@@ -2,7 +2,7 @@
 
 ## Description
 
-The Bareflank Hypervisor aims to provide platform for performing hypervisor research. Some highlights include:
+The Bareflank Hypervisor aims to provide a platform for performing hypervisor research. Some highlights include:
 
 - Zero legacy support (e.g. requires 64bit)
 - Written in C++
