@@ -1,4 +1,4 @@
-# QtMark JSON Library
+# Bareflank Hypervisor
 
 ## Description
 
@@ -18,6 +18,5 @@ https://github.com/Bareflank/hypervisor/wiki/Contributing
 
 ## License
 
-The QtMark Libraries are licensed under the GNU Lesser General Public License
-v2 (LGPL) library. Please note that this library depends on Qt which has it's
-own license.
+The Bareflank Hypervisor is licensed under the GNU Lesser General Public License
+v2 (LGPL) library. 
