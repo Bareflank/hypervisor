@@ -19,4 +19,4 @@ https://github.com/Bareflank/hypervisor/wiki/Contributing
 ## License
 
 The Bareflank Hypervisor is licensed under the GNU Lesser General Public License
-v2 (LGPL) library. 
+v2.1 (LGPL) library. 
