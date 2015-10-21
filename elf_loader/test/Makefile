@@ -1,5 +1,3 @@
-#!/bin/bash
-
 #
 # Bareflank Hypervisor
 #
@@ -21,34 +19,42 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-set -e
+################################################################################
+# FLAGS
+################################################################################
 
-if [ $# -gt 0 ]; then
-    if [ $1 = "clean" ]; then
+CC=gcc
+CXX=g++
+LD=g++
+RM=rm -rf
+MD=mkdir -p
 
-        rm -Rf ./tools/doxygen/osx/src
-        exit
-    fi
-fi
+CCFLAGS=
+CXXFLAGS=-std=c++11
+LDFLAGS=
 
-if [ ! -f tools/doxygen/osx/src/build/bin/doxygen ]; then
+DEFINES=
 
-	pushd tools/doxygen/osx
-	rm -Rf src
+################################################################################
+# Sources
+################################################################################
 
-	git clone https://github.com/doxygen/doxygen.git src
+TARGET_NAME=test
+TARGET_TYPE=bin
 
-	cd src
-	mkdir build
-  	cd build
-  	cmake -G "Unix Makefiles" ../
-	make -j
+OBJDIR=.build
+OUTDIR=../bin
 
-	popd
-fi
+SOURCES=test.cpp
 
-rm -Rf doc
-mkdir doc
+INCLUDES=
+LIBS=elf_loader
 
-cd doc
-../tools/doxygen/osx/src/build/bin/doxygen ../tools/doxygen/config.txt
+INCLUDE_PATHS=../include/ ./ ../../include/
+LIB_PATHS=../bin/
+
+################################################################################
+# Common
+################################################################################
+
+include ../../common/common_target.mk
