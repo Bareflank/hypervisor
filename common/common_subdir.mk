@@ -1,5 +1,3 @@
-#!/bin/bash
-
 #
 # Bareflank Hypervisor
 #
@@ -21,34 +19,29 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-set -e
+################################################################################
+# Color
+################################################################################
 
-if [ $# -gt 0 ]; then
-    if [ $1 = "clean" ]; then
+CS='\033[1;34m'
+CE='\033[0m'
 
-        rm -Rf ./tools/doxygen/osx/src
-        exit
-    fi
-fi
+################################################################################
+# Targets
+################################################################################
 
-if [ ! -f tools/doxygen/osx/src/build/bin/doxygen ]; then
+.PHONY: all
+.PHONY: clean
+.PHONY: custom_clean
 
-	pushd tools/doxygen/osx
-	rm -Rf src
+all:
+	@for dir in $(SUBDIRS); do \
+		echo $(CS)$(PWD)/$$dir$(CE); \
+		$(MAKE) -C $$dir; \
+	done
 
-	git clone https://github.com/doxygen/doxygen.git src
-
-	cd src
-	mkdir build
-  	cd build
-  	cmake -G "Unix Makefiles" ../
-	make -j
-
-	popd
-fi
-
-rm -Rf doc
-mkdir doc
-
-cd doc
-../tools/doxygen/osx/src/build/bin/doxygen ../tools/doxygen/config.txt
+clean: custom_clean
+	@for dir in $(SUBDIRS); do \
+		echo $(CS)$(PWD)/$$dir$(CE); \
+		$(MAKE) -C $$dir clean; \
+	done

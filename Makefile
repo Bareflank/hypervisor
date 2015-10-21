@@ -1,5 +1,3 @@
-#!/bin/bash
-
 #
 # Bareflank Hypervisor
 #
@@ -21,34 +19,14 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-set -e
+################################################################################
+# Subdirs
+################################################################################
 
-if [ $# -gt 0 ]; then
-    if [ $1 = "clean" ]; then
+SUBDIRS += elf_loader
 
-        rm -Rf ./tools/doxygen/osx/src
-        exit
-    fi
-fi
+################################################################################
+# Common
+################################################################################
 
-if [ ! -f tools/doxygen/osx/src/build/bin/doxygen ]; then
-
-	pushd tools/doxygen/osx
-	rm -Rf src
-
-	git clone https://github.com/doxygen/doxygen.git src
-
-	cd src
-	mkdir build
-  	cd build
-  	cmake -G "Unix Makefiles" ../
-	make -j
-
-	popd
-fi
-
-rm -Rf doc
-mkdir doc
-
-cd doc
-../tools/doxygen/osx/src/build/bin/doxygen ../tools/doxygen/config.txt
+include ./common/common_subdir.mk
