@@ -28,7 +28,7 @@ Although support for clang / LLVM would be preferred, version 1.0 will be compil
 
 Unlike previous type 2 hypervisors, the Bareflank hypervisor will be cross-compiled as a separate ELF formatted binary. For this reason, the driver entry points for each host operating system will only contain the bare minimum needed to read the hypervisor from disk, load it into memory (using an ELF loader), and then begin execution of the hypervisor itself. The bulk of the driver entry points (including he ELF loader) will be written as cross-platform C code, which will be shared to reduce the overall differences between each host specific driver. 
 
-<figure><img src="https://raw.githubusercontent.com/rianquinn/hypervisor/master/doc/roadmap/v1.0/type2_init.png" alt=“type2_init”></figure>
+<figure><img src="https://raw.githubusercontent.com/Bareflank/hypervisor/master/doc/roadmap/v1.0/type2_init.png" alt=“type2_init”></figure>
 
 Since the hypervisor will be cross-compiled, it would be possible to compile the hypervisor on Windows, and use it on a Linux based host operating system. Once the hypervisor is loaded, it will perform the bootstrapping of the hypervisor itself which will include:
 
