@@ -71,9 +71,9 @@ bool elf_loader_ut::init(void)
 {
     auto result = false;
 
-    auto dummy1_ifs = std::ifstream(c_dummy1_filename, std::ifstream::ate);
-    auto dummy2_ifs = std::ifstream(c_dummy2_filename, std::ifstream::ate);
-    auto dummy3_ifs = std::ifstream(c_dummy3_filename, std::ifstream::ate);
+    std::ifstream dummy1_ifs(c_dummy1_filename, std::ifstream::ate);
+    std::ifstream dummy2_ifs(c_dummy2_filename, std::ifstream::ate);
+    std::ifstream dummy3_ifs(c_dummy3_filename, std::ifstream::ate);
 
     if (dummy1_ifs.is_open() == false ||
         dummy2_ifs.is_open() == false ||

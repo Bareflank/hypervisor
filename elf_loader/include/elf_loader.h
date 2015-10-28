@@ -62,8 +62,8 @@ typedef int32_t elf64_sword;
 typedef uint64_t elf64_xword;
 typedef int64_t elf64_sxword;
 
-const elf64_sword ELF_TRUE = 1;
-const elf64_sword ELF_FALSE = 0;
+#define ELF_TRUE ((elf64_sword)1)
+#define ELF_FALSE ((elf64_sword)0)
 
 /******************************************************************************/
 /* ELF Error Codes                                                            */
@@ -75,60 +75,59 @@ const elf64_sword ELF_FALSE = 0;
  * The following define the different error codes that this library might
  * provide given bad input.
  */
-const elf64_sword ELF_SUCCESS = 0;
-const elf64_sword ELF_ERROR_INVALID_ARG = -1;
-const elf64_sword ELF_ERROR_INVALID_FILE = -2;
-const elf64_sword ELF_ERROR_INVALID_INDEX = -3;
-const elf64_sword ELF_ERROR_INVALID_OFFSET = -4;
-const elf64_sword ELF_ERROR_INVALID_STRING = -5;
-const elf64_sword ELF_ERROR_INVALID_EI_MAG0 = -101;
-const elf64_sword ELF_ERROR_INVALID_EI_MAG1 = -102;
-const elf64_sword ELF_ERROR_INVALID_EI_MAG2 = -103;
-const elf64_sword ELF_ERROR_INVALID_EI_MAG3 = -104;
-const elf64_sword ELF_ERROR_INVALID_EI_CLASS = -105;
-const elf64_sword ELF_ERROR_INVALID_EI_DATA = -106;
-const elf64_sword ELF_ERROR_INVALID_EI_VERSION = -107;
-const elf64_sword ELF_ERROR_INVALID_EI_OSABI = -108;
-const elf64_sword ELF_ERROR_INVALID_EI_ABIVERSION = -109;
-const elf64_sword ELF_ERROR_INVALID_E_TYPE = -110;
-const elf64_sword ELF_ERROR_INVALID_E_MACHINE = -111;
-const elf64_sword ELF_ERROR_INVALID_E_ENTRY = -112;
-const elf64_sword ELF_ERROR_INVALID_E_PHOFF = -113;
-const elf64_sword ELF_ERROR_INVALID_E_SHOFF = -114;
-const elf64_sword ELF_ERROR_INVALID_E_FLAGS = -115;
-const elf64_sword ELF_ERROR_INVALID_E_EHSIZE = -116;
-const elf64_sword ELF_ERROR_INVALID_E_PHENTSIZE = -117;
-const elf64_sword ELF_ERROR_INVALID_E_PHNUM = -118;
-const elf64_sword ELF_ERROR_INVALID_E_SHENTSIZE = -119;
-const elf64_sword ELF_ERROR_INVALID_E_SHNUM = -120;
-const elf64_sword ELF_ERROR_INVALID_E_SHSTRNDX = -121;
-const elf64_sword ELF_ERROR_INVALID_PHT = -122;
-const elf64_sword ELF_ERROR_INVALID_SHT = -123;
-const elf64_sword ELF_ERROR_INVALID_SH_NAME = -200;
-const elf64_sword ELF_ERROR_INVALID_SH_TYPE = -201;
-const elf64_sword ELF_ERROR_INVALID_SH_FLAGS = -202;
-const elf64_sword ELF_ERROR_INVALID_SH_ADDR = -203;
-const elf64_sword ELF_ERROR_INVALID_SH_OFFSET = -204;
-const elf64_sword ELF_ERROR_INVALID_SH_SIZE = -205;
-const elf64_sword ELF_ERROR_INVALID_SH_LINK = -206;
-const elf64_sword ELF_ERROR_INVALID_SH_INFO = -207;
-const elf64_sword ELF_ERROR_INVALID_SH_ADDRALIGN = -208;
-const elf64_sword ELF_ERROR_INVALID_SH_ENTSIZE = -209;
-const elf64_sword ELF_ERROR_INVALID_PH_TYPE = -300;
-const elf64_sword ELF_ERROR_INVALID_PH_FLAGS = -301;
-const elf64_sword ELF_ERROR_INVALID_PH_OFFSET = -302;
-const elf64_sword ELF_ERROR_INVALID_PH_VADDR = -303;
-const elf64_sword ELF_ERROR_INVALID_PH_PADDR = -304;
-const elf64_sword ELF_ERROR_INVALID_PH_FILESZ = -305;
-const elf64_sword ELF_ERROR_INVALID_PH_MEMSZ = -306;
-const elf64_sword ELF_ERROR_INVALID_PH_ALIGN = -307;
-const elf64_sword ELF_ERROR_INVALID_STRING_TABLE = -400;
-const elf64_sword ELF_ERROR_NO_SUCH_SYMBOL = -500;
-const elf64_sword ELF_ERROR_SYMBOL_UNDEFINED = -501;
-const elf64_sword ELF_ERROR_LOADER_FULL = -600;
-const elf64_sword ELF_ERROR_INVALID_LOADER = -601;
-const elf64_sword ELF_ERROR_INVALID_RELOCATION_TYPE = -701;
-
+#define ELF_SUCCESS ((elf64_sword)0)
+#define ELF_ERROR_INVALID_ARG ((elf64_sword)-1)
+#define ELF_ERROR_INVALID_FILE ((elf64_sword)-2)
+#define ELF_ERROR_INVALID_INDEX ((elf64_sword)-3)
+#define ELF_ERROR_INVALID_OFFSET ((elf64_sword)-4)
+#define ELF_ERROR_INVALID_STRING ((elf64_sword)-5)
+#define ELF_ERROR_INVALID_EI_MAG0 ((elf64_sword)-101)
+#define ELF_ERROR_INVALID_EI_MAG1 ((elf64_sword)-102)
+#define ELF_ERROR_INVALID_EI_MAG2 ((elf64_sword)-103)
+#define ELF_ERROR_INVALID_EI_MAG3 ((elf64_sword)-104)
+#define ELF_ERROR_INVALID_EI_CLASS ((elf64_sword)-105)
+#define ELF_ERROR_INVALID_EI_DATA ((elf64_sword)-106)
+#define ELF_ERROR_INVALID_EI_VERSION ((elf64_sword)-107)
+#define ELF_ERROR_INVALID_EI_OSABI ((elf64_sword)-108)
+#define ELF_ERROR_INVALID_EI_ABIVERSION ((elf64_sword)-109)
+#define ELF_ERROR_INVALID_E_TYPE ((elf64_sword)-110)
+#define ELF_ERROR_INVALID_E_MACHINE ((elf64_sword)-111)
+#define ELF_ERROR_INVALID_E_ENTRY ((elf64_sword)-112)
+#define ELF_ERROR_INVALID_E_PHOFF ((elf64_sword)-113)
+#define ELF_ERROR_INVALID_E_SHOFF ((elf64_sword)-114)
+#define ELF_ERROR_INVALID_E_FLAGS ((elf64_sword)-115)
+#define ELF_ERROR_INVALID_E_EHSIZE ((elf64_sword)-116)
+#define ELF_ERROR_INVALID_E_PHENTSIZE ((elf64_sword)-117)
+#define ELF_ERROR_INVALID_E_PHNUM ((elf64_sword)-118)
+#define ELF_ERROR_INVALID_E_SHENTSIZE ((elf64_sword)-119)
+#define ELF_ERROR_INVALID_E_SHNUM ((elf64_sword)-120)
+#define ELF_ERROR_INVALID_E_SHSTRNDX ((elf64_sword)-121)
+#define ELF_ERROR_INVALID_PHT ((elf64_sword)-122)
+#define ELF_ERROR_INVALID_SHT ((elf64_sword)-123)
+#define ELF_ERROR_INVALID_SH_NAME ((elf64_sword)-200)
+#define ELF_ERROR_INVALID_SH_TYPE ((elf64_sword)-201)
+#define ELF_ERROR_INVALID_SH_FLAGS ((elf64_sword)-202)
+#define ELF_ERROR_INVALID_SH_ADDR ((elf64_sword)-203)
+#define ELF_ERROR_INVALID_SH_OFFSET ((elf64_sword)-204)
+#define ELF_ERROR_INVALID_SH_SIZE ((elf64_sword)-205)
+#define ELF_ERROR_INVALID_SH_LINK ((elf64_sword)-206)
+#define ELF_ERROR_INVALID_SH_INFO ((elf64_sword)-207)
+#define ELF_ERROR_INVALID_SH_ADDRALIGN ((elf64_sword)-208)
+#define ELF_ERROR_INVALID_SH_ENTSIZE ((elf64_sword)-209)
+#define ELF_ERROR_INVALID_PH_TYPE ((elf64_sword)-300)
+#define ELF_ERROR_INVALID_PH_FLAGS ((elf64_sword)-301)
+#define ELF_ERROR_INVALID_PH_OFFSET ((elf64_sword)-302)
+#define ELF_ERROR_INVALID_PH_VADDR ((elf64_sword)-303)
+#define ELF_ERROR_INVALID_PH_PADDR ((elf64_sword)-304)
+#define ELF_ERROR_INVALID_PH_FILESZ ((elf64_sword)-305)
+#define ELF_ERROR_INVALID_PH_MEMSZ ((elf64_sword)-306)
+#define ELF_ERROR_INVALID_PH_ALIGN ((elf64_sword)-307)
+#define ELF_ERROR_INVALID_STRING_TABLE ((elf64_sword)-400)
+#define ELF_ERROR_NO_SUCH_SYMBOL ((elf64_sword)-500)
+#define ELF_ERROR_SYMBOL_UNDEFINED ((elf64_sword)-501)
+#define ELF_ERROR_LOADER_FULL ((elf64_sword)-600)
+#define ELF_ERROR_INVALID_LOADER ((elf64_sword)-601)
+#define ELF_ERROR_INVALID_RELOCATION_TYPE ((elf64_sword)-701)
 
 const char *ELF_SUCCESS_STR = "Success (ELF_SUCCESS)";
 const char *ELF_ERROR_INVALID_ARG_STR = "Invalid argument (ELF_ERROR_INVALID_ARG)";
@@ -293,17 +292,17 @@ elf_loader_relocate(struct elf_loader_t *loader);
  * The following is defined in the ELF 64bit file format specification:
  * http://www.uclibc.org/docs/elf-64-gen.pdf, page 3
  */
-const elf64_sword ei_mag0 = 0;
-const elf64_sword ei_mag1 = 1;
-const elf64_sword ei_mag2 = 2;
-const elf64_sword ei_mag3 = 3;
-const elf64_sword ei_class = 4;
-const elf64_sword ei_data = 5;
-const elf64_sword ei_version = 6;
-const elf64_sword ei_osabi = 7;
-const elf64_sword ei_abiversion = 8;
-const elf64_sword ei_pad = 9;
-const elf64_sword ei_nident = 16;
+#define ei_mag0 ((elf64_sword)0)
+#define ei_mag1 ((elf64_sword)1)
+#define ei_mag2 ((elf64_sword)2)
+#define ei_mag3 ((elf64_sword)3)
+#define ei_class ((elf64_sword)4)
+#define ei_data ((elf64_sword)5)
+#define ei_version ((elf64_sword)6)
+#define ei_osabi ((elf64_sword)7)
+#define ei_abiversion ((elf64_sword)8)
+#define ei_pad ((elf64_sword)9)
+#define ei_nident ((elf64_sword)16)
 
 /*
  * ELF Class Types
@@ -311,8 +310,8 @@ const elf64_sword ei_nident = 16;
  * The following is defined in the ELF 64bit file format specification:
  * http://www.uclibc.org/docs/elf-64-gen.pdf, page 5
  */
-const unsigned char elfclass32 = 1;
-const unsigned char elfclass64 = 2;
+#define elfclass32 ((unsigned char)1)
+#define elfclass64 ((unsigned char)2)
 
 const char *elfclass32_str = "ELF32 (elfclass32)";
 const char *elfclass64_str = "ELF64 (elfclass64)";
@@ -326,7 +325,7 @@ const char *elfclass64_str = "ELF64 (elfclass64)";
  * @return resulting string
  */
 const char *
-ei_class_to_str(unsigned char ei_class);
+ei_class_to_str(unsigned char _ei_class);
 
 /*
  * ELF Data Types
@@ -334,8 +333,8 @@ ei_class_to_str(unsigned char ei_class);
  * The following is defined in the ELF 64bit file format specification:
  * http://www.uclibc.org/docs/elf-64-gen.pdf, page 5
  */
-const unsigned char elfdata2lsb = 1;
-const unsigned char elfdata2msb = 2;
+#define elfdata2lsb ((unsigned char)1)
+#define elfdata2msb ((unsigned char)2)
 
 const char *elfdata2lsb_str = "2's complement, little endian (elfdata2lsb)";
 const char *elfdata2msb_str = "2's complement, big endian (elfdata2msb)";
@@ -349,7 +348,7 @@ const char *elfdata2msb_str = "2's complement, big endian (elfdata2msb)";
  * @return resulting string
  */
 const char *
-ei_data_to_str(unsigned char ei_data);
+ei_data_to_str(unsigned char _ei_data);
 
 /*
  * ELF Version
@@ -357,7 +356,8 @@ ei_data_to_str(unsigned char ei_data);
  * The following is defined in the ELF 64bit file format specification:
  * http://www.uclibc.org/docs/elf-64-gen.pdf, page 4
  */
-const unsigned char ev_current = 1;
+#define ev_current ((unsigned char)1)
+
 const char *ev_current_str = "1 (ev_current)";
 
 /*
@@ -377,9 +377,9 @@ version_to_str(unsigned char version);
  * The following is defined in the ELF 64bit file format specification:
  * http://www.uclibc.org/docs/elf-64-gen.pdf, page 5
  */
-const unsigned char elfosabi_sysv = 0;
-const unsigned char elfosabi_hpux = 1;
-const unsigned char elfosabi_standalone = 255;
+#define elfosabi_sysv ((unsigned char)0)
+#define elfosabi_hpux ((unsigned char)1)
+#define elfosabi_standalone ((unsigned char)255)
 
 const char *elfosabi_sysv_str = "System V ABI (elfosabi_sysv)";
 const char *elfosabi_hpux_str = "HP-UX operating system (elfosabi_hpux)";
@@ -393,8 +393,8 @@ const char *elfosabi_standalone_str = "Standalone (elfosabi_standalone)";
  * @param ei_osabi ei_osabi to convert to string
  * @return resulting string
  */
-const char *
-ei_osabi_to_str(unsigned char ei_osabi);
+const char*
+ei_osabi_to_str(unsigned char _ei_osabi);
 
 /*
  * ELF Types
@@ -402,15 +402,15 @@ ei_osabi_to_str(unsigned char ei_osabi);
  * The following is defined in the ELF 64bit file format specification:
  * http://www.uclibc.org/docs/elf-64-gen.pdf, page 5
  */
-const elf64_half et_none = 0;
-const elf64_half et_rel = 1;
-const elf64_half et_exec = 2;
-const elf64_half et_dyn = 3;
-const elf64_half et_core = 4;
-const elf64_half et_loos = 0xFE00;
-const elf64_half et_hios = 0xFEFF;
-const elf64_half et_loproc = 0xFF00;
-const elf64_half et_hiproc = 0xFFFF;
+#define et_none ((elf64_half)0)
+#define et_rel ((elf64_half)1)
+#define et_exec ((elf64_half)2)
+#define et_dyn ((elf64_half)3)
+#define et_core ((elf64_half)4)
+#define et_loos ((elf64_half)0xFE00)
+#define et_hios ((elf64_half)0xFEFF)
+#define et_loproc ((elf64_half)0xFF00)
+#define et_hiproc ((elf64_half)0xFFFF)
 
 const char *et_none_str = "No file type (et_none)";
 const char *et_rel_str = "Relocatable object file (et_rel)";
@@ -439,45 +439,45 @@ e_type_to_str(elf64_half e_type);
  * The following is defined in the Linux kernel sources:
  * linux/include/uapi/linux/elf-em.h
  */
-const elf64_half em_none = 0;
-const elf64_half em_m32 = 1;
-const elf64_half em_sparc = 2;
-const elf64_half em_386 = 3;
-const elf64_half em_68k = 4;
-const elf64_half em_88k = 5;
-const elf64_half em_486 = 6;
-const elf64_half em_860 = 7;
-const elf64_half em_mips = 8;
-const elf64_half em_mips_rs3_le = 10;
-const elf64_half em_mips_rs4_be = 11;
-const elf64_half em_parisc = 15;
-const elf64_half em_sparc32plus = 18;
-const elf64_half em_ppc = 20;
-const elf64_half em_ppc64 = 21;
-const elf64_half em_spu = 23;
-const elf64_half em_arm = 40;
-const elf64_half em_sh = 42;
-const elf64_half em_sparcv9 = 43;
-const elf64_half em_h8_300 = 46;
-const elf64_half em_ia_64 = 50;
-const elf64_half em_x86_64 = 62;
-const elf64_half em_s390 = 22;
-const elf64_half em_cris = 76;
-const elf64_half em_v850 = 87;
-const elf64_half em_m32r = 88;
-const elf64_half em_mn10300 = 89;
-const elf64_half em_openrisc = 92;
-const elf64_half em_blackfin = 106;
-const elf64_half em_altera_nios2 = 113;
-const elf64_half em_ti_c6000 = 140;
-const elf64_half em_aarch64 = 183;
-const elf64_half em_frv = 0x5441;
-const elf64_half em_avr32 = 0x18AD;
-const elf64_half em_alpha = 0x9026;
-const elf64_half em_cygnus_v850 = 0x9080;
-const elf64_half em_cygnus_m32r = 0x9041;
-const elf64_half em_s390_old = 0xA390;
-const elf64_half em_cygnus_mn10300 = 0xBEEF;
+#define em_none ((elf64_half)0)
+#define em_m32 ((elf64_half)1)
+#define em_sparc ((elf64_half)2)
+#define em_386 ((elf64_half)3)
+#define em_68k ((elf64_half)4)
+#define em_88k ((elf64_half)5)
+#define em_486 ((elf64_half)6)
+#define em_860 ((elf64_half)7)
+#define em_mips ((elf64_half)8)
+#define em_mips_rs3_le ((elf64_half)10)
+#define em_mips_rs4_be ((elf64_half)11)
+#define em_parisc ((elf64_half)15)
+#define em_sparc32plus ((elf64_half)18)
+#define em_ppc ((elf64_half)20)
+#define em_ppc64 ((elf64_half)21)
+#define em_spu ((elf64_half)23)
+#define em_arm ((elf64_half)40)
+#define em_sh ((elf64_half)42)
+#define em_sparcv9 ((elf64_half)43)
+#define em_h8_300 ((elf64_half)46)
+#define em_ia_64 ((elf64_half)50)
+#define em_x86_64 ((elf64_half)62)
+#define em_s390 ((elf64_half)22)
+#define em_cris ((elf64_half)76)
+#define em_v850 ((elf64_half)87)
+#define em_m32r ((elf64_half)88)
+#define em_mn10300 ((elf64_half)89)
+#define em_openrisc ((elf64_half)92)
+#define em_blackfin ((elf64_half)106)
+#define em_altera_nios2 ((elf64_half)113)
+#define em_ti_c6000 ((elf64_half)140)
+#define em_aarch64 ((elf64_half)183)
+#define em_frv ((elf64_half)0x5441)
+#define em_avr32 ((elf64_half)0x18AD)
+#define em_alpha ((elf64_half)0x9026)
+#define em_cygnus_v850 ((elf64_half)0x9080)
+#define em_cygnus_m32r ((elf64_half)0x9041)
+#define em_s390_old ((elf64_half)0xA390)
+#define em_cygnus_mn10300 ((elf64_half)0xBEEF)
 
 const char *em_none_str = "none";
 const char *em_m32_str = "m32";
@@ -570,22 +570,22 @@ elf_file_print_header(struct elf_file_t *ef);
  * The following is defined in the ELF 64bit file format specification:
  * http://www.uclibc.org/docs/elf-64-gen.pdf, page 7
  */
-const elf64_word sht_null = 0;
-const elf64_word sht_progbits = 1;
-const elf64_word sht_symtab = 2;
-const elf64_word sht_strtab = 3;
-const elf64_word sht_rela = 4;
-const elf64_word sht_hash = 5;
-const elf64_word sht_dynamic = 6;
-const elf64_word sht_note = 7;
-const elf64_word sht_nobits = 8;
-const elf64_word sht_rel = 9;
-const elf64_word sht_shlib = 10;
-const elf64_word sht_dynsym = 11;
-const elf64_word sht_loos = 0x60000000;
-const elf64_word sht_hios = 0x6FFFFFFF;
-const elf64_word sht_loproc = 0x70000000;
-const elf64_word sht_hiproc = 0x7FFFFFFF;
+#define sht_null ((elf64_word)0)
+#define sht_progbits ((elf64_word)1)
+#define sht_symtab ((elf64_word)2)
+#define sht_strtab ((elf64_word)3)
+#define sht_rela ((elf64_word)4)
+#define sht_hash ((elf64_word)5)
+#define sht_dynamic ((elf64_word)6)
+#define sht_note ((elf64_word)7)
+#define sht_nobits ((elf64_word)8)
+#define sht_rel ((elf64_word)9)
+#define sht_shlib ((elf64_word)10)
+#define sht_dynsym ((elf64_word)11)
+#define sht_loos ((elf64_word)0x60000000)
+#define sht_hios ((elf64_word)0x6FFFFFFF)
+#define sht_loproc ((elf64_word)0x70000000)
+#define sht_hiproc ((elf64_word)0x7FFFFFFF)
 
 const char *sht_null_str = "Unused (sht_null)";
 const char *sht_progbits_str = "Program data (sht_progbits)";
@@ -621,11 +621,11 @@ sh_type_to_str(elf64_word sh_type);
  * The following is defined in the ELF 64bit file format specification:
  * http://www.uclibc.org/docs/elf-64-gen.pdf, page 8
  */
-const elf64_xword shf_write = 0x1;
-const elf64_xword shf_alloc = 0x2;
-const elf64_xword shf_execinstr = 0x4;
-const elf64_xword shf_maskos = 0x0F000000;
-const elf64_xword shf_maskproc = 0xF0000000;
+#define shf_write ((elf64_xword)0x1)
+#define shf_alloc ((elf64_xword)0x2)
+#define shf_execinstr ((elf64_xword)0x4)
+#define shf_maskos ((elf64_xword)0x0F000000)
+#define shf_maskproc ((elf64_xword)0xF0000000)
 
 /*
  * ELF sh_flags (writable) -> bool
@@ -725,13 +725,13 @@ elf_section_name_string(struct elf_file_t *ef,
 /* ELF Dynamic Symbol Table                                                   */
 /******************************************************************************/
 
-const unsigned char stb_local = 0;
-const unsigned char stb_global = 1;
-const unsigned char stb_weak = 2;
-const unsigned char stb_loos = 10;
-const unsigned char stb_hios = 12;
-const unsigned char stb_loproc = 13;
-const unsigned char stb_hiproc = 15;
+#define stb_local ((unsigned char)0)
+#define stb_global ((unsigned char)1)
+#define stb_weak ((unsigned char)2)
+#define stb_loos ((unsigned char)10)
+#define stb_hios ((unsigned char)12)
+#define stb_loproc ((unsigned char)13)
+#define stb_hiproc ((unsigned char)15)
 
 const char *stb_local_str = "stb_local";
 const char *stb_global_str = "stb_global";
@@ -752,15 +752,15 @@ const char *stb_hiproc_str = "stb_hiproc";
 const char *
 stb_to_str(elf64_word st_info);
 
-const unsigned char stt_notype = 0;
-const unsigned char stt_object = 1;
-const unsigned char stt_func = 2;
-const unsigned char stt_section = 3;
-const unsigned char stt_file = 4;
-const unsigned char stt_loos = 10;
-const unsigned char stt_hios = 12;
-const unsigned char stt_loproc = 13;
-const unsigned char stt_hiproc = 15;
+#define stt_notype ((unsigned char)0)
+#define stt_object ((unsigned char)1)
+#define stt_func ((unsigned char)2)
+#define stt_section ((unsigned char)3)
+#define stt_file ((unsigned char)4)
+#define stt_loos ((unsigned char)10)
+#define stt_hios ((unsigned char)12)
+#define stt_loproc ((unsigned char)13)
+#define stt_hiproc ((unsigned char)15)
 
 const char *stt_notype_str = "stt_notype";
 const char *stt_object_str = "stt_object";
@@ -834,10 +834,10 @@ elf_print_sym(struct elf_file_t *ef,
 /* ELF Relocations                                                            */
 /******************************************************************************/
 
-const elf64_xword R_X86_64_64 = 1;
-const elf64_xword R_X86_64_GLOB_DAT = 6;
-const elf64_xword R_X86_64_JUMP_SLOT = 7;
-const elf64_xword R_X86_64_RELATIVE = 8;
+#define R_X86_64_64 ((elf64_xword)1)
+#define R_X86_64_GLOB_DAT ((elf64_xword)6)
+#define R_X86_64_JUMP_SLOT ((elf64_xword)7)
+#define R_X86_64_RELATIVE ((elf64_xword)8)
 
 const char *R_X86_64_64_STR = "R_X86_64_64";
 const char *R_X86_64_GLOB_DAT_STR = "R_X86_64_GLOB_DAT";
@@ -901,17 +901,17 @@ elf_print_relocations(struct elf_file_t *ef);
  * The following is defined in the ELF 64bit file format specification:
  * http://www.uclibc.org/docs/elf-64-gen.pdf, page 12
  */
-const elf64_word pt_null = 0;
-const elf64_word pt_load = 1;
-const elf64_word pt_dynamic = 2;
-const elf64_word pt_interp = 3;
-const elf64_word pt_note = 4;
-const elf64_word pt_shlib = 5;
-const elf64_word pt_phdr = 6;
-const elf64_word pt_loos = 0x60000000;
-const elf64_word pt_hios = 0x6FFFFFFF;
-const elf64_word pt_loproc = 0x70000000;
-const elf64_word pt_hiproc = 0x7FFFFFFF;
+#define pt_null ((elf64_word)0)
+#define pt_load ((elf64_word)1)
+#define pt_dynamic ((elf64_word)2)
+#define pt_interp ((elf64_word)3)
+#define pt_note ((elf64_word)4)
+#define pt_shlib ((elf64_word)5)
+#define pt_phdr ((elf64_word)6)
+#define pt_loos ((elf64_word)0x60000000)
+#define pt_hios ((elf64_word)0x6FFFFFFF)
+#define pt_loproc ((elf64_word)0x70000000)
+#define pt_hiproc ((elf64_word)0x7FFFFFFF)
 
 const char *pt_null_str = "Unused entry (pt_null)";
 const char *pt_load_str = "Loadable segment (pt_load)";
@@ -942,11 +942,11 @@ p_type_to_str(elf64_word p_type);
  * The following is defined in the ELF 64bit file format specification:
  * http://www.uclibc.org/docs/elf-64-gen.pdf, page 13
  */
-const elf64_xword pf_x = 0x1;
-const elf64_xword pf_w = 0x2;
-const elf64_xword pf_r = 0x4;
-const elf64_xword pf_maskos = 0x00FF0000;
-const elf64_xword pf_maskproc = 0xFF000000;
+#define pf_x ((elf64_xword)0x1)
+#define pf_w ((elf64_xword)0x2)
+#define pf_r ((elf64_xword)0x4)
+#define pf_maskos ((elf64_xword)0x00FF0000)
+#define pf_maskproc ((elf64_xword)0xFF000000)
 
 /*
  * ELF p_flags (executable) -> bool
