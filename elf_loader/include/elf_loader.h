@@ -321,11 +321,11 @@ const char *elfclass64_str = "ELF64 (elfclass64)";
  *
  * Returns a human reabable form of ei_class
  *
- * @param ei_class ei_class to convert to string
+ * @param class ei_class to convert to string
  * @return resulting string
  */
 const char *
-ei_class_to_str(unsigned char _ei_class);
+ei_class_to_str(unsigned char class);
 
 /*
  * ELF Data Types
@@ -344,11 +344,11 @@ const char *elfdata2msb_str = "2's complement, big endian (elfdata2msb)";
  *
  * Returns a human reabable form of ei_data
  *
- * @param ei_data ei_data to convert to string
+ * @param data ei_data to convert to string
  * @return resulting string
  */
 const char *
-ei_data_to_str(unsigned char _ei_data);
+ei_data_to_str(unsigned char data);
 
 /*
  * ELF Version
@@ -390,11 +390,11 @@ const char *elfosabi_standalone_str = "Standalone (elfosabi_standalone)";
  *
  * Returns a human reabable form of ei_osabi
  *
- * @param ei_osabi ei_osabi to convert to string
+ * @param osabi ei_osabi to convert to string
  * @return resulting string
  */
 const char*
-ei_osabi_to_str(unsigned char _ei_osabi);
+ei_osabi_to_str(unsigned char osabi);
 
 /*
  * ELF Types

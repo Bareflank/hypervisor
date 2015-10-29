@@ -522,9 +522,9 @@ elf_loader_relocate(struct elf_loader_t *loader)
  * @return const char * version of ei_class
  */
 const char *
-ei_class_to_str(unsigned char _ei_class)
+ei_class_to_str(unsigned char class)
 {
-    switch (_ei_class)
+    switch (class)
     {
         case elfclass32: return elfclass32_str;
         case elfclass64: return elfclass64_str;
@@ -539,9 +539,9 @@ ei_class_to_str(unsigned char _ei_class)
  * @return const char * version of ei_data
  */
 const char *
-ei_data_to_str(unsigned char _ei_data)
+ei_data_to_str(unsigned char data)
 {
-    switch (_ei_data)
+    switch (data)
     {
         case elfdata2lsb: return elfdata2lsb_str;
         case elfdata2msb: return elfdata2msb_str;
@@ -572,9 +572,9 @@ version_to_str(unsigned char version)
  * @return const char * version of ei_osabi
  */
 const char *
-ei_osabi_to_str(unsigned char _ei_osabi)
+ei_osabi_to_str(unsigned char osabi)
 {
-    switch (_ei_osabi)
+    switch (osabi)
     {
         case elfosabi_sysv: return elfosabi_sysv_str;
         case elfosabi_hpux: return elfosabi_hpux_str;
