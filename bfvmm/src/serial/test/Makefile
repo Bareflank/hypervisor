@@ -20,16 +20,52 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 ################################################################################
-# Subdirs
+# Native Flags
 ################################################################################
 
-SUBDIRS += debug_ring
-SUBDIRS += entry
-SUBDIRS += std
-SUBDIRS += serial
+CC=gcc
+CXX=g++
+LD=g++
+ASM=nasm
+
+CCFLAGS=
+CXXFLAGS=
+LDFLAGS=
+ASMFLAGS=
+
+OBJDIR=.build/native
+OUTDIR=../bin/native
 
 ################################################################################
 # Common
 ################################################################################
 
-include ../../common/common_subdir.mk
+DEFINES=
+
+RM=rm -rf
+MD=mkdir -p
+
+################################################################################
+# Sources
+################################################################################
+
+TARGET_NAME=serial_test
+TARGET_TYPE=bin
+TARGET_COMPILER=native
+
+OBJDIR=.build
+OUTDIR=../bin
+
+SOURCES=serial_test.cpp
+
+INCLUDES=
+LIB_PATHS=../bin/native
+LIBS=bf_serial
+
+INCLUDE_PATHS=../include/ ../../../include/ ../../../include/std 
+
+################################################################################
+# Common
+################################################################################
+
+include ../../../../common/common_target.mk
