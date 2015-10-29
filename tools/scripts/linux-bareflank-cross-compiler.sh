@@ -5,7 +5,7 @@ export GCC_TARGET=x86_64-elf
 export BINUTILS_TARGET=x86_64-elf
 export PATH="$PREFIX/bin:$PATH"
 
-apt-get install build-essentials libmpc-dev
+apt-get install build-essentials libmpc-dev libisl-dev
 
 mkdir -p $PREFIX
 

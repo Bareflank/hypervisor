@@ -14,7 +14,8 @@ You will need to install the following:
 
 ```
 apt-get install build-essentials
-apt-get install libmpc
+apt-get install libmpc-dev
+apt-get install libisl-dev
 ```
 
 ## Downloads
