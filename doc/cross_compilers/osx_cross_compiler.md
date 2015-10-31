@@ -23,8 +23,8 @@ brew install isl
 
 Before you can compile the cross-compiler, you must download it. For GCC, this consists of both binutils and gcc itself. Note that you must select gcc 5.2.0 or higher, and binutils 2.25.1 or higher. 
 
-[gcc ftp](ftp://ftp.gnu.org/gnu/gcc/)
-[binutils ftp](ftp://ftp.gnu.org/gnu/binutils/)
+ftp://ftp.gnu.org/gnu/gcc/ <br>
+ftp://ftp.gnu.org/gnu/binutils/
 
 ## Compilation Environment
 

@@ -36,12 +36,12 @@ CE='\033[0m'
 
 all:
 	@for dir in $(SUBDIRS); do \
-		echo $(CS)$(PWD)/$$dir$(CE); \
-		$(MAKE) -C $$dir; \
+		echo -e $(CS)$(PWD)/$$dir$(CE); \
+		$(MAKE) --no-print-directory -C $$dir; \
 	done
 
 clean: custom_clean
 	@for dir in $(SUBDIRS); do \
-		echo $(CS)$(PWD)/$$dir$(CE); \
-		$(MAKE) -C $$dir clean; \
+		echo -e $(CS)$(PWD)/$$dir$(CE); \
+		$(MAKE) --no-print-directory -C $$dir clean; \
 	done
