@@ -80,13 +80,13 @@ elf_strcmp(struct e_string *str1, struct e_string *str2)
 /**
  * Convert ELF error -> const char *
  *
- * @param error error code to convert
+ * @param value error code to convert
  * @return const char * version of error code
  */
 const char *
-elf_error(elf64_sword error)
+elf_error(elf64_sword value)
 {
-    switch (error)
+    switch (value)
     {
         case ELF_SUCCESS: return ELF_SUCCESS_STR;
         case ELF_ERROR_INVALID_ARG: return ELF_ERROR_INVALID_ARG_STR;
@@ -518,13 +518,13 @@ elf_loader_relocate(struct elf_loader_t *loader)
 /**
  * Convert ei_class -> const char *
  *
- * @param ei_class ei_class to convert
+ * @param value ei_class to convert
  * @return const char * version of ei_class
  */
 const char *
-ei_class_to_str(unsigned char class)
+ei_class_to_str(unsigned char value)
 {
-    switch (class)
+    switch (value)
     {
         case elfclass32: return elfclass32_str;
         case elfclass64: return elfclass64_str;
@@ -535,13 +535,13 @@ ei_class_to_str(unsigned char class)
 /**
  * Convert ei_data -> const char *
  *
- * @param ei_data ei_data to convert
+ * @param value ei_data to convert
  * @return const char * version of ei_data
  */
 const char *
-ei_data_to_str(unsigned char data)
+ei_data_to_str(unsigned char value)
 {
-    switch (data)
+    switch (value)
     {
         case elfdata2lsb: return elfdata2lsb_str;
         case elfdata2msb: return elfdata2msb_str;
@@ -552,13 +552,13 @@ ei_data_to_str(unsigned char data)
 /**
  * Convert version -> const char *
  *
- * @param version version to convert
+ * @param value version to convert
  * @return const char * version of version
  */
 const char *
-version_to_str(unsigned char version)
+version_to_str(unsigned char value)
 {
-    switch (version)
+    switch (value)
     {
         case ev_current: return ev_current_str;
         default: return "Unknown version";
@@ -568,13 +568,13 @@ version_to_str(unsigned char version)
 /**
  * Convert ei_osabi -> const char *
  *
- * @param ei_osabi ei_osabi to convert
+ * @param value ei_osabi to convert
  * @return const char * version of ei_osabi
  */
 const char *
-ei_osabi_to_str(unsigned char osabi)
+ei_osabi_to_str(unsigned char value)
 {
-    switch (osabi)
+    switch (value)
     {
         case elfosabi_sysv: return elfosabi_sysv_str;
         case elfosabi_hpux: return elfosabi_hpux_str;
@@ -586,13 +586,13 @@ ei_osabi_to_str(unsigned char osabi)
 /**
  * Convert e_type -> const char *
  *
- * @param e_type e_type to convert
+ * @param value e_type to convert
  * @return const char * version of e_type
  */
 const char *
-e_type_to_str(elf64_half e_type)
+e_type_to_str(elf64_half value)
 {
-    switch (e_type)
+    switch (value)
     {
         case et_none: return et_none_str;
         case et_rel: return et_rel_str;
@@ -610,13 +610,13 @@ e_type_to_str(elf64_half e_type)
 /**
  * Convert e_machine -> const char *
  *
- * @param e_machine e_machine to convert
+ * @param value e_machine to convert
  * @return const char * version of e_machine
  */
 const char *
-e_machine_to_str(elf64_half e_machine)
+e_machine_to_str(elf64_half value)
 {
-    switch (e_machine)
+    switch (value)
     {
         case em_none: return em_none_str;
         case em_m32: return em_m32_str;
@@ -713,13 +713,13 @@ elf_file_print_header(struct elf_file_t *ef)
 /**
  * Convert sh_type -> const char *
  *
- * @param sh_type sh_type to convert
+ * @param value sh_type to convert
  * @return const char * version of sh_type
  */
 const char *
-sh_type_to_str(elf64_word sh_type)
+sh_type_to_str(elf64_word value)
 {
-    switch (sh_type)
+    switch (value)
     {
         case sht_null: return sht_null_str;
         case sht_progbits: return sht_progbits_str;
@@ -980,13 +980,13 @@ elf_section_name_string(struct elf_file_t *ef,
 /**
  * Convert stb -> const char *
  *
- * @param st_info stb to convert
+ * @param value stb to convert
  * @return const char * version of stb
  */
 const char *
-stb_to_str(elf64_word st_info)
+stb_to_str(elf64_word value)
 {
-    switch (ELF_SYM_BIND(st_info))
+    switch (ELF_SYM_BIND(value))
     {
         case stb_local: return stb_local_str;
         case stb_global: return stb_global_str;
@@ -1002,13 +1002,13 @@ stb_to_str(elf64_word st_info)
 /**
  * Convert stt -> const char *
  *
- * @param st_info stt to convert
+ * @param value stt to convert
  * @return const char * version of stt
  */
 const char *
-stt_to_str(elf64_word st_info)
+stt_to_str(elf64_word value)
 {
-    switch (ELF_SYM_TYPE(st_info))
+    switch (ELF_SYM_TYPE(value))
     {
         case stt_notype: return stt_notype_str;
         case stt_object: return stt_object_str;
@@ -1327,13 +1327,13 @@ elf_print_sym(struct elf_file_t *ef,
 /**
  * Convert r_info (type) -> const char *
  *
- * @param r_info r_info (type) to convert
+ * @param value r_info (type) to convert
  * @return const char * version of r_info (type)
  */
 const char *
-rel_type_to_str(elf64_xword r_info)
+rel_type_to_str(elf64_xword value)
 {
-    switch (ELF_REL_TYPE(r_info))
+    switch (ELF_REL_TYPE(value))
     {
         case R_X86_64_64: return R_X86_64_64_STR;
         case R_X86_64_GLOB_DAT: return R_X86_64_GLOB_DAT_STR;
@@ -1669,13 +1669,13 @@ elf_print_relocations(struct elf_file_t *ef)
 /**
  * Convert p_type (type) -> const char *
  *
- * @param p_type p_type (type) to convert
+ * @param value p_type (type) to convert
  * @return const char * version of p_type (type)
  */
 const char *
-p_type_to_str(elf64_word p_type)
+p_type_to_str(elf64_word value)
 {
-    switch (p_type)
+    switch (value)
     {
         case pt_null: return pt_null_str;
         case pt_load: return pt_load_str;

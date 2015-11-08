@@ -183,16 +183,8 @@ const char *ELF_ERROR_LOADER_FULL_STR = "Loader is full (ELF_ERROR_LOADER_FULL_S
 const char *ELF_ERROR_INVALID_LOADER_STR = "Invalid loader (ELF_ERROR_INVALID_LOADER)";
 const char *ELF_ERROR_INVALID_RELOCATION_TYPE_STR = "Invalid relocation type (ELF_ERROR_INVALID_RELOCATION_TYPE)";
 
-/*
- * ELF error
- *
- * Returns a human reabable form of an ELF error
- *
- * @param error the return code from an ELF function
- * @return resulting string
- */
 const char *
-elf_error(elf64_sword error);
+elf_error(elf64_sword value);
 
 /******************************************************************************/
 /* ELF File                                                                   */
@@ -316,16 +308,8 @@ elf_loader_relocate(struct elf_loader_t *loader);
 const char *elfclass32_str = "ELF32 (elfclass32)";
 const char *elfclass64_str = "ELF64 (elfclass64)";
 
-/*
- * ELF ei_class -> char *
- *
- * Returns a human reabable form of ei_class
- *
- * @param class ei_class to convert to string
- * @return resulting string
- */
 const char *
-ei_class_to_str(unsigned char class);
+ei_class_to_str(unsigned char value);
 
 /*
  * ELF Data Types
@@ -339,16 +323,8 @@ ei_class_to_str(unsigned char class);
 const char *elfdata2lsb_str = "2's complement, little endian (elfdata2lsb)";
 const char *elfdata2msb_str = "2's complement, big endian (elfdata2msb)";
 
-/*
- * ELF ei_data -> char *
- *
- * Returns a human reabable form of ei_data
- *
- * @param data ei_data to convert to string
- * @return resulting string
- */
 const char *
-ei_data_to_str(unsigned char data);
+ei_data_to_str(unsigned char value);
 
 /*
  * ELF Version
@@ -360,16 +336,8 @@ ei_data_to_str(unsigned char data);
 
 const char *ev_current_str = "1 (ev_current)";
 
-/*
- * ELF ei_version / e_version -> char *
- *
- * Returns a human reabable form of ei_version and e_version
- *
- * @param version version to convert to string
- * @return resulting string
- */
 const char *
-version_to_str(unsigned char version);
+version_to_str(unsigned char value);
 
 /*
  * ELF OS / ABI Types
@@ -385,16 +353,8 @@ const char *elfosabi_sysv_str = "System V ABI (elfosabi_sysv)";
 const char *elfosabi_hpux_str = "HP-UX operating system (elfosabi_hpux)";
 const char *elfosabi_standalone_str = "Standalone (elfosabi_standalone)";
 
-/*
- * ELF ei_osabi -> char *
- *
- * Returns a human reabable form of ei_osabi
- *
- * @param osabi ei_osabi to convert to string
- * @return resulting string
- */
-const char*
-ei_osabi_to_str(unsigned char osabi);
+const char *
+ei_osabi_to_str(unsigned char value);
 
 /*
  * ELF Types
@@ -422,16 +382,8 @@ const char *et_hios_str = "Environment-specific use (et_hios)";
 const char *et_loproc_str = "Processor-specific use (et_loproc)";
 const char *et_hiproc_str = "Processor-specific use (et_hiproc)";
 
-/*
- * ELF e_type -> char *
- *
- * Returns a human reabable form of e_type
- *
- * @param e_type e_type to convert to string
- * @return resulting string
- */
 const char *
-e_type_to_str(elf64_half e_type);
+e_type_to_str(elf64_half value);
 
 /*
  * ELF Machine Codes
@@ -519,16 +471,8 @@ const char *em_cygnus_m32r_str = "cygnus_m32r";
 const char *em_s390_old_str = "s390_old";
 const char *em_cygnus_mn10300_str = "cygnus_mn10300";
 
-/*
- * ELF e_machine -> char *
- *
- * Returns a human reabable form of e_machine
- *
- * @param e_machine e_machine to convert to string
- * @return resulting string
- */
 const char *
-e_machine_to_str(elf64_half e_machine);
+e_machine_to_str(elf64_half value);
 
 /*
  * ELF File Header
@@ -604,16 +548,8 @@ const char *sht_hios_str = "Process specific (sht_hios)";
 const char *sht_loproc_str = "Process specific (sht_loproc)";
 const char *sht_hiproc_str = "Process specific (sht_hiproc)";
 
-/*
- * ELF sh_type -> char *
- *
- * Returns a human reabable form of sh_type
- *
- * @param sh_type sh_type to convert to string
- * @return resulting string
- */
 const char *
-sh_type_to_str(elf64_word sh_type);
+sh_type_to_str(elf64_word value);
 
 /*
  * ELF Section Attributes
@@ -741,16 +677,8 @@ const char *stb_hios_str = "stb_hios";
 const char *stb_loproc_str = "stb_loproc";
 const char *stb_hiproc_str = "stb_hiproc";
 
-/*
- * ELF stb -> char *
- *
- * Returns a human reabable form of st_info (bind)
- *
- * @param st_info st_info to convert to string
- * @return resulting string
- */
 const char *
-stb_to_str(elf64_word st_info);
+stb_to_str(elf64_word value);
 
 #define stt_notype ((unsigned char)0)
 #define stt_object ((unsigned char)1)
@@ -772,16 +700,8 @@ const char *stt_hios_str = "stt_hios";
 const char *stt_loproc_str = "stt_loproc";
 const char *stt_hiproc_str = "stt_hiproc";
 
-/*
- * ELF stt -> char *
- *
- * Returns a human reabable form of st_info (type)
- *
- * @param st_info st_info to convert to string
- * @return resulting string
- */
 const char *
-stt_to_str(elf64_word st_info);
+stt_to_str(elf64_word value);
 
 #define ELF_SYM_BIND(x) ((x) >> 4)
 #define ELF_SYM_TYPE(x) ((x) & 0xF)
@@ -844,16 +764,8 @@ const char *R_X86_64_GLOB_DAT_STR = "R_X86_64_GLOB_DAT";
 const char *R_X86_64_JUMP_SLOT_STR = "R_X86_64_JUMP_SLOT";
 const char *R_X86_64_RELATIVE_STR = "R_X86_64_RELATIVE";
 
-/*
- * ELF r_info (type) -> char *
- *
- * Returns a human reabable form of r_info (type)
- *
- * @param r_info r_info to convert to string
- * @return resulting string
- */
 const char *
-rel_type_to_str(elf64_xword r_info);
+rel_type_to_str(elf64_xword value);
 
 struct elf_rel
 {
@@ -925,16 +837,8 @@ const char *pt_hios_str = "Environment specific (pt_hios)";
 const char *pt_loproc_str = "Processor specific (pt_loproc)";
 const char *pt_hiproc_str = "Processor specific (pt_hiproc)";
 
-/*
- * ELF p_type -> char *
- *
- * Returns a human reabable form of p_type
- *
- * @param p_type p_type to convert to string
- * @return resulting string
- */
 const char *
-p_type_to_str(elf64_word p_type);
+p_type_to_str(elf64_word value);
 
 /*
  * ELF Section Attributes
