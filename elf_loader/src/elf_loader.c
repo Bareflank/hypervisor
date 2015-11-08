@@ -80,13 +80,13 @@ elf_strcmp(struct e_string *str1, struct e_string *str2)
 /**
  * Convert ELF error -> const char *
  *
- * @param error error code to convert
+ * @param value error code to convert
  * @return const char * version of error code
  */
 const char *
-elf_error(elf64_sword error)
+elf_error(elf64_sword value)
 {
-    switch (error)
+    switch (value)
     {
         case ELF_SUCCESS: return ELF_SUCCESS_STR;
         case ELF_ERROR_INVALID_ARG: return ELF_ERROR_INVALID_ARG_STR;
@@ -518,13 +518,13 @@ elf_loader_relocate(struct elf_loader_t *loader)
 /**
  * Convert ei_class -> const char *
  *
- * @param ei_class ei_class to convert
+ * @param value ei_class to convert
  * @return const char * version of ei_class
  */
 const char *
-ei_class_to_str(unsigned char class)
+ei_class_to_str(unsigned char value)
 {
-    switch (class)
+    switch (value)
     {
         case elfclass32: return elfclass32_str;
         case elfclass64: return elfclass64_str;
@@ -535,13 +535,13 @@ ei_class_to_str(unsigned char class)
 /**
  * Convert ei_data -> const char *
  *
- * @param ei_data ei_data to convert
+ * @param value ei_data to convert
  * @return const char * version of ei_data
  */
 const char *
-ei_data_to_str(unsigned char data)
+ei_data_to_str(unsigned char value)
 {
-    switch (data)
+    switch (value)
     {
         case elfdata2lsb: return elfdata2lsb_str;
         case elfdata2msb: return elfdata2msb_str;
@@ -552,13 +552,13 @@ ei_data_to_str(unsigned char data)
 /**
  * Convert version -> const char *
  *
- * @param version version to convert
+ * @param value version to convert
  * @return const char * version of version
  */
 const char *
-version_to_str(unsigned char version)
+version_to_str(unsigned char value)
 {
-    switch (version)
+    switch (value)
     {
         case ev_current: return ev_current_str;
         default: return "Unknown version";
@@ -568,13 +568,13 @@ version_to_str(unsigned char version)
 /**
  * Convert ei_osabi -> const char *
  *
- * @param ei_osabi ei_osabi to convert
+ * @param value ei_osabi to convert
  * @return const char * version of ei_osabi
  */
 const char *
-ei_osabi_to_str(unsigned char osabi)
+ei_osabi_to_str(unsigned char value)
 {
-    switch (osabi)
+    switch (value)
     {
         case elfosabi_sysv: return elfosabi_sysv_str;
         case elfosabi_hpux: return elfosabi_hpux_str;
@@ -586,13 +586,13 @@ ei_osabi_to_str(unsigned char osabi)
 /**
  * Convert e_type -> const char *
  *
- * @param e_type e_type to convert
+ * @param value e_type to convert
  * @return const char * version of e_type
  */
 const char *
-e_type_to_str(elf64_half e_type)
+e_type_to_str(elf64_half value)
 {
-    switch (e_type)
+    switch (value)
     {
         case et_none: return et_none_str;
         case et_rel: return et_rel_str;
@@ -610,13 +610,13 @@ e_type_to_str(elf64_half e_type)
 /**
  * Convert e_machine -> const char *
  *
- * @param e_machine e_machine to convert
+ * @param value e_machine to convert
  * @return const char * version of e_machine
  */
 const char *
-e_machine_to_str(elf64_half e_machine)
+e_machine_to_str(elf64_half value)
 {
-    switch (e_machine)
+    switch (value)
     {
         case em_none: return em_none_str;
         case em_m32: return em_m32_str;
@@ -690,9 +690,9 @@ elf_file_print_header(struct elf_file_t *ef)
     DEBUG("  %-35s %s\n", "Type:", e_type_to_str(ef->ehdr->e_type));
     DEBUG("  %-35s %s\n", "Machine:", e_machine_to_str(ef->ehdr->e_machine));
     DEBUG("  %-35s %s\n", "Version:", version_to_str(ef->ehdr->e_version));
-    DEBUG("  %-35s 0x%llX\n", "Entry point address:", ef->ehdr->e_entry);
-    DEBUG("  %-35s 0x%llX, %llu (bytes into file)\n", "Start of program headers:", ef->ehdr->e_phoff, ef->ehdr->e_phoff);
-    DEBUG("  %-35s 0x%llX, %llu (bytes into file)\n", "Start of section headers:", ef->ehdr->e_shoff, ef->ehdr->e_shoff);
+    DEBUG("  %-35s 0x%" PRIu64 "\n", "Entry point address:", ef->ehdr->e_entry);
+    DEBUG("  %-35s 0x%" PRIu64 ", %" PRIu64 " (bytes into file)\n", "Start of program headers:", ef->ehdr->e_phoff, ef->ehdr->e_phoff);
+    DEBUG("  %-35s 0x%" PRIu64 ", %" PRIu64 " (bytes into file)\n", "Start of section headers:", ef->ehdr->e_shoff, ef->ehdr->e_shoff);
     DEBUG("  %-35s 0x%X\n", "Flags:", ef->ehdr->e_flags);
     DEBUG("  %-35s %d (bytes)\n", "Size of this header:", ef->ehdr->e_ehsize);
     DEBUG("  %-35s %d (bytes)\n", "Size of program headers:", ef->ehdr->e_phentsize);
@@ -713,13 +713,13 @@ elf_file_print_header(struct elf_file_t *ef)
 /**
  * Convert sh_type -> const char *
  *
- * @param sh_type sh_type to convert
+ * @param value sh_type to convert
  * @return const char * version of sh_type
  */
 const char *
-sh_type_to_str(elf64_word sh_type)
+sh_type_to_str(elf64_word value)
 {
-    switch (sh_type)
+    switch (value)
     {
         case sht_null: return sht_null_str;
         case sht_progbits: return sht_progbits_str;
@@ -877,13 +877,13 @@ elf_print_section_header(struct elf_file_t *ef,
     if (sh_flags_is_executable(shdr) == ELF_TRUE) INFO("E ");
 
     INFO("\n");
-    DEBUG("  %-35s 0x%llX\n", "Address:", shdr->sh_addr);
-    DEBUG("  %-35s 0x%llX\n", "Offset:", shdr->sh_offset);
-    DEBUG("  %-35s %llu (bytes)\n", "Size:", shdr->sh_size);
+    DEBUG("  %-35s 0x%" PRIu64 "\n", "Address:", shdr->sh_addr);
+    DEBUG("  %-35s 0x%" PRIu64 "\n", "Offset:", shdr->sh_offset);
+    DEBUG("  %-35s %" PRIu64 " (bytes)\n", "Size:", shdr->sh_size);
     DEBUG("  %-35s %u\n", "Linked Section:", shdr->sh_link);
     DEBUG("  %-35s %u\n", "Info:", shdr->sh_info);
-    DEBUG("  %-35s %llu\n", "Address Alignment:", shdr->sh_addralign);
-    DEBUG("  %-35s %llu\n", "Entry Size:", shdr->sh_entsize);
+    DEBUG("  %-35s %" PRIu64 "\n", "Address Alignment:", shdr->sh_addralign);
+    DEBUG("  %-35s %" PRIu64 "\n", "Entry Size:", shdr->sh_entsize);
 
     DEBUG("\n");
 
@@ -980,13 +980,13 @@ elf_section_name_string(struct elf_file_t *ef,
 /**
  * Convert stb -> const char *
  *
- * @param st_info stb to convert
+ * @param value stb to convert
  * @return const char * version of stb
  */
 const char *
-stb_to_str(elf64_word st_info)
+stb_to_str(elf64_word value)
 {
-    switch (ELF_SYM_BIND(st_info))
+    switch (ELF_SYM_BIND(value))
     {
         case stb_local: return stb_local_str;
         case stb_global: return stb_global_str;
@@ -1002,13 +1002,13 @@ stb_to_str(elf64_word st_info)
 /**
  * Convert stt -> const char *
  *
- * @param st_info stt to convert
+ * @param value stt to convert
  * @return const char * version of stt
  */
 const char *
-stt_to_str(elf64_word st_info)
+stt_to_str(elf64_word value)
 {
-    switch (ELF_SYM_TYPE(st_info))
+    switch (ELF_SYM_TYPE(value))
     {
         case stt_notype: return stt_notype_str;
         case stt_object: return stt_object_str;
@@ -1304,14 +1304,14 @@ elf_print_sym(struct elf_file_t *ef,
     DEBUG("  %-35s %s\n", "Bind:", stb_to_str(sym->st_info));
     DEBUG("  %-35s %s\n", "Type:", stt_to_str(sym->st_info));
     DEBUG("  %-35s %d\n", "Section Index:", sym->st_shndx);
-    DEBUG("  %-35s 0x%llX\n", "Value:", sym->st_value);
-    DEBUG("  %-35s 0x%llX\n", "Size:", sym->st_size);
+    DEBUG("  %-35s 0x%" PRIu64 "\n", "Value:", sym->st_value);
+    DEBUG("  %-35s 0x%" PRIu64 "\n", "Size:", sym->st_size);
 
     DEBUG("\n");
 
 #else
 
-    DEBUG("Symbol: %-29s 0x%08llX %-2s %-12s %s\n", str.buf, sym->st_value, " ",
+    DEBUG("Symbol: %-29s 0x%08" PRIu64 " %-2s %-12s %s\n", str.buf, sym->st_value, " ",
           stb_to_str(sym->st_info),
           stt_to_str(sym->st_info));
 
@@ -1327,13 +1327,13 @@ elf_print_sym(struct elf_file_t *ef,
 /**
  * Convert r_info (type) -> const char *
  *
- * @param r_info r_info (type) to convert
+ * @param value r_info (type) to convert
  * @return const char * version of r_info (type)
  */
 const char *
-rel_type_to_str(elf64_xword r_info)
+rel_type_to_str(elf64_xword value)
 {
-    switch (ELF_REL_TYPE(r_info))
+    switch (ELF_REL_TYPE(value))
     {
         case R_X86_64_64: return R_X86_64_64_STR;
         case R_X86_64_GLOB_DAT: return R_X86_64_GLOB_DAT_STR;
@@ -1561,15 +1561,15 @@ elf_print_relocation(struct elf_rel *rel)
 #ifdef PRINT_DETAILED_REL
 
     DEBUG("Relocation:\n");
-    DEBUG("  %-35s 0x%08llX\n", "Offset:", rel->r_offset);
-    DEBUG("  %-35s %lld\n", "Symbol:", ELF_REL_SYM(rel->r_info));
+    DEBUG("  %-35s 0x%08" PRIu64 "\n", "Offset:", rel->r_offset);
+    DEBUG("  %-35s %" PRId64 "\n", "Symbol:", ELF_REL_SYM(rel->r_info));
     DEBUG("  %-35s %s\n", "Type:", rel_type_to_str(rel->r_info));
 
     DEBUG("\n");
 
 #else
 
-    DEBUG("Relocation: %-20s 0x%08llX %04lld\n", rel_type_to_str(rel->r_info),
+    DEBUG("Relocation: %-20s 0x%08" PRIu64 " %04" PRId64 "\n", rel_type_to_str(rel->r_info),
           rel->r_offset,
           ELF_REL_SYM(rel->r_info));
 
@@ -1595,16 +1595,16 @@ elf_print_relocation_addend(struct elf_rela *rela)
 #ifdef PRINT_DETAILED_REL
 
     DEBUG("Relocation:\n");
-    DEBUG("  %-35s 0x%08llX\n", "Offset:", rela->r_offset);
-    DEBUG("  %-35s %lld\n", "Symbol:", ELF_REL_SYM(rela->r_info));
+    DEBUG("  %-35s 0x%08" PRIu64 "\n", "Offset:", rela->r_offset);
+    DEBUG("  %-35s %" PRId64 "\n", "Symbol:", ELF_REL_SYM(rela->r_info));
     DEBUG("  %-35s %s\n", "Type:", rel_type_to_str(rela->r_info));
-    DEBUG("  %-35s 0x%llX\n", "Addend:", rela->r_addend);
+    DEBUG("  %-35s 0x%" PRIu64 "\n", "Addend:", rela->r_addend);
 
     DEBUG("\n");
 
 #else
 
-    DEBUG("Relocation: %-20s 0x%08llX %04lld 0x%08llX\n", rel_type_to_str(rela->r_info),
+    DEBUG("Relocation: %-20s 0x%08" PRIu64 " %04" PRId64 " 0x%08" PRIu64 "\n", rel_type_to_str(rela->r_info),
           rela->r_offset,
           ELF_REL_SYM(rela->r_info),
           rela->r_addend);
@@ -1669,13 +1669,13 @@ elf_print_relocations(struct elf_file_t *ef)
 /**
  * Convert p_type (type) -> const char *
  *
- * @param p_type p_type (type) to convert
+ * @param value p_type (type) to convert
  * @return const char * version of p_type (type)
  */
 const char *
-p_type_to_str(elf64_word p_type)
+p_type_to_str(elf64_word value)
 {
-    switch (p_type)
+    switch (value)
     {
         case pt_null: return pt_null_str;
         case pt_load: return pt_load_str;
@@ -1951,12 +1951,12 @@ elf_print_program_header(struct elf_file_t *ef,
     if (p_flags_is_readable(phdr) == ELF_TRUE) INFO("R ");
 
     INFO("\n");
-    DEBUG("  %-35s 0x%llX\n", "Offset:", phdr->p_offset);
-    DEBUG("  %-35s 0x%llX\n", "Virtual Address:", phdr->p_vaddr);
-    DEBUG("  %-35s 0x%llX\n", "Physical Address:", phdr->p_paddr);
-    DEBUG("  %-35s %llu (bytes)\n", "File Size:", phdr->p_filesz);
-    DEBUG("  %-35s %llu (bytes)\n", "Exec Size:", phdr->p_memsz);
-    DEBUG("  %-35s 0x%llX\n", "Alignment:", phdr->p_align);
+    DEBUG("  %-35s 0x%" PRIu64 "\n", "Offset:", phdr->p_offset);
+    DEBUG("  %-35s 0x%" PRIu64 "\n", "Virtual Address:", phdr->p_vaddr);
+    DEBUG("  %-35s 0x%" PRIu64 "\n", "Physical Address:", phdr->p_paddr);
+    DEBUG("  %-35s %" PRIu64 " (bytes)\n", "File Size:", phdr->p_filesz);
+    DEBUG("  %-35s %" PRIu64 " (bytes)\n", "Exec Size:", phdr->p_memsz);
+    DEBUG("  %-35s 0x%" PRIu64 "\n", "Alignment:", phdr->p_align);
 
     DEBUG("\n");
 
