@@ -47,8 +47,7 @@ if [ ! -f tools/doxygen/osx/src/build/bin/doxygen ]; then
 	popd
 fi
 
-rm -Rf doc
-mkdir doc
+mkdir -p doc
 
 cd doc
 ../tools/doxygen/osx/src/build/bin/doxygen ../tools/doxygen/config.txt
