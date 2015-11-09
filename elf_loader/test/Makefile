@@ -30,7 +30,7 @@ RM=rm -rf
 MD=mkdir -p
 
 CCFLAGS=
-CXXFLAGS=-std=c++11
+CXXFLAGS=-std=c++0x
 LDFLAGS=
 
 DEFINES=
