@@ -23,7 +23,7 @@
 #ifndef ELF_LOADER_H
 #define ELF_LOADER_H
 
-#include <stdint.h>
+#include <inttypes.h>
 
 #pragma pack(push, 1)
 

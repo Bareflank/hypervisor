@@ -690,9 +690,9 @@ elf_file_print_header(struct elf_file_t *ef)
     DEBUG("  %-35s %s\n", "Type:", e_type_to_str(ef->ehdr->e_type));
     DEBUG("  %-35s %s\n", "Machine:", e_machine_to_str(ef->ehdr->e_machine));
     DEBUG("  %-35s %s\n", "Version:", version_to_str(ef->ehdr->e_version));
-    DEBUG("  %-35s 0x%llX\n", "Entry point address:", ef->ehdr->e_entry);
-    DEBUG("  %-35s 0x%llX, %llu (bytes into file)\n", "Start of program headers:", ef->ehdr->e_phoff, ef->ehdr->e_phoff);
-    DEBUG("  %-35s 0x%llX, %llu (bytes into file)\n", "Start of section headers:", ef->ehdr->e_shoff, ef->ehdr->e_shoff);
+    DEBUG("  %-35s 0x%" PRIu64 "\n", "Entry point address:", ef->ehdr->e_entry);
+    DEBUG("  %-35s 0x%" PRIu64 ", %" PRIu64 " (bytes into file)\n", "Start of program headers:", ef->ehdr->e_phoff, ef->ehdr->e_phoff);
+    DEBUG("  %-35s 0x%" PRIu64 ", %" PRIu64 " (bytes into file)\n", "Start of section headers:", ef->ehdr->e_shoff, ef->ehdr->e_shoff);
     DEBUG("  %-35s 0x%X\n", "Flags:", ef->ehdr->e_flags);
     DEBUG("  %-35s %d (bytes)\n", "Size of this header:", ef->ehdr->e_ehsize);
     DEBUG("  %-35s %d (bytes)\n", "Size of program headers:", ef->ehdr->e_phentsize);
@@ -877,13 +877,13 @@ elf_print_section_header(struct elf_file_t *ef,
     if (sh_flags_is_executable(shdr) == ELF_TRUE) INFO("E ");
 
     INFO("\n");
-    DEBUG("  %-35s 0x%llX\n", "Address:", shdr->sh_addr);
-    DEBUG("  %-35s 0x%llX\n", "Offset:", shdr->sh_offset);
-    DEBUG("  %-35s %llu (bytes)\n", "Size:", shdr->sh_size);
+    DEBUG("  %-35s 0x%" PRIu64 "\n", "Address:", shdr->sh_addr);
+    DEBUG("  %-35s 0x%" PRIu64 "\n", "Offset:", shdr->sh_offset);
+    DEBUG("  %-35s %" PRIu64 " (bytes)\n", "Size:", shdr->sh_size);
     DEBUG("  %-35s %u\n", "Linked Section:", shdr->sh_link);
     DEBUG("  %-35s %u\n", "Info:", shdr->sh_info);
-    DEBUG("  %-35s %llu\n", "Address Alignment:", shdr->sh_addralign);
-    DEBUG("  %-35s %llu\n", "Entry Size:", shdr->sh_entsize);
+    DEBUG("  %-35s %" PRIu64 "\n", "Address Alignment:", shdr->sh_addralign);
+    DEBUG("  %-35s %" PRIu64 "\n", "Entry Size:", shdr->sh_entsize);
 
     DEBUG("\n");
 
@@ -1304,14 +1304,14 @@ elf_print_sym(struct elf_file_t *ef,
     DEBUG("  %-35s %s\n", "Bind:", stb_to_str(sym->st_info));
     DEBUG("  %-35s %s\n", "Type:", stt_to_str(sym->st_info));
     DEBUG("  %-35s %d\n", "Section Index:", sym->st_shndx);
-    DEBUG("  %-35s 0x%llX\n", "Value:", sym->st_value);
-    DEBUG("  %-35s 0x%llX\n", "Size:", sym->st_size);
+    DEBUG("  %-35s 0x%" PRIu64 "\n", "Value:", sym->st_value);
+    DEBUG("  %-35s 0x%" PRIu64 "\n", "Size:", sym->st_size);
 
     DEBUG("\n");
 
 #else
 
-    DEBUG("Symbol: %-29s 0x%08llX %-2s %-12s %s\n", str.buf, sym->st_value, " ",
+    DEBUG("Symbol: %-29s 0x%08" PRIu64 " %-2s %-12s %s\n", str.buf, sym->st_value, " ",
           stb_to_str(sym->st_info),
           stt_to_str(sym->st_info));
 
@@ -1561,15 +1561,15 @@ elf_print_relocation(struct elf_rel *rel)
 #ifdef PRINT_DETAILED_REL
 
     DEBUG("Relocation:\n");
-    DEBUG("  %-35s 0x%08llX\n", "Offset:", rel->r_offset);
-    DEBUG("  %-35s %lld\n", "Symbol:", ELF_REL_SYM(rel->r_info));
+    DEBUG("  %-35s 0x%08" PRIu64 "\n", "Offset:", rel->r_offset);
+    DEBUG("  %-35s %" PRId64 "\n", "Symbol:", ELF_REL_SYM(rel->r_info));
     DEBUG("  %-35s %s\n", "Type:", rel_type_to_str(rel->r_info));
 
     DEBUG("\n");
 
 #else
 
-    DEBUG("Relocation: %-20s 0x%08llX %04lld\n", rel_type_to_str(rel->r_info),
+    DEBUG("Relocation: %-20s 0x%08" PRIu64 " %04" PRId64 "\n", rel_type_to_str(rel->r_info),
           rel->r_offset,
           ELF_REL_SYM(rel->r_info));
 
@@ -1595,16 +1595,16 @@ elf_print_relocation_addend(struct elf_rela *rela)
 #ifdef PRINT_DETAILED_REL
 
     DEBUG("Relocation:\n");
-    DEBUG("  %-35s 0x%08llX\n", "Offset:", rela->r_offset);
-    DEBUG("  %-35s %lld\n", "Symbol:", ELF_REL_SYM(rela->r_info));
+    DEBUG("  %-35s 0x%08" PRIu64 "\n", "Offset:", rela->r_offset);
+    DEBUG("  %-35s %" PRId64 "\n", "Symbol:", ELF_REL_SYM(rela->r_info));
     DEBUG("  %-35s %s\n", "Type:", rel_type_to_str(rela->r_info));
-    DEBUG("  %-35s 0x%llX\n", "Addend:", rela->r_addend);
+    DEBUG("  %-35s 0x%" PRIu64 "\n", "Addend:", rela->r_addend);
 
     DEBUG("\n");
 
 #else
 
-    DEBUG("Relocation: %-20s 0x%08llX %04lld 0x%08llX\n", rel_type_to_str(rela->r_info),
+    DEBUG("Relocation: %-20s 0x%08" PRIu64 " %04" PRId64 " 0x%08" PRIu64 "\n", rel_type_to_str(rela->r_info),
           rela->r_offset,
           ELF_REL_SYM(rela->r_info),
           rela->r_addend);
@@ -1951,12 +1951,12 @@ elf_print_program_header(struct elf_file_t *ef,
     if (p_flags_is_readable(phdr) == ELF_TRUE) INFO("R ");
 
     INFO("\n");
-    DEBUG("  %-35s 0x%llX\n", "Offset:", phdr->p_offset);
-    DEBUG("  %-35s 0x%llX\n", "Virtual Address:", phdr->p_vaddr);
-    DEBUG("  %-35s 0x%llX\n", "Physical Address:", phdr->p_paddr);
-    DEBUG("  %-35s %llu (bytes)\n", "File Size:", phdr->p_filesz);
-    DEBUG("  %-35s %llu (bytes)\n", "Exec Size:", phdr->p_memsz);
-    DEBUG("  %-35s 0x%llX\n", "Alignment:", phdr->p_align);
+    DEBUG("  %-35s 0x%" PRIu64 "\n", "Offset:", phdr->p_offset);
+    DEBUG("  %-35s 0x%" PRIu64 "\n", "Virtual Address:", phdr->p_vaddr);
+    DEBUG("  %-35s 0x%" PRIu64 "\n", "Physical Address:", phdr->p_paddr);
+    DEBUG("  %-35s %" PRIu64 " (bytes)\n", "File Size:", phdr->p_filesz);
+    DEBUG("  %-35s %" PRIu64 " (bytes)\n", "Exec Size:", phdr->p_memsz);
+    DEBUG("  %-35s 0x%" PRIu64 "\n", "Alignment:", phdr->p_align);
 
     DEBUG("\n");
 
