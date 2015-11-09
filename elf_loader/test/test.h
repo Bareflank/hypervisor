@@ -34,9 +34,9 @@ public:
 
 protected:
 
-    virtual bool init(void) override;
-    virtual bool fini(void) override;
-    virtual bool list(void) override;
+    virtual bool init(void);
+    virtual bool fini(void);
+    virtual bool list(void);
 
 private:
 
