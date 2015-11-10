@@ -24,7 +24,8 @@ brew install isl
 Before you can compile the cross-compiler, you must download it. For GCC, this consists of both binutils and gcc itself. Note that you must select gcc 5.2.0 or higher, and binutils 2.25.1 or higher. All that is needed in this step are the links for the compiler you choose to install, as we will complete the actual download later. 
 
 ftp://ftp.gnu.org/gnu/gcc/ <br>
-ftp://ftp.gnu.org/gnu/binutils/
+ftp://ftp.gnu.org/gnu/binutils/ <br>
+http://www.nasm.us/pub/nasm/releasebuilds/
 
 ## Compilation Environment
 
@@ -44,9 +45,11 @@ cd ~/cross
 
 wget <link to gcc-*.tar.gz>
 wget <link to binutils-*.tar.gz>
+wget <link to nasm-*.tar.gz>
 
 tar xvf gcc-*.tar.gz
 tar xvf binutils-*.tar.gz
+tar xvf nasm-*.tar.gz
 
 mkdir build-gcc
 mkdir build-binutils
@@ -84,6 +87,18 @@ make install-target-libgcc
 
 Note that the paths for gmp, mpfr, mpc and isl are hardcoded for OS X El Capitan and might be different depending on which version of OS X and Homebrew that you are using. 
 
+## Compile NASM
+
+To compile nasm, run the following:
+
+```
+cd ~/cross/nasm-*
+
+./configure --prefix="$PREFIX"
+make 
+make install
+```
+
 ## Test
 
 The resulting cross-compiler should be located at:
@@ -92,4 +107,5 @@ The resulting cross-compiler should be located at:
 ~/opt/cross/bin/x86_64-elf-gcc
 ~/opt/cross/bin/x86_64-elf-g++
 ~/opt/cross/bin/x86_64-elf-ld
+~/opt/cross/bin/nasm
 ```
