@@ -1,0 +1,21 @@
+language: cpp
+
+compiler:
+- gcc
+
+env:
+- GCC_BASE=520
+
+before_install:
+- export SILENCE="defined"
+- if [ "$GCC_BASE" = "520" ]; then export BINUTILS_PATH="http://ftp.gnu.org/gnu/binutils/binutils-2.25.1.tar.bz2";  fi
+- if [ "$GCC_BASE" = "520" ]; then export GCC_PATH="https://ftp.gnu.org/gnu/gcc/gcc-5.2.0/gcc-5.2.0.tar.bz2";  fi
+
+install:
+- sudo apt-get update
+- travis_wait 30 ./tools/scripts/debian-cross-compiler.sh
+
+script:
+- make
+- cd elf_loader/bin
+- LD_LIBRARY_PATH=. ./test
