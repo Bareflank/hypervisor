@@ -50,7 +50,7 @@ SOURCES=test.cpp
 INCLUDES=
 LIBS=elf_loader
 
-INCLUDE_PATHS=../include/ ./ ../../include/
+INCLUDE_PATHS=./ ../include/ ../../include/
 LIB_PATHS=../bin/
 
 ################################################################################
