@@ -157,4 +157,6 @@ In addition to setting up the cross-compiler, you will also need to:
 
 You may also find the following link helpful:
 
-[Cygwin SSHD](http://techtorials.me/cygwin/sshd-configuration/)
+[Cygwin SSHD](http://techtorials.me/cygwin/sshd-configuration/) <br>
+[Windows KMDF Hello World](https://msdn.microsoft.com/en-us/library/windows/hardware/hh439665(v=vs.85).aspx) <br>
+[Provision Windows Test Machine](https://msdn.microsoft.com/en-us/library/windows/hardware/dn745909(v=vs.85).aspx) <br>
