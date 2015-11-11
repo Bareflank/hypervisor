@@ -38,15 +38,6 @@
 /* ELF Helpers                                                                */
 /******************************************************************************/
 
-/**
- * ELF String Comapre
- *
- * Determines if two strings are identical. This function is case snesitive.
- * @param str1 string to compare
- * @param str2 string to compare
- * @return ELF_TRUE is the strings are the same, ELF_FALSE if the strings are
- *     different, negative on error.
- */
 elf64_sword
 elf_strcmp(struct e_string *str1, struct e_string *str2)
 {
@@ -77,12 +68,6 @@ elf_strcmp(struct e_string *str1, struct e_string *str2)
 /* ELF Error Codes                                                            */
 /******************************************************************************/
 
-/**
- * Convert ELF error -> const char *
- *
- * @param value error code to convert
- * @return const char * version of error code
- */
 const char *
 elf_error(elf64_sword value)
 {
@@ -148,19 +133,6 @@ elf_error(elf64_sword value)
 /* ELF File                                                                   */
 /******************************************************************************/
 
-/**
- * Initialize an ELF file
- *
- * This function initializes an ELF file structure given the file's contents
- * in memory. The resulting structure will be used by all of the other
- * functions.
- *
- * @param file a character buffer containing the contents of the ELF file to
- *     be loaded.
- * @param fsize the size of the character buffer
- * @param ef the ELF file structure to initialize.
- * @return ELF_SUCCESS on success, negative on error
- */
 elf64_sword
 elf_file_init(char *file, elf64_sword fsize, struct elf_file_t *ef)
 {
@@ -355,20 +327,6 @@ elf_file_init(char *file, elf64_sword fsize, struct elf_file_t *ef)
     return ELF_SUCCESS;
 }
 
-/**
- * Load ELF file
- *
- * Once an ELF file has been initialized, use elf_total_exec_size to
- * get the amount of RAM that is needed to load the ELF file into memory.
- * Using this information, allocate Read, Write, Exectuable memory for the
- * ELF file, that is used by this function. This function will actually load
- * the ELF file into the allocated RAM.
- *
- * @param ef the ELF file
- * @param exec a character buffer to load the ELF file into
- * @param esize the size of the character buffer
- * @return ELF_SUCCESS on success, negative on error
- */
 elf64_sword
 elf_file_load(struct elf_file_t *ef, char *exec, elf64_sword esize)
 {
@@ -411,17 +369,6 @@ elf_file_load(struct elf_file_t *ef, char *exec, elf64_sword esize)
 /* ELF Loader                                                                 */
 /******************************************************************************/
 
-/**
- * Initialize ELF Loader
- *
- * The ELF loader is responsible for collecting all of the ELF files that
- * have been loaded, and relocates them in memory. If more then one library
- * is to be loaded, the relocation operation requires all of the symbol tables
- * from all of the libraries to be available during relocation.
- *
- * @param loader the ELF loader to initialize
- * @return ELF_SUCCESS on success, negative on error
- */
 elf64_sword
 elf_loader_init(struct elf_loader_t *loader)
 {
@@ -436,16 +383,6 @@ elf_loader_init(struct elf_loader_t *loader)
     return ELF_SUCCESS;
 }
 
-/**
- * Add ELF file to an ELF loader
- *
- * Once an ELF loader has been initialized, use this function to add an
- * ELF file to the ELF loader
- *
- * @param loader the ELF loader
- * @param ef the ELF file to add
- * @return ELF_SUCCESS on success, negative on error
- */
 elf64_sword
 elf_loader_add(struct elf_loader_t *loader, struct elf_file_t *ef)
 {
@@ -463,16 +400,6 @@ elf_loader_add(struct elf_loader_t *loader, struct elf_file_t *ef)
     return ELF_SUCCESS;
 }
 
-/**
- * Relocate ELF Loader
- *
- * Relocates all of the ELF files that have been added to the ELF loader.
- * Once all of the ELF files have been relocated, it's safe to resolve
- * symbols for execution.
- *
- * @param loader the ELF loader
- * @return ELF_SUCCESS on success, negative on error
- */
 elf64_sword
 elf_loader_relocate(struct elf_loader_t *loader)
 {
@@ -515,12 +442,6 @@ elf_loader_relocate(struct elf_loader_t *loader)
 /* ELF File Header                                                            */
 /******************************************************************************/
 
-/**
- * Convert ei_class -> const char *
- *
- * @param value ei_class to convert
- * @return const char * version of ei_class
- */
 const char *
 ei_class_to_str(unsigned char value)
 {
@@ -532,12 +453,6 @@ ei_class_to_str(unsigned char value)
     }
 }
 
-/**
- * Convert ei_data -> const char *
- *
- * @param value ei_data to convert
- * @return const char * version of ei_data
- */
 const char *
 ei_data_to_str(unsigned char value)
 {
@@ -549,12 +464,6 @@ ei_data_to_str(unsigned char value)
     }
 }
 
-/**
- * Convert version -> const char *
- *
- * @param value version to convert
- * @return const char * version of version
- */
 const char *
 version_to_str(unsigned char value)
 {
@@ -565,12 +474,6 @@ version_to_str(unsigned char value)
     }
 }
 
-/**
- * Convert ei_osabi -> const char *
- *
- * @param value ei_osabi to convert
- * @return const char * version of ei_osabi
- */
 const char *
 ei_osabi_to_str(unsigned char value)
 {
@@ -583,12 +486,6 @@ ei_osabi_to_str(unsigned char value)
     }
 }
 
-/**
- * Convert e_type -> const char *
- *
- * @param value e_type to convert
- * @return const char * version of e_type
- */
 const char *
 e_type_to_str(elf64_half value)
 {
@@ -607,12 +504,6 @@ e_type_to_str(elf64_half value)
     }
 }
 
-/**
- * Convert e_machine -> const char *
- *
- * @param value e_machine to convert
- * @return const char * version of e_machine
- */
 const char *
 e_machine_to_str(elf64_half value)
 {
@@ -661,12 +552,6 @@ e_machine_to_str(elf64_half value)
     }
 }
 
-/**
- * Print ELF file header
- *
- * @param ef the ELF file
- * @return ELF_SUCCESS on success, negative on error
- */
 elf64_sword
 elf_file_print_header(struct elf_file_t *ef)
 {
@@ -710,12 +595,6 @@ elf_file_print_header(struct elf_file_t *ef)
 /* ELF Section Header Table                                                   */
 /******************************************************************************/
 
-/**
- * Convert sh_type -> const char *
- *
- * @param value sh_type to convert
- * @return const char * version of sh_type
- */
 const char *
 sh_type_to_str(elf64_word value)
 {
@@ -741,12 +620,6 @@ sh_type_to_str(elf64_word value)
     }
 }
 
-/**
- * Convert sh_flags (writable) -> bool
- *
- * @param shdr section header with sh_flags to convert
- * @return ELF_TRUE if writable, ELF_FALSE otherwise
- */
 elf64_sword
 sh_flags_is_writable(struct elf_shdr *shdr)
 {
@@ -756,12 +629,6 @@ sh_flags_is_writable(struct elf_shdr *shdr)
     return (shdr->sh_flags & shf_write) != 0 ? ELF_TRUE : ELF_FALSE;
 }
 
-/**
- * Convert sh_flags (allocated) -> bool
- *
- * @param shdr section header with sh_flags to convert
- * @return ELF_TRUE if allocated, ELF_FALSE otherwise
- */
 elf64_sword
 sh_flags_is_allocated(struct elf_shdr *shdr)
 {
@@ -771,12 +638,6 @@ sh_flags_is_allocated(struct elf_shdr *shdr)
     return (shdr->sh_flags & shf_alloc) != 0 ? ELF_TRUE : ELF_FALSE;
 }
 
-/**
- * Convert sh_flags (executable) -> bool
- *
- * @param shdr section header with sh_flags to convert
- * @return ELF_TRUE if executable, ELF_FALSE otherwise
- */
 elf64_sword
 sh_flags_is_executable(struct elf_shdr *shdr)
 {
@@ -786,14 +647,6 @@ sh_flags_is_executable(struct elf_shdr *shdr)
     return (shdr->sh_flags & shf_execinstr) != 0 ? ELF_TRUE : ELF_FALSE;
 }
 
-/**
- * Get ELF section header
- *
- * @param ef the ELF file
- * @param index the index of the section to get
- * @param shdr the section header to return
- * @return ELF_SUCCESS on success, negative on error
- */
 elf64_sword
 elf_section_header(struct elf_file_t *ef,
                    elf64_word index,
@@ -810,12 +663,6 @@ elf_section_header(struct elf_file_t *ef,
     return ELF_SUCCESS;
 }
 
-/**
- * Print ELF section header table
- *
- * @param ef the ELF file
- * @return ELF_SUCCESS on success, negative on error
- */
 elf64_sword
 elf_print_section_header_table(struct elf_file_t *ef)
 {
@@ -844,13 +691,6 @@ elf_print_section_header_table(struct elf_file_t *ef)
     return ELF_SUCCESS;
 }
 
-/**
- * Print ELF section header
- *
- * @param ef the ELF file
- * @param shdr the section header to print
- * @return ELF_SUCCESS on success, negative on error
- */
 elf64_sword
 elf_print_section_header(struct elf_file_t *ef,
                          struct elf_shdr *shdr)
@@ -894,22 +734,6 @@ elf_print_section_header(struct elf_file_t *ef,
 /* Section Name String Table                                                  */
 /******************************************************************************/
 
-/**
- * Get ELF string table entry
- *
- * In each ELF file there are multiple string tables. Usually there is at
- * least a string table for all of the section headers (e.g. .got, .hash,
- * .dynsym, etc...) and then there is a string table for all of the dynamic
- * symbol names (e.g. fun1, my_glob1, etc...). A string table is nothing more
- * than a collection of null terminated strings, back to back. This function
- * takes a string table, and an offset into the table, and returns a string.
- *
- * @param ef the ELF file
- * @param strtab the string table
- * @param offset the offset (in bytes) into the string table
- * @param str the string being returned
- * @return ELF_SUCCESS on success, negative on error
- */
 elf64_sword
 elf_string_table_entry(struct elf_file_t *ef,
                        struct elf_shdr *strtab,
@@ -949,16 +773,6 @@ elf_string_table_entry(struct elf_file_t *ef,
     return ELF_SUCCESS;
 }
 
-/**
- * Get ELF section name
- *
- * This is a helper function for getting a section name.
- *
- * @param ef the ELF file
- * @param shdr the section header to get the name for
- * @param str the string being returned
- * @return ELF_SUCCESS on success, negative on error
- */
 elf64_sword
 elf_section_name_string(struct elf_file_t *ef,
                         struct elf_shdr *shdr,
@@ -977,12 +791,6 @@ elf_section_name_string(struct elf_file_t *ef,
 /* ELF Dynamic Symbol Table                                                   */
 /******************************************************************************/
 
-/**
- * Convert stb -> const char *
- *
- * @param value stb to convert
- * @return const char * version of stb
- */
 const char *
 stb_to_str(elf64_word value)
 {
@@ -999,12 +807,6 @@ stb_to_str(elf64_word value)
     }
 }
 
-/**
- * Convert stt -> const char *
- *
- * @param value stt to convert
- * @return const char * version of stt
- */
 const char *
 stt_to_str(elf64_word value)
 {
@@ -1023,18 +825,6 @@ stt_to_str(elf64_word value)
     }
 }
 
-/**
- * Get Dynamic Symbol (by index)
- *
- * This function will get a symbol from the dynamic symbol table given an
- * index. Note that this function does _not_ attempt to locate the symbol if
- * it's value is 0.
- *
- * @param ef the ELF file
- * @param index index into the .dynsym section
- * @param sym the symbol being returned
- * @return ELF_SUCCESS on success, negative on error
- */
 elf64_sword
 elf_symbol_by_index(struct elf_file_t *ef,
                     elf64_word index,
@@ -1054,18 +844,6 @@ elf_symbol_by_index(struct elf_file_t *ef,
     return ELF_SUCCESS;
 }
 
-/**
- * Get Dynamic Symbol (by name)
- *
- * This function will get a symbol from the dynamic symbol table given a
- * name. Note that this function does _not_ attempt to locate the symbol if
- * it's value is 0.
- *
- * @param ef the ELF file
- * @param name name of the symbol in the .dynsym section to get
- * @param sym the symbol being returned
- * @return ELF_SUCCESS on success, negative on error
- */
 elf64_sword
 elf_symbol_by_name(struct elf_file_t *ef,
                    struct e_string *name,
@@ -1110,26 +888,6 @@ elf_symbol_by_name(struct elf_file_t *ef,
     return ELF_ERROR_NO_SUCH_SYMBOL;
 }
 
-/**
- * Get Global Dynamic Symbol (by name)
- *
- * This function will get a symbol from the dynamic symbol table given a
- * name. If the symbol is not defined in the ELF file that was provided
- * (i.e. st_value == 0), this function will search all of the other ELF files
- * that were provided by an ELF loader to see if it can find the symbol that
- * is actually defined. If this function returns, ELF_ERROR_NO_SUCH_SYMBOL
- * the symbol is not defined by any of the ELF files that were loaded. If
- * the symbol was located, this function not only returns the symbol, but it
- * also returns the ELF file that the symbol was located in (which might be
- * the ELF file that was provided, or it might be an ELF file provided to
- * an ELF loader).
- *
- * @param efl the ELF file
- * @param name name of the symbol in the .dynsym section to get
- * @param efr the resulting ELF file that the symbol was located in
- * @param sym the symbol being returned
- * @return ELF_SUCCESS on success, negative on error
- */
 elf64_sword
 elf_symbol_by_name_global(struct elf_file_t *efl,
                           struct e_string *name,
@@ -1190,30 +948,6 @@ found:
     return ELF_SUCCESS;
 }
 
-/**
- * Resvole Symbol
- *
- * This function will lookup a symbol by it's name, and return it's absolute
- * address. Before this function can be run, the following must be done:
- *
- * - Each ELF file must be created and initalized.
- * - Each ELF file must be loaded into memory
- * - An ELF loader much be created an initalized.
- * - Each ELF file must be added to the ELF loader
- * - The ELF loader must be relocated
- *
- * Once these steps are completed, this function can be used to lookup the
- * absolute address for any symbol. Note that this function will return
- * the absolute address of a symbol in a different ELF file that what is
- * provided. It will however take longer as it must perform a global search.
- * Therefore, it is advised that the search be done on the ELF file that is
- * likely to contain the symbol.
- *
- * @param ef the ELF file
- * @param name name of the symbol in the .dynsym section to get
- * @param addr the resulting absolute address
- * @return ELF_SUCCESS on success, negative on error
- */
 elf64_sword
 elf_resolve_symbol(struct elf_file_t *ef,
                    struct e_string *name,
@@ -1238,12 +972,6 @@ elf_resolve_symbol(struct elf_file_t *ef,
     return ELF_SUCCESS;
 }
 
-/**
- * Print dynamic symbol table
- *
- * @param ef the ELF file
- * @return ELF_SUCCESS on success, negative on error
- */
 elf64_sword
 elf_print_sym_table(struct elf_file_t *ef)
 {
@@ -1274,13 +1002,6 @@ elf_print_sym_table(struct elf_file_t *ef)
     return ELF_SUCCESS;
 }
 
-/**
- * Print dynamic symbol
- *
- * @param ef the ELF file
- * @param sym the symbol to print
- * @return ELF_SUCCESS on success, negative on error
- */
 elf64_sword
 elf_print_sym(struct elf_file_t *ef,
               struct elf_sym *sym)
@@ -1324,12 +1045,6 @@ elf_print_sym(struct elf_file_t *ef,
 /* ELF Relocations                                                            */
 /******************************************************************************/
 
-/**
- * Convert r_info (type) -> const char *
- *
- * @param value r_info (type) to convert
- * @return const char * version of r_info (type)
- */
 const char *
 rel_type_to_str(elf64_xword value)
 {
@@ -1343,26 +1058,6 @@ rel_type_to_str(elf64_xword value)
     }
 }
 
-/**
- * Relocate Symbol
- *
- * Given a relocation record (from a relocation table), this function
- * performs the actual relocation.
- *
- * @note for x86_64, the documentation states that *ptr = S for GLOB_DAT and
- *     JUMP_SLOT. S in the documentation is sym->st_value, which is missing
- *     the base address to make the address "absolute". Most of the
- *     implementations that I found include the base address, so I believe this
- *     documentation to be in error. I have included the spec and a reference
- *     implementation in case it is needed.
- *
- * http://www.x86-64.org/documentation_folder/abi.pdf
- * https://github.com/madd-games/glidix/blob/186e2f699c045440f96551fcf504833d6d81799e/src/interp.c
- *
- * @param ef the ELF file
- * @param rel the relocation record to relocate
- * @return ELF_SUCCESS on success, negative on error
- */
 elf64_sword
 elf_relocate_symbol(struct elf_file_t *ef,
                     struct elf_rel *rel)
@@ -1415,31 +1110,6 @@ elf_relocate_symbol(struct elf_file_t *ef,
     return ELF_SUCCESS;
 }
 
-/**
- * Relocate Symbol (Addend)
- *
- * Given a relocation record (from a relocation table), this function
- * performs the actual relocation.
- *
- * @note for x86_64, the documentation states that *ptr = S for GLOB_DAT and
- *     JUMP_SLOT. S in the documentation is sym->st_value, which is missing
- *     the base address to make the address "absolute". Most of the
- *     implementations that I found include the base address, so I believe this
- *     documentation to be in error. I have included the spec and a reference
- *     implementation in case it is needed.
- *
- * http://www.x86-64.org/documentation_folder/abi.pdf
- * https://github.com/madd-games/glidix/blob/186e2f699c045440f96551fcf504833d6d81799e/src/interp.c
- *
- * @note The difference with this function is that it has an extra addend added
- * to the absolute address. This is only needed for a couple of types of
- * relocations, the big one being code like int x[2], *y = x + 1, which creates
- * a R_X86_64_64 style relocation.
- *
- * @param ef the ELF file
- * @param rela the relocation record to relocate
- * @return ELF_SUCCESS on success, negative on error
- */
 elf64_sword
 elf_relocate_symbol_addend(struct elf_file_t *ef,
                            struct elf_rela *rela)
@@ -1499,15 +1169,6 @@ elf_relocate_symbol_addend(struct elf_file_t *ef,
     return ELF_SUCCESS;
 }
 
-/**
- * Relocate Symbols
- *
- * This function goes through all of the relocation tables, and relocates
- * each record in each relocation table.
- *
- * @param ef the ELF file
- * @return ELF_SUCCESS on success, negative on error
- */
 elf64_sword
 elf_relocate_symbols(struct elf_file_t *ef)
 {
@@ -1544,12 +1205,6 @@ elf_relocate_symbols(struct elf_file_t *ef)
     return ELF_SUCCESS;
 }
 
-/**
- * Print Relocation
- *
- * @param rel the relocation record to print
- * @return ELF_SUCCESS on success, negative on error
- */
 elf64_sword
 elf_print_relocation(struct elf_rel *rel)
 {
@@ -1578,12 +1233,6 @@ elf_print_relocation(struct elf_rel *rel)
     return ELF_SUCCESS;
 }
 
-/**
- * Print Relocation (Addend)
- *
- * @param rela the relocation record to print
- * @return ELF_SUCCESS on success, negative on error
- */
 elf64_sword
 elf_print_relocation_addend(struct elf_rela *rela)
 {
@@ -1614,12 +1263,6 @@ elf_print_relocation_addend(struct elf_rela *rela)
     return ELF_SUCCESS;
 }
 
-/**
- * Print Relocations
- *
- * @param ef the ELF file
- * @return ELF_SUCCESS on success, negative on error
- */
 elf64_sword
 elf_print_relocations(struct elf_file_t *ef)
 {
@@ -1666,12 +1309,6 @@ elf_print_relocations(struct elf_file_t *ef)
    of the memory used to load the ELF file. This way, portions of the RAM that
    holds the program can be RW and other portions can be RE */
 
-/**
- * Convert p_type (type) -> const char *
- *
- * @param value p_type (type) to convert
- * @return const char * version of p_type (type)
- */
 const char *
 p_type_to_str(elf64_word value)
 {
@@ -1692,12 +1329,6 @@ p_type_to_str(elf64_word value)
     }
 }
 
-/**
- * Convert p_flags (executable) -> bool
- *
- * @param phdr program header containing p_flags to convert
- * @return ELF_TRUE if executable, ELF_FALSE otherwise
- */
 elf64_sword
 p_flags_is_executable(struct elf_phdr *phdr)
 {
@@ -1707,12 +1338,6 @@ p_flags_is_executable(struct elf_phdr *phdr)
     return (phdr->p_flags & pf_x) != 0 ? ELF_TRUE : ELF_FALSE;
 }
 
-/**
- * Convert p_flags (writable) -> bool
- *
- * @param phdr program header containing p_flags to convert
- * @return ELF_TRUE if writable, ELF_FALSE otherwise
- */
 elf64_sword
 p_flags_is_writable(struct elf_phdr *phdr)
 {
@@ -1722,12 +1347,6 @@ p_flags_is_writable(struct elf_phdr *phdr)
     return (phdr->p_flags & pf_w) != 0 ? ELF_TRUE : ELF_FALSE;
 }
 
-/**
- * Convert p_flags (readable) -> bool
- *
- * @param phdr program header containing p_flags to convert
- * @return ELF_TRUE if readable, ELF_FALSE otherwise
- */
 elf64_sword
 p_flags_is_readable(struct elf_phdr *phdr)
 {
@@ -1737,14 +1356,6 @@ p_flags_is_readable(struct elf_phdr *phdr)
     return (phdr->p_flags & pf_r) != 0 ? ELF_TRUE : ELF_FALSE;
 }
 
-/**
- * Get ELF program header
- *
- * @param ef the ELF file
- * @param index the index of the program header to get
- * @param phdr the program header to return
- * @return ELF_SUCCESS on success, negative on error
- */
 elf64_sword
 elf_program_header(struct elf_file_t *ef,
                    elf64_word index,
@@ -1761,27 +1372,6 @@ elf_program_header(struct elf_file_t *ef,
     return ELF_SUCCESS;
 }
 
-/**
- * Get exec size
- *
- * If the ELF file is "x" bytes, the RAM that the ELF file needs to be
- * loaded into would be "y" >= "x". The reason for this is the RAM would at
- * least need to add .bss section (which is not included in the ELF file itself)
- * and it's likely that the ELF file is broken up into read/execute and
- * read/write program segments, which are aligned to a "max" page size
- * boundary. For example, with a x86_64 cross compiler, the max page size is
- * 2MB. Thus, all of the read / executable sections are mapped to the first
- * set of pages marked for RE. The read / write sections (like .data) are all
- * in the a RW segment that are page aligned to 2MB. For a small library, this
- * would mean that the RE section is 0->2MB, and the RW section is 2MB->End.
- *
- * This function returns the total amount of RAM that is needed to load he
- * ELF file into RAM. This includes all of the segments, and their offsets for
- * page alignment.
- *
- * @param ef the ELF file
- * @return ELF_SUCCESS on success, negative on error
- */
 elf64_sxword
 elf_total_exec_size(struct elf_file_t *ef)
 {
@@ -1813,14 +1403,6 @@ elf_total_exec_size(struct elf_file_t *ef)
     return total_size;
 }
 
-/**
- * Load segments
- *
- * Loads the segments in the ELF file into RAM.
- *
- * @param ef the ELF file
- * @return ELF_SUCCESS on success, negative on error
- */
 elf64_sword
 elf_load_segments(struct elf_file_t *ef)
 {
@@ -1849,20 +1431,6 @@ elf_load_segments(struct elf_file_t *ef)
     return ELF_SUCCESS;
 }
 
-/**
- * Load segment
- *
- * Loads a specific segment into RAM. Note that a segment is a collection of
- * sections (e.g. .data, .got, .text, etc...). Typically there are two, one
- * for read / execute, and one for read / write. They can also be larger than
- * the ELF file. For example, the RW segment likely contains a .bss which is
- * not included in the ELF file. The segment defines where this bss section
- * is located, and what it's size is.
- *
- * @param ef the ELF file
- * @param phdr the program header for the segment to load
- * @return ELF_SUCCESS on success, negative on error
- */
 elf64_sword
 elf_load_segment(struct elf_file_t *ef,
                  struct elf_phdr *phdr)
@@ -1889,12 +1457,6 @@ elf_load_segment(struct elf_file_t *ef,
     return ELF_SUCCESS;
 }
 
-/**
- * Print Program Header Table
- *
- * @param ef the ELF file
- * @return ELF_SUCCESS on success, negative on error
- */
 elf64_sword
 elf_print_program_header_table(struct elf_file_t *ef)
 {
@@ -1923,13 +1485,6 @@ elf_print_program_header_table(struct elf_file_t *ef)
     return ELF_SUCCESS;
 }
 
-/**
- * Print Program Header
- *
- * @param ef the ELF file
- * @param phdr the program header for the segment to print
- * @return ELF_SUCCESS on success, negative on error
- */
 elf64_sword
 elf_print_program_header(struct elf_file_t *ef,
                          struct elf_phdr *phdr)
