@@ -25,16 +25,19 @@
 
 CROSS_CC=~/opt/cross/bin/x86_64-elf-gcc
 CROSS_CXX=~/opt/cross/bin/x86_64-elf-g++
+CROSS_ASM=~/opt/cross/bin/nasm
 CROSS_LD=~/opt/cross/bin/x86_64-elf-ld
 
 CC=$(CROSS_CC)
 CXX=$(CROSS_CXX)
+ASM=$(CROSS_ASM)
 LD=$(CROSS_LD)
 RM=rm -rf
 MD=mkdir -p
 
 CCFLAGS=
 CXXFLAGS=
+ASMFLAGS=-f elf64
 LDFLAGS=
 
 DEFINES=
@@ -50,13 +53,15 @@ TARGET_CROSS_COMPILED=true
 OBJDIR=.build
 OUTDIR=../bin
 
-SOURCES=dummy3.c
+SOURCES=dummy3.c abi_conversion.asm
 
 INCLUDES=
 LIBS=
 
 INCLUDE_PATHS=./ ../include/
 LIB_PATHS=
+
+VPATH=../../common/
 
 ################################################################################
 # Common

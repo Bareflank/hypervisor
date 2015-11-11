@@ -22,6 +22,7 @@
 #ifndef UNITTEST_H
 #define UNITTEST_H
 
+#include <stdlib.h>
 #include <iostream>
 
 #define EXPECT_TRUE(condition) \

@@ -66,14 +66,17 @@ endif
 # Get a list of C and CPP sources
 CC_SOURCES=$(filter %.c,$(SOURCES))
 CXX_SOURCES=$(filter %.cpp,$(SOURCES))
+ASM_SOURCES=$(filter %.asm,$(SOURCES))
 
 # Create a list of object files to compile for C and CPP
-CC_OBJECTS=$(patsubst %.c,$(OBJDIR)/%.o,$(CC_SOURCES))
-CXX_OBJECTS=$(patsubst %.cpp,$(OBJDIR)/%.o,$(CXX_SOURCES))
+CC_OBJECTS=$(patsubst %.c,%.o,$(CC_SOURCES))
+CXX_OBJECTS=$(patsubst %.cpp,%.o,$(CXX_SOURCES))
+ASM_OBJECTS=$(patsubst %.asm,%.o,$(ASM_SOURCES))
 
 # Concat the object file list (we need both forms)
 OBJECTS+=$(CC_OBJECTS)
 OBJECTS+=$(CXX_OBJECTS)
+OBJECTS+=$(ASM_OBJECTS)
 
 # Create a list of include files for C and CPP
 CC_FLAGS_INCLUDE_PATHS=$(patsubst %,-I%,$(INCLUDE_PATHS))
@@ -119,7 +122,10 @@ $(OBJDIR)/%.o: %.cpp $(OBJDIR)/%.d
 	$(CXX) $< -o $@ -c $(CXXFLAGS) $(DFLAGS) $(DEPFLAGS) $(CXX_FLAGS_INCLUDE_PATHS) $(INCLUDES)
 	$(POSTCOMPILE)
 
-$(TARGET): $(OBJECTS)
+$(OBJDIR)/%.o: %.asm
+	$(ASM) $< -o $@ $(ASMFLAGS)
+
+$(TARGET): $(addprefix $(OBJDIR)/, $(OBJECTS))
 	$(LD) -o $@ $^ $(LDFLAGS) $(LD_FLAGS_LIB_PATHS) $(LD_FLAGS_LIBS)
 
 clean: custom_clean

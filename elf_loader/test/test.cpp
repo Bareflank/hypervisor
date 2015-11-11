@@ -20,6 +20,7 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #include <test.h>
+#include <abi_conversion.h>
 
 #include <fstream>
 #include <iostream>
@@ -80,9 +81,9 @@ bool elf_loader_ut::init(void)
         dummy3_ifs.is_open() == false)
     {
         std::cout << "unable to open one or more dummy libraries: " << std::endl;
-        std::cout << "    - dummy1: " << dummy1_ifs.is_open();
-        std::cout << "    - dummy2: " << dummy2_ifs.is_open();
-        std::cout << "    - dummy3: " << dummy3_ifs.is_open();
+        std::cout << "    - dummy1: " << dummy1_ifs.is_open() << std::endl;
+        std::cout << "    - dummy2: " << dummy2_ifs.is_open() << std::endl;
+        std::cout << "    - dummy3: " << dummy3_ifs.is_open() << std::endl;
         goto close;
     }
 
@@ -95,9 +96,9 @@ bool elf_loader_ut::init(void)
         m_dummy3_length == 0)
     {
         std::cout << "one or more of the dummy libraries is empty: " << std::endl;
-        std::cout << "    - dummy1: " << dummy1_ifs.tellg();
-        std::cout << "    - dummy2: " << dummy2_ifs.tellg();
-        std::cout << "    - dummy3: " << dummy3_ifs.tellg();
+        std::cout << "    - dummy1: " << dummy1_ifs.tellg() << std::endl;
+        std::cout << "    - dummy2: " << dummy2_ifs.tellg() << std::endl;
+        std::cout << "    - dummy3: " << dummy3_ifs.tellg() << std::endl;
         goto close;
     }
 
@@ -110,9 +111,9 @@ bool elf_loader_ut::init(void)
         m_dummy3 == NULL)
     {
         std::cout << "unable to allocate space for one or more of the dummy libraries: " << std::endl;
-        std::cout << "    - dummy1: " << (void *)m_dummy1;
-        std::cout << "    - dummy2: " << (void *)m_dummy2;
-        std::cout << "    - dummy3: " << (void *)m_dummy3;
+        std::cout << "    - dummy1: " << (void *)m_dummy1 << std::endl;
+        std::cout << "    - dummy2: " << (void *)m_dummy2 << std::endl;
+        std::cout << "    - dummy3: " << (void *)m_dummy3 << std::endl;
         goto close;
     }
 
@@ -129,9 +130,9 @@ bool elf_loader_ut::init(void)
         dummy3_ifs.fail() == true)
     {
         std::cout << "unable to load one or more dummy libraries into memory: " << std::endl;
-        std::cout << "    - dummy1: " << dummy1_ifs.fail();
-        std::cout << "    - dummy2: " << dummy2_ifs.fail();
-        std::cout << "    - dummy3: " << dummy3_ifs.fail();
+        std::cout << "    - dummy1: " << dummy1_ifs.fail() << std::endl;
+        std::cout << "    - dummy2: " << dummy2_ifs.fail() << std::endl;
+        std::cout << "    - dummy3: " << dummy3_ifs.fail() << std::endl;
         goto close;
     }
 
@@ -959,6 +960,12 @@ void elf_loader_ut::test_elf_print_sym_table(void)
 {
     auto ret = 0;
 
+    ret = elf_print_sym_table(&m_dummy1_ef);
+    ASSERT_TRUE(ret == ELF_SUCCESS);
+
+    ret = elf_print_sym_table(&m_dummy2_ef);
+    ASSERT_TRUE(ret == ELF_SUCCESS);
+
     ret = elf_print_sym_table(&m_dummy3_ef);
     ASSERT_TRUE(ret == ELF_SUCCESS);
 }
@@ -967,6 +974,12 @@ void elf_loader_ut::test_elf_print_relocations(void)
 {
     auto ret = 0;
 
+    ret = elf_print_relocations(&m_dummy1_ef);
+    ASSERT_TRUE(ret == ELF_SUCCESS);
+
+    ret = elf_print_relocations(&m_dummy2_ef);
+    ASSERT_TRUE(ret == ELF_SUCCESS);
+
     ret = elf_print_relocations(&m_dummy3_ef);
     ASSERT_TRUE(ret == ELF_SUCCESS);
 }
@@ -974,27 +987,53 @@ void elf_loader_ut::test_elf_print_relocations(void)
 void elf_loader_ut::test_resolve(void)
 {
     auto ret = 0;
-    void *entry = 0;
-    struct e_string str = {"_Z12dummy3_test2i", 17};
+    void *entry1 = 0;
+    void *entry2 = 0;
+    struct e_string str1 = {"exec_ms64tosv64", 15};
+    struct e_string str2 = {"_Z12dummy3_test2i", 17};
 
-    ret = elf_resolve_symbol(&m_dummy3_ef, &str, &entry);
+    ret = elf_resolve_symbol(&m_dummy3_ef, &str1, &entry1);
     EXPECT_TRUE(ret == ELF_SUCCESS);
 
-    if (ret == ELF_SUCCESS)
-    {
-        std::function<int(int)> dummy3_test1 =
-            reinterpret_cast<int(*)(int)>(entry);
-
-        std::cout << std::endl;
-        std::cout << "Result: " << dummy3_test1(5) << std::endl;
-        std::cout << std::endl;
-    }
-    else
+    if (ret != ELF_SUCCESS)
     {
         std::cout << std::endl;
         std::cout << "Error: " << elf_error(ret) << std::endl;
         std::cout << std::endl;
+
+        return;
     }
+
+    ret = elf_resolve_symbol(&m_dummy3_ef, &str2, &entry2);
+    EXPECT_TRUE(ret == ELF_SUCCESS);
+
+    if (ret != ELF_SUCCESS)
+    {
+        std::cout << std::endl;
+        std::cout << "Error: " << elf_error(ret) << std::endl;
+        std::cout << std::endl;
+
+        return;
+    }
+
+#if defined(__CYGWIN__) && !defined(_WIN32)
+
+    exec_ms64tosv64_t exec_ms64tosv64 = (exec_ms64tosv64_t)entry1;
+
+    std::cout << std::endl;
+    std::cout << "Result: " << exec_ms64tosv64(entry2, (void *)5) << std::endl;
+    std::cout << std::endl;
+
+#else
+
+    entry_point_t entry_point = (entry_point_t)entry2;
+
+    std::cout << std::endl;
+    std::cout << "Result: " << entry_point((void *)5) << std::endl;
+    std::cout << std::endl;
+
+#endif
+
 }
 
 int
