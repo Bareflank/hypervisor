@@ -53,7 +53,7 @@ TARGET_CROSS_COMPILED=true
 OBJDIR=.build
 OUTDIR=../bin
 
-SOURCES=dummy1.c
+SOURCES=dummy1.cpp
 
 INCLUDES=
 LIBS=

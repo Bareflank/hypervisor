@@ -68,7 +68,7 @@ elf_loader_ut::elf_loader_ut() :
 {
 }
 
-bool elf_loader_ut::init(void)
+bool elf_loader_ut::init()
 {
     auto result = false;
 
@@ -96,9 +96,9 @@ bool elf_loader_ut::init(void)
         m_dummy3_length == 0)
     {
         std::cout << "one or more of the dummy libraries is empty: " << std::endl;
-        std::cout << "    - dummy1: " << dummy1_ifs.tellg() << std::endl;
-        std::cout << "    - dummy2: " << dummy2_ifs.tellg() << std::endl;
-        std::cout << "    - dummy3: " << dummy3_ifs.tellg() << std::endl;
+        std::cout << "    - dummy1: " << m_dummy1_length << std::endl;
+        std::cout << "    - dummy2: " << m_dummy2_length << std::endl;
+        std::cout << "    - dummy3: " << m_dummy3_length << std::endl;
         goto close;
     }
 
@@ -149,7 +149,7 @@ done:
     return result;
 }
 
-bool elf_loader_ut::fini(void)
+bool elf_loader_ut::fini()
 {
     if (m_dummy1 != NULL)
         delete[] m_dummy1;
@@ -172,7 +172,7 @@ bool elf_loader_ut::fini(void)
     return true;
 }
 
-bool elf_loader_ut::list(void)
+bool elf_loader_ut::list()
 {
     this->test_elf_file_init();
     this->test_elf_file_size();
@@ -211,7 +211,7 @@ char *alloc_exec(int32_t size)
                         MAP_PRIVATE | MAP_ANON, -1, 0);
 }
 
-void elf_loader_ut::test_elf_file_init(void)
+void elf_loader_ut::test_elf_file_init()
 {
     auto ret = 0;
 
@@ -438,7 +438,7 @@ void elf_loader_ut::test_elf_file_init(void)
 
 }
 
-void elf_loader_ut::test_elf_file_size(void)
+void elf_loader_ut::test_elf_file_size()
 {
     m_test_esize = elf_total_exec_size(NULL);
     ASSERT_TRUE(m_test_esize == ELF_ERROR_INVALID_ARG);
@@ -469,7 +469,7 @@ void elf_loader_ut::test_elf_file_size(void)
     ASSERT_TRUE(m_dummy3_exec != NULL);
 }
 
-void elf_loader_ut::test_elf_file_load(void)
+void elf_loader_ut::test_elf_file_load()
 {
     auto ret = 0;
 
@@ -503,7 +503,7 @@ void elf_loader_ut::test_elf_file_load(void)
     ASSERT_TRUE(ret == ELF_SUCCESS);
 }
 
-void elf_loader_ut::test_elf_loader_init(void)
+void elf_loader_ut::test_elf_loader_init()
 {
     auto ret = 0;
 
@@ -517,7 +517,7 @@ void elf_loader_ut::test_elf_loader_init(void)
     ASSERT_TRUE(ret == ELF_SUCCESS);
 }
 
-void elf_loader_ut::test_elf_loader_add(void)
+void elf_loader_ut::test_elf_loader_add()
 {
     auto ret = 0;
 
@@ -549,7 +549,7 @@ void elf_loader_ut::test_elf_loader_add(void)
     ASSERT_TRUE(ret == ELF_SUCCESS);
 }
 
-void elf_loader_ut::test_elf_loader_relocate(void)
+void elf_loader_ut::test_elf_loader_relocate()
 {
     auto ret = 0;
 
@@ -570,7 +570,7 @@ void elf_loader_ut::test_elf_loader_relocate(void)
     ASSERT_TRUE(ret == ELF_SUCCESS);
 }
 
-void elf_loader_ut::test_elf_section_header(void)
+void elf_loader_ut::test_elf_section_header()
 {
     auto ret = 0;
     struct elf_shdr *shdr = 0;
@@ -596,7 +596,7 @@ void elf_loader_ut::test_elf_section_header(void)
     ASSERT_TRUE(ret == ELF_SUCCESS);
 }
 
-void elf_loader_ut::test_elf_string_table_entry(void)
+void elf_loader_ut::test_elf_string_table_entry()
 {
     auto ret = 0;
     struct e_string str = {0};
@@ -634,7 +634,7 @@ void elf_loader_ut::test_elf_string_table_entry(void)
     ASSERT_TRUE(str.len == 5);
 }
 
-void elf_loader_ut::test_elf_section_name_string(void)
+void elf_loader_ut::test_elf_section_name_string()
 {
     auto ret = 0;
     struct e_string str = {0};
@@ -659,7 +659,7 @@ void elf_loader_ut::test_elf_section_name_string(void)
     ASSERT_TRUE(str.buf[0] == 'h');
 }
 
-void elf_loader_ut::test_elf_symbol_by_index(void)
+void elf_loader_ut::test_elf_symbol_by_index()
 {
     auto ret = 0;
     struct elf_sym *sym = 0;
@@ -682,7 +682,7 @@ void elf_loader_ut::test_elf_symbol_by_index(void)
     ASSERT_TRUE(ret == ELF_SUCCESS);
 }
 
-void elf_loader_ut::test_elf_symbol_by_name(void)
+void elf_loader_ut::test_elf_symbol_by_name()
 {
     auto ret = 0;
     struct elf_sym *sym = 0;
@@ -712,7 +712,7 @@ void elf_loader_ut::test_elf_symbol_by_name(void)
     ASSERT_TRUE(ret == ELF_SUCCESS);
 }
 
-void elf_loader_ut::test_elf_symbol_by_name_global(void)
+void elf_loader_ut::test_elf_symbol_by_name_global()
 {
     auto ret = 0;
     struct elf_sym *sym = 0;
@@ -752,7 +752,7 @@ void elf_loader_ut::test_elf_symbol_by_name_global(void)
     ASSERT_TRUE(efr == &m_test_elf);
 }
 
-void elf_loader_ut::test_elf_resolve_symbol(void)
+void elf_loader_ut::test_elf_resolve_symbol()
 {
     auto ret = 0;
     void *addr = 0;
@@ -782,7 +782,7 @@ void elf_loader_ut::test_elf_resolve_symbol(void)
     ASSERT_TRUE(ret == ELF_SUCCESS);
 }
 
-void elf_loader_ut::test_elf_relocate_symbol(void)
+void elf_loader_ut::test_elf_relocate_symbol()
 {
     auto ret = 0;
 
@@ -816,7 +816,7 @@ void elf_loader_ut::test_elf_relocate_symbol(void)
     ASSERT_TRUE(ret == ELF_SUCCESS);
 }
 
-void elf_loader_ut::test_elf_relocate_symbol_addend(void)
+void elf_loader_ut::test_elf_relocate_symbol_addend()
 {
     auto ret = 0;
 
@@ -850,7 +850,7 @@ void elf_loader_ut::test_elf_relocate_symbol_addend(void)
     ASSERT_TRUE(ret == ELF_SUCCESS);
 }
 
-void elf_loader_ut::test_elf_relocate_symbols(void)
+void elf_loader_ut::test_elf_relocate_symbols()
 {
     auto ret = 0;
 
@@ -866,7 +866,7 @@ void elf_loader_ut::test_elf_relocate_symbols(void)
     ASSERT_TRUE(ret == ELF_SUCCESS);
 }
 
-void elf_loader_ut::test_elf_program_header(void)
+void elf_loader_ut::test_elf_program_header()
 {
     auto ret = 0;
     struct elf_phdr *phdr = 0;
@@ -892,7 +892,7 @@ void elf_loader_ut::test_elf_program_header(void)
     ASSERT_TRUE(ret == ELF_SUCCESS);
 }
 
-void elf_loader_ut::test_elf_load_segments(void)
+void elf_loader_ut::test_elf_load_segments()
 {
     auto ret = 0;
 
@@ -908,7 +908,7 @@ void elf_loader_ut::test_elf_load_segments(void)
     ASSERT_TRUE(ret == ELF_SUCCESS);
 }
 
-void elf_loader_ut::test_elf_load_segment(void)
+void elf_loader_ut::test_elf_load_segment()
 {
     auto ret = 0;
 
@@ -932,7 +932,7 @@ void elf_loader_ut::test_elf_load_segment(void)
     ASSERT_TRUE(ret == ELF_SUCCESS);
 }
 
-void elf_loader_ut::test_elf_file_print_header(void)
+void elf_loader_ut::test_elf_file_print_header()
 {
     auto ret = 0;
 
@@ -940,7 +940,7 @@ void elf_loader_ut::test_elf_file_print_header(void)
     ASSERT_TRUE(ret == ELF_SUCCESS);
 }
 
-void elf_loader_ut::test_elf_print_section_header_table(void)
+void elf_loader_ut::test_elf_print_section_header_table()
 {
     auto ret = 0;
 
@@ -948,7 +948,7 @@ void elf_loader_ut::test_elf_print_section_header_table(void)
     ASSERT_TRUE(ret == ELF_SUCCESS);
 }
 
-void elf_loader_ut::test_elf_print_program_header_table(void)
+void elf_loader_ut::test_elf_print_program_header_table()
 {
     auto ret = 0;
 
@@ -956,7 +956,7 @@ void elf_loader_ut::test_elf_print_program_header_table(void)
     ASSERT_TRUE(ret == ELF_SUCCESS);
 }
 
-void elf_loader_ut::test_elf_print_sym_table(void)
+void elf_loader_ut::test_elf_print_sym_table()
 {
     auto ret = 0;
 
@@ -970,7 +970,7 @@ void elf_loader_ut::test_elf_print_sym_table(void)
     ASSERT_TRUE(ret == ELF_SUCCESS);
 }
 
-void elf_loader_ut::test_elf_print_relocations(void)
+void elf_loader_ut::test_elf_print_relocations()
 {
     auto ret = 0;
 
@@ -984,7 +984,7 @@ void elf_loader_ut::test_elf_print_relocations(void)
     ASSERT_TRUE(ret == ELF_SUCCESS);
 }
 
-void elf_loader_ut::test_resolve(void)
+void elf_loader_ut::test_resolve()
 {
     auto ret = 0;
     void *entry1 = 0;

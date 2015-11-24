@@ -30,43 +30,43 @@ class elf_loader_ut : public unittest
 public:
 
     elf_loader_ut();
-    virtual ~elf_loader_ut() {}
+    ~elf_loader_ut() {}
 
 protected:
 
-    virtual bool init(void);
-    virtual bool fini(void);
-    virtual bool list(void);
+    bool init() override;
+    bool fini() override;
+    bool list() override;
 
 private:
 
-    virtual void test_elf_file_init(void);
-    virtual void test_elf_file_size(void);
-    virtual void test_elf_file_load(void);
-    virtual void test_elf_loader_init(void);
-    virtual void test_elf_loader_add(void);
-    virtual void test_elf_loader_relocate(void);
-    virtual void test_elf_section_header(void);
-    virtual void test_elf_string_table_entry(void);
-    virtual void test_elf_section_name_string(void);
-    virtual void test_elf_symbol_by_index(void);
-    virtual void test_elf_symbol_by_name(void);
-    virtual void test_elf_symbol_by_name_global(void);
-    virtual void test_elf_resolve_symbol(void);
-    virtual void test_elf_relocate_symbol(void);
-    virtual void test_elf_relocate_symbol_addend(void);
-    virtual void test_elf_relocate_symbols(void);
-    virtual void test_elf_program_header(void);
-    virtual void test_elf_load_segments(void);
-    virtual void test_elf_load_segment(void);
+    void test_elf_file_init();
+    void test_elf_file_size();
+    void test_elf_file_load();
+    void test_elf_loader_init();
+    void test_elf_loader_add();
+    void test_elf_loader_relocate();
+    void test_elf_section_header();
+    void test_elf_string_table_entry();
+    void test_elf_section_name_string();
+    void test_elf_symbol_by_index();
+    void test_elf_symbol_by_name();
+    void test_elf_symbol_by_name_global();
+    void test_elf_resolve_symbol();
+    void test_elf_relocate_symbol();
+    void test_elf_relocate_symbol_addend();
+    void test_elf_relocate_symbols();
+    void test_elf_program_header();
+    void test_elf_load_segments();
+    void test_elf_load_segment();
 
-    virtual void test_elf_file_print_header(void);
-    virtual void test_elf_print_section_header_table(void);
-    virtual void test_elf_print_program_header_table(void);
-    virtual void test_elf_print_sym_table(void);
-    virtual void test_elf_print_relocations(void);
+    void test_elf_file_print_header();
+    void test_elf_print_section_header_table();
+    void test_elf_print_program_header_table();
+    void test_elf_print_sym_table();
+    void test_elf_print_relocations();
 
-    virtual void test_resolve(void);
+    void test_resolve();
 
 private:
 

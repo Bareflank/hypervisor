@@ -33,17 +33,20 @@ else
 		BIN_EXT=.exe
 		LIB_EXT=.dll
 		LIB_PRE=
+		SOURCES+=$(WINDOWS_SOURCES)
 	else
 		UNAME=$(shell uname -s)
 		ifeq ($(UNAME),Linux)
 			BIN_EXT=
 			LIB_EXT=.so
 			LIB_PRE=lib
+			SOURCES+=$(LINUX_SOURCES)
 		endif
 		ifeq ($(UNAME),Darwin)
 			BIN_EXT=
 			LIB_EXT=.dylib
 			LIB_PRE=lib
+			SOURCES+=$(OSX_SOURCES)
 			ifeq ($(TARGET_TYPE),lib)
 				LDFLAGS += -undefined dynamic_lookup
 			endif
