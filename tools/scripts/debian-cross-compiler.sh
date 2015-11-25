@@ -42,21 +42,21 @@ mkdir build-gcc
 
 pushd $TMPDIR/build-binutils
 ../binutils-*/configure --target=$TARGET --prefix="$PREFIX" --with-sysroot --disable-nls --disable-werror
-make
+make -j2
 make install
 popd
 
 pushd $TMPDIR/build-gcc
 ../gcc-*/configure --target=$TARGET --prefix="$PREFIX" --disable-nls --enable-languages=c,c++ --without-headers
-make all-gcc
-make all-target-libgcc
-make install-gcc
-make install-target-libgcc
+make -j2 all-gcc
+make -j2 all-target-libgcc
+make -j2 install-gcc
+make -j2 install-target-libgcc
 popd
 
 pushd $TMPDIR/nasm-*
 ./configure --prefix="$PREFIX"
-make
+make -j2
 make install
 popd
 
