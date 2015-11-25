@@ -1,0 +1,1 @@
+- create a custom PPA for Travic CI that contains our cross-compiler. Needs to support more than one version of GCC, and should install GCC in it's own directory to prevent the native GCC from being removed
