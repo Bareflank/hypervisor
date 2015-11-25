@@ -10,7 +10,7 @@
  * @param arg the argument you wish to pass to the entry point
  * @return the return value of the entry point
  */
-typedef void * (*entry_point_t)(void *arg);
+typedef void *(*entry_point_t)(void *arg);
 
 /**
  * Microsoft 64bit ABI to System V 64bit ABI
@@ -26,6 +26,6 @@ typedef void * (*entry_point_t)(void *arg);
  * @param arg the argument you wish to pass to the entry point
  * @return the return value of the entry point
  */
-typedef void * (*exec_ms64tosv64_t)(void *entry_point, void *arg);
+typedef void *(*exec_ms64tosv64_t)(void *entry_point, void *arg);
 
 #endif

@@ -20,51 +20,15 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 ################################################################################
-# FLAGS
+# Subdirs
 ################################################################################
 
-CROSS_CC=~/opt/cross/bin/x86_64-elf-gcc
-CROSS_CXX=~/opt/cross/bin/x86_64-elf-g++
-CROSS_ASM=~/opt/cross/bin/nasm
-CROSS_LD=~/opt/cross/bin/x86_64-elf-ld
-
-CC=$(CROSS_CC)
-CXX=$(CROSS_CXX)
-ASM=$(CROSS_ASM)
-LD=$(CROSS_LD)
-RM=rm -rf
-MD=mkdir -p
-
-CCFLAGS=
-CXXFLAGS=
-ASMFLAGS=-f elf64
-LDFLAGS=
-
-DEFINES=
-
-################################################################################
-# Sources
-################################################################################
-
-TARGET_NAME=dummy3
-TARGET_TYPE=lib
-TARGET_CROSS_COMPILED=true
-
-OBJDIR=.build
-OUTDIR=../bin
-
-SOURCES=dummy3.cpp abi_conversion.asm
-
-INCLUDES=
-LIBS=
-
-INCLUDE_PATHS=./ ../include/
-LIB_PATHS=
-
-VPATH=../../common/
+SUBDIRS += src
+SUBDIRS += test
+SUBDIRS += main
 
 ################################################################################
 # Common
 ################################################################################
 
-include ../../common/common_target.mk
+include ../common/common_subdir.mk

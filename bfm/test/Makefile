@@ -23,21 +23,14 @@
 # FLAGS
 ################################################################################
 
-CROSS_CC=~/opt/cross/bin/x86_64-elf-gcc
-CROSS_CXX=~/opt/cross/bin/x86_64-elf-g++
-CROSS_ASM=~/opt/cross/bin/nasm
-CROSS_LD=~/opt/cross/bin/x86_64-elf-ld
-
-CC=$(CROSS_CC)
-CXX=$(CROSS_CXX)
-ASM=$(CROSS_ASM)
-LD=$(CROSS_LD)
+CC=gcc
+CXX=g++
+LD=g++
 RM=rm -rf
 MD=mkdir -p
 
 CCFLAGS=
-CXXFLAGS=
-ASMFLAGS=-f elf64
+CXXFLAGS=-std=c++14
 LDFLAGS=
 
 DEFINES=
@@ -46,22 +39,19 @@ DEFINES=
 # Sources
 ################################################################################
 
-TARGET_NAME=dummy3
-TARGET_TYPE=lib
-TARGET_CROSS_COMPILED=true
+TARGET_NAME=test
+TARGET_TYPE=bin
 
 OBJDIR=.build
 OUTDIR=../bin
 
-SOURCES=dummy3.cpp abi_conversion.asm
+SOURCES=test.cpp
 
 INCLUDES=
-LIBS=
+LIBS=bfm
 
-INCLUDE_PATHS=./ ../include/
-LIB_PATHS=
-
-VPATH=../../common/
+INCLUDE_PATHS=./ ../include/ ../../include/ ../src/arch/include/
+LIB_PATHS=../bin/
 
 ################################################################################
 # Common
