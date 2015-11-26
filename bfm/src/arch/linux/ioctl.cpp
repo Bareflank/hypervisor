@@ -19,37 +19,25 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <cstdlib>
-
-#include <command_line_parser.h>
-#include <debug.h>
-#include <file.h>
 #include <ioctl.h>
-#include <ioctl_driver.h>
+#include <ioctl_private.h>
 
-int main(int argc, const char *argv[])
+ioctl::ioctl()
 {
-    command_line_parser clp(argc, argv);
+    d = (void *) new ioctl_private();
+}
 
-    if (clp.cmd() == command_line_parser_command::help)
-    {
-        std::cout << "Usage: bfm [OPTION]... start list_of_modules" << std::endl;
-        std::cout << "   or: bfm [OPTION]... stop" << std::endl;
-        std::cout << std::endl;
-        std::cout << "       -h, --help      help" << std::endl;
+ioctl::~ioctl()
+{
+    if (d != 0)
+        delete(ioctl_private *)d;
+}
 
-        return EXIT_SUCCESS;
-    }
+ioctl_error::type
+ioctl::call(ioctl_commands::type cmd, const void *const data, int32_t len) const
+{
+    if (d != 0)
+        return ((ioctl_private *)d)->call(cmd, data, len);
 
-    file f;
-    ioctl ctl;
-    ioctl_driver driver(&f, &ctl, &clp);
-
-    if (driver.process() != ioctl_driver_error::success)
-    {
-        bfm_error << "failed to process request" << std::endl;
-        return EXIT_FAILURE;
-    }
-
-    return EXIT_SUCCESS;
+    return ioctl_error::unknown;
 }

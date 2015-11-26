@@ -19,37 +19,46 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <cstdlib>
+#ifndef IOCTL_BASE_H
+#define IOCTL_BASE_H
 
-#include <command_line_parser.h>
-#include <debug.h>
-#include <file.h>
-#include <ioctl.h>
-#include <ioctl_driver.h>
+#include <stdint.h>
 
-int main(int argc, const char *argv[])
+namespace ioctl_error
 {
-    command_line_parser clp(argc, argv);
-
-    if (clp.cmd() == command_line_parser_command::help)
+    enum type
     {
-        std::cout << "Usage: bfm [OPTION]... start list_of_modules" << std::endl;
-        std::cout << "   or: bfm [OPTION]... stop" << std::endl;
-        std::cout << std::endl;
-        std::cout << "       -h, --help      help" << std::endl;
-
-        return EXIT_SUCCESS;
-    }
-
-    file f;
-    ioctl ctl;
-    ioctl_driver driver(&f, &ctl, &clp);
-
-    if (driver.process() != ioctl_driver_error::success)
-    {
-        bfm_error << "failed to process request" << std::endl;
-        return EXIT_FAILURE;
-    }
-
-    return EXIT_SUCCESS;
+        success = 0,
+        unknown = 1,
+        invalid_arg = 2,
+        failed_add_module = 3,
+        failed_start = 4,
+        failed_stop = 5
+    };
 }
+
+namespace ioctl_commands
+{
+    enum type
+    {
+        unknown = 0,
+        add_module = 1,
+        start = 2,
+        stop = 3
+    };
+}
+
+class ioctl_base
+{
+public:
+
+    ioctl_base() {}
+    virtual ~ioctl_base() {}
+
+    virtual ioctl_error::type call(ioctl_commands::type cmd,
+                                   const void *const data,
+                                   int32_t len) const
+    { return ioctl_error::success; }
+};
+
+#endif
