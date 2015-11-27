@@ -23,14 +23,14 @@
 #define TEST_H
 
 #include <unittest.h>
-#include <elf_loader.h>
+#include <bfelf_loader.h>
 
-class elf_loader_ut : public unittest
+class bfelf_loader_ut : public unittest
 {
 public:
 
-    elf_loader_ut();
-    ~elf_loader_ut() {}
+    bfelf_loader_ut();
+    ~bfelf_loader_ut() {}
 
 protected:
 
@@ -40,31 +40,31 @@ protected:
 
 private:
 
-    void test_elf_file_init();
-    void test_elf_file_size();
-    void test_elf_file_load();
-    void test_elf_loader_init();
-    void test_elf_loader_add();
-    void test_elf_loader_relocate();
-    void test_elf_section_header();
-    void test_elf_string_table_entry();
-    void test_elf_section_name_string();
-    void test_elf_symbol_by_index();
-    void test_elf_symbol_by_name();
-    void test_elf_symbol_by_name_global();
-    void test_elf_resolve_symbol();
-    void test_elf_relocate_symbol();
-    void test_elf_relocate_symbol_addend();
-    void test_elf_relocate_symbols();
-    void test_elf_program_header();
-    void test_elf_load_segments();
-    void test_elf_load_segment();
+    void test_bfelf_file_init();
+    void test_bfelf_file_size();
+    void test_bfelf_file_load();
+    void test_bfelf_loader_init();
+    void test_bfelf_loader_add();
+    void test_bfelf_loader_relocate();
+    void test_bfelf_section_header();
+    void test_bfelf_string_table_entry();
+    void test_bfelf_section_name_string();
+    void test_bfelf_symbol_by_index();
+    void test_bfelf_symbol_by_name();
+    void test_bfelf_symbol_by_name_global();
+    void test_bfelf_resolve_symbol();
+    void test_bfelf_relocate_symbol();
+    void test_bfelf_relocate_symbol_addend();
+    void test_bfelf_relocate_symbols();
+    void test_bfelf_program_header();
+    void test_bfelf_load_segments();
+    void test_bfelf_load_segment();
 
-    void test_elf_file_print_header();
-    void test_elf_print_section_header_table();
-    void test_elf_print_program_header_table();
-    void test_elf_print_sym_table();
-    void test_elf_print_relocations();
+    void test_bfelf_file_print_header();
+    void test_bfelf_print_section_header_table();
+    void test_bfelf_print_program_header_table();
+    void test_bfelf_print_sym_table();
+    void test_bfelf_print_relocations();
 
     void test_resolve();
 
@@ -84,16 +84,16 @@ private:
     int32_t m_dummy2_esize;
     int32_t m_dummy3_esize;
 
-    elf_file_t m_dummy1_ef;
-    elf_file_t m_dummy2_ef;
-    elf_file_t m_dummy3_ef;
+    bfelf_file_t m_dummy1_ef;
+    bfelf_file_t m_dummy2_ef;
+    bfelf_file_t m_dummy3_ef;
 
     char *m_test_exec;
     int32_t m_test_esize;
-    elf_file_t m_test_elf;
+    bfelf_file_t m_test_elf;
 
-    elf_loader_t m_loader;
-    elf_loader_t m_test_loader;
+    bfelf_loader_t m_loader;
+    bfelf_loader_t m_test_loader;
 };
 
 #endif
