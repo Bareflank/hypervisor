@@ -63,3 +63,22 @@ dummy3_test2(int num)
            l_my_glob3 +
            dummy3_test1(num);
 }
+
+int start_vmm(int num)
+{
+    if(num != 0)
+        return -1;
+
+    if(dummy3_test2(5) != 0x26)
+        return -2;
+
+    return 0;
+}
+
+int stop_vmm(int num)
+{
+    if(num != 0)
+        return -1;
+
+    return 0;
+}

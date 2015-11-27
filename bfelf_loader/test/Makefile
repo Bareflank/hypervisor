@@ -48,7 +48,7 @@ OUTDIR=../bin
 SOURCES=test.cpp
 
 INCLUDES=
-LIBS=elf_loader
+LIBS=bfelf_loader
 
 INCLUDE_PATHS=./ ../include/ ../../include/
 LIB_PATHS=../bin/
