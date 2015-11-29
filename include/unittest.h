@@ -22,6 +22,9 @@
 #ifndef UNITTEST_H
 #define UNITTEST_H
 
+#define NO_HIPPOMOCKS_NAMESPACE
+#define ENABLE_CFUNC_MOCKING_SUPPORT
+
 #include <stdlib.h>
 #include <iostream>
 #include <hippomocks.h>
@@ -254,6 +257,20 @@ protected:
     template<typename T>
     void run_unittest_with_mocks(MockRepository &mocks, T lamda, const char *func, int line)
     {
+        // TODO: Would be great if we could get a printout of the functions
+        // that are called that we were not expecting. Would also be great
+        // to get a list of calls that we were expecting that were not called.
+        //
+        // This will require some mods to HippoMocks to store a list of both
+        // types of problems, and then get that list when an expection
+        // occurs.
+        //
+        // There also seems to be a lot of logic in HippMocks for the
+        // NotImplementedException that doesn't ever seem to be filled in
+        // correctly. e.what() always returns "std::exception" but there
+        // appears to be logic to fill in e.what() with something else. Would
+        // be great to clean that up.
+
         try
         {
             lamda();

@@ -19,37 +19,23 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <cstdlib>
+#ifndef SPLIT_H
+#define SPLIT_H
 
-#include <command_line_parser.h>
-#include <debug.h>
-#include <file.h>
-#include <ioctl.h>
-#include <ioctl_driver.h>
+#include <vector>
+#include <string>
+#include <sstream>
 
-int main(int argc, const char *argv[])
-{
-    command_line_parser clp(argc, argv);
+/// Split String
+///
+/// C++ does not provide a split string function for std::string. The
+/// following function provides a split function given a single character
+/// delimiter.
+///
+/// @param str the string to split
+/// @param delimiter the character to search for the seperates the str
+/// @return str, broken up into a vector or strings, delimited by the
+///         provided delimiter
+std::vector<std::string> split(const std::string &str, char delimiter);
 
-    if (clp.cmd() == command_line_parser_command::help)
-    {
-        std::cout << "Usage: bfm [OPTION]... start list_of_modules" << std::endl;
-        std::cout << "   or: bfm [OPTION]... stop" << std::endl;
-        std::cout << std::endl;
-        std::cout << "       -h, --help      help" << std::endl;
-
-        return EXIT_SUCCESS;
-    }
-
-    file f;
-    ioctl ctl;
-    ioctl_driver driver(&f, &ctl, &clp);
-
-    if (driver.process() != ioctl_driver_error::success)
-    {
-        bfm_error << "failed to process request" << std::endl;
-        return EXIT_FAILURE;
-    }
-
-    return EXIT_SUCCESS;
-}
+#endif

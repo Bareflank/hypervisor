@@ -19,42 +19,115 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+#include <debug.h>
+#include <string.h>
 #include <command_line_parser.h>
 
-command_line_parser::command_line_parser()
+command_line_parser::command_line_parser(int argc, const char *argv[]) :
+    m_is_valid(false),
+    m_cmd(command_line_parser_command::unknown)
 {
+    if (argc <= 1)
+    {
+        m_is_valid = true;
+        m_cmd = command_line_parser_command::help;
+        return;
+    }
+
+    for (auto i = 1; i < argc; i++)
+    {
+        std::string str(argv[i]);
+
+        if (str.compare("-h") == 0 ||
+            str.compare("--help") == 0)
+        {
+            m_is_valid = true;
+            m_cmd = command_line_parser_command::help;
+            return;
+        }
+    }
+
+    for (auto i = 1; i < argc; i++)
+    {
+        std::string str(argv[i]);
+
+        if (str.empty() == true)
+            continue;
+
+        if (str[0] == '-')
+            continue;
+
+        if (str.compare("start") == 0)
+        {
+            parse_start(argc, argv, i + 1);
+            return;
+        }
+
+        if (str.compare("stop") == 0)
+        {
+            parse_stop(argc, argv, i + 1);
+            return;
+        }
+
+        bfm_error << "unknown command" << std::endl;
+        break;
+    }
 }
 
 command_line_parser::~command_line_parser()
 {
 }
 
-command_line_parser_error::type
-command_line_parser::parse(int argc, const char *argv[])
-{
-    return command_line_parser_error::unknown;
-}
-
 bool
 command_line_parser::is_valid() const
 {
-    return false;
-}
-
-bool
-command_line_parser::help() const
-{
-    return false;
+    return m_is_valid;
 }
 
 command_line_parser_command::type
 command_line_parser::cmd() const
 {
-    return command_line_parser_command::unknown;
+    return m_cmd;
 }
 
 std::string
 command_line_parser::modules() const
 {
-    return std::string();
+    return m_modules;
+}
+
+void
+command_line_parser::parse_start(int argc, const char *argv[], int index)
+{
+    auto i = index;
+    m_cmd = command_line_parser_command::start;
+
+    for (; i < argc; i++)
+    {
+        std::string str(argv[i]);
+
+        if (str.empty() == true)
+            continue;
+
+        if (str[0] == '-')
+            continue;
+
+        m_modules = str;
+        break;
+    }
+
+    if (i >= argc)
+    {
+        bfm_error << "missing argument" << std::endl;
+        return;
+    }
+
+    m_is_valid = true;
+}
+
+void
+command_line_parser::parse_stop(int argc, const char *argv[], int index)
+{
+    m_is_valid = true;
+    m_cmd = command_line_parser_command::stop;
 }

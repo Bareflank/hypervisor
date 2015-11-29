@@ -19,18 +19,41 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <ioctl_arch.h>
+#include <file.h>
 
-ioctl_arch::ioctl_arch()
+file::file()
 {
 }
 
-ioctl_arch::~ioctl_arch()
+file::~file()
 {
 }
 
-int
-ioctl_arch::call() const
+bool file::exists(const std::string &filename) const
 {
-    return 1;
+    auto good = false;
+    std::fstream fstream;
+
+    fstream.open(filename);
+    good = fstream.good();
+    fstream.close();
+
+    return good;
+}
+
+std::string file::read(const std::string &filename) const
+{
+    std::string contents;
+    std::fstream fstream;
+
+    fstream.open(filename);
+
+    if (fstream.good() == false)
+        return contents;
+
+    contents = std::string(std::istreambuf_iterator<char>(fstream),
+                           std::istreambuf_iterator<char>());
+
+    fstream.close();
+    return contents;
 }

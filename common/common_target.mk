@@ -34,6 +34,7 @@ else
 		LIB_EXT=.dll
 		LIB_PRE=
 		SOURCES+=$(WINDOWS_SOURCES)
+		INCLUDE_PATHS+=$(WINDOWS_INCLUDE_PATHS)
 	else
 		UNAME=$(shell uname -s)
 		ifeq ($(UNAME),Linux)
@@ -41,12 +42,14 @@ else
 			LIB_EXT=.so
 			LIB_PRE=lib
 			SOURCES+=$(LINUX_SOURCES)
+			INCLUDE_PATHS+=$(LINUX_INCLUDE_PATHS)
 		endif
 		ifeq ($(UNAME),Darwin)
 			BIN_EXT=
 			LIB_EXT=.dylib
 			LIB_PRE=lib
 			SOURCES+=$(OSX_SOURCES)
+			INCLUDE_PATHS+=$(OSX_INCLUDE_PATHS)
 			ifeq ($(TARGET_TYPE),lib)
 				LDFLAGS += -undefined dynamic_lookup
 			endif

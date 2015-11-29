@@ -19,20 +19,25 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#ifndef IOCTL_ARCH_H
-#define IOCTL_ARCH_H
+#ifndef IOCTL_PRIVATE_H
+#define IOCTL_PRIVATE_H
 
-#include <ioctl.h>
+#include <ioctl_base.h>
 
-class ioctl_arch : public ioctl
+class ioctl_private
 {
 public:
 
-    ioctl_arch();
-    ~ioctl_arch();
+    ioctl_private();
+    ~ioctl_private();
 
-    int
-    call() const;
+    ioctl_error::type call(ioctl_commands::type cmd,
+                           const void *const data,
+                           int32_t len) const;
+
+private:
+
+    int fd;
 };
 
 #endif

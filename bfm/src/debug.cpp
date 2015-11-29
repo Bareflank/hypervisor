@@ -19,37 +19,16 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <cstdlib>
-
-#include <command_line_parser.h>
 #include <debug.h>
-#include <file.h>
-#include <ioctl.h>
-#include <ioctl_driver.h>
 
-int main(int argc, const char *argv[])
-{
-    command_line_parser clp(argc, argv);
+bool g_debug_enabled = true;
+bool g_error_enabled = true;
 
-    if (clp.cmd() == command_line_parser_command::help)
-    {
-        std::cout << "Usage: bfm [OPTION]... start list_of_modules" << std::endl;
-        std::cout << "   or: bfm [OPTION]... stop" << std::endl;
-        std::cout << std::endl;
-        std::cout << "       -h, --help      help" << std::endl;
+void enable_debug() { g_debug_enabled = true; }
+void disable_debug() { g_debug_enabled = false; }
 
-        return EXIT_SUCCESS;
-    }
+void enable_error() { g_error_enabled = true; }
+void disable_error() { g_error_enabled = false; }
 
-    file f;
-    ioctl ctl;
-    ioctl_driver driver(&f, &ctl, &clp);
-
-    if (driver.process() != ioctl_driver_error::success)
-    {
-        bfm_error << "failed to process request" << std::endl;
-        return EXIT_FAILURE;
-    }
-
-    return EXIT_SUCCESS;
-}
+bool is_debug_enabled() { return g_debug_enabled; }
+bool is_error_enabled() { return g_error_enabled; }

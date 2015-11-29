@@ -45,14 +45,22 @@ TARGET_TYPE=lib
 OBJDIR=.build
 OUTDIR=../bin
 
-SOURCES=command_line_parser.cpp ioctl_driver.cpp
-LINUX_SOURCES=ioctl_arch.cpp
+SOURCES+=command_line_parser.cpp
+SOURCES+=debug.cpp
+SOURCES+=file.cpp
+SOURCES+=ioctl_driver.cpp
+SOURCES+=split.cpp
+
+LINUX_SOURCES+=ioctl.cpp
+LINUX_SOURCES+=ioctl_private.cpp
 
 INCLUDES=
 LIBS=
 
-INCLUDE_PATHS=./ ../include/ ../../include/ ./arch/include/
+INCLUDE_PATHS=./ ../include/ ../../include/
 LIB_PATHS=
+
+LINUX_INCLUDE_PATHS=./arch/linux/
 
 VPATH=arch/linux
 

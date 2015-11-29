@@ -39,7 +39,10 @@ protected:
 
 private:
 
+    void test_split();
     void test_command_line_parser();
+    void test_file();
+    void test_ioctl();
     void test_ioctl_driver();
 };
 

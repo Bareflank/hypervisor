@@ -19,37 +19,23 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <cstdlib>
+#ifndef FILE_BASE_H
+#define FILE_BASE_H
 
-#include <command_line_parser.h>
-#include <debug.h>
-#include <file.h>
-#include <ioctl.h>
-#include <ioctl_driver.h>
+#include <string>
 
-int main(int argc, const char *argv[])
+class file_base
 {
-    command_line_parser clp(argc, argv);
+public:
 
-    if (clp.cmd() == command_line_parser_command::help)
-    {
-        std::cout << "Usage: bfm [OPTION]... start list_of_modules" << std::endl;
-        std::cout << "   or: bfm [OPTION]... stop" << std::endl;
-        std::cout << std::endl;
-        std::cout << "       -h, --help      help" << std::endl;
+    file_base() {}
+    virtual ~file_base() {}
 
-        return EXIT_SUCCESS;
-    }
+    virtual bool exists(const std::string &filename) const
+    { return false; }
 
-    file f;
-    ioctl ctl;
-    ioctl_driver driver(&f, &ctl, &clp);
+    virtual std::string read(const std::string &filename) const
+    { return std::string(); }
+};
 
-    if (driver.process() != ioctl_driver_error::success)
-    {
-        bfm_error << "failed to process request" << std::endl;
-        return EXIT_FAILURE;
-    }
-
-    return EXIT_SUCCESS;
-}
+#endif
