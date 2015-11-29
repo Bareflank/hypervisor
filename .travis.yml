@@ -21,13 +21,25 @@ install:
 - sudo ln -s /usr/bin/g++-5 /usr/bin/g++
 - gcc --version
 - g++ --version
+- sudo cp /lib/modules/$(shell uname -r)/build/include/linux/compiler-gcc4.h /lib/modules/$(shell uname -r)/build/include/linux/compiler-gcc5.h
 - travis_wait 40 ./tools/scripts/debian-cross-compiler.sh
 
 script:
 - make
-- cd elf_loader/bin
+- cd bfelf_loader/bin
 - LD_LIBRARY_PATH=. ./test
 - cd ../..
 - cd bfm/bin
 - LD_LIBRARY_PATH=. ./test
 - cd ../..
+- cd driver_entry/src/arch/linux/
+- make
+- sudo make load
+- cd ../../../../
+- cd bfm/bin
+- ./bfm start test.modules
+- ./bfm stop
+- cd ../..
+- cd driver_entry/src/arch/linux/
+- sudo make unload
+- cd ../../../../

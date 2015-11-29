@@ -24,13 +24,27 @@
 #define DRIVER_ENTRY_INTERFACE_H
 
 /* ========================================================================== */
+/* Common                                                                     */
+/* ========================================================================== */
+
+#define BF_IOCTL_SUCCESS 0
+#define BF_IOCTL_ERROR_ADD_MODULE_FAILED -10001
+#define BF_IOCTL_ERROR_ADD_MODULE_LENGTH_FAILED -10002
+#define BF_IOCTL_ERROR_START_VMM_FAILED -10003
+#define BF_IOCTL_ERROR_STOP_VMM_FAILED -10004
+
+/* ========================================================================== */
 /* Linux Interfaces                                                           */
 /* ========================================================================== */
 
 #ifdef __linux__
 
-#ifndef DEVICE_MAJOR
-#define DEVICE_MAJOR 150
+#ifndef BAREFLANK_NAME
+#define BAREFLANK_NAME "bareflank"
+#endif
+
+#ifndef BAREFLANK_MAJOR
+#define BAREFLANK_MAJOR 150
 #endif
 
 /**
@@ -43,7 +57,7 @@
  *
  * @param arg character buffer containing the module to add
  */
-#define IOCTL_ADD_MODULE _IOR(DEVICE_MAJOR, 100, char *)
+#define IOCTL_ADD_MODULE _IOR(BAREFLANK_MAJOR, 100, char *)
 
 /**
  * Add Module Length
@@ -53,7 +67,7 @@
  *
  * @param arg length of the module to be added in bytes
  */
-#define IOCTL_ADD_MODULE_LENGTH _IOR(DEVICE_MAJOR, 101, char *)
+#define IOCTL_ADD_MODULE_LENGTH _IOR(BAREFLANK_MAJOR, 101, char *)
 
 /**
  * Start VMM
@@ -63,7 +77,7 @@
  * should have already been loaded prior to calling this IOCTL using
  * IOCTL_ADD_MODULE
  */
-#define IOCTL_START_VMM _IOR(DEVICE_MAJOR, 200, char *)
+#define IOCTL_START_VMM _IOR(BAREFLANK_MAJOR, 200, char *)
 
 /**
  * Stop VMM
@@ -71,7 +85,7 @@
  * This IOCTL tells the driver entry to stop the virtual machine monitor. Note
  * that this cannot be called while the vmm is not running.
  */
-#define IOCTL_STOP_VMM _IOR(DEVICE_MAJOR, 300, char *)
+#define IOCTL_STOP_VMM _IOR(BAREFLANK_MAJOR, 300, char *)
 
 #endif
 
