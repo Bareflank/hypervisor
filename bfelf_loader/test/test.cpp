@@ -28,9 +28,9 @@
 
 #include <sys/mman.h>
 
-auto c_dummy1_filename = "libdummy1.so";
-auto c_dummy2_filename = "libdummy2.so";
-auto c_dummy3_filename = "libdummy3.so";
+auto c_dummy1_filename = "../cross/libdummy1.so";
+auto c_dummy2_filename = "../cross/libdummy2.so";
+auto c_dummy3_filename = "../cross/libdummy3.so";
 
 struct bfelf_test
 {

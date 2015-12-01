@@ -1274,7 +1274,7 @@ namespace HippoMocks
             RAISEEXCEPTION(:: HM_NS NotImplementedException(repo));
         }
     protected:
-        std::map<int, void (* *)()> funcTables;
+        std::map<int, void ( * *)()> funcTables;
         void (*notimplementedfuncs[VIRT_FUNC_LIMIT])();
     public:
         bool isZombie;
@@ -1306,7 +1306,7 @@ namespace HippoMocks
             {
                 delete *i;
             }
-            for (std::map<int, void (* *)()>::iterator i = funcTables.begin(); i != funcTables.end(); ++i)
+            for (std::map<int, void ( * *)()>::iterator i = funcTables.begin(); i != funcTables.end(); ++i)
             {
                 delete [] i->second;
             }

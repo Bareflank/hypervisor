@@ -25,6 +25,7 @@
 
 SUBDIRS += bfelf_loader
 SUBDIRS += bfm
+SUBDIRS += bfvmm
 
 ################################################################################
 # Common

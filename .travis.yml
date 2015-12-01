@@ -25,9 +25,12 @@ install:
 
 script:
 - make
-- cd bfelf_loader/bin
+- cd bfelf_loader/bin/native/
 - LD_LIBRARY_PATH=. ./test
-- cd ../..
-- cd bfm/bin
+- cd ../../../
+- cd bfm/bin/native/
 - LD_LIBRARY_PATH=. ./test
-- cd ../..
+- cd ../../../
+- cd bfvmm/src/debug_ring/bin/native/
+- LD_LIBRARY_PATH=. ./test
+- cd ../../../../../

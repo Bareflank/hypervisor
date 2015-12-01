@@ -46,14 +46,26 @@ if [ ! -f $ASTYLE ]; then
 	popd
 fi
 
-find include/ -name "*.h" -exec $ASTYLE --options=./tools/astyle/astyle.config {} \;
-find include/ -name "*.c" -exec $ASTYLE --options=./tools/astyle/astyle.config {} \;
-find include/ -name "*.cpp" -exec $ASTYLE --options=./tools/astyle/astyle.config {} \;
+find bfelf_loader/ -name "*.h" -exec $ASTYLE --options=./tools/astyle/astyle.config {} \;
+find bfelf_loader/ -name "*.c" -exec $ASTYLE --options=./tools/astyle/astyle.config {} \;
+find bfelf_loader/ -name "*.cpp" -exec $ASTYLE --options=./tools/astyle/astyle.config {} \;
+
+find bfm/ -name "*.h" -exec $ASTYLE --options=./tools/astyle/astyle.config {} \;
+find bfm/ -name "*.c" -exec $ASTYLE --options=./tools/astyle/astyle.config {} \;
+find bfm/ -name "*.cpp" -exec $ASTYLE --options=./tools/astyle/astyle.config {} \;
+
+find bfvmm/ -name "*.h" -exec $ASTYLE --options=./tools/astyle/astyle.config {} \;
+find bfvmm/ -name "*.c" -exec $ASTYLE --options=./tools/astyle/astyle.config {} \;
+find bfvmm/ -name "*.cpp" -exec $ASTYLE --options=./tools/astyle/astyle.config {} \;
 
 find common/ -name "*.h" -exec $ASTYLE --options=./tools/astyle/astyle.config {} \;
 find common/ -name "*.c" -exec $ASTYLE --options=./tools/astyle/astyle.config {} \;
 find common/ -name "*.cpp" -exec $ASTYLE --options=./tools/astyle/astyle.config {} \;
 
-find elf_loader/ -name "*.h" -exec $ASTYLE --options=./tools/astyle/astyle.config {} \;
-find elf_loader/ -name "*.c" -exec $ASTYLE --options=./tools/astyle/astyle.config {} \;
-find elf_loader/ -name "*.cpp" -exec $ASTYLE --options=./tools/astyle/astyle.config {} \;
+find driver_entry/ -name "*.h" -exec $ASTYLE --options=./tools/astyle/astyle.config {} \;
+find driver_entry/ -name "*.c" -exec $ASTYLE --options=./tools/astyle/astyle.config {} \;
+find driver_entry/ -name "*.cpp" -exec $ASTYLE --options=./tools/astyle/astyle.config {} \;
+
+find include/ -name "*.h" -exec $ASTYLE --options=./tools/astyle/astyle.config {} \;
+find include/ -name "*.c" -exec $ASTYLE --options=./tools/astyle/astyle.config {} \;
+find include/ -name "*.cpp" -exec $ASTYLE --options=./tools/astyle/astyle.config {} \;

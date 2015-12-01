@@ -20,6 +20,25 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 ################################################################################
+# Native Flags
+################################################################################
+
+CC=gcc
+CXX=g++
+ASM=nasm
+LD=g++
+
+CCFLAGS=
+CXXFLAGS=-std=c++14
+ASMFLAGS=
+LDFLAGS=
+
+DEFINES=
+
+OBJDIR=.build/native
+OUTDIR=../bin/native
+
+################################################################################
 # Cross Flags
 ################################################################################
 
@@ -36,7 +55,7 @@ CROSS_LDFLAGS=
 CROSS_DEFINES=
 
 CROSS_OBJDIR=.build/cross
-CROSS_OUTDIR=../bin/cross
+CROSS_OUTDIR=../../../bin/cross
 
 ################################################################################
 # Common
@@ -49,26 +68,24 @@ MD=mkdir -p
 # Sources
 ################################################################################
 
-TARGET_NAME=dummy3
+TARGET_NAME=debug_ring
 TARGET_TYPE=lib
-TARGET_COMPILER=cross
+TARGET_COMPILER=both
 
-SOURCES=dummy3.cpp abi_conversion.asm
+SOURCES=debug_ring.cpp
 HEADERS=
 
 LIBS=
 
 LIB_PATHS=
-INCLUDE_PATHS=./ ../include/
-
-VPATH=../../common/
+INCLUDE_PATHS=./ ../../../include/ ../../../../include/
 
 ################################################################################
 # Environment Specific
 ################################################################################
 
 VMM_SOURCES=
-VMM_INCLUDE_PATHS=
+VMM_INCLUDE_PATHS=../../../include/std/
 
 WINDOWS_SOURCES=
 WINDOWS_INCLUDE_PATHS=
@@ -83,4 +100,4 @@ OSX_INCLUDE_PATHS=
 # Common
 ################################################################################
 
-include ../../common/common_target.mk
+include ../../../../common/common_target.mk

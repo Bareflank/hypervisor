@@ -59,38 +59,38 @@ add_module(char *file, int32_t fsize)
     void *exec;
     struct bfelf_file_t bfelf_file = {0};
 
-    if(g_vmm_status == VMM_STARTED)
+    if (g_vmm_status == VMM_STARTED)
     {
         ALERT("add_module: vmm already running\n");
         return BF_ERROR_VMM_ALREADY_STARTED;
     }
 
-    if(g_num_bfelf_files == MAX_NUM_MODULES)
+    if (g_num_bfelf_files == MAX_NUM_MODULES)
         return BF_ERROR_REACHED_MAX_MODULES;
 
     ret = bfelf_file_init(file, fsize, &bfelf_file);
-    if(ret != BFELF_SUCCESS)
+    if (ret != BFELF_SUCCESS)
     {
         ALERT("add_module: failed to initialize elf file: %d - %s\n", ret, bfelf_error(ret));
         goto failed;
     }
 
     size = bfelf_total_exec_size(&bfelf_file);
-    if(ret < BFELF_SUCCESS)
+    if (ret < BFELF_SUCCESS)
     {
         ALERT("add_module: failed to get the module's exec size %d - %s\n", size, bfelf_error(size));
         goto failed;
     }
 
     exec = platform_alloc_exec(size);
-    if(exec == NULL)
+    if (exec == NULL)
     {
         ALERT("add_module: failed alloc memory for exec\n");
         goto failed;
     }
 
     ret = bfelf_file_load(&bfelf_file, exec, size);
-    if(ret != BFELF_SUCCESS)
+    if (ret != BFELF_SUCCESS)
     {
         ALERT("add_module: failed to load the elf module: %d - %s\n", ret, bfelf_error(ret));
         goto failed_load;
@@ -120,10 +120,10 @@ clear_modules(void)
     int i;
     struct bfelf_file_t bfelf_file = {0};
 
-    for(i = 0; i < g_num_bfelf_execs; i++)
+    for (i = 0; i < g_num_bfelf_execs; i++)
         platform_free_exec(g_bfelf_execs[i]);
 
-    for(i = 0; i < MAX_NUM_MODULES; i++)
+    for (i = 0; i < MAX_NUM_MODULES; i++)
     {
         g_bfelf_execs[i] = 0;
         g_bfelf_files[i] = bfelf_file;
@@ -142,29 +142,29 @@ start_vmm(void)
     struct bfelf_loader_t loader = {0};
     struct e_string entry_str = {"_Z9start_vmmi", 13};
 
-    if(g_vmm_status == VMM_STARTED)
+    if (g_vmm_status == VMM_STARTED)
     {
         ALERT("start_vmm: cannot start vmm. vmm already started\n");
         return BF_ERROR_VMM_ALREADY_STARTED;
     }
 
-    if(g_num_bfelf_files <= 0)
+    if (g_num_bfelf_files <= 0)
     {
         ALERT("start_vmm: cannot start vmm. no modules were added\n");
         return BF_ERROR_NO_MODULES_ADDED;
     }
 
     ret = bfelf_loader_init(&loader);
-    if(ret != BFELF_SUCCESS)
+    if (ret != BFELF_SUCCESS)
     {
         ALERT("start_vmm: failed to initialize the elf loader: %d - %s\n", ret, bfelf_error(ret));
         return ret;
     }
 
-    for(i = 0; i < g_num_bfelf_files; i++)
+    for (i = 0; i < g_num_bfelf_files; i++)
     {
         ret = bfelf_loader_add(&loader, &(g_bfelf_files[i]));
-        if(ret != BFELF_SUCCESS)
+        if (ret != BFELF_SUCCESS)
         {
             ALERT("start_vmm: failed to add elf file to the elf loader: %d - %s\n", ret, bfelf_error(ret));
             return ret;
@@ -172,7 +172,7 @@ start_vmm(void)
     }
 
     ret = bfelf_loader_relocate(&loader);
-    if(ret != BFELF_SUCCESS)
+    if (ret != BFELF_SUCCESS)
     {
         ALERT("start_vmm: failed to relocate the elf loader: %d - %s\n", ret, bfelf_error(ret));
         return ret;
@@ -189,7 +189,7 @@ start_vmm(void)
         int64_t ret;
         entry_point_t entry_point = (entry_point_t)entry;
 
-        if((ret = (int64_t)entry_point((void *)0)) == 0)
+        if ((ret = (int64_t)entry_point((void *)0)) == 0)
         {
             DEBUG("\n");
             DEBUG("vmm started successfully:\n");
@@ -222,10 +222,10 @@ stop_vmm(void)
     void *entry = 0;
     struct e_string entry_str = {"_Z8stop_vmmi", 12};
 
-    if(g_vmm_status == VMM_STOPPED)
+    if (g_vmm_status == VMM_STOPPED)
         goto success;
 
-    if(g_num_bfelf_files <= 0)
+    if (g_num_bfelf_files <= 0)
     {
         ALERT("stop_vmm: cannot stop vmm. no modules were added\n");
         return BF_ERROR_NO_MODULES_ADDED;
@@ -242,7 +242,7 @@ stop_vmm(void)
         int64_t ret;
         entry_point_t entry_point = (entry_point_t)entry;
 
-        if((ret = (int64_t)entry_point((void *)0)) == 0)
+        if ((ret = (int64_t)entry_point((void *)0)) == 0)
         {
             DEBUG("\n");
             DEBUG("vmm stopped successfully:\n");

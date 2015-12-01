@@ -2,12 +2,26 @@
 
 ## Description
 
-The Bareflank Hypervisor aims to provide a platform for performing hypervisor research. Some highlights include:
+The Bareflank Hypervisor aims to provide a platform for performing hypervisor
+research. Some highlights include:
 
-- Zero legacy support (e.g. requires 64bit)
+- Reduced legacy support (e.g. requires 64bit, no support for BIOS, etc...)
 - Written in C++
 - Cross Platform
 - Few external dependencies
+
+In addition to simplied archiecture, the Bareflank hypervisor has been
+licensed under the v2.1 LGPL. The entire Bareflank hypervisor is a collection
+of cross-compiled libraries. Users of the Bareflank hypervisor are welcome
+to repalce any or all of the open source libraries with proprietary versions,
+enabling the development of internal hypevisor based research, while
+sharing the core portions of the hypervisor that don't usually change (for
+example, starting and stopping an Intel VT-x based hypervisor is the same
+whether it's KVM, Xen, VMWare, VIrtualBox or Bareflank).
+
+In return we ask that users contribute back to the project to enhance
+and maitain the open source portions of the hypervisor, such that all users
+can benefit.
 
 ## Compilation Instructions
 
@@ -24,17 +38,6 @@ you should be able to run:
 ```
 make
 make clean
-```
-
-If you placed the cross-compiler into a different directory, simply do the
-following (replace the path with yours);
-
-```
-export CROSS_CC=~/opt/cross/bin/x86_64-elf-gcc
-export CROSS_CXX=~/opt/cross/bin/x86_64-elf-g++
-export CROSS_LD=~/opt/cross/bin/x86_64-elf-ld
-make -e
-make -e clean
 ```
 
 ## Contributing
