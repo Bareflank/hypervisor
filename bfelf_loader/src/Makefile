@@ -33,19 +33,19 @@ CCFLAGS=
 CXXFLAGS=
 LDFLAGS=
 
-DEFINES=ENABLE_ELF_DEBUGGING
+DEFINES=ENABLE_BFELF_DEBUGGING
 
 ################################################################################
 # Sources
 ################################################################################
 
-TARGET_NAME=elf_loader
+TARGET_NAME=bfelf_loader
 TARGET_TYPE=lib
 
 OBJDIR=.build
 OUTDIR=../bin
 
-SOURCES=elf_loader.c
+SOURCES=bfelf_loader.c
 
 INCLUDES=
 LIBS=

@@ -60,7 +60,7 @@ ioctl_private::call(ioctl_commands::type cmd, const void *const data, int32_t le
                 return ioctl_error::invalid_arg;
             }
 
-            if ((ret = ioctl(fd, IOCTL_ADD_MODULE_LENGTH, &len)) < 0)
+            if ((ret = ioctl(fd, IOCTL_ADD_MODULE_LENGTH, len)) < 0)
             {
                 bfm_error << "failed IOCTL_ADD_MODULE_LENGTH" << std::endl;
                 return ioctl_error::failed_add_module;
