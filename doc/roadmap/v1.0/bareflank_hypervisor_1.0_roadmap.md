@@ -88,11 +88,11 @@ The following defines the high level tasks that this project would prefer to see
 
 ### Required Tasks for Version 1.0
 
-* Makefile build environment (Rian Quinn)
-* Linux cross-compiler script (Brendan Kerrigan)
-* Unit test framework (Rian Quinn)
-* ELF loader (Rian Quinn)
-* Linux driver entry point (Rian Quinn)
+* ~~Makefile build environment~~ (Rian Quinn)
+* ~~Linux cross-compiler script~~ (Brendan Kerrigan)
+* ~~Unit test framework~~ (Rian Quinn)
+* ~~ELF loader~~ (Rian Quinn)
+* ~~Linux driver entry point~~ (Rian Quinn)
 * Serial debugging facilities (Brendan Kerrigan)
 * PCI debugging facilities (Brendan Kerrigan)
 * VMCS facilities (Rian Quinn)
@@ -131,10 +131,12 @@ The following defines the high level tasks that this project would prefer to see
 
 ## Schedule
 
-* Development: October 2015 -> December 2015
+High Level Milestones
+* Development: October 2015 - December 2015
 * Feature Freeze: Mid December 2015
 * Final Release: January 2015
 
+Finer Grained Milestones
 * Milestone (2 November 2015): ELF Loader Complete
 * Milestone (16 November 2015): Driver Entry Point Complete 
 * Milestone (7 December 2015): VMCS Complete
