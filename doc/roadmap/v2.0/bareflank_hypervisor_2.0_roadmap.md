@@ -1,10 +1,14 @@
-# Bareflank Hypervisor 1.0 Roadmap
+# Bareflank Hypervisor 2.0 Roadmap
 
 ## Summary
 
 Version 2.0 of the Bareflank hypervisor will provide the following:
 * Support for Both Type 1 and Type 2
 * Support for launching multiple, basic guests (i.e. no guest OS support)
+
+Note that this roadmap assumes that the main goals for version 1.0 have 
+been completed, prior to the work under this roadmap being started. 
+The stretch goals from version 1.0 are optional. 
 
 ## Type 1 and Type 2 Support
 
@@ -245,10 +249,15 @@ The project spans one full year, and thus, milestones are calculated in
 man months, as the date in which these milestones are reached cannot be
 defined (since start dates are not defined)
 
-* Development: January 2016 -> December 2016
+High Level Milestones
+* Development: January 2016 - December 2016
 * Feature Freeze: November 2016
 * Final Release: January 2017
+* Demo Type 1: June 2016
+* Demo Type 1 with Guest Support: December 2016
+* Demo Type 2 with Guest Support: December 2016
 
+Finer Grained Milestones
 * Milestone (1.0 months): EFI environment complete
 * Milestone (1.0 months): Type 1 launch control VM complete
 * Milestone (0.5 months): Type 1 memory manager complete
@@ -260,4 +269,3 @@ defined (since start dates are not defined)
 * Milestone (0.5 months): Real-time scheduler complete
 * Milestone (2.5 months): Type 2 launch guest VMs complete
 * Milestone (1.0 months): Type 2 documentation complete
-
