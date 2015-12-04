@@ -41,7 +41,7 @@ ioctl_add_module(char *file)
     char *buf;
     int32_t ret;
 
-    if(g_num_files >= MAX_NUM_MODULES)
+    if (g_num_files >= MAX_NUM_MODULES)
     {
         ALERT("IOCTL_ADD_MODULE: too many modules have been loaded\n");
         return BF_IOCTL_ERROR_ADD_MODULE_FAILED;
@@ -61,21 +61,21 @@ ioctl_add_module(char *file)
      */
 
     buf = platform_alloc(g_module_length);
-    if(buf == NULL)
+    if (buf == NULL)
     {
         ALERT("IOCTL_ADD_MODULE: failed to allocate memory for the module\n");
         return BF_IOCTL_ERROR_ADD_MODULE_FAILED;
     }
 
     ret = copy_from_user(buf, file, g_module_length);
-    if(ret != 0)
+    if (ret != 0)
     {
         ALERT("IOCTL_ADD_MODULE: failed to copy memory from userspace\n");
         goto failed;
     }
 
     ret = add_module(buf, g_module_length);
-    if(ret != BF_SUCCESS)
+    if (ret != BF_SUCCESS)
     {
         ALERT("IOCTL_ADD_MODULE: failed to add module\n");
         goto failed;
@@ -110,7 +110,7 @@ ioctl_start_vmm(void)
     int ret;
 
     ret = start_vmm();
-    if(ret != BF_SUCCESS)
+    if (ret != BF_SUCCESS)
     {
         ALERT("IOCTL_START_VMM: failed to start vmm: %d\n", ret);
         return ret;
@@ -127,10 +127,10 @@ ioctl_stop_vmm(void)
     int ret;
 
     ret = stop_vmm();
-    if(ret != BF_SUCCESS)
+    if (ret != BF_SUCCESS)
         ALERT("IOCTL_START_VMM: failed to start vmm: %d\n", ret);
 
-    for(i = 0; i < g_num_files; i++)
+    for (i = 0; i < g_num_files; i++)
         platform_free(files[i]);
 
     g_num_files = 0;
@@ -144,7 +144,7 @@ dev_unlocked_ioctl(struct file *file,
                    unsigned int cmd,
                    unsigned long arg)
 {
-    switch(cmd)
+    switch (cmd)
     {
         case IOCTL_ADD_MODULE:
             return ioctl_add_module((char *)arg);
@@ -170,7 +170,8 @@ static struct file_operations fops =
     .unlocked_ioctl = dev_unlocked_ioctl,
 };
 
-static struct miscdevice bareflank_dev = {
+static struct miscdevice bareflank_dev =
+{
     MISC_DYNAMIC_MINOR,
     "bareflank",
     &fops
@@ -185,7 +186,7 @@ dev_init(void)
 {
     int ret;
 
-    if((ret = misc_register(&bareflank_dev)) < 0)
+    if ((ret = misc_register(&bareflank_dev)) < 0)
     {
         ALERT("misc_register failed\n");
         return ret;

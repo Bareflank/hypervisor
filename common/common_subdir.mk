@@ -27,21 +27,28 @@ CS='\033[1;34m'
 CE='\033[0m'
 
 ################################################################################
+# Current Directory
+################################################################################
+
+CURRENT_DIR=$(shell pwd)
+
+################################################################################
 # Targets
 ################################################################################
 
 .PHONY: all
 .PHONY: clean
-.PHONY: custom_clean
 
-all:
-	@for dir in $(SUBDIRS); do \
-		echo -e $(CS)$(PWD)/$$dir$(CE); \
-		$(MAKE) --no-print-directory -C $$dir; \
-	done
+all: $(SUBDIRS)
 
-clean: custom_clean
+$(SUBDIRS): force
+		@echo $(CS)$(CURRENT_DIR)/$@$(CE);
+		@$(MAKE) --no-print-directory -C $@
+
+force:;
+
+clean:
 	@for dir in $(SUBDIRS); do \
-		echo -e $(CS)$(PWD)/$$dir$(CE); \
+		echo $(CS)$(CURRENT_DIR)/$$dir$(CE); \
 		$(MAKE) --no-print-directory -C $$dir clean; \
 	done

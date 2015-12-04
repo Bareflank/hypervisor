@@ -20,7 +20,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 ################################################################################
-# FLAGS
+# Cross Flags
 ################################################################################
 
 CROSS_CC=~/opt/cross/bin/x86_64-elf-gcc
@@ -28,19 +28,22 @@ CROSS_CXX=~/opt/cross/bin/x86_64-elf-g++
 CROSS_ASM=~/opt/cross/bin/nasm
 CROSS_LD=~/opt/cross/bin/x86_64-elf-ld
 
-CC=$(CROSS_CC)
-CXX=$(CROSS_CXX)
-ASM=$(CROSS_ASM)
-LD=$(CROSS_LD)
+CROSS_CCFLAGS=
+CROSS_CXXFLAGS=-std=c++14
+CROSS_ASMFLAGS=-f elf64
+CROSS_LDFLAGS=
+
+CROSS_DEFINES=
+
+CROSS_OBJDIR=.build/cross
+CROSS_OUTDIR=../bin/cross
+
+################################################################################
+# Common
+################################################################################
+
 RM=rm -rf
 MD=mkdir -p
-
-CCFLAGS=
-CXXFLAGS=
-ASMFLAGS=-f elf64
-LDFLAGS=
-
-DEFINES=
 
 ################################################################################
 # Sources
@@ -48,18 +51,31 @@ DEFINES=
 
 TARGET_NAME=dummy2
 TARGET_TYPE=lib
-TARGET_CROSS_COMPILED=true
-
-OBJDIR=.build
-OUTDIR=../bin
+TARGET_COMPILER=cross
 
 SOURCES=dummy2.cpp
+HEADERS=
 
-INCLUDES=
 LIBS=
 
-INCLUDE_PATHS=./ ../include/
 LIB_PATHS=
+INCLUDE_PATHS=./ ../include/
+
+################################################################################
+# Environment Specific
+################################################################################
+
+VMM_SOURCES=
+VMM_INCLUDE_PATHS=
+
+WINDOWS_SOURCES=
+WINDOWS_INCLUDE_PATHS=
+
+LINUX_SOURCES=
+LINUX_INCLUDE_PATHS=
+
+OSX_SOURCES=
+OSX_INCLUDE_PATHS=
 
 ################################################################################
 # Common

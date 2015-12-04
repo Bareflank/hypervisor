@@ -20,20 +20,30 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 ################################################################################
-# FLAGS
+# Native Flags
 ################################################################################
 
 CC=gcc
 CXX=g++
+ASM=nasm
 LD=g++
-RM=rm -rf
-MD=mkdir -p
 
 CCFLAGS=
 CXXFLAGS=-std=c++14
+ASMFLAGS=
 LDFLAGS=
 
 DEFINES=
+
+OBJDIR=.build/native
+OUTDIR=../bin/native
+
+################################################################################
+# Common
+################################################################################
+
+RM=rm -rf
+MD=mkdir -p
 
 ################################################################################
 # Sources
@@ -41,28 +51,38 @@ DEFINES=
 
 TARGET_NAME=bfm
 TARGET_TYPE=lib
-
-OBJDIR=.build
-OUTDIR=../bin
+TARGET_COMPILER=native
 
 SOURCES+=command_line_parser.cpp
 SOURCES+=debug.cpp
 SOURCES+=file.cpp
 SOURCES+=ioctl_driver.cpp
 SOURCES+=split.cpp
+HEADERS=
+
+LIBS=
+
+LIB_PATHS=
+INCLUDE_PATHS=./ ../include/ ../../include/
+
+VPATH=arch/linux
+
+################################################################################
+# Environment Specific
+################################################################################
+
+VMM_SOURCES=
+VMM_INCLUDE_PATHS=
+
+WINDOWS_SOURCES=
+WINDOWS_INCLUDE_PATHS=
 
 LINUX_SOURCES+=ioctl.cpp
 LINUX_SOURCES+=ioctl_private.cpp
+LINUX_INCLUDE_PATHS+=./arch/linux/
 
-INCLUDES=
-LIBS=
-
-INCLUDE_PATHS=./ ../include/ ../../include/
-LIB_PATHS=
-
-LINUX_INCLUDE_PATHS=./arch/linux/
-
-VPATH=arch/linux
+OSX_SOURCES=
+OSX_INCLUDE_PATHS=
 
 ################################################################################
 # Common

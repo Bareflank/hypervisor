@@ -19,66 +19,19 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <dummy1.h>
-#include <dummy2.h>
-#include <dummy3.h>
+#ifndef STDINT_H
+#define STDINT_H
 
-int g_my_glob1;
-int g_my_glob2 = 0;
-int g_my_glob3 = 3;
+typedef char int8_t;
+typedef unsigned char uint8_t;
 
-static int l_my_glob1;
-static int l_my_glob2 = 0;
-static int l_my_glob3 = 3;
+typedef short int int16_t;
+typedef unsigned short int uint16_t;
 
-int x[2], *y = x + 1;
+typedef long int int32_t;
+typedef unsigned long int uint32_t;
 
-int
-dummy3_test1(int num)
-{
-    g_my_glob1 = 1;
+typedef long long int int64_t;
+typedef unsigned long long int uint64_t;
 
-    dummy2 _dummy2;
-
-    x[0] = 1;
-    x[1] = 2;
-
-    return g_my_glob1 +
-           g_my_glob2 +
-           g_my_glob3 +
-           *y +
-           dummy1_add1(num) +
-           dummy2::dummy2_add2(num) +
-           dummy1_mul1(num) +
-           _dummy2.dummy2_mul2(num);
-}
-
-int
-dummy3_test2(int num)
-{
-    l_my_glob1 = 1;
-
-    return l_my_glob1 +
-           l_my_glob2 +
-           l_my_glob3 +
-           dummy3_test1(num);
-}
-
-int start_vmm(int num)
-{
-    if (num != 0)
-        return -1;
-
-    if (dummy3_test2(5) != 0x26)
-        return -2;
-
-    return 0;
-}
-
-int stop_vmm(int num)
-{
-    if (num != 0)
-        return -1;
-
-    return 0;
-}
+#endif

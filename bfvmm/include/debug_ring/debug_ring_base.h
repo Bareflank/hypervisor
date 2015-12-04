@@ -19,66 +19,36 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <dummy1.h>
-#include <dummy2.h>
-#include <dummy3.h>
+#ifndef DEBUG_RING_BASE_H
+#define DEBUG_RING_BASE_H
 
-int g_my_glob1;
-int g_my_glob2 = 0;
-int g_my_glob3 = 3;
+#include <stdint.h>
 
-static int l_my_glob1;
-static int l_my_glob2 = 0;
-static int l_my_glob3 = 3;
-
-int x[2], *y = x + 1;
-
-int
-dummy3_test1(int num)
+namespace debug_ring_error
 {
-    g_my_glob1 = 1;
-
-    dummy2 _dummy2;
-
-    x[0] = 1;
-    x[1] = 2;
-
-    return g_my_glob1 +
-           g_my_glob2 +
-           g_my_glob3 +
-           *y +
-           dummy1_add1(num) +
-           dummy2::dummy2_add2(num) +
-           dummy1_mul1(num) +
-           _dummy2.dummy2_mul2(num);
+    enum type
+    {
+        success = 0,
+        failure = 1,
+        invalid = 2
+    };
 }
 
-int
-dummy3_test2(int num)
+class debug_ring_base
 {
-    l_my_glob1 = 1;
+public:
 
-    return l_my_glob1 +
-           l_my_glob2 +
-           l_my_glob3 +
-           dummy3_test1(num);
-}
+    debug_ring_base() {}
+    virtual ~debug_ring_base() {}
 
-int start_vmm(int num)
-{
-    if (num != 0)
-        return -1;
+    virtual void clear()
+    {}
 
-    if (dummy3_test2(5) != 0x26)
-        return -2;
+    virtual bool is_valid()
+    { return false; }
 
-    return 0;
-}
+    virtual debug_ring_error::type write(const char *str, int64_t len)
+    { return debug_ring_error::failure; }
+};
 
-int stop_vmm(int num)
-{
-    if (num != 0)
-        return -1;
-
-    return 0;
-}
+#endif

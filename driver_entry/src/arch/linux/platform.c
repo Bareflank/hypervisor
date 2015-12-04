@@ -30,7 +30,7 @@ platform_alloc(int32_t len)
 {
     void *addr;
 
-    if(len == 0)
+    if (len == 0)
     {
         ALERT("platform_alloc: invalid length\n");
         return NULL;
@@ -38,7 +38,7 @@ platform_alloc(int32_t len)
 
     addr = vmalloc(len);
 
-    if(addr == NULL)
+    if (addr == NULL)
     {
         ALERT("platform_alloc: failed to vmalloc mem: %d\n", len);
         return NULL;
@@ -52,7 +52,7 @@ platform_alloc_exec(int32_t len)
 {
     void *addr;
 
-    if(len == 0)
+    if (len == 0)
     {
         ALERT("platform_alloc_exec: invalid length\n");
         return NULL;
@@ -60,7 +60,7 @@ platform_alloc_exec(int32_t len)
 
     addr = __vmalloc(len, GFP_KERNEL, PAGE_KERNEL_EXEC);
 
-    if(addr == NULL)
+    if (addr == NULL)
     {
         ALERT("platform_alloc_exec: failed to vmalloc executable mem: %d\n", len);
         return NULL;
@@ -72,7 +72,7 @@ platform_alloc_exec(int32_t len)
 void
 platform_free(void *addr)
 {
-    if(addr == NULL)
+    if (addr == NULL)
     {
         ALERT("platform_free: invalid address %p\n", addr);
         return;
@@ -84,7 +84,7 @@ platform_free(void *addr)
 void
 platform_free_exec(void *addr)
 {
-    if(addr == NULL)
+    if (addr == NULL)
     {
         ALERT("platform_free_exec: invalid address %p\n", addr);
         return;

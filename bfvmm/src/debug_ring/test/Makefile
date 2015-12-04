@@ -20,23 +20,23 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 ################################################################################
-# Cross Flags
+# Native Flags
 ################################################################################
 
-CROSS_CC=~/opt/cross/bin/x86_64-elf-gcc
-CROSS_CXX=~/opt/cross/bin/x86_64-elf-g++
-CROSS_ASM=~/opt/cross/bin/nasm
-CROSS_LD=~/opt/cross/bin/x86_64-elf-ld
+CC=gcc
+CXX=g++
+ASM=nasm
+LD=g++
 
-CROSS_CCFLAGS=
-CROSS_CXXFLAGS=-std=c++14
-CROSS_ASMFLAGS=-f elf64
-CROSS_LDFLAGS=
+CCFLAGS=
+CXXFLAGS=-std=c++14
+ASMFLAGS=
+LDFLAGS=
 
-CROSS_DEFINES=
+DEFINES=
 
-CROSS_OBJDIR=.build/cross
-CROSS_OUTDIR=../bin/cross
+OBJDIR=.build/native
+OUTDIR=../bin/native
 
 ################################################################################
 # Common
@@ -49,19 +49,17 @@ MD=mkdir -p
 # Sources
 ################################################################################
 
-TARGET_NAME=dummy3
-TARGET_TYPE=lib
-TARGET_COMPILER=cross
+TARGET_NAME=test
+TARGET_TYPE=bin
+TARGET_COMPILER=native
 
-SOURCES=dummy3.cpp abi_conversion.asm
+SOURCES=test.cpp
 HEADERS=
 
-LIBS=
+LIBS=debug_ring
 
-LIB_PATHS=
-INCLUDE_PATHS=./ ../include/
-
-VPATH=../../common/
+LIB_PATHS=../bin/native
+INCLUDE_PATHS=./ ../../../include/  ../../../../include/
 
 ################################################################################
 # Environment Specific
@@ -83,4 +81,4 @@ OSX_INCLUDE_PATHS=
 # Common
 ################################################################################
 
-include ../../common/common_target.mk
+include ../../../../common/common_target.mk

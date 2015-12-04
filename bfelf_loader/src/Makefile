@@ -20,20 +20,30 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 ################################################################################
-# FLAGS
+# Native Flags
 ################################################################################
 
 CC=gcc
 CXX=g++
-LD=gcc
-RM=rm -rf
-MD=mkdir -p
+ASM=nasm
+LD=g++
 
 CCFLAGS=
-CXXFLAGS=
+CXXFLAGS=-std=c++14
+ASMFLAGS=
 LDFLAGS=
 
 DEFINES=ENABLE_BFELF_DEBUGGING
+
+OBJDIR=.build/native
+OUTDIR=../bin/native
+
+################################################################################
+# Common
+################################################################################
+
+RM=rm -rf
+MD=mkdir -p
 
 ################################################################################
 # Sources
@@ -41,17 +51,31 @@ DEFINES=ENABLE_BFELF_DEBUGGING
 
 TARGET_NAME=bfelf_loader
 TARGET_TYPE=lib
+TARGET_COMPILER=native
 
-OBJDIR=.build
-OUTDIR=../bin
+SOURCES=bfelf_loader.cpp
+HEADERS=
 
-SOURCES=bfelf_loader.c
-
-INCLUDES=
 LIBS=
 
-INCLUDE_PATHS=./ ../include/
 LIB_PATHS=
+INCLUDE_PATHS=./ ../include/
+
+################################################################################
+# Environment Specific
+################################################################################
+
+VMM_SOURCES=
+VMM_INCLUDE_PATHS=
+
+WINDOWS_SOURCES=
+WINDOWS_INCLUDE_PATHS=
+
+LINUX_SOURCES=
+LINUX_INCLUDE_PATHS=
+
+OSX_SOURCES=
+OSX_INCLUDE_PATHS=
 
 ################################################################################
 # Common

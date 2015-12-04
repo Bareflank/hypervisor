@@ -780,8 +780,8 @@ sh_flags_is_executable(struct bfelf_shdr *shdr)
 
 bfelf64_sword
 bfelf_section_header(struct bfelf_file_t *ef,
-                   bfelf64_word index,
-                   struct bfelf_shdr **shdr)
+                     bfelf64_word index,
+                     struct bfelf_shdr **shdr)
 {
     if (!ef || !ef->ehdr || !ef->shdrtab || !shdr)
         return BFELF_ERROR_INVALID_ARG;
@@ -824,7 +824,7 @@ bfelf_print_section_header_table(struct bfelf_file_t *ef)
 
 bfelf64_sword
 bfelf_print_section_header(struct bfelf_file_t *ef,
-                         struct bfelf_shdr *shdr)
+                           struct bfelf_shdr *shdr)
 {
     bfelf64_sword ret = 0;
     struct e_string section_name = {0};
@@ -867,9 +867,9 @@ bfelf_print_section_header(struct bfelf_file_t *ef,
 
 bfelf64_sword
 bfelf_string_table_entry(struct bfelf_file_t *ef,
-                       struct bfelf_shdr *strtab,
-                       bfelf64_word offset,
-                       struct e_string *str)
+                         struct bfelf_shdr *strtab,
+                         bfelf64_word offset,
+                         struct e_string *str)
 {
     char *buf = 0;
     bfelf64_word i = 0;
@@ -905,8 +905,8 @@ bfelf_string_table_entry(struct bfelf_file_t *ef,
 
 bfelf64_sword
 bfelf_section_name_string(struct bfelf_file_t *ef,
-                        struct bfelf_shdr *shdr,
-                        struct e_string *str)
+                          struct bfelf_shdr *shdr,
+                          struct e_string *str)
 {
     if (!ef || !shdr || !str)
         return BFELF_ERROR_INVALID_ARG;
@@ -975,8 +975,8 @@ stt_to_str(bfelf64_word value)
 
 bfelf64_sword
 bfelf_symbol_by_index(struct bfelf_file_t *ef,
-                    bfelf64_word index,
-                    struct bfelf_sym **sym)
+                      bfelf64_word index,
+                      struct bfelf_sym **sym)
 {
     if (!ef || !sym)
         return BFELF_ERROR_INVALID_ARG;
@@ -994,8 +994,8 @@ bfelf_symbol_by_index(struct bfelf_file_t *ef,
 
 bfelf64_sword
 bfelf_symbol_by_name(struct bfelf_file_t *ef,
-                   struct e_string *name,
-                   struct bfelf_sym **sym)
+                     struct e_string *name,
+                     struct bfelf_sym **sym)
 {
     bfelf64_sword i = 0;
     bfelf64_sword ret = 0;
@@ -1038,9 +1038,9 @@ bfelf_symbol_by_name(struct bfelf_file_t *ef,
 
 bfelf64_sword
 bfelf_symbol_by_name_global(struct bfelf_file_t *efl,
-                          struct e_string *name,
-                          struct bfelf_file_t **efr,
-                          struct bfelf_sym **sym)
+                            struct e_string *name,
+                            struct bfelf_file_t **efr,
+                            struct bfelf_sym **sym)
 {
     bfelf64_sword i = 0;
     bfelf64_sword ret = 0;
@@ -1098,8 +1098,8 @@ found:
 
 bfelf64_sword
 bfelf_resolve_symbol(struct bfelf_file_t *ef,
-                   struct e_string *name,
-                   void **addr)
+                     struct e_string *name,
+                     void **addr)
 {
     bfelf64_sword ret = 0;
     struct bfelf_sym *sym = 0;
@@ -1152,7 +1152,7 @@ bfelf_print_sym_table(struct bfelf_file_t *ef)
 
 bfelf64_sword
 bfelf_print_sym(struct bfelf_file_t *ef,
-              struct bfelf_sym *sym)
+                struct bfelf_sym *sym)
 {
     bfelf64_sword ret = 0;
     struct e_string str = {0};
@@ -1213,7 +1213,7 @@ rel_type_to_str(bfelf64_xword value)
 
 bfelf64_sword
 bfelf_relocate_symbol(struct bfelf_file_t *ef,
-                    struct bfelf_rel *rel)
+                      struct bfelf_rel *rel)
 {
     bfelf64_addr *ptr = 0;
     bfelf64_sword ret = 0;
@@ -1265,7 +1265,7 @@ bfelf_relocate_symbol(struct bfelf_file_t *ef,
 
 bfelf64_sword
 bfelf_relocate_symbol_addend(struct bfelf_file_t *ef,
-                           struct bfelf_rela *rela)
+                             struct bfelf_rela *rela)
 {
     bfelf64_addr *ptr = 0;
     bfelf64_sword ret = 0;
@@ -1519,8 +1519,8 @@ p_flags_is_readable(struct bfelf_phdr *phdr)
 
 bfelf64_sword
 bfelf_program_header(struct bfelf_file_t *ef,
-                   bfelf64_word index,
-                   struct bfelf_phdr **phdr)
+                     bfelf64_word index,
+                     struct bfelf_phdr **phdr)
 {
     if (!ef || !ef->ehdr || !ef->phdrtab || !phdr)
         return BFELF_ERROR_INVALID_ARG;
@@ -1594,7 +1594,7 @@ bfelf_load_segments(struct bfelf_file_t *ef)
 
 bfelf64_sword
 bfelf_load_segment(struct bfelf_file_t *ef,
-                 struct bfelf_phdr *phdr)
+                   struct bfelf_phdr *phdr)
 {
     char *exec = 0;
     char *file = 0;
@@ -1648,7 +1648,7 @@ bfelf_print_program_header_table(struct bfelf_file_t *ef)
 
 bfelf64_sword
 bfelf_print_program_header(struct bfelf_file_t *ef,
-                         struct bfelf_phdr *phdr)
+                           struct bfelf_phdr *phdr)
 {
     if (!ef || !phdr)
         return BFELF_ERROR_INVALID_ARG;
