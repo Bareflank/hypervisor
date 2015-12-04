@@ -72,13 +72,16 @@ TARGET_NAME=debug_ring
 TARGET_TYPE=lib
 TARGET_COMPILER=both
 
-SOURCES=debug_ring.cpp
+SOURCES+=debug_ring.cpp
+SOURCES+=debug_ring_interface.c
 HEADERS=
 
 LIBS=
 
 LIB_PATHS=
 INCLUDE_PATHS=./ ../../../include/ ../../../../include/
+
+vpath %.c ../../../../src/
 
 ################################################################################
 # Environment Specific

@@ -53,7 +53,12 @@ TARGET_NAME=test
 TARGET_TYPE=bin
 TARGET_COMPILER=native
 
-SOURCES=test.cpp
+SOURCES+=test.cpp
+SOURCES+=test_command_line_parser.cpp
+SOURCES+=test_file.cpp
+SOURCES+=test_ioctl.cpp
+SOURCES+=test_ioctl_driver.cpp
+SOURCES+=test_split.cpp
 HEADERS=
 
 LIBS=bfm

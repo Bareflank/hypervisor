@@ -59,6 +59,9 @@ ioctl_driver::process() const
         case command_line_parser_command::stop:
             return this->stop_vmm();
 
+        case command_line_parser_command::dump:
+            return this->dump_vmm();
+
         default:
         {
             bfm_error << "Unable to process command. Command is unknown" << std::endl;
@@ -130,7 +133,7 @@ ioctl_driver::start_vmm() const
 
     if (m_ioctlb->call(ioctl_commands::start, NULL, 0) != ioctl_error::success)
     {
-        bfm_error << "Unable to start vmm. failed to start vmm: " << std::endl;
+        bfm_error << "failed to start vmm: " << std::endl;
         return ioctl_driver_error::failure;
     }
 
@@ -146,7 +149,23 @@ ioctl_driver::stop_vmm() const
 
     if (m_ioctlb->call(ioctl_commands::stop, NULL, 0) != ioctl_error::success)
     {
-        bfm_error << "Unable to stop vmm. failed to stop vmm: " << std::endl;
+        bfm_error << "failed to stop vmm: " << std::endl;
+        return ioctl_driver_error::failure;
+    }
+
+    return ioctl_driver_error::success;
+}
+
+ioctl_driver_error::type
+ioctl_driver::dump_vmm() const
+{
+    assert(m_fb != NULL);
+    assert(m_clpb != NULL);
+    assert(m_ioctlb != NULL);
+
+    if (m_ioctlb->call(ioctl_commands::dump, NULL, 0) != ioctl_error::success)
+    {
+        bfm_error << "failed to dump vmm: " << std::endl;
         return ioctl_driver_error::failure;
     }
 

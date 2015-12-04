@@ -599,7 +599,7 @@ void bfelf_loader_ut::test_bfelf_section_header()
 void bfelf_loader_ut::test_bfelf_string_table_entry()
 {
     auto ret = 0;
-    struct e_string str = {0};
+    struct e_string_t str = {0};
 
     ret = bfelf_string_table_entry(NULL, m_test_elf.strtab, 0, &str);
     ASSERT_TRUE(ret == BFELF_ERROR_INVALID_ARG);
@@ -637,7 +637,7 @@ void bfelf_loader_ut::test_bfelf_string_table_entry()
 void bfelf_loader_ut::test_bfelf_section_name_string()
 {
     auto ret = 0;
-    struct e_string str = {0};
+    struct e_string_t str = {0};
     struct bfelf_shdr *shdr = 0;
 
     ret = bfelf_section_name_string(NULL, &g_test.shdr1, &str);
@@ -686,7 +686,7 @@ void bfelf_loader_ut::test_bfelf_symbol_by_name()
 {
     auto ret = 0;
     struct bfelf_sym *sym = 0;
-    struct e_string str = {0};
+    struct e_string_t str = {0};
 
     ret = bfelf_symbol_by_name(NULL, &str, &sym);
     ASSERT_TRUE(ret == BFELF_ERROR_INVALID_ARG);
@@ -716,7 +716,7 @@ void bfelf_loader_ut::test_bfelf_symbol_by_name_global()
 {
     auto ret = 0;
     struct bfelf_sym *sym = 0;
-    struct e_string str = {0};
+    struct e_string_t str = {0};
     struct bfelf_file_t *efr = 0;
 
     ret = bfelf_symbol_by_name_global(NULL, &str, &efr, &sym);
@@ -756,7 +756,7 @@ void bfelf_loader_ut::test_bfelf_resolve_symbol()
 {
     auto ret = 0;
     void *addr = 0;
-    struct e_string str = {0};
+    struct e_string_t str = {0};
 
     ret = bfelf_resolve_symbol(NULL, &str, &addr);
     ASSERT_TRUE(ret == BFELF_ERROR_INVALID_ARG);
@@ -989,8 +989,8 @@ void bfelf_loader_ut::test_resolve()
     auto ret = 0;
     void *entry1 = 0;
     void *entry2 = 0;
-    struct e_string str1 = {"exec_ms64tosv64", 15};
-    struct e_string str2 = {"_Z12dummy3_test2i", 17};
+    struct e_string_t str1 = {"exec_ms64tosv64", 15};
+    struct e_string_t str2 = {"_Z12dummy3_test2i", 17};
 
     ret = bfelf_resolve_symbol(&m_dummy3_ef, &str1, &entry1);
     EXPECT_TRUE(ret == BFELF_SUCCESS);

@@ -25,6 +25,10 @@
 
 #include <types.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * Allocate Memory
  *
@@ -68,5 +72,9 @@ platform_free(void *addr);
  */
 void
 platform_free_exec(void *addr);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

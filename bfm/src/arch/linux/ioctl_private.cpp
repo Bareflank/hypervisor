@@ -97,6 +97,17 @@ ioctl_private::call(ioctl_commands::type cmd, const void *const data, int32_t le
             return ioctl_error::success;
         }
 
+        case ioctl_commands::dump:
+        {
+            if ((ret = ioctl(fd, IOCTL_DUMP_VMM, 0)) < 0)
+            {
+                bfm_error << "failed IOCTL_DUMP_VMM" << std::endl;
+                return ioctl_error::failed_dump;
+            }
+
+            return ioctl_error::success;
+        }
+
         default:
             bfm_error << "unknown command" << std::endl;
             return ioctl_error::invalid_arg;

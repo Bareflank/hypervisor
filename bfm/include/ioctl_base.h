@@ -33,7 +33,8 @@ namespace ioctl_error
         invalid_arg = 2,
         failed_add_module = 3,
         failed_start = 4,
-        failed_stop = 5
+        failed_stop = 5,
+        failed_dump = 6
     };
 }
 
@@ -44,7 +45,8 @@ namespace ioctl_commands
         unknown = 0,
         add_module = 1,
         start = 2,
-        stop = 3
+        stop = 3,
+        dump = 4
     };
 }
 

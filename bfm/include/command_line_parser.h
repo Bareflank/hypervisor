@@ -87,6 +87,7 @@ private:
 
     void parse_start(int argc, const char *argv[], int index);
     void parse_stop(int argc, const char *argv[], int index);
+    void parse_dump(int argc, const char *argv[], int index);
 
 private:
 

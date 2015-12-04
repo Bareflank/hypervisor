@@ -25,6 +25,10 @@
 
 #include <types.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* ========================================================================== */
 /* Macros                                                                     */
 /* ========================================================================== */
@@ -35,12 +39,42 @@
 #define BF_ERROR_VMM_ALREADY_STARTED -5002
 #define BF_ERROR_FAILED_TO_START_VMM -5003
 #define BF_ERROR_FAILED_TO_STOP_VMM -5004
+#define BF_ERROR_FAILED_TO_ALLOC_DRR -5005
+#define BF_ERROR_FAILED_TO_ALLOC_RB -5006
+#define BF_ERROR_FAILED_TO_DUMP_DR -5007
 
 #define MAX_NUM_MODULES 100
+
+#define VMM_STARTED 1
+#define VMM_STOPPED 0
 
 /* ========================================================================== */
 /* Common Functions                                                           */
 /* ========================================================================== */
+
+/**
+ * Initialize Driver Entry
+ *
+ * This code should be run as part of the driver entry's init code. This
+ * sets up some resources that are needed throughout the lifetime of the
+ * driver entry.
+ *
+ * @return BF_SUCCESS on success, negative error code on failure
+ */
+int64_t
+common_init(void);
+
+/**
+ * Finalize Driver Entry
+ *
+ * This code should be run as part of the driver entry's fini code. This
+ * cleans up some resources that were needed throughout the lifetime of the
+ * driver entry.
+ *
+ * @return BF_SUCCESS on success, negative error code on failure
+ */
+int64_t
+common_fini(void);
 
 /**
  * Add Module
@@ -58,19 +92,8 @@
  * @param fsize the size of the file in bytes
  * @return BF_SUCCESS on success, negative error code on failure
  */
-int32_t
-add_module(char *file, int32_t fsize);
-
-/**
- * Clear Modules
- *
- * This function is executed by stop_vmm and does not need to be run manually.
- * Instead, the user should execute stop_vmm. This function removed the modules
- * that were added to memory, and then resets internal variables so that new
- * modules can be added, and the vmm can be started again.
- */
-void
-clear_modules(void);
+int64_t
+common_add_module(char *file, int64_t fsize);
 
 /**
  * Start VMM
@@ -84,8 +107,8 @@ clear_modules(void);
  *
  * @return BF_SUCCESS on success, negative error code on failure
  */
-int32_t
-start_vmm(void);
+int64_t
+common_start_vmm(void);
 
 /**
  * Stop VMM
@@ -98,7 +121,23 @@ start_vmm(void);
  *
  * @return BF_SUCCESS on success, negative error code on failure
  */
-int32_t
-stop_vmm(void);
+int64_t
+common_stop_vmm(void);
+
+/**
+ * Dump VMM
+ *
+ * This grabs the conents of the debug ring, and dumps the contents to the
+ * driver entry's console. This is one of a couple of ways to get feedback
+ * from the VMM.
+ *
+ * @return BF_SUCCESS on success, negative error code on failure
+ */
+int64_t
+common_dump_vmm(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

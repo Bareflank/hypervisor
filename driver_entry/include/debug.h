@@ -25,28 +25,42 @@
 
 #include <driver_entry_interface.h>
 
+#ifndef KERNEL
+#include <stdio.h>
+#define INFO(...) printf(__VA_ARGS__)
+#define DEBUG(...) printf("[" BAREFLANK_NAME "]: " __VA_ARGS__)
+#define ALERT(...) printf("[" BAREFLANK_NAME " ERROR]: " __VA_ARGS__)
+#endif
+
 /* ========================================================================== */
 /* Linux Debugging                                                            */
 /* ========================================================================== */
 
+#ifdef KERNEL
 #ifdef __linux__
 #include <linux/module.h>
+#define INFO(...) printk(KERN_INFO __VA_ARGS__)
 #define DEBUG(...) printk(KERN_INFO "[" BAREFLANK_NAME "]: " __VA_ARGS__)
 #define ALERT(...) printk(KERN_ALERT "[" BAREFLANK_NAME " ERROR]: " __VA_ARGS__)
+#endif
 #endif
 
 /* ========================================================================== */
 /* Windows Debugging                                                          */
 /* ========================================================================== */
 
+#ifdef KERNEL
 #ifdef _WIN32
+#endif
 #endif
 
 /* ========================================================================== */
 /* OSX Debugging                                                              */
 /* ========================================================================== */
 
+#ifdef KERNEL
 #ifdef __APPLE__
+#endif
 #endif
 
 #endif

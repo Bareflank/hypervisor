@@ -26,6 +26,7 @@
 SUBDIRS += bfelf_loader
 SUBDIRS += bfm
 SUBDIRS += bfvmm
+SUBDIRS += driver_entry
 
 ################################################################################
 # Common

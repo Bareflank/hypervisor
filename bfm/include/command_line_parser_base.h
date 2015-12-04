@@ -31,7 +31,8 @@ namespace command_line_parser_command
         unknown = 0,
         help = 1,
         start = 2,
-        stop = 3
+        stop = 3,
+        dump = 4
     };
 }
 

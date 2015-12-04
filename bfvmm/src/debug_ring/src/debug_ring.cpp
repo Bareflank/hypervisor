@@ -22,43 +22,41 @@
 #include <assert.h>
 #include <debug_ring/debug_ring.h>
 
-debug_ring::debug_ring(struct debug_ring_resources *drr) :
+debug_ring::debug_ring() :
     m_is_valid(false),
-    m_drr(drr)
+    m_drr(0)
 {
-    if (m_drr == 0)
-        return;
-
-    if (m_drr->len <= 0)
-        return;
-
-    m_is_valid = true;
-
-    clear();
 }
 
 debug_ring::~debug_ring()
 {
 }
 
-void debug_ring::clear()
+debug_ring_error::type
+debug_ring::init(struct debug_ring_resources *drr)
 {
-    if (m_is_valid == false)
-        return;
+    m_is_valid = false;
+    m_drr = drr;
+
+    if (m_drr == 0)
+        return debug_ring_error::invalid;
+
+    if (m_drr->len <= 0)
+        return debug_ring_error::invalid;
 
     m_drr->epos = 0;
     m_drr->spos = 0;
 
     for (auto i = 0; i < m_drr->len; i++)
         m_drr->buf[i] = '\0';
+
+    m_is_valid = true;
+
+    return debug_ring_error::success;
 }
 
-bool debug_ring::is_valid()
-{
-    return m_is_valid;
-}
-
-debug_ring_error::type debug_ring::write(const char *str, int64_t len)
+debug_ring_error::type
+debug_ring::write(const char *str, int64_t len)
 {
     // TODO: A more interesting implementation would use an optimized
     //       memcpy to implement this code. Doing so would increase it's

@@ -23,6 +23,10 @@
 #ifndef DEBUG_RING_INTERFACE_H
 #define DEBUG_RING_INTERFACE_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * Returned by debug_ring_read on error
  */
@@ -94,28 +98,11 @@ struct debug_ring_resources
  * @return the number of bytes read from the debug ring, DEBUG_RING_READ_ERROR
  *        on error
  */
-inline long long int
-debug_ring_read(struct debug_ring_resources *drr, char *str, long long int len)
-{
-    long long int i;
-    long long int spos;
-    long long int content;
+long long int
+debug_ring_read(struct debug_ring_resources *drr, char *str, long long int len);
 
-    if(drr == 0 || str == 0 || len == 0)
-        return DEBUG_RING_READ_ERROR;
-
-    spos = drr->spos % drr->len;
-    content = drr->epos - drr->spos;
-
-    for(i = 0; i < content && i < len; i++)
-    {
-        if(spos == drr->len)
-            spos = 0;
-
-        str[i] = drr->buf[spos++];
-    }
-
-    return content;
+#ifdef __cplusplus
 }
+#endif
 
 #endif

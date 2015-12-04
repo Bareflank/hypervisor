@@ -1,0 +1,3 @@
+../../../bfvmm/bin/cross/libentry.so
+../../../bfvmm/bin/cross/libstd.so
+../../../bfvmm/bin/cross/libdebug_ring.so

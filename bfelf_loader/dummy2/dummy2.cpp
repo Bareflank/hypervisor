@@ -39,3 +39,9 @@ dummy2::dummy2_add2(int num)
 {
     return num + s_data;
 }
+
+void *
+dummy2_func_pointer(void *arg)
+{
+    return 0;
+}

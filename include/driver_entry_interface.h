@@ -23,6 +23,10 @@
 #ifndef DRIVER_ENTRY_INTERFACE_H
 #define DRIVER_ENTRY_INTERFACE_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* ========================================================================== */
 /* Common                                                                     */
 /* ========================================================================== */
@@ -32,6 +36,7 @@
 #define BF_IOCTL_ERROR_ADD_MODULE_LENGTH_FAILED -10002
 #define BF_IOCTL_ERROR_START_VMM_FAILED -10003
 #define BF_IOCTL_ERROR_STOP_VMM_FAILED -10004
+#define BF_IOCTL_ERROR_DUMP_VMM_FAILED -10004
 
 /* ========================================================================== */
 /* Linux Interfaces                                                           */
@@ -87,6 +92,15 @@
  */
 #define IOCTL_STOP_VMM _IOR(BAREFLANK_MAJOR, 300, char *)
 
+/**
+ * Dump VMM
+ *
+ * This IOCTL tells the driver entry to dump the contents of the shared debug
+ * ring withing the VMM. Note that this can be called at any time, but only
+ * makes sense to call after the VMM has been loaded.
+ */
+#define IOCTL_DUMP_VMM _IOR(BAREFLANK_MAJOR, 400, char *)
+
 #endif
 
 /* ========================================================================== */
@@ -101,6 +115,10 @@
 /* ========================================================================== */
 
 #ifdef __APPLE__
+#endif
+
+#ifdef __cplusplus
+}
 #endif
 
 #endif

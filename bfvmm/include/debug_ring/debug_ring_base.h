@@ -41,12 +41,6 @@ public:
     debug_ring_base() {}
     virtual ~debug_ring_base() {}
 
-    virtual void clear()
-    {}
-
-    virtual bool is_valid()
-    { return false; }
-
     virtual debug_ring_error::type write(const char *str, int64_t len)
     { return debug_ring_error::failure; }
 };

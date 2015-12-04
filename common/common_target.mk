@@ -60,8 +60,10 @@ endif
 
 ifeq ($(TARGET_CROSS_COMPILED),true)
 	CROSS_BIN_EXT=
-	CROSS_LIB_EXT=.so
-	CROSS_LIB_PRE=lib
+	CROSS_SHARED_LIB_EXT=.so
+	CROSS_SHARED_LIB_PRE=lib
+	CROSS_STATIC_LIB_EXT=.a
+	CROSS_STATIC_LIB_PRE=lib
 	CROSS_SOURCES += $(SOURCES)
 	CROSS_SOURCES += $(VMM_SOURCES)
 	CROSS_INCLUDE_PATHS+=$(INCLUDE_PATHS)
@@ -72,24 +74,30 @@ endif
 ifeq ($(TARGET_NATIVE_COMPILED),true)
 	ifeq ($(OS),windows)
 		BIN_EXT=.exe
-		LIB_EXT=.dll
-		LIB_PRE=
+		SHARED_LIB_EXT=.dll
+		SHARED_LIB_PRE=
+		STATIC_LIB_EXT=.lib
+		STATIC_LIB_PRE=
 		SOURCES += $(WINDOWS_SOURCES)
 		INCLUDE_PATHS+=$(WINDOWS_INCLUDE_PATHS)
 		DEFINES+=OS_WINDOWS
 	endif
 	ifeq ($(OS),linux)
 		BIN_EXT=
-		LIB_EXT=.so
-		LIB_PRE=lib
+		SHARED_LIB_EXT=.so
+		SHARED_LIB_PRE=lib
+		STATIC_LIB_EXT=.a
+		STATIC_LIB_PRE=lib
 		SOURCES += $(LINUX_SOURCES)
 		INCLUDE_PATHS+=$(LINUX_INCLUDE_PATHS)
 		DEFINES+=OS_LINUX
 	endif
 	ifeq ($(OS),osx)
 		BIN_EXT=
-		LIB_EXT=.dylib
-		LIB_PRE=lib
+		SHARED_LIB_EXT=.dylib
+		SHARED_LIB_PRE=lib
+		STATIC_LIB_EXT=.a
+		STATIC_LIB_PRE=lib
 		SOURCES += $(OSX_SOURCES)
 		INCLUDE_PATHS+=$(OSX_INCLUDE_PATHS)
 		DEFINES+=OS_OSX
@@ -102,21 +110,44 @@ endif
 ifeq ($(TARGET_TYPE),lib)
 	ifeq ($(TARGET_CROSS_COMPILED),true)
 		CROSS_CCFLAGS+=-fpic
-		CROSS_CXXFLAGS+=-fpic
+		CROSS_CXXFLAGS+=-fpic -fno-rtti -fno-sized-deallocation -fno-exceptions -fno-use-cxa-atexit
 		CROSS_LDFLAGS+=-shared
-		CROSS_TARGET=$(patsubst %,$(CROSS_OUTDIR)/$(CROSS_LIB_PRE)%$(CROSS_LIB_EXT),$(TARGET_NAME))
+		CROSS_LD_OPTION=-o
+		CROSS_TARGET=$(patsubst %,$(CROSS_OUTDIR)/$(CROSS_SHARED_LIB_PRE)%$(CROSS_SHARED_LIB_EXT),$(TARGET_NAME))
 	endif
 	ifeq ($(TARGET_NATIVE_COMPILED),true)
 		CCFLAGS+=-fpic
 		CXXFLAGS+=-fpic
 		LDFLAGS+=-shared
-		TARGET=$(patsubst %,$(OUTDIR)/$(LIB_PRE)%$(LIB_EXT),$(TARGET_NAME))
+		LD_OPTION=-o
+		TARGET=$(patsubst %,$(OUTDIR)/$(SHARED_LIB_PRE)%$(SHARED_LIB_EXT),$(TARGET_NAME))
 	endif
-else
+endif
+
+ifeq ($(TARGET_TYPE),staticlib)
 	ifeq ($(TARGET_CROSS_COMPILED),true)
+		CROSS_CCFLAGS+=-fpic
+		CROSS_CXXFLAGS+=-fpic -fno-rtti -fno-sized-deallocation -fno-exceptions -fno-use-cxa-atexit
+		CROSS_LDFLAGS+=
+		CROSS_LD_OPTION=
+		CROSS_TARGET=$(patsubst %,$(CROSS_OUTDIR)/$(CROSS_STATIC_LIB_PRE)%$(CROSS_STATIC_LIB_EXT),$(TARGET_NAME))
+	endif
+	ifeq ($(TARGET_NATIVE_COMPILED),true)
+		CCFLAGS+=-fpic
+		CXXFLAGS+=-fpic
+		LDFLAGS+=
+		LD_OPTION=
+		TARGET=$(patsubst %,$(OUTDIR)/$(STATIC_LIB_PRE)%$(STATIC_LIB_EXT),$(TARGET_NAME))
+	endif
+endif
+
+ifeq ($(TARGET_TYPE),bin)
+	ifeq ($(TARGET_CROSS_COMPILED),true)
+		CROSS_LD_OPTION=-o
 		CROSS_TARGET=$(patsubst %,$(CROSS_OUTDIR)/%$(CROSS_BIN_EXT),$(TARGET_NAME))
 	endif
 	ifeq ($(TARGET_NATIVE_COMPILED),true)
+		LD_OPTION=-o
 		TARGET=$(patsubst %,$(OUTDIR)/%$(BIN_EXT),$(TARGET_NAME))
 	endif
 endif
@@ -230,7 +261,7 @@ $(CROSS_OBJDIR)/%.o: %.asm
 	$(CROSS_ASM) $< -o $@ $(CROSS_ASMFLAGS)
 
 $(CROSS_TARGET): $(addprefix $(CROSS_OBJDIR)/, $(CROSS_OBJECTS))
-	$(CROSS_LD) -o $@ $^ $(CROSS_LDFLAGS) $(CROSS_LD_FLAGS_LIB_PATHS) $(CROSS_LD_FLAGS_LIBS)
+	$(CROSS_LD) $(CROSS_LDFLAGS) $(CROSS_LD_OPTION) $@ $^ $(CROSS_LD_FLAGS_LIB_PATHS) $(CROSS_LD_FLAGS_LIBS)
 
 $(CROSS_OBJDIR)/%.d: ;
 -include $(patsubst %,$(CROSS_OBJDIR)/%.d,$(basename $(CROSS_SOURCES)))
@@ -249,10 +280,10 @@ ifeq ($(TARGET_NATIVE_COMPILED),true)
 native: $(OBJDIR) $(OUTDIR) $(TARGET)
 
 $(OBJDIR):
-	@$(MD) $(OBJDIR)
+	$(MD) $(OBJDIR)
 
 $(OUTDIR):
-	@$(MD) $(OUTDIR)
+	$(MD) $(OUTDIR)
 
 $(OBJDIR)/%.o: %.c $(OBJDIR)/%.d
 	$(CC) $< -o $@ -c $(CCFLAGS) $(DFLAGS) $(DEPFLAGS) $(CC_FLAGS_INCLUDE_PATHS) $(HEADERS)
@@ -266,7 +297,7 @@ $(OBJDIR)/%.o: %.asm
 	$(ASM) $< -o $@ $(ASMFLAGS)
 
 $(TARGET): $(addprefix $(OBJDIR)/, $(OBJECTS))
-	$(LD) -o $@ $^ $(LDFLAGS) $(LD_FLAGS_LIB_PATHS) $(LD_FLAGS_LIBS)
+	$(LD) $(LDFLAGS) $(LD_OPTION) $@ $^ $(LD_FLAGS_LIB_PATHS) $(LD_FLAGS_LIBS)
 
 $(OBJDIR)/%.d: ;
 -include $(patsubst %,$(OBJDIR)/%.d,$(basename $(SOURCES)))

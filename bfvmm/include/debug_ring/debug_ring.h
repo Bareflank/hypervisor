@@ -38,31 +38,21 @@ public:
 
     /// Debug Ring Constructor
     ///
-    /// Creates a debug ring based on the debug ring resources provided.
-    ///
-    /// @param drr debug resources created by the driver entry
-    ///
-    debug_ring(struct debug_ring_resources *drr);
+    debug_ring();
 
     /// Debug Ring Destructor
     ///
     ~debug_ring();
 
-    /// Clear Debug Ring
+    /// Initialize Debug Ring
     ///
-    /// Clears the debug ring, and resets all of the internal variables
-    /// back to 0.
+    /// Initializes the debug ring, and resets all of the internal variables
+    /// to 0.
     ///
-    void clear() override;
-
-    /// Is Valid
+    /// @param drr debug resources created by the driver entry
+    /// @return success on success, invalid on failure
     ///
-    /// Returns false if the debug ring is not valid. An invalid debug
-    /// ring usually means that you either provided the debug ring with
-    /// a NULL debug ring resource, or the length in the debug ring was
-    /// not set.
-    ///
-    bool is_valid() override;
+    debug_ring_error::type init(struct debug_ring_resources *drr);
 
     /// Write to Debug Ring
     ///

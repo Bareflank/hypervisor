@@ -65,7 +65,7 @@ LIBS=
 LIB_PATHS=
 INCLUDE_PATHS=./ ../include/ ../../include/
 
-VPATH=arch/linux
+vpath %.cpp arch/linux
 
 ################################################################################
 # Environment Specific

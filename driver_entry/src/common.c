@@ -27,32 +27,112 @@
 
 #include <bfelf_loader.h>
 #include <abi_conversion.h>
+#include <debug_ring_interface.h>
 
 /* ========================================================================== */
 /* Macros                                                                     */
 /* ========================================================================== */
 
-#define VMM_STARTED 1
-#define VMM_STOPPED 0
+#ifndef DEBUG_RING_SIZE
+#define DEBUG_RING_SIZE (10 * 4096)
+#endif
 
 /* ========================================================================== */
 /* Global                                                                     */
 /* ========================================================================== */
 
-uint32_t g_vmm_status = VMM_STOPPED;
+uint64_t g_vmm_status = VMM_STOPPED;
 
-uint32_t g_num_bfelf_files = 0;
+void *g_drr = 0;
+struct vmm_resources_t g_vmmr = {0};
+
+uint64_t g_num_bfelf_files = 0;
 struct bfelf_file_t g_bfelf_files[MAX_NUM_MODULES] = {0};
 
-uint32_t g_num_bfelf_execs = 0;
+uint64_t g_num_bfelf_execs = 0;
 void *g_bfelf_execs[MAX_NUM_MODULES] = {0};
+
+/* ========================================================================== */
+/* Helpers                                                                    */
+/* ========================================================================== */
+
+void
+clear_modules(void)
+{
+    int i;
+    struct bfelf_file_t bfelf_file = {0};
+
+    for (i = 0; i < g_num_bfelf_execs; i++)
+        platform_free_exec(g_bfelf_execs[i]);
+
+    for (i = 0; i < MAX_NUM_MODULES; i++)
+    {
+        g_bfelf_execs[i] = 0;
+        g_bfelf_files[i] = bfelf_file;
+    }
+
+    g_num_bfelf_execs = 0;
+    g_num_bfelf_files = 0;
+}
+
+uint64_t
+vmm_status(void)
+{
+    return g_vmm_status;
+}
+
+uint64_t
+num_elf_files(void)
+{
+    return g_num_bfelf_files;
+}
+
+struct bfelf_file_t *
+elf_file(uint64_t index)
+{
+    if (index >= g_num_bfelf_files)
+        ALERT("elf file index out of range\n");
+
+    return &g_bfelf_files[index];
+}
 
 /* ========================================================================== */
 /* Implementation                                                             */
 /* ========================================================================== */
 
-int32_t
-add_module(char *file, int32_t fsize)
+int64_t
+common_init(void)
+{
+    g_drr = platform_alloc(DEBUG_RING_SIZE);
+    if (g_drr == NULL)
+    {
+        ALERT("start_vmm: failed to allocate memory for the debug ring\n");
+        return BF_ERROR_FAILED_TO_ALLOC_DRR;
+    }
+
+    g_vmmr.drr = g_drr;
+    g_vmmr.drr->len = DEBUG_RING_SIZE - sizeof(struct debug_ring_resources);
+
+    return BF_SUCCESS;
+}
+
+int64_t
+common_fini(void)
+{
+    if (common_stop_vmm() != BF_SUCCESS)
+        ALERT("common_fini: failed to stop vmm\n");
+
+    if (g_drr != 0)
+    {
+        platform_free(g_drr);
+        g_drr = 0;
+    }
+
+    return BF_SUCCESS;
+}
+
+int64_t
+common_add_module(char *file, int64_t fsize)
 {
     int ret;
     int size;
@@ -114,33 +194,14 @@ failed:
     return ret;
 }
 
-void
-clear_modules(void)
-{
-    int i;
-    struct bfelf_file_t bfelf_file = {0};
-
-    for (i = 0; i < g_num_bfelf_execs; i++)
-        platform_free_exec(g_bfelf_execs[i]);
-
-    for (i = 0; i < MAX_NUM_MODULES; i++)
-    {
-        g_bfelf_execs[i] = 0;
-        g_bfelf_files[i] = bfelf_file;
-    }
-
-    g_num_bfelf_execs = 0;
-    g_num_bfelf_files = 0;
-}
-
-int32_t
-start_vmm(void)
+int64_t
+common_start_vmm(void)
 {
     int i;
     int ret;
     void *entry = 0;
     struct bfelf_loader_t loader = {0};
-    struct e_string entry_str = {"_Z9start_vmmi", 13};
+    struct e_string_t entry_str = {"_Z9start_vmmPv", 14};
 
     if (g_vmm_status == VMM_STARTED)
     {
@@ -186,14 +247,14 @@ start_vmm(void)
     }
     else
     {
-        int64_t ret;
+        void *ret;
         entry_point_t entry_point = (entry_point_t)entry;
 
-        if ((ret = (int64_t)entry_point((void *)0)) == 0)
+        if ((ret = entry_point(&g_vmmr)) == VMM_SUCCESS)
         {
             DEBUG("\n");
             DEBUG("vmm started successfully:\n");
-            DEBUG("    - exit code: %lld\n", ret);
+            DEBUG("    - exit code: %p\n", ret);
             DEBUG("\n");
 
             goto success;
@@ -202,7 +263,7 @@ start_vmm(void)
         {
             DEBUG("\n");
             DEBUG("vmm failed to start:\n");
-            DEBUG("    - exit code: %lld\n", ret);
+            DEBUG("    - exit code: %p\n", ret);
             DEBUG("\n");
 
             return BF_ERROR_FAILED_TO_START_VMM;
@@ -215,23 +276,23 @@ success:
     return BF_SUCCESS;
 }
 
-int32_t
-stop_vmm(void)
+int64_t
+common_stop_vmm(void)
 {
     int ret;
     void *entry = 0;
-    struct e_string entry_str = {"_Z8stop_vmmi", 12};
+    struct e_string_t entry_str = {"_Z8stop_vmmPv", 13};
 
-    if (g_vmm_status == VMM_STOPPED)
+    if (vmm_status() == VMM_STOPPED)
         goto success;
 
-    if (g_num_bfelf_files <= 0)
+    if (num_elf_files() <= 0)
     {
         ALERT("stop_vmm: cannot stop vmm. no modules were added\n");
         return BF_ERROR_NO_MODULES_ADDED;
     }
 
-    ret = bfelf_resolve_symbol(&g_bfelf_files[0], &entry_str, &entry);
+    ret = bfelf_resolve_symbol(elf_file(0), &entry_str, &entry);
     if (ret != BFELF_SUCCESS)
     {
         ALERT("stop_vmm: failed to resolve entry point: %d - %s\n", ret, bfelf_error(ret));
@@ -239,15 +300,18 @@ stop_vmm(void)
     }
     else
     {
-        int64_t ret;
+        void *ret;
         entry_point_t entry_point = (entry_point_t)entry;
 
-        if ((ret = (int64_t)entry_point((void *)0)) == 0)
+        if ((ret = entry_point(0)) == VMM_SUCCESS)
         {
             DEBUG("\n");
             DEBUG("vmm stopped successfully:\n");
-            DEBUG("    - exit code: %lld\n", ret);
+            DEBUG("    - exit code: %p\n", ret);
             DEBUG("\n");
+
+            if (common_dump_vmm() != BF_SUCCESS)
+                ALERT("common_fini: failed to dump vmm\n");
 
             goto success;
         }
@@ -255,8 +319,11 @@ stop_vmm(void)
         {
             DEBUG("\n");
             DEBUG("vmm failed to stop:\n");
-            DEBUG("    - exit code: %lld\n", ret);
+            DEBUG("    - exit code: %p\n", ret);
             DEBUG("\n");
+
+            if (common_dump_vmm() != BF_SUCCESS)
+                ALERT("common_fini: failed to dump vmm\n");
 
             return BF_ERROR_FAILED_TO_STOP_VMM;
         }
@@ -267,5 +334,38 @@ success:
     clear_modules();
 
     g_vmm_status = VMM_STOPPED;
+    return BF_SUCCESS;
+}
+
+int64_t
+common_dump_vmm(void)
+{
+    int i;
+    int ret;
+    char *rb;
+
+    rb = platform_alloc(DEBUG_RING_SIZE);
+    if (rb == NULL)
+    {
+        ALERT("dump_vmm: failed to allocate memory for the read buffer\n");
+        return BF_ERROR_FAILED_TO_ALLOC_RB;
+    }
+
+    for (i = 0; i < DEBUG_RING_SIZE; i++)
+        rb[i] = 0;
+
+    if ((ret = debug_ring_read(g_drr, rb, DEBUG_RING_SIZE)) < 0)
+    {
+        ALERT("dump_vmm: failed to dump debug ring\n");
+        return BF_ERROR_FAILED_TO_DUMP_DR;
+    }
+
+    INFO("\n");
+    INFO("VMM DUMP:\n");
+    INFO("============================================================\n");
+    INFO("%s\n", rb);
+    INFO("============================================================\n");
+    INFO("\n");
+
     return BF_SUCCESS;
 }
