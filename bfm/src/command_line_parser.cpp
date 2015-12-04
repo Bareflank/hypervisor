@@ -69,6 +69,12 @@ command_line_parser::command_line_parser(int argc, const char *argv[]) :
             return;
         }
 
+        if (str.compare("dump") == 0)
+        {
+            parse_dump(argc, argv, i + 1);
+            return;
+        }
+
         bfm_error << "unknown command" << std::endl;
         break;
     }
@@ -130,4 +136,11 @@ command_line_parser::parse_stop(int argc, const char *argv[], int index)
 {
     m_is_valid = true;
     m_cmd = command_line_parser_command::stop;
+}
+
+void
+command_line_parser::parse_dump(int argc, const char *argv[], int index)
+{
+    m_is_valid = true;
+    m_cmd = command_line_parser_command::dump;
 }

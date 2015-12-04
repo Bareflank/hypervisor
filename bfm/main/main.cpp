@@ -35,6 +35,7 @@ int main(int argc, const char *argv[])
     {
         std::cout << "Usage: bfm [OPTION]... start list_of_modules" << std::endl;
         std::cout << "   or: bfm [OPTION]... stop" << std::endl;
+        std::cout << "   or: bfm [OPTION]... dump" << std::endl;
         std::cout << std::endl;
         std::cout << "       -h, --help      help" << std::endl;
 

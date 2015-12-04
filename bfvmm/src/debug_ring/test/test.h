@@ -39,8 +39,8 @@ protected:
 
 private:
 
-    void test_create_dr_with_null_drr();
-    void test_create_dr_with_zero_length();
+    void test_init_dr_with_null_drr();
+    void test_init_dr_with_zero_length();
     void test_read_with_invalid_drr();
     void test_write_with_invalid_dr();
     void test_read_with_null_string();
@@ -54,10 +54,6 @@ private:
     void test_overcommit_dr();
     void test_overcommit_dr_more_than_once();
     void test_read_with_empty_dr();
-    void test_clear_empty_dr();
-    void test_write_dr_and_clear();
-    void test_overcommit_dr_and_clear();
-    void test_overcommit_dr_and_clear_and_write();
 
     void acceptance_test_stress();
 };

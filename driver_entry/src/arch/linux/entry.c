@@ -74,7 +74,7 @@ ioctl_add_module(char *file)
         goto failed;
     }
 
-    ret = add_module(buf, g_module_length);
+    ret = common_add_module(buf, g_module_length);
     if (ret != BF_SUCCESS)
     {
         ALERT("IOCTL_ADD_MODULE: failed to add module\n");
@@ -109,7 +109,7 @@ ioctl_start_vmm(void)
 {
     int ret;
 
-    ret = start_vmm();
+    ret = common_start_vmm();
     if (ret != BF_SUCCESS)
     {
         ALERT("IOCTL_START_VMM: failed to start vmm: %d\n", ret);
@@ -126,9 +126,9 @@ ioctl_stop_vmm(void)
     int i;
     int ret;
 
-    ret = stop_vmm();
+    ret = common_stop_vmm();
     if (ret != BF_SUCCESS)
-        ALERT("IOCTL_START_VMM: failed to start vmm: %d\n", ret);
+        ALERT("IOCTL_STOP_VMM: failed to stop vmm: %d\n", ret);
 
     for (i = 0; i < g_num_files; i++)
         platform_free(files[i]);
@@ -136,6 +136,19 @@ ioctl_stop_vmm(void)
     g_num_files = 0;
 
     DEBUG("IOCTL_STOP_VMM: succeeded\n");
+    return BF_IOCTL_SUCCESS;
+}
+
+int32_t
+ioctl_dump_vmm(void)
+{
+    int ret;
+
+    ret = common_dump_vmm();
+    if (ret != BF_SUCCESS)
+        ALERT("IOCTL_DUMP_VMM: failed to dump vmm: %d\n", ret);
+
+    DEBUG("IOCTL_DUMP_VMM: succeeded\n");
     return BF_IOCTL_SUCCESS;
 }
 
@@ -157,6 +170,9 @@ dev_unlocked_ioctl(struct file *file,
 
         case IOCTL_STOP_VMM:
             return ioctl_stop_vmm();
+
+        case IOCTL_DUMP_VMM:
+            return ioctl_dump_vmm();
 
         default:
             return -EINVAL;
@@ -186,9 +202,15 @@ dev_init(void)
 {
     int ret;
 
-    if ((ret = misc_register(&bareflank_dev)) < 0)
+    if ((ret = misc_register(&bareflank_dev)) != 0)
     {
         ALERT("misc_register failed\n");
+        return ret;
+    }
+
+    if ((ret = common_init()) != 0)
+    {
+        ALERT("common_init failed\n");
         return ret;
     }
 
@@ -199,7 +221,7 @@ dev_init(void)
 void
 dev_exit(void)
 {
-    ioctl_stop_vmm();
+    common_fini();
     misc_deregister(&bareflank_dev);
 
     DEBUG("dev_exit succeeded\n");

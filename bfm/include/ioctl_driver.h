@@ -80,6 +80,7 @@ private:
 
     ioctl_driver_error::type start_vmm() const;
     ioctl_driver_error::type stop_vmm() const;
+    ioctl_driver_error::type dump_vmm() const;
 
 private:
 

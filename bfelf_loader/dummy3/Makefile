@@ -59,9 +59,9 @@ HEADERS=
 LIBS=
 
 LIB_PATHS=
-INCLUDE_PATHS=./ ../include/
+INCLUDE_PATHS=./ ../include/ ../../include/
 
-VPATH=../../common/
+vpath %.asm ../../src/
 
 ################################################################################
 # Environment Specific

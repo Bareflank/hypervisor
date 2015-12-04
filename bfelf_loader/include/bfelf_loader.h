@@ -643,7 +643,7 @@ bfelf_print_section_header(struct bfelf_file_t *ef,
  * which we can set to ensure safety (i.e. is NULL is not present, at least
  * we will not overrun the file).
  */
-struct e_string
+struct e_string_t
 {
     const char *buf;
     bfelf64_sword len;
@@ -669,7 +669,7 @@ bfelf64_sword
 bfelf_string_table_entry(struct bfelf_file_t *ef,
                          struct bfelf_shdr *strtab,
                          bfelf64_word offset,
-                         struct e_string *str);
+                         struct e_string_t *str);
 
 
 /**
@@ -685,7 +685,7 @@ bfelf_string_table_entry(struct bfelf_file_t *ef,
 bfelf64_sword
 bfelf_section_name_string(struct bfelf_file_t *ef,
                           struct bfelf_shdr *shdr,
-                          struct e_string *str);
+                          struct e_string_t *str);
 
 /******************************************************************************/
 /* ELF Dynamic Symbol Table                                                   */
@@ -777,7 +777,7 @@ bfelf_symbol_by_index(struct bfelf_file_t *ef,
  */
 bfelf64_sword
 bfelf_symbol_by_name(struct bfelf_file_t *ef,
-                     struct e_string *name,
+                     struct e_string_t *name,
                      struct bfelf_sym **sym);
 
 /**
@@ -802,7 +802,7 @@ bfelf_symbol_by_name(struct bfelf_file_t *ef,
  */
 bfelf64_sword
 bfelf_symbol_by_name_global(struct bfelf_file_t *efl,
-                            struct e_string *name,
+                            struct e_string_t *name,
                             struct bfelf_file_t **efr,
                             struct bfelf_sym **sym);
 
@@ -832,7 +832,7 @@ bfelf_symbol_by_name_global(struct bfelf_file_t *efl,
  */
 bfelf64_sword
 bfelf_resolve_symbol(struct bfelf_file_t *ef,
-                     struct e_string *name,
+                     struct e_string_t *name,
                      void **addr);
 
 /**

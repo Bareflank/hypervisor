@@ -34,12 +34,19 @@
 #define INFO(...)
 #endif
 
+#ifdef LINUX_KERNEL
+#include <linux/module.h>
+#define ALERT(...) printk("[ELF ALERT]: " __VA_ARGS__)
+#else
+#define ALERT(...)
+#endif
+
 /******************************************************************************/
 /* ELF Helpers                                                                */
 /******************************************************************************/
 
 bfelf64_sword
-bfelf_strcmp(struct e_string *str1, struct e_string *str2)
+bfelf_strcmp(struct e_string_t *str1, struct e_string_t *str2)
 {
     bfelf64_sword i = 0;
 
@@ -827,7 +834,7 @@ bfelf_print_section_header(struct bfelf_file_t *ef,
                            struct bfelf_shdr *shdr)
 {
     bfelf64_sword ret = 0;
-    struct e_string section_name = {0};
+    struct e_string_t section_name = {0};
 
     if (!ef || !shdr)
         return BFELF_ERROR_INVALID_ARG;
@@ -869,7 +876,7 @@ bfelf64_sword
 bfelf_string_table_entry(struct bfelf_file_t *ef,
                          struct bfelf_shdr *strtab,
                          bfelf64_word offset,
-                         struct e_string *str)
+                         struct e_string_t *str)
 {
     char *buf = 0;
     bfelf64_word i = 0;
@@ -906,7 +913,7 @@ bfelf_string_table_entry(struct bfelf_file_t *ef,
 bfelf64_sword
 bfelf_section_name_string(struct bfelf_file_t *ef,
                           struct bfelf_shdr *shdr,
-                          struct e_string *str)
+                          struct e_string_t *str)
 {
     if (!ef || !shdr || !str)
         return BFELF_ERROR_INVALID_ARG;
@@ -994,7 +1001,7 @@ bfelf_symbol_by_index(struct bfelf_file_t *ef,
 
 bfelf64_sword
 bfelf_symbol_by_name(struct bfelf_file_t *ef,
-                     struct e_string *name,
+                     struct e_string_t *name,
                      struct bfelf_sym **sym)
 {
     bfelf64_sword i = 0;
@@ -1011,7 +1018,7 @@ bfelf_symbol_by_name(struct bfelf_file_t *ef,
     for (i = 0; i < ef->symnum; i++)
     {
         struct bfelf_sym *sym = 0;
-        struct e_string str = {0};
+        struct e_string_t str = {0};
 
         ret = bfelf_symbol_by_index(ef, i, &sym);
         if (ret != BFELF_SUCCESS)
@@ -1038,7 +1045,7 @@ bfelf_symbol_by_name(struct bfelf_file_t *ef,
 
 bfelf64_sword
 bfelf_symbol_by_name_global(struct bfelf_file_t *efl,
-                            struct e_string *name,
+                            struct e_string_t *name,
                             struct bfelf_file_t **efr,
                             struct bfelf_sym **sym)
 {
@@ -1086,6 +1093,8 @@ bfelf_symbol_by_name_global(struct bfelf_file_t *efl,
         };
     }
 
+    ALERT("failed to find: %s\n", name->buf);
+
     return BFELF_ERROR_NO_SUCH_SYMBOL;
 
 found:
@@ -1098,7 +1107,7 @@ found:
 
 bfelf64_sword
 bfelf_resolve_symbol(struct bfelf_file_t *ef,
-                     struct e_string *name,
+                     struct e_string_t *name,
                      void **addr)
 {
     bfelf64_sword ret = 0;
@@ -1155,7 +1164,7 @@ bfelf_print_sym(struct bfelf_file_t *ef,
                 struct bfelf_sym *sym)
 {
     bfelf64_sword ret = 0;
-    struct e_string str = {0};
+    struct e_string_t str = {0};
 
     if (!ef || !sym)
         return BFELF_ERROR_INVALID_ARG;
@@ -1218,7 +1227,7 @@ bfelf_relocate_symbol(struct bfelf_file_t *ef,
     bfelf64_addr *ptr = 0;
     bfelf64_sword ret = 0;
     struct bfelf_sym *sym = 0;
-    struct e_string name = {0};
+    struct e_string_t name = {0};
     struct bfelf_file_t *efr = 0;
 
     if (!ef || !rel)
@@ -1270,7 +1279,7 @@ bfelf_relocate_symbol_addend(struct bfelf_file_t *ef,
     bfelf64_addr *ptr = 0;
     bfelf64_sword ret = 0;
     struct bfelf_sym *sym = 0;
-    struct e_string name = {0};
+    struct e_string_t name = {0};
     struct bfelf_file_t *efr = 0;
 
     if (!ef || !rela)
@@ -1283,13 +1292,22 @@ bfelf_relocate_symbol_addend(struct bfelf_file_t *ef,
     if (ret != BFELF_SUCCESS)
         return ret;
 
-    ret = bfelf_string_table_entry(ef, ef->strtab, sym->st_name, &name);
-    if (ret != BFELF_SUCCESS)
-        return ret;
+    switch (BFELF_REL_TYPE(rela->r_info))
+    {
+        case BFR_X86_64_RELATIVE:
+            break;
 
-    ret = bfelf_symbol_by_name_global(ef, &name, &efr, &sym);
-    if (ret != BFELF_SUCCESS)
-        return ret;
+        default:
+        {
+            ret = bfelf_string_table_entry(ef, ef->strtab, sym->st_name, &name);
+            if (ret != BFELF_SUCCESS)
+                return ret;
+
+            ret = bfelf_symbol_by_name_global(ef, &name, &efr, &sym);
+            if (ret != BFELF_SUCCESS)
+                return ret;
+        }
+    };
 
     ptr = (bfelf64_addr *)(ef->exec + rela->r_offset);
 
@@ -1313,7 +1331,8 @@ bfelf_relocate_symbol_addend(struct bfelf_file_t *ef,
             break;
 
         case BFR_X86_64_RELATIVE:
-            *ptr = (bfelf64_addr)(efr->exec + rela->r_addend);
+            *ptr = (bfelf64_addr)(ef->exec + rela->r_addend);
+            break;
 
         default:
             return BFELF_ERROR_INVALID_RELOCATION_TYPE;

@@ -23,16 +23,7 @@
 #ifndef ABI_CONVERSION_H
 #define ABI_CONVERSION_H
 
-/**
- * Entry Point
- *
- * This typedef defines what an entry point is. All functions that are to
- * be called using the ELF loader should conform to this prototype.
- *
- * @param arg the argument you wish to pass to the entry point
- * @return the return value of the entry point
- */
-typedef void *(*entry_point_t)(void *arg);
+#include <vmm_entry.h>
 
 /**
  * Microsoft 64bit ABI to System V 64bit ABI
