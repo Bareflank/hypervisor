@@ -39,6 +39,9 @@ protected:
 
 private:
 
+    bool init_debug_ring();
+    bool fini_debug_ring();
+
     void test_init_dr_with_null_drr();
     void test_init_dr_with_zero_length();
     void test_read_with_invalid_drr();

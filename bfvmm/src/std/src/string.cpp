@@ -19,14 +19,19 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <string.h>
+#include <std/string.h>
 
 size_t strlen(const char *str)
+{
+    return bfstrlen(str);
+}
+
+size_t bfstrlen(const char *str)
 {
     size_t len = 0;
 
     if (str == 0)
-        return 0;
+        return len;
 
     while (str[len] != '\0')
         len++;

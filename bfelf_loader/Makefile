@@ -28,6 +28,7 @@ SUBDIRS += dummy2
 SUBDIRS += dummy3
 SUBDIRS += src
 SUBDIRS += test
+SUBDIRS += bin
 
 ################################################################################
 # Common

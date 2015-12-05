@@ -25,16 +25,5 @@ install:
 
 script:
 - make -j2
-- cd bfelf_loader/bin/native/
-- LD_LIBRARY_PATH=. ./test
-- cd ../../../
-- cd bfm/bin/native/
-- LD_LIBRARY_PATH=. ./test
-- cd ../../../
-- cd bfvmm/src/debug_ring/bin/native/
-- LD_LIBRARY_PATH=. ./test
-- cd ../../../../../
-- cd driver_entry/bin/native/
-- LD_LIBRARY_PATH=. ./test
-- cd ../../../
+- make unittest
 - if [[ -n $(./tools/astyle/linux/run.sh | grep Formatted) ]]; then echo "You must run astyle before submitting a pull request"; exit -1; fi

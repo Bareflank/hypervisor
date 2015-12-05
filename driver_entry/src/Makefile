@@ -64,6 +64,7 @@ LIBS=
 LIB_PATHS=
 INCLUDE_PATHS=./ ../include/ ../../include/ ../../bfelf_loader/include
 
+vpath %.c arch/test/
 vpath %.c ../../src/
 vpath %.c ../../bfelf_loader/src/
 

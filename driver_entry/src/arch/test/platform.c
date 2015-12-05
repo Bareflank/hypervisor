@@ -20,31 +20,31 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#include <stdio.h>
+#include <stdlib.h>
 #include <platform.h>
+#include <sys/mman.h>
 
 void *
-platform_alloc(int32_t len)
+platform_alloc(int64_t len)
 {
-    printf("error: platform_alloc called\n");
-    return 0;
+    return malloc(len);
 }
 
 void *
-platform_alloc_exec(int32_t len)
+platform_alloc_exec(int64_t len)
 {
-    printf("error: platform_alloc_exec called\n");
-    return 0;
+    return mmap(0, len, PROT_READ | PROT_WRITE | PROT_EXEC,
+                MAP_PRIVATE | MAP_ANON, -1, 0);
 }
 
 void
 platform_free(void *addr)
 {
-    printf("error: platform_free called\n");
+    free(addr);
 }
 
 void
-platform_free_exec(void *addr)
+platform_free_exec(void *addr, int64_t len)
 {
-    printf("error: platform_free_exec called\n");
+    munmap(addr, len);
 }

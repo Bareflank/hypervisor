@@ -23,9 +23,6 @@
 #include <abi_conversion.h>
 
 #include <fstream>
-#include <iostream>
-#include <functional>
-
 #include <sys/mman.h>
 
 auto c_dummy1_filename = "../cross/libdummy1.so";
@@ -157,7 +154,7 @@ bool bfelf_loader_ut::fini()
     if (m_dummy2 != NULL)
         delete[] m_dummy2;
 
-    if (m_dummy1 != NULL)
+    if (m_dummy3 != NULL)
         delete[] m_dummy3;
 
     if (m_dummy1_exec != NULL)
