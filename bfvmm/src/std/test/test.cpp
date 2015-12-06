@@ -46,6 +46,16 @@ std_ut::list()
     this->test_string_normal_string();
     this->test_string_multiple_normal_string();
 
+    this->test_itoa_null_string();
+    this->test_itoa_zero();
+    this->test_itoa_zero_base();
+    this->test_itoa_positive_number();
+    this->test_itoa_negative_number();
+    this->test_itoa_int_max();
+    this->test_itoa_int_min();
+    this->test_itoa_hex();
+    this->test_itoa_hex_max();
+
     return true;
 }
 

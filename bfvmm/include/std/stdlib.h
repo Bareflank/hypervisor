@@ -20,23 +20,32 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef STDINT_H
-#define STDINT_H
+#ifndef STDLIB_H
+#define STDLIB_H
 
-typedef char int8_t;
-typedef unsigned char uint8_t;
+#include <stddef.h>
+#include <stdint.h>
 
-typedef short int int16_t;
-typedef unsigned short int uint16_t;
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-typedef long int int32_t;
-typedef unsigned long int uint32_t;
+/*
+ * Since itoa can take any base, the largest number that you can represent
+ * would be base 2 (i.e. binary), which would be 64 characters long, which
+ * means that the minimum buffer size is 65 character which includes space
+ * for all of the digits, and a '\0'. It should be noted that we do not need
+ * to add space for a negative, because all of the numbers are treated as
+ * unsigned expect for base 10, which is signed, and the number of digits
+ * is far less than 65
+ */
+#define IOTA_MIN_BUF_SIZE 65
 
-typedef long long int int64_t;
-typedef unsigned long long int uint64_t;
+char *itoa(int64_t value, char *str, uint64_t base);
+char *bfitoa(int64_t value, char *str, uint64_t base);
 
-#define INT64_MIN (-9223372036854775808)
-#define INT64_MAX (9223372036854775807)
-#define UINT64_MAX (18446744073709551615)
+#ifdef __cplusplus
+}
+#endif
 
 #endif

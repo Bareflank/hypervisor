@@ -21,19 +21,9 @@
 
 #include <string.h>
 #include <vmm_entry.h>
+
+#include <std/iostream>
 #include <debug_ring/debug_ring.h>
-
-// =============================================================================
-// Global
-// =============================================================================
-
-// Since bareflank uses shared libraries for everything, there is no
-// initialization function to run the constructor and destructor for globally
-// defined classes. Therefore, make sure that all globally defined classes
-// don't use a constructor or destructor as these funcions will not be
-// executed.
-
-debug_ring g_dr;
 
 // =============================================================================
 // Entry Functions
@@ -47,12 +37,10 @@ start_vmm(void *arg)
     if (arg == 0)
         return VMM_ERROR_INVALID_ARG;
 
-    if (g_dr.init(vmmr->drr) != debug_ring_error::success)
-        return VMM_ERROR_INVALID_ARG;
+    if (debug_ring::instance().init(vmmr->drr) != debug_ring_error::success)
+        return VMM_ERROR_INIT_FAILED;
 
-    auto msg = "Hello world from the VMM\n";
-    g_dr.write(msg, strlen(msg));
-    g_dr.write(msg, strlen(msg));
+    std::cout.init();
 
     return 0;
 }
@@ -80,7 +68,14 @@ void operator delete[](void *p)
 
 extern "C"
 {
+
     void __cxa_pure_virtual()
     {
     }
+
+    int atexit(void (*func)(void))
+    {
+        return 0;
+    }
+
 }

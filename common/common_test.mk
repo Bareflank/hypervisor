@@ -28,13 +28,15 @@
 CS='\033[1;35m'
 CE='\033[0m'
 
+LIBRARY_PATHS := $(LIBRARY_PATHS):.
+
 all: force
 
 clean: force
 
 unittest: force
 	@echo $(CS)"--------------------------------------------------------------------------------"$(CE)
-	LD_LIBRARY_PATH=. ./test
+	LD_LIBRARY_PATH=$(LIBRARY_PATHS) ./test
 	@echo $(CS)"--------------------------------------------------------------------------------"$(CE)
 
 force: ;

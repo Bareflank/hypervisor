@@ -31,6 +31,7 @@
 #define VMM_SUCCESS 0
 #define VMM_ERROR_UNKNOWN ((void *)-1)
 #define VMM_ERROR_INVALID_ARG ((void *)-2)
+#define VMM_ERROR_INIT_FAILED ((void *)-3)
 
 /**
  * Entry Point

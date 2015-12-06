@@ -110,7 +110,7 @@ endif
 ifeq ($(TARGET_TYPE),lib)
 	ifeq ($(TARGET_CROSS_COMPILED),true)
 		CROSS_CCFLAGS+=-fpic
-		CROSS_CXXFLAGS+=-fpic -fno-rtti -fno-sized-deallocation -fno-exceptions -fno-use-cxa-atexit
+		CROSS_CXXFLAGS+=-fpic -fno-rtti -fno-sized-deallocation -fno-exceptions -fno-use-cxa-atexit -fno-threadsafe-statics
 		CROSS_LDFLAGS+=-shared
 		CROSS_LD_OPTION=-o
 		CROSS_TARGET=$(patsubst %,$(CROSS_OUTDIR)/$(CROSS_SHARED_LIB_PRE)%$(CROSS_SHARED_LIB_EXT),$(TARGET_NAME))
@@ -127,7 +127,7 @@ endif
 ifeq ($(TARGET_TYPE),staticlib)
 	ifeq ($(TARGET_CROSS_COMPILED),true)
 		CROSS_CCFLAGS+=-fpic
-		CROSS_CXXFLAGS+=-fpic -fno-rtti -fno-sized-deallocation -fno-exceptions -fno-use-cxa-atexit
+		CROSS_CXXFLAGS+=-fpic -fno-rtti -fno-sized-deallocation -fno-exceptions -fno-use-cxa-atexit -fno-threadsafe-statics
 		CROSS_LDFLAGS+=
 		CROSS_LD_OPTION=
 		CROSS_TARGET=$(patsubst %,$(CROSS_OUTDIR)/$(CROSS_STATIC_LIB_PRE)%$(CROSS_STATIC_LIB_EXT),$(TARGET_NAME))
@@ -143,10 +143,12 @@ endif
 
 ifeq ($(TARGET_TYPE),bin)
 	ifeq ($(TARGET_CROSS_COMPILED),true)
+		CROSS_LDFLAGS+=-Wl,--unresolved-symbols=ignore-in-shared-libs
 		CROSS_LD_OPTION=-o
 		CROSS_TARGET=$(patsubst %,$(CROSS_OUTDIR)/%$(CROSS_BIN_EXT),$(TARGET_NAME))
 	endif
 	ifeq ($(TARGET_NATIVE_COMPILED),true)
+		LDFLAGS+=-Wl,--unresolved-symbols=ignore-in-shared-libs
 		LD_OPTION=-o
 		TARGET=$(patsubst %,$(OUTDIR)/%$(BIN_EXT),$(TARGET_NAME))
 	endif
