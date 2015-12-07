@@ -29,8 +29,8 @@ CROSS_ASM=~/opt/cross/bin/nasm
 CROSS_LD=~/opt/cross/bin/x86_64-elf-ld
 
 CROSS_CCFLAGS=
-CROSS_CXXFLAGS=-c
-CROSS_LDFLAGS=-fPIC
+CROSS_CXXFLAGS=
+CROSS_LDFLAGS=
 CROSS_ASMFLAGS=-f elf64
 
 CROSS_OBJDIR=.build/cross
@@ -46,8 +46,8 @@ LD=g++
 ASM=nasm
 
 CCFLAGS=
-CXXFLAGS=-c
-LDFLAGS=-fPIC
+CXXFLAGS=
+LDFLAGS=
 ASMFLAGS=-f elf64
 
 OBJDIR=.build/native

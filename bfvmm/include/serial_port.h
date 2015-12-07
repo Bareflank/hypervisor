@@ -36,7 +36,7 @@ typedef enum
     EVEN,
     MARK,
     SPACE,
-    __PARITY_MAX
+    PARITY_MAX
 } PARITY_MODE;
 
 #define DEFAULT_BAUD_RATE 9600

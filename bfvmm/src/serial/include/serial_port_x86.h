@@ -62,36 +62,36 @@
 #define MIN_BAUD_RATE 50
 #define MAX_BAUD_RATE 115200
 
-struct __divisor_rate
+struct divisor_rate
 {
     uint32_t baud_rate;
     uint16_t divisor;
 };
 
-extern struct __divisor_rate divisor_table[];
+extern struct divisor_rate divisor_table[];
 
 /* Parity defines and lookup tables */
 
 #define PARITY_MASK             0xC7
 
-struct __parity_bits
+struct parity_bits
 {
     PARITY_MODE mode;
     uint8_t parity_bits;
 };
 
-extern struct __parity_bits parity_table[];
+extern struct parity_bits parity_table[];
 
 /* Data size defines and lookup tables */
 #define DATA_SIZE_MASK          0xFC
 
-struct __data_bits
+struct data_bits
 {
     uint8_t data_size;
     uint8_t data_bits;
 };
 
-extern struct __data_bits data_size_table[];
+extern struct data_bits data_size_table[];
 
 /* Receive buffer register */
 #define RBR_OFFSET              0x00

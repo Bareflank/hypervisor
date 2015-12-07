@@ -21,7 +21,7 @@
 
 #include <serial_port_x86.h>
 
-struct __divisor_rate divisor_table[] =
+struct divisor_rate divisor_table[] =
 {
     {50, 0x900},
     {75, 0x600},
@@ -44,17 +44,17 @@ struct __divisor_rate divisor_table[] =
     {0, 0},
 };
 
-struct __parity_bits parity_table[] =
+struct parity_bits parity_table[] =
 {
     { NONE, 0x00},
     { ODD,  0x08},
     { EVEN, 0x18},
     { MARK, 0x28},
     { SPACE, 0x38},
-    { __PARITY_MAX, 0x00 },
+    { PARITY_MAX, 0x00 },
 };
 
-struct __data_bits data_size_table[] =
+struct data_bits data_size_table[] =
 {
     { 5, 0x00 },
     { 6, 0x01 },
@@ -170,7 +170,7 @@ serial_port_x86::set_parity_mode(PARITY_MODE parity)
 
     data_bits = m_port_io.port_read_8(m_port + LCR_OFFSET);
 
-    while (parity_table[i].mode < __PARITY_MAX)
+    while (parity_table[i].mode < PARITY_MAX)
     {
         if (m_parity == parity_table[i].mode)
         {
