@@ -29,19 +29,36 @@ debug_ring_read(struct debug_ring_resources *drr, char *str, long long int len)
     long long int spos;
     long long int content;
 
-    if(drr == 0 || str == 0 || len == 0)
+    if (drr == 0 || str == 0 || len == 0)
         return DEBUG_RING_READ_ERROR;
 
     spos = drr->spos % drr->len;
     content = drr->epos - drr->spos;
 
-    for(i = 0; i < content && i < len; i++)
+    /*
+     * We need to remove the \0 from the output because it causes the Linux
+     * kernel logging daemon to get all sorts of mad. We need to keep it in
+     * the original ring because we use it to figure out which strings to
+     * remove when we run out of space
+     */
+
+    for (i = 0; i < content && i < len - 1; i++)
     {
-        if(spos == drr->len)
+        if (spos == drr->len)
             spos = 0;
 
-        str[i] = drr->buf[spos++];
+        if (drr->buf[spos] != '\0')
+            str[i] = drr->buf[spos];
+        else
+        {
+            i--;
+            content--;
+        }
+
+        spos++;
     }
+
+    str[i] = '\0';
 
     return content;
 }

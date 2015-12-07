@@ -29,11 +29,27 @@ driver_entry_ut::test_commit_fini_common_stop_failure()
 {
     MockRepository mocks;
 
-    mocks.OnCallFunc(platform_free);
     mocks.OnCallFunc(common_stop_vmm).Return(-1);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
+        EXPECT_TRUE(common_init() == BF_SUCCESS);
         EXPECT_TRUE(common_fini() == BF_SUCCESS);
     });
+}
+
+void
+driver_entry_ut::test_commit_fini_success()
+{
+    EXPECT_TRUE(common_init() == BF_SUCCESS);
+    EXPECT_TRUE(common_fini() == BF_SUCCESS);
+}
+
+void
+driver_entry_ut::test_commit_fini_success_multiple_times()
+{
+    EXPECT_TRUE(common_init() == BF_SUCCESS);
+    EXPECT_TRUE(common_fini() == BF_SUCCESS);
+    EXPECT_TRUE(common_fini() == BF_SUCCESS);
+    EXPECT_TRUE(common_fini() == BF_SUCCESS);
 }

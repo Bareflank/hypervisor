@@ -72,13 +72,17 @@ TARGET_NAME=std
 TARGET_TYPE=lib
 TARGET_COMPILER=both
 
-SOURCES+=string.cpp
+SOURCES+=string.c
+SOURCES+=stdlib.c
+SOURCES+=iostream.cpp
 HEADERS=
 
 LIBS=
 
 LIB_PATHS=
-INCLUDE_PATHS=./ ../../../include/ ../../../../include/
+INCLUDE_PATHS+=./
+INCLUDE_PATHS+=../../../include/
+INCLUDE_PATHS+=../../../../include/
 
 ################################################################################
 # Environment Specific

@@ -36,13 +36,15 @@ class debug_ring : public debug_ring_base
 {
 public:
 
-    /// Debug Ring Constructor
+    /// Get Singleton Instance
     ///
-    debug_ring();
+    /// @return an instance to this singleton class
+    ///
+    static debug_ring &instance();
 
     /// Debug Ring Destructor
     ///
-    ~debug_ring();
+    ~debug_ring() {}
 
     /// Initialize Debug Ring
     ///
@@ -66,6 +68,24 @@ public:
     /// @return success on success, error code on failure.
     ///
     debug_ring_error::type write(const char *str, int64_t len) override;
+
+private:
+
+    /// Private Debug Ring Constructor
+    ///
+    /// Since this is a singleton class, the constructor should not be used
+    /// directly. Instead, use instance()
+    ///
+    debug_ring() {}
+
+public:
+
+    /// Explicitly delete the use of the copying this class as it is a
+    /// singleton class
+    ///
+
+    debug_ring(debug_ring const &)      = delete;
+    void operator=(debug_ring const &)  = delete;
 
 private:
 

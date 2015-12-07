@@ -26,12 +26,12 @@
 CC=gcc
 CXX=g++
 ASM=nasm
-LD=g++
+LD=ar
 
 CCFLAGS=
 CXXFLAGS=-std=c++14
 ASMFLAGS=
-LDFLAGS=
+LDFLAGS=rcs
 
 DEFINES=ENABLE_BFELF_DEBUGGING
 
@@ -50,7 +50,7 @@ MD=mkdir -p
 ################################################################################
 
 TARGET_NAME=bfelf_loader
-TARGET_TYPE=lib
+TARGET_TYPE=staticlib
 TARGET_COMPILER=native
 
 SOURCES=bfelf_loader.cpp

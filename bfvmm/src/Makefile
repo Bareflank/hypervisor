@@ -26,6 +26,9 @@
 SUBDIRS += debug_ring
 SUBDIRS += entry
 SUBDIRS += std
+SUBDIRS += vmm
+SUBDIRS += vmcs
+SUBDIRS += intrinsics
 
 ################################################################################
 # Common

@@ -21,8 +21,6 @@
 
 #include <test.h>
 
-#include <memory>
-
 #include <common.h>
 #include <platform.h>
 
@@ -42,13 +40,15 @@ driver_entry_ut::test_commit_init_failed_alloc()
 void
 driver_entry_ut::test_commit_init_success()
 {
-    MockRepository mocks;
-    auto mem = std::shared_ptr<char>(new char[1000]());
+    EXPECT_TRUE(common_init() == BF_SUCCESS);
+    EXPECT_TRUE(common_fini() == BF_SUCCESS);
+}
 
-    mocks.OnCallFunc(platform_alloc).Return(mem.get());
-
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        EXPECT_TRUE(common_init() == BF_SUCCESS);
-    });
+void
+driver_entry_ut::test_commit_init_success_multiple_times()
+{
+    EXPECT_TRUE(common_init() == BF_SUCCESS);
+    EXPECT_TRUE(common_init() == BF_SUCCESS);
+    EXPECT_TRUE(common_init() == BF_SUCCESS);
+    EXPECT_TRUE(common_fini() == BF_SUCCESS);
 }

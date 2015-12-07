@@ -66,33 +66,32 @@ dummy3_test1(int num)
     }
 }
 
-class A
+class Blah1
 {
 public:
-    A() {}
-    virtual ~A() {}
+    Blah1() {}
+    virtual ~Blah1() {}
+
+    virtual int foo() { return 0; }
 };
 
-class B : public A
+class Blah2 : public Blah1
 {
 public:
-    B() : i(1) {}
-    ~B() {}
+    Blah2() {}
+    ~Blah2() {}
 
-    void init() {i = 1;}
-
-    decltype(auto) get_i() { return i; }
-private:
-    int i;
+    int boo() { return 1; }
+    int foo() override { return 1; }
 };
 
-B b;
+Blah2 g_blah2;
 
 int
 dummy3_test2(int num)
 {
-    b.init();
-    l_my_glob1 = b.get_i();
+    Blah2 &p_blah2 = g_blah2;
+    l_my_glob1 = p_blah2.foo();
 
     return l_my_glob1 +
            l_my_glob2 +
@@ -109,7 +108,7 @@ start_vmm(void *arg)
     if (dummy3_test2(5) != 0x26)
         return VMM_ERROR_UNKNOWN;
 
-    return 0;
+    return VMM_SUCCESS;
 }
 
 void *
@@ -118,7 +117,7 @@ stop_vmm(void *arg)
     if (arg != 0)
         return VMM_ERROR_INVALID_ARG;
 
-    return 0;
+    return VMM_SUCCESS;
 }
 
 void operator delete(void *ptr)

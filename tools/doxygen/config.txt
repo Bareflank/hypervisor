@@ -733,7 +733,7 @@ WARN_LOGFILE           =
 # spaces.
 # Note: If this tag is empty the current directory is searched.
 
-INPUT                  = ../include ../common ../bfelf_loader ../bfm ../bfvmm ../driver_entry
+INPUT                  = ../include ../common ../bfelf_loader ../bfm ../bfvmm ../driver_entry ../src
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses

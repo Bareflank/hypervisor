@@ -19,17 +19,12 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <string.h>
+#include <vmcs/vmcs.h>
 
-size_t strlen(const char *str)
+vmcs::vmcs()
 {
-    size_t len = 0;
+}
 
-    if (str == 0)
-        return 0;
-
-    while (str[len] != '\0')
-        len++;
-
-    return len;
+vmcs:: ~vmcs()
+{
 }

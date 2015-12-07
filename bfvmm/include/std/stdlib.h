@@ -20,31 +20,32 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#include <stdio.h>
-#include <platform.h>
+#ifndef STDLIB_H
+#define STDLIB_H
 
-void *
-platform_alloc(int32_t len)
-{
-    printf("error: platform_alloc called\n");
-    return 0;
-}
+#include <stddef.h>
+#include <stdint.h>
 
-void *
-platform_alloc_exec(int32_t len)
-{
-    printf("error: platform_alloc_exec called\n");
-    return 0;
-}
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-void
-platform_free(void *addr)
-{
-    printf("error: platform_free called\n");
-}
+/*
+ * Since itoa can take any base, the largest number that you can represent
+ * would be base 2 (i.e. binary), which would be 64 characters long, which
+ * means that the minimum buffer size is 65 character which includes space
+ * for all of the digits, and a '\0'. It should be noted that we do not need
+ * to add space for a negative, because all of the numbers are treated as
+ * unsigned expect for base 10, which is signed, and the number of digits
+ * is far less than 65
+ */
+#define IOTA_MIN_BUF_SIZE 65
 
-void
-platform_free_exec(void *addr)
-{
-    printf("error: platform_free_exec called\n");
+char *itoa(int64_t value, char *str, uint64_t base);
+char *bfitoa(int64_t value, char *str, uint64_t base);
+
+#ifdef __cplusplus
 }
+#endif
+
+#endif

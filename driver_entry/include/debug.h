@@ -26,10 +26,9 @@
 #include <driver_entry_interface.h>
 
 #ifndef KERNEL
-#include <stdio.h>
-#define INFO(...) printf(__VA_ARGS__)
-#define DEBUG(...) printf("[" BAREFLANK_NAME "]: " __VA_ARGS__)
-#define ALERT(...) printf("[" BAREFLANK_NAME " ERROR]: " __VA_ARGS__)
+#define INFO(...)
+#define DEBUG(...)
+#define ALERT(...)
 #endif
 
 /* ========================================================================== */

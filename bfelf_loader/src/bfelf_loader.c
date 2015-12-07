@@ -496,6 +496,8 @@ bfelf_loader_relocate(struct bfelf_loader_t *loader)
             return ret;
     }
 
+    /* TODO: Make sure there are no duplicate symbols globally */
+
     return BFELF_SUCCESS;
 }
 
