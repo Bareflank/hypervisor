@@ -2,6 +2,7 @@
 #include <linux/module.h>
 #include <linux/uaccess.h>
 #include <linux/miscdevice.h>
+#include <linux/vmalloc.h>
 
 #include <debug.h>
 #include <common.h>
