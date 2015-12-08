@@ -19,41 +19,59 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#ifndef TEST_H
-#define TEST_H
+#ifndef IOSTREAM_H
+#define IOSTREAM_H
 
-#include <unittest.h>
+#include <debug_ring/debug_ring_base.h>
 
-class std_ut : public unittest
+namespace std
+{
+
+namespace ostream_error
+{
+    enum type
+    {
+        success = 0,
+        failure = 0
+    };
+};
+
+enum ostream_modifier
+{
+    undefined_modifier = 0,
+    endl = 1,
+    dec = 10,
+    hex = 16
+};
+
+class ostream
 {
 public:
+    ostream() {}
+    ~ostream() {}
 
-    std_ut();
-    ~std_ut() {}
+    void init();
 
-protected:
-
-    bool init() override;
-    bool fini() override;
-    bool list() override;
+    ostream& operator<<(const char *str);
+    ostream& operator<<(bool val);
+    ostream& operator<<(char val);
+    ostream& operator<<(unsigned char val);
+    ostream& operator<<(short val);
+    ostream& operator<<(unsigned short val);
+    ostream& operator<<(int val);
+    ostream& operator<<(unsigned int val);
+    ostream& operator<<(long long int val);
+    ostream& operator<<(unsigned long long int val);
+    ostream& operator<<(void *val);
+    ostream& operator<<(ostream_modifier modifier);
 
 private:
 
-    void test_string_null();
-    void test_string_empty_string();
-    void test_string_string_of_zeros();
-    void test_string_normal_string();
-    void test_string_multiple_normal_string();
+    int64_t m_base;
+};
 
-    void test_itoa_null_string();
-    void test_itoa_zero();
-    void test_itoa_zero_base();
-    void test_itoa_positive_number();
-    void test_itoa_negative_number();
-    void test_itoa_int_max();
-    void test_itoa_int_min();
-    void test_itoa_hex();
-    void test_itoa_hex_max();
+extern ostream cout;
+
 };
 
 #endif

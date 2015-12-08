@@ -55,11 +55,13 @@ TARGET_COMPILER=native
 
 SOURCES+=test.cpp
 SOURCES+=test_string.cpp
+SOURCES+=test_stdlib.cpp
+SOURCES+=test_iostream.cpp
 HEADERS=
 
-LIBS=std
+LIBS=debug_ring std
 
-LIB_PATHS=../bin/native
+LIB_PATHS=../bin/native ../../debug_ring/bin/native
 INCLUDE_PATHS=./ ../../../include/  ../../../../include/
 
 ################################################################################

@@ -22,16 +22,6 @@
 #include <assert.h>
 #include <debug_ring/debug_ring.h>
 
-debug_ring::debug_ring() :
-    m_is_valid(false),
-    m_drr(0)
-{
-}
-
-debug_ring::~debug_ring()
-{
-}
-
 debug_ring_error::type
 debug_ring::init(struct debug_ring_resources *drr)
 {
@@ -127,4 +117,10 @@ debug_ring::write(const char *str, int64_t len)
     }
 
     return debug_ring_error::success;
+}
+
+debug_ring &debug_ring::instance()
+{
+    static debug_ring self;
+    return self;
 }

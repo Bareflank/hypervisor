@@ -20,23 +20,22 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef STDINT_H
-#define STDINT_H
+#include <std/string.h>
 
-typedef char int8_t;
-typedef unsigned char uint8_t;
+size_t strlen(const char *str)
+{
+    return bfstrlen(str);
+}
 
-typedef short int int16_t;
-typedef unsigned short int uint16_t;
+size_t bfstrlen(const char *str)
+{
+    size_t len = 0;
 
-typedef long int int32_t;
-typedef unsigned long int uint32_t;
+    if (str == 0)
+        return len;
 
-typedef long long int int64_t;
-typedef unsigned long long int uint64_t;
+    while (str[len] != '\0')
+        len++;
 
-#define INT64_MIN (-9223372036854775808)
-#define INT64_MAX (9223372036854775807)
-#define UINT64_MAX (18446744073709551615)
-
-#endif
+    return len;
+}
