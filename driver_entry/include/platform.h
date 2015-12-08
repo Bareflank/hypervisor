@@ -38,7 +38,7 @@ extern "C" {
  * @return a virtual address pointing to the newly allocated memory
  */
 void *
-platform_alloc(int32_t len);
+platform_alloc(int64_t len);
 
 /**
  * Allocate Executable Memory
@@ -49,7 +49,7 @@ platform_alloc(int32_t len);
  * @return a virtual address pointing to the newly allocated memory
  */
 void *
-platform_alloc_exec(int32_t len);
+platform_alloc_exec(int64_t len);
 
 /**
  * Free Memory
@@ -71,7 +71,7 @@ platform_free(void *addr);
  * @param addr the virtual address returned from platform_alloc_exec
  */
 void
-platform_free_exec(void *addr);
+platform_free_exec(void *addr, int64_t len);
 
 #ifdef __cplusplus
 }

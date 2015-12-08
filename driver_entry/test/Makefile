@@ -56,13 +56,17 @@ TARGET_COMPILER=native
 SOURCES+=test.cpp
 SOURCES+=test_common_init.cpp
 SOURCES+=test_common_fini.cpp
+SOURCES+=test_common_add_module.cpp
+SOURCES+=test_common_start.cpp
 SOURCES+=test_common_stop.cpp
+SOURCES+=test_common_dump.cpp
+SOURCES+=test_helpers.cpp
 HEADERS=
 
 LIBS=driver_entry
 
 LIB_PATHS=../bin/native
-INCLUDE_PATHS=./ ../include/  ../../include/
+INCLUDE_PATHS=./ ../include/  ../../include/ ../../bfelf_loader/include/
 
 ################################################################################
 # Environment Specific

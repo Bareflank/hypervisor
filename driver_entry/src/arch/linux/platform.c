@@ -26,7 +26,7 @@
 #include <linux/module.h>
 
 void *
-platform_alloc(int32_t len)
+platform_alloc(int64_t len)
 {
     void *addr;
 
@@ -40,7 +40,7 @@ platform_alloc(int32_t len)
 
     if (addr == NULL)
     {
-        ALERT("platform_alloc: failed to vmalloc mem: %d\n", len);
+        ALERT("platform_alloc: failed to vmalloc mem: %lld\n", len);
         return NULL;
     }
 
@@ -48,7 +48,7 @@ platform_alloc(int32_t len)
 }
 
 void *
-platform_alloc_exec(int32_t len)
+platform_alloc_exec(int64_t len)
 {
     void *addr;
 
@@ -62,7 +62,7 @@ platform_alloc_exec(int32_t len)
 
     if (addr == NULL)
     {
-        ALERT("platform_alloc_exec: failed to vmalloc executable mem: %d\n", len);
+        ALERT("platform_alloc_exec: failed to vmalloc executable mem: %lld\n", len);
         return NULL;
     }
 
@@ -82,7 +82,7 @@ platform_free(void *addr)
 }
 
 void
-platform_free_exec(void *addr)
+platform_free_exec(void *addr, int64_t len)
 {
     if (addr == NULL)
     {

@@ -69,3 +69,7 @@ find driver_entry/ -name "*.cpp" -exec $ASTYLE --options=./tools/astyle/astyle.c
 find include/ -name "*.h" -exec $ASTYLE --options=./tools/astyle/astyle.config {} \;
 find include/ -name "*.c" -exec $ASTYLE --options=./tools/astyle/astyle.config {} \;
 find include/ -name "*.cpp" -exec $ASTYLE --options=./tools/astyle/astyle.config {} \;
+
+find src/ -name "*.h" -exec $ASTYLE --options=./tools/astyle/astyle.config {} \;
+find src/ -name "*.c" -exec $ASTYLE --options=./tools/astyle/astyle.config {} \;
+find src/ -name "*.cpp" -exec $ASTYLE --options=./tools/astyle/astyle.config {} \;

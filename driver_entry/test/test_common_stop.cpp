@@ -23,6 +23,7 @@
 
 #include <common.h>
 #include <platform.h>
+#include <bfelf_loader.h>
 
 // =============================================================================
 // Expose Private Functions
@@ -34,11 +35,8 @@
 
 extern "C"
 {
-
     uint64_t vmm_status(void);
-    uint64_t num_elf_files(void);
-    struct bfelf_file_t *elf_file(uint64_t index);
-
+    int64_t execute_symbol(const char *sym);
 }
 
 // =============================================================================
@@ -46,7 +44,7 @@ extern "C"
 // =============================================================================
 
 void
-driver_entry_ut::test_common_stop_resolve_symbol_failure()
+driver_entry_ut::test_common_stop_already_stopped()
 {
     MockRepository mocks;
 
@@ -56,4 +54,32 @@ driver_entry_ut::test_common_stop_resolve_symbol_failure()
     {
         EXPECT_TRUE(common_stop_vmm() == BF_SUCCESS);
     });
+}
+
+void
+driver_entry_ut::test_common_stop_execute_symbol_failed()
+{
+    MockRepository mocks;
+
+    mocks.OnCallFunc(vmm_status).Return(VMM_STARTED);
+    mocks.OnCallFunc(execute_symbol).Return(-1);
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        EXPECT_TRUE(common_stop_vmm() == -1);
+    });
+}
+
+void
+driver_entry_ut::test_common_stop_success()
+{
+    EXPECT_TRUE(common_stop_vmm() == BF_SUCCESS);
+}
+
+void
+driver_entry_ut::test_common_stop_success_multiple_times()
+{
+    EXPECT_TRUE(common_stop_vmm() == BF_SUCCESS);
+    EXPECT_TRUE(common_stop_vmm() == BF_SUCCESS);
+    EXPECT_TRUE(common_stop_vmm() == BF_SUCCESS);
 }

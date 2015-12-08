@@ -29,15 +29,15 @@ debug_ring_read(struct debug_ring_resources *drr, char *str, long long int len)
     long long int spos;
     long long int content;
 
-    if(drr == 0 || str == 0 || len == 0)
+    if (drr == 0 || str == 0 || len == 0)
         return DEBUG_RING_READ_ERROR;
 
     spos = drr->spos % drr->len;
     content = drr->epos - drr->spos;
 
-    for(i = 0; i < content && i < len; i++)
+    for (i = 0; i < content && i < len; i++)
     {
-        if(spos == drr->len)
+        if (spos == drr->len)
             spos = 0;
 
         str[i] = drr->buf[spos++];

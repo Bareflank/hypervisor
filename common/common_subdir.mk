@@ -31,6 +31,7 @@ CE='\033[0m'
 ################################################################################
 
 CURRENT_DIR=$(shell pwd)
+SUBDIRS_UNITTEST=$(SUBDIRS)
 
 ################################################################################
 # Targets
@@ -38,6 +39,9 @@ CURRENT_DIR=$(shell pwd)
 
 .PHONY: all
 .PHONY: clean
+.PHONY: unittest
+
+.DEFAULT_GOAL := all
 
 all: $(SUBDIRS)
 
@@ -45,10 +49,16 @@ $(SUBDIRS): force
 		@echo $(CS)$(CURRENT_DIR)/$@$(CE);
 		@$(MAKE) --no-print-directory -C $@
 
-force:;
+unittest: force
+	@for dir in $(SUBDIRS); do \
+		echo $(CS)$(CURRENT_DIR)/$$dir$(CE); \
+		$(MAKE) --no-print-directory -C $$dir unittest || exit 1; \
+	done
 
-clean:
+clean: force
 	@for dir in $(SUBDIRS); do \
 		echo $(CS)$(CURRENT_DIR)/$$dir$(CE); \
 		$(MAKE) --no-print-directory -C $$dir clean; \
 	done
+
+force:;

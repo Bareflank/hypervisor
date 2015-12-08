@@ -109,7 +109,7 @@ start_vmm(void *arg)
     if (dummy3_test2(5) != 0x26)
         return VMM_ERROR_UNKNOWN;
 
-    return 0;
+    return VMM_SUCCESS;
 }
 
 void *
@@ -118,7 +118,7 @@ stop_vmm(void *arg)
     if (arg != 0)
         return VMM_ERROR_INVALID_ARG;
 
-    return 0;
+    return VMM_SUCCESS;
 }
 
 void operator delete(void *ptr)

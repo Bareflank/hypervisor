@@ -53,7 +53,8 @@ TARGET_NAME=test
 TARGET_TYPE=bin
 TARGET_COMPILER=native
 
-SOURCES=test.cpp
+SOURCES+=test.cpp
+SOURCES+=test_debug_ring.cpp
 HEADERS=
 
 LIBS=debug_ring

@@ -231,12 +231,15 @@ endif
 .PHONY: clean
 .PHONY: clean-cross
 .PHONY: clean-native
+.PHONY: unittest
 
 .DEFAULT_GOAL := all
 
 all: cross native
 
 clean: clean-cross clean-native
+
+force: ;
 
 ################################################################################
 # Cross Targets
@@ -272,6 +275,8 @@ $(CROSS_OBJDIR)/%.d: ;
 clean-cross:
 	$(RM) $(CROSS_OBJDIR) $(CROSS_TARGET)
 
+unittest: force
+
 endif
 
 ################################################################################
@@ -283,10 +288,10 @@ ifeq ($(TARGET_NATIVE_COMPILED),true)
 native: $(OBJDIR) $(OUTDIR) $(TARGET)
 
 $(OBJDIR):
-	$(MD) $(OBJDIR)
+	@$(MD) $(OBJDIR)
 
 $(OUTDIR):
-	$(MD) $(OUTDIR)
+	@$(MD) $(OUTDIR)
 
 $(OBJDIR)/%.o: %.c $(OBJDIR)/%.d
 	$(CC) $< -o $@ -c $(CCFLAGS) $(DFLAGS) $(DEPFLAGS) $(CC_FLAGS_INCLUDE_PATHS) $(HEADERS)
@@ -307,5 +312,7 @@ $(OBJDIR)/%.d: ;
 
 clean-native:
 	$(RM) $(OBJDIR) $(TARGET)
+
+unittest: force
 
 endif
