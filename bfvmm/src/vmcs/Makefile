@@ -23,16 +23,12 @@
 # Subdirs
 ################################################################################
 
-SUBDIRS += debug_ring
-SUBDIRS += entry
-SUBDIRS += std
-SUBDIRS += serial
-SUBDIRS += vmm
-SUBDIRS += vmcs
-SUBDIRS += intrinsics
+SUBDIRS += src
+SUBDIRS += test
+SUBDIRS += bin
 
 ################################################################################
 # Common
 ################################################################################
 
-include ../../common/common_subdir.mk
+include ../../../common/common_subdir.mk
