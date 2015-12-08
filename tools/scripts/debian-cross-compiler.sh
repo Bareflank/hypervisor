@@ -22,7 +22,7 @@ export PREFIX="$HOME/opt/cross"
 export TARGET=x86_64-elf
 export PATH="$PREFIX/bin:$PATH"
 
-sudo apt-get install build-essential libgmp-dev libmpc-dev libmpfr-dev libisl-dev flex bison -y
+sudo apt-get install build-essential libgmp-dev libmpc-dev libmpfr-dev libisl-dev flex bison nasm -y
 
 rm -Rf $TMPDIR
 mkdir -p $TMPDIR
