@@ -5,11 +5,13 @@ compiler:
 
 env:
 - GCC_BASE=520
+- GCC_BASE=530
 
 before_install:
 - export SILENCE="defined"
-- if [ "$GCC_BASE" = "520" ]; then export BINUTILS_PATH="http://ftp.gnu.org/gnu/binutils/binutils-2.25.1.tar.bz2";  fi
+- export BINUTILS_PATH="http://ftp.gnu.org/gnu/binutils/binutils-2.25.1.tar.bz2"
 - if [ "$GCC_BASE" = "520" ]; then export GCC_PATH="https://ftp.gnu.org/gnu/gcc/gcc-5.2.0/gcc-5.2.0.tar.bz2";  fi
+- if [ "$GCC_BASE" = "530" ]; then export GCC_PATH="https://ftp.gnu.org/gnu/gcc/gcc-5.3.0/gcc-5.3.0.tar.bz2";  fi
 
 install:
 - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
