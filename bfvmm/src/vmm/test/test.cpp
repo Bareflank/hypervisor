@@ -40,6 +40,8 @@ vmm_ut::fini()
 bool
 vmm_ut::list()
 {
+    this->test_check_support_v8086_enabled();
+
     return true;
 }
 

@@ -21,21 +21,12 @@
 
 #include <memory_manager/memory_manager.h>
 
-memory_manager *memory_manager::instance()
-{
-    static memory_manager self;
-    return &self;
-}
-
-memory_manager_error::type
-memory_manager::init()
+memory_manager::memory_manager()
 {
     auto blank_page = page();
 
     for (auto i = 0; i < MAX_PAGES; i++)
         m_pages[i] = blank_page;
-
-    return memory_manager_error::success;
 }
 
 memory_manager_error::type

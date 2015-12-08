@@ -19,12 +19,10 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <string.h>
 #include <vmm_entry.h>
 
 #include <std/iostream>
-#include <debug_ring/debug_ring.h>
-#include <memory_manager/memory_manager.h>
+#include <entry/entry_factory.h>
 
 // =============================================================================
 // Entry Functions
@@ -33,26 +31,51 @@
 void *
 start_vmm(void *arg)
 {
-    vmm_resources_t *vmmr = (vmm_resources_t *)arg;
+    auto *vmmr = (vmm_resources_t *)arg;
 
     if (arg == 0)
         return VMM_ERROR_INVALID_ARG;
 
-    // if (debug_ring::instance().init(vmmr->drr) != debug_ring_error::success)
-    //     return VMM_ERROR_DEBUG_RING_INIT_FAILED;
+    // TODO: At some point, we are going to have to be told what CPU we are
+    // starting on, and then get the VCPU for that CPU and initialize it.
+    // Since we only support single core for now, we use 0.
 
-    // std::cout.init();
+    auto vcpu = ef()->get_vcpu_factory()->get_vcpu(0);
+    auto memory_manager = ef()->get_memory_manager();
 
-    // if (memory_manager::instance().init() != memory_manager_error::success)
-    //     return VMM_ERROR_MEMORY_MANAGER_FAILED;
+    if (vcpu == 0 || memory_manager == 0)
+        return VMM_ERROR_INVALID_ENTRY_FACTORY;
 
-    // for (auto i = 0; i < MAX_PAGES; i++)
-    // {
-    //     auto pg = page(vmmr->pages[i]);
+    // -------------------------------------------------------------------------
+    // Initialize Debugging
 
-    //     if (memory_manager::instance().add_page(pg) != memory_manager_error::success)
-    //         return VMM_ERROR_INVALID_PAGES;
-    // }
+    std::cout.init();
+
+    if (vcpu->get_debug_ring()->init(vmmr->drr) != debug_ring_error::success)
+        return VMM_ERROR_INVALID_DRR;
+
+    // -------------------------------------------------------------------------
+    // Memory Managment
+
+    for (auto i = 0; i < MAX_PAGES; i++)
+    {
+        auto pg = page(vmmr->pages[i]);
+
+        if (memory_manager->add_page(pg) != memory_manager_error::success)
+            return VMM_ERROR_INVALID_PAGES;
+    }
+
+    // -------------------------------------------------------------------------
+    // Initialize and Start the VMM
+
+    auto ffvmm = vcpu->get_vmm();
+    auto intrinsics = vcpu->get_intrinsics();
+
+    if (ffvmm->init(intrinsics, memory_manager) != vmm_error::success)
+        return VMM_ERROR_VMM_INIT_FAILED;
+
+    if (ffvmm->start() != vmm_error::success)
+        return VMM_ERROR_VMM_START_FAILED;
 
     return 0;
 }
@@ -63,31 +86,19 @@ stop_vmm(void *arg)
     if (arg != 0)
         return VMM_ERROR_INVALID_ARG;
 
+    auto vcpu = ef()->get_vcpu_factory()->get_vcpu(0);
+    auto memory_manager = ef()->get_memory_manager();
+
+    if (vcpu == 0 || memory_manager == 0)
+        return VMM_ERROR_INVALID_ENTRY_FACTORY;
+
+    // -------------------------------------------------------------------------
+    // Stop the VMM
+
+    auto ffvmm = vcpu->get_vmm();
+
+    if (ffvmm->stop() != vmm_error::success)
+        return VMM_ERROR_VMM_STOP_FAILED;
+
     return 0;
-}
-
-// =============================================================================
-// C++ Support Functions
-// =============================================================================
-
-void operator delete(void *ptr)
-{
-}
-
-void operator delete[](void *p)
-{
-}
-
-extern "C"
-{
-
-    void __cxa_pure_virtual()
-    {
-    }
-
-    int atexit(void (*func)(void))
-    {
-        return 0;
-    }
-
 }

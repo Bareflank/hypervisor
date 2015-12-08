@@ -18,3 +18,30 @@
 ; You should have received a copy of the GNU Lesser General Public
 ; License along with this library; if not, write to the Free Software
 ; Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+
+global __vmxon:function
+global __vmxoff:function
+
+section .text
+
+; uint64_t __vmxon(void *vmxon_region)
+__vmxon:
+    vmxon [rdi]
+    jbe __vmx_failure
+    jmp __vmx_success
+
+; uint64_t __vmxoff(void)
+__vmxoff:
+    vmxoff
+    jbe __vmx_failure
+    jmp __vmx_success
+
+; vmx instruction failed
+__vmx_failure:
+    mov rax, 0x1
+    ret
+
+; vmx instruction succeded
+__vmx_success:
+    mov rax, 0x1
+    ret

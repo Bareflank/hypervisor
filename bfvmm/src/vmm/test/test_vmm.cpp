@@ -20,3 +20,20 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #include <test.h>
+#include <vmm/vmm_intel_x64.h>
+
+void
+vmm_ut::test_check_support_v8086_enabled()
+{
+    // MockRepository mocks;
+    // intrinsics_intel_x64 *intrinsics = mocks.Mock<intrinsics_intel_x64>();
+
+    // mocks.OnCall(intrinsics, intrinsics_intel_x64::read_rflags).Return(5);
+
+    // RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    // {
+    //     vmm_intel_x64::instance().init(intrinsics);
+
+    //     EXPECT_TRUE(vmm_intel_x64::instance().start() == vmm_error::success);
+    // });
+}

@@ -33,9 +33,12 @@
 #define VMM_SUCCESS 0
 #define VMM_ERROR_UNKNOWN ((void *)-1)
 #define VMM_ERROR_INVALID_ARG ((void *)-2)
-#define VMM_ERROR_DEBUG_RING_INIT_FAILED ((void *)-3)
-#define VMM_ERROR_MEMORY_MANAGER_FAILED ((void *)-4)
-#define VMM_ERROR_INVALID_PAGES ((void *)-5)
+#define VMM_ERROR_INVALID_PAGES ((void *)-3)
+#define VMM_ERROR_INVALID_ENTRY_FACTORY ((void *)-4)
+#define VMM_ERROR_INVALID_DRR ((void *)-5)
+#define VMM_ERROR_VMM_INIT_FAILED ((void *)-10)
+#define VMM_ERROR_VMM_START_FAILED ((void *)-20)
+#define VMM_ERROR_VMM_STOP_FAILED ((void *)-30)
 
 /**
  * Entry Point
