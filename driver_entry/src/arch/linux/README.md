@@ -35,6 +35,7 @@ To cleanup everything, run the following:
 cd ~/hypervisor/driver_entry/src/arch/linux/
 sudo make unload
 make clean
+
 cd ~/hypervisor
 make clean
 ```
