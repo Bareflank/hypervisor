@@ -16,15 +16,8 @@ Once you have a cross compiler setup, you need build the main source code. This
 can be done by doing the following:
 
 ```
-cd ~/hypervisor
 make
-```
-
-To validate that the build was successful, run the following:
-
-```
-cd ~/hypervisor
-make unit test
+make unittest
 ```
 
 The last compilation step involves compiling the Linux driver entry. This
