@@ -25,6 +25,7 @@
 #include <debug.h>
 #include <platform.h>
 
+#include <memory.h>
 #include <bfelf_loader.h>
 #include <abi_conversion.h>
 #include <debug_ring_interface.h>
@@ -216,6 +217,12 @@ execute_symbol(const char *sym, void *arg)
 int64_t
 common_init(void)
 {
+    int i;
+    struct vmm_resources_t *vmmr = get_vmmr();
+
+    if (vmmr == 0)
+        return BF_ERROR_INVALID_ARG;
+
     if (g_drr == 0)
     {
         g_drr = platform_alloc(DEBUG_RING_SIZE);
@@ -225,8 +232,21 @@ common_init(void)
             return BF_ERROR_FAILED_TO_ALLOC_DRR;
         }
 
-        g_vmmr.drr = g_drr;
-        g_vmmr.drr->len = DEBUG_RING_SIZE - sizeof(struct debug_ring_resources);
+        vmmr->drr = g_drr;
+        vmmr->drr->len = DEBUG_RING_SIZE - sizeof(struct debug_ring_resources);
+    }
+
+    for (i = 0; i < MAX_PAGES; i++)
+    {
+        if (vmmr->pages[i].virt == 0)
+        {
+            struct page_t pg = platform_alloc_page();
+
+            if (pg.virt == 0 || pg.phys == 0)
+                return BF_ERROR_OUT_OF_MEMORY;
+
+            vmmr->pages[i] = pg;
+        }
     }
 
     return BF_SUCCESS;
@@ -235,6 +255,13 @@ common_init(void)
 int64_t
 common_fini(void)
 {
+    int i;
+    struct page_t blank_pg = {0};
+    struct vmm_resources_t *vmmr = get_vmmr();
+
+    if (vmmr == 0)
+        return BF_ERROR_INVALID_ARG;
+
     if (common_stop_vmm() != BF_SUCCESS)
         ALERT("common_fini: failed to stop vmm\n");
 
@@ -242,6 +269,12 @@ common_fini(void)
     {
         platform_free(g_drr);
         g_drr = 0;
+    }
+
+    for (i = 0; i < MAX_PAGES; i++)
+    {
+        platform_free_page(vmmr->pages[i]);
+        vmmr->pages[i] = blank_pg;
     }
 
     return BF_SUCCESS;

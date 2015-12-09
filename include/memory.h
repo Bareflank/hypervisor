@@ -27,6 +27,13 @@
 extern "C" {
 #endif
 
+struct page_t
+{
+    void *phys;
+    void *virt;
+    unsigned long long size;
+};
+
 #define MAX_PAGES 10
 
 #ifdef __cplusplus

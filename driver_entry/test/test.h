@@ -39,7 +39,9 @@ protected:
 
 private:
 
+    void test_commit_init_invalid_vmmr();
     void test_commit_init_failed_alloc();
+    void test_commit_init_failed_alloc_page();
     void test_commit_init_success();
     void test_commit_init_success_multiple_times();
 

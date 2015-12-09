@@ -70,6 +70,18 @@ platform_alloc_exec(int64_t len)
     return addr;
 }
 
+struct page_t
+platform_alloc_page(void)
+{
+    struct page_t pg = {0};
+
+    pg.virt = (void *)__get_free_page(GFP_KERNEL);
+    pg.phys = (void *)virt_to_phys(pg.virt);
+    pg.size = PAGE_SIZE;
+
+    return pg;
+}
+
 void
 platform_free(void *addr)
 {
@@ -92,4 +104,13 @@ platform_free_exec(void *addr, int64_t len)
     }
 
     vfree(addr);
+}
+
+void
+platform_free_page(struct page_t pg)
+{
+    if (pg.virt == 0)
+        return;
+
+    free_page((unsigned long)pg.virt);
 }

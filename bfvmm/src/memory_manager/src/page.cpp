@@ -37,6 +37,14 @@ page::page(void *phys, void *virt, uint64_t size) :
 {
 }
 
+page::page(struct page_t pg) :
+    m_phys(pg.phys),
+    m_virt(pg.virt),
+    m_size(pg.size),
+    m_allocated(false)
+{
+}
+
 page::~page()
 {
 }

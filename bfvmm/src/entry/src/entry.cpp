@@ -24,6 +24,7 @@
 
 #include <std/iostream>
 #include <debug_ring/debug_ring.h>
+#include <memory_manager/memory_manager.h>
 
 // =============================================================================
 // Entry Functions
@@ -38,9 +39,20 @@ start_vmm(void *arg)
         return VMM_ERROR_INVALID_ARG;
 
     if (debug_ring::instance().init(vmmr->drr) != debug_ring_error::success)
-        return VMM_ERROR_INIT_FAILED;
+        return VMM_ERROR_DEBUG_RING_INIT_FAILED;
 
     std::cout.init();
+
+    if (memory_manager::instance().init() != memory_manager_error::success)
+        return VMM_ERROR_MEMORY_MANAGER_FAILED;
+
+    for (auto i = 0; i < MAX_PAGES; i++)
+    {
+        auto pg = page(vmmr->pages[i]);
+
+        if (memory_manager::instance().add_page(pg) != memory_manager_error::success)
+            return VMM_ERROR_INVALID_PAGES;
+    }
 
     return 0;
 }
