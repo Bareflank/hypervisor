@@ -29,7 +29,7 @@ Before you can compile, you must have a native GCC installer, as well as a
 GCC cross-compiler. For instructions on how to setup a GCC cross-compiler,
 please see the following:
 
-(Cross Compilers)[https://github.com/Bareflank/hypervisor/tree/master/doc/cross_compilers]
+[Cross Compilers](https://github.com/Bareflank/hypervisor/tree/master/doc/cross_compilers)
 
 If you are running on one of the supported platforms, setting up the cross
 compiler is as simple as:
@@ -51,7 +51,7 @@ entry points. Bareflank uses the driver entry point to gain kernel level
 access to the system to load the hypervisor. To see the instructions for
 how to load the hypervisor, please read the following:
 
-(Driver Entry Documentation)[https://github.com/Bareflank/hypervisor/tree/master/driver_entry/src/arch]
+[Driver Entry Documentation](https://github.com/Bareflank/hypervisor/tree/master/driver_entry/src/arch)
 
 To clean up the source directory, run:
 
