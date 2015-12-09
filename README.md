@@ -8,10 +8,12 @@ research. Some highlights include:
 - Reduced legacy support (e.g. requires 64bit, no support for BIOS, etc...)
 - Written in C++
 - Cross Platform
+- Developed using Test Driven Development
 - Few external dependencies
+- LGPL v2.1
 
 In addition to simplified architecture, the Bareflank hypervisor has been
-licensed under the v2.1 LGPL. The entire Bareflank hypervisor is a collection
+licensed under the LGPL v2.1. The entire Bareflank hypervisor is a collection
 of cross-compiled libraries. Users of the Bareflank hypervisor are welcome
 to replace any or all of the open source libraries with proprietary versions,
 enabling the development of internal hypervisor based research, while
