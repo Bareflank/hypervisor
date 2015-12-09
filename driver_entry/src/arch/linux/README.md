@@ -49,12 +49,21 @@ cd ~/hypervisor/driver_entry/src/arch/linux/
 sudo make load
 ```
 
-Once the driver entry is load, to run the hypervisor, you must run the
+Once the driver entry is loaded, to run the hypervisor, you must run the
 following:
 
 ```
 cd ~/hypervisor/bfm/bin/native
 ./bfm start vmm.modules
+./bfm dump
+dmesg
+```
+
+To stop the hypervisor, run the following:
+
+```
+cd ~/hypervisor/bfm/bin/native
+./bfm stop
 ./bfm dump
 dmesg
 ```
