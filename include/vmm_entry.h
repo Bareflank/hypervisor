@@ -24,6 +24,7 @@
 #define VMM_ENTRY_INTERFACE_H
 
 #include <memory.h>
+#include <constants.h>
 #include <debug_ring_interface.h>
 
 /**

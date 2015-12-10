@@ -22,8 +22,18 @@
 #ifndef DEBUG_RING_H
 #define DEBUG_RING_H
 
+#include <stdint.h>
 #include <debug_ring_interface.h>
-#include <debug_ring/debug_ring_base.h>
+
+namespace debug_ring_error
+{
+    enum type
+    {
+        success = 0,
+        failure = 1,
+        invalid = 2
+    };
+}
 
 /// Debug Ring
 ///
@@ -32,19 +42,17 @@
 /// the same buffer can read from the debug ring to extract the strings
 /// that are written to the buffer.
 ///
-class debug_ring : public debug_ring_base
+class debug_ring
 {
 public:
 
-    /// Get Singleton Instance
+    /// Default Constructor
     ///
-    /// @return an instance to this singleton class
-    ///
-    static debug_ring &instance();
+    debug_ring() {}
 
     /// Debug Ring Destructor
     ///
-    ~debug_ring() {}
+    virtual ~debug_ring() {}
 
     /// Initialize Debug Ring
     ///
@@ -54,7 +62,7 @@ public:
     /// @param drr debug resources created by the driver entry
     /// @return success on success, invalid on failure
     ///
-    debug_ring_error::type init(struct debug_ring_resources *drr);
+    virtual debug_ring_error::type init(struct debug_ring_resources *drr);
 
     /// Write to Debug Ring
     ///
@@ -67,25 +75,19 @@ public:
     /// @param len the length of the string in bytes
     /// @return success on success, error code on failure.
     ///
-    debug_ring_error::type write(const char *str, int64_t len) override;
+    virtual debug_ring_error::type write(const char *str, int64_t len);
 
-private:
-
-    /// Private Debug Ring Constructor
+    /// Copy Constructor
     ///
-    /// Since this is a singleton class, the constructor should not be used
-    /// directly. Instead, use instance()
+    /// Explicity deleted as copying this class is forbidden
     ///
-    debug_ring() {}
+    debug_ring(const debug_ring &) = delete;
 
-public:
-
-    /// Explicitly delete the use of the copying this class as it is a
-    /// singleton class
+    /// Equality Operator
     ///
-
-    debug_ring(debug_ring const &)      = delete;
-    void operator=(debug_ring const &)  = delete;
+    /// Explicity deleted as copying this class is forbidden
+    ///
+    void operator=(const debug_ring &) = delete;
 
 private:
 

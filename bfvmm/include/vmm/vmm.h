@@ -19,48 +19,15 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#ifndef IOSTREAM_H
-#define IOSTREAM_H
+#ifndef VMM_H
+#define VMM_H
 
-namespace std
-{
-
-enum ostream_modifier
-{
-    undefined_modifier = 0,
-    endl = 1,
-    dec = 10,
-    hex = 16
-};
-
-class ostream
+class vmm
 {
 public:
-    ostream() {}
-    ~ostream() {}
 
-    void init();
-
-    ostream& operator<<(const char *str);
-    ostream& operator<<(bool val);
-    ostream& operator<<(char val);
-    ostream& operator<<(unsigned char val);
-    ostream& operator<<(short val);
-    ostream& operator<<(unsigned short val);
-    ostream& operator<<(int val);
-    ostream& operator<<(unsigned int val);
-    ostream& operator<<(long long int val);
-    ostream& operator<<(unsigned long long int val);
-    ostream& operator<<(void *val);
-    ostream& operator<<(ostream_modifier modifier);
-
-private:
-
-    int m_base;
-};
-
-extern ostream cout;
-
+    vmm() {}
+    virtual ~vmm() {}
 };
 
 #endif

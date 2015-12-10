@@ -19,48 +19,26 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#ifndef IOSTREAM_H
-#define IOSTREAM_H
+#include <test.h>
+#include <vcpu/vcpu.h>
 
-namespace std
+void
+vcpu_ut::test_vcpu_invalid_default_vcpu()
 {
+    auto vc = vcpu();
+    EXPECT_TRUE(vc.is_valid() == false);
+}
 
-enum ostream_modifier
+void
+vcpu_ut::test_vcpu_invalid_id_only_vcpu()
 {
-    undefined_modifier = 0,
-    endl = 1,
-    dec = 10,
-    hex = 16
-};
+    auto vc = vcpu(10000);
+    EXPECT_TRUE(vc.is_valid() == false);
+}
 
-class ostream
+void
+vcpu_ut::test_vcpu_get_id()
 {
-public:
-    ostream() {}
-    ~ostream() {}
-
-    void init();
-
-    ostream& operator<<(const char *str);
-    ostream& operator<<(bool val);
-    ostream& operator<<(char val);
-    ostream& operator<<(unsigned char val);
-    ostream& operator<<(short val);
-    ostream& operator<<(unsigned short val);
-    ostream& operator<<(int val);
-    ostream& operator<<(unsigned int val);
-    ostream& operator<<(long long int val);
-    ostream& operator<<(unsigned long long int val);
-    ostream& operator<<(void *val);
-    ostream& operator<<(ostream_modifier modifier);
-
-private:
-
-    int m_base;
-};
-
-extern ostream cout;
-
-};
-
-#endif
+    auto vc = vcpu(1);
+    EXPECT_TRUE(vc.id() == 1);
+}

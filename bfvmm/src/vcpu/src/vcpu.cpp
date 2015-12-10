@@ -19,30 +19,31 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#ifndef DEBUG_RING_BASE_H
-#define DEBUG_RING_BASE_H
+#include <vcpu/vcpu.h>
+#include <constants.h>
 
-#include <stdint.h>
-
-namespace debug_ring_error
+vcpu::vcpu() :
+    m_id(-1)
 {
-    enum type
-    {
-        success = 0,
-        failure = 1,
-        invalid = 2
-    };
 }
 
-class debug_ring_base
+vcpu::vcpu(int64_t id) :
+    m_id(id)
 {
-public:
+}
 
-    debug_ring_base() {}
-    virtual ~debug_ring_base() {}
+vcpu::~vcpu()
+{
+}
 
-    virtual debug_ring_error::type write(const char *str, int64_t len)
-    { return debug_ring_error::failure; }
-};
+bool
+vcpu::is_valid() const
+{
+    return m_id >= 0 && m_id < MAX_VCPUS;
+}
 
-#endif
+int64_t
+vcpu::id() const
+{
+    return m_id;
+}

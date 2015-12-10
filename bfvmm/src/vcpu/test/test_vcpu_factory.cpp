@@ -19,41 +19,31 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#ifndef MEMORY_MANAGER_BASE_H
-#define MEMORY_MANAGER_BASE_H
+#include <test.h>
+#include <vcpu/vcpu_factory.h>
 
-#include <memory_manager/page.h>
-
-namespace memory_manager_error
+void
+vcpu_ut::test_vcpu_factory_get_vcpu_invalid_vcpuid()
 {
-    enum type
-    {
-        success = 0,
-        failure = 1,
-        out_of_memory = 2,
-        full = 3,
-        already_added = 4
-    };
-};
+    EXPECT_TRUE(vcpu_factory::instance()->get_vcpu(10000) == NULL);
+}
 
-class memory_manager_base
+void
+vcpu_ut::test_vcpu_factory_get_vcpu_valid_vcpuid()
 {
-public:
+    EXPECT_TRUE(vcpu_factory::instance()->get_vcpu(0) != NULL);
+}
 
-    memory_manager_base() {}
-    virtual ~memory_manager_base() {}
+void
+vcpu_ut::test_vcpu_factory_add_vcpu_invalid_vcpuid()
+{
+    auto vc = vcpu(10000);
+    EXPECT_TRUE(vcpu_factory::instance()->add_vcpu(vc) == vcpu_factory_error::failure);
+}
 
-    virtual memory_manager_error::type init()
-    { return memory_manager_error::failure; }
-
-    virtual memory_manager_error::type add_page(page &pg)
-    { return memory_manager_error::failure; }
-
-    virtual memory_manager_error::type alloc_page(page *pg)
-    { return memory_manager_error::failure; }
-
-    virtual void free_page(page &pg)
-    {  }
-};
-
-#endif
+void
+vcpu_ut::test_vcpu_factory_add_vcpu_success()
+{
+    auto vc = vcpu(0);
+    EXPECT_TRUE(vcpu_factory::instance()->add_vcpu(vc) == vcpu_factory_error::success);
+}

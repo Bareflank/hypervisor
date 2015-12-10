@@ -24,9 +24,21 @@
 
 #include <stdint.h>
 #include <memory.h>
-#include <memory_manager/memory_manager_base.h>
+#include <memory_manager/page.h>
 
-class memory_manager : public memory_manager_base
+namespace memory_manager_error
+{
+    enum type
+    {
+        success = 0,
+        failure = 1,
+        out_of_memory = 2,
+        full = 3,
+        already_added = 4
+    };
+};
+
+class memory_manager
 {
 public:
 
@@ -34,7 +46,7 @@ public:
     ///
     /// @return an instance to this singleton class
     ///
-    static memory_manager &instance();
+    static memory_manager *instance();
 
     /// Memory Manager Destructor
     ///
@@ -46,7 +58,7 @@ public:
     ///
     /// @return succss on success, failure otherwise
     ///
-    memory_manager_error::type init() override;
+    memory_manager_error::type init();
 
     /// Add Page to Memory Manager
     ///
@@ -58,7 +70,7 @@ public:
     ///     been added to the memory manager, already_added if the page has
     ///     already been added to the memory manager, and success on success
     ///
-    memory_manager_error::type add_page(page &pg) override;
+    memory_manager_error::type add_page(page &pg);
 
     /// Allocate Page
     ///
@@ -70,7 +82,7 @@ public:
     ///     memory manager has run out of pages to allocate, success on
     ///     success
     ///
-    memory_manager_error::type alloc_page(page *pg) override;
+    memory_manager_error::type alloc_page(page *pg);
 
     /// Free Page
     ///
@@ -80,7 +92,7 @@ public:
     ///
     /// @param pg page to free
     ///
-    void free_page(page &pg) override;
+    void free_page(page &pg);
 
 private:
 
@@ -93,11 +105,16 @@ private:
 
 public:
 
-    /// Explicitly delete the use of the copying this class as it is a
-    /// singleton class
+    /// Copy Constructor
     ///
-
+    /// Explicity deleted as copying this class is forbidden
+    ///
     memory_manager(const memory_manager &) = delete;
+
+    /// Equality Operator
+    ///
+    /// Explicity deleted as copying this class is forbidden
+    ///
     void operator=(const memory_manager &) = delete;
 
 private:

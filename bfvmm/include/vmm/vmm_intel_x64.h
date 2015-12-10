@@ -22,9 +22,9 @@
 #ifndef VMM_X86_64_H
 #define VMM_X86_64_H
 
-#include <vmm/vmm_base.h>
+#include <vmm/vmm.h>
 
-class vmm_intel_x64 : public vmm_base
+class vmm_intel_x64 : public vmm
 {
 public:
 

@@ -19,48 +19,41 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#ifndef IOSTREAM_H
-#define IOSTREAM_H
+#include <test.h>
 
-namespace std
+vcpu_ut::vcpu_ut()
 {
+}
 
-enum ostream_modifier
+bool
+vcpu_ut::init()
 {
-    undefined_modifier = 0,
-    endl = 1,
-    dec = 10,
-    hex = 16
-};
+    return true;
+}
 
-class ostream
+bool
+vcpu_ut::fini()
 {
-public:
-    ostream() {}
-    ~ostream() {}
+    return true;
+}
 
-    void init();
+bool
+vcpu_ut::list()
+{
+    this->test_vcpu_factory_get_vcpu_invalid_vcpuid();
+    this->test_vcpu_factory_get_vcpu_valid_vcpuid();
+    this->test_vcpu_factory_add_vcpu_invalid_vcpuid();
+    this->test_vcpu_factory_add_vcpu_success();
 
-    ostream& operator<<(const char *str);
-    ostream& operator<<(bool val);
-    ostream& operator<<(char val);
-    ostream& operator<<(unsigned char val);
-    ostream& operator<<(short val);
-    ostream& operator<<(unsigned short val);
-    ostream& operator<<(int val);
-    ostream& operator<<(unsigned int val);
-    ostream& operator<<(long long int val);
-    ostream& operator<<(unsigned long long int val);
-    ostream& operator<<(void *val);
-    ostream& operator<<(ostream_modifier modifier);
+    this->test_vcpu_invalid_default_vcpu();
+    this->test_vcpu_invalid_id_only_vcpu();
+    this->test_vcpu_get_id();
 
-private:
+    return true;
+}
 
-    int m_base;
-};
-
-extern ostream cout;
-
-};
-
-#endif
+int
+main(int argc, char *argv[])
+{
+    return RUN_ALL_TESTS(vcpu_ut);
+}
