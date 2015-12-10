@@ -27,27 +27,8 @@
 #include <ioctl.h>
 #include <ioctl_driver.h>
 
-// REMOVEME: This is only here to temporarly ensure that the kernel is only
-//     executed on core 0. Once the Linux kernel can handle this itself,
-//     this code should be removed.
-
-#ifdef OS_LINUX
-#include <sched.h>
-#endif
-
 int main(int argc, const char *argv[])
 {
-
-    // REMOVEME: This is only here to temporarly ensure that the kernel is only
-    //     executed on core 0. Once the Linux kernel can handle this itself,
-    //     this code should be removed.
-#ifdef OS_LINUX
-    cpu_set_t set;
-    CPU_ZERO(&set);
-    CPU_SET(0, &set);
-    sched_setaffinity(0, sizeof(cpu_set_t), &set);
-#endif
-
     command_line_parser clp(argc, argv);
 
     if (clp.cmd() == command_line_parser_command::help)
