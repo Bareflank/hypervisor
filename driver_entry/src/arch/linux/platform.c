@@ -24,6 +24,7 @@
 
 #include <debug.h>
 #include <linux/module.h>
+#include <linux/vmalloc.h>
 
 void *
 platform_alloc(int64_t len)
