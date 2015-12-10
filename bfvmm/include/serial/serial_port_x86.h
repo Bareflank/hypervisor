@@ -22,26 +22,18 @@
 #ifndef SERIAL_X86__H
 #define SERIAL_X86__H
 
-#include <port_io.h>
-#include <serial_port.h>
-/**
- *  @file    serial.h
- *  @author  Brendan Kerrigan
- *  @date    2015/11/02
- *  @version 0.1
- *
- *  @brief Provide serial port access
- *
- *  @section DESCRIPTION
- *
- *  Provides a wrapper class around a serial port, which is
- *  accessed via port I/O.
- *
- *  Useful information:
- *  http://wiki.osdev.org/Serial_Ports
- *  http://www.sci.muni.cz/docs/pc/serport.txt
- *
- */
+#include <serial/serial_port.h>
+#include <intrinsics/intrinsics_x64.h>
+
+//
+// Provides a wrapper class around a serial port, which is
+// accessed via port I/O.
+//
+// Useful information:
+// http://wiki.osdev.org/Serial_Ports
+// http://www.sci.muni.cz/docs/pc/serport.txt
+//
+//
 
 #define COM1_IO_PORT 0x3f8
 #define COM2_IO_PORT 0x2f8
@@ -154,7 +146,7 @@ class serial_port_x86 : public serial_port
 {
 
 public:
-    serial_port_x86(port_io &io, uint8_t port = 1, uint32_t baud = DEFAULT_BAUD_RATE, uint8_t data_bits = 8,
+    serial_port_x86(uint8_t port = 1, uint32_t baud = DEFAULT_BAUD_RATE, uint8_t data_bits = 8,
                     PARITY_MODE parity = NONE, uint8_t stop_bits = 1);
     ~serial_port_x86(void);
 
@@ -204,7 +196,9 @@ private:
 
     // Base IO port address
     uint16_t m_port;
-    port_io &m_port_io;
+
+    // For portio access
+    intrinsics_x64 m_intrinsics;
 };
 
 #endif // SERIAL_PORT__H

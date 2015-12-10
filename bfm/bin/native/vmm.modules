@@ -2,6 +2,7 @@
 ../../../bfvmm/bin/cross/libentry.so
 ../../../bfvmm/bin/cross/libstd.so
 ../../../bfvmm/bin/cross/libdebug_ring.so
+../../../bfvmm/bin/cross/libbf_serial.so
 ../../../bfvmm/bin/cross/libintrinsics.so
 ../../../bfvmm/bin/cross/libvmm.so
 ../../../bfvmm/bin/cross/libvmcs.so

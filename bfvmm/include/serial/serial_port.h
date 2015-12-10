@@ -17,16 +17,16 @@ namespace serial
         UNIMPLEMENTED,
     };
 
-    const char *toString[] =
-    {
-        STRINGIFY(SUCCESS),
-        STRINGIFY(GENERAL_ERROR),
-        STRINGIFY(INVALID_PARITY),
-        STRINGIFY(INVALID_BAUD),
-        STRINGIFY(INVALID_STOP_BITS),
-        STRINGIFY(INVALID_INTERRUPT_MODE),
-        STRINGIFY(UNIMPLEMENTED),
-    };
+    //    const char *toString[] =
+    //{
+    //    STRINGIFY(SUCCESS),
+    //    STRINGIFY(GENERAL_ERROR),
+    //    STRINGIFY(INVALID_PARITY),
+    //    STRINGIFY(INVALID_BAUD),
+    //    STRINGIFY(INVALID_STOP_BITS),
+    //    STRINGIFY(INVALID_INTERRUPT_MODE),
+    //    STRINGIFY(UNIMPLEMENTED),
+    //};
 }
 
 typedef enum
