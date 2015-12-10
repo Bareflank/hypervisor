@@ -1,8 +1,11 @@
+
 #include <linux/fs.h>
 #include <linux/module.h>
 #include <linux/uaccess.h>
 #include <linux/miscdevice.h>
 #include <linux/vmalloc.h>
+#include <linux/kallsyms.h>
+#include <linux/cpumask.h>
 
 #include <debug.h>
 #include <common.h>
@@ -17,6 +20,9 @@ int32_t g_module_length = 0;
 
 int32_t g_num_files = 0;
 char *files[MAX_NUM_MODULES] = {0};
+
+typedef long (*set_affinity_fn)(pid_t, const struct cpumask *);
+set_affinity_fn set_cpu_affinity;
 
 /* ========================================================================== */
 /* Misc Device                                                                */
@@ -158,6 +164,9 @@ dev_unlocked_ioctl(struct file *file,
                    unsigned int cmd,
                    unsigned long arg)
 {
+    const struct cpumask *cpu0 = cpumask_of(0);
+    set_cpu_affinity(current->pid, cpu0);
+
     switch (cmd)
     {
         case IOCTL_ADD_MODULE:
@@ -202,6 +211,13 @@ int
 dev_init(void)
 {
     int ret;
+
+    set_cpu_affinity = (set_affinity_fn)kallsyms_lookup_name("sched_setaffinity");
+    if (set_cpu_affinity == NULL)
+    {
+        ALERT("Failed to locate sched_setaffinity, to avoid problems, not continuing to load bareflank\n");
+        return -1;
+    }
 
     if ((ret = misc_register(&bareflank_dev)) != 0)
     {
