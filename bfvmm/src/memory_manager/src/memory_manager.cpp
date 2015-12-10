@@ -21,10 +21,10 @@
 
 #include <memory_manager/memory_manager.h>
 
-memory_manager &memory_manager::instance()
+memory_manager *memory_manager::instance()
 {
     static memory_manager self;
-    return self;
+    return &self;
 }
 
 memory_manager_error::type

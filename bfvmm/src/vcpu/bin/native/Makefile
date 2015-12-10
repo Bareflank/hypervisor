@@ -19,22 +19,4 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-################################################################################
-# Subdirs
-################################################################################
-
-SUBDIRS += memory_manager
-SUBDIRS += debug_ring
-SUBDIRS += entry
-SUBDIRS += std
-SUBDIRS += serial
-SUBDIRS += vmm
-SUBDIRS += vmcs
-SUBDIRS += intrinsics
-SUBDIRS += vcpu
-
-################################################################################
-# Common
-################################################################################
-
-include ../../common/common_subdir.mk
+include ../../../../../common/common_test.mk

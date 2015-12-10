@@ -19,48 +19,38 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#ifndef IOSTREAM_H
-#define IOSTREAM_H
+#include <vcpu/vcpu_factory.h>
 
-namespace std
+vcpu_factory *
+vcpu_factory::instance()
 {
+    static vcpu_factory self;
+    return &self;
+}
 
-enum ostream_modifier
+vcpu *
+vcpu_factory::get_vcpu(int64_t vcpuid)
 {
-    undefined_modifier = 0,
-    endl = 1,
-    dec = 10,
-    hex = 16
-};
+    // TODO: On the Intel archiecture at least, we need to find a way to map
+    // the x2APIC CPU addressing scheme to a set of VCPU numbers, similar to
+    // how the major operatings systems do this... and in a way that does not
+    // require a hash lookup. At the moment it appears that there can be
+    // gaps in what cpuid reports. For example, you could end up with an ID
+    // of 1, 2, 7, 8.
 
-class ostream
+    if (vcpuid >= MAX_VCPUS)
+        return 0;
+
+    return &m_vcpus[vcpuid];
+}
+
+vcpu_factory_error::type
+vcpu_factory::add_vcpu(const vcpu &vc)
 {
-public:
-    ostream() {}
-    ~ostream() {}
+    if (vc.id() >= MAX_VCPUS)
+        return vcpu_factory_error::failure;
 
-    void init();
+    m_vcpus[vc.id()] = vc;
 
-    ostream& operator<<(const char *str);
-    ostream& operator<<(bool val);
-    ostream& operator<<(char val);
-    ostream& operator<<(unsigned char val);
-    ostream& operator<<(short val);
-    ostream& operator<<(unsigned short val);
-    ostream& operator<<(int val);
-    ostream& operator<<(unsigned int val);
-    ostream& operator<<(long long int val);
-    ostream& operator<<(unsigned long long int val);
-    ostream& operator<<(void *val);
-    ostream& operator<<(ostream_modifier modifier);
-
-private:
-
-    int m_base;
-};
-
-extern ostream cout;
-
-};
-
-#endif
+    return vcpu_factory_error::success;
+}

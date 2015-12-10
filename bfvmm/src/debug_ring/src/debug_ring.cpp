@@ -118,9 +118,3 @@ debug_ring::write(const char *str, int64_t len)
 
     return debug_ring_error::success;
 }
-
-debug_ring &debug_ring::instance()
-{
-    static debug_ring self;
-    return self;
-}

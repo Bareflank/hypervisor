@@ -19,15 +19,51 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#ifndef VMM_BASE_H
-#define VMM_BASE_H
+#ifndef VCPU_H
+#define VCPU_H
 
-class vmm_base
+#include <stdint.h>
+
+class vcpu
 {
 public:
 
-    vmm_base() {}
-    virtual ~vmm_base() {}
+    /// Default VCPU Constructor
+    ///
+    /// Creates a VCPU with a negative, invalid ID and default
+    /// resources. This VCPU should not be used.
+    ///
+    vcpu();
+
+    /// Constructor
+    ///
+    /// Creates a VCPU with the provided id and default resources.
+    /// This VCPU should not be used.
+    ///
+    vcpu(int64_t id);
+
+    /// Destructor
+    ///
+    virtual ~vcpu();
+
+    /// Is Valid
+    ///
+    /// @return true if the VCPU is valid, false otherwise
+    ///
+    virtual bool is_valid() const;
+
+    /// VCPU Id
+    ///
+    /// Returns the ID of the VCPU. This ID can be anything, but is only
+    /// valid if it is between 0 <= id < MAX_CPUS
+    ///
+    /// @return the VPU's id
+    ///
+    virtual int64_t id() const;
+
+private:
+
+    int64_t m_id;
 };
 
 #endif

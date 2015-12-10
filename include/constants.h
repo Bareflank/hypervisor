@@ -20,24 +20,17 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef MEMORY_H
-#define MEMORY_H
+#ifndef CONSTANTS_H
+#define CONSTANTS_H
 
-#include <constants.h>
+/*
+ * Max Supported VCPUs
+ */
+#define MAX_PAGES 10
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-struct page_t
-{
-    void *phys;
-    void *virt;
-    unsigned long long size;
-};
-
-#ifdef __cplusplus
-}
-#endif
+/*
+ * Max Supported VCPUs
+ */
+#define MAX_VCPUS 1
 
 #endif

@@ -31,9 +31,7 @@
 
 namespace std
 {
-
     ostream cout;
-
 }
 
 // =============================================================================
@@ -52,7 +50,7 @@ namespace std
     ostream &
     ostream::operator<<(const char *str)
     {
-        debug_ring::instance().write(str, strlen(str));
+        // debug_ring::instance().write(str, strlen(str));
         return *this;
     }
 
