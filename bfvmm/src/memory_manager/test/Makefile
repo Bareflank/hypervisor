@@ -20,20 +20,67 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 ################################################################################
-# Subdirs
+# Native Flags
 ################################################################################
 
-SUBDIRS += memory_manager
-SUBDIRS += debug_ring
-SUBDIRS += entry
-SUBDIRS += std
-SUBDIRS += serial
-SUBDIRS += vmm
-SUBDIRS += vmcs
-SUBDIRS += intrinsics
+CC=gcc
+CXX=g++
+ASM=nasm
+LD=g++
+
+CCFLAGS=
+CXXFLAGS=-std=c++14
+ASMFLAGS=
+LDFLAGS=
+
+DEFINES=
+
+OBJDIR=.build/native
+OUTDIR=../bin/native
 
 ################################################################################
 # Common
 ################################################################################
 
-include ../../common/common_subdir.mk
+RM=rm -rf
+MD=mkdir -p
+
+################################################################################
+# Sources
+################################################################################
+
+TARGET_NAME=test
+TARGET_TYPE=bin
+TARGET_COMPILER=native
+
+SOURCES+=test.cpp
+SOURCES+=test_page.cpp
+SOURCES+=test_memory_manager.cpp
+HEADERS=
+
+LIBS=memory_manager
+
+LIB_PATHS=../bin/native
+INCLUDE_PATHS=./ ../../../include/  ../../../../include/
+
+################################################################################
+# Environment Specific
+################################################################################
+
+VMM_SOURCES=
+VMM_INCLUDE_PATHS=
+
+WINDOWS_SOURCES=
+WINDOWS_INCLUDE_PATHS=
+
+LINUX_SOURCES=
+LINUX_INCLUDE_PATHS=
+
+OSX_SOURCES=
+OSX_INCLUDE_PATHS=
+
+################################################################################
+# Common
+################################################################################
+
+include ../../../../common/common_target.mk
