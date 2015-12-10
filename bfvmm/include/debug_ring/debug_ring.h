@@ -77,18 +77,6 @@ public:
     ///
     virtual debug_ring_error::type write(const char *str, int64_t len);
 
-    /// Copy Constructor
-    ///
-    /// Explicity deleted as copying this class is forbidden
-    ///
-    debug_ring(const debug_ring &) = delete;
-
-    /// Equality Operator
-    ///
-    /// Explicity deleted as copying this class is forbidden
-    ///
-    void operator=(const debug_ring &) = delete;
-
 private:
 
     bool m_is_valid;

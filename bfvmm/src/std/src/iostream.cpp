@@ -23,7 +23,7 @@
 
 #include <std/stdlib.h>
 #include <std/string.h>
-#include <debug_ring/debug_ring.h>
+#include <entry/entry_factory.h>
 
 // =============================================================================
 // Globals
@@ -40,17 +40,30 @@ namespace std
 
 namespace std
 {
-
     void
     ostream::init()
     {
-        m_base = 10;
+        static auto initialized = false;
+
+        if (initialized == false)
+        {
+            m_base = 10;
+            initialized = true;
+        }
     }
 
     ostream &
     ostream::operator<<(const char *str)
     {
-        // debug_ring::instance().write(str, strlen(str));
+        // TODO: We need to add multi-core suppor here. To do that, this code
+        //       will have to lookup the CPU that it's running on to know which
+        //       debug ring to dump the text to
+
+        auto vc = ef()->get_vcpu_factory()->get_vcpu(0);
+
+        if (vc != 0)
+            vc->get_debug_ring()->write(str, strlen(str));
+
         return *this;
     }
 
@@ -127,6 +140,13 @@ namespace std
     }
 
     ostream &
+    ostream::operator<<(size_t val)
+    {
+        char str[IOTA_MIN_BUF_SIZE];
+        return *this << itoa(val, str, m_base);
+    }
+
+    ostream &
     ostream::operator<<(ostream_modifier modifier)
     {
         switch (modifier)
@@ -148,5 +168,4 @@ namespace std
 
         return *this;
     }
-
 }

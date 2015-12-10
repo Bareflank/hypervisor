@@ -22,12 +22,36 @@
 #ifndef VMM_H
 #define VMM_H
 
+#include <intrinsics/intrinsics.h>
+#include <memory_manager/memory_manager.h>
+
+namespace vmm_error
+{
+    enum type
+    {
+        success = 0,
+        failure = 1,
+        not_supported = 2,
+        out_of_memory = 3
+    };
+};
+
 class vmm
 {
 public:
 
     vmm() {}
     virtual ~vmm() {}
+
+    virtual vmm_error::type init(intrinsics *intrinsics,
+                                 memory_manager *memory_manager)
+    { return vmm_error::failure; }
+
+    virtual vmm_error::type start()
+    { return vmm_error::failure; }
+
+    virtual vmm_error::type stop()
+    { return vmm_error::failure; }
 };
 
 #endif

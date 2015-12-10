@@ -72,7 +72,10 @@ TARGET_NAME=entry
 TARGET_TYPE=lib
 TARGET_COMPILER=both
 
-SOURCES=entry.cpp
+SOURCES+=entry.cpp
+SOURCES+=entry_empty_c.c
+SOURCES+=entry_empty_cpp.cpp
+SOURCES+=entry_factory.cpp
 HEADERS=
 
 LIBS=

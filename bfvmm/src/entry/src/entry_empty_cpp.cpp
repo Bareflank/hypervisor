@@ -19,15 +19,10 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#ifndef VMCS_BASE_H
-#define VMCS_BASE_H
-
-class vmcs_base
+void operator delete(void *ptr)
 {
-public:
+}
 
-    vmcs_base() {}
-    virtual ~vmcs_base() {}
-};
-
-#endif
+void operator delete[](void *p)
+{
+}

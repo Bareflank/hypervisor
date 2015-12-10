@@ -22,9 +22,7 @@
 #ifndef VMCS_H
 #define VMCS_H
 
-#include <vmcs/vmcs_base.h>
-
-class vmcs : public vmcs_base
+class vmcs
 {
 public:
 

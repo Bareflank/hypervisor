@@ -146,12 +146,11 @@ endif
 
 ifeq ($(TARGET_TYPE),bin)
 	ifeq ($(TARGET_CROSS_COMPILED),true)
-		CROSS_LDFLAGS+=-Wl,--unresolved-symbols=ignore-in-shared-libs
 		CROSS_LD_OPTION=-o
 		CROSS_TARGET=$(patsubst %,$(CROSS_OUTDIR)/%$(CROSS_BIN_EXT),$(TARGET_NAME))
 	endif
 	ifeq ($(TARGET_NATIVE_COMPILED),true)
-		LDFLAGS+=-Wl,--unresolved-symbols=ignore-in-shared-libs
+		LDFLAGS+=-Wl,--unresolved-symbols=ignore-all
 		LD_OPTION=-o
 		TARGET=$(patsubst %,$(OUTDIR)/%$(BIN_EXT),$(TARGET_NAME))
 	endif

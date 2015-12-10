@@ -19,27 +19,15 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <vcpu/vcpu.h>
-#include <constants.h>
+// =============================================================================
+// C Empty Symbols
+// =============================================================================
 
-vcpu::vcpu() :
-    m_id(-1)
+void __cxa_pure_virtual()
 {
 }
 
-vcpu::vcpu(int64_t id) :
-    m_id(id)
+int atexit(void (*func)(void))
 {
-}
-
-bool
-vcpu::is_valid() const
-{
-    return m_id >= 0 && m_id < MAX_VCPUS;
-}
-
-int64_t
-vcpu::id() const
-{
-    return m_id;
+    return 0;
 }

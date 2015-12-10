@@ -60,7 +60,6 @@ private:
     void test_page_valid_equal_valid_different_size();
     void test_page_valid_equal_valid_same();
 
-    void test_memory_manager_init();
     void test_memory_manager_add_invalid_page();
     void test_memory_manager_add_valid_page();
     void test_memory_manager_add_same_page();

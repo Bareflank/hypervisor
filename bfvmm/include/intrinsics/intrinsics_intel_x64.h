@@ -23,14 +23,37 @@
 #ifndef INTRINSICS_INTEL_X64_H
 #define INTRINSICS_INTEL_X64_H
 
+#include <stdint.h>
+#include <intrinsics/intrinsics_x64.h>
+
+// =============================================================================
+// Intrinsics
+// =============================================================================
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+uint64_t __vmxon(void *vmxon_region);
+uint64_t __vmxoff(void);
 
+// =============================================================================
+// C++ Wrapper
+// =============================================================================
 
 #ifdef __cplusplus
 }
 #endif
+
+class intrinsics_intel_x64 : public intrinsics_x64
+{
+public:
+
+    bool vmxon(void *vmxon_region)
+    { __vmxon(vmxon_region); }
+
+    bool vmxoff()
+    { __vmxoff(); }
+};
 
 #endif

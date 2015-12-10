@@ -57,9 +57,9 @@ SOURCES+=test.cpp
 SOURCES+=test_vmm.cpp
 HEADERS=
 
-LIBS=vmm
+LIBS=vmm intrinsics
 
-LIB_PATHS=../bin/native
+LIB_PATHS=../bin/native ../../intrinsics/bin/native/
 INCLUDE_PATHS=./ ../../../include/  ../../../../include/
 
 ################################################################################

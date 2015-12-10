@@ -19,27 +19,21 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <vcpu/vcpu.h>
-#include <constants.h>
+#ifdef CROSS_COMPILED
 
-vcpu::vcpu() :
-    m_id(-1)
+#include <entry/entry_factory.h>
+
+entry_factory *ef()
 {
+    // We use static local variable here instead of a global variable to
+    // ensure that the constructor / destructor are actually called, since
+    // we do not support global c++ objects in the cross compiled code. Note
+    // that this functions is only need by the cross compiler as native test
+    // code will create it's own version and export as needed (in order to
+    // fake the classes being returned)
+
+    static entry_factory ef;
+    return &ef;
 }
 
-vcpu::vcpu(int64_t id) :
-    m_id(id)
-{
-}
-
-bool
-vcpu::is_valid() const
-{
-    return m_id >= 0 && m_id < MAX_VCPUS;
-}
-
-int64_t
-vcpu::id() const
-{
-    return m_id;
-}
+#endif

@@ -25,25 +25,29 @@
 void
 vcpu_ut::test_vcpu_factory_get_vcpu_invalid_vcpuid()
 {
-    EXPECT_TRUE(vcpu_factory::instance()->get_vcpu(10000) == NULL);
+    auto vf = vcpu_factory();
+    EXPECT_TRUE(vf.get_vcpu(10000) == NULL);
 }
 
 void
 vcpu_ut::test_vcpu_factory_get_vcpu_valid_vcpuid()
 {
-    EXPECT_TRUE(vcpu_factory::instance()->get_vcpu(0) != NULL);
+    auto vf = vcpu_factory();
+    EXPECT_TRUE(vf.get_vcpu(0) != NULL);
 }
 
 void
 vcpu_ut::test_vcpu_factory_add_vcpu_invalid_vcpuid()
 {
     auto vc = vcpu(10000);
-    EXPECT_TRUE(vcpu_factory::instance()->add_vcpu(vc) == vcpu_factory_error::failure);
+    auto vf = vcpu_factory();
+    EXPECT_TRUE(vf.add_vcpu(vc) == vcpu_factory_error::failure);
 }
 
 void
 vcpu_ut::test_vcpu_factory_add_vcpu_success()
 {
     auto vc = vcpu(0);
-    EXPECT_TRUE(vcpu_factory::instance()->add_vcpu(vc) == vcpu_factory_error::success);
+    auto vf = vcpu_factory();
+    EXPECT_TRUE(vf.add_vcpu(vc) == vcpu_factory_error::success);
 }

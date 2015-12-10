@@ -61,7 +61,6 @@ memory_manager_ut::list()
     this->test_page_valid_equal_valid_different_size();
     this->test_page_valid_equal_valid_same();
 
-    this->test_memory_manager_init();
     this->test_memory_manager_add_invalid_page();
     this->test_memory_manager_add_valid_page();
     this->test_memory_manager_add_same_page();

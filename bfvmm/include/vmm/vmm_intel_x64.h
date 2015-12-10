@@ -23,13 +23,75 @@
 #define VMM_X86_64_H
 
 #include <vmm/vmm.h>
+#include <intrinsics/intrinsics_intel_x64.h>
 
 class vmm_intel_x64 : public vmm
 {
 public:
 
-    vmm_intel_x64();
-    ~vmm_intel_x64();
+    /// Default Constructor
+    ///
+    vmm_intel_x64() {}
+
+    /// Destructor
+    ///
+    ~vmm_intel_x64() {}
+
+    /// Init VMM
+    ///
+    /// Initializes the VMM. One of the goals of this function is to decouple
+    /// the intrinsics from the VMM so that the VMM can be tested.
+    ///
+    /// @param intrinsics the intrinsics class that this VMM will use
+    /// @return success on success, failure otherwise
+    vmm_error::type init(intrinsics *intrinsics,
+                         memory_manager *memory_manager) override;
+
+    /// Start VMM
+    ///
+    /// Starts the VMM. In the process of starting the VMM, several
+    /// compatibility tests will be run to ensure that the VMM can in fact
+    /// be used.
+    ///
+    /// @return not_supported if the compability tests fail, success on success
+    ///         and failure otherwise
+    vmm_error::type start() override;
+
+    /// Stop VMM
+    ///
+    /// Stops the VMM.
+    ///
+    /// @return success on success, failure otherwise
+    vmm_error::type stop() override;
+
+private:
+
+    vmm_error::type verify_cpuid_vmx_supported();
+    vmm_error::type verify_vmx_capabilities_msr();
+    vmm_error::type verify_ia32_vmx_cr0_fixed0_msr();
+    vmm_error::type verify_ia32_vmx_cr0_fixed1_msr();
+    vmm_error::type verify_ia32_vmx_cr4_fixed0_msr();
+    vmm_error::type verify_ia32_vmx_cr4_fixed1_msr();
+    vmm_error::type verify_ia32_feature_control_msr();
+    vmm_error::type verify_v8086_disabled();
+
+    vmm_error::type create_vmxon_region();
+    vmm_error::type release_vmxon_region();
+
+    vmm_error::type enable_vmx_operation();
+    vmm_error::type disable_vmx_operation();
+
+    vmm_error::type execute_vmxon();
+    vmm_error::type execute_vmxoff();
+
+    uint64_t vmxon_vmcs_region_size();
+
+private:
+
+    memory_manager *m_memory_manager;
+    intrinsics_intel_x64 *m_intrinsics;
+
+    page m_vmxon_page;
 };
 
 #endif

@@ -28,9 +28,9 @@ SUBDIRS += debug_ring
 SUBDIRS += entry
 SUBDIRS += std
 SUBDIRS += serial
+SUBDIRS += intrinsics
 SUBDIRS += vmm
 SUBDIRS += vmcs
-SUBDIRS += intrinsics
 SUBDIRS += vcpu
 
 ################################################################################

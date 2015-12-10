@@ -38,6 +38,25 @@ protected:
     bool list() override;
 
 private:
+
+    void test_check_support_v8086_enabled();
+    // void test_check_support_long_mode_inactive();
+    // void test_check_support_long_mode_active_not_in_compatibility_mode();
+    // void test_check_support_cr0_protected_mode_disabled();
+    // void test_check_support_cr0_paging_disabled();
+    // void test_check_support_cr0_numeric_error_disabled();
+    // void test_check_support_cr0_vmx_extensions_disabled();
+    // void test_check_support_unsupported_cpuid_vmx();
+    // void test_check_support_ia32_vmx_cr0_fixed0_failed();
+    // void test_check_support_ia32_vmx_cr0_fixed1_failed();
+    // void test_check_support_unsupported_physical_address_width();
+    // void test_check_support_unsupported_memory_type();
+    // void test_check_support_ia32_vmx_cr4_fixed0_failed();
+    // void test_check_support_ia32_vmx_cr4_fixed1_failed();
+    // void test_check_support_();
+    // void test_check_support_();
+    // void test_check_support_();
 };
+
 
 #endif

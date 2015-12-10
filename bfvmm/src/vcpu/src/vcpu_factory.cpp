@@ -21,13 +21,6 @@
 
 #include <vcpu/vcpu_factory.h>
 
-vcpu_factory *
-vcpu_factory::instance()
-{
-    static vcpu_factory self;
-    return &self;
-}
-
 vcpu *
 vcpu_factory::get_vcpu(int64_t vcpuid)
 {

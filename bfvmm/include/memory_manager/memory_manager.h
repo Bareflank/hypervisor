@@ -42,23 +42,13 @@ class memory_manager
 {
 public:
 
-    /// Get Singleton Instance
+    /// Manager Constructor
     ///
-    /// @return an instance to this singleton class
-    ///
-    static memory_manager *instance();
+    memory_manager();
 
-    /// Memory Manager Destructor
+    /// Destructor
     ///
     ~memory_manager() {}
-
-    /// Init Memory Manager
-    ///
-    /// Initializes the memory manager.
-    ///
-    /// @return succss on success, failure otherwise
-    ///
-    memory_manager_error::type init();
 
     /// Add Page to Memory Manager
     ///
@@ -93,29 +83,6 @@ public:
     /// @param pg page to free
     ///
     void free_page(page &pg);
-
-private:
-
-    /// Private Memory Manager Constructor
-    ///
-    /// Since this is a singleton class, the constructor should not be used
-    /// directly. Instead, use instance()
-    ///
-    memory_manager() {}
-
-public:
-
-    /// Copy Constructor
-    ///
-    /// Explicity deleted as copying this class is forbidden
-    ///
-    memory_manager(const memory_manager &) = delete;
-
-    /// Equality Operator
-    ///
-    /// Explicity deleted as copying this class is forbidden
-    ///
-    void operator=(const memory_manager &) = delete;
 
 private:
 

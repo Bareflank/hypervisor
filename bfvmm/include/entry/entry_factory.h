@@ -19,27 +19,31 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <vcpu/vcpu.h>
-#include <constants.h>
+#ifndef ENTRY_FACTORY_H
+#define ENTRY_FACTORY_H
 
-vcpu::vcpu() :
-    m_id(-1)
-{
-}
+#include <vcpu/vcpu_factory.h>
+#include <memory_manager/memory_manager.h>
 
-vcpu::vcpu(int64_t id) :
-    m_id(id)
+class entry_factory
 {
-}
+public:
 
-bool
-vcpu::is_valid() const
-{
-    return m_id >= 0 && m_id < MAX_VCPUS;
-}
+    entry_factory() {}
+    virtual ~entry_factory() {}
 
-int64_t
-vcpu::id() const
-{
-    return m_id;
-}
+    virtual vcpu_factory *get_vcpu_factory()
+    { return &m_vcpu_factory; }
+
+    virtual memory_manager *get_memory_manager()
+    { return &m_memory_manager; }
+
+private:
+
+    vcpu_factory m_vcpu_factory;
+    memory_manager m_memory_manager;
+};
+
+entry_factory *ef();
+
+#endif

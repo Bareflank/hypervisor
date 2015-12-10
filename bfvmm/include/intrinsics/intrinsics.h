@@ -20,26 +20,15 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef STDINT_H
-#define STDINT_H
+#ifndef INTRINSICS_H
+#define INTRINSICS_H
 
-typedef char int8_t;
-typedef unsigned char uint8_t;
+class intrinsics
+{
+public:
 
-typedef short int int16_t;
-typedef unsigned short int uint16_t;
-
-typedef int int32_t;
-typedef unsigned int uint32_t;
-
-typedef long long int int64_t;
-typedef unsigned long long int uint64_t;
-
-typedef int64_t intptr_t;
-typedef uint64_t uintptr_t;
-
-#define INT64_MIN (-9223372036854775808)
-#define INT64_MAX (9223372036854775807)
-#define UINT64_MAX (18446744073709551615)
+    intrinsics() {}
+    virtual ~intrinsics() {}
+};
 
 #endif

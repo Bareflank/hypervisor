@@ -23,6 +23,7 @@
 #include <platform.h>
 
 #include <debug.h>
+#include <linux/slab.h>
 #include <linux/module.h>
 #include <linux/vmalloc.h>
 
@@ -75,7 +76,7 @@ platform_alloc_page(void)
 {
     struct page_t pg = {0};
 
-    pg.virt = (void *)__get_free_page(GFP_KERNEL);
+    pg.virt = kmalloc(PAGE_SIZE, GFP_KERNEL);
     pg.phys = (void *)virt_to_phys(pg.virt);
     pg.size = PAGE_SIZE;
 
@@ -112,5 +113,5 @@ platform_free_page(struct page_t pg)
     if (pg.virt == 0)
         return;
 
-    free_page((unsigned long)pg.virt);
+    kfree(pg.virt);
 }

@@ -40,13 +40,11 @@ class vcpu_factory
 {
 public:
 
-    /// Get Singleton Instance
+    /// Default Constructor
     ///
-    /// @return an instance to this singleton class
-    ///
-    static vcpu_factory *instance();
+    vcpu_factory() {}
 
-    /// VCPU Factory Destructor
+    /// Destructor
     ///
     ~vcpu_factory() {}
 
@@ -69,29 +67,6 @@ public:
     /// @return success on success, failure otherwise
     ///
     vcpu_factory_error::type add_vcpu(const vcpu &vc);
-
-private:
-
-    /// Private VCPU Factory Constructor
-    ///
-    /// Since this is a singleton class, the constructor should not be used
-    /// directly. Instead, use instance()
-    ///
-    vcpu_factory() {}
-
-public:
-
-    /// Copy Constructor
-    ///
-    /// Explicity deleted as copying this class is forbidden
-    ///
-    vcpu_factory(const vcpu_factory &) = delete;
-
-    /// Equality Operator
-    ///
-    /// Explicity deleted as copying this class is forbidden
-    ///
-    void operator=(const vcpu_factory &) = delete;
 
 private:
 

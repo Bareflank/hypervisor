@@ -22,7 +22,15 @@
 #ifndef VCPU_H
 #define VCPU_H
 
+// TODO: This VCPU is specific to Intel x64. At some point we should
+//       abstract the VCPU such that it has a common interface, and then
+//       subclass for each arch (i.e. Intel, AMD and ARM)
+
 #include <stdint.h>
+
+#include <vmm/vmm_intel_x64.h>
+#include <debug_ring/debug_ring.h>
+#include <intrinsics/intrinsics_intel_x64.h>
 
 class vcpu
 {
@@ -44,7 +52,7 @@ public:
 
     /// Destructor
     ///
-    virtual ~vcpu();
+    virtual ~vcpu() {}
 
     /// Is Valid
     ///
@@ -61,9 +69,34 @@ public:
     ///
     virtual int64_t id() const;
 
+    /// Get VMM
+    ///
+    /// @return vmm (will never be NULL)
+    ///
+    virtual vmm *get_vmm()
+    { return &m_vmm; }
+
+    /// Get Debug Ring
+    ///
+    /// @return debug ring (will never be NULL)
+    ///
+    virtual debug_ring *get_debug_ring()
+    { return &m_debug_ring; }
+
+    /// Get Intrinsics
+    ///
+    /// @return intrinsics (will never be NULL)
+    ///
+    virtual intrinsics_intel_x64 *get_intrinsics()
+    { return &m_intrinsics; }
+
 private:
 
     int64_t m_id;
+
+    vmm_intel_x64 m_vmm;
+    debug_ring m_debug_ring;
+    intrinsics_intel_x64 m_intrinsics;
 };
 
 #endif

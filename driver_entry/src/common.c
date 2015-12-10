@@ -424,12 +424,12 @@ common_dump_vmm(void)
     if (debug_ring_read(g_drr, rb, DEBUG_RING_SIZE) < 0)
         ALERT("dump_vmm: failed to read debug ring\n");
 
-    INFO("\n");
-    INFO("VMM DUMP:\n");
-    INFO("============================================================\n");
-    INFO("\n%s\n", rb);
-    INFO("============================================================\n");
-    INFO("\n");
+    DEBUG("\n");
+    DEBUG("VMM DUMP:\n");
+    DEBUG("===========================================================\n"
+          "\n%s\n", rb);
+    DEBUG("===========================================================\n");
+    DEBUG("\n");
 
     if (rb != 0)
         platform_free(rb);
