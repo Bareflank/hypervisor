@@ -48,7 +48,7 @@ public:
 
     /// Destructor
     ///
-    ~memory_manager() {}
+    virtual ~memory_manager() {}
 
     /// Add Page to Memory Manager
     ///
@@ -60,7 +60,7 @@ public:
     ///     been added to the memory manager, already_added if the page has
     ///     already been added to the memory manager, and success on success
     ///
-    memory_manager_error::type add_page(page &pg);
+    virtual memory_manager_error::type add_page(page &pg);
 
     /// Allocate Page
     ///
@@ -72,7 +72,7 @@ public:
     ///     memory manager has run out of pages to allocate, success on
     ///     success
     ///
-    memory_manager_error::type alloc_page(page *pg);
+    virtual memory_manager_error::type alloc_page(page *pg);
 
     /// Free Page
     ///
@@ -82,7 +82,7 @@ public:
     ///
     /// @param pg page to free
     ///
-    void free_page(page &pg);
+    virtual void free_page(page &pg);
 
 private:
 

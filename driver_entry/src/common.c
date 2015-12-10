@@ -191,7 +191,7 @@ execute_symbol(const char *sym, void *arg)
         {
             DEBUG("\n");
             DEBUG("%s executed successfully:\n", sym);
-            DEBUG("    - exit code: %p\n", ret);
+            DEBUG("    - exit code: %ld\n", (long)ret);
             DEBUG("\n");
 
             return BF_SUCCESS;
@@ -200,7 +200,7 @@ execute_symbol(const char *sym, void *arg)
         {
             DEBUG("\n");
             DEBUG("%s failed:\n", sym);
-            DEBUG("    - exit code: %p\n", ret);
+            DEBUG("    - exit code: %ld\n", (long)ret);
             DEBUG("\n");
 
             return BF_ERROR_FAILED_TO_EXECUTE_SYMBOL;
@@ -353,7 +353,7 @@ common_start_vmm(void)
     if (ret != BFELF_SUCCESS)
     {
         ALERT("start_vmm: failed to initialize the elf loader: %d - %s\n", ret, bfelf_error(ret));
-        return ret;
+        goto failure;
     }
 
     while ((bfelf_file = get_file(i++)) != 0)
@@ -362,7 +362,7 @@ common_start_vmm(void)
         if (ret != BFELF_SUCCESS)
         {
             ALERT("start_vmm: failed to add elf file to the elf loader: %d - %s\n", ret, bfelf_error(ret));
-            return ret;
+            goto failure;
         }
     }
 
@@ -370,18 +370,23 @@ common_start_vmm(void)
     if (ret != BFELF_SUCCESS)
     {
         ALERT("start_vmm: failed to relocate the elf loader: %d - %s\n", ret, bfelf_error(ret));
-        return ret;
+        goto failure;
     }
 
     ret = execute_symbol("_Z9start_vmmPv", get_vmmr());
     if (ret != BF_SUCCESS)
     {
         ALERT("start_vmm: failed to execute symbol: %d\n", ret);
-        return ret;
+        goto failure;
     }
 
     g_vmm_status = VMM_STARTED;
     return BF_SUCCESS;
+
+failure:
+
+    common_stop_vmm();
+    return ret;
 }
 
 int64_t

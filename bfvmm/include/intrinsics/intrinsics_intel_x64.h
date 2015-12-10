@@ -49,10 +49,13 @@ class intrinsics_intel_x64 : public intrinsics_x64
 {
 public:
 
-    bool vmxon(void *vmxon_region)
+    intrinsics_intel_x64() {}
+    virtual ~intrinsics_intel_x64() {}
+
+    virtual bool vmxon(void *vmxon_region)
     { __vmxon(vmxon_region); }
 
-    bool vmxoff()
+    virtual bool vmxoff()
     { __vmxoff(); }
 };
 

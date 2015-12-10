@@ -271,6 +271,8 @@ protected:
         // appears to be logic to fill in e.what() with something else. Would
         // be great to clean that up.
 
+        std::cout << std::uppercase;
+
         try
         {
             lamda();
