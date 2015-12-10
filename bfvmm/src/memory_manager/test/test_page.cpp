@@ -34,33 +34,41 @@ memory_manager_ut::test_page_constructor_blank_page()
 void
 memory_manager_ut::test_page_constructor_invalid_phys()
 {
-    page pg(0, this, 10);
+    page pg1(0, this, 10);
+    page pg2(page_t({0, this, 10}));
 
-    EXPECT_TRUE(pg.is_valid() == false);
+    EXPECT_TRUE(pg1.is_valid() == false);
+    EXPECT_TRUE(pg2.is_valid() == false);
 }
 
 void
 memory_manager_ut::test_page_constructor_invalid_virt()
 {
-    page pg(this, 0, 10);
+    page pg1(this, 0, 10);
+    page pg2(page_t({this, 0, 10}));
 
-    EXPECT_TRUE(pg.is_valid() == false);
+    EXPECT_TRUE(pg1.is_valid() == false);
+    EXPECT_TRUE(pg2.is_valid() == false);
 }
 
 void
 memory_manager_ut::test_page_constructor_invalid_size()
 {
-    page pg(this, this, 0);
+    page pg1(this, this, 0);
+    page pg2(page_t({this, this, 0}));
 
-    EXPECT_TRUE(pg.is_valid() == false);
+    EXPECT_TRUE(pg1.is_valid() == false);
+    EXPECT_TRUE(pg2.is_valid() == false);
 }
 
 void
 memory_manager_ut::test_page_constructor_valid_page()
 {
-    page pg(this, this, 10);
+    page pg1(this, this, 10);
+    page pg2(page_t({this, this, 10}));
 
-    EXPECT_TRUE(pg.is_valid() == true);
+    EXPECT_TRUE(pg1.is_valid() == true);
+    EXPECT_TRUE(pg2.is_valid() == true);
 }
 
 void

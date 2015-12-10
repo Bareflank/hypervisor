@@ -23,6 +23,7 @@
 #define PAGE_H
 
 #include <stdint.h>
+#include <memory.h>
 
 class page
 {
@@ -43,6 +44,16 @@ public:
     /// @param size the size of the page in bytes
     ///
     page(void *phys, void *virt, uint64_t size);
+
+    /// Valid Page Constructor
+    ///
+    /// If given a valid page struct, creates a valid page from a page struct
+    /// typically created by the driver entry
+    ///
+    /// @param pg page_t struct with the physical / virtual address and
+    ///     page size.
+    ///
+    page(struct page_t pg);
 
     /// Page Destructor
     ///

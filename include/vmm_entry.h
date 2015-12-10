@@ -23,6 +23,7 @@
 #ifndef VMM_ENTRY_INTERFACE_H
 #define VMM_ENTRY_INTERFACE_H
 
+#include <memory.h>
 #include <debug_ring_interface.h>
 
 /**
@@ -31,7 +32,9 @@
 #define VMM_SUCCESS 0
 #define VMM_ERROR_UNKNOWN ((void *)-1)
 #define VMM_ERROR_INVALID_ARG ((void *)-2)
-#define VMM_ERROR_INIT_FAILED ((void *)-3)
+#define VMM_ERROR_DEBUG_RING_INIT_FAILED ((void *)-3)
+#define VMM_ERROR_MEMORY_MANAGER_FAILED ((void *)-4)
+#define VMM_ERROR_INVALID_PAGES ((void *)-5)
 
 /**
  * Entry Point
@@ -56,7 +59,17 @@ typedef void *(*entry_point_t)(void *arg);
  */
 struct vmm_resources_t
 {
+    /*
+     * Debug ring structure used by the VMM to support debugging.
+     */
     struct debug_ring_resources *drr;
+
+    /*
+     * Array of pages that must be allocated by the driver entry to be
+     * used by the VMM's memory manager. If these are not filled in, the
+     * VMM entry will fail.
+     */
+    struct page_t pages[MAX_PAGES];
 };
 
 /**

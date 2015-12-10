@@ -132,7 +132,9 @@ driver_entry_ut::fini()
 bool
 driver_entry_ut::list()
 {
+    this->test_commit_init_invalid_vmmr();
     this->test_commit_init_failed_alloc();
+    this->test_commit_init_failed_alloc_page();
     this->test_commit_init_success();
     this->test_commit_init_success_multiple_times();
 

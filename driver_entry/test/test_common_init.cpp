@@ -24,6 +24,32 @@
 #include <common.h>
 #include <platform.h>
 
+// =============================================================================
+// Expose Private Functions
+// =============================================================================
+
+// In order to mock some of the C functions, we need to expose them. These are
+// private, so there is no need to test these functions, but we do need access
+// to them to mock them up to test the public functions.
+
+extern "C"
+{
+    struct vmm_resources_t *get_vmmr(void);
+}
+
+void
+driver_entry_ut::test_commit_init_invalid_vmmr()
+{
+    MockRepository mocks;
+
+    mocks.OnCallFunc(get_vmmr).Return(NULL);
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        EXPECT_TRUE(common_init() == BF_ERROR_INVALID_ARG);
+    });
+}
+
 void
 driver_entry_ut::test_commit_init_failed_alloc()
 {
@@ -34,6 +60,20 @@ driver_entry_ut::test_commit_init_failed_alloc()
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
         EXPECT_TRUE(common_init() == BF_ERROR_FAILED_TO_ALLOC_DRR);
+    });
+}
+
+void
+driver_entry_ut::test_commit_init_failed_alloc_page()
+{
+    page_t pg = {0};
+    MockRepository mocks;
+
+    mocks.OnCallFunc(platform_alloc_page).Return(pg);
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        EXPECT_TRUE(common_init() == BF_ERROR_OUT_OF_MEMORY);
     });
 }
 
