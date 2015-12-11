@@ -40,6 +40,9 @@ start_vmm(void *arg)
     // starting on, and then get the VCPU for that CPU and initialize it.
     // Since we only support single core for now, we use 0.
 
+    // TODO: There are a lot of train wrecks in the code here that need to be
+    //       removed.
+
     auto vcpu = ef()->get_vcpu_factory()->get_vcpu(0);
     auto memory_manager = ef()->get_memory_manager();
 
@@ -68,13 +71,24 @@ start_vmm(void *arg)
     // -------------------------------------------------------------------------
     // Initialize and Start the VMM
 
-    auto ffvmm = vcpu->get_vmm();
+    auto vmm = vcpu->get_vmm();
     auto intrinsics = vcpu->get_intrinsics();
 
-    if (ffvmm->init(intrinsics, memory_manager) != vmm_error::success)
+    if (vmm->init(intrinsics, memory_manager) != vmm_error::success)
         return VMM_ERROR_VMM_INIT_FAILED;
 
-    if (ffvmm->start() != vmm_error::success)
+    if (vmm->start() != vmm_error::success)
+        return VMM_ERROR_VMM_START_FAILED;
+
+    // -------------------------------------------------------------------------
+    // Initialize and Luanch the VMCS
+
+    auto vmcs = vcpu->get_vmcs();
+
+    if (vmcs->init(intrinsics, memory_manager) != vmcs_error::success)
+        return VMM_ERROR_VMM_INIT_FAILED;
+
+    if (vmcs->launch() != vmcs_error::success)
         return VMM_ERROR_VMM_START_FAILED;
 
     return 0;
@@ -95,9 +109,9 @@ stop_vmm(void *arg)
     // -------------------------------------------------------------------------
     // Stop the VMM
 
-    auto ffvmm = vcpu->get_vmm();
+    auto vmm = vcpu->get_vmm();
 
-    if (ffvmm->stop() != vmm_error::success)
+    if (vmm->stop() != vmm_error::success)
         return VMM_ERROR_VMM_STOP_FAILED;
 
     return 0;

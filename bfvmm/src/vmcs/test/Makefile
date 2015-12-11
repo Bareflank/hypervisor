@@ -54,12 +54,17 @@ TARGET_TYPE=bin
 TARGET_COMPILER=native
 
 SOURCES+=test.cpp
-SOURCES+=test_vmcs.cpp
+SOURCES+=test_vmcs_intel_x64.cpp
 HEADERS=
 
-LIBS=vmcs
+LIBS+=vmcs
+LIBS+=memory_manager
+LIBS+=intrinsics
 
-LIB_PATHS=../bin/native
+LIB_PATHS+=../bin/native
+LIB_PATHS+=../../intrinsics/bin/native
+LIB_PATHS+=../../memory_manager/bin/native
+
 INCLUDE_PATHS=./ ../../../include/  ../../../../include/
 
 ################################################################################

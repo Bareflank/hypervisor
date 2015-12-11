@@ -397,12 +397,12 @@ vmm_intel_x64::create_vmxon_region()
         return vmm_error::out_of_memory;
     }
 
-    if (m_vmxon_page.size() < vmxon_vmcs_region_size())
+    if (m_vmxon_page.size() < vmxon_region_size())
     {
         std::cout << "create_vmxon_region failed: "
                   << "the allocated page is not large enough:" << std::endl
                   << "    - page size: " << m_vmxon_page.size() << " "
-                  << "    - vmxon/vmcs region size: " << vmxon_vmcs_region_size()
+                  << "    - vmxon/vmcs region size: " << vmxon_region_size()
                   << std::endl;
         return vmm_error::not_supported;
     }
@@ -483,7 +483,7 @@ vmm_intel_x64::execute_vmxoff()
 }
 
 uint64_t
-vmm_intel_x64::vmxon_vmcs_region_size()
+vmm_intel_x64::vmxon_region_size()
 {
     auto vmx_basic_msr = m_intrinsics->read_msr(IA32_VMX_BASIC_MSR);
 

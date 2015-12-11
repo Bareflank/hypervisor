@@ -22,12 +22,33 @@
 #ifndef VMCS_H
 #define VMCS_H
 
+#include <intrinsics/intrinsics.h>
+#include <memory_manager/memory_manager.h>
+
+namespace vmcs_error
+{
+    enum type
+    {
+        success = 0,
+        failure = 1,
+        not_supported = 2,
+        out_of_memory = 3
+    };
+};
+
 class vmcs
 {
 public:
 
-    vmcs();
-    ~vmcs();
+    vmcs() {}
+    virtual ~vmcs() {}
+
+    virtual vmcs_error::type init(intrinsics *intrinsics,
+                                  memory_manager *memory_manager)
+    { return vmcs_error::failure; }
+
+    virtual vmcs_error::type launch()
+    { return vmcs_error::failure; }
 };
 
 #endif
