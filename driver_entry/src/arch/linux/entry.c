@@ -6,6 +6,7 @@
 #include <linux/vmalloc.h>
 #include <linux/kallsyms.h>
 #include <linux/cpumask.h>
+#include <linux/sched.h>
 
 #include <debug.h>
 #include <common.h>
