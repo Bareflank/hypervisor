@@ -70,17 +70,15 @@ TARGET_NAME=bf_serial
 TARGET_TYPE=lib
 TARGET_COMPILER=both
 
-SOURCES=serial_port_x86.cpp bf_portio.asm portio_x64.cpp
-LINUX_SOURCES=portio_linux.cpp 
+SOURCES=serial_port_x86.cpp
 
 INCLUDES=
 LIBS=
 
-INCLUDE_PATHS=../include/ ../../../include/ ../../../include/std 
+INCLUDE_PATHS=../include/ ../../../include
 
 LIB_PATHS=
 
-VMM_SOURCES=portio_x64.cpp
 VMM_INCLUDE_PATHS=../../../include/std/
 
 ################################################################################

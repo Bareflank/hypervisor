@@ -23,6 +23,7 @@
 #define IOSTREAM_H
 
 #include <stddef.h>
+#include <serial/serial_port_x86.h>
 
 namespace std
 {

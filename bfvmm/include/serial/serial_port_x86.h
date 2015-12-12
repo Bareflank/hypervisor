@@ -22,26 +22,18 @@
 #ifndef SERIAL_X86__H
 #define SERIAL_X86__H
 
-#include <port_io.h>
-#include <serial_port.h>
-/**
- *  @file    serial.h
- *  @author  Brendan Kerrigan
- *  @date    2015/11/02
- *  @version 0.1
- *
- *  @brief Provide serial port access
- *
- *  @section DESCRIPTION
- *
- *  Provides a wrapper class around a serial port, which is
- *  accessed via port I/O.
- *
- *  Useful information:
- *  http://wiki.osdev.org/Serial_Ports
- *  http://www.sci.muni.cz/docs/pc/serport.txt
- *
- */
+#include <serial/serial_port.h>
+#include <intrinsics/intrinsics_x64.h>
+
+//
+// Provides a wrapper class around a serial port, which is
+// accessed via port I/O.
+//
+// Useful information:
+// http://wiki.osdev.org/Serial_Ports
+// http://www.sci.muni.cz/docs/pc/serport.txt
+//
+//
 
 #define COM1_IO_PORT 0x3f8
 #define COM2_IO_PORT 0x2f8
@@ -154,30 +146,30 @@ class serial_port_x86 : public serial_port
 {
 
 public:
-    serial_port_x86(port_io &io, uint8_t port = 1, uint32_t baud = DEFAULT_BAUD_RATE, uint8_t data_bits = 8,
+    serial_port_x86(uint8_t port = 1, uint32_t baud = DEFAULT_BAUD_RATE, uint8_t data_bits = 8,
                     PARITY_MODE parity = NONE, uint8_t stop_bits = 1);
     ~serial_port_x86(void);
 
-    serial::errno open(void);
-    serial::errno close(void);
+    serial::err open(void);
+    serial::err close(void);
 
-    serial::errno set_baud_rate(uint32_t baud);
+    serial::err set_baud_rate(uint32_t baud);
     uint32_t baud_rate(void);
 
-    serial::errno set_parity_mode(PARITY_MODE parity);
+    serial::err set_parity_mode(PARITY_MODE parity);
     uint8_t parity_mode(void);
 
-    serial::errno set_data_size(uint8_t bits);
+    serial::err set_data_size(uint8_t bits);
     uint8_t data_size(void);
 
-    serial::errno set_stop_bits(uint8_t bits);
+    serial::err set_stop_bits(uint8_t bits);
     uint8_t stop_bits(void);
 
-    serial::errno enable_interrupt_mode(uint8_t mode);
+    serial::err enable_interrupt_mode(uint8_t mode);
     void disable_interrupt_mode(void);
     uint8_t interrupt_mode(void);
 
-    serial::errno enable_fifo(void);
+    serial::err enable_fifo(void);
     void disable_fifo(void);
     bool fifo(void);
 
@@ -195,7 +187,9 @@ public:
     bool transmitter_empty(void);
     bool error_byte_rx_fifo(void);
 
-    serial_port &operator<<(uint8_t value) { write(value); return *this; }
+    serial_port &operator<<(const char value) { write((uint8_t)value); return *this; }
+    serial_port &operator<<(const char *value) { write((int8_t *)value); return *this; }
+
 
 private:
     // Get appropriate divisor for desired baud
@@ -204,7 +198,9 @@ private:
 
     // Base IO port address
     uint16_t m_port;
-    port_io &m_port_io;
+
+    // For portio access
+    intrinsics_x64 m_intrinsics;
 };
 
 #endif // SERIAL_PORT__H

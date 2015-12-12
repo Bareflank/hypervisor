@@ -24,6 +24,7 @@
 
 #include <vcpu/vcpu_factory.h>
 #include <memory_manager/memory_manager.h>
+#include <serial/serial_port_x86.h>
 
 class entry_factory
 {
@@ -38,10 +39,14 @@ public:
     virtual memory_manager *get_memory_manager()
     { return &m_memory_manager; }
 
+    virtual serial_port_x86 *get_serial_port()
+    { return &m_serial_port; }
+
 private:
 
     vcpu_factory m_vcpu_factory;
     memory_manager m_memory_manager;
+    serial_port_x86 m_serial_port;
 };
 
 entry_factory *ef();

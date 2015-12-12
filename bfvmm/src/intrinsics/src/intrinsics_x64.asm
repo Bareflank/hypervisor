@@ -44,6 +44,10 @@ global __read_ldtr:function
 global __read_rsp:function
 global __read_gdt:function
 global __read_idt:function
+global __outb:function
+global __inb:function
+global __outw:function
+global __inw:function
 
 section .text
 
@@ -244,3 +248,33 @@ __read_gdt:
 __read_idt:
     sidt [rdi]
     ret
+
+; void __outb(uint16_t val, uint16_t port)
+__outb:
+	mov ax, di
+	mov dx, si
+	out dx, al
+	ret
+
+; void __outw(uint16_t val, uint16_t port)
+__outw:
+	mov ax, di
+	mov dx, si
+	out dx, ax
+	ret
+
+
+; uint8_t __inb(uint16_t port)
+__inb:
+	mov al, 0
+	mov dx, di
+	in al, dx
+	ret
+
+; uint16_t __inw(uint16_t port)
+__inw:
+	mov eax, 0
+	mov edx, edi
+	in ax, dx
+	ret
+

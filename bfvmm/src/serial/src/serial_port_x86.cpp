@@ -19,7 +19,7 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <serial_port_x86.h>
+#include <serial/serial_port_x86.h>
 
 struct divisor_rate divisor_table[] =
 {
@@ -63,7 +63,7 @@ struct data_bits data_size_table[] =
     { 0, 0x00 },
 };
 
-serial_port_x86::serial_port_x86(port_io &io, uint8_t port, uint32_t baud, uint8_t data_size, PARITY_MODE parity, uint8_t stop_bits) : m_port_io(io)
+serial_port_x86::serial_port_x86(uint8_t port, uint32_t baud, uint8_t data_size, PARITY_MODE parity, uint8_t stop_bits)
 {
     switch (port)
     {
@@ -79,6 +79,7 @@ serial_port_x86::serial_port_x86(port_io &io, uint8_t port, uint32_t baud, uint8
         }
         case 3:
         {
+
             m_port = COM3_IO_PORT;
             break;
         }
@@ -106,7 +107,7 @@ serial_port_x86::~serial_port_x86(void)
 
 }
 
-serial::errno
+serial::err
 serial_port_x86::open(void)
 {
     disable_interrupt_mode();
@@ -122,13 +123,13 @@ serial_port_x86::open(void)
     return serial::SUCCESS;
 }
 
-serial::errno
+serial::err
 serial_port_x86::close(void)
 {
     return serial::SUCCESS;
 }
 
-serial::errno
+serial::err
 serial_port_x86::set_baud_rate(uint32_t baud)
 {
     if (baud > MAX_BAUD_RATE)
@@ -145,11 +146,11 @@ serial_port_x86::set_baud_rate(uint32_t baud)
 
     // Set the DLAB bit, so we can configure the baud rate
     // of this port.
-    m_port_io.port_write_8(m_port + FCR_OFFSET, DLAB);
+    m_intrinsics.write_portio_8(m_port + FCR_OFFSET, DLAB);
 
     // Set the baud rate
-    m_port_io.port_write_8(m_port + DL_LSB_OFFSET, baud_to_lo_divisor(m_baud));
-    m_port_io.port_write_8(m_port + DL_MSB_OFFSET, baud_to_hi_divisor(m_baud));
+    m_intrinsics.write_portio_8(m_port + DL_LSB_OFFSET, baud_to_lo_divisor(m_baud));
+    m_intrinsics.write_portio_8(m_port + DL_MSB_OFFSET, baud_to_hi_divisor(m_baud));
 
     return serial::SUCCESS;
 }
@@ -160,7 +161,7 @@ serial_port_x86::baud_rate(void)
     return m_baud;
 }
 
-serial::errno
+serial::err
 serial_port_x86::set_parity_mode(PARITY_MODE parity)
 {
     uint8_t i = 0;
@@ -168,7 +169,7 @@ serial_port_x86::set_parity_mode(PARITY_MODE parity)
 
     m_parity = parity;
 
-    data_bits = m_port_io.port_read_8(m_port + LCR_OFFSET);
+    data_bits = m_intrinsics.read_portio_8(m_port + LCR_OFFSET);
 
     while (parity_table[i].mode < PARITY_MAX)
     {
@@ -185,7 +186,7 @@ serial_port_x86::set_parity_mode(PARITY_MODE parity)
         i++;
     }
 
-    m_port_io.port_write_8(m_port + LCR_OFFSET, data_bits);
+    m_intrinsics.write_portio_8(m_port + LCR_OFFSET, data_bits);
 
     return serial::SUCCESS;
 }
@@ -196,7 +197,7 @@ serial_port_x86::parity_mode(void)
     return m_parity;
 }
 
-serial::errno
+serial::err
 serial_port_x86::set_data_size(uint8_t size)
 {
     uint8_t i = 0;
@@ -205,7 +206,7 @@ serial_port_x86::set_data_size(uint8_t size)
     // Update our internal storage of size
     m_data_size = size;
 
-    data_bits = m_port_io.port_read_8(m_port + LCR_OFFSET);
+    data_bits = m_intrinsics.read_portio_8(m_port + LCR_OFFSET);
 
     while (data_size_table[i].data_size != 0)
     {
@@ -222,7 +223,7 @@ serial_port_x86::set_data_size(uint8_t size)
         i++;
     }
 
-    m_port_io.port_write_8(m_port + LCR_OFFSET, data_bits);
+    m_intrinsics.write_portio_8(m_port + LCR_OFFSET, data_bits);
 
     return serial::SUCCESS;
 }
@@ -233,13 +234,13 @@ serial_port_x86::data_size(void)
     return m_data_size;
 }
 
-serial::errno
+serial::err
 serial_port_x86::set_stop_bits(uint8_t bits)
 {
     uint8_t i = 0;
     uint8_t stop_bits = 0;
 
-    stop_bits = m_port_io.port_read_8(m_port + LCR_OFFSET);
+    stop_bits = m_intrinsics.read_portio_8(m_port + LCR_OFFSET);
 
     // Clear the stop bits, leave the rest intact
     stop_bits &= 0xFB;
@@ -251,7 +252,7 @@ serial_port_x86::set_stop_bits(uint8_t bits)
         stop_bits |= 0x04;
     }
 
-    m_port_io.port_write_8(m_port + LCR_OFFSET, stop_bits);
+    m_intrinsics.write_portio_8(m_port + LCR_OFFSET, stop_bits);
 
     return serial::SUCCESS;
 }
@@ -262,13 +263,13 @@ serial_port_x86::stop_bits(void)
     return m_stop_bits;
 }
 
-serial::errno
+serial::err
 serial_port_x86::enable_interrupt_mode(uint8_t interrupts)
 {
     m_interrupt_mode = interrupts;
 
     // Enable interrupts
-    m_port_io.port_write_8(m_port + IER_OFFSET, m_interrupt_mode);
+    m_intrinsics.write_portio_8(m_port + IER_OFFSET, m_interrupt_mode);
 
     return serial::SUCCESS;
 }
@@ -279,7 +280,7 @@ serial_port_x86::disable_interrupt_mode(void)
     m_interrupt_mode = 0;
 
     // Disable interrupts
-    m_port_io.port_write_8(m_port + IER_OFFSET, m_interrupt_mode);
+    m_intrinsics.write_portio_8(m_port + IER_OFFSET, m_interrupt_mode);
 }
 
 uint8_t
@@ -288,15 +289,15 @@ serial_port_x86::interrupt_mode(void)
     return m_interrupt_mode;
 }
 
-serial::errno
+serial::err
 serial_port_x86::enable_fifo(void)
 {
     m_fifo_enabled = true;
-    uint8_t value = m_port_io.port_read_8(m_port + FCR_OFFSET);
+    uint8_t value = m_intrinsics.read_portio_8(m_port + FCR_OFFSET);
 
     value |= FCR_MASK;
 
-    m_port_io.port_write_8(m_port + FCR_OFFSET, value);
+    m_intrinsics.write_portio_8(m_port + FCR_OFFSET, value);
 
     return serial::SUCCESS;
 }
@@ -305,11 +306,11 @@ void
 serial_port_x86::disable_fifo(void)
 {
     m_fifo_enabled = false;
-    uint8_t value = m_port_io.port_read_8(m_port + FCR_OFFSET);
+    uint8_t value = m_intrinsics.read_portio_8(m_port + FCR_OFFSET);
 
     value &= ~FCR_MASK;
 
-    m_port_io.port_write_8(m_port + FCR_OFFSET, value);
+    m_intrinsics.write_portio_8(m_port + FCR_OFFSET, value);
 }
 
 bool
@@ -321,7 +322,7 @@ serial_port_x86::fifo(void)
 void
 serial_port_x86::write(uint8_t byte)
 {
-    m_port_io.port_write_8(m_port, byte);
+    m_intrinsics.write_portio_8(m_port, byte);
 }
 
 void
@@ -337,7 +338,7 @@ serial_port_x86::write(int8_t *bytes)
 uint8_t
 serial_port_x86::read(void)
 {
-    return m_port_io.port_read_8(m_port);
+    return m_intrinsics.read_portio_8(m_port);
 }
 
 // Note:
@@ -347,49 +348,49 @@ serial_port_x86::read(void)
 bool
 serial_port_x86::data_ready(void)
 {
-    return !!(m_port_io.port_read_8(m_port + LSR_OFFSET) & LSR_DR);
+    return !!(m_intrinsics.read_portio_8(m_port + LSR_OFFSET) & LSR_DR);
 }
 
 bool
 serial_port_x86::overrun_error(void)
 {
-    return !!(m_port_io.port_read_8(m_port + LSR_OFFSET) & LSR_OE);
+    return !!(m_intrinsics.read_portio_8(m_port + LSR_OFFSET) & LSR_OE);
 }
 
 bool
 serial_port_x86::parity_error(void)
 {
-    return !!(m_port_io.port_read_8(m_port + LSR_OFFSET) & LSR_PE);
+    return !!(m_intrinsics.read_portio_8(m_port + LSR_OFFSET) & LSR_PE);
 }
 
 bool
 serial_port_x86::framing_error(void)
 {
-    return !!(m_port_io.port_read_8(m_port + LSR_OFFSET) & LSR_FE);
+    return !!(m_intrinsics.read_portio_8(m_port + LSR_OFFSET) & LSR_FE);
 }
 
 bool
 serial_port_x86::break_indicator(void)
 {
-    return !!(m_port_io.port_read_8(m_port + LSR_OFFSET) & LSR_BI);
+    return !!(m_intrinsics.read_portio_8(m_port + LSR_OFFSET) & LSR_BI);
 }
 
 bool
 serial_port_x86::transmit_hold_register_empty(void)
 {
-    return !!(m_port_io.port_read_8(m_port + LSR_OFFSET) & LSR_THRE);
+    return !!(m_intrinsics.read_portio_8(m_port + LSR_OFFSET) & LSR_THRE);
 }
 
 bool
 serial_port_x86::transmitter_empty(void)
 {
-    return !!(m_port_io.port_read_8(m_port + LSR_OFFSET) & LSR_TEMT);
+    return !!(m_intrinsics.read_portio_8(m_port + LSR_OFFSET) & LSR_TEMT);
 }
 
 bool
 serial_port_x86::error_byte_rx_fifo(void)
 {
-    return !!(m_port_io.port_read_8(m_port + LSR_OFFSET) & LSR_EBIF);
+    return !!(m_intrinsics.read_portio_8(m_port + LSR_OFFSET) & LSR_EBIF);
 }
 
 uint8_t
