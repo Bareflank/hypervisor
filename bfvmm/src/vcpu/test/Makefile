@@ -60,13 +60,16 @@ HEADERS=
 
 LIBS+=vcpu
 LIBS+=vmm
+LIBS+=vmcs
 LIBS+=debug_ring
 LIBS+=memory_manager
 
 LIB_PATHS+=../bin/native
 LIB_PATHS+=../../vmm/bin/native
+LIB_PATHS+=../../vmcs/bin/native
 LIB_PATHS+=../../debug_ring/bin/native
 LIB_PATHS+=../../memory_manager/bin/native
+
 INCLUDE_PATHS=./ ../../../include/  ../../../../include/
 
 ################################################################################

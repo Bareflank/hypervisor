@@ -72,7 +72,7 @@ TARGET_NAME=vmcs
 TARGET_TYPE=lib
 TARGET_COMPILER=both
 
-SOURCES+=vmcs.cpp
+SOURCES+=vmcs_intel_x64.cpp
 HEADERS=
 
 LIBS=

@@ -32,6 +32,7 @@
 namespace std
 {
     ostream cout;
+    int g_width = 0;
 }
 
 // =============================================================================
@@ -48,6 +49,10 @@ namespace std
         if (initialized == false)
         {
             m_base = 10;
+
+            m_width = 0;
+            m_justify = std::left;
+
             initialized = true;
         }
     }
@@ -55,14 +60,37 @@ namespace std
     ostream &
     ostream::operator<<(const char *str)
     {
-        // TODO: We need to add multi-core suppor here. To do that, this code
+        int len = strlen(str);
+        int gap = m_width - len;
+
+        if (m_width > 0)
+            m_width = 0;
+
+        // TODO: We need to add multi-core support here. To do that, this code
         //       will have to lookup the CPU that it's running on to know which
         //       debug ring to dump the text to
 
+        // TODO: There are a lot of train wrecks in the code here that
+        //       need to be removed.
+
         auto vc = ef()->get_vcpu_factory()->get_vcpu(0);
 
-        if (vc != 0)
-            vc->get_debug_ring()->write(str, strlen(str));
+        if (vc == 0)
+            return *this;
+
+        if (m_justify == std::right)
+        {
+            for (auto i = 0; i < gap; i++)
+                vc->get_debug_ring()->write(" ", 1);
+        }
+
+        vc->get_debug_ring()->write(str, len);
+
+        if (m_justify == std::left)
+        {
+            for (auto i = 0; i < gap; i++)
+                vc->get_debug_ring()->write(" ", 1);
+        }
 
         return *this;
     }
@@ -162,10 +190,29 @@ namespace std
                 m_base = 16;
                 break;
 
+            case std::set_width:
+                m_width = g_width;
+                break;
+
+            case std::left:
+                m_justify = std::left;
+                break;
+
+            case std::right:
+                m_justify = std::right;
+                break;
+
             default:
                 break;
         };
 
         return *this;
+    }
+
+    ostream_modifier
+    setw(int width)
+    {
+        g_width = width;
+        return std::set_width;
     }
 }

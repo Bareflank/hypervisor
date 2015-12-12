@@ -19,8 +19,8 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#ifndef VMM_X86_64_H
-#define VMM_X86_64_H
+#ifndef VMM_INTEL_X64_H
+#define VMM_INTEL_X64_H
 
 #include <vmm/vmm.h>
 #include <intrinsics/intrinsics_intel_x64.h>
@@ -40,9 +40,11 @@ public:
     /// Init VMM
     ///
     /// Initializes the VMM. One of the goals of this function is to decouple
-    /// the intrinsics from the VMM so that the VMM can be tested.
+    /// the intrinsics and memory manager from the VMM so that the VMM can
+    /// be tested.
     ///
     /// @param intrinsics the intrinsics class that this VMM will use
+    /// @param memory_manager the memory manager class that this VMM will use
     /// @return success on success, failure otherwise
     ///
     vmm_error::type init(intrinsics *intrinsics,
@@ -92,7 +94,7 @@ private:
     vmm_error::type execute_vmxon();
     vmm_error::type execute_vmxoff();
 
-    uint64_t vmxon_vmcs_region_size();
+    uint64_t vmxon_region_size();
 
 private:
 

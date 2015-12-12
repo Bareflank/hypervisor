@@ -29,6 +29,7 @@
 #include <stdint.h>
 
 #include <vmm/vmm_intel_x64.h>
+#include <vmcs/vmcs_intel_x64.h>
 #include <debug_ring/debug_ring.h>
 #include <intrinsics/intrinsics_intel_x64.h>
 
@@ -76,6 +77,21 @@ public:
     virtual vmm *get_vmm()
     { return &m_vmm; }
 
+    /// Get VMCS
+    ///
+    /// TODO: Once we support multiple guests, this will have to be a
+    /// std::list<vmcs> object as we will have to store more than one of
+    /// these. We will also need some for of "guest" object that can store
+    /// all of the vmcs object for that single guest as a vcpu will only
+    /// work on one vmcs per guest so the "parent" object that is actually
+    /// storing the vmcs should be the guest object itself
+    ///
+    /// @return vmcs (will never be NULL)
+    ///
+    virtual vmcs *get_vmcs()
+    { return &m_vmcs; }
+
+
     /// Get Debug Ring
     ///
     /// @return debug ring (will never be NULL)
@@ -95,6 +111,7 @@ private:
     int64_t m_id;
 
     vmm_intel_x64 m_vmm;
+    vmcs_intel_x64 m_vmcs;
     debug_ring m_debug_ring;
     intrinsics_intel_x64 m_intrinsics;
 };
