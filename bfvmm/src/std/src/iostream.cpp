@@ -31,8 +31,7 @@
 
 namespace std
 {
-    ostream cout;
-    int g_width = 0;
+    bfostream cout;
 }
 
 // =============================================================================
@@ -41,10 +40,22 @@ namespace std
 
 namespace std
 {
+    void
+    bfostream::init()
+    {
+        m_base = 10;
+        m_width = 0;
+        m_justify = std::left;
+    }
+
     ostream &
     ostream::operator<<(const char *str)
     {
-        init();
+        // TODO: At the moment we don't have a good way of specifying the
+        // VCPU that a print function comes from. We need to extend iostream
+        // so that a print statement can state which VCPU it's coming from
+        // so that it can be directed to the proper vcpu here. At the moment
+        // everything is broadcast (i.e. all vcpus will get the same output)
 
         int len = strlen(str);
         int gap = m_width - len;
@@ -52,38 +63,18 @@ namespace std
         if (m_width > 0)
             m_width = 0;
 
-        // TODO: We need to add multi-core support here. To do that, this code
-        //       will have to lookup the CPU that it's running on to know which
-        //       debug ring to dump the text to
-
-        // TODO: There are a lot of train wrecks in the code here that
-        //       need to be removed.
-
-        auto vc = ef()->get_vcpu_factory()->get_vcpu(0);
-        auto serial = ef()->get_serial_port();
-
-        if (vc == 0)
-            return *this;
-
         if (m_justify == std::right)
         {
             for (auto i = 0; i < gap; i++)
-            {
-                *serial << ' ';
-                vc->get_debug_ring()->write(" ", 1);
-            }
+                ef()->write(" ", 1);
         }
 
-        *serial << str;
-        vc->get_debug_ring()->write(str, len);
+        ef()->write(str, len);
 
         if (m_justify == std::left)
         {
             for (auto i = 0; i < gap; i++)
-            {
-                *serial << ' ';
-                vc->get_debug_ring()->write(" ", 1);
-            }
+                ef()->write(" ", 1);
         }
 
         return *this;
@@ -92,8 +83,6 @@ namespace std
     ostream &
     ostream::operator<<(bool val)
     {
-        init();
-
         if (val == true)
             return *this << "true";
         else
@@ -103,8 +92,6 @@ namespace std
     ostream &
     ostream::operator<<(char val)
     {
-        init();
-
         char str[2] = {val, '\0'};
         return *this << str;
     }
@@ -112,17 +99,12 @@ namespace std
     ostream &
     ostream::operator<<(unsigned char val)
     {
-        init();
-
-        unsigned char str[2] = {val, '\0'};
-        return *this << str;
+        return *this << (int)val;
     }
 
     ostream &
     ostream::operator<<(short val)
     {
-        init();
-
         char str[IOTA_MIN_BUF_SIZE];
         return *this << itoa(val, str, m_base);
     }
@@ -130,8 +112,6 @@ namespace std
     ostream &
     ostream::operator<<(unsigned short val)
     {
-        init();
-
         char str[IOTA_MIN_BUF_SIZE];
         return *this << itoa(val, str, m_base);
     }
@@ -139,8 +119,6 @@ namespace std
     ostream &
     ostream::operator<<(int val)
     {
-        init();
-
         char str[IOTA_MIN_BUF_SIZE];
         return *this << itoa(val, str, m_base);
     }
@@ -148,8 +126,6 @@ namespace std
     ostream &
     ostream::operator<<(unsigned int val)
     {
-        init();
-
         char str[IOTA_MIN_BUF_SIZE];
         return *this << itoa(val, str, m_base);
     }
@@ -157,8 +133,6 @@ namespace std
     ostream &
     ostream::operator<<(long long int val)
     {
-        init();
-
         char str[IOTA_MIN_BUF_SIZE];
         return *this << itoa(val, str, m_base);
     }
@@ -166,8 +140,6 @@ namespace std
     ostream &
     ostream::operator<<(unsigned long long int val)
     {
-        init();
-
         char str[IOTA_MIN_BUF_SIZE];
         return *this << itoa(val, str, m_base);
     }
@@ -175,8 +147,6 @@ namespace std
     ostream &
     ostream::operator<<(void *val)
     {
-        init();
-
         char str[IOTA_MIN_BUF_SIZE];
         return *this << "0x" << itoa((uint64_t)val, str, 16);
     }
@@ -184,8 +154,6 @@ namespace std
     ostream &
     ostream::operator<<(size_t val)
     {
-        init();
-
         char str[IOTA_MIN_BUF_SIZE];
         return *this << itoa(val, str, m_base);
     }
@@ -193,8 +161,6 @@ namespace std
     ostream &
     ostream::operator<<(ostream_modifier modifier)
     {
-        init();
-
         switch (modifier)
         {
             case std::endl:
@@ -206,10 +172,6 @@ namespace std
 
             case std::hex:
                 m_base = 16;
-                break;
-
-            case std::set_width:
-                m_width = g_width;
                 break;
 
             case std::left:
@@ -227,29 +189,15 @@ namespace std
         return *this;
     }
 
-    void
-    ostream::init()
+    ostream &
+    ostream::operator<<(ostream_width width)
     {
-        static auto initialized = false;
-
-        if (initialized == false)
-        {
-            m_base = 10;
-
-            m_width = 0;
-            m_justify = std::left;
-
-            auto serial = ef()->get_serial_port();
-            serial->open();
-
-            initialized = true;
-        }
+        m_width = width.val();
     }
 
-    ostream_modifier
+    ostream_width
     setw(int width)
     {
-        g_width = width;
-        return std::set_width;
+        return std::ostream_width(width);
     }
 }

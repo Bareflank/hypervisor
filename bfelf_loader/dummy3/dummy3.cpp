@@ -23,7 +23,9 @@
 #include <dummy2.h>
 #include <dummy3.h>
 
-#include <vmm_entry.h>
+#include <entry.h>
+#include <memory.h>
+#include <debug_ring_interface.h>
 
 int g_my_glob1;
 int g_my_glob2 = 0;
@@ -66,6 +68,22 @@ dummy3_test1(int num)
     }
 }
 
+// The following tests to make sure that we can actually create a class,
+// subclass that class, and overload a virtual function, which is a basic
+// requirement for c++
+//
+// Note that attempts to get a reference to any global data appears to be
+// broken. In the case below, attempting to call p_blah2->fool() will crash.
+// Instead, here, we call p_blah2.foo() which seems to work fine.
+//
+// Note that through testing, attempts to get a reference to any global
+// data will crash eventually. In the case described above, it will crash
+// instantly, but if you grab a reference to simply a global variable, it
+// seems to work fine some of the time, and crashes other times. Not entirely
+// sure why. What's really strange is that when it doesn't crash, the data
+// that it has is valid. At any rate our current belief is that this is a
+// bug with GCC, likely being exposed due to the way we have it configured.
+
 class Blah1
 {
 public:
@@ -99,38 +117,77 @@ dummy3_test2(int num)
            dummy3_test1(num);
 }
 
-void *
-start_vmm(void *arg)
-{
-    if (arg == 0)
-        return VMM_ERROR_INVALID_ARG;
+// The following functions are place holders for unit tests. Some of the
+// unit tests expect these functions to exist somewhere, and so we provided
+// them so that the unit tests can succeed.
 
+extern "C" int
+init_vmm(int arg)
+{
+    return ENTRY_SUCCESS;
+}
+
+extern "C" int
+start_vmm(int arg)
+{
     if (dummy3_test2(5) != 0x26)
-        return VMM_ERROR_UNKNOWN;
+        return ENTRY_ERROR_VMM_START_FAILED;
 
-    return VMM_SUCCESS;
+    return ENTRY_SUCCESS;
 }
 
-void *
-stop_vmm(void *arg)
+extern "C" int
+stop_vmm(int arg)
 {
-    if (arg != 0)
-        return VMM_ERROR_INVALID_ARG;
-
-    return VMM_SUCCESS;
+    return ENTRY_SUCCESS;
 }
 
-void operator delete(void *ptr)
+extern "C" long long int
+add_page(struct page_t *pg)
+{
+    return MEMORY_MANAGER_SUCCESS;
+}
+
+extern "C" long long int
+remove_page(struct page_t *pg)
+{
+    return MEMORY_MANAGER_SUCCESS;
+}
+
+extern "C" struct debug_ring_resources_t *
+get_drr(long long int vcpuid)
+{
+    static debug_ring_resources_t drr = {0};
+
+    if (vcpuid >= 1)
+        return 0;
+
+    return &drr;
+}
+
+extern "C" int
+sym_that_returns_success(int arg)
+{
+    return ENTRY_SUCCESS;
+}
+
+extern "C" int
+sym_that_returns_failure(int arg)
+{
+    return ENTRY_ERROR_VMM_START_FAILED;
+}
+
+void
+operator delete(void *ptr)
 {
 }
 
-void operator delete[](void *p)
+void
+operator delete[](void *p)
 {
 }
 
-extern "C"
+extern "C" void
+__cxa_pure_virtual()
 {
-    void __cxa_pure_virtual()
-    {
-    }
 }

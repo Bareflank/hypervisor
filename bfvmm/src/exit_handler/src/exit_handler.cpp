@@ -20,31 +20,43 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #include <iostream>
-#include <entry/entry_factory.h>
+#include <exit_handler/exit_handler_dispatch.h>
 
-// =============================================================================
-// Global
-// =============================================================================
-
-#define EXIT_HANDLER_STACK_SIZE 1024
-
-char stack[EXIT_HANDLER_STACK_SIZE] = {0};
-
-// =============================================================================
-// Entry Functions
-// =============================================================================
+// -----------------------------------------------------------------------------
+// C++ Implementation
+// -----------------------------------------------------------------------------
 
 void
-exit_handler()
+exit_handler_trampoline(void)
 {
+    auto ehd = exit_handler_dispatch();
+
+    ehd.dispatch();
 }
 
-char *
-exit_handler_stack()
+// -----------------------------------------------------------------------------
+// C Implementation
+// -----------------------------------------------------------------------------
+
+// The C implementation is needed bcause the actual exit handler entry point is
+// in assembly, which doesn't have access to the mangled C++ ABI. So to keep
+// things simple, the assembly jumps into C code first, which is then handed
+// off to C++ from there.
+
+extern "C" void
+exit_handler(void)
 {
+    exit_handler_trampoline();
+}
+
+extern "C" void *
+exit_handler_stack(void)
+{
+    static char stack[0x2000] = {0};
+
     // Note that we return the stack pointer, plus the size of the stack,
     // minus one because the stack grows down and thus, the starting point
     // of the stack is actually the end of it.
 
-    return (char *)((uint64_t)stack + EXIT_HANDLER_STACK_SIZE);
+    return &stack[0x1999];
 }

@@ -54,12 +54,14 @@ TARGET_TYPE=bin
 TARGET_COMPILER=native
 
 SOURCES+=test.cpp
-SOURCES+=test_common_init.cpp
-SOURCES+=test_common_fini.cpp
 SOURCES+=test_common_add_module.cpp
+SOURCES+=test_common_dump.cpp
+SOURCES+=test_common_fini.cpp
+SOURCES+=test_common_init.cpp
+SOURCES+=test_common_load.cpp
 SOURCES+=test_common_start.cpp
 SOURCES+=test_common_stop.cpp
-SOURCES+=test_common_dump.cpp
+SOURCES+=test_common_unload.cpp
 SOURCES+=test_helpers.cpp
 HEADERS=
 

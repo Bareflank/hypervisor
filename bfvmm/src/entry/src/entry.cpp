@@ -19,98 +19,32 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <vmm_entry.h>
-
-#include <iostream>
+#include <entry.h>
 #include <entry/entry_factory.h>
 
-// =============================================================================
-// Entry Functions
-// =============================================================================
-
-void *
-start_vmm(void *arg)
+extern "C" int
+init_vmm(int arg)
 {
-    auto *vmmr = (vmm_resources_t *)arg;
+    if (ef()->init_vmm(0) != entry_factory_error::success)
+        return ENTRY_ERROR_VMM_INIT_FAILED;
 
-    if (arg == 0)
-        return VMM_ERROR_INVALID_ARG;
-
-    // TODO: At some point, we are going to have to be told what CPU we are
-    // starting on, and then get the VCPU for that CPU and initialize it.
-    // Since we only support single core for now, we use 0.
-
-    // TODO: There are a lot of train wrecks in the code here that need to be
-    //       removed.
-
-    auto vcpu = ef()->get_vcpu_factory()->get_vcpu(0);
-    auto memory_manager = ef()->get_memory_manager();
-
-    if (vcpu == 0 || memory_manager == 0)
-        return VMM_ERROR_INVALID_ENTRY_FACTORY;
-
-    // -------------------------------------------------------------------------
-    // Initialize Debugging
-
-    if (vcpu->get_debug_ring()->init(vmmr->drr) != debug_ring_error::success)
-        return VMM_ERROR_INVALID_DRR;
-
-    // -------------------------------------------------------------------------
-    // Memory Managment
-
-    for (auto i = 0; i < MAX_PAGES; i++)
-    {
-        auto pg = page(vmmr->pages[i]);
-
-        if (memory_manager->add_page(pg) != memory_manager_error::success)
-            return VMM_ERROR_INVALID_PAGES;
-    }
-
-    // -------------------------------------------------------------------------
-    // Initialize and Start the VMM
-
-    auto vmm = vcpu->get_vmm();
-    auto intrinsics = vcpu->get_intrinsics();
-
-    if (vmm->init(intrinsics, memory_manager) != vmm_error::success)
-        return VMM_ERROR_VMM_INIT_FAILED;
-
-    if (vmm->start() != vmm_error::success)
-        return VMM_ERROR_VMM_START_FAILED;
-
-    // -------------------------------------------------------------------------
-    // Initialize and Luanch the VMCS
-
-    auto vmcs = vcpu->get_vmcs();
-
-    if (vmcs->init(intrinsics, memory_manager) != vmcs_error::success)
-        return VMM_ERROR_VMM_INIT_FAILED;
-
-    if (vmcs->launch() != vmcs_error::success)
-        return VMM_ERROR_VMM_START_FAILED;
-
-    return 0;
+    return ENTRY_SUCCESS;
 }
 
-void *
-stop_vmm(void *arg)
+extern "C" int
+start_vmm(int arg)
 {
-    if (arg != 0)
-        return VMM_ERROR_INVALID_ARG;
+    if (ef()->start_vmm(0) != entry_factory_error::success)
+        return ENTRY_ERROR_VMM_START_FAILED;
 
-    auto vcpu = ef()->get_vcpu_factory()->get_vcpu(0);
-    auto memory_manager = ef()->get_memory_manager();
+    return ENTRY_SUCCESS;
+}
 
-    if (vcpu == 0 || memory_manager == 0)
-        return VMM_ERROR_INVALID_ENTRY_FACTORY;
+extern "C" int
+stop_vmm(int arg)
+{
+    if (ef()->stop_vmm(0) != entry_factory_error::success)
+        return ENTRY_ERROR_VMM_STOP_FAILED;
 
-    // -------------------------------------------------------------------------
-    // Stop the VMM
-
-    auto vmm = vcpu->get_vmm();
-
-    if (vmm->stop() != vmm_error::success)
-        return VMM_ERROR_VMM_STOP_FAILED;
-
-    return 0;
+    return ENTRY_SUCCESS;
 }

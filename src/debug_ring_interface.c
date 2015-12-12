@@ -23,7 +23,7 @@
 #include <debug_ring_interface.h>
 
 long long int
-debug_ring_read(struct debug_ring_resources *drr, char *str, long long int len)
+debug_ring_read(struct debug_ring_resources_t *drr, char *str, long long int len)
 {
     long long int i;
     long long int spos;
@@ -32,7 +32,7 @@ debug_ring_read(struct debug_ring_resources *drr, char *str, long long int len)
     if (drr == 0 || str == 0 || len == 0)
         return DEBUG_RING_READ_ERROR;
 
-    spos = drr->spos % drr->len;
+    spos = drr->spos % DEBUG_RING_SIZE;
     content = drr->epos - drr->spos;
 
     /*
@@ -44,7 +44,7 @@ debug_ring_read(struct debug_ring_resources *drr, char *str, long long int len)
 
     for (i = 0; i < content && i < len - 1; i++)
     {
-        if (spos == drr->len)
+        if (spos == DEBUG_RING_SIZE)
             spos = 0;
 
         if (drr->buf[spos] != '\0')

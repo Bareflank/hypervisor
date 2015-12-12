@@ -24,13 +24,6 @@
 vcpu *
 vcpu_factory::get_vcpu(int64_t vcpuid)
 {
-    // TODO: On the Intel archiecture at least, we need to find a way to map
-    // the x2APIC CPU addressing scheme to a set of VCPU numbers, similar to
-    // how the major operatings systems do this... and in a way that does not
-    // require a hash lookup. At the moment it appears that there can be
-    // gaps in what cpuid reports. For example, you could end up with an ID
-    // of 1, 2, 7, 8.
-
     if (vcpuid >= MAX_VCPUS)
         return 0;
 
@@ -46,4 +39,50 @@ vcpu_factory::add_vcpu(const vcpu &vc)
     m_vcpus[vc.id()] = vc;
 
     return vcpu_factory_error::success;
+}
+
+vcpu_factory_error::type
+vcpu_factory::init(int64_t vcpuid)
+{
+    if (vcpuid >= MAX_VCPUS)
+        return vcpu_factory_error::invalid;
+
+    if (add_vcpu(vcpu(vcpuid)) != vcpu_factory_error::success)
+        return vcpu_factory_error::failure;
+
+    if (m_vcpus[vcpuid].init() != vcpu_error::success)
+        return vcpu_factory_error::failure;
+
+    return vcpu_factory_error::success;
+}
+
+vcpu_factory_error::type
+vcpu_factory::start(int64_t vcpuid)
+{
+    if (vcpuid >= MAX_VCPUS)
+        return vcpu_factory_error::invalid;
+
+    if (m_vcpus[vcpuid].start() != vcpu_error::success)
+        return vcpu_factory_error::failure;
+
+    return vcpu_factory_error::success;
+}
+
+vcpu_factory_error::type
+vcpu_factory::stop(int64_t vcpuid)
+{
+    if (vcpuid >= MAX_VCPUS)
+        return vcpu_factory_error::invalid;
+
+    if (m_vcpus[vcpuid].stop() != vcpu_error::success)
+        return vcpu_factory_error::failure;
+
+    return vcpu_factory_error::success;
+}
+
+void
+vcpu_factory::write(const char *str, int64_t len)
+{
+    for (auto i = 0; i < MAX_VCPUS; i++)
+        m_vcpus[i].write(str, len);
 }

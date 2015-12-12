@@ -19,28 +19,25 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <assert.h>
 #include <debug_ring/debug_ring.h>
 
 debug_ring_error::type
-debug_ring::init(struct debug_ring_resources *drr)
+debug_ring::init(int64_t vcpuid)
 {
     m_is_valid = false;
-    m_drr = drr;
+    m_drr = 0;
 
-    if (m_drr == 0)
+    if (vcpuid >= MAX_VCPUS)
         return debug_ring_error::invalid;
 
-    if (m_drr->len <= 0)
-        return debug_ring_error::invalid;
+    m_is_valid = true;
+    m_drr = get_drr(vcpuid);
 
     m_drr->epos = 0;
     m_drr->spos = 0;
 
-    for (auto i = 0; i < m_drr->len; i++)
+    for (auto i = 0; i < DEBUG_RING_SIZE; i++)
         m_drr->buf[i] = '\0';
-
-    m_is_valid = true;
 
     return debug_ring_error::success;
 }
@@ -57,17 +54,20 @@ debug_ring::write(const char *str, int64_t len)
     if (m_is_valid == false)
         return debug_ring_error::invalid;
 
-    if (str == 0 || len == 0 || len >= m_drr->len)
+    if (str == 0 || len == 0 || len >= DEBUG_RING_SIZE)
         return debug_ring_error::failure;
 
+    // The length that we were given is equivalent to strlen, which does not
+    // include the '\0', so we add one to the length to account for that.
     len++;
-    auto epos = m_drr->epos % m_drr->len;
-    auto spos = m_drr->spos % m_drr->len;
-    auto space = m_drr->len - (m_drr->epos - m_drr->spos);
+
+    auto epos = m_drr->epos % DEBUG_RING_SIZE;
+    auto spos = m_drr->spos % DEBUG_RING_SIZE;
+    auto space = DEBUG_RING_SIZE - (m_drr->epos - m_drr->spos);
 
     if (space < len)
     {
-        auto pos = spos;
+        auto cpos = spos;
 
         // Make room for the write. Normally, with a circular buffer, you
         // would just move the start position when a read occurs, but in this
@@ -83,31 +83,31 @@ debug_ring::write(const char *str, int64_t len)
         //       this is just debug text, and if we add locks, we would
         //       greatly increase the complexity of this code, while
         //       serializing the code, which is not a good idea.
-        while (space <= m_drr->len)
+        while (space <= DEBUG_RING_SIZE)
         {
-            if (pos == m_drr->len)
-                pos = 0;
+            if (cpos >= DEBUG_RING_SIZE)
+                cpos = 0;
 
-            if (spos == m_drr->len)
+            if (spos >= DEBUG_RING_SIZE)
                 spos = 0;
 
             spos++;
             space++;
             m_drr->spos++;
 
-            if (m_drr->buf[pos] == '\0' &&
+            if (m_drr->buf[cpos] == '\0' &&
                 space >= len)
             {
                 break;
             }
 
-            m_drr->buf[pos++] = '\0';
+            m_drr->buf[cpos++] = '\0';
         }
     }
 
     for (auto i = 0; i < len; i++)
     {
-        if (epos == m_drr->len)
+        if (epos >= DEBUG_RING_SIZE)
             epos = 0;
 
         m_drr->buf[epos] = str[i];
@@ -117,4 +117,15 @@ debug_ring::write(const char *str, int64_t len)
     }
 
     return debug_ring_error::success;
+}
+
+extern "C" struct debug_ring_resources_t *
+get_drr(long long int vcpuid)
+{
+    static debug_ring_resources_t drrs[MAX_VCPUS] = {0};
+
+    if (vcpuid >= MAX_VCPUS)
+        return 0;
+
+    return &drrs[vcpuid];
 }

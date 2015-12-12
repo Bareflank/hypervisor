@@ -173,8 +173,9 @@ public:
     void disable_fifo(void);
     bool fifo(void);
 
-    void write(uint8_t);
-    void write(int8_t *bytes);
+    void write(char c);
+    void write(const char *str);
+    void write(const char *str, int64_t len);
     uint8_t read(void);
 
     /* LSR methods */
@@ -187,9 +188,8 @@ public:
     bool transmitter_empty(void);
     bool error_byte_rx_fifo(void);
 
-    serial_port &operator<<(const char value) { write((uint8_t)value); return *this; }
-    serial_port &operator<<(const char *value) { write((int8_t *)value); return *this; }
-
+    serial_port &operator<<(char c) { write(c); return *this; }
+    serial_port &operator<<(const char *str) { write(str); return *this; }
 
 private:
     // Get appropriate divisor for desired baud

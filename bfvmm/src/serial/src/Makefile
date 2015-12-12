@@ -29,7 +29,7 @@ CROSS_ASM=~/opt/cross/bin/nasm
 CROSS_LD=~/opt/cross/bin/x86_64-elf-ld
 
 CROSS_CCFLAGS=
-CROSS_CXXFLAGS=
+CROSS_CXXFLAGS=-std=c++14
 CROSS_LDFLAGS=
 CROSS_ASMFLAGS=-f elf64
 
@@ -46,7 +46,7 @@ LD=g++
 ASM=nasm
 
 CCFLAGS=
-CXXFLAGS=
+CXXFLAGS=-std=c++14
 LDFLAGS=
 ASMFLAGS=-f elf64
 

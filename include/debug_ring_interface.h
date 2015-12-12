@@ -23,6 +23,10 @@
 #ifndef DEBUG_RING_INTERFACE_H
 #define DEBUG_RING_INTERFACE_H
 
+#include <constants.h>
+
+#pragma pack(push, 1)
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -33,6 +37,16 @@ extern "C" {
 #define DEBUG_RING_READ_ERROR -1
 
 /**
+ * Get Debug Ring Resource Typedef
+ *
+ * This is used by the driver entry to as the function signature for
+ * getting it's internal debug ring
+ */
+typedef struct debug_ring_resources_t *(*get_drr_t)(long long int vcpuid);
+
+/**
+ * @struct debug_ring_resources_t
+ *
  * Debug Ring Resources
  *
  * Each driver entry needs to allocate some memory for the debug ring, and
@@ -41,15 +55,15 @@ extern "C" {
  *
  * Prior to providing this structure to the debug ring, the memory should be
  * cleared, and the len of the buffer should be set to the total length of
- * memory allocated minus the size of debug_ring_resources.
+ * memory allocated minus the size of debug_ring_resources_t.
  *
  * @code
  *
  *  int len = PAGE_SIZE * 100;
- *  struct debug_ring_resources *drr = valloc(len);
+ *  struct debug_ring_resources_t *drr = valloc(len);
  *
  *  memset(drr, 0, len);
- *  drr->len = len - sizeof(debug_ring_resources);
+ *  drr->len = len - sizeof(debug_ring_resources_t);
  *
  *  <give to vmm and do stuff>
  *
@@ -69,18 +83,19 @@ extern "C" {
  * counters are 64bit, it would take a life time for the counters to
  * overflow.
  *
- * @len the length of the buffer (not the length of this struct)
- * @var epos the end position in the circular buffer
- * @var epos the start position in the circular buffer
- * @buf the circular buffer that stores the debug strings.
+ * @var debug_ring_resources_t::epos
+ *     the end position in the circular buffer
+ * @var debug_ring_resources_t::spos
+ *     the start position in the circular buffer
+ * @var debug_ring_resources_t::buf
+ *     the circular buffer that stores the debug strings.
  */
-struct debug_ring_resources
+struct debug_ring_resources_t
 {
-    long long int len;
     long long int epos;
     long long int spos;
 
-    char buf[];
+    char buf[DEBUG_RING_SIZE];
 };
 
 /**
@@ -99,10 +114,12 @@ struct debug_ring_resources
  *        on error
  */
 long long int
-debug_ring_read(struct debug_ring_resources *drr, char *str, long long int len);
+debug_ring_read(struct debug_ring_resources_t *drr, char *str, long long int len);
 
 #ifdef __cplusplus
 }
 #endif
+
+#pragma pack(pop)
 
 #endif

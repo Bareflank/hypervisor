@@ -40,11 +40,11 @@ extern "C" {
 /******************************************************************************/
 
 #ifndef BFELF_MAX_MODULES
-#define BFELF_MAX_MODULES 50
+#define BFELF_MAX_MODULES 25
 #endif
 
 #ifndef BFELF_MAX_RELTAB
-#define BFELF_MAX_RELTAB 10
+#define BFELF_MAX_RELTAB 3
 #endif
 
 /******************************************************************************/

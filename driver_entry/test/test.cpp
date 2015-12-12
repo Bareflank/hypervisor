@@ -28,6 +28,8 @@ auto c_dummy1_filename = "../../../bfelf_loader/bin/cross/libdummy1.so";
 auto c_dummy2_filename = "../../../bfelf_loader/bin/cross/libdummy2.so";
 auto c_dummy3_filename = "../../../bfelf_loader/bin/cross/libdummy3.so";
 
+extern "C" int verify_no_mem_leaks(void);
+
 driver_entry_ut::driver_entry_ut()
 {
 }
@@ -132,19 +134,16 @@ driver_entry_ut::fini()
 bool
 driver_entry_ut::list()
 {
-    this->test_commit_init_invalid_vmmr();
-    this->test_commit_init_failed_alloc();
-    this->test_commit_init_failed_alloc_page();
-    this->test_commit_init_success();
-    this->test_commit_init_success_multiple_times();
-
     this->test_commit_fini_common_stop_failure();
+    this->test_commit_fini_common_unload_failure();
     this->test_commit_fini_success();
     this->test_commit_fini_success_multiple_times();
 
     this->test_common_add_module_invalid_file();
     this->test_common_add_module_invalid_file_size();
-    this->test_common_add_module_status_already_running();
+    this->test_common_add_module_status_corrupt();
+    this->test_common_add_module_status_loaded();
+    this->test_common_add_module_status_running();
     this->test_common_add_module_get_next_file_failed();
     this->test_common_add_module_elf_file_init_failed();
     this->test_common_add_module_elf_file_total_exec_failed();
@@ -152,27 +151,48 @@ driver_entry_ut::list()
     this->test_common_add_module_elf_file_load_failed();
     this->test_common_add_module_add_success();
 
-    this->test_common_start_already_started();
-    this->test_common_start_init_loader_failed();
-    this->test_common_start_loader_add_failed();
-    this->test_common_start_loader_relocate_failed();
-    this->test_common_start_execute_symbol_failed();
-    this->test_common_start_get_vmmr_failed();
+    this->test_common_load_status_corrupt();
+    this->test_common_load_status_loaded();
+    this->test_common_load_status_running();
+    this->test_common_load_loader_init_failed();
+    this->test_common_load_loader_add_file_failed();
+    this->test_common_load_loader_relocate_failed();
+    this->test_common_load_allocate_page_pool_failed();
+    this->test_common_load_success();
+
+    this->test_common_unload_status_corrupt();
+    this->test_common_unload_status_running();
+    this->test_common_unload_free_page_pool_failed();
+    this->test_common_unload_remove_elf_files_failed();
+    this->test_common_unload_success_with_loaded();
+    this->test_common_unload_success_with_unloaded_without_modules();
+    this->test_common_unload_success_with_unloaded_with_modules();
+
+    this->test_common_start_status_corrupt();
+    this->test_common_start_status_running();
+    this->test_common_start_status_unloaded();
+    this->test_common_start_init_vmm_failed();
+    this->test_common_start_start_vmm_failed();
     this->test_common_start_success();
     this->test_common_start_success_multiple_times();
 
-    this->test_common_stop_already_stopped();
-    this->test_common_stop_execute_symbol_failed();
+    this->test_common_stop_status_corrupt();
+    this->test_common_stop_status_loaded();
+    this->test_common_stop_status_unloaded();
+    this->test_common_stop_start_vmm_failed();
     this->test_common_stop_success();
     this->test_common_stop_success_multiple_times();
 
+    this->test_common_dump_status_corrupt();
+    this->test_common_dump_status_unloaded();
     this->test_common_dump_platform_alloc_failed();
+    this->test_common_dump_resolve_symbol_failed();
     this->test_common_dump_debug_ring_read_failed();
     this->test_common_dump_success();
     this->test_common_dump_success_multiple_times();
 
+    this->test_helper_set_vmm_status();
     this->test_helper_vmm_status();
-    this->test_helper_get_vmmr();
     this->test_helper_get_file_invalid_index();
     this->test_helper_get_file_success();
     this->test_helper_get_next_file_too_man_files();
@@ -185,11 +205,25 @@ driver_entry_ut::list()
     this->test_helper_add_elf_file_success_multiple_times();
     this->test_helper_symbol_length_null_symbol();
     this->test_helper_symbol_length_success();
+    this->test_helper_resolve_symbol_invalid_name();
+    this->test_helper_resolve_symbol_invalid_sym();
+    this->test_helper_resolve_symbol_resolve_symbol_failed();
+    this->test_helper_resolve_symbol_success();
     this->test_helper_execute_symbol_invalid_arg();
-    this->test_helper_execute_symbol_get_file_failed();
     this->test_helper_execute_symbol_resolve_symbol_failed();
+    this->test_helper_execute_symbol_sym_failed();
+    this->test_helper_execute_symbol_sym_success();
+    this->test_helper_allocate_page_pool_resolve_symbol_failed();
+    this->test_helper_allocate_page_pool_alloc_page_failed();
+    this->test_helper_allocate_page_pool_add_page_failed();
+    this->test_helper_allocate_page_pool_success();
+    this->test_helper_allocate_page_pool_success_multiple_times();
+    this->test_helper_free_page_pool_resolve_symbol_failed();
+    this->test_helper_free_page_pool_remove_page_failed();
+    this->test_helper_free_page_pool_success();
+    this->test_helper_free_page_pool_success_multiple_times();
 
-    return true;
+    return verify_no_mem_leaks();
 }
 
 int

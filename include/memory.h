@@ -25,10 +25,25 @@
 
 #include <constants.h>
 
+#pragma pack(push, 1)
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+/**
+ * Memory Manger Error Codes
+ */
+#define MEMORY_MANAGER_SUCCESS 0
+#define MEMORY_MANAGER_FAILURE -1
+
+/**
+ * Page
+ *
+ * The following defines a page. This structure is used by the driver entry
+ * point to provide the VMM with information about a page that the driver
+ * entry point has allocated.
+ */
 struct page_t
 {
     void *phys;
@@ -36,8 +51,19 @@ struct page_t
     unsigned long long size;
 };
 
+/**
+ * Memory Manager Typedefs
+ *
+ * This is used by the driver entry to as the function signature for
+ * memory manager functions
+ */
+typedef long long int (*add_page_t)(struct page_t *pg);
+typedef long long int (*remove_page_t)(struct page_t *pg);
+
 #ifdef __cplusplus
 }
 #endif
+
+#pragma pack(pop)
 
 #endif

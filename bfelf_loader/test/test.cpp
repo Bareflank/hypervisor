@@ -1018,7 +1018,7 @@ void bfelf_loader_ut::test_resolve()
     exec_ms64tosv64_t exec_ms64tosv64 = (exec_ms64tosv64_t)entry1;
 
     std::cout << std::endl;
-    std::cout << "Result: " << exec_ms64tosv64(entry2, (void *)5) << std::endl;
+    std::cout << "Result: " << exec_ms64tosv64(entry2, 5) << std::endl;
     std::cout << std::endl;
 
 #else
@@ -1026,7 +1026,7 @@ void bfelf_loader_ut::test_resolve()
     entry_point_t entry_point = (entry_point_t)entry2;
 
     std::cout << std::endl;
-    std::cout << "Result: " << entry_point((void *)5) << std::endl;
+    std::cout << "Result: " << entry_point(5) << std::endl;
     std::cout << std::endl;
 
 #endif

@@ -35,7 +35,7 @@ public:
 
     /// Destructor
     ///
-    ~vmm_intel_x64() {}
+    virtual ~vmm_intel_x64() {}
 
     /// Init VMM
     ///
@@ -47,8 +47,8 @@ public:
     /// @param memory_manager the memory manager class that this VMM will use
     /// @return success on success, failure otherwise
     ///
-    vmm_error::type init(intrinsics *intrinsics,
-                         memory_manager *memory_manager) override;
+    virtual vmm_error::type init(intrinsics *intrinsics,
+                                 memory_manager *memory_manager) override;
 
     /// Start VMM
     ///
@@ -59,7 +59,7 @@ public:
     /// @return not_supported if the compability tests fail, success on success
     ///         and failure otherwise
     ///
-    vmm_error::type start() override;
+    virtual vmm_error::type start() override;
 
     /// Stop VMM
     ///
@@ -67,36 +67,31 @@ public:
     ///
     /// @return success on success, failure otherwise
     ///
-    vmm_error::type stop() override;
+    virtual vmm_error::type stop() override;
+
+protected:
+
+    virtual vmm_error::type verify_cpuid_vmx_supported();
+    virtual vmm_error::type verify_vmx_capabilities_msr();
+    virtual vmm_error::type verify_ia32_vmx_cr0_fixed_msr();
+    virtual vmm_error::type verify_ia32_vmx_cr4_fixed_msr();
+    virtual vmm_error::type verify_ia32_feature_control_msr();
+    virtual vmm_error::type verify_v8086_disabled();
+    virtual vmm_error::type verify_vmx_operation_enabled();
+    virtual vmm_error::type verify_vmx_operation_disabled();
+
+    virtual vmm_error::type create_vmxon_region();
+    virtual vmm_error::type release_vmxon_region();
+    virtual vmm_error::type enable_vmx_operation();
+    virtual vmm_error::type disable_vmx_operation();
+    virtual vmm_error::type execute_vmxon();
+    virtual vmm_error::type execute_vmxoff();
+
+    virtual uint64_t vmxon_region_size();
 
 private:
 
-    /// Normally you would not add a seem that exposes the private
-    /// functionality of a class, but in this case, testing each function
-    /// one at a time creates more maintainable code as you don't have the
-    /// cascading effect that would occur with just testing start
-    ///
     friend class vmm_ut;
-
-    vmm_error::type verify_cpuid_vmx_supported();
-    vmm_error::type verify_vmx_capabilities_msr();
-    vmm_error::type verify_ia32_vmx_cr0_fixed_msr();
-    vmm_error::type verify_ia32_vmx_cr4_fixed_msr();
-    vmm_error::type verify_ia32_feature_control_msr();
-    vmm_error::type verify_v8086_disabled();
-    vmm_error::type verify_vmx_operation_enabled();
-    vmm_error::type verify_vmx_operation_disabled();
-
-    vmm_error::type create_vmxon_region();
-    vmm_error::type release_vmxon_region();
-    vmm_error::type enable_vmx_operation();
-    vmm_error::type disable_vmx_operation();
-    vmm_error::type execute_vmxon();
-    vmm_error::type execute_vmxoff();
-
-    uint64_t vmxon_region_size();
-
-private:
 
     bool m_vmxon_enabled;
 

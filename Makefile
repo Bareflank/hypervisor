@@ -33,3 +33,52 @@ SUBDIRS += driver_entry
 ################################################################################
 
 include ./common/common_subdir.mk
+
+################################################################################
+# Custom Targets
+################################################################################
+
+CS_M='\033[1;95m'
+
+.PHONY: debian_load
+.PHONY: debian_clean
+.PHONY: start
+.PHONY: stop
+.PHONY: cycle
+.PHONY: cycle_dump
+.PHONY: loop
+
+debian_load:
+	cd driver_entry/src/arch/linux; \
+	sudo make unload; \
+	make clean; \
+	make; \
+	sudo make load
+
+debian_clean:
+	cd driver_entry/src/arch/linux; \
+	sudo make unload; \
+	make clean
+
+start:
+	cd bfm/bin/native; \
+	sudo ./run.sh start vmm.modules
+
+stop:
+	cd bfm/bin/native; \
+	sudo ./run.sh stop
+
+dump:
+	cd bfm/bin/native; \
+	sudo ./run.sh dump
+
+cycle: start stop
+
+cycle_dump: start dump stop
+
+loop: force
+	@for n in $(shell seq 1 $(NUM)); do \
+		echo $(CS_M)"cycle: $$n"$(CE); \
+		$(MAKE) cycle; \
+		echo; \
+    done

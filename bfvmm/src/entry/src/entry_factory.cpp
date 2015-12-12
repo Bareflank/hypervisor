@@ -19,21 +19,54 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#ifdef CROSS_COMPILED
-
+#include <iostream>
 #include <entry/entry_factory.h>
+
+#ifndef INIT_IOSTREAM
+#define INIT_IOSTREAM()
+#endif
+
+entry_factory_error::type
+entry_factory::init_vmm(int64_t vcpuid)
+{
+    INIT_IOSTREAM();
+
+    if (m_serial_port.open() != serial::success)
+        return entry_factory_error::failure;
+
+    if (m_vcpu_factory.init(vcpuid) != vcpu_factory_error::success)
+        return entry_factory_error::failure;
+
+    return entry_factory_error::success;
+}
+
+entry_factory_error::type
+entry_factory::start_vmm(int64_t vcpuid)
+{
+    if (m_vcpu_factory.start(vcpuid) != vcpu_factory_error::success)
+        return entry_factory_error::failure;
+
+    return entry_factory_error::success;
+}
+
+entry_factory_error::type
+entry_factory::stop_vmm(int64_t vcpuid)
+{
+    if (m_vcpu_factory.stop(vcpuid) != vcpu_factory_error::success)
+        return entry_factory_error::failure;
+
+    return entry_factory_error::success;
+}
+
+void
+entry_factory::write(const char *str, int64_t len)
+{
+    m_serial_port.write(str, len);
+    m_vcpu_factory.write(str, len);
+}
 
 entry_factory *ef()
 {
-    // We use static local variable here instead of a global variable to
-    // ensure that the constructor / destructor are actually called, since
-    // we do not support global c++ objects in the cross compiled code. Note
-    // that this functions is only need by the cross compiler as native test
-    // code will create it's own version and export as needed (in order to
-    // fake the classes being returned)
-
     static entry_factory ef;
     return &ef;
 }
-
-#endif
