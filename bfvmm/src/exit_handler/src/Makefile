@@ -39,6 +39,25 @@ OBJDIR=.build/native
 OUTDIR=../bin/native
 
 ################################################################################
+# Cross Flags
+################################################################################
+
+CROSS_CC=~/opt/cross/bin/x86_64-elf-gcc
+CROSS_CXX=~/opt/cross/bin/x86_64-elf-g++
+CROSS_ASM=~/opt/cross/bin/nasm
+CROSS_LD=~/opt/cross/bin/x86_64-elf-ld
+
+CROSS_CCFLAGS=
+CROSS_CXXFLAGS=-std=c++14
+CROSS_ASMFLAGS=-f elf64
+CROSS_LDFLAGS=
+
+CROSS_DEFINES=
+
+CROSS_OBJDIR=.build/cross
+CROSS_OUTDIR=../../../bin/cross
+
+################################################################################
 # Common
 ################################################################################
 
@@ -49,37 +68,24 @@ MD=mkdir -p
 # Sources
 ################################################################################
 
-TARGET_NAME=test
-TARGET_TYPE=bin
-TARGET_COMPILER=native
+TARGET_NAME=exit_handler
+TARGET_TYPE=lib
+TARGET_COMPILER=both
 
-SOURCES+=test.cpp
-SOURCES+=test_vcpu.cpp
-SOURCES+=test_vcpu_factory.cpp
+SOURCES+=exit_handler.cpp
 HEADERS=
 
-LIBS+=vcpu
-LIBS+=vmm
-LIBS+=vmcs
-LIBS+=debug_ring
-LIBS+=exit_handler
-LIBS+=memory_manager
+LIBS=
 
-LIB_PATHS+=../bin/native
-LIB_PATHS+=../../vmm/bin/native
-LIB_PATHS+=../../vmcs/bin/native
-LIB_PATHS+=../../debug_ring/bin/native
-LIB_PATHS+=../../exit_handler/bin/native
-LIB_PATHS+=../../memory_manager/bin/native
-
-INCLUDE_PATHS=./ ../../../include/  ../../../../include/
+LIB_PATHS=
+INCLUDE_PATHS=./ ../../../include/ ../../../../include/
 
 ################################################################################
 # Environment Specific
 ################################################################################
 
 VMM_SOURCES=
-VMM_INCLUDE_PATHS=
+VMM_INCLUDE_PATHS=../../../include/std/
 
 WINDOWS_SOURCES=
 WINDOWS_INCLUDE_PATHS=

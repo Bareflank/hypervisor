@@ -98,6 +98,8 @@ private:
 
 private:
 
+    bool m_vmxon_enabled;
+
     memory_manager *m_memory_manager;
     intrinsics_intel_x64 *m_intrinsics;
 

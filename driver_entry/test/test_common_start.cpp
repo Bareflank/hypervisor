@@ -110,7 +110,7 @@ driver_entry_ut::test_common_start_execute_symbol_failed()
 {
     MockRepository mocks;
 
-    mocks.ExpectCallFunc(execute_symbol).Return(-1);
+    mocks.OnCallFunc(execute_symbol).Return(-1);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -127,7 +127,7 @@ driver_entry_ut::test_common_start_get_vmmr_failed()
 {
     MockRepository mocks;
 
-    mocks.ExpectCallFunc(get_vmmr).Return(0);
+    mocks.OnCallFunc(get_vmmr).Return(0);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {

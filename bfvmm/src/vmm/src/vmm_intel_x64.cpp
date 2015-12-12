@@ -37,7 +37,8 @@ struct vmxon_region
 
 vmm_intel_x64::vmm_intel_x64() :
     m_intrinsics(0),
-    m_memory_manager(0)
+    m_memory_manager(0),
+    m_vmxon_enabled(false)
 {
 }
 
@@ -66,14 +67,6 @@ vmm_intel_x64::start()
 
     if (m_intrinsics == 0 || m_memory_manager == 0)
         return vmm_error::failure;
-
-    // As a safety measure, we want to make sure that VMX operation is
-    // disabled prior to running this code, as it would cause invalid
-    // opcode exceptions
-
-    ret = verify_vmx_operation_disabled();
-    if (ret != vmm_error::success)
-        return ret;
 
     // The following process is documented in the Intel Software Developers
     // Manual, Section 31.5 Setup VMM & Teardown.
@@ -137,14 +130,6 @@ vmm_intel_x64::stop()
 
     if (m_intrinsics == 0 || m_memory_manager == 0)
         return vmm_error::failure;
-
-    // As a safety measure, we want to make sure that VMX operation is
-    // disabled prior to running this code, as it would cause invalid
-    // opcode exceptions
-
-    ret = verify_vmx_operation_enabled();
-    if (ret != vmm_error::success)
-        return ret;
 
     // We don't have to do any checks to get ourselves out of the VMX
     // root operation. We simply need to reverse what we did to get into
@@ -305,7 +290,7 @@ vmm_intel_x64::verify_ia32_vmx_cr4_fixed_msr()
 vmm_error::type
 vmm_intel_x64::verify_ia32_feature_control_msr()
 {
-    auto ia32_feature_control = m_intrinsics->read_msr(IA32_FEATURE_CONTROL);
+    auto ia32_feature_control = m_intrinsics->read_msr(IA32_FEATURE_CONTROL_MSR);
 
     if ((ia32_feature_control & (1 << 0)) == 0)
     {
@@ -451,12 +436,16 @@ vmm_intel_x64::execute_vmxon()
     // location that has the address of the VMXON region, which sadly is not
     // well documented in the Intel manual.
 
+    if (m_vmxon_enabled == true)
+        return vmm_error::success;
+
     if (m_intrinsics->vmxon(&phys) == false)
     {
         std::cout << "execute_vmxon failed" << std::endl;
         return vmm_error::failure;
     }
 
+    m_vmxon_enabled = true;
     std::cout << "vmxon: success" << std::endl;
 
     return vmm_error::success;
@@ -471,12 +460,16 @@ vmm_intel_x64::execute_vmxoff()
     // run, was not successful, or was run on a different CPU that the one we
     // are running VMXOFF on.
 
+    if (m_vmxon_enabled == false)
+        return vmm_error::success;
+
     if (m_intrinsics->vmxoff() == false)
     {
         std::cout << "execute_vmxoff failed" << std::endl;
         return vmm_error::failure;
     }
 
+    m_vmxon_enabled = false;
     std::cout << "vmxoff: success" << std::endl;
 
     return vmm_error::success;
