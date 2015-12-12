@@ -150,26 +150,26 @@ public:
                     PARITY_MODE parity = NONE, uint8_t stop_bits = 1);
     ~serial_port_x86(void);
 
-    serial::errno open(void);
-    serial::errno close(void);
+    serial::err open(void);
+    serial::err close(void);
 
-    serial::errno set_baud_rate(uint32_t baud);
+    serial::err set_baud_rate(uint32_t baud);
     uint32_t baud_rate(void);
 
-    serial::errno set_parity_mode(PARITY_MODE parity);
+    serial::err set_parity_mode(PARITY_MODE parity);
     uint8_t parity_mode(void);
 
-    serial::errno set_data_size(uint8_t bits);
+    serial::err set_data_size(uint8_t bits);
     uint8_t data_size(void);
 
-    serial::errno set_stop_bits(uint8_t bits);
+    serial::err set_stop_bits(uint8_t bits);
     uint8_t stop_bits(void);
 
-    serial::errno enable_interrupt_mode(uint8_t mode);
+    serial::err enable_interrupt_mode(uint8_t mode);
     void disable_interrupt_mode(void);
     uint8_t interrupt_mode(void);
 
-    serial::errno enable_fifo(void);
+    serial::err enable_fifo(void);
     void disable_fifo(void);
     bool fifo(void);
 
@@ -187,7 +187,9 @@ public:
     bool transmitter_empty(void);
     bool error_byte_rx_fifo(void);
 
-    serial_port &operator<<(uint8_t value) { write(value); return *this; }
+    serial_port &operator<<(const char value) { write((uint8_t)value); return *this; }
+    serial_port &operator<<(const char *value) { write((int8_t *)value); return *this; }
+
 
 private:
     // Get appropriate divisor for desired baud

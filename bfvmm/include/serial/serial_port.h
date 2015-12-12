@@ -6,7 +6,7 @@
 
 namespace serial
 {
-    enum errno
+    enum err
     {
         SUCCESS,
         GENERAL_ERROR,
@@ -48,33 +48,33 @@ public:
                 PARITY_MODE parity = NONE, uint8_t stop_bits = 1) {}
     virtual ~serial_port(void) {}
 
-    virtual serial::errno
+    virtual serial::err
     open(void) { return serial::UNIMPLEMENTED; }
 
-    virtual serial::errno
+    virtual serial::err
     close(void)  { return serial::UNIMPLEMENTED; }
 
-    virtual serial::errno
+    virtual serial::err
     set_baud_rate(uint32_t baud) { return serial::UNIMPLEMENTED; }
 
     virtual uint32_t
     baud_rate(void) { return 0; }
 
-    virtual serial::errno
+    virtual serial::err
     set_parity_mode(PARITY_MODE parity) { return serial::UNIMPLEMENTED; }
     virtual uint8_t parity_mode(void) { return 0; }
 
-    virtual serial::errno set_data_size(uint8_t bits)  { return serial::UNIMPLEMENTED; }
+    virtual serial::err set_data_size(uint8_t bits)  { return serial::UNIMPLEMENTED; }
     virtual uint8_t data_size(void)  { return 0; }
 
-    virtual serial::errno set_stop_bits(uint8_t bits)  { return serial::UNIMPLEMENTED; }
+    virtual serial::err set_stop_bits(uint8_t bits)  { return serial::UNIMPLEMENTED; }
     virtual uint8_t stop_bits(void)  { return 0; }
 
-    virtual serial::errno enable_interrupt_mode(uint8_t mode)  { return serial::UNIMPLEMENTED; }
+    virtual serial::err enable_interrupt_mode(uint8_t mode)  { return serial::UNIMPLEMENTED; }
     virtual void disable_interrupt_mode(void) {}
     virtual uint8_t interrupt_mode(void)  { return 0; }
 
-    virtual serial::errno enable_fifo(void)  { return serial::UNIMPLEMENTED; }
+    virtual serial::err enable_fifo(void)  { return serial::UNIMPLEMENTED; }
     virtual void disable_fifo(void) {}
     virtual bool fifo(void)  { return false; }
 

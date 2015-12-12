@@ -60,6 +60,7 @@ namespace std
         //       need to be removed.
 
         auto vc = ef()->get_vcpu_factory()->get_vcpu(0);
+        auto serial = ef()->get_serial_port();
 
         if (vc == 0)
             return *this;
@@ -67,15 +68,22 @@ namespace std
         if (m_justify == std::right)
         {
             for (auto i = 0; i < gap; i++)
+            {
+                *serial << ' ';
                 vc->get_debug_ring()->write(" ", 1);
+            }
         }
 
+        *serial << str;
         vc->get_debug_ring()->write(str, len);
 
         if (m_justify == std::left)
         {
             for (auto i = 0; i < gap; i++)
+            {
+                *serial << ' ';
                 vc->get_debug_ring()->write(" ", 1);
+            }
         }
 
         return *this;
@@ -190,7 +198,7 @@ namespace std
         switch (modifier)
         {
             case std::endl:
-                return *this << "\n";
+                return *this << "\r\n";
 
             case std::dec:
                 m_base = 10;
@@ -230,6 +238,9 @@ namespace std
 
             m_width = 0;
             m_justify = std::left;
+
+            auto serial = ef()->get_serial_port();
+            serial->open();
 
             initialized = true;
         }

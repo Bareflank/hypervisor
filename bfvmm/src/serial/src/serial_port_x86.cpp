@@ -80,7 +80,7 @@ serial_port_x86::serial_port_x86(uint8_t port, uint32_t baud, uint8_t data_size,
         case 3:
         {
 
-	  m_port = COM3_IO_PORT;
+            m_port = COM3_IO_PORT;
             break;
         }
         case 4:
@@ -107,7 +107,7 @@ serial_port_x86::~serial_port_x86(void)
 
 }
 
-serial::errno
+serial::err
 serial_port_x86::open(void)
 {
     disable_interrupt_mode();
@@ -123,13 +123,13 @@ serial_port_x86::open(void)
     return serial::SUCCESS;
 }
 
-serial::errno
+serial::err
 serial_port_x86::close(void)
 {
     return serial::SUCCESS;
 }
 
-serial::errno
+serial::err
 serial_port_x86::set_baud_rate(uint32_t baud)
 {
     if (baud > MAX_BAUD_RATE)
@@ -161,7 +161,7 @@ serial_port_x86::baud_rate(void)
     return m_baud;
 }
 
-serial::errno
+serial::err
 serial_port_x86::set_parity_mode(PARITY_MODE parity)
 {
     uint8_t i = 0;
@@ -197,7 +197,7 @@ serial_port_x86::parity_mode(void)
     return m_parity;
 }
 
-serial::errno
+serial::err
 serial_port_x86::set_data_size(uint8_t size)
 {
     uint8_t i = 0;
@@ -234,7 +234,7 @@ serial_port_x86::data_size(void)
     return m_data_size;
 }
 
-serial::errno
+serial::err
 serial_port_x86::set_stop_bits(uint8_t bits)
 {
     uint8_t i = 0;
@@ -263,7 +263,7 @@ serial_port_x86::stop_bits(void)
     return m_stop_bits;
 }
 
-serial::errno
+serial::err
 serial_port_x86::enable_interrupt_mode(uint8_t interrupts)
 {
     m_interrupt_mode = interrupts;
@@ -289,7 +289,7 @@ serial_port_x86::interrupt_mode(void)
     return m_interrupt_mode;
 }
 
-serial::errno
+serial::err
 serial_port_x86::enable_fifo(void)
 {
     m_fifo_enabled = true;
