@@ -23,19 +23,10 @@
 # Subdirs
 ################################################################################
 
-SUBDIRS += memory_manager
-SUBDIRS += debug_ring
-SUBDIRS += entry
-SUBDIRS += std
-SUBDIRS += serial
-SUBDIRS += intrinsics
-SUBDIRS += exit_handler
-SUBDIRS += vmm
-SUBDIRS += vmcs
-SUBDIRS += vcpu
+SUBDIRS += native
 
 ################################################################################
 # Common
 ################################################################################
 
-include ../../common/common_subdir.mk
+include ../../../../common/common_subdir.mk

@@ -22,6 +22,7 @@
 LIBRARY_PATHS := $(LIBRARY_PATHS):../../../vmm/bin/native/
 LIBRARY_PATHS := $(LIBRARY_PATHS):../../../vmcs/bin/native/
 LIBRARY_PATHS := $(LIBRARY_PATHS):../../../debug_ring/bin/native/
+LIBRARY_PATHS := $(LIBRARY_PATHS):../../../exit_handler/bin/native/
 LIBRARY_PATHS := $(LIBRARY_PATHS):../../../memory_manager/bin/native/
 
 include ../../../../../common/common_test.mk

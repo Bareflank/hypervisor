@@ -66,7 +66,7 @@ driver_entry_ut::test_common_stop_execute_symbol_failed()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_TRUE(common_stop_vmm() == -1);
+        EXPECT_TRUE(common_stop_vmm() == BF_SUCCESS);
     });
 }
 

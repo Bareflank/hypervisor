@@ -127,7 +127,7 @@ vmm_ut::test_verify_vmx_capabilities_msr_success()
 }
 
 void
-vmm_ut::test_verify_ia32_vmx_cr0_fixed0_msr_failed_fixed0()
+vmm_ut::test_verify_ia32_vmx_cr0_fixed_msr_failed_fixed0()
 {
     MockRepository mocks;
     memory_manager *mm = mocks.Mock<memory_manager>();
@@ -147,7 +147,7 @@ vmm_ut::test_verify_ia32_vmx_cr0_fixed0_msr_failed_fixed0()
 }
 
 void
-vmm_ut::test_verify_ia32_vmx_cr0_fixed0_msr_failed_fixed1()
+vmm_ut::test_verify_ia32_vmx_cr0_fixed_msr_failed_fixed1()
 {
     MockRepository mocks;
     memory_manager *mm = mocks.Mock<memory_manager>();
@@ -167,7 +167,7 @@ vmm_ut::test_verify_ia32_vmx_cr0_fixed0_msr_failed_fixed1()
 }
 
 void
-vmm_ut::test_verify_ia32_vmx_cr0_fixed0_msr_success()
+vmm_ut::test_verify_ia32_vmx_cr0_fixed_msr_success()
 {
     MockRepository mocks;
     memory_manager *mm = mocks.Mock<memory_manager>();
@@ -187,7 +187,7 @@ vmm_ut::test_verify_ia32_vmx_cr0_fixed0_msr_success()
 }
 
 void
-vmm_ut::test_verify_ia32_vmx_cr4_fixed0_msr_failed_fixed0()
+vmm_ut::test_verify_ia32_vmx_cr4_fixed_msr_failed_fixed0()
 {
     MockRepository mocks;
     memory_manager *mm = mocks.Mock<memory_manager>();
@@ -207,7 +207,7 @@ vmm_ut::test_verify_ia32_vmx_cr4_fixed0_msr_failed_fixed0()
 }
 
 void
-vmm_ut::test_verify_ia32_vmx_cr4_fixed0_msr_failed_fixed1()
+vmm_ut::test_verify_ia32_vmx_cr4_fixed_msr_failed_fixed1()
 {
     MockRepository mocks;
     memory_manager *mm = mocks.Mock<memory_manager>();
@@ -227,7 +227,7 @@ vmm_ut::test_verify_ia32_vmx_cr4_fixed0_msr_failed_fixed1()
 }
 
 void
-vmm_ut::test_verify_ia32_vmx_cr4_fixed0_msr_success()
+vmm_ut::test_verify_ia32_vmx_cr4_fixed_msr_success()
 {
     MockRepository mocks;
     memory_manager *mm = mocks.Mock<memory_manager>();
@@ -256,7 +256,7 @@ vmm_ut::test_verify_ia32_feature_control_msr_failed()
     vmm_intel_x64 vmm;
     vmm.init(intrinsics, mm);
 
-    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_FEATURE_CONTROL).Return(0);
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_FEATURE_CONTROL_MSR).Return(0);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -274,7 +274,7 @@ vmm_ut::test_verify_ia32_feature_control_msr_success()
     vmm_intel_x64 vmm;
     vmm.init(intrinsics, mm);
 
-    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_FEATURE_CONTROL).Return(1);
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_FEATURE_CONTROL_MSR).Return(1);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -525,6 +525,25 @@ vmm_ut::test_release_vmxon_region()
 }
 
 void
+vmm_ut::test_execute_vmxon_already_on()
+{
+    MockRepository mocks;
+    memory_manager *mm = mocks.Mock<memory_manager>();
+    intrinsics_intel_x64 *intrinsics = mocks.Mock<intrinsics_intel_x64>();
+
+    vmm_intel_x64 vmm;
+    vmm.init(intrinsics, mm);
+
+    auto &mock1 = mocks.ExpectCall(intrinsics, intrinsics_intel_x64::vmxon).Return(true);
+    auto &mock2 = mocks.NeverCall(intrinsics, intrinsics_intel_x64::vmxon).After(mock1);
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        EXPECT_TRUE(vmm.execute_vmxon() == vmm_error::success);
+    });
+}
+
+void
 vmm_ut::test_execute_vmxon_failed()
 {
     MockRepository mocks;
@@ -543,6 +562,24 @@ vmm_ut::test_execute_vmxon_failed()
 }
 
 void
+vmm_ut::test_execute_vmxoff_already_off()
+{
+    MockRepository mocks;
+    memory_manager *mm = mocks.Mock<memory_manager>();
+    intrinsics_intel_x64 *intrinsics = mocks.Mock<intrinsics_intel_x64>();
+
+    vmm_intel_x64 vmm;
+    vmm.init(intrinsics, mm);
+
+    mocks.NeverCall(intrinsics, intrinsics_intel_x64::vmxoff);
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        EXPECT_TRUE(vmm.execute_vmxoff() == vmm_error::success);
+    });
+}
+
+void
 vmm_ut::test_execute_vmxoff_failed()
 {
     MockRepository mocks;
@@ -552,10 +589,12 @@ vmm_ut::test_execute_vmxoff_failed()
     vmm_intel_x64 vmm;
     vmm.init(intrinsics, mm);
 
-    mocks.ExpectCall(intrinsics, intrinsics_intel_x64::vmxoff).Return(false);
+    mocks.ExpectCall(intrinsics, intrinsics_intel_x64::vmxon).Return(true);
+    mocks.ExpectCall(intrinsics, intrinsics_intel_x64::vmxoff).Return(true);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_TRUE(vmm.execute_vmxoff() == vmm_error::failure);
+        EXPECT_TRUE(vmm.execute_vmxon() == vmm_error::success);
+        EXPECT_TRUE(vmm.execute_vmxoff() == vmm_error::success);
     });
 }

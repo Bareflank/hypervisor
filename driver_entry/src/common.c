@@ -373,6 +373,8 @@ common_start_vmm(void)
         goto failure;
     }
 
+    g_vmm_status = VMM_STARTED;
+
     ret = execute_symbol("_Z9start_vmmPv", get_vmmr());
     if (ret != BF_SUCCESS)
     {
@@ -380,7 +382,6 @@ common_start_vmm(void)
         goto failure;
     }
 
-    g_vmm_status = VMM_STARTED;
     return BF_SUCCESS;
 
 failure:
@@ -398,10 +399,7 @@ common_stop_vmm(void)
     {
         ret = execute_symbol("_Z8stop_vmmPv", 0);
         if (ret != BFELF_SUCCESS)
-        {
             ALERT("stop_vmm: failed to execute symbol: %d\n", ret);
-            return ret;
-        }
     }
 
     remove_elf_files();

@@ -21,7 +21,7 @@
 
 #include <vmm_entry.h>
 
-#include <std/iostream>
+#include <iostream>
 #include <entry/entry_factory.h>
 
 // =============================================================================
@@ -51,8 +51,6 @@ start_vmm(void *arg)
 
     // -------------------------------------------------------------------------
     // Initialize Debugging
-
-    std::cout.init();
 
     if (vcpu->get_debug_ring()->init(vmmr->drr) != debug_ring_error::success)
         return VMM_ERROR_INVALID_DRR;

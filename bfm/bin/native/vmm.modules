@@ -6,3 +6,4 @@
 ../../../bfvmm/bin/cross/libvmm.so
 ../../../bfvmm/bin/cross/libvmcs.so
 ../../../bfvmm/bin/cross/libvcpu.so
+../../../bfvmm/bin/cross/libexit_handler.so

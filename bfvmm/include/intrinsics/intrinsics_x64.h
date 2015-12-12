@@ -30,6 +30,8 @@
 // Intrinsics
 // =============================================================================
 
+#pragma pack(push, 1)
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -42,17 +44,67 @@ uint32_t __cpuid_edx(uint32_t val);
 uint64_t __read_rflags(void);
 
 uint64_t __read_msr(uint32_t msr);
+uint32_t __read_msr32(uint32_t msr);
 void __write_msr(uint32_t msr, uint64_t val);
 
-uint64_t __read_cr0();
+uint64_t __read_cr0(void);
 void __write_cr0(uint64_t val);
 
-uint64_t __read_cr4();
+uint64_t __read_cr3(void);
+void __write_cr3(uint64_t val);
+
+uint64_t __read_cr4(void);
 void __write_cr4(uint64_t val);
+
+uint16_t __read_es(void);
+uint16_t __read_cs(void);
+uint16_t __read_ss(void);
+uint16_t __read_ds(void);
+uint16_t __read_fs(void);
+uint16_t __read_gs(void);
+uint16_t __read_tr(void);
+uint16_t __read_ldtr(void);
+uint64_t __read_rsp(void);
+
+struct gdt_t
+{
+    uint64_t limit : 16;
+    uint64_t base  : 64;
+};
+
+struct idt_t
+{
+    uint64_t limit : 16;
+    uint64_t base  : 64;
+};
+
+struct segment_descriptor_t
+{
+    uint64_t limit_15_00         : 16;
+    uint64_t base_15_00          : 16;
+    uint64_t base_23_16          : 8;
+    uint64_t access_rights_07_00 : 8;
+    uint64_t limit_19_16         : 4;
+    uint64_t access_rights_15_12 : 4;
+    uint64_t base_31_24          : 8;
+};
+
+#define SEGMENT_DESCRIPTOR_LIMIT(a) ((a.limit_19_16 << 16) | \
+                                     (a.limit_15_00 << 0))
+#define SEGMENT_DESCRIPTOR_BASE(a) ((a.base_31_24 << 24) | \
+                                    (a.base_23_16 << 16) | \
+                                    (a.base_15_00 << 0))
+#define SEGMENT_DESCRIPTOR_ACCESS(a) ((a.access_rights_15_12 << 12) | \
+                                      (a.access_rights_07_00 << 0))
+
+void __read_gdt(gdt_t *gdt);
+void __read_idt(idt_t *idt);
 
 #ifdef __cplusplus
 }
 #endif
+
+#pragma pack(pop)
 
 // =============================================================================
 // C++ Wrapper
@@ -83,6 +135,9 @@ public:
     virtual uint64_t read_msr(uint32_t msr)
     { return __read_msr(msr); }
 
+    virtual uint32_t read_msr32(uint32_t msr)
+    { return __read_msr32(msr); }
+
     virtual void write_msr(uint32_t msr, uint64_t val)
     { __write_msr(msr, val); }
 
@@ -92,11 +147,50 @@ public:
     virtual void write_cr0(uint64_t val)
     { __write_cr0(val); }
 
+    virtual uint64_t read_cr3()
+    { return __read_cr3(); }
+
+    virtual void write_cr3(uint64_t val)
+    { __write_cr3(val); }
+
     virtual uint64_t read_cr4()
     { return __read_cr4(); }
 
     virtual void write_cr4(uint64_t val)
     { __write_cr4(val); }
+
+    virtual uint16_t read_es()
+    { return __read_es(); }
+
+    virtual uint16_t read_cs()
+    { return __read_cs(); }
+
+    virtual uint16_t read_ss()
+    { return __read_ss(); }
+
+    virtual uint16_t read_ds()
+    { return __read_ds(); }
+
+    virtual uint16_t read_fs()
+    { return __read_fs(); }
+
+    virtual uint16_t read_gs()
+    { return __read_gs(); }
+
+    virtual uint16_t read_tr()
+    { return __read_tr(); }
+
+    virtual uint16_t read_ldtr()
+    { return __read_ldtr(); }
+
+    virtual uint64_t read_rsp()
+    { return __read_rsp(); }
+
+    virtual void read_gdt(gdt_t *gdt)
+    { __read_gdt(gdt); }
+
+    virtual void read_idt(idt_t *idt)
+    { __read_idt(idt); }
 };
 
 // =============================================================================
@@ -166,6 +260,17 @@ public:
 #define IA32_VMX_CR0_FIXED1_MSR (0x487)
 #define IA32_VMX_CR4_FIXED0_MSR (0x488)
 #define IA32_VMX_CR4_FIXED1_MSR (0x489)
-#define IA32_FEATURE_CONTROL (0x3A)
+#define IA32_FEATURE_CONTROL_MSR (0x3A)
+#define IA32_VMX_TRUE_PINBASED_CTLS_MSR (0x48D)
+#define IA32_VMX_TRUE_PROCBASED_CTLS_MSR (0x48E)
+#define IA32_VMX_TRUE_EXIT_CTLS_MSR (0x48F)
+#define IA32_VMX_TRUE_ENTRY_CTLS_MSR (0x490)
+
+// 64-ia-32-architectures-software-developer-manual, section 35.1
+// IA-32 Architectural MSRs
+#define IA32_DEBUGCTL_MSR (0x1D9)
+#define IA32_SYSENTER_CS_MSR (0x174)
+#define IA32_SYSENTER_ESP_MSR (0x175)
+#define IA32_SYSENTER_EIP_MSR (0x176)
 
 #endif

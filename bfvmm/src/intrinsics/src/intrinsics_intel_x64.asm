@@ -21,6 +21,12 @@
 
 global __vmxon:function
 global __vmxoff:function
+global __vmclear:function
+global __vmptrld:function
+global __vmptrst:function
+global __vmwrite:function
+global __vmread:function
+global __vmlaunch:function
 
 section .text
 
@@ -33,6 +39,42 @@ __vmxon:
 ; uint64_t __vmxoff(void)
 __vmxoff:
     vmxoff
+    jbe __vmx_failure
+    jmp __vmx_success
+
+; uint64_t __vmclear(void *vmcs_region)
+__vmclear:
+    vmclear [rdi]
+    jbe __vmx_failure
+    jmp __vmx_success
+
+; uint64_t __vmptrld(void *vmcs_region)
+__vmptrld:
+    vmptrld [rdi]
+    jbe __vmx_failure
+    jmp __vmx_success
+
+; uint64_t __vmptrst(void *vmcs_region)
+__vmptrst:
+    vmptrst [rdi]
+    jbe __vmx_failure
+    jmp __vmx_success
+
+; uint64_t __vmwrite(uint64_t field, uint64_t val)
+__vmwrite:
+    vmwrite rdi, rsi
+    jbe __vmx_failure
+    jmp __vmx_success
+
+; uint64_t __vmread(uint64_t field, uint64_t *val)
+__vmread:
+    vmread [rsi], rdi
+    jbe __vmx_failure
+    jmp __vmx_success
+
+; uint64_t __vmlaunch(void)
+__vmlaunch:
+    vmlaunch
     jbe __vmx_failure
     jmp __vmx_success
 

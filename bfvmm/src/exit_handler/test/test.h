@@ -19,60 +19,25 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#ifndef IOSTREAM_H
-#define IOSTREAM_H
+#ifndef TEST_H
+#define TEST_H
 
-#include <stddef.h>
+#include <unittest.h>
 
-namespace std
-{
-
-enum ostream_modifier
-{
-    undefined_modifier = 0,
-    endl = 1,
-    dec = 10,
-    hex = 16,
-    set_width = 100,
-    left = 101,
-    right = 102
-};
-
-class ostream
+class exit_handler_ut : public unittest
 {
 public:
-    ostream() {}
-    ~ostream() {}
 
-    ostream& operator<<(const char *str);
-    ostream& operator<<(bool val);
-    ostream& operator<<(char val);
-    ostream& operator<<(unsigned char val);
-    ostream& operator<<(short val);
-    ostream& operator<<(unsigned short val);
-    ostream& operator<<(int val);
-    ostream& operator<<(unsigned int val);
-    ostream& operator<<(long long int val);
-    ostream& operator<<(unsigned long long int val);
-    ostream& operator<<(void *val);
-    ostream& operator<<(size_t val);
-    ostream& operator<<(ostream_modifier modifier);
+    exit_handler_ut();
+    ~exit_handler_ut() {}
+
+protected:
+
+    bool init() override;
+    bool fini() override;
+    bool list() override;
 
 private:
-
-    void init();
-
-private:
-
-    int m_base;
-    int m_width;
-    ostream_modifier m_justify;
-};
-
-ostream_modifier setw(int width);
-
-extern ostream cout;
-
 };
 
 #endif
