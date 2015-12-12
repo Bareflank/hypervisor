@@ -58,7 +58,10 @@ SOURCES+=test_vcpu.cpp
 SOURCES+=test_vcpu_factory.cpp
 HEADERS=
 
-LIBS=vcpu vmm debug_ring memory_manager
+LIBS+=vcpu
+LIBS+=vmm
+LIBS+=debug_ring
+LIBS+=memory_manager
 
 LIB_PATHS+=../bin/native
 LIB_PATHS+=../../vmm/bin/native

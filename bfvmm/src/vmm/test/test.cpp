@@ -40,7 +40,35 @@ vmm_ut::fini()
 bool
 vmm_ut::list()
 {
-    this->test_check_support_v8086_enabled();
+    this->test_vmm_start_uninitialized();
+    this->test_vmm_stop_uninitialized();
+    this->test_verify_cpuid_vmx_supported_failed();
+    this->test_verify_cpuid_vmx_supported_success();
+    this->test_verify_vmx_capabilities_msr_failed_invalid_physical_address_width();
+    this->test_verify_vmx_capabilities_msr_failed_invalid_memory_type();
+    this->test_verify_vmx_capabilities_msr_success();
+    this->test_verify_ia32_vmx_cr0_fixed0_msr_failed_fixed0();
+    this->test_verify_ia32_vmx_cr0_fixed0_msr_failed_fixed1();
+    this->test_verify_ia32_vmx_cr0_fixed0_msr_success();
+    this->test_verify_ia32_vmx_cr4_fixed0_msr_failed_fixed0();
+    this->test_verify_ia32_vmx_cr4_fixed0_msr_failed_fixed1();
+    this->test_verify_ia32_vmx_cr4_fixed0_msr_success();
+    this->test_verify_ia32_feature_control_msr_failed();
+    this->test_verify_ia32_feature_control_msr_success();
+    this->test_verify_v8086_disabled_failed();
+    this->test_verify_v8086_disabled_success();
+    this->test_verify_vmx_operation_enabled_failed();
+    this->test_verify_vmx_operation_enabled_success();
+    this->test_verify_vmx_operation_disabled_failed();
+    this->test_verify_vmx_operation_disabled_success();
+    this->test_enable_vmx_operation_success();
+    this->test_disable_vmx_operation_success();
+    this->test_create_vmxon_region_out_of_memory();
+    this->test_create_vmxon_region_misaligned_page();
+    this->test_create_vmxon_region_not_page_aligned();
+    this->test_release_vmxon_region();
+    this->test_execute_vmxon_failed();
+    this->test_execute_vmxoff_failed();
 
     return true;
 }

@@ -35,6 +35,12 @@ struct vmxon_region
 //  Implementation
 // =============================================================================
 
+vmm_intel_x64::vmm_intel_x64() :
+    m_intrinsics(0),
+    m_memory_manager(0)
+{
+}
+
 vmm_error::type
 vmm_intel_x64::init(intrinsics *intrinsics,
                     memory_manager *memory_manager)
@@ -61,6 +67,14 @@ vmm_intel_x64::start()
     if (m_intrinsics == 0 || m_memory_manager == 0)
         return vmm_error::failure;
 
+    // As a safety measure, we want to make sure that VMX operation is
+    // disabled prior to running this code, as it would cause invalid
+    // opcode exceptions
+
+    ret = verify_vmx_operation_disabled();
+    if (ret != vmm_error::success)
+        return ret;
+
     // The following process is documented in the Intel Software Developers
     // Manual, Section 31.5 Setup VMM & Teardown.
 
@@ -76,11 +90,7 @@ vmm_intel_x64::start()
     if (ret != vmm_error::success)
         return ret;
 
-    ret = verify_ia32_vmx_cr0_fixed0_msr();
-    if (ret != vmm_error::success)
-        return ret;
-
-    ret = verify_ia32_vmx_cr0_fixed1_msr();
+    ret = verify_ia32_vmx_cr0_fixed_msr();
     if (ret != vmm_error::success)
         return ret;
 
@@ -88,11 +98,11 @@ vmm_intel_x64::start()
     if (ret != vmm_error::success)
         return ret;
 
-    ret = verify_ia32_vmx_cr4_fixed0_msr();
+    ret = verify_vmx_operation_enabled();
     if (ret != vmm_error::success)
         return ret;
 
-    ret = verify_ia32_vmx_cr4_fixed1_msr();
+    ret = verify_ia32_vmx_cr4_fixed_msr();
     if (ret != vmm_error::success)
         return ret;
 
@@ -128,6 +138,18 @@ vmm_intel_x64::stop()
     if (m_intrinsics == 0 || m_memory_manager == 0)
         return vmm_error::failure;
 
+    // As a safety measure, we want to make sure that VMX operation is
+    // disabled prior to running this code, as it would cause invalid
+    // opcode exceptions
+
+    ret = verify_vmx_operation_enabled();
+    if (ret != vmm_error::success)
+        return ret;
+
+    // We don't have to do any checks to get ourselves out of the VMX
+    // root operation. We simply need to reverse what we did to get into
+    // VMX operation
+
     ret = execute_vmxoff();
     if (ret != vmm_error::success)
         return ret;
@@ -136,60 +158,13 @@ vmm_intel_x64::stop()
     if (ret != vmm_error::success)
         return ret;
 
-    ret = release_vmxon_region();
+    ret = verify_vmx_operation_disabled();
     if (ret != vmm_error::success)
         return ret;
 
-    return vmm_error::success;
-}
-
-vmm_error::type
-vmm_intel_x64::create_vmxon_region()
-{
-    if (m_memory_manager->alloc_page(&m_vmxon_page) != memory_manager_error::success)
-        return vmm_error::out_of_memory;
-
-    if (m_vmxon_page.size() < vmxon_vmcs_region_size())
-    {
-        std::cout << "create_vmxon_region failed: "
-                  << "the allocated page is not large enough:" << std::endl
-                  << "    - page size: " << m_vmxon_page.size() << " "
-                  << "    - vmxon/vmcs region size: " << vmxon_vmcs_region_size()
-                  << std::endl;
-        return vmm_error::not_supported;
-    }
-
-    if (((uintptr_t)m_vmxon_page.phys_addr() & 0x0000000000000FFF) != 0)
-    {
-        std::cout << "create_vmxon_region failed: "
-                  << "the allocated page is not page aligned:" << std::endl
-                  << "    - page phys: " << m_vmxon_page.phys_addr()
-                  << std::endl;
-        return vmm_error::not_supported;
-    }
-
-    auto buf = (char *)m_vmxon_page.virt_addr();
-    auto reg = (vmxon_region *)m_vmxon_page.virt_addr();
-
-    // The information regading this MSR can be found in appendix A.1. For
-    // the VMX capabilities check, we need the following:
-    //
-    // - Bits 30:0 contain the 31-bit VMCS revision identifier used by the
-    //   processor. Processors that use the same VMCS revision identifier use
-    //   the same size for VMCS regions (see subsequent item on bits 44:32)
-
-    for (auto i = 0; i < m_vmxon_page.size(); i++)
-        buf[i] = 0;
-
-    reg->revision_id = m_intrinsics->read_msr(IA32_VMX_BASIC_MSR) & 0x7FFFFFFFF;
-
-    return vmm_error::success;
-}
-
-vmm_error::type
-vmm_intel_x64::release_vmxon_region()
-{
-    m_memory_manager->free_page(m_vmxon_page);
+    ret = release_vmxon_region();
+    if (ret != vmm_error::success)
+        return ret;
 
     return vmm_error::success;
 }
@@ -248,7 +223,7 @@ vmm_intel_x64::verify_vmx_capabilities_msr()
     {
         std::cout << "verify_vmx_capabilities_msr failed: "
                   << "vmx capabilities MSR is reporting an unsupported physical address width: "
-                  << std::hex << physical_address_width << std::dec << std::endl;
+                  << physical_address_width << std::endl;
         return vmm_error::not_supported;
     }
 
@@ -256,7 +231,7 @@ vmm_intel_x64::verify_vmx_capabilities_msr()
     {
         std::cout << "verify_vmx_capabilities_msr failed: "
                   << "vmx capabilities MSR is reporting an unsupported memory type: "
-                  << std::hex << memory_type << std::dec << std::endl;
+                  << memory_type << std::endl;
         return vmm_error::not_supported;
     }
 
@@ -264,10 +239,11 @@ vmm_intel_x64::verify_vmx_capabilities_msr()
 }
 
 vmm_error::type
-vmm_intel_x64::verify_ia32_vmx_cr0_fixed0_msr()
+vmm_intel_x64::verify_ia32_vmx_cr0_fixed_msr()
 {
     auto cr0 = m_intrinsics->read_cr0();
-    auto ia32_vmx_cr0_fixed0_msr = m_intrinsics->read_msr(IA32_VMX_CR0_FIXED0_MSR);
+    auto ia32_vmx_cr0_fixed0 = m_intrinsics->read_msr(IA32_VMX_CR0_FIXED0_MSR);
+    auto ia32_vmx_cr0_fixed1 = m_intrinsics->read_msr(IA32_VMX_CR0_FIXED1_MSR);
 
     // The information regading this MSR can be found in appendix A.7.
     //
@@ -279,13 +255,15 @@ vmm_intel_x64::verify_ia32_vmx_cr0_fixed0_msr()
     // bit X is 0 in IA32_VMX_CR0_FIXED1, then that bit of CR0 is fixed to 0
     // in VMX operation.
 
-    if (((cr0 & ia32_vmx_cr0_fixed0_msr) & ~ia32_vmx_cr0_fixed0_msr) != 0)
+    if (0 != ((~cr0 & ia32_vmx_cr0_fixed0) | (cr0 & ~ia32_vmx_cr0_fixed1)))
     {
-        std::cout << "verify_ia32_vmx_cr0_fixed0_msr failed: "
-                  << "cr0 incorrectly setup: "
-                  << "    - cr0: " << cr0 << " "
-                  << "    - ia32_vmx_cr0_fixed0_msr: " << ia32_vmx_cr0_fixed0_msr
-                  << std::endl;
+        std::cout << "verify_ia32_vmx_cr0_fixed_msr failed. "
+                  << "cr0 incorrectly setup: " << std::endl
+                  << std::hex
+                  << "    - cr0: 0x" << cr0 << " " << std::endl
+                  << "    - ia32_vmx_cr0_fixed0: 0x" << ia32_vmx_cr0_fixed0 << std::endl
+                  << "    - ia32_vmx_cr0_fixed1: 0x" << ia32_vmx_cr0_fixed1 << std::endl
+                  << std::dec;
         return vmm_error::not_supported;
     }
 
@@ -293,39 +271,11 @@ vmm_intel_x64::verify_ia32_vmx_cr0_fixed0_msr()
 }
 
 vmm_error::type
-vmm_intel_x64::verify_ia32_vmx_cr0_fixed1_msr()
-{
-    auto cr0 = m_intrinsics->read_cr0();
-    auto ia32_vmx_cr0_fixed1_msr = m_intrinsics->read_msr(IA32_VMX_CR0_FIXED1_MSR);
-
-    // The information regading this MSR can be found in appendix A.7.
-    //
-    // The IA32_VMX_CR0_FIXED0 MSR (index 486H) and IA32_VMX_CR0_FIXED1 MSR
-    // (index 487H) indicate how bits in CR0 may be set in VMX operation.
-    // They report on bits in CR0 that are allowed to be 0 and to be 1,
-    // respectively, in VMX operation. If bit X is 1 in IA32_VMX_CR0_FIXED0,
-    // then that bit of CR0 is fixed to 1 in VMX operation. Similarly, if
-    // bit X is 0 in IA32_VMX_CR0_FIXED1, then that bit of CR0 is fixed to 0
-    // in VMX operation.
-
-    if (~((~cr0 & ~ia32_vmx_cr0_fixed1_msr) | ia32_vmx_cr0_fixed1_msr) != 0)
-    {
-        std::cout << "verify_ia32_vmx_cr0_fixed1_msr failed: "
-                  << "cr0 incorrectly setup: "
-                  << "    - cr0: " << cr0 << " "
-                  << "    - ia32_vmx_cr0_fixed1_msr: " << ia32_vmx_cr0_fixed1_msr
-                  << std::endl;
-        return vmm_error::not_supported;
-    }
-
-    return vmm_error::success;
-}
-
-vmm_error::type
-vmm_intel_x64::verify_ia32_vmx_cr4_fixed0_msr()
+vmm_intel_x64::verify_ia32_vmx_cr4_fixed_msr()
 {
     auto cr4 = m_intrinsics->read_cr4();
-    auto ia32_vmx_cr4_fixed0_msr = m_intrinsics->read_msr(IA32_VMX_CR4_FIXED0_MSR);
+    auto ia32_vmx_cr4_fixed0 = m_intrinsics->read_msr(IA32_VMX_CR4_FIXED0_MSR);
+    auto ia32_vmx_cr4_fixed1 = m_intrinsics->read_msr(IA32_VMX_CR4_FIXED1_MSR);
 
     // The information regading this MSR can be found in appendix A.7.
     //
@@ -337,42 +287,15 @@ vmm_intel_x64::verify_ia32_vmx_cr4_fixed0_msr()
     // bit X is 0 in IA32_VMX_CR4_FIXED1, then that bit of CR4 is fixed to 0
     // in VMX operation.
 
-    if (((cr4 & ia32_vmx_cr4_fixed0_msr) & ~ia32_vmx_cr4_fixed0_msr) != 0)
+    if (0 != ((~cr4 & ia32_vmx_cr4_fixed0) | (cr4 & ~ia32_vmx_cr4_fixed1)))
     {
-        std::cout << "verify_ia32_vmx_cr4_fixed0_msr failed: "
-                  << "cr4 incorrectly setup: "
-                  << "    - cr4: " << cr4 << " "
-                  << "    - ia32_vmx_cr4_fixed0_msr: " << ia32_vmx_cr4_fixed0_msr
-                  << std::endl;
-        return vmm_error::not_supported;
-    }
-
-    return vmm_error::success;
-}
-
-vmm_error::type
-vmm_intel_x64::verify_ia32_vmx_cr4_fixed1_msr()
-{
-    auto cr4 = m_intrinsics->read_cr4();
-    auto ia32_vmx_cr4_fixed1_msr = m_intrinsics->read_msr(IA32_VMX_CR4_FIXED1_MSR);
-
-    // The information regading this MSR can be found in appendix A.7.
-    //
-    // The IA32_VMX_CR4_FIXED0 MSR (index 488H) and IA32_VMX_CR4_FIXED1 MSR
-    // (index 489H) indicate how bits in CR4 may be set in VMX operation.
-    // They report on bits in CR4 that are allowed to be 0 and 1,
-    // respectively, in VMX operation. If bit X is 1 in IA32_VMX_CR4_FIXED0,
-    // then that bit of CR4 is fixed to 1 in VMX operation. Similarly, if
-    // bit X is 0 in IA32_VMX_CR4_FIXED1, then that bit of CR4 is fixed to 0
-    // in VMX operation.
-
-    if (~((~cr4 & ~ia32_vmx_cr4_fixed1_msr) | ia32_vmx_cr4_fixed1_msr) != 0)
-    {
-        std::cout << "verify_ia32_vmx_cr4_fixed1_msr failed: "
-                  << "cr4 incorrectly setup: "
-                  << "    - cr4: " << cr4 << " "
-                  << "    - ia32_vmx_cr4_fixed1_msr: " << ia32_vmx_cr4_fixed1_msr
-                  << std::endl;
+        std::cout << "verify_ia32_vmx_cr4_fixed_msr failed. "
+                  << "cr4 incorrectly setup: " << std::endl
+                  << std::hex
+                  << "    - cr4: 0x" << cr4 << " " << std::endl
+                  << "    - ia32_vmx_cr4_fixed0: 0x" << ia32_vmx_cr4_fixed0 << std::endl
+                  << "    - ia32_vmx_cr4_fixed1: 0x" << ia32_vmx_cr4_fixed1 << std::endl
+                  << std::dec;
         return vmm_error::not_supported;
     }
 
@@ -384,7 +307,7 @@ vmm_intel_x64::verify_ia32_feature_control_msr()
 {
     auto ia32_feature_control = m_intrinsics->read_msr(IA32_FEATURE_CONTROL);
 
-    if (ia32_feature_control & (1 << 0) == 0)
+    if ((ia32_feature_control & (1 << 0)) == 0)
     {
         std::cout << "verify_ia32_feature_control_msr failed: "
                   << "feature control MSR is reporting the lock bit is not set: "
@@ -412,14 +335,14 @@ vmm_intel_x64::verify_v8086_disabled()
 }
 
 vmm_error::type
-vmm_intel_x64::enable_vmx_operation()
+vmm_intel_x64::verify_vmx_operation_enabled()
 {
-    m_intrinsics->write_cr4(m_intrinsics->read_cr4() | CR4_VMXE_VMX_ENABLE_BIT);
+    auto cr4 = m_intrinsics->read_cr4();
 
-    if (m_intrinsics->read_cr4() & CR4_VMXE_VMX_ENABLE_BIT == 0)
+    if ((cr4 & CR4_VMXE_VMX_ENABLE_BIT) == 0)
     {
-        std::cout << "enable_vmx_operation failed: "
-                  << "failed to set CR4_VMXE_VMX_ENABLE_BIT:" << std::endl;
+        std::cout << "verify_vmx_operation_enabled failed: "
+                  << "CR4_VMXE_VMX_ENABLE_BIT is cleared" << std::endl;
         return vmm_error::failure;
     }
 
@@ -427,16 +350,94 @@ vmm_intel_x64::enable_vmx_operation()
 }
 
 vmm_error::type
-vmm_intel_x64::disable_vmx_operation()
+vmm_intel_x64::verify_vmx_operation_disabled()
 {
-    m_intrinsics->write_cr4(m_intrinsics->read_cr4() & ~CR4_VMXE_VMX_ENABLE_BIT);
+    auto cr4 = m_intrinsics->read_cr4();
 
-    if (m_intrinsics->read_cr4() & CR4_VMXE_VMX_ENABLE_BIT != 0)
+    if ((cr4 & CR4_VMXE_VMX_ENABLE_BIT) != 0)
     {
-        std::cout << "disable_vmx_operation failed: "
-                  << "failed to clear CR4_VMXE_VMX_ENABLE_BIT:" << std::endl;
+        std::cout << "verify_vmx_operation_disabled failed: "
+                  << "CR4_VMXE_VMX_ENABLE_BIT is set" << std::endl;
         return vmm_error::failure;
     }
+
+    return vmm_error::success;
+}
+
+vmm_error::type
+vmm_intel_x64::enable_vmx_operation()
+{
+    auto cr4 = m_intrinsics->read_cr4();
+    auto vmxe_vmx_enable_bit_set = cr4 | CR4_VMXE_VMX_ENABLE_BIT;
+
+    m_intrinsics->write_cr4(vmxe_vmx_enable_bit_set);
+
+    return vmm_error::success;
+}
+
+vmm_error::type
+vmm_intel_x64::disable_vmx_operation()
+{
+    auto cr4 = m_intrinsics->read_cr4();
+    auto vmxe_vmx_enable_bit_cleared = cr4 & ~CR4_VMXE_VMX_ENABLE_BIT;
+
+    m_intrinsics->write_cr4(vmxe_vmx_enable_bit_cleared);
+
+    return vmm_error::success;
+    return verify_vmx_operation_disabled();
+}
+
+vmm_error::type
+vmm_intel_x64::create_vmxon_region()
+{
+    if (m_memory_manager->alloc_page(&m_vmxon_page) != memory_manager_error::success)
+    {
+        std::cout << "create_vmxon_region failed: "
+                  << "out of memory" << std::endl;
+        return vmm_error::out_of_memory;
+    }
+
+    if (m_vmxon_page.size() < vmxon_vmcs_region_size())
+    {
+        std::cout << "create_vmxon_region failed: "
+                  << "the allocated page is not large enough:" << std::endl
+                  << "    - page size: " << m_vmxon_page.size() << " "
+                  << "    - vmxon/vmcs region size: " << vmxon_vmcs_region_size()
+                  << std::endl;
+        return vmm_error::not_supported;
+    }
+
+    if (((uintptr_t)m_vmxon_page.phys_addr() & 0x0000000000000FFF) != 0)
+    {
+        std::cout << "create_vmxon_region failed: "
+                  << "the allocated page is not page aligned:" << std::endl
+                  << "    - page phys: " << m_vmxon_page.phys_addr()
+                  << std::endl;
+        return vmm_error::not_supported;
+    }
+
+    auto buf = (char *)m_vmxon_page.virt_addr();
+    auto reg = (vmxon_region *)m_vmxon_page.virt_addr();
+
+    // The information regading this MSR can be found in appendix A.1. For
+    // the VMX capabilities check, we need the following:
+    //
+    // - Bits 30:0 contain the 31-bit VMCS revision identifier used by the
+    //   processor. Processors that use the same VMCS revision identifier use
+    //   the same size for VMCS regions (see subsequent item on bits 44:32)
+
+    for (auto i = 0; i < m_vmxon_page.size(); i++)
+        buf[i] = 0;
+
+    reg->revision_id = m_intrinsics->read_msr(IA32_VMX_BASIC_MSR) & 0x7FFFFFFFF;
+
+    return vmm_error::success;
+}
+
+vmm_error::type
+vmm_intel_x64::release_vmxon_region()
+{
+    m_memory_manager->free_page(m_vmxon_page);
 
     return vmm_error::success;
 }
@@ -464,11 +465,6 @@ vmm_intel_x64::execute_vmxon()
 vmm_error::type
 vmm_intel_x64::execute_vmxoff()
 {
-    // If the VMX enable bit was not already set, there is not need for use
-    // to execute the VMXOFF instruction.
-    if (m_intrinsics->read_cr4() & CR4_VMXE_VMX_ENABLE_BIT == 0)
-        return vmm_error::failure;
-
     // The VMXOFF instruction requires that the CPU be in VMX root operation.
     // If it is not, you can get an underfined intrustion error (or invalid
     // opcode). If we are not in VMX root operation it means that VMXON was not
@@ -502,7 +498,6 @@ vmm_intel_x64::vmxon_vmcs_region_size()
     //   Note: We basically ignore the above bits and just allocate 4K for each
     //   VMX region. The only thing we do with this function is ensure that
     //   the page that we were given is at least this big
-
 
     return (vmx_basic_msr >> 32) & 0x1FFF;
 }
