@@ -33,6 +33,8 @@ global __read_cr3:function
 global __write_cr3:function
 global __read_cr4:function
 global __write_cr4:function
+global __read_dr7:function
+global __write_dr7:function
 global __read_es:function
 global __read_cs:function
 global __read_ss:function
@@ -48,6 +50,7 @@ global __outb:function
 global __inb:function
 global __outw:function
 global __inw:function
+global __load_segment_limit
 
 section .text
 
@@ -186,6 +189,16 @@ __write_cr4:
     mov cr4, rdi
     ret
 
+; uint64_t __read_dr7(void)
+__read_dr7:
+    mov rax, dr7
+    ret
+
+; void __write_dr7(uint64_t val)
+__write_dr7:
+    mov dr7, rdi
+    ret
+
 ; uint16_t __read_es(void)
 __read_es:
     mov rax, 0
@@ -278,3 +291,7 @@ __inw:
 	in ax, dx
 	ret
 
+; uint32_t __load_segment_limit(uint16_t selector)
+__load_segment_limit:
+    lsl rax, di
+    ret

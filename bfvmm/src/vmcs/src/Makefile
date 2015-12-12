@@ -73,6 +73,9 @@ TARGET_TYPE=lib
 TARGET_COMPILER=both
 
 SOURCES+=vmcs_intel_x64.cpp
+SOURCES+=vmcs_intel_x64_debug.cpp
+SOURCES+=vmcs_intel_x64_check_misc.cpp
+SOURCES+=vmcs_intel_x64_check_host.cpp
 HEADERS=
 
 LIBS=

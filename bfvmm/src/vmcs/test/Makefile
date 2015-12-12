@@ -58,11 +58,13 @@ SOURCES+=test_vmcs_intel_x64.cpp
 HEADERS=
 
 LIBS+=vmcs
-LIBS+=memory_manager
 LIBS+=intrinsics
+LIBS+=exit_handler
+LIBS+=memory_manager
 
 LIB_PATHS+=../bin/native
 LIB_PATHS+=../../intrinsics/bin/native
+LIB_PATHS+=../../exit_handler/bin/native
 LIB_PATHS+=../../memory_manager/bin/native
 
 INCLUDE_PATHS=./ ../../../include/  ../../../../include/

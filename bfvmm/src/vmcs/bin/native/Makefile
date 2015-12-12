@@ -21,5 +21,6 @@
 
 LIBRARY_PATHS := $(LIBRARY_PATHS):../../../memory_manager/bin/native/
 LIBRARY_PATHS := $(LIBRARY_PATHS):../../../intrinsics/bin/native/
+LIBRARY_PATHS := $(LIBRARY_PATHS):../../../exit_handler/bin/native/
 
 include ../../../../../common/common_test.mk

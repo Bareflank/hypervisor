@@ -87,6 +87,23 @@ public:
 // VMCS Fields
 // =============================================================================
 
+// VMX MSRs
+// intel's software developer's manual, volume 3, appendix A.1
+#define IA32_VMX_BASIC_MSR                                        0x00000480
+#define IA32_VMX_CR0_FIXED0_MSR                                   0x00000486
+#define IA32_VMX_CR0_FIXED1_MSR                                   0x00000487
+#define IA32_VMX_CR4_FIXED0_MSR                                   0x00000488
+#define IA32_VMX_CR4_FIXED1_MSR                                   0x00000489
+#define IA32_FEATURE_CONTROL_MSR                                  0x0000003A
+#define IA32_VMX_TRUE_PINBASED_CTLS_MSR                           0x0000048D
+#define IA32_VMX_TRUE_PROCBASED_CTLS_MSR                          0x0000048E
+#define IA32_VMX_TRUE_EXIT_CTLS_MSR                               0x0000048F
+#define IA32_VMX_TRUE_ENTRY_CTLS_MSR                              0x00000490
+
+// The VMCS fields are defined in the intel's software developer's manual,
+// volumn 3, appendix B. An explaination of these fields can be found in
+// volume 3, chapter 24
+
 // 16bit Control Fields
 #define VMCS_VIRTUAL_PROCESSOR_IDENTIFIER                         0x00000000
 #define VMCS_POSTED_INTERRUPT_NOTIFICATION_VECTOR                 0x00000002
@@ -301,5 +318,81 @@ public:
 #define VMCS_HOST_IA32_SYSENTER_EIP                               0x00006C12
 #define VMCS_HOST_RSP                                             0x00006C14
 #define VMCS_HOST_RIP                                             0x00006C16
+
+// Pin-Based VM-Execution Controls
+// intel's software developers manual, volume 3, chapter 24.6.1.
+#define VM_EXEC_PIN_BASED_EXTERNAL_INTERRUPT_EXITING              (1 << 0)
+#define VM_EXEC_PIN_BASED_NMI_EXITING                             (1 << 3)
+#define VM_EXEC_PIN_BASED_VIRTUAL_NMIS                            (1 << 5)
+#define VM_EXEC_PIN_BASED_ACTIVATE_VMX_PREEMPTION_TIMER           (1 << 6)
+#define VM_EXEC_PIN_BASED_PROCESS_POSTED_INTERRUPTS               (1 << 7)
+
+// Primary Processor-Based VM-Execution Controls
+// intel's software developers manual, volume 3, chapter 24.6.2
+#define VM_EXEC_P_PROC_BASED_INTERRUPT_WINDOW_EXITING             (1 << 2)
+#define VM_EXEC_P_PROC_BASED_USE_TSC_OFFSETTING                   (1 << 3)
+#define VM_EXEC_P_PROC_BASED_HLT_EXITING                          (1 << 7)
+#define VM_EXEC_P_PROC_BASED_INVLPG_EXITING                       (1 << 9)
+#define VM_EXEC_P_PROC_BASED_MWAIT_EXITING                        (1 << 10)
+#define VM_EXEC_P_PROC_BASED_RDPMC_EXITING                        (1 << 11)
+#define VM_EXEC_P_PROC_BASED_RDTSC_EXITING                        (1 << 12)
+#define VM_EXEC_P_PROC_BASED_CR3_LOAD_EXITING                     (1 << 15)
+#define VM_EXEC_P_PROC_BASED_CR3_STORE_EXITING                    (1 << 16)
+#define VM_EXEC_P_PROC_BASED_CR8_LOAD_EXITING                     (1 << 19)
+#define VM_EXEC_P_PROC_BASED_CR8_STORE_EXITING                    (1 << 20)
+#define VM_EXEC_P_PROC_BASED_USE_TPR_SHADOW                       (1 << 21)
+#define VM_EXEC_P_PROC_BASED_NMI_WINDOW_EXITING                   (1 << 22)
+#define VM_EXEC_P_PROC_BASED_MOV_DR_EXITING                       (1 << 23)
+#define VM_EXEC_P_PROC_BASED_UNCONDITIONAL_I_O_EXITING            (1 << 24)
+#define VM_EXEC_P_PROC_BASED_USE_I_O_BITMAPS                      (1 << 25)
+#define VM_EXEC_P_PROC_BASED_MONITOR_TRAP_FLAG                    (1 << 27)
+#define VM_EXEC_P_PROC_BASED_USE_MSR_BITMAPS                      (1 << 28)
+#define VM_EXEC_P_PROC_BASED_MONITOR_EXITING                      (1 << 29)
+#define VM_EXEC_P_PROC_BASED_PAUSE_EXITING                        (1 << 30)
+#define VM_EXEC_P_PROC_BASED_ACTIVATE_SECONDARY_CONTROLS          (1 << 31)
+
+// Secondary Processor-Based VM-Execution Controls
+// intel's software developers manual, volume 3, chapter 24.6.2
+#define VM_EXEC_S_PROC_BASED_VIRTUALIZE_APIC_ACCESSES             (1 << 0)
+#define VM_EXEC_S_PROC_BASED_ENABLE_EPT                           (1 << 1)
+#define VM_EXEC_S_PROC_BASED_DESCRIPTOR_TABLE_EXITING             (1 << 2)
+#define VM_EXEC_S_PROC_BASED_ENABLE_RDTSCP                        (1 << 3)
+#define VM_EXEC_S_PROC_BASED_VIRTUALIZE_X2APIC_MODE               (1 << 4)
+#define VM_EXEC_S_PROC_BASED_ENABLE_VPID                          (1 << 5)
+#define VM_EXEC_S_PROC_BASED_WBINVD_EXITING                       (1 << 6)
+#define VM_EXEC_S_PROC_BASED_UNRESTRICTED_GUEST                   (1 << 7)
+#define VM_EXEC_S_PROC_BASED_APIC_REGISTER_VIRTUALIZATION         (1 << 8)
+#define VM_EXEC_S_PROC_BASED_VIRTUAL_INTERRUPT_DELIVERY           (1 << 9)
+#define VM_EXEC_S_PROC_BASED_PAUSE_LOOP_EXITING                   (1 << 10)
+#define VM_EXEC_S_PROC_BASED_RDRAND_EXITING                       (1 << 11)
+#define VM_EXEC_S_PROC_BASED_ENABLE_INVPCID                       (1 << 12)
+#define VM_EXEC_S_PROC_BASED_ENABLE_VM_FUNCTIONS                  (1 << 13)
+#define VM_EXEC_S_PROC_BASED_VMCS_SHADOWING                       (1 << 14)
+#define VM_EXEC_S_PROC_BASED_RDSEED_EXITING                       (1 << 16)
+#define VM_EXEC_S_PROC_BASED_EPT_VIOLATION_VE                     (1 << 18)
+#define VM_EXEC_S_PROC_BASED_ENABLE_XSAVES_XRSTORS                (1 << 20)
+
+// VM-Exit Control Fields
+// intel's software developers manual, volume 3, chapter 24.7.1
+#define VM_EXIT_CONTROL_SAVE_DEBUG_CONTROLS                       (1 << 2)
+#define VM_EXIT_CONTROL_HOST_ADDRESS_SPACE_SIZE                   (1 << 9)
+#define VM_EXIT_CONTROL_LOAD_IA32_PERF_GLOBAL_CTRL                (1 << 12)
+#define VM_EXIT_CONTROL_ACKNOWLEDGE_INTERRUPT_ON_EXIT             (1 << 15)
+#define VM_EXIT_CONTROL_SAVE_IA32_PAT                             (1 << 18)
+#define VM_EXIT_CONTROL_LOAD_IA32_PAT                             (1 << 19)
+#define VM_EXIT_CONTROL_SAVE_IA32_EFER                            (1 << 20)
+#define VM_EXIT_CONTROL_LOAD_IA32_EFER                            (1 << 21)
+#define VM_EXIT_CONTROL_SAVE_VMX_PREEMPTION_TIMER_VALUE           (1 << 22)
+
+// VM-Entry Control Fields
+// intel's software developers manual, volume 3, chapter 24.8.1
+#define VM_ENTRY_CONTROL_LOAD_DEBUG_CONTROLS                      (1 << 2)
+#define VM_ENTRY_CONTROL_IA_32E_MODE_GUEST                        (1 << 9)
+#define VM_ENTRY_CONTROL_ENTRY_TO_SMM                             (1 << 10)
+#define VM_ENTRY_CONTROL_DEACTIVATE_DUAL_MONITOR_TREATMENT        (1 << 11)
+#define VM_ENTRY_CONTROL_LOAD_IA32_PERF_GLOBAL_CTRL               (1 << 13)
+#define VM_ENTRY_CONTROL_LOAD_IA32_PAT                            (1 << 14)
+#define VM_ENTRY_CONTROL_LOAD_IA32_EFER                           (1 << 15)
+
 
 #endif
