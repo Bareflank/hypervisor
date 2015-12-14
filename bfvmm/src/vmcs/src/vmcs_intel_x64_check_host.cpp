@@ -36,7 +36,9 @@ vmcs_intel_x64::check_host_control_registers_and_msrs()
     result &= check_host_ia32_sysenter_eip_canonical_address();
     result &= check_host_ia32_perf_global_ctrl_for_reserved_bits();
     result &= check_host_ia32_pat_for_unsupported_bits();
+    result &= check_host_verify_load_ia32_efer_enabled();
     result &= check_host_ia32_efer_for_reserved_bits();
+    result &= check_host_ia32_efer_set();
 
     return result;
 }
@@ -47,16 +49,6 @@ vmcs_intel_x64::check_host_cr0_for_unsupported_bits()
     auto cr0 = vmread(VMCS_HOST_CR0);
     auto ia32_vmx_cr0_fixed0 = m_intrinsics->read_msr(IA32_VMX_CR0_FIXED0_MSR);
     auto ia32_vmx_cr0_fixed1 = m_intrinsics->read_msr(IA32_VMX_CR0_FIXED1_MSR);
-
-    // The information regading this MSR can be found in appendix A.7.
-    //
-    // The IA32_VMX_CR0_FIXED0 MSR (index 486H) and IA32_VMX_CR0_FIXED1 MSR
-    // (index 487H) indicate how bits in CR0 may be set in VMX operation.
-    // They report on bits in CR0 that are allowed to be 0 and to be 1,
-    // respectively, in VMX operation. If bit X is 1 in IA32_VMX_CR0_FIXED0,
-    // then that bit of CR0 is fixed to 1 in VMX operation. Similarly, if
-    // bit X is 0 in IA32_VMX_CR0_FIXED1, then that bit of CR0 is fixed to 0
-    // in VMX operation.
 
     if (0 != ((~cr0 & ia32_vmx_cr0_fixed0) | (cr0 & ~ia32_vmx_cr0_fixed1)))
     {
@@ -80,16 +72,6 @@ vmcs_intel_x64::check_host_cr4_for_unsupported_bits()
     auto ia32_vmx_cr4_fixed0 = m_intrinsics->read_msr(IA32_VMX_CR4_FIXED0_MSR);
     auto ia32_vmx_cr4_fixed1 = m_intrinsics->read_msr(IA32_VMX_CR4_FIXED1_MSR);
 
-    // The information regading this MSR can be found in appendix A.7.
-    //
-    // The IA32_VMX_CR0_FIXED0 MSR (index 486H) and IA32_VMX_CR0_FIXED1 MSR
-    // (index 487H) indicate how bits in CR0 may be set in VMX operation.
-    // They report on bits in CR0 that are allowed to be 0 and to be 1,
-    // respectively, in VMX operation. If bit X is 1 in IA32_VMX_CR0_FIXED0,
-    // then that bit of CR0 is fixed to 1 in VMX operation. Similarly, if
-    // bit X is 0 in IA32_VMX_CR0_FIXED1, then that bit of CR0 is fixed to 0
-    // in VMX operation.
-
     if (0 != ((~cr4 & ia32_vmx_cr4_fixed0) | (cr4 & ~ia32_vmx_cr4_fixed1)))
     {
         std::cout << "check_host_cr4_for_unsupported_bits failed. "
@@ -111,7 +93,7 @@ vmcs_intel_x64::check_host_cr3_for_unsupported_bits()
     auto cr3 = vmread(VMCS_HOST_CR3);
 
     // The manual states that CPUID will return the total number of bits that
-    // are supported, which at the moment is 42, and is unlikelyto change for
+    // are supported, which at the moment is 42, and is unlikely to change for
     // a while (256 terabytes). If this code triggers a failure do to being
     // hardcoded, cpuid(0x80000008) -> eax[7:0] will return the number of
     // bits that are supported on the system.
@@ -200,20 +182,56 @@ vmcs_intel_x64::check_host_ia32_pat_for_unsupported_bits()
 }
 
 bool
-vmcs_intel_x64::check_host_ia32_efer_for_reserved_bits()
+vmcs_intel_x64::check_host_verify_load_ia32_efer_enabled()
 {
-    auto controls = vmread(VMCS_VM_EXIT_CONTROLS);
+    auto controls = vmread(VMCS_VM_ENTRY_CONTROLS);
 
-    if ((controls & VM_ENTRY_CONTROL_LOAD_IA32_EFER) != 0)
+    if ((controls & VM_ENTRY_CONTROL_LOAD_IA32_EFER) == 0)
     {
-        std::cout << "unimplemented VMCS check: "
-                  << "check_host_ia32_efer_for_reserved_bits"
+        std::cout << "check_host_verify_load_ia32_efer_enabled: "
+                  << "only 64bit hosts are supported. load_ia32_efer must be enabled"
                   << std::endl;
         return false;
     }
 
     return true;
 }
+
+bool
+vmcs_intel_x64::check_host_ia32_efer_for_reserved_bits()
+{
+    auto vmcs_host_ia32_efer_full = vmread(VMCS_HOST_IA32_EFER_FULL);
+
+    if ((vmcs_host_ia32_efer_full & 0xFFFFFFFFFFFFF2FE) != 0)
+    {
+        std::cout << "check_host_ia32_efer_for_reserved_bits failed: "
+                  << "the reserved bits in is32_efer must be zero"
+                  << std::endl;
+        return false;
+    }
+
+    return true;
+}
+
+bool
+vmcs_intel_x64::check_host_ia32_efer_set()
+{
+    auto vmcs_host_ia32_efer_full = vmread(VMCS_HOST_IA32_EFER_FULL);
+
+    if ((vmcs_host_ia32_efer_full & 0x0000000000000500) != 0x0000000000000500)
+    {
+        std::cout << "check_host_ia32_efer_set failed. "
+                  << "host ia32_efer msr does not have LME and LMA set: " << std::endl
+                  << std::hex
+                  << "    - ia32_efer: 0x" << vmcs_host_ia32_efer_full << " " << std::endl
+                  << std::dec;
+
+        return false;
+    }
+
+    return true;
+}
+
 
 // -----------------------------------------------------------------------------
 // Host Segment and Descriptor-Table Register Checks
@@ -527,36 +545,12 @@ vmcs_intel_x64::check_host_checks_related_to_address_space_size()
 {
     auto result = true;
 
-    result &= check_host_ia32_efer_set();
     result &= check_host_if_outside_ia32e_mode();
     result &= check_host_vmcs_host_address_space_size_is_set();
     result &= check_host_verify_pae_is_enabled();
     result &= check_host_verify_rip_has_canonical_address();
 
     return result;
-}
-
-bool
-vmcs_intel_x64::check_host_ia32_efer_set()
-{
-    // Note taht this check does not exist in the documentation, but it is
-    // being checked by the hardware. If your in 64bit mode, you need to make
-    // sure that the host's VMCS_HOST_IA32_EFER_FULL field is set properly.
-
-    auto vmcs_host_ia32_efer_full = vmread(VMCS_HOST_IA32_EFER_FULL);
-
-    if ((vmcs_host_ia32_efer_full & 0x0000000000000500) != 0x0000000000000500)
-    {
-        std::cout << "check_host_ia32_efer_set failed. "
-                  << "host ia32_efer msr does not have LME and LMA set: " << std::endl
-                  << std::hex
-                  << "    - ia32_efer: 0x" << vmcs_host_ia32_efer_full << " " << std::endl
-                  << std::dec;
-
-        return false;
-    }
-
-    return true;
 }
 
 bool

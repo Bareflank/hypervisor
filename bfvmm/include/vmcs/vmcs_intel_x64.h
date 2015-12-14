@@ -110,6 +110,8 @@ private:
 
     void check_vm_instruction_error();
     bool check_is_address_canonical(uint64_t addr);
+    bool check_vmcs_host_state();
+    bool check_vmcs_guest_state();
 
     bool check_host_control_registers_and_msrs();
     bool check_host_cr0_for_unsupported_bits();
@@ -119,7 +121,9 @@ private:
     bool check_host_ia32_sysenter_eip_canonical_address();
     bool check_host_ia32_perf_global_ctrl_for_reserved_bits();
     bool check_host_ia32_pat_for_unsupported_bits();
+    bool check_host_verify_load_ia32_efer_enabled();
     bool check_host_ia32_efer_for_reserved_bits();
+    bool check_host_ia32_efer_set();
 
     bool check_host_segment_and_descriptor_table_registers();
     bool check_host_es_selector_rpl_ti_equal_zero();
@@ -139,11 +143,28 @@ private:
     bool check_host_tr_canonical_base_address();
 
     bool check_host_checks_related_to_address_space_size();
-    bool check_host_ia32_efer_set();
     bool check_host_if_outside_ia32e_mode();
     bool check_host_vmcs_host_address_space_size_is_set();
     bool check_host_verify_pae_is_enabled();
     bool check_host_verify_rip_has_canonical_address();
+
+    bool check_guest_checks_on_guest_control_registers_debug_registers_and_msrs();
+    bool check_guest_cr0_for_unsupported_bits();
+    bool check_guest_cr0_verify_paging_enabled();
+    bool check_guest_cr0_verify_protected_mode_enabled();
+    bool check_guest_cr4_for_unsupported_bits();
+    bool check_guest_load_debug_controls_verify_reserved_bits_equal_zero();
+    bool check_guest_verify_ia_32e_mode_enabled();
+    bool check_guest_cr4_verify_pae_enabled();
+    bool check_guest_cr3_for_unsupported_bits();
+    bool check_guest_load_debug_controls_verify_verify_dr7();
+    bool check_guest_ia32_sysenter_esp_canonical_address();
+    bool check_guest_ia32_sysenter_eip_canonical_address();
+    bool check_guest_ia32_perf_global_ctrl_for_reserved_bits();
+    bool check_guest_ia32_pat_for_unsupported_bits();
+    bool check_guest_verify_load_ia32_efer_enabled();
+    bool check_guest_ia32_efer_for_reserved_bits();
+    bool check_guest_ia32_efer_set();
 
 private:
 
