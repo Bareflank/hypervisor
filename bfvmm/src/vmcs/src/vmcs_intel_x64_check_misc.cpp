@@ -182,6 +182,22 @@ vmcs_intel_x64::check_vmcs_guest_state()
     auto result = true;
 
     result &= check_guest_checks_on_guest_control_registers_debug_registers_and_msrs();
+    result &= check_guest_checks_on_guest_segment_registers();
+    result &= check_guest_checks_on_guest_descriptor_table_registers();
+    result &= check_guest_checks_on_guest_rip_and_rflags();
+    result &= check_guest_checks_on_guest_non_register_state();
+
+    return result;
+}
+
+bool
+vmcs_intel_x64::check_vmcs_control_state()
+{
+    auto result = true;
+
+    result &= check_control_checks_on_vm_execution_control_fields();
+    result &= check_control_checks_on_vm_exit_control_fields();
+    result &= check_control_checks_on_vm_entry_control_fields();
 
     return result;
 }

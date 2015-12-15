@@ -1087,6 +1087,8 @@ bfelf_symbol_by_name_global(struct bfelf_file_t *efl,
                 if (tmpsym->st_value != 0)
                     goto found;
 
+                continue;
+
             case BFELF_ERROR_NO_SUCH_SYMBOL:
                 break;
 

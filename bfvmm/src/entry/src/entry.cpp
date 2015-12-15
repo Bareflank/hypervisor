@@ -56,8 +56,8 @@ start_vmm(void *arg)
     // -------------------------------------------------------------------------
     // Initialize Debugging
 
-    if (vcpu->get_debug_ring()->init(vmmr->drr) != debug_ring_error::success)
-        return VMM_ERROR_INVALID_DRR;
+    // if (vcpu->get_debug_ring()->init(vmmr->drr) != debug_ring_error::success)
+    //     return VMM_ERROR_INVALID_DRR;
 
     INIT_IOSTREAM();
 

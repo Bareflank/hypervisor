@@ -180,13 +180,27 @@ vmcs_intel_x64::launch()
     if (ret != vmcs_error::success)
         return ret;
 
+    // Before we attempt to launch the VMM, we run a bunch of tests on the
+    // VMCS to verify that the state of the VMCS is valid. These checks come
+    // from the intel software developer's manual, volume 3, chapter 26. Most
+    // of these checks are in the same order as the documentation. Some of
+    // these checks will need to be overloaded and implemented by a custom
+    // version of this VMCS. Currently, only 64bit VMs are supported. If that
+    // changes, these checks will likely need to be re-implemented.
+
+    if (check_vmcs_host_state() == false)
+        return vmcs_error::failure;
+
+    if (check_vmcs_guest_state() == false)
+        return vmcs_error::failure;
+
+    if (check_vmcs_control_state() == false)
+        return vmcs_error::failure;
+
     // The last step is to launch the VMCS. If the launch fails, we must
     // go through a series of error checks to identify why the failure
     // occured. If the launch succeeds, we should continue execution as
     // normal, not this code will be in a virtual machine when finished.
-
-    check_vmcs_host_state();
-    check_vmcs_guest_state();
 
     // ret = launch_vmcs();
     // if (ret != vmcs_error::success)
@@ -542,20 +556,20 @@ vmcs_intel_x64::write_32bit_control_fields()
         return vmcs_error::not_supported;
     }
 
-    lower = (m_intrinsics->read_msr(IA32_VMX_TRUE_PINBASED_CTLS_MSR) >> 0);
-    upper = (m_intrinsics->read_msr(IA32_VMX_TRUE_PINBASED_CTLS_MSR) >> 32);
+    lower = ((m_intrinsics->read_msr(IA32_VMX_TRUE_PINBASED_CTLS_MSR) >> 0) & 0x00000000FFFFFFFF);
+    upper = ((m_intrinsics->read_msr(IA32_VMX_TRUE_PINBASED_CTLS_MSR) >> 32) & 0x00000000FFFFFFFF);
     vmwrite(VMCS_PIN_BASED_VM_EXECUTION_CONTROLS, lower & upper);
 
-    lower = (m_intrinsics->read_msr(IA32_VMX_TRUE_PROCBASED_CTLS_MSR) >> 0);
-    upper = (m_intrinsics->read_msr(IA32_VMX_TRUE_PROCBASED_CTLS_MSR) >> 32);
+    lower = ((m_intrinsics->read_msr(IA32_VMX_TRUE_PROCBASED_CTLS_MSR) >> 0) & 0x00000000FFFFFFFF);
+    upper = ((m_intrinsics->read_msr(IA32_VMX_TRUE_PROCBASED_CTLS_MSR) >> 32) & 0x00000000FFFFFFFF);
     vmwrite(VMCS_PRIMARY_PROCESSOR_BASED_VM_EXECUTION_CONTROLS, lower & upper);
 
-    lower = (m_intrinsics->read_msr(IA32_VMX_TRUE_EXIT_CTLS_MSR) >> 0);
-    upper = (m_intrinsics->read_msr(IA32_VMX_TRUE_EXIT_CTLS_MSR) >> 32);
+    lower = ((m_intrinsics->read_msr(IA32_VMX_TRUE_EXIT_CTLS_MSR) >> 0) & 0x00000000FFFFFFFF);
+    upper = ((m_intrinsics->read_msr(IA32_VMX_TRUE_EXIT_CTLS_MSR) >> 32) & 0x00000000FFFFFFFF);
     vmwrite(VMCS_VM_EXIT_CONTROLS, lower & upper);
 
-    lower = (m_intrinsics->read_msr(IA32_VMX_TRUE_ENTRY_CTLS_MSR) >> 0);
-    upper = (m_intrinsics->read_msr(IA32_VMX_TRUE_ENTRY_CTLS_MSR) >> 32);
+    lower = ((m_intrinsics->read_msr(IA32_VMX_TRUE_ENTRY_CTLS_MSR) >> 0) & 0x00000000FFFFFFFF);
+    upper = ((m_intrinsics->read_msr(IA32_VMX_TRUE_ENTRY_CTLS_MSR) >> 32) & 0x00000000FFFFFFFF);
     vmwrite(VMCS_VM_ENTRY_CONTROLS, lower & upper);
 
     // unused: VMCS_EXCEPTION_BITMAP

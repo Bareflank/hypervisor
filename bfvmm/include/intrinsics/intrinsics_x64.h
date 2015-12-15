@@ -216,7 +216,7 @@ public:
         // 0 index as a "null selector". In 32bit mode, this would cause a
         // GP fault if you attempted to use this type of selector. In 64bit
         // mode, most of the selectors are null.
-        if (selector == 0)
+        if(selector == 0)
             return 0;
 
         // The global descriptor table is a table of segement descriptors.
@@ -275,7 +275,7 @@ public:
 
         // If we have a null selector, we return 0 since this is not a valid
         // selector into the GDT
-        if (selector == 0)
+        if(selector == 0)
             return 0;
 
         // The segment base description can be found in the intel's software
@@ -301,7 +301,7 @@ public:
         // ------------------------------------------------------------------
         //
 
-        if ((sd1 & 0x100000000000) == 0)
+        if((sd1 & 0x100000000000) == 0)
         {
             return base_63_32 | base_31_24 | base_23_16 | base_15_00;
         }
@@ -324,7 +324,7 @@ public:
         // a segment fault except in 64-bit mode. In general, a segment
         // register is unusable if it has been loaded with a null selector."
         //
-        if (selector == 0)
+        if(selector == 0)
             return 0x10000;
 
         // The segment access description can be found in the intel's software
@@ -345,6 +345,12 @@ public:
 // =============================================================================
 // Masks
 // =============================================================================
+
+// Selector Fields
+#define SELECTOR_TI_FLAG                                          (0x0004)
+#define SELECTOR_RPL_FLAG                                         (0x0003)
+#define SELECTOR_INDEX                                            (0xFFF8)
+#define SELECTOR_UNUSABLE                                         (1 << 16)
 
 // RFLAGS
 // 64-ia-32-architectures-software-developer-manual, section 3.4.3
