@@ -64,7 +64,7 @@ vmcs_intel_x64::check_control_pin_based_ctls_reserved_properly_set()
     auto lower = ((m_intrinsics->read_msr(IA32_VMX_TRUE_PINBASED_CTLS_MSR) >> 00) & 0x00000000FFFFFFFF);
     auto upper = ((m_intrinsics->read_msr(IA32_VMX_TRUE_PINBASED_CTLS_MSR) >> 32) & 0x00000000FFFFFFFF);
 
-    if((lower & controls_lower) != lower || (upper & ~controls_upper) != upper)
+    if ((lower & controls_lower) != lower || (upper & ~controls_upper) != upper)
     {
         std::cout << "check_control_pin_based_ctls_reserved_properly_set failed. "
                   << "pin based controls not setup properly: " << std::endl
@@ -89,7 +89,7 @@ vmcs_intel_x64::check_control_proc_based_ctls_reserved_properly_set()
     auto lower = ((m_intrinsics->read_msr(IA32_VMX_TRUE_PROCBASED_CTLS_MSR) >> 00) & 0x00000000FFFFFFFF);
     auto upper = ((m_intrinsics->read_msr(IA32_VMX_TRUE_PROCBASED_CTLS_MSR) >> 32) & 0x00000000FFFFFFFF);
 
-    if((lower & controls_lower) != lower || (upper & ~controls_upper) != upper)
+    if ((lower & controls_lower) != lower || (upper & ~controls_upper) != upper)
     {
         std::cout << "check_control_proc_based_ctls_reserved_properly_set failed. "
                   << "proc based controls not setup properly: " << std::endl
@@ -177,7 +177,7 @@ vmcs_intel_x64::check_control_nmi_exiting_and_virtual_nmi()
     auto controls = vmread(VMCS_PIN_BASED_VM_EXECUTION_CONTROLS);
 
     if ((controls & VM_EXEC_PIN_BASED_NMI_EXITING) != 0 &&
-        (controls & VM_EXEC_PIN_BASED_VIRTUAL_NMIS) != 0 )
+        (controls & VM_EXEC_PIN_BASED_VIRTUAL_NMIS) != 0)
     {
         std::cout << "check_control_nmi_exiting_and_virtual_nmi failed: "
                   << "if nmi exiting is 0, virtual nmi must be 0"
@@ -197,7 +197,7 @@ vmcs_intel_x64::check_control_virtual_nmi_and_nmi_window()
     auto controls2 = vmread(VMCS_PRIMARY_PROCESSOR_BASED_VM_EXECUTION_CONTROLS);
 
     if ((controls1 & VM_EXEC_PIN_BASED_NMI_EXITING) != 0 &&
-        (controls2 & VM_EXEC_P_PROC_BASED_NMI_WINDOW_EXITING) != 0 )
+        (controls2 & VM_EXEC_P_PROC_BASED_NMI_WINDOW_EXITING) != 0)
     {
         std::cout << "check_control_nmi_exiting_and_virtual_nmi failed: "
                   << "if nmi exiting is 0, virtual nmi must be 0"
@@ -456,7 +456,7 @@ vmcs_intel_x64::check_control_vm_exit_ctls_reserved_properly_set()
     auto lower = ((m_intrinsics->read_msr(IA32_VMX_TRUE_EXIT_CTLS_MSR) >> 00) & 0x00000000FFFFFFFF);
     auto upper = ((m_intrinsics->read_msr(IA32_VMX_TRUE_EXIT_CTLS_MSR) >> 32) & 0x00000000FFFFFFFF);
 
-    if((lower & controls_lower) != lower || (upper & ~controls_upper) != upper)
+    if ((lower & controls_lower) != lower || (upper & ~controls_upper) != upper)
     {
         std::cout << "check_control_vm_exit_ctls_reserved_properly_set failed. "
                   << "vm exit controls not setup properly: " << std::endl
@@ -479,7 +479,7 @@ vmcs_intel_x64::check_control_activate_and_save_premeption_timer_must_be_0()
     auto controls2 = vmread(VMCS_VM_EXIT_CONTROLS);
 
     if ((controls1 & VM_EXEC_PIN_BASED_ACTIVATE_VMX_PREEMPTION_TIMER) != 0 &&
-        (controls2 & VM_EXIT_CONTROL_SAVE_VMX_PREEMPTION_TIMER_VALUE) != 0 )
+        (controls2 & VM_EXIT_CONTROL_SAVE_VMX_PREEMPTION_TIMER_VALUE) != 0)
     {
         std::cout << "check_control_activate_and_save_premeption_timer_must_be_0 failed: "
                   << "if activate preempt timer is 0, save preempt timer must also be 0"
@@ -550,7 +550,7 @@ vmcs_intel_x64::check_control_vm_entry_ctls_reserved_properly_set()
     auto lower = ((m_intrinsics->read_msr(IA32_VMX_TRUE_ENTRY_CTLS_MSR) >> 00) & 0x00000000FFFFFFFF);
     auto upper = ((m_intrinsics->read_msr(IA32_VMX_TRUE_ENTRY_CTLS_MSR) >> 32) & 0x00000000FFFFFFFF);
 
-    if((lower & controls_lower) != lower || (upper & ~controls_upper) != upper)
+    if ((lower & controls_lower) != lower || (upper & ~controls_upper) != upper)
     {
         std::cout << "check_control_vm_entry_ctls_reserved_properly_set failed. "
                   << "vm entry controls not setup properly: " << std::endl

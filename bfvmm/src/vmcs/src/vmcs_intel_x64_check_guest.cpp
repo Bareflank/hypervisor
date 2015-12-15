@@ -76,7 +76,7 @@ vmcs_intel_x64::check_guest_cr0_verify_paging_enabled()
 {
     auto cr0 = vmread(VMCS_GUEST_CR0);
 
-    if((cr0 & CR0_PG_PAGING) == 0)
+    if ((cr0 & CR0_PG_PAGING) == 0)
     {
         std::cout << "check_guest_cr0_verify_paging_enabled failed. "
                   << "guest cr0 does not have paging enabled: " << std::endl
@@ -94,7 +94,7 @@ vmcs_intel_x64::check_guest_cr0_verify_protected_mode_enabled()
 {
     auto cr0 = vmread(VMCS_GUEST_CR0);
 
-    if((cr0 & CRO_PE_PROTECTION_ENABLE) == 0)
+    if ((cr0 & CRO_PE_PROTECTION_ENABLE) == 0)
     {
         std::cout << "check_guest_cr0_verify_protected_mode_enabled failed. "
                   << "guest cr0 does not have protected mode enabled: " << std::endl
@@ -166,7 +166,7 @@ vmcs_intel_x64::check_guest_cr4_verify_pae_enabled()
 {
     auto cr4 = vmread(VMCS_GUEST_CR4);
 
-    if((cr4 & CR4_PAE_PHYSICAL_ADDRESS_EXTENSIONS) == 0)
+    if ((cr4 & CR4_PAE_PHYSICAL_ADDRESS_EXTENSIONS) == 0)
     {
         std::cout << "check_guest_cr4_verify_pae_enabled failed. "
                   << "guest cr4 does not have pae enabled: " << std::endl
@@ -480,7 +480,7 @@ vmcs_intel_x64::check_guest_ldtr_ti_bit_equals_0()
     auto ldtr = vmread(VMCS_GUEST_LDTR_SELECTOR);
     auto ldtr_access = vmread(VMCS_GUEST_LDTR_ACCESS_RIGHTS);
 
-    if((ldtr_access & SELECTOR_UNUSABLE) != 0)
+    if ((ldtr_access & SELECTOR_UNUSABLE) != 0)
         return true;
 
     if ((ldtr & SELECTOR_TI_FLAG) != 0)
@@ -543,7 +543,7 @@ vmcs_intel_x64::check_guest_fs_base_is_canonical()
     auto fs_base = vmread(VMCS_GUEST_FS_BASE);
     auto fs_access = vmread(VMCS_GUEST_FS_ACCESS_RIGHTS);
 
-    if((fs_access & SELECTOR_UNUSABLE) != 0)
+    if ((fs_access & SELECTOR_UNUSABLE) != 0)
         return true;
 
     if (check_is_address_canonical(fs_base) == false)
@@ -566,7 +566,7 @@ vmcs_intel_x64::check_guest_gs_base_is_canonical()
     auto gs_base = vmread(VMCS_GUEST_GS_BASE);
     auto gs_access = vmread(VMCS_GUEST_GS_ACCESS_RIGHTS);
 
-    if((gs_access & SELECTOR_UNUSABLE) != 0)
+    if ((gs_access & SELECTOR_UNUSABLE) != 0)
         return true;
 
     if (check_is_address_canonical(gs_base) == false)
@@ -589,7 +589,7 @@ vmcs_intel_x64::check_guest_ldtr_base_is_canonical()
     auto ldtr_base = vmread(VMCS_GUEST_LDTR_BASE);
     auto ldtr_access = vmread(VMCS_GUEST_LDTR_ACCESS_RIGHTS);
 
-    if((ldtr_access & SELECTOR_UNUSABLE) != 0)
+    if ((ldtr_access & SELECTOR_UNUSABLE) != 0)
         return true;
 
     if (check_is_address_canonical(ldtr_base) == false)
@@ -631,7 +631,7 @@ vmcs_intel_x64::check_guest_ss_base_upper_dword_0()
     auto ss_base = vmread(VMCS_GUEST_SS_BASE);
     auto ss_access = vmread(VMCS_GUEST_SS_ACCESS_RIGHTS);
 
-    if((ss_access & SELECTOR_UNUSABLE) != 0)
+    if ((ss_access & SELECTOR_UNUSABLE) != 0)
         return true;
 
     if ((ss_base & 0xFFFFFFFF00000000) != 0)
@@ -654,7 +654,7 @@ vmcs_intel_x64::check_guest_ds_base_upper_dword_0()
     auto ds_base = vmread(VMCS_GUEST_DS_BASE);
     auto ds_acceds = vmread(VMCS_GUEST_DS_ACCESS_RIGHTS);
 
-    if((ds_acceds & SELECTOR_UNUSABLE) != 0)
+    if ((ds_acceds & SELECTOR_UNUSABLE) != 0)
         return true;
 
     if ((ds_base & 0xFFFFFFFF00000000) != 0)
@@ -677,7 +677,7 @@ vmcs_intel_x64::check_guest_es_base_upper_dword_0()
     auto es_base = vmread(VMCS_GUEST_ES_BASE);
     auto es_accees = vmread(VMCS_GUEST_ES_ACCESS_RIGHTS);
 
-    if((es_accees & SELECTOR_UNUSABLE) != 0)
+    if ((es_accees & SELECTOR_UNUSABLE) != 0)
         return true;
 
     if ((es_base & 0xFFFFFFFF00000000) != 0)
@@ -699,7 +699,7 @@ vmcs_intel_x64::check_guest_cs_access_rights_type()
 {
     auto cs_access = vmread(VMCS_GUEST_CS_ACCESS_RIGHTS);
 
-    switch(cs_access & 0x000F)
+    switch (cs_access & 0x000F)
     {
         case 9:
         case 11:
@@ -715,7 +715,7 @@ vmcs_intel_x64::check_guest_cs_access_rights_type()
                       << "    - cs_access: 0x" << cs_access << std::endl
                       << std::dec;
 
-        return false;
+            return false;
     }
 
     return true;
@@ -726,10 +726,10 @@ vmcs_intel_x64::check_guest_ss_access_rights_type()
 {
     auto ss_access = vmread(VMCS_GUEST_SS_ACCESS_RIGHTS);
 
-    if((ss_access & SELECTOR_UNUSABLE) != 0)
+    if ((ss_access & SELECTOR_UNUSABLE) != 0)
         return true;
 
-    switch(ss_access & 0x000F)
+    switch (ss_access & 0x000F)
     {
         case 3:
         case 7:
@@ -743,7 +743,7 @@ vmcs_intel_x64::check_guest_ss_access_rights_type()
                       << "    - ss_access: 0x" << ss_access << std::endl
                       << std::dec;
 
-        return false;
+            return false;
     }
 
     return true;
@@ -754,10 +754,10 @@ vmcs_intel_x64::check_guest_ds_access_rights_type()
 {
     auto ds_access = vmread(VMCS_GUEST_DS_ACCESS_RIGHTS);
 
-    if((ds_access & SELECTOR_UNUSABLE) != 0)
+    if ((ds_access & SELECTOR_UNUSABLE) != 0)
         return true;
 
-    switch(ds_access & 0x000F)
+    switch (ds_access & 0x000F)
     {
         case 1:
         case 3:
@@ -775,7 +775,7 @@ vmcs_intel_x64::check_guest_ds_access_rights_type()
                       << "    - ds_access: 0x" << ds_access << std::endl
                       << std::dec;
 
-        return false;
+            return false;
     }
 
     return true;
@@ -786,10 +786,10 @@ vmcs_intel_x64::check_guest_es_access_rights_type()
 {
     auto es_access = vmread(VMCS_GUEST_ES_ACCESS_RIGHTS);
 
-    if((es_access & SELECTOR_UNUSABLE) != 0)
+    if ((es_access & SELECTOR_UNUSABLE) != 0)
         return true;
 
-    switch(es_access & 0x000F)
+    switch (es_access & 0x000F)
     {
         case 1:
         case 3:
@@ -807,7 +807,7 @@ vmcs_intel_x64::check_guest_es_access_rights_type()
                       << "    - es_access: 0x" << es_access << std::endl
                       << std::dec;
 
-        return false;
+            return false;
     }
 
     return true;
@@ -818,10 +818,10 @@ vmcs_intel_x64::check_guest_fs_access_rights_type()
 {
     auto fs_access = vmread(VMCS_GUEST_FS_ACCESS_RIGHTS);
 
-    if((fs_access & SELECTOR_UNUSABLE) != 0)
+    if ((fs_access & SELECTOR_UNUSABLE) != 0)
         return true;
 
-    switch(fs_access & 0x000F)
+    switch (fs_access & 0x000F)
     {
         case 1:
         case 3:
@@ -839,7 +839,7 @@ vmcs_intel_x64::check_guest_fs_access_rights_type()
                       << "    - fs_access: 0x" << fs_access << std::endl
                       << std::dec;
 
-        return false;
+            return false;
     }
 
     return true;
@@ -850,10 +850,10 @@ vmcs_intel_x64::check_guest_gs_access_rights_type()
 {
     auto gs_access = vmread(VMCS_GUEST_GS_ACCESS_RIGHTS);
 
-    if((gs_access & SELECTOR_UNUSABLE) != 0)
+    if ((gs_access & SELECTOR_UNUSABLE) != 0)
         return true;
 
-    switch(gs_access & 0x000F)
+    switch (gs_access & 0x000F)
     {
         case 1:
         case 3:
@@ -871,7 +871,7 @@ vmcs_intel_x64::check_guest_gs_access_rights_type()
                       << "    - gs_access: 0x" << gs_access << std::endl
                       << std::dec;
 
-        return false;
+            return false;
     }
 
     return true;
@@ -901,7 +901,7 @@ vmcs_intel_x64::check_guest_ss_is_not_a_system_descriptor()
 {
     auto ss_access = vmread(VMCS_GUEST_SS_ACCESS_RIGHTS);
 
-    if((ss_access & SELECTOR_UNUSABLE) != 0)
+    if ((ss_access & SELECTOR_UNUSABLE) != 0)
         return true;
 
     if ((ss_access & 0x0010) == 0)
@@ -923,7 +923,7 @@ vmcs_intel_x64::check_guest_ds_is_not_a_system_descriptor()
 {
     auto ds_access = vmread(VMCS_GUEST_DS_ACCESS_RIGHTS);
 
-    if((ds_access & SELECTOR_UNUSABLE) != 0)
+    if ((ds_access & SELECTOR_UNUSABLE) != 0)
         return true;
 
     if ((ds_access & 0x0010) == 0)
@@ -945,7 +945,7 @@ vmcs_intel_x64::check_guest_es_is_not_a_system_descriptor()
 {
     auto es_access = vmread(VMCS_GUEST_ES_ACCESS_RIGHTS);
 
-    if((es_access & SELECTOR_UNUSABLE) != 0)
+    if ((es_access & SELECTOR_UNUSABLE) != 0)
         return true;
 
     if ((es_access & 0x0010) == 0)
@@ -967,7 +967,7 @@ vmcs_intel_x64::check_guest_fs_is_not_a_system_descriptor()
 {
     auto fs_access = vmread(VMCS_GUEST_FS_ACCESS_RIGHTS);
 
-    if((fs_access & SELECTOR_UNUSABLE) != 0)
+    if ((fs_access & SELECTOR_UNUSABLE) != 0)
         return true;
 
     if ((fs_access & 0x0010) == 0)
@@ -989,7 +989,7 @@ vmcs_intel_x64::check_guest_gs_is_not_a_system_descriptor()
 {
     auto gs_access = vmread(VMCS_GUEST_GS_ACCESS_RIGHTS);
 
-    if((gs_access & SELECTOR_UNUSABLE) != 0)
+    if ((gs_access & SELECTOR_UNUSABLE) != 0)
         return true;
 
     if ((gs_access & 0x0010) == 0)
@@ -1031,11 +1031,11 @@ vmcs_intel_x64::check_guest_cs_dpl_adheres_to_ss_dpl()
     auto cs_access = vmread(VMCS_GUEST_CS_ACCESS_RIGHTS);
     auto ss_access = vmread(VMCS_GUEST_SS_ACCESS_RIGHTS);
 
-    switch(cs_access & 0x000F)
+    switch (cs_access & 0x000F)
     {
         case 9:
         case 11:
-            if((cs_access & 0x60) != (ss_access & 0x60))
+            if ((cs_access & 0x60) != (ss_access & 0x60))
             {
                 std::cout << "check_guest_cs_dpl_adheres_to_ss_dpl failed. "
                           << "guest cs dpl must equal ss dpl if type is 9 or 11: " << std::endl
@@ -1050,7 +1050,7 @@ vmcs_intel_x64::check_guest_cs_dpl_adheres_to_ss_dpl()
 
         case 13:
         case 15:
-            if((cs_access & 0x60) > (ss_access & 0x60))
+            if ((cs_access & 0x60) > (ss_access & 0x60))
             {
                 std::cout << "check_guest_cs_dpl_adheres_to_ss_dpl failed. "
                           << "guest cs dpl must not be greater than ss dpl if type is 13 or 15: " << std::endl
@@ -1121,10 +1121,10 @@ vmcs_intel_x64::check_guest_ds_dpl()
     auto ds = vmread(VMCS_GUEST_DS_SELECTOR);
     auto ds_access = vmread(VMCS_GUEST_DS_ACCESS_RIGHTS);
 
-    if((ds_access & SELECTOR_UNUSABLE) != 0)
+    if ((ds_access & SELECTOR_UNUSABLE) != 0)
         return true;
 
-    if((ds_access & 0x000F) >= 12)
+    if ((ds_access & 0x000F) >= 12)
         return true;
 
     if ((ds_access & 0x0060) < (ds & SELECTOR_RPL_FLAG))
@@ -1148,10 +1148,10 @@ vmcs_intel_x64::check_guest_es_dpl()
     auto es = vmread(VMCS_GUEST_ES_SELECTOR);
     auto es_access = vmread(VMCS_GUEST_ES_ACCESS_RIGHTS);
 
-    if((es_access & SELECTOR_UNUSABLE) != 0)
+    if ((es_access & SELECTOR_UNUSABLE) != 0)
         return true;
 
-    if((es_access & 0x000F) >= 12)
+    if ((es_access & 0x000F) >= 12)
         return true;
 
     if ((es_access & 0x0060) < (es & SELECTOR_RPL_FLAG))
@@ -1175,10 +1175,10 @@ vmcs_intel_x64::check_guest_fs_dpl()
     auto fs = vmread(VMCS_GUEST_FS_SELECTOR);
     auto fs_access = vmread(VMCS_GUEST_FS_ACCESS_RIGHTS);
 
-    if((fs_access & SELECTOR_UNUSABLE) != 0)
+    if ((fs_access & SELECTOR_UNUSABLE) != 0)
         return true;
 
-    if((fs_access & 0x000F) >= 12)
+    if ((fs_access & 0x000F) >= 12)
         return true;
 
     if ((fs_access & 0x0060) < (fs & SELECTOR_RPL_FLAG))
@@ -1202,10 +1202,10 @@ vmcs_intel_x64::check_guest_gs_dpl()
     auto gs = vmread(VMCS_GUEST_GS_SELECTOR);
     auto gs_access = vmread(VMCS_GUEST_GS_ACCESS_RIGHTS);
 
-    if((gs_access & SELECTOR_UNUSABLE) != 0)
+    if ((gs_access & SELECTOR_UNUSABLE) != 0)
         return true;
 
-    if((gs_access & 0x000F) >= 12)
+    if ((gs_access & 0x000F) >= 12)
         return true;
 
     if ((gs_access & 0x0060) < (gs & SELECTOR_RPL_FLAG))
@@ -1247,7 +1247,7 @@ vmcs_intel_x64::check_guest_ss_must_be_present_if_usable()
 {
     auto ss_access = vmread(VMCS_GUEST_SS_ACCESS_RIGHTS);
 
-    if((ss_access & SELECTOR_UNUSABLE) != 0)
+    if ((ss_access & SELECTOR_UNUSABLE) != 0)
         return true;
 
     if ((ss_access & 0x0080) == 0)
@@ -1269,7 +1269,7 @@ vmcs_intel_x64::check_guest_ds_must_be_present_if_usable()
 {
     auto ds_access = vmread(VMCS_GUEST_DS_ACCESS_RIGHTS);
 
-    if((ds_access & SELECTOR_UNUSABLE) != 0)
+    if ((ds_access & SELECTOR_UNUSABLE) != 0)
         return true;
 
     if ((ds_access & 0x0080) == 0)
@@ -1291,7 +1291,7 @@ vmcs_intel_x64::check_guest_es_must_be_present_if_usable()
 {
     auto es_access = vmread(VMCS_GUEST_ES_ACCESS_RIGHTS);
 
-    if((es_access & SELECTOR_UNUSABLE) != 0)
+    if ((es_access & SELECTOR_UNUSABLE) != 0)
         return true;
 
     if ((es_access & 0x0080) == 0)
@@ -1313,7 +1313,7 @@ vmcs_intel_x64::check_guest_fs_must_be_present_if_usable()
 {
     auto fs_access = vmread(VMCS_GUEST_FS_ACCESS_RIGHTS);
 
-    if((fs_access & SELECTOR_UNUSABLE) != 0)
+    if ((fs_access & SELECTOR_UNUSABLE) != 0)
         return true;
 
     if ((fs_access & 0x0080) == 0)
@@ -1335,7 +1335,7 @@ vmcs_intel_x64::check_guest_gs_must_be_present_if_usable()
 {
     auto gs_access = vmread(VMCS_GUEST_GS_ACCESS_RIGHTS);
 
-    if((gs_access & SELECTOR_UNUSABLE) != 0)
+    if ((gs_access & SELECTOR_UNUSABLE) != 0)
         return true;
 
     if ((gs_access & 0x0080) == 0)
@@ -1376,7 +1376,7 @@ vmcs_intel_x64::check_guest_ss_access_rights_reserved_must_be_0()
 {
     auto ss_access = vmread(VMCS_GUEST_SS_ACCESS_RIGHTS);
 
-    if((ss_access & SELECTOR_UNUSABLE) != 0)
+    if ((ss_access & SELECTOR_UNUSABLE) != 0)
         return true;
 
     if ((ss_access & 0x0F00) != 0)
@@ -1398,7 +1398,7 @@ vmcs_intel_x64::check_guest_ds_access_rights_reserved_must_be_0()
 {
     auto ds_access = vmread(VMCS_GUEST_DS_ACCESS_RIGHTS);
 
-    if((ds_access & SELECTOR_UNUSABLE) != 0)
+    if ((ds_access & SELECTOR_UNUSABLE) != 0)
         return true;
 
     if ((ds_access & 0x0F00) != 0)
@@ -1420,7 +1420,7 @@ vmcs_intel_x64::check_guest_es_access_rights_reserved_must_be_0()
 {
     auto es_access = vmread(VMCS_GUEST_ES_ACCESS_RIGHTS);
 
-    if((es_access & SELECTOR_UNUSABLE) != 0)
+    if ((es_access & SELECTOR_UNUSABLE) != 0)
         return true;
 
     if ((es_access & 0x0F00) != 0)
@@ -1442,7 +1442,7 @@ vmcs_intel_x64::check_guest_fs_access_rights_reserved_must_be_0()
 {
     auto fs_access = vmread(VMCS_GUEST_FS_ACCESS_RIGHTS);
 
-    if((fs_access & SELECTOR_UNUSABLE) != 0)
+    if ((fs_access & SELECTOR_UNUSABLE) != 0)
         return true;
 
     if ((fs_access & 0x0F00) != 0)
@@ -1464,7 +1464,7 @@ vmcs_intel_x64::check_guest_gs_access_rights_reserved_must_be_0()
 {
     auto gs_access = vmread(VMCS_GUEST_GS_ACCESS_RIGHTS);
 
-    if((gs_access & SELECTOR_UNUSABLE) != 0)
+    if ((gs_access & SELECTOR_UNUSABLE) != 0)
         return true;
 
     if ((gs_access & 0x0F00) != 0)
@@ -1506,7 +1506,7 @@ vmcs_intel_x64::check_guest_cs_granularity()
     auto cs_limit = vmread(VMCS_GUEST_CS_LIMIT);
     auto cs_access = vmread(VMCS_GUEST_CS_ACCESS_RIGHTS);
 
-    if((cs_limit & 0x00000FFF) == 0 && (cs_access & 0x8000) != 0)
+    if ((cs_limit & 0x00000FFF) == 0 && (cs_access & 0x8000) != 0)
     {
         std::cout << "check_guest_cs_granularity failed. "
                   << "for cs, if any limit bit in 11:0 == 0, g must be 0" << std::endl
@@ -1518,7 +1518,7 @@ vmcs_intel_x64::check_guest_cs_granularity()
         return false;
     }
 
-    if((cs_limit & 0xFFF00000) != 0 && (cs_access & 0x8000) == 0)
+    if ((cs_limit & 0xFFF00000) != 0 && (cs_access & 0x8000) == 0)
     {
         std::cout << "check_guest_cs_granularity failed. "
                   << "for cs, if any limit bit in 31:20 == 1, g must be 1" << std::endl
@@ -1539,10 +1539,10 @@ vmcs_intel_x64::check_guest_ss_granularity()
     auto ss_limit = vmread(VMCS_GUEST_SS_LIMIT);
     auto ss_access = vmread(VMCS_GUEST_SS_ACCESS_RIGHTS);
 
-    if((ss_access & SELECTOR_UNUSABLE) != 0)
+    if ((ss_access & SELECTOR_UNUSABLE) != 0)
         return true;
 
-    if((ss_limit & 0x00000FFF) == 0 && (ss_access & 0x8000) != 0)
+    if ((ss_limit & 0x00000FFF) == 0 && (ss_access & 0x8000) != 0)
     {
         std::cout << "check_guest_ss_granularity failed. "
                   << "for ss, if any limit bit in 11:0 == 0, g must be 0" << std::endl
@@ -1554,7 +1554,7 @@ vmcs_intel_x64::check_guest_ss_granularity()
         return false;
     }
 
-    if((ss_limit & 0xFFF00000) != 0 && (ss_access & 0x8000) == 0)
+    if ((ss_limit & 0xFFF00000) != 0 && (ss_access & 0x8000) == 0)
     {
         std::cout << "check_guest_ss_granularity failed. "
                   << "for ss, if any limit bit in 31:20 == 1, g must be 1" << std::endl
@@ -1575,10 +1575,10 @@ vmcs_intel_x64::check_guest_ds_granularity()
     auto ds_limit = vmread(VMCS_GUEST_DS_LIMIT);
     auto ds_access = vmread(VMCS_GUEST_DS_ACCESS_RIGHTS);
 
-    if((ds_access & SELECTOR_UNUSABLE) != 0)
+    if ((ds_access & SELECTOR_UNUSABLE) != 0)
         return true;
 
-    if((ds_limit & 0x00000FFF) == 0 && (ds_access & 0x8000) != 0)
+    if ((ds_limit & 0x00000FFF) == 0 && (ds_access & 0x8000) != 0)
     {
         std::cout << "check_guest_ds_granularity failed. "
                   << "for ds, if any limit bit in 11:0 == 0, g must be 0" << std::endl
@@ -1590,7 +1590,7 @@ vmcs_intel_x64::check_guest_ds_granularity()
         return false;
     }
 
-    if((ds_limit & 0xFFF00000) != 0 && (ds_access & 0x8000) == 0)
+    if ((ds_limit & 0xFFF00000) != 0 && (ds_access & 0x8000) == 0)
     {
         std::cout << "check_guest_ds_granularity failed. "
                   << "for ds, if any limit bit in 31:20 == 1, g must be 1" << std::endl
@@ -1611,10 +1611,10 @@ vmcs_intel_x64::check_guest_es_granularity()
     auto es_limit = vmread(VMCS_GUEST_ES_LIMIT);
     auto es_access = vmread(VMCS_GUEST_ES_ACCESS_RIGHTS);
 
-    if((es_access & SELECTOR_UNUSABLE) != 0)
+    if ((es_access & SELECTOR_UNUSABLE) != 0)
         return true;
 
-    if((es_limit & 0x00000FFF) == 0 && (es_access & 0x8000) != 0)
+    if ((es_limit & 0x00000FFF) == 0 && (es_access & 0x8000) != 0)
     {
         std::cout << "check_guest_es_granularity failed. "
                   << "for es, if any limit bit in 11:0 == 0, g must be 0" << std::endl
@@ -1626,7 +1626,7 @@ vmcs_intel_x64::check_guest_es_granularity()
         return false;
     }
 
-    if((es_limit & 0xFFF00000) != 0 && (es_access & 0x8000) == 0)
+    if ((es_limit & 0xFFF00000) != 0 && (es_access & 0x8000) == 0)
     {
         std::cout << "check_guest_es_granularity failed. "
                   << "for es, if any limit bit in 31:20 == 1, g must be 1" << std::endl
@@ -1647,10 +1647,10 @@ vmcs_intel_x64::check_guest_fs_granularity()
     auto fs_limit = vmread(VMCS_GUEST_FS_LIMIT);
     auto fs_access = vmread(VMCS_GUEST_FS_ACCESS_RIGHTS);
 
-    if((fs_access & SELECTOR_UNUSABLE) != 0)
+    if ((fs_access & SELECTOR_UNUSABLE) != 0)
         return true;
 
-    if((fs_limit & 0x00000FFF) == 0 && (fs_access & 0x8000) != 0)
+    if ((fs_limit & 0x00000FFF) == 0 && (fs_access & 0x8000) != 0)
     {
         std::cout << "check_guest_fs_granularity failed. "
                   << "for fs, if any limit bit in 11:0 == 0, g must be 0" << std::endl
@@ -1662,7 +1662,7 @@ vmcs_intel_x64::check_guest_fs_granularity()
         return false;
     }
 
-    if((fs_limit & 0xFFF00000) != 0 && (fs_access & 0x8000) == 0)
+    if ((fs_limit & 0xFFF00000) != 0 && (fs_access & 0x8000) == 0)
     {
         std::cout << "check_guest_fs_granularity failed. "
                   << "for fs, if any limit bit in 31:20 == 1, g must be 1" << std::endl
@@ -1683,10 +1683,10 @@ vmcs_intel_x64::check_guest_gs_granularity()
     auto gs_limit = vmread(VMCS_GUEST_GS_LIMIT);
     auto gs_access = vmread(VMCS_GUEST_GS_ACCESS_RIGHTS);
 
-    if((gs_access & SELECTOR_UNUSABLE) != 0)
+    if ((gs_access & SELECTOR_UNUSABLE) != 0)
         return true;
 
-    if((gs_limit & 0x00000FFF) == 0 && (gs_access & 0x8000) != 0)
+    if ((gs_limit & 0x00000FFF) == 0 && (gs_access & 0x8000) != 0)
     {
         std::cout << "check_guest_gs_granularity failed. "
                   << "for gs, if any limit bit in 11:0 == 0, g must be 0" << std::endl
@@ -1698,7 +1698,7 @@ vmcs_intel_x64::check_guest_gs_granularity()
         return false;
     }
 
-    if((gs_limit & 0xFFF00000) != 0 && (gs_access & 0x8000) == 0)
+    if ((gs_limit & 0xFFF00000) != 0 && (gs_access & 0x8000) == 0)
     {
         std::cout << "check_guest_gs_granularity failed. "
                   << "for gs, if any limit bit in 31:20 == 1, g must be 1" << std::endl
@@ -1718,7 +1718,7 @@ vmcs_intel_x64::check_guest_cs_access_rights_remaining_reserved_bit_0()
 {
     auto cs_access = vmread(VMCS_GUEST_CS_ACCESS_RIGHTS);
 
-    if((cs_access & 0xFFFE0000) != 0)
+    if ((cs_access & 0xFFFE0000) != 0)
     {
         std::cout << "check_guest_cs_access_rights_remaining_reserved_bit_0 failed. "
                   << "cs bits 31:17 in the access rights must be 0" << std::endl
@@ -1737,10 +1737,10 @@ vmcs_intel_x64::check_guest_ss_access_rights_remaining_reserved_bit_0()
 {
     auto ss_access = vmread(VMCS_GUEST_SS_ACCESS_RIGHTS);
 
-    if((ss_access & SELECTOR_UNUSABLE) != 0)
+    if ((ss_access & SELECTOR_UNUSABLE) != 0)
         return true;
 
-    if((ss_access & 0xFFFE0000) != 0)
+    if ((ss_access & 0xFFFE0000) != 0)
     {
         std::cout << "check_guest_ss_access_rights_remaining_reserved_bit_0 failed. "
                   << "ss bits 31:17 in the access rights must be 0" << std::endl
@@ -1759,10 +1759,10 @@ vmcs_intel_x64::check_guest_ds_access_rights_remaining_reserved_bit_0()
 {
     auto ds_access = vmread(VMCS_GUEST_DS_ACCESS_RIGHTS);
 
-    if((ds_access & SELECTOR_UNUSABLE) != 0)
+    if ((ds_access & SELECTOR_UNUSABLE) != 0)
         return true;
 
-    if((ds_access & 0xFFFE0000) != 0)
+    if ((ds_access & 0xFFFE0000) != 0)
     {
         std::cout << "check_guest_ds_access_rights_remaining_reserved_bit_0 failed. "
                   << "ds bits 31:17 in the access rights must be 0" << std::endl
@@ -1781,10 +1781,10 @@ vmcs_intel_x64::check_guest_es_access_rights_remaining_reserved_bit_0()
 {
     auto es_access = vmread(VMCS_GUEST_ES_ACCESS_RIGHTS);
 
-    if((es_access & SELECTOR_UNUSABLE) != 0)
+    if ((es_access & SELECTOR_UNUSABLE) != 0)
         return true;
 
-    if((es_access & 0xFFFE0000) != 0)
+    if ((es_access & 0xFFFE0000) != 0)
     {
         std::cout << "check_guest_es_access_rights_remaining_reserved_bit_0 failed. "
                   << "es bits 31:17 in the access rights must be 0" << std::endl
@@ -1803,10 +1803,10 @@ vmcs_intel_x64::check_guest_fs_access_rights_remaining_reserved_bit_0()
 {
     auto fs_access = vmread(VMCS_GUEST_FS_ACCESS_RIGHTS);
 
-    if((fs_access & SELECTOR_UNUSABLE) != 0)
+    if ((fs_access & SELECTOR_UNUSABLE) != 0)
         return true;
 
-    if((fs_access & 0xFFFE0000) != 0)
+    if ((fs_access & 0xFFFE0000) != 0)
     {
         std::cout << "check_guest_fs_access_rights_remaining_reserved_bit_0 failed. "
                   << "fs bits 31:17 in the access rights must be 0" << std::endl
@@ -1825,10 +1825,10 @@ vmcs_intel_x64::check_guest_gs_access_rights_remaining_reserved_bit_0()
 {
     auto gs_access = vmread(VMCS_GUEST_GS_ACCESS_RIGHTS);
 
-    if((gs_access & SELECTOR_UNUSABLE) != 0)
+    if ((gs_access & SELECTOR_UNUSABLE) != 0)
         return true;
 
-    if((gs_access & 0xFFFE0000) != 0)
+    if ((gs_access & 0xFFFE0000) != 0)
     {
         std::cout << "check_guest_gs_access_rights_remaining_reserved_bit_0 failed. "
                   << "gs bits 31:17 in the access rights must be 0" << std::endl
@@ -1847,7 +1847,7 @@ vmcs_intel_x64::check_guest_tr_type_must_be_11()
 {
     auto tr_access = vmread(VMCS_GUEST_TR_ACCESS_RIGHTS);
 
-    if((tr_access & 0x000F) != 11)
+    if ((tr_access & 0x000F) != 11)
     {
         std::cout << "check_guest_tr_type_must_be_11 failed. "
                   << "tr type must be 11" << std::endl
@@ -1866,7 +1866,7 @@ vmcs_intel_x64::check_guest_tr_must_be_a_system_descriptor()
 {
     auto tr_access = vmread(VMCS_GUEST_TR_ACCESS_RIGHTS);
 
-    if((tr_access & 0x0010) != 0)
+    if ((tr_access & 0x0010) != 0)
     {
         std::cout << "check_guest_tr_must_be_a_system_descriptor failed. "
                   << "tr must be a system descsriptor, yet s == 1" << std::endl
@@ -1885,7 +1885,7 @@ vmcs_intel_x64::check_guest_tr_must_be_present()
 {
     auto tr_access = vmread(VMCS_GUEST_TR_ACCESS_RIGHTS);
 
-    if((tr_access & 0x0080) == 0)
+    if ((tr_access & 0x0080) == 0)
     {
         std::cout << "check_guest_tr_must_be_present failed. "
                   << "tr must be present, yet p == 0" << std::endl
@@ -1904,7 +1904,7 @@ vmcs_intel_x64::check_guest_tr_access_rights_reserved_must_be_0()
 {
     auto tr_access = vmread(VMCS_GUEST_TR_ACCESS_RIGHTS);
 
-    if((tr_access & 0x0F00) != 0)
+    if ((tr_access & 0x0F00) != 0)
     {
         std::cout << "check_guest_tr_access_rights_reserved_must_be_0 failed. "
                   << "tr reserved access rights must be 0" << std::endl
@@ -1924,7 +1924,7 @@ vmcs_intel_x64::check_guest_tr_granularity()
     auto tr_limit = vmread(VMCS_GUEST_TR_LIMIT);
     auto tr_access = vmread(VMCS_GUEST_TR_ACCESS_RIGHTS);
 
-    if((tr_limit & 0x00000FFF) == 0 && (tr_access & 0x8000) != 0)
+    if ((tr_limit & 0x00000FFF) == 0 && (tr_access & 0x8000) != 0)
     {
         std::cout << "check_guest_tr_granularity failed. "
                   << "for tr, if any limit bit in 11:0 == 0, g must be 0" << std::endl
@@ -1936,7 +1936,7 @@ vmcs_intel_x64::check_guest_tr_granularity()
         return false;
     }
 
-    if((tr_limit & 0xFFF00000) != 0 && (tr_access & 0x8000) == 0)
+    if ((tr_limit & 0xFFF00000) != 0 && (tr_access & 0x8000) == 0)
     {
         std::cout << "check_guest_tr_granularity failed. "
                   << "for tr, if any limit bit in 31:20 == 1, g must be 1" << std::endl
@@ -1956,7 +1956,7 @@ vmcs_intel_x64::check_guest_tr_must_be_usable()
 {
     auto tr_access = vmread(VMCS_GUEST_TR_ACCESS_RIGHTS);
 
-    if((tr_access & SELECTOR_UNUSABLE) != 0)
+    if ((tr_access & SELECTOR_UNUSABLE) != 0)
     {
         std::cout << "check_guest_tr_must_be_usable failed. "
                   << "tr must be usable" << std::endl
@@ -1975,7 +1975,7 @@ vmcs_intel_x64::check_guest_tr_access_rights_remaining_reserved_bit_0()
 {
     auto tr_access = vmread(VMCS_GUEST_TR_ACCESS_RIGHTS);
 
-    if((tr_access & 0xFFFE0000) != 0)
+    if ((tr_access & 0xFFFE0000) != 0)
     {
         std::cout << "check_guest_tr_access_rights_remaining_reserved_bit_0 failed. "
                   << "tr bits 31:17 in the access rights must be 0" << std::endl
@@ -1994,10 +1994,10 @@ vmcs_intel_x64::check_guest_ldtr_type_must_be_2()
 {
     auto ldtr_access = vmread(VMCS_GUEST_LDTR_ACCESS_RIGHTS);
 
-    if((ldtr_access & SELECTOR_UNUSABLE) != 0)
+    if ((ldtr_access & SELECTOR_UNUSABLE) != 0)
         return true;
 
-    if((ldtr_access & 0x000F) != 2)
+    if ((ldtr_access & 0x000F) != 2)
     {
         std::cout << "check_guest_ldtr_type_must_be_11 failed. "
                   << "ldtr type must be 2" << std::endl
@@ -2016,10 +2016,10 @@ vmcs_intel_x64::check_guest_ldtr_must_be_a_system_descriptor()
 {
     auto ldtr_access = vmread(VMCS_GUEST_LDTR_ACCESS_RIGHTS);
 
-    if((ldtr_access & SELECTOR_UNUSABLE) != 0)
+    if ((ldtr_access & SELECTOR_UNUSABLE) != 0)
         return true;
 
-    if((ldtr_access & 0x0010) != 0)
+    if ((ldtr_access & 0x0010) != 0)
     {
         std::cout << "check_guest_ldtr_must_be_a_system_descriptor failed. "
                   << "ldtr must be a system descsriptor, yet s == 1" << std::endl
@@ -2038,10 +2038,10 @@ vmcs_intel_x64::check_guest_ldtr_must_be_present()
 {
     auto ldtr_access = vmread(VMCS_GUEST_LDTR_ACCESS_RIGHTS);
 
-    if((ldtr_access & SELECTOR_UNUSABLE) != 0)
+    if ((ldtr_access & SELECTOR_UNUSABLE) != 0)
         return true;
 
-    if((ldtr_access & 0x0080) == 0)
+    if ((ldtr_access & 0x0080) == 0)
     {
         std::cout << "check_guest_ldtr_must_be_present failed. "
                   << "ldtr must be present, yet p == 0" << std::endl
@@ -2060,10 +2060,10 @@ vmcs_intel_x64::check_guest_ldtr_access_rights_reserved_must_be_0()
 {
     auto ldtr_access = vmread(VMCS_GUEST_LDTR_ACCESS_RIGHTS);
 
-    if((ldtr_access & SELECTOR_UNUSABLE) != 0)
+    if ((ldtr_access & SELECTOR_UNUSABLE) != 0)
         return true;
 
-    if((ldtr_access & 0x0F00) != 0)
+    if ((ldtr_access & 0x0F00) != 0)
     {
         std::cout << "check_guest_ldtr_access_rights_reserved_must_be_0 failed. "
                   << "ldtr reserved access rights must be 0" << std::endl
@@ -2083,10 +2083,10 @@ vmcs_intel_x64::check_guest_ldtr_granularity()
     auto ldtr_limit = vmread(VMCS_GUEST_LDTR_LIMIT);
     auto ldtr_access = vmread(VMCS_GUEST_LDTR_ACCESS_RIGHTS);
 
-    if((ldtr_access & SELECTOR_UNUSABLE) != 0)
+    if ((ldtr_access & SELECTOR_UNUSABLE) != 0)
         return true;
 
-    if((ldtr_limit & 0x00000FFF) == 0 && (ldtr_access & 0x8000) != 0)
+    if ((ldtr_limit & 0x00000FFF) == 0 && (ldtr_access & 0x8000) != 0)
     {
         std::cout << "check_guest_ldtr_granularity failed. "
                   << "for ldtr, if any limit bit in 11:0 == 0, g must be 0" << std::endl
@@ -2098,7 +2098,7 @@ vmcs_intel_x64::check_guest_ldtr_granularity()
         return false;
     }
 
-    if((ldtr_limit & 0xFFF00000) != 0 && (ldtr_access & 0x8000) == 0)
+    if ((ldtr_limit & 0xFFF00000) != 0 && (ldtr_access & 0x8000) == 0)
     {
         std::cout << "check_guest_ldtr_granularity failed. "
                   << "for ldtr, if any limit bit in 31:20 == 1, g must be 1" << std::endl
@@ -2118,10 +2118,10 @@ vmcs_intel_x64::check_guest_ldtr_access_rights_remaining_reserved_bit_0()
 {
     auto ldtr_access = vmread(VMCS_GUEST_LDTR_ACCESS_RIGHTS);
 
-    if((ldtr_access & SELECTOR_UNUSABLE) != 0)
+    if ((ldtr_access & SELECTOR_UNUSABLE) != 0)
         return true;
 
-    if((ldtr_access & 0xFFFE0000) != 0)
+    if ((ldtr_access & 0xFFFE0000) != 0)
     {
         std::cout << "check_guest_ldtr_access_rights_remaining_reserved_bit_0 failed. "
                   << "ldtr bits 31:17 in the access rights must be 0" << std::endl
