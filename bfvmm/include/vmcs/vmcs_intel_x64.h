@@ -54,6 +54,9 @@ public:
     ///
     vmcs_error::type launch() override;
 
+    void vmwrite(uint64_t field, uint64_t value);
+    uint64_t vmread(uint64_t field);
+
 private:
 
     /// Normally you would not add a seem that exposes the private
@@ -94,9 +97,6 @@ private:
     vmcs_error::type default_secondary_processor_based_vm_execution_controls();
     vmcs_error::type default_vm_exit_controls();
     vmcs_error::type default_vm_entry_controls();
-
-    void vmwrite(uint64_t field, uint64_t value);
-    uint64_t vmread(uint64_t field);
 
     void dump_vmcs();
     void dump_state();
@@ -345,6 +345,7 @@ private:
     intrinsics_intel_x64 *m_intrinsics;
 
     page m_vmcs_region;
+    page m_msr_bitmap;
 };
 
 #endif

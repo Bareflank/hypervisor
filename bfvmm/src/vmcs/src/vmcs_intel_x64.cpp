@@ -180,6 +180,28 @@ vmcs_intel_x64::launch()
     if (ret != vmcs_error::success)
         return ret;
 
+    // =========================================================================
+    // CLEAN ME UP
+    // =========================================================================
+
+    m_memory_manager->alloc_page(&m_msr_bitmap);
+
+    auto buf = (char *)m_msr_bitmap.virt_addr();
+    for (auto i = 0; i < m_msr_bitmap.size(); i++)
+        buf[i] = 0;
+
+    vmwrite(VMCS_ADDRESS_OF_MSR_BITMAPS_FULL, (uint64_t)m_msr_bitmap.phys_addr());
+
+    auto controls = vmread(VMCS_PRIMARY_PROCESSOR_BASED_VM_EXECUTION_CONTROLS);
+
+    controls |= VM_EXEC_P_PROC_BASED_USE_MSR_BITMAPS;
+
+    vmwrite(VMCS_PRIMARY_PROCESSOR_BASED_VM_EXECUTION_CONTROLS, controls);
+
+    // =========================================================================
+    // CLEAN ME UP
+    // =========================================================================
+
     // Before we attempt to launch the VMM, we run a bunch of tests on the
     // VMCS to verify that the state of the VMCS is valid. These checks come
     // from the intel software developer's manual, volume 3, chapter 26. Most
@@ -188,39 +210,39 @@ vmcs_intel_x64::launch()
     // version of this VMCS. Currently, only 64bit VMs are supported. If that
     // changes, these checks will likely need to be re-implemented.
 
-    if (check_vmcs_host_state() == false)
-        return vmcs_error::failure;
+    // if (check_vmcs_host_state() == false)
+    //     return vmcs_error::failure;
 
-    if (check_vmcs_guest_state() == false)
-        return vmcs_error::failure;
+    // if (check_vmcs_guest_state() == false)
+    //     return vmcs_error::failure;
 
-    if (check_vmcs_control_state() == false)
-        return vmcs_error::failure;
+    // if (check_vmcs_control_state() == false)
+    //     return vmcs_error::failure;
 
     // The last step is to launch the VMCS. If the launch fails, we must
     // go through a series of error checks to identify why the failure
     // occured. If the launch succeeds, we should continue execution as
     // normal, not this code will be in a virtual machine when finished.
 
-    // ret = launch_vmcs();
-    // if (ret != vmcs_error::success)
-    // {
-    std::cout << "launch failed!!!" << std::endl;
-    return vmcs_error::success;
-    // }
-    // else
-    // {
-    //     std::cout << "WOOT, launch was succesfull!!!" << std::endl;
-    //     return vmcs_error::success;
-    // }
+    std::cout << "msr: 0x" << std::hex << m_intrinsics->read_msr(0xC0000101) << std::endl;
+
+    ret = launch_vmcs();
+    if (ret != vmcs_error::success)
+    {
+        std::cout << "launch failed!!!" << std::endl;
+        return vmcs_error::success;
+    }
+    else
+    {
+        std::cout << "msr: 0x" << std::hex << m_intrinsics->read_msr(0xC0000101) << std::endl;
+        std::cout << "WOOT, launch was succesfull!!!" << std::endl;
+        return vmcs_error::success;
+    }
 }
 
 vmcs_error::type
 vmcs_intel_x64::launch_vmcs()
 {
-    vmwrite(VMCS_GUEST_RIP, (uint64_t) && success);
-    vmwrite(VMCS_GUEST_RSP, m_intrinsics->read_rsp());
-
     if (m_valid == false)
     {
         std::cout << "unable to launch VMCS, a failure invalidated the VMCS.";
@@ -231,18 +253,11 @@ vmcs_intel_x64::launch_vmcs()
 
     if (m_intrinsics->vmlaunch() == false)
     {
-        std::cout << "vmlaunch instruction failed with CF = 1 or ZF = 1";
+        std::cout << "vmlaunch instruction failed ";
         std::cout << std::endl;
 
         return vmcs_error::failure;
     }
-
-    std::cout << "vmlaunch instruction succeeded, but failed to launch VM";
-    std::cout << std::endl;
-
-    return vmcs_error::failure;
-
-success:
 
     return vmcs_error::success;
 }
@@ -695,7 +710,7 @@ vmcs_intel_x64::write_natural_width_host_state_fields()
     vmwrite(VMCS_HOST_IDTR_BASE, m_idt_reg.base);
 
     vmwrite(VMCS_HOST_RSP, (uint64_t)exit_handler_stack());
-    vmwrite(VMCS_HOST_RIP, (uint64_t)exit_handler);
+    vmwrite(VMCS_HOST_RIP, (uint64_t)exit_handler_entry);
 
     vmwrite(VMCS_HOST_IA32_SYSENTER_ESP, m_intrinsics->read_msr32(IA32_SYSENTER_ESP_MSR));
     vmwrite(VMCS_HOST_IA32_SYSENTER_EIP, m_intrinsics->read_msr32(IA32_SYSENTER_EIP_MSR));
@@ -772,8 +787,8 @@ vmcs_intel_x64::vmread(uint64_t field)
     {
         std::cout << std::hex;
         std::cout << "vmread failed: "
-                  << "field = " << field << ", "
-                  << "value = " << value << std::endl;
+                  << "field = 0x" << field << ", "
+                  << "value = 0x" << value << std::endl;
         std::cout << std::dec;
 
         m_valid = false;

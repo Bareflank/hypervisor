@@ -302,6 +302,9 @@ bfelf_file_init(char *file, bfelf64_sword fsize, struct bfelf_file_t *ef)
         if (ret != BFELF_SUCCESS)
             return ret;
 
+        if (shdr->sh_type == bfsht_nobits)
+            continue;
+
         if (shdr->sh_offset + shdr->sh_size > ef->fsize)
             return BFELF_ERROR_INVALID_SH_SIZE;
     }

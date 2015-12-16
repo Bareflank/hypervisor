@@ -19,6 +19,7 @@
 ; License along with this library; if not, write to the Free Software
 ; Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+global __halt:function
 global __cpuid_eax:function
 global __cpuid_ebx:function
 global __cpuid_ecx:function
@@ -53,6 +54,10 @@ global __inw:function
 global __load_segment_limit
 
 section .text
+
+; void __halt(void)
+__halt
+    hlt
 
 ; uint32_t cpuid_eax(uint32_t val)
 __cpuid_eax:
@@ -150,9 +155,10 @@ __write_msr:
     push rcx
     push rdx
 
-    mov rax, rdi
-    mov rdx, rdi
+    mov rax, rsi
+    mov rdx, rsi
     shr rdx, 32
+    mov ecx, edi
     wrmsr
 
     pop rdx

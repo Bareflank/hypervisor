@@ -30,7 +30,7 @@ LD=g++
 
 CCFLAGS=
 CXXFLAGS=-std=c++14
-ASMFLAGS=
+ASMFLAGS=-f elf64
 LDFLAGS=
 
 DEFINES=
@@ -73,6 +73,8 @@ TARGET_TYPE=lib
 TARGET_COMPILER=both
 
 SOURCES+=exit_handler.cpp
+SOURCES+=exit_handler_entry.asm
+SOURCES+=exit_handler_dispatch.cpp
 HEADERS=
 
 LIBS=

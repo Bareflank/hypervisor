@@ -36,6 +36,8 @@
 extern "C" {
 #endif
 
+void __halt(void);
+
 uint32_t __cpuid_eax(uint32_t val);
 uint32_t __cpuid_ebx(uint32_t val);
 uint32_t __cpuid_ecx(uint32_t val);
@@ -109,6 +111,9 @@ public:
     intrinsics_x64() {}
     virtual ~intrinsics_x64() {}
 
+    virtual void halt()
+    { __halt(); }
+
     virtual uint32_t cpuid_eax(uint32_t val)
     { return __cpuid_eax(val); }
 
@@ -121,7 +126,7 @@ public:
     virtual uint32_t cpuid_edx(uint32_t val)
     { return __cpuid_edx(val); }
 
-    virtual uint64_t read_rflags(void)
+    virtual uint64_t read_rflags()
     { return __read_rflags(); }
 
     virtual uint64_t read_msr(uint32_t msr)
