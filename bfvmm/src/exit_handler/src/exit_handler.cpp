@@ -19,6 +19,7 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+#include <iostream>
 #include <exit_handler/exit_handler_dispatch.h>
 
 // -----------------------------------------------------------------------------
@@ -28,9 +29,15 @@
 void
 exit_handler_trampoline(void)
 {
+    std::cout << "[exit_handler.cpp]: start" << std::endl;
+    for(auto i = 0; i < 1000000; i++);
+
     auto ehd = exit_handler_dispatch();
 
     ehd.dispatch();
+
+    std::cout << "[exit_handler.cpp]: end" << std::endl;
+    for(auto i = 0; i < 1000000; i++);
 }
 
 // -----------------------------------------------------------------------------

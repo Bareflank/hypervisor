@@ -107,7 +107,13 @@ exit_handler_entry:
     mov rdi, 0x0000681E             ; VMCS_GUEST_RIP
     vmread [g_guest_rip], rdi
 
+    mov al, 0xFF
+    out 0x61, al
+
     call exit_handler wrt ..plt
+
+    mov al, 0x00
+    out 0x61, al
 
     mov rdi, 0x0000681E             ; VMCS_GUEST_RIP
     vmwrite rdi, [g_guest_rip]

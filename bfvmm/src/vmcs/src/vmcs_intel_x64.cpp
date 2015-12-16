@@ -233,6 +233,10 @@ vmcs_intel_x64::launch()
     else
     {
         std::cout << "WOOT, launch was succesfull!!!" << std::endl;
+
+        std::cout << m_intrinsics->read_cr0() << std::endl;
+
+        std::cout << "WOOT, launch was succesfull!!!" << std::endl;
         return vmcs_error::success;
     }
 }
