@@ -27,13 +27,13 @@ exit_handler_dispatch::exit_handler_dispatch()
 {
     m_vcpu = ef()->get_vcpu_factory()->get_vcpu(0);
 
-    if (m_vcpu == 0)
+    if(m_vcpu == 0)
         return;
 
     m_vmcs_intel_x64 = reinterpret_cast<vmcs_intel_x64 *>(m_vcpu->get_vmcs());
     m_intrinsics_intel_x64 = reinterpret_cast<intrinsics_intel_x64 *>(m_vcpu->get_intrinsics());
 
-    if (m_vmcs_intel_x64 == 0 || m_intrinsics_intel_x64 == 0)
+    if(m_vmcs_intel_x64 == 0 || m_intrinsics_intel_x64 == 0)
         return;
 
     m_exit_reason = m_vmcs_intel_x64->vmread(VMCS_EXIT_REASON);
@@ -48,7 +48,7 @@ exit_handler_dispatch::~exit_handler_dispatch()
 void
 exit_handler_dispatch::dispatch()
 {
-    switch (m_exit_reason)
+    switch(m_exit_reason)
     {
         case VM_EXIT_REASON_EXCEPTION_OR_NON_MASKABLE_INTERRUPT:
             handle_exception_or_non_maskable_interrupt();
@@ -339,7 +339,16 @@ exit_handler_dispatch::handle_task_switch()
 void
 exit_handler_dispatch::handle_cpuid()
 {
+    std::cout << std::hex << std::endl;
+    std::cout << "cpuid: " << std::endl;
+    std::cout << "  - rax: 0x" << g_guest_rax << std::endl;
     guest_cpuid();
+    std::cout << "  - rax: 0x" << g_guest_rax << std::endl;
+    std::cout << "  - rbx: 0x" << g_guest_rbx << std::endl;
+    std::cout << "  - rcx: 0x" << g_guest_rcx << std::endl;
+    std::cout << "  - rdx: 0x" << g_guest_rdx << std::endl;
+    spin_wait();
+
     advance_rip();
 }
 
@@ -426,32 +435,15 @@ exit_handler_dispatch::handle_io_instruction()
 void
 exit_handler_dispatch::handle_rdmsr()
 {
-    std::cout << "rdmsr intrinsics:" << std::hex << std::endl;
-    std::cout << "    - msr = 0x" << m_intrinsics_intel_x64->read_msr(g_guest_rcx) << std::endl;
-
-    std::cout << "rdmsr:" << std::hex << std::endl;
-    std::cout << "    - g_guest_rcx = 0x" << g_guest_rcx << std::endl;
     guest_read_msr();
-    std::cout << "    - g_guest_rax = 0x" << g_guest_rax << std::endl;
-    std::cout << "    - g_guest_rdx = 0x" << g_guest_rdx << std::endl;
-
     advance_rip();
-
-    for (auto i = 0; i < 1000000; i++);
 }
 
 void
 exit_handler_dispatch::handle_wrmsr()
 {
-    std::cout << "wrmsr:" << std::hex << std::endl;
-    std::cout << "    - g_guest_rax = 0x" << g_guest_rax << std::endl;
-    std::cout << "    - g_guest_rcx = 0x" << g_guest_rcx << std::endl;
-    std::cout << "    - g_guest_rdx = 0x" << g_guest_rdx << std::endl;
     guest_write_msr();
-
     advance_rip();
-
-    for (auto i = 0; i < 1000000; i++);
 }
 
 void
@@ -571,7 +563,7 @@ exit_handler_dispatch::advance_rip()
 void
 exit_handler_dispatch::spin_wait()
 {
-    for (auto i = 0; i < 1000000; i++);
+    for(auto i = 0; i < 1000000; i++);
 }
 
 void
@@ -594,7 +586,7 @@ exit_handler_dispatch::unimplemented_handler()
 const char *
 exit_handler_dispatch::exit_reason_to_str(uint64_t exit_reason)
 {
-    switch (exit_reason)
+    switch(exit_reason)
     {
         case VM_EXIT_REASON_EXCEPTION_OR_NON_MASKABLE_INTERRUPT:
             return "VM_EXIT_REASON_EXCEPTION_OR_NON_MASKABLE_INTERRUPT";

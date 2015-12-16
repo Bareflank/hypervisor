@@ -224,8 +224,6 @@ vmcs_intel_x64::launch()
     // occured. If the launch succeeds, we should continue execution as
     // normal, not this code will be in a virtual machine when finished.
 
-    std::cout << "msr: 0x" << std::hex << m_intrinsics->read_msr(0xC0000101) << std::endl;
-
     ret = launch_vmcs();
     if (ret != vmcs_error::success)
     {
@@ -234,7 +232,6 @@ vmcs_intel_x64::launch()
     }
     else
     {
-        std::cout << "msr: 0x" << std::hex << m_intrinsics->read_msr(0xC0000101) << std::endl;
         std::cout << "WOOT, launch was succesfull!!!" << std::endl;
         return vmcs_error::success;
     }
@@ -675,8 +672,10 @@ vmcs_intel_x64::write_natural_width_guest_state_fields()
     vmwrite(VMCS_GUEST_CS_BASE, m_cs_base);
     vmwrite(VMCS_GUEST_SS_BASE, m_ss_base);
     vmwrite(VMCS_GUEST_DS_BASE, m_ds_base);
-    vmwrite(VMCS_GUEST_FS_BASE, m_fs_base);
-    vmwrite(VMCS_GUEST_GS_BASE, m_gs_base);
+    vmwrite(VMCS_GUEST_FS_BASE, m_intrinsics->read_msr(IA32_FS_BASE));
+    vmwrite(VMCS_GUEST_GS_BASE, m_intrinsics->read_msr(IA32_GS_BASE));
+    // vmwrite(VMCS_GUEST_FS_BASE, m_fs_base);
+    // vmwrite(VMCS_GUEST_GS_BASE, m_gs_base);
     vmwrite(VMCS_GUEST_LDTR_BASE, m_ldtr_base);
     vmwrite(VMCS_GUEST_TR_BASE, m_tr_base);
 
@@ -702,8 +701,10 @@ vmcs_intel_x64::write_natural_width_host_state_fields()
     vmwrite(VMCS_HOST_CR0, m_cr0);
     vmwrite(VMCS_HOST_CR3, m_cr3);
     vmwrite(VMCS_HOST_CR4, m_cr4);
-    vmwrite(VMCS_HOST_FS_BASE, m_fs_base);
-    vmwrite(VMCS_HOST_GS_BASE, m_gs_base);
+    vmwrite(VMCS_HOST_FS_BASE, m_intrinsics->read_msr(IA32_FS_BASE));
+    vmwrite(VMCS_HOST_GS_BASE, m_intrinsics->read_msr(IA32_GS_BASE));
+    // vmwrite(VMCS_HOST_FS_BASE, m_fs_base);
+    // vmwrite(VMCS_HOST_GS_BASE, m_gs_base);
     vmwrite(VMCS_HOST_TR_BASE, m_tr_base);
 
     vmwrite(VMCS_HOST_GDTR_BASE, m_gdt_reg.base);

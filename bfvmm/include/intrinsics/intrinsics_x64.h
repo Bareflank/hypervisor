@@ -420,5 +420,7 @@ public:
 #define IA32_SYSENTER_ESP_MSR                                     0x00000175
 #define IA32_SYSENTER_EIP_MSR                                     0x00000176
 #define IA32_EFER_MSR                                             0xC0000080
+#define IA32_FS_BASE                                              0xC0000100
+#define IA32_GS_BASE                                              0xC0000101
 
 #endif
