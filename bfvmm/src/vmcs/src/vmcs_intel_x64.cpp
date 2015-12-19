@@ -233,10 +233,6 @@ vmcs_intel_x64::launch()
     else
     {
         std::cout << "WOOT, launch was succesfull!!!" << std::endl;
-
-        std::cout << m_intrinsics->read_cr0() << std::endl;
-
-        std::cout << "WOOT, launch was succesfull!!!" << std::endl;
         return vmcs_error::success;
     }
 }
@@ -514,9 +510,9 @@ vmcs_intel_x64::write_64bit_guest_state_fields()
     //       with 64bit writes, which will fill in the high field for us.
 
     vmwrite(VMCS_VMCS_LINK_POINTER_FULL, 0xFFFFFFFFFFFFFFFF);
+    vmwrite(VMCS_GUEST_IA32_DEBUGCTL_FULL, m_intrinsics->read_msr(IA32_DEBUGCTL_MSR));
     vmwrite(VMCS_GUEST_IA32_EFER_FULL, m_intrinsics->read_msr(IA32_EFER_MSR));
 
-    // unused: VMCS_GUEST_IA32_DEBUGCTL_FULL
     // unused: VMCS_GUEST_IA32_PAT_FULL
     // unused: VMCS_GUEST_IA32_PERF_GLOBAL_CTRL_FULL
     // unused: VMCS_GUEST_PDPTE0_FULL
@@ -534,9 +530,8 @@ vmcs_intel_x64::write_64bit_host_state_fields()
     //       high and full fields. We simply need to load the full field
     //       with 64bit writes, which will fill in the high field for us.
 
-    vmwrite(VMCS_HOST_IA32_EFER_FULL, m_intrinsics->read_msr(IA32_EFER_MSR));
-
     // unused: VMCS_HOST_IA32_PAT_FULL
+    // unused: VMCS_HOST_IA32_EFER_FULL
     // unused: VMCS_HOST_IA32_PERF_GLOBAL_CTRL_FULL
 
     return vmcs_error::success;
@@ -565,27 +560,20 @@ vmcs_intel_x64::write_32bit_control_fields()
     //     - a 0 in the upper 32bits of the associated MSR means that the
     //       field must contain a 0.
 
-    if ((m_intrinsics->read_msr(IA32_VMX_BASIC_MSR) & (0x1ll << 55)) == 0)
-    {
-        std::cout << "bit 55 in IA32_VMX_BASIC_MSR is cleared. "
-                  << "hardware not supported" << std::endl;
-        return vmcs_error::not_supported;
-    }
-
-    lower = ((m_intrinsics->read_msr(IA32_VMX_TRUE_PINBASED_CTLS_MSR) >> 0) & 0x00000000FFFFFFFF);
-    upper = ((m_intrinsics->read_msr(IA32_VMX_TRUE_PINBASED_CTLS_MSR) >> 32) & 0x00000000FFFFFFFF);
+    lower = ((m_intrinsics->read_msr(IA32_VMX_PINBASED_CTLS_MSR) >> 0) & 0x00000000FFFFFFFF);
+    upper = ((m_intrinsics->read_msr(IA32_VMX_PINBASED_CTLS_MSR) >> 32) & 0x00000000FFFFFFFF);
     vmwrite(VMCS_PIN_BASED_VM_EXECUTION_CONTROLS, lower & upper);
 
-    lower = ((m_intrinsics->read_msr(IA32_VMX_TRUE_PROCBASED_CTLS_MSR) >> 0) & 0x00000000FFFFFFFF);
-    upper = ((m_intrinsics->read_msr(IA32_VMX_TRUE_PROCBASED_CTLS_MSR) >> 32) & 0x00000000FFFFFFFF);
+    lower = ((m_intrinsics->read_msr(IA32_VMX_PROCBASED_CTLS_MSR) >> 0) & 0x00000000FFFFFFFF);
+    upper = ((m_intrinsics->read_msr(IA32_VMX_PROCBASED_CTLS_MSR) >> 32) & 0x00000000FFFFFFFF);
     vmwrite(VMCS_PRIMARY_PROCESSOR_BASED_VM_EXECUTION_CONTROLS, lower & upper);
 
-    lower = ((m_intrinsics->read_msr(IA32_VMX_TRUE_EXIT_CTLS_MSR) >> 0) & 0x00000000FFFFFFFF);
-    upper = ((m_intrinsics->read_msr(IA32_VMX_TRUE_EXIT_CTLS_MSR) >> 32) & 0x00000000FFFFFFFF);
+    lower = ((m_intrinsics->read_msr(IA32_VMX_EXIT_CTLS_MSR) >> 0) & 0x00000000FFFFFFFF);
+    upper = ((m_intrinsics->read_msr(IA32_VMX_EXIT_CTLS_MSR) >> 32) & 0x00000000FFFFFFFF);
     vmwrite(VMCS_VM_EXIT_CONTROLS, lower & upper);
 
-    lower = ((m_intrinsics->read_msr(IA32_VMX_TRUE_ENTRY_CTLS_MSR) >> 0) & 0x00000000FFFFFFFF);
-    upper = ((m_intrinsics->read_msr(IA32_VMX_TRUE_ENTRY_CTLS_MSR) >> 32) & 0x00000000FFFFFFFF);
+    lower = ((m_intrinsics->read_msr(IA32_VMX_ENTRY_CTLS_MSR) >> 0) & 0x00000000FFFFFFFF);
+    upper = ((m_intrinsics->read_msr(IA32_VMX_ENTRY_CTLS_MSR) >> 32) & 0x00000000FFFFFFFF);
     vmwrite(VMCS_VM_ENTRY_CONTROLS, lower & upper);
 
     // unused: VMCS_EXCEPTION_BITMAP
@@ -678,8 +666,6 @@ vmcs_intel_x64::write_natural_width_guest_state_fields()
     vmwrite(VMCS_GUEST_DS_BASE, m_ds_base);
     vmwrite(VMCS_GUEST_FS_BASE, m_intrinsics->read_msr(IA32_FS_BASE));
     vmwrite(VMCS_GUEST_GS_BASE, m_intrinsics->read_msr(IA32_GS_BASE));
-    // vmwrite(VMCS_GUEST_FS_BASE, m_fs_base);
-    // vmwrite(VMCS_GUEST_GS_BASE, m_gs_base);
     vmwrite(VMCS_GUEST_LDTR_BASE, m_ldtr_base);
     vmwrite(VMCS_GUEST_TR_BASE, m_tr_base);
 
@@ -692,8 +678,8 @@ vmcs_intel_x64::write_natural_width_guest_state_fields()
     vmwrite(VMCS_GUEST_IA32_SYSENTER_EIP, m_intrinsics->read_msr32(IA32_SYSENTER_EIP_MSR));
 
     // unused: VMCS_GUEST_DR7
-    // unused: VMCS_GUEST_RSP, see launch_vmcs()
-    // unused: VMCS_GUEST_RIP, see launch_vmcs()
+    // unused: VMCS_GUEST_RSP, see m_intrinsics->vmlaunch()
+    // unused: VMCS_GUEST_RIP, see m_intrinsics->vmlaunch()
     // unused: VMCS_GUEST_PENDING_DEBUG_EXCEPTIONS
 
     return vmcs_error::success;
@@ -707,8 +693,6 @@ vmcs_intel_x64::write_natural_width_host_state_fields()
     vmwrite(VMCS_HOST_CR4, m_cr4);
     vmwrite(VMCS_HOST_FS_BASE, m_intrinsics->read_msr(IA32_FS_BASE));
     vmwrite(VMCS_HOST_GS_BASE, m_intrinsics->read_msr(IA32_GS_BASE));
-    // vmwrite(VMCS_HOST_FS_BASE, m_fs_base);
-    // vmwrite(VMCS_HOST_GS_BASE, m_gs_base);
     vmwrite(VMCS_HOST_TR_BASE, m_tr_base);
 
     vmwrite(VMCS_HOST_GDTR_BASE, m_gdt_reg.base);
@@ -726,18 +710,77 @@ vmcs_intel_x64::write_natural_width_host_state_fields()
 vmcs_error::type
 vmcs_intel_x64::default_pin_based_vm_execution_controls()
 {
+    auto controls = vmread(VMCS_PIN_BASED_VM_EXECUTION_CONTROLS);
+
+    // controls |= VM_EXEC_PIN_BASED_EXTERNAL_INTERRUPT_EXITING;
+    // controls |= VM_EXEC_PIN_BASED_NMI_EXITING;
+    // controls |= VM_EXEC_PIN_BASED_VIRTUAL_NMIS;
+    // controls |= VM_EXEC_PIN_BASED_ACTIVATE_VMX_PREEMPTION_TIMER;
+    // controls |= VM_EXEC_PIN_BASED_PROCESS_POSTED_INTERRUPTS;
+
+    vmwrite(VMCS_PIN_BASED_VM_EXECUTION_CONTROLS, controls);
+
     return vmcs_error::success;
 }
 
 vmcs_error::type
 vmcs_intel_x64::default_primary_processor_based_vm_execution_controls()
 {
+    auto controls = vmread(VMCS_PRIMARY_PROCESSOR_BASED_VM_EXECUTION_CONTROLS);
+
+    // controls |= VM_EXEC_P_PROC_BASED_INTERRUPT_WINDOW_EXITING;
+    // controls |= VM_EXEC_P_PROC_BASED_USE_TSC_OFFSETTING;
+    // controls |= VM_EXEC_P_PROC_BASED_HLT_EXITING;
+    // controls |= VM_EXEC_P_PROC_BASED_INVLPG_EXITING;
+    // controls |= VM_EXEC_P_PROC_BASED_MWAIT_EXITING;
+    // controls |= VM_EXEC_P_PROC_BASED_RDPMC_EXITING;
+    // controls |= VM_EXEC_P_PROC_BASED_RDTSC_EXITING;
+    // controls |= VM_EXEC_P_PROC_BASED_CR3_LOAD_EXITING;
+    // controls |= VM_EXEC_P_PROC_BASED_CR3_STORE_EXITING;
+    // controls |= VM_EXEC_P_PROC_BASED_CR8_LOAD_EXITING;
+    // controls |= VM_EXEC_P_PROC_BASED_CR8_STORE_EXITING;
+    // controls |= VM_EXEC_P_PROC_BASED_USE_TPR_SHADOW;
+    // controls |= VM_EXEC_P_PROC_BASED_NMI_WINDOW_EXITING;
+    // controls |= VM_EXEC_P_PROC_BASED_MOV_DR_EXITING;
+    // controls |= VM_EXEC_P_PROC_BASED_UNCONDITIONAL_IO_EXITING;
+    // controls |= VM_EXEC_P_PROC_BASED_USE_IO_BITMAPS;
+    // controls |= VM_EXEC_P_PROC_BASED_MONITOR_TRAP_FLAG;
+    // controls |= VM_EXEC_P_PROC_BASED_USE_MSR_BITMAPS;
+    // controls |= VM_EXEC_P_PROC_BASED_MONITOR_EXITING;
+    // controls |= VM_EXEC_P_PROC_BASED_PAUSE_EXITING;
+    // controls |= VM_EXEC_P_PROC_BASED_ACTIVATE_SECONDARY_CONTROLS;
+
+    vmwrite(VMCS_PRIMARY_PROCESSOR_BASED_VM_EXECUTION_CONTROLS, controls);
+
     return vmcs_error::success;
 }
 
 vmcs_error::type
 vmcs_intel_x64::default_secondary_processor_based_vm_execution_controls()
 {
+    auto controls = vmread(VMCS_SECONDARY_PROCESSOR_BASED_VM_EXECUTION_CONTROLS);
+
+    // controls |= VM_EXEC_S_PROC_BASED_VIRTUALIZE_APIC_ACCESSES;
+    // controls |= VM_EXEC_S_PROC_BASED_ENABLE_EPT;
+    // controls |= VM_EXEC_S_PROC_BASED_DESCRIPTOR_TABLE_EXITING;
+    // controls |= VM_EXEC_S_PROC_BASED_ENABLE_RDTSCP;
+    // controls |= VM_EXEC_S_PROC_BASED_VIRTUALIZE_X2APIC_MODE;
+    // controls |= VM_EXEC_S_PROC_BASED_ENABLE_VPID;
+    // controls |= VM_EXEC_S_PROC_BASED_WBINVD_EXITING;
+    // controls |= VM_EXEC_S_PROC_BASED_UNRESTRICTED_GUEST;
+    // controls |= VM_EXEC_S_PROC_BASED_APIC_REGISTER_VIRTUALIZATION;
+    // controls |= VM_EXEC_S_PROC_BASED_VIRTUAL_INTERRUPT_DELIVERY;
+    // controls |= VM_EXEC_S_PROC_BASED_PAUSE_LOOP_EXITING;
+    // controls |= VM_EXEC_S_PROC_BASED_RDRAND_EXITING;
+    // controls |= VM_EXEC_S_PROC_BASED_ENABLE_INVPCID;
+    // controls |= VM_EXEC_S_PROC_BASED_ENABLE_VM_FUNCTIONS;
+    // controls |= VM_EXEC_S_PROC_BASED_VMCS_SHADOWING;
+    // controls |= VM_EXEC_S_PROC_BASED_RDSEED_EXITING;
+    // controls |= VM_EXEC_S_PROC_BASED_EPT_VIOLATION_VE;
+    // controls |= VM_EXEC_S_PROC_BASED_ENABLE_XSAVES_XRSTORS;
+
+    vmwrite(VMCS_SECONDARY_PROCESSOR_BASED_VM_EXECUTION_CONTROLS, controls);
+
     return vmcs_error::success;
 }
 
@@ -746,9 +789,15 @@ vmcs_intel_x64::default_vm_exit_controls()
 {
     auto controls = vmread(VMCS_VM_EXIT_CONTROLS);
 
+    // controls |= VM_EXIT_CONTROL_SAVE_DEBUG_CONTROLS;
     controls |= VM_EXIT_CONTROL_HOST_ADDRESS_SPACE_SIZE;
-    controls |= VM_EXIT_CONTROL_SAVE_IA32_EFER;
-    controls |= VM_EXIT_CONTROL_LOAD_IA32_EFER;
+    // controls |= VM_EXIT_CONTROL_LOAD_IA32_PERF_GLOBAL_CTRL;
+    // controls |= VM_EXIT_CONTROL_ACKNOWLEDGE_INTERRUPT_ON_EXIT;
+    // controls |= VM_EXIT_CONTROL_SAVE_IA32_PAT;
+    // controls |= VM_EXIT_CONTROL_LOAD_IA32_PAT;
+    // controls |= VM_EXIT_CONTROL_SAVE_IA32_EFER;
+    // controls |= VM_EXIT_CONTROL_LOAD_IA32_EFER;
+    // controls |= VM_EXIT_CONTROL_SAVE_VMX_PREEMPTION_TIMER_VALUE;
 
     vmwrite(VMCS_VM_EXIT_CONTROLS, controls);
 
@@ -760,8 +809,13 @@ vmcs_intel_x64::default_vm_entry_controls()
 {
     auto controls = vmread(VMCS_VM_ENTRY_CONTROLS);
 
+    // controls |= VM_ENTRY_CONTROL_LOAD_DEBUG_CONTROLS;
     controls |= VM_ENTRY_CONTROL_IA_32E_MODE_GUEST;
-    controls |= VM_ENTRY_CONTROL_LOAD_IA32_EFER;
+    // controls |= VM_ENTRY_CONTROL_ENTRY_TO_SMM;
+    // controls |= VM_ENTRY_CONTROL_DEACTIVATE_DUAL_MONITOR_TREATMENT;
+    // controls |= VM_ENTRY_CONTROL_LOAD_IA32_PERF_GLOBAL_CTRL;
+    // controls |= VM_ENTRY_CONTROL_LOAD_IA32_PAT;
+    // controls |= VM_ENTRY_CONTROL_LOAD_IA32_EFER;
 
     vmwrite(VMCS_VM_ENTRY_CONTROLS, controls);
 

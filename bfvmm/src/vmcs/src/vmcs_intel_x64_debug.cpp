@@ -226,10 +226,10 @@ vmcs_intel_x64::dump_vmcs()
     std::cout << std::endl;
     std::cout << "Natural Width Read-Only Fields:" << std::endl;
     PRINT_FIELD(VMCS_EXIT_QUALIFICATION);
-    PRINT_FIELD(VMCS_I_O_RCX);
-    PRINT_FIELD(VMCS_I_O_RSI);
-    PRINT_FIELD(VMCS_I_O_RDI);
-    PRINT_FIELD(VMCS_I_O_RIP);
+    PRINT_FIELD(VMCS_IO_RCX);
+    PRINT_FIELD(VMCS_IO_RSI);
+    PRINT_FIELD(VMCS_IO_RDI);
+    PRINT_FIELD(VMCS_IO_RIP);
     PRINT_FIELD(VMCS_GUEST_LINEAR_ADDRESS);
 
     std::cout << std::endl;
@@ -443,11 +443,11 @@ vmcs_intel_x64::print_primary_processor_based_vm_execution_controls()
     if ((controls & VM_EXEC_P_PROC_BASED_MOV_DR_EXITING) != 0)
         std::cout << "- " << "VM_EXEC_P_PROC_BASED_MOV_DR_EXITING" << std::endl;
 
-    if ((controls & VM_EXEC_P_PROC_BASED_UNCONDITIONAL_I_O_EXITING) != 0)
-        std::cout << "- " << "VM_EXEC_P_PROC_BASED_UNCONDITIONAL_I_O_EXITING" << std::endl;
+    if ((controls & VM_EXEC_P_PROC_BASED_UNCONDITIONAL_IO_EXITING) != 0)
+        std::cout << "- " << "VM_EXEC_P_PROC_BASED_UNCONDITIONAL_IO_EXITING" << std::endl;
 
-    if ((controls & VM_EXEC_P_PROC_BASED_USE_I_O_BITMAPS) != 0)
-        std::cout << "- " << "VM_EXEC_P_PROC_BASED_USE_I_O_BITMAPS" << std::endl;
+    if ((controls & VM_EXEC_P_PROC_BASED_USE_IO_BITMAPS) != 0)
+        std::cout << "- " << "VM_EXEC_P_PROC_BASED_USE_IO_BITMAPS" << std::endl;
 
     if ((controls & VM_EXEC_P_PROC_BASED_MONITOR_TRAP_FLAG) != 0)
         std::cout << "- " << "VM_EXEC_P_PROC_BASED_MONITOR_TRAP_FLAG" << std::endl;

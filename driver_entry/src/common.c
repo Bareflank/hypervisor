@@ -98,6 +98,8 @@ add_elf_file(uint64_t size)
         return 0;
     }
 
+    DEBUG("adding module of size: %d\n", (int)size);
+
     file = get_next_file();
     if (file == 0)
     {

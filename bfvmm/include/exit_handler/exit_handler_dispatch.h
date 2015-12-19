@@ -112,6 +112,7 @@ private:
     intrinsics_intel_x64 *m_intrinsics_intel_x64;
 
     uint64_t m_exit_reason;
+    uint64_t m_exit_qualification;
     uint64_t m_exit_instruction_length;
     uint64_t m_exit_instruction_information;
 };

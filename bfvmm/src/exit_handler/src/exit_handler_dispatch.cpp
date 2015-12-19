@@ -37,6 +37,7 @@ exit_handler_dispatch::exit_handler_dispatch()
         return;
 
     m_exit_reason = m_vmcs_intel_x64->vmread(VMCS_EXIT_REASON);
+    m_exit_qualification = m_vmcs_intel_x64->vmread(VMCS_EXIT_QUALIFICATION);
     m_exit_instruction_length = m_vmcs_intel_x64->vmread(VMCS_VM_EXIT_INSTRUCTION_LENGTH);
     m_exit_instruction_information = m_vmcs_intel_x64->vmread(VMCS_VM_EXIT_INSTRUCTION_INFORMATION);
 }
@@ -339,16 +340,7 @@ exit_handler_dispatch::handle_task_switch()
 void
 exit_handler_dispatch::handle_cpuid()
 {
-    std::cout << std::hex << std::endl;
-    std::cout << "cpuid: " << std::endl;
-    std::cout << "  - rax: 0x" << g_guest_rax << std::endl;
     guest_cpuid();
-    std::cout << "  - rax: 0x" << g_guest_rax << std::endl;
-    std::cout << "  - rbx: 0x" << g_guest_rbx << std::endl;
-    std::cout << "  - rcx: 0x" << g_guest_rcx << std::endl;
-    std::cout << "  - rdx: 0x" << g_guest_rdx << std::endl;
-    spin_wait();
-
     advance_rip();
 }
 
@@ -422,7 +414,183 @@ exit_handler_dispatch::handle_vmxon()
 
 void
 exit_handler_dispatch::handle_control_register_accesses()
-{ unimplemented_handler(); }
+{
+    auto control_register = ((m_exit_qualification & 0x0000000F) >> 0);
+    auto access_type = ((m_exit_qualification & 0x00000030) >> 4);
+    auto general_purpose_register = ((m_exit_qualification & 0x00000F00) >> 8);
+
+    if(control_register != 3)
+        goto unimplemented;
+
+    if(access_type >= 2)
+        goto unimplemented;
+
+    if(access_type == 0)
+    {
+        switch(general_purpose_register)
+        {
+            case 0:
+                m_intrinsics_intel_x64->vmwrite(VMCS_GUEST_CR3, g_guest_rax);
+                break;
+
+            case 1:
+                m_intrinsics_intel_x64->vmwrite(VMCS_GUEST_CR3, g_guest_rcx);
+                break;
+
+            case 2:
+                m_intrinsics_intel_x64->vmwrite(VMCS_GUEST_CR3, g_guest_rdx);
+                break;
+
+            case 3:
+                m_intrinsics_intel_x64->vmwrite(VMCS_GUEST_CR3, g_guest_rbx);
+                break;
+
+            case 4:
+                m_intrinsics_intel_x64->vmwrite(VMCS_GUEST_CR3, g_guest_rsp);
+                break;
+
+            case 5:
+                m_intrinsics_intel_x64->vmwrite(VMCS_GUEST_CR3, g_guest_rbp);
+                break;
+
+            case 6:
+                m_intrinsics_intel_x64->vmwrite(VMCS_GUEST_CR3, g_guest_rsi);
+                break;
+
+            case 7:
+                m_intrinsics_intel_x64->vmwrite(VMCS_GUEST_CR3, g_guest_rdi);
+                break;
+
+            case 8:
+                m_intrinsics_intel_x64->vmwrite(VMCS_GUEST_CR3, g_guest_r08);
+                break;
+
+            case 9:
+                m_intrinsics_intel_x64->vmwrite(VMCS_GUEST_CR3, g_guest_r09);
+                break;
+
+            case 10:
+                m_intrinsics_intel_x64->vmwrite(VMCS_GUEST_CR3, g_guest_r10);
+                break;
+
+            case 11:
+                m_intrinsics_intel_x64->vmwrite(VMCS_GUEST_CR3, g_guest_r11);
+                break;
+
+            case 12:
+                m_intrinsics_intel_x64->vmwrite(VMCS_GUEST_CR3, g_guest_r12);
+                break;
+
+            case 13:
+                m_intrinsics_intel_x64->vmwrite(VMCS_GUEST_CR3, g_guest_r13);
+                break;
+
+            case 14:
+                m_intrinsics_intel_x64->vmwrite(VMCS_GUEST_CR3, g_guest_r14);
+                break;
+
+            case 15:
+                m_intrinsics_intel_x64->vmwrite(VMCS_GUEST_CR3, g_guest_r15);
+                break;
+
+            default:
+                goto unimplemented;
+        }
+
+        advance_rip();
+        return;
+    }
+
+    if(access_type == 1)
+    {
+        switch(general_purpose_register)
+        {
+            case 0:
+                m_intrinsics_intel_x64->vmread(VMCS_GUEST_CR3, &g_guest_rax);
+                break;
+
+            case 1:
+                m_intrinsics_intel_x64->vmread(VMCS_GUEST_CR3, &g_guest_rcx);
+                break;
+
+            case 2:
+                m_intrinsics_intel_x64->vmread(VMCS_GUEST_CR3, &g_guest_rdx);
+                break;
+
+            case 3:
+                m_intrinsics_intel_x64->vmread(VMCS_GUEST_CR3, &g_guest_rbx);
+                break;
+
+            case 4:
+                m_intrinsics_intel_x64->vmread(VMCS_GUEST_CR3, &g_guest_rsp);
+                break;
+
+            case 5:
+                m_intrinsics_intel_x64->vmread(VMCS_GUEST_CR3, &g_guest_rbp);
+                break;
+
+            case 6:
+                m_intrinsics_intel_x64->vmread(VMCS_GUEST_CR3, &g_guest_rsi);
+                break;
+
+            case 7:
+                m_intrinsics_intel_x64->vmread(VMCS_GUEST_CR3, &g_guest_rdi);
+                break;
+
+            case 8:
+                m_intrinsics_intel_x64->vmread(VMCS_GUEST_CR3, &g_guest_r08);
+                break;
+
+            case 9:
+                m_intrinsics_intel_x64->vmread(VMCS_GUEST_CR3, &g_guest_r09);
+                break;
+
+            case 10:
+                m_intrinsics_intel_x64->vmread(VMCS_GUEST_CR3, &g_guest_r10);
+                break;
+
+            case 11:
+                m_intrinsics_intel_x64->vmread(VMCS_GUEST_CR3, &g_guest_r11);
+                break;
+
+            case 12:
+                m_intrinsics_intel_x64->vmread(VMCS_GUEST_CR3, &g_guest_r12);
+                break;
+
+            case 13:
+                m_intrinsics_intel_x64->vmread(VMCS_GUEST_CR3, &g_guest_r13);
+                break;
+
+            case 14:
+                m_intrinsics_intel_x64->vmread(VMCS_GUEST_CR3, &g_guest_r14);
+                break;
+
+            case 15:
+                m_intrinsics_intel_x64->vmread(VMCS_GUEST_CR3, &g_guest_r15);
+                break;
+
+            default:
+                goto unimplemented;
+        }
+
+        advance_rip();
+        return;
+    }
+
+unimplemented:
+
+    std::cout << std::endl;
+    std::cout << std::endl;
+    std::cout << "Unimplemented Control Register Access: " << std::hex << std::endl;
+    std::cout << "----------------------------------------------------------------------" << std::endl;
+    std::cout << "- control_register: 0x" << control_register << std::endl;
+    std::cout << "- access_type: 0x" << access_type << std::endl;
+    std::cout << "- general_purpose_register: 0x" << general_purpose_register << std::endl;
+    std::cout << std::dec << std::endl;
+
+    spin_wait();
+    m_intrinsics_intel_x64->halt();
+}
 
 void
 exit_handler_dispatch::handle_mov_dr()
@@ -434,17 +602,11 @@ exit_handler_dispatch::handle_io_instruction()
 
 void
 exit_handler_dispatch::handle_rdmsr()
-{
-    guest_read_msr();
-    advance_rip();
-}
+{ unimplemented_handler(); }
 
 void
 exit_handler_dispatch::handle_wrmsr()
-{
-    guest_write_msr();
-    advance_rip();
-}
+{ unimplemented_handler(); }
 
 void
 exit_handler_dispatch::handle_vm_entry_failure_invalid_guest_state()
@@ -579,7 +741,6 @@ exit_handler_dispatch::unimplemented_handler()
     std::cout << std::dec << std::endl;
 
     spin_wait();
-
     m_intrinsics_intel_x64->halt();
 }
 

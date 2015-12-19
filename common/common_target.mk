@@ -114,7 +114,7 @@ ifeq ($(TARGET_TYPE),lib)
 	ifeq ($(TARGET_CROSS_COMPILED),true)
 		CROSS_CCFLAGS+=-fpic
 		CROSS_CXXFLAGS+=-fpic -fno-rtti -fno-sized-deallocation -fno-exceptions -fno-use-cxa-atexit -fno-threadsafe-statics
-		CROSS_LDFLAGS+=-shared
+		CROSS_LDFLAGS+=-shared -z max-page-size=4096
 		CROSS_LD_OPTION=-o
 		CROSS_TARGET=$(patsubst %,$(CROSS_OUTDIR)/$(CROSS_SHARED_LIB_PRE)%$(CROSS_SHARED_LIB_EXT),$(TARGET_NAME))
 	endif

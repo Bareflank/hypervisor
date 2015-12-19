@@ -401,9 +401,6 @@ bfelf_file_load(struct bfelf_file_t *ef, char *exec, bfelf64_sword esize)
     if (!ef || !exec)
         return BFELF_ERROR_INVALID_ARG;
 
-    if (esize < ef->fsize)
-        return BFELF_ERROR_INVALID_ARG;
-
     if (ef->valid != BFELF_TRUE)
         return BFELF_ERROR_INVALID_FILE;
 

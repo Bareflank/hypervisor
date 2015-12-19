@@ -29,15 +29,9 @@
 void
 exit_handler_trampoline(void)
 {
-    std::cout << "[exit_handler.cpp]: start" << std::endl;
-    for(auto i = 0; i < 1000000; i++);
-
     auto ehd = exit_handler_dispatch();
 
     ehd.dispatch();
-
-    std::cout << "[exit_handler.cpp]: end" << std::endl;
-    for(auto i = 0; i < 1000000; i++);
 }
 
 // -----------------------------------------------------------------------------
@@ -49,25 +43,20 @@ exit_handler_trampoline(void)
 // things simple, the assembly jumps into C code first, which is then handed
 // off to C++ from there.
 
-extern "C"
+extern "C" void
+exit_handler(void)
 {
+    exit_handler_trampoline();
+}
 
-    void
-    exit_handler(void)
-    {
-        exit_handler_trampoline();
-    }
+extern "C" void *
+exit_handler_stack(void)
+{
+    static char stack[0x2000] = {0};
 
-    void *
-    exit_handler_stack(void)
-    {
-        static char stack[0x2000] = {0};
+    // Note that we return the stack pointer, plus the size of the stack,
+    // minus one because the stack grows down and thus, the starting point
+    // of the stack is actually the end of it.
 
-        // Note that we return the stack pointer, plus the size of the stack,
-        // minus one because the stack grows down and thus, the starting point
-        // of the stack is actually the end of it.
-
-        return &stack[0x1999];
-    }
-
+    return &stack[0x1999];
 }

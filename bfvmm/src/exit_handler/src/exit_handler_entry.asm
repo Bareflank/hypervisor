@@ -85,6 +85,7 @@ exit_handler_entry:
 
     cli
 
+    ; Reigsters
     mov [g_guest_rax], rax
     mov [g_guest_rbx], rbx
     mov [g_guest_rcx], rcx
@@ -101,26 +102,21 @@ exit_handler_entry:
     mov [g_guest_r14], r14
     mov [g_guest_r15], r15
 
-    mov rdi, 0x0000681C             ; VMCS_GUEST_RSP
+    ; RSP, RIP
+    mov rdi, 0x0000681C
     vmread [g_guest_rsp], rdi
-
-    mov rdi, 0x0000681E             ; VMCS_GUEST_RIP
+    mov rdi, 0x0000681E
     vmread [g_guest_rip], rdi
-
-    mov al, 0xFF
-    out 0x61, al
 
     call exit_handler wrt ..plt
 
-    mov al, 0x00
-    out 0x61, al
-
-    mov rdi, 0x0000681E             ; VMCS_GUEST_RIP
+    ; RIP, RSP
+    mov rdi, 0x0000681E
     vmwrite rdi, [g_guest_rip]
-
-    mov rdi, 0x0000681C             ; VMCS_GUEST_RSP
+    mov rdi, 0x0000681C
     vmwrite rdi, [g_guest_rsp]
 
+    ; Registers
     mov r15, [g_guest_r15]
     mov r14, [g_guest_r14]
     mov r13, [g_guest_r13]
@@ -214,8 +210,8 @@ guest_write_msr:
     push rcx
     push rdx
 
-    mov rax, [g_guest_rax]
     mov rcx, [g_guest_rcx]
+    mov rax, [g_guest_rax]
     mov rdx, [g_guest_rdx]
 
     wrmsr

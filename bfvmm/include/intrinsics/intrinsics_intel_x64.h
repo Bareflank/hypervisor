@@ -95,6 +95,10 @@ public:
 #define IA32_VMX_CR4_FIXED0_MSR                                   0x00000488
 #define IA32_VMX_CR4_FIXED1_MSR                                   0x00000489
 #define IA32_FEATURE_CONTROL_MSR                                  0x0000003A
+#define IA32_VMX_PINBASED_CTLS_MSR                                0x00000481
+#define IA32_VMX_PROCBASED_CTLS_MSR                               0x00000482
+#define IA32_VMX_EXIT_CTLS_MSR                                    0x00000483
+#define IA32_VMX_ENTRY_CTLS_MSR                                   0x00000484
 #define IA32_VMX_TRUE_PINBASED_CTLS_MSR                           0x0000048D
 #define IA32_VMX_TRUE_PROCBASED_CTLS_MSR                          0x0000048E
 #define IA32_VMX_TRUE_EXIT_CTLS_MSR                               0x0000048F
@@ -277,10 +281,10 @@ public:
 
 // Natural Width Read-Only Fields
 #define VMCS_EXIT_QUALIFICATION                                   0x00006400
-#define VMCS_I_O_RCX                                              0x00006402
-#define VMCS_I_O_RSI                                              0x00006404
-#define VMCS_I_O_RDI                                              0x00006406
-#define VMCS_I_O_RIP                                              0x00006408
+#define VMCS_IO_RCX                                               0x00006402
+#define VMCS_IO_RSI                                               0x00006404
+#define VMCS_IO_RDI                                               0x00006406
+#define VMCS_IO_RIP                                               0x00006408
 #define VMCS_GUEST_LINEAR_ADDRESS                                 0x0000640A
 
 // Natural Width Guest State Fields
@@ -343,8 +347,8 @@ public:
 #define VM_EXEC_P_PROC_BASED_USE_TPR_SHADOW                       (1 << 21)
 #define VM_EXEC_P_PROC_BASED_NMI_WINDOW_EXITING                   (1 << 22)
 #define VM_EXEC_P_PROC_BASED_MOV_DR_EXITING                       (1 << 23)
-#define VM_EXEC_P_PROC_BASED_UNCONDITIONAL_I_O_EXITING            (1 << 24)
-#define VM_EXEC_P_PROC_BASED_USE_I_O_BITMAPS                      (1 << 25)
+#define VM_EXEC_P_PROC_BASED_UNCONDITIONAL_IO_EXITING             (1 << 24)
+#define VM_EXEC_P_PROC_BASED_USE_IO_BITMAPS                       (1 << 25)
 #define VM_EXEC_P_PROC_BASED_MONITOR_TRAP_FLAG                    (1 << 27)
 #define VM_EXEC_P_PROC_BASED_USE_MSR_BITMAPS                      (1 << 28)
 #define VM_EXEC_P_PROC_BASED_MONITOR_EXITING                      (1 << 29)

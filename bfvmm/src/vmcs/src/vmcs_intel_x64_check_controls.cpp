@@ -128,7 +128,7 @@ vmcs_intel_x64::check_control_io_bitmap_address_bits()
 {
     auto controls = vmread(VMCS_PRIMARY_PROCESSOR_BASED_VM_EXECUTION_CONTROLS);
 
-    if ((controls & VM_EXEC_P_PROC_BASED_USE_I_O_BITMAPS) != 0)
+    if ((controls & VM_EXEC_P_PROC_BASED_USE_IO_BITMAPS) != 0)
     {
         std::cout << "unimplemented VMCS check: "
                   << "check_control_io_bitmap_address_bits"
