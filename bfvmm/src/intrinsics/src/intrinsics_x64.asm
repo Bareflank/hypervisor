@@ -19,6 +19,7 @@
 ; License along with this library; if not, write to the Free Software
 ; Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+global __halt:function
 global __cpuid_eax:function
 global __cpuid_ebx:function
 global __cpuid_ecx:function
@@ -33,6 +34,8 @@ global __read_cr3:function
 global __write_cr3:function
 global __read_cr4:function
 global __write_cr4:function
+global __read_dr7:function
+global __write_dr7:function
 global __read_es:function
 global __read_cs:function
 global __read_ss:function
@@ -48,8 +51,13 @@ global __outb:function
 global __inb:function
 global __outw:function
 global __inw:function
+global __load_segment_limit
 
 section .text
+
+; void __halt(void)
+__halt
+    hlt
 
 ; uint32_t cpuid_eax(uint32_t val)
 __cpuid_eax:
@@ -147,9 +155,10 @@ __write_msr:
     push rcx
     push rdx
 
-    mov rax, rdi
-    mov rdx, rdi
+    mov rax, rsi
+    mov rdx, rsi
     shr rdx, 32
+    mov ecx, edi
     wrmsr
 
     pop rdx
@@ -184,6 +193,16 @@ __read_cr4:
 ; void __write_cr4(uint64_t val)
 __write_cr4:
     mov cr4, rdi
+    ret
+
+; uint64_t __read_dr7(void)
+__read_dr7:
+    mov rax, dr7
+    ret
+
+; void __write_dr7(uint64_t val)
+__write_dr7:
+    mov dr7, rdi
     ret
 
 ; uint16_t __read_es(void)
@@ -278,3 +297,7 @@ __inw:
 	in ax, dx
 	ret
 
+; uint32_t __load_segment_limit(uint16_t selector)
+__load_segment_limit:
+    lsl rax, di
+    ret

@@ -87,6 +87,27 @@ public:
 // VMCS Fields
 // =============================================================================
 
+// VMX MSRs
+// intel's software developer's manual, volume 3, appendix A.1
+#define IA32_VMX_BASIC_MSR                                        0x00000480
+#define IA32_VMX_CR0_FIXED0_MSR                                   0x00000486
+#define IA32_VMX_CR0_FIXED1_MSR                                   0x00000487
+#define IA32_VMX_CR4_FIXED0_MSR                                   0x00000488
+#define IA32_VMX_CR4_FIXED1_MSR                                   0x00000489
+#define IA32_FEATURE_CONTROL_MSR                                  0x0000003A
+#define IA32_VMX_PINBASED_CTLS_MSR                                0x00000481
+#define IA32_VMX_PROCBASED_CTLS_MSR                               0x00000482
+#define IA32_VMX_EXIT_CTLS_MSR                                    0x00000483
+#define IA32_VMX_ENTRY_CTLS_MSR                                   0x00000484
+#define IA32_VMX_TRUE_PINBASED_CTLS_MSR                           0x0000048D
+#define IA32_VMX_TRUE_PROCBASED_CTLS_MSR                          0x0000048E
+#define IA32_VMX_TRUE_EXIT_CTLS_MSR                               0x0000048F
+#define IA32_VMX_TRUE_ENTRY_CTLS_MSR                              0x00000490
+
+// The VMCS fields are defined in the intel's software developer's manual,
+// volumn 3, appendix B. An explaination of these fields can be found in
+// volume 3, chapter 24
+
 // 16bit Control Fields
 #define VMCS_VIRTUAL_PROCESSOR_IDENTIFIER                         0x00000000
 #define VMCS_POSTED_INTERRUPT_NOTIFICATION_VECTOR                 0x00000002
@@ -260,10 +281,10 @@ public:
 
 // Natural Width Read-Only Fields
 #define VMCS_EXIT_QUALIFICATION                                   0x00006400
-#define VMCS_I_O_RCX                                              0x00006402
-#define VMCS_I_O_RSI                                              0x00006404
-#define VMCS_I_O_RDI                                              0x00006406
-#define VMCS_I_O_RIP                                              0x00006408
+#define VMCS_IO_RCX                                               0x00006402
+#define VMCS_IO_RSI                                               0x00006404
+#define VMCS_IO_RDI                                               0x00006406
+#define VMCS_IO_RIP                                               0x00006408
 #define VMCS_GUEST_LINEAR_ADDRESS                                 0x0000640A
 
 // Natural Width Guest State Fields
@@ -301,5 +322,143 @@ public:
 #define VMCS_HOST_IA32_SYSENTER_EIP                               0x00006C12
 #define VMCS_HOST_RSP                                             0x00006C14
 #define VMCS_HOST_RIP                                             0x00006C16
+
+// Pin-Based VM-Execution Controls
+// intel's software developers manual, volume 3, chapter 24.6.1.
+#define VM_EXEC_PIN_BASED_EXTERNAL_INTERRUPT_EXITING              (1 << 0)
+#define VM_EXEC_PIN_BASED_NMI_EXITING                             (1 << 3)
+#define VM_EXEC_PIN_BASED_VIRTUAL_NMIS                            (1 << 5)
+#define VM_EXEC_PIN_BASED_ACTIVATE_VMX_PREEMPTION_TIMER           (1 << 6)
+#define VM_EXEC_PIN_BASED_PROCESS_POSTED_INTERRUPTS               (1 << 7)
+
+// Primary Processor-Based VM-Execution Controls
+// intel's software developers manual, volume 3, chapter 24.6.2
+#define VM_EXEC_P_PROC_BASED_INTERRUPT_WINDOW_EXITING             (1 << 2)
+#define VM_EXEC_P_PROC_BASED_USE_TSC_OFFSETTING                   (1 << 3)
+#define VM_EXEC_P_PROC_BASED_HLT_EXITING                          (1 << 7)
+#define VM_EXEC_P_PROC_BASED_INVLPG_EXITING                       (1 << 9)
+#define VM_EXEC_P_PROC_BASED_MWAIT_EXITING                        (1 << 10)
+#define VM_EXEC_P_PROC_BASED_RDPMC_EXITING                        (1 << 11)
+#define VM_EXEC_P_PROC_BASED_RDTSC_EXITING                        (1 << 12)
+#define VM_EXEC_P_PROC_BASED_CR3_LOAD_EXITING                     (1 << 15)
+#define VM_EXEC_P_PROC_BASED_CR3_STORE_EXITING                    (1 << 16)
+#define VM_EXEC_P_PROC_BASED_CR8_LOAD_EXITING                     (1 << 19)
+#define VM_EXEC_P_PROC_BASED_CR8_STORE_EXITING                    (1 << 20)
+#define VM_EXEC_P_PROC_BASED_USE_TPR_SHADOW                       (1 << 21)
+#define VM_EXEC_P_PROC_BASED_NMI_WINDOW_EXITING                   (1 << 22)
+#define VM_EXEC_P_PROC_BASED_MOV_DR_EXITING                       (1 << 23)
+#define VM_EXEC_P_PROC_BASED_UNCONDITIONAL_IO_EXITING             (1 << 24)
+#define VM_EXEC_P_PROC_BASED_USE_IO_BITMAPS                       (1 << 25)
+#define VM_EXEC_P_PROC_BASED_MONITOR_TRAP_FLAG                    (1 << 27)
+#define VM_EXEC_P_PROC_BASED_USE_MSR_BITMAPS                      (1 << 28)
+#define VM_EXEC_P_PROC_BASED_MONITOR_EXITING                      (1 << 29)
+#define VM_EXEC_P_PROC_BASED_PAUSE_EXITING                        (1 << 30)
+#define VM_EXEC_P_PROC_BASED_ACTIVATE_SECONDARY_CONTROLS          (1 << 31)
+
+// Secondary Processor-Based VM-Execution Controls
+// intel's software developers manual, volume 3, chapter 24.6.2
+#define VM_EXEC_S_PROC_BASED_VIRTUALIZE_APIC_ACCESSES             (1 << 0)
+#define VM_EXEC_S_PROC_BASED_ENABLE_EPT                           (1 << 1)
+#define VM_EXEC_S_PROC_BASED_DESCRIPTOR_TABLE_EXITING             (1 << 2)
+#define VM_EXEC_S_PROC_BASED_ENABLE_RDTSCP                        (1 << 3)
+#define VM_EXEC_S_PROC_BASED_VIRTUALIZE_X2APIC_MODE               (1 << 4)
+#define VM_EXEC_S_PROC_BASED_ENABLE_VPID                          (1 << 5)
+#define VM_EXEC_S_PROC_BASED_WBINVD_EXITING                       (1 << 6)
+#define VM_EXEC_S_PROC_BASED_UNRESTRICTED_GUEST                   (1 << 7)
+#define VM_EXEC_S_PROC_BASED_APIC_REGISTER_VIRTUALIZATION         (1 << 8)
+#define VM_EXEC_S_PROC_BASED_VIRTUAL_INTERRUPT_DELIVERY           (1 << 9)
+#define VM_EXEC_S_PROC_BASED_PAUSE_LOOP_EXITING                   (1 << 10)
+#define VM_EXEC_S_PROC_BASED_RDRAND_EXITING                       (1 << 11)
+#define VM_EXEC_S_PROC_BASED_ENABLE_INVPCID                       (1 << 12)
+#define VM_EXEC_S_PROC_BASED_ENABLE_VM_FUNCTIONS                  (1 << 13)
+#define VM_EXEC_S_PROC_BASED_VMCS_SHADOWING                       (1 << 14)
+#define VM_EXEC_S_PROC_BASED_RDSEED_EXITING                       (1 << 16)
+#define VM_EXEC_S_PROC_BASED_EPT_VIOLATION_VE                     (1 << 18)
+#define VM_EXEC_S_PROC_BASED_ENABLE_XSAVES_XRSTORS                (1 << 20)
+
+// VM-Exit Control Fields
+// intel's software developers manual, volume 3, chapter 24.7.1
+#define VM_EXIT_CONTROL_SAVE_DEBUG_CONTROLS                       (1 << 2)
+#define VM_EXIT_CONTROL_HOST_ADDRESS_SPACE_SIZE                   (1 << 9)
+#define VM_EXIT_CONTROL_LOAD_IA32_PERF_GLOBAL_CTRL                (1 << 12)
+#define VM_EXIT_CONTROL_ACKNOWLEDGE_INTERRUPT_ON_EXIT             (1 << 15)
+#define VM_EXIT_CONTROL_SAVE_IA32_PAT                             (1 << 18)
+#define VM_EXIT_CONTROL_LOAD_IA32_PAT                             (1 << 19)
+#define VM_EXIT_CONTROL_SAVE_IA32_EFER                            (1 << 20)
+#define VM_EXIT_CONTROL_LOAD_IA32_EFER                            (1 << 21)
+#define VM_EXIT_CONTROL_SAVE_VMX_PREEMPTION_TIMER_VALUE           (1 << 22)
+
+// VM-Entry Control Fields
+// intel's software developers manual, volume 3, chapter 24.8.1
+#define VM_ENTRY_CONTROL_LOAD_DEBUG_CONTROLS                      (1 << 2)
+#define VM_ENTRY_CONTROL_IA_32E_MODE_GUEST                        (1 << 9)
+#define VM_ENTRY_CONTROL_ENTRY_TO_SMM                             (1 << 10)
+#define VM_ENTRY_CONTROL_DEACTIVATE_DUAL_MONITOR_TREATMENT        (1 << 11)
+#define VM_ENTRY_CONTROL_LOAD_IA32_PERF_GLOBAL_CTRL               (1 << 13)
+#define VM_ENTRY_CONTROL_LOAD_IA32_PAT                            (1 << 14)
+#define VM_ENTRY_CONTROL_LOAD_IA32_EFER                           (1 << 15)
+
+// VM Exit Reasons
+// intel's software developers manual, volume 3, appendix c
+#define VM_EXIT_REASON_EXCEPTION_OR_NON_MASKABLE_INTERRUPT        (0)
+#define VM_EXIT_REASON_EXTERNAL_INTERRUPT                         (1)
+#define VM_EXIT_REASON_TRIPLE_FAULT                               (2)
+#define VM_EXIT_REASON_INIT_SIGNAL                                (3)
+#define VM_EXIT_REASON_SIPI                                       (4)
+#define VM_EXIT_REASON_SMI                                        (5)
+#define VM_EXIT_REASON_OTHER_SMI                                  (6)
+#define VM_EXIT_REASON_INTERRUPT_WINDOW                           (7)
+#define VM_EXIT_REASON_NMI_WINDOW                                 (8)
+#define VM_EXIT_REASON_TASK_SWITCH                                (9)
+#define VM_EXIT_REASON_CPUID                                      (10)
+#define VM_EXIT_REASON_GETSEC                                     (11)
+#define VM_EXIT_REASON_HLT                                        (12)
+#define VM_EXIT_REASON_INVD                                       (13)
+#define VM_EXIT_REASON_INVLPG                                     (14)
+#define VM_EXIT_REASON_RDPMC                                      (15)
+#define VM_EXIT_REASON_RDTSC                                      (16)
+#define VM_EXIT_REASON_RSM                                        (17)
+#define VM_EXIT_REASON_VMCALL                                     (18)
+#define VM_EXIT_REASON_VMCLEAR                                    (19)
+#define VM_EXIT_REASON_VMLAUNCH                                   (20)
+#define VM_EXIT_REASON_VMPTRLD                                    (21)
+#define VM_EXIT_REASON_VMPTRST                                    (22)
+#define VM_EXIT_REASON_VMREAD                                     (23)
+#define VM_EXIT_REASON_VMRESUME                                   (24)
+#define VM_EXIT_REASON_VMWRITE                                    (25)
+#define VM_EXIT_REASON_VMXOFF                                     (26)
+#define VM_EXIT_REASON_VMXON                                      (27)
+#define VM_EXIT_REASON_CONTROL_REGISTER_ACCESSES                  (28)
+#define VM_EXIT_REASON_MOV_DR                                     (29)
+#define VM_EXIT_REASON_IO_INSTRUCTION                             (30)
+#define VM_EXIT_REASON_RDMSR                                      (31)
+#define VM_EXIT_REASON_WRMSR                                      (32)
+#define VM_EXIT_REASON_VM_ENTRY_FAILURE_INVALID_GUEST_STATE       (33)
+#define VM_EXIT_REASON_VM_ENTRY_FAILURE_MSR_LOADING               (34)
+#define VM_EXIT_REASON_MWAIT                                      (36)
+#define VM_EXIT_REASON_MONITOR_TRAP_FLAG                          (37)
+#define VM_EXIT_REASON_MONITOR                                    (39)
+#define VM_EXIT_REASON_PAUSE                                      (40)
+#define VM_EXIT_REASON_VM_ENTRY_FAILURE_MACHINE_CHECK_EVENT       (41)
+#define VM_EXIT_REASON_TPR_BELOW_THRESHOLD                        (43)
+#define VM_EXIT_REASON_APIC_ACCESS                                (44)
+#define VM_EXIT_REASON_VIRTUALIZED_EOI                            (45)
+#define VM_EXIT_REASON_ACCESS_TO_GDTR_OR_IDTR                     (46)
+#define VM_EXIT_REASON_ACCESS_TO_LDTR_OR_TR                       (47)
+#define VM_EXIT_REASON_EPT_VIOLATION                              (48)
+#define VM_EXIT_REASON_EPT_MISCONFIGURATION                       (49)
+#define VM_EXIT_REASON_INVEPT                                     (50)
+#define VM_EXIT_REASON_RDTSCP                                     (51)
+#define VM_EXIT_REASON_VMX_PREEMPTION_TIMER_EXPIRED               (52)
+#define VM_EXIT_REASON_INVVPID                                    (53)
+#define VM_EXIT_REASON_WBINVD                                     (54)
+#define VM_EXIT_REASON_XSETBV                                     (55)
+#define VM_EXIT_REASON_APIC_WRITE                                 (56)
+#define VM_EXIT_REASON_RDRAND                                     (57)
+#define VM_EXIT_REASON_INVPCID                                    (58)
+#define VM_EXIT_REASON_VMFUNC                                     (59)
+#define VM_EXIT_REASON_RDSEED                                     (61)
+#define VM_EXIT_REASON_XSAVES                                     (63)
+#define VM_EXIT_REASON_XRSTORS                                    (64)
 
 #endif

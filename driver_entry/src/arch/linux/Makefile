@@ -33,9 +33,8 @@ clean:
 
 load:
 	insmod ./$(TARGET_MODULE).ko
-	chmod a+rw /dev/bareflank
 
 unload:
-	rmmod ./$(TARGET_MODULE).ko
+	-rmmod ./$(TARGET_MODULE).ko
 
 endif

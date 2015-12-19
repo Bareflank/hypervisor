@@ -33,3 +33,32 @@ SUBDIRS += driver_entry
 ################################################################################
 
 include ./common/common_subdir.mk
+
+################################################################################
+# Custom Targets
+################################################################################
+
+.PHONY: debian_load
+.PHONY: debian_clean
+.PHONY: start
+.PHONY: stop
+
+debian_load:
+	cd driver_entry/src/arch/linux; \
+	sudo make unload; \
+	make clean; \
+	make; \
+	sudo make load
+
+debian_clean:
+	cd driver_entry/src/arch/linux; \
+	sudo make unload; \
+	make clean
+
+start:
+	cd bfm/bin/native; \
+	sudo ./run.sh start vmm.modules
+
+stop:
+	cd bfm/bin/native; \
+	sudo ./run.sh stop

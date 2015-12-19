@@ -19,36 +19,7 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <test.h>
+#ifndef IOMANIP
+#define IOMANIP
 
-vmcs_ut::vmcs_ut()
-{
-}
-
-bool
-vmcs_ut::init()
-{
-    return true;
-}
-
-bool
-vmcs_ut::fini()
-{
-    return true;
-}
-
-bool
-vmcs_ut::list()
-{
-    this->test_check_host_cr0_for_unsupported_bits_missing_1s();
-    this->test_check_host_cr0_for_unsupported_bits_missing_0s();
-    this->test_check_host_cr0_for_unsupported_bits_valid();
-
-    return true;
-}
-
-int
-main(int argc, char *argv[])
-{
-    return RUN_ALL_TESTS(vmcs_ut);
-}
+#endif

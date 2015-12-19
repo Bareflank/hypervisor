@@ -58,8 +58,8 @@ SOURCES+=test_vmm_intel_x64.cpp
 HEADERS=
 
 LIBS+=vmm
-LIBS+=memory_manager
 LIBS+=intrinsics
+LIBS+=memory_manager
 
 LIB_PATHS+=../bin/native
 LIB_PATHS+=../../intrinsics/bin/native
