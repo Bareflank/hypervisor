@@ -28,22 +28,21 @@ debug_ring_ut::debug_ring_ut()
 bool
 debug_ring_ut::init()
 {
-    return this->init_debug_ring();
+    return true;
 }
 
 bool
 debug_ring_ut::fini()
 {
-    return this->fini_debug_ring();
+    return true;
 }
 
 bool
 debug_ring_ut::list()
 {
-    this->test_init_dr_with_null_drr();
-    this->test_init_dr_with_zero_length();
-    this->test_read_with_invalid_drr();
+    this->test_init_dr_with_invalid_vcpuid();
     this->test_write_with_invalid_dr();
+    this->test_read_with_invalid_drr();
     this->test_read_with_null_string();
     this->test_read_with_zero_length();
     this->test_write_with_null_string();
@@ -55,7 +54,6 @@ debug_ring_ut::list()
     this->test_overcommit_dr();
     this->test_overcommit_dr_more_than_once();
     this->test_read_with_empty_dr();
-
     this->acceptance_test_stress();
 
     return true;

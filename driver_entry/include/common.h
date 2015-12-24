@@ -33,24 +33,41 @@ extern "C" {
 /* Macros                                                                     */
 /* ========================================================================== */
 
+/*
+ * Error Codes
+ *
+ * Note that these are not the only error codes that could come out of the
+ * driver entry. Error codes in supporting software (like the ELF loader)
+ * could also show up, so these should be in a range that are easy to
+ * identify
+ */
 #define BF_SUCCESS 0
 #define BF_ERROR_INVALID_ARG -5001
 #define BF_ERROR_INVALID_INDEX -5002
 #define BF_ERROR_NO_MODULES_ADDED -5010
 #define BF_ERROR_MAX_MODULES_REACHED -5011
-#define BF_ERROR_VMM_ALREADY_STARTED -5012
-#define BF_ERROR_FAILED_TO_EXECUTE_SYMBOL -5013
-#define BF_ERROR_FAILED_TO_ADD_FILE -5014
-#define BF_ERROR_FAILED_TO_ALLOC_DRR -5015
-#define BF_ERROR_FAILED_TO_ALLOC_RB -5016
+#define BF_ERROR_VMM_INVALID_STATE -5012
+#define BF_ERROR_FAILED_TO_ADD_FILE -5015
 #define BF_ERROR_FAILED_TO_DUMP_DR -5017
 #define BF_ERROR_OUT_OF_MEMORY -5018
+#define BF_ERROR_VMM_CORRUPTED -5100
 #define BF_ERROR_UNKNOWN -5200
 
-#define MAX_NUM_MODULES 100
-
-#define VMM_STARTED 1
-#define VMM_STOPPED 0
+/*
+ * Driver Entry State Machine
+ *
+ *  The driver entry has three major states that it could end up in. When the
+ *  driver entry is unloaded, it means that the VMM has not been placed in
+ *  memory. The loaded state means that the VMM is in memory, and relocated.
+ *  In this state, symbol lookups are possible, and thus things like the VMM
+ *  dump comand work. The running state means that the VMM is actually running.
+ *  The goal of the state machine is to ensure that the driver keeps track of
+ *  the state of the VMM, and handles its transition properly.
+ */
+#define VMM_UNLOADED 0
+#define VMM_LOADED 1
+#define VMM_RUNNING 3
+#define VMM_CORRUPT 100
 
 /* ========================================================================== */
 /* Common Functions                                                           */
@@ -100,14 +117,35 @@ int64_t
 common_add_module(char *file, int64_t fsize);
 
 /**
+ * Load VMM
+ *
+ * This function loads the vmm (assuming that the modules that were
+ * loaded are actually a vmm). Once a VMM is loaded, it is placed in memory,
+ * and all of the modules are properly reloacted such that, code within each
+ * module is now capable of executing.
+ *
+ * @return BF_SUCCESS on success, negative error code on failure
+ */
+int64_t
+common_load_vmm(void);
+
+/**
+ * Unload VMM
+ *
+ * This function unloads the vmm. Once the VMM is unloaded, all of the symboles
+ * for the VMM are removed from memory, and are no longer accessible. The VMM
+ * cannot be unloaded unless the VMM is already loaded, but is not running.
+ *
+ * @return BF_SUCCESS on success, negative error code on failure
+ */
+int64_t
+common_unload_vmm(void);
+
+/**
  * Start VMM
  *
- * This function starts the vmm (assuming that the modules that were
- * loaded are actually a vmm). The user should run add_module prior to running
- * this function for all of the modules that are needed. If symbols are
- * missing, this function will error out. If the vmm has already been started,
- * this function will also error out. Finally, the vmm must have
- * "_Z9start_vmmi" in one of the modules for the vmm to successfully start.
+ * This function starts the vmm. Before the VMM can be started, it must first
+ * be loaded.
  *
  * @return BF_SUCCESS on success, negative error code on failure
  */
@@ -117,11 +155,8 @@ common_start_vmm(void);
 /**
  * Stop VMM
  *
- * This function stops the vmm (assuming that the modules that were
- * loaded are actually a vmm). The user should run start_vmm prior to running
- * this function. If the vmm has not already been started,
- * this function will also error out. Finally, the vmm must have
- * "_Z8stop_vmmi" in one of the modules for the vmm to successfully stop.
+ * This function stops the vmm. Before a VMM can be stopped, it must first be
+ * loaded, and running.
  *
  * @return BF_SUCCESS on success, negative error code on failure
  */
@@ -133,7 +168,8 @@ common_stop_vmm(void);
  *
  * This grabs the conents of the debug ring, and dumps the contents to the
  * driver entry's console. This is one of a couple of ways to get feedback
- * from the VMM.
+ * from the VMM. Note that the VMM must at least be loaded for this function
+ * to work as it has to do a symbol lookup
  *
  * @return BF_SUCCESS on success, negative error code on failure
  */

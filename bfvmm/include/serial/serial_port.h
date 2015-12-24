@@ -6,9 +6,11 @@
 
 namespace serial
 {
+    // TODO: These should be lower case as they are not macros
+
     enum err
     {
-        SUCCESS,
+        success,
         GENERAL_ERROR,
         INVALID_PARITY,
         INVALID_BAUD,
@@ -19,7 +21,7 @@ namespace serial
 
     //    const char *toString[] =
     //{
-    //    STRINGIFY(SUCCESS),
+    //    STRINGIFY(success),
     //    STRINGIFY(GENERAL_ERROR),
     //    STRINGIFY(INVALID_PARITY),
     //    STRINGIFY(INVALID_BAUD),
@@ -78,8 +80,9 @@ public:
     virtual void disable_fifo(void) {}
     virtual bool fifo(void)  { return false; }
 
-    virtual void write(uint8_t) {}
-    virtual void write(int8_t *bytes) {}
+    virtual void write(char c) {}
+    virtual void write(const char *str) {}
+    virtual void write(const char *str, int64_t len) {}
     virtual uint8_t read(void) { return 0; }
 
     virtual bool data_ready(void) { return false; }
@@ -91,7 +94,8 @@ public:
     virtual bool transmitter_empty(void) { return false; }
     virtual bool error_byte_rx_fifo(void) { return false; }
 
-    virtual serial_port &operator<<(uint8_t value) { return *this; }
+    virtual serial_port &operator<<(char c) { return *this; }
+    virtual serial_port &operator<<(const char *str) { return *this; }
 
 protected:
     // Get appropriate divisor for desired baud

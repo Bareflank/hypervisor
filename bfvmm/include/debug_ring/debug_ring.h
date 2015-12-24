@@ -59,10 +59,10 @@ public:
     /// Initializes the debug ring, and resets all of the internal variables
     /// to 0.
     ///
-    /// @param drr debug resources created by the driver entry
+    /// @param vcpuid the vcpu to use for this debug ring
     /// @return success on success, invalid on failure
     ///
-    virtual debug_ring_error::type init(struct debug_ring_resources *drr);
+    virtual debug_ring_error::type init(int64_t vcpuid);
 
     /// Write to Debug Ring
     ///
@@ -80,7 +80,20 @@ public:
 private:
 
     bool m_is_valid;
-    struct debug_ring_resources *m_drr;
+    struct debug_ring_resources_t *m_drr;
 };
+
+/// Get Debug Ring Resource
+///
+/// Returns a pointer to a debug_ring_resources_t for a given CPU. Note that
+/// this serves two purposes. We cannot define global memory with a GCC bug
+/// showing up (random crashes), and this provides a simple way for the unit
+/// test to get access to this memory.
+///
+/// @param vcpuid defines which debug ring to return
+/// @return the debug_ring_resources_t for the provided vcpuid
+///
+extern "C" struct debug_ring_resources_t *
+get_drr(long long int vcpuid);
 
 #endif

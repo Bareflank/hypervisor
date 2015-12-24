@@ -26,11 +26,29 @@
 /*
  * Max Supported VCPUs
  */
+#ifndef MAX_PAGES
 #define MAX_PAGES 10
+#endif
 
 /*
  * Max Supported VCPUs
  */
+#ifndef MAX_VCPUS
 #define MAX_VCPUS 1
+#endif
+
+/*
+ * Max Supported Modules
+ */
+#ifndef MAX_NUM_MODULES
+#define MAX_NUM_MODULES 25
+#endif
+
+/**
+ * Defines the size of a Debug Ring
+ */
+#ifndef DEBUG_RING_SIZE
+#define DEBUG_RING_SIZE (10 * 4096)
+#endif
 
 #endif

@@ -22,32 +22,41 @@
 #ifndef VCPU_H
 #define VCPU_H
 
-// TODO: This VCPU is specific to Intel x64. At some point we should
-//       abstract the VCPU such that it has a common interface, and then
-//       subclass for each arch (i.e. Intel, AMD and ARM)
-
 #include <stdint.h>
+#include <debug_ring/debug_ring.h>
 
+// TODO: This vCPU is specific to Intel x64. At some point we should
+//       abstract the vCPU such that it has a common interface, and then
+//       subclass for each arch (i.e. Intel, AMD and ARM)
 #include <vmm/vmm_intel_x64.h>
 #include <vmcs/vmcs_intel_x64.h>
-#include <debug_ring/debug_ring.h>
 #include <intrinsics/intrinsics_intel_x64.h>
+
+namespace vcpu_error
+{
+    enum type
+    {
+        success = 0,
+        failure = 1,
+        invalid = 2
+    };
+}
 
 class vcpu
 {
 public:
 
-    /// Default VCPU Constructor
+    /// Default vCPU Constructor
     ///
-    /// Creates a VCPU with a negative, invalid ID and default
-    /// resources. This VCPU should not be used.
+    /// Creates a vCPU with a negative, invalid ID and default
+    /// resources. This vCPU should not be used.
     ///
     vcpu();
 
     /// Constructor
     ///
-    /// Creates a VCPU with the provided id and default resources.
-    /// This VCPU should not be used.
+    /// Creates a vCPU with the provided id and default resources.
+    /// This vCPU should not be used.
     ///
     vcpu(int64_t id);
 
@@ -57,54 +66,53 @@ public:
 
     /// Is Valid
     ///
-    /// @return true if the VCPU is valid, false otherwise
+    /// @return true if the vCPU is valid, false otherwise
     ///
     virtual bool is_valid() const;
 
-    /// VCPU Id
+    /// vCPU Id
     ///
-    /// Returns the ID of the VCPU. This ID can be anything, but is only
+    /// Returns the ID of the vCPU. This ID can be anything, but is only
     /// valid if it is between 0 <= id < MAX_CPUS
     ///
     /// @return the VPU's id
     ///
     virtual int64_t id() const;
 
-    /// Get VMM
+    /// Init
     ///
-    /// @return vmm (will never be NULL)
+    /// Initializes the vCPU.
     ///
-    virtual vmm *get_vmm()
-    { return &m_vmm; }
+    /// @return success on success, failure otherwise
+    ///
+    virtual vcpu_error::type init();
 
-    /// Get VMCS
+    /// Start
     ///
-    /// TODO: Once we support multiple guests, this will have to be a
-    /// std::list<vmcs> object as we will have to store more than one of
-    /// these. We will also need some for of "guest" object that can store
-    /// all of the vmcs object for that single guest as a vcpu will only
-    /// work on one vmcs per guest so the "parent" object that is actually
-    /// storing the vmcs should be the guest object itself
+    /// Starts the vCPU.
     ///
-    /// @return vmcs (will never be NULL)
+    /// @return success on success, failure otherwise
     ///
-    virtual vmcs *get_vmcs()
-    { return &m_vmcs; }
+    virtual vcpu_error::type start();
 
+    /// Stop
+    ///
+    /// Stops the vCPU.
+    ///
+    /// @return success on success, failure otherwise
+    ///
+    virtual vcpu_error::type stop();
 
-    /// Get Debug Ring
+    /// Write to Log
     ///
-    /// @return debug ring (will never be NULL)
+    /// Writes to this specific vCPU's log. Note that this could be writing
+    /// to more than one log, but is likely writing to the debug ring for this
+    /// vCPU.
     ///
-    virtual debug_ring *get_debug_ring()
-    { return &m_debug_ring; }
-
-    /// Get Intrinsics
+    /// @param str the string to write to the log
+    /// @param len the length of the string
     ///
-    /// @return intrinsics (will never be NULL)
-    ///
-    virtual intrinsics_intel_x64 *get_intrinsics()
-    { return &m_intrinsics; }
+    virtual void write(const char *str, int64_t len);
 
 private:
 
@@ -112,8 +120,9 @@ private:
 
     vmm_intel_x64 m_vmm;
     vmcs_intel_x64 m_vmcs;
-    debug_ring m_debug_ring;
     intrinsics_intel_x64 m_intrinsics;
+
+    debug_ring m_debug_ring;
 };
 
 #endif

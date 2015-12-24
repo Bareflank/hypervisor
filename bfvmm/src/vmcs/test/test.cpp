@@ -40,6 +40,10 @@ vmcs_ut::fini()
 bool
 vmcs_ut::list()
 {
+    this->test_check_host_cr0_for_unsupported_bits_missing_1s();
+    this->test_check_host_cr0_for_unsupported_bits_missing_0s();
+    this->test_check_host_cr0_for_unsupported_bits_valid();
+
     return true;
 }
 

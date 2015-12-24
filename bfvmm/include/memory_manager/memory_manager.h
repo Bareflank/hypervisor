@@ -89,4 +89,39 @@ private:
     page m_pages[MAX_PAGES];
 };
 
+/// Get Memory Manager
+///
+/// We cannot use global memory since we don't have support for globally
+/// constructor objects. Instead, we provide access to a globally defined
+/// memory manager via a statically created global object with still provides
+/// global access to a single memory manager, but allows the manager to be
+/// properly constructed, and provides a simple means to test the class if
+/// needed.
+memory_manager *mm();
+
+/// Add Page
+///
+/// Adds a page to the memory manager. This is a "C" function that can
+/// be used by the driver entry point to provide the memory manager with a
+/// page that it can manage.
+///
+/// @param pg the page to add to the memory manager
+/// @return MEMORY_MANAGER_SUCCESS on success, MEMORY_MANAGER_FAILURE
+///     otherwise
+///
+extern "C" long long int
+add_page(struct page_t *pg);
+
+/// Remove Page
+///
+/// Remove a page to the memory manager. This is a "C" function that can
+/// be used by the driver entry point to remove a page from  the memory manager.
+///
+/// @param pg the page to remove from the memory manager
+/// @return MEMORY_MANAGER_SUCCESS on success, MEMORY_MANAGER_FAILURE
+///     otherwise
+///
+extern "C" long long int
+remove_page(struct page_t *pg);
+
 #endif

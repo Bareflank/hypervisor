@@ -39,13 +39,9 @@ protected:
 
 private:
 
-    bool init_debug_ring();
-    bool fini_debug_ring();
-
-    void test_init_dr_with_null_drr();
-    void test_init_dr_with_zero_length();
-    void test_read_with_invalid_drr();
+    void test_init_dr_with_invalid_vcpuid();
     void test_write_with_invalid_dr();
+    void test_read_with_invalid_drr();
     void test_read_with_null_string();
     void test_read_with_zero_length();
     void test_write_with_null_string();
@@ -57,7 +53,6 @@ private:
     void test_overcommit_dr();
     void test_overcommit_dr_more_than_once();
     void test_read_with_empty_dr();
-
     void acceptance_test_stress();
 };
 

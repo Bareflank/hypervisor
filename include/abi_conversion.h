@@ -23,7 +23,7 @@
 #ifndef ABI_CONVERSION_H
 #define ABI_CONVERSION_H
 
-#include <vmm_entry.h>
+#include <entry.h>
 
 /**
  * Microsoft 64bit ABI to System V 64bit ABI
@@ -39,6 +39,6 @@
  * @param arg the argument you wish to pass to the entry point
  * @return the return value of the entry point
  */
-typedef void *(*exec_ms64tosv64_t)(void *entry_point, void *arg);
+typedef void *(*exec_ms64tosv64_t)(void *entry_point, int);
 
 #endif

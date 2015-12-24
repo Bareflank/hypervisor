@@ -25,6 +25,8 @@ char *files[MAX_NUM_MODULES] = {0};
 typedef long (*set_affinity_fn)(pid_t, const struct cpumask *);
 set_affinity_fn set_cpu_affinity;
 
+struct mm_struct *g_mmu_context = NULL;
+
 /* ========================================================================== */
 /* Misc Device                                                                */
 /* ========================================================================== */
@@ -117,10 +119,24 @@ ioctl_start_vmm(void)
 {
     int ret;
 
+    ret = common_load_vmm();
+    if (ret != BF_SUCCESS)
+    {
+        ALERT("IOCTL_START_VMM: failed to load vmm: %d\n", ret);
+        return ret;
+    }
+
     ret = common_start_vmm();
     if (ret != BF_SUCCESS)
     {
         ALERT("IOCTL_START_VMM: failed to start vmm: %d\n", ret);
+        return ret;
+    }
+
+    g_mmu_context = get_task_mm(current);
+    if (!g_mmu_context)
+    {
+        ALERT("IOCTL_START_VMM: couldn't find a memory context in which to run!\n");
         return ret;
     }
 
@@ -138,9 +154,17 @@ ioctl_stop_vmm(void)
     if (ret != BF_SUCCESS)
         ALERT("IOCTL_STOP_VMM: failed to stop vmm: %d\n", ret);
 
+    ret = common_unload_vmm();
+    if (ret != BF_SUCCESS)
+        ALERT("IOCTL_STOP_VMM: failed to unload vmm: %d\n", ret);
+
     for (i = 0; i < g_num_files; i++)
         platform_free(files[i]);
 
+    if (g_mmu_context)
+        mmput(g_mmu_context);
+
+    g_mmu_context = NULL;
     g_num_files = 0;
 
     DEBUG("IOCTL_STOP_VMM: succeeded\n");

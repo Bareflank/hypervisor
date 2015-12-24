@@ -30,6 +30,22 @@ driver_entry_ut::test_commit_fini_common_stop_failure()
     MockRepository mocks;
 
     mocks.OnCallFunc(common_stop_vmm).Return(-1);
+    mocks.OnCallFunc(common_unload_vmm).Return(BF_SUCCESS);
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        EXPECT_TRUE(common_init() == BF_SUCCESS);
+        EXPECT_TRUE(common_fini() == BF_SUCCESS);
+    });
+}
+
+void
+driver_entry_ut::test_commit_fini_common_unload_failure()
+{
+    MockRepository mocks;
+
+    mocks.OnCallFunc(common_stop_vmm).Return(BF_SUCCESS);
+    mocks.OnCallFunc(common_unload_vmm).Return(-1);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {

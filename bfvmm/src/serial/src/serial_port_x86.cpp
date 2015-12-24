@@ -120,13 +120,13 @@ serial_port_x86::open(void)
 
     enable_interrupt_mode(m_interrupt_mode);
 
-    return serial::SUCCESS;
+    return serial::success;
 }
 
 serial::err
 serial_port_x86::close(void)
 {
-    return serial::SUCCESS;
+    return serial::success;
 }
 
 serial::err
@@ -152,7 +152,7 @@ serial_port_x86::set_baud_rate(uint32_t baud)
     m_intrinsics.write_portio_8(m_port + DL_LSB_OFFSET, baud_to_lo_divisor(m_baud));
     m_intrinsics.write_portio_8(m_port + DL_MSB_OFFSET, baud_to_hi_divisor(m_baud));
 
-    return serial::SUCCESS;
+    return serial::success;
 }
 
 uint32_t
@@ -188,7 +188,7 @@ serial_port_x86::set_parity_mode(PARITY_MODE parity)
 
     m_intrinsics.write_portio_8(m_port + LCR_OFFSET, data_bits);
 
-    return serial::SUCCESS;
+    return serial::success;
 }
 
 uint8_t
@@ -225,7 +225,7 @@ serial_port_x86::set_data_size(uint8_t size)
 
     m_intrinsics.write_portio_8(m_port + LCR_OFFSET, data_bits);
 
-    return serial::SUCCESS;
+    return serial::success;
 }
 
 uint8_t
@@ -254,7 +254,7 @@ serial_port_x86::set_stop_bits(uint8_t bits)
 
     m_intrinsics.write_portio_8(m_port + LCR_OFFSET, stop_bits);
 
-    return serial::SUCCESS;
+    return serial::success;
 }
 
 uint8_t
@@ -271,7 +271,7 @@ serial_port_x86::enable_interrupt_mode(uint8_t interrupts)
     // Enable interrupts
     m_intrinsics.write_portio_8(m_port + IER_OFFSET, m_interrupt_mode);
 
-    return serial::SUCCESS;
+    return serial::success;
 }
 
 void
@@ -299,7 +299,7 @@ serial_port_x86::enable_fifo(void)
 
     m_intrinsics.write_portio_8(m_port + FCR_OFFSET, value);
 
-    return serial::SUCCESS;
+    return serial::success;
 }
 
 void
@@ -320,19 +320,29 @@ serial_port_x86::fifo(void)
 }
 
 void
-serial_port_x86::write(uint8_t byte)
+serial_port_x86::write(char c)
 {
-    m_intrinsics.write_portio_8(m_port, byte);
+    m_intrinsics.write_portio_8(m_port, c);
 }
 
 void
-serial_port_x86::write(int8_t *bytes)
+serial_port_x86::write(const char *str)
 {
-    if (bytes == 0x00) return;
-    while (*bytes)
-    {
-        write((uint8_t)*bytes++);
-    }
+    if (str == 0)
+        return;
+
+    while (*str)
+        write(*str++);
+}
+
+void
+serial_port_x86::write(const char *str, int64_t len)
+{
+    if (str == 0)
+        return;
+
+    for (auto i = 0; i < len; i++)
+        write(str[i]);
 }
 
 uint8_t

@@ -82,6 +82,7 @@ platform_free(void *addr);
  * using the platform_alloc_exec function.
  *
  * @param addr the virtual address returned from platform_alloc_exec
+ * @param len the size of the memory allocated
  */
 void
 platform_free_exec(void *addr, int64_t len);

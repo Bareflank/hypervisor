@@ -23,10 +23,6 @@
 
 memory_manager::memory_manager()
 {
-    auto blank_page = page();
-
-    for (auto i = 0; i < MAX_PAGES; i++)
-        m_pages[i] = blank_page;
 }
 
 memory_manager_error::type
@@ -94,4 +90,30 @@ memory_manager::free_page(page &pg)
             return;
         }
     }
+}
+
+memory_manager *mm()
+{
+    static memory_manager mm;
+    return &mm;
+}
+
+extern "C" long long int
+add_page(struct page_t *pg)
+{
+    if (pg == 0)
+        return MEMORY_MANAGER_FAILURE;
+
+    auto tmp = page(*pg);
+
+    if (mm()->add_page(tmp) != memory_manager_error::success)
+        return MEMORY_MANAGER_FAILURE;
+
+    return MEMORY_MANAGER_SUCCESS;
+}
+
+extern "C" long long int
+remove_page(struct page_t *pg)
+{
+    return MEMORY_MANAGER_SUCCESS;
 }

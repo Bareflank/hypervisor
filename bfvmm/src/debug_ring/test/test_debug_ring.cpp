@@ -20,54 +20,27 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #include <test.h>
-
 #include <debug_ring/debug_ring.h>
 
-#define BUF_SIZE 10
-#define DRR_SIZE 4096
-
 debug_ring dr;
+debug_ring_resources_t *drr;
 
-char rb[BUF_SIZE] = {0};
-debug_ring_resources *drr = NULL;
-debug_ring_resources *bad_drr = NULL;
+char rb[DEBUG_RING_SIZE];
+char wb[DEBUG_RING_SIZE + 100];
 
-bool
-debug_ring_ut::init_debug_ring()
+void
+init_wb(uint64_t num, char val = 'A')
 {
-    drr = (debug_ring_resources *)calloc(DRR_SIZE, 1);
-    bad_drr = (debug_ring_resources *)calloc(DRR_SIZE, 1);
+    for (auto i = 0; i < num; i++)
+        wb[i] = val;
 
-    drr->len = BUF_SIZE;
-
-    return true;
-}
-
-bool
-debug_ring_ut::fini_debug_ring()
-{
-    free(drr);
-    free(bad_drr);
-
-    return true;
+    wb[num] = 0;
 }
 
 void
-debug_ring_ut::test_init_dr_with_null_drr()
+debug_ring_ut::test_init_dr_with_invalid_vcpuid()
 {
-    EXPECT_TRUE(dr.init(NULL) == debug_ring_error::invalid);
-}
-
-void
-debug_ring_ut::test_init_dr_with_zero_length()
-{
-    EXPECT_TRUE(dr.init(bad_drr) == debug_ring_error::invalid);
-}
-
-void
-debug_ring_ut::test_read_with_invalid_drr()
-{
-    EXPECT_TRUE(debug_ring_read(NULL, rb, BUF_SIZE) == DEBUG_RING_READ_ERROR);
+    EXPECT_TRUE(dr.init(10000) == debug_ring_error::invalid);
 }
 
 void
@@ -75,128 +48,173 @@ debug_ring_ut::test_write_with_invalid_dr()
 {
     auto wb = "01234";
 
-    EXPECT_TRUE(dr.init(NULL) == debug_ring_error::invalid);
+    EXPECT_TRUE(dr.init(10000) == debug_ring_error::invalid);
     EXPECT_TRUE(dr.write(wb, strlen(wb)) == debug_ring_error::invalid);
+}
+
+void
+debug_ring_ut::test_read_with_invalid_drr()
+{
+    EXPECT_TRUE(debug_ring_read(NULL, rb, DEBUG_RING_SIZE) == DEBUG_RING_READ_ERROR);
 }
 
 void
 debug_ring_ut::test_read_with_null_string()
 {
-    EXPECT_TRUE(dr.init(drr) == debug_ring_error::success);
-    EXPECT_TRUE(debug_ring_read(drr, NULL, BUF_SIZE) == DEBUG_RING_READ_ERROR);
+    dr.init(0);
+    drr = get_drr(0);
+
+    EXPECT_TRUE(debug_ring_read(drr, NULL, DEBUG_RING_SIZE) == DEBUG_RING_READ_ERROR);
 }
 
 void
 debug_ring_ut::test_read_with_zero_length()
 {
-    EXPECT_TRUE(dr.init(drr) == debug_ring_error::success);
+    dr.init(0);
+    drr = get_drr(0);
+
     EXPECT_TRUE(debug_ring_read(drr, rb, 0) == DEBUG_RING_READ_ERROR);
 }
 
 void
 debug_ring_ut::test_write_with_null_string()
 {
+    dr.init(0);
+    drr = get_drr(0);
+
     auto wb = "01234";
 
-    EXPECT_TRUE(dr.init(drr) == debug_ring_error::success);
     EXPECT_TRUE(dr.write(NULL, strlen(wb)) == debug_ring_error::failure);
 }
 
 void
 debug_ring_ut::test_write_with_zero_length()
 {
+    dr.init(0);
+    drr = get_drr(0);
+
     auto wb = "01234";
 
-    EXPECT_TRUE(dr.init(drr) == debug_ring_error::success);
     EXPECT_TRUE(dr.write(wb, 0) == debug_ring_error::failure);
 }
 
 void
 debug_ring_ut::test_write_string_to_dr_that_is_larger_than_dr()
 {
-    auto wb = "0123456789";
+    dr.init(0);
+    drr = get_drr(0);
 
-    EXPECT_TRUE(dr.init(drr) == debug_ring_error::success);
+    init_wb(DEBUG_RING_SIZE);
+
     EXPECT_TRUE(dr.write(wb, strlen(wb)) == debug_ring_error::failure);
 }
 
 void
 debug_ring_ut::test_write_string_to_dr_that_is_much_larger_than_dr()
 {
-    auto wb = "0123456789ABCDEFG";
+    dr.init(0);
+    drr = get_drr(0);
 
-    EXPECT_TRUE(dr.init(drr) == debug_ring_error::success);
+    init_wb(DEBUG_RING_SIZE + 50);
+
     EXPECT_TRUE(dr.write(wb, strlen(wb)) == debug_ring_error::failure);
 }
 
 void
 debug_ring_ut::test_write_one_small_string_to_dr()
 {
+    dr.init(0);
+    drr = get_drr(0);
+
     auto wb = "01234";
 
-    EXPECT_TRUE(dr.init(drr) == debug_ring_error::success);
     EXPECT_TRUE(dr.write(wb, strlen(wb)) == debug_ring_error::success);
-    EXPECT_TRUE(debug_ring_read(drr, rb, BUF_SIZE) == 5);
+    EXPECT_TRUE(debug_ring_read(drr, rb, DEBUG_RING_SIZE) == 5);
 }
 
 void
 debug_ring_ut::test_fill_dr()
 {
-    auto wb = "012345678";
+    dr.init(0);
+    drr = get_drr(0);
 
-    EXPECT_TRUE(dr.init(drr) == debug_ring_error::success);
+    init_wb(DEBUG_RING_SIZE - 1);
+
     EXPECT_TRUE(dr.write(wb, strlen(wb)) == debug_ring_error::success);
-    EXPECT_TRUE(debug_ring_read(drr, rb, BUF_SIZE) == BUF_SIZE);
-    EXPECT_TRUE(rb[BUF_SIZE - 1] == '\0');
+    EXPECT_TRUE(debug_ring_read(drr, rb, DEBUG_RING_SIZE) == DEBUG_RING_SIZE);
+    EXPECT_TRUE(rb[DEBUG_RING_SIZE - 1] == '\0');
 }
 
 void
 debug_ring_ut::test_overcommit_dr()
 {
-    auto wb1 = "012345678";
-    auto wb2 = "ABCDE";
+    dr.init(0);
+    drr = get_drr(0);
 
-    EXPECT_TRUE(dr.init(drr) == debug_ring_error::success);
-    EXPECT_TRUE(dr.write(wb1, strlen(wb1)) == debug_ring_error::success);
-    EXPECT_TRUE(dr.write(wb2, strlen(wb2)) == debug_ring_error::success);
-    EXPECT_TRUE(debug_ring_read(drr, rb, BUF_SIZE) == 5);
-    EXPECT_TRUE(rb[0] == 'A');
+    init_wb(DEBUG_RING_SIZE - 10, 'A');
+    EXPECT_TRUE(dr.write(wb, strlen(wb)) == debug_ring_error::success);
+
+    init_wb(100, 'B');
+    EXPECT_TRUE(dr.write(wb, strlen(wb)) == debug_ring_error::success);
+
+    EXPECT_TRUE(debug_ring_read(drr, rb, DEBUG_RING_SIZE) == 100);
+    EXPECT_TRUE(rb[0] == 'B');
 }
 
 void
 debug_ring_ut::test_overcommit_dr_more_than_once()
 {
+    dr.init(0);
+    drr = get_drr(0);
+
     auto wb1 = "012345678";
     auto wb2 = "ABCDE";
     auto wb3 = "FG";
     auto wb4 = "012345";
 
-    EXPECT_TRUE(dr.init(drr) == debug_ring_error::success);
-    EXPECT_TRUE(dr.write(wb1, strlen(wb1)) == debug_ring_error::success);
-    EXPECT_TRUE(dr.write(wb2, strlen(wb2)) == debug_ring_error::success);
-    EXPECT_TRUE(dr.write(wb3, strlen(wb3)) == debug_ring_error::success);
-    EXPECT_TRUE(dr.write(wb4, strlen(wb4)) == debug_ring_error::success);
-    EXPECT_TRUE(debug_ring_read(drr, rb, BUF_SIZE) == BUF_SIZE - 2);
-    EXPECT_TRUE(rb[0] == 'F');
+    init_wb(100, 'A');
+    EXPECT_TRUE(dr.write(wb, strlen(wb)) == debug_ring_error::success);
+
+    init_wb(100, 'B');
+    EXPECT_TRUE(dr.write(wb, strlen(wb)) == debug_ring_error::success);
+
+    init_wb(100, 'C');
+    EXPECT_TRUE(dr.write(wb, strlen(wb)) == debug_ring_error::success);
+
+    init_wb(DEBUG_RING_SIZE - 150, 'D');
+    EXPECT_TRUE(dr.write(wb, strlen(wb)) == debug_ring_error::success);
+
+    EXPECT_TRUE(debug_ring_read(drr, rb, DEBUG_RING_SIZE) == DEBUG_RING_SIZE - 50);
+    EXPECT_TRUE(rb[0] == 'C');
 }
 
 void
 debug_ring_ut::test_read_with_empty_dr()
 {
-    EXPECT_TRUE(dr.init(drr) == debug_ring_error::success);
-    EXPECT_TRUE(debug_ring_read(drr, rb, BUF_SIZE) == 0);
+    dr.init(0);
+    drr = get_drr(0);
+
+    EXPECT_TRUE(debug_ring_read(drr, rb, DEBUG_RING_SIZE) == 0);
 }
 
 void
 debug_ring_ut::acceptance_test_stress()
 {
+    dr.init(0);
+    drr = get_drr(0);
+
     auto wb = "012";
 
-    EXPECT_TRUE(dr.init(drr) == debug_ring_error::success);
-
-    for (auto i = 0; i < 1000; i++)
+    for (auto i = 0; i < DEBUG_RING_SIZE; i++)
         dr.write(wb, strlen(wb));
 
-    EXPECT_TRUE(debug_ring_read(drr, rb, BUF_SIZE) == 6);
+    // The total number of bytes that we read out, should be equal to
+    // the total number of strings that can fit into the debug ring, minus
+    // the '\0' for each string (as they are stripped).
+
+    auto num = DEBUG_RING_SIZE / (strlen(wb) + 1);
+    auto total = num * strlen(wb);
+
+    EXPECT_TRUE(debug_ring_read(drr, rb, DEBUG_RING_SIZE) == total);
     EXPECT_TRUE(rb[0] == '0');
 }

@@ -38,6 +38,10 @@ protected:
     bool list() override;
 
 private:
+
+    void test_check_host_cr0_for_unsupported_bits_missing_1s();
+    void test_check_host_cr0_for_unsupported_bits_missing_0s();
+    void test_check_host_cr0_for_unsupported_bits_valid();
 };
 
 #endif

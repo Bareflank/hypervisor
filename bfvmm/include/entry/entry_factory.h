@@ -23,29 +23,69 @@
 #define ENTRY_FACTORY_H
 
 #include <vcpu/vcpu_factory.h>
-#include <memory_manager/memory_manager.h>
 #include <serial/serial_port_x86.h>
+
+namespace entry_factory_error
+{
+    enum type
+    {
+        success = 0,
+        failure = 1
+    };
+}
 
 class entry_factory
 {
 public:
 
+    /// Entry Factory Default Constructor
+    ///
     entry_factory() {}
+
+    /// Entry Factory Default Destructor
+    ///
     virtual ~entry_factory() {}
 
-    virtual vcpu_factory *get_vcpu_factory()
-    { return &m_vcpu_factory; }
+    /// Entry Factory Init VMM
+    ///
+    /// Initializes the VMM.
+    ///
+    /// @param vcpuid the vcpu to initialize the vmm on
+    /// @return success on success, falure otherwise
+    ///
+    virtual entry_factory_error::type init_vmm(int64_t vcpuid);
 
-    virtual memory_manager *get_memory_manager()
-    { return &m_memory_manager; }
+    /// Entry Factory Start VMM
+    ///
+    /// Starts the VMM.
+    ///
+    /// @param vcpuid the vcpu to start the vmm on
+    /// @return success on success, falure otherwise
+    ///
+    virtual entry_factory_error::type start_vmm(int64_t vcpuid);
 
-    virtual serial_port_x86 *get_serial_port()
-    { return &m_serial_port; }
+    /// Entry Factory Stop VMM
+    ///
+    /// Stops the VMM.
+    ///
+    /// @param vcpuid the vcpu to stop the vmm on
+    /// @return success on success, falure otherwise
+    ///
+    virtual entry_factory_error::type stop_vmm(int64_t vcpuid);
+
+    /// Write to Log
+    ///
+    /// Writes a string of size length to the log. Note that the log
+    /// could be to multiple sources including a debug ring and serial
+    ///
+    /// @param str the string to write to the log
+    /// @param len the length of the string
+    ///
+    virtual void write(const char *str, int64_t len);
 
 private:
 
     vcpu_factory m_vcpu_factory;
-    memory_manager m_memory_manager;
     serial_port_x86 m_serial_port;
 };
 

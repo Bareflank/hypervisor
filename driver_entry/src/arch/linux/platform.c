@@ -30,21 +30,18 @@
 void *
 platform_alloc(int64_t len)
 {
-    void *addr;
+    void *addr = NULL;
 
     if (len == 0)
     {
         ALERT("platform_alloc: invalid length\n");
-        return NULL;
+        return addr;
     }
 
     addr = vmalloc(len);
 
     if (addr == NULL)
-    {
         ALERT("platform_alloc: failed to vmalloc mem: %lld\n", len);
-        return NULL;
-    }
 
     return addr;
 }
@@ -52,21 +49,18 @@ platform_alloc(int64_t len)
 void *
 platform_alloc_exec(int64_t len)
 {
-    void *addr;
+    void *addr = NULL;
 
     if (len == 0)
     {
         ALERT("platform_alloc_exec: invalid length\n");
-        return NULL;
+        return addr;
     }
 
     addr = __vmalloc(len, GFP_KERNEL, PAGE_KERNEL_EXEC);
 
     if (addr == NULL)
-    {
         ALERT("platform_alloc_exec: failed to vmalloc executable mem: %lld\n", len);
-        return NULL;
-    }
 
     return addr;
 }
@@ -79,6 +73,9 @@ platform_alloc_page(void)
     pg.virt = kmalloc(PAGE_SIZE, GFP_KERNEL);
     pg.phys = (void *)virt_to_phys(pg.virt);
     pg.size = PAGE_SIZE;
+
+    if (pg.virt == NULL || pg.phys == NULL)
+        ALERT("platform_alloc_page: failed to kmalloc page\n");
 
     return pg;
 }
@@ -111,7 +108,10 @@ void
 platform_free_page(struct page_t pg)
 {
     if (pg.virt == 0)
+    {
+        ALERT("platform_free_page: invalid address %p\n", pg.virt);
         return;
+    }
 
     kfree(pg.virt);
 }

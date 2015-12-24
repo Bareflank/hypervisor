@@ -39,19 +39,16 @@ protected:
 
 private:
 
-    void test_commit_init_invalid_vmmr();
-    void test_commit_init_failed_alloc();
-    void test_commit_init_failed_alloc_page();
-    void test_commit_init_success();
-    void test_commit_init_success_multiple_times();
-
     void test_commit_fini_common_stop_failure();
+    void test_commit_fini_common_unload_failure();
     void test_commit_fini_success();
     void test_commit_fini_success_multiple_times();
 
     void test_common_add_module_invalid_file();
     void test_common_add_module_invalid_file_size();
-    void test_common_add_module_status_already_running();
+    void test_common_add_module_status_corrupt();
+    void test_common_add_module_status_loaded();
+    void test_common_add_module_status_running();
     void test_common_add_module_get_next_file_failed();
     void test_common_add_module_elf_file_init_failed();
     void test_common_add_module_elf_file_total_exec_failed();
@@ -59,27 +56,48 @@ private:
     void test_common_add_module_elf_file_load_failed();
     void test_common_add_module_add_success();
 
-    void test_common_start_already_started();
-    void test_common_start_init_loader_failed();
-    void test_common_start_loader_add_failed();
-    void test_common_start_loader_relocate_failed();
-    void test_common_start_execute_symbol_failed();
-    void test_common_start_get_vmmr_failed();
+    void test_common_load_status_corrupt();
+    void test_common_load_status_loaded();
+    void test_common_load_status_running();
+    void test_common_load_loader_init_failed();
+    void test_common_load_loader_add_file_failed();
+    void test_common_load_loader_relocate_failed();
+    void test_common_load_allocate_page_pool_failed();
+    void test_common_load_success();
+
+    void test_common_unload_status_corrupt();
+    void test_common_unload_status_running();
+    void test_common_unload_free_page_pool_failed();
+    void test_common_unload_remove_elf_files_failed();
+    void test_common_unload_success_with_loaded();
+    void test_common_unload_success_with_unloaded_without_modules();
+    void test_common_unload_success_with_unloaded_with_modules();
+
+    void test_common_start_status_corrupt();
+    void test_common_start_status_running();
+    void test_common_start_status_unloaded();
+    void test_common_start_init_vmm_failed();
+    void test_common_start_start_vmm_failed();
     void test_common_start_success();
     void test_common_start_success_multiple_times();
 
-    void test_common_stop_already_stopped();
-    void test_common_stop_execute_symbol_failed();
+    void test_common_stop_status_corrupt();
+    void test_common_stop_status_loaded();
+    void test_common_stop_status_unloaded();
+    void test_common_stop_start_vmm_failed();
     void test_common_stop_success();
     void test_common_stop_success_multiple_times();
 
+    void test_common_dump_status_corrupt();
+    void test_common_dump_status_unloaded();
     void test_common_dump_platform_alloc_failed();
+    void test_common_dump_resolve_symbol_failed();
     void test_common_dump_debug_ring_read_failed();
     void test_common_dump_success();
     void test_common_dump_success_multiple_times();
 
+    void test_helper_set_vmm_status();
     void test_helper_vmm_status();
-    void test_helper_get_vmmr();
     void test_helper_get_file_invalid_index();
     void test_helper_get_file_success();
     void test_helper_get_next_file_too_man_files();
@@ -92,9 +110,23 @@ private:
     void test_helper_add_elf_file_success_multiple_times();
     void test_helper_symbol_length_null_symbol();
     void test_helper_symbol_length_success();
+    void test_helper_resolve_symbol_invalid_name();
+    void test_helper_resolve_symbol_invalid_sym();
+    void test_helper_resolve_symbol_resolve_symbol_failed();
+    void test_helper_resolve_symbol_success();
     void test_helper_execute_symbol_invalid_arg();
-    void test_helper_execute_symbol_get_file_failed();
     void test_helper_execute_symbol_resolve_symbol_failed();
+    void test_helper_execute_symbol_sym_failed();
+    void test_helper_execute_symbol_sym_success();
+    void test_helper_allocate_page_pool_resolve_symbol_failed();
+    void test_helper_allocate_page_pool_alloc_page_failed();
+    void test_helper_allocate_page_pool_add_page_failed();
+    void test_helper_allocate_page_pool_success();
+    void test_helper_allocate_page_pool_success_multiple_times();
+    void test_helper_free_page_pool_resolve_symbol_failed();
+    void test_helper_free_page_pool_remove_page_failed();
+    void test_helper_free_page_pool_success();
+    void test_helper_free_page_pool_success_multiple_times();
 
 private:
 
