@@ -22,8 +22,7 @@
 #ifndef IOSTREAM_H
 #define IOSTREAM_H
 
-#include <stddef.h>
-#include <serial/serial_port_x86.h>
+#include <stdint.h>
 
 namespace std
 {
@@ -57,44 +56,35 @@ public:
     ostream() {}
     virtual ~ostream() {}
 
+    bool init();
+
     ostream& operator<<(const char *str);
     ostream& operator<<(bool val);
     ostream& operator<<(char val);
-    ostream& operator<<(unsigned char val);
-    ostream& operator<<(short val);
-    ostream& operator<<(unsigned short val);
-    ostream& operator<<(int val);
-    ostream& operator<<(unsigned int val);
-    ostream& operator<<(long long int val);
-    ostream& operator<<(unsigned long long int val);
     ostream& operator<<(void *val);
-    ostream& operator<<(size_t val);
+    ostream& operator<<(int8_t val);
+    ostream& operator<<(uint8_t val);
+    ostream& operator<<(int16_t val);
+    ostream& operator<<(uint16_t val);
+    ostream& operator<<(int32_t val);
+    ostream& operator<<(uint32_t val);
+    ostream& operator<<(int64_t val);
+    ostream& operator<<(uint64_t val);
+
     ostream& operator<<(ostream_modifier modifier);
     ostream& operator<<(ostream_width width);
 
-protected:
+private:
 
     int m_base;
     int m_width;
     ostream_modifier m_justify;
 };
 
-class bfostream : public ostream
-{
-public:
-
-    bfostream() {}
-    virtual ~bfostream() {}
-
-    void init();
-};
-
 ostream_width setw(int width);
 
-extern bfostream cout;
+extern ostream cout;
 
 };
-
-#define INIT_IOSTREAM std::cout.init
 
 #endif

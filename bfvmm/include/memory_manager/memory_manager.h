@@ -22,106 +22,171 @@
 #ifndef MEMORY_MANAGER_H
 #define MEMORY_MANAGER_H
 
+#include <stddef.h>
 #include <stdint.h>
 #include <memory.h>
-#include <memory_manager/page.h>
-
-namespace memory_manager_error
-{
-    enum type
-    {
-        success = 0,
-        failure = 1,
-        out_of_memory = 2,
-        full = 3,
-        already_added = 4
-    };
-};
 
 class memory_manager
 {
 public:
 
-    /// Manager Constructor
-    ///
-    memory_manager();
-
     /// Destructor
     ///
     virtual ~memory_manager() {}
 
-    /// Add Page to Memory Manager
+    /// Get Singleton Instance
     ///
-    /// Adds a page to the memory mamanger. The page must be a valid page
-    /// that has not already been added.
+    /// Get an instance to the singleton class.
     ///
-    /// @param pg valid page to add to the memory manager
-    /// @return failure if the page is invalid, full if too many pages have
-    ///     been added to the memory manager, already_added if the page has
-    ///     already been added to the memory manager, and success on success
-    ///
-    virtual memory_manager_error::type add_page(page &pg);
+    static memory_manager *instance();
 
-    /// Allocate Page
+    /// Free Blocks
     ///
-    /// Allocates a page from the memory manage. Once a page has been
-    /// allocated, it cannot be allocated again unless it has been freed.
+    /// This class can be used to determine the total number of free blocks
+    /// that the memory mamnager has left. Using this function, you can
+    /// determine how much memory has been allocated, as well as how much
+    /// memory is free. Not that that, although this will tell you how much
+    /// is free, it cannot tell you if that memory can be allocated, since the
+    /// free blocks could be highly fragemented.
     ///
-    /// @param pg pointer to page to store the allocated page
-    /// @return invalid if a NULL page is provide, out_of_memory if the
-    ///     memory manager has run out of pages to allocate, success on
-    ///     success
+    /// @return number of free blocks.
     ///
-    virtual memory_manager_error::type alloc_page(page *pg);
+    virtual int64_t free_blocks();
 
-    /// Free Page
+    /// Malloc
     ///
-    /// Frees a page that has been previously allocated. Once a page is free
-    /// it can be allocated again (i.e. discontinue use of a page once it has
-    /// been freed)
+    /// Allocates a block of size bytes of memory, returning a pointer to the
+    /// beginning of the block. The content of the newly allocated block of
+    /// memory is not initialized. If size is 0, this function returns 0. If
+    /// the size if equal to MAX_PAGE_SIZE, the memory returned is guaranteed
+    /// to be aligned to MAX_PAGE_SIZE. Although this function will accept any
+    /// size granularity, the minimum size that will be allocated is always
+    /// MAX_CACHE_LINE_SIZE.
     ///
-    /// @param pg page to free
+    /// Note that this function generally should not be used directly, but
+    /// instead new / delete should be used.
     ///
-    virtual void free_page(page &pg);
+    /// @param size the number of bytes to allocate
+    /// @return a pointer to the starting address of the memory allocated.
+    ///
+    virtual void *malloc(size_t size);
+
+    /// Malloc Aligned
+    ///
+    /// Allocates a block of size bytes of memory, returning a pointer to the
+    /// beginning of the block. The content of the newly allocated block of
+    /// memory is not initialized. If size is 0, this function returns 0.
+    /// Although this function will accept any size granularity, the minimum
+    /// size that will be allocated is always MAX_CACHE_LINE_SIZE.
+    ///
+    /// Unlike malloc, this function allows the programmer to specify that
+    /// desired alignment of memory. When possible, malloc should be used
+    /// instead indirectly by using new / delete as these already provide
+    /// MAX_PAGE_SIZE alignment.
+    ///
+    /// @param size the number of bytes to allocate
+    /// @param alignment the desired alignment
+    /// @return a pointer to the starting address of the memory allocated.
+    ///
+    virtual void *malloc_aligned(size_t size, int64_t alignment);
+
+    /// Free
+    ///
+    /// Deallocates a block of memory previously allocated by a call to malloc,
+    /// making it available again for further allocations. If ptr does not
+    /// point to memory that was previously allocated, the call is ignored.
+    /// If ptr is 0, the call is also ignored. If ptr points to an offset into
+    /// memory that was previously allocated by a call to malloc, this function
+    /// will free all of the memory allocated.
+    ///
+    /// Note that this function generally should not be used directly, but
+    /// instead new / delete should be used.
+    ///
+    /// @param ptr a pointer to memory previously allocated using malloc.
+    ///
+    virtual void free(void *ptr);
+
+    /// Virtual Address To Physical Address
+    ///
+    /// Given a virtual address, returns a physical address. If the memory
+    /// manager does not have a memory descriptor for the provided address,
+    /// or the provided address is 0, 0 is returned.
+    ///
+    /// @param virt virtual address to convert
+    /// @return physical address
+    ///
+    virtual void *virt_to_phys(void *virt);
+
+    /// Physical Address To Virtual Address
+    ///
+    /// Given a physical address, returns a virtual address. If the memory
+    /// manager does not have a memory descriptor for the provided address,
+    /// or the provided address is 0, 0 is returned.
+    ///
+    /// @param phys physical address to convert
+    /// @return virtual address
+    ///
+    virtual void *phys_to_virt(void *phys);
+
+    /// Adds Memory Descriptor List
+    ///
+    /// Adds a memory descriptor list to the memory manager. The memory
+    /// descriptors are used by the memory manager to do address conversions
+    /// and lookup memory access rights. Note that this function should only
+    /// by called by the driver entry point prior to initialization.
+    ///
+    /// @param mdl a pointer to a memory descriptor array
+    /// @param num the number of memory descriptors in the array
+    /// @return MEMORY_MANAGER_SUCCESS on success, MEMORY_MANAGER_FAILURE
+    ///     otherwise
+    virtual int64_t add_mdl(struct memory_descriptor *mdl, int64_t num);
+
+public:
+
+    /// Disable the copy consturctor
+    ///
+    memory_manager(const memory_manager &) = delete;
+
+    /// Disable the copy operator
+    ///
+    memory_manager &operator=(const memory_manager &) = delete;
 
 private:
 
-    page m_pages[MAX_PAGES];
+    /// Default Constructor
+    ///
+    memory_manager();
+
+private:
+
+    virtual void *block_to_virt(int64_t block);
+    virtual int64_t virt_to_block(void *virt);
+
+    virtual bool is_block_aligned(int64_t block, int64_t alignment);
+
+private:
+
+    uint32_t m_start;
 };
 
-/// Get Memory Manager
+/// Memory Manager Macro
 ///
-/// We cannot use global memory since we don't have support for globally
-/// constructor objects. Instead, we provide access to a globally defined
-/// memory manager via a statically created global object with still provides
-/// global access to a single memory manager, but allows the manager to be
-/// properly constructed, and provides a simple means to test the class if
-/// needed.
-memory_manager *mm();
+/// The following macro can be used to quickly call the memory manager as
+/// this class will likely be called by a lot of code. This call is guaranteed
+/// to not be NULL
+///
+#define g_mm memory_manager::instance()
 
-/// Add Page
+/// Add Memory Descriptor List
 ///
-/// Adds a page to the memory manager. This is a "C" function that can
-/// be used by the driver entry point to provide the memory manager with a
-/// page that it can manage.
+/// This is used by the driver entry to add an MDL to VMM. The driver entry
+/// will need to collect memory descriptors for every page of memory that the
+/// VMM is using so that the memory manager can provide mappings as needed.
 ///
-/// @param pg the page to add to the memory manager
-/// @return MEMORY_MANAGER_SUCCESS on success, MEMORY_MANAGER_FAILURE
-///     otherwise
+/// @param mdl the memory descirptor list
+/// @param num the number of memory diescriptors in the list
+/// @return MEMORY_MANAGER_SUCCESS on success, MEMORY_MANAGER_FAILURE otherwise
 ///
-extern "C" long long int
-add_page(struct page_t *pg);
-
-/// Remove Page
-///
-/// Remove a page to the memory manager. This is a "C" function that can
-/// be used by the driver entry point to remove a page from  the memory manager.
-///
-/// @param pg the page to remove from the memory manager
-/// @return MEMORY_MANAGER_SUCCESS on success, MEMORY_MANAGER_FAILURE
-///     otherwise
-///
-extern "C" long long int
-remove_page(struct page_t *pg);
+extern "C" long long int add_mdl(struct memory_descriptor *mdl, long long int num);
 
 #endif

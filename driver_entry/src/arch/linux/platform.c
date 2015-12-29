@@ -65,20 +65,20 @@ platform_alloc_exec(int64_t len)
     return addr;
 }
 
-struct page_t
-platform_alloc_page(void)
-{
-    struct page_t pg = {0};
+// struct page_t
+// platform_alloc_page(void)
+// {
+//     struct page_t pg = {0};
 
-    pg.virt = kmalloc(PAGE_SIZE, GFP_KERNEL);
-    pg.phys = (void *)virt_to_phys(pg.virt);
-    pg.size = PAGE_SIZE;
+//     pg.virt = kmalloc(PAGE_SIZE, GFP_KERNEL);
+//     pg.phys = (void *)virt_to_phys(pg.virt);
+//     pg.size = PAGE_SIZE;
 
-    if (pg.virt == NULL || pg.phys == NULL)
-        ALERT("platform_alloc_page: failed to kmalloc page\n");
+//     if (pg.virt == NULL || pg.phys == NULL)
+//         ALERT("platform_alloc_page: failed to kmalloc page\n");
 
-    return pg;
-}
+//     return pg;
+// }
 
 void
 platform_free(void *addr)
@@ -102,16 +102,4 @@ platform_free_exec(void *addr, int64_t len)
     }
 
     vfree(addr);
-}
-
-void
-platform_free_page(struct page_t pg)
-{
-    if (pg.virt == 0)
-    {
-        ALERT("platform_free_page: invalid address %p\n", pg.virt);
-        return;
-    }
-
-    kfree(pg.virt);
 }

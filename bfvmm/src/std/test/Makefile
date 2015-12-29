@@ -61,7 +61,14 @@ HEADERS=
 
 LIBS=debug_ring std
 
-LIB_PATHS=../bin/native ../../debug_ring/bin/native
+LIBS+=std
+LIBS+=serial
+LIBS+=debug_ring
+
+LIB_PATHS+=../bin/native
+LIB_PATHS+=../../serial/bin/native
+LIB_PATHS+=../../debug_ring/bin/native
+
 INCLUDE_PATHS=./ ../../../include/  ../../../../include/
 
 ################################################################################

@@ -68,22 +68,6 @@ dummy3_test1(int num)
     }
 }
 
-// The following tests to make sure that we can actually create a class,
-// subclass that class, and overload a virtual function, which is a basic
-// requirement for c++
-//
-// Note that attempts to get a reference to any global data appears to be
-// broken. In the case below, attempting to call p_blah2->fool() will crash.
-// Instead, here, we call p_blah2.foo() which seems to work fine.
-//
-// Note that through testing, attempts to get a reference to any global
-// data will crash eventually. In the case described above, it will crash
-// instantly, but if you grab a reference to simply a global variable, it
-// seems to work fine some of the time, and crashes other times. Not entirely
-// sure why. What's really strange is that when it doesn't crash, the data
-// that it has is valid. At any rate our current belief is that this is a
-// bug with GCC, likely being exposed due to the way we have it configured.
-
 class Blah1
 {
 public:
@@ -99,17 +83,38 @@ public:
     Blah2() {}
     ~Blah2() {}
 
-    int boo() { return 1; }
-    int foo() override { return 1; }
+    int boo()
+    { return 1; }
+
+    int foo() override
+    { return 1; }
 };
 
 Blah2 g_blah2;
 
+Blah2 *
+static_blah()
+{
+    static Blah2 my_blah;
+    return &my_blah;
+}
+
 int
 dummy3_test2(int num)
 {
-    Blah2 &p_blah2 = g_blah2;
-    l_my_glob1 = p_blah2.foo();
+    Blah2 &r_blah2 = g_blah2;
+    l_my_glob1 = r_blah2.foo();
+
+    // Foo does not crash. This is the pattern we have been using for
+    // everything as it seems to be stable.
+    static_blah()->foo();
+
+    // Foo does crash. Still don't know why, but this repros in the kernel
+    // as well so don't do it. Oh.... and if you notice, I do the same thing
+    // above, just not with -> and it works fine. I also do it with a staticly
+    // defined memory and it works fine.
+    // Blah2 *p_blah2 = &g_blah2;
+    // p_blah2->foo();
 
     return l_my_glob1 +
            l_my_glob2 +
@@ -191,3 +196,10 @@ extern "C" void
 __cxa_pure_virtual()
 {
 }
+
+extern "C" int
+atexit(void (*func)(void))
+{
+    return 0;
+}
+

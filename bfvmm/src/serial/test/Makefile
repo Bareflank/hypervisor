@@ -60,9 +60,9 @@ SOURCES=serial_test.cpp
 
 INCLUDES=
 LIB_PATHS=../bin/native
-LIBS=bf_serial
+LIBS=serial
 
-INCLUDE_PATHS=../include/ ../../../include/ ../../../include/std 
+INCLUDE_PATHS=../include/ ../../../include/ ../../../include/std
 
 ################################################################################
 # Common

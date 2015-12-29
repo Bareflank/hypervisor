@@ -38,11 +38,9 @@ void
 vmcs_ut::test_check_host_cr0_for_unsupported_bits_missing_1s()
 {
     MockRepository mocks;
-    memory_manager *mm = mocks.Mock<memory_manager>();
     intrinsics_intel_x64 *intrinsics = mocks.Mock<intrinsics_intel_x64>();
 
-    vmcs_intel_x64 vmcs;
-    vmcs.init(intrinsics, mm);
+    vmcs_intel_x64 vmcs(intrinsics);
 
     fake_vmread_return = 0x0;
     mocks.OnCall(intrinsics, intrinsics_intel_x64::vmread).Do(fake_vmread);
@@ -59,11 +57,9 @@ void
 vmcs_ut::test_check_host_cr0_for_unsupported_bits_missing_0s()
 {
     MockRepository mocks;
-    memory_manager *mm = mocks.Mock<memory_manager>();
     intrinsics_intel_x64 *intrinsics = mocks.Mock<intrinsics_intel_x64>();
 
-    vmcs_intel_x64 vmcs;
-    vmcs.init(intrinsics, mm);
+    vmcs_intel_x64 vmcs(intrinsics);
 
     fake_vmread_return = 0xFFFFFFFFFFFFFFFF;
     mocks.OnCall(intrinsics, intrinsics_intel_x64::vmread).Do(fake_vmread);
@@ -80,11 +76,9 @@ void
 vmcs_ut::test_check_host_cr0_for_unsupported_bits_valid()
 {
     MockRepository mocks;
-    memory_manager *mm = mocks.Mock<memory_manager>();
     intrinsics_intel_x64 *intrinsics = mocks.Mock<intrinsics_intel_x64>();
 
-    vmcs_intel_x64 vmcs;
-    vmcs.init(intrinsics, mm);
+    vmcs_intel_x64 vmcs(intrinsics);
 
     // The hardware apears to always return 0xFFFFFFFFFFFFFFFF for the fixed
     // 1 MSR, which means that it is always ok to turn on a bit. For this

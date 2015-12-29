@@ -22,7 +22,6 @@
 #include <test.h>
 #include <debug_ring/debug_ring.h>
 
-debug_ring dr;
 debug_ring_resources_t *drr;
 
 char rb[DEBUG_RING_SIZE];
@@ -38,17 +37,12 @@ init_wb(uint64_t num, char val = 'A')
 }
 
 void
-debug_ring_ut::test_init_dr_with_invalid_vcpuid()
-{
-    EXPECT_TRUE(dr.init(10000) == debug_ring_error::invalid);
-}
-
-void
 debug_ring_ut::test_write_with_invalid_dr()
 {
+    debug_ring dr(10000);
+
     auto wb = "01234";
 
-    EXPECT_TRUE(dr.init(10000) == debug_ring_error::invalid);
     EXPECT_TRUE(dr.write(wb, strlen(wb)) == debug_ring_error::invalid);
 }
 
@@ -61,7 +55,7 @@ debug_ring_ut::test_read_with_invalid_drr()
 void
 debug_ring_ut::test_read_with_null_string()
 {
-    dr.init(0);
+    debug_ring dr(0);
     drr = get_drr(0);
 
     EXPECT_TRUE(debug_ring_read(drr, NULL, DEBUG_RING_SIZE) == DEBUG_RING_READ_ERROR);
@@ -70,7 +64,7 @@ debug_ring_ut::test_read_with_null_string()
 void
 debug_ring_ut::test_read_with_zero_length()
 {
-    dr.init(0);
+    debug_ring dr(0);
     drr = get_drr(0);
 
     EXPECT_TRUE(debug_ring_read(drr, rb, 0) == DEBUG_RING_READ_ERROR);
@@ -79,7 +73,7 @@ debug_ring_ut::test_read_with_zero_length()
 void
 debug_ring_ut::test_write_with_null_string()
 {
-    dr.init(0);
+    debug_ring dr(0);
     drr = get_drr(0);
 
     auto wb = "01234";
@@ -90,7 +84,7 @@ debug_ring_ut::test_write_with_null_string()
 void
 debug_ring_ut::test_write_with_zero_length()
 {
-    dr.init(0);
+    debug_ring dr(0);
     drr = get_drr(0);
 
     auto wb = "01234";
@@ -101,7 +95,7 @@ debug_ring_ut::test_write_with_zero_length()
 void
 debug_ring_ut::test_write_string_to_dr_that_is_larger_than_dr()
 {
-    dr.init(0);
+    debug_ring dr(0);
     drr = get_drr(0);
 
     init_wb(DEBUG_RING_SIZE);
@@ -112,7 +106,7 @@ debug_ring_ut::test_write_string_to_dr_that_is_larger_than_dr()
 void
 debug_ring_ut::test_write_string_to_dr_that_is_much_larger_than_dr()
 {
-    dr.init(0);
+    debug_ring dr(0);
     drr = get_drr(0);
 
     init_wb(DEBUG_RING_SIZE + 50);
@@ -123,7 +117,7 @@ debug_ring_ut::test_write_string_to_dr_that_is_much_larger_than_dr()
 void
 debug_ring_ut::test_write_one_small_string_to_dr()
 {
-    dr.init(0);
+    debug_ring dr(0);
     drr = get_drr(0);
 
     auto wb = "01234";
@@ -135,7 +129,7 @@ debug_ring_ut::test_write_one_small_string_to_dr()
 void
 debug_ring_ut::test_fill_dr()
 {
-    dr.init(0);
+    debug_ring dr(0);
     drr = get_drr(0);
 
     init_wb(DEBUG_RING_SIZE - 1);
@@ -148,7 +142,7 @@ debug_ring_ut::test_fill_dr()
 void
 debug_ring_ut::test_overcommit_dr()
 {
-    dr.init(0);
+    debug_ring dr(0);
     drr = get_drr(0);
 
     init_wb(DEBUG_RING_SIZE - 10, 'A');
@@ -164,7 +158,7 @@ debug_ring_ut::test_overcommit_dr()
 void
 debug_ring_ut::test_overcommit_dr_more_than_once()
 {
-    dr.init(0);
+    debug_ring dr(0);
     drr = get_drr(0);
 
     auto wb1 = "012345678";
@@ -191,7 +185,7 @@ debug_ring_ut::test_overcommit_dr_more_than_once()
 void
 debug_ring_ut::test_read_with_empty_dr()
 {
-    dr.init(0);
+    debug_ring dr(0);
     drr = get_drr(0);
 
     EXPECT_TRUE(debug_ring_read(drr, rb, DEBUG_RING_SIZE) == 0);
@@ -200,7 +194,7 @@ debug_ring_ut::test_read_with_empty_dr()
 void
 debug_ring_ut::acceptance_test_stress()
 {
-    dr.init(0);
+    debug_ring dr(0);
     drr = get_drr(0);
 
     auto wb = "012";

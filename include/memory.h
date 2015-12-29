@@ -38,27 +38,35 @@ extern "C" {
 #define MEMORY_MANAGER_FAILURE -1
 
 /**
- * Page
+ * Memory Descriptor
  *
- * The following defines a page. This structure is used by the driver entry
- * point to provide the VMM with information about a page that the driver
- * entry point has allocated.
+ * A memory descriptor provides information about a block of memory.
+ * Typically, each page of memory that the VMM uses will have a memory
+ * descriptor assocaited with it. The VMM will use this information to create
+ * it's resources, as well as generate page tables as needed.
+ *
+ * @var phys the starting physical address of the block of memory
+ * @var virt the starting virtual address of the block of memory
+ * @var size the size of the block of memory
+ * @var type the type of meory block. This is likely archiecture specific as
+ *     this holds information about access rights, etc...
  */
-struct page_t
+struct memory_descriptor
 {
     void *phys;
     void *virt;
-    unsigned long long size;
+    unsigned long long int size;
+    unsigned long long int type;
 };
 
 /**
- * Memory Manager Typedefs
+ * Add Memory Descriptor List
  *
- * This is used by the driver entry to as the function signature for
- * memory manager functions
+ * This is used by the driver entry to add an MDL to VMM. The driver entry
+ * will need to collect memory descriptors for every page of memory that the
+ * VMM is using so that the memory manager can provide mappings as needed.
  */
-typedef long long int (*add_page_t)(struct page_t *pg);
-typedef long long int (*remove_page_t)(struct page_t *pg);
+typedef long long int (*add_mdl_t)(struct memory_descriptor *mdl, long long int num);
 
 #ifdef __cplusplus
 }

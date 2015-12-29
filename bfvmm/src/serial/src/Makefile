@@ -66,7 +66,7 @@ MD=mkdir -p
 # Sources
 ################################################################################
 
-TARGET_NAME=bf_serial
+TARGET_NAME=serial
 TARGET_TYPE=lib
 TARGET_COMPILER=both
 

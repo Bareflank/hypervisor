@@ -118,15 +118,15 @@ private:
     void test_helper_execute_symbol_resolve_symbol_failed();
     void test_helper_execute_symbol_sym_failed();
     void test_helper_execute_symbol_sym_success();
-    void test_helper_allocate_page_pool_resolve_symbol_failed();
-    void test_helper_allocate_page_pool_alloc_page_failed();
-    void test_helper_allocate_page_pool_add_page_failed();
-    void test_helper_allocate_page_pool_success();
-    void test_helper_allocate_page_pool_success_multiple_times();
-    void test_helper_free_page_pool_resolve_symbol_failed();
-    void test_helper_free_page_pool_remove_page_failed();
-    void test_helper_free_page_pool_success();
-    void test_helper_free_page_pool_success_multiple_times();
+    // void test_helper_allocate_page_pool_resolve_symbol_failed();
+    // void test_helper_allocate_page_pool_alloc_page_failed();
+    // void test_helper_allocate_page_pool_add_page_failed();
+    // void test_helper_allocate_page_pool_success();
+    // void test_helper_allocate_page_pool_success_multiple_times();
+    // void test_helper_free_page_pool_resolve_symbol_failed();
+    // void test_helper_free_page_pool_remove_page_failed();
+    // void test_helper_free_page_pool_success();
+    // void test_helper_free_page_pool_success_multiple_times();
 
 private:
 

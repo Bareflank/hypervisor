@@ -26,8 +26,8 @@
 SUBDIRS += memory_manager
 SUBDIRS += debug_ring
 SUBDIRS += entry
-SUBDIRS += std
 SUBDIRS += serial
+SUBDIRS += std
 SUBDIRS += intrinsics
 SUBDIRS += exit_handler
 SUBDIRS += vmm

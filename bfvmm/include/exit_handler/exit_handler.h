@@ -22,6 +22,8 @@
 #ifndef EXIT_HANDLER
 #define EXIT_HANDLER
 
+#include <stdint.h>
+
 extern "C"
 {
 

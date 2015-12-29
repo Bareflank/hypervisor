@@ -19,23 +19,16 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#ifndef VCPU_H
-#define VCPU_H
+#ifndef VCPU_INTEL_X64_H
+#define VCPU_INTEL_X64_H
 
-#include <stdint.h>
-#include <debug_ring/debug_ring.h>
+#include <vcpu/vcpu.h>
 
-namespace vcpu_error
-{
-    enum type
-    {
-        success = 0,
-        failure = 1,
-        invalid = 2
-    };
-}
+#include <vmm/vmm_intel_x64.h>
+#include <vmcs/vmcs_intel_x64.h>
+#include <intrinsics/intrinsics_intel_x64.h>
 
-class vcpu
+class vcpu_intel_x64 : public vcpu
 {
 public:
 
@@ -43,36 +36,25 @@ public:
     ///
     /// Creates a vCPU with the provided id and default resources.
     ///
-    vcpu(int64_t id);
+    vcpu_intel_x64(int64_t id);
 
     /// Override Constructor
     ///
-    /// Creates a vCPU with the provided id and debug ring. This constructor
+    /// Creates a vCPU with the provided resources. This constructor
     /// provides a means to override and repalce the internal resources of the
     /// vCPU. Note that if one of the resources is set to NULL, a default
     /// will be constructed in it's place, providing a means to select which
     /// internal components to override.
     ///
-    vcpu(int64_t id, debug_ring *m_debug_ring);
+    vcpu_intel_x64(int64_t id,
+                   debug_ring *debug_ring,
+                   vmm_intel_x64 *vmm,
+                   vmcs_intel_x64 *vmcs,
+                   intrinsics_intel_x64 *intrinsics);
 
     /// Destructor
     ///
-    virtual ~vcpu() {}
-
-    /// Is Valid
-    ///
-    /// @return true if the vCPU is valid, false otherwise
-    ///
-    virtual bool is_valid() const;
-
-    /// vCPU Id
-    ///
-    /// Returns the ID of the vCPU. This ID can be anything, but is only
-    /// valid if it is between 0 <= id < MAX_CPUS
-    ///
-    /// @return the VPU's id
-    ///
-    virtual int64_t id() const;
+    virtual ~vcpu_intel_x64() {}
 
     /// Start
     ///
@@ -80,7 +62,7 @@ public:
     ///
     /// @return success on success, failure otherwise
     ///
-    virtual vcpu_error::type start();
+    virtual vcpu_error::type start() override;
 
     /// Stop
     ///
@@ -88,23 +70,13 @@ public:
     ///
     /// @return success on success, failure otherwise
     ///
-    virtual vcpu_error::type stop();
-
-    /// Write to Log
-    ///
-    /// Writes to this specific vCPU's log. Note that this could be writing
-    /// to more than one log, but is likely writing to the debug ring for this
-    /// vCPU.
-    ///
-    /// @param str the string to write to the log
-    /// @param len the length of the string
-    ///
-    virtual void write(const char *str, int64_t len);
+    virtual vcpu_error::type stop() override;
 
 private:
 
-    int64_t m_id;
-    debug_ring *m_debug_ring;
+    vmm_intel_x64 *m_vmm;
+    vmcs_intel_x64 *m_vmcs;
+    intrinsics_intel_x64 *m_intrinsics;
 };
 
 #endif

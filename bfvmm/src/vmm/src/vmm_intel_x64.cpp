@@ -35,29 +35,10 @@ struct vmxon_region
 //  Implementation
 // =============================================================================
 
-vmm_intel_x64::vmm_intel_x64() :
-    m_intrinsics(0),
-    m_memory_manager(0),
+vmm_intel_x64::vmm_intel_x64(intrinsics_intel_x64 *intrinsics) :
+    m_intrinsics(intrinsics),
     m_vmxon_enabled(false)
 {
-}
-
-vmm_error::type
-vmm_intel_x64::init(intrinsics *intrinsics,
-                    memory_manager *memory_manager)
-{
-    if (intrinsics == 0 || memory_manager == 0)
-        return vmm_error::failure;
-
-    // Ideally we would use dynamic_cast to get access to the intrinics
-    // for this archiecture, simply to validate that we were passed the
-    // correct class. Since the VMM does not have RTTI, we cannot use this
-    // function.
-
-    m_intrinsics = reinterpret_cast<intrinsics_intel_x64 *>(intrinsics);
-    m_memory_manager = memory_manager;
-
-    return vmm_error::success;
 }
 
 vmm_error::type
@@ -65,7 +46,7 @@ vmm_intel_x64::start()
 {
     vmm_error::type ret;
 
-    if (m_intrinsics == 0 || m_memory_manager == 0)
+    if (m_intrinsics == 0)
         return vmm_error::failure;
 
     // The following process is documented in the Intel Software Developers
@@ -128,7 +109,7 @@ vmm_intel_x64::stop()
 {
     vmm_error::type ret;
 
-    if (m_intrinsics == 0 || m_memory_manager == 0)
+    if (m_intrinsics == 0)
         return vmm_error::failure;
 
     // We don't have to do any checks to get ourselves out of the VMX
@@ -375,46 +356,46 @@ vmm_intel_x64::disable_vmx_operation()
 vmm_error::type
 vmm_intel_x64::create_vmxon_region()
 {
-    if (m_memory_manager->alloc_page(&m_vmxon_page) != memory_manager_error::success)
-    {
-        std::cout << "create_vmxon_region failed: "
-                  << "out of memory" << std::endl;
-        return vmm_error::out_of_memory;
-    }
+    // if (m_memory_manager->alloc_page(&m_vmxon_page) != memory_manager_error::success)
+    // {
+    //     std::cout << "create_vmxon_region failed: "
+    //               << "out of memory" << std::endl;
+    //     return vmm_error::out_of_memory;
+    // }
 
-    if (m_vmxon_page.size() < vmxon_region_size())
-    {
-        std::cout << "create_vmxon_region failed: "
-                  << "the allocated page is not large enough:" << std::endl
-                  << "    - page size: " << m_vmxon_page.size() << " "
-                  << "    - vmxon/vmcs region size: " << vmxon_region_size()
-                  << std::endl;
-        return vmm_error::not_supported;
-    }
+    // if (m_vmxon_page.size() < vmxon_region_size())
+    // {
+    //     std::cout << "create_vmxon_region failed: "
+    //               << "the allocated page is not large enough:" << std::endl
+    //               << "    - page size: " << m_vmxon_page.size() << " "
+    //               << "    - vmxon/vmcs region size: " << vmxon_region_size()
+    //               << std::endl;
+    //     return vmm_error::not_supported;
+    // }
 
-    if (((uintptr_t)m_vmxon_page.phys_addr() & 0x0000000000000FFF) != 0)
-    {
-        std::cout << "create_vmxon_region failed: "
-                  << "the allocated page is not page aligned:" << std::endl
-                  << "    - page phys: " << m_vmxon_page.phys_addr()
-                  << std::endl;
-        return vmm_error::not_supported;
-    }
+    // if (((uintptr_t)m_vmxon_page.phys_addr() & 0x0000000000000FFF) != 0)
+    // {
+    //     std::cout << "create_vmxon_region failed: "
+    //               << "the allocated page is not page aligned:" << std::endl
+    //               << "    - page phys: " << m_vmxon_page.phys_addr()
+    //               << std::endl;
+    //     return vmm_error::not_supported;
+    // }
 
-    auto buf = (char *)m_vmxon_page.virt_addr();
-    auto reg = (vmxon_region *)m_vmxon_page.virt_addr();
+    // auto buf = (char *)m_vmxon_page.virt_addr();
+    // auto reg = (vmxon_region *)m_vmxon_page.virt_addr();
 
-    // The information regading this MSR can be found in appendix A.1. For
-    // the VMX capabilities check, we need the following:
-    //
-    // - Bits 30:0 contain the 31-bit VMCS revision identifier used by the
-    //   processor. Processors that use the same VMCS revision identifier use
-    //   the same size for VMCS regions (see subsequent item on bits 44:32)
+    // // The information regading this MSR can be found in appendix A.1. For
+    // // the VMX capabilities check, we need the following:
+    // //
+    // // - Bits 30:0 contain the 31-bit VMCS revision identifier used by the
+    // //   processor. Processors that use the same VMCS revision identifier use
+    // //   the same size for VMCS regions (see subsequent item on bits 44:32)
 
-    for (auto i = 0; i < m_vmxon_page.size(); i++)
-        buf[i] = 0;
+    // for (auto i = 0; i < m_vmxon_page.size(); i++)
+    //     buf[i] = 0;
 
-    reg->revision_id = m_intrinsics->read_msr(IA32_VMX_BASIC_MSR) & 0x7FFFFFFFF;
+    // reg->revision_id = m_intrinsics->read_msr(IA32_VMX_BASIC_MSR) & 0x7FFFFFFFF;
 
     return vmm_error::success;
 }
@@ -422,7 +403,7 @@ vmm_intel_x64::create_vmxon_region()
 vmm_error::type
 vmm_intel_x64::release_vmxon_region()
 {
-    m_memory_manager->free_page(m_vmxon_page);
+    // m_memory_manager->free_page(m_vmxon_page);
 
     return vmm_error::success;
 }
@@ -430,23 +411,23 @@ vmm_intel_x64::release_vmxon_region()
 vmm_error::type
 vmm_intel_x64::execute_vmxon()
 {
-    auto phys = m_vmxon_page.phys_addr();
+    // auto phys = m_vmxon_page.phys_addr();
 
-    // For some reason, the VMXON instruction takes the address of a memory
-    // location that has the address of the VMXON region, which sadly is not
-    // well documented in the Intel manual.
+    // // For some reason, the VMXON instruction takes the address of a memory
+    // // location that has the address of the VMXON region, which sadly is not
+    // // well documented in the Intel manual.
 
-    if (m_vmxon_enabled == true)
-        return vmm_error::success;
+    // if (m_vmxon_enabled == true)
+    //     return vmm_error::success;
 
-    if (m_intrinsics->vmxon(&phys) == false)
-    {
-        std::cout << "execute_vmxon failed" << std::endl;
-        return vmm_error::failure;
-    }
+    // if (m_intrinsics->vmxon(&phys) == false)
+    // {
+    //     std::cout << "execute_vmxon failed" << std::endl;
+    //     return vmm_error::failure;
+    // }
 
-    m_vmxon_enabled = true;
-    std::cout << "vmxon: success" << std::endl;
+    // m_vmxon_enabled = true;
+    // std::cout << "vmxon: success" << std::endl;
 
     return vmm_error::success;
 }

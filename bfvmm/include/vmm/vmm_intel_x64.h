@@ -22,33 +22,30 @@
 #ifndef VMM_INTEL_X64_H
 #define VMM_INTEL_X64_H
 
-#include <vmm/vmm.h>
 #include <intrinsics/intrinsics_intel_x64.h>
 
-class vmm_intel_x64 : public vmm
+namespace vmm_error
+{
+    enum type
+    {
+        success = 0,
+        failure = 1,
+        not_supported = 2,
+        out_of_memory = 3
+    };
+};
+
+class vmm_intel_x64
 {
 public:
 
     /// Default Constructor
     ///
-    vmm_intel_x64();
+    vmm_intel_x64(intrinsics_intel_x64 *intrinsics);
 
     /// Destructor
     ///
     virtual ~vmm_intel_x64() {}
-
-    /// Init VMM
-    ///
-    /// Initializes the VMM. One of the goals of this function is to decouple
-    /// the intrinsics and memory manager from the VMM so that the VMM can
-    /// be tested.
-    ///
-    /// @param intrinsics the intrinsics class that this VMM will use
-    /// @param memory_manager the memory manager class that this VMM will use
-    /// @return success on success, failure otherwise
-    ///
-    virtual vmm_error::type init(intrinsics *intrinsics,
-                                 memory_manager *memory_manager) override;
 
     /// Start VMM
     ///
@@ -59,7 +56,7 @@ public:
     /// @return not_supported if the compability tests fail, success on success
     ///         and failure otherwise
     ///
-    virtual vmm_error::type start() override;
+    virtual vmm_error::type start();
 
     /// Stop VMM
     ///
@@ -67,7 +64,7 @@ public:
     ///
     /// @return success on success, failure otherwise
     ///
-    virtual vmm_error::type stop() override;
+    virtual vmm_error::type stop();
 
 protected:
 
@@ -95,10 +92,7 @@ private:
 
     bool m_vmxon_enabled;
 
-    memory_manager *m_memory_manager;
     intrinsics_intel_x64 *m_intrinsics;
-
-    page m_vmxon_page;
 };
 
 #endif

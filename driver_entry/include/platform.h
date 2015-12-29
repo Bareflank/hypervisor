@@ -24,7 +24,6 @@
 #define PLATFORM_H
 
 #include <types.h>
-#include <memory.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -53,18 +52,6 @@ void *
 platform_alloc_exec(int64_t len);
 
 /**
- * Allocate Page
- *
- * Used by the common code to allocate a page of memory. Note that the
- * page of memory must also be page aligned.
- *
- * @return a page struct that must be filled in as the information in
- *     this struct is used by the VMM to setup memory management.
- */
-struct page_t
-platform_alloc_page(void);
-
-/**
  * Free Memory
  *
  * Used by the common code to free virtual memory that was allocated
@@ -86,16 +73,6 @@ platform_free(void *addr);
  */
 void
 platform_free_exec(void *addr, int64_t len);
-
-/**
- * Free Page
- *
- * Used by the common code to free a page of memory.
- *
- * @param pg the page to free
- */
-void
-platform_free_page(struct page_t pg);
 
 #ifdef __cplusplus
 }

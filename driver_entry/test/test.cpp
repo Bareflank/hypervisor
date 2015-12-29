@@ -213,15 +213,15 @@ driver_entry_ut::list()
     this->test_helper_execute_symbol_resolve_symbol_failed();
     this->test_helper_execute_symbol_sym_failed();
     this->test_helper_execute_symbol_sym_success();
-    this->test_helper_allocate_page_pool_resolve_symbol_failed();
-    this->test_helper_allocate_page_pool_alloc_page_failed();
-    this->test_helper_allocate_page_pool_add_page_failed();
-    this->test_helper_allocate_page_pool_success();
-    this->test_helper_allocate_page_pool_success_multiple_times();
-    this->test_helper_free_page_pool_resolve_symbol_failed();
-    this->test_helper_free_page_pool_remove_page_failed();
-    this->test_helper_free_page_pool_success();
-    this->test_helper_free_page_pool_success_multiple_times();
+    // this->test_helper_allocate_page_pool_resolve_symbol_failed();
+    // this->test_helper_allocate_page_pool_alloc_page_failed();
+    // this->test_helper_allocate_page_pool_add_page_failed();
+    // this->test_helper_allocate_page_pool_success();
+    // this->test_helper_allocate_page_pool_success_multiple_times();
+    // this->test_helper_free_page_pool_resolve_symbol_failed();
+    // this->test_helper_free_page_pool_remove_page_failed();
+    // this->test_helper_free_page_pool_success();
+    // this->test_helper_free_page_pool_success_multiple_times();
 
     return verify_no_mem_leaks();
 }
