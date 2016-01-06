@@ -22,7 +22,33 @@
 #ifndef IOCTL_H
 #define IOCTL_H
 
-#include <ioctl_base.h>
+#include <stdint.h>
+
+namespace ioctl_error
+{
+    enum type
+    {
+        success = 0,
+        unknown = 1,
+        invalid_arg = 2,
+        failed_add_module = 3,
+        failed_start = 4,
+        failed_stop = 5,
+        failed_dump = 6
+    };
+}
+
+namespace ioctl_commands
+{
+    enum type
+    {
+        unknown = 0,
+        add_module = 1,
+        start = 2,
+        stop = 3,
+        dump = 4
+    };
+}
 
 /// IOCTL
 ///
@@ -34,7 +60,7 @@
 ///
 /// @code
 ///
-/// arch/ioctl : public ioctl_base
+/// arch/ioctl
 /// {
 /// private:
 ///     void *d; // ioctl_private <-- actually implements IOCTL call
@@ -50,12 +76,12 @@
 /// the size of the data being sent. It's up to each OS specific implemetation
 /// to convert the cross-platform API to an OS specific API that makes sense.
 ///
-class ioctl : public ioctl_base
+class ioctl
 {
 public:
 
     ioctl();
-    ~ioctl();
+    virtual ~ioctl();
 
     /// Call
     ///
@@ -66,9 +92,9 @@ public:
     /// @param len the length of the data to send to the driver entry
     /// @return an error code the describes the various errors that might occur
     ///
-    ioctl_error::type call(ioctl_commands::type cmd,
-                           const void *const data,
-                           int32_t len) const override;
+    virtual ioctl_error::type call(ioctl_commands::type cmd,
+                                   const void *const data,
+                                   int32_t len) const;
 
 private:
 

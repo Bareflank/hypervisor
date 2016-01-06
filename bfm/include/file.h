@@ -22,8 +22,8 @@
 #ifndef FILE_H
 #define FILE_H
 
+#include <string>
 #include <fstream>
-#include <file_base.h>
 
 /// File
 ///
@@ -31,7 +31,7 @@
 /// class wraps calls to ifstream and fstream to simplify their interface
 /// as well as provide an implementation for the rest of the Bareflank
 /// Manager, such that testing is eaiser.
-class file : public file_base
+class file
 {
 public:
 
@@ -42,7 +42,7 @@ public:
 
     /// File Destructor
     ///
-    ~file();
+    virtual ~file();
 
     /// Exists
     ///
@@ -51,7 +51,7 @@ public:
     /// @param filename the filename to check for existence.
     /// @return true if filename exists
     ///
-    bool exists(const std::string &filename) const override;
+    virtual bool exists(const std::string &filename) const;
 
     /// Read
     ///
@@ -62,7 +62,7 @@ public:
     /// @param filename the filename to read.
     /// @return the contents of filename, or an empty string if filename
     ///         does not exists.
-    std::string read(const std::string &filename) const override;
+    virtual std::string read(const std::string &filename) const;
 };
 
 #endif

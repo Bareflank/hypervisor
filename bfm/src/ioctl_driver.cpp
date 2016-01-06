@@ -21,12 +21,12 @@
 
 #include <ioctl_driver.h>
 
-ioctl_driver::ioctl_driver(const file_base *const fb,
-                           const ioctl_base *const ioctlb,
-                           const command_line_parser_base *const clpb) :
-    m_fb(fb),
-    m_ioctlb(ioctlb),
-    m_clpb(clpb)
+ioctl_driver::ioctl_driver(const file *const f,
+                           const ioctl *const ctl,
+                           const command_line_parser *const clp) :
+    m_f(f),
+    m_ctl(ctl),
+    m_clp(clp)
 {
 }
 
@@ -37,21 +37,21 @@ ioctl_driver::~ioctl_driver()
 ioctl_driver_error::type
 ioctl_driver::process() const
 {
-    if (m_fb == NULL ||
-        m_clpb == NULL ||
-        m_ioctlb == NULL)
+    if (m_f == NULL ||
+        m_ctl == NULL ||
+        m_clp == NULL)
     {
         bfm_error << "Invalid IOCTL driver" << std::endl;
         return ioctl_driver_error::failure;
     }
 
-    if (m_clpb->is_valid() == false)
+    if (m_clp->is_valid() == false)
     {
         bfm_error << "Invalid command line parser" << std::endl;
         return ioctl_driver_error::failure;
     }
 
-    switch (m_clpb->cmd())
+    switch (m_clp->cmd())
     {
         case command_line_parser_command::start:
             return this->start_vmm();
@@ -75,11 +75,11 @@ ioctl_driver::process() const
 ioctl_driver_error::type
 ioctl_driver::start_vmm() const
 {
-    assert(m_fb != NULL);
-    assert(m_clpb != NULL);
-    assert(m_ioctlb != NULL);
+    assert(m_f != NULL);
+    assert(m_ctl != NULL);
+    assert(m_clp != NULL);
 
-    auto modules_filename = m_clpb->modules();
+    auto modules_filename = m_clp->modules();
 
     if (modules_filename.empty() == true)
     {
@@ -87,13 +87,13 @@ ioctl_driver::start_vmm() const
         return ioctl_driver_error::failure;
     }
 
-    if (m_fb->exists(modules_filename) == false)
+    if (m_f->exists(modules_filename) == false)
     {
         bfm_error << "Unable to start vmm. Provided filename for the list of modules does not exist" << std::endl;
         return ioctl_driver_error::failure;
     }
 
-    auto modules = m_fb->read(modules_filename);
+    auto modules = m_f->read(modules_filename);
 
     if (modules.empty() == true)
     {
@@ -106,13 +106,13 @@ ioctl_driver::start_vmm() const
         if (module.empty() == true)
             continue;
 
-        if (m_fb->exists(module) == false)
+        if (m_f->exists(module) == false)
         {
             bfm_error << "Unable to start vmm. module does not exist: " << module << std::endl;
             return ioctl_driver_error::failure;
         }
 
-        auto contents = m_fb->read(module);
+        auto contents = m_f->read(module);
 
         if (contents.empty() == true)
         {
@@ -120,9 +120,9 @@ ioctl_driver::start_vmm() const
             return ioctl_driver_error::failure;
         }
 
-        auto result = m_ioctlb->call(ioctl_commands::add_module,
-                                     contents.c_str(),
-                                     contents.length());
+        auto result = m_ctl->call(ioctl_commands::add_module,
+                                  contents.c_str(),
+                                  contents.length());
 
         if (result != ioctl_error::success)
         {
@@ -131,7 +131,7 @@ ioctl_driver::start_vmm() const
         }
     }
 
-    if (m_ioctlb->call(ioctl_commands::start, NULL, 0) != ioctl_error::success)
+    if (m_ctl->call(ioctl_commands::start, NULL, 0) != ioctl_error::success)
     {
         bfm_error << "failed to start vmm: " << std::endl;
         return ioctl_driver_error::failure;
@@ -143,11 +143,11 @@ ioctl_driver::start_vmm() const
 ioctl_driver_error::type
 ioctl_driver::stop_vmm() const
 {
-    assert(m_fb != NULL);
-    assert(m_clpb != NULL);
-    assert(m_ioctlb != NULL);
+    assert(m_f != NULL);
+    assert(m_ctl != NULL);
+    assert(m_clp != NULL);
 
-    if (m_ioctlb->call(ioctl_commands::stop, NULL, 0) != ioctl_error::success)
+    if (m_ctl->call(ioctl_commands::stop, NULL, 0) != ioctl_error::success)
     {
         bfm_error << "failed to stop vmm: " << std::endl;
         return ioctl_driver_error::failure;
@@ -159,11 +159,11 @@ ioctl_driver::stop_vmm() const
 ioctl_driver_error::type
 ioctl_driver::dump_vmm() const
 {
-    assert(m_fb != NULL);
-    assert(m_clpb != NULL);
-    assert(m_ioctlb != NULL);
+    assert(m_f != NULL);
+    assert(m_ctl != NULL);
+    assert(m_clp != NULL);
 
-    if (m_ioctlb->call(ioctl_commands::dump, NULL, 0) != ioctl_error::success)
+    if (m_ctl->call(ioctl_commands::dump, NULL, 0) != ioctl_error::success)
     {
         bfm_error << "failed to dump vmm: " << std::endl;
         return ioctl_driver_error::failure;

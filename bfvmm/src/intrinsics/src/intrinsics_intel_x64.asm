@@ -109,7 +109,7 @@ __vmlaunch:
     call __vmlaunch_trampoline
     ret
 
-__vmlaunch_trampoline
+__vmlaunch_trampoline:
 
     pop rsi
 

@@ -178,7 +178,7 @@
 ///
 /// @endcode
 ///
-#define RUN_ALL_TESTS(ut) []() -> decltype(auto) { ut _ut; return _ut.run(); }()
+#define RUN_ALL_TESTS(ut) [&]() -> decltype(auto) { (void) argc; (void) argv; ut _ut; return _ut.run(); }()
 
 class unittest
 {

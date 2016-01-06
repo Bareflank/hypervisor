@@ -155,7 +155,7 @@ vmcs_intel_x64::check_vm_instruction_error()
 bool
 vmcs_intel_x64::check_is_address_canonical(uint64_t addr)
 {
-    if (((addr >= 0x0000000000000000) && (addr <= 0x00007FFFFFFFFFFF)) ||
+    if (((addr <= 0x00007FFFFFFFFFFF)) ||
         ((addr >= 0xFFFF800000000000) && (addr <= 0xFFFFFFFFFFFFFFFF)))
     {
         return true;

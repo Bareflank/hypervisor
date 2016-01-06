@@ -20,12 +20,10 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #include <test.h>
-
 #include <file.h>
-#include <file_base.h>
 
 // This is not a true unit test since we are not providing the file
-// class with a mock of fstream. Our attempts at doing that we not
+// class with a mock of fstream. Our attempts at doing that were not
 // successful. These tests at least help us prove that the file class
 // is going to work as intended.
 

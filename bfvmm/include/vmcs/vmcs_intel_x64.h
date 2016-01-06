@@ -33,7 +33,7 @@ namespace vmcs_error
         not_supported = 2,
         out_of_memory = 3
     };
-};
+}
 
 class vmcs_intel_x64
 {

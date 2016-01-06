@@ -159,13 +159,13 @@ struct bfelf64_ehdr;
  */
 struct bfreltab_t
 {
-    bfelf64_sword num;
+    bfelf64_word num;
     struct bfelf_rel *tab;
 };
 
 struct bfrelatab_t
 {
-    bfelf64_sword num;
+    bfelf64_word num;
     struct bfelf_rela *tab;
 };
 
@@ -179,8 +179,8 @@ struct bfelf_file_t
 {
     char *file;
     char *exec;
-    bfelf64_sword fsize;
-    bfelf64_sword esize;
+    uint64_t fsize;
+    uint64_t esize;
 
     struct bfelf64_ehdr *ehdr;
     struct bfelf_shdr *shdrtab;
@@ -190,16 +190,16 @@ struct bfelf_file_t
     struct bfelf_shdr *strtab;
     struct bfelf_shdr *shstrtab;
 
-    bfelf64_sword symnum;
+    bfelf64_word symnum;
     struct bfelf_sym *symtab;
 
-    bfelf64_sword efnum;
+    bfelf64_word efnum;
     struct bfelf_file_t *eftab[BFELF_MAX_MODULES];
 
-    bfelf64_sword num_rel;
+    bfelf64_word num_rel;
     struct bfreltab_t bfreltab[BFELF_MAX_RELTAB];
 
-    bfelf64_sword num_rela;
+    bfelf64_word num_rela;
     struct bfrelatab_t bfrelatab[BFELF_MAX_RELTAB];
 
     bfelf64_sword valid;
@@ -219,7 +219,7 @@ struct bfelf_file_t
  * @return BFELF_SUCCESS on success, negative on error
  */
 bfelf64_sword
-bfelf_file_init(char *file, bfelf64_sword fsize, struct bfelf_file_t *ef);
+bfelf_file_init(char *file, uint64_t fsize, struct bfelf_file_t *ef);
 
 /**
  * Load ELF file
@@ -236,7 +236,7 @@ bfelf_file_init(char *file, bfelf64_sword fsize, struct bfelf_file_t *ef);
  * @return BFELF_SUCCESS on success, negative on error
  */
 bfelf64_sword
-bfelf_file_load(struct bfelf_file_t *ef, char *exec, bfelf64_sword esize);
+bfelf_file_load(struct bfelf_file_t *ef, char *exec, uint64_t esize);
 
 /******************************************************************************/
 /* ELF Loader                                                                 */

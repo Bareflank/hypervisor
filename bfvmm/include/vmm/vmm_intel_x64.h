@@ -33,7 +33,7 @@ namespace vmm_error
         not_supported = 2,
         out_of_memory = 3
     };
-};
+}
 
 class vmm_intel_x64
 {

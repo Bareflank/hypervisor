@@ -237,7 +237,6 @@ serial_port_x86::data_size(void)
 serial::err
 serial_port_x86::set_stop_bits(uint8_t bits)
 {
-    uint8_t i = 0;
     uint8_t stop_bits = 0;
 
     stop_bits = m_intrinsics.read_portio_8(m_port + LCR_OFFSET);

@@ -134,6 +134,10 @@ command_line_parser::parse_start(int argc, const char *argv[], int index)
 void
 command_line_parser::parse_stop(int argc, const char *argv[], int index)
 {
+    (void) argc;
+    (void) argv;
+    (void) index;
+
     m_is_valid = true;
     m_cmd = command_line_parser_command::stop;
 }
@@ -141,6 +145,10 @@ command_line_parser::parse_stop(int argc, const char *argv[], int index)
 void
 command_line_parser::parse_dump(int argc, const char *argv[], int index)
 {
+    (void) argc;
+    (void) argv;
+    (void) index;
+
     m_is_valid = true;
     m_cmd = command_line_parser_command::dump;
 }

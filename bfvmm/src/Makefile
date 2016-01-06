@@ -23,16 +23,16 @@
 # Subdirs
 ################################################################################
 
+SUBDIRS += intrinsics
 SUBDIRS += memory_manager
 SUBDIRS += debug_ring
-SUBDIRS += entry
 SUBDIRS += serial
-SUBDIRS += std
-SUBDIRS += intrinsics
 SUBDIRS += exit_handler
 SUBDIRS += vmm
 SUBDIRS += vmcs
 SUBDIRS += vcpu
+SUBDIRS += entry
+SUBDIRS += std
 
 ################################################################################
 # Common

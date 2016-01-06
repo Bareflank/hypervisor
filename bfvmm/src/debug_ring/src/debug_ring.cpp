@@ -118,7 +118,7 @@ debug_ring::write(const char *str, int64_t len)
 extern "C" struct debug_ring_resources_t *
 get_drr(long long int vcpuid)
 {
-    static debug_ring_resources_t drrs[MAX_VCPUS] = {0};
+    static debug_ring_resources_t drrs[MAX_VCPUS] = {0, 0, 0};
 
     if (vcpuid < 0 || vcpuid >= MAX_VCPUS)
         return 0;

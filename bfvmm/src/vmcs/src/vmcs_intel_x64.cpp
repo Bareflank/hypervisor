@@ -23,7 +23,7 @@
 #include <iostream>
 
 #include <vmcs/vmcs_intel_x64.h>
-#include <exit_handler/exit_handler.h>
+// #include <exit_handler/exit_handler.h>
 
 // =============================================================================
 //  Helper Structs
@@ -679,8 +679,8 @@ vmcs_intel_x64::write_natural_width_host_state_fields()
     vmwrite(VMCS_HOST_GDTR_BASE, m_gdt_reg.base);
     vmwrite(VMCS_HOST_IDTR_BASE, m_idt_reg.base);
 
-    vmwrite(VMCS_HOST_RSP, (uint64_t)exit_handler_stack());
-    vmwrite(VMCS_HOST_RIP, (uint64_t)exit_handler_entry);
+    // vmwrite(VMCS_HOST_RSP, (uint64_t)exit_handler_stack());
+    // vmwrite(VMCS_HOST_RIP, (uint64_t)exit_handler_entry);
 
     // unused: VMCS_HOST_FS_BASE
     // unused: VMCS_HOST_GS_BASE

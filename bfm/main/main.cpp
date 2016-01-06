@@ -29,9 +29,11 @@
 
 int main(int argc, const char *argv[])
 {
-    command_line_parser clp(argc, argv);
+    auto f = new file;
+    auto ctl = new ioctl;
+    auto clp = new command_line_parser(argc, argv);
 
-    if (clp.cmd() == command_line_parser_command::help)
+    if (clp->cmd() == command_line_parser_command::help)
     {
         std::cout << "Usage: bfm [OPTION]... start list_of_modules" << std::endl;
         std::cout << "   or: bfm [OPTION]... stop" << std::endl;
@@ -42,11 +44,9 @@ int main(int argc, const char *argv[])
         return EXIT_SUCCESS;
     }
 
-    file f;
-    ioctl ctl;
-    ioctl_driver driver(&f, &ctl, &clp);
+    auto driver = new ioctl_driver(f, ctl, clp);
 
-    if (driver.process() != ioctl_driver_error::success)
+    if (driver->process() != ioctl_driver_error::success)
     {
         bfm_error << "failed to process request" << std::endl;
         return EXIT_FAILURE;

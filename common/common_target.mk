@@ -20,191 +20,329 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 ################################################################################
-# OS Detection
-################################################################################
-
-ifeq ($(OS),Windows_NT)
-	OS=windows
-else
-	UNAME=$(shell uname -s)
-	ifeq ($(UNAME),Linux)
-		OS=linux
-	endif
-	ifeq ($(UNAME),Darwin)
-		OS=osx
-	endif
-endif
-
-################################################################################
 # Compilers
 ################################################################################
 
-ifeq ($(TARGET_COMPILER),native)
-	TARGET_CROSS_COMPILED=
-	TARGET_NATIVE_COMPILED=true
+ifeq ($(TARGET_COMPILER), native)
+	TARGET_CROSS_COMPILED:=
+	TARGET_NATIVE_COMPILED:=true
 endif
 
-ifeq ($(TARGET_COMPILER),cross)
-	TARGET_CROSS_COMPILED=true
-	TARGET_NATIVE_COMPILED=
+ifeq ($(TARGET_COMPILER), cross)
+	TARGET_CROSS_COMPILED:=true
+	TARGET_NATIVE_COMPILED:=
 endif
 
-ifeq ($(TARGET_COMPILER),both)
-	TARGET_CROSS_COMPILED=true
-	TARGET_NATIVE_COMPILED=true
+ifeq ($(TARGET_COMPILER), both)
+	TARGET_CROSS_COMPILED:=true
+	TARGET_NATIVE_COMPILED:=true
 endif
+
+################################################################################
+# OS Detection
+################################################################################
+
+ifeq ($(OS), Windows_NT)
+	OS:=windows
+else
+	UNAME:=$(shell uname -s)
+	ifeq ($(UNAME), Linux)
+		OS:=linux
+	endif
+endif
+
+################################################################################
+# Output Directories
+################################################################################
+
+NATIVE_OBJDIR_PARENT:=$(NATIVE_OBJDIR)
+NATIVE_OUTDIR_PARENT:=$(NATIVE_OUTDIR)
+NATIVE_OBJDIR:=$(NATIVE_OBJDIR)/native
+NATIVE_OUTDIR:=$(NATIVE_OUTDIR)/native
+
+CROSS_OBJDIR_PARENT:=$(CROSS_OBJDIR)
+CROSS_OUTDIR_PARENT:=$(CROSS_OUTDIR)
+CROSS_OBJDIR:=$(CROSS_OBJDIR)/cross
+CROSS_OUTDIR:=$(CROSS_OUTDIR)/cross
+
+################################################################################
+# Exectuables
+################################################################################
+
+NATIVE_CC:=gcc
+NATIVE_CXX:=g++
+NATIVE_ASM:=nasm
+NATIVE_LD:=g++
+NATIVE_AR:=ar
+
+CROSS_CC:=~/opt/cross/bin/x86_64-elf-gcc
+CROSS_CXX:=~/opt/cross/bin/x86_64-elf-g++
+CROSS_ASM:=~/opt/cross/bin/nasm
+CROSS_LD:=~/opt/cross/bin/x86_64-elf-ld
+CROSS_AR:=~/opt/cross/bin/x86_64-elf-ar
+
+RM:=rm -rf
+MD:=mkdir -p
+TEST:=test
+RMDIR:=rmdir --ignore-fail-on-non-empty -p
+
+################################################################################
+# Default CC Flags
+################################################################################
+
+NATIVE_CCFLAGS+=-fpic
+NATIVE_CCFLAGS+=-Wall
+NATIVE_CCFLAGS+=-Wextra
+NATIVE_CCFLAGS+=-Wpedantic
+
+CROSS_CCFLAGS+=-fpic
+CROSS_CCFLAGS+=-mno-red-zone
+CROSS_CCFLAGS+=-mcmodel=large
+CROSS_CCFLAGS+=-ffreestanding
+CROSS_CCFLAGS+=-Wall
+CROSS_CCFLAGS+=-Wextra
+CROSS_CCFLAGS+=-Wpedantic
+
+################################################################################
+# Default CXX Flags
+################################################################################
+
+NATIVE_CXXFLAGS+=-fpic
+NATIVE_CXXFLAGS+=-std=c++14
+NATIVE_CXXFLAGS+=-Wall
+NATIVE_CXXFLAGS+=-Wextra
+NATIVE_CXXFLAGS+=-Wpedantic
+
+CROSS_CXXFLAGS+=-fpic
+CROSS_CXXFLAGS+=-mno-red-zone
+CROSS_CXXFLAGS+=-mcmodel=large
+CROSS_CXXFLAGS+=-ffreestanding
+CROSS_CXXFLAGS+=-fno-rtti
+CROSS_CXXFLAGS+=-fno-sized-deallocation
+CROSS_CXXFLAGS+=-fno-exceptions
+CROSS_CXXFLAGS+=-fno-use-cxa-atexit
+CROSS_CXXFLAGS+=-fno-threadsafe-statics
+CROSS_CXXFLAGS+=-std=c++14
+CROSS_CXXFLAGS+=-Wall
+CROSS_CXXFLAGS+=-Wextra
+CROSS_CXXFLAGS+=-Wpedantic
+
+################################################################################
+# Default ASM Flags
+################################################################################
+
+NATIVE_ASMFLAGS+=-f elf64
+
+CROSS_ASMFLAGS+=-f elf64
+
+################################################################################
+# Default LD Flags
+################################################################################
+
+NATIVE_LDFLAGS+=-Wl,-fuse-ld=gold
+
+CROSS_LDFLAGS+=-fuse-ld=gold
+CROSS_LDFLAGS+=-z max-page-size=4096
+CROSS_LDFLAGS+=-ffreestanding
+CROSS_LDFLAGS+=-nostdlib
+
+################################################################################
+# Default AR Flags
+################################################################################
+
+NATIVE_ARFLAGS+=rcs
+
+CROSS_ARFLAGS+=rcs
 
 ################################################################################
 # Target Naming
 ################################################################################
 
-ifeq ($(TARGET_CROSS_COMPILED),true)
-	CROSS_BIN_EXT=
-	CROSS_SHARED_LIB_EXT=.so
-	CROSS_SHARED_LIB_PRE=lib
-	CROSS_STATIC_LIB_EXT=.a
-	CROSS_STATIC_LIB_PRE=lib
-	CROSS_SOURCES += $(SOURCES)
-	CROSS_SOURCES += $(VMM_SOURCES)
-	CROSS_INCLUDE_PATHS+=$(INCLUDE_PATHS)
-	CROSS_INCLUDE_PATHS+=$(VMM_INCLUDE_PATHS)
-	CROSS_DEFINES+=OS_VMM
+ifeq ($(TARGET_CROSS_COMPILED), true)
+	CROSS_BIN_EXT:=
+	CROSS_BIN_PRE:=
+	CROSS_SHARED_LIB_EXT:=.so
+	CROSS_SHARED_LIB_PRE:=lib
+	CROSS_STATIC_LIB_EXT:=_static.a
+	CROSS_STATIC_LIB_PRE:=lib
 endif
 
-ifeq ($(TARGET_NATIVE_COMPILED),true)
-	ifeq ($(OS),windows)
-		BIN_EXT=.exe
-		SHARED_LIB_EXT=.dll
-		SHARED_LIB_PRE=
-		STATIC_LIB_EXT=.lib
-		STATIC_LIB_PRE=
-		NATIVE_SOURCES += $(WINDOWS_SOURCES)
-		NATIVE_SOURCES += $(SOURCES)
-		INCLUDE_PATHS+=$(WINDOWS_INCLUDE_PATHS)
-		DEFINES+=OS_WINDOWS
+ifeq ($(TARGET_NATIVE_COMPILED), true)
+	ifeq ($(OS), windows)
+		NATIVE_BIN_EXT:=.exe
+		NATIVE_BIN_PRE:=
+		NATIVE_SHARED_LIB_EXT:=.dll
+		NATIVE_SHARED_LIB_PRE:=
+		NATIVE_STATIC_LIB_EXT:=_static.lib
+		NATIVE_STATIC_LIB_PRE:=
 	endif
-	ifeq ($(OS),linux)
-		BIN_EXT=
-		SHARED_LIB_EXT=.so
-		SHARED_LIB_PRE=lib
-		STATIC_LIB_EXT=.a
-		STATIC_LIB_PRE=lib
-		NATIVE_SOURCES += $(LINUX_SOURCES)
-		NATIVE_SOURCES += $(SOURCES)
-		INCLUDE_PATHS+=$(LINUX_INCLUDE_PATHS)
-		DEFINES+=OS_LINUX
-	endif
-	ifeq ($(OS),osx)
-		BIN_EXT=
-		SHARED_LIB_EXT=.dylib
-		SHARED_LIB_PRE=lib
-		STATIC_LIB_EXT=.a
-		STATIC_LIB_PRE=lib
-		NATIVE_SOURCES += $(OSX_SOURCES)
-		NATIVE_SOURCES += $(SOURCES)
-		INCLUDE_PATHS+=$(OSX_INCLUDE_PATHS)
-		DEFINES+=OS_OSX
-		ifeq ($(TARGET_TYPE),lib)
-			LDFLAGS += -undefined dynamic_lookup
-		endif
+	ifeq ($(OS), linux)
+		NATIVE_BIN_EXT:=
+		NATIVE_BIN_PRE:=
+		NATIVE_SHARED_LIB_EXT:=.so
+		NATIVE_SHARED_LIB_PRE:=lib
+		NATIVE_STATIC_LIB_EXT:=_static.a
+		NATIVE_STATIC_LIB_PRE:=lib
 	endif
 endif
 
-ifeq ($(TARGET_TYPE),lib)
-	ifeq ($(TARGET_CROSS_COMPILED),true)
-		CROSS_CCFLAGS+=-fpic -mno-red-zone -mcmodel=large -ffreestanding
-		CROSS_CXXFLAGS+=-fpic -fno-rtti -fno-sized-deallocation -fno-exceptions -fno-use-cxa-atexit -fno-threadsafe-statics -ffreestanding -mno-red-zone -mcmodel=large
-		CROSS_LDFLAGS+=-shared -z max-page-size=4096 -ffreestanding -nostdlib
-		CROSS_LD_OPTION=-o
-		CROSS_TARGET=$(patsubst %,$(CROSS_OUTDIR)/$(CROSS_SHARED_LIB_PRE)%$(CROSS_SHARED_LIB_EXT),$(TARGET_NAME))
-	endif
-	ifeq ($(TARGET_NATIVE_COMPILED),true)
-		CCFLAGS+=-fpic
-		CXXFLAGS+=-fpic
-		LDFLAGS+=-shared
-		LD_OPTION=-o
-		TARGET=$(patsubst %,$(OUTDIR)/$(SHARED_LIB_PRE)%$(SHARED_LIB_EXT),$(TARGET_NAME))
-	endif
-endif
+NATIVE_TARGET_BIN:=$(patsubst %, $(NATIVE_OUTDIR)/$(NATIVE_BIN_PRE)%$(NATIVE_BIN_EXT), $(TARGET_NAME))
+NATIVE_TARGET_SHARED:=$(patsubst %, $(NATIVE_OUTDIR)/$(NATIVE_SHARED_LIB_PRE)%$(NATIVE_SHARED_LIB_EXT), $(TARGET_NAME))
+NATIVE_TARGET_STATIC:=$(patsubst %, $(NATIVE_OUTDIR)/$(NATIVE_STATIC_LIB_PRE)%$(NATIVE_STATIC_LIB_EXT), $(TARGET_NAME))
 
-ifeq ($(TARGET_TYPE),staticlib)
-	ifeq ($(TARGET_CROSS_COMPILED),true)
-		CROSS_CCFLAGS+=-fpic -mno-red-zone -mcmodel=large -ffreestanding
-		CROSS_CXXFLAGS+=-fpic -fno-rtti -fno-sized-deallocation -fno-exceptions -fno-use-cxa-atexit -fno-threadsafe-statics -ffreestanding -mno-red-zone -mcmodel=large
-		CROSS_LDFLAGS+= -z max-page-size=4096 -ffreestanding -nostdlib
-		CROSS_LD_OPTION=
-		CROSS_TARGET=$(patsubst %,$(CROSS_OUTDIR)/$(CROSS_STATIC_LIB_PRE)%$(CROSS_STATIC_LIB_EXT),$(TARGET_NAME))
-	endif
-	ifeq ($(TARGET_NATIVE_COMPILED),true)
-		CCFLAGS+=-fpic
-		CXXFLAGS+=-fpic
-		LDFLAGS+=
-		LD_OPTION=
-		TARGET=$(patsubst %,$(OUTDIR)/$(STATIC_LIB_PRE)%$(STATIC_LIB_EXT),$(TARGET_NAME))
-	endif
-endif
-
-ifeq ($(TARGET_TYPE),bin)
-	ifeq ($(TARGET_CROSS_COMPILED),true)
-		CROSS_LD_OPTION=-o
-		CROSS_TARGET=$(patsubst %,$(CROSS_OUTDIR)/%$(CROSS_BIN_EXT),$(TARGET_NAME))
-	endif
-	ifeq ($(TARGET_NATIVE_COMPILED),true)
-		LDFLAGS+=-Wl,--unresolved-symbols=ignore-all
-		LD_OPTION=-o
-		TARGET=$(patsubst %,$(OUTDIR)/%$(BIN_EXT),$(TARGET_NAME))
-	endif
-endif
-
-ifeq ($(TARGET_CROSS_COMPILED),true)
-	CROSS_DEFINES+=CROSS_COMPILED
-	CROSS_DFLAGS=$(patsubst %,-D%,$(CROSS_DEFINES))
-endif
-
-ifeq ($(TARGET_NATIVE_COMPILED),true)
-	DEFINES+=NATIVE_COMPILED
-	DFLAGS=$(patsubst %,-D%,$(DEFINES))
-endif
+CROSS_TARGET_BIN:=$(patsubst %, $(CROSS_OUTDIR)/$(CROSS_BIN_PRE)%$(CROSS_BIN_EXT), $(TARGET_NAME))
+CROSS_TARGET_SHARED:=$(patsubst %, $(CROSS_OUTDIR)/$(CROSS_SHARED_LIB_PRE)%$(CROSS_SHARED_LIB_EXT), $(TARGET_NAME))
+CROSS_TARGET_STATIC:=$(patsubst %, $(CROSS_OUTDIR)/$(CROSS_STATIC_LIB_PRE)%$(CROSS_STATIC_LIB_EXT), $(TARGET_NAME))
 
 ################################################################################
 # Source Files
 ################################################################################
 
-ifeq ($(TARGET_CROSS_COMPILED),true)
-	CROSS_CC_SOURCES=$(filter %.c,$(CROSS_SOURCES))
-	CROSS_CXX_SOURCES=$(filter %.cpp,$(CROSS_SOURCES))
-	CROSS_ASM_SOURCES=$(filter %.asm,$(CROSS_SOURCES))
+ifeq ($(TARGET_CROSS_COMPILED), true)
+	CROSS_SOURCES+=$(SOURCES)
+	CROSS_SOURCES+=$(VMM_SOURCES)
 endif
 
-ifeq ($(TARGET_NATIVE_COMPILED),true)
-	CC_SOURCES=$(filter %.c,$(NATIVE_SOURCES))
-	CXX_SOURCES=$(filter %.cpp,$(NATIVE_SOURCES))
-	ASM_SOURCES=$(filter %.asm,$(NATIVE_SOURCES))
+ifeq ($(TARGET_NATIVE_COMPILED), true)
+	ifeq ($(OS), windows)
+		NATIVE_SOURCES+=$(SOURCES)
+		NATIVE_SOURCES+=$(WINDOWS_SOURCES)
+	endif
+	ifeq ($(OS), linux)
+		NATIVE_SOURCES+=$(SOURCES)
+		NATIVE_SOURCES+=$(LINUX_SOURCES)
+	endif
 endif
+
+CROSS_CC_SOURCES:=$(filter %.c, $(wildcard $(CROSS_SOURCES)))
+CROSS_CXX_SOURCES:=$(filter %.cpp, $(wildcard $(CROSS_SOURCES)))
+CROSS_ASM_SOURCES:=$(filter %.asm, $(wildcard $(CROSS_SOURCES)))
+
+NATIVE_CC_SOURCES:=$(filter %.c, $(wildcard $(NATIVE_SOURCES)))
+NATIVE_CXX_SOURCES:=$(filter %.cpp ,$(wildcard $(NATIVE_SOURCES)))
+NATIVE_ASM_SOURCES:=$(filter %.asm, $(wildcard $(NATIVE_SOURCES)))
+
+################################################################################
+# Include Paths
+################################################################################
+
+ifeq ($(TARGET_CROSS_COMPILED), true)
+	CROSS_INCLUDE_PATHS+=$(INCLUDE_PATHS)
+	CROSS_INCLUDE_PATHS+=$(VMM_INCLUDE_PATHS)
+endif
+
+ifeq ($(TARGET_NATIVE_COMPILED), true)
+	ifeq ($(OS), windows)
+		NATIVE_INCLUDE_PATHS+=$(INCLUDE_PATHS)
+		NATIVE_INCLUDE_PATHS+=$(WINDOWS_INCLUDE_PATHS)
+	endif
+	ifeq ($(OS), linux)
+		NATIVE_INCLUDE_PATHS+=$(INCLUDE_PATHS)
+		NATIVE_INCLUDE_PATHS+=$(LINUX_INCLUDE_PATHS)
+	endif
+endif
+
+CROSS_CCFLAGS+=$(addprefix -I, $(strip $(CROSS_INCLUDE_PATHS)))
+CROSS_CXXFLAGS+=$(addprefix -I, $(strip $(CROSS_INCLUDE_PATHS)))
+
+NATIVE_CCFLAGS+=$(addprefix -I, $(strip $(NATIVE_INCLUDE_PATHS)))
+NATIVE_CXXFLAGS+=$(addprefix -I, $(strip $(NATIVE_INCLUDE_PATHS)))
+
+################################################################################
+# Library Paths
+################################################################################
+
+ifeq ($(TARGET_CROSS_COMPILED), true)
+	CROSS_LIBRARY_PATHS+=$(LIBRARY_PATHS)
+	CROSS_LIBRARY_PATHS+=$(VMM_LIBRARY_PATHS)
+endif
+
+ifeq ($(TARGET_NATIVE_COMPILED), true)
+	ifeq ($(OS), windows)
+		NATIVE_LIBRARY_PATHS+=$(LIBRARY_PATHS)
+		NATIVE_LIBRARY_PATHS+=$(WINDOWS_LIBRARY_PATHS)
+	endif
+	ifeq ($(OS), linux)
+		NATIVE_LIBRARY_PATHS+=$(LIBRARY_PATHS)
+		NATIVE_LIBRARY_PATHS+=$(LINUX_LIBRARY_PATHS)
+	endif
+endif
+
+NATIVE_LDFLAGS+=$(addprefix -L, $(strip $(NATIVE_LIBRARY_PATHS)))
+
+CROSS_LDFLAGS+=$(addprefix -L, $(strip $(CROSS_LIBRARY_PATHS)))
+
+################################################################################
+# Libraries
+################################################################################
+
+ifeq ($(TARGET_CROSS_COMPILED), true)
+	CROSS_LIBS+=$(LIBS)
+	CROSS_LIBS+=$(VMM_LIBS)
+endif
+
+ifeq ($(TARGET_NATIVE_COMPILED), true)
+	ifeq ($(OS), windows)
+		NATIVE_LIBS+=$(LIBS)
+		NATIVE_LIBS+=$(WINDOWS_LIBS)
+	endif
+	ifeq ($(OS), linux)
+		NATIVE_LIBS+=$(LIBS)
+		NATIVE_LIBS+=$(LINUX_LIBS)
+	endif
+endif
+
+NATIVE_LDFLAGS+=$(addprefix -l, $(strip $(NATIVE_LIBS)))
+
+CROSS_LDFLAGS+=$(addprefix -l, $(strip $(CROSS_LIBS)))
 
 ################################################################################
 # Object Files
 ################################################################################
 
-ifeq ($(TARGET_CROSS_COMPILED),true)
-	CROSS_OBJECTS+=$(patsubst %.c,%.o,$(CROSS_CC_SOURCES))
-	CROSS_OBJECTS+=$(patsubst %.cpp,%.o,$(CROSS_CXX_SOURCES))
-	CROSS_OBJECTS+=$(patsubst %.asm,%.o,$(CROSS_ASM_SOURCES))
-	CROSS_CC_FLAGS_INCLUDE_PATHS=$(patsubst %,-I%,$(CROSS_INCLUDE_PATHS))
-	CROSS_CXX_FLAGS_INCLUDE_PATHS=$(patsubst %,-I%,$(CROSS_INCLUDE_PATHS))
-	CROSS_LD_FLAGS_LIBS=$(patsubst %,-l%,$(LIBS))
-	CROSS_LD_FLAGS_LIB_PATHS=$(patsubst %,-L%,$(LIB_PATHS))
+CROSS_OBJECTS+=$(patsubst %.c, %.o, $(CROSS_CC_SOURCES))
+CROSS_OBJECTS+=$(patsubst %.cpp, %.o, $(CROSS_CXX_SOURCES))
+CROSS_OBJECTS+=$(patsubst %.asm, %.o, $(CROSS_ASM_SOURCES))
+
+NATIVE_OBJECTS+=$(patsubst %.c, %.o, $(NATIVE_CC_SOURCES))
+NATIVE_OBJECTS+=$(patsubst %.cpp, %.o, $(NATIVE_CXX_SOURCES))
+NATIVE_OBJECTS+=$(patsubst %.asm, %.o, $(NATIVE_ASM_SOURCES))
+
+################################################################################
+# OS Defines
+################################################################################
+
+ifeq ($(TARGET_CROSS_COMPILED), true)
+	CROSS_DEFINES+=OS_VMM
 endif
 
-ifeq ($(TARGET_NATIVE_COMPILED),true)
-	OBJECTS+=$(patsubst %.c,%.o,$(CC_SOURCES))
-	OBJECTS+=$(patsubst %.cpp,%.o,$(CXX_SOURCES))
-	OBJECTS+=$(patsubst %.asm,%.o,$(ASM_SOURCES))
-	CC_FLAGS_INCLUDE_PATHS=$(patsubst %,-I%,$(INCLUDE_PATHS))
-	CXX_FLAGS_INCLUDE_PATHS=$(patsubst %,-I%,$(INCLUDE_PATHS))
-	LD_FLAGS_LIBS=$(patsubst %,-l%,$(LIBS))
-	LD_FLAGS_LIB_PATHS=$(patsubst %,-L%,$(LIB_PATHS))
+ifeq ($(TARGET_NATIVE_COMPILED), true)
+	ifeq ($(OS), windows)
+		NATIVE_DEFINES+=OS_WINDOWS
+	endif
+	ifeq ($(OS), linux)
+		NATIVE_DEFINES+=OS_LINUX
+	endif
 endif
+
+################################################################################
+# Compiler Defines
+################################################################################
+
+ifeq ($(TARGET_CROSS_COMPILED), true)
+	CROSS_DEFINES+=CROSS_COMPILED
+endif
+
+ifeq ($(TARGET_NATIVE_COMPILED), true)
+	NATIVE_DEFINES+=NATIVE_COMPILED
+endif
+
+################################################################################
+# Define Flags
+################################################################################
+
+CROSS_DFLAGS:=$(addprefix -D, $(strip $(CROSS_DEFINES)))
+NATIVE_DFLAGS:=$(addprefix -D, $(strip $(NATIVE_DEFINES)))
 
 ################################################################################
 # Dependency Auto-Genetaion
@@ -212,15 +350,52 @@ endif
 
 # http://make.mad-scientist.net/papers/advanced-auto-dependency-generation/
 
-ifeq ($(TARGET_CROSS_COMPILED),true)
-	CROSS_DEPFLAGS = -MT $@ -MMD -MP -MF $(CROSS_OBJDIR)/$*.Td
-	CROSS_POSTCOMPILE = @mv -f $(CROSS_OBJDIR)/$*.Td $(CROSS_OBJDIR)/$*.d
-endif
+CROSS_DEPFLAGS=-MT $@ -MMD -MP -MF $(CROSS_OBJDIR)/$*.Td
+CROSS_POSTCOMPILE=@mv -f $(CROSS_OBJDIR)/$*.Td $(CROSS_OBJDIR)/$*.d
 
-ifeq ($(TARGET_NATIVE_COMPILED),true)
-	DEPFLAGS = -MT $@ -MMD -MP -MF $(OBJDIR)/$*.Td
-	POSTCOMPILE = @mv -f $(OBJDIR)/$*.Td $(OBJDIR)/$*.d
-endif
+NATIVE_DEPFLAGS=-MT $@ -MMD -MP -MF $(NATIVE_OBJDIR)/$*.Td
+NATIVE_POSTCOMPILE=@mv -f $(NATIVE_OBJDIR)/$*.Td $(NATIVE_OBJDIR)/$*.d
+
+################################################################################
+# VPATH Directories
+################################################################################
+
+vpath %.c $(dir $(CROSS_CC_SOURCES)) $(dir $(NATIVE_CC_SOURCES))
+vpath %.cpp $(dir $(CROSS_CXX_SOURCES)) $(dir $(NATIVE_CXX_SOURCES))
+vpath %.asm $(dir $(CROSS_ASM_SOURCES)) $(dir $(NATIVE_ASM_SOURCES))
+
+################################################################################
+# Object Files Paths
+################################################################################
+
+CROSS_OBJECTS:=$(addprefix $(CROSS_OBJDIR)/, $(notdir $(CROSS_OBJECTS)))
+NATIVE_OBJECTS:=$(addprefix $(NATIVE_OBJDIR)/, $(notdir $(NATIVE_OBJECTS)))
+
+################################################################################
+# Cross Cleanup
+################################################################################
+
+CROSS_OBJDIR:=$(strip $(CROSS_OBJDIR))
+CROSS_OUTDIR:=$(strip $(CROSS_OUTDIR))
+
+CROSS_CCFLAGS:=$(strip $(CROSS_CCFLAGS))
+CROSS_CXXFLAGS:=$(strip $(CROSS_CXXFLAGS))
+CROSS_ASMFLAGS:=$(strip $(CROSS_ASMFLAGS))
+CROSS_LDFLAGS:=$(strip $(CROSS_LDFLAGS))
+CROSS_ARFLAGS:=$(strip $(CROSS_ARFLAGS))
+
+################################################################################
+# Native Cleanup
+################################################################################
+
+NATIVE_OBJDIR:=$(strip $(NATIVE_OBJDIR))
+NATIVE_OUTDIR:=$(strip $(NATIVE_OUTDIR))
+
+NATIVE_CCFLAGS:=$(strip $(NATIVE_CCFLAGS))
+NATIVE_CXXFLAGS:=$(strip $(NATIVE_CXXFLAGS))
+NATIVE_ASMFLAGS:=$(strip $(NATIVE_ASMFLAGS))
+NATIVE_LDFLAGS:=$(strip $(NATIVE_LDFLAGS))
+NATIVE_ARFLAGS:=$(strip $(NATIVE_ARFLAGS))
 
 ################################################################################
 # Target Settings
@@ -229,6 +404,8 @@ endif
 .PHONY: all
 .PHONY: cross
 .PHONY: native
+.PHONY: cross_target
+.PHONY: native_target
 .PHONY: clean
 .PHONY: clean-cross
 .PHONY: clean-native
@@ -240,15 +417,18 @@ all: cross native
 
 clean: clean-cross clean-native
 
+blah:
+	echo $(dir $(CROSS_ASM_SOURCES))
+
 force: ;
 
 ################################################################################
 # Cross Targets
 ################################################################################
 
-ifeq ($(TARGET_CROSS_COMPILED),true)
+ifeq ($(TARGET_CROSS_COMPILED), true)
 
-cross: $(CROSS_OBJDIR) $(CROSS_OUTDIR) $(CROSS_TARGET)
+native: $(CROSS_OBJDIR) $(CROSS_OUTDIR) cross_target
 
 $(CROSS_OBJDIR):
 	@$(MD) $(CROSS_OBJDIR)
@@ -257,26 +437,48 @@ $(CROSS_OUTDIR):
 	@$(MD) $(CROSS_OUTDIR)
 
 $(CROSS_OBJDIR)/%.o: %.c $(CROSS_OBJDIR)/%.d
-	$(CROSS_CC) $< -o $@ -c $(CROSS_CCFLAGS) $(CROSS_DFLAGS) $(CROSS_DEPFLAGS) $(CROSS_CC_FLAGS_INCLUDE_PATHS) $(HEADERS)
+	$(CROSS_CC) $< -o $@ -c $(CROSS_CCFLAGS) $(CROSS_DFLAGS) $(CROSS_DEPFLAGS)
 	$(CROSS_POSTCOMPILE)
 
 $(CROSS_OBJDIR)/%.o: %.cpp $(CROSS_OBJDIR)/%.d
-	$(CROSS_CXX) $< -o $@ -c $(CROSS_CXXFLAGS) $(CROSS_DFLAGS) $(CROSS_DEPFLAGS) $(CROSS_CXX_FLAGS_INCLUDE_PATHS) $(HEADERS)
+	$(CROSS_CXX) $< -o $@ -c $(CROSS_CXXFLAGS) $(CROSS_DFLAGS) $(CROSS_DEPFLAGS)
 	$(CROSS_POSTCOMPILE)
 
 $(CROSS_OBJDIR)/%.o: %.asm
 	$(CROSS_ASM) $< -o $@ $(CROSS_ASMFLAGS)
 
-$(CROSS_TARGET): $(addprefix $(CROSS_OBJDIR)/, $(CROSS_OBJECTS))
-	$(CROSS_LD) $(CROSS_LDFLAGS) $(CROSS_LD_OPTION) $@ $^ $(CROSS_LD_FLAGS_LIB_PATHS) $(CROSS_LD_FLAGS_LIBS)
+$(CROSS_TARGET_BIN): $(CROSS_OBJECTS)
+	$(CROSS_LD) -o $@ $^ $(CROSS_LDFLAGS)
+
+$(CROSS_TARGET_SHARED): $(CROSS_OBJECTS)
+	$(CROSS_LD) -shared -o $@ $^ $(CROSS_LDFLAGS)
+
+$(CROSS_TARGET_STATIC): $(CROSS_OBJECTS)
+	$(CROSS_AR) $(CROSS_ARFLAGS) $@ $^
+
+ifeq ($(TARGET_TYPE),lib)
+cross_target: $(CROSS_TARGET_STATIC) $(CROSS_TARGET_SHARED)
+else
+cross_target: $(CROSS_TARGET_BIN)
+endif
 
 $(CROSS_OBJDIR)/%.d: ;
--include $(patsubst %,$(CROSS_OBJDIR)/%.d,$(basename $(CROSS_SOURCES)))
+-include $(patsubst %, $(CROSS_OBJDIR)/%.d, $(notdir $(basename $(CROSS_SOURCES))))
 
 clean-cross:
-	$(RM) $(CROSS_OBJDIR) $(CROSS_TARGET)
-
-unittest: force
+ifeq ($(TARGET_TYPE),lib)
+	$(RM) $(CROSS_TARGET_SHARED)
+	$(RM) $(CROSS_TARGET_STATIC)
+else
+	$(RM) $(CROSS_TARGET_BIN)
+endif
+	$(RM) $(CROSS_OBJDIR)/*.o
+	$(RM) $(CROSS_OBJDIR)/*.d
+	$(RM) $(CROSS_OBJDIR)/*.Td
+	([ -d $(CROSS_OBJDIR) ] && $(RMDIR) $(CROSS_OBJDIR)) || $(TEST) 1
+	([ -d $(CROSS_OUTDIR) ] && $(RMDIR) $(CROSS_OUTDIR)) || $(TEST) 1
+	([ -d $(CROSS_OBJDIR_PARENT) ] && $(RMDIR) $(CROSS_OBJDIR_PARENT)) || $(TEST) 1
+	([ -d $(CROSS_OUTDIR_PARENT) ] && $(RMDIR) $(CROSS_OUTDIR_PARENT)) || $(TEST) 1
 
 endif
 
@@ -284,36 +486,60 @@ endif
 # Native Targets
 ################################################################################
 
-ifeq ($(TARGET_NATIVE_COMPILED),true)
+ifeq ($(TARGET_NATIVE_COMPILED), true)
 
-native: $(OBJDIR) $(OUTDIR) $(TARGET)
+native: $(NATIVE_OBJDIR) $(NATIVE_OUTDIR) native_target
 
-$(OBJDIR):
-	@$(MD) $(OBJDIR)
+$(NATIVE_OBJDIR):
+	@$(MD) $(NATIVE_OBJDIR)
 
-$(OUTDIR):
-	@$(MD) $(OUTDIR)
+$(NATIVE_OUTDIR):
+	@$(MD) $(NATIVE_OUTDIR)
 
-$(OBJDIR)/%.o: %.c $(OBJDIR)/%.d
-	$(CC) $< -o $@ -c $(CCFLAGS) $(DFLAGS) $(DEPFLAGS) $(CC_FLAGS_INCLUDE_PATHS) $(HEADERS)
-	$(POSTCOMPILE)
+$(NATIVE_OBJDIR)/%.o: %.c $(NATIVE_OBJDIR)/%.d
+	$(NATIVE_CC) $< -o $@ -c $(NATIVE_CCFLAGS) $(NATIVE_DFLAGS) $(NATIVE_DEPFLAGS)
+	$(NATIVE_POSTCOMPILE)
 
-$(OBJDIR)/%.o: %.cpp $(OBJDIR)/%.d
-	$(CXX) $< -o $@ -c $(CXXFLAGS) $(DFLAGS) $(DEPFLAGS) $(CXX_FLAGS_INCLUDE_PATHS) $(HEADERS)
-	$(POSTCOMPILE)
+$(NATIVE_OBJDIR)/%.o: %.cpp $(NATIVE_OBJDIR)/%.d
+	$(NATIVE_CXX) $< -o $@ -c $(NATIVE_CXXFLAGS) $(NATIVE_DFLAGS) $(NATIVE_DEPFLAGS)
+	$(NATIVE_POSTCOMPILE)
 
-$(OBJDIR)/%.o: %.asm
-	$(ASM) $< -o $@ $(ASMFLAGS)
+$(NATIVE_OBJDIR)/%.o: %.asm
+	$(NATIVE_ASM) $< -o $@ $(NATIVE_ASMFLAGS)
 
-$(TARGET): $(addprefix $(OBJDIR)/, $(OBJECTS))
-	$(LD) $(LDFLAGS) $(LD_OPTION) $@ $^ $(LD_FLAGS_LIB_PATHS) $(LD_FLAGS_LIBS)
+$(NATIVE_TARGET_BIN): $(NATIVE_OBJECTS)
+	$(NATIVE_LD) $^ -o $@ $(NATIVE_LDFLAGS)
 
-$(OBJDIR)/%.d: ;
--include $(patsubst %,$(OBJDIR)/%.d,$(basename $(SOURCES)))
+$(NATIVE_TARGET_SHARED): $(NATIVE_OBJECTS)
+	$(NATIVE_LD) -shared $^ -o $@ $(NATIVE_LDFLAGS)
+
+$(NATIVE_TARGET_STATIC): $(NATIVE_OBJECTS)
+	$(NATIVE_AR) $(NATIVE_ARFLAGS) $@ $^
+
+ifeq ($(TARGET_TYPE),lib)
+native_target: $(NATIVE_TARGET_STATIC) $(NATIVE_TARGET_SHARED)
+else
+native_target: $(NATIVE_TARGET_BIN)
+endif
+
+$(NATIVE_OBJDIR)/%.d: ;
+-include $(patsubst %, $(NATIVE_OBJDIR)/%.d, $(notdir $(basename $(NATIVE_SOURCES))))
 
 clean-native:
-	$(RM) $(OBJDIR) $(TARGET)
-
-unittest: force
+ifeq ($(TARGET_TYPE),lib)
+	$(RM) $(NATIVE_TARGET_SHARED)
+	$(RM) $(NATIVE_TARGET_STATIC)
+else
+	$(RM) $(NATIVE_TARGET_BIN)
+endif
+	$(RM) $(NATIVE_OBJDIR)/*.o
+	$(RM) $(NATIVE_OBJDIR)/*.d
+	$(RM) $(NATIVE_OBJDIR)/*.Td
+	([ -d $(NATIVE_OBJDIR) ] && $(RMDIR) $(NATIVE_OBJDIR)) || $(TEST) 1
+	([ -d $(NATIVE_OUTDIR) ] && $(RMDIR) $(NATIVE_OUTDIR)) || $(TEST) 1
+	([ -d $(NATIVE_OBJDIR_PARENT) ] && $(RMDIR) $(NATIVE_OBJDIR_PARENT)) || $(TEST) 1
+	([ -d $(NATIVE_OUTDIR_PARENT) ] && $(RMDIR) $(NATIVE_OUTDIR_PARENT)) || $(TEST) 1
 
 endif
+
+unittest: force

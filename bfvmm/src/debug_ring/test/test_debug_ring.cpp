@@ -30,7 +30,7 @@ char wb[DEBUG_RING_SIZE + 100];
 void
 init_wb(uint64_t num, char val = 'A')
 {
-    for (auto i = 0; i < num; i++)
+    for (auto i = 0U; i < num; i++)
         wb[i] = val;
 
     wb[num] = 0;
@@ -161,11 +161,6 @@ debug_ring_ut::test_overcommit_dr_more_than_once()
     debug_ring dr(0);
     drr = get_drr(0);
 
-    auto wb1 = "012345678";
-    auto wb2 = "ABCDE";
-    auto wb3 = "FG";
-    auto wb4 = "012345";
-
     init_wb(100, 'A');
     EXPECT_TRUE(dr.write(wb, strlen(wb)) == debug_ring_error::success);
 
@@ -206,8 +201,8 @@ debug_ring_ut::acceptance_test_stress()
     // the total number of strings that can fit into the debug ring, minus
     // the '\0' for each string (as they are stripped).
 
-    auto num = DEBUG_RING_SIZE / (strlen(wb) + 1);
-    auto total = num * strlen(wb);
+    int64_t num = DEBUG_RING_SIZE / (strlen(wb) + 1);
+    int64_t total = num * strlen(wb);
 
     EXPECT_TRUE(debug_ring_read(drr, rb, DEBUG_RING_SIZE) == total);
     EXPECT_TRUE(rb[0] == '0');

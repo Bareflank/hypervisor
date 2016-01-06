@@ -20,49 +20,65 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 ################################################################################
-# Native Flags
+# Target Information
 ################################################################################
 
-CC=gcc
-CXX=g++
-LD=g++
-ASM=nasm
-
-CCFLAGS=
-CXXFLAGS=
-LDFLAGS=
-ASMFLAGS=
-
-OBJDIR=.build/native
-OUTDIR=../bin/native
+TARGET_NAME:=test
+TARGET_TYPE:=bin
+TARGET_COMPILER:=native
 
 ################################################################################
-# Common
+# Compiler Flags
 ################################################################################
 
-DEFINES=
+NATIVE_CCFLAGS+=
+NATIVE_CXXFLAGS+=
+NATIVE_ASMFLAGS+=
+NATIVE_LDFLAGS+=
+NATIVE_ARFLAGS+=
+NATIVE_DEFINES+=
 
-RM=rm -rf
-MD=mkdir -p
+################################################################################
+# Output
+################################################################################
+
+NATIVE_OBJDIR:=.build
+NATIVE_OUTDIR:=../bin
 
 ################################################################################
 # Sources
 ################################################################################
 
-TARGET_NAME=serial_test
-TARGET_TYPE=bin
-TARGET_COMPILER=native
+# TODO: The naming here is inconsistant. Should be:
+# test.cpp
+# test_serial.cpp
 
-OBJDIR=.build
-OUTDIR=../bin
+#SOURCES+=test.cpp
+SOURCES+=serial_test.cpp
 
-SOURCES=serial_test.cpp
+INCLUDE_PATHS+=./
+INCLUDE_PATHS+=../../../include/
+INCLUDE_PATHS+=../../../../include/
 
-INCLUDES=
-LIB_PATHS=../bin/native
-LIBS=serial
+LIBS+=serial
+LIBS+=intrinsics
 
-INCLUDE_PATHS=../include/ ../../../include/ ../../../include/std
+LIBRARY_PATHS+=../bin/native/
+LIBRARY_PATHS+=../../intrinsics/bin/native
+
+################################################################################
+# Environment Specific
+################################################################################
+
+WINDOWS_SOURCES+=
+WINDOWS_INCLUDE_PATHS+=
+WINDOWS_LIBS+=
+WINDOWS_LIBRARY_PATHS+=
+
+LINUX_SOURCES+=
+LINUX_INCLUDE_PATHS+=
+LINUX_LIBS+=
+LINUX_LIBRARY_PATHS+=
 
 ################################################################################
 # Common

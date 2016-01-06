@@ -20,75 +20,70 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 ################################################################################
-# Native Flags
+# Target Information
 ################################################################################
 
-CC=gcc
-CXX=g++
-ASM=nasm
-LD=g++
-
-CCFLAGS=
-CXXFLAGS=-std=c++14
-ASMFLAGS=
-LDFLAGS=
-
-DEFINES=
-
-OBJDIR=.build/native
-OUTDIR=../bin/native
+TARGET_NAME:=test
+TARGET_TYPE:=bin
+TARGET_COMPILER:=native
 
 ################################################################################
-# Common
+# Compiler Flags
 ################################################################################
 
-RM=rm -rf
-MD=mkdir -p
+NATIVE_CCFLAGS+=
+NATIVE_CXXFLAGS+=
+NATIVE_ASMFLAGS+=
+NATIVE_LDFLAGS+=
+NATIVE_ARFLAGS+=
+NATIVE_DEFINES+=
+
+################################################################################
+# Output
+################################################################################
+
+NATIVE_OBJDIR:=.build
+NATIVE_OUTDIR:=../bin
 
 ################################################################################
 # Sources
 ################################################################################
 
-TARGET_NAME=test
-TARGET_TYPE=bin
-TARGET_COMPILER=native
-
 SOURCES+=test.cpp
 SOURCES+=test_vcpu.cpp
 SOURCES+=test_vcpu_factory.cpp
-HEADERS=
+
+INCLUDE_PATHS+=./
+INCLUDE_PATHS+=../../../include/
+INCLUDE_PATHS+=../../../../include/
 
 LIBS+=vcpu
 LIBS+=vmm
 LIBS+=vmcs
 LIBS+=debug_ring
+LIBS+=intrinsics
 LIBS+=exit_handler
-LIBS+=memory_manager
 
-LIB_PATHS+=../bin/native
-LIB_PATHS+=../../vmm/bin/native
-LIB_PATHS+=../../vmcs/bin/native
-LIB_PATHS+=../../debug_ring/bin/native
-LIB_PATHS+=../../exit_handler/bin/native
-LIB_PATHS+=../../memory_manager/bin/native
-
-INCLUDE_PATHS=./ ../../../include/  ../../../../include/
+LIBRARY_PATHS+=../bin/native
+LIBRARY_PATHS+=../../vmm/bin/native
+LIBRARY_PATHS+=../../vmcs/bin/native
+LIBRARY_PATHS+=../../debug_ring/bin/native
+LIBRARY_PATHS+=../../intrinsics/bin/native
+LIBRARY_PATHS+=../../exit_handler/bin/native
 
 ################################################################################
 # Environment Specific
 ################################################################################
 
-VMM_SOURCES=
-VMM_INCLUDE_PATHS=
+WINDOWS_SOURCES+=
+WINDOWS_INCLUDE_PATHS+=
+WINDOWS_LIBS+=
+WINDOWS_LIBRARY_PATHS+=
 
-WINDOWS_SOURCES=
-WINDOWS_INCLUDE_PATHS=
-
-LINUX_SOURCES=
-LINUX_INCLUDE_PATHS=
-
-OSX_SOURCES=
-OSX_INCLUDE_PATHS=
+LINUX_SOURCES+=
+LINUX_INCLUDE_PATHS+=
+LINUX_LIBS+=
+LINUX_LIBRARY_PATHS+=
 
 ################################################################################
 # Common

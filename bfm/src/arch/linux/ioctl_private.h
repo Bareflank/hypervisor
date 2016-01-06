@@ -22,7 +22,7 @@
 #ifndef IOCTL_PRIVATE_H
 #define IOCTL_PRIVATE_H
 
-#include <ioctl_base.h>
+#include <ioctl.h>
 
 class ioctl_private
 {

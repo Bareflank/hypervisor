@@ -20,69 +20,63 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 ################################################################################
-# Native Flags
+# Target Information
 ################################################################################
 
-CC=gcc
-CXX=g++
-ASM=nasm
-LD=g++
-
-CCFLAGS=
-CXXFLAGS=-std=c++14
-ASMFLAGS=
-LDFLAGS=
-
-DEFINES=
-
-OBJDIR=.build/native
-OUTDIR=../bin/native
+TARGET_NAME:=bfm
+TARGET_TYPE:=lib
+TARGET_COMPILER:=native
 
 ################################################################################
-# Common
+# Compiler Flags
 ################################################################################
 
-RM=rm -rf
-MD=mkdir -p
+NATIVE_CCFLAGS+=
+NATIVE_CXXFLAGS+=
+NATIVE_ASMFLAGS+=
+NATIVE_LDFLAGS+=
+NATIVE_ARFLAGS+=
+NATIVE_DEFINES+=
+
+################################################################################
+# Output
+################################################################################
+
+NATIVE_OBJDIR:=.build
+NATIVE_OUTDIR:=../bin
 
 ################################################################################
 # Sources
 ################################################################################
-
-TARGET_NAME=bfm
-TARGET_TYPE=lib
-TARGET_COMPILER=native
 
 SOURCES+=command_line_parser.cpp
 SOURCES+=debug.cpp
 SOURCES+=file.cpp
 SOURCES+=ioctl_driver.cpp
 SOURCES+=split.cpp
-HEADERS=
 
-LIBS=
+INCLUDE_PATHS+=./
+INCLUDE_PATHS+=../include/
+INCLUDE_PATHS+=../../include/
 
-LIB_PATHS=
-INCLUDE_PATHS=./ ../include/ ../../include/
+LIBS+=
 
-vpath %.cpp arch/linux
+LIBRARY_PATHS+=
 
 ################################################################################
 # Environment Specific
 ################################################################################
 
-VMM_SOURCES=
-VMM_INCLUDE_PATHS=
+WINDOWS_SOURCES+=
+WINDOWS_INCLUDE_PATHS+=
+WINDOWS_LIBS+=
+WINDOWS_LIBRARY_PATHS+=
 
-WINDOWS_SOURCES=
-WINDOWS_INCLUDE_PATHS=
-
-LINUX_SOURCES+=ioctl.cpp
-LINUX_SOURCES+=ioctl_private.cpp
-LINUX_INCLUDE_PATHS+=./arch/linux/
-
-OSX_SOURCES=
-OSX_INCLUDE_PATHS=
+LINUX_SOURCES+=arch/linux/ioctl.cpp
+LINUX_SOURCES+=arch/linux/ioctl_private.cpp
+LINUX_INCLUDE_PATHS+=arch/linux/
+LINUX_LIBS+=
+LINUX_LIBRARY_PATHS+=
 
 ################################################################################
 # Common

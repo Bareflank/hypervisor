@@ -20,86 +20,78 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 ################################################################################
-# Native Flags
+# Target Information
 ################################################################################
 
-CC=gcc
-CXX=g++
-ASM=nasm
-LD=g++
-
-CCFLAGS=
-CXXFLAGS=-std=c++14
-ASMFLAGS=
-LDFLAGS=
-
-DEFINES=
-
-OBJDIR=.build/native
-OUTDIR=../bin/native
+TARGET_NAME:=vmcs
+TARGET_TYPE:=lib
+TARGET_COMPILER:=both
 
 ################################################################################
-# Cross Flags
+# Compiler Flags
 ################################################################################
 
-CROSS_CC=~/opt/cross/bin/x86_64-elf-gcc
-CROSS_CXX=~/opt/cross/bin/x86_64-elf-g++
-CROSS_ASM=~/opt/cross/bin/nasm
-CROSS_LD=~/opt/cross/bin/x86_64-elf-ld
+NATIVE_CCFLAGS+=
+NATIVE_CXXFLAGS+=
+NATIVE_ASMFLAGS+=
+NATIVE_LDFLAGS+=
+NATIVE_ARFLAGS+=
+NATIVE_DEFINES+=
 
-CROSS_CCFLAGS=
-CROSS_CXXFLAGS=-std=c++14
-CROSS_ASMFLAGS=-f elf64
-CROSS_LDFLAGS=
-
-CROSS_DEFINES=
-
-CROSS_OBJDIR=.build/cross
-CROSS_OUTDIR=../../../bin/cross
+CROSS_CCFLAGS+=
+CROSS_CXXFLAGS+=
+CROSS_ASMFLAGS+=
+CROSS_LDFLAGS+=
+CROSS_ARFLAGS+=
+CROSS_DEFINES+=
 
 ################################################################################
-# Common
+# Output
 ################################################################################
 
-RM=rm -rf
-MD=mkdir -p
+NATIVE_OBJDIR:=.build
+NATIVE_OUTDIR:=../bin
+
+CROSS_OBJDIR:=.build
+CROSS_OUTDIR:=../../../bin
 
 ################################################################################
 # Sources
 ################################################################################
 
-TARGET_NAME=vmcs
-TARGET_TYPE=lib
-TARGET_COMPILER=both
-
 SOURCES+=vmcs_intel_x64.cpp
-SOURCES+=vmcs_intel_x64_debug.cpp
-SOURCES+=vmcs_intel_x64_check_misc.cpp
-SOURCES+=vmcs_intel_x64_check_host.cpp
-SOURCES+=vmcs_intel_x64_check_guest.cpp
 SOURCES+=vmcs_intel_x64_check_controls.cpp
-HEADERS=
+SOURCES+=vmcs_intel_x64_check_guest.cpp
+SOURCES+=vmcs_intel_x64_check_host.cpp
+SOURCES+=vmcs_intel_x64_check_misc.cpp
+SOURCES+=vmcs_intel_x64_debug.cpp
 
-LIBS=
+INCLUDE_PATHS+=./
+INCLUDE_PATHS+=../../../include/
+INCLUDE_PATHS+=../../../../include/
 
-LIB_PATHS=
-INCLUDE_PATHS=./ ../../../include/ ../../../../include/
+LIBS+=
+
+LIBRARY_PATHS+=
 
 ################################################################################
 # Environment Specific
 ################################################################################
 
-VMM_SOURCES=
-VMM_INCLUDE_PATHS=../../../include/std/
+VMM_SOURCES+=
+VMM_INCLUDE_PATHS+=../../../include/std/
+VMM_LIBS+=
+VMM_LIBRARY_PATHS+=
 
-WINDOWS_SOURCES=
-WINDOWS_INCLUDE_PATHS=
+WINDOWS_SOURCES+=
+WINDOWS_INCLUDE_PATHS+=
+WINDOWS_LIBS+=
+WINDOWS_LIBRARY_PATHS+=
 
-LINUX_SOURCES=
-LINUX_INCLUDE_PATHS=
-
-OSX_SOURCES=
-OSX_INCLUDE_PATHS=
+LINUX_SOURCES+=
+LINUX_INCLUDE_PATHS+=
+LINUX_LIBS+=
+LINUX_LIBRARY_PATHS+=
 
 ################################################################################
 # Common

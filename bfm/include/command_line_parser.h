@@ -22,7 +22,19 @@
 #ifndef COMMAND_LINE_PARSER_H
 #define COMMAND_LINE_PARSER_H
 
-#include <command_line_parser_base.h>
+#include <string>
+
+namespace command_line_parser_command
+{
+    enum type
+    {
+        unknown = 0,
+        help = 1,
+        start = 2,
+        stop = 3,
+        dump = 4
+    };
+}
 
 /// Comand Line Parser
 ///
@@ -37,7 +49,7 @@
 /// with the cmd() function to determine if the command line args provided
 /// make sense, as well as which command to execute.
 ///
-class command_line_parser : public command_line_parser_base
+class command_line_parser
 {
 public:
 
@@ -53,7 +65,7 @@ public:
 
     /// Command Line Parser Destructor
     ///
-    ~command_line_parser();
+    virtual ~command_line_parser();
 
     /// Is Valid
     ///
@@ -62,7 +74,7 @@ public:
     ///
     /// @return true if the arguments make sense, false otherwise
     ///
-    bool is_valid() const override;
+    virtual bool is_valid() const;
 
     /// Command
     ///
@@ -71,7 +83,7 @@ public:
     ///
     /// @return command provided by the arguments
     ///
-    command_line_parser_command::type cmd() const override;
+    virtual command_line_parser_command::type cmd() const;
 
     /// Modules
     ///
@@ -81,7 +93,7 @@ public:
     ///
     /// @return module list filename
     ///
-    std::string modules() const override;
+    virtual std::string modules() const;
 
 private:
 

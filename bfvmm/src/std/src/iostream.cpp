@@ -77,7 +77,7 @@ namespace std
     ostream &
     ostream::operator<<(const char *str)
     {
-        int len = strlen(str);
+        int len = bfstrlen(str);
         int gap = m_width - len;
 
         if (m_width > 0)
@@ -120,63 +120,63 @@ namespace std
     ostream::operator<<(void *val)
     {
         char str[IOTA_MIN_BUF_SIZE];
-        return *this << "0x" << itoa((uint64_t)val, str, 16);
+        return *this << "0x" << bfitoa((uint64_t)val, str, 16);
     }
 
     ostream &
     ostream::operator<<(int8_t val)
     {
         char str[IOTA_MIN_BUF_SIZE];
-        return *this << itoa(val, str, m_base);
+        return *this << bfitoa(val, str, m_base);
     }
 
     ostream &
     ostream::operator<<(uint8_t val)
     {
         char str[IOTA_MIN_BUF_SIZE];
-        return *this << itoa(val, str, m_base);
+        return *this << bfitoa(val, str, m_base);
     }
 
     ostream &
     ostream::operator<<(int16_t val)
     {
         char str[IOTA_MIN_BUF_SIZE];
-        return *this << itoa(val, str, m_base);
+        return *this << bfitoa(val, str, m_base);
     }
 
     ostream &
     ostream::operator<<(uint16_t val)
     {
         char str[IOTA_MIN_BUF_SIZE];
-        return *this << itoa(val, str, m_base);
+        return *this << bfitoa(val, str, m_base);
     }
 
     ostream &
     ostream::operator<<(int32_t val)
     {
         char str[IOTA_MIN_BUF_SIZE];
-        return *this << itoa(val, str, m_base);
+        return *this << bfitoa(val, str, m_base);
     }
 
     ostream &
     ostream::operator<<(uint32_t val)
     {
         char str[IOTA_MIN_BUF_SIZE];
-        return *this << itoa(val, str, m_base);
+        return *this << bfitoa(val, str, m_base);
     }
 
     ostream &
     ostream::operator<<(int64_t val)
     {
         char str[IOTA_MIN_BUF_SIZE];
-        return *this << itoa(val, str, m_base);
+        return *this << bfitoa(val, str, m_base);
     }
 
     ostream &
     ostream::operator<<(uint64_t val)
     {
         char str[IOTA_MIN_BUF_SIZE];
-        return *this << itoa(val, str, m_base);
+        return *this << bfitoa(val, str, m_base);
     }
 
     ostream &
@@ -214,6 +214,7 @@ namespace std
     ostream::operator<<(ostream_width width)
     {
         m_width = width.val();
+        return *this;
     }
 
     ostream_width
