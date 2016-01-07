@@ -83,7 +83,8 @@ get_next_file(void)
 void *
 add_elf_file(uint64_t size)
 {
-    int i;
+    uint64_t i;
+
     void *exec;
     struct bfelf_file_t *file;
 
@@ -123,7 +124,8 @@ add_elf_file(uint64_t size)
 int64_t
 remove_elf_files(void)
 {
-    int i, j;
+    uint64_t i;
+    uint64_t j;
     struct bfelf_file_t file = {0};
 
     for (i = 0; i < g_num_bfelf_files; i++)

@@ -85,6 +85,6 @@ ostream_width setw(int width);
 
 extern ostream cout;
 
-};
+}
 
 #endif

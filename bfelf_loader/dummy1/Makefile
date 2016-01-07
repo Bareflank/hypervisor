@@ -20,62 +20,52 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 ################################################################################
-# Cross Flags
+# Target Information
 ################################################################################
 
-CROSS_CC=~/opt/cross/bin/x86_64-elf-gcc
-CROSS_CXX=~/opt/cross/bin/x86_64-elf-g++
-CROSS_ASM=~/opt/cross/bin/nasm
-CROSS_LD=~/opt/cross/bin/x86_64-elf-ld
-
-CROSS_CCFLAGS=
-CROSS_CXXFLAGS=-std=c++14
-CROSS_ASMFLAGS=-f elf64
-CROSS_LDFLAGS=
-
-CROSS_DEFINES=
-
-CROSS_OBJDIR=.build/cross
-CROSS_OUTDIR=../bin/cross
+TARGET_NAME:=dummy1
+TARGET_TYPE:=lib
+TARGET_COMPILER:=cross
 
 ################################################################################
-# Common
+# Compiler Flags
 ################################################################################
 
-RM=rm -rf
-MD=mkdir -p
+CROSS_CCFLAGS+=
+CROSS_CXXFLAGS+=
+CROSS_ASMFLAGS+=
+CROSS_LDFLAGS+=
+CROSS_ARFLAGS+=
+CROSS_DEFINES+=
+
+################################################################################
+# Output
+################################################################################
+
+CROSS_OBJDIR:=.build
+CROSS_OUTDIR:=../bin
 
 ################################################################################
 # Sources
 ################################################################################
 
-TARGET_NAME=dummy1
-TARGET_TYPE=lib
-TARGET_COMPILER=cross
+SOURCES+=dummy1.cpp
 
-SOURCES=dummy1.cpp
-HEADERS=
+INCLUDE_PATHS+=./
+INCLUDE_PATHS+=../include/
 
-LIBS=
+LIBS+=
 
-LIB_PATHS=
-INCLUDE_PATHS=./ ../include/
+LIBRARY_PATHS+=
 
 ################################################################################
 # Environment Specific
 ################################################################################
 
-VMM_SOURCES=
-VMM_INCLUDE_PATHS=
-
-WINDOWS_SOURCES=
-WINDOWS_INCLUDE_PATHS=
-
-LINUX_SOURCES=
-LINUX_INCLUDE_PATHS=
-
-OSX_SOURCES=
-OSX_INCLUDE_PATHS=
+VMM_SOURCES+=
+VMM_INCLUDE_PATHS+=
+VMM_LIBS+=
+VMM_LIBRARY_PATHS+=
 
 ################################################################################
 # Common

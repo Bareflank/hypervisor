@@ -129,12 +129,16 @@ dummy3_test2(int num)
 extern "C" int
 init_vmm(int arg)
 {
+    (void) arg;
+
     return ENTRY_SUCCESS;
 }
 
 extern "C" int
 start_vmm(int arg)
 {
+    (void) arg;
+
     if (dummy3_test2(5) != 0x26)
         return ENTRY_ERROR_VMM_START_FAILED;
 
@@ -144,25 +148,15 @@ start_vmm(int arg)
 extern "C" int
 stop_vmm(int arg)
 {
+    (void) arg;
+
     return ENTRY_SUCCESS;
-}
-
-extern "C" long long int
-add_page(struct page_t *pg)
-{
-    return MEMORY_MANAGER_SUCCESS;
-}
-
-extern "C" long long int
-remove_page(struct page_t *pg)
-{
-    return MEMORY_MANAGER_SUCCESS;
 }
 
 extern "C" struct debug_ring_resources_t *
 get_drr(long long int vcpuid)
 {
-    static debug_ring_resources_t drr = {0};
+    static debug_ring_resources_t drr = {0, 0, 0};
 
     if (vcpuid >= 1)
         return 0;
@@ -173,23 +167,29 @@ get_drr(long long int vcpuid)
 extern "C" int
 sym_that_returns_success(int arg)
 {
+    (void) arg;
+
     return ENTRY_SUCCESS;
 }
 
 extern "C" int
 sym_that_returns_failure(int arg)
 {
+    (void) arg;
+
     return ENTRY_ERROR_VMM_START_FAILED;
 }
 
 void
 operator delete(void *ptr)
 {
+    (void) ptr;
 }
 
 void
 operator delete[](void *p)
 {
+    (void) p;
 }
 
 extern "C" void
@@ -200,6 +200,8 @@ __cxa_pure_virtual()
 extern "C" int
 atexit(void (*func)(void))
 {
+    (void) func;
+
     return 0;
 }
 

@@ -26,6 +26,7 @@
 SUBDIRS += src
 SUBDIRS += test
 SUBDIRS += main
+SUBDIRS += bin
 
 ################################################################################
 # Common

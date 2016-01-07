@@ -111,8 +111,6 @@ close:
     dummy2_ifs.close();
     dummy3_ifs.close();
 
-done:
-
     return result;
 }
 

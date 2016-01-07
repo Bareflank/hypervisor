@@ -44,14 +44,14 @@ uint8_t g_mem_pool[MAX_MEM_POOL] ALIGN = {0};
 // We use the value stored here to tell us what the starting address is when a
 // block is allocated. This greatly simplifies freeing memory at the expense of
 // a lot of memory needed to manage memory.
-uint32_t g_block_allocated[MAX_BLOCKS] = {0};
+int64_t g_block_allocated[MAX_BLOCKS] = {0};
 
 // A memory descriptor stores information about each page of memory. The
 // memory manager will use this information to provide trnaslations for the rest
 // of the VMM. For example, if the VMM needs to know the physical address of a
 // virtual address, it can ask the memory manager, which provides this
 // information using the MDLs.
-struct memory_descriptor g_mdl[MAX_NUM_MEMORY_DESCRIPTORS] = {0};
+struct memory_descriptor g_mdl[MAX_NUM_MEMORY_DESCRIPTORS] = {0, 0, 0, 0};
 
 // -----------------------------------------------------------------------------
 // Implementation
@@ -104,10 +104,10 @@ memory_manager::malloc_aligned(size_t size, int64_t alignment)
     // It's not until the first hole or "fragmentation" occurs, that m_start
     // must stop until the fragmentation is removed.
 
-    auto count = 0;
-    auto block = 0;
-    auto reset = 0;
-    auto num_blocks = size / MAX_CACHE_LINE_SIZE;
+    int64_t count = 0;
+    int64_t block = 0;
+    int64_t reset = 0;
+    int64_t num_blocks = size / MAX_CACHE_LINE_SIZE;
 
     if (size % MAX_CACHE_LINE_SIZE != 0)
         num_blocks++;
@@ -204,12 +204,16 @@ memory_manager::block_to_virt(int64_t block)
 void *
 memory_manager::virt_to_phys(void *virt)
 {
+    (void) virt;
+
     return 0;
 }
 
 void *
 memory_manager::phys_to_virt(void *phys)
 {
+    (void) phys;
+
     return 0;
 }
 
@@ -237,6 +241,9 @@ memory_manager::is_block_aligned(int64_t block, int64_t alignment)
 int64_t
 memory_manager::add_mdl(struct memory_descriptor *mdl, int64_t num)
 {
+    (void) mdl;
+    (void) num;
+
     return MEMORY_MANAGER_SUCCESS;
 }
 
@@ -251,7 +258,7 @@ memory_manager::memory_manager()
         g_block_allocated[i] = FREE_BLOCK;
 
     for (auto i = 0; i < MAX_NUM_MEMORY_DESCRIPTORS; i++)
-        g_mdl[i] = {0};
+        g_mdl[i] = {0, 0, 0, 0};
 }
 
 int64_t

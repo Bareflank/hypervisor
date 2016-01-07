@@ -36,8 +36,8 @@ struct vmxon_region
 // =============================================================================
 
 vmm_intel_x64::vmm_intel_x64(intrinsics_intel_x64 *intrinsics) :
-    m_intrinsics(intrinsics),
-    m_vmxon_enabled(false)
+    m_vmxon_enabled(false),
+    m_intrinsics(intrinsics)
 {
 }
 

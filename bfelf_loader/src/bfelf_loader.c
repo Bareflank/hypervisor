@@ -195,7 +195,7 @@ bfelf_error(bfelf64_sword value)
 /******************************************************************************/
 
 bfelf64_sword
-bfelf_file_init(char *file, bfelf64_sword fsize, struct bfelf_file_t *ef)
+bfelf_file_init(char *file, uint64_t fsize, struct bfelf_file_t *ef)
 {
     bfelf64_word i = 0;
     bfelf64_sword ret = 0;
@@ -392,11 +392,11 @@ bfelf_file_init(char *file, bfelf64_sword fsize, struct bfelf_file_t *ef)
 }
 
 bfelf64_sword
-bfelf_file_load(struct bfelf_file_t *ef, char *exec, bfelf64_sword esize)
+bfelf_file_load(struct bfelf_file_t *ef, char *exec, uint64_t esize)
 {
     bfelf64_word i = 0;
     bfelf64_sword ret = 0;
-    bfelf64_sxword total_size = 0;
+    bfelf64_sword total_size = 0;
 
     if (!ef || !exec)
         return BFELF_ERROR_INVALID_ARG;
@@ -408,7 +408,7 @@ bfelf_file_load(struct bfelf_file_t *ef, char *exec, bfelf64_sword esize)
     if (total_size < BFELF_SUCCESS)
         return ret;
 
-    if (esize != total_size)
+    if ((bfelf64_sword)esize != total_size)
         return BFELF_ERROR_INVALID_ARG;
 
     for (i = 0; i < esize; i++)
@@ -464,8 +464,8 @@ bfelf_loader_add(struct bfelf_loader_t *loader, struct bfelf_file_t *ef)
 bfelf64_sword
 bfelf_loader_relocate(struct bfelf_loader_t *loader)
 {
-    bfelf64_word i = 0;
-    bfelf64_word j = 0;
+    bfelf64_sword i = 0;
+    bfelf64_sword j = 0;
     bfelf64_sword ret = 0;
 
     if (!loader)
@@ -852,9 +852,9 @@ bfelf_print_section_header(struct bfelf_file_t *ef,
     DEBUG("  %-35s %s\n", "Type:", sh_type_to_str(shdr->sh_type));
     DEBUG("  %-35s ", "Flags:");
 
-    if (sh_flags_is_writable(shdr) == BFELF_TRUE) INFO("W ");
-    if (sh_flags_is_allocated(shdr) == BFELF_TRUE) INFO("A ");
-    if (sh_flags_is_executable(shdr) == BFELF_TRUE) INFO("E ");
+    if (sh_flags_is_writable(shdr) == BFELF_TRUE) { INFO("W "); }
+    if (sh_flags_is_allocated(shdr) == BFELF_TRUE) { INFO("A "); }
+    if (sh_flags_is_executable(shdr) == BFELF_TRUE) { INFO("E "); }
 
     INFO("\n");
     DEBUG("  %-35s 0x%" PRIu64 "\n", "Address:", shdr->sh_addr);
@@ -881,7 +881,7 @@ bfelf_string_table_entry(struct bfelf_file_t *ef,
                          struct e_string_t *str)
 {
     char *buf = 0;
-    bfelf64_word i = 0;
+    bfelf64_sword i = 0;
     bfelf64_sword max = 0;
     bfelf64_sword length = 0;
 
@@ -1006,7 +1006,7 @@ bfelf_symbol_by_name(struct bfelf_file_t *ef,
                      struct e_string_t *name,
                      struct bfelf_sym **sym)
 {
-    bfelf64_sword i = 0;
+    bfelf64_word i = 0;
     bfelf64_sword ret = 0;
 
     /* TODO: Use .hash instead of a O(n) loop. */
@@ -1051,7 +1051,7 @@ bfelf_symbol_by_name_global(struct bfelf_file_t *efl,
                             struct bfelf_file_t **efr,
                             struct bfelf_sym **sym)
 {
-    bfelf64_sword i = 0;
+    bfelf64_word i = 0;
     bfelf64_sword ret = 0;
     struct bfelf_sym *tmpsym = 0;
     struct bfelf_file_t *tmpef = efl;
@@ -1136,7 +1136,7 @@ bfelf_resolve_symbol(struct bfelf_file_t *ef,
 bfelf64_sword
 bfelf_print_sym_table(struct bfelf_file_t *ef)
 {
-    bfelf64_sword i = 0;
+    bfelf64_word i = 0;
     bfelf64_sword ret = 0;
 
     if (!ef)
@@ -1683,9 +1683,9 @@ bfelf_print_program_header(struct bfelf_file_t *ef,
     DEBUG("  %-35s %s\n", "Type:", p_type_to_str(phdr->p_type));
     DEBUG("  %-35s ", "Flags:");
 
-    if (p_flags_is_executable(phdr) == BFELF_TRUE) INFO("E ");
-    if (p_flags_is_writable(phdr) == BFELF_TRUE) INFO("W ");
-    if (p_flags_is_readable(phdr) == BFELF_TRUE) INFO("R ");
+    if (p_flags_is_executable(phdr) == BFELF_TRUE) { INFO("E "); }
+    if (p_flags_is_writable(phdr) == BFELF_TRUE) { INFO("W "); }
+    if (p_flags_is_readable(phdr) == BFELF_TRUE) { INFO("R "); }
 
     INFO("\n");
     DEBUG("  %-35s 0x%" PRIu64 "\n", "Offset:", phdr->p_offset);

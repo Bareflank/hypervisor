@@ -26,6 +26,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -41,7 +43,10 @@ extern "C" {
  */
 #define IOTA_MIN_BUF_SIZE 65
 
+#ifdef CROSS_COMPILED
 char *itoa(int64_t value, char *str, uint64_t base);
+#endif
+
 char *bfitoa(int64_t value, char *str, uint64_t base);
 
 #ifdef __cplusplus

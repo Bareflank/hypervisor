@@ -43,5 +43,7 @@ dummy2::dummy2_add2(int num)
 void *
 dummy2_func_pointer(void *arg)
 {
+    (void) arg;
+
     return 0;
 }

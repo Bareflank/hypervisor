@@ -56,7 +56,7 @@ global __load_segment_limit
 section .text
 
 ; void __halt(void)
-__halt
+__halt:
     hlt
 
 ; uint32_t cpuid_eax(uint32_t val)

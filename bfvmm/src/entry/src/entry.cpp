@@ -26,6 +26,8 @@
 int
 init_vmm_trampoline(int arg)
 {
+    (void) arg;
+
     if (init_std() == false)
         return ENTRY_ERROR_VMM_INIT_FAILED;
 
@@ -38,6 +40,8 @@ init_vmm_trampoline(int arg)
 int
 start_vmm_trampoline(int arg)
 {
+    (void) arg;
+
     if (g_vcm->start(0) != vcpu_manager_error::success)
         return ENTRY_ERROR_VMM_START_FAILED;
 
@@ -47,6 +51,8 @@ start_vmm_trampoline(int arg)
 int
 stop_vmm_trampoline(int arg)
 {
+    (void) arg;
+
     if (g_vcm->stop(0) != vcpu_manager_error::success)
         return ENTRY_ERROR_VMM_STOP_FAILED;
 
@@ -56,18 +62,24 @@ stop_vmm_trampoline(int arg)
 extern "C" int
 init_vmm(int arg)
 {
+    (void) arg;
+
     return init_vmm_trampoline(arg);
 }
 
 extern "C" int
 start_vmm(int arg)
 {
+    (void) arg;
+
     return start_vmm_trampoline(arg);
 }
 
 extern "C" int
 stop_vmm(int arg)
 {
+    (void) arg;
+
     return stop_vmm_trampoline(arg);
 }
 
@@ -83,7 +95,9 @@ __cxa_pure_virtual(void)
 }
 
 extern "C" int
-atexit(void (*func)(void))
+atexit(void (*func)(void)) throw ()
 {
+    (void) func;
+
     return 0;
 }

@@ -22,10 +22,10 @@
 #ifndef IOCTL_DRIVER_H
 #define IOCTL_DRIVER_H
 
-#include <command_line_parser_base.h>
+#include <command_line_parser.h>
 #include <debug.h>
-#include <file_base.h>
-#include <ioctl_base.h>
+#include <file.h>
+#include <ioctl.h>
 #include <split.h>
 
 namespace ioctl_driver_error
@@ -58,13 +58,13 @@ public:
     /// @param fb file class used to read from the filesystem
     /// @param ioctlb ioctl class used to communicate with the driver entry
     /// @param clpb command line parser used to parse user input
-    ioctl_driver(const file_base *const fb,
-                 const ioctl_base *const ioctlb,
-                 const command_line_parser_base *const clpb);
+    ioctl_driver(const file *const f,
+                 const ioctl *const ctl,
+                 const command_line_parser *const clp);
 
     /// IOCTL Driver Destructor
     ///
-    ~ioctl_driver();
+    virtual ~ioctl_driver();
 
     /// Process
     ///
@@ -74,7 +74,7 @@ public:
     ///
     /// @return success on success, failure otherwise.
     ///
-    ioctl_driver_error::type process() const;
+    virtual ioctl_driver_error::type process() const;
 
 private:
 
@@ -84,9 +84,9 @@ private:
 
 private:
 
-    const file_base *const m_fb;
-    const ioctl_base *const m_ioctlb;
-    const command_line_parser_base *const m_clpb;
+    const file *const m_f;
+    const ioctl *const m_ctl;
+    const command_line_parser *const m_clp;
 };
 
 #endif

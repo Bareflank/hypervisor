@@ -20,66 +20,73 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 ################################################################################
-# Cross Flags
+# Target Information
 ################################################################################
 
-CROSS_CC=~/opt/cross/bin/x86_64-elf-gcc
-CROSS_CXX=~/opt/cross/bin/x86_64-elf-g++
-CROSS_ASM=~/opt/cross/bin/nasm
-CROSS_LD=~/opt/cross/bin/x86_64-elf-ld
-
-CROSS_CCFLAGS=
-CROSS_CXXFLAGS=-std=c++14
-CROSS_LDFLAGS=
-CROSS_ASMFLAGS=-f elf64
-
-CROSS_OBJDIR=.build/cross
-CROSS_OUTDIR=../../../bin/cross
+TARGET_NAME:=serial
+TARGET_TYPE:=lib
+TARGET_COMPILER:=both
 
 ################################################################################
-# Native Flags
+# Compiler Flags
 ################################################################################
 
-CC=gcc
-CXX=g++
-LD=g++
-ASM=nasm
+NATIVE_CCFLAGS+=
+NATIVE_CXXFLAGS+=
+NATIVE_ASMFLAGS+=
+NATIVE_LDFLAGS+=
+NATIVE_ARFLAGS+=
+NATIVE_DEFINES+=
 
-CCFLAGS=
-CXXFLAGS=-std=c++14
-LDFLAGS=
-ASMFLAGS=-f elf64
-
-OBJDIR=.build/native
-OUTDIR=../bin/native
+CROSS_CCFLAGS+=
+CROSS_CXXFLAGS+=
+CROSS_ASMFLAGS+=
+CROSS_LDFLAGS+=
+CROSS_ARFLAGS+=
+CROSS_DEFINES+=
 
 ################################################################################
-# Common
+# Output
 ################################################################################
 
-DEFINES=
+NATIVE_OBJDIR:=.build
+NATIVE_OUTDIR:=../bin
 
-RM=rm -rf
-MD=mkdir -p
+CROSS_OBJDIR:=.build
+CROSS_OUTDIR:=../../../bin
 
 ################################################################################
 # Sources
 ################################################################################
 
-TARGET_NAME=serial
-TARGET_TYPE=lib
-TARGET_COMPILER=both
+SOURCES+=serial_port_x86.cpp
 
-SOURCES=serial_port_x86.cpp
+INCLUDE_PATHS+=./
+INCLUDE_PATHS+=../../../include/
+INCLUDE_PATHS+=../../../../include/
 
-INCLUDES=
-LIBS=
+LIBS+=
 
-INCLUDE_PATHS=../include/ ../../../include
+LIBRARY_PATHS+=
 
-LIB_PATHS=
+################################################################################
+# Environment Specific
+################################################################################
 
-VMM_INCLUDE_PATHS=../../../include/std/
+VMM_SOURCES+=
+VMM_INCLUDE_PATHS+=../../../include/std/
+VMM_LIBS+=
+VMM_LIBRARY_PATHS+=
+
+WINDOWS_SOURCES+=
+WINDOWS_INCLUDE_PATHS+=
+WINDOWS_LIBS+=
+WINDOWS_LIBRARY_PATHS+=
+
+LINUX_SOURCES+=
+LINUX_INCLUDE_PATHS+=
+LINUX_LIBS+=
+LINUX_LIBRARY_PATHS+=
 
 ################################################################################
 # Common

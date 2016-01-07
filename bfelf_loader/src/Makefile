@@ -20,62 +20,57 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 ################################################################################
-# Native Flags
+# Target Information
 ################################################################################
 
-CC=gcc
-CXX=g++
-ASM=nasm
-LD=ar
-
-CCFLAGS=
-CXXFLAGS=-std=c++14
-ASMFLAGS=
-LDFLAGS=rcs
-
-DEFINES=ENABLE_BFELF_DEBUGGING
-
-OBJDIR=.build/native
-OUTDIR=../bin/native
+TARGET_NAME:=bfelf_loader
+TARGET_TYPE:=lib
+TARGET_COMPILER:=native
 
 ################################################################################
-# Common
+# Compiler Flags
 ################################################################################
 
-RM=rm -rf
-MD=mkdir -p
+NATIVE_CCFLAGS+=
+NATIVE_CXXFLAGS+=
+NATIVE_ASMFLAGS+=
+NATIVE_LDFLAGS+=
+NATIVE_ARFLAGS+=
+NATIVE_DEFINES+=ENABLE_BFELF_DEBUGGING
+
+################################################################################
+# Output
+################################################################################
+
+NATIVE_OBJDIR:=.build
+NATIVE_OUTDIR:=../bin
 
 ################################################################################
 # Sources
 ################################################################################
 
-TARGET_NAME=bfelf_loader
-TARGET_TYPE=staticlib
-TARGET_COMPILER=native
+SOURCES+=bfelf_loader.c
 
-SOURCES=bfelf_loader.cpp
-HEADERS=
+INCLUDE_PATHS+=./
+INCLUDE_PATHS+=../include/
 
-LIBS=
+LIBS+=
 
-LIB_PATHS=
-INCLUDE_PATHS=./ ../include/
+LIBRARY_PATHS+=
 
 ################################################################################
 # Environment Specific
 ################################################################################
 
-VMM_SOURCES=
-VMM_INCLUDE_PATHS=
+WINDOWS_SOURCES+=
+WINDOWS_INCLUDE_PATHS+=
+WINDOWS_LIBS+=
+WINDOWS_LIBRARY_PATHS+=
 
-WINDOWS_SOURCES=
-WINDOWS_INCLUDE_PATHS=
-
-LINUX_SOURCES=
-LINUX_INCLUDE_PATHS=
-
-OSX_SOURCES=
-OSX_INCLUDE_PATHS=
+LINUX_SOURCES+=
+LINUX_INCLUDE_PATHS+=
+LINUX_LIBS+=
+LINUX_LIBRARY_PATHS+=
 
 ################################################################################
 # Common

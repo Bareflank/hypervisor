@@ -20,13 +20,7 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #include <test.h>
-
 #include <ioctl.h>
-#include <ioctl_base.h>
-
-// Since the IOCTL interface is OS specific, it's not easy to create a
-// unit test for this class that exercises all of the issues that can
-// occur when attempting to talk to the driver.
 
 void
 bfm_ut::test_ioctl_with_unknown_command()

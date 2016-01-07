@@ -20,9 +20,7 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #include <test.h>
-
 #include <command_line_parser.h>
-#include <command_line_parser_base.h>
 
 void
 bfm_ut::test_command_line_parser_with_no_args()

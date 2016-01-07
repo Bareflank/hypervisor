@@ -29,7 +29,10 @@
 extern "C" {
 #endif
 
+#ifdef CROSS_COMPILED
 size_t strlen(const char *str);
+#endif
+
 size_t bfstrlen(const char *str);
 
 #ifdef __cplusplus

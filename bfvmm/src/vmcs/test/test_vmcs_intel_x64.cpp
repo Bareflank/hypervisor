@@ -27,6 +27,8 @@ uint64_t fake_vmread_return;
 bool
 fake_vmread(uint64_t field, uint64_t *val)
 {
+    (void) field;
+
     if (val == 0)
         return false;
 
