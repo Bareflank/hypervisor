@@ -15,6 +15,10 @@ if [ -z "$GCC_PATH" ]; then
     export GCC_PATH="https://ftp.gnu.org/gnu/gcc/gcc-5.2.0/gcc-5.2.0.tar.bz2"
 fi
 
+if [ -z "$GCC_PATCH" ]; then
+    export GCC_PATCH="https://raw.githubusercontent.com/Bareflank/hypervisor/master/tools/patches/gcc-5.2.0_no-red-zone.patch"
+fi
+
 if [ -z "$NASM_PATH" ]; then
     export NASM_PATH="http://www.nasm.us/pub/nasm/releasebuilds/2.11.08/nasm-2.11.08.tar.gz"
 fi
@@ -35,9 +39,9 @@ rm -Rf $TMPDIR
 mkdir -p $TMPDIR
 
 pushd $TMPDIR
-
 wget $BINUTILS_PATH
 wget $GCC_PATH
+wget $GCC_PATCH
 wget $NASM_PATH
 
 tar xvf binutils-*.tar.bz2
@@ -46,26 +50,30 @@ tar xvf nasm-*.tar.gz
 
 mkdir build-binutils
 mkdir build-gcc
+popd
+
+pushd $TMPDIR/gcc-*
+patch -p1 < ../gcc-*_no-red-zone.patch
+popd
 
 pushd $TMPDIR/build-binutils
 ../binutils-*/configure --target=$TARGET --prefix="$PREFIX" --with-sysroot --disable-nls --disable-werror
-make
+make -j2
 make install
 popd
 
 pushd $TMPDIR/build-gcc
 ../gcc-*/configure --target=$TARGET --prefix="$PREFIX" --disable-nls --enable-languages=c,c++ --without-headers
-make all-gcc
-make all-target-libgcc
-make install-gcc
-make install-target-libgcc
+make -j2 all-gcc
+make -j2 all-target-libgcc
+make -j2 install-gcc
+make -j2 install-target-libgcc
 popd
 
 pushd $TMPDIR/nasm-*
 ./configure --prefix="$PREFIX"
-make
+make -j2
 make install
 popd
 
-popd
 rm -Rf $TMPDIR
