@@ -22,6 +22,8 @@ Version 1.0 TODO:
   VMM modules need their unit tests completed including serial)
 - Turn on all warnings, and error no warnings to verify that the code is clean
   and ready to go
+- All of the "C" interfaces should use the int64_t/uint64_t types instead of
+  long lon int / unsigned long long int.
 
 Version 1.1 TODO:
 - Need to have a completely isolated exit handler. It should have it's own

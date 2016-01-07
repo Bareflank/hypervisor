@@ -54,7 +54,7 @@ TARGET_TYPE=bin
 TARGET_COMPILER=native
 
 SOURCES+=test.cpp
-SOURCES+=test_page.cpp
+#SOURCES+=test_page.cpp
 SOURCES+=test_memory_manager.cpp
 HEADERS=
 

@@ -21,14 +21,12 @@
 
 #include <debug_ring/debug_ring.h>
 
-debug_ring_error::type
-debug_ring::init(int64_t vcpuid)
+debug_ring::debug_ring(int64_t vcpuid) :
+    m_is_valid(false),
+    m_drr(0)
 {
-    m_is_valid = false;
-    m_drr = 0;
-
-    if (vcpuid >= MAX_VCPUS)
-        return debug_ring_error::invalid;
+    if (vcpuid < 0 || vcpuid >= MAX_VCPUS)
+        return;
 
     m_is_valid = true;
     m_drr = get_drr(vcpuid);
@@ -38,8 +36,6 @@ debug_ring::init(int64_t vcpuid)
 
     for (auto i = 0; i < DEBUG_RING_SIZE; i++)
         m_drr->buf[i] = '\0';
-
-    return debug_ring_error::success;
 }
 
 debug_ring_error::type
@@ -124,7 +120,7 @@ get_drr(long long int vcpuid)
 {
     static debug_ring_resources_t drrs[MAX_VCPUS] = {0};
 
-    if (vcpuid >= MAX_VCPUS)
+    if (vcpuid < 0 || vcpuid >= MAX_VCPUS)
         return 0;
 
     return &drrs[vcpuid];

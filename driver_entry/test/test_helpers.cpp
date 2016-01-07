@@ -258,163 +258,163 @@ driver_entry_ut::test_helper_execute_symbol_sym_success()
     EXPECT_TRUE(common_unload_vmm() == BF_SUCCESS);
 }
 
-long long int return_value;
+// long long int return_value;
 
-extern "C" long long int
-mock_add_page(struct page_t *pg)
-{
-    return return_value;
-}
+// extern "C" long long int
+// mock_add_page(struct page_t *pg)
+// {
+//     return return_value;
+// }
 
-extern "C" long long int
-mock_remove_page(struct page_t *pg)
-{
-    return return_value;
-}
+// extern "C" long long int
+// mock_remove_page(struct page_t *pg)
+// {
+//     return return_value;
+// }
 
-int64_t
-mock_resolve_symbol(const char *name, void **sym)
-{
-    if (sym == 0)
-        return -100;
+// int64_t
+// mock_resolve_symbol(const char *name, void **sym)
+// {
+//     if (sym == 0)
+//         return -100;
 
-    if (strcmp(name, "add_page") == 0) *sym = (void *)mock_add_page;
-    if (strcmp(name, "remove_page") == 0) *sym = (void *)mock_remove_page;
+//     if (strcmp(name, "add_page") == 0) *sym = (void *)mock_add_page;
+//     if (strcmp(name, "remove_page") == 0) *sym = (void *)mock_remove_page;
 
-    return BF_SUCCESS;
-}
+//     return BF_SUCCESS;
+// }
 
-void
-driver_entry_ut::test_helper_allocate_page_pool_resolve_symbol_failed()
-{
-    MockRepository mocks;
+// void
+// driver_entry_ut::test_helper_allocate_page_pool_resolve_symbol_failed()
+// {
+//     MockRepository mocks;
 
-    mocks.OnCallFunc(resolve_symbol).Return(-1);
+//     mocks.OnCallFunc(resolve_symbol).Return(-1);
 
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        EXPECT_TRUE(allocate_page_pool() == -1);
-    });
-}
+//     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+//     {
+//         EXPECT_TRUE(allocate_page_pool() == -1);
+//     });
+// }
 
-void
-driver_entry_ut::test_helper_allocate_page_pool_alloc_page_failed()
-{
-    MockRepository mocks;
-    struct page_t blank_page = {0};
+// void
+// driver_entry_ut::test_helper_allocate_page_pool_alloc_page_failed()
+// {
+//     MockRepository mocks;
+//     struct page_t blank_page = {0};
 
-    mocks.OnCallFunc(resolve_symbol).Do(mock_resolve_symbol);
-    mocks.OnCallFunc(platform_alloc_page).Return(blank_page);
+//     mocks.OnCallFunc(resolve_symbol).Do(mock_resolve_symbol);
+//     mocks.OnCallFunc(platform_alloc_page).Return(blank_page);
 
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        EXPECT_TRUE(allocate_page_pool() == BF_ERROR_OUT_OF_MEMORY);
-    });
-}
+//     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+//     {
+//         EXPECT_TRUE(allocate_page_pool() == BF_ERROR_OUT_OF_MEMORY);
+//     });
+// }
 
-void
-driver_entry_ut::test_helper_allocate_page_pool_add_page_failed()
-{
-    MockRepository mocks;
+// void
+// driver_entry_ut::test_helper_allocate_page_pool_add_page_failed()
+// {
+//     MockRepository mocks;
 
-    mocks.OnCallFunc(resolve_symbol).Do(mock_resolve_symbol);
+//     mocks.OnCallFunc(resolve_symbol).Do(mock_resolve_symbol);
 
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        return_value = -1;
-        EXPECT_TRUE(allocate_page_pool() == -1);
+//     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+//     {
+//         return_value = -1;
+//         EXPECT_TRUE(allocate_page_pool() == -1);
 
-        return_value = 0;
-        EXPECT_TRUE(free_page_pool() == BF_SUCCESS);
-    });
-}
+//         return_value = 0;
+//         EXPECT_TRUE(free_page_pool() == BF_SUCCESS);
+//     });
+// }
 
-void
-driver_entry_ut::test_helper_allocate_page_pool_success()
-{
-    EXPECT_TRUE(common_add_module(m_dummy1, m_dummy1_length) == BF_SUCCESS);
-    EXPECT_TRUE(common_add_module(m_dummy2, m_dummy2_length) == BF_SUCCESS);
-    EXPECT_TRUE(common_add_module(m_dummy3, m_dummy3_length) == BF_SUCCESS);
-    EXPECT_TRUE(common_load_vmm() == BF_SUCCESS);
-    EXPECT_TRUE(allocate_page_pool() == BF_SUCCESS);
-    EXPECT_TRUE(free_page_pool() == BF_SUCCESS);
-    EXPECT_TRUE(common_unload_vmm() == BF_SUCCESS);
-}
+// void
+// driver_entry_ut::test_helper_allocate_page_pool_success()
+// {
+//     EXPECT_TRUE(common_add_module(m_dummy1, m_dummy1_length) == BF_SUCCESS);
+//     EXPECT_TRUE(common_add_module(m_dummy2, m_dummy2_length) == BF_SUCCESS);
+//     EXPECT_TRUE(common_add_module(m_dummy3, m_dummy3_length) == BF_SUCCESS);
+//     EXPECT_TRUE(common_load_vmm() == BF_SUCCESS);
+//     EXPECT_TRUE(allocate_page_pool() == BF_SUCCESS);
+//     EXPECT_TRUE(free_page_pool() == BF_SUCCESS);
+//     EXPECT_TRUE(common_unload_vmm() == BF_SUCCESS);
+// }
 
-void
-driver_entry_ut::test_helper_allocate_page_pool_success_multiple_times()
-{
-    EXPECT_TRUE(common_add_module(m_dummy1, m_dummy1_length) == BF_SUCCESS);
-    EXPECT_TRUE(common_add_module(m_dummy2, m_dummy2_length) == BF_SUCCESS);
-    EXPECT_TRUE(common_add_module(m_dummy3, m_dummy3_length) == BF_SUCCESS);
-    EXPECT_TRUE(common_load_vmm() == BF_SUCCESS);
-    EXPECT_TRUE(allocate_page_pool() == BF_SUCCESS);
-    EXPECT_TRUE(allocate_page_pool() == BF_SUCCESS);
-    EXPECT_TRUE(allocate_page_pool() == BF_SUCCESS);
-    EXPECT_TRUE(free_page_pool() == BF_SUCCESS);
-    EXPECT_TRUE(common_unload_vmm() == BF_SUCCESS);
-}
+// void
+// driver_entry_ut::test_helper_allocate_page_pool_success_multiple_times()
+// {
+//     EXPECT_TRUE(common_add_module(m_dummy1, m_dummy1_length) == BF_SUCCESS);
+//     EXPECT_TRUE(common_add_module(m_dummy2, m_dummy2_length) == BF_SUCCESS);
+//     EXPECT_TRUE(common_add_module(m_dummy3, m_dummy3_length) == BF_SUCCESS);
+//     EXPECT_TRUE(common_load_vmm() == BF_SUCCESS);
+//     EXPECT_TRUE(allocate_page_pool() == BF_SUCCESS);
+//     EXPECT_TRUE(allocate_page_pool() == BF_SUCCESS);
+//     EXPECT_TRUE(allocate_page_pool() == BF_SUCCESS);
+//     EXPECT_TRUE(free_page_pool() == BF_SUCCESS);
+//     EXPECT_TRUE(common_unload_vmm() == BF_SUCCESS);
+// }
 
-void
-driver_entry_ut::test_helper_free_page_pool_resolve_symbol_failed()
-{
-    MockRepository mocks;
+// void
+// driver_entry_ut::test_helper_free_page_pool_resolve_symbol_failed()
+// {
+//     MockRepository mocks;
 
-    mocks.OnCallFunc(resolve_symbol).Return(-1);
+//     mocks.OnCallFunc(resolve_symbol).Return(-1);
 
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        EXPECT_TRUE(free_page_pool() == -1);
-    });
-}
+//     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+//     {
+//         EXPECT_TRUE(free_page_pool() == -1);
+//     });
+// }
 
-void
-driver_entry_ut::test_helper_free_page_pool_remove_page_failed()
-{
-    EXPECT_TRUE(common_add_module(m_dummy1, m_dummy1_length) == BF_SUCCESS);
-    EXPECT_TRUE(common_add_module(m_dummy2, m_dummy2_length) == BF_SUCCESS);
-    EXPECT_TRUE(common_add_module(m_dummy3, m_dummy3_length) == BF_SUCCESS);
-    EXPECT_TRUE(common_load_vmm() == BF_SUCCESS);
-    EXPECT_TRUE(allocate_page_pool() == BF_SUCCESS);
+// void
+// driver_entry_ut::test_helper_free_page_pool_remove_page_failed()
+// {
+//     EXPECT_TRUE(common_add_module(m_dummy1, m_dummy1_length) == BF_SUCCESS);
+//     EXPECT_TRUE(common_add_module(m_dummy2, m_dummy2_length) == BF_SUCCESS);
+//     EXPECT_TRUE(common_add_module(m_dummy3, m_dummy3_length) == BF_SUCCESS);
+//     EXPECT_TRUE(common_load_vmm() == BF_SUCCESS);
+//     EXPECT_TRUE(allocate_page_pool() == BF_SUCCESS);
 
-    {
-        MockRepository mocks;
+//     {
+//         MockRepository mocks;
 
-        mocks.OnCallFunc(resolve_symbol).Do(mock_resolve_symbol);
+//         mocks.OnCallFunc(resolve_symbol).Do(mock_resolve_symbol);
 
-        RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-        {
-            return_value = -1;
-            EXPECT_TRUE(free_page_pool() == -1);
-        });
-    }
+//         RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+//         {
+//             return_value = -1;
+//             EXPECT_TRUE(free_page_pool() == -1);
+//         });
+//     }
 
-    EXPECT_TRUE(free_page_pool() == BF_SUCCESS);
-    EXPECT_TRUE(common_unload_vmm() == BF_SUCCESS);
-}
+//     EXPECT_TRUE(free_page_pool() == BF_SUCCESS);
+//     EXPECT_TRUE(common_unload_vmm() == BF_SUCCESS);
+// }
 
-void
-driver_entry_ut::test_helper_free_page_pool_success()
-{
-    EXPECT_TRUE(common_add_module(m_dummy1, m_dummy1_length) == BF_SUCCESS);
-    EXPECT_TRUE(common_add_module(m_dummy2, m_dummy2_length) == BF_SUCCESS);
-    EXPECT_TRUE(common_add_module(m_dummy3, m_dummy3_length) == BF_SUCCESS);
-    EXPECT_TRUE(common_load_vmm() == BF_SUCCESS);
-    EXPECT_TRUE(allocate_page_pool() == BF_SUCCESS);
-    EXPECT_TRUE(free_page_pool() == BF_SUCCESS);
-    EXPECT_TRUE(common_unload_vmm() == BF_SUCCESS);
-}
+// void
+// driver_entry_ut::test_helper_free_page_pool_success()
+// {
+//     EXPECT_TRUE(common_add_module(m_dummy1, m_dummy1_length) == BF_SUCCESS);
+//     EXPECT_TRUE(common_add_module(m_dummy2, m_dummy2_length) == BF_SUCCESS);
+//     EXPECT_TRUE(common_add_module(m_dummy3, m_dummy3_length) == BF_SUCCESS);
+//     EXPECT_TRUE(common_load_vmm() == BF_SUCCESS);
+//     EXPECT_TRUE(allocate_page_pool() == BF_SUCCESS);
+//     EXPECT_TRUE(free_page_pool() == BF_SUCCESS);
+//     EXPECT_TRUE(common_unload_vmm() == BF_SUCCESS);
+// }
 
-void
-driver_entry_ut::test_helper_free_page_pool_success_multiple_times()
-{
-    EXPECT_TRUE(common_add_module(m_dummy1, m_dummy1_length) == BF_SUCCESS);
-    EXPECT_TRUE(common_add_module(m_dummy2, m_dummy2_length) == BF_SUCCESS);
-    EXPECT_TRUE(common_add_module(m_dummy3, m_dummy3_length) == BF_SUCCESS);
-    EXPECT_TRUE(common_load_vmm() == BF_SUCCESS);
-    EXPECT_TRUE(allocate_page_pool() == BF_SUCCESS);
-    EXPECT_TRUE(free_page_pool() == BF_SUCCESS);
-    EXPECT_TRUE(free_page_pool() == BF_SUCCESS);
-    EXPECT_TRUE(free_page_pool() == BF_SUCCESS);
-    EXPECT_TRUE(common_unload_vmm() == BF_SUCCESS);
-}
+// void
+// driver_entry_ut::test_helper_free_page_pool_success_multiple_times()
+// {
+//     EXPECT_TRUE(common_add_module(m_dummy1, m_dummy1_length) == BF_SUCCESS);
+//     EXPECT_TRUE(common_add_module(m_dummy2, m_dummy2_length) == BF_SUCCESS);
+//     EXPECT_TRUE(common_add_module(m_dummy3, m_dummy3_length) == BF_SUCCESS);
+//     EXPECT_TRUE(common_load_vmm() == BF_SUCCESS);
+//     EXPECT_TRUE(allocate_page_pool() == BF_SUCCESS);
+//     EXPECT_TRUE(free_page_pool() == BF_SUCCESS);
+//     EXPECT_TRUE(free_page_pool() == BF_SUCCESS);
+//     EXPECT_TRUE(free_page_pool() == BF_SUCCESS);
+//     EXPECT_TRUE(common_unload_vmm() == BF_SUCCESS);
+// }

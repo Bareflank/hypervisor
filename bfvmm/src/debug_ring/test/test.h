@@ -39,7 +39,6 @@ protected:
 
 private:
 
-    void test_init_dr_with_invalid_vcpuid();
     void test_write_with_invalid_dr();
     void test_read_with_invalid_drr();
     void test_read_with_null_string();

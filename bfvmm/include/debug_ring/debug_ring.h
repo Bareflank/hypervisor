@@ -48,21 +48,11 @@ public:
 
     /// Default Constructor
     ///
-    debug_ring() {}
+    debug_ring(int64_t vcpuid);
 
     /// Debug Ring Destructor
     ///
     virtual ~debug_ring() {}
-
-    /// Initialize Debug Ring
-    ///
-    /// Initializes the debug ring, and resets all of the internal variables
-    /// to 0.
-    ///
-    /// @param vcpuid the vcpu to use for this debug ring
-    /// @return success on success, invalid on failure
-    ///
-    virtual debug_ring_error::type init(int64_t vcpuid);
 
     /// Write to Debug Ring
     ///

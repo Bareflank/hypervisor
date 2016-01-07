@@ -73,7 +73,8 @@ TARGET_TYPE=lib
 TARGET_COMPILER=both
 
 SOURCES+=vcpu.cpp
-SOURCES+=vcpu_factory.cpp
+SOURCES+=vcpu_intel_x64.cpp
+SOURCES+=vcpu_manager.cpp
 HEADERS=
 
 LIBS=

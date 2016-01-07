@@ -20,5 +20,6 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 LIBRARY_PATHS := $(LIBRARY_PATHS):../../../debug_ring/bin/native/
+LIBRARY_PATHS := $(LIBRARY_PATHS):../../../serial/bin/native/
 
 include ../../../../../common/common_test.mk

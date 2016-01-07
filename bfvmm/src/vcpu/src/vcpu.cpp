@@ -19,20 +19,22 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <iostream>
-#include <constants.h>
-
 #include <vcpu/vcpu.h>
-#include <memory_manager/memory_manager.h>
 
-vcpu::vcpu() :
-    m_id(-1)
-{
-}
+#include <iostream>
 
 vcpu::vcpu(int64_t id) :
     m_id(id)
 {
+    m_debug_ring = new debug_ring(id);
+}
+
+vcpu::vcpu(int64_t id, debug_ring *m_debug_ring) :
+    m_id(id),
+    m_debug_ring(m_debug_ring)
+{
+    if (m_debug_ring == 0)
+        m_debug_ring = new debug_ring(id);
 }
 
 bool
@@ -48,46 +50,20 @@ vcpu::id() const
 }
 
 vcpu_error::type
-vcpu::init()
-{
-    if (is_valid() == false)
-        return vcpu_error::invalid;
-
-    if (m_debug_ring.init(m_id) != debug_ring_error::success)
-        return vcpu_error::failure;
-
-    if (m_vmm.init(&m_intrinsics, mm()) != vmm_error::success)
-        return vcpu_error::failure;
-
-    if (m_vmcs.init(&m_intrinsics, mm()) != vmcs_error::success)
-        return vcpu_error::failure;
-
-    return vcpu_error::success;
-}
-
-vcpu_error::type
 vcpu::start()
 {
-    if (m_vmm.start() != vmm_error::success)
-        return vcpu_error::failure;
-
-    if (m_vmcs.launch() != vmcs_error::success)
-        return vcpu_error::failure;
-
     return vcpu_error::success;
 }
 
 vcpu_error::type
 vcpu::stop()
 {
-    if (m_vmm.stop() != vmm_error::success)
-        return vcpu_error::failure;
-
     return vcpu_error::success;
 }
 
 void
 vcpu::write(const char *str, int64_t len)
 {
-    m_debug_ring.write(str, len);
+    if (m_debug_ring != 0)
+        m_debug_ring->write(str, len);
 }

@@ -19,10 +19,21 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-void operator delete(void *ptr)
+#ifndef STD_H
+#define STD_H
+
+#include <iostream>
+
+inline bool
+init_std(void)
 {
+    auto result = true;
+
+#ifdef CROSS_COMPILED
+    result &= std::cout.init();
+#endif
+
+    return result;
 }
 
-void operator delete[](void *p)
-{
-}
+#endif

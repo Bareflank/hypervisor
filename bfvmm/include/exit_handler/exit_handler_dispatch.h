@@ -22,7 +22,9 @@
 #ifndef EXIT_HANDLER_DISPATCH_H
 #define EXIT_HANDLER_DISPATCH_H
 
-#include <entry/entry_factory.h>
+#include <stdint.h>
+#include <intrinsics/intrinsics_intel_x64.h>
+
 
 class exit_handler_dispatch
 {
@@ -107,8 +109,6 @@ private:
 
 private:
 
-    vcpu *m_vcpu;
-    vmcs_intel_x64 *m_vmcs_intel_x64;
     intrinsics_intel_x64 *m_intrinsics_intel_x64;
 
     uint64_t m_exit_reason;

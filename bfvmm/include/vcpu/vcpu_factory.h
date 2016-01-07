@@ -22,20 +22,12 @@
 #ifndef VCPU_FACTORY_H
 #define VCPU_FACTORY_H
 
-#include <vcpu/vcpu.h>
+#include <vcpu/vcpu_intel_x64.h>
 
-#include <stdint.h>
-#include <constants.h>
-
-namespace vcpu_factory_error
-{
-    enum type
-    {
-        success = 0,
-        failure = 1,
-        invalid = 2
-    };
-}
+// TODO: Note that this is a placeholder. This class needs to be moved to
+// it's own module, as this is what people will implement to create their
+// own vCPUs. This way, they have a very simple means picking which portions
+// of the system to change without having to re-write a lot of code.
 
 class vcpu_factory
 {
@@ -49,66 +41,13 @@ public:
     ///
     virtual ~vcpu_factory() {}
 
-    /// Get vCPU
+    /// Make vCPU
     ///
-    /// Gets a vcpu from the vcpu factory. If the vcpuid that is provided
-    /// is invalid, this function will return NULL. Otherwise, it will
-    /// return a pointer to the vcpu.
+    /// @return returns a pointer to a newly created vCPU. Note that it is
+    /// up to the caller to free this vCPU.
     ///
-    /// @param vcpuid the vcpu's id
-    /// @return NULL if the vcpuid is invalid or a valid pointer to a vcpu
-    ///
-    virtual vcpu *get_vcpu(int64_t vcpuid);
-
-    /// Add vCPU
-    ///
-    /// Adds a vcpu to the vCPU factory.
-    ///
-    /// @param vc the vcpu to add
-    /// @return success on success, failure otherwise
-    ///
-    virtual vcpu_factory_error::type add_vcpu(const vcpu &vc);
-
-    /// vCPU Factory Init vCPU
-    ///
-    /// Initializes the vCPU.
-    ///
-    /// @param vcpuid the vcpu to initialize
-    /// @return success on success, falure otherwise
-    ///
-    virtual vcpu_factory_error::type init(int64_t vcpuid);
-
-    /// vCPU Factory Start vCPU
-    ///
-    /// Starts the vCPU.
-    ///
-    /// @param vcpuid the vcpu to start
-    /// @return success on success, falure otherwise
-    ///
-    virtual vcpu_factory_error::type start(int64_t vcpuid);
-
-    /// vCPU Factory Stop vCPU
-    ///
-    /// Stops the vCPU.
-    ///
-    /// @param vcpuid the vcpu to stop
-    /// @return success on success, falure otherwise
-    ///
-    virtual vcpu_factory_error::type stop(int64_t vcpuid);
-
-    /// Write to Log
-    ///
-    /// Writes a string of size length to the log. Note that the log
-    /// could be to multiple sources but is likely writing to a debug ring
-    ///
-    /// @param str the string to write to the log
-    /// @param len the length of the string
-    ///
-    virtual void write(const char *str, int64_t len);
-
-private:
-
-    vcpu m_vcpus[MAX_VCPUS];
+    vcpu *make_vcpu(int64_t vcpuid)
+    { return new vcpu_intel_x64(vcpuid); }
 };
 
 #endif

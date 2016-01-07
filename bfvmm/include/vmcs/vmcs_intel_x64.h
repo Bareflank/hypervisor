@@ -22,33 +22,30 @@
 #ifndef VMCS_INTEL_X64_H
 #define VMCS_INTEL_X64_H
 
-#include <vmcs/vmcs.h>
 #include <intrinsics/intrinsics_intel_x64.h>
 
-class vmcs_intel_x64 : public vmcs
+namespace vmcs_error
+{
+    enum type
+    {
+        success = 0,
+        failure = 1,
+        not_supported = 2,
+        out_of_memory = 3
+    };
+};
+
+class vmcs_intel_x64
 {
 public:
 
     /// Default Constructor
     ///
-    vmcs_intel_x64();
+    vmcs_intel_x64(intrinsics_intel_x64 *intrinsics);
 
     /// Destructor
     ///
     virtual ~vmcs_intel_x64() {}
-
-    /// Init VMCS
-    ///
-    /// Initializes the VMCS. One of the goals of this function is to decouple
-    /// the intrinsics and memory manager from the VMCS so that the VMCS can
-    /// be tested.
-    ///
-    /// @param intrinsics the intrinsics class that this VMCS will use
-    /// @param memory_manager the memory manager class that this VMCS will use
-    /// @return success on success, failure otherwise
-    ///
-    virtual vmcs_error::type init(intrinsics *intrinsics,
-                                  memory_manager *memory_manager) override;
 
     /// Launch VMM
     ///
@@ -59,7 +56,7 @@ public:
     ///     manager is out of memory, not_supported if the current hardware
     ///     and/or software configuration is not supported, failure otherwise
     ///
-    virtual vmcs_error::type launch() override;
+    virtual vmcs_error::type launch();
 
 protected:
 
@@ -344,11 +341,7 @@ private:
 
     bool m_valid;
 
-    memory_manager *m_memory_manager;
     intrinsics_intel_x64 *m_intrinsics;
-
-    page m_vmcs_region;
-    page m_msr_bitmap;
 };
 
 #endif

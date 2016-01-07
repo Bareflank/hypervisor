@@ -20,31 +20,70 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #include <entry.h>
-#include <entry/entry_factory.h>
+#include <std/std.h>
+#include <vcpu/vcpu_manager.h>
 
-extern "C" int
-init_vmm(int arg)
+int
+init_vmm_trampoline(int arg)
 {
-    if (ef()->init_vmm(0) != entry_factory_error::success)
+    if (init_std() == false)
+        return ENTRY_ERROR_VMM_INIT_FAILED;
+
+    if (g_vcm->init(0) != vcpu_manager_error::success)
         return ENTRY_ERROR_VMM_INIT_FAILED;
 
     return ENTRY_SUCCESS;
 }
 
-extern "C" int
-start_vmm(int arg)
+int
+start_vmm_trampoline(int arg)
 {
-    if (ef()->start_vmm(0) != entry_factory_error::success)
+    if (g_vcm->start(0) != vcpu_manager_error::success)
         return ENTRY_ERROR_VMM_START_FAILED;
 
     return ENTRY_SUCCESS;
 }
 
-extern "C" int
-stop_vmm(int arg)
+int
+stop_vmm_trampoline(int arg)
 {
-    if (ef()->stop_vmm(0) != entry_factory_error::success)
+    if (g_vcm->stop(0) != vcpu_manager_error::success)
         return ENTRY_ERROR_VMM_STOP_FAILED;
 
     return ENTRY_SUCCESS;
+}
+
+extern "C" int
+init_vmm(int arg)
+{
+    return init_vmm_trampoline(arg);
+}
+
+extern "C" int
+start_vmm(int arg)
+{
+    return start_vmm_trampoline(arg);
+}
+
+extern "C" int
+stop_vmm(int arg)
+{
+    return stop_vmm_trampoline(arg);
+}
+
+// -----------------------------------------------------------------------------
+// REMOVE ME
+// -----------------------------------------------------------------------------
+//
+// The following should be removed once we fully support global constructors
+
+extern "C" void
+__cxa_pure_virtual(void)
+{
+}
+
+extern "C" int
+atexit(void (*func)(void))
+{
+    return 0;
 }
