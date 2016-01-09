@@ -36,6 +36,8 @@ struct bfelf_test
     bfelf_phdr phdr2;
     char tmp[16];
     char strtab[12];
+    void *ctors[2];
+    void *dtors[2];
     bfelf_sym symtab[2];
     bfelf_rel reltab[2];
     bfelf_rela relatab[2];
@@ -43,6 +45,8 @@ struct bfelf_test
     bfelf_shdr shdr2;
     bfelf_shdr shdr3;
     bfelf_shdr shdr4;
+    bfelf_shdr shdr5;
+    bfelf_shdr shdr6;
 };
 
 bfelf_test g_test = {};
@@ -185,6 +189,10 @@ bool bfelf_loader_ut::list()
     this->test_bfelf_relocate_symbol();
     this->test_bfelf_relocate_symbol_addend();
     this->test_bfelf_relocate_symbols();
+    this->test_bfelf_ctor_num();
+    this->test_bfelf_dtor_num();
+    this->test_bfelf_resolve_ctor();
+    this->test_bfelf_resolve_dtor();
     this->test_bfelf_program_header();
     this->test_bfelf_load_segments();
     this->test_bfelf_load_segment();
@@ -309,7 +317,7 @@ void bfelf_loader_ut::test_bfelf_file_init()
     g_test.header.e_shentsize = sizeof(struct bfelf_shdr);
 
     g_test.header.e_phnum = 2;
-    g_test.header.e_shnum = 4;
+    g_test.header.e_shnum = 6;
 
     g_test.header.e_shstrndx = 10;
     ret = bfelf_file_init((char *)&g_test, sizeof(g_test), &m_test_elf);
@@ -321,10 +329,10 @@ void bfelf_loader_ut::test_bfelf_file_init()
     ASSERT_TRUE(ret == BFELF_ERROR_INVALID_PHT);
     g_test.header.e_phnum = 2;
 
-    g_test.header.e_shnum = 5;
+    g_test.header.e_shnum = 7;
     ret = bfelf_file_init((char *)&g_test, sizeof(g_test), &m_test_elf);
     ASSERT_TRUE(ret == BFELF_ERROR_INVALID_SHT);
-    g_test.header.e_shnum = 4;
+    g_test.header.e_shnum = 6;
 
     g_test.shdr1.sh_offset = 16000;
     ret = bfelf_file_init((char *)&g_test, sizeof(g_test), &m_test_elf);
@@ -860,6 +868,98 @@ void bfelf_loader_ut::test_bfelf_relocate_symbols()
     ASSERT_TRUE(ret == BFELF_SUCCESS);
 }
 
+void bfelf_loader_ut::test_bfelf_ctor_num()
+{
+    auto ret = 0;
+
+    ret = bfelf_ctor_num(NULL);
+    ASSERT_TRUE(ret == BFELF_ERROR_INVALID_ARG);
+
+    m_test_elf.valid = BFELF_FALSE;
+    ret = bfelf_ctor_num(&m_test_elf);
+    ASSERT_TRUE(ret == BFELF_ERROR_INVALID_FILE);
+    m_test_elf.valid = BFELF_TRUE;
+
+    ret = bfelf_ctor_num(&m_test_elf);
+    ASSERT_TRUE(ret == 0);
+
+    m_test_elf.ctors = &g_test.shdr5;
+    g_test.shdr5.sh_size = 16;
+    g_test.shdr5.sh_offset = (bfelf64_off)&g_test.ctors - (bfelf64_off)&g_test;
+    g_test.ctors[0] = (void *)0x10;
+    g_test.ctors[1] = (void *)0x20;
+
+    ret = bfelf_ctor_num(&m_test_elf);
+    ASSERT_TRUE(ret == 2);
+}
+
+void bfelf_loader_ut::test_bfelf_dtor_num()
+{
+    auto ret = 0;
+
+    ret = bfelf_dtor_num(NULL);
+    ASSERT_TRUE(ret == BFELF_ERROR_INVALID_ARG);
+
+    m_test_elf.valid = BFELF_FALSE;
+    ret = bfelf_dtor_num(&m_test_elf);
+    ASSERT_TRUE(ret == BFELF_ERROR_INVALID_FILE);
+    m_test_elf.valid = BFELF_TRUE;
+
+    ret = bfelf_dtor_num(&m_test_elf);
+    ASSERT_TRUE(ret == 0);
+
+    m_test_elf.dtors = &g_test.shdr6;
+    g_test.shdr6.sh_size = 16;
+    g_test.shdr6.sh_offset = (bfelf64_off)&g_test.ctors - (bfelf64_off)&g_test;
+    g_test.dtors[0] = (void *)0x10;
+    g_test.dtors[1] = (void *)0x20;
+
+    ret = bfelf_dtor_num(&m_test_elf);
+    ASSERT_TRUE(ret == 2);
+}
+
+void bfelf_loader_ut::test_bfelf_resolve_ctor()
+{
+    auto ret = 0;
+    void *addr = 0;
+
+    ret = bfelf_resolve_ctor(NULL, 0, &addr);
+    ASSERT_TRUE(ret == BFELF_ERROR_INVALID_ARG);
+
+    ret = bfelf_resolve_ctor(&m_test_elf, 0, 0);
+    ASSERT_TRUE(ret == BFELF_ERROR_INVALID_ARG);
+
+    m_test_elf.valid = BFELF_FALSE;
+    ret = bfelf_resolve_ctor(&m_test_elf, 0, &addr);
+    ASSERT_TRUE(ret == BFELF_ERROR_INVALID_FILE);
+    m_test_elf.valid = BFELF_TRUE;
+
+    ret = bfelf_resolve_ctor(&m_test_elf, 0, &addr);
+    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    ASSERT_TRUE(addr == m_test_exec + 0x10);
+}
+
+void bfelf_loader_ut::test_bfelf_resolve_dtor()
+{
+    auto ret = 0;
+    void *addr = 0;
+
+    ret = bfelf_resolve_dtor(NULL, 0, &addr);
+    ASSERT_TRUE(ret == BFELF_ERROR_INVALID_ARG);
+
+    ret = bfelf_resolve_dtor(&m_test_elf, 0, 0);
+    ASSERT_TRUE(ret == BFELF_ERROR_INVALID_ARG);
+
+    m_test_elf.valid = BFELF_FALSE;
+    ret = bfelf_resolve_dtor(&m_test_elf, 0, &addr);
+    ASSERT_TRUE(ret == BFELF_ERROR_INVALID_FILE);
+    m_test_elf.valid = BFELF_TRUE;
+
+    ret = bfelf_resolve_dtor(&m_test_elf, 0, &addr);
+    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    ASSERT_TRUE(addr == m_test_exec + 0x10);
+}
+
 void bfelf_loader_ut::test_bfelf_program_header()
 {
     auto ret = 0;
@@ -978,6 +1078,9 @@ void bfelf_loader_ut::test_bfelf_print_relocations()
     ASSERT_TRUE(ret == BFELF_SUCCESS);
 }
 
+typedef void(*ctor_func)(void);
+typedef void(*dtor_func)(void);
+
 void bfelf_loader_ut::test_resolve()
 {
     auto ret = 0;
@@ -985,6 +1088,16 @@ void bfelf_loader_ut::test_resolve()
     void *entry2 = 0;
     struct e_string_t str1 = {"exec_ms64tosv64", 15};
     struct e_string_t str2 = {"_Z12dummy3_test2i", 17};
+
+    for (auto i = 0; i < bfelf_ctor_num(&m_dummy3_ef); i++)
+    {
+        ctor_func func;
+
+        ret = bfelf_resolve_ctor(&m_dummy3_ef, i, (void **)&func);
+        ASSERT_TRUE(ret == BFELF_SUCCESS);
+
+        func();
+    }
 
     ret = bfelf_resolve_symbol(&m_dummy3_ef, &str1, &entry1);
     EXPECT_TRUE(ret == BFELF_SUCCESS);
@@ -1028,6 +1141,15 @@ void bfelf_loader_ut::test_resolve()
 
 #endif
 
+    for (auto i = 0; i < bfelf_dtor_num(&m_dummy3_ef); i++)
+    {
+        dtor_func func;
+
+        ret = bfelf_resolve_dtor(&m_dummy3_ef, i, (void **)&func);
+        ASSERT_TRUE(ret == BFELF_SUCCESS);
+
+        func();
+    }
 }
 
 int

@@ -31,6 +31,9 @@
 #include <constants.h>
 #include <debug_ring_interface.h>
 
+typedef void(*ctor_func)(void);
+typedef void(*dtor_func)(void);
+
 /* ========================================================================== */
 /* Global                                                                     */
 /* ========================================================================== */
@@ -220,6 +223,58 @@ execute_symbol(const char *sym)
 }
 
 int64_t
+execute_ctors(struct bfelf_file_t *bfelf_file)
+{
+    int i = 0;
+    int ret = 0;
+
+    if (bfelf_file == 0)
+        return BF_ERROR_INVALID_ARG;
+
+    for (i = 0; i < bfelf_ctor_num(bfelf_file); i++)
+    {
+        ctor_func func;
+
+        ret = bfelf_resolve_ctor(bfelf_file, i, (void **)&func);
+        if (ret != BF_SUCCESS)
+        {
+            ALERT("execute_ctors: failed to resolve ctor: %d\n", ret);
+            return ret;
+        }
+
+        func();
+    }
+
+    return BF_SUCCESS;
+}
+
+int64_t
+execute_dtors(struct bfelf_file_t *bfelf_file)
+{
+    int i = 0;
+    int ret = 0;
+
+    if (bfelf_file == 0)
+        return BF_ERROR_INVALID_ARG;
+
+    for (i = 0; i < bfelf_dtor_num(bfelf_file); i++)
+    {
+        dtor_func func;
+
+        ret = bfelf_resolve_dtor(bfelf_file, i, (void **)&func);
+        if (ret != BF_SUCCESS)
+        {
+            ALERT("execute_ctors: failed to resolve dtor: %d\n", ret);
+            return ret;
+        }
+
+        func();
+    }
+
+    return BF_SUCCESS;
+}
+
+int64_t
 allocate_page_pool(void)
 {
     // int i;
@@ -378,8 +433,8 @@ common_add_module(char *file, int64_t fsize)
 int64_t
 common_load_vmm(void)
 {
-    int i = 0;
-    int ret = 0;
+    int i;
+    int ret;
     struct bfelf_loader_t loader = {0};
     struct bfelf_file_t *bfelf_file = 0;
 
@@ -401,16 +456,17 @@ common_load_vmm(void)
     ret = bfelf_loader_init(&loader);
     if (ret != BFELF_SUCCESS)
     {
-        ALERT("start_vmm: failed to initialize the elf loader: %d - %s\n", ret, bfelf_error(ret));
+        ALERT("load_vmm: failed to initialize the elf loader: %d - %s\n", ret, bfelf_error(ret));
         return ret;
     }
 
+    i = 0;
     while ((bfelf_file = get_file(i++)) != 0)
     {
         ret = bfelf_loader_add(&loader, bfelf_file);
         if (ret != BFELF_SUCCESS)
         {
-            ALERT("start_vmm: failed to add elf file to the elf loader: %d - %s\n", ret, bfelf_error(ret));
+            ALERT("load_vmm: failed to add elf file to the elf loader: %d - %s\n", ret, bfelf_error(ret));
             return ret;
         }
     }
@@ -418,14 +474,25 @@ common_load_vmm(void)
     ret = bfelf_loader_relocate(&loader);
     if (ret != BFELF_SUCCESS)
     {
-        ALERT("start_vmm: failed to relocate the elf loader: %d - %s\n", ret, bfelf_error(ret));
+        ALERT("load_vmm: failed to relocate the elf loader: %d - %s\n", ret, bfelf_error(ret));
         return ret;
+    }
+
+    i = 0;
+    while ((bfelf_file = get_file(i++)) != 0)
+    {
+        ret = execute_ctors(bfelf_file);
+        if (ret != BF_SUCCESS)
+        {
+            ALERT("load_vmm: failed to execute ctors: %d\n", ret);
+            return ret;
+        }
     }
 
     ret = allocate_page_pool();
     if (ret != BF_SUCCESS)
     {
-        ALERT("start_vmm: failed to allocate page pool: %d\n", ret);
+        ALERT("load_vmm: failed to allocate page pool: %d\n", ret);
         return ret;
     }
 
@@ -436,7 +503,9 @@ common_load_vmm(void)
 int64_t
 common_unload_vmm(void)
 {
+    int i;
     int ret;
+    struct bfelf_file_t *bfelf_file = 0;
 
     if (vmm_status() == VMM_CORRUPT)
     {
@@ -452,6 +521,17 @@ common_unload_vmm(void)
 
     if (vmm_status() == VMM_LOADED)
     {
+        i = 0;
+        while ((bfelf_file = get_file(i++)) != 0)
+        {
+            ret = execute_dtors(bfelf_file);
+            if (ret != BF_SUCCESS)
+            {
+                ALERT("unload_vmm: failed to execute dtors: %d\n", ret);
+                goto corrupted;
+            }
+        }
+
         ret = free_page_pool();
         if (ret != BF_SUCCESS)
         {
@@ -463,7 +543,7 @@ common_unload_vmm(void)
     ret = remove_elf_files();
     if (ret != BF_SUCCESS)
     {
-        ALERT("stop_vmm: failed to remove elf files: %d\n", ret);
+        ALERT("unload_vmm: failed to remove elf files: %d\n", ret);
         goto corrupted;
     }
 
@@ -530,7 +610,7 @@ common_stop_vmm(void)
 
     if (vmm_status() == VMM_UNLOADED)
     {
-        ALERT("start_vmm: failed to stop vmm. the vmm must be loaded and running prior to stoping\n");
+        ALERT("stop_vmm: failed to stop vmm. the vmm must be loaded and running prior to stoping\n");
         return BF_ERROR_VMM_INVALID_STATE;
     }
 

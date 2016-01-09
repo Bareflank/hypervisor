@@ -80,14 +80,17 @@ public:
 class Blah2 : public Blah1
 {
 public:
-    Blah2() {}
+    Blah2() { data = 1; }
     ~Blah2() {}
 
     int boo()
-    { return 1; }
+    { return data; }
 
     int foo() override
-    { return 1; }
+    { return data; }
+
+private:
+    int data;
 };
 
 Blah2 g_blah2;
@@ -105,16 +108,10 @@ dummy3_test2(int num)
     Blah2 &r_blah2 = g_blah2;
     l_my_glob1 = r_blah2.foo();
 
-    // Foo does not crash. This is the pattern we have been using for
-    // everything as it seems to be stable.
     static_blah()->foo();
 
-    // Foo does crash. Still don't know why, but this repros in the kernel
-    // as well so don't do it. Oh.... and if you notice, I do the same thing
-    // above, just not with -> and it works fine. I also do it with a staticly
-    // defined memory and it works fine.
-    // Blah2 *p_blah2 = &g_blah2;
-    // p_blah2->foo();
+    Blah2 *p_blah2 = &g_blah2;
+    p_blah2->foo();
 
     return l_my_glob1 +
            l_my_glob2 +
