@@ -1,11 +1,17 @@
 #!/bin/bash
 
+set -e
+
 if [ -z "$BINUTILS_PATH" ]; then
     export BINUTILS_PATH="http://ftp.gnu.org/gnu/binutils/binutils-2.25.1.tar.bz2"
 fi
 
 if [ -z "$GCC_PATH" ]; then
     export GCC_PATH="https://ftp.gnu.org/gnu/gcc/gcc-5.2.0/gcc-5.2.0.tar.bz2"
+fi
+
+if [ -z "$GCC_PATCH" ]; then
+    export GCC_PATCH="https://raw.githubusercontent.com/Bareflank/hypervisor/master/tools/patches/gcc-5.2.0_no-red-zone.patch"
 fi
 
 if [ -z "$NASM_PATH" ]; then
@@ -28,9 +34,9 @@ rm -Rf $TMPDIR
 mkdir -p $TMPDIR
 
 pushd $TMPDIR
-
 wget $BINUTILS_PATH
 wget $GCC_PATH
+wget $GCC_PATCH
 wget $NASM_PATH
 
 tar xvf binutils-*.tar.bz2
@@ -39,6 +45,11 @@ tar xvf nasm-*.tar.gz
 
 mkdir build-binutils
 mkdir build-gcc
+popd
+
+pushd $TMPDIR/gcc-*
+patch -p1 < ../gcc-*_no-red-zone.patch
+popd
 
 pushd $TMPDIR/build-binutils
 ../binutils-*/configure --target=$TARGET --prefix="$PREFIX" --with-sysroot --disable-nls --disable-werror
@@ -60,5 +71,4 @@ make -j2
 make install
 popd
 
-popd
 rm -Rf $TMPDIR

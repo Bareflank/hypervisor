@@ -255,6 +255,7 @@ NATIVE_CXXFLAGS+=$(addprefix -I, $(strip $(NATIVE_INCLUDE_PATHS)))
 ifeq ($(TARGET_CROSS_COMPILED), true)
 	CROSS_LIBRARY_PATHS+=$(LIBRARY_PATHS)
 	CROSS_LIBRARY_PATHS+=$(VMM_LIBRARY_PATHS)
+	CROSS_LIBRARY_PATHS+=$(dir $(shell $(CROSS_CC) -mno-red-zone -print-libgcc-file-name))
 endif
 
 ifeq ($(TARGET_NATIVE_COMPILED), true)
@@ -279,6 +280,7 @@ CROSS_LDFLAGS+=$(addprefix -L, $(strip $(CROSS_LIBRARY_PATHS)))
 ifeq ($(TARGET_CROSS_COMPILED), true)
 	CROSS_LIBS+=$(LIBS)
 	CROSS_LIBS+=$(VMM_LIBS)
+	CROSS_LIBS+=gcc
 endif
 
 ifeq ($(TARGET_NATIVE_COMPILED), true)
