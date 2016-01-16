@@ -11,7 +11,7 @@ if [ -z "$GCC_PATH" ]; then
 fi
 
 if [ -z "$GCC_PATCH" ]; then
-    export GCC_PATCH="https://raw.githubusercontent.com/Bareflank/hypervisor/master/tools/patches/gcc-5.2.0_no-red-zone.patch"
+    export GCC_PATCH="https://raw.githubusercontent.com/Bareflank/hypervisor/master/tools/patches/gcc-5.2.0_bareflank.patch"
 fi
 
 if [ -z "$NASM_PATH" ]; then
