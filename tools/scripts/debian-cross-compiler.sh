@@ -48,7 +48,7 @@ mkdir build-gcc
 popd
 
 pushd $TMPDIR/gcc-*
-patch -p1 < ../gcc-*_no-red-zone.patch
+patch -p1 < ../gcc-*_bareflank.patch
 popd
 
 pushd $TMPDIR/build-binutils
