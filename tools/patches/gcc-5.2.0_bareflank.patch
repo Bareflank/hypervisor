@@ -1,0 +1,33 @@
+diff -Naur gcc-5.2.0/gcc/config/i386/t-x86_64-elf gcc-5.2.0_bareflank/gcc/config/i386/t-x86_64-elf
+--- gcc-5.2.0/gcc/config/i386/t-x86_64-elf	1969-12-31 16:00:00.000000000 -0800
++++ gcc-5.2.0_bareflank/gcc/config/i386/t-x86_64-elf	2016-01-16 05:31:53.456976825 -0800
+@@ -0,0 +1,4 @@
++# Add libgcc multilib variant without red-zone requirement
++
++MULTILIB_OPTIONS += mno-red-zone
++MULTILIB_DIRNAMES += no-red-zone
+diff -Naur gcc-5.2.0/gcc/config/link.h gcc-5.2.0_bareflank/gcc/config/link.h
+--- gcc-5.2.0/gcc/config/link.h	1969-12-31 16:00:00.000000000 -0800
++++ gcc-5.2.0_bareflank/gcc/config/link.h	2016-01-16 05:35:16.308054321 -0800
+@@ -0,0 +1,8 @@
++#undef LINK_SPEC
++#define LINK_SPEC "\
++  %{shared:-shared} \
++  %{!shared: \
++    %{!static: \
++      %{rdynamic:-export-dynamic} \
++      -dynamic-linker /lib/glidixld.so} \
++      %{static:-static}}"
+diff -Naur gcc-5.2.0/gcc/config.gcc gcc-5.2.0_bareflank/gcc/config.gcc
+--- gcc-5.2.0/gcc/config.gcc	2015-07-02 08:53:33.000000000 -0700
++++ gcc-5.2.0_bareflank/gcc/config.gcc	2016-01-16 05:34:45.901395408 -0800
+@@ -1369,7 +1369,8 @@
+ 	tm_file="${tm_file} i386/unix.h i386/att.h dbxelf.h elfos.h newlib-stdint.h i386/i386elf.h"
+ 	;;
+ x86_64-*-elf*)
+-	tm_file="${tm_file} i386/unix.h i386/att.h dbxelf.h elfos.h newlib-stdint.h i386/i386elf.h i386/x86-64.h"
++	tmake_file="${tmake_file} i386/t-x86_64-elf" # include the new multilib configuration (see http://wiki.osdev.org/Libgcc_without_red_zone)
++	tm_file="${tm_file} i386/unix.h i386/att.h dbxelf.h elfos.h newlib-stdint.h i386/i386elf.h i386/x86-64.h link.h"
+ 	;;
+ i[34567]86-*-rdos*)
+     tm_file="${tm_file} i386/unix.h i386/att.h dbxelf.h elfos.h newlib-stdint.h i386/i386elf.h i386/rdos.h"
