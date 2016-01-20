@@ -2,8 +2,8 @@ diff -Naur gcc/gcc/config/i386/t-x86_64-elf gcc_bareflank/gcc/config/i386/t-x86_
 --- gcc/gcc/config/i386/t-x86_64-elf	1969-12-31 16:00:00.000000000 -0800
 +++ gcc_bareflank/gcc/config/i386/t-x86_64-elf	2016-01-20 04:31:05.551783604 -0800
 @@ -0,0 +1,2 @@
-++MULTILIB_OPTIONS += mno-red-zone
-++MULTILIB_DIRNAMES += no-red-zone
++MULTILIB_OPTIONS += mno-red-zone
++MULTILIB_DIRNAMES += no-red-zone
 diff -Naur gcc/gcc/config.gcc gcc_bareflank/gcc/config.gcc
 --- gcc/gcc/config.gcc	2016-01-20 04:30:07.866086228 -0800
 +++ gcc_bareflank/gcc/config.gcc	2016-01-20 04:32:17.992897101 -0800
