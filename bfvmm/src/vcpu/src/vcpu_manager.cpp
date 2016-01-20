@@ -34,11 +34,8 @@ vcpu_manager::instance()
 vcpu_manager_error::type
 vcpu_manager::init(int64_t vcpuid)
 {
-    if (vcpuid >= MAX_VCPUS)
+    if (vcpuid < 0 || vcpuid >= MAX_VCPUS)
         return vcpu_manager_error::invalid;
-
-    if (m_vcpus[vcpuid] != 0)
-        delete m_vcpus[vcpuid];
 
     m_vcpus[vcpuid] = m_factory.make_vcpu(vcpuid);
 
@@ -48,13 +45,15 @@ vcpu_manager::init(int64_t vcpuid)
 vcpu_manager_error::type
 vcpu_manager::start(int64_t vcpuid)
 {
-    if (vcpuid >= MAX_VCPUS)
+    if (vcpuid < 0 || vcpuid >= MAX_VCPUS)
         return vcpu_manager_error::invalid;
 
-    if (m_vcpus[vcpuid] == 0)
+    const auto &vc = m_vcpus[vcpuid];
+
+    if (!vc)
         return vcpu_manager_error::invalid;
 
-    if (m_vcpus[vcpuid]->start() != vcpu_error::success)
+    if (vc->start() != vcpu_error::success)
         return vcpu_manager_error::failure;
 
     return vcpu_manager_error::success;
@@ -63,13 +62,15 @@ vcpu_manager::start(int64_t vcpuid)
 vcpu_manager_error::type
 vcpu_manager::stop(int64_t vcpuid)
 {
-    if (vcpuid >= MAX_VCPUS)
+    if (vcpuid < 0 || vcpuid >= MAX_VCPUS)
         return vcpu_manager_error::invalid;
 
-    if (m_vcpus[vcpuid] == 0)
+    const auto &vc = m_vcpus[vcpuid];
+
+    if (!vc)
         return vcpu_manager_error::invalid;
 
-    if (m_vcpus[vcpuid]->stop() != vcpu_error::success)
+    if (vc->stop() != vcpu_error::success)
         return vcpu_manager_error::failure;
 
     return vcpu_manager_error::success;
@@ -78,22 +79,23 @@ vcpu_manager::stop(int64_t vcpuid)
 void
 vcpu_manager::write(int64_t vcpuid, const char *str, int64_t len)
 {
-    if (vcpuid < 0 || vcpuid >= MAX_VCPUS || m_vcpus[vcpuid] == 0)
+    const auto &vc = m_vcpus[vcpuid];
+
+    if (!vc)
     {
-        for (auto i = 0; i < MAX_VCPUS; i++)
+        for (const auto &kv : m_vcpus)
         {
-            if (m_vcpus[i] != 0)
-                m_vcpus[i]->write(str, len);
+            if (kv.second)
+                kv.second->write(str, len);
         }
     }
     else
     {
-        m_vcpus[vcpuid]->write(str, len);
+        vc->write(str, len);
     }
 }
 
-vcpu_manager::vcpu_manager() :
-    m_vcpus{0}
+vcpu_manager::vcpu_manager()
 {
 }
 
@@ -118,4 +120,3 @@ write(int file, const void *buffer, size_t count)
 
     return count;
 }
-
