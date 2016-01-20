@@ -61,17 +61,19 @@ write(const char *str, int64_t len)
 
 namespace std
 {
-    bool
-    ostream::init()
+    ostream::ostream() :
+        m_base(10),
+        m_width(0),
+        m_justify(std::left)
     {
-        m_base = 10;
-        m_width = 0;
-        m_justify = std::left;
+        internal_serial()->open();
+        internal_serial()->write("serial: open\n");
+    }
 
-        if (internal_serial()->open() != serial::success)
-            return false;
-
-        return true;
+    ostream::~ostream()
+    {
+        internal_serial()->write("serial: closed\n");
+        internal_serial()->close();
     }
 
     ostream &

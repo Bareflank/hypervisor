@@ -45,6 +45,8 @@ extern "C"
     int64_t symbol_length(const char *sym);
     int64_t resolve_symbol(const char *name, void **sym);
     int64_t execute_symbol(const char *sym);
+    int64_t execute_ctors(struct bfelf_file_t *bfelf_file);
+    int64_t execute_dtors(struct bfelf_file_t *bfelf_file);
     int64_t allocate_page_pool(void);
     int64_t free_page_pool(void);
 }
@@ -256,6 +258,54 @@ driver_entry_ut::test_helper_execute_symbol_sym_success()
     EXPECT_TRUE(common_load_vmm() == BF_SUCCESS);
     EXPECT_TRUE(execute_symbol("sym_that_returns_success") == ENTRY_SUCCESS);
     EXPECT_TRUE(common_unload_vmm() == BF_SUCCESS);
+}
+
+void
+driver_entry_ut::test_helper_execute_ctors_invalid_arg()
+{
+    EXPECT_TRUE(execute_ctors(NULL) == BF_ERROR_INVALID_ARG);
+}
+
+void
+driver_entry_ut::test_helper_execute_ctors_resolve_ctor_failed()
+{
+    MockRepository mocks;
+
+    mocks.OnCallFunc(bfelf_ctor_num).Return(1);
+    mocks.OnCallFunc(bfelf_resolve_ctor).Return(-1);
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        EXPECT_TRUE(common_add_module(m_dummy1, m_dummy1_length) == BF_SUCCESS);
+        EXPECT_TRUE(common_add_module(m_dummy2, m_dummy2_length) == BF_SUCCESS);
+        EXPECT_TRUE(common_add_module(m_dummy3, m_dummy3_length) == BF_SUCCESS);
+        EXPECT_TRUE(execute_ctors((bfelf_file_t *)0x10) == -1);
+        EXPECT_TRUE(common_unload_vmm() == BF_SUCCESS);
+    });
+}
+
+void
+driver_entry_ut::test_helper_execute_dtors_invalid_arg()
+{
+    EXPECT_TRUE(execute_dtors(NULL) == BF_ERROR_INVALID_ARG);
+}
+
+void
+driver_entry_ut::test_helper_execute_dtors_resolve_ctor_failed()
+{
+    MockRepository mocks;
+
+    mocks.OnCallFunc(bfelf_dtor_num).Return(1);
+    mocks.OnCallFunc(bfelf_resolve_dtor).Return(-1);
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        EXPECT_TRUE(common_add_module(m_dummy1, m_dummy1_length) == BF_SUCCESS);
+        EXPECT_TRUE(common_add_module(m_dummy2, m_dummy2_length) == BF_SUCCESS);
+        EXPECT_TRUE(common_add_module(m_dummy3, m_dummy3_length) == BF_SUCCESS);
+        EXPECT_TRUE(execute_dtors((bfelf_file_t *)0x10) == -1);
+        EXPECT_TRUE(common_unload_vmm() == BF_SUCCESS);
+    });
 }
 
 // long long int return_value;

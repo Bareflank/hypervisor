@@ -2,11 +2,6 @@ Misc:
 - create a custom PPA for Travic CI that contains our cross-compiler. Needs to
   support more than one version of GCC, and should install GCC in it's own
   directory to prevent the native GCC from being removed
-- redo the elf_loader unit test to use hippo mocks. Doing so will allow us to
-  mock up a function's dependencis, allowing us to test each function's tasks
-  better
-- cleanup the elf_loader as it has newlines for function call in the header,
-  which was abandoned.
 - We need to go through all of the error codes, and map out blocks for each
   module, driver, elf error, etc... This way, when an error bubbles through
   the system, it's easy to identify
@@ -20,6 +15,13 @@ Version 1.0 TODO:
   VMM modules need their unit tests completed including serial)
 - All of the "C" interfaces should use the int64_t/uint64_t types instead of
   long lon int / unsigned long long int.
+- remove the "valid" flag in the elf loader as it it meaning less and each
+  function should be able to live on it's own.
+- redo the elf_loader unit test to use hippo mocks. Doing so will allow us to
+  mock up a function's dependencis, allowing us to test each function's tasks
+  better
+- cleanup the elf_loader as it has newlines for function calls in the header,
+  which was abandoned.
 
 Version 1.1 TODO:
 - Need to have a completely isolated exit handler. It should have it's own
@@ -41,3 +43,4 @@ Documenttion:
 - Statics using the stack and the crash we saw with the memory manager
 - The build system could use a document that explains how it works and the
   various different features that it has
+- ctors / dtors

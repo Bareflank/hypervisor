@@ -155,11 +155,13 @@ driver_entry_ut::list()
     this->test_common_load_loader_init_failed();
     this->test_common_load_loader_add_file_failed();
     this->test_common_load_loader_relocate_failed();
+    this->test_common_load_execute_ctors_failed();
     this->test_common_load_allocate_page_pool_failed();
     this->test_common_load_success();
 
     this->test_common_unload_status_corrupt();
     this->test_common_unload_status_running();
+    this->test_common_unload_execute_dtors_failed();
     this->test_common_unload_free_page_pool_failed();
     this->test_common_unload_remove_elf_files_failed();
     this->test_common_unload_success_with_loaded();
@@ -211,6 +213,11 @@ driver_entry_ut::list()
     this->test_helper_execute_symbol_resolve_symbol_failed();
     this->test_helper_execute_symbol_sym_failed();
     this->test_helper_execute_symbol_sym_success();
+    this->test_helper_execute_ctors_invalid_arg();
+    this->test_helper_execute_ctors_resolve_ctor_failed();
+    this->test_helper_execute_dtors_invalid_arg();
+    this->test_helper_execute_dtors_resolve_ctor_failed();
+
     // this->test_helper_allocate_page_pool_resolve_symbol_failed();
     // this->test_helper_allocate_page_pool_alloc_page_failed();
     // this->test_helper_allocate_page_pool_add_page_failed();

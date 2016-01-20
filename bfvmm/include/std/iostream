@@ -53,10 +53,8 @@ class ostream
 {
 public:
 
-    ostream() {}
-    virtual ~ostream() {}
-
-    bool init();
+    ostream();
+    virtual ~ostream();
 
     ostream& operator<<(const char *str);
     ostream& operator<<(bool val);

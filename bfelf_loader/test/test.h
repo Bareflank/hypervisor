@@ -56,6 +56,10 @@ private:
     void test_bfelf_relocate_symbol();
     void test_bfelf_relocate_symbol_addend();
     void test_bfelf_relocate_symbols();
+    void test_bfelf_ctor_num();
+    void test_bfelf_dtor_num();
+    void test_bfelf_resolve_ctor();
+    void test_bfelf_resolve_dtor();
     void test_bfelf_program_header();
     void test_bfelf_load_segments();
     void test_bfelf_load_segment();

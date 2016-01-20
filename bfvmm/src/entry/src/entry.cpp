@@ -20,16 +20,12 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #include <entry.h>
-#include <std/std.h>
 #include <vcpu/vcpu_manager.h>
 
 int
 init_vmm_trampoline(int arg)
 {
     (void) arg;
-
-    if (init_std() == false)
-        return ENTRY_ERROR_VMM_INIT_FAILED;
 
     if (g_vcm->init(0) != vcpu_manager_error::success)
         return ENTRY_ERROR_VMM_INIT_FAILED;
