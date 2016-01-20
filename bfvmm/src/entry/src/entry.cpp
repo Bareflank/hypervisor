@@ -32,7 +32,7 @@ init_vmm_trampoline(int arg)
     if (g_vcm->init(0) != vcpu_manager_error::success)
         return ENTRY_ERROR_VMM_INIT_FAILED;
 
-    std::cout << "init_vmm_trampoline: completed" << std::endl;
+    std::cout << "init_vmm_trampoline: completed\n";
     return ENTRY_SUCCESS;
 }
 
@@ -44,7 +44,7 @@ start_vmm_trampoline(int arg)
     if (g_vcm->start(0) != vcpu_manager_error::success)
         return ENTRY_ERROR_VMM_START_FAILED;
 
-    std::cout << "start_vmm_trampoline: completed" << std::endl;
+    std::cout << "start_vmm_trampoline: completed\n";
     return ENTRY_SUCCESS;
 }
 
@@ -56,7 +56,7 @@ stop_vmm_trampoline(int arg)
     if (g_vcm->stop(0) != vcpu_manager_error::success)
         return ENTRY_ERROR_VMM_STOP_FAILED;
 
-    std::cout << "stop_vmm_trampoline: completed" << std::endl;
+    std::cout << "stop_vmm_trampoline: completed\n";
     return ENTRY_SUCCESS;
 }
 

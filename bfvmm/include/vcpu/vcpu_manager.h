@@ -22,6 +22,8 @@
 #ifndef VCPU_MANAGER_H
 #define VCPU_MANAGER_H
 
+#include <map>
+#include <memory>
 #include <vcpu/vcpu_factory.h>
 
 namespace vcpu_manager_error
@@ -105,7 +107,7 @@ private:
 
 private:
 
-    vcpu *m_vcpus[MAX_VCPUS];
+    std::map<int64_t, std::shared_ptr<vcpu> > m_vcpus;
 
 private:
 

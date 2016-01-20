@@ -22,6 +22,7 @@
 #ifndef VCPU_FACTORY_H
 #define VCPU_FACTORY_H
 
+#include <memory>
 #include <vcpu/vcpu_intel_x64.h>
 
 // TODO: Note that this is a placeholder. This class needs to be moved to
@@ -46,8 +47,8 @@ public:
     /// @return returns a pointer to a newly created vCPU. Note that it is
     /// up to the caller to free this vCPU.
     ///
-    vcpu *make_vcpu(int64_t vcpuid)
-    { return new vcpu_intel_x64(vcpuid); }
+    std::shared_ptr<vcpu> make_vcpu(int64_t vcpuid)
+    { return std::make_shared<vcpu>(vcpuid); }
 };
 
 #endif
