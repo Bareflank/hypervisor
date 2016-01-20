@@ -5,6 +5,10 @@ Misc:
 - We need to go through all of the error codes, and map out blocks for each
   module, driver, elf error, etc... This way, when an error bubbles through
   the system, it's easy to identify
+- Add support for weak / strong symbols in the ELF loader as this could get us
+  in trouble at some point.
+- Destructors for statically created classes are not being called. This should
+  be resolved at some point.
 
 Version 1.0 TODO:
 - BFM needs the ability to load / unload the VMM as well as start / stop the

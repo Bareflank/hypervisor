@@ -60,6 +60,10 @@ private:
     void test_bfelf_dtor_num();
     void test_bfelf_resolve_ctor();
     void test_bfelf_resolve_dtor();
+    void test_bfelf_init_num();
+    void test_bfelf_fini_num();
+    void test_bfelf_resolve_init();
+    void test_bfelf_resolve_fini();
     void test_bfelf_program_header();
     void test_bfelf_load_segments();
     void test_bfelf_load_segment();

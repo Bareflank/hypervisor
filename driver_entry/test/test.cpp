@@ -156,11 +156,13 @@ driver_entry_ut::list()
     this->test_common_load_loader_add_file_failed();
     this->test_common_load_loader_relocate_failed();
     this->test_common_load_execute_ctors_failed();
+    this->test_common_load_execute_inits_failed();
     this->test_common_load_allocate_page_pool_failed();
     this->test_common_load_success();
 
     this->test_common_unload_status_corrupt();
     this->test_common_unload_status_running();
+    this->test_common_unload_execute_finis_failed();
     this->test_common_unload_execute_dtors_failed();
     this->test_common_unload_free_page_pool_failed();
     this->test_common_unload_remove_elf_files_failed();

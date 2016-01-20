@@ -75,7 +75,7 @@ LIBRARY_PATHS+=
 ################################################################################
 
 VMM_SOURCES+=
-VMM_INCLUDE_PATHS+=../../../include/std/
+VMM_INCLUDE_PATHS+=
 VMM_LIBS+=
 VMM_LIBRARY_PATHS+=
 

@@ -100,11 +100,15 @@ serial_port_x86::serial_port_x86(uint8_t port, uint32_t baud, uint8_t data_size,
     m_parity = parity;
     m_data_size = data_size;
     m_stop_bits = stop_bits;
+
+    this->open();
+    this->write("serial: open\n");
 }
 
 serial_port_x86::~serial_port_x86(void)
 {
-
+    this->write("serial: close\n");
+    this->close();
 }
 
 serial::err

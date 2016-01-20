@@ -75,10 +75,10 @@ NATIVE_ASM:=nasm
 NATIVE_LD:=g++
 NATIVE_AR:=ar
 
-CROSS_CC:=~/opt/cross/bin/x86_64-elf-gcc
-CROSS_CXX:=~/opt/cross/bin/x86_64-elf-g++
+CROSS_CC:=~/opt/cross/bin/x86_64-bareflank-gcc
+CROSS_CXX:=~/opt/cross/bin/x86_64-bareflank-g++
 CROSS_ASM:=~/opt/cross/bin/nasm
-CROSS_LD:=~/opt/cross/bin/x86_64-elf-ld
+CROSS_LD:=~/opt/cross/bin/x86_64-bareflank-g++
 CROSS_AR:=~/opt/cross/bin/x86_64-elf-ar
 
 RM:=rm -rf
@@ -96,9 +96,9 @@ NATIVE_CCFLAGS+=-Wextra
 NATIVE_CCFLAGS+=-Wpedantic
 
 CROSS_CCFLAGS+=-fpic
-CROSS_CCFLAGS+=-mno-red-zone
-CROSS_CCFLAGS+=-mcmodel=large
 CROSS_CCFLAGS+=-ffreestanding
+CROSS_CCFLAGS+=-fno-exceptions
+CROSS_CCFLAGS+=-mno-red-zone
 CROSS_CCFLAGS+=-Wall
 CROSS_CCFLAGS+=-Wextra
 CROSS_CCFLAGS+=-Wpedantic
@@ -114,14 +114,11 @@ NATIVE_CXXFLAGS+=-Wextra
 NATIVE_CXXFLAGS+=-Wpedantic
 
 CROSS_CXXFLAGS+=-fpic
-CROSS_CXXFLAGS+=-mno-red-zone
-CROSS_CXXFLAGS+=-mcmodel=large
 CROSS_CXXFLAGS+=-ffreestanding
-CROSS_CXXFLAGS+=-fno-rtti
-CROSS_CXXFLAGS+=-fno-sized-deallocation
 CROSS_CXXFLAGS+=-fno-exceptions
 CROSS_CXXFLAGS+=-fno-use-cxa-atexit
 CROSS_CXXFLAGS+=-fno-threadsafe-statics
+CROSS_CXXFLAGS+=-mno-red-zone
 CROSS_CXXFLAGS+=-std=c++14
 CROSS_CXXFLAGS+=-Wall
 CROSS_CXXFLAGS+=-Wextra
@@ -139,12 +136,7 @@ CROSS_ASMFLAGS+=-f elf64
 # Default LD Flags
 ################################################################################
 
-NATIVE_LDFLAGS+=-Wl,-fuse-ld=gold
-
-CROSS_LDFLAGS+=-fuse-ld=gold
 CROSS_LDFLAGS+=-z max-page-size=4096
-CROSS_LDFLAGS+=-ffreestanding
-CROSS_LDFLAGS+=-nostdlib
 
 ################################################################################
 # Default AR Flags
@@ -255,7 +247,6 @@ NATIVE_CXXFLAGS+=$(addprefix -I, $(strip $(NATIVE_INCLUDE_PATHS)))
 ifeq ($(TARGET_CROSS_COMPILED), true)
 	CROSS_LIBRARY_PATHS+=$(LIBRARY_PATHS)
 	CROSS_LIBRARY_PATHS+=$(VMM_LIBRARY_PATHS)
-	CROSS_LIBRARY_PATHS+=$(dir $(shell $(CROSS_CC) -mno-red-zone -print-libgcc-file-name))
 endif
 
 ifeq ($(TARGET_NATIVE_COMPILED), true)
@@ -280,7 +271,6 @@ CROSS_LDFLAGS+=$(addprefix -L, $(strip $(CROSS_LIBRARY_PATHS)))
 ifeq ($(TARGET_CROSS_COMPILED), true)
 	CROSS_LIBS+=$(LIBS)
 	CROSS_LIBS+=$(VMM_LIBS)
-	CROSS_LIBS+=gcc
 endif
 
 ifeq ($(TARGET_NATIVE_COMPILED), true)
@@ -343,8 +333,29 @@ endif
 # Define Flags
 ################################################################################
 
-CROSS_DFLAGS:=$(addprefix -D, $(strip $(CROSS_DEFINES)))
-NATIVE_DFLAGS:=$(addprefix -D, $(strip $(NATIVE_DEFINES)))
+CROSS_DEFINES+=_HAVE_LONG_DOUBLE
+CROSS_DEFINES+=_LDBL_EQ_DBL
+CROSS_DEFINES+=_POSIX_TIMERS
+CROSS_DEFINES+=MALLOC_PROVIDED
+CROSS_DEFINES+=_NEWLIB_VERSION
+
+CROSS_CCFLAGS+=$(addprefix -D, $(strip $(CROSS_DEFINES)))
+CROSS_CXXFLAGS+=$(addprefix -D, $(strip $(CROSS_DEFINES)))
+
+NATIVE_CCFLAGS+=$(addprefix -D, $(strip $(NATIVE_DEFINES)))
+NATIVE_CXXFLAGS+=$(addprefix -D, $(strip $(NATIVE_DEFINES)))
+
+################################################################################
+# Undefines Flags
+################################################################################
+
+CROSS_UNDEFINES+=__STRICT_ANSI__
+
+CROSS_CCFLAGS+=$(addprefix -U, $(strip $(CROSS_UNDEFINES)))
+CROSS_CXXFLAGS+=$(addprefix -U, $(strip $(CROSS_UNDEFINES)))
+
+NATIVE_CCFLAGS+=$(addprefix -U, $(strip $(NATIVE_UNDEFINES)))
+NATIVE_CXXFLAGS+=$(addprefix -U, $(strip $(NATIVE_UNDEFINES)))
 
 ################################################################################
 # Dependency Auto-Genetaion
@@ -439,11 +450,11 @@ $(CROSS_OUTDIR):
 	@$(MD) $(CROSS_OUTDIR)
 
 $(CROSS_OBJDIR)/%.o: %.c $(CROSS_OBJDIR)/%.d
-	$(CROSS_CC) $< -o $@ -c $(CROSS_CCFLAGS) $(CROSS_DFLAGS) $(CROSS_DEPFLAGS)
+	$(CROSS_CC) $< -o $@ -c $(CROSS_CCFLAGS) $(CROSS_DEPFLAGS)
 	$(CROSS_POSTCOMPILE)
 
 $(CROSS_OBJDIR)/%.o: %.cpp $(CROSS_OBJDIR)/%.d
-	$(CROSS_CXX) $< -o $@ -c $(CROSS_CXXFLAGS) $(CROSS_DFLAGS) $(CROSS_DEPFLAGS)
+	$(CROSS_CXX) $< -o $@ -c $(CROSS_CXXFLAGS) $(CROSS_DEPFLAGS)
 	$(CROSS_POSTCOMPILE)
 
 $(CROSS_OBJDIR)/%.o: %.asm
@@ -499,11 +510,11 @@ $(NATIVE_OUTDIR):
 	@$(MD) $(NATIVE_OUTDIR)
 
 $(NATIVE_OBJDIR)/%.o: %.c $(NATIVE_OBJDIR)/%.d
-	$(NATIVE_CC) $< -o $@ -c $(NATIVE_CCFLAGS) $(NATIVE_DFLAGS) $(NATIVE_DEPFLAGS)
+	$(NATIVE_CC) $< -o $@ -c $(NATIVE_CCFLAGS) $(NATIVE_DEPFLAGS)
 	$(NATIVE_POSTCOMPILE)
 
 $(NATIVE_OBJDIR)/%.o: %.cpp $(NATIVE_OBJDIR)/%.d
-	$(NATIVE_CXX) $< -o $@ -c $(NATIVE_CXXFLAGS) $(NATIVE_DFLAGS) $(NATIVE_DEPFLAGS)
+	$(NATIVE_CXX) $< -o $@ -c $(NATIVE_CXXFLAGS) $(NATIVE_DEPFLAGS)
 	$(NATIVE_POSTCOMPILE)
 
 $(NATIVE_OBJDIR)/%.o: %.asm

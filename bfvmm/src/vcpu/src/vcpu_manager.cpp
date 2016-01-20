@@ -19,7 +19,10 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+#include <stddef.h>
+
 #include <vcpu/vcpu_manager.h>
+#include <serial/serial_port_x86.h>
 
 vcpu_manager *
 vcpu_manager::instance()
@@ -93,3 +96,26 @@ vcpu_manager::vcpu_manager() :
     m_vcpus{0}
 {
 }
+
+serial_port_x86 *
+internal_serial()
+{
+    static serial_port_x86 serial;
+    return &serial;
+}
+
+extern "C" int
+write(int file, const void *buffer, size_t count)
+{
+    (void) file;
+
+    // TODO: Need to add a cout to each vcpu so that it can provide a unique
+    // file handle so that we know what vcpu to write to. At the moment, we
+    // simply broadcast to all vcpus
+
+    internal_serial()->write((char *)buffer, count);
+    vcpu_manager::instance()->write(-1, (char *)buffer, count);
+
+    return count;
+}
+

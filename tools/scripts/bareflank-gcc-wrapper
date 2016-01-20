@@ -1,0 +1,156 @@
+#!/bin/bash -e
+
+# ------------------------------------------------------------------------------
+# Info
+# ------------------------------------------------------------------------------
+
+VERBOSE="false"
+
+for ARG in "$@"
+do
+    if [[ $ARG == "-v" ]]; then
+        VERBOSE="true"
+    fi
+done
+
+# ------------------------------------------------------------------------------
+# Mode
+# ------------------------------------------------------------------------------
+
+MODE="link"
+
+for ARG in "$@"
+do
+    if [[ $ARG == "-c" ]]; then
+        MODE="compile"
+    fi
+done
+
+# ------------------------------------------------------------------------------
+# Compiler
+# ------------------------------------------------------------------------------
+
+COMPILER="unsupported"
+
+if [[ $0 == *"gcc" ]]; then
+    COMPILER="$HOME/opt/cross/bin/x86_64-elf-gcc"
+fi
+
+if [[ $0 == *"g++" ]]; then
+    COMPILER="$HOME/opt/cross/bin/x86_64-elf-g++"
+fi
+
+if [[ $COMPILER == "unsupported" ]]; then
+    echo "You cannot use the wrapper directly. Instead, use a symlink that ends in gcc or g++"
+    exit 1
+fi
+
+# ------------------------------------------------------------------------------
+# Unsupported
+# ------------------------------------------------------------------------------
+
+UNSUPPORTED=false
+
+for ARG in "$@"
+do
+    if [[ $MODE == "link" ]]; then
+        if [[ $ARG == *".c" ]]; then
+            UNSUPPORTED=true
+        fi
+        if [[ $ARG == *".cpp" ]]; then
+            UNSUPPORTED=true
+        fi
+    fi
+done
+
+if [[ $UNSUPPORTED == "true" ]]; then
+    echo "Compiling and linking at the same time is not supported. Use -c"
+    exit 1
+fi
+
+# ------------------------------------------------------------------------------
+# Filter Arguments
+# ------------------------------------------------------------------------------
+
+i=0
+ARGS[$i]=
+
+for ARG in "$@"
+do
+    if [[ $ARG == "-v"* ]]; then continue; fi
+
+    if [[ $MODE == "link" ]]; then
+
+        if [[ $ARG == "-m"* ]]; then continue; fi
+        if [[ $ARG == "-f"* ]]; then continue; fi
+        if [[ $ARG == "-W"* ]]; then continue; fi
+        if [[ $ARG == "-D"* ]]; then continue; fi
+        if [[ $ARG == "-U"* ]]; then continue; fi
+        if [[ $ARG == "-std"* ]]; then continue; fi
+
+        if [[ $ARG == "-rdynamic" ]]; then
+            ARG="-export-dynamic"
+        fi
+    fi
+
+    ARGS[$i]=$ARG
+    i=$((i + 1))
+
+done
+
+# ------------------------------------------------------------------------------
+# Sysroot Libraries
+# ------------------------------------------------------------------------------
+
+# By default, bareflank does not support the use of libc or libc++ as static
+# libraries. Instead, libc is only used to create libc++, and libc++ must
+# be loaded at runtime, and thus does not need to be known during linking. The
+# only thing the hypervisor code should need from the sysroot is the includes.
+
+if [[ $BAREFLANK_WRAPPER_INCLUDE_LIBC == "true" ]]; then
+    SYSROOT_LIBS="-lc -lbfc"
+    SYSROOT_LIB_PATH="-L$HOME/opt/cross/x86_64-elf/lib/"
+fi
+
+# ------------------------------------------------------------------------------
+# Sysroot Includes
+# ------------------------------------------------------------------------------
+
+SYSROOT_INC_PATH="-I$HOME/opt/cross/x86_64-elf/include/ -I$HOME/opt/cross/x86_64-elf/include/c++/v1/"
+
+# ------------------------------------------------------------------------------
+# Libgcc
+# ------------------------------------------------------------------------------
+
+LIBGCC_FILENAME=`$COMPILER -mno-red-zone -print-libgcc-file-name`
+LIBGCC_DIRNAME=`dirname $LIBGCC_FILENAME`
+
+if [[ $MODE == "link" ]]; then
+    LIBGCC_LIBS="-lgcc"
+    LIBGCC_LIB_PATH="-L$LIBGCC_DIRNAME"
+fi
+
+# ------------------------------------------------------------------------------
+# Execute
+# ------------------------------------------------------------------------------
+
+if [ $VERBOSE == "true" ]; then
+    echo "ARGS: $@"
+    echo "MODE: $MODE"
+    echo "COMPILER: $COMPILER"
+    echo "FILTERED ARGS: ${ARGS[*]}"
+    echo "LIBGCC_LIBS: $LIBGCC_LIBS"
+    echo "LIBGCC_LIB_PATH: $LIBGCC_LIB_PATH"
+    echo "SYSROOT_LIBS: $SYSROOT_LIBS"
+    echo "SYSROOT_LIB_PATH: $SYSROOT_LIB_PATH"
+    echo "SYSROOT_INC_PATH: $SYSROOT_INC_PATH"
+    echo ""
+fi
+
+if [[ $MODE == "compile" ]]; then
+    $COMPILER $SYSROOT_INC_PATH ${ARGS[*]}
+fi
+
+if [[ $MODE == "link" ]]; then
+    $HOME/opt/cross/bin/x86_64-elf-ld ${ARGS[*]} $SYSROOT_LIB_PATH $SYSROOT_LIBS $LIBGCC_LIB_PATH $LIBGCC_LIBS
+fi

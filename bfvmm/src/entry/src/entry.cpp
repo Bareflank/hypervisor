@@ -19,6 +19,8 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+#include <iostream>
+
 #include <entry.h>
 #include <vcpu/vcpu_manager.h>
 
@@ -30,6 +32,7 @@ init_vmm_trampoline(int arg)
     if (g_vcm->init(0) != vcpu_manager_error::success)
         return ENTRY_ERROR_VMM_INIT_FAILED;
 
+    std::cout << "init_vmm_trampoline: completed" << std::endl;
     return ENTRY_SUCCESS;
 }
 
@@ -41,6 +44,7 @@ start_vmm_trampoline(int arg)
     if (g_vcm->start(0) != vcpu_manager_error::success)
         return ENTRY_ERROR_VMM_START_FAILED;
 
+    std::cout << "start_vmm_trampoline: completed" << std::endl;
     return ENTRY_SUCCESS;
 }
 
@@ -52,6 +56,7 @@ stop_vmm_trampoline(int arg)
     if (g_vcm->stop(0) != vcpu_manager_error::success)
         return ENTRY_ERROR_VMM_STOP_FAILED;
 
+    std::cout << "stop_vmm_trampoline: completed" << std::endl;
     return ENTRY_SUCCESS;
 }
 
@@ -77,23 +82,4 @@ stop_vmm(int arg)
     (void) arg;
 
     return stop_vmm_trampoline(arg);
-}
-
-// -----------------------------------------------------------------------------
-// REMOVE ME
-// -----------------------------------------------------------------------------
-//
-// The following should be removed once we fully support global constructors
-
-extern "C" void
-__cxa_pure_virtual(void)
-{
-}
-
-extern "C" int
-atexit(void (*func)(void)) throw ()
-{
-    (void) func;
-
-    return 0;
 }
