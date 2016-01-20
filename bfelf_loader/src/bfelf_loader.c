@@ -38,7 +38,8 @@
 #include <linux/module.h>
 #define ALERT(...) printk("[ELF ALERT]: " __VA_ARGS__)
 #else
-#define ALERT(...)
+#include <stdio.h>
+#define ALERT(...) printf("[ELF ALERT]: " __VA_ARGS__)
 #endif
 
 /******************************************************************************/
@@ -395,6 +396,8 @@ bfelf_file_init(char *file, uint64_t fsize, struct bfelf_file_t *ef)
         struct e_string_t name;
         struct e_string_t name_ctors = {".ctors", 6};
         struct e_string_t name_dtors = {".dtors", 6};
+        struct e_string_t name_init_array = {".init_array", 11};
+        struct e_string_t name_fini_array = {".fini_array", 11};
 
         ret = bfelf_section_header(ef, i, &shdr);
         if (ret != BFELF_SUCCESS)
@@ -413,6 +416,18 @@ bfelf_file_init(char *file, uint64_t fsize, struct bfelf_file_t *ef)
         if (bfelf_strcmp(&name, &name_dtors) == BFELF_TRUE)
         {
             ef->dtors = shdr;
+            continue;
+        }
+
+        if (bfelf_strcmp(&name, &name_init_array) == BFELF_TRUE)
+        {
+            ef->init_array = shdr;
+            continue;
+        }
+
+        if (bfelf_strcmp(&name, &name_fini_array) == BFELF_TRUE)
+        {
+            ef->fini_array = shdr;
             continue;
         }
     }
@@ -1579,6 +1594,88 @@ bfelf_resolve_dtor(struct bfelf_file_t *ef,
         return BFELF_ERROR_INVALID_INDEX;
 
     sym = ((bfelf64_addr *)(ef->file + ef->dtors->sh_offset))[index];
+    *addr = ef->exec + sym;
+
+    return BFELF_SUCCESS;
+}
+
+/******************************************************************************/
+/* ELF INIT / FINI                                                            */
+/******************************************************************************/
+
+bfelf64_sword
+bfelf_init_num(struct bfelf_file_t *ef)
+{
+    if (!ef)
+        return BFELF_ERROR_INVALID_ARG;
+
+    if (ef->valid != BFELF_TRUE)
+        return BFELF_ERROR_INVALID_FILE;
+
+    if (ef->init_array == 0)
+        return 0;
+
+    return ef->init_array->sh_size / sizeof(void *);
+}
+
+bfelf64_sword
+bfelf_fini_num(struct bfelf_file_t *ef)
+{
+    if (!ef)
+        return BFELF_ERROR_INVALID_ARG;
+
+    if (ef->valid != BFELF_TRUE)
+        return BFELF_ERROR_INVALID_FILE;
+
+    if (ef->fini_array == 0)
+        return 0;
+
+    return ef->fini_array->sh_size / sizeof(void *);
+}
+
+bfelf64_sword
+bfelf_resolve_init(struct bfelf_file_t *ef,
+                   bfelf64_word index,
+                   void **addr)
+{
+    bfelf64_word num = 0;
+    bfelf64_addr sym = 0;
+
+    if (!ef || !addr)
+        return BFELF_ERROR_INVALID_ARG;
+
+    if (ef->valid != BFELF_TRUE)
+        return BFELF_ERROR_INVALID_FILE;
+
+    num = bfelf_init_num(ef);
+    if (index >= num)
+        return BFELF_ERROR_INVALID_INDEX;
+
+    sym = ((bfelf64_addr *)(ef->file + ef->init_array->sh_offset))[index];
+    *addr = ef->exec + sym;
+
+    return BFELF_SUCCESS;
+}
+
+bfelf64_sword
+bfelf_resolve_fini(struct bfelf_file_t *ef,
+                   bfelf64_word index,
+                   void **addr)
+{
+    bfelf64_word num = 0;
+    bfelf64_addr sym = 0;
+
+    if (!ef || !addr)
+        return BFELF_ERROR_INVALID_ARG;
+
+    if (ef->valid != BFELF_TRUE)
+        return BFELF_ERROR_INVALID_FILE;
+
+    num = bfelf_fini_num(ef);
+    if (index >= num)
+        return BFELF_ERROR_INVALID_INDEX;
+
+    sym = ((bfelf64_addr *)(ef->file + ef->fini_array->sh_offset))[index];
     *addr = ef->exec + sym;
 
     return BFELF_SUCCESS;

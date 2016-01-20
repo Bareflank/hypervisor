@@ -31,9 +31,6 @@
 #include <constants.h>
 #include <debug_ring_interface.h>
 
-typedef void(*ctor_func)(void);
-typedef void(*dtor_func)(void);
-
 /* ========================================================================== */
 /* Global                                                                     */
 /* ========================================================================== */
@@ -264,7 +261,59 @@ execute_dtors(struct bfelf_file_t *bfelf_file)
         ret = bfelf_resolve_dtor(bfelf_file, i, (void **)&func);
         if (ret != BF_SUCCESS)
         {
-            ALERT("execute_ctors: failed to resolve dtor: %d\n", ret);
+            ALERT("execute_dtors: failed to resolve dtor: %d\n", ret);
+            return ret;
+        }
+
+        func();
+    }
+
+    return BF_SUCCESS;
+}
+
+int64_t
+execute_inits(struct bfelf_file_t *bfelf_file)
+{
+    int i = 0;
+    int ret = 0;
+
+    if (bfelf_file == 0)
+        return BF_ERROR_INVALID_ARG;
+
+    for (i = 0; i < bfelf_init_num(bfelf_file); i++)
+    {
+        init_func func;
+
+        ret = bfelf_resolve_init(bfelf_file, i, (void **)&func);
+        if (ret != BF_SUCCESS)
+        {
+            ALERT("execute_inits: failed to resolve init: %d\n", ret);
+            return ret;
+        }
+
+        func();
+    }
+
+    return BF_SUCCESS;
+}
+
+int64_t
+execute_finis(struct bfelf_file_t *bfelf_file)
+{
+    int i = 0;
+    int ret = 0;
+
+    if (bfelf_file == 0)
+        return BF_ERROR_INVALID_ARG;
+
+    for (i = 0; i < bfelf_fini_num(bfelf_file); i++)
+    {
+        fini_func func;
+
+        ret = bfelf_resolve_fini(bfelf_file, i, (void **)&func);
+        if (ret != BF_SUCCESS)
+        {
+            ALERT("execute_finis: failed to resolve fini: %d\n", ret);
             return ret;
         }
 
@@ -457,7 +506,7 @@ common_load_vmm(void)
     if (ret != BFELF_SUCCESS)
     {
         ALERT("load_vmm: failed to initialize the elf loader: %d - %s\n", ret, bfelf_error(ret));
-        return ret;
+        goto failure;
     }
 
     i = 0;
@@ -467,7 +516,7 @@ common_load_vmm(void)
         if (ret != BFELF_SUCCESS)
         {
             ALERT("load_vmm: failed to add elf file to the elf loader: %d - %s\n", ret, bfelf_error(ret));
-            return ret;
+            goto failure;
         }
     }
 
@@ -475,7 +524,7 @@ common_load_vmm(void)
     if (ret != BFELF_SUCCESS)
     {
         ALERT("load_vmm: failed to relocate the elf loader: %d - %s\n", ret, bfelf_error(ret));
-        return ret;
+        goto failure;
     }
 
     i = 0;
@@ -485,7 +534,14 @@ common_load_vmm(void)
         if (ret != BF_SUCCESS)
         {
             ALERT("load_vmm: failed to execute ctors: %d\n", ret);
-            return ret;
+            goto failure;
+        }
+
+        ret = execute_inits(bfelf_file);
+        if (ret != BF_SUCCESS)
+        {
+            ALERT("load_vmm: failed to execute inits: %d\n", ret);
+            goto failure;
         }
     }
 
@@ -493,11 +549,16 @@ common_load_vmm(void)
     if (ret != BF_SUCCESS)
     {
         ALERT("load_vmm: failed to allocate page pool: %d\n", ret);
-        return ret;
+        goto failure;
     }
 
     g_vmm_status = VMM_LOADED;
     return BF_SUCCESS;
+
+failure:
+
+    common_unload_vmm();
+    return ret;
 }
 
 int64_t
@@ -524,6 +585,13 @@ common_unload_vmm(void)
         i = 0;
         while ((bfelf_file = get_file(i++)) != 0)
         {
+            ret = execute_finis(bfelf_file);
+            if (ret != BF_SUCCESS)
+            {
+                ALERT("unload_vmm: failed to execute finis: %d\n", ret);
+                goto corrupted;
+            }
+
             ret = execute_dtors(bfelf_file);
             if (ret != BF_SUCCESS)
             {
@@ -580,18 +648,23 @@ common_start_vmm(void)
     if (ret != BF_SUCCESS)
     {
         ALERT("start_vmm: failed to execute init_vmm: %d\n", ret);
-        return ret;
+        goto failure;
     }
 
     ret = execute_symbol("start_vmm");
     if (ret != BF_SUCCESS)
     {
         ALERT("start_vmm: failed to execute start_vmm: %d\n", ret);
-        return ret;
+        goto failure;
     }
 
     g_vmm_status = VMM_RUNNING;
     return BF_SUCCESS;
+
+failure:
+
+    common_stop_vmm();
+    return ret;
 }
 
 int64_t

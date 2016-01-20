@@ -40,6 +40,7 @@ extern "C"
     int64_t remove_elf_files(void);
     int64_t set_vmm_status(int64_t status);
     int64_t execute_dtors(struct bfelf_file_t *bfelf_file);
+    int64_t execute_finis(struct bfelf_file_t *bfelf_file);
 }
 
 // =============================================================================
@@ -73,6 +74,29 @@ driver_entry_ut::test_common_unload_status_running()
 }
 
 void
+driver_entry_ut::test_common_unload_execute_finis_failed()
+{
+    EXPECT_TRUE(common_add_module(m_dummy1, m_dummy1_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_add_module(m_dummy2, m_dummy2_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_add_module(m_dummy3, m_dummy3_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_load_vmm() == BF_SUCCESS);
+
+    {
+        MockRepository mocks;
+
+        mocks.OnCallFunc(execute_finis).Return(-1);
+
+        RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+        {
+            EXPECT_TRUE(common_unload_vmm() == -1);
+            EXPECT_TRUE(set_vmm_status(VMM_LOADED) == VMM_CORRUPT);
+        });
+    }
+
+    EXPECT_TRUE(common_unload_vmm() == BF_SUCCESS);
+}
+
+void
 driver_entry_ut::test_common_unload_execute_dtors_failed()
 {
     EXPECT_TRUE(common_add_module(m_dummy1, m_dummy1_length) == BF_SUCCESS);
@@ -83,6 +107,7 @@ driver_entry_ut::test_common_unload_execute_dtors_failed()
     {
         MockRepository mocks;
 
+        mocks.OnCallFunc(execute_finis).Return(BF_SUCCESS);
         mocks.OnCallFunc(execute_dtors).Return(-1);
 
         RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -101,6 +126,7 @@ driver_entry_ut::test_common_unload_free_page_pool_failed()
     MockRepository mocks;
 
     mocks.OnCallFunc(vmm_status).Return(VMM_LOADED);
+    mocks.OnCallFunc(execute_finis).Return(BF_SUCCESS);
     mocks.OnCallFunc(execute_dtors).Return(BF_SUCCESS);
     mocks.OnCallFunc(free_page_pool).Return(-1);
 

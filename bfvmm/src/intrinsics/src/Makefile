@@ -62,9 +62,7 @@ CROSS_OUTDIR:=../../../bin
 SOURCES+=intrinsics_x64.asm
 SOURCES+=intrinsics_intel_x64.asm
 
-INCLUDE_PATHS+=./
-INCLUDE_PATHS+=../../../include/
-INCLUDE_PATHS+=../../../../include/
+INCLUDE_PATHS+=
 
 LIBS+=
 
@@ -75,7 +73,7 @@ LIBRARY_PATHS+=
 ################################################################################
 
 VMM_SOURCES+=
-VMM_INCLUDE_PATHS+=../../../include/std/
+VMM_INCLUDE_PATHS+=
 VMM_LIBS+=
 VMM_LIBRARY_PATHS+=
 

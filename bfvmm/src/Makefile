@@ -32,7 +32,6 @@ SUBDIRS += vmm
 SUBDIRS += vmcs
 SUBDIRS += vcpu
 SUBDIRS += entry
-SUBDIRS += std
 
 ################################################################################
 # Common

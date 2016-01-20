@@ -38,6 +38,8 @@ struct bfelf_test
     char strtab[12];
     void *ctors[2];
     void *dtors[2];
+    void *init_array[2];
+    void *fini_array[2];
     bfelf_sym symtab[2];
     bfelf_rel reltab[2];
     bfelf_rela relatab[2];
@@ -910,7 +912,7 @@ void bfelf_loader_ut::test_bfelf_dtor_num()
 
     m_test_elf.dtors = &g_test.shdr6;
     g_test.shdr6.sh_size = 16;
-    g_test.shdr6.sh_offset = (bfelf64_off)&g_test.ctors - (bfelf64_off)&g_test;
+    g_test.shdr6.sh_offset = (bfelf64_off)&g_test.dtors - (bfelf64_off)&g_test;
     g_test.dtors[0] = (void *)0x10;
     g_test.dtors[1] = (void *)0x20;
 
@@ -956,6 +958,98 @@ void bfelf_loader_ut::test_bfelf_resolve_dtor()
     m_test_elf.valid = BFELF_TRUE;
 
     ret = bfelf_resolve_dtor(&m_test_elf, 0, &addr);
+    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    ASSERT_TRUE(addr == m_test_exec + 0x10);
+}
+
+void bfelf_loader_ut::test_bfelf_init_num()
+{
+    auto ret = 0;
+
+    ret = bfelf_init_num(NULL);
+    ASSERT_TRUE(ret == BFELF_ERROR_INVALID_ARG);
+
+    m_test_elf.valid = BFELF_FALSE;
+    ret = bfelf_init_num(&m_test_elf);
+    ASSERT_TRUE(ret == BFELF_ERROR_INVALID_FILE);
+    m_test_elf.valid = BFELF_TRUE;
+
+    ret = bfelf_init_num(&m_test_elf);
+    ASSERT_TRUE(ret == 0);
+
+    m_test_elf.init_array = &g_test.shdr5;
+    g_test.shdr5.sh_size = 16;
+    g_test.shdr5.sh_offset = (bfelf64_off)&g_test.init_array - (bfelf64_off)&g_test;
+    g_test.init_array[0] = (void *)0x10;
+    g_test.init_array[1] = (void *)0x20;
+
+    ret = bfelf_init_num(&m_test_elf);
+    ASSERT_TRUE(ret == 2);
+}
+
+void bfelf_loader_ut::test_bfelf_fini_num()
+{
+    auto ret = 0;
+
+    ret = bfelf_fini_num(NULL);
+    ASSERT_TRUE(ret == BFELF_ERROR_INVALID_ARG);
+
+    m_test_elf.valid = BFELF_FALSE;
+    ret = bfelf_fini_num(&m_test_elf);
+    ASSERT_TRUE(ret == BFELF_ERROR_INVALID_FILE);
+    m_test_elf.valid = BFELF_TRUE;
+
+    ret = bfelf_fini_num(&m_test_elf);
+    ASSERT_TRUE(ret == 0);
+
+    m_test_elf.fini_array = &g_test.shdr6;
+    g_test.shdr6.sh_size = 16;
+    g_test.shdr6.sh_offset = (bfelf64_off)&g_test.fini_array - (bfelf64_off)&g_test;
+    g_test.fini_array[0] = (void *)0x10;
+    g_test.fini_array[1] = (void *)0x20;
+
+    ret = bfelf_fini_num(&m_test_elf);
+    ASSERT_TRUE(ret == 2);
+}
+
+void bfelf_loader_ut::test_bfelf_resolve_init()
+{
+    auto ret = 0;
+    void *addr = 0;
+
+    ret = bfelf_resolve_init(NULL, 0, &addr);
+    ASSERT_TRUE(ret == BFELF_ERROR_INVALID_ARG);
+
+    ret = bfelf_resolve_init(&m_test_elf, 0, 0);
+    ASSERT_TRUE(ret == BFELF_ERROR_INVALID_ARG);
+
+    m_test_elf.valid = BFELF_FALSE;
+    ret = bfelf_resolve_init(&m_test_elf, 0, &addr);
+    ASSERT_TRUE(ret == BFELF_ERROR_INVALID_FILE);
+    m_test_elf.valid = BFELF_TRUE;
+
+    ret = bfelf_resolve_init(&m_test_elf, 0, &addr);
+    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    ASSERT_TRUE(addr == m_test_exec + 0x10);
+}
+
+void bfelf_loader_ut::test_bfelf_resolve_fini()
+{
+    auto ret = 0;
+    void *addr = 0;
+
+    ret = bfelf_resolve_fini(NULL, 0, &addr);
+    ASSERT_TRUE(ret == BFELF_ERROR_INVALID_ARG);
+
+    ret = bfelf_resolve_fini(&m_test_elf, 0, 0);
+    ASSERT_TRUE(ret == BFELF_ERROR_INVALID_ARG);
+
+    m_test_elf.valid = BFELF_FALSE;
+    ret = bfelf_resolve_fini(&m_test_elf, 0, &addr);
+    ASSERT_TRUE(ret == BFELF_ERROR_INVALID_FILE);
+    m_test_elf.valid = BFELF_TRUE;
+
+    ret = bfelf_resolve_fini(&m_test_elf, 0, &addr);
     ASSERT_TRUE(ret == BFELF_SUCCESS);
     ASSERT_TRUE(addr == m_test_exec + 0x10);
 }
@@ -1078,9 +1172,6 @@ void bfelf_loader_ut::test_bfelf_print_relocations()
     ASSERT_TRUE(ret == BFELF_SUCCESS);
 }
 
-typedef void(*ctor_func)(void);
-typedef void(*dtor_func)(void);
-
 void bfelf_loader_ut::test_resolve()
 {
     auto ret = 0;
@@ -1094,6 +1185,16 @@ void bfelf_loader_ut::test_resolve()
         ctor_func func;
 
         ret = bfelf_resolve_ctor(&m_dummy3_ef, i, (void **)&func);
+        ASSERT_TRUE(ret == BFELF_SUCCESS);
+
+        func();
+    }
+
+    for (auto i = 0; i < bfelf_init_num(&m_dummy3_ef); i++)
+    {
+        init_func func;
+
+        ret = bfelf_resolve_init(&m_dummy3_ef, i, (void **)&func);
         ASSERT_TRUE(ret == BFELF_SUCCESS);
 
         func();
@@ -1140,6 +1241,16 @@ void bfelf_loader_ut::test_resolve()
     std::cout << std::endl;
 
 #endif
+
+    for (auto i = 0; i < bfelf_fini_num(&m_dummy3_ef); i++)
+    {
+        fini_func func;
+
+        ret = bfelf_resolve_fini(&m_dummy3_ef, i, (void **)&func);
+        ASSERT_TRUE(ret == BFELF_SUCCESS);
+
+        func();
+    }
 
     for (auto i = 0; i < bfelf_dtor_num(&m_dummy3_ef); i++)
     {

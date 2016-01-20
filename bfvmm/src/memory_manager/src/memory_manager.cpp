@@ -273,22 +273,38 @@ add_mdl(struct memory_descriptor *mdl, long long int num)
     return add_mdl_trampoline(mdl, num);
 }
 
-#ifdef CROSS_COMPILED
+extern "C" void *
+_malloc_r(size_t size)
+{
+    size_t i;
+    char *ptr = (char *)g_mm->malloc(size);
 
-void *
-operator new(size_t size)
-{ return g_mm->malloc(size); }
+    if (ptr != NULL)
+    {
+        // Per the spec, you are not supposed to zero out memory for malloc,
+        // but we do anyways just to me on the safe side.
+        for (i = 0; i < size; i++)
+            ptr[i] = 0;
+    }
 
-void *
-operator new[](size_t size)
-{ return g_mm->malloc(size); }
+    return ptr;
+}
 
-void
-operator delete(void *ptr)
-{ g_mm->free(ptr); }
+extern "C" void
+_free_r(void *ptr)
+{
+    g_mm->free(ptr);
+}
 
-void
-operator delete[](void *ptr)
-{ g_mm->free(ptr); }
+extern "C" void *
+_calloc_r(size_t nmemb, size_t size)
+{
+    return _malloc_r(nmemb * size);
+}
 
-#endif
+extern "C" void *
+_realloc_r(void *ptr, size_t size)
+{
+    _free_r(ptr);
+    return _malloc_r(size);
+}

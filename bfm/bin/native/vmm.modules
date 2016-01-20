@@ -1,10 +1,10 @@
 ../../../bfvmm/bin/cross/libmemory_manager.so
 ../../../bfvmm/bin/cross/libentry.so
 ../../../bfvmm/bin/cross/libserial.so
-../../../bfvmm/bin/cross/libstd.so
 ../../../bfvmm/bin/cross/libdebug_ring.so
 ../../../bfvmm/bin/cross/libintrinsics.so
 ../../../bfvmm/bin/cross/libvmm.so
 ../../../bfvmm/bin/cross/libvmcs.so
 ../../../bfvmm/bin/cross/libvcpu.so
 ../../../bfvmm/bin/cross/libexit_handler.so
+../../../bfvmm/bin/cross/libc++.so

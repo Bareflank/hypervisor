@@ -186,11 +186,14 @@ struct bfelf_file_t
     struct bfelf_shdr *shdrtab;
     struct bfelf_phdr *phdrtab;
 
-    struct bfelf_shdr *ctors;
-    struct bfelf_shdr *dtors;
     struct bfelf_shdr *dynsym;
     struct bfelf_shdr *strtab;
     struct bfelf_shdr *shstrtab;
+
+    struct bfelf_shdr *ctors;
+    struct bfelf_shdr *dtors;
+    struct bfelf_shdr *init_array;
+    struct bfelf_shdr *fini_array;
 
     bfelf64_word symnum;
     struct bfelf_sym *symtab;
@@ -987,6 +990,9 @@ bfelf_print_relocations(struct bfelf_file_t *ef);
 /* ELF CTORS / DTORS                                                          */
 /******************************************************************************/
 
+typedef void(*ctor_func)(void);
+typedef void(*dtor_func)(void);
+
 /*
  * ELF .ctors / .dtors
  *
@@ -1062,6 +1068,67 @@ bfelf_resolve_ctor(struct bfelf_file_t *ef,
  */
 bfelf64_sword
 bfelf_resolve_dtor(struct bfelf_file_t *ef,
+                   bfelf64_word index,
+                   void **addr);
+
+/******************************************************************************/
+/* ELF INIT / FINI                                                            */
+/******************************************************************************/
+
+typedef void(*init_func)(void);
+typedef void(*fini_func)(void);
+
+/**
+ * Number of INITs
+ *
+ * @param ef the ELF file
+ * @return the number of entries in the .init_array table / section in the
+ *     ELF file.
+ */
+bfelf64_sword
+bfelf_init_num(struct bfelf_file_t *ef);
+
+/**
+ * Number of FINIs
+ *
+ * @param ef the ELF file
+ * @return the number of entries in the .fini_array table / section in the
+ *     ELF file.
+ */
+bfelf64_sword
+bfelf_fini_num(struct bfelf_file_t *ef);
+
+/**
+ * Resolve INIT
+ *
+ * Given an ELF file, this function returns the address of a INIT based on
+ * the provided index. To get the total number of INITs in the table that
+ * bounds the index, use 0 <= index < bfelf_init_num.
+ *
+ * @param ef the ELF file
+ * @param index the INIT to resolve
+ * @param addr the resulting absolute address
+ * @return BFELF_SUCCESS on success, negative on error
+ */
+bfelf64_sword
+bfelf_resolve_init(struct bfelf_file_t *ef,
+                   bfelf64_word index,
+                   void **addr);
+
+/**
+ * Resolve FINI
+ *
+ * Given an ELF file, this function returns the address of a FINI based on
+ * the provided index. To get the total number of FINIs in the table that
+ * bounds the index, use 0 <= index < bfelf_fini_num.
+ *
+ * @param ef the ELF file
+ * @param index the FINI to resolve
+ * @param addr the resulting absolute address
+ * @return BFELF_SUCCESS on success, negative on error
+ */
+bfelf64_sword
+bfelf_resolve_fini(struct bfelf_file_t *ef,
                    bfelf64_word index,
                    void **addr);
 

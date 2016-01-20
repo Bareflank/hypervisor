@@ -63,11 +63,13 @@ private:
     void test_common_load_loader_add_file_failed();
     void test_common_load_loader_relocate_failed();
     void test_common_load_execute_ctors_failed();
+    void test_common_load_execute_inits_failed();
     void test_common_load_allocate_page_pool_failed();
     void test_common_load_success();
 
     void test_common_unload_status_corrupt();
     void test_common_unload_status_running();
+    void test_common_unload_execute_finis_failed();
     void test_common_unload_execute_dtors_failed();
     void test_common_unload_free_page_pool_failed();
     void test_common_unload_remove_elf_files_failed();
