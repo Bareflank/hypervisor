@@ -1,10 +1,19 @@
 
 ### Warning: 
+
+* 1/11/2015: *
 Although we have a couple of branches that successfully launch 
 the VMM, we are in the process of adding the C++ STL, and thus this repo 
-is a but unstable. This process should be complete in the next couple of 
+is a bit unstable. This process should be complete in the next couple of 
 weeks. If you have questions, we free to email us, or post your questions 
 to the mailing list. 
+
+* 1/21/2015 Update: *
+We have successfully integrated Libc++ into the VMM. We are in the process
+of updating the VMM logic, and re-integrating the VMCS / Exit handler 
+logic. Once this is complete, we should have a working VM launch. We 
+anticipate this work begin completed by the end of the month (no promisses)
+<br>
 
 # Bareflank Hypervisor
 
