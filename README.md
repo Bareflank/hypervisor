@@ -12,7 +12,7 @@ to the mailing list.
 We have successfully integrated Libc++ into the VMM. We are in the process
 of updating the VMM logic, and re-integrating the VMCS / Exit handler 
 logic. Once this is complete, we should have a working VM launch. We 
-anticipate this work begin completed by the end of the month (no promisses)
+anticipate this work being completed by the end of the month (no promisses)
 <br>
 
 # Bareflank Hypervisor
