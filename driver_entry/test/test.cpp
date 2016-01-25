@@ -24,9 +24,17 @@
 #include <fstream>
 #include <sys/mman.h>
 
-auto c_dummy1_filename = "../../../bfelf_loader/bin/cross/libdummy1.so";
-auto c_dummy2_filename = "../../../bfelf_loader/bin/cross/libdummy2.so";
-auto c_dummy3_filename = "../../../bfelf_loader/bin/cross/libdummy3.so";
+const auto c_dummy_add_mdl_failure_filename = "../cross/libdummy_add_mdl_failure.so";
+const auto c_dummy_add_mdl_success_filename = "../cross/libdummy_add_mdl_success.so";
+const auto c_dummy_get_drr_failure_filename = "../cross/libdummy_get_drr_failure.so";
+const auto c_dummy_get_drr_success_filename = "../cross/libdummy_get_drr_success.so";
+const auto c_dummy_init_vmm_failure_filename = "../cross/libdummy_init_vmm_failure.so";
+const auto c_dummy_init_vmm_success_filename = "../cross/libdummy_init_vmm_success.so";
+const auto c_dummy_misc_filename = "../cross/libdummy_misc.so";
+const auto c_dummy_start_vmm_failure_filename = "../cross/libdummy_start_vmm_failure.so";
+const auto c_dummy_start_vmm_success_filename = "../cross/libdummy_start_vmm_success.so";
+const auto c_dummy_stop_vmm_failure_filename = "../cross/libdummy_stop_vmm_failure.so";
+const auto c_dummy_stop_vmm_success_filename = "../cross/libdummy_stop_vmm_success.so";
 
 extern "C" int verify_no_mem_leaks(void);
 
@@ -39,67 +47,171 @@ driver_entry_ut::init()
 {
     auto result = false;
 
-    std::ifstream dummy1_ifs(c_dummy1_filename, std::ifstream::ate);
-    std::ifstream dummy2_ifs(c_dummy2_filename, std::ifstream::ate);
-    std::ifstream dummy3_ifs(c_dummy3_filename, std::ifstream::ate);
+    std::ifstream dummy_add_mdl_failure_ifs(c_dummy_add_mdl_failure_filename, std::ifstream::ate);
+    std::ifstream dummy_add_mdl_success_ifs(c_dummy_add_mdl_success_filename, std::ifstream::ate);
+    std::ifstream dummy_get_drr_failure_ifs(c_dummy_get_drr_failure_filename, std::ifstream::ate);
+    std::ifstream dummy_get_drr_success_ifs(c_dummy_get_drr_success_filename, std::ifstream::ate);
+    std::ifstream dummy_init_vmm_failure_ifs(c_dummy_init_vmm_failure_filename, std::ifstream::ate);
+    std::ifstream dummy_init_vmm_success_ifs(c_dummy_init_vmm_success_filename, std::ifstream::ate);
+    std::ifstream dummy_misc_ifs(c_dummy_misc_filename, std::ifstream::ate);
+    std::ifstream dummy_start_vmm_failure_ifs(c_dummy_start_vmm_failure_filename, std::ifstream::ate);
+    std::ifstream dummy_start_vmm_success_ifs(c_dummy_start_vmm_success_filename, std::ifstream::ate);
+    std::ifstream dummy_stop_vmm_failure_ifs(c_dummy_stop_vmm_failure_filename, std::ifstream::ate);
+    std::ifstream dummy_stop_vmm_success_ifs(c_dummy_stop_vmm_success_filename, std::ifstream::ate);
 
-    if (dummy1_ifs.is_open() == false ||
-        dummy2_ifs.is_open() == false ||
-        dummy3_ifs.is_open() == false)
+    if (dummy_add_mdl_failure_ifs.is_open() == false ||
+        dummy_add_mdl_failure_ifs.is_open() == false ||
+        dummy_get_drr_failure_ifs.is_open() == false ||
+        dummy_get_drr_success_ifs.is_open() == false ||
+        dummy_init_vmm_failure_ifs.is_open() == false ||
+        dummy_init_vmm_success_ifs.is_open() == false ||
+        dummy_misc_ifs.is_open() == false ||
+        dummy_start_vmm_failure_ifs.is_open() == false ||
+        dummy_start_vmm_success_ifs.is_open() == false ||
+        dummy_stop_vmm_failure_ifs.is_open() == false ||
+        dummy_stop_vmm_success_ifs.is_open() == false)
     {
         std::cout << "unable to open one or more dummy libraries: " << std::endl;
-        std::cout << "    - dummy1: " << dummy1_ifs.is_open() << std::endl;
-        std::cout << "    - dummy2: " << dummy2_ifs.is_open() << std::endl;
-        std::cout << "    - dummy3: " << dummy3_ifs.is_open() << std::endl;
+        std::cout << "    - dummy_add_mdl_failure: " << dummy_add_mdl_failure_ifs.is_open() << std::endl;
+        std::cout << "    - dummy_add_mdl_success: " << dummy_add_mdl_success_ifs.is_open() << std::endl;
+        std::cout << "    - dummy_get_drr_failure: " << dummy_get_drr_failure_ifs.is_open() << std::endl;
+        std::cout << "    - dummy_get_drr_success: " << dummy_get_drr_success_ifs.is_open() << std::endl;
+        std::cout << "    - dummy_init_vmm_failure: " << dummy_init_vmm_failure_ifs.is_open() << std::endl;
+        std::cout << "    - dummy_init_vmm_success: " << dummy_init_vmm_success_ifs.is_open() << std::endl;
+        std::cout << "    - dummy_misc: " << dummy_misc_ifs.is_open() << std::endl;
+        std::cout << "    - dummy_start_vmm_failure: " << dummy_start_vmm_failure_ifs.is_open() << std::endl;
+        std::cout << "    - dummy_start_vmm_success: " << dummy_start_vmm_success_ifs.is_open() << std::endl;
+        std::cout << "    - dummy_stop_vmm_failure: " << dummy_stop_vmm_failure_ifs.is_open() << std::endl;
+        std::cout << "    - dummy_stop_vmm_success: " << dummy_stop_vmm_success_ifs.is_open() << std::endl;
         goto close;
     }
 
-    m_dummy1_length = dummy1_ifs.tellg();
-    m_dummy2_length = dummy2_ifs.tellg();
-    m_dummy3_length = dummy3_ifs.tellg();
+    m_dummy_add_mdl_failure_length = dummy_add_mdl_failure_ifs.tellg();
+    m_dummy_add_mdl_success_length = dummy_add_mdl_success_ifs.tellg();
+    m_dummy_get_drr_failure_length = dummy_get_drr_failure_ifs.tellg();
+    m_dummy_get_drr_success_length = dummy_get_drr_success_ifs.tellg();
+    m_dummy_init_vmm_failure_length = dummy_init_vmm_failure_ifs.tellg();
+    m_dummy_init_vmm_success_length = dummy_init_vmm_success_ifs.tellg();
+    m_dummy_misc_length = dummy_misc_ifs.tellg();
+    m_dummy_start_vmm_failure_length = dummy_start_vmm_failure_ifs.tellg();
+    m_dummy_start_vmm_success_length = dummy_start_vmm_success_ifs.tellg();
+    m_dummy_stop_vmm_failure_length = dummy_stop_vmm_failure_ifs.tellg();
+    m_dummy_stop_vmm_success_length = dummy_stop_vmm_success_ifs.tellg();
 
-    if (m_dummy1_length == 0 ||
-        m_dummy2_length == 0 ||
-        m_dummy3_length == 0)
+    if (m_dummy_add_mdl_failure_length == 0 ||
+        m_dummy_add_mdl_failure_length == 0 ||
+        m_dummy_get_drr_failure_length == 0 ||
+        m_dummy_get_drr_success_length == 0 ||
+        m_dummy_init_vmm_failure_length == 0 ||
+        m_dummy_init_vmm_success_length == 0 ||
+        m_dummy_misc_length == 0 ||
+        m_dummy_start_vmm_failure_length == 0 ||
+        m_dummy_start_vmm_success_length == 0 ||
+        m_dummy_stop_vmm_failure_length == 0 ||
+        m_dummy_stop_vmm_success_length == 0)
     {
         std::cout << "one or more of the dummy libraries is empty: " << std::endl;
-        std::cout << "    - dummy1: " << m_dummy1_length << std::endl;
-        std::cout << "    - dummy2: " << m_dummy2_length << std::endl;
-        std::cout << "    - dummy3: " << m_dummy3_length << std::endl;
+        std::cout << "    - dummy_add_mdl_failure: " << m_dummy_add_mdl_failure_length << std::endl;
+        std::cout << "    - dummy_add_mdl_success: " << m_dummy_add_mdl_success_length << std::endl;
+        std::cout << "    - dummy_get_drr_failure: " << m_dummy_get_drr_failure_length << std::endl;
+        std::cout << "    - dummy_get_drr_success: " << m_dummy_get_drr_success_length << std::endl;
+        std::cout << "    - dummy_init_vmm_failure: " << m_dummy_init_vmm_failure_length << std::endl;
+        std::cout << "    - dummy_init_vmm_success: " << m_dummy_init_vmm_success_length << std::endl;
+        std::cout << "    - dummy_misc: " << m_dummy_misc_length << std::endl;
+        std::cout << "    - dummy_start_vmm_failure: " << m_dummy_start_vmm_failure_length << std::endl;
+        std::cout << "    - dummy_start_vmm_success: " << m_dummy_start_vmm_success_length << std::endl;
+        std::cout << "    - dummy_stop_vmm_failure: " << m_dummy_stop_vmm_failure_length << std::endl;
+        std::cout << "    - dummy_stop_vmm_success: " << m_dummy_stop_vmm_success_length << std::endl;
         goto close;
     }
 
-    m_dummy1 = new char[dummy1_ifs.tellg()];
-    m_dummy2 = new char[dummy2_ifs.tellg()];
-    m_dummy3 = new char[dummy3_ifs.tellg()];
+    m_dummy_add_mdl_failure = new char[dummy_add_mdl_failure_ifs.tellg()];
+    m_dummy_add_mdl_success = new char[dummy_add_mdl_success_ifs.tellg()];
+    m_dummy_get_drr_failure = new char[dummy_get_drr_failure_ifs.tellg()];
+    m_dummy_get_drr_success = new char[dummy_get_drr_success_ifs.tellg()];
+    m_dummy_init_vmm_failure = new char[dummy_init_vmm_failure_ifs.tellg()];
+    m_dummy_init_vmm_success = new char[dummy_init_vmm_success_ifs.tellg()];
+    m_dummy_misc = new char[dummy_misc_ifs.tellg()];
+    m_dummy_start_vmm_failure = new char[dummy_start_vmm_failure_ifs.tellg()];
+    m_dummy_start_vmm_success = new char[dummy_start_vmm_success_ifs.tellg()];
+    m_dummy_stop_vmm_failure = new char[dummy_stop_vmm_failure_ifs.tellg()];
+    m_dummy_stop_vmm_success = new char[dummy_stop_vmm_success_ifs.tellg()];
 
-    if (m_dummy1 == NULL ||
-        m_dummy2 == NULL ||
-        m_dummy3 == NULL)
+    if (m_dummy_add_mdl_failure == NULL ||
+        m_dummy_add_mdl_failure == NULL ||
+        m_dummy_get_drr_failure == NULL ||
+        m_dummy_get_drr_success == NULL ||
+        m_dummy_init_vmm_failure == NULL ||
+        m_dummy_init_vmm_success == NULL ||
+        m_dummy_misc == NULL ||
+        m_dummy_start_vmm_failure == NULL ||
+        m_dummy_start_vmm_success == NULL ||
+        m_dummy_stop_vmm_failure == NULL ||
+        m_dummy_stop_vmm_success == NULL)
     {
         std::cout << "unable to allocate space for one or more of the dummy libraries: " << std::endl;
-        std::cout << "    - dummy1: " << (void *)m_dummy1 << std::endl;
-        std::cout << "    - dummy2: " << (void *)m_dummy2 << std::endl;
-        std::cout << "    - dummy3: " << (void *)m_dummy3 << std::endl;
+        std::cout << "    - dummy_add_mdl_failure: " << (void *)m_dummy_add_mdl_failure << std::endl;
+        std::cout << "    - dummy_add_mdl_success: " << (void *)m_dummy_add_mdl_success << std::endl;
+        std::cout << "    - dummy_get_drr_failure: " << (void *)m_dummy_get_drr_failure << std::endl;
+        std::cout << "    - dummy_get_drr_success: " << (void *)m_dummy_get_drr_success << std::endl;
+        std::cout << "    - dummy_init_vmm_failure: " << (void *)m_dummy_init_vmm_failure << std::endl;
+        std::cout << "    - dummy_init_vmm_success: " << (void *)m_dummy_init_vmm_success << std::endl;
+        std::cout << "    - dummy_misc: " << (void *)m_dummy_misc << std::endl;
+        std::cout << "    - dummy_start_vmm_failure: " << (void *)m_dummy_start_vmm_failure << std::endl;
+        std::cout << "    - dummy_start_vmm_success: " << (void *)m_dummy_start_vmm_success << std::endl;
+        std::cout << "    - dummy_stop_vmm_failure: " << (void *)m_dummy_stop_vmm_failure << std::endl;
+        std::cout << "    - dummy_stop_vmm_success: " << (void *)m_dummy_stop_vmm_success << std::endl;
         goto close;
     }
 
-    dummy1_ifs.seekg(0);
-    dummy2_ifs.seekg(0);
-    dummy3_ifs.seekg(0);
+    dummy_add_mdl_failure_ifs.seekg(0);
+    dummy_add_mdl_success_ifs.seekg(0);
+    dummy_get_drr_failure_ifs.seekg(0);
+    dummy_get_drr_success_ifs.seekg(0);
+    dummy_init_vmm_failure_ifs.seekg(0);
+    dummy_init_vmm_success_ifs.seekg(0);
+    dummy_misc_ifs.seekg(0);
+    dummy_start_vmm_failure_ifs.seekg(0);
+    dummy_start_vmm_success_ifs.seekg(0);
+    dummy_stop_vmm_failure_ifs.seekg(0);
+    dummy_stop_vmm_success_ifs.seekg(0);
 
-    dummy1_ifs.read(m_dummy1, m_dummy1_length);
-    dummy2_ifs.read(m_dummy2, m_dummy2_length);
-    dummy3_ifs.read(m_dummy3, m_dummy3_length);
+    dummy_add_mdl_failure_ifs.read(m_dummy_add_mdl_failure, m_dummy_add_mdl_failure_length);
+    dummy_add_mdl_success_ifs.read(m_dummy_add_mdl_success, m_dummy_add_mdl_success_length);
+    dummy_get_drr_failure_ifs.read(m_dummy_get_drr_failure, m_dummy_get_drr_failure_length);
+    dummy_get_drr_success_ifs.read(m_dummy_get_drr_success, m_dummy_get_drr_success_length);
+    dummy_init_vmm_failure_ifs.read(m_dummy_init_vmm_failure, m_dummy_init_vmm_failure_length);
+    dummy_init_vmm_success_ifs.read(m_dummy_init_vmm_success, m_dummy_init_vmm_success_length);
+    dummy_misc_ifs.read(m_dummy_misc, m_dummy_misc_length);
+    dummy_start_vmm_failure_ifs.read(m_dummy_start_vmm_failure, m_dummy_start_vmm_failure_length);
+    dummy_start_vmm_success_ifs.read(m_dummy_start_vmm_success, m_dummy_start_vmm_success_length);
+    dummy_stop_vmm_failure_ifs.read(m_dummy_stop_vmm_failure, m_dummy_stop_vmm_failure_length);
+    dummy_stop_vmm_success_ifs.read(m_dummy_stop_vmm_success, m_dummy_stop_vmm_success_length);
 
-    if (dummy1_ifs.fail() == true ||
-        dummy2_ifs.fail() == true ||
-        dummy3_ifs.fail() == true)
+    if (dummy_add_mdl_failure_ifs.fail() == true ||
+        dummy_add_mdl_failure_ifs.fail() == true ||
+        dummy_get_drr_failure_ifs.fail() == true ||
+        dummy_get_drr_success_ifs.fail() == true ||
+        dummy_init_vmm_failure_ifs.fail() == true ||
+        dummy_init_vmm_success_ifs.fail() == true ||
+        dummy_misc_ifs.fail() == true ||
+        dummy_start_vmm_failure_ifs.fail() == true ||
+        dummy_start_vmm_success_ifs.fail() == true ||
+        dummy_stop_vmm_failure_ifs.fail() == true ||
+        dummy_stop_vmm_success_ifs.fail() == true)
     {
         std::cout << "unable to load one or more dummy libraries into memory: " << std::endl;
-        std::cout << "    - dummy1: " << dummy1_ifs.fail() << std::endl;
-        std::cout << "    - dummy2: " << dummy2_ifs.fail() << std::endl;
-        std::cout << "    - dummy3: " << dummy3_ifs.fail() << std::endl;
+        std::cout << "    - dummy_add_mdl_failure: " << dummy_add_mdl_failure_ifs.fail() << std::endl;
+        std::cout << "    - dummy_add_mdl_success: " << dummy_add_mdl_success_ifs.fail() << std::endl;
+        std::cout << "    - dummy_get_drr_failure: " << dummy_get_drr_failure_ifs.fail() << std::endl;
+        std::cout << "    - dummy_get_drr_success: " << dummy_get_drr_success_ifs.fail() << std::endl;
+        std::cout << "    - dummy_init_vmm_failure: " << dummy_init_vmm_failure_ifs.fail() << std::endl;
+        std::cout << "    - dummy_init_vmm_success: " << dummy_init_vmm_success_ifs.fail() << std::endl;
+        std::cout << "    - dummy_misc: " << dummy_misc_ifs.fail() << std::endl;
+        std::cout << "    - dummy_start_vmm_failure: " << dummy_start_vmm_failure_ifs.fail() << std::endl;
+        std::cout << "    - dummy_start_vmm_success: " << dummy_start_vmm_success_ifs.fail() << std::endl;
+        std::cout << "    - dummy_stop_vmm_failure: " << dummy_stop_vmm_failure_ifs.fail() << std::endl;
+        std::cout << "    - dummy_stop_vmm_success: " << dummy_stop_vmm_success_ifs.fail() << std::endl;
         goto close;
     }
 
@@ -107,9 +219,17 @@ driver_entry_ut::init()
 
 close:
 
-    dummy1_ifs.close();
-    dummy2_ifs.close();
-    dummy3_ifs.close();
+    dummy_add_mdl_failure_ifs.close();
+    dummy_add_mdl_success_ifs.close();
+    dummy_get_drr_failure_ifs.close();
+    dummy_get_drr_success_ifs.close();
+    dummy_init_vmm_failure_ifs.close();
+    dummy_init_vmm_success_ifs.close();
+    dummy_misc_ifs.close();
+    dummy_start_vmm_failure_ifs.close();
+    dummy_start_vmm_success_ifs.close();
+    dummy_stop_vmm_failure_ifs.close();
+    dummy_stop_vmm_success_ifs.close();
 
     return result;
 }
@@ -117,14 +237,38 @@ close:
 bool
 driver_entry_ut::fini()
 {
-    if (m_dummy1 != NULL)
-        delete[] m_dummy1;
+    if (m_dummy_add_mdl_failure != NULL)
+        delete[] m_dummy_add_mdl_failure;
 
-    if (m_dummy2 != NULL)
-        delete[] m_dummy2;
+    if (m_dummy_add_mdl_success != NULL)
+        delete[] m_dummy_add_mdl_success;
 
-    if (m_dummy3 != NULL)
-        delete[] m_dummy3;
+    if (m_dummy_get_drr_failure != NULL)
+        delete[] m_dummy_get_drr_failure;
+
+    if (m_dummy_get_drr_success != NULL)
+        delete[] m_dummy_get_drr_success;
+
+    if (m_dummy_init_vmm_failure != NULL)
+        delete[] m_dummy_init_vmm_failure;
+
+    if (m_dummy_init_vmm_success != NULL)
+        delete[] m_dummy_init_vmm_success;
+
+    if (m_dummy_misc != NULL)
+        delete[] m_dummy_misc;
+
+    if (m_dummy_start_vmm_failure != NULL)
+        delete[] m_dummy_start_vmm_failure;
+
+    if (m_dummy_start_vmm_success != NULL)
+        delete[] m_dummy_start_vmm_success;
+
+    if (m_dummy_stop_vmm_failure != NULL)
+        delete[] m_dummy_stop_vmm_failure;
+
+    if (m_dummy_stop_vmm_success != NULL)
+        delete[] m_dummy_stop_vmm_success;
 
     return true;
 }
@@ -132,103 +276,73 @@ driver_entry_ut::fini()
 bool
 driver_entry_ut::list()
 {
-    this->test_commit_fini_common_stop_failure();
-    this->test_commit_fini_common_unload_failure();
-    this->test_commit_fini_success();
-    this->test_commit_fini_success_multiple_times();
+    this->test_common_fini_unloaded();
+    this->test_common_fini_successful_start();
+    this->test_common_fini_successful_load();
+    this->test_common_fini_successful_add_module();
+    this->test_common_fini_corrupted();
+    this->test_common_fini_failed_load();
+    this->test_common_fini_failed_start();
 
     this->test_common_add_module_invalid_file();
     this->test_common_add_module_invalid_file_size();
-    this->test_common_add_module_status_corrupt();
-    this->test_common_add_module_status_loaded();
-    this->test_common_add_module_status_running();
-    this->test_common_add_module_get_next_file_failed();
-    this->test_common_add_module_elf_file_init_failed();
-    this->test_common_add_module_elf_file_total_exec_failed();
-    this->test_common_add_module_add_elf_file_failed();
-    this->test_common_add_module_elf_file_load_failed();
-    this->test_common_add_module_add_success();
+    this->test_common_add_module_garbage_module();
+    this->test_common_add_module_add_when_already_loaded();
+    this->test_common_add_module_add_when_already_running();
+    this->test_common_add_module_add_when_corrupt();
+    this->test_common_add_module_add_too_many();
 
-    this->test_common_load_status_corrupt();
-    this->test_common_load_status_loaded();
-    this->test_common_load_status_running();
-    this->test_common_load_loader_init_failed();
-    this->test_common_load_loader_add_file_failed();
-    this->test_common_load_loader_relocate_failed();
-    this->test_common_load_execute_ctors_failed();
-    this->test_common_load_execute_inits_failed();
-    this->test_common_load_allocate_page_pool_failed();
-    this->test_common_load_success();
+    this->test_common_load_successful_load();
+    this->test_common_load_load_when_already_loaded();
+    this->test_common_load_load_when_already_running();
+    this->test_common_load_load_when_corrupt();
+    this->test_common_load_fail_due_to_relocation_error();
+    this->test_common_load_fail_due_to_no_modules_added();
+    this->test_common_load_add_mdl_failed();
 
-    this->test_common_unload_status_corrupt();
-    this->test_common_unload_status_running();
-    this->test_common_unload_execute_finis_failed();
-    this->test_common_unload_execute_dtors_failed();
-    this->test_common_unload_free_page_pool_failed();
-    this->test_common_unload_remove_elf_files_failed();
-    this->test_common_unload_success_with_loaded();
-    this->test_common_unload_success_with_unloaded_without_modules();
-    this->test_common_unload_success_with_unloaded_with_modules();
+    this->test_common_unload_unload_when_already_unloaded();
+    this->test_common_unload_unload_when_running();
+    this->test_common_unload_unload_when_corrupt();
 
-    this->test_common_start_status_corrupt();
-    this->test_common_start_status_running();
-    this->test_common_start_status_unloaded();
-    this->test_common_start_init_vmm_failed();
-    this->test_common_start_start_vmm_failed();
-    this->test_common_start_success();
-    this->test_common_start_success_multiple_times();
+    this->test_common_start_start_when_unloaded();
+    this->test_common_start_start_when_already_running();
+    this->test_common_start_start_when_corrupt();
+    this->test_common_start_start_when_init_vmm_missing();
+    this->test_common_start_start_when_start_vmm_missing();
+    this->test_common_start_init_vmm_failure();
+    this->test_common_start_start_vmm_failure();
 
-    this->test_common_stop_status_corrupt();
-    this->test_common_stop_status_loaded();
-    this->test_common_stop_status_unloaded();
-    this->test_common_stop_start_vmm_failed();
-    this->test_common_stop_success();
-    this->test_common_stop_success_multiple_times();
+    this->test_common_stop_stop_when_unloaded();
+    this->test_common_stop_stop_when_not_running();
+    this->test_common_stop_stop_when_alread_stopped();
+    this->test_common_stop_stop_when_corrupt();
+    this->test_common_stop_stop_vmm_missing();
+    this->test_common_stop_stop_vmm_failure();
 
-    this->test_common_dump_status_corrupt();
-    this->test_common_dump_status_unloaded();
-    this->test_common_dump_platform_alloc_failed();
-    this->test_common_dump_resolve_symbol_failed();
-    this->test_common_dump_debug_ring_read_failed();
-    this->test_common_dump_success();
-    this->test_common_dump_success_multiple_times();
+    this->test_common_dump_dump_when_unloaded();
+    this->test_common_dump_dump_when_corrupt();
+    this->test_common_dump_dump_when_loaded();
+    this->test_common_dump_get_drr_missing();
+    this->test_common_dump_get_drr_failure();
 
-    this->test_helper_set_vmm_status();
-    this->test_helper_vmm_status();
+    this->test_helper_common_vmm_status();
     this->test_helper_get_file_invalid_index();
     this->test_helper_get_file_success();
-    this->test_helper_get_next_file_too_man_files();
-    this->test_helper_get_next_file_success();
-    this->test_helper_add_elf_file_invalid_size();
-    this->test_helper_add_elf_file_();
-    this->test_helper_add_elf_file_get_next_file_failed();
-    this->test_helper_add_elf_file_platform_alloc_exec_failed();
-    this->test_helper_add_elf_file_success();
-    this->test_helper_add_elf_file_success_multiple_times();
     this->test_helper_symbol_length_null_symbol();
     this->test_helper_symbol_length_success();
     this->test_helper_resolve_symbol_invalid_name();
     this->test_helper_resolve_symbol_invalid_sym();
-    this->test_helper_resolve_symbol_resolve_symbol_failed();
-    this->test_helper_resolve_symbol_success();
+    this->test_helper_resolve_symbol_missing_symbol();
     this->test_helper_execute_symbol_invalid_arg();
-    this->test_helper_execute_symbol_resolve_symbol_failed();
+    this->test_helper_execute_symbol_missing_symbol();
     this->test_helper_execute_symbol_sym_failed();
     this->test_helper_execute_symbol_sym_success();
-    this->test_helper_execute_ctors_invalid_arg();
-    this->test_helper_execute_ctors_resolve_ctor_failed();
-    this->test_helper_execute_dtors_invalid_arg();
-    this->test_helper_execute_dtors_resolve_ctor_failed();
-
-    // this->test_helper_allocate_page_pool_resolve_symbol_failed();
-    // this->test_helper_allocate_page_pool_alloc_page_failed();
-    // this->test_helper_allocate_page_pool_add_page_failed();
-    // this->test_helper_allocate_page_pool_success();
-    // this->test_helper_allocate_page_pool_success_multiple_times();
-    // this->test_helper_free_page_pool_resolve_symbol_failed();
-    // this->test_helper_free_page_pool_remove_page_failed();
-    // this->test_helper_free_page_pool_success();
-    // this->test_helper_free_page_pool_success_multiple_times();
+    this->test_helper_constructors_success();
+    this->test_helper_add_mdl_invalid_exec();
+    this->test_helper_add_mdl_invalid_size();
+    this->test_helper_add_mdl_1_page();
+    this->test_helper_add_mdl_3_pages();
+    this->test_helper_add_mdl_3_pages_plus();
 
     return verify_no_mem_leaks();
 }

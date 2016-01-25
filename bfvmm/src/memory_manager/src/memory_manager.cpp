@@ -19,6 +19,11 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+
+#include <debug.h>
 #include <constants.h>
 #include <memory_manager/memory_manager.h>
 
@@ -29,7 +34,7 @@
 #define FREE_BLOCK (-1)
 
 // -----------------------------------------------------------------------------
-// GLobal Memory
+// Global Memory
 // -----------------------------------------------------------------------------
 
 // The following defines the entire memory pool. This pool will be used by the
@@ -46,12 +51,25 @@ uint8_t g_mem_pool[MAX_MEM_POOL] ALIGN = {0};
 // a lot of memory needed to manage memory.
 int64_t g_block_allocated[MAX_BLOCKS] = {0};
 
-// A memory descriptor stores information about each page of memory. The
-// memory manager will use this information to provide trnaslations for the rest
-// of the VMM. For example, if the VMM needs to know the physical address of a
-// virtual address, it can ask the memory manager, which provides this
-// information using the MDLs.
-struct memory_descriptor g_mdl[MAX_NUM_MEMORY_DESCRIPTORS] = {0, 0, 0, 0};
+// -----------------------------------------------------------------------------
+// Helpers
+// -----------------------------------------------------------------------------
+
+void *
+out_of_memory(void)
+{
+
+#ifdef CROSS_COMPILED
+
+    const char *msg = "FATAL ERROR: Out of memory!!!";
+
+    write(0, msg, strlen(msg));
+    abort();
+
+#endif
+
+    return 0;
+}
 
 // -----------------------------------------------------------------------------
 // Implementation
@@ -69,7 +87,7 @@ memory_manager::free_blocks()
 {
     auto num_blocks = 0;
 
-    for (auto i = 0; i < MAX_BLOCKS; i++)
+    for (auto i = 0U; i < MAX_BLOCKS; i++)
         if (g_block_allocated[i] == FREE_BLOCK)
             num_blocks++;
 
@@ -104,10 +122,10 @@ memory_manager::malloc_aligned(size_t size, int64_t alignment)
     // It's not until the first hole or "fragmentation" occurs, that m_start
     // must stop until the fragmentation is removed.
 
-    int64_t count = 0;
-    int64_t block = 0;
-    int64_t reset = 0;
-    int64_t num_blocks = size / MAX_CACHE_LINE_SIZE;
+    auto count = 0U;
+    auto block = 0U;
+    auto reset = 0U;
+    auto num_blocks = size / MAX_CACHE_LINE_SIZE;
 
     if (size % MAX_CACHE_LINE_SIZE != 0)
         num_blocks++;
@@ -143,13 +161,13 @@ memory_manager::malloc_aligned(size_t size, int64_t alignment)
 
     if (count == num_blocks)
     {
-        for (auto b = block;  b < MAX_BLOCKS && b < num_blocks + block; b++)
+        for (auto b = block; b < MAX_BLOCKS && b < num_blocks + block; b++)
             g_block_allocated[b] = block;
 
         return block_to_virt(block);
     }
 
-    return 0;
+    return out_of_memory();
 }
 
 void
@@ -172,15 +190,15 @@ memory_manager::free(void *ptr)
 
     auto block = virt_to_block(ptr);
 
-    if (block < 0 || block >= MAX_BLOCKS)
+    if (block < 0 || (uint32_t)block >= MAX_BLOCKS)
         return;
 
     auto start = g_block_allocated[block];
 
-    if (start < 0 || start >= MAX_BLOCKS)
+    if (start < 0 || (uint32_t)start >= MAX_BLOCKS)
         return;
 
-    for (auto b = start; b < MAX_BLOCKS; b++)
+    for (auto b = (uint32_t)start; b < MAX_BLOCKS; b++)
     {
         if (b < m_start)
             m_start = b;
@@ -195,26 +213,10 @@ memory_manager::free(void *ptr)
 void *
 memory_manager::block_to_virt(int64_t block)
 {
-    if (block >= MAX_BLOCKS)
+    if (block < 0 || (uint32_t)block >= MAX_BLOCKS)
         return 0;
 
     return g_mem_pool + (block * MAX_CACHE_LINE_SIZE);
-}
-
-void *
-memory_manager::virt_to_phys(void *virt)
-{
-    (void) virt;
-
-    return 0;
-}
-
-void *
-memory_manager::phys_to_virt(void *phys)
-{
-    (void) phys;
-
-    return 0;
 }
 
 int64_t
@@ -226,10 +228,40 @@ memory_manager::virt_to_block(void *virt)
     return ((uint8_t *)virt - g_mem_pool) / MAX_CACHE_LINE_SIZE;
 }
 
+void *
+memory_manager::virt_to_phys(void *virt)
+{
+    auto key = (uintptr_t)virt >> MAX_PAGE_SHIFT;
+    const auto &md_iter = m_virt_to_phys_map.find(key);
+
+    if (md_iter == m_virt_to_phys_map.end())
+        return 0;
+
+    auto upper = ((uintptr_t)md_iter->second.phys & ~(MAX_PAGE_SIZE - 1));
+    auto lower = ((uintptr_t)virt & (MAX_PAGE_SIZE - 1));
+
+    return (void *)(upper | lower);
+}
+
+void *
+memory_manager::phys_to_virt(void *phys)
+{
+    auto key = (uintptr_t)phys >> MAX_PAGE_SHIFT;
+    const auto &md_iter = m_phys_to_virt_map.find(key);
+
+    if (md_iter == m_phys_to_virt_map.end())
+        return 0;
+
+    auto upper = ((uintptr_t)md_iter->second.virt & ~(MAX_PAGE_SIZE - 1));
+    auto lower = ((uintptr_t)phys & (MAX_PAGE_SIZE - 1));
+
+    return (void *)(upper | lower);
+}
+
 bool
 memory_manager::is_block_aligned(int64_t block, int64_t alignment)
 {
-    if (block >= MAX_BLOCKS)
+    if (block < 0 || (uint32_t)block >= MAX_BLOCKS)
         return false;
 
     if (alignment <= 0)
@@ -238,11 +270,44 @@ memory_manager::is_block_aligned(int64_t block, int64_t alignment)
     return ((uint64_t)block_to_virt(block) % alignment) == 0;
 }
 
+#include <iostream>
+
 int64_t
 memory_manager::add_mdl(struct memory_descriptor *mdl, int64_t num)
 {
-    (void) mdl;
-    (void) num;
+    if (mdl == 0 || num == 0)
+        return MEMORY_MANAGER_FAILURE;
+
+    for (auto i = 0; i < num; i++)
+    {
+        const auto &md = mdl[i];
+
+        if (md.size != MAX_PAGE_SIZE)
+        {
+            bferror << "invalid page size. expecting: " << MAX_PAGE_SIZE
+                    << ", got: " << md.size << bfendl;
+            return MEMORY_MANAGER_FAILURE;
+        }
+
+        if (((uintptr_t)md.virt & (MAX_PAGE_SIZE - 1)) != 0)
+        {
+            bferror << "virtual address is not page aligned. expecting: "
+                    << (void *)((uintptr_t)md.virt & ~(MAX_PAGE_SIZE - 1))
+                    << ", got: " << md.virt << bfendl;
+            return MEMORY_MANAGER_FAILURE;
+        }
+
+        if (((uintptr_t)md.phys & (MAX_PAGE_SIZE - 1)) != 0)
+        {
+            bferror << "virtual address is not page aligned. expecting: "
+                    << (void *)((uintptr_t)md.phys & ~(MAX_PAGE_SIZE - 1))
+                    << ", got: " << md.phys << bfendl;
+            return MEMORY_MANAGER_FAILURE;
+        }
+
+        m_virt_to_phys_map[(uintptr_t)md.virt >> MAX_PAGE_SHIFT] = md;
+        m_phys_to_virt_map[(uintptr_t)md.phys >> MAX_PAGE_SHIFT] = md;
+    }
 
     return MEMORY_MANAGER_SUCCESS;
 }
@@ -251,14 +316,11 @@ memory_manager::memory_manager()
 {
     m_start = 0;
 
-    for (auto i = 0; i < MAX_MEM_POOL; i++)
+    for (auto i = 0U; i < MAX_MEM_POOL; i++)
         g_mem_pool[i] = 0;
 
-    for (auto i = 0; i < MAX_BLOCKS; i++)
+    for (auto i = 0U; i < MAX_BLOCKS; i++)
         g_block_allocated[i] = FREE_BLOCK;
-
-    for (auto i = 0; i < MAX_NUM_MEMORY_DESCRIPTORS; i++)
-        g_mdl[i] = {0, 0, 0, 0};
 }
 
 int64_t
@@ -267,22 +329,22 @@ add_mdl_trampoline(struct memory_descriptor *mdl, int64_t num)
     return g_mm->add_mdl(mdl, num);
 }
 
-extern "C" long long int
-add_mdl(struct memory_descriptor *mdl, long long int num)
+extern "C" int64_t
+add_mdl(struct memory_descriptor *mdl, int64_t num)
 {
     return add_mdl_trampoline(mdl, num);
 }
 
 extern "C" void *
-_malloc_r(size_t size)
+_malloc_r(struct _reent *reent, size_t size) throw()
 {
+    (void) reent;
+
     size_t i;
     char *ptr = (char *)g_mm->malloc(size);
 
     if (ptr != NULL)
     {
-        // Per the spec, you are not supposed to zero out memory for malloc,
-        // but we do anyways just to me on the safe side.
         for (i = 0; i < size; i++)
             ptr[i] = 0;
     }
@@ -291,20 +353,22 @@ _malloc_r(size_t size)
 }
 
 extern "C" void
-_free_r(void *ptr)
+_free_r(struct _reent *reent, void *ptr) throw()
 {
+    (void) reent;
+
     g_mm->free(ptr);
 }
 
 extern "C" void *
-_calloc_r(size_t nmemb, size_t size)
+_calloc_r(struct _reent *reent, size_t nmemb, size_t size)
 {
-    return _malloc_r(nmemb * size);
+    return _malloc_r(reent, nmemb * size);
 }
 
 extern "C" void *
-_realloc_r(void *ptr, size_t size)
+_realloc_r(struct _reent *reent, void *ptr, size_t size)
 {
-    _free_r(ptr);
-    return _malloc_r(size);
+    _free_r(reent, ptr);
+    return _malloc_r(reent, size);
 }

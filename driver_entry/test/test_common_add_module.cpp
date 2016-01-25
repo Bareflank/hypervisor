@@ -23,159 +23,77 @@
 
 #include <common.h>
 #include <platform.h>
-#include <bfelf_loader.h>
-
-// =============================================================================
-// Expose Private Functions
-// =============================================================================
-
-// In order to mock some of the C functions, we need to expose them. These are
-// private, so there is no need to test these functions, but we do need access
-// to them to mock them up to test the public functions.
-
-extern "C"
-{
-    uint64_t vmm_status(void);
-    struct bfelf_file_t *get_next_file(void);
-    void *add_elf_file(uint64_t size);
-}
-
-// =============================================================================
-// Tests
-// =============================================================================
+#include <constants.h>
 
 void
 driver_entry_ut::test_common_add_module_invalid_file()
 {
-    MockRepository mocks;
-
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        EXPECT_TRUE(common_add_module(NULL, m_dummy1_length) == BF_ERROR_INVALID_ARG);
-    });
+    EXPECT_TRUE(common_add_module(0, m_dummy_misc_length) == BF_ERROR_INVALID_ARG);
 }
 
 void
 driver_entry_ut::test_common_add_module_invalid_file_size()
 {
-    MockRepository mocks;
-
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        EXPECT_TRUE(common_add_module(m_dummy1, 0) == BF_ERROR_INVALID_ARG);
-    });
+    EXPECT_TRUE(common_add_module(m_dummy_misc, 0) == BF_ERROR_INVALID_ARG);
 }
 
 void
-driver_entry_ut::test_common_add_module_status_corrupt()
+driver_entry_ut::test_common_add_module_garbage_module()
 {
-    MockRepository mocks;
+    char file[] = "this is clearly not an ELF file!!!";
 
-    mocks.OnCallFunc(vmm_status).Return(VMM_CORRUPT);
-
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        EXPECT_TRUE(common_add_module(m_dummy1, m_dummy1_length) == BF_ERROR_VMM_CORRUPTED);
-    });
+    EXPECT_TRUE(common_add_module(file, strlen(file)) == BFELF_ERROR_INVALID_ARG);
 }
 
 void
-driver_entry_ut::test_common_add_module_status_loaded()
+driver_entry_ut::test_common_add_module_add_when_already_loaded()
 {
-    MockRepository mocks;
-
-    mocks.OnCallFunc(vmm_status).Return(VMM_LOADED);
-
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        EXPECT_TRUE(common_add_module(m_dummy1, m_dummy1_length) == BF_ERROR_VMM_INVALID_STATE);
-    });
+    EXPECT_TRUE(common_add_module(m_dummy_add_mdl_success, m_dummy_add_mdl_success_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_add_module(m_dummy_misc, m_dummy_misc_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_load_vmm() == BF_SUCCESS);
+    EXPECT_TRUE(common_vmm_status() == VMM_LOADED);
+    EXPECT_TRUE(common_add_module(m_dummy_get_drr_success, m_dummy_get_drr_success_length) == BF_ERROR_VMM_INVALID_STATE);
+    EXPECT_TRUE(common_fini() == BF_SUCCESS);
 }
 
 void
-driver_entry_ut::test_common_add_module_status_running()
+driver_entry_ut::test_common_add_module_add_when_already_running()
 {
-    MockRepository mocks;
-
-    mocks.OnCallFunc(vmm_status).Return(VMM_RUNNING);
-
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        EXPECT_TRUE(common_add_module(m_dummy1, m_dummy1_length) == BF_ERROR_VMM_INVALID_STATE);
-    });
+    EXPECT_TRUE(common_add_module(m_dummy_init_vmm_success, m_dummy_init_vmm_success_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_add_module(m_dummy_start_vmm_success, m_dummy_start_vmm_success_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_add_module(m_dummy_stop_vmm_success, m_dummy_stop_vmm_success_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_add_module(m_dummy_add_mdl_success, m_dummy_add_mdl_success_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_add_module(m_dummy_misc, m_dummy_misc_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_load_vmm() == BF_SUCCESS);
+    EXPECT_TRUE(common_start_vmm() == BF_SUCCESS);
+    EXPECT_TRUE(common_vmm_status() == VMM_RUNNING);
+    EXPECT_TRUE(common_add_module(m_dummy_get_drr_success, m_dummy_get_drr_success_length) == BF_ERROR_VMM_INVALID_STATE);
+    EXPECT_TRUE(common_fini() == BF_SUCCESS);
 }
 
 void
-driver_entry_ut::test_common_add_module_get_next_file_failed()
+driver_entry_ut::test_common_add_module_add_when_corrupt()
 {
-    MockRepository mocks;
+    EXPECT_TRUE(common_add_module(m_dummy_init_vmm_success, m_dummy_init_vmm_success_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_add_module(m_dummy_start_vmm_success, m_dummy_start_vmm_success_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_add_module(m_dummy_stop_vmm_failure, m_dummy_stop_vmm_failure_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_add_module(m_dummy_add_mdl_success, m_dummy_add_mdl_success_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_add_module(m_dummy_misc, m_dummy_misc_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_load_vmm() == BF_SUCCESS);
+    EXPECT_TRUE(common_start_vmm() == BF_SUCCESS);
+    EXPECT_TRUE(common_fini() == BF_ERROR_VMM_CORRUPTED);
+    EXPECT_TRUE(common_vmm_status() == VMM_CORRUPT);
+    EXPECT_TRUE(common_add_module(m_dummy_get_drr_success, m_dummy_get_drr_success_length) == BF_ERROR_VMM_CORRUPTED);
 
-    mocks.OnCallFunc(get_next_file).Return(0);
-
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        EXPECT_TRUE(common_add_module(m_dummy1, m_dummy1_length) == BF_ERROR_MAX_MODULES_REACHED);
-    });
+    common_reset();
 }
 
 void
-driver_entry_ut::test_common_add_module_elf_file_init_failed()
+driver_entry_ut::test_common_add_module_add_too_many()
 {
-    MockRepository mocks;
+    for (auto i = 0U; i < MAX_NUM_MODULES; i++)
+        EXPECT_TRUE(common_add_module(m_dummy_init_vmm_success, m_dummy_init_vmm_success_length) == BF_SUCCESS);
 
-    mocks.OnCallFunc(bfelf_file_init).Return(-1);
-
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        EXPECT_TRUE(common_add_module(m_dummy1, m_dummy1_length) == -1);
-    });
-}
-
-void
-driver_entry_ut::test_common_add_module_elf_file_total_exec_failed()
-{
-    MockRepository mocks;
-
-    mocks.OnCallFunc(bfelf_total_exec_size).Return(-1);
-
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        EXPECT_TRUE(common_add_module(m_dummy1, m_dummy1_length) == -1);
-    });
-}
-
-void
-driver_entry_ut::test_common_add_module_add_elf_file_failed()
-{
-    MockRepository mocks;
-
-    mocks.OnCallFunc(add_elf_file).Return(0);
-
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        EXPECT_TRUE(common_add_module(m_dummy1, m_dummy1_length) == BF_ERROR_FAILED_TO_ADD_FILE);
-    });
-}
-
-void
-driver_entry_ut::test_common_add_module_elf_file_load_failed()
-{
-    MockRepository mocks;
-
-    mocks.OnCallFunc(add_elf_file).Return((void *)100);
-    mocks.OnCallFunc(bfelf_file_load).Return(-1);
-
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        EXPECT_TRUE(common_add_module(m_dummy1, m_dummy1_length) == -1);
-    });
-}
-
-void
-driver_entry_ut::test_common_add_module_add_success()
-{
-    EXPECT_TRUE(common_add_module(m_dummy1, m_dummy1_length) == BF_SUCCESS);
-    EXPECT_TRUE(common_add_module(m_dummy2, m_dummy2_length) == BF_SUCCESS);
-    EXPECT_TRUE(common_add_module(m_dummy3, m_dummy3_length) == BF_SUCCESS);
-    EXPECT_TRUE(common_unload_vmm() == BF_SUCCESS);
+    EXPECT_TRUE(common_add_module(m_dummy_init_vmm_success, m_dummy_init_vmm_success_length) == BF_ERROR_MAX_MODULES_REACHED);
+    EXPECT_TRUE(common_fini() == BF_SUCCESS);
 }

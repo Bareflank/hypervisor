@@ -23,9 +23,8 @@
 # Subdirs
 ################################################################################
 
-SUBDIRS += dummy1
-SUBDIRS += dummy2
-SUBDIRS += dummy3
+SUBDIRS += dummy_misc
+SUBDIRS += dummy_code
 SUBDIRS += src
 SUBDIRS += test
 SUBDIRS += bin

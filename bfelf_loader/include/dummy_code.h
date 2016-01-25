@@ -19,13 +19,29 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#ifndef DUMMY1_H
-#define DUMMY1_H
+#ifndef CODE_H
+#define CODE_H
 
-int
-dummy1_mul1(int num);
+class base
+{
+public:
+    base();
+    virtual ~base();
 
-int
-dummy1_add1(int num);
+    virtual int foo(int);
+};
+
+class derived : public base
+{
+public:
+    derived();
+    ~derived();
+
+    int foo(int);
+
+private:
+
+    int m_member;
+};
 
 #endif

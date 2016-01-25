@@ -23,6 +23,7 @@
 #include <platform.h>
 
 #include <debug.h>
+#include <linux/mm.h>
 #include <linux/slab.h>
 #include <linux/module.h>
 #include <linux/vmalloc.h>
@@ -65,20 +66,14 @@ platform_alloc_exec(int64_t len)
     return addr;
 }
 
-// struct page_t
-// platform_alloc_page(void)
-// {
-//     struct page_t pg = {0};
-
-//     pg.virt = kmalloc(PAGE_SIZE, GFP_KERNEL);
-//     pg.phys = (void *)virt_to_phys(pg.virt);
-//     pg.size = PAGE_SIZE;
-
-//     if (pg.virt == NULL || pg.phys == NULL)
-//         ALERT("platform_alloc_page: failed to kmalloc page\n");
-
-//     return pg;
-// }
+void *
+platform_virt_to_phys(void *virt)
+{
+    if (is_vmalloc_addr(virt))
+        return (void *)page_to_phys(vmalloc_to_page(virt));
+    else
+        return (void *)virt_to_phys(virt);
+}
 
 void
 platform_free(void *addr)

@@ -19,11 +19,13 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#ifndef ASSERT_H
-#define ASSERT_H
+#include <debug_ring_interface.h>
 
-// TODO: Implement an assert that we can use in the vmm. Likely this
-//       will output some nasty text via serial, and then hlt.
-#define assert(a)
+extern "C" struct debug_ring_resources_t *
+get_drr(int64_t vcpuid)
+{
+    (void) vcpuid;
+    static struct debug_ring_resources_t drr;
 
-#endif
+    return &drr;
+}

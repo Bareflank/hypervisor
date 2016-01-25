@@ -32,7 +32,7 @@
  * an exit handler is defined for each vCPU).
  */
 #ifndef MAX_VCPUS
-#define MAX_VCPUS (1)
+#define MAX_VCPUS (1LL)
 #endif
 
 /*
@@ -45,21 +45,36 @@
  * Note: defined in bytes
  */
 #ifndef MAX_CACHE_LINE_SIZE
-#define MAX_CACHE_LINE_SIZE (64)
+#define MAX_CACHE_LINE_SIZE (64ULL)
 #endif
 
 /*
- * Page Size
+ * Max Page Shift
  *
- * Defines the size of a page, which is used in a lot of places in the code.
- * Note that the memory manager handles memory of this size differently as well
- * for perforamnce reasons, so the value might need to be tweaked on other
- * systems.
+ * Defines the maximum page size that is supported by the VMM (not the max
+ * size supported by hardware, which is likely different). For now, this is
+ * set to a value that is likely supported by most hardware. All pages must
+ * be translated to this value, as the VMM only supports one page size.
+ *
+ * Note: defined in bits
+ */
+#ifndef MAX_PAGE_SHIFT
+#define MAX_PAGE_SHIFT (12ULL)
+#endif
+
+
+/*
+ * Max Page Size
+ *
+ * Defines the maximum page size that is supported by the VMM (not the max
+ * size supported by hardware, which is likely different). For now, this is
+ * set to a value that is likely supported by most hardware. All pages must
+ * be translated to this value, as the VMM only supports one page size.
  *
  * Note: defined in bytes
  */
 #ifndef MAX_PAGE_SIZE
-#define MAX_PAGE_SIZE (4096)
+#define MAX_PAGE_SIZE (1ULL << MAX_PAGE_SHIFT)
 #endif
 
 /*
@@ -73,7 +88,7 @@
  * size.
  */
 #ifndef MAX_BLOCKS
-#define MAX_BLOCKS (16 * MAX_PAGE_SIZE)
+#define MAX_BLOCKS (16ULL * MAX_PAGE_SIZE)
 #endif
 
 /*
@@ -109,25 +124,7 @@
  * value changes.
  */
 #ifndef MAX_NUM_MODULES
-#define MAX_NUM_MODULES (25)
-#endif
-
-/*
- * Max Number of Memory Descriptors
- *
- * The driver entry has to collect information about each page of memory that
- * the VMM uses, and then fills this information into a memory descriptor and
- * provides the info to the memory manager during initialization. This
- * defines the total number of descriptors that the memory manager can support
- * which caps the total amount of memory that the VMM can consume. This
- * includes it's internal memory for new / delete, but also all of the memory
- * used by every single module. If the driver entry is having a problem, this
- * number might need to be increased.
- *
- * Note: This caps the VMM at 100MB (i.e. 100MB / Page Size)
- */
-#ifndef MAX_NUM_MEMORY_DESCRIPTORS
-#define MAX_NUM_MEMORY_DESCRIPTORS (25600)
+#define MAX_NUM_MODULES (25ULL)
 #endif
 
 /**
@@ -142,7 +139,7 @@
  * Note: defined in bytes
  */
 #ifndef DEBUG_RING_SIZE
-#define DEBUG_RING_SIZE (10 * 4096)
+#define DEBUG_RING_SIZE (10ULL * MAX_PAGE_SIZE)
 #endif
 
 /**

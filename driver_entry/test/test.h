@@ -39,112 +39,100 @@ protected:
 
 private:
 
-    void test_commit_fini_common_stop_failure();
-    void test_commit_fini_common_unload_failure();
-    void test_commit_fini_success();
-    void test_commit_fini_success_multiple_times();
+    void test_common_fini_unloaded();
+    void test_common_fini_successful_start();
+    void test_common_fini_successful_load();
+    void test_common_fini_successful_add_module();
+    void test_common_fini_corrupted();
+    void test_common_fini_failed_load();
+    void test_common_fini_failed_start();
 
     void test_common_add_module_invalid_file();
     void test_common_add_module_invalid_file_size();
-    void test_common_add_module_status_corrupt();
-    void test_common_add_module_status_loaded();
-    void test_common_add_module_status_running();
-    void test_common_add_module_get_next_file_failed();
-    void test_common_add_module_elf_file_init_failed();
-    void test_common_add_module_elf_file_total_exec_failed();
-    void test_common_add_module_add_elf_file_failed();
-    void test_common_add_module_elf_file_load_failed();
-    void test_common_add_module_add_success();
+    void test_common_add_module_garbage_module();
+    void test_common_add_module_add_when_already_loaded();
+    void test_common_add_module_add_when_already_running();
+    void test_common_add_module_add_when_corrupt();
+    void test_common_add_module_add_too_many();
 
-    void test_common_load_status_corrupt();
-    void test_common_load_status_loaded();
-    void test_common_load_status_running();
-    void test_common_load_loader_init_failed();
-    void test_common_load_loader_add_file_failed();
-    void test_common_load_loader_relocate_failed();
-    void test_common_load_execute_ctors_failed();
-    void test_common_load_execute_inits_failed();
-    void test_common_load_allocate_page_pool_failed();
-    void test_common_load_success();
+    void test_common_load_successful_load();
+    void test_common_load_load_when_already_loaded();
+    void test_common_load_load_when_already_running();
+    void test_common_load_load_when_corrupt();
+    void test_common_load_fail_due_to_relocation_error();
+    void test_common_load_fail_due_to_no_modules_added();
+    void test_common_load_add_mdl_failed();
 
-    void test_common_unload_status_corrupt();
-    void test_common_unload_status_running();
-    void test_common_unload_execute_finis_failed();
-    void test_common_unload_execute_dtors_failed();
-    void test_common_unload_free_page_pool_failed();
-    void test_common_unload_remove_elf_files_failed();
-    void test_common_unload_success_with_loaded();
-    void test_common_unload_success_with_unloaded_without_modules();
-    void test_common_unload_success_with_unloaded_with_modules();
+    void test_common_unload_unload_when_already_unloaded();
+    void test_common_unload_unload_when_running();
+    void test_common_unload_unload_when_corrupt();
 
-    void test_common_start_status_corrupt();
-    void test_common_start_status_running();
-    void test_common_start_status_unloaded();
-    void test_common_start_init_vmm_failed();
-    void test_common_start_start_vmm_failed();
-    void test_common_start_success();
-    void test_common_start_success_multiple_times();
+    void test_common_start_start_when_unloaded();
+    void test_common_start_start_when_already_running();
+    void test_common_start_start_when_corrupt();
+    void test_common_start_start_when_init_vmm_missing();
+    void test_common_start_start_when_start_vmm_missing();
+    void test_common_start_init_vmm_failure();
+    void test_common_start_start_vmm_failure();
 
-    void test_common_stop_status_corrupt();
-    void test_common_stop_status_loaded();
-    void test_common_stop_status_unloaded();
-    void test_common_stop_start_vmm_failed();
-    void test_common_stop_success();
-    void test_common_stop_success_multiple_times();
+    void test_common_stop_stop_when_unloaded();
+    void test_common_stop_stop_when_not_running();
+    void test_common_stop_stop_when_alread_stopped();
+    void test_common_stop_stop_when_corrupt();
+    void test_common_stop_stop_vmm_missing();
+    void test_common_stop_stop_vmm_failure();
 
-    void test_common_dump_status_corrupt();
-    void test_common_dump_status_unloaded();
-    void test_common_dump_platform_alloc_failed();
-    void test_common_dump_resolve_symbol_failed();
-    void test_common_dump_debug_ring_read_failed();
-    void test_common_dump_success();
-    void test_common_dump_success_multiple_times();
+    void test_common_dump_dump_when_unloaded();
+    void test_common_dump_dump_when_corrupt();
+    void test_common_dump_dump_when_loaded();
+    void test_common_dump_get_drr_missing();
+    void test_common_dump_get_drr_failure();
 
-    void test_helper_set_vmm_status();
-    void test_helper_vmm_status();
+    void test_helper_common_vmm_status();
     void test_helper_get_file_invalid_index();
     void test_helper_get_file_success();
-    void test_helper_get_next_file_too_man_files();
-    void test_helper_get_next_file_success();
-    void test_helper_add_elf_file_invalid_size();
-    void test_helper_add_elf_file_();
-    void test_helper_add_elf_file_get_next_file_failed();
-    void test_helper_add_elf_file_platform_alloc_exec_failed();
-    void test_helper_add_elf_file_success();
-    void test_helper_add_elf_file_success_multiple_times();
     void test_helper_symbol_length_null_symbol();
     void test_helper_symbol_length_success();
     void test_helper_resolve_symbol_invalid_name();
     void test_helper_resolve_symbol_invalid_sym();
-    void test_helper_resolve_symbol_resolve_symbol_failed();
-    void test_helper_resolve_symbol_success();
+    void test_helper_resolve_symbol_missing_symbol();
     void test_helper_execute_symbol_invalid_arg();
-    void test_helper_execute_symbol_resolve_symbol_failed();
+    void test_helper_execute_symbol_missing_symbol();
     void test_helper_execute_symbol_sym_failed();
     void test_helper_execute_symbol_sym_success();
-    void test_helper_execute_ctors_invalid_arg();
-    void test_helper_execute_ctors_resolve_ctor_failed();
-    void test_helper_execute_dtors_invalid_arg();
-    void test_helper_execute_dtors_resolve_ctor_failed();
-
-    // void test_helper_allocate_page_pool_resolve_symbol_failed();
-    // void test_helper_allocate_page_pool_alloc_page_failed();
-    // void test_helper_allocate_page_pool_add_page_failed();
-    // void test_helper_allocate_page_pool_success();
-    // void test_helper_allocate_page_pool_success_multiple_times();
-    // void test_helper_free_page_pool_resolve_symbol_failed();
-    // void test_helper_free_page_pool_remove_page_failed();
-    // void test_helper_free_page_pool_success();
-    // void test_helper_free_page_pool_success_multiple_times();
+    void test_helper_constructors_success();
+    void test_helper_destructors_success();
+    void test_helper_add_mdl_invalid_exec();
+    void test_helper_add_mdl_invalid_size();
+    void test_helper_add_mdl_1_page();
+    void test_helper_add_mdl_3_pages();
+    void test_helper_add_mdl_3_pages_plus();
 
 private:
 
-    char *m_dummy1;
-    char *m_dummy2;
-    char *m_dummy3;
-    int32_t m_dummy1_length;
-    int32_t m_dummy2_length;
-    int32_t m_dummy3_length;
+    char *m_dummy_add_mdl_failure;
+    char *m_dummy_add_mdl_success;
+    char *m_dummy_get_drr_failure;
+    char *m_dummy_get_drr_success;
+    char *m_dummy_init_vmm_failure;
+    char *m_dummy_init_vmm_success;
+    char *m_dummy_misc;
+    char *m_dummy_start_vmm_failure;
+    char *m_dummy_start_vmm_success;
+    char *m_dummy_stop_vmm_failure;
+    char *m_dummy_stop_vmm_success;
+
+    int32_t m_dummy_add_mdl_failure_length;
+    int32_t m_dummy_add_mdl_success_length;
+    int32_t m_dummy_get_drr_failure_length;
+    int32_t m_dummy_get_drr_success_length;
+    int32_t m_dummy_init_vmm_failure_length;
+    int32_t m_dummy_init_vmm_success_length;
+    int32_t m_dummy_misc_length;
+    int32_t m_dummy_start_vmm_failure_length;
+    int32_t m_dummy_start_vmm_success_length;
+    int32_t m_dummy_stop_vmm_failure_length;
+    int32_t m_dummy_stop_vmm_success_length;
 };
 
 #endif

@@ -19,31 +19,25 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <dummy2.h>
+#ifndef DEBUG_H
+#define DEBUG_H
 
-int dummy2::s_data = 2;
+#include <iostream>
 
-dummy2::dummy2() :
-    m_data(2)
-{
-}
+#define bfcolor_end "\033[0m"
+#define bfcolor_debug "\033[1;32m"
+#define bfcolor_warning "\033[1;33m"
+#define bfcolor_error "\033[1;31m"
+#define bfcolor_func "\033[1;36m"
+#define bfcolor_line "\033[1;35m"
 
-int
-dummy2::dummy2_mul2(int num)
-{
-    return num * m_data;
-}
+#define bfendl "\n";
+#define bfverbose "[" << bfcolor_func << __PRETTY_FUNCTION__ << ":" << bfcolor_line << __LINE__ << bfcolor_end << "] "
 
-int
-dummy2::dummy2_add2(int num)
-{
-    return num + s_data;
-}
+#define bfinfo std::cout
+#define bfdebug std::cout << bfcolor_debug << "DEBUG" << bfcolor_end << ": "
+#define bfwarning std::cout << bfverbose << bfcolor_warning << "WARNING" << bfcolor_end << ": "
+#define bferror std::cout << bfverbose << bfcolor_error << "ERROR" << bfcolor_end << ": "
+#define bffatal std::cout << bfverbose << bfcolor_error << "ERROR" << bfcolor_end << ": "
 
-void *
-dummy2_func_pointer(void *arg)
-{
-    (void) arg;
-
-    return 0;
-}
+#endif

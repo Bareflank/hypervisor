@@ -22,15 +22,15 @@
 
 #include <debug_ring_interface.h>
 
-long long int
-debug_ring_read(struct debug_ring_resources_t *drr, char *str, long long int len)
+uint64_t
+debug_ring_read(struct debug_ring_resources_t *drr, char *str, uint64_t len)
 {
-    long long int i;
-    long long int spos;
-    long long int content;
+    uint64_t i;
+    uint64_t spos;
+    uint64_t content;
 
     if (drr == 0 || str == 0 || len == 0)
-        return DEBUG_RING_READ_ERROR;
+        return 0;
 
     spos = drr->spos % DEBUG_RING_SIZE;
     content = drr->epos - drr->spos;

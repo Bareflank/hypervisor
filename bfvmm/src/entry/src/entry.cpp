@@ -19,65 +19,72 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <iostream>
-
+#include <debug.h>
 #include <entry.h>
 #include <vcpu/vcpu_manager.h>
+#include <memory_manager/memory_manager.h>
 
-int
-init_vmm_trampoline(int arg)
+int64_t
+init_vmm_trampoline(int64_t arg)
 {
     (void) arg;
 
     if (g_vcm->init(0) != vcpu_manager_error::success)
         return ENTRY_ERROR_VMM_INIT_FAILED;
 
-    std::cout << "init_vmm_trampoline: completed\n";
     return ENTRY_SUCCESS;
 }
 
-int
-start_vmm_trampoline(int arg)
+int64_t
+start_vmm_trampoline(int64_t arg)
 {
     (void) arg;
 
     if (g_vcm->start(0) != vcpu_manager_error::success)
         return ENTRY_ERROR_VMM_START_FAILED;
 
-    std::cout << "start_vmm_trampoline: completed\n";
+    bfdebug << "started:" << bfendl;
+    bfdebug << "    - free blocks: " << g_mm->free_blocks() << " out of: "
+            << MAX_BLOCKS << " = " << g_mm->free_blocks() * 100 / MAX_BLOCKS
+            << "%" << bfendl;
+
     return ENTRY_SUCCESS;
 }
 
-int
-stop_vmm_trampoline(int arg)
+int64_t
+stop_vmm_trampoline(int64_t arg)
 {
     (void) arg;
 
     if (g_vcm->stop(0) != vcpu_manager_error::success)
         return ENTRY_ERROR_VMM_STOP_FAILED;
 
-    std::cout << "stop_vmm_trampoline: completed\n";
+    bfdebug << "stopped:" << bfendl;
+    bfdebug << "    - free blocks: " << g_mm->free_blocks() << " out of: "
+            << MAX_BLOCKS << " = " << g_mm->free_blocks() * 100 / MAX_BLOCKS
+            << "%" << bfendl;
+
     return ENTRY_SUCCESS;
 }
 
-extern "C" int
-init_vmm(int arg)
+extern "C" int64_t
+init_vmm(int64_t arg)
 {
     (void) arg;
 
     return init_vmm_trampoline(arg);
 }
 
-extern "C" int
-start_vmm(int arg)
+extern "C" int64_t
+start_vmm(int64_t arg)
 {
     (void) arg;
 
     return start_vmm_trampoline(arg);
 }
 
-extern "C" int
-stop_vmm(int arg)
+extern "C" int64_t
+stop_vmm(int64_t arg)
 {
     (void) arg;
 

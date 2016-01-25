@@ -19,19 +19,34 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <dummy1.h>
+#include <dummy_code.h>
 
-int g_dummy1 = 1;
-static int l_dummy1 = 1;
-
-int
-dummy1_mul1(int num)
+base::base()
 {
-    return num * g_dummy1;
 }
 
-int
-dummy1_add1(int num)
+base::~base()
 {
-    return num + l_dummy1;
 }
+
+int base::foo(int arg)
+{
+    (void) arg;
+
+    return 0;
+}
+
+derived::derived() :
+    m_member(1000)
+{
+}
+
+derived::~derived()
+{
+}
+
+int derived::foo(int arg)
+{
+    return arg + m_member;
+}
+

@@ -23,6 +23,12 @@
 #ifndef DEBUG_RING_INTERFACE_H
 #define DEBUG_RING_INTERFACE_H
 
+#ifndef KERNEL
+#include <stdint.h>
+#else
+#include <types.h>
+#endif
+
 #include <constants.h>
 
 #pragma pack(push, 1)
@@ -32,17 +38,12 @@ extern "C" {
 #endif
 
 /**
- * Returned by debug_ring_read on error
- */
-#define DEBUG_RING_READ_ERROR -1
-
-/**
  * Get Debug Ring Resource Typedef
  *
  * This is used by the driver entry to as the function signature for
  * getting it's internal debug ring
  */
-typedef struct debug_ring_resources_t *(*get_drr_t)(long long int vcpuid);
+typedef struct debug_ring_resources_t *(*get_drr_t)(int64_t vcpuid);
 
 /**
  * @struct debug_ring_resources_t
@@ -92,8 +93,8 @@ typedef struct debug_ring_resources_t *(*get_drr_t)(long long int vcpuid);
  */
 struct debug_ring_resources_t
 {
-    long long int epos;
-    long long int spos;
+    uint64_t epos;
+    uint64_t spos;
 
     char buf[DEBUG_RING_SIZE];
 };
@@ -110,11 +111,11 @@ struct debug_ring_resources_t
  * @param str the buffer to read the string into. should be the same size
  *        as drr in bytes
  * @param len the length of the str buffer in bytes
- * @return the number of bytes read from the debug ring, DEBUG_RING_READ_ERROR
+ * @return the number of bytes read from the debug ring, 0
  *        on error
  */
-long long int
-debug_ring_read(struct debug_ring_resources_t *drr, char *str, long long int len);
+uint64_t
+debug_ring_read(struct debug_ring_resources_t *drr, char *str, uint64_t len);
 
 #ifdef __cplusplus
 }
