@@ -340,6 +340,21 @@ bfelf_file_init(char *file, uint64_t fsize, struct bfelf_file_t *ef)
         }
     }
 
+    for (i = 0; i < ef->ehdr->e_shnum; i++)
+    {
+        struct bfelf_shdr *shdr;
+
+        ret = bfelf_section_header(ef, i, &shdr);
+        if (ret != BFELF_SUCCESS)
+            return ret;
+
+        if (shdr->sh_type == bfsht_hash)
+        {
+            ef->hashtab = shdr;
+            break;
+        }
+    }
+
     if (dynsym == 0)
         return BFELF_ERROR_INVALID_FILE;
 
@@ -364,6 +379,9 @@ bfelf_file_init(char *file, uint64_t fsize, struct bfelf_file_t *ef)
     ef->symnum = dynsym->sh_size / sizeof(struct bfelf_sym);
     ef->symtab = (struct bfelf_sym *)(file + dynsym->sh_offset);
 
+    if (ef->ehdr->e_shnum >= BFELF_MAX_RELTAB)
+        return BFELF_ERROR_INVALID_E_SHNUM;
+
     for (i = 0; i < ef->ehdr->e_shnum; i++)
     {
         struct bfelf_shdr *shdr;
@@ -385,6 +403,27 @@ bfelf_file_init(char *file, uint64_t fsize, struct bfelf_file_t *ef)
             ef->bfrelatab[ef->num_rela].tab = (struct bfelf_rela *)(ef->file + shdr->sh_offset);
             ef->num_rela++;
         }
+    }
+
+    if (ef->hashtab)
+    {
+        ef->num_bucket = ((bfelf64_word *)(ef->hashtab->sh_offset +
+                                           ef->file))[0];
+
+        ef->num_chain = ((bfelf64_word *)(ef->hashtab->sh_offset +
+                                          ef->file +
+                                          sizeof(ef->num_bucket)))[0];
+
+        ef->bfhashtab = (bfelf64_word *)(ef->hashtab->sh_offset +
+                                         ef->file +
+                                         sizeof(ef->num_bucket) +
+                                         sizeof(ef->num_chain));
+
+        ef->symchain = (bfelf64_word *)(ef->hashtab->sh_offset +
+                                        ef->file +
+                                        sizeof(ef->num_bucket) +
+                                        sizeof(ef->num_chain) +
+                                        sizeof(*ef->bfhashtab) * ef->num_bucket);
     }
 
     ef->valid = BFELF_TRUE;
@@ -1026,6 +1065,62 @@ stt_to_str(bfelf64_word value)
     }
 }
 
+bfelf64_word
+bfelf_hash(const char *name)
+{
+    bfelf64_word h = 0, g;
+
+    while (*name)
+    {
+        h = (h << 4) + *name++;
+        g = h & 0xf0000000;
+        if (g)
+        {
+            h ^= g >> 24;
+        }
+
+        h &= 0x0fffffff;
+    }
+
+    return h;
+}
+
+bfelf64_sword
+bfelf_symbol_by_hash(struct bfelf_file_t *ef,
+                     struct e_string_t *name,
+                     struct bfelf_sym **sym)
+{
+    bfelf64_word i = 0, ret = -1, hash_index;
+
+    if (!ef || !sym)
+        return BFELF_ERROR_INVALID_FILE;
+
+    if (!ef->hashtab)
+        return BFELF_ERROR_INVALID_HASH_TABLE;
+
+    hash_index = bfelf_hash(name->buf) % ef->num_bucket;
+
+    if (hash_index == 0) return BFELF_ERROR_INVALID_HASH_TABLE;
+
+    for (i = ef->bfhashtab[hash_index]; i != 0; i = ef->symchain[i])
+    {
+        if (BFELF_SUCCESS == bfelf_symbol_by_index(ef, i, sym))
+        {
+            struct bfelf_sym *l_sym = *sym;
+            struct e_string_t str = {0};
+
+            ret = bfelf_string_table_entry(ef, ef->strtab, l_sym->st_name, &str);
+            if (ret != BFELF_SUCCESS)
+                return ret;
+
+            ret = bfelf_strcmp(name, &str);
+            if (ret == BFELF_TRUE) return BFELF_SUCCESS;
+        }
+    }
+
+    return BFELF_ERROR_INVALID_HASH_TABLE;
+}
+
 bfelf64_sword
 bfelf_symbol_by_index(struct bfelf_file_t *ef,
                       bfelf64_word index,
@@ -1051,7 +1146,7 @@ bfelf_symbol_by_name(struct bfelf_file_t *ef,
                      struct bfelf_sym **sym)
 {
     bfelf64_word i = 0;
-    bfelf64_sword ret = 0;
+    bfelf64_sword ret = -1;
 
     /* TODO: Use .hash instead of a O(n) loop. */
 
@@ -1061,28 +1156,38 @@ bfelf_symbol_by_name(struct bfelf_file_t *ef,
     if (ef->valid != BFELF_TRUE)
         return BFELF_ERROR_INVALID_FILE;
 
-    for (i = 0; i < ef->symnum; i++)
+    ret = bfelf_symbol_by_hash(ef, name, sym);
+
+    if (ret != BFELF_SUCCESS)
     {
-        struct bfelf_sym *sym = 0;
-        struct e_string_t str = {0};
+        for (i = 0; i < ef->symnum; i++)
+        {
+            struct bfelf_sym *sym = 0;
+            struct e_string_t str = {0};
 
-        ret = bfelf_symbol_by_index(ef, i, &sym);
-        if (ret != BFELF_SUCCESS)
+            ret = bfelf_symbol_by_index(ef, i, &sym);
+            if (ret != BFELF_SUCCESS)
+                return ret;
+
+            ret = bfelf_string_table_entry(ef, ef->strtab, sym->st_name, &str);
+            if (ret != BFELF_SUCCESS)
+                return ret;
+
+            ret = bfelf_strcmp(name, &str);
+            if (ret == BFELF_FALSE) continue;
+            if (ret == BFELF_TRUE) break;
             return ret;
+        }
 
-        ret = bfelf_string_table_entry(ef, ef->strtab, sym->st_name, &str);
-        if (ret != BFELF_SUCCESS)
-            return ret;
+        if (i != ef->symnum)
+        {
+            *sym = &(ef->symtab[i]);
 
-        ret = bfelf_strcmp(name, &str);
-        if (ret == BFELF_FALSE) continue;
-        if (ret == BFELF_TRUE) break;
-        return ret;
+            return BFELF_SUCCESS;
+        }
     }
-
-    if (i != ef->symnum)
+    else
     {
-        *sym = &(ef->symtab[i]);
         return BFELF_SUCCESS;
     }
 
@@ -1314,6 +1419,7 @@ bfelf_relocate_symbol(struct bfelf_file_t *ef,
             break;
 
         default:
+            bfelf_print_relocation(rel);
             return BFELF_ERROR_INVALID_RELOCATION_TYPE;
     }
 
@@ -1383,6 +1489,7 @@ bfelf_relocate_symbol_addend(struct bfelf_file_t *ef,
             break;
 
         default:
+            bfelf_print_relocation_addend(rela);
             return BFELF_ERROR_INVALID_RELOCATION_TYPE;
     }
 
