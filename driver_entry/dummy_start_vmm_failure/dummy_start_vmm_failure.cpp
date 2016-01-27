@@ -19,25 +19,12 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#ifndef DUMMY2_H
-#define DUMMY2_H
+#include <entry.h>
 
-class dummy2
+extern "C" int64_t
+start_vmm(int64_t arg)
 {
-public:
+    (void) arg;
 
-    dummy2();
-
-    int
-    dummy2_mul2(int num);
-
-    static int
-    dummy2_add2(int num);
-
-private:
-
-    int m_data;
-    static int s_data;
-};
-
-#endif
+    return ENTRY_ERROR_VMM_START_FAILED;
+}

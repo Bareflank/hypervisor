@@ -25,9 +25,8 @@
 #include <fstream>
 #include <sys/mman.h>
 
-auto c_dummy1_filename = "../cross/libdummy1.so";
-auto c_dummy2_filename = "../cross/libdummy2.so";
-auto c_dummy3_filename = "../cross/libdummy3.so";
+const auto c_dummy_misc_filename = "../cross/libdummy_misc.so";
+const auto c_dummy_code_filename = "../cross/libdummy_code.so";
 
 struct bfelf_test
 {
@@ -54,18 +53,14 @@ struct bfelf_test
 bfelf_test g_test = {};
 
 bfelf_loader_ut::bfelf_loader_ut() :
-    m_dummy1(0),
-    m_dummy2(0),
-    m_dummy3(0),
-    m_dummy1_length(0),
-    m_dummy2_length(0),
-    m_dummy3_length(0),
-    m_dummy1_exec(0),
-    m_dummy2_exec(0),
-    m_dummy3_exec(0),
-    m_dummy1_esize(0),
-    m_dummy2_esize(0),
-    m_dummy3_esize(0),
+    m_dummy_misc(0),
+    m_dummy_code(0),
+    m_dummy_misc_length(0),
+    m_dummy_code_length(0),
+    m_dummy_misc_exec(0),
+    m_dummy_code_exec(0),
+    m_dummy_misc_esize(0),
+    m_dummy_code_esize(0),
     m_test_exec(0),
     m_test_esize(0)
 {
@@ -75,67 +70,54 @@ bool bfelf_loader_ut::init()
 {
     auto result = false;
 
-    std::ifstream dummy1_ifs(c_dummy1_filename, std::ifstream::ate);
-    std::ifstream dummy2_ifs(c_dummy2_filename, std::ifstream::ate);
-    std::ifstream dummy3_ifs(c_dummy3_filename, std::ifstream::ate);
+    std::ifstream dummy_misc_ifs(c_dummy_misc_filename, std::ifstream::ate);
+    std::ifstream dummy_code_ifs(c_dummy_code_filename, std::ifstream::ate);
 
-    if (dummy1_ifs.is_open() == false ||
-        dummy2_ifs.is_open() == false ||
-        dummy3_ifs.is_open() == false)
+    if (dummy_misc_ifs.is_open() == false ||
+        dummy_code_ifs.is_open() == false)
     {
         std::cout << "unable to open one or more dummy libraries: " << std::endl;
-        std::cout << "    - dummy1: " << dummy1_ifs.is_open() << std::endl;
-        std::cout << "    - dummy2: " << dummy2_ifs.is_open() << std::endl;
-        std::cout << "    - dummy3: " << dummy3_ifs.is_open() << std::endl;
+        std::cout << "    - dummy_misc: " << dummy_misc_ifs.is_open() << std::endl;
+        std::cout << "    - dummy_code: " << dummy_code_ifs.is_open() << std::endl;
         goto close;
     }
 
-    m_dummy1_length = dummy1_ifs.tellg();
-    m_dummy2_length = dummy2_ifs.tellg();
-    m_dummy3_length = dummy3_ifs.tellg();
+    m_dummy_misc_length = dummy_misc_ifs.tellg();
+    m_dummy_code_length = dummy_code_ifs.tellg();
 
-    if (m_dummy1_length == 0 ||
-        m_dummy2_length == 0 ||
-        m_dummy3_length == 0)
+    if (m_dummy_misc_length == 0 ||
+        m_dummy_code_length == 0)
     {
         std::cout << "one or more of the dummy libraries is empty: " << std::endl;
-        std::cout << "    - dummy1: " << m_dummy1_length << std::endl;
-        std::cout << "    - dummy2: " << m_dummy2_length << std::endl;
-        std::cout << "    - dummy3: " << m_dummy3_length << std::endl;
+        std::cout << "    - dummy_misc: " << m_dummy_misc_length << std::endl;
+        std::cout << "    - dummy_code: " << m_dummy_code_length << std::endl;
         goto close;
     }
 
-    m_dummy1 = new char[dummy1_ifs.tellg()];
-    m_dummy2 = new char[dummy2_ifs.tellg()];
-    m_dummy3 = new char[dummy3_ifs.tellg()];
+    m_dummy_misc = new char[dummy_misc_ifs.tellg()];
+    m_dummy_code = new char[dummy_code_ifs.tellg()];
 
-    if (m_dummy1 == NULL ||
-        m_dummy2 == NULL ||
-        m_dummy3 == NULL)
+    if (m_dummy_misc == NULL ||
+        m_dummy_code == NULL)
     {
         std::cout << "unable to allocate space for one or more of the dummy libraries: " << std::endl;
-        std::cout << "    - dummy1: " << (void *)m_dummy1 << std::endl;
-        std::cout << "    - dummy2: " << (void *)m_dummy2 << std::endl;
-        std::cout << "    - dummy3: " << (void *)m_dummy3 << std::endl;
+        std::cout << "    - dummy_misc: " << (void *)m_dummy_misc << std::endl;
+        std::cout << "    - dummy_code: " << (void *)m_dummy_code << std::endl;
         goto close;
     }
 
-    dummy1_ifs.seekg(0);
-    dummy2_ifs.seekg(0);
-    dummy3_ifs.seekg(0);
+    dummy_misc_ifs.seekg(0);
+    dummy_code_ifs.seekg(0);
 
-    dummy1_ifs.read(m_dummy1, m_dummy1_length);
-    dummy2_ifs.read(m_dummy2, m_dummy2_length);
-    dummy3_ifs.read(m_dummy3, m_dummy3_length);
+    dummy_misc_ifs.read(m_dummy_misc, m_dummy_misc_length);
+    dummy_code_ifs.read(m_dummy_code, m_dummy_code_length);
 
-    if (dummy1_ifs.fail() == true ||
-        dummy2_ifs.fail() == true ||
-        dummy3_ifs.fail() == true)
+    if (dummy_misc_ifs.fail() == true ||
+        dummy_code_ifs.fail() == true)
     {
         std::cout << "unable to load one or more dummy libraries into memory: " << std::endl;
-        std::cout << "    - dummy1: " << dummy1_ifs.fail() << std::endl;
-        std::cout << "    - dummy2: " << dummy2_ifs.fail() << std::endl;
-        std::cout << "    - dummy3: " << dummy3_ifs.fail() << std::endl;
+        std::cout << "    - dummy_misc: " << dummy_misc_ifs.fail() << std::endl;
+        std::cout << "    - dummy_code: " << dummy_code_ifs.fail() << std::endl;
         goto close;
     }
 
@@ -143,32 +125,25 @@ bool bfelf_loader_ut::init()
 
 close:
 
-    dummy1_ifs.close();
-    dummy2_ifs.close();
-    dummy3_ifs.close();
+    dummy_misc_ifs.close();
+    dummy_code_ifs.close();
 
     return result;
 }
 
 bool bfelf_loader_ut::fini()
 {
-    if (m_dummy1 != NULL)
-        delete[] m_dummy1;
+    if (m_dummy_misc != NULL)
+        delete[] m_dummy_misc;
 
-    if (m_dummy2 != NULL)
-        delete[] m_dummy2;
+    if (m_dummy_code != NULL)
+        delete[] m_dummy_code;
 
-    if (m_dummy3 != NULL)
-        delete[] m_dummy3;
+    if (m_dummy_misc_exec != NULL)
+        munmap(m_dummy_misc_exec, m_dummy_misc_esize);
 
-    if (m_dummy1_exec != NULL)
-        munmap(m_dummy1_exec, m_dummy1_esize);
-
-    if (m_dummy2_exec != NULL)
-        munmap(m_dummy2_exec, m_dummy2_esize);
-
-    if (m_dummy3_exec != NULL)
-        munmap(m_dummy3_exec, m_dummy3_esize);
+    if (m_dummy_code_exec != NULL)
+        munmap(m_dummy_code_exec, m_dummy_code_esize);
 
     return true;
 }
@@ -434,11 +409,9 @@ void bfelf_loader_ut::test_bfelf_file_init()
     ret = bfelf_file_init((char *)&g_test, sizeof(g_test), &m_test_elf);
     ASSERT_TRUE(ret == BFELF_SUCCESS);
 
-    ret = bfelf_file_init(m_dummy1, m_dummy1_length, &m_dummy1_ef);
+    ret = bfelf_file_init(m_dummy_misc, m_dummy_misc_length, &m_dummy_misc_ef);
     ASSERT_TRUE(ret == BFELF_SUCCESS);
-    ret = bfelf_file_init(m_dummy2, m_dummy2_length, &m_dummy2_ef);
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
-    ret = bfelf_file_init(m_dummy3, m_dummy3_length, &m_dummy3_ef);
+    ret = bfelf_file_init(m_dummy_code, m_dummy_code_length, &m_dummy_code_ef);
     ASSERT_TRUE(ret == BFELF_SUCCESS);
 
 }
@@ -459,19 +432,15 @@ void bfelf_loader_ut::test_bfelf_file_size()
     m_test_exec = alloc_exec(m_test_esize);
     ASSERT_TRUE(m_test_exec != NULL);
 
-    m_dummy1_esize = bfelf_total_exec_size(&m_dummy1_ef);
-    ASSERT_TRUE(m_dummy1_esize > BFELF_SUCCESS);
-    m_dummy2_esize = bfelf_total_exec_size(&m_dummy2_ef);
-    ASSERT_TRUE(m_dummy2_esize > BFELF_SUCCESS);
-    m_dummy3_esize = bfelf_total_exec_size(&m_dummy3_ef);
-    ASSERT_TRUE(m_dummy3_esize > BFELF_SUCCESS);
+    m_dummy_misc_esize = bfelf_total_exec_size(&m_dummy_misc_ef);
+    ASSERT_TRUE(m_dummy_misc_esize > BFELF_SUCCESS);
+    m_dummy_code_esize = bfelf_total_exec_size(&m_dummy_code_ef);
+    ASSERT_TRUE(m_dummy_code_esize > BFELF_SUCCESS);
 
-    m_dummy1_exec = alloc_exec(m_dummy1_esize);
-    ASSERT_TRUE(m_dummy1_exec != NULL);
-    m_dummy2_exec = alloc_exec(m_dummy2_esize);
-    ASSERT_TRUE(m_dummy2_exec != NULL);
-    m_dummy3_exec = alloc_exec(m_dummy3_esize);
-    ASSERT_TRUE(m_dummy3_exec != NULL);
+    m_dummy_misc_exec = alloc_exec(m_dummy_misc_esize);
+    ASSERT_TRUE(m_dummy_misc_exec != NULL);
+    m_dummy_code_exec = alloc_exec(m_dummy_code_esize);
+    ASSERT_TRUE(m_dummy_code_exec != NULL);
 }
 
 void bfelf_loader_ut::test_bfelf_file_load()
@@ -500,11 +469,9 @@ void bfelf_loader_ut::test_bfelf_file_load()
     ret = bfelf_file_load(&m_test_elf, m_test_exec, m_test_esize);
     ASSERT_TRUE(ret == BFELF_SUCCESS);
 
-    ret = bfelf_file_load(&m_dummy1_ef, m_dummy1_exec, m_dummy1_esize);
+    ret = bfelf_file_load(&m_dummy_misc_ef, m_dummy_misc_exec, m_dummy_misc_esize);
     ASSERT_TRUE(ret == BFELF_SUCCESS);
-    ret = bfelf_file_load(&m_dummy2_ef, m_dummy2_exec, m_dummy2_esize);
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
-    ret = bfelf_file_load(&m_dummy3_ef, m_dummy3_exec, m_dummy3_esize);
+    ret = bfelf_file_load(&m_dummy_code_ef, m_dummy_code_exec, m_dummy_code_esize);
     ASSERT_TRUE(ret == BFELF_SUCCESS);
 }
 
@@ -526,7 +493,7 @@ void bfelf_loader_ut::test_bfelf_loader_add()
 {
     auto ret = 0;
 
-    ret = bfelf_loader_add(NULL, &m_dummy1_ef);
+    ret = bfelf_loader_add(NULL, &m_dummy_misc_ef);
     ASSERT_TRUE(ret == BFELF_ERROR_INVALID_ARG);
 
     ret = bfelf_loader_add(&m_test_loader, NULL);
@@ -546,11 +513,9 @@ void bfelf_loader_ut::test_bfelf_loader_add()
     ret = bfelf_loader_add(&m_test_loader, &m_test_elf);
     ASSERT_TRUE(ret == BFELF_SUCCESS);
 
-    ret = bfelf_loader_add(&m_loader, &m_dummy1_ef);
+    ret = bfelf_loader_add(&m_loader, &m_dummy_misc_ef);
     ASSERT_TRUE(ret == BFELF_SUCCESS);
-    ret = bfelf_loader_add(&m_loader, &m_dummy2_ef);
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
-    ret = bfelf_loader_add(&m_loader, &m_dummy3_ef);
+    ret = bfelf_loader_add(&m_loader, &m_dummy_code_ef);
     ASSERT_TRUE(ret == BFELF_SUCCESS);
 }
 
@@ -1124,7 +1089,10 @@ void bfelf_loader_ut::test_bfelf_file_print_header()
 {
     auto ret = 0;
 
-    ret = bfelf_file_print_header(&m_dummy3_ef);
+    ret = bfelf_file_print_header(&m_dummy_misc_ef);
+    ASSERT_TRUE(ret == BFELF_SUCCESS);
+
+    ret = bfelf_file_print_header(&m_dummy_code_ef);
     ASSERT_TRUE(ret == BFELF_SUCCESS);
 }
 
@@ -1132,7 +1100,10 @@ void bfelf_loader_ut::test_bfelf_print_section_header_table()
 {
     auto ret = 0;
 
-    ret = bfelf_print_section_header_table(&m_dummy3_ef);
+    ret = bfelf_print_section_header_table(&m_dummy_misc_ef);
+    ASSERT_TRUE(ret == BFELF_SUCCESS);
+
+    ret = bfelf_print_section_header_table(&m_dummy_code_ef);
     ASSERT_TRUE(ret == BFELF_SUCCESS);
 }
 
@@ -1140,7 +1111,10 @@ void bfelf_loader_ut::test_bfelf_print_program_header_table()
 {
     auto ret = 0;
 
-    ret = bfelf_print_program_header_table(&m_dummy3_ef);
+    ret = bfelf_print_program_header_table(&m_dummy_misc_ef);
+    ASSERT_TRUE(ret == BFELF_SUCCESS);
+
+    ret = bfelf_print_program_header_table(&m_dummy_code_ef);
     ASSERT_TRUE(ret == BFELF_SUCCESS);
 }
 
@@ -1148,13 +1122,10 @@ void bfelf_loader_ut::test_bfelf_print_sym_table()
 {
     auto ret = 0;
 
-    ret = bfelf_print_sym_table(&m_dummy1_ef);
+    ret = bfelf_print_sym_table(&m_dummy_misc_ef);
     ASSERT_TRUE(ret == BFELF_SUCCESS);
 
-    ret = bfelf_print_sym_table(&m_dummy2_ef);
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
-
-    ret = bfelf_print_sym_table(&m_dummy3_ef);
+    ret = bfelf_print_sym_table(&m_dummy_code_ef);
     ASSERT_TRUE(ret == BFELF_SUCCESS);
 }
 
@@ -1162,45 +1133,40 @@ void bfelf_loader_ut::test_bfelf_print_relocations()
 {
     auto ret = 0;
 
-    ret = bfelf_print_relocations(&m_dummy1_ef);
+    ret = bfelf_print_relocations(&m_dummy_misc_ef);
     ASSERT_TRUE(ret == BFELF_SUCCESS);
 
-    ret = bfelf_print_relocations(&m_dummy2_ef);
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
-
-    ret = bfelf_print_relocations(&m_dummy3_ef);
+    ret = bfelf_print_relocations(&m_dummy_code_ef);
     ASSERT_TRUE(ret == BFELF_SUCCESS);
 }
 
 void bfelf_loader_ut::test_resolve()
 {
     auto ret = 0;
-    void *entry1 = 0;
-    void *entry2 = 0;
-    struct e_string_t str1 = {"exec_ms64tosv64", 15};
-    struct e_string_t str2 = {"_Z12dummy3_test2i", 17};
+    entry_point_t entry_point;
+    struct e_string_t str = {"foo", 3};
 
-    for (auto i = 0; i < bfelf_ctor_num(&m_dummy3_ef); i++)
+    for (auto i = 0; i < bfelf_ctor_num(&m_dummy_misc_ef); i++)
     {
         ctor_func func;
 
-        ret = bfelf_resolve_ctor(&m_dummy3_ef, i, (void **)&func);
+        ret = bfelf_resolve_ctor(&m_dummy_misc_ef, i, (void **)&func);
         ASSERT_TRUE(ret == BFELF_SUCCESS);
 
         func();
     }
 
-    for (auto i = 0; i < bfelf_init_num(&m_dummy3_ef); i++)
+    for (auto i = 0; i < bfelf_init_num(&m_dummy_misc_ef); i++)
     {
         init_func func;
 
-        ret = bfelf_resolve_init(&m_dummy3_ef, i, (void **)&func);
+        ret = bfelf_resolve_init(&m_dummy_misc_ef, i, (void **)&func);
         ASSERT_TRUE(ret == BFELF_SUCCESS);
 
         func();
     }
 
-    ret = bfelf_resolve_symbol(&m_dummy3_ef, &str1, &entry1);
+    ret = bfelf_resolve_symbol(&m_dummy_misc_ef, &str, (void **)&entry_point);
     EXPECT_TRUE(ret == BFELF_SUCCESS);
 
     if (ret != BFELF_SUCCESS)
@@ -1211,52 +1177,26 @@ void bfelf_loader_ut::test_resolve()
 
         return;
     }
-
-    ret = bfelf_resolve_symbol(&m_dummy3_ef, &str2, &entry2);
-    EXPECT_TRUE(ret == BFELF_SUCCESS);
-
-    if (ret != BFELF_SUCCESS)
-    {
-        std::cout << std::endl;
-        std::cout << "Error: " << bfelf_error(ret) << std::endl;
-        std::cout << std::endl;
-
-        return;
-    }
-
-#if defined(__CYGWIN__) && !defined(_WIN32)
-
-    exec_ms64tosv64_t exec_ms64tosv64 = (exec_ms64tosv64_t)entry1;
-
-    std::cout << std::endl;
-    std::cout << "Result: " << exec_ms64tosv64(entry2, 5) << std::endl;
-    std::cout << std::endl;
-
-#else
-
-    entry_point_t entry_point = (entry_point_t)entry2;
 
     std::cout << std::endl;
     std::cout << "Result: " << entry_point(5) << std::endl;
     std::cout << std::endl;
 
-#endif
-
-    for (auto i = 0; i < bfelf_fini_num(&m_dummy3_ef); i++)
+    for (auto i = 0; i < bfelf_fini_num(&m_dummy_misc_ef); i++)
     {
         fini_func func;
 
-        ret = bfelf_resolve_fini(&m_dummy3_ef, i, (void **)&func);
+        ret = bfelf_resolve_fini(&m_dummy_misc_ef, i, (void **)&func);
         ASSERT_TRUE(ret == BFELF_SUCCESS);
 
         func();
     }
 
-    for (auto i = 0; i < bfelf_dtor_num(&m_dummy3_ef); i++)
+    for (auto i = 0; i < bfelf_dtor_num(&m_dummy_misc_ef); i++)
     {
         dtor_func func;
 
-        ret = bfelf_resolve_dtor(&m_dummy3_ef, i, (void **)&func);
+        ret = bfelf_resolve_dtor(&m_dummy_misc_ef, i, (void **)&func);
         ASSERT_TRUE(ret == BFELF_SUCCESS);
 
         func();

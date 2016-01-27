@@ -52,6 +52,20 @@ void *
 platform_alloc_exec(int64_t len);
 
 /**
+ * Convert Virtual Address to Physical Address
+ *
+ * Given a virtual address, this function returns the associated physical
+ * address. Note that any page pool issues should be handle by the platform
+ * (i.e. the users of this function should be able to provide any virtual
+ * address, regardless of where the address originated from).
+ *
+ * @param virt thevirtual address to convert
+ * @return the physical address assocaited with the provided virtual address
+ */
+void *
+platform_virt_to_phys(void *virt);
+
+/**
  * Free Memory
  *
  * Used by the common code to free virtual memory that was allocated

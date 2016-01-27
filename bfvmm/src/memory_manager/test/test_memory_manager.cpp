@@ -20,6 +20,7 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #include <test.h>
+#include <constants.h>
 #include <memory_manager/memory_manager.h>
 
 void
@@ -127,7 +128,7 @@ memory_manager_ut::test_memory_manager_malloc_all_of_memory()
 {
     void *addr[MAX_BLOCKS] = {0};
 
-    for (auto i = 0; i < MAX_BLOCKS - 1; i++)
+    for (auto i = 0U; i < MAX_BLOCKS - 1; i++)
         addr[i] = g_mm->malloc(MAX_CACHE_LINE_SIZE);
 
     EXPECT_TRUE(g_mm->free_blocks() == 1);
@@ -136,7 +137,7 @@ memory_manager_ut::test_memory_manager_malloc_all_of_memory()
     EXPECT_TRUE(g_mm->free_blocks() == 0);
     EXPECT_TRUE(g_mm->malloc(10) == 0);
 
-    for (auto i = 0; i < MAX_BLOCKS; i++)
+    for (auto i = 0U; i < MAX_BLOCKS; i++)
         g_mm->free(addr[i]);
 
     EXPECT_TRUE(g_mm->free_blocks() == MAX_BLOCKS);
@@ -147,7 +148,7 @@ memory_manager_ut::test_memory_manager_malloc_all_of_memory_fragmented()
 {
     void *addr[TOTAL_NUM_PAGES] = {0};
 
-    for (auto i = 0; i < TOTAL_NUM_PAGES - 1; i++)
+    for (auto i = 0U; i < TOTAL_NUM_PAGES - 1; i++)
         addr[i] = g_mm->malloc(MAX_PAGE_SIZE);
 
     EXPECT_TRUE(g_mm->free_blocks() == BLOCKS_PER_PAGE);
@@ -156,7 +157,7 @@ memory_manager_ut::test_memory_manager_malloc_all_of_memory_fragmented()
     EXPECT_TRUE(g_mm->free_blocks() == BLOCKS_PER_PAGE - 1);
     EXPECT_TRUE(g_mm->malloc(MAX_PAGE_SIZE) == 0);
 
-    for (auto i = 0; i < TOTAL_NUM_PAGES; i++)
+    for (auto i = 0U; i < TOTAL_NUM_PAGES; i++)
         g_mm->free(addr[i]);
 
     EXPECT_TRUE(g_mm->free_blocks() == MAX_BLOCKS);
@@ -230,4 +231,144 @@ memory_manager_ut::test_memory_manager_malloc_alloc_fragment()
     g_mm->free(addr6);
 
     EXPECT_TRUE(g_mm->free_blocks() == MAX_BLOCKS);
+}
+
+void
+memory_manager_ut::test_memory_manager_add_mdl_invalid_mdl()
+{
+    EXPECT_TRUE(g_mm->add_mdl(0, 1) == MEMORY_MANAGER_FAILURE);
+}
+
+void
+memory_manager_ut::test_memory_manager_add_mdl_invalid_num()
+{
+    struct memory_descriptor mdl[1] = {{0, 0, 0, 0}};
+
+    EXPECT_TRUE(g_mm->add_mdl(mdl, 0) == MEMORY_MANAGER_FAILURE);
+}
+
+void
+memory_manager_ut::test_memory_manager_add_mdl_invalid_size()
+{
+    struct memory_descriptor mdl[1] = {{
+            (void *)0x12345000,
+            (void *)0x54321000, 10, 0
+        }
+    };
+
+    EXPECT_TRUE(g_mm->add_mdl(mdl, 1) == MEMORY_MANAGER_FAILURE);
+}
+
+void
+memory_manager_ut::test_memory_manager_add_mdl_unaligned_physical()
+{
+    struct memory_descriptor mdl[1] = {{
+            (void *)0x12345123,
+            (void *)0x54321000, 4096, 0
+        }
+    };
+
+    EXPECT_TRUE(g_mm->add_mdl(mdl, 1) == MEMORY_MANAGER_FAILURE);
+}
+
+void
+memory_manager_ut::test_memory_manager_add_mdl_unaligned_virtual()
+{
+    struct memory_descriptor mdl[1] = {{
+            (void *)0x12345000,
+            (void *)0x54321123, 4096, 0
+        }
+    };
+
+    EXPECT_TRUE(g_mm->add_mdl(mdl, 1) == MEMORY_MANAGER_FAILURE);
+}
+
+void
+memory_manager_ut::test_memory_manager_virt_to_phys_unknown()
+{
+    EXPECT_TRUE(g_mm->virt_to_phys((void *)0x54321000) == (void *)0);
+}
+
+void
+memory_manager_ut::test_memory_manager_phys_to_virt_unknown()
+{
+    EXPECT_TRUE(g_mm->phys_to_virt((void *)0x12346000) == (void *)0);
+}
+
+void
+memory_manager_ut::test_memory_manager_virt_to_phys_random_address()
+{
+    struct memory_descriptor mdl[1] = {{
+            (void *)0x12345000,
+            (void *)0x54321000, 4096, 0
+        }
+    };
+
+    EXPECT_TRUE(g_mm->add_mdl(mdl, 1) == MEMORY_MANAGER_SUCCESS);
+    EXPECT_TRUE(g_mm->virt_to_phys((void *)0x54321ABC) == (void *)0x12345ABC);
+}
+
+void
+memory_manager_ut::test_memory_manager_virt_to_phys_upper_limit()
+{
+    struct memory_descriptor mdl[1] = {{
+            (void *)0x12345000,
+            (void *)0x54321000, 4096, 0
+        }
+    };
+
+    EXPECT_TRUE(g_mm->add_mdl(mdl, 1) == MEMORY_MANAGER_SUCCESS);
+    EXPECT_TRUE(g_mm->virt_to_phys((void *)0x54321FFF) == (void *)0x12345FFF);
+}
+
+void
+memory_manager_ut::test_memory_manager_virt_to_phys_lower_limit()
+{
+    struct memory_descriptor mdl[1] = {{
+            (void *)0x12345000,
+            (void *)0x54321000, 4096, 0
+        }
+    };
+
+    EXPECT_TRUE(g_mm->add_mdl(mdl, 1) == MEMORY_MANAGER_SUCCESS);
+    EXPECT_TRUE(g_mm->virt_to_phys((void *)0x54321000) == (void *)0x12345000);
+}
+
+void
+memory_manager_ut::test_memory_manager_phys_to_virt_random_address()
+{
+    struct memory_descriptor mdl[1] = {{
+            (void *)0x12345000,
+            (void *)0x54321000, 4096, 0
+        }
+    };
+
+    EXPECT_TRUE(g_mm->add_mdl(mdl, 1) == MEMORY_MANAGER_SUCCESS);
+    EXPECT_TRUE(g_mm->phys_to_virt((void *)0x12345ABC) == (void *)0x54321ABC);
+}
+
+void
+memory_manager_ut::test_memory_manager_phys_to_virt_upper_limit()
+{
+    struct memory_descriptor mdl[1] = {{
+            (void *)0x12345000,
+            (void *)0x54321000, 4096, 0
+        }
+    };
+
+    EXPECT_TRUE(g_mm->add_mdl(mdl, 1) == MEMORY_MANAGER_SUCCESS);
+    EXPECT_TRUE(g_mm->phys_to_virt((void *)0x12345FFF) == (void *)0x54321FFF);
+}
+
+void
+memory_manager_ut::test_memory_manager_phys_to_virt_lower_limit()
+{
+    struct memory_descriptor mdl[1] = {{
+            (void *)0x12345000,
+            (void *)0x54321000, 4096, 0
+        }
+    };
+
+    EXPECT_TRUE(g_mm->add_mdl(mdl, 1) == MEMORY_MANAGER_SUCCESS);
+    EXPECT_TRUE(g_mm->phys_to_virt((void *)0x12345000) == (void *)0x54321000);
 }

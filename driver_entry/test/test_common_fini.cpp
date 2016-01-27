@@ -21,51 +21,94 @@
 
 #include <test.h>
 
+#include <entry.h>
 #include <common.h>
 #include <platform.h>
 
 void
-driver_entry_ut::test_commit_fini_common_stop_failure()
+driver_entry_ut::test_common_fini_unloaded()
 {
-    MockRepository mocks;
-
-    mocks.OnCallFunc(common_stop_vmm).Return(-1);
-    mocks.OnCallFunc(common_unload_vmm).Return(BF_SUCCESS);
-
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        EXPECT_TRUE(common_init() == BF_SUCCESS);
-        EXPECT_TRUE(common_fini() == BF_SUCCESS);
-    });
-}
-
-void
-driver_entry_ut::test_commit_fini_common_unload_failure()
-{
-    MockRepository mocks;
-
-    mocks.OnCallFunc(common_stop_vmm).Return(BF_SUCCESS);
-    mocks.OnCallFunc(common_unload_vmm).Return(-1);
-
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        EXPECT_TRUE(common_init() == BF_SUCCESS);
-        EXPECT_TRUE(common_fini() == BF_SUCCESS);
-    });
-}
-
-void
-driver_entry_ut::test_commit_fini_success()
-{
-    EXPECT_TRUE(common_init() == BF_SUCCESS);
+    EXPECT_TRUE(common_fini() == BF_SUCCESS);
+    EXPECT_TRUE(common_fini() == BF_SUCCESS);
     EXPECT_TRUE(common_fini() == BF_SUCCESS);
 }
 
 void
-driver_entry_ut::test_commit_fini_success_multiple_times()
+driver_entry_ut::test_common_fini_successful_start()
 {
-    EXPECT_TRUE(common_init() == BF_SUCCESS);
+    EXPECT_TRUE(common_add_module(m_dummy_init_vmm_success, m_dummy_init_vmm_success_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_add_module(m_dummy_start_vmm_success, m_dummy_start_vmm_success_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_add_module(m_dummy_stop_vmm_success, m_dummy_stop_vmm_success_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_add_module(m_dummy_add_mdl_success, m_dummy_add_mdl_success_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_add_module(m_dummy_misc, m_dummy_misc_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_load_vmm() == BF_SUCCESS);
+    EXPECT_TRUE(common_start_vmm() == BF_SUCCESS);
     EXPECT_TRUE(common_fini() == BF_SUCCESS);
+    EXPECT_TRUE(common_vmm_status() == VMM_UNLOADED);
+}
+
+void
+driver_entry_ut::test_common_fini_successful_load()
+{
+    EXPECT_TRUE(common_add_module(m_dummy_init_vmm_success, m_dummy_init_vmm_success_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_add_module(m_dummy_start_vmm_success, m_dummy_start_vmm_success_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_add_module(m_dummy_stop_vmm_success, m_dummy_stop_vmm_success_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_add_module(m_dummy_add_mdl_success, m_dummy_add_mdl_success_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_add_module(m_dummy_misc, m_dummy_misc_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_load_vmm() == BF_SUCCESS);
     EXPECT_TRUE(common_fini() == BF_SUCCESS);
+    EXPECT_TRUE(common_vmm_status() == VMM_UNLOADED);
+}
+
+void
+driver_entry_ut::test_common_fini_successful_add_module()
+{
+    EXPECT_TRUE(common_add_module(m_dummy_init_vmm_success, m_dummy_init_vmm_success_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_add_module(m_dummy_start_vmm_success, m_dummy_start_vmm_success_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_add_module(m_dummy_stop_vmm_success, m_dummy_stop_vmm_success_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_add_module(m_dummy_add_mdl_success, m_dummy_add_mdl_success_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_add_module(m_dummy_misc, m_dummy_misc_length) == BF_SUCCESS);
     EXPECT_TRUE(common_fini() == BF_SUCCESS);
+    EXPECT_TRUE(common_vmm_status() == VMM_UNLOADED);
+}
+
+void
+driver_entry_ut::test_common_fini_corrupted()
+{
+    EXPECT_TRUE(common_add_module(m_dummy_init_vmm_success, m_dummy_init_vmm_success_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_add_module(m_dummy_start_vmm_success, m_dummy_start_vmm_success_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_add_module(m_dummy_stop_vmm_failure, m_dummy_stop_vmm_failure_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_add_module(m_dummy_add_mdl_success, m_dummy_add_mdl_success_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_add_module(m_dummy_misc, m_dummy_misc_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_load_vmm() == BF_SUCCESS);
+    EXPECT_TRUE(common_start_vmm() == BF_SUCCESS);
+    EXPECT_TRUE(common_fini() == BF_ERROR_VMM_CORRUPTED);
+    EXPECT_TRUE(common_vmm_status() == VMM_CORRUPT);
+
+    common_reset();
+}
+
+void
+driver_entry_ut::test_common_fini_failed_load()
+{
+    EXPECT_TRUE(common_add_module(m_dummy_init_vmm_success, m_dummy_init_vmm_success_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_add_module(m_dummy_start_vmm_success, m_dummy_start_vmm_success_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_add_module(m_dummy_stop_vmm_success, m_dummy_stop_vmm_success_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_load_vmm() == BFELF_ERROR_NO_SUCH_SYMBOL);
+    EXPECT_TRUE(common_fini() == BF_SUCCESS);
+    EXPECT_TRUE(common_vmm_status() == VMM_UNLOADED);
+}
+
+void
+driver_entry_ut::test_common_fini_failed_start()
+{
+    EXPECT_TRUE(common_add_module(m_dummy_init_vmm_success, m_dummy_init_vmm_success_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_add_module(m_dummy_start_vmm_failure, m_dummy_start_vmm_failure_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_add_module(m_dummy_stop_vmm_success, m_dummy_stop_vmm_success_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_add_module(m_dummy_add_mdl_success, m_dummy_add_mdl_success_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_add_module(m_dummy_misc, m_dummy_misc_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_load_vmm() == BF_SUCCESS);
+    EXPECT_TRUE(common_start_vmm() == ENTRY_ERROR_VMM_START_FAILED);
+    EXPECT_TRUE(common_fini() == BF_SUCCESS);
+    EXPECT_TRUE(common_vmm_status() == VMM_UNLOADED);
 }

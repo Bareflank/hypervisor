@@ -76,8 +76,15 @@ vcpu_manager::stop(int64_t vcpuid)
     return vcpu_manager_error::success;
 }
 
+serial_port_x86 *
+internal_serial()
+{
+    static serial_port_x86 serial;
+    return &serial;
+}
+
 void
-vcpu_manager::write(int64_t vcpuid, const char *str, int64_t len)
+vcpu_manager::write(int64_t vcpuid, std::string &str)
 {
     const auto &vc = m_vcpus[vcpuid];
 
@@ -86,12 +93,12 @@ vcpu_manager::write(int64_t vcpuid, const char *str, int64_t len)
         for (const auto &kv : m_vcpus)
         {
             if (kv.second)
-                kv.second->write(str, len);
+                kv.second->write(str);
         }
     }
     else
     {
-        vc->write(str, len);
+        vc->write(str);
     }
 }
 
@@ -99,24 +106,17 @@ vcpu_manager::vcpu_manager()
 {
 }
 
-serial_port_x86 *
-internal_serial()
-{
-    static serial_port_x86 serial;
-    return &serial;
-}
-
 extern "C" int
 write(int file, const void *buffer, size_t count)
 {
-    (void) file;
+    std::string str((char *)buffer, count);
 
-    // TODO: Need to add a cout to each vcpu so that it can provide a unique
-    // file handle so that we know what vcpu to write to. At the moment, we
-    // simply broadcast to all vcpus
+    internal_serial()->write(str);
 
-    internal_serial()->write((char *)buffer, count);
-    vcpu_manager::instance()->write(-1, (char *)buffer, count);
+    if (file == 0)
+        vcpu_manager::instance()->write(-1, str);
+    else
+        vcpu_manager::instance()->write(file - 1000, str);
 
     return count;
 }

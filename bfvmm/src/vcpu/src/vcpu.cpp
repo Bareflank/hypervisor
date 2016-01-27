@@ -19,9 +19,8 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+#include <debug.h>
 #include <vcpu/vcpu.h>
-
-#include <iostream>
 
 vcpu::vcpu(int64_t id) :
     m_id(id)
@@ -62,8 +61,26 @@ vcpu::stop()
 }
 
 void
-vcpu::write(const char *str, int64_t len)
+erase(std::string &str, const std::string &substr)
 {
+    auto start_pos = str.find(substr);
+
+    if (start_pos == std::string::npos)
+        return;
+
+    str.erase(start_pos, substr.length());
+}
+
+void
+vcpu::write(std::string &str)
+{
+    erase(str, bfcolor_end);
+    erase(str, bfcolor_debug);
+    erase(str, bfcolor_warning);
+    erase(str, bfcolor_error);
+    erase(str, bfcolor_func);
+    erase(str, bfcolor_line);
+
     if (m_debug_ring != 0)
-        m_debug_ring->write(str, len);
+        m_debug_ring->write(str);
 }

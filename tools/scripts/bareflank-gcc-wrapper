@@ -108,7 +108,7 @@ done
 # only thing the hypervisor code should need from the sysroot is the includes.
 
 if [[ $BAREFLANK_WRAPPER_INCLUDE_LIBC == "true" ]]; then
-    SYSROOT_LIBS="-lc -lbfc"
+    SYSROOT_LIBS="-lc -lm -lbfc"
     SYSROOT_LIB_PATH="-L$HOME/opt/cross/x86_64-elf/lib/"
 fi
 

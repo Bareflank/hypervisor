@@ -23,7 +23,7 @@
 # Target Information
 ################################################################################
 
-TARGET_NAME:=dummy1
+TARGET_NAME:=dummy_start_vmm_failure
 TARGET_TYPE:=lib
 TARGET_COMPILER:=cross
 
@@ -49,10 +49,11 @@ CROSS_OUTDIR:=../bin
 # Sources
 ################################################################################
 
-SOURCES+=dummy1.cpp
+SOURCES+=dummy_start_vmm_failure.cpp
 
 INCLUDE_PATHS+=./
 INCLUDE_PATHS+=../include/
+INCLUDE_PATHS+=../../include/
 
 LIBS+=
 

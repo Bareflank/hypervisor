@@ -43,7 +43,6 @@ private:
     void test_read_with_invalid_drr();
     void test_read_with_null_string();
     void test_read_with_zero_length();
-    void test_write_with_null_string();
     void test_write_with_zero_length();
     void test_write_string_to_dr_that_is_larger_than_dr();
     void test_write_string_to_dr_that_is_much_larger_than_dr();

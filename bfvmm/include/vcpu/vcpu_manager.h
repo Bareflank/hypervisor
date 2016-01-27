@@ -85,9 +85,8 @@ public:
     ///
     /// @param vcpuid the vcpu's log to write to
     /// @param str the string to write to the log
-    /// @param len the length of the string
     ///
-    void write(int64_t vcpuid, const char *str, int64_t len);
+    void write(int64_t vcpuid, std::string &str);
 
 public:
 

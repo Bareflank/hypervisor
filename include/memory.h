@@ -23,7 +23,11 @@
 #ifndef MEMORY_H
 #define MEMORY_H
 
-#include <constants.h>
+#ifndef KERNEL
+#include <stdint.h>
+#else
+#include <types.h>
+#endif
 
 #pragma pack(push, 1)
 
@@ -35,7 +39,7 @@ extern "C" {
  * Memory Manger Error Codes
  */
 #define MEMORY_MANAGER_SUCCESS 0
-#define MEMORY_MANAGER_FAILURE -1
+#define MEMORY_MANAGER_FAILURE -1LL
 
 /**
  * Memory Descriptor
@@ -55,8 +59,8 @@ struct memory_descriptor
 {
     void *phys;
     void *virt;
-    unsigned long long int size;
-    unsigned long long int type;
+    uint64_t size;
+    uint64_t type;
 };
 
 /**
@@ -66,7 +70,7 @@ struct memory_descriptor
  * will need to collect memory descriptors for every page of memory that the
  * VMM is using so that the memory manager can provide mappings as needed.
  */
-typedef long long int (*add_mdl_t)(struct memory_descriptor *mdl, long long int num);
+typedef int64_t (*add_mdl_t)(struct memory_descriptor *mdl, int64_t num);
 
 #ifdef __cplusplus
 }

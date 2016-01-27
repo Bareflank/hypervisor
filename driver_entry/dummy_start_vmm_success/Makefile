@@ -23,7 +23,7 @@
 # Target Information
 ################################################################################
 
-TARGET_NAME:=dummy3
+TARGET_NAME:=dummy_start_vmm_success
 TARGET_TYPE:=lib
 TARGET_COMPILER:=cross
 
@@ -49,8 +49,7 @@ CROSS_OUTDIR:=../bin
 # Sources
 ################################################################################
 
-SOURCES+=dummy3.cpp
-SOURCES+=../../src/abi_conversion.asm
+SOURCES+=dummy_start_vmm_success.cpp
 
 INCLUDE_PATHS+=./
 INCLUDE_PATHS+=../include/

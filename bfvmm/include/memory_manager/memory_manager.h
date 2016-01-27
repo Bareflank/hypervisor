@@ -22,6 +22,8 @@
 #ifndef MEMORY_MANAGER_H
 #define MEMORY_MANAGER_H
 
+#include <map>
+
 #include <stddef.h>
 #include <stdint.h>
 #include <memory.h>
@@ -167,6 +169,9 @@ private:
 private:
 
     uint32_t m_start;
+
+    std::map<uintptr_t, struct memory_descriptor> m_virt_to_phys_map;
+    std::map<uintptr_t, struct memory_descriptor> m_phys_to_virt_map;
 };
 
 /// Memory Manager Macro
@@ -187,6 +192,6 @@ private:
 /// @param num the number of memory diescriptors in the list
 /// @return MEMORY_MANAGER_SUCCESS on success, MEMORY_MANAGER_FAILURE otherwise
 ///
-extern "C" long long int add_mdl(struct memory_descriptor *mdl, long long int num);
+extern "C" int64_t add_mdl(struct memory_descriptor *mdl, int64_t num);
 
 #endif

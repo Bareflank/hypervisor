@@ -52,6 +52,19 @@ private:
     void test_memory_manager_malloc_aligned_ignored_alignment();
     void test_memory_manager_malloc_aligned();
     void test_memory_manager_malloc_alloc_fragment();
+    void test_memory_manager_add_mdl_invalid_mdl();
+    void test_memory_manager_add_mdl_invalid_num();
+    void test_memory_manager_add_mdl_invalid_size();
+    void test_memory_manager_add_mdl_unaligned_physical();
+    void test_memory_manager_add_mdl_unaligned_virtual();
+    void test_memory_manager_virt_to_phys_unknown();
+    void test_memory_manager_phys_to_virt_unknown();
+    void test_memory_manager_virt_to_phys_random_address();
+    void test_memory_manager_virt_to_phys_upper_limit();
+    void test_memory_manager_virt_to_phys_lower_limit();
+    void test_memory_manager_phys_to_virt_random_address();
+    void test_memory_manager_phys_to_virt_upper_limit();
+    void test_memory_manager_phys_to_virt_lower_limit();
 };
 
 #endif

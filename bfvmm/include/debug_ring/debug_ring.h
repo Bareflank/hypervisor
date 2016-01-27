@@ -22,6 +22,7 @@
 #ifndef DEBUG_RING_H
 #define DEBUG_RING_H
 
+#include <string>
 #include <stdint.h>
 #include <debug_ring_interface.h>
 
@@ -62,10 +63,9 @@ public:
     /// buffer until enough space is made, to add the string.
     ///
     /// @param str the string to write to the debug ring
-    /// @param len the length of the string in bytes
     /// @return success on success, error code on failure.
     ///
-    virtual debug_ring_error::type write(const char *str, int64_t len);
+    virtual debug_ring_error::type write(const std::string &str);
 
 private:
 
@@ -84,6 +84,6 @@ private:
 /// @return the debug_ring_resources_t for the provided vcpuid
 ///
 extern "C" struct debug_ring_resources_t *
-get_drr(long long int vcpuid);
+get_drr(int64_t vcpuid);
 
 #endif

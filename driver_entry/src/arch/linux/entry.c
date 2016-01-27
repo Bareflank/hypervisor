@@ -116,6 +116,42 @@ ioctl_add_module_length(int32_t len)
 }
 
 int32_t
+ioctl_stop_vmm(void)
+{
+    int i;
+    int ret;
+    int status = BF_IOCTL_SUCCESS;
+
+    ret = common_stop_vmm();
+    if (ret != BF_SUCCESS)
+    {
+        ALERT("IOCTL_STOP_VMM: failed to stop vmm: %d\n", ret);
+        status = BF_IOCTL_ERROR_STOP_VMM_FAILED;
+    }
+
+    ret = common_unload_vmm();
+    if (ret != BF_SUCCESS)
+    {
+        ALERT("IOCTL_STOP_VMM: failed to unload vmm: %d\n", ret);
+        status = BF_IOCTL_ERROR_STOP_VMM_FAILED;
+    }
+
+    for (i = 0; i < g_num_files; i++)
+        platform_free(files[i]);
+
+    if (g_mmu_context)
+        mmput(g_mmu_context);
+
+    g_num_files = 0;
+    g_mmu_context = NULL;
+
+    if (status == BF_IOCTL_SUCCESS)
+        DEBUG("IOCTL_STOP_VMM: succeeded\n");
+
+    return status;
+}
+
+int32_t
 ioctl_start_vmm(void)
 {
     int ret;
@@ -124,52 +160,38 @@ ioctl_start_vmm(void)
     if (ret != BF_SUCCESS)
     {
         ALERT("IOCTL_START_VMM: failed to load vmm: %d\n", ret);
-        return ret;
+        goto failure;
     }
 
     ret = common_start_vmm();
     if (ret != BF_SUCCESS)
     {
         ALERT("IOCTL_START_VMM: failed to start vmm: %d\n", ret);
-        return ret;
+        goto failure;
     }
 
     g_mmu_context = get_task_mm(current);
     if (!g_mmu_context)
     {
         ALERT("IOCTL_START_VMM: couldn't find a memory context in which to run!\n");
-        return ret;
+        goto failure;
     }
 
     DEBUG("IOCTL_START_VMM: succeeded\n");
     return BF_IOCTL_SUCCESS;
-}
 
-int32_t
-ioctl_stop_vmm(void)
-{
-    int i;
-    int ret;
+failure:
 
-    ret = common_stop_vmm();
-    if (ret != BF_SUCCESS)
-        ALERT("IOCTL_STOP_VMM: failed to stop vmm: %d\n", ret);
+    /*
+     * This does not work as intended. This works if "start_vmm" fails, but
+     * if "load_vmm" fails, you will have to restart using make debian_load
+     * because there is no way to just unload. This is due to the fact that
+     * BFM doesn't have the unload / load IOCTLs yet. Once those are
+     * implemented, this issue should go away.
+     */
 
-    ret = common_unload_vmm();
-    if (ret != BF_SUCCESS)
-        ALERT("IOCTL_STOP_VMM: failed to unload vmm: %d\n", ret);
-
-    for (i = 0; i < g_num_files; i++)
-        platform_free(files[i]);
-
-    if (g_mmu_context)
-        mmput(g_mmu_context);
-
-    g_mmu_context = NULL;
-    g_num_files = 0;
-
-    DEBUG("IOCTL_STOP_VMM: succeeded\n");
-    return BF_IOCTL_SUCCESS;
+    ioctl_stop_vmm();
+    return BF_IOCTL_ERROR_START_VMM_FAILED;
 }
 
 int32_t
@@ -179,7 +201,10 @@ ioctl_dump_vmm(void)
 
     ret = common_dump_vmm();
     if (ret != BF_SUCCESS)
+    {
         ALERT("IOCTL_DUMP_VMM: failed to dump vmm: %d\n", ret);
+        return BF_IOCTL_ERROR_DUMP_VMM_FAILED;
+    }
 
     DEBUG("IOCTL_DUMP_VMM: succeeded\n");
     return BF_IOCTL_SUCCESS;
@@ -225,7 +250,7 @@ static struct file_operations fops =
 static struct miscdevice bareflank_dev =
 {
     MISC_DYNAMIC_MINOR,
-    "bareflank",
+    BAREFLANK_NAME,
     &fops
 };
 

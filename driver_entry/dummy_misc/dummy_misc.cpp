@@ -19,13 +19,42 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#ifndef DUMMY3_H
-#define DUMMY3_H
+#include <stdint.h>
 
-int
-dummy3_test1(int num);
+int g_misc = 0;
 
-int
-dummy3_test2(int num);
+class test
+{
+public:
+    test()
+    { g_misc = 10; }
 
-#endif
+    virtual ~test()
+    { g_misc = 20; }
+};
+
+test g_test;
+
+void
+operator delete(void *ptr)
+{
+    (void) ptr;
+}
+
+extern "C" int64_t
+sym_that_returns_failure(int64_t)
+{
+    return -1;
+}
+
+extern "C" int64_t
+sym_that_returns_success(int64_t)
+{
+    return 0;
+}
+
+extern "C" int64_t
+get_misc(void)
+{
+    return g_misc;
+}

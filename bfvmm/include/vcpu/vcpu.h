@@ -22,6 +22,7 @@
 #ifndef VCPU_H
 #define VCPU_H
 
+#include <string>
 #include <stdint.h>
 #include <debug_ring/debug_ring.h>
 
@@ -97,9 +98,8 @@ public:
     /// vCPU.
     ///
     /// @param str the string to write to the log
-    /// @param len the length of the string
     ///
-    virtual void write(const char *str, int64_t len);
+    virtual void write(std::string &str);
 
 private:
 

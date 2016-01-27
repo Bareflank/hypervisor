@@ -22,6 +22,7 @@
 #ifndef SERIAL_X86__H
 #define SERIAL_X86__H
 
+#include <string>
 #include <serial/serial_port.h>
 #include <intrinsics/intrinsics_x64.h>
 
@@ -173,9 +174,11 @@ public:
     void disable_fifo(void);
     bool fifo(void);
 
+    // void write(const char *str);
+    // void write(const char *str, int64_t len);
+
     void write(char c);
-    void write(const char *str);
-    void write(const char *str, int64_t len);
+    void write(const std::string &str);
     uint8_t read(void);
 
     /* LSR methods */
@@ -188,8 +191,8 @@ public:
     bool transmitter_empty(void);
     bool error_byte_rx_fifo(void);
 
-    serial_port &operator<<(char c) { write(c); return *this; }
-    serial_port &operator<<(const char *str) { write(str); return *this; }
+    // serial_port &operator<<(char c) { write(c); return *this; }
+    // serial_port &operator<<(const char *str) { write(str); return *this; }
 
 private:
     // Get appropriate divisor for desired baud

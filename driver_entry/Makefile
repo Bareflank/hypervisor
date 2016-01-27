@@ -23,6 +23,17 @@
 # Subdirs
 ################################################################################
 
+SUBDIRS += dummy_add_mdl_failure
+SUBDIRS += dummy_add_mdl_success
+SUBDIRS += dummy_get_drr_failure
+SUBDIRS += dummy_get_drr_success
+SUBDIRS += dummy_init_vmm_failure
+SUBDIRS += dummy_init_vmm_success
+SUBDIRS += dummy_misc
+SUBDIRS += dummy_start_vmm_failure
+SUBDIRS += dummy_start_vmm_success
+SUBDIRS += dummy_stop_vmm_failure
+SUBDIRS += dummy_stop_vmm_success
 SUBDIRS += src
 SUBDIRS += test
 SUBDIRS += bin

@@ -102,12 +102,10 @@ serial_port_x86::serial_port_x86(uint8_t port, uint32_t baud, uint8_t data_size,
     m_stop_bits = stop_bits;
 
     this->open();
-    this->write("serial: open\n");
 }
 
 serial_port_x86::~serial_port_x86(void)
 {
-    this->write("serial: close\n");
     this->close();
 }
 
@@ -322,6 +320,26 @@ serial_port_x86::fifo(void)
     return m_fifo_enabled;
 }
 
+// void
+// serial_port_x86::write(const char *str)
+// {
+//     if (str == 0)
+//         return;
+
+//     while (*str)
+//         write(*str++);
+// }
+
+// void
+// serial_port_x86::write(const char *str, int64_t len)
+// {
+//     if (str == 0)
+//         return;
+
+//     for (auto i = 0; i < len; i++)
+//         write(str[i]);
+// }
+
 void
 serial_port_x86::write(char c)
 {
@@ -329,23 +347,10 @@ serial_port_x86::write(char c)
 }
 
 void
-serial_port_x86::write(const char *str)
+serial_port_x86::write(const std::string &str)
 {
-    if (str == 0)
-        return;
-
-    while (*str)
-        write(*str++);
-}
-
-void
-serial_port_x86::write(const char *str, int64_t len)
-{
-    if (str == 0)
-        return;
-
-    for (auto i = 0; i < len; i++)
-        write(str[i]);
+    for (auto c : str)
+        write(c);
 }
 
 uint8_t

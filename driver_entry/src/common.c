@@ -24,127 +24,31 @@
 #include <common.h>
 #include <platform.h>
 
-#include <bfelf_loader.h>
-
 #include <entry.h>
 #include <memory.h>
 #include <constants.h>
 #include <debug_ring_interface.h>
 
-/* ========================================================================== */
+/* -------------------------------------------------------------------------- */
 /* Global                                                                     */
-/* ========================================================================== */
+/* -------------------------------------------------------------------------- */
 
 int64_t g_vmm_status = VMM_UNLOADED;
 
-uint64_t g_num_bfelf_files = 0;
-void *g_bfelf_execs[MAX_NUM_MODULES] = {0};
-uint64_t g_bfelf_sizes[MAX_NUM_MODULES] = {0};
-struct bfelf_file_t g_bfelf_files[MAX_NUM_MODULES] = {0};
+uint64_t g_num_modules = 0;
+struct module_t g_modules[MAX_NUM_MODULES] = {0};
 
-// struct page_t page_pool[MAX_PAGES] = {0};
-
-/* ========================================================================== */
+/* -------------------------------------------------------------------------- */
 /* Helpers                                                                    */
-/* ========================================================================== */
+/* -------------------------------------------------------------------------- */
 
-int64_t
-set_vmm_status(int64_t status)
+struct module_t *
+get_module(uint64_t index)
 {
-    int64_t old_status = g_vmm_status;
-    g_vmm_status = status;
-    return old_status;
-}
-
-uint64_t
-vmm_status(void)
-{
-    return g_vmm_status;
-}
-
-struct bfelf_file_t *
-get_file(uint64_t index)
-{
-    if (index >= g_num_bfelf_files)
+    if (index >= g_num_modules)
         return 0;
 
-    return &g_bfelf_files[index];
-}
-
-struct bfelf_file_t *
-get_next_file(void)
-{
-    if (g_num_bfelf_files >= MAX_NUM_MODULES)
-        return 0;
-
-    return &g_bfelf_files[g_num_bfelf_files];
-}
-
-void *
-add_elf_file(uint64_t size)
-{
-    uint64_t i;
-
-    void *exec;
-    struct bfelf_file_t *file;
-
-    if (size == 0)
-    {
-        ALERT("add_elf_file: invalid arg\n");
-        return 0;
-    }
-
-    file = get_next_file();
-    if (file == 0)
-    {
-        ALERT("add_elf_file: failed to get the next file to add\n");
-        return 0;
-    }
-
-    exec = platform_alloc_exec(size);
-    if (exec == 0)
-    {
-        ALERT("add_elf_file: out of memory\n");
-        return 0;
-    }
-
-    DEBUG("adding module of size: 0x%x    at: %p\n", (int)size, exec);
-
-    for (i = 0; i < size; i++)
-        ((char *)exec)[i] = 0;
-
-    g_bfelf_execs[g_num_bfelf_files] = exec;
-    g_bfelf_sizes[g_num_bfelf_files] = size;
-
-    g_num_bfelf_files++;
-
-    return exec;
-}
-
-int64_t
-remove_elf_files(void)
-{
-    uint64_t i;
-    uint64_t j;
-    struct bfelf_file_t file = {0};
-
-    for (i = 0; i < g_num_bfelf_files; i++)
-    {
-        for (j = 0; j < g_bfelf_sizes[i]; j++)
-            ((char *)g_bfelf_execs[i])[j] = 0;
-
-        DEBUG("removing module of size: 0x%x\n", (int)g_bfelf_sizes[i]);
-
-        platform_free_exec(g_bfelf_execs[i], g_bfelf_sizes[i]);
-
-        g_bfelf_execs[i] = 0;
-        g_bfelf_sizes[i] = 0;
-        g_bfelf_files[i] = file;
-    }
-
-    g_num_bfelf_files = 0;
-
-    return BF_SUCCESS;
+    return &(g_modules[index]);
 }
 
 int64_t
@@ -164,20 +68,23 @@ symbol_length(const char *sym)
 int64_t
 resolve_symbol(const char *name, void **sym)
 {
-    int ret;
+    int64_t ret;
     struct e_string_t str = {0};
-    struct bfelf_file_t *bfelf_file = get_file(0);
+    struct module_t *module = get_module(0);
 
     if (name == 0 || sym == 0)
         return BF_ERROR_INVALID_ARG;
 
+    if (module == 0)
+        return BF_ERROR_NO_MODULES_ADDED;
+
     str.buf = name;
     str.len = symbol_length(name);
 
-    ret = bfelf_resolve_symbol(bfelf_file, &str, sym);
+    ret = bfelf_resolve_symbol(&module->file, &str, sym);
     if (ret != BFELF_SUCCESS)
     {
-        ALERT("%s could not be found: %d - %s\n", name, ret, bfelf_error(ret));
+        ALERT("%s could not be found: %" PRId64 " - %s\n", name, ret, bfelf_error(ret));
         return ret;
     }
 
@@ -185,9 +92,9 @@ resolve_symbol(const char *name, void **sym)
 }
 
 int64_t
-execute_symbol(const char *sym)
+execute_symbol(const char *sym, int64_t arg)
 {
-    int ret = 0;
+    int64_t ret = 0;
     entry_point_t entry_point;
 
     if (sym == 0)
@@ -196,11 +103,11 @@ execute_symbol(const char *sym)
     ret = resolve_symbol(sym, (void **)&entry_point);
     if (ret != BF_SUCCESS)
     {
-        ALERT("execute_symbol: failed to resolve entry point: %d\n", ret);
+        ALERT("execute_symbol: failed to resolve entry point: %" PRId64 "\n", ret);
         return ret;
     }
 
-    ret = entry_point(0);
+    ret = entry_point(arg);
     if (ret != ENTRY_SUCCESS)
     {
         DEBUG("\n");
@@ -222,8 +129,8 @@ execute_symbol(const char *sym)
 int64_t
 execute_ctors(struct bfelf_file_t *bfelf_file)
 {
-    int i = 0;
-    int ret = 0;
+    int64_t i = 0;
+    int64_t ret = 0;
 
     if (bfelf_file == 0)
         return BF_ERROR_INVALID_ARG;
@@ -235,7 +142,7 @@ execute_ctors(struct bfelf_file_t *bfelf_file)
         ret = bfelf_resolve_ctor(bfelf_file, i, (void **)&func);
         if (ret != BF_SUCCESS)
         {
-            ALERT("execute_ctors: failed to resolve ctor: %d\n", ret);
+            ALERT("execute_ctors: failed to resolve ctor: %" PRId64 "\n", ret);
             return ret;
         }
 
@@ -248,8 +155,8 @@ execute_ctors(struct bfelf_file_t *bfelf_file)
 int64_t
 execute_dtors(struct bfelf_file_t *bfelf_file)
 {
-    int i = 0;
-    int ret = 0;
+    int64_t i = 0;
+    int64_t ret = 0;
 
     if (bfelf_file == 0)
         return BF_ERROR_INVALID_ARG;
@@ -261,7 +168,7 @@ execute_dtors(struct bfelf_file_t *bfelf_file)
         ret = bfelf_resolve_dtor(bfelf_file, i, (void **)&func);
         if (ret != BF_SUCCESS)
         {
-            ALERT("execute_dtors: failed to resolve dtor: %d\n", ret);
+            ALERT("execute_dtors: failed to resolve dtor: %" PRId64 "\n", ret);
             return ret;
         }
 
@@ -274,8 +181,8 @@ execute_dtors(struct bfelf_file_t *bfelf_file)
 int64_t
 execute_inits(struct bfelf_file_t *bfelf_file)
 {
-    int i = 0;
-    int ret = 0;
+    int64_t i = 0;
+    int64_t ret = 0;
 
     if (bfelf_file == 0)
         return BF_ERROR_INVALID_ARG;
@@ -287,7 +194,7 @@ execute_inits(struct bfelf_file_t *bfelf_file)
         ret = bfelf_resolve_init(bfelf_file, i, (void **)&func);
         if (ret != BF_SUCCESS)
         {
-            ALERT("execute_inits: failed to resolve init: %d\n", ret);
+            ALERT("execute_inits: failed to resolve init: %" PRId64 "\n", ret);
             return ret;
         }
 
@@ -300,8 +207,8 @@ execute_inits(struct bfelf_file_t *bfelf_file)
 int64_t
 execute_finis(struct bfelf_file_t *bfelf_file)
 {
-    int i = 0;
-    int ret = 0;
+    int64_t i = 0;
+    int64_t ret = 0;
 
     if (bfelf_file == 0)
         return BF_ERROR_INVALID_ARG;
@@ -313,7 +220,7 @@ execute_finis(struct bfelf_file_t *bfelf_file)
         ret = bfelf_resolve_fini(bfelf_file, i, (void **)&func);
         if (ret != BF_SUCCESS)
         {
-            ALERT("execute_finis: failed to resolve fini: %d\n", ret);
+            ALERT("execute_finis: failed to resolve fini: %" PRId64 "\n", ret);
             return ret;
         }
 
@@ -324,78 +231,91 @@ execute_finis(struct bfelf_file_t *bfelf_file)
 }
 
 int64_t
-allocate_page_pool(void)
+add_mdl_to_memory_manager(char *exec, uint64_t size)
 {
-    // int i;
-    // int ret;
-    // add_page_t add_page;
+    int64_t i = 0;
+    int64_t ret = 0;
+    int64_t num = 0;
+    uint64_t page = 0;
+    add_mdl_t add_mdl = 0;
+    struct memory_descriptor *mdl;
 
-    // ret = resolve_symbol("add_page", (void **)&add_page);
-    // if (ret != BF_SUCCESS)
-    // {
-    //     ALERT("allocate_page_pool: failed to locate add_page. the symbol is missing or not loaded\n");
-    //     return ret;
-    // }
+    if (exec == 0 || size == 0)
+        return BF_ERROR_INVALID_ARG;
 
-    // for (i = 0; i < MAX_PAGES; i++)
-    // {
-    //     if (page_pool[i].virt != 0)
-    //         continue;
+    num = (size / MAX_PAGE_SIZE);
+    if (size % MAX_PAGE_SIZE != 0)
+        num++;
 
-    //     page_pool[i] = platform_alloc_page();
+    mdl = (struct memory_descriptor *)platform_alloc(num * sizeof(struct memory_descriptor));
+    if (mdl == 0)
+    {
+        ALERT("add_mdl_to_memory_manager: failed to allocate mdl\n");
+        return BF_ERROR_OUT_OF_MEMORY;
+    }
 
-    //     if (page_pool[i].virt == 0)
-    //         return BF_ERROR_OUT_OF_MEMORY;
+    for (i = 0; i < num; i++, page += MAX_PAGE_SIZE)
+    {
+        mdl[i].virt = exec + page;
+        mdl[i].phys = platform_virt_to_phys(mdl[i].virt);
+        mdl[i].size = MAX_PAGE_SIZE;
+        mdl[i].type = 0;
+    }
 
-    //     ret = add_page(&page_pool[i]);
-    //     if (ret != MEMORY_MANAGER_SUCCESS)
-    //     {
-    //         ALERT("allocate_page_pool: failed to add page to memory manager\n");
-    //         return ret;
-    //     }
-    // }
+    ret = resolve_symbol("add_mdl", (void **)&add_mdl);
+    if (ret != BF_SUCCESS)
+    {
+        ALERT("add_mdl_to_memory_manager: failed to locate add_mdl. "
+              "the symbol is missing or not loaded\n");
+        goto failure;
+    }
 
+    ret = add_mdl(mdl, num);
+    if (ret != MEMORY_MANAGER_SUCCESS)
+    {
+        ALERT("add_mdl_to_memory_manager: failed to add mdl.\n");
+        goto failure;
+    }
+
+    platform_free(mdl);
     return BF_SUCCESS;
+
+failure:
+
+    platform_free(mdl);
+    return ret;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Implementation                                                             */
+/* -------------------------------------------------------------------------- */
+
+int64_t
+common_vmm_status(void)
+{
+    return g_vmm_status;
 }
 
 int64_t
-free_page_pool(void)
+common_reset(void)
 {
-    // int i;
-    // int ret;
-    // remove_page_t remove_page;
+    uint64_t i;
+    struct bfelf_file_t file = {0};
 
-    // ret = resolve_symbol("remove_page", (void **)&remove_page);
-    // if (ret != BF_SUCCESS)
-    // {
-    //     ALERT("free_page_pool: failed to locate remove_page. the symbol is missing or not loaded\n");
-    //     return ret;
-    // }
+    for (i = 0; i < g_num_modules; i++)
+    {
+        platform_free_exec(g_modules[i].exec, g_modules[i].size);
 
-    // for (i = 0; i < MAX_PAGES; i++)
-    // {
-    //     struct page_t blank_page = {0};
+        g_modules[i].exec = 0;
+        g_modules[i].size = 0;
+        g_modules[i].file = file;
+    }
 
-    //     if (page_pool[i].virt == 0)
-    //         continue;
-
-    //     ret = remove_page(&page_pool[i]);
-    //     if (ret != MEMORY_MANAGER_SUCCESS)
-    //     {
-    //         ALERT("free_page_pool: failed to remove page from memory manager\n");
-    //         return ret;
-    //     }
-
-    //     platform_free_page(page_pool[i]);
-    //     page_pool[i] = blank_page;
-    // }
+    g_num_modules = 0;
+    g_vmm_status = VMM_UNLOADED;
 
     return BF_SUCCESS;
 }
-
-/* ========================================================================== */
-/* Implementation                                                             */
-/* ========================================================================== */
 
 int64_t
 common_init(void)
@@ -406,22 +326,46 @@ common_init(void)
 int64_t
 common_fini(void)
 {
-    if (common_stop_vmm() != BF_SUCCESS)
-        ALERT("common_fini: failed to stop vmm\n");
+    int64_t ret = 0;
 
-    if (common_unload_vmm() != BF_SUCCESS)
-        ALERT("common_fini: failed to unload vmm\n");
+    if (common_vmm_status() == VMM_RUNNING)
+    {
+        ret = common_stop_vmm();
+        if (ret != BF_SUCCESS)
+            ALERT("common_fini: failed to stop vmm\n");
+    }
 
-    return BF_SUCCESS;
+    if (common_vmm_status() == VMM_LOADED)
+    {
+        ret = common_unload_vmm();
+        if (ret != BF_SUCCESS)
+            ALERT("common_fini: failed to unload vmm\n");
+    }
+
+    if (common_vmm_status() == VMM_CORRUPT)
+        return BF_ERROR_VMM_CORRUPTED;
+
+    if (common_vmm_status() == VMM_UNLOADED && g_num_modules > 0)
+    {
+        ret = common_reset();
+        if (ret != BF_SUCCESS)
+            ALERT("common_fini: failed to reset\n");
+    }
+
+    return ret;
 }
 
 int64_t
 common_add_module(char *file, int64_t fsize)
 {
-    int ret;
-    int size;
-    void *exec;
-    struct bfelf_file_t *bfelf_file;
+    int64_t ret = 0;
+    struct module_t *module = 0;
+
+    /*
+     * TODO: Might not be a bad idea to add the ability to detect when a
+     * module is alreayed added. Since we want the ability to have signed
+     * modules, we could combine the two and kill two birds with one stone.
+     */
 
     if (file == 0 || fsize == 0)
     {
@@ -429,93 +373,113 @@ common_add_module(char *file, int64_t fsize)
         return BF_ERROR_INVALID_ARG;
     }
 
-    if (vmm_status() == VMM_CORRUPT)
+    if (common_vmm_status() == VMM_CORRUPT)
     {
         ALERT("add_module: unable to service request, vmm corrupted\n");
         return BF_ERROR_VMM_CORRUPTED;
     }
 
-    if (vmm_status() != VMM_UNLOADED)
+    if (common_vmm_status() != VMM_UNLOADED)
     {
-        ALERT("add_module: failed to add module. the vmm must be stopped, and unloaded prior to adding modules\n");
+        ALERT("add_module: failed to add module. the vmm must be stopped, "
+              "and unloaded prior to adding modules\n");
         return BF_ERROR_VMM_INVALID_STATE;
     }
 
-    bfelf_file = get_next_file();
-    if (bfelf_file == 0)
+    if (g_num_modules >= MAX_NUM_MODULES)
     {
-        ALERT("add_module: failed to get the next file to add\n");
+        ALERT("add_module: too many modules loaded\n");
         return BF_ERROR_MAX_MODULES_REACHED;
     }
 
-    ret = bfelf_file_init(file, fsize, bfelf_file);
+    module = &(g_modules[g_num_modules]);
+
+    ret = bfelf_file_init(file, fsize, &module->file);
     if (ret != BFELF_SUCCESS)
     {
-        ALERT("add_module: failed to initialize elf file: %d - %s\n", ret, bfelf_error(ret));
+        ALERT("add_module: failed to initialize elf file: %" PRId64 " - %s\n",
+              ret, bfelf_error(ret));
         return ret;
     }
 
-    size = bfelf_total_exec_size(bfelf_file);
-    if (size < BFELF_SUCCESS)
+    module->size = bfelf_total_exec_size(&module->file);
+    if (module->size < BFELF_SUCCESS)
     {
-        ALERT("add_module: failed to get the module's exec size %d - %s\n", size, bfelf_error(size));
-        return size;
+        ALERT("add_module: failed to get the module's exec size %" PRId64 " - %s\n",
+              module->size, bfelf_error(module->size));
+        return module->size;
     }
 
-    exec = add_elf_file(size);
-    if (exec == 0)
+    module->exec = platform_alloc_exec(module->size);
+    if (module->exec == 0)
     {
-        ALERT("add_module: failed to add file: %d\n", ret);
-        return BF_ERROR_FAILED_TO_ADD_FILE;
+        ALERT("add_module: out of memory\n");
+        return 0;
     }
 
-    ret = bfelf_file_load(bfelf_file, exec, size);
+    ret = bfelf_file_load(&module->file, module->exec, module->size);
     if (ret != BFELF_SUCCESS)
     {
-        ALERT("add_module: failed to load the elf module: %d - %s\n", ret, bfelf_error(ret));
-        return ret;
+        ALERT("add_module: failed to load the elf module: %" PRId64 " - %s\n",
+              ret, bfelf_error(ret));
+        goto failure;
     }
 
+    g_num_modules++;
     return BF_SUCCESS;
+
+failure:
+
+    platform_free_exec(module->exec, module->size);
+    return ret;
 }
 
 int64_t
 common_load_vmm(void)
 {
-    int i;
-    int ret;
+    int64_t i = 0;
+    int64_t ret = 0;
+    struct module_t *module = 0;
     struct bfelf_loader_t loader = {0};
-    struct bfelf_file_t *bfelf_file = 0;
 
-    if (vmm_status() == VMM_CORRUPT)
+    if (common_vmm_status() == VMM_CORRUPT)
     {
         ALERT("load_vmm: unable to service request, vmm corrupted\n");
         return BF_ERROR_VMM_CORRUPTED;
     }
 
-    if (vmm_status() == VMM_LOADED)
+    if (common_vmm_status() == VMM_LOADED)
         return BF_SUCCESS;
 
-    if (vmm_status() == VMM_RUNNING)
+    if (common_vmm_status() == VMM_RUNNING)
     {
-        ALERT("load_vmm: failed to load vmm. vmm cannot be loaded while another vmm is running\n");
+        ALERT("load_vmm: failed to load vmm. vmm cannot be loaded while "
+              "another vmm is running\n");
         return BF_ERROR_VMM_INVALID_STATE;
+    }
+
+    if (g_num_modules == 0)
+    {
+        ALERT("load_vmm: failed to load vmm. no modules were added\n");
+        return BF_ERROR_NO_MODULES_ADDED;
     }
 
     ret = bfelf_loader_init(&loader);
     if (ret != BFELF_SUCCESS)
     {
-        ALERT("load_vmm: failed to initialize the elf loader: %d - %s\n", ret, bfelf_error(ret));
+        ALERT("load_vmm: failed to initialize the elf loader: %" PRId64 " - %s\n",
+              ret, bfelf_error(ret));
         goto failure;
     }
 
     i = 0;
-    while ((bfelf_file = get_file(i++)) != 0)
+    while ((module = get_module(i++)) != 0)
     {
-        ret = bfelf_loader_add(&loader, bfelf_file);
+        ret = bfelf_loader_add(&loader, &module->file);
         if (ret != BFELF_SUCCESS)
         {
-            ALERT("load_vmm: failed to add elf file to the elf loader: %d - %s\n", ret, bfelf_error(ret));
+            ALERT("load_vmm: failed to add elf file to the elf loader: "
+                  "%" PRId64 " - %s\n", ret, bfelf_error(ret));
             goto failure;
         }
     }
@@ -523,33 +487,38 @@ common_load_vmm(void)
     ret = bfelf_loader_relocate(&loader);
     if (ret != BFELF_SUCCESS)
     {
-        ALERT("load_vmm: failed to relocate the elf loader: %d - %s\n", ret, bfelf_error(ret));
+        ALERT("load_vmm: failed to relocate the elf loader: %" PRId64 " - %s\n",
+              ret, bfelf_error(ret));
         goto failure;
     }
 
     i = 0;
-    while ((bfelf_file = get_file(i++)) != 0)
+    while ((module = get_module(i++)) != 0)
     {
-        ret = execute_ctors(bfelf_file);
+        ret = execute_ctors(&module->file);
         if (ret != BF_SUCCESS)
         {
-            ALERT("load_vmm: failed to execute ctors: %d\n", ret);
+            ALERT("load_vmm: failed to execute ctors: %" PRId64 "\n", ret);
             goto failure;
         }
 
-        ret = execute_inits(bfelf_file);
+        ret = execute_inits(&module->file);
         if (ret != BF_SUCCESS)
         {
-            ALERT("load_vmm: failed to execute inits: %d\n", ret);
+            ALERT("load_vmm: failed to execute inits: %" PRId64 "\n", ret);
             goto failure;
         }
     }
 
-    ret = allocate_page_pool();
-    if (ret != BF_SUCCESS)
+    i = 0;
+    while ((module = get_module(i++)) != 0)
     {
-        ALERT("load_vmm: failed to allocate page pool: %d\n", ret);
-        goto failure;
+        ret = add_mdl_to_memory_manager(module->exec, module->size);
+        if (ret != BF_SUCCESS)
+        {
+            ALERT("load_vmm: failed to add memory descriptors: %" PRId64 "\n", ret);
+            goto failure;
+        }
     }
 
     g_vmm_status = VMM_LOADED;
@@ -564,58 +533,46 @@ failure:
 int64_t
 common_unload_vmm(void)
 {
-    int i;
-    int ret;
-    struct bfelf_file_t *bfelf_file = 0;
+    int64_t i = 0;
+    int64_t ret = 0;
+    struct module_t *module = 0;
 
-    if (vmm_status() == VMM_CORRUPT)
+    if (common_vmm_status() == VMM_CORRUPT)
     {
         ALERT("unload_vmm: unable to service request, vmm corrupted\n");
         return BF_ERROR_VMM_CORRUPTED;
     }
 
-    if (vmm_status() == VMM_RUNNING)
+    if (common_vmm_status() == VMM_RUNNING)
     {
-        ALERT("unload_vmm: failed to unload vmm. cannot unload a vmm that is still running\n");
+        ALERT("unload_vmm: failed to unload vmm. cannot unload a vmm that "
+              "is still running\n");
         return BF_ERROR_VMM_INVALID_STATE;
     }
 
-    if (vmm_status() == VMM_LOADED)
+    if (common_vmm_status() == VMM_LOADED)
     {
         i = 0;
-        while ((bfelf_file = get_file(i++)) != 0)
+        while ((module = get_module(i++)) != 0)
         {
-            ret = execute_finis(bfelf_file);
+            ret = execute_finis(&module->file);
             if (ret != BF_SUCCESS)
             {
-                ALERT("unload_vmm: failed to execute finis: %d\n", ret);
+                ALERT("unload_vmm: failed to execute finis: %" PRId64 "\n", ret);
                 goto corrupted;
             }
 
-            ret = execute_dtors(bfelf_file);
+            ret = execute_dtors(&module->file);
             if (ret != BF_SUCCESS)
             {
-                ALERT("unload_vmm: failed to execute dtors: %d\n", ret);
+                ALERT("unload_vmm: failed to execute dtors: %" PRId64 "\n", ret);
                 goto corrupted;
             }
         }
-
-        ret = free_page_pool();
-        if (ret != BF_SUCCESS)
-        {
-            ALERT("unload_vmm: failed to free page pool: %d\n", ret);
-            goto corrupted;
-        }
     }
 
-    ret = remove_elf_files();
-    if (ret != BF_SUCCESS)
-    {
-        ALERT("unload_vmm: failed to remove elf files: %d\n", ret);
-        goto corrupted;
-    }
+    common_reset();
 
-    g_vmm_status = VMM_UNLOADED;
     return BF_SUCCESS;
 
 corrupted:
@@ -627,34 +584,35 @@ corrupted:
 int64_t
 common_start_vmm(void)
 {
-    int ret = 0;
+    int64_t ret = 0;
 
-    if (vmm_status() == VMM_CORRUPT)
+    if (common_vmm_status() == VMM_CORRUPT)
     {
         ALERT("start_vmm: unable to service request, vmm corrupted\n");
         return BF_ERROR_VMM_CORRUPTED;
     }
 
-    if (vmm_status() == VMM_RUNNING)
+    if (common_vmm_status() == VMM_RUNNING)
         return BF_SUCCESS;
 
-    if (vmm_status() == VMM_UNLOADED)
+    if (common_vmm_status() == VMM_UNLOADED)
     {
-        ALERT("start_vmm: failed to start vmm. the vmm must be loaded prior to starting\n");
+        ALERT("start_vmm: failed to start vmm. the vmm must be loaded "
+              "prior to starting\n");
         return BF_ERROR_VMM_INVALID_STATE;
     }
 
-    ret = execute_symbol("init_vmm");
+    ret = execute_symbol("init_vmm", 0);
     if (ret != BF_SUCCESS)
     {
-        ALERT("start_vmm: failed to execute init_vmm: %d\n", ret);
+        ALERT("start_vmm: failed to execute init_vmm: %" PRId64 "\n", ret);
         goto failure;
     }
 
-    ret = execute_symbol("start_vmm");
+    ret = execute_symbol("start_vmm", 0);
     if (ret != BF_SUCCESS)
     {
-        ALERT("start_vmm: failed to execute start_vmm: %d\n", ret);
+        ALERT("start_vmm: failed to execute start_vmm: %" PRId64 "\n", ret);
         goto failure;
     }
 
@@ -670,27 +628,28 @@ failure:
 int64_t
 common_stop_vmm(void)
 {
-    int ret;
+    int64_t ret;
 
-    if (vmm_status() == VMM_CORRUPT)
+    if (common_vmm_status() == VMM_CORRUPT)
     {
         ALERT("stop_vmm: unable to service request, vmm corrupted\n");
         return BF_ERROR_VMM_CORRUPTED;
     }
 
-    if (vmm_status() == VMM_LOADED)
+    if (common_vmm_status() == VMM_LOADED)
         return BF_SUCCESS;
 
-    if (vmm_status() == VMM_UNLOADED)
+    if (common_vmm_status() == VMM_UNLOADED)
     {
-        ALERT("stop_vmm: failed to stop vmm. the vmm must be loaded and running prior to stoping\n");
+        ALERT("stop_vmm: failed to stop vmm. the vmm must be loaded and "
+              "running prior to stoping\n");
         return BF_ERROR_VMM_INVALID_STATE;
     }
 
-    ret = execute_symbol("stop_vmm");
+    ret = execute_symbol("stop_vmm", 0);
     if (ret != BFELF_SUCCESS)
     {
-        ALERT("stop_vmm: failed to execute symbol: %d\n", ret);
+        ALERT("stop_vmm: failed to execute symbol: %" PRId64 "\n", ret);
         goto corrupted;
     }
 
@@ -706,21 +665,17 @@ corrupted:
 int64_t
 common_dump_vmm(void)
 {
-    int i;
-    int j;
-    int ret;
-    char *rb1;
-    char *rb2;
-    get_drr_t get_drr;
+    char *rb1 = 0;
+    char *rb2 = 0;
+    int64_t ret = 0;
+    get_drr_t get_drr = 0;
     struct debug_ring_resources_t *drr = 0;
 
-    if (vmm_status() == VMM_CORRUPT)
-    {
-        ALERT("dump_vmm: unable to service request, vmm corrupted\n");
-        return BF_ERROR_VMM_CORRUPTED;
-    }
+    uint64_t i = 0;
+    uint64_t j = 0;
+    uint64_t len = 0;
 
-    if (vmm_status() == VMM_UNLOADED)
+    if (common_vmm_status() == VMM_UNLOADED)
     {
         ALERT("dump_vmm: failed to dump vmm as it has not been loaded yet\n");
         return BF_ERROR_VMM_INVALID_STATE;
@@ -743,7 +698,8 @@ common_dump_vmm(void)
     ret = resolve_symbol("get_drr", (void **)&get_drr);
     if (ret != BF_SUCCESS)
     {
-        ALERT("dump_vmm: failed to locate get_drr. the symbol is missing or not loaded\n");
+        ALERT("dump_vmm: failed to locate get_drr. the symbol is missing "
+              "or not loaded\n");
         goto failure;
     }
 
@@ -754,18 +710,14 @@ common_dump_vmm(void)
         goto failure;
     }
 
-    if (debug_ring_read(drr, rb1, DEBUG_RING_SIZE) < 0)
-    {
-        ALERT("dump_vmm: failed to read debug ring\n");
-        goto failure;
-    }
+    len = debug_ring_read(drr, rb1, DEBUG_RING_SIZE);
 
     DEBUG("\n");
     DEBUG("VMM DUMP:\n");
     DEBUG("================================================================================\n");
     DEBUG("\n");
 
-    for (i = 0, j = 0; i < DEBUG_RING_SIZE; i++, j++)
+    for (i = 0, j = 0; i < len; i++, j++)
     {
         rb2[j] = rb1[i];
 

@@ -53,6 +53,12 @@ platform_alloc_exec(int64_t len)
                 MAP_PRIVATE | MAP_ANON, -1, 0);
 }
 
+void *
+platform_virt_to_phys(void *virt)
+{
+    return virt;
+}
+
 void
 platform_free(void *addr)
 {

@@ -38,6 +38,7 @@
 #ifdef KERNEL
 #ifdef __linux__
 #include <linux/types.h>
+#define PRId64 "lld"
 #endif
 #endif
 

@@ -34,12 +34,12 @@ debug_ring::debug_ring(int64_t vcpuid) :
     m_drr->epos = 0;
     m_drr->spos = 0;
 
-    for (auto i = 0; i < DEBUG_RING_SIZE; i++)
+    for (auto i = 0U; i < DEBUG_RING_SIZE; i++)
         m_drr->buf[i] = '\0';
 }
 
 debug_ring_error::type
-debug_ring::write(const char *str, int64_t len)
+debug_ring::write(const std::string &str)
 {
     // TODO: A more interesting implementation would use an optimized
     //       memcpy to implement this code. Doing so would increase it's
@@ -50,12 +50,15 @@ debug_ring::write(const char *str, int64_t len)
     if (m_is_valid == false)
         return debug_ring_error::invalid;
 
-    if (str == 0 || len == 0 || len >= DEBUG_RING_SIZE)
+    if (str.length() >= DEBUG_RING_SIZE)
         return debug_ring_error::failure;
+
+    if (str.length() == 0)
+        return debug_ring_error::success;
 
     // The length that we were given is equivalent to strlen, which does not
     // include the '\0', so we add one to the length to account for that.
-    len++;
+    auto len = str.length() + 1;
 
     auto epos = m_drr->epos % DEBUG_RING_SIZE;
     auto spos = m_drr->spos % DEBUG_RING_SIZE;
@@ -101,7 +104,7 @@ debug_ring::write(const char *str, int64_t len)
         }
     }
 
-    for (auto i = 0; i < len; i++)
+    for (auto i = 0U; i < len; i++)
     {
         if (epos >= DEBUG_RING_SIZE)
             epos = 0;
@@ -116,7 +119,7 @@ debug_ring::write(const char *str, int64_t len)
 }
 
 extern "C" struct debug_ring_resources_t *
-get_drr(long long int vcpuid)
+get_drr(int64_t vcpuid)
 {
     static debug_ring_resources_t drrs[MAX_VCPUS] = {0, 0, 0};
 

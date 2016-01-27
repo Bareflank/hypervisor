@@ -78,23 +78,18 @@ private:
 
 private:
 
-    char *m_dummy1;
-    char *m_dummy2;
-    char *m_dummy3;
-    int32_t m_dummy1_length;
-    int32_t m_dummy2_length;
-    int32_t m_dummy3_length;
+    char *m_dummy_misc;
+    char *m_dummy_code;
+    int32_t m_dummy_misc_length;
+    int32_t m_dummy_code_length;
 
-    char *m_dummy1_exec;
-    char *m_dummy2_exec;
-    char *m_dummy3_exec;
-    int32_t m_dummy1_esize;
-    int32_t m_dummy2_esize;
-    int32_t m_dummy3_esize;
+    char *m_dummy_misc_exec;
+    char *m_dummy_code_exec;
+    int32_t m_dummy_misc_esize;
+    int32_t m_dummy_code_esize;
 
-    bfelf_file_t m_dummy1_ef;
-    bfelf_file_t m_dummy2_ef;
-    bfelf_file_t m_dummy3_ef;
+    bfelf_file_t m_dummy_misc_ef;
+    bfelf_file_t m_dummy_code_ef;
 
     char *m_test_exec;
     int32_t m_test_esize;

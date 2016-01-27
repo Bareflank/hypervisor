@@ -24,14 +24,15 @@
 #define COMMON_H
 
 #include <types.h>
+#include <bfelf_loader.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/* ========================================================================== */
+/* -------------------------------------------------------------------------- */
 /* Macros                                                                     */
-/* ========================================================================== */
+/* -------------------------------------------------------------------------- */
 
 /*
  * Error Codes
@@ -69,9 +70,49 @@ extern "C" {
 #define VMM_RUNNING 3
 #define VMM_CORRUPT 100
 
-/* ========================================================================== */
+/* -------------------------------------------------------------------------- */
+/* Module                                                                     */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * This structure defines the properties that make up a module. Specifically,
+ * a module is made up of the ELF file that stores all of the information
+ * assocaited with the module as well as the execution buffer and size where
+ * the module will be loaded to, and execute from.
+ *
+ * @var exec the buffer that the module is executed from
+ * @var size the size of the execution buffer
+ * @var file the ELF file that has all of the information about the module
+ */
+struct module_t
+{
+    char *exec;
+    int64_t size;
+    struct bfelf_file_t file;
+};
+
+/* -------------------------------------------------------------------------- */
 /* Common Functions                                                           */
-/* ========================================================================== */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * VMM Status
+ *
+ * @return returns the current status of the VMM.
+ */
+int64_t
+common_vmm_status(void);
+
+/**
+ * Reset
+ *
+ * This function should not be called directly. Instead, use common_unload.
+ * This is only exposed publically for unit testing.
+ *
+ * @return will always return BF_SUCCESS
+ */
+int64_t
+common_reset(void);
 
 /**
  * Initialize Driver Entry

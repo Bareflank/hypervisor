@@ -23,8 +23,11 @@
 #ifndef ENTRY_INTERFACE_H
 #define ENTRY_INTERFACE_H
 
-#include <memory.h>
-#include <constants.h>
+#ifndef KERNEL
+#include <stdint.h>
+#else
+#include <types.h>
+#endif
 
 #pragma pack(push, 1)
 
@@ -36,9 +39,9 @@ extern "C" {
  * Entry Error Codes
  */
 #define ENTRY_SUCCESS 0
-#define ENTRY_ERROR_VMM_INIT_FAILED -10
-#define ENTRY_ERROR_VMM_START_FAILED -20
-#define ENTRY_ERROR_VMM_STOP_FAILED -30
+#define ENTRY_ERROR_VMM_INIT_FAILED -10LL
+#define ENTRY_ERROR_VMM_START_FAILED -20LL
+#define ENTRY_ERROR_VMM_STOP_FAILED -30LL
 
 /**
  * Entry Point
@@ -49,43 +52,7 @@ extern "C" {
  * @param arg the argument you wish to pass to the entry point
  * @return the return value of the entry point
  */
-typedef int(*entry_point_t)(int);
-
-/**
- * Init VMM
- *
- * This is the prototype for the function that should be called by the driver
- * entry to init the VMM.
- *
- * @param arg currently unused (set to 0)
- * @return VMM_SUCCESS on success, negative error code on failure
- */
-int
-init_vmm(int arg);
-
-/**
- * Start VMM
- *
- * This is the prototype for the function that should be called by the driver
- * entry to start the VMM.
- *
- * @param arg currently unused (set to 0)
- * @return VMM_SUCCESS on success, negative error code on failure
- */
-int
-start_vmm(int arg);
-
-/**
- * Stop VMM
- *
- * This is the prototype for the function that should be called by the driver
- * entry to stop the VMM.
- *
- * @param arg currently unused (set to 0)
- * @return VMM_SUCCESS on success, negative error code on failure
- */
-int
-stop_vmm(int arg);
+typedef int64_t(*entry_point_t)(int64_t);
 
 #ifdef __cplusplus
 }

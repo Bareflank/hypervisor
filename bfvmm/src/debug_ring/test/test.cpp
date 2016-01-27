@@ -44,7 +44,6 @@ debug_ring_ut::list()
     this->test_read_with_invalid_drr();
     this->test_read_with_null_string();
     this->test_read_with_zero_length();
-    this->test_write_with_null_string();
     this->test_write_with_zero_length();
     this->test_write_string_to_dr_that_is_larger_than_dr();
     this->test_write_string_to_dr_that_is_much_larger_than_dr();

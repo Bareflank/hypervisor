@@ -17,8 +17,6 @@ Version 1.0 TODO:
 - Need to have all of the VMCS checks implemented and unit tested
 - Need to have all of the remaining unit tests completed (i.e. all of the
   VMM modules need their unit tests completed including serial)
-- All of the "C" interfaces should use the int64_t/uint64_t types instead of
-  long lon int / unsigned long long int.
 - remove the "valid" flag in the elf loader as it it meaning less and each
   function should be able to live on it's own.
 - redo the elf_loader unit test to use hippo mocks. Doing so will allow us to

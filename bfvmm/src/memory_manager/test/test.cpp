@@ -53,6 +53,19 @@ memory_manager_ut::list()
     this->test_memory_manager_malloc_aligned_ignored_alignment();
     this->test_memory_manager_malloc_aligned();
     this->test_memory_manager_malloc_alloc_fragment();
+    this->test_memory_manager_add_mdl_invalid_mdl();
+    this->test_memory_manager_add_mdl_invalid_num();
+    this->test_memory_manager_add_mdl_invalid_size();
+    this->test_memory_manager_add_mdl_unaligned_physical();
+    this->test_memory_manager_add_mdl_unaligned_virtual();
+    this->test_memory_manager_virt_to_phys_unknown();
+    this->test_memory_manager_phys_to_virt_unknown();
+    this->test_memory_manager_virt_to_phys_random_address();
+    this->test_memory_manager_virt_to_phys_upper_limit();
+    this->test_memory_manager_virt_to_phys_lower_limit();
+    this->test_memory_manager_phys_to_virt_random_address();
+    this->test_memory_manager_phys_to_virt_upper_limit();
+    this->test_memory_manager_phys_to_virt_lower_limit();
 
     return true;
 }
