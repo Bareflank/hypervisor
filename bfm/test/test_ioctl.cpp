@@ -21,30 +21,189 @@
 
 #include <test.h>
 #include <ioctl.h>
+#include <debug_ring_interface.h>
+
+// -----------------------------------------------------------------------------
+// Expose Private Functions
+// -----------------------------------------------------------------------------
+
+int64_t bf_ioctl_open();
+int64_t bf_send_ioctl(int64_t fd, unsigned long request);
+int64_t bf_read_ioctl(int64_t fd, unsigned long request, void *data);
+int64_t bf_write_ioctl(int64_t fd, unsigned long request, const void *data);
+
+// -----------------------------------------------------------------------------
+// Global Data
+// -----------------------------------------------------------------------------
+
+ioctl g_ctl;
+debug_ring_resources_t g_drr;
+
+// -----------------------------------------------------------------------------
+// Tests
+// -----------------------------------------------------------------------------
 
 void
-bfm_ut::test_ioctl_with_unknown_command()
+bfm_ut::test_ioctl_driver_inaccessible()
 {
-    ioctl ctl;
-    auto msg = "hello world";
+    MockRepository mocks;
 
-    EXPECT_TRUE(ctl.call(ioctl_commands::unknown, msg, ::strlen(msg)) == ioctl_error::invalid_arg);
+    mocks.OnCallFunc(bf_ioctl_open).Return(-1);
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        EXPECT_EXCEPTION(g_ctl.open(), bfn::driver_inaccessible_error);
+    });
 }
 
 void
-bfm_ut::test_ioctl_with_null_msg()
+bfm_ut::test_ioctl_add_module_with_invalid_length()
 {
-    ioctl ctl;
-    auto msg = "hello world";
+    MockRepository mocks;
 
-    EXPECT_TRUE(ctl.call(ioctl_commands::add_module, NULL, ::strlen(msg)) == ioctl_error::invalid_arg);
+    mocks.OnCallFunc(bf_send_ioctl).Return(0);
+    mocks.OnCallFunc(bf_read_ioctl).Return(0);
+    mocks.OnCallFunc(bf_write_ioctl).Return(0);
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        EXPECT_EXCEPTION(g_ctl.call_ioctl_add_module(""_s), bfn::invalid_argument_error);
+    });
 }
 
 void
-bfm_ut::test_ioctl_with_zero_length()
+bfm_ut::test_ioctl_add_module_failed()
 {
-    ioctl ctl;
-    auto msg = "hello world";
+    auto data = "hello world"_s;
+    MockRepository mocks;
 
-    EXPECT_TRUE(ctl.call(ioctl_commands::add_module, msg, 0) == ioctl_error::invalid_arg);
+    mocks.OnCallFunc(bf_send_ioctl).Return(-1);
+    mocks.OnCallFunc(bf_read_ioctl).Return(-1);
+    mocks.OnCallFunc(bf_write_ioctl).Return(-1);
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        EXPECT_EXCEPTION(g_ctl.call_ioctl_add_module(data), bfn::ioctl_failed_error);
+    });
+}
+
+void
+bfm_ut::test_ioctl_load_vmm_failed()
+{
+    MockRepository mocks;
+
+    mocks.OnCallFunc(bf_send_ioctl).Return(-1);
+    mocks.OnCallFunc(bf_read_ioctl).Return(-1);
+    mocks.OnCallFunc(bf_write_ioctl).Return(-1);
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        EXPECT_EXCEPTION(g_ctl.call_ioctl_load_vmm(), bfn::ioctl_failed_error);
+    });
+}
+
+void
+bfm_ut::test_ioctl_unload_vmm_failed()
+{
+    MockRepository mocks;
+
+    mocks.OnCallFunc(bf_send_ioctl).Return(-1);
+    mocks.OnCallFunc(bf_read_ioctl).Return(-1);
+    mocks.OnCallFunc(bf_write_ioctl).Return(-1);
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        EXPECT_EXCEPTION(g_ctl.call_ioctl_unload_vmm(), bfn::ioctl_failed_error);
+    });
+}
+
+void
+bfm_ut::test_ioctl_start_vmm_failed()
+{
+    MockRepository mocks;
+
+    mocks.OnCallFunc(bf_send_ioctl).Return(-1);
+    mocks.OnCallFunc(bf_read_ioctl).Return(-1);
+    mocks.OnCallFunc(bf_write_ioctl).Return(-1);
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        EXPECT_EXCEPTION(g_ctl.call_ioctl_start_vmm(), bfn::ioctl_failed_error);
+    });
+}
+
+void
+bfm_ut::test_ioctl_stop_vmm_failed()
+{
+    MockRepository mocks;
+
+    mocks.OnCallFunc(bf_send_ioctl).Return(-1);
+    mocks.OnCallFunc(bf_read_ioctl).Return(-1);
+    mocks.OnCallFunc(bf_write_ioctl).Return(-1);
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        EXPECT_EXCEPTION(g_ctl.call_ioctl_stop_vmm(), bfn::ioctl_failed_error);
+    });
+}
+
+void
+bfm_ut::test_ioctl_dump_vmm_with_invalid_drr()
+{
+    MockRepository mocks;
+
+    mocks.OnCallFunc(bf_send_ioctl).Return(0);
+    mocks.OnCallFunc(bf_read_ioctl).Return(0);
+    mocks.OnCallFunc(bf_write_ioctl).Return(0);
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        EXPECT_EXCEPTION(g_ctl.call_ioctl_dump_vmm(0), bfn::invalid_argument_error);
+    });
+}
+
+void
+bfm_ut::test_ioctl_dump_vmm_failed()
+{
+    MockRepository mocks;
+
+    mocks.OnCallFunc(bf_send_ioctl).Return(-1);
+    mocks.OnCallFunc(bf_read_ioctl).Return(-1);
+    mocks.OnCallFunc(bf_write_ioctl).Return(-1);
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        EXPECT_EXCEPTION(g_ctl.call_ioctl_dump_vmm(&g_drr), bfn::ioctl_failed_error);
+    });
+}
+
+void
+bfm_ut::test_ioctl_vmm_status_with_invalid_drr()
+{
+    MockRepository mocks;
+
+    mocks.OnCallFunc(bf_send_ioctl).Return(0);
+    mocks.OnCallFunc(bf_read_ioctl).Return(0);
+    mocks.OnCallFunc(bf_write_ioctl).Return(0);
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        EXPECT_EXCEPTION(g_ctl.call_ioctl_vmm_status(0), bfn::invalid_argument_error);
+    });
+}
+
+void
+bfm_ut::test_ioctl_vmm_status_failed()
+{
+    int64_t status;
+    MockRepository mocks;
+
+    mocks.OnCallFunc(bf_send_ioctl).Return(-1);
+    mocks.OnCallFunc(bf_read_ioctl).Return(-1);
+    mocks.OnCallFunc(bf_write_ioctl).Return(-1);
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        EXPECT_EXCEPTION(g_ctl.call_ioctl_vmm_status(&status), bfn::ioctl_failed_error);
+    });
 }

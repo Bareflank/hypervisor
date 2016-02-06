@@ -9,10 +9,9 @@ Misc:
   in trouble at some point.
 - Destructors for statically created classes are not being called. This should
   be resolved at some point.
+- Add support for clang/LLVM
 
 Version 1.0 TODO:
-- BFM needs the ability to load / unload the VMM as well as start / stop the
-  VMM
 - Need to be able to start / stop a basic VM
 - Need to have all of the VMCS checks implemented and unit tested
 - Need to have all of the remaining unit tests completed (i.e. all of the
@@ -24,6 +23,9 @@ Version 1.0 TODO:
   better
 - cleanup the elf_loader as it has newlines for function calls in the header,
   which was abandoned.
+- Everything should be using the new debug.h instead of manually calling
+  std::cout
+- Provide support for Debian, Fedora, CentOS
 
 Version 1.1 TODO:
 - Need to have a completely isolated exit handler. It should have it's own

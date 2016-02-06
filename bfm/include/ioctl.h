@@ -22,83 +22,136 @@
 #ifndef IOCTL_H
 #define IOCTL_H
 
+#include <memory>
 #include <stdint.h>
+#include <driver_entry_interface.h>
 
-namespace ioctl_error
+/// IOCTL Private Base
+///
+/// Only needed for dynamic cast
+///
+class ioctl_private_base
 {
-    enum type
-    {
-        success = 0,
-        unknown = 1,
-        invalid_arg = 2,
-        failed_add_module = 3,
-        failed_start = 4,
-        failed_stop = 5,
-        failed_dump = 6
-    };
-}
-
-namespace ioctl_commands
-{
-    enum type
-    {
-        unknown = 0,
-        add_module = 1,
-        start = 2,
-        stop = 3,
-        dump = 4
-    };
-}
+public:
+    ioctl_private_base() {}
+    virtual ~ioctl_private_base() {}
+};
 
 /// IOCTL
 ///
-/// The IOCTL class is responsible for making calls to IOCTL. This class
-/// has a complicated structure designed to provide both the ability to be
-/// mocked by HippoMocks, but all provide the ability to be implemented by
-/// different operating systems (as there are not standard implementations
-/// of an IOCTL). The structure is as follows:
-///
-/// @code
-///
-/// arch/ioctl
-/// {
-/// private:
-///     void *d; // ioctl_private <-- actually implements IOCTL call
-/// }
-///
-/// @endcode
-///
-/// With this structure, each operating system is free to implement it's
-/// IOCTL as needed, while still providing the ability to be mocked up for
-/// unit testing.
-///
-/// The IOCTL class takes a command to send, as well as the data to send and
-/// the size of the data being sent. It's up to each OS specific implemetation
-/// to convert the cross-platform API to an OS specific API that makes sense.
+/// Calls into the bareflank driver entry to perform a desired action. Note
+/// that for this class to function, the driver entry must be loaded, and
+/// bfm must be executed with the proper permissions.
 ///
 class ioctl
 {
 public:
 
-    ioctl();
+    /// Default Constructor
+    ///
+    ioctl() noexcept;
+
+    /// Destructor
+    ///
     virtual ~ioctl();
 
-    /// Call
+    /// Open
     ///
-    /// Makes an IOCTL call to the driver entry.
+    /// Open's a connection to the bareflank driver.
     ///
-    /// @param cmd the command to send to the driver entry
-    /// @param data the data to send to the driver entry
-    /// @param len the length of the data to send to the driver entry
-    /// @return an error code the describes the various errors that might occur
+    /// @throws driver_inaccessible_error thrown when the ioctl class is unable
+    ///     to open a connection to the bareflank driver.
     ///
-    virtual ioctl_error::type call(ioctl_commands::type cmd,
-                                   const void *const data,
-                                   int32_t len) const;
+    virtual void open();
+
+    /// Add Module
+    ///
+    /// Add's a module to the driver entry.
+    ///
+    /// @param str ELF file to be added to the driver entry
+    ///
+    /// @throws invalid_argument_error thrown if data == 0, or len <= 0
+    /// @throws ioctl_failed_error thrown if the ioctl failed. Note that this
+    ///    could have been because bfm was unable to ioctl the driver, or it
+    ///    could be because the driver entry reported a failure when executing
+    ///    the ioctl.
+    ///
+    virtual void call_ioctl_add_module(const std::string &str);
+
+    /// Load VMM
+    ///
+    /// Loads the VMM
+    ///
+    /// @throws ioctl_failed_error thrown if the ioctl failed. Note that this
+    ///    could have been because bfm was unable to ioctl the driver, or it
+    ///    could be because the driver entry reported a failure when executing
+    ///    the ioctl.
+    ///
+    virtual void call_ioctl_load_vmm();
+
+    /// Unload VMM
+    ///
+    /// Unloads the VMM
+    ///
+    /// @throws ioctl_failed_error thrown if the ioctl failed. Note that this
+    ///    could have been because bfm was unable to ioctl the driver, or it
+    ///    could be because the driver entry reported a failure when executing
+    ///    the ioctl.
+    ///
+    virtual void call_ioctl_unload_vmm();
+
+    /// Start VMM
+    ///
+    /// Starts the VMM
+    ///
+    /// @throws ioctl_failed_error thrown if the ioctl failed. Note that this
+    ///    could have been because bfm was unable to ioctl the driver, or it
+    ///    could be because the driver entry reported a failure when executing
+    ///    the ioctl.
+    ///
+    virtual void call_ioctl_start_vmm();
+
+    /// Stop VMM
+    ///
+    /// Stops the VMM
+    ///
+    /// @throws ioctl_failed_error thrown if the ioctl failed. Note that this
+    ///    could have been because bfm was unable to ioctl the driver, or it
+    ///    could be because the driver entry reported a failure when executing
+    ///    the ioctl.
+    ///
+    virtual void call_ioctl_stop_vmm();
+
+    /// Dump VMM
+    ///
+    /// Dumps the content's of the VMM's debug ring
+    ///
+    /// @param drr pointer a debug_ring_resources_t
+    ///
+    /// @throws invalid_argument_error thrown if drr == 0
+    /// @throws ioctl_failed_error thrown if the ioctl failed. Note that this
+    ///    could have been because bfm was unable to ioctl the driver, or it
+    ///    could be because the driver entry reported a failure when executing
+    ///    the ioctl.
+    ///
+    virtual void call_ioctl_dump_vmm(debug_ring_resources_t *drr);
+
+    /// VMM Status
+    ///
+    /// Get's the status of the VMM
+    ///
+    /// @param status pointer to provide the status to
+    ///
+    /// @throws invalid_argument_error thrown if status == 0
+    /// @throws ioctl_failed_error thrown if the ioctl failed. Note that this
+    ///    could have been because bfm was unable to ioctl the driver, or it
+    ///    could be because the driver entry reported a failure when executing
+    ///    the ioctl.
+    ///
+    virtual void call_ioctl_vmm_status(int64_t *status);
 
 private:
-
-    void *d;
+    std::shared_ptr<ioctl_private_base> m_d;
 };
 
 #endif

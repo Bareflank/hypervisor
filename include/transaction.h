@@ -19,16 +19,29 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <debug.h>
+#include <utility>
+#include <functional>
 
-bool g_debug_enabled = true;
-bool g_error_enabled = true;
+class commit_or_rollback
+{
+public:
+    commit_or_rollback(std::function<void()> &&fail_handler) :
+        m_committed(false),
+        m_fail_handler(std::move(fail_handler))
+    {
+    }
 
-void enable_debug() { g_debug_enabled = true; }
-void disable_debug() { g_debug_enabled = false; }
+    ~commit_or_rollback()
+    {
+        if (!m_committed)
+            m_fail_handler();
+    }
 
-void enable_error() { g_error_enabled = true; }
-void disable_error() { g_error_enabled = false; }
+    void commit() noexcept
+    { m_committed = true; }
 
-bool is_debug_enabled() { return g_debug_enabled; }
-bool is_error_enabled() { return g_error_enabled; }
+private:
+
+    bool m_committed;
+    std::function<void()> m_fail_handler;
+};

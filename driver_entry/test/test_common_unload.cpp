@@ -23,6 +23,7 @@
 
 #include <common.h>
 #include <platform.h>
+#include <driver_entry_interface.h>
 
 void
 driver_entry_ut::test_common_unload_unload_when_already_unloaded()

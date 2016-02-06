@@ -26,411 +26,1053 @@
 #include <ioctl.h>
 #include <ioctl_driver.h>
 
+ioctl_driver g_driver;
+
 void
-bfm_ut::test_ioctl_driver_with_null_fb()
+bfm_ut::test_ioctl_driver_process_invalid_file()
 {
     MockRepository mocks;
 
-    ioctl *ioctlb = mocks.Mock<ioctl>();
-    command_line_parser *clpb = mocks.Mock<command_line_parser>();
-
-    mocks.autoExpect = false;
+    auto f = bfn::mock_shared<file>(mocks);
+    auto ctl = bfn::mock_shared<ioctl>(mocks);
+    auto clp = bfn::mock_shared<command_line_parser>(mocks);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        ioctl_driver driver(NULL, ioctlb, clpb);
-        EXPECT_TRUE(driver.process() == ioctl_driver_error::failure);
+        EXPECT_EXCEPTION(g_driver.process(NULL, ctl, clp), bfn::invalid_argument_error);
     });
 }
 
 void
-bfm_ut::test_ioctl_driver_null_ioctlb()
+bfm_ut::test_ioctl_driver_process_invalid_ioctl()
 {
     MockRepository mocks;
 
-    file *fb = mocks.Mock<file>();
-    command_line_parser *clpb = mocks.Mock<command_line_parser>();
-
-    mocks.autoExpect = false;
+    auto f = bfn::mock_shared<file>(mocks);
+    auto ctl = bfn::mock_shared<ioctl>(mocks);
+    auto clp = bfn::mock_shared<command_line_parser>(mocks);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        ioctl_driver driver(fb, NULL, clpb);
-        EXPECT_TRUE(driver.process() == ioctl_driver_error::failure);
+        EXPECT_EXCEPTION(g_driver.process(f, NULL, clp), bfn::invalid_argument_error);
     });
 }
 
 void
-bfm_ut::test_ioctl_driver_with_null_clp()
+bfm_ut::test_ioctl_driver_process_invalid_command_line_parser()
 {
     MockRepository mocks;
 
-    file *fb = mocks.Mock<file>();
-    ioctl *ioctlb = mocks.Mock<ioctl>();
-
-    mocks.autoExpect = false;
+    auto f = bfn::mock_shared<file>(mocks);
+    auto ctl = bfn::mock_shared<ioctl>(mocks);
+    auto clp = bfn::mock_shared<command_line_parser>(mocks);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        ioctl_driver driver(fb, ioctlb, NULL);
-        EXPECT_TRUE(driver.process() == ioctl_driver_error::failure);
+        EXPECT_EXCEPTION(g_driver.process(f, ctl, NULL), bfn::invalid_argument_error);
     });
 }
 
 void
-bfm_ut::test_ioctl_driver_with_invalid_clp()
+bfm_ut::test_ioctl_driver_process_help()
 {
     MockRepository mocks;
 
-    file *fb = mocks.Mock<file>();
-    ioctl *ioctlb = mocks.Mock<ioctl>();
-    command_line_parser *clpb = mocks.Mock<command_line_parser>();
-    ioctl_driver driver(fb, ioctlb, clpb);
+    auto f = bfn::mock_shared<file>(mocks);
+    auto ctl = bfn::mock_shared<ioctl>(mocks);
+    auto clp = bfn::mock_shared<command_line_parser>(mocks);
 
-    mocks.ExpectCall(clpb, command_line_parser::is_valid).Return(false);
+    mocks.OnCall(clp.get(), command_line_parser::cmd).Return(command_line_parser_command::help);
+    mocks.OnCall(clp.get(), command_line_parser::modules).Return(""_s);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_TRUE(driver.process() == ioctl_driver_error::failure);
+        EXPECT_NO_EXCEPTION(g_driver.process(f, ctl, clp));
     });
 }
 
 void
-bfm_ut::test_ioctl_driver_with_unknown_command()
+bfm_ut::test_ioctl_driver_process_load_vmm_running()
 {
     MockRepository mocks;
 
-    file *fb = mocks.Mock<file>();
-    ioctl *ioctlb = mocks.Mock<ioctl>();
-    command_line_parser *clpb = mocks.Mock<command_line_parser>();
-    ioctl_driver driver(fb, ioctlb, clpb);
+    auto f = bfn::mock_shared<file>(mocks);
+    auto ctl = bfn::mock_shared<ioctl>(mocks);
+    auto clp = bfn::mock_shared<command_line_parser>(mocks);
 
-    mocks.ExpectCall(clpb, command_line_parser::is_valid).Return(true);
-    mocks.ExpectCall(clpb, command_line_parser::cmd).Return(command_line_parser_command::unknown);
+    mocks.OnCall(clp.get(), command_line_parser::cmd).Return(command_line_parser_command::load);
+    mocks.OnCall(clp.get(), command_line_parser::modules).Return(""_s);
+    mocks.OnCall(ctl.get(), ioctl::call_ioctl_stop_vmm);
+    mocks.OnCall(ctl.get(), ioctl::call_ioctl_unload_vmm);
+
+    mocks.OnCall(ctl.get(), ioctl::call_ioctl_vmm_status).Do([](auto * status)
+    {
+        *status = VMM_RUNNING;
+    });
+
+    mocks.OnCall(f.get(), file::read).Throw(
+        invalid_file(""_s)
+    );
+
+    mocks.ExpectCall(ctl.get(), ioctl::call_ioctl_stop_vmm);
+    mocks.ExpectCall(ctl.get(), ioctl::call_ioctl_unload_vmm);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_TRUE(driver.process() == ioctl_driver_error::failure);
+        EXPECT_EXCEPTION(g_driver.process(f, ctl, clp), bfn::invalid_file_error);
     });
 }
 
 void
-bfm_ut::test_ioctl_driver_with_help()
+bfm_ut::test_ioctl_driver_process_load_vmm_loaded()
 {
     MockRepository mocks;
 
-    file *fb = mocks.Mock<file>();
-    ioctl *ioctlb = mocks.Mock<ioctl>();
-    command_line_parser *clpb = mocks.Mock<command_line_parser>();
-    ioctl_driver driver(fb, ioctlb, clpb);
+    auto f = bfn::mock_shared<file>(mocks);
+    auto ctl = bfn::mock_shared<ioctl>(mocks);
+    auto clp = bfn::mock_shared<command_line_parser>(mocks);
 
-    mocks.ExpectCall(clpb, command_line_parser::is_valid).Return(true);
-    mocks.ExpectCall(clpb, command_line_parser::cmd).Return(command_line_parser_command::help);
+    mocks.OnCall(clp.get(), command_line_parser::cmd).Return(command_line_parser_command::load);
+    mocks.OnCall(clp.get(), command_line_parser::modules).Return(""_s);
+    mocks.OnCall(ctl.get(), ioctl::call_ioctl_unload_vmm);
+
+    mocks.OnCall(ctl.get(), ioctl::call_ioctl_vmm_status).Do([](auto * status)
+    {
+        *status = VMM_LOADED;
+    });
+
+    mocks.OnCall(f.get(), file::read).Throw(
+        invalid_file(""_s)
+    );
+
+    mocks.NeverCall(ctl.get(), ioctl::call_ioctl_stop_vmm);
+    mocks.ExpectCall(ctl.get(), ioctl::call_ioctl_unload_vmm);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_TRUE(driver.process() == ioctl_driver_error::failure);
+        EXPECT_EXCEPTION(g_driver.process(f, ctl, clp), bfn::invalid_file_error);
     });
 }
 
 void
-bfm_ut::test_ioctl_driver_with_start_and_no_modules()
+bfm_ut::test_ioctl_driver_process_load_vmm_corrupt()
 {
     MockRepository mocks;
 
-    file *fb = mocks.Mock<file>();
-    ioctl *ioctlb = mocks.Mock<ioctl>();
-    command_line_parser *clpb = mocks.Mock<command_line_parser>();
-    ioctl_driver driver(fb, ioctlb, clpb);
+    auto f = bfn::mock_shared<file>(mocks);
+    auto ctl = bfn::mock_shared<ioctl>(mocks);
+    auto clp = bfn::mock_shared<command_line_parser>(mocks);
 
-    mocks.ExpectCall(clpb, command_line_parser::is_valid).Return(true);
-    mocks.ExpectCall(clpb, command_line_parser::cmd).Return(command_line_parser_command::start);
-    mocks.ExpectCall(clpb, command_line_parser::modules).Return(std::string());
+    mocks.OnCall(clp.get(), command_line_parser::cmd).Return(command_line_parser_command::load);
+    mocks.OnCall(clp.get(), command_line_parser::modules).Return(""_s);
+
+    mocks.OnCall(ctl.get(), ioctl::call_ioctl_vmm_status).Do([](auto * status)
+    {
+        *status = VMM_CORRUPT;
+    });
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_TRUE(driver.process() == ioctl_driver_error::failure);
+        EXPECT_EXCEPTION(g_driver.process(f, ctl, clp), bfn::corrupt_vmm_error);
     });
 }
 
 void
-bfm_ut::test_ioctl_driver_with_start_and_bad_module_filename()
+bfm_ut::test_ioctl_driver_process_load_vmm_unknown_status()
 {
     MockRepository mocks;
 
-    file *fb = mocks.Mock<file>();
-    ioctl *ioctlb = mocks.Mock<ioctl>();
-    command_line_parser *clpb = mocks.Mock<command_line_parser>();
-    ioctl_driver driver(fb, ioctlb, clpb);
+    auto f = bfn::mock_shared<file>(mocks);
+    auto ctl = bfn::mock_shared<ioctl>(mocks);
+    auto clp = bfn::mock_shared<command_line_parser>(mocks);
 
-    mocks.OnCall(clpb, command_line_parser::is_valid).Return(true);
-    mocks.OnCall(clpb, command_line_parser::cmd).Return(command_line_parser_command::start);
-    mocks.OnCall(clpb, command_line_parser::modules).Return(std::string("bad_filename"));
-    mocks.ExpectCall(fb, file::exists).Return(false);
+    mocks.OnCall(clp.get(), command_line_parser::cmd).Return(command_line_parser_command::load);
+    mocks.OnCall(clp.get(), command_line_parser::modules).Return(""_s);
+
+    mocks.OnCall(ctl.get(), ioctl::call_ioctl_vmm_status).Do([](auto * status)
+    {
+        *status = -1;
+    });
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_TRUE(driver.process() == ioctl_driver_error::failure);
+        EXPECT_EXCEPTION(g_driver.process(f, ctl, clp), bfn::unknown_status_error);
     });
 }
 
 void
-bfm_ut::test_ioctl_driver_with_start_and_empty_list_of_modules()
+bfm_ut::test_ioctl_driver_process_load_bad_modules_filename()
 {
     MockRepository mocks;
 
-    file *fb = mocks.Mock<file>();
-    ioctl *ioctlb = mocks.Mock<ioctl>();
-    command_line_parser *clpb = mocks.Mock<command_line_parser>();
-    ioctl_driver driver(fb, ioctlb, clpb);
+    auto f = bfn::mock_shared<file>(mocks);
+    auto ctl = bfn::mock_shared<ioctl>(mocks);
+    auto clp = bfn::mock_shared<command_line_parser>(mocks);
 
-    mocks.OnCall(clpb, command_line_parser::is_valid).Return(true);
-    mocks.OnCall(clpb, command_line_parser::cmd).Return(command_line_parser_command::start);
-    mocks.OnCall(clpb, command_line_parser::modules).Return(std::string("good_filename"));
-    mocks.ExpectCall(fb, file::exists).Return(true);
-    mocks.ExpectCall(fb, file::read).Return(std::string());
+    mocks.OnCall(clp.get(), command_line_parser::cmd).Return(command_line_parser_command::load);
+    mocks.OnCall(clp.get(), command_line_parser::modules).Return(""_s);
+
+    mocks.OnCall(ctl.get(), ioctl::call_ioctl_vmm_status).Do([](auto * status)
+    {
+        *status = VMM_UNLOADED;
+    });
+
+    mocks.OnCall(f.get(), file::read).Throw(
+        invalid_file(""_s)
+    );
+
+    mocks.ExpectCall(ctl.get(), ioctl::call_ioctl_unload_vmm);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_TRUE(driver.process() == ioctl_driver_error::failure);
+        EXPECT_EXCEPTION(g_driver.process(f, ctl, clp), bfn::invalid_file_error);
     });
 }
 
 void
-bfm_ut::test_ioctl_driver_with_start_and_one_bad_module_filename()
+bfm_ut::test_ioctl_driver_process_load_bad_module_filename()
 {
     MockRepository mocks;
 
-    file *fb = mocks.Mock<file>();
-    ioctl *ioctlb = mocks.Mock<ioctl>();
-    command_line_parser *clpb = mocks.Mock<command_line_parser>();
-    ioctl_driver driver(fb, ioctlb, clpb);
+    auto f = bfn::mock_shared<file>(mocks);
+    auto ctl = bfn::mock_shared<ioctl>(mocks);
+    auto clp = bfn::mock_shared<command_line_parser>(mocks);
 
-    mocks.OnCall(clpb, command_line_parser::is_valid).Return(true);
-    mocks.OnCall(clpb, command_line_parser::cmd).Return(command_line_parser_command::start);
-    mocks.OnCall(clpb, command_line_parser::modules).Return(std::string("good_filename"));
-    mocks.ExpectCall(fb, file::exists).With("good_filename").Return(true);
-    mocks.ExpectCall(fb, file::read).Return(std::string("one_bad_file"));
-    mocks.ExpectCall(fb, file::exists).With("one_bad_file").Return(false);
+    mocks.OnCall(clp.get(), command_line_parser::cmd).Return(command_line_parser_command::load);
+    mocks.OnCall(clp.get(), command_line_parser::modules).Return("modules"_s);
+    mocks.OnCall(ctl.get(), ioctl::call_ioctl_add_module);
+
+    mocks.OnCall(ctl.get(), ioctl::call_ioctl_vmm_status).Do([](auto * status)
+    {
+        *status = VMM_UNLOADED;
+    });
+
+    mocks.OnCall(f.get(), file::read).Do([](auto filename) -> auto
+    {
+        if (filename.compare("modules"_s) == 0)
+            return "1\n2\n3\n"_s;
+        if (filename.compare("2"_s) == 0)
+            throw invalid_file(""_s);
+        return "good"_s;
+    });
+
+    mocks.ExpectCall(ctl.get(), ioctl::call_ioctl_unload_vmm);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_TRUE(driver.process() == ioctl_driver_error::failure);
+        EXPECT_EXCEPTION(g_driver.process(f, ctl, clp), bfn::invalid_file_error);
     });
 }
 
 void
-bfm_ut::test_ioctl_driver_with_start_and_more_than_one_bad_module_filename()
+bfm_ut::test_ioctl_driver_process_load_add_module_failed()
 {
     MockRepository mocks;
 
-    file *fb = mocks.Mock<file>();
-    ioctl *ioctlb = mocks.Mock<ioctl>();
-    command_line_parser *clpb = mocks.Mock<command_line_parser>();
-    ioctl_driver driver(fb, ioctlb, clpb);
+    auto f = bfn::mock_shared<file>(mocks);
+    auto ctl = bfn::mock_shared<ioctl>(mocks);
+    auto clp = bfn::mock_shared<command_line_parser>(mocks);
 
-    mocks.OnCall(clpb, command_line_parser::is_valid).Return(true);
-    mocks.OnCall(clpb, command_line_parser::cmd).Return(command_line_parser_command::start);
-    mocks.OnCall(clpb, command_line_parser::modules).Return(std::string("good_filename"));
-    mocks.ExpectCall(fb, file::exists).With("good_filename").Return(true);
-    mocks.ExpectCall(fb, file::read).With("good_filename").Return(std::string("one\nbad\nfile"));
-    mocks.ExpectCall(fb, file::exists).With("one").Return(false);
+    mocks.OnCall(clp.get(), command_line_parser::cmd).Return(command_line_parser_command::load);
+    mocks.OnCall(clp.get(), command_line_parser::modules).Return("modules"_s);
+
+    mocks.OnCall(ctl.get(), ioctl::call_ioctl_vmm_status).Do([](auto * status)
+    {
+        *status = VMM_UNLOADED;
+    });
+
+    mocks.OnCall(f.get(), file::read).Do([](auto filename) -> auto
+    {
+        if (filename.compare("modules"_s) == 0)
+            return "1\n2\n3\n"_s;
+        if (filename.compare("2"_s) == 0)
+            return "bad"_s;
+        return "good"_s;
+    });
+
+    mocks.OnCall(ctl.get(), ioctl::call_ioctl_add_module).Do([](auto data)
+    {
+        if (data.compare("bad"_s) == 0)
+            throw ioctl_failed(IOCTL_ADD_MODULE);
+    });
+
+    mocks.ExpectCall(ctl.get(), ioctl::call_ioctl_unload_vmm);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_TRUE(driver.process() == ioctl_driver_error::failure);
+        EXPECT_EXCEPTION(g_driver.process(f, ctl, clp), bfn::ioctl_failed_error);
     });
 }
 
 void
-bfm_ut::test_ioctl_driver_with_start_and_empty_module()
+bfm_ut::test_ioctl_driver_process_load_load_failed()
 {
     MockRepository mocks;
 
-    file *fb = mocks.Mock<file>();
-    ioctl *ioctlb = mocks.Mock<ioctl>();
-    command_line_parser *clpb = mocks.Mock<command_line_parser>();
-    ioctl_driver driver(fb, ioctlb, clpb);
+    auto f = bfn::mock_shared<file>(mocks);
+    auto ctl = bfn::mock_shared<ioctl>(mocks);
+    auto clp = bfn::mock_shared<command_line_parser>(mocks);
 
-    mocks.OnCall(clpb, command_line_parser::is_valid).Return(true);
-    mocks.OnCall(clpb, command_line_parser::cmd).Return(command_line_parser_command::start);
-    mocks.OnCall(clpb, command_line_parser::modules).Return(std::string("good_filename"));
-    mocks.ExpectCall(fb, file::exists).With("good_filename").Return(true);
-    mocks.ExpectCall(fb, file::read).With("good_filename").Return(std::string("three\ngood\nfiles\n"));
-    mocks.ExpectCall(fb, file::exists).With("three").Return(true);
-    mocks.ExpectCall(fb, file::read).With("three").Return(std::string());
+    mocks.OnCall(clp.get(), command_line_parser::cmd).Return(command_line_parser_command::load);
+    mocks.OnCall(clp.get(), command_line_parser::modules).Return("modules"_s);
+    mocks.OnCall(f.get(), file::read).Return(""_s);
+    mocks.OnCall(ctl.get(), ioctl::call_ioctl_add_module);
+
+    mocks.OnCall(ctl.get(), ioctl::call_ioctl_vmm_status).Do([](auto * status)
+    {
+        *status = VMM_UNLOADED;
+    });
+
+    mocks.OnCall(ctl.get(), ioctl::call_ioctl_load_vmm).Throw(
+        ioctl_failed(IOCTL_LOAD_VMM)
+    );
+
+    mocks.ExpectCall(ctl.get(), ioctl::call_ioctl_unload_vmm);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_TRUE(driver.process() == ioctl_driver_error::failure);
+        EXPECT_EXCEPTION(g_driver.process(f, ctl, clp), bfn::ioctl_failed_error);
     });
 }
 
 void
-bfm_ut::test_ioctl_driver_with_start_and_ioctl_add_module_failure()
+bfm_ut::test_ioctl_driver_process_load_success()
 {
     MockRepository mocks;
 
-    file *fb = mocks.Mock<file>();
-    ioctl *ioctlb = mocks.Mock<ioctl>();
-    command_line_parser *clpb = mocks.Mock<command_line_parser>();
-    ioctl_driver driver(fb, ioctlb, clpb);
+    auto f = bfn::mock_shared<file>(mocks);
+    auto ctl = bfn::mock_shared<ioctl>(mocks);
+    auto clp = bfn::mock_shared<command_line_parser>(mocks);
 
-    mocks.OnCall(clpb, command_line_parser::is_valid).Return(true);
-    mocks.OnCall(clpb, command_line_parser::cmd).Return(command_line_parser_command::start);
-    mocks.OnCall(clpb, command_line_parser::modules).Return(std::string("good_filename"));
-    mocks.OnCall(fb, file::exists).With("good_filename").Return(true);
-    mocks.OnCall(fb, file::read).With("good_filename").Return(std::string("three\ngood\nfiles\n"));
-    mocks.OnCall(fb, file::exists).With("three").Return(true);
-    mocks.OnCall(fb, file::read).With("three").Return(std::string("goood_contents"));
-    mocks.ExpectCall(ioctlb, ioctl::call).With(ioctl_commands::add_module, _, _).Return(ioctl_error::failed_add_module);
+    mocks.OnCall(clp.get(), command_line_parser::cmd).Return(command_line_parser_command::load);
+    mocks.OnCall(clp.get(), command_line_parser::modules).Return("modules"_s);
+    mocks.OnCall(f.get(), file::read).Return(""_s);
+    mocks.OnCall(ctl.get(), ioctl::call_ioctl_add_module);
+    mocks.OnCall(ctl.get(), ioctl::call_ioctl_load_vmm);
+
+    mocks.OnCall(ctl.get(), ioctl::call_ioctl_vmm_status).Do([](auto * status)
+    {
+        *status = VMM_UNLOADED;
+    });
+
+    mocks.NeverCall(ctl.get(), ioctl::call_ioctl_unload_vmm);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_TRUE(driver.process() == ioctl_driver_error::failure);
+        EXPECT_NO_EXCEPTION(g_driver.process(f, ctl, clp));
     });
 }
 
 void
-bfm_ut::test_ioctl_driver_with_start_and_ioctl_start_vmm_failure()
+bfm_ut::test_ioctl_driver_process_unload_vmm_running()
 {
     MockRepository mocks;
 
-    file *fb = mocks.Mock<file>();
-    ioctl *ioctlb = mocks.Mock<ioctl>();
-    command_line_parser *clpb = mocks.Mock<command_line_parser>();
-    ioctl_driver driver(fb, ioctlb, clpb);
+    auto f = bfn::mock_shared<file>(mocks);
+    auto ctl = bfn::mock_shared<ioctl>(mocks);
+    auto clp = bfn::mock_shared<command_line_parser>(mocks);
 
-    mocks.OnCall(clpb, command_line_parser::is_valid).Return(true);
-    mocks.OnCall(clpb, command_line_parser::cmd).Return(command_line_parser_command::start);
-    mocks.OnCall(clpb, command_line_parser::modules).Return(std::string("good_filename"));
-    mocks.OnCall(fb, file::exists).With("good_filename").Return(true);
-    mocks.OnCall(fb, file::read).With("good_filename").Return(std::string("three\ngood\nfiles\n"));
-    mocks.OnCall(fb, file::exists).With("three").Return(true);
-    mocks.OnCall(fb, file::read).With("three").Return(std::string("goood_contents"));
-    mocks.ExpectCall(ioctlb, ioctl::call).With(ioctl_commands::add_module, _, _).Return(ioctl_error::success);
-    mocks.OnCall(fb, file::exists).With("good").Return(true);
-    mocks.OnCall(fb, file::read).With("good").Return(std::string("goood_contents"));
-    mocks.ExpectCall(ioctlb, ioctl::call).With(ioctl_commands::add_module, _, _).Return(ioctl_error::success);
-    mocks.OnCall(fb, file::exists).With("files").Return(true);
-    mocks.OnCall(fb, file::read).With("files").Return(std::string("goood_contents"));
-    mocks.ExpectCall(ioctlb, ioctl::call).With(ioctl_commands::add_module, _, _).Return(ioctl_error::success);
-    mocks.ExpectCall(ioctlb, ioctl::call).With(ioctl_commands::start, _, _).Return(ioctl_error::failed_start);
+    mocks.OnCall(clp.get(), command_line_parser::cmd).Return(command_line_parser_command::unload);
+    mocks.OnCall(clp.get(), command_line_parser::modules).Return(""_s);
+    mocks.OnCall(ctl.get(), ioctl::call_ioctl_stop_vmm);
+    mocks.OnCall(ctl.get(), ioctl::call_ioctl_unload_vmm);
+
+    mocks.OnCall(ctl.get(), ioctl::call_ioctl_vmm_status).Do([](auto * status)
+    {
+        *status = VMM_RUNNING;
+    });
+
+    mocks.ExpectCall(ctl.get(), ioctl::call_ioctl_stop_vmm);
+    mocks.ExpectCall(ctl.get(), ioctl::call_ioctl_unload_vmm);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_TRUE(driver.process() == ioctl_driver_error::failure);
+        EXPECT_NO_EXCEPTION(g_driver.process(f, ctl, clp));
     });
 }
 
 void
-bfm_ut::test_ioctl_driver_with_start_and_ioctl_start_vmm_success()
+bfm_ut::test_ioctl_driver_process_unload_vmm_loaded()
 {
     MockRepository mocks;
 
-    file *fb = mocks.Mock<file>();
-    ioctl *ioctlb = mocks.Mock<ioctl>();
-    command_line_parser *clpb = mocks.Mock<command_line_parser>();
-    ioctl_driver driver(fb, ioctlb, clpb);
+    auto f = bfn::mock_shared<file>(mocks);
+    auto ctl = bfn::mock_shared<ioctl>(mocks);
+    auto clp = bfn::mock_shared<command_line_parser>(mocks);
 
-    mocks.OnCall(clpb, command_line_parser::is_valid).Return(true);
-    mocks.OnCall(clpb, command_line_parser::cmd).Return(command_line_parser_command::start);
-    mocks.OnCall(clpb, command_line_parser::modules).Return(std::string("good_filename"));
-    mocks.OnCall(fb, file::exists).With("good_filename").Return(true);
-    mocks.OnCall(fb, file::read).With("good_filename").Return(std::string("three\ngood\nfiles\n"));
-    mocks.OnCall(fb, file::exists).With("three").Return(true);
-    mocks.OnCall(fb, file::read).With("three").Return(std::string("goood_contents"));
-    mocks.ExpectCall(ioctlb, ioctl::call).With(ioctl_commands::add_module, _, _).Return(ioctl_error::success);
-    mocks.OnCall(fb, file::exists).With("good").Return(true);
-    mocks.OnCall(fb, file::read).With("good").Return(std::string("goood_contents"));
-    mocks.ExpectCall(ioctlb, ioctl::call).With(ioctl_commands::add_module, _, _).Return(ioctl_error::success);
-    mocks.OnCall(fb, file::exists).With("files").Return(true);
-    mocks.OnCall(fb, file::read).With("files").Return(std::string("goood_contents"));
-    mocks.ExpectCall(ioctlb, ioctl::call).With(ioctl_commands::add_module, _, _).Return(ioctl_error::success);
-    mocks.ExpectCall(ioctlb, ioctl::call).With(ioctl_commands::start, _, _).Return(ioctl_error::success);
+    mocks.OnCall(clp.get(), command_line_parser::cmd).Return(command_line_parser_command::unload);
+    mocks.OnCall(clp.get(), command_line_parser::modules).Return(""_s);
+    mocks.OnCall(ctl.get(), ioctl::call_ioctl_unload_vmm);
+
+    mocks.OnCall(ctl.get(), ioctl::call_ioctl_vmm_status).Do([](auto * status)
+    {
+        *status = VMM_LOADED;
+    });
+
+    mocks.NeverCall(ctl.get(), ioctl::call_ioctl_stop_vmm);
+    mocks.ExpectCall(ctl.get(), ioctl::call_ioctl_unload_vmm);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_TRUE(driver.process() == ioctl_driver_error::success);
+        EXPECT_NO_EXCEPTION(g_driver.process(f, ctl, clp));
     });
 }
 
 void
-bfm_ut::test_ioctl_driver_with_stop_and_ioctl_stop_vmm_failure()
+bfm_ut::test_ioctl_driver_process_unload_vmm_unloaded()
 {
     MockRepository mocks;
 
-    file *fb = mocks.Mock<file>();
-    ioctl *ioctlb = mocks.Mock<ioctl>();
-    command_line_parser *clpb = mocks.Mock<command_line_parser>();
-    ioctl_driver driver(fb, ioctlb, clpb);
+    auto f = bfn::mock_shared<file>(mocks);
+    auto ctl = bfn::mock_shared<ioctl>(mocks);
+    auto clp = bfn::mock_shared<command_line_parser>(mocks);
 
-    mocks.OnCall(clpb, command_line_parser::is_valid).Return(true);
-    mocks.OnCall(clpb, command_line_parser::cmd).Return(command_line_parser_command::stop);
-    mocks.ExpectCall(ioctlb, ioctl::call).With(ioctl_commands::stop, _, _).Return(ioctl_error::failed_stop);
+    mocks.OnCall(clp.get(), command_line_parser::cmd).Return(command_line_parser_command::unload);
+    mocks.OnCall(clp.get(), command_line_parser::modules).Return(""_s);
+
+    mocks.OnCall(ctl.get(), ioctl::call_ioctl_vmm_status).Do([](auto * status)
+    {
+        *status = VMM_UNLOADED;
+    });
+
+    mocks.NeverCall(ctl.get(), ioctl::call_ioctl_stop_vmm);
+    mocks.ExpectCall(ctl.get(), ioctl::call_ioctl_unload_vmm);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_TRUE(driver.process() == ioctl_driver_error::failure);
+        EXPECT_NO_EXCEPTION(g_driver.process(f, ctl, clp));
     });
 }
 
 void
-bfm_ut::test_ioctl_driver_with_stop_and_ioctl_stop_vmm_success()
+bfm_ut::test_ioctl_driver_process_unload_vmm_corrupt()
 {
     MockRepository mocks;
 
-    file *fb = mocks.Mock<file>();
-    ioctl *ioctlb = mocks.Mock<ioctl>();
-    command_line_parser *clpb = mocks.Mock<command_line_parser>();
-    ioctl_driver driver(fb, ioctlb, clpb);
+    auto f = bfn::mock_shared<file>(mocks);
+    auto ctl = bfn::mock_shared<ioctl>(mocks);
+    auto clp = bfn::mock_shared<command_line_parser>(mocks);
 
-    mocks.OnCall(clpb, command_line_parser::is_valid).Return(true);
-    mocks.OnCall(clpb, command_line_parser::cmd).Return(command_line_parser_command::stop);
-    mocks.ExpectCall(ioctlb, ioctl::call).With(ioctl_commands::stop, _, _).Return(ioctl_error::success);
+    mocks.OnCall(clp.get(), command_line_parser::cmd).Return(command_line_parser_command::unload);
+    mocks.OnCall(clp.get(), command_line_parser::modules).Return(""_s);
+
+    mocks.OnCall(ctl.get(), ioctl::call_ioctl_vmm_status).Do([](auto * status)
+    {
+        *status = VMM_CORRUPT;
+    });
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_TRUE(driver.process() == ioctl_driver_error::success);
+        EXPECT_EXCEPTION(g_driver.process(f, ctl, clp), bfn::corrupt_vmm_error);
     });
 }
 
 void
-bfm_ut::test_ioctl_driver_with_stop_and_ioctl_dump_vmm_failure()
+bfm_ut::test_ioctl_driver_process_unload_vmm_unknown_status()
 {
     MockRepository mocks;
 
-    file *fb = mocks.Mock<file>();
-    ioctl *ioctlb = mocks.Mock<ioctl>();
-    command_line_parser *clpb = mocks.Mock<command_line_parser>();
-    ioctl_driver driver(fb, ioctlb, clpb);
+    auto f = bfn::mock_shared<file>(mocks);
+    auto ctl = bfn::mock_shared<ioctl>(mocks);
+    auto clp = bfn::mock_shared<command_line_parser>(mocks);
 
-    mocks.OnCall(clpb, command_line_parser::is_valid).Return(true);
-    mocks.OnCall(clpb, command_line_parser::cmd).Return(command_line_parser_command::dump);
-    mocks.ExpectCall(ioctlb, ioctl::call).With(ioctl_commands::dump, _, _).Return(ioctl_error::failed_dump);
+    mocks.OnCall(clp.get(), command_line_parser::cmd).Return(command_line_parser_command::unload);
+    mocks.OnCall(clp.get(), command_line_parser::modules).Return(""_s);
+
+    mocks.OnCall(ctl.get(), ioctl::call_ioctl_vmm_status).Do([](auto * status)
+    {
+        *status = -1;
+    });
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_TRUE(driver.process() == ioctl_driver_error::failure);
+        EXPECT_EXCEPTION(g_driver.process(f, ctl, clp), bfn::unknown_status_error);
     });
 }
 
 void
-bfm_ut::test_ioctl_driver_with_stop_and_ioctl_dump_vmm_success()
+bfm_ut::test_ioctl_driver_process_unload_unload_failed()
 {
     MockRepository mocks;
 
-    file *fb = mocks.Mock<file>();
-    ioctl *ioctlb = mocks.Mock<ioctl>();
-    command_line_parser *clpb = mocks.Mock<command_line_parser>();
-    ioctl_driver driver(fb, ioctlb, clpb);
+    auto f = bfn::mock_shared<file>(mocks);
+    auto ctl = bfn::mock_shared<ioctl>(mocks);
+    auto clp = bfn::mock_shared<command_line_parser>(mocks);
 
-    mocks.OnCall(clpb, command_line_parser::is_valid).Return(true);
-    mocks.OnCall(clpb, command_line_parser::cmd).Return(command_line_parser_command::dump);
-    mocks.ExpectCall(ioctlb, ioctl::call).With(ioctl_commands::dump, _, _).Return(ioctl_error::success);
+    mocks.OnCall(clp.get(), command_line_parser::cmd).Return(command_line_parser_command::unload);
+    mocks.OnCall(clp.get(), command_line_parser::modules).Return(""_s);
+
+    mocks.OnCall(ctl.get(), ioctl::call_ioctl_vmm_status).Do([](auto * status)
+    {
+        *status = VMM_LOADED;
+    });
+
+    mocks.OnCall(ctl.get(), ioctl::call_ioctl_unload_vmm).Throw(
+        ioctl_failed(IOCTL_UNLOAD_VMM)
+    );
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_TRUE(driver.process() == ioctl_driver_error::success);
+        EXPECT_EXCEPTION(g_driver.process(f, ctl, clp), bfn::ioctl_failed_error);
+    });
+}
+
+void
+bfm_ut::test_ioctl_driver_process_unload_success()
+{
+    MockRepository mocks;
+
+    auto f = bfn::mock_shared<file>(mocks);
+    auto ctl = bfn::mock_shared<ioctl>(mocks);
+    auto clp = bfn::mock_shared<command_line_parser>(mocks);
+
+    mocks.OnCall(clp.get(), command_line_parser::cmd).Return(command_line_parser_command::unload);
+    mocks.OnCall(clp.get(), command_line_parser::modules).Return(""_s);
+    mocks.OnCall(ctl.get(), ioctl::call_ioctl_unload_vmm);
+
+    mocks.OnCall(ctl.get(), ioctl::call_ioctl_vmm_status).Do([](auto * status)
+    {
+        *status = VMM_LOADED;
+    });
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        EXPECT_NO_EXCEPTION(g_driver.process(f, ctl, clp));
+    });
+}
+
+void
+bfm_ut::test_ioctl_driver_process_start_vmm_running()
+{
+    MockRepository mocks;
+
+    auto f = bfn::mock_shared<file>(mocks);
+    auto ctl = bfn::mock_shared<ioctl>(mocks);
+    auto clp = bfn::mock_shared<command_line_parser>(mocks);
+
+    mocks.OnCall(clp.get(), command_line_parser::cmd).Return(command_line_parser_command::start);
+    mocks.OnCall(clp.get(), command_line_parser::modules).Return(""_s);
+
+    mocks.OnCall(ctl.get(), ioctl::call_ioctl_vmm_status).Do([](auto * status)
+    {
+        *status = VMM_RUNNING;
+    });
+
+    mocks.ExpectCall(ctl.get(), ioctl::call_ioctl_stop_vmm);
+    mocks.ExpectCall(ctl.get(), ioctl::call_ioctl_start_vmm);
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        EXPECT_NO_EXCEPTION(g_driver.process(f, ctl, clp));
+    });
+}
+
+void
+bfm_ut::test_ioctl_driver_process_start_vmm_loaded()
+{
+    MockRepository mocks;
+
+    auto f = bfn::mock_shared<file>(mocks);
+    auto ctl = bfn::mock_shared<ioctl>(mocks);
+    auto clp = bfn::mock_shared<command_line_parser>(mocks);
+
+    mocks.OnCall(clp.get(), command_line_parser::cmd).Return(command_line_parser_command::start);
+    mocks.OnCall(clp.get(), command_line_parser::modules).Return(""_s);
+
+    mocks.OnCall(ctl.get(), ioctl::call_ioctl_vmm_status).Do([](auto * status)
+    {
+        *status = VMM_LOADED;
+    });
+
+    mocks.NeverCall(ctl.get(), ioctl::call_ioctl_stop_vmm);
+    mocks.ExpectCall(ctl.get(), ioctl::call_ioctl_start_vmm);
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        EXPECT_NO_EXCEPTION(g_driver.process(f, ctl, clp));
+    });
+}
+
+void
+bfm_ut::test_ioctl_driver_process_start_vmm_unloaded()
+{
+    MockRepository mocks;
+
+    auto f = bfn::mock_shared<file>(mocks);
+    auto ctl = bfn::mock_shared<ioctl>(mocks);
+    auto clp = bfn::mock_shared<command_line_parser>(mocks);
+
+    mocks.OnCall(clp.get(), command_line_parser::cmd).Return(command_line_parser_command::start);
+    mocks.OnCall(clp.get(), command_line_parser::modules).Return(""_s);
+
+    mocks.OnCall(ctl.get(), ioctl::call_ioctl_vmm_status).Do([](auto * status)
+    {
+        *status = VMM_UNLOADED;
+    });
+
+    mocks.NeverCall(ctl.get(), ioctl::call_ioctl_stop_vmm);
+    mocks.NeverCall(ctl.get(), ioctl::call_ioctl_start_vmm);
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        EXPECT_EXCEPTION(g_driver.process(f, ctl, clp), bfn::invalid_vmm_state_error);
+    });
+}
+
+void
+bfm_ut::test_ioctl_driver_process_start_vmm_corrupt()
+{
+    MockRepository mocks;
+
+    auto f = bfn::mock_shared<file>(mocks);
+    auto ctl = bfn::mock_shared<ioctl>(mocks);
+    auto clp = bfn::mock_shared<command_line_parser>(mocks);
+
+    mocks.OnCall(clp.get(), command_line_parser::cmd).Return(command_line_parser_command::start);
+    mocks.OnCall(clp.get(), command_line_parser::modules).Return(""_s);
+
+    mocks.OnCall(ctl.get(), ioctl::call_ioctl_vmm_status).Do([](auto * status)
+    {
+        *status = VMM_CORRUPT;
+    });
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        EXPECT_EXCEPTION(g_driver.process(f, ctl, clp), bfn::corrupt_vmm_error);
+    });
+}
+
+void
+bfm_ut::test_ioctl_driver_process_start_vmm_unknown_status()
+{
+    MockRepository mocks;
+
+    auto f = bfn::mock_shared<file>(mocks);
+    auto ctl = bfn::mock_shared<ioctl>(mocks);
+    auto clp = bfn::mock_shared<command_line_parser>(mocks);
+
+    mocks.OnCall(clp.get(), command_line_parser::cmd).Return(command_line_parser_command::start);
+    mocks.OnCall(clp.get(), command_line_parser::modules).Return(""_s);
+
+    mocks.OnCall(ctl.get(), ioctl::call_ioctl_vmm_status).Do([](auto * status)
+    {
+        *status = -1;
+    });
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        EXPECT_EXCEPTION(g_driver.process(f, ctl, clp), bfn::unknown_status_error);
+    });
+}
+
+void
+bfm_ut::test_ioctl_driver_process_start_start_failed()
+{
+    MockRepository mocks;
+
+    auto f = bfn::mock_shared<file>(mocks);
+    auto ctl = bfn::mock_shared<ioctl>(mocks);
+    auto clp = bfn::mock_shared<command_line_parser>(mocks);
+
+    mocks.OnCall(clp.get(), command_line_parser::cmd).Return(command_line_parser_command::start);
+    mocks.OnCall(clp.get(), command_line_parser::modules).Return(""_s);
+
+    mocks.OnCall(ctl.get(), ioctl::call_ioctl_vmm_status).Do([](auto * status)
+    {
+        *status = VMM_LOADED;
+    });
+
+    mocks.OnCall(ctl.get(), ioctl::call_ioctl_start_vmm).Throw(
+        ioctl_failed(IOCTL_START_VMM)
+    );
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        EXPECT_EXCEPTION(g_driver.process(f, ctl, clp), bfn::ioctl_failed_error);
+    });
+}
+
+void
+bfm_ut::test_ioctl_driver_process_start_success()
+{
+    MockRepository mocks;
+
+    auto f = bfn::mock_shared<file>(mocks);
+    auto ctl = bfn::mock_shared<ioctl>(mocks);
+    auto clp = bfn::mock_shared<command_line_parser>(mocks);
+
+    mocks.OnCall(clp.get(), command_line_parser::cmd).Return(command_line_parser_command::start);
+    mocks.OnCall(clp.get(), command_line_parser::modules).Return(""_s);
+    mocks.OnCall(ctl.get(), ioctl::call_ioctl_start_vmm);
+
+    mocks.OnCall(ctl.get(), ioctl::call_ioctl_vmm_status).Do([](auto * status)
+    {
+        *status = VMM_LOADED;
+    });
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        EXPECT_NO_EXCEPTION(g_driver.process(f, ctl, clp));
+    });
+}
+
+void
+bfm_ut::test_ioctl_driver_process_stop_vmm_loaded()
+{
+    MockRepository mocks;
+
+    auto f = bfn::mock_shared<file>(mocks);
+    auto ctl = bfn::mock_shared<ioctl>(mocks);
+    auto clp = bfn::mock_shared<command_line_parser>(mocks);
+
+    mocks.OnCall(clp.get(), command_line_parser::cmd).Return(command_line_parser_command::stop);
+    mocks.OnCall(clp.get(), command_line_parser::modules).Return(""_s);
+
+    mocks.OnCall(ctl.get(), ioctl::call_ioctl_vmm_status).Do([](auto * status)
+    {
+        *status = VMM_LOADED;
+    });
+
+    mocks.NeverCall(ctl.get(), ioctl::call_ioctl_stop_vmm);
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        EXPECT_NO_EXCEPTION(g_driver.process(f, ctl, clp));
+    });
+}
+
+void
+bfm_ut::test_ioctl_driver_process_stop_vmm_unloaded()
+{
+    MockRepository mocks;
+
+    auto f = bfn::mock_shared<file>(mocks);
+    auto ctl = bfn::mock_shared<ioctl>(mocks);
+    auto clp = bfn::mock_shared<command_line_parser>(mocks);
+
+    mocks.OnCall(clp.get(), command_line_parser::cmd).Return(command_line_parser_command::stop);
+    mocks.OnCall(clp.get(), command_line_parser::modules).Return(""_s);
+
+    mocks.OnCall(ctl.get(), ioctl::call_ioctl_vmm_status).Do([](auto * status)
+    {
+        *status = VMM_UNLOADED;
+    });
+
+    mocks.NeverCall(ctl.get(), ioctl::call_ioctl_stop_vmm);
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        EXPECT_NO_EXCEPTION(g_driver.process(f, ctl, clp));
+    });
+}
+
+void
+bfm_ut::test_ioctl_driver_process_stop_vmm_corrupt()
+{
+    MockRepository mocks;
+
+    auto f = bfn::mock_shared<file>(mocks);
+    auto ctl = bfn::mock_shared<ioctl>(mocks);
+    auto clp = bfn::mock_shared<command_line_parser>(mocks);
+
+    mocks.OnCall(clp.get(), command_line_parser::cmd).Return(command_line_parser_command::stop);
+    mocks.OnCall(clp.get(), command_line_parser::modules).Return(""_s);
+
+    mocks.OnCall(ctl.get(), ioctl::call_ioctl_vmm_status).Do([](auto * status)
+    {
+        *status = VMM_CORRUPT;
+    });
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        EXPECT_EXCEPTION(g_driver.process(f, ctl, clp), bfn::corrupt_vmm_error);
+    });
+}
+
+void
+bfm_ut::test_ioctl_driver_process_stop_vmm_unknown_status()
+{
+    MockRepository mocks;
+
+    auto f = bfn::mock_shared<file>(mocks);
+    auto ctl = bfn::mock_shared<ioctl>(mocks);
+    auto clp = bfn::mock_shared<command_line_parser>(mocks);
+
+    mocks.OnCall(clp.get(), command_line_parser::cmd).Return(command_line_parser_command::stop);
+    mocks.OnCall(clp.get(), command_line_parser::modules).Return(""_s);
+
+    mocks.OnCall(ctl.get(), ioctl::call_ioctl_vmm_status).Do([](auto * status)
+    {
+        *status = -1;
+    });
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        EXPECT_EXCEPTION(g_driver.process(f, ctl, clp), bfn::unknown_status_error);
+    });
+}
+
+void
+bfm_ut::test_ioctl_driver_process_stop_stop_failed()
+{
+    MockRepository mocks;
+
+    auto f = bfn::mock_shared<file>(mocks);
+    auto ctl = bfn::mock_shared<ioctl>(mocks);
+    auto clp = bfn::mock_shared<command_line_parser>(mocks);
+
+    mocks.OnCall(clp.get(), command_line_parser::cmd).Return(command_line_parser_command::stop);
+    mocks.OnCall(clp.get(), command_line_parser::modules).Return(""_s);
+
+    mocks.OnCall(ctl.get(), ioctl::call_ioctl_vmm_status).Do([](auto * status)
+    {
+        *status = VMM_RUNNING;
+    });
+
+    mocks.OnCall(ctl.get(), ioctl::call_ioctl_stop_vmm).Throw(
+        ioctl_failed(IOCTL_STOP_VMM)
+    );
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        EXPECT_EXCEPTION(g_driver.process(f, ctl, clp), bfn::ioctl_failed_error);
+    });
+}
+
+void
+bfm_ut::test_ioctl_driver_process_stop_success()
+{
+    MockRepository mocks;
+
+    auto f = bfn::mock_shared<file>(mocks);
+    auto ctl = bfn::mock_shared<ioctl>(mocks);
+    auto clp = bfn::mock_shared<command_line_parser>(mocks);
+
+    mocks.OnCall(clp.get(), command_line_parser::cmd).Return(command_line_parser_command::stop);
+    mocks.OnCall(clp.get(), command_line_parser::modules).Return(""_s);
+    mocks.OnCall(ctl.get(), ioctl::call_ioctl_stop_vmm);
+
+    mocks.OnCall(ctl.get(), ioctl::call_ioctl_vmm_status).Do([](auto * status)
+    {
+        *status = VMM_RUNNING;
+    });
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        EXPECT_NO_EXCEPTION(g_driver.process(f, ctl, clp));
+    });
+}
+
+void
+bfm_ut::test_ioctl_driver_process_dump_vmm_unloaded()
+{
+    MockRepository mocks;
+
+    auto f = bfn::mock_shared<file>(mocks);
+    auto ctl = bfn::mock_shared<ioctl>(mocks);
+    auto clp = bfn::mock_shared<command_line_parser>(mocks);
+
+    mocks.OnCall(clp.get(), command_line_parser::cmd).Return(command_line_parser_command::dump);
+    mocks.OnCall(clp.get(), command_line_parser::modules).Return(""_s);
+
+    mocks.OnCall(ctl.get(), ioctl::call_ioctl_vmm_status).Do([](auto * status)
+    {
+        *status = VMM_UNLOADED;
+    });
+
+    mocks.NeverCall(ctl.get(), ioctl::call_ioctl_dump_vmm);
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        EXPECT_EXCEPTION(g_driver.process(f, ctl, clp), bfn::invalid_vmm_state_error);
+    });
+}
+
+void
+bfm_ut::test_ioctl_driver_process_dump_vmm_unknown_status()
+{
+    MockRepository mocks;
+
+    auto f = bfn::mock_shared<file>(mocks);
+    auto ctl = bfn::mock_shared<ioctl>(mocks);
+    auto clp = bfn::mock_shared<command_line_parser>(mocks);
+
+    mocks.OnCall(clp.get(), command_line_parser::cmd).Return(command_line_parser_command::dump);
+    mocks.OnCall(clp.get(), command_line_parser::modules).Return(""_s);
+
+    mocks.OnCall(ctl.get(), ioctl::call_ioctl_vmm_status).Do([](auto * status)
+    {
+        *status = -1;
+    });
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        EXPECT_EXCEPTION(g_driver.process(f, ctl, clp), bfn::unknown_status_error);
+    });
+}
+
+void
+bfm_ut::test_ioctl_driver_process_dump_dump_failed()
+{
+    MockRepository mocks;
+
+    auto f = bfn::mock_shared<file>(mocks);
+    auto ctl = bfn::mock_shared<ioctl>(mocks);
+    auto clp = bfn::mock_shared<command_line_parser>(mocks);
+
+    mocks.OnCall(clp.get(), command_line_parser::cmd).Return(command_line_parser_command::dump);
+    mocks.OnCall(clp.get(), command_line_parser::modules).Return(""_s);
+
+    mocks.OnCall(ctl.get(), ioctl::call_ioctl_vmm_status).Do([](auto * status)
+    {
+        *status = VMM_LOADED;
+    });
+
+    mocks.OnCall(ctl.get(), ioctl::call_ioctl_dump_vmm).Throw(
+        ioctl_failed(IOCTL_DUMP_VMM)
+    );
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        EXPECT_EXCEPTION(g_driver.process(f, ctl, clp), bfn::ioctl_failed_error);
+    });
+}
+
+void
+bfm_ut::test_ioctl_driver_process_dump_success()
+{
+    MockRepository mocks;
+
+    auto f = bfn::mock_shared<file>(mocks);
+    auto ctl = bfn::mock_shared<ioctl>(mocks);
+    auto clp = bfn::mock_shared<command_line_parser>(mocks);
+
+    mocks.OnCall(clp.get(), command_line_parser::cmd).Return(command_line_parser_command::dump);
+    mocks.OnCall(clp.get(), command_line_parser::modules).Return(""_s);
+    mocks.OnCall(ctl.get(), ioctl::call_ioctl_dump_vmm);
+
+    mocks.OnCall(ctl.get(), ioctl::call_ioctl_vmm_status).Do([](auto * status)
+    {
+        *status = VMM_LOADED;
+    });
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        EXPECT_NO_EXCEPTION(g_driver.process(f, ctl, clp));
+    });
+}
+
+void
+bfm_ut::test_ioctl_driver_process_vmm_status_running()
+{
+    MockRepository mocks;
+
+    auto f = bfn::mock_shared<file>(mocks);
+    auto ctl = bfn::mock_shared<ioctl>(mocks);
+    auto clp = bfn::mock_shared<command_line_parser>(mocks);
+
+    mocks.OnCall(clp.get(), command_line_parser::cmd).Return(command_line_parser_command::status);
+    mocks.OnCall(clp.get(), command_line_parser::modules).Return(""_s);
+
+    mocks.OnCall(ctl.get(), ioctl::call_ioctl_vmm_status).Do([](auto * status)
+    {
+        *status = VMM_RUNNING;
+    });
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        EXPECT_NO_EXCEPTION(g_driver.process(f, ctl, clp));
+    });
+}
+
+void
+bfm_ut::test_ioctl_driver_process_vmm_status_loaded()
+{
+    MockRepository mocks;
+
+    auto f = bfn::mock_shared<file>(mocks);
+    auto ctl = bfn::mock_shared<ioctl>(mocks);
+    auto clp = bfn::mock_shared<command_line_parser>(mocks);
+
+    mocks.OnCall(clp.get(), command_line_parser::cmd).Return(command_line_parser_command::status);
+    mocks.OnCall(clp.get(), command_line_parser::modules).Return(""_s);
+
+    mocks.OnCall(ctl.get(), ioctl::call_ioctl_vmm_status).Do([](auto * status)
+    {
+        *status = VMM_LOADED;
+    });
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        EXPECT_NO_EXCEPTION(g_driver.process(f, ctl, clp));
+    });
+}
+
+void
+bfm_ut::test_ioctl_driver_process_vmm_status_unloaded()
+{
+    MockRepository mocks;
+
+    auto f = bfn::mock_shared<file>(mocks);
+    auto ctl = bfn::mock_shared<ioctl>(mocks);
+    auto clp = bfn::mock_shared<command_line_parser>(mocks);
+
+    mocks.OnCall(clp.get(), command_line_parser::cmd).Return(command_line_parser_command::status);
+    mocks.OnCall(clp.get(), command_line_parser::modules).Return(""_s);
+
+    mocks.OnCall(ctl.get(), ioctl::call_ioctl_vmm_status).Do([](auto * status)
+    {
+        *status = VMM_UNLOADED;
+    });
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        EXPECT_NO_EXCEPTION(g_driver.process(f, ctl, clp));
+    });
+}
+
+void
+bfm_ut::test_ioctl_driver_process_vmm_status_corrupt()
+{
+    MockRepository mocks;
+
+    auto f = bfn::mock_shared<file>(mocks);
+    auto ctl = bfn::mock_shared<ioctl>(mocks);
+    auto clp = bfn::mock_shared<command_line_parser>(mocks);
+
+    mocks.OnCall(clp.get(), command_line_parser::cmd).Return(command_line_parser_command::status);
+    mocks.OnCall(clp.get(), command_line_parser::modules).Return(""_s);
+
+    mocks.OnCall(ctl.get(), ioctl::call_ioctl_vmm_status).Do([](auto * status)
+    {
+        *status = VMM_CORRUPT;
+    });
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        EXPECT_NO_EXCEPTION(g_driver.process(f, ctl, clp));
+    });
+}
+
+void
+bfm_ut::test_ioctl_driver_process_vmm_status_unknown_status()
+{
+    MockRepository mocks;
+
+    auto f = bfn::mock_shared<file>(mocks);
+    auto ctl = bfn::mock_shared<ioctl>(mocks);
+    auto clp = bfn::mock_shared<command_line_parser>(mocks);
+
+    mocks.OnCall(clp.get(), command_line_parser::cmd).Return(command_line_parser_command::status);
+    mocks.OnCall(clp.get(), command_line_parser::modules).Return(""_s);
+
+    mocks.OnCall(ctl.get(), ioctl::call_ioctl_vmm_status).Do([](auto * status)
+    {
+        *status = -1;
+    });
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        EXPECT_EXCEPTION(g_driver.process(f, ctl, clp), bfn::unknown_status_error);
     });
 }

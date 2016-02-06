@@ -54,22 +54,6 @@ extern "C" {
 #define BF_ERROR_VMM_CORRUPTED -5100
 #define BF_ERROR_UNKNOWN -5200
 
-/*
- * Driver Entry State Machine
- *
- *  The driver entry has three major states that it could end up in. When the
- *  driver entry is unloaded, it means that the VMM has not been placed in
- *  memory. The loaded state means that the VMM is in memory, and relocated.
- *  In this state, symbol lookups are possible, and thus things like the VMM
- *  dump comand work. The running state means that the VMM is actually running.
- *  The goal of the state machine is to ensure that the driver keeps track of
- *  the state of the VMM, and handles its transition properly.
- */
-#define VMM_UNLOADED 0
-#define VMM_LOADED 1
-#define VMM_RUNNING 3
-#define VMM_CORRUPT 100
-
 /* -------------------------------------------------------------------------- */
 /* Module                                                                     */
 /* -------------------------------------------------------------------------- */
@@ -80,9 +64,12 @@ extern "C" {
  * assocaited with the module as well as the execution buffer and size where
  * the module will be loaded to, and execute from.
  *
- * @var exec the buffer that the module is executed from
- * @var size the size of the execution buffer
- * @var file the ELF file that has all of the information about the module
+ * @var module_t::exec
+ *     the buffer that the module is executed from
+ * @var module_t::size
+ *     the size of the execution buffer
+ * @var module_t::file
+ *     the ELF file that has all of the information about the module
  */
 struct module_t
 {
@@ -212,10 +199,11 @@ common_stop_vmm(void);
  * from the VMM. Note that the VMM must at least be loaded for this function
  * to work as it has to do a symbol lookup
  *
+ * @param user_drr a pointer to the drr provided by the user
  * @return BF_SUCCESS on success, negative error code on failure
  */
 int64_t
-common_dump_vmm(void);
+common_dump_vmm(struct debug_ring_resources_t *user_drr);
 
 #ifdef __cplusplus
 }

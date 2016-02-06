@@ -18,9 +18,9 @@
 /* Global                                                                     */
 /* ========================================================================== */
 
-int32_t g_module_length = 0;
+int64_t g_module_length = 0;
 
-int32_t g_num_files = 0;
+int64_t g_num_files = 0;
 char *files[MAX_NUM_MODULES] = {0};
 
 typedef long (*set_affinity_fn)(pid_t, const struct cpumask *);
@@ -46,16 +46,16 @@ dev_release(struct inode *inode, struct file *file)
     return 0;
 }
 
-int32_t
+static long
 ioctl_add_module(char *file)
 {
     char *buf;
-    int32_t ret;
+    int64_t ret;
 
     if (g_num_files >= MAX_NUM_MODULES)
     {
         ALERT("IOCTL_ADD_MODULE: too many modules have been loaded\n");
-        return BF_IOCTL_ERROR_ADD_MODULE_FAILED;
+        return BF_IOCTL_FAILURE;
     }
 
     /*
@@ -65,7 +65,7 @@ ioctl_add_module(char *file)
      * that we have to store state, so userspace has to be careful
      * to send these IOCTLs in the correct order.
      *
-     * Linux also does not copy userspace memory for use, so we need
+     * Linux also does not copy userspace memory for us, so we need
      * to do this ourselves. As a result, we alloc memory for the
      * buffer that userspace is providing us so that we can copy this
      * memory from userspace as needed.
@@ -75,7 +75,7 @@ ioctl_add_module(char *file)
     if (buf == NULL)
     {
         ALERT("IOCTL_ADD_MODULE: failed to allocate memory for the module\n");
-        return BF_IOCTL_ERROR_ADD_MODULE_FAILED;
+        return BF_IOCTL_FAILURE;
     }
 
     ret = copy_from_user(buf, file, g_module_length);
@@ -103,46 +103,86 @@ failed:
     vfree(buf);
 
     DEBUG("IOCTL_ADD_MODULE: failed\n");
-    return BF_IOCTL_ERROR_ADD_MODULE_FAILED;
+    return BF_IOCTL_FAILURE;
 }
 
-int32_t
-ioctl_add_module_length(int32_t len)
+static long
+ioctl_add_module_length(int64_t *len)
 {
-    g_module_length = len;
+    if (len == 0)
+    {
+        ALERT("IOCTL_ADD_MODULE_LENGTH: failed with len == NULL\n");
+        return BF_IOCTL_FAILURE;
+    }
+
+    g_module_length = *len;
 
     DEBUG("IOCTL_ADD_MODULE_LENGTH: succeeded\n");
     return BF_IOCTL_SUCCESS;
 }
 
-int32_t
-ioctl_stop_vmm(void)
+static long
+ioctl_unload_vmm(void)
 {
     int i;
     int ret;
-    int status = BF_IOCTL_SUCCESS;
-
-    ret = common_stop_vmm();
-    if (ret != BF_SUCCESS)
-    {
-        ALERT("IOCTL_STOP_VMM: failed to stop vmm: %d\n", ret);
-        status = BF_IOCTL_ERROR_STOP_VMM_FAILED;
-    }
+    long status = BF_IOCTL_SUCCESS;
 
     ret = common_unload_vmm();
     if (ret != BF_SUCCESS)
     {
-        ALERT("IOCTL_STOP_VMM: failed to unload vmm: %d\n", ret);
-        status = BF_IOCTL_ERROR_STOP_VMM_FAILED;
+        ALERT("IOCTL_UNLOAD_VMM: failed to unload vmm: %d\n", ret);
+        status = BF_IOCTL_FAILURE;
     }
 
     for (i = 0; i < g_num_files; i++)
         platform_free(files[i]);
 
+    g_num_files = 0;
+
+    if (status == BF_IOCTL_SUCCESS)
+        DEBUG("IOCTL_UNLOAD_VMM: succeeded\n");
+
+    return status;
+}
+
+static long
+ioctl_load_vmm(void)
+{
+    int ret;
+
+    ret = common_load_vmm();
+    if (ret != BF_SUCCESS)
+    {
+        ALERT("IOCTL_LOAD_VMM: failed to load vmm: %d\n", ret);
+        goto failure;
+    }
+
+    DEBUG("IOCTL_LOAD_VMM: succeeded\n");
+    return BF_IOCTL_SUCCESS;
+
+failure:
+
+    ioctl_unload_vmm();
+    return BF_IOCTL_FAILURE;
+}
+
+static long
+ioctl_stop_vmm(void)
+{
+    int ret;
+    long status = BF_IOCTL_SUCCESS;
+
+    ret = common_stop_vmm();
+    if (ret != BF_SUCCESS)
+    {
+        ALERT("IOCTL_STOP_VMM: failed to stop vmm: %d\n", ret);
+        status = BF_IOCTL_FAILURE;
+    }
+
     if (g_mmu_context)
         mmput(g_mmu_context);
 
-    g_num_files = 0;
     g_mmu_context = NULL;
 
     if (status == BF_IOCTL_SUCCESS)
@@ -151,17 +191,10 @@ ioctl_stop_vmm(void)
     return status;
 }
 
-int32_t
+static long
 ioctl_start_vmm(void)
 {
     int ret;
-
-    ret = common_load_vmm();
-    if (ret != BF_SUCCESS)
-    {
-        ALERT("IOCTL_START_VMM: failed to load vmm: %d\n", ret);
-        goto failure;
-    }
 
     ret = common_start_vmm();
     if (ret != BF_SUCCESS)
@@ -182,31 +215,38 @@ ioctl_start_vmm(void)
 
 failure:
 
-    /*
-     * This does not work as intended. This works if "start_vmm" fails, but
-     * if "load_vmm" fails, you will have to restart using make debian_load
-     * because there is no way to just unload. This is due to the fact that
-     * BFM doesn't have the unload / load IOCTLs yet. Once those are
-     * implemented, this issue should go away.
-     */
-
     ioctl_stop_vmm();
-    return BF_IOCTL_ERROR_START_VMM_FAILED;
+    return BF_IOCTL_FAILURE;
 }
 
-int32_t
-ioctl_dump_vmm(void)
+static long
+ioctl_dump_vmm(struct debug_ring_resources_t *user_drr)
 {
     int ret;
 
-    ret = common_dump_vmm();
+    ret = common_dump_vmm(user_drr);
     if (ret != BF_SUCCESS)
     {
         ALERT("IOCTL_DUMP_VMM: failed to dump vmm: %d\n", ret);
-        return BF_IOCTL_ERROR_DUMP_VMM_FAILED;
+        return BF_IOCTL_FAILURE;
     }
 
     DEBUG("IOCTL_DUMP_VMM: succeeded\n");
+    return BF_IOCTL_SUCCESS;
+}
+
+static long
+ioctl_vmm_status(int64_t *status)
+{
+    if (status == 0)
+    {
+        ALERT("IOCTL_VMM_STATUS: failed with status == NULL\n");
+        return BF_IOCTL_FAILURE;
+    }
+
+    *status = common_vmm_status();
+
+    DEBUG("IOCTL_VMM_STATUS: succeeded\n");
     return BF_IOCTL_SUCCESS;
 }
 
@@ -224,7 +264,13 @@ dev_unlocked_ioctl(struct file *file,
             return ioctl_add_module((char *)arg);
 
         case IOCTL_ADD_MODULE_LENGTH:
-            return ioctl_add_module_length((int32_t)arg);
+            return ioctl_add_module_length((int64_t *)arg);
+
+        case IOCTL_LOAD_VMM:
+            return ioctl_load_vmm();
+
+        case IOCTL_UNLOAD_VMM:
+            return ioctl_unload_vmm();
 
         case IOCTL_START_VMM:
             return ioctl_start_vmm();
@@ -233,7 +279,10 @@ dev_unlocked_ioctl(struct file *file,
             return ioctl_stop_vmm();
 
         case IOCTL_DUMP_VMM:
-            return ioctl_dump_vmm();
+            return ioctl_dump_vmm((struct debug_ring_resources_t *)arg);
+
+        case IOCTL_VMM_STATUS:
+            return ioctl_vmm_status((int64_t *)arg);
 
         default:
             return -EINVAL;

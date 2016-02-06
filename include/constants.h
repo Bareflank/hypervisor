@@ -149,8 +149,8 @@
  * the larger the potential size of the module could be. Note that at minimum,
  * this needs to be aligned to the MAX_CACHE_LINE_SIZE
  */
-#ifndef ALIGN
-#define ALIGN __attribute__((aligned(MAX_CACHE_LINE_SIZE)))
+#ifndef ALIGN_MEMORY
+#define ALIGN_MEMORY __attribute__((aligned(MAX_CACHE_LINE_SIZE)))
 #endif
 
 #endif

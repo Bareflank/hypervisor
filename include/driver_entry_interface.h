@@ -23,6 +23,14 @@
 #ifndef DRIVER_ENTRY_INTERFACE_H
 #define DRIVER_ENTRY_INTERFACE_H
 
+#ifndef KERNEL
+#include <stdint.h>
+#else
+#include <types.h>
+#endif
+
+#include <debug_ring_interface.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -31,12 +39,27 @@ extern "C" {
 /* Common                                                                     */
 /* ========================================================================== */
 
+/**
+ * Driver Error Codes
+ */
 #define BF_IOCTL_SUCCESS 0
-#define BF_IOCTL_ERROR_ADD_MODULE_FAILED -10001
-#define BF_IOCTL_ERROR_ADD_MODULE_LENGTH_FAILED -10002
-#define BF_IOCTL_ERROR_START_VMM_FAILED -10003
-#define BF_IOCTL_ERROR_STOP_VMM_FAILED -10004
-#define BF_IOCTL_ERROR_DUMP_VMM_FAILED -10004
+#define BF_IOCTL_FAILURE -10000
+
+/*
+ * Driver Entry State Machine
+ *
+ *  The driver entry has three major states that it could end up in. When the
+ *  driver entry is unloaded, it means that the VMM has not been placed in
+ *  memory. The loaded state means that the VMM is in memory, and relocated.
+ *  In this state, symbol lookups are possible, and thus things like the VMM
+ *  dump comand work. The running state means that the VMM is actually running.
+ *  The goal of the state machine is to ensure that the driver keeps track of
+ *  the state of the VMM, and handles its transition properly.
+ */
+#define VMM_UNLOADED 10
+#define VMM_LOADED 11
+#define VMM_RUNNING 12
+#define VMM_CORRUPT 100
 
 /* ========================================================================== */
 /* Linux Interfaces                                                           */
@@ -53,6 +76,16 @@ extern "C" {
 #endif
 
 /**
+ * Add Module Length
+ *
+ * This IOCTL tells the driver entry point what the size of the module to
+ * be loaded will be. Note that this cannot be called while the vmm is running.
+ *
+ * @param arg length of the module to be added in bytes
+ */
+#define IOCTL_ADD_MODULE_LENGTH _IOW(BAREFLANK_MAJOR, 101, int64_t *)
+
+/**
  * Add Module
  *
  * This IOCTL instructs the driver entry point to add a module. Note that this
@@ -61,28 +94,39 @@ extern "C" {
  * the size of the module is.
  *
  * @param arg character buffer containing the module to add
+ * @return
  */
-#define IOCTL_ADD_MODULE _IOR(BAREFLANK_MAJOR, 100, char *)
+#define IOCTL_ADD_MODULE _IOW(BAREFLANK_MAJOR, 100, char *)
 
 /**
- * Add Module Length
+ * Load VMM
  *
- * This IOCTL tells the driver entry point what the size of the module to
- * be loaded will be. Note that this cannot be called while the vmm is running.
- *
- * @param arg length of the module to be added in bytes
+ * This IOCTL tells the driver entry to load the virtual machine monitor. Note
+ * that the VMM must be in an unloaded state, and all of the modules must be
+ * added using IOCTL_ADD_MODULE
  */
-#define IOCTL_ADD_MODULE_LENGTH _IOR(BAREFLANK_MAJOR, 101, char *)
+#define IOCTL_LOAD_VMM _IO(BAREFLANK_MAJOR, 200)
+
+/**
+ * Unload VMM
+ *
+ * This IOCTL tells the driver entry to unload the virtual machine monitor.
+ * Note that the VMM must be in a loaded state, but not running. This IOCTL
+ * will unload the VMM, and remove any modules that were added via
+ * IOCTL_ADD_MODULE. If the VMM is to be loaded again, the modules must be
+ * added first.
+ */
+#define IOCTL_UNLOAD_VMM _IO(BAREFLANK_MAJOR, 300)
 
 /**
  * Start VMM
  *
  * This IOCTL tells the driver entry to start the virtual machine monitor. Note
- * that this cannot be called while the vmm is running. All of the modeuls
+ * that this cannot be called while the vmm is running. All of the modules
  * should have already been loaded prior to calling this IOCTL using
  * IOCTL_ADD_MODULE
  */
-#define IOCTL_START_VMM _IOR(BAREFLANK_MAJOR, 200, char *)
+#define IOCTL_START_VMM _IO(BAREFLANK_MAJOR, 400)
 
 /**
  * Stop VMM
@@ -90,16 +134,24 @@ extern "C" {
  * This IOCTL tells the driver entry to stop the virtual machine monitor. Note
  * that this cannot be called while the vmm is not running.
  */
-#define IOCTL_STOP_VMM _IOR(BAREFLANK_MAJOR, 300, char *)
+#define IOCTL_STOP_VMM _IO(BAREFLANK_MAJOR, 500)
 
 /**
  * Dump VMM
  *
  * This IOCTL tells the driver entry to dump the contents of the shared debug
- * ring withing the VMM. Note that this can be called at any time, but only
- * makes sense to call after the VMM has been loaded.
+ * ring withing the VMM. Note that the VMM must be loaded prior to calling
+ * this IOCTL using IOCTL_LOAD_VMM
  */
-#define IOCTL_DUMP_VMM _IOR(BAREFLANK_MAJOR, 400, char *)
+#define IOCTL_DUMP_VMM _IOR(BAREFLANK_MAJOR, 600, struct debug_ring_resources_t *)
+
+/**
+ * VMM Status
+ *
+ * This queries the driver for it's current state. This can be called at any
+ * time.
+ */
+#define IOCTL_VMM_STATUS _IOR(BAREFLANK_MAJOR, 700, int64_t *)
 
 #endif
 

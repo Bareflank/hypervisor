@@ -19,136 +19,145 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <debug.h>
-#include <string.h>
+#include <exception.h>
+
 #include <command_line_parser.h>
 
-command_line_parser::command_line_parser(int argc, const char *argv[]) :
-    m_is_valid(false),
-    m_cmd(command_line_parser_command::unknown)
+// -----------------------------------------------------------------------------
+// Implementation
+// -----------------------------------------------------------------------------
+
+command_line_parser::command_line_parser() noexcept
 {
-    if (argc <= 1)
-    {
-        m_is_valid = true;
-        m_cmd = command_line_parser_command::help;
-        return;
-    }
-
-    for (auto i = 1; i < argc; i++)
-    {
-        std::string str(argv[i]);
-
-        if (str.compare("-h") == 0 ||
-            str.compare("--help") == 0)
-        {
-            m_is_valid = true;
-            m_cmd = command_line_parser_command::help;
-            return;
-        }
-    }
-
-    for (auto i = 1; i < argc; i++)
-    {
-        std::string str(argv[i]);
-
-        if (str.empty() == true)
-            continue;
-
-        if (str[0] == '-')
-            continue;
-
-        if (str.compare("start") == 0)
-        {
-            parse_start(argc, argv, i + 1);
-            return;
-        }
-
-        if (str.compare("stop") == 0)
-        {
-            parse_stop(argc, argv, i + 1);
-            return;
-        }
-
-        if (str.compare("dump") == 0)
-        {
-            parse_dump(argc, argv, i + 1);
-            return;
-        }
-
-        bfm_error << "unknown command" << std::endl;
-        break;
-    }
+    reset();
 }
 
 command_line_parser::~command_line_parser()
 {
 }
 
-bool
-command_line_parser::is_valid() const
+void
+command_line_parser::parse(const std::vector<std::string> &args)
 {
-    return m_is_valid;
+    for (const auto &arg : args)
+    {
+        if (arg != "-h" && arg != "--help")
+            continue;
+
+        return reset();
+    }
+
+    for (auto i = 0U; i < args.size(); i++)
+    {
+        const auto &arg = args[i];
+
+        if (arg.empty() == true)
+            continue;
+
+        if (arg[0] == '-')
+            continue;
+
+        if (arg == "load") return parse_load(args, i);
+        if (arg == "unload") return parse_unload(args, i);
+        if (arg == "start") return parse_start(args, i);
+        if (arg == "stop") return parse_stop(args, i);
+        if (arg == "dump") return parse_dump(args, i);
+        if (arg == "status") return parse_status(args, i);
+
+        throw unknown_command(arg);
+    }
+
+    return reset();
 }
 
 command_line_parser_command::type
-command_line_parser::cmd() const
+command_line_parser::cmd() const noexcept
 {
     return m_cmd;
 }
 
 std::string
-command_line_parser::modules() const
+command_line_parser::modules() const noexcept
 {
     return m_modules;
 }
 
 void
-command_line_parser::parse_start(int argc, const char *argv[], int index)
+command_line_parser::reset() noexcept
 {
-    auto i = index;
-    m_cmd = command_line_parser_command::start;
+    m_cmd = command_line_parser_command::help;
+    m_modules.clear();
+}
 
-    for (; i < argc; i++)
+void
+command_line_parser::parse_load(const std::vector<std::string> &args, size_t index)
+{
+    for (auto i = index + 1; i < args.size(); i++)
     {
-        std::string str(argv[i]);
+        const auto &arg = args[i];
 
-        if (str.empty() == true)
+        if (arg.empty() == true)
             continue;
 
-        if (str[0] == '-')
+        if (arg[0] == '-')
             continue;
 
-        m_modules = str;
-        break;
-    }
+        m_cmd = command_line_parser_command::load;
+        m_modules = arg;
 
-    if (i >= argc)
-    {
-        bfm_error << "missing argument" << std::endl;
         return;
     }
 
-    m_is_valid = true;
+    throw missing_argument();
 }
 
 void
-command_line_parser::parse_stop(int argc, const char *argv[], int index)
+command_line_parser::parse_unload(const std::vector<std::string> &args, size_t index)
 {
-    (void) argc;
-    (void) argv;
+    (void) args;
     (void) index;
 
-    m_is_valid = true;
+    m_cmd = command_line_parser_command::unload;
+    m_modules.clear();
+}
+
+void
+command_line_parser::parse_start(const std::vector<std::string> &args, size_t index)
+{
+    (void) args;
+    (void) index;
+
+    m_cmd = command_line_parser_command::start;
+    m_modules.clear();
+}
+
+void
+command_line_parser::parse_stop(const std::vector<std::string> &args, size_t index)
+{
+    (void) args;
+    (void) index;
+
     m_cmd = command_line_parser_command::stop;
+    m_modules.clear();
 }
 
 void
-command_line_parser::parse_dump(int argc, const char *argv[], int index)
+command_line_parser::parse_dump(const std::vector<std::string> &args, size_t index)
 {
-    (void) argc;
-    (void) argv;
+    (void) args;
     (void) index;
 
-    m_is_valid = true;
     m_cmd = command_line_parser_command::dump;
+    m_modules.clear();
 }
+
+void
+command_line_parser::parse_status(const std::vector<std::string> &args, size_t index)
+{
+    (void) args;
+    (void) index;
+
+    m_cmd = command_line_parser_command::status;
+    m_modules.clear();
+}
+

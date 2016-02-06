@@ -21,7 +21,8 @@
 
 #include <split.h>
 
-std::vector<std::string> split(const std::string &str, char delimiter)
+std::vector<std::string>
+split(const std::string &str, char delimiter)
 {
     std::istringstream ss(str);
     std::vector<std::string> result;

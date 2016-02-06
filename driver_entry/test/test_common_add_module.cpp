@@ -24,6 +24,7 @@
 #include <common.h>
 #include <platform.h>
 #include <constants.h>
+#include <driver_entry_interface.h>
 
 void
 driver_entry_ut::test_common_add_module_invalid_file()

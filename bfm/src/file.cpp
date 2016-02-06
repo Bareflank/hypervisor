@@ -20,6 +20,7 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #include <file.h>
+#include <exception.h>
 
 file::file()
 {
@@ -29,30 +30,17 @@ file::~file()
 {
 }
 
-bool file::exists(const std::string &filename) const
+std::string
+file::read(const std::string &filename) const
 {
-    auto good = false;
     std::fstream fstream;
 
-    fstream.open(filename);
-    good = fstream.good();
-    fstream.close();
-
-    return good;
-}
-
-std::string file::read(const std::string &filename) const
-{
-    std::string contents;
-    std::fstream fstream;
-
-    fstream.open(filename);
-
+    fstream.open(filename, std::ios_base::in);
     if (fstream.good() == false)
-        return contents;
+        throw invalid_file(filename);
 
-    contents = std::string(std::istreambuf_iterator<char>(fstream),
-                           std::istreambuf_iterator<char>());
+    auto contents = std::string(std::istreambuf_iterator<char>(fstream),
+                                std::istreambuf_iterator<char>());
 
     fstream.close();
     return contents;

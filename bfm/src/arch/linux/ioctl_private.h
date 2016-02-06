@@ -24,20 +24,24 @@
 
 #include <ioctl.h>
 
-class ioctl_private
+class ioctl_private : public ioctl_private_base
 {
 public:
-
     ioctl_private();
-    ~ioctl_private();
+    virtual ~ioctl_private();
 
-    ioctl_error::type call(ioctl_commands::type cmd,
-                           const void *const data,
-                           int32_t len) const;
+    virtual void open();
+    virtual void call_ioctl_add_module_length(int64_t len);
+    virtual void call_ioctl_add_module(const char *data);
+    virtual void call_ioctl_load_vmm();
+    virtual void call_ioctl_unload_vmm();
+    virtual void call_ioctl_start_vmm();
+    virtual void call_ioctl_stop_vmm();
+    virtual void call_ioctl_dump_vmm(debug_ring_resources_t *drr);
+    virtual void call_ioctl_vmm_status(int64_t *status);
 
 private:
-
-    int fd;
+    int64_t fd;
 };
 
 #endif
