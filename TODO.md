@@ -41,7 +41,7 @@ Version 2.0 TODO:
 
 Documenttion:
 - Problem with reusing CR3 from IOCTL
-- Red-zone
+- Red-zone: http://eli.thegreenplace.net/2011/09/06/stack-frame-layout-on-x86-64/
 - Statics using the stack and the crash we saw with the memory manager
 - The build system could use a document that explains how it works and the
   various different features that it has
