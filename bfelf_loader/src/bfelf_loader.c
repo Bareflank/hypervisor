@@ -379,9 +379,6 @@ bfelf_file_init(char *file, uint64_t fsize, struct bfelf_file_t *ef)
     ef->symnum = dynsym->sh_size / sizeof(struct bfelf_sym);
     ef->symtab = (struct bfelf_sym *)(file + dynsym->sh_offset);
 
-    if (ef->ehdr->e_shnum >= BFELF_MAX_RELTAB)
-        return BFELF_ERROR_INVALID_E_SHNUM;
-
     for (i = 0; i < ef->ehdr->e_shnum; i++)
     {
         struct bfelf_shdr *shdr;
@@ -395,6 +392,9 @@ bfelf_file_init(char *file, uint64_t fsize, struct bfelf_file_t *ef)
             ef->bfreltab[ef->num_rel].num = shdr->sh_size / sizeof(struct bfelf_rel);
             ef->bfreltab[ef->num_rel].tab = (struct bfelf_rel *)(ef->file + shdr->sh_offset);
             ef->num_rel++;
+
+            if (ef->num_rel >= BFELF_MAX_RELTAB)
+                return BFELF_ERROR_LOADER_FULL;
         }
 
         if (shdr->sh_type == bfsht_rela)
@@ -402,6 +402,9 @@ bfelf_file_init(char *file, uint64_t fsize, struct bfelf_file_t *ef)
             ef->bfrelatab[ef->num_rela].num = shdr->sh_size / sizeof(struct bfelf_rela);
             ef->bfrelatab[ef->num_rela].tab = (struct bfelf_rela *)(ef->file + shdr->sh_offset);
             ef->num_rela++;
+
+            if (ef->num_rela >= BFELF_MAX_RELTAB)
+                return BFELF_ERROR_LOADER_FULL;
         }
     }
 
