@@ -44,7 +44,7 @@ extern "C" {
 #endif
 
 #ifndef BFELF_MAX_RELTAB
-#define BFELF_MAX_RELTAB 3
+#define BFELF_MAX_RELTAB 8
 #endif
 
 /******************************************************************************/
@@ -127,6 +127,7 @@ typedef int64_t bfelf64_sxword;
 #define BFELF_ERROR_INVALID_PH_MEMSZ ((bfelf64_sword)-306)
 #define BFELF_ERROR_INVALID_PH_ALIGN ((bfelf64_sword)-307)
 #define BFELF_ERROR_INVALID_STRING_TABLE ((bfelf64_sword)-400)
+#define BFELF_ERROR_INVALID_HASH_TABLE ((bfelf64_sword)-401)
 #define BFELF_ERROR_NO_SUCH_SYMBOL ((bfelf64_sword)-500)
 #define BFELF_ERROR_SYMBOL_UNDEFINED ((bfelf64_sword)-501)
 #define BFELF_ERROR_LOADER_FULL ((bfelf64_sword)-600)
@@ -189,6 +190,13 @@ struct bfelf_file_t
     struct bfelf_shdr *dynsym;
     struct bfelf_shdr *strtab;
     struct bfelf_shdr *shstrtab;
+    struct bfelf_shdr *hashtab;
+
+    bfelf64_word num_bucket;
+    bfelf64_word *bfhashtab;
+
+    bfelf64_word num_chain;
+    bfelf64_word *symchain;
 
     struct bfelf_shdr *ctors;
     struct bfelf_shdr *dtors;
