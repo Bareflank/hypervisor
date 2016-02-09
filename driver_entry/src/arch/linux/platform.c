@@ -25,6 +25,7 @@
 #include <debug.h>
 #include <linux/mm.h>
 #include <linux/slab.h>
+#include <linux/string.h>
 #include <linux/module.h>
 #include <linux/vmalloc.h>
 
@@ -97,4 +98,22 @@ platform_free_exec(void *addr, int64_t len)
     }
 
     vfree(addr);
+}
+
+void
+platform_memset(void *ptr, char value, int64_t num)
+{
+    if (!ptr)
+        return;
+
+    memset(ptr, value, num);
+}
+
+void
+platform_memcpy(void *dst, const void *src, int64_t num)
+{
+    if (!dst || !src)
+        return;
+
+    memcpy(dst, src, num);
 }

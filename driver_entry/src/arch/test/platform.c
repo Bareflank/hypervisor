@@ -22,6 +22,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <platform.h>
 #include <sys/mman.h>
 
@@ -71,4 +72,22 @@ platform_free_exec(void *addr, int64_t len)
 {
     alloc_exec_count--;
     munmap(addr, len);
+}
+
+void
+platform_memset(void *ptr, char value, int64_t num)
+{
+    if (!ptr)
+        return;
+
+    memset(ptr, value, num);
+}
+
+void
+platform_memcpy(void *dst, const void *src, int64_t num)
+{
+    if (!dst || !src)
+        return;
+
+    memcpy(dst, src, num);
 }

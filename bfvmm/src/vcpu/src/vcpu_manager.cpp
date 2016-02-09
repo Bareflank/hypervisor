@@ -20,9 +20,7 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #include <stddef.h>
-
 #include <vcpu/vcpu_manager.h>
-#include <serial/serial_port_x86.h>
 
 vcpu_manager *
 vcpu_manager::instance()
@@ -76,13 +74,6 @@ vcpu_manager::stop(int64_t vcpuid)
     return vcpu_manager_error::success;
 }
 
-serial_port_x86 *
-internal_serial()
-{
-    static serial_port_x86 serial;
-    return &serial;
-}
-
 void
 vcpu_manager::write(int64_t vcpuid, std::string &str)
 {
@@ -104,6 +95,15 @@ vcpu_manager::write(int64_t vcpuid, std::string &str)
 
 vcpu_manager::vcpu_manager()
 {
+}
+
+#include <serial/serial_port_x86.h>
+
+serial_port_x86 *
+internal_serial()
+{
+    static serial_port_x86 serial;
+    return &serial;
 }
 
 extern "C" int

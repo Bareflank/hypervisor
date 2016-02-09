@@ -23,6 +23,8 @@
 #ifndef BFELF_LOADER_H
 #define BFELF_LOADER_H
 
+#include <crtinit.h>
+
 #ifdef KERNEL
 #include <linux/types.h>
 #else
@@ -43,8 +45,12 @@ extern "C" {
 #define BFELF_MAX_MODULES 25
 #endif
 
-#ifndef BFELF_MAX_RELTAB
-#define BFELF_MAX_RELTAB 8
+#ifndef BFELF_MAX_RELATAB
+#define BFELF_MAX_RELATAB 8
+#endif
+
+#ifndef BFELF_MAX_SEGMENTS
+#define BFELF_MAX_SEGMENTS 4
 #endif
 
 /******************************************************************************/
@@ -66,12 +72,11 @@ typedef int32_t bfelf64_sword;
 typedef uint64_t bfelf64_xword;
 typedef int64_t bfelf64_sxword;
 
-#define BFELF_TRUE ((bfelf64_sword)1)
-#define BFELF_FALSE ((bfelf64_sword)0)
-
 /******************************************************************************/
 /* ELF Error Codes                                                            */
 /******************************************************************************/
+
+#define BFELF_ERROR_START ((bfelf64_sword)-11000)
 
 /*
  * ELF error codes
@@ -80,59 +85,19 @@ typedef int64_t bfelf64_sxword;
  * provide given bad input.
  */
 #define BFELF_SUCCESS ((bfelf64_sword)0)
-#define BFELF_ERROR_INVALID_ARG ((bfelf64_sword)-1)
-#define BFELF_ERROR_INVALID_FILE ((bfelf64_sword)-2)
-#define BFELF_ERROR_INVALID_INDEX ((bfelf64_sword)-3)
-#define BFELF_ERROR_INVALID_OFFSET ((bfelf64_sword)-4)
-#define BFELF_ERROR_INVALID_STRING ((bfelf64_sword)-5)
-#define BFELF_ERROR_INVALID_EI_MAG0 ((bfelf64_sword)-101)
-#define BFELF_ERROR_INVALID_EI_MAG1 ((bfelf64_sword)-102)
-#define BFELF_ERROR_INVALID_EI_MAG2 ((bfelf64_sword)-103)
-#define BFELF_ERROR_INVALID_EI_MAG3 ((bfelf64_sword)-104)
-#define BFELF_ERROR_INVALID_EI_CLASS ((bfelf64_sword)-105)
-#define BFELF_ERROR_INVALID_EI_DATA ((bfelf64_sword)-106)
-#define BFELF_ERROR_INVALID_EI_VERSION ((bfelf64_sword)-107)
-#define BFELF_ERROR_INVALID_EI_OSABI ((bfelf64_sword)-108)
-#define BFELF_ERROR_INVALID_EI_ABIVERSION ((bfelf64_sword)-109)
-#define BFELF_ERROR_INVALID_E_TYPE ((bfelf64_sword)-110)
-#define BFELF_ERROR_INVALID_E_MACHINE ((bfelf64_sword)-111)
-#define BFELF_ERROR_INVALID_E_ENTRY ((bfelf64_sword)-112)
-#define BFELF_ERROR_INVALID_E_PHOFF ((bfelf64_sword)-113)
-#define BFELF_ERROR_INVALID_E_SHOFF ((bfelf64_sword)-114)
-#define BFELF_ERROR_INVALID_E_FLAGS ((bfelf64_sword)-115)
-#define BFELF_ERROR_INVALID_E_EHSIZE ((bfelf64_sword)-116)
-#define BFELF_ERROR_INVALID_E_PHENTSIZE ((bfelf64_sword)-117)
-#define BFELF_ERROR_INVALID_E_PHNUM ((bfelf64_sword)-118)
-#define BFELF_ERROR_INVALID_E_SHENTSIZE ((bfelf64_sword)-119)
-#define BFELF_ERROR_INVALID_E_SHNUM ((bfelf64_sword)-120)
-#define BFELF_ERROR_INVALID_E_SHSTRNDX ((bfelf64_sword)-121)
-#define BFELF_ERROR_INVALID_PHT ((bfelf64_sword)-122)
-#define BFELF_ERROR_INVALID_SHT ((bfelf64_sword)-123)
-#define BFELF_ERROR_INVALID_SH_NAME ((bfelf64_sword)-200)
-#define BFELF_ERROR_INVALID_SH_TYPE ((bfelf64_sword)-201)
-#define BFELF_ERROR_INVALID_SH_FLAGS ((bfelf64_sword)-202)
-#define BFELF_ERROR_INVALID_SH_ADDR ((bfelf64_sword)-203)
-#define BFELF_ERROR_INVALID_SH_OFFSET ((bfelf64_sword)-204)
-#define BFELF_ERROR_INVALID_SH_SIZE ((bfelf64_sword)-205)
-#define BFELF_ERROR_INVALID_SH_LINK ((bfelf64_sword)-206)
-#define BFELF_ERROR_INVALID_SH_INFO ((bfelf64_sword)-207)
-#define BFELF_ERROR_INVALID_SH_ADDRALIGN ((bfelf64_sword)-208)
-#define BFELF_ERROR_INVALID_SH_ENTSIZE ((bfelf64_sword)-209)
-#define BFELF_ERROR_INVALID_PH_TYPE ((bfelf64_sword)-300)
-#define BFELF_ERROR_INVALID_PH_FLAGS ((bfelf64_sword)-301)
-#define BFELF_ERROR_INVALID_PH_OFFSET ((bfelf64_sword)-302)
-#define BFELF_ERROR_INVALID_PH_VADDR ((bfelf64_sword)-303)
-#define BFELF_ERROR_INVALID_PH_PADDR ((bfelf64_sword)-304)
-#define BFELF_ERROR_INVALID_PH_FILESZ ((bfelf64_sword)-305)
-#define BFELF_ERROR_INVALID_PH_MEMSZ ((bfelf64_sword)-306)
-#define BFELF_ERROR_INVALID_PH_ALIGN ((bfelf64_sword)-307)
-#define BFELF_ERROR_INVALID_STRING_TABLE ((bfelf64_sword)-400)
-#define BFELF_ERROR_INVALID_HASH_TABLE ((bfelf64_sword)-401)
-#define BFELF_ERROR_NO_SUCH_SYMBOL ((bfelf64_sword)-500)
-#define BFELF_ERROR_SYMBOL_UNDEFINED ((bfelf64_sword)-501)
-#define BFELF_ERROR_LOADER_FULL ((bfelf64_sword)-600)
-#define BFELF_ERROR_INVALID_LOADER ((bfelf64_sword)-601)
-#define BFELF_ERROR_INVALID_RELOCATION_TYPE ((bfelf64_sword)-701)
+#define BFELF_ERROR_INVALID_ARG (BFELF_ERROR_START - (bfelf64_sword)1)
+#define BFELF_ERROR_INVALID_FILE (BFELF_ERROR_START - (bfelf64_sword)2)
+#define BFELF_ERROR_INVALID_INDEX (BFELF_ERROR_START - (bfelf64_sword)3)
+#define BFELF_ERROR_INVALID_STRING (BFELF_ERROR_START - (bfelf64_sword)4)
+#define BFELF_ERROR_INVALID_SIGNATURE (BFELF_ERROR_START - (bfelf64_sword)5)
+#define BFELF_ERROR_UNSUPPORTED_FILE (BFELF_ERROR_START - (bfelf64_sword)6)
+#define BFELF_ERROR_INVALID_SEGMENT (BFELF_ERROR_START - (bfelf64_sword)7)
+#define BFELF_ERROR_INVALID_SECTION (BFELF_ERROR_START - (bfelf64_sword)8)
+#define BFELF_ERROR_LOADER_FULL (BFELF_ERROR_START - (bfelf64_sword)9)
+#define BFELF_ERROR_NO_SUCH_SYMBOL (BFELF_ERROR_START - (bfelf64_sword)10)
+#define BFELF_ERROR_MISMATCH (BFELF_ERROR_START - (bfelf64_sword)11)
+#define BFELF_ERROR_UNSUPPORTED_RELA (BFELF_ERROR_START - (bfelf64_sword)12)
+#define BFELF_ERROR_OUT_OF_ORDER (BFELF_ERROR_START - (bfelf64_sword)13)
 
 /**
  * Convert ELF error -> const char *
@@ -140,8 +105,7 @@ typedef int64_t bfelf64_sxword;
  * @param value error code to convert
  * @return const char * version of error code
  */
-const char *
-bfelf_error(bfelf64_sword value);
+const char *bfelf_error(bfelf64_sword value);
 
 /******************************************************************************/
 /* ELF File                                                                   */
@@ -153,18 +117,25 @@ struct bfelf_shdr;
 struct bfelf64_ehdr;
 
 /*
+ * String
+ *
+ * The following defines an ELF string, which is a C style, null terminated
+ * string, with it's expected length.
+ *
+ */
+struct e_string_t
+{
+    const char *buf;
+    bfelf64_sword len;
+};
+
+/*
  * Relocation Table
  *
  * The following is used by this API to store information about a symbol
  * table.
  */
-struct bfreltab_t
-{
-    bfelf64_word num;
-    struct bfelf_rel *tab;
-};
-
-struct bfrelatab_t
+struct relatab_t
 {
     bfelf64_word num;
     struct bfelf_rela *tab;
@@ -181,41 +152,29 @@ struct bfelf_file_t
     char *file;
     char *exec;
     uint64_t fsize;
-    uint64_t esize;
+
+    uint64_t num_loadable_segments;
+    struct bfelf_phdr *loadable_segments[BFELF_MAX_SEGMENTS];
 
     struct bfelf64_ehdr *ehdr;
     struct bfelf_shdr *shdrtab;
     struct bfelf_phdr *phdrtab;
 
     struct bfelf_shdr *dynsym;
+    struct bfelf_shdr *hashtab;
     struct bfelf_shdr *strtab;
     struct bfelf_shdr *shstrtab;
-    struct bfelf_shdr *hashtab;
 
-    bfelf64_word num_bucket;
-    bfelf64_word *bfhashtab;
-
-    bfelf64_word num_chain;
-    bfelf64_word *symchain;
-
-    struct bfelf_shdr *ctors;
-    struct bfelf_shdr *dtors;
-    struct bfelf_shdr *init_array;
-    struct bfelf_shdr *fini_array;
+    bfelf64_word nbucket;
+    bfelf64_word nchain;
+    bfelf64_word *bucket;
+    bfelf64_word *chain;
 
     bfelf64_word symnum;
     struct bfelf_sym *symtab;
 
-    bfelf64_word efnum;
-    struct bfelf_file_t *eftab[BFELF_MAX_MODULES];
-
-    bfelf64_word num_rel;
-    struct bfreltab_t bfreltab[BFELF_MAX_RELTAB];
-
     bfelf64_word num_rela;
-    struct bfrelatab_t bfrelatab[BFELF_MAX_RELTAB];
-
-    bfelf64_sword valid;
+    struct relatab_t relatab[BFELF_MAX_RELATAB];
 };
 
 /**
@@ -231,75 +190,43 @@ struct bfelf_file_t
  * @param ef the ELF file structure to initialize.
  * @return BFELF_SUCCESS on success, negative on error
  */
-bfelf64_sword
-bfelf_file_init(char *file, uint64_t fsize, struct bfelf_file_t *ef);
+bfelf64_sword bfelf_file_init(char *file,
+                              uint64_t fsize,
+                              struct bfelf_file_t *ef);
 
 /**
- * Load ELF file
+ * Get number of program segments
  *
- * Once an ELF file has been initialized, use bfelf_total_exec_size to
- * get the amount of RAM that is needed to load the ELF file into memory.
- * Using this information, allocate Read, Write, Exectuable memory for the
- * ELF file, that is used by this function. This function will actually load
- * the ELF file into the allocated RAM.
+ * Once an ELF file has been initialized, the next step is to load all of the
+ * program segments into memory, relocate them, and then execute the entry
+ * point. To assist this operation, this function returns the total number of
+ * program segments.
  *
  * @param ef the ELF file
- * @param exec a character buffer to load the ELF file into
- * @param esize the size of the character buffer
- * @return BFELF_SUCCESS on success, negative on error
+ * @return number of segments on success, negative on error
  */
-bfelf64_sword
-bfelf_file_load(struct bfelf_file_t *ef, char *exec, uint64_t esize);
-
-/******************************************************************************/
-/* ELF Loader                                                                 */
-/******************************************************************************/
-
-struct bfelf_loader_t
-{
-    bfelf64_sword num;
-    struct bfelf_file_t *efs[BFELF_MAX_MODULES];
-};
+bfelf64_sxword bfelf_file_num_segments(struct bfelf_file_t *ef);
 
 /**
- * Initialize ELF Loader
+ * Get program segment
  *
- * The ELF loader is responsible for collecting all of the ELF files that
- * have been loaded, and relocates them in memory. If more then one library
- * is to be loaded, the relocation operation requires all of the symbol tables
- * from all of the libraries to be available during relocation.
+ * Once you know how many program segments there are, you can use this
+ * function to get each segment. This ELF library doesn't simplify the
+ * program loading part, because how this inforamtion is used, greatly depends
+ * on the scenario, and all of the information in the program header is needed
+ * depending on how your loading the program.
  *
- * @param loader the ELF loader to initialize
+ * @note The segment has already been sanitized by the ELF library. Doing these
+ * checks again would only be wasteful.
+ *
+ * @param ef the ELF file
+ * @param index the segment index to get
+ * @param phdr where to store the segment's program header
  * @return BFELF_SUCCESS on success, negative on error
  */
-bfelf64_sword
-bfelf_loader_init(struct bfelf_loader_t *loader);
-
-/**
- * Add ELF file to an ELF loader
- *
- * Once an ELF loader has been initialized, use this function to add an
- * ELF file to the ELF loader
- *
- * @param loader the ELF loader
- * @param ef the ELF file to add
- * @return BFELF_SUCCESS on success, negative on error
- */
-bfelf64_sword
-bfelf_loader_add(struct bfelf_loader_t *loader, struct bfelf_file_t *ef);
-
-/**
- * Relocate ELF Loader
- *
- * Relocates all of the ELF files that have been added to the ELF loader.
- * Once all of the ELF files have been relocated, it's safe to resolve
- * symbols for execution.
- *
- * @param loader the ELF loader
- * @return BFELF_SUCCESS on success, negative on error
- */
-bfelf64_sword
-bfelf_loader_relocate(struct bfelf_loader_t *loader);
+bfelf64_sword bfelf_file_get_segment(struct bfelf_file_t *ef,
+                                     bfelf64_word index,
+                                     struct bfelf_phdr **phdr);
 
 /******************************************************************************/
 /* ELF File Header                                                            */
@@ -332,15 +259,6 @@ bfelf_loader_relocate(struct bfelf_loader_t *loader);
 #define bfelfclass32 ((unsigned char)1)
 #define bfelfclass64 ((unsigned char)2)
 
-/**
- * Convert ei_class -> const char *
- *
- * @param value ei_class to convert
- * @return const char * version of ei_class
- */
-const char *
-ei_class_to_str(unsigned char value);
-
 /*
  * ELF Data Types
  *
@@ -350,15 +268,6 @@ ei_class_to_str(unsigned char value);
 #define bfelfdata2lsb ((unsigned char)1)
 #define bfelfdata2msb ((unsigned char)2)
 
-/**
- * Convert ei_data -> const char *
- *
- * @param value ei_data to convert
- * @return const char * version of ei_data
- */
-const char *
-ei_data_to_str(unsigned char value);
-
 /*
  * ELF Version
  *
@@ -366,15 +275,6 @@ ei_data_to_str(unsigned char value);
  * http://www.uclibc.org/docs/elf-64-gen.pdf, page 4
  */
 #define bfev_current ((unsigned char)1)
-
-/**
- * Convert version -> const char *
- *
- * @param value version to convert
- * @return const char * version of version
- */
-const char *
-version_to_str(unsigned char value);
 
 /*
  * ELF OS / ABI Types
@@ -385,15 +285,6 @@ version_to_str(unsigned char value);
 #define bfelfosabi_sysv ((unsigned char)0)
 #define bfelfosabi_hpux ((unsigned char)1)
 #define bfelfosabi_standalone ((unsigned char)255)
-
-/**
- * Convert ei_osabi -> const char *
- *
- * @param value ei_osabi to convert
- * @return const char * version of ei_osabi
- */
-const char *
-ei_osabi_to_str(unsigned char value);
 
 /*
  * ELF Types
@@ -410,15 +301,6 @@ ei_osabi_to_str(unsigned char value);
 #define bfet_hios ((bfelf64_half)0xFEFF)
 #define bfet_loproc ((bfelf64_half)0xFF00)
 #define bfet_hiproc ((bfelf64_half)0xFFFF)
-
-/**
- * Convert e_type -> const char *
- *
- * @param value e_type to convert
- * @return const char * version of e_type
- */
-const char *
-e_type_to_str(bfelf64_half value);
 
 /*
  * ELF Machine Codes
@@ -466,15 +348,6 @@ e_type_to_str(bfelf64_half value);
 #define bfem_s390_old ((bfelf64_half)0xA390)
 #define bfem_cygnus_mn10300 ((bfelf64_half)0xBEEF)
 
-/**
- * Convert e_machine -> const char *
- *
- * @param value e_machine to convert
- * @return const char * version of e_machine
- */
-const char *
-e_machine_to_str(bfelf64_half value);
-
 /*
  * ELF File Header
  *
@@ -501,15 +374,6 @@ struct bfelf64_ehdr
     bfelf64_half e_shnum;
     bfelf64_half e_shstrndx;
 };
-
-/**
- * Print ELF file header
- *
- * @param ef the ELF file
- * @return BFELF_SUCCESS on success, negative on error
- */
-bfelf64_sword
-bfelf_file_print_header(struct bfelf_file_t *ef);
 
 /******************************************************************************/
 /* ELF Section Header Table                                                   */
@@ -538,15 +402,6 @@ bfelf_file_print_header(struct bfelf_file_t *ef);
 #define bfsht_loproc ((bfelf64_word)0x70000000)
 #define bfsht_hiproc ((bfelf64_word)0x7FFFFFFF)
 
-/**
- * Convert sh_type -> const char *
- *
- * @param value sh_type to convert
- * @return const char * version of sh_type
- */
-const char *
-sh_type_to_str(bfelf64_word value);
-
 /*
  * ELF Section Attributes
  *
@@ -558,33 +413,11 @@ sh_type_to_str(bfelf64_word value);
 #define bfshf_execinstr ((bfelf64_xword)0x4)
 #define bfshf_maskos ((bfelf64_xword)0x0F000000)
 #define bfshf_maskproc ((bfelf64_xword)0xF0000000)
+#define bfshf_undocumneted ((bfelf64_xword)0x00000060)
 
-/**
- * Convert sh_flags (writable) -> bool
- *
- * @param shdr section header with sh_flags to convert
- * @return BFELF_TRUE if writable, BFELF_FALSE otherwise
- */
-bfelf64_sword
-sh_flags_is_writable(struct bfelf_shdr *shdr);
-
-/**
- * Convert sh_flags (allocated) -> bool
- *
- * @param shdr section header with sh_flags to convert
- * @return BFELF_TRUE if allocated, BFELF_FALSE otherwise
- */
-bfelf64_sword
-sh_flags_is_allocated(struct bfelf_shdr *shdr);
-
-/**
- * Convert sh_flags (executable) -> bool
- *
- * @param shdr section header with sh_flags to convert
- * @return BFELF_TRUE if executable, BFELF_FALSE otherwise
- */
-bfelf64_sword
-sh_flags_is_executable(struct bfelf_shdr *shdr);
+#define bfshf_a (bfshf_alloc)
+#define bfshf_wa (bfshf_write | bfshf_alloc)
+#define bfshf_ai (bfshf_alloc | bfshf_write | bfshf_undocumneted)
 
 /*
  * ELF Section Header Entry
@@ -610,100 +443,16 @@ struct bfelf_shdr
     bfelf64_xword sh_entsize;
 };
 
-/**
- * Get ELF section header
- *
- * @param ef the ELF file
- * @param index the index of the section to get
- * @param shdr the section header to return
- * @return BFELF_SUCCESS on success, negative on error
- */
-bfelf64_sword
-bfelf_section_header(struct bfelf_file_t *ef,
-                     bfelf64_word index,
-                     struct bfelf_shdr **shdr);
-
-/**
- * Print ELF section header table
- *
- * @param ef the ELF file
- * @return BFELF_SUCCESS on success, negative on error
- */
-bfelf64_sword
-bfelf_print_section_header_table(struct bfelf_file_t *ef);
-
-/**
- * Print ELF section header
- *
- * @param ef the ELF file
- * @param shdr the section header to print
- * @return BFELF_SUCCESS on success, negative on error
- */
-bfelf64_sword
-bfelf_print_section_header(struct bfelf_file_t *ef,
-                           struct bfelf_shdr *shdr);
-
-/******************************************************************************/
-/* String Table                                                               */
-/******************************************************************************/
-
-/*
- * String
- *
- * The problem with the ELF format is that strings are nothing more than a
- * NULL terminated character array, which doesn't help much in the presence
- * of a fuzzer. We define a string as a character array, plus a length,
- * which we can set to ensure safety (i.e. is NULL is not present, at least
- * we will not overrun the file).
- */
-struct e_string_t
-{
-    const char *buf;
-    bfelf64_sword len;
-};
-
-/**
- * Get ELF string table entry
- *
- * In each ELF file there are multiple string tables. Usually there is at
- * least a string table for all of the section headers (e.g. .got, .hash,
- * .dynsym, etc...) and then there is a string table for all of the dynamic
- * symbol names (e.g. fun1, my_glob1, etc...). A string table is nothing more
- * than a collection of null terminated strings, back to back. This function
- * takes a string table, and an offset into the table, and returns a string.
- *
- * @param ef the ELF file
- * @param strtab the string table
- * @param offset the offset (in bytes) into the string table
- * @param str the string being returned
- * @return BFELF_SUCCESS on success, negative on error
- */
-bfelf64_sword
-bfelf_string_table_entry(struct bfelf_file_t *ef,
-                         struct bfelf_shdr *strtab,
-                         bfelf64_word offset,
-                         struct e_string_t *str);
-
-
-/**
- * Get ELF section name
- *
- * This is a helper function for getting a section name.
- *
- * @param ef the ELF file
- * @param shdr the section header to get the name for
- * @param str the string being returned
- * @return BFELF_SUCCESS on success, negative on error
- */
-bfelf64_sword
-bfelf_section_name_string(struct bfelf_file_t *ef,
-                          struct bfelf_shdr *shdr,
-                          struct e_string_t *str);
-
 /******************************************************************************/
 /* ELF Dynamic Symbol Table                                                   */
 /******************************************************************************/
 
+/*
+ * ELF Symbol Bindings
+ *
+ * The following is defined in the ELF 64bit file format specification:
+ * http://www.uclibc.org/docs/elf-64-gen.pdf, page 10
+ */
 #define bfstb_local ((unsigned char)0)
 #define bfstb_global ((unsigned char)1)
 #define bfstb_weak ((unsigned char)2)
@@ -712,15 +461,12 @@ bfelf_section_name_string(struct bfelf_file_t *ef,
 #define bfstb_loproc ((unsigned char)13)
 #define bfstb_hiproc ((unsigned char)15)
 
-/**
- * Convert stb -> const char *
+/*
+ * ELF Symbol Types
  *
- * @param value stb to convert
- * @return const char * version of stb
+ * The following is defined in the ELF 64bit file format specification:
+ * http://www.uclibc.org/docs/elf-64-gen.pdf, page 10
  */
-const char *
-stb_to_str(bfelf64_word value);
-
 #define bfstt_notype ((unsigned char)0)
 #define bfstt_object ((unsigned char)1)
 #define bfstt_func ((unsigned char)2)
@@ -731,17 +477,22 @@ stb_to_str(bfelf64_word value);
 #define bfstt_loproc ((unsigned char)13)
 #define bfstt_hiproc ((unsigned char)15)
 
-/**
- * Convert stt -> const char *
+/*
+ * ELF Symbol Info Algorithms
  *
- * @param value stt to convert
- * @return const char * version of stt
+ * The following is defined in the ELF 64bit file format specification:
+ * http://www.uclibc.org/docs/elf-64-gen.pdf, page 11
  */
-const char *
-stt_to_str(bfelf64_word value);
-
 #define BFELF_SYM_BIND(x) ((x) >> 4)
 #define BFELF_SYM_TYPE(x) ((x) & 0xF)
+
+/*
+ * ELF Undefined Symbol Index
+ *
+ * The following is defined in the ELF 64bit file format specification:
+ * http://www.uclibc.org/docs/elf-64-gen.pdf, page 9
+ */
+#define STN_UNDEF 0
 
 /*
  * ELF Symbol
@@ -759,139 +510,39 @@ struct bfelf_sym
     bfelf64_xword st_size;
 };
 
-/**
- * Get Dynamic Symbol (by index)
- *
- * This function will get a symbol from the dynamic symbol table given an
- * index. Note that this function does _not_ attempt to locate the symbol if
- * it's value is 0.
- *
- * @param ef the ELF file
- * @param index index into the .dynsym section
- * @param sym the symbol being returned
- * @return BFELF_SUCCESS on success, negative on error
- */
-bfelf64_sword
-bfelf_symbol_by_index(struct bfelf_file_t *ef,
-                      bfelf64_word index,
-                      struct bfelf_sym **sym);
-
-/**
- * Get Dynamic Symbol (by name)
- *
- * This function will get a symbol from the dynamic symbol table given a
- * name. Note that this function does _not_ attempt to locate the symbol if
- * it's value is 0.
- *
- * @param ef the ELF file
- * @param name name of the symbol in the .dynsym section to get
- * @param sym the symbol being returned
- * @return BFELF_SUCCESS on success, negative on error
- */
-bfelf64_sword
-bfelf_symbol_by_name(struct bfelf_file_t *ef,
-                     struct e_string_t *name,
-                     struct bfelf_sym **sym);
-
-/**
- * Get Global Dynamic Symbol (by name)
- *
- * This function will get a symbol from the dynamic symbol table given a
- * name. If the symbol is not defined in the ELF file that was provided
- * (i.e. st_value == 0), this function will search all of the other ELF files
- * that were provided by an ELF loader to see if it can find the symbol that
- * is actually defined. If this function returns, BFELF_ERROR_NO_SUCH_SYMBOL
- * the symbol is not defined by any of the ELF files that were loaded. If
- * the symbol was located, this function not only returns the symbol, but it
- * also returns the ELF file that the symbol was located in (which might be
- * the ELF file that was provided, or it might be an ELF file provided to
- * an ELF loader).
- *
- * @param efl the ELF file
- * @param name name of the symbol in the .dynsym section to get
- * @param efr the resulting ELF file that the symbol was located in
- * @param sym the symbol being returned
- * @return BFELF_SUCCESS on success, negative on error
- */
-bfelf64_sword
-bfelf_symbol_by_name_global(struct bfelf_file_t *efl,
-                            struct e_string_t *name,
-                            struct bfelf_file_t **efr,
-                            struct bfelf_sym **sym);
-
-/**
- * Resvole Symbol
- *
- * This function will lookup a symbol by it's name, and return it's absolute
- * address. Before this function can be run, the following must be done:
- *
- * - Each ELF file must be created and initalized.
- * - Each ELF file must be loaded into memory
- * - An ELF loader much be created an initalized.
- * - Each ELF file must be added to the ELF loader
- * - The ELF loader must be relocated
- *
- * Once these steps are completed, this function can be used to lookup the
- * absolute address for any symbol. Note that this function will return
- * the absolute address of a symbol in a different ELF file that what is
- * provided. It will however take longer as it must perform a global search.
- * Therefore, it is advised that the search be done on the ELF file that is
- * likely to contain the symbol.
- *
- * @param ef the ELF file
- * @param name name of the symbol in the .dynsym section to get
- * @param addr the resulting absolute address
- * @return BFELF_SUCCESS on success, negative on error
- */
-bfelf64_sword
-bfelf_resolve_symbol(struct bfelf_file_t *ef,
-                     struct e_string_t *name,
-                     void **addr);
-
-/**
- * Print dynamic symbol table
- *
- * @param ef the ELF file
- * @return BFELF_SUCCESS on success, negative on error
- */
-bfelf64_sword
-bfelf_print_sym_table(struct bfelf_file_t *ef);
-
-/**
- * Print dynamic symbol
- *
- * @param ef the ELF file
- * @param sym the symbol to print
- * @return BFELF_SUCCESS on success, negative on error
- */
-bfelf64_sword
-bfelf_print_sym(struct bfelf_file_t *ef,
-                struct bfelf_sym *sym);
-
 /******************************************************************************/
 /* ELF Relocations                                                            */
 /******************************************************************************/
 
+/*
+ * System V ABI 64bit Relocations
+ *
+ * The following is defined in the ELF 64bit file format specification:
+ * http://www.x86-64.org/documentation/abi.pdf, page 71
+ */
 #define BFR_X86_64_64 ((bfelf64_xword)1)
 #define BFR_X86_64_GLOB_DAT ((bfelf64_xword)6)
 #define BFR_X86_64_JUMP_SLOT ((bfelf64_xword)7)
 #define BFR_X86_64_RELATIVE ((bfelf64_xword)8)
 
-/**
- * Convert r_info (type) -> const char *
+/*
+ * ELF Relocation
  *
- * @param value r_info (type) to convert
- * @return const char * version of r_info (type)
+ * The following is defined in the ELF 64bit file format specification:
+ * http://www.uclibc.org/docs/elf-64-gen.pdf, page 11
  */
-const char *
-rel_type_to_str(bfelf64_xword value);
-
 struct bfelf_rel
 {
     bfelf64_addr r_offset;
     bfelf64_xword r_info;
 };
 
+/*
+ * ELF Relocation Addend
+ *
+ * The following is defined in the ELF 64bit file format specification:
+ * http://www.uclibc.org/docs/elf-64-gen.pdf, page 11
+ */
 struct bfelf_rela
 {
     bfelf64_addr r_offset;
@@ -899,246 +550,14 @@ struct bfelf_rela
     bfelf64_sxword r_addend;
 };
 
+/*
+ * ELF Relocation Info Algorithms
+ *
+ * The following is defined in the ELF 64bit file format specification:
+ * http://www.uclibc.org/docs/elf-64-gen.pdf, page 11
+ */
 #define BFELF_REL_SYM(i)  ((i) >> 32)
 #define BFELF_REL_TYPE(i) ((i) & 0xFFFFFFFFL)
-
-/**
- * Relocate Symbol
- *
- * Given a relocation record (from a relocation table), this function
- * performs the actual relocation.
- *
- * @note for x86_64, the documentation states that *ptr = S for GLOB_DAT and
- *     JUMP_SLOT. S in the documentation is sym->st_value, which is missing
- *     the base address to make the address "absolute". Most of the
- *     implementations that I found include the base address, so I believe this
- *     documentation to be in error. I have included the spec and a reference
- *     implementation in case it is needed.
- *
- * http://www.x86-64.org/documentation_folder/abi.pdf
- * https://github.com/madd-games/glidix/blob/186e2f699c045440f96551fcf504833d6d81799e/src/interp.c
- *
- * @param ef the ELF file
- * @param rel the relocation record to relocate
- * @return BFELF_SUCCESS on success, negative on error
- */
-bfelf64_sword
-bfelf_relocate_symbol(struct bfelf_file_t *ef,
-                      struct bfelf_rel *rel);
-
-/**
- * Relocate Symbol (Addend)
- *
- * Given a relocation record (from a relocation table), this function
- * performs the actual relocation.
- *
- * @note for x86_64, the documentation states that *ptr = S for GLOB_DAT and
- *     JUMP_SLOT. S in the documentation is sym->st_value, which is missing
- *     the base address to make the address "absolute". Most of the
- *     implementations that I found include the base address, so I believe this
- *     documentation to be in error. I have included the spec and a reference
- *     implementation in case it is needed.
- *
- * http://www.x86-64.org/documentation_folder/abi.pdf
- * https://github.com/madd-games/glidix/blob/186e2f699c045440f96551fcf504833d6d81799e/src/interp.c
- *
- * @note The difference with this function is that it has an extra addend added
- * to the absolute address. This is only needed for a couple of types of
- * relocations, the big one being code like int x[2], *y = x + 1, which creates
- * a BFR_X86_64_64 style relocation.
- *
- * @param ef the ELF file
- * @param rela the relocation record to relocate
- * @return BFELF_SUCCESS on success, negative on error
- */
-bfelf64_sword
-bfelf_relocate_symbol_addend(struct bfelf_file_t *ef,
-                             struct bfelf_rela *rela);
-
-/**
- * Relocate Symbols
- *
- * This function goes through all of the relocation tables, and relocates
- * each record in each relocation table.
- *
- * @param ef the ELF file
- * @return BFELF_SUCCESS on success, negative on error
- */
-bfelf64_sword
-bfelf_relocate_symbols(struct bfelf_file_t *ef);
-
-/**
- * Print Relocation
- *
- * @param rel the relocation record to print
- * @return BFELF_SUCCESS on success, negative on error
- */
-bfelf64_sword
-bfelf_print_relocation(struct bfelf_rel *rel);
-
-/**
- * Print Relocation (Addend)
- *
- * @param rela the relocation record to print
- * @return BFELF_SUCCESS on success, negative on error
- */
-bfelf64_sword
-bfelf_print_relocation_addend(struct bfelf_rela *rela);
-
-/**
- * Print Relocations
- *
- * @param ef the ELF file
- * @return BFELF_SUCCESS on success, negative on error
- */
-bfelf64_sword
-bfelf_print_relocations(struct bfelf_file_t *ef);
-
-/******************************************************************************/
-/* ELF CTORS / DTORS                                                          */
-/******************************************************************************/
-
-typedef void(*ctor_func)(void);
-typedef void(*dtor_func)(void);
-
-/*
- * ELF .ctors / .dtors
- *
- * These two sections in each ELF file contain a table of function pointers to
- * constructor / destructor code. A lot of references talk about how these are
- * for C++ and although they are probably used by C++ mostly, GCC uses these
- * for a lot more, and not in a way that you might imagine. In C, GCC provides
- * the ability to have constructor / destructor code, so these sections can
- * still exist. In C++, you would think that these sections would contain one
- * pointer per globally defined object (so that each globally defined object's
- * constructor can be called). In practice, this is not the case. It appears
- * that GCC typically on 64bit shared libraries, only places one function in
- * each of these tables, which eventually calls:
- *
- * XXX_static_initialization_and_destruction_XXX
- *
- * Calls to each global constructor / destructor appear to be called from this
- * function which is generated by GCC itself.
- *
- * For further information about what these sections are, see OSDev, or
- * http://linux.die.net/man/5/elf
- *
- * In general, this is a really undocumented part of setting up a fully
- * functinaly C++ environment.
- */
-
-/**
- * Number of CTORs
- *
- * @param ef the ELF file
- * @return the number of entries in the CTOR table / section in the ELF file.
- */
-bfelf64_sword
-bfelf_ctor_num(struct bfelf_file_t *ef);
-
-/**
- * Number of DTORs
- *
- * @param ef the ELF file
- * @return the number of entries in the DTOR table / section in the ELF file.
- */
-bfelf64_sword
-bfelf_dtor_num(struct bfelf_file_t *ef);
-
-/**
- * Resolve CTOR
- *
- * Given an ELF file, this function returns the address of a CTOR based on
- * the provided index. To get the total number of CTORs in the table that
- * bounds the index, use 0 <= index < bfelf_ctor_num.
- *
- * @param ef the ELF file
- * @param index the CTOR to resolve
- * @param addr the resulting absolute address
- * @return BFELF_SUCCESS on success, negative on error
- */
-bfelf64_sword
-bfelf_resolve_ctor(struct bfelf_file_t *ef,
-                   bfelf64_word index,
-                   void **addr);
-
-/**
- * Resolve DTOR
- *
- * Given an ELF file, this function returns the address of a DTOR based on
- * the provided index. To get the total number of DTORs in the table that
- * bounds the index, use 0 <= index < bfelf_dtor_num.
- *
- * @param ef the ELF file
- * @param index the DTOR to resolve
- * @param addr the resulting absolute address
- * @return BFELF_SUCCESS on success, negative on error
- */
-bfelf64_sword
-bfelf_resolve_dtor(struct bfelf_file_t *ef,
-                   bfelf64_word index,
-                   void **addr);
-
-/******************************************************************************/
-/* ELF INIT / FINI                                                            */
-/******************************************************************************/
-
-typedef void(*init_func)(void);
-typedef void(*fini_func)(void);
-
-/**
- * Number of INITs
- *
- * @param ef the ELF file
- * @return the number of entries in the .init_array table / section in the
- *     ELF file.
- */
-bfelf64_sword
-bfelf_init_num(struct bfelf_file_t *ef);
-
-/**
- * Number of FINIs
- *
- * @param ef the ELF file
- * @return the number of entries in the .fini_array table / section in the
- *     ELF file.
- */
-bfelf64_sword
-bfelf_fini_num(struct bfelf_file_t *ef);
-
-/**
- * Resolve INIT
- *
- * Given an ELF file, this function returns the address of a INIT based on
- * the provided index. To get the total number of INITs in the table that
- * bounds the index, use 0 <= index < bfelf_init_num.
- *
- * @param ef the ELF file
- * @param index the INIT to resolve
- * @param addr the resulting absolute address
- * @return BFELF_SUCCESS on success, negative on error
- */
-bfelf64_sword
-bfelf_resolve_init(struct bfelf_file_t *ef,
-                   bfelf64_word index,
-                   void **addr);
-
-/**
- * Resolve FINI
- *
- * Given an ELF file, this function returns the address of a FINI based on
- * the provided index. To get the total number of FINIs in the table that
- * bounds the index, use 0 <= index < bfelf_fini_num.
- *
- * @param ef the ELF file
- * @param index the FINI to resolve
- * @param addr the resulting absolute address
- * @return BFELF_SUCCESS on success, negative on error
- */
-bfelf64_sword
-bfelf_resolve_fini(struct bfelf_file_t *ef,
-                   bfelf64_word index,
-                   void **addr);
 
 /******************************************************************************/
 /* ELF Program Header                                                         */
@@ -1162,15 +581,6 @@ bfelf_resolve_fini(struct bfelf_file_t *ef,
 #define bfpt_loproc ((bfelf64_word)0x70000000)
 #define bfpt_hiproc ((bfelf64_word)0x7FFFFFFF)
 
-/**
- * Convert p_type (type) -> const char *
- *
- * @param value p_type (type) to convert
- * @return const char * version of p_type (type)
- */
-const char *
-p_type_to_str(bfelf64_word value);
-
 /*
  * ELF Section Attributes
  *
@@ -1182,33 +592,6 @@ p_type_to_str(bfelf64_word value);
 #define bfpf_r ((bfelf64_xword)0x4)
 #define bfpf_maskos ((bfelf64_xword)0x00FF0000)
 #define bfpf_maskproc ((bfelf64_xword)0xFF000000)
-
-/**
- * Convert p_flags (executable) -> bool
- *
- * @param phdr program header containing p_flags to convert
- * @return BFELF_TRUE if executable, BFELF_FALSE otherwise
- */
-bfelf64_sword
-p_flags_is_executable(struct bfelf_phdr *phdr);
-
-/**
- * Convert p_flags (writable) -> bool
- *
- * @param phdr program header containing p_flags to convert
- * @return BFELF_TRUE if writable, BFELF_FALSE otherwise
- */
-bfelf64_sword
-p_flags_is_writable(struct bfelf_phdr *phdr);
-
-/**
- * Convert p_flags (readable) -> bool
- *
- * @param phdr program header containing p_flags to convert
- * @return BFELF_TRUE if readable, BFELF_FALSE otherwise
- */
-bfelf64_sword
-p_flags_is_readable(struct bfelf_phdr *phdr);
 
 /*
  * ELF Program Header Entry
@@ -1232,92 +615,93 @@ struct bfelf_phdr
     bfelf64_xword p_align;
 };
 
-/**
- * Get ELF program header
- *
- * @param ef the ELF file
- * @param index the index of the program header to get
- * @param phdr the program header to return
- * @return BFELF_SUCCESS on success, negative on error
- */
-bfelf64_sword
-bfelf_program_header(struct bfelf_file_t *ef,
-                     bfelf64_word index,
-                     struct bfelf_phdr **phdr);
+/******************************************************************************/
+/* ELF Loader                                                                 */
+/******************************************************************************/
 
 /**
- * Get exec size
+ * ELF Loader
  *
- * If the ELF file is "x" bytes, the RAM that the ELF file needs to be
- * loaded into would be "y" >= "x". The reason for this is the RAM would at
- * least need to add .bss section (which is not included in the ELF file itself)
- * and it's likely that the ELF file is broken up into read/execute and
- * read/write program segments, which are aligned to a "max" page size
- * boundary. For example, with a x86_64 cross compiler, the max page size is
- * 2MB. Thus, all of the read / executable sections are mapped to the first
- * set of pages marked for RE. The read / write sections (like .data) are all
- * in the a RW segment that are page aligned to 2MB. For a small library, this
- * would mean that the RE section is 0->2MB, and the RW section is 2MB->End.
- *
- * This function returns the total amount of RAM that is needed to load he
- * ELF file into RAM. This includes all of the segments, and their offsets for
- * page alignment.
- *
- * @param ef the ELF file
- * @return BFELF_SUCCESS on success, negative on error
+ * The following structure is used to create an ELF loader, which groups up
+ * all of the ELF files used by a single program, mainly needed for global
+ * symbol searching.
  */
-bfelf64_sxword
-bfelf_total_exec_size(struct bfelf_file_t *ef);
+struct bfelf_loader_t
+{
+    bfelf64_word num;
+    bfelf64_word relocated;
+    struct bfelf_file_t *efs[BFELF_MAX_MODULES];
+};
 
 /**
- * Load segments
+ * Add ELF file to an ELF loader
  *
- * Loads the segments in the ELF file into RAM.
+ * Once an ELF loader has been initialized, use this function to add an
+ * ELF file to the ELF loader
  *
- * @param ef the ELF file
+ * @param loader the ELF loader
+ * @param ef the ELF file to add
+ * @param exec the offset into memory where this ELF file is loaded. This is
+ *     used during relocations to move a symbol to where it is actually
+ *     located. For most libraries, this should be an actual value, while
+ *     for more binaries, this is likely 0. Also note that this value should
+ *     be relative to the page tables that will be used when the application
+ *     is run.
  * @return BFELF_SUCCESS on success, negative on error
  */
-bfelf64_sword
-bfelf_load_segments(struct bfelf_file_t *ef);
+bfelf64_sword bfelf_loader_add(struct bfelf_loader_t *loader,
+                               struct bfelf_file_t *ef,
+                               char *exec);
 
 /**
- * Load segment
+ * Relocate ELF Loader
  *
- * Loads a specific segment into RAM. Note that a segment is a collection of
- * sections (e.g. .data, .got, .text, etc...). Typically there are two, one
- * for read / execute, and one for read / write. They can also be larger than
- * the ELF file. For example, the RW segment likely contains a .bss which is
- * not included in the ELF file. The segment defines where this bss section
- * is located, and what it's size is.
+ * Relocates all of the ELF files that have been added to the ELF loader.
+ * Once all of the ELF files have been relocated, it's safe to resolve
+ * symbols for execution.
  *
- * @param ef the ELF file
- * @param phdr the program header for the segment to load
+ * @param loader the ELF loader
  * @return BFELF_SUCCESS on success, negative on error
  */
-bfelf64_sword
-bfelf_load_segment(struct bfelf_file_t *ef,
-                   struct bfelf_phdr *phdr);
+bfelf64_sword bfelf_loader_relocate(struct bfelf_loader_t *loader);
 
 /**
- * Print Program Header Table
+ * Resolve Symbol
  *
- * @param ef the ELF file
+ * Once an ELF loader has had all of it's ELF files initalized and added,
+ * use the relocate ELF loader to setup the ELF files such that they can
+ * be executed. If the ELF file is relocated into memory that is accessable
+ * via the ELF loader, the resolve symbol function can be used to get the
+ * address of a specific symbol so that it can be executed.
+ *
+ * @param loader the ELF loader
+ * @param name the name of the symbol to resolve
+ * @param addr the resulting address if the symbol is successfully resolved
  * @return BFELF_SUCCESS on success, negative on error
  */
-bfelf64_sword
-bfelf_print_program_header_table(struct bfelf_file_t *ef);
+bfelf64_sword bfelf_loader_resolve_symbol(struct bfelf_loader_t *loader,
+        struct e_string_t *name,
+        void **addr);
 
 /**
- * Print Program Header
+ * Get Info
  *
- * @param ef the ELF file
- * @param phdr the program header for the segment to print
+ * Once an ELF loader has had all of it's ELF files initalized and added,
+ * use the relocate ELF loader to setup the ELF files such that they can
+ * be executed. Once this is done, this function can be used to get the
+ * C runtime information for bootstrapping a binary / module. If the info
+ * structure is located in memory that is accessible to the loader, the
+ * init and fini functions are provided in the inof structure itself for
+ * executing the runtime functions.
+ *
+ * @param loader the ELF loader
+ * @param ef the ELF file to get the info structure for
+ * @param info the info structore to store the results.
  * @return BFELF_SUCCESS on success, negative on error
  */
-bfelf64_sword
-bfelf_print_program_header(struct bfelf_file_t *ef,
-                           struct bfelf_phdr *phdr);
-
+bfelf64_sword bfelf_loader_get_info(struct bfelf_loader_t *loader,
+                                    struct bfelf_file_t *ef,
+                                    struct section_info_t *info);
 
 #ifdef __cplusplus
 }
