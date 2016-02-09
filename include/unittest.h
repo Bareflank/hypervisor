@@ -25,8 +25,13 @@
 #define NO_HIPPOMOCKS_NAMESPACE
 #define ENABLE_CFUNC_MOCKING_SUPPORT
 
+#ifdef OS_LINUX
+#define LINUX_TARGET
+#endif
+
 #include <stdlib.h>
 #include <iostream>
+#include <exception.h>
 #include <hippomocks.h>
 
 /// Expect True
@@ -61,11 +66,45 @@
     if(!(condition)) { this->inc_pass(); } \
     else { this->expect_failed(#condition, __PRETTY_FUNCTION__, __LINE__); }
 
+/// Expect Exception
+///
+/// This macro verifies a unit test throws an exception. If the unit
+/// test throws an exception, the unit test reports a failue and continues
+/// testing.
+///
+/// @code
+///
+/// EXPECT_EXCEPTION(blah.do_something()) // unit test fails if no throw()
+///
+/// @endcode
+///
+#define EXPECT_EXCEPTION(a, b) \
+    { \
+        bool caught = false; \
+        try{ a; } \
+        catch(bfn::general_exception &ge) \
+        { \
+            if (strcmp(ge.what(), typeid(b).name()) == 0) \
+                caught = true; \
+            else \
+                std::cerr << "wrong exception caught: " << ge.what() << std::endl; \
+        } \
+        catch(std::exception &e) \
+        { \
+            throw; \
+        } \
+        catch(...) \
+        { \
+            std::cerr << "unknown exception caught" << std::endl; \
+        } \
+        EXPECT_TRUE(caught); \
+    }
+
 /// Expect No Exception
 ///
 /// This macro verifies a unit test does not throw an exception. If the unit
-/// test throws an exception, the unit test reports a failue and continues
-/// testing.
+/// test does not throw an exception, the unit test reports a failue and
+/// continues testing.
 ///
 /// @code
 ///
@@ -77,6 +116,8 @@
     { \
         bool caught = false; \
         try{ a; } \
+        catch(bfn::general_exception &ge) { caught = true; } \
+        catch(std::exception &e) { throw; } \
         catch(...) { caught = true; } \
         EXPECT_FALSE(caught); \
     }
@@ -113,6 +154,40 @@
     if(!(condition)) { this->inc_pass(); } \
     else { this->assert_failed(#condition, __PRETTY_FUNCTION__, __LINE__); }
 
+/// Assert Exception
+///
+/// This macro verifies a unit test throws an exception. If the unit
+/// test does not throw an exception, the unit test reports a failue and stops.
+///
+/// @code
+///
+/// ASSERT_EXCEPTION(blah.do_something()) // unit test fails if throw()
+///
+/// @endcode
+///
+
+#define ASSERT_EXCEPTION(a, b) \
+    { \
+        bool caught = false; \
+        try{ a; } \
+        catch(bfn::general_exception &ge) \
+        { \
+            if (strcmp(ge.what(), typeid(b).name()) == 0) \
+                caught = true; \
+            else \
+                std::cerr << "wrong exception caught: " << ge.what() << std::endl; \
+        } \
+        catch(std::exception &e) \
+        { \
+            throw; \
+        } \
+        catch(...) \
+        { \
+            std::cerr << "unknown exception caught" << std::endl; \
+        } \
+        ASSERT_TRUE(caught); \
+    }
+
 /// Assert No Exception
 ///
 /// This macro verifies a unit test does not throw an exception. If the unit
@@ -128,6 +203,8 @@
     { \
         bool caught = false; \
         try{ a; } \
+        catch(bfn::general_exception &ge) { caught = true; } \
+        catch(std::exception &e) { throw; } \
         catch(...) { caught = true; } \
         ASSERT_FALSE(caught); \
     }
@@ -179,6 +256,42 @@
 /// @endcode
 ///
 #define RUN_ALL_TESTS(ut) [&]() -> decltype(auto) { (void) argc; (void) argv; ut _ut; return _ut.run(); }()
+
+/// No Delete
+///
+/// This is used by mock_shared to prevent a shared pointer from performing the
+/// deletion of the variable. In this case, mock is doing this for us. Note
+/// that this should not be used directly.
+///
+template<class T> void
+no_delete(T *)
+{ }
+
+namespace bfn
+{
+
+    /// Mock Shared
+    ///
+    /// Use this function to create a mocked version of a shared pointer. This
+    /// works similar to make_shared, but creates a shared pointer that is created
+    /// by Hippnomocks. Note that you must provide a mock class, and when that
+    /// class is destroyed, the pointers being held by shared_ptr are no longer
+    /// valid.
+    ///
+    template<class T> std::shared_ptr<T>
+    mock_shared(MockRepository &mocks)
+    { return std::shared_ptr<T>(mocks.Mock<T>(), no_delete<T>); }
+
+}
+
+// The latests and greatest GCC does not have support for c++14 literals, so
+// we need to define them ourselves. Of course it complains if the literal is
+// not defined with a "_" so we have our own custom literal here. This should
+// be able to be removed once GCC decides to get with the times.
+
+inline std::string
+operator ""_s(const char *str, std::size_t len)
+{ return std::string(str, len); }
 
 class unittest
 {
@@ -277,18 +390,18 @@ protected:
         {
             lamda();
         }
-        catch (std::exception e)
+        catch (std::exception &e)
         {
-            this->expect_failed("non-implemented function was called", func, line);
+            this->expect_failed(e.what(), func, line);
         }
 
         try
         {
             mocks.VerifyAll();
         }
-        catch (...)
+        catch (std::exception &e)
         {
-            this->expect_failed("the mock's expectations were not meet", func, line);
+            this->expect_failed(e.what(), func, line);
         }
 
         mocks.reset();

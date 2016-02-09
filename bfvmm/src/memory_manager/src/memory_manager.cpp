@@ -40,7 +40,7 @@
 // The following defines the entire memory pool. This pool will be used by the
 // VMM to create the different resources that it needs, which is mainly given
 // out using new/delete. If space runs out, this will need to be increased.
-uint8_t g_mem_pool[MAX_MEM_POOL] ALIGN = {0};
+uint8_t g_mem_pool[MAX_MEM_POOL] ALIGN_MEMORY = {0};
 
 // The memory pool itself is given out in blocks. Any attempt to new / delete
 // will always allocate at least a block of memory, which is usually set to a

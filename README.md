@@ -1,50 +1,70 @@
 
-### Warning: 
+### Warning:
 
 * **1/11/2015:**
-Although we have a couple of branches that successfully launch 
-the VMM, we are in the process of adding the C++ STL, and thus this repo 
-is a bit unstable. This process should be complete in the next couple of 
-weeks. If you have questions, we free to email us, or post your questions 
-to the mailing list. 
+Although we have a couple of branches that successfully launch
+the VMM, we are in the process of adding the C++ STL, and thus this repo
+is a bit unstable. This process should be complete in the next couple of
+weeks. If you have questions, we free to email us, or post your questions
+to the mailing list.
 
 * **1/21/2015 Update:**
 We have successfully integrated Libc++ into the VMM. We are in the process
-of updating the VMM logic, and re-integrating the VMCS / Exit handler 
-logic. Once this is complete, we should have a working VM launch. We 
-anticipate this work being completed by the end of the month (no promisses)
+of updating the VMM logic, and re-integrating the VMCS / Exit handler
+logic. Once this is complete, we should have a working VM launch. For now, the
+VMM does not attempt a VM launch.
+
 <br>
 
 # Bareflank Hypervisor
 
 ## Description
 
-The Bareflank Hypervisor aims to provide a platform for performing hypervisor
-research. Some highlights include:
+The bareflank hypervisor is an open source, lightweight hypervisor, lead by
+Assured Information Security, Inc. designed specifically to enable hypervisor
+based research. To support any style of research, bareflank comes complete with:
+- a generic virtual machine monitor (VMM),
+- a custom ELF loader
+- a user mode application to manage the hypervisor.
+- a set of driver entries to launch the VMM
 
-- Reduced legacy support (e.g. requires 64bit, no support for BIOS, etc...)
-- Written in C++
-- Cross Platform
-- Developed using Test Driven Development
-- Few external dependencies
-- LGPL v2.1
+In addition, the entire bareflank project is licensed under the
+GNU Lesser General Public License v2.1 (LGPL), providing a means for users of
+the project to both contribute back to the project, but also create proprietary
+extensions if so desired.
 
-In addition to simplified architecture, the Bareflank hypervisor has been
-licensed under the LGPL v2.1. The entire Bareflank hypervisor is a collection
-of cross-compiled libraries. Users of the Bareflank hypervisor are welcome
-to replace any or all of the open source libraries with proprietary versions,
-enabling the development of internal hypervisor based research, while
-sharing the core portions of the hypervisor that don't usually change (for
-example, starting and stopping an Intel VT-x based hypervisor is the same
-whether it's KVM, Xen, VMWare, VIrtualBox or Bareflank).
+To ease the development of the VMM, bareflank has partial support for C++,
+including the C++ Standard Template Library (STL) via libc++. With the C++ STL,
+bareflank has access to shared pointers, complex data structures
+(e.g. hash tables, maps, lists, etc…), and several other modern C++ features.
+Most of these features are “header only”, meaning only the parts of the STL
+that are used are included, providing a convenient means to keep the VMM as
+small as possible. Existing open source hypervisors that are written in C
+spend a considerable amount of time re-writing similar functionality instead on
+focusing on what matters most: hypervisor technologies.
 
-In return we ask that users contribute back to the project to enhance
-and maintain the open source portions of the hypervisor, such that all users
-can benefit.
+Since the goal of the project is to provide a lightweight hypervisor for
+research, the VMM only provides the bare minimum support to launch a VMM,
+which for Intel, consists of:
+- enabling virtual machine extensions (VMX),
+- setting up a virtual machine control structure (VMCS),
+- setting up a basic exit handler prior to launching the VMM.
+
+The default exit handler simply hands control back to the operating system
+if and when a VM exit should occur. The result is a VMM whose privileged code
+(i.e. the code that runs with so called “ring -1” privileges) is less than a
+couple hundred lines. Since bareflank is written in C++, users can leverage
+inheritance to extend every part of the hypervisor to provide additional
+functionality above and beyond what is already provided.
+
+In addition to bareflank’s lightweight, modular design, the entire hypervisor
+has been written using test driven development. As such, all of bareflank’s
+code comes complete with a set of unit tests to validate that the provided
+code works as expected.
 
 ## Compilation Instructions
 
-Before you can compile, you must have a native GCC installer, as well as a
+Before you can compile, you must have both a native GCC compiler, as well as a
 GCC cross-compiler. For instructions on how to setup a GCC cross-compiler,
 please see the following:
 
@@ -54,11 +74,14 @@ If you are running on one of the supported platforms, setting up the cross
 compiler is as simple as:
 
 ```
-./tools/scripts/<platform>-cross-compiler.sh
+./tools/scripts/setup-<platform>.sh
+./tools/scripts/create-cross-compiler.sh
 ```
 
-Once you have your cross compiler setup based on the script, or instructions,
-you should be able to run the following
+The create-cross-compiler.sh script not only creates the cross compiler, but
+it also sets up the libc and libc++ environment, creating a sysroot that will
+be used by the bareflank hypervisor. Once you have your cross compiler setup
+based on the script, or instructions, you should be able to run the following
 
 ```
 make

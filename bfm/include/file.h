@@ -44,24 +44,17 @@ public:
     ///
     virtual ~file();
 
-    /// Exists
-    ///
-    /// Returns true if the file provides exists on the filesystem.
-    ///
-    /// @param filename the filename to check for existence.
-    /// @return true if filename exists
-    ///
-    virtual bool exists(const std::string &filename) const;
-
     /// Read
     ///
     /// Reads the entire contents of a file, and returns the result in
-    /// a c++ standard string. If the file does not exist, an empty
-    /// string is returned.
+    /// a c++ standard string.
     ///
     /// @param filename the filename to read.
-    /// @return the contents of filename, or an empty string if filename
-    ///         does not exists.
+    /// @return the contents of filename
+    ///
+    /// @throws invalid_filename_error thrown if the filename does not exist
+    ///     or is not readable
+    ///
     virtual std::string read(const std::string &filename) const;
 };
 

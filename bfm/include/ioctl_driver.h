@@ -23,19 +23,9 @@
 #define IOCTL_DRIVER_H
 
 #include <command_line_parser.h>
-#include <debug.h>
 #include <file.h>
 #include <ioctl.h>
 #include <split.h>
-
-namespace ioctl_driver_error
-{
-    enum type
-    {
-        success = 0,
-        failure = 1
-    };
-}
 
 /// IOCTL Driver
 ///
@@ -50,19 +40,11 @@ class ioctl_driver
 {
 public:
 
-    /// IOCTL Driver Constructor
+    /// Default Constructor
     ///
-    /// Creates and IOCTL driver to tell the driver entry what to do
-    /// based on information provided by the command lin e parser.
-    ///
-    /// @param fb file class used to read from the filesystem
-    /// @param ioctlb ioctl class used to communicate with the driver entry
-    /// @param clpb command line parser used to parse user input
-    ioctl_driver(const file *const f,
-                 const ioctl *const ctl,
-                 const command_line_parser *const clp);
+    ioctl_driver() noexcept;
 
-    /// IOCTL Driver Destructor
+    /// Destructor
     ///
     virtual ~ioctl_driver();
 
@@ -72,21 +54,37 @@ public:
     /// construction. If the IOCTL driver has a problem during processing,
     /// this function will return with an error.
     ///
-    /// @return success on success, failure otherwise.
+    /// @param f file class used to read from the filesystem
+    /// @param ctl ioctl class used to communicate with the driver entry
+    /// @param clp command line parser used to parse user input
     ///
-    virtual ioctl_driver_error::type process() const;
+    /// @throws invalid_argument_error thrown if f == 0, ctl == 0 or clp == 0
+    /// @throws corrupt_vmm_error thrown if the VMM is in a corrupt state.
+    ///     The VMM gets into a corrupt state when a stop or unload fails.
+    ///     Once this happens, dump still works, but everthing else will fail.
+    /// @throws unknown_status_error if the VMM is in an unknown state. This
+    ///     should never happen. If it doesn, the driver is not working right
+    /// @throws invalid_vmm_state_error if the VMM is in an invalid state. This
+    ///     usually happens because the clp states the user wanted to start or
+    ///     dump but forgot to load the VMM first.
+    ///
+    virtual void process(std::shared_ptr<file> f,
+                         std::shared_ptr<ioctl> ctl,
+                         std::shared_ptr<command_line_parser> clp);
 
 private:
 
-    ioctl_driver_error::type start_vmm() const;
-    ioctl_driver_error::type stop_vmm() const;
-    ioctl_driver_error::type dump_vmm() const;
+    void load_vmm(const std::shared_ptr<file> &f,
+                  const std::shared_ptr<ioctl> &ctl,
+                  const std::shared_ptr<command_line_parser> &clp);
 
-private:
+    void unload_vmm(const std::shared_ptr<ioctl> &ctl);
+    void start_vmm(const std::shared_ptr<ioctl> &ctl);
+    void stop_vmm(const std::shared_ptr<ioctl> &ctl);
+    void dump_vmm(const std::shared_ptr<ioctl> &ctl);
+    void vmm_status(const std::shared_ptr<ioctl> &ctl);
 
-    const file *const m_f;
-    const ioctl *const m_ctl;
-    const command_line_parser *const m_clp;
+    int64_t get_status(const std::shared_ptr<ioctl> &ctl);
 };
 
 #endif

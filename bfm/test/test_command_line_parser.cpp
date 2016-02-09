@@ -19,184 +19,270 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+#include <string>
+#include <exception.h>
+
 #include <test.h>
 #include <command_line_parser.h>
+
+// -----------------------------------------------------------------------------
+// Tests
+// -----------------------------------------------------------------------------
+
+command_line_parser g_clp;
 
 void
 bfm_ut::test_command_line_parser_with_no_args()
 {
-    int argc = 1;
-    const char *argv[] = {"app_name"};
-    command_line_parser clp(argc, argv);
+    auto args = {""_s};
 
-    EXPECT_TRUE(clp.is_valid() == true);
-    EXPECT_TRUE(clp.cmd() == command_line_parser_command::help);
+    g_clp.reset();
+    EXPECT_NO_EXCEPTION(g_clp.parse(args));
+
+    EXPECT_TRUE(g_clp.cmd() == command_line_parser_command::help);
+    EXPECT_TRUE(g_clp.modules() == "");
 }
 
 void
 bfm_ut::test_command_line_parser_with_unknown_command()
 {
-    int argc = 2;
-    const char *argv[] = {"app_name", "unknown"};
-    command_line_parser clp(argc, argv);
+    auto args = {"unknown"_s};
 
-    EXPECT_TRUE(clp.is_valid() == false);
-    EXPECT_TRUE(clp.cmd() == command_line_parser_command::unknown);
+    g_clp.reset();
+    EXPECT_EXCEPTION(g_clp.parse(args), bfn::unknown_command_error);
+
+    EXPECT_TRUE(g_clp.cmd() == command_line_parser_command::help);
+    EXPECT_TRUE(g_clp.modules() == "");
+}
+
+void
+bfm_ut::test_command_line_parser_with_unknown_command_maintains_state()
+{
+    auto args1 = {"unload"_s};
+    auto args2 = {"unknown"_s};
+
+    g_clp.reset();
+    EXPECT_NO_EXCEPTION(g_clp.parse(args1));
+    EXPECT_EXCEPTION(g_clp.parse(args2), bfn::unknown_command_error);
+
+    EXPECT_TRUE(g_clp.cmd() == command_line_parser_command::unload);
+    EXPECT_TRUE(g_clp.modules() == "");
 }
 
 void
 bfm_ut::test_command_line_parser_with_unknown_option_single_bar()
 {
-    int argc = 2;
-    const char *argv[] = {"app_name", "-unknown"};
-    command_line_parser clp(argc, argv);
+    auto args = {"-unknown"_s};
 
-    EXPECT_TRUE(clp.is_valid() == false);
-    EXPECT_TRUE(clp.cmd() == command_line_parser_command::unknown);
+    g_clp.reset();
+    EXPECT_NO_EXCEPTION(g_clp.parse(args));
+
+    EXPECT_TRUE(g_clp.cmd() == command_line_parser_command::help);
+    EXPECT_TRUE(g_clp.modules() == "");
 }
 
 void
 bfm_ut::test_command_line_parser_with_unknown_option_dual_bar()
 {
-    int argc = 2;
-    const char *argv[] = {"app_name", "--unknown"};
-    command_line_parser clp(argc, argv);
+    auto args = {"--unknown"_s};
 
-    EXPECT_TRUE(clp.is_valid() == false);
-    EXPECT_TRUE(clp.cmd() == command_line_parser_command::unknown);
+    g_clp.reset();
+    EXPECT_NO_EXCEPTION(g_clp.parse(args));
+
+    EXPECT_TRUE(g_clp.cmd() == command_line_parser_command::help);
+    EXPECT_TRUE(g_clp.modules() == "");
 }
 
 void
 bfm_ut::test_command_line_parser_with_single_bar_help()
 {
-    int argc = 2;
-    const char *argv[] = {"app_name", "-h"};
-    command_line_parser clp(argc, argv);
+    auto args = {"-h"_s};
 
-    EXPECT_TRUE(clp.is_valid() == true);
-    EXPECT_TRUE(clp.cmd() == command_line_parser_command::help);
+    g_clp.reset();
+    EXPECT_NO_EXCEPTION(g_clp.parse(args));
+
+    EXPECT_TRUE(g_clp.cmd() == command_line_parser_command::help);
+    EXPECT_TRUE(g_clp.modules() == "");
 }
 
 void
 bfm_ut::test_command_line_parser_with_dual_bar_help()
 {
-    int argc = 2;
-    const char *argv[] = {"app_name", "--help"};
-    command_line_parser clp(argc, argv);
+    auto args = {"--help"_s};
 
-    EXPECT_TRUE(clp.is_valid() == true);
-    EXPECT_TRUE(clp.cmd() == command_line_parser_command::help);
+    g_clp.reset();
+    EXPECT_NO_EXCEPTION(g_clp.parse(args));
+
+    EXPECT_TRUE(g_clp.cmd() == command_line_parser_command::help);
+    EXPECT_TRUE(g_clp.modules() == "");
 }
 
 void
-bfm_ut::test_command_line_parser_with_start_no_modules()
+bfm_ut::test_command_line_parser_with_load_no_modules()
 {
-    int argc = 2;
-    const char *argv[] = {"app_name", "start"};
-    command_line_parser clp(argc, argv);
+    auto args = {"load"_s};
 
-    EXPECT_TRUE(clp.is_valid() == false);
-    EXPECT_TRUE(clp.cmd() == command_line_parser_command::start);
+    g_clp.reset();
+    EXPECT_EXCEPTION(g_clp.parse(args), bfn::missing_argument_error);
+
+    EXPECT_TRUE(g_clp.cmd() == command_line_parser_command::help);
+    EXPECT_TRUE(g_clp.modules() == "");
 }
 
 void
-bfm_ut::test_command_line_parser_with_valid_start()
+bfm_ut::test_command_line_parser_with_load_no_modules_maintains_state()
 {
-    int argc = 3;
-    const char *argv[] = {"app_name", "start", "filename"};
-    command_line_parser clp(argc, argv);
+    auto args1 = {"unload"_s};
+    auto args2 = {"load"_s};
 
-    EXPECT_TRUE(clp.is_valid() == true);
-    EXPECT_TRUE(clp.cmd() == command_line_parser_command::start);
-    EXPECT_TRUE(clp.modules() == std::string("filename"));
+    g_clp.reset();
+    EXPECT_NO_EXCEPTION(g_clp.parse(args1));
+    EXPECT_EXCEPTION(g_clp.parse(args2), bfn::missing_argument_error);
+
+    EXPECT_TRUE(g_clp.cmd() == command_line_parser_command::unload);
+    EXPECT_TRUE(g_clp.modules() == "");
 }
 
 void
-bfm_ut::test_command_line_parser_with_valid_start_unknown_option()
+bfm_ut::test_command_line_parser_with_valid_load()
 {
-    int argc = 4;
-    const char *argv[] = {"app_name", "start", "--unknow_option", "filename"};
-    command_line_parser clp(argc, argv);
+    auto args = {"load"_s, "filename"_s};
 
-    EXPECT_TRUE(clp.is_valid() == true);
-    EXPECT_TRUE(clp.cmd() == command_line_parser_command::start);
-    EXPECT_TRUE(clp.modules() == std::string("filename"));
+    g_clp.reset();
+    EXPECT_NO_EXCEPTION(g_clp.parse(args));
+
+    EXPECT_TRUE(g_clp.cmd() == command_line_parser_command::load);
+    EXPECT_TRUE(g_clp.modules() == "filename");
+}
+
+void
+bfm_ut::test_command_line_parser_with_valid_load_unknown_option()
+{
+    auto args = {"load"_s, "--unknow_option"_s, "filename"_s};
+
+    g_clp.reset();
+    EXPECT_NO_EXCEPTION(g_clp.parse(args));
+
+    EXPECT_TRUE(g_clp.cmd() == command_line_parser_command::load);
+    EXPECT_TRUE(g_clp.modules() == "filename");
 }
 
 void
 bfm_ut::test_command_line_parser_with_single_bar_help_unknown_option()
 {
-    int argc = 3;
-    const char *argv[] = {"app_name", "-h", "unknown"};
-    command_line_parser clp(argc, argv);
+    auto args = {"-h"_s, "unknown"_s};
 
-    EXPECT_TRUE(clp.is_valid() == true);
-    EXPECT_TRUE(clp.cmd() == command_line_parser_command::help);
+    g_clp.reset();
+    EXPECT_NO_EXCEPTION(g_clp.parse(args));
+
+    EXPECT_TRUE(g_clp.cmd() == command_line_parser_command::help);
+    EXPECT_TRUE(g_clp.modules() == "");
 }
 
 void
 bfm_ut::test_command_line_parser_with_dual_bar_help_unknown_option()
 {
-    int argc = 3;
-    const char *argv[] = {"app_name", "--help", "unknown"};
-    command_line_parser clp(argc, argv);
+    auto args = {"--help"_s, "unknown"_s};
 
-    EXPECT_TRUE(clp.is_valid() == true);
-    EXPECT_TRUE(clp.cmd() == command_line_parser_command::help);
+    g_clp.reset();
+    EXPECT_NO_EXCEPTION(g_clp.parse(args));
+
+    EXPECT_TRUE(g_clp.cmd() == command_line_parser_command::help);
+    EXPECT_TRUE(g_clp.modules() == "");
 }
 
 void
-bfm_ut::test_command_line_parser_with_unknown_command_before_valid_start()
+bfm_ut::test_command_line_parser_with_unknown_command_before_valid_load()
 {
-    int argc = 4;
-    const char *argv[] = {"app_name", "unknown_cmd", "start", "filename"};
-    command_line_parser clp(argc, argv);
+    auto args = {"unknown_cmd"_s, "load"_s, "filename"_s};
 
-    EXPECT_TRUE(clp.is_valid() == false);
-    EXPECT_TRUE(clp.cmd() == command_line_parser_command::unknown);
+    g_clp.reset();
+    EXPECT_EXCEPTION(g_clp.parse(args), bfn::unknown_command_error);
+
+    EXPECT_TRUE(g_clp.cmd() == command_line_parser_command::help);
+    EXPECT_TRUE(g_clp.modules() == "");
 }
 
 void
-bfm_ut::test_command_line_parser_with_unknown_command_after_valid_start()
+bfm_ut::test_command_line_parser_with_unknown_command_after_valid_load()
 {
-    int argc = 4;
-    const char *argv[] = {"app_name", "start", "filename", "unknown_cmd"};
-    command_line_parser clp(argc, argv);
+    auto args = {"load"_s, "filename"_s, "unknown_cmd"_s};
 
-    EXPECT_TRUE(clp.is_valid() == true);
-    EXPECT_TRUE(clp.cmd() == command_line_parser_command::start);
-    EXPECT_TRUE(clp.modules() == std::string("filename"));
+    g_clp.reset();
+    EXPECT_NO_EXCEPTION(g_clp.parse(args));
+
+    EXPECT_TRUE(g_clp.cmd() == command_line_parser_command::load);
+    EXPECT_TRUE(g_clp.modules() == "filename");
 }
 
 void
-bfm_ut::test_command_line_parser_with_help_and_valid_start()
+bfm_ut::test_command_line_parser_with_help_and_valid_load()
 {
-    int argc = 4;
-    const char *argv[] = {"app_name", "-h", "start", "filename"};
-    command_line_parser clp(argc, argv);
+    auto args = {"-h"_s, "load"_s, "filename"_s};
 
-    EXPECT_TRUE(clp.is_valid() == true);
-    EXPECT_TRUE(clp.cmd() == command_line_parser_command::help);
+    g_clp.reset();
+    EXPECT_NO_EXCEPTION(g_clp.parse(args));
+
+    EXPECT_TRUE(g_clp.cmd() == command_line_parser_command::help);
+    EXPECT_TRUE(g_clp.modules() == "");
+}
+
+void
+bfm_ut::test_command_line_parser_with_valid_unload()
+{
+    auto args = {"unload"_s};
+
+    g_clp.reset();
+    EXPECT_NO_EXCEPTION(g_clp.parse(args));
+
+    EXPECT_TRUE(g_clp.cmd() == command_line_parser_command::unload);
+    EXPECT_TRUE(g_clp.modules() == "");
+}
+
+void
+bfm_ut::test_command_line_parser_with_valid_start()
+{
+    auto args = {"start"_s};
+
+    g_clp.reset();
+    EXPECT_NO_EXCEPTION(g_clp.parse(args));
+
+    EXPECT_TRUE(g_clp.cmd() == command_line_parser_command::start);
+    EXPECT_TRUE(g_clp.modules() == "");
 }
 
 void
 bfm_ut::test_command_line_parser_with_valid_stop()
 {
-    int argc = 2;
-    const char *argv[] = {"app_name", "stop"};
-    command_line_parser clp(argc, argv);
+    auto args = {"stop"_s};
 
-    EXPECT_TRUE(clp.is_valid() == true);
-    EXPECT_TRUE(clp.cmd() == command_line_parser_command::stop);
+    g_clp.reset();
+    EXPECT_NO_EXCEPTION(g_clp.parse(args));
+
+    EXPECT_TRUE(g_clp.cmd() == command_line_parser_command::stop);
+    EXPECT_TRUE(g_clp.modules() == "");
 }
 
 void
 bfm_ut::test_command_line_parser_with_valid_dump()
 {
-    int argc = 2;
-    const char *argv[] = {"app_name", "dump"};
-    command_line_parser clp(argc, argv);
+    auto args = {"dump"_s};
 
-    EXPECT_TRUE(clp.is_valid() == true);
-    EXPECT_TRUE(clp.cmd() == command_line_parser_command::dump);
+    g_clp.reset();
+    EXPECT_NO_EXCEPTION(g_clp.parse(args));
+
+    EXPECT_TRUE(g_clp.cmd() == command_line_parser_command::dump);
+    EXPECT_TRUE(g_clp.modules() == "");
+}
+
+void
+bfm_ut::test_command_line_parser_with_valid_status()
+{
+    auto args = {"status"_s};
+
+    g_clp.reset();
+    EXPECT_NO_EXCEPTION(g_clp.parse(args));
+
+    EXPECT_TRUE(g_clp.cmd() == command_line_parser_command::status);
+    EXPECT_TRUE(g_clp.modules() == "");
 }

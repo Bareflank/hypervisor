@@ -19,14 +19,14 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <ioctl_driver.h>
+#include <iostream>
 
-ioctl_driver::ioctl_driver(const file *const f,
-                           const ioctl *const ctl,
-                           const command_line_parser *const clp) :
-    m_f(f),
-    m_ctl(ctl),
-    m_clp(clp)
+#include <exception.h>
+#include <transaction.h>
+#include <ioctl_driver.h>
+#include <driver_entry_interface.h>
+
+ioctl_driver::ioctl_driver() noexcept
 {
 }
 
@@ -34,140 +34,162 @@ ioctl_driver::~ioctl_driver()
 {
 }
 
-ioctl_driver_error::type
-ioctl_driver::process() const
+void
+ioctl_driver::process(std::shared_ptr<file> f,
+                      std::shared_ptr<ioctl> ctl,
+                      std::shared_ptr<command_line_parser> clp)
 {
-    if (m_f == NULL ||
-        m_ctl == NULL ||
-        m_clp == NULL)
-    {
-        bfm_error << "Invalid IOCTL driver" << std::endl;
-        return ioctl_driver_error::failure;
-    }
+    if (f == 0)
+        throw invalid_argument(f, "f == NULL");
 
-    if (m_clp->is_valid() == false)
-    {
-        bfm_error << "Invalid command line parser" << std::endl;
-        return ioctl_driver_error::failure;
-    }
+    if (ctl == 0)
+        throw invalid_argument(ctl, "ctl == NULL");
 
-    switch (m_clp->cmd())
+    if (clp == 0)
+        throw invalid_argument(clp, "clp == NULL");
+
+    switch (clp->cmd())
     {
+        case command_line_parser_command::help:
+            return;
+
+        case command_line_parser_command::load:
+            return this->load_vmm(f, ctl, clp);
+
+        case command_line_parser_command::unload:
+            return this->unload_vmm(ctl);
+
         case command_line_parser_command::start:
-            return this->start_vmm();
+            return this->start_vmm(ctl);
 
         case command_line_parser_command::stop:
-            return this->stop_vmm();
+            return this->stop_vmm(ctl);
 
         case command_line_parser_command::dump:
-            return this->dump_vmm();
+            return this->dump_vmm(ctl);
 
-        default:
-        {
-            bfm_error << "Unable to process command. Command is unknown" << std::endl;
-            return ioctl_driver_error::failure;
-        }
+        case command_line_parser_command::status:
+            return this->vmm_status(ctl);
     }
-
-    return ioctl_driver_error::success;
 }
 
-ioctl_driver_error::type
-ioctl_driver::start_vmm() const
+void
+ioctl_driver::load_vmm(const std::shared_ptr<file> &f,
+                       const std::shared_ptr<ioctl> &ctl,
+                       const std::shared_ptr<command_line_parser> &clp)
 {
-    assert(m_f != NULL);
-    assert(m_ctl != NULL);
-    assert(m_clp != NULL);
-
-    auto modules_filename = m_clp->modules();
-
-    if (modules_filename.empty() == true)
+    switch (get_status(ctl))
     {
-        bfm_error << "Unable to start vmm. List of modules was not provided" << std::endl;
-        return ioctl_driver_error::failure;
+        case VMM_RUNNING: stop_vmm(ctl);
+        case VMM_LOADED: unload_vmm(ctl);
+        case VMM_UNLOADED: break;
+        case VMM_CORRUPT: throw corrupt_vmm();
+        default: throw unknown_status();
     }
 
-    if (m_f->exists(modules_filename) == false)
+    auto cor1 = commit_or_rollback([&]
     {
-        bfm_error << "Unable to start vmm. Provided filename for the list of modules does not exist" << std::endl;
-        return ioctl_driver_error::failure;
-    }
+        unload_vmm(ctl);
+    });
 
-    auto modules = m_f->read(modules_filename);
-
-    if (modules.empty() == true)
-    {
-        bfm_error << "Unable to start vmm. Provided list of modules is empty" << std::endl;
-        return ioctl_driver_error::failure;
-    }
-
-    for (const auto &module : split(modules, '\n'))
+    for (const auto &module : split(f->read(clp->modules()), '\n'))
     {
         if (module.empty() == true)
             continue;
 
-        if (m_f->exists(module) == false)
-        {
-            bfm_error << "Unable to start vmm. module does not exist: " << module << std::endl;
-            return ioctl_driver_error::failure;
-        }
-
-        auto contents = m_f->read(module);
-
-        if (contents.empty() == true)
-        {
-            bfm_error << "Unable to start vmm. module is empty: " << module << std::endl;
-            return ioctl_driver_error::failure;
-        }
-
-        auto result = m_ctl->call(ioctl_commands::add_module,
-                                  contents.c_str(),
-                                  contents.length());
-
-        if (result != ioctl_error::success)
-        {
-            bfm_error << "Unable to start vmm. failed to add module: " << module << std::endl;
-            return ioctl_driver_error::failure;
-        }
+        ctl->call_ioctl_add_module(f->read(module));
     }
 
-    if (m_ctl->call(ioctl_commands::start, NULL, 0) != ioctl_error::success)
-    {
-        bfm_error << "failed to start vmm: " << std::endl;
-        return ioctl_driver_error::failure;
-    }
+    ctl->call_ioctl_load_vmm();
 
-    return ioctl_driver_error::success;
+    cor1.commit();
 }
 
-ioctl_driver_error::type
-ioctl_driver::stop_vmm() const
+void
+ioctl_driver::unload_vmm(const std::shared_ptr<ioctl> &ctl)
 {
-    assert(m_f != NULL);
-    assert(m_ctl != NULL);
-    assert(m_clp != NULL);
-
-    if (m_ctl->call(ioctl_commands::stop, NULL, 0) != ioctl_error::success)
+    switch (get_status(ctl))
     {
-        bfm_error << "failed to stop vmm: " << std::endl;
-        return ioctl_driver_error::failure;
+        case VMM_RUNNING: stop_vmm(ctl);
+        case VMM_LOADED: break;
+        case VMM_UNLOADED: break;
+        case VMM_CORRUPT: throw corrupt_vmm();
+        default: throw unknown_status();
     }
 
-    return ioctl_driver_error::success;
+    ctl->call_ioctl_unload_vmm();
 }
 
-ioctl_driver_error::type
-ioctl_driver::dump_vmm() const
+void
+ioctl_driver::start_vmm(const std::shared_ptr<ioctl> &ctl)
 {
-    assert(m_f != NULL);
-    assert(m_ctl != NULL);
-    assert(m_clp != NULL);
-
-    if (m_ctl->call(ioctl_commands::dump, NULL, 0) != ioctl_error::success)
+    switch (get_status(ctl))
     {
-        bfm_error << "failed to dump vmm: " << std::endl;
-        return ioctl_driver_error::failure;
+        case VMM_RUNNING: stop_vmm(ctl);
+        case VMM_LOADED: break;
+        case VMM_UNLOADED: throw invalid_vmm_state("vmm must be loaded first");
+        case VMM_CORRUPT: throw corrupt_vmm();
+        default: throw unknown_status();
     }
 
-    return ioctl_driver_error::success;
+    ctl->call_ioctl_start_vmm();
+}
+
+void
+ioctl_driver::stop_vmm(const std::shared_ptr<ioctl> &ctl)
+{
+    switch (get_status(ctl))
+    {
+        case VMM_RUNNING: break;
+        case VMM_LOADED: return;
+        case VMM_UNLOADED: return;
+        case VMM_CORRUPT: throw corrupt_vmm();
+        default: throw unknown_status();
+    }
+
+    ctl->call_ioctl_stop_vmm();
+}
+
+void
+ioctl_driver::dump_vmm(const std::shared_ptr<ioctl> &ctl)
+{
+    auto drr = debug_ring_resources_t();
+    auto buffer = std::make_unique<char[]>(DEBUG_RING_SIZE);
+
+    switch (get_status(ctl))
+    {
+        case VMM_RUNNING: break;
+        case VMM_LOADED: break;
+        case VMM_UNLOADED: throw invalid_vmm_state("vmm must be loaded first");
+        case VMM_CORRUPT: break;
+        default: throw unknown_status();
+    }
+
+    ctl->call_ioctl_dump_vmm(&drr);
+
+    if (debug_ring_read(&drr, buffer.get(), DEBUG_RING_SIZE) > 0)
+        std::cout << buffer.get();
+}
+
+void
+ioctl_driver::vmm_status(const std::shared_ptr<ioctl> &ctl)
+{
+    switch (get_status(ctl))
+    {
+        case VMM_UNLOADED: std::cout << "VMM_UNLOADED\n"; return;
+        case VMM_LOADED: std::cout << "VMM_LOADED\n"; return;
+        case VMM_RUNNING: std::cout << "VMM_RUNNING\n"; return;
+        case VMM_CORRUPT: std::cout << "VMM_CORRUPT\n"; return;
+        default: throw unknown_status();
+    }
+}
+
+int64_t
+ioctl_driver::get_status(const std::shared_ptr<ioctl> &ctl)
+{
+    int64_t status = -1;
+
+    ctl->call_ioctl_vmm_status(&status);
+
+    return status;
 }

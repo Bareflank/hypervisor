@@ -22,17 +22,20 @@
 #ifndef COMMAND_LINE_PARSER_H
 #define COMMAND_LINE_PARSER_H
 
+#include <vector>
 #include <string>
 
 namespace command_line_parser_command
 {
     enum type
     {
-        unknown = 0,
         help = 1,
-        start = 2,
-        stop = 3,
-        dump = 4
+        load = 2,
+        unload = 3,
+        start = 4,
+        stop = 5,
+        dump = 6,
+        status = 7
     };
 }
 
@@ -55,26 +58,32 @@ public:
 
     /// Command Line Parser Constructor
     ///
-    /// Creates a command line parser given the arc / argv from the
-    /// main function.
+    /// Creates a default command line parser with:
+    /// - cmd() == command_line_parser_command::help
+    /// - modules() == std::string()
     ///
-    /// @param argc argc from main()
-    /// @param argv argv from main()
-    ///
-    command_line_parser(int argc, const char *argv[]);
+    command_line_parser() noexcept;
 
     /// Command Line Parser Destructor
     ///
     virtual ~command_line_parser();
 
-    /// Is Valid
+    /// Parse Command Line
     ///
-    /// This function returns true if the command line arguments provided
-    /// to this function make sense.
+    /// Parses the command line. Upon successfull completion, resets the
+    /// internal state to resemble the provided arguments. On failure, this
+    /// function has a strong no-effect guarentte, and throws an exception.
+    /// If an empty list is provided, this function resets the internal state
+    /// to that of the default constructor
     ///
-    /// @return true if the arguments make sense, false otherwise
+    /// @param args the arguments to parse (likely a list compiled from
+    ///     argc and argv)
+    /// @throws unknown_command_error thrown if the provided arguments do not
+    ///     contain a recognizable command.
+    /// @throws missing_argument_error thrown if a provided argument is
+    ///     missing
     ///
-    virtual bool is_valid() const;
+    virtual void parse(const std::vector<std::string> &args);
 
     /// Command
     ///
@@ -83,7 +92,7 @@ public:
     ///
     /// @return command provided by the arguments
     ///
-    virtual command_line_parser_command::type cmd() const;
+    virtual command_line_parser_command::type cmd() const noexcept;
 
     /// Modules
     ///
@@ -93,17 +102,25 @@ public:
     ///
     /// @return module list filename
     ///
-    virtual std::string modules() const;
+    virtual std::string modules() const noexcept;
+
+    /// Reset
+    ///
+    /// Resets the internal state to that of the default constructor
+    ///
+    void reset() noexcept;
 
 private:
 
-    void parse_start(int argc, const char *argv[], int index);
-    void parse_stop(int argc, const char *argv[], int index);
-    void parse_dump(int argc, const char *argv[], int index);
+    void parse_load(const std::vector<std::string> &args, size_t index);
+    void parse_unload(const std::vector<std::string> &args, size_t index);
+    void parse_start(const std::vector<std::string> &args, size_t index);
+    void parse_stop(const std::vector<std::string> &args, size_t index);
+    void parse_dump(const std::vector<std::string> &args, size_t index);
+    void parse_status(const std::vector<std::string> &args, size_t index);
 
 private:
 
-    bool m_is_valid;
     command_line_parser_command::type m_cmd;
     std::string m_modules;
 };

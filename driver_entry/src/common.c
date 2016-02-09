@@ -27,7 +27,7 @@
 #include <entry.h>
 #include <memory.h>
 #include <constants.h>
-#include <debug_ring_interface.h>
+#include <driver_entry_interface.h>
 
 /* -------------------------------------------------------------------------- */
 /* Global                                                                     */
@@ -663,17 +663,14 @@ corrupted:
 }
 
 int64_t
-common_dump_vmm(void)
+common_dump_vmm(struct debug_ring_resources_t *user_drr)
 {
-    char *rb1 = 0;
-    char *rb2 = 0;
     int64_t ret = 0;
     get_drr_t get_drr = 0;
     struct debug_ring_resources_t *drr = 0;
 
-    uint64_t i = 0;
-    uint64_t j = 0;
-    uint64_t len = 0;
+    if (user_drr == 0)
+        return BF_ERROR_INVALID_ARG;
 
     if (common_vmm_status() == VMM_UNLOADED)
     {
@@ -681,84 +678,21 @@ common_dump_vmm(void)
         return BF_ERROR_VMM_INVALID_STATE;
     }
 
-    rb1 = platform_alloc(DEBUG_RING_SIZE);
-    rb2 = platform_alloc(DEBUG_RING_SIZE + 1);
-    if (rb1 == 0 || rb2 == 0)
-    {
-        ALERT("dump_vmm: failed to allocate memory for the read buffer\n");
-        return BF_ERROR_OUT_OF_MEMORY;
-    }
-
-    for (i = 0; i < DEBUG_RING_SIZE; i++)
-    {
-        rb1[i] = 0;
-        rb2[i] = 0;
-    }
-
     ret = resolve_symbol("get_drr", (void **)&get_drr);
     if (ret != BF_SUCCESS)
     {
         ALERT("dump_vmm: failed to locate get_drr. the symbol is missing "
               "or not loaded\n");
-        goto failure;
+        return ret;
     }
 
     drr = get_drr(0);
     if (drr == 0)
     {
         ALERT("dump_vmm: failed to get debug ring resources\n");
-        goto failure;
+        return BF_ERROR_FAILED_TO_DUMP_DR;
     }
 
-    len = debug_ring_read(drr, rb1, DEBUG_RING_SIZE);
-
-    DEBUG("\n");
-    DEBUG("VMM DUMP:\n");
-    DEBUG("================================================================================\n");
-    DEBUG("\n");
-
-    for (i = 0, j = 0; i < len; i++, j++)
-    {
-        rb2[j] = rb1[i];
-
-        /**
-         * In this case, the user got to the end of the buffer, and they
-         * had a new line, which means that we can stop.
-         */
-        if (rb1[i] == '\0' && j == 0)
-            break;
-
-        /**
-         * In this case, we are at the end of the ring buffer, but the user
-         * forgot to add a newline at the end, so we add one instead.
-         */
-        if (rb1[i] == '\0')
-            rb2[j] = '\n';
-
-        /**
-         * On each newline, we print out the next string. We do not need to
-         * add a newline as it already exists in the buffer itself.
-         */
-        if (rb2[j] == '\n')
-        {
-            rb2[j + 1] = '\0';
-            DEBUG("%s", rb2);
-
-            j = -1;
-        }
-    }
-
-    DEBUG("\n");
-    DEBUG("================================================================================\n");
-    DEBUG("\n");
-
-    platform_free(rb1);
-    platform_free(rb2);
+    *user_drr = *drr;
     return BF_SUCCESS;
-
-failure:
-
-    platform_free(rb1);
-    platform_free(rb2);
-    return BF_ERROR_FAILED_TO_DUMP_DR;
 }

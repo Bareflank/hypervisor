@@ -60,7 +60,7 @@ INCLUDE_PATHS+=./
 INCLUDE_PATHS+=../include/
 INCLUDE_PATHS+=../../include/
 
-LIBS+=bfm
+LIBS+=bfm_static
 
 LIBRARY_PATHS+=../bin/native/
 

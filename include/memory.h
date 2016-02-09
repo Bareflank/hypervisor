@@ -49,10 +49,14 @@ extern "C" {
  * descriptor assocaited with it. The VMM will use this information to create
  * it's resources, as well as generate page tables as needed.
  *
- * @var phys the starting physical address of the block of memory
- * @var virt the starting virtual address of the block of memory
- * @var size the size of the block of memory
- * @var type the type of meory block. This is likely archiecture specific as
+ * @var memory_descriptor::phys
+ *     the starting physical address of the block of memory
+ * @var memory_descriptor::virt
+ *     the starting virtual address of the block of memory
+ * @var memory_descriptor::size
+ *     the size of the block of memory
+ * @var memory_descriptor::type
+ *     the type of meory block. This is likely archiecture specific as
  *     this holds information about access rights, etc...
  */
 struct memory_descriptor

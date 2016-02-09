@@ -19,6 +19,8 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+#include <exception.h>
+
 #include <test.h>
 #include <file.h>
 
@@ -27,44 +29,19 @@
 // successful. These tests at least help us prove that the file class
 // is going to work as intended.
 
-void
-bfm_ut::test_file_exists_with_bad_filename()
-{
-    file f;
-    auto filename = "/tmp/bad_filename.txt";
-
-    EXPECT_TRUE(f.exists(filename) == false);
-}
-
-void
-bfm_ut::test_file_exists_with_good_filename()
-{
-    file f;
-    auto text = "blah";
-    auto filename = "/tmp/bfm_test.txt";
-
-    std::ofstream tmp(filename);
-    tmp << text;
-    tmp.close();
-
-    EXPECT_TRUE(f.exists(filename) == true);
-
-    std::remove(filename);
-}
+file g_f;
 
 void
 bfm_ut::test_file_read_with_bad_filename()
 {
-    file f;
     auto filename = "/tmp/bad_filename.txt";
 
-    EXPECT_TRUE(f.read(filename) == std::string());
+    EXPECT_EXCEPTION(g_f.read(filename), bfn::invalid_file_error);
 }
 
 void
 bfm_ut::test_file_read_with_good_filename()
 {
-    file f;
     auto text = "blah";
     auto filename = "/tmp/bfm_test.txt";
 
@@ -72,7 +49,7 @@ bfm_ut::test_file_read_with_good_filename()
     tmp << text;
     tmp.close();
 
-    EXPECT_TRUE(f.read(filename) == std::string(text));
+    EXPECT_TRUE(g_f.read(filename) == std::string(text));
 
     std::remove(filename);
 }

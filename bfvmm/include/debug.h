@@ -31,7 +31,7 @@
 #define bfcolor_func "\033[1;36m"
 #define bfcolor_line "\033[1;35m"
 
-#define bfendl "\n";
+#define bfendl std::endl
 #define bfverbose "[" << bfcolor_func << __PRETTY_FUNCTION__ << ":" << bfcolor_line << __LINE__ << bfcolor_end << "] "
 
 #define bfinfo std::cout

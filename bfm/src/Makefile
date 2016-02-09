@@ -50,10 +50,10 @@ NATIVE_OUTDIR:=../bin
 ################################################################################
 
 SOURCES+=command_line_parser.cpp
-SOURCES+=debug.cpp
 SOURCES+=file.cpp
 SOURCES+=ioctl_driver.cpp
 SOURCES+=split.cpp
+SOURCES+=../../src/debug_ring_interface.c
 
 INCLUDE_PATHS+=./
 INCLUDE_PATHS+=../include/

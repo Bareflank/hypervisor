@@ -74,13 +74,6 @@ erase(std::string &str, const std::string &substr)
 void
 vcpu::write(std::string &str)
 {
-    erase(str, bfcolor_end);
-    erase(str, bfcolor_debug);
-    erase(str, bfcolor_warning);
-    erase(str, bfcolor_error);
-    erase(str, bfcolor_func);
-    erase(str, bfcolor_line);
-
     if (m_debug_ring != 0)
         m_debug_ring->write(str);
 }

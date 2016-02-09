@@ -19,7 +19,7 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <debug.h>
+#include <exception.h>
 #include <ioctl_private.h>
 #include <driver_entry_interface.h>
 
@@ -27,10 +27,40 @@
 #include <unistd.h>
 #include <sys/ioctl.h>
 
+// -----------------------------------------------------------------------------
+// Unit Test Seems
+// -----------------------------------------------------------------------------
+
+int64_t
+bf_ioctl_open()
+{
+    return open("/dev/bareflank", O_RDWR);
+}
+
+int64_t
+bf_send_ioctl(int64_t fd, unsigned long request)
+{
+    return ioctl(fd, request);
+}
+
+int64_t
+bf_read_ioctl(int64_t fd, unsigned long request, void *data)
+{
+    return ioctl(fd, request, data);
+}
+
+int64_t
+bf_write_ioctl(int64_t fd, unsigned long request, const void *data)
+{
+    return ioctl(fd, request, data);
+}
+
+// -----------------------------------------------------------------------------
+// Implementation
+// -----------------------------------------------------------------------------
+
 ioctl_private::ioctl_private()
 {
-    if ((fd = open("/dev/bareflank", O_RDWR)) < 0)
-        bfm_error << "failed to open bareflank device driver" << std::endl;
 }
 
 ioctl_private::~ioctl_private()
@@ -39,77 +69,77 @@ ioctl_private::~ioctl_private()
         close(fd);
 }
 
-ioctl_error::type
-ioctl_private::call(ioctl_commands::type cmd, const void *const data, int32_t len) const
+void
+ioctl_private::open()
 {
-    int ret;
+    if ((fd = bf_ioctl_open()) < 0)
+        throw driver_inaccessible();
+}
 
-    switch (cmd)
-    {
-        case ioctl_commands::add_module:
-        {
-            if (data == 0)
-            {
-                bfm_error << "invalid argument - data == NULL" << std::endl;
-                return ioctl_error::invalid_arg;
-            }
+void
+ioctl_private::call_ioctl_add_module_length(int64_t len)
+{
+    if (len <= 0)
+        throw invalid_argument(len, "len <= 0");
 
-            if (len == 0)
-            {
-                bfm_error << "invalid argument - length == 0" << std::endl;
-                return ioctl_error::invalid_arg;
-            }
+    if (bf_write_ioctl(fd, IOCTL_ADD_MODULE_LENGTH, &len) < 0)
+        throw ioctl_failed(IOCTL_ADD_MODULE_LENGTH);
+}
 
-            if ((ret = ioctl(fd, IOCTL_ADD_MODULE_LENGTH, len)) < 0)
-            {
-                bfm_error << "failed IOCTL_ADD_MODULE_LENGTH" << std::endl;
-                return ioctl_error::failed_add_module;
-            }
+void
+ioctl_private::call_ioctl_add_module(const char *data)
+{
+    if (data == 0)
+        throw invalid_argument(data, "data == NULL");
 
-            if ((ret = ioctl(fd, IOCTL_ADD_MODULE, data)) < 0)
-            {
-                bfm_error << "failed IOCTL_ADD_MODULE" << std::endl;
-                return ioctl_error::failed_add_module;
-            }
+    if (bf_write_ioctl(fd, IOCTL_ADD_MODULE, data) < 0)
+        throw ioctl_failed(IOCTL_ADD_MODULE);
+}
 
-            return ioctl_error::success;
-        }
+void
+ioctl_private::call_ioctl_load_vmm()
+{
+    if (bf_send_ioctl(fd, IOCTL_LOAD_VMM) < 0)
+        throw ioctl_failed(IOCTL_LOAD_VMM);
+}
 
-        case ioctl_commands::start:
-        {
-            if ((ret = ioctl(fd, IOCTL_START_VMM, 0)) < 0)
-            {
-                bfm_error << "failed IOCTL_START_VMM" << std::endl;
-                return ioctl_error::failed_start;
-            }
+void
+ioctl_private::call_ioctl_unload_vmm()
+{
+    if (bf_send_ioctl(fd, IOCTL_UNLOAD_VMM) < 0)
+        throw ioctl_failed(IOCTL_UNLOAD_VMM);
+}
 
-            return ioctl_error::success;
-        }
+void
+ioctl_private::call_ioctl_start_vmm()
+{
+    if (bf_send_ioctl(fd, IOCTL_START_VMM) < 0)
+        throw ioctl_failed(IOCTL_START_VMM);
+}
 
-        case ioctl_commands::stop:
-        {
-            if ((ret = ioctl(fd, IOCTL_STOP_VMM, 0)) < 0)
-            {
-                bfm_error << "failed IOCTL_STOP_VMM" << std::endl;
-                return ioctl_error::failed_stop;
-            }
+void
+ioctl_private::call_ioctl_stop_vmm()
+{
+    if (bf_send_ioctl(fd, IOCTL_STOP_VMM) < 0)
+        throw ioctl_failed(IOCTL_STOP_VMM);
+}
 
-            return ioctl_error::success;
-        }
+void
+ioctl_private::call_ioctl_dump_vmm(debug_ring_resources_t *drr)
+{
+    if (drr == 0)
+        throw invalid_argument(drr, "drr == NULL");
 
-        case ioctl_commands::dump:
-        {
-            if ((ret = ioctl(fd, IOCTL_DUMP_VMM, 0)) < 0)
-            {
-                bfm_error << "failed IOCTL_DUMP_VMM" << std::endl;
-                return ioctl_error::failed_dump;
-            }
+    if (bf_read_ioctl(fd, IOCTL_DUMP_VMM, drr) < 0)
+        throw ioctl_failed(IOCTL_DUMP_VMM);
+}
 
-            return ioctl_error::success;
-        }
+void
+ioctl_private::call_ioctl_vmm_status(int64_t *status)
+{
+    if (status == 0)
+        throw invalid_argument(status, "status == NULL");
 
-        default:
-            bfm_error << "unknown command" << std::endl;
-            return ioctl_error::invalid_arg;
-    };
+    if (bf_read_ioctl(fd, IOCTL_VMM_STATUS, status) < 0)
+        throw ioctl_failed(IOCTL_VMM_STATUS);
 }

@@ -22,22 +22,86 @@
 #include <ioctl.h>
 #include <ioctl_private.h>
 
-ioctl::ioctl()
+ioctl::ioctl() noexcept
 {
-    d = (void *) new ioctl_private();
+    m_d = std::make_shared<ioctl_private>();
 }
 
 ioctl::~ioctl()
 {
-    if (d != 0)
-        delete(ioctl_private *)d;
 }
 
-ioctl_error::type
-ioctl::call(ioctl_commands::type cmd, const void *const data, int32_t len) const
+void
+ioctl::open()
 {
-    if (d != 0)
-        return ((ioctl_private *)d)->call(cmd, data, len);
+    auto d = std::dynamic_pointer_cast<ioctl_private>(m_d);
 
-    return ioctl_error::unknown;
+    if (d)
+        d->open();
+}
+
+void
+ioctl::call_ioctl_add_module(const std::string &str)
+{
+    auto d = std::dynamic_pointer_cast<ioctl_private>(m_d);
+
+    if (d)
+    {
+        d->call_ioctl_add_module_length(str.length());
+        d->call_ioctl_add_module(str.c_str());
+    }
+}
+
+void
+ioctl::call_ioctl_load_vmm()
+{
+    auto d = std::dynamic_pointer_cast<ioctl_private>(m_d);
+
+    if (d)
+        d->call_ioctl_load_vmm();
+}
+
+void
+ioctl::call_ioctl_unload_vmm()
+{
+    auto d = std::dynamic_pointer_cast<ioctl_private>(m_d);
+
+    if (d)
+        d->call_ioctl_unload_vmm();
+}
+
+void
+ioctl::call_ioctl_start_vmm()
+{
+    auto d = std::dynamic_pointer_cast<ioctl_private>(m_d);
+
+    if (d)
+        d->call_ioctl_start_vmm();
+}
+
+void
+ioctl::call_ioctl_stop_vmm()
+{
+    auto d = std::dynamic_pointer_cast<ioctl_private>(m_d);
+
+    if (d)
+        d->call_ioctl_stop_vmm();
+}
+
+void
+ioctl::call_ioctl_dump_vmm(debug_ring_resources_t *drr)
+{
+    auto d = std::dynamic_pointer_cast<ioctl_private>(m_d);
+
+    if (d)
+        d->call_ioctl_dump_vmm(drr);
+}
+
+void
+ioctl::call_ioctl_vmm_status(int64_t *status)
+{
+    auto d = std::dynamic_pointer_cast<ioctl_private>(m_d);
+
+    if (d)
+        d->call_ioctl_vmm_status(status);
 }

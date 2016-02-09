@@ -41,44 +41,56 @@ include ./common/common_subdir.mk
 CS_M='\033[1;95m'
 
 .PHONY: debian_load
-.PHONY: debian_clean
+.PHONY: debian_unload
+.PHONY: load
+.PHONY: unload
 .PHONY: start
 .PHONY: stop
-.PHONY: cycle
-.PHONY: cycle_dump
+.PHONY: dump
 .PHONY: loop
 
-debian_load:
+debian_load: force
 	cd driver_entry/src/arch/linux; \
 	sudo make unload; \
 	make clean; \
 	make; \
 	sudo make load
 
-debian_clean:
+debian_unload: force
 	cd driver_entry/src/arch/linux; \
 	sudo make unload; \
 	make clean
 
-start:
+load: force
 	cd bfm/bin/native; \
-	sudo ./run.sh start vmm.modules
+	sudo ./run.sh load vmm.modules
 
-stop:
+unload: force
+	cd bfm/bin/native; \
+	sudo ./run.sh unload
+
+start: force
+	cd bfm/bin/native; \
+	sudo ./run.sh start
+
+stop: force
 	cd bfm/bin/native; \
 	sudo ./run.sh stop
 
-dump:
+dump: force
 	cd bfm/bin/native; \
 	sudo ./run.sh dump
 
-cycle: start stop
-
-cycle_dump: start dump stop
+status: force
+	cd bfm/bin/native; \
+	sudo ./run.sh status
 
 loop: force
 	@for n in $(shell seq 1 $(NUM)); do \
 		echo $(CS_M)"cycle: $$n"$(CE); \
-		$(MAKE) cycle; \
+		$(MAKE) load; \
+		$(MAKE) start; \
+		$(MAKE) stop; \
+		$(MAKE) unload; \
 		echo; \
-    done
+    done \
