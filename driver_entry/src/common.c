@@ -38,6 +38,8 @@ int64_t g_vmm_status = VMM_UNLOADED;
 uint64_t g_num_modules = 0;
 struct module_t g_modules[MAX_NUM_MODULES] = {0};
 
+struct bfelf_loader_t g_loader;
+
 /* -------------------------------------------------------------------------- */
 /* Helpers                                                                    */
 /* -------------------------------------------------------------------------- */
@@ -81,7 +83,7 @@ resolve_symbol(const char *name, void **sym)
     str.buf = name;
     str.len = symbol_length(name);
 
-    ret = bfelf_resolve_symbol(&module->file, &str, sym);
+    ret = bfelf_loader_resolve_symbol(&g_loader, &str, sym);
     if (ret != BFELF_SUCCESS)
     {
         ALERT("%s could not be found: %" PRId64 " - %s\n", name, ret, bfelf_error(ret));
@@ -122,110 +124,6 @@ execute_symbol(const char *sym, int64_t arg)
     DEBUG("%s executed successfully:\n", sym);
     DEBUG("    - exit code: %ld\n", (long)ret);
     DEBUG("\n");
-
-    return BF_SUCCESS;
-}
-
-int64_t
-execute_ctors(struct bfelf_file_t *bfelf_file)
-{
-    int64_t i = 0;
-    int64_t ret = 0;
-
-    if (bfelf_file == 0)
-        return BF_ERROR_INVALID_ARG;
-
-    for (i = 0; i < bfelf_ctor_num(bfelf_file); i++)
-    {
-        ctor_func func;
-
-        ret = bfelf_resolve_ctor(bfelf_file, i, (void **)&func);
-        if (ret != BF_SUCCESS)
-        {
-            ALERT("execute_ctors: failed to resolve ctor: %" PRId64 "\n", ret);
-            return ret;
-        }
-
-        func();
-    }
-
-    return BF_SUCCESS;
-}
-
-int64_t
-execute_dtors(struct bfelf_file_t *bfelf_file)
-{
-    int64_t i = 0;
-    int64_t ret = 0;
-
-    if (bfelf_file == 0)
-        return BF_ERROR_INVALID_ARG;
-
-    for (i = 0; i < bfelf_dtor_num(bfelf_file); i++)
-    {
-        dtor_func func;
-
-        ret = bfelf_resolve_dtor(bfelf_file, i, (void **)&func);
-        if (ret != BF_SUCCESS)
-        {
-            ALERT("execute_dtors: failed to resolve dtor: %" PRId64 "\n", ret);
-            return ret;
-        }
-
-        func();
-    }
-
-    return BF_SUCCESS;
-}
-
-int64_t
-execute_inits(struct bfelf_file_t *bfelf_file)
-{
-    int64_t i = 0;
-    int64_t ret = 0;
-
-    if (bfelf_file == 0)
-        return BF_ERROR_INVALID_ARG;
-
-    for (i = 0; i < bfelf_init_num(bfelf_file); i++)
-    {
-        init_func func;
-
-        ret = bfelf_resolve_init(bfelf_file, i, (void **)&func);
-        if (ret != BF_SUCCESS)
-        {
-            ALERT("execute_inits: failed to resolve init: %" PRId64 "\n", ret);
-            return ret;
-        }
-
-        func();
-    }
-
-    return BF_SUCCESS;
-}
-
-int64_t
-execute_finis(struct bfelf_file_t *bfelf_file)
-{
-    int64_t i = 0;
-    int64_t ret = 0;
-
-    if (bfelf_file == 0)
-        return BF_ERROR_INVALID_ARG;
-
-    for (i = 0; i < bfelf_fini_num(bfelf_file); i++)
-    {
-        fini_func func;
-
-        ret = bfelf_resolve_fini(bfelf_file, i, (void **)&func);
-        if (ret != BF_SUCCESS)
-        {
-            ALERT("execute_finis: failed to resolve fini: %" PRId64 "\n", ret);
-            return ret;
-        }
-
-        func();
-    }
 
     return BF_SUCCESS;
 }
@@ -286,6 +184,59 @@ failure:
     return ret;
 }
 
+uint64_t
+get_elf_file_size(struct bfelf_file_t *ef)
+{
+    bfelf64_word i = 0;
+    bfelf64_xword total = 0;
+    bfelf64_xword num_segments = bfelf_file_num_segments(ef);
+
+    if (ef == 0)
+        return BF_ERROR_INVALID_ARG;
+
+    for (i = 0; i < num_segments; i++)
+    {
+        int64_t ret = 0;
+        struct bfelf_phdr *phdr = 0;
+
+        ret = bfelf_file_get_segment(ef, i, &phdr);
+        if (ret != BFELF_SUCCESS)
+            return ret;
+
+        if (total < phdr->p_vaddr + phdr->p_memsz)
+            total = phdr->p_vaddr + phdr->p_memsz;
+    }
+
+    return total;
+}
+
+int64_t
+load_elf_file(struct bfelf_file_t *ef, char *exec, uint64_t size)
+{
+    bfelf64_word i = 0;
+    bfelf64_xword num_segments = bfelf_file_num_segments(ef);
+
+    if (ef == 0 || exec == 0 || size == 0)
+        return BF_ERROR_INVALID_ARG;
+
+    platform_memset(exec, 0, size);
+
+    for (i = 0; i < num_segments; i++)
+    {
+        int64_t ret = 0;
+        struct bfelf_phdr *phdr = 0;
+
+        ret = bfelf_file_get_segment(ef, i, &phdr);
+        if (ret != BFELF_SUCCESS)
+            return ret;
+
+        platform_memcpy(exec + phdr->p_vaddr, ef->file + phdr->p_offset,
+                        phdr->p_filesz);
+    }
+
+    return BF_SUCCESS;
+}
+
 /* -------------------------------------------------------------------------- */
 /* Implementation                                                             */
 /* -------------------------------------------------------------------------- */
@@ -313,6 +264,8 @@ common_reset(void)
 
     g_num_modules = 0;
     g_vmm_status = VMM_UNLOADED;
+
+    platform_memset(&g_loader, 0, sizeof(struct bfelf_loader_t));
 
     return BF_SUCCESS;
 }
@@ -402,11 +355,11 @@ common_add_module(char *file, int64_t fsize)
         return ret;
     }
 
-    module->size = bfelf_total_exec_size(&module->file);
-    if (module->size < BFELF_SUCCESS)
+    module->size = get_elf_file_size(&module->file);
+    if (module->size < BF_SUCCESS)
     {
-        ALERT("add_module: failed to get the module's exec size %" PRId64 " - %s\n",
-              module->size, bfelf_error(module->size));
+        ALERT("add_module: failed to get the module's exec size %" PRId64 "\n",
+              module->size);
         return module->size;
     }
 
@@ -417,11 +370,10 @@ common_add_module(char *file, int64_t fsize)
         return 0;
     }
 
-    ret = bfelf_file_load(&module->file, module->exec, module->size);
-    if (ret != BFELF_SUCCESS)
+    ret = load_elf_file(&module->file, module->exec, module->size);
+    if (ret != BF_SUCCESS)
     {
-        ALERT("add_module: failed to load the elf module: %" PRId64 " - %s\n",
-              ret, bfelf_error(ret));
+        ALERT("add_module: failed to load the elf module: %" PRId64 "\n", ret);
         goto failure;
     }
 
@@ -440,7 +392,6 @@ common_load_vmm(void)
     int64_t i = 0;
     int64_t ret = 0;
     struct module_t *module = 0;
-    struct bfelf_loader_t loader = {0};
 
     if (common_vmm_status() == VMM_CORRUPT)
     {
@@ -464,18 +415,12 @@ common_load_vmm(void)
         return BF_ERROR_NO_MODULES_ADDED;
     }
 
-    ret = bfelf_loader_init(&loader);
-    if (ret != BFELF_SUCCESS)
-    {
-        ALERT("load_vmm: failed to initialize the elf loader: %" PRId64 " - %s\n",
-              ret, bfelf_error(ret));
-        goto failure;
-    }
+    platform_memset(&g_loader, 0, sizeof(struct bfelf_loader_t));
 
     i = 0;
     while ((module = get_module(i++)) != 0)
     {
-        ret = bfelf_loader_add(&loader, &module->file);
+        ret = bfelf_loader_add(&g_loader, &module->file, module->exec);
         if (ret != BFELF_SUCCESS)
         {
             ALERT("load_vmm: failed to add elf file to the elf loader: "
@@ -484,7 +429,7 @@ common_load_vmm(void)
         }
     }
 
-    ret = bfelf_loader_relocate(&loader);
+    ret = bfelf_loader_relocate(&g_loader);
     if (ret != BFELF_SUCCESS)
     {
         ALERT("load_vmm: failed to relocate the elf loader: %" PRId64 " - %s\n",
@@ -495,19 +440,16 @@ common_load_vmm(void)
     i = 0;
     while ((module = get_module(i++)) != 0)
     {
-        ret = execute_ctors(&module->file);
+        struct section_info_t info = {0};
+
+        ret = bfelf_loader_get_info(&g_loader, &module->file, &info);
         if (ret != BF_SUCCESS)
         {
-            ALERT("load_vmm: failed to execute ctors: %" PRId64 "\n", ret);
+            ALERT("load_vmm: failed to get info: %" PRId64 "\n", ret);
             goto failure;
         }
 
-        ret = execute_inits(&module->file);
-        if (ret != BF_SUCCESS)
-        {
-            ALERT("load_vmm: failed to execute inits: %" PRId64 "\n", ret);
-            goto failure;
-        }
+        info.local_init(&info);
     }
 
     i = 0;
@@ -555,19 +497,16 @@ common_unload_vmm(void)
         i = 0;
         while ((module = get_module(i++)) != 0)
         {
-            ret = execute_finis(&module->file);
+            struct section_info_t info = {0};
+
+            ret = bfelf_loader_get_info(&g_loader, &module->file, &info);
             if (ret != BF_SUCCESS)
             {
-                ALERT("unload_vmm: failed to execute finis: %" PRId64 "\n", ret);
+                ALERT("unload_vmm: failed to get info: %" PRId64 "\n", ret);
                 goto corrupted;
             }
 
-            ret = execute_dtors(&module->file);
-            if (ret != BF_SUCCESS)
-            {
-                ALERT("unload_vmm: failed to execute dtors: %" PRId64 "\n", ret);
-                goto corrupted;
-            }
+            info.local_fini(&info);
         }
     }
 

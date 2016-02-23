@@ -109,14 +109,25 @@ done
 
 if [[ $BAREFLANK_WRAPPER_INCLUDE_LIBC == "true" ]]; then
     SYSROOT_LIBS="-lc -lm -lbfc"
-    SYSROOT_LIB_PATH="-L$HOME/opt/cross/x86_64-elf/lib/"
 fi
+
+SYSROOT_LIB_PATH="-L$HOME/opt/cross/x86_64-elf/lib/"
 
 # ------------------------------------------------------------------------------
 # Sysroot Includes
 # ------------------------------------------------------------------------------
 
-SYSROOT_INC_PATH="-I$HOME/opt/cross/x86_64-elf/include/ -I$HOME/opt/cross/x86_64-elf/include/c++/v1/"
+SYSROOT_INC_PATH="-I$HOME/opt/cross/x86_64-elf/include/ -I$HOME/opt/cross/x86_64-elf/include/c++/v1/ "
+
+# REMOVE ME
+#
+# For whatever reason, Libcxx is running a test during it's initial compilation
+# and it needs access to the includes, but doesn't supply them on the
+# command line. This fixes that issue for now.
+
+if [[ $BAREFLANK_WRAPPER_INCLUDE_TMPLIBCXX == "true" ]]; then
+    SYSROOT_INC_PATH+="-I$HOME/tmp-build-dir/libcxx/include/ "
+fi
 
 # ------------------------------------------------------------------------------
 # Libgcc
@@ -126,7 +137,7 @@ LIBGCC_FILENAME=`$COMPILER -mno-red-zone -print-libgcc-file-name`
 LIBGCC_DIRNAME=`dirname $LIBGCC_FILENAME`
 
 if [[ $MODE == "link" ]]; then
-    LIBGCC_LIBS="-lgcc"
+    LIBGCC_LIBS="-u local_init -u local_fini -lcrt -lgcc"
     LIBGCC_LIB_PATH="-L$LIBGCC_DIRNAME"
 fi
 

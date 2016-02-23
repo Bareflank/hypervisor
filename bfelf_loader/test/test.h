@@ -22,8 +22,12 @@
 #ifndef TEST_H
 #define TEST_H
 
+#include <memory>
+
 #include <unittest.h>
-#include <bfelf_loader.h>
+#include <transaction.h>
+
+#include <test_elf.h>
 
 class bfelf_loader_ut : public unittest
 {
@@ -40,63 +44,108 @@ protected:
 
 private:
 
-    void test_bfelf_file_init();
-    void test_bfelf_file_size();
-    void test_bfelf_file_load();
-    void test_bfelf_loader_init();
-    void test_bfelf_loader_add();
-    void test_bfelf_loader_relocate();
-    void test_bfelf_section_header();
-    void test_bfelf_string_table_entry();
-    void test_bfelf_section_name_string();
-    void test_bfelf_symbol_by_index();
-    void test_bfelf_symbol_by_name();
-    void test_bfelf_symbol_by_name_global();
-    void test_bfelf_resolve_symbol();
-    void test_bfelf_relocate_symbol();
-    void test_bfelf_relocate_symbol_addend();
-    void test_bfelf_relocate_symbols();
-    void test_bfelf_ctor_num();
-    void test_bfelf_dtor_num();
-    void test_bfelf_resolve_ctor();
-    void test_bfelf_resolve_dtor();
-    void test_bfelf_init_num();
-    void test_bfelf_fini_num();
-    void test_bfelf_resolve_init();
-    void test_bfelf_resolve_fini();
-    void test_bfelf_program_header();
-    void test_bfelf_load_segments();
-    void test_bfelf_load_segment();
+    std::shared_ptr<char> load_elf_file(struct bfelf_file_t *ef);
+    bfelf_test get_test() const;
 
-    void test_bfelf_file_print_header();
-    void test_bfelf_print_section_header_table();
-    void test_bfelf_print_program_header_table();
-    void test_bfelf_print_sym_table();
-    void test_bfelf_print_relocations();
+    void test_bfelf_file_init_success();
+    void test_bfelf_file_init_invalid_file_arg();
+    void test_bfelf_file_init_invalid_file_size_arg();
+    void test_bfelf_file_init_invalid_elf_file();
+    void test_bfelf_file_init_invalid_magic_0();
+    void test_bfelf_file_init_invalid_magic_1();
+    void test_bfelf_file_init_invalid_magic_2();
+    void test_bfelf_file_init_invalid_magic_3();
+    void test_bfelf_file_init_invalid_class();
+    void test_bfelf_file_init_invalid_data();
+    void test_bfelf_file_init_invalid_ident_version();
+    void test_bfelf_file_init_invalid_osabi();
+    void test_bfelf_file_init_invalid_abiversion();
+    void test_bfelf_file_init_invalid_type();
+    void test_bfelf_file_init_invalid_machine();
+    void test_bfelf_file_init_invalid_version();
+    void test_bfelf_file_init_invalid_flags();
+    void test_bfelf_file_init_invalid_header_size();
+    void test_bfelf_file_init_invalid_program_header_size();
+    void test_bfelf_file_init_invalid_section_header_size();
+    void test_bfelf_file_init_invalid_program_header_offset();
+    void test_bfelf_file_init_invalid_section_header_offset();
+    void test_bfelf_file_init_invalid_program_header_num();
+    void test_bfelf_file_init_invalid_section_header_num();
+    void test_bfelf_file_init_invalid_section_header_string_table_index();
+    void test_bfelf_file_init_invalid_segment_file_size();
+    void test_bfelf_file_init_invalid_segment_addresses();
+    void test_bfelf_file_init_invalid_segment_alignment();
+    void test_bfelf_file_init_invalid_segment_offset();
+    void test_bfelf_file_init_invalid_section_offset();
+    void test_bfelf_file_init_invalid_section_size();
+    void test_bfelf_file_init_invalid_section_name();
+    void test_bfelf_file_init_invalid_section_link();
+    void test_bfelf_file_init_invalid_segment_address();
+    void test_bfelf_file_init_invalid_segment_size();
+    void test_bfelf_file_init_invalid_entry();
+    void test_bfelf_file_init_invalid_section_type();
+    void test_bfelf_file_init_invalid_section_flags();
+    void test_bfelf_file_init_invalid_section_address_alignment();
+    void test_bfelf_file_init_invalid_section_entry_size();
+    void test_bfelf_file_init_missing_dynsym();
+    void test_bfelf_file_init_too_many_program_segments();
+    void test_bfelf_file_init_too_many_relocation_tables();
+    void test_bfelf_file_init_invalid_hash_table_size1();
+    void test_bfelf_file_init_invalid_hash_table_size2();
+    void test_bfelf_file_init_invalid_hash_table_size3();
 
-    void test_resolve();
+    void test_bfelf_file_num_segments_invalid_ef();
+    void test_bfelf_file_num_segments_uninitalized();
+    void test_bfelf_file_num_segments_success();
+
+    void test_bfelf_file_get_segment_invalid_ef();
+    void test_bfelf_file_get_segment_invalid_index();
+    void test_bfelf_file_get_segment_invalid_phdr();
+    void test_bfelf_file_get_segment_success();
+
+    void test_bfelf_loader_add_invalid_loader();
+    void test_bfelf_loader_add_invalid_elf_file();
+    void test_bfelf_loader_add_too_many_files();
+
+    void test_bfelf_loader_resolve_symbol_invalid_loader();
+    void test_bfelf_loader_resolve_symbol_invalid_name();
+    void test_bfelf_loader_resolve_symbol_invalid_addr();
+    void test_bfelf_loader_resolve_symbol_no_relocation();
+    void test_bfelf_loader_resolve_symbol_no_files_added();
+    void test_bfelf_loader_resolve_symbol_uninitialized_files();
+    void test_bfelf_loader_resolve_no_such_symbol();
+    void test_bfelf_loader_resolve_zero_length_symbol();
+    void test_bfelf_loader_resolve_invalid_symbol_length();
+    void test_bfelf_loader_resolve_symbol_length_too_large();
+    void test_bfelf_loader_resolve_symbol_success();
+    void test_bfelf_loader_resolve_no_such_symbol_no_hash();
+    void test_bfelf_loader_resolve_zero_length_symbol_no_hash();
+    void test_bfelf_loader_resolve_invalid_symbol_length_no_hash();
+    void test_bfelf_loader_resolve_symbol_length_too_large_no_hash();
+    void test_bfelf_loader_resolve_symbol_success_no_hash();
+    void test_bfelf_loader_resolve_symbol_real_test();
+
+    void test_bfelf_loader_relocate_invalid_loader();
+    void test_bfelf_loader_relocate_no_files_added();
+    void test_bfelf_loader_relocate_uninitialized_files();
+    void test_bfelf_loader_relocate_twice();
+
+    void test_bfelf_loader_get_info_invalid_loader();
+    void test_bfelf_loader_get_info_invalid_elf_file();
+    void test_bfelf_loader_get_info_invalid_info();
+    void test_bfelf_loader_get_info_no_relocation();
+    void test_bfelf_loader_get_info_expected_misc_resources();
+    void test_bfelf_loader_get_info_expected_code_resources();
 
 private:
 
-    char *m_dummy_misc;
-    char *m_dummy_code;
-    int32_t m_dummy_misc_length;
-    int32_t m_dummy_code_length;
+    std::shared_ptr<char> m_dummy_misc;
+    std::shared_ptr<char> m_dummy_code;
+    int64_t m_dummy_misc_length;
+    int64_t m_dummy_code_length;
 
-    char *m_dummy_misc_exec;
-    char *m_dummy_code_exec;
-    int32_t m_dummy_misc_esize;
-    int32_t m_dummy_code_esize;
-
-    bfelf_file_t m_dummy_misc_ef;
-    bfelf_file_t m_dummy_code_ef;
-
-    char *m_test_exec;
-    int32_t m_test_esize;
-    bfelf_file_t m_test_elf;
-
-    bfelf_loader_t m_loader;
-    bfelf_loader_t m_test_loader;
+    std::shared_ptr<char> m_dummy_misc_exec;
+    std::shared_ptr<char> m_dummy_code_exec;
 };
 
 #endif

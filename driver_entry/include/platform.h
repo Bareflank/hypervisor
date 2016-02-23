@@ -88,6 +88,26 @@ platform_free(void *addr);
 void
 platform_free_exec(void *addr, int64_t len);
 
+/**
+ * Memset
+ *
+ * @param ptr a pointer to the memory to set
+ * @param value the value to set each byte to
+ * @param num the number of bytes to set
+ */
+void
+platform_memset(void *ptr, char value, int64_t num);
+
+/**
+ * Memcpy
+ *
+ * @param dst a pointer to the memory to copy to
+ * @param src a pointer to the memory to copy from
+ * @param num the number of bytes to copy
+ */
+void
+platform_memcpy(void *dst, const void *src, int64_t num);
+
 #ifdef __cplusplus
 }
 #endif

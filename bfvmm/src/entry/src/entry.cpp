@@ -21,6 +21,7 @@
 
 #include <debug.h>
 #include <entry.h>
+#include <constants.h>
 #include <vcpu/vcpu_manager.h>
 #include <memory_manager/memory_manager.h>
 

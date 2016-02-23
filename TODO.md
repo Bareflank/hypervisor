@@ -5,8 +5,6 @@ Misc:
 - We need to go through all of the error codes, and map out blocks for each
   module, driver, elf error, etc... This way, when an error bubbles through
   the system, it's easy to identify
-- Add support for weak / strong symbols in the ELF loader as this could get us
-  in trouble at some point.
 - Destructors for statically created classes are not being called. This should
   be resolved at some point.
 - Add support for clang/LLVM
@@ -16,13 +14,6 @@ Version 1.0 TODO:
 - Need to have all of the VMCS checks implemented and unit tested
 - Need to have all of the remaining unit tests completed (i.e. all of the
   VMM modules need their unit tests completed including serial)
-- remove the "valid" flag in the elf loader as it it meaning less and each
-  function should be able to live on it's own.
-- redo the elf_loader unit test to use hippo mocks. Doing so will allow us to
-  mock up a function's dependencis, allowing us to test each function's tasks
-  better
-- cleanup the elf_loader as it has newlines for function calls in the header,
-  which was abandoned.
 - Everything should be using the new debug.h instead of manually calling
   std::cout
 - Provide support for Debian, Fedora, CentOS

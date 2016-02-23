@@ -1,5 +1,37 @@
 #!/bin/bash -e
 
+# Options:
+#
+# export SILENCE=true
+#     Tells the script to redirect all output to a set of log files. This
+#     is mainly used by Travis CI because it cannot handle all of the output
+#     that this scripts spits out.
+#
+# export KEEP_TMP=true
+#     Tells the script to keep the tmp directory when it's finished. This is
+#     used by developers of this script so that you can work on the script
+#     without having to recompile every step constantly. If you need to
+#     re-execute a step, simply delete the associated "touch" portion of the
+#     step, and it will re-execute your step, and any step that depends on
+#     that step.
+#
+# export BINUTILS_URL=<url>
+# export GCC_URL=<url>
+# export GCC_PATCH_URL=<url>
+# export NASM_URL=<url>
+# export NEWLIB_URL=<url>
+# export CMAKE_URL=<url>
+#     Tells the script to use the URL for the package provided. This is also
+#     used by Travis CI, but can be used by anyone, to taget specific versions
+#     of software. For example, this can be used to create GCC 5.3.0 instead
+#     of the default.
+#
+#     Note that not all versions of software are supported, so it's possible
+#     that changing one of these might cause you to create a build environment
+#     that is not supported. To see the list of supported variations, please
+#     see the Travis CI script, or supporting documentation.
+#
+
 # ------------------------------------------------------------------------------
 # Silence
 # ------------------------------------------------------------------------------
@@ -10,9 +42,9 @@
 # we supress output here, and then use a script in Travis CI to ping it's
 # watchdog every so often to keep this script alive.
 
-if [ -n "${SILENCE+1}" ]; then
-  exec 1>~/create-cross-compiler_stdout.log
-  exec 2>~/create-cross-compiler_stderr.log
+if [ -n "$SILENCE" ]; then
+    exec 1>~/create-cross-compiler_stdout.log
+    exec 2>~/create-cross-compiler_stderr.log
 fi
 
 # ------------------------------------------------------------------------------
@@ -91,6 +123,24 @@ if [ -z "$CMAKE_URL" ]; then
 fi
 
 # ------------------------------------------------------------------------------
+# Debugging
+# ------------------------------------------------------------------------------
+
+echo BINUTILS_URL = $BINUTILS_URL
+echo GCC_URL = $GCC_URL
+echo GCC_PATCH_URL = $GCC_PATCH_URL
+echo NASM_URL = $NASM_URL
+echo NEWLIB_URL = $NEWLIB_URL
+echo CMAKE_URL = $CMAKE_URL
+
+echo TMPDIR = $TMPDIR
+echo PREFIX = $PREFIX
+echo TARGET = $TARGET
+echo SYSROOT = $SYSROOT
+echo PATH = $PATH
+echo HYPERVISOR_ROOT = $HYPERVISOR_ROOT
+
+# ------------------------------------------------------------------------------
 # Setup
 # ------------------------------------------------------------------------------
 
@@ -108,35 +158,43 @@ fi
 
 pushd $TMPDIR
 
+set -x
+
 # ------------------------------------------------------------------------------
 # Fetch
 # ------------------------------------------------------------------------------
 
 if [ ! -d "binutils" ]; then
+    rm -Rf completed_build_binutils
     wget --no-check-certificate $BINUTILS_URL
     tar xvf binutils-*.tar.bz2
     mv binutils-*/ binutils
 fi
 
 if [ ! -d "gcc" ]; then
+    rm -Rf completed_build_gcc
+    rm -Rf completed_patch_gcc
     wget --no-check-certificate $GCC_URL
     tar xvf gcc-*.tar.bz2
     mv gcc-*/ gcc
 fi
 
 if [ ! -d "nasm" ]; then
+    rm -Rf completed_build_nasm
     wget --no-check-certificate $NASM_URL
     tar xvf nasm-*.tar.gz
     mv nasm-*/ nasm
 fi
 
 if [ ! -d "newlib" ]; then
+    rm -Rf completed_build_newlib
     wget --no-check-certificate $NEWLIB_URL
     tar xvf newlib-*.tar.gz
     mv newlib-*/ newlib
 fi
 
 if [ ! -d "cmake" ]; then
+    rm -Rf completed_build_cmake
     wget --no-check-certificate $CMAKE_URL
     tar xvf cmake-*.tar.gz
     mv cmake-*/ cmake
@@ -148,14 +206,17 @@ if [ ! -f "gcc_bareflank.patch" ]; then
 fi
 
 if [ ! -d "libbfc" ]; then
+    rm -Rf completed_build_libbfc
     git clone --depth 1 https://github.com/Bareflank/libbfc.git
 fi
 
 if [ ! -d "libcxxabi" ]; then
+    rm -Rf completed_build_libcxxabi
     git clone --depth 1 http://llvm.org/git/libcxxabi
 fi
 
 if [ ! -d "libcxx" ]; then
+    rm -Rf completed_build_libcxx
     git clone --depth 1 http://llvm.org/git/libcxx
 fi
 
@@ -267,6 +328,7 @@ if [ ! -f "completed_build_nasm" ]; then
     touch completed_build_nasm
 fi
 
+
 # ------------------------------------------------------------------------------
 # Flags
 # ------------------------------------------------------------------------------
@@ -277,36 +339,38 @@ fi
 # note that we build the flags upon each other to ensure that the flags are
 # consistent.
 
-NEWLIB_DEFINES="$NEWLIB_DEFINES -D_HAVE_LONG_DOUBLE"
-NEWLIB_DEFINES="$NEWLIB_DEFINES -D_LDBL_EQ_DBL"
-NEWLIB_DEFINES="$NEWLIB_DEFINES -D_POSIX_TIMERS"
-NEWLIB_DEFINES="$NEWLIB_DEFINES -U__STRICT_ANSI__"
-NEWLIB_DEFINES="$NEWLIB_DEFINES -DMALLOC_PROVIDED"
-NEWLIB_DEFINES="$NEWLIB_DEFINES -D_NEWLIB_VERSION"
+export NEWLIB_DEFINES="-D_HAVE_LONG_DOUBLE -D_LDBL_EQ_DBL -D_POSIX_TIMERS -U__STRICT_ANSI__ -DMALLOC_PROVIDED -D_NEWLIB_VERSION" 2> /dev/null
+export LIBBFC_DEFINES="-DSYM_PROVIDED__WRITE -DSYM_PROVIDED__MALLOC -DSYM_PROVIDED__FREE -DSYM_PROVIDED__CALLOC -DSYM_PROVIDED__REALLOC" 2> /dev/null
+export CFLAGS="-fpic -ffreestanding -mno-red-zone $NEWLIB_DEFINES" 2> /dev/null
+export CXXFLAGS="-fno-use-cxa-atexit -fno-threadsafe-statics $CFLAGS" 2> /dev/null
 
-LIBBFC_DEFINES="$LIBBFC_DEFINES -DSYM_PROVIDED__WRITE"
-LIBBFC_DEFINES="$LIBBFC_DEFINES -DSYM_PROVIDED__MALLOC"
-LIBBFC_DEFINES="$LIBBFC_DEFINES -DSYM_PROVIDED__FREE"
-LIBBFC_DEFINES="$LIBBFC_DEFINES -DSYM_PROVIDED__CALLOC"
-LIBBFC_DEFINES="$LIBBFC_DEFINES -DSYM_PROVIDED__REALLOC"
+# ------------------------------------------------------------------------------
+# CRT
+# ------------------------------------------------------------------------------
 
-CFLAGS="$CFLAGS -fpic"
-CFLAGS="$CFLAGS -ffreestanding"
-CFLAGS="$CFLAGS -mno-red-zone"
-CFLAGS="$CFLAGS $NEWLIB_DEFINES"
+if [ ! -f "completed_build_crt" ]; then
 
-CXXFLAGS="$CXXFLAGS -fno-use-cxa-atexit"
-CXXFLAGS="$CXXFLAGS -fno-threadsafe-statics"
-CXXFLAGS="$CXXFLAGS $CFLAGS"
+    rm -Rf completed_build_libcxx
 
-export CFLAGS=$CFLAGS
-export CXXFLAGS=$CXXFLAGS
+    rm -Rf build-crt
+    mkdir -p build-crt
+
+    pushd build-crt
+    $PREFIX/bin/x86_64-bareflank-gcc $CFLAGS -c $HYPERVISOR_ROOT/bfcrt/*.c -I$HYPERVISOR_ROOT/include/
+    $PREFIX/bin/x86_64-elf-ar rcs libcrt.a *.o
+    cp -Rf libcrt.a $SYSROOT/lib/
+    popd
+
+    touch completed_build_crt
+fi
 
 # ------------------------------------------------------------------------------
 # Nasm
 # ------------------------------------------------------------------------------
 
 if [ ! -f "completed_build_newlib" ]; then
+
+    rm -Rf completed_build_libcxx
 
     rm -Rf build-newlib
     mkdir -p build-newlib
@@ -326,6 +390,8 @@ fi
 
 if [ ! -f "completed_build_libbfc" ]; then
 
+    rm -Rf completed_build_libcxx
+
     rm -Rf build-libbfc
     mkdir -p build-libbfc
 
@@ -343,6 +409,9 @@ fi
 # ------------------------------------------------------------------------------
 
 if [ ! -f "completed_build_libcxxabi" ]; then
+
+    rm -Rf $SYSROOT/include/c++
+    rm -Rf completed_build_libcxx
 
     rm -Rf build-libcxxabi
     mkdir -p build-libcxxabi
@@ -364,15 +433,19 @@ if [ ! -f "completed_build_libcxxabi" ]; then
 fi
 
 # ------------------------------------------------------------------------------
-# Libcxxabi
+# Libcxx
 # ------------------------------------------------------------------------------
-
-export BAREFLANK_WRAPPER_INCLUDE_LIBC=true
 
 if [ ! -f "completed_build_libcxx" ]; then
 
+    rm -Rf $SYSROOT/include/c++
+    rm -Rf completed_install_libcxx
+
     rm -Rf build-libcxx
     mkdir -p build-libcxx
+
+    export BAREFLANK_WRAPPER_INCLUDE_LIBC=true 2> /dev/null
+    export BAREFLANK_WRAPPER_INCLUDE_TMPLIBCXX=true 2> /dev/null
 
     pushd build-libcxx
     cmake ../libcxx/ \
@@ -389,24 +462,34 @@ if [ ! -f "completed_build_libcxx" ]; then
     make -j2 install
     popd
 
+    export BAREFLANK_WRAPPER_INCLUDE_TMPLIBCXX=false 2> /dev/null
+    export BAREFLANK_WRAPPER_INCLUDE_LIBC=false 2> /dev/null
+
     touch completed_build_libcxx
 fi
 
-export BAREFLANK_WRAPPER_INCLUDE_LIBC=false
-
 # ------------------------------------------------------------------------------
-# Copy
+# Install
 # ------------------------------------------------------------------------------
 
-if [ ! -d $HYPERVISOR_ROOT/bfvmm/bin/cross ]; then
+if [ ! -f "completed_install_libcxx" ]; then
+
     mkdir -p $HYPERVISOR_ROOT/bfvmm/bin/cross
-fi
+    cp -Rf $SYSROOT/lib/libc++.so.1.0 $HYPERVISOR_ROOT/bfvmm/bin/cross/libc++.so
 
-cp -Rf $SYSROOT/lib/libc++.so.1.0 $HYPERVISOR_ROOT/bfvmm/bin/cross/libc++.so
+    touch completed_install_libcxx
+fi
 
 # ------------------------------------------------------------------------------
 # Done
 # ------------------------------------------------------------------------------
 
+set +x
+
 popd
-rm -Rf $TMPDIR
+
+if [ -n "$KEEP_TMP" ]; then
+    echo "KEEP_TMP == true. You must manually delete: $TMPDIR"
+else
+    rm -Rf $TMPDIR
+fi

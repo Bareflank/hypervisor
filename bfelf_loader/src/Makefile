@@ -53,6 +53,7 @@ SOURCES+=bfelf_loader.c
 
 INCLUDE_PATHS+=./
 INCLUDE_PATHS+=../include/
+INCLUDE_PATHS+=../../include/
 
 LIBS+=
 

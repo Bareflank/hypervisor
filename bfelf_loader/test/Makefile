@@ -50,6 +50,13 @@ NATIVE_OUTDIR:=../bin
 ################################################################################
 
 SOURCES+=test.cpp
+SOURCES+=test_file_get_segment.cpp
+SOURCES+=test_file_init.cpp
+SOURCES+=test_file_num_segments.cpp
+SOURCES+=test_loader_add.cpp
+SOURCES+=test_loader_get_info.cpp
+SOURCES+=test_loader_relocate.cpp
+SOURCES+=test_loader_resolve_symbol.cpp
 
 INCLUDE_PATHS+=./
 INCLUDE_PATHS+=../include/
