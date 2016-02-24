@@ -27,10 +27,10 @@ SUBDIRS += intrinsics
 SUBDIRS += memory_manager
 SUBDIRS += debug_ring
 SUBDIRS += serial
-SUBDIRS += exit_handler
 SUBDIRS += vmm
-SUBDIRS += vmcs
 SUBDIRS += vcpu
+SUBDIRS += exit_handler
+SUBDIRS += vmcs
 SUBDIRS += entry
 
 ################################################################################

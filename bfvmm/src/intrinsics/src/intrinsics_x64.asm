@@ -28,6 +28,7 @@ global __read_rflags:function
 global __read_msr:function
 global __read_msr32:function
 global __write_msr:function
+global __read_rip:function
 global __read_cr0:function
 global __write_cr0:function
 global __read_cr3:function
@@ -37,16 +38,25 @@ global __write_cr4:function
 global __read_dr7:function
 global __write_dr7:function
 global __read_es:function
+global __write_es:function
 global __read_cs:function
 global __read_ss:function
+global __write_ss:function
 global __read_ds:function
+global __write_ds:function
 global __read_fs:function
+global __write_fs:function
 global __read_gs:function
+global __write_gs:function
 global __read_tr:function
+global __write_tr:function
 global __read_ldtr:function
+global __write_ldtr:function
 global __read_rsp:function
 global __read_gdt:function
+global __write_gdt:function
 global __read_idt:function
+global __write_idt:function
 global __outb:function
 global __inb:function
 global __outw:function
@@ -165,6 +175,11 @@ __write_msr:
     pop rcx
     ret
 
+; uint64_t __read_rip(void)
+__read_rip:
+    lea rax, [rel $]
+    ret
+
 ; uint64_t __read_cr0(void)
 __read_cr0:
     mov rax, cr0
@@ -211,6 +226,11 @@ __read_es:
     mov ax, es
     ret
 
+; void __write_es(uint16_t val)
+__write_es:
+    mov es, di
+    ret
+
 ; uint16_t __read_cs(void)
 __read_cs:
     mov rax, 0
@@ -223,10 +243,20 @@ __read_ss:
     mov ax, ss
     ret
 
+; void __write_ss(uint16_t val)
+__write_ss:
+    mov ss, di
+    ret
+
 ; uint16_t __read_ds(void)
 __read_ds:
     mov rax, 0
     mov ax, ds
+    ret
+
+; void __write_ds(uint16_t val)
+__write_ds:
+    mov ds, di
     ret
 
 ; uint16_t __read_fs(void)
@@ -235,10 +265,20 @@ __read_fs:
     mov ax, fs
     ret
 
+; void __write_fs(uint16_t val)
+__write_fs:
+    mov fs, di
+    ret
+
 ; uint16_t __read_gs(void)
 __read_gs:
     mov rax, 0
     mov ax, gs
+    ret
+
+; void __write_gs(uint16_t val)
+__write_gs:
+    mov gs, di
     ret
 
 ; uint16_t __read_tr(void)
@@ -247,10 +287,20 @@ __read_tr:
     str ax
     ret
 
+; void __write_tr(uint16_t val)
+__write_tr:
+    ltr di
+    ret
+
 ; uint16_t __read_ldtr(void)
 __read_ldtr:
     mov rax, 0
     sldt ax
+    ret
+
+; void __write_ldtr(uint16_t val)
+__write_ldtr:
+    lldt di
     ret
 
 ; uint64_t __read_rsp(void)
@@ -263,9 +313,19 @@ __read_gdt:
     sgdt [rdi]
     ret
 
+; void __write_gdt(gdt_t *gdt)
+__write_gdt:
+    lgdt [rdi]
+    ret
+
 ; void __read_idt(idt_t *idt)
 __read_idt:
     sidt [rdi]
+    ret
+
+; void __write_idt(idt_t *idt)
+__write_idt:
+    lidt [rdi]
     ret
 
 ; void __outb(uint16_t val, uint16_t port)

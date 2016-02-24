@@ -23,7 +23,7 @@
 #define VMM_INTEL_X64_H
 
 #include <intrinsics/intrinsics_intel_x64.h>
-
+#include <memory_manager/memory_manager.h>
 namespace vmm_error
 {
     enum type
@@ -91,6 +91,8 @@ private:
     friend class vmm_ut;
 
     bool m_vmxon_enabled;
+
+    char *m_vmxon_page;
 
     intrinsics_intel_x64 *m_intrinsics;
 };

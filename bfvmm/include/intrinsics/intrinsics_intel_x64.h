@@ -24,6 +24,7 @@
 #define INTRINSICS_INTEL_X64_H
 
 #include <stdint.h>
+#include <iostream>
 #include <intrinsics/intrinsics_x64.h>
 
 // =============================================================================
@@ -36,6 +37,7 @@ extern "C" {
 
 uint64_t __vmxon(void *vmxon_region);
 uint64_t __vmxoff(void);
+uint64_t __vmcall(uint64_t value);
 uint64_t __vmclear(void *vmcs_region);
 uint64_t __vmptrld(void *vmcs_region);
 uint64_t __vmptrst(void *vmcs_region);
@@ -64,6 +66,9 @@ public:
     virtual bool vmxoff()
     { return __vmxoff(); }
 
+    virtual bool vmcall(uint64_t value)
+    { __vmcall(value); }
+
     virtual bool vmclear(void *vmcs_region)
     { return __vmclear(vmcs_region); }
 
@@ -79,8 +84,18 @@ public:
     virtual bool vmread(uint64_t field, uint64_t *val)
     { return __vmread(field, val); }
 
+    virtual uint64_t vmread(uint64_t field)
+    {
+        uint64_t val = 0;
+        __vmread(field, &val);
+        return val;
+    }
+
     virtual bool vmlaunch()
     { return __vmlaunch(); }
+
+    bool tmp;
+    volatile uint64_t rsp;
 };
 
 // =============================================================================

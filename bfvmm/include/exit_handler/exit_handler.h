@@ -53,6 +53,12 @@ extern "C"
     ///
     void exit_handler_entry(void);
 
+    /// Promote Guest VMCS state to VMX root mode
+    ///
+    /// Abandon the host state, and jump into the guest state
+    /// from the host.
+    void promote_vmcs_to_root(void);
+
     /// Guest State
     ///
     /// The following exposes the guest state to the rest of the exit handler.

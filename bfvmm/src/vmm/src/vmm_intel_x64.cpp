@@ -117,6 +117,7 @@ vmm_intel_x64::stop()
     // VMX operation
 
     ret = execute_vmxoff();
+
     if (ret != vmm_error::success)
         return ret;
 
@@ -356,34 +357,25 @@ vmm_intel_x64::disable_vmx_operation()
 vmm_error::type
 vmm_intel_x64::create_vmxon_region()
 {
-    // if (m_memory_manager->alloc_page(&m_vmxon_page) != memory_manager_error::success)
-    // {
-    //     std::cout << "create_vmxon_region failed: "
-    //               << "out of memory" << std::endl;
-    //     return vmm_error::out_of_memory;
-    // }
+    m_vmxon_page = new char[4096];
+    if (!m_vmxon_page)
+    {
+        std::cout << "create_vmxon_region failed: "
+                  << "out of memory" << std::endl;
+        return vmm_error::out_of_memory;
+    }
 
-    // if (m_vmxon_page.size() < vmxon_region_size())
-    // {
-    //     std::cout << "create_vmxon_region failed: "
-    //               << "the allocated page is not large enough:" << std::endl
-    //               << "    - page size: " << m_vmxon_page.size() << " "
-    //               << "    - vmxon/vmcs region size: " << vmxon_region_size()
-    //               << std::endl;
-    //     return vmm_error::not_supported;
-    // }
-
-    // if (((uintptr_t)m_vmxon_page.phys_addr() & 0x0000000000000FFF) != 0)
-    // {
-    //     std::cout << "create_vmxon_region failed: "
-    //               << "the allocated page is not page aligned:" << std::endl
-    //               << "    - page phys: " << m_vmxon_page.phys_addr()
-    //               << std::endl;
-    //     return vmm_error::not_supported;
-    // }
+    if (((uintptr_t)g_mm->virt_to_phys(m_vmxon_page) & 0x0000000000000FFF) != 0)
+    {
+        std::cout << "create_vmxon_region failed: "
+                  << "the allocated page is not page aligned:" << std::endl
+                  << "    - page phys: " << g_mm->virt_to_phys(m_vmxon_page)
+                  << std::endl;
+        return vmm_error::not_supported;
+    }
 
     // auto buf = (char *)m_vmxon_page.virt_addr();
-    // auto reg = (vmxon_region *)m_vmxon_page.virt_addr();
+    auto reg = (vmxon_region *)m_vmxon_page;
 
     // // The information regading this MSR can be found in appendix A.1. For
     // // the VMX capabilities check, we need the following:
@@ -392,10 +384,10 @@ vmm_intel_x64::create_vmxon_region()
     // //   processor. Processors that use the same VMCS revision identifier use
     // //   the same size for VMCS regions (see subsequent item on bits 44:32)
 
-    // for (auto i = 0; i < m_vmxon_page.size(); i++)
-    //     buf[i] = 0;
+    for (auto i = 0U; i < vmxon_region_size(); i++)
+        m_vmxon_page[i] = 0;
 
-    // reg->revision_id = m_intrinsics->read_msr(IA32_VMX_BASIC_MSR) & 0x7FFFFFFFF;
+    reg->revision_id = m_intrinsics->read_msr(IA32_VMX_BASIC_MSR) & 0x7FFFFFFFF;
 
     return vmm_error::success;
 }
@@ -403,7 +395,7 @@ vmm_intel_x64::create_vmxon_region()
 vmm_error::type
 vmm_intel_x64::release_vmxon_region()
 {
-    // m_memory_manager->free_page(m_vmxon_page);
+    delete m_vmxon_page;
 
     return vmm_error::success;
 }
@@ -411,26 +403,27 @@ vmm_intel_x64::release_vmxon_region()
 vmm_error::type
 vmm_intel_x64::execute_vmxon()
 {
-    // auto phys = m_vmxon_page.phys_addr();
+    auto phys = g_mm->virt_to_phys(m_vmxon_page);
 
-    // // For some reason, the VMXON instruction takes the address of a memory
-    // // location that has the address of the VMXON region, which sadly is not
-    // // well documented in the Intel manual.
+    // For some reason, the VMXON instruction takes the address of a memory
+    // location that has the address of the VMXON region, which sadly is not
+    // well documented in the Intel manual.
 
-    // if (m_vmxon_enabled == true)
-    //     return vmm_error::success;
+    if (m_vmxon_enabled == true)
+        return vmm_error::success;
 
-    // if (m_intrinsics->vmxon(&phys) == false)
-    // {
-    //     std::cout << "execute_vmxon failed" << std::endl;
-    //     return vmm_error::failure;
-    // }
+    if (m_intrinsics->vmxon(&phys) == false)
+    {
+        std::cout << "execute_vmxon failed" << std::endl;
+        return vmm_error::failure;
+    }
 
-    // m_vmxon_enabled = true;
-    // std::cout << "vmxon: success" << std::endl;
+    m_vmxon_enabled = true;
+    std::cout << "vmxon: success" << std::endl;
 
     return vmm_error::success;
 }
+
 
 vmm_error::type
 vmm_intel_x64::execute_vmxoff()
@@ -451,6 +444,7 @@ vmm_intel_x64::execute_vmxoff()
     }
 
     m_vmxon_enabled = false;
+
     std::cout << "vmxoff: success" << std::endl;
 
     return vmm_error::success;

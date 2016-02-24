@@ -22,6 +22,9 @@
 bits 64
 default rel
 
+%define VMCS_GUEST_RSP 0x0000681C
+%define VMCS_GUEST_RIP 0x0000681E
+
 global g_guest_rax:data
 global g_guest_rbx:data
 global g_guest_rcx:data
@@ -42,6 +45,7 @@ global g_guest_rip:data
 
 extern exit_handler
 global exit_handler_entry
+global promote_vmcs_to_root
 
 section .data
 
@@ -65,6 +69,34 @@ g_guest_rip dq 0
 
 section .text
 
+
+;; VMCS Promotion
+promote_vmcs_to_root:
+    mov rax, [g_guest_rip]
+    mov rsp, [g_guest_rsp]
+    push rax
+
+    mov rdi, [g_guest_rdi]
+    mov rsi, [g_guest_rsi]
+    mov rbp, [g_guest_rbp]
+
+    mov rdx, [g_guest_rdx]
+    mov rcx, [g_guest_rcx]
+    mov rbx, [g_guest_rbx]
+    mov rax, [g_guest_rax]
+    mov r15, [g_guest_r15]
+    mov r14, [g_guest_r14]
+    mov r13, [g_guest_r13]
+    mov r12, [g_guest_r12]
+    mov r11, [g_guest_r11]
+    mov r10, [g_guest_r10]
+    mov r9,  [g_guest_r09]
+    mov r8,  [g_guest_r08]
+    mov rsp, [g_guest_rsp]
+
+    sti
+    ret
+
 ; VMM Entry Point
 ;
 ; The exit handler is the actual VMM. It's the peice of code that sits above
@@ -85,7 +117,7 @@ exit_handler_entry:
 
     cli
 
-    ; Reigsters
+    ; Registers
     mov [g_guest_rax], rax
     mov [g_guest_rbx], rbx
     mov [g_guest_rcx], rcx
@@ -103,17 +135,17 @@ exit_handler_entry:
     mov [g_guest_r15], r15
 
     ; RSP, RIP
-    mov rdi, 0x0000681C
+    mov rdi, VMCS_GUEST_RSP
     vmread [g_guest_rsp], rdi
-    mov rdi, 0x0000681E
+    mov rdi, VMCS_GUEST_RIP
     vmread [g_guest_rip], rdi
 
     call exit_handler wrt ..plt
 
     ; RIP, RSP
-    mov rdi, 0x0000681E
+    mov rdi, VMCS_GUEST_RIP
     vmwrite rdi, [g_guest_rip]
-    mov rdi, 0x0000681C
+    mov rdi, VMCS_GUEST_RSP
     vmwrite rdi, [g_guest_rsp]
 
     ; Registers
@@ -136,7 +168,6 @@ exit_handler_entry:
     sti
 
     vmresume
-
 
 ; VMM Guest Instructions
 ;

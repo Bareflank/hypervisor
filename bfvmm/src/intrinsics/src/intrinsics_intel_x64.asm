@@ -21,6 +21,7 @@
 
 global __vmxon:function
 global __vmxoff:function
+global __vmcall:function
 global __vmclear:function
 global __vmptrld:function
 global __vmptrst:function
@@ -39,6 +40,13 @@ __vmxon:
 ; uint64_t __vmxoff(void)
 __vmxoff:
     vmxoff
+    jbe __vmx_failure
+    jmp __vmx_success
+
+; uint64_t __vmcall(uint64_t value)
+__vmcall:
+    mov rax, rdi
+    vmcall
     jbe __vmx_failure
     jmp __vmx_success
 
@@ -81,7 +89,6 @@ __vmx_failure:
 __vmx_success:
     mov rax, 0x1
     ret
-
 
 ; uint64_t __vmlaunch(void)
 ;

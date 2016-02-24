@@ -14,6 +14,9 @@ of updating the VMM logic, and re-integrating the VMCS / Exit handler
 logic. Once this is complete, we should have a working VM launch. For now, the
 VMM does not attempt a VM launch.
 
+* **2/24/2015 Update:**
+VMM can now launch again, and can be stopped.
+
 <br>
 
 # Bareflank Hypervisor

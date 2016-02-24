@@ -22,24 +22,10 @@
 #include <iostream>
 #include <exit_handler/exit_handler.h>
 #include <exit_handler/exit_handler_dispatch.h>
+#include <vcpu/vcpu_manager.h>
 
-exit_handler_dispatch::exit_handler_dispatch()
+exit_handler_dispatch::exit_handler_dispatch(intrinsics_intel_x64 *intrinsics) : m_intrinsics(intrinsics)
 {
-    // m_vcpu = ef()->get_vcpu_factory()->get_vcpu(0);
-
-    // if(m_vcpu == 0)
-    //     return;
-
-    // m_vmcs_intel_x64 = reinterpret_cast<vmcs_intel_x64 *>(m_vcpu->get_vmcs());
-    // m_intrinsics_intel_x64 = reinterpret_cast<intrinsics_intel_x64 *>(m_vcpu->get_intrinsics());
-
-    // if(m_vmcs_intel_x64 == 0 || m_intrinsics_intel_x64 == 0)
-    //     return;
-
-    // m_exit_reason = m_vmcs_intel_x64->vmread(VMCS_EXIT_REASON);
-    // m_exit_qualification = m_vmcs_intel_x64->vmread(VMCS_EXIT_QUALIFICATION);
-    // m_exit_instruction_length = m_vmcs_intel_x64->vmread(VMCS_VM_EXIT_INSTRUCTION_LENGTH);
-    // m_exit_instruction_information = m_vmcs_intel_x64->vmread(VMCS_VM_EXIT_INSTRUCTION_INFORMATION);
 }
 
 exit_handler_dispatch::~exit_handler_dispatch()
@@ -49,6 +35,11 @@ exit_handler_dispatch::~exit_handler_dispatch()
 void
 exit_handler_dispatch::dispatch()
 {
+    m_intrinsics->vmread(VMCS_EXIT_REASON, &m_exit_reason);
+    m_intrinsics->vmread(VMCS_EXIT_QUALIFICATION, &m_exit_qualification);
+    m_intrinsics->vmread(VMCS_VM_EXIT_INSTRUCTION_LENGTH, &m_exit_instruction_length);
+    m_intrinsics->vmread(VMCS_VM_EXIT_INSTRUCTION_INFORMATION, &m_exit_instruction_information);
+
     switch (m_exit_reason)
     {
         case VM_EXIT_REASON_EXCEPTION_OR_NON_MASKABLE_INTERRUPT:
@@ -374,7 +365,24 @@ exit_handler_dispatch::handle_rsm()
 
 void
 exit_handler_dispatch::handle_vmcall()
-{ unimplemented_handler(); }
+{
+    switch (g_guest_rax)
+    {
+        case VMCS_PROMOTION:
+        {
+            advance_rip();
+            g_guest_rax = 0x00;
+            g_vcm->promote_vcpu(0);
+            break;
+        }
+        default:
+        {
+            g_guest_rax = 0xFFFFFFFFFFFFFFFF;
+            advance_rip();
+            break;
+        }
+    }
+}
 
 void
 exit_handler_dispatch::handle_vmclear()
@@ -430,67 +438,67 @@ exit_handler_dispatch::handle_control_register_accesses()
         switch (general_purpose_register)
         {
             case 0:
-                m_intrinsics_intel_x64->vmwrite(VMCS_GUEST_CR3, g_guest_rax);
+                m_intrinsics->vmwrite(VMCS_GUEST_CR3, g_guest_rax);
                 break;
 
             case 1:
-                m_intrinsics_intel_x64->vmwrite(VMCS_GUEST_CR3, g_guest_rcx);
+                m_intrinsics->vmwrite(VMCS_GUEST_CR3, g_guest_rcx);
                 break;
 
             case 2:
-                m_intrinsics_intel_x64->vmwrite(VMCS_GUEST_CR3, g_guest_rdx);
+                m_intrinsics->vmwrite(VMCS_GUEST_CR3, g_guest_rdx);
                 break;
 
             case 3:
-                m_intrinsics_intel_x64->vmwrite(VMCS_GUEST_CR3, g_guest_rbx);
+                m_intrinsics->vmwrite(VMCS_GUEST_CR3, g_guest_rbx);
                 break;
 
             case 4:
-                m_intrinsics_intel_x64->vmwrite(VMCS_GUEST_CR3, g_guest_rsp);
+                m_intrinsics->vmwrite(VMCS_GUEST_CR3, g_guest_rsp);
                 break;
 
             case 5:
-                m_intrinsics_intel_x64->vmwrite(VMCS_GUEST_CR3, g_guest_rbp);
+                m_intrinsics->vmwrite(VMCS_GUEST_CR3, g_guest_rbp);
                 break;
 
             case 6:
-                m_intrinsics_intel_x64->vmwrite(VMCS_GUEST_CR3, g_guest_rsi);
+                m_intrinsics->vmwrite(VMCS_GUEST_CR3, g_guest_rsi);
                 break;
 
             case 7:
-                m_intrinsics_intel_x64->vmwrite(VMCS_GUEST_CR3, g_guest_rdi);
+                m_intrinsics->vmwrite(VMCS_GUEST_CR3, g_guest_rdi);
                 break;
 
             case 8:
-                m_intrinsics_intel_x64->vmwrite(VMCS_GUEST_CR3, g_guest_r08);
+                m_intrinsics->vmwrite(VMCS_GUEST_CR3, g_guest_r08);
                 break;
 
             case 9:
-                m_intrinsics_intel_x64->vmwrite(VMCS_GUEST_CR3, g_guest_r09);
+                m_intrinsics->vmwrite(VMCS_GUEST_CR3, g_guest_r09);
                 break;
 
             case 10:
-                m_intrinsics_intel_x64->vmwrite(VMCS_GUEST_CR3, g_guest_r10);
+                m_intrinsics->vmwrite(VMCS_GUEST_CR3, g_guest_r10);
                 break;
 
             case 11:
-                m_intrinsics_intel_x64->vmwrite(VMCS_GUEST_CR3, g_guest_r11);
+                m_intrinsics->vmwrite(VMCS_GUEST_CR3, g_guest_r11);
                 break;
 
             case 12:
-                m_intrinsics_intel_x64->vmwrite(VMCS_GUEST_CR3, g_guest_r12);
+                m_intrinsics->vmwrite(VMCS_GUEST_CR3, g_guest_r12);
                 break;
 
             case 13:
-                m_intrinsics_intel_x64->vmwrite(VMCS_GUEST_CR3, g_guest_r13);
+                m_intrinsics->vmwrite(VMCS_GUEST_CR3, g_guest_r13);
                 break;
 
             case 14:
-                m_intrinsics_intel_x64->vmwrite(VMCS_GUEST_CR3, g_guest_r14);
+                m_intrinsics->vmwrite(VMCS_GUEST_CR3, g_guest_r14);
                 break;
 
             case 15:
-                m_intrinsics_intel_x64->vmwrite(VMCS_GUEST_CR3, g_guest_r15);
+                m_intrinsics->vmwrite(VMCS_GUEST_CR3, g_guest_r15);
                 break;
 
             default:
@@ -506,67 +514,67 @@ exit_handler_dispatch::handle_control_register_accesses()
         switch (general_purpose_register)
         {
             case 0:
-                m_intrinsics_intel_x64->vmread(VMCS_GUEST_CR3, &g_guest_rax);
+                m_intrinsics->vmread(VMCS_GUEST_CR3, &g_guest_rax);
                 break;
 
             case 1:
-                m_intrinsics_intel_x64->vmread(VMCS_GUEST_CR3, &g_guest_rcx);
+                m_intrinsics->vmread(VMCS_GUEST_CR3, &g_guest_rcx);
                 break;
 
             case 2:
-                m_intrinsics_intel_x64->vmread(VMCS_GUEST_CR3, &g_guest_rdx);
+                m_intrinsics->vmread(VMCS_GUEST_CR3, &g_guest_rdx);
                 break;
 
             case 3:
-                m_intrinsics_intel_x64->vmread(VMCS_GUEST_CR3, &g_guest_rbx);
+                m_intrinsics->vmread(VMCS_GUEST_CR3, &g_guest_rbx);
                 break;
 
             case 4:
-                m_intrinsics_intel_x64->vmread(VMCS_GUEST_CR3, &g_guest_rsp);
+                m_intrinsics->vmread(VMCS_GUEST_CR3, &g_guest_rsp);
                 break;
 
             case 5:
-                m_intrinsics_intel_x64->vmread(VMCS_GUEST_CR3, &g_guest_rbp);
+                m_intrinsics->vmread(VMCS_GUEST_CR3, &g_guest_rbp);
                 break;
 
             case 6:
-                m_intrinsics_intel_x64->vmread(VMCS_GUEST_CR3, &g_guest_rsi);
+                m_intrinsics->vmread(VMCS_GUEST_CR3, &g_guest_rsi);
                 break;
 
             case 7:
-                m_intrinsics_intel_x64->vmread(VMCS_GUEST_CR3, &g_guest_rdi);
+                m_intrinsics->vmread(VMCS_GUEST_CR3, &g_guest_rdi);
                 break;
 
             case 8:
-                m_intrinsics_intel_x64->vmread(VMCS_GUEST_CR3, &g_guest_r08);
+                m_intrinsics->vmread(VMCS_GUEST_CR3, &g_guest_r08);
                 break;
 
             case 9:
-                m_intrinsics_intel_x64->vmread(VMCS_GUEST_CR3, &g_guest_r09);
+                m_intrinsics->vmread(VMCS_GUEST_CR3, &g_guest_r09);
                 break;
 
             case 10:
-                m_intrinsics_intel_x64->vmread(VMCS_GUEST_CR3, &g_guest_r10);
+                m_intrinsics->vmread(VMCS_GUEST_CR3, &g_guest_r10);
                 break;
 
             case 11:
-                m_intrinsics_intel_x64->vmread(VMCS_GUEST_CR3, &g_guest_r11);
+                m_intrinsics->vmread(VMCS_GUEST_CR3, &g_guest_r11);
                 break;
 
             case 12:
-                m_intrinsics_intel_x64->vmread(VMCS_GUEST_CR3, &g_guest_r12);
+                m_intrinsics->vmread(VMCS_GUEST_CR3, &g_guest_r12);
                 break;
 
             case 13:
-                m_intrinsics_intel_x64->vmread(VMCS_GUEST_CR3, &g_guest_r13);
+                m_intrinsics->vmread(VMCS_GUEST_CR3, &g_guest_r13);
                 break;
 
             case 14:
-                m_intrinsics_intel_x64->vmread(VMCS_GUEST_CR3, &g_guest_r14);
+                m_intrinsics->vmread(VMCS_GUEST_CR3, &g_guest_r14);
                 break;
 
             case 15:
-                m_intrinsics_intel_x64->vmread(VMCS_GUEST_CR3, &g_guest_r15);
+                m_intrinsics->vmread(VMCS_GUEST_CR3, &g_guest_r15);
                 break;
 
             default:
@@ -589,7 +597,8 @@ unimplemented:
     std::cout << std::dec << std::endl;
 
     spin_wait();
-    m_intrinsics_intel_x64->halt();
+    spin_wait();
+    m_intrinsics->halt();
 }
 
 void
@@ -602,11 +611,17 @@ exit_handler_dispatch::handle_io_instruction()
 
 void
 exit_handler_dispatch::handle_rdmsr()
-{ unimplemented_handler(); }
+{
+    guest_read_msr();
+    advance_rip();
+}
 
 void
 exit_handler_dispatch::handle_wrmsr()
-{ unimplemented_handler(); }
+{
+    guest_write_msr();
+    advance_rip();
+}
 
 void
 exit_handler_dispatch::handle_vm_entry_failure_invalid_guest_state()
@@ -733,6 +748,20 @@ exit_handler_dispatch::unimplemented_handler()
 {
     std::cout << std::endl;
     std::cout << std::endl;
+    std::cout << "Guest register state: " << std::hex << std::endl;
+    std::cout << "----------------------------------------------------------------------" << std::endl;
+    std::cout << "g_guest_rax: 0x" << g_guest_rax << std::endl;
+    std::cout << "g_guest_rbx: 0x" << g_guest_rbx << std::endl;
+    std::cout << "g_guest_rcx: 0x" << g_guest_rcx << std::endl;
+    std::cout << "g_guest_rdx: 0x" << g_guest_rdx << std::endl << std::endl;
+    std::cout << "g_guest_rsi: 0x" << g_guest_rsi << std::endl;
+    std::cout << "g_guest_rdi: 0x" << g_guest_rdi << std::endl << std::endl;
+    std::cout << "g_guest_rsp: 0x" << g_guest_rsp << std::endl;
+    std::cout << "g_guest_rbp: 0x" << g_guest_rbp << std::endl;
+    std::cout << "g_guest_rip: 0x" << g_guest_rip << std::endl;
+
+    std::cout << std::endl;
+    std::cout << std::endl;
     std::cout << "Unimplemented Exit Handler: " << std::hex << std::endl;
     std::cout << "----------------------------------------------------------------------" << std::endl;
     std::cout << "- exit reason: 0x" << m_exit_reason << " = " << exit_reason_to_str(m_exit_reason) << std::endl;
@@ -741,7 +770,8 @@ exit_handler_dispatch::unimplemented_handler()
     std::cout << std::dec << std::endl;
 
     spin_wait();
-    m_intrinsics_intel_x64->halt();
+    spin_wait();
+    m_intrinsics->halt();
 }
 
 const char *

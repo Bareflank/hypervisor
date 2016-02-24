@@ -30,6 +30,7 @@ vcpu_intel_x64::vcpu_intel_x64(int64_t id) :
     m_intrinsics = new intrinsics_intel_x64();
     m_vmm = new vmm_intel_x64(m_intrinsics);
     m_vmcs = new vmcs_intel_x64(m_intrinsics);
+    m_exit_handler = new exit_handler_dispatch(m_intrinsics);
 }
 
 vcpu_intel_x64::vcpu_intel_x64(int64_t id,
@@ -55,11 +56,20 @@ vcpu_intel_x64::vcpu_intel_x64(int64_t id,
 vcpu_error::type
 vcpu_intel_x64::start()
 {
-    // if (m_vmm.start() != vmm_error::success)
-    //     return vcpu_intel_x64_error::failure;
+    std::cout << "About to start and launch the hypervisor" << std::endl;
+    if (m_vmm->start() != vmm_error::success)
+        return vcpu_error::failure;
 
-    // if (m_vmcs.launch() != vmcs_error::success)
-    //     return vcpu_intel_x64_error::failure;
+    if (m_vmcs->launch() != vmcs_error::success)
+        return vcpu_error::failure;
+
+    return vcpu_error::success;
+}
+
+vcpu_error::type
+vcpu_intel_x64::dispatch()
+{
+    m_exit_handler->dispatch();
 
     return vcpu_error::success;
 }
@@ -67,8 +77,34 @@ vcpu_intel_x64::start()
 vcpu_error::type
 vcpu_intel_x64::stop()
 {
-    // if (m_vmm.stop() != vmm_error::success)
-    //     return vcpu_intel_x64_error::failure;
+    m_vmcs->clear_vmcs_region();
+
+    if (m_vmm->stop() != vmm_error::success)
+        return vcpu_error::failure;
 
     return vcpu_error::success;
+}
+
+vcpu_error::type
+vcpu_intel_x64::promote()
+{
+    m_vmcs->unlaunch();
+    return vcpu_error::success;
+}
+
+vcpu_error::type
+vcpu_intel_x64::request_teardown()
+{
+    if (vcpu_error::success == m_intrinsics->vmcall(VMCS_PROMOTION))
+    {
+        std::cout << "Promoted guest to VMX Root" << std::endl;
+        return vcpu_error::success;
+    }
+    else
+    {
+        std::cout << "Invalid vmcall id" << std::endl;
+        return vcpu_error::success;
+    }
+
+    return vcpu_error::failure;
 }

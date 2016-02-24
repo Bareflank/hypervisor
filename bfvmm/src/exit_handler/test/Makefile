@@ -57,9 +57,10 @@ INCLUDE_PATHS+=../../../include/
 INCLUDE_PATHS+=../../../../include/
 
 LIBS+=exit_handler
+LIBS+=vcpu
 
 LIBRARY_PATHS+=../bin/native/
-
+LIBRARY_PATHS+=../../vcpu/bin/native
 ################################################################################
 # Environment Specific
 ################################################################################

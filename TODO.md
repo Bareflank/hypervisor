@@ -10,7 +10,6 @@ Misc:
 - Add support for clang/LLVM
 
 Version 1.0 TODO:
-- Need to be able to start / stop a basic VM
 - Need to have all of the VMCS checks implemented and unit tested
 - Need to have all of the remaining unit tests completed (i.e. all of the
   VMM modules need their unit tests completed including serial)
