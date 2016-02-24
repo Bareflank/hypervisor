@@ -92,6 +92,7 @@ public:
     ///
     /// @param vcpuid the vcpu to promote
     /// @return On success the function never returns
+    ///
     vcpu_manager_error::type promote_vcpu(int64_t vcpuid);
 
     /// Write to Log

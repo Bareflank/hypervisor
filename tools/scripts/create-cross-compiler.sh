@@ -7,7 +7,7 @@
 #     is mainly used by Travis CI because it cannot handle all of the output
 #     that this scripts spits out.
 #
-export KEEP_TMP=true
+# export KEEP_TMP=true
 #     Tells the script to keep the tmp directory when it's finished. This is
 #     used by developers of this script so that you can work on the script
 #     without having to recompile every step constantly. If you need to

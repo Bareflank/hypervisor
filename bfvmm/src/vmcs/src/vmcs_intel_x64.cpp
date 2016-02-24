@@ -39,9 +39,9 @@ struct vmcs_region
 // =============================================================================
 
 vmcs_intel_x64::vmcs_intel_x64(intrinsics_intel_x64 *intrinsics) :
-    m_intrinsics(intrinsics)
+    m_msr_bitmap(4096 * 8), m_intrinsics(intrinsics)
 {
-    m_msr_bitmap = new bitmap(4096 * 8);
+
 }
 
 vmcs_error::type
@@ -165,7 +165,7 @@ vmcs_intel_x64::launch()
     // =========================================================================
     // CLEAN ME UP
     // =========================================================================
-    vmwrite(VMCS_ADDRESS_OF_MSR_BITMAPS_FULL, (uint64_t)g_mm->virt_to_phys(m_msr_bitmap->address()));
+    vmwrite(VMCS_ADDRESS_OF_MSR_BITMAPS_FULL, (uint64_t)g_mm->virt_to_phys(m_msr_bitmap.address()));
 
     // =========================================================================
     // CLEAN ME UP
@@ -287,31 +287,31 @@ vmcs_intel_x64::save_state()
 vmcs_error::type
 vmcs_intel_x64::unlaunch()
 {
-    m_intrinsics->write_es(m_intrinsics->vmread(VMCS_GUEST_ES_SELECTOR));
-    m_intrinsics->write_ds(m_intrinsics->vmread(VMCS_GUEST_DS_SELECTOR));
-    m_intrinsics->write_fs(m_intrinsics->vmread(VMCS_GUEST_FS_SELECTOR));
-    m_intrinsics->write_gs(m_intrinsics->vmread(VMCS_GUEST_GS_SELECTOR));
-    m_intrinsics->write_msr(IA32_EFER_MSR, m_intrinsics->vmread(VMCS_GUEST_IA32_EFER_FULL));
-    m_intrinsics->write_msr(IA32_PAT_MSR, m_intrinsics->vmread(VMCS_GUEST_IA32_PAT_FULL));
-    m_intrinsics->write_msr(IA32_SYSENTER_CS_MSR, m_intrinsics->vmread(VMCS_GUEST_IA32_SYSENTER_CS));
-    m_intrinsics->write_msr(IA32_FS_BASE_MSR, m_intrinsics->vmread(VMCS_GUEST_FS_BASE));
-    m_intrinsics->write_msr(IA32_GS_BASE_MSR, m_intrinsics->vmread(VMCS_GUEST_GS_BASE));
-    m_intrinsics->write_msr(IA32_SYSENTER_ESP_MSR, m_intrinsics->vmread(VMCS_GUEST_IA32_SYSENTER_ESP));
-    m_intrinsics->write_msr(IA32_SYSENTER_EIP_MSR, m_intrinsics->vmread(VMCS_GUEST_IA32_SYSENTER_EIP));
-    m_intrinsics->write_cr3(m_intrinsics->vmread(VMCS_GUEST_CR3));
+    m_intrinsics->write_es(vmread(VMCS_GUEST_ES_SELECTOR));
+    m_intrinsics->write_ds(vmread(VMCS_GUEST_DS_SELECTOR));
+    m_intrinsics->write_fs(vmread(VMCS_GUEST_FS_SELECTOR));
+    m_intrinsics->write_gs(vmread(VMCS_GUEST_GS_SELECTOR));
+    m_intrinsics->write_msr(IA32_EFER_MSR, vmread(VMCS_GUEST_IA32_EFER_FULL));
+    m_intrinsics->write_msr(IA32_PAT_MSR, vmread(VMCS_GUEST_IA32_PAT_FULL));
+    m_intrinsics->write_msr(IA32_SYSENTER_CS_MSR, vmread(VMCS_GUEST_IA32_SYSENTER_CS));
+    m_intrinsics->write_msr(IA32_FS_BASE_MSR, vmread(VMCS_GUEST_FS_BASE));
+    m_intrinsics->write_msr(IA32_GS_BASE_MSR, vmread(VMCS_GUEST_GS_BASE));
+    m_intrinsics->write_msr(IA32_SYSENTER_ESP_MSR, vmread(VMCS_GUEST_IA32_SYSENTER_ESP));
+    m_intrinsics->write_msr(IA32_SYSENTER_EIP_MSR, vmread(VMCS_GUEST_IA32_SYSENTER_EIP));
+    m_intrinsics->write_cr3(vmread(VMCS_GUEST_CR3));
 
     promote_vmcs_to_root();
 
-
     // This doesn't actually get returned
-
     return vmcs_error::success;
 }
 
 vmcs_error::type
 vmcs_intel_x64::create_vmcs_region()
 {
-    m_vmcs_region = new char[4096];
+    // Note: This relies on make_unique returning an already
+    // zeroed-out buffer (think calloc not malloc.)
+    m_vmcs_region = std::make_unique<char[]>(4096);
 
     if (!m_vmcs_region)
     {
@@ -320,16 +320,16 @@ vmcs_intel_x64::create_vmcs_region()
         return vmcs_error::out_of_memory;
     }
 
-    if ((((uintptr_t)memory_manager::instance()->virt_to_phys(m_vmcs_region)) & 0x0000000000000FFF) != 0)
+    if ((((uintptr_t)g_mm->virt_to_phys(m_vmcs_region.get())) & 0x0000000000000FFF) != 0)
     {
         std::cout << "create_vmcs_region failed: "
                   << "the allocated page is not page aligned:" << std::endl
-                  << "    - page phys: " << memory_manager::instance()->virt_to_phys(m_vmcs_region)
+                  << "    - page phys: " << g_mm->virt_to_phys(m_vmcs_region.get())
                   << std::endl;
         return vmcs_error::not_supported;
     }
 
-    auto reg = (vmcs_region *)m_vmcs_region;
+    auto reg = (vmcs_region *)m_vmcs_region.get();
 
     // // The information regading this MSR can be found in appendix A.1. For
     // // the VMX capabilities check, we need the following:
@@ -337,9 +337,6 @@ vmcs_intel_x64::create_vmcs_region()
     // // - Bits 30:0 contain the 31-bit VMCS revision identifier used by the
     // //   processor. Processors that use the same VMCS revision identifier use
     // //   the same size for VMCS regions (see subsequent item on bits 44:32)
-
-    for (auto i = 0U; i < vmcs_region_size(); i++)
-        m_vmcs_region[i] = 0;
 
     reg->revision_id = (m_intrinsics->read_msr(IA32_VMX_BASIC_MSR) & 0x7FFFFFFFF);
 
@@ -349,15 +346,14 @@ vmcs_intel_x64::create_vmcs_region()
 vmcs_error::type
 vmcs_intel_x64::release_vmxon_region()
 {
-    delete m_vmcs_region;
-
+    // This function should probably go away now.
     return vmcs_error::success;
 }
 
 vmcs_error::type
 vmcs_intel_x64::clear_vmcs_region()
 {
-    auto phys = memory_manager::instance()->virt_to_phys(m_vmcs_region);
+    auto phys = g_mm->virt_to_phys(m_vmcs_region.get());
 
     // For some reason, the VMCLEAR instruction takes the address of a memory
     // location that has the address of the VMCS region, which sadly is not
@@ -377,7 +373,7 @@ vmcs_intel_x64::clear_vmcs_region()
 vmcs_error::type
 vmcs_intel_x64::load_vmcs_region()
 {
-    auto phys = memory_manager::instance()->virt_to_phys(m_vmcs_region);
+    auto phys = g_mm->virt_to_phys(m_vmcs_region.get());
 
     // For some reason, the VMPTRLD instruction takes the address of a memory
     // location that has the address of the VMCS region, which sadly is not
@@ -675,8 +671,8 @@ vmcs_intel_x64::write_natural_width_host_state_fields()
 {
     vmwrite(VMCS_HOST_CR0, m_cr0);
     vmwrite(VMCS_HOST_CR3, m_cr3);
-
     vmwrite(VMCS_HOST_CR4, m_cr4);
+
     vmwrite(VMCS_HOST_TR_BASE, m_tr_base);
 
     vmwrite(VMCS_HOST_GDTR_BASE, m_gdt_reg.base);

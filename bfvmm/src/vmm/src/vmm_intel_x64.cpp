@@ -357,7 +357,9 @@ vmm_intel_x64::disable_vmx_operation()
 vmm_error::type
 vmm_intel_x64::create_vmxon_region()
 {
-    m_vmxon_page = new char[4096];
+    // This relies on make_unique providing a zeroed-out buffer, so
+    // no clearing is necessary.
+    m_vmxon_page = std::make_unique<char[]>(4096);
     if (!m_vmxon_page)
     {
         std::cout << "create_vmxon_region failed: "
@@ -365,27 +367,24 @@ vmm_intel_x64::create_vmxon_region()
         return vmm_error::out_of_memory;
     }
 
-    if (((uintptr_t)g_mm->virt_to_phys(m_vmxon_page) & 0x0000000000000FFF) != 0)
+    if (((uintptr_t)g_mm->virt_to_phys(m_vmxon_page.get()) & 0x0000000000000FFF) != 0)
     {
         std::cout << "create_vmxon_region failed: "
                   << "the allocated page is not page aligned:" << std::endl
-                  << "    - page phys: " << g_mm->virt_to_phys(m_vmxon_page)
+                  << "    - page phys: " << g_mm->virt_to_phys(m_vmxon_page.get())
                   << std::endl;
         return vmm_error::not_supported;
     }
 
-    // auto buf = (char *)m_vmxon_page.virt_addr();
-    auto reg = (vmxon_region *)m_vmxon_page;
+    auto reg = (vmxon_region *)m_vmxon_page.get();
 
-    // // The information regading this MSR can be found in appendix A.1. For
-    // // the VMX capabilities check, we need the following:
-    // //
-    // // - Bits 30:0 contain the 31-bit VMCS revision identifier used by the
-    // //   processor. Processors that use the same VMCS revision identifier use
-    // //   the same size for VMCS regions (see subsequent item on bits 44:32)
-
-    for (auto i = 0U; i < vmxon_region_size(); i++)
-        m_vmxon_page[i] = 0;
+    // The information regading this MSR can be found in appendix A.1. For
+    // the VMX capabilities check, we need the following:
+    //
+    // - Bits 30:
+    //   0 contain the 31-bit VMCS revision identifier used by the
+    //   processor. Processors that use the same VMCS revision identifier use
+    //   the same size for VMCS regions (see subsequent item on bits 44:32)
 
     reg->revision_id = m_intrinsics->read_msr(IA32_VMX_BASIC_MSR) & 0x7FFFFFFFF;
 
@@ -395,15 +394,14 @@ vmm_intel_x64::create_vmxon_region()
 vmm_error::type
 vmm_intel_x64::release_vmxon_region()
 {
-    delete m_vmxon_page;
-
+    // This function can probably be removed.
     return vmm_error::success;
 }
 
 vmm_error::type
 vmm_intel_x64::execute_vmxon()
 {
-    auto phys = g_mm->virt_to_phys(m_vmxon_page);
+    auto phys = g_mm->virt_to_phys(m_vmxon_page.get());
 
     // For some reason, the VMXON instruction takes the address of a memory
     // location that has the address of the VMXON region, which sadly is not

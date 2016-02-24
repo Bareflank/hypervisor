@@ -67,7 +67,7 @@ public:
     { return __vmxoff(); }
 
     virtual bool vmcall(uint64_t value)
-    { __vmcall(value); }
+    { return __vmcall(value); }
 
     virtual bool vmclear(void *vmcs_region)
     { return __vmclear(vmcs_region); }
@@ -93,9 +93,6 @@ public:
 
     virtual bool vmlaunch()
     { return __vmlaunch(); }
-
-    bool tmp;
-    volatile uint64_t rsp;
 };
 
 // =============================================================================

@@ -23,6 +23,7 @@
 #define BITMAP__H
 
 #include <stdint.h>
+#include <memory>
 
 class bitmap
 {
@@ -59,7 +60,7 @@ public:
     bool bit(uint32_t n);
 
 private:
-    uint8_t *m_bitmap;
+    std::unique_ptr<uint8_t[]> m_bitmap;
     uint32_t m_length;
 };
 
