@@ -23,7 +23,7 @@
 #ifndef BFELF_LOADER_H
 #define BFELF_LOADER_H
 
-#include <crtinit.h>
+#include <crt.h>
 
 #ifdef KERNEL
 #include <linux/types.h>
@@ -630,6 +630,7 @@ struct bfelf_loader_t
 {
     bfelf64_word num;
     bfelf64_word relocated;
+    bfelf64_word ignore_crt;
     struct bfelf_file_t *efs[BFELF_MAX_MODULES];
 };
 

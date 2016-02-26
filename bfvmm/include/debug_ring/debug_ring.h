@@ -75,15 +75,11 @@ private:
 
 /// Get Debug Ring Resource
 ///
-/// Returns a pointer to a debug_ring_resources_t for a given CPU. Note that
-/// this serves two purposes. We cannot define global memory with a GCC bug
-/// showing up (random crashes), and this provides a simple way for the unit
-/// test to get access to this memory.
+/// Returns a pointer to a debug_ring_resources_t for a given CPU.
 ///
 /// @param vcpuid defines which debug ring to return
 /// @return the debug_ring_resources_t for the provided vcpuid
 ///
-extern "C" struct debug_ring_resources_t *
-get_drr(int64_t vcpuid);
+extern "C" struct debug_ring_resources_t *get_drr(int64_t vcpuid);
 
 #endif

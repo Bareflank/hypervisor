@@ -211,6 +211,7 @@ driver_entry_ut::test_helper_add_mdl_1_page()
     get_mdl_num_t get_mdl_num;
 
     EXPECT_TRUE(common_add_module(m_dummy_add_mdl_success, m_dummy_add_mdl_success_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_add_module(m_dummy_misc, m_dummy_misc_length) == BF_SUCCESS);
     EXPECT_TRUE(common_load_vmm() == BF_SUCCESS);
     ASSERT_TRUE(resolve_symbol("get_mdl_num", (void **)&get_mdl_num) == BF_SUCCESS);
 
@@ -226,6 +227,7 @@ driver_entry_ut::test_helper_add_mdl_3_pages()
     get_mdl_num_t get_mdl_num;
 
     EXPECT_TRUE(common_add_module(m_dummy_add_mdl_success, m_dummy_add_mdl_success_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_add_module(m_dummy_misc, m_dummy_misc_length) == BF_SUCCESS);
     EXPECT_TRUE(common_load_vmm() == BF_SUCCESS);
     ASSERT_TRUE(resolve_symbol("get_mdl_num", (void **)&get_mdl_num) == BF_SUCCESS);
 
@@ -241,6 +243,7 @@ driver_entry_ut::test_helper_add_mdl_3_pages_plus()
     get_mdl_num_t get_mdl_num;
 
     EXPECT_TRUE(common_add_module(m_dummy_add_mdl_success, m_dummy_add_mdl_success_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_add_module(m_dummy_misc, m_dummy_misc_length) == BF_SUCCESS);
     EXPECT_TRUE(common_load_vmm() == BF_SUCCESS);
     ASSERT_TRUE(resolve_symbol("get_mdl_num", (void **)&get_mdl_num) == BF_SUCCESS);
 

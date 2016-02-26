@@ -182,16 +182,4 @@ private:
 ///
 #define g_mm memory_manager::instance()
 
-/// Add Memory Descriptor List
-///
-/// This is used by the driver entry to add an MDL to VMM. The driver entry
-/// will need to collect memory descriptors for every page of memory that the
-/// VMM is using so that the memory manager can provide mappings as needed.
-///
-/// @param mdl the memory descirptor list
-/// @param num the number of memory diescriptors in the list
-/// @return MEMORY_MANAGER_SUCCESS on success, MEMORY_MANAGER_FAILURE otherwise
-///
-extern "C" int64_t add_mdl(struct memory_descriptor *mdl, int64_t num);
-
 #endif

@@ -97,7 +97,6 @@ NATIVE_CCFLAGS+=-Wpedantic
 
 CROSS_CCFLAGS+=-fpic
 CROSS_CCFLAGS+=-ffreestanding
-CROSS_CCFLAGS+=-fno-exceptions
 CROSS_CCFLAGS+=-mno-red-zone
 CROSS_CCFLAGS+=-Wall
 CROSS_CCFLAGS+=-Wextra
@@ -115,7 +114,6 @@ NATIVE_CXXFLAGS+=-Wpedantic
 
 CROSS_CXXFLAGS+=-fpic
 CROSS_CXXFLAGS+=-ffreestanding
-CROSS_CXXFLAGS+=-fno-exceptions
 CROSS_CXXFLAGS+=-fno-use-cxa-atexit
 CROSS_CXXFLAGS+=-fno-threadsafe-statics
 CROSS_CXXFLAGS+=-mno-red-zone

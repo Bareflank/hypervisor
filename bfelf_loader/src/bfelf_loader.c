@@ -252,8 +252,8 @@ private_check_support(struct bfelf_file_t *ef)
     if (ef->ehdr->e_ident[bfei_version] != bfev_current)
         return unsupported_file("unsupported version");
 
-    if (ef->ehdr->e_ident[bfei_osabi] != bfelfosabi_sysv)
-        return unsupported_file("file does not use the system v abi");
+    // if (ef->ehdr->e_ident[bfei_osabi] != bfelfosabi_sysv)
+    //     return unsupported_file("file does not use the system v abi");
 
     if (ef->ehdr->e_ident[bfei_abiversion] != 0)
         return unsupported_file("unsupported abi version");
@@ -1101,21 +1101,24 @@ bfelf_loader_get_info(struct bfelf_loader_t *loader,
         info->eh_frame_size = shdr->sh_size;
     }
 
-    ret = private_symbol_by_name(ef, &name_local_init, &found_sym);
-    if (ret != BFELF_SUCCESS)
-        goto failure;
+    if (loader->ignore_crt == 0)
+    {
+        ret = private_symbol_by_name(ef, &name_local_init, &found_sym);
+        if (ret != BFELF_SUCCESS)
+            goto failure;
 
-    ret = private_resolve_symbol(ef, found_sym, (void **)&info->local_init);
-    if (ret != BFELF_SUCCESS)
-        return ret;
+        ret = private_resolve_symbol(ef, found_sym, (void **)&info->local_init);
+        if (ret != BFELF_SUCCESS)
+            return ret;
 
-    ret = private_symbol_by_name(ef, &name_local_fini, &found_sym);
-    if (ret != BFELF_SUCCESS)
-        goto failure;
+        ret = private_symbol_by_name(ef, &name_local_fini, &found_sym);
+        if (ret != BFELF_SUCCESS)
+            goto failure;
 
-    ret = private_resolve_symbol(ef, found_sym, (void **)&info->local_fini);
-    if (ret != BFELF_SUCCESS)
-        return ret;
+        ret = private_resolve_symbol(ef, found_sym, (void **)&info->local_fini);
+        if (ret != BFELF_SUCCESS)
+            return ret;
+    }
 
     return BFELF_SUCCESS;
 

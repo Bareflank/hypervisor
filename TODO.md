@@ -8,8 +8,15 @@ Misc:
 - Destructors for statically created classes are not being called. This should
   be resolved at some point.
 - Add support for clang/LLVM
+- Add DWARF4 expression support in the unwinder
 
 Version 1.0 TODO:
+- Add exception support to debug ring
+- Add exception support to exit handler
+- Add exception support to memory manager
+- Add exception support to vcpu
+- Add exception support to vmcs
+- Add exception support to vmm
 - Need to have all of the VMCS checks implemented and unit tested
 - Need to have all of the remaining unit tests completed (i.e. all of the
   VMM modules need their unit tests completed including serial)

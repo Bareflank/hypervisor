@@ -18,11 +18,16 @@ done
 # ------------------------------------------------------------------------------
 
 MODE="link"
+TYPE="binary"
 
 for ARG in "$@"
 do
     if [[ $ARG == "-c" ]]; then
         MODE="compile"
+    fi
+
+    if [[ $ARG == "-shared" ]]; then
+        TYPE="shared"
     fi
 done
 
@@ -108,7 +113,7 @@ done
 # only thing the hypervisor code should need from the sysroot is the includes.
 
 if [[ $BAREFLANK_WRAPPER_INCLUDE_LIBC == "true" ]]; then
-    SYSROOT_LIBS="-lc -lm -lbfc"
+    SYSROOT_LIBS="-lc -lbfc -lbfunwind_static"
 fi
 
 SYSROOT_LIB_PATH="-L$HOME/opt/cross/x86_64-elf/lib/"
@@ -133,12 +138,8 @@ fi
 # Libgcc
 # ------------------------------------------------------------------------------
 
-LIBGCC_FILENAME=`$COMPILER -mno-red-zone -print-libgcc-file-name`
-LIBGCC_DIRNAME=`dirname $LIBGCC_FILENAME`
-
-if [[ $MODE == "link" ]]; then
-    LIBGCC_LIBS="-u local_init -u local_fini -lcrt -lgcc"
-    LIBGCC_LIB_PATH="-L$LIBGCC_DIRNAME"
+if [[ $MODE == "link" ]] && [[ $TYPE == "shared" ]]; then
+    BAREFLANK_LIBS="-u local_init -u local_fini -lcrt"
 fi
 
 # ------------------------------------------------------------------------------
@@ -150,11 +151,10 @@ if [ $VERBOSE == "true" ]; then
     echo "MODE: $MODE"
     echo "COMPILER: $COMPILER"
     echo "FILTERED ARGS: ${ARGS[*]}"
-    echo "LIBGCC_LIBS: $LIBGCC_LIBS"
-    echo "LIBGCC_LIB_PATH: $LIBGCC_LIB_PATH"
     echo "SYSROOT_LIBS: $SYSROOT_LIBS"
     echo "SYSROOT_LIB_PATH: $SYSROOT_LIB_PATH"
     echo "SYSROOT_INC_PATH: $SYSROOT_INC_PATH"
+    echo "BAREFLANK_LIBS: $BAREFLANK_LIBS"
     echo ""
 fi
 
@@ -163,5 +163,5 @@ if [[ $MODE == "compile" ]]; then
 fi
 
 if [[ $MODE == "link" ]]; then
-    $HOME/opt/cross/bin/x86_64-elf-ld ${ARGS[*]} $SYSROOT_LIB_PATH $SYSROOT_LIBS $LIBGCC_LIB_PATH $LIBGCC_LIBS
+    $HOME/opt/cross/bin/x86_64-elf-ld ${ARGS[*]} $SYSROOT_LIB_PATH $SYSROOT_LIBS $BAREFLANK_LIBS
 fi

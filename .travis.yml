@@ -27,6 +27,6 @@ install:
 - if ! travis_wait 40 ./tools/scripts/setup-debian.sh; then cat ~/setup-debian_stderr.log; cat ~/create-cross-compiler_stderr.log; fi
 
 script:
-- make -j2
+- make
 - make unittest
 - if [[ -n $(./tools/astyle/linux/run.sh | grep Formatted) ]]; then echo "You must run astyle before submitting a pull request"; exit -1; fi

@@ -19,61 +19,86 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <debug.h>
 #include <entry.h>
+#include <debug.h>
 #include <constants.h>
+#include <exception.h>
+#include <eh_frame_list.h>
 #include <vcpu/vcpu_manager.h>
+#include <debug_ring/debug_ring.h>
 #include <memory_manager/memory_manager.h>
 
-int64_t
-init_vmm_trampoline(int64_t arg)
+// -----------------------------------------------------------------------------
+// Global
+// -----------------------------------------------------------------------------
+
+auto g_eh_frame_list_num = 0ULL;
+struct eh_frame_t g_eh_frame_list[MAX_NUM_MODULES] = {};
+
+// -----------------------------------------------------------------------------
+// Helpers
+// -----------------------------------------------------------------------------
+
+template<typename T> int64_t
+catch_all(T func)
 {
-    (void) arg;
+    int64_t result = ENTRY_ERROR_UNKNOWN;
 
-    if (g_vcm->init(0) != vcpu_manager_error::success)
-        return ENTRY_ERROR_VMM_INIT_FAILED;
+    try
+    {
+        result = func();
+    }
+    catch (bfn::general_exception &ge)
+    {
+        bferror << "unhandled exception caught: " << ge << bfendl;
+    }
+    catch (std::exception &e)
+    {
+        bferror << "unhandled exception caught: " << e.what() << bfendl;
+    }
+    catch (...)
+    {
+        bferror << "unhandled exception caught: unknown" << bfendl;
+    }
 
-    return ENTRY_SUCCESS;
+    return result;
 }
 
-int64_t
-start_vmm_trampoline(int64_t arg)
+void
+terminate()
 {
-    (void) arg;
-
-    if (g_vcm->start(0) != vcpu_manager_error::success)
-        return ENTRY_ERROR_VMM_START_FAILED;
-
-    bfdebug << "started:" << bfendl;
-    bfdebug << "    - free blocks: " << g_mm->free_blocks() << " out of: "
-            << MAX_BLOCKS << " = " << g_mm->free_blocks() * 100 / MAX_BLOCKS
-            << "%" << bfendl;
-
-    return ENTRY_SUCCESS;
+    bferror << "FATAL ERROR: terminate called" << bfendl;
+    abort();
 }
 
-int64_t
-stop_vmm_trampoline(int64_t arg)
+void
+new_handler()
 {
-    (void) arg;
-
-    if (g_vcm->stop(0) != vcpu_manager_error::success)
-        return ENTRY_ERROR_VMM_STOP_FAILED;
-
-    bfdebug << "stopped:" << bfendl;
-    bfdebug << "    - free blocks: " << g_mm->free_blocks() << " out of: "
-            << MAX_BLOCKS << " = " << g_mm->free_blocks() * 100 / MAX_BLOCKS
-            << "%" << bfendl;
-
-    return ENTRY_SUCCESS;
+    bferror << "FATAL ERROR: out of memory" << bfendl;
+    std::terminate();
 }
+
+// -----------------------------------------------------------------------------
+// Entry Points
+// -----------------------------------------------------------------------------
 
 extern "C" int64_t
 init_vmm(int64_t arg)
 {
     (void) arg;
 
-    return init_vmm_trampoline(arg);
+    std::set_terminate(terminate);
+    std::set_new_handler(new_handler);
+
+    return catch_all([&]() -> int64_t
+    {
+
+        if (g_vcm->init(0) != vcpu_manager_error::success)
+            return ENTRY_ERROR_VMM_INIT_FAILED;
+
+        return ENTRY_SUCCESS;
+
+    });
 }
 
 extern "C" int64_t
@@ -81,7 +106,20 @@ start_vmm(int64_t arg)
 {
     (void) arg;
 
-    return start_vmm_trampoline(arg);
+    return catch_all([&]() -> int64_t
+    {
+
+        if (g_vcm->start(0) != vcpu_manager_error::success)
+            return ENTRY_ERROR_VMM_START_FAILED;
+
+        bfdebug << "started:" << bfendl;
+        bfdebug << "    - free blocks: " << g_mm->free_blocks() << " out of: "
+        << MAX_BLOCKS << " = " << g_mm->free_blocks() * 100 / MAX_BLOCKS
+        << "%" << bfendl;
+
+        return ENTRY_SUCCESS;
+
+    });
 }
 
 extern "C" int64_t
@@ -89,5 +127,48 @@ stop_vmm(int64_t arg)
 {
     (void) arg;
 
-    return stop_vmm_trampoline(arg);
+    return catch_all([&]() -> int64_t
+    {
+
+        if (g_vcm->stop(0) != vcpu_manager_error::success)
+            return ENTRY_ERROR_VMM_STOP_FAILED;
+
+        bfdebug << "stopped:" << bfendl;
+        bfdebug << "    - free blocks: " << g_mm->free_blocks() << " out of: "
+        << MAX_BLOCKS << " = " << g_mm->free_blocks() * 100 / MAX_BLOCKS
+        << "%" << bfendl;
+
+        return ENTRY_SUCCESS;
+
+    });
+}
+
+extern "C" int64_t
+add_mdl(struct memory_descriptor *mdl, int64_t num)
+{
+    return catch_all([&]() -> int64_t
+    {
+        return g_mm->add_mdl(mdl, num);
+    });
+}
+
+// -----------------------------------------------------------------------------
+// C Runtime Support
+// -----------------------------------------------------------------------------
+
+extern "C" struct eh_frame_t *
+get_eh_frame_list()
+{
+    return g_eh_frame_list;
+}
+
+extern "C" void
+register_eh_frame(void *addr, uint64_t size)
+{
+    if (g_eh_frame_list_num >= MAX_NUM_MODULES)
+        return;
+
+    g_eh_frame_list[g_eh_frame_list_num].addr = addr;
+    g_eh_frame_list[g_eh_frame_list_num].size = size;
+    g_eh_frame_list_num++;
 }

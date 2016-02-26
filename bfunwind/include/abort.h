@@ -1,5 +1,5 @@
 //
-// Bareflank Hypervisor
+// Bareflank Unwind Library
 //
 // Copyright (C) 2015 Assured Information Security, Inc.
 // Author: Rian Quinn        <quinnr@ainfosec.com>
@@ -19,50 +19,21 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <stdint.h>
+#ifndef ABORT_H
+#define ABORT_H
 
-int g_misc = 0;
-
-class test
+#ifndef DISABLE_ABORT
+#include <stdio.h>
+#include <stdlib.h>
+inline void
+private_abort(const char *msg, const char *func, int line)
 {
-public:
-    test()
-    { g_misc = 10; }
-
-    virtual ~test()
-    { g_misc = 20; }
-};
-
-test g_test;
-
-void
-operator delete(void *ptr)
-{
-    (void) ptr;
+    fprintf(stdout, "%s FATAL ERROR [%d]: %s\n", func, line, msg);
+    abort();
 }
+#define ABORT(a) private_abort(a,__func__,__LINE__);
+#else
+#define ABORT(a) while(1);
+#endif
 
-extern "C" int64_t
-sym_that_returns_failure(int64_t)
-{
-    return -1;
-}
-
-extern "C" int64_t
-sym_that_returns_success(int64_t)
-{
-    return 0;
-}
-
-extern "C" int64_t
-get_misc(void)
-{
-    return g_misc;
-}
-
-extern "C" void
-register_eh_frame(void *addr, uint64_t size)
-{
-    (void) addr;
-    (void) size;
-}
-
+#endif

@@ -20,13 +20,19 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef CRTINIT_H
-#define CRTINIT_H
+#ifndef CRT_H
+#define CRT_H
 
 #ifndef KERNEL
 #include <stdint.h>
 #else
 #include <types.h>
+#endif
+
+#pragma pack(push, 1)
+
+#ifdef __cplusplus
+extern "C" {
 #endif
 
 struct section_info_t;
@@ -73,5 +79,11 @@ struct section_info_t
     local_init_t local_init;
     local_fini_t local_fini;
 };
+
+#ifdef __cplusplus
+}
+#endif
+
+#pragma pack(pop)
 
 #endif
