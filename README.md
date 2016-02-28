@@ -24,9 +24,9 @@ The bareflank hypervisor is an open source, lightweight hypervisor, lead by
 Assured Information Security, Inc. designed specifically to enable hypervisor
 based research. To support any style of research, bareflank comes complete with:
 - a generic virtual machine monitor (VMM),
-- a custom ELF loader
 - a user mode application to manage the hypervisor.
-- a set of driver entries to launch the VMM
+- a set of driver entries to launch the VMM from various host operating systems
+  (e.g. Linux, Windows, UEFI)
 
 In addition, the entire bareflank project is licensed under the
 GNU Lesser General Public License v2.1 (LGPL), providing a means for users of
