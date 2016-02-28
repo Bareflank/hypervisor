@@ -40,7 +40,7 @@ bareflank has access to shared pointers, complex data structures
 Most of these features are “header only”, meaning only the parts of the STL
 that are used are included, providing a convenient means to keep the VMM as
 small as possible. Existing open source hypervisors that are written in C
-spend a considerable amount of time re-writing similar functionality instead on
+spend a considerable amount of time re-writing similar functionality instead of
 focusing on what matters most: hypervisor technologies.
 
 Since the goal of the project is to provide a lightweight hypervisor for
