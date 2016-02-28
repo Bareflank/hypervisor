@@ -77,7 +77,7 @@ compiler is as simple as:
 ./tools/scripts/setup-<platform>.sh
 ```
 
-The create-cross-compiler.sh script not only creates the cross compiler, but
+The setup-<platform>.sh script not only creates the cross compiler, but
 it also sets up the libc and libc++ environment, creating a sysroot that will
 be used by the bareflank hypervisor. Once you have your cross compiler setup
 based on the script, or instructions, you should be able to run the following
