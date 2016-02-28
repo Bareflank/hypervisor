@@ -49,6 +49,8 @@ uint64_t __read_msr(uint32_t msr);
 uint32_t __read_msr32(uint32_t msr);
 void __write_msr(uint32_t msr, uint64_t val);
 
+uint64_t __read_rip(void);
+
 uint64_t __read_cr0(void);
 void __write_cr0(uint64_t val);
 
@@ -62,13 +64,28 @@ uint64_t __read_dr7(void);
 void __write_dr7(uint64_t val);
 
 uint16_t __read_es(void);
+void __write_es(uint16_t val);
+
 uint16_t __read_cs(void);
+
 uint16_t __read_ss(void);
+void __write_ss(uint16_t val);
+
 uint16_t __read_ds(void);
+void __write_ds(uint16_t val);
+
 uint16_t __read_fs(void);
+void __write_fs(uint16_t val);
+
 uint16_t __read_gs(void);
+void __write_gs(uint16_t val);
+
 uint16_t __read_tr(void);
+void __write_tr(uint16_t val);
+
 uint16_t __read_ldtr(void);
+void __write_ldtr(uint16_t val);
+
 uint64_t __read_rsp(void);
 
 struct gdt_t
@@ -85,6 +102,8 @@ struct idt_t
 
 void __read_gdt(gdt_t *gdt);
 void __read_idt(idt_t *idt);
+void __write_gdt(gdt_t *gdt);
+void __write_idt(idt_t *idt);
 
 void __outb(uint16_t val, uint16_t port);
 void __outw(uint16_t val, uint16_t port);
@@ -138,6 +157,9 @@ public:
     virtual void write_msr(uint32_t msr, uint64_t val)
     { __write_msr(msr, val); }
 
+    virtual uint64_t read_rip()
+    { return __read_rip(); }
+
     virtual uint64_t read_cr0()
     { return __read_cr0(); }
 
@@ -165,26 +187,47 @@ public:
     virtual uint16_t read_es()
     { return __read_es(); }
 
+    virtual void write_es(uint16_t val)
+    { __write_es(val); }
+
     virtual uint16_t read_cs()
     { return __read_cs(); }
 
     virtual uint16_t read_ss()
     { return __read_ss(); }
 
+    virtual void write_ss(uint16_t val)
+    { __write_ss(val); }
+
     virtual uint16_t read_ds()
     { return __read_ds(); }
+
+    virtual void write_ds(uint16_t val)
+    { __write_ds(val); }
 
     virtual uint16_t read_fs()
     { return __read_fs(); }
 
+    virtual void write_fs(uint16_t val)
+    { __write_fs(val); }
+
     virtual uint16_t read_gs()
     { return __read_gs(); }
+
+    virtual void write_gs(uint16_t val)
+    { __write_gs(val); }
 
     virtual uint16_t read_tr()
     { return __read_tr(); }
 
+    virtual void write_tr(uint16_t val)
+    { __write_tr(val); }
+
     virtual uint16_t read_ldtr()
     { return __read_ldtr(); }
+
+    virtual void write_ldtr(uint16_t val)
+    { return __write_ldtr(val); }
 
     virtual uint64_t read_rsp()
     { return __read_rsp(); }
@@ -192,8 +235,14 @@ public:
     virtual void read_gdt(gdt_t *gdt)
     { __read_gdt(gdt); }
 
+    virtual void write_gdt(gdt_t *gdt)
+    { __write_gdt(gdt); }
+
     virtual void read_idt(idt_t *idt)
     { __read_idt(idt); }
+
+    virtual void write_idt(idt_t *idt)
+    { __write_idt(idt); }
 
     virtual void write_portio_8(uint16_t port, uint8_t value)
     { __outb(value, port); }

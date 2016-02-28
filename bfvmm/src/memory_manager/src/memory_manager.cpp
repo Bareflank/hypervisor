@@ -246,6 +246,7 @@ memory_manager::virt_to_phys(void *virt)
 void *
 memory_manager::phys_to_virt(void *phys)
 {
+
     auto key = (uintptr_t)phys >> MAX_PAGE_SHIFT;
     const auto &md_iter = m_phys_to_virt_map.find(key);
 
@@ -305,6 +306,7 @@ memory_manager::add_mdl(struct memory_descriptor *mdl, int64_t num)
 
         m_virt_to_phys_map[(uintptr_t)md.virt >> MAX_PAGE_SHIFT] = md;
         m_phys_to_virt_map[(uintptr_t)md.phys >> MAX_PAGE_SHIFT] = md;
+
     }
 
     return MEMORY_MANAGER_SUCCESS;

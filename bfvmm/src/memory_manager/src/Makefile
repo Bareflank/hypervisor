@@ -60,6 +60,7 @@ CROSS_OUTDIR:=../../../bin
 ################################################################################
 
 SOURCES+=memory_manager.cpp
+HEADERS=
 
 INCLUDE_PATHS+=./
 INCLUDE_PATHS+=../../../include/

@@ -51,6 +51,7 @@ NATIVE_OUTDIR:=../bin
 
 SOURCES+=test.cpp
 SOURCES+=test_memory_manager.cpp
+HEADERS=
 
 INCLUDE_PATHS+=./
 INCLUDE_PATHS+=../../../include/

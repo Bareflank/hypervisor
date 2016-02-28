@@ -25,12 +25,13 @@
 #include <stdint.h>
 #include <intrinsics/intrinsics_intel_x64.h>
 
+#define VMCS_PROMOTION 0xDEADBEEF
 
 class exit_handler_dispatch
 {
 public:
 
-    exit_handler_dispatch();
+    exit_handler_dispatch(intrinsics_intel_x64 *intrinsics);
     virtual ~exit_handler_dispatch();
 
     virtual void dispatch();
@@ -101,7 +102,6 @@ protected:
     virtual void advance_rip();
 
 private:
-
     void spin_wait();
     void unimplemented_handler();
 
@@ -109,7 +109,7 @@ private:
 
 private:
 
-    intrinsics_intel_x64 *m_intrinsics_intel_x64;
+    intrinsics_intel_x64 *m_intrinsics;
 
     uint64_t m_exit_reason;
     uint64_t m_exit_qualification;

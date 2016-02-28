@@ -23,7 +23,7 @@
 #include <iostream>
 
 #include <vmcs/vmcs_intel_x64.h>
-// #include <exit_handler/exit_handler.h>
+#include <exit_handler/exit_handler.h>
 
 // =============================================================================
 //  Helper Structs
@@ -39,8 +39,9 @@ struct vmcs_region
 // =============================================================================
 
 vmcs_intel_x64::vmcs_intel_x64(intrinsics_intel_x64 *intrinsics) :
-    m_intrinsics(intrinsics)
+    m_msr_bitmap(4096 * 8), m_intrinsics(intrinsics)
 {
+
 }
 
 vmcs_error::type
@@ -164,20 +165,7 @@ vmcs_intel_x64::launch()
     // =========================================================================
     // CLEAN ME UP
     // =========================================================================
-
-    // m_memory_manager->alloc_page(&m_msr_bitmap);
-
-    // auto buf = (char *)m_msr_bitmap.virt_addr();
-    // for (auto i = 0; i < m_msr_bitmap.size(); i++)
-    //     buf[i] = 0;
-
-    // vmwrite(VMCS_ADDRESS_OF_MSR_BITMAPS_FULL, (uint64_t)m_msr_bitmap.phys_addr());
-
-    // auto controls = vmread(VMCS_PRIMARY_PROCESSOR_BASED_VM_EXECUTION_CONTROLS);
-
-    // controls |= VM_EXEC_P_PROC_BASED_USE_MSR_BITMAPS;
-
-    // vmwrite(VMCS_PRIMARY_PROCESSOR_BASED_VM_EXECUTION_CONTROLS, controls);
+    vmwrite(VMCS_ADDRESS_OF_MSR_BITMAPS_FULL, (uint64_t)g_mm->virt_to_phys(m_msr_bitmap.address()));
 
     // =========================================================================
     // CLEAN ME UP
@@ -209,10 +197,9 @@ vmcs_intel_x64::launch()
     // go through a series of error checks to identify why the failure
     // occured. If the launch succeeds, we should continue execution as
     // normal, not this code will be in a virtual machine when finished.
-
-    // ret = launch_vmcs();
-    // if (ret != vmcs_error::success)
-    //     return ret;
+    ret = launch_vmcs();
+    if (ret != vmcs_error::success)
+        return ret;
 
     return vmcs_error::success;
 }
@@ -298,36 +285,51 @@ vmcs_intel_x64::save_state()
 }
 
 vmcs_error::type
+vmcs_intel_x64::unlaunch()
+{
+    m_intrinsics->write_es(vmread(VMCS_GUEST_ES_SELECTOR));
+    m_intrinsics->write_ds(vmread(VMCS_GUEST_DS_SELECTOR));
+    m_intrinsics->write_fs(vmread(VMCS_GUEST_FS_SELECTOR));
+    m_intrinsics->write_gs(vmread(VMCS_GUEST_GS_SELECTOR));
+    m_intrinsics->write_msr(IA32_EFER_MSR, vmread(VMCS_GUEST_IA32_EFER_FULL));
+    m_intrinsics->write_msr(IA32_PAT_MSR, vmread(VMCS_GUEST_IA32_PAT_FULL));
+    m_intrinsics->write_msr(IA32_SYSENTER_CS_MSR, vmread(VMCS_GUEST_IA32_SYSENTER_CS));
+    m_intrinsics->write_msr(IA32_FS_BASE_MSR, vmread(VMCS_GUEST_FS_BASE));
+    m_intrinsics->write_msr(IA32_GS_BASE_MSR, vmread(VMCS_GUEST_GS_BASE));
+    m_intrinsics->write_msr(IA32_SYSENTER_ESP_MSR, vmread(VMCS_GUEST_IA32_SYSENTER_ESP));
+    m_intrinsics->write_msr(IA32_SYSENTER_EIP_MSR, vmread(VMCS_GUEST_IA32_SYSENTER_EIP));
+    m_intrinsics->write_cr3(vmread(VMCS_GUEST_CR3));
+
+    promote_vmcs_to_root();
+
+    // This doesn't actually get returned
+    return vmcs_error::success;
+}
+
+vmcs_error::type
 vmcs_intel_x64::create_vmcs_region()
 {
-    // if (m_memory_manager->alloc_page(&m_vmcs_region) != memory_manager_error::success)
-    // {
-    //     std::cout << "create_vmcs_region failed: "
-    //               << "out of memory" << std::endl;
-    //     return vmcs_error::out_of_memory;
-    // }
+    // Note: This relies on make_unique returning an already
+    // zeroed-out buffer (think calloc not malloc.)
+    m_vmcs_region = std::make_unique<char[]>(4096);
 
-    // if (m_vmcs_region.size() < vmcs_region_size())
-    // {
-    //     std::cout << "create_vmcs_region failed: "
-    //               << "the allocated page is not large enough:" << std::endl
-    //               << "    - page size: " << m_vmcs_region.size() << " "
-    //               << "    - vmxon/vmcs region size: " << vmcs_region_size()
-    //               << std::endl;
-    //     return vmcs_error::not_supported;
-    // }
+    if (!m_vmcs_region)
+    {
+        std::cout << "create_vmcs_region failed: "
+                  << "out of memory" << std::endl;
+        return vmcs_error::out_of_memory;
+    }
 
-    // if (((uintptr_t)m_vmcs_region.phys_addr() & 0x0000000000000FFF) != 0)
-    // {
-    //     std::cout << "create_vmcs_region failed: "
-    //               << "the allocated page is not page aligned:" << std::endl
-    //               << "    - page phys: " << m_vmcs_region.phys_addr()
-    //               << std::endl;
-    //     return vmcs_error::not_supported;
-    // }
+    if ((((uintptr_t)g_mm->virt_to_phys(m_vmcs_region.get())) & 0x0000000000000FFF) != 0)
+    {
+        std::cout << "create_vmcs_region failed: "
+                  << "the allocated page is not page aligned:" << std::endl
+                  << "    - page phys: " << g_mm->virt_to_phys(m_vmcs_region.get())
+                  << std::endl;
+        return vmcs_error::not_supported;
+    }
 
-    // auto buf = (char *)m_vmcs_region.virt_addr();
-    // auto reg = (vmcs_region *)m_vmcs_region.virt_addr();
+    auto reg = (vmcs_region *)m_vmcs_region.get();
 
     // // The information regading this MSR can be found in appendix A.1. For
     // // the VMX capabilities check, we need the following:
@@ -336,10 +338,7 @@ vmcs_intel_x64::create_vmcs_region()
     // //   processor. Processors that use the same VMCS revision identifier use
     // //   the same size for VMCS regions (see subsequent item on bits 44:32)
 
-    // for (auto i = 0; i < m_vmcs_region.size(); i++)
-    //     buf[i] = 0;
-
-    // reg->revision_id = (m_intrinsics->read_msr(IA32_VMX_BASIC_MSR) & 0x7FFFFFFFF);
+    reg->revision_id = (m_intrinsics->read_msr(IA32_VMX_BASIC_MSR) & 0x7FFFFFFFF);
 
     return vmcs_error::success;
 }
@@ -347,27 +346,26 @@ vmcs_intel_x64::create_vmcs_region()
 vmcs_error::type
 vmcs_intel_x64::release_vmxon_region()
 {
-    // m_memory_manager->free_page(m_vmcs_region);
-
+    // This function should probably go away now.
     return vmcs_error::success;
 }
 
 vmcs_error::type
 vmcs_intel_x64::clear_vmcs_region()
 {
-    // auto phys = m_vmcs_region.phys_addr();
+    auto phys = g_mm->virt_to_phys(m_vmcs_region.get());
 
-    // // For some reason, the VMCLEAR instruction takes the address of a memory
-    // // location that has the address of the VMCS region, which sadly is not
-    // // well documented in the Intel manual.
+    // For some reason, the VMCLEAR instruction takes the address of a memory
+    // location that has the address of the VMCS region, which sadly is not
+    // well documented in the Intel manual.
 
-    // if (m_intrinsics->vmclear(&phys) == false)
-    // {
-    //     std::cout << "vmclear failed" << std::endl;
-    //     return vmcs_error::failure;
-    // }
+    if (m_intrinsics->vmclear(&phys) == false)
+    {
+        std::cout << "vmclear failed" << std::endl;
+        return vmcs_error::failure;
+    }
 
-    // m_valid = true;
+    m_valid = true;
 
     return vmcs_error::success;
 }
@@ -375,17 +373,17 @@ vmcs_intel_x64::clear_vmcs_region()
 vmcs_error::type
 vmcs_intel_x64::load_vmcs_region()
 {
-    // auto phys = m_vmcs_region.phys_addr();
+    auto phys = g_mm->virt_to_phys(m_vmcs_region.get());
 
-    // // For some reason, the VMPTRLD instruction takes the address of a memory
-    // // location that has the address of the VMCS region, which sadly is not
-    // // well documented in the Intel manual.
+    // For some reason, the VMPTRLD instruction takes the address of a memory
+    // location that has the address of the VMCS region, which sadly is not
+    // well documented in the Intel manual.
 
-    // if (m_intrinsics->vmptrld(&phys) == false)
-    // {
-    //     std::cout << "vmptrld failed" << std::endl;
-    //     return vmcs_error::failure;
-    // }
+    if (m_intrinsics->vmptrld(&phys) == false)
+    {
+        std::cout << "vmptrld failed" << std::endl;
+        return vmcs_error::failure;
+    }
 
     return vmcs_error::success;
 }
@@ -674,13 +672,14 @@ vmcs_intel_x64::write_natural_width_host_state_fields()
     vmwrite(VMCS_HOST_CR0, m_cr0);
     vmwrite(VMCS_HOST_CR3, m_cr3);
     vmwrite(VMCS_HOST_CR4, m_cr4);
+
     vmwrite(VMCS_HOST_TR_BASE, m_tr_base);
 
     vmwrite(VMCS_HOST_GDTR_BASE, m_gdt_reg.base);
     vmwrite(VMCS_HOST_IDTR_BASE, m_idt_reg.base);
 
-    // vmwrite(VMCS_HOST_RSP, (uint64_t)exit_handler_stack());
-    // vmwrite(VMCS_HOST_RIP, (uint64_t)exit_handler_entry);
+    vmwrite(VMCS_HOST_RSP, (uint64_t)exit_handler_stack());
+    vmwrite(VMCS_HOST_RIP, (uint64_t)exit_handler_entry);
 
     // unused: VMCS_HOST_FS_BASE
     // unused: VMCS_HOST_GS_BASE
@@ -728,7 +727,7 @@ vmcs_intel_x64::default_primary_processor_based_vm_execution_controls()
     // controls |= VM_EXEC_P_PROC_BASED_UNCONDITIONAL_IO_EXITING;
     // controls |= VM_EXEC_P_PROC_BASED_USE_IO_BITMAPS;
     // controls |= VM_EXEC_P_PROC_BASED_MONITOR_TRAP_FLAG;
-    // controls |= VM_EXEC_P_PROC_BASED_USE_MSR_BITMAPS;
+    controls |= VM_EXEC_P_PROC_BASED_USE_MSR_BITMAPS;
     // controls |= VM_EXEC_P_PROC_BASED_MONITOR_EXITING;
     // controls |= VM_EXEC_P_PROC_BASED_PAUSE_EXITING;
     // controls |= VM_EXEC_P_PROC_BASED_ACTIVATE_SECONDARY_CONTROLS;

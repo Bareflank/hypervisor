@@ -58,6 +58,23 @@ vcpu_manager::start(int64_t vcpuid)
 }
 
 vcpu_manager_error::type
+vcpu_manager::dispatch(int64_t vcpuid)
+{
+    if (vcpuid < 0 || vcpuid >= MAX_VCPUS)
+        return vcpu_manager_error::invalid;
+
+    const auto &vc = m_vcpus[vcpuid];
+
+    if (!vc)
+        return vcpu_manager_error::invalid;
+
+    if (vc->dispatch() != vcpu_error::success)
+        return vcpu_manager_error::failure;
+
+    return vcpu_manager_error::success;
+}
+
+vcpu_manager_error::type
 vcpu_manager::stop(int64_t vcpuid)
 {
     if (vcpuid < 0 || vcpuid >= MAX_VCPUS)
@@ -68,8 +85,27 @@ vcpu_manager::stop(int64_t vcpuid)
     if (!vc)
         return vcpu_manager_error::invalid;
 
+    if (vc->request_teardown() != vcpu_error::success)
+        return vcpu_manager_error::failure;
+
     if (vc->stop() != vcpu_error::success)
         return vcpu_manager_error::failure;
+
+    return vcpu_manager_error::success;
+}
+
+vcpu_manager_error::type
+vcpu_manager::promote_vcpu(int64_t vcpuid)
+{
+    if (vcpuid < 0 || vcpuid >= MAX_VCPUS)
+        return vcpu_manager_error::invalid;
+
+    const auto &vc = m_vcpus[vcpuid];
+
+    if (!vc)
+        return vcpu_manager_error::invalid;
+
+    vc->promote();
 
     return vcpu_manager_error::success;
 }

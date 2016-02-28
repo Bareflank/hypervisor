@@ -23,6 +23,8 @@
 #define VMM_INTEL_X64_H
 
 #include <intrinsics/intrinsics_intel_x64.h>
+#include <memory_manager/memory_manager.h>
+#include <memory>
 
 namespace vmm_error
 {
@@ -91,6 +93,8 @@ private:
     friend class vmm_ut;
 
     bool m_vmxon_enabled;
+
+    std::unique_ptr<char[]> m_vmxon_page;
 
     intrinsics_intel_x64 *m_intrinsics;
 };

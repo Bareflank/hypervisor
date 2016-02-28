@@ -68,6 +68,15 @@ public:
     ///
     vcpu_manager_error::type start(int64_t vcpuid);
 
+    /// Dispatch vCPU exit handler
+    ///
+    /// Runs the vCPU's exit handler
+    ///
+    /// @param vcpuid the vcpu to stop
+    /// @return success on success, falure otherwise
+    ///
+    vcpu_manager_error::type dispatch(int64_t vcpuid);
+
     /// Stop vCPU
     ///
     /// Stops the vCPU.
@@ -76,6 +85,15 @@ public:
     /// @return success on success, falure otherwise
     ///
     vcpu_manager_error::type stop(int64_t vcpuid);
+
+    /// Promote vCPU
+    ///
+    /// Promote vCPU to host CPU state
+    ///
+    /// @param vcpuid the vcpu to promote
+    /// @return On success the function never returns
+    ///
+    vcpu_manager_error::type promote_vcpu(int64_t vcpuid);
 
     /// Write to Log
     ///

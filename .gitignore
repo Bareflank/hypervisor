@@ -1,1 +1,11 @@
 bfvmm/bin/cross/libc++.so
+.build/
+*.a
+bin/
+*.o.*
+*.o
+.*
+*.ko
+*.mod.c
+*.order
+*.symvers

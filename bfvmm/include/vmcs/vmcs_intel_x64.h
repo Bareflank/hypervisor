@@ -23,6 +23,8 @@
 #define VMCS_INTEL_X64_H
 
 #include <intrinsics/intrinsics_intel_x64.h>
+#include <memory_manager/memory_manager.h>
+#include <vmcs/bitmap.h>
 
 namespace vmcs_error
 {
@@ -58,6 +60,9 @@ public:
     ///
     virtual vmcs_error::type launch();
 
+    virtual vmcs_error::type unlaunch();
+    virtual vmcs_error::type clear_vmcs_region();
+
 protected:
 
     virtual vmcs_error::type launch_vmcs();
@@ -67,8 +72,6 @@ protected:
 
     virtual vmcs_error::type create_vmcs_region();
     virtual vmcs_error::type release_vmxon_region();
-
-    virtual vmcs_error::type clear_vmcs_region();
     virtual vmcs_error::type load_vmcs_region();
 
     virtual uint64_t vmcs_region_size();
@@ -294,6 +297,8 @@ private:
 
     friend class vmcs_ut;
 
+    bitmap m_msr_bitmap;
+
     uint16_t m_es;
     uint16_t m_cs;
     uint16_t m_ss;
@@ -340,6 +345,7 @@ private:
     uint64_t m_tr_base;
 
     bool m_valid;
+    std::unique_ptr<char[]> m_vmcs_region;
 
     intrinsics_intel_x64 *m_intrinsics;
 };
