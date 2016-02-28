@@ -33,6 +33,7 @@ Version 2.0 TODO:
 - Multiple guest support running http://www.includeos.org/
 
 Documenttion:
+- Update cross compiler documentation to include how to setup sysroot
 - Problem with reusing CR3 from IOCTL
 - Red-zone: http://eli.thegreenplace.net/2011/09/06/stack-frame-layout-on-x86-64/
 - Statics using the stack and the crash we saw with the memory manager
