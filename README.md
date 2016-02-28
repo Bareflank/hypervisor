@@ -75,7 +75,6 @@ compiler is as simple as:
 
 ```
 ./tools/scripts/setup-<platform>.sh
-./tools/scripts/create-cross-compiler.sh
 ```
 
 The create-cross-compiler.sh script not only creates the cross compiler, but
