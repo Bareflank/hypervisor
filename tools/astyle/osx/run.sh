@@ -46,6 +46,10 @@ if [ ! -f $ASTYLE ]; then
 	popd
 fi
 
+find bfcrt/ -name "*.h" -exec $ASTYLE --options=./tools/astyle/astyle.config {} \;
+find bfcrt/ -name "*.c" -exec $ASTYLE --options=./tools/astyle/astyle.config {} \;
+find bfcrt/ -name "*.cpp" -exec $ASTYLE --options=./tools/astyle/astyle.config {} \;
+
 find bfelf_loader/ -name "*.h" -exec $ASTYLE --options=./tools/astyle/astyle.config {} \;
 find bfelf_loader/ -name "*.c" -exec $ASTYLE --options=./tools/astyle/astyle.config {} \;
 find bfelf_loader/ -name "*.cpp" -exec $ASTYLE --options=./tools/astyle/astyle.config {} \;
@@ -53,6 +57,10 @@ find bfelf_loader/ -name "*.cpp" -exec $ASTYLE --options=./tools/astyle/astyle.c
 find bfm/ -name "*.h" -exec $ASTYLE --options=./tools/astyle/astyle.config {} \;
 find bfm/ -name "*.c" -exec $ASTYLE --options=./tools/astyle/astyle.config {} \;
 find bfm/ -name "*.cpp" -exec $ASTYLE --options=./tools/astyle/astyle.config {} \;
+
+find bfunwind/ -name "*.h" -exec $ASTYLE --options=./tools/astyle/astyle.config {} \;
+find bfunwind/ -name "*.c" -exec $ASTYLE --options=./tools/astyle/astyle.config {} \;
+find bfunwind/ -name "*.cpp" -exec $ASTYLE --options=./tools/astyle/astyle.config {} \;
 
 find bfvmm/ -name "*.h" -exec $ASTYLE --options=./tools/astyle/astyle.config {} \;
 find bfvmm/ -name "*.c" -exec $ASTYLE --options=./tools/astyle/astyle.config {} \;

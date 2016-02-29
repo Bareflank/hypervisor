@@ -92,12 +92,10 @@ init_vmm(int64_t arg)
 
     return catch_all([&]() -> int64_t
     {
-
         if (g_vcm->init(0) != vcpu_manager_error::success)
             return ENTRY_ERROR_VMM_INIT_FAILED;
 
         return ENTRY_SUCCESS;
-
     });
 }
 
@@ -108,7 +106,6 @@ start_vmm(int64_t arg)
 
     return catch_all([&]() -> int64_t
     {
-
         if (g_vcm->start(0) != vcpu_manager_error::success)
             return ENTRY_ERROR_VMM_START_FAILED;
 
@@ -118,7 +115,6 @@ start_vmm(int64_t arg)
         << "%" << bfendl;
 
         return ENTRY_SUCCESS;
-
     });
 }
 
@@ -129,7 +125,6 @@ stop_vmm(int64_t arg)
 
     return catch_all([&]() -> int64_t
     {
-
         if (g_vcm->stop(0) != vcpu_manager_error::success)
             return ENTRY_ERROR_VMM_STOP_FAILED;
 
@@ -139,7 +134,6 @@ stop_vmm(int64_t arg)
         << "%" << bfendl;
 
         return ENTRY_SUCCESS;
-
     });
 }
 

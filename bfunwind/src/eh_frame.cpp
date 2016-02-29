@@ -47,7 +47,7 @@ decode_pointer(char **addr, uint64_t encoding)
             break;
 
         case DW_EH_PE_pcrel:
-            result += (uint64_t)*addr;
+            result += (uint64_t) * addr;
             break;
 
         case DW_EH_PE_textrel:
@@ -73,7 +73,7 @@ decode_pointer(char **addr, uint64_t encoding)
     switch (encoding & 0x0F)
     {
         case DW_EH_PE_absptr:
-            result += (uint64_t)*(void **)*addr;
+            result += (uint64_t) * (void **)*addr;
             *addr += sizeof(void *);
             break;
 
@@ -82,17 +82,17 @@ decode_pointer(char **addr, uint64_t encoding)
             break;
 
         case DW_EH_PE_udata2:
-            result += (uint64_t)*(uint16_t *)*addr;
+            result += (uint64_t) * (uint16_t *)*addr;
             *addr += sizeof(uint16_t);
             break;
 
         case DW_EH_PE_udata4:
-            result += (uint64_t)*(uint32_t *)*addr;
+            result += (uint64_t) * (uint32_t *)*addr;
             *addr += sizeof(uint32_t);
             break;
 
         case DW_EH_PE_udata8:
-            result += (uint64_t)*(uint64_t *)*addr;
+            result += (uint64_t) * (uint64_t *)*addr;
             *addr += sizeof(uint64_t);
             break;
 
@@ -101,17 +101,17 @@ decode_pointer(char **addr, uint64_t encoding)
             break;
 
         case DW_EH_PE_sdata2:
-            result += (uint64_t)*(int16_t *)*addr;
+            result += (uint64_t) * (int16_t *)*addr;
             *addr += sizeof(int16_t);
             break;
 
         case DW_EH_PE_sdata4:
-            result += (uint64_t)*(int32_t *)*addr;
+            result += (uint64_t) * (int32_t *)*addr;
             *addr += sizeof(int32_t);
             break;
 
         case DW_EH_PE_sdata8:
-            result += (uint64_t)*(int64_t *)*addr;
+            result += (uint64_t) * (int64_t *)*addr;
             *addr += sizeof(int64_t);
             break;
 
@@ -146,7 +146,7 @@ common_entry::common_entry(const struct eh_frame_t &eh_frame) :
 {
 }
 
-common_entry& common_entry::operator++()
+common_entry &common_entry::operator++()
 {
     if (m_entry_start == 0)
         return *this;
@@ -281,7 +281,7 @@ ci_entry::parse(char *addr)
 
         for (auto i = 1U; m_augmentation_string[i] != 0 && i <= len; i++)
         {
-            switch(m_augmentation_string[i])
+            switch (m_augmentation_string[i])
             {
                 case 'L':
                     m_lsda_encoding = *(uint8_t *)p++;
@@ -352,7 +352,7 @@ fd_entry::parse(char *addr)
         return;
 
     auto p = payload_start();
-    auto p_cie = (char *)((uint64_t)p - *(uint32_t *)p);
+    auto p_cie = (char *)((uint64_t)p - * (uint32_t *)p);
 
     m_cie = ci_entry(eh_frame(), p_cie);
     p += sizeof(uint32_t);
@@ -366,7 +366,7 @@ fd_entry::parse(char *addr)
 
         for (auto i = 1U; m_cie.augmentation_string(i) != 0 && i <= len; i++)
         {
-            switch(m_cie.augmentation_string(i))
+            switch (m_cie.augmentation_string(i))
             {
                 case 'L':
                     m_lsda = decode_pointer(&p, m_cie.lsda_encoding());
@@ -398,7 +398,7 @@ eh_frame::find_fde(register_state *state)
 
     for (auto m = 0U; m < MAX_NUM_MODULES; m++)
     {
-        for(auto fde = fd_entry(eh_frame_list[m]); fde; ++fde)
+        for (auto fde = fd_entry(eh_frame_list[m]); fde; ++fde)
         {
             if (fde.is_cie())
                 continue;

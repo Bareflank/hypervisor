@@ -246,7 +246,7 @@ public:
     ///
     /// @return next CIE/FDE
     ///
-    common_entry& operator++();
+    common_entry &operator++();
 
     /// Valid
     ///
