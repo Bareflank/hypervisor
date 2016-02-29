@@ -28,12 +28,12 @@
 
 namespace vcpu_manager_error
 {
-    enum type
-    {
-        success = 0,
-        failure = 1,
-        invalid = 2
-    };
+enum type
+{
+    success = 0,
+    failure = 1,
+    invalid = 2
+};
 }
 
 class vcpu_manager

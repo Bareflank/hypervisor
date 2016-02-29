@@ -28,13 +28,13 @@
 
 namespace vmm_error
 {
-    enum type
-    {
-        success = 0,
-        failure = 1,
-        not_supported = 2,
-        out_of_memory = 3
-    };
+enum type
+{
+    success = 0,
+    failure = 1,
+    not_supported = 2,
+    out_of_memory = 3
+};
 }
 
 class vmm_intel_x64

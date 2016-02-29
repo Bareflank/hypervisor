@@ -27,16 +27,16 @@
 
 namespace command_line_parser_command
 {
-    enum type
-    {
-        help = 1,
-        load = 2,
-        unload = 3,
-        start = 4,
-        stop = 5,
-        dump = 6,
-        status = 7
-    };
+enum type
+{
+    help = 1,
+    load = 2,
+    unload = 3,
+    start = 4,
+    stop = 5,
+    dump = 6,
+    status = 7
+};
 }
 
 /// Comand Line Parser

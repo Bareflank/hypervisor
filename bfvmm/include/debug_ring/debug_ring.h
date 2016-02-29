@@ -24,17 +24,12 @@
 
 #include <string>
 #include <stdint.h>
+#include <exception.h>
 #include <debug_ring_interface.h>
 
-namespace debug_ring_error
-{
-    enum type
-    {
-        success = 0,
-        failure = 1,
-        invalid = 2
-    };
-}
+// -----------------------------------------------------------------------------
+// Definition
+// -----------------------------------------------------------------------------
 
 /// Debug Ring
 ///
@@ -65,11 +60,10 @@ public:
     /// @param str the string to write to the debug ring
     /// @return success on success, error code on failure.
     ///
-    virtual debug_ring_error::type write(const std::string &str);
+    virtual void write(const std::string &str);
 
 private:
 
-    bool m_is_valid;
     struct debug_ring_resources_t *m_drr;
 };
 
@@ -81,5 +75,25 @@ private:
 /// @return the debug_ring_resources_t for the provided vcpuid
 ///
 extern "C" struct debug_ring_resources_t *get_drr(int64_t vcpuid);
+
+// -----------------------------------------------------------------------------
+// Exceptions
+// -----------------------------------------------------------------------------
+
+namespace bfn
+{
+
+/// Invalid Debug Ring
+///
+class invalid_debug_ring_error : public bfn::general_exception
+{
+public:
+    virtual std::ostream &print(std::ostream &os) const
+    { return os << "invalid debug ring: unable to write"; }
+};
+
+#define invalid_debug_ring() bfn::invalid_debug_ring_error()
+
+}
 
 #endif
