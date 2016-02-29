@@ -110,9 +110,7 @@ start_vmm(int64_t arg)
             return ENTRY_ERROR_VMM_START_FAILED;
 
         bfdebug << "started:" << bfendl;
-        bfdebug << "    - free blocks: " << g_mm->free_blocks() << " out of: "
-        << MAX_BLOCKS << " = " << g_mm->free_blocks() * 100 / MAX_BLOCKS
-        << "%" << bfendl;
+        bfdebug << "    - free blocks: " << g_mm->free_blocks() << bfendl;
 
         return ENTRY_SUCCESS;
     });
@@ -128,10 +126,8 @@ stop_vmm(int64_t arg)
         if (g_vcm->stop(0) != vcpu_manager_error::success)
             return ENTRY_ERROR_VMM_STOP_FAILED;
 
-        bfdebug << "stopped:" << bfendl;
-        bfdebug << "    - free blocks: " << g_mm->free_blocks() << " out of: "
-        << MAX_BLOCKS << " = " << g_mm->free_blocks() * 100 / MAX_BLOCKS
-        << "%" << bfendl;
+        bfdebug << "started:" << bfendl;
+        bfdebug << "    - free blocks: " << g_mm->free_blocks() << bfendl;
 
         return ENTRY_SUCCESS;
     });
@@ -142,7 +138,8 @@ add_mdl(struct memory_descriptor *mdl, int64_t num)
 {
     return catch_all([&]() -> int64_t
     {
-        return g_mm->add_mdl(mdl, num);
+        g_mm->add_mdl(mdl, num);
+        return ENTRY_SUCCESS;
     });
 }
 

@@ -21,8 +21,8 @@
 
 #include <test.h>
 #include <constants.h>
-#include <transaction.h>
 #include <eh_frame_list.h>
+#include <commit_or_rollback.h>
 
 #include <fstream>
 #include <sys/mman.h>
