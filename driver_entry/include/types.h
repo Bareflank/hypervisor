@@ -39,6 +39,9 @@
 #ifdef __linux__
 #include <linux/types.h>
 #define PRId64 "lld"
+#define BFIO _IO
+#define BFIOR _IOR
+#define BFIOW _IOW
 #endif
 #endif
 
@@ -57,6 +60,9 @@
 
 #ifdef KERNEL
 #ifdef __APPLE__
+#define BFIOW(x,y,z) (y)
+#define BFIO(x,y) (y)
+#define BFIOR(x,y,z) (y)
 #endif
 #endif
 

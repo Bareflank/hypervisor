@@ -39,6 +39,9 @@ extern "C" {
 /* Common                                                                     */
 /* ========================================================================== */
 
+
+
+
 /**
  * Driver Error Codes
  */
@@ -83,7 +86,7 @@ extern "C" {
  *
  * @param arg length of the module to be added in bytes
  */
-#define IOCTL_ADD_MODULE_LENGTH _IOW(BAREFLANK_MAJOR, 101, int64_t *)
+#define IOCTL_ADD_MODULE_LENGTH BFIOW(BAREFLANK_MAJOR, 101, int64_t *)
 
 /**
  * Add Module
@@ -96,7 +99,7 @@ extern "C" {
  * @param arg character buffer containing the module to add
  * @return
  */
-#define IOCTL_ADD_MODULE _IOW(BAREFLANK_MAJOR, 100, char *)
+#define IOCTL_ADD_MODULE BFIOW(BAREFLANK_MAJOR, 100, char *)
 
 /**
  * Load VMM
@@ -105,7 +108,7 @@ extern "C" {
  * that the VMM must be in an unloaded state, and all of the modules must be
  * added using IOCTL_ADD_MODULE
  */
-#define IOCTL_LOAD_VMM _IO(BAREFLANK_MAJOR, 200)
+#define IOCTL_LOAD_VMM BFIO(BAREFLANK_MAJOR, 200)
 
 /**
  * Unload VMM
@@ -116,7 +119,7 @@ extern "C" {
  * IOCTL_ADD_MODULE. If the VMM is to be loaded again, the modules must be
  * added first.
  */
-#define IOCTL_UNLOAD_VMM _IO(BAREFLANK_MAJOR, 300)
+#define IOCTL_UNLOAD_VMM BFIO(BAREFLANK_MAJOR, 300)
 
 /**
  * Start VMM
@@ -126,7 +129,7 @@ extern "C" {
  * should have already been loaded prior to calling this IOCTL using
  * IOCTL_ADD_MODULE
  */
-#define IOCTL_START_VMM _IO(BAREFLANK_MAJOR, 400)
+#define IOCTL_START_VMM BFIO(BAREFLANK_MAJOR, 400)
 
 /**
  * Stop VMM
@@ -134,7 +137,7 @@ extern "C" {
  * This IOCTL tells the driver entry to stop the virtual machine monitor. Note
  * that this cannot be called while the vmm is not running.
  */
-#define IOCTL_STOP_VMM _IO(BAREFLANK_MAJOR, 500)
+#define IOCTL_STOP_VMM BFIO(BAREFLANK_MAJOR, 500)
 
 /**
  * Dump VMM
@@ -143,7 +146,7 @@ extern "C" {
  * ring withing the VMM. Note that the VMM must be loaded prior to calling
  * this IOCTL using IOCTL_LOAD_VMM
  */
-#define IOCTL_DUMP_VMM _IOR(BAREFLANK_MAJOR, 600, struct debug_ring_resources_t *)
+#define IOCTL_DUMP_VMM BFIOR(BAREFLANK_MAJOR, 600, struct debug_ring_resources_t *)
 
 /**
  * VMM Status
@@ -151,7 +154,7 @@ extern "C" {
  * This queries the driver for it's current state. This can be called at any
  * time.
  */
-#define IOCTL_VMM_STATUS _IOR(BAREFLANK_MAJOR, 700, int64_t *)
+#define IOCTL_VMM_STATUS BFIOR(BAREFLANK_MAJOR, 700, int64_t *)
 
 #endif
 
