@@ -7,7 +7,7 @@
 ../../../bfvmm/bin/cross/libserial.so
 ../../../bfvmm/bin/cross/libdebug_ring.so
 ../../../bfvmm/bin/cross/libintrinsics.so
-../../../bfvmm/bin/cross/libvmm.so
+../../../bfvmm/bin/cross/libvmxon.so
 ../../../bfvmm/bin/cross/libvmcs.so
 ../../../bfvmm/bin/cross/libvcpu.so
 ../../../bfvmm/bin/cross/libexit_handler.so

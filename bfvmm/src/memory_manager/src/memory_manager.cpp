@@ -27,6 +27,7 @@
 #include <constants.h>
 #include <commit_or_rollback.h>
 #include <memory_manager/memory_manager.h>
+#include <memory_manager/memory_manager_exceptions.h>
 
 // -----------------------------------------------------------------------------
 // Macros

@@ -21,6 +21,7 @@
 
 #include <test.h>
 #include <debug_ring/debug_ring.h>
+#include <debug_ring/debug_ring_exceptions.h>
 
 debug_ring_resources_t *drr;
 

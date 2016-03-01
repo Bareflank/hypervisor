@@ -23,15 +23,9 @@
 #define MEMORY_MANAGER_H
 
 #include <map>
-
 #include <stddef.h>
 #include <stdint.h>
 #include <memory.h>
-#include <exception.h>
-
-// -----------------------------------------------------------------------------
-// Definition
-// -----------------------------------------------------------------------------
 
 class memory_manager
 {
@@ -149,6 +143,11 @@ public:
     /// @param mdl a pointer to a memory descriptor array
     /// @param num the number of memory descriptors in the array
     ///
+    /// @throws invalid_argument_error thrown if mdl == 0 or num == 0
+    /// @throws invalid_mdl_error thrown if a memory descriptor in the list
+    ///     is not the size of a page, if the virtual address is not page
+    ///     aligned, or if the physical address is not page aligned.
+    ///
     virtual void add_mdl(struct memory_descriptor *mdl, int64_t num);
 
 public:
@@ -183,34 +182,5 @@ private:
 /// to not be NULL
 ///
 #define g_mm memory_manager::instance()
-
-// -----------------------------------------------------------------------------
-// Exceptions
-// -----------------------------------------------------------------------------
-
-namespace bfn
-{
-
-/// Invalid MDL
-///
-class invalid_mdl_error : public bfn::general_exception
-{
-public:
-    invalid_mdl_error(const std::string &msg, uint64_t index) :
-        m_msg(msg),
-        m_index(index)
-    {}
-
-    virtual std::ostream &print(std::ostream &os) const
-    { return os << "invalid mdl [" << m_index << "]: " << m_msg; }
-
-private:
-    std::string m_msg;
-    uint64_t m_index;
-};
-
-#define invalid_mdl(a,b) bfn::invalid_mdl_error(a,b)
-
-}
 
 #endif

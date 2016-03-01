@@ -21,33 +21,41 @@
 
 #include <vcpu/vcpu_intel_x64.h>
 
+
+// TODO: Get rid of the "naked new" operators. THese should be unique pointers
+//     if possible (maybe shared if we have to pass them around)
+//
+// TODO: Change to exception logic
+
+
+
 vcpu_intel_x64::vcpu_intel_x64(int64_t id) :
     vcpu(id),
-    m_vmm(0),
+    m_vmxon(0),
     m_vmcs(0),
     m_intrinsics(0)
 {
     m_intrinsics = new intrinsics_intel_x64();
-    m_vmm = new vmm_intel_x64(m_intrinsics);
+    m_vmxon = new vmxon_intel_x64(m_intrinsics);
     m_vmcs = new vmcs_intel_x64(m_intrinsics);
     m_exit_handler = new exit_handler_dispatch(m_intrinsics);
 }
 
 vcpu_intel_x64::vcpu_intel_x64(int64_t id,
                                debug_ring *debug_ring,
-                               vmm_intel_x64 *vmm,
+                               vmxon_intel_x64 *vmxon,
                                vmcs_intel_x64 *vmcs,
                                intrinsics_intel_x64 *intrinsics) :
     vcpu(id, debug_ring),
-    m_vmm(vmm),
+    m_vmxon(vmxon),
     m_vmcs(vmcs),
     m_intrinsics(intrinsics)
 {
     if (intrinsics == 0)
         m_intrinsics = new intrinsics_intel_x64();
 
-    if (vmm == 0)
-        m_vmm = new vmm_intel_x64(m_intrinsics);
+    if (vmxon == 0)
+        m_vmxon = new vmxon_intel_x64(m_intrinsics);
 
     if (vmcs == 0)
         m_vmcs = new vmcs_intel_x64(intrinsics);
@@ -56,9 +64,7 @@ vcpu_intel_x64::vcpu_intel_x64(int64_t id,
 vcpu_error::type
 vcpu_intel_x64::start()
 {
-    std::cout << "About to start and launch the hypervisor" << std::endl;
-    if (m_vmm->start() != vmm_error::success)
-        return vcpu_error::failure;
+    m_vmxon->start();
 
     if (m_vmcs->launch() != vmcs_error::success)
         return vcpu_error::failure;
@@ -79,8 +85,7 @@ vcpu_intel_x64::stop()
 {
     m_vmcs->clear_vmcs_region();
 
-    if (m_vmm->stop() != vmm_error::success)
-        return vcpu_error::failure;
+    m_vmxon->stop();
 
     return vcpu_error::success;
 }

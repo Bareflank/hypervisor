@@ -20,6 +20,7 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #include <debug_ring/debug_ring.h>
+#include <debug_ring/debug_ring_exceptions.h>
 
 // -----------------------------------------------------------------------------
 // Global

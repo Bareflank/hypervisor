@@ -24,7 +24,7 @@
 
 #include <vcpu/vcpu.h>
 
-#include <vmm/vmm_intel_x64.h>
+#include <vmxon/vmxon_intel_x64.h>
 #include <vmcs/vmcs_intel_x64.h>
 #include <exit_handler/exit_handler_dispatch.h>
 #include <intrinsics/intrinsics_intel_x64.h>
@@ -49,7 +49,7 @@ public:
     ///
     vcpu_intel_x64(int64_t id,
                    debug_ring *debug_ring,
-                   vmm_intel_x64 *vmm,
+                   vmxon_intel_x64 *vmxon,
                    vmcs_intel_x64 *vmcs,
                    intrinsics_intel_x64 *intrinsics);
 
@@ -100,7 +100,7 @@ public:
     virtual vcpu_error::type request_teardown() override;
 
 private:
-    vmm_intel_x64 *m_vmm;
+    vmxon_intel_x64 *m_vmxon;
     vmcs_intel_x64 *m_vmcs;
     exit_handler_dispatch *m_exit_handler;
     intrinsics_intel_x64 *m_intrinsics;

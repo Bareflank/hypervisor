@@ -19,25 +19,27 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#ifndef DEBUG_H
-#define DEBUG_H
+#ifndef DEBUG_RING_EXCEPTIONS_H
+#define DEBUG_RING_EXCEPTIONS_H
 
-#include <iostream>
+#include <exception.h>
 
-#define bfcolor_end "\033[0m"
-#define bfcolor_debug "\033[1;32m"
-#define bfcolor_warning "\033[1;33m"
-#define bfcolor_error "\033[1;31m"
-#define bfcolor_func "\033[1;36m"
-#define bfcolor_line "\033[1;35m"
+namespace bfn
+{
 
-#define bfendl std::endl
-#define bfverbose "[" << bfcolor_func << __PRETTY_FUNCTION__ << ":" << bfcolor_line << __LINE__ << bfcolor_end << "] "
+// -----------------------------------------------------------------------------
+// Invalid Debug Ring
+// -----------------------------------------------------------------------------
 
-#define bfinfo std::cout
-#define bfdebug std::cout << bfcolor_debug << "DEBUG" << bfcolor_end << ": "
-#define bfwarning std::cout << bfverbose << bfcolor_warning << "WARNING" << bfcolor_end << ": "
-#define bferror std::cout << bfcolor_error << "ERROR" << bfcolor_end << ": "
-#define bffatal std::cout << bfcolor_error << "ERROR" << bfcolor_end << ": "
+class invalid_debug_ring_error : public bfn::general_exception
+{
+public:
+    virtual std::ostream &print(std::ostream &os) const
+    { return os << "invalid debug ring: unable to write"; }
+};
+
+#define invalid_debug_ring() bfn::invalid_debug_ring_error()
+
+}
 
 #endif
