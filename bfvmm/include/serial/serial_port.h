@@ -6,29 +6,29 @@
 
 namespace serial
 {
-    // TODO: These should be lower case as they are not macros
+// TODO: These should be lower case as they are not macros
 
-    enum err
-    {
-        success,
-        GENERAL_ERROR,
-        INVALID_PARITY,
-        INVALID_BAUD,
-        INVALID_STOP_BITS,
-        INVALID_INTERRUPT_MODE,
-        UNIMPLEMENTED,
-    };
+enum err
+{
+    success,
+    GENERAL_ERROR,
+    INVALID_PARITY,
+    INVALID_BAUD,
+    INVALID_STOP_BITS,
+    INVALID_INTERRUPT_MODE,
+    UNIMPLEMENTED,
+};
 
-    //    const char *toString[] =
-    //{
-    //    STRINGIFY(success),
-    //    STRINGIFY(GENERAL_ERROR),
-    //    STRINGIFY(INVALID_PARITY),
-    //    STRINGIFY(INVALID_BAUD),
-    //    STRINGIFY(INVALID_STOP_BITS),
-    //    STRINGIFY(INVALID_INTERRUPT_MODE),
-    //    STRINGIFY(UNIMPLEMENTED),
-    //};
+//    const char *toString[] =
+//{
+//    STRINGIFY(success),
+//    STRINGIFY(GENERAL_ERROR),
+//    STRINGIFY(INVALID_PARITY),
+//    STRINGIFY(INVALID_BAUD),
+//    STRINGIFY(INVALID_STOP_BITS),
+//    STRINGIFY(INVALID_INTERRUPT_MODE),
+//    STRINGIFY(UNIMPLEMENTED),
+//};
 }
 
 typedef enum

@@ -41,13 +41,11 @@ get_drr(int64_t vcpuid)
 // -----------------------------------------------------------------------------
 
 debug_ring::debug_ring(int64_t vcpuid) :
-    m_is_valid(false),
     m_drr(0)
 {
     if (vcpuid < 0 || vcpuid >= MAX_VCPUS)
         return;
 
-    m_is_valid = true;
     m_drr = get_drr(vcpuid);
 
     m_drr->epos = 0;
@@ -57,7 +55,7 @@ debug_ring::debug_ring(int64_t vcpuid) :
         m_drr->buf[i] = '\0';
 }
 
-debug_ring_error::type
+void
 debug_ring::write(const std::string &str)
 {
     // TODO: A more interesting implementation would use an optimized
@@ -66,14 +64,14 @@ debug_ring::write(const std::string &str)
     //       optimized memcpy that used both rep string instructions and
     //       SIMD instructions
 
-    if (m_is_valid == false)
-        return debug_ring_error::invalid;
+    if (m_drr == NULL)
+        throw invalid_debug_ring();
 
     if (str.length() >= DEBUG_RING_SIZE)
-        return debug_ring_error::failure;
+        throw range_error("str", str.length(), 0, DEBUG_RING_SIZE);
 
     if (str.length() == 0)
-        return debug_ring_error::success;
+        return;
 
     // The length that we were given is equivalent to strlen, which does not
     // include the '\0', so we add one to the length to account for that.
@@ -133,6 +131,4 @@ debug_ring::write(const std::string &str)
         epos++;
         m_drr->epos++;
     }
-
-    return debug_ring_error::success;
 }
