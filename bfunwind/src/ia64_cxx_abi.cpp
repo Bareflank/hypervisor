@@ -86,7 +86,8 @@ private_phase1(struct _Unwind_Context *context)
 
     private_step(context, 0);
 
-    return private_step_loop(context, [](_Unwind_Context *context) -> bool {
+    return private_step_loop(context, [](_Unwind_Context * context) -> bool
+    {
         switch (private_personality(_UA_SEARCH_PHASE, context))
         {
             case _URC_HANDLER_FOUND:
@@ -112,7 +113,8 @@ private_phase2(struct _Unwind_Context *context)
 
     private_step(context, 0);
 
-    return private_step_loop(context, [](_Unwind_Context *context) -> bool {
+    return private_step_loop(context, [](_Unwind_Context * context) -> bool
+    {
         auto action = _UA_CLEANUP_PHASE;
 
         if (context->exception_object->private_1 == context->fde.pc_begin())

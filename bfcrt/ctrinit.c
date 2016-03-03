@@ -37,7 +37,7 @@ void local_init(struct section_info_t *info)
         int n = info->ctors_size / sizeof(ctor_t);
         ctor_t *ctors = (ctor_t *)info->ctors_addr;
 
-        while(i < n && ctors[i] != 0)
+        while (i < n && ctors[i] != 0)
             ctors[i++]();
     }
 
@@ -55,7 +55,7 @@ void local_fini(struct section_info_t *info)
         int n = info->dtors_size / sizeof(dtor_t);
         dtor_t *dtors = (dtor_t *)info->dtors_addr;
 
-        while(i < n && dtors[i] != 0)
+        while (i < n && dtors[i] != 0)
             dtors[i++]();
     }
 }

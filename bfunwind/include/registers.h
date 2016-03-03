@@ -127,7 +127,7 @@ public:
     /// @param index the index of the register to get the name for
     /// @return returns the name of the register requested
     ///
-    virtual const char* name(uint64_t index) const
+    virtual const char *name(uint64_t index) const
     { (void) index; return "forgot to overload name"; }
 
     /// Dump

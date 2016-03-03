@@ -140,12 +140,12 @@ public:
     uint64_t max_num_registers() const override
     { return 17; }
 
-    const char* name(uint64_t index) const override
+    const char *name(uint64_t index) const override
     {
         if (index >= max_num_registers())
             ABORT("register index out of bounds");
 
-        switch(index)
+        switch (index)
         {
             case 0x00: return "rax";
             case 0x01: return "rdx";

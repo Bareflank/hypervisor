@@ -254,7 +254,8 @@ private_parse_instruction(cfi_table_row *row,
 
     (*p)++;
 
-    if_opcode(DW_CFA_advance_loc, {
+    if_opcode(DW_CFA_advance_loc,
+    {
         auto loc = (uint64_t)operand * cie.code_alignment();
         if ((*l2 += loc) > *l1)
         {
@@ -264,21 +265,25 @@ private_parse_instruction(cfi_table_row *row,
         log("%ld to 0x%lx\n", loc, pc_begin + *l2);
     })
 
-    if_opcode(DW_CFA_offset, {
+    if_opcode(DW_CFA_offset,
+    {
         auto value = (int64_t)dwarf4::decode_uleb128(p) * cie.data_alignment();
         row->set_reg(cfi_register(operand, rule_offsetn, value));
         log("r%d (%s) at cfa + n(%ld)\n", operand, state->name(operand), value);
     })
 
-    if_opcode(DW_CFA_restore, {
+    if_opcode(DW_CFA_restore,
+    {
         ABORT("register restoration currently not supported");
     })
 
-    if_opcode(DW_CFA_nop, {
+    if_opcode(DW_CFA_nop,
+    {
         log("\n");
     })
 
-    if_opcode(DW_CFA_set_loc, {
+    if_opcode(DW_CFA_set_loc,
+    {
         *l2 = decode_pointer(p, cie.pointer_encoding());
         if (*l2 > *l1)
         {
@@ -288,7 +293,8 @@ private_parse_instruction(cfi_table_row *row,
         log("%ld to 0x%lx\n", *l2, pc_begin + *l2);
     })
 
-    if_opcode(DW_CFA_advance_loc1, {
+    if_opcode(DW_CFA_advance_loc1,
+    {
         auto loc = get<uint8_t>(p) * cie.code_alignment();
         if ((*l2 += loc) > *l1)
         {
@@ -298,7 +304,8 @@ private_parse_instruction(cfi_table_row *row,
         log("%ld to 0x%lx\n", loc, pc_begin + *l2);
     })
 
-    if_opcode(DW_CFA_advance_loc2, {
+    if_opcode(DW_CFA_advance_loc2,
+    {
         auto loc = get<uint16_t>(p) * cie.code_alignment();
         if ((*l2 += loc) > *l1)
         {
@@ -308,7 +315,8 @@ private_parse_instruction(cfi_table_row *row,
         log("%ld to 0x%lx\n", loc, pc_begin + *l2);
     })
 
-    if_opcode(DW_CFA_advance_loc4, {
+    if_opcode(DW_CFA_advance_loc4,
+    {
         auto loc = get<uint32_t>(p) * cie.code_alignment();
         if ((*l2 += loc) > *l1)
         {
@@ -318,124 +326,144 @@ private_parse_instruction(cfi_table_row *row,
         log("%ld to 0x%lx\n", loc, pc_begin + *l2);
     })
 
-    if_opcode(DW_CFA_offset_extended, {
+    if_opcode(DW_CFA_offset_extended,
+    {
         auto reg = dwarf4::decode_uleb128(p);
         auto value = (int64_t)dwarf4::decode_uleb128(p) * cie.data_alignment();
         row->set_reg(cfi_register(reg, rule_offsetn, value));
         log("r%ld (%s) at cfa + n(%ld)\n", reg, state->name(reg), value);
     })
 
-    if_opcode(DW_CFA_restore_extended, {
+    if_opcode(DW_CFA_restore_extended,
+    {
         ABORT("register restoration currently not supported");
     })
 
-    if_opcode(DW_CFA_undefined, {
+    if_opcode(DW_CFA_undefined,
+    {
         auto reg = dwarf4::decode_uleb128(p);
         row->set_reg(reg, rule_undefined);
         log("r%ld (%s)\n", reg, state->name(reg));
     })
 
-    if_opcode(DW_CFA_same_value, {
+    if_opcode(DW_CFA_same_value,
+    {
         auto reg = dwarf4::decode_uleb128(p);
         row->set_reg(reg, rule_same_value);
         log("r%ld (%s)\n", reg, state->name(reg));
     })
 
-    if_opcode(DW_CFA_register, {
+    if_opcode(DW_CFA_register,
+    {
         auto reg1 = dwarf4::decode_uleb128(p);
         auto reg2 = dwarf4::decode_uleb128(p);
         row->set_reg(reg1, row->reg(reg2).rule());
         log("r%ld (%s) to r%ld (%s)\n", reg2, state->name(reg2),
-                                        reg1, state->name(reg1));
+        reg1, state->name(reg1));
     })
 
-    if_opcode(DW_CFA_remember_state, {
+    if_opcode(DW_CFA_remember_state,
+    {
         ABORT("unsupported in .eh_frame. this should not happen");
     })
 
-    if_opcode(DW_CFA_restore_state, {
+    if_opcode(DW_CFA_restore_state,
+    {
         ABORT("unsupported in .eh_frame. this should not happen");
     })
 
-    if_opcode(DW_CFA_def_cfa, {
+    if_opcode(DW_CFA_def_cfa,
+    {
         auto cfa = row->cfa();
         cfa.set_reg_index(dwarf4::decode_uleb128(p));
         cfa.set_offset(dwarf4::decode_uleb128(p));
         row->set_cfa(cfa);
         log("r%ld (%s) ofs %ld\n", cfa.reg_index(),
-                                   state->name(cfa.reg_index()),
-                                   cfa.offset());
+        state->name(cfa.reg_index()),
+        cfa.offset());
     })
 
-    if_opcode(DW_CFA_def_cfa_register, {
+    if_opcode(DW_CFA_def_cfa_register,
+    {
         auto cfa = row->cfa();
         cfa.set_reg_index(dwarf4::decode_uleb128(p));
         row->set_cfa(cfa);
         log("r%ld (%s)\n", cfa.reg_index(), state->name(cfa.reg_index()));
     })
 
-    if_opcode(DW_CFA_def_cfa_offset, {
+    if_opcode(DW_CFA_def_cfa_offset,
+    {
         auto cfa = row->cfa();
         cfa.set_offset(dwarf4::decode_uleb128(p));
         row->set_cfa(cfa);
         log("%ld\n", cfa.offset());
     })
 
-    if_opcode(DW_CFA_def_cfa_expression, {
+    if_opcode(DW_CFA_def_cfa_expression,
+    {
         ABORT("DWARF4 expressions currently not supported");
     })
 
-    if_opcode(DW_CFA_expression, {
+    if_opcode(DW_CFA_expression,
+    {
         ABORT("DWARF4 expressions currently not supported");
     })
 
-    if_opcode(DW_CFA_offset_extended_sf, {
+    if_opcode(DW_CFA_offset_extended_sf,
+    {
         auto reg = dwarf4::decode_uleb128(p);
         auto value = dwarf4::decode_sleb128(p) * cie.data_alignment();
         row->set_reg(cfi_register(reg, rule_offsetn, value));
         log("r%ld (%s) at cfa + n(%ld)\n", reg, state->name(reg), value);
     })
 
-    if_opcode(DW_CFA_def_cfa_sf, {
+    if_opcode(DW_CFA_def_cfa_sf,
+    {
         auto cfa = row->cfa();
         cfa.set_reg_index(dwarf4::decode_uleb128(p));
         cfa.set_offset(dwarf4::decode_sleb128(p) * cie.data_alignment());
         row->set_cfa(cfa);
         log("r%ld (%s) ofs %ld\n", cfa.reg_index(),
-                                   state->name(cfa.reg_index()),
-                                   cfa.offset());
+        state->name(cfa.reg_index()),
+        cfa.offset());
     })
 
-    if_opcode(DW_CFA_def_cfa_offset_sf, {
+    if_opcode(DW_CFA_def_cfa_offset_sf,
+    {
         auto cfa = row->cfa();
         cfa.set_offset(dwarf4::decode_sleb128(p) * cie.data_alignment());
         row->set_cfa(cfa);
         log("%ld\n", cfa.offset());
     })
 
-    if_opcode(DW_CFA_val_offset, {
+    if_opcode(DW_CFA_val_offset,
+    {
         auto reg = dwarf4::decode_uleb128(p);
         auto value = (int64_t)dwarf4::decode_uleb128(p) * cie.data_alignment();
         row->set_reg(cfi_register(reg, rule_val_offsetn, value));
         log("r%ld (%s) at cfa + n(%ld)\n", reg, state->name(reg), value);
     })
 
-    if_opcode(DW_CFA_val_offset_sf, {
+    if_opcode(DW_CFA_val_offset_sf,
+    {
         auto reg = dwarf4::decode_uleb128(p);
         auto value = dwarf4::decode_sleb128(p) * cie.data_alignment();
         row->set_reg(cfi_register(reg, rule_val_offsetn, value));
         log("r%ld (%s) at cfa + n(%ld)\n", reg, state->name(reg), value);
     })
 
-    if_opcode(DW_CFA_val_expression, {
+    if_opcode(DW_CFA_val_expression,
+    {
         ABORT("DWARF4 expressions currently not supported");
     })
 
-    if_opcode(DW_CFA_GNU_args_size, {
+    if_opcode(DW_CFA_GNU_args_size,
+    {
         ABORT("GNU extension DW_CFA_GNU_args_size is currently not supported");
     })
 
-    if_opcode(DW_CFA_GNU_negative_offset_extended, {
+    if_opcode(DW_CFA_GNU_negative_offset_extended,
+    {
         auto reg = dwarf4::decode_uleb128(p);
         auto value = (int64_t)dwarf4::decode_uleb128(p) * cie.data_alignment();
         row->set_reg(cfi_register(reg, rule_offsetn, -value));
@@ -469,7 +497,7 @@ private_decode_cfi(const fd_entry &fde, register_state *state)
     auto row = cfi_table_row();
     const auto &cie = fde.cie();
 
-    #ifndef DISABLE_LOGGING
+#ifndef DISABLE_LOGGING
     auto eh_frame = fde.eh_frame();
     auto cie_offset1 = (uint64_t)cie.entry_start() - (uint64_t)eh_frame.addr;
     auto cie_size = (uint64_t)(cie.entry_end() - cie.entry_start());
@@ -478,12 +506,12 @@ private_decode_cfi(const fd_entry &fde, register_state *state)
     log("%08lx ", cie_size);
     log("%08lx ", 0UL);
     log("CIE\n");
-    #endif
+#endif
 
     private_parse_instructions(&row, cie, fde, state, true);
     log("\n");
 
-    #ifndef DISABLE_LOGGING
+#ifndef DISABLE_LOGGING
     auto fde_offset1 = (uint64_t)fde.entry_start() - (uint64_t)eh_frame.addr;
     auto fde_offset2 = (uint64_t)fde.payload_start() - (uint64_t)eh_frame.addr;
     auto fde_size = (uint64_t)(fde.entry_end() - fde.entry_start());
@@ -497,7 +525,7 @@ private_decode_cfi(const fd_entry &fde, register_state *state)
     log("cie=%08lx ", cie_offset1);
     log("pc=%08lx..%08lx", pc_begin, pc_end);
     log("\n");
-    #endif
+#endif
 
     private_parse_instructions(&row, cie, fde, state, false);
     log("\n");
@@ -516,7 +544,7 @@ dwarf4::dwarf4::decode_sleb128(char **addr)
     int64_t shift = 0;
     int64_t result = 0;
 
-    while(1)
+    while (1)
     {
         byte = *((uint8_t *)(*addr)++);
         result |= ((byte & 0x7f) << shift);
@@ -538,7 +566,7 @@ dwarf4::decode_uleb128(char **addr)
     uint64_t shift = 0;
     uint64_t result = 0;
 
-    while(1)
+    while (1)
     {
         byte = *((uint8_t *)(*addr)++);
         result |= ((byte & 0x7f) << shift);

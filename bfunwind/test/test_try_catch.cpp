@@ -68,7 +68,7 @@ void
 throw_custom_exception_func()
 { throw bfn::general_exception(); }
 
-std::ostream& operator<<(std::ostream& os, const raii&)
+std::ostream &operator<<(std::ostream &os, const raii &)
 {
     throw_exception_func();
     return os;
@@ -77,7 +77,7 @@ std::ostream& operator<<(std::ostream& os, const raii&)
 void
 level2()
 {
-    switch(g_throw_type)
+    switch (g_throw_type)
     {
         case throw_bool:
             throw_bool_func();
@@ -108,7 +108,7 @@ bfunwind_ut::test_catch_all()
         g_throw_type = throw_exception;
         level1();
     }
-    catch(...)
+    catch (...)
     {
         caught = true;
     }
@@ -126,12 +126,12 @@ bfunwind_ut::test_catch_bool()
         g_throw_type = throw_bool;
         level1();
     }
-    catch(bool val)
+    catch (bool val)
     {
         caught = true;
         EXPECT_TRUE(val == true);
     }
-    catch(...)
+    catch (...)
     {}
 
     EXPECT_TRUE(caught == true);
@@ -147,12 +147,12 @@ bfunwind_ut::test_catch_int()
         g_throw_type = throw_int;
         level1();
     }
-    catch(int val)
+    catch (int val)
     {
         caught = true;
         EXPECT_TRUE(val == 5);
     }
-    catch(...)
+    catch (...)
     {}
 
     EXPECT_TRUE(caught == true);
@@ -168,12 +168,12 @@ bfunwind_ut::test_catch_cstr()
         g_throw_type = throw_cstr;
         level1();
     }
-    catch(const char *val)
+    catch (const char *val)
     {
         caught = true;
         EXPECT_TRUE(strcmp(val, "1234") == 0);
     }
-    catch(...)
+    catch (...)
     {}
 
     EXPECT_TRUE(caught == true);
@@ -189,12 +189,12 @@ bfunwind_ut::test_catch_string()
         g_throw_type = throw_string;
         level1();
     }
-    catch(std::string &val)
+    catch (std::string &val)
     {
         caught = true;
         EXPECT_TRUE(val.compare("1234") == 0);
     }
-    catch(...)
+    catch (...)
     {}
 
     EXPECT_TRUE(caught == true);
@@ -210,11 +210,11 @@ bfunwind_ut::test_catch_exception()
         g_throw_type = throw_exception;
         level1();
     }
-    catch(std::exception &e)
+    catch (std::exception &e)
     {
         caught = true;
     }
-    catch(...)
+    catch (...)
     {}
 
     EXPECT_TRUE(caught == true);
@@ -230,11 +230,11 @@ bfunwind_ut::test_catch_custom_exception()
         g_throw_type = throw_custom_exception;
         level1();
     }
-    catch(bfn::general_exception &ge)
+    catch (bfn::general_exception &ge)
     {
         caught = true;
     }
-    catch(...)
+    catch (...)
     {}
 
     EXPECT_TRUE(caught == true);
@@ -249,7 +249,7 @@ bfunwind_ut::test_catch_multiple_catches_per_function()
     {
         throw_exception_func();
     }
-    catch(std::exception &e)
+    catch (std::exception &e)
     {
         caught = true;
     }
@@ -261,7 +261,7 @@ bfunwind_ut::test_catch_multiple_catches_per_function()
     {
         throw_exception_func();
     }
-    catch(std::exception &e)
+    catch (std::exception &e)
     {
         caught = true;
     }
@@ -273,7 +273,7 @@ bfunwind_ut::test_catch_multiple_catches_per_function()
     {
         throw_exception_func();
     }
-    catch(std::exception &e)
+    catch (std::exception &e)
     {
         caught = true;
     }
@@ -297,7 +297,7 @@ bfunwind_ut::test_catch_raii()
 
         throw_exception_func();
     }
-    catch(std::exception &e)
+    catch (std::exception &e)
     {
         caught = true;
     }
@@ -316,7 +316,7 @@ bfunwind_ut::test_catch_throw_from_stream()
         auto raii1 = raii();
         std::cout << raii1 << std::endl;
     }
-    catch(std::exception &e)
+    catch (std::exception &e)
     {
         caught = true;
     }
@@ -336,14 +336,14 @@ bfunwind_ut::test_catch_nested_throw_in_catch()
         {
             throw_exception_func();
         }
-        catch(std::exception &e)
+        catch (std::exception &e)
         {
             caught1 = true;
             throw_exception_func();
         }
 
     }
-    catch(std::exception &e)
+    catch (std::exception &e)
     {
         caught2 = true;
     }
@@ -364,14 +364,14 @@ bfunwind_ut::test_catch_nested_throw_outside_catch()
         {
             throw_exception_func();
         }
-        catch(std::exception &e)
+        catch (std::exception &e)
         {
             caught1 = true;
         }
 
         throw_exception_func();
     }
-    catch(std::exception &e)
+    catch (std::exception &e)
     {
         caught2 = true;
     }
@@ -392,12 +392,12 @@ bfunwind_ut::test_catch_nested_throw_uncaught()
         {
             throw_exception_func();
         }
-        catch(bool val)
+        catch (bool val)
         {
             caught1 = true;
         }
     }
-    catch(std::exception &e)
+    catch (std::exception &e)
     {
         caught2 = true;
     }
@@ -418,13 +418,13 @@ bfunwind_ut::test_catch_nested_throw_rethrow()
         {
             throw_exception_func();
         }
-        catch(std::exception &e)
+        catch (std::exception &e)
         {
             caught1 = true;
             throw e;
         }
     }
-    catch(std::exception &e)
+    catch (std::exception &e)
     {
         caught2 = true;
     }
@@ -450,7 +450,7 @@ bfunwind_ut::test_catch_throw_with_lots_of_register_mods()
     {
         throw_exception_func();
     }
-    catch(std::exception &e)
+    catch (std::exception &e)
     {
         caught = true;
     }
@@ -478,7 +478,7 @@ bfunwind_ut::test_catch_throw_with_lots_of_register_mods()
     {
         throw_exception_func();
     }
-    catch(std::exception &e)
+    catch (std::exception &e)
     {
         caught = true;
     }

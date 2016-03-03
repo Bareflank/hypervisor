@@ -121,7 +121,7 @@ typedef enum
 /// @param reason the reason for deleting exc
 /// @param exc the _Unwind_Exception to delete
 ///
-typedef void (*_Unwind_Exception_Cleanup_Fn) (
+typedef void (*_Unwind_Exception_Cleanup_Fn)(
     _Unwind_Reason_Code reason,
     struct _Unwind_Exception *exc);
 
@@ -288,10 +288,10 @@ static const _Unwind_Action _UA_CLEANUP_PHASE = 2;
 static const _Unwind_Action _UA_HANDLER_FRAME = 4;
 static const _Unwind_Action _UA_FORCE_UNWIND = 8;
 
-typedef _Unwind_Reason_Code (*__personality_routine)
-    (int version, _Unwind_Action actions, uint64_t exceptionClass,
-     struct _Unwind_Exception *exceptionObject,
-     struct _Unwind_Context *context);
+typedef _Unwind_Reason_Code(*__personality_routine)
+(int version, _Unwind_Action actions, uint64_t exceptionClass,
+ struct _Unwind_Exception *exceptionObject,
+ struct _Unwind_Context *context);
 
 // -----------------------------------------------------------------------------
 // GNU Extensions
