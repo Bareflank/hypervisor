@@ -20,7 +20,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#include <crtinit.h>
+#include <crt.h>
+#include <eh_frame_list.h>
 
 typedef void (*ctor_t)(void);
 typedef void (*dtor_t)(void);
@@ -39,6 +40,8 @@ void local_init(struct section_info_t *info)
         while(i < n && ctors[i] != 0)
             ctors[i++]();
     }
+
+    register_eh_frame(info->eh_frame_addr, info->eh_frame_size);
 }
 
 void local_fini(struct section_info_t *info)

@@ -21,6 +21,25 @@
 
 #include <debug_ring/debug_ring.h>
 
+// -----------------------------------------------------------------------------
+// Global
+// -----------------------------------------------------------------------------
+
+extern "C" struct debug_ring_resources_t *
+get_drr(int64_t vcpuid)
+{
+    static debug_ring_resources_t drrs[MAX_VCPUS] = {};
+
+    if (vcpuid < 0 || vcpuid >= MAX_VCPUS)
+        return 0;
+
+    return &drrs[vcpuid];
+}
+
+// -----------------------------------------------------------------------------
+// Debug Ring Implementation
+// -----------------------------------------------------------------------------
+
 debug_ring::debug_ring(int64_t vcpuid) :
     m_is_valid(false),
     m_drr(0)
@@ -116,15 +135,4 @@ debug_ring::write(const std::string &str)
     }
 
     return debug_ring_error::success;
-}
-
-extern "C" struct debug_ring_resources_t *
-get_drr(int64_t vcpuid)
-{
-    static debug_ring_resources_t drrs[MAX_VCPUS] = {0, 0, 0};
-
-    if (vcpuid < 0 || vcpuid >= MAX_VCPUS)
-        return 0;
-
-    return &drrs[vcpuid];
 }

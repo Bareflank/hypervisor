@@ -345,6 +345,26 @@ export CFLAGS="-fpic -ffreestanding -mno-red-zone $NEWLIB_DEFINES" 2> /dev/null
 export CXXFLAGS="-fno-use-cxa-atexit -fno-threadsafe-statics $CFLAGS" 2> /dev/null
 
 # ------------------------------------------------------------------------------
+# Newlib
+# ------------------------------------------------------------------------------
+
+if [ ! -f "completed_build_newlib" ]; then
+
+    rm -Rf completed_build_libcxx
+
+    rm -Rf build-newlib
+    mkdir -p build-newlib
+
+    pushd build-newlib
+    ../newlib/configure --target=$TARGET --prefix=$PREFIX
+    make -j2
+    make -j2 install
+    popd
+
+    touch completed_build_newlib
+fi
+
+# ------------------------------------------------------------------------------
 # CRT
 # ------------------------------------------------------------------------------
 
@@ -365,23 +385,20 @@ if [ ! -f "completed_build_crt" ]; then
 fi
 
 # ------------------------------------------------------------------------------
-# Nasm
+# Unwind
 # ------------------------------------------------------------------------------
 
-if [ ! -f "completed_build_newlib" ]; then
+if [ ! -f "completed_build_unwind" ]; then
 
     rm -Rf completed_build_libcxx
 
-    rm -Rf build-newlib
-    mkdir -p build-newlib
-
-    pushd build-newlib
-    ../newlib/configure --target=$TARGET --prefix=$PREFIX
-    make -j2
-    make -j2 install
+    pushd $HYPERVISOR_ROOT/bfunwind
+    make clean
+    make
+    cp -Rf bin/cross/libbfunwind_static.a $SYSROOT/lib/
     popd
 
-    touch completed_build_newlib
+    touch completed_build_unwind
 fi
 
 # ------------------------------------------------------------------------------

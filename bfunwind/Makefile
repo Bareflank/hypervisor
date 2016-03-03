@@ -23,75 +23,12 @@
 # Subdirs
 ################################################################################
 
-SUBDIRS += bfelf_loader
-SUBDIRS += bfm
-SUBDIRS += bfunwind
-SUBDIRS += bfvmm
-SUBDIRS += driver_entry
+SUBDIRS += src
+SUBDIRS += test
+SUBDIRS += bin
 
 ################################################################################
 # Common
 ################################################################################
 
-include ./common/common_subdir.mk
-
-################################################################################
-# Custom Targets
-################################################################################
-
-CS_M='\033[1;95m'
-
-.PHONY: debian_load
-.PHONY: debian_unload
-.PHONY: load
-.PHONY: unload
-.PHONY: start
-.PHONY: stop
-.PHONY: dump
-.PHONY: loop
-
-debian_load: force
-	cd driver_entry/src/arch/linux; \
-	sudo make unload; \
-	make clean; \
-	make; \
-	sudo make load
-
-debian_unload: force
-	cd driver_entry/src/arch/linux; \
-	sudo make unload; \
-	make clean
-
-load: force
-	cd bfm/bin/native; \
-	sudo ./run.sh load vmm.modules
-
-unload: force
-	cd bfm/bin/native; \
-	sudo ./run.sh unload
-
-start: force
-	cd bfm/bin/native; \
-	sudo ./run.sh start
-
-stop: force
-	cd bfm/bin/native; \
-	sudo ./run.sh stop
-
-dump: force
-	cd bfm/bin/native; \
-	sudo ./run.sh dump
-
-status: force
-	cd bfm/bin/native; \
-	sudo ./run.sh status
-
-loop: force
-	@for n in $(shell seq 1 $(NUM)); do \
-		echo $(CS_M)"cycle: $$n"$(CE); \
-		$(MAKE) load; \
-		$(MAKE) start; \
-		$(MAKE) stop; \
-		$(MAKE) unload; \
-		echo; \
-    done \
+include ../common/common_subdir.mk

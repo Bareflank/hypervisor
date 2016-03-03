@@ -323,20 +323,8 @@ memory_manager::memory_manager()
         g_block_allocated[i] = FREE_BLOCK;
 }
 
-int64_t
-add_mdl_trampoline(struct memory_descriptor *mdl, int64_t num)
-{
-    return g_mm->add_mdl(mdl, num);
-}
-
-extern "C" int64_t
-add_mdl(struct memory_descriptor *mdl, int64_t num)
-{
-    return add_mdl_trampoline(mdl, num);
-}
-
 extern "C" void *
-_malloc_r(struct _reent *reent, size_t size) throw()
+_malloc_r(struct _reent *reent, size_t size)
 {
     (void) reent;
 
@@ -353,7 +341,7 @@ _malloc_r(struct _reent *reent, size_t size) throw()
 }
 
 extern "C" void
-_free_r(struct _reent *reent, void *ptr) throw()
+_free_r(struct _reent *reent, void *ptr)
 {
     (void) reent;
 

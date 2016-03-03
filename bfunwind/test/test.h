@@ -19,50 +19,47 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <stdint.h>
+#ifndef TEST_H
+#define TEST_H
 
-int g_misc = 0;
+#include <unittest.h>
+#include <bfelf_loader.h>
 
-class test
+class bfunwind_ut : public unittest
 {
 public:
-    test()
-    { g_misc = 10; }
 
-    virtual ~test()
-    { g_misc = 20; }
+    bfunwind_ut();
+    ~bfunwind_ut() {}
+
+protected:
+
+    bool init() override;
+    bool fini() override;
+    bool list() override;
+
+private:
+
+    void test_catch_all();
+    void test_catch_bool();
+    void test_catch_int();
+    void test_catch_cstr();
+    void test_catch_string();
+    void test_catch_exception();
+    void test_catch_custom_exception();
+    void test_catch_multiple_catches_per_function();
+    void test_catch_raii();
+    void test_catch_throw_from_stream();
+    void test_catch_nested_throw_in_catch();
+    void test_catch_nested_throw_outside_catch();
+    void test_catch_nested_throw_uncaught();
+    void test_catch_nested_throw_rethrow();
+    void test_catch_throw_with_lots_of_register_mods();
+
+private:
+
+    std::shared_ptr<char> m_self;
+    int64_t m_self_length;
 };
 
-test g_test;
-
-void
-operator delete(void *ptr)
-{
-    (void) ptr;
-}
-
-extern "C" int64_t
-sym_that_returns_failure(int64_t)
-{
-    return -1;
-}
-
-extern "C" int64_t
-sym_that_returns_success(int64_t)
-{
-    return 0;
-}
-
-extern "C" int64_t
-get_misc(void)
-{
-    return g_misc;
-}
-
-extern "C" void
-register_eh_frame(void *addr, uint64_t size)
-{
-    (void) addr;
-    (void) size;
-}
-
+#endif

@@ -1,5 +1,5 @@
 //
-// Bareflank Hypervisor
+// Bareflank Unwind Library
 //
 // Copyright (C) 2015 Assured Information Security, Inc.
 // Author: Rian Quinn        <quinnr@ainfosec.com>
@@ -19,50 +19,14 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <stdint.h>
+#ifndef LOG_H
+#define LOG_H
 
-int g_misc = 0;
+#ifndef DISABLE_LOGGING
+#include <stdio.h>
+#define log(...) fprintf(stdout, __VA_ARGS__)
+#else
+#define log(...)
+#endif
 
-class test
-{
-public:
-    test()
-    { g_misc = 10; }
-
-    virtual ~test()
-    { g_misc = 20; }
-};
-
-test g_test;
-
-void
-operator delete(void *ptr)
-{
-    (void) ptr;
-}
-
-extern "C" int64_t
-sym_that_returns_failure(int64_t)
-{
-    return -1;
-}
-
-extern "C" int64_t
-sym_that_returns_success(int64_t)
-{
-    return 0;
-}
-
-extern "C" int64_t
-get_misc(void)
-{
-    return g_misc;
-}
-
-extern "C" void
-register_eh_frame(void *addr, uint64_t size)
-{
-    (void) addr;
-    (void) size;
-}
-
+#endif
