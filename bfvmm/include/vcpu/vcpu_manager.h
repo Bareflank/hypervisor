@@ -40,6 +40,10 @@ class vcpu_manager
 {
 public:
 
+    /// Default Constructor
+    ///
+    vcpu_manager();
+
     /// Destructor
     ///
     ~vcpu_manager() {}
@@ -57,7 +61,7 @@ public:
     /// @param vcpuid the vcpu to initialize
     /// @return success on success, failure otherwise
     ///
-    vcpu_manager_error::type init(int64_t vcpuid);
+    virtual vcpu_manager_error::type init(int64_t vcpuid);
 
     /// Start vCPU
     ///
@@ -66,7 +70,7 @@ public:
     /// @param vcpuid the vcpu to start
     /// @return success on success, falure otherwise
     ///
-    vcpu_manager_error::type start(int64_t vcpuid);
+    virtual vcpu_manager_error::type start(int64_t vcpuid);
 
     /// Dispatch vCPU exit handler
     ///
@@ -75,7 +79,7 @@ public:
     /// @param vcpuid the vcpu to stop
     /// @return success on success, falure otherwise
     ///
-    vcpu_manager_error::type dispatch(int64_t vcpuid);
+    virtual vcpu_manager_error::type dispatch(int64_t vcpuid);
 
     /// Stop vCPU
     ///
@@ -84,7 +88,7 @@ public:
     /// @param vcpuid the vcpu to stop
     /// @return success on success, falure otherwise
     ///
-    vcpu_manager_error::type stop(int64_t vcpuid);
+    virtual vcpu_manager_error::type stop(int64_t vcpuid);
 
     /// Promote vCPU
     ///
@@ -93,7 +97,7 @@ public:
     /// @param vcpuid the vcpu to promote
     /// @return On success the function never returns
     ///
-    vcpu_manager_error::type promote_vcpu(int64_t vcpuid);
+    virtual vcpu_manager_error::type promote_vcpu(int64_t vcpuid);
 
     /// Write to Log
     ///
@@ -104,7 +108,7 @@ public:
     /// @param vcpuid the vcpu's log to write to
     /// @param str the string to write to the log
     ///
-    void write(int64_t vcpuid, std::string &str);
+    virtual void write(int64_t vcpuid, std::string &str);
 
 public:
 
@@ -115,12 +119,6 @@ public:
     /// Disable the copy operator
     ///
     vcpu_manager &operator=(const vcpu_manager &) = delete;
-
-private:
-
-    /// Default Constructor
-    ///
-    vcpu_manager();
 
 private:
 

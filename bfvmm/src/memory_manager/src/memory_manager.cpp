@@ -25,6 +25,7 @@
 
 #include <debug.h>
 #include <constants.h>
+#include <commit_or_rollback.h>
 #include <memory_manager/memory_manager.h>
 
 // -----------------------------------------------------------------------------
@@ -125,7 +126,7 @@ memory_manager::malloc_aligned(size_t size, int64_t alignment)
     auto count = 0U;
     auto block = 0U;
     auto reset = 0U;
-    auto num_blocks = size / MAX_CACHE_LINE_SIZE;
+    auto num_blocks = size >> MAX_CACHE_LINE_SHIFT;
 
     if (size % MAX_CACHE_LINE_SIZE != 0)
         num_blocks++;
@@ -225,7 +226,7 @@ memory_manager::virt_to_block(void *virt)
     if (virt >= g_mem_pool + MAX_MEM_POOL)
         return -1;
 
-    return ((uint8_t *)virt - g_mem_pool) / MAX_CACHE_LINE_SIZE;
+    return ((uint8_t *)virt - g_mem_pool) >> MAX_CACHE_LINE_SHIFT;
 }
 
 void *
@@ -271,45 +272,39 @@ memory_manager::is_block_aligned(int64_t block, int64_t alignment)
     return ((uint64_t)block_to_virt(block) % alignment) == 0;
 }
 
-int64_t
+void
 memory_manager::add_mdl(struct memory_descriptor *mdl, int64_t num)
 {
-    if (mdl == 0 || num == 0)
-        return MEMORY_MANAGER_FAILURE;
+    if (mdl == NULL)
+        throw invalid_argument(mdl, "mdl == NULL");
+
+    if (num == 0)
+        throw invalid_argument(num, "num == 0");
 
     for (auto i = 0; i < num; i++)
     {
         const auto &md = mdl[i];
 
         if (md.size != MAX_PAGE_SIZE)
-        {
-            bferror << "invalid page size. expecting: " << MAX_PAGE_SIZE
-                    << ", got: " << md.size << bfendl;
-            return MEMORY_MANAGER_FAILURE;
-        }
+            throw invalid_mdl("md.size != MAX_PAGE_SIZE", i);
 
         if (((uintptr_t)md.virt & (MAX_PAGE_SIZE - 1)) != 0)
-        {
-            bferror << "virtual address is not page aligned. expecting: "
-                    << (void *)((uintptr_t)md.virt & ~(MAX_PAGE_SIZE - 1))
-                    << ", got: " << md.virt << bfendl;
-            return MEMORY_MANAGER_FAILURE;
-        }
+            throw invalid_mdl("virt address is not page aligned", i);
 
         if (((uintptr_t)md.phys & (MAX_PAGE_SIZE - 1)) != 0)
+            throw invalid_mdl("phys address is not page aligned", i);
+
+        auto cor1 = commit_or_rollback([&]
         {
-            bferror << "virtual address is not page aligned. expecting: "
-                    << (void *)((uintptr_t)md.phys & ~(MAX_PAGE_SIZE - 1))
-                    << ", got: " << md.phys << bfendl;
-            return MEMORY_MANAGER_FAILURE;
-        }
+            m_virt_to_phys_map.erase((uintptr_t)md.virt >> MAX_PAGE_SHIFT);
+            m_phys_to_virt_map.erase((uintptr_t)md.phys >> MAX_PAGE_SHIFT);
+        });
 
         m_virt_to_phys_map[(uintptr_t)md.virt >> MAX_PAGE_SHIFT] = md;
         m_phys_to_virt_map[(uintptr_t)md.phys >> MAX_PAGE_SHIFT] = md;
 
+        cor1.commit();
     }
-
-    return MEMORY_MANAGER_SUCCESS;
 }
 
 memory_manager::memory_manager()

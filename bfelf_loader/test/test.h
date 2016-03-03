@@ -25,8 +25,6 @@
 #include <memory>
 
 #include <unittest.h>
-#include <transaction.h>
-
 #include <test_elf.h>
 
 class bfelf_loader_ut : public unittest

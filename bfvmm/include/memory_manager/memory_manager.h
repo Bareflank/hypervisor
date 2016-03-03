@@ -27,10 +27,19 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <memory.h>
+#include <exception.h>
+
+// -----------------------------------------------------------------------------
+// Definition
+// -----------------------------------------------------------------------------
 
 class memory_manager
 {
 public:
+
+    /// Default Constructor
+    ///
+    memory_manager();
 
     /// Destructor
     ///
@@ -139,9 +148,8 @@ public:
     ///
     /// @param mdl a pointer to a memory descriptor array
     /// @param num the number of memory descriptors in the array
-    /// @return MEMORY_MANAGER_SUCCESS on success, MEMORY_MANAGER_FAILURE
-    ///     otherwise
-    virtual int64_t add_mdl(struct memory_descriptor *mdl, int64_t num);
+    ///
+    virtual void add_mdl(struct memory_descriptor *mdl, int64_t num);
 
 public:
 
@@ -152,12 +160,6 @@ public:
     /// Disable the copy operator
     ///
     memory_manager &operator=(const memory_manager &) = delete;
-
-private:
-
-    /// Default Constructor
-    ///
-    memory_manager();
 
 private:
 
@@ -181,5 +183,34 @@ private:
 /// to not be NULL
 ///
 #define g_mm memory_manager::instance()
+
+// -----------------------------------------------------------------------------
+// Exceptions
+// -----------------------------------------------------------------------------
+
+namespace bfn
+{
+
+/// Invalid MDL
+///
+class invalid_mdl_error : public bfn::general_exception
+{
+public:
+    invalid_mdl_error(const std::string &msg, uint64_t index) :
+        m_msg(msg),
+        m_index(index)
+    {}
+
+    virtual std::ostream &print(std::ostream &os) const
+    { return os << "invalid mdl [" << m_index << "]: " << m_msg; }
+
+private:
+    std::string m_msg;
+    uint64_t m_index;
+};
+
+#define invalid_mdl(a,b) bfn::invalid_mdl_error(a,b)
+
+}
 
 #endif

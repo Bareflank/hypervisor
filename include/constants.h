@@ -36,6 +36,20 @@
 #endif
 
 /*
+ * Cache Line Shift
+ *
+ * The memory manager at the moment keeps track of blocks using a cache line
+ * for performance reasons. If the cache line size is different, this value
+ * might need to be tweaked. Note that this defines the shift that will be
+ * used by MAX_CACHE_LINE_SIZE
+ *
+ * Note: defined in bits
+ */
+#ifndef MAX_CACHE_LINE_SHIFT
+#define MAX_CACHE_LINE_SHIFT (6ULL)
+#endif
+
+/*
  * Cache Line Size
  *
  * The memory manager at the moment keeps track of blocks using a cache line
@@ -45,7 +59,7 @@
  * Note: defined in bytes
  */
 #ifndef MAX_CACHE_LINE_SIZE
-#define MAX_CACHE_LINE_SIZE (64ULL)
+#define MAX_CACHE_LINE_SIZE (1 << MAX_CACHE_LINE_SHIFT)
 #endif
 
 /*

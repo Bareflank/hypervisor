@@ -331,12 +331,14 @@ public:
 
     virtual std::ostream &print(std::ostream &os) const
     {
-        return os << "out of range: " << m_msg << ". "
-               << "got: " << m_got << " "
-               << "lower: " << m_lower << " "
-               << "upper: " << m_upper << " "
-               << "func: " << m_func << " "
-               << "line: " << m_line;
+        os << "out of range:";
+        os << std::endl << "    - got: " << m_got;
+        os << std::endl << "    - lower: " << m_lower;
+        os << std::endl << "    - upper: " << m_upper;
+        os << std::endl << "    - func: " << m_func;
+        os << std::endl << "    - line: " << m_line;
+
+        return os;
     }
 
 private:

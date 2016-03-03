@@ -236,7 +236,7 @@ memory_manager_ut::test_memory_manager_malloc_alloc_fragment()
 void
 memory_manager_ut::test_memory_manager_add_mdl_invalid_mdl()
 {
-    EXPECT_TRUE(g_mm->add_mdl(0, 1) == MEMORY_MANAGER_FAILURE);
+    EXPECT_EXCEPTION(g_mm->add_mdl(0, 1), bfn::invalid_argument_error);
 }
 
 void
@@ -244,7 +244,7 @@ memory_manager_ut::test_memory_manager_add_mdl_invalid_num()
 {
     struct memory_descriptor mdl[1] = {{0, 0, 0, 0}};
 
-    EXPECT_TRUE(g_mm->add_mdl(mdl, 0) == MEMORY_MANAGER_FAILURE);
+    EXPECT_EXCEPTION(g_mm->add_mdl(mdl, 0), bfn::invalid_argument_error);
 }
 
 void
@@ -256,7 +256,7 @@ memory_manager_ut::test_memory_manager_add_mdl_invalid_size()
         }
     };
 
-    EXPECT_TRUE(g_mm->add_mdl(mdl, 1) == MEMORY_MANAGER_FAILURE);
+    EXPECT_EXCEPTION(g_mm->add_mdl(mdl, 1), bfn::invalid_mdl_error);
 }
 
 void
@@ -268,7 +268,7 @@ memory_manager_ut::test_memory_manager_add_mdl_unaligned_physical()
         }
     };
 
-    EXPECT_TRUE(g_mm->add_mdl(mdl, 1) == MEMORY_MANAGER_FAILURE);
+    EXPECT_EXCEPTION(g_mm->add_mdl(mdl, 1), bfn::invalid_mdl_error);
 }
 
 void
@@ -280,7 +280,7 @@ memory_manager_ut::test_memory_manager_add_mdl_unaligned_virtual()
         }
     };
 
-    EXPECT_TRUE(g_mm->add_mdl(mdl, 1) == MEMORY_MANAGER_FAILURE);
+    EXPECT_EXCEPTION(g_mm->add_mdl(mdl, 1), bfn::invalid_mdl_error);
 }
 
 void
@@ -304,7 +304,7 @@ memory_manager_ut::test_memory_manager_virt_to_phys_random_address()
         }
     };
 
-    EXPECT_TRUE(g_mm->add_mdl(mdl, 1) == MEMORY_MANAGER_SUCCESS);
+    EXPECT_NO_EXCEPTION(g_mm->add_mdl(mdl, 1));
     EXPECT_TRUE(g_mm->virt_to_phys((void *)0x54321ABC) == (void *)0x12345ABC);
 }
 
@@ -317,7 +317,7 @@ memory_manager_ut::test_memory_manager_virt_to_phys_upper_limit()
         }
     };
 
-    EXPECT_TRUE(g_mm->add_mdl(mdl, 1) == MEMORY_MANAGER_SUCCESS);
+    EXPECT_NO_EXCEPTION(g_mm->add_mdl(mdl, 1));
     EXPECT_TRUE(g_mm->virt_to_phys((void *)0x54321FFF) == (void *)0x12345FFF);
 }
 
@@ -330,7 +330,7 @@ memory_manager_ut::test_memory_manager_virt_to_phys_lower_limit()
         }
     };
 
-    EXPECT_TRUE(g_mm->add_mdl(mdl, 1) == MEMORY_MANAGER_SUCCESS);
+    EXPECT_NO_EXCEPTION(g_mm->add_mdl(mdl, 1));
     EXPECT_TRUE(g_mm->virt_to_phys((void *)0x54321000) == (void *)0x12345000);
 }
 
@@ -343,7 +343,7 @@ memory_manager_ut::test_memory_manager_phys_to_virt_random_address()
         }
     };
 
-    EXPECT_TRUE(g_mm->add_mdl(mdl, 1) == MEMORY_MANAGER_SUCCESS);
+    EXPECT_NO_EXCEPTION(g_mm->add_mdl(mdl, 1));
     EXPECT_TRUE(g_mm->phys_to_virt((void *)0x12345ABC) == (void *)0x54321ABC);
 }
 
@@ -356,7 +356,7 @@ memory_manager_ut::test_memory_manager_phys_to_virt_upper_limit()
         }
     };
 
-    EXPECT_TRUE(g_mm->add_mdl(mdl, 1) == MEMORY_MANAGER_SUCCESS);
+    EXPECT_NO_EXCEPTION(g_mm->add_mdl(mdl, 1));
     EXPECT_TRUE(g_mm->phys_to_virt((void *)0x12345FFF) == (void *)0x54321FFF);
 }
 
@@ -369,6 +369,6 @@ memory_manager_ut::test_memory_manager_phys_to_virt_lower_limit()
         }
     };
 
-    EXPECT_TRUE(g_mm->add_mdl(mdl, 1) == MEMORY_MANAGER_SUCCESS);
+    EXPECT_NO_EXCEPTION(g_mm->add_mdl(mdl, 1));
     EXPECT_TRUE(g_mm->phys_to_virt((void *)0x12345000) == (void *)0x54321000);
 }
