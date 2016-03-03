@@ -58,14 +58,14 @@ INCLUDE_PATHS+=../../../include/
 INCLUDE_PATHS+=../../../../include/
 
 LIBS+=vcpu
-LIBS+=vmm
+LIBS+=vmxon
 LIBS+=vmcs
 LIBS+=debug_ring
 LIBS+=intrinsics
 LIBS+=exit_handler
 
 LIBRARY_PATHS+=../bin/native
-LIBRARY_PATHS+=../../vmm/bin/native
+LIBRARY_PATHS+=../../vmxon/bin/native
 LIBRARY_PATHS+=../../vmcs/bin/native
 LIBRARY_PATHS+=../../debug_ring/bin/native
 LIBRARY_PATHS+=../../intrinsics/bin/native

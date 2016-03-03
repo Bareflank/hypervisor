@@ -50,13 +50,13 @@ NATIVE_OUTDIR:=../bin
 ################################################################################
 
 SOURCES+=test.cpp
-SOURCES+=test_vmm_intel_x64.cpp
+SOURCES+=test_vmxon_intel_x64.cpp
 
 INCLUDE_PATHS+=./
 INCLUDE_PATHS+=../../../include/
 INCLUDE_PATHS+=../../../../include/
 
-LIBS+=vmm
+LIBS+=vmxon
 LIBS+=intrinsics
 LIBS+=memory_manager
 

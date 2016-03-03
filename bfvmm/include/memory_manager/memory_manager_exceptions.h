@@ -19,25 +19,36 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#ifndef DEBUG_H
-#define DEBUG_H
+#ifndef MEMORY_MANAGER_EXCEPTIONS_H
+#define MEMORY_MANAGER_EXCEPTIONS_H
 
-#include <iostream>
+#include <exception.h>
 
-#define bfcolor_end "\033[0m"
-#define bfcolor_debug "\033[1;32m"
-#define bfcolor_warning "\033[1;33m"
-#define bfcolor_error "\033[1;31m"
-#define bfcolor_func "\033[1;36m"
-#define bfcolor_line "\033[1;35m"
+namespace bfn
+{
 
-#define bfendl std::endl
-#define bfverbose "[" << bfcolor_func << __PRETTY_FUNCTION__ << ":" << bfcolor_line << __LINE__ << bfcolor_end << "] "
+// -----------------------------------------------------------------------------
+// Invalid MDL
+// -----------------------------------------------------------------------------
 
-#define bfinfo std::cout
-#define bfdebug std::cout << bfcolor_debug << "DEBUG" << bfcolor_end << ": "
-#define bfwarning std::cout << bfverbose << bfcolor_warning << "WARNING" << bfcolor_end << ": "
-#define bferror std::cout << bfcolor_error << "ERROR" << bfcolor_end << ": "
-#define bffatal std::cout << bfcolor_error << "ERROR" << bfcolor_end << ": "
+class invalid_mdl_error : public bfn::general_exception
+{
+public:
+    invalid_mdl_error(const std::string &msg, uint64_t index) :
+        m_msg(msg),
+        m_index(index)
+    {}
+
+    virtual std::ostream &print(std::ostream &os) const
+    { return os << "invalid mdl [" << m_index << "]: " << m_msg; }
+
+private:
+    std::string m_msg;
+    uint64_t m_index;
+};
+
+#define invalid_mdl(a,b) bfn::invalid_mdl_error(a,b)
+
+}
 
 #endif

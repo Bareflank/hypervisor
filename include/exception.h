@@ -29,8 +29,10 @@
 namespace bfn
 {
 
-/// General Exception
-///
+// -----------------------------------------------------------------------------
+// General Exception
+// -----------------------------------------------------------------------------
+
 /// The following defines a general exception used in Bareflank. This should
 /// not thrown and instead, an exception that inherits from this should be
 /// thrown that provides more decent output. This exception type can however
@@ -99,19 +101,17 @@ public:
 ///
 /// @endcode
 ///
-inline std::ostream &operator<<(std::ostream &os, const bfn::general_exception &ge)
+inline std::ostream &
+operator<<(std::ostream &os, const bfn::general_exception &ge)
 { return ge.print(os); }
 
 namespace bfn
 {
 
 // -----------------------------------------------------------------------------
+// Unknown Command Error
+// -----------------------------------------------------------------------------
 
-/// Unknown Command Error
-///
-/// Thrown when an unknown command has been provided. The unknown command
-/// should be provided to the exception's constructor
-///
 class unknown_command_error : public bfn::general_exception
 {
 public:
@@ -129,11 +129,9 @@ private:
 #define unknown_command(a) bfn::unknown_command_error(a)
 
 // -----------------------------------------------------------------------------
+// Missing Argument Error
+// -----------------------------------------------------------------------------
 
-/// Missing Argument Error
-///
-/// Thrown when an argument is missing.
-///
 class missing_argument_error : public bfn::general_exception
 {
 public:
@@ -144,14 +142,9 @@ public:
 #define missing_argument() bfn::missing_argument_error()
 
 // -----------------------------------------------------------------------------
+// Invalid Filename Error
+// -----------------------------------------------------------------------------
 
-/// Invalid Filename Error
-///
-/// Thrown when a filename is invalid. This usually happens when a file
-/// cannot be openned which could occur because the file does not exist, or
-/// the current user does not have the proper permissions. The filename
-/// should be provided to the constructor.
-///
 class invalid_file_error : public bfn::general_exception
 {
 public:
@@ -169,14 +162,9 @@ private:
 #define invalid_file(a) bfn::invalid_file_error(a)
 
 // -----------------------------------------------------------------------------
+// Driver Inaccessible
+// -----------------------------------------------------------------------------
 
-/// Driver Inaccessible
-///
-/// Thrown when the bareflank manager cannot open a connection to the
-/// bareflank driver. This is likely because the bareflank driver is not
-/// installed or loaded, but could be for other reasons such as invalid
-/// permissions.
-///
 class driver_inaccessible_error : public bfn::general_exception
 {
 public:
@@ -184,8 +172,8 @@ public:
     {
         os << "bareflank driver inaccessible:";
         os << std::endl << "    - check that the bareflank driver is loaded";
-        os << std::endl << "    - check that bfm was exectued with the proper permissions";
-
+        os << std::endl << "    - check that bfm was exectued with the "
+           << "proper permissions";
         return os;
     }
 };
@@ -193,12 +181,9 @@ public:
 #define driver_inaccessible(a) bfn::driver_inaccessible_error(a)
 
 // -----------------------------------------------------------------------------
+// Invalid Argument
+// -----------------------------------------------------------------------------
 
-/// Invalid Argument
-///
-/// Thrown when a function is called with invalid arguments. This is a logic
-/// error that should be corrected if thrown
-///
 class invalid_argument_error : public bfn::general_exception
 {
 public:
@@ -230,12 +215,9 @@ private:
     bfn::invalid_argument_error(__PRETTY_FUNCTION__,#a,b)
 
 // -----------------------------------------------------------------------------
+// IOCTL Failed
+// -----------------------------------------------------------------------------
 
-/// IOCTL Failed
-///
-/// Thrown when a call to an IOCTL fails. This generally means that something
-/// went wrong in the driver entry
-///
 class ioctl_failed_error : public bfn::general_exception
 {
 public:
@@ -253,13 +235,9 @@ private:
 #define ioctl_failed(a) bfn::ioctl_failed_error(#a)
 
 // -----------------------------------------------------------------------------
+// Corrupt VMM
+// -----------------------------------------------------------------------------
 
-/// Corrupt VMM
-///
-/// Thrown when a call the VMM is made when the VMM has entered a corrupt
-/// state. Once the VMM is in a corrupt state, the system is no longer
-/// revoerable (restart is needed at minimum, likely will result in fault)
-///
 class corrupt_vmm_error : public bfn::general_exception
 {
 public:
@@ -270,11 +248,9 @@ public:
 #define corrupt_vmm() bfn::corrupt_vmm_error()
 
 // -----------------------------------------------------------------------------
+// Unknown VMM Status
+// -----------------------------------------------------------------------------
 
-/// Unknown VMM Status
-///
-/// Thrown when the VMM status is unknown. This really should not happen.
-///
 class unknown_status_error : public bfn::general_exception
 {
 public:
@@ -285,13 +261,9 @@ public:
 #define unknown_status() bfn::unknown_status_error()
 
 // -----------------------------------------------------------------------------
+// Invalid VMM Status
+// -----------------------------------------------------------------------------
 
-/// Invalid VMM Status
-///
-/// Thrown when the user attempts to put the VMM in a state in the wrong order.
-/// For example, if the user attempts to start the VMM prior to loading the
-/// VMM
-///
 class invalid_vmm_state_error : public bfn::general_exception
 {
 public:
@@ -309,9 +281,9 @@ private:
 #define invalid_vmm_state(a) bfn::invalid_vmm_state_error(a)
 
 // -----------------------------------------------------------------------------
+// Range Error
+// -----------------------------------------------------------------------------
 
-/// Out Of Range
-///
 class range_error : public bfn::general_exception
 {
 public:
@@ -352,6 +324,35 @@ private:
 
 #define range_error(a,b,c,d) \
     bfn::range_error(a,__PRETTY_FUNCTION__,__LINE__,b,c,d)
+
+// -----------------------------------------------------------------------------
+// Invalid Alignment
+// -----------------------------------------------------------------------------
+
+class invalid_alignmnet_error : public bfn::general_exception
+{
+public:
+    invalid_alignmnet_error(const std::string &msg,
+                            uint64_t addr) :
+        m_msg(msg),
+        m_addr(addr)
+    {}
+
+    virtual std::ostream &print(std::ostream &os) const
+    {
+        os << "invalid address alignment: ";
+        os << std::endl << "    - reason: " << m_msg;
+        os << std::endl << "    - addr: " << m_addr;
+
+        return os;
+    }
+
+private:
+    std::string m_msg;
+    uint64_t m_addr;
+};
+
+#define invalid_alignmnet(a,b) bfn::invalid_alignmnet_error(a,b)
 
 }
 

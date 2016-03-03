@@ -23,7 +23,7 @@
 # Target Information
 ################################################################################
 
-TARGET_NAME:=vmm
+TARGET_NAME:=vmxon
 TARGET_TYPE:=lib
 TARGET_COMPILER:=both
 
@@ -59,7 +59,7 @@ CROSS_OUTDIR:=../../../bin
 # Sources
 ################################################################################
 
-SOURCES+=vmm_intel_x64.cpp
+SOURCES+=vmxon_intel_x64.cpp
 
 INCLUDE_PATHS+=./
 INCLUDE_PATHS+=../../../include/

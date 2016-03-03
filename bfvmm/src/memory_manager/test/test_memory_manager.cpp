@@ -22,6 +22,7 @@
 #include <test.h>
 #include <constants.h>
 #include <memory_manager/memory_manager.h>
+#include <memory_manager/memory_manager_exceptions.h>
 
 void
 memory_manager_ut::test_memory_manager_malloc_zero()

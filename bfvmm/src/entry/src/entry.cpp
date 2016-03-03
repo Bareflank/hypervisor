@@ -39,6 +39,8 @@ struct eh_frame_t g_eh_frame_list[MAX_NUM_MODULES] = {};
 // Helpers
 // -----------------------------------------------------------------------------
 
+#include <vmxon/vmxon_exceptions_intel_x64.h>
+
 template<typename T> int64_t
 catch_all(T func)
 {
@@ -50,15 +52,23 @@ catch_all(T func)
     }
     catch (bfn::general_exception &ge)
     {
-        bferror << "unhandled exception caught: " << ge << bfendl;
+        bferror << "----------------------------------------" << bfendl;
+        bferror << "- General Exception Caught             -" << bfendl;
+        bferror << "----------------------------------------" << bfendl;
+        bfinfo << "" << ge << bfendl;
     }
     catch (std::exception &e)
     {
-        bferror << "unhandled exception caught: " << e.what() << bfendl;
+        bferror << "----------------------------------------" << bfendl;
+        bferror << "- Standard Exception Caught            -" << bfendl;
+        bferror << "----------------------------------------" << bfendl;
+        bfinfo << "" << e.what() << bfendl;
     }
     catch (...)
     {
-        bferror << "unhandled exception caught: unknown" << bfendl;
+        bferror << "----------------------------------------" << bfendl;
+        bferror << "- Unknown Exception Caught             -" << bfendl;
+        bferror << "----------------------------------------" << bfendl;
     }
 
     return result;

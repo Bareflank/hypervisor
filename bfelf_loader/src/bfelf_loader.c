@@ -825,13 +825,13 @@ private_symbol_by_name(struct bfelf_file_t *ef,
 static bfelf64_sword
 private_symbol_global(struct bfelf_loader_t *loader,
                       struct e_string_t *name,
-                      struct bfelf_file_t *ef_ignore,
                       struct bfelf_file_t **ef_found,
                       struct bfelf_sym **sym)
 {
     bfelf64_word i = 0;
     bfelf64_sword ret = 0;
     struct bfelf_sym *found_sym = 0;
+    struct bfelf_file_t *ef_ignore = *ef_found;
 
     *sym = 0;
     *ef_found = 0;
@@ -891,13 +891,16 @@ private_relocate_symbol(struct bfelf_loader_t *loader,
     if (ret != BFELF_SUCCESS)
         return ret;
 
-    if (found_sym->st_value == 0)
+    if (BFELF_SYM_BIND(found_sym->st_info) == bfstb_weak)
+        found_ef = 0;
+
+    if (found_sym->st_value == 0 || found_ef == 0)
     {
         ret = private_get_string(ef, ef->strtab, found_sym->st_name, &name);
         if (ret != BFELF_SUCCESS)
             return ret;
 
-        ret = private_symbol_global(loader, &name, ef, &found_ef, &found_sym);
+        ret = private_symbol_global(loader, &name, &found_ef, &found_sym);
         if (ret != BFELF_SUCCESS)
             return ret;
     }
@@ -1022,7 +1025,7 @@ bfelf_loader_resolve_symbol(struct bfelf_loader_t *loader,
     if (loader->relocated == 0)
         return out_of_order("you need to call bfelf_loader_relocate first");
 
-    ret = private_symbol_global(loader, name, 0, &found_ef, &found_sym);
+    ret = private_symbol_global(loader, name, &found_ef, &found_sym);
     if (ret != BFELF_SUCCESS)
         return ret;
 
