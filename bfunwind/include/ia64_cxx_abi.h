@@ -174,11 +174,11 @@ struct _Unwind_Exception
 /// stack is unwound so that it always points to the FDE for the CFA for the
 /// currently stored register state.
 ///
-/// @var fde
+/// @var _Unwind_Context::fde
 ///     the FDE that describes the CFA for this register state
-/// @var state
+/// @var _Unwind_Context::state
 ///     the current register state
-/// @var exception_object
+/// @var _Unwind_Context::exception_object
 ///     the exception object that layer 2 created
 ///
 struct _Unwind_Context

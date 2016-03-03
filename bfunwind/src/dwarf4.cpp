@@ -538,7 +538,7 @@ private_decode_cfi(const fd_entry &fde, register_state *state)
 // -----------------------------------------------------------------------------
 
 int64_t
-dwarf4::dwarf4::decode_sleb128(char **addr)
+dwarf4::decode_sleb128(char **addr)
 {
     uint8_t byte = 0;
     int64_t shift = 0;

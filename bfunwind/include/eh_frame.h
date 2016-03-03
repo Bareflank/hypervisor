@@ -509,7 +509,7 @@ public:
     /// without an epilogue, and the range will include the address of the
     /// next instruction which is the start of another function.
     ///
-    /// @param the program counter (on x86_64 this is rip) to test
+    /// @param pc the program counter (on x86_64 this is rip) to test
     /// @return returns true if this FDE contains the instructions for the
     ///     PC provided.
     ///
