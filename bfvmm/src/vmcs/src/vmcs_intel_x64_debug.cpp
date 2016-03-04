@@ -276,332 +276,332 @@ vmcs_intel_x64::dump_vmcs()
 #define PRINT_STATE(a) \
     std::cout << std::left << std::setw(55) << #a \
               << "0x" << a << std::endl;
-void
-vmcs_intel_x64::dump_state()
-{
-    std::cout << std::hex << std::endl;
-    std::cout << "State Dump:" << std::endl;
-    std::cout << "----------------------------------------------------------------------" << std::endl;
-
-    std::cout << std::endl;
-    std::cout << "Segment Selectors:" << std::endl;
-    PRINT_STATE(m_es);
-    PRINT_STATE(m_cs);
-    PRINT_STATE(m_ss);
-    PRINT_STATE(m_ds);
-    PRINT_STATE(m_fs);
-    PRINT_STATE(m_gs);
-    PRINT_STATE(m_tr);
-    PRINT_STATE(m_ldtr);
-
-    std::cout << std::endl;
-    std::cout << "Registers:" << std::endl;
-    PRINT_STATE(m_cr0);
-    PRINT_STATE(m_cr3);
-    PRINT_STATE(m_cr4);
-    PRINT_STATE(m_dr7);
-    PRINT_STATE(m_rflags);
-
-    std::cout << std::endl;
-    std::cout << "GDT/IDT:" << std::endl;
-    PRINT_STATE(m_gdt_reg.limit);
-    PRINT_STATE(m_gdt_reg.base);
-    PRINT_STATE(m_idt_reg.limit);
-    PRINT_STATE(m_idt_reg.base);
-
-    std::cout << std::endl;
-    std::cout << "Segment Limit:" << std::endl;
-    PRINT_STATE(m_es_limit);
-    PRINT_STATE(m_cs_limit);
-    PRINT_STATE(m_ss_limit);
-    PRINT_STATE(m_ds_limit);
-    PRINT_STATE(m_fs_limit);
-    PRINT_STATE(m_gs_limit);
-    PRINT_STATE(m_ldtr_limit);
-    PRINT_STATE(m_tr_limit);
-
-    std::cout << std::endl;
-    std::cout << "Segment Access:" << std::endl;
-    PRINT_STATE(m_es_access);
-    PRINT_STATE(m_cs_access);
-    PRINT_STATE(m_ss_access);
-    PRINT_STATE(m_ds_access);
-    PRINT_STATE(m_fs_access);
-    PRINT_STATE(m_gs_access);
-    PRINT_STATE(m_ldtr_access);
-    PRINT_STATE(m_tr_access);
-
-    std::cout << std::endl;
-    std::cout << "Segment Base:" << std::endl;
-    PRINT_STATE(m_es_base);
-    PRINT_STATE(m_cs_base);
-    PRINT_STATE(m_ss_base);
-    PRINT_STATE(m_ds_base);
-    PRINT_STATE(m_fs_base);
-    PRINT_STATE(m_gs_base);
-    PRINT_STATE(m_ldtr_base);
-    PRINT_STATE(m_tr_base);
-
-    std::cout << std::endl;
-    std::cout << "Segment Descriptors:" << std::endl;
-    PRINT_STATE(m_intrinsics->segment_descriptor(m_es));
-    PRINT_STATE(m_intrinsics->segment_descriptor(m_cs));
-    PRINT_STATE(m_intrinsics->segment_descriptor(m_ss));
-    PRINT_STATE(m_intrinsics->segment_descriptor(m_ds));
-    PRINT_STATE(m_intrinsics->segment_descriptor(m_fs));
-    PRINT_STATE(m_intrinsics->segment_descriptor(m_gs));
-    PRINT_STATE(m_intrinsics->segment_descriptor(m_ldtr));
-    PRINT_STATE(m_intrinsics->segment_descriptor(m_tr));
-
-    std::cout << std::dec << std::left << std::endl;
-}
-
-void
-vmcs_intel_x64::print_execution_controls()
-{
-    print_pin_based_vm_execution_controls();
-    print_primary_processor_based_vm_execution_controls();
-    print_secondary_processor_based_vm_execution_controls();
-    print_vm_exit_control_fields();
-    print_vm_entry_control_fields();
-}
-
-void
-vmcs_intel_x64::print_pin_based_vm_execution_controls()
-{
-    auto controls = vmread(VMCS_PIN_BASED_VM_EXECUTION_CONTROLS);
-
-    std::cout << std::hex << std::endl;
-    std::cout << "Pin-Based VM-Execution Controls:" << std::endl;
-    std::cout << "----------------------------------------------------------------------" << std::endl;
-
-    if ((controls & VM_EXEC_PIN_BASED_EXTERNAL_INTERRUPT_EXITING) != 0)
-        std::cout << "- " << "VM_EXEC_PIN_BASED_EXTERNAL_INTERRUPT_EXITING" << std::endl;
+// void
+// vmcs_intel_x64::dump_state()
+// {
+//     std::cout << std::hex << std::endl;
+//     std::cout << "State Dump:" << std::endl;
+//     std::cout << "----------------------------------------------------------------------" << std::endl;
+
+//     std::cout << std::endl;
+//     std::cout << "Segment Selectors:" << std::endl;
+//     PRINT_STATE(m_es);
+//     PRINT_STATE(m_cs);
+//     PRINT_STATE(m_ss);
+//     PRINT_STATE(m_ds);
+//     PRINT_STATE(m_fs);
+//     PRINT_STATE(m_gs);
+//     PRINT_STATE(m_tr);
+//     PRINT_STATE(m_ldtr);
+
+//     std::cout << std::endl;
+//     std::cout << "Registers:" << std::endl;
+//     PRINT_STATE(m_cr0);
+//     PRINT_STATE(m_cr3);
+//     PRINT_STATE(m_cr4);
+//     PRINT_STATE(m_dr7);
+//     PRINT_STATE(m_rflags);
+
+//     std::cout << std::endl;
+//     std::cout << "GDT/IDT:" << std::endl;
+//     PRINT_STATE(m_gdt_reg.limit);
+//     PRINT_STATE(m_gdt_reg.base);
+//     PRINT_STATE(m_idt_reg.limit);
+//     PRINT_STATE(m_idt_reg.base);
+
+//     std::cout << std::endl;
+//     std::cout << "Segment Limit:" << std::endl;
+//     PRINT_STATE(m_es_limit);
+//     PRINT_STATE(m_cs_limit);
+//     PRINT_STATE(m_ss_limit);
+//     PRINT_STATE(m_ds_limit);
+//     PRINT_STATE(m_fs_limit);
+//     PRINT_STATE(m_gs_limit);
+//     PRINT_STATE(m_ldtr_limit);
+//     PRINT_STATE(m_tr_limit);
+
+//     std::cout << std::endl;
+//     std::cout << "Segment Access:" << std::endl;
+//     PRINT_STATE(m_es_access);
+//     PRINT_STATE(m_cs_access);
+//     PRINT_STATE(m_ss_access);
+//     PRINT_STATE(m_ds_access);
+//     PRINT_STATE(m_fs_access);
+//     PRINT_STATE(m_gs_access);
+//     PRINT_STATE(m_ldtr_access);
+//     PRINT_STATE(m_tr_access);
+
+//     std::cout << std::endl;
+//     std::cout << "Segment Base:" << std::endl;
+//     PRINT_STATE(m_es_base);
+//     PRINT_STATE(m_cs_base);
+//     PRINT_STATE(m_ss_base);
+//     PRINT_STATE(m_ds_base);
+//     PRINT_STATE(m_fs_base);
+//     PRINT_STATE(m_gs_base);
+//     PRINT_STATE(m_ldtr_base);
+//     PRINT_STATE(m_tr_base);
+
+//     std::cout << std::endl;
+//     std::cout << "Segment Descriptors:" << std::endl;
+//     PRINT_STATE(m_intrinsics->segment_descriptor(m_es));
+//     PRINT_STATE(m_intrinsics->segment_descriptor(m_cs));
+//     PRINT_STATE(m_intrinsics->segment_descriptor(m_ss));
+//     PRINT_STATE(m_intrinsics->segment_descriptor(m_ds));
+//     PRINT_STATE(m_intrinsics->segment_descriptor(m_fs));
+//     PRINT_STATE(m_intrinsics->segment_descriptor(m_gs));
+//     PRINT_STATE(m_intrinsics->segment_descriptor(m_ldtr));
+//     PRINT_STATE(m_intrinsics->segment_descriptor(m_tr));
+
+//     std::cout << std::dec << std::left << std::endl;
+// }
+
+// void
+// vmcs_intel_x64::print_execution_controls()
+// {
+//     print_pin_based_vm_execution_controls();
+//     print_primary_processor_based_vm_execution_controls();
+//     print_secondary_processor_based_vm_execution_controls();
+//     print_vm_exit_control_fields();
+//     print_vm_entry_control_fields();
+// }
+
+// void
+// vmcs_intel_x64::print_pin_based_vm_execution_controls()
+// {
+//     auto controls = vmread(VMCS_PIN_BASED_VM_EXECUTION_CONTROLS);
+
+//     std::cout << std::hex << std::endl;
+//     std::cout << "Pin-Based VM-Execution Controls:" << std::endl;
+//     std::cout << "----------------------------------------------------------------------" << std::endl;
+
+//     if ((controls & VM_EXEC_PIN_BASED_EXTERNAL_INTERRUPT_EXITING) != 0)
+//         std::cout << "- " << "VM_EXEC_PIN_BASED_EXTERNAL_INTERRUPT_EXITING" << std::endl;
 
-    if ((controls & VM_EXEC_PIN_BASED_NMI_EXITING) != 0)
-        std::cout << "- " << "VM_EXEC_PIN_BASED_NMI_EXITING" << std::endl;
+//     if ((controls & VM_EXEC_PIN_BASED_NMI_EXITING) != 0)
+//         std::cout << "- " << "VM_EXEC_PIN_BASED_NMI_EXITING" << std::endl;
 
-    if ((controls & VM_EXEC_PIN_BASED_VIRTUAL_NMIS) != 0)
-        std::cout << "- " << "VM_EXEC_PIN_BASED_VIRTUAL_NMIS" << std::endl;
+//     if ((controls & VM_EXEC_PIN_BASED_VIRTUAL_NMIS) != 0)
+//         std::cout << "- " << "VM_EXEC_PIN_BASED_VIRTUAL_NMIS" << std::endl;
 
-    if ((controls & VM_EXEC_PIN_BASED_ACTIVATE_VMX_PREEMPTION_TIMER) != 0)
-        std::cout << "- " << "VM_EXEC_PIN_BASED_ACTIVATE_VMX_PREEMPTION_TIMER" << std::endl;
+//     if ((controls & VM_EXEC_PIN_BASED_ACTIVATE_VMX_PREEMPTION_TIMER) != 0)
+//         std::cout << "- " << "VM_EXEC_PIN_BASED_ACTIVATE_VMX_PREEMPTION_TIMER" << std::endl;
 
-    if ((controls & VM_EXEC_PIN_BASED_PROCESS_POSTED_INTERRUPTS) != 0)
-        std::cout << "- " << "VM_EXEC_PIN_BASED_PROCESS_POSTED_INTERRUPTS" << std::endl;
+//     if ((controls & VM_EXEC_PIN_BASED_PROCESS_POSTED_INTERRUPTS) != 0)
+//         std::cout << "- " << "VM_EXEC_PIN_BASED_PROCESS_POSTED_INTERRUPTS" << std::endl;
 
-    std::cout << std::dec << std::endl;
-}
+//     std::cout << std::dec << std::endl;
+// }
 
-void
-vmcs_intel_x64::print_primary_processor_based_vm_execution_controls()
-{
-    auto controls = vmread(VMCS_PRIMARY_PROCESSOR_BASED_VM_EXECUTION_CONTROLS);
+// void
+// vmcs_intel_x64::print_primary_processor_based_vm_execution_controls()
+// {
+//     auto controls = vmread(VMCS_PRIMARY_PROCESSOR_BASED_VM_EXECUTION_CONTROLS);
 
-    std::cout << std::hex << std::endl;
-    std::cout << "Primary Processor-Based VM-Execution Controls:" << std::endl;
-    std::cout << "----------------------------------------------------------------------" << std::endl;
+//     std::cout << std::hex << std::endl;
+//     std::cout << "Primary Processor-Based VM-Execution Controls:" << std::endl;
+//     std::cout << "----------------------------------------------------------------------" << std::endl;
 
-    if ((controls & VM_EXEC_P_PROC_BASED_INTERRUPT_WINDOW_EXITING) != 0)
-        std::cout << "- " << "VM_EXEC_P_PROC_BASED_INTERRUPT_WINDOW_EXITING" << std::endl;
+//     if ((controls & VM_EXEC_P_PROC_BASED_INTERRUPT_WINDOW_EXITING) != 0)
+//         std::cout << "- " << "VM_EXEC_P_PROC_BASED_INTERRUPT_WINDOW_EXITING" << std::endl;
 
-    if ((controls & VM_EXEC_P_PROC_BASED_USE_TSC_OFFSETTING) != 0)
-        std::cout << "- " << "VM_EXEC_P_PROC_BASED_USE_TSC_OFFSETTING" << std::endl;
+//     if ((controls & VM_EXEC_P_PROC_BASED_USE_TSC_OFFSETTING) != 0)
+//         std::cout << "- " << "VM_EXEC_P_PROC_BASED_USE_TSC_OFFSETTING" << std::endl;
 
-    if ((controls & VM_EXEC_P_PROC_BASED_HLT_EXITING) != 0)
-        std::cout << "- " << "VM_EXEC_P_PROC_BASED_HLT_EXITING" << std::endl;
+//     if ((controls & VM_EXEC_P_PROC_BASED_HLT_EXITING) != 0)
+//         std::cout << "- " << "VM_EXEC_P_PROC_BASED_HLT_EXITING" << std::endl;
 
-    if ((controls & VM_EXEC_P_PROC_BASED_INVLPG_EXITING) != 0)
-        std::cout << "- " << "VM_EXEC_P_PROC_BASED_INVLPG_EXITING" << std::endl;
+//     if ((controls & VM_EXEC_P_PROC_BASED_INVLPG_EXITING) != 0)
+//         std::cout << "- " << "VM_EXEC_P_PROC_BASED_INVLPG_EXITING" << std::endl;
 
-    if ((controls & VM_EXEC_P_PROC_BASED_MWAIT_EXITING) != 0)
-        std::cout << "- " << "VM_EXEC_P_PROC_BASED_MWAIT_EXITING" << std::endl;
+//     if ((controls & VM_EXEC_P_PROC_BASED_MWAIT_EXITING) != 0)
+//         std::cout << "- " << "VM_EXEC_P_PROC_BASED_MWAIT_EXITING" << std::endl;
 
-    if ((controls & VM_EXEC_P_PROC_BASED_RDPMC_EXITING) != 0)
-        std::cout << "- " << "VM_EXEC_P_PROC_BASED_RDPMC_EXITING" << std::endl;
+//     if ((controls & VM_EXEC_P_PROC_BASED_RDPMC_EXITING) != 0)
+//         std::cout << "- " << "VM_EXEC_P_PROC_BASED_RDPMC_EXITING" << std::endl;
 
-    if ((controls & VM_EXEC_P_PROC_BASED_RDTSC_EXITING) != 0)
-        std::cout << "- " << "VM_EXEC_P_PROC_BASED_RDTSC_EXITING" << std::endl;
+//     if ((controls & VM_EXEC_P_PROC_BASED_RDTSC_EXITING) != 0)
+//         std::cout << "- " << "VM_EXEC_P_PROC_BASED_RDTSC_EXITING" << std::endl;
 
-    if ((controls & VM_EXEC_P_PROC_BASED_CR3_LOAD_EXITING) != 0)
-        std::cout << "- " << "VM_EXEC_P_PROC_BASED_CR3_LOAD_EXITING" << std::endl;
+//     if ((controls & VM_EXEC_P_PROC_BASED_CR3_LOAD_EXITING) != 0)
+//         std::cout << "- " << "VM_EXEC_P_PROC_BASED_CR3_LOAD_EXITING" << std::endl;
 
-    if ((controls & VM_EXEC_P_PROC_BASED_CR3_STORE_EXITING) != 0)
-        std::cout << "- " << "VM_EXEC_P_PROC_BASED_CR3_STORE_EXITING" << std::endl;
+//     if ((controls & VM_EXEC_P_PROC_BASED_CR3_STORE_EXITING) != 0)
+//         std::cout << "- " << "VM_EXEC_P_PROC_BASED_CR3_STORE_EXITING" << std::endl;
 
-    if ((controls & VM_EXEC_P_PROC_BASED_CR8_LOAD_EXITING) != 0)
-        std::cout << "- " << "VM_EXEC_P_PROC_BASED_CR8_LOAD_EXITING" << std::endl;
+//     if ((controls & VM_EXEC_P_PROC_BASED_CR8_LOAD_EXITING) != 0)
+//         std::cout << "- " << "VM_EXEC_P_PROC_BASED_CR8_LOAD_EXITING" << std::endl;
 
-    if ((controls & VM_EXEC_P_PROC_BASED_CR8_STORE_EXITING) != 0)
-        std::cout << "- " << "VM_EXEC_P_PROC_BASED_CR8_STORE_EXITING" << std::endl;
+//     if ((controls & VM_EXEC_P_PROC_BASED_CR8_STORE_EXITING) != 0)
+//         std::cout << "- " << "VM_EXEC_P_PROC_BASED_CR8_STORE_EXITING" << std::endl;
 
-    if ((controls & VM_EXEC_P_PROC_BASED_USE_TPR_SHADOW) != 0)
-        std::cout << "- " << "VM_EXEC_P_PROC_BASED_USE_TPR_SHADOW" << std::endl;
+//     if ((controls & VM_EXEC_P_PROC_BASED_USE_TPR_SHADOW) != 0)
+//         std::cout << "- " << "VM_EXEC_P_PROC_BASED_USE_TPR_SHADOW" << std::endl;
 
-    if ((controls & VM_EXEC_P_PROC_BASED_NMI_WINDOW_EXITING) != 0)
-        std::cout << "- " << "VM_EXEC_P_PROC_BASED_NMI_WINDOW_EXITING" << std::endl;
+//     if ((controls & VM_EXEC_P_PROC_BASED_NMI_WINDOW_EXITING) != 0)
+//         std::cout << "- " << "VM_EXEC_P_PROC_BASED_NMI_WINDOW_EXITING" << std::endl;
 
-    if ((controls & VM_EXEC_P_PROC_BASED_MOV_DR_EXITING) != 0)
-        std::cout << "- " << "VM_EXEC_P_PROC_BASED_MOV_DR_EXITING" << std::endl;
+//     if ((controls & VM_EXEC_P_PROC_BASED_MOV_DR_EXITING) != 0)
+//         std::cout << "- " << "VM_EXEC_P_PROC_BASED_MOV_DR_EXITING" << std::endl;
 
-    if ((controls & VM_EXEC_P_PROC_BASED_UNCONDITIONAL_IO_EXITING) != 0)
-        std::cout << "- " << "VM_EXEC_P_PROC_BASED_UNCONDITIONAL_IO_EXITING" << std::endl;
+//     if ((controls & VM_EXEC_P_PROC_BASED_UNCONDITIONAL_IO_EXITING) != 0)
+//         std::cout << "- " << "VM_EXEC_P_PROC_BASED_UNCONDITIONAL_IO_EXITING" << std::endl;
 
-    if ((controls & VM_EXEC_P_PROC_BASED_USE_IO_BITMAPS) != 0)
-        std::cout << "- " << "VM_EXEC_P_PROC_BASED_USE_IO_BITMAPS" << std::endl;
+//     if ((controls & VM_EXEC_P_PROC_BASED_USE_IO_BITMAPS) != 0)
+//         std::cout << "- " << "VM_EXEC_P_PROC_BASED_USE_IO_BITMAPS" << std::endl;
 
-    if ((controls & VM_EXEC_P_PROC_BASED_MONITOR_TRAP_FLAG) != 0)
-        std::cout << "- " << "VM_EXEC_P_PROC_BASED_MONITOR_TRAP_FLAG" << std::endl;
+//     if ((controls & VM_EXEC_P_PROC_BASED_MONITOR_TRAP_FLAG) != 0)
+//         std::cout << "- " << "VM_EXEC_P_PROC_BASED_MONITOR_TRAP_FLAG" << std::endl;
 
-    if ((controls & VM_EXEC_P_PROC_BASED_USE_MSR_BITMAPS) != 0)
-        std::cout << "- " << "VM_EXEC_P_PROC_BASED_USE_MSR_BITMAPS" << std::endl;
+//     if ((controls & VM_EXEC_P_PROC_BASED_USE_MSR_BITMAPS) != 0)
+//         std::cout << "- " << "VM_EXEC_P_PROC_BASED_USE_MSR_BITMAPS" << std::endl;
 
-    if ((controls & VM_EXEC_P_PROC_BASED_MONITOR_EXITING) != 0)
-        std::cout << "- " << "VM_EXEC_P_PROC_BASED_MONITOR_EXITING" << std::endl;
+//     if ((controls & VM_EXEC_P_PROC_BASED_MONITOR_EXITING) != 0)
+//         std::cout << "- " << "VM_EXEC_P_PROC_BASED_MONITOR_EXITING" << std::endl;
 
-    if ((controls & VM_EXEC_P_PROC_BASED_PAUSE_EXITING) != 0)
-        std::cout << "- " << "VM_EXEC_P_PROC_BASED_PAUSE_EXITING" << std::endl;
+//     if ((controls & VM_EXEC_P_PROC_BASED_PAUSE_EXITING) != 0)
+//         std::cout << "- " << "VM_EXEC_P_PROC_BASED_PAUSE_EXITING" << std::endl;
 
-    if ((controls & VM_EXEC_P_PROC_BASED_ACTIVATE_SECONDARY_CONTROLS) != 0)
-        std::cout << "- " << "VM_EXEC_P_PROC_BASED_ACTIVATE_SECONDARY_CONTROLS" << std::endl;
+//     if ((controls & VM_EXEC_P_PROC_BASED_ACTIVATE_SECONDARY_CONTROLS) != 0)
+//         std::cout << "- " << "VM_EXEC_P_PROC_BASED_ACTIVATE_SECONDARY_CONTROLS" << std::endl;
 
-    std::cout << std::dec << std::endl;
-}
+//     std::cout << std::dec << std::endl;
+// }
 
-void
-vmcs_intel_x64::print_secondary_processor_based_vm_execution_controls()
-{
-    auto controls = vmread(VMCS_SECONDARY_PROCESSOR_BASED_VM_EXECUTION_CONTROLS);
+// void
+// vmcs_intel_x64::print_secondary_processor_based_vm_execution_controls()
+// {
+//     auto controls = vmread(VMCS_SECONDARY_PROCESSOR_BASED_VM_EXECUTION_CONTROLS);
 
-    std::cout << std::hex << std::endl;
-    std::cout << "Secondary Processor-Based VM-Execution Controls:" << std::endl;
-    std::cout << "----------------------------------------------------------------------" << std::endl;
+//     std::cout << std::hex << std::endl;
+//     std::cout << "Secondary Processor-Based VM-Execution Controls:" << std::endl;
+//     std::cout << "----------------------------------------------------------------------" << std::endl;
 
-    if ((controls & VM_EXEC_S_PROC_BASED_VIRTUALIZE_APIC_ACCESSES) != 0)
-        std::cout << "- " << "VM_EXEC_S_PROC_BASED_VIRTUALIZE_APIC_ACCESSES" << std::endl;
+//     if ((controls & VM_EXEC_S_PROC_BASED_VIRTUALIZE_APIC_ACCESSES) != 0)
+//         std::cout << "- " << "VM_EXEC_S_PROC_BASED_VIRTUALIZE_APIC_ACCESSES" << std::endl;
 
-    if ((controls & VM_EXEC_S_PROC_BASED_ENABLE_EPT) != 0)
-        std::cout << "- " << "VM_EXEC_S_PROC_BASED_ENABLE_EPT" << std::endl;
+//     if ((controls & VM_EXEC_S_PROC_BASED_ENABLE_EPT) != 0)
+//         std::cout << "- " << "VM_EXEC_S_PROC_BASED_ENABLE_EPT" << std::endl;
 
-    if ((controls & VM_EXEC_S_PROC_BASED_DESCRIPTOR_TABLE_EXITING) != 0)
-        std::cout << "- " << "VM_EXEC_S_PROC_BASED_DESCRIPTOR_TABLE_EXITING" << std::endl;
+//     if ((controls & VM_EXEC_S_PROC_BASED_DESCRIPTOR_TABLE_EXITING) != 0)
+//         std::cout << "- " << "VM_EXEC_S_PROC_BASED_DESCRIPTOR_TABLE_EXITING" << std::endl;
 
-    if ((controls & VM_EXEC_S_PROC_BASED_ENABLE_RDTSCP) != 0)
-        std::cout << "- " << "VM_EXEC_S_PROC_BASED_ENABLE_RDTSCP" << std::endl;
+//     if ((controls & VM_EXEC_S_PROC_BASED_ENABLE_RDTSCP) != 0)
+//         std::cout << "- " << "VM_EXEC_S_PROC_BASED_ENABLE_RDTSCP" << std::endl;
 
-    if ((controls & VM_EXEC_S_PROC_BASED_VIRTUALIZE_X2APIC_MODE) != 0)
-        std::cout << "- " << "VM_EXEC_S_PROC_BASED_VIRTUALIZE_X2APIC_MODE" << std::endl;
+//     if ((controls & VM_EXEC_S_PROC_BASED_VIRTUALIZE_X2APIC_MODE) != 0)
+//         std::cout << "- " << "VM_EXEC_S_PROC_BASED_VIRTUALIZE_X2APIC_MODE" << std::endl;
 
-    if ((controls & VM_EXEC_S_PROC_BASED_ENABLE_VPID) != 0)
-        std::cout << "- " << "VM_EXEC_S_PROC_BASED_ENABLE_VPID" << std::endl;
+//     if ((controls & VM_EXEC_S_PROC_BASED_ENABLE_VPID) != 0)
+//         std::cout << "- " << "VM_EXEC_S_PROC_BASED_ENABLE_VPID" << std::endl;
 
-    if ((controls & VM_EXEC_S_PROC_BASED_WBINVD_EXITING) != 0)
-        std::cout << "- " << "VM_EXEC_S_PROC_BASED_WBINVD_EXITING" << std::endl;
+//     if ((controls & VM_EXEC_S_PROC_BASED_WBINVD_EXITING) != 0)
+//         std::cout << "- " << "VM_EXEC_S_PROC_BASED_WBINVD_EXITING" << std::endl;
 
-    if ((controls & VM_EXEC_S_PROC_BASED_UNRESTRICTED_GUEST) != 0)
-        std::cout << "- " << "VM_EXEC_S_PROC_BASED_UNRESTRICTED_GUEST" << std::endl;
+//     if ((controls & VM_EXEC_S_PROC_BASED_UNRESTRICTED_GUEST) != 0)
+//         std::cout << "- " << "VM_EXEC_S_PROC_BASED_UNRESTRICTED_GUEST" << std::endl;
 
-    if ((controls & VM_EXEC_S_PROC_BASED_APIC_REGISTER_VIRTUALIZATION) != 0)
-        std::cout << "- " << "VM_EXEC_S_PROC_BASED_APIC_REGISTER_VIRTUALIZATION" << std::endl;
+//     if ((controls & VM_EXEC_S_PROC_BASED_APIC_REGISTER_VIRTUALIZATION) != 0)
+//         std::cout << "- " << "VM_EXEC_S_PROC_BASED_APIC_REGISTER_VIRTUALIZATION" << std::endl;
 
-    if ((controls & VM_EXEC_S_PROC_BASED_VIRTUAL_INTERRUPT_DELIVERY) != 0)
-        std::cout << "- " << "VM_EXEC_S_PROC_BASED_VIRTUAL_INTERRUPT_DELIVERY" << std::endl;
+//     if ((controls & VM_EXEC_S_PROC_BASED_VIRTUAL_INTERRUPT_DELIVERY) != 0)
+//         std::cout << "- " << "VM_EXEC_S_PROC_BASED_VIRTUAL_INTERRUPT_DELIVERY" << std::endl;
 
-    if ((controls & VM_EXEC_S_PROC_BASED_PAUSE_LOOP_EXITING) != 0)
-        std::cout << "- " << "VM_EXEC_S_PROC_BASED_PAUSE_LOOP_EXITING" << std::endl;
+//     if ((controls & VM_EXEC_S_PROC_BASED_PAUSE_LOOP_EXITING) != 0)
+//         std::cout << "- " << "VM_EXEC_S_PROC_BASED_PAUSE_LOOP_EXITING" << std::endl;
 
-    if ((controls & VM_EXEC_S_PROC_BASED_RDRAND_EXITING) != 0)
-        std::cout << "- " << "VM_EXEC_S_PROC_BASED_RDRAND_EXITING" << std::endl;
+//     if ((controls & VM_EXEC_S_PROC_BASED_RDRAND_EXITING) != 0)
+//         std::cout << "- " << "VM_EXEC_S_PROC_BASED_RDRAND_EXITING" << std::endl;
 
-    if ((controls & VM_EXEC_S_PROC_BASED_ENABLE_INVPCID) != 0)
-        std::cout << "- " << "VM_EXEC_S_PROC_BASED_ENABLE_INVPCID" << std::endl;
+//     if ((controls & VM_EXEC_S_PROC_BASED_ENABLE_INVPCID) != 0)
+//         std::cout << "- " << "VM_EXEC_S_PROC_BASED_ENABLE_INVPCID" << std::endl;
 
-    if ((controls & VM_EXEC_S_PROC_BASED_ENABLE_VM_FUNCTIONS) != 0)
-        std::cout << "- " << "VM_EXEC_S_PROC_BASED_ENABLE_VM_FUNCTIONS" << std::endl;
+//     if ((controls & VM_EXEC_S_PROC_BASED_ENABLE_VM_FUNCTIONS) != 0)
+//         std::cout << "- " << "VM_EXEC_S_PROC_BASED_ENABLE_VM_FUNCTIONS" << std::endl;
 
-    if ((controls & VM_EXEC_S_PROC_BASED_VMCS_SHADOWING) != 0)
-        std::cout << "- " << "VM_EXEC_S_PROC_BASED_VMCS_SHADOWING" << std::endl;
+//     if ((controls & VM_EXEC_S_PROC_BASED_VMCS_SHADOWING) != 0)
+//         std::cout << "- " << "VM_EXEC_S_PROC_BASED_VMCS_SHADOWING" << std::endl;
 
-    if ((controls & VM_EXEC_S_PROC_BASED_RDSEED_EXITING) != 0)
-        std::cout << "- " << "VM_EXEC_S_PROC_BASED_RDSEED_EXITING" << std::endl;
+//     if ((controls & VM_EXEC_S_PROC_BASED_RDSEED_EXITING) != 0)
+//         std::cout << "- " << "VM_EXEC_S_PROC_BASED_RDSEED_EXITING" << std::endl;
 
-    if ((controls & VM_EXEC_S_PROC_BASED_EPT_VIOLATION_VE) != 0)
-        std::cout << "- " << "VM_EXEC_S_PROC_BASED_EPT_VIOLATION_VE" << std::endl;
+//     if ((controls & VM_EXEC_S_PROC_BASED_EPT_VIOLATION_VE) != 0)
+//         std::cout << "- " << "VM_EXEC_S_PROC_BASED_EPT_VIOLATION_VE" << std::endl;
 
-    if ((controls & VM_EXEC_S_PROC_BASED_ENABLE_XSAVES_XRSTORS) != 0)
-        std::cout << "- " << "VM_EXEC_S_PROC_BASED_ENABLE_XSAVES_XRSTORS" << std::endl;
+//     if ((controls & VM_EXEC_S_PROC_BASED_ENABLE_XSAVES_XRSTORS) != 0)
+//         std::cout << "- " << "VM_EXEC_S_PROC_BASED_ENABLE_XSAVES_XRSTORS" << std::endl;
 
-    std::cout << std::dec << std::endl;
-}
+//     std::cout << std::dec << std::endl;
+// }
 
-void
-vmcs_intel_x64::print_vm_exit_control_fields()
-{
-    auto controls = vmread(VMCS_VM_EXIT_CONTROLS);
+// void
+// vmcs_intel_x64::print_vm_exit_control_fields()
+// {
+//     auto controls = vmread(VMCS_VM_EXIT_CONTROLS);
 
-    std::cout << std::hex << std::endl;
-    std::cout << "VM-Exit Controls:" << std::endl;
-    std::cout << "----------------------------------------------------------------------" << std::endl;
+//     std::cout << std::hex << std::endl;
+//     std::cout << "VM-Exit Controls:" << std::endl;
+//     std::cout << "----------------------------------------------------------------------" << std::endl;
 
-    if ((controls & VM_EXIT_CONTROL_SAVE_DEBUG_CONTROLS) != 0)
-        std::cout << "- " << "VM_EXIT_CONTROL_SAVE_DEBUG_CONTROLS" << std::endl;
+//     if ((controls & VM_EXIT_CONTROL_SAVE_DEBUG_CONTROLS) != 0)
+//         std::cout << "- " << "VM_EXIT_CONTROL_SAVE_DEBUG_CONTROLS" << std::endl;
 
-    if ((controls & VM_EXIT_CONTROL_HOST_ADDRESS_SPACE_SIZE) != 0)
-        std::cout << "- " << "VM_EXIT_CONTROL_HOST_ADDRESS_SPACE_SIZE" << std::endl;
+//     if ((controls & VM_EXIT_CONTROL_HOST_ADDRESS_SPACE_SIZE) != 0)
+//         std::cout << "- " << "VM_EXIT_CONTROL_HOST_ADDRESS_SPACE_SIZE" << std::endl;
 
-    if ((controls & VM_EXIT_CONTROL_LOAD_IA32_PERF_GLOBAL_CTRL) != 0)
-        std::cout << "- " << "VM_EXIT_CONTROL_LOAD_IA32_PERF_GLOBAL_CTRL" << std::endl;
+//     if ((controls & VM_EXIT_CONTROL_LOAD_IA32_PERF_GLOBAL_CTRL) != 0)
+//         std::cout << "- " << "VM_EXIT_CONTROL_LOAD_IA32_PERF_GLOBAL_CTRL" << std::endl;
 
-    if ((controls & VM_EXIT_CONTROL_ACKNOWLEDGE_INTERRUPT_ON_EXIT) != 0)
-        std::cout << "- " << "VM_EXIT_CONTROL_ACKNOWLEDGE_INTERRUPT_ON_EXIT" << std::endl;
+//     if ((controls & VM_EXIT_CONTROL_ACKNOWLEDGE_INTERRUPT_ON_EXIT) != 0)
+//         std::cout << "- " << "VM_EXIT_CONTROL_ACKNOWLEDGE_INTERRUPT_ON_EXIT" << std::endl;
 
-    if ((controls & VM_EXIT_CONTROL_SAVE_IA32_PAT) != 0)
-        std::cout << "- " << "VM_EXIT_CONTROL_SAVE_IA32_PAT" << std::endl;
+//     if ((controls & VM_EXIT_CONTROL_SAVE_IA32_PAT) != 0)
+//         std::cout << "- " << "VM_EXIT_CONTROL_SAVE_IA32_PAT" << std::endl;
 
-    if ((controls & VM_EXIT_CONTROL_LOAD_IA32_PAT) != 0)
-        std::cout << "- " << "VM_EXIT_CONTROL_LOAD_IA32_PAT" << std::endl;
+//     if ((controls & VM_EXIT_CONTROL_LOAD_IA32_PAT) != 0)
+//         std::cout << "- " << "VM_EXIT_CONTROL_LOAD_IA32_PAT" << std::endl;
 
-    if ((controls & VM_EXIT_CONTROL_SAVE_IA32_EFER) != 0)
-        std::cout << "- " << "VM_EXIT_CONTROL_SAVE_IA32_EFER" << std::endl;
+//     if ((controls & VM_EXIT_CONTROL_SAVE_IA32_EFER) != 0)
+//         std::cout << "- " << "VM_EXIT_CONTROL_SAVE_IA32_EFER" << std::endl;
 
-    if ((controls & VM_EXIT_CONTROL_LOAD_IA32_EFER) != 0)
-        std::cout << "- " << "VM_EXIT_CONTROL_LOAD_IA32_EFER" << std::endl;
+//     if ((controls & VM_EXIT_CONTROL_LOAD_IA32_EFER) != 0)
+//         std::cout << "- " << "VM_EXIT_CONTROL_LOAD_IA32_EFER" << std::endl;
 
-    if ((controls & VM_EXIT_CONTROL_SAVE_VMX_PREEMPTION_TIMER_VALUE) != 0)
-        std::cout << "- " << "VM_EXIT_CONTROL_SAVE_VMX_PREEMPTION_TIMER_VALUE" << std::endl;
+//     if ((controls & VM_EXIT_CONTROL_SAVE_VMX_PREEMPTION_TIMER_VALUE) != 0)
+//         std::cout << "- " << "VM_EXIT_CONTROL_SAVE_VMX_PREEMPTION_TIMER_VALUE" << std::endl;
 
-    std::cout << std::dec << std::endl;
-}
+//     std::cout << std::dec << std::endl;
+// }
 
-void
-vmcs_intel_x64::print_vm_entry_control_fields()
-{
-    auto controls = vmread(VMCS_VM_ENTRY_CONTROLS);
+// void
+// vmcs_intel_x64::print_vm_entry_control_fields()
+// {
+//     auto controls = vmread(VMCS_VM_ENTRY_CONTROLS);
 
-    std::cout << std::hex << std::endl;
-    std::cout << "VM-Entry Controls:" << std::endl;
-    std::cout << "----------------------------------------------------------------------" << std::endl;
+//     std::cout << std::hex << std::endl;
+//     std::cout << "VM-Entry Controls:" << std::endl;
+//     std::cout << "----------------------------------------------------------------------" << std::endl;
 
-    if ((controls & VM_ENTRY_CONTROL_LOAD_DEBUG_CONTROLS) != 0)
-        std::cout << "- " << "VM_ENTRY_CONTROL_LOAD_DEBUG_CONTROLS" << std::endl;
+//     if ((controls & VM_ENTRY_CONTROL_LOAD_DEBUG_CONTROLS) != 0)
+//         std::cout << "- " << "VM_ENTRY_CONTROL_LOAD_DEBUG_CONTROLS" << std::endl;
 
-    if ((controls & VM_ENTRY_CONTROL_IA_32E_MODE_GUEST) != 0)
-        std::cout << "- " << "VM_ENTRY_CONTROL_IA_32E_MODE_GUEST" << std::endl;
+//     if ((controls & VM_ENTRY_CONTROL_IA_32E_MODE_GUEST) != 0)
+//         std::cout << "- " << "VM_ENTRY_CONTROL_IA_32E_MODE_GUEST" << std::endl;
 
-    if ((controls & VM_ENTRY_CONTROL_ENTRY_TO_SMM) != 0)
-        std::cout << "- " << "VM_ENTRY_CONTROL_ENTRY_TO_SMM" << std::endl;
+//     if ((controls & VM_ENTRY_CONTROL_ENTRY_TO_SMM) != 0)
+//         std::cout << "- " << "VM_ENTRY_CONTROL_ENTRY_TO_SMM" << std::endl;
 
-    if ((controls & VM_ENTRY_CONTROL_DEACTIVATE_DUAL_MONITOR_TREATMENT) != 0)
-        std::cout << "- " << "VM_ENTRY_CONTROL_DEACTIVATE_DUAL_MONITOR_TREATMENT" << std::endl;
+//     if ((controls & VM_ENTRY_CONTROL_DEACTIVATE_DUAL_MONITOR_TREATMENT) != 0)
+//         std::cout << "- " << "VM_ENTRY_CONTROL_DEACTIVATE_DUAL_MONITOR_TREATMENT" << std::endl;
 
-    if ((controls & VM_ENTRY_CONTROL_LOAD_IA32_PERF_GLOBAL_CTRL) != 0)
-        std::cout << "- " << "VM_ENTRY_CONTROL_LOAD_IA32_PERF_GLOBAL_CTRL" << std::endl;
+//     if ((controls & VM_ENTRY_CONTROL_LOAD_IA32_PERF_GLOBAL_CTRL) != 0)
+//         std::cout << "- " << "VM_ENTRY_CONTROL_LOAD_IA32_PERF_GLOBAL_CTRL" << std::endl;
 
-    if ((controls & VM_ENTRY_CONTROL_LOAD_IA32_PAT) != 0)
-        std::cout << "- " << "VM_ENTRY_CONTROL_LOAD_IA32_PAT" << std::endl;
+//     if ((controls & VM_ENTRY_CONTROL_LOAD_IA32_PAT) != 0)
+//         std::cout << "- " << "VM_ENTRY_CONTROL_LOAD_IA32_PAT" << std::endl;
 
-    if ((controls & VM_ENTRY_CONTROL_LOAD_IA32_EFER) != 0)
-        std::cout << "- " << "VM_ENTRY_CONTROL_LOAD_IA32_EFER" << std::endl;
+//     if ((controls & VM_ENTRY_CONTROL_LOAD_IA32_EFER) != 0)
+//         std::cout << "- " << "VM_ENTRY_CONTROL_LOAD_IA32_EFER" << std::endl;
 
-    std::cout << std::dec << std::endl;
-}
+//     std::cout << std::dec << std::endl;
+// }
