@@ -167,4 +167,16 @@
 #define ALIGN_MEMORY __attribute__((aligned(MAX_CACHE_LINE_SIZE)))
 #endif
 
+/// Stack Size
+///
+/// Each entry function is guarded with a custom stack to prevent stack
+/// overflows from corrupting the kernel, as well as providing a larger stack
+/// that common in userspace code, but not in the kernel. If stack corruption
+/// is occuring, this function likely needs to be increased. Note one stack
+/// frame is allocated per CPU, so only increase this if needed.
+///
+/// Note: define in 64bits (i.e. an array of uint64_t)
+///
+#define STACK_SIZE 0x2000
+
 #endif

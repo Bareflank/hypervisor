@@ -107,14 +107,22 @@ public:
 #define IA32_VMX_CR4_FIXED0_MSR                                   0x00000488
 #define IA32_VMX_CR4_FIXED1_MSR                                   0x00000489
 #define IA32_FEATURE_CONTROL_MSR                                  0x0000003A
-#define IA32_VMX_PINBASED_CTLS_MSR                                0x00000481
-#define IA32_VMX_PROCBASED_CTLS_MSR                               0x00000482
-#define IA32_VMX_EXIT_CTLS_MSR                                    0x00000483
-#define IA32_VMX_ENTRY_CTLS_MSR                                   0x00000484
 #define IA32_VMX_TRUE_PINBASED_CTLS_MSR                           0x0000048D
 #define IA32_VMX_TRUE_PROCBASED_CTLS_MSR                          0x0000048E
 #define IA32_VMX_TRUE_EXIT_CTLS_MSR                               0x0000048F
 #define IA32_VMX_TRUE_ENTRY_CTLS_MSR                              0x00000490
+
+#ifdef USE_INTEL_X64_LEGACY_CTLS
+#define IA32_VMX_PINBASED_CTLS_MSR                                0x00000481
+#define IA32_VMX_PROCBASED_CTLS_MSR                               0x00000482
+#define IA32_VMX_EXIT_CTLS_MSR                                    0x00000483
+#define IA32_VMX_ENTRY_CTLS_MSR                                   0x00000484
+#else
+#define IA32_VMX_PINBASED_CTLS_MSR IA32_VMX_TRUE_PINBASED_CTLS_MSR
+#define IA32_VMX_PROCBASED_CTLS_MSR IA32_VMX_TRUE_PROCBASED_CTLS_MSR
+#define IA32_VMX_EXIT_CTLS_MSR IA32_VMX_TRUE_EXIT_CTLS_MSR
+#define IA32_VMX_ENTRY_CTLS_MSR IA32_VMX_TRUE_ENTRY_CTLS_MSR
+#endif
 
 // The VMCS fields are defined in the intel's software developer's manual,
 // volumn 3, appendix B. An explaination of these fields can be found in

@@ -40,6 +40,7 @@ global __write_dr7:function
 global __read_es:function
 global __write_es:function
 global __read_cs:function
+global __write_cs:function
 global __read_ss:function
 global __write_ss:function
 global __read_ds:function
@@ -235,6 +236,11 @@ __write_es:
 __read_cs:
     mov rax, 0
     mov ax, cs
+    ret
+
+; void __write_cs(uint16_t val)
+__write_cs:
+    mov cs, di
     ret
 
 ; uint16_t __read_ss(void)
