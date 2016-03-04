@@ -43,11 +43,14 @@ CS_M='\033[1;95m'
 
 .PHONY: debian_load
 .PHONY: debian_unload
+.PHONY: debian_clean
 .PHONY: load
 .PHONY: unload
 .PHONY: start
 .PHONY: stop
 .PHONY: dump
+.PHONY: status
+.PHONY: quick
 .PHONY: loop
 
 debian_load: force
@@ -61,6 +64,9 @@ debian_unload: force
 	cd driver_entry/src/arch/linux; \
 	sudo make unload; \
 	make clean
+
+debian_clean: force
+	$(MAKE) debian_unload
 
 load: force
 	cd bfm/bin/native; \
@@ -85,6 +91,10 @@ dump: force
 status: force
 	cd bfm/bin/native; \
 	sudo ./run.sh status
+
+quick: force
+	$(MAKE) load; \
+	$(MAKE) start
 
 loop: force
 	@for n in $(shell seq 1 $(NUM)); do \

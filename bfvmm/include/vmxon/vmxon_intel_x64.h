@@ -23,7 +23,6 @@
 #define VMXON_INTEL_X64_H
 
 #include <memory>
-#include <memory_manager/memory_manager.h>
 #include <intrinsics/intrinsics_intel_x64.h>
 
 // -----------------------------------------------------------------------------

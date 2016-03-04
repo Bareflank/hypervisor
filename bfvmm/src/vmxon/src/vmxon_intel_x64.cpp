@@ -22,6 +22,7 @@
 #include <commit_or_rollback.h>
 #include <vmxon/vmxon_intel_x64.h>
 #include <vmxon/vmxon_exceptions_intel_x64.h>
+#include <memory_manager/memory_manager.h>
 
 // =============================================================================
 //  Implementation

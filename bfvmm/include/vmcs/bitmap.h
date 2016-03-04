@@ -19,8 +19,8 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#ifndef BITMAP__H
-#define BITMAP__H
+#ifndef BITMAP_H
+#define BITMAP_H
 
 #include <stdint.h>
 #include <memory>
@@ -28,7 +28,9 @@
 class bitmap
 {
 public:
+
     /// Constructor
+    ///
     /// @param num_bits size of the bitmap in bits
     ///
     bitmap(uint32_t num_bits);
@@ -37,31 +39,44 @@ public:
     ///
     virtual ~bitmap() {}
 
-    /// address
-    /// @return the virtual address of the beginning
-    ///         of the bitmap
+    /// Virtual Address
     ///
-    uint8_t *address();
+    /// @return the virtual address of the beginning of the bitmap
+    ///
+    uint64_t virt_addr() const noexcept
+    { return m_virt_addr; }
 
-    /// set_bit
+    /// Physical Address
+    ///
+    /// @return the virtual address of the beginning of the bitmap
+    ///
+    uint64_t phys_addr() const noexcept
+    { return m_phys_addr; }
+
+    /// Set Bit
+    ///
     /// @param n nth bit to set in the bitmap
     ///
-    void set_bit(uint32_t n);
+    void set_bit(uint32_t n) noexcept;
 
-    /// reset_bit
+    /// Reset Bit
+    ///
     /// @param n nth bit to clear in the bitmap
     ///
-    void clear_bit(uint32_t n);
+    void clear_bit(uint32_t n) noexcept;
 
-    /// bit
+    /// Get Bit
+    ///
     /// @param n nth bit's status to return
     /// @return true if the bit is set, false otherwise
     ///
-    bool bit(uint32_t n);
+    bool bit(uint32_t n) const noexcept;
 
 private:
-    std::unique_ptr<uint8_t[]> m_bitmap;
     uint32_t m_length;
+    uint64_t m_virt_addr;
+    uint64_t m_phys_addr;
+    std::unique_ptr<uint8_t[]> m_bitmap;
 };
 
-#endif // BITMAP__H
+#endif

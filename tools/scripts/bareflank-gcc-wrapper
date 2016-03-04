@@ -113,7 +113,8 @@ done
 # only thing the hypervisor code should need from the sysroot is the includes.
 
 if [[ $BAREFLANK_WRAPPER_INCLUDE_LIBC == "true" ]]; then
-    SYSROOT_LIBS="-lc -lbfc -lbfunwind_static"
+    SYSROOT_LIBS+="-lc -lbfc -lbfunwind_static "
+    SYSROOT_LIBS+="-u __cxa_throw_bad_array_new_length"
 fi
 
 SYSROOT_LIB_PATH="-L$HOME/opt/cross/x86_64-elf/lib/"
@@ -123,16 +124,6 @@ SYSROOT_LIB_PATH="-L$HOME/opt/cross/x86_64-elf/lib/"
 # ------------------------------------------------------------------------------
 
 SYSROOT_INC_PATH="-I$HOME/opt/cross/x86_64-elf/include/ -I$HOME/opt/cross/x86_64-elf/include/c++/v1/ "
-
-# REMOVE ME
-#
-# For whatever reason, Libcxx is running a test during it's initial compilation
-# and it needs access to the includes, but doesn't supply them on the
-# command line. This fixes that issue for now.
-
-if [[ $BAREFLANK_WRAPPER_INCLUDE_TMPLIBCXX == "true" ]]; then
-    SYSROOT_INC_PATH+="-I$HOME/tmp-build-dir/libcxx/include/ "
-fi
 
 # ------------------------------------------------------------------------------
 # Libgcc

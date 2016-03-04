@@ -19,45 +19,28 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <vmcs/bitmap.h>
-#include <memory_manager/memory_manager.h>
+#ifndef ENTRY_H
+#define ENTRY_H
 
-bitmap::bitmap(uint32_t num_bits)
-{
-    m_length = num_bits >> 3;
+/// Entry Function
+///
+/// Defines the signature for an entry function.
+///
+typedef int64_t (*entry_t)(void);
 
-    if (num_bits % 8)
-        m_length++;
+/// Execute With Stack
+///
+/// The following function is written in assembly, and provides the ability to
+/// execute an entry function with a different stack than the one that is
+/// provided by the kernel. To do this, this assembly function creates a
+/// traditional stack frame (using the base pointer), prior to replacing the
+/// stack pointer.
+///
+/// @param func entry function to call with new stack
+/// @param stack the new stack
+/// @param size the size of the new stack
+/// @return the return value of the entry function
+///
+extern "C" int64_t execute_with_stack(entry_t func, void *stack, uint64_t size);
 
-    m_bitmap = std::make_unique<uint8_t[]>(m_length);
-
-    m_virt_addr = (uint64_t)m_bitmap.get();
-    m_phys_addr = (uint64_t)g_mm->virt_to_phys(m_bitmap.get());
-}
-
-void bitmap::set_bit(uint32_t n) noexcept
-{
-    if ((n >> 3) > m_length)
-        return;
-
-    m_bitmap.get()[n >> 3] |= (1 << (n % 8));
-}
-
-void bitmap::clear_bit(uint32_t n) noexcept
-{
-    if ((n >> 3) > m_length)
-        return;
-
-    m_bitmap.get()[n >> 3] &= ~(1 << (n % 8));
-}
-
-bool bitmap::bit(uint32_t n) const noexcept
-{
-    if ((n >> 3) > m_length)
-        return false;
-
-    if (m_bitmap.get()[n >> 3] & (1 << (n % 8)))
-        return true;
-
-    return false;
-}
+#endif

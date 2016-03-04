@@ -19,13 +19,15 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+#include <memory>
+
 #include <entry.h>
+#include <entry/entry.h>
 #include <debug.h>
 #include <constants.h>
 #include <exception.h>
 #include <eh_frame_list.h>
 #include <vcpu/vcpu_manager.h>
-#include <debug_ring/debug_ring.h>
 #include <memory_manager/memory_manager.h>
 
 // -----------------------------------------------------------------------------
@@ -39,30 +41,75 @@ struct eh_frame_t g_eh_frame_list[MAX_NUM_MODULES] = {};
 // Helpers
 // -----------------------------------------------------------------------------
 
-#include <vmxon/vmxon_exceptions_intel_x64.h>
-
+/// Guard Stack
+///
+/// Since we are using userspace style code / libraries (like libc++) in this
+/// code, we could end up overrunning the stack, as we do not have control of
+/// all of the code, and some of it assumes that the stack is very large. This
+/// guard provides a new stack that is much larger, ensuring that the kernel's
+/// stack is not corrupted.
+///
+/// Note: Order matters here. You must catch all exceptions first before
+/// calling this function. Since the execute with stack function uses
+/// assembly, there is no FDE entry for this function which means that stack
+/// unwinding cannot continue past this point.
+///
+/// Note: We can use make_unqiue here because bad_alloc always results in
+/// an abort (i.e. system halt).
+///
 template<typename T> int64_t
-catch_all(T func)
+guard_stack(T func)
 {
-    int64_t result = ENTRY_ERROR_UNKNOWN;
+    auto num = 0;
+    auto ret = ENTRY_ERROR_UNKNOWN;
+    auto stack = std::make_unique<uint64_t[]>(STACK_SIZE);
 
+    for (num = 0; num < STACK_SIZE; num++)
+        stack[num] = 0xFFFFFFFFFFFFFFFF;
+
+    ret = execute_with_stack(func, stack.get(), STACK_SIZE << 3);
+
+    for (num = 0; num < STACK_SIZE; num++)
+        if (stack[num] != 0xFFFFFFFFFFFFFFFF)
+            break;
+
+    bfinfo << std::dec;
+    bfdebug << "    - free heap space: " << (g_mm->free_blocks() >> 4)
+            << " kbytes" << bfendl;
+    bfdebug << "    - free stack space: " << (num >> 7)
+            << " kbytes" << bfendl;
+    return ret;
+}
+
+/// Guard Exceptions
+///
+/// The following attempts to catch all of the different types of execptions
+/// that could be thrown. The default bareflank implementation only throws
+/// general exceptions. Libc++ however could also throw a standard exception,
+/// which also needs to be caught. We also provide a catch all incase a
+/// non-standard exception is thrown, preventing exceptions from moving
+/// beyond this point.
+///
+template<typename T> int64_t
+guard_exceptions(T func)
+{
     try
     {
-        result = func();
+        return func();
     }
     catch (bfn::general_exception &ge)
     {
         bferror << "----------------------------------------" << bfendl;
         bferror << "- General Exception Caught             -" << bfendl;
         bferror << "----------------------------------------" << bfendl;
-        bfinfo << "" << ge << bfendl;
+        bfinfo << ge << bfendl;
     }
     catch (std::exception &e)
     {
         bferror << "----------------------------------------" << bfendl;
         bferror << "- Standard Exception Caught            -" << bfendl;
         bferror << "----------------------------------------" << bfendl;
-        bfinfo << "" << e.what() << bfendl;
+        bfinfo << e.what() << bfendl;
     }
     catch (...)
     {
@@ -71,20 +118,20 @@ catch_all(T func)
         bferror << "----------------------------------------" << bfendl;
     }
 
-    return result;
+    return ENTRY_ERROR_UNKNOWN;
 }
 
 void
 terminate()
 {
-    bferror << "FATAL ERROR: terminate called" << bfendl;
+    bffatal << "terminate called" << bfendl;
     abort();
 }
 
 void
 new_handler()
 {
-    bferror << "FATAL ERROR: out of memory" << bfendl;
+    bffatal << "out of memory" << bfendl;
     std::terminate();
 }
 
@@ -100,12 +147,17 @@ init_vmm(int64_t arg)
     std::set_terminate(terminate);
     std::set_new_handler(new_handler);
 
-    return catch_all([&]() -> int64_t
+    return guard_stack([&]() -> int64_t
     {
-        if (g_vcm->init(0) != vcpu_manager_error::success)
-            return ENTRY_ERROR_VMM_INIT_FAILED;
+        return guard_exceptions([&]() -> int64_t
+        {
+            bfdebug << "initializing:" << bfendl;
 
-        return ENTRY_SUCCESS;
+            if (g_vcm->init(0) != vcpu_manager_error::success)
+                return ENTRY_ERROR_VMM_INIT_FAILED;
+
+            return ENTRY_SUCCESS;
+        });
     });
 }
 
@@ -114,15 +166,17 @@ start_vmm(int64_t arg)
 {
     (void) arg;
 
-    return catch_all([&]() -> int64_t
+    return guard_stack([&]() -> int64_t
     {
-        if (g_vcm->start(0) != vcpu_manager_error::success)
-            return ENTRY_ERROR_VMM_START_FAILED;
+        return guard_exceptions([&]() -> int64_t
+        {
+            bfdebug << "starting:" << bfendl;
 
-        bfdebug << "started:" << bfendl;
-        bfdebug << "    - free blocks: " << g_mm->free_blocks() << bfendl;
+            if (g_vcm->start(0) != vcpu_manager_error::success)
+                return ENTRY_ERROR_VMM_START_FAILED;
 
-        return ENTRY_SUCCESS;
+            return ENTRY_SUCCESS;
+        });
     });
 }
 
@@ -131,22 +185,24 @@ stop_vmm(int64_t arg)
 {
     (void) arg;
 
-    return catch_all([&]() -> int64_t
+    return guard_stack([&]() -> int64_t
     {
-        if (g_vcm->stop(0) != vcpu_manager_error::success)
-            return ENTRY_ERROR_VMM_STOP_FAILED;
+        return guard_exceptions([&]() -> int64_t
+        {
+            bfdebug << "stopping:" << bfendl;
 
-        bfdebug << "started:" << bfendl;
-        bfdebug << "    - free blocks: " << g_mm->free_blocks() << bfendl;
+            if (g_vcm->stop(0) != vcpu_manager_error::success)
+                return ENTRY_ERROR_VMM_STOP_FAILED;
 
-        return ENTRY_SUCCESS;
+            return ENTRY_SUCCESS;
+        });
     });
 }
 
 extern "C" int64_t
 add_mdl(struct memory_descriptor *mdl, int64_t num)
 {
-    return catch_all([&]() -> int64_t
+    return guard_exceptions([&]() -> int64_t
     {
         g_mm->add_mdl(mdl, num);
         return ENTRY_SUCCESS;
