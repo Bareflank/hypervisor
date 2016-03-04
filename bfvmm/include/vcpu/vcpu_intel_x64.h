@@ -89,16 +89,6 @@ public:
     ///
     virtual vcpu_error::type promote() override;
 
-    /// Request teardown
-    ///
-    /// Call into the hypervisor to promote  the vCPU
-    ///  guest state to the host. Following this, the
-    /// hypervisor can be shut down from the promoted guest.
-    ///
-    /// @return success on success, failure otherwise
-    ///
-    virtual vcpu_error::type request_teardown() override;
-
 private:
     vmxon_intel_x64 *m_vmxon;
     vmcs_intel_x64 *m_vmcs;

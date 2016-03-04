@@ -92,7 +92,6 @@ promote_vmcs_to_root:
     mov r10, [g_guest_r10]
     mov r9,  [g_guest_r09]
     mov r8,  [g_guest_r08]
-    mov rsp, [g_guest_rsp]
 
     sti
     ret

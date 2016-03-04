@@ -7,7 +7,7 @@
 #     is mainly used by Travis CI because it cannot handle all of the output
 #     that this scripts spits out.
 #
-# export KEEP_TMP=true
+export KEEP_TMP=true
 #     Tells the script to keep the tmp directory when it's finished. This is
 #     used by developers of this script so that you can work on the script
 #     without having to recompile every step constantly. If you need to
@@ -164,47 +164,6 @@ set -x
 # Fetch
 # ------------------------------------------------------------------------------
 
-if [ ! -d "binutils" ]; then
-    rm -Rf completed_build_binutils
-    wget --no-check-certificate $BINUTILS_URL
-    tar xvf binutils-*.tar.bz2
-    mv binutils-*/ binutils
-fi
-
-if [ ! -d "gcc" ]; then
-    rm -Rf completed_build_gcc
-    rm -Rf completed_patch_gcc
-    wget --no-check-certificate $GCC_URL
-    tar xvf gcc-*.tar.bz2
-    mv gcc-*/ gcc
-fi
-
-if [ ! -d "nasm" ]; then
-    rm -Rf completed_build_nasm
-    wget --no-check-certificate $NASM_URL
-    tar xvf nasm-*.tar.gz
-    mv nasm-*/ nasm
-fi
-
-if [ ! -d "newlib" ]; then
-    rm -Rf completed_build_newlib
-    wget --no-check-certificate $NEWLIB_URL
-    tar xvf newlib-*.tar.gz
-    mv newlib-*/ newlib
-fi
-
-if [ ! -d "cmake" ]; then
-    rm -Rf completed_build_cmake
-    wget --no-check-certificate $CMAKE_URL
-    tar xvf cmake-*.tar.gz
-    mv cmake-*/ cmake
-fi
-
-if [ ! -f "gcc_bareflank.patch" ]; then
-    wget $GCC_PATCH_URL
-    mv gcc-*_bareflank.patch gcc_bareflank.patch
-fi
-
 if [ ! -d "libbfc" ]; then
     rm -Rf completed_build_libbfc
     git clone --depth 1 https://github.com/Bareflank/libbfc.git
@@ -224,23 +183,6 @@ if [ ! -d "llvm" ]; then
     git clone --depth 1 http://llvm.org/git/llvm
 fi
 
-# ------------------------------------------------------------------------------
-# Patches
-# ------------------------------------------------------------------------------
-
-if [ ! -f "completed_patch_gcc" ]; then
-
-    pushd $TMPDIR/gcc/
-    patch -p1 < ../gcc_bareflank.patch
-    popd
-
-    touch completed_patch_gcc
-fi
-
-# ------------------------------------------------------------------------------
-# Install Wrapper
-# ------------------------------------------------------------------------------
-
 if [ ! -f "installed_bareflank_gcc_wrapper" ]; then
 
     rm -Rf $PREFIX/bin/x86_64-bareflank-gcc
@@ -254,65 +196,6 @@ if [ ! -f "installed_bareflank_gcc_wrapper" ]; then
     touch installed_bareflank_gcc_wrapper
 fi
 
-# ------------------------------------------------------------------------------
-# Cmake
-# ------------------------------------------------------------------------------
-
-if [ ! -f "completed_build_cmake" ]; then
-
-    rm -Rf build-cmake
-    mkdir -p build-cmake
-
-    pushd build-cmake
-    ../cmake/configure
-    make -j2
-    sudo make -j2 install
-    popd
-
-    touch completed_build_cmake
-fi
-
-# ------------------------------------------------------------------------------
-# Binutils
-# ------------------------------------------------------------------------------
-
-if [ ! -f "completed_build_binutils" ]; then
-
-    rm -Rf build-binutils
-    mkdir -p build-binutils
-
-    pushd build-binutils
-    ../binutils/configure --target=$TARGET --prefix="$PREFIX" --with-sysroot --disable-nls --disable-werror
-    make -j2
-    make -j2 install
-    popd
-
-    touch completed_build_binutils
-fi
-
-# ------------------------------------------------------------------------------
-# GCC
-# ------------------------------------------------------------------------------
-
-if [ ! -f "completed_build_gcc" ]; then
-
-    rm -Rf build-gcc
-    mkdir -p build-gcc
-
-    pushd build-gcc
-    ../gcc/configure --target=$TARGET --prefix="$PREFIX" --disable-nls --enable-languages=c,c++ --without-headers
-    make -j2 all-gcc
-    make -j2 all-target-libgcc
-    make -j2 install-gcc
-    make -j2 install-target-libgcc
-    popd
-
-    touch completed_build_gcc
-fi
-
-# ------------------------------------------------------------------------------
-# Nasm
-# ------------------------------------------------------------------------------
 
 if [ ! -f "completed_build_nasm" ]; then
 
@@ -344,28 +227,6 @@ export LIBBFC_DEFINES="-DSYM_PROVIDED__WRITE -DSYM_PROVIDED__MALLOC -DSYM_PROVID
 export CFLAGS="-fpic -ffreestanding -mno-red-zone $NEWLIB_DEFINES" 2> /dev/null
 export CXXFLAGS="-fno-use-cxa-atexit -fno-threadsafe-statics $CFLAGS" 2> /dev/null
 
-# ------------------------------------------------------------------------------
-# Newlib
-# ------------------------------------------------------------------------------
-
-if [ ! -f "completed_build_newlib" ]; then
-
-    rm -Rf completed_build_libcxx
-
-    rm -Rf build-newlib
-    mkdir -p build-newlib
-
-    pushd build-newlib
-    ../newlib/configure --target=$TARGET --prefix=$PREFIX
-    make -j2
-    make -j2 install
-    popd
-
-    touch completed_build_newlib
-fi
-
-# ------------------------------------------------------------------------------
-# CRT
 # ------------------------------------------------------------------------------
 
 if [ ! -f "completed_build_crt" ]; then

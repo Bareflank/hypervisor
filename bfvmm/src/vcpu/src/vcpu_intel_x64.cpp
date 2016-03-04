@@ -106,18 +106,3 @@ vcpu_intel_x64::promote()
 
     return vcpu_error::success;
 }
-
-vcpu_error::type
-vcpu_intel_x64::request_teardown()
-{
-    if (vcpu_error::success == m_intrinsics->vmcall(VMCS_PROMOTION))
-    {
-        return vcpu_error::success;
-    }
-    else
-    {
-        return vcpu_error::success;
-    }
-
-    return vcpu_error::failure;
-}

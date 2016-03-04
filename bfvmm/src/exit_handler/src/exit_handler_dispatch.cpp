@@ -365,24 +365,7 @@ exit_handler_dispatch::handle_rsm()
 
 void
 exit_handler_dispatch::handle_vmcall()
-{
-    switch (g_guest_rax)
-    {
-        case VMCS_PROMOTION:
-        {
-            advance_rip();
-            g_guest_rax = 0x00;
-            g_vcm->promote_vcpu(0);
-            break;
-        }
-        default:
-        {
-            g_guest_rax = 0xFFFFFFFFFFFFFFFF;
-            advance_rip();
-            break;
-        }
-    }
-}
+{ unimplemented_handler(); }
 
 void
 exit_handler_dispatch::handle_vmclear()
@@ -414,7 +397,10 @@ exit_handler_dispatch::handle_vmwrite()
 
 void
 exit_handler_dispatch::handle_vmxoff()
-{ unimplemented_handler(); }
+{
+    g_guest_rax = 0x00;
+    g_vcm->promote_vcpu(0);
+}
 
 void
 exit_handler_dispatch::handle_vmxon()

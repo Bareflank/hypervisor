@@ -85,9 +85,6 @@ vcpu_manager::stop(int64_t vcpuid)
     if (!vc)
         return vcpu_manager_error::invalid;
 
-    if (vc->request_teardown() != vcpu_error::success)
-        return vcpu_manager_error::failure;
-
     if (vc->stop() != vcpu_error::success)
         return vcpu_manager_error::failure;
 
