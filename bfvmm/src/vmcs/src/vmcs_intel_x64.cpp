@@ -19,447 +19,144 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <iomanip>
-#include <iostream>
-
+#include <debug.h>
+#include <commit_or_rollback.h>
 #include <vmcs/vmcs_intel_x64.h>
+#include <vmcs/vmcs_exceptions_intel_x64.h>
 #include <exit_handler/exit_handler.h>
-
-// =============================================================================
-//  Helper Structs
-// =============================================================================
-
-struct vmcs_region
-{
-    uint32_t revision_id;
-};
+#include <memory_manager/memory_manager.h>
 
 // =============================================================================
 //  Implementation
 // =============================================================================
 
 vmcs_intel_x64::vmcs_intel_x64(intrinsics_intel_x64 *intrinsics) :
-    m_msr_bitmap(4096 * 8), m_intrinsics(intrinsics)
+    m_msr_bitmap(4096 * 8),
+    m_io_bitmap_a(4096 * 8),
+    m_io_bitmap_b(4096 * 8),
+    m_intrinsics(intrinsics)
 {
-
+    m_msr_bitmap_phys = m_msr_bitmap.phys_addr();
+    m_io_bitmap_a_phys = m_io_bitmap_a.phys_addr();
+    m_io_bitmap_b_phys = m_io_bitmap_b.phys_addr();
 }
 
-vmcs_error::type
-vmcs_intel_x64::launch()
+void
+vmcs_intel_x64::launch(const vmcs_state_intel_x64 &host_state,
+                       const vmcs_state_intel_x64 &guest_state)
 {
-    vmcs_error::type ret;
+    if (m_intrinsics == NULL)
+        throw invalid_vmcs();
 
-    if (m_intrinsics == 0)
-        return vmcs_error::failure;
+    auto cor1 = commit_or_rollback([&]
+    { this->release_vmcs_region(); });
 
-    // Before we can do anything, we need to save the state of the CPU. This
-    // information will be used to fill in the VMCS fields, and prevents a
-    // lot of duplication.
+    this->create_vmcs_region();
 
-    ret = save_state();
-    if (ret != vmcs_error::success)
-        return ret;
+    if (m_intrinsics->vmclear(&m_vmcs_region_phys) == false)
+        throw vmcs_failure("failed to clear vmcs");
 
-    // The process for luanching a virtual machine can be found in the
-    // Intel Software Developers Manual, in section 31.6. This process is
-    // a complete nightmare, so make sure you take a look at this
-    // documentation for trying to make sense of the code in this class.
+    if (m_intrinsics->vmptrld(&m_vmcs_region_phys) == false)
+        throw vmcs_failure("failed to load vmcs");
 
-    ret = create_vmcs_region();
-    if (ret != vmcs_error::success)
-        return ret;
+    this->write_16bit_guest_state(guest_state);
+    this->write_64bit_guest_state(guest_state);
+    this->write_32bit_guest_state(guest_state);
+    this->write_natural_guest_state(guest_state);
 
-    ret = clear_vmcs_region();
-    if (ret != vmcs_error::success)
-        return ret;
+    this->write_16bit_control_state(host_state);
+    this->write_64bit_control_state(host_state);
+    this->write_32bit_control_state(host_state);
+    this->write_natural_control_state(host_state);
 
-    ret = load_vmcs_region();
-    if (ret != vmcs_error::success)
-        return ret;
+    this->write_16bit_host_state(host_state);
+    this->write_64bit_host_state(host_state);
+    this->write_32bit_host_state(host_state);
+    this->write_natural_host_state(host_state);
 
-    // The next set of steps fills in the previously loaded VMCS with
-    // information about the guest / host. In this case, the guest is the
-    // host OS that is running this code, and the host, is the VMM exit
-    // handler that we provide. Note that if something goes wrong, it's
-    // likely in the code below. For more information about how to debug
-    // issues with this code, see Chapter 27 in the Intel Software Developers
-    // Manual.
-
-    // Also, note that the VMCS fields are fully documented in appendix
-    // B of the Intel Software Developers Manual.
-
-    ret = write_16bit_control_fields();
-    if (ret != vmcs_error::success)
-        return ret;
-
-    ret = write_16bit_guest_state_fields();
-    if (ret != vmcs_error::success)
-        return ret;
-
-    ret = write_16bit_host_state_fields();
-    if (ret != vmcs_error::success)
-        return ret;
-
-    ret = write_64bit_control_fields();
-    if (ret != vmcs_error::success)
-        return ret;
-
-    ret = write_64bit_guest_state_fields();
-    if (ret != vmcs_error::success)
-        return ret;
-
-    ret = write_64bit_host_state_fields();
-    if (ret != vmcs_error::success)
-        return ret;
-
-    ret = write_32bit_control_fields();
-    if (ret != vmcs_error::success)
-        return ret;
-
-    ret = write_32bit_guest_state_fields();
-    if (ret != vmcs_error::success)
-        return ret;
-
-    ret = write_32bit_host_state_fields();
-    if (ret != vmcs_error::success)
-        return ret;
-
-    ret = write_natural_width_control_fields();
-    if (ret != vmcs_error::success)
-        return ret;
-
-    ret = write_natural_width_guest_state_fields();
-    if (ret != vmcs_error::success)
-        return ret;
-
-    ret = write_natural_width_host_state_fields();
-    if (ret != vmcs_error::success)
-        return ret;
-
-    // Once the VMCS is setup, we need to turn on certain bits within the VMCS
-    // that tell VT-x how to treat out VMM as well as the guest VM that we plan
-    // to launch. Note that we could put these calls in the above code, but
-    // this makes it more explicit about what we plan to enable, outside of
-    // the bare minimum, which is what the above code is doing.
-
-    ret = default_pin_based_vm_execution_controls();
-    if (ret != vmcs_error::success)
-        return ret;
-
-    ret = default_primary_processor_based_vm_execution_controls();
-    if (ret != vmcs_error::success)
-        return ret;
-
-    ret = default_secondary_processor_based_vm_execution_controls();
-    if (ret != vmcs_error::success)
-        return ret;
-
-    ret = default_vm_exit_controls();
-    if (ret != vmcs_error::success)
-        return ret;
-
-    ret = default_vm_entry_controls();
-    if (ret != vmcs_error::success)
-        return ret;
-
-    // =========================================================================
-    // CLEAN ME UP
-    // =========================================================================
-    vmwrite(VMCS_ADDRESS_OF_MSR_BITMAPS_FULL, (uint64_t)g_mm->virt_to_phys(m_msr_bitmap.address()));
-
-    // =========================================================================
-    // CLEAN ME UP
-    // =========================================================================
-
-    // Before we attempt to launch the VMM, we run a bunch of tests on the
-    // VMCS to verify that the state of the VMCS is valid. These checks come
-    // from the intel software developer's manual, volume 3, chapter 26. Most
-    // of these checks are in the same order as the documentation.
-
-    // if (check_vmcs_host_state() == false)
-    //     return vmcs_error::failure;
-
-    // if (check_vmcs_guest_state() == false)
-    //     return vmcs_error::failure;
-
-    // if (check_vmcs_control_state() == false)
-    //     return vmcs_error::failure;
-
-    // If there happens to be an issue with the VMCS, you can use these
-    // functions to print out the state of the VMCS, as well as the internal
-    // state of this object so that you can check to see if there are any
-    // issues.
-
-    // dump_vmcs();
-    // dump_state();
-
-    // The last step is to launch the VMCS. If the launch fails, we must
-    // go through a series of error checks to identify why the failure
-    // occured. If the launch succeeds, we should continue execution as
-    // normal, not this code will be in a virtual machine when finished.
-    ret = launch_vmcs();
-    if (ret != vmcs_error::success)
-        return ret;
-
-    return vmcs_error::success;
-}
-
-vmcs_error::type
-vmcs_intel_x64::launch_vmcs()
-{
-    if (m_valid == false)
-    {
-        std::cout << "unable to launch VMCS, a failure invalidated the VMCS.";
-        std::cout << std::endl;
-
-        return vmcs_error::failure;
-    }
+    this->default_pin_based_vm_execution_controls();
+    this->default_primary_processor_based_vm_execution_controls();
+    this->default_secondary_processor_based_vm_execution_controls();
+    this->default_vm_exit_controls();
+    this->default_vm_entry_controls();
 
     if (m_intrinsics->vmlaunch() == false)
+        throw vmcs_launch_failure(this->check_vm_instruction_error());
+
+    cor1.commit();
+}
+
+void
+vmcs_intel_x64::promote()
+{
+    if (m_intrinsics == NULL)
+        throw invalid_vmcs();
+
+    auto cor1 = commit_or_rollback([&]
     {
-        std::cout << "vmlaunch instruction failed ";
-        std::cout << std::endl;
+        bffatal << "promote failed. unable to rollback state" << bfendl;
+        abort();
+    });
 
-        return vmcs_error::failure;
-    }
-
-    std::cout << "WOOT, launch was succesfull!!!" << std::endl;
-    return vmcs_error::success;
-}
-
-vmcs_error::type
-vmcs_intel_x64::resume_vmcs()
-{
-    return vmcs_error::success;
-}
-
-vmcs_error::type
-vmcs_intel_x64::save_state()
-{
-    m_es = m_intrinsics->read_es();
-    m_cs = m_intrinsics->read_cs();
-    m_ss = m_intrinsics->read_ss();
-    m_ds = m_intrinsics->read_ds();
-    m_fs = m_intrinsics->read_fs();
-    m_gs = m_intrinsics->read_gs();
-    m_ldtr = m_intrinsics->read_ldtr();
-    m_tr = m_intrinsics->read_tr();
-
-    m_cr0 = m_intrinsics->read_cr0();
-    m_cr3 = m_intrinsics->read_cr3();
-    m_cr4 = m_intrinsics->read_cr4();
-    m_dr7 = m_intrinsics->read_dr7();
-    m_rflags = m_intrinsics->read_rflags();
-
-    m_intrinsics->read_gdt(&m_gdt_reg);
-    m_intrinsics->read_idt(&m_idt_reg);
-
-    m_es_limit = m_intrinsics->segment_descriptor_limit(m_es);
-    m_cs_limit = m_intrinsics->segment_descriptor_limit(m_cs);
-    m_ss_limit = m_intrinsics->segment_descriptor_limit(m_ss);
-    m_ds_limit = m_intrinsics->segment_descriptor_limit(m_ds);
-    m_fs_limit = m_intrinsics->segment_descriptor_limit(m_fs);
-    m_gs_limit = m_intrinsics->segment_descriptor_limit(m_gs);
-    m_ldtr_limit = m_intrinsics->segment_descriptor_limit(m_ldtr);
-    m_tr_limit = m_intrinsics->segment_descriptor_limit(m_tr);
-
-    m_es_access = m_intrinsics->segment_descriptor_access(m_es);
-    m_cs_access = m_intrinsics->segment_descriptor_access(m_cs);
-    m_ss_access = m_intrinsics->segment_descriptor_access(m_ss);
-    m_ds_access = m_intrinsics->segment_descriptor_access(m_ds);
-    m_fs_access = m_intrinsics->segment_descriptor_access(m_fs);
-    m_gs_access = m_intrinsics->segment_descriptor_access(m_gs);
-    m_ldtr_access = m_intrinsics->segment_descriptor_access(m_ldtr);
-    m_tr_access = m_intrinsics->segment_descriptor_access(m_tr);
-
-    m_es_base = m_intrinsics->segment_descriptor_base(m_es);
-    m_cs_base = m_intrinsics->segment_descriptor_base(m_cs);
-    m_ss_base = m_intrinsics->segment_descriptor_base(m_ss);
-    m_ds_base = m_intrinsics->segment_descriptor_base(m_ds);
-    m_fs_base = m_intrinsics->segment_descriptor_base(m_fs);
-    m_gs_base = m_intrinsics->segment_descriptor_base(m_gs);
-    m_ldtr_base = m_intrinsics->segment_descriptor_base(m_ldtr);
-    m_tr_base = m_intrinsics->segment_descriptor_base(m_tr);
-
-    return vmcs_error::success;
-}
-
-vmcs_error::type
-vmcs_intel_x64::unlaunch()
-{
-    m_intrinsics->write_es(vmread(VMCS_GUEST_ES_SELECTOR));
-    m_intrinsics->write_ds(vmread(VMCS_GUEST_DS_SELECTOR));
-    m_intrinsics->write_fs(vmread(VMCS_GUEST_FS_SELECTOR));
-    m_intrinsics->write_gs(vmread(VMCS_GUEST_GS_SELECTOR));
-    m_intrinsics->write_msr(IA32_EFER_MSR, vmread(VMCS_GUEST_IA32_EFER_FULL));
-    m_intrinsics->write_msr(IA32_PAT_MSR, vmread(VMCS_GUEST_IA32_PAT_FULL));
-    m_intrinsics->write_msr(IA32_SYSENTER_CS_MSR, vmread(VMCS_GUEST_IA32_SYSENTER_CS));
-    m_intrinsics->write_msr(IA32_FS_BASE_MSR, vmread(VMCS_GUEST_FS_BASE));
-    m_intrinsics->write_msr(IA32_GS_BASE_MSR, vmread(VMCS_GUEST_GS_BASE));
-    m_intrinsics->write_msr(IA32_SYSENTER_ESP_MSR, vmread(VMCS_GUEST_IA32_SYSENTER_ESP));
-    m_intrinsics->write_msr(IA32_SYSENTER_EIP_MSR, vmread(VMCS_GUEST_IA32_SYSENTER_EIP));
-    m_intrinsics->write_cr3(vmread(VMCS_GUEST_CR3));
+    this->promote_16bit_guest_state();
+    this->promote_64bit_guest_state();
+    this->promote_32bit_guest_state();
+    this->promote_natural_guest_state();
 
     promote_vmcs_to_root();
-
-    // This doesn't actually get returned
-    return vmcs_error::success;
 }
 
-vmcs_error::type
+void
 vmcs_intel_x64::create_vmcs_region()
 {
-    // Note: This relies on make_unique returning an already
-    // zeroed-out buffer (think calloc not malloc.)
+    auto cor1 = commit_or_rollback([&]
+    { this->release_vmcs_region(); });
+
     m_vmcs_region = std::make_unique<char[]>(4096);
+    m_vmcs_region_phys = (uintptr_t)g_mm->virt_to_phys(m_vmcs_region.get());
 
-    if (!m_vmcs_region)
+    if ((m_vmcs_region_phys & 0x0000000000000FFF) != 0)
+        throw invalid_alignmnet(
+            "vmxon region not page aligned", m_vmcs_region_phys);
+
+    auto region = (uint32_t *)m_vmcs_region.get();
+    region[0] = m_intrinsics->read_msr(IA32_VMX_BASIC_MSR) & 0x7FFFFFFFF;
+
+    cor1.commit();
+}
+
+void
+vmcs_intel_x64::release_vmcs_region()
+{
+    if (m_vmcs_region_phys != 0)
     {
-        std::cout << "create_vmcs_region failed: "
-                  << "out of memory" << std::endl;
-        return vmcs_error::out_of_memory;
+        if (m_intrinsics->vmclear(&m_vmcs_region_phys) == false)
+            throw vmcs_failure("failed to clear vmcs");
+
+        m_vmcs_region.reset();
+        m_vmcs_region_phys = 0;
     }
-
-    if ((((uintptr_t)g_mm->virt_to_phys(m_vmcs_region.get())) & 0x0000000000000FFF) != 0)
-    {
-        std::cout << "create_vmcs_region failed: "
-                  << "the allocated page is not page aligned:" << std::endl
-                  << "    - page phys: " << g_mm->virt_to_phys(m_vmcs_region.get())
-                  << std::endl;
-        return vmcs_error::not_supported;
-    }
-
-    auto reg = (vmcs_region *)m_vmcs_region.get();
-
-    // // The information regading this MSR can be found in appendix A.1. For
-    // // the VMX capabilities check, we need the following:
-    // //
-    // // - Bits 30:0 contain the 31-bit VMCS revision identifier used by the
-    // //   processor. Processors that use the same VMCS revision identifier use
-    // //   the same size for VMCS regions (see subsequent item on bits 44:32)
-
-    reg->revision_id = (m_intrinsics->read_msr(IA32_VMX_BASIC_MSR) & 0x7FFFFFFFF);
-
-    return vmcs_error::success;
 }
 
-vmcs_error::type
-vmcs_intel_x64::release_vmxon_region()
+void
+vmcs_intel_x64::write_16bit_control_state(const vmcs_state_intel_x64 &state)
 {
-    // This function should probably go away now.
-    return vmcs_error::success;
-}
+    (void) state;
 
-vmcs_error::type
-vmcs_intel_x64::clear_vmcs_region()
-{
-    auto phys = g_mm->virt_to_phys(m_vmcs_region.get());
-
-    // For some reason, the VMCLEAR instruction takes the address of a memory
-    // location that has the address of the VMCS region, which sadly is not
-    // well documented in the Intel manual.
-
-    if (m_intrinsics->vmclear(&phys) == false)
-    {
-        std::cout << "vmclear failed" << std::endl;
-        return vmcs_error::failure;
-    }
-
-    m_valid = true;
-
-    return vmcs_error::success;
-}
-
-vmcs_error::type
-vmcs_intel_x64::load_vmcs_region()
-{
-    auto phys = g_mm->virt_to_phys(m_vmcs_region.get());
-
-    // For some reason, the VMPTRLD instruction takes the address of a memory
-    // location that has the address of the VMCS region, which sadly is not
-    // well documented in the Intel manual.
-
-    if (m_intrinsics->vmptrld(&phys) == false)
-    {
-        std::cout << "vmptrld failed" << std::endl;
-        return vmcs_error::failure;
-    }
-
-    return vmcs_error::success;
-}
-
-uint64_t
-vmcs_intel_x64::vmcs_region_size()
-{
-    auto vmx_basic_msr = m_intrinsics->read_msr(IA32_VMX_BASIC_MSR);
-
-    // The information regading this MSR can be found in appendix A.1. For
-    // the VMX capabilities check, we need the following:
-    //
-    // - Bits 44:32 report the number of bytes that software should allocate
-    //   for the VMXON region and any VMCS region. It is a value greater
-    //   than 0 and at most 4096 (bit 44 is set if and only if bits 43:32 are
-    //   clear).
-    //
-    //   Note: We basically ignore the above bits and just allocate 4K for each
-    //   VMX region. The only thing we do with this function is ensure that
-    //   the page that we were given is at least this big
-
-    return (vmx_basic_msr >> 32) & 0x1FFF;
-}
-
-vmcs_error::type
-vmcs_intel_x64::write_16bit_control_fields()
-{
     // unused: VMCS_VIRTUAL_PROCESSOR_IDENTIFIER
     // unused: VMCS_POSTED_INTERRUPT_NOTIFICATION_VECTOR
     // unused: VMCS_EPTP_INDEX
-
-    return vmcs_error::success;
 }
 
-vmcs_error::type
-vmcs_intel_x64::write_16bit_guest_state_fields()
+void
+vmcs_intel_x64::write_64bit_control_state(const vmcs_state_intel_x64 &state)
 {
-    vmwrite(VMCS_GUEST_ES_SELECTOR, m_es);
-    vmwrite(VMCS_GUEST_CS_SELECTOR, m_cs);
-    vmwrite(VMCS_GUEST_SS_SELECTOR, m_ss);
-    vmwrite(VMCS_GUEST_DS_SELECTOR, m_ds);
-    vmwrite(VMCS_GUEST_FS_SELECTOR, m_fs);
-    vmwrite(VMCS_GUEST_GS_SELECTOR, m_gs);
-    vmwrite(VMCS_GUEST_LDTR_SELECTOR, m_ldtr);
-    vmwrite(VMCS_GUEST_TR_SELECTOR, m_tr);
+    (void) state;
 
-    // unused: VMCS_GUEST_INTERRUPT_STATUS
+    vmwrite(VMCS_ADDRESS_OF_MSR_BITMAPS_FULL, m_msr_bitmap_phys);
+    vmwrite(VMCS_ADDRESS_OF_IO_BITMAP_A_FULL, m_io_bitmap_a_phys);
+    vmwrite(VMCS_ADDRESS_OF_IO_BITMAP_B_FULL, m_io_bitmap_b_phys);
 
-    return vmcs_error::success;
-}
-
-vmcs_error::type
-vmcs_intel_x64::write_16bit_host_state_fields()
-{
-    vmwrite(VMCS_HOST_CS_SELECTOR, m_cs);
-    vmwrite(VMCS_HOST_SS_SELECTOR, m_ss);
-    vmwrite(VMCS_HOST_TR_SELECTOR, m_tr);
-
-    // unused: VMCS_HOST_ES_SELECTOR
-    // unused: VMCS_HOST_DS_SELECTOR
-    // unused: VMCS_HOST_FS_SELECTOR
-    // unused: VMCS_HOST_GS_SELECTOR
-
-    return vmcs_error::success;
-}
-
-vmcs_error::type
-vmcs_intel_x64::write_64bit_control_fields()
-{
-    // Note: Since we are in 64bit mode, we do not need to load both the
-    //       high and full fields. We simply need to load the full field
-    //       with 64bit writes, which will fill in the high field for us.
-
-    // unused: VMCS_ADDRESS_OF_IO_BITMAP_A_FULL
-    // unused: VMCS_ADDRESS_OF_IO_BITMAP_B_FULL
-    // unused: VMCS_ADDRESS_OF_MSR_BITMAPS_FULL
     // unused: VMCS_VM_EXIT_MSR_STORE_ADDRESS_FULL
     // unused: VMCS_VM_EXIT_MSR_LOAD_ADDRESS_FULL
     // unused: VMCS_VM_ENTRY_MSR_LOAD_ADDRESS_FULL
@@ -479,82 +176,28 @@ vmcs_intel_x64::write_64bit_control_fields()
     // unused: VMCS_VMWRITE_BITMAP_ADDRESS_FULL
     // unused: VMCS_VIRTUALIZATION_EXCEPTION_INFORMATION_ADDRESS_FULL
     // unused: VMCS_XSS_EXITING_BITMAP_FULL
-
-    return vmcs_error::success;
 }
 
-vmcs_error::type
-vmcs_intel_x64::write_64bit_guest_state_fields()
-{
-    // Note: Since we are in 64bit mode, we do not need to load both the
-    //       high and full fields. We simply need to load the full field
-    //       with 64bit writes, which will fill in the high field for us.
-
-    vmwrite(VMCS_VMCS_LINK_POINTER_FULL, 0xFFFFFFFFFFFFFFFF);
-    vmwrite(VMCS_GUEST_IA32_DEBUGCTL_FULL, m_intrinsics->read_msr(IA32_DEBUGCTL_MSR));
-    vmwrite(VMCS_GUEST_IA32_EFER_FULL, m_intrinsics->read_msr(IA32_EFER_MSR));
-    vmwrite(VMCS_GUEST_IA32_PAT_FULL, m_intrinsics->read_msr(IA32_PAT_MSR));
-
-    // unused: VMCS_GUEST_IA32_PERF_GLOBAL_CTRL_FULL
-    // unused: VMCS_GUEST_PDPTE0_FULL
-    // unused: VMCS_GUEST_PDPTE1_FULL
-    // unused: VMCS_GUEST_PDPTE2_FULL
-    // unused: VMCS_GUEST_PDPTE3_FULL
-
-    return vmcs_error::success;
-}
-
-vmcs_error::type
-vmcs_intel_x64::write_64bit_host_state_fields()
-{
-    // Note: Since we are in 64bit mode, we do not need to load both the
-    //       high and full fields. We simply need to load the full field
-    //       with 64bit writes, which will fill in the high field for us.
-
-    // unused: VMCS_HOST_IA32_PAT_FULL
-    // unused: VMCS_HOST_IA32_EFER_FULL
-    // unused: VMCS_HOST_IA32_PERF_GLOBAL_CTRL_FULL
-
-    return vmcs_error::success;
-}
-
-vmcs_error::type
-vmcs_intel_x64::write_32bit_control_fields()
+void
+vmcs_intel_x64::write_32bit_control_state(const vmcs_state_intel_x64 &state)
 {
     uint64_t lower;
     uint64_t upper;
 
-    // For the following fields, there is a complex, algorithm that is used
-    // to determine what these values of these fields actually should be.
-    //
-    // - VMCS_PIN_BASED_VM_EXECUTION_CONTROLS
-    // - VMCS_PRIMARY_PROCESSOR_BASED_VM_EXECUTION_CONTROLS
-    // - VMCS_VM_EXIT_CONTROLS
-    // - VMCS_VM_ENTRY_CONTROLS
-    //
-    // These algorithms are defined in section 31.5.1 Algorithms for
-    // Determining VMX Capabilities. We use a subset of algorithm #3.
-    //
-    // Basically, the way this works is for each of the fields is:
-    //     - a 1 in the lower 32bits of the associated MSR means that the
-    //       field must contain a 1.
-    //     - a 0 in the upper 32bits of the associated MSR means that the
-    //       field must contain a 0.
-
-    lower = ((m_intrinsics->read_msr(IA32_VMX_PINBASED_CTLS_MSR) >> 0) & 0x00000000FFFFFFFF);
-    upper = ((m_intrinsics->read_msr(IA32_VMX_PINBASED_CTLS_MSR) >> 32) & 0x00000000FFFFFFFF);
+    lower = ((state.ia32_vmx_pinbased_ctls_msr() >> 0) & 0x00000000FFFFFFFF);
+    upper = ((state.ia32_vmx_pinbased_ctls_msr() >> 32) & 0x00000000FFFFFFFF);
     vmwrite(VMCS_PIN_BASED_VM_EXECUTION_CONTROLS, lower & upper);
 
-    lower = ((m_intrinsics->read_msr(IA32_VMX_PROCBASED_CTLS_MSR) >> 0) & 0x00000000FFFFFFFF);
-    upper = ((m_intrinsics->read_msr(IA32_VMX_PROCBASED_CTLS_MSR) >> 32) & 0x00000000FFFFFFFF);
+    lower = ((state.ia32_vmx_procbased_ctls_msr() >> 0) & 0x00000000FFFFFFFF);
+    upper = ((state.ia32_vmx_procbased_ctls_msr() >> 32) & 0x00000000FFFFFFFF);
     vmwrite(VMCS_PRIMARY_PROCESSOR_BASED_VM_EXECUTION_CONTROLS, lower & upper);
 
-    lower = ((m_intrinsics->read_msr(IA32_VMX_EXIT_CTLS_MSR) >> 0) & 0x00000000FFFFFFFF);
-    upper = ((m_intrinsics->read_msr(IA32_VMX_EXIT_CTLS_MSR) >> 32) & 0x00000000FFFFFFFF);
+    lower = ((state.ia32_vmx_exit_ctls_msr() >> 0) & 0x00000000FFFFFFFF);
+    upper = ((state.ia32_vmx_exit_ctls_msr() >> 32) & 0x00000000FFFFFFFF);
     vmwrite(VMCS_VM_EXIT_CONTROLS, lower & upper);
 
-    lower = ((m_intrinsics->read_msr(IA32_VMX_ENTRY_CTLS_MSR) >> 0) & 0x00000000FFFFFFFF);
-    upper = ((m_intrinsics->read_msr(IA32_VMX_ENTRY_CTLS_MSR) >> 32) & 0x00000000FFFFFFFF);
+    lower = ((state.ia32_vmx_entry_ctls_msr() >> 0) & 0x00000000FFFFFFFF);
+    upper = ((state.ia32_vmx_entry_ctls_msr() >> 32) & 0x00000000FFFFFFFF);
     vmwrite(VMCS_VM_ENTRY_CONTROLS, lower & upper);
 
     // unused: VMCS_EXCEPTION_BITMAP
@@ -571,58 +214,13 @@ vmcs_intel_x64::write_32bit_control_fields()
     // unused: VMCS_SECONDARY_PROCESSOR_BASED_VM_EXECUTION_CONTROLS
     // unused: VMCS_PLE_GAP
     // unused: VMCS_PLE_WINDOW
-
-    return vmcs_error::success;
 }
 
-vmcs_error::type
-vmcs_intel_x64::write_32bit_guest_state_fields()
+void
+vmcs_intel_x64::write_natural_control_state(const vmcs_state_intel_x64 &state)
 {
-    // Not sure why but the limit is always set to all f's for both the guest
-    // and the host. Both VMXCPU, and KVM do this.
+    (void) state;
 
-    vmwrite(VMCS_GUEST_ES_LIMIT, m_es_limit);
-    vmwrite(VMCS_GUEST_CS_LIMIT, m_cs_limit);
-    vmwrite(VMCS_GUEST_SS_LIMIT, m_ss_limit);
-    vmwrite(VMCS_GUEST_DS_LIMIT, m_ds_limit);
-    vmwrite(VMCS_GUEST_FS_LIMIT, m_fs_limit);
-    vmwrite(VMCS_GUEST_GS_LIMIT, m_gs_limit);
-    vmwrite(VMCS_GUEST_LDTR_LIMIT, m_ldtr_limit);
-    vmwrite(VMCS_GUEST_TR_LIMIT, m_tr_limit);
-
-    vmwrite(VMCS_GUEST_GDTR_LIMIT, m_gdt_reg.limit);
-    vmwrite(VMCS_GUEST_IDTR_LIMIT, m_idt_reg.limit);
-
-    vmwrite(VMCS_GUEST_ES_ACCESS_RIGHTS, m_es_access);
-    vmwrite(VMCS_GUEST_CS_ACCESS_RIGHTS, m_cs_access);
-    vmwrite(VMCS_GUEST_SS_ACCESS_RIGHTS, m_ss_access);
-    vmwrite(VMCS_GUEST_DS_ACCESS_RIGHTS, m_ds_access);
-    vmwrite(VMCS_GUEST_FS_ACCESS_RIGHTS, m_fs_access);
-    vmwrite(VMCS_GUEST_GS_ACCESS_RIGHTS, m_gs_access);
-    vmwrite(VMCS_GUEST_LDTR_ACCESS_RIGHTS, m_ldtr_access);
-    vmwrite(VMCS_GUEST_TR_ACCESS_RIGHTS, m_tr_access);
-
-    vmwrite(VMCS_GUEST_IA32_SYSENTER_CS, m_intrinsics->read_msr32(IA32_SYSENTER_CS_MSR));
-
-    // unused: VMCS_GUEST_INTERRUPTIBILITY_STATE
-    // unused: VMCS_GUEST_ACTIVITY_STATE
-    // unused: VMCS_GUEST_SMBASE
-    // unused: VMCS_VMX_PREEMPTION_TIMER_VALUE
-
-    return vmcs_error::success;
-}
-
-vmcs_error::type
-vmcs_intel_x64::write_32bit_host_state_fields()
-{
-    // unused: VMCS_HOST_IA32_SYSENTER_CS
-
-    return vmcs_error::success;
-}
-
-vmcs_error::type
-vmcs_intel_x64::write_natural_width_control_fields()
-{
     // unused: VMCS_CR0_GUEST_HOST_MASK
     // unused: VMCS_CR4_GUEST_HOST_MASK
     // unused: VMCS_CR0_READ_SHADOW
@@ -631,52 +229,144 @@ vmcs_intel_x64::write_natural_width_control_fields()
     // unused: VMCS_CR3_TARGET_VALUE_1
     // unused: VMCS_CR3_TARGET_VALUE_2
     // unused: VMCS_CR3_TARGET_VALUE_31
-
-    return vmcs_error::success;
 }
 
-vmcs_error::type
-vmcs_intel_x64::write_natural_width_guest_state_fields()
+void
+vmcs_intel_x64::write_16bit_guest_state(const vmcs_state_intel_x64 &state)
 {
-    vmwrite(VMCS_GUEST_CR0, m_cr0);
-    vmwrite(VMCS_GUEST_CR3, m_cr3);
-    vmwrite(VMCS_GUEST_CR4, m_cr4);
-    vmwrite(VMCS_GUEST_ES_BASE, m_es_base);
-    vmwrite(VMCS_GUEST_CS_BASE, m_cs_base);
-    vmwrite(VMCS_GUEST_SS_BASE, m_ss_base);
-    vmwrite(VMCS_GUEST_DS_BASE, m_ds_base);
-    vmwrite(VMCS_GUEST_FS_BASE, m_intrinsics->read_msr(IA32_FS_BASE_MSR));
-    vmwrite(VMCS_GUEST_GS_BASE, m_intrinsics->read_msr(IA32_GS_BASE_MSR));
-    vmwrite(VMCS_GUEST_LDTR_BASE, m_ldtr_base);
-    vmwrite(VMCS_GUEST_TR_BASE, m_tr_base);
+    vmwrite(VMCS_GUEST_ES_SELECTOR, state.es());
+    vmwrite(VMCS_GUEST_CS_SELECTOR, state.cs());
+    vmwrite(VMCS_GUEST_SS_SELECTOR, state.ss());
+    vmwrite(VMCS_GUEST_DS_SELECTOR, state.ds());
+    vmwrite(VMCS_GUEST_FS_SELECTOR, state.fs());
+    vmwrite(VMCS_GUEST_GS_SELECTOR, state.gs());
+    vmwrite(VMCS_GUEST_TR_SELECTOR, state.tr());
 
-    vmwrite(VMCS_GUEST_GDTR_BASE, m_gdt_reg.base);
-    vmwrite(VMCS_GUEST_IDTR_BASE, m_idt_reg.base);
+    // unused: VMCS_GUEST_LDTR_SELECTOR
+    // unused: VMCS_GUEST_INTERRUPT_STATUS
+}
 
-    vmwrite(VMCS_GUEST_DR7, m_dr7);
-    vmwrite(VMCS_GUEST_RFLAGS, m_rflags);
+void
+vmcs_intel_x64::write_64bit_guest_state(const vmcs_state_intel_x64 &state)
+{
+    vmwrite(VMCS_VMCS_LINK_POINTER_FULL, 0xFFFFFFFFFFFFFFFF);
+    vmwrite(VMCS_GUEST_IA32_EFER_FULL, state.ia32_efer_msr());
 
-    vmwrite(VMCS_GUEST_IA32_SYSENTER_ESP, m_intrinsics->read_msr32(IA32_SYSENTER_ESP_MSR));
-    vmwrite(VMCS_GUEST_IA32_SYSENTER_EIP, m_intrinsics->read_msr32(IA32_SYSENTER_EIP_MSR));
+    // unused: VMCS_GUEST_IA32_DEBUGCTL_FULL
+    // unused: VMCS_GUEST_IA32_PAT_FULL
+    // unused: VMCS_GUEST_IA32_PERF_GLOBAL_CTRL_FULL
+    // unused: VMCS_GUEST_PDPTE0_FULL
+    // unused: VMCS_GUEST_PDPTE1_FULL
+    // unused: VMCS_GUEST_PDPTE2_FULL
+    // unused: VMCS_GUEST_PDPTE3_FULL
+}
 
+void
+vmcs_intel_x64::write_32bit_guest_state(const vmcs_state_intel_x64 &state)
+{
+    auto unusable = m_intrinsics->segment_descriptor_access(0);
+
+    vmwrite(VMCS_GUEST_ES_LIMIT, state.es_limit());
+    vmwrite(VMCS_GUEST_CS_LIMIT, state.cs_limit());
+    vmwrite(VMCS_GUEST_SS_LIMIT, state.ss_limit());
+    vmwrite(VMCS_GUEST_DS_LIMIT, state.ds_limit());
+    vmwrite(VMCS_GUEST_FS_LIMIT, state.fs_limit());
+    vmwrite(VMCS_GUEST_GS_LIMIT, state.gs_limit());
+    vmwrite(VMCS_GUEST_TR_LIMIT, state.tr_limit());
+
+    vmwrite(VMCS_GUEST_GDTR_LIMIT, state.gdt().limit);
+    vmwrite(VMCS_GUEST_IDTR_LIMIT, state.idt().limit);
+
+    vmwrite(VMCS_GUEST_ES_ACCESS_RIGHTS, state.es_access());
+    vmwrite(VMCS_GUEST_CS_ACCESS_RIGHTS, state.cs_access());
+    vmwrite(VMCS_GUEST_SS_ACCESS_RIGHTS, state.ss_access());
+    vmwrite(VMCS_GUEST_DS_ACCESS_RIGHTS, state.ds_access());
+    vmwrite(VMCS_GUEST_FS_ACCESS_RIGHTS, state.fs_access());
+    vmwrite(VMCS_GUEST_GS_ACCESS_RIGHTS, state.gs_access());
+    vmwrite(VMCS_GUEST_LDTR_ACCESS_RIGHTS, unusable);
+    vmwrite(VMCS_GUEST_TR_ACCESS_RIGHTS, state.tr_access());
+
+    vmwrite(VMCS_GUEST_IA32_SYSENTER_CS, state.ia32_sysenter_cs_msr());
+
+    // unused: VMCS_GUEST_LDTR_LIMIT
+    // unused: VMCS_GUEST_LDTR_ACCESS_RIGHTS
+    // unused: VMCS_GUEST_INTERRUPTIBILITY_STATE
+    // unused: VMCS_GUEST_ACTIVITY_STATE
+    // unused: VMCS_GUEST_SMBASE
+    // unused: VMCS_VMX_PREEMPTION_TIMER_VALUE
+}
+
+void
+vmcs_intel_x64::write_natural_guest_state(const vmcs_state_intel_x64 &state)
+{
+    vmwrite(VMCS_GUEST_CR0, state.cr0());
+    vmwrite(VMCS_GUEST_CR3, state.cr3());
+    vmwrite(VMCS_GUEST_CR4, state.cr4());
+    vmwrite(VMCS_GUEST_ES_BASE, state.es_base());
+    vmwrite(VMCS_GUEST_CS_BASE, state.cs_base());
+    vmwrite(VMCS_GUEST_SS_BASE, state.ss_base());
+    vmwrite(VMCS_GUEST_DS_BASE, state.ds_base());
+    vmwrite(VMCS_GUEST_FS_BASE, state.ia32_fs_base_msr());
+    vmwrite(VMCS_GUEST_GS_BASE, state.ia32_gs_base_msr());
+    vmwrite(VMCS_GUEST_TR_BASE, state.tr_base());
+
+    vmwrite(VMCS_GUEST_GDTR_BASE, state.gdt().base);
+    vmwrite(VMCS_GUEST_IDTR_BASE, state.idt().base);
+
+    vmwrite(VMCS_GUEST_RFLAGS, state.rflags());
+
+    vmwrite(VMCS_GUEST_IA32_SYSENTER_ESP, state.ia32_sysenter_esp_msr());
+    vmwrite(VMCS_GUEST_IA32_SYSENTER_EIP, state.ia32_sysenter_eip_msr());
+
+    // unused: VMCS_GUEST_LDTR_BASE
+    // unused: VMCS_GUEST_DR7
     // unused: VMCS_GUEST_RSP, see m_intrinsics->vmlaunch()
     // unused: VMCS_GUEST_RIP, see m_intrinsics->vmlaunch()
     // unused: VMCS_GUEST_PENDING_DEBUG_EXCEPTIONS
-
-    return vmcs_error::success;
 }
 
-vmcs_error::type
-vmcs_intel_x64::write_natural_width_host_state_fields()
+void
+vmcs_intel_x64::write_16bit_host_state(const vmcs_state_intel_x64 &state)
 {
-    vmwrite(VMCS_HOST_CR0, m_cr0);
-    vmwrite(VMCS_HOST_CR3, m_cr3);
-    vmwrite(VMCS_HOST_CR4, m_cr4);
+    vmwrite(VMCS_HOST_CS_SELECTOR, state.cs());
+    vmwrite(VMCS_HOST_SS_SELECTOR, state.ss());
+    vmwrite(VMCS_HOST_TR_SELECTOR, state.tr());
 
-    vmwrite(VMCS_HOST_TR_BASE, m_tr_base);
+    // unused: VMCS_HOST_ES_SELECTOR
+    // unused: VMCS_HOST_DS_SELECTOR
+    // unused: VMCS_HOST_FS_SELECTOR
+    // unused: VMCS_HOST_GS_SELECTOR
+}
 
-    vmwrite(VMCS_HOST_GDTR_BASE, m_gdt_reg.base);
-    vmwrite(VMCS_HOST_IDTR_BASE, m_idt_reg.base);
+void
+vmcs_intel_x64::write_64bit_host_state(const vmcs_state_intel_x64 &state)
+{
+    (void) state;
+
+    // unused: VMCS_HOST_IA32_PAT_FULL
+    // unused: VMCS_HOST_IA32_EFER_FULL
+    // unused: VMCS_HOST_IA32_PERF_GLOBAL_CTRL_FULL
+}
+
+void
+vmcs_intel_x64::write_32bit_host_state(const vmcs_state_intel_x64 &state)
+{
+    (void) state;
+
+    // unused: VMCS_HOST_IA32_SYSENTER_CS
+}
+
+void
+vmcs_intel_x64::write_natural_host_state(const vmcs_state_intel_x64 &state)
+{
+    vmwrite(VMCS_HOST_CR0, state.cr0());
+    vmwrite(VMCS_HOST_CR3, state.cr3());
+    vmwrite(VMCS_HOST_CR4, state.cr4());
+
+    vmwrite(VMCS_HOST_TR_BASE, state.tr_base());
+
+    vmwrite(VMCS_HOST_GDTR_BASE, state.gdt().base);
+    vmwrite(VMCS_HOST_IDTR_BASE, state.idt().base);
 
     vmwrite(VMCS_HOST_RSP, (uint64_t)exit_handler_stack());
     vmwrite(VMCS_HOST_RIP, (uint64_t)exit_handler_entry);
@@ -685,11 +375,58 @@ vmcs_intel_x64::write_natural_width_host_state_fields()
     // unused: VMCS_HOST_GS_BASE
     // unused: VMCS_HOST_IA32_SYSENTER_ESP
     // unused: VMCS_HOST_IA32_SYSENTER_EIP
-
-    return vmcs_error::success;
 }
 
-vmcs_error::type
+void
+vmcs_intel_x64::promote_16bit_guest_state()
+{
+    m_intrinsics->write_es(vmread(VMCS_GUEST_ES_SELECTOR));
+    // m_intrinsics->write_cs(vmread(VMCS_GUEST_CS_SELECTOR));
+    // m_intrinsics->write_ss(vmread(VMCS_GUEST_SS_SELECTOR));
+    m_intrinsics->write_ds(vmread(VMCS_GUEST_DS_SELECTOR));
+    m_intrinsics->write_fs(vmread(VMCS_GUEST_FS_SELECTOR));
+    m_intrinsics->write_gs(vmread(VMCS_GUEST_GS_SELECTOR));
+    // m_intrinsics->write_tr(vmread(VMCS_GUEST_TR_SELECTOR));
+}
+
+void
+vmcs_intel_x64::promote_64bit_guest_state()
+{
+    auto ia32_efer_msr = vmread(VMCS_GUEST_IA32_EFER_FULL);
+    auto ia32_pat_msr = vmread(VMCS_GUEST_IA32_PAT_FULL);
+
+    m_intrinsics->write_msr(IA32_EFER_MSR, ia32_efer_msr);
+    m_intrinsics->write_msr(IA32_PAT_MSR, ia32_pat_msr);
+
+    // unused: VMCS_GUEST_IA32_PERF_GLOBAL_CTRL_FULL
+}
+
+void
+vmcs_intel_x64::promote_32bit_guest_state()
+{
+    auto ia32_sysenter_cs_msr = vmread(VMCS_GUEST_IA32_SYSENTER_CS);
+    m_intrinsics->write_msr(IA32_SYSENTER_CS_MSR, ia32_sysenter_cs_msr);
+}
+
+void
+vmcs_intel_x64::promote_natural_guest_state()
+{
+    m_intrinsics->write_cr0(vmread(VMCS_GUEST_CR0));
+    m_intrinsics->write_cr3(vmread(VMCS_GUEST_CR3));
+    m_intrinsics->write_cr4(vmread(VMCS_GUEST_CR4));
+
+    auto ia32_fs_base_msr = vmread(VMCS_GUEST_FS_BASE);
+    auto ia32_gs_base_msr = vmread(VMCS_GUEST_GS_BASE);
+    auto ia32_sysenter_esp_msr = vmread(VMCS_GUEST_IA32_SYSENTER_ESP);
+    auto ia32_sysenter_eip_msr = vmread(VMCS_GUEST_IA32_SYSENTER_EIP);
+
+    m_intrinsics->write_msr(IA32_FS_BASE_MSR, ia32_fs_base_msr);
+    m_intrinsics->write_msr(IA32_GS_BASE_MSR, ia32_gs_base_msr);
+    m_intrinsics->write_msr(IA32_SYSENTER_ESP_MSR, ia32_sysenter_esp_msr);
+    m_intrinsics->write_msr(IA32_SYSENTER_EIP_MSR, ia32_sysenter_eip_msr);
+}
+
+void
 vmcs_intel_x64::default_pin_based_vm_execution_controls()
 {
     auto controls = vmread(VMCS_PIN_BASED_VM_EXECUTION_CONTROLS);
@@ -701,11 +438,9 @@ vmcs_intel_x64::default_pin_based_vm_execution_controls()
     // controls |= VM_EXEC_PIN_BASED_PROCESS_POSTED_INTERRUPTS;
 
     vmwrite(VMCS_PIN_BASED_VM_EXECUTION_CONTROLS, controls);
-
-    return vmcs_error::success;
 }
 
-vmcs_error::type
+void
 vmcs_intel_x64::default_primary_processor_based_vm_execution_controls()
 {
     auto controls = vmread(VMCS_PRIMARY_PROCESSOR_BASED_VM_EXECUTION_CONTROLS);
@@ -725,7 +460,7 @@ vmcs_intel_x64::default_primary_processor_based_vm_execution_controls()
     // controls |= VM_EXEC_P_PROC_BASED_NMI_WINDOW_EXITING;
     // controls |= VM_EXEC_P_PROC_BASED_MOV_DR_EXITING;
     // controls |= VM_EXEC_P_PROC_BASED_UNCONDITIONAL_IO_EXITING;
-    // controls |= VM_EXEC_P_PROC_BASED_USE_IO_BITMAPS;
+    controls |= VM_EXEC_P_PROC_BASED_USE_IO_BITMAPS;
     // controls |= VM_EXEC_P_PROC_BASED_MONITOR_TRAP_FLAG;
     controls |= VM_EXEC_P_PROC_BASED_USE_MSR_BITMAPS;
     // controls |= VM_EXEC_P_PROC_BASED_MONITOR_EXITING;
@@ -733,11 +468,9 @@ vmcs_intel_x64::default_primary_processor_based_vm_execution_controls()
     // controls |= VM_EXEC_P_PROC_BASED_ACTIVATE_SECONDARY_CONTROLS;
 
     vmwrite(VMCS_PRIMARY_PROCESSOR_BASED_VM_EXECUTION_CONTROLS, controls);
-
-    return vmcs_error::success;
 }
 
-vmcs_error::type
+void
 vmcs_intel_x64::default_secondary_processor_based_vm_execution_controls()
 {
     auto controls = vmread(VMCS_SECONDARY_PROCESSOR_BASED_VM_EXECUTION_CONTROLS);
@@ -762,11 +495,9 @@ vmcs_intel_x64::default_secondary_processor_based_vm_execution_controls()
     // controls |= VM_EXEC_S_PROC_BASED_ENABLE_XSAVES_XRSTORS;
 
     vmwrite(VMCS_SECONDARY_PROCESSOR_BASED_VM_EXECUTION_CONTROLS, controls);
-
-    return vmcs_error::success;
 }
 
-vmcs_error::type
+void
 vmcs_intel_x64::default_vm_exit_controls()
 {
     auto controls = vmread(VMCS_VM_EXIT_CONTROLS);
@@ -782,11 +513,9 @@ vmcs_intel_x64::default_vm_exit_controls()
     // controls |= VM_EXIT_CONTROL_SAVE_VMX_PREEMPTION_TIMER_VALUE;
 
     vmwrite(VMCS_VM_EXIT_CONTROLS, controls);
-
-    return vmcs_error::success;
 }
 
-vmcs_error::type
+void
 vmcs_intel_x64::default_vm_entry_controls()
 {
     auto controls = vmread(VMCS_VM_ENTRY_CONTROLS);
@@ -800,23 +529,6 @@ vmcs_intel_x64::default_vm_entry_controls()
     // controls |= VM_ENTRY_CONTROL_LOAD_IA32_EFER;
 
     vmwrite(VMCS_VM_ENTRY_CONTROLS, controls);
-
-    return vmcs_error::success;
-}
-
-void
-vmcs_intel_x64::vmwrite(uint64_t field, uint64_t value)
-{
-    if (m_intrinsics->vmwrite(field, value) == false)
-    {
-        std::cout << std::hex;
-        std::cout << "vmwrite failed: "
-                  << "field = " << field << ", "
-                  << "value = " << value << std::endl;
-        std::cout << std::dec;
-
-        m_valid = false;
-    }
 }
 
 uint64_t
@@ -825,15 +537,14 @@ vmcs_intel_x64::vmread(uint64_t field)
     uint64_t value = 0;
 
     if (m_intrinsics->vmread(field, &value) == false)
-    {
-        std::cout << std::hex;
-        std::cout << "vmread failed: "
-                  << "field = 0x" << field << ", "
-                  << "value = 0x" << value << std::endl;
-        std::cout << std::dec;
-
-        m_valid = false;
-    }
+        throw vmcs_read_failure(field);
 
     return value;
+}
+
+void
+vmcs_intel_x64::vmwrite(uint64_t field, uint64_t value)
+{
+    if (m_intrinsics->vmwrite(field, value) == false)
+        throw vmcs_write_failure(field, value);
 }

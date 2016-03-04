@@ -33,6 +33,12 @@ Version 1.1 TODO:
   can be customized.
 - Need to rename the VCPU logic as it's really specific to Intel.
 - Add Windows support
+- Once we have our own GDT/IDT, part of the "promote" process needs to restore
+  the GDT/IDT which is not being done. The segment registers are swapped, but
+  we are not doing a sgdt or sidt to swap these.
+- CS, SS and TR need to be restored properly when promoting. This will be
+  really important once a new GDT is used in the host.
+- Provide APIs within the VMCS for setting / clearing traps to MSRs and IO
 
 Version 2.0 TODO:
 - Type 1 and Type 2 support

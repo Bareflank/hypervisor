@@ -22,20 +22,9 @@
 #ifndef VMCS_INTEL_X64_H
 #define VMCS_INTEL_X64_H
 
-#include <intrinsics/intrinsics_intel_x64.h>
-#include <memory_manager/memory_manager.h>
 #include <vmcs/bitmap.h>
-
-namespace vmcs_error
-{
-enum type
-{
-    success = 0,
-    failure = 1,
-    not_supported = 2,
-    out_of_memory = 3
-};
-}
+#include <vmcs/vmcs_state_intel_x64.h>
+#include <intrinsics/intrinsics_intel_x64.h>
 
 class vmcs_intel_x64
 {
@@ -49,66 +38,98 @@ public:
     ///
     virtual ~vmcs_intel_x64() {}
 
-    /// Launch VMM
+    /// Launch
     ///
     /// Launches the VMCS. Note that this will create a new guest VM when
     /// it is complete.
     ///
-    /// @return success on success, out_of_memory is the provided memory
-    ///     manager is out of memory, not_supported if the current hardware
-    ///     and/or software configuration is not supported, failure otherwise
+    /// @throws invalid_vmcs thrown if the VMCS was created without
+    ///     intrinsics
     ///
-    virtual vmcs_error::type launch();
+    virtual void launch(const vmcs_state_intel_x64 &host_state,
+                        const vmcs_state_intel_x64 &guest_state);
 
-    virtual vmcs_error::type unlaunch();
-    virtual vmcs_error::type clear_vmcs_region();
+    /// Promote
+    ///
+    /// Promotes this guest to VMX root. This is used to transition out of
+    /// VMX operation as the guest that this VMCS defines is likely about to
+    /// disable VMX operation, and needs to be in VMX root to do so. Note
+    /// that this function doesn't actually return if it is successful.
+    /// Instead, the CPU resumes execution on the last instruction executed
+    /// by the guest.
+    ///
+    /// If this function fails in the middle of it's execution, it calls
+    /// abort. This is done because the process of promoting sets the CPU
+    /// state, and if it dies in the middle, the CPU is left in a corrupt
+    /// state.
+    ///
+    /// @throws invalid_vmcs thrown if the VMCS was created without
+    ///     intrinsics
+    ///
+    virtual void promote();
 
 protected:
 
-    virtual vmcs_error::type launch_vmcs();
-    virtual vmcs_error::type resume_vmcs();
-
-    virtual vmcs_error::type save_state();
-
-    virtual vmcs_error::type create_vmcs_region();
-    virtual vmcs_error::type release_vmxon_region();
-    virtual vmcs_error::type load_vmcs_region();
-
-    virtual uint64_t vmcs_region_size();
-
-    virtual vmcs_error::type write_16bit_control_fields();
-    virtual vmcs_error::type write_16bit_guest_state_fields();
-    virtual vmcs_error::type write_16bit_host_state_fields();
-    virtual vmcs_error::type write_64bit_control_fields();
-    virtual vmcs_error::type write_64bit_guest_state_fields();
-    virtual vmcs_error::type write_64bit_host_state_fields();
-    virtual vmcs_error::type write_32bit_control_fields();
-    virtual vmcs_error::type write_32bit_guest_state_fields();
-    virtual vmcs_error::type write_32bit_host_state_fields();
-    virtual vmcs_error::type write_natural_width_control_fields();
-    virtual vmcs_error::type write_natural_width_guest_state_fields();
-    virtual vmcs_error::type write_natural_width_host_state_fields();
-
-    virtual vmcs_error::type default_pin_based_vm_execution_controls();
-    virtual vmcs_error::type default_primary_processor_based_vm_execution_controls();
-    virtual vmcs_error::type default_secondary_processor_based_vm_execution_controls();
-    virtual vmcs_error::type default_vm_exit_controls();
-    virtual vmcs_error::type default_vm_entry_controls();
-
-    virtual void vmwrite(uint64_t field, uint64_t value);
+    /// VM Read
+    ///
+    /// This is the same as intrinsics->vmread, but throws if an error
+    /// occurs.
+    ///
+    /// @param field the vmcs field to read
+    /// @return the value of the vmcs field
+    ///
+    /// @throws vmcs_read_failure_error thrown if the vmread fails
+    ///
     virtual uint64_t vmread(uint64_t field);
 
+    /// VM Write
+    ///
+    /// This is the same as intrinsics->vmwrite, but throws if an error
+    /// occurs.
+    ///
+    /// @param field the vmcs field to read
+    /// @param value the value to write to the vmcs field
+    ///
+    /// @throws vmcs_write_failure_error thrown if the vmwrite fails
+    ///
+    virtual void vmwrite(uint64_t field, uint64_t value);
+
+private:
+
+    void create_vmcs_region();
+    void release_vmcs_region();
+
+    void write_16bit_control_state(const vmcs_state_intel_x64 &state);
+    void write_64bit_control_state(const vmcs_state_intel_x64 &state);
+    void write_32bit_control_state(const vmcs_state_intel_x64 &state);
+    void write_natural_control_state(const vmcs_state_intel_x64 &state);
+
+    void write_16bit_guest_state(const vmcs_state_intel_x64 &state);
+    void write_64bit_guest_state(const vmcs_state_intel_x64 &state);
+    void write_32bit_guest_state(const vmcs_state_intel_x64 &state);
+    void write_natural_guest_state(const vmcs_state_intel_x64 &state);
+
+    void write_16bit_host_state(const vmcs_state_intel_x64 &state);
+    void write_64bit_host_state(const vmcs_state_intel_x64 &state);
+    void write_32bit_host_state(const vmcs_state_intel_x64 &state);
+    void write_natural_host_state(const vmcs_state_intel_x64 &state);
+
+    void promote_16bit_guest_state();
+    void promote_64bit_guest_state();
+    void promote_32bit_guest_state();
+    void promote_natural_guest_state();
+
+    void default_pin_based_vm_execution_controls();
+    void default_primary_processor_based_vm_execution_controls();
+    void default_secondary_processor_based_vm_execution_controls();
+    void default_vm_exit_controls();
+    void default_vm_entry_controls();
+
+protected:
+
     virtual void dump_vmcs();
-    virtual void dump_state();
 
-    virtual void print_execution_controls();
-    virtual void print_pin_based_vm_execution_controls();
-    virtual void print_primary_processor_based_vm_execution_controls();
-    virtual void print_secondary_processor_based_vm_execution_controls();
-    virtual void print_vm_exit_control_fields();
-    virtual void print_vm_entry_control_fields();
-
-    virtual void check_vm_instruction_error();
+    virtual std::string check_vm_instruction_error();
     virtual bool check_is_address_canonical(uint64_t addr);
     virtual bool check_vmcs_host_state();
     virtual bool check_vmcs_guest_state();
@@ -298,56 +319,17 @@ private:
     friend class vmcs_ut;
 
     bitmap m_msr_bitmap;
+    bitmap m_io_bitmap_a;
+    bitmap m_io_bitmap_b;
 
-    uint16_t m_es;
-    uint16_t m_cs;
-    uint16_t m_ss;
-    uint16_t m_ds;
-    uint16_t m_fs;
-    uint16_t m_gs;
-    uint16_t m_tr;
-    uint16_t m_ldtr;
-
-    uint64_t m_cr0;
-    uint64_t m_cr3;
-    uint64_t m_cr4;
-    uint64_t m_dr7;
-    uint64_t m_rflags;
-
-    gdt_t m_gdt_reg;
-    idt_t m_idt_reg;
-
-    uint32_t m_es_limit;
-    uint32_t m_cs_limit;
-    uint32_t m_ss_limit;
-    uint32_t m_ds_limit;
-    uint32_t m_fs_limit;
-    uint32_t m_gs_limit;
-    uint32_t m_ldtr_limit;
-    uint32_t m_tr_limit;
-
-    uint32_t m_es_access;
-    uint32_t m_cs_access;
-    uint32_t m_ss_access;
-    uint32_t m_ds_access;
-    uint32_t m_fs_access;
-    uint32_t m_gs_access;
-    uint32_t m_ldtr_access;
-    uint32_t m_tr_access;
-
-    uint64_t m_es_base;
-    uint64_t m_cs_base;
-    uint64_t m_ss_base;
-    uint64_t m_ds_base;
-    uint64_t m_fs_base;
-    uint64_t m_gs_base;
-    uint64_t m_ldtr_base;
-    uint64_t m_tr_base;
-
-    bool m_valid;
-    std::unique_ptr<char[]> m_vmcs_region;
+    uint64_t m_msr_bitmap_phys;
+    uint64_t m_io_bitmap_a_phys;
+    uint64_t m_io_bitmap_b_phys;
 
     intrinsics_intel_x64 *m_intrinsics;
+
+    uint64_t m_vmcs_region_phys;
+    std::unique_ptr<char[]> m_vmcs_region;
 };
 
 #endif

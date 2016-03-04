@@ -38,6 +38,6 @@
 #define bfdebug std::cout << bfcolor_debug << "DEBUG" << bfcolor_end << ": "
 #define bfwarning std::cout << bfverbose << bfcolor_warning << "WARNING" << bfcolor_end << ": "
 #define bferror std::cout << bfcolor_error << "ERROR" << bfcolor_end << ": "
-#define bffatal std::cout << bfcolor_error << "ERROR" << bfcolor_end << ": "
+#define bffatal std::cout << bfcolor_error << "FATAL ERROR" << bfcolor_end << ": "
 
 #endif

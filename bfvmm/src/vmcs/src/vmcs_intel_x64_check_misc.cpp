@@ -19,137 +19,103 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <iomanip>
-#include <iostream>
-
 #include <vmcs/vmcs_intel_x64.h>
 
-void
+std::string
 vmcs_intel_x64::check_vm_instruction_error()
 {
-    auto check_vm_instruction = vmread(VMCS_VM_INSTRUCTION_ERROR);
-
-    if (check_vm_instruction == 0)
-        return;
-
-    // The following error codes are defined in the Intel Software Developers
-    // Manual, Chapter 3, Section 30.4.
-
-    std::cout << "VM Instruction Error:" << std::endl;
-    std::cout << "----------------------------------------------------------------------" << std::endl;
-
-    switch (check_vm_instruction)
+    switch (vmread(VMCS_VM_INSTRUCTION_ERROR))
     {
         case 1:
-            std::cout << "VMCALL executed in VMX root operation" << std::endl;
-            break;
+            return "VMCALL executed in VMX root operation";
 
         case 2:
-            std::cout << "VMCLEAR with invalid physical address" << std::endl;
-            break;
+            return "VMCLEAR with invalid physical address";
 
         case 3:
-            std::cout << "VMCLEAR with VMXON pointer" << std::endl;
-            break;
+            return "VMCLEAR with VMXON pointer";
 
         case 4:
-            std::cout << "VMLAUNCH with non-clear VMCS" << std::endl;
-            break;
+            return "VMLAUNCH with non-clear VMCS";
 
         case 5:
-            std::cout << "VMRESUME with non-launched VMCS" << std::endl;
-            break;
+            return "VMRESUME with non-launched VMCS";
 
         case 6:
-            std::cout << "VMRESUME after VMXOFF (VMXOFF and VMXON between VMLAUNCH and VMRESUME)" << std::endl;
-            break;
+            return "VMRESUME after VMXOFF (VMXOFF and VMXON between "
+                   "VMLAUNCH and VMRESUME)";
 
         case 7:
-            std::cout << "VM entry with invalid control field(s)" << std::endl;
-            break;
+            return "VM entry with invalid control field(s)";
 
         case 8:
-            std::cout << "VM entry with invalid host-state field(s)" << std::endl;
-            break;
+            return "VM entry with invalid host-state field(s)";
 
         case 9:
-            std::cout << "VMPTRLD with invalid physical address" << std::endl;
-            break;
+            return "VMPTRLD with invalid physical address";
 
         case 10:
-            std::cout << "VMPTRLD with VMXON pointer" << std::endl;
-            break;
+            return "VMPTRLD with VMXON pointer";
 
         case 11:
-            std::cout << "VMPTRLD with incorrect VMCS revision identifier" << std::endl;
-            break;
+            return "VMPTRLD with incorrect VMCS revision identifier";
 
         case 12:
-            std::cout << "VMREAD/VMWRITE from/to unsupported VMCS component" << std::endl;
-            break;
+            return "VMREAD/VMWRITE from/to unsupported VMCS component";
 
         case 13:
-            std::cout << "VMWRITE to read-only VMCS component" << std::endl;
-            break;
+            return "VMWRITE to read-only VMCS component";
 
         case 15:
-            std::cout << "VMXON executed in VMX root operation" << std::endl;
-            break;
+            return "VMXON executed in VMX root operation";
 
         case 16:
-            std::cout << "VM entry with invalid executive-VMCS pointer" << std::endl;
-            break;
+            return "VM entry with invalid executive-VMCS pointer";
 
         case 17:
-            std::cout << "VM entry with non-launched executive VMCS" << std::endl;
-            break;
+            return "VM entry with non-launched executive VMCS";
 
         case 18:
-            std::cout << "VM entry with executive-VMCS pointer not VMXON pointer (when attempting "
-                      << "to deactivate the dual-monitor treatment of SMIs and SMM)" << std::endl;
-            break;
+            return "VM entry with executive-VMCS pointer not VMXON "
+                   "pointer (when attempting to deactivate the "
+                   "dual-monitor treatment of SMIs and SMM)";
 
         case 19:
-            std::cout << "VMCALL with non-clear VMCS (when attempting to activate the dual-monitor "
-                      << "treatment of SMIs and SMM)" << std::endl;
-            break;
+            return "VMCALL with non-clear VMCS (when attempting to "
+                   "activate the dual-monitor treatment of SMIs and "
+                   "SMM)";
 
         case 20:
-            std::cout << "VMCALL with invalid VM-exit control fields" << std::endl;
-            break;
+            return "VMCALL with invalid VM-exit control fields";
 
         case 22:
-            std::cout << "VMCALL with incorrect MSEG revision identifier (when attempting to "
-                      << "activate the dual-monitor treatment of SMIs and SMM)" << std::endl;
-            break;
+            return "VMCALL with incorrect MSEG revision identifier "
+                   "(when attempting to activate the dual-monitor "
+                   "treatment of SMIs and SMM)";
 
         case 23:
-            std::cout << "VMXOFF under dual-monitor treatment of SMIs and SMM" << std::endl;
-            break;
+            return "VMXOFF under dual-monitor treatment of SMIs and "
+                   "SMM";
 
         case 24:
-            std::cout << "VMCALL with invalid SMM-monitor features (when attempting to activate the "
-                      << "dual-monitor treatment of SMIs and SMM)" << std::endl;
-            break;
+            return "VMCALL with invalid SMM-monitor features (when "
+                   "attempting to activate the dual-monitor treatment "
+                   "of SMIs and SMM)";
 
         case 25:
-            std::cout << "VM entry with invalid VM-execution control fields in executive VMCS (when "
-                      << "attempting to return from SMM)" << std::endl;
-            break;
+            return "VM entry with invalid VM-execution control fields "
+                   "in executive VMCS (when attempting to return from "
+                   "SMM)";
 
         case 26:
-            std::cout << "VM entry with events blocked by MOV SS." << std::endl;
-            break;
+            return "VM entry with events blocked by MOV SS.";
 
         case 28:
-            std::cout << "Invalid operand to INVEPT/INVVPID." << std::endl;
-            break;
+            return "Invalid operand to INVEPT/INVVPID.";
 
         default:
-            std::cout << "Unknown vm instruction error: " << check_vm_instruction << std::endl;
+            return "Unknown vm instruction error";
     }
-
-    std::cout << std::endl;
 }
 
 bool

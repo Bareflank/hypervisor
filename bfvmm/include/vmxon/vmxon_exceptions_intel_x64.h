@@ -54,7 +54,6 @@ public:
         m_func(func),
         m_line(line)
     {}
-    virtual ~vmxon_failure_error() {}
 
     virtual std::ostream &print(std::ostream &os) const
     {
@@ -82,14 +81,14 @@ private:
 class vmxon_capabilities_failure_error : public bfn::general_exception
 {
 public:
-    vmxon_capabilities_failure_error(const std::string &msr_name,
-                                     const std::string &field_name,
+    vmxon_capabilities_failure_error(const std::string &msr_str,
+                                     const std::string &field_str,
                                      uint64_t msr,
                                      uint64_t field,
                                      const std::string &func,
                                      uint64_t line) :
-        m_msr_name(msr_name),
-        m_field_name(field_name),
+        m_msr_str(msr_str),
+        m_field_str(field_str),
         m_msr(msr),
         m_field(field),
         m_func(func),
@@ -99,8 +98,8 @@ public:
     virtual std::ostream &print(std::ostream &os) const
     {
         os << "vmxon capabilities not supported:";
-        os << std::endl << "    - " << m_msr_name << ": " << m_msr;
-        os << std::endl << "    - " << m_field_name << ": " << m_field;
+        os << std::endl << "    - " << m_msr_str << ": " << (void *)m_msr;
+        os << std::endl << "    - " << m_field_str << ": " << (void *)m_field;
         os << std::endl << "    - func: " << m_func;
         os << std::endl << "    - line: " << m_line;
 
@@ -108,8 +107,8 @@ public:
     }
 
 private:
-    std::string m_msr_name;
-    std::string m_field_name;
+    std::string m_msr_str;
+    std::string m_field_str;
     uint64_t m_msr;
     uint64_t m_field;
     std::string m_func;
@@ -126,17 +125,17 @@ private:
 class vmxon_fixed_msr_failure_error : public bfn::general_exception
 {
 public:
-    vmxon_fixed_msr_failure_error(const std::string &cr_name,
-                                  const std::string &fixed0_name,
-                                  const std::string &fixed1_name,
+    vmxon_fixed_msr_failure_error(const std::string &cr_str,
+                                  const std::string &fixed0_str,
+                                  const std::string &fixed1_str,
                                   uint64_t cr,
                                   uint64_t fixed0,
                                   uint64_t fixed1,
                                   const std::string &func,
                                   uint64_t line) :
-        m_cr_name(cr_name),
-        m_fixed0_name(fixed0_name),
-        m_fixed1_name(fixed1_name),
+        m_cr_str(cr_str),
+        m_fixed0_str(fixed0_str),
+        m_fixed1_str(fixed1_str),
         m_cr(cr),
         m_fixed0(fixed0),
         m_fixed1(fixed1),
@@ -147,21 +146,19 @@ public:
     virtual std::ostream &print(std::ostream &os) const
     {
         os << "vmxon fixed msr bits not supported:";
-        os << std::hex;
-        os << std::endl << "    - " << m_cr_name << ": " << m_cr;
-        os << std::endl << "    - " << m_fixed0_name << ": " << m_fixed0;
-        os << std::endl << "    - " << m_fixed1_name << ": " << m_fixed1;
+        os << std::endl << "    - " << m_cr_str << ": " << (void *)m_cr;
+        os << std::endl << "    - " << m_fixed0_str << ": " << (void *)m_fixed0;
+        os << std::endl << "    - " << m_fixed1_str << ": " << (void *)m_fixed1;
         os << std::endl << "    - func: " << m_func;
         os << std::endl << "    - line: " << m_line;
-        os << std::dec;
 
         return os;
     }
 
 private:
-    const std::string &m_cr_name;
-    const std::string &m_fixed0_name;
-    const std::string &m_fixed1_name;
+    const std::string &m_cr_str;
+    const std::string &m_fixed0_str;
+    const std::string &m_fixed1_str;
     uint64_t m_cr;
     uint64_t m_fixed0;
     uint64_t m_fixed1;

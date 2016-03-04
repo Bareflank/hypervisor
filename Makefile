@@ -86,6 +86,10 @@ status: force
 	cd bfm/bin/native; \
 	sudo ./run.sh status
 
+quick: force
+	$(MAKE) load; \
+	$(MAKE) start
+
 loop: force
 	@for n in $(shell seq 1 $(NUM)); do \
 		echo $(CS_M)"cycle: $$n"$(CE); \

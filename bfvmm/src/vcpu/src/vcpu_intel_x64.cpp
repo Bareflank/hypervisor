@@ -19,6 +19,7 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+#include <commit_or_rollback.h>
 #include <vcpu/vcpu_intel_x64.h>
 
 
@@ -26,6 +27,9 @@
 //     if possible (maybe shared if we have to pass them around)
 //
 // TODO: Change to exception logic
+//
+// TODO: If the launch fails, it still tries to "request" a teardown, and
+// crashes with an invalid opcode.
 
 
 
@@ -64,10 +68,16 @@ vcpu_intel_x64::vcpu_intel_x64(int64_t id,
 vcpu_error::type
 vcpu_intel_x64::start()
 {
+    auto cor1 = commit_or_rollback([&]
+    { m_vmxon->stop(); });
+
     m_vmxon->start();
 
-    if (m_vmcs->launch() != vmcs_error::success)
-        return vcpu_error::failure;
+    auto state = vmcs_state_intel_x64(m_intrinsics, true);
+
+    m_vmcs->launch(state, state);
+
+    cor1.commit();
 
     return vcpu_error::success;
 }
@@ -83,8 +93,6 @@ vcpu_intel_x64::dispatch()
 vcpu_error::type
 vcpu_intel_x64::stop()
 {
-    m_vmcs->clear_vmcs_region();
-
     m_vmxon->stop();
 
     return vcpu_error::success;
@@ -93,7 +101,8 @@ vcpu_intel_x64::stop()
 vcpu_error::type
 vcpu_intel_x64::promote()
 {
-    m_vmcs->unlaunch();
+    m_vmcs->promote();
+
     return vcpu_error::success;
 }
 
@@ -102,12 +111,10 @@ vcpu_intel_x64::request_teardown()
 {
     if (vcpu_error::success == m_intrinsics->vmcall(VMCS_PROMOTION))
     {
-        std::cout << "Promoted guest to VMX Root" << std::endl;
         return vcpu_error::success;
     }
     else
     {
-        std::cout << "Invalid vmcall id" << std::endl;
         return vcpu_error::success;
     }
 

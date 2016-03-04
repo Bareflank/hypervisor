@@ -67,6 +67,7 @@ uint16_t __read_es(void);
 void __write_es(uint16_t val);
 
 uint16_t __read_cs(void);
+void __write_cs(uint16_t val);
 
 uint16_t __read_ss(void);
 void __write_ss(uint16_t val);
@@ -192,6 +193,9 @@ public:
 
     virtual uint16_t read_cs()
     { return __read_cs(); }
+
+    virtual void write_cs(uint16_t val)
+    { __write_cs(val); }
 
     virtual uint16_t read_ss()
     { return __read_ss(); }

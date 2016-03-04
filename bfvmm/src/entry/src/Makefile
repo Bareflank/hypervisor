@@ -60,6 +60,7 @@ CROSS_OUTDIR:=../../../bin
 ################################################################################
 
 SOURCES+=entry.cpp
+SOURCES+=entry_asm.asm
 
 INCLUDE_PATHS+=./
 INCLUDE_PATHS+=../../../include/
