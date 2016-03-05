@@ -11,7 +11,6 @@ git clone https://github.com/Bareflank/hypervisor.git
 cd ~/hypervisor
 
 ./tools/scripts/setup-debian.sh
-./tools/scripts/create-cross-compiler.sh
 ```
 
 Once you have a cross compiler setup, you need to build the main source code.
