@@ -22,7 +22,12 @@
 #ifndef VMCS_STATE_INTEL_X64_H
 #define VMCS_STATE_INTEL_X64_H
 
+#include <debug.h>
 #include <intrinsics/intrinsics_intel_x64.h>
+
+#define PRINT_STATE(a) \
+    bfdebug << std::left << std::setw(35) << #a \
+            << std::hex << "0x" << m_##a << std::dec << bfendl;
 
 class vmcs_state_intel_x64
 {
@@ -462,6 +467,88 @@ public:
 
     void set_ia32_gs_base_msr(uint64_t val)
     { m_ia32_gs_base_msr = val; }
+
+    void dump() const
+    {
+        bfdebug << "----------------------------------------" << bfendl;
+        bfdebug << "- State Dump                           -" << bfendl;
+        bfdebug << "----------------------------------------" << bfendl;
+
+        bfdebug << bfendl;
+        bfdebug << "Segment Selectors:" << bfendl;
+        PRINT_STATE(es);
+        PRINT_STATE(cs);
+        PRINT_STATE(ss);
+        PRINT_STATE(ds);
+        PRINT_STATE(fs);
+        PRINT_STATE(gs);
+        PRINT_STATE(tr);
+
+        bfdebug << bfendl;
+        bfdebug << "Registers:" << bfendl;
+        PRINT_STATE(cr0);
+        PRINT_STATE(cr3);
+        PRINT_STATE(cr4);
+        PRINT_STATE(dr7);
+
+        bfdebug << bfendl;
+        bfdebug << "Flags:" << bfendl;
+        PRINT_STATE(rflags);
+
+        bfdebug << bfendl;
+        bfdebug << "GDT/IDT:" << bfendl;
+        PRINT_STATE(gdt_reg.limit);
+        PRINT_STATE(gdt_reg.base);
+        PRINT_STATE(idt_reg.limit);
+        PRINT_STATE(idt_reg.base);
+
+        bfdebug << bfendl;
+        bfdebug << "Segment Limit:" << bfendl;
+        PRINT_STATE(es_limit);
+        PRINT_STATE(cs_limit);
+        PRINT_STATE(ss_limit);
+        PRINT_STATE(ds_limit);
+        PRINT_STATE(fs_limit);
+        PRINT_STATE(gs_limit);
+        PRINT_STATE(tr_limit);
+
+        bfdebug << bfendl;
+        bfdebug << "Segment Access:" << bfendl;
+        PRINT_STATE(es_access);
+        PRINT_STATE(cs_access);
+        PRINT_STATE(ss_access);
+        PRINT_STATE(ds_access);
+        PRINT_STATE(fs_access);
+        PRINT_STATE(gs_access);
+        PRINT_STATE(tr_access);
+
+        bfdebug << bfendl;
+        bfdebug << "Segment Base:" << bfendl;
+        PRINT_STATE(es_base);
+        PRINT_STATE(cs_base);
+        PRINT_STATE(ss_base);
+        PRINT_STATE(ds_base);
+        PRINT_STATE(fs_base);
+        PRINT_STATE(gs_base);
+        PRINT_STATE(tr_base);
+
+        bfdebug << bfendl;
+        bfdebug << "MSRs:" << bfendl;
+        PRINT_STATE(ia32_debugctl_msr);
+        PRINT_STATE(ia32_efer_msr);
+        PRINT_STATE(ia32_pat_msr);
+        PRINT_STATE(ia32_vmx_pinbased_ctls_msr);
+        PRINT_STATE(ia32_vmx_procbased_ctls_msr);
+        PRINT_STATE(ia32_vmx_exit_ctls_msr);
+        PRINT_STATE(ia32_vmx_entry_ctls_msr);
+        PRINT_STATE(ia32_sysenter_cs_msr);
+        PRINT_STATE(ia32_sysenter_esp_msr);
+        PRINT_STATE(ia32_sysenter_eip_msr);
+        PRINT_STATE(ia32_fs_base_msr);
+        PRINT_STATE(ia32_gs_base_msr);
+
+        bfdebug << bfendl;
+    }
 
 private:
 

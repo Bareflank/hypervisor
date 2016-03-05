@@ -200,6 +200,15 @@ protected:
     virtual bool supports_load_ia32_pat_on_entry();
     virtual bool supports_load_ia32_efer_on_entry();
 
+    virtual bool supports_eptp_switching();
+
+    virtual void print_execution_controls();
+    virtual void print_pin_based_vm_execution_controls();
+    virtual void print_primary_processor_based_vm_execution_controls();
+    virtual void print_secondary_processor_based_vm_execution_controls();
+    virtual void print_vm_exit_control_fields();
+    virtual void print_vm_entry_control_fields();
+
     virtual bool check_host_control_registers_and_msrs();
     virtual bool check_host_cr0_for_unsupported_bits();
     virtual bool check_host_cr4_for_unsupported_bits();

@@ -767,3 +767,16 @@ vmcs_intel_x64::supports_load_ia32_efer_on_entry()
     return ia32_vmx_entry_ctls_msr &
            (VM_ENTRY_CONTROL_LOAD_IA32_EFER << 32);
 }
+
+bool
+vmcs_intel_x64::supports_eptp_switching()
+{
+    if (this->supports_secondary_controls() == false)
+        return false;
+
+    if (this->supports_vm_functions() == false)
+        return false;
+
+    return (vmread(VMCS_VM_FUNCTION_CONTROLS_FULL) &
+            VM_FUNCTION_CONTROL_EPTP_SWITCHING);
+}

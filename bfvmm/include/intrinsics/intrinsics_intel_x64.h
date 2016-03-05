@@ -419,6 +419,9 @@ public:
 #define VM_ENTRY_CONTROL_LOAD_IA32_PAT                            (1ULL << 14)
 #define VM_ENTRY_CONTROL_LOAD_IA32_EFER                           (1ULL << 15)
 
+// VM-Function Control Fields
+#define VM_FUNCTION_CONTROL_EPTP_SWITCHING                        (1ULL << 0)
+
 // VM Exit Reasons
 // intel's software developers manual, volume 3, appendix c
 #define VM_EXIT_REASON_EXCEPTION_OR_NON_MASKABLE_INTERRUPT        (0)
