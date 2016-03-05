@@ -34,16 +34,16 @@ namespace bfn
 class invalid_mdl_error : public bfn::general_exception
 {
 public:
-    invalid_mdl_error(const std::string &msg, uint64_t index) :
-        m_msg(msg),
+    invalid_mdl_error(const std::string &mesg, uint64_t index) :
+        m_mesg(mesg),
         m_index(index)
     {}
 
     virtual std::ostream &print(std::ostream &os) const
-    { return os << "invalid mdl [" << m_index << "]: " << m_msg; }
+    { return os << "invalid mdl [" << m_index << "]: " << m_mesg; }
 
 private:
-    std::string m_msg;
+    std::string m_mesg;
     uint64_t m_index;
 };
 

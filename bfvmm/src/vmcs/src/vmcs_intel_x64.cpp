@@ -48,6 +48,18 @@ vmcs_intel_x64::launch(const vmcs_state_intel_x64 &host_state,
     if (m_intrinsics == NULL)
         throw invalid_vmcs();
 
+    if (this->supports_msr_bitmaps() == false)
+        throw hardware_unsupported("msr bitmaps required");
+
+    if (this->supports_io_bitmaps() == false)
+        throw hardware_unsupported("io bitmaps required");
+
+    if (this->supports_host_address_space_size() == false)
+        throw hardware_unsupported("64bit host support required");
+
+    if (this->supports_ia_32e_mode_guest() == false)
+        throw hardware_unsupported("64bit guest support required");
+
     auto cor1 = commit_or_rollback([&]
     { this->release_vmcs_region(); });
 

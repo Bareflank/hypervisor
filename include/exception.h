@@ -115,15 +115,15 @@ namespace bfn
 class unknown_command_error : public bfn::general_exception
 {
 public:
-    unknown_command_error(const std::string &msg) :
-        m_msg(msg)
+    unknown_command_error(const std::string &mesg) :
+        m_mesg(mesg)
     {}
 
     virtual std::ostream &print(std::ostream &os) const
-    { return os << "unknown command: `" << m_msg << "`"; }
+    { return os << "unknown command: `" << m_mesg << "`"; }
 
 private:
-    std::string m_msg;
+    std::string m_mesg;
 };
 
 #define unknown_command(a) bfn::unknown_command_error(a)
@@ -148,15 +148,15 @@ public:
 class invalid_file_error : public bfn::general_exception
 {
 public:
-    invalid_file_error(const std::string &msg) :
-        m_msg(msg)
+    invalid_file_error(const std::string &mesg) :
+        m_mesg(mesg)
     {}
 
     virtual std::ostream &print(std::ostream &os) const
-    { return os << "invalid filename: `" << m_msg << "`"; }
+    { return os << "invalid filename: `" << m_mesg << "`"; }
 
 private:
-    std::string m_msg;
+    std::string m_mesg;
 };
 
 #define invalid_file(a) bfn::invalid_file_error(a)
@@ -267,15 +267,15 @@ public:
 class invalid_vmm_state_error : public bfn::general_exception
 {
 public:
-    invalid_vmm_state_error(const std::string &msg) :
-        m_msg(msg)
+    invalid_vmm_state_error(const std::string &mesg) :
+        m_mesg(mesg)
     {}
 
     virtual std::ostream &print(std::ostream &os) const
-    { return os << m_msg; }
+    { return os << m_mesg; }
 
 private:
-    std::string m_msg;
+    std::string m_mesg;
 };
 
 #define invalid_vmm_state(a) bfn::invalid_vmm_state_error(a)
@@ -287,16 +287,16 @@ private:
 class range_error : public bfn::general_exception
 {
 public:
-    range_error(const std::string &msg,
+    range_error(const std::string &mesg,
                 const std::string &func,
                 uint64_t line,
-                uint64_t got,
+                uint64_t index,
                 uint64_t lower,
                 uint64_t upper) :
-        m_msg(msg),
+        m_mesg(mesg),
         m_func(func),
         m_line(line),
-        m_got(got),
+        m_index(index),
         m_lower(lower),
         m_upper(upper)
     {}
@@ -304,20 +304,21 @@ public:
     virtual std::ostream &print(std::ostream &os) const
     {
         os << "out of range:";
-        os << std::endl << "    - got: " << m_got;
-        os << std::endl << "    - lower: " << m_lower;
-        os << std::endl << "    - upper: " << m_upper;
+        os << std::endl << "    - mesg: " << m_mesg;
         os << std::endl << "    - func: " << m_func;
         os << std::endl << "    - line: " << m_line;
+        os << std::endl << "    - index: " << m_index;
+        os << std::endl << "    - lower: " << m_lower;
+        os << std::endl << "    - upper: " << m_upper;
 
         return os;
     }
 
 private:
-    std::string m_msg;
+    std::string m_mesg;
     std::string m_func;
     uint64_t m_line;
-    uint64_t m_got;
+    uint64_t m_index;
     uint64_t m_lower;
     uint64_t m_upper;
 };
@@ -332,27 +333,61 @@ private:
 class invalid_alignmnet_error : public bfn::general_exception
 {
 public:
-    invalid_alignmnet_error(const std::string &msg,
+    invalid_alignmnet_error(const std::string &mesg,
                             uint64_t addr) :
-        m_msg(msg),
+        m_mesg(mesg),
         m_addr(addr)
     {}
 
     virtual std::ostream &print(std::ostream &os) const
     {
         os << "invalid address alignment: ";
-        os << std::endl << "    - reason: " << m_msg;
+        os << std::endl << "    - mesg: " << m_mesg;
         os << std::endl << "    - addr: " << m_addr;
 
         return os;
     }
 
 private:
-    std::string m_msg;
+    std::string m_mesg;
     uint64_t m_addr;
 };
 
 #define invalid_alignmnet(a,b) bfn::invalid_alignmnet_error(a,b)
+
+// -----------------------------------------------------------------------------
+// Hardware Unsupported
+// -----------------------------------------------------------------------------
+
+class hardware_unsupported_error : public bfn::general_exception
+{
+public:
+    hardware_unsupported_error(const std::string &mesg,
+                               const std::string &func,
+                               uint64_t line) :
+        m_mesg(mesg),
+        m_func(func),
+        m_line(line)
+    {}
+
+    virtual std::ostream &print(std::ostream &os) const
+    {
+        os << "hardware unsupported: ";
+        os << std::endl << "    - mesg: " << m_mesg;
+        os << std::endl << "    - func: " << m_func;
+        os << std::endl << "    - line: " << m_line;
+
+        return os;
+    }
+
+private:
+    std::string m_mesg;
+    std::string m_func;
+    uint64_t m_line;
+};
+
+#define hardware_unsupported(a) \
+    bfn::hardware_unsupported_error(a,__func__,__LINE__)
 
 }
 
