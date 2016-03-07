@@ -47,10 +47,10 @@ public:
 class vmxon_failure_error : public bfn::general_exception
 {
 public:
-    vmxon_failure_error(const std::string &msg,
+    vmxon_failure_error(const std::string &mesg,
                         const std::string &func,
                         uint64_t line) :
-        m_msg(msg),
+        m_mesg(mesg),
         m_func(func),
         m_line(line)
     {}
@@ -58,7 +58,7 @@ public:
     virtual std::ostream &print(std::ostream &os) const
     {
         os << "vmxon failure:";
-        os << std::endl << "    - reason: " << m_msg;
+        os << std::endl << "    - mesg: " << m_mesg;
         os << std::endl << "    - func: " << m_func;
         os << std::endl << "    - line: " << m_line;
 
@@ -66,7 +66,7 @@ public:
     }
 
 private:
-    std::string m_msg;
+    std::string m_mesg;
     std::string m_func;
     uint64_t m_line;
 };

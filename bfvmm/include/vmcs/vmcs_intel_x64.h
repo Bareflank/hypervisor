@@ -135,7 +135,70 @@ protected:
     virtual bool check_vmcs_guest_state();
     virtual bool check_vmcs_control_state();
 
+    virtual bool supports_external_interrupt_exiting();
+    virtual bool supports_nmi_exiting();
+    virtual bool supports_virtual_nmis();
+    virtual bool supports_vmx_preemption_timer();
+    virtual bool supports_posted_interrupts();
+
+    virtual bool supports_interrupt_window_exiting();
+    virtual bool supports_tsc_offsetting();
+    virtual bool supports_hlt_exiting();
+    virtual bool supports_invlpg_exiting();
+    virtual bool supports_mwait_exiting();
+    virtual bool supports_rdpmc_exiting();
+    virtual bool supports_rdtsc_exiting();
+    virtual bool supports_cr3_load_exiting();
+    virtual bool supports_cr3_store_exiting();
+    virtual bool supports_cr8_load_exiting();
+    virtual bool supports_cr8_store_exiting();
+    virtual bool supports_tpr_shadow();
+    virtual bool supports_nmi_window_exiting();
+    virtual bool supports_mov_dr_exiting();
+    virtual bool supports_unconditional_io_exiting();
+    virtual bool supports_io_bitmaps();
+    virtual bool supports_monitor_trap_flag();
+    virtual bool supports_msr_bitmaps();
+    virtual bool supports_monitor_exiting();
+    virtual bool supports_pause_exiting();
+    virtual bool supports_secondary_controls();
+
+    virtual bool supports_virtualized_apic();
+    virtual bool supports_ept();
+    virtual bool supports_descriptor_table_exiting();
+    virtual bool supports_rdtscp();
+    virtual bool supports_x2apic_mode();
     virtual bool supports_vpid();
+    virtual bool supports_wbinvd_exiting();
+    virtual bool supports_unrestricted_guests();
+    virtual bool supports_apic_register_virtualization();
+    virtual bool supports_virtual_interrupt_delivery();
+    virtual bool supports_pause_loop_exiting();
+    virtual bool supports_rdrand_exiting();
+    virtual bool supports_invpcid();
+    virtual bool supports_vm_functions();
+    virtual bool supports_vmcs_shadowing();
+    virtual bool supports_rdseed_exiting();
+    virtual bool supports_ept_violation_ve();
+    virtual bool supports_xsave_xrestore();
+
+    virtual bool supports_save_debug_controls_on_exit();
+    virtual bool supports_host_address_space_size();
+    virtual bool supports_load_ia32_perf_global_ctrl_on_exit();
+    virtual bool supports_ack_interrupt_on_exit();
+    virtual bool supports_save_ia32_pat_on_exit();
+    virtual bool supports_load_ia32_pat_on_exit();
+    virtual bool supports_save_ia32_efer_on_exit();
+    virtual bool supports_load_ia32_efer_on_exit();
+    virtual bool supports_save_vmx_preemption_timer_on_exit();
+
+    virtual bool supports_load_debug_controls_on_entry();
+    virtual bool supports_ia_32e_mode_guest();
+    virtual bool supports_entry_to_smm();
+    virtual bool supports_deactivate_dual_monitor_treatment();
+    virtual bool supports_load_ia32_perf_global_ctrl_on_entry();
+    virtual bool supports_load_ia32_pat_on_entry();
+    virtual bool supports_load_ia32_efer_on_entry();
 
     virtual bool check_host_control_registers_and_msrs();
     virtual bool check_host_cr0_for_unsupported_bits();
