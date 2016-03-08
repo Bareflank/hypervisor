@@ -24,10 +24,6 @@
 #include <vmxon/vmxon_exceptions_intel_x64.h>
 #include <memory_manager/memory_manager.h>
 
-// =============================================================================
-//  Implementation
-// =============================================================================
-
 vmxon_intel_x64::vmxon_intel_x64(intrinsics_intel_x64 *intrinsics) :
     m_intrinsics(intrinsics),
     m_vmxon_enabled(false)

@@ -26,10 +26,6 @@
 #include <exit_handler/exit_handler.h>
 #include <memory_manager/memory_manager.h>
 
-// =============================================================================
-//  Implementation
-// =============================================================================
-
 vmcs_intel_x64::vmcs_intel_x64(intrinsics_intel_x64 *intrinsics) :
     m_msr_bitmap(4096 * 8),
     m_io_bitmap_a(4096 * 8),
@@ -91,6 +87,8 @@ vmcs_intel_x64::launch(const vmcs_state_intel_x64 &host_state,
     this->default_secondary_processor_based_vm_execution_controls();
     this->default_vm_exit_controls();
     this->default_vm_entry_controls();
+
+    this->check_vmcs_control_state();
 
     if (m_intrinsics->vmlaunch() == false)
         throw vmcs_launch_failure(this->check_vm_instruction_error());
@@ -554,7 +552,7 @@ vmcs_intel_x64::default_vm_entry_controls()
 }
 
 uint64_t
-vmcs_intel_x64::vmread(uint64_t field)
+vmcs_intel_x64::vmread(uint64_t field) const
 {
     uint64_t value = 0;
 

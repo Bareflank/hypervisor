@@ -112,6 +112,8 @@ public:
 #define IA32_VMX_TRUE_EXIT_CTLS_MSR                               0x0000048F
 #define IA32_VMX_TRUE_ENTRY_CTLS_MSR                              0x00000490
 #define IA32_VMX_PROCBASED_CTLS2_MSR                              0x0000048B
+#define IA32_VMX_EPT_VPID_CAP_MSR                                 0x0000048C
+#define IA32_VMX_VMFUNC_MSR                                       0x00000491
 
 #ifdef USE_INTEL_X64_LEGACY_CTLS
 #define IA32_VMX_PINBASED_CTLS_MSR                                0x00000481

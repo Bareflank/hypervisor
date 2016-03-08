@@ -80,7 +80,7 @@ protected:
     ///
     /// @throws vmcs_read_failure_error thrown if the vmread fails
     ///
-    virtual uint64_t vmread(uint64_t field);
+    virtual uint64_t vmread(uint64_t field) const;
 
     /// VM Write
     ///
@@ -131,9 +131,16 @@ protected:
 
     virtual std::string check_vm_instruction_error();
     virtual bool check_is_address_canonical(uint64_t addr);
+    virtual bool check_has_valid_address_width(uint64_t addr);
     virtual bool check_vmcs_host_state();
     virtual bool check_vmcs_guest_state();
-    virtual bool check_vmcs_control_state();
+    virtual void check_vmcs_control_state();
+
+    virtual uint64_t get_pin_ctls() const;
+    virtual uint64_t get_proc_ctls() const;
+    virtual uint64_t get_proc2_ctls() const;
+    virtual uint64_t get_exit_ctls() const;
+    virtual uint64_t get_entry_ctls() const;
 
     virtual bool supports_external_interrupt_exiting();
     virtual bool supports_nmi_exiting();
@@ -354,39 +361,44 @@ protected:
     virtual bool check_guest_all_interruptability_state_fields();
     virtual bool check_guest_all_vmcs_link_pointerchecks();
 
-    virtual bool check_control_checks_on_vm_execution_control_fields();
-    virtual bool check_control_pin_based_ctls_reserved_properly_set();
-    virtual bool check_control_proc_based_ctls_reserved_properly_set();
-    virtual bool check_control_cr3_count_less_then_4();
-    virtual bool check_control_io_bitmap_address_bits();
-    virtual bool check_control_msr_bitmap_address_bits();
-    virtual bool check_control_tpr_shadow_and_virtual_apic();
-    virtual bool check_control_nmi_exiting_and_virtual_nmi();
-    virtual bool check_control_virtual_nmi_and_nmi_window();
-    virtual bool check_control_virtual_apic_address_bits();
-    virtual bool check_control_virtual_x2apic_and_tpr();
-    virtual bool check_control_register_apic_mode_and_tpr();
-    virtual bool check_control_virtual_interrupt_delivery_and_tpr();
-    virtual bool check_control_x2apic_mode_and_virtual_apic_access();
-    virtual bool check_control_virtual_interrupt_and_external_interrupt();
-    virtual bool check_control_process_posted_interrupt_checks();
-    virtual bool check_control_vpid_checks();
-    virtual bool check_control_enable_ept_checks();
-    virtual bool check_control_unrestricted_guests();
-    virtual bool check_control_enable_vm_functions();
-    virtual bool check_control_enable_vmcs_shadowing();
-    virtual bool check_control_enable_ept_violation_checks();
+    virtual void checks_on_vm_execution_control_fields();
+    virtual void check_control_pin_based_ctls_reserved_properly_set();
+    virtual void check_control_proc_based_ctls_reserved_properly_set();
+    virtual void check_control_proc_based_ctls2_reserved_properly_set();
+    virtual void check_control_cr3_count_less_then_4();
+    virtual void check_control_io_bitmap_address_bits();
+    virtual void check_control_msr_bitmap_address_bits();
+    virtual void check_control_tpr_shadow_and_virtual_apic();
+    virtual void check_control_nmi_exiting_and_virtual_nmi();
+    virtual void check_control_virtual_nmi_and_nmi_window();
+    virtual void check_control_virtual_apic_address_bits();
+    virtual void check_control_virtual_x2apic_and_tpr();
+    virtual void check_control_register_apic_mode_and_tpr();
+    virtual void check_control_virtual_interrupt_delivery_and_tpr();
+    virtual void check_control_x2apic_mode_and_virtual_apic_access();
+    virtual void check_control_virtual_interrupt_and_external_interrupt();
+    virtual void check_control_process_posted_interrupt_checks();
+    virtual void check_control_vpid_checks();
+    virtual void check_control_enable_ept_checks();
+    virtual void check_control_unrestricted_guests();
+    virtual void check_control_enable_vm_functions();
+    virtual void check_control_enable_vmcs_shadowing();
+    virtual void check_control_enable_ept_violation_checks();
 
-    virtual bool check_control_checks_on_vm_exit_control_fields();
-    virtual bool check_control_vm_exit_ctls_reserved_properly_set();
-    virtual bool check_control_activate_and_save_premeption_timer_must_be_0();
-    virtual bool check_control_exit_msr_store_address();
-    virtual bool check_control_exit_msr_load_address();
+    virtual void check_control_checks_on_vm_exit_control_fields();
+    virtual void check_control_vm_exit_ctls_reserved_properly_set();
+    virtual void check_control_activate_and_save_premeption_timer_must_be_0();
+    virtual void check_control_exit_msr_store_address();
+    virtual void check_control_exit_msr_load_address();
 
-    virtual bool check_control_checks_on_vm_entry_control_fields();
-    virtual bool check_control_vm_entry_ctls_reserved_properly_set();
-    virtual bool check_control_event_injection_checks();
-    virtual bool check_control_entry_msr_load_address();
+    virtual void check_control_checks_on_vm_entry_control_fields();
+    virtual void check_control_vm_entry_ctls_reserved_properly_set();
+    virtual void check_control_event_injection_type_vector_checks();
+    virtual void check_control_event_injection_delivery_ec_checks();
+    virtual void check_control_event_injection_reserved_bits_checks();
+    virtual void check_control_event_injection_ec_checks();
+    virtual void check_control_event_injection_instr_length_checks();
+    virtual void check_control_entry_msr_load_address();
 
 private:
 

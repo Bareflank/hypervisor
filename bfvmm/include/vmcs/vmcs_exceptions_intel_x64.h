@@ -47,10 +47,10 @@ public:
 class vmcs_failure_error : public bfn::general_exception
 {
 public:
-    vmcs_failure_error(const std::string &msg,
+    vmcs_failure_error(const std::string &mesg,
                        const std::string &func,
                        uint64_t line) :
-        m_msg(msg),
+        m_mesg(mesg),
         m_func(func),
         m_line(line)
     {}
@@ -58,7 +58,7 @@ public:
     virtual std::ostream &print(std::ostream &os) const
     {
         os << "vmcs failure:";
-        os << std::endl << "    - reason: " << m_msg;
+        os << std::endl << "    - mesg: " << m_mesg;
         os << std::endl << "    - func: " << m_func;
         os << std::endl << "    - line: " << m_line;
 
@@ -66,7 +66,7 @@ public:
     }
 
 private:
-    std::string m_msg;
+    std::string m_mesg;
     std::string m_func;
     uint64_t m_line;
 };
@@ -153,10 +153,10 @@ private:
 class vmcs_launch_failure_error : public bfn::general_exception
 {
 public:
-    vmcs_launch_failure_error(const std::string &msg,
+    vmcs_launch_failure_error(const std::string &mesg,
                               const std::string &func,
                               uint64_t line) :
-        m_msg(msg),
+        m_mesg(mesg),
         m_func(func),
         m_line(line)
     {}
@@ -164,7 +164,7 @@ public:
     virtual std::ostream &print(std::ostream &os) const
     {
         os << "vmcs launch failure:";
-        os << std::endl << "    - reason: " << m_msg;
+        os << std::endl << "    - mesg: " << m_mesg;
         os << std::endl << "    - func: " << m_func;
         os << std::endl << "    - line: " << m_line;
 
@@ -172,13 +172,103 @@ public:
     }
 
 private:
-    std::string m_msg;
+    std::string m_mesg;
     std::string m_func;
     uint64_t m_line;
 };
 
 #define vmcs_launch_failure(a) \
     bfn::vmcs_launch_failure_error(a,__func__,__LINE__)
+
+// -----------------------------------------------------------------------------
+// VMCS Invalid CTLS
+// -----------------------------------------------------------------------------
+
+class vmcs_invalid_ctls_error : public bfn::general_exception
+{
+public:
+    vmcs_invalid_ctls_error(const std::string &mesg,
+                            uint64_t msr_lower,
+                            uint64_t msr_upper,
+                            uint64_t controls_lower,
+                            uint64_t controls_upper,
+                            const std::string &func,
+                            uint64_t line) :
+        m_mesg(mesg),
+        m_msr_lower(msr_lower),
+        m_msr_upper(msr_upper),
+        m_controls_lower(controls_lower),
+        m_controls_upper(controls_upper),
+        m_func(func),
+        m_line(line)
+    {}
+
+    virtual std::ostream &print(std::ostream &os) const
+    {
+        os << m_func << " failed:";
+        os << std::endl << "    - mesg: " << m_mesg
+           << " controls not setup properly";
+        os << std::endl << "    - msr_lower: " << m_msr_lower;
+        os << std::endl << "    - msr_upper: " << m_msr_upper;
+        os << std::endl << "    - controls_lower: " << m_controls_lower;
+        os << std::endl << "    - controls_upper: " << m_controls_upper;
+        os << std::endl << "    - line: " << m_line;
+
+        return os;
+    }
+
+private:
+    std::string m_mesg;
+    uint64_t m_msr_lower;
+    uint64_t m_msr_upper;
+    uint64_t m_controls_lower;
+    uint64_t m_controls_upper;
+    std::string m_func;
+    uint64_t m_line;
+};
+
+#define vmcs_invalid_ctls(a,b,c,d,e) \
+    bfn::vmcs_invalid_ctls_error(a,b,c,d,e,__func__,__LINE__)
+
+// -----------------------------------------------------------------------------
+// VMCS Invalid Field
+// -----------------------------------------------------------------------------
+
+class vmcs_invalid_field_error : public bfn::general_exception
+{
+public:
+    vmcs_invalid_field_error(const std::string &mesg,
+                             const std::string &field_str,
+                             uint64_t field,
+                             const std::string &func,
+                             uint64_t line) :
+        m_mesg(mesg),
+        m_field_str(field_str),
+        m_field(field),
+        m_func(func),
+        m_line(line)
+    {}
+
+    virtual std::ostream &print(std::ostream &os) const
+    {
+        os << m_func << " failed:";
+        os << std::endl << "    - mesg: " << m_mesg;
+        os << std::endl << "    - " << m_field_str << ": " << m_field;
+        os << std::endl << "    - line: " << m_line;
+
+        return os;
+    }
+
+private:
+    std::string m_mesg;
+    std::string m_field_str;
+    uint64_t m_field;
+    std::string m_func;
+    uint64_t m_line;
+};
+
+#define vmcs_invalid_field(a,b) \
+    bfn::vmcs_invalid_field_error(a,#b,b,__func__,__LINE__)
 
 }
 

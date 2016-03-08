@@ -131,6 +131,15 @@ vmcs_intel_x64::check_is_address_canonical(uint64_t addr)
 }
 
 bool
+vmcs_intel_x64::check_has_valid_address_width(uint64_t addr)
+{
+    if ((addr & 0xFFFF000000000000) == 0)
+        return true;
+
+    return false;
+}
+
+bool
 vmcs_intel_x64::check_vmcs_host_state()
 {
     auto result = true;
@@ -152,18 +161,6 @@ vmcs_intel_x64::check_vmcs_guest_state()
     result &= check_guest_checks_on_guest_descriptor_table_registers();
     result &= check_guest_checks_on_guest_rip_and_rflags();
     result &= check_guest_checks_on_guest_non_register_state();
-
-    return result;
-}
-
-bool
-vmcs_intel_x64::check_vmcs_control_state()
-{
-    auto result = true;
-
-    result &= check_control_checks_on_vm_execution_control_fields();
-    result &= check_control_checks_on_vm_exit_control_fields();
-    result &= check_control_checks_on_vm_entry_control_fields();
 
     return result;
 }
