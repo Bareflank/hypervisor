@@ -221,7 +221,7 @@ bfm_ut::test_ioctl_driver_process_load_bad_modules_filename()
         invalid_file(""_s)
     );
 
-    mocks.ExpectCall(ctl.get(), ioctl::call_ioctl_unload_vmm);
+    mocks.OnCall(ctl.get(), ioctl::call_ioctl_unload_vmm);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -256,7 +256,7 @@ bfm_ut::test_ioctl_driver_process_load_bad_module_filename()
         return "good"_s;
     });
 
-    mocks.ExpectCall(ctl.get(), ioctl::call_ioctl_unload_vmm);
+    mocks.OnCall(ctl.get(), ioctl::call_ioctl_unload_vmm);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -296,7 +296,7 @@ bfm_ut::test_ioctl_driver_process_load_add_module_failed()
             throw ioctl_failed(IOCTL_ADD_MODULE);
     });
 
-    mocks.ExpectCall(ctl.get(), ioctl::call_ioctl_unload_vmm);
+    mocks.OnCall(ctl.get(), ioctl::call_ioctl_unload_vmm);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -327,7 +327,7 @@ bfm_ut::test_ioctl_driver_process_load_load_failed()
         ioctl_failed(IOCTL_LOAD_VMM)
     );
 
-    mocks.ExpectCall(ctl.get(), ioctl::call_ioctl_unload_vmm);
+    mocks.OnCall(ctl.get(), ioctl::call_ioctl_unload_vmm);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -355,7 +355,7 @@ bfm_ut::test_ioctl_driver_process_load_success()
         *status = VMM_UNLOADED;
     });
 
-    mocks.NeverCall(ctl.get(), ioctl::call_ioctl_unload_vmm);
+    mocks.OnCall(ctl.get(), ioctl::call_ioctl_unload_vmm);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
