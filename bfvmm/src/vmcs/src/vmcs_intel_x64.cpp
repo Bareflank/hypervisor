@@ -22,7 +22,7 @@
 #include <debug.h>
 #include <commit_or_rollback.h>
 #include <vmcs/vmcs_intel_x64.h>
-#include <vmcs/vmcs_exceptions_intel_x64.h>
+#include <vmcs/vmcs_intel_x64_exceptions.h>
 #include <exit_handler/exit_handler.h>
 #include <memory_manager/memory_manager.h>
 
@@ -89,6 +89,7 @@ vmcs_intel_x64::launch(const vmcs_state_intel_x64 &host_state,
     this->default_vm_entry_controls();
 
     this->check_vmcs_control_state();
+    this->check_vmcs_guest_state();
 
     if (m_intrinsics->vmlaunch() == false)
         throw vmcs_launch_failure(this->check_vm_instruction_error());
@@ -122,14 +123,15 @@ vmcs_intel_x64::create_vmcs_region()
     auto cor1 = commit_or_rollback([&]
     { this->release_vmcs_region(); });
 
-    m_vmcs_region = std::make_unique<char[]>(4096);
-    m_vmcs_region_phys = (uintptr_t)g_mm->virt_to_phys(m_vmcs_region.get());
+    auto region = (uint32_t *)g_mm->malloc_aligned(4096, 4096);
 
-    if ((m_vmcs_region_phys & 0x0000000000000FFF) != 0)
+    m_vmcs_region = std::unique_ptr<uint32_t>(region);
+    m_vmcs_region_phys = (uintptr_t)g_mm->virt_to_phys(region);
+
+    if (((uintptr_t)region & 0x0000000000000FFF) != 0)
         throw invalid_alignmnet(
-            "vmxon region not page aligned", m_vmcs_region_phys);
+            "vmxon region not page aligned", (uintptr_t)region);
 
-    auto region = (uint32_t *)m_vmcs_region.get();
     region[0] = m_intrinsics->read_msr(IA32_VMX_BASIC_MSR) & 0x7FFFFFFFF;
 
     cor1.commit();

@@ -40,10 +40,6 @@ class vcpu_manager
 {
 public:
 
-    /// Default Constructor
-    ///
-    vcpu_manager();
-
     /// Destructor
     ///
     ~vcpu_manager() {}
@@ -119,6 +115,12 @@ public:
     /// Disable the copy operator
     ///
     vcpu_manager &operator=(const vcpu_manager &) = delete;
+
+private:
+
+    /// Default Constructor
+    ///
+    vcpu_manager();
 
 private:
 

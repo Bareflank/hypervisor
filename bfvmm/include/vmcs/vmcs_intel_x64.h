@@ -23,7 +23,7 @@
 #define VMCS_INTEL_X64_H
 
 #include <vmcs/bitmap.h>
-#include <vmcs/vmcs_state_intel_x64.h>
+#include <vmcs/vmcs_intel_x64_state.h>
 #include <intrinsics/intrinsics_intel_x64.h>
 
 class vmcs_intel_x64
@@ -132,8 +132,9 @@ protected:
     virtual std::string check_vm_instruction_error();
     virtual bool check_is_address_canonical(uint64_t addr);
     virtual bool check_has_valid_address_width(uint64_t addr);
+
     virtual bool check_vmcs_host_state();
-    virtual bool check_vmcs_guest_state();
+    virtual void check_vmcs_guest_state();
     virtual void check_vmcs_control_state();
 
     virtual uint64_t get_pin_ctls() const;
@@ -251,115 +252,112 @@ protected:
     virtual bool check_host_verify_pae_is_enabled();
     virtual bool check_host_verify_rip_has_canonical_address();
 
-    virtual bool check_guest_checks_on_guest_control_registers_debug_registers_and_msrs();
-    virtual bool check_guest_cr0_for_unsupported_bits();
-    virtual bool check_guest_cr0_verify_paging_enabled();
-    virtual bool check_guest_cr0_verify_protected_mode_enabled();
-    virtual bool check_guest_cr4_for_unsupported_bits();
-    virtual bool check_guest_load_debug_controls_verify_reserved_bits_equal_zero();
-    virtual bool check_guest_verify_ia_32e_mode_enabled();
-    virtual bool check_guest_cr4_verify_pae_enabled();
-    virtual bool check_guest_cr3_for_unsupported_bits();
-    virtual bool check_guest_load_debug_controls_verify_verify_dr7();
-    virtual bool check_guest_ia32_sysenter_esp_canonical_address();
-    virtual bool check_guest_ia32_sysenter_eip_canonical_address();
-    virtual bool check_guest_ia32_perf_global_ctrl_for_reserved_bits();
-    virtual bool check_guest_ia32_pat_for_unsupported_bits();
-    virtual bool check_guest_verify_load_ia32_efer_enabled();
-    virtual bool check_guest_ia32_efer_for_reserved_bits();
-    virtual bool check_guest_ia32_efer_set();
+    virtual void checks_on_guest_control_registers_debug_registers_and_msrs();
+    virtual void check_guest_cr0_for_unsupported_bits();
+    virtual void check_guest_cr0_verify_paging_enabled();
+    virtual void check_guest_cr4_for_unsupported_bits();
+    virtual void check_guest_load_debug_controls_verify_reserved();
+    virtual void check_guest_verify_ia_32e_mode_enabled();
+    virtual void check_guest_verify_ia_32e_mode_disabled();
+    virtual void check_guest_cr3_for_unsupported_bits();
+    virtual void check_guest_load_debug_controls_verify_verify_dr7();
+    virtual void check_guest_ia32_sysenter_esp_canonical_address();
+    virtual void check_guest_ia32_sysenter_eip_canonical_address();
+    virtual void check_guest_verify_load_ia32_perf_global_ctrl();
+    virtual void check_guest_verify_load_ia32_pat();
+    virtual void check_guest_verify_load_ia32_efer();
 
-    virtual bool check_guest_checks_on_guest_segment_registers();
-    virtual bool check_guest_v8086_mode_disabled();
-    virtual bool check_guest_unrestricted_guest_disabled();
-    virtual bool check_guest_tr_ti_bit_equals_0();
-    virtual bool check_guest_ldtr_ti_bit_equals_0();
-    virtual bool check_guest_ss_and_cs_rpl_are_the_same();
-    virtual bool check_guest_tr_base_is_canonical();
-    virtual bool check_guest_fs_base_is_canonical();
-    virtual bool check_guest_gs_base_is_canonical();
-    virtual bool check_guest_ldtr_base_is_canonical();
-    virtual bool check_guest_cs_base_upper_dword_0();
-    virtual bool check_guest_ss_base_upper_dword_0();
-    virtual bool check_guest_ds_base_upper_dword_0();
-    virtual bool check_guest_es_base_upper_dword_0();
-    virtual bool check_guest_cs_access_rights_type();
-    virtual bool check_guest_ss_access_rights_type();
-    virtual bool check_guest_ds_access_rights_type();
-    virtual bool check_guest_es_access_rights_type();
-    virtual bool check_guest_fs_access_rights_type();
-    virtual bool check_guest_gs_access_rights_type();
-    virtual bool check_guest_cs_is_not_a_system_descriptor();
-    virtual bool check_guest_ss_is_not_a_system_descriptor();
-    virtual bool check_guest_ds_is_not_a_system_descriptor();
-    virtual bool check_guest_es_is_not_a_system_descriptor();
-    virtual bool check_guest_fs_is_not_a_system_descriptor();
-    virtual bool check_guest_gs_is_not_a_system_descriptor();
-    virtual bool check_guest_cs_type_not_equal_3();
-    virtual bool check_guest_cs_dpl_adheres_to_ss_dpl();
-    virtual bool check_guest_ss_dpl_must_equal_rpl();
-    virtual bool check_guest_ss_dpl_must_equal_zero();
-    virtual bool check_guest_ds_dpl();
-    virtual bool check_guest_es_dpl();
-    virtual bool check_guest_fs_dpl();
-    virtual bool check_guest_gs_dpl();
-    virtual bool check_guest_cs_must_be_present();
-    virtual bool check_guest_ss_must_be_present_if_usable();
-    virtual bool check_guest_ds_must_be_present_if_usable();
-    virtual bool check_guest_es_must_be_present_if_usable();
-    virtual bool check_guest_fs_must_be_present_if_usable();
-    virtual bool check_guest_gs_must_be_present_if_usable();
-    virtual bool check_guest_cs_access_rights_reserved_must_be_0();
-    virtual bool check_guest_ss_access_rights_reserved_must_be_0();
-    virtual bool check_guest_ds_access_rights_reserved_must_be_0();
-    virtual bool check_guest_es_access_rights_reserved_must_be_0();
-    virtual bool check_guest_fs_access_rights_reserved_must_be_0();
-    virtual bool check_guest_gs_access_rights_reserved_must_be_0();
-    virtual bool check_guest_cs_db_must_be_0_if_l_equals_1();
-    virtual bool check_guest_cs_granularity();
-    virtual bool check_guest_ss_granularity();
-    virtual bool check_guest_ds_granularity();
-    virtual bool check_guest_es_granularity();
-    virtual bool check_guest_fs_granularity();
-    virtual bool check_guest_gs_granularity();
-    virtual bool check_guest_cs_access_rights_remaining_reserved_bit_0();
-    virtual bool check_guest_ss_access_rights_remaining_reserved_bit_0();
-    virtual bool check_guest_ds_access_rights_remaining_reserved_bit_0();
-    virtual bool check_guest_es_access_rights_remaining_reserved_bit_0();
-    virtual bool check_guest_fs_access_rights_remaining_reserved_bit_0();
-    virtual bool check_guest_gs_access_rights_remaining_reserved_bit_0();
-    virtual bool check_guest_tr_type_must_be_11();
-    virtual bool check_guest_tr_must_be_a_system_descriptor();
-    virtual bool check_guest_tr_must_be_present();
-    virtual bool check_guest_tr_access_rights_reserved_must_be_0();
-    virtual bool check_guest_tr_granularity();
-    virtual bool check_guest_tr_must_be_usable();
-    virtual bool check_guest_tr_access_rights_remaining_reserved_bit_0();
-    virtual bool check_guest_ldtr_type_must_be_2();
-    virtual bool check_guest_ldtr_must_be_a_system_descriptor();
-    virtual bool check_guest_ldtr_must_be_present();
-    virtual bool check_guest_ldtr_access_rights_reserved_must_be_0();
-    virtual bool check_guest_ldtr_granularity();
-    virtual bool check_guest_ldtr_access_rights_remaining_reserved_bit_0();
+    // virtual void check_guest_checks_on_guest_segment_registers();
+    // virtual void check_guest_v8086_mode_disabled();
+    // virtual void check_guest_unrestricted_guest_disabled();
+    // virtual void check_guest_tr_ti_bit_equals_0();
+    // virtual void check_guest_ldtr_ti_bit_equals_0();
+    // virtual void check_guest_ss_and_cs_rpl_are_the_same();
+    // virtual void check_guest_tr_base_is_canonical();
+    // virtual void check_guest_fs_base_is_canonical();
+    // virtual void check_guest_gs_base_is_canonical();
+    // virtual void check_guest_ldtr_base_is_canonical();
+    // virtual void check_guest_cs_base_upper_dword_0();
+    // virtual void check_guest_ss_base_upper_dword_0();
+    // virtual void check_guest_ds_base_upper_dword_0();
+    // virtual void check_guest_es_base_upper_dword_0();
+    // virtual void check_guest_cs_access_rights_type();
+    // virtual void check_guest_ss_access_rights_type();
+    // virtual void check_guest_ds_access_rights_type();
+    // virtual void check_guest_es_access_rights_type();
+    // virtual void check_guest_fs_access_rights_type();
+    // virtual void check_guest_gs_access_rights_type();
+    // virtual void check_guest_cs_is_not_a_system_descriptor();
+    // virtual void check_guest_ss_is_not_a_system_descriptor();
+    // virtual void check_guest_ds_is_not_a_system_descriptor();
+    // virtual void check_guest_es_is_not_a_system_descriptor();
+    // virtual void check_guest_fs_is_not_a_system_descriptor();
+    // virtual void check_guest_gs_is_not_a_system_descriptor();
+    // virtual void check_guest_cs_type_not_equal_3();
+    // virtual void check_guest_cs_dpl_adheres_to_ss_dpl();
+    // virtual void check_guest_ss_dpl_must_equal_rpl();
+    // virtual void check_guest_ss_dpl_must_equal_zero();
+    // virtual void check_guest_ds_dpl();
+    // virtual void check_guest_es_dpl();
+    // virtual void check_guest_fs_dpl();
+    // virtual void check_guest_gs_dpl();
+    // virtual void check_guest_cs_must_be_present();
+    // virtual void check_guest_ss_must_be_present_if_usable();
+    // virtual void check_guest_ds_must_be_present_if_usable();
+    // virtual void check_guest_es_must_be_present_if_usable();
+    // virtual void check_guest_fs_must_be_present_if_usable();
+    // virtual void check_guest_gs_must_be_present_if_usable();
+    // virtual void check_guest_cs_access_rights_reserved_must_be_0();
+    // virtual void check_guest_ss_access_rights_reserved_must_be_0();
+    // virtual void check_guest_ds_access_rights_reserved_must_be_0();
+    // virtual void check_guest_es_access_rights_reserved_must_be_0();
+    // virtual void check_guest_fs_access_rights_reserved_must_be_0();
+    // virtual void check_guest_gs_access_rights_reserved_must_be_0();
+    // virtual void check_guest_cs_db_must_be_0_if_l_equals_1();
+    // virtual void check_guest_cs_granularity();
+    // virtual void check_guest_ss_granularity();
+    // virtual void check_guest_ds_granularity();
+    // virtual void check_guest_es_granularity();
+    // virtual void check_guest_fs_granularity();
+    // virtual void check_guest_gs_granularity();
+    // virtual void check_guest_cs_access_rights_remaining_reserved_bit_0();
+    // virtual void check_guest_ss_access_rights_remaining_reserved_bit_0();
+    // virtual void check_guest_ds_access_rights_remaining_reserved_bit_0();
+    // virtual void check_guest_es_access_rights_remaining_reserved_bit_0();
+    // virtual void check_guest_fs_access_rights_remaining_reserved_bit_0();
+    // virtual void check_guest_gs_access_rights_remaining_reserved_bit_0();
+    // virtual void check_guest_tr_type_must_be_11();
+    // virtual void check_guest_tr_must_be_a_system_descriptor();
+    // virtual void check_guest_tr_must_be_present();
+    // virtual void check_guest_tr_access_rights_reserved_must_be_0();
+    // virtual void check_guest_tr_granularity();
+    // virtual void check_guest_tr_must_be_usable();
+    // virtual void check_guest_tr_access_rights_remaining_reserved_bit_0();
+    // virtual void check_guest_ldtr_type_must_be_2();
+    // virtual void check_guest_ldtr_must_be_a_system_descriptor();
+    // virtual void check_guest_ldtr_must_be_present();
+    // virtual void check_guest_ldtr_access_rights_reserved_must_be_0();
+    // virtual void check_guest_ldtr_granularity();
+    // virtual void check_guest_ldtr_access_rights_remaining_reserved_bit_0();
 
-    virtual bool check_guest_checks_on_guest_descriptor_table_registers();
-    virtual bool check_guest_gdtr_base_must_be_canonical();
-    virtual bool check_guest_idtr_base_must_be_canonical();
-    virtual bool check_guest_gdtr_limit_reserved_bits();
-    virtual bool check_guest_idtr_limit_reserved_bits();
+    // virtual void check_guest_checks_on_guest_descriptor_table_registers();
+    // virtual void check_guest_gdtr_base_must_be_canonical();
+    // virtual void check_guest_idtr_base_must_be_canonical();
+    // virtual void check_guest_gdtr_limit_reserved_bits();
+    // virtual void check_guest_idtr_limit_reserved_bits();
 
-    virtual bool check_guest_checks_on_guest_rip_and_rflags();
-    virtual bool check_guest_rflags_reserved_bits();
-    virtual bool check_guest_rflag_interrupt_enable();
+    // virtual void check_guest_checks_on_guest_rip_and_rflags();
+    // virtual void check_guest_rflags_reserved_bits();
+    // virtual void check_guest_rflag_interrupt_enable();
 
-    virtual bool check_guest_checks_on_guest_non_register_state();
-    virtual bool check_guest_valid_activity_state();
-    virtual bool check_guest_activity_state_not_hlt_when_dpl_not_0();
-    virtual bool check_guest_must_be_active_if_injecting_blocking_state();
-    virtual bool check_guest_valid_interruptability_and_activity_state_combo();
-    virtual bool check_guest_valid_activity_state_and_smm();
-    virtual bool check_guest_all_interruptability_state_fields();
-    virtual bool check_guest_all_vmcs_link_pointerchecks();
+    // virtual void check_guest_checks_on_guest_non_register_state();
+    // virtual void check_guest_valid_activity_state();
+    // virtual void check_guest_activity_state_not_hlt_when_dpl_not_0();
+    // virtual void check_guest_must_be_active_if_injecting_blocking_state();
+    // virtual void check_guest_valid_interruptability_and_activity_state_combo();
+    // virtual void check_guest_valid_activity_state_and_smm();
+    // virtual void check_guest_all_interruptability_state_fields();
+    // virtual void check_guest_all_vmcs_link_pointerchecks();
 
     virtual void checks_on_vm_execution_control_fields();
     virtual void check_control_pin_based_ctls_reserved_properly_set();
@@ -385,13 +383,13 @@ protected:
     virtual void check_control_enable_vmcs_shadowing();
     virtual void check_control_enable_ept_violation_checks();
 
-    virtual void check_control_checks_on_vm_exit_control_fields();
+    virtual void checks_on_vm_exit_control_fields();
     virtual void check_control_vm_exit_ctls_reserved_properly_set();
     virtual void check_control_activate_and_save_premeption_timer_must_be_0();
     virtual void check_control_exit_msr_store_address();
     virtual void check_control_exit_msr_load_address();
 
-    virtual void check_control_checks_on_vm_entry_control_fields();
+    virtual void checks_on_vm_entry_control_fields();
     virtual void check_control_vm_entry_ctls_reserved_properly_set();
     virtual void check_control_event_injection_type_vector_checks();
     virtual void check_control_event_injection_delivery_ec_checks();
@@ -415,7 +413,7 @@ private:
     intrinsics_intel_x64 *m_intrinsics;
 
     uint64_t m_vmcs_region_phys;
-    std::unique_ptr<char[]> m_vmcs_region;
+    std::unique_ptr<uint32_t> m_vmcs_region;
 };
 
 #endif

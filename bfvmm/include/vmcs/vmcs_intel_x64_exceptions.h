@@ -208,10 +208,10 @@ public:
         os << m_func << " failed:";
         os << std::endl << "    - mesg: " << m_mesg
            << " controls not setup properly";
-        os << std::endl << "    - msr_lower: " << m_msr_lower;
-        os << std::endl << "    - msr_upper: " << m_msr_upper;
-        os << std::endl << "    - controls_lower: " << m_controls_lower;
-        os << std::endl << "    - controls_upper: " << m_controls_upper;
+        os << std::endl << "    - msr_lower: " << (void *)m_msr_lower;
+        os << std::endl << "    - msr_upper: " << (void *)m_msr_upper;
+        os << std::endl << "    - controls_lower: " << (void *)m_controls_lower;
+        os << std::endl << "    - controls_upper: " << (void *)m_controls_upper;
         os << std::endl << "    - line: " << m_line;
 
         return os;
@@ -253,7 +253,7 @@ public:
     {
         os << m_func << " failed:";
         os << std::endl << "    - mesg: " << m_mesg;
-        os << std::endl << "    - " << m_field_str << ": " << m_field;
+        os << std::endl << "    - " << m_field_str << ": " << (void *)m_field;
         os << std::endl << "    - line: " << m_line;
 
         return os;
@@ -269,6 +269,52 @@ private:
 
 #define vmcs_invalid_field(a,b) \
     bfn::vmcs_invalid_field_error(a,#b,b,__func__,__LINE__)
+
+// -----------------------------------------------------------------------------
+// VMCS Invalid Ctrl
+// -----------------------------------------------------------------------------
+
+class vmcs_invalid_ctrl_error : public bfn::general_exception
+{
+public:
+    vmcs_invalid_ctrl_error(const std::string &cr_str,
+                            uint64_t cr,
+                            uint64_t fixed0,
+                            uint64_t fixed1,
+                            const std::string &func,
+                            uint64_t line) :
+        m_cr_str(cr_str),
+        m_cr(cr),
+        m_fixed0(fixed0),
+        m_fixed1(fixed1),
+        m_func(func),
+        m_line(line)
+    {}
+
+    virtual std::ostream &print(std::ostream &os) const
+    {
+        os << m_func << " failed:";
+        os << std::endl << "    - mesg: " << m_cr_str
+           << " not setup properly";
+        os << std::endl << "    - " << m_cr_str << ": " << (void *)m_cr;
+        os << std::endl << "    - fixed0: " << (void *)m_fixed0;
+        os << std::endl << "    - fixed1: " << (void *)m_fixed1;
+        os << std::endl << "    - line: " << m_line;
+
+        return os;
+    }
+
+private:
+    std::string m_cr_str;
+    uint64_t m_cr;
+    uint64_t m_fixed0;
+    uint64_t m_fixed1;
+    std::string m_func;
+    uint64_t m_line;
+};
+
+#define vmcs_invalid_ctrl(a,b,c) \
+    bfn::vmcs_invalid_ctrl_error(#a,a,b,c,__func__,__LINE__)
 
 }
 

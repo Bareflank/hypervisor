@@ -27,13 +27,11 @@
 #include <stdint.h>
 #include <memory.h>
 
+class vmxon_ut;
+
 class memory_manager
 {
 public:
-
-    /// Default Constructor
-    ///
-    memory_manager();
 
     /// Destructor
     ///
@@ -159,6 +157,14 @@ public:
     /// Disable the copy operator
     ///
     memory_manager &operator=(const memory_manager &) = delete;
+
+private:
+
+    friend vmxon_ut;
+
+    /// Default Constructor
+    ///
+    memory_manager();
 
 private:
 
