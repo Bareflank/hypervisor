@@ -410,6 +410,16 @@ public:
 #define SELECTOR_INDEX                                            (0xFFF8)
 #define SELECTOR_UNUSABLE                                         (1 << 16)
 
+// Segment Access Rights
+#define SEGMENT_ACCESS_RIGHTS_TYPE                                (0x000F)
+#define SEGMENT_ACCESS_RIGHTS_SYSTEM_DESCRIPTOR                   (0x0010)
+#define SEGMENT_ACCESS_RIGHTS_DPL                                 (0x0060)
+#define SEGMENT_ACCESS_RIGHTS_PRESENT                             (0x0080)
+#define SEGMENT_ACCESS_RIGHTS_RESERVED                            (0x0F00)
+#define SEGMENT_ACCESS_RIGHTS_L                                   (0x2000)
+#define SEGMENT_ACCESS_RIGHTS_DB                                  (0x4000)
+#define SEGMENT_ACCESS_RIGHTS_GRANULARITY                         (0x8000)
+
 // RFLAGS
 // 64-ia-32-architectures-software-developer-manual, section 3.4.3
 #define RFLAGS_CF_CARRY_FLAG                                      (1 << 0)
@@ -459,7 +469,7 @@ public:
 #define CR4_OSXMMEXCPT                                            (1 << 10)
 #define CR4_VMXE_VMX_ENABLE_BIT                                   (1 << 13)
 #define CR4_SMXE_SMX_ENABLE_BIT                                   (1 << 14)
-#define CR4_FSGSBASE_FSGSBASE_ENABLE_BIT                          (1 << 16)
+#define CR4_FSGSBASE_ENABLE_BIT                                   (1 << 16)
 #define CR4_PCIDE_PCID_ENABLE_BIT                                 (1 << 17)
 #define CR4_OSXSAVE                                               (1 << 18)
 #define CR4_SMEP_SMEP_ENABLE_BIT                                  (1 << 20)

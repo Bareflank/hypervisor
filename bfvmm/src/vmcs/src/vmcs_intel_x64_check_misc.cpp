@@ -20,6 +20,8 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #include <vmcs/vmcs_intel_x64.h>
+#include <vmcs/vmcs_intel_x64_checks.h>
+#include <vmcs/vmcs_intel_x64_exceptions.h>
 
 std::string
 vmcs_intel_x64::check_vm_instruction_error()
@@ -140,6 +142,82 @@ vmcs_intel_x64::check_has_valid_address_width(uint64_t addr)
         return true;
 
     return false;
+}
+
+bool
+vmcs_intel_x64::check_is_v8086_enabled()
+{
+    return (vmread(VMCS_GUEST_RFLAGS) & RFLAGS_VM_VIRTUAL_8086_MODE) != 0;
+}
+
+bool
+vmcs_intel_x64::check_is_unrestricted_enabled()
+{
+    auto ctls = get_proc2_ctls();
+
+    if proc2_enabled(ctls, VM_EXEC_S_PROC_BASED_UNRESTRICTED_GUEST)
+        return true;
+
+    return false;
+}
+
+bool
+vmcs_intel_x64::check_is_ia32e_mode_enabled()
+{
+    auto ctls = get_entry_ctls();
+
+    if entry_enabled(ctls, VM_ENTRY_CONTROL_IA_32E_MODE_GUEST)
+        return true;
+
+    return false;
+}
+
+bool
+vmcs_intel_x64::check_is_cs_usable()
+{
+    return (vmread(VMCS_GUEST_CS_ACCESS_RIGHTS) & SELECTOR_UNUSABLE) == 0;
+}
+
+bool
+vmcs_intel_x64::check_is_ss_usable()
+{
+    return (vmread(VMCS_GUEST_SS_ACCESS_RIGHTS) & SELECTOR_UNUSABLE) == 0;
+}
+
+bool
+vmcs_intel_x64::check_is_ds_usable()
+{
+    return (vmread(VMCS_GUEST_DS_ACCESS_RIGHTS) & SELECTOR_UNUSABLE) == 0;
+}
+
+bool
+vmcs_intel_x64::check_is_es_usable()
+{
+    return (vmread(VMCS_GUEST_ES_ACCESS_RIGHTS) & SELECTOR_UNUSABLE) == 0;
+}
+
+bool
+vmcs_intel_x64::check_is_gs_usable()
+{
+    return (vmread(VMCS_GUEST_GS_ACCESS_RIGHTS) & SELECTOR_UNUSABLE) == 0;
+}
+
+bool
+vmcs_intel_x64::check_is_fs_usable()
+{
+    return (vmread(VMCS_GUEST_FS_ACCESS_RIGHTS) & SELECTOR_UNUSABLE) == 0;
+}
+
+bool
+vmcs_intel_x64::check_is_tr_usable()
+{
+    return (vmread(VMCS_GUEST_TR_ACCESS_RIGHTS) & SELECTOR_UNUSABLE) == 0;
+}
+
+bool
+vmcs_intel_x64::check_is_ldtr_usable()
+{
+    return (vmread(VMCS_GUEST_LDTR_ACCESS_RIGHTS) & SELECTOR_UNUSABLE) == 0;
 }
 
 bool

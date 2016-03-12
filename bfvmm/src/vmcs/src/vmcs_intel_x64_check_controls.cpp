@@ -453,14 +453,14 @@ vmcs_intel_x64::check_control_enable_ept_checks()
 void
 vmcs_intel_x64::check_control_unrestricted_guests()
 {
-    auto ctls2 = get_proc2_ctls();
+    auto ctls = get_proc2_ctls();
 
-    if proc2_disabled(ctls2, VM_EXEC_S_PROC_BASED_UNRESTRICTED_GUEST)
+    if (check_is_unrestricted_enabled() == false)
         return;
 
-    if pin_disabled(ctls2, VM_EXEC_S_PROC_BASED_ENABLE_EPT)
+    if pin_disabled(ctls, VM_EXEC_S_PROC_BASED_ENABLE_EPT)
         throw vmcs_invalid_field("enable ept must be 1 "
-                                 "if unrestricted guest is 1", ctls2);
+                                 "if unrestricted guest is 1", ctls);
 }
 
 void
@@ -726,11 +726,10 @@ vmcs_intel_x64::check_control_event_injection_delivery_ec_checks()
 
     auto cr0 = vmread(VMCS_GUEST_CR0);
 
-    auto ctls = get_proc2_ctls();
     auto type = (interrupt_info_field & 0x0000000000000700) >> 8;
     auto vector = (interrupt_info_field & 0x00000000000000FF) >> 0;
 
-    if proc2_enabled(ctls, VM_EXEC_S_PROC_BASED_UNRESTRICTED_GUEST)
+    if (check_is_unrestricted_enabled() == true)
     {
         if ((cr0 & CRO_PE_PROTECTION_ENABLE) == 0)
             throw vmcs_invalid_field("unrestricted guest must be 0 or PE must "
