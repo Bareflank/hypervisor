@@ -25,6 +25,18 @@
 #include <vmcs/vmcs_intel_x64.h>
 
 bool
+vmcs_intel_x64::check_vmcs_host_state()
+{
+    auto result = true;
+
+    result &= check_host_control_registers_and_msrs();
+    result &= check_host_segment_and_descriptor_table_registers();
+    result &= check_host_checks_related_to_address_space_size();
+
+    return result;
+}
+
+bool
 vmcs_intel_x64::check_host_control_registers_and_msrs()
 {
     auto result = true;

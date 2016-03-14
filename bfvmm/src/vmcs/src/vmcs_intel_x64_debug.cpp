@@ -38,11 +38,11 @@ vmcs_intel_x64::dump_vmcs()
 
     bfdebug << bfendl;
     bfdebug << "16bit Control Fields:" << bfendl;
-    PRINT_FIELD(supports_vpid(),
+    PRINT_FIELD(is_supported_vpid(),
                 VMCS_VIRTUAL_PROCESSOR_IDENTIFIER);
-    PRINT_FIELD(supports_posted_interrupts(),
+    PRINT_FIELD(is_supported_posted_interrupts(),
                 VMCS_POSTED_INTERRUPT_NOTIFICATION_VECTOR);
-    PRINT_FIELD(supports_ept_violation_ve(),
+    PRINT_FIELD(is_supported_ept_violation_ve(),
                 VMCS_EPTP_INDEX);
 
     bfdebug << bfendl;
@@ -55,7 +55,7 @@ vmcs_intel_x64::dump_vmcs()
     PRINT_FIELD(true, VMCS_GUEST_GS_SELECTOR);
     PRINT_FIELD(true, VMCS_GUEST_LDTR_SELECTOR);
     PRINT_FIELD(true, VMCS_GUEST_TR_SELECTOR);
-    PRINT_FIELD(supports_virtual_interrupt_delivery(),
+    PRINT_FIELD(is_supported_virtual_interrupt_delivery(),
                 VMCS_GUEST_INTERRUPT_STATUS);
 
     bfdebug << bfendl;
@@ -74,9 +74,9 @@ vmcs_intel_x64::dump_vmcs()
     PRINT_FIELD(true, VMCS_ADDRESS_OF_IO_BITMAP_A_HIGH);
     PRINT_FIELD(true, VMCS_ADDRESS_OF_IO_BITMAP_B_FULL);
     PRINT_FIELD(true, VMCS_ADDRESS_OF_IO_BITMAP_B_HIGH);
-    PRINT_FIELD(supports_msr_bitmaps(),
+    PRINT_FIELD(is_supported_msr_bitmaps(),
                 VMCS_ADDRESS_OF_MSR_BITMAPS_FULL);
-    PRINT_FIELD(supports_msr_bitmaps(),
+    PRINT_FIELD(is_supported_msr_bitmaps(),
                 VMCS_ADDRESS_OF_MSR_BITMAPS_HIGH);
     PRINT_FIELD(true, VMCS_VM_EXIT_MSR_STORE_ADDRESS_FULL);
     PRINT_FIELD(true, VMCS_VM_EXIT_MSR_STORE_ADDRESS_HIGH);
@@ -88,68 +88,68 @@ vmcs_intel_x64::dump_vmcs()
     PRINT_FIELD(true, VMCS_EXECUTIVE_VMCS_POINTER_HIGH);
     PRINT_FIELD(true, VMCS_TSC_OFFSET_FULL);
     PRINT_FIELD(true, VMCS_TSC_OFFSET_HIGH);
-    PRINT_FIELD(supports_tpr_shadow(),
+    PRINT_FIELD(is_supported_tpr_shadow(),
                 VMCS_VIRTUAL_APIC_ADDRESS_FULL);
-    PRINT_FIELD(supports_tpr_shadow(),
+    PRINT_FIELD(is_supported_tpr_shadow(),
                 VMCS_VIRTUAL_APIC_ADDRESS_HIGH);
-    PRINT_FIELD(supports_virtualized_apic(),
+    PRINT_FIELD(is_supported_virtualized_apic(),
                 VMCS_APIC_ACCESS_ADDRESS_FULL);
-    PRINT_FIELD(supports_virtualized_apic(),
+    PRINT_FIELD(is_supported_virtualized_apic(),
                 VMCS_APIC_ACCESS_ADDRESS_HIGH);
-    PRINT_FIELD(supports_posted_interrupts(),
+    PRINT_FIELD(is_supported_posted_interrupts(),
                 VMCS_POSTED_INTERRUPT_DESCRIPTOR_ADDRESS_FULL);
-    PRINT_FIELD(supports_posted_interrupts(),
+    PRINT_FIELD(is_supported_posted_interrupts(),
                 VMCS_POSTED_INTERRUPT_DESCRIPTOR_ADDRESS_HIGH);
-    PRINT_FIELD(supports_vm_functions(),
+    PRINT_FIELD(is_supported_vm_functions(),
                 VMCS_VM_FUNCTION_CONTROLS_FULL);
-    PRINT_FIELD(supports_vm_functions(),
+    PRINT_FIELD(is_supported_vm_functions(),
                 VMCS_VM_FUNCTION_CONTROLS_HIGH);
-    PRINT_FIELD(supports_ept(),
+    PRINT_FIELD(is_supported_ept(),
                 VMCS_EPT_POINTER_FULL);
-    PRINT_FIELD(supports_ept(),
+    PRINT_FIELD(is_supported_ept(),
                 VMCS_EPT_POINTER_HIGH);
-    PRINT_FIELD(supports_virtual_interrupt_delivery(),
+    PRINT_FIELD(is_supported_virtual_interrupt_delivery(),
                 VMCS_EOI_EXIT_BITMAP_0_FULL);
-    PRINT_FIELD(supports_virtual_interrupt_delivery(),
+    PRINT_FIELD(is_supported_virtual_interrupt_delivery(),
                 VMCS_EOI_EXIT_BITMAP_0_HIGH);
-    PRINT_FIELD(supports_virtual_interrupt_delivery(),
+    PRINT_FIELD(is_supported_virtual_interrupt_delivery(),
                 VMCS_EOI_EXIT_BITMAP_1_FULL);
-    PRINT_FIELD(supports_virtual_interrupt_delivery(),
+    PRINT_FIELD(is_supported_virtual_interrupt_delivery(),
                 VMCS_EOI_EXIT_BITMAP_1_HIGH);
-    PRINT_FIELD(supports_virtual_interrupt_delivery(),
+    PRINT_FIELD(is_supported_virtual_interrupt_delivery(),
                 VMCS_EOI_EXIT_BITMAP_2_FULL);
-    PRINT_FIELD(supports_virtual_interrupt_delivery(),
+    PRINT_FIELD(is_supported_virtual_interrupt_delivery(),
                 VMCS_EOI_EXIT_BITMAP_2_HIGH);
-    PRINT_FIELD(supports_virtual_interrupt_delivery(),
+    PRINT_FIELD(is_supported_virtual_interrupt_delivery(),
                 VMCS_EOI_EXIT_BITMAP_3_FULL);
-    PRINT_FIELD(supports_virtual_interrupt_delivery(),
+    PRINT_FIELD(is_supported_virtual_interrupt_delivery(),
                 VMCS_EOI_EXIT_BITMAP_3_HIGH);
-    PRINT_FIELD(supports_eptp_switching(),
+    PRINT_FIELD(is_supported_eptp_switching(),
                 VMCS_EPTP_LIST_ADDRESS_FULL);
-    PRINT_FIELD(supports_eptp_switching(),
+    PRINT_FIELD(is_supported_eptp_switching(),
                 VMCS_EPTP_LIST_ADDRESS_HIGH);
-    PRINT_FIELD(supports_vmcs_shadowing(),
+    PRINT_FIELD(is_supported_vmcs_shadowing(),
                 VMCS_VMREAD_BITMAP_ADDRESS_FULL);
-    PRINT_FIELD(supports_vmcs_shadowing(),
+    PRINT_FIELD(is_supported_vmcs_shadowing(),
                 VMCS_VMREAD_BITMAP_ADDRESS_HIGH);
-    PRINT_FIELD(supports_vmcs_shadowing(),
+    PRINT_FIELD(is_supported_vmcs_shadowing(),
                 VMCS_VMWRITE_BITMAP_ADDRESS_FULL);
-    PRINT_FIELD(supports_vmcs_shadowing(),
+    PRINT_FIELD(is_supported_vmcs_shadowing(),
                 VMCS_VMWRITE_BITMAP_ADDRESS_HIGH);
-    PRINT_FIELD(supports_ept_violation_ve(),
+    PRINT_FIELD(is_supported_ept_violation_ve(),
                 VMCS_VIRTUALIZATION_EXCEPTION_INFORMATION_ADDRESS_FULL);
-    PRINT_FIELD(supports_ept_violation_ve(),
+    PRINT_FIELD(is_supported_ept_violation_ve(),
                 VMCS_VIRTUALIZATION_EXCEPTION_INFORMATION_ADDRESS_HIGH);
-    PRINT_FIELD(supports_xsave_xrestore(),
+    PRINT_FIELD(is_supported_xsave_xrestore(),
                 VMCS_XSS_EXITING_BITMAP_FULL);
-    PRINT_FIELD(supports_xsave_xrestore(),
+    PRINT_FIELD(is_supported_xsave_xrestore(),
                 VMCS_XSS_EXITING_BITMAP_HIGH);
 
     bfdebug << bfendl;
     bfdebug << "64bit Read-Only Data Fields:" << bfendl;
-    PRINT_FIELD(supports_ept(),
+    PRINT_FIELD(is_supported_ept(),
                 VMCS_GUEST_PHYSICAL_ADDRESS_FULL);
-    PRINT_FIELD(supports_ept(),
+    PRINT_FIELD(is_supported_ept(),
                 VMCS_GUEST_PHYSICAL_ADDRESS_HIGH);
 
     bfdebug << bfendl;
@@ -158,48 +158,48 @@ vmcs_intel_x64::dump_vmcs()
     PRINT_FIELD(true, VMCS_VMCS_LINK_POINTER_HIGH);
     PRINT_FIELD(true, VMCS_GUEST_IA32_DEBUGCTL_FULL);
     PRINT_FIELD(true, VMCS_GUEST_IA32_DEBUGCTL_HIGH);
-    PRINT_FIELD(supports_load_ia32_pat_on_entry(),
+    PRINT_FIELD(is_supported_load_ia32_pat_on_entry(),
                 VMCS_GUEST_IA32_PAT_FULL);
-    PRINT_FIELD(supports_load_ia32_pat_on_entry(),
+    PRINT_FIELD(is_supported_load_ia32_pat_on_entry(),
                 VMCS_GUEST_IA32_PAT_HIGH);
-    PRINT_FIELD(supports_load_ia32_efer_on_entry(),
+    PRINT_FIELD(is_supported_load_ia32_efer_on_entry(),
                 VMCS_GUEST_IA32_EFER_FULL);
-    PRINT_FIELD(supports_load_ia32_efer_on_entry(),
+    PRINT_FIELD(is_supported_load_ia32_efer_on_entry(),
                 VMCS_GUEST_IA32_EFER_HIGH);
-    PRINT_FIELD(supports_load_ia32_perf_global_ctrl_on_entry(),
+    PRINT_FIELD(is_supported_load_ia32_perf_global_ctrl_on_entry(),
                 VMCS_GUEST_IA32_PERF_GLOBAL_CTRL_FULL);
-    PRINT_FIELD(supports_load_ia32_perf_global_ctrl_on_entry(),
+    PRINT_FIELD(is_supported_load_ia32_perf_global_ctrl_on_entry(),
                 VMCS_GUEST_IA32_PERF_GLOBAL_CTRL_HIGH);
-    PRINT_FIELD(supports_ept(),
+    PRINT_FIELD(is_supported_ept(),
                 VMCS_GUEST_PDPTE0_FULL);
-    PRINT_FIELD(supports_ept(),
+    PRINT_FIELD(is_supported_ept(),
                 VMCS_GUEST_PDPTE0_HIGH);
-    PRINT_FIELD(supports_ept(),
+    PRINT_FIELD(is_supported_ept(),
                 VMCS_GUEST_PDPTE1_FULL);
-    PRINT_FIELD(supports_ept(),
+    PRINT_FIELD(is_supported_ept(),
                 VMCS_GUEST_PDPTE1_HIGH);
-    PRINT_FIELD(supports_ept(),
+    PRINT_FIELD(is_supported_ept(),
                 VMCS_GUEST_PDPTE2_FULL);
-    PRINT_FIELD(supports_ept(),
+    PRINT_FIELD(is_supported_ept(),
                 VMCS_GUEST_PDPTE2_HIGH);
-    PRINT_FIELD(supports_ept(),
+    PRINT_FIELD(is_supported_ept(),
                 VMCS_GUEST_PDPTE3_FULL);
-    PRINT_FIELD(supports_ept(),
+    PRINT_FIELD(is_supported_ept(),
                 VMCS_GUEST_PDPTE3_HIGH);
 
     bfdebug << bfendl;
     bfdebug << "64bit Host State Fields:" << bfendl;
-    PRINT_FIELD(supports_load_ia32_pat_on_exit(),
+    PRINT_FIELD(is_supported_load_ia32_pat_on_exit(),
                 VMCS_HOST_IA32_PAT_FULL);
-    PRINT_FIELD(supports_load_ia32_pat_on_exit(),
+    PRINT_FIELD(is_supported_load_ia32_pat_on_exit(),
                 VMCS_HOST_IA32_PAT_HIGH);
-    PRINT_FIELD(supports_load_ia32_efer_on_exit(),
+    PRINT_FIELD(is_supported_load_ia32_efer_on_exit(),
                 VMCS_HOST_IA32_EFER_FULL);
-    PRINT_FIELD(supports_load_ia32_efer_on_exit(),
+    PRINT_FIELD(is_supported_load_ia32_efer_on_exit(),
                 VMCS_HOST_IA32_EFER_HIGH);
-    PRINT_FIELD(supports_load_ia32_perf_global_ctrl_on_exit(),
+    PRINT_FIELD(is_supported_load_ia32_perf_global_ctrl_on_exit(),
                 VMCS_HOST_IA32_PERF_GLOBAL_CTRL_FULL);
-    PRINT_FIELD(supports_load_ia32_perf_global_ctrl_on_exit(),
+    PRINT_FIELD(is_supported_load_ia32_perf_global_ctrl_on_exit(),
                 VMCS_HOST_IA32_PERF_GLOBAL_CTRL_HIGH);
 
     bfdebug << bfendl;
@@ -218,13 +218,13 @@ vmcs_intel_x64::dump_vmcs()
     PRINT_FIELD(true, VMCS_VM_ENTRY_INTERRUPTION_INFORMATION_FIELD);
     PRINT_FIELD(true, VMCS_VM_ENTRY_EXCEPTION_ERROR_CODE);
     PRINT_FIELD(true, VMCS_VM_ENTRY_INSTRUCTION_LENGTH);
-    PRINT_FIELD(supports_tpr_shadow(),
+    PRINT_FIELD(is_supported_tpr_shadow(),
                 VMCS_TPR_THRESHOLD);
-    PRINT_FIELD(supports_secondary_controls(),
+    PRINT_FIELD(is_supported_secondary_controls(),
                 VMCS_SECONDARY_PROCESSOR_BASED_VM_EXECUTION_CONTROLS);
-    PRINT_FIELD(supports_pause_loop_exiting(),
+    PRINT_FIELD(is_supported_pause_loop_exiting(),
                 VMCS_PLE_GAP);
-    PRINT_FIELD(supports_pause_loop_exiting(),
+    PRINT_FIELD(is_supported_pause_loop_exiting(),
                 VMCS_PLE_WINDOW);
 
     bfdebug << bfendl;
@@ -262,7 +262,7 @@ vmcs_intel_x64::dump_vmcs()
     PRINT_FIELD(true, VMCS_GUEST_ACTIVITY_STATE);
     PRINT_FIELD(true, VMCS_GUEST_SMBASE);
     PRINT_FIELD(true, VMCS_GUEST_IA32_SYSENTER_CS);
-    PRINT_FIELD(supports_vmx_preemption_timer(),
+    PRINT_FIELD(is_supported_vmx_preemption_timer(),
                 VMCS_VMX_PREEMPTION_TIMER_VALUE);
 
     bfdebug << bfendl;

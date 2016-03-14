@@ -20,7 +20,6 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #include <vmcs/vmcs_intel_x64.h>
-#include <vmcs/vmcs_intel_x64_checks.h>
 #include <vmcs/vmcs_intel_x64_exceptions.h>
 
 void
@@ -43,7 +42,7 @@ vmcs_intel_x64::checks_on_guest_control_registers_debug_registers_and_msrs()
     check_guest_verify_ia_32e_mode_enabled();
     check_guest_verify_ia_32e_mode_disabled();
     check_guest_cr3_for_unsupported_bits();
-    check_guest_load_debug_controls_verify_verify_dr7();
+    check_guest_load_debug_controls_verify_dr7();
     check_guest_ia32_sysenter_esp_canonical_address();
     check_guest_ia32_sysenter_eip_canonical_address();
     check_guest_verify_load_ia32_perf_global_ctrl();
@@ -89,9 +88,7 @@ vmcs_intel_x64::check_guest_cr4_for_unsupported_bits()
 void
 vmcs_intel_x64::check_guest_load_debug_controls_verify_reserved()
 {
-    auto ctls = get_entry_ctls();
-
-    if entry_disabled(ctls, VM_ENTRY_CONTROL_LOAD_DEBUG_CONTROLS)
+    if (is_enabled_load_debug_controls_on_entry() == false)
         return;
 
     auto vmcs_ia32_debugctl =
@@ -105,7 +102,7 @@ vmcs_intel_x64::check_guest_load_debug_controls_verify_reserved()
 void
 vmcs_intel_x64::check_guest_verify_ia_32e_mode_enabled()
 {
-    if (check_is_ia32e_mode_enabled() == false)
+    if (is_enabled_ia_32e_mode_guest() == false)
         return;
 
     auto cr0 = vmread(VMCS_GUEST_CR0);
@@ -123,7 +120,7 @@ vmcs_intel_x64::check_guest_verify_ia_32e_mode_enabled()
 void
 vmcs_intel_x64::check_guest_verify_ia_32e_mode_disabled()
 {
-    if (check_is_ia32e_mode_enabled() == true)
+    if (is_enabled_ia_32e_mode_guest() == true)
         return;
 
     auto cr4 = vmread(VMCS_GUEST_CR4);
@@ -143,11 +140,9 @@ vmcs_intel_x64::check_guest_cr3_for_unsupported_bits()
 }
 
 void
-vmcs_intel_x64::check_guest_load_debug_controls_verify_verify_dr7()
+vmcs_intel_x64::check_guest_load_debug_controls_verify_dr7()
 {
-    auto ctls = get_entry_ctls();
-
-    if entry_disabled(ctls, VM_ENTRY_CONTROL_LOAD_DEBUG_CONTROLS)
+    if (is_enabled_load_debug_controls_on_entry() == false)
         return;
 
     auto dr7 = vmread(VMCS_GUEST_DR7);
@@ -178,9 +173,7 @@ vmcs_intel_x64::check_guest_ia32_sysenter_eip_canonical_address()
 void
 vmcs_intel_x64::check_guest_verify_load_ia32_perf_global_ctrl()
 {
-    auto ctls = get_entry_ctls();
-
-    if entry_disabled(ctls, VM_ENTRY_CONTROL_LOAD_IA32_PERF_GLOBAL_CTRL)
+    if (is_enabled_load_ia32_perf_global_ctrl_on_entry() == false)
         return;
 
     auto vmcs_ia32_perf_global_ctrl =
@@ -212,9 +205,7 @@ private_check_pat(uint64_t pat)
 void
 vmcs_intel_x64::check_guest_verify_load_ia32_pat()
 {
-    auto ctls = get_entry_ctls();
-
-    if entry_disabled(ctls, VM_ENTRY_CONTROL_LOAD_IA32_PAT)
+    if (is_enabled_load_ia32_pat_on_entry() == false)
         return;
 
     auto pat0 = vmread(VMCS_GUEST_IA32_PAT_FULL) & 0x00000000000000FF >> 0;
@@ -254,9 +245,7 @@ vmcs_intel_x64::check_guest_verify_load_ia32_pat()
 void
 vmcs_intel_x64::check_guest_verify_load_ia32_efer()
 {
-    auto ctls = get_entry_ctls();
-
-    if entry_disabled(ctls, VM_ENTRY_CONTROL_LOAD_IA32_EFER)
+    if (is_enabled_load_ia32_efer_on_entry() == false)
         return;
 
     auto efer = vmread(VMCS_GUEST_IA32_EFER_FULL);
@@ -269,11 +258,11 @@ vmcs_intel_x64::check_guest_verify_load_ia32_efer()
     auto lma = (efer && 0x0000000000000400);
     auto lme = (efer && 0x0000000000000100);
 
-    if (check_is_ia32e_mode_enabled() == false && lma != 0)
+    if (is_enabled_ia_32e_mode_guest() == false && lma != 0)
         throw vmcs_invalid_field("ia 32e mode is 0, but efer.lma is 1. "
                                  "they must be equal", lma);
 
-    if (check_is_ia32e_mode_enabled() == true && lma == 0)
+    if (is_enabled_ia_32e_mode_guest() == true && lma == 0)
         throw vmcs_invalid_field("ia 32e mode is 1, but efer.lma is 0. "
                                  "they must be equal", lma);
 
@@ -405,10 +394,10 @@ vmcs_intel_x64::check_guest_ldtr_ti_bit_equals_0()
 void
 vmcs_intel_x64::check_guest_ss_and_cs_rpl_are_the_same()
 {
-    if (check_is_v8086_enabled() == true)
+    if (is_enabled_v8086() == true)
         return;
 
-    if (check_is_unrestricted_enabled() == true)
+    if (is_enabled_unrestricted_guests() == true)
         return;
 
     auto ss = vmread(VMCS_GUEST_SS_SELECTOR);
@@ -421,7 +410,7 @@ vmcs_intel_x64::check_guest_ss_and_cs_rpl_are_the_same()
 void
 vmcs_intel_x64::check_guest_cs_base_is_shifted()
 {
-    if (check_is_v8086_enabled() == false)
+    if (is_enabled_v8086() == false)
         return;
 
     auto cs = vmread(VMCS_GUEST_CS_SELECTOR);
@@ -435,7 +424,7 @@ vmcs_intel_x64::check_guest_cs_base_is_shifted()
 void
 vmcs_intel_x64::check_guest_ss_base_is_shifted()
 {
-    if (check_is_v8086_enabled() == false)
+    if (is_enabled_v8086() == false)
         return;
 
     auto ss = vmread(VMCS_GUEST_SS_SELECTOR);
@@ -449,7 +438,7 @@ vmcs_intel_x64::check_guest_ss_base_is_shifted()
 void
 vmcs_intel_x64::check_guest_ds_base_is_shifted()
 {
-    if (check_is_v8086_enabled() == false)
+    if (is_enabled_v8086() == false)
         return;
 
     auto ds = vmread(VMCS_GUEST_DS_SELECTOR);
@@ -463,7 +452,7 @@ vmcs_intel_x64::check_guest_ds_base_is_shifted()
 void
 vmcs_intel_x64::check_guest_es_base_is_shifted()
 {
-    if (check_is_v8086_enabled() == false)
+    if (is_enabled_v8086() == false)
         return;
 
     auto es = vmread(VMCS_GUEST_ES_SELECTOR);
@@ -477,7 +466,7 @@ vmcs_intel_x64::check_guest_es_base_is_shifted()
 void
 vmcs_intel_x64::check_guest_fs_base_is_shifted()
 {
-    if (check_is_v8086_enabled() == false)
+    if (is_enabled_v8086() == false)
         return;
 
     auto fs = vmread(VMCS_GUEST_FS_SELECTOR);
@@ -491,7 +480,7 @@ vmcs_intel_x64::check_guest_fs_base_is_shifted()
 void
 vmcs_intel_x64::check_guest_gs_base_is_shifted()
 {
-    if (check_is_v8086_enabled() == false)
+    if (is_enabled_v8086() == false)
         return;
 
     auto gs = vmread(VMCS_GUEST_GS_SELECTOR);
@@ -593,7 +582,7 @@ vmcs_intel_x64::check_guest_es_base_upper_dword_0()
 void
 vmcs_intel_x64::check_guest_cs_limit()
 {
-    if (check_is_v8086_enabled() == false)
+    if (is_enabled_v8086() == false)
         return;
 
     auto cs_limit = vmread(VMCS_GUEST_CS_LIMIT);
@@ -606,7 +595,7 @@ vmcs_intel_x64::check_guest_cs_limit()
 void
 vmcs_intel_x64::check_guest_ss_limit()
 {
-    if (check_is_v8086_enabled() == false)
+    if (is_enabled_v8086() == false)
         return;
 
     auto ss_limit = vmread(VMCS_GUEST_SS_LIMIT);
@@ -619,7 +608,7 @@ vmcs_intel_x64::check_guest_ss_limit()
 void
 vmcs_intel_x64::check_guest_ds_limit()
 {
-    if (check_is_v8086_enabled() == false)
+    if (is_enabled_v8086() == false)
         return;
 
     auto ds_limit = vmread(VMCS_GUEST_DS_LIMIT);
@@ -632,7 +621,7 @@ vmcs_intel_x64::check_guest_ds_limit()
 void
 vmcs_intel_x64::check_guest_es_limit()
 {
-    if (check_is_v8086_enabled() == false)
+    if (is_enabled_v8086() == false)
         return;
 
     auto es_limit = vmread(VMCS_GUEST_ES_LIMIT);
@@ -645,7 +634,7 @@ vmcs_intel_x64::check_guest_es_limit()
 void
 vmcs_intel_x64::check_guest_gs_limit()
 {
-    if (check_is_v8086_enabled() == false)
+    if (is_enabled_v8086() == false)
         return;
 
     auto gs_limit = vmread(VMCS_GUEST_GS_LIMIT);
@@ -658,7 +647,7 @@ vmcs_intel_x64::check_guest_gs_limit()
 void
 vmcs_intel_x64::check_guest_fs_limit()
 {
-    if (check_is_v8086_enabled() == false)
+    if (is_enabled_v8086() == false)
         return;
 
     auto fs_limit = vmread(VMCS_GUEST_FS_LIMIT);
@@ -671,7 +660,7 @@ vmcs_intel_x64::check_guest_fs_limit()
 void
 vmcs_intel_x64::check_guest_v8086_cs_access_rights()
 {
-    if (check_is_v8086_enabled() == false)
+    if (is_enabled_v8086() == false)
         return;
 
     auto cs_access = vmread(VMCS_GUEST_CS_ACCESS_RIGHTS);
@@ -684,7 +673,7 @@ vmcs_intel_x64::check_guest_v8086_cs_access_rights()
 void
 vmcs_intel_x64::check_guest_v8086_ss_access_rights()
 {
-    if (check_is_v8086_enabled() == false)
+    if (is_enabled_v8086() == false)
         return;
 
     auto ss_access = vmread(VMCS_GUEST_SS_ACCESS_RIGHTS);
@@ -697,7 +686,7 @@ vmcs_intel_x64::check_guest_v8086_ss_access_rights()
 void
 vmcs_intel_x64::check_guest_v8086_ds_access_rights()
 {
-    if (check_is_v8086_enabled() == false)
+    if (is_enabled_v8086() == false)
         return;
 
     auto ds_access = vmread(VMCS_GUEST_DS_ACCESS_RIGHTS);
@@ -710,7 +699,7 @@ vmcs_intel_x64::check_guest_v8086_ds_access_rights()
 void
 vmcs_intel_x64::check_guest_v8086_es_access_rights()
 {
-    if (check_is_v8086_enabled() == false)
+    if (is_enabled_v8086() == false)
         return;
 
     auto es_access = vmread(VMCS_GUEST_ES_ACCESS_RIGHTS);
@@ -723,7 +712,7 @@ vmcs_intel_x64::check_guest_v8086_es_access_rights()
 void
 vmcs_intel_x64::check_guest_v8086_fs_access_rights()
 {
-    if (check_is_v8086_enabled() == false)
+    if (is_enabled_v8086() == false)
         return;
 
     auto fs_access = vmread(VMCS_GUEST_FS_ACCESS_RIGHTS);
@@ -736,7 +725,7 @@ vmcs_intel_x64::check_guest_v8086_fs_access_rights()
 void
 vmcs_intel_x64::check_guest_v8086_gs_access_rights()
 {
-    if (check_is_v8086_enabled() == false)
+    if (is_enabled_v8086() == false)
         return;
 
     auto gs_access = vmread(VMCS_GUEST_GS_ACCESS_RIGHTS);
@@ -754,7 +743,7 @@ vmcs_intel_x64::check_guest_cs_access_rights_type()
     switch (cs_access & SEGMENT_ACCESS_RIGHTS_TYPE)
     {
         case 3:
-            if (check_is_unrestricted_enabled() == false)
+            if (is_enabled_unrestricted_guests() == false)
                 break;
 
         case 9:
@@ -1029,7 +1018,7 @@ vmcs_intel_x64::check_guest_ss_dpl_must_equal_rpl()
     auto ss = vmread(VMCS_GUEST_SS_SELECTOR);
     auto ss_access = vmread(VMCS_GUEST_SS_ACCESS_RIGHTS);
 
-    if (check_is_unrestricted_enabled() == true)
+    if (is_enabled_unrestricted_guests() == true)
         return;
 
     auto ss_dpl = (ss_access & SEGMENT_ACCESS_RIGHTS_DPL) >> 5;
@@ -1065,7 +1054,7 @@ vmcs_intel_x64::check_guest_ds_dpl()
     auto ds = vmread(VMCS_GUEST_DS_SELECTOR);
     auto ds_access = vmread(VMCS_GUEST_DS_ACCESS_RIGHTS);
 
-    if (check_is_unrestricted_enabled() == true)
+    if (is_enabled_unrestricted_guests() == true)
         return;
 
     if (check_is_ds_usable() == false)
@@ -1090,7 +1079,7 @@ vmcs_intel_x64::check_guest_es_dpl()
     auto es = vmread(VMCS_GUEST_ES_SELECTOR);
     auto es_access = vmread(VMCS_GUEST_ES_ACCESS_RIGHTS);
 
-    if (check_is_unrestricted_enabled() == true)
+    if (is_enabled_unrestricted_guests() == true)
         return;
 
     if (check_is_es_usable() == false)
@@ -1115,7 +1104,7 @@ vmcs_intel_x64::check_guest_fs_dpl()
     auto fs = vmread(VMCS_GUEST_FS_SELECTOR);
     auto fs_access = vmread(VMCS_GUEST_FS_ACCESS_RIGHTS);
 
-    if (check_is_unrestricted_enabled() == true)
+    if (is_enabled_unrestricted_guests() == true)
         return;
 
     if (check_is_fs_usable() == false)
@@ -1140,7 +1129,7 @@ vmcs_intel_x64::check_guest_gs_dpl()
     auto gs = vmread(VMCS_GUEST_GS_SELECTOR);
     auto gs_access = vmread(VMCS_GUEST_GS_ACCESS_RIGHTS);
 
-    if (check_is_unrestricted_enabled() == true)
+    if (is_enabled_unrestricted_guests() == true)
         return;
 
     if (check_is_gs_usable() == false)
@@ -1312,7 +1301,7 @@ vmcs_intel_x64::check_guest_gs_access_rights_reserved_must_be_0()
 void
 vmcs_intel_x64::check_guest_cs_db_must_be_0_if_l_equals_1()
 {
-    if (check_is_ia32e_mode_enabled() == false)
+    if (is_enabled_ia_32e_mode_guest() == false)
         return;
 
     auto cs_access = vmread(VMCS_GUEST_CS_ACCESS_RIGHTS);
@@ -1519,7 +1508,7 @@ vmcs_intel_x64::check_guest_tr_type_must_be_11()
     switch (tr_access & SEGMENT_ACCESS_RIGHTS_TYPE)
     {
         case 3:
-            if (check_is_ia32e_mode_enabled() == true)
+            if (is_enabled_ia_32e_mode_guest() == true)
                 throw vmcs_invalid_field("tr type canot only be 3 if ia32e "
                                          "mode is disabled", tr_access);
         case 11:

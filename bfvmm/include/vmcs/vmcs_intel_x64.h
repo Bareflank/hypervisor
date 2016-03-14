@@ -94,36 +94,36 @@ protected:
     ///
     virtual void vmwrite(uint64_t field, uint64_t value);
 
-private:
+protected:
 
-    void create_vmcs_region();
-    void release_vmcs_region();
+    virtual void create_vmcs_region();
+    virtual void release_vmcs_region();
 
-    void write_16bit_control_state(const vmcs_state_intel_x64 &state);
-    void write_64bit_control_state(const vmcs_state_intel_x64 &state);
-    void write_32bit_control_state(const vmcs_state_intel_x64 &state);
-    void write_natural_control_state(const vmcs_state_intel_x64 &state);
+    virtual void write_16bit_control_state(const vmcs_state_intel_x64 &state);
+    virtual void write_64bit_control_state(const vmcs_state_intel_x64 &state);
+    virtual void write_32bit_control_state(const vmcs_state_intel_x64 &state);
+    virtual void write_natural_control_state(const vmcs_state_intel_x64 &state);
 
-    void write_16bit_guest_state(const vmcs_state_intel_x64 &state);
-    void write_64bit_guest_state(const vmcs_state_intel_x64 &state);
-    void write_32bit_guest_state(const vmcs_state_intel_x64 &state);
-    void write_natural_guest_state(const vmcs_state_intel_x64 &state);
+    virtual void write_16bit_guest_state(const vmcs_state_intel_x64 &state);
+    virtual void write_64bit_guest_state(const vmcs_state_intel_x64 &state);
+    virtual void write_32bit_guest_state(const vmcs_state_intel_x64 &state);
+    virtual void write_natural_guest_state(const vmcs_state_intel_x64 &state);
 
-    void write_16bit_host_state(const vmcs_state_intel_x64 &state);
-    void write_64bit_host_state(const vmcs_state_intel_x64 &state);
-    void write_32bit_host_state(const vmcs_state_intel_x64 &state);
-    void write_natural_host_state(const vmcs_state_intel_x64 &state);
+    virtual void write_16bit_host_state(const vmcs_state_intel_x64 &state);
+    virtual void write_64bit_host_state(const vmcs_state_intel_x64 &state);
+    virtual void write_32bit_host_state(const vmcs_state_intel_x64 &state);
+    virtual void write_natural_host_state(const vmcs_state_intel_x64 &state);
 
-    void promote_16bit_guest_state();
-    void promote_64bit_guest_state();
-    void promote_32bit_guest_state();
-    void promote_natural_guest_state();
+    virtual void promote_16bit_guest_state();
+    virtual void promote_64bit_guest_state();
+    virtual void promote_32bit_guest_state();
+    virtual void promote_natural_guest_state();
 
-    void default_pin_based_vm_execution_controls();
-    void default_primary_processor_based_vm_execution_controls();
-    void default_secondary_processor_based_vm_execution_controls();
-    void default_vm_exit_controls();
-    void default_vm_entry_controls();
+    virtual void default_pin_based_vm_execution_controls();
+    virtual void default_primary_processor_based_vm_execution_controls();
+    virtual void default_secondary_processor_based_vm_execution_controls();
+    virtual void default_vm_exit_controls();
+    virtual void default_vm_entry_controls();
 
 protected:
 
@@ -132,9 +132,6 @@ protected:
     virtual std::string check_vm_instruction_error();
     virtual bool check_is_address_canonical(uint64_t addr);
     virtual bool check_has_valid_address_width(uint64_t addr);
-    virtual bool check_is_v8086_enabled();
-    virtual bool check_is_unrestricted_enabled();
-    virtual bool check_is_ia32e_mode_enabled();
     virtual bool check_is_cs_usable();
     virtual bool check_is_ss_usable();
     virtual bool check_is_ds_usable();
@@ -144,82 +141,145 @@ protected:
     virtual bool check_is_tr_usable();
     virtual bool check_is_ldtr_usable();
 
-    virtual bool check_vmcs_host_state();
-    virtual void check_vmcs_guest_state();
-    virtual void check_vmcs_control_state();
-
     virtual uint64_t get_pin_ctls() const;
     virtual uint64_t get_proc_ctls() const;
     virtual uint64_t get_proc2_ctls() const;
     virtual uint64_t get_exit_ctls() const;
     virtual uint64_t get_entry_ctls() const;
 
-    virtual bool supports_external_interrupt_exiting();
-    virtual bool supports_nmi_exiting();
-    virtual bool supports_virtual_nmis();
-    virtual bool supports_vmx_preemption_timer();
-    virtual bool supports_posted_interrupts();
+    virtual bool is_enabled_v8086() const;
 
-    virtual bool supports_interrupt_window_exiting();
-    virtual bool supports_tsc_offsetting();
-    virtual bool supports_hlt_exiting();
-    virtual bool supports_invlpg_exiting();
-    virtual bool supports_mwait_exiting();
-    virtual bool supports_rdpmc_exiting();
-    virtual bool supports_rdtsc_exiting();
-    virtual bool supports_cr3_load_exiting();
-    virtual bool supports_cr3_store_exiting();
-    virtual bool supports_cr8_load_exiting();
-    virtual bool supports_cr8_store_exiting();
-    virtual bool supports_tpr_shadow();
-    virtual bool supports_nmi_window_exiting();
-    virtual bool supports_mov_dr_exiting();
-    virtual bool supports_unconditional_io_exiting();
-    virtual bool supports_io_bitmaps();
-    virtual bool supports_monitor_trap_flag();
-    virtual bool supports_msr_bitmaps();
-    virtual bool supports_monitor_exiting();
-    virtual bool supports_pause_exiting();
-    virtual bool supports_secondary_controls();
+    virtual bool is_enabled_external_interrupt_exiting() const;
+    virtual bool is_enabled_nmi_exiting() const;
+    virtual bool is_enabled_virtual_nmis() const;
+    virtual bool is_enabled_vmx_preemption_timer() const;
+    virtual bool is_enabled_posted_interrupts() const;
 
-    virtual bool supports_virtualized_apic();
-    virtual bool supports_ept();
-    virtual bool supports_descriptor_table_exiting();
-    virtual bool supports_rdtscp();
-    virtual bool supports_x2apic_mode();
-    virtual bool supports_vpid();
-    virtual bool supports_wbinvd_exiting();
-    virtual bool supports_unrestricted_guests();
-    virtual bool supports_apic_register_virtualization();
-    virtual bool supports_virtual_interrupt_delivery();
-    virtual bool supports_pause_loop_exiting();
-    virtual bool supports_rdrand_exiting();
-    virtual bool supports_invpcid();
-    virtual bool supports_vm_functions();
-    virtual bool supports_vmcs_shadowing();
-    virtual bool supports_rdseed_exiting();
-    virtual bool supports_ept_violation_ve();
-    virtual bool supports_xsave_xrestore();
+    virtual bool is_enabled_interrupt_window_exiting() const;
+    virtual bool is_enabled_tsc_offsetting() const;
+    virtual bool is_enabled_hlt_exiting() const;
+    virtual bool is_enabled_invlpg_exiting() const;
+    virtual bool is_enabled_mwait_exiting() const;
+    virtual bool is_enabled_rdpmc_exiting() const;
+    virtual bool is_enabled_rdtsc_exiting() const;
+    virtual bool is_enabled_cr3_load_exiting() const;
+    virtual bool is_enabled_cr3_store_exiting() const;
+    virtual bool is_enabled_cr8_load_exiting() const;
+    virtual bool is_enabled_cr8_store_exiting() const;
+    virtual bool is_enabled_tpr_shadow() const;
+    virtual bool is_enabled_nmi_window_exiting() const;
+    virtual bool is_enabled_mov_dr_exiting() const;
+    virtual bool is_enabled_unconditional_io_exiting() const;
+    virtual bool is_enabled_io_bitmaps() const;
+    virtual bool is_enabled_monitor_trap_flag() const;
+    virtual bool is_enabled_msr_bitmaps() const;
+    virtual bool is_enabled_monitor_exiting() const;
+    virtual bool is_enabled_pause_exiting() const;
+    virtual bool is_enabled_secondary_controls() const;
 
-    virtual bool supports_save_debug_controls_on_exit();
-    virtual bool supports_host_address_space_size();
-    virtual bool supports_load_ia32_perf_global_ctrl_on_exit();
-    virtual bool supports_ack_interrupt_on_exit();
-    virtual bool supports_save_ia32_pat_on_exit();
-    virtual bool supports_load_ia32_pat_on_exit();
-    virtual bool supports_save_ia32_efer_on_exit();
-    virtual bool supports_load_ia32_efer_on_exit();
-    virtual bool supports_save_vmx_preemption_timer_on_exit();
+    virtual bool is_enabled_virtualized_apic() const;
+    virtual bool is_enabled_ept() const;
+    virtual bool is_enabled_descriptor_table_exiting() const;
+    virtual bool is_enabled_rdtscp() const;
+    virtual bool is_enabled_x2apic_mode() const;
+    virtual bool is_enabled_vpid() const;
+    virtual bool is_enabled_wbinvd_exiting() const;
+    virtual bool is_enabled_unrestricted_guests() const;
+    virtual bool is_enabled_apic_register_virtualization() const;
+    virtual bool is_enabled_virtual_interrupt_delivery() const;
+    virtual bool is_enabled_pause_loop_exiting() const;
+    virtual bool is_enabled_rdrand_exiting() const;
+    virtual bool is_enabled_invpcid() const;
+    virtual bool is_enabled_vm_functions() const;
+    virtual bool is_enabled_vmcs_shadowing() const;
+    virtual bool is_enabled_rdseed_exiting() const;
+    virtual bool is_enabled_ept_violation_ve() const;
+    virtual bool is_enabled_xsave_xrestore() const;
 
-    virtual bool supports_load_debug_controls_on_entry();
-    virtual bool supports_ia_32e_mode_guest();
-    virtual bool supports_entry_to_smm();
-    virtual bool supports_deactivate_dual_monitor_treatment();
-    virtual bool supports_load_ia32_perf_global_ctrl_on_entry();
-    virtual bool supports_load_ia32_pat_on_entry();
-    virtual bool supports_load_ia32_efer_on_entry();
+    virtual bool is_enabled_save_debug_controls_on_exit() const;
+    virtual bool is_enabled_host_address_space_size() const;
+    virtual bool is_enabled_load_ia32_perf_global_ctrl_on_exit() const;
+    virtual bool is_enabled_ack_interrupt_on_exit() const;
+    virtual bool is_enabled_save_ia32_pat_on_exit() const;
+    virtual bool is_enabled_load_ia32_pat_on_exit() const;
+    virtual bool is_enabled_save_ia32_efer_on_exit() const;
+    virtual bool is_enabled_load_ia32_efer_on_exit() const;
+    virtual bool is_enabled_save_vmx_preemption_timer_on_exit() const;
 
-    virtual bool supports_eptp_switching();
+    virtual bool is_enabled_load_debug_controls_on_entry() const;
+    virtual bool is_enabled_ia_32e_mode_guest() const;
+    virtual bool is_enabled_entry_to_smm() const;
+    virtual bool is_enabled_deactivate_dual_monitor_treatment() const;
+    virtual bool is_enabled_load_ia32_perf_global_ctrl_on_entry() const;
+    virtual bool is_enabled_load_ia32_pat_on_entry() const;
+    virtual bool is_enabled_load_ia32_efer_on_entry() const;
+
+    virtual bool is_supported_external_interrupt_exiting() const;
+    virtual bool is_supported_nmi_exiting() const;
+    virtual bool is_supported_virtual_nmis() const;
+    virtual bool is_supported_vmx_preemption_timer() const;
+    virtual bool is_supported_posted_interrupts() const;
+
+    virtual bool is_supported_interrupt_window_exiting() const;
+    virtual bool is_supported_tsc_offsetting() const;
+    virtual bool is_supported_hlt_exiting() const;
+    virtual bool is_supported_invlpg_exiting() const;
+    virtual bool is_supported_mwait_exiting() const;
+    virtual bool is_supported_rdpmc_exiting() const;
+    virtual bool is_supported_rdtsc_exiting() const;
+    virtual bool is_supported_cr3_load_exiting() const;
+    virtual bool is_supported_cr3_store_exiting() const;
+    virtual bool is_supported_cr8_load_exiting() const;
+    virtual bool is_supported_cr8_store_exiting() const;
+    virtual bool is_supported_tpr_shadow() const;
+    virtual bool is_supported_nmi_window_exiting() const;
+    virtual bool is_supported_mov_dr_exiting() const;
+    virtual bool is_supported_unconditional_io_exiting() const;
+    virtual bool is_supported_io_bitmaps() const;
+    virtual bool is_supported_monitor_trap_flag() const;
+    virtual bool is_supported_msr_bitmaps() const;
+    virtual bool is_supported_monitor_exiting() const;
+    virtual bool is_supported_pause_exiting() const;
+    virtual bool is_supported_secondary_controls() const;
+
+    virtual bool is_supported_virtualized_apic() const;
+    virtual bool is_supported_ept() const;
+    virtual bool is_supported_descriptor_table_exiting() const;
+    virtual bool is_supported_rdtscp() const;
+    virtual bool is_supported_x2apic_mode() const;
+    virtual bool is_supported_vpid() const;
+    virtual bool is_supported_wbinvd_exiting() const;
+    virtual bool is_supported_unrestricted_guests() const;
+    virtual bool is_supported_apic_register_virtualization() const;
+    virtual bool is_supported_virtual_interrupt_delivery() const;
+    virtual bool is_supported_pause_loop_exiting() const;
+    virtual bool is_supported_rdrand_exiting() const;
+    virtual bool is_supported_invpcid() const;
+    virtual bool is_supported_vm_functions() const;
+    virtual bool is_supported_vmcs_shadowing() const;
+    virtual bool is_supported_rdseed_exiting() const;
+    virtual bool is_supported_ept_violation_ve() const;
+    virtual bool is_supported_xsave_xrestore() const;
+
+    virtual bool is_supported_save_debug_controls_on_exit() const;
+    virtual bool is_supported_host_address_space_size() const;
+    virtual bool is_supported_load_ia32_perf_global_ctrl_on_exit() const;
+    virtual bool is_supported_ack_interrupt_on_exit() const;
+    virtual bool is_supported_save_ia32_pat_on_exit() const;
+    virtual bool is_supported_load_ia32_pat_on_exit() const;
+    virtual bool is_supported_save_ia32_efer_on_exit() const;
+    virtual bool is_supported_load_ia32_efer_on_exit() const;
+    virtual bool is_supported_save_vmx_preemption_timer_on_exit() const;
+
+    virtual bool is_supported_load_debug_controls_on_entry() const;
+    virtual bool is_supported_ia_32e_mode_guest() const;
+    virtual bool is_supported_entry_to_smm() const;
+    virtual bool is_supported_deactivate_dual_monitor_treatment() const;
+    virtual bool is_supported_load_ia32_perf_global_ctrl_on_entry() const;
+    virtual bool is_supported_load_ia32_pat_on_entry() const;
+    virtual bool is_supported_load_ia32_efer_on_entry() const;
+
+    virtual bool is_supported_eptp_switching() const;
 
     virtual void print_execution_controls();
     virtual void print_pin_based_vm_execution_controls();
@@ -227,6 +287,10 @@ protected:
     virtual void print_secondary_processor_based_vm_execution_controls();
     virtual void print_vm_exit_control_fields();
     virtual void print_vm_entry_control_fields();
+
+    virtual bool check_vmcs_host_state();
+    virtual void check_vmcs_guest_state();
+    virtual void check_vmcs_control_state();
 
     virtual bool check_host_control_registers_and_msrs();
     virtual bool check_host_cr0_for_unsupported_bits();
@@ -271,7 +335,7 @@ protected:
     virtual void check_guest_verify_ia_32e_mode_enabled();
     virtual void check_guest_verify_ia_32e_mode_disabled();
     virtual void check_guest_cr3_for_unsupported_bits();
-    virtual void check_guest_load_debug_controls_verify_verify_dr7();
+    virtual void check_guest_load_debug_controls_verify_dr7();
     virtual void check_guest_ia32_sysenter_esp_canonical_address();
     virtual void check_guest_ia32_sysenter_eip_canonical_address();
     virtual void check_guest_verify_load_ia32_perf_global_ctrl();
