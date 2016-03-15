@@ -92,7 +92,12 @@ vmcs_intel_x64::launch(const vmcs_state_intel_x64 &host_state,
     this->check_vmcs_guest_state();
 
     if (m_intrinsics->vmlaunch() == false)
-        throw vmcs_launch_failure(this->check_vm_instruction_error());
+    {
+        this->check_vmcs_control_state();
+        this->check_vmcs_guest_state();
+
+        throw vmcs_launch_failure(this->get_vm_instruction_error());
+    }
 
     cor1.commit();
 }
