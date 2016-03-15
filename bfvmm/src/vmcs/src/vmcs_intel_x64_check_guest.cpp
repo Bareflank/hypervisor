@@ -21,6 +21,7 @@
 
 #include <vmcs/vmcs_intel_x64.h>
 #include <vmcs/vmcs_intel_x64_exceptions.h>
+#include <memory_manager/memory_manager.h>
 
 void
 vmcs_intel_x64::check_vmcs_guest_state()
@@ -28,8 +29,8 @@ vmcs_intel_x64::check_vmcs_guest_state()
     checks_on_guest_control_registers_debug_registers_and_msrs();
     checks_on_guest_segment_registers();
     checks_on_guest_descriptor_table_registers();
-    // checks_on_guest_rip_and_rflags();
-    // checks_on_guest_non_register_state();
+    checks_on_guest_rip_and_rflags();
+    checks_on_guest_non_register_state();
 }
 
 void
@@ -135,7 +136,7 @@ vmcs_intel_x64::check_guest_cr3_for_unsupported_bits()
 {
     auto cr3 = vmread(VMCS_GUEST_CR0);
 
-    if (check_has_valid_address_width(cr3) == false)
+    if (is_physical_address_valid(cr3) == false)
         throw invalid_address("cr3 too large", cr3);
 }
 
@@ -157,7 +158,7 @@ vmcs_intel_x64::check_guest_ia32_sysenter_esp_canonical_address()
 {
     auto esp = vmread(VMCS_GUEST_IA32_SYSENTER_ESP);
 
-    if (check_is_address_canonical(esp) == false)
+    if (is_address_canonical(esp) == false)
         throw invalid_address("guest esp must be canonical", esp);
 }
 
@@ -166,7 +167,7 @@ vmcs_intel_x64::check_guest_ia32_sysenter_eip_canonical_address()
 {
     auto eip = vmread(VMCS_GUEST_IA32_SYSENTER_EIP);
 
-    if (check_is_address_canonical(eip) == false)
+    if (is_address_canonical(eip) == false)
         throw invalid_address("guest eip must be canonical", eip);
 }
 
@@ -255,8 +256,8 @@ vmcs_intel_x64::check_guest_verify_load_ia32_efer()
                                  "load ia32 efer entry is enabled", efer);
 
     auto cr0 = vmread(VMCS_GUEST_CR0);
-    auto lma = (efer && 0x0000000000000400);
-    auto lme = (efer && 0x0000000000000100);
+    auto lma = (efer && IA32_EFER_LMA);
+    auto lme = (efer && IA32_EFER_LME);
 
     if (is_enabled_ia_32e_mode_guest() == false && lma != 0)
         throw vmcs_invalid_field("ia 32e mode is 0, but efer.lma is 1. "
@@ -384,7 +385,7 @@ vmcs_intel_x64::check_guest_ldtr_ti_bit_equals_0()
 {
     auto ldtr = vmread(VMCS_GUEST_LDTR_SELECTOR);
 
-    if (check_is_ldtr_usable() == false)
+    if (is_ldtr_usable() == false)
         return;
 
     if ((ldtr & SELECTOR_TI_FLAG) != 0)
@@ -496,7 +497,7 @@ vmcs_intel_x64::check_guest_tr_base_is_canonical()
 {
     auto tr_base = vmread(VMCS_GUEST_TR_BASE);
 
-    if (check_is_address_canonical(tr_base) == false)
+    if (is_address_canonical(tr_base) == false)
         throw vmcs_invalid_field("guest tr base non-canonical", tr_base);
 }
 
@@ -505,7 +506,7 @@ vmcs_intel_x64::check_guest_fs_base_is_canonical()
 {
     auto fs_base = vmread(VMCS_GUEST_FS_BASE);
 
-    if (check_is_address_canonical(fs_base) == false)
+    if (is_address_canonical(fs_base) == false)
         throw vmcs_invalid_field("guest fs base non-canonical", fs_base);
 }
 
@@ -514,7 +515,7 @@ vmcs_intel_x64::check_guest_gs_base_is_canonical()
 {
     auto gs_base = vmread(VMCS_GUEST_GS_BASE);
 
-    if (check_is_address_canonical(gs_base) == false)
+    if (is_address_canonical(gs_base) == false)
         throw vmcs_invalid_field("guest gs base non-canonical", gs_base);
 }
 
@@ -523,10 +524,10 @@ vmcs_intel_x64::check_guest_ldtr_base_is_canonical()
 {
     auto ldtr_base = vmread(VMCS_GUEST_LDTR_BASE);
 
-    if (check_is_ldtr_usable() == false)
+    if (is_ldtr_usable() == false)
         return;
 
-    if (check_is_address_canonical(ldtr_base) == false)
+    if (is_address_canonical(ldtr_base) == false)
         throw vmcs_invalid_field("guest ldtr base non-canonical", ldtr_base);
 }
 
@@ -545,7 +546,7 @@ vmcs_intel_x64::check_guest_ss_base_upper_dword_0()
 {
     auto ss_base = vmread(VMCS_GUEST_SS_BASE);
 
-    if (check_is_ds_usable() == false)
+    if (is_ds_usable() == false)
         return;
 
     if ((ss_base & 0xFFFFFFFF00000000) != 0)
@@ -558,7 +559,7 @@ vmcs_intel_x64::check_guest_ds_base_upper_dword_0()
 {
     auto ds_base = vmread(VMCS_GUEST_DS_BASE);
 
-    if (check_is_ds_usable() == false)
+    if (is_ds_usable() == false)
         return;
 
     if ((ds_base & 0xFFFFFFFF00000000) != 0)
@@ -571,7 +572,7 @@ vmcs_intel_x64::check_guest_es_base_upper_dword_0()
 {
     auto es_base = vmread(VMCS_GUEST_ES_BASE);
 
-    if (check_is_es_usable() == false)
+    if (is_es_usable() == false)
         return;
 
     if ((es_base & 0xFFFFFFFF00000000) != 0)
@@ -589,7 +590,7 @@ vmcs_intel_x64::check_guest_cs_limit()
 
     if (cs_limit != 0x000000000000FFFF)
         throw vmcs_invalid_field("if virtual 8086 mode is enabled, "
-                                 "cs base must be 0xFFFF", cs_limit);
+                                 "cs limit must be 0xFFFF", cs_limit);
 }
 
 void
@@ -602,7 +603,7 @@ vmcs_intel_x64::check_guest_ss_limit()
 
     if (ss_limit != 0x000000000000FFFF)
         throw vmcs_invalid_field("if virtual 8086 mode is enabled, "
-                                 "ss base must be 0xFFFF", ss_limit);
+                                 "ss limit must be 0xFFFF", ss_limit);
 }
 
 void
@@ -615,7 +616,7 @@ vmcs_intel_x64::check_guest_ds_limit()
 
     if (ds_limit != 0x000000000000FFFF)
         throw vmcs_invalid_field("if virtual 8086 mode is enabled, "
-                                 "ds base must be 0xFFFF", ds_limit);
+                                 "ds limit must be 0xFFFF", ds_limit);
 }
 
 void
@@ -628,7 +629,7 @@ vmcs_intel_x64::check_guest_es_limit()
 
     if (es_limit != 0x000000000000FFFF)
         throw vmcs_invalid_field("if virtual 8086 mode is enabled, "
-                                 "es base must be 0xFFFF", es_limit);
+                                 "es limit must be 0xFFFF", es_limit);
 }
 
 void
@@ -641,7 +642,7 @@ vmcs_intel_x64::check_guest_gs_limit()
 
     if (gs_limit != 0x000000000000FFFF)
         throw vmcs_invalid_field("if virtual 8086 mode is enabled, "
-                                 "gs base must be 0xFFFF", gs_limit);
+                                 "gs limit must be 0xFFFF", gs_limit);
 }
 
 void
@@ -654,7 +655,7 @@ vmcs_intel_x64::check_guest_fs_limit()
 
     if (fs_limit != 0x000000000000FFFF)
         throw vmcs_invalid_field("if virtual 8086 mode is enabled, "
-                                 "fs base must be 0xFFFF", fs_limit);
+                                 "fs limit must be 0xFFFF", fs_limit);
 }
 
 void
@@ -766,7 +767,7 @@ vmcs_intel_x64::check_guest_ss_access_rights_type()
 {
     auto ss_access = vmread(VMCS_GUEST_SS_ACCESS_RIGHTS);
 
-    if (check_is_ss_usable() == false)
+    if (is_ss_usable() == false)
         return;
 
     switch (ss_access & SEGMENT_ACCESS_RIGHTS_TYPE)
@@ -787,7 +788,7 @@ vmcs_intel_x64::check_guest_ds_access_rights_type()
 {
     auto ds_access = vmread(VMCS_GUEST_DS_ACCESS_RIGHTS);
 
-    if (check_is_ds_usable() == false)
+    if (is_ds_usable() == false)
         return;
 
     switch (ds_access & SEGMENT_ACCESS_RIGHTS_TYPE)
@@ -813,7 +814,7 @@ vmcs_intel_x64::check_guest_es_access_rights_type()
 {
     auto es_access = vmread(VMCS_GUEST_ES_ACCESS_RIGHTS);
 
-    if (check_is_es_usable() == false)
+    if (is_es_usable() == false)
         return;
 
     switch (es_access & SEGMENT_ACCESS_RIGHTS_TYPE)
@@ -839,7 +840,7 @@ vmcs_intel_x64::check_guest_fs_access_rights_type()
 {
     auto fs_access = vmread(VMCS_GUEST_FS_ACCESS_RIGHTS);
 
-    if (check_is_fs_usable() == false)
+    if (is_fs_usable() == false)
         return;
 
     switch (fs_access & SEGMENT_ACCESS_RIGHTS_TYPE)
@@ -865,7 +866,7 @@ vmcs_intel_x64::check_guest_gs_access_rights_type()
 {
     auto gs_access = vmread(VMCS_GUEST_GS_ACCESS_RIGHTS);
 
-    if (check_is_gs_usable() == false)
+    if (is_gs_usable() == false)
         return;
 
     switch (gs_access & SEGMENT_ACCESS_RIGHTS_TYPE)
@@ -901,7 +902,7 @@ vmcs_intel_x64::check_guest_ss_is_not_a_system_descriptor()
 {
     auto ss_access = vmread(VMCS_GUEST_SS_ACCESS_RIGHTS);
 
-    if (check_is_ss_usable() == false)
+    if (is_ss_usable() == false)
         return;
 
     if ((ss_access & SEGMENT_ACCESS_RIGHTS_SYSTEM_DESCRIPTOR) == 0)
@@ -914,7 +915,7 @@ vmcs_intel_x64::check_guest_ds_is_not_a_system_descriptor()
 {
     auto ds_access = vmread(VMCS_GUEST_DS_ACCESS_RIGHTS);
 
-    if (check_is_ds_usable() == false)
+    if (is_ds_usable() == false)
         return;
 
     if ((ds_access & SEGMENT_ACCESS_RIGHTS_SYSTEM_DESCRIPTOR) == 0)
@@ -927,7 +928,7 @@ vmcs_intel_x64::check_guest_es_is_not_a_system_descriptor()
 {
     auto es_access = vmread(VMCS_GUEST_ES_ACCESS_RIGHTS);
 
-    if (check_is_es_usable() == false)
+    if (is_es_usable() == false)
         return;
 
     if ((es_access & SEGMENT_ACCESS_RIGHTS_SYSTEM_DESCRIPTOR) == 0)
@@ -940,7 +941,7 @@ vmcs_intel_x64::check_guest_fs_is_not_a_system_descriptor()
 {
     auto fs_access = vmread(VMCS_GUEST_FS_ACCESS_RIGHTS);
 
-    if (check_is_fs_usable() == false)
+    if (is_fs_usable() == false)
         return;
 
     if ((fs_access & SEGMENT_ACCESS_RIGHTS_SYSTEM_DESCRIPTOR) == 0)
@@ -953,7 +954,7 @@ vmcs_intel_x64::check_guest_gs_is_not_a_system_descriptor()
 {
     auto gs_access = vmread(VMCS_GUEST_GS_ACCESS_RIGHTS);
 
-    if (check_is_gs_usable() == false)
+    if (is_gs_usable() == false)
         return;
 
     if ((gs_access & SEGMENT_ACCESS_RIGHTS_SYSTEM_DESCRIPTOR) == 0)
@@ -1057,7 +1058,7 @@ vmcs_intel_x64::check_guest_ds_dpl()
     if (is_enabled_unrestricted_guests() == true)
         return;
 
-    if (check_is_ds_usable() == false)
+    if (is_ds_usable() == false)
         return;
 
     if ((ds_access & SEGMENT_ACCESS_RIGHTS_TYPE) >= 12)
@@ -1082,7 +1083,7 @@ vmcs_intel_x64::check_guest_es_dpl()
     if (is_enabled_unrestricted_guests() == true)
         return;
 
-    if (check_is_es_usable() == false)
+    if (is_es_usable() == false)
         return;
 
     if ((es_access & SEGMENT_ACCESS_RIGHTS_TYPE) >= 12)
@@ -1107,7 +1108,7 @@ vmcs_intel_x64::check_guest_fs_dpl()
     if (is_enabled_unrestricted_guests() == true)
         return;
 
-    if (check_is_fs_usable() == false)
+    if (is_fs_usable() == false)
         return;
 
     if ((fs_access & SEGMENT_ACCESS_RIGHTS_TYPE) >= 12)
@@ -1132,7 +1133,7 @@ vmcs_intel_x64::check_guest_gs_dpl()
     if (is_enabled_unrestricted_guests() == true)
         return;
 
-    if (check_is_gs_usable() == false)
+    if (is_gs_usable() == false)
         return;
 
     if ((gs_access & SEGMENT_ACCESS_RIGHTS_TYPE) >= 12)
@@ -1163,7 +1164,7 @@ vmcs_intel_x64::check_guest_ss_must_be_present_if_usable()
 {
     auto ss_access = vmread(VMCS_GUEST_SS_ACCESS_RIGHTS);
 
-    if (check_is_ss_usable() == false)
+    if (is_ss_usable() == false)
         return;
 
     if ((ss_access & SEGMENT_ACCESS_RIGHTS_PRESENT) == 0)
@@ -1176,7 +1177,7 @@ vmcs_intel_x64::check_guest_ds_must_be_present_if_usable()
 {
     auto ds_access = vmread(VMCS_GUEST_DS_ACCESS_RIGHTS);
 
-    if (check_is_ds_usable() == false)
+    if (is_ds_usable() == false)
         return;
 
     if ((ds_access & SEGMENT_ACCESS_RIGHTS_PRESENT) == 0)
@@ -1189,7 +1190,7 @@ vmcs_intel_x64::check_guest_es_must_be_present_if_usable()
 {
     auto es_access = vmread(VMCS_GUEST_ES_ACCESS_RIGHTS);
 
-    if (check_is_es_usable() == false)
+    if (is_es_usable() == false)
         return;
 
     if ((es_access & SEGMENT_ACCESS_RIGHTS_PRESENT) == 0)
@@ -1202,7 +1203,7 @@ vmcs_intel_x64::check_guest_fs_must_be_present_if_usable()
 {
     auto fs_access = vmread(VMCS_GUEST_FS_ACCESS_RIGHTS);
 
-    if (check_is_fs_usable() == false)
+    if (is_fs_usable() == false)
         return;
 
     if ((fs_access & SEGMENT_ACCESS_RIGHTS_PRESENT) == 0)
@@ -1215,7 +1216,7 @@ vmcs_intel_x64::check_guest_gs_must_be_present_if_usable()
 {
     auto gs_access = vmread(VMCS_GUEST_GS_ACCESS_RIGHTS);
 
-    if (check_is_gs_usable() == false)
+    if (is_gs_usable() == false)
         return;
 
     if ((gs_access & SEGMENT_ACCESS_RIGHTS_PRESENT) == 0)
@@ -1238,7 +1239,7 @@ vmcs_intel_x64::check_guest_ss_access_rights_reserved_must_be_0()
 {
     auto ss_access = vmread(VMCS_GUEST_SS_ACCESS_RIGHTS);
 
-    if (check_is_ss_usable() == false)
+    if (is_ss_usable() == false)
         return;
 
     if ((ss_access & SEGMENT_ACCESS_RIGHTS_RESERVED) != 0)
@@ -1251,7 +1252,7 @@ vmcs_intel_x64::check_guest_ds_access_rights_reserved_must_be_0()
 {
     auto ds_access = vmread(VMCS_GUEST_DS_ACCESS_RIGHTS);
 
-    if (check_is_ds_usable() == false)
+    if (is_ds_usable() == false)
         return;
 
     if ((ds_access & SEGMENT_ACCESS_RIGHTS_RESERVED) != 0)
@@ -1264,7 +1265,7 @@ vmcs_intel_x64::check_guest_es_access_rights_reserved_must_be_0()
 {
     auto es_access = vmread(VMCS_GUEST_ES_ACCESS_RIGHTS);
 
-    if (check_is_es_usable() == false)
+    if (is_es_usable() == false)
         return;
 
     if ((es_access & SEGMENT_ACCESS_RIGHTS_RESERVED) != 0)
@@ -1277,7 +1278,7 @@ vmcs_intel_x64::check_guest_fs_access_rights_reserved_must_be_0()
 {
     auto fs_access = vmread(VMCS_GUEST_FS_ACCESS_RIGHTS);
 
-    if (check_is_fs_usable() == false)
+    if (is_fs_usable() == false)
         return;
 
     if ((fs_access & SEGMENT_ACCESS_RIGHTS_RESERVED) != 0)
@@ -1290,7 +1291,7 @@ vmcs_intel_x64::check_guest_gs_access_rights_reserved_must_be_0()
 {
     auto gs_access = vmread(VMCS_GUEST_GS_ACCESS_RIGHTS);
 
-    if (check_is_gs_usable() == false)
+    if (is_gs_usable() == false)
         return;
 
     if ((gs_access & SEGMENT_ACCESS_RIGHTS_RESERVED) != 0)
@@ -1337,7 +1338,7 @@ vmcs_intel_x64::check_guest_ss_granularity()
     auto ss_access = vmread(VMCS_GUEST_SS_ACCESS_RIGHTS);
     auto g = (ss_access & SEGMENT_ACCESS_RIGHTS_GRANULARITY);
 
-    if (check_is_ss_usable() == false)
+    if (is_ss_usable() == false)
         return;
 
     if ((ss_limit & 0x00000FFF) != 0x00000FFF && g != 0)
@@ -1356,7 +1357,7 @@ vmcs_intel_x64::check_guest_ds_granularity()
     auto ds_access = vmread(VMCS_GUEST_DS_ACCESS_RIGHTS);
     auto g = (ds_access & SEGMENT_ACCESS_RIGHTS_GRANULARITY);
 
-    if (check_is_ds_usable() == false)
+    if (is_ds_usable() == false)
         return;
 
     if ((ds_limit & 0x00000FFF) != 0x00000FFF && g != 0)
@@ -1375,7 +1376,7 @@ vmcs_intel_x64::check_guest_es_granularity()
     auto es_access = vmread(VMCS_GUEST_ES_ACCESS_RIGHTS);
     auto g = (es_access & SEGMENT_ACCESS_RIGHTS_GRANULARITY);
 
-    if (check_is_es_usable() == false)
+    if (is_es_usable() == false)
         return;
 
     if ((es_limit & 0x00000FFF) != 0x00000FFF && g != 0)
@@ -1394,7 +1395,7 @@ vmcs_intel_x64::check_guest_fs_granularity()
     auto fs_access = vmread(VMCS_GUEST_FS_ACCESS_RIGHTS);
     auto g = (fs_access & SEGMENT_ACCESS_RIGHTS_GRANULARITY);
 
-    if (check_is_fs_usable() == false)
+    if (is_fs_usable() == false)
         return;
 
     if ((fs_limit & 0x00000FFF) != 0x00000FFF && g != 0)
@@ -1413,7 +1414,7 @@ vmcs_intel_x64::check_guest_gs_granularity()
     auto gs_access = vmread(VMCS_GUEST_GS_ACCESS_RIGHTS);
     auto g = (gs_access & SEGMENT_ACCESS_RIGHTS_GRANULARITY);
 
-    if (check_is_gs_usable() == false)
+    if (is_gs_usable() == false)
         return;
 
     if ((gs_limit & 0x00000FFF) != 0x00000FFF && g != 0)
@@ -1440,7 +1441,7 @@ vmcs_intel_x64::check_guest_ss_access_rights_remaining_reserved_bit_0()
 {
     auto ss_access = vmread(VMCS_GUEST_SS_ACCESS_RIGHTS);
 
-    if (check_is_ss_usable() == false)
+    if (is_ss_usable() == false)
         return;
 
     if ((ss_access & 0xFFFE0000) != 0)
@@ -1453,7 +1454,7 @@ vmcs_intel_x64::check_guest_ds_access_rights_remaining_reserved_bit_0()
 {
     auto ds_access = vmread(VMCS_GUEST_DS_ACCESS_RIGHTS);
 
-    if (check_is_ds_usable() == false)
+    if (is_ds_usable() == false)
         return;
 
     if ((ds_access & 0xFFFE0000) != 0)
@@ -1466,7 +1467,7 @@ vmcs_intel_x64::check_guest_es_access_rights_remaining_reserved_bit_0()
 {
     auto es_access = vmread(VMCS_GUEST_ES_ACCESS_RIGHTS);
 
-    if (check_is_es_usable() == false)
+    if (is_es_usable() == false)
         return;
 
     if ((es_access & 0xFFFE0000) != 0)
@@ -1479,7 +1480,7 @@ vmcs_intel_x64::check_guest_fs_access_rights_remaining_reserved_bit_0()
 {
     auto fs_access = vmread(VMCS_GUEST_FS_ACCESS_RIGHTS);
 
-    if (check_is_fs_usable() == false)
+    if (is_fs_usable() == false)
         return;
 
     if ((fs_access & 0xFFFE0000) != 0)
@@ -1492,7 +1493,7 @@ vmcs_intel_x64::check_guest_gs_access_rights_remaining_reserved_bit_0()
 {
     auto gs_access = vmread(VMCS_GUEST_GS_ACCESS_RIGHTS);
 
-    if (check_is_gs_usable() == false)
+    if (is_gs_usable() == false)
         return;
 
     if ((gs_access & 0xFFFE0000) != 0)
@@ -1568,7 +1569,7 @@ vmcs_intel_x64::check_guest_tr_granularity()
 void
 vmcs_intel_x64::check_guest_tr_must_be_usable()
 {
-    if (check_is_tr_usable() == false)
+    if (is_tr_usable() == false)
         throw vmcs_invalid_field("tr must be usable", 0);
 }
 
@@ -1587,7 +1588,7 @@ vmcs_intel_x64::check_guest_ldtr_type_must_be_2()
 {
     auto ldtr_access = vmread(VMCS_GUEST_LDTR_ACCESS_RIGHTS);
 
-    if (check_is_ldtr_usable() == false)
+    if (is_ldtr_usable() == false)
         return;
 
     if ((ldtr_access & SEGMENT_ACCESS_RIGHTS_TYPE) != 2)
@@ -1599,7 +1600,7 @@ vmcs_intel_x64::check_guest_ldtr_must_be_a_system_descriptor()
 {
     auto ldtr_access = vmread(VMCS_GUEST_LDTR_ACCESS_RIGHTS);
 
-    if (check_is_ldtr_usable() == false)
+    if (is_ldtr_usable() == false)
         return;
 
     if ((ldtr_access & SEGMENT_ACCESS_RIGHTS_SYSTEM_DESCRIPTOR) != 0)
@@ -1612,7 +1613,7 @@ vmcs_intel_x64::check_guest_ldtr_must_be_present()
 {
     auto ldtr_access = vmread(VMCS_GUEST_LDTR_ACCESS_RIGHTS);
 
-    if (check_is_ldtr_usable() == false)
+    if (is_ldtr_usable() == false)
         return;
 
     if ((ldtr_access & SEGMENT_ACCESS_RIGHTS_PRESENT) == 0)
@@ -1625,7 +1626,7 @@ vmcs_intel_x64::check_guest_ldtr_access_rights_reserved_must_be_0()
 {
     auto ldtr_access = vmread(VMCS_GUEST_LDTR_ACCESS_RIGHTS);
 
-    if (check_is_ldtr_usable() == false)
+    if (is_ldtr_usable() == false)
         return;
 
     if ((ldtr_access & 0x0F00) != 0)
@@ -1654,7 +1655,7 @@ vmcs_intel_x64::check_guest_ldtr_access_rights_remaining_reserved_bit_0()
 {
     auto ldtr_access = vmread(VMCS_GUEST_LDTR_ACCESS_RIGHTS);
 
-    if (check_is_ldtr_usable() == false)
+    if (is_ldtr_usable() == false)
         return;
 
     if ((ldtr_access & SEGMENT_ACCESS_RIGHTS_RESERVED) != 0)
@@ -1676,7 +1677,7 @@ vmcs_intel_x64::check_guest_gdtr_base_must_be_canonical()
 {
     auto gdtr_base = vmread(VMCS_GUEST_GDTR_BASE);
 
-    if (check_is_address_canonical(gdtr_base) == false)
+    if (is_address_canonical(gdtr_base) == false)
         throw vmcs_invalid_field("gdtr base is non-canonical", gdtr_base);
 }
 
@@ -1685,7 +1686,7 @@ vmcs_intel_x64::check_guest_idtr_base_must_be_canonical()
 {
     auto idtr_base = vmread(VMCS_GUEST_IDTR_BASE);
 
-    if (check_is_address_canonical(idtr_base) == false)
+    if (is_address_canonical(idtr_base) == false)
         throw vmcs_invalid_field("idtr base is non-canonical", idtr_base);
 }
 
@@ -1707,192 +1708,561 @@ vmcs_intel_x64::check_guest_idtr_limit_reserved_bits()
         throw vmcs_invalid_field("idtr limit bits 31:16 must be 0", idtr_limit);
 }
 
-// void
-// vmcs_intel_x64::check_guest_checks_on_guest_rip_and_rflags()
-// {
-//     auto result = true;
+void
+vmcs_intel_x64::checks_on_guest_rip_and_rflags()
+{
+    check_guest_rip_upper_bits();
+    check_guest_rip_valid_addr();
+    check_guest_rflags_reserved_bits();
+    check_guest_rflags_vm_bit();
+    check_guest_rflag_interrupt_enable();
+}
 
-//     check_guest_rflags_reserved_bits();
-//     check_guest_rflag_interrupt_enable();
+void
+vmcs_intel_x64::check_guest_rip_upper_bits()
+{
+    auto cs_l = vmread(VMCS_GUEST_CS_ACCESS_RIGHTS) & SEGMENT_ACCESS_RIGHTS_L;
 
-//     return result;
-// }
+    if (is_enabled_ia_32e_mode_guest() == true && cs_l != 0)
+        return;
 
-// void
-// vmcs_intel_x64::check_guest_rflags_reserved_bits()
-// {
-//     auto rflags = vmread(VMCS_GUEST_RFLAGS);
+    auto rip = vmread(VMCS_GUEST_RIP);
 
-//     if ((rflags & 0xFFC08028) != 0 || (rflags & 0x2) == 0)
-//     {
-//         std::cout << "check_guest_rflags_reserved_bits failed. "
-//                   << "reserved bits in rflags must be 0, and bit 1 must be 1: " << std::endl
-//                   << std::hex
-//                   << "    - rflags: 0x" << rflags << std::endl
-//                   << std::dec;
+    if ((rip & 0xFFFFFFFF00000000) != 0)
+        throw vmcs_invalid_field("rip bits 61:32 must 0 if IA 32e mode is "
+                                 "disabled or cs L is disabled", rip);
+}
 
-//         return false;
-//     }
+void
+vmcs_intel_x64::check_guest_rip_valid_addr()
+{
+    auto cs_l = vmread(VMCS_GUEST_CS_ACCESS_RIGHTS) & SEGMENT_ACCESS_RIGHTS_L;
 
-//     return true;
-// }
+    if (is_enabled_ia_32e_mode_guest() == false || cs_l == 0)
+        return;
 
-// void
-// vmcs_intel_x64::check_guest_rflag_interrupt_enable()
-// {
-//     auto event_injection = vmread(VMCS_VM_ENTRY_INTERRUPTION_INFORMATION_FIELD);
+    auto rip = vmread(VMCS_GUEST_RIP);
 
-//     if (event_injection != 0)
-//     {
-//         std::cout << "unimplemented VMCS check: "
-//                   << "check_guest_rflag_interrupt_enable"
-//                   << std::endl;
-//         return false;
-//     }
+    if (is_linear_address_valid(rip) == false)
+        throw vmcs_invalid_field("rip bits must be canonical", rip);
+}
 
-//     return true;
-// }
+void
+vmcs_intel_x64::check_guest_rflags_reserved_bits()
+{
+    auto rflags = vmread(VMCS_GUEST_RFLAGS);
 
-// void
-// vmcs_intel_x64::check_guest_checks_on_guest_non_register_state()
-// {
-//     auto result = true;
+    if ((rflags & 0xFFFFFFFFFFC08028) != 0 || (rflags & 0x2) == 0)
+        throw vmcs_invalid_field("reserved bits in rflags must be 0, and "
+                                 "bit 1 must be 1", rflags);
+}
 
-//     check_guest_valid_activity_state();
-//     check_guest_activity_state_not_hlt_when_dpl_not_0();
-//     check_guest_must_be_active_if_injecting_blocking_state();
-//     check_guest_valid_interruptability_and_activity_state_combo();
-//     check_guest_valid_activity_state_and_smm();
-//     check_guest_all_interruptability_state_fields();
-//     check_guest_all_vmcs_link_pointerchecks();
+void
+vmcs_intel_x64::check_guest_rflags_vm_bit()
+{
+    auto cr0 = vmread(VMCS_GUEST_CR0);
+    auto rflags = vmread(VMCS_GUEST_RFLAGS);
 
-//     return result;
-// }
+    auto pe = cr0 & CRO_PE_PROTECTION_ENABLE;
 
-// void
-// vmcs_intel_x64::check_guest_valid_activity_state()
-// {
-//     auto activity = vmread(VMCS_GUEST_ACTIVITY_STATE);
+    if (is_enabled_ia_32e_mode_guest() == false && pe == 1)
+        return;
 
-//     if (activity > 3)
-//     {
-//         std::cout << "check_guest_valid_activity_state failed. "
-//                   << "guest activity state must be between 0 - 3: " << std::endl
-//                   << std::hex
-//                   << "    - activity: 0x" << activity << std::endl
-//                   << std::dec;
+    if ((rflags & RFLAGS_VM_VIRTUAL_8086_MODE) != 0)
+        throw vmcs_invalid_field("rflags VM must be 0 if ia 32e mode is 1 "
+                                 "or PE is 0", rflags);
+}
 
-//         return false;
-//     }
+void
+vmcs_intel_x64::check_guest_rflag_interrupt_enable()
+{
+    auto interrupt_info_field =
+        vmread(VMCS_VM_ENTRY_INTERRUPTION_INFORMATION_FIELD);
 
-//     return true;
-// }
+    if ((interrupt_info_field & VM_INTERRUPT_INFORMATION_VALID) == 0)
+        return;
 
-// void
-// vmcs_intel_x64::check_guest_activity_state_not_hlt_when_dpl_not_0()
-// {
-//     auto activity = vmread(VMCS_GUEST_ACTIVITY_STATE);
+    auto type = (interrupt_info_field & VM_INTERRUPT_INFORMATION_TYPE) >> 8;
 
-//     if (activity != 0)
-//     {
-//         std::cout << "unimplemented VMCS check: "
-//                   << "check_guest_activity_state_not_hlt_when_dpl_not_0"
-//                   << std::endl;
-//         return false;
-//     }
+    if (type != VM_INTERRUPTION_TYPE_EXTERNAL)
+        return;
 
-//     return true;
-// }
+    auto rflags = vmread(VMCS_GUEST_RFLAGS);
 
-// void
-// vmcs_intel_x64::check_guest_must_be_active_if_injecting_blocking_state()
-// {
-//     auto event_injection = vmread(VMCS_VM_ENTRY_INTERRUPTION_INFORMATION_FIELD);
+    if ((rflags & RFLAGS_IF_INTERRUPT_ENABLE_FLAG) == 0)
+        throw vmcs_invalid_field("rflags IF must be 1 if the valid bit is 1 "
+                                 "and interrupt type is external", rflags);
+}
 
-//     if (event_injection != 0)
-//     {
-//         std::cout << "unimplemented VMCS check: "
-//                   << "check_guest_must_be_active_if_injecting_blocking_state"
-//                   << std::endl;
-//         return false;
-//     }
+void
+vmcs_intel_x64::checks_on_guest_non_register_state()
+{
+    check_guest_valid_activity_state();
+    check_guest_activity_state_not_hlt_when_dpl_not_0();
+    check_guest_valid_activity_state();
+    check_guest_activity_state_not_hlt_when_dpl_not_0();
+    check_guest_must_be_active_if_injecting_blocking_state();
+    check_guest_hlt_valid_interrupts();
+    check_guest_shutdown_valid_interrupts();
+    check_guest_sipi_valid_interrupts();
+    check_guest_valid_activity_state_and_smm();
+    check_guest_interruptability_state_reserved();
+    check_guest_interruptability_state_sti_mov_ss();
+    check_guest_interruptability_state_sti();
+    check_guest_interruptability_state_external_interrupt();
+    check_guest_interruptability_state_nmi();
+    check_guest_interruptability_not_in_smm();
+    check_guest_interruptability_entry_to_smm();
+    check_guest_interruptability_state_sti_and_nmi();
+    check_guest_interruptability_state_virtual_nmi();
+    check_guest_pending_debug_exceptions_reserved();
+    check_guest_pending_debug_exceptions_dbg_ctl();
+    check_guest_vmcs_link_pointer_bits_11_0();
+    check_guest_vmcs_link_pointer_valid_addr();
+    check_guest_vmcs_link_pointer_first_word();
+    check_guest_vmcs_link_pointer_not_in_smm();
+    check_guest_vmcs_link_pointer_in_smm();
+}
 
-//     return true;
-// }
+void
+vmcs_intel_x64::check_guest_valid_activity_state()
+{
+    auto activity_state = vmread(VMCS_GUEST_ACTIVITY_STATE);
 
-// void
-// vmcs_intel_x64::check_guest_valid_interruptability_and_activity_state_combo()
-// {
-//     auto event_injection = vmread(VMCS_VM_ENTRY_INTERRUPTION_INFORMATION_FIELD);
+    if (activity_state > 3)
+        vmcs_invalid_field("activity state must be 0 - 3", activity_state);
+}
 
-//     if (event_injection != 0)
-//     {
-//         std::cout << "unimplemented VMCS check: "
-//                   << "check_guest_valid_interruptability_and_activity_state_combo"
-//                   << std::endl;
-//         return false;
-//     }
+void
+vmcs_intel_x64::check_guest_activity_state_not_hlt_when_dpl_not_0()
+{
+    auto ss_access = vmread(VMCS_GUEST_SS_ACCESS_RIGHTS);
+    auto activity_state = vmread(VMCS_GUEST_ACTIVITY_STATE);
 
-//     return true;
-// }
+    if (activity_state != VM_ACTIVITY_STATE_HLT)
+        return;
 
-// void
-// vmcs_intel_x64::check_guest_valid_activity_state_and_smm()
-// {
-//     auto controls = vmread(VMCS_VM_ENTRY_CONTROLS);
+    if ((ss_access & SEGMENT_ACCESS_RIGHTS_DPL) != 0)
+        vmcs_invalid_field("ss.dpl must be 0 if activity state is HLT",
+                           activity_state);
+}
 
-//     if ((controls & VM_ENTRY_CONTROL_ENTRY_TO_SMM) != 0)
-//     {
-//         std::cout << "unimplemented VMCS check: "
-//                   << "check_guest_valid_activity_state_and_smm"
-//                   << std::endl;
-//         return false;
-//     }
+void
+vmcs_intel_x64::check_guest_must_be_active_if_injecting_blocking_state()
+{
+    auto activity_state = vmread(VMCS_GUEST_ACTIVITY_STATE);
 
-//     return true;
-// }
+    if (activity_state == VM_ACTIVITY_STATE_ACTIVE)
+        return;
 
-// void
-// vmcs_intel_x64::check_guest_all_interruptability_state_fields()
-// {
-//     auto event_injection = vmread(VMCS_VM_ENTRY_INTERRUPTION_INFORMATION_FIELD);
+    auto interruptability_state =
+        vmread(VMCS_GUEST_INTERRUPTIBILITY_STATE);
 
-//     // Note that chapter 26.3.1.5 has a section on interruptability state
-//     // that this test was written for. This one check represents all of the
-//     // checks, thus if this field is used, these checks will need to be
-//     // implemented (i.e. there is more than one of them)
-//     //
-//     // This also includes the pending debug exceptions as they are related
-//     // to the interruptability state
+    if ((interruptability_state & VM_INTERRUPTABILITY_STATE_STI) != 0)
+        throw vmcs_invalid_field("activity state must be active if "
+                                 "interruptability state is sti",
+                                 activity_state);
 
-//     if (event_injection != 0)
-//     {
-//         std::cout << "unimplemented VMCS check: "
-//                   << "check_guest_all_interruptability_state_fields"
-//                   << std::endl;
-//         return false;
-//     }
+    if ((interruptability_state & VM_INTERRUPTABILITY_STATE_MOV_SS) != 0)
+        throw vmcs_invalid_field("activity state must be active if "
+                                 "interruptability state is mov-ss",
+                                 activity_state);
+}
 
-//     return true;
-// }
+void
+vmcs_intel_x64::check_guest_hlt_valid_interrupts()
+{
+    auto interrupt_info_field =
+        vmread(VMCS_VM_ENTRY_INTERRUPTION_INFORMATION_FIELD);
 
-// void
-// vmcs_intel_x64::check_guest_all_vmcs_link_pointerchecks()
-// {
-//     auto link_pointer = vmread(VMCS_VMCS_LINK_POINTER_FULL);
+    if ((interrupt_info_field & VM_INTERRUPT_INFORMATION_VALID) == 0)
+        return;
 
-//     // Note that chapter 26.3.1.5 has a section on the vmcs link pointer
-//     // that this test was written for. This one check represents all of the
-//     // checks, thus if this field is used, these checks will need to be
-//     // implemented (i.e. there is more than one of them)
+    auto activity_state = vmread(VMCS_GUEST_ACTIVITY_STATE);
 
-//     if (link_pointer != 0xFFFFFFFFFFFFFFFF)
-//     {
-//         std::cout << "unimplemented VMCS check: "
-//                   << "check_guest_all_vmcs_link_pointerchecks"
-//                   << std::endl;
-//         return false;
-//     }
+    if (activity_state != VM_ACTIVITY_STATE_HLT)
+        return;
 
-//     return true;
-// }
+    auto type = (interrupt_info_field & VM_INTERRUPT_INFORMATION_TYPE) >> 8;
+    auto vector = (interrupt_info_field & VM_INTERRUPT_INFORMATION_VECTOR) >> 0;
+
+    switch (type)
+    {
+        case VM_INTERRUPTION_TYPE_EXTERNAL:
+        case VM_INTERRUPTION_TYPE_NMI:
+            return;
+
+        case VM_INTERRUPTION_TYPE_HARDWARE:
+            if (vector == INTERRUPT_DEBUG_EXCEPTION)
+                return;
+
+            if (vector == INTERRUPT_MACHINE_CHECK)
+                return;
+
+            break;
+
+        case VM_INTERRUPTION_TYPE_OTHER:
+            if (vector == MTF_VM_EXIT)
+                return;
+
+            break;
+
+        default:
+            break;
+    }
+
+    throw vmcs_2_invalid_fields("invalid interruption combination",
+                                type, vector);
+}
+
+void
+vmcs_intel_x64::check_guest_shutdown_valid_interrupts()
+{
+    auto interrupt_info_field =
+        vmread(VMCS_VM_ENTRY_INTERRUPTION_INFORMATION_FIELD);
+
+    if ((interrupt_info_field & VM_INTERRUPT_INFORMATION_VALID) == 0)
+        return;
+
+    auto activity_state = vmread(VMCS_GUEST_ACTIVITY_STATE);
+
+    if (activity_state != VM_ACTIVITY_STATE_SHUTDOWN)
+        return;
+
+    auto type = (interrupt_info_field & VM_INTERRUPT_INFORMATION_TYPE) >> 8;
+    auto vector = (interrupt_info_field & VM_INTERRUPT_INFORMATION_VECTOR) >> 0;
+
+    switch (type)
+    {
+        case VM_INTERRUPTION_TYPE_NMI:
+            return;
+
+        case VM_INTERRUPTION_TYPE_HARDWARE:
+            if (vector == INTERRUPT_MACHINE_CHECK)
+                return;
+
+            break;
+
+        default:
+            break;
+    }
+
+    throw vmcs_2_invalid_fields("invalid interruption combination",
+                                type, vector);
+}
+
+void
+vmcs_intel_x64::check_guest_sipi_valid_interrupts()
+{
+    auto interrupt_info_field =
+        vmread(VMCS_VM_ENTRY_INTERRUPTION_INFORMATION_FIELD);
+
+    if ((interrupt_info_field & VM_INTERRUPT_INFORMATION_VALID) == 0)
+        return;
+
+    auto activity_state = vmread(VMCS_GUEST_ACTIVITY_STATE);
+
+    if (activity_state != VM_ACTIVITY_STATE_WAIT_FOR_SIPI)
+        return;
+
+    throw vmcs_invalid_field("invalid interruption combination",
+                             activity_state);
+}
+
+void
+vmcs_intel_x64::check_guest_valid_activity_state_and_smm()
+{
+    if (is_enabled_entry_to_smm() == false)
+        return;
+
+    auto activity_state = vmread(VMCS_GUEST_ACTIVITY_STATE);
+
+    if (activity_state != VM_ACTIVITY_STATE_WAIT_FOR_SIPI)
+        return;
+
+    throw vmcs_invalid_field("activity state must not equal wait for sipi "
+                             "if entry to smm is enabled",
+                             activity_state);
+}
+
+void
+vmcs_intel_x64::check_guest_interruptability_state_reserved()
+{
+    auto interruptability_state =
+        vmread(VMCS_GUEST_INTERRUPTIBILITY_STATE);
+
+    if ((interruptability_state & 0xFFFFFFFFFFFFFFF0) != 0)
+        throw vmcs_invalid_field("interruptability state reserved bits "
+                                 "31:4 must be 0", interruptability_state);
+}
+
+void
+vmcs_intel_x64::check_guest_interruptability_state_sti_mov_ss()
+{
+    auto interruptability_state =
+        vmread(VMCS_GUEST_INTERRUPTIBILITY_STATE);
+
+    auto sti = interruptability_state & VM_INTERRUPTABILITY_STATE_STI;
+    auto mov_ss = interruptability_state & VM_INTERRUPTABILITY_STATE_MOV_SS;
+
+    if (sti == 1 && mov_ss == 1)
+        throw vmcs_invalid_field("interruptability state sti and mov ss "
+                                 "cannot both be 1", interruptability_state);
+
+}
+
+void
+vmcs_intel_x64::check_guest_interruptability_state_sti()
+{
+    auto interruptability_state =
+        vmread(VMCS_GUEST_INTERRUPTIBILITY_STATE);
+
+    auto rflags = vmread(VMCS_GUEST_RFLAGS);
+
+    if ((rflags & RFLAGS_IF_INTERRUPT_ENABLE_FLAG) != 0)
+        return;
+
+    auto sti = interruptability_state & VM_INTERRUPTABILITY_STATE_STI;
+
+    if (sti != 0)
+        throw vmcs_2_invalid_fields("interruptability state sti must be 0 if "
+                                    "rflags interrupt enabled is 0",
+                                    rflags, interruptability_state);
+}
+
+void
+vmcs_intel_x64::check_guest_interruptability_state_external_interrupt()
+{
+    auto interrupt_info_field =
+        vmread(VMCS_VM_ENTRY_INTERRUPTION_INFORMATION_FIELD);
+
+    if ((interrupt_info_field & VM_INTERRUPT_INFORMATION_VALID) == 0)
+        return;
+
+    auto type = (interrupt_info_field & VM_INTERRUPT_INFORMATION_TYPE) >> 8;
+
+    if (type != VM_INTERRUPTION_TYPE_EXTERNAL)
+        return;
+
+    auto interruptability_state =
+        vmread(VMCS_GUEST_INTERRUPTIBILITY_STATE);
+
+    if ((interruptability_state & VM_INTERRUPTABILITY_STATE_STI) != 0)
+        throw vmcs_invalid_field("interruptability state sti must be 0 if "
+                                 "interrupt type is external and valid",
+                                 interruptability_state);
+
+    if ((interruptability_state & VM_INTERRUPTABILITY_STATE_MOV_SS) != 0)
+        throw vmcs_invalid_field("activity state must be active if "
+                                 "interruptability state is mov-ss",
+                                 interruptability_state);
+}
+
+void
+vmcs_intel_x64::check_guest_interruptability_state_nmi()
+{
+    auto interrupt_info_field =
+        vmread(VMCS_VM_ENTRY_INTERRUPTION_INFORMATION_FIELD);
+
+    if ((interrupt_info_field & VM_INTERRUPT_INFORMATION_VALID) == 0)
+        return;
+
+    auto type = (interrupt_info_field & VM_INTERRUPT_INFORMATION_TYPE) >> 8;
+
+    if (type != VM_INTERRUPTION_TYPE_NMI)
+        return;
+
+    auto interruptability_state =
+        vmread(VMCS_GUEST_INTERRUPTIBILITY_STATE);
+
+    if ((interruptability_state & VM_INTERRUPTABILITY_STATE_MOV_SS) != 0)
+        throw vmcs_invalid_field("activity state must be active if "
+                                 "interruptability state is mov-ss",
+                                 interruptability_state);
+}
+
+void
+vmcs_intel_x64::check_guest_interruptability_not_in_smm()
+{
+}
+
+void
+vmcs_intel_x64::check_guest_interruptability_entry_to_smm()
+{
+    if (is_enabled_entry_to_smm() == false)
+        return;
+
+    auto interruptability_state =
+        vmread(VMCS_GUEST_INTERRUPTIBILITY_STATE);
+
+    if ((interruptability_state & VM_INTERRUPTABILITY_STATE_SMI) == 0)
+        throw vmcs_invalid_field("interruptability state smi must be enabled "
+                                 "if entry to smm is enabled",
+                                 interruptability_state);
+}
+
+void
+vmcs_intel_x64::check_guest_interruptability_state_sti_and_nmi()
+{
+    auto interrupt_info_field =
+        vmread(VMCS_VM_ENTRY_INTERRUPTION_INFORMATION_FIELD);
+
+    if ((interrupt_info_field & VM_INTERRUPT_INFORMATION_VALID) == 0)
+        return;
+
+    auto type = (interrupt_info_field & VM_INTERRUPT_INFORMATION_TYPE) >> 8;
+
+    if (type != VM_INTERRUPTION_TYPE_NMI)
+        return;
+
+    auto interruptability_state =
+        vmread(VMCS_GUEST_INTERRUPTIBILITY_STATE);
+
+    if ((interruptability_state & VM_INTERRUPTABILITY_STATE_STI) != 0)
+        throw vmcs_invalid_field("some processors require sti to be 0 if "
+                                 "the interruption type is nmi",
+                                 interruptability_state);
+}
+
+void
+vmcs_intel_x64::check_guest_interruptability_state_virtual_nmi()
+{
+    if (is_enabled_virtual_nmis() == false)
+        return;
+
+    auto interrupt_info_field =
+        vmread(VMCS_VM_ENTRY_INTERRUPTION_INFORMATION_FIELD);
+
+    if ((interrupt_info_field & VM_INTERRUPT_INFORMATION_VALID) == 0)
+        return;
+
+    auto type = (interrupt_info_field & VM_INTERRUPT_INFORMATION_TYPE) >> 8;
+
+    if (type != VM_INTERRUPTION_TYPE_NMI)
+        return;
+
+    auto interruptability_state =
+        vmread(VMCS_GUEST_INTERRUPTIBILITY_STATE);
+
+    if ((interruptability_state & VM_INTERRUPTABILITY_STATE_NMI) != 0)
+        throw vmcs_2_invalid_fields("if virtual nmi is enabled, and the "
+                                    "interruption type is NMI, blocking by nmi "
+                                    "must be disabled", interrupt_info_field,
+                                    interruptability_state);
+}
+
+void
+vmcs_intel_x64::check_guest_pending_debug_exceptions_reserved()
+{
+    auto pending_debug_exceptions =
+        vmread(VMCS_GUEST_PENDING_DEBUG_EXCEPTIONS);
+
+    if ((pending_debug_exceptions & 0xFFFFFFFFFFFF2FF0) != 0)
+        throw vmcs_invalid_field("pending debug exception reserved bits "
+                                 "must be 0", pending_debug_exceptions);
+}
+
+void
+vmcs_intel_x64::check_guest_pending_debug_exceptions_dbg_ctl()
+{
+    auto interruptability_state =
+        vmread(VMCS_GUEST_INTERRUPTIBILITY_STATE);
+
+    auto activity_state =
+        vmread(VMCS_GUEST_ACTIVITY_STATE);
+
+    auto sti = interruptability_state & VM_INTERRUPTABILITY_STATE_STI;
+    auto mov_ss = interruptability_state & VM_INTERRUPTABILITY_STATE_MOV_SS;
+    auto hlt = activity_state & VM_ACTIVITY_STATE_HLT;
+
+    if (sti == 0 && mov_ss == 0 && hlt == 0)
+        return;
+
+    auto pending_debug_exceptions =
+        vmread(VMCS_GUEST_PENDING_DEBUG_EXCEPTIONS);
+
+    auto bs = pending_debug_exceptions & PENDING_DEBUG_EXCEPTION_BS;
+
+    auto rflags = vmread(VMCS_GUEST_RFLAGS);
+    auto vmcs_ia32_debugctl = vmread(VMCS_GUEST_IA32_DEBUGCTL_FULL);
+
+    auto tf = rflags & RFLAGS_TF_TRAP_FLAG;
+    auto btf = vmcs_ia32_debugctl & IA32_DEBUGCTL_BTF;
+
+    if (bs == 0 && tf != 0 && btf == 0)
+        throw vmcs_invalid_field("pending debug exception bs must be 1 if "
+                                 "rflags tf is 1 and debugctl btf is 0",
+                                 pending_debug_exceptions);
+
+    if (bs == 1 && tf == 0 && btf == 1)
+        throw vmcs_invalid_field("pending debug exception bs must be 0 if "
+                                 "rflags tf is 0 and debugctl btf is 1",
+                                 pending_debug_exceptions);
+}
+
+void
+vmcs_intel_x64::check_guest_vmcs_link_pointer_bits_11_0()
+{
+    auto vmcs_link_pointer = vmread(VMCS_VMCS_LINK_POINTER_FULL);
+
+    if (vmcs_link_pointer == 0xFFFFFFFFFFFFFFFF)
+        return;
+
+    if ((vmcs_link_pointer & 0x0000000000000FFF) != 0)
+        throw vmcs_invalid_field("vmcs link pointer bits 11:0 must be 0",
+                                 vmcs_link_pointer);
+}
+
+void
+vmcs_intel_x64::check_guest_vmcs_link_pointer_valid_addr()
+{
+    auto vmcs_link_pointer = vmread(VMCS_VMCS_LINK_POINTER_FULL);
+
+    if (vmcs_link_pointer == 0xFFFFFFFFFFFFFFFF)
+        return;
+
+    if (is_physical_address_valid(vmcs_link_pointer) == false)
+        throw vmcs_invalid_field("vmcs link pointer invalid physical address",
+                                 vmcs_link_pointer);
+}
+
+void
+vmcs_intel_x64::check_guest_vmcs_link_pointer_first_word()
+{
+    auto vmcs_link_pointer = vmread(VMCS_VMCS_LINK_POINTER_FULL);
+
+    if (vmcs_link_pointer == 0xFFFFFFFFFFFFFFFF)
+        return;
+
+    auto vmcs = g_mm->phys_to_virt((void *)vmcs_link_pointer);
+
+    if (vmcs == 0)
+        throw vmcs_invalid_field("invalid vmcs physical address",
+                                 vmcs_link_pointer);
+
+    auto basic_msr = m_intrinsics->read_msr(IA32_VMX_BASIC_MSR) & 0x7FFFFFFFF;
+    auto revision_id = (((uint32_t *)vmcs)[0]) & 0x7FFFFFFF;
+    auto vmcs_shadow = (((uint32_t *)vmcs)[0]) & 0x80000000;
+
+    if (basic_msr != revision_id)
+        throw vmcs_invalid_field("shadow vmcs must contain CPU's revision id",
+                                 revision_id);
+
+    if (is_enabled_vmcs_shadowing() == false)
+        return;
+
+    if (vmcs_shadow == 0)
+        throw vmcs_invalid_field("shadow vmcs bit must be enabled if vmcs "
+                                 "shadowing is enabled", vmcs_shadow);
+
+}
+
+void
+vmcs_intel_x64::check_guest_vmcs_link_pointer_not_in_smm()
+{
+}
+
+void
+vmcs_intel_x64::check_guest_vmcs_link_pointer_in_smm()
+{
+}
