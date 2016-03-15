@@ -356,6 +356,35 @@ private:
 #define invalid_alignmnet(a,b) bfn::invalid_alignmnet_error(a,b)
 
 // -----------------------------------------------------------------------------
+// Invalid Address
+// -----------------------------------------------------------------------------
+
+class invalid_address_error : public bfn::general_exception
+{
+public:
+    invalid_address_error(const std::string &mesg,
+                          uint64_t addr) :
+        m_mesg(mesg),
+        m_addr(addr)
+    {}
+
+    virtual std::ostream &print(std::ostream &os) const
+    {
+        os << "invalid address: ";
+        os << std::endl << "    - mesg: " << m_mesg;
+        os << std::endl << "    - addr: " << m_addr;
+
+        return os;
+    }
+
+private:
+    std::string m_mesg;
+    uint64_t m_addr;
+};
+
+#define invalid_address(a,b) bfn::invalid_address_error(a,b)
+
+// -----------------------------------------------------------------------------
 // Hardware Unsupported
 // -----------------------------------------------------------------------------
 

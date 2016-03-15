@@ -81,7 +81,7 @@ private:
 
     bool m_vmxon_enabled;
     uintptr_t m_vmxon_region_phys;
-    std::unique_ptr<char[]> m_vmxon_region;
+    std::unique_ptr<uint32_t> m_vmxon_region;
 };
 
 #endif

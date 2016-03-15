@@ -122,7 +122,8 @@ private:
 class cfi_table_row
 {
 public:
-    cfi_table_row()
+    cfi_table_row() :
+        m_arg_size(0)
     {
         for (auto i = 0; i < MAX_NUM_REGISTERS; i++)
             m_registers[i].set_index(i);
@@ -130,6 +131,9 @@ public:
 
     const cfi_cfa &cfa() const
     { return m_cfa; }
+
+    uint64_t arg_size() const
+    { return m_arg_size; }
 
     const cfi_register &reg(uint64_t index) const
     {
@@ -141,6 +145,9 @@ public:
 
     void set_cfa(const cfi_cfa &cfa)
     { m_cfa = cfa; }
+
+    void set_arg_size(uint64_t arg_size)
+    { m_arg_size = arg_size; }
 
     void set_reg(const cfi_register &reg)
     {
@@ -168,6 +175,7 @@ public:
 
 private:
     cfi_cfa m_cfa;
+    uint64_t m_arg_size;
     cfi_register m_registers[MAX_NUM_REGISTERS];
 };
 
@@ -459,7 +467,9 @@ private_parse_instruction(cfi_table_row *row,
 
     if_opcode(DW_CFA_GNU_args_size,
     {
-        ABORT("GNU extension DW_CFA_GNU_args_size is currently not supported");
+        auto arg_size = dwarf4::decode_uleb128(p);
+        row->set_arg_size(arg_size);
+        log("arg size %d\n", arg_size);
     })
 
     if_opcode(DW_CFA_GNU_negative_offset_extended,
@@ -599,5 +609,5 @@ dwarf4::unwind(const fd_entry &fde, register_state *state)
         state->set(i, private_decode_reg(reg, cfa, state));
     }
 
-    state->commit(cfa);
+    state->commit(cfa + row.arg_size());
 }

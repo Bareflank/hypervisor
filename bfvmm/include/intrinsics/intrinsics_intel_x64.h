@@ -112,6 +112,8 @@ public:
 #define IA32_VMX_TRUE_EXIT_CTLS_MSR                               0x0000048F
 #define IA32_VMX_TRUE_ENTRY_CTLS_MSR                              0x00000490
 #define IA32_VMX_PROCBASED_CTLS2_MSR                              0x0000048B
+#define IA32_VMX_EPT_VPID_CAP_MSR                                 0x0000048C
+#define IA32_VMX_VMFUNC_MSR                                       0x00000491
 
 #ifdef USE_INTEL_X64_LEGACY_CTLS
 #define IA32_VMX_PINBASED_CTLS_MSR                                0x00000481
@@ -418,6 +420,9 @@ public:
 #define VM_ENTRY_CONTROL_LOAD_IA32_PERF_GLOBAL_CTRL               (1ULL << 13)
 #define VM_ENTRY_CONTROL_LOAD_IA32_PAT                            (1ULL << 14)
 #define VM_ENTRY_CONTROL_LOAD_IA32_EFER                           (1ULL << 15)
+
+// VM-Function Control Fields
+#define VM_FUNCTION_CONTROL_EPTP_SWITCHING                        (1ULL << 0)
 
 // VM Exit Reasons
 // intel's software developers manual, volume 3, appendix c

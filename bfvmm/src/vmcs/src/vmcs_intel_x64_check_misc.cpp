@@ -131,6 +131,18 @@ vmcs_intel_x64::check_is_address_canonical(uint64_t addr)
 }
 
 bool
+vmcs_intel_x64::check_has_valid_address_width(uint64_t addr)
+{
+    auto bits = (m_intrinsics->cpuid_eax(0x80000008) & 0x00000000000000FF);
+    auto mask = (0xFFFFFFFFFFFFFFFFULL >> bits) << bits;
+
+    if ((addr & mask) == 0)
+        return true;
+
+    return false;
+}
+
+bool
 vmcs_intel_x64::check_vmcs_host_state()
 {
     auto result = true;
@@ -138,32 +150,6 @@ vmcs_intel_x64::check_vmcs_host_state()
     result &= check_host_control_registers_and_msrs();
     result &= check_host_segment_and_descriptor_table_registers();
     result &= check_host_checks_related_to_address_space_size();
-
-    return result;
-}
-
-bool
-vmcs_intel_x64::check_vmcs_guest_state()
-{
-    auto result = true;
-
-    result &= check_guest_checks_on_guest_control_registers_debug_registers_and_msrs();
-    result &= check_guest_checks_on_guest_segment_registers();
-    result &= check_guest_checks_on_guest_descriptor_table_registers();
-    result &= check_guest_checks_on_guest_rip_and_rflags();
-    result &= check_guest_checks_on_guest_non_register_state();
-
-    return result;
-}
-
-bool
-vmcs_intel_x64::check_vmcs_control_state()
-{
-    auto result = true;
-
-    result &= check_control_checks_on_vm_execution_control_fields();
-    result &= check_control_checks_on_vm_exit_control_fields();
-    result &= check_control_checks_on_vm_entry_control_fields();
 
     return result;
 }
@@ -766,4 +752,17 @@ vmcs_intel_x64::supports_load_ia32_efer_on_entry()
 
     return ia32_vmx_entry_ctls_msr &
            (VM_ENTRY_CONTROL_LOAD_IA32_EFER << 32);
+}
+
+bool
+vmcs_intel_x64::supports_eptp_switching()
+{
+    if (this->supports_secondary_controls() == false)
+        return false;
+
+    if (this->supports_vm_functions() == false)
+        return false;
+
+    return (vmread(VMCS_VM_FUNCTION_CONTROLS_FULL) &
+            VM_FUNCTION_CONTROL_EPTP_SWITCHING);
 }

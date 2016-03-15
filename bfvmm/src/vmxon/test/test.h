@@ -24,12 +24,12 @@
 
 #include <unittest.h>
 
-class vmm_ut : public unittest
+class vmxon_ut : public unittest
 {
 public:
 
-    vmm_ut();
-    ~vmm_ut() {}
+    vmxon_ut();
+    ~vmxon_ut() {}
 
 protected:
 
@@ -39,37 +39,35 @@ protected:
 
 private:
 
-    void test_vmm_start_uninitialized();
-    void test_vmm_stop_uninitialized();
-    void test_verify_cpuid_vmx_supported_failed();
-    void test_verify_cpuid_vmx_supported_success();
-    void test_verify_vmx_capabilities_msr_failed_invalid_physical_address_width();
-    void test_verify_vmx_capabilities_msr_failed_invalid_memory_type();
-    void test_verify_vmx_capabilities_msr_success();
-    void test_verify_ia32_vmx_cr0_fixed_msr_failed_fixed0();
-    void test_verify_ia32_vmx_cr0_fixed_msr_failed_fixed1();
-    void test_verify_ia32_vmx_cr0_fixed_msr_success();
-    void test_verify_ia32_vmx_cr4_fixed_msr_failed_fixed0();
-    void test_verify_ia32_vmx_cr4_fixed_msr_failed_fixed1();
-    void test_verify_ia32_vmx_cr4_fixed_msr_success();
-    void test_verify_ia32_feature_control_msr_failed();
-    void test_verify_ia32_feature_control_msr_success();
-    void test_verify_v8086_disabled_failed();
-    void test_verify_v8086_disabled_success();
-    void test_verify_vmx_operation_enabled_failed();
-    void test_verify_vmx_operation_enabled_success();
-    void test_verify_vmx_operation_disabled_failed();
-    void test_verify_vmx_operation_disabled_success();
-    void test_enable_vmx_operation_success();
-    void test_disable_vmx_operation_success();
-    void test_create_vmxon_region_out_of_memory();
-    void test_create_vmxon_region_misaligned_page();
+    // void test_vmm_start_uninitialized();
+    // void test_vmm_stop_uninitialized();
+    // void test_verify_cpuid_vmx_supported_failed();
+    // void test_verify_cpuid_vmx_supported_success();
+    // void test_verify_vmx_capabilities_msr_failed_invalid_physical_address_width();
+    // void test_verify_vmx_capabilities_msr_failed_invalid_memory_type();
+    // void test_verify_vmx_capabilities_msr_success();
+    // void test_verify_ia32_vmx_cr0_fixed_msr_failed_fixed0();
+    // void test_verify_ia32_vmx_cr0_fixed_msr_failed_fixed1();
+    // void test_verify_ia32_vmx_cr0_fixed_msr_success();
+    // void test_verify_ia32_vmx_cr4_fixed_msr_failed_fixed0();
+    // void test_verify_ia32_vmx_cr4_fixed_msr_failed_fixed1();
+    // void test_verify_ia32_vmx_cr4_fixed_msr_success();
+    // void test_verify_ia32_feature_control_msr_failed();
+    // void test_verify_ia32_feature_control_msr_success();
+    // void test_verify_v8086_disabled_failed();
+    // void test_verify_v8086_disabled_success();
+    // void test_verify_vmx_operation_enabled_failed();
+    // void test_verify_vmx_operation_enabled_success();
+    // void test_verify_vmx_operation_disabled_failed();
+    // void test_verify_vmx_operation_disabled_success();
+    // void test_enable_vmx_operation_success();
+    // void test_disable_vmx_operation_success();
     void test_create_vmxon_region_not_page_aligned();
-    void test_release_vmxon_region();
-    void test_execute_vmxon_already_on();
-    void test_execute_vmxon_failed();
-    void test_execute_vmxoff_already_off();
-    void test_execute_vmxoff_failed();
+    // void test_release_vmxon_region();
+    // void test_execute_vmxon_already_on();
+    // void test_execute_vmxon_failed();
+    // void test_execute_vmxoff_already_off();
+    // void test_execute_vmxoff_failed();
 };
 
 #endif

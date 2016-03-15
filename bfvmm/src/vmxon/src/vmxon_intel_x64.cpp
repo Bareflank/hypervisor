@@ -24,10 +24,6 @@
 #include <vmxon/vmxon_exceptions_intel_x64.h>
 #include <memory_manager/memory_manager.h>
 
-// =============================================================================
-//  Implementation
-// =============================================================================
-
 vmxon_intel_x64::vmxon_intel_x64(intrinsics_intel_x64 *intrinsics) :
     m_intrinsics(intrinsics),
     m_vmxon_enabled(false)
@@ -172,14 +168,15 @@ vmxon_intel_x64::create_vmxon_region()
     auto cor1 = commit_or_rollback([&]
     { this->release_vmxon_region(); });
 
-    m_vmxon_region = std::make_unique<char[]>(4096);
-    m_vmxon_region_phys = (uintptr_t)g_mm->virt_to_phys(m_vmxon_region.get());
+    auto region = (uint32_t *)g_mm->malloc_aligned(4096, 4096);
 
-    if ((m_vmxon_region_phys & 0x0000000000000FFF) != 0)
+    m_vmxon_region = std::unique_ptr<uint32_t>(region);
+    m_vmxon_region_phys = (uintptr_t)g_mm->virt_to_phys(region);
+
+    if (((uintptr_t)region & 0x0000000000000FFF) != 0)
         throw invalid_alignmnet(
-            "vmxon region not page aligned", m_vmxon_region_phys);
+            "vmxon region not page aligned", (uintptr_t)region);
 
-    auto region = (uint32_t *)m_vmxon_region.get();
     region[0] = m_intrinsics->read_msr(IA32_VMX_BASIC_MSR) & 0x7FFFFFFFF;
 
     cor1.commit();
