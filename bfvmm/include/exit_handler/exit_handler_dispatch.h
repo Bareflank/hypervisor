@@ -25,8 +25,6 @@
 #include <stdint.h>
 #include <intrinsics/intrinsics_intel_x64.h>
 
-#define VMCS_PROMOTION 0xDEADBEEF
-
 class exit_handler_dispatch
 {
 public:
@@ -100,14 +98,14 @@ protected:
     virtual void handle_xrstors();
 
     virtual void advance_rip();
-
-private:
-    void spin_wait();
     void unimplemented_handler();
 
     const char *exit_reason_to_str(uint64_t exit_reason);
 
-private:
+    virtual uint64_t vmread(uint64_t field) const;
+    virtual void vmwrite(uint64_t field, uint64_t value);
+
+protected:
 
     intrinsics_intel_x64 *m_intrinsics;
 

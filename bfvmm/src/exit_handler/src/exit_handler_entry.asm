@@ -44,8 +44,9 @@ global g_guest_rsp:data
 global g_guest_rip:data
 
 extern exit_handler
-global exit_handler_entry
-global promote_vmcs_to_root
+global exit_handler_entry:function
+global promote_vmcs_to_root:function
+global halt_cpu:function
 
 section .data
 
@@ -69,21 +70,17 @@ g_guest_rip dq 0
 
 section .text
 
-
-;; VMCS Promotion
+; Promote VMCS
+;
+; Continues execution using the Guest state. Once this function execute,
+; the host VMM will stop executing, and the guest will execute at the
+; instruction that it exited on (likely the vmxoff instruction)
+;
 promote_vmcs_to_root:
-    mov rax, [g_guest_rip]
     mov rsp, [g_guest_rsp]
+    mov rax, [g_guest_rip]
     push rax
 
-    mov rdi, [g_guest_rdi]
-    mov rsi, [g_guest_rsi]
-    mov rbp, [g_guest_rbp]
-
-    mov rdx, [g_guest_rdx]
-    mov rcx, [g_guest_rcx]
-    mov rbx, [g_guest_rbx]
-    mov rax, [g_guest_rax]
     mov r15, [g_guest_r15]
     mov r14, [g_guest_r14]
     mov r13, [g_guest_r13]
@@ -92,6 +89,13 @@ promote_vmcs_to_root:
     mov r10, [g_guest_r10]
     mov r9,  [g_guest_r09]
     mov r8,  [g_guest_r08]
+    mov rdi, [g_guest_rdi]
+    mov rsi, [g_guest_rsi]
+    mov rbp, [g_guest_rbp]
+    mov rdx, [g_guest_rdx]
+    mov rcx, [g_guest_rcx]
+    mov rbx, [g_guest_rbx]
+    mov rax, [g_guest_rax]
 
     sti
     ret
@@ -116,7 +120,6 @@ exit_handler_entry:
 
     cli
 
-    ; Registers
     mov [g_guest_rax], rax
     mov [g_guest_rbx], rbx
     mov [g_guest_rcx], rcx
@@ -133,21 +136,18 @@ exit_handler_entry:
     mov [g_guest_r14], r14
     mov [g_guest_r15], r15
 
-    ; RSP, RIP
-    mov rdi, VMCS_GUEST_RSP
-    vmread [g_guest_rsp], rdi
     mov rdi, VMCS_GUEST_RIP
     vmread [g_guest_rip], rdi
+    mov rdi, VMCS_GUEST_RSP
+    vmread [g_guest_rsp], rdi
 
     call exit_handler wrt ..plt
 
-    ; RIP, RSP
-    mov rdi, VMCS_GUEST_RIP
-    vmwrite rdi, [g_guest_rip]
     mov rdi, VMCS_GUEST_RSP
     vmwrite rdi, [g_guest_rsp]
+    mov rdi, VMCS_GUEST_RIP
+    vmwrite rdi, [g_guest_rip]
 
-    ; Registers
     mov r15, [g_guest_r15]
     mov r14, [g_guest_r14]
     mov r13, [g_guest_r13]
@@ -168,6 +168,14 @@ exit_handler_entry:
 
     vmresume
 
+; Halt CPU
+;
+; This is call in case of an error
+;
+halt_cpu:
+    cli
+    hlt
+
 ; VMM Guest Instructions
 ;
 ; Certain instructions are better optimized, if they have direct access to the
@@ -187,8 +195,6 @@ exit_handler_entry:
 ; the state of the guest
 
 global guest_cpuid:function
-global guest_read_msr:function
-global guest_write_msr:function
 
 ; void guest_cpuid(void)
 guest_cpuid:
@@ -214,41 +220,3 @@ guest_cpuid:
     pop rcx
     pop rbx
     ret
-
-; void guest_read_msr(void)
-guest_read_msr:
-    push rcx
-    push rdx
-
-    mov rax, [g_guest_rax]
-    mov rcx, [g_guest_rcx]
-    mov rdx, [g_guest_rdx]
-
-    rdmsr
-
-    mov [g_guest_rax], rax
-    mov [g_guest_rdx], rdx
-
-    mov rax, 0
-
-    pop rdx
-    pop rcx
-    ret
-
-; void guest_write_msr(void)
-guest_write_msr:
-    push rcx
-    push rdx
-
-    mov rcx, [g_guest_rcx]
-    mov rax, [g_guest_rax]
-    mov rdx, [g_guest_rdx]
-
-    wrmsr
-
-    mov rax, 0
-
-    pop rdx
-    pop rcx
-    ret
-

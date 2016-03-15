@@ -137,7 +137,7 @@ vmcs_intel_x64::check_guest_cr3_for_unsupported_bits()
     auto cr3 = vmread(VMCS_GUEST_CR0);
 
     if (is_physical_address_valid(cr3) == false)
-        throw invalid_address("cr3 too large", cr3);
+        throw invalid_address("guest cr3 too large", cr3);
 }
 
 void
@@ -185,24 +185,6 @@ vmcs_intel_x64::check_guest_verify_load_ia32_perf_global_ctrl()
                                  vmcs_ia32_perf_global_ctrl);
 }
 
-static bool
-private_check_pat(uint64_t pat)
-{
-    switch (pat)
-    {
-        case 0:
-        case 1:
-        case 4:
-        case 5:
-        case 6:
-        case 7:
-            return true;
-
-        default:
-            return false;
-    }
-}
-
 void
 vmcs_intel_x64::check_guest_verify_load_ia32_pat()
 {
@@ -218,28 +200,28 @@ vmcs_intel_x64::check_guest_verify_load_ia32_pat()
     auto pat6 = vmread(VMCS_GUEST_IA32_PAT_FULL) & 0x00FF000000000000 >> 48;
     auto pat7 = vmread(VMCS_GUEST_IA32_PAT_FULL) & 0xFF00000000000000 >> 56;
 
-    if (private_check_pat(pat0) == false)
+    if (check_pat(pat0) == false)
         throw vmcs_invalid_field("pat0 has an invalid memory type", pat0);
 
-    if (private_check_pat(pat1) == false)
+    if (check_pat(pat1) == false)
         throw vmcs_invalid_field("pat1 has an invalid memory type", pat1);
 
-    if (private_check_pat(pat2) == false)
+    if (check_pat(pat2) == false)
         throw vmcs_invalid_field("pat2 has an invalid memory type", pat2);
 
-    if (private_check_pat(pat3) == false)
+    if (check_pat(pat3) == false)
         throw vmcs_invalid_field("pat3 has an invalid memory type", pat3);
 
-    if (private_check_pat(pat4) == false)
+    if (check_pat(pat4) == false)
         throw vmcs_invalid_field("pat4 has an invalid memory type", pat4);
 
-    if (private_check_pat(pat5) == false)
+    if (check_pat(pat5) == false)
         throw vmcs_invalid_field("pat5 has an invalid memory type", pat5);
 
-    if (private_check_pat(pat6) == false)
+    if (check_pat(pat6) == false)
         throw vmcs_invalid_field("pat6 has an invalid memory type", pat6);
 
-    if (private_check_pat(pat7) == false)
+    if (check_pat(pat7) == false)
         throw vmcs_invalid_field("pat7 has an invalid memory type", pat7);
 }
 

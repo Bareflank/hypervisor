@@ -19,43 +19,31 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <iomanip>
-#include <iostream>
-
 #include <vmcs/vmcs_intel_x64.h>
+#include <vmcs/vmcs_intel_x64_exceptions.h>
 
-bool
+void
 vmcs_intel_x64::check_vmcs_host_state()
 {
-    auto result = true;
-
-    result &= check_host_control_registers_and_msrs();
-    result &= check_host_segment_and_descriptor_table_registers();
-    result &= check_host_checks_related_to_address_space_size();
-
-    return result;
+    check_host_control_registers_and_msrs();
+    check_host_segment_and_descriptor_table_registers();
+    check_host_checks_related_to_address_space_size();
 }
 
-bool
+void
 vmcs_intel_x64::check_host_control_registers_and_msrs()
 {
-    auto result = true;
-
-    result &= check_host_cr0_for_unsupported_bits();
-    result &= check_host_cr4_for_unsupported_bits();
-    result &= check_host_cr3_for_unsupported_bits();
-    result &= check_host_ia32_sysenter_esp_canonical_address();
-    result &= check_host_ia32_sysenter_eip_canonical_address();
-    result &= check_host_ia32_perf_global_ctrl_for_reserved_bits();
-    result &= check_host_ia32_pat_for_unsupported_bits();
-    result &= check_host_verify_load_ia32_efer_enabled();
-    result &= check_host_ia32_efer_for_reserved_bits();
-    result &= check_host_ia32_efer_set();
-
-    return result;
+    check_host_cr0_for_unsupported_bits();
+    check_host_cr4_for_unsupported_bits();
+    check_host_cr3_for_unsupported_bits();
+    check_host_ia32_sysenter_esp_canonical_address();
+    check_host_ia32_sysenter_eip_canonical_address();
+    check_host_verify_load_ia32_perf_global_ctrl();
+    check_host_verify_load_ia32_pat();
+    check_host_verify_load_ia32_efer();
 }
 
-bool
+void
 vmcs_intel_x64::check_host_cr0_for_unsupported_bits()
 {
     auto cr0 = vmread(VMCS_HOST_CR0);
@@ -63,21 +51,10 @@ vmcs_intel_x64::check_host_cr0_for_unsupported_bits()
     auto ia32_vmx_cr0_fixed1 = m_intrinsics->read_msr(IA32_VMX_CR0_FIXED1_MSR);
 
     if (0 != ((~cr0 & ia32_vmx_cr0_fixed0) | (cr0 & ~ia32_vmx_cr0_fixed1)))
-    {
-        std::cout << "check_host_cr0_for_unsupported_bits failed. "
-                  << "host cr0 incorrectly setup: " << std::endl
-                  << std::hex
-                  << "    - cr0: 0x" << cr0 << " " << std::endl
-                  << "    - ia32_vmx_cr0_fixed0: 0x" << ia32_vmx_cr0_fixed0 << std::endl
-                  << "    - ia32_vmx_cr0_fixed1: 0x" << ia32_vmx_cr0_fixed1 << std::endl
-                  << std::dec;
-        return false;
-    }
-
-    return true;
+        throw vmcs_invalid_ctrl(cr0, ia32_vmx_cr0_fixed0, ia32_vmx_cr0_fixed1);
 }
 
-bool
+void
 vmcs_intel_x64::check_host_cr4_for_unsupported_bits()
 {
     auto cr4 = vmread(VMCS_HOST_CR4);
@@ -85,558 +62,364 @@ vmcs_intel_x64::check_host_cr4_for_unsupported_bits()
     auto ia32_vmx_cr4_fixed1 = m_intrinsics->read_msr(IA32_VMX_CR4_FIXED1_MSR);
 
     if (0 != ((~cr4 & ia32_vmx_cr4_fixed0) | (cr4 & ~ia32_vmx_cr4_fixed1)))
-    {
-        std::cout << "check_host_cr4_for_unsupported_bits failed. "
-                  << "host cr4 incorrectly setup: " << std::endl
-                  << std::hex
-                  << "    - cr4: 0x" << cr4 << " " << std::endl
-                  << "    - ia32_vmx_cr4_fixed0: 0x" << ia32_vmx_cr4_fixed0 << std::endl
-                  << "    - ia32_vmx_cr4_fixed1: 0x" << ia32_vmx_cr4_fixed1 << std::endl
-                  << std::dec;
-        return false;
-    }
-
-    return true;
+        throw vmcs_invalid_ctrl(cr4, ia32_vmx_cr4_fixed0, ia32_vmx_cr4_fixed1);
 }
 
-bool
+void
 vmcs_intel_x64::check_host_cr3_for_unsupported_bits()
 {
     auto cr3 = vmread(VMCS_HOST_CR3);
 
-    // The manual states that CPUID will return the total number of bits that
-    // are supported, which at the moment is 42, and is unlikely to change for
-    // a while (256 terabytes). If this code triggers a failure do to being
-    // hardcoded, cpuid(0x80000008) -> eax[7:0] will return the number of
-    // bits that are supported on the system.
-
-    if ((cr3 & ~0x3FFFFFFFFFF) != 0)
-    {
-        std::cout << "check_host_cr3_for_unsupported_bits failed. "
-                  << "host cr3 has an unsupported address width: " << std::endl
-                  << std::hex
-                  << "    - cr3: 0x" << cr3 << " " << std::endl
-                  << std::dec;
-        return false;
-    }
-
-    return true;
+    if (is_physical_address_valid(cr3) == false)
+        throw invalid_address("host cr3 too large", cr3);
 }
 
-bool
+void
 vmcs_intel_x64::check_host_ia32_sysenter_esp_canonical_address()
 {
     auto esp = vmread(VMCS_HOST_IA32_SYSENTER_EIP);
 
     if (is_address_canonical(esp) == false)
-    {
-        std::cout << "check_host_ia32_sysenter_esp_canonical_address failed. "
-                  << "host ia32_sysenter_esp has a non-canonical address: " << std::endl
-                  << std::hex
-                  << "    - ia32_sysenter_esp: 0x" << esp << " " << std::endl
-                  << std::dec;
-
-        return false;
-    }
-
-    return true;
+        throw invalid_address("host esp must be canonical", esp);
 }
 
-bool
+void
 vmcs_intel_x64::check_host_ia32_sysenter_eip_canonical_address()
 {
     auto eip = vmread(VMCS_HOST_IA32_SYSENTER_EIP);
 
     if (is_address_canonical(eip) == false)
-    {
-        std::cout << "check_host_ia32_sysenter_eip_canonical_address failed. "
-                  << "host ia32_sysenter_eip has a non-canonical address: " << std::endl
-                  << std::hex
-                  << "    - ia32_sysenter_eip: 0x" << eip << " " << std::endl
-                  << std::dec;
-
-        return false;
-    }
-
-    return true;
+        throw invalid_address("host eip must be canonical", eip);
 }
 
-bool
-vmcs_intel_x64::check_host_ia32_perf_global_ctrl_for_reserved_bits()
+void
+vmcs_intel_x64::check_host_verify_load_ia32_perf_global_ctrl()
 {
-    auto controls = vmread(VMCS_VM_EXIT_CONTROLS);
+    if (is_enabled_load_ia32_perf_global_ctrl_on_exit() == false)
+        return;
 
-    if ((controls & VM_EXIT_CONTROL_LOAD_IA32_PERF_GLOBAL_CTRL) != 0)
-    {
-        std::cout << "unimplemented VMCS check: "
-                  << "check_host_ia32_perf_global_ctrl_for_reserved_bits"
-                  << std::endl;
-        return false;
-    }
+    auto vmcs_ia32_perf_global_ctrl =
+        vmread(VMCS_HOST_IA32_PERF_GLOBAL_CTRL_FULL);
 
-    return true;
+    if ((vmcs_ia32_perf_global_ctrl & 0xFFFFFFF8FFFFFFFC) != 0)
+        throw vmcs_invalid_field("perf global ctrl msr reserved bits must be 0",
+                                 vmcs_ia32_perf_global_ctrl);
 }
 
-bool
-vmcs_intel_x64::check_host_ia32_pat_for_unsupported_bits()
+void
+vmcs_intel_x64::check_host_verify_load_ia32_pat()
 {
-    auto controls = vmread(VMCS_VM_EXIT_CONTROLS);
+    if (is_enabled_load_ia32_pat_on_exit() == false)
+        return;
 
-    if ((controls & VM_EXIT_CONTROL_LOAD_IA32_PAT) != 0)
-    {
-        std::cout << "unimplemented VMCS check: "
-                  << "check_host_ia32_pat_for_unsupported_bits"
-                  << std::endl;
-        return false;
-    }
+    auto pat0 = vmread(VMCS_HOST_IA32_PAT_FULL) & 0x00000000000000FF >> 0;
+    auto pat1 = vmread(VMCS_HOST_IA32_PAT_FULL) & 0x000000000000FF00 >> 8;
+    auto pat2 = vmread(VMCS_HOST_IA32_PAT_FULL) & 0x0000000000FF0000 >> 16;
+    auto pat3 = vmread(VMCS_HOST_IA32_PAT_FULL) & 0x00000000FF000000 >> 24;
+    auto pat4 = vmread(VMCS_HOST_IA32_PAT_FULL) & 0x000000FF00000000 >> 32;
+    auto pat5 = vmread(VMCS_HOST_IA32_PAT_FULL) & 0x0000FF0000000000 >> 40;
+    auto pat6 = vmread(VMCS_HOST_IA32_PAT_FULL) & 0x00FF000000000000 >> 48;
+    auto pat7 = vmread(VMCS_HOST_IA32_PAT_FULL) & 0xFF00000000000000 >> 56;
 
-    return true;
+    if (check_pat(pat0) == false)
+        throw vmcs_invalid_field("pat0 has an invalid memory type", pat0);
+
+    if (check_pat(pat1) == false)
+        throw vmcs_invalid_field("pat1 has an invalid memory type", pat1);
+
+    if (check_pat(pat2) == false)
+        throw vmcs_invalid_field("pat2 has an invalid memory type", pat2);
+
+    if (check_pat(pat3) == false)
+        throw vmcs_invalid_field("pat3 has an invalid memory type", pat3);
+
+    if (check_pat(pat4) == false)
+        throw vmcs_invalid_field("pat4 has an invalid memory type", pat4);
+
+    if (check_pat(pat5) == false)
+        throw vmcs_invalid_field("pat5 has an invalid memory type", pat5);
+
+    if (check_pat(pat6) == false)
+        throw vmcs_invalid_field("pat6 has an invalid memory type", pat6);
+
+    if (check_pat(pat7) == false)
+        throw vmcs_invalid_field("pat7 has an invalid memory type", pat7);
 }
 
-bool
-vmcs_intel_x64::check_host_verify_load_ia32_efer_enabled()
+void
+vmcs_intel_x64::check_host_verify_load_ia32_efer()
 {
-    auto controls = vmread(VMCS_VM_ENTRY_CONTROLS);
+    if (is_enabled_load_ia32_efer_on_exit() == false)
+        return;
 
-    if ((controls & VM_ENTRY_CONTROL_LOAD_IA32_EFER) == 0)
-    {
-        std::cout << "check_host_verify_load_ia32_efer_enabled: "
-                  << "only 64bit hosts are supported. load_ia32_efer must be enabled"
-                  << std::endl;
-        return false;
-    }
+    auto efer = vmread(VMCS_HOST_IA32_EFER_FULL);
 
-    return true;
+    if ((efer & 0xFFFFFFFFFFFFF2FE) != 0)
+        throw vmcs_invalid_field("ia32 efer msr reserved buts must be 0 if "
+                                 "load ia32 efer entry is enabled", efer);
+
+    auto cr0 = vmread(VMCS_HOST_CR0);
+    auto lma = (efer && IA32_EFER_LMA);
+    auto lme = (efer && IA32_EFER_LME);
+
+    if (is_enabled_host_address_space_size() == false && lma != 0)
+        throw vmcs_invalid_field("host addr space is 0, but efer.lma is 1. "
+                                 "they must be equal", lma);
+
+    if (is_enabled_host_address_space_size() == true && lma == 0)
+        throw vmcs_invalid_field("host addr space is 1, but efer.lma is 0. "
+                                 "they must be equal", lma);
+
+    if ((cr0 & CR0_PG_PAGING) == 0)
+        return;
+
+    if (lme == 0 && lma != 0)
+        throw vmcs_invalid_field("efer.lme is 0, but efer.lma is 1. "
+                                 "they must be equal", lma);
+
+    if (lme != 0 && lma == 0)
+        throw vmcs_invalid_field("efer.lme is 1, but efer.lma is 0. "
+                                 "they must be equal", lma);
 }
-
-bool
-vmcs_intel_x64::check_host_ia32_efer_for_reserved_bits()
-{
-    auto vmcs_host_ia32_efer_full = vmread(VMCS_HOST_IA32_EFER_FULL);
-
-    if ((vmcs_host_ia32_efer_full & 0xFFFFFFFFFFFFF2FE) != 0)
-    {
-        std::cout << "check_host_ia32_efer_for_reserved_bits failed: "
-                  << "the reserved bits in is32_efer must be zero"
-                  << std::endl;
-        return false;
-    }
-
-    return true;
-}
-
-bool
-vmcs_intel_x64::check_host_ia32_efer_set()
-{
-    auto vmcs_host_ia32_efer_full = vmread(VMCS_HOST_IA32_EFER_FULL);
-
-    if ((vmcs_host_ia32_efer_full & 0x0000000000000500) != 0x0000000000000500)
-    {
-        std::cout << "check_host_ia32_efer_set failed. "
-                  << "host ia32_efer msr does not have LME and LMA set: " << std::endl
-                  << std::hex
-                  << "    - ia32_efer: 0x" << vmcs_host_ia32_efer_full << " " << std::endl
-                  << std::dec;
-
-        return false;
-    }
-
-    return true;
-}
-
 
 // -----------------------------------------------------------------------------
 // Host Segment and Descriptor-Table Register Checks
 // -----------------------------------------------------------------------------
 
-bool
+void
 vmcs_intel_x64::check_host_segment_and_descriptor_table_registers()
 {
-    auto result = true;
-
-    result &= check_host_es_selector_rpl_ti_equal_zero();
-    result &= check_host_cs_selector_rpl_ti_equal_zero();
-    result &= check_host_ss_selector_rpl_ti_equal_zero();
-    result &= check_host_ds_selector_rpl_ti_equal_zero();
-    result &= check_host_fs_selector_rpl_ti_equal_zero();
-    result &= check_host_gs_selector_rpl_ti_equal_zero();
-    result &= check_host_tr_selector_rpl_ti_equal_zero();
-    result &= check_host_cs_not_equal_zero();
-    result &= check_host_tr_not_equal_zero();
-    result &= check_host_ss_not_equal_zero();
-    result &= check_host_fs_canonical_base_address();
-    result &= check_host_gs_canonical_base_address();
-    result &= check_host_gdtr_canonical_base_address();
-    result &= check_host_idtr_canonical_base_address();
-    result &= check_host_tr_canonical_base_address();
-
-    return result;
+    check_host_es_selector_rpl_ti_equal_zero();
+    check_host_cs_selector_rpl_ti_equal_zero();
+    check_host_ss_selector_rpl_ti_equal_zero();
+    check_host_ds_selector_rpl_ti_equal_zero();
+    check_host_fs_selector_rpl_ti_equal_zero();
+    check_host_gs_selector_rpl_ti_equal_zero();
+    check_host_tr_selector_rpl_ti_equal_zero();
+    check_host_cs_not_equal_zero();
+    check_host_tr_not_equal_zero();
+    check_host_ss_not_equal_zero();
+    check_host_fs_canonical_base_address();
+    check_host_gs_canonical_base_address();
+    check_host_gdtr_canonical_base_address();
+    check_host_idtr_canonical_base_address();
+    check_host_tr_canonical_base_address();
 }
 
-bool
+void
 vmcs_intel_x64::check_host_es_selector_rpl_ti_equal_zero()
 {
     auto es = vmread(VMCS_HOST_ES_SELECTOR);
 
-    if ((es & 0x0003) != 0)
-    {
-        std::cout << "check_host_es_selector_rpl_ti_equal_zero failed. "
-                  << "RPL or TI not equal to 0: " << std::endl
-                  << std::hex
-                  << "    - es: 0x" << es << " " << std::endl
-                  << std::dec;
-        return false;
-    }
-
-    return true;
+    if ((es & (SELECTOR_RPL_FLAG | SELECTOR_TI_FLAG)) != 0)
+        throw vmcs_invalid_field("host rpl / tr's es flag must be 0", es);
 }
 
-bool
+void
 vmcs_intel_x64::check_host_cs_selector_rpl_ti_equal_zero()
 {
     auto cs = vmread(VMCS_HOST_CS_SELECTOR);
 
-    if ((cs & 0x0003) != 0)
-    {
-        std::cout << "check_host_cs_selector_rpl_ti_equal_zero failed. "
-                  << "RPL or TI not equal to 0: " << std::endl
-                  << std::hex
-                  << "    - cs: 0x" << cs << " " << std::endl
-                  << std::dec;
-        return false;
-    }
-
-    return true;
+    if ((cs & (SELECTOR_RPL_FLAG | SELECTOR_TI_FLAG)) != 0)
+        throw vmcs_invalid_field("host rpl / tr's cs flag must be 0", cs);
 }
 
-bool
+void
 vmcs_intel_x64::check_host_ss_selector_rpl_ti_equal_zero()
 {
     auto ss = vmread(VMCS_HOST_SS_SELECTOR);
 
-    if ((ss & 0x0003) != 0)
-    {
-        std::cout << "check_host_ss_selector_rpl_ti_equal_zero failed. "
-                  << "RPL or TI not equal to 0: " << std::endl
-                  << std::hex
-                  << "    - ss: 0x" << ss << " " << std::endl
-                  << std::dec;
-        return false;
-    }
-
-    return true;
+    if ((ss & (SELECTOR_RPL_FLAG | SELECTOR_TI_FLAG)) != 0)
+        throw vmcs_invalid_field("host rpl / tr's ss flag must be 0", ss);
 }
 
-bool
+void
 vmcs_intel_x64::check_host_ds_selector_rpl_ti_equal_zero()
 {
     auto ds = vmread(VMCS_HOST_DS_SELECTOR);
 
-    if ((ds & 0x0003) != 0)
-    {
-        std::cout << "check_host_ds_selector_rpl_ti_equal_zero failed. "
-                  << "RPL or TI not equal to 0: " << std::endl
-                  << std::hex
-                  << "    - ds: 0x" << ds << " " << std::endl
-                  << std::dec;
-        return false;
-    }
-
-    return true;
+    if ((ds & (SELECTOR_RPL_FLAG | SELECTOR_TI_FLAG)) != 0)
+        throw vmcs_invalid_field("host rpl / tr's ds flag must be 0", ds);
 }
 
-bool
+void
 vmcs_intel_x64::check_host_fs_selector_rpl_ti_equal_zero()
 {
     auto fs = vmread(VMCS_HOST_FS_SELECTOR);
 
-    if ((fs & 0x0003) != 0)
-    {
-        std::cout << "check_host_fs_selector_rpl_ti_equal_zero failed. "
-                  << "RPL or TI not equal to 0: " << std::endl
-                  << std::hex
-                  << "    - fs: 0x" << fs << " " << std::endl
-                  << std::dec;
-        return false;
-    }
-
-    return true;
+    if ((fs & (SELECTOR_RPL_FLAG | SELECTOR_TI_FLAG)) != 0)
+        throw vmcs_invalid_field("host rpl / tr's fs flag must be 0", fs);
 }
 
-bool
+void
 vmcs_intel_x64::check_host_gs_selector_rpl_ti_equal_zero()
 {
     auto gs = vmread(VMCS_HOST_GS_SELECTOR);
 
-    if ((gs & 0x0003) != 0)
-    {
-        std::cout << "check_host_gs_selector_rpl_ti_equal_zero failed. "
-                  << "RPL or TI not equal to 0: " << std::endl
-                  << std::hex
-                  << "    - gs: 0x" << gs << " " << std::endl
-                  << std::dec;
-        return false;
-    }
-
-    return true;
+    if ((gs & (SELECTOR_RPL_FLAG | SELECTOR_TI_FLAG)) != 0)
+        throw vmcs_invalid_field("host rpl / tr's gs flag must be 0", gs);
 }
 
-bool
+void
 vmcs_intel_x64::check_host_tr_selector_rpl_ti_equal_zero()
 {
     auto tr = vmread(VMCS_HOST_TR_SELECTOR);
 
-    if ((tr & 0x0003) != 0)
-    {
-        std::cout << "check_host_tr_selector_rpl_ti_equal_zero failed. "
-                  << "RPL or TI not equal to 0: " << std::endl
-                  << std::hex
-                  << "    - tr: 0x" << tr << " " << std::endl
-                  << std::dec;
-        return false;
-    }
-
-    return true;
+    if ((tr & (SELECTOR_RPL_FLAG | SELECTOR_TI_FLAG)) != 0)
+        throw vmcs_invalid_field("host rpl / tr's tr flag must be 0", tr);
 }
 
-bool
+void
 vmcs_intel_x64::check_host_cs_not_equal_zero()
 {
     auto cs = vmread(VMCS_HOST_CS_SELECTOR);
 
     if (cs == 0x0000)
-    {
-        std::cout << "check_host_cs_not_equal_zero failed. "
-                  << "cs select equal to zero: " << std::endl
-                  << std::hex
-                  << "    - cs: 0x" << cs << " " << std::endl
-                  << std::dec;
-        return false;
-    }
-
-    return true;
+        throw vmcs_invalid_field("host cs cannot equal 0", cs);
 }
 
-bool
+void
 vmcs_intel_x64::check_host_tr_not_equal_zero()
 {
     auto tr = vmread(VMCS_HOST_TR_SELECTOR);
 
     if (tr == 0x0000)
-    {
-        std::cout << "check_host_tr_not_equal_zero failed. "
-                  << "tr select equal to zero: " << std::endl
-                  << std::hex
-                  << "    - tr: 0x" << tr << " " << std::endl
-                  << std::dec;
-        return false;
-    }
-
-    return true;
+        throw vmcs_invalid_field("host tr cannot equal 0", tr);
 }
 
-bool
+void
 vmcs_intel_x64::check_host_ss_not_equal_zero()
 {
     auto ss = vmread(VMCS_HOST_SS_SELECTOR);
-    auto controls = vmread(VMCS_VM_EXIT_CONTROLS);
 
-    if ((controls & VM_EXIT_CONTROL_HOST_ADDRESS_SPACE_SIZE) != 0)
-        return true;
+    if (is_enabled_host_address_space_size() == true)
+        return;
 
     if (ss == 0x0000)
-    {
-        std::cout << "check_host_ss_not_equal_zero failed. "
-                  << "ss select equal to zero: " << std::endl
-                  << std::hex
-                  << "    - ss: 0x" << ss << " " << std::endl
-                  << std::dec;
-        return false;
-    }
-
-    return true;
+        throw vmcs_invalid_field("host ss cannot equal 0", ss);
 }
 
-bool
+void
 vmcs_intel_x64::check_host_fs_canonical_base_address()
 {
     auto fs_base = vmread(VMCS_HOST_FS_BASE);
 
     if (is_address_canonical(fs_base) == false)
-    {
-        std::cout << "check_host_fs_canonical_base_address failed. "
-                  << "host fs base has a non-canonical address: " << std::endl
-                  << std::hex
-                  << "    - fs base: 0x" << fs_base << " " << std::endl
-                  << std::dec;
-
-        return false;
-    }
-
-    return true;
+        throw invalid_address("host fs base must be canonical", fs_base);
 }
 
-bool
+void
 vmcs_intel_x64::check_host_gs_canonical_base_address()
 {
     auto gs_base = vmread(VMCS_HOST_GS_BASE);
 
     if (is_address_canonical(gs_base) == false)
-    {
-        std::cout << "check_host_gs_canonical_base_address failed. "
-                  << "host gs base has a non-canonical address: " << std::endl
-                  << std::hex
-                  << "    - gs base: 0x" << gs_base << " " << std::endl
-                  << std::dec;
-
-        return false;
-    }
-
-    return true;
+        throw invalid_address("host gs base must be canonical", gs_base);
 }
 
-bool
+void
 vmcs_intel_x64::check_host_gdtr_canonical_base_address()
 {
     auto gdtr_base = vmread(VMCS_HOST_GDTR_BASE);
 
     if (is_address_canonical(gdtr_base) == false)
-    {
-        std::cout << "check_host_gdtr_canonical_base_address failed. "
-                  << "host gdtr base has a non-canonical address: " << std::endl
-                  << std::hex
-                  << "    - gdtr base: 0x" << gdtr_base << " " << std::endl
-                  << std::dec;
-
-        return false;
-    }
-
-    return true;
+        throw invalid_address("host gdtr base must be canonical", gdtr_base);
 }
 
-bool
+void
 vmcs_intel_x64::check_host_idtr_canonical_base_address()
 {
     auto idtr_base = vmread(VMCS_HOST_IDTR_BASE);
 
     if (is_address_canonical(idtr_base) == false)
-    {
-        std::cout << "check_host_idtr_canonical_base_address failed. "
-                  << "host idtr base has a non-canonical address: " << std::endl
-                  << std::hex
-                  << "    - idtr base: 0x" << idtr_base << " " << std::endl
-                  << std::dec;
-
-        return false;
-    }
-
-    return true;
+        throw invalid_address("host idtr base must be canonical", idtr_base);
 }
 
-bool
+void
 vmcs_intel_x64::check_host_tr_canonical_base_address()
 {
     auto tr_base = vmread(VMCS_HOST_FS_BASE);
 
     if (is_address_canonical(tr_base) == false)
-    {
-        std::cout << "check_host_tr_canonical_base_address failed. "
-                  << "host tr base has a non-canonical address: " << std::endl
-                  << std::hex
-                  << "    - tr base: 0x" << tr_base << " " << std::endl
-                  << std::dec;
-
-        return false;
-    }
-
-    return true;
+        throw invalid_address("host tr base must be canonical", tr_base);
 }
 
-bool
+void
 vmcs_intel_x64::check_host_checks_related_to_address_space_size()
 {
-    auto result = true;
-
-    result &= check_host_if_outside_ia32e_mode();
-    result &= check_host_vmcs_host_address_space_size_is_set();
-    result &= check_host_verify_pae_is_enabled();
-    result &= check_host_verify_rip_has_canonical_address();
-
-    return result;
+    check_host_if_outside_ia32e_mode();
+    check_host_vmcs_host_address_space_size_is_set();
+    check_host_host_address_space_disabled();
+    check_host_host_address_space_enabled();
 }
 
-bool
+void
 vmcs_intel_x64::check_host_if_outside_ia32e_mode()
 {
     auto ia32_efer_msr = m_intrinsics->read_msr(IA32_EFER_MSR);
 
-    if ((ia32_efer_msr & 0x0000000000000500) != 0x0000000000000500)
-    {
-        std::cout << "check_host_if_outside_ia32e_mode failed. "
-                  << "attempted to use bareflank with an unsupported OS. bareflank only supports 64bit: " << std::endl
-                  << std::hex
-                  << "    - ia32_efer: 0x" << ia32_efer_msr << " " << std::endl
-                  << std::dec;
+    if ((ia32_efer_msr & IA32_EFER_LMA) != 0)
+        return;
 
-        return false;
-    }
+    if (is_enabled_ia_32e_mode_guest() == true)
+        throw vmcs_invalid_field("ia 32e mode must be 0 if efer.lma == 0",
+                                 ia32_efer_msr);
 
-    return true;
+    if (is_enabled_host_address_space_size() == true)
+        throw vmcs_invalid_field("host addr space must be 0 if efer.lma == 0",
+                                 ia32_efer_msr);
 }
 
-bool
+void
 vmcs_intel_x64::check_host_vmcs_host_address_space_size_is_set()
 {
-    auto controls = vmread(VMCS_VM_EXIT_CONTROLS);
+    auto ia32_efer_msr = m_intrinsics->read_msr(IA32_EFER_MSR);
 
-    if ((controls & VM_EXIT_CONTROL_HOST_ADDRESS_SPACE_SIZE) == 0)
-    {
-        std::cout << "check_host_vmcs_host_address_space_size_is_set failed. "
-                  << "in 64bit, the host address space size exit control must be enabled: " << std::endl
-                  << std::hex
-                  << "    - vm-exit controls: 0x" << controls << " " << std::endl
-                  << std::dec;
+    if ((ia32_efer_msr & IA32_EFER_LMA) == 0)
+        return;
 
-        return false;
-    }
-
-    return true;
+    if (is_enabled_host_address_space_size() == false)
+        throw vmcs_invalid_field("host addr space must be 1 if efer.lma == 1",
+                                 ia32_efer_msr);
 }
 
-bool
-vmcs_intel_x64::check_host_verify_pae_is_enabled()
+void
+vmcs_intel_x64::check_host_host_address_space_disabled()
 {
+    if (is_enabled_host_address_space_size() == true)
+        return;
+
+    if (is_enabled_ia_32e_mode_guest() == true)
+        throw vmcs_invalid_field("ia 32e mode must be disabled if host addr "
+                                 "space is disabled", 0);
+
+    auto cr4 = vmread(VMCS_HOST_CR4);
+
+    if ((cr4 & CR4_PCIDE_PCID_ENABLE_BIT) != 0)
+        throw vmcs_invalid_field("cr4 pcide must be disabled if host addr "
+                                 "space is disabled", 0);
+
+    auto rip = vmread(VMCS_HOST_RIP);
+
+    if ((rip & 0xFFFFFFFF00000000) != 0)
+        throw vmcs_invalid_field("rip bits 63:32 must be 0 if host addr "
+                                 "space is disabled", 0);
+}
+
+void
+vmcs_intel_x64::check_host_host_address_space_enabled()
+{
+    if (is_enabled_host_address_space_size() == false)
+        return;
+
     auto cr4 = vmread(VMCS_HOST_CR4);
 
     if ((cr4 & CR4_PAE_PHYSICAL_ADDRESS_EXTENSIONS) == 0)
-    {
-        std::cout << "check_host_verify_pae_is_enabled failed. "
-                  << "in 64bit mode, PAE must be turned on: " << std::endl
-                  << std::hex
-                  << "    - cr4: 0x" << cr4 << " " << std::endl
-                  << std::dec;
+        throw vmcs_invalid_field("cr4 pae must be enabled if host addr "
+                                 "space is enabled", 0);
 
-        return false;
-    }
-
-    return true;
-}
-
-bool
-vmcs_intel_x64::check_host_verify_rip_has_canonical_address()
-{
     auto rip = vmread(VMCS_HOST_RIP);
 
     if (is_address_canonical(rip) == false)
-    {
-        std::cout << "check_host_verify_rip_has_canonical_address failed. "
-                  << "host idtr base has a non-canonical address: " << std::endl
-                  << std::hex
-                  << "    - rip: 0x" << rip << " " << std::endl
-                  << std::dec;
-
-        return false;
-    }
-
-    return true;
+        throw invalid_address("host rip must be canonical", rip);
 }
