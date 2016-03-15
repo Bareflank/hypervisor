@@ -6,23 +6,23 @@ Misc:
   module, driver, elf error, etc... This way, when an error bubbles through
   the system, it's easy to identify
 - Destructors for statically created classes are not being called. This should
-  be resolved at some point. Likely this problem will go away once we have a 
+  be resolved at some point. Likely this problem will go away once we have a
   custom libc, as atexit registers the destructor, but is never executed since
-  we cannot use _exit() at the moment. 
+  we cannot use _exit() at the moment.
 - Add support for clang/LLVM
-- Add DWARF4 expression support in the unwinder (this could go away if 
-  Clang/LLVM doesn't need it either). 
-- Add support for Intel's MPX. This doesn't look like a huge amount of work, but 
-  would require a custom libmpx designed for the kernel in a cross platform 
-  fashion. Might not be possible until the new libc is developed with basic 
-  pthread mutex support. 
-- Modify the common.c code in the driver entry to handle memory protections 
-  properly. Specifically, we want to make sure that we are respecting the 
-  read/execute and read/write memory protections that are labeled by the 
+- Add DWARF4 expression support in the unwinder (this could go away if
+  Clang/LLVM doesn't need it either).
+- Add support for Intel's MPX. This doesn't look like a huge amount of work, but
+  would require a custom libmpx designed for the kernel in a cross platform
+  fashion. Might not be possible until the new libc is developed with basic
+  pthread mutex support.
+- Modify the common.c code in the driver entry to handle memory protections
+  properly. Specifically, we want to make sure that we are respecting the
+  read/execute and read/write memory protections that are labeled by the
   ELF program loader. This isn't useful until we break apart libc++.so such
   that it's not marked r/w/x (likely to be solved with the new libc)
-- We use our own stack, and the memory for this stack comes from .bss, as it 
-  allocated using make_unique. We need to ensure that this memory is marked 
+- We use our own stack, and the memory for this stack comes from .bss, as it
+  allocated using make_unique. We need to ensure that this memory is marked
   read/write and not read/execute (likely it is, but we should verify).
 
 Version 1.0 TODO:
@@ -38,6 +38,7 @@ Version 1.0 TODO:
 - Everything should be using the new debug.h instead of manually calling
   std::cout
 - Provide support for Debian, Fedora, CentOS
+- Get rid of as many hardcode values in the VMCS and VMXON code as possible
 
 Version 1.1 TODO:
 - Need to have a completely isolated exit handler. It should have it's own
@@ -54,10 +55,10 @@ Version 1.1 TODO:
 - CS, SS and TR need to be restored properly when promoting. This will be
   really important once a new GDT is used in the host.
 - Provide APIs within the VMCS for setting / clearing traps to MSRs and IO
-- Create custom libc. This first step should be to provide equvilant 
+- Create custom libc. This first step should be to provide equvilant
   functionality to newlib. Once this is done, the next step should be to break
-  apart libc++.so into libc.so, libcxxabi.so (statically linked with the 
-  unwinder), and libc++.so. 
+  apart libc++.so into libc.so, libcxxabi.so (statically linked with the
+  unwinder), and libc++.so.
 
 Version 2.0 TODO:
 - Type 1 and Type 2 support

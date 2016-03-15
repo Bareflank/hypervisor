@@ -271,6 +271,53 @@ private:
     bfn::vmcs_invalid_field_error(a,#b,b,__func__,__LINE__)
 
 // -----------------------------------------------------------------------------
+// VMCS 2 Invalid Fields
+// -----------------------------------------------------------------------------
+
+class vmcs_2_invalid_fields_error : public bfn::general_exception
+{
+public:
+    vmcs_2_invalid_fields_error(const std::string &mesg,
+                                const std::string &field1_str,
+                                const std::string &field2_str,
+                                uint64_t field1,
+                                uint64_t field2,
+                                const std::string &func,
+                                uint64_t line) :
+        m_mesg(mesg),
+        m_field1_str(field1_str),
+        m_field2_str(field2_str),
+        m_field1(field1),
+        m_field2(field2),
+        m_func(func),
+        m_line(line)
+    {}
+
+    virtual std::ostream &print(std::ostream &os) const
+    {
+        os << m_func << " failed:";
+        os << std::endl << "    - mesg: " << m_mesg;
+        os << std::endl << "    - " << m_field1_str << ": " << (void *)m_field1;
+        os << std::endl << "    - " << m_field2_str << ": " << (void *)m_field2;
+        os << std::endl << "    - line: " << m_line;
+
+        return os;
+    }
+
+private:
+    std::string m_mesg;
+    std::string m_field1_str;
+    std::string m_field2_str;
+    uint64_t m_field1;
+    uint64_t m_field2;
+    std::string m_func;
+    uint64_t m_line;
+};
+
+#define vmcs_2_invalid_fields(a,b,c) \
+    bfn::vmcs_2_invalid_fields_error(a,#b,#c,b,c,__func__,__LINE__)
+
+// -----------------------------------------------------------------------------
 // VMCS Invalid Ctrl
 // -----------------------------------------------------------------------------
 

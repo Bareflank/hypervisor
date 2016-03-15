@@ -20,15 +20,14 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #include <vmcs/vmcs_intel_x64.h>
-#include <vmcs/vmcs_intel_x64_checks.h>
 #include <vmcs/vmcs_intel_x64_exceptions.h>
 
 void
 vmcs_intel_x64::check_vmcs_guest_state()
 {
     checks_on_guest_control_registers_debug_registers_and_msrs();
-    // checks_on_guest_segment_registers();
-    // checks_on_guest_descriptor_table_registers();
+    checks_on_guest_segment_registers();
+    checks_on_guest_descriptor_table_registers();
     // checks_on_guest_rip_and_rflags();
     // checks_on_guest_non_register_state();
 }
@@ -43,7 +42,7 @@ vmcs_intel_x64::checks_on_guest_control_registers_debug_registers_and_msrs()
     check_guest_verify_ia_32e_mode_enabled();
     check_guest_verify_ia_32e_mode_disabled();
     check_guest_cr3_for_unsupported_bits();
-    check_guest_load_debug_controls_verify_verify_dr7();
+    check_guest_load_debug_controls_verify_dr7();
     check_guest_ia32_sysenter_esp_canonical_address();
     check_guest_ia32_sysenter_eip_canonical_address();
     check_guest_verify_load_ia32_perf_global_ctrl();
@@ -89,9 +88,7 @@ vmcs_intel_x64::check_guest_cr4_for_unsupported_bits()
 void
 vmcs_intel_x64::check_guest_load_debug_controls_verify_reserved()
 {
-    auto ctls = get_entry_ctls();
-
-    if entry_disabled(ctls, VM_ENTRY_CONTROL_LOAD_DEBUG_CONTROLS)
+    if (is_enabled_load_debug_controls_on_entry() == false)
         return;
 
     auto vmcs_ia32_debugctl =
@@ -105,9 +102,7 @@ vmcs_intel_x64::check_guest_load_debug_controls_verify_reserved()
 void
 vmcs_intel_x64::check_guest_verify_ia_32e_mode_enabled()
 {
-    auto ctls = get_entry_ctls();
-
-    if entry_disabled(ctls, VM_ENTRY_CONTROL_IA_32E_MODE_GUEST)
+    if (is_enabled_ia_32e_mode_guest() == false)
         return;
 
     auto cr0 = vmread(VMCS_GUEST_CR0);
@@ -125,9 +120,7 @@ vmcs_intel_x64::check_guest_verify_ia_32e_mode_enabled()
 void
 vmcs_intel_x64::check_guest_verify_ia_32e_mode_disabled()
 {
-    auto ctls = get_entry_ctls();
-
-    if entry_enabled(ctls, VM_ENTRY_CONTROL_IA_32E_MODE_GUEST)
+    if (is_enabled_ia_32e_mode_guest() == true)
         return;
 
     auto cr4 = vmread(VMCS_GUEST_CR4);
@@ -147,11 +140,9 @@ vmcs_intel_x64::check_guest_cr3_for_unsupported_bits()
 }
 
 void
-vmcs_intel_x64::check_guest_load_debug_controls_verify_verify_dr7()
+vmcs_intel_x64::check_guest_load_debug_controls_verify_dr7()
 {
-    auto ctls = get_entry_ctls();
-
-    if entry_disabled(ctls, VM_ENTRY_CONTROL_LOAD_DEBUG_CONTROLS)
+    if (is_enabled_load_debug_controls_on_entry() == false)
         return;
 
     auto dr7 = vmread(VMCS_GUEST_DR7);
@@ -182,9 +173,7 @@ vmcs_intel_x64::check_guest_ia32_sysenter_eip_canonical_address()
 void
 vmcs_intel_x64::check_guest_verify_load_ia32_perf_global_ctrl()
 {
-    auto ctls = get_entry_ctls();
-
-    if entry_disabled(ctls, VM_ENTRY_CONTROL_LOAD_IA32_PERF_GLOBAL_CTRL)
+    if (is_enabled_load_ia32_perf_global_ctrl_on_entry() == false)
         return;
 
     auto vmcs_ia32_perf_global_ctrl =
@@ -216,9 +205,7 @@ private_check_pat(uint64_t pat)
 void
 vmcs_intel_x64::check_guest_verify_load_ia32_pat()
 {
-    auto ctls = get_entry_ctls();
-
-    if entry_disabled(ctls, VM_ENTRY_CONTROL_LOAD_IA32_PAT)
+    if (is_enabled_load_ia32_pat_on_entry() == false)
         return;
 
     auto pat0 = vmread(VMCS_GUEST_IA32_PAT_FULL) & 0x00000000000000FF >> 0;
@@ -258,9 +245,7 @@ vmcs_intel_x64::check_guest_verify_load_ia32_pat()
 void
 vmcs_intel_x64::check_guest_verify_load_ia32_efer()
 {
-    auto ctls = get_entry_ctls();
-
-    if entry_disabled(ctls, VM_ENTRY_CONTROL_LOAD_IA32_EFER)
+    if (is_enabled_load_ia32_efer_on_entry() == false)
         return;
 
     auto efer = vmread(VMCS_GUEST_IA32_EFER_FULL);
@@ -273,11 +258,11 @@ vmcs_intel_x64::check_guest_verify_load_ia32_efer()
     auto lma = (efer && 0x0000000000000400);
     auto lme = (efer && 0x0000000000000100);
 
-    if ((ctls & VM_ENTRY_CONTROL_IA_32E_MODE_GUEST) == 0 && lma != 0)
+    if (is_enabled_ia_32e_mode_guest() == false && lma != 0)
         throw vmcs_invalid_field("ia 32e mode is 0, but efer.lma is 1. "
                                  "they must be equal", lma);
 
-    if ((ctls & VM_ENTRY_CONTROL_IA_32E_MODE_GUEST) != 0 && lma == 0)
+    if (is_enabled_ia_32e_mode_guest() == true && lma == 0)
         throw vmcs_invalid_field("ia 32e mode is 1, but efer.lma is 0. "
                                  "they must be equal", lma);
 
@@ -293,1889 +278,1434 @@ vmcs_intel_x64::check_guest_verify_load_ia32_efer()
                                  "they must be equal", lma);
 }
 
-// void
-// vmcs_intel_x64::check_guest_checks_on_guest_segment_registers()
-// {
-//     auto result = true;
-
-//     check_guest_v8086_mode_disabled();
-//     check_guest_unrestricted_guest_disabled();
-//     check_guest_tr_ti_bit_equals_0();
-//     check_guest_ldtr_ti_bit_equals_0();
-//     check_guest_ss_and_cs_rpl_are_the_same();
-//     check_guest_tr_base_is_canonical();
-//     check_guest_fs_base_is_canonical();
-//     check_guest_gs_base_is_canonical();
-//     check_guest_ldtr_base_is_canonical();
-//     check_guest_cs_base_upper_dword_0();
-//     check_guest_ss_base_upper_dword_0();
-//     check_guest_ds_base_upper_dword_0();
-//     check_guest_es_base_upper_dword_0();
-//     check_guest_cs_access_rights_type();
-//     check_guest_ss_access_rights_type();
-//     check_guest_ds_access_rights_type();
-//     check_guest_es_access_rights_type();
-//     check_guest_fs_access_rights_type();
-//     check_guest_gs_access_rights_type();
-//     check_guest_cs_is_not_a_system_descriptor();
-//     check_guest_ss_is_not_a_system_descriptor();
-//     check_guest_ds_is_not_a_system_descriptor();
-//     check_guest_es_is_not_a_system_descriptor();
-//     check_guest_fs_is_not_a_system_descriptor();
-//     check_guest_gs_is_not_a_system_descriptor();
-//     check_guest_cs_type_not_equal_3();
-//     check_guest_cs_dpl_adheres_to_ss_dpl();
-//     check_guest_ss_dpl_must_equal_rpl();
-//     check_guest_ss_dpl_must_equal_zero();
-//     check_guest_ds_dpl();
-//     check_guest_es_dpl();
-//     check_guest_fs_dpl();
-//     check_guest_gs_dpl();
-//     check_guest_cs_must_be_present();
-//     check_guest_ss_must_be_present_if_usable();
-//     check_guest_ds_must_be_present_if_usable();
-//     check_guest_es_must_be_present_if_usable();
-//     check_guest_fs_must_be_present_if_usable();
-//     check_guest_gs_must_be_present_if_usable();
-//     check_guest_cs_access_rights_reserved_must_be_0();
-//     check_guest_ss_access_rights_reserved_must_be_0();
-//     check_guest_ds_access_rights_reserved_must_be_0();
-//     check_guest_es_access_rights_reserved_must_be_0();
-//     check_guest_fs_access_rights_reserved_must_be_0();
-//     check_guest_gs_access_rights_reserved_must_be_0();
-//     check_guest_cs_db_must_be_0_if_l_equals_1();
-//     check_guest_cs_granularity();
-//     check_guest_ss_granularity();
-//     check_guest_ds_granularity();
-//     check_guest_es_granularity();
-//     check_guest_fs_granularity();
-//     check_guest_gs_granularity();
-//     check_guest_cs_access_rights_remaining_reserved_bit_0();
-//     check_guest_ss_access_rights_remaining_reserved_bit_0();
-//     check_guest_ds_access_rights_remaining_reserved_bit_0();
-//     check_guest_es_access_rights_remaining_reserved_bit_0();
-//     check_guest_fs_access_rights_remaining_reserved_bit_0();
-//     check_guest_gs_access_rights_remaining_reserved_bit_0();
-//     check_guest_tr_type_must_be_11();
-//     check_guest_tr_must_be_a_system_descriptor();
-//     check_guest_tr_must_be_present();
-//     check_guest_tr_access_rights_reserved_must_be_0();
-//     check_guest_tr_granularity();
-//     check_guest_tr_must_be_usable();
-//     check_guest_tr_access_rights_remaining_reserved_bit_0();
-//     check_guest_ldtr_type_must_be_2();
-//     check_guest_ldtr_must_be_a_system_descriptor();
-//     check_guest_ldtr_must_be_present();
-//     check_guest_ldtr_access_rights_reserved_must_be_0();
-//     check_guest_ldtr_granularity();
-//     check_guest_ldtr_access_rights_remaining_reserved_bit_0();
-
-//     return result;
-// }
-
-// void
-// vmcs_intel_x64::check_guest_v8086_mode_disabled()
-// {
-//     auto rflags = vmread(VMCS_GUEST_RFLAGS);
-
-//     if ((rflags & RFLAGS_VM_VIRTUAL_8086_MODE) != 0)
-//     {
-//         std::cout << "check_guest_v8086_mode_disabled failed. "
-//                   << "guests in v8086 mode are not supported: " << std::endl
-//                   << std::hex
-//                   << "    - rflags: 0x" << rflags << std::endl
-//                   << std::dec;
-
-//         return false;
-//     }
-
-//     return true;
-// }
-
-// void
-// vmcs_intel_x64::check_guest_unrestricted_guest_disabled()
-// {
-//     auto controls = vmread(VMCS_SECONDARY_PROCESSOR_BASED_VM_EXECUTION_CONTROLS);
-
-//     if ((controls & VM_EXEC_S_PROC_BASED_UNRESTRICTED_GUEST) != 0)
-//     {
-//         std::cout << "check_guest_unrestricted_guest_disabled: "
-//                   << "only 64bit guests are supported. unrestricted guests are not supported"
-//                   << std::endl;
-//         return false;
-//     }
-
-//     return true;
-// }
-
-// void
-// vmcs_intel_x64::check_guest_tr_ti_bit_equals_0()
-// {
-//     auto tr = vmread(VMCS_GUEST_TR_SELECTOR);
-
-//     if ((tr & SELECTOR_TI_FLAG) != 0)
-//     {
-//         std::cout << "check_guest_tr_ti_bit_equals_0 failed. "
-//                   << "tr's ti flag is not equal to zero: " << std::endl
-//                   << std::hex
-//                   << "    - tr: 0x" << tr << std::endl
-//                   << std::dec;
-
-//         return false;
-//     }
-
-//     return true;
-// }
-
-// void
-// vmcs_intel_x64::check_guest_ldtr_ti_bit_equals_0()
-// {
-//     auto ldtr = vmread(VMCS_GUEST_LDTR_SELECTOR);
-//     auto ldtr_access = vmread(VMCS_GUEST_LDTR_ACCESS_RIGHTS);
-
-//     if ((ldtr_access & SELECTOR_UNUSABLE) != 0)
-//         return true;
-
-//     if ((ldtr & SELECTOR_TI_FLAG) != 0)
-//     {
-//         std::cout << "check_guest_ldtr_ti_bit_equals_0 failed. "
-//                   << "ldtr is usable, and the ti flag is not equal to zero: " << std::endl
-//                   << std::hex
-//                   << "    - ldtr: 0x" << ldtr << std::endl
-//                   << std::dec;
-
-//         return false;
-//     }
-
-//     return true;
-// }
-
-// void
-// vmcs_intel_x64::check_guest_ss_and_cs_rpl_are_the_same()
-// {
-//     auto ss = vmread(VMCS_GUEST_SS_SELECTOR);
-//     auto cs = vmread(VMCS_GUEST_CS_SELECTOR);
-
-//     if ((ss & SELECTOR_RPL_FLAG) != (cs & SELECTOR_RPL_FLAG))
-//     {
-//         std::cout << "check_guest_ss_and_cs_rpl_are_the_same failed. "
-//                   << "ss and cs requested privilage level (rpl) must be the same: " << std::endl
-//                   << std::hex
-//                   << "    - ss: 0x" << ss << std::endl
-//                   << "    - cs: 0x" << cs << std::endl
-//                   << std::dec;
-
-//         return false;
-//     }
-
-//     return true;
-// }
-
-// void
-// vmcs_intel_x64::check_guest_tr_base_is_canonical()
-// {
-//     auto tr_base = vmread(VMCS_GUEST_TR_BASE);
-
-//     if (check_is_address_canonical(tr_base) == false)
-//     {
-//         std::cout << "check_guest_tr_base_is_canonical failed. "
-//                   << "guest tr base has a non-canonical address: " << std::endl
-//                   << std::hex
-//                   << "    - tr_base: 0x" << tr_base << std::endl
-//                   << std::dec;
-
-//         return false;
-//     }
-
-//     return true;
-// }
-
-// void
-// vmcs_intel_x64::check_guest_fs_base_is_canonical()
-// {
-//     auto fs_base = vmread(VMCS_GUEST_FS_BASE);
-//     auto fs_access = vmread(VMCS_GUEST_FS_ACCESS_RIGHTS);
-
-//     if ((fs_access & SELECTOR_UNUSABLE) != 0)
-//         return true;
-
-//     if (check_is_address_canonical(fs_base) == false)
-//     {
-//         std::cout << "check_guest_fs_base_is_canonical failed. "
-//                   << "guest fs base has a non-canonical address: " << std::endl
-//                   << std::hex
-//                   << "    - fs_base: 0x" << fs_base << std::endl
-//                   << std::dec;
-
-//         return false;
-//     }
-
-//     return true;
-// }
-
-// void
-// vmcs_intel_x64::check_guest_gs_base_is_canonical()
-// {
-//     auto gs_base = vmread(VMCS_GUEST_GS_BASE);
-//     auto gs_access = vmread(VMCS_GUEST_GS_ACCESS_RIGHTS);
-
-//     if ((gs_access & SELECTOR_UNUSABLE) != 0)
-//         return true;
-
-//     if (check_is_address_canonical(gs_base) == false)
-//     {
-//         std::cout << "check_guest_gs_base_is_canonical failed. "
-//                   << "guest gs base has a non-canonical address: " << std::endl
-//                   << std::hex
-//                   << "    - gs_base: 0x" << gs_base << std::endl
-//                   << std::dec;
-
-//         return false;
-//     }
-
-//     return true;
-// }
-
-// void
-// vmcs_intel_x64::check_guest_ldtr_base_is_canonical()
-// {
-//     auto ldtr_base = vmread(VMCS_GUEST_LDTR_BASE);
-//     auto ldtr_access = vmread(VMCS_GUEST_LDTR_ACCESS_RIGHTS);
-
-//     if ((ldtr_access & SELECTOR_UNUSABLE) != 0)
-//         return true;
-
-//     if (check_is_address_canonical(ldtr_base) == false)
-//     {
-//         std::cout << "check_guest_ldtr_base_is_canonical failed. "
-//                   << "guest ldtr base has a non-canonical address: " << std::endl
-//                   << std::hex
-//                   << "    - ldtr_base: 0x" << ldtr_base << std::endl
-//                   << std::dec;
-
-//         return false;
-//     }
-
-//     return true;
-// }
-
-// void
-// vmcs_intel_x64::check_guest_cs_base_upper_dword_0()
-// {
-//     auto cs_base = vmread(VMCS_GUEST_CS_BASE);
-
-//     if ((cs_base & 0xFFFFFFFF00000000) != 0)
-//     {
-//         std::cout << "check_guest_cs_base_upper_dword_0 failed. "
-//                   << "guest cs base bits 63:32 must be 0: " << std::endl
-//                   << std::hex
-//                   << "    - cs_base: 0x" << cs_base << std::endl
-//                   << std::dec;
-
-//         return false;
-//     }
-
-//     return true;
-// }
-
-// void
-// vmcs_intel_x64::check_guest_ss_base_upper_dword_0()
-// {
-//     auto ss_base = vmread(VMCS_GUEST_SS_BASE);
-//     auto ss_access = vmread(VMCS_GUEST_SS_ACCESS_RIGHTS);
-
-//     if ((ss_access & SELECTOR_UNUSABLE) != 0)
-//         return true;
-
-//     if ((ss_base & 0xFFFFFFFF00000000) != 0)
-//     {
-//         std::cout << "check_guest_ss_base_upper_dword_0 failed. "
-//                   << "guest ss base bits 63:32 must be 0: " << std::endl
-//                   << std::hex
-//                   << "    - ss_base: 0x" << ss_base << std::endl
-//                   << std::dec;
-
-//         return false;
-//     }
-
-//     return true;
-// }
-
-// void
-// vmcs_intel_x64::check_guest_ds_base_upper_dword_0()
-// {
-//     auto ds_base = vmread(VMCS_GUEST_DS_BASE);
-//     auto ds_acceds = vmread(VMCS_GUEST_DS_ACCESS_RIGHTS);
-
-//     if ((ds_acceds & SELECTOR_UNUSABLE) != 0)
-//         return true;
-
-//     if ((ds_base & 0xFFFFFFFF00000000) != 0)
-//     {
-//         std::cout << "check_guest_ds_base_upper_dword_0 failed. "
-//                   << "guest ds base bits 63:32 must be 0: " << std::endl
-//                   << std::hex
-//                   << "    - ds_base: 0x" << ds_base << std::endl
-//                   << std::dec;
-
-//         return false;
-//     }
-
-//     return true;
-// }
-
-// void
-// vmcs_intel_x64::check_guest_es_base_upper_dword_0()
-// {
-//     auto es_base = vmread(VMCS_GUEST_ES_BASE);
-//     auto es_accees = vmread(VMCS_GUEST_ES_ACCESS_RIGHTS);
-
-//     if ((es_accees & SELECTOR_UNUSABLE) != 0)
-//         return true;
-
-//     if ((es_base & 0xFFFFFFFF00000000) != 0)
-//     {
-//         std::cout << "check_guest_es_base_upper_dword_0 failed. "
-//                   << "guest es base bits 63:32 must be 0: " << std::endl
-//                   << std::hex
-//                   << "    - es_base: 0x" << es_base << std::endl
-//                   << std::dec;
-
-//         return false;
-//     }
-
-//     return true;
-// }
-
-// void
-// vmcs_intel_x64::check_guest_cs_access_rights_type()
-// {
-//     auto cs_access = vmread(VMCS_GUEST_CS_ACCESS_RIGHTS);
-
-//     switch (cs_access & 0x000F)
-//     {
-//         case 9:
-//         case 11:
-//         case 13:
-//         case 15:
-//             break;
-
-//         default:
-
-//             std::cout << "check_guest_cs_access_right_type failed. "
-//                       << "guest cs type must be 9, 11, 13 or 15: " << std::endl
-//                       << std::hex
-//                       << "    - cs_access: 0x" << cs_access << std::endl
-//                       << std::dec;
-
-//             return false;
-//     }
-
-//     return true;
-// }
-
-// void
-// vmcs_intel_x64::check_guest_ss_access_rights_type()
-// {
-//     auto ss_access = vmread(VMCS_GUEST_SS_ACCESS_RIGHTS);
-
-//     if ((ss_access & SELECTOR_UNUSABLE) != 0)
-//         return true;
-
-//     switch (ss_access & 0x000F)
-//     {
-//         case 3:
-//         case 7:
-//             break;
-
-//         default:
-
-//             std::cout << "check_guest_ss_access_right_type failed. "
-//                       << "guest ss type must be 3 or 7: " << std::endl
-//                       << std::hex
-//                       << "    - ss_access: 0x" << ss_access << std::endl
-//                       << std::dec;
-
-//             return false;
-//     }
-
-//     return true;
-// }
-
-// void
-// vmcs_intel_x64::check_guest_ds_access_rights_type()
-// {
-//     auto ds_access = vmread(VMCS_GUEST_DS_ACCESS_RIGHTS);
-
-//     if ((ds_access & SELECTOR_UNUSABLE) != 0)
-//         return true;
-
-//     switch (ds_access & 0x000F)
-//     {
-//         case 1:
-//         case 3:
-//         case 5:
-//         case 7:
-//         case 11:
-//         case 15:
-//             break;
-
-//         default:
-
-//             std::cout << "check_guest_ds_access_right_type failed. "
-//                       << "guest ds type must be 1, 3, 5, 7, 11 or 15: " << std::endl
-//                       << std::hex
-//                       << "    - ds_access: 0x" << ds_access << std::endl
-//                       << std::dec;
-
-//             return false;
-//     }
-
-//     return true;
-// }
-
-// void
-// vmcs_intel_x64::check_guest_es_access_rights_type()
-// {
-//     auto es_access = vmread(VMCS_GUEST_ES_ACCESS_RIGHTS);
-
-//     if ((es_access & SELECTOR_UNUSABLE) != 0)
-//         return true;
-
-//     switch (es_access & 0x000F)
-//     {
-//         case 1:
-//         case 3:
-//         case 5:
-//         case 7:
-//         case 11:
-//         case 15:
-//             break;
-
-//         default:
-
-//             std::cout << "check_guest_es_access_right_type failed. "
-//                       << "guest es type must be 1, 3, 5, 7, 11 or 15: " << std::endl
-//                       << std::hex
-//                       << "    - es_access: 0x" << es_access << std::endl
-//                       << std::dec;
-
-//             return false;
-//     }
-
-//     return true;
-// }
-
-// void
-// vmcs_intel_x64::check_guest_fs_access_rights_type()
-// {
-//     auto fs_access = vmread(VMCS_GUEST_FS_ACCESS_RIGHTS);
-
-//     if ((fs_access & SELECTOR_UNUSABLE) != 0)
-//         return true;
-
-//     switch (fs_access & 0x000F)
-//     {
-//         case 1:
-//         case 3:
-//         case 5:
-//         case 7:
-//         case 11:
-//         case 15:
-//             break;
-
-//         default:
-
-//             std::cout << "check_guest_fs_access_right_type failed. "
-//                       << "guest fs type must be 1, 3, 5, 7, 11 or 15: " << std::endl
-//                       << std::hex
-//                       << "    - fs_access: 0x" << fs_access << std::endl
-//                       << std::dec;
-
-//             return false;
-//     }
-
-//     return true;
-// }
-
-// void
-// vmcs_intel_x64::check_guest_gs_access_rights_type()
-// {
-//     auto gs_access = vmread(VMCS_GUEST_GS_ACCESS_RIGHTS);
-
-//     if ((gs_access & SELECTOR_UNUSABLE) != 0)
-//         return true;
-
-//     switch (gs_access & 0x000F)
-//     {
-//         case 1:
-//         case 3:
-//         case 5:
-//         case 7:
-//         case 11:
-//         case 15:
-//             break;
-
-//         default:
-
-//             std::cout << "check_guest_gs_access_right_type failed. "
-//                       << "guest gs type must be 1, 3, 5, 7, 11 or 15: " << std::endl
-//                       << std::hex
-//                       << "    - gs_access: 0x" << gs_access << std::endl
-//                       << std::dec;
-
-//             return false;
-//     }
-
-//     return true;
-// }
-
-// void
-// vmcs_intel_x64::check_guest_cs_is_not_a_system_descriptor()
-// {
-//     auto cs_access = vmread(VMCS_GUEST_CS_ACCESS_RIGHTS);
-
-//     if ((cs_access & 0x0010) == 0)
-//     {
-//         std::cout << "check_guest_cs_is_not_a_system_descriptor failed. "
-//                   << "cs must be a code / data descriptor. S should equal 1: " << std::endl
-//                   << std::hex
-//                   << "    - cs_access: 0x" << cs_access << std::endl
-//                   << std::dec;
-
-//         return false;
-//     }
-
-//     return true;
-// }
-
-// void
-// vmcs_intel_x64::check_guest_ss_is_not_a_system_descriptor()
-// {
-//     auto ss_access = vmread(VMCS_GUEST_SS_ACCESS_RIGHTS);
-
-//     if ((ss_access & SELECTOR_UNUSABLE) != 0)
-//         return true;
-
-//     if ((ss_access & 0x0010) == 0)
-//     {
-//         std::cout << "check_guest_ss_is_not_a_system_descriptor failed. "
-//                   << "ss must be a code / data descriptor. S should equal 1: " << std::endl
-//                   << std::hex
-//                   << "    - ss_access: 0x" << ss_access << std::endl
-//                   << std::dec;
-
-//         return false;
-//     }
-
-//     return true;
-// }
-
-// void
-// vmcs_intel_x64::check_guest_ds_is_not_a_system_descriptor()
-// {
-//     auto ds_access = vmread(VMCS_GUEST_DS_ACCESS_RIGHTS);
-
-//     if ((ds_access & SELECTOR_UNUSABLE) != 0)
-//         return true;
-
-//     if ((ds_access & 0x0010) == 0)
-//     {
-//         std::cout << "check_guest_ds_is_not_a_system_descriptor failed. "
-//                   << "ds must be a code / data descriptor. S should equal 1: " << std::endl
-//                   << std::hex
-//                   << "    - ds_access: 0x" << ds_access << std::endl
-//                   << std::dec;
-
-//         return false;
-//     }
-
-//     return true;
-// }
-
-// void
-// vmcs_intel_x64::check_guest_es_is_not_a_system_descriptor()
-// {
-//     auto es_access = vmread(VMCS_GUEST_ES_ACCESS_RIGHTS);
-
-//     if ((es_access & SELECTOR_UNUSABLE) != 0)
-//         return true;
-
-//     if ((es_access & 0x0010) == 0)
-//     {
-//         std::cout << "check_guest_es_is_not_a_system_descriptor failed. "
-//                   << "es must be a code / data descriptor. S should equal 1: " << std::endl
-//                   << std::hex
-//                   << "    - es_access: 0x" << es_access << std::endl
-//                   << std::dec;
-
-//         return false;
-//     }
-
-//     return true;
-// }
-
-// void
-// vmcs_intel_x64::check_guest_fs_is_not_a_system_descriptor()
-// {
-//     auto fs_access = vmread(VMCS_GUEST_FS_ACCESS_RIGHTS);
-
-//     if ((fs_access & SELECTOR_UNUSABLE) != 0)
-//         return true;
-
-//     if ((fs_access & 0x0010) == 0)
-//     {
-//         std::cout << "check_guest_fs_is_not_a_system_descriptor failed. "
-//                   << "fs must be a code / data descriptor. S should equal 1: " << std::endl
-//                   << std::hex
-//                   << "    - fs_access: 0x" << fs_access << std::endl
-//                   << std::dec;
-
-//         return false;
-//     }
-
-//     return true;
-// }
-
-// void
-// vmcs_intel_x64::check_guest_gs_is_not_a_system_descriptor()
-// {
-//     auto gs_access = vmread(VMCS_GUEST_GS_ACCESS_RIGHTS);
-
-//     if ((gs_access & SELECTOR_UNUSABLE) != 0)
-//         return true;
-
-//     if ((gs_access & 0x0010) == 0)
-//     {
-//         std::cout << "check_guest_gs_is_not_a_system_descriptor failed. "
-//                   << "gs must be a code / data descriptor. S should equal 1: " << std::endl
-//                   << std::hex
-//                   << "    - gs_access: 0x" << gs_access << std::endl
-//                   << std::dec;
-
-//         return false;
-//     }
-
-//     return true;
-// }
-
-// void
-// vmcs_intel_x64::check_guest_cs_type_not_equal_3()
-// {
-//     auto cs_access = vmread(VMCS_GUEST_CS_ACCESS_RIGHTS);
-
-//     if ((cs_access & 0x000F) == 3)
-//     {
-//         std::cout << "check_guest_cs_type_not_equal_3 failed. "
-//                   << "unrestricted guests are not supported. CS type cannot equal 3: " << std::endl
-//                   << std::hex
-//                   << "    - cs_access: 0x" << cs_access << std::endl
-//                   << std::dec;
-
-//         return false;
-//     }
-
-//     return true;
-// }
-
-// void
-// vmcs_intel_x64::check_guest_cs_dpl_adheres_to_ss_dpl()
-// {
-//     auto cs_access = vmread(VMCS_GUEST_CS_ACCESS_RIGHTS);
-//     auto ss_access = vmread(VMCS_GUEST_SS_ACCESS_RIGHTS);
-
-//     switch (cs_access & 0x000F)
-//     {
-//         case 9:
-//         case 11:
-//             if ((cs_access & 0x60) != (ss_access & 0x60))
-//             {
-//                 std::cout << "check_guest_cs_dpl_adheres_to_ss_dpl failed. "
-//                           << "guest cs dpl must equal ss dpl if type is 9 or 11: " << std::endl
-//                           << std::hex
-//                           << "    - cs_access: 0x" << cs_access << std::endl
-//                           << "    - ss_access: 0x" << ss_access << std::endl
-//                           << std::dec;
-//                 return false;
-//             }
-
-//             break;
-
-//         case 13:
-//         case 15:
-//             if ((cs_access & 0x60) > (ss_access & 0x60))
-//             {
-//                 std::cout << "check_guest_cs_dpl_adheres_to_ss_dpl failed. "
-//                           << "guest cs dpl must not be greater than ss dpl if type is 13 or 15: " << std::endl
-//                           << std::hex
-//                           << "    - cs_access: 0x" << cs_access << std::endl
-//                           << "    - ss_access: 0x" << ss_access << std::endl
-//                           << std::dec;
-//                 return false;
-//             }
-
-//             break;
-
-//         default:
-//             break;
-//     }
-
-//     return true;
-// }
-
-// void
-// vmcs_intel_x64::check_guest_ss_dpl_must_equal_rpl()
-// {
-//     auto ss = vmread(VMCS_GUEST_SS_SELECTOR);
-//     auto ss_access = vmread(VMCS_GUEST_SS_ACCESS_RIGHTS);
-
-//     if ((ss_access & 0x0060) != (ss & SELECTOR_RPL_FLAG))
-//     {
-//         std::cout << "check_guest_ss_dpl_must_equal_rpl failed. "
-//                   << "ss dpl must equal ss rpl: " << std::endl
-//                   << std::hex
-//                   << "    - ss: 0x" << ss << std::endl
-//                   << "    - ss_access: 0x" << ss_access << std::endl
-//                   << std::dec;
-
-//         return false;
-//     }
-
-//     return true;
-// }
-
-// void
-// vmcs_intel_x64::check_guest_ss_dpl_must_equal_zero()
-// {
-//     auto cs_access = vmread(VMCS_GUEST_CS_ACCESS_RIGHTS);
-//     auto ss_access = vmread(VMCS_GUEST_SS_ACCESS_RIGHTS);
-
-//     if ((ss_access & 0x0060) != 0 && (cs_access & 0x000F) == 3)
-//     {
-//         std::cout << "check_guest_ss_dpl_must_equal_zero failed. "
-//                   << "if cs type == 3, ss dpl must equal 0: " << std::endl
-//                   << std::hex
-//                   << "    - cs_access: 0x" << cs_access << std::endl
-//                   << "    - ss_access: 0x" << ss_access << std::endl
-//                   << std::dec;
-
-//         return false;
-//     }
-
-//     // No need to check for CRE.PE == 0, since protected mode and 64bit mode
-//     // must be enabled, and are already checked.
-
-//     return true;
-// }
-
-// void
-// vmcs_intel_x64::check_guest_ds_dpl()
-// {
-//     auto ds = vmread(VMCS_GUEST_DS_SELECTOR);
-//     auto ds_access = vmread(VMCS_GUEST_DS_ACCESS_RIGHTS);
-
-//     if ((ds_access & SELECTOR_UNUSABLE) != 0)
-//         return true;
-
-//     if ((ds_access & 0x000F) >= 12)
-//         return true;
-
-//     if ((ds_access & 0x0060) < (ds & SELECTOR_RPL_FLAG))
-//     {
-//         std::cout << "check_guest_ds_dpl failed. "
-//                   << "ds dpl cannot be less then rpl if usable, and type between 0 - 11: " << std::endl
-//                   << std::hex
-//                   << "    - ds: 0x" << ds << std::endl
-//                   << "    - ds_access: 0x" << ds_access << std::endl
-//                   << std::dec;
-
-//         return false;
-//     }
-
-//     return true;
-// }
-
-// void
-// vmcs_intel_x64::check_guest_es_dpl()
-// {
-//     auto es = vmread(VMCS_GUEST_ES_SELECTOR);
-//     auto es_access = vmread(VMCS_GUEST_ES_ACCESS_RIGHTS);
-
-//     if ((es_access & SELECTOR_UNUSABLE) != 0)
-//         return true;
-
-//     if ((es_access & 0x000F) >= 12)
-//         return true;
-
-//     if ((es_access & 0x0060) < (es & SELECTOR_RPL_FLAG))
-//     {
-//         std::cout << "check_guest_es_dpl failed. "
-//                   << "es dpl cannot be less then rpl if usable, and type between 0 - 11: " << std::endl
-//                   << std::hex
-//                   << "    - es: 0x" << es << std::endl
-//                   << "    - es_access: 0x" << es_access << std::endl
-//                   << std::dec;
-
-//         return false;
-//     }
-
-//     return true;
-// }
-
-// void
-// vmcs_intel_x64::check_guest_fs_dpl()
-// {
-//     auto fs = vmread(VMCS_GUEST_FS_SELECTOR);
-//     auto fs_access = vmread(VMCS_GUEST_FS_ACCESS_RIGHTS);
-
-//     if ((fs_access & SELECTOR_UNUSABLE) != 0)
-//         return true;
-
-//     if ((fs_access & 0x000F) >= 12)
-//         return true;
-
-//     if ((fs_access & 0x0060) < (fs & SELECTOR_RPL_FLAG))
-//     {
-//         std::cout << "check_guest_fs_dpl failed. "
-//                   << "fs dpl cannot be less then rpl if usable, and type between 0 - 11: " << std::endl
-//                   << std::hex
-//                   << "    - fs: 0x" << fs << std::endl
-//                   << "    - fs_access: 0x" << fs_access << std::endl
-//                   << std::dec;
-
-//         return false;
-//     }
-
-//     return true;
-// }
-
-// void
-// vmcs_intel_x64::check_guest_gs_dpl()
-// {
-//     auto gs = vmread(VMCS_GUEST_GS_SELECTOR);
-//     auto gs_access = vmread(VMCS_GUEST_GS_ACCESS_RIGHTS);
-
-//     if ((gs_access & SELECTOR_UNUSABLE) != 0)
-//         return true;
-
-//     if ((gs_access & 0x000F) >= 12)
-//         return true;
-
-//     if ((gs_access & 0x0060) < (gs & SELECTOR_RPL_FLAG))
-//     {
-//         std::cout << "check_guest_gs_dpl failed. "
-//                   << "gs dpl cannot be less then rpl if usable, and type between 0 - 11: " << std::endl
-//                   << std::hex
-//                   << "    - gs: 0x" << gs << std::endl
-//                   << "    - gs_access: 0x" << gs_access << std::endl
-//                   << std::dec;
-
-//         return false;
-//     }
-
-//     return true;
-// }
-
-// void
-// vmcs_intel_x64::check_guest_cs_must_be_present()
-// {
-//     auto cs_access = vmread(VMCS_GUEST_CS_ACCESS_RIGHTS);
-
-//     if ((cs_access & 0x0080) == 0)
-//     {
-//         std::cout << "check_guest_cs_must_be_present failed. "
-//                   << "cs must be present, p == 0: " << std::endl
-//                   << std::hex
-//                   << "    - cs_access: 0x" << cs_access << std::endl
-//                   << std::dec;
-
-//         return false;
-//     }
-
-//     return true;
-// }
-
-// void
-// vmcs_intel_x64::check_guest_ss_must_be_present_if_usable()
-// {
-//     auto ss_access = vmread(VMCS_GUEST_SS_ACCESS_RIGHTS);
-
-//     if ((ss_access & SELECTOR_UNUSABLE) != 0)
-//         return true;
-
-//     if ((ss_access & 0x0080) == 0)
-//     {
-//         std::cout << "check_guest_ss_must_be_present failed. "
-//                   << "ss must be present, p == 0: " << std::endl
-//                   << std::hex
-//                   << "    - ss_access: 0x" << ss_access << std::endl
-//                   << std::dec;
-
-//         return false;
-//     }
-
-//     return true;
-// }
-
-// void
-// vmcs_intel_x64::check_guest_ds_must_be_present_if_usable()
-// {
-//     auto ds_access = vmread(VMCS_GUEST_DS_ACCESS_RIGHTS);
-
-//     if ((ds_access & SELECTOR_UNUSABLE) != 0)
-//         return true;
-
-//     if ((ds_access & 0x0080) == 0)
-//     {
-//         std::cout << "check_guest_ds_must_be_present failed. "
-//                   << "ds must be present, p == 0: " << std::endl
-//                   << std::hex
-//                   << "    - ds_access: 0x" << ds_access << std::endl
-//                   << std::dec;
-
-//         return false;
-//     }
-
-//     return true;
-// }
-
-// void
-// vmcs_intel_x64::check_guest_es_must_be_present_if_usable()
-// {
-//     auto es_access = vmread(VMCS_GUEST_ES_ACCESS_RIGHTS);
-
-//     if ((es_access & SELECTOR_UNUSABLE) != 0)
-//         return true;
-
-//     if ((es_access & 0x0080) == 0)
-//     {
-//         std::cout << "check_guest_es_must_be_present failed. "
-//                   << "es must be present, p == 0: " << std::endl
-//                   << std::hex
-//                   << "    - es_access: 0x" << es_access << std::endl
-//                   << std::dec;
-
-//         return false;
-//     }
-
-//     return true;
-// }
-
-// void
-// vmcs_intel_x64::check_guest_fs_must_be_present_if_usable()
-// {
-//     auto fs_access = vmread(VMCS_GUEST_FS_ACCESS_RIGHTS);
-
-//     if ((fs_access & SELECTOR_UNUSABLE) != 0)
-//         return true;
-
-//     if ((fs_access & 0x0080) == 0)
-//     {
-//         std::cout << "check_guest_fs_must_be_present failed. "
-//                   << "fs must be present, p == 0: " << std::endl
-//                   << std::hex
-//                   << "    - fs_access: 0x" << fs_access << std::endl
-//                   << std::dec;
-
-//         return false;
-//     }
-
-//     return true;
-// }
-
-// void
-// vmcs_intel_x64::check_guest_gs_must_be_present_if_usable()
-// {
-//     auto gs_access = vmread(VMCS_GUEST_GS_ACCESS_RIGHTS);
-
-//     if ((gs_access & SELECTOR_UNUSABLE) != 0)
-//         return true;
-
-//     if ((gs_access & 0x0080) == 0)
-//     {
-//         std::cout << "check_guest_gs_must_be_present failed. "
-//                   << "gs must be present, p == 0: " << std::endl
-//                   << std::hex
-//                   << "    - gs_access: 0x" << gs_access << std::endl
-//                   << std::dec;
-
-//         return false;
-//     }
-
-//     return true;
-// }
-
-// void
-// vmcs_intel_x64::check_guest_cs_access_rights_reserved_must_be_0()
-// {
-//     auto cs_access = vmread(VMCS_GUEST_CS_ACCESS_RIGHTS);
-
-//     if ((cs_access & 0x0F00) != 0)
-//     {
-//         std::cout << "check_guest_cs_access_rights_reserved_must_be_0 failed. "
-//                   << "cs reserved bits must be 0" << std::endl
-//                   << std::hex
-//                   << "    - cs_access: 0x" << cs_access << std::endl
-//                   << std::dec;
-
-//         return false;
-//     }
-
-//     return true;
-// }
-
-// void
-// vmcs_intel_x64::check_guest_ss_access_rights_reserved_must_be_0()
-// {
-//     auto ss_access = vmread(VMCS_GUEST_SS_ACCESS_RIGHTS);
-
-//     if ((ss_access & SELECTOR_UNUSABLE) != 0)
-//         return true;
-
-//     if ((ss_access & 0x0F00) != 0)
-//     {
-//         std::cout << "check_guest_ss_access_rights_reserved_must_be_0 failed. "
-//                   << "ss reserved bits must be 0" << std::endl
-//                   << std::hex
-//                   << "    - ss_access: 0x" << ss_access << std::endl
-//                   << std::dec;
-
-//         return false;
-//     }
-
-//     return true;
-// }
-
-// void
-// vmcs_intel_x64::check_guest_ds_access_rights_reserved_must_be_0()
-// {
-//     auto ds_access = vmread(VMCS_GUEST_DS_ACCESS_RIGHTS);
-
-//     if ((ds_access & SELECTOR_UNUSABLE) != 0)
-//         return true;
-
-//     if ((ds_access & 0x0F00) != 0)
-//     {
-//         std::cout << "check_guest_ds_access_rights_reserved_must_be_0 failed. "
-//                   << "ds reserved bits must be 0" << std::endl
-//                   << std::hex
-//                   << "    - ds_access: 0x" << ds_access << std::endl
-//                   << std::dec;
-
-//         return false;
-//     }
-
-//     return true;
-// }
-
-// void
-// vmcs_intel_x64::check_guest_es_access_rights_reserved_must_be_0()
-// {
-//     auto es_access = vmread(VMCS_GUEST_ES_ACCESS_RIGHTS);
-
-//     if ((es_access & SELECTOR_UNUSABLE) != 0)
-//         return true;
-
-//     if ((es_access & 0x0F00) != 0)
-//     {
-//         std::cout << "check_guest_es_access_rights_reserved_must_be_0 failed. "
-//                   << "es reserved bits must be 0" << std::endl
-//                   << std::hex
-//                   << "    - es_access: 0x" << es_access << std::endl
-//                   << std::dec;
-
-//         return false;
-//     }
-
-//     return true;
-// }
-
-// void
-// vmcs_intel_x64::check_guest_fs_access_rights_reserved_must_be_0()
-// {
-//     auto fs_access = vmread(VMCS_GUEST_FS_ACCESS_RIGHTS);
-
-//     if ((fs_access & SELECTOR_UNUSABLE) != 0)
-//         return true;
-
-//     if ((fs_access & 0x0F00) != 0)
-//     {
-//         std::cout << "check_guest_fs_access_rights_reserved_must_be_0 failed. "
-//                   << "fs reserved bits must be 0" << std::endl
-//                   << std::hex
-//                   << "    - fs_access: 0x" << fs_access << std::endl
-//                   << std::dec;
-
-//         return false;
-//     }
-
-//     return true;
-// }
-
-// void
-// vmcs_intel_x64::check_guest_gs_access_rights_reserved_must_be_0()
-// {
-//     auto gs_access = vmread(VMCS_GUEST_GS_ACCESS_RIGHTS);
-
-//     if ((gs_access & SELECTOR_UNUSABLE) != 0)
-//         return true;
-
-//     if ((gs_access & 0x0F00) != 0)
-//     {
-//         std::cout << "check_guest_gs_access_rights_reserved_must_be_0 failed. "
-//                   << "gs reserved bits must be 0" << std::endl
-//                   << std::hex
-//                   << "    - gs_access: 0x" << gs_access << std::endl
-//                   << std::dec;
-
-//         return false;
-//     }
-
-//     return true;
-// }
-
-// void
-// vmcs_intel_x64::check_guest_cs_db_must_be_0_if_l_equals_1()
-// {
-//     auto cs_access = vmread(VMCS_GUEST_CS_ACCESS_RIGHTS);
-
-//     if ((cs_access & 0x2000) != 0 && (cs_access & 0x4000) != 0)
-//     {
-//         std::cout << "check_guest_cs_db_must_be_0_if_l_equals_1 failed. "
-//                   << "for cs, db must be 0 if l is 1" << std::endl
-//                   << std::hex
-//                   << "    - cs_access: 0x" << cs_access << std::endl
-//                   << std::dec;
-
-//         return false;
-//     }
-
-//     return true;
-// }
-
-// void
-// vmcs_intel_x64::check_guest_cs_granularity()
-// {
-//     auto cs_limit = vmread(VMCS_GUEST_CS_LIMIT);
-//     auto cs_access = vmread(VMCS_GUEST_CS_ACCESS_RIGHTS);
-
-//     if ((cs_limit & 0x00000FFF) == 0 && (cs_access & 0x8000) != 0)
-//     {
-//         std::cout << "check_guest_cs_granularity failed. "
-//                   << "for cs, if any limit bit in 11:0 == 0, g must be 0" << std::endl
-//                   << std::hex
-//                   << "    - cs_limit: 0x" << cs_limit << std::endl
-//                   << "    - cs_access: 0x" << cs_access << std::endl
-//                   << std::dec;
-
-//         return false;
-//     }
-
-//     if ((cs_limit & 0xFFF00000) != 0 && (cs_access & 0x8000) == 0)
-//     {
-//         std::cout << "check_guest_cs_granularity failed. "
-//                   << "for cs, if any limit bit in 31:20 == 1, g must be 1" << std::endl
-//                   << std::hex
-//                   << "    - cs_limit: 0x" << cs_limit << std::endl
-//                   << "    - cs_access: 0x" << cs_access << std::endl
-//                   << std::dec;
-
-//         return false;
-//     }
-
-//     return true;
-// }
-
-// void
-// vmcs_intel_x64::check_guest_ss_granularity()
-// {
-//     auto ss_limit = vmread(VMCS_GUEST_SS_LIMIT);
-//     auto ss_access = vmread(VMCS_GUEST_SS_ACCESS_RIGHTS);
-
-//     if ((ss_access & SELECTOR_UNUSABLE) != 0)
-//         return true;
-
-//     if ((ss_limit & 0x00000FFF) == 0 && (ss_access & 0x8000) != 0)
-//     {
-//         std::cout << "check_guest_ss_granularity failed. "
-//                   << "for ss, if any limit bit in 11:0 == 0, g must be 0" << std::endl
-//                   << std::hex
-//                   << "    - ss_limit: 0x" << ss_limit << std::endl
-//                   << "    - ss_access: 0x" << ss_access << std::endl
-//                   << std::dec;
-
-//         return false;
-//     }
-
-//     if ((ss_limit & 0xFFF00000) != 0 && (ss_access & 0x8000) == 0)
-//     {
-//         std::cout << "check_guest_ss_granularity failed. "
-//                   << "for ss, if any limit bit in 31:20 == 1, g must be 1" << std::endl
-//                   << std::hex
-//                   << "    - ss_limit: 0x" << ss_limit << std::endl
-//                   << "    - ss_access: 0x" << ss_access << std::endl
-//                   << std::dec;
-
-//         return false;
-//     }
-
-//     return true;
-// }
-
-// void
-// vmcs_intel_x64::check_guest_ds_granularity()
-// {
-//     auto ds_limit = vmread(VMCS_GUEST_DS_LIMIT);
-//     auto ds_access = vmread(VMCS_GUEST_DS_ACCESS_RIGHTS);
-
-//     if ((ds_access & SELECTOR_UNUSABLE) != 0)
-//         return true;
-
-//     if ((ds_limit & 0x00000FFF) == 0 && (ds_access & 0x8000) != 0)
-//     {
-//         std::cout << "check_guest_ds_granularity failed. "
-//                   << "for ds, if any limit bit in 11:0 == 0, g must be 0" << std::endl
-//                   << std::hex
-//                   << "    - ds_limit: 0x" << ds_limit << std::endl
-//                   << "    - ds_access: 0x" << ds_access << std::endl
-//                   << std::dec;
-
-//         return false;
-//     }
-
-//     if ((ds_limit & 0xFFF00000) != 0 && (ds_access & 0x8000) == 0)
-//     {
-//         std::cout << "check_guest_ds_granularity failed. "
-//                   << "for ds, if any limit bit in 31:20 == 1, g must be 1" << std::endl
-//                   << std::hex
-//                   << "    - ds_limit: 0x" << ds_limit << std::endl
-//                   << "    - ds_access: 0x" << ds_access << std::endl
-//                   << std::dec;
-
-//         return false;
-//     }
-
-//     return true;
-// }
-
-// void
-// vmcs_intel_x64::check_guest_es_granularity()
-// {
-//     auto es_limit = vmread(VMCS_GUEST_ES_LIMIT);
-//     auto es_access = vmread(VMCS_GUEST_ES_ACCESS_RIGHTS);
-
-//     if ((es_access & SELECTOR_UNUSABLE) != 0)
-//         return true;
-
-//     if ((es_limit & 0x00000FFF) == 0 && (es_access & 0x8000) != 0)
-//     {
-//         std::cout << "check_guest_es_granularity failed. "
-//                   << "for es, if any limit bit in 11:0 == 0, g must be 0" << std::endl
-//                   << std::hex
-//                   << "    - es_limit: 0x" << es_limit << std::endl
-//                   << "    - es_access: 0x" << es_access << std::endl
-//                   << std::dec;
-
-//         return false;
-//     }
-
-//     if ((es_limit & 0xFFF00000) != 0 && (es_access & 0x8000) == 0)
-//     {
-//         std::cout << "check_guest_es_granularity failed. "
-//                   << "for es, if any limit bit in 31:20 == 1, g must be 1" << std::endl
-//                   << std::hex
-//                   << "    - es_limit: 0x" << es_limit << std::endl
-//                   << "    - es_access: 0x" << es_access << std::endl
-//                   << std::dec;
-
-//         return false;
-//     }
-
-//     return true;
-// }
-
-// void
-// vmcs_intel_x64::check_guest_fs_granularity()
-// {
-//     auto fs_limit = vmread(VMCS_GUEST_FS_LIMIT);
-//     auto fs_access = vmread(VMCS_GUEST_FS_ACCESS_RIGHTS);
-
-//     if ((fs_access & SELECTOR_UNUSABLE) != 0)
-//         return true;
-
-//     if ((fs_limit & 0x00000FFF) == 0 && (fs_access & 0x8000) != 0)
-//     {
-//         std::cout << "check_guest_fs_granularity failed. "
-//                   << "for fs, if any limit bit in 11:0 == 0, g must be 0" << std::endl
-//                   << std::hex
-//                   << "    - fs_limit: 0x" << fs_limit << std::endl
-//                   << "    - fs_access: 0x" << fs_access << std::endl
-//                   << std::dec;
-
-//         return false;
-//     }
-
-//     if ((fs_limit & 0xFFF00000) != 0 && (fs_access & 0x8000) == 0)
-//     {
-//         std::cout << "check_guest_fs_granularity failed. "
-//                   << "for fs, if any limit bit in 31:20 == 1, g must be 1" << std::endl
-//                   << std::hex
-//                   << "    - fs_limit: 0x" << fs_limit << std::endl
-//                   << "    - fs_access: 0x" << fs_access << std::endl
-//                   << std::dec;
-
-//         return false;
-//     }
-
-//     return true;
-// }
-
-// void
-// vmcs_intel_x64::check_guest_gs_granularity()
-// {
-//     auto gs_limit = vmread(VMCS_GUEST_GS_LIMIT);
-//     auto gs_access = vmread(VMCS_GUEST_GS_ACCESS_RIGHTS);
-
-//     if ((gs_access & SELECTOR_UNUSABLE) != 0)
-//         return true;
-
-//     if ((gs_limit & 0x00000FFF) == 0 && (gs_access & 0x8000) != 0)
-//     {
-//         std::cout << "check_guest_gs_granularity failed. "
-//                   << "for gs, if any limit bit in 11:0 == 0, g must be 0" << std::endl
-//                   << std::hex
-//                   << "    - gs_limit: 0x" << gs_limit << std::endl
-//                   << "    - gs_access: 0x" << gs_access << std::endl
-//                   << std::dec;
-
-//         return false;
-//     }
-
-//     if ((gs_limit & 0xFFF00000) != 0 && (gs_access & 0x8000) == 0)
-//     {
-//         std::cout << "check_guest_gs_granularity failed. "
-//                   << "for gs, if any limit bit in 31:20 == 1, g must be 1" << std::endl
-//                   << std::hex
-//                   << "    - gs_limit: 0x" << gs_limit << std::endl
-//                   << "    - gs_access: 0x" << gs_access << std::endl
-//                   << std::dec;
-
-//         return false;
-//     }
-
-//     return true;
-// }
-
-// void
-// vmcs_intel_x64::check_guest_cs_access_rights_remaining_reserved_bit_0()
-// {
-//     auto cs_access = vmread(VMCS_GUEST_CS_ACCESS_RIGHTS);
-
-//     if ((cs_access & 0xFFFE0000) != 0)
-//     {
-//         std::cout << "check_guest_cs_access_rights_remaining_reserved_bit_0 failed. "
-//                   << "cs bits 31:17 in the access rights must be 0" << std::endl
-//                   << std::hex
-//                   << "    - cs_access: 0x" << cs_access << std::endl
-//                   << std::dec;
-
-//         return false;
-//     }
-
-//     return true;
-// }
-
-// void
-// vmcs_intel_x64::check_guest_ss_access_rights_remaining_reserved_bit_0()
-// {
-//     auto ss_access = vmread(VMCS_GUEST_SS_ACCESS_RIGHTS);
-
-//     if ((ss_access & SELECTOR_UNUSABLE) != 0)
-//         return true;
-
-//     if ((ss_access & 0xFFFE0000) != 0)
-//     {
-//         std::cout << "check_guest_ss_access_rights_remaining_reserved_bit_0 failed. "
-//                   << "ss bits 31:17 in the access rights must be 0" << std::endl
-//                   << std::hex
-//                   << "    - ss_access: 0x" << ss_access << std::endl
-//                   << std::dec;
-
-//         return false;
-//     }
-
-//     return true;
-// }
-
-// void
-// vmcs_intel_x64::check_guest_ds_access_rights_remaining_reserved_bit_0()
-// {
-//     auto ds_access = vmread(VMCS_GUEST_DS_ACCESS_RIGHTS);
-
-//     if ((ds_access & SELECTOR_UNUSABLE) != 0)
-//         return true;
-
-//     if ((ds_access & 0xFFFE0000) != 0)
-//     {
-//         std::cout << "check_guest_ds_access_rights_remaining_reserved_bit_0 failed. "
-//                   << "ds bits 31:17 in the access rights must be 0" << std::endl
-//                   << std::hex
-//                   << "    - ds_access: 0x" << ds_access << std::endl
-//                   << std::dec;
-
-//         return false;
-//     }
-
-//     return true;
-// }
-
-// void
-// vmcs_intel_x64::check_guest_es_access_rights_remaining_reserved_bit_0()
-// {
-//     auto es_access = vmread(VMCS_GUEST_ES_ACCESS_RIGHTS);
-
-//     if ((es_access & SELECTOR_UNUSABLE) != 0)
-//         return true;
-
-//     if ((es_access & 0xFFFE0000) != 0)
-//     {
-//         std::cout << "check_guest_es_access_rights_remaining_reserved_bit_0 failed. "
-//                   << "es bits 31:17 in the access rights must be 0" << std::endl
-//                   << std::hex
-//                   << "    - es_access: 0x" << es_access << std::endl
-//                   << std::dec;
-
-//         return false;
-//     }
-
-//     return true;
-// }
-
-// void
-// vmcs_intel_x64::check_guest_fs_access_rights_remaining_reserved_bit_0()
-// {
-//     auto fs_access = vmread(VMCS_GUEST_FS_ACCESS_RIGHTS);
-
-//     if ((fs_access & SELECTOR_UNUSABLE) != 0)
-//         return true;
-
-//     if ((fs_access & 0xFFFE0000) != 0)
-//     {
-//         std::cout << "check_guest_fs_access_rights_remaining_reserved_bit_0 failed. "
-//                   << "fs bits 31:17 in the access rights must be 0" << std::endl
-//                   << std::hex
-//                   << "    - fs_access: 0x" << fs_access << std::endl
-//                   << std::dec;
-
-//         return false;
-//     }
-
-//     return true;
-// }
-
-// void
-// vmcs_intel_x64::check_guest_gs_access_rights_remaining_reserved_bit_0()
-// {
-//     auto gs_access = vmread(VMCS_GUEST_GS_ACCESS_RIGHTS);
-
-//     if ((gs_access & SELECTOR_UNUSABLE) != 0)
-//         return true;
-
-//     if ((gs_access & 0xFFFE0000) != 0)
-//     {
-//         std::cout << "check_guest_gs_access_rights_remaining_reserved_bit_0 failed. "
-//                   << "gs bits 31:17 in the access rights must be 0" << std::endl
-//                   << std::hex
-//                   << "    - gs_access: 0x" << gs_access << std::endl
-//                   << std::dec;
-
-//         return false;
-//     }
-
-//     return true;
-// }
-
-// void
-// vmcs_intel_x64::check_guest_tr_type_must_be_11()
-// {
-//     auto tr_access = vmread(VMCS_GUEST_TR_ACCESS_RIGHTS);
-
-//     if ((tr_access & 0x000F) != 11)
-//     {
-//         std::cout << "check_guest_tr_type_must_be_11 failed. "
-//                   << "tr type must be 11" << std::endl
-//                   << std::hex
-//                   << "    - tr_access: 0x" << tr_access << std::endl
-//                   << std::dec;
-
-//         return false;
-//     }
-
-//     return true;
-// }
-
-// void
-// vmcs_intel_x64::check_guest_tr_must_be_a_system_descriptor()
-// {
-//     auto tr_access = vmread(VMCS_GUEST_TR_ACCESS_RIGHTS);
-
-//     if ((tr_access & 0x0010) != 0)
-//     {
-//         std::cout << "check_guest_tr_must_be_a_system_descriptor failed. "
-//                   << "tr must be a system descsriptor, yet s == 1" << std::endl
-//                   << std::hex
-//                   << "    - tr_access: 0x" << tr_access << std::endl
-//                   << std::dec;
-
-//         return false;
-//     }
-
-//     return true;
-// }
-
-// void
-// vmcs_intel_x64::check_guest_tr_must_be_present()
-// {
-//     auto tr_access = vmread(VMCS_GUEST_TR_ACCESS_RIGHTS);
-
-//     if ((tr_access & 0x0080) == 0)
-//     {
-//         std::cout << "check_guest_tr_must_be_present failed. "
-//                   << "tr must be present, yet p == 0" << std::endl
-//                   << std::hex
-//                   << "    - tr_access: 0x" << tr_access << std::endl
-//                   << std::dec;
-
-//         return false;
-//     }
-
-//     return true;
-// }
-
-// void
-// vmcs_intel_x64::check_guest_tr_access_rights_reserved_must_be_0()
-// {
-//     auto tr_access = vmread(VMCS_GUEST_TR_ACCESS_RIGHTS);
-
-//     if ((tr_access & 0x0F00) != 0)
-//     {
-//         std::cout << "check_guest_tr_access_rights_reserved_must_be_0 failed. "
-//                   << "tr reserved access rights must be 0" << std::endl
-//                   << std::hex
-//                   << "    - tr_access: 0x" << tr_access << std::endl
-//                   << std::dec;
-
-//         return false;
-//     }
-
-//     return true;
-// }
-
-// void
-// vmcs_intel_x64::check_guest_tr_granularity()
-// {
-//     auto tr_limit = vmread(VMCS_GUEST_TR_LIMIT);
-//     auto tr_access = vmread(VMCS_GUEST_TR_ACCESS_RIGHTS);
-
-//     if ((tr_limit & 0x00000FFF) == 0 && (tr_access & 0x8000) != 0)
-//     {
-//         std::cout << "check_guest_tr_granularity failed. "
-//                   << "for tr, if any limit bit in 11:0 == 0, g must be 0" << std::endl
-//                   << std::hex
-//                   << "    - tr_limit: 0x" << tr_limit << std::endl
-//                   << "    - tr_access: 0x" << tr_access << std::endl
-//                   << std::dec;
-
-//         return false;
-//     }
-
-//     if ((tr_limit & 0xFFF00000) != 0 && (tr_access & 0x8000) == 0)
-//     {
-//         std::cout << "check_guest_tr_granularity failed. "
-//                   << "for tr, if any limit bit in 31:20 == 1, g must be 1" << std::endl
-//                   << std::hex
-//                   << "    - tr_limit: 0x" << tr_limit << std::endl
-//                   << "    - tr_access: 0x" << tr_access << std::endl
-//                   << std::dec;
-
-//         return false;
-//     }
-
-//     return true;
-// }
-
-// void
-// vmcs_intel_x64::check_guest_tr_must_be_usable()
-// {
-//     auto tr_access = vmread(VMCS_GUEST_TR_ACCESS_RIGHTS);
-
-//     if ((tr_access & SELECTOR_UNUSABLE) != 0)
-//     {
-//         std::cout << "check_guest_tr_must_be_usable failed. "
-//                   << "tr must be usable" << std::endl
-//                   << std::hex
-//                   << "    - tr_access: 0x" << tr_access << std::endl
-//                   << std::dec;
-
-//         return false;
-//     }
-
-//     return true;
-// }
-
-// void
-// vmcs_intel_x64::check_guest_tr_access_rights_remaining_reserved_bit_0()
-// {
-//     auto tr_access = vmread(VMCS_GUEST_TR_ACCESS_RIGHTS);
-
-//     if ((tr_access & 0xFFFE0000) != 0)
-//     {
-//         std::cout << "check_guest_tr_access_rights_remaining_reserved_bit_0 failed. "
-//                   << "tr bits 31:17 in the access rights must be 0" << std::endl
-//                   << std::hex
-//                   << "    - tr_access: 0x" << tr_access << std::endl
-//                   << std::dec;
-
-//         return false;
-//     }
-
-//     return true;
-// }
-
-// void
-// vmcs_intel_x64::check_guest_ldtr_type_must_be_2()
-// {
-//     auto ldtr_access = vmread(VMCS_GUEST_LDTR_ACCESS_RIGHTS);
-
-//     if ((ldtr_access & SELECTOR_UNUSABLE) != 0)
-//         return true;
-
-//     if ((ldtr_access & 0x000F) != 2)
-//     {
-//         std::cout << "check_guest_ldtr_type_must_be_11 failed. "
-//                   << "ldtr type must be 2" << std::endl
-//                   << std::hex
-//                   << "    - ldtr_access: 0x" << ldtr_access << std::endl
-//                   << std::dec;
-
-//         return false;
-//     }
-
-//     return true;
-// }
-
-// void
-// vmcs_intel_x64::check_guest_ldtr_must_be_a_system_descriptor()
-// {
-//     auto ldtr_access = vmread(VMCS_GUEST_LDTR_ACCESS_RIGHTS);
-
-//     if ((ldtr_access & SELECTOR_UNUSABLE) != 0)
-//         return true;
-
-//     if ((ldtr_access & 0x0010) != 0)
-//     {
-//         std::cout << "check_guest_ldtr_must_be_a_system_descriptor failed. "
-//                   << "ldtr must be a system descsriptor, yet s == 1" << std::endl
-//                   << std::hex
-//                   << "    - ldtr_access: 0x" << ldtr_access << std::endl
-//                   << std::dec;
-
-//         return false;
-//     }
-
-//     return true;
-// }
-
-// void
-// vmcs_intel_x64::check_guest_ldtr_must_be_present()
-// {
-//     auto ldtr_access = vmread(VMCS_GUEST_LDTR_ACCESS_RIGHTS);
-
-//     if ((ldtr_access & SELECTOR_UNUSABLE) != 0)
-//         return true;
-
-//     if ((ldtr_access & 0x0080) == 0)
-//     {
-//         std::cout << "check_guest_ldtr_must_be_present failed. "
-//                   << "ldtr must be present, yet p == 0" << std::endl
-//                   << std::hex
-//                   << "    - ldtr_access: 0x" << ldtr_access << std::endl
-//                   << std::dec;
-
-//         return false;
-//     }
-
-//     return true;
-// }
-
-// void
-// vmcs_intel_x64::check_guest_ldtr_access_rights_reserved_must_be_0()
-// {
-//     auto ldtr_access = vmread(VMCS_GUEST_LDTR_ACCESS_RIGHTS);
-
-//     if ((ldtr_access & SELECTOR_UNUSABLE) != 0)
-//         return true;
-
-//     if ((ldtr_access & 0x0F00) != 0)
-//     {
-//         std::cout << "check_guest_ldtr_access_rights_reserved_must_be_0 failed. "
-//                   << "ldtr reserved access rights must be 0" << std::endl
-//                   << std::hex
-//                   << "    - ldtr_access: 0x" << ldtr_access << std::endl
-//                   << std::dec;
-
-//         return false;
-//     }
-
-//     return true;
-// }
-
-// void
-// vmcs_intel_x64::check_guest_ldtr_granularity()
-// {
-//     auto ldtr_limit = vmread(VMCS_GUEST_LDTR_LIMIT);
-//     auto ldtr_access = vmread(VMCS_GUEST_LDTR_ACCESS_RIGHTS);
-
-//     if ((ldtr_access & SELECTOR_UNUSABLE) != 0)
-//         return true;
-
-//     if ((ldtr_limit & 0x00000FFF) == 0 && (ldtr_access & 0x8000) != 0)
-//     {
-//         std::cout << "check_guest_ldtr_granularity failed. "
-//                   << "for ldtr, if any limit bit in 11:0 == 0, g must be 0" << std::endl
-//                   << std::hex
-//                   << "    - ldtr_limit: 0x" << ldtr_limit << std::endl
-//                   << "    - ldtr_access: 0x" << ldtr_access << std::endl
-//                   << std::dec;
-
-//         return false;
-//     }
-
-//     if ((ldtr_limit & 0xFFF00000) != 0 && (ldtr_access & 0x8000) == 0)
-//     {
-//         std::cout << "check_guest_ldtr_granularity failed. "
-//                   << "for ldtr, if any limit bit in 31:20 == 1, g must be 1" << std::endl
-//                   << std::hex
-//                   << "    - ldtr_limit: 0x" << ldtr_limit << std::endl
-//                   << "    - ldtr_access: 0x" << ldtr_access << std::endl
-//                   << std::dec;
-
-//         return false;
-//     }
-
-//     return true;
-// }
-
-// void
-// vmcs_intel_x64::check_guest_ldtr_access_rights_remaining_reserved_bit_0()
-// {
-//     auto ldtr_access = vmread(VMCS_GUEST_LDTR_ACCESS_RIGHTS);
-
-//     if ((ldtr_access & SELECTOR_UNUSABLE) != 0)
-//         return true;
-
-//     if ((ldtr_access & 0xFFFE0000) != 0)
-//     {
-//         std::cout << "check_guest_ldtr_access_rights_remaining_reserved_bit_0 failed. "
-//                   << "ldtr bits 31:17 in the access rights must be 0" << std::endl
-//                   << std::hex
-//                   << "    - ldtr_access: 0x" << ldtr_access << std::endl
-//                   << std::dec;
-
-//         return false;
-//     }
-
-//     return true;
-// }
-
-// void
-// vmcs_intel_x64::check_guest_checks_on_guest_descriptor_table_registers()
-// {
-//     auto result = true;
-
-//     check_guest_gdtr_base_must_be_canonical();
-//     check_guest_idtr_base_must_be_canonical();
-//     check_guest_gdtr_limit_reserved_bits();
-//     check_guest_idtr_limit_reserved_bits();
-
-//     return result;
-// }
-
-// void
-// vmcs_intel_x64::check_guest_gdtr_base_must_be_canonical()
-// {
-//     auto gdtr_base = vmread(VMCS_GUEST_GDTR_BASE);
-
-//     if (check_is_address_canonical(gdtr_base) == false)
-//     {
-//         std::cout << "check_guest_gdtr_base_must_be_canonical failed. "
-//                   << "guest gdtr_base has a non-canonical address: " << std::endl
-//                   << std::hex
-//                   << "    - gdtr_base: 0x" << gdtr_base << std::endl
-//                   << std::dec;
-
-//         return false;
-//     }
-
-//     return true;
-// }
-
-// void
-// vmcs_intel_x64::check_guest_idtr_base_must_be_canonical()
-// {
-//     auto idtr_base = vmread(VMCS_GUEST_IDTR_BASE);
-
-//     if (check_is_address_canonical(idtr_base) == false)
-//     {
-//         std::cout << "check_guest_idtr_base_must_be_canonical failed. "
-//                   << "guest idtr_base has a non-canonical address: " << std::endl
-//                   << std::hex
-//                   << "    - idtr_base: 0x" << idtr_base << std::endl
-//                   << std::dec;
-
-//         return false;
-//     }
-
-//     return true;
-// }
-
-// void
-// vmcs_intel_x64::check_guest_gdtr_limit_reserved_bits()
-// {
-//     auto gdtr_limit = vmread(VMCS_GUEST_GDTR_LIMIT);
-
-//     if ((gdtr_limit & 0xFFFF0000) != 0)
-//     {
-//         std::cout << "check_guest_gdtr_limit_reserved_bits failed. "
-//                   << "guest gdtr_limit reserved bits must be 0: " << std::endl
-//                   << std::hex
-//                   << "    - gdtr_limit: 0x" << gdtr_limit << std::endl
-//                   << std::dec;
-
-//         return false;
-//     }
-
-//     return true;
-// }
-
-// void
-// vmcs_intel_x64::check_guest_idtr_limit_reserved_bits()
-// {
-//     auto idtr_limit = vmread(VMCS_GUEST_IDTR_LIMIT);
-
-//     if ((idtr_limit & 0xFFFF0000) != 0)
-//     {
-//         std::cout << "check_guest_idtr_limit_reserved_bits failed. "
-//                   << "guest idtr_limit reserved bits must be 0: " << std::endl
-//                   << std::hex
-//                   << "    - idtr_limit: 0x" << idtr_limit << std::endl
-//                   << std::dec;
-
-//         return false;
-//     }
-
-//     return true;
-// }
+void
+vmcs_intel_x64::checks_on_guest_segment_registers()
+{
+    check_guest_tr_ti_bit_equals_0();
+    check_guest_ldtr_ti_bit_equals_0();
+    check_guest_ss_and_cs_rpl_are_the_same();
+    check_guest_cs_base_is_shifted();
+    check_guest_ss_base_is_shifted();
+    check_guest_ds_base_is_shifted();
+    check_guest_es_base_is_shifted();
+    check_guest_fs_base_is_shifted();
+    check_guest_gs_base_is_shifted();
+    check_guest_tr_base_is_canonical();
+    check_guest_fs_base_is_canonical();
+    check_guest_gs_base_is_canonical();
+    check_guest_ldtr_base_is_canonical();
+    check_guest_cs_base_upper_dword_0();
+    check_guest_ss_base_upper_dword_0();
+    check_guest_ds_base_upper_dword_0();
+    check_guest_es_base_upper_dword_0();
+    check_guest_cs_limit();
+    check_guest_ss_limit();
+    check_guest_ds_limit();
+    check_guest_es_limit();
+    check_guest_gs_limit();
+    check_guest_fs_limit();
+    check_guest_v8086_cs_access_rights();
+    check_guest_v8086_ss_access_rights();
+    check_guest_v8086_ds_access_rights();
+    check_guest_v8086_es_access_rights();
+    check_guest_v8086_fs_access_rights();
+    check_guest_v8086_gs_access_rights();
+    check_guest_cs_access_rights_type();
+    check_guest_ss_access_rights_type();
+    check_guest_ds_access_rights_type();
+    check_guest_es_access_rights_type();
+    check_guest_fs_access_rights_type();
+    check_guest_gs_access_rights_type();
+    check_guest_cs_is_not_a_system_descriptor();
+    check_guest_ss_is_not_a_system_descriptor();
+    check_guest_ds_is_not_a_system_descriptor();
+    check_guest_es_is_not_a_system_descriptor();
+    check_guest_fs_is_not_a_system_descriptor();
+    check_guest_gs_is_not_a_system_descriptor();
+    check_guest_cs_type_not_equal_3();
+    check_guest_cs_dpl_adheres_to_ss_dpl();
+    check_guest_ss_dpl_must_equal_rpl();
+    check_guest_ss_dpl_must_equal_zero();
+    check_guest_ds_dpl();
+    check_guest_es_dpl();
+    check_guest_fs_dpl();
+    check_guest_gs_dpl();
+    check_guest_cs_must_be_present();
+    check_guest_ss_must_be_present_if_usable();
+    check_guest_ds_must_be_present_if_usable();
+    check_guest_es_must_be_present_if_usable();
+    check_guest_fs_must_be_present_if_usable();
+    check_guest_gs_must_be_present_if_usable();
+    check_guest_cs_access_rights_reserved_must_be_0();
+    check_guest_ss_access_rights_reserved_must_be_0();
+    check_guest_ds_access_rights_reserved_must_be_0();
+    check_guest_es_access_rights_reserved_must_be_0();
+    check_guest_fs_access_rights_reserved_must_be_0();
+    check_guest_gs_access_rights_reserved_must_be_0();
+    check_guest_cs_db_must_be_0_if_l_equals_1();
+    check_guest_cs_granularity();
+    check_guest_ss_granularity();
+    check_guest_ds_granularity();
+    check_guest_es_granularity();
+    check_guest_fs_granularity();
+    check_guest_gs_granularity();
+    check_guest_cs_access_rights_remaining_reserved_bit_0();
+    check_guest_ss_access_rights_remaining_reserved_bit_0();
+    check_guest_ds_access_rights_remaining_reserved_bit_0();
+    check_guest_es_access_rights_remaining_reserved_bit_0();
+    check_guest_fs_access_rights_remaining_reserved_bit_0();
+    check_guest_gs_access_rights_remaining_reserved_bit_0();
+    check_guest_tr_type_must_be_11();
+    check_guest_tr_must_be_a_system_descriptor();
+    check_guest_tr_must_be_present();
+    check_guest_tr_access_rights_reserved_must_be_0();
+    check_guest_tr_granularity();
+    check_guest_tr_must_be_usable();
+    check_guest_tr_access_rights_remaining_reserved_bit_0();
+    check_guest_ldtr_type_must_be_2();
+    check_guest_ldtr_must_be_a_system_descriptor();
+    check_guest_ldtr_must_be_present();
+    check_guest_ldtr_access_rights_reserved_must_be_0();
+    check_guest_ldtr_granularity();
+    check_guest_ldtr_access_rights_remaining_reserved_bit_0();
+}
+
+void
+vmcs_intel_x64::check_guest_tr_ti_bit_equals_0()
+{
+    auto tr = vmread(VMCS_GUEST_TR_SELECTOR);
+
+    if ((tr & SELECTOR_TI_FLAG) != 0)
+        throw vmcs_invalid_field("guest tr's ti flag must be zero", tr);
+}
+
+void
+vmcs_intel_x64::check_guest_ldtr_ti_bit_equals_0()
+{
+    auto ldtr = vmread(VMCS_GUEST_LDTR_SELECTOR);
+
+    if (check_is_ldtr_usable() == false)
+        return;
+
+    if ((ldtr & SELECTOR_TI_FLAG) != 0)
+        throw vmcs_invalid_field("guest ldtr's ti flag must be zero", ldtr);
+}
+
+void
+vmcs_intel_x64::check_guest_ss_and_cs_rpl_are_the_same()
+{
+    if (is_enabled_v8086() == true)
+        return;
+
+    if (is_enabled_unrestricted_guests() == true)
+        return;
+
+    auto ss = vmread(VMCS_GUEST_SS_SELECTOR);
+    auto cs = vmread(VMCS_GUEST_CS_SELECTOR);
+
+    if ((ss & SELECTOR_RPL_FLAG) != (cs & SELECTOR_RPL_FLAG))
+        throw vmcs_2_invalid_fields("ss and cs rpl must be the same", ss, cs);
+}
+
+void
+vmcs_intel_x64::check_guest_cs_base_is_shifted()
+{
+    if (is_enabled_v8086() == false)
+        return;
+
+    auto cs = vmread(VMCS_GUEST_CS_SELECTOR);
+    auto cs_base = vmread(VMCS_GUEST_CS_BASE);
+
+    if ((cs << 4) != cs_base)
+        throw vmcs_2_invalid_fields("if virtual 8086 mode is enabled, cs base "
+                                    "must be cs shift 4 bits", cs_base, cs);
+}
+
+void
+vmcs_intel_x64::check_guest_ss_base_is_shifted()
+{
+    if (is_enabled_v8086() == false)
+        return;
+
+    auto ss = vmread(VMCS_GUEST_SS_SELECTOR);
+    auto ss_base = vmread(VMCS_GUEST_SS_BASE);
+
+    if ((ss << 4) != ss_base)
+        throw vmcs_2_invalid_fields("if virtual 8086 mode is enabled, ss base "
+                                    "must be ss shift 4 bits", ss_base, ss);
+}
+
+void
+vmcs_intel_x64::check_guest_ds_base_is_shifted()
+{
+    if (is_enabled_v8086() == false)
+        return;
+
+    auto ds = vmread(VMCS_GUEST_DS_SELECTOR);
+    auto ds_base = vmread(VMCS_GUEST_DS_BASE);
+
+    if ((ds << 4) != ds_base)
+        throw vmcs_2_invalid_fields("if virtual 8086 mode is enabled, ds base "
+                                    "must be ds shift 4 bits", ds_base, ds);
+}
+
+void
+vmcs_intel_x64::check_guest_es_base_is_shifted()
+{
+    if (is_enabled_v8086() == false)
+        return;
+
+    auto es = vmread(VMCS_GUEST_ES_SELECTOR);
+    auto es_base = vmread(VMCS_GUEST_ES_BASE);
+
+    if ((es << 4) != es_base)
+        throw vmcs_2_invalid_fields("if virtual 8086 mode is enabled, es base "
+                                    "must be es shift 4 bits", es_base, es);
+}
+
+void
+vmcs_intel_x64::check_guest_fs_base_is_shifted()
+{
+    if (is_enabled_v8086() == false)
+        return;
+
+    auto fs = vmread(VMCS_GUEST_FS_SELECTOR);
+    auto fs_base = vmread(VMCS_GUEST_FS_BASE);
+
+    if ((fs << 4) != fs_base)
+        throw vmcs_2_invalid_fields("if virtual 8086 mode is enabled, fs base "
+                                    "must be fs shift 4 bits", fs_base, fs);
+}
+
+void
+vmcs_intel_x64::check_guest_gs_base_is_shifted()
+{
+    if (is_enabled_v8086() == false)
+        return;
+
+    auto gs = vmread(VMCS_GUEST_GS_SELECTOR);
+    auto gs_base = vmread(VMCS_GUEST_GS_BASE);
+
+    if ((gs << 4) != gs_base)
+        throw vmcs_2_invalid_fields("if virtual 8086 mode is enabled, gs base "
+                                    "must be gs shift 4 bits", gs_base, gs);
+}
+
+void
+vmcs_intel_x64::check_guest_tr_base_is_canonical()
+{
+    auto tr_base = vmread(VMCS_GUEST_TR_BASE);
+
+    if (check_is_address_canonical(tr_base) == false)
+        throw vmcs_invalid_field("guest tr base non-canonical", tr_base);
+}
+
+void
+vmcs_intel_x64::check_guest_fs_base_is_canonical()
+{
+    auto fs_base = vmread(VMCS_GUEST_FS_BASE);
+
+    if (check_is_address_canonical(fs_base) == false)
+        throw vmcs_invalid_field("guest fs base non-canonical", fs_base);
+}
+
+void
+vmcs_intel_x64::check_guest_gs_base_is_canonical()
+{
+    auto gs_base = vmread(VMCS_GUEST_GS_BASE);
+
+    if (check_is_address_canonical(gs_base) == false)
+        throw vmcs_invalid_field("guest gs base non-canonical", gs_base);
+}
+
+void
+vmcs_intel_x64::check_guest_ldtr_base_is_canonical()
+{
+    auto ldtr_base = vmread(VMCS_GUEST_LDTR_BASE);
+
+    if (check_is_ldtr_usable() == false)
+        return;
+
+    if (check_is_address_canonical(ldtr_base) == false)
+        throw vmcs_invalid_field("guest ldtr base non-canonical", ldtr_base);
+}
+
+void
+vmcs_intel_x64::check_guest_cs_base_upper_dword_0()
+{
+    auto cs_base = vmread(VMCS_GUEST_CS_BASE);
+
+    if ((cs_base & 0xFFFFFFFF00000000) != 0)
+        throw vmcs_invalid_field("guest cs base bits 63:32 must be 0",
+                                 cs_base);
+}
+
+void
+vmcs_intel_x64::check_guest_ss_base_upper_dword_0()
+{
+    auto ss_base = vmread(VMCS_GUEST_SS_BASE);
+
+    if (check_is_ds_usable() == false)
+        return;
+
+    if ((ss_base & 0xFFFFFFFF00000000) != 0)
+        throw vmcs_invalid_field("guest ss base bits 63:32 must be 0",
+                                 ss_base);
+}
+
+void
+vmcs_intel_x64::check_guest_ds_base_upper_dword_0()
+{
+    auto ds_base = vmread(VMCS_GUEST_DS_BASE);
+
+    if (check_is_ds_usable() == false)
+        return;
+
+    if ((ds_base & 0xFFFFFFFF00000000) != 0)
+        throw vmcs_invalid_field("guest ds base bits 63:32 must be 0",
+                                 ds_base);
+}
+
+void
+vmcs_intel_x64::check_guest_es_base_upper_dword_0()
+{
+    auto es_base = vmread(VMCS_GUEST_ES_BASE);
+
+    if (check_is_es_usable() == false)
+        return;
+
+    if ((es_base & 0xFFFFFFFF00000000) != 0)
+        throw vmcs_invalid_field("guest es base bits 63:32 must be 0",
+                                 es_base);
+}
+
+void
+vmcs_intel_x64::check_guest_cs_limit()
+{
+    if (is_enabled_v8086() == false)
+        return;
+
+    auto cs_limit = vmread(VMCS_GUEST_CS_LIMIT);
+
+    if (cs_limit != 0x000000000000FFFF)
+        throw vmcs_invalid_field("if virtual 8086 mode is enabled, "
+                                 "cs base must be 0xFFFF", cs_limit);
+}
+
+void
+vmcs_intel_x64::check_guest_ss_limit()
+{
+    if (is_enabled_v8086() == false)
+        return;
+
+    auto ss_limit = vmread(VMCS_GUEST_SS_LIMIT);
+
+    if (ss_limit != 0x000000000000FFFF)
+        throw vmcs_invalid_field("if virtual 8086 mode is enabled, "
+                                 "ss base must be 0xFFFF", ss_limit);
+}
+
+void
+vmcs_intel_x64::check_guest_ds_limit()
+{
+    if (is_enabled_v8086() == false)
+        return;
+
+    auto ds_limit = vmread(VMCS_GUEST_DS_LIMIT);
+
+    if (ds_limit != 0x000000000000FFFF)
+        throw vmcs_invalid_field("if virtual 8086 mode is enabled, "
+                                 "ds base must be 0xFFFF", ds_limit);
+}
+
+void
+vmcs_intel_x64::check_guest_es_limit()
+{
+    if (is_enabled_v8086() == false)
+        return;
+
+    auto es_limit = vmread(VMCS_GUEST_ES_LIMIT);
+
+    if (es_limit != 0x000000000000FFFF)
+        throw vmcs_invalid_field("if virtual 8086 mode is enabled, "
+                                 "es base must be 0xFFFF", es_limit);
+}
+
+void
+vmcs_intel_x64::check_guest_gs_limit()
+{
+    if (is_enabled_v8086() == false)
+        return;
+
+    auto gs_limit = vmread(VMCS_GUEST_GS_LIMIT);
+
+    if (gs_limit != 0x000000000000FFFF)
+        throw vmcs_invalid_field("if virtual 8086 mode is enabled, "
+                                 "gs base must be 0xFFFF", gs_limit);
+}
+
+void
+vmcs_intel_x64::check_guest_fs_limit()
+{
+    if (is_enabled_v8086() == false)
+        return;
+
+    auto fs_limit = vmread(VMCS_GUEST_FS_LIMIT);
+
+    if (fs_limit != 0x000000000000FFFF)
+        throw vmcs_invalid_field("if virtual 8086 mode is enabled, "
+                                 "fs base must be 0xFFFF", fs_limit);
+}
+
+void
+vmcs_intel_x64::check_guest_v8086_cs_access_rights()
+{
+    if (is_enabled_v8086() == false)
+        return;
+
+    auto cs_access = vmread(VMCS_GUEST_CS_ACCESS_RIGHTS);
+
+    if (cs_access != 0x00000000000000F3)
+        throw vmcs_invalid_field("if virtual 8086 mode is enabled, "
+                                 "cs access rights must be 0x00F3", cs_access);
+}
+
+void
+vmcs_intel_x64::check_guest_v8086_ss_access_rights()
+{
+    if (is_enabled_v8086() == false)
+        return;
+
+    auto ss_access = vmread(VMCS_GUEST_SS_ACCESS_RIGHTS);
+
+    if (ss_access != 0x00000000000000F3)
+        throw vmcs_invalid_field("if virtual 8086 mode is enabled, "
+                                 "ss access rights must be 0x00F3", ss_access);
+}
+
+void
+vmcs_intel_x64::check_guest_v8086_ds_access_rights()
+{
+    if (is_enabled_v8086() == false)
+        return;
+
+    auto ds_access = vmread(VMCS_GUEST_DS_ACCESS_RIGHTS);
+
+    if (ds_access != 0x00000000000000F3)
+        throw vmcs_invalid_field("if virtual 8086 mode is enabled, "
+                                 "ds access rights must be 0x00F3", ds_access);
+}
+
+void
+vmcs_intel_x64::check_guest_v8086_es_access_rights()
+{
+    if (is_enabled_v8086() == false)
+        return;
+
+    auto es_access = vmread(VMCS_GUEST_ES_ACCESS_RIGHTS);
+
+    if (es_access != 0x00000000000000F3)
+        throw vmcs_invalid_field("if virtual 8086 mode is enabled, "
+                                 "es access rights must be 0x00F3", es_access);
+}
+
+void
+vmcs_intel_x64::check_guest_v8086_fs_access_rights()
+{
+    if (is_enabled_v8086() == false)
+        return;
+
+    auto fs_access = vmread(VMCS_GUEST_FS_ACCESS_RIGHTS);
+
+    if (fs_access != 0x00000000000000F3)
+        throw vmcs_invalid_field("if virtual 8086 mode is enabled, "
+                                 "fs access rights must be 0x00F3", fs_access);
+}
+
+void
+vmcs_intel_x64::check_guest_v8086_gs_access_rights()
+{
+    if (is_enabled_v8086() == false)
+        return;
+
+    auto gs_access = vmread(VMCS_GUEST_GS_ACCESS_RIGHTS);
+
+    if (gs_access != 0x00000000000000F3)
+        throw vmcs_invalid_field("if virtual 8086 mode is enabled, "
+                                 "gs access rights must be 0x00F3", gs_access);
+}
+
+void
+vmcs_intel_x64::check_guest_cs_access_rights_type()
+{
+    auto cs_access = vmread(VMCS_GUEST_CS_ACCESS_RIGHTS);
+
+    switch (cs_access & SEGMENT_ACCESS_RIGHTS_TYPE)
+    {
+        case 3:
+            if (is_enabled_unrestricted_guests() == false)
+                break;
+
+        case 9:
+        case 11:
+        case 13:
+        case 15:
+            return;
+
+        default:
+            break;
+    }
+
+    throw vmcs_invalid_field("guest cs type must be 9, 11, 13, 15, or "
+                             "3 (if unrestricted guest support is enabled ",
+                             cs_access);
+}
+
+void
+vmcs_intel_x64::check_guest_ss_access_rights_type()
+{
+    auto ss_access = vmread(VMCS_GUEST_SS_ACCESS_RIGHTS);
+
+    if (check_is_ss_usable() == false)
+        return;
+
+    switch (ss_access & SEGMENT_ACCESS_RIGHTS_TYPE)
+    {
+        case 3:
+        case 7:
+            return;
+
+        default:
+            break;
+    }
+
+    throw vmcs_invalid_field("guest ss type must be 3 or 7", ss_access);
+}
+
+void
+vmcs_intel_x64::check_guest_ds_access_rights_type()
+{
+    auto ds_access = vmread(VMCS_GUEST_DS_ACCESS_RIGHTS);
+
+    if (check_is_ds_usable() == false)
+        return;
+
+    switch (ds_access & SEGMENT_ACCESS_RIGHTS_TYPE)
+    {
+        case 1:
+        case 3:
+        case 5:
+        case 7:
+        case 11:
+        case 15:
+            return;
+
+        default:
+            break;
+    }
+
+    throw vmcs_invalid_field("guest ds type must be 1, 3, 5, 7, 11, or 15",
+                             ds_access);
+}
+
+void
+vmcs_intel_x64::check_guest_es_access_rights_type()
+{
+    auto es_access = vmread(VMCS_GUEST_ES_ACCESS_RIGHTS);
+
+    if (check_is_es_usable() == false)
+        return;
+
+    switch (es_access & SEGMENT_ACCESS_RIGHTS_TYPE)
+    {
+        case 1:
+        case 3:
+        case 5:
+        case 7:
+        case 11:
+        case 15:
+            return;
+
+        default:
+            break;
+    }
+
+    throw vmcs_invalid_field("guest ds type must be 1, 3, 5, 7, 11, or 15",
+                             es_access);
+}
+
+void
+vmcs_intel_x64::check_guest_fs_access_rights_type()
+{
+    auto fs_access = vmread(VMCS_GUEST_FS_ACCESS_RIGHTS);
+
+    if (check_is_fs_usable() == false)
+        return;
+
+    switch (fs_access & SEGMENT_ACCESS_RIGHTS_TYPE)
+    {
+        case 1:
+        case 3:
+        case 5:
+        case 7:
+        case 11:
+        case 15:
+            return;
+
+        default:
+            break;
+    }
+
+    throw vmcs_invalid_field("guest fs type must be 1, 3, 5, 7, 11, or 15",
+                             fs_access);
+}
+
+void
+vmcs_intel_x64::check_guest_gs_access_rights_type()
+{
+    auto gs_access = vmread(VMCS_GUEST_GS_ACCESS_RIGHTS);
+
+    if (check_is_gs_usable() == false)
+        return;
+
+    switch (gs_access & SEGMENT_ACCESS_RIGHTS_TYPE)
+    {
+        case 1:
+        case 3:
+        case 5:
+        case 7:
+        case 11:
+        case 15:
+            return;
+
+        default:
+            break;
+    }
+
+    throw vmcs_invalid_field("guest gs type must be 1, 3, 5, 7, 11, or 15",
+                             gs_access);
+}
+
+void
+vmcs_intel_x64::check_guest_cs_is_not_a_system_descriptor()
+{
+    auto cs_access = vmread(VMCS_GUEST_CS_ACCESS_RIGHTS);
+
+    if ((cs_access & SEGMENT_ACCESS_RIGHTS_SYSTEM_DESCRIPTOR) == 0)
+        throw vmcs_invalid_field("cs must be a code/data descriptor. "
+                                 "S should equal 1", cs_access);
+}
+
+void
+vmcs_intel_x64::check_guest_ss_is_not_a_system_descriptor()
+{
+    auto ss_access = vmread(VMCS_GUEST_SS_ACCESS_RIGHTS);
+
+    if (check_is_ss_usable() == false)
+        return;
+
+    if ((ss_access & SEGMENT_ACCESS_RIGHTS_SYSTEM_DESCRIPTOR) == 0)
+        throw vmcs_invalid_field("ss must be a code/data descriptor. "
+                                 "S should equal 1", ss_access);
+}
+
+void
+vmcs_intel_x64::check_guest_ds_is_not_a_system_descriptor()
+{
+    auto ds_access = vmread(VMCS_GUEST_DS_ACCESS_RIGHTS);
+
+    if (check_is_ds_usable() == false)
+        return;
+
+    if ((ds_access & SEGMENT_ACCESS_RIGHTS_SYSTEM_DESCRIPTOR) == 0)
+        throw vmcs_invalid_field("ds must be a code/data descriptor. "
+                                 "S should equal 1", ds_access);
+}
+
+void
+vmcs_intel_x64::check_guest_es_is_not_a_system_descriptor()
+{
+    auto es_access = vmread(VMCS_GUEST_ES_ACCESS_RIGHTS);
+
+    if (check_is_es_usable() == false)
+        return;
+
+    if ((es_access & SEGMENT_ACCESS_RIGHTS_SYSTEM_DESCRIPTOR) == 0)
+        throw vmcs_invalid_field("es must be a code/data descriptor. "
+                                 "S should equal 1", es_access);
+}
+
+void
+vmcs_intel_x64::check_guest_fs_is_not_a_system_descriptor()
+{
+    auto fs_access = vmread(VMCS_GUEST_FS_ACCESS_RIGHTS);
+
+    if (check_is_fs_usable() == false)
+        return;
+
+    if ((fs_access & SEGMENT_ACCESS_RIGHTS_SYSTEM_DESCRIPTOR) == 0)
+        throw vmcs_invalid_field("fs must be a code/data descriptor. "
+                                 "S should equal 1", fs_access);
+}
+
+void
+vmcs_intel_x64::check_guest_gs_is_not_a_system_descriptor()
+{
+    auto gs_access = vmread(VMCS_GUEST_GS_ACCESS_RIGHTS);
+
+    if (check_is_gs_usable() == false)
+        return;
+
+    if ((gs_access & SEGMENT_ACCESS_RIGHTS_SYSTEM_DESCRIPTOR) == 0)
+        throw vmcs_invalid_field("gs must be a code/data descriptor. "
+                                 "S should equal 1", gs_access);
+}
+
+void
+vmcs_intel_x64::check_guest_cs_type_not_equal_3()
+{
+    auto cs_access = vmread(VMCS_GUEST_CS_ACCESS_RIGHTS);
+
+    if ((cs_access & SEGMENT_ACCESS_RIGHTS_TYPE) != 3)
+        return;
+
+    if ((cs_access & SEGMENT_ACCESS_RIGHTS_DPL) != 0)
+        throw vmcs_invalid_field("cs dpl must be 0 if type == 3.", cs_access);
+}
+
+void
+vmcs_intel_x64::check_guest_cs_dpl_adheres_to_ss_dpl()
+{
+    auto cs_access = vmread(VMCS_GUEST_CS_ACCESS_RIGHTS);
+    auto ss_access = vmread(VMCS_GUEST_SS_ACCESS_RIGHTS);
+
+    switch (cs_access & SEGMENT_ACCESS_RIGHTS_TYPE)
+    {
+        case 9:
+        case 11:
+        {
+            auto cs_dpl = (cs_access & SEGMENT_ACCESS_RIGHTS_DPL);
+            auto ss_dpl = (ss_access & SEGMENT_ACCESS_RIGHTS_DPL);
+
+            if (cs_dpl != ss_dpl)
+                throw vmcs_2_invalid_fields("if cs access rights type is 9, 11"
+                                            "cs dpl must equal ss dpl",
+                                            cs_dpl, ss_dpl);
+            break;
+        }
+
+        case 13:
+        case 15:
+        {
+            auto cs_dpl = (cs_access & SEGMENT_ACCESS_RIGHTS_DPL);
+            auto ss_dpl = (ss_access & SEGMENT_ACCESS_RIGHTS_DPL);
+
+            if (cs_dpl > ss_dpl)
+                throw vmcs_2_invalid_fields("if cs access rights type is 13, 15"
+                                            "cs dpl must not be greater than "
+                                            "ss dpl", cs_dpl, ss_dpl);
+            break;
+        }
+
+        default:
+            break;
+    }
+}
+
+void
+vmcs_intel_x64::check_guest_ss_dpl_must_equal_rpl()
+{
+    auto ss = vmread(VMCS_GUEST_SS_SELECTOR);
+    auto ss_access = vmread(VMCS_GUEST_SS_ACCESS_RIGHTS);
+
+    if (is_enabled_unrestricted_guests() == true)
+        return;
+
+    auto ss_dpl = (ss_access & SEGMENT_ACCESS_RIGHTS_DPL) >> 5;
+    auto ss_rpl = (ss & SELECTOR_RPL_FLAG) >> 0;
+
+    if (ss_dpl != ss_rpl)
+        throw vmcs_2_invalid_fields("if unrestricted guest mode is disabled"
+                                    "ss dpl must equal ss rpl",
+                                    ss_dpl, ss_rpl);
+}
+
+void
+vmcs_intel_x64::check_guest_ss_dpl_must_equal_zero()
+{
+    auto cr0 = vmread(VMCS_GUEST_CR0);
+    auto cs_access = vmread(VMCS_GUEST_CS_ACCESS_RIGHTS);
+    auto ss_access = vmread(VMCS_GUEST_SS_ACCESS_RIGHTS);
+
+    auto pe = (cr0 & CRO_PE_PROTECTION_ENABLE);
+    auto cs_type = (cs_access & SEGMENT_ACCESS_RIGHTS_TYPE);
+
+    if (cs_type != 3 && pe != 0)
+        return;
+
+    if ((ss_access & SEGMENT_ACCESS_RIGHTS_DPL) != 0)
+        throw vmcs_invalid_field("if cs type is 3 or protected mode is "
+                                 "disabled, DPL must be 0", ss_access);
+}
+
+void
+vmcs_intel_x64::check_guest_ds_dpl()
+{
+    auto ds = vmread(VMCS_GUEST_DS_SELECTOR);
+    auto ds_access = vmread(VMCS_GUEST_DS_ACCESS_RIGHTS);
+
+    if (is_enabled_unrestricted_guests() == true)
+        return;
+
+    if (check_is_ds_usable() == false)
+        return;
+
+    if ((ds_access & SEGMENT_ACCESS_RIGHTS_TYPE) >= 12)
+        return;
+
+    auto ds_dpl = (ds_access & SEGMENT_ACCESS_RIGHTS_DPL) >> 5;
+    auto ds_rpl = (ds & SELECTOR_RPL_FLAG) >> 0;
+
+    if (ds_dpl < ds_rpl)
+        throw vmcs_2_invalid_fields("if unrestricted guest mode is disabled, "
+                                    "and ds is usable, and the access rights "
+                                    "type is in the range 0-11, dpl cannot be "
+                                    "less than rpl", ds_dpl, ds_rpl);
+}
+
+void
+vmcs_intel_x64::check_guest_es_dpl()
+{
+    auto es = vmread(VMCS_GUEST_ES_SELECTOR);
+    auto es_access = vmread(VMCS_GUEST_ES_ACCESS_RIGHTS);
+
+    if (is_enabled_unrestricted_guests() == true)
+        return;
+
+    if (check_is_es_usable() == false)
+        return;
+
+    if ((es_access & SEGMENT_ACCESS_RIGHTS_TYPE) >= 12)
+        return;
+
+    auto es_dpl = (es_access & SEGMENT_ACCESS_RIGHTS_DPL) >> 5;
+    auto es_rpl = (es & SELECTOR_RPL_FLAG) >> 0;
+
+    if (es_dpl < es_rpl)
+        throw vmcs_2_invalid_fields("if unrestricted guest mode is disabled, "
+                                    "and es is usable, and the access rights "
+                                    "type is in the range 0-11, dpl cannot be "
+                                    "less than rpl", es_dpl, es_rpl);
+}
+
+void
+vmcs_intel_x64::check_guest_fs_dpl()
+{
+    auto fs = vmread(VMCS_GUEST_FS_SELECTOR);
+    auto fs_access = vmread(VMCS_GUEST_FS_ACCESS_RIGHTS);
+
+    if (is_enabled_unrestricted_guests() == true)
+        return;
+
+    if (check_is_fs_usable() == false)
+        return;
+
+    if ((fs_access & SEGMENT_ACCESS_RIGHTS_TYPE) >= 12)
+        return;
+
+    auto fs_dpl = (fs_access & SEGMENT_ACCESS_RIGHTS_DPL) >> 5;
+    auto fs_rpl = (fs & SELECTOR_RPL_FLAG) >> 0;
+
+    if (fs_dpl < fs_rpl)
+        throw vmcs_2_invalid_fields("if unrestricted guest mode is disabled, "
+                                    "and fs is usable, and the access rights "
+                                    "type is in the range 0-11, dpl cannot be "
+                                    "less than rpl", fs_dpl, fs_rpl);
+}
+
+void
+vmcs_intel_x64::check_guest_gs_dpl()
+{
+    auto gs = vmread(VMCS_GUEST_GS_SELECTOR);
+    auto gs_access = vmread(VMCS_GUEST_GS_ACCESS_RIGHTS);
+
+    if (is_enabled_unrestricted_guests() == true)
+        return;
+
+    if (check_is_gs_usable() == false)
+        return;
+
+    if ((gs_access & SEGMENT_ACCESS_RIGHTS_TYPE) >= 12)
+        return;
+
+    auto gs_dpl = (gs_access & SEGMENT_ACCESS_RIGHTS_DPL) >> 5;
+    auto gs_rpl = (gs & SELECTOR_RPL_FLAG) >> 0;
+
+    if (gs_dpl < gs_rpl)
+        throw vmcs_2_invalid_fields("if unrestricted guest mode is disabled, "
+                                    "and gs is usable, and the access rights "
+                                    "type is in the range 0-11, dpl cannot be "
+                                    "less than rpl", gs_dpl, gs_rpl);
+}
+
+void
+vmcs_intel_x64::check_guest_cs_must_be_present()
+{
+    auto cs_access = vmread(VMCS_GUEST_CS_ACCESS_RIGHTS);
+
+    if ((cs_access & SEGMENT_ACCESS_RIGHTS_PRESENT) == 0)
+        throw vmcs_invalid_field("cs access rights present flag must be 1 ",
+                                 cs_access);
+}
+
+void
+vmcs_intel_x64::check_guest_ss_must_be_present_if_usable()
+{
+    auto ss_access = vmread(VMCS_GUEST_SS_ACCESS_RIGHTS);
+
+    if (check_is_ss_usable() == false)
+        return;
+
+    if ((ss_access & SEGMENT_ACCESS_RIGHTS_PRESENT) == 0)
+        throw vmcs_invalid_field("ss access rights present flag must be 1 "
+                                 "if ss is usable", ss_access);
+}
+
+void
+vmcs_intel_x64::check_guest_ds_must_be_present_if_usable()
+{
+    auto ds_access = vmread(VMCS_GUEST_DS_ACCESS_RIGHTS);
+
+    if (check_is_ds_usable() == false)
+        return;
+
+    if ((ds_access & SEGMENT_ACCESS_RIGHTS_PRESENT) == 0)
+        throw vmcs_invalid_field("ds access rights present flag must be 1 "
+                                 "if ds is usable", ds_access);
+}
+
+void
+vmcs_intel_x64::check_guest_es_must_be_present_if_usable()
+{
+    auto es_access = vmread(VMCS_GUEST_ES_ACCESS_RIGHTS);
+
+    if (check_is_es_usable() == false)
+        return;
+
+    if ((es_access & SEGMENT_ACCESS_RIGHTS_PRESENT) == 0)
+        throw vmcs_invalid_field("es access rights present flag must be 1 "
+                                 "if es is usable", es_access);
+}
+
+void
+vmcs_intel_x64::check_guest_fs_must_be_present_if_usable()
+{
+    auto fs_access = vmread(VMCS_GUEST_FS_ACCESS_RIGHTS);
+
+    if (check_is_fs_usable() == false)
+        return;
+
+    if ((fs_access & SEGMENT_ACCESS_RIGHTS_PRESENT) == 0)
+        throw vmcs_invalid_field("fs access rights present flag must be 1 "
+                                 "if fs is usable", fs_access);
+}
+
+void
+vmcs_intel_x64::check_guest_gs_must_be_present_if_usable()
+{
+    auto gs_access = vmread(VMCS_GUEST_GS_ACCESS_RIGHTS);
+
+    if (check_is_gs_usable() == false)
+        return;
+
+    if ((gs_access & SEGMENT_ACCESS_RIGHTS_PRESENT) == 0)
+        throw vmcs_invalid_field("gs access rights present flag must be 1 "
+                                 "if gs is usable", gs_access);
+}
+
+void
+vmcs_intel_x64::check_guest_cs_access_rights_reserved_must_be_0()
+{
+    auto cs_access = vmread(VMCS_GUEST_CS_ACCESS_RIGHTS);
+
+    if ((cs_access & SEGMENT_ACCESS_RIGHTS_RESERVED) != 0)
+        throw vmcs_invalid_field("cs access rights reserved bits must be 0 ",
+                                 cs_access);
+}
+
+void
+vmcs_intel_x64::check_guest_ss_access_rights_reserved_must_be_0()
+{
+    auto ss_access = vmread(VMCS_GUEST_SS_ACCESS_RIGHTS);
+
+    if (check_is_ss_usable() == false)
+        return;
+
+    if ((ss_access & SEGMENT_ACCESS_RIGHTS_RESERVED) != 0)
+        throw vmcs_invalid_field("ss access rights reserved bits must be 0 "
+                                 "if ss is usable", ss_access);
+}
+
+void
+vmcs_intel_x64::check_guest_ds_access_rights_reserved_must_be_0()
+{
+    auto ds_access = vmread(VMCS_GUEST_DS_ACCESS_RIGHTS);
+
+    if (check_is_ds_usable() == false)
+        return;
+
+    if ((ds_access & SEGMENT_ACCESS_RIGHTS_RESERVED) != 0)
+        throw vmcs_invalid_field("ds access rights reserved bits must be 0 "
+                                 "if ds is usable", ds_access);
+}
+
+void
+vmcs_intel_x64::check_guest_es_access_rights_reserved_must_be_0()
+{
+    auto es_access = vmread(VMCS_GUEST_ES_ACCESS_RIGHTS);
+
+    if (check_is_es_usable() == false)
+        return;
+
+    if ((es_access & SEGMENT_ACCESS_RIGHTS_RESERVED) != 0)
+        throw vmcs_invalid_field("es access rights reserved bits must be 0 "
+                                 "if es is usable", es_access);
+}
+
+void
+vmcs_intel_x64::check_guest_fs_access_rights_reserved_must_be_0()
+{
+    auto fs_access = vmread(VMCS_GUEST_FS_ACCESS_RIGHTS);
+
+    if (check_is_fs_usable() == false)
+        return;
+
+    if ((fs_access & SEGMENT_ACCESS_RIGHTS_RESERVED) != 0)
+        throw vmcs_invalid_field("fs access rights reserved bits must be 0 "
+                                 "if fs is usable", fs_access);
+}
+
+void
+vmcs_intel_x64::check_guest_gs_access_rights_reserved_must_be_0()
+{
+    auto gs_access = vmread(VMCS_GUEST_GS_ACCESS_RIGHTS);
+
+    if (check_is_gs_usable() == false)
+        return;
+
+    if ((gs_access & SEGMENT_ACCESS_RIGHTS_RESERVED) != 0)
+        throw vmcs_invalid_field("gs access rights reserved bits must be 0 "
+                                 "if gs is usable", gs_access);
+}
+
+void
+vmcs_intel_x64::check_guest_cs_db_must_be_0_if_l_equals_1()
+{
+    if (is_enabled_ia_32e_mode_guest() == false)
+        return;
+
+    auto cs_access = vmread(VMCS_GUEST_CS_ACCESS_RIGHTS);
+
+    if ((cs_access & SEGMENT_ACCESS_RIGHTS_L) == 0)
+        return;
+
+    if ((cs_access & SEGMENT_ACCESS_RIGHTS_DB) != 0)
+        throw vmcs_invalid_field("d/b for guest cs must be 0 if in ia 32e "
+                                 "mode and l == 1", cs_access);
+}
+
+void
+vmcs_intel_x64::check_guest_cs_granularity()
+{
+    auto cs_limit = vmread(VMCS_GUEST_CS_LIMIT);
+    auto cs_access = vmread(VMCS_GUEST_CS_ACCESS_RIGHTS);
+    auto g = (cs_access & SEGMENT_ACCESS_RIGHTS_GRANULARITY);
+
+    if ((cs_limit & 0x00000FFF) != 0x00000FFF && g != 0)
+        throw vmcs_2_invalid_fields("guest cs granularity must be 0 if any "
+                                    "bit 11:0 is 0", cs_limit, cs_access);
+
+    if ((cs_limit & 0xFFF00000) != 0x00000000 && g == 0)
+        throw vmcs_2_invalid_fields("guest cs granularity must be 1 if any "
+                                    "bit 31:20 is 1", cs_limit, cs_access);
+}
+
+void
+vmcs_intel_x64::check_guest_ss_granularity()
+{
+    auto ss_limit = vmread(VMCS_GUEST_SS_LIMIT);
+    auto ss_access = vmread(VMCS_GUEST_SS_ACCESS_RIGHTS);
+    auto g = (ss_access & SEGMENT_ACCESS_RIGHTS_GRANULARITY);
+
+    if (check_is_ss_usable() == false)
+        return;
+
+    if ((ss_limit & 0x00000FFF) != 0x00000FFF && g != 0)
+        throw vmcs_2_invalid_fields("guest ss granularity must be 0 if any "
+                                    "bit 11:0 is 0", ss_limit, ss_access);
+
+    if ((ss_limit & 0xFFF00000) != 0x00000000 && g == 0)
+        throw vmcs_2_invalid_fields("guest ss granularity must be 1 if any "
+                                    "bit 31:20 is 1", ss_limit, ss_access);
+}
+
+void
+vmcs_intel_x64::check_guest_ds_granularity()
+{
+    auto ds_limit = vmread(VMCS_GUEST_DS_LIMIT);
+    auto ds_access = vmread(VMCS_GUEST_DS_ACCESS_RIGHTS);
+    auto g = (ds_access & SEGMENT_ACCESS_RIGHTS_GRANULARITY);
+
+    if (check_is_ds_usable() == false)
+        return;
+
+    if ((ds_limit & 0x00000FFF) != 0x00000FFF && g != 0)
+        throw vmcs_2_invalid_fields("guest ds granularity must be 0 if any "
+                                    "bit 11:0 is 0", ds_limit, ds_access);
+
+    if ((ds_limit & 0xFFF00000) != 0x00000000 && g == 0)
+        throw vmcs_2_invalid_fields("guest ds granularity must be 1 if any "
+                                    "bit 31:20 is 1", ds_limit, ds_access);
+}
+
+void
+vmcs_intel_x64::check_guest_es_granularity()
+{
+    auto es_limit = vmread(VMCS_GUEST_ES_LIMIT);
+    auto es_access = vmread(VMCS_GUEST_ES_ACCESS_RIGHTS);
+    auto g = (es_access & SEGMENT_ACCESS_RIGHTS_GRANULARITY);
+
+    if (check_is_es_usable() == false)
+        return;
+
+    if ((es_limit & 0x00000FFF) != 0x00000FFF && g != 0)
+        throw vmcs_2_invalid_fields("guest es granularity must be 0 if any "
+                                    "bit 11:0 is 0", es_limit, es_access);
+
+    if ((es_limit & 0xFFF00000) != 0x00000000 && g == 0)
+        throw vmcs_2_invalid_fields("guest es granularity must be 1 if any "
+                                    "bit 31:20 is 1", es_limit, es_access);
+}
+
+void
+vmcs_intel_x64::check_guest_fs_granularity()
+{
+    auto fs_limit = vmread(VMCS_GUEST_FS_LIMIT);
+    auto fs_access = vmread(VMCS_GUEST_FS_ACCESS_RIGHTS);
+    auto g = (fs_access & SEGMENT_ACCESS_RIGHTS_GRANULARITY);
+
+    if (check_is_fs_usable() == false)
+        return;
+
+    if ((fs_limit & 0x00000FFF) != 0x00000FFF && g != 0)
+        throw vmcs_2_invalid_fields("guest fs granularity must be 0 if any "
+                                    "bit 11:0 is 0", fs_limit, fs_access);
+
+    if ((fs_limit & 0xFFF00000) != 0x00000000 && g == 0)
+        throw vmcs_2_invalid_fields("guest fs granularity must be 1 if any "
+                                    "bit 31:20 is 1", fs_limit, fs_access);
+}
+
+void
+vmcs_intel_x64::check_guest_gs_granularity()
+{
+    auto gs_limit = vmread(VMCS_GUEST_GS_LIMIT);
+    auto gs_access = vmread(VMCS_GUEST_GS_ACCESS_RIGHTS);
+    auto g = (gs_access & SEGMENT_ACCESS_RIGHTS_GRANULARITY);
+
+    if (check_is_gs_usable() == false)
+        return;
+
+    if ((gs_limit & 0x00000FFF) != 0x00000FFF && g != 0)
+        throw vmcs_2_invalid_fields("guest gs granularity must be 0 if any "
+                                    "bit 11:0 is 0", gs_limit, gs_access);
+
+    if ((gs_limit & 0xFFF00000) != 0x00000000 && g == 0)
+        throw vmcs_2_invalid_fields("guest gs granularity must be 1 if any "
+                                    "bit 31:20 is 1", gs_limit, gs_access);
+}
+
+void
+vmcs_intel_x64::check_guest_cs_access_rights_remaining_reserved_bit_0()
+{
+    auto cs_access = vmread(VMCS_GUEST_CS_ACCESS_RIGHTS);
+
+    if ((cs_access & 0xFFFE0000) != 0)
+        throw vmcs_invalid_field("guest cs access rights bits 31:17 must "
+                                 "be 0 ", cs_access);
+}
+
+void
+vmcs_intel_x64::check_guest_ss_access_rights_remaining_reserved_bit_0()
+{
+    auto ss_access = vmread(VMCS_GUEST_SS_ACCESS_RIGHTS);
+
+    if (check_is_ss_usable() == false)
+        return;
+
+    if ((ss_access & 0xFFFE0000) != 0)
+        throw vmcs_invalid_field("guest ss access rights bits 31:17 must "
+                                 "be 0 ", ss_access);
+}
+
+void
+vmcs_intel_x64::check_guest_ds_access_rights_remaining_reserved_bit_0()
+{
+    auto ds_access = vmread(VMCS_GUEST_DS_ACCESS_RIGHTS);
+
+    if (check_is_ds_usable() == false)
+        return;
+
+    if ((ds_access & 0xFFFE0000) != 0)
+        throw vmcs_invalid_field("guest ds access rights bits 31:17 must "
+                                 "be 0 ", ds_access);
+}
+
+void
+vmcs_intel_x64::check_guest_es_access_rights_remaining_reserved_bit_0()
+{
+    auto es_access = vmread(VMCS_GUEST_ES_ACCESS_RIGHTS);
+
+    if (check_is_es_usable() == false)
+        return;
+
+    if ((es_access & 0xFFFE0000) != 0)
+        throw vmcs_invalid_field("guest es access rights bits 31:17 must "
+                                 "be 0 ", es_access);
+}
+
+void
+vmcs_intel_x64::check_guest_fs_access_rights_remaining_reserved_bit_0()
+{
+    auto fs_access = vmread(VMCS_GUEST_FS_ACCESS_RIGHTS);
+
+    if (check_is_fs_usable() == false)
+        return;
+
+    if ((fs_access & 0xFFFE0000) != 0)
+        throw vmcs_invalid_field("guest fs access rights bits 31:17 must "
+                                 "be 0 ", fs_access);
+}
+
+void
+vmcs_intel_x64::check_guest_gs_access_rights_remaining_reserved_bit_0()
+{
+    auto gs_access = vmread(VMCS_GUEST_GS_ACCESS_RIGHTS);
+
+    if (check_is_gs_usable() == false)
+        return;
+
+    if ((gs_access & 0xFFFE0000) != 0)
+        throw vmcs_invalid_field("guest gs access rights bits 31:17 must "
+                                 "be 0 ", gs_access);
+}
+
+void
+vmcs_intel_x64::check_guest_tr_type_must_be_11()
+{
+    auto tr_access = vmread(VMCS_GUEST_TR_ACCESS_RIGHTS);
+
+    switch (tr_access & SEGMENT_ACCESS_RIGHTS_TYPE)
+    {
+        case 3:
+            if (is_enabled_ia_32e_mode_guest() == true)
+                throw vmcs_invalid_field("tr type canot only be 3 if ia32e "
+                                         "mode is disabled", tr_access);
+        case 11:
+            return;
+
+        default:
+            throw vmcs_invalid_field("tr type must be 3 or 11", tr_access);
+    }
+}
+
+void
+vmcs_intel_x64::check_guest_tr_must_be_a_system_descriptor()
+{
+    auto tr_access = vmread(VMCS_GUEST_TR_ACCESS_RIGHTS);
+
+    if ((tr_access & SEGMENT_ACCESS_RIGHTS_SYSTEM_DESCRIPTOR) != 0)
+        throw vmcs_invalid_field("tr must be a system descriptor. "
+                                 "S should equal 0", tr_access);
+}
+
+void
+vmcs_intel_x64::check_guest_tr_must_be_present()
+{
+    auto tr_access = vmread(VMCS_GUEST_TR_ACCESS_RIGHTS);
+
+    if ((tr_access & SEGMENT_ACCESS_RIGHTS_PRESENT) == 0)
+        throw vmcs_invalid_field("tr access rights present flag must be 1 ",
+                                 tr_access);
+}
+
+void
+vmcs_intel_x64::check_guest_tr_access_rights_reserved_must_be_0()
+{
+    auto tr_access = vmread(VMCS_GUEST_TR_ACCESS_RIGHTS);
+
+    if ((tr_access & 0x0F00) != 0)
+        throw vmcs_invalid_field("tr access rights bits 11:8 must be 0",
+                                 tr_access);
+}
+
+void
+vmcs_intel_x64::check_guest_tr_granularity()
+{
+    auto tr_limit = vmread(VMCS_GUEST_TR_LIMIT);
+    auto tr_access = vmread(VMCS_GUEST_TR_ACCESS_RIGHTS);
+    auto g = (tr_access & SEGMENT_ACCESS_RIGHTS_GRANULARITY);
+
+    if ((tr_limit & 0x00000FFF) != 0x00000FFF && g != 0)
+        throw vmcs_2_invalid_fields("guest tr granularity must be 0 if any "
+                                    "bit 11:0 is 0", tr_limit, tr_access);
+
+    if ((tr_limit & 0xFFF00000) != 0x00000000 && g == 0)
+        throw vmcs_2_invalid_fields("guest tr granularity must be 1 if any "
+                                    "bit 31:20 is 1", tr_limit, tr_access);
+}
+
+void
+vmcs_intel_x64::check_guest_tr_must_be_usable()
+{
+    if (check_is_tr_usable() == false)
+        throw vmcs_invalid_field("tr must be usable", 0);
+}
+
+void
+vmcs_intel_x64::check_guest_tr_access_rights_remaining_reserved_bit_0()
+{
+    auto tr_access = vmread(VMCS_GUEST_TR_ACCESS_RIGHTS);
+
+    if ((tr_access & 0xFFFE0000) != 0)
+        throw vmcs_invalid_field("guest tr access rights bits 31:17 must "
+                                 "be 0 ", tr_access);
+}
+
+void
+vmcs_intel_x64::check_guest_ldtr_type_must_be_2()
+{
+    auto ldtr_access = vmread(VMCS_GUEST_LDTR_ACCESS_RIGHTS);
+
+    if (check_is_ldtr_usable() == false)
+        return;
+
+    if ((ldtr_access & SEGMENT_ACCESS_RIGHTS_TYPE) != 2)
+        throw vmcs_invalid_field("guest ldtr type must 2", ldtr_access);
+}
+
+void
+vmcs_intel_x64::check_guest_ldtr_must_be_a_system_descriptor()
+{
+    auto ldtr_access = vmread(VMCS_GUEST_LDTR_ACCESS_RIGHTS);
+
+    if (check_is_ldtr_usable() == false)
+        return;
+
+    if ((ldtr_access & SEGMENT_ACCESS_RIGHTS_SYSTEM_DESCRIPTOR) != 0)
+        throw vmcs_invalid_field("ldtr must be a system descriptor. "
+                                 "S should equal 0", ldtr_access);
+}
+
+void
+vmcs_intel_x64::check_guest_ldtr_must_be_present()
+{
+    auto ldtr_access = vmread(VMCS_GUEST_LDTR_ACCESS_RIGHTS);
+
+    if (check_is_ldtr_usable() == false)
+        return;
+
+    if ((ldtr_access & SEGMENT_ACCESS_RIGHTS_PRESENT) == 0)
+        throw vmcs_invalid_field("ldtr access rights present flag must be 1 "
+                                 "if ldtr is usable", ldtr_access);
+}
+
+void
+vmcs_intel_x64::check_guest_ldtr_access_rights_reserved_must_be_0()
+{
+    auto ldtr_access = vmread(VMCS_GUEST_LDTR_ACCESS_RIGHTS);
+
+    if (check_is_ldtr_usable() == false)
+        return;
+
+    if ((ldtr_access & 0x0F00) != 0)
+        throw vmcs_invalid_field("ldtr access rights bits 11:8 must be 0",
+                                 ldtr_access);
+}
+
+void
+vmcs_intel_x64::check_guest_ldtr_granularity()
+{
+    auto ldtr_limit = vmread(VMCS_GUEST_LDTR_LIMIT);
+    auto ldtr_access = vmread(VMCS_GUEST_LDTR_ACCESS_RIGHTS);
+    auto g = (ldtr_access & SEGMENT_ACCESS_RIGHTS_GRANULARITY);
+
+    if ((ldtr_limit & 0x00000FFF) != 0x00000FFF && g != 0)
+        throw vmcs_2_invalid_fields("guest ldtr granularity must be 0 if any "
+                                    "bit 11:0 is 0", ldtr_limit, ldtr_access);
+
+    if ((ldtr_limit & 0xFFF00000) != 0x00000000 && g == 0)
+        throw vmcs_2_invalid_fields("guest ldtr granularity must be 1 if any "
+                                    "bit 31:20 is 1", ldtr_limit, ldtr_access);
+}
+
+void
+vmcs_intel_x64::check_guest_ldtr_access_rights_remaining_reserved_bit_0()
+{
+    auto ldtr_access = vmread(VMCS_GUEST_LDTR_ACCESS_RIGHTS);
+
+    if (check_is_ldtr_usable() == false)
+        return;
+
+    if ((ldtr_access & SEGMENT_ACCESS_RIGHTS_RESERVED) != 0)
+        throw vmcs_invalid_field("ldtr access rights reserved bits must be 0 "
+                                 "if ldtr is usable", ldtr_access);
+}
+
+void
+vmcs_intel_x64::checks_on_guest_descriptor_table_registers()
+{
+    check_guest_gdtr_base_must_be_canonical();
+    check_guest_idtr_base_must_be_canonical();
+    check_guest_gdtr_limit_reserved_bits();
+    check_guest_idtr_limit_reserved_bits();
+}
+
+void
+vmcs_intel_x64::check_guest_gdtr_base_must_be_canonical()
+{
+    auto gdtr_base = vmread(VMCS_GUEST_GDTR_BASE);
+
+    if (check_is_address_canonical(gdtr_base) == false)
+        throw vmcs_invalid_field("gdtr base is non-canonical", gdtr_base);
+}
+
+void
+vmcs_intel_x64::check_guest_idtr_base_must_be_canonical()
+{
+    auto idtr_base = vmread(VMCS_GUEST_IDTR_BASE);
+
+    if (check_is_address_canonical(idtr_base) == false)
+        throw vmcs_invalid_field("idtr base is non-canonical", idtr_base);
+}
+
+void
+vmcs_intel_x64::check_guest_gdtr_limit_reserved_bits()
+{
+    auto gdtr_limit = vmread(VMCS_GUEST_GDTR_LIMIT);
+
+    if ((gdtr_limit & 0xFFFF0000) != 0)
+        throw vmcs_invalid_field("gdtr limit bits 31:16 must be 0", gdtr_limit);
+}
+
+void
+vmcs_intel_x64::check_guest_idtr_limit_reserved_bits()
+{
+    auto idtr_limit = vmread(VMCS_GUEST_IDTR_LIMIT);
+
+    if ((idtr_limit & 0xFFFF0000) != 0)
+        throw vmcs_invalid_field("idtr limit bits 31:16 must be 0", idtr_limit);
+}
 
 // void
 // vmcs_intel_x64::check_guest_checks_on_guest_rip_and_rflags()

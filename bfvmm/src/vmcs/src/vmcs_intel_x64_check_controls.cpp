@@ -20,44 +20,8 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #include <vmcs/vmcs_intel_x64.h>
-#include <vmcs/vmcs_intel_x64_checks.h>
 #include <vmcs/vmcs_intel_x64_exceptions.h>
 #include <memory_manager/memory_manager.h>
-
-// -----------------------------------------------------------------------------
-//  Helpers
-// -----------------------------------------------------------------------------
-
-uint64_t
-vmcs_intel_x64::get_pin_ctls() const
-{ return vmread(VMCS_PIN_BASED_VM_EXECUTION_CONTROLS); }
-
-uint64_t
-vmcs_intel_x64::get_proc_ctls() const
-{ return vmread(VMCS_PRIMARY_PROCESSOR_BASED_VM_EXECUTION_CONTROLS); }
-
-uint64_t
-vmcs_intel_x64::get_proc2_ctls() const
-{
-    auto ctls = get_proc_ctls();
-
-    if proc_disabled(ctls, VM_EXEC_P_PROC_BASED_ACTIVATE_SECONDARY_CONTROLS)
-        return 0;
-
-    return vmread(VMCS_SECONDARY_PROCESSOR_BASED_VM_EXECUTION_CONTROLS);
-}
-
-uint64_t
-vmcs_intel_x64::get_exit_ctls() const
-{ return vmread(VMCS_VM_EXIT_CONTROLS); }
-
-uint64_t
-vmcs_intel_x64::get_entry_ctls() const
-{ return vmread(VMCS_VM_ENTRY_CONTROLS); }
-
-// -----------------------------------------------------------------------------
-//  Implementation
-// -----------------------------------------------------------------------------
 
 void
 vmcs_intel_x64::check_vmcs_control_state()
@@ -160,9 +124,7 @@ vmcs_intel_x64::check_control_cr3_count_less_then_4()
 void
 vmcs_intel_x64::check_control_io_bitmap_address_bits()
 {
-    auto ctls = get_proc_ctls();
-
-    if proc_disabled(ctls, VM_EXEC_P_PROC_BASED_USE_IO_BITMAPS)
+    if (is_enabled_io_bitmaps() == false)
         return;
 
     auto addr_a = vmread(VMCS_ADDRESS_OF_IO_BITMAP_A_FULL);
@@ -184,9 +146,7 @@ vmcs_intel_x64::check_control_io_bitmap_address_bits()
 void
 vmcs_intel_x64::check_control_msr_bitmap_address_bits()
 {
-    auto ctls = get_proc_ctls();
-
-    if proc_disabled(ctls, VM_EXEC_P_PROC_BASED_USE_MSR_BITMAPS)
+    if (is_enabled_msr_bitmaps() == false)
         return;
 
     auto addr = vmread(VMCS_ADDRESS_OF_MSR_BITMAPS_FULL);
@@ -201,9 +161,7 @@ vmcs_intel_x64::check_control_msr_bitmap_address_bits()
 void
 vmcs_intel_x64::check_control_tpr_shadow_and_virtual_apic()
 {
-    auto ctls1 = get_proc_ctls();
-
-    if proc_disabled(ctls1, VM_EXEC_P_PROC_BASED_USE_TPR_SHADOW)
+    if (is_enabled_tpr_shadow() == false)
         return;
 
     auto phys_addr = vmread(VMCS_VIRTUAL_APIC_ADDRESS_FULL);
@@ -217,9 +175,7 @@ vmcs_intel_x64::check_control_tpr_shadow_and_virtual_apic()
     if (check_has_valid_address_width(phys_addr) == false)
         throw invalid_address("vitual apic addr too large", phys_addr);
 
-    auto ctls2 = get_proc2_ctls();
-
-    if proc2_disabled(ctls2, VM_EXEC_S_PROC_BASED_VIRTUAL_INTERRUPT_DELIVERY)
+    if (is_enabled_virtual_interrupt_delivery() == false)
         return;
 
     auto tpr_threshold = vmread(VMCS_TPR_THRESHOLD);
@@ -227,9 +183,7 @@ vmcs_intel_x64::check_control_tpr_shadow_and_virtual_apic()
     if ((tpr_threshold & 0x00000000FFFFFFF0) != 0)
         throw vmcs_invalid_field("bits 31:4 must be 0", tpr_threshold);
 
-    auto ctls3 = get_proc2_ctls();
-
-    if proc2_disabled(ctls3, VM_EXEC_S_PROC_BASED_VIRTUALIZE_APIC_ACCESSES)
+    if (is_enabled_virtualized_apic() == false)
         return;
 
     auto virt_addr = (uint64_t)g_mm->phys_to_virt((void *)phys_addr);
@@ -248,36 +202,29 @@ vmcs_intel_x64::check_control_tpr_shadow_and_virtual_apic()
 void
 vmcs_intel_x64::check_control_nmi_exiting_and_virtual_nmi()
 {
-    auto ctls = get_pin_ctls();
-
-    if pin_enabled(ctls, VM_EXEC_PIN_BASED_NMI_EXITING)
+    if (is_enabled_nmi_exiting() == true)
         return;
 
-    if pin_enabled(ctls, VM_EXEC_PIN_BASED_VIRTUAL_NMIS)
+    if (is_enabled_virtual_nmis() == true)
         throw vmcs_invalid_field(
-            "virtual NMI must be 0 if NMI exiting is 0", ctls);
+            "virtual NMI must be 0 if NMI exiting is 0", 0);
 }
 
 void
 vmcs_intel_x64::check_control_virtual_nmi_and_nmi_window()
 {
-    auto ctls1 = get_pin_ctls();
-    auto ctls2 = get_proc_ctls();
-
-    if pin_enabled(ctls1, VM_EXEC_PIN_BASED_VIRTUAL_NMIS)
+    if (is_enabled_virtual_nmis() == true)
         return;
 
-    if proc_enabled(ctls2, VM_EXEC_P_PROC_BASED_NMI_WINDOW_EXITING)
+    if (is_enabled_nmi_window_exiting() == true)
         throw vmcs_invalid_field(
-            "NMI window exiting must be 0 if virtual NMI is 0", ctls2);
+            "NMI window exiting must be 0 if virtual NMI is 0", 0);
 }
 
 void
 vmcs_intel_x64::check_control_virtual_apic_address_bits()
 {
-    auto ctls = get_proc2_ctls();
-
-    if proc2_disabled(ctls, VM_EXEC_S_PROC_BASED_VIRTUALIZE_APIC_ACCESSES)
+    if (is_enabled_virtualized_apic() == false)
         return;
 
     auto phys_addr = vmread(VMCS_APIC_ACCESS_ADDRESS_FULL);
@@ -295,90 +242,71 @@ vmcs_intel_x64::check_control_virtual_apic_address_bits()
 void
 vmcs_intel_x64::check_control_virtual_x2apic_and_tpr()
 {
-    auto ctls1 = get_proc_ctls();
-    auto ctls2 = get_proc2_ctls();
-
-    if proc_enabled(ctls1, VM_EXEC_P_PROC_BASED_USE_TPR_SHADOW)
+    if (is_enabled_tpr_shadow() == true)
         return;
 
-    if proc2_enabled(ctls2, VM_EXEC_S_PROC_BASED_VIRTUALIZE_X2APIC_MODE)
+    if (is_enabled_x2apic_mode() == true)
         throw vmcs_invalid_field(
-            "x2 apic mode must be 0 if use tpr shadow is 0", ctls2);
+            "x2 apic mode must be 0 if use tpr shadow is 0", 0);
 }
 
 void
 vmcs_intel_x64::check_control_register_apic_mode_and_tpr()
 {
-    auto ctls1 = get_proc_ctls();
-    auto ctls2 = get_proc2_ctls();
-
-    if proc_enabled(ctls1, VM_EXEC_P_PROC_BASED_USE_TPR_SHADOW)
+    if (is_enabled_tpr_shadow() == true)
         return;
 
-    if proc2_enabled(ctls2, VM_EXEC_S_PROC_BASED_APIC_REGISTER_VIRTUALIZATION)
+    if (is_enabled_apic_register_virtualization() == true)
         throw vmcs_invalid_field(
-            "apic register virt must be 0 if use tpr shadow is 0", ctls2);
+            "apic register virt must be 0 if use tpr shadow is 0", 0);
 }
 
 void
 vmcs_intel_x64::check_control_virtual_interrupt_delivery_and_tpr()
 {
-    auto ctls1 = get_proc_ctls();
-    auto ctls2 = get_proc2_ctls();
-
-    if proc_enabled(ctls1, VM_EXEC_P_PROC_BASED_USE_TPR_SHADOW)
+    if (is_enabled_tpr_shadow() == true)
         return;
 
-    if proc2_enabled(ctls2, VM_EXEC_S_PROC_BASED_VIRTUAL_INTERRUPT_DELIVERY)
+    if (is_enabled_virtual_interrupt_delivery() == true)
         throw vmcs_invalid_field(
-            "virt interrupt delivery must be 0 if use tpr shadow is 0", ctls2);
+            "virt interrupt delivery must be 0 if use tpr shadow is 0", 0);
 }
 
 void
 vmcs_intel_x64::check_control_x2apic_mode_and_virtual_apic_access()
 {
-    auto ctls = get_proc2_ctls();
-
-    if proc2_disabled(ctls, VM_EXEC_S_PROC_BASED_VIRTUALIZE_X2APIC_MODE)
+    if (is_enabled_x2apic_mode() == false)
         return;
 
-    if proc2_enabled(ctls, VM_EXEC_S_PROC_BASED_VIRTUALIZE_APIC_ACCESSES)
+    if (is_enabled_virtualized_apic() == true)
         throw vmcs_invalid_field(
-            "apic accesses must be 0 if x2 apic mode is 1", ctls);
+            "apic accesses must be 0 if x2 apic mode is 1", 0);
 }
 
 void
 vmcs_intel_x64::check_control_virtual_interrupt_and_external_interrupt()
 {
-    auto ctls1 = get_pin_ctls();
-    auto ctls2 = get_proc2_ctls();
-
-    if proc2_disabled(ctls2, VM_EXEC_S_PROC_BASED_VIRTUAL_INTERRUPT_DELIVERY)
+    if (is_enabled_virtual_interrupt_delivery() == false)
         return;
 
-    if pin_disabled(ctls1, VM_EXEC_PIN_BASED_EXTERNAL_INTERRUPT_EXITING)
+    if (is_enabled_external_interrupt_exiting() == false)
         throw vmcs_invalid_field("external interrupt exiting must be 1 "
-                                 "if virtual interrupt delivery is 1", ctls1);
+                                 "if virtual interrupt delivery is 1", 0);
 }
 
 void
 vmcs_intel_x64::check_control_process_posted_interrupt_checks()
 {
-    auto ctls1 = get_pin_ctls();
-    auto ctls2 = get_proc2_ctls();
-
-    if pin_disabled(ctls1, VM_EXEC_PIN_BASED_PROCESS_POSTED_INTERRUPTS)
+    if (is_enabled_posted_interrupts() == false)
         return;
 
-    if proc2_disabled(ctls2, VM_EXEC_S_PROC_BASED_VIRTUAL_INTERRUPT_DELIVERY)
+    if (is_enabled_virtual_interrupt_delivery() == false)
         throw vmcs_invalid_field("virtual interrupt delivery must be 1 "
-                                 "if posted interrupts is 1", ctls2);
+                                 "if posted interrupts is 1", 0);
 
-    auto ctls3 = get_exit_ctls();
-
-    if exit_disabled(ctls3, VM_EXIT_CONTROL_ACKNOWLEDGE_INTERRUPT_ON_EXIT)
+    if (is_enabled_ack_interrupt_on_exit() == false)
         throw vmcs_invalid_field("ack interrupt on exit must be 1 "
-                                 "if posted interrupts is 1", ctls3);
+                                 "if posted interrupts is 1", 0);
 
     auto vector = vmread(VMCS_POSTED_INTERRUPT_NOTIFICATION_VECTOR);
 
@@ -399,9 +327,7 @@ vmcs_intel_x64::check_control_process_posted_interrupt_checks()
 void
 vmcs_intel_x64::check_control_vpid_checks()
 {
-    auto ctls = get_proc2_ctls();
-
-    if proc2_disabled(ctls, VM_EXEC_S_PROC_BASED_ENABLE_VPID)
+    if (is_enabled_vpid() == false)
         return;
 
     if (vmread(VMCS_VIRTUAL_PROCESSOR_IDENTIFIER) == 0)
@@ -411,9 +337,7 @@ vmcs_intel_x64::check_control_vpid_checks()
 void
 vmcs_intel_x64::check_control_enable_ept_checks()
 {
-    auto ctls = get_proc2_ctls();
-
-    if proc2_disabled(ctls, VM_EXEC_S_PROC_BASED_ENABLE_EPT)
+    if (is_enabled_ept() == false)
         return;
 
     auto eptp = vmread(VMCS_EPT_POINTER_FULL);
@@ -453,22 +377,18 @@ vmcs_intel_x64::check_control_enable_ept_checks()
 void
 vmcs_intel_x64::check_control_unrestricted_guests()
 {
-    auto ctls2 = get_proc2_ctls();
-
-    if proc2_disabled(ctls2, VM_EXEC_S_PROC_BASED_UNRESTRICTED_GUEST)
+    if (is_enabled_unrestricted_guests() == false)
         return;
 
-    if pin_disabled(ctls2, VM_EXEC_S_PROC_BASED_ENABLE_EPT)
+    if (is_enabled_ept() == false)
         throw vmcs_invalid_field("enable ept must be 1 "
-                                 "if unrestricted guest is 1", ctls2);
+                                 "if unrestricted guest is 1", 0);
 }
 
 void
 vmcs_intel_x64::check_control_enable_vm_functions()
 {
-    auto ctls = get_proc2_ctls();
-
-    if proc2_disabled(ctls, VM_EXEC_S_PROC_BASED_ENABLE_VM_FUNCTIONS)
+    if (is_enabled_vm_functions() == false)
         return;
 
     auto vmcs_vm_function_controls =
@@ -484,9 +404,9 @@ vmcs_intel_x64::check_control_enable_vm_functions()
     if ((VM_FUNCTION_CONTROL_EPTP_SWITCHING & vmcs_vm_function_controls) == 0)
         return;
 
-    if proc2_disabled(ctls, VM_EXEC_S_PROC_BASED_ENABLE_EPT)
+    if (is_enabled_ept() == false)
         throw vmcs_invalid_field(
-            "enable ept must be 1 if eptp switching is 1", ctls);
+            "enable ept must be 1 if eptp switching is 1", 0);
 
     auto eptp_list = vmread(VMCS_EPTP_LIST_ADDRESS_FULL);
 
@@ -501,9 +421,7 @@ vmcs_intel_x64::check_control_enable_vm_functions()
 void
 vmcs_intel_x64::check_control_enable_vmcs_shadowing()
 {
-    auto ctls = get_proc2_ctls();
-
-    if proc2_disabled(ctls, VM_EXEC_S_PROC_BASED_VMCS_SHADOWING)
+    if (is_enabled_vmcs_shadowing() == false)
         return;
 
     auto vmcs_vmread_bitmap_address =
@@ -534,9 +452,7 @@ vmcs_intel_x64::check_control_enable_vmcs_shadowing()
 void
 vmcs_intel_x64::check_control_enable_ept_violation_checks()
 {
-    auto ctls = get_proc2_ctls();
-
-    if proc2_disabled(ctls, VM_EXEC_S_PROC_BASED_EPT_VIOLATION_VE)
+    if (is_enabled_ept_violation_ve() == false)
         return;
 
     auto vmcs_virt_except_info_address =
@@ -582,16 +498,12 @@ vmcs_intel_x64::check_control_vm_exit_ctls_reserved_properly_set()
 void
 vmcs_intel_x64::check_control_activate_and_save_premeption_timer_must_be_0()
 {
-    auto ctls1 = get_pin_ctls();
-    auto ctls2 = get_exit_ctls();
-
-    if pin_enabled(ctls1, VM_EXEC_PIN_BASED_ACTIVATE_VMX_PREEMPTION_TIMER)
+    if (is_enabled_vmx_preemption_timer() == true)
         return;
 
-    if pin_enabled(ctls2, VM_EXIT_CONTROL_SAVE_VMX_PREEMPTION_TIMER_VALUE)
+    if (is_enabled_save_vmx_preemption_timer_on_exit() == true)
         throw vmcs_invalid_field("save vmx preemption timer must be 0 "
-                                 "if the activate vmx preemption timer is 0",
-                                 ctls1);
+                                 "if activate vmx preemption timer is 0", 0);
 }
 
 void
@@ -689,7 +601,7 @@ vmcs_intel_x64::check_control_event_injection_type_vector_checks()
         throw vmcs_invalid_field("interrupt information field type of 1 "
                                  "is reserved", interrupt_info_field);
 
-    if (supports_monitor_trap_flag() == false && type == 7)
+    if (is_supported_monitor_trap_flag() == false && type == 7)
         throw vmcs_invalid_field("interrupt information field type of 7 "
                                  "is reserved on this hardware",
                                  interrupt_info_field);
@@ -726,11 +638,10 @@ vmcs_intel_x64::check_control_event_injection_delivery_ec_checks()
 
     auto cr0 = vmread(VMCS_GUEST_CR0);
 
-    auto ctls = get_proc2_ctls();
     auto type = (interrupt_info_field & 0x0000000000000700) >> 8;
     auto vector = (interrupt_info_field & 0x00000000000000FF) >> 0;
 
-    if proc2_enabled(ctls, VM_EXEC_S_PROC_BASED_UNRESTRICTED_GUEST)
+    if (is_enabled_unrestricted_guests() == true)
     {
         if ((cr0 & CRO_PE_PROTECTION_ENABLE) == 0)
             throw vmcs_invalid_field("unrestricted guest must be 0 or PE must "
