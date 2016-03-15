@@ -94,17 +94,23 @@ ioctl_driver::load_vmm(const std::shared_ptr<file> &f,
 {
     switch (get_status(ctl))
     {
-        case VMM_RUNNING: stop_vmm(ctl);
-        case VMM_LOADED: unload_vmm(ctl);
-        case VMM_UNLOADED: break;
-        case VMM_CORRUPT: throw corrupt_vmm();
-        default: throw unknown_status();
+        case VMM_RUNNING:
+            stop_vmm(ctl);
+
+        case VMM_LOADED:
+        case VMM_UNLOADED:
+            unload_vmm(ctl);
+            break;
+
+        case VMM_CORRUPT:
+            throw corrupt_vmm();
+
+        default:
+            throw unknown_status();
     }
 
     auto cor1 = commit_or_rollback([&]
-    {
-        unload_vmm(ctl);
-    });
+    { unload_vmm(ctl); });
 
     for (const auto &module : split(f->read(clp->modules()), '\n'))
     {
