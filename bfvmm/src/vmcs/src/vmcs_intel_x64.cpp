@@ -28,13 +28,9 @@
 
 vmcs_intel_x64::vmcs_intel_x64(intrinsics_intel_x64 *intrinsics) :
     m_msr_bitmap(4096 * 8),
-    m_io_bitmap_a(4096 * 8),
-    m_io_bitmap_b(4096 * 8),
     m_intrinsics(intrinsics)
 {
     m_msr_bitmap_phys = m_msr_bitmap.phys_addr();
-    m_io_bitmap_a_phys = m_io_bitmap_a.phys_addr();
-    m_io_bitmap_b_phys = m_io_bitmap_b.phys_addr();
 }
 
 void
@@ -46,9 +42,6 @@ vmcs_intel_x64::launch(const vmcs_state_intel_x64 &host_state,
 
     if (this->is_supported_msr_bitmaps() == false)
         throw hardware_unsupported("msr bitmaps required");
-
-    if (this->is_supported_io_bitmaps() == false)
-        throw hardware_unsupported("io bitmaps required");
 
     if (this->is_supported_host_address_space_size() == false)
         throw hardware_unsupported("64bit host support required");
@@ -88,13 +81,23 @@ vmcs_intel_x64::launch(const vmcs_state_intel_x64 &host_state,
     this->default_vm_exit_controls();
     this->default_vm_entry_controls();
 
-    this->check_vmcs_control_state();
-    this->check_vmcs_guest_state();
-
     if (m_intrinsics->vmlaunch() == false)
     {
+        this->dump_vmcs();
+
+        this->print_execution_controls();
+        this->print_pin_based_vm_execution_controls();
+        this->print_primary_processor_based_vm_execution_controls();
+        this->print_secondary_processor_based_vm_execution_controls();
+        this->print_vm_exit_control_fields();
+        this->print_vm_entry_control_fields();
+
+        host_state.dump("Host");
+        guest_state.dump("Guest");
+
         this->check_vmcs_control_state();
         this->check_vmcs_guest_state();
+        this->check_vmcs_host_state();
 
         throw vmcs_launch_failure(this->get_vm_instruction_error());
     }
@@ -171,9 +174,9 @@ vmcs_intel_x64::write_64bit_control_state(const vmcs_state_intel_x64 &state)
     (void) state;
 
     vmwrite(VMCS_ADDRESS_OF_MSR_BITMAPS_FULL, m_msr_bitmap_phys);
-    vmwrite(VMCS_ADDRESS_OF_IO_BITMAP_A_FULL, m_io_bitmap_a_phys);
-    vmwrite(VMCS_ADDRESS_OF_IO_BITMAP_B_FULL, m_io_bitmap_b_phys);
 
+    // unused: VMCS_ADDRESS_OF_IO_BITMAP_A_FULL
+    // unused: VMCS_ADDRESS_OF_IO_BITMAP_B_FULL
     // unused: VMCS_VM_EXIT_MSR_STORE_ADDRESS_FULL
     // unused: VMCS_VM_EXIT_MSR_LOAD_ADDRESS_FULL
     // unused: VMCS_VM_ENTRY_MSR_LOAD_ADDRESS_FULL
@@ -487,7 +490,7 @@ vmcs_intel_x64::default_primary_processor_based_vm_execution_controls()
     // controls |= VM_EXEC_P_PROC_BASED_NMI_WINDOW_EXITING;
     // controls |= VM_EXEC_P_PROC_BASED_MOV_DR_EXITING;
     // controls |= VM_EXEC_P_PROC_BASED_UNCONDITIONAL_IO_EXITING;
-    controls |= VM_EXEC_P_PROC_BASED_USE_IO_BITMAPS;
+    // controls |= VM_EXEC_P_PROC_BASED_USE_IO_BITMAPS;
     // controls |= VM_EXEC_P_PROC_BASED_MONITOR_TRAP_FLAG;
     controls |= VM_EXEC_P_PROC_BASED_USE_MSR_BITMAPS;
     // controls |= VM_EXEC_P_PROC_BASED_MONITOR_EXITING;

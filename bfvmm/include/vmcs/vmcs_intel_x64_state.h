@@ -468,10 +468,10 @@ public:
     void set_ia32_gs_base_msr(uint64_t val)
     { m_ia32_gs_base_msr = val; }
 
-    void dump() const
+    void dump(const std::string &name) const
     {
         bfdebug << "----------------------------------------" << bfendl;
-        bfdebug << "- State Dump                           -" << bfendl;
+        bfdebug << "- State Dump: " << name << bfendl;
         bfdebug << "----------------------------------------" << bfendl;
 
         bfdebug << bfendl;

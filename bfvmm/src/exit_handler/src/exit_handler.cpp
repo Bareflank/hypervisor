@@ -1,4 +1,3 @@
-
 //
 // Bareflank Hypervisor
 //
@@ -20,34 +19,66 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <iostream>
+#include <debug.h>
+#include <exception.h>
 #include <vcpu/vcpu_manager.h>
+#include <exit_handler/exit_handler.h>
 #include <exit_handler/exit_handler_dispatch.h>
 
 // -----------------------------------------------------------------------------
-// C++ Implementation
+// Helpers
 // -----------------------------------------------------------------------------
 
-void
-exit_handler_trampoline(void)
+/// Guard Exceptions
+///
+/// The following attempts to catch all of the different types of execptions
+/// that could be thrown. The default bareflank implementation only throws
+/// general exceptions. Libc++ however could also throw a standard exception,
+/// which also needs to be caught. We also provide a catch all incase a
+/// non-standard exception is thrown, preventing exceptions from moving
+/// beyond this point.
+///
+template<typename T> void
+guard_exceptions(T func)
 {
-    // Hardcode vcpuid to zero for now
-    g_vcm->dispatch(0);
+    try
+    {
+        return func();
+    }
+    catch (bfn::general_exception &ge)
+    {
+        bferror << "----------------------------------------" << bfendl;
+        bferror << "- General Exception Caught             -" << bfendl;
+        bferror << "----------------------------------------" << bfendl;
+        bfinfo << ge << bfendl;
+    }
+    catch (std::exception &e)
+    {
+        bferror << "----------------------------------------" << bfendl;
+        bferror << "- Standard Exception Caught            -" << bfendl;
+        bferror << "----------------------------------------" << bfendl;
+        bfinfo << e.what() << bfendl;
+    }
+    catch (...)
+    {
+        bferror << "----------------------------------------" << bfendl;
+        bferror << "- Unknown Exception Caught             -" << bfendl;
+        bferror << "----------------------------------------" << bfendl;
+    }
+
+    for (auto i = 0; i < 1000000; i++);
+    halt_cpu();
 }
 
 // -----------------------------------------------------------------------------
-// C Implementation
+// Implementation
 // -----------------------------------------------------------------------------
-
-// The C implementation is needed bcause the actual exit handler entry point is
-// in assembly, which doesn't have access to the mangled C++ ABI. So to keep
-// things simple, the assembly jumps into C code first, which is then handed
-// off to C++ from there.
 
 extern "C" void
 exit_handler(void)
 {
-    exit_handler_trampoline();
+    guard_exceptions([&]()
+    { g_vcm->dispatch(0); });
 }
 
 extern "C" void *
