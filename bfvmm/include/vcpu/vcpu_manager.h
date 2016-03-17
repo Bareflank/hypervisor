@@ -26,16 +26,6 @@
 #include <memory>
 #include <vcpu/vcpu_factory.h>
 
-namespace vcpu_manager_error
-{
-enum type
-{
-    success = 0,
-    failure = 1,
-    invalid = 2
-};
-}
-
 class vcpu_manager
 {
 public:
@@ -57,7 +47,7 @@ public:
     /// @param vcpuid the vcpu to initialize
     /// @return success on success, failure otherwise
     ///
-    virtual vcpu_manager_error::type init(int64_t vcpuid);
+    virtual void init(int64_t vcpuid);
 
     /// Start vCPU
     ///
@@ -66,7 +56,7 @@ public:
     /// @param vcpuid the vcpu to start
     /// @return success on success, falure otherwise
     ///
-    virtual vcpu_manager_error::type start(int64_t vcpuid);
+    virtual void start(int64_t vcpuid);
 
     /// Dispatch vCPU exit handler
     ///
@@ -75,7 +65,7 @@ public:
     /// @param vcpuid the vcpu to stop
     /// @return success on success, falure otherwise
     ///
-    virtual vcpu_manager_error::type dispatch(int64_t vcpuid);
+    virtual void dispatch(int64_t vcpuid);
 
     /// Stop vCPU
     ///
@@ -84,7 +74,16 @@ public:
     /// @param vcpuid the vcpu to stop
     /// @return success on success, falure otherwise
     ///
-    virtual vcpu_manager_error::type stop(int64_t vcpuid);
+    virtual void stop(int64_t vcpuid);
+
+    /// Halt vCPU
+    ///
+    /// Halts the vCPU.
+    ///
+    /// @param vcpuid the vcpu to halt
+    /// @return success on success, falure otherwise
+    ///
+    virtual void halt(int64_t vcpuid);
 
     /// Promote vCPU
     ///
@@ -93,7 +92,7 @@ public:
     /// @param vcpuid the vcpu to promote
     /// @return On success the function never returns
     ///
-    virtual vcpu_manager_error::type promote_vcpu(int64_t vcpuid);
+    virtual void promote(int64_t vcpuid);
 
     /// Write to Log
     ///

@@ -50,7 +50,8 @@ NATIVE_OUTDIR:=../bin
 ################################################################################
 
 SOURCES+=test.cpp
-SOURCES+=test_exit_handler.cpp
+SOURCES+=test_exit_handler_intel_x64.cpp
+SOURCES+=test_exit_handler_intel_x64_entry.cpp
 
 INCLUDE_PATHS+=./
 INCLUDE_PATHS+=../../../include/
@@ -58,9 +59,22 @@ INCLUDE_PATHS+=../../../../include/
 
 LIBS+=exit_handler
 LIBS+=vcpu
+LIBS+=vmxon
+LIBS+=vmcs
+LIBS+=serial
+LIBS+=debug_ring
+LIBS+=memory_manager
+LIBS+=intrinsics
 
 LIBRARY_PATHS+=../bin/native/
 LIBRARY_PATHS+=../../vcpu/bin/native
+LIBRARY_PATHS+=../../vmxon/bin/native
+LIBRARY_PATHS+=../../vmcs/bin/native
+LIBRARY_PATHS+=../../serial/bin/native
+LIBRARY_PATHS+=../../debug_ring/bin/native
+LIBRARY_PATHS+=../../memory_manager/bin/native
+LIBRARY_PATHS+=../../intrinsics/bin/native
+
 ################################################################################
 # Environment Specific
 ################################################################################

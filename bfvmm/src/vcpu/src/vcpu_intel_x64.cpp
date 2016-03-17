@@ -37,22 +37,25 @@ vcpu_intel_x64::vcpu_intel_x64(int64_t id) :
     vcpu(id),
     m_vmxon(0),
     m_vmcs(0),
+    m_exit_handler(0),
     m_intrinsics(0)
 {
     m_intrinsics = new intrinsics_intel_x64();
     m_vmxon = new vmxon_intel_x64(m_intrinsics);
     m_vmcs = new vmcs_intel_x64(m_intrinsics);
-    m_exit_handler = new exit_handler_dispatch(m_intrinsics);
+    m_exit_handler = new exit_handler_intel_x64(m_intrinsics);
 }
 
 vcpu_intel_x64::vcpu_intel_x64(int64_t id,
                                debug_ring *debug_ring,
                                vmxon_intel_x64 *vmxon,
                                vmcs_intel_x64 *vmcs,
+                               exit_handler_intel_x64 *exit_handler,
                                intrinsics_intel_x64 *intrinsics) :
     vcpu(id, debug_ring),
     m_vmxon(vmxon),
     m_vmcs(vmcs),
+    m_exit_handler(exit_handler),
     m_intrinsics(intrinsics)
 {
     if (intrinsics == 0)
@@ -63,6 +66,9 @@ vcpu_intel_x64::vcpu_intel_x64(int64_t id,
 
     if (vmcs == 0)
         m_vmcs = new vmcs_intel_x64(intrinsics);
+
+    if (exit_handler == 0)
+        m_exit_handler = new exit_handler_intel_x64(m_intrinsics);
 }
 
 vcpu_error::type
@@ -95,6 +101,14 @@ vcpu_error::type
 vcpu_intel_x64::stop()
 {
     m_vmxon->stop();
+
+    return vcpu_error::success;
+}
+
+vcpu_error::type
+vcpu_intel_x64::halt()
+{
+    m_intrinsics->stop();
 
     return vcpu_error::success;
 }

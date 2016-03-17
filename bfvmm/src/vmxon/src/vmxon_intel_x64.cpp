@@ -28,14 +28,13 @@ vmxon_intel_x64::vmxon_intel_x64(intrinsics_intel_x64 *intrinsics) :
     m_intrinsics(intrinsics),
     m_vmxon_enabled(false)
 {
+    if (m_intrinsics == 0)
+        throw invalid_argument(intrinsics, "intrinsics == null");
 }
 
 void
 vmxon_intel_x64::start()
 {
-    if (m_intrinsics == NULL)
-        throw invalid_vmxon();
-
     if (this->is_vmx_operation_enabled() == true)
         throw vmxon_failure("vmxon already enabled");
 
@@ -73,9 +72,6 @@ vmxon_intel_x64::start()
 void
 vmxon_intel_x64::stop()
 {
-    if (m_intrinsics == NULL)
-        throw invalid_vmxon();
-
     this->execute_vmxoff();
     this->disable_vmx_operation();
 

@@ -404,6 +404,8 @@ protected:
             this->expect_failed(e.what(), func, line);
         }
 
+        inc_pass();
+
         mocks.reset();
     }
 

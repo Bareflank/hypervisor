@@ -19,19 +19,46 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#ifndef EXIT_HANDLER_DISPATCH_H
-#define EXIT_HANDLER_DISPATCH_H
+#ifndef EXIT_HANDLER_INTEL_X64_H
+#define EXIT_HANDLER_INTEL_X64_H
 
 #include <stdint.h>
 #include <intrinsics/intrinsics_intel_x64.h>
 
-class exit_handler_dispatch
+/// Exit Handler Dispatch
+///
+/// This class is responsible for detecting why a guest exited (i.e. stopped
+/// it's execution), and dispatches the appropriated handler to emulate the
+/// instruction that could not execute. Note that this class could be executed
+/// a lot, so performance is key here.
+///
+/// This class works with the VMCS class to provide the bare minimum exit
+/// handler needed to execute a 64bit guest, with the TRUE controls being used.
+/// In general, the only instruction that needs to be emulated is the CPUID
+/// instruction. If more functionality is needed (which is likely), the user
+/// can subclass this class, and overload the handlers that are needed. The
+/// basics are provided with this class to ease development.
+///
+class exit_handler_intel_x64
 {
 public:
 
-    exit_handler_dispatch(intrinsics_intel_x64 *intrinsics);
-    virtual ~exit_handler_dispatch();
+    /// Default Constructor
+    ///
+    /// @param intrinsics the intriniscs class to be used by this class
+    /// @throws invalid argument if the intrinsics class is null.
+    ///
+    exit_handler_intel_x64(intrinsics_intel_x64 *intrinsics);
 
+    /// Destructor
+    ///
+    virtual ~exit_handler_intel_x64();
+
+    /// Dispatch
+    ///
+    /// Called when a VM exit needs to be handled. This function will decode
+    /// the exit reason, and dispatch the correct handler.
+    ///
     virtual void dispatch();
 
 protected:
