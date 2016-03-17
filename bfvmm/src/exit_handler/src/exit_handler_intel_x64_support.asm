@@ -46,7 +46,6 @@ global g_guest_rip:data
 extern exit_handler
 global exit_handler_entry:function
 global promote_vmcs_to_root:function
-global halt_cpu:function
 
 section .data
 
@@ -77,6 +76,7 @@ section .text
 ; instruction that it exited on (likely the vmxoff instruction)
 ;
 promote_vmcs_to_root:
+
     mov rsp, [g_guest_rsp]
     mov rax, [g_guest_rip]
     push rax
@@ -167,56 +167,3 @@ exit_handler_entry:
     sti
 
     vmresume
-
-; Halt CPU
-;
-; This is call in case of an error
-;
-halt_cpu:
-    cli
-    hlt
-
-; VMM Guest Instructions
-;
-; Certain instructions are better optimized, if they have direct access to the
-; guest state. The exit handler can use the information that is stored in the
-; resulting guest state as needed, or it can choose to pass on the resulting
-; state back to the guest. These functions provide these optimized instructions
-;
-; Note that some of these instructions only modify the first 32 bits of the
-; registers. Since we do not know what ABI will be running as it could be
-; System V or MS x64, we cannot assume what state the upper bits of these
-; registers should be left in. For this reason, when we execute these
-; instructions, we first load the guest state into the register, and then allow
-; the instruction to execute as expected, and then save the result, thus
-; preserving the upper bits of each register that would be affected by the
-; instruction. It's still possible for the exit handler to modify from there
-; as needed, but at least the starting point of the instruction is preserving
-; the state of the guest
-
-global guest_cpuid:function
-
-; void guest_cpuid(void)
-guest_cpuid:
-    push rbx
-    push rcx
-    push rdx
-
-    mov rax, [g_guest_rax]
-    mov rbx, [g_guest_rbx]
-    mov rcx, [g_guest_rcx]
-    mov rdx, [g_guest_rdx]
-
-    cpuid
-
-    mov [g_guest_rax], rax
-    mov [g_guest_rbx], rbx
-    mov [g_guest_rcx], rcx
-    mov [g_guest_rdx], rdx
-
-    mov rax, 0
-
-    pop rdx
-    pop rcx
-    pop rbx
-    ret

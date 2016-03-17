@@ -20,10 +20,10 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #include <debug.h>
-#include <exception.h>
 #include <vcpu/vcpu_manager.h>
-#include <exit_handler/exit_handler.h>
-#include <exit_handler/exit_handler_dispatch.h>
+#include <exit_handler/exit_handler_intel_x64_entry.h>
+#include <exit_handler/exit_handler_intel_x64_support.h>
+#include <exit_handler/exit_handler_intel_x64_exceptions.h>
 
 // -----------------------------------------------------------------------------
 // Helpers
@@ -67,7 +67,7 @@ guard_exceptions(T func)
     }
 
     for (auto i = 0; i < 1000000; i++);
-    halt_cpu();
+    g_vcm->halt(0);
 }
 
 // -----------------------------------------------------------------------------
@@ -79,16 +79,4 @@ exit_handler(void)
 {
     guard_exceptions([&]()
     { g_vcm->dispatch(0); });
-}
-
-extern "C" void *
-exit_handler_stack(void)
-{
-    static char stack[0x2000] = {0};
-
-    // Note that we return the stack pointer, plus the size of the stack,
-    // minus one because the stack grows down and thus, the starting point
-    // of the stack is actually the end of it.
-
-    return &stack[0x1999];
 }

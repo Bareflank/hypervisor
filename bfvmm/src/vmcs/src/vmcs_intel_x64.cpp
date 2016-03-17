@@ -20,16 +20,20 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #include <debug.h>
+#include <constants.h>
 #include <commit_or_rollback.h>
 #include <vmcs/vmcs_intel_x64.h>
 #include <vmcs/vmcs_intel_x64_exceptions.h>
-#include <exit_handler/exit_handler.h>
+#include <exit_handler/exit_handler_intel_x64_support.h>
 #include <memory_manager/memory_manager.h>
 
 vmcs_intel_x64::vmcs_intel_x64(intrinsics_intel_x64 *intrinsics) :
     m_msr_bitmap(4096 * 8),
     m_intrinsics(intrinsics)
 {
+    if (m_intrinsics == 0)
+        throw invalid_argument(intrinsics, "intrinsics == null");
+
     m_msr_bitmap_phys = m_msr_bitmap.phys_addr();
 }
 
@@ -37,9 +41,6 @@ void
 vmcs_intel_x64::launch(const vmcs_state_intel_x64 &host_state,
                        const vmcs_state_intel_x64 &guest_state)
 {
-    if (m_intrinsics == NULL)
-        throw invalid_vmcs();
-
     if (this->is_supported_msr_bitmaps() == false)
         throw hardware_unsupported("msr bitmaps required");
 
@@ -50,9 +51,13 @@ vmcs_intel_x64::launch(const vmcs_state_intel_x64 &host_state,
         throw hardware_unsupported("64bit guest support required");
 
     auto cor1 = commit_or_rollback([&]
-    { this->release_vmcs_region(); });
+    {
+        this->release_vmcs_region();
+        this->release_exit_handler_stack();
+    });
 
     this->create_vmcs_region();
+    this->create_exit_handler_stack();
 
     if (m_intrinsics->vmclear(&m_vmcs_region_phys) == false)
         throw vmcs_failure("failed to clear vmcs");
@@ -108,9 +113,6 @@ vmcs_intel_x64::launch(const vmcs_state_intel_x64 &host_state,
 void
 vmcs_intel_x64::promote()
 {
-    if (m_intrinsics == NULL)
-        throw invalid_vmcs();
-
     auto cor1 = commit_or_rollback([&]
     {
         bffatal << "promote failed. unable to rollback state" << bfendl;
@@ -156,6 +158,23 @@ vmcs_intel_x64::release_vmcs_region()
         m_vmcs_region.reset();
         m_vmcs_region_phys = 0;
     }
+}
+
+void
+vmcs_intel_x64::create_exit_handler_stack()
+{
+    auto cor1 = commit_or_rollback([&]
+    { this->release_exit_handler_stack(); });
+
+    m_exit_handler_stack = std::make_unique<char[]>(STACK_SIZE);
+
+    cor1.commit();
+}
+
+void
+vmcs_intel_x64::release_exit_handler_stack()
+{
+    m_exit_handler_stack.reset();
 }
 
 void
@@ -389,6 +408,8 @@ vmcs_intel_x64::write_32bit_host_state(const vmcs_state_intel_x64 &state)
 void
 vmcs_intel_x64::write_natural_host_state(const vmcs_state_intel_x64 &state)
 {
+    auto exit_handler_stack = m_exit_handler_stack.get() + STACK_SIZE - 1;
+
     vmwrite(VMCS_HOST_CR0, state.cr0());
     vmwrite(VMCS_HOST_CR3, state.cr3());
     vmwrite(VMCS_HOST_CR4, state.cr4());
@@ -398,7 +419,7 @@ vmcs_intel_x64::write_natural_host_state(const vmcs_state_intel_x64 &state)
     vmwrite(VMCS_HOST_GDTR_BASE, state.gdt().base);
     vmwrite(VMCS_HOST_IDTR_BASE, state.idt().base);
 
-    vmwrite(VMCS_HOST_RSP, (uint64_t)exit_handler_stack());
+    vmwrite(VMCS_HOST_RSP, (uint64_t)exit_handler_stack);
     vmwrite(VMCS_HOST_RIP, (uint64_t)exit_handler_entry);
 
     // unused: VMCS_HOST_FS_BASE
