@@ -19,4 +19,17 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <test.h>
+#ifndef EXIT_HANDLER_INTEL_X64_ENTRY_H
+#define EXIT_HANDLER_INTEL_X64_ENTRY_H
+
+#include <stdint.h>
+
+/// Exit Handler
+///
+/// This is the "C" portion of the exit handler. Once the entry point has
+/// finished it's job, it hands control to this function, which trampolines
+/// to a C++ exit handler dispatch which will ultamitely handle the VM exit
+///
+extern "C" void exit_handler(void);
+
+#endif

@@ -19,7 +19,7 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <stddef.h>
+#include <exception.h>
 #include <vcpu/vcpu_manager.h>
 
 vcpu_manager *
@@ -29,82 +29,83 @@ vcpu_manager::instance()
     return &self;
 }
 
-vcpu_manager_error::type
+void
 vcpu_manager::init(int64_t vcpuid)
 {
     if (vcpuid < 0 || vcpuid >= MAX_VCPUS)
-        return vcpu_manager_error::invalid;
+        throw invalid_argument(vcpuid, "out of range");
 
     m_vcpus[vcpuid] = m_factory.make_vcpu(vcpuid);
-
-    return vcpu_manager_error::success;
 }
 
-vcpu_manager_error::type
+void
 vcpu_manager::start(int64_t vcpuid)
 {
     if (vcpuid < 0 || vcpuid >= MAX_VCPUS)
-        return vcpu_manager_error::invalid;
+        throw invalid_argument(vcpuid, "out of range");
 
     const auto &vc = m_vcpus[vcpuid];
 
     if (!vc)
-        return vcpu_manager_error::invalid;
+        throw invalid_argument(vcpuid, "vcpu has not yet been created");
 
-    if (vc->start() != vcpu_error::success)
-        return vcpu_manager_error::failure;
-
-    return vcpu_manager_error::success;
+    vc->start();
 }
 
-vcpu_manager_error::type
+void
 vcpu_manager::dispatch(int64_t vcpuid)
 {
     if (vcpuid < 0 || vcpuid >= MAX_VCPUS)
-        return vcpu_manager_error::invalid;
+        throw invalid_argument(vcpuid, "out of range");
 
     const auto &vc = m_vcpus[vcpuid];
 
     if (!vc)
-        return vcpu_manager_error::invalid;
+        throw invalid_argument(vcpuid, "vcpu has not yet been created");
 
-    if (vc->dispatch() != vcpu_error::success)
-        return vcpu_manager_error::failure;
-
-    return vcpu_manager_error::success;
+    vc->dispatch();
 }
 
-vcpu_manager_error::type
+void
 vcpu_manager::stop(int64_t vcpuid)
 {
     if (vcpuid < 0 || vcpuid >= MAX_VCPUS)
-        return vcpu_manager_error::invalid;
+        throw invalid_argument(vcpuid, "out of range");
 
     const auto &vc = m_vcpus[vcpuid];
 
     if (!vc)
-        return vcpu_manager_error::invalid;
+        throw invalid_argument(vcpuid, "vcpu has not yet been created");
 
-    if (vc->stop() != vcpu_error::success)
-        return vcpu_manager_error::failure;
-
-    return vcpu_manager_error::success;
+    vc->stop();
 }
 
-vcpu_manager_error::type
-vcpu_manager::promote_vcpu(int64_t vcpuid)
+void
+vcpu_manager::halt(int64_t vcpuid)
 {
     if (vcpuid < 0 || vcpuid >= MAX_VCPUS)
-        return vcpu_manager_error::invalid;
+        throw invalid_argument(vcpuid, "out of range");
 
     const auto &vc = m_vcpus[vcpuid];
 
     if (!vc)
-        return vcpu_manager_error::invalid;
+        throw invalid_argument(vcpuid, "vcpu has not yet been created");
+
+    vc->halt();
+}
+
+void
+vcpu_manager::promote(int64_t vcpuid)
+{
+    if (vcpuid < 0 || vcpuid >= MAX_VCPUS)
+        throw invalid_argument(vcpuid, "out of range");
+
+    const auto &vc = m_vcpus[vcpuid];
+
+    if (!vc)
+        throw invalid_argument(vcpuid, "vcpu has not yet been created");
 
     vc->promote();
-
-    return vcpu_manager_error::success;
 }
 
 void
