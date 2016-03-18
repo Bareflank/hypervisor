@@ -15,16 +15,8 @@ before_install:
 - if [ "$GCC_BASE" = "530" ]; then export GCC_PATCH_URL="https://raw.githubusercontent.com/Bareflank/hypervisor/master/tools/patches/gcc-5.3.0_bareflank.patch";  fi
 
 install:
-- sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
 - sudo apt-get update
-- sudo apt-get install g++-5 --force-yes
-- sudo rm /usr/bin/gcc
-- sudo rm /usr/bin/g++
-- sudo ln -s /usr/bin/gcc-5 /usr/bin/gcc
-- sudo ln -s /usr/bin/g++-5 /usr/bin/g++
-- gcc --version
-- g++ --version
-- if ! travis_wait 40 ./tools/scripts/setup-debian.sh; then cat ~/setup-debian_stderr.log; cat ~/create-cross-compiler_stderr.log; fi
+- if ! travis_wait 40 ./tools/scripts/setup-ubuntu.sh; then cat ~/setup-ubuntu_stderr.log; cat ~/create-cross-compiler_stderr.log; fi
 
 script:
 - make
