@@ -22,6 +22,25 @@
 #include <exception.h>
 #include <vcpu/vcpu_manager.h>
 
+// -----------------------------------------------------------------------------
+// Helpers
+// -----------------------------------------------------------------------------
+
+#define vcpu_execute(a,b) \
+    if (a < 0 || a >= MAX_VCPUS) \
+        throw invalid_argument(a, "out of range"); \
+    \
+    const auto &vc = m_vcpus[a]; \
+    \
+    if (!vc) \
+        throw invalid_argument(a, "vcpu has not yet been created"); \
+    \
+    vc->b();
+
+// -----------------------------------------------------------------------------
+// Implementation
+// -----------------------------------------------------------------------------
+
 vcpu_manager *
 vcpu_manager::instance()
 {
@@ -35,122 +54,49 @@ vcpu_manager::init(int64_t vcpuid)
     if (vcpuid < 0 || vcpuid >= MAX_VCPUS)
         throw invalid_argument(vcpuid, "out of range");
 
-    m_vcpus[vcpuid] = m_factory.make_vcpu(vcpuid);
+    m_vcpus[vcpuid] = m_vcpu_factory->make_vcpu(vcpuid);
 }
 
 void
 vcpu_manager::start(int64_t vcpuid)
-{
-    if (vcpuid < 0 || vcpuid >= MAX_VCPUS)
-        throw invalid_argument(vcpuid, "out of range");
-
-    const auto &vc = m_vcpus[vcpuid];
-
-    if (!vc)
-        throw invalid_argument(vcpuid, "vcpu has not yet been created");
-
-    vc->start();
-}
+{ vcpu_execute(vcpuid, start); }
 
 void
 vcpu_manager::dispatch(int64_t vcpuid)
-{
-    if (vcpuid < 0 || vcpuid >= MAX_VCPUS)
-        throw invalid_argument(vcpuid, "out of range");
-
-    const auto &vc = m_vcpus[vcpuid];
-
-    if (!vc)
-        throw invalid_argument(vcpuid, "vcpu has not yet been created");
-
-    vc->dispatch();
-}
+{ vcpu_execute(vcpuid, dispatch); }
 
 void
 vcpu_manager::stop(int64_t vcpuid)
 {
-    if (vcpuid < 0 || vcpuid >= MAX_VCPUS)
-        throw invalid_argument(vcpuid, "out of range");
+    vcpu_execute(vcpuid, stop);
 
-    const auto &vc = m_vcpus[vcpuid];
-
-    if (!vc)
-        throw invalid_argument(vcpuid, "vcpu has not yet been created");
-
-    vc->stop();
+    m_vcpus[vcpuid].reset();
 }
 
 void
 vcpu_manager::halt(int64_t vcpuid)
-{
-    if (vcpuid < 0 || vcpuid >= MAX_VCPUS)
-        throw invalid_argument(vcpuid, "out of range");
-
-    const auto &vc = m_vcpus[vcpuid];
-
-    if (!vc)
-        throw invalid_argument(vcpuid, "vcpu has not yet been created");
-
-    vc->halt();
-}
+{ vcpu_execute(vcpuid, halt); }
 
 void
 vcpu_manager::promote(int64_t vcpuid)
-{
-    if (vcpuid < 0 || vcpuid >= MAX_VCPUS)
-        throw invalid_argument(vcpuid, "out of range");
-
-    const auto &vc = m_vcpus[vcpuid];
-
-    if (!vc)
-        throw invalid_argument(vcpuid, "vcpu has not yet been created");
-
-    vc->promote();
-}
+{ vcpu_execute(vcpuid, promote); }
 
 void
-vcpu_manager::write(int64_t vcpuid, std::string &str)
+vcpu_manager::write(int64_t vcpuid, const std::string &str)
 {
-    const auto &vc = m_vcpus[vcpuid];
-
-    if (!vc)
+    if (vcpuid < 0 || vcpuid >= MAX_VCPUS || !m_vcpus[vcpuid])
     {
-        for (const auto &kv : m_vcpus)
-        {
-            if (kv.second)
-                kv.second->write(str);
-        }
+        for (const auto &vc : m_vcpus)
+            if (vc) vc->write(str);
     }
     else
     {
-        vc->write(str);
+        m_vcpus[vcpuid]->write(str);
     }
 }
 
-vcpu_manager::vcpu_manager()
+vcpu_manager::vcpu_manager() :
+    m_vcpus(MAX_VCPUS),
+    m_vcpu_factory(std::make_shared<vcpu_factory>())
 {
-}
-
-#include <serial/serial_port_x86.h>
-
-serial_port_x86 *
-internal_serial()
-{
-    static serial_port_x86 serial;
-    return &serial;
-}
-
-extern "C" int
-write(int file, const void *buffer, size_t count)
-{
-    std::string str((char *)buffer, count);
-
-    internal_serial()->write(str);
-
-    if (file == 0)
-        vcpu_manager::instance()->write(-1, str);
-    else
-        vcpu_manager::instance()->write(file - 1000, str);
-
-    return count;
 }

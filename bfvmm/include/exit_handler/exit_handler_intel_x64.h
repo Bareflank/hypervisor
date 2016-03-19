@@ -22,7 +22,7 @@
 #ifndef EXIT_HANDLER_INTEL_X64_H
 #define EXIT_HANDLER_INTEL_X64_H
 
-#include <stdint.h>
+#include <memory>
 #include <intrinsics/intrinsics_intel_x64.h>
 
 /// Exit Handler Dispatch
@@ -48,7 +48,7 @@ public:
     /// @param intrinsics the intriniscs class to be used by this class
     /// @throws invalid argument if the intrinsics class is null.
     ///
-    exit_handler_intel_x64(intrinsics_intel_x64 *intrinsics);
+    exit_handler_intel_x64(const std::shared_ptr<intrinsics_intel_x64> &intrinsics);
 
     /// Destructor
     ///
@@ -134,7 +134,7 @@ protected:
 
 protected:
 
-    intrinsics_intel_x64 *m_intrinsics;
+    std::shared_ptr<intrinsics_intel_x64> m_intrinsics;
 
     uint64_t m_exit_reason;
     uint64_t m_exit_qualification;

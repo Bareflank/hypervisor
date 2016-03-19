@@ -59,6 +59,7 @@ INCLUDE_PATHS+=../../../../include/
 
 LIBS+=exit_handler
 LIBS+=vcpu
+LIBS+=vcpu_factory
 LIBS+=vmxon
 LIBS+=vmcs
 LIBS+=serial
@@ -68,6 +69,7 @@ LIBS+=intrinsics
 
 LIBRARY_PATHS+=../bin/native/
 LIBRARY_PATHS+=../../vcpu/bin/native
+LIBRARY_PATHS+=../../vcpu_factory/bin/native
 LIBRARY_PATHS+=../../vmxon/bin/native
 LIBRARY_PATHS+=../../vmcs/bin/native
 LIBRARY_PATHS+=../../serial/bin/native

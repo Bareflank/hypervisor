@@ -73,11 +73,11 @@ guard_stack(T func)
         if (stack[num] != 0xFFFFFFFFFFFFFFFF)
             break;
 
-    bfinfo << std::dec;
-    bfdebug << "    - free heap space: " << (g_mm->free_blocks() >> 4)
-            << " kbytes" << bfendl;
-    bfdebug << "    - free stack space: " << (num >> 7)
-            << " kbytes" << bfendl;
+    // bfinfo << std::dec;
+    // bfdebug << "    - free heap space: " << (g_mm->free_blocks() >> 4)
+    //         << " kbytes" << bfendl;
+    // bfdebug << "    - free stack space: " << (num >> 7)
+    //         << " kbytes" << bfendl;
 
     return ret;
 }
@@ -154,7 +154,6 @@ init_vmm(int64_t arg)
     {
         return guard_exceptions([&]()
         {
-            bfdebug << "initializing:" << bfendl;
             g_vcm->init(0);
         });
     });
@@ -169,8 +168,10 @@ start_vmm(int64_t arg)
     {
         return guard_exceptions([&]()
         {
-            bfdebug << "starting:" << bfendl;
             g_vcm->start(0);
+            bfdebug << "success: host os is "
+            << bfcolor_green "now " << bfcolor_end
+            << "in a vm" << bfendl;
         });
     });
 }
@@ -184,8 +185,10 @@ stop_vmm(int64_t arg)
     {
         return guard_exceptions([&]()
         {
-            bfdebug << "stopping:" << bfendl;
             g_vcm->stop(0);
+            bfdebug << "success: host os is "
+            << bfcolor_red "not " << bfcolor_end
+            << "in a vm" << bfendl;
         });
     });
 }

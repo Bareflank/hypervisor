@@ -24,11 +24,11 @@
 #include <vmxon/vmxon_exceptions_intel_x64.h>
 #include <memory_manager/memory_manager.h>
 
-vmxon_intel_x64::vmxon_intel_x64(intrinsics_intel_x64 *intrinsics) :
+vmxon_intel_x64::vmxon_intel_x64(const std::shared_ptr<intrinsics_intel_x64> &intrinsics) :
     m_intrinsics(intrinsics),
     m_vmxon_enabled(false)
 {
-    if (m_intrinsics == 0)
+    if (!m_intrinsics)
         throw invalid_argument(intrinsics, "intrinsics == null");
 }
 

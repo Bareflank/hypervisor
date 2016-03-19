@@ -20,33 +20,64 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 ################################################################################
-# Color
+# Target Information
 ################################################################################
 
-CG='\033[1;32m'
-CS='\033[1;35m'
-CE='\033[0m'
+TARGET_NAME:=test
+TARGET_TYPE:=bin
+TARGET_COMPILER:=native
 
 ################################################################################
-# Paths
+# Compiler Flags
 ################################################################################
 
-LIBRARY_PATHS := $(LIBRARY_PATHS):.
+NATIVE_CCFLAGS+=
+NATIVE_CXXFLAGS+=
+NATIVE_ASMFLAGS+=
+NATIVE_LDFLAGS+=
+NATIVE_ARFLAGS+=
+NATIVE_DEFINES+=
 
 ################################################################################
-# Targets
+# Output
 ################################################################################
 
-.PHONY: run_tests
+NATIVE_OBJDIR:=.build
+NATIVE_OUTDIR:=../bin
 
-.DEFAULT_GOAL := run_tests
+################################################################################
+# Sources
+################################################################################
 
-run_tests: force
-	@echo $(CS)"--------------------------------------------------------------------------------"$(CE)
-	@LD_LIBRARY_PATH=$(LIBRARY_PATHS) ./test > output.txt 2>&1 || (cat output.txt; exit 1)
-	@cat output.txt | grep "totals:"
-	@rm output.txt
-	@echo $(CS)"--------------------------------------------------------------------------------"$(CE)
+SOURCES+=test.cpp
+SOURCES+=test_misc.cpp
 
+INCLUDE_PATHS+=./
+INCLUDE_PATHS+=../../../include/
+INCLUDE_PATHS+=../../../../include/
 
-force: ;
+LIBS+=misc
+LIBS+=serial
+
+LIBRARY_PATHS+=../bin/native
+LIBRARY_PATHS+=../../serial/bin/native
+
+################################################################################
+# Environment Specific
+################################################################################
+
+WINDOWS_SOURCES+=
+WINDOWS_INCLUDE_PATHS+=
+WINDOWS_LIBS+=
+WINDOWS_LIBRARY_PATHS+=
+
+LINUX_SOURCES+=
+LINUX_INCLUDE_PATHS+=
+LINUX_LIBS+=
+LINUX_LIBRARY_PATHS+=
+
+################################################################################
+# Common
+################################################################################
+
+include ../../../../common/common_target.mk

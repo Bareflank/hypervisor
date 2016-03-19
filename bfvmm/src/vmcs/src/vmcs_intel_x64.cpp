@@ -27,11 +27,11 @@
 #include <exit_handler/exit_handler_intel_x64_support.h>
 #include <memory_manager/memory_manager.h>
 
-vmcs_intel_x64::vmcs_intel_x64(intrinsics_intel_x64 *intrinsics) :
+vmcs_intel_x64::vmcs_intel_x64(const std::shared_ptr<intrinsics_intel_x64> &intrinsics) :
     m_msr_bitmap(4096 * 8),
     m_intrinsics(intrinsics)
 {
-    if (m_intrinsics == 0)
+    if (!m_intrinsics)
         throw invalid_argument(intrinsics, "intrinsics == null");
 
     m_msr_bitmap_phys = m_msr_bitmap.phys_addr();

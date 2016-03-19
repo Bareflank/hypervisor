@@ -20,33 +20,76 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 ################################################################################
-# Color
+# Target Information
 ################################################################################
 
-CG='\033[1;32m'
-CS='\033[1;35m'
-CE='\033[0m'
+TARGET_NAME:=misc
+TARGET_TYPE:=lib
+TARGET_COMPILER:=both
 
 ################################################################################
-# Paths
+# Compiler Flags
 ################################################################################
 
-LIBRARY_PATHS := $(LIBRARY_PATHS):.
+NATIVE_CCFLAGS+=
+NATIVE_CXXFLAGS+=
+NATIVE_ASMFLAGS+=
+NATIVE_LDFLAGS+=
+NATIVE_ARFLAGS+=
+NATIVE_DEFINES+=
+
+CROSS_CCFLAGS+=
+CROSS_CXXFLAGS+=
+CROSS_ASMFLAGS+=
+CROSS_LDFLAGS+=
+CROSS_ARFLAGS+=
+CROSS_DEFINES+=
 
 ################################################################################
-# Targets
+# Output
 ################################################################################
 
-.PHONY: run_tests
+NATIVE_OBJDIR:=.build
+NATIVE_OUTDIR:=../bin
 
-.DEFAULT_GOAL := run_tests
+CROSS_OBJDIR:=.build
+CROSS_OUTDIR:=../../../bin
 
-run_tests: force
-	@echo $(CS)"--------------------------------------------------------------------------------"$(CE)
-	@LD_LIBRARY_PATH=$(LIBRARY_PATHS) ./test > output.txt 2>&1 || (cat output.txt; exit 1)
-	@cat output.txt | grep "totals:"
-	@rm output.txt
-	@echo $(CS)"--------------------------------------------------------------------------------"$(CE)
+################################################################################
+# Sources
+################################################################################
 
+SOURCES+=misc.cpp
 
-force: ;
+INCLUDE_PATHS+=./
+INCLUDE_PATHS+=../../../include/
+INCLUDE_PATHS+=../../../../include/
+
+LIBS+=
+
+LIBRARY_PATHS+=
+
+################################################################################
+# Environment Specific
+################################################################################
+
+VMM_SOURCES+=
+VMM_INCLUDE_PATHS+=
+VMM_LIBS+=
+VMM_LIBRARY_PATHS+=
+
+WINDOWS_SOURCES+=
+WINDOWS_INCLUDE_PATHS+=
+WINDOWS_LIBS+=
+WINDOWS_LIBRARY_PATHS+=
+
+LINUX_SOURCES+=
+LINUX_INCLUDE_PATHS+=
+LINUX_LIBS+=
+LINUX_LIBRARY_PATHS+=
+
+################################################################################
+# Common
+################################################################################
+
+include ../../../../common/common_target.mk

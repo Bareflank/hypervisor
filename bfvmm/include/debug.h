@@ -25,6 +25,9 @@
 #include <iomanip>
 #include <iostream>
 
+#define bfcolor_green "\033[1;32m"
+#define bfcolor_red "\033[1;31m"
+
 #define bfcolor_end "\033[0m"
 #define bfcolor_debug "\033[1;32m"
 #define bfcolor_warning "\033[1;33m"

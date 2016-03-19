@@ -19,29 +19,10 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#ifndef VCPU_FACTORY_H
-#define VCPU_FACTORY_H
+#include <vcpu/vcpu_factory.h>
 
-#include <memory>
-#include <vcpu/vcpu_intel_x64.h>
-
-class vcpu_factory
+std::shared_ptr<vcpu>
+vcpu_factory::make_vcpu(int64_t vcpuid)
 {
-public:
-
-    /// Default Constructor
-    ///
-    vcpu_factory() {}
-
-    /// Destructor
-    ///
-    virtual ~vcpu_factory() {}
-
-    /// Make vCPU
-    ///
-    /// @return returns a pointer to a newly created vCPU.
-    ///
-    virtual std::shared_ptr<vcpu> make_vcpu(int64_t vcpuid);
-};
-
-#endif
+    return std::make_shared<vcpu_intel_x64>(vcpuid);
+}
