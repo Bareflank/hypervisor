@@ -278,7 +278,7 @@ public:
     virtual uint32_t load_segment_limit(uint16_t selector)
     { return __load_segment_limit(selector); }
 
-    uint64_t
+    virtual uint64_t
     segment_descriptor(uint16_t selector)
     {
         gdt_t gdt_reg;
@@ -313,7 +313,7 @@ public:
         return gdt[selector];
     }
 
-    uint32_t
+    virtual uint32_t
     segment_descriptor_limit(uint16_t selector)
     {
         // The segment limit description can be found in the intel's software
@@ -336,7 +336,7 @@ public:
         return load_segment_limit(selector);
     }
 
-    uint64_t
+    virtual uint64_t
     segment_descriptor_base(uint16_t selector)
     {
         uint64_t sd1 = segment_descriptor(selector);
@@ -384,7 +384,7 @@ public:
         }
     }
 
-    uint32_t
+    virtual uint32_t
     segment_descriptor_access(uint16_t selector)
     {
         uint64_t sd = segment_descriptor(selector);

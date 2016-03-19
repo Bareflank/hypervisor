@@ -35,7 +35,7 @@ public:
 
     /// Default Constructor
     ///
-    vmxon_intel_x64(intrinsics_intel_x64 *intrinsics);
+    vmxon_intel_x64(const std::shared_ptr<intrinsics_intel_x64> &intrinsics);
 
     /// Destructor
     ///
@@ -77,7 +77,7 @@ private:
 
     friend class vmxon_ut;
 
-    intrinsics_intel_x64 *m_intrinsics;
+    std::shared_ptr<intrinsics_intel_x64> m_intrinsics;
 
     bool m_vmxon_enabled;
     uintptr_t m_vmxon_region_phys;

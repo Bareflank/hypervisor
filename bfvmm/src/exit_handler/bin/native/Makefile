@@ -20,6 +20,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 LIBRARY_PATHS := $(LIBRARY_PATHS):../../../vcpu/bin/native
+LIBRARY_PATHS := $(LIBRARY_PATHS):../../../vcpu_factory/bin/native
 LIBRARY_PATHS := $(LIBRARY_PATHS):../../../vmxon/bin/native
 LIBRARY_PATHS := $(LIBRARY_PATHS):../../../vmcs/bin/native
 LIBRARY_PATHS := $(LIBRARY_PATHS):../../../serial/bin/native

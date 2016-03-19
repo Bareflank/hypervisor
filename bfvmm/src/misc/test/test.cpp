@@ -19,29 +19,41 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#ifndef VCPU_FACTORY_H
-#define VCPU_FACTORY_H
+#include <test.h>
 
-#include <memory>
-#include <vcpu/vcpu_intel_x64.h>
-
-class vcpu_factory
+vcpu_ut::vcpu_ut()
 {
-public:
+}
 
-    /// Default Constructor
-    ///
-    vcpu_factory() {}
+bool
+vcpu_ut::init()
+{
+    return true;
+}
 
-    /// Destructor
-    ///
-    virtual ~vcpu_factory() {}
+bool
+vcpu_ut::fini()
+{
+    return true;
+}
 
-    /// Make vCPU
-    ///
-    /// @return returns a pointer to a newly created vCPU.
-    ///
-    virtual std::shared_ptr<vcpu> make_vcpu(int64_t vcpuid);
-};
+bool
+vcpu_ut::list()
+{
+    this->test_vcpu_factory_get_vcpu_invalid_vcpuid();
+    this->test_vcpu_factory_get_vcpu_valid_vcpuid();
+    this->test_vcpu_factory_add_vcpu_invalid_vcpuid();
+    this->test_vcpu_factory_add_vcpu_success();
 
-#endif
+    this->test_vcpu_invalid_default_vcpu();
+    this->test_vcpu_invalid_id_only_vcpu();
+    this->test_vcpu_get_id();
+
+    return true;
+}
+
+int
+main(int argc, char *argv[])
+{
+    return RUN_ALL_TESTS(vcpu_ut);
+}

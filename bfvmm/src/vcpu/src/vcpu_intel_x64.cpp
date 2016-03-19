@@ -22,56 +22,42 @@
 #include <commit_or_rollback.h>
 #include <vcpu/vcpu_intel_x64.h>
 
-
-// TODO: Get rid of the "naked new" operators. THese should be unique pointers
-//     if possible (maybe shared if we have to pass them around)
-//
-// TODO: Change to exception logic
-//
-// TODO: If the launch fails, it still tries to "request" a teardown, and
-// crashes with an invalid opcode.
-
-
-
 vcpu_intel_x64::vcpu_intel_x64(int64_t id) :
-    vcpu(id),
-    m_vmxon(0),
-    m_vmcs(0),
-    m_exit_handler(0),
-    m_intrinsics(0)
+    vcpu(id)
 {
-    m_intrinsics = new intrinsics_intel_x64();
-    m_vmxon = new vmxon_intel_x64(m_intrinsics);
-    m_vmcs = new vmcs_intel_x64(m_intrinsics);
-    m_exit_handler = new exit_handler_intel_x64(m_intrinsics);
+    m_intrinsics = std::make_shared<intrinsics_intel_x64>();
+    m_vmxon = std::make_shared<vmxon_intel_x64>(m_intrinsics);
+    m_vmcs = std::make_shared<vmcs_intel_x64>(m_intrinsics);
+    m_exit_handler = std::make_shared<exit_handler_intel_x64>(m_intrinsics);
 }
 
 vcpu_intel_x64::vcpu_intel_x64(int64_t id,
-                               debug_ring *debug_ring,
-                               vmxon_intel_x64 *vmxon,
-                               vmcs_intel_x64 *vmcs,
-                               exit_handler_intel_x64 *exit_handler,
-                               intrinsics_intel_x64 *intrinsics) :
+                               const std::shared_ptr<debug_ring> &debug_ring,
+                               const std::shared_ptr<vmxon_intel_x64> &vmxon,
+                               const std::shared_ptr<vmcs_intel_x64> &vmcs,
+                               const std::shared_ptr<exit_handler_intel_x64> &exit_handler,
+                               const std::shared_ptr<intrinsics_intel_x64> &intrinsics) :
     vcpu(id, debug_ring),
+
     m_vmxon(vmxon),
     m_vmcs(vmcs),
     m_exit_handler(exit_handler),
     m_intrinsics(intrinsics)
 {
-    if (intrinsics == 0)
-        m_intrinsics = new intrinsics_intel_x64();
+    if (!intrinsics)
+        m_intrinsics = std::make_shared<intrinsics_intel_x64>();
 
-    if (vmxon == 0)
-        m_vmxon = new vmxon_intel_x64(m_intrinsics);
+    if (!vmxon)
+        m_vmxon = std::make_shared<vmxon_intel_x64>(m_intrinsics);
 
-    if (vmcs == 0)
-        m_vmcs = new vmcs_intel_x64(intrinsics);
+    if (!vmcs)
+        m_vmcs = std::make_shared<vmcs_intel_x64>(m_intrinsics);
 
-    if (exit_handler == 0)
-        m_exit_handler = new exit_handler_intel_x64(m_intrinsics);
+    if (!exit_handler)
+        m_exit_handler = std::make_shared<exit_handler_intel_x64>(m_intrinsics);
 }
 
-vcpu_error::type
+void
 vcpu_intel_x64::start()
 {
     auto cor1 = commit_or_rollback([&]
@@ -85,38 +71,4 @@ vcpu_intel_x64::start()
     m_vmcs->launch(host_state, guest_state);
 
     cor1.commit();
-
-    return vcpu_error::success;
-}
-
-vcpu_error::type
-vcpu_intel_x64::dispatch()
-{
-    m_exit_handler->dispatch();
-
-    return vcpu_error::success;
-}
-
-vcpu_error::type
-vcpu_intel_x64::stop()
-{
-    m_vmxon->stop();
-
-    return vcpu_error::success;
-}
-
-vcpu_error::type
-vcpu_intel_x64::halt()
-{
-    m_intrinsics->stop();
-
-    return vcpu_error::success;
-}
-
-vcpu_error::type
-vcpu_intel_x64::promote()
-{
-    m_vmcs->promote();
-
-    return vcpu_error::success;
 }

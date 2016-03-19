@@ -54,7 +54,7 @@ public:
 
     /// Default Constructor
     ///
-    vmcs_intel_x64(intrinsics_intel_x64 *intrinsics);
+    vmcs_intel_x64(const std::shared_ptr<intrinsics_intel_x64> &intrinsics);
 
     /// Destructor
     ///
@@ -520,7 +520,7 @@ protected:
     bitmap m_msr_bitmap;
     uint64_t m_msr_bitmap_phys;
 
-    intrinsics_intel_x64 *m_intrinsics;
+    std::shared_ptr<intrinsics_intel_x64> m_intrinsics;
 
     uint64_t m_vmcs_region_phys;
     std::unique_ptr<uint32_t> m_vmcs_region;

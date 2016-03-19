@@ -19,29 +19,37 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#ifndef VCPU_FACTORY_H
-#define VCPU_FACTORY_H
+#include <vcpu/vcpu_manager.h>
+#include <serial/serial_port_x86.h>
 
-#include <memory>
-#include <vcpu/vcpu_intel_x64.h>
-
-class vcpu_factory
+serial_port_x86 *
+internal_serial()
 {
-public:
+    static serial_port_x86 serial;
+    return &serial;
+}
 
-    /// Default Constructor
-    ///
-    vcpu_factory() {}
+extern "C" int
+write(int file, const void *buffer, size_t count)
+{
+    std::string str((char *)buffer, count);
 
-    /// Destructor
-    ///
-    virtual ~vcpu_factory() {}
+    internal_serial()->write(str);
 
-    /// Make vCPU
-    ///
-    /// @return returns a pointer to a newly created vCPU.
-    ///
-    virtual std::shared_ptr<vcpu> make_vcpu(int64_t vcpuid);
-};
+    if (file == 0)
+        g_vcm->write(-1, str);
+    else
+        g_vcm->write(file - 1000, str);
 
-#endif
+    return count;
+}
+
+extern "C" int
+fstat(int file, struct stat *sbuf)
+{
+    (void) file;
+    (void) sbuf;
+
+    errno = -ENOSYS;
+    return -1;
+}
