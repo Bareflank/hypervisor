@@ -418,18 +418,25 @@ NATIVE_ARFLAGS:=$(strip $(NATIVE_ARFLAGS))
 .PHONY: cross_target
 .PHONY: native_target
 .PHONY: clean
+.PHONY: clean_src
+.PHONY: clean_tests
 .PHONY: clean-cross
 .PHONY: clean-native
-.PHONY: unittest
+.PHONY: build_src
+.PHONY: build_tests
 
 .DEFAULT_GOAL := all
 
+build_src: all
+build_tests: all
+
+clean_src: clean
+clean_tests: clean
+
 all: cross native
+	@echo > /dev/null
 
 clean: clean-cross clean-native
-
-blah:
-	echo $(dir $(CROSS_ASM_SOURCES))
 
 force: ;
 
@@ -552,5 +559,3 @@ endif
 	([ -d $(NATIVE_OUTDIR_PARENT) ] && $(RMDIR) $(NATIVE_OUTDIR_PARENT)) || $(TEST) 1
 
 endif
-
-unittest: force

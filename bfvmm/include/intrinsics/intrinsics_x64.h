@@ -37,11 +37,17 @@ extern "C" {
 #endif
 
 void __halt(void);
+void __stop(void);
 
 uint32_t __cpuid_eax(uint32_t val);
 uint32_t __cpuid_ebx(uint32_t val);
 uint32_t __cpuid_ecx(uint32_t val);
 uint32_t __cpuid_edx(uint32_t val);
+
+void __cpuid(uint64_t *rax,
+             uint64_t *rbx,
+             uint64_t *rcx,
+             uint64_t *rdx);
 
 uint64_t __read_rflags(void);
 
@@ -134,6 +140,9 @@ public:
     virtual void halt()
     { __halt(); }
 
+    virtual void stop()
+    { __stop(); }
+
     virtual uint32_t cpuid_eax(uint32_t val)
     { return __cpuid_eax(val); }
 
@@ -145,6 +154,12 @@ public:
 
     virtual uint32_t cpuid_edx(uint32_t val)
     { return __cpuid_edx(val); }
+
+    virtual void cpuid(uint64_t *rax,
+                       uint64_t *rbx,
+                       uint64_t *rcx,
+                       uint64_t *rdx)
+    { __cpuid(rax, rbx, rcx, rdx); }
 
     virtual uint64_t read_rflags()
     { return __read_rflags(); }
@@ -263,7 +278,7 @@ public:
     virtual uint32_t load_segment_limit(uint16_t selector)
     { return __load_segment_limit(selector); }
 
-    uint64_t
+    virtual uint64_t
     segment_descriptor(uint16_t selector)
     {
         gdt_t gdt_reg;
@@ -298,7 +313,7 @@ public:
         return gdt[selector];
     }
 
-    uint32_t
+    virtual uint32_t
     segment_descriptor_limit(uint16_t selector)
     {
         // The segment limit description can be found in the intel's software
@@ -321,7 +336,7 @@ public:
         return load_segment_limit(selector);
     }
 
-    uint64_t
+    virtual uint64_t
     segment_descriptor_base(uint16_t selector)
     {
         uint64_t sd1 = segment_descriptor(selector);
@@ -369,7 +384,7 @@ public:
         }
     }
 
-    uint32_t
+    virtual uint32_t
     segment_descriptor_access(uint16_t selector)
     {
         uint64_t sd = segment_descriptor(selector);
@@ -486,5 +501,50 @@ public:
 #define IA32_EFER_MSR                                             0xC0000080
 #define IA32_FS_BASE_MSR                                          0xC0000100
 #define IA32_GS_BASE_MSR                                          0xC0000101
+
+// 64-ia-32-architectures-software-developer-manual, section 6.3.1
+// IA-32 Interrupts and Exceptions
+#define INTERRUPT_DIVIDE_ERROR                                        (0)
+#define INTERRUPT_DEBUG_EXCEPTION                                     (1)
+#define INTERRUPT_NMI_INTERRUPT                                       (2)
+#define INTERRUPT_BREAKPOINT                                          (3)
+#define INTERRUPT_OVERFLOW                                            (4)
+#define INTERRUPT_BOUND_RANGE_EXCEEDED                                (5)
+#define INTERRUPT_INVALID_OPCODE                                      (6)
+#define INTERRUPT_DEVICE_NOT_AVAILABLE                                (7)
+#define INTERRUPT_DOUBLE_FAULT                                        (8)
+#define INTERRUPT_COPROCESSOR_SEGMENT_OVERRUN                         (9)
+#define INTERRUPT_INVALID_TSS                                         (10)
+#define INTERRUPT_SEGMENT_NOT_PRESENT                                 (11)
+#define INTERRUPT_STACK_SEGMENT_FAULT                                 (12)
+#define INTERRUPT_GENERAL_PROTECTION                                  (13)
+#define INTERRUPT_PAGE_FAULT                                          (14)
+#define INTERRUPT_FLOATING_POINT_ERROR                                (16)
+#define INTERRUPT_ALIGNMENT_CHECK                                     (17)
+#define INTERRUPT_MACHINE_CHECK                                       (18)
+#define INTERRUPT_SIMD_FLOATING_POINT_EXCEPTION                       (19)
+#define INTERRUPT_VIRTUALIZATION_EXCEPTION                            (20)
+
+// Debug Control
+// 64-ia-32-architectures-software-developer-manual, section 35.1
+#define IA32_DEBUGCTL_LBR                                             (1 << 0)
+#define IA32_DEBUGCTL_BTF                                             (1 << 1)
+#define IA32_DEBUGCTL_TR                                              (1 << 6)
+#define IA32_DEBUGCTL_BTS                                             (1 << 7)
+#define IA32_DEBUGCTL_BTINT                                           (1 << 8)
+#define IA32_DEBUGCTL_BTS_OFF_OS                                      (1 << 9)
+#define IA32_DEBUGCTL_BTS_OFF_USER                                    (1 << 10)
+#define IA32_DEBUGCTL_FREEZE_LBRS_ON_PMI                              (1 << 11)
+#define IA32_DEBUGCTL_FREEZE_PERFMON_ON_PMI                           (1 << 12)
+#define IA32_DEBUGCTL_ENABLE_UNCORE_PMI                               (1 << 13)
+#define IA32_DEBUGCTL_FREEZE_WHILE_SMM                                (1 << 14)
+#define IA32_DEBUGCTL_RTM_DEBUG                                       (1 << 15)
+
+// EFER
+// 64-ia-32-architectures-software-developer-manual, section 35.1
+#define IA32_EFER_SCE                                                 (1 << 0)
+#define IA32_EFER_LME                                                 (1 << 8)
+#define IA32_EFER_LMA                                                 (1 << 10)
+#define IA32_EFER_NXE                                                 (1 << 11)
 
 #endif

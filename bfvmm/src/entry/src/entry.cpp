@@ -73,11 +73,12 @@ guard_stack(T func)
         if (stack[num] != 0xFFFFFFFFFFFFFFFF)
             break;
 
-    bfinfo << std::dec;
-    bfdebug << "    - free heap space: " << (g_mm->free_blocks() >> 4)
-            << " kbytes" << bfendl;
-    bfdebug << "    - free stack space: " << (num >> 7)
-            << " kbytes" << bfendl;
+    // bfinfo << std::dec;
+    // bfdebug << "    - free heap space: " << (g_mm->free_blocks() >> 4)
+    //         << " kbytes" << bfendl;
+    // bfdebug << "    - free stack space: " << (num >> 7)
+    //         << " kbytes" << bfendl;
+
     return ret;
 }
 
@@ -95,7 +96,9 @@ guard_exceptions(T func)
 {
     try
     {
-        return func();
+        func();
+
+        return ENTRY_SUCCESS;
     }
     catch (bfn::general_exception &ge)
     {
@@ -149,14 +152,9 @@ init_vmm(int64_t arg)
 
     return guard_stack([&]() -> int64_t
     {
-        return guard_exceptions([&]() -> int64_t
+        return guard_exceptions([&]()
         {
-            bfdebug << "initializing:" << bfendl;
-
-            if (g_vcm->init(0) != vcpu_manager_error::success)
-                return ENTRY_ERROR_VMM_INIT_FAILED;
-
-            return ENTRY_SUCCESS;
+            g_vcm->init(0);
         });
     });
 }
@@ -168,14 +166,12 @@ start_vmm(int64_t arg)
 
     return guard_stack([&]() -> int64_t
     {
-        return guard_exceptions([&]() -> int64_t
+        return guard_exceptions([&]()
         {
-            bfdebug << "starting:" << bfendl;
-
-            if (g_vcm->start(0) != vcpu_manager_error::success)
-                return ENTRY_ERROR_VMM_START_FAILED;
-
-            return ENTRY_SUCCESS;
+            g_vcm->start(0);
+            bfdebug << "success: host os is "
+            << bfcolor_green "now " << bfcolor_end
+            << "in a vm" << bfendl;
         });
     });
 }
@@ -187,14 +183,12 @@ stop_vmm(int64_t arg)
 
     return guard_stack([&]() -> int64_t
     {
-        return guard_exceptions([&]() -> int64_t
+        return guard_exceptions([&]()
         {
-            bfdebug << "stopping:" << bfendl;
-
-            if (g_vcm->stop(0) != vcpu_manager_error::success)
-                return ENTRY_ERROR_VMM_STOP_FAILED;
-
-            return ENTRY_SUCCESS;
+            g_vcm->stop(0);
+            bfdebug << "success: host os is "
+            << bfcolor_red "not " << bfcolor_end
+            << "in a vm" << bfendl;
         });
     });
 }
@@ -202,11 +196,8 @@ stop_vmm(int64_t arg)
 extern "C" int64_t
 add_mdl(struct memory_descriptor *mdl, int64_t num)
 {
-    return guard_exceptions([&]() -> int64_t
-    {
-        g_mm->add_mdl(mdl, num);
-        return ENTRY_SUCCESS;
-    });
+    return guard_exceptions([&]()
+    { g_mm->add_mdl(mdl, num); });
 }
 
 // -----------------------------------------------------------------------------

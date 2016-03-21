@@ -21,18 +21,9 @@ Misc:
   read/execute and read/write memory protections that are labeled by the
   ELF program loader. This isn't useful until we break apart libc++.so such
   that it's not marked r/w/x (likely to be solved with the new libc)
-- We use our own stack, and the memory for this stack comes from .bss, as it
-  allocated using make_unique. We need to ensure that this memory is marked
-  read/write and not read/execute (likely it is, but we should verify).
 
 Version 1.0 TODO:
-- Add exception support to debug ring
-- Add exception support to exit handler
-- Add exception support to memory manager
-- Add exception support to vcpu
-- Add exception support to vmcs
-- Add exception support to vmm
-- Need to have all of the VMCS checks implemented and unit tested
+- Need to have all of the VMCS checks unit tested
 - Need to have all of the remaining unit tests completed (i.e. all of the
   VMM modules need their unit tests completed including serial)
 - Everything should be using the new debug.h instead of manually calling
@@ -44,25 +35,22 @@ Version 1.1 TODO:
 - Need to have a completely isolated exit handler. It should have it's own
   CR3, IDT, and GDT.
 - Need MultiCore support
-- Need a simple means for subclassing, at a minimum, the VMCS and exit handler.
-  Ideally, the entire VCPU class should be able to be subclassed so that it
-  can be customized.
-- Need to rename the VCPU logic as it's really specific to Intel.
 - Add Windows support
 - Once we have our own GDT/IDT, part of the "promote" process needs to restore
   the GDT/IDT which is not being done. The segment registers are swapped, but
   we are not doing a sgdt or sidt to swap these.
 - CS, SS and TR need to be restored properly when promoting. This will be
   really important once a new GDT is used in the host.
-- Provide APIs within the VMCS for setting / clearing traps to MSRs and IO
 - Create custom libc. This first step should be to provide equvilant
   functionality to newlib. Once this is done, the next step should be to break
   apart libc++.so into libc.so, libcxxabi.so (statically linked with the
   unwinder), and libc++.so.
 
 Version 2.0 TODO:
-- Type 1 and Type 2 support
-- Multiple guest support running http://www.includeos.org/
+- UEFI Support (i.e. type 1)
+- Multiple guest support running http://www.includeos.org/ or some other
+  unikernel
+- Hyperkernel support
 
 Documenttion:
 - Update cross compiler documentation to include how to setup sysroot

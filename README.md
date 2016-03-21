@@ -83,6 +83,46 @@ To clean up the source directory, run:
 make clean
 ```
 
+## Roadmap (updated 3-19-2016)
+
+### Version 1.0
+
+Target: April 2016
+
+* ~~ELF Loader~~
+* ~~Userspace Managment Application (bfm)~~
+* ~~Unwinder~~
+* ~~Initial C++ Environment~~
+* ~~Linux Driver Entry~~
+* Basic VMM
+* Testing (Ubuntu, Debian, Fedora, CentOS)
+
+Note: The first version only supports Linux in a type 2 configuration. The
+hypervisor itself doesn't do much other than hoist Linux into a virtual
+machine and continue execution.
+
+### Version 1.1
+
+Target: September 2016
+
+* Multi-Core Support
+* Windows Support
+* Updated C++ Environment
+* Isolated VMM
+
+### Version 2.0
+
+Target: Janurary 2017
+
+* UEFI Support (i.e. type 1)
+* Hyperkernel Support
+* Guest Support
+
+Note: Bareflank is only inteneded to provide the bare minimum. Mods for 2.0
+will only contain what is needed to support these goals. The actual
+hyperkernel and guest support will be done in a different repo to prevent
+Bareflank itself from becoming too compilcated for basic research.
+
 ## Contributing
 
 If you would like to participate in the development of this project, the
@@ -94,3 +134,14 @@ https://github.com/Bareflank/hypervisor/wiki/Contributing
 
 The Bareflank Hypervisor is licensed under the GNU Lesser General Public License
 v2.1 (LGPL).
+
+## Related
+
+If your interested in Bareflank, you might also be interested in the following
+hypervisor projects:
+
+**MoRE:** <br>
+https://github.com/ainfosec/MoRE
+
+**SimpleVisor:**  <br>
+https://github.com/ionescu007/SimpleVisor

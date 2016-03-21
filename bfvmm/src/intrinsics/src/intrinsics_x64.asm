@@ -20,10 +20,12 @@
 ; Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 global __halt:function
+global __stop:function
 global __cpuid_eax:function
 global __cpuid_ebx:function
 global __cpuid_ecx:function
 global __cpuid_edx:function
+global __cpuid:function
 global __read_rflags:function
 global __read_msr:function
 global __read_msr32:function
@@ -68,6 +70,11 @@ section .text
 
 ; void __halt(void)
 __halt:
+    hlt
+
+; void __stop(void)
+__stop:
+    cli
     hlt
 
 ; uint32_t cpuid_eax(uint32_t val)
@@ -126,6 +133,35 @@ __cpuid_edx:
 
     pop rdx
     pop rcx
+    pop rbx
+    ret
+
+; void __cpuid(uint64_t *rax,
+;              uint64_t *rbx,
+;              uint64_t *rcx,
+;              uint64_t *rdx);
+__cpuid:
+    push rbx
+
+    mov r8, rdi
+    mov r9, rsi
+    mov r10, rdx
+    mov r11, rcx
+
+    mov rax, [r8]
+    mov rbx, [r9]
+    mov rcx, [r10]
+    mov rdx, [r11]
+
+    cpuid
+
+    mov [r8], rax
+    mov [r9], rbx
+    mov [r10], rcx
+    mov [r11], rdx
+
+    mov rax, 0
+
     pop rbx
     ret
 
