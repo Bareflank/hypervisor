@@ -59,9 +59,9 @@ CROSS_OUTDIR:=../../../bin
 # Sources
 ################################################################################
 
-SOURCES+=exit_handler.cpp
-SOURCES+=exit_handler_entry.asm
-SOURCES+=exit_handler_dispatch.cpp
+SOURCES+=exit_handler_intel_x64.cpp
+SOURCES+=exit_handler_intel_x64_entry.cpp
+SOURCES+=exit_handler_intel_x64_support.asm
 
 
 INCLUDE_PATHS+=./

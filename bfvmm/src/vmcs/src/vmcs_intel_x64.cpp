@@ -20,35 +20,29 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #include <debug.h>
+#include <constants.h>
 #include <commit_or_rollback.h>
 #include <vmcs/vmcs_intel_x64.h>
 #include <vmcs/vmcs_intel_x64_exceptions.h>
-#include <exit_handler/exit_handler.h>
+#include <exit_handler/exit_handler_intel_x64_support.h>
 #include <memory_manager/memory_manager.h>
 
-vmcs_intel_x64::vmcs_intel_x64(intrinsics_intel_x64 *intrinsics) :
+vmcs_intel_x64::vmcs_intel_x64(const std::shared_ptr<intrinsics_intel_x64> &intrinsics) :
     m_msr_bitmap(4096 * 8),
-    m_io_bitmap_a(4096 * 8),
-    m_io_bitmap_b(4096 * 8),
     m_intrinsics(intrinsics)
 {
+    if (!m_intrinsics)
+        throw invalid_argument(intrinsics, "intrinsics == null");
+
     m_msr_bitmap_phys = m_msr_bitmap.phys_addr();
-    m_io_bitmap_a_phys = m_io_bitmap_a.phys_addr();
-    m_io_bitmap_b_phys = m_io_bitmap_b.phys_addr();
 }
 
 void
 vmcs_intel_x64::launch(const vmcs_state_intel_x64 &host_state,
                        const vmcs_state_intel_x64 &guest_state)
 {
-    if (m_intrinsics == NULL)
-        throw invalid_vmcs();
-
     if (this->is_supported_msr_bitmaps() == false)
         throw hardware_unsupported("msr bitmaps required");
-
-    if (this->is_supported_io_bitmaps() == false)
-        throw hardware_unsupported("io bitmaps required");
 
     if (this->is_supported_host_address_space_size() == false)
         throw hardware_unsupported("64bit host support required");
@@ -57,9 +51,13 @@ vmcs_intel_x64::launch(const vmcs_state_intel_x64 &host_state,
         throw hardware_unsupported("64bit guest support required");
 
     auto cor1 = commit_or_rollback([&]
-    { this->release_vmcs_region(); });
+    {
+        this->release_vmcs_region();
+        this->release_exit_handler_stack();
+    });
 
     this->create_vmcs_region();
+    this->create_exit_handler_stack();
 
     if (m_intrinsics->vmclear(&m_vmcs_region_phys) == false)
         throw vmcs_failure("failed to clear vmcs");
@@ -88,11 +86,26 @@ vmcs_intel_x64::launch(const vmcs_state_intel_x64 &host_state,
     this->default_vm_exit_controls();
     this->default_vm_entry_controls();
 
-    this->check_vmcs_control_state();
-    this->check_vmcs_guest_state();
-
     if (m_intrinsics->vmlaunch() == false)
-        throw vmcs_launch_failure(this->check_vm_instruction_error());
+    {
+        this->dump_vmcs();
+
+        this->print_execution_controls();
+        this->print_pin_based_vm_execution_controls();
+        this->print_primary_processor_based_vm_execution_controls();
+        this->print_secondary_processor_based_vm_execution_controls();
+        this->print_vm_exit_control_fields();
+        this->print_vm_entry_control_fields();
+
+        host_state.dump("Host");
+        guest_state.dump("Guest");
+
+        this->check_vmcs_control_state();
+        this->check_vmcs_guest_state();
+        this->check_vmcs_host_state();
+
+        throw vmcs_launch_failure(this->get_vm_instruction_error());
+    }
 
     cor1.commit();
 }
@@ -100,9 +113,6 @@ vmcs_intel_x64::launch(const vmcs_state_intel_x64 &host_state,
 void
 vmcs_intel_x64::promote()
 {
-    if (m_intrinsics == NULL)
-        throw invalid_vmcs();
-
     auto cor1 = commit_or_rollback([&]
     {
         bffatal << "promote failed. unable to rollback state" << bfendl;
@@ -151,6 +161,23 @@ vmcs_intel_x64::release_vmcs_region()
 }
 
 void
+vmcs_intel_x64::create_exit_handler_stack()
+{
+    auto cor1 = commit_or_rollback([&]
+    { this->release_exit_handler_stack(); });
+
+    m_exit_handler_stack = std::make_unique<char[]>(STACK_SIZE);
+
+    cor1.commit();
+}
+
+void
+vmcs_intel_x64::release_exit_handler_stack()
+{
+    m_exit_handler_stack.reset();
+}
+
+void
 vmcs_intel_x64::write_16bit_control_state(const vmcs_state_intel_x64 &state)
 {
     (void) state;
@@ -166,9 +193,9 @@ vmcs_intel_x64::write_64bit_control_state(const vmcs_state_intel_x64 &state)
     (void) state;
 
     vmwrite(VMCS_ADDRESS_OF_MSR_BITMAPS_FULL, m_msr_bitmap_phys);
-    vmwrite(VMCS_ADDRESS_OF_IO_BITMAP_A_FULL, m_io_bitmap_a_phys);
-    vmwrite(VMCS_ADDRESS_OF_IO_BITMAP_B_FULL, m_io_bitmap_b_phys);
 
+    // unused: VMCS_ADDRESS_OF_IO_BITMAP_A_FULL
+    // unused: VMCS_ADDRESS_OF_IO_BITMAP_B_FULL
     // unused: VMCS_VM_EXIT_MSR_STORE_ADDRESS_FULL
     // unused: VMCS_VM_EXIT_MSR_LOAD_ADDRESS_FULL
     // unused: VMCS_VM_ENTRY_MSR_LOAD_ADDRESS_FULL
@@ -381,6 +408,8 @@ vmcs_intel_x64::write_32bit_host_state(const vmcs_state_intel_x64 &state)
 void
 vmcs_intel_x64::write_natural_host_state(const vmcs_state_intel_x64 &state)
 {
+    auto exit_handler_stack = m_exit_handler_stack.get() + STACK_SIZE - 1;
+
     vmwrite(VMCS_HOST_CR0, state.cr0());
     vmwrite(VMCS_HOST_CR3, state.cr3());
     vmwrite(VMCS_HOST_CR4, state.cr4());
@@ -390,7 +419,7 @@ vmcs_intel_x64::write_natural_host_state(const vmcs_state_intel_x64 &state)
     vmwrite(VMCS_HOST_GDTR_BASE, state.gdt().base);
     vmwrite(VMCS_HOST_IDTR_BASE, state.idt().base);
 
-    vmwrite(VMCS_HOST_RSP, (uint64_t)exit_handler_stack());
+    vmwrite(VMCS_HOST_RSP, (uint64_t)exit_handler_stack);
     vmwrite(VMCS_HOST_RIP, (uint64_t)exit_handler_entry);
 
     // unused: VMCS_HOST_FS_BASE
@@ -482,7 +511,7 @@ vmcs_intel_x64::default_primary_processor_based_vm_execution_controls()
     // controls |= VM_EXEC_P_PROC_BASED_NMI_WINDOW_EXITING;
     // controls |= VM_EXEC_P_PROC_BASED_MOV_DR_EXITING;
     // controls |= VM_EXEC_P_PROC_BASED_UNCONDITIONAL_IO_EXITING;
-    controls |= VM_EXEC_P_PROC_BASED_USE_IO_BITMAPS;
+    // controls |= VM_EXEC_P_PROC_BASED_USE_IO_BITMAPS;
     // controls |= VM_EXEC_P_PROC_BASED_MONITOR_TRAP_FLAG;
     controls |= VM_EXEC_P_PROC_BASED_USE_MSR_BITMAPS;
     // controls |= VM_EXEC_P_PROC_BASED_MONITOR_EXITING;

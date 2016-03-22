@@ -35,8 +35,8 @@ SUBDIRS += dummy_start_vmm_success
 SUBDIRS += dummy_stop_vmm_failure
 SUBDIRS += dummy_stop_vmm_success
 SUBDIRS += src
-SUBDIRS += test
 SUBDIRS += bin
+SUBDIRS += test
 
 ################################################################################
 # Common

@@ -23,42 +23,110 @@
 # Color
 ################################################################################
 
+CI='\033[1;32m'
+CO='\033[1;35m'
 CS='\033[1;34m'
 CE='\033[0m'
 
 ################################################################################
-# Current Directory
+# Variables
 ################################################################################
 
 CURRENT_DIR=$(shell pwd)
-SUBDIRS_UNITTEST=$(SUBDIRS)
+
+################################################################################
+# Build Dirs
+################################################################################
+
+BUILD_SRC_DIRS:=$(filter-out bin,$(SUBDIRS))
+BUILD_SRC_DIRS:=$(filter-out test,$(BUILD_SRC_DIRS))
+
+BUILD_TST_DIRS:=$(filter test,$(SUBDIRS))
+
+ifeq ($(strip $(BUILD_SRC_DIRS)), )
+    BUILD_SRC_DIRS+=$(PARENT_SUBDIRS)
+endif
+
+ifeq ($(strip $(BUILD_TST_DIRS)), )
+    BUILD_TST_DIRS+=$(PARENT_SUBDIRS)
+endif
+
+################################################################################
+# Run Dirs
+################################################################################
+
+RUN_DIRS+=$(filter bin,$(SUBDIRS))
+RUN_DIRS+=$(filter native,$(SUBDIRS))
+
+ifeq ($(strip $(RUN_DIRS)), )
+    RUN_DIRS+=$(PARENT_SUBDIRS)
+endif
+
+################################################################################
+# Clean Dirs
+################################################################################
+
+CLEAN_DIRS:=$(filter-out bin,$(SUBDIRS))
+
+ifeq ($(strip $(CLEAN_DIRS)), )
+    CLEAN_DIRS+=$(PARENT_SUBDIRS)
+endif
 
 ################################################################################
 # Targets
 ################################################################################
 
-.PHONY: all
 .PHONY: clean
-.PHONY: unittest
+.PHONY: clean_src
+.PHONY: clean_tests
+.PHONY: build_src
+.PHONY: build_tests
+.PHONY: run_tests
 
 .DEFAULT_GOAL := all
 
-all: $(SUBDIRS)
+all: build_src build_tests
 
-$(SUBDIRS): force
-		@echo $(CS)$(CURRENT_DIR)/$@$(CE);
-		@$(MAKE) --no-print-directory -C $@
-
-unittest: force
-	@for dir in $(SUBDIRS); do \
-		echo $(CS)$(CURRENT_DIR)/$$dir$(CE); \
-		$(MAKE) --no-print-directory -C $$dir unittest || exit 1; \
+build_src:
+	@for dir in $(BUILD_SRC_DIRS); do \
+		echo $(CI)"-->" $(CS)$(CURRENT_DIR)/$$dir$(CE); \
+		$(MAKE) --no-print-directory -C $$dir build_src || exit 1; \
+		echo $(CO)"<--" $(CS)$(CURRENT_DIR)/$$dir$(CE); \
 	done
 
-clean: force
-	@for dir in $(SUBDIRS); do \
-		echo $(CS)$(CURRENT_DIR)/$$dir$(CE); \
+build_tests:
+	@for dir in $(BUILD_TST_DIRS); do \
+		echo $(CI)"-->" $(CS)$(CURRENT_DIR)/$$dir$(CE); \
+		$(MAKE) --no-print-directory -C $$dir build_tests || exit 1; \
+		echo $(CO)"<--" $(CS)$(CURRENT_DIR)/$$dir$(CE); \
+	done
+
+run_tests: force
+	@for dir in $(RUN_DIRS); do \
+		echo $(CI)"-->" $(CS)$(CURRENT_DIR)/$$dir$(CE); \
+		$(MAKE) --no-print-directory -C $$dir run_tests || exit 1; \
+		echo $(CO)"<--" $(CS)$(CURRENT_DIR)/$$dir$(CE); \
+	done
+
+clean:
+	@for dir in $(CLEAN_DIRS); do \
+		echo $(CI)"-->" $(CS)$(CURRENT_DIR)/$$dir$(CE); \
 		$(MAKE) --no-print-directory -C $$dir clean; \
+		echo $(CO)"<--" $(CS)$(CURRENT_DIR)/$$dir$(CE); \
+	done
+
+clean_src:
+	@for dir in $(BUILD_SRC_DIRS); do \
+		echo $(CI)"-->" $(CS)$(CURRENT_DIR)/$$dir$(CE); \
+		$(MAKE) --no-print-directory -C $$dir clean_src; \
+		echo $(CO)"<--" $(CS)$(CURRENT_DIR)/$$dir$(CE); \
+	done
+
+clean_tests:
+	@for dir in $(BUILD_TST_DIRS); do \
+		echo $(CI)"-->" $(CS)$(CURRENT_DIR)/$$dir$(CE); \
+		$(MAKE) --no-print-directory -C $$dir clean_tests; \
+		echo $(CO)"<--" $(CS)$(CURRENT_DIR)/$$dir$(CE); \
 	done
 
 force:;

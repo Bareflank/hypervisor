@@ -20,3 +20,25 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #include <test.h>
+#include <vcpu/vcpu.h>
+
+void
+vcpu_ut::test_vcpu_invalid_default_vcpu()
+{
+    // auto vc = vcpu();
+    // EXPECT_TRUE(vc.is_valid() == false);
+}
+
+void
+vcpu_ut::test_vcpu_invalid_id_only_vcpu()
+{
+    // auto vc = vcpu(10000);
+    // EXPECT_TRUE(vc.is_valid() == false);
+}
+
+void
+vcpu_ut::test_vcpu_get_id()
+{
+    // auto vc = vcpu(1);
+    // EXPECT_TRUE(vc.id() == 1);
+}

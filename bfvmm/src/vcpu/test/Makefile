@@ -51,25 +51,30 @@ NATIVE_OUTDIR:=../bin
 
 SOURCES+=test.cpp
 SOURCES+=test_vcpu.cpp
-SOURCES+=test_vcpu_factory.cpp
+SOURCES+=test_vcpu_intel_x64.cpp
+SOURCES+=test_vcpu_manager.cpp
 
 INCLUDE_PATHS+=./
 INCLUDE_PATHS+=../../../include/
 INCLUDE_PATHS+=../../../../include/
 
 LIBS+=vcpu
+LIBS+=vcpu_factory
 LIBS+=vmxon
 LIBS+=vmcs
 LIBS+=debug_ring
 LIBS+=intrinsics
 LIBS+=exit_handler
+LIBS+=memory_manager
 
 LIBRARY_PATHS+=../bin/native
+LIBRARY_PATHS+=../../vcpu_factory/bin/native
 LIBRARY_PATHS+=../../vmxon/bin/native
 LIBRARY_PATHS+=../../vmcs/bin/native
 LIBRARY_PATHS+=../../debug_ring/bin/native
 LIBRARY_PATHS+=../../intrinsics/bin/native
 LIBRARY_PATHS+=../../exit_handler/bin/native
+LIBRARY_PATHS+=../../memory_manager/bin/native
 
 ################################################################################
 # Environment Specific

@@ -21,14 +21,12 @@
 
 #include <memory>
 
+#include <debug.h>
 #include <entry.h>
 #include <entry/entry.h>
-#include <debug.h>
-#include <constants.h>
 #include <exception.h>
 #include <eh_frame_list.h>
 #include <vcpu/vcpu_manager.h>
-#include <memory_manager/memory_manager.h>
 
 // -----------------------------------------------------------------------------
 // Global
@@ -40,6 +38,11 @@ struct eh_frame_t g_eh_frame_list[MAX_NUM_MODULES] = {};
 // -----------------------------------------------------------------------------
 // Helpers
 // -----------------------------------------------------------------------------
+
+#define guard(a) \
+    guard_stack([&]() -> int64_t \
+    { return guard_exceptions([&]() { a; }); });
+
 
 /// Guard Stack
 ///
@@ -73,11 +76,12 @@ guard_stack(T func)
         if (stack[num] != 0xFFFFFFFFFFFFFFFF)
             break;
 
-    bfinfo << std::dec;
-    bfdebug << "    - free heap space: " << (g_mm->free_blocks() >> 4)
-            << " kbytes" << bfendl;
-    bfdebug << "    - free stack space: " << (num >> 7)
-            << " kbytes" << bfendl;
+    // bfinfo << std::dec;
+    // bfdebug << "    - free heap space: " << (g_mm->free_blocks() >> 4)
+    //         << " kbytes" << bfendl;
+    // bfdebug << "    - free stack space: " << (num >> 7)
+    //         << " kbytes" << bfendl;
+
     return ret;
 }
 
@@ -95,7 +99,9 @@ guard_exceptions(T func)
 {
     try
     {
-        return func();
+        func();
+
+        return ENTRY_SUCCESS;
     }
     catch (bfn::general_exception &ge)
     {
@@ -121,20 +127,6 @@ guard_exceptions(T func)
     return ENTRY_ERROR_UNKNOWN;
 }
 
-void
-terminate()
-{
-    bffatal << "terminate called" << bfendl;
-    abort();
-}
-
-void
-new_handler()
-{
-    bffatal << "out of memory" << bfendl;
-    std::terminate();
-}
-
 // -----------------------------------------------------------------------------
 // Entry Points
 // -----------------------------------------------------------------------------
@@ -144,21 +136,7 @@ init_vmm(int64_t arg)
 {
     (void) arg;
 
-    std::set_terminate(terminate);
-    std::set_new_handler(new_handler);
-
-    return guard_stack([&]() -> int64_t
-    {
-        return guard_exceptions([&]() -> int64_t
-        {
-            bfdebug << "initializing:" << bfendl;
-
-            if (g_vcm->init(0) != vcpu_manager_error::success)
-                return ENTRY_ERROR_VMM_INIT_FAILED;
-
-            return ENTRY_SUCCESS;
-        });
-    });
+    return guard(g_vcm->init(0));
 }
 
 extern "C" int64_t
@@ -166,18 +144,7 @@ start_vmm(int64_t arg)
 {
     (void) arg;
 
-    return guard_stack([&]() -> int64_t
-    {
-        return guard_exceptions([&]() -> int64_t
-        {
-            bfdebug << "starting:" << bfendl;
-
-            if (g_vcm->start(0) != vcpu_manager_error::success)
-                return ENTRY_ERROR_VMM_START_FAILED;
-
-            return ENTRY_SUCCESS;
-        });
-    });
+    return guard(g_vcm->start(0));
 }
 
 extern "C" int64_t
@@ -185,28 +152,7 @@ stop_vmm(int64_t arg)
 {
     (void) arg;
 
-    return guard_stack([&]() -> int64_t
-    {
-        return guard_exceptions([&]() -> int64_t
-        {
-            bfdebug << "stopping:" << bfendl;
-
-            if (g_vcm->stop(0) != vcpu_manager_error::success)
-                return ENTRY_ERROR_VMM_STOP_FAILED;
-
-            return ENTRY_SUCCESS;
-        });
-    });
-}
-
-extern "C" int64_t
-add_mdl(struct memory_descriptor *mdl, int64_t num)
-{
-    return guard_exceptions([&]() -> int64_t
-    {
-        g_mm->add_mdl(mdl, num);
-        return ENTRY_SUCCESS;
-    });
+    return guard(g_vcm->stop(0));
 }
 
 // -----------------------------------------------------------------------------
@@ -222,6 +168,9 @@ get_eh_frame_list()
 extern "C" void
 register_eh_frame(void *addr, uint64_t size)
 {
+    if (addr == nullptr || size == 0)
+        return;
+
     if (g_eh_frame_list_num >= MAX_NUM_MODULES)
         return;
 

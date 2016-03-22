@@ -19,4 +19,10 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <test.h>
+#include <vcpu/vcpu_factory.h>
+
+std::shared_ptr<vcpu>
+vcpu_factory::make_vcpu(int64_t vcpuid)
+{
+    return std::make_shared<vcpu_intel_x64>(vcpuid);
+}
