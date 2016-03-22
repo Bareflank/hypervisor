@@ -73,6 +73,39 @@ out_of_memory(void)
     return 0;
 }
 
+template<typename T> int64_t
+guard_exceptions(T func)
+{
+    try
+    {
+        func();
+
+        return MEMORY_MANAGER_SUCCESS;
+    }
+    catch (bfn::general_exception &ge)
+    {
+        bferror << "----------------------------------------" << bfendl;
+        bferror << "- General Exception Caught             -" << bfendl;
+        bferror << "----------------------------------------" << bfendl;
+        bfinfo << ge << bfendl;
+    }
+    catch (std::exception &e)
+    {
+        bferror << "----------------------------------------" << bfendl;
+        bferror << "- Standard Exception Caught            -" << bfendl;
+        bferror << "----------------------------------------" << bfendl;
+        bfinfo << e.what() << bfendl;
+    }
+    catch (...)
+    {
+        bferror << "----------------------------------------" << bfendl;
+        bferror << "- Unknown Exception Caught             -" << bfendl;
+        bferror << "----------------------------------------" << bfendl;
+    }
+
+    return MEMORY_MANAGER_FAILURE;
+}
+
 // -----------------------------------------------------------------------------
 // Implementation
 // -----------------------------------------------------------------------------
@@ -355,4 +388,11 @@ _realloc_r(struct _reent *reent, void *ptr, size_t size)
 {
     _free_r(reent, ptr);
     return _malloc_r(reent, size);
+}
+
+extern "C" int64_t
+add_mdl(struct memory_descriptor *mdl, int64_t num)
+{
+    return guard_exceptions([&]()
+    { g_mm->add_mdl(mdl, num); });
 }

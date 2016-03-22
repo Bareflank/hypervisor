@@ -91,7 +91,6 @@ private:
     void test_vcpu_manager_write_invalid_vcpuid_with_valid_vcpu();
     void test_vcpu_manager_write_uninitialized_vcpuid_with_valid_vcpu();
     void test_vcpu_manager_write_success();
-
 };
 
 #endif

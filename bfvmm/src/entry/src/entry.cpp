@@ -21,14 +21,12 @@
 
 #include <memory>
 
+#include <debug.h>
 #include <entry.h>
 #include <entry/entry.h>
-#include <debug.h>
-#include <constants.h>
 #include <exception.h>
 #include <eh_frame_list.h>
 #include <vcpu/vcpu_manager.h>
-#include <memory_manager/memory_manager.h>
 
 // -----------------------------------------------------------------------------
 // Global
@@ -40,6 +38,11 @@ struct eh_frame_t g_eh_frame_list[MAX_NUM_MODULES] = {};
 // -----------------------------------------------------------------------------
 // Helpers
 // -----------------------------------------------------------------------------
+
+#define guard(a) \
+    guard_stack([&]() -> int64_t \
+    { return guard_exceptions([&]() { a; }); });
+
 
 /// Guard Stack
 ///
@@ -124,20 +127,6 @@ guard_exceptions(T func)
     return ENTRY_ERROR_UNKNOWN;
 }
 
-void
-terminate()
-{
-    bffatal << "terminate called" << bfendl;
-    abort();
-}
-
-void
-new_handler()
-{
-    bffatal << "out of memory" << bfendl;
-    std::terminate();
-}
-
 // -----------------------------------------------------------------------------
 // Entry Points
 // -----------------------------------------------------------------------------
@@ -147,16 +136,7 @@ init_vmm(int64_t arg)
 {
     (void) arg;
 
-    std::set_terminate(terminate);
-    std::set_new_handler(new_handler);
-
-    return guard_stack([&]() -> int64_t
-    {
-        return guard_exceptions([&]()
-        {
-            g_vcm->init(0);
-        });
-    });
+    return guard(g_vcm->init(0));
 }
 
 extern "C" int64_t
@@ -164,16 +144,7 @@ start_vmm(int64_t arg)
 {
     (void) arg;
 
-    return guard_stack([&]() -> int64_t
-    {
-        return guard_exceptions([&]()
-        {
-            g_vcm->start(0);
-            bfdebug << "success: host os is "
-            << bfcolor_green "now " << bfcolor_end
-            << "in a vm" << bfendl;
-        });
-    });
+    return guard(g_vcm->start(0));
 }
 
 extern "C" int64_t
@@ -181,23 +152,7 @@ stop_vmm(int64_t arg)
 {
     (void) arg;
 
-    return guard_stack([&]() -> int64_t
-    {
-        return guard_exceptions([&]()
-        {
-            g_vcm->stop(0);
-            bfdebug << "success: host os is "
-            << bfcolor_red "not " << bfcolor_end
-            << "in a vm" << bfendl;
-        });
-    });
-}
-
-extern "C" int64_t
-add_mdl(struct memory_descriptor *mdl, int64_t num)
-{
-    return guard_exceptions([&]()
-    { g_mm->add_mdl(mdl, num); });
+    return guard(g_vcm->stop(0));
 }
 
 // -----------------------------------------------------------------------------
@@ -213,6 +168,9 @@ get_eh_frame_list()
 extern "C" void
 register_eh_frame(void *addr, uint64_t size)
 {
+    if (addr == nullptr || size == 0)
+        return;
+
     if (g_eh_frame_list_num >= MAX_NUM_MODULES)
         return;
 
