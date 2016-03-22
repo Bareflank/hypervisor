@@ -59,7 +59,12 @@ vcpu_manager::init(int64_t vcpuid)
 
 void
 vcpu_manager::start(int64_t vcpuid)
-{ vcpu_execute(vcpuid, start); }
+{
+    vcpu_execute(vcpuid, start);
+
+    bfdebug << "success: host os is " << bfcolor_green "now " << bfcolor_end
+            << "in a vm" << bfendl;
+}
 
 void
 vcpu_manager::dispatch(int64_t vcpuid)
@@ -69,6 +74,9 @@ void
 vcpu_manager::stop(int64_t vcpuid)
 {
     vcpu_execute(vcpuid, stop);
+
+    bfdebug << "success: host os is " << bfcolor_red "not " << bfcolor_end
+            << "in a vm" << bfendl;
 
     m_vcpus[vcpuid].reset();
 }
