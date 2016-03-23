@@ -40,35 +40,26 @@ vmxon_ut::fini()
 bool
 vmxon_ut::list()
 {
-    // this->test_vmm_start_uninitialized();
-    // this->test_vmm_stop_uninitialized();
-    // this->test_verify_cpuid_vmx_supported_failed();
-    // this->test_verify_cpuid_vmx_supported_success();
-    // this->test_verify_vmx_capabilities_msr_failed_invalid_physical_address_width();
-    // this->test_verify_vmx_capabilities_msr_failed_invalid_memory_type();
-    // this->test_verify_vmx_capabilities_msr_success();
-    // this->test_verify_ia32_vmx_cr0_fixed_msr_failed_fixed0();
-    // this->test_verify_ia32_vmx_cr0_fixed_msr_failed_fixed1();
-    // this->test_verify_ia32_vmx_cr0_fixed_msr_success();
-    // this->test_verify_ia32_vmx_cr4_fixed_msr_failed_fixed0();
-    // this->test_verify_ia32_vmx_cr4_fixed_msr_failed_fixed1();
-    // this->test_verify_ia32_vmx_cr4_fixed_msr_success();
-    // this->test_verify_ia32_feature_control_msr_failed();
-    // this->test_verify_ia32_feature_control_msr_success();
-    // this->test_verify_v8086_disabled_failed();
-    // this->test_verify_v8086_disabled_success();
-    // this->test_verify_vmx_operation_enabled_failed();
-    // this->test_verify_vmx_operation_enabled_success();
-    // this->test_verify_vmx_operation_disabled_failed();
-    // this->test_verify_vmx_operation_disabled_success();
-    // this->test_enable_vmx_operation_success();
-    // this->test_disable_vmx_operation_success();
-    this->test_create_vmxon_region_not_page_aligned();
-    // this->test_release_vmxon_region();
-    // this->test_execute_vmxon_already_on();
-    // this->test_execute_vmxon_failed();
-    // this->test_execute_vmxoff_already_off();
-    // this->test_execute_vmxoff_failed();
+    // vmxon::start
+    this->test_start_success();
+    this->test_start_execute_vmxon_already_on_failure();
+    this->test_start_execute_vmxon_failure();
+    this->test_start_check_ia32_vmx_cr4_fixed0_msr_failure();
+    this->test_start_check_ia32_vmx_cr4_fixed1_msr_failure();
+    this->test_start_enable_vmx_operation_failure();
+    this->test_start_v8086_disabled_failure();
+    this->test_start_check_ia32_feature_control_msr();
+    this->test_start_check_ia32_vmx_cr0_fixed0_msr();
+    this->test_start_check_ia32_vmx_cr0_fixed1_msr();
+    this->test_start_check_vmx_capabilities_msr_memtype_failure();
+    this->test_start_check_vmx_capabilities_msr_addr_width_failure();
+    this->test_start_vmxon_already_enabled_failure();
+    this->test_start_check_cpuid_vmx_supported_failure();
+
+    // vmxon::stop
+    this->test_stop_success();
+    this->test_stop_vmxoff_check_failure();
+    this->test_stop_vmxoff_failure();
 
     return true;
 }

@@ -38,36 +38,24 @@ protected:
     bool list() override;
 
 private:
+    void test_start_success();
+    void test_start_execute_vmxon_already_on_failure();
+    void test_start_execute_vmxon_failure();
+    void test_start_check_ia32_vmx_cr4_fixed0_msr_failure();
+    void test_start_check_ia32_vmx_cr4_fixed1_msr_failure();
+    void test_start_enable_vmx_operation_failure();
+    void test_start_v8086_disabled_failure();
+    void test_start_check_ia32_feature_control_msr();
+    void test_start_check_ia32_vmx_cr0_fixed0_msr();
+    void test_start_check_ia32_vmx_cr0_fixed1_msr();
+    void test_start_check_vmx_capabilities_msr_memtype_failure();
+    void test_start_check_vmx_capabilities_msr_addr_width_failure();
+    void test_start_vmxon_already_enabled_failure();
+    void test_start_check_cpuid_vmx_supported_failure();
 
-    // void test_vmm_start_uninitialized();
-    // void test_vmm_stop_uninitialized();
-    // void test_verify_cpuid_vmx_supported_failed();
-    // void test_verify_cpuid_vmx_supported_success();
-    // void test_verify_vmx_capabilities_msr_failed_invalid_physical_address_width();
-    // void test_verify_vmx_capabilities_msr_failed_invalid_memory_type();
-    // void test_verify_vmx_capabilities_msr_success();
-    // void test_verify_ia32_vmx_cr0_fixed_msr_failed_fixed0();
-    // void test_verify_ia32_vmx_cr0_fixed_msr_failed_fixed1();
-    // void test_verify_ia32_vmx_cr0_fixed_msr_success();
-    // void test_verify_ia32_vmx_cr4_fixed_msr_failed_fixed0();
-    // void test_verify_ia32_vmx_cr4_fixed_msr_failed_fixed1();
-    // void test_verify_ia32_vmx_cr4_fixed_msr_success();
-    // void test_verify_ia32_feature_control_msr_failed();
-    // void test_verify_ia32_feature_control_msr_success();
-    // void test_verify_v8086_disabled_failed();
-    // void test_verify_v8086_disabled_success();
-    // void test_verify_vmx_operation_enabled_failed();
-    // void test_verify_vmx_operation_enabled_success();
-    // void test_verify_vmx_operation_disabled_failed();
-    // void test_verify_vmx_operation_disabled_success();
-    // void test_enable_vmx_operation_success();
-    // void test_disable_vmx_operation_success();
-    void test_create_vmxon_region_not_page_aligned();
-    // void test_release_vmxon_region();
-    // void test_execute_vmxon_already_on();
-    // void test_execute_vmxon_failed();
-    // void test_execute_vmxoff_already_off();
-    // void test_execute_vmxoff_failed();
+    void test_stop_success();
+    void test_stop_vmxoff_check_failure();
+    void test_stop_vmxoff_failure();
 };
 
 #endif

@@ -139,7 +139,7 @@ vmcs_intel_x64::create_vmcs_region()
     m_vmcs_region_phys = (uintptr_t)g_mm->virt_to_phys(region);
 
     if (((uintptr_t)region & 0x0000000000000FFF) != 0)
-        throw invalid_alignmnet(
+        throw invalid_alignment(
             "vmxon region not page aligned", (uintptr_t)region);
 
     region[0] = m_intrinsics->read_msr(IA32_VMX_BASIC_MSR) & 0x7FFFFFFFF;

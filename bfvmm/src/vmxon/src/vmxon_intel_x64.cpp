@@ -85,7 +85,7 @@ void
 vmxon_intel_x64::check_cpuid_vmx_supported()
 {
     if ((m_intrinsics->cpuid_ecx(1) & (1 << 5)) == 0)
-        vmxon_failure("VMX extensions not supported");
+        throw vmxon_failure("VMX extensions not supported");
 }
 
 void
@@ -172,10 +172,6 @@ vmxon_intel_x64::create_vmxon_region()
 
     m_vmxon_region = std::unique_ptr<uint32_t>(region);
     m_vmxon_region_phys = (uintptr_t)g_mm->virt_to_phys(region);
-
-    if (((uintptr_t)region & 0x0000000000000FFF) != 0)
-        throw invalid_alignmnet(
-            "vmxon region not page aligned", (uintptr_t)region);
 
     region[0] = m_intrinsics->read_msr(IA32_VMX_BASIC_MSR) & 0x7FFFFFFFF;
 

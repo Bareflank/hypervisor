@@ -131,10 +131,10 @@ vmcs_intel_x64::check_control_io_bitmap_address_bits()
     auto addr_b = vmread(VMCS_ADDRESS_OF_IO_BITMAP_B_FULL);
 
     if ((addr_a & 0x0000000000000FFF) != 0)
-        throw invalid_alignmnet("io bitmap a addr not page aligned", addr_a);
+        throw invalid_alignment("io bitmap a addr not page aligned", addr_a);
 
     if ((addr_b & 0x0000000000000FFF) != 0)
-        throw invalid_alignmnet("io bitmap b addr not page aligned", addr_b);
+        throw invalid_alignment("io bitmap b addr not page aligned", addr_b);
 
     if (is_physical_address_valid(addr_a) == false)
         throw invalid_address("io bitmap a addr too large", addr_a);
@@ -152,7 +152,7 @@ vmcs_intel_x64::check_control_msr_bitmap_address_bits()
     auto addr = vmread(VMCS_ADDRESS_OF_MSR_BITMAPS_FULL);
 
     if ((addr & 0x0000000000000FFF) != 0)
-        throw invalid_alignmnet("msr bitmap addr not page aligned", addr);
+        throw invalid_alignment("msr bitmap addr not page aligned", addr);
 
     if (is_physical_address_valid(addr) == false)
         throw invalid_address("msr bitmap addr too large", addr);
@@ -170,7 +170,7 @@ vmcs_intel_x64::check_control_tpr_shadow_and_virtual_apic()
         throw invalid_address("vitual apic physical addr is NULL", phys_addr);
 
     if ((phys_addr & 0x0000000000000FFF) != 0)
-        throw invalid_alignmnet("virtual apic addr not 4k aligned", phys_addr);
+        throw invalid_alignment("virtual apic addr not 4k aligned", phys_addr);
 
     if (is_physical_address_valid(phys_addr) == false)
         throw invalid_address("vitual apic addr too large", phys_addr);
@@ -233,7 +233,7 @@ vmcs_intel_x64::check_control_virtual_apic_address_bits()
         throw invalid_address("apic access physical addr is NULL", phys_addr);
 
     if ((phys_addr & 0x0000000000000FFF) != 0)
-        throw invalid_alignmnet("apic access addr not 4k aligned", phys_addr);
+        throw invalid_alignment("apic access addr not 4k aligned", phys_addr);
 
     if (is_physical_address_valid(phys_addr) == false)
         throw invalid_address("apic access addr too large", phys_addr);
