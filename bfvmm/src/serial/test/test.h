@@ -19,31 +19,37 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <test.h>
-#include <vcpu/vcpu_factory.h>
+#ifndef TEST_H
+#define TEST_H
 
-void
-vcpu_ut::test_vcpu_factory_get_vcpu_invalid_vcpuid()
-{
-    // EXPECT_TRUE(vcpu_factory::instance()->get_vcpu(10000) == NULL);
-}
+#include <unittest.h>
 
-void
-vcpu_ut::test_vcpu_factory_get_vcpu_valid_vcpuid()
+class serial_ut : public unittest
 {
-    // EXPECT_TRUE(vcpu_factory::instance()->get_vcpu(0) != NULL);
-}
+public:
 
-void
-vcpu_ut::test_vcpu_factory_add_vcpu_invalid_vcpuid()
-{
-    // auto vc = vcpu(10000);
-    // EXPECT_TRUE(vcpu_factory::instance()->add_vcpu(vc) == vcpu_factory_error::failure);
-}
+    serial_ut();
+    ~serial_ut() {}
 
-void
-vcpu_ut::test_vcpu_factory_add_vcpu_success()
-{
-    // auto vc = vcpu(0);
-    // EXPECT_TRUE(vcpu_factory::instance()->add_vcpu(vc) == vcpu_factory_error::success);
-}
+protected:
+
+    bool init() override;
+    bool fini() override;
+    bool list() override;
+
+private:
+
+    void test_serial_success();
+    void test_serial_set_baud_rate_success();
+    void test_serial_set_baud_rate_unknown();
+    void test_serial_set_data_bits_success();
+    void test_serial_set_data_bits_success_extra_bits();
+    void test_serial_set_stop_bits_success();
+    void test_serial_set_stop_bits_success_extra_bits();
+    void test_serial_set_parity_bits_success();
+    void test_serial_set_parity_bits_success_extra_bits();
+    void test_serial_write_character();
+    void test_serial_write_string();
+};
+
+#endif

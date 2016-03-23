@@ -43,7 +43,6 @@ struct eh_frame_t g_eh_frame_list[MAX_NUM_MODULES] = {};
     guard_stack([&]() -> int64_t \
     { return guard_exceptions([&]() { a; }); });
 
-
 /// Guard Stack
 ///
 /// Since we are using userspace style code / libraries (like libc++) in this

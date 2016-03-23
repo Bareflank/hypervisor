@@ -134,152 +134,152 @@ class intrinsics_x64 : public intrinsics
 {
 public:
 
-    intrinsics_x64() {}
+    intrinsics_x64() noexcept {}
     virtual ~intrinsics_x64() {}
 
-    virtual void halt()
+    virtual void halt() const noexcept
     { __halt(); }
 
-    virtual void stop()
+    virtual void stop() const noexcept
     { __stop(); }
 
-    virtual uint32_t cpuid_eax(uint32_t val)
+    virtual uint32_t cpuid_eax(uint32_t val) const noexcept
     { return __cpuid_eax(val); }
 
-    virtual uint32_t cpuid_ebx(uint32_t val)
+    virtual uint32_t cpuid_ebx(uint32_t val) const noexcept
     { return __cpuid_ebx(val); }
 
-    virtual uint32_t cpuid_ecx(uint32_t val)
+    virtual uint32_t cpuid_ecx(uint32_t val) const noexcept
     { return __cpuid_ecx(val); }
 
-    virtual uint32_t cpuid_edx(uint32_t val)
+    virtual uint32_t cpuid_edx(uint32_t val) const noexcept
     { return __cpuid_edx(val); }
 
     virtual void cpuid(uint64_t *rax,
                        uint64_t *rbx,
                        uint64_t *rcx,
-                       uint64_t *rdx)
+                       uint64_t *rdx) const noexcept
     { __cpuid(rax, rbx, rcx, rdx); }
 
-    virtual uint64_t read_rflags()
+    virtual uint64_t read_rflags() const noexcept
     { return __read_rflags(); }
 
-    virtual uint64_t read_msr(uint32_t msr)
+    virtual uint64_t read_msr(uint32_t msr) const noexcept
     { return __read_msr(msr); }
 
-    virtual uint32_t read_msr32(uint32_t msr)
+    virtual uint32_t read_msr32(uint32_t msr) const noexcept
     { return __read_msr32(msr); }
 
-    virtual void write_msr(uint32_t msr, uint64_t val)
+    virtual void write_msr(uint32_t msr, uint64_t val) const noexcept
     { __write_msr(msr, val); }
 
-    virtual uint64_t read_rip()
+    virtual uint64_t read_rip() const noexcept
     { return __read_rip(); }
 
-    virtual uint64_t read_cr0()
+    virtual uint64_t read_cr0() const noexcept
     { return __read_cr0(); }
 
-    virtual void write_cr0(uint64_t val)
+    virtual void write_cr0(uint64_t val) const noexcept
     { __write_cr0(val); }
 
-    virtual uint64_t read_cr3()
+    virtual uint64_t read_cr3() const noexcept
     { return __read_cr3(); }
 
-    virtual void write_cr3(uint64_t val)
+    virtual void write_cr3(uint64_t val) const noexcept
     { __write_cr3(val); }
 
-    virtual uint64_t read_cr4()
+    virtual uint64_t read_cr4() const noexcept
     { return __read_cr4(); }
 
-    virtual void write_cr4(uint64_t val)
+    virtual void write_cr4(uint64_t val) const noexcept
     { __write_cr4(val); }
 
-    virtual uint64_t read_dr7()
+    virtual uint64_t read_dr7() const noexcept
     { return __read_dr7(); }
 
-    virtual void write_dr7(uint64_t val)
+    virtual void write_dr7(uint64_t val) const noexcept
     { __write_dr7(val); }
 
-    virtual uint16_t read_es()
+    virtual uint16_t read_es() const noexcept
     { return __read_es(); }
 
-    virtual void write_es(uint16_t val)
+    virtual void write_es(uint16_t val) const noexcept
     { __write_es(val); }
 
-    virtual uint16_t read_cs()
+    virtual uint16_t read_cs() const noexcept
     { return __read_cs(); }
 
-    virtual void write_cs(uint16_t val)
+    virtual void write_cs(uint16_t val) const noexcept
     { __write_cs(val); }
 
-    virtual uint16_t read_ss()
+    virtual uint16_t read_ss() const noexcept
     { return __read_ss(); }
 
-    virtual void write_ss(uint16_t val)
+    virtual void write_ss(uint16_t val) const noexcept
     { __write_ss(val); }
 
-    virtual uint16_t read_ds()
+    virtual uint16_t read_ds() const noexcept
     { return __read_ds(); }
 
-    virtual void write_ds(uint16_t val)
+    virtual void write_ds(uint16_t val) const noexcept
     { __write_ds(val); }
 
-    virtual uint16_t read_fs()
+    virtual uint16_t read_fs() const noexcept
     { return __read_fs(); }
 
-    virtual void write_fs(uint16_t val)
+    virtual void write_fs(uint16_t val) const noexcept
     { __write_fs(val); }
 
-    virtual uint16_t read_gs()
+    virtual uint16_t read_gs() const noexcept
     { return __read_gs(); }
 
-    virtual void write_gs(uint16_t val)
+    virtual void write_gs(uint16_t val) const noexcept
     { __write_gs(val); }
 
-    virtual uint16_t read_tr()
+    virtual uint16_t read_tr() const noexcept
     { return __read_tr(); }
 
-    virtual void write_tr(uint16_t val)
+    virtual void write_tr(uint16_t val) const noexcept
     { __write_tr(val); }
 
-    virtual uint16_t read_ldtr()
+    virtual uint16_t read_ldtr() const noexcept
     { return __read_ldtr(); }
 
-    virtual void write_ldtr(uint16_t val)
+    virtual void write_ldtr(uint16_t val) const noexcept
     { return __write_ldtr(val); }
 
-    virtual uint64_t read_rsp()
+    virtual uint64_t read_rsp() const noexcept
     { return __read_rsp(); }
 
-    virtual void read_gdt(gdt_t *gdt)
+    virtual void read_gdt(gdt_t *gdt) const noexcept
     { __read_gdt(gdt); }
 
-    virtual void write_gdt(gdt_t *gdt)
+    virtual void write_gdt(gdt_t *gdt) const noexcept
     { __write_gdt(gdt); }
 
-    virtual void read_idt(idt_t *idt)
+    virtual void read_idt(idt_t *idt) const noexcept
     { __read_idt(idt); }
 
-    virtual void write_idt(idt_t *idt)
+    virtual void write_idt(idt_t *idt) const noexcept
     { __write_idt(idt); }
 
-    virtual void write_portio_8(uint16_t port, uint8_t value)
+    virtual void write_portio_8(uint16_t port, uint8_t value) const noexcept
     { __outb(value, port); }
 
-    virtual void write_portio_16(uint16_t port, uint16_t value)
+    virtual void write_portio_16(uint16_t port, uint16_t value) const noexcept
     { __outw(value, port); }
 
-    virtual uint8_t read_portio_8(uint16_t port)
+    virtual uint8_t read_portio_8(uint16_t port) const noexcept
     { return __inb(port); }
 
-    virtual uint16_t read_portio_16(uint16_t port)
+    virtual uint16_t read_portio_16(uint16_t port) const noexcept
     { return __inw(port); }
 
-    virtual uint32_t load_segment_limit(uint16_t selector)
+    virtual uint32_t load_segment_limit(uint16_t selector) const noexcept
     { return __load_segment_limit(selector); }
 
     virtual uint64_t
-    segment_descriptor(uint16_t selector)
+    segment_descriptor(uint16_t selector) const noexcept
     {
         gdt_t gdt_reg;
         read_gdt(&gdt_reg);
@@ -314,7 +314,7 @@ public:
     }
 
     virtual uint32_t
-    segment_descriptor_limit(uint16_t selector)
+    segment_descriptor_limit(uint16_t selector) const noexcept
     {
         // The segment limit description can be found in the intel's software
         // developer's manual, volume 3, chapter 3.4.5 as well as volume 3,
@@ -337,7 +337,7 @@ public:
     }
 
     virtual uint64_t
-    segment_descriptor_base(uint16_t selector)
+    segment_descriptor_base(uint16_t selector) const noexcept
     {
         uint64_t sd1 = segment_descriptor(selector);
         uint64_t sd2 = segment_descriptor(selector + (1 << 3));
@@ -385,7 +385,7 @@ public:
     }
 
     virtual uint32_t
-    segment_descriptor_access(uint16_t selector)
+    segment_descriptor_access(uint16_t selector) const noexcept
     {
         uint64_t sd = segment_descriptor(selector);
         uint64_t access_07_00 = ((sd & 0x0000FF0000000000) >> 40);
@@ -546,5 +546,12 @@ public:
 #define IA32_EFER_LME                                                 (1 << 8)
 #define IA32_EFER_LMA                                                 (1 << 10)
 #define IA32_EFER_NXE                                                 (1 << 11)
+
+// Serial COM Port Addresses
+// http://wiki.osdev.org/Serial_Ports
+#define COM1_PORT                                                     0x3f8
+#define COM2_PORT                                                     0x2f8
+#define COM3_PORT                                                     0x3e8
+#define COM4_PORT                                                     0x2e8
 
 #endif

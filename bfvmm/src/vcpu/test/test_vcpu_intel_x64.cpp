@@ -161,31 +161,6 @@ vcpu_ut::test_vcpu_intel_x64_start_vmcs_launch_failed()
 }
 
 void
-vcpu_ut::test_vcpu_intel_x64_start_read_msr_failed()
-{
-    MockRepository mocks;
-    auto dr = bfn::mock_shared<debug_ring>(mocks);
-    auto on = bfn::mock_shared<vmxon_intel_x64>(mocks);
-    auto cs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto eh = bfn::mock_shared<exit_handler_intel_x64>(mocks);
-    auto in = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    auto vc = std::make_shared<vcpu_intel_x64>(0, dr, on, cs, eh, in);
-
-    mocks.OnCall(on.get(), vmxon_intel_x64::start);
-    mocks.OnCall(on.get(), vmxon_intel_x64::stop);
-    mocks.OnCall(cs.get(), vmcs_intel_x64::launch);
-
-    setup_intrinsics(mocks, in.get());
-    mocks.OnCall(in.get(), intrinsics_intel_x64::read_msr).Throw(bfn::general_exception());
-
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        EXPECT_EXCEPTION(vc->start(), bfn::general_exception);
-    });
-}
-
-void
 vcpu_ut::test_vcpu_intel_x64_start_success()
 {
     MockRepository mocks;

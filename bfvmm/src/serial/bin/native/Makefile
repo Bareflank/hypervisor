@@ -19,16 +19,13 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-################################################################################
-# Subdirs
-################################################################################
+LIBRARY_PATHS := $(LIBRARY_PATHS):../../../vcpu/bin/native
+LIBRARY_PATHS := $(LIBRARY_PATHS):../../../vcpu_factory/bin/native
+LIBRARY_PATHS := $(LIBRARY_PATHS):../../../vmxon/bin/native
+LIBRARY_PATHS := $(LIBRARY_PATHS):../../../vmcs/bin/native
+LIBRARY_PATHS := $(LIBRARY_PATHS):../../../serial/bin/native
+LIBRARY_PATHS := $(LIBRARY_PATHS):../../../debug_ring/bin/native
+LIBRARY_PATHS := $(LIBRARY_PATHS):../../../memory_manager/bin/native
+LIBRARY_PATHS := $(LIBRARY_PATHS):../../../intrinsics/bin/native/
 
-SUBDIRS += src
-SUBDIRS += bin
-SUBDIRS += test
-
-################################################################################
-# Common
-################################################################################
-
-include ../../../common/common_subdir.mk
+include ../../../../../common/common_test.mk
