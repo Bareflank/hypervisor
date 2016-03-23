@@ -19,30 +19,44 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <vcpu/vcpu_manager.h>
-#include <serial/serial_port_intel_x64.h>
+#include <test.h>
 
-extern "C" int
-write(int file, const void *buffer, size_t count)
+serial_ut::serial_ut()
 {
-    std::string str((char *)buffer, count);
-
-    serial_port_intel_x64::instance()->write(str);
-
-    if (file == 0)
-        g_vcm->write(-1, str);
-    else
-        g_vcm->write(file - 1000, str);
-
-    return count;
 }
 
-extern "C" int
-fstat(int file, struct stat *sbuf)
+bool
+serial_ut::init()
 {
-    (void) file;
-    (void) sbuf;
+    return true;
+}
 
-    errno = -ENOSYS;
-    return -1;
+bool
+serial_ut::fini()
+{
+    return true;
+}
+
+bool
+serial_ut::list()
+{
+    this->test_serial_success();
+    this->test_serial_set_baud_rate_success();
+    this->test_serial_set_baud_rate_unknown();
+    this->test_serial_set_data_bits_success();
+    this->test_serial_set_data_bits_success_extra_bits();
+    this->test_serial_set_stop_bits_success();
+    this->test_serial_set_stop_bits_success_extra_bits();
+    this->test_serial_set_parity_bits_success();
+    this->test_serial_set_parity_bits_success_extra_bits();
+    this->test_serial_write_character();
+    this->test_serial_write_string();
+
+    return true;
+}
+
+int
+main(int argc, char *argv[])
+{
+    return RUN_ALL_TESTS(serial_ut);
 }

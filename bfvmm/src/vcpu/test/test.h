@@ -51,7 +51,6 @@ private:
     void test_vcpu_intel_x64_valid();
     void test_vcpu_intel_x64_start_vmxon_start_failed();
     void test_vcpu_intel_x64_start_vmcs_launch_failed();
-    void test_vcpu_intel_x64_start_read_msr_failed();
     void test_vcpu_intel_x64_start_success();
     void test_vcpu_intel_x64_dispatch();
     void test_vcpu_intel_x64_stop();

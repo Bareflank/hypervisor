@@ -602,13 +602,12 @@ corrupted:
 }
 
 int64_t
-common_dump_vmm(struct debug_ring_resources_t *user_drr)
+common_dump_vmm(struct debug_ring_resources_t **drr)
 {
     int64_t ret = 0;
     get_drr_t get_drr = 0;
-    struct debug_ring_resources_t *drr = 0;
 
-    if (user_drr == 0)
+    if (drr == 0)
         return BF_ERROR_INVALID_ARG;
 
     if (common_vmm_status() == VMM_UNLOADED)
@@ -625,13 +624,12 @@ common_dump_vmm(struct debug_ring_resources_t *user_drr)
         return ret;
     }
 
-    drr = get_drr(0);
-    if (drr == 0)
+    *drr = get_drr(0);
+    if (*drr == 0)
     {
         ALERT("dump_vmm: failed to get debug ring resources\n");
         return BF_ERROR_FAILED_TO_DUMP_DR;
     }
 
-    *user_drr = *drr;
     return BF_SUCCESS;
 }

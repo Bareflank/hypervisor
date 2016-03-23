@@ -59,7 +59,7 @@ CROSS_OUTDIR:=../../../bin
 # Sources
 ################################################################################
 
-SOURCES+=serial_port_x86.cpp
+SOURCES+=serial_port_intel_x64.cpp
 
 INCLUDE_PATHS+=./
 INCLUDE_PATHS+=../../../include/

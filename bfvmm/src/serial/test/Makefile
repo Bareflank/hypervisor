@@ -49,12 +49,8 @@ NATIVE_OUTDIR:=../bin
 # Sources
 ################################################################################
 
-# TODO: The naming here is inconsistant. Should be:
-# test.cpp
-# test_serial.cpp
-
-#SOURCES+=test.cpp
-SOURCES+=serial_test.cpp
+SOURCES+=test.cpp
+SOURCES+=test_serial_port_intel_x64.cpp
 
 INCLUDE_PATHS+=./
 INCLUDE_PATHS+=../../../include/
@@ -63,7 +59,7 @@ INCLUDE_PATHS+=../../../../include/
 LIBS+=serial
 LIBS+=intrinsics
 
-LIBRARY_PATHS+=../bin/native/
+LIBRARY_PATHS+=../bin/native
 LIBRARY_PATHS+=../../intrinsics/bin/native
 
 ################################################################################

@@ -115,7 +115,7 @@ ioctl_add_module_length(int64_t *len)
         return BF_IOCTL_FAILURE;
     }
 
-    g_module_length = *len;
+    copy_from_user(&g_module_length, len, sizeof(int64_t));
 
     DEBUG("IOCTL_ADD_MODULE_LENGTH: succeeded\n");
     return BF_IOCTL_SUCCESS;
@@ -224,13 +224,16 @@ static long
 ioctl_dump_vmm(struct debug_ring_resources_t *user_drr)
 {
     int ret;
+    struct debug_ring_resources_t *drr = 0;
 
-    ret = common_dump_vmm(user_drr);
+    ret = common_dump_vmm(&drr);
     if (ret != BF_SUCCESS)
     {
         ALERT("IOCTL_DUMP_VMM: failed to dump vmm: %d\n", ret);
         return BF_IOCTL_FAILURE;
     }
+
+    copy_to_user(user_drr, drr, sizeof(struct debug_ring_resources_t));
 
     DEBUG("IOCTL_DUMP_VMM: succeeded\n");
     return BF_IOCTL_SUCCESS;
@@ -239,13 +242,15 @@ ioctl_dump_vmm(struct debug_ring_resources_t *user_drr)
 static long
 ioctl_vmm_status(int64_t *status)
 {
+    int64_t ret = common_vmm_status();
+
     if (status == 0)
     {
         ALERT("IOCTL_VMM_STATUS: failed with status == NULL\n");
         return BF_IOCTL_FAILURE;
     }
 
-    *status = common_vmm_status();
+    copy_to_user(status, &ret, sizeof(int64_t));
 
     DEBUG("IOCTL_VMM_STATUS: succeeded\n");
     return BF_IOCTL_SUCCESS;

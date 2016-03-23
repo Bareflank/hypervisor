@@ -57,34 +57,34 @@ class intrinsics_intel_x64 : public intrinsics_x64
 {
 public:
 
-    intrinsics_intel_x64() {}
+    intrinsics_intel_x64() noexcept {}
     virtual ~intrinsics_intel_x64() {}
 
-    virtual bool vmxon(void *vmxon_region)
+    virtual bool vmxon(void *vmxon_region) const noexcept
     { return __vmxon(vmxon_region); }
 
-    virtual bool vmxoff()
+    virtual bool vmxoff() const noexcept
     { return __vmxoff(); }
 
-    virtual bool vmcall(uint64_t value)
+    virtual bool vmcall(uint64_t value) const noexcept
     { return __vmcall(value); }
 
-    virtual bool vmclear(void *vmcs_region)
+    virtual bool vmclear(void *vmcs_region) const noexcept
     { return __vmclear(vmcs_region); }
 
-    virtual bool vmptrld(void *vmcs_region)
+    virtual bool vmptrld(void *vmcs_region) const noexcept
     { return __vmptrld(vmcs_region); }
 
-    virtual bool vmptrst(void *vmcs_region)
+    virtual bool vmptrst(void *vmcs_region) const noexcept
     { return __vmptrst(vmcs_region); }
 
-    virtual bool vmwrite(uint64_t field, uint64_t val)
+    virtual bool vmwrite(uint64_t field, uint64_t val) const noexcept
     { return __vmwrite(field, val); }
 
-    virtual bool vmread(uint64_t field, uint64_t *val)
+    virtual bool vmread(uint64_t field, uint64_t *val) const noexcept
     { return __vmread(field, val); }
 
-    virtual bool vmlaunch()
+    virtual bool vmlaunch() const noexcept
     { return __vmlaunch(); }
 };
 

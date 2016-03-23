@@ -177,6 +177,8 @@
 ///
 /// Note: define in 64bits (i.e. an array of uint64_t)
 ///
+#ifndef STACK_SIZE
 #define STACK_SIZE 0x2000
+#endif
 
 #endif

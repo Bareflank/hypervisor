@@ -26,7 +26,7 @@
 #include <platform.h>
 #include <driver_entry_interface.h>
 
-debug_ring_resources_t g_drr;
+debug_ring_resources_t *g_drr;
 
 void
 driver_entry_ut::test_common_dump_invalid_drr()

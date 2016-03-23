@@ -52,7 +52,6 @@ vcpu_ut::list()
     this->test_vcpu_intel_x64_valid();
     this->test_vcpu_intel_x64_start_vmxon_start_failed();
     this->test_vcpu_intel_x64_start_vmcs_launch_failed();
-    this->test_vcpu_intel_x64_start_read_msr_failed();
     this->test_vcpu_intel_x64_start_success();
     this->test_vcpu_intel_x64_dispatch();
     this->test_vcpu_intel_x64_stop();

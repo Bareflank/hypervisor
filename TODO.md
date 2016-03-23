@@ -21,6 +21,8 @@ Misc:
   read/execute and read/write memory protections that are labeled by the
   ELF program loader. This isn't useful until we break apart libc++.so such
   that it's not marked r/w/x (likely to be solved with the new libc)
+- Add system beep code for additional debugging
+- Add support for the PCI debugger
 
 Version 1.0 TODO:
 - Need to have all of the VMCS checks unit tested
@@ -30,6 +32,8 @@ Version 1.0 TODO:
   std::cout
 - Provide support for Debian, Fedora, CentOS
 - Get rid of as many hardcode values in the VMCS and VMXON code as possible
+- Need to pass CFLAGS and CXXFLAGS through. Test by changing the serial port
+  during compilation via environment variable
 
 Version 1.1 TODO:
 - Need to have a completely isolated exit handler. It should have it's own

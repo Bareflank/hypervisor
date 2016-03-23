@@ -38,7 +38,6 @@ public:
     /// Creates a vCPU with the provided id and default resources.
     ///
     /// @param id the id of the vcpu
-    /// @param debug_ring the debug ring the vcpu should use
     ///
     vcpu_intel_x64(int64_t id);
 
