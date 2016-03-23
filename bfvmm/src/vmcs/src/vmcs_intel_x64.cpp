@@ -301,9 +301,9 @@ vmcs_intel_x64::write_64bit_guest_state(const vmcs_state_intel_x64 &state)
 {
     vmwrite(VMCS_VMCS_LINK_POINTER_FULL, 0xFFFFFFFFFFFFFFFF);
     vmwrite(VMCS_GUEST_IA32_EFER_FULL, state.ia32_efer_msr());
+    vmwrite(VMCS_GUEST_IA32_PAT_FULL, state.ia32_pat_msr());
 
     // unused: VMCS_GUEST_IA32_DEBUGCTL_FULL
-    // unused: VMCS_GUEST_IA32_PAT_FULL
     // unused: VMCS_GUEST_IA32_PERF_GLOBAL_CTRL_FULL
     // unused: VMCS_GUEST_PDPTE0_FULL
     // unused: VMCS_GUEST_PDPTE1_FULL
