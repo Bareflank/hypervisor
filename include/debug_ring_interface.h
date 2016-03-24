@@ -114,8 +114,39 @@ struct debug_ring_resources_t
  * @return the number of bytes read from the debug ring, 0
  *        on error
  */
-uint64_t
-debug_ring_read(struct debug_ring_resources_t *drr, char *str, uint64_t len);
+extern inline uint64_t
+debug_ring_read(struct debug_ring_resources_t *drr, char *str, uint64_t len)
+{
+    uint64_t i;
+    uint64_t spos;
+    uint64_t content;
+
+    if (drr == 0 || str == 0 || len == 0)
+        return 0;
+
+    spos = drr->spos % DEBUG_RING_SIZE;
+    content = drr->epos - drr->spos;
+
+    for (i = 0; i < content && i < len - 1; i++)
+    {
+        if (spos == DEBUG_RING_SIZE)
+            spos = 0;
+
+        if (drr->buf[spos] != '\0')
+            str[i] = drr->buf[spos];
+        else
+        {
+            i--;
+            content--;
+        }
+
+        spos++;
+    }
+
+    str[i] = '\0';
+
+    return content;
+}
 
 #ifdef __cplusplus
 }
