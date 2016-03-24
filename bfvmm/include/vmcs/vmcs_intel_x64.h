@@ -129,23 +129,33 @@ protected:
 
     virtual void dump_vmcs();
 
-    virtual std::string check_vm_instruction_error();
-    virtual bool check_is_address_canonical(uint64_t addr);
-    virtual bool check_has_valid_address_width(uint64_t addr);
-    virtual bool check_is_cs_usable();
-    virtual bool check_is_ss_usable();
-    virtual bool check_is_ds_usable();
-    virtual bool check_is_es_usable();
-    virtual bool check_is_gs_usable();
-    virtual bool check_is_fs_usable();
-    virtual bool check_is_tr_usable();
-    virtual bool check_is_ldtr_usable();
+    virtual void print_execution_controls();
+    virtual void print_pin_based_vm_execution_controls();
+    virtual void print_primary_processor_based_vm_execution_controls();
+    virtual void print_secondary_processor_based_vm_execution_controls();
+    virtual void print_vm_exit_control_fields();
+    virtual void print_vm_entry_control_fields();
+
+    virtual std::string get_vm_instruction_error();
 
     virtual uint64_t get_pin_ctls() const;
     virtual uint64_t get_proc_ctls() const;
     virtual uint64_t get_proc2_ctls() const;
     virtual uint64_t get_exit_ctls() const;
     virtual uint64_t get_entry_ctls() const;
+
+    virtual bool is_address_canonical(uint64_t addr);
+    virtual bool is_linear_address_valid(uint64_t addr);
+    virtual bool is_physical_address_valid(uint64_t addr);
+
+    virtual bool is_cs_usable();
+    virtual bool is_ss_usable();
+    virtual bool is_ds_usable();
+    virtual bool is_es_usable();
+    virtual bool is_gs_usable();
+    virtual bool is_fs_usable();
+    virtual bool is_tr_usable();
+    virtual bool is_ldtr_usable();
 
     virtual bool is_enabled_v8086() const;
 
@@ -280,13 +290,6 @@ protected:
     virtual bool is_supported_load_ia32_efer_on_entry() const;
 
     virtual bool is_supported_eptp_switching() const;
-
-    virtual void print_execution_controls();
-    virtual void print_pin_based_vm_execution_controls();
-    virtual void print_primary_processor_based_vm_execution_controls();
-    virtual void print_secondary_processor_based_vm_execution_controls();
-    virtual void print_vm_exit_control_fields();
-    virtual void print_vm_entry_control_fields();
 
     virtual bool check_vmcs_host_state();
     virtual void check_vmcs_guest_state();
@@ -437,18 +440,37 @@ protected:
     virtual void check_guest_gdtr_limit_reserved_bits();
     virtual void check_guest_idtr_limit_reserved_bits();
 
-    // virtual void check_guest_checks_on_guest_rip_and_rflags();
-    // virtual void check_guest_rflags_reserved_bits();
-    // virtual void check_guest_rflag_interrupt_enable();
+    virtual void checks_on_guest_rip_and_rflags();
+    virtual void check_guest_rip_upper_bits();
+    virtual void check_guest_rip_valid_addr();
+    virtual void check_guest_rflags_reserved_bits();
+    virtual void check_guest_rflags_vm_bit();
+    virtual void check_guest_rflag_interrupt_enable();
 
-    // virtual void check_guest_checks_on_guest_non_register_state();
-    // virtual void check_guest_valid_activity_state();
-    // virtual void check_guest_activity_state_not_hlt_when_dpl_not_0();
-    // virtual void check_guest_must_be_active_if_injecting_blocking_state();
-    // virtual void check_guest_valid_interruptability_and_activity_state_combo();
-    // virtual void check_guest_valid_activity_state_and_smm();
-    // virtual void check_guest_all_interruptability_state_fields();
-    // virtual void check_guest_all_vmcs_link_pointerchecks();
+    virtual void checks_on_guest_non_register_state();
+    virtual void check_guest_valid_activity_state();
+    virtual void check_guest_activity_state_not_hlt_when_dpl_not_0();
+    virtual void check_guest_must_be_active_if_injecting_blocking_state();
+    virtual void check_guest_hlt_valid_interrupts();
+    virtual void check_guest_shutdown_valid_interrupts();
+    virtual void check_guest_sipi_valid_interrupts();
+    virtual void check_guest_valid_activity_state_and_smm();
+    virtual void check_guest_interruptability_state_reserved();
+    virtual void check_guest_interruptability_state_sti_mov_ss();
+    virtual void check_guest_interruptability_state_sti();
+    virtual void check_guest_interruptability_state_external_interrupt();
+    virtual void check_guest_interruptability_state_nmi();
+    virtual void check_guest_interruptability_not_in_smm();
+    virtual void check_guest_interruptability_entry_to_smm();
+    virtual void check_guest_interruptability_state_sti_and_nmi();
+    virtual void check_guest_interruptability_state_virtual_nmi();
+    virtual void check_guest_pending_debug_exceptions_reserved();
+    virtual void check_guest_pending_debug_exceptions_dbg_ctl();
+    virtual void check_guest_vmcs_link_pointer_bits_11_0();
+    virtual void check_guest_vmcs_link_pointer_valid_addr();
+    virtual void check_guest_vmcs_link_pointer_first_word();
+    virtual void check_guest_vmcs_link_pointer_not_in_smm();
+    virtual void check_guest_vmcs_link_pointer_in_smm();
 
     virtual void checks_on_vm_execution_control_fields();
     virtual void check_control_pin_based_ctls_reserved_properly_set();

@@ -128,7 +128,7 @@ vmcs_intel_x64::check_host_ia32_sysenter_esp_canonical_address()
 {
     auto esp = vmread(VMCS_HOST_IA32_SYSENTER_EIP);
 
-    if (check_is_address_canonical(esp) == false)
+    if (is_address_canonical(esp) == false)
     {
         std::cout << "check_host_ia32_sysenter_esp_canonical_address failed. "
                   << "host ia32_sysenter_esp has a non-canonical address: " << std::endl
@@ -147,7 +147,7 @@ vmcs_intel_x64::check_host_ia32_sysenter_eip_canonical_address()
 {
     auto eip = vmread(VMCS_HOST_IA32_SYSENTER_EIP);
 
-    if (check_is_address_canonical(eip) == false)
+    if (is_address_canonical(eip) == false)
     {
         std::cout << "check_host_ia32_sysenter_eip_canonical_address failed. "
                   << "host ia32_sysenter_eip has a non-canonical address: " << std::endl
@@ -462,7 +462,7 @@ vmcs_intel_x64::check_host_fs_canonical_base_address()
 {
     auto fs_base = vmread(VMCS_HOST_FS_BASE);
 
-    if (check_is_address_canonical(fs_base) == false)
+    if (is_address_canonical(fs_base) == false)
     {
         std::cout << "check_host_fs_canonical_base_address failed. "
                   << "host fs base has a non-canonical address: " << std::endl
@@ -481,7 +481,7 @@ vmcs_intel_x64::check_host_gs_canonical_base_address()
 {
     auto gs_base = vmread(VMCS_HOST_GS_BASE);
 
-    if (check_is_address_canonical(gs_base) == false)
+    if (is_address_canonical(gs_base) == false)
     {
         std::cout << "check_host_gs_canonical_base_address failed. "
                   << "host gs base has a non-canonical address: " << std::endl
@@ -500,7 +500,7 @@ vmcs_intel_x64::check_host_gdtr_canonical_base_address()
 {
     auto gdtr_base = vmread(VMCS_HOST_GDTR_BASE);
 
-    if (check_is_address_canonical(gdtr_base) == false)
+    if (is_address_canonical(gdtr_base) == false)
     {
         std::cout << "check_host_gdtr_canonical_base_address failed. "
                   << "host gdtr base has a non-canonical address: " << std::endl
@@ -519,7 +519,7 @@ vmcs_intel_x64::check_host_idtr_canonical_base_address()
 {
     auto idtr_base = vmread(VMCS_HOST_IDTR_BASE);
 
-    if (check_is_address_canonical(idtr_base) == false)
+    if (is_address_canonical(idtr_base) == false)
     {
         std::cout << "check_host_idtr_canonical_base_address failed. "
                   << "host idtr base has a non-canonical address: " << std::endl
@@ -538,7 +538,7 @@ vmcs_intel_x64::check_host_tr_canonical_base_address()
 {
     auto tr_base = vmread(VMCS_HOST_FS_BASE);
 
-    if (check_is_address_canonical(tr_base) == false)
+    if (is_address_canonical(tr_base) == false)
     {
         std::cout << "check_host_tr_canonical_base_address failed. "
                   << "host tr base has a non-canonical address: " << std::endl
@@ -627,7 +627,7 @@ vmcs_intel_x64::check_host_verify_rip_has_canonical_address()
 {
     auto rip = vmread(VMCS_HOST_RIP);
 
-    if (check_is_address_canonical(rip) == false)
+    if (is_address_canonical(rip) == false)
     {
         std::cout << "check_host_verify_rip_has_canonical_address failed. "
                   << "host idtr base has a non-canonical address: " << std::endl
