@@ -84,13 +84,6 @@ public:
     virtual bool vmread(uint64_t field, uint64_t *val)
     { return __vmread(field, val); }
 
-    virtual uint64_t vmread(uint64_t field)
-    {
-        uint64_t val = 0;
-        __vmread(field, &val);
-        return val;
-    }
-
     virtual bool vmlaunch()
     { return __vmlaunch(); }
 };

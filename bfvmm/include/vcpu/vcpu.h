@@ -99,6 +99,14 @@ public:
     ///
     virtual vcpu_error::type stop();
 
+    /// Halt
+    ///
+    /// Halts the vCPU.
+    ///
+    /// @return success on success, failure otherwise
+    ///
+    virtual vcpu_error::type halt();
+
     /// promote
     ///
     /// promote the vCPU to host CPU state

@@ -19,8 +19,8 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#ifndef EXIT_HANDLER_EXCEPTIONS_INTEL_X64_H
-#define EXIT_HANDLER_EXCEPTIONS_INTEL_X64_H
+#ifndef EXIT_HANDLER_INTEL_X64_EXCEPTIONS_H
+#define EXIT_HANDLER_INTEL_X64_EXCEPTIONS_H
 
 #include <exception.h>
 

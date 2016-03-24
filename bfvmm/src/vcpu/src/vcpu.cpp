@@ -67,6 +67,12 @@ vcpu::stop()
 }
 
 vcpu_error::type
+vcpu::halt()
+{
+    return vcpu_error::success;
+}
+
+vcpu_error::type
 vcpu::request_teardown()
 {
     return vcpu_error::success;

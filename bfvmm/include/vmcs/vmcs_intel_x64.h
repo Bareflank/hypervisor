@@ -95,6 +95,9 @@ protected:
     virtual void create_vmcs_region();
     virtual void release_vmcs_region();
 
+    virtual void create_exit_handler_stack();
+    virtual void release_exit_handler_stack();
+
     virtual void write_16bit_control_state(const vmcs_state_intel_x64 &state);
     virtual void write_64bit_control_state(const vmcs_state_intel_x64 &state);
     virtual void write_32bit_control_state(const vmcs_state_intel_x64 &state);
@@ -521,6 +524,8 @@ protected:
 
     uint64_t m_vmcs_region_phys;
     std::unique_ptr<uint32_t> m_vmcs_region;
+
+    std::unique_ptr<char[]> m_exit_handler_stack;
 };
 
 #endif

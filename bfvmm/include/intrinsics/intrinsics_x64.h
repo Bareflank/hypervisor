@@ -37,11 +37,17 @@ extern "C" {
 #endif
 
 void __halt(void);
+void __stop(void);
 
 uint32_t __cpuid_eax(uint32_t val);
 uint32_t __cpuid_ebx(uint32_t val);
 uint32_t __cpuid_ecx(uint32_t val);
 uint32_t __cpuid_edx(uint32_t val);
+
+void __cpuid(uint64_t *rax,
+             uint64_t *rbx,
+             uint64_t *rcx,
+             uint64_t *rdx);
 
 uint64_t __read_rflags(void);
 
@@ -134,6 +140,9 @@ public:
     virtual void halt()
     { __halt(); }
 
+    virtual void stop()
+    { __stop(); }
+
     virtual uint32_t cpuid_eax(uint32_t val)
     { return __cpuid_eax(val); }
 
@@ -145,6 +154,12 @@ public:
 
     virtual uint32_t cpuid_edx(uint32_t val)
     { return __cpuid_edx(val); }
+
+    virtual void cpuid(uint64_t *rax,
+                       uint64_t *rbx,
+                       uint64_t *rcx,
+                       uint64_t *rdx)
+    { __cpuid(rax, rbx, rcx, rdx); }
 
     virtual uint64_t read_rflags()
     { return __read_rflags(); }
