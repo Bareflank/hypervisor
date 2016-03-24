@@ -4,11 +4,13 @@
 # Checks
 # ------------------------------------------------------------------------------
 
+sudo dnf install -y redhat-lsb-core
+
 case $(lsb_release -si) in
-Debian)
+Fedora)
     ;;
 *)
-    echo "This script can only be used with: Debian"
+    echo "This script can only be used with: Fedora"
     exit 1
 esac
 
@@ -28,8 +30,8 @@ fi
 # watchdog every so often to keep this script alive.
 
 if [ -n "${SILENCE+1}" ]; then
-  exec 1>~/setup-ubuntu_stdout.log
-  exec 2>~/setup-ubuntu_stderr.log
+  exec 1>~/setup-fedora_stdout.log
+  exec 2>~/setup-fedora_stderr.log
 fi
 
 # ------------------------------------------------------------------------------
@@ -37,51 +39,31 @@ fi
 # ------------------------------------------------------------------------------
 
 case $(lsb_release -sr) in
-8.3)
+24)
     ;&
-8.2)
+
+23)
     ;&
-8.1)
-    ;&
-8.0)
 
-    if [ -z "$SILENCE" ]; then
-        read -r -p "This script will update cmake to version 3.x. Continue? [y/n]: " response
-        case $response in
-            [yY][eE][sS]|[yY])
-                ;;
-            *)
-                exit 1
-                ;;
-        esac
-    fi
+22)
 
-    sudo apt-get install -y --force-yes build-essential
-    sudo apt-get install -y --force-yes linux-headers-$(uname -r)
-    sudo apt-get install -y --force-yes libgmp-dev
-    sudo apt-get install -y --force-yes libmpc-dev
-    sudo apt-get install -y --force-yes libmpfr-dev
-    sudo apt-get install -y --force-yes libisl-dev
-    sudo apt-get install -y --force-yes flex
-    sudo apt-get install -y --force-yes bison
-    sudo apt-get install -y --force-yes nasm
-    sudo apt-get install -y --force-yes texinfo
-
-    rm -Rf $HOME/tmp-dir-cmake
-    mkdir $HOME/tmp-dir-cmake
-    pushd $HOME/tmp-dir-cmake
-    git clone --depth 1 git://cmake.org/cmake.git
-    cd cmake
-    ./configure
-    make -j2
-    sudo make -j2 install
-    popd
-    rm -Rf $HOME/tmp-dir-cmake
+    sudo dnf groupinstall -y "Development Tools"
+    sudo dnf install -y gcc-c++
+    sudo dnf install -y gmp-devel
+    sudo dnf install -y libmpc-devel
+    sudo dnf install -y mpfr-devel
+    sudo dnf install -y isl-devel
+    sudo dnf install -y cmake
+    sudo dnf install -y nasm
+    sudo dnf install -y texinfo
+    sudo dnf install -y libstdc++-static
+    sudo dnf install -y kernel-devel
+    sudo dnf install -y kernel-headers
 
     ;;
 
 *)
-    echo "This version of Debian is not supported"
+    echo "This version of Fedora is not supported"
     exit 1
 
 esac

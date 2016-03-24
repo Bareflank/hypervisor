@@ -26,7 +26,7 @@
 
 struct test_dynsym
 {
-    struct bfelf_sym syms[2];
+    bfelf_sym syms[2];
 };
 
 struct test_hashtab
@@ -61,42 +61,42 @@ struct test_relatab
 
 struct test_phdrtab
 {
-    struct bfelf_phdr re_segment1;
-    struct bfelf_phdr re_segment2;
-    struct bfelf_phdr rw_segment1;
-    struct bfelf_phdr rw_segment2;
-    struct bfelf_phdr too_many;
+    bfelf_phdr re_segment1;
+    bfelf_phdr re_segment2;
+    bfelf_phdr rw_segment1;
+    bfelf_phdr rw_segment2;
+    bfelf_phdr too_many;
 };
 
 struct test_shdrtab
 {
-    struct bfelf_shdr dynsym;       // 0
-    struct bfelf_shdr hashtab;      // 1
-    struct bfelf_shdr strtab;       // 2
-    struct bfelf_shdr shstrtab;     // 3
-    struct bfelf_shdr relatab1;     // 4
-    struct bfelf_shdr relatab2;     // 5
-    struct bfelf_shdr relatab3;     // 6
-    struct bfelf_shdr relatab4;     // 7
-    struct bfelf_shdr relatab5;     // 8
-    struct bfelf_shdr relatab6;     // 9
-    struct bfelf_shdr relatab7;     // 10
-    struct bfelf_shdr relatab8;     // 11
-    struct bfelf_shdr too_many;     // 12
+    bfelf_shdr dynsym;       // 0
+    bfelf_shdr hashtab;      // 1
+    bfelf_shdr strtab;       // 2
+    bfelf_shdr shstrtab;     // 3
+    bfelf_shdr relatab1;     // 4
+    bfelf_shdr relatab2;     // 5
+    bfelf_shdr relatab3;     // 6
+    bfelf_shdr relatab4;     // 7
+    bfelf_shdr relatab5;     // 8
+    bfelf_shdr relatab6;     // 9
+    bfelf_shdr relatab7;     // 10
+    bfelf_shdr relatab8;     // 11
+    bfelf_shdr too_many;     // 12
 };
 
 struct bfelf_test
 {
-    struct bfelf64_ehdr header;
-    struct test_phdrtab phdrtab;
+    bfelf64_ehdr header;
+    test_phdrtab phdrtab;
 
-    struct test_dynsym dynsym;
-    struct test_hashtab hashtab;
-    struct test_strtab strtab;
-    struct test_shstrtab shstrtab;
-    struct test_relatab relatab;
+    test_dynsym dynsym;
+    test_hashtab hashtab;
+    test_strtab strtab;
+    test_shstrtab shstrtab;
+    test_relatab relatab;
 
-    struct test_shdrtab shdrtab;
+    test_shdrtab shdrtab;
 };
 
 #endif

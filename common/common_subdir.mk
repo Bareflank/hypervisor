@@ -19,6 +19,8 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+SHELL=/bin/bash
+
 ################################################################################
 # Color
 ################################################################################
@@ -89,44 +91,44 @@ all: build_src build_tests
 
 build_src:
 	@for dir in $(BUILD_SRC_DIRS); do \
-		echo $(CI)"-->" $(CS)$(CURRENT_DIR)/$$dir$(CE); \
+		echo -e $(CI)"-->" $(CS)$(CURRENT_DIR)/$$dir$(CE); \
 		$(MAKE) --no-print-directory -C $$dir build_src || exit 1; \
-		echo $(CO)"<--" $(CS)$(CURRENT_DIR)/$$dir$(CE); \
+		echo -e $(CO)"<--" $(CS)$(CURRENT_DIR)/$$dir$(CE); \
 	done
 
 build_tests:
 	@for dir in $(BUILD_TST_DIRS); do \
-		echo $(CI)"-->" $(CS)$(CURRENT_DIR)/$$dir$(CE); \
+		echo -e $(CI)"-->" $(CS)$(CURRENT_DIR)/$$dir$(CE); \
 		$(MAKE) --no-print-directory -C $$dir build_tests || exit 1; \
-		echo $(CO)"<--" $(CS)$(CURRENT_DIR)/$$dir$(CE); \
+		echo -e $(CO)"<--" $(CS)$(CURRENT_DIR)/$$dir$(CE); \
 	done
 
 run_tests: force
 	@for dir in $(RUN_DIRS); do \
-		echo $(CI)"-->" $(CS)$(CURRENT_DIR)/$$dir$(CE); \
+		echo -e $(CI)"-->" $(CS)$(CURRENT_DIR)/$$dir$(CE); \
 		$(MAKE) --no-print-directory -C $$dir run_tests || exit 1; \
-		echo $(CO)"<--" $(CS)$(CURRENT_DIR)/$$dir$(CE); \
+		echo -e $(CO)"<--" $(CS)$(CURRENT_DIR)/$$dir$(CE); \
 	done
 
 clean:
 	@for dir in $(CLEAN_DIRS); do \
-		echo $(CI)"-->" $(CS)$(CURRENT_DIR)/$$dir$(CE); \
+		echo -e $(CI)"-->" $(CS)$(CURRENT_DIR)/$$dir$(CE); \
 		$(MAKE) --no-print-directory -C $$dir clean; \
-		echo $(CO)"<--" $(CS)$(CURRENT_DIR)/$$dir$(CE); \
+		echo -e $(CO)"<--" $(CS)$(CURRENT_DIR)/$$dir$(CE); \
 	done
 
 clean_src:
 	@for dir in $(BUILD_SRC_DIRS); do \
-		echo $(CI)"-->" $(CS)$(CURRENT_DIR)/$$dir$(CE); \
+		echo -e $(CI)"-->" $(CS)$(CURRENT_DIR)/$$dir$(CE); \
 		$(MAKE) --no-print-directory -C $$dir clean_src; \
-		echo $(CO)"<--" $(CS)$(CURRENT_DIR)/$$dir$(CE); \
+		echo -e $(CO)"<--" $(CS)$(CURRENT_DIR)/$$dir$(CE); \
 	done
 
 clean_tests:
 	@for dir in $(BUILD_TST_DIRS); do \
-		echo $(CI)"-->" $(CS)$(CURRENT_DIR)/$$dir$(CE); \
+		echo -e $(CI)"-->" $(CS)$(CURRENT_DIR)/$$dir$(CE); \
 		$(MAKE) --no-print-directory -C $$dir clean_tests; \
-		echo $(CO)"<--" $(CS)$(CURRENT_DIR)/$$dir$(CE); \
+		echo -e $(CO)"<--" $(CS)$(CURRENT_DIR)/$$dir$(CE); \
 	done
 
 force:;

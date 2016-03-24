@@ -237,21 +237,21 @@ memory_manager_ut::test_memory_manager_malloc_alloc_fragment()
 void
 memory_manager_ut::test_memory_manager_add_mdl_invalid_mdl()
 {
-    EXPECT_EXCEPTION(g_mm->add_mdl(0, 1), bfn::invalid_argument_error);
+    EXPECT_EXCEPTION(g_mm->add_mdl(0, 1), std::invalid_argument);
 }
 
 void
 memory_manager_ut::test_memory_manager_add_mdl_invalid_num()
 {
-    struct memory_descriptor mdl[1] = {{0, 0, 0, 0}};
+    memory_descriptor mdl[1] = {{0, 0, 0, 0}};
 
-    EXPECT_EXCEPTION(g_mm->add_mdl(mdl, 0), bfn::invalid_argument_error);
+    EXPECT_EXCEPTION(g_mm->add_mdl(mdl, 0), std::invalid_argument);
 }
 
 void
 memory_manager_ut::test_memory_manager_add_mdl_invalid_size()
 {
-    struct memory_descriptor mdl[1] = {{
+    memory_descriptor mdl[1] = {{
             (void *)0x12345000,
             (void *)0x54321000, 10, 0
         }
@@ -263,7 +263,7 @@ memory_manager_ut::test_memory_manager_add_mdl_invalid_size()
 void
 memory_manager_ut::test_memory_manager_add_mdl_unaligned_physical()
 {
-    struct memory_descriptor mdl[1] = {{
+    memory_descriptor mdl[1] = {{
             (void *)0x12345123,
             (void *)0x54321000, 4096, 0
         }
@@ -275,7 +275,7 @@ memory_manager_ut::test_memory_manager_add_mdl_unaligned_physical()
 void
 memory_manager_ut::test_memory_manager_add_mdl_unaligned_virtual()
 {
-    struct memory_descriptor mdl[1] = {{
+    memory_descriptor mdl[1] = {{
             (void *)0x12345000,
             (void *)0x54321123, 4096, 0
         }
@@ -299,7 +299,7 @@ memory_manager_ut::test_memory_manager_phys_to_virt_unknown()
 void
 memory_manager_ut::test_memory_manager_virt_to_phys_random_address()
 {
-    struct memory_descriptor mdl[1] = {{
+    memory_descriptor mdl[1] = {{
             (void *)0x12345000,
             (void *)0x54321000, 4096, 0
         }
@@ -312,7 +312,7 @@ memory_manager_ut::test_memory_manager_virt_to_phys_random_address()
 void
 memory_manager_ut::test_memory_manager_virt_to_phys_upper_limit()
 {
-    struct memory_descriptor mdl[1] = {{
+    memory_descriptor mdl[1] = {{
             (void *)0x12345000,
             (void *)0x54321000, 4096, 0
         }
@@ -325,7 +325,7 @@ memory_manager_ut::test_memory_manager_virt_to_phys_upper_limit()
 void
 memory_manager_ut::test_memory_manager_virt_to_phys_lower_limit()
 {
-    struct memory_descriptor mdl[1] = {{
+    memory_descriptor mdl[1] = {{
             (void *)0x12345000,
             (void *)0x54321000, 4096, 0
         }
@@ -338,7 +338,7 @@ memory_manager_ut::test_memory_manager_virt_to_phys_lower_limit()
 void
 memory_manager_ut::test_memory_manager_phys_to_virt_random_address()
 {
-    struct memory_descriptor mdl[1] = {{
+    memory_descriptor mdl[1] = {{
             (void *)0x12345000,
             (void *)0x54321000, 4096, 0
         }
@@ -351,7 +351,7 @@ memory_manager_ut::test_memory_manager_phys_to_virt_random_address()
 void
 memory_manager_ut::test_memory_manager_phys_to_virt_upper_limit()
 {
-    struct memory_descriptor mdl[1] = {{
+    memory_descriptor mdl[1] = {{
             (void *)0x12345000,
             (void *)0x54321000, 4096, 0
         }
@@ -364,7 +364,7 @@ memory_manager_ut::test_memory_manager_phys_to_virt_upper_limit()
 void
 memory_manager_ut::test_memory_manager_phys_to_virt_lower_limit()
 {
-    struct memory_descriptor mdl[1] = {{
+    memory_descriptor mdl[1] = {{
             (void *)0x12345000,
             (void *)0x54321000, 4096, 0
         }

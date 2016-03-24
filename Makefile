@@ -19,6 +19,15 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+SHELL=/bin/bash
+
+################################################################################
+# Color
+################################################################################
+
+CS='\033[1;95m'
+CE='\033[0m'
+
 ################################################################################
 # Subdirs
 ################################################################################
@@ -39,8 +48,6 @@ include ./common/common_subdir.mk
 ################################################################################
 # Custom Targets
 ################################################################################
-
-CS_M='\033[1;95m'
 
 .PHONY: debian_load
 .PHONY: debian_unload
@@ -97,7 +104,7 @@ quick: load start
 
 loop: force
 	@for n in $(shell seq 1 $(NUM)); do \
-		echo $(CS_M)"cycle: $$n"$(CE); \
+		echo $(CS)"cycle: $$n"$(CE); \
 		$(MAKE) --no-print-directory load; \
 		$(MAKE) --no-print-directory start; \
 		$(MAKE) --no-print-directory stop; \

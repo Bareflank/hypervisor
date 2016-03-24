@@ -24,7 +24,7 @@
 void
 bfelf_loader_ut::test_bfelf_file_init_success()
 {
-    bfelf_file_t ef = {};
+    bfelf_file_t ef;
     auto test = get_test();
 
     auto ret = bfelf_file_init((char *)&test, sizeof(test), &ef);
@@ -34,7 +34,7 @@ bfelf_loader_ut::test_bfelf_file_init_success()
 void
 bfelf_loader_ut::test_bfelf_file_init_invalid_file_arg()
 {
-    bfelf_file_t ef = {};
+    bfelf_file_t ef;
     auto test = get_test();
 
     auto ret = bfelf_file_init(0, sizeof(test), &ef);
@@ -44,7 +44,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_file_arg()
 void
 bfelf_loader_ut::test_bfelf_file_init_invalid_file_size_arg()
 {
-    bfelf_file_t ef = {};
+    bfelf_file_t ef;
     auto test = get_test();
 
     auto ret = bfelf_file_init((char *)&test, 0, &ef);
@@ -63,7 +63,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_elf_file()
 void
 bfelf_loader_ut::test_bfelf_file_init_invalid_magic_0()
 {
-    bfelf_file_t ef = {};
+    bfelf_file_t ef;
     auto test = get_test();
 
     test.header.e_ident[bfei_mag0] = 0;
@@ -75,7 +75,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_magic_0()
 void
 bfelf_loader_ut::test_bfelf_file_init_invalid_magic_1()
 {
-    bfelf_file_t ef = {};
+    bfelf_file_t ef;
     auto test = get_test();
 
     test.header.e_ident[bfei_mag1] = 0;
@@ -87,7 +87,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_magic_1()
 void
 bfelf_loader_ut::test_bfelf_file_init_invalid_magic_2()
 {
-    bfelf_file_t ef = {};
+    bfelf_file_t ef;
     auto test = get_test();
 
     test.header.e_ident[bfei_mag2] = 0;
@@ -99,7 +99,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_magic_2()
 void
 bfelf_loader_ut::test_bfelf_file_init_invalid_magic_3()
 {
-    bfelf_file_t ef = {};
+    bfelf_file_t ef;
     auto test = get_test();
 
     test.header.e_ident[bfei_mag3] = 0;
@@ -111,7 +111,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_magic_3()
 void
 bfelf_loader_ut::test_bfelf_file_init_invalid_class()
 {
-    bfelf_file_t ef = {};
+    bfelf_file_t ef;
     auto test = get_test();
 
     test.header.e_ident[bfei_class] = 0x4;
@@ -123,7 +123,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_class()
 void
 bfelf_loader_ut::test_bfelf_file_init_invalid_data()
 {
-    bfelf_file_t ef = {};
+    bfelf_file_t ef;
     auto test = get_test();
 
     test.header.e_ident[bfei_data] = 0x8;
@@ -135,7 +135,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_data()
 void
 bfelf_loader_ut::test_bfelf_file_init_invalid_ident_version()
 {
-    bfelf_file_t ef = {};
+    bfelf_file_t ef;
     auto test = get_test();
 
     test.header.e_ident[bfei_version] = 0x15;
@@ -147,7 +147,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_ident_version()
 void
 bfelf_loader_ut::test_bfelf_file_init_invalid_osabi()
 {
-    // bfelf_file_t ef = {};
+    // bfelf_file_t ef;
     // auto test = get_test();
 
     // test.header.e_ident[bfei_osabi] = 0x16;
@@ -159,7 +159,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_osabi()
 void
 bfelf_loader_ut::test_bfelf_file_init_invalid_abiversion()
 {
-    bfelf_file_t ef = {};
+    bfelf_file_t ef;
     auto test = get_test();
 
     test.header.e_ident[bfei_abiversion] = 0x23;
@@ -171,7 +171,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_abiversion()
 void
 bfelf_loader_ut::test_bfelf_file_init_invalid_type()
 {
-    bfelf_file_t ef = {};
+    bfelf_file_t ef;
     auto test = get_test();
 
     test.header.e_type = 0xDEAD;
@@ -183,7 +183,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_type()
 void
 bfelf_loader_ut::test_bfelf_file_init_invalid_machine()
 {
-    bfelf_file_t ef = {};
+    bfelf_file_t ef;
     auto test = get_test();
 
     test.header.e_machine = 0xDEAD;
@@ -195,7 +195,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_machine()
 void
 bfelf_loader_ut::test_bfelf_file_init_invalid_version()
 {
-    bfelf_file_t ef = {};
+    bfelf_file_t ef;
     auto test = get_test();
 
     test.header.e_version = 0xDEAD;
@@ -207,7 +207,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_version()
 void
 bfelf_loader_ut::test_bfelf_file_init_invalid_flags()
 {
-    bfelf_file_t ef = {};
+    bfelf_file_t ef;
     auto test = get_test();
 
     test.header.e_flags = 0xDEAD;
@@ -219,7 +219,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_flags()
 void
 bfelf_loader_ut::test_bfelf_file_init_invalid_header_size()
 {
-    bfelf_file_t ef = {};
+    bfelf_file_t ef;
     auto test = get_test();
 
     test.header.e_ehsize = 0xDEAD;
@@ -231,7 +231,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_header_size()
 void
 bfelf_loader_ut::test_bfelf_file_init_invalid_program_header_size()
 {
-    bfelf_file_t ef = {};
+    bfelf_file_t ef;
     auto test = get_test();
 
     test.header.e_phentsize = 0xDEAD;
@@ -243,7 +243,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_program_header_size()
 void
 bfelf_loader_ut::test_bfelf_file_init_invalid_section_header_size()
 {
-    bfelf_file_t ef = {};
+    bfelf_file_t ef;
     auto test = get_test();
 
     test.header.e_shentsize = 0xDEAD;
@@ -255,7 +255,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_section_header_size()
 void
 bfelf_loader_ut::test_bfelf_file_init_invalid_program_header_offset()
 {
-    bfelf_file_t ef = {};
+    bfelf_file_t ef;
     auto test = get_test();
 
     test.header.e_phoff = 0xDEADBEEF;
@@ -267,7 +267,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_program_header_offset()
 void
 bfelf_loader_ut::test_bfelf_file_init_invalid_section_header_offset()
 {
-    bfelf_file_t ef = {};
+    bfelf_file_t ef;
     auto test = get_test();
 
     test.header.e_shoff = 0xDEADBEEF;
@@ -279,7 +279,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_section_header_offset()
 void
 bfelf_loader_ut::test_bfelf_file_init_invalid_program_header_num()
 {
-    bfelf_file_t ef = {};
+    bfelf_file_t ef;
     auto test = get_test();
 
     test.header.e_phnum = 0xDEAD;
@@ -291,7 +291,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_program_header_num()
 void
 bfelf_loader_ut::test_bfelf_file_init_invalid_section_header_num()
 {
-    bfelf_file_t ef = {};
+    bfelf_file_t ef;
     auto test = get_test();
 
     test.header.e_shnum = 0xDEAD;
@@ -303,7 +303,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_section_header_num()
 void
 bfelf_loader_ut::test_bfelf_file_init_invalid_section_header_string_table_index()
 {
-    bfelf_file_t ef = {};
+    bfelf_file_t ef;
     auto test = get_test();
 
     test.header.e_shstrndx = 0xDEAD;
@@ -315,7 +315,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_section_header_string_table_index(
 void
 bfelf_loader_ut::test_bfelf_file_init_invalid_segment_file_size()
 {
-    bfelf_file_t ef = {};
+    bfelf_file_t ef;
     auto test = get_test();
 
     test.phdrtab.re_segment1.p_filesz = 0xDEADBEEF;
@@ -327,7 +327,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_segment_file_size()
 void
 bfelf_loader_ut::test_bfelf_file_init_invalid_segment_addresses()
 {
-    bfelf_file_t ef = {};
+    bfelf_file_t ef;
     auto test = get_test();
 
     test.phdrtab.re_segment1.p_vaddr = 0xDEADBEEF;
@@ -339,7 +339,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_segment_addresses()
 void
 bfelf_loader_ut::test_bfelf_file_init_invalid_segment_alignment()
 {
-    // bfelf_file_t ef = {};
+    // bfelf_file_t ef;
     // auto test = get_test();
 
     // test.phdrtab.re_segment1.p_align = 0xDEADBEEF;
@@ -351,7 +351,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_segment_alignment()
 void
 bfelf_loader_ut::test_bfelf_file_init_invalid_segment_offset()
 {
-    bfelf_file_t ef = {};
+    bfelf_file_t ef;
     auto test = get_test();
 
     test.phdrtab.re_segment1.p_offset = 0xDEADBEEF;
@@ -363,7 +363,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_segment_offset()
 void
 bfelf_loader_ut::test_bfelf_file_init_invalid_section_offset()
 {
-    bfelf_file_t ef = {};
+    bfelf_file_t ef;
     auto test = get_test();
 
     test.shdrtab.hashtab.sh_offset = 0xDEADBEEF;
@@ -375,7 +375,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_section_offset()
 void
 bfelf_loader_ut::test_bfelf_file_init_invalid_section_size()
 {
-    bfelf_file_t ef = {};
+    bfelf_file_t ef;
     auto test = get_test();
 
     test.shdrtab.hashtab.sh_size = 0xDEADBEEF;
@@ -387,7 +387,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_section_size()
 void
 bfelf_loader_ut::test_bfelf_file_init_invalid_section_name()
 {
-    bfelf_file_t ef = {};
+    bfelf_file_t ef;
     auto test = get_test();
 
     test.shdrtab.hashtab.sh_name = 0xDEAD;
@@ -399,7 +399,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_section_name()
 void
 bfelf_loader_ut::test_bfelf_file_init_invalid_section_link()
 {
-    bfelf_file_t ef = {};
+    bfelf_file_t ef;
     auto test = get_test();
 
     test.shdrtab.hashtab.sh_link = 0xDEAD;
@@ -411,7 +411,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_section_link()
 void
 bfelf_loader_ut::test_bfelf_file_init_invalid_segment_address()
 {
-    bfelf_file_t ef = {};
+    bfelf_file_t ef;
     auto test = get_test();
 
     test.phdrtab.re_segment1.p_paddr = 0xDEAD;
@@ -424,7 +424,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_segment_address()
 void
 bfelf_loader_ut::test_bfelf_file_init_invalid_segment_size()
 {
-    bfelf_file_t ef = {};
+    bfelf_file_t ef;
     auto test = get_test();
 
     test.phdrtab.re_segment1.p_memsz = 0x275;
@@ -437,7 +437,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_segment_size()
 void
 bfelf_loader_ut::test_bfelf_file_init_invalid_entry()
 {
-    bfelf_file_t ef = {};
+    bfelf_file_t ef;
     auto test = get_test();
 
     test.header.e_entry = 0xDEADBEEF;
@@ -449,7 +449,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_entry()
 void
 bfelf_loader_ut::test_bfelf_file_init_invalid_section_type()
 {
-    bfelf_file_t ef = {};
+    bfelf_file_t ef;
     auto test = get_test();
 
     test.shdrtab.shstrtab.sh_type = 0xDEAD;
@@ -461,7 +461,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_section_type()
 void
 bfelf_loader_ut::test_bfelf_file_init_invalid_section_flags()
 {
-    bfelf_file_t ef = {};
+    bfelf_file_t ef;
     auto test = get_test();
 
     test.shdrtab.shstrtab.sh_flags = 0xDEAD;
@@ -473,7 +473,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_section_flags()
 void
 bfelf_loader_ut::test_bfelf_file_init_invalid_section_address_alignment()
 {
-    bfelf_file_t ef = {};
+    bfelf_file_t ef;
     auto test = get_test();
 
     test.shdrtab.shstrtab.sh_addralign = 0xDEAD;
@@ -485,7 +485,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_section_address_alignment()
 void
 bfelf_loader_ut::test_bfelf_file_init_invalid_section_entry_size()
 {
-    bfelf_file_t ef = {};
+    bfelf_file_t ef;
     auto test = get_test();
 
     test.shdrtab.shstrtab.sh_entsize = 0xDEAD;
@@ -497,7 +497,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_section_entry_size()
 void
 bfelf_loader_ut::test_bfelf_file_init_missing_dynsym()
 {
-    bfelf_file_t ef = {};
+    bfelf_file_t ef;
     auto test = get_test();
 
     test.shdrtab.dynsym.sh_type = 0xDEAD;
@@ -509,7 +509,7 @@ bfelf_loader_ut::test_bfelf_file_init_missing_dynsym()
 void
 bfelf_loader_ut::test_bfelf_file_init_too_many_program_segments()
 {
-    bfelf_file_t ef = {};
+    bfelf_file_t ef;
     auto test = get_test();
 
     test.phdrtab.too_many.p_type = bfpt_load;
@@ -521,7 +521,7 @@ bfelf_loader_ut::test_bfelf_file_init_too_many_program_segments()
 void
 bfelf_loader_ut::test_bfelf_file_init_too_many_relocation_tables()
 {
-    bfelf_file_t ef = {};
+    bfelf_file_t ef;
     auto test = get_test();
 
     test.shdrtab.too_many.sh_type = bfsht_rela;
@@ -533,7 +533,7 @@ bfelf_loader_ut::test_bfelf_file_init_too_many_relocation_tables()
 void
 bfelf_loader_ut::test_bfelf_file_init_invalid_hash_table_size1()
 {
-    bfelf_file_t ef = {};
+    bfelf_file_t ef;
     auto test = get_test();
 
     test.shdrtab.hashtab.sh_size = 1;
@@ -545,7 +545,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_hash_table_size1()
 void
 bfelf_loader_ut::test_bfelf_file_init_invalid_hash_table_size2()
 {
-    bfelf_file_t ef = {};
+    bfelf_file_t ef;
     auto test = get_test();
 
     test.hashtab.nbucket = 0xDEAD;
@@ -557,7 +557,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_hash_table_size2()
 void
 bfelf_loader_ut::test_bfelf_file_init_invalid_hash_table_size3()
 {
-    bfelf_file_t ef = {};
+    bfelf_file_t ef;
     auto test = get_test();
 
     test.hashtab.nchain = 0xDEAD;

@@ -221,7 +221,7 @@ bfelf_loader_ut::load_elf_file(bfelf_file_t *ef)
     for (auto i = 0U; i < num_segments; i++)
     {
         auto ret = 0;
-        struct bfelf_phdr *phdr = 0;
+        bfelf_phdr *phdr = 0;
 
         ret = bfelf_file_get_segment(ef, i, &phdr);
         if (ret != BFELF_SUCCESS)
@@ -241,7 +241,7 @@ bfelf_loader_ut::load_elf_file(bfelf_file_t *ef)
     for (auto i = 0U; i < num_segments; i++)
     {
         auto ret = 0;
-        struct bfelf_phdr *phdr = 0;
+        bfelf_phdr *phdr = 0;
 
         ret = bfelf_file_get_segment(ef, i, &phdr);
         if (ret != BFELF_SUCCESS)
@@ -261,7 +261,9 @@ bfelf_loader_ut::load_elf_file(bfelf_file_t *ef)
 bfelf_test
 bfelf_loader_ut::get_test() const
 {
-    struct bfelf_test test = {};
+    bfelf_test test;
+
+    memset(&test, 0, sizeof(test));
 
     test.header.e_ident[bfei_mag0] = 0x7F;
     test.header.e_ident[bfei_mag1] = 'E';
@@ -279,11 +281,11 @@ bfelf_loader_ut::get_test() const
     test.header.e_phoff = offset(test.phdrtab, test);
     test.header.e_shoff = offset(test.shdrtab, test);
     test.header.e_flags = 0;
-    test.header.e_ehsize = sizeof(struct bfelf64_ehdr);
-    test.header.e_phentsize = sizeof(struct bfelf_phdr);
-    test.header.e_phnum = sizeof(struct test_phdrtab) / sizeof(struct bfelf_phdr);
-    test.header.e_shentsize = sizeof(struct bfelf_shdr);
-    test.header.e_shnum = sizeof(struct test_shdrtab) / sizeof(struct bfelf_shdr);
+    test.header.e_ehsize = sizeof(bfelf64_ehdr);
+    test.header.e_phentsize = sizeof(bfelf_phdr);
+    test.header.e_phnum = sizeof(test_phdrtab) / sizeof(bfelf_phdr);
+    test.header.e_shentsize = sizeof(bfelf_shdr);
+    test.header.e_shnum = sizeof(test_shdrtab) / sizeof(bfelf_shdr);
     test.header.e_shstrndx = 3;
 
     test.phdrtab.re_segment1.p_type = bfpt_load;
@@ -327,7 +329,7 @@ bfelf_loader_ut::get_test() const
     test.shdrtab.shstrtab.sh_flags = 0;
     test.shdrtab.shstrtab.sh_addr = 0x250;
     test.shdrtab.shstrtab.sh_offset = offset(test.shstrtab, test);
-    test.shdrtab.shstrtab.sh_size = sizeof(struct test_shstrtab);
+    test.shdrtab.shstrtab.sh_size = sizeof(test_shstrtab);
     test.shdrtab.shstrtab.sh_link = 0;
     test.shdrtab.shstrtab.sh_addralign = 1;
     test.shdrtab.shstrtab.sh_entsize = 0;
@@ -337,17 +339,17 @@ bfelf_loader_ut::get_test() const
     test.shdrtab.dynsym.sh_flags = bfshf_a;
     test.shdrtab.dynsym.sh_addr = 0x250;
     test.shdrtab.dynsym.sh_offset = offset(test.dynsym, test);
-    test.shdrtab.dynsym.sh_size = sizeof(struct test_dynsym);
+    test.shdrtab.dynsym.sh_size = sizeof(test_dynsym);
     test.shdrtab.dynsym.sh_link = 2;
     test.shdrtab.dynsym.sh_addralign = 8;
-    test.shdrtab.dynsym.sh_entsize = sizeof(struct bfelf_sym);
+    test.shdrtab.dynsym.sh_entsize = sizeof(bfelf_sym);
 
     test.shdrtab.hashtab.sh_name = offset(test.shstrtab.name2, test.shstrtab);
     test.shdrtab.hashtab.sh_type = bfsht_hash;
     test.shdrtab.hashtab.sh_flags = bfshf_a;
     test.shdrtab.hashtab.sh_addr = 0x250;
     test.shdrtab.hashtab.sh_offset = offset(test.hashtab, test);
-    test.shdrtab.hashtab.sh_size = sizeof(struct test_hashtab);
+    test.shdrtab.hashtab.sh_size = sizeof(test_hashtab);
     test.shdrtab.hashtab.sh_link = 0;
     test.shdrtab.hashtab.sh_addralign = 8;
     test.shdrtab.hashtab.sh_entsize = 0x4;
@@ -357,7 +359,7 @@ bfelf_loader_ut::get_test() const
     test.shdrtab.strtab.sh_flags = bfshf_a;
     test.shdrtab.strtab.sh_addr = 0x250;
     test.shdrtab.strtab.sh_offset = offset(test.strtab, test);
-    test.shdrtab.strtab.sh_size = sizeof(struct test_strtab);
+    test.shdrtab.strtab.sh_size = sizeof(test_strtab);
     test.shdrtab.strtab.sh_link = 0;
     test.shdrtab.strtab.sh_addralign = 1;
     test.shdrtab.strtab.sh_entsize = 0;
@@ -367,80 +369,80 @@ bfelf_loader_ut::get_test() const
     test.shdrtab.relatab1.sh_flags = bfshf_ai;
     test.shdrtab.relatab1.sh_addr = 0x250;
     test.shdrtab.relatab1.sh_offset = offset(test.relatab, test);
-    test.shdrtab.relatab1.sh_size = sizeof(struct test_relatab);
+    test.shdrtab.relatab1.sh_size = sizeof(test_relatab);
     test.shdrtab.relatab1.sh_link = 0;
     test.shdrtab.relatab1.sh_addralign = 8;
-    test.shdrtab.relatab1.sh_entsize = sizeof(struct bfelf_rela);
+    test.shdrtab.relatab1.sh_entsize = sizeof(bfelf_rela);
 
     test.shdrtab.relatab2.sh_name = offset(test.shstrtab.name5, test.shstrtab);
     test.shdrtab.relatab2.sh_type = bfsht_rela;
     test.shdrtab.relatab2.sh_flags = bfshf_ai;
     test.shdrtab.relatab2.sh_addr = 0x250;
     test.shdrtab.relatab2.sh_offset = offset(test.relatab, test);
-    test.shdrtab.relatab2.sh_size = sizeof(struct test_relatab);
+    test.shdrtab.relatab2.sh_size = sizeof(test_relatab);
     test.shdrtab.relatab2.sh_link = 0;
     test.shdrtab.relatab2.sh_addralign = 8;
-    test.shdrtab.relatab2.sh_entsize = sizeof(struct bfelf_rela);
+    test.shdrtab.relatab2.sh_entsize = sizeof(bfelf_rela);
 
     test.shdrtab.relatab3.sh_name = offset(test.shstrtab.name5, test.shstrtab);
     test.shdrtab.relatab3.sh_type = bfsht_rela;
     test.shdrtab.relatab3.sh_flags = bfshf_ai;
     test.shdrtab.relatab3.sh_addr = 0x250;
     test.shdrtab.relatab3.sh_offset = offset(test.relatab, test);
-    test.shdrtab.relatab3.sh_size = sizeof(struct test_relatab);
+    test.shdrtab.relatab3.sh_size = sizeof(test_relatab);
     test.shdrtab.relatab3.sh_link = 0;
     test.shdrtab.relatab3.sh_addralign = 8;
-    test.shdrtab.relatab3.sh_entsize = sizeof(struct bfelf_rela);
+    test.shdrtab.relatab3.sh_entsize = sizeof(bfelf_rela);
 
     test.shdrtab.relatab4.sh_name = offset(test.shstrtab.name5, test.shstrtab);
     test.shdrtab.relatab4.sh_type = bfsht_rela;
     test.shdrtab.relatab4.sh_flags = bfshf_ai;
     test.shdrtab.relatab4.sh_addr = 0x250;
     test.shdrtab.relatab4.sh_offset = offset(test.relatab, test);
-    test.shdrtab.relatab4.sh_size = sizeof(struct test_relatab);
+    test.shdrtab.relatab4.sh_size = sizeof(test_relatab);
     test.shdrtab.relatab4.sh_link = 0;
     test.shdrtab.relatab4.sh_addralign = 8;
-    test.shdrtab.relatab4.sh_entsize = sizeof(struct bfelf_rela);
+    test.shdrtab.relatab4.sh_entsize = sizeof(bfelf_rela);
 
     test.shdrtab.relatab5.sh_name = offset(test.shstrtab.name5, test.shstrtab);
     test.shdrtab.relatab5.sh_type = bfsht_rela;
     test.shdrtab.relatab5.sh_flags = bfshf_ai;
     test.shdrtab.relatab5.sh_addr = 0x250;
     test.shdrtab.relatab5.sh_offset = offset(test.relatab, test);
-    test.shdrtab.relatab5.sh_size = sizeof(struct test_relatab);
+    test.shdrtab.relatab5.sh_size = sizeof(test_relatab);
     test.shdrtab.relatab5.sh_link = 0;
     test.shdrtab.relatab5.sh_addralign = 8;
-    test.shdrtab.relatab5.sh_entsize = sizeof(struct bfelf_rela);
+    test.shdrtab.relatab5.sh_entsize = sizeof(bfelf_rela);
 
     test.shdrtab.relatab6.sh_name = offset(test.shstrtab.name5, test.shstrtab);
     test.shdrtab.relatab6.sh_type = bfsht_rela;
     test.shdrtab.relatab6.sh_flags = bfshf_ai;
     test.shdrtab.relatab6.sh_addr = 0x250;
     test.shdrtab.relatab6.sh_offset = offset(test.relatab, test);
-    test.shdrtab.relatab6.sh_size = sizeof(struct test_relatab);
+    test.shdrtab.relatab6.sh_size = sizeof(test_relatab);
     test.shdrtab.relatab6.sh_link = 0;
     test.shdrtab.relatab6.sh_addralign = 8;
-    test.shdrtab.relatab6.sh_entsize = sizeof(struct bfelf_rela);
+    test.shdrtab.relatab6.sh_entsize = sizeof(bfelf_rela);
 
     test.shdrtab.relatab7.sh_name = offset(test.shstrtab.name5, test.shstrtab);
     test.shdrtab.relatab7.sh_type = bfsht_rela;
     test.shdrtab.relatab7.sh_flags = bfshf_ai;
     test.shdrtab.relatab7.sh_addr = 0x250;
     test.shdrtab.relatab7.sh_offset = offset(test.relatab, test);
-    test.shdrtab.relatab7.sh_size = sizeof(struct test_relatab);
+    test.shdrtab.relatab7.sh_size = sizeof(test_relatab);
     test.shdrtab.relatab7.sh_link = 0;
     test.shdrtab.relatab7.sh_addralign = 8;
-    test.shdrtab.relatab7.sh_entsize = sizeof(struct bfelf_rela);
+    test.shdrtab.relatab7.sh_entsize = sizeof(bfelf_rela);
 
     test.shdrtab.relatab8.sh_name = offset(test.shstrtab.name5, test.shstrtab);
     test.shdrtab.relatab8.sh_type = bfsht_rela;
     test.shdrtab.relatab8.sh_flags = bfshf_ai;
     test.shdrtab.relatab8.sh_addr = 0x250;
     test.shdrtab.relatab8.sh_offset = offset(test.relatab, test);
-    test.shdrtab.relatab8.sh_size = sizeof(struct test_relatab);
+    test.shdrtab.relatab8.sh_size = sizeof(test_relatab);
     test.shdrtab.relatab8.sh_link = 0;
     test.shdrtab.relatab8.sh_addralign = 8;
-    test.shdrtab.relatab8.sh_entsize = sizeof(struct bfelf_rela);
+    test.shdrtab.relatab8.sh_entsize = sizeof(bfelf_rela);
 
     test.hashtab.nbucket = 2;
     test.hashtab.nchain = 2;

@@ -31,7 +31,8 @@ bfelf_loader_ut::test_bfelf_file_num_segments_invalid_ef()
 void
 bfelf_loader_ut::test_bfelf_file_num_segments_uninitalized()
 {
-    bfelf_file_t ef = {};
+    bfelf_file_t ef;
+    memset(&ef, 0, sizeof(ef));
 
     auto ret = bfelf_file_num_segments(&ef);
     EXPECT_TRUE(ret == 0);
@@ -40,7 +41,7 @@ bfelf_loader_ut::test_bfelf_file_num_segments_uninitalized()
 void
 bfelf_loader_ut::test_bfelf_file_num_segments_success()
 {
-    bfelf_file_t ef = {};
+    bfelf_file_t ef;
     auto test = get_test();
 
     bfelf_file_init((char *)&test, sizeof(test), &ef);

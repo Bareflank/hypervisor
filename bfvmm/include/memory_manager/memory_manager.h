@@ -144,7 +144,7 @@ public:
     ///     is not the size of a page, if the virtual address is not page
     ///     aligned, or if the physical address is not page aligned.
     ///
-    virtual void add_mdl(struct memory_descriptor *mdl, int64_t num);
+    virtual void add_mdl(memory_descriptor *mdl, int64_t num);
 
 public:
 
@@ -173,8 +173,8 @@ private:
 
     uint32_t m_start;
 
-    std::map<uintptr_t, struct memory_descriptor> m_virt_to_phys_map;
-    std::map<uintptr_t, struct memory_descriptor> m_phys_to_virt_map;
+    std::map<uintptr_t, memory_descriptor> m_virt_to_phys_map;
+    std::map<uintptr_t, memory_descriptor> m_phys_to_virt_map;
 };
 
 /// Memory Manager Macro

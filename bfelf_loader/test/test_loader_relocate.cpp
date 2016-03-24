@@ -31,7 +31,8 @@ bfelf_loader_ut::test_bfelf_loader_relocate_invalid_loader()
 void
 bfelf_loader_ut::test_bfelf_loader_relocate_no_files_added()
 {
-    struct bfelf_loader_t loader = {};
+    bfelf_loader_t loader;
+    memset(&loader, 0, sizeof(loader));
 
     auto ret = bfelf_loader_relocate(&loader);
     EXPECT_TRUE(ret == BFELF_SUCCESS);
@@ -41,9 +42,13 @@ void
 bfelf_loader_ut::test_bfelf_loader_relocate_uninitialized_files()
 {
     auto ret = 0;
-    struct bfelf_file_t ef1 = {};
-    struct bfelf_file_t ef2 = {};
-    struct bfelf_loader_t loader = {};
+    bfelf_file_t ef1;
+    bfelf_file_t ef2;
+    bfelf_loader_t loader;
+
+    memset(&ef1, 0, sizeof(ef1));
+    memset(&ef2, 0, sizeof(ef2));
+    memset(&loader, 0, sizeof(loader));
 
     ret = bfelf_loader_add(&loader, &ef1, 0);
     EXPECT_TRUE(ret == BFELF_SUCCESS);
@@ -59,9 +64,13 @@ void
 bfelf_loader_ut::test_bfelf_loader_relocate_twice()
 {
     auto ret = 0;
-    struct bfelf_file_t ef1 = {};
-    struct bfelf_file_t ef2 = {};
-    struct bfelf_loader_t loader = {};
+    bfelf_file_t ef1;
+    bfelf_file_t ef2;
+    bfelf_loader_t loader;
+
+    memset(&ef1, 0, sizeof(ef1));
+    memset(&ef2, 0, sizeof(ef2));
+    memset(&loader, 0, sizeof(loader));
 
     ret = bfelf_loader_add(&loader, &ef1, 0);
     EXPECT_TRUE(ret == BFELF_SUCCESS);

@@ -48,13 +48,13 @@ vcpu_ut::test_vcpu_manager_valid()
 void
 vcpu_ut::test_vcpu_manager_init_negative_vcpuid()
 {
-    EXPECT_EXCEPTION(g_vcm->init(-1), bfn::invalid_argument_error);
+    EXPECT_EXCEPTION(g_vcm->init(-1), std::out_of_range);
 }
 
 void
 vcpu_ut::test_vcpu_manager_init_invalid_vcpuid()
 {
-    EXPECT_EXCEPTION(g_vcm->init(10000), bfn::invalid_argument_error);
+    EXPECT_EXCEPTION(g_vcm->init(10000), std::out_of_range);
 }
 
 void
@@ -91,19 +91,19 @@ vcpu_ut::test_vcpu_manager_init_success_twice()
 void
 vcpu_ut::test_vcpu_manager_start_negative_vcpuid()
 {
-    EXPECT_EXCEPTION(g_vcm->start(-1), bfn::invalid_argument_error);
+    EXPECT_EXCEPTION(g_vcm->start(-1), std::out_of_range);
 }
 
 void
 vcpu_ut::test_vcpu_manager_start_invalid_vcpuid()
 {
-    EXPECT_EXCEPTION(g_vcm->start(10000), bfn::invalid_argument_error);
+    EXPECT_EXCEPTION(g_vcm->start(10000), std::out_of_range);
 }
 
 void
 vcpu_ut::test_vcpu_manager_start_uninitialized_vcpuid()
 {
-    EXPECT_EXCEPTION(g_vcm->start(0), bfn::invalid_argument_error);
+    EXPECT_EXCEPTION(g_vcm->start(0), std::out_of_range);
 }
 
 void
@@ -126,19 +126,19 @@ vcpu_ut::test_vcpu_manager_start_success()
 void
 vcpu_ut::test_vcpu_manager_dispatch_negative_vcpuid()
 {
-    EXPECT_EXCEPTION(g_vcm->dispatch(-1), bfn::invalid_argument_error);
+    EXPECT_EXCEPTION(g_vcm->dispatch(-1), std::out_of_range);
 }
 
 void
 vcpu_ut::test_vcpu_manager_dispatch_invalid_vcpuid()
 {
-    EXPECT_EXCEPTION(g_vcm->dispatch(10000), bfn::invalid_argument_error);
+    EXPECT_EXCEPTION(g_vcm->dispatch(10000), std::out_of_range);
 }
 
 void
 vcpu_ut::test_vcpu_manager_dispatch_uninitialized_vcpuid()
 {
-    EXPECT_EXCEPTION(g_vcm->dispatch(0), bfn::invalid_argument_error);
+    EXPECT_EXCEPTION(g_vcm->dispatch(0), std::out_of_range);
 }
 
 void
@@ -161,19 +161,19 @@ vcpu_ut::test_vcpu_manager_dispatch_success()
 void
 vcpu_ut::test_vcpu_manager_stop_negative_vcpuid()
 {
-    EXPECT_EXCEPTION(g_vcm->stop(-1), bfn::invalid_argument_error);
+    EXPECT_EXCEPTION(g_vcm->stop(-1), std::out_of_range);
 }
 
 void
 vcpu_ut::test_vcpu_manager_stop_invalid_vcpuid()
 {
-    EXPECT_EXCEPTION(g_vcm->stop(10000), bfn::invalid_argument_error);
+    EXPECT_EXCEPTION(g_vcm->stop(10000), std::out_of_range);
 }
 
 void
 vcpu_ut::test_vcpu_manager_stop_uninitialized_vcpuid()
 {
-    EXPECT_EXCEPTION(g_vcm->stop(0), bfn::invalid_argument_error);
+    EXPECT_EXCEPTION(g_vcm->stop(0), std::out_of_range);
 }
 
 void
@@ -203,26 +203,26 @@ vcpu_ut::test_vcpu_manager_stop_twice()
     {
         ASSERT_NO_EXCEPTION(g_vcm->init(0));
         ASSERT_NO_EXCEPTION(g_vcm->stop(0));
-        EXPECT_EXCEPTION(g_vcm->stop(0), bfn::invalid_argument_error);
+        EXPECT_EXCEPTION(g_vcm->stop(0), std::out_of_range);
     });
 }
 
 void
 vcpu_ut::test_vcpu_manager_halt_negative_vcpuid()
 {
-    EXPECT_EXCEPTION(g_vcm->halt(-1), bfn::invalid_argument_error);
+    EXPECT_EXCEPTION(g_vcm->halt(-1), std::out_of_range);
 }
 
 void
 vcpu_ut::test_vcpu_manager_halt_invalid_vcpuid()
 {
-    EXPECT_EXCEPTION(g_vcm->halt(10000), bfn::invalid_argument_error);
+    EXPECT_EXCEPTION(g_vcm->halt(10000), std::out_of_range);
 }
 
 void
 vcpu_ut::test_vcpu_manager_halt_uninitialized_vcpuid()
 {
-    EXPECT_EXCEPTION(g_vcm->halt(0), bfn::invalid_argument_error);
+    EXPECT_EXCEPTION(g_vcm->halt(0), std::out_of_range);
 }
 
 void
@@ -245,19 +245,19 @@ vcpu_ut::test_vcpu_manager_halt_success()
 void
 vcpu_ut::test_vcpu_manager_promote_negative_vcpuid()
 {
-    EXPECT_EXCEPTION(g_vcm->promote(-1), bfn::invalid_argument_error);
+    EXPECT_EXCEPTION(g_vcm->promote(-1), std::out_of_range);
 }
 
 void
 vcpu_ut::test_vcpu_manager_promote_invalid_vcpuid()
 {
-    EXPECT_EXCEPTION(g_vcm->promote(10000), bfn::invalid_argument_error);
+    EXPECT_EXCEPTION(g_vcm->promote(10000), std::out_of_range);
 }
 
 void
 vcpu_ut::test_vcpu_manager_promote_uninitialized_vcpuid()
 {
-    EXPECT_EXCEPTION(g_vcm->promote(0), bfn::invalid_argument_error);
+    EXPECT_EXCEPTION(g_vcm->promote(0), std::out_of_range);
 }
 
 void
