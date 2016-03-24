@@ -23,7 +23,6 @@
 #include <constants.h>
 #include <commit_or_rollback.h>
 #include <vmcs/vmcs_intel_x64.h>
-#include <vmcs/vmcs_intel_x64_exceptions.h>
 #include <exit_handler/exit_handler_intel_x64_support.h>
 #include <memory_manager/memory_manager.h>
 
@@ -88,23 +87,23 @@ vmcs_intel_x64::launch(const vmcs_state_intel_x64 &host_state,
 
     if (m_intrinsics->vmlaunch() == false)
     {
-        this->dump_vmcs();
+        // this->dump_vmcs();
 
-        this->print_execution_controls();
-        this->print_pin_based_vm_execution_controls();
-        this->print_primary_processor_based_vm_execution_controls();
-        this->print_secondary_processor_based_vm_execution_controls();
-        this->print_vm_exit_control_fields();
-        this->print_vm_entry_control_fields();
+        // this->print_execution_controls();
+        // this->print_pin_based_vm_execution_controls();
+        // this->print_primary_processor_based_vm_execution_controls();
+        // this->print_secondary_processor_based_vm_execution_controls();
+        // this->print_vm_exit_control_fields();
+        // this->print_vm_entry_control_fields();
 
-        host_state.dump("Host");
-        guest_state.dump("Guest");
-
-        this->check_vmcs_control_state();
-        this->check_vmcs_guest_state();
-        this->check_vmcs_host_state();
+        // host_state.dump("Host");
+        // guest_state.dump("Guest");
 
         throw vmcs_launch_failure(this->get_vm_instruction_error());
+
+        // this->check_vmcs_control_state();
+        // this->check_vmcs_guest_state();
+        // this->check_vmcs_host_state();
     }
 
     cor1.commit();
@@ -138,10 +137,6 @@ vmcs_intel_x64::create_vmcs_region()
     m_vmcs_region = std::unique_ptr<uint32_t>(region);
     m_vmcs_region_phys = (uintptr_t)g_mm->virt_to_phys(region);
 
-    if (((uintptr_t)region & 0x0000000000000FFF) != 0)
-        throw invalid_alignment(
-            "vmxon region not page aligned", (uintptr_t)region);
-
     region[0] = m_intrinsics->read_msr(IA32_VMX_BASIC_MSR) & 0x7FFFFFFFF;
 
     cor1.commit();
@@ -152,9 +147,6 @@ vmcs_intel_x64::release_vmcs_region()
 {
     if (m_vmcs_region_phys != 0)
     {
-        if (m_intrinsics->vmclear(&m_vmcs_region_phys) == false)
-            throw vmcs_failure("failed to clear vmcs");
-
         m_vmcs_region.reset();
         m_vmcs_region_phys = 0;
     }

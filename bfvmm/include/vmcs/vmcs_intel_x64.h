@@ -24,6 +24,7 @@
 
 #include <vmcs/bitmap.h>
 #include <vmcs/vmcs_intel_x64_state.h>
+#include <vmcs/vmcs_intel_x64_exceptions.h>
 #include <intrinsics/intrinsics_intel_x64.h>
 
 /// Intel x86_64 VMCS

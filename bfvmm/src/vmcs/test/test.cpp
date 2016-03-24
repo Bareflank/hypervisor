@@ -21,6 +21,7 @@
 
 #include <test.h>
 
+
 vmcs_ut::vmcs_ut()
 {
 }
@@ -40,9 +41,16 @@ vmcs_ut::fini()
 bool
 vmcs_ut::list()
 {
-    this->test_check_host_cr0_for_unsupported_bits_missing_1s();
-    this->test_check_host_cr0_for_unsupported_bits_missing_0s();
-    this->test_check_host_cr0_for_unsupported_bits_valid();
+    this->test_no_intrinsics();
+    this->test_launch_is_supported_msr_bitmaps_failure();
+    this->test_launch_is_supported_host_address_space_size_failure();
+    this->test_launch_is_supported_ia_32e_mode_guest_failure();
+    this->test_launch_vmclear_failure();
+    this->test_launch_vmptrld_failure();
+    this->test_launch_vmwrite_failure();
+    this->test_launch_vmread_failure();
+    this->test_launch_vmlaunch_failure();
+    this->test_launch_success();
 
     return true;
 }
