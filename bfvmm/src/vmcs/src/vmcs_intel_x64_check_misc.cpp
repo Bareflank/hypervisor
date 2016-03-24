@@ -1080,7 +1080,7 @@ bool
 vmcs_intel_x64::is_supported_external_interrupt_exiting() const
 {
     auto ia32_vmx_pinbased_ctls_msr =
-        m_intrinsics->read_msr(IA32_VMX_PINBASED_CTLS_MSR);
+        m_intrinsics->read_msr(IA32_VMX_TRUE_PINBASED_CTLS_MSR);
 
     return ia32_vmx_pinbased_ctls_msr &
            (VM_EXEC_PIN_BASED_EXTERNAL_INTERRUPT_EXITING << 32);
@@ -1090,7 +1090,7 @@ bool
 vmcs_intel_x64::is_supported_nmi_exiting() const
 {
     auto ia32_vmx_pinbased_ctls_msr =
-        m_intrinsics->read_msr(IA32_VMX_PINBASED_CTLS_MSR);
+        m_intrinsics->read_msr(IA32_VMX_TRUE_PINBASED_CTLS_MSR);
 
     return ia32_vmx_pinbased_ctls_msr &
            (VM_EXEC_PIN_BASED_NMI_EXITING << 32);
@@ -1100,7 +1100,7 @@ bool
 vmcs_intel_x64::is_supported_virtual_nmis() const
 {
     auto ia32_vmx_pinbased_ctls_msr =
-        m_intrinsics->read_msr(IA32_VMX_PINBASED_CTLS_MSR);
+        m_intrinsics->read_msr(IA32_VMX_TRUE_PINBASED_CTLS_MSR);
 
     return ia32_vmx_pinbased_ctls_msr &
            (VM_EXEC_PIN_BASED_VIRTUAL_NMIS << 32);
@@ -1110,7 +1110,7 @@ bool
 vmcs_intel_x64::is_supported_vmx_preemption_timer() const
 {
     auto ia32_vmx_pinbased_ctls_msr =
-        m_intrinsics->read_msr(IA32_VMX_PINBASED_CTLS_MSR);
+        m_intrinsics->read_msr(IA32_VMX_TRUE_PINBASED_CTLS_MSR);
 
     return ia32_vmx_pinbased_ctls_msr &
            (VM_EXEC_PIN_BASED_ACTIVATE_VMX_PREEMPTION_TIMER << 32);
@@ -1120,7 +1120,7 @@ bool
 vmcs_intel_x64::is_supported_posted_interrupts() const
 {
     auto ia32_vmx_pinbased_ctls_msr =
-        m_intrinsics->read_msr(IA32_VMX_PINBASED_CTLS_MSR);
+        m_intrinsics->read_msr(IA32_VMX_TRUE_PINBASED_CTLS_MSR);
 
     return ia32_vmx_pinbased_ctls_msr &
            (VM_EXEC_PIN_BASED_PROCESS_POSTED_INTERRUPTS << 32);
@@ -1130,7 +1130,7 @@ bool
 vmcs_intel_x64::is_supported_interrupt_window_exiting() const
 {
     auto ia32_vmx_procbased_ctls_msr =
-        m_intrinsics->read_msr(IA32_VMX_PROCBASED_CTLS_MSR);
+        m_intrinsics->read_msr(IA32_VMX_TRUE_PROCBASED_CTLS_MSR);
 
     return ia32_vmx_procbased_ctls_msr &
            (VM_EXEC_P_PROC_BASED_INTERRUPT_WINDOW_EXITING << 32);
@@ -1140,7 +1140,7 @@ bool
 vmcs_intel_x64::is_supported_tsc_offsetting() const
 {
     auto ia32_vmx_procbased_ctls_msr =
-        m_intrinsics->read_msr(IA32_VMX_PROCBASED_CTLS_MSR);
+        m_intrinsics->read_msr(IA32_VMX_TRUE_PROCBASED_CTLS_MSR);
 
     return ia32_vmx_procbased_ctls_msr &
            (VM_EXEC_P_PROC_BASED_USE_TSC_OFFSETTING << 32);
@@ -1150,7 +1150,7 @@ bool
 vmcs_intel_x64::is_supported_hlt_exiting() const
 {
     auto ia32_vmx_procbased_ctls_msr =
-        m_intrinsics->read_msr(IA32_VMX_PROCBASED_CTLS_MSR);
+        m_intrinsics->read_msr(IA32_VMX_TRUE_PROCBASED_CTLS_MSR);
 
     return ia32_vmx_procbased_ctls_msr &
            (VM_EXEC_P_PROC_BASED_HLT_EXITING << 32);
@@ -1160,7 +1160,7 @@ bool
 vmcs_intel_x64::is_supported_invlpg_exiting() const
 {
     auto ia32_vmx_procbased_ctls_msr =
-        m_intrinsics->read_msr(IA32_VMX_PROCBASED_CTLS_MSR);
+        m_intrinsics->read_msr(IA32_VMX_TRUE_PROCBASED_CTLS_MSR);
 
     return ia32_vmx_procbased_ctls_msr &
            (VM_EXEC_P_PROC_BASED_INVLPG_EXITING << 32);
@@ -1170,7 +1170,7 @@ bool
 vmcs_intel_x64::is_supported_mwait_exiting() const
 {
     auto ia32_vmx_procbased_ctls_msr =
-        m_intrinsics->read_msr(IA32_VMX_PROCBASED_CTLS_MSR);
+        m_intrinsics->read_msr(IA32_VMX_TRUE_PROCBASED_CTLS_MSR);
 
     return ia32_vmx_procbased_ctls_msr &
            (VM_EXEC_P_PROC_BASED_MWAIT_EXITING << 32);
@@ -1180,7 +1180,7 @@ bool
 vmcs_intel_x64::is_supported_rdpmc_exiting() const
 {
     auto ia32_vmx_procbased_ctls_msr =
-        m_intrinsics->read_msr(IA32_VMX_PROCBASED_CTLS_MSR);
+        m_intrinsics->read_msr(IA32_VMX_TRUE_PROCBASED_CTLS_MSR);
 
     return ia32_vmx_procbased_ctls_msr &
            (VM_EXEC_P_PROC_BASED_RDPMC_EXITING << 32);
@@ -1190,7 +1190,7 @@ bool
 vmcs_intel_x64::is_supported_rdtsc_exiting() const
 {
     auto ia32_vmx_procbased_ctls_msr =
-        m_intrinsics->read_msr(IA32_VMX_PROCBASED_CTLS_MSR);
+        m_intrinsics->read_msr(IA32_VMX_TRUE_PROCBASED_CTLS_MSR);
 
     return ia32_vmx_procbased_ctls_msr &
            (VM_EXEC_P_PROC_BASED_RDTSC_EXITING << 32);
@@ -1200,7 +1200,7 @@ bool
 vmcs_intel_x64::is_supported_cr3_load_exiting() const
 {
     auto ia32_vmx_procbased_ctls_msr =
-        m_intrinsics->read_msr(IA32_VMX_PROCBASED_CTLS_MSR);
+        m_intrinsics->read_msr(IA32_VMX_TRUE_PROCBASED_CTLS_MSR);
 
     return ia32_vmx_procbased_ctls_msr &
            (VM_EXEC_P_PROC_BASED_CR3_LOAD_EXITING << 32);
@@ -1210,7 +1210,7 @@ bool
 vmcs_intel_x64::is_supported_cr3_store_exiting() const
 {
     auto ia32_vmx_procbased_ctls_msr =
-        m_intrinsics->read_msr(IA32_VMX_PROCBASED_CTLS_MSR);
+        m_intrinsics->read_msr(IA32_VMX_TRUE_PROCBASED_CTLS_MSR);
 
     return ia32_vmx_procbased_ctls_msr &
            (VM_EXEC_P_PROC_BASED_CR3_STORE_EXITING << 32);
@@ -1220,7 +1220,7 @@ bool
 vmcs_intel_x64::is_supported_cr8_load_exiting() const
 {
     auto ia32_vmx_procbased_ctls_msr =
-        m_intrinsics->read_msr(IA32_VMX_PROCBASED_CTLS_MSR);
+        m_intrinsics->read_msr(IA32_VMX_TRUE_PROCBASED_CTLS_MSR);
 
     return ia32_vmx_procbased_ctls_msr &
            (VM_EXEC_P_PROC_BASED_CR8_LOAD_EXITING << 32);
@@ -1230,7 +1230,7 @@ bool
 vmcs_intel_x64::is_supported_cr8_store_exiting() const
 {
     auto ia32_vmx_procbased_ctls_msr =
-        m_intrinsics->read_msr(IA32_VMX_PROCBASED_CTLS_MSR);
+        m_intrinsics->read_msr(IA32_VMX_TRUE_PROCBASED_CTLS_MSR);
 
     return ia32_vmx_procbased_ctls_msr &
            (VM_EXEC_P_PROC_BASED_CR8_STORE_EXITING << 32);
@@ -1240,7 +1240,7 @@ bool
 vmcs_intel_x64::is_supported_tpr_shadow() const
 {
     auto ia32_vmx_procbased_ctls_msr =
-        m_intrinsics->read_msr(IA32_VMX_PROCBASED_CTLS_MSR);
+        m_intrinsics->read_msr(IA32_VMX_TRUE_PROCBASED_CTLS_MSR);
 
     return ia32_vmx_procbased_ctls_msr &
            (VM_EXEC_P_PROC_BASED_USE_TPR_SHADOW << 32);
@@ -1250,7 +1250,7 @@ bool
 vmcs_intel_x64::is_supported_nmi_window_exiting() const
 {
     auto ia32_vmx_procbased_ctls_msr =
-        m_intrinsics->read_msr(IA32_VMX_PROCBASED_CTLS_MSR);
+        m_intrinsics->read_msr(IA32_VMX_TRUE_PROCBASED_CTLS_MSR);
 
     return ia32_vmx_procbased_ctls_msr &
            (VM_EXEC_P_PROC_BASED_NMI_WINDOW_EXITING << 32);
@@ -1260,7 +1260,7 @@ bool
 vmcs_intel_x64::is_supported_mov_dr_exiting() const
 {
     auto ia32_vmx_procbased_ctls_msr =
-        m_intrinsics->read_msr(IA32_VMX_PROCBASED_CTLS_MSR);
+        m_intrinsics->read_msr(IA32_VMX_TRUE_PROCBASED_CTLS_MSR);
 
     return ia32_vmx_procbased_ctls_msr &
            (VM_EXEC_P_PROC_BASED_MOV_DR_EXITING << 32);
@@ -1270,7 +1270,7 @@ bool
 vmcs_intel_x64::is_supported_unconditional_io_exiting() const
 {
     auto ia32_vmx_procbased_ctls_msr =
-        m_intrinsics->read_msr(IA32_VMX_PROCBASED_CTLS_MSR);
+        m_intrinsics->read_msr(IA32_VMX_TRUE_PROCBASED_CTLS_MSR);
 
     return ia32_vmx_procbased_ctls_msr &
            (VM_EXEC_P_PROC_BASED_UNCONDITIONAL_IO_EXITING << 32);
@@ -1280,7 +1280,7 @@ bool
 vmcs_intel_x64::is_supported_io_bitmaps() const
 {
     auto ia32_vmx_procbased_ctls_msr =
-        m_intrinsics->read_msr(IA32_VMX_PROCBASED_CTLS_MSR);
+        m_intrinsics->read_msr(IA32_VMX_TRUE_PROCBASED_CTLS_MSR);
 
     return ia32_vmx_procbased_ctls_msr &
            (VM_EXEC_P_PROC_BASED_USE_IO_BITMAPS << 32);
@@ -1290,7 +1290,7 @@ bool
 vmcs_intel_x64::is_supported_monitor_trap_flag() const
 {
     auto ia32_vmx_procbased_ctls_msr =
-        m_intrinsics->read_msr(IA32_VMX_PROCBASED_CTLS_MSR);
+        m_intrinsics->read_msr(IA32_VMX_TRUE_PROCBASED_CTLS_MSR);
 
     return ia32_vmx_procbased_ctls_msr &
            (VM_EXEC_P_PROC_BASED_MONITOR_TRAP_FLAG << 32);
@@ -1300,7 +1300,7 @@ bool
 vmcs_intel_x64::is_supported_msr_bitmaps() const
 {
     auto ia32_vmx_procbased_ctls_msr =
-        m_intrinsics->read_msr(IA32_VMX_PROCBASED_CTLS_MSR);
+        m_intrinsics->read_msr(IA32_VMX_TRUE_PROCBASED_CTLS_MSR);
 
     return ia32_vmx_procbased_ctls_msr &
            (VM_EXEC_P_PROC_BASED_MONITOR_TRAP_FLAG << 32);
@@ -1310,7 +1310,7 @@ bool
 vmcs_intel_x64::is_supported_monitor_exiting() const
 {
     auto ia32_vmx_procbased_ctls_msr =
-        m_intrinsics->read_msr(IA32_VMX_PROCBASED_CTLS_MSR);
+        m_intrinsics->read_msr(IA32_VMX_TRUE_PROCBASED_CTLS_MSR);
 
     return ia32_vmx_procbased_ctls_msr &
            (VM_EXEC_P_PROC_BASED_MONITOR_EXITING << 32);
@@ -1320,7 +1320,7 @@ bool
 vmcs_intel_x64::is_supported_pause_exiting() const
 {
     auto ia32_vmx_procbased_ctls_msr =
-        m_intrinsics->read_msr(IA32_VMX_PROCBASED_CTLS_MSR);
+        m_intrinsics->read_msr(IA32_VMX_TRUE_PROCBASED_CTLS_MSR);
 
     return ia32_vmx_procbased_ctls_msr &
            (VM_EXEC_P_PROC_BASED_PAUSE_EXITING << 32);
@@ -1330,7 +1330,7 @@ bool
 vmcs_intel_x64::is_supported_secondary_controls() const
 {
     auto ia32_vmx_procbased_ctls_msr =
-        m_intrinsics->read_msr(IA32_VMX_PROCBASED_CTLS_MSR);
+        m_intrinsics->read_msr(IA32_VMX_TRUE_PROCBASED_CTLS_MSR);
 
     return ia32_vmx_procbased_ctls_msr &
            (VM_EXEC_P_PROC_BASED_ACTIVATE_SECONDARY_CONTROLS << 32);
@@ -1520,7 +1520,7 @@ bool
 vmcs_intel_x64::is_supported_save_debug_controls_on_exit() const
 {
     auto ia32_vmx_exit_ctls_msr =
-        m_intrinsics->read_msr(IA32_VMX_EXIT_CTLS_MSR);
+        m_intrinsics->read_msr(IA32_VMX_TRUE_EXIT_CTLS_MSR);
 
     return ia32_vmx_exit_ctls_msr &
            (VM_EXIT_CONTROL_SAVE_DEBUG_CONTROLS << 32);
@@ -1530,7 +1530,7 @@ bool
 vmcs_intel_x64::is_supported_host_address_space_size() const
 {
     auto ia32_vmx_exit_ctls_msr =
-        m_intrinsics->read_msr(IA32_VMX_EXIT_CTLS_MSR);
+        m_intrinsics->read_msr(IA32_VMX_TRUE_EXIT_CTLS_MSR);
 
     return ia32_vmx_exit_ctls_msr &
            (VM_EXIT_CONTROL_HOST_ADDRESS_SPACE_SIZE << 32);
@@ -1540,7 +1540,7 @@ bool
 vmcs_intel_x64::is_supported_load_ia32_perf_global_ctrl_on_exit() const
 {
     auto ia32_vmx_exit_ctls_msr =
-        m_intrinsics->read_msr(IA32_VMX_EXIT_CTLS_MSR);
+        m_intrinsics->read_msr(IA32_VMX_TRUE_EXIT_CTLS_MSR);
 
     return ia32_vmx_exit_ctls_msr &
            (VM_EXIT_CONTROL_LOAD_IA32_PERF_GLOBAL_CTRL << 32);
@@ -1550,7 +1550,7 @@ bool
 vmcs_intel_x64::is_supported_ack_interrupt_on_exit() const
 {
     auto ia32_vmx_exit_ctls_msr =
-        m_intrinsics->read_msr(IA32_VMX_EXIT_CTLS_MSR);
+        m_intrinsics->read_msr(IA32_VMX_TRUE_EXIT_CTLS_MSR);
 
     return ia32_vmx_exit_ctls_msr &
            (VM_EXIT_CONTROL_ACKNOWLEDGE_INTERRUPT_ON_EXIT << 32);
@@ -1560,7 +1560,7 @@ bool
 vmcs_intel_x64::is_supported_save_ia32_pat_on_exit() const
 {
     auto ia32_vmx_exit_ctls_msr =
-        m_intrinsics->read_msr(IA32_VMX_EXIT_CTLS_MSR);
+        m_intrinsics->read_msr(IA32_VMX_TRUE_EXIT_CTLS_MSR);
 
     return ia32_vmx_exit_ctls_msr &
            (VM_EXIT_CONTROL_SAVE_IA32_PAT << 32);
@@ -1570,7 +1570,7 @@ bool
 vmcs_intel_x64::is_supported_load_ia32_pat_on_exit() const
 {
     auto ia32_vmx_exit_ctls_msr =
-        m_intrinsics->read_msr(IA32_VMX_EXIT_CTLS_MSR);
+        m_intrinsics->read_msr(IA32_VMX_TRUE_EXIT_CTLS_MSR);
 
     return ia32_vmx_exit_ctls_msr &
            (VM_EXIT_CONTROL_LOAD_IA32_PAT << 32);
@@ -1580,7 +1580,7 @@ bool
 vmcs_intel_x64::is_supported_save_ia32_efer_on_exit() const
 {
     auto ia32_vmx_exit_ctls_msr =
-        m_intrinsics->read_msr(IA32_VMX_EXIT_CTLS_MSR);
+        m_intrinsics->read_msr(IA32_VMX_TRUE_EXIT_CTLS_MSR);
 
     return ia32_vmx_exit_ctls_msr &
            (VM_EXIT_CONTROL_SAVE_IA32_EFER << 32);
@@ -1590,7 +1590,7 @@ bool
 vmcs_intel_x64::is_supported_load_ia32_efer_on_exit() const
 {
     auto ia32_vmx_exit_ctls_msr =
-        m_intrinsics->read_msr(IA32_VMX_EXIT_CTLS_MSR);
+        m_intrinsics->read_msr(IA32_VMX_TRUE_EXIT_CTLS_MSR);
 
     return ia32_vmx_exit_ctls_msr &
            (VM_EXIT_CONTROL_LOAD_IA32_EFER << 32);
@@ -1600,7 +1600,7 @@ bool
 vmcs_intel_x64::is_supported_save_vmx_preemption_timer_on_exit() const
 {
     auto ia32_vmx_exit_ctls_msr =
-        m_intrinsics->read_msr(IA32_VMX_EXIT_CTLS_MSR);
+        m_intrinsics->read_msr(IA32_VMX_TRUE_EXIT_CTLS_MSR);
 
     return ia32_vmx_exit_ctls_msr &
            (VM_EXIT_CONTROL_SAVE_VMX_PREEMPTION_TIMER_VALUE << 32);
@@ -1610,7 +1610,7 @@ bool
 vmcs_intel_x64::is_supported_load_debug_controls_on_entry() const
 {
     auto ia32_vmx_entry_ctls_msr =
-        m_intrinsics->read_msr(IA32_VMX_ENTRY_CTLS_MSR);
+        m_intrinsics->read_msr(IA32_VMX_TRUE_ENTRY_CTLS_MSR);
 
     return ia32_vmx_entry_ctls_msr &
            (VM_ENTRY_CONTROL_LOAD_DEBUG_CONTROLS << 32);
@@ -1620,7 +1620,7 @@ bool
 vmcs_intel_x64::is_supported_ia_32e_mode_guest() const
 {
     auto ia32_vmx_entry_ctls_msr =
-        m_intrinsics->read_msr(IA32_VMX_ENTRY_CTLS_MSR);
+        m_intrinsics->read_msr(IA32_VMX_TRUE_ENTRY_CTLS_MSR);
 
     return ia32_vmx_entry_ctls_msr &
            (VM_ENTRY_CONTROL_IA_32E_MODE_GUEST << 32);
@@ -1630,7 +1630,7 @@ bool
 vmcs_intel_x64::is_supported_entry_to_smm() const
 {
     auto ia32_vmx_entry_ctls_msr =
-        m_intrinsics->read_msr(IA32_VMX_ENTRY_CTLS_MSR);
+        m_intrinsics->read_msr(IA32_VMX_TRUE_ENTRY_CTLS_MSR);
 
     return ia32_vmx_entry_ctls_msr &
            (VM_ENTRY_CONTROL_ENTRY_TO_SMM << 32);
@@ -1640,7 +1640,7 @@ bool
 vmcs_intel_x64::is_supported_deactivate_dual_monitor_treatment() const
 {
     auto ia32_vmx_entry_ctls_msr =
-        m_intrinsics->read_msr(IA32_VMX_ENTRY_CTLS_MSR);
+        m_intrinsics->read_msr(IA32_VMX_TRUE_ENTRY_CTLS_MSR);
 
     return ia32_vmx_entry_ctls_msr &
            (VM_ENTRY_CONTROL_DEACTIVATE_DUAL_MONITOR_TREATMENT << 32);
@@ -1650,7 +1650,7 @@ bool
 vmcs_intel_x64::is_supported_load_ia32_perf_global_ctrl_on_entry() const
 {
     auto ia32_vmx_entry_ctls_msr =
-        m_intrinsics->read_msr(IA32_VMX_ENTRY_CTLS_MSR);
+        m_intrinsics->read_msr(IA32_VMX_TRUE_ENTRY_CTLS_MSR);
 
     return ia32_vmx_entry_ctls_msr &
            (VM_ENTRY_CONTROL_LOAD_IA32_PERF_GLOBAL_CTRL << 32);
@@ -1660,7 +1660,7 @@ bool
 vmcs_intel_x64::is_supported_load_ia32_pat_on_entry() const
 {
     auto ia32_vmx_entry_ctls_msr =
-        m_intrinsics->read_msr(IA32_VMX_ENTRY_CTLS_MSR);
+        m_intrinsics->read_msr(IA32_VMX_TRUE_ENTRY_CTLS_MSR);
 
     return ia32_vmx_entry_ctls_msr &
            (VM_ENTRY_CONTROL_LOAD_IA32_PAT << 32);
@@ -1670,7 +1670,7 @@ bool
 vmcs_intel_x64::is_supported_load_ia32_efer_on_entry() const
 {
     auto ia32_vmx_entry_ctls_msr =
-        m_intrinsics->read_msr(IA32_VMX_ENTRY_CTLS_MSR);
+        m_intrinsics->read_msr(IA32_VMX_TRUE_ENTRY_CTLS_MSR);
 
     return ia32_vmx_entry_ctls_msr &
            (VM_ENTRY_CONTROL_LOAD_IA32_EFER << 32);

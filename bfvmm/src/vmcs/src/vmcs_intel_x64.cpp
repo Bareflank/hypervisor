@@ -120,8 +120,8 @@ vmcs_intel_x64::promote()
     });
 
     this->promote_16bit_guest_state();
-    this->promote_64bit_guest_state();
     this->promote_32bit_guest_state();
+    this->promote_64bit_guest_state();
     this->promote_natural_guest_state();
 
     promote_vmcs_to_root();
@@ -226,13 +226,13 @@ vmcs_intel_x64::write_32bit_control_state(const vmcs_state_intel_x64 &state)
     uint64_t upper;
 
     auto ia32_vmx_pinbased_ctls_msr =
-        m_intrinsics->read_msr(IA32_VMX_PINBASED_CTLS_MSR);
+        m_intrinsics->read_msr(IA32_VMX_TRUE_PINBASED_CTLS_MSR);
     auto ia32_vmx_procbased_ctls_msr =
-        m_intrinsics->read_msr(IA32_VMX_PROCBASED_CTLS_MSR);
+        m_intrinsics->read_msr(IA32_VMX_TRUE_PROCBASED_CTLS_MSR);
     auto ia32_vmx_exit_ctls_msr =
-        m_intrinsics->read_msr(IA32_VMX_EXIT_CTLS_MSR);
+        m_intrinsics->read_msr(IA32_VMX_TRUE_EXIT_CTLS_MSR);
     auto ia32_vmx_entry_ctls_msr =
-        m_intrinsics->read_msr(IA32_VMX_ENTRY_CTLS_MSR);
+        m_intrinsics->read_msr(IA32_VMX_TRUE_ENTRY_CTLS_MSR);
 
     lower = ((ia32_vmx_pinbased_ctls_msr >> 0) & 0x00000000FFFFFFFF);
     upper = ((ia32_vmx_pinbased_ctls_msr >> 32) & 0x00000000FFFFFFFF);

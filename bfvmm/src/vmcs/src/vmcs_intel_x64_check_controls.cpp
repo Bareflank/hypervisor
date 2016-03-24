@@ -62,7 +62,7 @@ void
 vmcs_intel_x64::check_control_pin_based_ctls_reserved_properly_set()
 {
     auto ia32_vmx_pinbased_ctls_msr =
-        m_intrinsics->read_msr(IA32_VMX_PINBASED_CTLS_MSR);
+        m_intrinsics->read_msr(IA32_VMX_TRUE_PINBASED_CTLS_MSR);
 
     auto lower = ((ia32_vmx_pinbased_ctls_msr >> 00) & 0x00000000FFFFFFFF);
     auto upper = ((ia32_vmx_pinbased_ctls_msr >> 32) & 0x00000000FFFFFFFF);
@@ -80,7 +80,7 @@ void
 vmcs_intel_x64::check_control_proc_based_ctls_reserved_properly_set()
 {
     auto ia32_vmx_procbased_ctls_msr =
-        m_intrinsics->read_msr(IA32_VMX_PROCBASED_CTLS_MSR);
+        m_intrinsics->read_msr(IA32_VMX_TRUE_PROCBASED_CTLS_MSR);
 
     auto lower = ((ia32_vmx_procbased_ctls_msr >> 00) & 0x00000000FFFFFFFF);
     auto upper = ((ia32_vmx_procbased_ctls_msr >> 32) & 0x00000000FFFFFFFF);
@@ -481,7 +481,7 @@ void
 vmcs_intel_x64::check_control_vm_exit_ctls_reserved_properly_set()
 {
     auto ia32_vmx_exit_ctls_msr =
-        m_intrinsics->read_msr(IA32_VMX_EXIT_CTLS_MSR);
+        m_intrinsics->read_msr(IA32_VMX_TRUE_EXIT_CTLS_MSR);
 
     auto lower = ((ia32_vmx_exit_ctls_msr >> 00) & 0x00000000FFFFFFFF);
     auto upper = ((ia32_vmx_exit_ctls_msr >> 32) & 0x00000000FFFFFFFF);
@@ -572,7 +572,7 @@ void
 vmcs_intel_x64::check_control_vm_entry_ctls_reserved_properly_set()
 {
     auto ia32_vmx_entry_ctls_msr =
-        m_intrinsics->read_msr(IA32_VMX_ENTRY_CTLS_MSR);
+        m_intrinsics->read_msr(IA32_VMX_TRUE_ENTRY_CTLS_MSR);
 
     auto lower = ((ia32_vmx_entry_ctls_msr >> 00) & 0x00000000FFFFFFFF);
     auto upper = ((ia32_vmx_entry_ctls_msr >> 32) & 0x00000000FFFFFFFF);
