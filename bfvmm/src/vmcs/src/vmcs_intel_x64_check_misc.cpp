@@ -23,7 +23,7 @@
 #include <vmcs/vmcs_intel_x64_exceptions.h>
 
 std::string
-vmcs_intel_x64::check_vm_instruction_error()
+vmcs_intel_x64::get_vm_instruction_error()
 {
     switch (vmread(VMCS_VM_INSTRUCTION_ERROR))
     {
@@ -119,78 +119,6 @@ vmcs_intel_x64::check_vm_instruction_error()
     }
 }
 
-bool
-vmcs_intel_x64::check_is_address_canonical(uint64_t addr)
-{
-    if (((addr <= 0x00007FFFFFFFFFFF)) ||
-        ((addr >= 0xFFFF800000000000) && (addr <= 0xFFFFFFFFFFFFFFFF)))
-    {
-        return true;
-    }
-
-    return false;
-}
-
-bool
-vmcs_intel_x64::check_has_valid_address_width(uint64_t addr)
-{
-    auto bits = (m_intrinsics->cpuid_eax(0x80000008) & 0x00000000000000FF);
-    auto mask = (0xFFFFFFFFFFFFFFFFULL >> bits) << bits;
-
-    if ((addr & mask) == 0)
-        return true;
-
-    return false;
-}
-
-bool
-vmcs_intel_x64::check_is_cs_usable()
-{
-    return (vmread(VMCS_GUEST_CS_ACCESS_RIGHTS) & SELECTOR_UNUSABLE) == 0;
-}
-
-bool
-vmcs_intel_x64::check_is_ss_usable()
-{
-    return (vmread(VMCS_GUEST_SS_ACCESS_RIGHTS) & SELECTOR_UNUSABLE) == 0;
-}
-
-bool
-vmcs_intel_x64::check_is_ds_usable()
-{
-    return (vmread(VMCS_GUEST_DS_ACCESS_RIGHTS) & SELECTOR_UNUSABLE) == 0;
-}
-
-bool
-vmcs_intel_x64::check_is_es_usable()
-{
-    return (vmread(VMCS_GUEST_ES_ACCESS_RIGHTS) & SELECTOR_UNUSABLE) == 0;
-}
-
-bool
-vmcs_intel_x64::check_is_gs_usable()
-{
-    return (vmread(VMCS_GUEST_GS_ACCESS_RIGHTS) & SELECTOR_UNUSABLE) == 0;
-}
-
-bool
-vmcs_intel_x64::check_is_fs_usable()
-{
-    return (vmread(VMCS_GUEST_FS_ACCESS_RIGHTS) & SELECTOR_UNUSABLE) == 0;
-}
-
-bool
-vmcs_intel_x64::check_is_tr_usable()
-{
-    return (vmread(VMCS_GUEST_TR_ACCESS_RIGHTS) & SELECTOR_UNUSABLE) == 0;
-}
-
-bool
-vmcs_intel_x64::check_is_ldtr_usable()
-{
-    return (vmread(VMCS_GUEST_LDTR_ACCESS_RIGHTS) & SELECTOR_UNUSABLE) == 0;
-}
-
 uint64_t
 vmcs_intel_x64::get_pin_ctls() const
 {
@@ -222,6 +150,84 @@ uint64_t
 vmcs_intel_x64::get_entry_ctls() const
 {
     return vmread(VMCS_VM_ENTRY_CONTROLS);
+}
+
+bool
+vmcs_intel_x64::is_address_canonical(uint64_t addr)
+{
+    if (((addr <= 0x00007FFFFFFFFFFF)) ||
+        ((addr >= 0xFFFF800000000000) && (addr <= 0xFFFFFFFFFFFFFFFF)))
+    {
+        return true;
+    }
+
+    return false;
+}
+
+bool
+vmcs_intel_x64::is_linear_address_valid(uint64_t addr)
+{
+    return is_address_canonical(addr);
+}
+
+bool
+vmcs_intel_x64::is_physical_address_valid(uint64_t addr)
+{
+    auto bits = (m_intrinsics->cpuid_eax(0x80000008) & 0x00000000000000FF);
+    auto mask = (0xFFFFFFFFFFFFFFFFULL >> bits) << bits;
+
+    if ((addr & mask) == 0)
+        return true;
+
+    return false;
+}
+
+bool
+vmcs_intel_x64::is_cs_usable()
+{
+    return (vmread(VMCS_GUEST_CS_ACCESS_RIGHTS) & SELECTOR_UNUSABLE) == 0;
+}
+
+bool
+vmcs_intel_x64::is_ss_usable()
+{
+    return (vmread(VMCS_GUEST_SS_ACCESS_RIGHTS) & SELECTOR_UNUSABLE) == 0;
+}
+
+bool
+vmcs_intel_x64::is_ds_usable()
+{
+    return (vmread(VMCS_GUEST_DS_ACCESS_RIGHTS) & SELECTOR_UNUSABLE) == 0;
+}
+
+bool
+vmcs_intel_x64::is_es_usable()
+{
+    return (vmread(VMCS_GUEST_ES_ACCESS_RIGHTS) & SELECTOR_UNUSABLE) == 0;
+}
+
+bool
+vmcs_intel_x64::is_gs_usable()
+{
+    return (vmread(VMCS_GUEST_GS_ACCESS_RIGHTS) & SELECTOR_UNUSABLE) == 0;
+}
+
+bool
+vmcs_intel_x64::is_fs_usable()
+{
+    return (vmread(VMCS_GUEST_FS_ACCESS_RIGHTS) & SELECTOR_UNUSABLE) == 0;
+}
+
+bool
+vmcs_intel_x64::is_tr_usable()
+{
+    return (vmread(VMCS_GUEST_TR_ACCESS_RIGHTS) & SELECTOR_UNUSABLE) == 0;
+}
+
+bool
+vmcs_intel_x64::is_ldtr_usable()
+{
+    return (vmread(VMCS_GUEST_LDTR_ACCESS_RIGHTS) & SELECTOR_UNUSABLE) == 0;
 }
 
 bool
@@ -1681,4 +1687,22 @@ vmcs_intel_x64::is_supported_eptp_switching() const
 
     return (vmread(VMCS_VM_FUNCTION_CONTROLS_FULL) &
             VM_FUNCTION_CONTROL_EPTP_SWITCHING);
+}
+
+bool
+vmcs_intel_x64::check_pat(uint64_t pat)
+{
+    switch (pat)
+    {
+        case 0:
+        case 1:
+        case 4:
+        case 5:
+        case 6:
+        case 7:
+            return true;
+
+        default:
+            return false;
+    }
 }

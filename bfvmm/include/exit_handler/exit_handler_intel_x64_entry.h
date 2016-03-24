@@ -19,31 +19,17 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <test.h>
-#include <vcpu/vcpu_factory.h>
+#ifndef EXIT_HANDLER_INTEL_X64_ENTRY_H
+#define EXIT_HANDLER_INTEL_X64_ENTRY_H
 
-void
-vcpu_ut::test_vcpu_factory_get_vcpu_invalid_vcpuid()
-{
-    // EXPECT_TRUE(vcpu_factory::instance()->get_vcpu(10000) == NULL);
-}
+#include <stdint.h>
 
-void
-vcpu_ut::test_vcpu_factory_get_vcpu_valid_vcpuid()
-{
-    // EXPECT_TRUE(vcpu_factory::instance()->get_vcpu(0) != NULL);
-}
+/// Exit Handler
+///
+/// This is the "C" portion of the exit handler. Once the entry point has
+/// finished it's job, it hands control to this function, which trampolines
+/// to a C++ exit handler dispatch which will ultamitely handle the VM exit
+///
+extern "C" void exit_handler(void);
 
-void
-vcpu_ut::test_vcpu_factory_add_vcpu_invalid_vcpuid()
-{
-    // auto vc = vcpu(10000);
-    // EXPECT_TRUE(vcpu_factory::instance()->add_vcpu(vc) == vcpu_factory_error::failure);
-}
-
-void
-vcpu_ut::test_vcpu_factory_add_vcpu_success()
-{
-    // auto vc = vcpu(0);
-    // EXPECT_TRUE(vcpu_factory::instance()->add_vcpu(vc) == vcpu_factory_error::success);
-}
+#endif

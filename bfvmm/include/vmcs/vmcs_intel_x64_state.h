@@ -22,6 +22,8 @@
 #ifndef VMCS_STATE_INTEL_X64_H
 #define VMCS_STATE_INTEL_X64_H
 
+#include <memory>
+
 #include <debug.h>
 #include <intrinsics/intrinsics_intel_x64.h>
 
@@ -83,7 +85,7 @@ public:
         m_ia32_gs_base_msr(0)
     {}
 
-    vmcs_state_intel_x64(intrinsics_intel_x64 *intrinsics) :
+    vmcs_state_intel_x64(const std::shared_ptr<intrinsics_intel_x64> &intrinsics) :
         m_es(0),
         m_cs(0),
         m_ss(0),
@@ -132,6 +134,9 @@ public:
         m_ia32_fs_base_msr(0),
         m_ia32_gs_base_msr(0)
     {
+        if (!intrinsics)
+            return;
+
         m_es = intrinsics->read_es();
         m_cs = intrinsics->read_cs();
         m_ss = intrinsics->read_ss();
@@ -468,10 +473,10 @@ public:
     void set_ia32_gs_base_msr(uint64_t val)
     { m_ia32_gs_base_msr = val; }
 
-    void dump() const
+    void dump(const std::string &name) const
     {
         bfdebug << "----------------------------------------" << bfendl;
-        bfdebug << "- State Dump                           -" << bfendl;
+        bfdebug << "- State Dump: " << name << bfendl;
         bfdebug << "----------------------------------------" << bfendl;
 
         bfdebug << bfendl;

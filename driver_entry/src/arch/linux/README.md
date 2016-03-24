@@ -3,14 +3,14 @@
 To compile the bareflank hypevisor on Linux, first ensure that bareflank's
 main source code has been compiled. To do this, you must first have a
 cross compiler setup. The following instructions assume that you are using
-Debian.
+Ubuntu.
 
 ```
 cd ~/
 git clone https://github.com/Bareflank/hypervisor.git
 cd ~/hypervisor
 
-./tools/scripts/setup-debian.sh
+./tools/scripts/setup-ubuntu.sh
 ```
 
 Once you have a cross compiler setup, you need to build the main source code.
@@ -51,9 +51,10 @@ sudo LD_LIBRARY_PATH=. ./bfm unload
 popd
 ```
 
-On Debian, you can also:
+On Linux, you can also:
 
 ```
+make quick
 make load
 make start
 make status

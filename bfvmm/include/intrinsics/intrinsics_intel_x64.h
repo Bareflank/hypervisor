@@ -57,41 +57,34 @@ class intrinsics_intel_x64 : public intrinsics_x64
 {
 public:
 
-    intrinsics_intel_x64() {}
+    intrinsics_intel_x64() noexcept {}
     virtual ~intrinsics_intel_x64() {}
 
-    virtual bool vmxon(void *vmxon_region)
+    virtual bool vmxon(void *vmxon_region) const noexcept
     { return __vmxon(vmxon_region); }
 
-    virtual bool vmxoff()
+    virtual bool vmxoff() const noexcept
     { return __vmxoff(); }
 
-    virtual bool vmcall(uint64_t value)
+    virtual bool vmcall(uint64_t value) const noexcept
     { return __vmcall(value); }
 
-    virtual bool vmclear(void *vmcs_region)
+    virtual bool vmclear(void *vmcs_region) const noexcept
     { return __vmclear(vmcs_region); }
 
-    virtual bool vmptrld(void *vmcs_region)
+    virtual bool vmptrld(void *vmcs_region) const noexcept
     { return __vmptrld(vmcs_region); }
 
-    virtual bool vmptrst(void *vmcs_region)
+    virtual bool vmptrst(void *vmcs_region) const noexcept
     { return __vmptrst(vmcs_region); }
 
-    virtual bool vmwrite(uint64_t field, uint64_t val)
+    virtual bool vmwrite(uint64_t field, uint64_t val) const noexcept
     { return __vmwrite(field, val); }
 
-    virtual bool vmread(uint64_t field, uint64_t *val)
+    virtual bool vmread(uint64_t field, uint64_t *val) const noexcept
     { return __vmread(field, val); }
 
-    virtual uint64_t vmread(uint64_t field)
-    {
-        uint64_t val = 0;
-        __vmread(field, &val);
-        return val;
-    }
-
-    virtual bool vmlaunch()
+    virtual bool vmlaunch() const noexcept
     { return __vmlaunch(); }
 };
 
@@ -486,5 +479,61 @@ public:
 #define VM_EXIT_REASON_RDSEED                                     (61)
 #define VM_EXIT_REASON_XSAVES                                     (63)
 #define VM_EXIT_REASON_XRSTORS                                    (64)
+
+// VM Activity State
+// intel's software developers manual, volume 3, 24.4.2
+#define VM_ACTIVITY_STATE_ACTIVE                                  (0)
+#define VM_ACTIVITY_STATE_HLT                                     (1)
+#define VM_ACTIVITY_STATE_SHUTDOWN                                (2)
+#define VM_ACTIVITY_STATE_WAIT_FOR_SIPI                           (3)
+
+// VM Interrupability State
+// intel's software developers manual, volume 3, 24.4.2
+#define VM_INTERRUPTABILITY_STATE_STI                             (1 << 0)
+#define VM_INTERRUPTABILITY_STATE_MOV_SS                          (1 << 1)
+#define VM_INTERRUPTABILITY_STATE_SMI                             (1 << 2)
+#define VM_INTERRUPTABILITY_STATE_NMI                             (1 << 3)
+
+// VM Interrupt Information Fields
+// intel's software developers manual, volume 3, 24.8.3
+#define VM_INTERRUPT_INFORMATION_VECTOR                           (0x000000FF)
+#define VM_INTERRUPT_INFORMATION_TYPE                             (0x00000700)
+#define VM_INTERRUPT_INFORMATION_DELIVERY_ERROR                   (0x00000800)
+#define VM_INTERRUPT_INFORMATION_VALID                            (0x80000000)
+
+// VM Interruption Types
+// intel's software developers manual, volume 3, 24.8.3
+#define VM_INTERRUPTION_TYPE_EXTERNAL                             (0)
+#define VM_INTERRUPTION_TYPE_NMI                                  (2)
+#define VM_INTERRUPTION_TYPE_HARDWARE                             (3)
+#define VM_INTERRUPTION_TYPE_SOFTWARE_INTERRUPT                   (4)
+#define VM_INTERRUPTION_TYPE_PRIVILEGED_SOFTWARE_EXCEPTION        (5)
+#define VM_INTERRUPTION_TYPE_SOFTWARE_EXCEPTION                   (6)
+#define VM_INTERRUPTION_TYPE_OTHER                                (7)
+
+// MTF VM Exit
+// intel's software developers manual, volume 3, 26.5.2
+#define MTF_VM_EXIT                                               (0)
+
+// Pending Debug Exceptions
+// intel's software developers manual, volume 3, 24.4.2
+#define PENDING_DEBUG_EXCEPTION_B0                                (1 << 0)
+#define PENDING_DEBUG_EXCEPTION_B1                                (1 << 1)
+#define PENDING_DEBUG_EXCEPTION_B2                                (1 << 2)
+#define PENDING_DEBUG_EXCEPTION_B3                                (1 << 3)
+#define PENDING_DEBUG_EXCEPTION_ENABLED_BREAKPOINT                (1 << 12)
+#define PENDING_DEBUG_EXCEPTION_BS                                (1 << 14)
+
+// VPID and EPT Capabilities
+// intel's software developer's manual, volume 3, appendix A.10
+#define IA32_VMX_EPT_VPID_CAP_UC                                  (1 << 8)
+#define IA32_VMX_EPT_VPID_CAP_WB                                  (1 << 14)
+#define IA32_VMX_EPT_VPID_CAP_AD                                  (1 << 21)
+
+// EPTP Format
+// intel's software developer's manual, volume 3, appendix 24.6.11
+#define EPTP_MEMORY_TYPE                                   0x0000000000000007
+#define EPTP_PAGE_WALK_LENGTH                              0x0000000000000038
+#define EPTP_ACCESSED_DIRTY_FLAGS_ENABLED                  0x0000000000000040
 
 #endif

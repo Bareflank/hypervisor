@@ -19,26 +19,35 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <iostream>
-#include <exit_handler/exit_handler.h>
-#include <exit_handler/exit_handler_dispatch.h>
+#include <debug.h>
+#include <exit_handler/exit_handler_intel_x64.h>
+#include <exit_handler/exit_handler_intel_x64_entry.h>
+#include <exit_handler/exit_handler_intel_x64_support.h>
+#include <exit_handler/exit_handler_intel_x64_exceptions.h>
 #include <vcpu/vcpu_manager.h>
 
-exit_handler_dispatch::exit_handler_dispatch(intrinsics_intel_x64 *intrinsics) : m_intrinsics(intrinsics)
+exit_handler_intel_x64::exit_handler_intel_x64(const std::shared_ptr<intrinsics_intel_x64> &intrinsics) :
+    m_intrinsics(intrinsics)
 {
+    if (!m_intrinsics)
+        throw invalid_argument(intrinsics, "intrinsics == null");
 }
 
-exit_handler_dispatch::~exit_handler_dispatch()
+exit_handler_intel_x64::~exit_handler_intel_x64()
 {
 }
 
 void
-exit_handler_dispatch::dispatch()
+exit_handler_intel_x64::dispatch()
 {
-    m_intrinsics->vmread(VMCS_EXIT_REASON, &m_exit_reason);
-    m_intrinsics->vmread(VMCS_EXIT_QUALIFICATION, &m_exit_qualification);
-    m_intrinsics->vmread(VMCS_VM_EXIT_INSTRUCTION_LENGTH, &m_exit_instruction_length);
-    m_intrinsics->vmread(VMCS_VM_EXIT_INSTRUCTION_INFORMATION, &m_exit_instruction_information);
+    m_exit_reason =
+        vmread(VMCS_EXIT_REASON);
+    m_exit_qualification =
+        vmread(VMCS_EXIT_QUALIFICATION);
+    m_exit_instruction_length =
+        vmread(VMCS_VM_EXIT_INSTRUCTION_LENGTH);
+    m_exit_instruction_information =
+        vmread(VMCS_VM_EXIT_INSTRUCTION_INFORMATION);
 
     switch (m_exit_reason)
     {
@@ -289,479 +298,295 @@ exit_handler_dispatch::dispatch()
 }
 
 void
-exit_handler_dispatch::handle_exception_or_non_maskable_interrupt()
+exit_handler_intel_x64::handle_exception_or_non_maskable_interrupt()
 { unimplemented_handler(); }
 
 void
-exit_handler_dispatch::handle_external_interrupt()
+exit_handler_intel_x64::handle_external_interrupt()
 { unimplemented_handler(); }
 
 void
-exit_handler_dispatch::handle_triple_fault()
+exit_handler_intel_x64::handle_triple_fault()
 { unimplemented_handler(); }
 
 void
-exit_handler_dispatch::handle_init_signal()
+exit_handler_intel_x64::handle_init_signal()
 { unimplemented_handler(); }
 
 void
-exit_handler_dispatch::handle_sipi()
+exit_handler_intel_x64::handle_sipi()
 { unimplemented_handler(); }
 
 void
-exit_handler_dispatch::handle_smi()
+exit_handler_intel_x64::handle_smi()
 { unimplemented_handler(); }
 
 void
-exit_handler_dispatch::handle_other_smi()
+exit_handler_intel_x64::handle_other_smi()
 { unimplemented_handler(); }
 
 void
-exit_handler_dispatch::handle_interrupt_window()
+exit_handler_intel_x64::handle_interrupt_window()
 { unimplemented_handler(); }
 
 void
-exit_handler_dispatch::handle_nmi_window()
+exit_handler_intel_x64::handle_nmi_window()
 { unimplemented_handler(); }
 
 void
-exit_handler_dispatch::handle_task_switch()
+exit_handler_intel_x64::handle_task_switch()
 { unimplemented_handler(); }
 
 void
-exit_handler_dispatch::handle_cpuid()
+exit_handler_intel_x64::handle_cpuid()
 {
-    guest_cpuid();
+    m_intrinsics->cpuid(&g_guest_rax,
+                        &g_guest_rbx,
+                        &g_guest_rcx,
+                        &g_guest_rdx);
+
     advance_rip();
 }
 
 void
-exit_handler_dispatch::handle_getsec()
+exit_handler_intel_x64::handle_getsec()
 { unimplemented_handler(); }
 
 void
-exit_handler_dispatch::handle_hlt()
+exit_handler_intel_x64::handle_hlt()
 { unimplemented_handler(); }
 
 void
-exit_handler_dispatch::handle_invd()
+exit_handler_intel_x64::handle_invd()
 { unimplemented_handler(); }
 
 void
-exit_handler_dispatch::handle_invlpg()
+exit_handler_intel_x64::handle_invlpg()
 { unimplemented_handler(); }
 
 void
-exit_handler_dispatch::handle_rdpmc()
+exit_handler_intel_x64::handle_rdpmc()
 { unimplemented_handler(); }
 
 void
-exit_handler_dispatch::handle_rdtsc()
+exit_handler_intel_x64::handle_rdtsc()
 { unimplemented_handler(); }
 
 void
-exit_handler_dispatch::handle_rsm()
+exit_handler_intel_x64::handle_rsm()
 { unimplemented_handler(); }
 
 void
-exit_handler_dispatch::handle_vmcall()
+exit_handler_intel_x64::handle_vmcall()
 { unimplemented_handler(); }
 
 void
-exit_handler_dispatch::handle_vmclear()
+exit_handler_intel_x64::handle_vmclear()
 { unimplemented_handler(); }
 
 void
-exit_handler_dispatch::handle_vmlaunch()
+exit_handler_intel_x64::handle_vmlaunch()
 { unimplemented_handler(); }
 
 void
-exit_handler_dispatch::handle_vmptrld()
+exit_handler_intel_x64::handle_vmptrld()
 { unimplemented_handler(); }
 
 void
-exit_handler_dispatch::handle_vmptrst()
+exit_handler_intel_x64::handle_vmptrst()
 { unimplemented_handler(); }
 
 void
-exit_handler_dispatch::handle_vmread()
+exit_handler_intel_x64::handle_vmread()
 { unimplemented_handler(); }
 
 void
-exit_handler_dispatch::handle_vmresume()
+exit_handler_intel_x64::handle_vmresume()
 { unimplemented_handler(); }
 
 void
-exit_handler_dispatch::handle_vmwrite()
+exit_handler_intel_x64::handle_vmwrite()
 { unimplemented_handler(); }
 
 void
-exit_handler_dispatch::handle_vmxoff()
+exit_handler_intel_x64::handle_vmxoff()
 {
-    g_guest_rax = 0x00;
-    g_vcm->promote_vcpu(0);
+    g_vcm->promote(0);
 }
 
 void
-exit_handler_dispatch::handle_vmxon()
+exit_handler_intel_x64::handle_vmxon()
 { unimplemented_handler(); }
 
 void
-exit_handler_dispatch::handle_control_register_accesses()
-{
-    auto control_register = ((m_exit_qualification & 0x0000000F) >> 0);
-    auto access_type = ((m_exit_qualification & 0x00000030) >> 4);
-    auto general_purpose_register = ((m_exit_qualification & 0x00000F00) >> 8);
-
-    if (control_register != 3)
-        goto unimplemented;
-
-    if (access_type >= 2)
-        goto unimplemented;
-
-    if (access_type == 0)
-    {
-        switch (general_purpose_register)
-        {
-            case 0:
-                m_intrinsics->vmwrite(VMCS_GUEST_CR3, g_guest_rax);
-                break;
-
-            case 1:
-                m_intrinsics->vmwrite(VMCS_GUEST_CR3, g_guest_rcx);
-                break;
-
-            case 2:
-                m_intrinsics->vmwrite(VMCS_GUEST_CR3, g_guest_rdx);
-                break;
-
-            case 3:
-                m_intrinsics->vmwrite(VMCS_GUEST_CR3, g_guest_rbx);
-                break;
-
-            case 4:
-                m_intrinsics->vmwrite(VMCS_GUEST_CR3, g_guest_rsp);
-                break;
-
-            case 5:
-                m_intrinsics->vmwrite(VMCS_GUEST_CR3, g_guest_rbp);
-                break;
-
-            case 6:
-                m_intrinsics->vmwrite(VMCS_GUEST_CR3, g_guest_rsi);
-                break;
-
-            case 7:
-                m_intrinsics->vmwrite(VMCS_GUEST_CR3, g_guest_rdi);
-                break;
-
-            case 8:
-                m_intrinsics->vmwrite(VMCS_GUEST_CR3, g_guest_r08);
-                break;
-
-            case 9:
-                m_intrinsics->vmwrite(VMCS_GUEST_CR3, g_guest_r09);
-                break;
-
-            case 10:
-                m_intrinsics->vmwrite(VMCS_GUEST_CR3, g_guest_r10);
-                break;
-
-            case 11:
-                m_intrinsics->vmwrite(VMCS_GUEST_CR3, g_guest_r11);
-                break;
-
-            case 12:
-                m_intrinsics->vmwrite(VMCS_GUEST_CR3, g_guest_r12);
-                break;
-
-            case 13:
-                m_intrinsics->vmwrite(VMCS_GUEST_CR3, g_guest_r13);
-                break;
-
-            case 14:
-                m_intrinsics->vmwrite(VMCS_GUEST_CR3, g_guest_r14);
-                break;
-
-            case 15:
-                m_intrinsics->vmwrite(VMCS_GUEST_CR3, g_guest_r15);
-                break;
-
-            default:
-                goto unimplemented;
-        }
-
-        advance_rip();
-        return;
-    }
-
-    if (access_type == 1)
-    {
-        switch (general_purpose_register)
-        {
-            case 0:
-                m_intrinsics->vmread(VMCS_GUEST_CR3, &g_guest_rax);
-                break;
-
-            case 1:
-                m_intrinsics->vmread(VMCS_GUEST_CR3, &g_guest_rcx);
-                break;
-
-            case 2:
-                m_intrinsics->vmread(VMCS_GUEST_CR3, &g_guest_rdx);
-                break;
-
-            case 3:
-                m_intrinsics->vmread(VMCS_GUEST_CR3, &g_guest_rbx);
-                break;
-
-            case 4:
-                m_intrinsics->vmread(VMCS_GUEST_CR3, &g_guest_rsp);
-                break;
-
-            case 5:
-                m_intrinsics->vmread(VMCS_GUEST_CR3, &g_guest_rbp);
-                break;
-
-            case 6:
-                m_intrinsics->vmread(VMCS_GUEST_CR3, &g_guest_rsi);
-                break;
-
-            case 7:
-                m_intrinsics->vmread(VMCS_GUEST_CR3, &g_guest_rdi);
-                break;
-
-            case 8:
-                m_intrinsics->vmread(VMCS_GUEST_CR3, &g_guest_r08);
-                break;
-
-            case 9:
-                m_intrinsics->vmread(VMCS_GUEST_CR3, &g_guest_r09);
-                break;
-
-            case 10:
-                m_intrinsics->vmread(VMCS_GUEST_CR3, &g_guest_r10);
-                break;
-
-            case 11:
-                m_intrinsics->vmread(VMCS_GUEST_CR3, &g_guest_r11);
-                break;
-
-            case 12:
-                m_intrinsics->vmread(VMCS_GUEST_CR3, &g_guest_r12);
-                break;
-
-            case 13:
-                m_intrinsics->vmread(VMCS_GUEST_CR3, &g_guest_r13);
-                break;
-
-            case 14:
-                m_intrinsics->vmread(VMCS_GUEST_CR3, &g_guest_r14);
-                break;
-
-            case 15:
-                m_intrinsics->vmread(VMCS_GUEST_CR3, &g_guest_r15);
-                break;
-
-            default:
-                goto unimplemented;
-        }
-
-        advance_rip();
-        return;
-    }
-
-unimplemented:
-
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << "Unimplemented Control Register Access: " << std::hex << std::endl;
-    std::cout << "----------------------------------------------------------------------" << std::endl;
-    std::cout << "- control_register: 0x" << control_register << std::endl;
-    std::cout << "- access_type: 0x" << access_type << std::endl;
-    std::cout << "- general_purpose_register: 0x" << general_purpose_register << std::endl;
-    std::cout << std::dec << std::endl;
-
-    spin_wait();
-    spin_wait();
-    m_intrinsics->halt();
-}
-
-void
-exit_handler_dispatch::handle_mov_dr()
+exit_handler_intel_x64::handle_control_register_accesses()
 { unimplemented_handler(); }
 
 void
-exit_handler_dispatch::handle_io_instruction()
+exit_handler_intel_x64::handle_mov_dr()
 { unimplemented_handler(); }
 
 void
-exit_handler_dispatch::handle_rdmsr()
-{
-    guest_read_msr();
-    advance_rip();
-}
-
-void
-exit_handler_dispatch::handle_wrmsr()
-{
-    guest_write_msr();
-    advance_rip();
-}
-
-void
-exit_handler_dispatch::handle_vm_entry_failure_invalid_guest_state()
+exit_handler_intel_x64::handle_io_instruction()
 { unimplemented_handler(); }
 
 void
-exit_handler_dispatch::handle_vm_entry_failure_msr_loading()
+exit_handler_intel_x64::handle_rdmsr()
 { unimplemented_handler(); }
 
 void
-exit_handler_dispatch::handle_mwait()
+exit_handler_intel_x64::handle_wrmsr()
 { unimplemented_handler(); }
 
 void
-exit_handler_dispatch::handle_monitor_trap_flag()
+exit_handler_intel_x64::handle_vm_entry_failure_invalid_guest_state()
 { unimplemented_handler(); }
 
 void
-exit_handler_dispatch::handle_monitor()
+exit_handler_intel_x64::handle_vm_entry_failure_msr_loading()
 { unimplemented_handler(); }
 
 void
-exit_handler_dispatch::handle_pause()
+exit_handler_intel_x64::handle_mwait()
 { unimplemented_handler(); }
 
 void
-exit_handler_dispatch::handle_vm_entry_failure_machine_check_event()
+exit_handler_intel_x64::handle_monitor_trap_flag()
 { unimplemented_handler(); }
 
 void
-exit_handler_dispatch::handle_tpr_below_threshold()
+exit_handler_intel_x64::handle_monitor()
 { unimplemented_handler(); }
 
 void
-exit_handler_dispatch::handle_apic_access()
+exit_handler_intel_x64::handle_pause()
 { unimplemented_handler(); }
 
 void
-exit_handler_dispatch::handle_virtualized_eoi()
+exit_handler_intel_x64::handle_vm_entry_failure_machine_check_event()
 { unimplemented_handler(); }
 
 void
-exit_handler_dispatch::handle_access_to_gdtr_or_idtr()
+exit_handler_intel_x64::handle_tpr_below_threshold()
 { unimplemented_handler(); }
 
 void
-exit_handler_dispatch::handle_access_to_ldtr_or_tr()
+exit_handler_intel_x64::handle_apic_access()
 { unimplemented_handler(); }
 
 void
-exit_handler_dispatch::handle_ept_violation()
+exit_handler_intel_x64::handle_virtualized_eoi()
 { unimplemented_handler(); }
 
 void
-exit_handler_dispatch::handle_ept_misconfiguration()
+exit_handler_intel_x64::handle_access_to_gdtr_or_idtr()
 { unimplemented_handler(); }
 
 void
-exit_handler_dispatch::handle_invept()
+exit_handler_intel_x64::handle_access_to_ldtr_or_tr()
 { unimplemented_handler(); }
 
 void
-exit_handler_dispatch::handle_rdtscp()
+exit_handler_intel_x64::handle_ept_violation()
 { unimplemented_handler(); }
 
 void
-exit_handler_dispatch::handle_vmx_preemption_timer_expired()
+exit_handler_intel_x64::handle_ept_misconfiguration()
 { unimplemented_handler(); }
 
 void
-exit_handler_dispatch::handle_invvpid()
+exit_handler_intel_x64::handle_invept()
 { unimplemented_handler(); }
 
 void
-exit_handler_dispatch::handle_wbinvd()
+exit_handler_intel_x64::handle_rdtscp()
 { unimplemented_handler(); }
 
 void
-exit_handler_dispatch::handle_xsetbv()
+exit_handler_intel_x64::handle_vmx_preemption_timer_expired()
 { unimplemented_handler(); }
 
 void
-exit_handler_dispatch::handle_apic_write()
+exit_handler_intel_x64::handle_invvpid()
 { unimplemented_handler(); }
 
 void
-exit_handler_dispatch::handle_rdrand()
+exit_handler_intel_x64::handle_wbinvd()
 { unimplemented_handler(); }
 
 void
-exit_handler_dispatch::handle_invpcid()
+exit_handler_intel_x64::handle_xsetbv()
 { unimplemented_handler(); }
 
 void
-exit_handler_dispatch::handle_vmfunc()
+exit_handler_intel_x64::handle_apic_write()
 { unimplemented_handler(); }
 
 void
-exit_handler_dispatch::handle_rdseed()
+exit_handler_intel_x64::handle_rdrand()
 { unimplemented_handler(); }
 
 void
-exit_handler_dispatch::handle_xsaves()
+exit_handler_intel_x64::handle_invpcid()
 { unimplemented_handler(); }
 
 void
-exit_handler_dispatch::handle_xrstors()
+exit_handler_intel_x64::handle_vmfunc()
 { unimplemented_handler(); }
 
 void
-exit_handler_dispatch::advance_rip()
+exit_handler_intel_x64::handle_rdseed()
+{ unimplemented_handler(); }
+
+void
+exit_handler_intel_x64::handle_xsaves()
+{ unimplemented_handler(); }
+
+void
+exit_handler_intel_x64::handle_xrstors()
+{ unimplemented_handler(); }
+
+void
+exit_handler_intel_x64::advance_rip()
 {
     g_guest_rip += m_exit_instruction_length;
 }
 
 void
-exit_handler_dispatch::spin_wait()
+exit_handler_intel_x64::unimplemented_handler()
 {
+    bferror << bfendl;
+    bferror << bfendl;
+    bferror << "Guest register state: " << bfendl;
+    bferror << "----------------------------------------------------" << bfendl;
+    bferror << "g_guest_rax: " << (void *)g_guest_rax << bfendl;
+    bferror << "g_guest_rbx: " << (void *)g_guest_rbx << bfendl;
+    bferror << "g_guest_rcx: " << (void *)g_guest_rcx << bfendl;
+    bferror << "g_guest_rdx: " << (void *)g_guest_rdx << bfendl;
+    bferror << "g_guest_rsi: " << (void *)g_guest_rsi << bfendl;
+    bferror << "g_guest_rdi: " << (void *)g_guest_rdi << bfendl;
+    bferror << "g_guest_rsp: " << (void *)g_guest_rsp << bfendl;
+    bferror << "g_guest_rbp: " << (void *)g_guest_rbp << bfendl;
+    bferror << "g_guest_rip: " << (void *)g_guest_rip << bfendl;
+
+    bferror << bfendl;
+    bferror << bfendl;
+    bferror << "Unimplemented Exit Handler: " << bfendl;
+    bferror << "----------------------------------------------------" << bfendl;
+    bferror << "- exit reason: "
+            << (void *)m_exit_reason << " = "
+            << exit_reason_to_str(m_exit_reason) << bfendl;
+    bferror << "- instruction length: "
+            << (void *)m_exit_instruction_length << bfendl;
+    bferror << "- instruction information: "
+            << (void *)m_exit_instruction_information << bfendl;
+
     for (auto i = 0; i < 1000000; i++);
-}
-
-void
-exit_handler_dispatch::unimplemented_handler()
-{
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << "Guest register state: " << std::hex << std::endl;
-    std::cout << "----------------------------------------------------------------------" << std::endl;
-    std::cout << "g_guest_rax: 0x" << g_guest_rax << std::endl;
-    std::cout << "g_guest_rbx: 0x" << g_guest_rbx << std::endl;
-    std::cout << "g_guest_rcx: 0x" << g_guest_rcx << std::endl;
-    std::cout << "g_guest_rdx: 0x" << g_guest_rdx << std::endl << std::endl;
-    std::cout << "g_guest_rsi: 0x" << g_guest_rsi << std::endl;
-    std::cout << "g_guest_rdi: 0x" << g_guest_rdi << std::endl << std::endl;
-    std::cout << "g_guest_rsp: 0x" << g_guest_rsp << std::endl;
-    std::cout << "g_guest_rbp: 0x" << g_guest_rbp << std::endl;
-    std::cout << "g_guest_rip: 0x" << g_guest_rip << std::endl;
-
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << "Unimplemented Exit Handler: " << std::hex << std::endl;
-    std::cout << "----------------------------------------------------------------------" << std::endl;
-    std::cout << "- exit reason: 0x" << m_exit_reason << " = " << exit_reason_to_str(m_exit_reason) << std::endl;
-    std::cout << "- instruction length: 0x" << m_exit_instruction_length << std::endl;
-    std::cout << "- instruction information: 0x" << m_exit_instruction_information << std::endl;
-    std::cout << std::dec << std::endl;
-
-    spin_wait();
-    spin_wait();
-    m_intrinsics->halt();
+    m_intrinsics->stop();
 }
 
 const char *
-exit_handler_dispatch::exit_reason_to_str(uint64_t exit_reason)
+exit_handler_intel_x64::exit_reason_to_str(uint64_t exit_reason)
 {
     switch (exit_reason)
     {
@@ -948,4 +773,22 @@ exit_handler_dispatch::exit_reason_to_str(uint64_t exit_reason)
         default:
             return "UNKNOWN";
     };
+}
+
+uint64_t
+exit_handler_intel_x64::vmread(uint64_t field) const
+{
+    uint64_t value = 0;
+
+    if (m_intrinsics->vmread(field, &value) == false)
+        throw exit_handler_read_failure(field);
+
+    return value;
+}
+
+void
+exit_handler_intel_x64::vmwrite(uint64_t field, uint64_t value)
+{
+    if (m_intrinsics->vmwrite(field, value) == false)
+        throw exit_handler_write_failure(field, value);
 }

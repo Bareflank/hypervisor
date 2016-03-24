@@ -203,7 +203,7 @@ common_stop_vmm(void);
  * @return BF_SUCCESS on success, negative error code on failure
  */
 int64_t
-common_dump_vmm(struct debug_ring_resources_t *user_drr);
+common_dump_vmm(struct debug_ring_resources_t **user_drr);
 
 #ifdef __cplusplus
 }
