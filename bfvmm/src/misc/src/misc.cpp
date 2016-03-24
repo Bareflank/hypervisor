@@ -25,16 +25,20 @@
 extern "C" int
 write(int file, const void *buffer, size_t count)
 {
-    std::string str((char *)buffer, count);
+    if (buffer == nullptr || count == 0)
+        return 0;
 
-    serial_port_intel_x64::instance()->write(str);
+    if (file == 1 || file == 2)
+    {
+        auto str = std::string((char *)buffer, count);
 
-    if (file == 0)
         g_vcm->write(-1, str);
-    else
-        g_vcm->write(file - 1000, str);
+        serial_port_intel_x64::instance()->write(str);
 
-    return count;
+        return count;
+    }
+
+    return 0;
 }
 
 extern "C" int
