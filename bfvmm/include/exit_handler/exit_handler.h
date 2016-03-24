@@ -26,7 +26,6 @@
 
 extern "C"
 {
-
     /// Exit Handler
     ///
     /// This is the "C" portion of the exit handler. Once the entry point has
@@ -91,22 +90,11 @@ extern "C"
     ///
     void guest_cpuid(void);
 
-    /// Guest Read MSR
+    /// Halt CPU
     ///
-    /// Executes the RDMSR instruction using the guest state instead of the
-    /// host register state. The result of the instruction is stored back into
-    /// the guest state, which can then be used by the exit handler as needed.
-    ///
-    void guest_read_msr(void);
-
-    /// Guest Read MSR
-    ///
-    /// Executes the RDMSR instruction using the guest state instead of the
-    /// host register state. The result of the instruction is stored back into
-    /// the guest state, which can then be used by the exit handler as needed.
-    ///
-    void guest_write_msr(void);
-
+    /// This is called if an error occurs, and the exit handler can no longer
+    /// continue it's execution.
+    void halt_cpu(void);
 }
 
 #endif

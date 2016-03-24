@@ -26,6 +26,28 @@
 #include <vmcs/vmcs_intel_x64_state.h>
 #include <intrinsics/intrinsics_intel_x64.h>
 
+/// Intel x86_64 VMCS
+///
+/// The following provides the basic VMCS implementation as defined by the
+/// Intel Software Developer's Manual (chapters 24-33). To best understand
+/// this code, the manual should first be read.
+///
+/// This class provides the bare minimum to get a virtual machine to execute.
+/// It assumes a 64bit VMM, and a 64bit guest. It does not trap on anything
+/// by default, and thus the guest is allows to execute unfettered. If
+/// an error should occur, it contains the logic needed to help identify the
+/// issue, including a complete implementation of chapter 26 in the Intel
+/// manual, that describes all of the checks the CPU will perform prior to
+/// a VMM launch.
+///
+/// To use this class, subclass vmcs_intel_x64, and overload the protected
+/// functions for setting up the guest / host state to provide the desired
+/// functionality. Don't forget to call the base class function when complete
+/// unless you intend to provide the same functionality.
+///
+/// @note This VMCS does not support SMM / Dual Monitor Mode, and the missing
+/// logic will have to be provided by the user if such support is needed.
+///
 class vmcs_intel_x64
 {
 public:
@@ -70,32 +92,6 @@ public:
 
 protected:
 
-    /// VM Read
-    ///
-    /// This is the same as intrinsics->vmread, but throws if an error
-    /// occurs.
-    ///
-    /// @param field the vmcs field to read
-    /// @return the value of the vmcs field
-    ///
-    /// @throws vmcs_read_failure_error thrown if the vmread fails
-    ///
-    virtual uint64_t vmread(uint64_t field) const;
-
-    /// VM Write
-    ///
-    /// This is the same as intrinsics->vmwrite, but throws if an error
-    /// occurs.
-    ///
-    /// @param field the vmcs field to read
-    /// @param value the value to write to the vmcs field
-    ///
-    /// @throws vmcs_write_failure_error thrown if the vmwrite fails
-    ///
-    virtual void vmwrite(uint64_t field, uint64_t value);
-
-protected:
-
     virtual void create_vmcs_region();
     virtual void release_vmcs_region();
 
@@ -124,6 +120,9 @@ protected:
     virtual void default_secondary_processor_based_vm_execution_controls();
     virtual void default_vm_exit_controls();
     virtual void default_vm_entry_controls();
+
+    virtual uint64_t vmread(uint64_t field) const;
+    virtual void vmwrite(uint64_t field, uint64_t value);
 
 protected:
 
@@ -291,44 +290,42 @@ protected:
 
     virtual bool is_supported_eptp_switching() const;
 
-    virtual bool check_vmcs_host_state();
+    virtual void check_vmcs_host_state();
     virtual void check_vmcs_guest_state();
     virtual void check_vmcs_control_state();
 
-    virtual bool check_host_control_registers_and_msrs();
-    virtual bool check_host_cr0_for_unsupported_bits();
-    virtual bool check_host_cr4_for_unsupported_bits();
-    virtual bool check_host_cr3_for_unsupported_bits();
-    virtual bool check_host_ia32_sysenter_esp_canonical_address();
-    virtual bool check_host_ia32_sysenter_eip_canonical_address();
-    virtual bool check_host_ia32_perf_global_ctrl_for_reserved_bits();
-    virtual bool check_host_ia32_pat_for_unsupported_bits();
-    virtual bool check_host_verify_load_ia32_efer_enabled();
-    virtual bool check_host_ia32_efer_for_reserved_bits();
-    virtual bool check_host_ia32_efer_set();
+    virtual void check_host_control_registers_and_msrs();
+    virtual void check_host_cr0_for_unsupported_bits();
+    virtual void check_host_cr4_for_unsupported_bits();
+    virtual void check_host_cr3_for_unsupported_bits();
+    virtual void check_host_ia32_sysenter_esp_canonical_address();
+    virtual void check_host_ia32_sysenter_eip_canonical_address();
+    virtual void check_host_verify_load_ia32_perf_global_ctrl();
+    virtual void check_host_verify_load_ia32_pat();
+    virtual void check_host_verify_load_ia32_efer();
 
-    virtual bool check_host_segment_and_descriptor_table_registers();
-    virtual bool check_host_es_selector_rpl_ti_equal_zero();
-    virtual bool check_host_cs_selector_rpl_ti_equal_zero();
-    virtual bool check_host_ss_selector_rpl_ti_equal_zero();
-    virtual bool check_host_ds_selector_rpl_ti_equal_zero();
-    virtual bool check_host_fs_selector_rpl_ti_equal_zero();
-    virtual bool check_host_gs_selector_rpl_ti_equal_zero();
-    virtual bool check_host_tr_selector_rpl_ti_equal_zero();
-    virtual bool check_host_cs_not_equal_zero();
-    virtual bool check_host_tr_not_equal_zero();
-    virtual bool check_host_ss_not_equal_zero();
-    virtual bool check_host_fs_canonical_base_address();
-    virtual bool check_host_gs_canonical_base_address();
-    virtual bool check_host_gdtr_canonical_base_address();
-    virtual bool check_host_idtr_canonical_base_address();
-    virtual bool check_host_tr_canonical_base_address();
+    virtual void check_host_segment_and_descriptor_table_registers();
+    virtual void check_host_es_selector_rpl_ti_equal_zero();
+    virtual void check_host_cs_selector_rpl_ti_equal_zero();
+    virtual void check_host_ss_selector_rpl_ti_equal_zero();
+    virtual void check_host_ds_selector_rpl_ti_equal_zero();
+    virtual void check_host_fs_selector_rpl_ti_equal_zero();
+    virtual void check_host_gs_selector_rpl_ti_equal_zero();
+    virtual void check_host_tr_selector_rpl_ti_equal_zero();
+    virtual void check_host_cs_not_equal_zero();
+    virtual void check_host_tr_not_equal_zero();
+    virtual void check_host_ss_not_equal_zero();
+    virtual void check_host_fs_canonical_base_address();
+    virtual void check_host_gs_canonical_base_address();
+    virtual void check_host_gdtr_canonical_base_address();
+    virtual void check_host_idtr_canonical_base_address();
+    virtual void check_host_tr_canonical_base_address();
 
-    virtual bool check_host_checks_related_to_address_space_size();
-    virtual bool check_host_if_outside_ia32e_mode();
-    virtual bool check_host_vmcs_host_address_space_size_is_set();
-    virtual bool check_host_verify_pae_is_enabled();
-    virtual bool check_host_verify_rip_has_canonical_address();
+    virtual void check_host_checks_related_to_address_space_size();
+    virtual void check_host_if_outside_ia32e_mode();
+    virtual void check_host_vmcs_host_address_space_size_is_set();
+    virtual void check_host_host_address_space_disabled();
+    virtual void check_host_host_address_space_enabled();
 
     virtual void checks_on_guest_control_registers_debug_registers_and_msrs();
     virtual void check_guest_cr0_for_unsupported_bits();
@@ -511,17 +508,14 @@ protected:
     virtual void check_control_event_injection_instr_length_checks();
     virtual void check_control_entry_msr_load_address();
 
-private:
+    virtual bool check_pat(uint64_t pat);
+
+protected:
 
     friend class vmcs_ut;
 
     bitmap m_msr_bitmap;
-    bitmap m_io_bitmap_a;
-    bitmap m_io_bitmap_b;
-
     uint64_t m_msr_bitmap_phys;
-    uint64_t m_io_bitmap_a_phys;
-    uint64_t m_io_bitmap_b_phys;
 
     intrinsics_intel_x64 *m_intrinsics;
 

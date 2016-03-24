@@ -1688,3 +1688,21 @@ vmcs_intel_x64::is_supported_eptp_switching() const
     return (vmread(VMCS_VM_FUNCTION_CONTROLS_FULL) &
             VM_FUNCTION_CONTROL_EPTP_SWITCHING);
 }
+
+bool
+vmcs_intel_x64::check_pat(uint64_t pat)
+{
+    switch (pat)
+    {
+        case 0:
+        case 1:
+        case 4:
+        case 5:
+        case 6:
+        case 7:
+            return true;
+
+        default:
+            return false;
+    }
+}
