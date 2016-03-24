@@ -136,10 +136,10 @@ vmcs_intel_x64::check_control_io_bitmap_address_bits()
     if ((addr_b & 0x0000000000000FFF) != 0)
         throw invalid_alignmnet("io bitmap b addr not page aligned", addr_b);
 
-    if (check_has_valid_address_width(addr_a) == false)
+    if (is_physical_address_valid(addr_a) == false)
         throw invalid_address("io bitmap a addr too large", addr_a);
 
-    if (check_has_valid_address_width(addr_b) == false)
+    if (is_physical_address_valid(addr_b) == false)
         throw invalid_address("io bitmap b addr too large", addr_b);
 }
 
@@ -154,7 +154,7 @@ vmcs_intel_x64::check_control_msr_bitmap_address_bits()
     if ((addr & 0x0000000000000FFF) != 0)
         throw invalid_alignmnet("msr bitmap addr not page aligned", addr);
 
-    if (check_has_valid_address_width(addr) == false)
+    if (is_physical_address_valid(addr) == false)
         throw invalid_address("msr bitmap addr too large", addr);
 }
 
@@ -172,7 +172,7 @@ vmcs_intel_x64::check_control_tpr_shadow_and_virtual_apic()
     if ((phys_addr & 0x0000000000000FFF) != 0)
         throw invalid_alignmnet("virtual apic addr not 4k aligned", phys_addr);
 
-    if (check_has_valid_address_width(phys_addr) == false)
+    if (is_physical_address_valid(phys_addr) == false)
         throw invalid_address("vitual apic addr too large", phys_addr);
 
     if (is_enabled_virtual_interrupt_delivery() == false)
@@ -235,7 +235,7 @@ vmcs_intel_x64::check_control_virtual_apic_address_bits()
     if ((phys_addr & 0x0000000000000FFF) != 0)
         throw invalid_alignmnet("apic access addr not 4k aligned", phys_addr);
 
-    if (check_has_valid_address_width(phys_addr) == false)
+    if (is_physical_address_valid(phys_addr) == false)
         throw invalid_address("apic access addr too large", phys_addr);
 }
 
@@ -320,7 +320,7 @@ vmcs_intel_x64::check_control_process_posted_interrupt_checks()
         throw vmcs_invalid_field("bits 5:0 of the interrupt descriptor addr "
                                  "must be 0 if posted interrupts is 1", vector);
 
-    if (check_has_valid_address_width(addr) == false)
+    if (is_physical_address_valid(addr) == false)
         throw invalid_address("interrupt descriptor addr too large", addr);
 }
 
@@ -345,27 +345,27 @@ vmcs_intel_x64::check_control_enable_ept_checks()
     auto ia32_vmx_ept_vpid_cap_msr =
         m_intrinsics->read_msr(IA32_VMX_EPT_VPID_CAP_MSR);
 
-    auto uncacheable = (ia32_vmx_ept_vpid_cap_msr & 0x0000000000000100);
-    auto write_back = (ia32_vmx_ept_vpid_cap_msr & 0x4000000000000000);
+    auto uncacheable = (ia32_vmx_ept_vpid_cap_msr & IA32_VMX_EPT_VPID_CAP_UC);
+    auto write_back = (ia32_vmx_ept_vpid_cap_msr & IA32_VMX_EPT_VPID_CAP_WB);
 
-    if ((eptp & 0x0000000000000007) == 0 && uncacheable == 0)
+    if ((eptp & EPTP_MEMORY_TYPE) == 0 && uncacheable == 0)
         throw vmcs_invalid_field("hardware does not support ept memory type: "
                                  "uncachable", ia32_vmx_ept_vpid_cap_msr);
 
-    if ((eptp & 0x0000000000000007) == 6 && write_back == 0)
+    if ((eptp & EPTP_MEMORY_TYPE) == 6 && write_back == 0)
         throw vmcs_invalid_field("hardware does not support ept memory type: "
                                  "write-back", ia32_vmx_ept_vpid_cap_msr);
 
-    if ((eptp & 0x0000000000000007) != 0 && (eptp & 0x0000000000000007) != 6)
+    if ((eptp & EPTP_MEMORY_TYPE) != 0 && (eptp & EPTP_MEMORY_TYPE) != 6)
         throw vmcs_invalid_field("unknown eptp memory type", eptp);
 
-    if ((eptp & 0x0000000000000038) >> 3 != 3)
+    if ((eptp & EPTP_PAGE_WALK_LENGTH) >> 3 != 3)
         throw vmcs_invalid_field("the ept walk-through length must 1 less "
                                  "than 4, i.e. 3", eptp);
 
-    auto dirty_accessed = (ia32_vmx_ept_vpid_cap_msr & 0x0000000000200000);
+    auto ad = (ia32_vmx_ept_vpid_cap_msr & IA32_VMX_EPT_VPID_CAP_AD);
 
-    if ((eptp & 0x0000000000000040) != 0 && dirty_accessed == 0)
+    if ((eptp & EPTP_ACCESSED_DIRTY_FLAGS_ENABLED) != 0 && ad == 0)
         throw vmcs_invalid_field("hardware does not support dirty / "
                                  "accessed flags for ept",
                                  ia32_vmx_ept_vpid_cap_msr);
@@ -414,7 +414,7 @@ vmcs_intel_x64::check_control_enable_vm_functions()
         throw vmcs_invalid_field(
             "bits 11:0 must be 0 for eptp list address", eptp_list);
 
-    if (check_has_valid_address_width(eptp_list) == false)
+    if (is_physical_address_valid(eptp_list) == false)
         throw invalid_address("eptp list address addr too large", eptp_list);
 }
 
@@ -440,11 +440,11 @@ vmcs_intel_x64::check_control_enable_vmcs_shadowing()
                                  "write bitmap address",
                                  vmcs_vmwrite_bitmap_address);
 
-    if (check_has_valid_address_width(vmcs_vmread_bitmap_address) == false)
+    if (is_physical_address_valid(vmcs_vmread_bitmap_address) == false)
         throw invalid_address("vmcs read bitmap address addr too "
                               "large", vmcs_vmread_bitmap_address);
 
-    if (check_has_valid_address_width(vmcs_vmwrite_bitmap_address) == false)
+    if (is_physical_address_valid(vmcs_vmwrite_bitmap_address) == false)
         throw invalid_address("vmcs write bitmap address addr too "
                               "large", vmcs_vmwrite_bitmap_address);
 }
@@ -463,7 +463,7 @@ vmcs_intel_x64::check_control_enable_ept_violation_checks()
                                  "virt except info address",
                                  vmcs_virt_except_info_address);
 
-    if (check_has_valid_address_width(vmcs_virt_except_info_address) == false)
+    if (is_physical_address_valid(vmcs_virt_except_info_address) == false)
         throw invalid_address("vmcs virt except info address addr too "
                               "large", vmcs_virt_except_info_address);
 }
@@ -520,13 +520,13 @@ vmcs_intel_x64::check_control_exit_msr_store_address()
         throw vmcs_invalid_field("bits 3:0 must be 0 for the "
                                  "exit msr store address", msr_store_addr);
 
-    if (check_has_valid_address_width(msr_store_addr) == false)
+    if (is_physical_address_valid(msr_store_addr) == false)
         throw invalid_address("exit msr store addr too "
                               "large", msr_store_addr);
 
     auto msr_store_addr_end = msr_store_addr + (msr_store_count * 16) - 1;
 
-    if (check_has_valid_address_width(msr_store_addr_end) == false)
+    if (is_physical_address_valid(msr_store_addr_end) == false)
         throw invalid_address("end of exit msr store area too "
                               "large", msr_store_addr_end);
 }
@@ -545,13 +545,13 @@ vmcs_intel_x64::check_control_exit_msr_load_address()
         throw vmcs_invalid_field("bits 3:0 must be 0 for the "
                                  "exit msr load address", msr_load_addr);
 
-    if (check_has_valid_address_width(msr_load_addr) == false)
+    if (is_physical_address_valid(msr_load_addr) == false)
         throw invalid_address("exit msr load addr too "
                               "large", msr_load_addr);
 
     auto msr_load_addr_end = msr_load_addr + (msr_load_count * 16) - 1;
 
-    if (check_has_valid_address_width(msr_load_addr_end) == false)
+    if (is_physical_address_valid(msr_load_addr_end) == false)
         throw invalid_address("end of exit msr load area too "
                               "large", msr_load_addr_end);
 }
@@ -592,10 +592,10 @@ vmcs_intel_x64::check_control_event_injection_type_vector_checks()
     auto interrupt_info_field =
         vmread(VMCS_VM_ENTRY_INTERRUPTION_INFORMATION_FIELD);
 
-    if ((interrupt_info_field & 0x0000000080000000) == 0)
+    if ((interrupt_info_field & VM_INTERRUPT_INFORMATION_VALID) == 0)
         return;
 
-    auto type = (interrupt_info_field & 0x0000000000000700) >> 8;
+    auto type = (interrupt_info_field & VM_INTERRUPT_INFORMATION_TYPE) >> 8;
 
     if (type == 1)
         throw vmcs_invalid_field("interrupt information field type of 1 "
@@ -606,7 +606,7 @@ vmcs_intel_x64::check_control_event_injection_type_vector_checks()
                                  "is reserved on this hardware",
                                  interrupt_info_field);
 
-    auto vector = interrupt_info_field & 0x00000000000000FF;
+    auto vector = interrupt_info_field & VM_INTERRUPT_INFORMATION_VECTOR;
 
     if (type == 2 && vector != 2)
         throw vmcs_invalid_field("interrupt information field vector must be "
@@ -630,16 +630,16 @@ vmcs_intel_x64::check_control_event_injection_delivery_ec_checks()
     auto interrupt_info_field =
         vmread(VMCS_VM_ENTRY_INTERRUPTION_INFORMATION_FIELD);
 
-    if ((interrupt_info_field & 0x0000000080000000) == 0)
+    if ((interrupt_info_field & VM_INTERRUPT_INFORMATION_VALID) == 0)
         return;
 
-    if ((interrupt_info_field & 0x0000000000000800) == 0)
+    if ((interrupt_info_field & VM_INTERRUPT_INFORMATION_DELIVERY_ERROR) == 0)
         return;
 
     auto cr0 = vmread(VMCS_GUEST_CR0);
 
-    auto type = (interrupt_info_field & 0x0000000000000700) >> 8;
-    auto vector = (interrupt_info_field & 0x00000000000000FF) >> 0;
+    auto type = (interrupt_info_field & VM_INTERRUPT_INFORMATION_TYPE) >> 8;
+    auto vector = (interrupt_info_field & VM_INTERRUPT_INFORMATION_VECTOR) >> 0;
 
     if (is_enabled_unrestricted_guests() == true)
     {
@@ -679,7 +679,7 @@ vmcs_intel_x64::check_control_event_injection_reserved_bits_checks()
     auto interrupt_info_field =
         vmread(VMCS_VM_ENTRY_INTERRUPTION_INFORMATION_FIELD);
 
-    if ((interrupt_info_field & 0x0000000080000000) == 0)
+    if ((interrupt_info_field & VM_INTERRUPT_INFORMATION_VALID) == 0)
         return;
 
     if ((interrupt_info_field & 0x000000007FFFF000) != 0)
@@ -696,10 +696,10 @@ vmcs_intel_x64::check_control_event_injection_ec_checks()
     auto exception_error_code =
         vmread(VMCS_VM_ENTRY_EXCEPTION_ERROR_CODE);
 
-    if ((interrupt_info_field & 0x0000000080000000) == 0)
+    if ((interrupt_info_field & VM_INTERRUPT_INFORMATION_VALID) == 0)
         return;
 
-    if ((interrupt_info_field & 0x0000000000000800) == 0)
+    if ((interrupt_info_field & VM_INTERRUPT_INFORMATION_DELIVERY_ERROR) == 0)
         return;
 
     if ((exception_error_code & 0x00000000FFFF8000) == 0)
@@ -718,10 +718,10 @@ vmcs_intel_x64::check_control_event_injection_instr_length_checks()
     auto instruction_length =
         vmread(VMCS_VM_ENTRY_INSTRUCTION_LENGTH);
 
-    if ((interrupt_info_field & 0x0000000080000000) == 0)
+    if ((interrupt_info_field & VM_INTERRUPT_INFORMATION_VALID) == 0)
         return;
 
-    auto type = (interrupt_info_field & 0x0000000000000700) >> 8;
+    auto type = (interrupt_info_field & VM_INTERRUPT_INFORMATION_TYPE) >> 8;
 
     switch (type)
     {
@@ -754,13 +754,13 @@ vmcs_intel_x64::check_control_entry_msr_load_address()
         throw vmcs_invalid_field("bits 3:0 must be 0 for the "
                                  "entry msr load address", msr_load_addr);
 
-    if (check_has_valid_address_width(msr_load_addr) == false)
+    if (is_physical_address_valid(msr_load_addr) == false)
         throw invalid_address("entry msr load addr too "
                               "large", msr_load_addr);
 
     auto msr_load_addr_end = msr_load_addr + (msr_load_count * 16) - 1;
 
-    if (check_has_valid_address_width(msr_load_addr_end) == false)
+    if (is_physical_address_valid(msr_load_addr_end) == false)
         throw invalid_address("end of entry msr load area too "
                               "large", msr_load_addr_end);
 }

@@ -21,24 +21,53 @@
 
 #include <test.h>
 #include <vcpu/vcpu.h>
+#include <debug_ring/debug_ring.h>
 
 void
-vcpu_ut::test_vcpu_invalid_default_vcpu()
+vcpu_ut::test_vcpu_negative_id()
 {
-    // auto vc = vcpu();
-    // EXPECT_TRUE(vc.is_valid() == false);
+    auto dr = std::make_shared<debug_ring>(0);
+
+    EXPECT_EXCEPTION(std::make_shared<vcpu>(-1), bfn::invalid_argument_error);
+    EXPECT_EXCEPTION(std::make_shared<vcpu>(-1, dr), bfn::invalid_argument_error);
 }
 
 void
-vcpu_ut::test_vcpu_invalid_id_only_vcpu()
+vcpu_ut::test_vcpu_id_too_large()
 {
-    // auto vc = vcpu(10000);
-    // EXPECT_TRUE(vc.is_valid() == false);
+    auto dr = std::make_shared<debug_ring>(0);
+
+    EXPECT_EXCEPTION(std::make_shared<vcpu>(10000), bfn::invalid_argument_error);
+    EXPECT_EXCEPTION(std::make_shared<vcpu>(10000, dr), bfn::invalid_argument_error);
 }
 
 void
-vcpu_ut::test_vcpu_get_id()
+vcpu_ut::test_vcpu_invalid_debug_ring()
 {
-    // auto vc = vcpu(1);
-    // EXPECT_TRUE(vc.id() == 1);
+    auto dr = std::shared_ptr<debug_ring>();
+
+    EXPECT_NO_EXCEPTION(std::make_shared<vcpu>(0, dr));
+}
+
+void
+vcpu_ut::test_vcpu_valid()
+{
+    auto dr = std::make_shared<debug_ring>(0);
+
+    EXPECT_NO_EXCEPTION(std::make_shared<vcpu>(0, dr));
+}
+
+void
+vcpu_ut::test_vcpu_write()
+{
+    MockRepository mocks;
+    auto dr = bfn::mock_shared<debug_ring>(mocks);
+    auto vc = std::make_shared<vcpu>(0, dr);
+
+    mocks.ExpectCall(dr.get(), debug_ring::write);
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        vc->write("hello world");
+    });
 }

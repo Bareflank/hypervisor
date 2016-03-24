@@ -50,6 +50,10 @@ find bfcrt/ -name "*.h" -exec $ASTYLE --options=./tools/astyle/astyle.config {} 
 find bfcrt/ -name "*.c" -exec $ASTYLE --options=./tools/astyle/astyle.config {} \;
 find bfcrt/ -name "*.cpp" -exec $ASTYLE --options=./tools/astyle/astyle.config {} \;
 
+find bfdrivers/ -name "*.h" -exec $ASTYLE --options=./tools/astyle/astyle.config {} \;
+find bfdrivers/ -name "*.c" -exec $ASTYLE --options=./tools/astyle/astyle.config {} \;
+find bfdrivers/ -name "*.cpp" -exec $ASTYLE --options=./tools/astyle/astyle.config {} \;
+
 find bfelf_loader/ -name "*.h" -exec $ASTYLE --options=./tools/astyle/astyle.config {} \;
 find bfelf_loader/ -name "*.c" -exec $ASTYLE --options=./tools/astyle/astyle.config {} \;
 find bfelf_loader/ -name "*.cpp" -exec $ASTYLE --options=./tools/astyle/astyle.config {} \;
@@ -70,14 +74,6 @@ find common/ -name "*.h" -exec $ASTYLE --options=./tools/astyle/astyle.config {}
 find common/ -name "*.c" -exec $ASTYLE --options=./tools/astyle/astyle.config {} \;
 find common/ -name "*.cpp" -exec $ASTYLE --options=./tools/astyle/astyle.config {} \;
 
-find driver_entry/ -name "*.h" -exec $ASTYLE --options=./tools/astyle/astyle.config {} \;
-find driver_entry/ -name "*.c" -exec $ASTYLE --options=./tools/astyle/astyle.config {} \;
-find driver_entry/ -name "*.cpp" -exec $ASTYLE --options=./tools/astyle/astyle.config {} \;
-
 find include/ -name "*.h" -exec $ASTYLE --options=./tools/astyle/astyle.config {} \;
 find include/ -name "*.c" -exec $ASTYLE --options=./tools/astyle/astyle.config {} \;
 find include/ -name "*.cpp" -exec $ASTYLE --options=./tools/astyle/astyle.config {} \;
-
-find src/ -name "*.h" -exec $ASTYLE --options=./tools/astyle/astyle.config {} \;
-find src/ -name "*.c" -exec $ASTYLE --options=./tools/astyle/astyle.config {} \;
-find src/ -name "*.cpp" -exec $ASTYLE --options=./tools/astyle/astyle.config {} \;
