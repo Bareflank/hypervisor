@@ -22,7 +22,7 @@
 #ifndef VCPU_MANAGER_H
 #define VCPU_MANAGER_H
 
-#include <map>
+#include <vector>
 #include <memory>
 #include <vcpu/vcpu_factory.h>
 
@@ -45,7 +45,7 @@ public:
     /// Initializes the vCPU.
     ///
     /// @param vcpuid the vcpu to initialize
-    /// @return success on success, failure otherwise
+    /// @throws invalid_argument_error thrown when the vcpuid is invalid
     ///
     virtual void init(int64_t vcpuid);
 
@@ -54,7 +54,8 @@ public:
     /// Starts the vCPU.
     ///
     /// @param vcpuid the vcpu to start
-    /// @return success on success, falure otherwise
+    /// @throws invalid_argument_error thrown when the vcpuid is invalid, or
+    ///     if the vcpuid has yet to be initialized
     ///
     virtual void start(int64_t vcpuid);
 
@@ -63,7 +64,8 @@ public:
     /// Runs the vCPU's exit handler
     ///
     /// @param vcpuid the vcpu to stop
-    /// @return success on success, falure otherwise
+    /// @throws invalid_argument_error thrown when the vcpuid is invalid, or
+    ///     if the vcpuid has yet to be initialized
     ///
     virtual void dispatch(int64_t vcpuid);
 
@@ -72,7 +74,8 @@ public:
     /// Stops the vCPU.
     ///
     /// @param vcpuid the vcpu to stop
-    /// @return success on success, falure otherwise
+    /// @throws invalid_argument_error thrown when the vcpuid is invalid, or
+    ///     if the vcpuid has yet to be initialized
     ///
     virtual void stop(int64_t vcpuid);
 
@@ -81,7 +84,8 @@ public:
     /// Halts the vCPU.
     ///
     /// @param vcpuid the vcpu to halt
-    /// @return success on success, falure otherwise
+    /// @throws invalid_argument_error thrown when the vcpuid is invalid, or
+    ///     if the vcpuid has yet to be initialized
     ///
     virtual void halt(int64_t vcpuid);
 
@@ -90,7 +94,8 @@ public:
     /// Promote vCPU to host CPU state
     ///
     /// @param vcpuid the vcpu to promote
-    /// @return On success the function never returns
+    /// @throws invalid_argument_error thrown when the vcpuid is invalid, or
+    ///     if the vcpuid has yet to be initialized
     ///
     virtual void promote(int64_t vcpuid);
 
@@ -103,7 +108,7 @@ public:
     /// @param vcpuid the vcpu's log to write to
     /// @param str the string to write to the log
     ///
-    virtual void write(int64_t vcpuid, std::string &str);
+    virtual void write(int64_t vcpuid, const std::string &str);
 
 public:
 
@@ -123,7 +128,7 @@ private:
 
 private:
 
-    std::map<int64_t, std::shared_ptr<vcpu> > m_vcpus;
+    std::vector<std::shared_ptr<vcpu> > m_vcpus;
 
 private:
 
@@ -132,11 +137,12 @@ private:
     /// The vCPU factory is a seem that provides better access for unit
     /// testing, which allows us to create misbehaving vcpus
     ///
-    vcpu_factory m_factory;
+    std::shared_ptr<vcpu_factory> m_vcpu_factory;
 
     /// Set vCPU Factory
     ///
-    void set_factory(const vcpu_factory &factory);
+    void set_factory(const std::shared_ptr<vcpu_factory> &factory)
+    { m_vcpu_factory = factory; }
 };
 
 /// vCPU Manager Macro

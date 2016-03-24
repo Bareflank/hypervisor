@@ -25,11 +25,6 @@
 #include <memory>
 #include <vcpu/vcpu_intel_x64.h>
 
-// TODO: Note that this is a placeholder. This class needs to be moved to
-// it's own module, as this is what people will implement to create their
-// own vCPUs. This way, they have a very simple means picking which portions
-// of the system to change without having to re-write a lot of code.
-
 class vcpu_factory
 {
 public:
@@ -44,11 +39,9 @@ public:
 
     /// Make vCPU
     ///
-    /// @return returns a pointer to a newly created vCPU. Note that it is
-    /// up to the caller to free this vCPU.
+    /// @return returns a pointer to a newly created vCPU.
     ///
-    std::shared_ptr<vcpu> make_vcpu(int64_t vcpuid)
-    { return std::make_shared<vcpu_intel_x64>(vcpuid); }
+    virtual std::shared_ptr<vcpu> make_vcpu(int64_t vcpuid);
 };
 
 #endif

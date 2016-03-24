@@ -23,15 +23,17 @@
 # Subdirs
 ################################################################################
 
-SUBDIRS += intrinsics
-SUBDIRS += memory_manager
-SUBDIRS += debug_ring
-SUBDIRS += serial
-SUBDIRS += vcpu
-SUBDIRS += vmxon
-SUBDIRS += vmcs
-SUBDIRS += exit_handler
-SUBDIRS += entry
+PARENT_SUBDIRS += intrinsics
+PARENT_SUBDIRS += memory_manager
+PARENT_SUBDIRS += debug_ring
+PARENT_SUBDIRS += serial
+PARENT_SUBDIRS += vcpu
+PARENT_SUBDIRS += vcpu_factory
+PARENT_SUBDIRS += vmxon
+PARENT_SUBDIRS += vmcs
+PARENT_SUBDIRS += exit_handler
+PARENT_SUBDIRS += entry
+PARENT_SUBDIRS += misc
 
 ################################################################################
 # Common

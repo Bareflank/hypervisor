@@ -26,10 +26,10 @@
 #include <exit_handler/exit_handler_intel_x64_exceptions.h>
 #include <vcpu/vcpu_manager.h>
 
-exit_handler_intel_x64::exit_handler_intel_x64(intrinsics_intel_x64 *intrinsics) :
+exit_handler_intel_x64::exit_handler_intel_x64(const std::shared_ptr<intrinsics_intel_x64> &intrinsics) :
     m_intrinsics(intrinsics)
 {
-    if (m_intrinsics == 0)
+    if (!m_intrinsics)
         throw invalid_argument(intrinsics, "intrinsics == null");
 }
 

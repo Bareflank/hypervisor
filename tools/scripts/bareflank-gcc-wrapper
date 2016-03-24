@@ -129,8 +129,10 @@ SYSROOT_INC_PATH="-I$HOME/opt/cross/x86_64-elf/include/ -I$HOME/opt/cross/x86_64
 # Libgcc
 # ------------------------------------------------------------------------------
 
-if [[ $MODE == "link" ]] && [[ $TYPE == "shared" ]]; then
-    BAREFLANK_LIBS="-u local_init -u local_fini -lcrt"
+if [[ $BAREFLANK_WRAPPER_IGNORE_CRT != "true" ]]; then
+    if [[ $MODE == "link" ]] && [[ $TYPE == "shared" ]]; then
+        BAREFLANK_LIBS="-u local_init -u local_fini -lbfcrt_static "
+    fi
 fi
 
 # ------------------------------------------------------------------------------

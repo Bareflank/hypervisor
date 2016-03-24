@@ -19,24 +19,34 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-.PHONY: all
-.PHONY: clean
-.PHONY: unittest
+################################################################################
+# Color
+################################################################################
 
-.DEFAULT_GOAL := all
-
+CG='\033[1;32m'
 CS='\033[1;35m'
 CE='\033[0m'
 
+################################################################################
+# Paths
+################################################################################
+
 LIBRARY_PATHS := $(LIBRARY_PATHS):.
 
-all: force
+################################################################################
+# Targets
+################################################################################
 
-clean: force
+.PHONY: run_tests
 
-unittest: force
+.DEFAULT_GOAL := run_tests
+
+run_tests: force
 	@echo $(CS)"--------------------------------------------------------------------------------"$(CE)
-	LD_LIBRARY_PATH=$(LIBRARY_PATHS) ./test
+	@LD_LIBRARY_PATH=$(LIBRARY_PATHS) ./test > output.txt 2>&1 || (cat output.txt; exit 1)
+	@cat output.txt | grep "totals:"
+	@rm output.txt
 	@echo $(CS)"--------------------------------------------------------------------------------"$(CE)
+
 
 force: ;

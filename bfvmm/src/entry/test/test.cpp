@@ -40,6 +40,24 @@ entry_ut::fini()
 bool
 entry_ut::list()
 {
+    this->test_init_vmm_success();
+    this->test_init_vmm_throws_general_exception();
+    this->test_init_vmm_throws_standard_exception();
+    this->test_init_vmm_throws_any_exception();
+    this->test_start_vmm_success();
+    this->test_start_vmm_throws_general_exception();
+    this->test_start_vmm_throws_standard_exception();
+    this->test_start_vmm_throws_any_exception();
+    this->test_stop_vmm_success();
+    this->test_stop_vmm_throws_general_exception();
+    this->test_stop_vmm_throws_standard_exception();
+    this->test_stop_vmm_throws_any_exception();
+    this->test_get_eh_frame_list_success();
+    this->test_register_eh_frame_invalid_addr();
+    this->test_register_eh_frame_invalid_size();
+    this->test_register_eh_frame_success();
+    this->test_register_eh_frame_too_many();
+
     return true;
 }
 

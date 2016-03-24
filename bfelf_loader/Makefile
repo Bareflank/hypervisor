@@ -26,8 +26,8 @@
 SUBDIRS += dummy_misc
 SUBDIRS += dummy_code
 SUBDIRS += src
-SUBDIRS += test
 SUBDIRS += bin
+SUBDIRS += test
 
 ################################################################################
 # Common
