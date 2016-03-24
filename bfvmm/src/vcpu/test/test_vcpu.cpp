@@ -28,8 +28,8 @@ vcpu_ut::test_vcpu_negative_id()
 {
     auto dr = std::make_shared<debug_ring>(0);
 
-    EXPECT_EXCEPTION(std::make_shared<vcpu>(-1), bfn::invalid_argument_error);
-    EXPECT_EXCEPTION(std::make_shared<vcpu>(-1, dr), bfn::invalid_argument_error);
+    EXPECT_EXCEPTION(std::make_shared<vcpu>(-1), std::out_of_range);
+    EXPECT_EXCEPTION(std::make_shared<vcpu>(-1, dr), std::out_of_range);
 }
 
 void
@@ -37,8 +37,8 @@ vcpu_ut::test_vcpu_id_too_large()
 {
     auto dr = std::make_shared<debug_ring>(0);
 
-    EXPECT_EXCEPTION(std::make_shared<vcpu>(10000), bfn::invalid_argument_error);
-    EXPECT_EXCEPTION(std::make_shared<vcpu>(10000, dr), bfn::invalid_argument_error);
+    EXPECT_EXCEPTION(std::make_shared<vcpu>(10000), std::out_of_range);
+    EXPECT_EXCEPTION(std::make_shared<vcpu>(10000, dr), std::out_of_range);
 }
 
 void

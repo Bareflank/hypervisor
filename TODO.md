@@ -26,16 +26,8 @@ Misc:
 
 Version 1.0 TODO:
 - Need to have all of the VMCS checks unit tested
-- Need to have all of the remaining unit tests completed (i.e. all of the
-  VMM modules need their unit tests completed including serial)
-- Everything should be using the new debug.h instead of manually calling
-  std::cout
-- Provide support for Debian, Fedora, CentOS
-- Get rid of as many hardcode values in the VMCS and VMXON code as possible
-- Need to pass CFLAGS and CXXFLAGS through. Test by changing the serial port
-  during compilation via environment variable
-- Get rid of the GCC pathces
 - Search for / and % and get rid of them
+- Make sure all required instructions are emulated
 
 Version 1.1 TODO:
 - Need to have a completely isolated exit handler. It should have it's own
@@ -60,3 +52,14 @@ Version 2.0 TODO:
 
 Documenttion:
 - Update cross compiler documentation to include how to setup sysroot
+- Problem with reusing CR3 from IOCTL
+- Red-zone: http://eli.thegreenplace.net/2011/09/06/stack-frame-layout-on-x86-64/
+- Statics using the stack and the crash we saw with the memory manager
+- The build system could use a document that explains how it works and the
+  various different features that it has
+- ctors / dtors
+
+Known Issues:
+- Sleep does not work when Bareflank is running. Attemping to do so will freeze
+  the system
+- Fedora freezes after a period of inactivity (might be related to above issue)

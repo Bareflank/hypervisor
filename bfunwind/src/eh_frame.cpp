@@ -132,11 +132,11 @@ common_entry::common_entry() :
     m_entry_end(0),
     m_payload_start(0),
     m_payload_end(0),
-    m_eh_frame{}
+    m_eh_frame{0, 0}
 {
 }
 
-common_entry::common_entry(const struct eh_frame_t &eh_frame) :
+common_entry::common_entry(const eh_frame_t &eh_frame) :
     m_is_cie(0),
     m_entry_start(0),
     m_entry_end(0),
@@ -219,7 +219,7 @@ ci_entry::ci_entry() :
 {
 }
 
-ci_entry::ci_entry(const struct eh_frame_t &eh_frame) :
+ci_entry::ci_entry(const eh_frame_t &eh_frame) :
     common_entry(eh_frame),
 
     m_augmentation_string(0),
@@ -235,7 +235,7 @@ ci_entry::ci_entry(const struct eh_frame_t &eh_frame) :
     parse((char *)eh_frame.addr);
 }
 
-ci_entry::ci_entry(const struct eh_frame_t &eh_frame, void *addr) :
+ci_entry::ci_entry(const eh_frame_t &eh_frame, void *addr) :
     common_entry(eh_frame),
 
     m_augmentation_string(0),
@@ -318,7 +318,7 @@ fd_entry::fd_entry() :
 {
 }
 
-fd_entry::fd_entry(const struct eh_frame_t &eh_frame) :
+fd_entry::fd_entry(const eh_frame_t &eh_frame) :
     common_entry(eh_frame),
 
     m_pc_begin(0),
@@ -329,7 +329,7 @@ fd_entry::fd_entry(const struct eh_frame_t &eh_frame) :
     parse((char *)eh_frame.addr);
 }
 
-fd_entry::fd_entry(const struct eh_frame_t &eh_frame, void *addr) :
+fd_entry::fd_entry(const eh_frame_t &eh_frame, void *addr) :
     common_entry(eh_frame),
 
     m_pc_begin(0),
