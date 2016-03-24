@@ -41,7 +41,9 @@ struct section_info_t;
  * Local Init
  *
  * Initialized a binary / module. This is very similar to _init that GCC
- * uses on Linux.
+ * uses on Linux.This is called by the driver entry as each module. Each
+ * module has this function as it is statically linked with each module as
+ * it is compiled by the gcc wrapper
  *
  * @param info a pointer to the section info structure that is used by the
  *     init funcion.
@@ -52,12 +54,40 @@ typedef void (*local_init_t)(struct section_info_t *info);
  * Local Fini
  *
  * Initialized a binary / module. This is very similar to _fini that GCC
- * uses on Linux.
+ * uses on Linux. This is called by the driver entry as each module. Each
+ * module has this function as it is statically linked with each module as
+ * it is compiled by the gcc wrapper
  *
  * @param info a pointer to the section info structure that is used by the
  *     fini funcion.
  */
 typedef void (*local_fini_t)(struct section_info_t *info);
+
+/**
+ * Local Init
+ *
+ * Initialized a binary / module. This is very similar to _init that GCC
+ * uses on Linux.This is called by the driver entry as each module. Each
+ * module has this function as it is statically linked with each module as
+ * it is compiled by the gcc wrapper
+ *
+ * @param info a pointer to the section info structure that is used by the
+ *     init funcion.
+ */
+void local_init(struct section_info_t *info);
+
+/**
+ * Local Fini
+ *
+ * Initialized a binary / module. This is very similar to _fini that GCC
+ * uses on Linux. This is called by the driver entry as each module. Each
+ * module has this function as it is statically linked with each module as
+ * it is compiled by the gcc wrapper
+ *
+ * @param info a pointer to the section info structure that is used by the
+ *     fini funcion.
+ */
+void local_fini(struct section_info_t *info);
 
 /**
  * Info Struct

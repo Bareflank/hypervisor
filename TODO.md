@@ -35,6 +35,7 @@ Version 1.0 TODO:
 - Need to pass CFLAGS and CXXFLAGS through. Test by changing the serial port
   during compilation via environment variable
 - Get rid of the GCC pathces
+- Search for / and % and get rid of them
 
 Version 1.1 TODO:
 - Need to have a completely isolated exit handler. It should have it's own

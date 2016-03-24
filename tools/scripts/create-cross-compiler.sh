@@ -372,17 +372,20 @@ if [ ! -f "completed_build_crt" ]; then
 
     rm -Rf completed_build_libcxx
 
-    rm -Rf build-crt
-    mkdir -p build-crt
+    export BAREFLANK_WRAPPER_IGNORE_CRT=true 2> /dev/null
 
-    pushd build-crt
-    $PREFIX/bin/x86_64-bareflank-gcc $CFLAGS -c $HYPERVISOR_ROOT/bfcrt/*.c -I$HYPERVISOR_ROOT/include/
-    $PREFIX/bin/x86_64-elf-ar rcs libcrt.a *.o
-    cp -Rf libcrt.a $SYSROOT/lib/
+    pushd $HYPERVISOR_ROOT/bfcrt
+    make clean
+    make
+    cp -Rf bin/cross/libbfcrt_static.a $SYSROOT/lib/
     popd
+
+    export BAREFLANK_WRAPPER_IGNORE_CRT=false 2> /dev/null
 
     touch completed_build_crt
 fi
+
+
 
 # ------------------------------------------------------------------------------
 # Unwind
@@ -462,7 +465,6 @@ if [ ! -f "completed_build_libcxx" ]; then
     mkdir -p build-libcxx
 
     export BAREFLANK_WRAPPER_INCLUDE_LIBC=true 2> /dev/null
-    export BAREFLANK_WRAPPER_INCLUDE_TMPLIBCXX=true 2> /dev/null
 
     pushd build-libcxx
     cmake ../libcxx/ \
@@ -479,7 +481,6 @@ if [ ! -f "completed_build_libcxx" ]; then
     make -j2 install
     popd
 
-    export BAREFLANK_WRAPPER_INCLUDE_TMPLIBCXX=false 2> /dev/null
     export BAREFLANK_WRAPPER_INCLUDE_LIBC=false 2> /dev/null
 
     touch completed_build_libcxx
