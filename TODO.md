@@ -34,6 +34,7 @@ Version 1.0 TODO:
 - Get rid of as many hardcode values in the VMCS and VMXON code as possible
 - Need to pass CFLAGS and CXXFLAGS through. Test by changing the serial port
   during compilation via environment variable
+- Get rid of the GCC pathces
 
 Version 1.1 TODO:
 - Need to have a completely isolated exit handler. It should have it's own

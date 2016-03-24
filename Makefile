@@ -23,11 +23,11 @@
 # Subdirs
 ################################################################################
 
+PARENT_SUBDIRS += bfdrivers
 PARENT_SUBDIRS += bfelf_loader
 PARENT_SUBDIRS += bfm
 PARENT_SUBDIRS += bfunwind
 PARENT_SUBDIRS += bfvmm
-PARENT_SUBDIRS += driver_entry
 
 ################################################################################
 # Common
@@ -55,14 +55,14 @@ CS_M='\033[1;95m'
 .PHONY: unittest
 
 debian_load: force
-	@cd driver_entry/src/arch/linux; \
+	@cd bfdrivers/src/arch/linux; \
 	sudo make unload; \
 	make clean; \
 	make; \
 	sudo make load
 
 debian_unload: force
-	@cd driver_entry/src/arch/linux; \
+	@cd bfdrivers/src/arch/linux; \
 	sudo make unload; \
 	make clean
 
