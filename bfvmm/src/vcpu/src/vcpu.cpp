@@ -20,78 +20,26 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #include <debug.h>
+#include <exception.h>
+
 #include <vcpu/vcpu.h>
 
 vcpu::vcpu(int64_t id) :
     m_id(id)
 {
-    m_debug_ring = new debug_ring(id);
+    if (id < 0 || id >= MAX_VCPUS)
+        throw invalid_argument(id, "out of range");
+
+    m_debug_ring = std::make_shared<debug_ring>(id);
 }
 
-vcpu::vcpu(int64_t id, debug_ring *m_debug_ring) :
+vcpu::vcpu(int64_t id, const std::shared_ptr<debug_ring> &dr) :
     m_id(id),
-    m_debug_ring(m_debug_ring)
+    m_debug_ring(dr)
 {
-    if (m_debug_ring == 0)
-        m_debug_ring = new debug_ring(id);
-}
+    if (id < 0 || id >= MAX_VCPUS)
+        throw invalid_argument(id, "out of range");
 
-bool
-vcpu::is_valid() const
-{
-    return m_id >= 0 && m_id < MAX_VCPUS;
-}
-
-int64_t
-vcpu::id() const
-{
-    return m_id;
-}
-
-vcpu_error::type
-vcpu::start()
-{
-    return vcpu_error::success;
-}
-
-vcpu_error::type
-vcpu::dispatch()
-{
-    return vcpu_error::success;
-}
-
-vcpu_error::type
-vcpu::stop()
-{
-    return vcpu_error::success;
-}
-
-vcpu_error::type
-vcpu::halt()
-{
-    return vcpu_error::success;
-}
-
-vcpu_error::type
-vcpu::request_teardown()
-{
-    return vcpu_error::success;
-}
-
-void
-erase(std::string &str, const std::string &substr)
-{
-    auto start_pos = str.find(substr);
-
-    if (start_pos == std::string::npos)
-        return;
-
-    str.erase(start_pos, substr.length());
-}
-
-void
-vcpu::write(std::string &str)
-{
-    if (m_debug_ring != 0)
-        m_debug_ring->write(str);
+    if (!dr)
+        m_debug_ring = std::make_shared<debug_ring>(id);
 }

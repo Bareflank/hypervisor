@@ -43,4 +43,28 @@ typedef int64_t (*entry_t)(void);
 ///
 extern "C" int64_t execute_with_stack(entry_t func, void *stack, uint64_t size);
 
+/// Init VMM
+///
+/// Initialize the VMM. Should always be run before start.
+///
+/// @return ENTRY_SUCCESS on success, ENTRY_ERROR_UNKNOWN otherwise.
+///
+extern "C" int64_t init_vmm(int64_t arg);
+
+/// Start VMM
+///
+/// Starts the VMM.
+///
+/// @return ENTRY_SUCCESS on success, ENTRY_ERROR_UNKNOWN otherwise.
+///
+extern "C" int64_t start_vmm(int64_t arg);
+
+/// Stop VMM
+///
+/// Stop the VMM. To start the VMM again, init should be run first.
+///
+/// @return ENTRY_SUCCESS on success, ENTRY_ERROR_UNKNOWN otherwise.
+///
+extern "C" int64_t stop_vmm(int64_t arg);
+
 #endif

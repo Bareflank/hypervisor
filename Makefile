@@ -23,11 +23,12 @@
 # Subdirs
 ################################################################################
 
-SUBDIRS += bfelf_loader
-SUBDIRS += bfm
-SUBDIRS += bfunwind
-SUBDIRS += bfvmm
-SUBDIRS += driver_entry
+PARENT_SUBDIRS += bfcrt
+PARENT_SUBDIRS += bfdrivers
+PARENT_SUBDIRS += bfelf_loader
+PARENT_SUBDIRS += bfm
+PARENT_SUBDIRS += bfunwind
+PARENT_SUBDIRS += bfvmm
 
 ################################################################################
 # Common
@@ -52,56 +53,55 @@ CS_M='\033[1;95m'
 .PHONY: status
 .PHONY: quick
 .PHONY: loop
+.PHONY: unittest
 
 debian_load: force
-	cd driver_entry/src/arch/linux; \
+	@cd bfdrivers/src/arch/linux; \
 	sudo make unload; \
 	make clean; \
 	make; \
 	sudo make load
 
 debian_unload: force
-	cd driver_entry/src/arch/linux; \
+	@cd bfdrivers/src/arch/linux; \
 	sudo make unload; \
 	make clean
 
-debian_clean: force
-	$(MAKE) debian_unload
+debian_clean: debian_unload
 
 load: force
-	cd bfm/bin/native; \
-	sudo ./run.sh load vmm.modules
+	@cd bfm/bin/native; \
+	sudo ./run.sh load vmm.modules;
 
 unload: force
-	cd bfm/bin/native; \
+	@cd bfm/bin/native; \
 	sudo ./run.sh unload
 
 start: force
-	cd bfm/bin/native; \
+	@cd bfm/bin/native; \
 	sudo ./run.sh start
 
 stop: force
-	cd bfm/bin/native; \
+	@cd bfm/bin/native; \
 	sudo ./run.sh stop
 
 dump: force
-	cd bfm/bin/native; \
+	@cd bfm/bin/native; \
 	sudo ./run.sh dump
 
 status: force
-	cd bfm/bin/native; \
+	@cd bfm/bin/native; \
 	sudo ./run.sh status
 
-quick: force
-	$(MAKE) load; \
-	$(MAKE) start
+quick: load start
 
 loop: force
 	@for n in $(shell seq 1 $(NUM)); do \
 		echo $(CS_M)"cycle: $$n"$(CE); \
-		$(MAKE) load; \
-		$(MAKE) start; \
-		$(MAKE) stop; \
-		$(MAKE) unload; \
-		echo; \
+		$(MAKE) --no-print-directory load; \
+		$(MAKE) --no-print-directory start; \
+		$(MAKE) --no-print-directory stop; \
+		$(MAKE) --no-print-directory unload; \
     done \
+
+unittest: run_tests

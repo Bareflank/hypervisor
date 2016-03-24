@@ -37,6 +37,8 @@ public:
     ///
     /// Creates a vCPU with the provided id and default resources.
     ///
+    /// @param id the id of the vcpu
+    ///
     vcpu_intel_x64(int64_t id);
 
     /// Override Constructor
@@ -47,12 +49,19 @@ public:
     /// will be constructed in it's place, providing a means to select which
     /// internal components to override.
     ///
+    /// @param id the id of the vcpu
+    /// @param debug_ring the debug ring the vcpu should use
+    /// @param vmxon the vmxon the vcpu should use
+    /// @param vmcs the vmcs the vcpu should use
+    /// @param exit_handler the exit handler the vcpu should use
+    /// @param intrinsics the intrinsics the vcpu should use
+    ///
     vcpu_intel_x64(int64_t id,
-                   debug_ring *debug_ring,
-                   vmxon_intel_x64 *vmxon,
-                   vmcs_intel_x64 *vmcs,
-                   exit_handler_intel_x64 *exit_handler,
-                   intrinsics_intel_x64 *intrinsics);
+                   const std::shared_ptr<debug_ring> &debug_ring,
+                   const std::shared_ptr<vmxon_intel_x64> &vmxon,
+                   const std::shared_ptr<vmcs_intel_x64> &vmcs,
+                   const std::shared_ptr<exit_handler_intel_x64> &exit_handler,
+                   const std::shared_ptr<intrinsics_intel_x64> &intrinsics);
 
     /// Destructor
     ///
@@ -62,47 +71,42 @@ public:
     ///
     /// Starts the vCPU.
     ///
-    /// @return success on success, failure otherwise
-    ///
-    virtual vcpu_error::type start() override;
+    virtual void start() override;
 
     /// Dispatch
     ///
     /// Dispatches the exit handler for the vCPU.
     ///
-    /// @return success on success, failure otherwise
-    ///
-    virtual vcpu_error::type dispatch() override;
+    virtual void dispatch() override
+    { m_exit_handler->dispatch(); }
 
     /// Stop
     ///
     /// Stops the vCPU.
     ///
-    /// @return success on success, failure otherwise
-    ///
-    virtual vcpu_error::type stop() override;
+    virtual void stop() override
+    { m_vmxon->stop(); }
 
     /// Halt
     ///
     /// Halts the vCPU.
     ///
-    /// @return success on success, failure otherwise
-    ///
-    virtual vcpu_error::type halt() override;
+    virtual void halt() override
+    { m_intrinsics->stop(); }
 
-    /// promote
+    /// Promote
     ///
-    /// promote the vCPU to host CPU state
+    /// Promote the vCPU to host CPU state
     ///
-    /// @return never returns on success, failure otherwise
-    ///
-    virtual vcpu_error::type promote() override;
+    virtual void promote() override
+    { m_vmcs->promote(); }
 
 private:
-    vmxon_intel_x64 *m_vmxon;
-    vmcs_intel_x64 *m_vmcs;
-    exit_handler_intel_x64 *m_exit_handler;
-    intrinsics_intel_x64 *m_intrinsics;
+
+    std::shared_ptr<vmxon_intel_x64> m_vmxon;
+    std::shared_ptr<vmcs_intel_x64> m_vmcs;
+    std::shared_ptr<exit_handler_intel_x64> m_exit_handler;
+    std::shared_ptr<intrinsics_intel_x64> m_intrinsics;
 };
 
 #endif

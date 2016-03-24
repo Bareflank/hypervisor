@@ -87,7 +87,11 @@
             if (strcmp(ge.what(), typeid(b).name()) == 0) \
                 caught = true; \
             else \
-                std::cerr << "wrong exception caught: " << ge.what() << std::endl; \
+            { \
+                std::cerr << "wrong exception caught: " << std::endl; \
+                std::cerr << "    - caught: " << ge.what() << std::endl; \
+                std::cerr << "    - expecting: " << typeid(b).name() << std::endl; \
+            } \
         } \
         catch(std::exception &e) \
         { \
@@ -175,7 +179,11 @@
             if (strcmp(ge.what(), typeid(b).name()) == 0) \
                 caught = true; \
             else \
-                std::cerr << "wrong exception caught: " << ge.what() << std::endl; \
+            { \
+                std::cerr << "wrong exception caught: " << std::endl; \
+                std::cerr << "    - caught: " << ge.what() << std::endl; \
+                std::cerr << "    - expecting: " << typeid(b).name() << std::endl; \
+            } \
         } \
         catch(std::exception &e) \
         { \
