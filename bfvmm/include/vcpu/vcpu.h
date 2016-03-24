@@ -23,18 +23,8 @@
 #define VCPU_H
 
 #include <string>
-#include <stdint.h>
+#include <memory>
 #include <debug_ring/debug_ring.h>
-
-namespace vcpu_error
-{
-enum type
-{
-    success = 0,
-    failure = 1,
-    invalid = 2
-};
-}
 
 class vcpu
 {
@@ -43,6 +33,9 @@ public:
     /// Constructor
     ///
     /// Creates a vCPU with the provided id and default resources.
+    ///
+    /// @param id the id of the vcpu
+    /// @throws invalid_argument_error if the id is invalid
     ///
     vcpu(int64_t id);
 
@@ -54,17 +47,15 @@ public:
     /// will be constructed in it's place, providing a means to select which
     /// internal components to override.
     ///
-    vcpu(int64_t id, debug_ring *m_debug_ring);
+    /// @param id the id of the vcpu
+    /// @param dr the debug ring the vcpu should use
+    /// @throws invalid_argument_error if the id is invalid
+    ///
+    vcpu(int64_t id, const std::shared_ptr<debug_ring> &dr);
 
     /// Destructor
     ///
     virtual ~vcpu() {}
-
-    /// Is Valid
-    ///
-    /// @return true if the vCPU is valid, false otherwise
-    ///
-    virtual bool is_valid() const;
 
     /// vCPU Id
     ///
@@ -73,50 +64,43 @@ public:
     ///
     /// @return the VPU's id
     ///
-    virtual int64_t id() const;
+    virtual int64_t id() const
+    { return m_id; }
 
     /// Start
     ///
     /// Starts the vCPU.
     ///
-    /// @return success on success, failure otherwise
-    ///
-    virtual vcpu_error::type start();
+    virtual void start()
+    { }
 
     /// Dispatch
     ///
     /// Dispatches the exit handler for the vCPU.
     ///
-    /// @return success on success, failure otherwise
-    ///
-    virtual vcpu_error::type dispatch();
+    virtual void dispatch()
+    { }
 
     /// Stop
     ///
     /// Stops the vCPU.
     ///
-    /// @return success on success, failure otherwise
-    ///
-    virtual vcpu_error::type stop();
+    virtual void stop()
+    { }
 
-    /// promote
+    /// Halt
     ///
-    /// promote the vCPU to host CPU state
+    /// Halts the vCPU.
     ///
-    /// @return never returns on success, failure otherwise
-    ///
-    virtual vcpu_error::type promote() { return vcpu_error::success; }
+    virtual void halt()
+    { }
 
-
-    /// Request teardown
+    /// Promote
     ///
-    /// Call into the hypervisor to promote  the vCPU
-    ///  guest state to the host. Following this, the
-    /// hypervisor can be shut down from the promoted guest.
+    /// Promote the vCPU to host CPU state
     ///
-    /// @return success on success, failure otherwise
-    ///
-    virtual vcpu_error::type request_teardown();
+    virtual void promote()
+    { }
 
     /// Write to Log
     ///
@@ -126,12 +110,13 @@ public:
     ///
     /// @param str the string to write to the log
     ///
-    virtual void write(std::string &str);
+    virtual void write(const std::string &str)
+    { m_debug_ring->write(str); }
 
 private:
 
     int64_t m_id;
-    debug_ring *m_debug_ring;
+    std::shared_ptr<debug_ring> m_debug_ring;
 };
 
 #endif

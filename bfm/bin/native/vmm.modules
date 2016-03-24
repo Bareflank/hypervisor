@@ -10,5 +10,7 @@
 ../../../bfvmm/bin/cross/libvmxon.so
 ../../../bfvmm/bin/cross/libvmcs.so
 ../../../bfvmm/bin/cross/libvcpu.so
+../../../bfvmm/bin/cross/libvcpu_factory.so
 ../../../bfvmm/bin/cross/libexit_handler.so
+../../../bfvmm/bin/cross/libmisc.so
 ../../../bfvmm/bin/cross/libc++.so

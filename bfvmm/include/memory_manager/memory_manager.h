@@ -27,8 +27,6 @@
 #include <stdint.h>
 #include <memory.h>
 
-class vmxon_ut;
-
 class memory_manager
 {
 public:
@@ -159,8 +157,6 @@ public:
     memory_manager &operator=(const memory_manager &) = delete;
 
 private:
-
-    friend vmxon_ut;
 
     /// Default Constructor
     ///
