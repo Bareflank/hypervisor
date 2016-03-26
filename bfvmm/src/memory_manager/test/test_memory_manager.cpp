@@ -204,7 +204,7 @@ memory_manager_ut::test_memory_manager_malloc_aligned()
 void
 memory_manager_ut::test_memory_manager_malloc_alloc_fragment()
 {
-    auto addr1 = g_mm->malloc_aligned(10, 3);
+    auto addr1 = g_mm->malloc_aligned(10, 16);
     auto addr2 = g_mm->malloc_aligned(MAX_PAGE_SIZE, MAX_PAGE_SIZE);
     auto addr3 = g_mm->malloc_aligned(10, 0);
     auto addr4 = g_mm->malloc_aligned(10, 0);

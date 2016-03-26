@@ -104,7 +104,7 @@ quick: load start
 
 loop: force
 	@for n in $(shell seq 1 $(NUM)); do \
-		echo $(CS)"cycle: $$n"$(CE); \
+		echo -e $(CS)"cycle: $$n"$(CE); \
 		$(MAKE) --no-print-directory load; \
 		$(MAKE) --no-print-directory start; \
 		$(MAKE) --no-print-directory stop; \
