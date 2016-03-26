@@ -32,7 +32,7 @@ vmcs_intel_x64::vmcs_intel_x64(const std::shared_ptr<intrinsics_intel_x64> &intr
     m_intrinsics(intrinsics)
 {
     if (!m_intrinsics)
-        throw invalid_argument(intrinsics, "intrinsics == null");
+        throw std::invalid_argument("intrinsics == null");
 
     m_msr_bitmap_phys = m_msr_bitmap.phys_addr();
 }
@@ -431,6 +431,11 @@ vmcs_intel_x64::write_natural_host_state(const vmcs_state_intel_x64 &state)
 void
 vmcs_intel_x64::promote_16bit_guest_state()
 {
+    // TODO: This needs to be fixed in future versions. For now this works
+    // because we use the same selectors with the guest and host, but once
+    // we address that, this code will not work with cs, ss and tr commented
+    // out.
+
     m_intrinsics->write_es(vmread(VMCS_GUEST_ES_SELECTOR));
     // m_intrinsics->write_cs(vmread(VMCS_GUEST_CS_SELECTOR));
     // m_intrinsics->write_ss(vmread(VMCS_GUEST_SS_SELECTOR));

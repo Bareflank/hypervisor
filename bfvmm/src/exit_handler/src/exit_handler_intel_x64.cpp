@@ -30,7 +30,7 @@ exit_handler_intel_x64::exit_handler_intel_x64(const std::shared_ptr<intrinsics_
     m_intrinsics(intrinsics)
 {
     if (!m_intrinsics)
-        throw invalid_argument(intrinsics, "intrinsics == null");
+        throw std::invalid_argument("intrinsics == null");
 }
 
 exit_handler_intel_x64::~exit_handler_intel_x64()
@@ -358,7 +358,10 @@ exit_handler_intel_x64::handle_hlt()
 
 void
 exit_handler_intel_x64::handle_invd()
-{ unimplemented_handler(); }
+{
+    m_intrinsics->invd();
+    advance_rip();
+}
 
 void
 exit_handler_intel_x64::handle_invlpg()

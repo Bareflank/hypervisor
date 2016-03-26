@@ -19,6 +19,8 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+SHELL=/bin/bash
+
 ################################################################################
 # Compilers
 ################################################################################
@@ -91,12 +93,14 @@ RMDIR:=rmdir --ignore-fail-on-non-empty -p
 ################################################################################
 
 NATIVE_CCFLAGS+=-fpic
+NATIVE_CCFLAGS+=-std=c99
 NATIVE_CCFLAGS+=-Wall
 NATIVE_CCFLAGS+=-Wextra
 NATIVE_CCFLAGS+=-Wpedantic
 
 CROSS_CCFLAGS+=-fpic
 CROSS_CCFLAGS+=-ffreestanding
+CROSS_CCFLAGS+=-std=c99
 CROSS_CCFLAGS+=-mno-red-zone
 CROSS_CCFLAGS+=-Wall
 CROSS_CCFLAGS+=-Wextra

@@ -90,7 +90,7 @@ debug_ring_ut::test_write_string_to_dr_that_is_larger_than_dr()
 
     init_wb(DEBUG_RING_SIZE);
 
-    EXPECT_EXCEPTION(dr.write(wb), bfn::range_error);
+    EXPECT_EXCEPTION(dr.write(wb), std::invalid_argument);
 }
 
 void
@@ -101,7 +101,7 @@ debug_ring_ut::test_write_string_to_dr_that_is_much_larger_than_dr()
 
     init_wb(DEBUG_RING_SIZE + 50);
 
-    EXPECT_EXCEPTION(dr.write(wb), bfn::range_error);
+    EXPECT_EXCEPTION(dr.write(wb), std::invalid_argument);
 }
 
 void

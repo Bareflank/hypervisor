@@ -142,6 +142,21 @@
 #endif
 
 /**
+ * Debug Ring Shift
+ *
+ * Defines the size of the debug ring. Note that each vCPU gets one of these,
+ * and thus the total amount of memory that is used can add up quickly. That
+ * being said, make these as large as you can afford. Also note that these
+ * will be allocated using the mem pool, so make sure that it is large enough
+ * to hold the debug rings for each vCPU and then some.
+ *
+ * Note: defined in shifted bits
+ */
+#ifndef DEBUG_RING_SHIFT
+#define DEBUG_RING_SHIFT (15)
+#endif
+
+/**
  * Debug Ring Size
  *
  * Defines the size of the debug ring. Note that each vCPU gets one of these,
@@ -152,9 +167,7 @@
  *
  * Note: defined in bytes
  */
-#ifndef DEBUG_RING_SIZE
-#define DEBUG_RING_SIZE (10ULL * MAX_PAGE_SIZE)
-#endif
+#define DEBUG_RING_SIZE (1 << DEBUG_RING_SHIFT)
 
 /**
  * Alignment

@@ -28,7 +28,7 @@ vcpu::vcpu(int64_t id) :
     m_id(id)
 {
     if (id < 0 || id >= MAX_VCPUS)
-        throw invalid_argument(id, "out of range");
+        throw std::out_of_range("vcpu id");
 
     m_debug_ring = std::make_shared<debug_ring>(id);
 }
@@ -38,7 +38,7 @@ vcpu::vcpu(int64_t id, const std::shared_ptr<debug_ring> &dr) :
     m_debug_ring(dr)
 {
     if (id < 0 || id >= MAX_VCPUS)
-        throw invalid_argument(id, "out of range");
+        throw std::out_of_range("vcpu id");
 
     if (!dr)
         m_debug_ring = std::make_shared<debug_ring>(id);

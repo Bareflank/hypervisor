@@ -28,12 +28,12 @@
 
 #define vcpu_execute(a,b) \
     if (a < 0 || a >= MAX_VCPUS) \
-        throw invalid_argument(a, "out of range"); \
+        throw std::out_of_range("vcpu id"); \
     \
     const auto &vc = m_vcpus[a]; \
     \
     if (!vc) \
-        throw invalid_argument(a, "vcpu has not yet been created"); \
+        throw std::out_of_range("vcpu not yet initialized"); \
     \
     vc->b();
 
@@ -52,7 +52,7 @@ void
 vcpu_manager::init(int64_t vcpuid)
 {
     if (vcpuid < 0 || vcpuid >= MAX_VCPUS)
-        throw invalid_argument(vcpuid, "out of range");
+        throw std::out_of_range("vcpu id");
 
     m_vcpus[vcpuid] = m_vcpu_factory->make_vcpu(vcpuid);
 }

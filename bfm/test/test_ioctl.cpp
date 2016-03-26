@@ -67,7 +67,7 @@ bfm_ut::test_ioctl_add_module_with_invalid_length()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_EXCEPTION(g_ctl.call_ioctl_add_module(""_s), bfn::invalid_argument_error);
+        EXPECT_EXCEPTION(g_ctl.call_ioctl_add_module(""_s), std::invalid_argument);
     });
 }
 
@@ -158,7 +158,7 @@ bfm_ut::test_ioctl_dump_vmm_with_invalid_drr()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_EXCEPTION(g_ctl.call_ioctl_dump_vmm(0), bfn::invalid_argument_error);
+        EXPECT_EXCEPTION(g_ctl.call_ioctl_dump_vmm(0), std::invalid_argument);
     });
 }
 
@@ -188,7 +188,7 @@ bfm_ut::test_ioctl_vmm_status_with_invalid_drr()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_EXCEPTION(g_ctl.call_ioctl_vmm_status(0), bfn::invalid_argument_error);
+        EXPECT_EXCEPTION(g_ctl.call_ioctl_vmm_status(0), std::invalid_argument);
     });
 }
 
