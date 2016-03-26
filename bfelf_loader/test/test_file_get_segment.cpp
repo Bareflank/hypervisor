@@ -24,7 +24,7 @@
 void
 bfelf_loader_ut::test_bfelf_file_get_segment_invalid_ef()
 {
-    struct bfelf_phdr *phdr = 0;
+    bfelf_phdr *phdr = 0;
 
     auto ret = bfelf_file_get_segment(0, 0, &phdr);
     EXPECT_TRUE(ret == BFELF_ERROR_INVALID_ARG);
@@ -33,9 +33,9 @@ bfelf_loader_ut::test_bfelf_file_get_segment_invalid_ef()
 void
 bfelf_loader_ut::test_bfelf_file_get_segment_invalid_index()
 {
-    bfelf_file_t ef = {};
+    bfelf_file_t ef;
+    bfelf_phdr *phdr = 0;
     auto test = get_test();
-    struct bfelf_phdr *phdr = 0;
 
     bfelf_file_init((char *)&test, sizeof(test), &ef);
 
@@ -46,7 +46,7 @@ bfelf_loader_ut::test_bfelf_file_get_segment_invalid_index()
 void
 bfelf_loader_ut::test_bfelf_file_get_segment_invalid_phdr()
 {
-    bfelf_file_t ef = {};
+    bfelf_file_t ef;
     auto test = get_test();
 
     bfelf_file_init((char *)&test, sizeof(test), &ef);
@@ -58,9 +58,9 @@ bfelf_loader_ut::test_bfelf_file_get_segment_invalid_phdr()
 void
 bfelf_loader_ut::test_bfelf_file_get_segment_success()
 {
-    bfelf_file_t ef = {};
+    bfelf_file_t ef;
+    bfelf_phdr *phdr = 0;
     auto test = get_test();
-    struct bfelf_phdr *phdr = 0;
 
     bfelf_file_init((char *)&test, sizeof(test), &ef);
 

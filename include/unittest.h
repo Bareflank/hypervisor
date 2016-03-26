@@ -81,27 +81,55 @@
 #define EXPECT_EXCEPTION(a, b) \
     { \
         bool caught = false; \
+        bool wrong_exception = false; \
+        std::string caught_str; \
+        std::string expecting_str; \
         try{ a; } \
+        catch(BaseException &be) \
+        { \
+            throw; \
+        } \
         catch(bfn::general_exception &ge) \
         { \
-            if (strcmp(ge.what(), typeid(b).name()) == 0) \
-                caught = true; \
-            else \
+            caught = true; \
+            if (strcmp(typeid(ge).name(), typeid(b).name()) != 0) \
             { \
-                std::cerr << "wrong exception caught: " << std::endl; \
-                std::cerr << "    - caught: " << ge.what() << std::endl; \
-                std::cerr << "    - expecting: " << typeid(b).name() << std::endl; \
+                wrong_exception = true; \
+                caught_str = typeid(ge).name(); \
+                expecting_str = typeid(b).name(); \
             } \
         } \
         catch(std::exception &e) \
         { \
-            throw; \
+            caught = true; \
+            if (strcmp(typeid(e).name(), typeid(b).name()) != 0) \
+            { \
+                wrong_exception = true; \
+                caught_str = typeid(e).name(); \
+                expecting_str = typeid(b).name(); \
+            } \
         } \
         catch(...) \
         { \
+            caught = true; \
+            wrong_exception = true; \
             std::cerr << "unknown exception caught" << std::endl; \
         } \
-        EXPECT_TRUE(caught); \
+        if(caught == false) \
+        { \
+            this->expect_failed("no exception was caught", __PRETTY_FUNCTION__, __LINE__); \
+        } \
+        else \
+        { \
+            if (wrong_exception == true) \
+            { \
+                this->expect_failed("wrong exception caught", __PRETTY_FUNCTION__, __LINE__); \
+                std::cerr << "    - caught: " << caught_str << std::endl; \
+                std::cerr << "    - expecting: " << expecting_str << std::endl; \
+            } \
+            else \
+                this->inc_pass(); \
+        } \
     }
 
 /// Expect No Exception
@@ -120,8 +148,9 @@
     { \
         bool caught = false; \
         try{ a; } \
+        catch(BaseException &be) { throw; } \
         catch(bfn::general_exception &ge) { caught = true; } \
-        catch(std::exception &e) { throw; } \
+        catch(std::exception &e) { caught = true; } \
         catch(...) { caught = true; } \
         EXPECT_FALSE(caught); \
     }
@@ -173,27 +202,55 @@
 #define ASSERT_EXCEPTION(a, b) \
     { \
         bool caught = false; \
+        bool wrong_exception = false; \
+        std::string caught_str; \
+        std::string expecting_str; \
         try{ a; } \
+        catch(BaseException &be) \
+        { \
+            throw; \
+        } \
         catch(bfn::general_exception &ge) \
         { \
-            if (strcmp(ge.what(), typeid(b).name()) == 0) \
-                caught = true; \
-            else \
+            caught = true; \
+            if (strcmp(typeid(ge).name(), typeid(b).name()) != 0) \
             { \
-                std::cerr << "wrong exception caught: " << std::endl; \
-                std::cerr << "    - caught: " << ge.what() << std::endl; \
-                std::cerr << "    - expecting: " << typeid(b).name() << std::endl; \
+                wrong_exception = true; \
+                caught_str = typeid(ge).name(); \
+                expecting_str = typeid(b).name(); \
             } \
         } \
         catch(std::exception &e) \
         { \
-            throw; \
+            caught = true; \
+            if (strcmp(typeid(e).name(), typeid(b).name()) != 0) \
+            { \
+                wrong_exception = true; \
+                caught_str = typeid(e).name(); \
+                expecting_str = typeid(b).name(); \
+            } \
         } \
         catch(...) \
         { \
+            caught = true; \
+            wrong_exception = true; \
             std::cerr << "unknown exception caught" << std::endl; \
         } \
-        ASSERT_TRUE(caught); \
+        if(caught == false) \
+        { \
+            this->assert_failed("no exception was caught", __PRETTY_FUNCTION__, __LINE__); \
+        } \
+        else \
+        { \
+            if (wrong_exception == true) \
+            { \
+                this->assert_failed("wrong exception caught", __PRETTY_FUNCTION__, __LINE__); \
+                std::cerr << "    - caught: " << caught_str << std::endl; \
+                std::cerr << "    - expecting: " << expecting_str << std::endl; \
+            } \
+            else \
+                this->inc_pass(); \
+        } \
     }
 
 /// Assert No Exception
@@ -211,8 +268,9 @@
     { \
         bool caught = false; \
         try{ a; } \
+        catch(BaseException &be) { throw; } \
         catch(bfn::general_exception &ge) { caught = true; } \
-        catch(std::exception &e) { throw; } \
+        catch(std::exception &e) { caught = true; } \
         catch(...) { caught = true; } \
         ASSERT_FALSE(caught); \
     }
@@ -510,7 +568,7 @@ public:
     expect_failed(const char *condition, const char *func, int line)
     {
         std::cout << "\033[1;31mFAILED\033[0m: [" << line << "]: " << func << std::endl;
-        std::cout << "   - condition: " << condition << std::endl;
+        std::cout << "    - condition: " << condition << std::endl;
         this->inc_fail();
     }
 

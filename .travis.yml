@@ -10,9 +10,7 @@ env:
 before_install:
 - export SILENCE="defined"
 - if [ "$GCC_BASE" = "520" ]; then export GCC_URL="https://ftp.gnu.org/gnu/gcc/gcc-5.2.0/gcc-5.2.0.tar.bz2";  fi
-- if [ "$GCC_BASE" = "520" ]; then export GCC_PATCH_URL="https://raw.githubusercontent.com/Bareflank/hypervisor/master/tools/patches/gcc-5.2.0_bareflank.patch";  fi
 - if [ "$GCC_BASE" = "530" ]; then export GCC_URL="https://ftp.gnu.org/gnu/gcc/gcc-5.3.0/gcc-5.3.0.tar.bz2";  fi
-- if [ "$GCC_BASE" = "530" ]; then export GCC_PATCH_URL="https://raw.githubusercontent.com/Bareflank/hypervisor/master/tools/patches/gcc-5.3.0_bareflank.patch";  fi
 
 install:
 - sudo apt-get update

@@ -307,13 +307,13 @@ memory_manager::is_block_aligned(int64_t block, int64_t alignment)
 }
 
 void
-memory_manager::add_mdl(struct memory_descriptor *mdl, int64_t num)
+memory_manager::add_mdl(memory_descriptor *mdl, int64_t num)
 {
     if (mdl == NULL)
-        throw invalid_argument(mdl, "mdl == NULL");
+        throw std::invalid_argument("mdl == NULL");
 
     if (num == 0)
-        throw invalid_argument(num, "num == 0");
+        throw std::invalid_argument("num == 0");
 
     for (auto i = 0; i < num; i++)
     {
@@ -391,7 +391,7 @@ _realloc_r(struct _reent *reent, void *ptr, size_t size)
 }
 
 extern "C" int64_t
-add_mdl(struct memory_descriptor *mdl, int64_t num)
+add_mdl(memory_descriptor *mdl, int64_t num)
 {
     return guard_exceptions([&]()
     { g_mm->add_mdl(mdl, num); });

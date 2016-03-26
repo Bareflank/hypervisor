@@ -20,14 +20,19 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
+#define _POSIX_C_SOURCE 200809L
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <platform.h>
 #include <sys/mman.h>
+#include <constants.h>
 
 int alloc_count = 0;
 int alloc_exec_count = 0;
+
+#define PAGE_ROUND_UP(x) ( (((uintptr_t)(x)) + MAX_PAGE_SIZE-1)  & (~(MAX_PAGE_SIZE-1)) )
 
 int
 verify_no_mem_leaks(void)
@@ -46,12 +51,24 @@ platform_alloc(int64_t len)
     return malloc(len);
 }
 
+#include <errno.h>
+
 void *
 platform_alloc_exec(int64_t len)
 {
+    void *addr = 0;
+
+    len = PAGE_ROUND_UP(len);
+    posix_memalign(&addr, MAX_PAGE_SIZE, len);
+    if (mprotect(addr, len, PROT_READ | PROT_WRITE | PROT_EXEC) == -1)
+    {
+        platform_free_exec(addr, len);
+        return 0;
+    }
+
     alloc_exec_count++;
-    return mmap(0, len, PROT_READ | PROT_WRITE | PROT_EXEC,
-                MAP_PRIVATE | MAP_ANON, -1, 0);
+
+    return addr;
 }
 
 void *
@@ -70,8 +87,10 @@ platform_free(void *addr)
 void
 platform_free_exec(void *addr, int64_t len)
 {
+    (void) len;
+
     alloc_exec_count--;
-    munmap(addr, len);
+    free(addr);
 }
 
 void

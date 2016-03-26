@@ -69,7 +69,7 @@ debug_ring::write(const std::string &str)
         throw invalid_debug_ring();
 
     if (str.length() >= DEBUG_RING_SIZE)
-        throw range_error("str", str.length(), 0, DEBUG_RING_SIZE);
+        throw std::invalid_argument("str.length() >= DEBUG_RING_SIZE");
 
     if (str.length() == 0)
         return;

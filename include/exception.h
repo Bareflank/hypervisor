@@ -25,6 +25,7 @@
 #include <string>
 #include <ostream>
 #include <typeinfo>
+#include <stdexcept>
 
 namespace bfn
 {
@@ -181,40 +182,6 @@ public:
 #define driver_inaccessible(a) bfn::driver_inaccessible_error(a)
 
 // -----------------------------------------------------------------------------
-// Invalid Argument
-// -----------------------------------------------------------------------------
-
-class invalid_argument_error : public bfn::general_exception
-{
-public:
-    invalid_argument_error(const std::string &func,
-                           const std::string &arg,
-                           const std::string &issue) :
-        m_func(func),
-        m_arg(arg),
-        m_issue(issue)
-    {}
-
-    virtual std::ostream &print(std::ostream &os) const
-    {
-        os << "invalid argument:";
-        os << std::endl << "    - func: " << m_func;
-        os << std::endl << "    - arg: " << m_arg;
-        os << std::endl << "    - issue: " << m_issue;
-
-        return os;
-    }
-
-private:
-    std::string m_func;
-    std::string m_arg;
-    std::string m_issue;
-};
-
-#define invalid_argument(a,b) \
-    bfn::invalid_argument_error(__PRETTY_FUNCTION__,#a,b)
-
-// -----------------------------------------------------------------------------
 // IOCTL Failed
 // -----------------------------------------------------------------------------
 
@@ -279,52 +246,6 @@ private:
 };
 
 #define invalid_vmm_state(a) bfn::invalid_vmm_state_error(a)
-
-// -----------------------------------------------------------------------------
-// Range Error
-// -----------------------------------------------------------------------------
-
-class range_error : public bfn::general_exception
-{
-public:
-    range_error(const std::string &mesg,
-                const std::string &func,
-                uint64_t line,
-                uint64_t index,
-                uint64_t lower,
-                uint64_t upper) :
-        m_mesg(mesg),
-        m_func(func),
-        m_line(line),
-        m_index(index),
-        m_lower(lower),
-        m_upper(upper)
-    {}
-
-    virtual std::ostream &print(std::ostream &os) const
-    {
-        os << "out of range:";
-        os << std::endl << "    - mesg: " << m_mesg;
-        os << std::endl << "    - func: " << m_func;
-        os << std::endl << "    - line: " << m_line;
-        os << std::endl << "    - index: " << m_index;
-        os << std::endl << "    - lower: " << m_lower;
-        os << std::endl << "    - upper: " << m_upper;
-
-        return os;
-    }
-
-private:
-    std::string m_mesg;
-    std::string m_func;
-    uint64_t m_line;
-    uint64_t m_index;
-    uint64_t m_lower;
-    uint64_t m_upper;
-};
-
-#define range_error(a,b,c,d) \
-    bfn::range_error(a,__PRETTY_FUNCTION__,__LINE__,b,c,d)
 
 // -----------------------------------------------------------------------------
 // Invalid Alignment
