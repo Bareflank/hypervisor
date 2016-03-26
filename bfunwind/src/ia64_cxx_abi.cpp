@@ -29,7 +29,7 @@
 // -----------------------------------------------------------------------------
 
 static _Unwind_Reason_Code
-private_personality(_Unwind_Action action, struct _Unwind_Context *context)
+private_personality(_Unwind_Action action, _Unwind_Context *context)
 {
     auto pl = context->fde.cie().personality_function();
 
@@ -53,7 +53,7 @@ private_personality(_Unwind_Action action, struct _Unwind_Context *context)
 typedef bool (* step_func_t)(_Unwind_Context *context);
 
 _Unwind_Reason_Code
-private_step(struct _Unwind_Context *context, step_func_t func)
+private_step(_Unwind_Context *context, step_func_t func)
 {
     if ((context->fde = eh_frame::find_fde(context->state)) == false)
         return _URC_END_OF_STACK;
@@ -67,7 +67,7 @@ private_step(struct _Unwind_Context *context, step_func_t func)
 }
 
 _Unwind_Reason_Code
-private_step_loop(struct _Unwind_Context *context, step_func_t func)
+private_step_loop(_Unwind_Context *context, step_func_t func)
 {
     while (1)
     {
@@ -78,7 +78,7 @@ private_step_loop(struct _Unwind_Context *context, step_func_t func)
 }
 
 static _Unwind_Reason_Code
-private_phase1(struct _Unwind_Context *context)
+private_phase1(_Unwind_Context *context)
 {
     log("\n");
     log("============================================================\n");
@@ -105,7 +105,7 @@ private_phase1(struct _Unwind_Context *context)
 }
 
 static _Unwind_Reason_Code
-private_phase2(struct _Unwind_Context *context)
+private_phase2(_Unwind_Context *context)
 {
     log("\n");
     log("============================================================\n");
@@ -140,7 +140,7 @@ _Unwind_RaiseException(_Unwind_Exception *exception_object)
 {
     auto ret = _URC_END_OF_STACK;
 
-    auto registers = registers_intel_x64();
+    auto registers = registers_intel_x64_t();
     __store_registers_intel_x64(&registers);
 
     exception_object->private_1 = 0;
@@ -166,7 +166,7 @@ _Unwind_RaiseException(_Unwind_Exception *exception_object)
 extern "C" void
 _Unwind_Resume(_Unwind_Exception *exception_object)
 {
-    auto registers = registers_intel_x64();
+    auto registers = registers_intel_x64_t();
     __store_registers_intel_x64(&registers);
 
     auto state = register_state_intel_x64(registers);
@@ -184,45 +184,45 @@ _Unwind_DeleteException(_Unwind_Exception *exception_object)
 }
 
 extern "C" uintptr_t
-_Unwind_GetGR(struct _Unwind_Context *context, int index)
+_Unwind_GetGR(_Unwind_Context *context, int index)
 {
     return context->state->get(index);
 }
 
 extern "C" void
-_Unwind_SetGR(struct _Unwind_Context *context, int index, uintptr_t value)
+_Unwind_SetGR(_Unwind_Context *context, int index, uintptr_t value)
 {
     context->state->set(index, value);
     context->state->commit();
 }
 
 extern "C" uintptr_t
-_Unwind_GetIP(struct _Unwind_Context *context)
+_Unwind_GetIP(_Unwind_Context *context)
 {
     return context->state->get_ip();
 }
 
 extern "C" void
-_Unwind_SetIP(struct _Unwind_Context *context, uintptr_t value)
+_Unwind_SetIP(_Unwind_Context *context, uintptr_t value)
 {
     context->state->set_ip(value);
     context->state->commit();
 }
 
 extern "C" uintptr_t
-_Unwind_GetLanguageSpecificData(struct _Unwind_Context *context)
+_Unwind_GetLanguageSpecificData(_Unwind_Context *context)
 {
     return context->fde.lsda();
 }
 
 extern "C" uintptr_t
-_Unwind_GetRegionStart(struct _Unwind_Context *context)
+_Unwind_GetRegionStart(_Unwind_Context *context)
 {
     return context->fde.pc_begin();
 }
 
 extern "C" uintptr_t
-_Unwind_GetIPInfo(struct _Unwind_Context *context, int *ip_before_insn)
+_Unwind_GetIPInfo(_Unwind_Context *context, int *ip_before_insn)
 {
     if (ip_before_insn == NULL)
         ABORT("ip_before_insn == NULL");

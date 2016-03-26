@@ -123,7 +123,7 @@ typedef enum
 ///
 typedef void (*_Unwind_Exception_Cleanup_Fn)(
     _Unwind_Reason_Code reason,
-    struct _Unwind_Exception *exc);
+    _Unwind_Exception *exc);
 
 /// _Unwind_Exception
 ///
@@ -249,22 +249,22 @@ _Unwind_DeleteException(_Unwind_Exception *exception_object);
 //
 
 extern "C" uintptr_t
-_Unwind_GetGR(struct _Unwind_Context *context, int index);
+_Unwind_GetGR(_Unwind_Context *context, int index);
 
 extern "C" void
-_Unwind_SetGR(struct _Unwind_Context *context, int index, uintptr_t value);
+_Unwind_SetGR(_Unwind_Context *context, int index, uintptr_t value);
 
 extern "C" uintptr_t
-_Unwind_GetIP(struct _Unwind_Context *context);
+_Unwind_GetIP(_Unwind_Context *context);
 
 extern "C" void
-_Unwind_SetIP(struct _Unwind_Context *context, uintptr_t value);
+_Unwind_SetIP(_Unwind_Context *context, uintptr_t value);
 
 extern "C" uintptr_t
-_Unwind_GetLanguageSpecificData(struct _Unwind_Context *context);
+_Unwind_GetLanguageSpecificData(_Unwind_Context *context);
 
 extern "C" uintptr_t
-_Unwind_GetRegionStart(struct _Unwind_Context *context);
+_Unwind_GetRegionStart(_Unwind_Context *context);
 
 // -----------------------------------------------------------------------------
 // 1.6 Personality Routine
@@ -288,10 +288,10 @@ static const _Unwind_Action _UA_CLEANUP_PHASE = 2;
 static const _Unwind_Action _UA_HANDLER_FRAME = 4;
 static const _Unwind_Action _UA_FORCE_UNWIND = 8;
 
-typedef _Unwind_Reason_Code(*__personality_routine)
-(int version, _Unwind_Action actions, uint64_t exceptionClass,
- struct _Unwind_Exception *exceptionObject,
- struct _Unwind_Context *context);
+typedef _Unwind_Reason_Code(*__personality_routine)(int version,
+        _Unwind_Action actions, uint64_t exceptionClass,
+        _Unwind_Exception *exceptionObject,
+        _Unwind_Context *context);
 
 // -----------------------------------------------------------------------------
 // GNU Extensions
@@ -302,6 +302,6 @@ typedef _Unwind_Reason_Code(*__personality_routine)
 //
 
 extern "C" uintptr_t
-_Unwind_GetIPInfo(struct _Unwind_Context *context, int *ip_before_insn);
+_Unwind_GetIPInfo(_Unwind_Context *context, int *ip_before_insn);
 
 #endif

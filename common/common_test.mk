@@ -19,6 +19,8 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+SHELL=/bin/bash
+
 ################################################################################
 # Color
 ################################################################################
@@ -42,11 +44,11 @@ LIBRARY_PATHS := $(LIBRARY_PATHS):.
 .DEFAULT_GOAL := run_tests
 
 run_tests: force
-	@echo $(CS)"--------------------------------------------------------------------------------"$(CE)
+	@echo -e $(CS)"--------------------------------------------------------------------------------"$(CE)
 	@LD_LIBRARY_PATH=$(LIBRARY_PATHS) ./test > output.txt 2>&1 || (cat output.txt; exit 1)
 	@cat output.txt | grep "totals:"
 	@rm output.txt
-	@echo $(CS)"--------------------------------------------------------------------------------"$(CE)
+	@echo -e $(CS)"--------------------------------------------------------------------------------"$(CE)
 
 
 force: ;

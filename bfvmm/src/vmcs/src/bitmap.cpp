@@ -26,7 +26,7 @@ bitmap::bitmap(uint32_t num_bits)
 {
     m_length = num_bits >> 3;
 
-    if (num_bits % 8)
+    if (num_bits & 7)
         m_length++;
 
     m_bitmap = std::make_unique<uint8_t[]>(m_length);
@@ -40,7 +40,7 @@ void bitmap::set_bit(uint32_t n) noexcept
     if ((n >> 3) > m_length)
         return;
 
-    m_bitmap.get()[n >> 3] |= (1 << (n % 8));
+    m_bitmap.get()[n >> 3] |= (1 << (n & 7));
 }
 
 void bitmap::clear_bit(uint32_t n) noexcept
@@ -48,7 +48,7 @@ void bitmap::clear_bit(uint32_t n) noexcept
     if ((n >> 3) > m_length)
         return;
 
-    m_bitmap.get()[n >> 3] &= ~(1 << (n % 8));
+    m_bitmap.get()[n >> 3] &= ~(1 << (n & 7));
 }
 
 bool bitmap::bit(uint32_t n) const noexcept
@@ -56,7 +56,7 @@ bool bitmap::bit(uint32_t n) const noexcept
     if ((n >> 3) > m_length)
         return false;
 
-    if (m_bitmap.get()[n >> 3] & (1 << (n % 8)))
+    if (m_bitmap.get()[n >> 3] & (1 << (n & 7)))
         return true;
 
     return false;

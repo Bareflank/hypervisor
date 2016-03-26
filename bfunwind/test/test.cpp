@@ -31,8 +31,8 @@
 // Exception Handler Framework
 // -----------------------------------------------------------------------------
 
-struct section_info_t g_info = {};
-struct eh_frame_t g_eh_frame_list[MAX_NUM_MODULES] = {};
+section_info_t g_info;
+eh_frame_t g_eh_frame_list[MAX_NUM_MODULES] = {{0, 0}};
 
 extern "C" struct eh_frame_t *
 get_eh_frame_list()
@@ -107,12 +107,13 @@ bool bfunwind_ut::init()
     cor2.commit();
 
     auto ret = 0;
-    struct bfelf_file_t self_ef = {};
+    bfelf_file_t self_ef;
 
     ret = bfelf_file_init(m_self.get(), m_self_length, &self_ef);
     ASSERT_TRUE(ret == BFELF_SUCCESS);
 
-    struct bfelf_loader_t loader = {};
+    bfelf_loader_t loader;
+    memset(&loader, 0, sizeof(loader));
 
     loader.relocated = 1;
     loader.ignore_crt = 1;

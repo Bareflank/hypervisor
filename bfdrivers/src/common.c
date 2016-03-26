@@ -36,7 +36,7 @@
 int64_t g_vmm_status = VMM_UNLOADED;
 
 uint64_t g_num_modules = 0;
-struct module_t g_modules[MAX_NUM_MODULES] = {0};
+struct module_t g_modules[MAX_NUM_MODULES] = {{0}};
 
 struct bfelf_loader_t g_loader;
 

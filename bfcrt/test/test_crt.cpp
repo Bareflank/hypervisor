@@ -54,7 +54,9 @@ crt_ut::test_local_init_invalid_arg()
 void
 crt_ut::test_local_init_invalid_addr()
 {
-    section_info_t info = {};
+    section_info_t info;
+
+    memset(&info, 0, sizeof(info));
 
     MockRepository mocks;
     mocks.NeverCallFunc(func1);
@@ -74,7 +76,9 @@ crt_ut::test_local_init_invalid_addr()
 void
 crt_ut::test_local_init_invalid_size()
 {
-    section_info_t info = {};
+    section_info_t info;
+
+    memset(&info, 0, sizeof(info));
 
     MockRepository mocks;
     mocks.NeverCallFunc(func1);
@@ -96,7 +100,9 @@ crt_ut::test_local_init_invalid_size()
 void
 crt_ut::test_local_init_valid_stop_at_size()
 {
-    section_info_t info = {};
+    section_info_t info;
+
+    memset(&info, 0, sizeof(info));
 
     MockRepository mocks;
     mocks.ExpectCallFunc(func1);
@@ -119,7 +125,9 @@ crt_ut::test_local_init_valid_stop_at_size()
 void
 crt_ut::test_local_init_valid_stop_at_null()
 {
-    section_info_t info = {};
+    section_info_t info;
+
+    memset(&info, 0, sizeof(info));
 
     MockRepository mocks;
     mocks.ExpectCallFunc(func1);
@@ -148,7 +156,9 @@ crt_ut::test_local_fini_invalid_arg()
 void
 crt_ut::test_local_fini_invalid_addr()
 {
-    section_info_t info = {};
+    section_info_t info;
+
+    memset(&info, 0, sizeof(info));
 
     MockRepository mocks;
     mocks.NeverCallFunc(func1);
@@ -165,7 +175,9 @@ crt_ut::test_local_fini_invalid_addr()
 void
 crt_ut::test_local_fini_invalid_size()
 {
-    section_info_t info = {};
+    section_info_t info;
+
+    memset(&info, 0, sizeof(info));
 
     MockRepository mocks;
     mocks.NeverCallFunc(func1);
@@ -184,7 +196,9 @@ crt_ut::test_local_fini_invalid_size()
 void
 crt_ut::test_local_fini_valid_stop_at_size()
 {
-    section_info_t info = {};
+    section_info_t info;
+
+    memset(&info, 0, sizeof(info));
 
     MockRepository mocks;
     mocks.ExpectCallFunc(func1);
@@ -204,7 +218,9 @@ crt_ut::test_local_fini_valid_stop_at_size()
 void
 crt_ut::test_local_fini_valid_stop_at_null()
 {
-    section_info_t info = {};
+    section_info_t info;
+
+    memset(&info, 0, sizeof(info));
 
     MockRepository mocks;
     mocks.ExpectCallFunc(func1);
