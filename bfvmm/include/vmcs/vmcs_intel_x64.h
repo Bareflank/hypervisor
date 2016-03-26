@@ -54,7 +54,7 @@ public:
 
     /// Default Constructor
     ///
-    vmcs_intel_x64(const std::shared_ptr<intrinsics_intel_x64> &intrinsics);
+    vmcs_intel_x64(const std::shared_ptr<intrinsics_intel_x64> &intrinsics = nullptr);
 
     /// Destructor
     ///
@@ -118,11 +118,11 @@ protected:
     virtual void promote_32bit_guest_state();
     virtual void promote_natural_guest_state();
 
-    virtual void default_pin_based_vm_execution_controls();
-    virtual void default_primary_processor_based_vm_execution_controls();
-    virtual void default_secondary_processor_based_vm_execution_controls();
-    virtual void default_vm_exit_controls();
-    virtual void default_vm_entry_controls();
+    virtual void pin_based_vm_execution_controls();
+    virtual void primary_processor_based_vm_execution_controls();
+    virtual void secondary_processor_based_vm_execution_controls();
+    virtual void vm_exit_controls();
+    virtual void vm_entry_controls();
 
     virtual uint64_t vmread(uint64_t field) const;
     virtual void vmwrite(uint64_t field, uint64_t value);

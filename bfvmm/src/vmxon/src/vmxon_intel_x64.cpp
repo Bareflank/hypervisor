@@ -29,7 +29,7 @@ vmxon_intel_x64::vmxon_intel_x64(const std::shared_ptr<intrinsics_intel_x64> &in
     m_vmxon_enabled(false)
 {
     if (!m_intrinsics)
-        throw std::invalid_argument("intrinsics == null");
+        m_intrinsics = std::make_shared<intrinsics_intel_x64>();
 }
 
 void

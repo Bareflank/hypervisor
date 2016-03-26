@@ -29,6 +29,16 @@ CS='\033[1;95m'
 CE='\033[0m'
 
 ################################################################################
+# Load Modules
+################################################################################
+
+ifeq ($(MODULES),)
+	LOAD_MODULES=vmm.modules
+else
+	LOAD_MODULES=../../../$(MODULES)
+endif
+
+################################################################################
 # Subdirs
 ################################################################################
 
@@ -38,6 +48,8 @@ PARENT_SUBDIRS += bfelf_loader
 PARENT_SUBDIRS += bfm
 PARENT_SUBDIRS += bfunwind
 PARENT_SUBDIRS += bfvmm
+PARENT_SUBDIRS += $(filter src_%, $(dir $(wildcard */)))
+PARENT_SUBDIRS += $(filter hypervisor_example_%, $(dir $(wildcard */)))
 
 ################################################################################
 # Common
@@ -78,7 +90,7 @@ debian_clean: debian_unload
 
 load: force
 	@cd bfm/bin/native; \
-	sudo ./run.sh load vmm.modules;
+	sudo ./run.sh load $(LOAD_MODULES);
 
 unload: force
 	@cd bfm/bin/native; \
@@ -109,6 +121,6 @@ loop: force
 		$(MAKE) --no-print-directory start; \
 		$(MAKE) --no-print-directory stop; \
 		$(MAKE) --no-print-directory unload; \
-    done \
+	done \
 
 unittest: run_tests
