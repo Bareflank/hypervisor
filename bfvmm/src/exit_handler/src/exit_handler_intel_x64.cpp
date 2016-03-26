@@ -358,7 +358,10 @@ exit_handler_intel_x64::handle_hlt()
 
 void
 exit_handler_intel_x64::handle_invd()
-{ unimplemented_handler(); }
+{
+    m_intrinsics->invd();
+    advance_rip();
+}
 
 void
 exit_handler_intel_x64::handle_invlpg()

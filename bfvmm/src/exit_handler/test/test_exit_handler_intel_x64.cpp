@@ -365,7 +365,8 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_invd()
     auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
     g_exit_reason = VM_EXIT_REASON_INVD;
 
-    mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
+    mocks.NeverCall(intrinsics.get(), intrinsics_intel_x64::stop);
+    mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::invd);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
