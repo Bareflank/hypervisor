@@ -26,7 +26,6 @@ Misc:
 
 Version 1.0 TODO:
 - Need to have all of the VMCS checks unit tested
-- Make sure all required instructions are emulated
 
 Version 1.1 TODO:
 - Need to have a completely isolated exit handler. It should have it's own

@@ -39,6 +39,8 @@ extern "C" {
 void __halt(void);
 void __stop(void);
 
+void __invd(void);
+
 uint32_t __cpuid_eax(uint32_t val);
 uint32_t __cpuid_ebx(uint32_t val);
 uint32_t __cpuid_ecx(uint32_t val);
@@ -142,6 +144,9 @@ public:
 
     virtual void stop() const noexcept
     { __stop(); }
+
+    virtual void invd() const noexcept
+    { __invd(); }
 
     virtual uint32_t cpuid_eax(uint32_t val) const noexcept
     { return __cpuid_eax(val); }
