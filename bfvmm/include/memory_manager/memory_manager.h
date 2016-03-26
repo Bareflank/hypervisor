@@ -89,7 +89,7 @@ public:
     /// @param alignment the desired alignment
     /// @return a pointer to the starting address of the memory allocated.
     ///
-    virtual void *malloc_aligned(size_t size, int64_t alignment);
+    virtual void *malloc_aligned(size_t size, uint64_t alignment);
 
     /// Free
     ///

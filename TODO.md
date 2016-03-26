@@ -26,7 +26,6 @@ Misc:
 
 Version 1.0 TODO:
 - Need to have all of the VMCS checks unit tested
-- Search for / and % and get rid of them
 - Make sure all required instructions are emulated
 
 Version 1.1 TODO:
