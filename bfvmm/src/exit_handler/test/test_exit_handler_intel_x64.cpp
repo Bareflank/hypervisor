@@ -69,7 +69,7 @@ void
 exit_handler_intel_x64_ut::test_invalid_intrinics()
 {
     auto null_intrinsics = std::shared_ptr<intrinsics_intel_x64>();
-    EXPECT_EXCEPTION(std::make_unique<exit_handler_intel_x64>(null_intrinsics), std::invalid_argument);
+    EXPECT_NO_EXCEPTION(std::make_unique<exit_handler_intel_x64>(null_intrinsics));
 }
 
 void

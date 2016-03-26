@@ -9,3 +9,5 @@ bin/
 *.mod.c
 *.order
 *.symvers
+src_*
+hypervisor_example_*

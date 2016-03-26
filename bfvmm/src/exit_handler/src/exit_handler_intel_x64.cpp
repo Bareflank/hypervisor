@@ -30,7 +30,7 @@ exit_handler_intel_x64::exit_handler_intel_x64(const std::shared_ptr<intrinsics_
     m_intrinsics(intrinsics)
 {
     if (!m_intrinsics)
-        throw std::invalid_argument("intrinsics == null");
+        m_intrinsics = std::make_shared<intrinsics_intel_x64>();
 }
 
 exit_handler_intel_x64::~exit_handler_intel_x64()
