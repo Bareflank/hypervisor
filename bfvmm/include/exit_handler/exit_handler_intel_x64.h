@@ -48,7 +48,7 @@ public:
     /// @param intrinsics the intriniscs class to be used by this class
     /// @throws invalid argument if the intrinsics class is null.
     ///
-    exit_handler_intel_x64(const std::shared_ptr<intrinsics_intel_x64> &intrinsics);
+    exit_handler_intel_x64(const std::shared_ptr<intrinsics_intel_x64> &intrinsics = nullptr);
 
     /// Destructor
     ///

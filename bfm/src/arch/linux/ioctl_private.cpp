@@ -80,7 +80,7 @@ void
 ioctl_private::call_ioctl_add_module_length(int64_t len)
 {
     if (len <= 0)
-        throw invalid_argument(len, "len <= 0");
+        throw std::invalid_argument("len <= 0");
 
     if (bf_write_ioctl(fd, IOCTL_ADD_MODULE_LENGTH, &len) < 0)
         throw ioctl_failed(IOCTL_ADD_MODULE_LENGTH);
@@ -90,7 +90,7 @@ void
 ioctl_private::call_ioctl_add_module(const char *data)
 {
     if (data == 0)
-        throw invalid_argument(data, "data == NULL");
+        throw std::invalid_argument("data == NULL");
 
     if (bf_write_ioctl(fd, IOCTL_ADD_MODULE, data) < 0)
         throw ioctl_failed(IOCTL_ADD_MODULE);
@@ -128,7 +128,7 @@ void
 ioctl_private::call_ioctl_dump_vmm(debug_ring_resources_t *drr)
 {
     if (drr == 0)
-        throw invalid_argument(drr, "drr == NULL");
+        throw std::invalid_argument("drr == NULL");
 
     if (bf_read_ioctl(fd, IOCTL_DUMP_VMM, drr) < 0)
         throw ioctl_failed(IOCTL_DUMP_VMM);
@@ -138,7 +138,7 @@ void
 ioctl_private::call_ioctl_vmm_status(int64_t *status)
 {
     if (status == 0)
-        throw invalid_argument(status, "status == NULL");
+        throw std::invalid_argument("status == NULL");
 
     if (bf_read_ioctl(fd, IOCTL_VMM_STATUS, status) < 0)
         throw ioctl_failed(IOCTL_VMM_STATUS);

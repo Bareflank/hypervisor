@@ -35,7 +35,7 @@ public:
 
     /// Default Constructor
     ///
-    vmxon_intel_x64(const std::shared_ptr<intrinsics_intel_x64> &intrinsics);
+    vmxon_intel_x64(const std::shared_ptr<intrinsics_intel_x64> &intrinsics = nullptr);
 
     /// Destructor
     ///

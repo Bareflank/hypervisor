@@ -33,7 +33,7 @@
 // -----------------------------------------------------------------------------
 
 auto g_eh_frame_list_num = 0ULL;
-struct eh_frame_t g_eh_frame_list[MAX_NUM_MODULES] = {};
+eh_frame_t g_eh_frame_list[MAX_NUM_MODULES] = {};
 
 // -----------------------------------------------------------------------------
 // Helpers

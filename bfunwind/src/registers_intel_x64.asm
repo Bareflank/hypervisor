@@ -24,7 +24,7 @@ global __load_registers_intel_x64:function
 
 section .text
 
-; void __store_registers_intel_x64(struct registers_intel_x64 *state)
+; void __store_registers_intel_x64(registers_intel_x64_t *state)
 ;
 ; This function saves the current register state. Since this function is
 ; "naked", the state of the registers is identical to the state of the
@@ -64,7 +64,7 @@ __store_registers_intel_x64:
 
     ret
 
-; void __load_registers_intel_x64(struct registers_intel_x64 *state)
+; void __load_registers_intel_x64(registers_intel_x64_t *state)
 ;
 ; The goal of this function is to "resume" by setting the current state of the
 ; CPU to the state that was saved. This function is a little complicated

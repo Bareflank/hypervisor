@@ -231,7 +231,7 @@ public:
     /// Creates an invalid CIE/FDE, but stores the location of the beginning
     /// of the .eh_frame section.
     ///
-    explicit common_entry(const struct eh_frame_t &eh_frame);
+    explicit common_entry(const eh_frame_t &eh_frame);
 
     /// Destructor
     ///
@@ -304,7 +304,7 @@ public:
     ///
     /// @return returns the .eh_frame associated with this CIE/FDE
     ///
-    struct eh_frame_t eh_frame() const
+    eh_frame_t eh_frame() const
     { return m_eh_frame; }
 
 protected:
@@ -319,7 +319,7 @@ protected:
     char *m_payload_start;
     char *m_payload_end;
 
-    struct eh_frame_t m_eh_frame;
+    eh_frame_t m_eh_frame;
 };
 
 // -----------------------------------------------------------------------------
@@ -355,14 +355,14 @@ public:
     /// Creates an invalid CIE, but stores the location of the beginning
     /// of the .eh_frame section.
     ///
-    explicit ci_entry(const struct eh_frame_t &eh_frame);
+    explicit ci_entry(const eh_frame_t &eh_frame);
 
     /// Constructor
     ///
     /// Creates a valid CIE if the addr that is provided points to a valid
     /// CIE in the .eh_frame provided
     ///
-    explicit ci_entry(const struct eh_frame_t &eh_frame, void *addr);
+    explicit ci_entry(const eh_frame_t &eh_frame, void *addr);
 
     /// Destructor
     ///
@@ -488,14 +488,14 @@ public:
     /// Creates an invalid FDE, but stores the location of the beginning
     /// of the .eh_frame section.
     ///
-    explicit fd_entry(const struct eh_frame_t &eh_frame);
+    explicit fd_entry(const eh_frame_t &eh_frame);
 
     /// Constructor
     ///
     /// Creates a valid FDE if the addr that is provided points to a valid
     /// FDE in the .eh_frame provided
     ///
-    explicit fd_entry(const struct eh_frame_t &eh_frame, void *addr);
+    explicit fd_entry(const eh_frame_t &eh_frame, void *addr);
 
     /// Destructor
     ///
