@@ -16,6 +16,8 @@ GNU Lesser General Public License v2.1 (LGPL), providing a means for users of
 the project to both contribute back to the project, but also create proprietary
 extensions if so desired.
 
+[![Bareflank Demonstration Video](http://img.youtube.com/vi/adesFxQ741c/0.jpg)](https://www.youtube.com/watch?v=adesFxQ741c)
+
 To ease the development of the VMM, bareflank has partial support for C++,
 including the C++ Standard Template Library (STL) via libc++. With the C++ STL,
 bareflank has access to shared pointers, complex data structures
@@ -95,11 +97,11 @@ Target: April 2016
 * ~~Initial C++ Environment~~
 * ~~Linux Driver Entry~~
 * Basic VMM
-* Testing (Ubuntu, Debian, Fedora, CentOS)
+* ~~Testing (Ubuntu, Debian, Fedora, CentOS)~~
 
 Note: The first version only supports Linux in a type 2 configuration. The
 hypervisor itself doesn't do much other than hoist Linux into a virtual
-machine and continue execution.
+machine and continue execution. 
 
 ### Version 1.1
 
