@@ -4,7 +4,7 @@
 
 The Bareflank manager (BFM) is the userspace application responsible for managing the VMM. BFM communicates with the driver entry point to tell the driver to load, start, stop and unload the VMM. It also is capable of getting the VMM's status, and dumping debug information from the VMM. 
 
-## Hot It is Used
+## How It is Used
 
 BFM itself is a simple, userspace application, written in C++ designed to be cross platform, and simple to use. It is however not intended to be the only application to talk to the driver entries, but rather the console based application that is officially supported by the Bareflank project. BFM is made up of a couple components:
 - The command line parser
