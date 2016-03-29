@@ -31,7 +31,7 @@ The \_\_UnwindRaiseException function saves the register state, and then uses th
 
 Once the FDE is located, this code parses the FDE and then uses the DWARF 4 code to decode the stack instructions which unwind the stack for the stack frame the FDE describes. The DWARF code is located here:
 
-[dwarf](https://github.com/Bareflank/hypervisor/blob/master/bfunwind/src/dwarf4.cpp)
+[dwarf4](https://github.com/Bareflank/hypervisor/blob/master/bfunwind/src/dwarf4.cpp)
 
 The stack is unwound using the DWARF code, and control is handed back to the ia64_cxx_abi which calls a personality function located in the ".text" section in each ELF module which tells the ia64_cxx_abi code if it should continue to unwind, or stop. This process continues until the code is told to stop, in which case the CPU state is updated to reflect the unwound state. For more information and detail on this process, read each header file as it contains a lot more specifics. 
 
