@@ -21,6 +21,20 @@ This library is very specific to the architecture as it usually has to have some
 
 Since "throw" statements in C++ code generate \_\_cxa_xxx function calls, there is no needed to link the unwind library to every single module as they contain symbols for \_\_cxa_xxx and not \_\_UnwindRaiseException. Instead, the unwind library needs to be linked to the libc++abi, and the libc++abi needs to be available at load time. Currently, libc++abi is statically linked to libc++.so, which is loaded by the driver / ELF loader with the rest of the VMM. In future version of Bareflank, libc.so, libc++.so and libc++abi.so will all be loaded by the driver / ELF loader separately and the unwind library will be statically linked to libc++abi.so only. 
 
+The code in the unwind library is organized by the spec that each file implements (since there are multiple specs to get unwinding to work). Generally speaking, when an exception is thrown, the \_\_UnwindRaiseException function is called which is located here:
+
+[ia64_cxx_abi](https://github.com/Bareflank/hypervisor/blob/master/bfunwind/src/ia64_cxx_abi.cpp)
+
+The \_\_UnwindRaiseException function saves the register state, and then uses the program counter (i.e. rip for Intel x86_64), and looks up the FDE assocaited with the PC. The FDEs are stored in the ".eh_frame" section in each ELF module. The following code is used to get the FDE:
+
+[eh_frame](https://github.com/Bareflank/hypervisor/blob/master/bfunwind/src/eh_frame.cpp)
+
+Once the FDE is located, this code parses the FDE and then uses the DWARF 4 code to decode the stack instructions which unwind the stack for the stack frame the FDE describes. The DWARF code is located here:
+
+[dwarf](https://github.com/Bareflank/hypervisor/blob/master/bfunwind/src/dwarf4.cpp)
+
+The stack is unwound using the DWARF code, and control is handed back to the ia64_cxx_abi which calls a personality function located in the ".text" section in each ELF module which tells the ia64_cxx_abi code if it should continue to unwind, or stop. This process continues until the code is told to stop, in which case the CPU state is updated to reflect the unwound state. For more information and detail on this process, read each header file as it contains a lot more specifics. 
+
 ## Limitations
 
 Currently the unwind library only has support for x86_64, and has only been tested on Intel (although it's unlikely changes are needed to support AMD64). The unwind library also does not have support for DWARF expressions. Currently expression support has not been needed, but if GCC generates code that does in fact use DWARF expressions, a thrown exception would fail in the unwinder with a call to abort if it's available. Like the rest of Bareflank, the unwinder assumes that if allocations fail, the system will be halted (i.e. there is no support for gracefully failing an out-of-memory error). 
@@ -36,3 +50,5 @@ The commit_or_rollback code allows you to create a class that will execute a fun
 [vmxon](https://github.com/Bareflank/hypervisor/blob/master/bfvmm/src/vmxon/src/vmxon_intel_x64.cpp#L35)
 
 When the VMXON code creates the VMXON region, state has been created. Just prior to creating this region, a commit_or_rollback  (COR) class is created, with a rollback lambda function that releases the region. The last thing the function does it commit the COR. If an error occurs (such as an exception is thrown), the commit function will never be executed, thus when the COR is destroyed, it will execute the rollback function, automatically releasing the VMXON region. These commit_or_rollback function classes will be seen through out the code to ensure that state is handled properly in the event of an error, and can be used by a user of Bareflank to provided similar state guarantees. 
+
+During the development of this code, one bug was found that is worth mentioning here. In the System V spec, the register order is rax, _rdx_, rcx, rbx, etc..., not rax, _rbx_, rcx, rdx. When you read the code, you will see this reflected in the source, and it is by design, as this is how the spec is written, if you change the order of these reigsters to reflect the Intel Manual, the code will not work properly. 
