@@ -6,8 +6,8 @@
 The unwind library is used by C++ to provide exception support. When an exception is thrown in C++, an exception object is created (the object that will be thrown; which is usually something that inherits std::exception), and the stack is unwound until a catch(xxx) statement is found that matches the exception object that was thrown, or the end of the stack is reached in which case std::terminate is called (which in our case results in a call to abort). The code that "unwinds" the stack is the unwind library. On Linux, there are several unwind libraries that can be used with GCC and Clang/LLVM. The three main unwind libraries are libgcc (provided by the GCC compiler), libunwind, and (given the same name) Apple's libunwind that is now part of the LLVM project. 
 
 [libgcc](https://github.com/gcc-mirror/gcc/tree/master/libgcc) <br>
-[libunwind](http://www.nongnu.org/libunwind/) <br>
-[libunwind](https://github.com/llvm-mirror/libunwind) <br>
+[libunwind (Savannah)](http://www.nongnu.org/libunwind/) <br>
+[libunwind (Apple)](https://github.com/llvm-mirror/libunwind) <br>
 
 All of these unwind libraries are tightly coupled to user space, and in some cases even require pthread support to work. For this reason, Bareflank provides it's own unwind library capable of being executed in the kernel, with thread-safety, but with no external dependencies (i.e. not even libc is needed). 
 
