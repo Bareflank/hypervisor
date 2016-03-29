@@ -42,7 +42,7 @@ protected:
 
 private:
 
-    std::shared_ptr<char> load_elf_file(struct bfelf_file_t *ef);
+    std::shared_ptr<char> load_elf_file(bfelf_file_t *ef);
     bfelf_test get_test() const;
 
     void test_bfelf_file_init_success();

@@ -35,8 +35,8 @@ vcpu_ut::test_vcpu_intel_x64_negative_id()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_EXCEPTION(std::make_shared<vcpu_intel_x64>(-1), bfn::invalid_argument_error);
-        EXPECT_EXCEPTION(std::make_shared<vcpu_intel_x64>(-1, dr, on, cs, eh, in), bfn::invalid_argument_error);
+        EXPECT_EXCEPTION(std::make_shared<vcpu_intel_x64>(-1), std::out_of_range);
+        EXPECT_EXCEPTION(std::make_shared<vcpu_intel_x64>(-1, dr, on, cs, eh, in), std::out_of_range);
     });
 }
 
@@ -52,8 +52,8 @@ vcpu_ut::test_vcpu_intel_x64_id_too_large()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_EXCEPTION(std::make_shared<vcpu_intel_x64>(10000), bfn::invalid_argument_error);
-        EXPECT_EXCEPTION(std::make_shared<vcpu_intel_x64>(10000, dr, on, cs, eh, in), bfn::invalid_argument_error);
+        EXPECT_EXCEPTION(std::make_shared<vcpu_intel_x64>(10000), std::out_of_range);
+        EXPECT_EXCEPTION(std::make_shared<vcpu_intel_x64>(10000, dr, on, cs, eh, in), std::out_of_range);
     });
 }
 

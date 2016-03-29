@@ -36,7 +36,7 @@
 int64_t g_vmm_status = VMM_UNLOADED;
 
 uint64_t g_num_modules = 0;
-struct module_t g_modules[MAX_NUM_MODULES] = {0};
+struct module_t g_modules[MAX_NUM_MODULES] = {{0}};
 
 struct bfelf_loader_t g_loader;
 
@@ -376,6 +376,10 @@ common_add_module(char *file, int64_t fsize)
         ALERT("add_module: failed to load the elf module: %" PRId64 "\n", ret);
         goto failure;
     }
+
+    DEBUG("common_add_module [%d]:\n", (int)g_num_modules);
+    DEBUG("    addr = %p\n", (void *)module->exec);
+    DEBUG("    size = %p\n", (void *)module->size);
 
     g_num_modules++;
     return BF_SUCCESS;

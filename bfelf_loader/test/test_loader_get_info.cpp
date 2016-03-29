@@ -24,8 +24,8 @@
 void
 bfelf_loader_ut::test_bfelf_loader_get_info_invalid_loader()
 {
-    struct bfelf_file_t ef = {};
-    struct section_info_t info = {};
+    bfelf_file_t ef;
+    section_info_t info;
 
     auto ret = bfelf_loader_get_info(0, &ef, &info);
     EXPECT_TRUE(ret == BFELF_ERROR_INVALID_ARG);
@@ -34,8 +34,10 @@ bfelf_loader_ut::test_bfelf_loader_get_info_invalid_loader()
 void
 bfelf_loader_ut::test_bfelf_loader_get_info_invalid_elf_file()
 {
-    struct section_info_t info = {};
-    struct bfelf_loader_t loader = {};
+    section_info_t info;
+    bfelf_loader_t loader;
+
+    memset(&loader, 0, sizeof(loader));
 
     auto ret = bfelf_loader_get_info(&loader, 0, &info);
     EXPECT_TRUE(ret == BFELF_ERROR_INVALID_ARG);
@@ -44,8 +46,10 @@ bfelf_loader_ut::test_bfelf_loader_get_info_invalid_elf_file()
 void
 bfelf_loader_ut::test_bfelf_loader_get_info_invalid_info()
 {
-    struct bfelf_file_t ef = {};
-    struct bfelf_loader_t loader = {};
+    bfelf_file_t ef;
+    bfelf_loader_t loader;
+
+    memset(&loader, 0, sizeof(loader));
 
     auto ret = bfelf_loader_get_info(&loader, &ef, 0);
     EXPECT_TRUE(ret == BFELF_ERROR_INVALID_ARG);
@@ -54,9 +58,11 @@ bfelf_loader_ut::test_bfelf_loader_get_info_invalid_info()
 void
 bfelf_loader_ut::test_bfelf_loader_get_info_no_relocation()
 {
-    struct bfelf_file_t ef = {};
-    struct section_info_t info = {};
-    struct bfelf_loader_t loader = {};
+    bfelf_file_t ef;
+    section_info_t info;
+    bfelf_loader_t loader;
+
+    memset(&loader, 0, sizeof(loader));
 
     auto ret = bfelf_loader_get_info(&loader, &ef, &info);
     EXPECT_TRUE(ret == BFELF_ERROR_OUT_OF_ORDER);
@@ -66,8 +72,8 @@ void
 bfelf_loader_ut::test_bfelf_loader_get_info_expected_misc_resources()
 {
     auto ret = 0;
-    struct bfelf_file_t dummy_misc_ef = {};
-    struct bfelf_file_t dummy_code_ef = {};
+    bfelf_file_t dummy_misc_ef;
+    bfelf_file_t dummy_code_ef;
 
     ret = bfelf_file_init(m_dummy_misc.get(), m_dummy_misc_length, &dummy_misc_ef);
     ASSERT_TRUE(ret == BFELF_SUCCESS);
@@ -79,7 +85,8 @@ bfelf_loader_ut::test_bfelf_loader_get_info_expected_misc_resources()
     m_dummy_code_exec = load_elf_file(&dummy_code_ef);
     ASSERT_TRUE(m_dummy_code_exec.get() != 0);
 
-    struct bfelf_loader_t loader = {};
+    bfelf_loader_t loader;
+    memset(&loader, 0, sizeof(loader));
 
     ret = bfelf_loader_add(&loader, &dummy_misc_ef, m_dummy_misc_exec.get());
     ASSERT_TRUE(ret == BFELF_SUCCESS);
@@ -89,7 +96,7 @@ bfelf_loader_ut::test_bfelf_loader_get_info_expected_misc_resources()
     ret = bfelf_loader_relocate(&loader);
     EXPECT_TRUE(ret == BFELF_SUCCESS);
 
-    struct section_info_t info = {};
+    section_info_t info;
 
     ret = bfelf_loader_get_info(&loader, &dummy_misc_ef, &info);
     ASSERT_TRUE(ret == BFELF_SUCCESS);
@@ -111,8 +118,8 @@ void
 bfelf_loader_ut::test_bfelf_loader_get_info_expected_code_resources()
 {
     auto ret = 0;
-    struct bfelf_file_t dummy_misc_ef = {};
-    struct bfelf_file_t dummy_code_ef = {};
+    bfelf_file_t dummy_misc_ef;
+    bfelf_file_t dummy_code_ef;
 
     ret = bfelf_file_init(m_dummy_misc.get(), m_dummy_misc_length, &dummy_misc_ef);
     ASSERT_TRUE(ret == BFELF_SUCCESS);
@@ -124,7 +131,8 @@ bfelf_loader_ut::test_bfelf_loader_get_info_expected_code_resources()
     m_dummy_code_exec = load_elf_file(&dummy_code_ef);
     ASSERT_TRUE(m_dummy_code_exec.get() != 0);
 
-    struct bfelf_loader_t loader = {};
+    bfelf_loader_t loader;
+    memset(&loader, 0, sizeof(loader));
 
     ret = bfelf_loader_add(&loader, &dummy_misc_ef, m_dummy_misc_exec.get());
     ASSERT_TRUE(ret == BFELF_SUCCESS);
@@ -134,7 +142,8 @@ bfelf_loader_ut::test_bfelf_loader_get_info_expected_code_resources()
     ret = bfelf_loader_relocate(&loader);
     EXPECT_TRUE(ret == BFELF_SUCCESS);
 
-    struct section_info_t info = {};
+    section_info_t info;
+    memset(&info, 0, sizeof(info));
 
     ret = bfelf_loader_get_info(&loader, &dummy_code_ef, &info);
     ASSERT_TRUE(ret == BFELF_SUCCESS);
