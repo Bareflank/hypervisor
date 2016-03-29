@@ -377,6 +377,10 @@ common_add_module(char *file, int64_t fsize)
         goto failure;
     }
 
+    DEBUG("common_add_module [%d]:\n", (int)g_num_modules);
+    DEBUG("    addr = %p\n", (void *)module->exec);
+    DEBUG("    size = %p\n", (void *)module->size);
+
     g_num_modules++;
     return BF_SUCCESS;
 
