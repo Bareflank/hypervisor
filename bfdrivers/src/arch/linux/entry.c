@@ -8,6 +8,8 @@
 #include <linux/cpumask.h>
 #include <linux/sched.h>
 
+#include <asm/tlbflush.h>
+
 #include <debug.h>
 #include <common.h>
 #include <platform.h>
@@ -193,6 +195,8 @@ ioctl_stop_vmm(void)
 
     g_mmu_context = NULL;
 
+    cr4_init_shadow();
+
     if (status == BF_IOCTL_SUCCESS)
         DEBUG("IOCTL_STOP_VMM: succeeded\n");
 
@@ -217,6 +221,8 @@ ioctl_start_vmm(void)
         ALERT("IOCTL_START_VMM: failed to start vmm: %d\n", ret);
         goto failure;
     }
+
+    cr4_init_shadow();
 
     DEBUG("IOCTL_START_VMM: succeeded\n");
     return BF_IOCTL_SUCCESS;
