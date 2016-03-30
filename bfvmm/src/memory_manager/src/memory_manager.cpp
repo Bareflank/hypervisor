@@ -136,7 +136,7 @@ memory_manager::malloc(size_t size)
 }
 
 void *
-memory_manager::malloc_aligned(size_t size, int64_t alignment)
+memory_manager::malloc_aligned(size_t size, uint64_t alignment)
 {
     if (size == 0)
         return 0;
@@ -162,7 +162,7 @@ memory_manager::malloc_aligned(size_t size, int64_t alignment)
     auto reset = 0U;
     auto num_blocks = size >> MAX_CACHE_LINE_SHIFT;
 
-    if (size % MAX_CACHE_LINE_SIZE != 0)
+    if ((size & (MAX_CACHE_LINE_SIZE - 1)) != 0)
         num_blocks++;
 
     for (auto b = m_start; b < MAX_BLOCKS && count < num_blocks; b++)
@@ -294,6 +294,12 @@ memory_manager::phys_to_virt(void *phys)
     return (void *)(upper | lower);
 }
 
+static bool
+private_is_power_of_2(uint64_t x)
+{
+    return ((x != 0) && !(x & (x - 1)));
+}
+
 bool
 memory_manager::is_block_aligned(int64_t block, int64_t alignment)
 {
@@ -303,17 +309,20 @@ memory_manager::is_block_aligned(int64_t block, int64_t alignment)
     if (alignment <= 0)
         return true;
 
-    return ((uint64_t)block_to_virt(block) % alignment) == 0;
+    if (private_is_power_of_2(alignment) == false)
+        return false;
+
+    return ((uint64_t)block_to_virt(block) & (alignment - 1)) == 0;
 }
 
 void
-memory_manager::add_mdl(struct memory_descriptor *mdl, int64_t num)
+memory_manager::add_mdl(memory_descriptor *mdl, int64_t num)
 {
     if (mdl == NULL)
-        throw invalid_argument(mdl, "mdl == NULL");
+        throw std::invalid_argument("mdl == NULL");
 
     if (num == 0)
-        throw invalid_argument(num, "num == 0");
+        throw std::invalid_argument("num == 0");
 
     for (auto i = 0; i < num; i++)
     {
@@ -391,7 +400,7 @@ _realloc_r(struct _reent *reent, void *ptr, size_t size)
 }
 
 extern "C" int64_t
-add_mdl(struct memory_descriptor *mdl, int64_t num)
+add_mdl(memory_descriptor *mdl, int64_t num)
 {
     return guard_exceptions([&]()
     { g_mm->add_mdl(mdl, num); });

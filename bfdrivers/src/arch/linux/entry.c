@@ -8,6 +8,8 @@
 #include <linux/cpumask.h>
 #include <linux/sched.h>
 
+#include <asm/tlbflush.h>
+
 #include <debug.h>
 #include <common.h>
 #include <platform.h>
@@ -49,8 +51,8 @@ dev_release(struct inode *inode, struct file *file)
 static long
 ioctl_add_module(char *file)
 {
+    int ret;
     char *buf;
-    int64_t ret;
 
     if (g_num_files >= MAX_NUM_MODULES)
     {
@@ -109,13 +111,20 @@ failed:
 static long
 ioctl_add_module_length(int64_t *len)
 {
+    int ret;
+
     if (len == 0)
     {
         ALERT("IOCTL_ADD_MODULE_LENGTH: failed with len == NULL\n");
         return BF_IOCTL_FAILURE;
     }
 
-    copy_from_user(&g_module_length, len, sizeof(int64_t));
+    ret = copy_from_user(&g_module_length, len, sizeof(int64_t));
+    if (ret != 0)
+    {
+        ALERT("IOCTL_ADD_MODULE_LENGTH: failed to copy memory from userspace\n");
+        return BF_IOCTL_FAILURE;
+    }
 
     DEBUG("IOCTL_ADD_MODULE_LENGTH: succeeded\n");
     return BF_IOCTL_SUCCESS;
@@ -186,6 +195,8 @@ ioctl_stop_vmm(void)
 
     g_mmu_context = NULL;
 
+    cr4_init_shadow();
+
     if (status == BF_IOCTL_SUCCESS)
         DEBUG("IOCTL_STOP_VMM: succeeded\n");
 
@@ -211,6 +222,8 @@ ioctl_start_vmm(void)
         goto failure;
     }
 
+    cr4_init_shadow();
+
     DEBUG("IOCTL_START_VMM: succeeded\n");
     return BF_IOCTL_SUCCESS;
 
@@ -233,7 +246,12 @@ ioctl_dump_vmm(struct debug_ring_resources_t *user_drr)
         return BF_IOCTL_FAILURE;
     }
 
-    copy_to_user(user_drr, drr, sizeof(struct debug_ring_resources_t));
+    ret = copy_to_user(user_drr, drr, sizeof(struct debug_ring_resources_t));
+    if (ret != 0)
+    {
+        ALERT("IOCTL_DUMP_VMM: failed to copy memory from userspace\n");
+        return BF_IOCTL_FAILURE;
+    }
 
     DEBUG("IOCTL_DUMP_VMM: succeeded\n");
     return BF_IOCTL_SUCCESS;
@@ -242,7 +260,8 @@ ioctl_dump_vmm(struct debug_ring_resources_t *user_drr)
 static long
 ioctl_vmm_status(int64_t *status)
 {
-    int64_t ret = common_vmm_status();
+    int ret;
+    int64_t vmm_status = common_vmm_status();
 
     if (status == 0)
     {
@@ -250,7 +269,12 @@ ioctl_vmm_status(int64_t *status)
         return BF_IOCTL_FAILURE;
     }
 
-    copy_to_user(status, &ret, sizeof(int64_t));
+    ret = copy_to_user(status, &vmm_status, sizeof(int64_t));
+    if (ret != 0)
+    {
+        ALERT("IOCTL_VMM_STATUS: failed to copy memory from userspace\n");
+        return BF_IOCTL_FAILURE;
+    }
 
     DEBUG("IOCTL_VMM_STATUS: succeeded\n");
     return BF_IOCTL_SUCCESS;

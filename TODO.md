@@ -26,16 +26,6 @@ Misc:
 
 Version 1.0 TODO:
 - Need to have all of the VMCS checks unit tested
-- Need to have all of the remaining unit tests completed (i.e. all of the
-  VMM modules need their unit tests completed including serial)
-- Everything should be using the new debug.h instead of manually calling
-  std::cout
-- Provide support for Debian, Fedora, CentOS
-- Get rid of as many hardcode values in the VMCS and VMXON code as possible
-- Need to pass CFLAGS and CXXFLAGS through. Test by changing the serial port
-  during compilation via environment variable
-- Get rid of the GCC pathces
-- Search for / and % and get rid of them
 
 Version 1.1 TODO:
 - Need to have a completely isolated exit handler. It should have it's own
@@ -60,3 +50,12 @@ Version 2.0 TODO:
 
 Documenttion:
 - Update cross compiler documentation to include how to setup sysroot
+
+Known Issues:
+- Kernels that have CONFIG_DEBUG_STACKOVERFLOW enabled will kernel oops when
+  do_IRQ is called because Bareflank uses it's own stack, and this triggers
+  the oops as stack_overflow_check thinks the stack has been overrun. The
+  oops can be safely ignored, but the best solution at the moment is to
+  disable this check from executing or don't use a kernrel with this enabled.
+  This is seen on Fedora as installing the kernel source enables a debug kernel
+  by default with this enabled.

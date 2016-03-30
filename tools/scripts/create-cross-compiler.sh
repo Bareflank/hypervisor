@@ -106,10 +106,6 @@ if [ -z "$GCC_URL" ]; then
     export GCC_URL="https://ftp.gnu.org/gnu/gcc/gcc-5.2.0/gcc-5.2.0.tar.bz2"
 fi
 
-if [ -z "$GCC_PATCH_URL" ]; then
-    export GCC_PATCH_URL="https://raw.githubusercontent.com/Bareflank/hypervisor/master/tools/patches/gcc-5.2.0_bareflank.patch"
-fi
-
 if [ -z "$NASM_URL" ]; then
     export NASM_URL="http://www.nasm.us/pub/nasm/releasebuilds/2.11.08/nasm-2.11.08.tar.gz"
 fi
@@ -173,7 +169,6 @@ fi
 
 if [ ! -d "gcc" ]; then
     rm -Rf completed_build_gcc
-    rm -Rf completed_patch_gcc
     wget --no-check-certificate $GCC_URL
     tar xvf gcc-*.tar.bz2
     mv gcc-*/ gcc
@@ -191,18 +186,6 @@ if [ ! -d "newlib" ]; then
     wget --no-check-certificate $NEWLIB_URL
     tar xvf newlib-*.tar.gz
     mv newlib-*/ newlib
-fi
-
-if [ ! -d "cmake" ]; then
-    rm -Rf completed_build_cmake
-    wget --no-check-certificate $CMAKE_URL
-    tar xvf cmake-*.tar.gz
-    mv cmake-*/ cmake
-fi
-
-if [ ! -f "gcc_bareflank.patch" ]; then
-    wget $GCC_PATCH_URL
-    mv gcc-*_bareflank.patch gcc_bareflank.patch
 fi
 
 if [ ! -d "libbfc" ]; then
@@ -225,19 +208,6 @@ if [ ! -d "llvm" ]; then
 fi
 
 # ------------------------------------------------------------------------------
-# Patches
-# ------------------------------------------------------------------------------
-
-if [ ! -f "completed_patch_gcc" ]; then
-
-    pushd $TMPDIR/gcc/
-    patch -p1 < ../gcc_bareflank.patch
-    popd
-
-    touch completed_patch_gcc
-fi
-
-# ------------------------------------------------------------------------------
 # Install Wrapper
 # ------------------------------------------------------------------------------
 
@@ -252,24 +222,6 @@ if [ ! -f "installed_bareflank_gcc_wrapper" ]; then
     ln -s $HYPERVISOR_ROOT/tools/scripts/bareflank-gcc-wrapper $PREFIX/bin/x86_64-bareflank-g++
 
     touch installed_bareflank_gcc_wrapper
-fi
-
-# ------------------------------------------------------------------------------
-# Cmake
-# ------------------------------------------------------------------------------
-
-if [ ! -f "completed_build_cmake" ]; then
-
-    rm -Rf build-cmake
-    mkdir -p build-cmake
-
-    pushd build-cmake
-    ../cmake/configure
-    make -j2
-    sudo make -j2 install
-    popd
-
-    touch completed_build_cmake
 fi
 
 # ------------------------------------------------------------------------------
@@ -300,7 +252,7 @@ if [ ! -f "completed_build_gcc" ]; then
     mkdir -p build-gcc
 
     pushd build-gcc
-    ../gcc/configure --target=$TARGET --prefix="$PREFIX" --disable-nls --enable-languages=c,c++ --without-headers
+    ../gcc/configure --target=$TARGET --prefix="$PREFIX" --disable-nls --enable-languages=c,c++ --without-headers --without-isl
     make -j2 all-gcc
     make -j2 all-target-libgcc
     make -j2 install-gcc

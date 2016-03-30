@@ -69,7 +69,7 @@ debug_ring::write(const std::string &str)
         throw invalid_debug_ring();
 
     if (str.length() >= DEBUG_RING_SIZE)
-        throw range_error("str", str.length(), 0, DEBUG_RING_SIZE);
+        throw std::invalid_argument("str.length() >= DEBUG_RING_SIZE");
 
     if (str.length() == 0)
         return;
@@ -78,8 +78,8 @@ debug_ring::write(const std::string &str)
     // include the '\0', so we add one to the length to account for that.
     auto len = str.length() + 1;
 
-    auto epos = m_drr->epos % DEBUG_RING_SIZE;
-    auto spos = m_drr->spos % DEBUG_RING_SIZE;
+    auto epos = m_drr->epos & (DEBUG_RING_SIZE - 1);
+    auto spos = m_drr->spos & (DEBUG_RING_SIZE - 1);
     auto space = DEBUG_RING_SIZE - (m_drr->epos - m_drr->spos);
 
     if (space < len)

@@ -34,7 +34,7 @@
 // Load / Store Registers
 // -----------------------------------------------------------------------------
 
-struct registers_intel_x64
+struct registers_intel_x64_t
 {
     uint64_t rax;
     uint64_t rdx;
@@ -63,7 +63,7 @@ struct registers_intel_x64
 /// @return always returns 0
 ///
 extern "C"
-void __store_registers_intel_x64(struct registers_intel_x64 *state);
+void __store_registers_intel_x64(registers_intel_x64_t *state);
 
 /// __load_registers_intel_x64
 ///
@@ -73,7 +73,7 @@ void __store_registers_intel_x64(struct registers_intel_x64 *state);
 /// @return always returns 0
 ///
 extern "C"
-void __load_registers_intel_x64(struct registers_intel_x64 *state);
+void __load_registers_intel_x64(registers_intel_x64_t *state);
 
 // -----------------------------------------------------------------------------
 // Register State
@@ -90,7 +90,7 @@ void __load_registers_intel_x64(struct registers_intel_x64 *state);
 class register_state_intel_x64 : public register_state
 {
 public:
-    register_state_intel_x64(registers_intel_x64 registers)
+    register_state_intel_x64(registers_intel_x64_t registers)
     {
         m_registers = registers;
         m_tmp_registers = registers;
@@ -190,8 +190,8 @@ public:
     }
 
 private:
-    registers_intel_x64 m_registers;
-    registers_intel_x64 m_tmp_registers;
+    registers_intel_x64_t m_registers;
+    registers_intel_x64_t m_tmp_registers;
 };
 
 #endif
