@@ -61,9 +61,9 @@ include ./common/common_subdir.mk
 # Custom Targets
 ################################################################################
 
-.PHONY: debian_load
-.PHONY: debian_unload
-.PHONY: debian_clean
+.PHONY: linux_load
+.PHONY: linux_unload
+.PHONY: linux_clean
 .PHONY: load
 .PHONY: unload
 .PHONY: start
@@ -74,19 +74,19 @@ include ./common/common_subdir.mk
 .PHONY: loop
 .PHONY: unittest
 
-debian_load: force
+linux_load: force
 	@cd bfdrivers/src/arch/linux; \
 	sudo make unload; \
 	make clean; \
 	make; \
 	sudo make load
 
-debian_unload: force
+linux_unload: force
 	@cd bfdrivers/src/arch/linux; \
 	sudo make unload; \
 	make clean
 
-debian_clean: debian_unload
+linux_clean: linux_unload
 
 load: force
 	@cd bfm/bin/native; \
