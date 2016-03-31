@@ -1,6 +1,8 @@
 
 # Bareflank Hypervisor
 
+![](https://travis-ci.org/Bareflank/hypervisor.svg?branch=master)
+
 ## Description
 
 The bareflank hypervisor is an open source, lightweight hypervisor, lead by
@@ -15,8 +17,6 @@ In addition, the entire bareflank project is licensed under the
 GNU Lesser General Public License v2.1 (LGPL), providing a means for users of
 the project to both contribute back to the project, but also create proprietary
 extensions if so desired.
-
-[![Bareflank Demonstration Video](http://img.youtube.com/vi/adesFxQ741c/0.jpg)](https://www.youtube.com/watch?v=adesFxQ741c)
 
 To ease the development of the VMM, bareflank has partial support for C++,
 including Exception support and the C++ Standard Template Library (STL) 
@@ -39,6 +39,13 @@ In addition to bareflank’s lightweight, modular design, the entire hypervisor
 has been written using test driven development. As such, all of bareflank’s
 code comes complete with a set of unit tests to validate that the provided
 code works as expected.
+
+## Demo
+
+Checkout the latest demo for how to compile, use and extend the 
+bareflank hypervisor
+
+[![Bareflank Demonstration Video](http://img.youtube.com/vi/adesFxQ741c/0.jpg)](https://www.youtube.com/watch?v=adesFxQ741c)
 
 ## Compilation Instructions
 
@@ -92,7 +99,7 @@ For more detailed instructions please read the following (based on which OS your
 To provide examples of how you might extend bareflank to provide your own custom
 functionality, we have provided a couple of examples:
 
-[CPUID Count](https://github.com/Bareflank/hypervisor_example_cpuidcount)
+[CPUID Count](https://github.com/Bareflank/hypervisor_example_cpuidcount) <br>
 [Enable VPID](https://github.com/Bareflank/hypervisor_example_vpid)
 
 ## Roadmap (updated 3-19-2016)
