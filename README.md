@@ -16,7 +16,7 @@ GNU Lesser General Public License v2.1 (LGPL), providing a means for users of
 the project to both contribute back to the project, but also create proprietary
 extensions if so desired.
 
-To ease the development of the VMM, bareflank has partial support for C++,
+To ease the development of the VMM, bareflank has support for C++,
 including Exception support and the C++ Standard Template Library (STL) 
 via libc++. With the C++ STL, users can quickly prototype new technologies as
 bareflank has access to shared pointers, complex data structures
