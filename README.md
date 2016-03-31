@@ -1,8 +1,6 @@
 
 <figure><img src="https://raw.githubusercontent.com/Bareflank/hypervisor/master/doc/images/logo.png" width="500"></figure>
 
-<br>
-
 ## Description
 
 The bareflank hypervisor is an open source, lightweight hypervisor, lead by
