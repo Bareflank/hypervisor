@@ -3,8 +3,6 @@
 
 <br>
 
-![](https://travis-ci.org/Bareflank/hypervisor.svg?branch=master)
-
 ## Description
 
 The bareflank hypervisor is an open source, lightweight hypervisor, lead by
@@ -41,6 +39,8 @@ In addition to bareflank’s lightweight, modular design, the entire hypervisor
 has been written using test driven development. As such, all of bareflank’s
 code comes complete with a set of unit tests to validate that the provided
 code works as expected.
+
+![](https://travis-ci.org/Bareflank/hypervisor.svg?branch=master)
 
 ## Demo
 
