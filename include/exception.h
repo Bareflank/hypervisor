@@ -251,10 +251,10 @@ private:
 // Invalid Alignment
 // -----------------------------------------------------------------------------
 
-class invalid_alignmnet_error : public bfn::general_exception
+class invalid_alignment_error : public bfn::general_exception
 {
 public:
-    invalid_alignmnet_error(const std::string &mesg,
+    invalid_alignment_error(const std::string &mesg,
                             uint64_t addr) :
         m_mesg(mesg),
         m_addr(addr)
@@ -274,7 +274,7 @@ private:
     uint64_t m_addr;
 };
 
-#define invalid_alignmnet(a,b) bfn::invalid_alignmnet_error(a,b)
+#define invalid_alignment(a,b) bfn::invalid_alignment_error(a,b)
 
 // -----------------------------------------------------------------------------
 // Invalid Address

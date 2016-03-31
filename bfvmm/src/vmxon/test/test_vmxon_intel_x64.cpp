@@ -24,536 +24,702 @@
 #include <vmxon/vmxon_exceptions_intel_x64.h>
 #include <memory_manager/memory_manager.h>
 
-
-
-// void
-// vmxon_ut::test_vmxon_start_uninitialized()
-// {
-//     vmxon_intel_x64 vmxon(0);
-//     EXPECT_TRUE(vmxon.start() == vmxon_error::failure);
-// }
-
-// void
-// vmxon_ut::test_vmxon_stop_uninitialized()
-// {
-//     vmxon_intel_x64 vmxon(0);
-//     EXPECT_TRUE(vmxon.stop() == vmxon_error::failure);
-// }
-
-// void
-// vmxon_ut::test_verify_cpuid_vmx_supported_failed()
-// {
-//     MockRepository mocks;
-//     intrinsics_intel_x64 *intrinsics = mocks.Mock<intrinsics_intel_x64>();
-
-//     vmxon_intel_x64 vmxon(intrinsics);
-
-//     mocks.OnCall(intrinsics, intrinsics_intel_x64::cpuid_ecx).Return(0);
-
-//     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-//     {
-//         EXPECT_TRUE(vmxon.verify_cpuid_vmx_supported() == vmxon_error::not_supported);
-//     });
-// }
-
-// void
-// vmxon_ut::test_verify_cpuid_vmx_supported_success()
-// {
-//     MockRepository mocks;
-//     intrinsics_intel_x64 *intrinsics = mocks.Mock<intrinsics_intel_x64>();
-
-//     vmxon_intel_x64 vmxon(intrinsics);
-
-//     mocks.OnCall(intrinsics, intrinsics_intel_x64::cpuid_ecx).Return((1 << 5));
-
-//     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-//     {
-//         EXPECT_TRUE(vmxon.verify_cpuid_vmx_supported() == vmxon_error::success);
-//     });
-// }
-
-// void
-// vmxon_ut::test_verify_vmx_capabilities_msr_failed_invalid_physical_address_width()
-// {
-//     MockRepository mocks;
-//     intrinsics_intel_x64 *intrinsics = mocks.Mock<intrinsics_intel_x64>();
-
-//     vmxon_intel_x64 vmxon(intrinsics);
-
-//     mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_BASIC_MSR).Return((1ll << 48));
-
-//     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-//     {
-//         EXPECT_TRUE(vmxon.verify_vmx_capabilities_msr() == vmxon_error::not_supported);
-//     });
-// }
-
-// void
-// vmxon_ut::test_verify_vmx_capabilities_msr_failed_invalid_memory_type()
-// {
-//     MockRepository mocks;
-//     intrinsics_intel_x64 *intrinsics = mocks.Mock<intrinsics_intel_x64>();
-
-//     vmxon_intel_x64 vmxon(intrinsics);
-
-//     mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_BASIC_MSR).Return(0);
-
-//     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-//     {
-//         EXPECT_TRUE(vmxon.verify_vmx_capabilities_msr() == vmxon_error::not_supported);
-//     });
-// }
-
-// void
-// vmxon_ut::test_verify_vmx_capabilities_msr_success()
-// {
-//     MockRepository mocks;
-//     intrinsics_intel_x64 *intrinsics = mocks.Mock<intrinsics_intel_x64>();
-
-//     vmxon_intel_x64 vmxon(intrinsics);
-
-//     mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_BASIC_MSR).Return((6ll << 50));
-
-//     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-//     {
-//         EXPECT_TRUE(vmxon.verify_vmx_capabilities_msr() == vmxon_error::success);
-//     });
-// }
-
-// void
-// vmxon_ut::test_verify_ia32_vmx_cr0_fixed_msr_failed_fixed0()
-// {
-//     MockRepository mocks;
-//     intrinsics_intel_x64 *intrinsics = mocks.Mock<intrinsics_intel_x64>();
-
-//     vmxon_intel_x64 vmxon(intrinsics);
-
-//     mocks.OnCall(intrinsics, intrinsics_intel_x64::read_cr0).Return(0);
-//     mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_CR0_FIXED0_MSR).Return(0x1);
-//     mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_CR0_FIXED1_MSR).Return(0xFFFFFFFFFFFFFFFF);
-
-//     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-//     {
-//         EXPECT_TRUE(vmxon.verify_ia32_vmx_cr0_fixed_msr() == vmxon_error::not_supported);
-//     });
-// }
-
-// void
-// vmxon_ut::test_verify_ia32_vmx_cr0_fixed_msr_failed_fixed1()
-// {
-//     MockRepository mocks;
-//     intrinsics_intel_x64 *intrinsics = mocks.Mock<intrinsics_intel_x64>();
-
-//     vmxon_intel_x64 vmxon(intrinsics);
-
-//     mocks.OnCall(intrinsics, intrinsics_intel_x64::read_cr0).Return(0xFFFFFFFFFFFFFFFF);
-//     mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_CR0_FIXED0_MSR).Return(0);
-//     mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_CR0_FIXED1_MSR).Return(0xFFFFFFFFFFFFFFF7);
-
-//     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-//     {
-//         EXPECT_TRUE(vmxon.verify_ia32_vmx_cr0_fixed_msr() == vmxon_error::not_supported);
-//     });
-// }
-
-// void
-// vmxon_ut::test_verify_ia32_vmx_cr0_fixed_msr_success()
-// {
-//     MockRepository mocks;
-//     intrinsics_intel_x64 *intrinsics = mocks.Mock<intrinsics_intel_x64>();
-
-//     vmxon_intel_x64 vmxon(intrinsics);
-
-//     mocks.OnCall(intrinsics, intrinsics_intel_x64::read_cr0).Return(0x1);
-//     mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_CR0_FIXED0_MSR).Return(0x1);
-//     mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_CR0_FIXED1_MSR).Return(0xFFFFFFFFFFFFFFF7);
-
-//     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-//     {
-//         EXPECT_TRUE(vmxon.verify_ia32_vmx_cr0_fixed_msr() == vmxon_error::success);
-//     });
-// }
-
-// void
-// vmxon_ut::test_verify_ia32_vmx_cr4_fixed_msr_failed_fixed0()
-// {
-//     MockRepository mocks;
-//     intrinsics_intel_x64 *intrinsics = mocks.Mock<intrinsics_intel_x64>();
-
-//     vmxon_intel_x64 vmxon(intrinsics);
-
-//     mocks.OnCall(intrinsics, intrinsics_intel_x64::read_cr4).Return(0);
-//     mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_CR4_FIXED0_MSR).Return(0x1);
-//     mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_CR4_FIXED1_MSR).Return(0xFFFFFFFFFFFFFFFF);
-
-//     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-//     {
-//         EXPECT_TRUE(vmxon.verify_ia32_vmx_cr4_fixed_msr() == vmxon_error::not_supported);
-//     });
-// }
-
-// void
-// vmxon_ut::test_verify_ia32_vmx_cr4_fixed_msr_failed_fixed1()
-// {
-//     MockRepository mocks;
-//     intrinsics_intel_x64 *intrinsics = mocks.Mock<intrinsics_intel_x64>();
-
-//     vmxon_intel_x64 vmxon(intrinsics);
-
-//     mocks.OnCall(intrinsics, intrinsics_intel_x64::read_cr4).Return(0xFFFFFFFFFFFFFFFF);
-//     mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_CR4_FIXED0_MSR).Return(0);
-//     mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_CR4_FIXED1_MSR).Return(0xFFFFFFFFFFFFFFF7);
-
-//     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-//     {
-//         EXPECT_TRUE(vmxon.verify_ia32_vmx_cr4_fixed_msr() == vmxon_error::not_supported);
-//     });
-// }
-
-// void
-// vmxon_ut::test_verify_ia32_vmx_cr4_fixed_msr_success()
-// {
-//     MockRepository mocks;
-//     intrinsics_intel_x64 *intrinsics = mocks.Mock<intrinsics_intel_x64>();
-
-//     vmxon_intel_x64 vmxon(intrinsics);
-
-//     mocks.OnCall(intrinsics, intrinsics_intel_x64::read_cr4).Return(0x1);
-//     mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_CR4_FIXED0_MSR).Return(0x1);
-//     mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_CR4_FIXED1_MSR).Return(0xFFFFFFFFFFFFFFF7);
-
-//     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-//     {
-//         EXPECT_TRUE(vmxon.verify_ia32_vmx_cr4_fixed_msr() == vmxon_error::success);
-//     });
-// }
-
-// void
-// vmxon_ut::test_verify_ia32_feature_control_msr_failed()
-// {
-//     MockRepository mocks;
-//     intrinsics_intel_x64 *intrinsics = mocks.Mock<intrinsics_intel_x64>();
-
-//     vmxon_intel_x64 vmxon(intrinsics);
-
-//     mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_FEATURE_CONTROL_MSR).Return(0);
-
-//     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-//     {
-//         EXPECT_TRUE(vmxon.verify_ia32_feature_control_msr() == vmxon_error::not_supported);
-//     });
-// }
-
-// void
-// vmxon_ut::test_verify_ia32_feature_control_msr_success()
-// {
-//     MockRepository mocks;
-//     intrinsics_intel_x64 *intrinsics = mocks.Mock<intrinsics_intel_x64>();
-
-//     vmxon_intel_x64 vmxon(intrinsics);
-
-//     mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_FEATURE_CONTROL_MSR).Return(1);
-
-//     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-//     {
-//         EXPECT_TRUE(vmxon.verify_ia32_feature_control_msr() == vmxon_error::success);
-//     });
-// }
-
-// void
-// vmxon_ut::test_verify_v8086_disabled_failed()
-// {
-//     MockRepository mocks;
-//     intrinsics_intel_x64 *intrinsics = mocks.Mock<intrinsics_intel_x64>();
-
-//     vmxon_intel_x64 vmxon(intrinsics);
-
-//     mocks.OnCall(intrinsics, intrinsics_intel_x64::read_rflags).Return(RFLAGS_VM_VIRTUAL_8086_MODE);
-
-//     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-//     {
-//         EXPECT_TRUE(vmxon.verify_v8086_disabled() == vmxon_error::not_supported);
-//     });
-// }
-
-// void
-// vmxon_ut::test_verify_v8086_disabled_success()
-// {
-//     MockRepository mocks;
-//     intrinsics_intel_x64 *intrinsics = mocks.Mock<intrinsics_intel_x64>();
-
-//     vmxon_intel_x64 vmxon(intrinsics);
-
-//     mocks.OnCall(intrinsics, intrinsics_intel_x64::read_rflags).Return(0);
-
-//     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-//     {
-//         EXPECT_TRUE(vmxon.verify_v8086_disabled() == vmxon_error::success);
-//     });
-// }
-
-// void
-// vmxon_ut::test_verify_vmx_operation_enabled_failed()
-// {
-//     MockRepository mocks;
-//     intrinsics_intel_x64 *intrinsics = mocks.Mock<intrinsics_intel_x64>();
-
-//     vmxon_intel_x64 vmxon(intrinsics);
-
-//     mocks.OnCall(intrinsics, intrinsics_intel_x64::read_cr4).Return(0);
-
-//     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-//     {
-//         EXPECT_TRUE(vmxon.verify_vmx_operation_enabled() == vmxon_error::failure);
-//     });
-// }
-
-// void
-// vmxon_ut::test_verify_vmx_operation_enabled_success()
-// {
-//     MockRepository mocks;
-//     intrinsics_intel_x64 *intrinsics = mocks.Mock<intrinsics_intel_x64>();
-
-//     vmxon_intel_x64 vmxon(intrinsics);
-
-//     mocks.OnCall(intrinsics, intrinsics_intel_x64::read_cr4).Return(CR4_VMXE_VMX_ENABLE_BIT);
-
-//     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-//     {
-//         EXPECT_TRUE(vmxon.verify_vmx_operation_enabled() == vmxon_error::success);
-//     });
-// }
-
-// void
-// vmxon_ut::test_verify_vmx_operation_disabled_failed()
-// {
-//     MockRepository mocks;
-//     intrinsics_intel_x64 *intrinsics = mocks.Mock<intrinsics_intel_x64>();
-
-//     vmxon_intel_x64 vmxon(intrinsics);
-
-//     mocks.OnCall(intrinsics, intrinsics_intel_x64::read_cr4).Return(CR4_VMXE_VMX_ENABLE_BIT);
-
-//     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-//     {
-//         EXPECT_TRUE(vmxon.verify_vmx_operation_disabled() == vmxon_error::failure);
-//     });
-// }
-
-// void
-// vmxon_ut::test_verify_vmx_operation_disabled_success()
-// {
-//     MockRepository mocks;
-//     intrinsics_intel_x64 *intrinsics = mocks.Mock<intrinsics_intel_x64>();
-
-//     vmxon_intel_x64 vmxon(intrinsics);
-
-//     mocks.OnCall(intrinsics, intrinsics_intel_x64::read_cr4).Return(0);
-
-//     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-//     {
-//         EXPECT_TRUE(vmxon.verify_vmx_operation_disabled() == vmxon_error::success);
-//     });
-// }
-
-// void
-// vmxon_ut::test_enable_vmx_operation_success()
-// {
-//     MockRepository mocks;
-//     intrinsics_intel_x64 *intrinsics = mocks.Mock<intrinsics_intel_x64>();
-
-//     vmxon_intel_x64 vmxon(intrinsics);
-
-//     mocks.OnCall(intrinsics, intrinsics_intel_x64::read_cr4).Return(0);
-//     mocks.ExpectCall(intrinsics, intrinsics_intel_x64::write_cr4).With(CR4_VMXE_VMX_ENABLE_BIT);
-
-//     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-//     {
-//         EXPECT_TRUE(vmxon.enable_vmx_operation() == vmxon_error::success);
-//     });
-// }
-
-// void
-// vmxon_ut::test_disable_vmx_operation_success()
-// {
-//     MockRepository mocks;
-//     intrinsics_intel_x64 *intrinsics = mocks.Mock<intrinsics_intel_x64>();
-
-//     vmxon_intel_x64 vmxon(intrinsics);
-
-//     mocks.OnCall(intrinsics, intrinsics_intel_x64::read_cr4).Return(0xFFFFFFFFFFFFFFFF);
-//     mocks.ExpectCall(intrinsics, intrinsics_intel_x64::write_cr4).With(~CR4_VMXE_VMX_ENABLE_BIT);
-
-//     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-//     {
-//         EXPECT_TRUE(vmxon.disable_vmx_operation() == vmxon_error::success);
-//     });
-// }
-
-// void
-// vmxon_ut::test_create_vmxon_region_out_of_memory()
-// {
-//     // MockRepository mocks;
-//     // memory_manager *mm = mocks.Mock<memory_manager>();
-//     // intrinsics_intel_x64 *intrinsics = mocks.Mock<intrinsics_intel_x64>();
-
-//     // vmxon_intel_x64 vmxon(intrinsics);
-//     // vmxon.init(intrinsics, mm);
-
-//     // mocks.OnCall(mm, memory_manager::alloc_page).Return(memory_manager_error::out_of_memory);
-
-//     // RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-//     // {
-//     //     EXPECT_TRUE(vmxon.create_vmxon_region() == vmxon_error::out_of_memory);
-//     // });
-// }
-
-// // memory_manager_error::type
-// // alloc_page_wrong_size(page *pg)
-// // {
-// //     if (pg == 0)
-// //         return memory_manager_error::failure;
-
-// //     *pg = page((void *)4, (void *)8, 15);
-
-// //     return memory_manager_error::success;
-// // }
-
-// void
-// vmxon_ut::test_create_vmxon_region_misaligned_page()
-// {
-//     // MockRepository mocks;
-//     // memory_manager *mm = mocks.Mock<memory_manager>();
-//     // intrinsics_intel_x64 *intrinsics = mocks.Mock<intrinsics_intel_x64>();
-
-//     // vmxon_intel_x64 vmxon(intrinsics);
-//     // vmxon.init(intrinsics, mm);
-
-//     // mocks.OnCall(mm, memory_manager::alloc_page).Do(alloc_page_wrong_size);
-//     // mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).Return((4096LL << 32));
-
-//     // RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-//     // {
-//     //     EXPECT_TRUE(vmxon.create_vmxon_region() == vmxon_error::not_supported);
-//     // });
-// }
-
-// // memory_manager_error::type
-// // alloc_page_not_page_aligned(page *pg)
-// // {
-// //     if (pg == 0)
-// //         return memory_manager_error::failure;
-
-// //     *pg = page((void *)16, (void *)23, 4096);
-
-// //     return memory_manager_error::success;
-// // }
+memory_manager *mm = NULL;
+uint64_t f_cr4 = 0;
+
+static void *
+stubbed_malloc_aligned(size_t size, int64_t alignment)
+{
+    void *ptr = NULL;
+
+    posix_memalign(&ptr, alignment, size);
+
+    return (void *)ptr;
+}
+
+static memory_manager *
+fake_memory_manager()
+{
+    return mm;
+}
+
+static void
+stubbed_write_cr4(uint32_t cr4)
+{
+    f_cr4 = cr4;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// vmxon::stop
+//////////////////////////////////////////////////////////////////////////////
 
 void
-vmxon_ut::test_create_vmxon_region_not_page_aligned()
+vmxon_ut::test_start_success()
 {
-    auto region = (char *)malloc(5000);
-
-    if (((uintptr_t)region & 0x0000000000000FFF) == 0)
-        region++;
-
     MockRepository mocks;
-    memory_manager *mm = mocks.Mock<memory_manager>();
-    intrinsics_intel_x64 *intrinsics = mocks.Mock<intrinsics_intel_x64>();
-    mocks.OnCallFunc(memory_manager::instance).Return(mm);
+    auto in = bfn::mock_shared<intrinsics_intel_x64>(mocks);
+    auto intrinsics = in.get();
+    auto l_mm = bfn::mock_shared<memory_manager>(mocks);
+    mm = l_mm.get();
 
-    mocks.OnCall(mm, memory_manager::malloc_aligned).Return(region);
-    mocks.OnCall(mm, memory_manager::virt_to_phys).Return(region);
-    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).Return(0);
+    // is_vmx_operation_enabled
+    Call &cr4_0 = mocks.ExpectCall(intrinsics, intrinsics_intel_x64::read_cr4).Return(0);
+
+    // check_cpuid_vmx_supported
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::cpuid_ecx).With(1).Return((1 << 5));
+
+    // check_vmx_capabilities_msr
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_BASIC_MSR).Return(((uint64_t)6 << 50) & (~((uint64_t)1 << 48)));
+
+    // check_ia32_vmx_cr0_fixed_msr
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_cr0).Return((0xffffffff));
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_CR0_FIXED0_MSR).Return(0);
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_CR0_FIXED1_MSR).Return(0xffffffff);
+
+    // check_ia32_feature_control_msr
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_FEATURE_CONTROL_MSR).Return((1 << 0));
+
+    // check_v8086_disabled
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_rflags).Return(~RFLAGS_VM_VIRTUAL_8086_MODE);
+
+    // create_vmxon_region
+    mocks.OnCallFunc(memory_manager::instance).Do(fake_memory_manager);
+    mocks.OnCall(mm, memory_manager::malloc_aligned).Do(stubbed_malloc_aligned);
+    mocks.OnCall(mm, memory_manager::virt_to_phys).Return((void *)0xDEADBEEFDEAF1000);
+
+    // enable_vmx_operation
+    Call &cr4_1 = mocks.ExpectCall(intrinsics, intrinsics_intel_x64::read_cr4).After(cr4_0).Return(0);
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::write_cr4).Do(stubbed_write_cr4);
+
+    // is_vmx_operation_enabled
+    Call &cr4_2 = mocks.ExpectCall(intrinsics, intrinsics_intel_x64::read_cr4).After(cr4_1).Return(CR4_VMXE_VMX_ENABLE_BIT);
+
+    // check_ia32_vmx_cr4_fixed_msr
+    mocks.ExpectCall(intrinsics, intrinsics_intel_x64::read_cr4).After(cr4_2).Return(0xDEADBEEF);
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_CR4_FIXED0_MSR).Return(~(~(0xDEADBEEF)));
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_CR4_FIXED1_MSR).Return(0xDEADBEEF);
+
+    // execute_vmxon
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::vmxon).Return(true);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        vmxon_intel_x64 vmxon(intrinsics);
-        EXPECT_EXCEPTION(vmxon.create_vmxon_region(), bfn::invalid_alignmnet_error);
+        vmxon_intel_x64 vmxon(in);
+
+        EXPECT_NO_EXCEPTION(vmxon.start());
     });
 }
 
-// void
-// vmxon_ut::test_release_vmxon_region()
-// {
-//     // MockRepository mocks;
-//     // memory_manager *mm = mocks.Mock<memory_manager>();
-//     // intrinsics_intel_x64 *intrinsics = mocks.Mock<intrinsics_intel_x64>();
+void
+vmxon_ut::test_start_execute_vmxon_already_on_failure()
+{
+    MockRepository mocks;
+    auto in = bfn::mock_shared<intrinsics_intel_x64>(mocks);
+    auto intrinsics = in.get();
+    auto l_mm = bfn::mock_shared<memory_manager>(mocks);
+    mm = l_mm.get();
 
-//     // vmxon_intel_x64 vmxon(intrinsics);
-//     // vmxon.init(intrinsics, mm);
+    // is_vmx_operation_enabled
+    Call &cr4_0 = mocks.ExpectCall(intrinsics, intrinsics_intel_x64::read_cr4).Return(0);
 
-//     // mocks.ExpectCall(mm, memory_manager::free_page);
+    // check_cpuid_vmx_supported
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::cpuid_ecx).With(1).Return((1 << 5));
 
-//     // RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-//     // {
-//     //     EXPECT_TRUE(vmxon.release_vmxon_region() == vmxon_error::success);
-//     // });
-// }
+    // check_vmx_capabilities_msr
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_BASIC_MSR).Return(((uint64_t)6 << 50) & (~((uint64_t)1 << 48)));
 
-// void
-// vmxon_ut::test_execute_vmxon_already_on()
-// {
-//     // MockRepository mocks;
-//     // intrinsics_intel_x64 *intrinsics = mocks.Mock<intrinsics_intel_x64>();
+    // check_ia32_vmx_cr0_fixed_msr
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_cr0).Return((0xffffffff));
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_CR0_FIXED0_MSR).Return(0);
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_CR0_FIXED1_MSR).Return(0xffffffff);
 
-//     // vmxon_intel_x64 vmxon(intrinsics);
+    // check_ia32_feature_control_msr
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_FEATURE_CONTROL_MSR).Return((1 << 0));
 
-//     // auto &mock1 = mocks.ExpectCall(intrinsics, intrinsics_intel_x64::vmxon).Return(true);
-//     // auto &mock2 = mocks.NeverCall(intrinsics, intrinsics_intel_x64::vmxon).After(mock1);
+    // check_v8086_disabled
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_rflags).Return(~RFLAGS_VM_VIRTUAL_8086_MODE);
 
-//     // RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-//     // {
-//     //     EXPECT_TRUE(vmxon.execute_vmxon() == vmxon_error::success);
-//     // });
-// }
+    // create_vmxon_region
+    mocks.OnCallFunc(memory_manager::instance).Do(fake_memory_manager);
+    mocks.OnCall(mm, memory_manager::malloc_aligned).Do(stubbed_malloc_aligned);
+    mocks.OnCall(mm, memory_manager::virt_to_phys).Return((void *)0xDEADBEEFDEAF1000);
 
-// void
-// vmxon_ut::test_execute_vmxon_failed()
-// {
-//     // MockRepository mocks;
-//     // intrinsics_intel_x64 *intrinsics = mocks.Mock<intrinsics_intel_x64>();
+    // enable_vmx_operation
+    Call &cr4_1 = mocks.ExpectCall(intrinsics, intrinsics_intel_x64::read_cr4).After(cr4_0).Return(0);
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::write_cr4).Do(stubbed_write_cr4);
 
-//     // vmxon_intel_x64 vmxon(intrinsics);
+    // is_vmx_operation_enabled ***
+    Call &cr4_2 = mocks.ExpectCall(intrinsics, intrinsics_intel_x64::read_cr4).After(cr4_1).Return(~CR4_VMXE_VMX_ENABLE_BIT);
 
-//     // mocks.ExpectCall(intrinsics, intrinsics_intel_x64::vmxon).Return(false);
+    // check_ia32_vmx_cr4_fixed_msr
+    mocks.ExpectCall(intrinsics, intrinsics_intel_x64::read_cr4).After(cr4_2).Return(0xDEADBEEF);
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_CR4_FIXED0_MSR).Return(~(~(0xDEADBEEF)));
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_CR4_FIXED1_MSR).Return(0xDEADBEEF);
 
-//     // RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-//     // {
-//     //     EXPECT_TRUE(vmxon.execute_vmxon() == vmxon_error::failure);
-//     // });
-// }
+    // execute_vmxon
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::vmxon).Return(true);
 
-// void
-// vmxon_ut::test_execute_vmxoff_already_off()
-// {
-//     MockRepository mocks;
-//     intrinsics_intel_x64 *intrinsics = mocks.Mock<intrinsics_intel_x64>();
+    // Handle rollbacks
+    mocks.OnCall(in.get(), intrinsics_intel_x64::read_cr4).Return(0);
+    mocks.OnCall(in.get(), intrinsics_intel_x64::vmxoff).Return(true);
+    mocks.OnCall(in.get(), intrinsics_intel_x64::write_cr4).Do(stubbed_write_cr4);
 
-//     vmxon_intel_x64 vmxon(intrinsics);
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        vmxon_intel_x64 vmxon(in);
+        vmxon.m_vmxon_enabled = true;
+        EXPECT_EXCEPTION(vmxon.start(), bfn::vmxon_failure_error);
+    });
+}
 
-//     mocks.NeverCall(intrinsics, intrinsics_intel_x64::vmxoff);
+void
+vmxon_ut::test_start_execute_vmxon_failure()
+{
+    MockRepository mocks;
+    auto in = bfn::mock_shared<intrinsics_intel_x64>(mocks);
+    auto intrinsics = in.get();
+    auto l_mm = bfn::mock_shared<memory_manager>(mocks);
+    mm = l_mm.get();
 
-//     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-//     {
-//         EXPECT_TRUE(vmxon.execute_vmxoff() == vmxon_error::success);
-//     });
-// }
+    // is_vmx_operation_enabled
+    Call &cr4_0 = mocks.ExpectCall(intrinsics, intrinsics_intel_x64::read_cr4).Return(0);
 
-// void
-// vmxon_ut::test_execute_vmxoff_failed()
-// {
-//     // MockRepository mocks;
-//     // intrinsics_intel_x64 *intrinsics = mocks.Mock<intrinsics_intel_x64>();
+    // check_cpuid_vmx_supported
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::cpuid_ecx).With(1).Return((1 << 5));
 
-//     // vmxon_intel_x64 vmxon(intrinsics);
+    // check_vmx_capabilities_msr
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_BASIC_MSR).Return(((uint64_t)6 << 50) & (~((uint64_t)1 << 48)));
 
-//     // mocks.ExpectCall(intrinsics, intrinsics_intel_x64::vmxon).Return(true);
-//     // mocks.ExpectCall(intrinsics, intrinsics_intel_x64::vmxoff).Return(true);
+    // check_ia32_vmx_cr0_fixed_msr
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_cr0).Return((0xffffffff));
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_CR0_FIXED0_MSR).Return(0);
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_CR0_FIXED1_MSR).Return(0xffffffff);
 
-//     // RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-//     // {
-//     //     EXPECT_TRUE(vmxon.execute_vmxon() == vmxon_error::success);
-//     //     EXPECT_TRUE(vmxon.execute_vmxoff() == vmxon_error::success);
-//     // });
-// }
+    // check_ia32_feature_control_msr
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_FEATURE_CONTROL_MSR).Return((1 << 0));
+
+    // check_v8086_disabled
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_rflags).Return(~RFLAGS_VM_VIRTUAL_8086_MODE);
+
+    // create_vmxon_region
+    mocks.OnCallFunc(memory_manager::instance).Do(fake_memory_manager);
+    mocks.OnCall(mm, memory_manager::malloc_aligned).Do(stubbed_malloc_aligned);
+    mocks.OnCall(mm, memory_manager::virt_to_phys).Return((void *)0xDEADBEEFDEAF1000);
+
+    // enable_vmx_operation
+    Call &cr4_1 = mocks.ExpectCall(intrinsics, intrinsics_intel_x64::read_cr4).After(cr4_0).Return(0);
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::write_cr4).Do(stubbed_write_cr4);
+
+    // is_vmx_operation_enabled ***
+    Call &cr4_2 = mocks.ExpectCall(intrinsics, intrinsics_intel_x64::read_cr4).After(cr4_1).Return(~CR4_VMXE_VMX_ENABLE_BIT);
+
+    // check_ia32_vmx_cr4_fixed_msr
+    mocks.ExpectCall(intrinsics, intrinsics_intel_x64::read_cr4).After(cr4_2).Return(0xDEADBEEF);
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_CR4_FIXED0_MSR).Return(~(~(0xDEADBEEF)));
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_CR4_FIXED1_MSR).Return(0xDEADBEEF);
+
+    // execute_vmxon
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::vmxon).Return(false);
+
+    // Handle rollbacks
+    mocks.OnCall(in.get(), intrinsics_intel_x64::read_cr4).Return(0);
+    mocks.OnCall(in.get(), intrinsics_intel_x64::vmxoff).Return(true);
+    mocks.OnCall(in.get(), intrinsics_intel_x64::write_cr4).Do(stubbed_write_cr4);
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        vmxon_intel_x64 vmxon(in);
+
+        EXPECT_EXCEPTION(vmxon.start(), bfn::vmxon_failure_error);
+    });
+}
+
+void
+vmxon_ut::test_start_check_ia32_vmx_cr4_fixed0_msr_failure()
+{
+    MockRepository mocks;
+    auto in = bfn::mock_shared<intrinsics_intel_x64>(mocks);
+    auto intrinsics = in.get();
+    auto l_mm = bfn::mock_shared<memory_manager>(mocks);
+    mm = l_mm.get();
+
+    // is_vmx_operation_enabled
+    Call &cr4_0 = mocks.ExpectCall(intrinsics, intrinsics_intel_x64::read_cr4).Return(0);
+
+    // check_cpuid_vmx_supported
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::cpuid_ecx).With(1).Return((1 << 5));
+
+    // check_vmx_capabilities_msr
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_BASIC_MSR).Return(((uint64_t)6 << 50) & (~((uint64_t)1 << 48)));
+
+    // check_ia32_vmx_cr0_fixed_msr
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_cr0).Return((0xffffffff));
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_CR0_FIXED0_MSR).Return(0);
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_CR0_FIXED1_MSR).Return(0xffffffff);
+
+    // check_ia32_feature_control_msr
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_FEATURE_CONTROL_MSR).Return((1 << 0));
+
+    // check_v8086_disabled
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_rflags).Return(~RFLAGS_VM_VIRTUAL_8086_MODE);
+
+    // create_vmxon_region
+    mocks.OnCallFunc(memory_manager::instance).Do(fake_memory_manager);
+    mocks.OnCall(mm, memory_manager::malloc_aligned).Do(stubbed_malloc_aligned);
+    mocks.OnCall(mm, memory_manager::virt_to_phys).Return((void *)0xDEADBEEFDEAF1000);
+
+    // enable_vmx_operation
+    Call &cr4_1 = mocks.ExpectCall(intrinsics, intrinsics_intel_x64::read_cr4).After(cr4_0).Return(0);
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::write_cr4).Do(stubbed_write_cr4);
+
+    // is_vmx_operation_enabled
+    Call &cr4_2 = mocks.ExpectCall(intrinsics, intrinsics_intel_x64::read_cr4).After(cr4_1).Return(CR4_VMXE_VMX_ENABLE_BIT);
+
+    // check_ia32_vmx_cr4_fixed_msr ***
+    mocks.ExpectCall(intrinsics, intrinsics_intel_x64::read_cr4).After(cr4_2).Return(0xDEADBEEF);
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_CR4_FIXED0_MSR).Return(0xFEEDBEEF);
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_CR4_FIXED1_MSR).Return(0xDEADBEEF);
+
+    // Handle rollbacks
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_cr4).Return(0);
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::vmxoff).Return(true);
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::write_cr4).Do(stubbed_write_cr4);
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        vmxon_intel_x64 vmxon(in);
+
+        EXPECT_EXCEPTION(vmxon.start(), bfn::vmxon_fixed_msr_failure_error);
+    });
+}
+
+void
+vmxon_ut::test_start_check_ia32_vmx_cr4_fixed1_msr_failure()
+{
+    MockRepository mocks;
+    auto in = bfn::mock_shared<intrinsics_intel_x64>(mocks);
+    auto intrinsics = in.get();
+    auto l_mm = bfn::mock_shared<memory_manager>(mocks);
+    mm = l_mm.get();
+
+    // is_vmx_operation_enabled
+    Call &cr4_0 = mocks.ExpectCall(intrinsics, intrinsics_intel_x64::read_cr4).Return(0);
+
+    // check_cpuid_vmx_supported
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::cpuid_ecx).With(1).Return((1 << 5));
+
+    // check_vmx_capabilities_msr
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_BASIC_MSR).Return(((uint64_t)6 << 50) & (~((uint64_t)1 << 48)));
+
+    // check_ia32_vmx_cr0_fixed_msr
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_cr0).Return((0xffffffff));
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_CR0_FIXED0_MSR).Return(0);
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_CR0_FIXED1_MSR).Return(0xffffffff);
+
+    // check_ia32_feature_control_msr
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_FEATURE_CONTROL_MSR).Return((1 << 0));
+
+    // check_v8086_disabled
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_rflags).Return(~RFLAGS_VM_VIRTUAL_8086_MODE);
+
+    // create_vmxon_region
+    mocks.OnCallFunc(memory_manager::instance).Do(fake_memory_manager);
+    mocks.OnCall(mm, memory_manager::malloc_aligned).Do(stubbed_malloc_aligned);
+    mocks.OnCall(mm, memory_manager::virt_to_phys).Return((void *)0xDEADBEEFDEAF1000);
+
+    // enable_vmx_operation
+    Call &cr4_1 = mocks.ExpectCall(intrinsics, intrinsics_intel_x64::read_cr4).After(cr4_0).Return(0);
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::write_cr4).Do(stubbed_write_cr4);
+
+    // is_vmx_operation_enabled
+    Call &cr4_2 = mocks.ExpectCall(intrinsics, intrinsics_intel_x64::read_cr4).After(cr4_1).Return(CR4_VMXE_VMX_ENABLE_BIT);
+
+    // check_ia32_vmx_cr4_fixed_msr ***
+    mocks.ExpectCall(intrinsics, intrinsics_intel_x64::read_cr4).After(cr4_2).Return(0xDEADBEEF);
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_CR4_FIXED0_MSR).Return(~(~(0xDEADBEEF)));
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_CR4_FIXED1_MSR).Return(0);
+
+    // execute_vmxon
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::vmxon).Return(true);
+
+    // Handle rollbacks
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_cr4).Return(0);
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::vmxoff).Return(true);
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::write_cr4).Do(stubbed_write_cr4);
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        vmxon_intel_x64 vmxon(in);
+
+        EXPECT_EXCEPTION(vmxon.start(), bfn::vmxon_fixed_msr_failure_error);
+    });
+}
+
+void
+vmxon_ut::test_start_enable_vmx_operation_failure()
+{
+    MockRepository mocks;
+    auto in = bfn::mock_shared<intrinsics_intel_x64>(mocks);
+    auto intrinsics = in.get();
+    auto l_mm = bfn::mock_shared<memory_manager>(mocks);
+    mm = l_mm.get();
+
+    // is_vmx_operation_enabled
+    Call &cr4_0 = mocks.ExpectCall(intrinsics, intrinsics_intel_x64::read_cr4).Return(0);
+
+    // check_cpuid_vmx_supported
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::cpuid_ecx).With(1).Return((1 << 5));
+
+    // check_vmx_capabilities_msr
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_BASIC_MSR).Return(((uint64_t)6 << 50) & (~((uint64_t)1 << 48)));
+
+    // check_ia32_vmx_cr0_fixed_msr
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_cr0).Return((0xffffffff));
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_CR0_FIXED0_MSR).Return(0);
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_CR0_FIXED1_MSR).Return(0xffffffff);
+
+    // check_ia32_feature_control_msr
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_FEATURE_CONTROL_MSR).Return((1 << 0));
+
+    // check_v8086_disabled
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_rflags).Return(~RFLAGS_VM_VIRTUAL_8086_MODE);
+
+    // create_vmxon_region
+    mocks.OnCallFunc(memory_manager::instance).Do(fake_memory_manager);
+    mocks.OnCall(mm, memory_manager::malloc_aligned).Do(stubbed_malloc_aligned);
+    mocks.OnCall(mm, memory_manager::virt_to_phys).Return((void *)0xDEADBEEFDEAF1000);
+
+    // enable_vmx_operation
+    Call &cr4_1 = mocks.ExpectCall(intrinsics, intrinsics_intel_x64::read_cr4).After(cr4_0).Return(0);
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::write_cr4).Do(stubbed_write_cr4);
+
+    // is_vmx_operation_enabled ***
+    Call &cr4_2 = mocks.ExpectCall(intrinsics, intrinsics_intel_x64::read_cr4).After(cr4_1).Return(~CR4_VMXE_VMX_ENABLE_BIT);
+
+    // check_ia32_vmx_cr4_fixed_msr
+    mocks.ExpectCall(intrinsics, intrinsics_intel_x64::read_cr4).After(cr4_2).Return(0xDEADBEEF);
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_CR4_FIXED0_MSR).Return(~(~(0xDEADBEEF)));
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_CR4_FIXED1_MSR).Return(0xDEADBEEF);
+
+    // execute_vmxon
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::vmxon).Return(true);
+
+    // Handle rollbacks
+    mocks.OnCall(in.get(), intrinsics_intel_x64::read_cr4).Return(0);
+    mocks.OnCall(in.get(), intrinsics_intel_x64::vmxoff).Return(true);
+    mocks.OnCall(in.get(), intrinsics_intel_x64::write_cr4).Do(stubbed_write_cr4);
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        vmxon_intel_x64 vmxon(in);
+
+        EXPECT_EXCEPTION(vmxon.start(), bfn::vmxon_failure_error);
+    });
+}
+
+void
+vmxon_ut::test_start_v8086_disabled_failure()
+{
+    MockRepository mocks;
+    auto in = bfn::mock_shared<intrinsics_intel_x64>(mocks);
+    auto intrinsics = in.get();
+    auto l_mm = bfn::mock_shared<memory_manager>(mocks);
+    mm = l_mm.get();
+
+    // is_vmx_operation_enabled
+    mocks.ExpectCall(intrinsics, intrinsics_intel_x64::read_cr4).Return(0);
+
+    // check_cpuid_vmx_supported
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::cpuid_ecx).With(1).Return((1 << 5));
+
+    // check_vmx_capabilities_msr
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_BASIC_MSR).Return(((uint64_t)6 << 50) & (~((uint64_t)1 << 48)));
+
+    // check_ia32_vmx_cr0_fixed_msr
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_cr0).Return((0xffffffff));
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_CR0_FIXED0_MSR).Return(0);
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_CR0_FIXED1_MSR).Return(0xffffffff);
+
+    // check_ia32_feature_control_msr
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_FEATURE_CONTROL_MSR).Return((1 << 0));
+
+    // check_v8086_disabled
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_rflags).Return(RFLAGS_VM_VIRTUAL_8086_MODE);
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        vmxon_intel_x64 vmxon(in);
+
+        EXPECT_EXCEPTION(vmxon.start(), bfn::vmxon_failure_error);
+    });
+}
+
+void
+vmxon_ut::test_start_check_ia32_feature_control_msr()
+{
+    MockRepository mocks;
+    auto in = bfn::mock_shared<intrinsics_intel_x64>(mocks);
+    auto intrinsics = in.get();
+    auto l_mm = bfn::mock_shared<memory_manager>(mocks);
+    mm = l_mm.get();
+
+    // is_vmx_operation_enabled
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_cr4).Return(0);
+
+    // check_cpuid_vmx_supported
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::cpuid_ecx).With(1).Return((1 << 5));
+
+    // check_vmx_capabilities_msr
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_BASIC_MSR).Return(((uint64_t)6 << 50) & (~((uint64_t)1 << 48)));
+
+    // check_ia32_vmx_cr0_fixed_msr
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_cr0).Return((0xffffffff));
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_CR0_FIXED0_MSR).Return(0);
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_CR0_FIXED1_MSR).Return(0xffffffff);
+
+    // check_ia32_feature_control_msr
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_FEATURE_CONTROL_MSR).Return(0);
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        vmxon_intel_x64 vmxon(in);
+
+        EXPECT_EXCEPTION(vmxon.start(), bfn::vmxon_failure_error);
+    });
+}
+
+void
+vmxon_ut::test_start_check_ia32_vmx_cr0_fixed0_msr()
+{
+    MockRepository mocks;
+    auto in = bfn::mock_shared<intrinsics_intel_x64>(mocks);
+    auto intrinsics = in.get();
+    auto l_mm = bfn::mock_shared<memory_manager>(mocks);
+    mm = l_mm.get();
+
+    // is_vmx_operation_enabled
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_cr4).Return(0);
+
+    // check_cpuid_vmx_supported
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::cpuid_ecx).With(1).Return((1 << 5));
+
+    // check_vmx_capabilities_msr
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_BASIC_MSR).Return(((uint64_t)6 << 50) & (~((uint64_t)1 << 48)));
+
+    // check_ia32_vmx_cr0_fixed_msr
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_cr0).Return(0xDEADBEEF);
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_CR0_FIXED0_MSR).Return(~(0xDEADBEEF));
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_CR0_FIXED1_MSR).Return(0xDEADBEEF);
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        vmxon_intel_x64 vmxon(in);
+
+        EXPECT_EXCEPTION(vmxon.start(), bfn::vmxon_fixed_msr_failure_error);
+    });
+}
+
+void
+vmxon_ut::test_start_check_ia32_vmx_cr0_fixed1_msr()
+{
+    MockRepository mocks;
+    auto in = bfn::mock_shared<intrinsics_intel_x64>(mocks);
+    auto intrinsics = in.get();
+    auto l_mm = bfn::mock_shared<memory_manager>(mocks);
+    mm = l_mm.get();
+
+    // is_vmx_operation_enabled
+    mocks.ExpectCall(intrinsics, intrinsics_intel_x64::read_cr4).Return(0);
+
+    // check_cpuid_vmx_supported
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::cpuid_ecx).With(1).Return((1 << 5));
+
+    // check_vmx_capabilities_msr
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_BASIC_MSR).Return(((uint64_t)6 << 50) & (~((uint64_t)1 << 48)));
+
+    // check_ia32_vmx_cr0_fixed_msr
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_cr0).Return(0xDEADBEEF);
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_CR0_FIXED0_MSR).Return(~(0xDEADBEEF));
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_CR0_FIXED1_MSR).Return(0);
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        vmxon_intel_x64 vmxon(in);
+
+        EXPECT_EXCEPTION(vmxon.start(), bfn::vmxon_fixed_msr_failure_error);
+    });
+}
+
+
+void
+vmxon_ut::test_start_check_vmx_capabilities_msr_memtype_failure()
+{
+    MockRepository mocks;
+    auto in = bfn::mock_shared<intrinsics_intel_x64>(mocks);
+    auto intrinsics = in.get();
+    auto l_mm = bfn::mock_shared<memory_manager>(mocks);
+    mm = l_mm.get();
+
+    // is_vmx_operation_enabled
+    mocks.ExpectCall(intrinsics, intrinsics_intel_x64::read_cr4).Return(0);
+
+    // check_cpuid_vmx_supported
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::cpuid_ecx).With(1).Return((1 << 5));
+
+    // check_vmx_capabilities_msr
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_BASIC_MSR).Return(((uint64_t)3 << 50) & (~((uint64_t)1 << 48)));
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        vmxon_intel_x64 vmxon(in);
+
+        EXPECT_EXCEPTION(vmxon.start(), bfn::vmxon_capabilities_failure_error);
+    });
+}
+
+void
+vmxon_ut::test_start_check_vmx_capabilities_msr_addr_width_failure()
+{
+    MockRepository mocks;
+    auto in = bfn::mock_shared<intrinsics_intel_x64>(mocks);
+    auto intrinsics = in.get();
+    auto l_mm = bfn::mock_shared<memory_manager>(mocks);
+    mm = l_mm.get();
+
+    // is_vmx_operation_enabled
+    mocks.ExpectCall(intrinsics, intrinsics_intel_x64::read_cr4).Return(0);
+
+    // check_cpuid_vmx_supported
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::cpuid_ecx).With(1).Return((1 << 5));
+
+    // check_vmx_capabilities_msr
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_BASIC_MSR).Return((((uint64_t)1 << 48)));
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        vmxon_intel_x64 vmxon(in);
+
+        EXPECT_EXCEPTION(vmxon.start(), bfn::vmxon_capabilities_failure_error);
+    });
+}
+
+void
+vmxon_ut::test_start_check_cpuid_vmx_supported_failure()
+{
+    MockRepository mocks;
+    auto in = bfn::mock_shared<intrinsics_intel_x64>(mocks);
+    auto intrinsics = in.get();
+    auto l_mm = bfn::mock_shared<memory_manager>(mocks);
+    mm = l_mm.get();
+
+    // is_vmx_operation_enabled
+    mocks.ExpectCall(intrinsics, intrinsics_intel_x64::read_cr4).Return(0);
+
+    // check_cpuid_vmx_supported
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::cpuid_ecx).With(1).Return(~(1 << 5));
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        vmxon_intel_x64 vmxon(in);
+
+        EXPECT_EXCEPTION(vmxon.start(), bfn::vmxon_failure_error);
+    });
+}
+
+void
+vmxon_ut::test_start_vmxon_already_enabled_failure()
+{
+    MockRepository mocks;
+    auto in = bfn::mock_shared<intrinsics_intel_x64>(mocks);
+    auto intrinsics = in.get();
+    auto l_mm = bfn::mock_shared<memory_manager>(mocks);
+    mm = l_mm.get();
+
+    // is_vmx_operation_enabled
+    mocks.ExpectCall(intrinsics, intrinsics_intel_x64::read_cr4).Return(CR4_VMXE_VMX_ENABLE_BIT);
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        vmxon_intel_x64 vmxon(in);
+
+        EXPECT_EXCEPTION(vmxon.start(), bfn::vmxon_failure_error);
+    });
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// vmxon::stop
+//////////////////////////////////////////////////////////////////////////////
+
+void
+vmxon_ut::test_stop_success()
+{
+    MockRepository mocks;
+    auto in = bfn::mock_shared<intrinsics_intel_x64>(mocks);
+    auto intrinsics = in.get();
+    auto l_mm = bfn::mock_shared<memory_manager>(mocks);
+    mm = l_mm.get();
+
+    // execute_vmxoff
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::vmxoff).Return(true);
+
+    // disable_vmx_operation
+    Call &cr4_0 = mocks.ExpectCall(intrinsics, intrinsics_intel_x64::read_cr4).Return(0);
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::write_cr4).Do(stubbed_write_cr4);
+
+    // is_vmx_operation_enabled
+    mocks.ExpectCall(intrinsics, intrinsics_intel_x64::read_cr4).After(cr4_0).Return(~CR4_VMXE_VMX_ENABLE_BIT);
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        vmxon_intel_x64 vmxon(in);
+
+        EXPECT_NO_EXCEPTION(vmxon.stop());
+    });
+}
+
+void
+vmxon_ut::test_stop_vmxoff_check_failure()
+{
+    MockRepository mocks;
+    auto in = bfn::mock_shared<intrinsics_intel_x64>(mocks);
+    auto intrinsics = in.get();
+    auto l_mm = bfn::mock_shared<memory_manager>(mocks);
+    mm = l_mm.get();
+
+    // execute_vmxoff
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::vmxoff).Return(true);
+
+    // disable_vmx_operation
+    Call &cr4_0 = mocks.ExpectCall(intrinsics, intrinsics_intel_x64::read_cr4).Return(0);
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::write_cr4).Do(stubbed_write_cr4);
+
+    // is_vmx_operation_enabled
+    mocks.ExpectCall(intrinsics, intrinsics_intel_x64::read_cr4).After(cr4_0).Return(CR4_VMXE_VMX_ENABLE_BIT);
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        vmxon_intel_x64 vmxon(in);
+
+        EXPECT_EXCEPTION(vmxon.stop(), bfn::vmxon_failure_error);
+    });
+}
+
+void
+vmxon_ut::test_stop_vmxoff_failure()
+{
+    MockRepository mocks;
+    auto in = bfn::mock_shared<intrinsics_intel_x64>(mocks);
+    auto intrinsics = in.get();
+    auto l_mm = bfn::mock_shared<memory_manager>(mocks);
+    mm = l_mm.get();
+
+    // execute_vmxoff
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::vmxoff).Return(false);
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        vmxon_intel_x64 vmxon(in);
+        vmxon.m_vmxon_enabled = true;
+        EXPECT_EXCEPTION(vmxon.stop(), bfn::vmxon_failure_error);
+    });
+}

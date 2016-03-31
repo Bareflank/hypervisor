@@ -57,15 +57,23 @@ INCLUDE_PATHS+=../../../include/
 INCLUDE_PATHS+=../../../../include/
 
 LIBS+=vmcs
-LIBS+=vcpu
-LIBS+=intrinsics
 LIBS+=exit_handler
+LIBS+=vcpu
+LIBS+=vcpu_factory
+LIBS+=vmxon
+LIBS+=vmcs
+LIBS+=debug_ring
+LIBS+=intrinsics
 LIBS+=memory_manager
 
 LIBRARY_PATHS+=../bin/native
-LIBRARY_PATHS+=../../vcpu/bin/native
-LIBRARY_PATHS+=../../intrinsics/bin/native
 LIBRARY_PATHS+=../../exit_handler/bin/native
+LIBRARY_PATHS+=../../vcpu/bin/native
+LIBRARY_PATHS+=../../vcpu_factory/bin/native
+LIBRARY_PATHS+=../../vmxon/bin/native
+LIBRARY_PATHS+=../../vmcs/bin/native
+LIBRARY_PATHS+=../../debug_ring/bin/native
+LIBRARY_PATHS+=../../intrinsics/bin/native
 LIBRARY_PATHS+=../../memory_manager/bin/native
 
 ################################################################################

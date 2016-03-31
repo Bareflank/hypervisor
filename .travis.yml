@@ -13,10 +13,10 @@ before_install:
 - if [ "$GCC_BASE" = "530" ]; then export GCC_URL="https://ftp.gnu.org/gnu/gcc/gcc-5.3.0/gcc-5.3.0.tar.bz2";  fi
 
 install:
+- if [[ -n $(./tools/astyle/linux/run.sh | grep Formatted) ]]; then echo "You must run astyle before submitting a pull request"; exit -1; fi
 - sudo apt-get update
 - if ! travis_wait 40 ./tools/scripts/setup-ubuntu.sh; then cat ~/setup-ubuntu_stderr.log; cat ~/create-cross-compiler_stderr.log; fi
 
 script:
 - make
 - make unittest
-- if [[ -n $(./tools/astyle/linux/run.sh | grep Formatted) ]]; then echo "You must run astyle before submitting a pull request"; exit -1; fi

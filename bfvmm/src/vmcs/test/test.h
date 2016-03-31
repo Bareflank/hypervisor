@@ -38,10 +38,34 @@ protected:
     bool list() override;
 
 private:
+    ///////////////////////////////////////////////////////////////////////////
+    // Constructor test
+    ///////////////////////////////////////////////////////////////////////////
+    void test_no_intrinsics();
 
-    void test_check_host_cr0_for_unsupported_bits_missing_1s();
-    void test_check_host_cr0_for_unsupported_bits_missing_0s();
-    void test_check_host_cr0_for_unsupported_bits_valid();
+    ///////////////////////////////////////////////////////////////////////////
+    // vmcs_intel_x64::launch
+    ///////////////////////////////////////////////////////////////////////////
+    void test_launch_is_supported_msr_bitmaps_failure();
+    void test_launch_is_supported_host_address_space_size_failure();
+    void test_launch_is_supported_ia_32e_mode_guest_failure();
+    void test_launch_create_vmcs_region_failure();
+    void test_launch_create_exit_handler_stack_failure();
+    void test_launch_vmclear_failure();
+    void test_launch_vmptrld_failure();
+    void test_launch_vmwrite_failure();
+    void test_launch_vmread_failure();
+    void test_launch_vmlaunch_failure();
+    void test_launch_success();
+
+    ///////////////////////////////////////////////////////////////////////////
+    // vmcs_intel_x64::promote (can't test?)
+    ///////////////////////////////////////////////////////////////////////////
+
+    ///////////////////////////////////////////////////////////////////////////
+    // vmcs_intel_x64::check_vmcs_control_state
+    ///////////////////////////////////////////////////////////////////////////
+    // void test_check_control_pin_based_ctls_reserved_properly_set_
 };
 
 #endif
