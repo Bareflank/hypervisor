@@ -99,8 +99,8 @@ For more detailed instructions please read the following (based on which OS your
 To provide examples of how you might extend bareflank to provide your own custom
 functionality, we have provided a couple of examples:
 
-[CPUID Count](https://github.com/Bareflank/hypervisor_example_cpuidcount) <br>
-[Enable VPID](https://github.com/Bareflank/hypervisor_example_vpid)
+[Enable VPID](https://github.com/Bareflank/hypervisor_example_vpid) <br>
+[CPUID Count](https://github.com/Bareflank/hypervisor_example_cpuidcount)
 
 ## Roadmap (updated 3-19-2016)
 
