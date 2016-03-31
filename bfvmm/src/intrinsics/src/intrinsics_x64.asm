@@ -29,8 +29,9 @@ global __cpuid_edx:function
 global __cpuid:function
 global __read_rflags:function
 global __read_msr:function
-global __read_msr32:function
 global __write_msr:function
+global __read_msr_reg:function
+global __write_msr_reg:function
 global __read_rip:function
 global __read_cr0:function
 global __write_cr0:function
@@ -86,59 +87,43 @@ __invd:
 ; uint32_t cpuid_eax(uint32_t val)
 __cpuid_eax:
     push rbx
-    push rcx
-    push rdx
 
     mov eax, edi
     cpuid
 
-    pop rdx
-    pop rcx
     pop rbx
     ret
 
 ; uint32_t cpuid_ebx(uint32_t val)
 __cpuid_ebx:
     push rbx
-    push rcx
-    push rdx
 
     mov eax, edi
     cpuid
     mov eax, ebx
 
-    pop rdx
-    pop rcx
     pop rbx
     ret
 
 ; uint32_t cpuid_ecx(uint32_t val)
 __cpuid_ecx:
     push rbx
-    push rcx
-    push rdx
 
     mov eax, edi
     cpuid
     mov eax, ecx
 
-    pop rdx
-    pop rcx
     pop rbx
     ret
 
 ; uint32_t cpuid_edx(uint32_t val)
 __cpuid_edx:
     push rbx
-    push rcx
-    push rdx
 
     mov eax, edi
     cpuid
     mov eax, edx
 
-    pop rdx
-    pop rcx
     pop rbx
     ret
 
@@ -179,43 +164,51 @@ __read_rflags:
 
 ; uint64_t __read_msr(uint32_t msr)
 __read_msr:
-    push rcx
-    push rdx
-
     mov ecx, edi
     rdmsr
     shl rdx, 32
     or rax, rdx
 
-    pop rdx
-    pop rcx
-    ret
-
-; uint64_t __read_msr32(uint32_t msr)
-__read_msr32:
-    push rcx
-    push rdx
-
-    mov ecx, edi
-    rdmsr
-
-    pop rdx
-    pop rcx
     ret
 
 ; void __write_msr(uint32_t msr, uint64_t val)
 __write_msr:
-    push rcx
-    push rdx
-
     mov rax, rsi
     mov rdx, rsi
     shr rdx, 32
     mov ecx, edi
     wrmsr
 
-    pop rdx
-    pop rcx
+    ret
+
+; void __read_msr_reg(uint32_t msr, uint32_t *edx, uint32_t *eax)
+__read_msr_reg:
+    mov r8, rsi
+    mov r9, rdx
+
+    mov ecx, edi
+
+    rdmsr
+
+    mov [r8], edx
+    mov [r9], eax
+
+    mov rax, 0
+    ret
+
+; void __write_msr_reg(uint32_t msr, uint32_t edx, uint32_t eax)
+__write_msr_reg:
+    mov r8, rdi
+    mov r9, rsi
+    mov r10, rdx
+
+    mov rcx, r8
+    mov rdx, r9
+    mov rax, r10
+
+    wrmsr
+
+    mov rax, 0
     ret
 
 ; uint64_t __read_rip(void)
@@ -389,7 +382,6 @@ __outw:
 	mov dx, si
 	out dx, ax
 	ret
-
 
 ; uint8_t __inb(uint16_t port)
 __inb:

@@ -22,7 +22,6 @@
 #ifndef VMCS_INTEL_X64_H
 #define VMCS_INTEL_X64_H
 
-#include <vmcs/bitmap.h>
 #include <vmcs/vmcs_intel_x64_state.h>
 #include <vmcs/vmcs_intel_x64_exceptions.h>
 #include <intrinsics/intrinsics_intel_x64.h>
@@ -517,9 +516,6 @@ protected:
 protected:
 
     friend class vmcs_ut;
-
-    bitmap m_msr_bitmap;
-    uint64_t m_msr_bitmap_phys;
 
     std::shared_ptr<intrinsics_intel_x64> m_intrinsics;
 

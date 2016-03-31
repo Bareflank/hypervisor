@@ -72,8 +72,8 @@ public:
         m_gs_base(0),
         m_tr_base(0),
         m_ia32_debugctl_msr(0),
-        m_ia32_efer_msr(0),
         m_ia32_pat_msr(0),
+        m_ia32_efer_msr(0),
         m_ia32_vmx_pinbased_ctls_msr(0),
         m_ia32_vmx_procbased_ctls_msr(0),
         m_ia32_vmx_exit_ctls_msr(0),
@@ -122,8 +122,8 @@ public:
         m_gs_base(0),
         m_tr_base(0),
         m_ia32_debugctl_msr(0),
-        m_ia32_efer_msr(0),
         m_ia32_pat_msr(0),
+        m_ia32_efer_msr(0),
         m_ia32_vmx_pinbased_ctls_msr(0),
         m_ia32_vmx_procbased_ctls_msr(0),
         m_ia32_vmx_exit_ctls_msr(0),
@@ -180,11 +180,11 @@ public:
         m_tr_base = intrinsics->segment_descriptor_base(m_tr);
 
         m_ia32_debugctl_msr = intrinsics->read_msr(IA32_DEBUGCTL_MSR);
-        m_ia32_efer_msr = intrinsics->read_msr(IA32_EFER_MSR);
         m_ia32_pat_msr = intrinsics->read_msr(IA32_PAT_MSR);
-        m_ia32_sysenter_cs_msr = intrinsics->read_msr32(IA32_SYSENTER_CS_MSR);
-        m_ia32_sysenter_esp_msr = intrinsics->read_msr32(IA32_SYSENTER_ESP_MSR);
-        m_ia32_sysenter_eip_msr = intrinsics->read_msr32(IA32_SYSENTER_EIP_MSR);
+        m_ia32_efer_msr = intrinsics->read_msr(IA32_EFER_MSR);
+        m_ia32_sysenter_cs_msr = intrinsics->read_msr(IA32_SYSENTER_CS_MSR);
+        m_ia32_sysenter_esp_msr = intrinsics->read_msr(IA32_SYSENTER_ESP_MSR);
+        m_ia32_sysenter_eip_msr = intrinsics->read_msr(IA32_SYSENTER_EIP_MSR);
         m_ia32_fs_base_msr = intrinsics->read_msr(IA32_FS_BASE_MSR);
         m_ia32_gs_base_msr = intrinsics->read_msr(IA32_GS_BASE_MSR);
     }
@@ -404,11 +404,11 @@ public:
     uint64_t ia32_debugctl_msr() const
     { return m_ia32_debugctl_msr; }
 
-    uint64_t ia32_efer_msr() const
-    { return m_ia32_efer_msr; }
-
     uint64_t ia32_pat_msr() const
     { return m_ia32_pat_msr; }
+
+    uint64_t ia32_efer_msr() const
+    { return m_ia32_efer_msr; }
 
     uint64_t ia32_vmx_pinbased_ctls_msr() const
     { return m_ia32_vmx_pinbased_ctls_msr; }
@@ -440,11 +440,11 @@ public:
     void set_ia32_debugctl_msr(uint64_t val)
     { m_ia32_debugctl_msr = val; }
 
-    void set_ia32_efer_msr(uint64_t val)
-    { m_ia32_efer_msr = val; }
-
     void set_ia32_pat_msr(uint64_t val)
     { m_ia32_pat_msr = val; }
+
+    void set_ia32_efer_msr(uint64_t val)
+    { m_ia32_efer_msr = val; }
 
     void set_ia32_vmx_pinbased_ctls_msr(uint64_t val)
     { m_ia32_vmx_pinbased_ctls_msr = val; }
@@ -540,8 +540,8 @@ public:
         bfdebug << bfendl;
         bfdebug << "MSRs:" << bfendl;
         PRINT_STATE(ia32_debugctl_msr);
-        PRINT_STATE(ia32_efer_msr);
         PRINT_STATE(ia32_pat_msr);
+        PRINT_STATE(ia32_efer_msr);
         PRINT_STATE(ia32_vmx_pinbased_ctls_msr);
         PRINT_STATE(ia32_vmx_procbased_ctls_msr);
         PRINT_STATE(ia32_vmx_exit_ctls_msr);
@@ -600,8 +600,8 @@ private:
     uint64_t m_tr_base;
 
     uint64_t m_ia32_debugctl_msr;
-    uint64_t m_ia32_efer_msr;
     uint64_t m_ia32_pat_msr;
+    uint64_t m_ia32_efer_msr;
     uint64_t m_ia32_vmx_pinbased_ctls_msr;
     uint64_t m_ia32_vmx_procbased_ctls_msr;
     uint64_t m_ia32_vmx_exit_ctls_msr;

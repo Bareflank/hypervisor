@@ -46,9 +46,6 @@ private:
     ///////////////////////////////////////////////////////////////////////////
     // vmcs_intel_x64::launch
     ///////////////////////////////////////////////////////////////////////////
-    void test_launch_is_supported_msr_bitmaps_failure();
-    void test_launch_is_supported_host_address_space_size_failure();
-    void test_launch_is_supported_ia_32e_mode_guest_failure();
     void test_launch_create_vmcs_region_failure();
     void test_launch_create_exit_handler_stack_failure();
     void test_launch_vmclear_failure();
