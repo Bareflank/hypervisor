@@ -1,5 +1,5 @@
 
-<figure><img src="https://raw.githubusercontent.com/Bareflank/hypervisor/master/doc/images/logo.png" width="500"></figure>
+<figure><img src="https://raw.githubusercontent.com/Bareflank/hypervisor/master/doc/images/logo.png" width="501"></figure>
 
 ## Description
 
