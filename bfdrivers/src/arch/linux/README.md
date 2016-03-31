@@ -1,9 +1,13 @@
 ## Compilation Instructions
 
-To compile the bareflank hypevisor on Linux, first ensure that bareflank's
-main source code has been compiled. To do this, you must first have a
-cross compiler setup. The following instructions assume that you are using
-Ubuntu.
+Supported Linux distributions are:
+- Ubuntu 12.04, 14.04, 15.04, 15.10
+- Debian Jessie
+- Fedora 22, 23
+
+To compile bareflank, first start by downloading the repo, and running the 
+setup-\<platform\>.sh script, which creates the cross compiler and sysroot
+that will be used later. 
 
 ```
 cd ~/
@@ -18,13 +22,13 @@ This can be done by doing the following:
 
 ```
 make
-make debian_load
+make linux_load
 ```
 
 To cleanup everything, run the following:
 
 ```
-make debian_unload
+make linux_unload
 make clean
 ```
 
@@ -51,14 +55,31 @@ sudo LD_LIBRARY_PATH=. ./bfm unload
 popd
 ```
 
-On Linux, you can also:
+On Linux, you can also run the following from the repo's root:
 
 ```
-make quick
 make load
 make start
-make status
-make dump
 make stop
 make unload
+make quick
+make status
+make dump
+make loop NUM=<xxx>
+```
+
+When extending the hypervisor, you need to provide the list 
+of modules you want to load. If you do this by hand, simply 
+replace vmm.modules with your own. If however you use the 
+shortcuts, do the following:
+
+```
+make [load|quick] MODULES=<path to list>
+```
+
+or
+
+```
+export MODULES=<path to list>
+make [load|quick]
 ```
