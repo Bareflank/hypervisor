@@ -19,7 +19,8 @@ extensions if so desired.
 [![Bareflank Demonstration Video](http://img.youtube.com/vi/adesFxQ741c/0.jpg)](https://www.youtube.com/watch?v=adesFxQ741c)
 
 To ease the development of the VMM, bareflank has partial support for C++,
-including the C++ Standard Template Library (STL) via libc++. With the C++ STL,
+including Exception support and the C++ Standard Template Library (STL) 
+via libc++. With the C++ STL, users can quickly prototype new technologies as
 bareflank has access to shared pointers, complex data structures
 (e.g. hash tables, maps, lists, etc…), and several other modern C++ features.
 Most of these features are “header only”, meaning only the parts of the STL
@@ -29,16 +30,8 @@ spend a considerable amount of time re-writing similar functionality instead of
 focusing on what matters most: hypervisor technologies.
 
 Since the goal of the project is to provide a lightweight hypervisor for
-research, the VMM only provides the bare minimum support to launch a VMM,
-which for Intel, consists of:
-- enabling virtual machine extensions (VMX),
-- setting up a virtual machine control structure (VMCS),
-- setting up a basic exit handler prior to launching the VMM.
-
-The default exit handler simply hands control back to the operating system
-if and when a VM exit should occur. The result is a VMM whose privileged code
-(i.e. the code that runs with so called “ring -1” privileges) is less than a
-couple hundred lines. Since bareflank is written in C++, users can leverage
+research, the VMM only provides the bare minimum support to launch a VMM.
+As bareflank is written in C++, users can leverage
 inheritance to extend every part of the hypervisor to provide additional
 functionality above and beyond what is already provided.
 
@@ -50,13 +43,9 @@ code works as expected.
 ## Compilation Instructions
 
 Before you can compile, you must have both a native GCC compiler, as well as a
-GCC cross-compiler. For instructions on how to setup a GCC cross-compiler,
-please see the following:
-
-[Cross Compilers](https://github.com/Bareflank/hypervisor/tree/master/doc/cross_compilers)
-
-If you are running on one of the supported platforms, setting up the cross
-compiler is as simple as:
+GCC cross-compiler. If you are running on one of the supported platforms 
+(Ubuntu 12.04, 14.04, 15.04, 15.10, Debian Jessie, Fedora 22, 23), 
+setting up the cross compiler is as simple as:
 
 ```
 ./tools/scripts/setup-<platform>.sh
@@ -65,7 +54,7 @@ compiler is as simple as:
 The setup-<platform>.sh script not only creates the cross compiler, but
 it also sets up the libc and libc++ environment, creating a sysroot that will
 be used by the bareflank hypervisor. Once you have your cross compiler setup
-based on the script, or instructions, you should be able to run the following
+based on the script, you should be able to run the following:
 
 ```
 make
@@ -74,16 +63,37 @@ make unittest
 
 To run the hypervisor, you need to first compile, and load one of the driver
 entry points. Bareflank uses the driver entry point to gain kernel level
-access to the system to load the hypervisor. To see the instructions for
-how to load the hypervisor, please read the following:
+access to the system to load the hypervisor. On Linux, this is as simple as:
+
+```
+make linux_load
+make quick
+```
+
+and to reverse this:
+
+```
+make linux_unload
+```
+
+and to get status information, use the following:
+
+```
+make status
+make dump
+```
+
+For more detailed instructions please read the following (based on which OS your using):
 
 [Driver Entry Documentation](https://github.com/Bareflank/hypervisor/tree/master/driver_entry/src/arch)
 
-To clean up the source directory, run:
+## Example Extensions
 
-```
-make clean
-```
+To provide examples of how you might extend bareflank to provide your own custom
+functionality, we have provided a couple of examples:
+
+[CPUID Count](https://github.com/Bareflank/hypervisor_example_cpuidcount)
+[Enable VPID](https://github.com/Bareflank/hypervisor_example_vpid)
 
 ## Roadmap (updated 3-19-2016)
 
@@ -112,18 +122,11 @@ Target: September 2016
 * Updated C++ Environment
 * Isolated VMM
 
-### Version 2.0
+### Version 1.2
 
 Target: Janurary 2017
 
 * UEFI Support (i.e. type 1)
-* Hyperkernel Support
-* Guest Support
-
-Note: Bareflank is only inteneded to provide the bare minimum. Mods for 2.0
-will only contain what is needed to support these goals. The actual
-hyperkernel and guest support will be done in a different repo to prevent
-Bareflank itself from becoming too compilcated for basic research.
 
 ## Contributing
 
