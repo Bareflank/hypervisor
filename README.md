@@ -1,5 +1,7 @@
 
-# Bareflank Hypervisor
+<figure><img src="https://raw.githubusercontent.com/Bareflank/hypervisor/master/doc/images/logo.png" width="500"></figure>
+
+<br>
 
 ![](https://travis-ci.org/Bareflank/hypervisor.svg?branch=master)
 
