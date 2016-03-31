@@ -55,7 +55,7 @@ sudo LD_LIBRARY_PATH=. ./bfm unload
 popd
 ```
 
-On Linux, you can also run the following from the repo's root:
+On Linux, you can also run the following shortcuts from the repo's root:
 
 ```
 make load
