@@ -92,7 +92,7 @@ make dump
 
 For more detailed instructions please read the following (based on which OS your using):
 
-[Driver Entry Documentation](https://github.com/Bareflank/hypervisor/tree/master/driver_entry/src/arch)
+[Driver Entry Documentation](https://github.com/Bareflank/hypervisor/tree/master/bfdrivers/src/arch)
 
 ## Example Extensions
 
