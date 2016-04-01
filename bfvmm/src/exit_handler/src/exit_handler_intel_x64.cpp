@@ -435,11 +435,115 @@ exit_handler_intel_x64::handle_io_instruction()
 
 void
 exit_handler_intel_x64::handle_rdmsr()
-{ unimplemented_handler(); }
+{
+    uint64_t msr = 0;
+
+    switch (g_guest_rcx)
+    {
+        case IA32_DEBUGCTL_MSR:
+            msr = vmread(VMCS_GUEST_IA32_DEBUGCTL_FULL);
+            break;
+        case IA32_PAT_MSR:
+            msr = vmread(VMCS_GUEST_IA32_PAT_FULL);
+            break;
+        case IA32_EFER_MSR:
+            msr = vmread(VMCS_GUEST_IA32_EFER_FULL);
+            break;
+        case IA32_SYSENTER_CS_MSR:
+            msr = vmread(VMCS_GUEST_IA32_SYSENTER_CS);
+            break;
+        case IA32_SYSENTER_ESP_MSR:
+            msr = vmread(VMCS_GUEST_IA32_SYSENTER_ESP);
+            break;
+        case IA32_SYSENTER_EIP_MSR:
+            msr = vmread(VMCS_GUEST_IA32_SYSENTER_EIP);
+            break;
+        case IA32_FS_BASE_MSR:
+            msr = vmread(VMCS_GUEST_FS_BASE);
+            break;
+        case IA32_GS_BASE_MSR:
+            msr = vmread(VMCS_GUEST_GS_BASE);
+            break;
+        default:
+            break;
+    }
+
+    switch (g_guest_rcx)
+    {
+        case IA32_DEBUGCTL_MSR:
+        case IA32_PAT_MSR:
+        case IA32_EFER_MSR:
+        case IA32_SYSENTER_CS_MSR:
+        case IA32_SYSENTER_ESP_MSR:
+        case IA32_SYSENTER_EIP_MSR:
+        case IA32_FS_BASE_MSR:
+        case IA32_GS_BASE_MSR:
+            g_guest_rax = ((msr & 0x00000000FFFFFFFF) >> 0);
+            g_guest_rdx = ((msr & 0xFFFFFFFF00000000) >> 32);
+            break;
+        default:
+            m_intrinsics->read_msr_reg(g_guest_rcx, &g_guest_rdx, &g_guest_rax);
+            break;
+    }
+
+    advance_rip();
+}
 
 void
 exit_handler_intel_x64::handle_wrmsr()
-{ unimplemented_handler(); }
+{
+    uint64_t msr = 0;
+
+    switch (g_guest_rcx)
+    {
+        case IA32_DEBUGCTL_MSR:
+        case IA32_PAT_MSR:
+        case IA32_EFER_MSR:
+        case IA32_SYSENTER_CS_MSR:
+        case IA32_SYSENTER_ESP_MSR:
+        case IA32_SYSENTER_EIP_MSR:
+        case IA32_FS_BASE_MSR:
+        case IA32_GS_BASE_MSR:
+            msr |= ((g_guest_rax << 0) & 0x00000000FFFFFFFF);
+            msr |= ((g_guest_rdx << 32) & 0xFFFFFFFF00000000);
+            break;
+        default:
+            break;
+    }
+
+    switch (g_guest_rcx)
+    {
+        case IA32_DEBUGCTL_MSR:
+            vmwrite(VMCS_GUEST_IA32_DEBUGCTL_FULL, msr);
+            break;
+        case IA32_PAT_MSR:
+            vmwrite(VMCS_GUEST_IA32_PAT_FULL, msr);
+            break;
+        case IA32_EFER_MSR:
+            vmwrite(VMCS_GUEST_IA32_EFER_FULL, msr);
+            break;
+        case IA32_SYSENTER_CS_MSR:
+            vmwrite(VMCS_GUEST_IA32_SYSENTER_CS, msr);
+            break;
+        case IA32_SYSENTER_ESP_MSR:
+            vmwrite(VMCS_GUEST_IA32_SYSENTER_ESP, msr);
+            break;
+        case IA32_SYSENTER_EIP_MSR:
+            vmwrite(VMCS_GUEST_IA32_SYSENTER_EIP, msr);
+            break;
+        case IA32_FS_BASE_MSR:
+            vmwrite(VMCS_GUEST_FS_BASE, msr);
+            break;
+        case IA32_GS_BASE_MSR:
+            vmwrite(VMCS_GUEST_GS_BASE, msr);
+            break;
+        default:
+            m_intrinsics->write_msr_reg(g_guest_rcx, g_guest_rdx, g_guest_rax);
+            break;
+    }
+
+    advance_rip();
+}
 
 void
 exit_handler_intel_x64::handle_vm_entry_failure_invalid_guest_state()

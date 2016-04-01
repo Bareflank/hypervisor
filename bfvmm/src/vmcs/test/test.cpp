@@ -42,9 +42,6 @@ bool
 vmcs_ut::list()
 {
     this->test_no_intrinsics();
-    this->test_launch_is_supported_msr_bitmaps_failure();
-    this->test_launch_is_supported_host_address_space_size_failure();
-    this->test_launch_is_supported_ia_32e_mode_guest_failure();
     this->test_launch_vmclear_failure();
     this->test_launch_vmptrld_failure();
     this->test_launch_vmwrite_failure();

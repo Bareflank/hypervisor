@@ -133,7 +133,6 @@ setup_intrinsics(MockRepository &mocks, intrinsics_intel_x64 *in)
     mocks.OnCall(in, intrinsics_intel_x64::segment_descriptor_base).Return(0);
 
     mocks.OnCall(in, intrinsics_intel_x64::read_msr).Return(0);
-    mocks.OnCall(in, intrinsics_intel_x64::read_msr32).Return(0);
 }
 
 void

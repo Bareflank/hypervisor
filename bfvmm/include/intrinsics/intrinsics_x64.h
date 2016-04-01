@@ -54,8 +54,10 @@ void __cpuid(uint64_t *rax,
 uint64_t __read_rflags(void);
 
 uint64_t __read_msr(uint32_t msr);
-uint32_t __read_msr32(uint32_t msr);
 void __write_msr(uint32_t msr, uint64_t val);
+
+void __read_msr_reg(uint32_t msr, uint32_t *edx, uint32_t *eax);
+void __write_msr_reg(uint32_t msr, uint32_t edx, uint32_t eax);
 
 uint64_t __read_rip(void);
 
@@ -172,11 +174,17 @@ public:
     virtual uint64_t read_msr(uint32_t msr) const noexcept
     { return __read_msr(msr); }
 
-    virtual uint32_t read_msr32(uint32_t msr) const noexcept
-    { return __read_msr32(msr); }
-
     virtual void write_msr(uint32_t msr, uint64_t val) const noexcept
     { __write_msr(msr, val); }
+
+    virtual void read_msr_reg(uint32_t msr, uint32_t *edx, uint32_t *eax)
+    { __read_msr_reg(msr, edx, eax); }
+
+    virtual void read_msr_reg(uint32_t msr, uint64_t *edx, uint64_t *eax)
+    { __read_msr_reg(msr, (uint32_t *)edx, (uint32_t *)eax); }
+
+    virtual void write_msr_reg(uint32_t msr, uint32_t edx, uint32_t eax)
+    { __write_msr_reg(msr, edx, eax); }
 
     virtual uint64_t read_rip() const noexcept
     { return __read_rip(); }
