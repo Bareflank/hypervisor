@@ -7,6 +7,7 @@
 #include <linux/kallsyms.h>
 #include <linux/cpumask.h>
 #include <linux/sched.h>
+#include <linux/version.h>
 
 #include <asm/tlbflush.h>
 
@@ -29,6 +30,18 @@ typedef long (*set_affinity_fn)(pid_t, const struct cpumask *);
 set_affinity_fn set_cpu_affinity;
 
 struct mm_struct *g_mmu_context = NULL;
+
+/* ========================================================================== */
+/* Helpers                                                                    */
+/* ========================================================================== */
+
+static void
+private_cr4_init_shadow(void)
+{
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,0,0)
+    cr4_init_shadow();
+#endif
+}
 
 /* ========================================================================== */
 /* Misc Device                                                                */
@@ -195,7 +208,7 @@ ioctl_stop_vmm(void)
 
     g_mmu_context = NULL;
 
-    cr4_init_shadow();
+    private_cr4_init_shadow();
 
     if (status == BF_IOCTL_SUCCESS)
         DEBUG("IOCTL_STOP_VMM: succeeded\n");
@@ -222,7 +235,7 @@ ioctl_start_vmm(void)
         goto failure;
     }
 
-    cr4_init_shadow();
+    private_cr4_init_shadow();
 
     DEBUG("IOCTL_START_VMM: succeeded\n");
     return BF_IOCTL_SUCCESS;
