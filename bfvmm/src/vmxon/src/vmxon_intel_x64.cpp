@@ -103,7 +103,7 @@ vmxon_intel_x64::check_vmx_capabilities_msr()
         throw vmxon_capabilities_failure(
             vmx_basic_msr, memory_type);
 
-    if (vmx_basic_msr & (1ULL << 55))
+    if ((vmx_basic_msr & (1ULL << 55)) == 0)
         throw vmxon_capabilities_failure(
             vmx_basic_msr, 55);
 }
