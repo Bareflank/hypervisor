@@ -245,7 +245,7 @@ vmcs_intel_x64::is_enabled_external_interrupt_exiting() const
         return false;
 
     if (is_supported_external_interrupt_exiting() == false)
-        throw hardware_unsupported("VMCS control not supported");
+        return false;
 
     return true;
 }
@@ -259,7 +259,7 @@ vmcs_intel_x64::is_enabled_nmi_exiting() const
         return false;
 
     if (is_supported_nmi_exiting() == false)
-        throw hardware_unsupported("VMCS control not supported");
+        return false;
 
     return true;
 }
@@ -273,7 +273,7 @@ vmcs_intel_x64::is_enabled_virtual_nmis() const
         return false;
 
     if (is_supported_virtual_nmis() == false)
-        throw hardware_unsupported("VMCS control not supported");
+        return false;
 
     return true;
 }
@@ -287,7 +287,7 @@ vmcs_intel_x64::is_enabled_vmx_preemption_timer() const
         return false;
 
     if (is_supported_vmx_preemption_timer() == false)
-        throw hardware_unsupported("VMCS control not supported");
+        return false;
 
     return true;
 }
@@ -301,7 +301,7 @@ vmcs_intel_x64::is_enabled_posted_interrupts() const
         return false;
 
     if (is_supported_posted_interrupts() == false)
-        throw hardware_unsupported("VMCS control not supported");
+        return false;
 
     return true;
 }
@@ -315,7 +315,7 @@ vmcs_intel_x64::is_enabled_interrupt_window_exiting() const
         return false;
 
     if (is_supported_interrupt_window_exiting() == false)
-        throw hardware_unsupported("VMCS control not supported");
+        return false;
 
     return true;
 }
@@ -329,7 +329,7 @@ vmcs_intel_x64::is_enabled_tsc_offsetting() const
         return false;
 
     if (is_supported_tsc_offsetting() == false)
-        throw hardware_unsupported("VMCS control not supported");
+        return false;
 
     return true;
 }
@@ -343,7 +343,7 @@ vmcs_intel_x64::is_enabled_hlt_exiting() const
         return false;
 
     if (is_supported_hlt_exiting() == false)
-        throw hardware_unsupported("VMCS control not supported");
+        return false;
 
     return true;
 }
@@ -357,7 +357,7 @@ vmcs_intel_x64::is_enabled_invlpg_exiting() const
         return false;
 
     if (is_supported_invlpg_exiting() == false)
-        throw hardware_unsupported("VMCS control not supported");
+        return false;
 
     return true;
 }
@@ -371,7 +371,7 @@ vmcs_intel_x64::is_enabled_mwait_exiting() const
         return false;
 
     if (is_supported_mwait_exiting() == false)
-        throw hardware_unsupported("VMCS control not supported");
+        return false;
 
     return true;
 }
@@ -385,7 +385,7 @@ vmcs_intel_x64::is_enabled_rdpmc_exiting() const
         return false;
 
     if (is_supported_rdpmc_exiting() == false)
-        throw hardware_unsupported("VMCS control not supported");
+        return false;
 
     return true;
 }
@@ -399,7 +399,7 @@ vmcs_intel_x64::is_enabled_rdtsc_exiting() const
         return false;
 
     if (is_supported_rdtsc_exiting() == false)
-        throw hardware_unsupported("VMCS control not supported");
+        return false;
 
     return true;
 }
@@ -413,7 +413,7 @@ vmcs_intel_x64::is_enabled_cr3_load_exiting() const
         return false;
 
     if (is_supported_cr3_load_exiting() == false)
-        throw hardware_unsupported("VMCS control not supported");
+        return false;
 
     return true;
 }
@@ -427,7 +427,7 @@ vmcs_intel_x64::is_enabled_cr3_store_exiting() const
         return false;
 
     if (is_supported_cr3_store_exiting() == false)
-        throw hardware_unsupported("VMCS control not supported");
+        return false;
 
     return true;
 }
@@ -441,7 +441,7 @@ vmcs_intel_x64::is_enabled_cr8_load_exiting() const
         return false;
 
     if (is_supported_cr8_load_exiting() == false)
-        throw hardware_unsupported("VMCS control not supported");
+        return false;
 
     return true;
 }
@@ -455,7 +455,7 @@ vmcs_intel_x64::is_enabled_cr8_store_exiting() const
         return false;
 
     if (is_supported_cr8_store_exiting() == false)
-        throw hardware_unsupported("VMCS control not supported");
+        return false;
 
     return true;
 }
@@ -469,7 +469,7 @@ vmcs_intel_x64::is_enabled_tpr_shadow() const
         return false;
 
     if (is_supported_tpr_shadow() == false)
-        throw hardware_unsupported("VMCS control not supported");
+        return false;
 
     return true;
 }
@@ -483,7 +483,7 @@ vmcs_intel_x64::is_enabled_nmi_window_exiting() const
         return false;
 
     if (is_supported_nmi_window_exiting() == false)
-        throw hardware_unsupported("VMCS control not supported");
+        return false;
 
     return true;
 }
@@ -497,7 +497,7 @@ vmcs_intel_x64::is_enabled_mov_dr_exiting() const
         return false;
 
     if (is_supported_mov_dr_exiting() == false)
-        throw hardware_unsupported("VMCS control not supported");
+        return false;
 
     return true;
 }
@@ -511,7 +511,7 @@ vmcs_intel_x64::is_enabled_unconditional_io_exiting() const
         return false;
 
     if (is_supported_unconditional_io_exiting() == false)
-        throw hardware_unsupported("VMCS control not supported");
+        return false;
 
     return true;
 }
@@ -525,7 +525,7 @@ vmcs_intel_x64::is_enabled_io_bitmaps() const
         return false;
 
     if (is_supported_io_bitmaps() == false)
-        throw hardware_unsupported("VMCS control not supported");
+        return false;
 
     return true;
 }
@@ -539,7 +539,7 @@ vmcs_intel_x64::is_enabled_monitor_trap_flag() const
         return false;
 
     if (is_supported_monitor_trap_flag() == false)
-        throw hardware_unsupported("VMCS control not supported");
+        return false;
 
     return true;
 }
@@ -553,7 +553,7 @@ vmcs_intel_x64::is_enabled_msr_bitmaps() const
         return false;
 
     if (is_supported_msr_bitmaps() == false)
-        throw hardware_unsupported("VMCS control not supported");
+        return false;
 
     return true;
 }
@@ -567,7 +567,7 @@ vmcs_intel_x64::is_enabled_monitor_exiting() const
         return false;
 
     if (is_supported_monitor_exiting() == false)
-        throw hardware_unsupported("VMCS control not supported");
+        return false;
 
     return true;
 }
@@ -581,7 +581,7 @@ vmcs_intel_x64::is_enabled_pause_exiting() const
         return false;
 
     if (is_supported_pause_exiting() == false)
-        throw hardware_unsupported("VMCS control not supported");
+        return false;
 
     return true;
 }
@@ -595,7 +595,7 @@ vmcs_intel_x64::is_enabled_secondary_controls() const
         return false;
 
     if (is_supported_secondary_controls() == false)
-        throw hardware_unsupported("VMCS control not supported");
+        return false;
 
     return true;
 }
@@ -609,7 +609,7 @@ vmcs_intel_x64::is_enabled_virtualized_apic() const
         return false;
 
     if (is_supported_virtualized_apic() == false)
-        throw hardware_unsupported("VMCS control not supported");
+        return false;
 
     return true;
 }
@@ -623,7 +623,7 @@ vmcs_intel_x64::is_enabled_ept() const
         return false;
 
     if (is_supported_ept() == false)
-        throw hardware_unsupported("VMCS control not supported");
+        return false;
 
     return true;
 }
@@ -637,7 +637,7 @@ vmcs_intel_x64::is_enabled_descriptor_table_exiting() const
         return false;
 
     if (is_supported_descriptor_table_exiting() == false)
-        throw hardware_unsupported("VMCS control not supported");
+        return false;
 
     return true;
 }
@@ -651,7 +651,7 @@ vmcs_intel_x64::is_enabled_rdtscp() const
         return false;
 
     if (is_supported_rdtscp() == false)
-        throw hardware_unsupported("VMCS control not supported");
+        return false;
 
     return true;
 }
@@ -665,7 +665,7 @@ vmcs_intel_x64::is_enabled_x2apic_mode() const
         return false;
 
     if (is_supported_x2apic_mode() == false)
-        throw hardware_unsupported("VMCS control not supported");
+        return false;
 
     return true;
 }
@@ -679,7 +679,7 @@ vmcs_intel_x64::is_enabled_vpid() const
         return false;
 
     if (is_supported_vpid() == false)
-        throw hardware_unsupported("VMCS control not supported");
+        return false;
 
     return true;
 }
@@ -693,7 +693,7 @@ vmcs_intel_x64::is_enabled_wbinvd_exiting() const
         return false;
 
     if (is_supported_wbinvd_exiting() == false)
-        throw hardware_unsupported("VMCS control not supported");
+        return false;
 
     return true;
 }
@@ -707,7 +707,7 @@ vmcs_intel_x64::is_enabled_unrestricted_guests() const
         return false;
 
     if (is_supported_unrestricted_guests() == false)
-        throw hardware_unsupported("VMCS control not supported");
+        return false;
 
     return true;
 }
@@ -721,7 +721,7 @@ vmcs_intel_x64::is_enabled_apic_register_virtualization() const
         return false;
 
     if (is_supported_apic_register_virtualization() == false)
-        throw hardware_unsupported("VMCS control not supported");
+        return false;
 
     return true;
 }
@@ -735,7 +735,7 @@ vmcs_intel_x64::is_enabled_virtual_interrupt_delivery() const
         return false;
 
     if (is_supported_virtual_interrupt_delivery() == false)
-        throw hardware_unsupported("VMCS control not supported");
+        return false;
 
     return true;
 }
@@ -749,7 +749,7 @@ vmcs_intel_x64::is_enabled_pause_loop_exiting() const
         return false;
 
     if (is_supported_pause_loop_exiting() == false)
-        throw hardware_unsupported("VMCS control not supported");
+        return false;
 
     return true;
 }
@@ -763,7 +763,7 @@ vmcs_intel_x64::is_enabled_rdrand_exiting() const
         return false;
 
     if (is_supported_rdrand_exiting() == false)
-        throw hardware_unsupported("VMCS control not supported");
+        return false;
 
     return true;
 }
@@ -777,7 +777,7 @@ vmcs_intel_x64::is_enabled_invpcid() const
         return false;
 
     if (is_supported_invpcid() == false)
-        throw hardware_unsupported("VMCS control not supported");
+        return false;
 
     return true;
 }
@@ -791,7 +791,7 @@ vmcs_intel_x64::is_enabled_vm_functions() const
         return false;
 
     if (is_supported_vm_functions() == false)
-        throw hardware_unsupported("VMCS control not supported");
+        return false;
 
     return true;
 }
@@ -805,7 +805,7 @@ vmcs_intel_x64::is_enabled_vmcs_shadowing() const
         return false;
 
     if (is_supported_vmcs_shadowing() == false)
-        throw hardware_unsupported("VMCS control not supported");
+        return false;
 
     return true;
 }
@@ -819,7 +819,7 @@ vmcs_intel_x64::is_enabled_rdseed_exiting() const
         return false;
 
     if (is_supported_rdseed_exiting() == false)
-        throw hardware_unsupported("VMCS control not supported");
+        return false;
 
     return true;
 }
@@ -833,7 +833,7 @@ vmcs_intel_x64::is_enabled_ept_violation_ve() const
         return false;
 
     if (is_supported_ept_violation_ve() == false)
-        throw hardware_unsupported("VMCS control not supported");
+        return false;
 
     return true;
 }
@@ -847,7 +847,7 @@ vmcs_intel_x64::is_enabled_xsave_xrestore() const
         return false;
 
     if (is_supported_xsave_xrestore() == false)
-        throw hardware_unsupported("VMCS control not supported");
+        return false;
 
     return true;
 }
@@ -861,7 +861,7 @@ vmcs_intel_x64::is_enabled_save_debug_controls_on_exit() const
         return false;
 
     if (is_supported_save_debug_controls_on_exit() == false)
-        throw hardware_unsupported("VMCS control not supported");
+        return false;
 
     return true;
 }
@@ -875,7 +875,7 @@ vmcs_intel_x64::is_enabled_host_address_space_size() const
         return false;
 
     if (is_supported_host_address_space_size() == false)
-        throw hardware_unsupported("VMCS control not supported");
+        return false;
 
     return true;
 }
@@ -889,7 +889,7 @@ vmcs_intel_x64::is_enabled_load_ia32_perf_global_ctrl_on_exit() const
         return false;
 
     if (is_supported_load_ia32_perf_global_ctrl_on_exit() == false)
-        throw hardware_unsupported("VMCS control not supported");
+        return false;
 
     return true;
 }
@@ -903,7 +903,7 @@ vmcs_intel_x64::is_enabled_ack_interrupt_on_exit() const
         return false;
 
     if (is_supported_ack_interrupt_on_exit() == false)
-        throw hardware_unsupported("VMCS control not supported");
+        return false;
 
     return true;
 }
@@ -917,7 +917,7 @@ vmcs_intel_x64::is_enabled_save_ia32_pat_on_exit() const
         return false;
 
     if (is_supported_save_ia32_pat_on_exit() == false)
-        throw hardware_unsupported("VMCS control not supported");
+        return false;
 
     return true;
 }
@@ -931,7 +931,7 @@ vmcs_intel_x64::is_enabled_load_ia32_pat_on_exit() const
         return false;
 
     if (is_supported_load_ia32_pat_on_exit() == false)
-        throw hardware_unsupported("VMCS control not supported");
+        return false;
 
     return true;
 }
@@ -945,7 +945,7 @@ vmcs_intel_x64::is_enabled_save_ia32_efer_on_exit() const
         return false;
 
     if (is_supported_save_ia32_efer_on_exit() == false)
-        throw hardware_unsupported("VMCS control not supported");
+        return false;
 
     return true;
 }
@@ -959,7 +959,7 @@ vmcs_intel_x64::is_enabled_load_ia32_efer_on_exit() const
         return false;
 
     if (is_supported_load_ia32_efer_on_exit() == false)
-        throw hardware_unsupported("VMCS control not supported");
+        return false;
 
     return true;
 }
@@ -973,7 +973,7 @@ vmcs_intel_x64::is_enabled_save_vmx_preemption_timer_on_exit() const
         return false;
 
     if (is_supported_save_vmx_preemption_timer_on_exit() == false)
-        throw hardware_unsupported("VMCS control not supported");
+        return false;
 
     return true;
 }
@@ -987,7 +987,7 @@ vmcs_intel_x64::is_enabled_load_debug_controls_on_entry() const
         return false;
 
     if (is_supported_load_debug_controls_on_entry() == false)
-        throw hardware_unsupported("VMCS control not supported");
+        return false;
 
     return true;
 }
@@ -1001,7 +1001,7 @@ vmcs_intel_x64::is_enabled_ia_32e_mode_guest() const
         return false;
 
     if (is_supported_ia_32e_mode_guest() == false)
-        throw hardware_unsupported("VMCS control not supported");
+        return false;
 
     return true;
 }
@@ -1015,7 +1015,7 @@ vmcs_intel_x64::is_enabled_entry_to_smm() const
         return false;
 
     if (is_supported_entry_to_smm() == false)
-        throw hardware_unsupported("VMCS control not supported");
+        return false;
 
     return true;
 }
@@ -1029,7 +1029,7 @@ vmcs_intel_x64::is_enabled_deactivate_dual_monitor_treatment() const
         return false;
 
     if (is_supported_deactivate_dual_monitor_treatment() == false)
-        throw hardware_unsupported("VMCS control not supported");
+        return false;
 
     return true;
 }
@@ -1043,7 +1043,7 @@ vmcs_intel_x64::is_enabled_load_ia32_perf_global_ctrl_on_entry() const
         return false;
 
     if (is_supported_load_ia32_perf_global_ctrl_on_entry() == false)
-        throw hardware_unsupported("VMCS control not supported");
+        return false;
 
     return true;
 }
@@ -1057,7 +1057,7 @@ vmcs_intel_x64::is_enabled_load_ia32_pat_on_entry() const
         return false;
 
     if (is_supported_load_ia32_pat_on_entry() == false)
-        throw hardware_unsupported("VMCS control not supported");
+        return false;
 
     return true;
 }
@@ -1071,7 +1071,7 @@ vmcs_intel_x64::is_enabled_load_ia32_efer_on_entry() const
         return false;
 
     if (is_supported_load_ia32_efer_on_entry() == false)
-        throw hardware_unsupported("VMCS control not supported");
+        return false;
 
     return true;
 }
