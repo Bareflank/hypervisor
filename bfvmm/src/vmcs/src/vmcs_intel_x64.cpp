@@ -75,23 +75,23 @@ vmcs_intel_x64::launch(const vmcs_state_intel_x64 &host_state,
 
     if (m_intrinsics->vmlaunch() == false)
     {
-        // this->dump_vmcs();
+        this->dump_vmcs();
 
-        // this->print_execution_controls();
-        // this->print_pin_based_vm_execution_controls();
-        // this->print_primary_processor_based_vm_execution_controls();
-        // this->print_secondary_processor_based_vm_execution_controls();
-        // this->print_vm_exit_control_fields();
-        // this->print_vm_entry_control_fields();
+        this->print_execution_controls();
+        this->print_pin_based_vm_execution_controls();
+        this->print_primary_processor_based_vm_execution_controls();
+        this->print_secondary_processor_based_vm_execution_controls();
+        this->print_vm_exit_control_fields();
+        this->print_vm_entry_control_fields();
 
-        // host_state.dump("Host");
-        // guest_state.dump("Guest");
+        host_state.dump("Host");
+        guest_state.dump("Guest");
 
-        throw vmcs_launch_failure(this->get_vm_instruction_error());
-
-        // this->check_vmcs_control_state();
+        this->check_vmcs_control_state();
         // this->check_vmcs_guest_state();
         // this->check_vmcs_host_state();
+
+        throw vmcs_launch_failure(this->get_vm_instruction_error());
     }
 
     cor1.commit();
