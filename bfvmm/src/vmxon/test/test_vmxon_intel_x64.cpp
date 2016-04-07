@@ -69,7 +69,8 @@ vmxon_ut::test_start_success()
     mocks.OnCall(intrinsics, intrinsics_intel_x64::cpuid_ecx).With(1).Return((1 << 5));
 
     // check_vmx_capabilities_msr
-    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_BASIC_MSR).Return(((uint64_t)6 << 50) & (~((uint64_t)1 << 48)));
+    auto basic = ((1ULL << 55) | ((6ULL << 50) & (~(1ULL << 48))));
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_BASIC_MSR).Return(basic);
 
     // check_ia32_vmx_cr0_fixed_msr
     mocks.OnCall(intrinsics, intrinsics_intel_x64::read_cr0).Return((0xffffffff));
@@ -126,7 +127,8 @@ vmxon_ut::test_start_execute_vmxon_already_on_failure()
     mocks.OnCall(intrinsics, intrinsics_intel_x64::cpuid_ecx).With(1).Return((1 << 5));
 
     // check_vmx_capabilities_msr
-    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_BASIC_MSR).Return(((uint64_t)6 << 50) & (~((uint64_t)1 << 48)));
+    auto basic = ((1ULL << 55) | ((6ULL << 50) & (~(1ULL << 48))));
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_BASIC_MSR).Return(basic);
 
     // check_ia32_vmx_cr0_fixed_msr
     mocks.OnCall(intrinsics, intrinsics_intel_x64::read_cr0).Return((0xffffffff));
@@ -188,7 +190,8 @@ vmxon_ut::test_start_execute_vmxon_failure()
     mocks.OnCall(intrinsics, intrinsics_intel_x64::cpuid_ecx).With(1).Return((1 << 5));
 
     // check_vmx_capabilities_msr
-    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_BASIC_MSR).Return(((uint64_t)6 << 50) & (~((uint64_t)1 << 48)));
+    auto basic = ((1ULL << 55) | ((6ULL << 50) & (~(1ULL << 48))));
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_BASIC_MSR).Return(basic);
 
     // check_ia32_vmx_cr0_fixed_msr
     mocks.OnCall(intrinsics, intrinsics_intel_x64::read_cr0).Return((0xffffffff));
@@ -250,7 +253,8 @@ vmxon_ut::test_start_check_ia32_vmx_cr4_fixed0_msr_failure()
     mocks.OnCall(intrinsics, intrinsics_intel_x64::cpuid_ecx).With(1).Return((1 << 5));
 
     // check_vmx_capabilities_msr
-    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_BASIC_MSR).Return(((uint64_t)6 << 50) & (~((uint64_t)1 << 48)));
+    auto basic = ((1ULL << 55) | ((6ULL << 50) & (~(1ULL << 48))));
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_BASIC_MSR).Return(basic);
 
     // check_ia32_vmx_cr0_fixed_msr
     mocks.OnCall(intrinsics, intrinsics_intel_x64::read_cr0).Return((0xffffffff));
@@ -309,7 +313,8 @@ vmxon_ut::test_start_check_ia32_vmx_cr4_fixed1_msr_failure()
     mocks.OnCall(intrinsics, intrinsics_intel_x64::cpuid_ecx).With(1).Return((1 << 5));
 
     // check_vmx_capabilities_msr
-    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_BASIC_MSR).Return(((uint64_t)6 << 50) & (~((uint64_t)1 << 48)));
+    auto basic = ((1ULL << 55) | ((6ULL << 50) & (~(1ULL << 48))));
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_BASIC_MSR).Return(basic);
 
     // check_ia32_vmx_cr0_fixed_msr
     mocks.OnCall(intrinsics, intrinsics_intel_x64::read_cr0).Return((0xffffffff));
@@ -371,7 +376,8 @@ vmxon_ut::test_start_enable_vmx_operation_failure()
     mocks.OnCall(intrinsics, intrinsics_intel_x64::cpuid_ecx).With(1).Return((1 << 5));
 
     // check_vmx_capabilities_msr
-    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_BASIC_MSR).Return(((uint64_t)6 << 50) & (~((uint64_t)1 << 48)));
+    auto basic = ((1ULL << 55) | ((6ULL << 50) & (~(1ULL << 48))));
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_BASIC_MSR).Return(basic);
 
     // check_ia32_vmx_cr0_fixed_msr
     mocks.OnCall(intrinsics, intrinsics_intel_x64::read_cr0).Return((0xffffffff));
@@ -433,7 +439,8 @@ vmxon_ut::test_start_v8086_disabled_failure()
     mocks.OnCall(intrinsics, intrinsics_intel_x64::cpuid_ecx).With(1).Return((1 << 5));
 
     // check_vmx_capabilities_msr
-    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_BASIC_MSR).Return(((uint64_t)6 << 50) & (~((uint64_t)1 << 48)));
+    auto basic = ((1ULL << 55) | ((6ULL << 50) & (~(1ULL << 48))));
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_BASIC_MSR).Return(basic);
 
     // check_ia32_vmx_cr0_fixed_msr
     mocks.OnCall(intrinsics, intrinsics_intel_x64::read_cr0).Return((0xffffffff));
@@ -470,7 +477,8 @@ vmxon_ut::test_start_check_ia32_feature_control_msr()
     mocks.OnCall(intrinsics, intrinsics_intel_x64::cpuid_ecx).With(1).Return((1 << 5));
 
     // check_vmx_capabilities_msr
-    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_BASIC_MSR).Return(((uint64_t)6 << 50) & (~((uint64_t)1 << 48)));
+    auto basic = ((1ULL << 55) | ((6ULL << 50) & (~(1ULL << 48))));
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_BASIC_MSR).Return(basic);
 
     // check_ia32_vmx_cr0_fixed_msr
     mocks.OnCall(intrinsics, intrinsics_intel_x64::read_cr0).Return((0xffffffff));
@@ -504,7 +512,8 @@ vmxon_ut::test_start_check_ia32_vmx_cr0_fixed0_msr()
     mocks.OnCall(intrinsics, intrinsics_intel_x64::cpuid_ecx).With(1).Return((1 << 5));
 
     // check_vmx_capabilities_msr
-    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_BASIC_MSR).Return(((uint64_t)6 << 50) & (~((uint64_t)1 << 48)));
+    auto basic = ((1ULL << 55) | ((6ULL << 50) & (~(1ULL << 48))));
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_BASIC_MSR).Return(basic);
 
     // check_ia32_vmx_cr0_fixed_msr
     mocks.OnCall(intrinsics, intrinsics_intel_x64::read_cr0).Return(0xDEADBEEF);
@@ -535,7 +544,8 @@ vmxon_ut::test_start_check_ia32_vmx_cr0_fixed1_msr()
     mocks.OnCall(intrinsics, intrinsics_intel_x64::cpuid_ecx).With(1).Return((1 << 5));
 
     // check_vmx_capabilities_msr
-    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_BASIC_MSR).Return(((uint64_t)6 << 50) & (~((uint64_t)1 << 48)));
+    auto basic = ((1ULL << 55) | ((6ULL << 50) & (~(1ULL << 48))));
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_BASIC_MSR).Return(basic);
 
     // check_ia32_vmx_cr0_fixed_msr
     mocks.OnCall(intrinsics, intrinsics_intel_x64::read_cr0).Return(0xDEADBEEF);
@@ -567,7 +577,8 @@ vmxon_ut::test_start_check_vmx_capabilities_msr_memtype_failure()
     mocks.OnCall(intrinsics, intrinsics_intel_x64::cpuid_ecx).With(1).Return((1 << 5));
 
     // check_vmx_capabilities_msr
-    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_BASIC_MSR).Return(((uint64_t)3 << 50) & (~((uint64_t)1 << 48)));
+    auto basic = ((1ULL << 55) | ((3ULL << 50) & (~(1ULL << 48))));
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_BASIC_MSR).Return(basic);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -593,7 +604,8 @@ vmxon_ut::test_start_check_vmx_capabilities_msr_addr_width_failure()
     mocks.OnCall(intrinsics, intrinsics_intel_x64::cpuid_ecx).With(1).Return((1 << 5));
 
     // check_vmx_capabilities_msr
-    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_BASIC_MSR).Return((((uint64_t)1 << 48)));
+    auto basic = ((1ULL << 55) | ((~(1ULL << 48))));
+    mocks.OnCall(intrinsics, intrinsics_intel_x64::read_msr).With(IA32_VMX_BASIC_MSR).Return(basic);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
