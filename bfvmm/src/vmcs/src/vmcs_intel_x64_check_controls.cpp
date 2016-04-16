@@ -44,9 +44,6 @@ vmcs_intel_x64::checks_on_vm_execution_control_fields()
     check_control_nmi_exiting_and_virtual_nmi();
     check_control_virtual_nmi_and_nmi_window();
     check_control_virtual_apic_address_bits();
-    check_control_virtual_x2apic_and_tpr();
-    check_control_register_apic_mode_and_tpr();
-    check_control_virtual_interrupt_delivery_and_tpr();
     check_control_x2apic_mode_and_virtual_apic_access();
     check_control_virtual_interrupt_and_external_interrupt();
     check_control_process_posted_interrupt_checks();
@@ -64,15 +61,15 @@ vmcs_intel_x64::check_control_pin_based_ctls_reserved_properly_set()
     auto ia32_vmx_pinbased_ctls_msr =
         m_intrinsics->read_msr(IA32_VMX_TRUE_PINBASED_CTLS_MSR);
 
-    auto lower = ((ia32_vmx_pinbased_ctls_msr >> 00) & 0x00000000FFFFFFFF);
-    auto upper = ((ia32_vmx_pinbased_ctls_msr >> 32) & 0x00000000FFFFFFFF);
+    auto allowed_zero = ((ia32_vmx_pinbased_ctls_msr >> 00) & 0x00000000FFFFFFFF);
+    auto allowed_one = ((ia32_vmx_pinbased_ctls_msr >> 32) & 0x00000000FFFFFFFF);
 
     auto ctls = get_pin_ctls();
     auto ctls_lower = ((ctls >> 00) & 0x00000000FFFFFFFF);
     auto ctls_upper = ((ctls >> 32) & 0x00000000FFFFFFFF);
 
-    if ((lower & ctls_lower) != lower || (upper & ~ctls_upper) != upper)
-        throw vmcs_invalid_ctls("pin based", lower, upper,
+    if ((allowed_zero & ctls_lower) != allowed_zero || (allowed_one & ~ctls_upper) != allowed_one)
+        throw vmcs_invalid_ctls("pin based", allowed_zero, allowed_one,
                                 ctls_lower, ctls_upper);
 }
 
@@ -82,15 +79,15 @@ vmcs_intel_x64::check_control_proc_based_ctls_reserved_properly_set()
     auto ia32_vmx_procbased_ctls_msr =
         m_intrinsics->read_msr(IA32_VMX_TRUE_PROCBASED_CTLS_MSR);
 
-    auto lower = ((ia32_vmx_procbased_ctls_msr >> 00) & 0x00000000FFFFFFFF);
-    auto upper = ((ia32_vmx_procbased_ctls_msr >> 32) & 0x00000000FFFFFFFF);
+    auto allowed_zero = ((ia32_vmx_procbased_ctls_msr >> 00) & 0x00000000FFFFFFFF);
+    auto allowed_one = ((ia32_vmx_procbased_ctls_msr >> 32) & 0x00000000FFFFFFFF);
 
     auto ctls = get_proc_ctls();
     auto ctls_lower = ((ctls >> 00) & 0x00000000FFFFFFFF);
     auto ctls_upper = ((ctls >> 32) & 0x00000000FFFFFFFF);
 
-    if ((lower & ctls_lower) != lower || (upper & ~ctls_upper) != upper)
-        throw vmcs_invalid_ctls("proc based", lower, upper,
+    if ((allowed_zero & ctls_lower) != allowed_zero || (allowed_one & ~ctls_upper) != allowed_one)
+        throw vmcs_invalid_ctls("proc based", allowed_zero, allowed_one,
                                 ctls_lower, ctls_upper);
 }
 
@@ -100,15 +97,15 @@ vmcs_intel_x64::check_control_proc_based_ctls2_reserved_properly_set()
     auto ia32_vmx_procbased_ctls2_msr =
         m_intrinsics->read_msr(IA32_VMX_PROCBASED_CTLS2_MSR);
 
-    auto lower = ((ia32_vmx_procbased_ctls2_msr >> 00) & 0x00000000FFFFFFFF);
-    auto upper = ((ia32_vmx_procbased_ctls2_msr >> 32) & 0x00000000FFFFFFFF);
+    auto allowed_zero = ((ia32_vmx_procbased_ctls2_msr >> 00) & 0x00000000FFFFFFFF);
+    auto allowed_one = ((ia32_vmx_procbased_ctls2_msr >> 32) & 0x00000000FFFFFFFF);
 
     auto ctls2 = get_proc2_ctls();
     auto ctls2_lower = ((ctls2 >> 00) & 0x00000000FFFFFFFF);
     auto ctls2_upper = ((ctls2 >> 32) & 0x00000000FFFFFFFF);
 
-    if ((lower & ctls2_lower) != lower || (upper & ~ctls2_upper) != upper)
-        throw vmcs_invalid_ctls("secondary proc based", lower, upper,
+    if ((allowed_zero & ctls2_lower) != allowed_zero || (allowed_one & ~ctls2_upper) != allowed_one)
+        throw vmcs_invalid_ctls("secondary proc based", allowed_zero, allowed_one,
                                 ctls2_lower, ctls2_upper);
 }
 
@@ -161,51 +158,63 @@ vmcs_intel_x64::check_control_msr_bitmap_address_bits()
 void
 vmcs_intel_x64::check_control_tpr_shadow_and_virtual_apic()
 {
-    if (is_enabled_tpr_shadow() == false)
-        return;
+    if (is_enabled_tpr_shadow())
+    {
+        auto phys_addr = vmread(VMCS_VIRTUAL_APIC_ADDRESS_FULL);
 
-    auto phys_addr = vmread(VMCS_VIRTUAL_APIC_ADDRESS_FULL);
+        if (phys_addr == 0)
+            throw invalid_address("virtual apic physical addr is NULL", phys_addr);
 
-    if (phys_addr == 0)
-        throw invalid_address("vitual apic physical addr is NULL", phys_addr);
+        if ((phys_addr & 0x0000000000000FFF) != 0)
+            throw invalid_alignment("virtual apic addr not 4k aligned", phys_addr);
 
-    if ((phys_addr & 0x0000000000000FFF) != 0)
-        throw invalid_alignment("virtual apic addr not 4k aligned", phys_addr);
+        if (is_physical_address_valid(phys_addr) == false)
+            throw invalid_address("virtual apic addr too large", phys_addr);
 
-    if (is_physical_address_valid(phys_addr) == false)
-        throw invalid_address("vitual apic addr too large", phys_addr);
+        if (is_enabled_virtual_interrupt_delivery() == false)
+            throw hardware_unsupported("virtual interrupt delivery is disabled or unsupported");
 
-    if (is_enabled_virtual_interrupt_delivery() == false)
-        return;
+        auto tpr_threshold = vmread(VMCS_TPR_THRESHOLD);
 
-    auto tpr_threshold = vmread(VMCS_TPR_THRESHOLD);
+        if ((tpr_threshold & 0x00000000FFFFFFF0) != 0)
+            throw vmcs_invalid_field("bits 31:4 must be 0", tpr_threshold);
 
-    if ((tpr_threshold & 0x00000000FFFFFFF0) != 0)
-        throw vmcs_invalid_field("bits 31:4 must be 0", tpr_threshold);
+        if (is_enabled_virtualized_apic() == false)
+            throw hardware_unsupported("virtualized apics are disabled or unsupported");
 
-    if (is_enabled_virtualized_apic() == false)
-        return;
+        auto virt_addr = (uint64_t)g_mm->phys_to_virt((void *)phys_addr);
 
-    auto virt_addr = (uint64_t)g_mm->phys_to_virt((void *)phys_addr);
+        if (virt_addr == 0)
+            throw invalid_address("vitual apic virtual addr is NULL", virt_addr);
 
-    if (virt_addr == 0)
-        throw invalid_address("vitual apic virtual addr is NULL", virt_addr);
+        // This is described in 26.2.1.1
+        auto vtpr = (((uint8_t *)((uint8_t *)virt_addr + 0x80))[0]);
+        auto vtpr_74 = (vtpr & 0xF0) >> 4;
+        auto tpr_threshold_30 = (uint8_t)(tpr_threshold & 0x000000000000000F);
 
-    auto vtpr = (((uint32_t *)((char *)virt_addr + 0x80))[0]);
-    auto vtpr_74 = vtpr & 0x00000000000000F0;
-    auto tpr_threshold_30 = vtpr & 0x000000000000000F;
+        if (tpr_threshold_30 > vtpr_74)
+            throw vmcs_invalid_field("invalid TPR threshold", tpr_threshold);
+    }
+    else
+    {
+        if (is_enabled_x2apic_mode())
+            throw hardware_unsupported("x2apic mode must be disabled if tpr shadow is disabled");
 
-    if (tpr_threshold_30 > (vtpr_74 >> 4))
-        throw vmcs_invalid_field("invalid TPR threshold", tpr_threshold);
+        if (is_enabled_apic_register_virtualization())
+            throw hardware_unsupported("apic register virtualization must be disabled if tpr shadow is disabled");
+
+        if (is_enabled_virtual_interrupt_delivery())
+            throw hardware_unsupported("virtual interrupt delivery must be disabled if tpr shadow is disabled");
+    }
 }
 
 void
 vmcs_intel_x64::check_control_nmi_exiting_and_virtual_nmi()
 {
-    if (is_enabled_nmi_exiting() == true)
-        return;
+    auto nmi_exiting = is_enabled_nmi_exiting();
+    auto virtual_nmis = is_enabled_virtual_nmis();
 
-    if (is_enabled_virtual_nmis() == true)
+    if (nmi_exiting == false && virtual_nmis == true)
         throw vmcs_invalid_field(
             "virtual NMI must be 0 if NMI exiting is 0", 0);
 }
@@ -213,10 +222,10 @@ vmcs_intel_x64::check_control_nmi_exiting_and_virtual_nmi()
 void
 vmcs_intel_x64::check_control_virtual_nmi_and_nmi_window()
 {
-    if (is_enabled_virtual_nmis() == true)
-        return;
+    auto virtual_nmis = is_enabled_virtual_nmis();
+    auto nmi_window_exiting = is_enabled_nmi_window_exiting();
 
-    if (is_enabled_nmi_window_exiting() == true)
+    if (virtual_nmis == false && nmi_window_exiting == true)
         throw vmcs_invalid_field(
             "NMI window exiting must be 0 if virtual NMI is 0", 0);
 }
@@ -240,45 +249,12 @@ vmcs_intel_x64::check_control_virtual_apic_address_bits()
 }
 
 void
-vmcs_intel_x64::check_control_virtual_x2apic_and_tpr()
-{
-    if (is_enabled_tpr_shadow() == true)
-        return;
-
-    if (is_enabled_x2apic_mode() == true)
-        throw vmcs_invalid_field(
-            "x2 apic mode must be 0 if use tpr shadow is 0", 0);
-}
-
-void
-vmcs_intel_x64::check_control_register_apic_mode_and_tpr()
-{
-    if (is_enabled_tpr_shadow() == true)
-        return;
-
-    if (is_enabled_apic_register_virtualization() == true)
-        throw vmcs_invalid_field(
-            "apic register virt must be 0 if use tpr shadow is 0", 0);
-}
-
-void
-vmcs_intel_x64::check_control_virtual_interrupt_delivery_and_tpr()
-{
-    if (is_enabled_tpr_shadow() == true)
-        return;
-
-    if (is_enabled_virtual_interrupt_delivery() == true)
-        throw vmcs_invalid_field(
-            "virt interrupt delivery must be 0 if use tpr shadow is 0", 0);
-}
-
-void
 vmcs_intel_x64::check_control_x2apic_mode_and_virtual_apic_access()
 {
-    if (is_enabled_x2apic_mode() == false)
-        return;
+    auto x2apic_mode = is_enabled_x2apic_mode();
+    auto virtualized_apic = is_enabled_virtualized_apic();
 
-    if (is_enabled_virtualized_apic() == true)
+    if (x2apic_mode == true && virtualized_apic == true)
         throw vmcs_invalid_field(
             "apic accesses must be 0 if x2 apic mode is 1", 0);
 }
@@ -286,10 +262,10 @@ vmcs_intel_x64::check_control_x2apic_mode_and_virtual_apic_access()
 void
 vmcs_intel_x64::check_control_virtual_interrupt_and_external_interrupt()
 {
-    if (is_enabled_virtual_interrupt_delivery() == false)
-        return;
+    auto virtual_interrupt_delivery = is_enabled_virtual_interrupt_delivery();
+    auto external_interrupt_exiting = is_enabled_external_interrupt_exiting();
 
-    if (is_enabled_external_interrupt_exiting() == false)
+    if (virtual_interrupt_delivery == true && external_interrupt_exiting == false)
         throw vmcs_invalid_field("external interrupt exiting must be 1 "
                                  "if virtual interrupt delivery is 1", 0);
 }
@@ -498,10 +474,10 @@ vmcs_intel_x64::check_control_vm_exit_ctls_reserved_properly_set()
 void
 vmcs_intel_x64::check_control_activate_and_save_premeption_timer_must_be_0()
 {
-    if (is_enabled_vmx_preemption_timer() == true)
-        return;
+    auto vmx_preemption_timer = is_enabled_vmx_preemption_timer();
+    auto save_vmx_preemption_timer_on_exit = is_enabled_save_vmx_preemption_timer_on_exit();
 
-    if (is_enabled_save_vmx_preemption_timer_on_exit() == true)
+    if (vmx_preemption_timer == false && save_vmx_preemption_timer_on_exit == true)
         throw vmcs_invalid_field("save vmx preemption timer must be 0 "
                                  "if activate vmx preemption timer is 0", 0);
 }
@@ -702,7 +678,7 @@ vmcs_intel_x64::check_control_event_injection_ec_checks()
     if ((interrupt_info_field & VM_INTERRUPT_INFORMATION_DELIVERY_ERROR) == 0)
         return;
 
-    if ((exception_error_code & 0x00000000FFFF8000) == 0)
+    if ((exception_error_code & 0x00000000FFFF8000) != 0)
         throw vmcs_invalid_field("bits 31:15 of the exception error code "
                                  "field must be 0 if deliver error code bit "
                                  "is set in the interrupt info field",
@@ -725,9 +701,9 @@ vmcs_intel_x64::check_control_event_injection_instr_length_checks()
 
     switch (type)
     {
-        case 4:
-        case 5:
-        case 6:
+        case 4: // Software interrupt
+        case 5: // Privileged software exception
+        case 6: // Software exception
             break;
 
         default:

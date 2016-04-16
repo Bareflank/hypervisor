@@ -483,9 +483,6 @@ protected:
     virtual void check_control_nmi_exiting_and_virtual_nmi();
     virtual void check_control_virtual_nmi_and_nmi_window();
     virtual void check_control_virtual_apic_address_bits();
-    virtual void check_control_virtual_x2apic_and_tpr();
-    virtual void check_control_register_apic_mode_and_tpr();
-    virtual void check_control_virtual_interrupt_delivery_and_tpr();
     virtual void check_control_x2apic_mode_and_virtual_apic_access();
     virtual void check_control_virtual_interrupt_and_external_interrupt();
     virtual void check_control_process_posted_interrupt_checks();

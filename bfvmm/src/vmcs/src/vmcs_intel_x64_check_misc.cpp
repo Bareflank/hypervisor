@@ -1303,7 +1303,7 @@ vmcs_intel_x64::is_supported_msr_bitmaps() const
         m_intrinsics->read_msr(IA32_VMX_TRUE_PROCBASED_CTLS_MSR);
 
     return ia32_vmx_procbased_ctls_msr &
-           (VM_EXEC_P_PROC_BASED_MONITOR_TRAP_FLAG << 32);
+           (VM_EXEC_P_PROC_BASED_USE_MSR_BITMAPS << 32);
 }
 
 bool
