@@ -11,3 +11,4 @@ bin/
 *.symvers
 src_*
 hypervisor_example_*
+doc/html/*
