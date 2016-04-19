@@ -1,13 +1,13 @@
-## Compilation Instructions
+## Linux Driver Compilation Instructions
 
 Supported Linux distributions are:
 - Ubuntu 12.04, 14.04, 15.04, 15.10
 - Debian Jessie
 - Fedora 22, 23
 
-To compile bareflank, first start by downloading the repo, and running the 
+To compile bareflank, first start by downloading the repo, and running the
 setup-\<platform\>.sh script, which creates the cross compiler and sysroot
-that will be used later. 
+that will be used later.
 
 ```
 cd ~/
@@ -68,9 +68,9 @@ make dump
 make loop NUM=<xxx>
 ```
 
-When extending the hypervisor, you need to provide the list 
-of modules you want to load. If you do this by hand, simply 
-replace vmm.modules with your own. If however you use the 
+When extending the hypervisor, you need to provide the list
+of modules you want to load. If you do this by hand, simply
+replace vmm.modules with your own. If however you use the
 shortcuts, do the following:
 
 ```

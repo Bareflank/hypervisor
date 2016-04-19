@@ -71,8 +71,8 @@ vmcs_ut::test_launch_is_supported_host_address_space_size_failure()
     auto in = bfn::mock_shared<intrinsics_intel_x64>(mocks);
 
     vmcs_intel_x64 vmcs(in);
-    auto host_state = vmcs_state_intel_x64();
-    auto guest_state = vmcs_state_intel_x64();
+    auto host_state = vmcs_intel_x64_state();
+    auto guest_state = vmcs_intel_x64_state();
 
     // Setup
     mocks.OnCall(in.get(), intrinsics_intel_x64::read_msr).With(IA32_VMX_TRUE_PROCBASED_CTLS_MSR).Return((VM_EXEC_P_PROC_BASED_MONITOR_TRAP_FLAG << 32));
@@ -94,8 +94,8 @@ vmcs_ut::test_launch_is_supported_ia_32e_mode_guest_failure()
     auto in = bfn::mock_shared<intrinsics_intel_x64>(mocks);
 
     vmcs_intel_x64 vmcs(in);
-    auto host_state = vmcs_state_intel_x64();
-    auto guest_state = vmcs_state_intel_x64();
+    auto host_state = vmcs_intel_x64_state();
+    auto guest_state = vmcs_intel_x64_state();
 
     // Setup
     mocks.OnCall(in.get(), intrinsics_intel_x64::read_msr).With(IA32_VMX_TRUE_PROCBASED_CTLS_MSR).Return((VM_EXEC_P_PROC_BASED_MONITOR_TRAP_FLAG << 32));
@@ -119,8 +119,8 @@ vmcs_ut::test_launch_vmclear_failure()
     mm = l_mm.get();
 
     vmcs_intel_x64 vmcs(in);
-    auto host_state = vmcs_state_intel_x64();
-    auto guest_state = vmcs_state_intel_x64();
+    auto host_state = vmcs_intel_x64_state();
+    auto guest_state = vmcs_intel_x64_state();
 
     // Setup
     mocks.OnCall(in.get(), intrinsics_intel_x64::read_msr).With(IA32_VMX_TRUE_EXIT_CTLS_MSR).Return((VM_EXIT_CONTROL_HOST_ADDRESS_SPACE_SIZE << 32));
@@ -152,8 +152,8 @@ vmcs_ut::test_launch_vmptrld_failure()
     mm = l_mm.get();
 
     vmcs_intel_x64 vmcs(in);
-    auto host_state = vmcs_state_intel_x64();
-    auto guest_state = vmcs_state_intel_x64();
+    auto host_state = vmcs_intel_x64_state();
+    auto guest_state = vmcs_intel_x64_state();
 
     // Setup
 
@@ -189,8 +189,8 @@ vmcs_ut::test_launch_vmwrite_failure()
     mm = l_mm.get();
 
     vmcs_intel_x64 vmcs(in);
-    auto host_state = vmcs_state_intel_x64();
-    auto guest_state = vmcs_state_intel_x64();
+    auto host_state = vmcs_intel_x64_state();
+    auto guest_state = vmcs_intel_x64_state();
 
     // Setup
     mocks.OnCall(in.get(), intrinsics_intel_x64::read_msr).With(IA32_VMX_TRUE_EXIT_CTLS_MSR).Return((VM_EXIT_CONTROL_HOST_ADDRESS_SPACE_SIZE << 32));
@@ -225,8 +225,8 @@ vmcs_ut::test_launch_vmread_failure()
     mm = l_mm.get();
 
     vmcs_intel_x64 vmcs(in);
-    auto host_state = vmcs_state_intel_x64();
-    auto guest_state = vmcs_state_intel_x64();
+    auto host_state = vmcs_intel_x64_state();
+    auto guest_state = vmcs_intel_x64_state();
 
     // Setup
     mocks.OnCall(in.get(), intrinsics_intel_x64::read_msr).With(IA32_VMX_TRUE_PROCBASED_CTLS_MSR).Return((VM_EXEC_P_PROC_BASED_USE_MSR_BITMAPS << 32));
@@ -295,8 +295,8 @@ vmcs_ut::test_launch_success()
     mm = l_mm.get();
 
     vmcs_intel_x64 vmcs(in);
-    auto host_state = vmcs_state_intel_x64();
-    auto guest_state = vmcs_state_intel_x64();
+    auto host_state = vmcs_intel_x64_state();
+    auto guest_state = vmcs_intel_x64_state();
 
     setup_success_launch(mocks, in.get());
 

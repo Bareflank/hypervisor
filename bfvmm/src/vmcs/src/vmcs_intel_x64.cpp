@@ -34,8 +34,8 @@ vmcs_intel_x64::vmcs_intel_x64(const std::shared_ptr<intrinsics_intel_x64> &intr
 }
 
 void
-vmcs_intel_x64::launch(const vmcs_state_intel_x64 &host_state,
-                       const vmcs_state_intel_x64 &guest_state)
+vmcs_intel_x64::launch(const vmcs_intel_x64_state &host_state,
+                       const vmcs_intel_x64_state &guest_state)
 {
     auto cor1 = commit_or_rollback([&]
     {
@@ -158,7 +158,7 @@ vmcs_intel_x64::release_exit_handler_stack()
 }
 
 void
-vmcs_intel_x64::write_16bit_control_state(const vmcs_state_intel_x64 &state)
+vmcs_intel_x64::write_16bit_control_state(const vmcs_intel_x64_state &state)
 {
     (void) state;
 
@@ -168,7 +168,7 @@ vmcs_intel_x64::write_16bit_control_state(const vmcs_state_intel_x64 &state)
 }
 
 void
-vmcs_intel_x64::write_64bit_control_state(const vmcs_state_intel_x64 &state)
+vmcs_intel_x64::write_64bit_control_state(const vmcs_intel_x64_state &state)
 {
     (void) state;
 
@@ -197,7 +197,7 @@ vmcs_intel_x64::write_64bit_control_state(const vmcs_state_intel_x64 &state)
 }
 
 void
-vmcs_intel_x64::write_32bit_control_state(const vmcs_state_intel_x64 &state)
+vmcs_intel_x64::write_32bit_control_state(const vmcs_intel_x64_state &state)
 {
     (void) state;
 
@@ -246,7 +246,7 @@ vmcs_intel_x64::write_32bit_control_state(const vmcs_state_intel_x64 &state)
 }
 
 void
-vmcs_intel_x64::write_natural_control_state(const vmcs_state_intel_x64 &state)
+vmcs_intel_x64::write_natural_control_state(const vmcs_intel_x64_state &state)
 {
     (void) state;
 
@@ -261,7 +261,7 @@ vmcs_intel_x64::write_natural_control_state(const vmcs_state_intel_x64 &state)
 }
 
 void
-vmcs_intel_x64::write_16bit_guest_state(const vmcs_state_intel_x64 &state)
+vmcs_intel_x64::write_16bit_guest_state(const vmcs_intel_x64_state &state)
 {
     vmwrite(VMCS_GUEST_ES_SELECTOR, state.es());
     vmwrite(VMCS_GUEST_CS_SELECTOR, state.cs());
@@ -276,7 +276,7 @@ vmcs_intel_x64::write_16bit_guest_state(const vmcs_state_intel_x64 &state)
 }
 
 void
-vmcs_intel_x64::write_64bit_guest_state(const vmcs_state_intel_x64 &state)
+vmcs_intel_x64::write_64bit_guest_state(const vmcs_intel_x64_state &state)
 {
     vmwrite(VMCS_VMCS_LINK_POINTER_FULL, 0xFFFFFFFFFFFFFFFF);
     vmwrite(VMCS_GUEST_IA32_DEBUGCTL_FULL, state.ia32_debugctl_msr());
@@ -291,7 +291,7 @@ vmcs_intel_x64::write_64bit_guest_state(const vmcs_state_intel_x64 &state)
 }
 
 void
-vmcs_intel_x64::write_32bit_guest_state(const vmcs_state_intel_x64 &state)
+vmcs_intel_x64::write_32bit_guest_state(const vmcs_intel_x64_state &state)
 {
     auto unusable = m_intrinsics->segment_descriptor_access(0);
 
@@ -325,7 +325,7 @@ vmcs_intel_x64::write_32bit_guest_state(const vmcs_state_intel_x64 &state)
 }
 
 void
-vmcs_intel_x64::write_natural_guest_state(const vmcs_state_intel_x64 &state)
+vmcs_intel_x64::write_natural_guest_state(const vmcs_intel_x64_state &state)
 {
     vmwrite(VMCS_GUEST_CR0, state.cr0());
     vmwrite(VMCS_GUEST_CR3, state.cr3());
@@ -354,7 +354,7 @@ vmcs_intel_x64::write_natural_guest_state(const vmcs_state_intel_x64 &state)
 }
 
 void
-vmcs_intel_x64::write_16bit_host_state(const vmcs_state_intel_x64 &state)
+vmcs_intel_x64::write_16bit_host_state(const vmcs_intel_x64_state &state)
 {
     vmwrite(VMCS_HOST_CS_SELECTOR, state.cs());
     vmwrite(VMCS_HOST_SS_SELECTOR, state.ss());
@@ -367,7 +367,7 @@ vmcs_intel_x64::write_16bit_host_state(const vmcs_state_intel_x64 &state)
 }
 
 void
-vmcs_intel_x64::write_64bit_host_state(const vmcs_state_intel_x64 &state)
+vmcs_intel_x64::write_64bit_host_state(const vmcs_intel_x64_state &state)
 {
     (void) state;
 
@@ -378,7 +378,7 @@ vmcs_intel_x64::write_64bit_host_state(const vmcs_state_intel_x64 &state)
 }
 
 void
-vmcs_intel_x64::write_32bit_host_state(const vmcs_state_intel_x64 &state)
+vmcs_intel_x64::write_32bit_host_state(const vmcs_intel_x64_state &state)
 {
     (void) state;
 
@@ -386,7 +386,7 @@ vmcs_intel_x64::write_32bit_host_state(const vmcs_state_intel_x64 &state)
 }
 
 void
-vmcs_intel_x64::write_natural_host_state(const vmcs_state_intel_x64 &state)
+vmcs_intel_x64::write_natural_host_state(const vmcs_intel_x64_state &state)
 {
     auto exit_handler_stack = m_exit_handler_stack.get() + STACK_SIZE - 1;
 

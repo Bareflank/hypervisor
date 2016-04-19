@@ -31,11 +31,11 @@
     bfdebug << std::left << std::setw(35) << #a \
             << std::hex << "0x" << m_##a << std::dec << bfendl;
 
-class vmcs_state_intel_x64
+class vmcs_intel_x64_state
 {
 public:
 
-    vmcs_state_intel_x64() :
+    vmcs_intel_x64_state() :
         m_es(0),
         m_cs(0),
         m_ss(0),
@@ -85,7 +85,7 @@ public:
         m_ia32_gs_base_msr(0)
     {}
 
-    vmcs_state_intel_x64(const std::shared_ptr<intrinsics_intel_x64> &intrinsics) :
+    vmcs_intel_x64_state(const std::shared_ptr<intrinsics_intel_x64> &intrinsics) :
         m_es(0),
         m_cs(0),
         m_ss(0),
@@ -189,7 +189,7 @@ public:
         m_ia32_gs_base_msr = intrinsics->read_msr(IA32_GS_BASE_MSR);
     }
 
-    ~vmcs_state_intel_x64() {}
+    ~vmcs_intel_x64_state() {}
 
     uint16_t es() const
     { return m_es; }

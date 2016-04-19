@@ -1,4 +1,4 @@
-# C Runtime Library
+# C Runtime Library {#bfcrt_readme}
 
 ## Description
 
@@ -40,10 +40,10 @@ GCC appears to use CTORS/DTORS while Clang/LLVM appears to use init_array
 /fini_array. These sections are all the same; a list of void (*func)(void)
 function pointers. When each module is loaded, the CTORS/init_array functions
 all need to be executed, while during destruction, DTORS/fini_array functions
-need to be executed. Finally, each ELF module has a ".eh_frame" section (even 
-for C code sometimes), that contains stack unwinding information that is 
-needed by the unwind library. The ELF loader gathers the location and size 
-of each of these sections, which in turn is used by the CRT library to 
+need to be executed. Finally, each ELF module has a ".eh_frame" section (even
+for C code sometimes), that contains stack unwinding information that is
+needed by the unwind library. The ELF loader gathers the location and size
+of each of these sections, which in turn is used by the CRT library to
 setup/teardown a module:
 
 [ELF loader](https://github.com/Bareflank/hypervisor/blob/master/bfelf_loader/src/bfelf_loader.c#L1039)
@@ -62,10 +62,10 @@ added:
 - [local_init](https://github.com/Bareflank/hypervisor/blob/master/bfcrt/src/crt.cpp#L26)
 - [local_fini](https://github.com/Bareflank/hypervisor/blob/master/bfcrt/src/crt.cpp#L44)
 
-Here is an example of the "entry" modules for the VMM that has these symbols
+Here is an example of the "entry" module for the VMM that has these symbols
 added by the wrapper script:
 
-<figure><img src="https://raw.githubusercontent.com/Bareflank/hypervisor/master/doc/images/local_symbols.png" width="500"></figure>
+<img src="https://raw.githubusercontent.com/Bareflank/hypervisor/master/doc/images/local_symbols.png" width="500">
 
 As you can see, these symbols are marked as global, meaning they have relocation
 entries, and their addresses can be looked up using the ELF loader. The

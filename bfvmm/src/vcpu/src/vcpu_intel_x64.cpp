@@ -65,8 +65,8 @@ vcpu_intel_x64::start()
 
     m_vmxon->start();
 
-    auto host_state = vmcs_state_intel_x64(m_intrinsics);
-    auto guest_state = vmcs_state_intel_x64(m_intrinsics);
+    auto host_state = vmcs_intel_x64_state(m_intrinsics);
+    auto guest_state = vmcs_intel_x64_state(m_intrinsics);
 
     m_vmcs->launch(host_state, guest_state);
 
