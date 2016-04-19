@@ -73,6 +73,10 @@ include ./common/common_subdir.mk
 .PHONY: quick
 .PHONY: loop
 .PHONY: unittest
+.PHONY: astyle
+.PHONY: astyle_clean
+.PHONY: doxygen
+.PHONY: doxygen_clean
 
 linux_load: force
 	@cd bfdrivers/src/arch/linux; \
@@ -124,3 +128,15 @@ loop: force
 	done \
 
 unittest: run_tests
+
+astyle:
+	@./tools/astyle/linux/run.sh
+
+astyle_clean:
+	@./tools/astyle/linux/run.sh clean
+
+doxygen:
+	@./tools/doxygen/linux/run.sh
+
+doxygen_clean:
+	@./tools/doxygen/linux/run.sh clean
