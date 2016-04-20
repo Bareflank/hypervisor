@@ -1,4 +1,4 @@
-# Virtual Machine Monitor (VMM) {#bfvmm_readme}
+# Virtual Machine Monitor (VMM)
 
 ## Description
 
