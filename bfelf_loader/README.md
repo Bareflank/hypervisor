@@ -1,4 +1,4 @@
-# ELF Loader {#bfelf_loader_readme}
+# ELF Loader
 
 ## Description
 
