@@ -4,8 +4,8 @@
 ## Description
 
 The Bareflank Hypervisor is an open source, lightweight hypervisor, lead by
-Assured Information Security, Inc. designed specifically to enable rapid
-prototyping of hypervisor technologies. To ease development, Bareflank
+Assured Information Security, Inc. the provides the scaffolding needed to
+rapidly prototype hypervisor technologies. To ease development, Bareflank
 is written in C++, and includes support for exceptions and the C++ Standard
 Template Library (STL) via libc++. With the C++ STL, users can leverage
 shared pointers, complex data structures (e.g. hash tables, maps, lists,
@@ -16,17 +16,15 @@ focusing on what matters most: hypervisor technologies. Furthermore, users
 can leverage inheritance to extend every part of the hypervisor to provide
 additional functionality above and beyond what is already provided.
 
-To this end, Bareflank's primary goal is to provide the scaffolding needed
+To this end, Bareflank's primary goal is to remain simple, and
+minimalistic, providing only the scaffolding needed
 to construct more complete/complicated hypervisors including:
 - Type 1 Hypervisors (like Xen)
 - Type 2 Hypervisors (like VirtualBox)
 - Host-Only Hypervisors (commonly used by anti-virus and rootkits)
 
-Although Bareflank aims to support as many hypervisor configurations as
-possible, Bareflank itself will remain simple, and minimalistic; only
-providing the scaffolding needed by these configurations. The core business
-logic will remain in the hypervisors that extend Bareflank, and not in
-Bareflank itself.
+The core business logic will remain in the hypervisors that extend
+Bareflank, and not in Bareflank itself.
 
 To support Bareflank's design approach, the entire project is licensed
 under the GNU Lesser General Public License v2.1 (LGPL), specifically
