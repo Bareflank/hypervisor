@@ -1,4 +1,4 @@
-# Bareflank Manager (BFM) {#bfm_readme}
+# Bareflank Manager (BFM)
 
 ## Description
 
