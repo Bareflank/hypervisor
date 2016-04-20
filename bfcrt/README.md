@@ -1,4 +1,4 @@
-# C Runtime Library {#bfcrt_readme}
+# C Runtime Library <a name="bfcrt_readme"></a>
 
 ## Description
 
