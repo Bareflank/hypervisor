@@ -62,18 +62,18 @@ eh_frame_t g_eh_frame_list[MAX_NUM_MODULES] = {};
 template<typename T> int64_t
 guard_stack(T func)
 {
-    auto num = 0;
     auto ret = ENTRY_ERROR_UNKNOWN;
     auto stack = std::make_unique<uint64_t[]>(STACK_SIZE);
 
-    for (num = 0; num < STACK_SIZE; num++)
-        stack[num] = 0xFFFFFFFFFFFFFFFF;
+    // auto num = 0;
+    // for (num = 0; num < STACK_SIZE; num++)
+    //     stack[num] = 0xFFFFFFFFFFFFFFFF;
 
     ret = execute_with_stack(func, stack.get(), STACK_SIZE << 3);
 
-    for (num = 0; num < STACK_SIZE; num++)
-        if (stack[num] != 0xFFFFFFFFFFFFFFFF)
-            break;
+    // for (num = 0; num < STACK_SIZE; num++)
+    //     if (stack[num] != 0xFFFFFFFFFFFFFFFF)
+    //         break;
 
     // bfinfo << std::dec;
     // bfdebug << "    - free heap space: " << (g_mm->free_blocks() >> 4)

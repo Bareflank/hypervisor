@@ -26,6 +26,13 @@
 #include <memory>
 #include <vcpu/vcpu_factory.h>
 
+/// vCPU Manager
+///
+/// The vCPU manager is responsible for creating / destroying vCPUs, and
+/// calling a vCPU's interface, depending on which vcpuid is provided. If you
+/// need to work with a vCPU, but all you have is a vcpuid, this is the class
+/// to use.
+///
 class vcpu_manager
 {
 public:

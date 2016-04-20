@@ -25,6 +25,23 @@
 #include <memory>
 #include <vcpu/vcpu_intel_x64.h>
 
+/// vCPU Factory
+///
+/// This class is used by the vcpu_manager to create vCPUs. Specifically,
+/// this class provides a seem that allows users of Bareflank to replace the
+/// default vCPU with their own, custom vCPUs that extend the functionality
+/// of Bareflank above and beyond what is already provided. This seems also
+/// provides a means to unit test the vcpu_manager.
+///
+/// To provide custom logic, define your own make_vcpu function, in your
+/// own vcpu_factory module, and load your module instead of the module that
+/// is provided by Bareflank. For an example of how to do this, please
+/// see:
+///
+/// <a href="https://github.com/Bareflank/hypervisor_example_vpid">Bareflank Hypervisor VPID Example</a>
+/// <br>
+/// <a href="https://github.com/Bareflank/hypervisor_example_cpuidcount">Bareflank Hypervisor CPUID Example</a>
+///
 class vcpu_factory
 {
 public:

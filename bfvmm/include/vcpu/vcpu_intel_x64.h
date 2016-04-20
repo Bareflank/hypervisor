@@ -29,6 +29,27 @@
 #include <exit_handler/exit_handler_intel_x64.h>
 #include <intrinsics/intrinsics_intel_x64.h>
 
+/// Virtual CPU (Intel x86_64)
+///
+/// The Virtual CPU represents a "CPU" to the hypervisor that is specific to
+/// Intel x86_64. Each core in a multi-core system has a vCPU associated with
+/// it. Each guest VM must also have a vCPU for each physical CPU on the
+/// system, which means that the total number of vCPUs being managed by the
+/// vcpu_manager is
+///
+/// @code
+/// #cores + (#cores * #guests)
+/// @endcode
+///
+/// This Intel specific vCPU class provides all of the functionality of the
+/// base vCPU, but also adds classes specific to Intel's VT-x including the
+/// vmxon_intel_x64, vmcs_intel_x64, exit_handler_intel_x64 and
+/// intrinsics_intel_x64 classes.
+///
+/// Note that these should not be created directly, but instead should be
+/// created by the vcpu_manager, which uses the vcpu_factory to actually
+/// create a vcpu.
+///
 class vcpu_intel_x64 : public vcpu
 {
 public:
@@ -50,11 +71,16 @@ public:
     /// internal components to override.
     ///
     /// @param id the id of the vcpu
-    /// @param debug_ring the debug ring the vcpu should use
-    /// @param vmxon the vmxon the vcpu should use
-    /// @param vmcs the vmcs the vcpu should use
-    /// @param exit_handler the exit handler the vcpu should use
-    /// @param intrinsics the intrinsics the vcpu should use
+    /// @param debug_ring the debug ring the vcpu should use. If you
+    ///     provide nullptr, a default debug ring will be created.
+    /// @param vmxon the vmxon the vcpu should use. If you
+    ///     provide nullptr, a default vmxon will be created.
+    /// @param vmcs the vmcs the vcpu should use. If you
+    ///     provide nullptr, a default vmcs will be created.
+    /// @param exit_handler the exit handler the vcpu should use. If you
+    ///     provide nullptr, a default exit handler will be created.
+    /// @param intrinsics the intrinsics the vcpu should use. If you
+    ///     provide nullptr, a default intrinsics will be created.
     ///
     vcpu_intel_x64(int64_t id,
                    const std::shared_ptr<debug_ring> &debug_ring,

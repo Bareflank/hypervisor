@@ -34,19 +34,24 @@
 ///
 /// This class provides the bare minimum to get a virtual machine to execute.
 /// It assumes a 64bit VMM, and a 64bit guest. It does not trap on anything
-/// by default, and thus the guest is allows to execute unfettered. If
+/// by default, and thus the guest is allowed to execute unfettered. If
 /// an error should occur, it contains the logic needed to help identify the
 /// issue, including a complete implementation of chapter 26 in the Intel
 /// manual, that describes all of the checks the CPU will perform prior to
-/// a VMM launch.
+/// a VM launch.
 ///
 /// To use this class, subclass vmcs_intel_x64, and overload the protected
 /// functions for setting up the guest / host state to provide the desired
 /// functionality. Don't forget to call the base class function when complete
-/// unless you intend to provide the same functionality.
+/// unless you intend to provide the same functionality. For an example of
+/// how to do this, please see:
+///
+/// <a href="https://github.com/Bareflank/hypervisor_example_vpid">Bareflank Hypervisor VPID Example</a>
 ///
 /// @note This VMCS does not support SMM / Dual Monitor Mode, and the missing
 /// logic will have to be provided by the user if such support is needed.
+///
+/// This class is managed by vcpu_intel_x64
 ///
 class vmcs_intel_x64
 {

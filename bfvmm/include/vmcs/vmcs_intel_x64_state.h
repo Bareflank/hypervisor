@@ -31,6 +31,12 @@
     bfdebug << std::left << std::setw(35) << #a \
             << std::hex << "0x" << m_##a << std::dec << bfendl;
 
+/// VMCS State
+///
+/// Generic class that stores the CPU state that is intended when setting up
+/// a VMCS. Note that two of these are needed for each VMCS; one for the
+/// guest and one for the host.
+///
 class vmcs_intel_x64_state
 {
 public:

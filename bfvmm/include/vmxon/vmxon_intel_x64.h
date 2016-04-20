@@ -29,6 +29,14 @@
 // Definition
 // -----------------------------------------------------------------------------
 
+/// VMXON (Intel x86_64)
+///
+/// This class is respobsible for turning Intel's VMX (also know as VT-x)
+/// on / off. To do that, it performs a series of checks that are described
+/// in the Intel manual, and then runs either vmxon or vmxoff.
+///
+/// This class is managed by vcpu_intel_x64
+///
 class vmxon_intel_x64
 {
 public:

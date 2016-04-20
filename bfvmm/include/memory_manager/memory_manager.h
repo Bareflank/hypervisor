@@ -27,6 +27,32 @@
 #include <stdint.h>
 #include <memory.h>
 
+/// The memory manager has two specific functions:
+/// - malloc / free memory
+/// - virt_to_phys / phys_to_virt conversions
+///
+/// To support malloc / free, the memory manager has a buffer that is
+/// created at compile time that is can pull from and provide to the rest
+/// of the VMM. If the memory manager runs out of memory, the system is
+/// halted. To increase memory, adjust the number of blocks that are reserved
+/// in constants.h.
+///
+/// To support virt / phys mappings, the memory manager has an add_mdl
+/// function that is called by the driver entry. Each time the driver entry
+/// allocates memory for an ELF module, it must call add_mdl with a list of
+/// page mappings that tells the VMM how to convert from virt to phys and back.
+/// The memory manager uses this information to provide the VMM with the needed
+/// conversions.
+///
+/// Finally, this module also provides the libc functions that are needed by
+/// libc++ for new / delete. For this reason, this modules is required to get
+/// libc++ working, which is needed by, pretty much the rest of the VMM
+/// including the serial code. Therefore, if there is issues with the
+/// memory mamaner, the process of debugging the memory manager is not simple,
+/// as you must get rid of all of the other modules, and work with the
+/// memory manager directly until it's working as needed (i.e. why unit
+/// testing can be very helpful here).
+///
 class memory_manager
 {
 public:
