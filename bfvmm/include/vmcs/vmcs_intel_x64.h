@@ -68,8 +68,8 @@ public:
     /// @throws invalid_vmcs thrown if the VMCS was created without
     ///     intrinsics
     ///
-    virtual void launch(const vmcs_state_intel_x64 &host_state,
-                        const vmcs_state_intel_x64 &guest_state);
+    virtual void launch(const vmcs_intel_x64_state &host_state,
+                        const vmcs_intel_x64_state &guest_state);
 
     /// Promote
     ///
@@ -98,20 +98,20 @@ protected:
     virtual void create_exit_handler_stack();
     virtual void release_exit_handler_stack();
 
-    virtual void write_16bit_control_state(const vmcs_state_intel_x64 &state);
-    virtual void write_64bit_control_state(const vmcs_state_intel_x64 &state);
-    virtual void write_32bit_control_state(const vmcs_state_intel_x64 &state);
-    virtual void write_natural_control_state(const vmcs_state_intel_x64 &state);
+    virtual void write_16bit_control_state(const vmcs_intel_x64_state &state);
+    virtual void write_64bit_control_state(const vmcs_intel_x64_state &state);
+    virtual void write_32bit_control_state(const vmcs_intel_x64_state &state);
+    virtual void write_natural_control_state(const vmcs_intel_x64_state &state);
 
-    virtual void write_16bit_guest_state(const vmcs_state_intel_x64 &state);
-    virtual void write_64bit_guest_state(const vmcs_state_intel_x64 &state);
-    virtual void write_32bit_guest_state(const vmcs_state_intel_x64 &state);
-    virtual void write_natural_guest_state(const vmcs_state_intel_x64 &state);
+    virtual void write_16bit_guest_state(const vmcs_intel_x64_state &state);
+    virtual void write_64bit_guest_state(const vmcs_intel_x64_state &state);
+    virtual void write_32bit_guest_state(const vmcs_intel_x64_state &state);
+    virtual void write_natural_guest_state(const vmcs_intel_x64_state &state);
 
-    virtual void write_16bit_host_state(const vmcs_state_intel_x64 &state);
-    virtual void write_64bit_host_state(const vmcs_state_intel_x64 &state);
-    virtual void write_32bit_host_state(const vmcs_state_intel_x64 &state);
-    virtual void write_natural_host_state(const vmcs_state_intel_x64 &state);
+    virtual void write_16bit_host_state(const vmcs_intel_x64_state &state);
+    virtual void write_64bit_host_state(const vmcs_intel_x64_state &state);
+    virtual void write_32bit_host_state(const vmcs_intel_x64_state &state);
+    virtual void write_natural_host_state(const vmcs_intel_x64_state &state);
 
     virtual void promote_16bit_guest_state();
     virtual void promote_64bit_guest_state();

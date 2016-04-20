@@ -74,7 +74,7 @@
 ///
 /// @code
 ///
-/// EXPECT_EXCEPTION(blah.do_something()) // unit test fails if no throw()
+/// EXPECT_EXCEPTION(blah.do_something(), std::exception) // unit test fails if no throw()
 ///
 /// @endcode
 ///
@@ -194,7 +194,7 @@
 ///
 /// @code
 ///
-/// ASSERT_EXCEPTION(blah.do_something()) // unit test fails if throw()
+/// ASSERT_EXCEPTION(blah.do_something(), std::exception) // unit test fails if throw()
 ///
 /// @endcode
 ///
@@ -277,10 +277,10 @@
 
 /// Run Unittests with Mocks
 ///
-/// When using mocks, it's possible that Hippo Mocks could throw an
+/// When using mocks, it's possible that hippomocks could throw an
 /// exception. For example, if you call a function on a mocked class that
-/// you have not setup an "ExpectCall" for. If this happens, a default
-/// function within Hippo Mocks is called, that throws an exception.
+/// you have not setup an "OnCall" for. If this happens, a default
+/// function within hippomocks is called, that throws an exception.
 ///
 /// To handle these types of issues, mocks should be used inside this
 /// function call using a lamda function. This way, if an exeption should
@@ -294,7 +294,7 @@
 /// Blah1 *blah1 = mocks.ClassMock<Blah1>();
 /// Blah2 *blah2 = new Blah2;
 ///
-/// mocks.ExpectCall(blah1, Blah1::a).Return(false);
+/// mocks.OnCall(blah1, Blah1::a).Return(false);
 ///
 /// RUN_UNITTEST_WITH_MOCKS(mocks, [&]
 /// {
@@ -343,6 +343,11 @@ namespace bfn
 /// by Hippnomocks. Note that you must provide a mock class, and when that
 /// class is destroyed, the pointers being held by shared_ptr are no longer
 /// valid.
+///
+/// @code
+/// MockRepository mocks;
+/// auto in = bfn::mock_shared<intrinsics_intel_x64>(mocks);
+/// @endcode
 ///
 template<class T> std::shared_ptr<T>
 mock_shared(MockRepository &mocks)
