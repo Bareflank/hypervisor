@@ -1,7 +1,4 @@
-My Main Page                         
-============              {#mainpage}
-
-# C Runtime Library <a name="bfcrt_readme"></a>
+# C Runtime Library
 
 ## Description
 
