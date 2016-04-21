@@ -134,6 +134,7 @@ Target: September 2016
 Target: Janurary 2017
 
 * UEFI Support (i.e. type 1)
+* Basic Guest Support
 
 ## Contributing
 
