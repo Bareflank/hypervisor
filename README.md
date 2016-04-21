@@ -106,7 +106,7 @@ functionality, we have provided a couple of examples:
 [Enable VPID](https://github.com/Bareflank/hypervisor_example_vpid) <br>
 [CPUID Count](https://github.com/Bareflank/hypervisor_example_cpuidcount)
 
-## Roadmap (updated 3-19-2016)
+## Roadmap (updated 4-21-2016)
 
 ### Version 1.0
 
