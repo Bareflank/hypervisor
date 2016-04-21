@@ -10,7 +10,7 @@
 ///
 /// The Bareflank Hypervisor is an open source, lightweight hypervisor, lead by
 /// Assured Information Security, Inc. the provides the scaffolding needed to
-/// rapidly prototype hypervisors. To ease development, Bareflank
+/// rapidly prototype new hypervisors. To ease development, Bareflank
 /// is written in C++, and includes support for exceptions and the C++ Standard
 /// Template Library (STL) via libc++. With the C++ STL, users can leverage
 /// shared pointers, complex data structures (e.g. hash tables, maps, lists,
