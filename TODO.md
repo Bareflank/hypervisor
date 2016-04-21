@@ -42,10 +42,12 @@ Version 1.1 TODO:
   apart libc++.so into libc.so, libcxxabi.so (statically linked with the
   unwinder), and libc++.so.
 
-Version 2.0 TODO:
+Version 1.2 TODO:
 - UEFI Support (i.e. type 1)
 - Multiple guest support running http://www.includeos.org/ or some other
-  unikernel
+  unikernel. Note that the actual guest support will likely be in a different
+  repo, but Bareflank itself will need some changes to support this (for
+  example, some organizational changes to the vcpu to run a guest). 
 - Hyperkernel support
 
 Documenttion:
