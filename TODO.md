@@ -50,9 +50,6 @@ Version 1.2 TODO:
   example, some organizational changes to the vcpu to run a guest). 
 - Hyperkernel support
 
-Documenttion:
-- Update cross compiler documentation to include how to setup sysroot
-
 Known Issues:
 - Kernels that have CONFIG_DEBUG_STACKOVERFLOW enabled will kernel oops when
   do_IRQ is called because Bareflank uses it's own stack, and this triggers
