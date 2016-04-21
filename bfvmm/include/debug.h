@@ -35,16 +35,57 @@
 #define bfcolor_func "\033[1;36m"
 #define bfcolor_line "\033[1;35m"
 
+/// This macro is a shortcut for std::endl
+///
 #define bfendl std::endl
 
+/// This macro is a shortcut for std::cout that adds some text and color.
+/// Use it like std::cout
+///
+/// @code
+/// bfinfo << "hello world" << bfend;
+/// @endcode
+///
 #define bfinfo \
     std::cout
+
+/// This macro is a shortcut for std::cout that adds some text and color.
+/// Use it like std::cout
+///
+/// @code
+/// bfdebug << "hello world" << bfend;
+/// @endcode
+///
 #define bfdebug \
     std::cout << bfcolor_debug << "DEBUG" << bfcolor_end << ": "
+
+/// This macro is a shortcut for std::cout that adds some text and color.
+/// Use it like std::cout
+///
+/// @code
+/// bfwarning << "hello world" << bfend;
+/// @endcode
+///
 #define bfwarning \
     std::cout << bfcolor_warning << "WARNING" << bfcolor_end << ": "
+
+/// This macro is a shortcut for std::cout that adds some text and color.
+/// Use it like std::cout
+///
+/// @code
+/// bferror << "hello world" << bfend;
+/// @endcode
+///
 #define bferror \
     std::cout << bfcolor_error << "ERROR" << bfcolor_end << ": "
+
+/// This macro is a shortcut for std::cout that adds some text and color.
+/// Use it like std::cout
+///
+/// @code
+/// bffatal << "hello world" << bfend;
+/// @endcode
+///
 #define bffatal \
     std::cout << bfcolor_error << "FATAL ERROR" << bfcolor_end << ": "
 

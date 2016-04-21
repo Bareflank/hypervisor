@@ -22,6 +22,46 @@
 #include <utility>
 #include <functional>
 
+/// Commit Or Rollback
+///
+/// This class is used by a large portion of Bareflank for properly handling
+/// execptions. When a failure occurs, and an exception is thrown, it's
+/// possible that a function is partly into the process of creating state.
+/// The exception will leave the state of the system "partially" created,
+/// which can cause a lot of problems. The commit_or_rollback class provides
+/// a means to rollback code when a failure occurs.
+///
+/// vmxon_intel_x64::start provides a good example of how this works. In
+/// general, to rollback state changes, do the following:
+///
+/// @code
+///
+/// int a = 10;
+/// int b = 10;
+///
+/// void foo()
+/// {
+///     auto cor1 = commit_or_rollback([&]
+///     { a = 0 });
+///
+///     a = 10;
+///
+///     auto cor2 = commit_or_rollback([&]
+///     { b = 0 });
+///
+///     b = 10;
+///
+///     cor1.commit();
+///     cor2.commit();
+/// }
+///
+/// @endcode
+///
+/// If an exception is thrown prior to the commit functions being executed,
+/// the rollback lambda functions are executed. Note that the commit functions
+/// are labeled noexcept, and should be the very last thing you do to ensure
+/// that state is prorperly rolled back in a failure occurs.
+///
 class commit_or_rollback
 {
 public:

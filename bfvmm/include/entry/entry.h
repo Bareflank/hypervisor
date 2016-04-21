@@ -45,24 +45,39 @@ extern "C" int64_t execute_with_stack(entry_t func, void *stack, uint64_t size);
 
 /// Init VMM
 ///
-/// Initialize the VMM. Should always be run before start.
+/// This function initializes the VMM. The driver entry uses the ELF loader
+/// to call this "C" function from the kernel. Prior to executing this
+/// function, a new stack is provided, and all exceptions are caught prior to
+/// completing. To initialize the VMM, this function calls the vcpu_manager's
+/// init function, which begins the processing of initialization.
 ///
+/// @param arg unused (likely will contain the cpu's core # in the future)
 /// @return ENTRY_SUCCESS on success, ENTRY_ERROR_UNKNOWN otherwise.
 ///
 extern "C" int64_t init_vmm(int64_t arg);
 
 /// Start VMM
 ///
-/// Starts the VMM.
+/// This function starts the VMM. The driver entry uses the ELF loader
+/// to call this "C" function from the kernel. Prior to executing this
+/// function, a new stack is provided, and all exceptions are caught prior to
+/// completing. To start the VMM, this function calls the vcpu_manager's
+/// start function, which begins the processing of starting the vmm.
 ///
+/// @param arg unused (likely will contain the cpu's core # in the future)
 /// @return ENTRY_SUCCESS on success, ENTRY_ERROR_UNKNOWN otherwise.
 ///
 extern "C" int64_t start_vmm(int64_t arg);
 
 /// Stop VMM
 ///
-/// Stop the VMM. To start the VMM again, init should be run first.
+/// This function stops the VMM. The driver entry uses the ELF loader
+/// to call this "C" function from the kernel. Prior to executing this
+/// function, a new stack is provided, and all exceptions are caught prior to
+/// completing. To stop the VMM, this function calls the vcpu_manager's
+/// stop function, which begins the processing of stopping the vmm.
 ///
+/// @param arg unused (likely will contain the cpu's core # in the future)
 /// @return ENTRY_SUCCESS on success, ENTRY_ERROR_UNKNOWN otherwise.
 ///
 extern "C" int64_t stop_vmm(int64_t arg);

@@ -364,6 +364,32 @@ inline std::string
 operator ""_s(const char *str, std::size_t len)
 { return std::string(str, len); }
 
+/// Unit Test
+///
+/// This class provides the scaffolding needed to perform a unit test. Note
+/// that this class also provides support for Hippomocks.
+///
+/// In general, if you want an example of how to use this class, start with
+/// one of the existing unit tests, as they are cookie-cutter in design.
+/// For example, take a look at the following:
+///
+/// @ref debug_ring_ut
+///
+/// The unit test macros should be used when creating a unit test.
+/// @ref EXPECT_TRUE <br>
+/// @ref EXPECT_FALSE <br>
+/// @ref EXPECT_EXCEPTION <br>
+/// @ref EXPECT_NO_EXCEPTION <br>
+/// @ref ASSERT_TRUE <br>
+/// @ref ASSERT_FALSE <br>
+/// @ref ASSERT_EXCEPTION <br>
+/// @ref ASSERT_NO_EXCEPTION <br>
+///
+/// And when a shared_ptr must be created that is being mocked by Hippomocks,
+/// be sure to use:
+///
+/// @ref bfn::mock_shared <br>
+///
 class unittest
 {
 

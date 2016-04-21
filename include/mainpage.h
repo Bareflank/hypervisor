@@ -1,17 +1,16 @@
-/// @mainpage Bareflank APIs
+/// @mainpage Bareflank APIs (version 1.0.0)
 /// @section pageTOC Content
 ///     -# @ref description
 ///     -# @ref license
 ///     -# @ref unit_tests
 ///     -# @ref extending_bareflank
-///     -# @ref subproject_reference
 ///     -# @ref vmm_reference
 ///
 /// @section description Description
 ///
 /// The Bareflank Hypervisor is an open source, lightweight hypervisor, lead by
 /// Assured Information Security, Inc. the provides the scaffolding needed to
-/// rapidly prototype hypervisor technologies. To ease development, Bareflank
+/// rapidly prototype hypervisors. To ease development, Bareflank
 /// is written in C++, and includes support for exceptions and the C++ Standard
 /// Template Library (STL) via libc++. With the C++ STL, users can leverage
 /// shared pointers, complex data structures (e.g. hash tables, maps, lists,
@@ -238,18 +237,6 @@
 /// make unload
 /// @endcode
 ///
-/// @section subproject_reference Subproject Reference
-///
-/// Bareflank is a combination of a bunch of sub-projects that, when
-/// combined, makeup the entire hypervisor. These sub-projects include:
-///
-/// @ref bfcrt_readme <br>
-/// @ref bfdrivers_readme <br>
-/// @ref bfelf_loader_readme <br>
-/// @ref bfm_readme <br>
-/// @ref bfunwind_readme <br>
-/// @ref bfvmm_readme <br>
-///
 /// @section vmm_reference VMM Reference
 ///
 /// Bareflank's VMM is made up of the following components:
@@ -297,6 +284,7 @@
 /// @ref bfwarning <br>
 /// @ref bferror <br>
 /// @ref bffatal <br>
+/// @ref bfendl <br>
 /// @ref debug_ring <br>
 /// @ref serial_port_intel_x64 <br>
 ///

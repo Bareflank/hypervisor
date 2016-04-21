@@ -26,6 +26,26 @@
 #include <memory>
 #include <debug_ring/debug_ring.h>
 
+/// Virtual CPU
+///
+/// The Virtual CPU represents a "CPU" to the hypervisor. Each core in a
+/// multi-core system has a vCPU associated with it. Each guest VM must also
+/// have a vCPU for each physical CPU on the system, which means that the
+/// total number of vCPUs being managed by the vcpu_manager is
+///
+/// @code
+/// #cores + (#cores * #guests)
+/// @endcode
+///
+/// This generic vCPU class not only provides the base class that architecture
+/// specific vCPUs will be created from, but it also provides some of the base
+/// functionality that is common between all vCPUs. For example, all vCPUs
+/// have an "id" and a debug_ring.
+///
+/// Note that these should not be created directly, but instead should be
+/// created by the vcpu_manager, which uses the vcpu_factory to actually
+/// create a vcpu.
+///
 class vcpu
 {
 public:
@@ -48,7 +68,8 @@ public:
     /// internal components to override.
     ///
     /// @param id the id of the vcpu
-    /// @param dr the debug ring the vcpu should use
+    /// @param dr the debug ring the vcpu should use. If you provide nullptr,
+    ///     a default debug ring will be created.
     /// @throws invalid_argument_error if the id is invalid
     ///
     vcpu(int64_t id, const std::shared_ptr<debug_ring> &dr);
