@@ -47,7 +47,7 @@ that the provided code works as expected.
 Checkout the latest demo for how to compile, use and extend the
 Bareflank Hypervisor
 
-[![Bareflank Demonstration Video](http://img.youtube.com/vi/adesFxQ741c/0.jpg)](https://www.youtube.com/watch?v=adesFxQ741c)
+[![Bareflank Demonstration Video](http://img.youtube.com/vi/YgQdECPzDkQ/0.jpg)](https://www.youtube.com/watch?v=YgQdECPzDkQ)
 
 ## Compilation Instructions
 
