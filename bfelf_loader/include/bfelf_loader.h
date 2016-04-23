@@ -175,6 +175,8 @@ struct bfelf_file_t
 
     bfelf64_word num_rela;
     struct relatab_t relatab[BFELF_MAX_RELATAB];
+
+    bfelf64_word relocated;
 };
 
 /**
@@ -227,6 +229,27 @@ bfelf64_sxword bfelf_file_num_segments(struct bfelf_file_t *ef);
 bfelf64_sword bfelf_file_get_segment(struct bfelf_file_t *ef,
                                      bfelf64_word index,
                                      struct bfelf_phdr **phdr);
+
+/**
+ * Resolve Symbol
+ *
+ * Once an ELF loader has had all of it's ELF files initalized and added,
+ * use the relocate ELF loader to setup the ELF files such that they can
+ * be executed. If the ELF file is relocated into memory that is accessable
+ * via the ELF loader, the resolve symbol function can be used to get the
+ * address of a specific symbol so that it can be executed.
+ *
+ * Note that this version takes a single ELF module instead of the
+ * loader. The loader version will do a global lookup if it has to.
+ *
+ * @param ef the ELF file to get the symbol from
+ * @param name the name of the symbol to resolve
+ * @param addr the resulting address if the symbol is successfully resolved
+ * @return BFELF_SUCCESS on success, negative on error
+ */
+bfelf64_sword bfelf_file_resolve_symbol(struct bfelf_file_t *ef,
+                                        struct e_string_t *name,
+                                        void **addr);
 
 /******************************************************************************/
 /* ELF File Header                                                            */
@@ -630,7 +653,6 @@ struct bfelf_loader_t
 {
     bfelf64_word num;
     bfelf64_word relocated;
-    bfelf64_word ignore_crt;
     struct bfelf_file_t *efs[BFELF_MAX_MODULES];
 };
 

@@ -101,6 +101,21 @@ private:
     void test_bfelf_file_get_segment_invalid_phdr();
     void test_bfelf_file_get_segment_success();
 
+    void test_bfelf_file_resolve_symbol_invalid_loader();
+    void test_bfelf_file_resolve_symbol_invalid_name();
+    void test_bfelf_file_resolve_symbol_invalid_addr();
+    void test_bfelf_file_resolve_symbol_no_relocation();
+    void test_bfelf_file_resolve_no_such_symbol();
+    void test_bfelf_file_resolve_zero_length_symbol();
+    void test_bfelf_file_resolve_invalid_symbol_length();
+    void test_bfelf_file_resolve_symbol_length_too_large();
+    void test_bfelf_file_resolve_symbol_success();
+    void test_bfelf_file_resolve_no_such_symbol_no_hash();
+    void test_bfelf_file_resolve_zero_length_symbol_no_hash();
+    void test_bfelf_file_resolve_invalid_symbol_length_no_hash();
+    void test_bfelf_file_resolve_symbol_length_too_large_no_hash();
+    void test_bfelf_file_resolve_symbol_success_no_hash();
+
     void test_bfelf_loader_add_invalid_loader();
     void test_bfelf_loader_add_invalid_elf_file();
     void test_bfelf_loader_add_too_many_files();

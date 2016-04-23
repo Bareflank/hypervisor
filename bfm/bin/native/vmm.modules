@@ -2,8 +2,9 @@
 # Default Modules                                                              #
 ################################################################################
 
-../../../bfvmm/bin/cross/libmemory_manager.so
+../../../bfvmm/bin/cross/libc++.so
 ../../../bfvmm/bin/cross/libentry.so
+../../../bfvmm/bin/cross/libmemory_manager.so
 ../../../bfvmm/bin/cross/libserial.so
 ../../../bfvmm/bin/cross/libdebug_ring.so
 ../../../bfvmm/bin/cross/libintrinsics.so
@@ -13,4 +14,3 @@
 ../../../bfvmm/bin/cross/libvcpu_factory.so
 ../../../bfvmm/bin/cross/libexit_handler.so
 ../../../bfvmm/bin/cross/libmisc.so
-../../../bfvmm/bin/cross/libc++.so
