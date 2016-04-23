@@ -53,6 +53,7 @@ SOURCES+=test.cpp
 SOURCES+=test_file_get_segment.cpp
 SOURCES+=test_file_init.cpp
 SOURCES+=test_file_num_segments.cpp
+SOURCES+=test_file_resolve_symbol.cpp
 SOURCES+=test_loader_add.cpp
 SOURCES+=test_loader_get_info.cpp
 SOURCES+=test_loader_relocate.cpp

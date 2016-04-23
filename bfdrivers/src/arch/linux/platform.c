@@ -28,6 +28,9 @@
 #include <linux/string.h>
 #include <linux/module.h>
 #include <linux/vmalloc.h>
+#include <linux/version.h>
+
+#include <asm/tlbflush.h>
 
 void *
 platform_alloc(int64_t len)
@@ -116,4 +119,20 @@ platform_memcpy(void *dst, const void *src, int64_t num)
         return;
 
     memcpy(dst, src, num);
+}
+
+void
+platform_start(void)
+{
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,0,0)
+    cr4_init_shadow();
+#endif
+}
+
+void
+platform_stop(void)
+{
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,0,0)
+    cr4_init_shadow();
+#endif
 }

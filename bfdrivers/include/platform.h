@@ -37,8 +37,7 @@ extern "C" {
  * @param len the size of virtual memory to be allocated in bytes.
  * @return a virtual address pointing to the newly allocated memory
  */
-void *
-platform_alloc(int64_t len);
+void *platform_alloc(int64_t len);
 
 /**
  * Allocate Executable Memory
@@ -48,8 +47,7 @@ platform_alloc(int64_t len);
  * @param len the size of virtual memory to be allocated in bytes.
  * @return a virtual address pointing to the newly allocated memory
  */
-void *
-platform_alloc_exec(int64_t len);
+void *platform_alloc_exec(int64_t len);
 
 /**
  * Convert Virtual Address to Physical Address
@@ -62,8 +60,7 @@ platform_alloc_exec(int64_t len);
  * @param virt thevirtual address to convert
  * @return the physical address assocaited with the provided virtual address
  */
-void *
-platform_virt_to_phys(void *virt);
+void *platform_virt_to_phys(void *virt);
 
 /**
  * Free Memory
@@ -73,8 +70,7 @@ platform_virt_to_phys(void *virt);
  *
  * @param addr the virtual address returned from platform_alloc
  */
-void
-platform_free(void *addr);
+void platform_free(void *addr);
 
 /**
  * Free Executable Memory
@@ -85,8 +81,7 @@ platform_free(void *addr);
  * @param addr the virtual address returned from platform_alloc_exec
  * @param len the size of the memory allocated
  */
-void
-platform_free_exec(void *addr, int64_t len);
+void platform_free_exec(void *addr, int64_t len);
 
 /**
  * Memset
@@ -95,8 +90,7 @@ platform_free_exec(void *addr, int64_t len);
  * @param value the value to set each byte to
  * @param num the number of bytes to set
  */
-void
-platform_memset(void *ptr, char value, int64_t num);
+void platform_memset(void *ptr, char value, int64_t num);
 
 /**
  * Memcpy
@@ -105,8 +99,21 @@ platform_memset(void *ptr, char value, int64_t num);
  * @param src a pointer to the memory to copy from
  * @param num the number of bytes to copy
  */
-void
-platform_memcpy(void *dst, const void *src, int64_t num);
+void platform_memcpy(void *dst, const void *src, int64_t num);
+
+/**
+ * Start
+ *
+ * Run after the start function has been executed.
+ */
+void platform_start(void);
+
+/**
+ * Stop
+ *
+ * Run after the stop function has been executed.
+ */
+void platform_stop(void);
 
 #ifdef __cplusplus
 }

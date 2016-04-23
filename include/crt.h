@@ -105,9 +105,6 @@ struct section_info_t
 
     void *eh_frame_addr;
     uint64_t eh_frame_size;
-
-    local_init_t local_init;
-    local_fini_t local_fini;
 };
 
 #ifdef __cplusplus
