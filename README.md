@@ -42,7 +42,7 @@ that the provided code works as expected.
 
 Most people think that hypervisors are meant to virtualize servers and 
 provide a means to run Windows on a Mac, but there is a whole field 
-of research that use hypervisors that never actually start a virtual 
+of research were hypervisors are used but never actually start a virtual 
 machine. Since a hypervisor is capable of controlling the host OS 
 running underneath it, (so called "ring -1"), hypervisors have been 
 used for introspection, reverse engineering, anti-virus, containerization, 
