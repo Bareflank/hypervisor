@@ -396,7 +396,8 @@ if [ ! -f "completed_build_libcxxabi" ]; then
         -DLIBCXXABI_SYSROOT=$SYSROOT/ \
         -DCMAKE_C_COMPILER=$PREFIX/bin/x86_64-bareflank-gcc \
         -DCMAKE_CXX_COMPILER=$PREFIX/bin/x86_64-bareflank-g++ \
-        -DLIBCXXABI_ENABLE_THREADS=OFF
+        -DLIBCXXABI_ENABLE_THREADS=OFF \
+        -DLIBCXXABI_ENABLE_SHARED=OFF
     make -j2
     make -j2 install
     popd
@@ -416,7 +417,7 @@ if [ ! -f "completed_build_libcxx" ]; then
     rm -Rf build-libcxx
     mkdir -p build-libcxx
 
-    export BAREFLANK_WRAPPER_INCLUDE_LIBC=true 2> /dev/null
+    export BAREFLANK_WRAPPER_IS_LIBCXX=true 2> /dev/null
 
     pushd build-libcxx
     cmake ../libcxx/ \
@@ -433,7 +434,7 @@ if [ ! -f "completed_build_libcxx" ]; then
     make -j2 install
     popd
 
-    export BAREFLANK_WRAPPER_INCLUDE_LIBC=false 2> /dev/null
+    export BAREFLANK_WRAPPER_IS_LIBCXX=false 2> /dev/null
 
     touch completed_build_libcxx
 fi
