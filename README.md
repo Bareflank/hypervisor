@@ -54,8 +54,8 @@ source hypervisors are so focused on supporting virtual machines and
 burdened with legacy support that they are painful to work with when 
 conducting less traditional hypervisor research. 
 
-Bareflank was created to provide the base hypervisor needed to support this 
-research. To support this goal, Bareflank leverages C++ not only to provide 
+Bareflank's goal is to provide the scaffolding needed to create any type of 
+hypervisor. To support this, Bareflank leverages C++ not only to provide 
 a clear method for extending the hypervisor via inheritance, but also to 
 provide access to the C++ STL. For example, suppose your writing an 
 introspection hypervisor that needs to store the different system calls that
