@@ -67,10 +67,10 @@ With Bareflank's design, you can focus on the goal of your project, and less
 on implementing the foundation needed to support your project. 
 
 Bareflank will always maintain the "bare minimum" needed to stand up a 
-hypervisor. In the future, additional repositories will be added that extend
+hypervisor. Future repositories/projects will be created that extend
 the hypervisor to add additional API support for common research tasks (e.g. 
 VT-x APIs, LibVMI APIs, and even guest support APIs). Long term, it is our 
-hope that projects in the future will leverage Bareflank to create hypervisors 
+hope that others will leverage Bareflank to create hypervisors 
 capable of competing with existing type 1 and type 2 open source hypervisors, 
 but Bareflank itself will remain focused on the bare minimum scaffolding. 
 
