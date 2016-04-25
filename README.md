@@ -57,7 +57,8 @@ conducting less traditional hypervisor research.
 Bareflank's goal is to provide the scaffolding needed to create any type of 
 hypervisor. To support this, Bareflank leverages C++ not only to provide 
 a clear method for extending the hypervisor via inheritance, but also to 
-provide access to the C++ STL. For example, suppose your writing an 
+provide access to the C++ STL to reduce the time it takes to prototype and 
+implement new technologies. For example, suppose your writing an 
 introspection hypervisor that needs to store the different system calls that
 are being made in a hash table for fast lookups. Doing this in an existing C 
 based hypervisor might require you to create your own hash table implementation. 
