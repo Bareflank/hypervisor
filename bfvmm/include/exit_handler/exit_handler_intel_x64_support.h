@@ -34,34 +34,4 @@
 ///
 extern "C" void exit_handler_entry(void);
 
-/// Promote Guest VMCS state to VMX root mode
-///
-/// Abandon the host state, and jump into the guest state
-/// from the host.
-extern "C" void promote_vmcs_to_root(void);
-
-/// Guest State
-///
-/// The following exposes the guest state to the rest of the exit handler.
-/// Note that this guest state actually exists in the assembly code to
-/// provide it easy access to save / restore the guest state on exits.
-///
-extern "C" { extern uint64_t g_guest_rax; }
-extern "C" { extern uint64_t g_guest_rbx; }
-extern "C" { extern uint64_t g_guest_rcx; }
-extern "C" { extern uint64_t g_guest_rdx; }
-extern "C" { extern uint64_t g_guest_rbp; }
-extern "C" { extern uint64_t g_guest_rsi; }
-extern "C" { extern uint64_t g_guest_rdi; }
-extern "C" { extern uint64_t g_guest_r08; }
-extern "C" { extern uint64_t g_guest_r09; }
-extern "C" { extern uint64_t g_guest_r10; }
-extern "C" { extern uint64_t g_guest_r11; }
-extern "C" { extern uint64_t g_guest_r12; }
-extern "C" { extern uint64_t g_guest_r13; }
-extern "C" { extern uint64_t g_guest_r14; }
-extern "C" { extern uint64_t g_guest_r15; }
-extern "C" { extern uint64_t g_guest_rsp; }
-extern "C" { extern uint64_t g_guest_rip; }
-
 #endif

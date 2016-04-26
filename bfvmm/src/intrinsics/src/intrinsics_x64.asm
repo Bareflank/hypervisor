@@ -66,7 +66,6 @@ global __outb:function
 global __inb:function
 global __outw:function
 global __inw:function
-global __load_segment_limit
 
 section .text
 
@@ -274,9 +273,18 @@ __read_cs:
     ret
 
 ; void __write_cs(uint16_t val)
+;
+; The added 0x48 is an undocumented issue with NASM. Basically, even though
+; BITS 64 is used, and we are compiling for 64bit, NASM does not add the
+; REX prefix to the retf instruction. As a result, we need to hand jam it in,
+; otherwise NASM will compile a 32bit instruction, and the data on the stack
+; will be wrong
 __write_cs:
-    mov cs, di
-    ret
+    pop rax
+    push di
+    push rax
+    db 0x48
+    retf
 
 ; uint16_t __read_ss(void)
 __read_ss:
@@ -349,22 +357,22 @@ __read_rsp:
     mov rax, rsp
     ret
 
-; void __read_gdt(gdt_t *gdt)
+; void __read_gdt(void *gdt)
 __read_gdt:
     sgdt [rdi]
     ret
 
-; void __write_gdt(gdt_t *gdt)
+; void __write_gdt(void *gdt)
 __write_gdt:
     lgdt [rdi]
     ret
 
-; void __read_idt(idt_t *idt)
+; void __read_idt(void *idt)
 __read_idt:
     sidt [rdi]
     ret
 
-; void __write_idt(idt_t *idt)
+; void __write_idt(void *idt)
 __write_idt:
     lidt [rdi]
     ret
@@ -396,8 +404,3 @@ __inw:
 	mov edx, edi
 	in ax, dx
 	ret
-
-; uint32_t __load_segment_limit(uint16_t selector)
-__load_segment_limit:
-    lsl rax, di
-    ret

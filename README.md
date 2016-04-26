@@ -19,9 +19,9 @@ additional functionality above and beyond what is already provided.
 To this end, Bareflank's primary goal is to remain simple, and
 minimalistic, providing only the scaffolding needed
 to construct more complete/complicated hypervisors including:
-- Type 1 Hypervisors (like Xen)
-- Type 2 Hypervisors (like VirtualBox)
-- Host-Only Hypervisors (commonly used by anti-virus and rootkits)
+- Bare Metal Hypervisors (also known as type 1, like [Xen](http://www.xenproject.org))
+- Late Launch Hypervisors (also known as type 2, like [VirtualBox](https://www.virtualbox.org))
+- Host-Only Hypervisors (no guests, like [MoRE](https://github.com/ainfosec/MoRE))
 
 The core business logic will remain in the hypervisors that extend
 Bareflank, and not in Bareflank itself.
@@ -173,6 +173,13 @@ Target: Janurary 2017
 * UEFI Support (i.e. type 1)
 * Basic Guest Support
 * BFM / Driver Extension Support
+
+### Version 1.3
+
+Target: June 2017
+
+* 64bit ARM Support
+* Intel Nested Virtualization Support
 
 ## Contributing
 

@@ -128,10 +128,6 @@ setup_intrinsics(MockRepository &mocks, intrinsics_intel_x64 *in)
     mocks.OnCall(in, intrinsics_intel_x64::read_gdt);
     mocks.OnCall(in, intrinsics_intel_x64::read_idt);
 
-    mocks.OnCall(in, intrinsics_intel_x64::segment_descriptor_limit).Return(0);
-    mocks.OnCall(in, intrinsics_intel_x64::segment_descriptor_access).Return(0);
-    mocks.OnCall(in, intrinsics_intel_x64::segment_descriptor_base).Return(0);
-
     mocks.OnCall(in, intrinsics_intel_x64::read_msr).Return(0);
 }
 
@@ -184,26 +180,6 @@ vcpu_ut::test_vcpu_intel_x64_start_success()
 }
 
 void
-vcpu_ut::test_vcpu_intel_x64_dispatch()
-{
-    MockRepository mocks;
-    auto dr = bfn::mock_shared<debug_ring>(mocks);
-    auto on = bfn::mock_shared<vmxon_intel_x64>(mocks);
-    auto cs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto eh = bfn::mock_shared<exit_handler_intel_x64>(mocks);
-    auto in = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    auto vc = std::make_shared<vcpu_intel_x64>(0, dr, on, cs, eh, in);
-
-    mocks.OnCall(eh.get(), exit_handler_intel_x64::dispatch);
-
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        EXPECT_NO_EXCEPTION(vc->dispatch());
-    });
-}
-
-void
 vcpu_ut::test_vcpu_intel_x64_stop()
 {
     MockRepository mocks;
@@ -220,45 +196,5 @@ vcpu_ut::test_vcpu_intel_x64_stop()
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
         EXPECT_NO_EXCEPTION(vc->stop());
-    });
-}
-
-void
-vcpu_ut::test_vcpu_intel_x64_halt()
-{
-    MockRepository mocks;
-    auto dr = bfn::mock_shared<debug_ring>(mocks);
-    auto on = bfn::mock_shared<vmxon_intel_x64>(mocks);
-    auto cs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto eh = bfn::mock_shared<exit_handler_intel_x64>(mocks);
-    auto in = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    auto vc = std::make_shared<vcpu_intel_x64>(0, dr, on, cs, eh, in);
-
-    mocks.OnCall(in.get(), intrinsics_intel_x64::stop);
-
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        EXPECT_NO_EXCEPTION(vc->halt());
-    });
-}
-
-void
-vcpu_ut::test_vcpu_intel_x64_promote()
-{
-    MockRepository mocks;
-    auto dr = bfn::mock_shared<debug_ring>(mocks);
-    auto on = bfn::mock_shared<vmxon_intel_x64>(mocks);
-    auto cs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto eh = bfn::mock_shared<exit_handler_intel_x64>(mocks);
-    auto in = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    auto vc = std::make_shared<vcpu_intel_x64>(0, dr, on, cs, eh, in);
-
-    mocks.OnCall(cs.get(), vmcs_intel_x64::promote);
-
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        EXPECT_NO_EXCEPTION(vc->promote());
     });
 }

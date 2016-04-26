@@ -24,7 +24,6 @@
 #include <exit_handler/exit_handler_intel_x64_entry.h>
 #include <exit_handler/exit_handler_intel_x64_support.h>
 #include <exit_handler/exit_handler_intel_x64_exceptions.h>
-#include <vcpu/vcpu_manager.h>
 
 exit_handler_intel_x64::exit_handler_intel_x64(const std::shared_ptr<intrinsics_intel_x64> &intrinsics) :
     m_intrinsics(intrinsics)
@@ -49,7 +48,7 @@ exit_handler_intel_x64::dispatch()
     m_exit_instruction_information =
         vmread(VMCS_VM_EXIT_INSTRUCTION_INFORMATION);
 
-    switch (m_exit_reason)
+    switch (m_exit_reason & 0x0000FFFF)
     {
         case VM_EXIT_REASON_EXCEPTION_OR_NON_MASKABLE_INTERRUPT:
             handle_exception_or_non_maskable_interrupt();
@@ -298,6 +297,12 @@ exit_handler_intel_x64::dispatch()
 }
 
 void
+exit_handler_intel_x64::halt()
+{
+    m_intrinsics->stop();
+}
+
+void
 exit_handler_intel_x64::handle_exception_or_non_maskable_interrupt()
 { unimplemented_handler(); }
 
@@ -340,10 +345,10 @@ exit_handler_intel_x64::handle_task_switch()
 void
 exit_handler_intel_x64::handle_cpuid()
 {
-    m_intrinsics->cpuid(&g_guest_rax,
-                        &g_guest_rbx,
-                        &g_guest_rcx,
-                        &g_guest_rdx);
+    m_intrinsics->cpuid(&m_state_save->rax,
+                        &m_state_save->rbx,
+                        &m_state_save->rcx,
+                        &m_state_save->rdx);
 
     advance_rip();
 }
@@ -414,7 +419,7 @@ exit_handler_intel_x64::handle_vmwrite()
 void
 exit_handler_intel_x64::handle_vmxoff()
 {
-    g_vcm->promote(0);
+    m_vmcs->promote();
 }
 
 void
@@ -438,7 +443,7 @@ exit_handler_intel_x64::handle_rdmsr()
 {
     uint64_t msr = 0;
 
-    switch (g_guest_rcx)
+    switch (m_state_save->rcx)
     {
         case IA32_DEBUGCTL_MSR:
             msr = vmread(VMCS_GUEST_IA32_DEBUGCTL_FULL);
@@ -468,7 +473,7 @@ exit_handler_intel_x64::handle_rdmsr()
             break;
     }
 
-    switch (g_guest_rcx)
+    switch (m_state_save->rcx)
     {
         case IA32_DEBUGCTL_MSR:
         case IA32_PAT_MSR:
@@ -478,11 +483,13 @@ exit_handler_intel_x64::handle_rdmsr()
         case IA32_SYSENTER_EIP_MSR:
         case IA32_FS_BASE_MSR:
         case IA32_GS_BASE_MSR:
-            g_guest_rax = ((msr & 0x00000000FFFFFFFF) >> 0);
-            g_guest_rdx = ((msr & 0xFFFFFFFF00000000) >> 32);
+            m_state_save->rax = ((msr & 0x00000000FFFFFFFF) >> 0);
+            m_state_save->rdx = ((msr & 0xFFFFFFFF00000000) >> 32);
             break;
         default:
-            m_intrinsics->read_msr_reg(g_guest_rcx, &g_guest_rdx, &g_guest_rax);
+            m_intrinsics->read_msr_reg(m_state_save->rcx,
+                                       &m_state_save->rdx,
+                                       &m_state_save->rax);
             break;
     }
 
@@ -494,7 +501,7 @@ exit_handler_intel_x64::handle_wrmsr()
 {
     uint64_t msr = 0;
 
-    switch (g_guest_rcx)
+    switch (m_state_save->rcx)
     {
         case IA32_DEBUGCTL_MSR:
         case IA32_PAT_MSR:
@@ -504,14 +511,14 @@ exit_handler_intel_x64::handle_wrmsr()
         case IA32_SYSENTER_EIP_MSR:
         case IA32_FS_BASE_MSR:
         case IA32_GS_BASE_MSR:
-            msr |= ((g_guest_rax << 0) & 0x00000000FFFFFFFF);
-            msr |= ((g_guest_rdx << 32) & 0xFFFFFFFF00000000);
+            msr |= ((m_state_save->rax << 0) & 0x00000000FFFFFFFF);
+            msr |= ((m_state_save->rdx << 32) & 0xFFFFFFFF00000000);
             break;
         default:
             break;
     }
 
-    switch (g_guest_rcx)
+    switch (m_state_save->rcx)
     {
         case IA32_DEBUGCTL_MSR:
             vmwrite(VMCS_GUEST_IA32_DEBUGCTL_FULL, msr);
@@ -538,7 +545,9 @@ exit_handler_intel_x64::handle_wrmsr()
             vmwrite(VMCS_GUEST_GS_BASE, msr);
             break;
         default:
-            m_intrinsics->write_msr_reg(g_guest_rcx, g_guest_rdx, g_guest_rax);
+            m_intrinsics->write_msr_reg(m_state_save->rcx,
+                                        m_state_save->rdx,
+                                        m_state_save->rax);
             break;
     }
 
@@ -656,7 +665,7 @@ exit_handler_intel_x64::handle_xrstors()
 void
 exit_handler_intel_x64::advance_rip()
 {
-    g_guest_rip += m_exit_instruction_length;
+    m_state_save->rip += m_exit_instruction_length;
 }
 
 void
@@ -666,30 +675,54 @@ exit_handler_intel_x64::unimplemented_handler()
     bferror << bfendl;
     bferror << "Guest register state: " << bfendl;
     bferror << "----------------------------------------------------" << bfendl;
-    bferror << "g_guest_rax: " << (void *)g_guest_rax << bfendl;
-    bferror << "g_guest_rbx: " << (void *)g_guest_rbx << bfendl;
-    bferror << "g_guest_rcx: " << (void *)g_guest_rcx << bfendl;
-    bferror << "g_guest_rdx: " << (void *)g_guest_rdx << bfendl;
-    bferror << "g_guest_rsi: " << (void *)g_guest_rsi << bfendl;
-    bferror << "g_guest_rdi: " << (void *)g_guest_rdi << bfendl;
-    bferror << "g_guest_rsp: " << (void *)g_guest_rsp << bfendl;
-    bferror << "g_guest_rbp: " << (void *)g_guest_rbp << bfendl;
-    bferror << "g_guest_rip: " << (void *)g_guest_rip << bfendl;
+    bferror << "m_state_save->rax: " << (void *)m_state_save->rax << bfendl;
+    bferror << "m_state_save->rbx: " << (void *)m_state_save->rbx << bfendl;
+    bferror << "m_state_save->rcx: " << (void *)m_state_save->rcx << bfendl;
+    bferror << "m_state_save->rdx: " << (void *)m_state_save->rdx << bfendl;
+    bferror << "m_state_save->rbp: " << (void *)m_state_save->rbp << bfendl;
+    bferror << "m_state_save->rsi: " << (void *)m_state_save->rsi << bfendl;
+    bferror << "m_state_save->rdi: " << (void *)m_state_save->rdi << bfendl;
+    bferror << "m_state_save->r08: " << (void *)m_state_save->r08 << bfendl;
+    bferror << "m_state_save->r09: " << (void *)m_state_save->r09 << bfendl;
+    bferror << "m_state_save->r10: " << (void *)m_state_save->r10 << bfendl;
+    bferror << "m_state_save->r11: " << (void *)m_state_save->r11 << bfendl;
+    bferror << "m_state_save->r12: " << (void *)m_state_save->r12 << bfendl;
+    bferror << "m_state_save->r13: " << (void *)m_state_save->r13 << bfendl;
+    bferror << "m_state_save->r14: " << (void *)m_state_save->r14 << bfendl;
+    bferror << "m_state_save->r15: " << (void *)m_state_save->r15 << bfendl;
+    bferror << "m_state_save->rip: " << (void *)m_state_save->rip << bfendl;
+    bferror << "m_state_save->rsp: " << (void *)m_state_save->rsp << bfendl;
 
     bferror << bfendl;
     bferror << bfendl;
     bferror << "Unimplemented Exit Handler: " << bfendl;
     bferror << "----------------------------------------------------" << bfendl;
     bferror << "- exit reason: "
-            << (void *)m_exit_reason << " = "
-            << exit_reason_to_str(m_exit_reason) << bfendl;
+            << (void *)m_exit_reason << bfendl;
+    bferror << "- exit reason string: "
+            << exit_reason_to_str(m_exit_reason & 0x0000FFFF) << bfendl;
+    bferror << "- exit qualification: "
+            << (void *)m_exit_qualification << bfendl;
     bferror << "- instruction length: "
             << (void *)m_exit_instruction_length << bfendl;
     bferror << "- instruction information: "
             << (void *)m_exit_instruction_information << bfendl;
+    bferror << bfendl;
 
-    for (auto i = 0; i < 1000000; i++);
-    m_intrinsics->stop();
+    if ((m_exit_reason & 0x80000000) != 0)
+    {
+        bferror << "VM-entry failure detected!!!" << bfendl;
+        bferror << bfendl;
+
+        m_vmcs->check_vmcs_control_state();
+        m_vmcs->check_vmcs_guest_state();
+        m_vmcs->check_vmcs_host_state();
+    }
+
+    bferror << bfendl;
+    bferror << bfendl;
+
+    halt();
 }
 
 const char *

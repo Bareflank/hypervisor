@@ -21,6 +21,7 @@
 
 #include <test.h>
 #include <vmcs/vmcs_intel_x64.h>
+#include <vmcs/vmcs_intel_x64_exceptions.h>
 #include <memory_manager/memory_manager.h>
 
 uint64_t fake_vmread_return[8];
@@ -71,8 +72,8 @@ vmcs_ut::test_launch_is_supported_host_address_space_size_failure()
     auto in = bfn::mock_shared<intrinsics_intel_x64>(mocks);
 
     vmcs_intel_x64 vmcs(in);
-    auto host_state = vmcs_intel_x64_state();
-    auto guest_state = vmcs_intel_x64_state();
+    auto host_state = std::make_shared<vmcs_intel_x64_state>();
+    auto guest_state = std::make_shared<vmcs_intel_x64_state>();
 
     // Setup
     mocks.OnCall(in.get(), intrinsics_intel_x64::read_msr).With(IA32_VMX_TRUE_PROCBASED_CTLS_MSR).Return((VM_EXEC_P_PROC_BASED_MONITOR_TRAP_FLAG << 32));
@@ -94,8 +95,8 @@ vmcs_ut::test_launch_is_supported_ia_32e_mode_guest_failure()
     auto in = bfn::mock_shared<intrinsics_intel_x64>(mocks);
 
     vmcs_intel_x64 vmcs(in);
-    auto host_state = vmcs_intel_x64_state();
-    auto guest_state = vmcs_intel_x64_state();
+    auto host_state = std::make_shared<vmcs_intel_x64_state>();
+    auto guest_state = std::make_shared<vmcs_intel_x64_state>();
 
     // Setup
     mocks.OnCall(in.get(), intrinsics_intel_x64::read_msr).With(IA32_VMX_TRUE_PROCBASED_CTLS_MSR).Return((VM_EXEC_P_PROC_BASED_MONITOR_TRAP_FLAG << 32));
@@ -119,8 +120,8 @@ vmcs_ut::test_launch_vmclear_failure()
     mm = l_mm.get();
 
     vmcs_intel_x64 vmcs(in);
-    auto host_state = vmcs_intel_x64_state();
-    auto guest_state = vmcs_intel_x64_state();
+    auto host_state = std::make_shared<vmcs_intel_x64_state>();
+    auto guest_state = std::make_shared<vmcs_intel_x64_state>();
 
     // Setup
     mocks.OnCall(in.get(), intrinsics_intel_x64::read_msr).With(IA32_VMX_TRUE_EXIT_CTLS_MSR).Return((VM_EXIT_CONTROL_HOST_ADDRESS_SPACE_SIZE << 32));
@@ -152,8 +153,8 @@ vmcs_ut::test_launch_vmptrld_failure()
     mm = l_mm.get();
 
     vmcs_intel_x64 vmcs(in);
-    auto host_state = vmcs_intel_x64_state();
-    auto guest_state = vmcs_intel_x64_state();
+    auto host_state = std::make_shared<vmcs_intel_x64_state>();
+    auto guest_state = std::make_shared<vmcs_intel_x64_state>();
 
     // Setup
 
@@ -189,8 +190,8 @@ vmcs_ut::test_launch_vmwrite_failure()
     mm = l_mm.get();
 
     vmcs_intel_x64 vmcs(in);
-    auto host_state = vmcs_intel_x64_state();
-    auto guest_state = vmcs_intel_x64_state();
+    auto host_state = std::make_shared<vmcs_intel_x64_state>();
+    auto guest_state = std::make_shared<vmcs_intel_x64_state>();
 
     // Setup
     mocks.OnCall(in.get(), intrinsics_intel_x64::read_msr).With(IA32_VMX_TRUE_EXIT_CTLS_MSR).Return((VM_EXIT_CONTROL_HOST_ADDRESS_SPACE_SIZE << 32));
@@ -225,8 +226,8 @@ vmcs_ut::test_launch_vmread_failure()
     mm = l_mm.get();
 
     vmcs_intel_x64 vmcs(in);
-    auto host_state = vmcs_intel_x64_state();
-    auto guest_state = vmcs_intel_x64_state();
+    auto host_state = std::make_shared<vmcs_intel_x64_state>();
+    auto guest_state = std::make_shared<vmcs_intel_x64_state>();
 
     // Setup
     mocks.OnCall(in.get(), intrinsics_intel_x64::read_msr).With(IA32_VMX_TRUE_PROCBASED_CTLS_MSR).Return((VM_EXEC_P_PROC_BASED_USE_MSR_BITMAPS << 32));
@@ -242,8 +243,6 @@ vmcs_ut::test_launch_vmread_failure()
 
     mocks.OnCall(in.get(), intrinsics_intel_x64::vmclear).Return(true);
     mocks.OnCall(in.get(), intrinsics_intel_x64::vmptrld).Return(true);
-
-    mocks.OnCall(in.get(), intrinsics_intel_x64::segment_descriptor_access).Return(0);
 
     mocks.OnCall(in.get(), intrinsics_intel_x64::vmwrite).Return(true);
 
@@ -276,8 +275,6 @@ static void setup_success_launch(MockRepository &mocks, intrinsics_intel_x64 *in
     mocks.OnCall(in, intrinsics_intel_x64::vmclear).Return(true);
     mocks.OnCall(in, intrinsics_intel_x64::vmptrld).Return(true);
 
-    mocks.OnCall(in, intrinsics_intel_x64::segment_descriptor_access).Return(0);
-
     mocks.OnCall(in, intrinsics_intel_x64::vmwrite).Return(true);
     mocks.OnCall(in, intrinsics_intel_x64::vmread).Return(true);
 
@@ -295,8 +292,8 @@ vmcs_ut::test_launch_success()
     mm = l_mm.get();
 
     vmcs_intel_x64 vmcs(in);
-    auto host_state = vmcs_intel_x64_state();
-    auto guest_state = vmcs_intel_x64_state();
+    auto host_state = std::make_shared<vmcs_intel_x64_state>();
+    auto guest_state = std::make_shared<vmcs_intel_x64_state>();
 
     setup_success_launch(mocks, in.get());
 

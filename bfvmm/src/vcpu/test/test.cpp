@@ -53,10 +53,7 @@ vcpu_ut::list()
     this->test_vcpu_intel_x64_start_vmxon_start_failed();
     this->test_vcpu_intel_x64_start_vmcs_launch_failed();
     this->test_vcpu_intel_x64_start_success();
-    this->test_vcpu_intel_x64_dispatch();
     this->test_vcpu_intel_x64_stop();
-    this->test_vcpu_intel_x64_halt();
-    this->test_vcpu_intel_x64_promote();
 
     this->test_vcpu_manager_valid();
     this->test_vcpu_manager_init_negative_vcpuid();
@@ -67,22 +64,10 @@ vcpu_ut::list()
     this->test_vcpu_manager_start_invalid_vcpuid();
     this->test_vcpu_manager_start_uninitialized_vcpuid();
     this->test_vcpu_manager_start_success();
-    this->test_vcpu_manager_dispatch_negative_vcpuid();
-    this->test_vcpu_manager_dispatch_invalid_vcpuid();
-    this->test_vcpu_manager_dispatch_uninitialized_vcpuid();
-    this->test_vcpu_manager_dispatch_success();
     this->test_vcpu_manager_stop_invalid_vcpuid();
     this->test_vcpu_manager_stop_uninitialized_vcpuid();
     this->test_vcpu_manager_stop_success();
     this->test_vcpu_manager_stop_twice();
-    this->test_vcpu_manager_halt_negative_vcpuid();
-    this->test_vcpu_manager_halt_invalid_vcpuid();
-    this->test_vcpu_manager_halt_uninitialized_vcpuid();
-    this->test_vcpu_manager_halt_success();
-    this->test_vcpu_manager_promote_negative_vcpuid();
-    this->test_vcpu_manager_promote_invalid_vcpuid();
-    this->test_vcpu_manager_promote_uninitialized_vcpuid();
-    this->test_vcpu_manager_promote_success();
     this->test_vcpu_manager_write_negative_vcpuid();
     this->test_vcpu_manager_write_invalid_vcpuid();
     this->test_vcpu_manager_write_uninitialized_vcpuid();

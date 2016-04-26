@@ -23,9 +23,10 @@
 #define VCPU_INTEL_X64_H
 
 #include <vcpu/vcpu.h>
-
 #include <vmxon/vmxon_intel_x64.h>
 #include <vmcs/vmcs_intel_x64.h>
+#include <vmcs/vmcs_intel_x64_vmm_state.h>
+#include <vmcs/vmcs_intel_x64_host_vm_state.h>
 #include <exit_handler/exit_handler_intel_x64.h>
 #include <intrinsics/intrinsics_intel_x64.h>
 
@@ -99,33 +100,11 @@ public:
     ///
     virtual void start() override;
 
-    /// Dispatch
-    ///
-    /// Dispatches the exit handler for the vCPU.
-    ///
-    virtual void dispatch() override
-    { m_exit_handler->dispatch(); }
-
     /// Stop
     ///
     /// Stops the vCPU.
     ///
-    virtual void stop() override
-    { m_vmxon->stop(); }
-
-    /// Halt
-    ///
-    /// Halts the vCPU.
-    ///
-    virtual void halt() override
-    { m_intrinsics->stop(); }
-
-    /// Promote
-    ///
-    /// Promote the vCPU to host CPU state
-    ///
-    virtual void promote() override
-    { m_vmcs->promote(); }
+    virtual void stop() override;
 
 private:
 
@@ -133,6 +112,10 @@ private:
     std::shared_ptr<vmcs_intel_x64> m_vmcs;
     std::shared_ptr<exit_handler_intel_x64> m_exit_handler;
     std::shared_ptr<intrinsics_intel_x64> m_intrinsics;
+    std::shared_ptr<state_save_intel_x64> m_state_save;
+
+    std::shared_ptr<vmcs_intel_x64_vmm_state> m_vmm_state;
+    std::shared_ptr<vmcs_intel_x64_host_vm_state> m_host_vm_state;
 };
 
 #endif

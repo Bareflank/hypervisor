@@ -19,17 +19,16 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#ifndef EXIT_HANDLER_INTEL_X64_ENTRY_H
-#define EXIT_HANDLER_INTEL_X64_ENTRY_H
+#ifndef VMCS_INTEL_X64_PROMOTE_H
+#define VMCS_INTEL_X64_PROMOTE_H
 
-#include <exit_handler/exit_handler_intel_x64.h>
+#include <stdint.h>
 
-/// Exit Handler
+/// Promote Guest VMCS state to VMX root mode
 ///
-/// This is the "C" portion of the exit handler. Once the entry point has
-/// finished it's job, it hands control to this function, which trampolines
-/// to a C++ exit handler dispatch which will ultamitely handle the VM exit
+/// Abandon the host state, and jump into the guest state
+/// from the host.
 ///
-extern "C" void exit_handler(exit_handler_intel_x64 *exit_handler);
+extern "C" void promote_vmcs_to_root(uint64_t state_save);
 
 #endif

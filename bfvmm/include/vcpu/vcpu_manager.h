@@ -66,16 +66,6 @@ public:
     ///
     virtual void start(int64_t vcpuid);
 
-    /// Dispatch vCPU exit handler
-    ///
-    /// Runs the vCPU's exit handler
-    ///
-    /// @param vcpuid the vcpu to stop
-    /// @throws invalid_argument_error thrown when the vcpuid is invalid, or
-    ///     if the vcpuid has yet to be initialized
-    ///
-    virtual void dispatch(int64_t vcpuid);
-
     /// Stop vCPU
     ///
     /// Stops the vCPU.
@@ -85,26 +75,6 @@ public:
     ///     if the vcpuid has yet to be initialized
     ///
     virtual void stop(int64_t vcpuid);
-
-    /// Halt vCPU
-    ///
-    /// Halts the vCPU.
-    ///
-    /// @param vcpuid the vcpu to halt
-    /// @throws invalid_argument_error thrown when the vcpuid is invalid, or
-    ///     if the vcpuid has yet to be initialized
-    ///
-    virtual void halt(int64_t vcpuid);
-
-    /// Promote vCPU
-    ///
-    /// Promote vCPU to host CPU state
-    ///
-    /// @param vcpuid the vcpu to promote
-    /// @throws invalid_argument_error thrown when the vcpuid is invalid, or
-    ///     if the vcpuid has yet to be initialized
-    ///
-    virtual void promote(int64_t vcpuid);
 
     /// Write to Log
     ///
