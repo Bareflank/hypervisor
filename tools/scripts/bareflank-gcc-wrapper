@@ -1,19 +1,6 @@
 #!/bin/bash -e
 
 # ------------------------------------------------------------------------------
-# Info
-# ------------------------------------------------------------------------------
-
-VERBOSE="false"
-
-for ARG in "$@"
-do
-    if [[ $ARG == "-v" ]]; then
-        VERBOSE="true"
-    fi
-done
-
-# ------------------------------------------------------------------------------
 # Mode
 # ------------------------------------------------------------------------------
 
@@ -74,28 +61,71 @@ if [[ $UNSUPPORTED == "true" ]]; then
 fi
 
 # ------------------------------------------------------------------------------
+# Convert Arguments
+# ------------------------------------------------------------------------------
+
+i=0
+CONVERTED_ARGS[$i]=
+
+for ARG in "$@"
+do
+
+    if [[ $MODE == "link" ]]; then
+
+        # We need to convert the GCC syntax for passing LD flags to LD so that
+        # LD is getting the correct settings.
+        if [[ $ARG == "-Wl,"* ]]; then
+            ARG=${ARG/-Wl,/}
+            ARG=${ARG/,/ }
+        fi
+
+        # GCC's syntax is different than LD's for this option.
+        if [[ $ARG == "-rdynamic" ]]; then
+            ARG="-export-dynamic"
+        fi
+
+    fi
+
+    CONVERTED_ARGS[$i]=$ARG
+    i=$((i + 1))
+
+done
+
+# ------------------------------------------------------------------------------
 # Filter Arguments
 # ------------------------------------------------------------------------------
 
 i=0
 ARGS[$i]=
 
-for ARG in "$@"
+for ARG in "${CONVERTED_ARGS[@]}"
 do
-    if [[ $ARG == "-v"* ]]; then continue; fi
 
     if [[ $MODE == "link" ]]; then
 
+        # These flags are all specific to GCC and are not used by LD. CMake
+        # will send these to GCC, and GCC filters them similar to what we
+        # do here.
         if [[ $ARG == "-m"* ]]; then continue; fi
         if [[ $ARG == "-f"* ]]; then continue; fi
         if [[ $ARG == "-W"* ]]; then continue; fi
         if [[ $ARG == "-D"* ]]; then continue; fi
         if [[ $ARG == "-U"* ]]; then continue; fi
-        if [[ $ARG == "-std"* ]]; then continue; fi
 
-        if [[ $ARG == "-rdynamic" ]]; then
-            ARG="-export-dynamic"
+        # For some reason, Libc++abi turns this on for a shared library, and
+        # we really don't want it as we provide the symbols as needed. In
+        # general if this is enabled, we should disable it.
+        if [[ $ARG == "-z defs" ]]; then
+            echo "WARNING: -z defs disabled by bareflank-gcc-wrapper"
+            continue;
         fi
+
+        # These are not used by LD, and actually cause LD to do some pretty
+        # terrible things. For example, nodefaults tells LD to use "-n" which
+        # changes the permissions from RE/RW -> RWE which is really bad.
+        if [[ $ARG == "-std"* ]]; then continue; fi
+        if [[ $ARG == "-nodefaultlibs" ]]; then continue; fi
+
     fi
 
     ARGS[$i]=$ARG
@@ -112,7 +142,7 @@ done
 # be loaded at runtime, and thus does not need to be known during linking. The
 # only thing the hypervisor code should need from the sysroot is the includes.
 
-if [[ $BAREFLANK_WRAPPER_INCLUDE_LIBC == "true" ]]; then
+if [[ $BAREFLANK_WRAPPER_IS_LIBCXX == "true" ]]; then
     SYSROOT_LIBS+="-lc -lbfc -lbfunwind_static "
     SYSROOT_LIBS+="-u __cxa_throw_bad_array_new_length"
 fi
@@ -139,7 +169,7 @@ fi
 # Execute
 # ------------------------------------------------------------------------------
 
-if [ $VERBOSE == "true" ]; then
+if [ ! -z "$VERBOSE" ]; then
     echo "ARGS: $@"
     echo "MODE: $MODE"
     echo "COMPILER: $COMPILER"
@@ -156,5 +186,5 @@ if [[ $MODE == "compile" ]]; then
 fi
 
 if [[ $MODE == "link" ]]; then
-    $HOME/opt/cross/bin/x86_64-elf-ld ${ARGS[*]} $SYSROOT_LIB_PATH $SYSROOT_LIBS $BAREFLANK_LIBS
+    $HOME/opt/cross/bin/x86_64-elf-ld ${ARGS[*]} $SYSROOT_LIB_PATH $SYSROOT_LIBS $BAREFLANK_LIBS -z max-page-size=4096 -z relro -z now
 fi
