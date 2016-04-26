@@ -34,7 +34,7 @@ extern "C"
 {
     struct module_t *get_module(uint64_t index);
     int64_t symbol_length(const char *sym);
-    int64_t resolve_symbol(const char *name, void **sym);
+    int64_t resolve_symbol(const char *name, void **sym, struct module_t *module);
     int64_t execute_symbol(const char *sym, int64_t arg);
     int64_t add_mdl_to_memory_manager(char *exec, uint64_t size);
 
@@ -108,13 +108,13 @@ driver_entry_ut::test_helper_resolve_symbol_invalid_name()
 {
     void *sym;
 
-    EXPECT_TRUE(resolve_symbol(0, &sym) == BF_ERROR_INVALID_ARG);
+    EXPECT_TRUE(resolve_symbol(0, &sym, 0) == BF_ERROR_INVALID_ARG);
 }
 
 void
 driver_entry_ut::test_helper_resolve_symbol_invalid_sym()
 {
-    EXPECT_TRUE(resolve_symbol("sym", 0) == BF_ERROR_INVALID_ARG);
+    EXPECT_TRUE(resolve_symbol("sym", 0, 0) == BF_ERROR_INVALID_ARG);
 }
 
 void
@@ -128,7 +128,7 @@ driver_entry_ut::test_helper_resolve_symbol_missing_symbol()
     EXPECT_TRUE(common_add_module(m_dummy_add_mdl_success, m_dummy_add_mdl_success_length) == BF_SUCCESS);
     EXPECT_TRUE(common_add_module(m_dummy_misc, m_dummy_misc_length) == BF_SUCCESS);
     EXPECT_TRUE(common_load_vmm() == BF_SUCCESS);
-    EXPECT_TRUE(resolve_symbol("invalid_symbol", &sym) == BFELF_ERROR_NO_SUCH_SYMBOL);
+    EXPECT_TRUE(resolve_symbol("invalid_symbol", &sym, 0) == BFELF_ERROR_NO_SUCH_SYMBOL);
     EXPECT_TRUE(common_fini() == BF_SUCCESS);
 }
 
@@ -188,7 +188,7 @@ driver_entry_ut::test_helper_constructors_success()
     EXPECT_TRUE(common_add_module(m_dummy_add_mdl_success, m_dummy_add_mdl_success_length) == BF_SUCCESS);
     EXPECT_TRUE(common_add_module(m_dummy_misc, m_dummy_misc_length) == BF_SUCCESS);
     EXPECT_TRUE(common_load_vmm() == BF_SUCCESS);
-    ASSERT_TRUE(resolve_symbol("get_misc", (void **)&get_misc) == BF_SUCCESS);
+    ASSERT_TRUE(resolve_symbol("get_misc", (void **)&get_misc, 0) == BF_SUCCESS);
     EXPECT_TRUE(get_misc() == 10);
     EXPECT_TRUE(common_fini() == BF_SUCCESS);
 }
@@ -213,7 +213,7 @@ driver_entry_ut::test_helper_add_mdl_1_page()
     EXPECT_TRUE(common_add_module(m_dummy_add_mdl_success, m_dummy_add_mdl_success_length) == BF_SUCCESS);
     EXPECT_TRUE(common_add_module(m_dummy_misc, m_dummy_misc_length) == BF_SUCCESS);
     EXPECT_TRUE(common_load_vmm() == BF_SUCCESS);
-    ASSERT_TRUE(resolve_symbol("get_mdl_num", (void **)&get_mdl_num) == BF_SUCCESS);
+    ASSERT_TRUE(resolve_symbol("get_mdl_num", (void **)&get_mdl_num, 0) == BF_SUCCESS);
 
     EXPECT_TRUE(add_mdl_to_memory_manager(exec_1_page, exec_1_page_length) == BF_SUCCESS);
     EXPECT_TRUE(get_mdl_num() == 1);
@@ -229,7 +229,7 @@ driver_entry_ut::test_helper_add_mdl_3_pages()
     EXPECT_TRUE(common_add_module(m_dummy_add_mdl_success, m_dummy_add_mdl_success_length) == BF_SUCCESS);
     EXPECT_TRUE(common_add_module(m_dummy_misc, m_dummy_misc_length) == BF_SUCCESS);
     EXPECT_TRUE(common_load_vmm() == BF_SUCCESS);
-    ASSERT_TRUE(resolve_symbol("get_mdl_num", (void **)&get_mdl_num) == BF_SUCCESS);
+    ASSERT_TRUE(resolve_symbol("get_mdl_num", (void **)&get_mdl_num, 0) == BF_SUCCESS);
 
     EXPECT_TRUE(add_mdl_to_memory_manager(exec_3_pages, exec_3_pages_length) == BF_SUCCESS);
     EXPECT_TRUE(get_mdl_num() == 3);
@@ -245,7 +245,7 @@ driver_entry_ut::test_helper_add_mdl_3_pages_plus()
     EXPECT_TRUE(common_add_module(m_dummy_add_mdl_success, m_dummy_add_mdl_success_length) == BF_SUCCESS);
     EXPECT_TRUE(common_add_module(m_dummy_misc, m_dummy_misc_length) == BF_SUCCESS);
     EXPECT_TRUE(common_load_vmm() == BF_SUCCESS);
-    ASSERT_TRUE(resolve_symbol("get_mdl_num", (void **)&get_mdl_num) == BF_SUCCESS);
+    ASSERT_TRUE(resolve_symbol("get_mdl_num", (void **)&get_mdl_num, 0) == BF_SUCCESS);
 
     EXPECT_TRUE(add_mdl_to_memory_manager(exec_3_pages_plus, exec_3_pages_plus_length) == BF_SUCCESS);
     EXPECT_TRUE(get_mdl_num() == 4);

@@ -166,6 +166,21 @@ bool bfelf_loader_ut::list()
     this->test_bfelf_file_get_segment_invalid_phdr();
     this->test_bfelf_file_get_segment_success();
 
+    this->test_bfelf_file_resolve_symbol_invalid_loader();
+    this->test_bfelf_file_resolve_symbol_invalid_name();
+    this->test_bfelf_file_resolve_symbol_invalid_addr();
+    this->test_bfelf_file_resolve_symbol_no_relocation();
+    this->test_bfelf_file_resolve_no_such_symbol();
+    this->test_bfelf_file_resolve_zero_length_symbol();
+    this->test_bfelf_file_resolve_invalid_symbol_length();
+    this->test_bfelf_file_resolve_symbol_length_too_large();
+    this->test_bfelf_file_resolve_symbol_success();
+    this->test_bfelf_file_resolve_no_such_symbol_no_hash();
+    this->test_bfelf_file_resolve_zero_length_symbol_no_hash();
+    this->test_bfelf_file_resolve_invalid_symbol_length_no_hash();
+    this->test_bfelf_file_resolve_symbol_length_too_large_no_hash();
+    this->test_bfelf_file_resolve_symbol_success_no_hash();
+
     this->test_bfelf_loader_add_invalid_loader();
     this->test_bfelf_loader_add_invalid_elf_file();
     this->test_bfelf_loader_add_too_many_files();

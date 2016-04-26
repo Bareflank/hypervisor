@@ -69,6 +69,8 @@ vmxon_intel_x64::start()
     cor3.commit();
 }
 
+#include <debug.h>
+
 void
 vmxon_intel_x64::stop()
 {

@@ -116,7 +116,6 @@ bool bfunwind_ut::init()
     memset(&loader, 0, sizeof(loader));
 
     loader.relocated = 1;
-    loader.ignore_crt = 1;
 
     ret = bfelf_loader_get_info(&loader, &self_ef, &g_info);
     ASSERT_TRUE(ret == BFELF_SUCCESS);

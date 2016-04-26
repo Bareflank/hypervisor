@@ -109,9 +109,6 @@ bfelf_loader_ut::test_bfelf_loader_get_info_expected_misc_resources()
 
     EXPECT_TRUE(info.eh_frame_addr != 0);
     EXPECT_TRUE(info.eh_frame_size != 0);
-
-    EXPECT_TRUE(info.local_init != 0);
-    EXPECT_TRUE(info.local_fini != 0);
 }
 
 void
@@ -156,7 +153,4 @@ bfelf_loader_ut::test_bfelf_loader_get_info_expected_code_resources()
 
     EXPECT_TRUE(info.eh_frame_addr != 0);
     EXPECT_TRUE(info.eh_frame_size != 0);
-
-    EXPECT_TRUE(info.local_init != 0);
-    EXPECT_TRUE(info.local_fini != 0);
 }

@@ -68,26 +68,39 @@ symbol_length(const char *sym)
 }
 
 int64_t
-resolve_symbol(const char *name, void **sym)
+resolve_symbol(const char *name, void **sym, struct module_t *module)
 {
     int64_t ret;
     struct e_string_t str = {0};
-    struct module_t *module = get_module(0);
 
     if (name == 0 || sym == 0)
         return BF_ERROR_INVALID_ARG;
 
-    if (module == 0)
+    if (module == 0 && g_num_modules == 0)
         return BF_ERROR_NO_MODULES_ADDED;
 
     str.buf = name;
     str.len = symbol_length(name);
 
-    ret = bfelf_loader_resolve_symbol(&g_loader, &str, sym);
-    if (ret != BFELF_SUCCESS)
+    if (module == 0)
     {
-        ALERT("%s could not be found: %" PRId64 " - %s\n", name, ret, bfelf_error(ret));
-        return ret;
+        ret = bfelf_loader_resolve_symbol(&g_loader, &str, sym);
+        if (ret != BFELF_SUCCESS)
+        {
+            ALERT("%s could not be found: %" PRId64 " - %s\n", name, ret,
+                  bfelf_error(ret));
+            return ret;
+        }
+    }
+    else
+    {
+        ret = bfelf_file_resolve_symbol(&module->file, &str, sym);
+        if (ret != BFELF_SUCCESS)
+        {
+            ALERT("%s could not be found: %" PRId64 " - %s\n", name, ret,
+                  bfelf_error(ret));
+            return ret;
+        }
     }
 
     return BF_SUCCESS;
@@ -102,10 +115,11 @@ execute_symbol(const char *sym, int64_t arg)
     if (sym == 0)
         return BF_ERROR_INVALID_ARG;
 
-    ret = resolve_symbol(sym, (void **)&entry_point);
+    ret = resolve_symbol(sym, (void **)&entry_point, 0);
     if (ret != BF_SUCCESS)
     {
-        ALERT("execute_symbol: failed to resolve entry point: %" PRId64 "\n", ret);
+        ALERT("execute_symbol: failed to resolve entry point: %" PRId64 "\n",
+              ret);
         return ret;
     }
 
@@ -134,6 +148,7 @@ add_mdl_to_memory_manager(char *exec, uint64_t size)
     int64_t i = 0;
     int64_t ret = 0;
     int64_t num = 0;
+    int64_t len = 0;
     uint64_t page = 0;
     add_mdl_t add_mdl = 0;
     struct memory_descriptor *mdl;
@@ -145,7 +160,8 @@ add_mdl_to_memory_manager(char *exec, uint64_t size)
     if (size % MAX_PAGE_SIZE != 0)
         num++;
 
-    mdl = (struct memory_descriptor *)platform_alloc(num * sizeof(struct memory_descriptor));
+    len = num * sizeof(struct memory_descriptor);
+    mdl = (struct memory_descriptor *)platform_alloc(len);
     if (mdl == 0)
     {
         ALERT("add_mdl_to_memory_manager: failed to allocate mdl\n");
@@ -160,7 +176,7 @@ add_mdl_to_memory_manager(char *exec, uint64_t size)
         mdl[i].type = 0;
     }
 
-    ret = resolve_symbol("add_mdl", (void **)&add_mdl);
+    ret = resolve_symbol("add_mdl", (void **)&add_mdl, 0);
     if (ret != BF_SUCCESS)
     {
         ALERT("add_mdl_to_memory_manager: failed to locate add_mdl. "
@@ -421,8 +437,7 @@ common_load_vmm(void)
 
     platform_memset(&g_loader, 0, sizeof(struct bfelf_loader_t));
 
-    i = 0;
-    while ((module = get_module(i++)) != 0)
+    for (i = 0; (module = get_module(i)) != 0; i++)
     {
         ret = bfelf_loader_add(&g_loader, &module->file, module->exec);
         if (ret != BFELF_SUCCESS)
@@ -441,9 +456,9 @@ common_load_vmm(void)
         goto failure;
     }
 
-    i = 0;
-    while ((module = get_module(i++)) != 0)
+    for (i = 0; (module = get_module(i)) != 0; i++)
     {
+        local_init_t local_init = 0;
         struct section_info_t info = {0};
 
         ret = bfelf_loader_get_info(&g_loader, &module->file, &info);
@@ -453,16 +468,24 @@ common_load_vmm(void)
             goto failure;
         }
 
-        info.local_init(&info);
+        ret = resolve_symbol("local_init", (void **)&local_init, module);
+        if (ret != BF_SUCCESS)
+        {
+            ALERT("load_vmm: failed to locate local_init. the symbol is missing "
+                  "which means the modules was not compiled with the wrapper\n");
+            goto failure;
+        }
+
+        local_init(&info);
     }
 
-    i = 0;
-    while ((module = get_module(i++)) != 0)
+    for (i = 0; (module = get_module(i)) != 0; i++)
     {
         ret = add_mdl_to_memory_manager(module->exec, module->size);
         if (ret != BF_SUCCESS)
         {
-            ALERT("load_vmm: failed to add memory descriptors: %" PRId64 "\n", ret);
+            ALERT("load_vmm: failed to add memory descriptors: %" PRId64 "\n",
+                  ret);
             goto failure;
         }
     }
@@ -498,9 +521,9 @@ common_unload_vmm(void)
 
     if (common_vmm_status() == VMM_LOADED)
     {
-        i = 0;
-        while ((module = get_module(i++)) != 0)
+        for (i = g_num_modules - 1; (module = get_module(i)) != 0; i--)
         {
+            local_fini_t local_fini = 0;
             struct section_info_t info = {0};
 
             ret = bfelf_loader_get_info(&g_loader, &module->file, &info);
@@ -510,7 +533,15 @@ common_unload_vmm(void)
                 goto corrupted;
             }
 
-            info.local_fini(&info);
+            ret = resolve_symbol("local_fini", (void **)&local_fini, module);
+            if (ret != BF_SUCCESS)
+            {
+                ALERT("unload_vmm: failed to locate local_fini. the symbol is missing "
+                      "which means the modules was not compiled with the wrapper\n");
+                goto corrupted;
+            }
+
+            local_fini(&info);
         }
     }
 
@@ -559,6 +590,8 @@ common_start_vmm(void)
         goto failure;
     }
 
+    platform_start();
+
     g_vmm_status = VMM_RUNNING;
     return BF_SUCCESS;
 
@@ -596,6 +629,8 @@ common_stop_vmm(void)
         goto corrupted;
     }
 
+    platform_stop();
+
     g_vmm_status = VMM_LOADED;
     return BF_SUCCESS;
 
@@ -620,7 +655,7 @@ common_dump_vmm(struct debug_ring_resources_t **drr)
         return BF_ERROR_VMM_INVALID_STATE;
     }
 
-    ret = resolve_symbol("get_drr", (void **)&get_drr);
+    ret = resolve_symbol("get_drr", (void **)&get_drr, 0);
     if (ret != BF_SUCCESS)
     {
         ALERT("dump_vmm: failed to locate get_drr. the symbol is missing "

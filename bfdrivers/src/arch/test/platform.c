@@ -110,3 +110,13 @@ platform_memcpy(void *dst, const void *src, int64_t num)
 
     memcpy(dst, src, num);
 }
+
+void
+platform_start(void)
+{
+}
+
+void
+platform_stop(void)
+{
+}

@@ -188,10 +188,6 @@ private_elf_string_equals(struct e_string_t *str1, struct e_string_t *str2)
     return BFELF_SUCCESS;
 }
 
-/* -------------------------------------------------------------------------- */
-/* ELF File                                                                   */
-/* -------------------------------------------------------------------------- */
-
 static bfelf64_sword
 private_get_string(struct bfelf_file_t *ef,
                    struct bfelf_shdr *strtab,
@@ -221,6 +217,259 @@ failure:
 
     return invalid_file("the dynamic string table is corrupt");
 }
+
+/* -------------------------------------------------------------------------- */
+/* ELF Dynamic Symbol Table                                                   */
+/* -------------------------------------------------------------------------- */
+
+static bfelf64_sword
+private_symbol_by_index(struct bfelf_file_t *ef,
+                        bfelf64_word index,
+                        struct bfelf_sym **sym)
+{
+    if (index >= ef->symnum)
+        return invalid_index("index out of bounds");
+
+    *sym = &(ef->symtab[index]);
+
+    return BFELF_SUCCESS;
+}
+
+static unsigned long
+private_hash(const char *name)
+{
+    unsigned long h = 0, g;
+
+    while (*name)
+    {
+        h = (h << 4) + *name++;
+        if ((g = (h & 0xf0000000)))
+            h ^= g >> 24;
+        h &= 0x0fffffff;
+    }
+
+    return h;
+}
+
+static bfelf64_sword
+private_check_symbol(struct bfelf_file_t *ef,
+                     bfelf64_word index,
+                     struct e_string_t *name,
+                     struct bfelf_sym **sym)
+{
+    bfelf64_sword ret = 0;
+    struct e_string_t str = {0};
+
+    ret = private_symbol_by_index(ef, index, sym);
+    if (ret != BFELF_SUCCESS)
+        goto failure;
+
+    ret = private_get_string(ef, ef->strtab, (*sym)->st_name, &str);
+    if (ret != BFELF_SUCCESS)
+        goto failure;
+
+    ret = private_elf_string_equals(name, &str);
+    if (ret != BFELF_SUCCESS)
+        goto failure;
+
+    return BFELF_SUCCESS;
+
+failure:
+
+    *sym = 0;
+    return BFELF_ERROR_MISMATCH;
+}
+
+static bfelf64_sword
+private_symbol_by_hash(struct bfelf_file_t *ef,
+                       struct e_string_t *name,
+                       struct bfelf_sym **sym)
+{
+    bfelf64_word i = 0;
+    bfelf64_sword ret = 0;
+    unsigned long x = private_hash(name->buf);
+
+    i = ef->bucket[x % ef->nbucket];
+    while (i > STN_UNDEF && i < ef->nchain)
+    {
+        ret = private_check_symbol(ef, i, name, sym);
+        if (ret == BFELF_ERROR_MISMATCH)
+        {
+            i = ef->chain[i];
+            continue;
+        }
+
+        if (ret != BFELF_SUCCESS)
+            return ret;
+
+        return BFELF_SUCCESS;
+    }
+
+    return BFELF_ERROR_NO_SUCH_SYMBOL;
+}
+
+static bfelf64_sword
+private_symbol_by_name(struct bfelf_file_t *ef,
+                       struct e_string_t *name,
+                       struct bfelf_sym **sym)
+{
+    bfelf64_word i = 0;
+    bfelf64_sword ret = 0;
+
+    if (ef->hashtab != 0)
+        return private_symbol_by_hash(ef, name, sym);
+
+    for (i = 0; i < ef->symnum; i++)
+    {
+        ret = private_check_symbol(ef, i, name, sym);
+        if (ret == BFELF_ERROR_MISMATCH)
+            continue;
+
+        if (ret != BFELF_SUCCESS)
+            return ret;
+
+        return BFELF_SUCCESS;
+    }
+
+    return BFELF_ERROR_NO_SUCH_SYMBOL;
+}
+
+static bfelf64_sword
+private_symbol_global(struct bfelf_loader_t *loader,
+                      struct e_string_t *name,
+                      struct bfelf_file_t **ef_found,
+                      struct bfelf_sym **sym)
+{
+    bfelf64_word i = 0;
+    bfelf64_sword ret = 0;
+    struct bfelf_sym *found_sym = 0;
+    struct bfelf_file_t *ef_ignore = *ef_found;
+
+    *sym = 0;
+    *ef_found = 0;
+
+    for (i = 0; i < loader->num; i++)
+    {
+        if (loader->efs[i] == ef_ignore)
+            continue;
+
+        ret = private_symbol_by_name(loader->efs[i], name, &found_sym);
+        if (ret == BFELF_ERROR_NO_SUCH_SYMBOL)
+            continue;
+
+        if (ret != BFELF_SUCCESS)
+            return ret;
+
+        if (found_sym->st_value == 0)
+            continue;
+
+        *sym = found_sym;
+        *ef_found = loader->efs[i];
+
+        if (BFELF_SYM_BIND(found_sym->st_info) == bfstb_weak)
+            continue;
+
+        return BFELF_SUCCESS;
+    }
+
+    if (*sym != 0)
+        return BFELF_SUCCESS;
+
+    return no_such_symbol(name->buf);
+}
+
+/* -------------------------------------------------------------------------- */
+/* ELF Relocations                                                            */
+/* -------------------------------------------------------------------------- */
+
+static bfelf64_sword
+private_relocate_symbol(struct bfelf_loader_t *loader,
+                        struct bfelf_file_t *ef,
+                        struct bfelf_rela *rela)
+{
+    bfelf64_sword ret = 0;
+    struct e_string_t name = {0};
+    struct bfelf_sym *found_sym = 0;
+    struct bfelf_file_t *found_ef = ef;
+    bfelf64_addr *ptr = (bfelf64_addr *)(ef->exec + rela->r_offset);
+
+    if (BFELF_REL_TYPE(rela->r_info) == BFR_X86_64_RELATIVE)
+    {
+        *ptr = (bfelf64_addr)(ef->exec + rela->r_addend);
+        return BFELF_SUCCESS;
+    }
+
+    ret = private_symbol_by_index(ef, BFELF_REL_SYM(rela->r_info), &found_sym);
+    if (ret != BFELF_SUCCESS)
+        return ret;
+
+    if (BFELF_SYM_BIND(found_sym->st_info) == bfstb_weak)
+        found_ef = 0;
+
+    if (found_sym->st_value == 0 || found_ef == 0)
+    {
+        ret = private_get_string(ef, ef->strtab, found_sym->st_name, &name);
+        if (ret != BFELF_SUCCESS)
+            return ret;
+
+        ret = private_symbol_global(loader, &name, &found_ef, &found_sym);
+        if (ret != BFELF_SUCCESS)
+            return ret;
+    }
+
+    *ptr = (bfelf64_addr)(found_ef->exec + found_sym->st_value);
+
+    switch (BFELF_REL_TYPE(rela->r_info))
+    {
+        case BFR_X86_64_64:
+            *ptr += (bfelf64_addr)(rela->r_addend);
+            break;
+
+        case BFR_X86_64_GLOB_DAT:
+        case BFR_X86_64_JUMP_SLOT:
+            break;
+
+        default:
+            return unsupported_rel(name.buf);
+    }
+
+    return BFELF_SUCCESS;
+}
+
+static bfelf64_sword
+private_relocate_symbols(struct bfelf_loader_t *loader,
+                         struct bfelf_file_t *ef)
+{
+    bfelf64_word r = 0;
+    bfelf64_word t = 0;
+    bfelf64_sword ret = 0;
+
+    for (t = 0; t < ef->num_rela; t++)
+    {
+        for (r = 0; r < ef->relatab[t].num; r++)
+        {
+            ret = private_relocate_symbol(loader, ef, &(ef->relatab[t].tab[r]));
+            if (ret != BFELF_SUCCESS)
+                return ret;
+        }
+    }
+
+    return BFELF_SUCCESS;
+}
+
+bfelf64_sword
+private_resolve_symbol(struct bfelf_file_t *ef,
+                       struct bfelf_sym *sym,
+                       void **addr)
+{
+    *addr = ef->exec + sym->st_value;
+
+    return BFELF_SUCCESS;
+}
+
+/* -------------------------------------------------------------------------- */
+/* ELF File                                                                   */
+/* -------------------------------------------------------------------------- */
 
 static bfelf64_sword
 private_check_signature(struct bfelf_file_t *ef)
@@ -706,241 +955,33 @@ bfelf_file_get_segment(struct bfelf_file_t *ef,
     return BFELF_SUCCESS;
 }
 
-/* -------------------------------------------------------------------------- */
-/* ELF Dynamic Symbol Table                                                   */
-/* -------------------------------------------------------------------------- */
-
-static bfelf64_sword
-private_symbol_by_index(struct bfelf_file_t *ef,
-                        bfelf64_word index,
-                        struct bfelf_sym **sym)
+bfelf64_sword
+bfelf_file_resolve_symbol(struct bfelf_file_t *ef,
+                          struct e_string_t *name,
+                          void **addr)
 {
-    if (index >= ef->symnum)
-        return invalid_index("index out of bounds");
-
-    *sym = &(ef->symtab[index]);
-
-    return BFELF_SUCCESS;
-}
-
-static unsigned long
-private_hash(const char *name)
-{
-    unsigned long h = 0, g;
-
-    while (*name)
-    {
-        h = (h << 4) + *name++;
-        if ((g = (h & 0xf0000000)))
-            h ^= g >> 24;
-        h &= 0x0fffffff;
-    }
-
-    return h;
-}
-
-static bfelf64_sword
-private_check_symbol(struct bfelf_file_t *ef,
-                     bfelf64_word index,
-                     struct e_string_t *name,
-                     struct bfelf_sym **sym)
-{
-    bfelf64_sword ret = 0;
-    struct e_string_t str = {0};
-
-    ret = private_symbol_by_index(ef, index, sym);
-    if (ret != BFELF_SUCCESS)
-        goto failure;
-
-    ret = private_get_string(ef, ef->strtab, (*sym)->st_name, &str);
-    if (ret != BFELF_SUCCESS)
-        goto failure;
-
-    ret = private_elf_string_equals(name, &str);
-    if (ret != BFELF_SUCCESS)
-        goto failure;
-
-    return BFELF_SUCCESS;
-
-failure:
-
-    *sym = 0;
-    return BFELF_ERROR_MISMATCH;
-}
-
-static bfelf64_sword
-private_symbol_by_hash(struct bfelf_file_t *ef,
-                       struct e_string_t *name,
-                       struct bfelf_sym **sym)
-{
-    bfelf64_word i = 0;
-    bfelf64_sword ret = 0;
-    unsigned long x = private_hash(name->buf);
-
-    i = ef->bucket[x % ef->nbucket];
-    while (i > STN_UNDEF && i < ef->nchain)
-    {
-        ret = private_check_symbol(ef, i, name, sym);
-        if (ret == BFELF_ERROR_MISMATCH)
-        {
-            i = ef->chain[i];
-            continue;
-        }
-
-        if (ret != BFELF_SUCCESS)
-            return ret;
-
-        return BFELF_SUCCESS;
-    }
-
-    return BFELF_ERROR_NO_SUCH_SYMBOL;
-}
-
-static bfelf64_sword
-private_symbol_by_name(struct bfelf_file_t *ef,
-                       struct e_string_t *name,
-                       struct bfelf_sym **sym)
-{
-    bfelf64_word i = 0;
-    bfelf64_sword ret = 0;
-
-    if (ef->hashtab != 0)
-        return private_symbol_by_hash(ef, name, sym);
-
-    for (i = 0; i < ef->symnum; i++)
-    {
-        ret = private_check_symbol(ef, i, name, sym);
-        if (ret == BFELF_ERROR_MISMATCH)
-            continue;
-
-        if (ret != BFELF_SUCCESS)
-            return ret;
-
-        return BFELF_SUCCESS;
-    }
-
-    return BFELF_ERROR_NO_SUCH_SYMBOL;
-}
-
-static bfelf64_sword
-private_symbol_global(struct bfelf_loader_t *loader,
-                      struct e_string_t *name,
-                      struct bfelf_file_t **ef_found,
-                      struct bfelf_sym **sym)
-{
-    bfelf64_word i = 0;
     bfelf64_sword ret = 0;
     struct bfelf_sym *found_sym = 0;
-    struct bfelf_file_t *ef_ignore = *ef_found;
 
-    *sym = 0;
-    *ef_found = 0;
+    if (!ef)
+        return invalid_argument("ef == NULL");
 
-    for (i = 0; i < loader->num; i++)
-    {
-        if (loader->efs[i] == ef_ignore)
-            continue;
+    if (!name)
+        return invalid_argument("name == NULL");
 
-        ret = private_symbol_by_name(loader->efs[i], name, &found_sym);
-        if (ret == BFELF_ERROR_NO_SUCH_SYMBOL)
-            continue;
+    if (!addr)
+        return invalid_argument("addr == NULL");
 
-        if (ret != BFELF_SUCCESS)
-            return ret;
+    if (ef->relocated == 0)
+        return out_of_order("you need to call bfelf_loader_relocate first");
 
-        if (found_sym->st_value == 0)
-            continue;
-
-        *sym = found_sym;
-        *ef_found = loader->efs[i];
-
-        if (BFELF_SYM_BIND(found_sym->st_info) == bfstb_weak)
-            continue;
-
-        return BFELF_SUCCESS;
-    }
-
-    if (*sym != 0)
-        return BFELF_SUCCESS;
-
-    return no_such_symbol(name->buf);
-}
-
-/* -------------------------------------------------------------------------- */
-/* ELF Relocations                                                            */
-/* -------------------------------------------------------------------------- */
-
-static bfelf64_sword
-private_relocate_symbol(struct bfelf_loader_t *loader,
-                        struct bfelf_file_t *ef,
-                        struct bfelf_rela *rela)
-{
-    bfelf64_sword ret = 0;
-    struct e_string_t name = {0};
-    struct bfelf_sym *found_sym = 0;
-    struct bfelf_file_t *found_ef = ef;
-    bfelf64_addr *ptr = (bfelf64_addr *)(ef->exec + rela->r_offset);
-
-    if (BFELF_REL_TYPE(rela->r_info) == BFR_X86_64_RELATIVE)
-    {
-        *ptr = (bfelf64_addr)(ef->exec + rela->r_addend);
-        return BFELF_SUCCESS;
-    }
-
-    ret = private_symbol_by_index(ef, BFELF_REL_SYM(rela->r_info), &found_sym);
+    ret = private_symbol_by_name(ef, name, &found_sym);
     if (ret != BFELF_SUCCESS)
         return ret;
 
-    if (BFELF_SYM_BIND(found_sym->st_info) == bfstb_weak)
-        found_ef = 0;
-
-    if (found_sym->st_value == 0 || found_ef == 0)
-    {
-        ret = private_get_string(ef, ef->strtab, found_sym->st_name, &name);
-        if (ret != BFELF_SUCCESS)
-            return ret;
-
-        ret = private_symbol_global(loader, &name, &found_ef, &found_sym);
-        if (ret != BFELF_SUCCESS)
-            return ret;
-    }
-
-    *ptr = (bfelf64_addr)(found_ef->exec + found_sym->st_value);
-
-    switch (BFELF_REL_TYPE(rela->r_info))
-    {
-        case BFR_X86_64_64:
-            *ptr += (bfelf64_addr)(rela->r_addend);
-            break;
-
-        case BFR_X86_64_GLOB_DAT:
-        case BFR_X86_64_JUMP_SLOT:
-            break;
-
-        default:
-            return unsupported_rel(name.buf);
-    }
-
-    return BFELF_SUCCESS;
-}
-
-static bfelf64_sword
-private_relocate_symbols(struct bfelf_loader_t *loader,
-                         struct bfelf_file_t *ef)
-{
-    bfelf64_word r = 0;
-    bfelf64_word t = 0;
-    bfelf64_sword ret = 0;
-
-    for (t = 0; t < ef->num_rela; t++)
-    {
-        for (r = 0; r < ef->relatab[t].num; r++)
-        {
-            ret = private_relocate_symbol(loader, ef, &(ef->relatab[t].tab[r]));
-            if (ret != BFELF_SUCCESS)
-                return ret;
-        }
-    }
+    ret = private_resolve_symbol(ef, found_sym, addr);
+    if (ret != BFELF_SUCCESS)
+        return ret;
 
     return BFELF_SUCCESS;
 }
@@ -986,19 +1027,11 @@ bfelf_loader_relocate(struct bfelf_loader_t *loader)
         ret = private_relocate_symbols(loader, loader->efs[i]);
         if (ret != BFELF_SUCCESS)
             return ret;
+
+        loader->efs[i]->relocated = 1;
     }
 
     loader->relocated = 1;
-
-    return BFELF_SUCCESS;
-}
-
-bfelf64_sword
-private_resolve_symbol(struct bfelf_file_t *ef,
-                       struct bfelf_sym *sym,
-                       void **addr)
-{
-    *addr = ef->exec + sym->st_value;
 
     return BFELF_SUCCESS;
 }
@@ -1043,12 +1076,9 @@ bfelf_loader_get_info(struct bfelf_loader_t *loader,
 {
     bfelf64_sword ret = 0;
     struct bfelf_shdr *shdr = 0;
-    struct bfelf_sym *found_sym = 0;
     struct e_string_t name_ctors = {".ctors", 6};
-    struct e_string_t name_dtors = {".ctors", 6};
+    struct e_string_t name_dtors = {".dtors", 6};
     struct e_string_t name_eh_frame = {".eh_frame", 9};
-    struct e_string_t name_local_init = {"local_init", 10};
-    struct e_string_t name_local_fini = {"local_fini", 10};
 
     if (!loader)
         return invalid_argument("loader == NULL");
@@ -1104,25 +1134,6 @@ bfelf_loader_get_info(struct bfelf_loader_t *loader,
         info->eh_frame_size = shdr->sh_size;
     }
 
-    if (loader->ignore_crt == 0)
-    {
-        ret = private_symbol_by_name(ef, &name_local_init, &found_sym);
-        if (ret != BFELF_SUCCESS)
-            goto failure;
-
-        ret = private_resolve_symbol(ef, found_sym, (void **)&info->local_init);
-        if (ret != BFELF_SUCCESS)
-            return ret;
-
-        ret = private_symbol_by_name(ef, &name_local_fini, &found_sym);
-        if (ret != BFELF_SUCCESS)
-            goto failure;
-
-        ret = private_resolve_symbol(ef, found_sym, (void **)&info->local_fini);
-        if (ret != BFELF_SUCCESS)
-            return ret;
-    }
-
     return BFELF_SUCCESS;
 
 failure:
@@ -1135,9 +1146,6 @@ failure:
 
     info->eh_frame_addr = 0;
     info->eh_frame_size = 0;
-
-    info->local_init = 0;
-    info->local_fini = 0;
 
     return ret;
 }
