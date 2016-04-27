@@ -144,9 +144,10 @@ functionality, we have provided a couple of examples:
 
 ## Roadmap (updated 4-27-2016)
 
-### Version 1.0 [link](https://github.com/Bareflank/hypervisor/releases/tag/v1.0.0)
+### Version 1.0
 
-Released: April 27, 2016
+Released: April 27, 2016 <br>
+[[link](https://github.com/Bareflank/hypervisor/releases/tag/v1.0.0)]
 
 * ~~ELF Loader~~
 * ~~Userspace Managment Application (bfm)~~
