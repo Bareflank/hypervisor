@@ -19,13 +19,9 @@ Misc:
 - Modify the common.c code in the driver entry to handle memory protections
   properly. Specifically, we want to make sure that we are respecting the
   read/execute and read/write memory protections that are labeled by the
-  ELF program loader. This isn't useful until we break apart libc++.so such
-  that it's not marked r/w/x (likely to be solved with the new libc)
+  ELF program loader.
 - Add system beep code for additional debugging
 - Add support for the PCI debugger
-
-Version 1.0 TODO:
-- Need to have all of the VMCS checks unit tested
 
 Version 1.1 TODO:
 - Need to have a completely isolated exit handler. It should have it's own
@@ -47,7 +43,7 @@ Version 1.2 TODO:
 - Multiple guest support running http://www.includeos.org/ or some other
   unikernel. Note that the actual guest support will likely be in a different
   repo, but Bareflank itself will need some changes to support this (for
-  example, some organizational changes to the vcpu to run a guest). 
+  example, some organizational changes to the vcpu to run a guest).
 - Hyperkernel support
 
 Known Issues:

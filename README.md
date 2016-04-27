@@ -40,39 +40,39 @@ that the provided code works as expected.
 
 ## Motivation
 
-Most people think that hypervisors are meant to virtualize servers and 
-provide a means to run Windows on a Mac, but there is a whole field 
-of research were hypervisors are used without guest virtual 
-machines. Since a hypervisor is capable of controlling the host OS 
-running underneath it, (so called "ring -1"), hypervisors have been 
-used for introspection, reverse engineering, anti-virus, containerization, 
-diversity, and even architectural research like the 
-[MoRE](https://github.com/ainfosec/MoRE) hypervisor. All of these use 
-cases start the same way, by spending months standing up the hypervisor 
-itself before you can start working on your actual project. Existing open 
-source hypervisors are so focused on supporting virtual machines and 
-burdened with legacy support that they are painful to work with when 
-conducting less traditional hypervisor research. 
+Most people think that hypervisors are meant to virtualize servers and
+provide a means to run Windows on a Mac, but there is a whole field
+of research were hypervisors are used without guest virtual
+machines. Since a hypervisor is capable of controlling the host OS
+running underneath it, (so called "ring -1"), hypervisors have been
+used for introspection, reverse engineering, anti-virus, containerization,
+diversity, and even architectural research like the
+[MoRE](https://github.com/ainfosec/MoRE) hypervisor. All of these use
+cases start the same way, by spending months standing up the hypervisor
+itself before you can start working on your actual project. Existing open
+source hypervisors are so focused on supporting virtual machines and
+burdened with legacy support that they are painful to work with when
+conducting less traditional hypervisor research.
 
-Bareflank's goal is to provide the scaffolding needed to create any type of 
-hypervisor. To support this, Bareflank leverages C++ not only to provide 
-a clear method for extending the hypervisor via inheritance, but also to 
-provide access to the C++ STL to reduce the time it takes to prototype and 
-implement new technologies. For example, suppose your writing an 
+Bareflank's goal is to provide the scaffolding needed to create any type of
+hypervisor. To support this, Bareflank leverages C++ not only to provide
+a clear method for extending the hypervisor via inheritance, but also to
+provide access to the C++ STL to reduce the time it takes to prototype and
+implement new technologies. For example, suppose your writing an
 introspection hypervisor that needs to store the different system calls that
-are being made in a hash table for fast lookups. Doing this in an existing C 
-based hypervisor might require you to create your own hash table implementation. 
-This same implementation is trivial with the STL's existing data structures. 
-With Bareflank's design, you can focus on the goal of your project, and less 
-on implementing the foundation needed to support your project. 
+are being made in a hash table for fast lookups. Doing this in an existing C
+based hypervisor might require you to create your own hash table implementation.
+This same implementation is trivial with the STL's existing data structures.
+With Bareflank's design, you can focus on the goal of your project, and less
+on implementing the foundation needed to support your project.
 
-Bareflank will always maintain the "bare minimum" needed to stand up a 
+Bareflank will always maintain the "bare minimum" needed to stand up a
 hypervisor. Future repositories/projects will be created that extend
-the hypervisor to add additional API support for common research tasks (e.g. 
-VT-x APIs, LibVMI APIs, and even guest support APIs). Long term, it is our 
-hope that others will leverage Bareflank to create hypervisors 
-capable of competing with existing type 1 and type 2 open source hypervisors, 
-but Bareflank itself will remain focused on the bare minimum scaffolding. 
+the hypervisor to add additional API support for common research tasks (e.g.
+VT-x APIs, LibVMI APIs, and even guest support APIs). Long term, it is our
+hope that others will leverage Bareflank to create hypervisors
+capable of competing with existing type 1 and type 2 open source hypervisors,
+but Bareflank itself will remain focused on the bare minimum scaffolding.
 
 ## Website
 
@@ -142,18 +142,18 @@ functionality, we have provided a couple of examples:
 [Enable VPID](https://github.com/Bareflank/hypervisor_example_vpid) <br>
 [CPUID Count](https://github.com/Bareflank/hypervisor_example_cpuidcount)
 
-## Roadmap (updated 4-21-2016)
+## Roadmap (updated 4-27-2016)
 
 ### Version 1.0
 
-Target: April 2016
+Released: April 27, 2016
 
 * ~~ELF Loader~~
 * ~~Userspace Managment Application (bfm)~~
 * ~~Unwinder~~
 * ~~Initial C++ Environment~~
 * ~~Linux Driver Entry~~
-* Basic VMM
+* ~~Basic VMM~~
 * ~~Testing (Ubuntu, Debian, Fedora, CentOS)~~
 
 ### Version 1.1
