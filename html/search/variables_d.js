@@ -30,7 +30,7 @@ var searchData=
   ['relatab6',['relatab6',['../structtest__shdrtab.html#a4f473050b283c2424a982ea1486ab6d8',1,'test_shdrtab']]],
   ['relatab7',['relatab7',['../structtest__shdrtab.html#afcf83d07fd515cfb06f866926fa9ac10',1,'test_shdrtab']]],
   ['relatab8',['relatab8',['../structtest__shdrtab.html#aeb9142f274ad1d0763a860c6702c9c2b',1,'test_shdrtab']]],
-  ['relocated',['relocated',['../structbfelf__loader__t.html#a243178336e8cb489327cbc60e2a6081e',1,'bfelf_loader_t']]],
+  ['relocated',['relocated',['../structbfelf__file__t.html#ac7b29abd918f34e0e4432bff101da1dd',1,'bfelf_file_t::relocated()'],['../structbfelf__loader__t.html#a243178336e8cb489327cbc60e2a6081e',1,'bfelf_loader_t::relocated()']]],
   ['rip',['rip',['../structregisters__intel__x64__t.html#a768c25a7045b2d685e757503f622298d',1,'registers_intel_x64_t']]],
   ['rsi',['rsi',['../structregisters__intel__x64__t.html#a2014ff5d42a4c210b70fc70471b84010',1,'registers_intel_x64_t']]],
   ['rsp',['rsp',['../structregisters__intel__x64__t.html#a3ede0b221fde7414295b9fd611003ab4',1,'registers_intel_x64_t']]],

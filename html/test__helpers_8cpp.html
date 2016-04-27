@@ -98,8 +98,8 @@ Functions</h2></td></tr>
 <tr class="separator:a3571fec697e0e795dd796be0334c9d3d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af375c36227615b087ba9025af6a31fa1"><td class="memItemLeft" align="right" valign="top">int64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="test__helpers_8cpp.html#af375c36227615b087ba9025af6a31fa1">symbol_length</a> (const char *sym)</td></tr>
 <tr class="separator:af375c36227615b087ba9025af6a31fa1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8288e764c4e316b000abbf7b3d9a3735"><td class="memItemLeft" align="right" valign="top">int64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="test__helpers_8cpp.html#a8288e764c4e316b000abbf7b3d9a3735">resolve_symbol</a> (const char *name, void **sym)</td></tr>
-<tr class="separator:a8288e764c4e316b000abbf7b3d9a3735"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a42cbd4c4208de7f0f5dd9781cf5364b4"><td class="memItemLeft" align="right" valign="top">int64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="test__helpers_8cpp.html#a42cbd4c4208de7f0f5dd9781cf5364b4">resolve_symbol</a> (const char *name, void **sym, struct <a class="el" href="structmodule__t.html">module_t</a> *module)</td></tr>
+<tr class="separator:a42cbd4c4208de7f0f5dd9781cf5364b4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a94e89cdeb558fb47d50ec6000a8b87b9"><td class="memItemLeft" align="right" valign="top">int64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="test__helpers_8cpp.html#a94e89cdeb558fb47d50ec6000a8b87b9">execute_symbol</a> (const char *sym, int64_t arg)</td></tr>
 <tr class="separator:a94e89cdeb558fb47d50ec6000a8b87b9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a47681194c8c2cc4a701bf0728e983845"><td class="memItemLeft" align="right" valign="top">int64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="test__helpers_8cpp.html#a47681194c8c2cc4a701bf0728e983845">add_mdl_to_memory_manager</a> (char *exec, uint64_t size)</td></tr>
@@ -186,7 +186,7 @@ Variables</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a8288e764c4e316b000abbf7b3d9a3735"></a>
+<a class="anchor" id="a42cbd4c4208de7f0f5dd9781cf5364b4"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -200,7 +200,13 @@ Variables</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">void **&#160;</td>
-          <td class="paramname"><em>sym</em>&#160;</td>
+          <td class="paramname"><em>sym</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">struct <a class="el" href="structmodule__t.html">module_t</a> *&#160;</td>
+          <td class="paramname"><em>module</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -238,7 +244,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="common_8c_source.html#l00097">97</a> of file <a class="el" href="common_8c_source.html">common.c</a>.</p>
+<p>Definition at line <a class="el" href="common_8c_source.html#l00110">110</a> of file <a class="el" href="common_8c_source.html">common.c</a>.</p>
 
 </div>
 </div>
@@ -266,7 +272,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="common_8c_source.html#l00132">132</a> of file <a class="el" href="common_8c_source.html">common.c</a>.</p>
+<p>Definition at line <a class="el" href="common_8c_source.html#l00146">146</a> of file <a class="el" href="common_8c_source.html">common.c</a>.</p>
 
 </div>
 </div>
@@ -358,7 +364,7 @@ Variables</h2></td></tr>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Wed Apr 20 2016 18:22:03 by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Wed Apr 27 2016 15:56:28 by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.12
 </small></address>

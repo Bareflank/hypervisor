@@ -48,6 +48,7 @@ var searchData=
   ['test_5ffile_5fget_5fsegment_2ecpp',['test_file_get_segment.cpp',['../test__file__get__segment_8cpp.html',1,'']]],
   ['test_5ffile_5finit_2ecpp',['test_file_init.cpp',['../test__file__init_8cpp.html',1,'']]],
   ['test_5ffile_5fnum_5fsegments_2ecpp',['test_file_num_segments.cpp',['../test__file__num__segments_8cpp.html',1,'']]],
+  ['test_5ffile_5fresolve_5fsymbol_2ecpp',['test_file_resolve_symbol.cpp',['../test__file__resolve__symbol_8cpp.html',1,'']]],
   ['test_5fhashtab',['test_hashtab',['../structtest__hashtab.html',1,'']]],
   ['test_5fhelpers_2ecpp',['test_helpers.cpp',['../test__helpers_8cpp.html',1,'']]],
   ['test_5fioctl_2ecpp',['test_ioctl.cpp',['../test__ioctl_8cpp.html',1,'']]],

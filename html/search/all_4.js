@@ -27,6 +27,7 @@ var searchData=
   ['derived',['derived',['../classderived.html',1,'derived'],['../classderived.html#a6e2ca5e4a55441160d28d1a9b3de16c9',1,'derived::derived()']]],
   ['dev_5fexit',['dev_exit',['../entry_8c.html#a604322111497a40a5ffdc5476ffe05b1',1,'entry.c']]],
   ['dev_5finit',['dev_init',['../entry_8c.html#a55037dd347890ce4dfc8b7d3eeb52c0c',1,'entry.c']]],
+  ['dev_5freboot',['dev_reboot',['../entry_8c.html#ab254dac94e6b189f1ecbc21faa241916',1,'entry.c']]],
   ['disable_5fvmx_5foperation',['disable_vmx_operation',['../classvmxon__intel__x64.html#a931d92325d919f1808a3e14d9aedf61a',1,'vmxon_intel_x64']]],
   ['dispatch',['dispatch',['../classexit__handler__intel__x64.html#a5a9ce22a4f8a02eb3186c67a9dd083d7',1,'exit_handler_intel_x64::dispatch()'],['../classvcpu.html#acc55e157583d359730ff493a67428d8b',1,'vcpu::dispatch()'],['../classvcpu__intel__x64.html#a67714777c18a98feb0c76272e86724dc',1,'vcpu_intel_x64::dispatch()'],['../classvcpu__manager.html#a188d411e0dfae00a6ee6f3557282fe67',1,'vcpu_manager::dispatch()']]],
   ['dlab',['DLAB',['../serial__port__intel__x64_8h.html#aeacff95e17799eeacbff843e63ead9d3',1,'serial_port_intel_x64.h']]],

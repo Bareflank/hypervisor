@@ -34,7 +34,7 @@ var searchData=
   ['release_5fvmcs_5fregion',['release_vmcs_region',['../classvmcs__intel__x64.html#a648a3b75d9d5a4711643eb169653b846',1,'vmcs_intel_x64']]],
   ['release_5fvmxon_5fregion',['release_vmxon_region',['../classvmxon__intel__x64.html#aa4c12b6951bab7c0c2375176ee83e919',1,'vmxon_intel_x64']]],
   ['reset',['reset',['../classcommand__line__parser.html#a33b84e0b8547d0bec9078e2e5e01739d',1,'command_line_parser']]],
-  ['resolve_5fsymbol',['resolve_symbol',['../common_8c.html#a8288e764c4e316b000abbf7b3d9a3735',1,'resolve_symbol(const char *name, void **sym):&#160;common.c'],['../test__helpers_8cpp.html#a8288e764c4e316b000abbf7b3d9a3735',1,'resolve_symbol(const char *name, void **sym):&#160;common.c']]],
+  ['resolve_5fsymbol',['resolve_symbol',['../common_8c.html#a42cbd4c4208de7f0f5dd9781cf5364b4',1,'resolve_symbol(const char *name, void **sym, struct module_t *module):&#160;common.c'],['../test__helpers_8cpp.html#a42cbd4c4208de7f0f5dd9781cf5364b4',1,'resolve_symbol(const char *name, void **sym, struct module_t *module):&#160;common.c']]],
   ['resume',['resume',['../classregister__state.html#a524bb327282664360e05739cd2530657',1,'register_state::resume()'],['../classregister__state__intel__x64.html#aa7806e90928f4f0c083db97dc3267fdd',1,'register_state_intel_x64::resume()']]],
   ['return_5faddress_5freg',['return_address_reg',['../classci__entry.html#add4a3a9e306682a29f8d8355d5847f4a',1,'ci_entry']]],
   ['rflags',['rflags',['../classvmcs__intel__x64__state.html#a9e57578f8313d843fa4e65d2b5861f09',1,'vmcs_intel_x64_state']]],

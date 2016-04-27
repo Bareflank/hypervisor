@@ -9,7 +9,7 @@ var searchData=
   ['memory_5fmanager_5fut',['memory_manager_ut',['../classmemory__manager__ut.html#a74d224dc8679470d0fa12168140e1787',1,'memory_manager_ut']]],
   ['mock_5fshared',['mock_shared',['../namespacebfn.html#a1add7b2fffc70c1b8984c26453106d86',1,'bfn']]],
   ['module_5fexit',['module_exit',['../entry_8c.html#a955a26ebf7818f0cf618aef281cc58f8',1,'entry.c']]],
-  ['module_5finfo',['MODULE_INFO',['../bareflank_8mod_8c.html#a59ae061e50f755cbc9dbde3c6688273a',1,'MODULE_INFO(vermagic, VERMAGIC_STRING):&#160;bareflank.mod.c'],['../bareflank_8mod_8c.html#a303f09a35e77aa43778fb092b4306876',1,'MODULE_INFO(srcversion, &quot;AA01D5DFF69720EB048D06E&quot;):&#160;bareflank.mod.c']]],
+  ['module_5finfo',['MODULE_INFO',['../bareflank_8mod_8c.html#a59ae061e50f755cbc9dbde3c6688273a',1,'MODULE_INFO(vermagic, VERMAGIC_STRING):&#160;bareflank.mod.c'],['../bareflank_8mod_8c.html#a3fbb31190328c79d93ae9157ae96965d',1,'MODULE_INFO(srcversion, &quot;CF9E734A3B5CFD71E8696AE&quot;):&#160;bareflank.mod.c']]],
   ['module_5finit',['module_init',['../entry_8c.html#a75d7f96356418953ac298e95d6066d8a',1,'entry.c']]],
   ['module_5flicense',['MODULE_LICENSE',['../entry_8c.html#ad94b36675e7eb067ea3ce6ff9e244a44',1,'entry.c']]],
   ['modules',['modules',['../classcommand__line__parser.html#afd5c72b9ab0b0b83a212bef1e3d0075a',1,'command_line_parser']]]
