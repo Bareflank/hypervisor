@@ -7,6 +7,8 @@
 #include <linux/kallsyms.h>
 #include <linux/cpumask.h>
 #include <linux/sched.h>
+#include <linux/notifier.h>
+#include <linux/reboot.h>
 
 #include <debug.h>
 #include <common.h>
@@ -35,6 +37,9 @@ struct mm_struct *g_mmu_context = NULL;
 static int
 dev_open(struct inode *inode, struct file *file)
 {
+    (void) inode;
+    (void) file;
+
     DEBUG("dev_open succeeded\n");
     return 0;
 }
@@ -42,6 +47,9 @@ dev_open(struct inode *inode, struct file *file)
 static int
 dev_release(struct inode *inode, struct file *file)
 {
+    (void) inode;
+    (void) file;
+
     DEBUG("dev_release succeeded\n");
     return 0;
 }
@@ -274,13 +282,21 @@ ioctl_vmm_status(int64_t *status)
     return BF_IOCTL_SUCCESS;
 }
 
+static void
+helper_fini(void)
+{
+    set_cpu_affinity(current->pid, cpumask_of(0));
+    common_fini();
+}
+
 static long
 dev_unlocked_ioctl(struct file *file,
                    unsigned int cmd,
                    unsigned long arg)
 {
-    const struct cpumask *cpu0 = cpumask_of(0);
-    set_cpu_affinity(current->pid, cpu0);
+    (void) file;
+
+    set_cpu_affinity(current->pid, cpumask_of(0));
 
     switch (cmd)
     {
@@ -328,13 +344,33 @@ static struct miscdevice bareflank_dev =
 };
 
 /* ========================================================================== */
-/* Entry                                                                      */
+/* Entry / Exit                                                               */
 /* ========================================================================== */
+
+int
+dev_reboot(struct notifier_block *nb,
+           unsigned long code, void *unused)
+{
+    (void) nb;
+    (void) code;
+    (void) unused;
+
+    helper_fini();
+
+    return NOTIFY_DONE;
+}
+
+static struct notifier_block bareflank_notifier_block =
+{
+    .notifier_call = dev_reboot
+};
 
 int
 dev_init(void)
 {
     int ret;
+
+    register_reboot_notifier(&bareflank_notifier_block);
 
     set_cpu_affinity = (set_affinity_fn)kallsyms_lookup_name("sched_setaffinity");
     if (set_cpu_affinity == NULL)
@@ -362,8 +398,10 @@ dev_init(void)
 void
 dev_exit(void)
 {
-    common_fini();
+    helper_fini();
+
     misc_deregister(&bareflank_dev);
+    unregister_reboot_notifier(&bareflank_notifier_block);
 
     DEBUG("dev_exit succeeded\n");
     return;

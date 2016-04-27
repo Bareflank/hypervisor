@@ -59,6 +59,7 @@ case $(lsb_release -sr) in
     sudo dnf install -y libstdc++-static
     sudo dnf install -y kernel-devel
     sudo dnf install -y kernel-headers
+    sudo dnf update -y kernel
 
     ;;
 
@@ -73,3 +74,9 @@ esac
 # ------------------------------------------------------------------------------
 
 ./tools/scripts/create-cross-compiler.sh
+
+# ------------------------------------------------------------------------------
+# Reboot
+# ------------------------------------------------------------------------------
+
+echo "WARNING: A reboot is required before you can build the hypervisor!!!!!"

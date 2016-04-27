@@ -5,6 +5,7 @@
 ///     -# @ref unit_tests
 ///     -# @ref extending_bareflank
 ///     -# @ref vmm_reference
+///     -# @ref serial
 ///
 /// @section description Description
 ///
@@ -287,4 +288,43 @@
 /// @ref bfendl <br>
 /// @ref debug_ring <br>
 /// @ref serial_port_intel_x64 <br>
+///
+/// @section serial Serial Setup
+///
+/// With VMWare, Bareflank will use serial0 to output bfxxx / std::cout /
+/// std::cerr by default. On some VMWare systems, the printer uses serial0,
+/// so you might have to remove (disabling is not enough) the printer prior
+/// to adding the serial device. Worst case, you can modify the .vmx file
+/// manually to setup serial0.
+///
+/// On physical hardware however, you might have to define the serial port
+/// during compilation to something other than the default (or if you
+/// want to use a different VMWare serial port). To tell Bareflank to use
+/// a different port, you need to define the default port prior to
+/// compiling Bareflank.
+///
+/// export CROSS_CXXFLAGS="-DDEFAULT_COM_PORT=0x<port #>"
+///
+/// By default this is set to "COM1_PORT" or "0x3f8". You can set this to
+/// any of the following:
+/// - COM1_PORT
+/// - COM2_PORT
+/// - COM3_PORT
+/// - COM4_PORT
+/// - 0x<port #>
+///
+/// On some Intel systems with PCI serial devices the port numbers are:
+/// - 0xe000
+/// - 0xe010
+///
+/// You can use the above method to define all of the parameters for serial
+/// as well. The default values are listed below, and you can change them
+/// to anything you wish:
+/// - DEFAULT_COM_PORT=COM1_PORT
+/// - DEFAULT_BAUD_RATE=baud_rate_115200
+/// - DEFAULT_DATA_BITS=char_length_8
+/// - DEFAULT_STOP_BITS=stop_bits_1
+/// - DEFAULT_PARITY_BITS=parity_none
+///
+/// For more information, please see serial_port_intel_x64.h
 ///
