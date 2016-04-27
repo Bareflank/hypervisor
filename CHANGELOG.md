@@ -3,6 +3,7 @@
 ## [1.0.0] - 2016-27-04
 ### Added
 - Linux support
+- Single core support (core 0)
 - Custom C runtime library for constructor / destructor support and registering
   exception handlers
 - Custom driver entry logic for loading the VMM
