@@ -47,6 +47,7 @@ Version 1.2 TODO:
   repo, but Bareflank itself will need some changes to support this (for
   example, some organizational changes to the vcpu to run a guest).
 - Hyperkernel support
+- Provide a means to extend BFM and the drivers
 
 Known Issues:
 - Kernels that have CONFIG_DEBUG_STACKOVERFLOW enabled will kernel oops when
