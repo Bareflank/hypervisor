@@ -37,6 +37,8 @@ Version 1.1 TODO:
   functionality to newlib. Once this is done, the next step should be to break
   apart libc++.so into libc.so, libcxxabi.so (statically linked with the
   unwinder), and libc++.so.
+- ELF loader has some C++ comments in it. Make sure in general that C/C++ 
+  comments are done properly. 
 
 Version 1.2 TODO:
 - UEFI Support (i.e. type 1)
