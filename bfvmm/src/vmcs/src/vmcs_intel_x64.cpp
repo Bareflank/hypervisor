@@ -23,6 +23,7 @@
 #include <constants.h>
 #include <commit_or_rollback.h>
 #include <intrinsics/gdt_x64.h>
+#include <intrinsics/idt_x64.h>
 #include <vmcs/vmcs_intel_x64.h>
 #include <vmcs/vmcs_intel_x64_promote.h>
 #include <vmcs/vmcs_intel_x64_exceptions.h>
@@ -122,7 +123,7 @@ vmcs_intel_x64::promote()
     gdt_reg.base = vmread(VMCS_GUEST_GDTR_BASE);
     gdt_reg.limit = vmread(VMCS_GUEST_GDTR_LIMIT);
 
-    auto idt_reg = idt_t();
+    auto idt_reg = idt_reg_x64_t();
     idt_reg.base = vmread(VMCS_GUEST_IDTR_BASE);
     idt_reg.limit = vmread(VMCS_GUEST_IDTR_LIMIT);
 

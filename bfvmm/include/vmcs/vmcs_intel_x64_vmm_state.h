@@ -26,6 +26,7 @@
 #include <vmcs/vmcs_intel_x64_state.h>
 
 #include <intrinsics/gdt_x64.h>
+#include <intrinsics/idt_x64.h>
 #include <intrinsics/tss_x64.h>
 #include <intrinsics/intrinsics_intel_x64.h>
 
@@ -48,75 +49,7 @@ class vmcs_intel_x64_vmm_state : public vmcs_intel_x64_state
 public:
 
     vmcs_intel_x64_vmm_state(const std::shared_ptr<state_save_intel_x64> &state_save,
-                             const std::shared_ptr<intrinsics_intel_x64> &intrinsics) :
-        m_gdt(5)
-    {
-        if (!state_save)
-            throw std::invalid_argument("state_save == nullptr");
-
-        if (!intrinsics)
-            throw std::invalid_argument("intrinsics == nullptr");
-
-        uint16_t cs_access_rights = 0;
-        uint16_t ds_access_rights = 0;
-        uint16_t tr_access_rights = 0;
-
-        cs_access_rights |= SEGMENT_ACCESS_RIGHTS_TYPE_REA;
-        cs_access_rights |= SEGMENT_ACCESS_RIGHTS_CODE_DATA_DESCRIPTOR;
-        cs_access_rights |= SEGMENT_ACCESS_RIGHTS_PRESENT;
-        cs_access_rights |= SEGMENT_ACCESS_RIGHTS_L;
-        cs_access_rights |= SEGMENT_ACCESS_RIGHTS_GRANULARITY_PAGES;
-
-        ds_access_rights |= SEGMENT_ACCESS_RIGHTS_TYPE_RWA;
-        ds_access_rights |= SEGMENT_ACCESS_RIGHTS_CODE_DATA_DESCRIPTOR;
-        ds_access_rights |= SEGMENT_ACCESS_RIGHTS_PRESENT;
-        ds_access_rights |= SEGMENT_ACCESS_RIGHTS_DB;
-        ds_access_rights |= SEGMENT_ACCESS_RIGHTS_GRANULARITY_PAGES;
-
-        tr_access_rights |= SEGMENT_ACCESS_RIGHTS_TYPE_TSS_AVAILABLE;
-        tr_access_rights |= SEGMENT_ACCESS_RIGHTS_PRESENT;
-
-        m_gdt.set_access_rights(0, 0);
-        m_gdt.set_access_rights(1, cs_access_rights);
-        m_gdt.set_access_rights(2, ds_access_rights);
-        m_gdt.set_access_rights(3, tr_access_rights);
-
-        m_gdt.set_base(0, 0);
-        m_gdt.set_base(1, 0);
-        m_gdt.set_base(2, 0);
-        m_gdt.set_base(3, (uint64_t)&m_tss);
-
-        m_gdt.set_limit(0, 0);
-        m_gdt.set_limit(1, 0xFFFFF);
-        m_gdt.set_limit(2, 0xFFFFF);
-        m_gdt.set_limit(3, sizeof(m_tss));
-
-        m_cs_index = 1;
-        m_ss_index = 2;
-        m_fs_index = 2;
-        m_gs_index = 2;
-        m_tr_index = 3;
-
-        m_cs = m_cs_index << 3;
-        m_ss = m_ss_index << 3;
-        m_fs = m_fs_index << 3;
-        m_gs = m_gs_index << 3;
-        m_tr = m_tr_index << 3;
-
-        m_cr0 = intrinsics->read_cr0();
-        m_cr3 = intrinsics->read_cr3();
-        m_cr4 = intrinsics->read_cr4();
-
-        m_rflags = intrinsics->read_rflags();
-
-        intrinsics->read_idt(&m_idt_reg);
-
-        m_ia32_pat_msr = intrinsics->read_msr(IA32_PAT_MSR);
-        m_ia32_efer_msr = intrinsics->read_msr(IA32_EFER_MSR);
-        m_ia32_fs_base_msr = 0;
-        m_ia32_gs_base_msr = (uint64_t)state_save.get();
-    }
-
+                             const std::shared_ptr<intrinsics_intel_x64> &intrinsics);
     ~vmcs_intel_x64_vmm_state() {}
 
     uint16_t cs() const override { return m_cs; }
@@ -132,10 +65,10 @@ public:
     uint64_t rflags() const override { return m_rflags; }
 
     uint64_t gdt_base() const override { return m_gdt.base(); }
-    uint64_t idt_base() const override { return m_idt_reg.base; }
+    uint64_t idt_base() const override { return m_idt.base(); }
 
     uint16_t gdt_limit() const override { return m_gdt.limit(); }
-    uint16_t idt_limit() const override { return m_idt_reg.limit; }
+    uint16_t idt_limit() const override { return m_idt.limit(); }
 
     uint32_t cs_limit() const override { return m_gdt.limit(m_cs_index); }
     uint32_t ss_limit() const override { return m_gdt.limit(m_ss_index); }
@@ -212,8 +145,8 @@ public:
         bfdebug << "gdt/idt:" << bfendl;
         PRINT_STATE(m_gdt.base());
         PRINT_STATE(m_gdt.limit());
-        PRINT_STATE(m_idt_reg.base);
-        PRINT_STATE(m_idt_reg.limit);
+        PRINT_STATE(m_idt.base());
+        PRINT_STATE(m_idt.limit());
 
         bfdebug << bfendl;
         bfdebug << "model specific registers:" << bfendl;
@@ -247,7 +180,7 @@ private:
 
     tss_x64 m_tss;
     gdt_x64 m_gdt;
-    idt_t m_idt_reg;
+    idt_x64 m_idt;
 
     uint64_t m_ia32_pat_msr;
     uint64_t m_ia32_efer_msr;
