@@ -95,32 +95,11 @@ public:
     virtual void start()
     { }
 
-    /// Dispatch
-    ///
-    /// Dispatches the exit handler for the vCPU.
-    ///
-    virtual void dispatch()
-    { }
-
     /// Stop
     ///
     /// Stops the vCPU.
     ///
     virtual void stop()
-    { }
-
-    /// Halt
-    ///
-    /// Halts the vCPU.
-    ///
-    virtual void halt()
-    { }
-
-    /// Promote
-    ///
-    /// Promote the vCPU to host CPU state
-    ///
-    virtual void promote()
     { }
 
     /// Write to Log

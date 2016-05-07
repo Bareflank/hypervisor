@@ -22,8 +22,8 @@
 #ifndef VMCS_INTEL_X64_H
 #define VMCS_INTEL_X64_H
 
+#include <memory>
 #include <vmcs/vmcs_intel_x64_state.h>
-#include <vmcs/vmcs_intel_x64_exceptions.h>
 #include <intrinsics/intrinsics_intel_x64.h>
 
 /// Intel x86_64 VMCS
@@ -73,8 +73,8 @@ public:
     /// @throws invalid_vmcs thrown if the VMCS was created without
     ///     intrinsics
     ///
-    virtual void launch(const vmcs_intel_x64_state &host_state,
-                        const vmcs_intel_x64_state &guest_state);
+    virtual void launch(const std::shared_ptr<vmcs_intel_x64_state> &host_state,
+                        const std::shared_ptr<vmcs_intel_x64_state> &guest_state);
 
     /// Promote
     ///
@@ -103,25 +103,20 @@ protected:
     virtual void create_exit_handler_stack();
     virtual void release_exit_handler_stack();
 
-    virtual void write_16bit_control_state(const vmcs_intel_x64_state &state);
-    virtual void write_64bit_control_state(const vmcs_intel_x64_state &state);
-    virtual void write_32bit_control_state(const vmcs_intel_x64_state &state);
-    virtual void write_natural_control_state(const vmcs_intel_x64_state &state);
+    virtual void write_16bit_control_state(const std::shared_ptr<vmcs_intel_x64_state> &state);
+    virtual void write_64bit_control_state(const std::shared_ptr<vmcs_intel_x64_state> &state);
+    virtual void write_32bit_control_state(const std::shared_ptr<vmcs_intel_x64_state> &state);
+    virtual void write_natural_control_state(const std::shared_ptr<vmcs_intel_x64_state> &state);
 
-    virtual void write_16bit_guest_state(const vmcs_intel_x64_state &state);
-    virtual void write_64bit_guest_state(const vmcs_intel_x64_state &state);
-    virtual void write_32bit_guest_state(const vmcs_intel_x64_state &state);
-    virtual void write_natural_guest_state(const vmcs_intel_x64_state &state);
+    virtual void write_16bit_guest_state(const std::shared_ptr<vmcs_intel_x64_state> &state);
+    virtual void write_64bit_guest_state(const std::shared_ptr<vmcs_intel_x64_state> &state);
+    virtual void write_32bit_guest_state(const std::shared_ptr<vmcs_intel_x64_state> &state);
+    virtual void write_natural_guest_state(const std::shared_ptr<vmcs_intel_x64_state> &state);
 
-    virtual void write_16bit_host_state(const vmcs_intel_x64_state &state);
-    virtual void write_64bit_host_state(const vmcs_intel_x64_state &state);
-    virtual void write_32bit_host_state(const vmcs_intel_x64_state &state);
-    virtual void write_natural_host_state(const vmcs_intel_x64_state &state);
-
-    virtual void promote_16bit_guest_state();
-    virtual void promote_64bit_guest_state();
-    virtual void promote_32bit_guest_state();
-    virtual void promote_natural_guest_state();
+    virtual void write_16bit_host_state(const std::shared_ptr<vmcs_intel_x64_state> &state);
+    virtual void write_64bit_host_state(const std::shared_ptr<vmcs_intel_x64_state> &state);
+    virtual void write_32bit_host_state(const std::shared_ptr<vmcs_intel_x64_state> &state);
+    virtual void write_natural_host_state(const std::shared_ptr<vmcs_intel_x64_state> &state);
 
     virtual void pin_based_vm_execution_controls();
     virtual void primary_processor_based_vm_execution_controls();
@@ -518,6 +513,7 @@ protected:
 protected:
 
     friend class vmcs_ut;
+    friend class exit_handler_intel_x64;
 
     std::shared_ptr<intrinsics_intel_x64> m_intrinsics;
 

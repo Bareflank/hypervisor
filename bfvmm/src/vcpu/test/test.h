@@ -52,10 +52,7 @@ private:
     void test_vcpu_intel_x64_start_vmxon_start_failed();
     void test_vcpu_intel_x64_start_vmcs_launch_failed();
     void test_vcpu_intel_x64_start_success();
-    void test_vcpu_intel_x64_dispatch();
     void test_vcpu_intel_x64_stop();
-    void test_vcpu_intel_x64_halt();
-    void test_vcpu_intel_x64_promote();
 
     void test_vcpu_manager_valid();
     void test_vcpu_manager_init_negative_vcpuid();
@@ -66,23 +63,11 @@ private:
     void test_vcpu_manager_start_invalid_vcpuid();
     void test_vcpu_manager_start_uninitialized_vcpuid();
     void test_vcpu_manager_start_success();
-    void test_vcpu_manager_dispatch_negative_vcpuid();
-    void test_vcpu_manager_dispatch_invalid_vcpuid();
-    void test_vcpu_manager_dispatch_uninitialized_vcpuid();
-    void test_vcpu_manager_dispatch_success();
     void test_vcpu_manager_stop_negative_vcpuid();
     void test_vcpu_manager_stop_invalid_vcpuid();
     void test_vcpu_manager_stop_uninitialized_vcpuid();
     void test_vcpu_manager_stop_success();
     void test_vcpu_manager_stop_twice();
-    void test_vcpu_manager_halt_negative_vcpuid();
-    void test_vcpu_manager_halt_invalid_vcpuid();
-    void test_vcpu_manager_halt_uninitialized_vcpuid();
-    void test_vcpu_manager_halt_success();
-    void test_vcpu_manager_promote_negative_vcpuid();
-    void test_vcpu_manager_promote_invalid_vcpuid();
-    void test_vcpu_manager_promote_uninitialized_vcpuid();
-    void test_vcpu_manager_promote_success();
     void test_vcpu_manager_write_negative_vcpuid();
     void test_vcpu_manager_write_invalid_vcpuid();
     void test_vcpu_manager_write_uninitialized_vcpuid();

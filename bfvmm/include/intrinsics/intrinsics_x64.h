@@ -24,9 +24,9 @@
 
 #include <stdint.h>
 
-// =============================================================================
+// -----------------------------------------------------------------------------
 // Intrinsics
-// =============================================================================
+// -----------------------------------------------------------------------------
 
 #pragma pack(push, 1)
 
@@ -97,22 +97,17 @@ void __write_ldtr(uint16_t val);
 
 uint64_t __read_rsp(void);
 
-struct gdt_t
-{
-    uint64_t limit : 16;
-    uint64_t base  : 64;
-};
-
 struct idt_t
 {
     uint64_t limit : 16;
     uint64_t base  : 64;
 };
 
-void __read_gdt(gdt_t *gdt);
-void __read_idt(idt_t *idt);
-void __write_gdt(gdt_t *gdt);
-void __write_idt(idt_t *idt);
+void __read_gdt(void *gdt);
+void __write_gdt(void *gdt);
+
+void __read_idt(void *idt);
+void __write_idt(void *idt);
 
 void __outb(uint16_t val, uint16_t port);
 void __outw(uint16_t val, uint16_t port);
@@ -120,17 +115,15 @@ void __outw(uint16_t val, uint16_t port);
 uint8_t __inb(uint16_t port);
 uint16_t __inw(uint16_t port);
 
-uint32_t __load_segment_limit(uint16_t selector);
-
 #ifdef __cplusplus
 }
 #endif
 
 #pragma pack(pop)
 
-// =============================================================================
+// -----------------------------------------------------------------------------
 // C++ Wrapper
-// =============================================================================
+// -----------------------------------------------------------------------------
 
 /// Intrinsics (x64)
 ///
@@ -267,16 +260,16 @@ public:
     virtual uint64_t read_rsp() const noexcept
     { return __read_rsp(); }
 
-    virtual void read_gdt(gdt_t *gdt) const noexcept
+    virtual void read_gdt(void *gdt) const noexcept
     { __read_gdt(gdt); }
 
-    virtual void write_gdt(gdt_t *gdt) const noexcept
+    virtual void write_gdt(void *gdt) const noexcept
     { __write_gdt(gdt); }
 
-    virtual void read_idt(idt_t *idt) const noexcept
+    virtual void read_idt(void *idt) const noexcept
     { __read_idt(idt); }
 
-    virtual void write_idt(idt_t *idt) const noexcept
+    virtual void write_idt(void *idt) const noexcept
     { __write_idt(idt); }
 
     virtual void write_portio_8(uint16_t port, uint8_t value) const noexcept
@@ -290,145 +283,6 @@ public:
 
     virtual uint16_t read_portio_16(uint16_t port) const noexcept
     { return __inw(port); }
-
-    virtual uint32_t load_segment_limit(uint16_t selector) const noexcept
-    { return __load_segment_limit(selector); }
-
-    virtual uint64_t
-    segment_descriptor(uint16_t selector) const noexcept
-    {
-        gdt_t gdt_reg;
-        read_gdt(&gdt_reg);
-
-        // Intel defines a null selector as a selector = 0. Basically, the
-        // first entry in the GDT is not used, and the processor views the
-        // 0 index as a "null selector". In 32bit mode, this would cause a
-        // GP fault if you attempted to use this type of selector. In 64bit
-        // mode, most of the selectors are null.
-        if (selector == 0)
-            return 0;
-
-        // The global descriptor table is a table of segement descriptors.
-        // The decriptors can take on different forms, and their definition
-        // is in the intel's software developer's manual, volume 3, chapter
-        // 3.5. In 64bit mode, code / data segments are still 32bits, while
-        // TSS descriptors (defined in chapter 7.2.3), states that a
-        // TSS descriptor is actually 16 bytes long, as more space is needed
-        // for the 64bit base address.In general, even though there are
-        // different types of descriptors, they all take on a similar form,
-        // which is best described in chapter 3.4.5.
-        uint64_t *gdt = (uint64_t *)gdt_reg.base;
-
-        // Each selector is 16bits, with bit 1-0 indicating the requested
-        // privilege level (RPL) and bit 2 indicating the table indicator (TI).
-        // The index into the GDT is the remaining bits, thus, to get to the
-        // index we remove the RPL and TI bit.
-        selector = (selector >> 3);
-
-        // Finally, return the 8-byte segment descriptor
-        return gdt[selector];
-    }
-
-    virtual uint32_t
-    segment_descriptor_limit(uint16_t selector) const noexcept
-    {
-        // The segment limit description can be found in the intel's software
-        // developer's manual, volume 3, chapter 3.4.5 as well as volume 3,
-        // chapter 24.4.1.
-        //
-        // ------------------------------------------------------------------
-        // |               | Limit 19-16 |                                  |
-        // ------------------------------------------------------------------
-        // |                             |            Limit 15-00           |
-        // ------------------------------------------------------------------
-        //
-        // Note that for the limit, we use LSL because it translates the limit
-        // field for us. If the granularity bit in the segment descriptor is
-        // set to 1, the limit is measured in pages, while if the granularity
-        // bit is set to 0, it's measured in bytes. a VMCS however only takes
-        // bytes, so we return the limit from LSL as it will do this
-        // translation for us.
-
-        return load_segment_limit(selector);
-    }
-
-    virtual uint64_t
-    segment_descriptor_base(uint16_t selector) const noexcept
-    {
-        uint64_t sd1 = segment_descriptor(selector);
-        uint64_t sd2 = segment_descriptor(selector + (1 << 3));
-        uint64_t base_15_00 = ((sd1 & 0x00000000FFFF0000) >> 16);
-        uint64_t base_23_16 = ((sd1 & 0x000000FF00000000) >> 16);
-        uint64_t base_31_24 = ((sd1 & 0xFF00000000000000) >> 32);
-        uint64_t base_63_32 = ((sd2 & 0x00000000FFFFFFFF) << 32);
-
-        // If we have a null selector, we return 0 since this is not a valid
-        // selector into the GDT
-        if (selector == 0)
-            return 0;
-
-        // The segment base description can be found in the intel's software
-        // developer's manual, volume 3, chapter 3.4.5 as well as volume 3,
-        // chapter 24.4.1.
-        //
-        // Note that in 64bit mode, system descriptors are 16 bytes long
-        // instread of the traditional 8 bytes. A system descriptor has the
-        // system flag set to 0. Most of the time, this is going to be the
-        // TSS descriptor. Even though Intel Tasks don't exist in 64 bit mode,
-        // the TSS descriptor is still used, and thus, TR must still be loaded.
-        //
-        // Note that the selector index starts in bit 3 in the segment
-        // selector register, so to add 1 to the register, you are actually
-        // adding 0x8, or (1 << 3) to get the next descriptor in the GDT.
-        //
-        // ------------------------------------------------------------------
-        // |                       Base 63-32                               |
-        // ------------------------------------------------------------------
-        // |   Base 31-24   |                              |   Base 23-16   |
-        // ------------------------------------------------------------------
-        // |          Base 15-00         |                                  |
-        // ------------------------------------------------------------------
-        //
-
-        if ((sd1 & 0x100000000000) == 0)
-        {
-            return base_63_32 | base_31_24 | base_23_16 | base_15_00;
-        }
-        else
-        {
-            return base_31_24 | base_23_16 | base_15_00;
-        }
-    }
-
-    virtual uint32_t
-    segment_descriptor_access(uint16_t selector) const noexcept
-    {
-        uint64_t sd = segment_descriptor(selector);
-        uint64_t access_07_00 = ((sd & 0x0000FF0000000000) >> 40);
-        uint64_t access_15_12 = ((sd & 0x00F0000000000000) >> 40);
-
-        // Note that the Intel manual, in chapter 24.4.1, states that there is
-        // an extra "usable" bit that we need to account for. Specifically they
-        // state: "Bit 16 indicates an unusable segment. Attempts to use such
-        // a segment fault except in 64-bit mode. In general, a segment
-        // register is unusable if it has been loaded with a null selector."
-        //
-        if (selector == 0)
-            return 0x10000;
-
-        // The segment access description can be found in the intel's software
-        // developer's manual, volume 3, chapter 3.4.5 as well as volume 3,
-        // chapter 24.4.1.
-        //
-        // ------------------------------------------------------------------
-        // |           | A 15-12 |       |  Access 07-00   |                |
-        // ------------------------------------------------------------------
-        // |                             |                                  |
-        // ------------------------------------------------------------------
-        //
-
-        return access_15_12 | access_07_00;
-    }
 };
 
 // =============================================================================
@@ -443,6 +297,11 @@ public:
 
 // Segment Access Rights
 #define SEGMENT_ACCESS_RIGHTS_TYPE                                (0x000F)
+#define SEGMENT_ACCESS_RIGHTS_TYPE_TSS_BUSY                       (0x0002)
+#define SEGMENT_ACCESS_RIGHTS_TYPE_RWA                            (0x0003)
+#define SEGMENT_ACCESS_RIGHTS_TYPE_REA                            (0x000B)
+#define SEGMENT_ACCESS_RIGHTS_TYPE_TSS_AVAILABLE                  (0x0009)
+#define SEGMENT_ACCESS_RIGHTS_CODE_DATA_DESCRIPTOR                (0x0010)
 #define SEGMENT_ACCESS_RIGHTS_SYSTEM_DESCRIPTOR                   (0x0010)
 #define SEGMENT_ACCESS_RIGHTS_DPL                                 (0x0060)
 #define SEGMENT_ACCESS_RIGHTS_PRESENT                             (0x0080)
@@ -450,6 +309,7 @@ public:
 #define SEGMENT_ACCESS_RIGHTS_L                                   (0x2000)
 #define SEGMENT_ACCESS_RIGHTS_DB                                  (0x4000)
 #define SEGMENT_ACCESS_RIGHTS_GRANULARITY                         (0x8000)
+#define SEGMENT_ACCESS_RIGHTS_GRANULARITY_PAGES                   (0x8000)
 
 // RFLAGS
 // 64-ia-32-architectures-software-developer-manual, section 3.4.3

@@ -67,10 +67,6 @@ vcpu_manager::start(int64_t vcpuid)
 }
 
 void
-vcpu_manager::dispatch(int64_t vcpuid)
-{ vcpu_execute(vcpuid, dispatch); }
-
-void
 vcpu_manager::stop(int64_t vcpuid)
 {
     vcpu_execute(vcpuid, stop);
@@ -80,14 +76,6 @@ vcpu_manager::stop(int64_t vcpuid)
 
     m_vcpus[vcpuid].reset();
 }
-
-void
-vcpu_manager::halt(int64_t vcpuid)
-{ vcpu_execute(vcpuid, halt); }
-
-void
-vcpu_manager::promote(int64_t vcpuid)
-{ vcpu_execute(vcpuid, promote); }
 
 void
 vcpu_manager::write(int64_t vcpuid, const std::string &str)

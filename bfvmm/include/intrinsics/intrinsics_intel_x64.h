@@ -26,9 +26,9 @@
 #include <iostream>
 #include <intrinsics/intrinsics_x64.h>
 
-// =============================================================================
+// -----------------------------------------------------------------------------
 // Intrinsics
-// =============================================================================
+// -----------------------------------------------------------------------------
 
 #ifdef __cplusplus
 extern "C" {
@@ -44,9 +44,49 @@ uint64_t __vmwrite(uint64_t field, uint64_t val);
 uint64_t __vmread(uint64_t field, uint64_t *val);
 uint64_t __vmlaunch(void);
 
-// =============================================================================
+// -----------------------------------------------------------------------------
+// State Save
+// -----------------------------------------------------------------------------
+
+// When ever an exit occurs, the CPU saves portions of the CPU state, but
+// for whatever reason, it does not save the general purpose registers. We
+// have to do this ourselves. So, the very first thing the exit handler has to
+// do is save the guest's register state. The problem is, each CPU has it's
+// own register state, and thus must have it's own state save area. To handle
+// this, we define this state save area and then each exit handler creates
+// it's own state save area. To get access to this quickly, we store the
+// address of the state save area in the GS base MSR. This way, we can use
+// [gs:xxx] to save the general purpose registers.
+
+struct state_save_intel_x64
+{
+    uint64_t rax;                   // 0x000
+    uint64_t rbx;                   // 0x008
+    uint64_t rcx;                   // 0x010
+    uint64_t rdx;                   // 0x018
+    uint64_t rbp;                   // 0x020
+    uint64_t rsi;                   // 0x028
+    uint64_t rdi;                   // 0x030
+    uint64_t r08;                   // 0x038
+    uint64_t r09;                   // 0x040
+    uint64_t r10;                   // 0x048
+    uint64_t r11;                   // 0x050
+    uint64_t r12;                   // 0x058
+    uint64_t r13;                   // 0x060
+    uint64_t r14;                   // 0x068
+    uint64_t r15;                   // 0x070
+    uint64_t rip;                   // 0x078
+    uint64_t rsp;                   // 0x080
+
+    uint64_t vcpu_ptr;              // 0x088
+    uint64_t vmxon_ptr;             // 0x090
+    uint64_t vmcs_ptr;              // 0x098
+    uint64_t exit_handler_ptr;      // 0x0A0
+};
+
+// -----------------------------------------------------------------------------
 // C++ Wrapper
-// =============================================================================
+// -----------------------------------------------------------------------------
 
 #ifdef __cplusplus
 }
@@ -92,9 +132,9 @@ public:
     { return __vmlaunch(); }
 };
 
-// =============================================================================
+// -----------------------------------------------------------------------------
 // VMCS Fields
-// =============================================================================
+// -----------------------------------------------------------------------------
 
 // VMX MSRs
 // intel's software developer's manual, volume 3, appendix A.1

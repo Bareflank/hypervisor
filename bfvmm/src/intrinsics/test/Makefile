@@ -23,9 +23,9 @@
 # Target Information
 ################################################################################
 
-TARGET_NAME:=intrinsics
-TARGET_TYPE:=lib
-TARGET_COMPILER:=both
+TARGET_NAME:=test
+TARGET_TYPE:=bin
+TARGET_COMPILER:=native
 
 ################################################################################
 # Compiler Flags
@@ -38,13 +38,6 @@ NATIVE_LDFLAGS+=
 NATIVE_ARFLAGS+=
 NATIVE_DEFINES+=
 
-CROSS_CCFLAGS+=
-CROSS_CXXFLAGS+=
-CROSS_ASMFLAGS+=
-CROSS_LDFLAGS+=
-CROSS_ARFLAGS+=
-CROSS_DEFINES+=
-
 ################################################################################
 # Output
 ################################################################################
@@ -52,32 +45,24 @@ CROSS_DEFINES+=
 NATIVE_OBJDIR:=.build
 NATIVE_OUTDIR:=../bin
 
-CROSS_OBJDIR:=.build
-CROSS_OUTDIR:=../../../bin
-
 ################################################################################
 # Sources
 ################################################################################
 
-SOURCES+=gdt_x64.cpp
-SOURCES+=intrinsics_x64.asm
-SOURCES+=intrinsics_intel_x64.asm
+SOURCES+=test.cpp
+SOURCES+=test_gdt_x64.cpp
 
-INCLUDE_PATHS+=../../../include
-INCLUDE_PATHS+=../../../../include
+INCLUDE_PATHS+=./
+INCLUDE_PATHS+=../../../include/
+INCLUDE_PATHS+=../../../../include/
 
-LIBS+=
+LIBS+=intrinsics
 
-LIBRARY_PATHS+=
+LIBRARY_PATHS+=../bin/native
 
 ################################################################################
 # Environment Specific
 ################################################################################
-
-VMM_SOURCES+=
-VMM_INCLUDE_PATHS+=
-VMM_LIBS+=
-VMM_LIBRARY_PATHS+=
 
 WINDOWS_SOURCES+=
 WINDOWS_INCLUDE_PATHS+=

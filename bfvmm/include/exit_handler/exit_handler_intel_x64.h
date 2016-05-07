@@ -23,9 +23,14 @@
 #define EXIT_HANDLER_INTEL_X64_H
 
 #include <memory>
+#include <vmcs/vmcs_intel_x64.h>
 #include <intrinsics/intrinsics_intel_x64.h>
 
-/// Exit Handler Dispatch
+// -----------------------------------------------------------------------------
+// Exit Handler
+// -----------------------------------------------------------------------------
+
+/// Exit Handler
 ///
 /// This class is responsible for detecting why a guest exited (i.e. stopped
 /// it's execution), and dispatches the appropriated handler to emulate the
@@ -60,6 +65,13 @@ public:
     /// the exit reason, and dispatch the correct handler.
     ///
     virtual void dispatch();
+
+    /// Halt
+    ///
+    /// Called when the exit handler needs to halt the CPU. This would mainly
+    /// be due to an error.
+    ///
+    virtual void halt();
 
 protected:
 
@@ -134,12 +146,26 @@ protected:
 
 protected:
 
+    friend class vcpu_intel_x64;
+    friend class exit_handler_intel_x64_ut;
+
     std::shared_ptr<intrinsics_intel_x64> m_intrinsics;
 
     uint64_t m_exit_reason;
     uint64_t m_exit_qualification;
     uint64_t m_exit_instruction_length;
     uint64_t m_exit_instruction_information;
+
+    std::shared_ptr<vmcs_intel_x64> m_vmcs;
+    std::shared_ptr<state_save_intel_x64> m_state_save;
+
+private:
+
+    void set_vmcs(const std::shared_ptr<vmcs_intel_x64> &vmcs)
+    { m_vmcs = vmcs; }
+
+    void set_state_save(const std::shared_ptr<state_save_intel_x64> &state_save)
+    { m_state_save = state_save; }
 };
 
 #endif

@@ -120,6 +120,7 @@ private:
     void test_vm_exit_reason_rdseed();
     void test_vm_exit_reason_xsaves();
     void test_vm_exit_reason_xrstors();
+    void test_halt();
 };
 
 #endif

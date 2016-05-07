@@ -20,7 +20,7 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #include <debug.h>
-#include <vcpu/vcpu_manager.h>
+#include <exit_handler/exit_handler_intel_x64.h>
 #include <exit_handler/exit_handler_intel_x64_entry.h>
 #include <exit_handler/exit_handler_intel_x64_support.h>
 #include <exit_handler/exit_handler_intel_x64_exceptions.h>
@@ -38,12 +38,14 @@
 /// non-standard exception is thrown, preventing exceptions from moving
 /// beyond this point.
 ///
-template<typename T> void
+template<typename T> bool
 guard_exceptions(T func)
 {
     try
     {
-        return func();
+        func();
+
+        return true;
     }
     catch (bfn::general_exception &ge)
     {
@@ -66,8 +68,7 @@ guard_exceptions(T func)
         bferror << "----------------------------------------" << bfendl;
     }
 
-    for (auto i = 0; i < 1000000; i++);
-    g_vcm->halt(0);
+    return false;
 }
 
 // -----------------------------------------------------------------------------
@@ -75,8 +76,8 @@ guard_exceptions(T func)
 // -----------------------------------------------------------------------------
 
 extern "C" void
-exit_handler(void)
+exit_handler(exit_handler_intel_x64 *exit_handler)
 {
-    guard_exceptions([&]()
-    { g_vcm->dispatch(0); });
+    if (guard_exceptions([&]() { exit_handler->dispatch(); }) == false)
+    exit_handler->halt();
 }

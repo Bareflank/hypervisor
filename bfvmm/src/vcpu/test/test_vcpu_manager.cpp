@@ -124,41 +124,6 @@ vcpu_ut::test_vcpu_manager_start_success()
 }
 
 void
-vcpu_ut::test_vcpu_manager_dispatch_negative_vcpuid()
-{
-    EXPECT_EXCEPTION(g_vcm->dispatch(-1), std::out_of_range);
-}
-
-void
-vcpu_ut::test_vcpu_manager_dispatch_invalid_vcpuid()
-{
-    EXPECT_EXCEPTION(g_vcm->dispatch(10000), std::out_of_range);
-}
-
-void
-vcpu_ut::test_vcpu_manager_dispatch_uninitialized_vcpuid()
-{
-    EXPECT_EXCEPTION(g_vcm->dispatch(0), std::out_of_range);
-}
-
-void
-vcpu_ut::test_vcpu_manager_dispatch_success()
-{
-    MockRepository mocks;
-    g_vcpu = bfn::mock_shared<vcpu>(mocks);
-
-    mocks.OnCall(g_vcpu.get(), vcpu::stop);
-    mocks.ExpectCall(g_vcpu.get(), vcpu::dispatch);
-
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        ASSERT_NO_EXCEPTION(g_vcm->init(0));
-        ASSERT_NO_EXCEPTION(g_vcm->dispatch(0));
-        ASSERT_NO_EXCEPTION(g_vcm->stop(0));
-    });
-}
-
-void
 vcpu_ut::test_vcpu_manager_stop_negative_vcpuid()
 {
     EXPECT_EXCEPTION(g_vcm->stop(-1), std::out_of_range);
@@ -204,76 +169,6 @@ vcpu_ut::test_vcpu_manager_stop_twice()
         ASSERT_NO_EXCEPTION(g_vcm->init(0));
         ASSERT_NO_EXCEPTION(g_vcm->stop(0));
         EXPECT_EXCEPTION(g_vcm->stop(0), std::out_of_range);
-    });
-}
-
-void
-vcpu_ut::test_vcpu_manager_halt_negative_vcpuid()
-{
-    EXPECT_EXCEPTION(g_vcm->halt(-1), std::out_of_range);
-}
-
-void
-vcpu_ut::test_vcpu_manager_halt_invalid_vcpuid()
-{
-    EXPECT_EXCEPTION(g_vcm->halt(10000), std::out_of_range);
-}
-
-void
-vcpu_ut::test_vcpu_manager_halt_uninitialized_vcpuid()
-{
-    EXPECT_EXCEPTION(g_vcm->halt(0), std::out_of_range);
-}
-
-void
-vcpu_ut::test_vcpu_manager_halt_success()
-{
-    MockRepository mocks;
-    g_vcpu = bfn::mock_shared<vcpu>(mocks);
-
-    mocks.OnCall(g_vcpu.get(), vcpu::stop);
-    mocks.ExpectCall(g_vcpu.get(), vcpu::halt);
-
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        ASSERT_NO_EXCEPTION(g_vcm->init(0));
-        ASSERT_NO_EXCEPTION(g_vcm->halt(0));
-        ASSERT_NO_EXCEPTION(g_vcm->stop(0));
-    });
-}
-
-void
-vcpu_ut::test_vcpu_manager_promote_negative_vcpuid()
-{
-    EXPECT_EXCEPTION(g_vcm->promote(-1), std::out_of_range);
-}
-
-void
-vcpu_ut::test_vcpu_manager_promote_invalid_vcpuid()
-{
-    EXPECT_EXCEPTION(g_vcm->promote(10000), std::out_of_range);
-}
-
-void
-vcpu_ut::test_vcpu_manager_promote_uninitialized_vcpuid()
-{
-    EXPECT_EXCEPTION(g_vcm->promote(0), std::out_of_range);
-}
-
-void
-vcpu_ut::test_vcpu_manager_promote_success()
-{
-    MockRepository mocks;
-    g_vcpu = bfn::mock_shared<vcpu>(mocks);
-
-    mocks.OnCall(g_vcpu.get(), vcpu::stop);
-    mocks.ExpectCall(g_vcpu.get(), vcpu::promote);
-
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        ASSERT_NO_EXCEPTION(g_vcm->init(0));
-        ASSERT_NO_EXCEPTION(g_vcm->promote(0));
-        ASSERT_NO_EXCEPTION(g_vcm->stop(0));
     });
 }
 
