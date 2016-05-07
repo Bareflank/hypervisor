@@ -80,8 +80,10 @@ platform_virt_to_phys(void *virt)
 }
 
 void
-platform_free(void *addr)
+platform_free(void *addr, int64_t len)
 {
+    (void)len;
+
     if (addr == NULL)
     {
         ALERT("platform_free: invalid address %p\n", addr);

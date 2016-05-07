@@ -70,7 +70,7 @@ void *platform_virt_to_phys(void *virt);
  *
  * @param addr the virtual address returned from platform_alloc
  */
-void platform_free(void *addr);
+void platform_free(void *addr, int64_t len);
 
 /**
  * Free Executable Memory

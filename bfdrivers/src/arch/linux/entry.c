@@ -24,6 +24,7 @@ int64_t g_module_length = 0;
 
 int64_t g_num_files = 0;
 char *files[MAX_NUM_MODULES] = {0};
+int64_t files_size[MAX_NUM_MODULES] = { 0 };
 
 typedef long (*set_affinity_fn)(pid_t, const struct cpumask *);
 set_affinity_fn set_cpu_affinity;
@@ -101,6 +102,8 @@ ioctl_add_module(char *file)
     }
 
     files[g_num_files] = buf;
+    files_size[g_num_files] = g_module_length;
+
     g_num_files++;
 
     DEBUG("IOCTL_ADD_MODULE: succeeded\n");
@@ -151,7 +154,7 @@ ioctl_unload_vmm(void)
     }
 
     for (i = 0; i < g_num_files; i++)
-        platform_free(files[i]);
+        platform_free(files[i], files_size[i]);
 
     g_num_files = 0;
 
