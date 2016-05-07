@@ -1,3 +1,4 @@
+
 Misc:
 - create a custom PPA for Travic CI that contains our cross-compiler. Needs to
   support more than one version of GCC, and should install GCC in it's own
@@ -22,6 +23,9 @@ Misc:
   ELF program loader.
 - Add system beep code for additional debugging
 - Add support for the PCI debugger
+- Trigger a rebuild if bfcrt changes
+- Trigger a rebuild of libcxx is bfunwind changes
+- Some scripts use "-" while others use "_", we should be consistent
 
 Version 1.1 TODO:
 - Need to have a completely isolated exit handler. It should have it's own
@@ -45,6 +49,11 @@ Version 1.1 TODO:
 - the debug.h code should use std::cerr were needed
 - per-core debugging should be done
 - #define for line endings for bfendl
+- Uses the following as our default flags to match Clear Linux: -g2 -O3 -pipe
+  -fexceptions -fstack-protector -m64 -march=westmere -mtune=native
+  -malign-data=abi
+- Fix issue with dwarf4.cpp. The encoding / decoding logic has been updated
+  to fix issue with the -1 << shift, which we should also be fixing.
 
 Version 1.2 TODO:
 - UEFI Support (i.e. type 1)

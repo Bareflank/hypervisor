@@ -23,13 +23,17 @@
 ### Changed
 - The VMCS state classes are now shared by pointer (i.e. shared_ptr)
   instead of my reference. This was done to support inheritance.
+- The build system has been completely redone to provide both out-of-tree
+  compilation, but also to provide support for docker. With this new system,
+  it is possible to stand up the hypervisor in less than 10 minutes from start
+  to finish, while also maintaining multiple build systems for testing
 
 ### Fixed
-- If a VM-entry failured occured, the exit handler would incorrectly read
+- If a VM-entry failure occurred, the exit handler would incorrectly read
   the error as unknown because it was not filtering the VM-entry failure
   bit
-- Some of the macros in the intrinsics file were causing unsigned intergers
-  because they hit touched bit 31. The macros have been expanded to 64bits
+- Some of the macros in the intrinsics file were causing unsigned integers
+  because they hit touched bit 31. The macros have been expanded to 64 bits
   to prevent this
 
 ### Removed
@@ -51,7 +55,7 @@
   exception handlers
 - Custom driver entry logic for loading the VMM
 - Custom ELF loader for loading the VMM modules
-- Userspace managament application (BFM) for starting / stopping the
+- User-space management application (BFM) for starting / stopping the
   hypervisor
 - Custom kernel-safe unwind library for adding exception support to the VMM
 - Basic VMM with support for Intel x86_64. The VMM places the Host OS into
@@ -60,4 +64,4 @@
 - Custom build environment
 - Complete set of unit tests
 - Documentation
-- Scripts for setting up Unbuntu, Debian and Fedora build environments.
+- Scripts for setting up Ubuntu, Debian and Fedora build environments.

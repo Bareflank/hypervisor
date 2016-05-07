@@ -1,13 +1,19 @@
 ## Linux Driver Compilation Instructions
 
 Supported Linux distributions are:
-- Ubuntu 12.04, 14.04, 15.04, 15.10
-- Debian Jessie
-- Fedora 22, 23
+- Ubuntu 14.04, 16.04
+- Debian Stretch
+- Fedora 23
+
+NOTE: If you would like to use an unsupported platform, so long as you have
+the latest and greatest docker, and GCC5+, it's likely that a build is
+possble. The above platforms are simply what our developers are testing.
+If you plan to use an unsupported platform, start by modifying a
+setup-\<platform\>.sh to suit your needs. In some cases, all you have to
+do is enable the platform your using.
 
 To compile bareflank, first start by downloading the repo, and running the
-setup-\<platform\>.sh script, which creates the cross compiler and sysroot
-that will be used later.
+setup-\<platform\>.sh script
 
 ```
 cd ~/
@@ -39,7 +45,7 @@ This can be done manually by executing:
 
 ```
 pushd bfm/bin/native
-sudo LD_LIBRARY_PATH=. ./bfm load vmm.modules
+sudo LD_LIBRARY_PATH=. ./bfm load <module_file>
 sudo LD_LIBRARY_PATH=. ./bfm start
 sudo LD_LIBRARY_PATH=. ./bfm status
 sudo LD_LIBRARY_PATH=. ./bfm dump
@@ -60,26 +66,59 @@ On Linux, you can also run the following shortcuts from the repo's root:
 ```
 make load
 make start
-make stop
-make unload
-make quick
 make status
 make dump
+
+make stop
+make unload
+
+make quick
 make loop NUM=<xxx>
 ```
 
-When extending the hypervisor, you need to provide the list
-of modules you want to load. If you do this by hand, simply
-replace vmm.modules with your own. If however you use the
-shortcuts, do the following:
+Bareflank comes with a stock module file called vmm.modules. This file is
+encoded and must be translated to be useful. The "make" shortcuts do this
+for you. If you have your own modules file, you can use absolute / relative
+addresses and no decoding is needed. If you, however, use the BUILD_ABS and
+HYPER_ABS macros, like the vmm.modules file, you can decode the paths by
+using the build_scripts/filter_module_file.sh script which takes in the file
+to be decoded, and stores the results in a file referenced in the second
+argument. To see how this is done, look at the root Makefile.
+
+If you are using the "make" shortcuts, and you want to specify a different
+modules file, you can use the following:
 
 ```
 make [load|quick] MODULES=<path to list>
 ```
 
-or
+Also note that when you run the setup-\<platform\>.sh script, you can ask it
+to not configure for you, which allows you to setup an out-of-tree build
+where you can specify your own module file and extensions as follows:
 
 ```
-export MODULES=<path to list>
-make [load|quick]
+cd ~/
+git clone https://github.com/Bareflank/hypervisor.git
+cd ~/hypervisor
+
+./tools/scripts/setup-ubuntu.sh --no-configure
+
+cd ~/
+mkdir build
+cd ~/build
+
+~/hypervisor/configure -m <path to module_file> -e <path to extension>
+
+make
+make unittest
+
+make linux_load
+make quick
+make stop
+make linux_unload
+
 ```
+
+Note that when you use the "-m" with the configure script yourself, you no
+longer need to specify the module file you wish to use as the bulid system
+will remember which module file you specified.

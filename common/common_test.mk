@@ -33,11 +33,14 @@ CE='\033[0m'
 # Paths
 ################################################################################
 
-LIBRARY_PATHS := $(LIBRARY_PATHS):.
+LIBRARY_PATH := $(LIBRARY_PATH):.
 
 ################################################################################
 # Targets
 ################################################################################
+
+Makefile: $(HYPER_REL)/Makefile.bf
+	@ BUILD_ABS=$(BUILD_ABS) BUILD_REL=$(BUILD_REL) HYPER_REL=$(HYPER_REL) $(HYPER_ABS)/configure.sh -r --this-is-make
 
 .PHONY: run_tests
 
@@ -45,10 +48,9 @@ LIBRARY_PATHS := $(LIBRARY_PATHS):.
 
 run_tests: force
 	@echo -e $(CS)"--------------------------------------------------------------------------------"$(CE)
-	@LD_LIBRARY_PATH=$(LIBRARY_PATHS) ./test > output.txt 2>&1 || (cat output.txt; exit 1)
+	@LD_LIBRARY_PATH=$(LIBRARY_PATH) ./test > output.txt 2>&1 || (cat output.txt; exit 1)
 	@cat output.txt | grep "totals:"
 	@rm output.txt
 	@echo -e $(CS)"--------------------------------------------------------------------------------"$(CE)
-
 
 force: ;
