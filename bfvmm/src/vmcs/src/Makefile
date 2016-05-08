@@ -65,6 +65,8 @@ SOURCES+=vmcs_intel_x64_check_guest.cpp
 SOURCES+=vmcs_intel_x64_check_host.cpp
 SOURCES+=vmcs_intel_x64_check_misc.cpp
 SOURCES+=vmcs_intel_x64_debug.cpp
+SOURCES+=vmcs_intel_x64_vmm_state.cpp
+SOURCES+=vmcs_intel_x64_host_vm_state.cpp
 SOURCES+=vmcs_intel_x64_promote.asm
 
 INCLUDE_PATHS+=./

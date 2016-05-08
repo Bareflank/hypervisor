@@ -26,6 +26,7 @@
 #include <vmcs/vmcs_intel_x64_state.h>
 
 #include <intrinsics/gdt_x64.h>
+#include <intrinsics/idt_x64.h>
 #include <intrinsics/intrinsics_intel_x64.h>
 
 /// VMCS Host VM State
@@ -39,47 +40,7 @@ class vmcs_intel_x64_host_vm_state : public vmcs_intel_x64_state
 {
 public:
 
-    vmcs_intel_x64_host_vm_state(const std::shared_ptr<intrinsics_intel_x64> &intrinsics) :
-        m_gdt(std::static_pointer_cast<intrinsics_x64>(intrinsics))
-    {
-        if (!intrinsics)
-            throw std::invalid_argument("intrinsics == nullptr");
-
-        m_es = intrinsics->read_es();
-        m_cs = intrinsics->read_cs();
-        m_ss = intrinsics->read_ss();
-        m_ds = intrinsics->read_ds();
-        m_fs = intrinsics->read_fs();
-        m_gs = intrinsics->read_gs();
-        m_tr = intrinsics->read_tr();
-
-        m_es_index = m_es >> 3;
-        m_cs_index = m_cs >> 3;
-        m_ss_index = m_ss >> 3;
-        m_ds_index = m_ds >> 3;
-        m_fs_index = m_fs >> 3;
-        m_gs_index = m_gs >> 3;
-        m_tr_index = m_tr >> 3;
-
-        m_cr0 = intrinsics->read_cr0();
-        m_cr3 = intrinsics->read_cr3();
-        m_cr4 = intrinsics->read_cr4();
-        m_dr7 = intrinsics->read_dr7();
-
-        m_rflags = intrinsics->read_rflags();
-
-        intrinsics->read_idt(&m_idt_reg);
-
-        m_ia32_debugctl_msr = intrinsics->read_msr(IA32_DEBUGCTL_MSR);
-        m_ia32_pat_msr = intrinsics->read_msr(IA32_PAT_MSR);
-        m_ia32_efer_msr = intrinsics->read_msr(IA32_EFER_MSR);
-        m_ia32_sysenter_cs_msr = intrinsics->read_msr(IA32_SYSENTER_CS_MSR);
-        m_ia32_sysenter_esp_msr = intrinsics->read_msr(IA32_SYSENTER_ESP_MSR);
-        m_ia32_sysenter_eip_msr = intrinsics->read_msr(IA32_SYSENTER_EIP_MSR);
-        m_ia32_fs_base_msr = intrinsics->read_msr(IA32_FS_BASE_MSR);
-        m_ia32_gs_base_msr = intrinsics->read_msr(IA32_GS_BASE_MSR);
-    }
-
+    vmcs_intel_x64_host_vm_state(const std::shared_ptr<intrinsics_intel_x64> &intrinsics);
     ~vmcs_intel_x64_host_vm_state() {}
 
     uint16_t es() const override { return m_es; }
@@ -98,10 +59,10 @@ public:
     uint64_t rflags() const override { return m_rflags; }
 
     uint64_t gdt_base() const override { return m_gdt.base(); }
-    uint64_t idt_base() const override { return m_idt_reg.base; }
+    uint64_t idt_base() const override { return m_idt.base(); }
 
     uint16_t gdt_limit() const override { return m_gdt.limit(); }
-    uint16_t idt_limit() const override { return m_idt_reg.limit; }
+    uint16_t idt_limit() const override { return m_idt.limit(); }
 
     uint32_t es_limit() const override { return m_gdt.limit(m_es_index); }
     uint32_t cs_limit() const override { return m_gdt.limit(m_cs_index); }
@@ -197,8 +158,8 @@ public:
         bfdebug << "gdt/idt:" << bfendl;
         PRINT_STATE(m_gdt.base());
         PRINT_STATE(m_gdt.limit());
-        PRINT_STATE(m_idt_reg.base);
-        PRINT_STATE(m_idt_reg.limit);
+        PRINT_STATE(m_idt.base());
+        PRINT_STATE(m_idt.limit());
 
         bfdebug << bfendl;
         bfdebug << "model specific registers:" << bfendl;
@@ -240,7 +201,7 @@ private:
     uint64_t m_rflags;
 
     gdt_x64 m_gdt;
-    idt_t m_idt_reg;
+    idt_x64 m_idt;
 
     uint64_t m_ia32_debugctl_msr;
     uint64_t m_ia32_pat_msr;

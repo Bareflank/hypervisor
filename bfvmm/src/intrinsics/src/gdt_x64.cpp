@@ -19,7 +19,6 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <debug.h>
 #include <exception.h>
 #include <intrinsics/gdt_x64.h>
 
@@ -29,7 +28,7 @@ gdt_x64::gdt_x64(uint16_t size) :
     if (size == 0)
         return;
 
-    auto addr = new uint64_t[size];
+    auto addr = new uint64_t[size]();
 
     m_gdt_reg.base = (uint64_t)addr;
     m_gdt_reg.limit = (uint16_t)(size << 3);

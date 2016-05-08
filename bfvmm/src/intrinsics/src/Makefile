@@ -60,6 +60,7 @@ CROSS_OUTDIR:=../../../bin
 ################################################################################
 
 SOURCES+=gdt_x64.cpp
+SOURCES+=idt_x64.cpp
 SOURCES+=intrinsics_x64.asm
 SOURCES+=intrinsics_intel_x64.asm
 

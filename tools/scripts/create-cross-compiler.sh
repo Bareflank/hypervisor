@@ -195,16 +195,16 @@ fi
 
 if [ ! -d "libcxxabi" ]; then
     rm -Rf completed_build_libcxxabi
-    git clone --depth 1 http://llvm.org/git/libcxxabi
+    git clone --depth 1 -b release_38 http://llvm.org/git/libcxxabi
 fi
 
 if [ ! -d "libcxx" ]; then
     rm -Rf completed_build_libcxx
-    git clone --depth 1 http://llvm.org/git/libcxx
+    git clone --depth 1 -b release_38 http://llvm.org/git/libcxx
 fi
 
 if [ ! -d "llvm" ]; then
-    git clone --depth 1 http://llvm.org/git/llvm
+    git clone --depth 1 -b release_38 http://llvm.org/git/llvm
 fi
 
 # ------------------------------------------------------------------------------

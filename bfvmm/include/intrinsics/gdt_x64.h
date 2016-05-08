@@ -23,7 +23,6 @@
 #define GDT_X64_H
 
 #include <memory>
-#include <functional>
 #include <intrinsics/intrinsics_x64.h>
 
 // -----------------------------------------------------------------------------
@@ -55,8 +54,54 @@ struct gdt_reg_x64_t
 
 /// Global Descriptor Table
 ///
-/// Talk about why we don't have a descriptor class because these might be
-/// a descriptor or a TSS and they are different sizes.
+/// This class provides an abstraction around the global descriptor table
+/// for 64bit.
+///
+/// This class does not provide a "descriptor" class as the amount of code
+/// needed to completely abstract each descriptor type would be enormous
+/// for something that is setup once, and never touched again. So it is
+/// left to the user to understand how to set the access rights for each
+/// descriptor manually, as this is the part that is descriptor specific.
+/// In general, all of the information about each descriptor can be found
+/// in the Intel Manual in Volume 3.
+///
+/// Generally speaking, there are 2 different types of descriptors, a
+/// code/data segment descriptor, and a TSS descriptor.
+///
+/// A code/data segment descriptor is a descriptor that is loaded into
+/// es, cs, ss, ds, fs or gs. Information about these types of descriptors
+/// can be found in Volume 3, section 3.4.5. A code segment is any
+/// segment that is loaded into CS. Although not called out in all of the
+/// documentation, Intel does have a stack segment which is any descriptor
+/// loaded into SS, and the access rights are different for a stack segment.
+/// Finally there are data segments which are any descriptor loaded into
+/// es, ds, fs and gs. On 64bit, es and ds are not available, so they should
+/// always point to the NULL descriptor, which is the first descriptor in the
+/// table, which has to be set to all 0s (per the spec). The only parts of
+/// cs, ss, fs, and gs that are used are the access rights. The CPU in
+/// 64bit mode assumes that the base is set to 0, and the limit is 0xFFFFF.
+/// Although the limit is only 4G (because it's only 20 bits), the CPU
+/// internally sets the limit to 2^64 for you. fs and gs are the only segments
+/// that can have a base address not set to 0, but they cannot be set using
+/// the GDT, and instead have to be set using the MSRs. Bareflank uses
+/// gs to store the offset into the state save area for the exit handler.
+///
+/// A TSS descriptor defines the task state segment. This is a structure
+/// that is defined 7.2 (for 32bit), and 7.7 (for 64bit). The OS might
+/// fill in this structure for syscalls, but in general, this structure
+/// is not used in 64bit, but still needs to be defined. For a hypervisor,
+/// this structure can be left blank. The base address of the TSS descriptor
+/// needs to be the address of the TSS, the limit should be sizeof(TSS), which
+/// for a hypervisor that doesn't use the IO bitmap, or any custom data is
+/// 104 bytes, and the access rights are set to a present 64bit TSS. There
+/// is one complication with the TSS descriptor which is that you cannot
+/// simply call ltr (load task register) with any TSS. The TSS cannot have
+/// the busy flags set. Since there is a TSS that the host OS has, and a
+/// TSS for the VMM, this tends to be fine, up to the point where the
+/// VMM attempts to promote the guest. When this happens, there are actually
+/// two TSS descriptors marked as busy, which should never happen, but does.
+/// The solution is to mark the host OS's TSS descriptor as not busy
+/// manually before loading it.
 ///
 class gdt_x64
 {
@@ -184,4 +229,4 @@ private:
     std::shared_ptr<uint64_t> m_gdt;
 };
 
-#endif // GDT__H
+#endif
