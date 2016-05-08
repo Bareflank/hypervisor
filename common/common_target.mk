@@ -50,6 +50,8 @@ else
 	UNAME:=$(shell uname -s)
 	ifeq ($(UNAME), Linux)
 		OS:=linux
+	else
+		OS:=osx
 	endif
 endif
 
@@ -138,7 +140,7 @@ CROSS_ASMFLAGS+=-f elf64
 # Default AR Flags
 ################################################################################
 
-NATIVE_ARFLAGS+=rcs
+NATIVE_ARFLAGS+=-rcs
 
 CROSS_ARFLAGS+=rcs
 
@@ -172,6 +174,14 @@ ifeq ($(TARGET_NATIVE_COMPILED), true)
 		NATIVE_STATIC_LIB_EXT:=_static.a
 		NATIVE_STATIC_LIB_PRE:=lib
 	endif
+	ifeq ($(OS), osx)
+		NATIVE_BIN_EXT:=
+		NATIVE_BIN_PRE:=
+		NATIVE_SHARED_LIB_EXT:=.dylib
+		NATIVE_SHARED_LIB_PRE:=lib
+		NATIVE_STATIC_LIB_EXT:=_static.a
+		NATIVE_STATIC_LIB_PRE:=lib
+	endif
 endif
 
 NATIVE_TARGET_BIN:=$(patsubst %, $(NATIVE_OUTDIR)/$(NATIVE_BIN_PRE)%$(NATIVE_BIN_EXT), $(TARGET_NAME))
@@ -199,6 +209,10 @@ ifeq ($(TARGET_NATIVE_COMPILED), true)
 	ifeq ($(OS), linux)
 		NATIVE_SOURCES+=$(SOURCES)
 		NATIVE_SOURCES+=$(LINUX_SOURCES)
+	endif
+	ifeq ($(OS), osx)
+		NATIVE_SOURCES+=$(SOURCES)
+		NATIVE_SOURCES+=$(OSX_SOURCES)
 	endif
 endif
 
@@ -228,6 +242,10 @@ ifeq ($(TARGET_NATIVE_COMPILED), true)
 		NATIVE_INCLUDE_PATHS+=$(INCLUDE_PATHS)
 		NATIVE_INCLUDE_PATHS+=$(LINUX_INCLUDE_PATHS)
 	endif
+	ifeq ($(OS), osx)
+		NATIVE_INCLUDE_PATHS+=$(INCLUDE_PATHS)
+		NATIVE_INCLUDE_PATHS+=$(OSX_INCLUDE_PATHS)
+	endif
 endif
 
 CROSS_CCFLAGS+=$(addprefix -I, $(strip $(CROSS_INCLUDE_PATHS)))
@@ -254,6 +272,11 @@ ifeq ($(TARGET_NATIVE_COMPILED), true)
 		NATIVE_LIBRARY_PATHS+=$(LIBRARY_PATHS)
 		NATIVE_LIBRARY_PATHS+=$(LINUX_LIBRARY_PATHS)
 	endif
+	ifeq ($(OS), osx)
+		NATIVE_LIBRARY_PATHS+=$(LIBRARY_PATHS)
+		NATIVE_LIBRARY_PATHS+=$(OSX_LIBRARY_PATHS)
+		NATIVE_LDFLAGS+=$(OSX_LDFLAGS)
+	endif
 endif
 
 NATIVE_LDFLAGS+=$(addprefix -L, $(strip $(NATIVE_LIBRARY_PATHS)))
@@ -277,6 +300,10 @@ ifeq ($(TARGET_NATIVE_COMPILED), true)
 	ifeq ($(OS), linux)
 		NATIVE_LIBS+=$(LIBS)
 		NATIVE_LIBS+=$(LINUX_LIBS)
+	endif
+	ifeq ($(OS), osx)
+		NATIVE_LIBS+=$(LIBS)
+		NATIVE_LIBS+=$(OSX_LIBS)
 	endif
 endif
 
@@ -310,6 +337,9 @@ ifeq ($(TARGET_NATIVE_COMPILED), true)
 	endif
 	ifeq ($(OS), linux)
 		NATIVE_DEFINES+=OS_LINUX
+	endif
+	ifeq ($(OS), osx)
+		NATIVE_DEFINES+=OS_OSX
 	endif
 endif
 

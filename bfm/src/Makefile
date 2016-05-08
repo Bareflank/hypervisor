@@ -78,6 +78,13 @@ LINUX_INCLUDE_PATHS+=arch/linux/
 LINUX_LIBS+=
 LINUX_LIBRARY_PATHS+=
 
+OSX_SOURCES+=arch/osx/ioctl.cpp
+OSX_SOURCES+=arch/osx/ioctl_private.cpp
+OSX_INCLUDE_PATHS+=arch/osx/
+OSX_LIBS+=
+OSX_LIBRARY_PATHS+=
+OSX_LDFLAGS+=-framework IOKit
+
 ################################################################################
 # Common
 ################################################################################
