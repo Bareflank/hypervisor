@@ -191,12 +191,12 @@ add_mdl_to_memory_manager(char *exec, uint64_t size)
         goto failure;
     }
 
-    platform_free(mdl);
+    platform_free(mdl, len);
     return BF_SUCCESS;
 
 failure:
 
-    platform_free(mdl);
+    platform_free(mdl, len);
     return ret;
 }
 

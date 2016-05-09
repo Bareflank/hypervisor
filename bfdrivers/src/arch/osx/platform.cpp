@@ -21,16 +21,34 @@
  */
 
 #include <platform.h>
-
 #include <debug.h>
-#include <linux/mm.h>
-#include <linux/slab.h>
-#include <linux/string.h>
-#include <linux/module.h>
-#include <linux/vmalloc.h>
-#include <linux/version.h>
 
-#include <asm/tlbflush.h>
+#include <libkern/OSMalloc.h>
+#include <vm/pmap.h>
+#include <libkern/libkern.h>
+#include <sys/conf.h>
+#include <mach/mach_types.h>
+extern "C" {
+#include <kern/assert.h>
+#include <kern/kext_alloc.h>
+#include <vm/vm_map.h>
+#include <vm/vm_kern.h>
+}
+
+#include <IOKit/IOLib.h>
+#include <IOKit/IOMemoryDescriptor.h>
+
+
+OSMallocTag bf_mem_tag = NULL;
+extern vm_map_t kernel_map;
+extern int kernel_pmap;
+extern "C" kern_return_t kmem_alloc(vm_map_t        map,
+                                    vm_offset_t     *addrp,
+                                    vm_size_t       size,
+                                    vm_prot_t        prot);
+
+typedef int pmap_t;
+extern ppnum_t pmap_find_phys(pmap_t pmap, addr64_t va);
 
 void *
 platform_alloc(int64_t len)
@@ -39,14 +57,16 @@ platform_alloc(int64_t len)
 
     if (len == 0)
     {
-        ALERT("platform_alloc: invalid length\n");
+        IOLog("platform_alloc: invalid length\n");
         return addr;
     }
 
-    addr = vmalloc(len);
+    addr = OSMalloc((uint32_t)len, bf_mem_tag);
 
     if (addr == NULL)
-        ALERT("platform_alloc: failed to vmalloc mem: %lld\n", len);
+    {
+        IOLog("platform_alloc: failed to vmalloc mem: %lld\n", len);
+    }
 
     return addr;
 }
@@ -54,43 +74,37 @@ platform_alloc(int64_t len)
 void *
 platform_alloc_exec(int64_t len)
 {
-    void *addr = NULL;
+    void *ptr = platform_alloc(len);
 
-    if (len == 0)
-    {
-        ALERT("platform_alloc_exec: invalid length\n");
-        return addr;
-    }
-
-    addr = __vmalloc(len, GFP_KERNEL, PAGE_KERNEL_EXEC);
-
-    if (addr == NULL)
-        ALERT("platform_alloc_exec: failed to vmalloc executable mem: %lld\n", len);
-
-    return addr;
+    return ptr;
 }
 
 void *
 platform_virt_to_phys(void *virt)
 {
-    if (is_vmalloc_addr(virt))
-        return (void *)page_to_phys(vmalloc_to_page(virt));
-    else
-        return (void *)virt_to_phys(virt);
+    void *ptr = 0x00;
+    IOMemoryDescriptor *mem_desc;
+
+    mem_desc = IOMemoryDescriptor::withAddress(virt, 4096, kIODirectionInOut);
+
+    mem_desc->prepare();
+
+    ptr = (void *)mem_desc->getPhysicalAddress();
+
+    return ptr;
 }
 
 void
 platform_free(void *addr, int64_t len)
 {
-    (void)len;
-
     if (addr == NULL)
     {
-        ALERT("platform_free: invalid address %p\n", addr);
+        IOLog("platform_free: invalid address %p\n", addr);
         return;
     }
 
-    vfree(addr);
+
+    OSFree(addr, (uint32_t)len, bf_mem_tag);
 }
 
 void
@@ -98,11 +112,11 @@ platform_free_exec(void *addr, int64_t len)
 {
     if (addr == NULL)
     {
-        ALERT("platform_free_exec: invalid address %p\n", addr);
+        IOLog("platform_free_exec: invalid address %p\n", addr);
         return;
     }
 
-    vfree(addr);
+    platform_free(addr, len);
 }
 
 void
@@ -124,17 +138,13 @@ platform_memcpy(void *dst, const void *src, int64_t num)
 }
 
 void
-platform_start(void)
+platform_start()
 {
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,0,0)
-    cr4_init_shadow();
-#endif
+
 }
 
 void
-platform_stop(void)
+platform_stop()
 {
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,0,0)
-    cr4_init_shadow();
-#endif
+
 }

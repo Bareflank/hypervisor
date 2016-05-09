@@ -23,14 +23,6 @@
 #ifndef DRIVER_ENTRY_INTERFACE_H
 #define DRIVER_ENTRY_INTERFACE_H
 
-#ifndef KERNEL
-#include <stdint.h>
-#else
-#include <types.h>
-#endif
-
-#include <debug_ring_interface.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -61,18 +53,35 @@ extern "C" {
 #define VMM_RUNNING 12
 #define VMM_CORRUPT 100
 
-/* ========================================================================== */
-/* Linux Interfaces                                                           */
-/* ========================================================================== */
-
-#ifdef __linux__
-
 #ifndef BAREFLANK_NAME
 #define BAREFLANK_NAME "bareflank"
 #endif
 
 #ifndef BAREFLANK_MAJOR
 #define BAREFLANK_MAJOR 150
+#endif
+
+#define IOCTL_ADD_MODULE_LENGTH_CMD 101
+#define IOCTL_ADD_MODULE_CMD 100
+#define IOCTL_LOAD_VMM_CMD 200
+#define IOCTL_UNLOAD_VMM_CMD 300
+#define IOCTL_START_VMM_CMD 400
+#define IOCTL_STOP_VMM_CMD 500
+#define IOCTL_DUMP_VMM_CMD 600
+#define IOCTL_VMM_STATUS_CMD 700
+
+#include <debug_ring_interface.h>
+
+/* ========================================================================== */
+/* Linux Interfaces                                                           */
+/* ========================================================================== */
+
+#ifdef __linux__
+
+#ifndef KERNEL
+#include <stdint.h>
+#else
+#include <types.h>
 #endif
 
 /**
@@ -83,7 +92,7 @@ extern "C" {
  *
  * @param arg length of the module to be added in bytes
  */
-#define IOCTL_ADD_MODULE_LENGTH _IOW(BAREFLANK_MAJOR, 101, int64_t *)
+#define IOCTL_ADD_MODULE_LENGTH _IOW(BAREFLANK_MAJOR, IOCTL_ADD_MODULE_LENGTH_CMD, int64_t *)
 
 /**
  * Add Module
@@ -96,7 +105,7 @@ extern "C" {
  * @param arg character buffer containing the module to add
  * @return
  */
-#define IOCTL_ADD_MODULE _IOW(BAREFLANK_MAJOR, 100, char *)
+#define IOCTL_ADD_MODULE _IOW(BAREFLANK_MAJOR, IOCTL_ADD_MODULE_CMD, char *)
 
 /**
  * Load VMM
@@ -105,7 +114,7 @@ extern "C" {
  * that the VMM must be in an unloaded state, and all of the modules must be
  * added using IOCTL_ADD_MODULE
  */
-#define IOCTL_LOAD_VMM _IO(BAREFLANK_MAJOR, 200)
+#define IOCTL_LOAD_VMM _IO(BAREFLANK_MAJOR, IOCTL_LOAD_VMM_CMD)
 
 /**
  * Unload VMM
@@ -116,7 +125,7 @@ extern "C" {
  * IOCTL_ADD_MODULE. If the VMM is to be loaded again, the modules must be
  * added first.
  */
-#define IOCTL_UNLOAD_VMM _IO(BAREFLANK_MAJOR, 300)
+#define IOCTL_UNLOAD_VMM _IO(BAREFLANK_MAJOR, IOCTL_UNLOAD_VMM_CMD)
 
 /**
  * Start VMM
@@ -126,7 +135,7 @@ extern "C" {
  * should have already been loaded prior to calling this IOCTL using
  * IOCTL_ADD_MODULE
  */
-#define IOCTL_START_VMM _IO(BAREFLANK_MAJOR, 400)
+#define IOCTL_START_VMM _IO(BAREFLANK_MAJOR, IOCTL_START_VMM_CMD)
 
 /**
  * Stop VMM
@@ -134,7 +143,7 @@ extern "C" {
  * This IOCTL tells the driver entry to stop the virtual machine monitor. Note
  * that this cannot be called while the vmm is not running.
  */
-#define IOCTL_STOP_VMM _IO(BAREFLANK_MAJOR, 500)
+#define IOCTL_STOP_VMM _IO(BAREFLANK_MAJOR, IOCTL_STOP_VMM_CMD)
 
 /**
  * Dump VMM
@@ -143,7 +152,7 @@ extern "C" {
  * ring withing the VMM. Note that the VMM must be loaded prior to calling
  * this IOCTL using IOCTL_LOAD_VMM
  */
-#define IOCTL_DUMP_VMM _IOR(BAREFLANK_MAJOR, 600, struct debug_ring_resources_t *)
+#define IOCTL_DUMP_VMM _IOR(BAREFLANK_MAJOR, IOCTL_DUMP_VMM_CMD, struct debug_ring_resources_t *)
 
 /**
  * VMM Status
@@ -151,7 +160,7 @@ extern "C" {
  * This queries the driver for it's current state. This can be called at any
  * time.
  */
-#define IOCTL_VMM_STATUS _IOR(BAREFLANK_MAJOR, 700, int64_t *)
+#define IOCTL_VMM_STATUS _IOR(BAREFLANK_MAJOR, IOCTL_VMM_STATUS_CMD, int64_t *)
 
 #endif
 
@@ -167,6 +176,24 @@ extern "C" {
 /* ========================================================================== */
 
 #ifdef __APPLE__
+#include <stdint.h>
+
+typedef struct bf_ioctl
+{
+    uint32_t command;
+    uint32_t size;
+    void *addr;
+} bf_ioctl_t;
+
+#define IOCTL_ADD_MODULE_LENGTH IOCTL_ADD_MODULE_LENGTH_CMD
+#define IOCTL_ADD_MODULE IOCTL_ADD_MODULE_CMD
+#define IOCTL_LOAD_VMM IOCTL_LOAD_VMM_CMD
+#define IOCTL_UNLOAD_VMM IOCTL_UNLOAD_VMM_CMD
+#define IOCTL_START_VMM IOCTL_START_VMM_CMD
+#define IOCTL_STOP_VMM IOCTL_STOP_VMM_CMD
+#define IOCTL_DUMP_VMM IOCTL_DUMP_VMM_CMD
+#define IOCTL_VMM_STATUS IOCTL_VMM_STATUS_CMD
+
 #endif
 
 #ifdef __cplusplus

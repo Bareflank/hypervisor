@@ -60,6 +60,10 @@
 
 #ifdef KERNEL
 #ifdef __APPLE__
+#include <IOKit/IOLib.h>
+#define INFO(...) IOLog(__VA_ARGS__)
+#define DEBUG(...) IOLog("[" BAREFLANK_NAME "]: " __VA_ARGS__)
+#define ALERT(...) IOLog("[" BAREFLANK_NAME " ERROR]: " __VA_ARGS__)
 #endif
 #endif
 

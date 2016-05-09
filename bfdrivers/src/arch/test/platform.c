@@ -78,8 +78,9 @@ platform_virt_to_phys(void *virt)
 }
 
 void
-platform_free(void *addr)
+platform_free(void *addr, int64_t len)
 {
+    (void)len;
     alloc_count--;
     free(addr);
 }
