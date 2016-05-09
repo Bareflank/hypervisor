@@ -78,6 +78,12 @@ LINUX_INCLUDE_PATHS+=
 LINUX_LIBS+=
 LINUX_LIBRARY_PATHS+=
 
+OSX_SOURCES+=
+OSX_SOURCES+=
+OSX_INCLUDE_PATHS+=
+OSX_LIBS+=
+OSX_LIBRARY_PATHS+=
+
 ################################################################################
 # Common
 ################################################################################

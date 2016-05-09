@@ -34,36 +34,36 @@
 int64_t
 bf_ioctl_open()
 {
-  return 5;
+    return 5;
 }
 
 int64_t
 bf_send_ioctl(int64_t fd, unsigned long request)
 {
-  (void)fd;
-  (void)request;
-  
-  return 0;
+    (void)fd;
+    (void)request;
+
+    return 0;
 }
 
 int64_t
 bf_read_ioctl(int64_t fd, unsigned long request, void *data)
 {
-  (void)fd;
-  (void)request;
-  (void)data;
+    (void)fd;
+    (void)request;
+    (void)data;
 
-  return 0;
+    return 0;
 }
 
 int64_t
 bf_write_ioctl(int64_t fd, unsigned long request, const void *data)
 {
-  (void)fd;
-  (void)request;
-  (void)data;
+    (void)fd;
+    (void)request;
+    (void)data;
 
-  return 0;
+    return 0;
 }
 
 // -----------------------------------------------------------------------------
@@ -81,8 +81,8 @@ ioctl_private::~ioctl_private()
 
 void ioctl_private::ioctl_write(bf_ioctl_t *in, bf_ioctl_t *out)
 {
-    size_t inStructSize = sizeof( bf_ioctl_t );
-    size_t outStructSize = sizeof( bf_ioctl_t );
+    size_t inStructSize = sizeof(bf_ioctl_t);
+    size_t outStructSize = sizeof(bf_ioctl_t);
 
     // Send the message to the kernel.
     IOConnectCallStructMethod(m_connect, 1, in, inStructSize, out, &outStructSize);
@@ -90,8 +90,8 @@ void ioctl_private::ioctl_write(bf_ioctl_t *in, bf_ioctl_t *out)
 
 void ioctl_private::ioctl_read(bf_ioctl_t *in, bf_ioctl_t *out)
 {
-    size_t inStructSize = sizeof( bf_ioctl_t );
-    size_t outStructSize = sizeof( bf_ioctl_t );
+    size_t inStructSize = sizeof(bf_ioctl_t);
+    size_t outStructSize = sizeof(bf_ioctl_t);
 
     // Send the message to the kernel.
     IOConnectCallStructMethod(m_connect, 1, in, inStructSize, out, &outStructSize);
@@ -102,31 +102,31 @@ ioctl_private::open()
 {
     io_iterator_t iterator;
     io_service_t service;
-    kern_return_t kernResult = IOServiceGetMatchingServices(kIOMasterPortDefault, IOServiceMatching("com_github_bareflank_bareflank"), &iterator);
+    kern_return_t kernResult = IOServiceGetMatchingServices(kIOMasterPortDefault, IOServiceMatching("org_bareflank_osx"), &iterator);
 
     // Make sure the service was located.
-    if (kernResult != KERN_SUCCESS) 
+    if (kernResult != KERN_SUCCESS)
     {
         throw unknown_command("IOServiceGetMatchingServices failed.\n");
     }
 
     // Get the service from the criteria listed above.
-    if ((service = IOIteratorNext( iterator )) != IO_OBJECT_NULL) 
+    if ((service = IOIteratorNext(iterator)) != IO_OBJECT_NULL)
     {
 
         // Now that the service is located, setup a connection to that service.
         kernResult = IOServiceOpen(service, mach_task_self(), 0, &m_connect);
-        
+
         // Make sure a connection was made.
-        if (kernResult != KERN_SUCCESS) 
+        if (kernResult != KERN_SUCCESS)
         {
 
             throw unknown_command("Unabled to get handle to the driver.\n");
         }
-    }   
+    }
 }
 
-int64_t 
+int64_t
 ioctl_private::bf_write_ioctl(int fd, uint32_t cmd, void *arg)
 {
     (void)fd;
@@ -143,7 +143,7 @@ ioctl_private::bf_write_ioctl(int fd, uint32_t cmd, void *arg)
     return out.command;
 }
 
-int64_t 
+int64_t
 ioctl_private::bf_read_ioctl(int fd, uint32_t cmd, void *arg)
 {
     (void)fd;
@@ -160,14 +160,14 @@ ioctl_private::bf_read_ioctl(int fd, uint32_t cmd, void *arg)
     return out.command;
 }
 
-int64_t 
+int64_t
 ioctl_private::bf_send_ioctl(int fd, uint32_t cmd)
 {
     (void)fd;
 
     bf_ioctl_t in = { 0, 0, 0 };
     bf_ioctl_t out = { 0, 0, 0 };
-    
+
     in.command = cmd;
     in.addr = 0;
     in.size = 0;
@@ -176,7 +176,7 @@ ioctl_private::bf_send_ioctl(int fd, uint32_t cmd)
 
     return out.command;
 }
-    
+
 
 void
 ioctl_private::call_ioctl_add_module_length(int64_t len)
@@ -198,7 +198,7 @@ ioctl_private::call_ioctl_add_module(const char *data)
     if (data == 0)
         throw unknown_command("data == NULL");
 
-    if (bf_write_ioctl(fd, IOCTL_ADD_MODULE, (void*)data) < 0)
+    if (bf_write_ioctl(fd, IOCTL_ADD_MODULE, (void *)data) < 0)
         throw ioctl_failed(IOCTL_ADD_MODULE);
 }
 

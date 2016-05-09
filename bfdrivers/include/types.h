@@ -35,29 +35,26 @@
 /* Linux Types                                                                */
 /* ========================================================================== */
 
-#ifdef KERNEL
-#ifdef __linux__
+#if defined(KERNEL) && defined(__linux__)
 #include <linux/types.h>
 #define PRId64 "lld"
-#endif
 #endif
 
 /* ========================================================================== */
 /* Windows Types                                                              */
 /* ========================================================================== */
 
-#ifdef KERNEL
-#ifdef _WIN32
-#endif
+#if defined(KERNEL) && defined(_WIN32)
 #endif
 
 /* ========================================================================== */
 /* OSX Types                                                                  */
 /* ========================================================================== */
 
-#ifdef KERNEL
-#ifdef __APPLE__
-#endif
+#if defined(KERNEL) && defined(__APPLE__)
+#define PRId64 "lld"
+#include <stdint.h>
+#define NULL 0
 #endif
 
 #endif

@@ -34,13 +34,18 @@
 #define INFO(...)
 #endif
 
-#ifdef LINUX_KERNEL
+#ifdef KERNEL
+#if defined(__linux__)
 #include <linux/module.h>
 #define ALERT(...) printk("[ELF ALERT]: " __VA_ARGS__)
-
 #else
+#define ALERT(...) IOLog("[ELF ALERT]: " __VA_ARGS__)
+#endif
+#else
+#ifdef __linux__
 #include <stdio.h>
 #define ALERT(...) printf("[ELF ALERT]: " __VA_ARGS__)
+#endif
 #endif
 
 /* -------------------------------------------------------------------------- */

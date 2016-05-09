@@ -25,10 +25,16 @@
 
 #include <crt.h>
 
-#ifdef KERNEL
+#if defined(KERNEL) && defined(__linux__)
 #include <linux/types.h>
 #else
+#ifdef __linux__
 #include <inttypes.h>
+#endif
+#endif
+
+#if defined(KERNEL) && defined(__osx__)
+#include <stdint.h>
 #endif
 
 #pragma pack(push, 1)

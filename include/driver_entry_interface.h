@@ -178,10 +178,11 @@ extern "C" {
 #ifdef __APPLE__
 #include <stdint.h>
 
-typedef struct bf_ioctl {
-	uint32_t command;
-	uint32_t size;
-	void *addr;
+typedef struct bf_ioctl
+{
+    uint32_t command;
+    uint32_t size;
+    void *addr;
 } bf_ioctl_t;
 
 #define IOCTL_ADD_MODULE_LENGTH IOCTL_ADD_MODULE_LENGTH_CMD
