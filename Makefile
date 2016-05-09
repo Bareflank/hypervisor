@@ -64,9 +64,6 @@ include ./common/common_subdir.mk
 .PHONY: linux_load
 .PHONY: linux_unload
 .PHONY: linux_clean
-.PHONY: osx_load
-.PHONY: osx_unload
-.PHONY: osx_clean
 .PHONY: load
 .PHONY: unload
 .PHONY: start
@@ -94,16 +91,6 @@ linux_unload: force
 	make clean
 
 linux_clean: linux_unload
-
-osx_load: force
-	@cd bfdrivers/src/arch/osx; \
-	echo osx_load
-
-osx_unload: force
-	@cd bfdrivers/src/arch/osx; \
-	echo osx_unload
-
-osx_clean: osx_unload
 
 load: force
 	@cd bfm/bin/native; \
