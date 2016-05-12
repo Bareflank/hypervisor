@@ -1,0 +1,9 @@
+################################################################################
+# Default Modules                                                              #
+################################################################################
+
+../../../bfvmm/bin/cross/libc++.so
+../../../bfvmm/bin/cross/libmemory_manager.so
+../../../bfvmm/bin/cross/libserial.so
+../../../bfvmm/bin/cross/libintrinsics.so
+../../../bfvmm/bin/cross/libmisc.so
