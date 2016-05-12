@@ -21,7 +21,7 @@ minimalistic, providing only the scaffolding needed
 to construct more complete/complicated hypervisors including:
 - Bare Metal Hypervisors (also known as type 1, like [Xen](http://www.xenproject.org))
 - Late Launch Hypervisors (also known as type 2, like [VirtualBox](https://www.virtualbox.org))
-- Host-Only Hypervisors (no guests, like [MoRE](https://github.com/ainfosec/MoRE) and [SimpleVisor](https://github.com/ionescu007/SimpleVisor))
+- Host-Only Hypervisors (no guests, like [MoRE](https://github.com/ainfosec/MoRE), [SimpleVisor](https://github.com/ionescu007/SimpleVisor)) and [HyperPlatform](https://github.com/tandasat/HyperPlatform)
 
 The core business logic will remain in the hypervisors that extend
 Bareflank, and not in Bareflank itself.
@@ -207,3 +207,6 @@ https://github.com/ainfosec/MoRE
 
 **SimpleVisor:**  <br>
 https://github.com/ionescu007/SimpleVisor
+
+**HyperPlatform:**  <br>
+https://github.com/tandasat/HyperPlatform
