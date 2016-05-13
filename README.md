@@ -210,3 +210,6 @@ https://github.com/ionescu007/SimpleVisor
 
 **HyperPlatform:**  <br>
 https://github.com/tandasat/HyperPlatform
+
+**HyperBone:**  <br>
+https://github.com/DarthTon/HyperBone
