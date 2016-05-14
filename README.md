@@ -1,5 +1,5 @@
 
-<img src="https://raw.githubusercontent.com/Bareflank/hypervisor/master/doc/images/logo-black.png" width="501">
+<img src="https://raw.githubusercontent.com/Bareflank/hypervisor/master/doc/images/bareflank_logo.jpg" width="501">
 
 ## Description
 
