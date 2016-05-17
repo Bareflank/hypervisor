@@ -44,6 +44,7 @@ Version 1.1 TODO:
 - All structs used in C++ only should have constructors
 - the debug.h code should use std::cerr were needed
 - per-core debugging should be done
+- #define for line endings for bfendl
 
 Version 1.2 TODO:
 - UEFI Support (i.e. type 1)
