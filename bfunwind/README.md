@@ -20,7 +20,7 @@ This library is very specific to the architecture as it usually has to have some
 
 Since "throw" statements in C++ code generate \_\_cxa_xxx function calls, there is no needed to link the unwind library to every single module as they contain symbols for \_\_cxa_xxx and not \_\_UnwindRaiseException. Instead, the unwind library needs to be linked to the libc++abi, and the libc++abi needs to be available at load time. Currently, libc++abi is statically linked to libc++.so, which is loaded by the driver / ELF loader with the rest of the VMM. In future version of Bareflank, libc.so, libc++.so and libc++abi.so will all be loaded by the driver / ELF loader separately and the unwind library will be statically linked to libc++abi.so only.
 
-The code in the unwind library is organized by the spec that each file implements (since there are multiple specs to get unwinding to work). Generally speaking, when an exception is thrown, the \_\_UnwindRaiseException function is called which is located here:
+The code in the unwind library is organized by the spec that each file implements (since there are multiple specs to get unwinding to work). Generally speaking, when an exception is thrown, the \_\_Unwind\_RaiseException function is called which is located here:
 
 [ia64_cxx_abi](https://github.com/Bareflank/hypervisor/blob/master/bfunwind/src/ia64_cxx_abi.cpp)
 
