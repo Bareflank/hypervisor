@@ -12,9 +12,9 @@ All of these unwind libraries are tightly coupled to user space, and in some cas
 
 ## How It is Used
 
-When the "throw" keyword is used in C++, the compiler actually replaces this with a call to \_\_cxa_allocate, and \_\_cxa_throw. The allocate function allocates the exception object, and the throw performs the stack unwinding. These functions are provided by the C++ ABI. In GCC this would normally be libsupc++. Bareflank currently uses libc++, and thus uses libc++abi instead of libsupc++. The C++ ABI handles most of the C++ specifics, but eventually makes a call to \_\_UnwindRaiseException which is a IA64 C++ ABI specific function call (with it's own specification) that must be provided by an "unwind" library.
+When the "throw" keyword is used in C++, the compiler actually replaces this with a call to \_\_cxa_allocate, and \_\_cxa_throw. The allocate function allocates the exception object, and the throw performs the stack unwinding. These functions are provided by the C++ ABI. In GCC this would normally be libsupc++. Bareflank currently uses libc++, and thus uses libc++abi instead of libsupc++. The C++ ABI handles most of the C++ specifics, but eventually makes a call to \_\_Unwind\_RaiseException which is a IA64 C++ ABI specific function call (with it's own specification) that must be provided by an "unwind" library.
 
-[call to \_\_UnwindRaiseException](https://github.com/llvm-mirror/libcxxabi/blob/master/src/cxa_exception.cpp#L195)
+[call to \_\_Unwind\_RaiseException](https://github.com/llvm-mirror/libcxxabi/blob/master/src/cxa_exception.cpp#L195)
 
 This library is very specific to the architecture as it usually has to have some raw assembly to perform the "jump" into the function that contains the catch statement (as the registers have to be restored). Currently, Bareflank has support for x86_64, but will eventually have support for ARM 64bit as well.
 
