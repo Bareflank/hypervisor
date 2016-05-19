@@ -24,7 +24,7 @@ The code in the unwind library is organized by the spec that each file implement
 
 [ia64_cxx_abi](https://github.com/Bareflank/hypervisor/blob/master/bfunwind/src/ia64_cxx_abi.cpp)
 
-The \_\_UnwindRaiseException function saves the register state, and then uses the program counter (i.e. rip for Intel x86_64), and looks up the FDE assocaited with the PC. The FDEs are stored in the ".eh_frame" section in each ELF module. The following code is used to get the FDE:
+The \_\_Unwind\_RaiseException function saves the register state, and then uses the program counter (i.e. rip for Intel x86_64), and looks up the FDE assocaited with the PC. The FDEs are stored in the ".eh_frame" section in each ELF module. The following code is used to get the FDE:
 
 [eh_frame](https://github.com/Bareflank/hypervisor/blob/master/bfunwind/src/eh_frame.cpp)
 
