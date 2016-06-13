@@ -248,8 +248,13 @@ footer {
   -webkit-font-smoothing:subpixel-antialiased;
 }
 
+div.post-title {
+  color:#39c;
+}
+
 div.post-body {
-  margin-left: 50px
+  margin-left: 50px;
+  font-size: 12px;
 }
 
 @media print, screen and (max-width: 960px) {
