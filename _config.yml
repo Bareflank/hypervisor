@@ -1,4 +1,5 @@
 name: Bareflank Hypervisor RSS
+url: http://bareflank.github.io/hypervisor/
 
 gems:
   - jekyll-sitemap
