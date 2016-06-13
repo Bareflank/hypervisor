@@ -1,3 +1,7 @@
+---
+# this is an empty front matter
+---
+
 <?xml version="1.0" encoding="utf-8"?>
 {% if site.url %}
   {% assign url_base = site.url | append: site.baseurl %}
