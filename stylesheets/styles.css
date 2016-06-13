@@ -257,6 +257,10 @@ div.post-body {
   font-size: 11px;
 }
 
+ul.post-list {
+  padding: 0;
+}
+
 @media print, screen and (max-width: 960px) {
 
   div.wrapper {
