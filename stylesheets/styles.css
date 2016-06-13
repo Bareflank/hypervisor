@@ -253,8 +253,8 @@ div.post-title {
 }
 
 div.post-body {
-  margin-left: 50px;
-  font-size: 12px;
+  margin-left: 20px;
+  font-size: 11px;
 }
 
 @media print, screen and (max-width: 960px) {
