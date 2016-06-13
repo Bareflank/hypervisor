@@ -255,7 +255,7 @@ div.post-body {
 
 ul.post-list {
   list-style-position: inside;
-  padding-left: 2px;
+  padding-left: 5px;
 }
 
 @media print, screen and (max-width: 960px) {
