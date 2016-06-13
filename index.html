@@ -86,9 +86,7 @@ has been documented to explain what it does, and how it works.
 
 <div>
   {% for post in site.posts %}
-    <div class=post-title>
-      {{ page.title }}
-    </div>
+    <h1><a href="{{ site.baseurl }}{{ post.url }}">{{ post.title }}</a></h1>
     <div class="post-body">
       {{ post.excerpt }}
       Written on {{ page.date | date: "%B %e, %Y" }}
