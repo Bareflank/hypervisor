@@ -88,7 +88,7 @@ has been documented to explain what it does, and how it works.
   {% for post in site.posts %}
     <a href="{{ site.baseurl }}/hypervisor/{{ post.url }}">{{ post.title }} - {{ post.date | date: "%B %e, %Y" }}</a>
     <div class="post-body">
-      {{ post.excerpt }}
+      {{ post.content }}
     </div>
     <br>
   {% endfor %}
