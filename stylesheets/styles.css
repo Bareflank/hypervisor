@@ -253,9 +253,6 @@ div.post-body {
   font-size: 11.5px;
 }
 
-ul.post-list {
-  padding: 2px;
-}
 
 @media print, screen and (max-width: 960px) {
 
