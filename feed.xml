@@ -9,6 +9,7 @@
   {% assign url_base = site.github.url %}
 {% endif %}
 <feed xmlns="http://www.w3.org/2005/Atom"{% if site.lang %} xml:lang="{{ site.lang }}"{% endif %}>
+  <icon>https://raw.githubusercontent.com/Bareflank/hypervisor/master/doc/images/bareflank_favicon.png</icon>
   <logo>https://raw.githubusercontent.com/Bareflank/hypervisor/master/doc/images/bareflank_favicon.png</logo>
   <link href="{{ page.url | prepend: url_base }}" rel="self" type="application/atom+xml" />
   <link href="{{ url_base }}/" rel="alternate" type="text/html" {% if site.lang %}hreflang="{{ site.lang }}" {% endif %}/>
