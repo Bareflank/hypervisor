@@ -1,0 +1,20 @@
+The Bareflank Team is proud to announce the first release of our hypervisor, version 1.0.0.
+
+NOTES:
+
+<ul>
+  <li>Linux support</li>
+  <li>Single core support (core 0)</li>
+  <li>Custom C runtime library for constructor / destructor support and registering exception handlers</li>
+  <li>Custom driver entry logic for loading the VMM</li>
+  <li>Custom ELF loader for loading the VMM modules</li>
+  <li>Userspace managament application (BFM) for starting / stopping the hypervisor</li>
+  <li>Custom kernel-safe unwind library for adding exception support to the VMM</li>
+  <li>Basic VMM with support for Intel x86_64. The VMM places the Host OS into a virtual machine and back out. Currently can be extended to provide additional functionality </li>
+  <li>Custom build environment</li>
+  <li>Complete set of unit tests</li>
+  <li>Documentation</li>
+  <li>Scripts for setting up Unbuntu, Debian and Fedora build environments.</li>
+</ul>
+
+
