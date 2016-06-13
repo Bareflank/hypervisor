@@ -253,6 +253,10 @@ div.post-body {
   font-size: 11.5px;
 }
 
+ul.post-list {
+  list-style-position: inside;
+  padding-left: 0;
+}
 
 @media print, screen and (max-width: 960px) {
 
