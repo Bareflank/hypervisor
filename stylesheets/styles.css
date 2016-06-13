@@ -248,6 +248,10 @@ footer {
   -webkit-font-smoothing:subpixel-antialiased;
 }
 
+post-body {
+  margin-left: 50px
+}
+
 @media print, screen and (max-width: 960px) {
 
   div.wrapper {

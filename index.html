@@ -86,8 +86,11 @@ has been documented to explain what it does, and how it works.
 
 <div>
   {% for post in site.posts %}
-    <div>
+    <div class="post-body">
       {{ post.excerpt }}
+      <div class="date">
+      Written on {{ page.date | date: "%B %e, %Y" }}
+      </div>
     </div>
   {% endfor %}
 </div>
