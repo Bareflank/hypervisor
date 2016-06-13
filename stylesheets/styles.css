@@ -248,7 +248,7 @@ footer {
   -webkit-font-smoothing:subpixel-antialiased;
 }
 
-#post-body {
+div.post-body {
   margin-left: 50px
 }
 
