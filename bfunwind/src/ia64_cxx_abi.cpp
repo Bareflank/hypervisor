@@ -20,9 +20,27 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #include <abort.h>
+#include <dwarf4.h>
 #include <eh_frame.h>
 #include <registers.h>
 #include <ia64_cxx_abi.h>
+
+// -----------------------------------------------------------------------------
+// Context
+// -----------------------------------------------------------------------------
+
+struct _Unwind_Context
+{
+    fd_entry fde;
+    register_state *state;
+    _Unwind_Exception *exception_object;
+
+    _Unwind_Context(register_state *s, _Unwind_Exception *eo) :
+        state(s),
+        exception_object(eo)
+    {
+    }
+};
 
 // -----------------------------------------------------------------------------
 // Helpers
@@ -38,8 +56,8 @@ private_personality(_Unwind_Action action, _Unwind_Context *context)
 
     auto pr = ((__personality_routine *)pl)[0];
 
-    if (pr == NULL)
-        ABORT("personality routine is NULL");
+    if (pr == 0)
+        ABORT("personality routine is 0");
 
     return pr(1, action,
               context->exception_object->exception_class,
@@ -178,7 +196,7 @@ _Unwind_Resume(_Unwind_Exception *exception_object)
 extern "C" void
 _Unwind_DeleteException(_Unwind_Exception *exception_object)
 {
-    if (exception_object->exception_cleanup != NULL)
+    if (exception_object->exception_cleanup != 0)
         (*exception_object->exception_cleanup)(_URC_FOREIGN_EXCEPTION_CAUGHT,
                                                exception_object);
 }
@@ -224,8 +242,8 @@ _Unwind_GetRegionStart(_Unwind_Context *context)
 extern "C" uintptr_t
 _Unwind_GetIPInfo(_Unwind_Context *context, int *ip_before_insn)
 {
-    if (ip_before_insn == NULL)
-        ABORT("ip_before_insn == NULL");
+    if (ip_before_insn == 0)
+        ABORT("ip_before_insn == 0");
 
     *ip_before_insn = 0;
     return _Unwind_GetIP(context);

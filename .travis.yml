@@ -1,26 +1,22 @@
 language: cpp
 
+services:
+- docker
+
 compiler:
 - gcc
 
 env:
-- GCC_BASE=510
-- GCC_BASE=520
-- GCC_BASE=530
-- GCC_BASE=610
-
-before_install:
-- export SILENCE="defined"
-- if [ "$GCC_BASE" = "510" ]; then export GCC_URL="https://ftp.gnu.org/gnu/gcc/gcc-5.1.0/gcc-5.1.0.tar.bz2";  fi
-- if [ "$GCC_BASE" = "520" ]; then export GCC_URL="https://ftp.gnu.org/gnu/gcc/gcc-5.2.0/gcc-5.2.0.tar.bz2";  fi
-- if [ "$GCC_BASE" = "530" ]; then export GCC_URL="https://ftp.gnu.org/gnu/gcc/gcc-5.3.0/gcc-5.3.0.tar.bz2";  fi
-- if [ "$GCC_BASE" = "610" ]; then export GCC_URL="https://ftp.gnu.org/gnu/gcc/gcc-6.1.0/gcc-6.1.0.tar.bz2";  fi
+- COMPILER=gcc_510
+- COMPILER=gcc_520
+- COMPILER=gcc_530
+- COMPILER=gcc_540
+- COMPILER=gcc_610
 
 install:
 - if [[ -n $(./tools/astyle/linux/run.sh | grep Formatted) ]]; then echo "You must run astyle before submitting a pull request"; exit -1; fi
-- sudo apt-get update
-- if ! travis_wait 40 ./tools/scripts/setup-ubuntu.sh; then cat ~/setup-ubuntu_stderr.log; cat ~/create-cross-compiler_stderr.log; fi
+- travis_wait 40 ./tools/scripts/setup-ubuntu.sh -g $COMPILER
 
 script:
-- make
+- make -j2
 - make unittest

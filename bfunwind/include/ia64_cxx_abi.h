@@ -23,7 +23,6 @@
 #define IA64_CXX_ABI_H
 
 #include <stdint.h>
-#include <dwarf4.h>
 
 struct _Unwind_Exception;
 
@@ -167,32 +166,8 @@ struct _Unwind_Exception
 
 /// The Unwind Context, is a pointer that is opaque to layers 1 and 2, and
 /// is used by layer 3 to store the information needed to do stack unwinding.
-/// In our case, this context stores the layer 1/layer 2 exception object,
-/// it stores the current register state (which is modified as stack
-/// unwinding is performed) and it store the FDE that describes the CFA for
-/// the register state that is stored. The FDE will also be changed as the
-/// stack is unwound so that it always points to the FDE for the CFA for the
-/// currently stored register state.
 ///
-/// @var _Unwind_Context::fde
-///     the FDE that describes the CFA for this register state
-/// @var _Unwind_Context::state
-///     the current register state
-/// @var _Unwind_Context::exception_object
-///     the exception object that layer 2 created
-///
-struct _Unwind_Context
-{
-    fd_entry fde;
-    register_state *state;
-    _Unwind_Exception *exception_object;
-
-    _Unwind_Context(register_state *s, _Unwind_Exception *eo) :
-        state(s),
-        exception_object(eo)
-    {
-    }
-};
+struct _Unwind_Context;
 
 // -----------------------------------------------------------------------------
 // 1.3 Throwing an Exception

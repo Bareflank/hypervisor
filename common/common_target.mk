@@ -79,11 +79,11 @@ NATIVE_ASM:=nasm
 NATIVE_LD:=g++
 NATIVE_AR:=ar
 
-CROSS_CC:=~/opt/cross/bin/x86_64-bareflank-gcc
-CROSS_CXX:=~/opt/cross/bin/x86_64-bareflank-g++
-CROSS_ASM:=~/opt/cross/bin/nasm
-CROSS_LD:=~/opt/cross/bin/x86_64-bareflank-g++
-CROSS_AR:=~/opt/cross/bin/x86_64-elf-ar
+CROSS_CC:=$(BUILD_ABS)/build_scripts/x86_64-bareflank-gcc
+CROSS_CXX:=$(BUILD_ABS)/build_scripts/x86_64-bareflank-g++
+CROSS_ASM:=$(BUILD_ABS)/build_scripts/x86_64-bareflank-nasm
+CROSS_LD:=$(BUILD_ABS)/build_scripts/x86_64-bareflank-g++
+CROSS_AR:=$(BUILD_ABS)/build_scripts/x86_64-bareflank-ar
 
 RM:=rm -rf
 MD:=mkdir -p
@@ -363,7 +363,6 @@ CROSS_DEFINES+=_HAVE_LONG_DOUBLE
 CROSS_DEFINES+=_LDBL_EQ_DBL
 CROSS_DEFINES+=_POSIX_TIMERS
 CROSS_DEFINES+=MALLOC_PROVIDED
-CROSS_DEFINES+=_NEWLIB_VERSION
 
 CROSS_CCFLAGS+=$(addprefix -D, $(strip $(CROSS_DEFINES)))
 CROSS_CXXFLAGS+=$(addprefix -D, $(strip $(CROSS_DEFINES)))
@@ -440,6 +439,9 @@ NATIVE_ARFLAGS:=$(strip $(NATIVE_ARFLAGS))
 # Target Settings
 ################################################################################
 
+Makefile: $(HYPER_REL)/Makefile.bf
+	@ BUILD_ABS=$(BUILD_ABS) BUILD_REL=$(BUILD_REL) HYPER_REL=$(HYPER_REL) $(HYPER_ABS)/configure.sh -r --this-is-make
+
 .PHONY: all
 .PHONY: cross
 .PHONY: native
@@ -474,7 +476,7 @@ force: ;
 
 ifeq ($(TARGET_CROSS_COMPILED), true)
 
-native: $(CROSS_OBJDIR) $(CROSS_OUTDIR) cross_target
+cross: $(CROSS_OBJDIR) $(CROSS_OUTDIR) cross_target
 
 $(CROSS_OBJDIR):
 	@$(MD) $(CROSS_OBJDIR)
@@ -483,15 +485,16 @@ $(CROSS_OUTDIR):
 	@$(MD) $(CROSS_OUTDIR)
 
 $(CROSS_OBJDIR)/%.o: %.c $(CROSS_OBJDIR)/%.d
-	$(CROSS_CC) $< -o $@ -c $(CROSS_CCFLAGS) $(CROSS_DEPFLAGS)
+	$(CROSS_CC) $(realpath $<) -o $@ -c $(CROSS_CCFLAGS) $(CROSS_DEPFLAGS)
 	$(CROSS_POSTCOMPILE)
 
 $(CROSS_OBJDIR)/%.o: %.cpp $(CROSS_OBJDIR)/%.d
-	$(CROSS_CXX) $< -o $@ -c $(CROSS_CXXFLAGS) $(CROSS_DEPFLAGS)
+	$(CROSS_CXX) $(realpath $<) -o $@ -c $(CROSS_CXXFLAGS) $(CROSS_DEPFLAGS)
 	$(CROSS_POSTCOMPILE)
 
 $(CROSS_OBJDIR)/%.o: %.asm
-	$(CROSS_ASM) $< -o $@ $(CROSS_ASMFLAGS)
+	@[[ ! -d $(CROSS_OBJDIR) ]] && $(MD) $(CROSS_OBJDIR) || $(TEST) 1
+	$(CROSS_ASM) $(realpath $<) -o $@ $(CROSS_ASMFLAGS)
 
 $(CROSS_TARGET_BIN): $(CROSS_OBJECTS)
 	$(CROSS_LD) -o $@ $^ $(CROSS_LDFLAGS)
@@ -543,15 +546,16 @@ $(NATIVE_OUTDIR):
 	@$(MD) $(NATIVE_OUTDIR)
 
 $(NATIVE_OBJDIR)/%.o: %.c $(NATIVE_OBJDIR)/%.d
-	$(NATIVE_CC) $< -o $@ -c $(NATIVE_CCFLAGS) $(NATIVE_DEPFLAGS)
+	$(NATIVE_CC) $(realpath $<) -o $@ -c $(NATIVE_CCFLAGS) $(NATIVE_DEPFLAGS)
 	$(NATIVE_POSTCOMPILE)
 
 $(NATIVE_OBJDIR)/%.o: %.cpp $(NATIVE_OBJDIR)/%.d
-	$(NATIVE_CXX) $< -o $@ -c $(NATIVE_CXXFLAGS) $(NATIVE_DEPFLAGS)
+	$(NATIVE_CXX) $(realpath $<) -o $@ -c $(NATIVE_CXXFLAGS) $(NATIVE_DEPFLAGS)
 	$(NATIVE_POSTCOMPILE)
 
 $(NATIVE_OBJDIR)/%.o: %.asm
-	$(NATIVE_ASM) $< -o $@ $(NATIVE_ASMFLAGS)
+	@[[ ! -d $(NATIVE_OBJDIR) ]] && $(MD) $(NATIVE_OBJDIR) || $(TEST) 1
+	$(NATIVE_ASM) $(realpath $<) -o $@ $(NATIVE_ASMFLAGS)
 
 $(NATIVE_TARGET_BIN): $(NATIVE_OBJECTS)
 	$(NATIVE_LD) $^ -o $@ $(NATIVE_LDFLAGS)
