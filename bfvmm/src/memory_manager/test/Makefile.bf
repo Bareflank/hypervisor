@@ -51,6 +51,8 @@ NATIVE_OUTDIR+=%BUILD_REL%/../bin
 
 SOURCES+=test.cpp
 SOURCES+=test_memory_manager.cpp
+SOURCES+=test_page_table_x64.cpp
+SOURCES+=test_page_table_entry_x64.cpp
 HEADERS=
 
 INCLUDE_PATHS+=./

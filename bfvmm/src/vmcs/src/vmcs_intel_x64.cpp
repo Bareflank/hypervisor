@@ -127,6 +127,11 @@ vmcs_intel_x64::promote()
     idt_reg.base = vmread(VMCS_GUEST_IDTR_BASE);
     idt_reg.limit = vmread(VMCS_GUEST_IDTR_LIMIT);
 
+    m_intrinsics->write_cr0(vmread(VMCS_GUEST_CR0));
+    m_intrinsics->write_cr3(vmread(VMCS_GUEST_CR3));
+    m_intrinsics->write_cr4(vmread(VMCS_GUEST_CR4));
+    m_intrinsics->write_dr7(vmread(VMCS_GUEST_DR7));
+
     m_intrinsics->write_gdt(&gdt_reg);
     m_intrinsics->write_idt(&idt_reg);
 
@@ -144,11 +149,6 @@ vmcs_intel_x64::promote()
     m_intrinsics->write_fs(vmread(VMCS_GUEST_FS_SELECTOR));
     m_intrinsics->write_gs(vmread(VMCS_GUEST_GS_SELECTOR));
     m_intrinsics->write_tr(vmread(VMCS_GUEST_TR_SELECTOR));
-
-    m_intrinsics->write_cr0(vmread(VMCS_GUEST_CR0));
-    m_intrinsics->write_cr3(vmread(VMCS_GUEST_CR3));
-    m_intrinsics->write_cr4(vmread(VMCS_GUEST_CR4));
-    m_intrinsics->write_dr7(vmread(VMCS_GUEST_DR7));
 
     m_intrinsics->write_msr(IA32_DEBUGCTL_MSR, ia32_debugctl_msr);
     m_intrinsics->write_msr(IA32_PAT_MSR, ia32_pat_msr);

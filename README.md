@@ -175,7 +175,7 @@ Target: September 2016
 * Multi-Core Support
 * Windows Support
 * Updated C++ Environment
-* Isolated VMM
+* ~~Isolated VMM~~
 
 ### Version 1.2
 

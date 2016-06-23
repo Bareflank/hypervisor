@@ -65,7 +65,7 @@ public:
     ///
     /// Get an instance to the singleton class.
     ///
-    static memory_manager *instance();
+    static memory_manager *instance() noexcept;
 
     /// Free Blocks
     ///
@@ -171,6 +171,20 @@ public:
     ///     aligned, or if the physical address is not page aligned.
     ///
     virtual void add_mdl(memory_descriptor *mdl, int64_t num);
+
+    /// Get Virt to Phys Map
+    ///
+    /// @return the entire virtual to physical memory descriptor map
+    ///
+    virtual const std::map<uintptr_t, memory_descriptor> &virt_to_phys_map() const noexcept
+    { return m_virt_to_phys_map; }
+
+    /// Get Phys to Virt Map
+    ///
+    /// @return the entire physical to virtual memory descriptor map
+    ///
+    virtual const std::map<uintptr_t, memory_descriptor> &phys_to_virt_map() const noexcept
+    { return m_phys_to_virt_map; }
 
 public:
 

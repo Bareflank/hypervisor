@@ -108,6 +108,7 @@ unload: force
 	@sudo LD_LIBRARY_PATH=%BUILD_ABS%/makefiles/bfm/bin/native/ %BUILD_ABS%/makefiles/bfm/bin/native/bfm unload
 
 start: force
+	@sync
 	@sudo LD_LIBRARY_PATH=%BUILD_ABS%/makefiles/bfm/bin/native/ %BUILD_ABS%/makefiles/bfm/bin/native/bfm start
 
 stop: force

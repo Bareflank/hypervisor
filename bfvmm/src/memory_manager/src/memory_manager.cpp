@@ -111,7 +111,7 @@ guard_exceptions(T func)
 // -----------------------------------------------------------------------------
 
 memory_manager *
-memory_manager::instance()
+memory_manager::instance() noexcept
 {
     static memory_manager self;
     return &self;
@@ -327,9 +327,6 @@ memory_manager::add_mdl(memory_descriptor *mdl, int64_t num)
     for (auto i = 0; i < num; i++)
     {
         const auto &md = mdl[i];
-
-        if (md.size != MAX_PAGE_SIZE)
-            throw invalid_mdl("md.size != MAX_PAGE_SIZE", i);
 
         if (((uintptr_t)md.virt & (MAX_PAGE_SIZE - 1)) != 0)
             throw invalid_mdl("virt address is not page aligned", i);

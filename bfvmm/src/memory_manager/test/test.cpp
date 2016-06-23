@@ -55,7 +55,6 @@ memory_manager_ut::list()
     this->test_memory_manager_malloc_alloc_fragment();
     this->test_memory_manager_add_mdl_invalid_mdl();
     this->test_memory_manager_add_mdl_invalid_num();
-    this->test_memory_manager_add_mdl_invalid_size();
     this->test_memory_manager_add_mdl_unaligned_physical();
     this->test_memory_manager_add_mdl_unaligned_virtual();
     this->test_memory_manager_virt_to_phys_unknown();
@@ -66,6 +65,39 @@ memory_manager_ut::list()
     this->test_memory_manager_phys_to_virt_random_address();
     this->test_memory_manager_phys_to_virt_upper_limit();
     this->test_memory_manager_phys_to_virt_lower_limit();
+
+    this->test_page_table_x64_no_entry();
+    this->test_page_table_x64_with_entry();
+    this->test_page_table_x64_add_page_success();
+    this->test_page_table_x64_add_two_pages_no_added_mem_success();
+    this->test_page_table_x64_add_two_pages_with_added_mem_success();
+    this->test_page_table_x64_add_many_pages_success();
+    this->test_page_table_x64_add_page_twice_failure();
+    this->test_page_table_x64_table_phys_addr_success();
+    this->test_page_table_x64_table_phys_addr_failure();
+
+    this->test_page_table_entry_x64_null_present();
+    this->test_page_table_entry_x64_present();
+    this->test_page_table_entry_x64_null_rw();
+    this->test_page_table_entry_x64_rw();
+    this->test_page_table_entry_x64_null_us();
+    this->test_page_table_entry_x64_us();
+    this->test_page_table_entry_x64_null_pwt();
+    this->test_page_table_entry_x64_pwt();
+    this->test_page_table_entry_x64_null_pcd();
+    this->test_page_table_entry_x64_pcd();
+    this->test_page_table_entry_x64_null_accessed();
+    this->test_page_table_entry_x64_accessed();
+    this->test_page_table_entry_x64_null_dirty();
+    this->test_page_table_entry_x64_dirty();
+    this->test_page_table_entry_x64_null_pat();
+    this->test_page_table_entry_x64_pat();
+    this->test_page_table_entry_x64_null_global();
+    this->test_page_table_entry_x64_global();
+    this->test_page_table_entry_x64_null_nx();
+    this->test_page_table_entry_x64_nx();
+    this->test_page_table_entry_x64_null_phys_addr();
+    this->test_page_table_entry_x64_phys_addr();
 
     return true;
 }

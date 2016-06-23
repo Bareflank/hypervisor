@@ -243,21 +243,9 @@ memory_manager_ut::test_memory_manager_add_mdl_invalid_mdl()
 void
 memory_manager_ut::test_memory_manager_add_mdl_invalid_num()
 {
-    memory_descriptor mdl[1] = {{0, 0, 0, 0}};
+    memory_descriptor mdl[1] = {{0, 0, 0}};
 
     EXPECT_EXCEPTION(g_mm->add_mdl(mdl, 0), std::invalid_argument);
-}
-
-void
-memory_manager_ut::test_memory_manager_add_mdl_invalid_size()
-{
-    memory_descriptor mdl[1] = {{
-            (void *)0x12345000,
-            (void *)0x54321000, 10, 0
-        }
-    };
-
-    EXPECT_EXCEPTION(g_mm->add_mdl(mdl, 1), bfn::invalid_mdl_error);
 }
 
 void
@@ -265,7 +253,7 @@ memory_manager_ut::test_memory_manager_add_mdl_unaligned_physical()
 {
     memory_descriptor mdl[1] = {{
             (void *)0x12345123,
-            (void *)0x54321000, 4096, 0
+            (void *)0x54321000, 0
         }
     };
 
@@ -277,7 +265,7 @@ memory_manager_ut::test_memory_manager_add_mdl_unaligned_virtual()
 {
     memory_descriptor mdl[1] = {{
             (void *)0x12345000,
-            (void *)0x54321123, 4096, 0
+            (void *)0x54321123, 0
         }
     };
 
@@ -301,7 +289,7 @@ memory_manager_ut::test_memory_manager_virt_to_phys_random_address()
 {
     memory_descriptor mdl[1] = {{
             (void *)0x12345000,
-            (void *)0x54321000, 4096, 0
+            (void *)0x54321000, 0
         }
     };
 
@@ -314,7 +302,7 @@ memory_manager_ut::test_memory_manager_virt_to_phys_upper_limit()
 {
     memory_descriptor mdl[1] = {{
             (void *)0x12345000,
-            (void *)0x54321000, 4096, 0
+            (void *)0x54321000, 0
         }
     };
 
@@ -327,7 +315,7 @@ memory_manager_ut::test_memory_manager_virt_to_phys_lower_limit()
 {
     memory_descriptor mdl[1] = {{
             (void *)0x12345000,
-            (void *)0x54321000, 4096, 0
+            (void *)0x54321000, 0
         }
     };
 
@@ -340,7 +328,7 @@ memory_manager_ut::test_memory_manager_phys_to_virt_random_address()
 {
     memory_descriptor mdl[1] = {{
             (void *)0x12345000,
-            (void *)0x54321000, 4096, 0
+            (void *)0x54321000, 0
         }
     };
 
@@ -353,7 +341,7 @@ memory_manager_ut::test_memory_manager_phys_to_virt_upper_limit()
 {
     memory_descriptor mdl[1] = {{
             (void *)0x12345000,
-            (void *)0x54321000, 4096, 0
+            (void *)0x54321000, 0
         }
     };
 
@@ -366,7 +354,7 @@ memory_manager_ut::test_memory_manager_phys_to_virt_lower_limit()
 {
     memory_descriptor mdl[1] = {{
             (void *)0x12345000,
-            (void *)0x54321000, 4096, 0
+            (void *)0x54321000, 0
         }
     };
 

@@ -20,8 +20,10 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #include <test.h>
+#include <stdlib.h>
 #include <vcpu/vcpu_intel_x64.h>
 #include <debug_ring/debug_ring.h>
+#include <memory_manager/memory_manager.h>
 
 void
 vcpu_ut::test_vcpu_intel_x64_negative_id()
@@ -107,6 +109,28 @@ vcpu_ut::test_vcpu_intel_x64_start_vmxon_start_failed()
     });
 }
 
+void *
+malloc_aligned(size_t size, uint64_t alignment)
+{
+    void *ptr = 0;
+    posix_memalign(&ptr, alignment, size);
+    return ptr;
+}
+
+void *
+virt_to_phys(void *)
+{
+    static uintptr_t phys = 0x0000000ABCDEF0000;
+    return (void *)(phys + 0x1000);
+}
+
+const std::map<uintptr_t, memory_descriptor> &virt_to_phys_map() noexcept
+{
+    static std::map<uintptr_t, memory_descriptor> m_virt_to_phys_map;
+    return m_virt_to_phys_map;
+}
+
+
 static void
 setup_intrinsics(MockRepository &mocks, intrinsics_intel_x64 *in)
 {
@@ -135,6 +159,7 @@ void
 vcpu_ut::test_vcpu_intel_x64_start_vmcs_launch_failed()
 {
     MockRepository mocks;
+    auto mm = mocks.Mock<memory_manager>();
     auto dr = bfn::mock_shared<debug_ring>(mocks);
     auto on = bfn::mock_shared<vmxon_intel_x64>(mocks);
     auto cs = bfn::mock_shared<vmcs_intel_x64>(mocks);
@@ -146,6 +171,11 @@ vcpu_ut::test_vcpu_intel_x64_start_vmcs_launch_failed()
     mocks.OnCall(on.get(), vmxon_intel_x64::start);
     mocks.OnCall(on.get(), vmxon_intel_x64::stop);
     mocks.OnCall(cs.get(), vmcs_intel_x64::launch).Throw(bfn::general_exception());
+
+    mocks.OnCallFunc(memory_manager::instance).Return(mm);
+    mocks.OnCall(mm, memory_manager::malloc_aligned).Do(malloc_aligned);
+    mocks.OnCall(mm, memory_manager::virt_to_phys).Do(virt_to_phys);
+    mocks.OnCall(mm, memory_manager::virt_to_phys_map).Do(virt_to_phys_map);
 
     setup_intrinsics(mocks, in.get());
 
@@ -159,6 +189,7 @@ void
 vcpu_ut::test_vcpu_intel_x64_start_success()
 {
     MockRepository mocks;
+    auto mm = mocks.Mock<memory_manager>();
     auto dr = bfn::mock_shared<debug_ring>(mocks);
     auto on = bfn::mock_shared<vmxon_intel_x64>(mocks);
     auto cs = bfn::mock_shared<vmcs_intel_x64>(mocks);
@@ -170,6 +201,11 @@ vcpu_ut::test_vcpu_intel_x64_start_success()
     mocks.OnCall(on.get(), vmxon_intel_x64::start);
     mocks.OnCall(on.get(), vmxon_intel_x64::stop);
     mocks.OnCall(cs.get(), vmcs_intel_x64::launch);
+
+    mocks.OnCallFunc(memory_manager::instance).Return(mm);
+    mocks.OnCall(mm, memory_manager::malloc_aligned).Do(malloc_aligned);
+    mocks.OnCall(mm, memory_manager::virt_to_phys).Do(virt_to_phys);
+    mocks.OnCall(mm, memory_manager::virt_to_phys_map).Do(virt_to_phys_map);
 
     setup_intrinsics(mocks, in.get());
 

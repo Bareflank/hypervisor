@@ -42,6 +42,13 @@ extern "C" {
 #define MEMORY_MANAGER_FAILURE -1LL
 
 /**
+ * Memory Types
+ */
+#define MEMORY_TYPE_R 0x1
+#define MEMORY_TYPE_W 0x2
+#define MEMORY_TYPE_E 0x4
+
+/**
  * Memory Descriptor
  *
  * A memory descriptor provides information about a block of memory.
@@ -53,8 +60,6 @@ extern "C" {
  *     the starting physical address of the block of memory
  * @var memory_descriptor::virt
  *     the starting virtual address of the block of memory
- * @var memory_descriptor::size
- *     the size of the block of memory
  * @var memory_descriptor::type
  *     the type of meory block. This is likely archiecture specific as
  *     this holds information about access rights, etc...
@@ -63,8 +68,7 @@ struct memory_descriptor
 {
     void *phys;
     void *virt;
-    uint64_t size;
-    uint64_t type;
+    uint8_t type;
 };
 
 /**

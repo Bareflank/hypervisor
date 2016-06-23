@@ -1,8 +1,5 @@
 
 Misc:
-- create a custom PPA for Travic CI that contains our cross-compiler. Needs to
-  support more than one version of GCC, and should install GCC in it's own
-  directory to prevent the native GCC from being removed
 - We need to go through all of the error codes, and map out blocks for each
   module, driver, elf error, etc... This way, when an error bubbles through
   the system, it's easy to identify
@@ -28,15 +25,8 @@ Misc:
 - Some scripts use "-" while others use "_", we should be consistent
 
 Version 1.1 TODO:
-- Need to have a completely isolated exit handler. It should have it's own
-  CR3, IDT, and GDT.
 - Need MultiCore support
 - Add Windows support
-- Once we have our own GDT/IDT, part of the "promote" process needs to restore
-  the GDT/IDT which is not being done. The segment registers are swapped, but
-  we are not doing a sgdt or sidt to swap these.
-- CS, SS and TR need to be restored properly when promoting. This will be
-  really important once a new GDT is used in the host.
 - Create custom libc. This first step should be to provide equvilant
   functionality to newlib. Once this is done, the next step should be to break
   apart libc++.so into libc.so, libcxxabi.so (statically linked with the
@@ -54,6 +44,10 @@ Version 1.1 TODO:
   -malign-data=abi
 - Fix issue with dwarf4.cpp. The encoding / decoding logic has been updated
   to fix issue with the -1 << shift, which we should also be fixing.
+- Once we have our own custom C, we should print a backtrace in the unwind
+  logic when an exception is throw so that we can see what lead up to the
+  exception. This is really important as std::exceptions do not have
+  contextual information about where the exception occured.
 
 Version 1.2 TODO:
 - UEFI Support (i.e. type 1)
@@ -63,6 +57,17 @@ Version 1.2 TODO:
   example, some organizational changes to the vcpu to run a guest).
 - Hyperkernel support
 - Provide a means to extend BFM and the drivers
+
+Version 1.3 TODO:
+- We should consider running a static analysis tool on the code to identify
+  issues with the source before moving onto a 2.0. Basically, once we have
+  support for all of the platforms we wish to target, and the C++ environment
+  is relatively stable, we should take some time to cleanup any issues
+  with reliability and security before moving onto more features.
+
+Version 2.0 TODO:
+- If possible we should implement C++ GSL. Just depends on whether or not
+  the GSL is available as well as a checking tool by then.
 
 Known Issues:
 - Kernels that have CONFIG_DEBUG_STACKOVERFLOW enabled will kernel oops when

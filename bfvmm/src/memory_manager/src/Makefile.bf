@@ -60,6 +60,8 @@ NATIVE_OUTDIR+=%BUILD_REL%/../bin
 ################################################################################
 
 SOURCES+=memory_manager.cpp
+SOURCES+=page_table_x64.cpp
+SOURCES+=page_table_entry_x64.cpp
 HEADERS=
 
 INCLUDE_PATHS+=./

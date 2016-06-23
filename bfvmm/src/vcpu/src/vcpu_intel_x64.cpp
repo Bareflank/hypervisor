@@ -83,7 +83,7 @@ vcpu_intel_x64::start()
 
     m_vmxon->start();
 
-    m_vmm_state = std::make_shared<vmcs_intel_x64_vmm_state>(m_state_save, m_intrinsics);
+    m_vmm_state = std::make_shared<vmcs_intel_x64_vmm_state>(m_state_save);
     m_host_vm_state = std::make_shared<vmcs_intel_x64_host_vm_state>(m_intrinsics);
 
     m_vmcs->launch(m_vmm_state, m_host_vm_state);
