@@ -88,18 +88,27 @@ Bareflank Hypervisor
 
 ## Compilation Instructions
 
-Before you can compile, you must have both a native GCC compiler, as well as a
-GCC cross-compiler. If you are running on one of the supported platforms,
-setting up the cross compiler is as simple as:
+NOTE: Our master branch is our working, experimental branch and might be
+unstable. If you would like to use Bareflank, we recommend using a tagged
+release which has been more thoroughly tested. Of course if you happen to
+find a bug, please let us know [here](https://github.com/Bareflank/hypervisor/issues)
+
+Before you can compile, the build environment must be present. If you are on
+a supported platform, you should be able to run the following:
 
 ```
+cd ~/
+git https://github.com/bareflank/hypervisor.git
+cd ~/hypervisor
+git checkout -b v1.0.0
+
 ./tools/scripts/setup-<platform>.sh
 ```
 
-The setup-\<platform\>.sh script not only creates the cross compiler, but
-it also sets up the libc and libc++ environment, creating a sysroot that will
-be used by the Bareflank Hypervisor. Once you have your cross compiler setup
-based on the script, you should be able to run the following:
+If you are not on a supported platform, your are more than welcome to modify
+an existing setup-\<platform\>.sh script to suite your needs. Its likely
+the hypervisor will work assuming you can get it to compile. Once you have
+the cross compilers you can run:
 
 ```
 make
@@ -116,19 +125,19 @@ make load
 make start
 ```
 
+to get status information, use the following:
+
+```
+make status
+make dump
+```
+
 to reverse this:
 
 ```
 make stop
 make unload
 make linux_unload
-```
-
-to get status information, use the following:
-
-```
-make status
-make dump
 ```
 
 For more detailed instructions please read the following (based on which OS your using):
@@ -166,7 +175,7 @@ Target: September 2016
 * Multi-Core Support
 * Windows Support
 * Updated C++ Environment
-* Isolated VMM
+* ~~Isolated VMM~~
 
 ### Version 1.2
 

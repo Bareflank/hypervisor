@@ -143,7 +143,7 @@ execute_symbol(const char *sym, int64_t arg)
 }
 
 int64_t
-add_mdl_to_memory_manager(char *exec, uint64_t size)
+add_mdl_to_memory_manager(char *exec, uint64_t size, uint64_t type)
 {
     int64_t i = 0;
     int64_t ret = 0;
@@ -172,8 +172,7 @@ add_mdl_to_memory_manager(char *exec, uint64_t size)
     {
         mdl[i].virt = exec + page;
         mdl[i].phys = platform_virt_to_phys(mdl[i].virt);
-        mdl[i].size = MAX_PAGE_SIZE;
-        mdl[i].type = 0;
+        mdl[i].type = type;
     }
 
     ret = resolve_symbol("add_mdl", (void **)&add_mdl, 0);
@@ -208,7 +207,7 @@ get_elf_file_size(struct bfelf_file_t *ef)
     bfelf64_xword num_segments = bfelf_file_num_segments(ef);
 
     if (ef == 0)
-        return BF_ERROR_INVALID_ARG;
+        return 0;
 
     for (i = 0; i < num_segments; i++)
     {
@@ -217,7 +216,10 @@ get_elf_file_size(struct bfelf_file_t *ef)
 
         ret = bfelf_file_get_segment(ef, i, &phdr);
         if (ret != BFELF_SUCCESS)
-            return ret;
+        {
+            ALERT("bfelf_file_get_segment failed: %d\n", (int)ret);
+            return 0;
+        }
 
         if (total < phdr->p_vaddr + phdr->p_memsz)
             total = phdr->p_vaddr + phdr->p_memsz;
@@ -372,11 +374,10 @@ common_add_module(char *file, int64_t fsize)
     }
 
     module->size = get_elf_file_size(&module->file);
-    if (module->size < BF_SUCCESS)
+    if (module->size == 0)
     {
-        ALERT("add_module: failed to get the module's exec size %" PRId64 "\n",
-              module->size);
-        return module->size;
+        ALERT("add_module: failed to get the module's exec size\n");
+        return BF_ERROR_FAILED_TO_ADD_FILE;
     }
 
     module->exec = platform_alloc_exec(module->size);
@@ -385,6 +386,13 @@ common_add_module(char *file, int64_t fsize)
         ALERT("add_module: out of memory\n");
         return 0;
     }
+
+    /*
+     * TODO: Need to set the permissions of memory for the module here.
+     * Once that is done, we need to set the type properly so that it gets
+     * propegated up correctly. Remove me once complete
+     */
+    module->type = MEMORY_TYPE_R | MEMORY_TYPE_W | MEMORY_TYPE_E;
 
     ret = load_elf_file(&module->file, module->exec, module->size);
     if (ret != BF_SUCCESS)
@@ -481,7 +489,7 @@ common_load_vmm(void)
 
     for (i = 0; (module = get_module(i)) != 0; i++)
     {
-        ret = add_mdl_to_memory_manager(module->exec, module->size);
+        ret = add_mdl_to_memory_manager(module->exec, module->size, module->type);
         if (ret != BF_SUCCESS)
         {
             ALERT("load_vmm: failed to add memory descriptors: %" PRId64 "\n",

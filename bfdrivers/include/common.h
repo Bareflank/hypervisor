@@ -74,7 +74,8 @@ extern "C" {
 struct module_t
 {
     char *exec;
-    int64_t size;
+    uint64_t size;
+    uint64_t type;
     struct bfelf_file_t file;
 };
 

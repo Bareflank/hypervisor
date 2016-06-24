@@ -12,3 +12,14 @@ bin/
 src_*
 hypervisor_example_*
 doc/html/*
+tools/scripts/x86_64-bareflank-g++
+tools/scripts/x86_64-bareflank-gcc
+/Makefile
+/build_*
+/source_*
+/configure_version
+/env.sh
+/git_working_tree.sh
+/makefiles/
+/sysroot/
+/module_file

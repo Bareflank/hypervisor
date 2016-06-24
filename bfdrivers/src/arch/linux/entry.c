@@ -29,8 +29,6 @@ int64_t files_size[MAX_NUM_MODULES] = { 0 };
 typedef long (*set_affinity_fn)(pid_t, const struct cpumask *);
 set_affinity_fn set_cpu_affinity;
 
-struct mm_struct *g_mmu_context = NULL;
-
 /* ========================================================================== */
 /* Misc Device                                                                */
 /* ========================================================================== */
@@ -199,11 +197,6 @@ ioctl_stop_vmm(void)
         status = BF_IOCTL_FAILURE;
     }
 
-    if (g_mmu_context)
-        mmput(g_mmu_context);
-
-    g_mmu_context = NULL;
-
     if (status == BF_IOCTL_SUCCESS)
         DEBUG("IOCTL_STOP_VMM: succeeded\n");
 
@@ -214,13 +207,6 @@ static long
 ioctl_start_vmm(void)
 {
     int ret;
-
-    g_mmu_context = get_task_mm(current);
-    if (!g_mmu_context)
-    {
-        ALERT("IOCTL_START_VMM: couldn't find a memory context in which to run!\n");
-        goto failure;
-    }
 
     ret = common_start_vmm();
     if (ret != BF_SUCCESS)

@@ -46,11 +46,11 @@ BUILD_SRC_DIRS:=$(filter-out test,$(BUILD_SRC_DIRS))
 BUILD_TST_DIRS:=$(filter test,$(SUBDIRS))
 
 ifeq ($(strip $(BUILD_SRC_DIRS)), )
-    BUILD_SRC_DIRS+=$(PARENT_SUBDIRS)
+	BUILD_SRC_DIRS+=$(PARENT_SUBDIRS)
 endif
 
 ifeq ($(strip $(BUILD_TST_DIRS)), )
-    BUILD_TST_DIRS+=$(PARENT_SUBDIRS)
+	BUILD_TST_DIRS+=$(PARENT_SUBDIRS)
 endif
 
 ################################################################################
@@ -61,7 +61,7 @@ RUN_DIRS+=$(filter bin,$(SUBDIRS))
 RUN_DIRS+=$(filter native,$(SUBDIRS))
 
 ifeq ($(strip $(RUN_DIRS)), )
-    RUN_DIRS+=$(PARENT_SUBDIRS)
+	RUN_DIRS+=$(PARENT_SUBDIRS)
 endif
 
 ################################################################################
@@ -71,12 +71,15 @@ endif
 CLEAN_DIRS:=$(filter-out bin,$(SUBDIRS))
 
 ifeq ($(strip $(CLEAN_DIRS)), )
-    CLEAN_DIRS+=$(PARENT_SUBDIRS)
+	CLEAN_DIRS+=$(PARENT_SUBDIRS)
 endif
 
 ################################################################################
 # Targets
 ################################################################################
+
+Makefile: $(HYPER_REL)/Makefile.bf
+	@ BUILD_ABS=$(BUILD_ABS) BUILD_REL=$(BUILD_REL) HYPER_REL=$(HYPER_REL) $(HYPER_ABS)/configure.sh -r --this-is-make
 
 .PHONY: clean
 .PHONY: clean_src
@@ -87,46 +90,102 @@ endif
 
 .DEFAULT_GOAL := all
 
-all: build_src build_tests
+all:
+	@$(MAKE) --no-print-directory build_src
+	@$(MAKE) --no-print-directory build_tests
 
 build_src:
 	@for dir in $(BUILD_SRC_DIRS); do \
+		dir=`basename $$dir`; \
 		echo -e $(CI)"-->" $(CS)$(CURRENT_DIR)/$$dir$(CE); \
+		if [[ ! -d $(CURRENT_DIR)/$$dir ]]; then \
+			mkdir $(CURRENT_DIR)/$$dir; \
+		fi; \
+		if [[ ! -f $(CURRENT_DIR)/$$dir/Makefile ]]; then \
+			pushd $(CURRENT_DIR)/$$dir; \
+			BUILD_ABS=$(BUILD_ABS) BUILD_REL=$(BUILD_REL)/$$dir HYPER_REL=$(HYPER_REL)/$$dir $(HYPER_ABS)/configure.sh -r --this-is-make; \
+			popd; \
+		fi; \
 		$(MAKE) --no-print-directory -C $$dir build_src || exit 1; \
 		echo -e $(CO)"<--" $(CS)$(CURRENT_DIR)/$$dir$(CE); \
 	done
 
 build_tests:
 	@for dir in $(BUILD_TST_DIRS); do \
+		dir=`basename $$dir`; \
 		echo -e $(CI)"-->" $(CS)$(CURRENT_DIR)/$$dir$(CE); \
+		if [[ ! -d $(CURRENT_DIR)/$$dir ]]; then \
+			mkdir $(CURRENT_DIR)/$$dir; \
+		fi; \
+		if [[ ! -f $(CURRENT_DIR)/$$dir/Makefile ]]; then \
+			pushd $(CURRENT_DIR)/$$dir; \
+			BUILD_ABS=$(BUILD_ABS) BUILD_REL=$(BUILD_REL)/$$dir HYPER_REL=$(HYPER_REL)/$$dir $(HYPER_ABS)/configure.sh -r --this-is-make; \
+			popd; \
+		fi; \
 		$(MAKE) --no-print-directory -C $$dir build_tests || exit 1; \
 		echo -e $(CO)"<--" $(CS)$(CURRENT_DIR)/$$dir$(CE); \
 	done
 
 run_tests: force
 	@for dir in $(RUN_DIRS); do \
+		dir=`basename $$dir`; \
 		echo -e $(CI)"-->" $(CS)$(CURRENT_DIR)/$$dir$(CE); \
+		if [[ ! -d $(CURRENT_DIR)/$$dir ]]; then \
+			mkdir $(CURRENT_DIR)/$$dir; \
+		fi; \
+		if [[ ! -f $(CURRENT_DIR)/$$dir/Makefile ]]; then \
+			pushd $(CURRENT_DIR)/$$dir; \
+			BUILD_ABS=$(BUILD_ABS) BUILD_REL=$(BUILD_REL)/$$dir HYPER_REL=$(HYPER_REL)/$$dir $(HYPER_ABS)/configure.sh -r --this-is-make; \
+			popd; \
+		fi; \
 		$(MAKE) --no-print-directory -C $$dir run_tests || exit 1; \
 		echo -e $(CO)"<--" $(CS)$(CURRENT_DIR)/$$dir$(CE); \
 	done
 
 clean:
 	@for dir in $(CLEAN_DIRS); do \
+		dir=`basename $$dir`; \
 		echo -e $(CI)"-->" $(CS)$(CURRENT_DIR)/$$dir$(CE); \
+		if [[ ! -d $(CURRENT_DIR)/$$dir ]]; then \
+			mkdir $(CURRENT_DIR)/$$dir; \
+		fi; \
+		if [[ ! -f $(CURRENT_DIR)/$$dir/Makefile ]]; then \
+			pushd $(CURRENT_DIR)/$$dir; \
+			BUILD_ABS=$(BUILD_ABS) BUILD_REL=$(BUILD_REL)/$$dir HYPER_REL=$(HYPER_REL)/$$dir $(HYPER_ABS)/configure.sh -r --this-is-make; \
+			popd; \
+		fi; \
 		$(MAKE) --no-print-directory -C $$dir clean; \
 		echo -e $(CO)"<--" $(CS)$(CURRENT_DIR)/$$dir$(CE); \
 	done
 
 clean_src:
 	@for dir in $(BUILD_SRC_DIRS); do \
+		dir=`basename $$dir`; \
 		echo -e $(CI)"-->" $(CS)$(CURRENT_DIR)/$$dir$(CE); \
+		if [[ ! -d $(CURRENT_DIR)/$$dir ]]; then \
+			mkdir $(CURRENT_DIR)/$$dir; \
+		fi; \
+		if [[ ! -f $(CURRENT_DIR)/$$dir/Makefile ]]; then \
+			pushd $(CURRENT_DIR)/$$dir; \
+			BUILD_ABS=$(BUILD_ABS) BUILD_REL=$(BUILD_REL)/$$dir HYPER_REL=$(HYPER_REL)/$$dir $(HYPER_ABS)/configure.sh -r --this-is-make; \
+			popd; \
+		fi; \
 		$(MAKE) --no-print-directory -C $$dir clean_src; \
 		echo -e $(CO)"<--" $(CS)$(CURRENT_DIR)/$$dir$(CE); \
 	done
 
 clean_tests:
 	@for dir in $(BUILD_TST_DIRS); do \
+		dir=`basename $$dir`; \
 		echo -e $(CI)"-->" $(CS)$(CURRENT_DIR)/$$dir$(CE); \
+		if [[ ! -d $(CURRENT_DIR)/$$dir ]]; then \
+			mkdir $(CURRENT_DIR)/$$dir; \
+		fi; \
+		if [[ ! -f $(CURRENT_DIR)/$$dir/Makefile ]]; then \
+			pushd $(CURRENT_DIR)/$$dir; \
+			BUILD_ABS=$(BUILD_ABS) BUILD_REL=$(BUILD_REL)/$$dir HYPER_REL=$(HYPER_REL)/$$dir $(HYPER_ABS)/configure.sh -r --this-is-make; \
+			popd; \
+		fi; \
 		$(MAKE) --no-print-directory -C $$dir clean_tests; \
 		echo -e $(CO)"<--" $(CS)$(CURRENT_DIR)/$$dir$(CE); \
 	done

@@ -57,7 +57,7 @@ void *platform_alloc_exec(int64_t len);
  * (i.e. the users of this function should be able to provide any virtual
  * address, regardless of where the address originated from).
  *
- * @param virt thevirtual address to convert
+ * @param virt the virtual address to convert
  * @return the physical address assocaited with the provided virtual address
  */
 void *platform_virt_to_phys(void *virt);
@@ -69,6 +69,7 @@ void *platform_virt_to_phys(void *virt);
  * using the platform_alloc function.
  *
  * @param addr the virtual address returned from platform_alloc
+ * @param len the size of the memory allocated
  */
 void platform_free(void *addr, int64_t len);
 

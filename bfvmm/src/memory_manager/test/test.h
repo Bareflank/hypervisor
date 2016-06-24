@@ -54,7 +54,6 @@ private:
     void test_memory_manager_malloc_alloc_fragment();
     void test_memory_manager_add_mdl_invalid_mdl();
     void test_memory_manager_add_mdl_invalid_num();
-    void test_memory_manager_add_mdl_invalid_size();
     void test_memory_manager_add_mdl_unaligned_physical();
     void test_memory_manager_add_mdl_unaligned_virtual();
     void test_memory_manager_virt_to_phys_unknown();
@@ -65,6 +64,39 @@ private:
     void test_memory_manager_phys_to_virt_random_address();
     void test_memory_manager_phys_to_virt_upper_limit();
     void test_memory_manager_phys_to_virt_lower_limit();
+
+    void test_page_table_x64_no_entry();
+    void test_page_table_x64_with_entry();
+    void test_page_table_x64_add_page_success();
+    void test_page_table_x64_add_two_pages_no_added_mem_success();
+    void test_page_table_x64_add_two_pages_with_added_mem_success();
+    void test_page_table_x64_add_many_pages_success();
+    void test_page_table_x64_add_page_twice_failure();
+    void test_page_table_x64_table_phys_addr_success();
+    void test_page_table_x64_table_phys_addr_failure();
+
+    void test_page_table_entry_x64_null_present();
+    void test_page_table_entry_x64_present();
+    void test_page_table_entry_x64_null_rw();
+    void test_page_table_entry_x64_rw();
+    void test_page_table_entry_x64_null_us();
+    void test_page_table_entry_x64_us();
+    void test_page_table_entry_x64_null_pwt();
+    void test_page_table_entry_x64_pwt();
+    void test_page_table_entry_x64_null_pcd();
+    void test_page_table_entry_x64_pcd();
+    void test_page_table_entry_x64_null_accessed();
+    void test_page_table_entry_x64_accessed();
+    void test_page_table_entry_x64_null_dirty();
+    void test_page_table_entry_x64_dirty();
+    void test_page_table_entry_x64_null_pat();
+    void test_page_table_entry_x64_pat();
+    void test_page_table_entry_x64_null_global();
+    void test_page_table_entry_x64_global();
+    void test_page_table_entry_x64_null_nx();
+    void test_page_table_entry_x64_nx();
+    void test_page_table_entry_x64_null_phys_addr();
+    void test_page_table_entry_x64_phys_addr();
 };
 
 #endif

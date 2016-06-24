@@ -1,10 +1,30 @@
 #!/bin/bash -e
+#
+# Bareflank Hypervisor
+#
+# Copyright (C) 2015 Assured Information Security, Inc.
+# Author: Rian Quinn        <quinnr@ainfosec.com>
+# Author: Brendan Kerrigan  <kerriganb@ainfosec.com>
+#
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License as published by the Free Software Foundation; either
+# version 2.1 of the License, or (at your option) any later version.
+#
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+# Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public
+# License along with this library; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+
+sudo dnf install -y redhat-lsb-core
 
 # ------------------------------------------------------------------------------
 # Checks
 # ------------------------------------------------------------------------------
-
-sudo dnf install -y redhat-lsb-core
 
 case $(lsb_release -si) in
 Fedora)
@@ -14,39 +34,32 @@ Fedora)
     exit 1
 esac
 
-if [ ! -d "bfelf_loader" ]; then
+if [[ ! -d "bfelf_loader" ]]; then
     echo "This script must be run from bareflank root directory"
     exit 1
 fi
 
 # ------------------------------------------------------------------------------
-# Silence
+# Help
 # ------------------------------------------------------------------------------
 
-# This is used by Travic CI to prevent this script from overwhelming it's
-# output. If there is too much output, Travis CI just gives up. The problem is,
-# Travis CI uses output as a means to know that the script has not died. So
-# we supress output here, and then use a script in Travis CI to ping it's
-# watchdog every so often to keep this script alive.
-
-if [ -n "${SILENCE+1}" ]; then
-  exec 1>~/setup-fedora_stdout.log
-  exec 2>~/setup-fedora_stderr.log
-fi
+option_help() {
+    echo -e "Usage: setup-ubuntu.sh [OPTION]"
+    echo -e "Sets up the system to compile / use Bareflank"
+    echo -e ""
+    echo -e "       -h, --help                       show this help menu"
+    echo -e "       -l, --local                      setup local cross compilers"
+    echo -e "       -n, --no-configure               skip the configure step"
+    echo -e "       -g, --compiler <dirname>         directory of cross compiler"
+    echo -e "       -o, --out_of_tree <dirname>      setup out of tree build"
+    echo -e ""
+}
 
 # ------------------------------------------------------------------------------
-# Install Packages
+# Functions
 # ------------------------------------------------------------------------------
 
-case $(lsb_release -sr) in
-24)
-    ;&
-
-23)
-    ;&
-
-22)
-
+install_common_packages() {
     sudo dnf groupinstall -y "Development Tools"
     sudo dnf install -y gcc-c++
     sudo dnf install -y gmp-devel
@@ -60,7 +73,58 @@ case $(lsb_release -sr) in
     sudo dnf install -y kernel-devel
     sudo dnf install -y kernel-headers
     sudo dnf update -y kernel
+    curl -fsSL https://get.docker.com/ | sh
+}
 
+prepare_docker() {
+    sudo usermod -a -G docker $USER
+    sudo systemctl start docker
+    sudo systemctl enable docker
+}
+
+# ------------------------------------------------------------------------------
+# Arguments
+# ------------------------------------------------------------------------------
+
+while [[ $# -ne 0 ]]; do
+
+    if [[ $1 == "-h" ]] || [[ $1 == "--help" ]]; then
+        option_help
+        exit 0
+    fi
+
+    if [[ $1 == "-l" ]] || [[ $1 == "--local_compilers" ]]; then
+        local="true"
+    fi
+
+    if [[ $1 == "-g" ]] || [[ $1 == "--compiler" ]]; then
+        shift
+        compiler="-g $1"
+    fi
+
+    if [[ $1 == "-n" ]] || [[ $1 == "--no-configure" ]]; then
+        noconfigure="true"
+    fi
+
+    if [[ $1 == "-o" ]] || [[ $1 == "--out_of_tree" ]]; then
+        shift
+        out_of_tree="true"
+        build_dir=$1
+        hypervisor_dir=$PWD
+    fi
+
+    shift
+
+done
+
+# ------------------------------------------------------------------------------
+# Setup System
+# ------------------------------------------------------------------------------
+
+case $(lsb_release -sr) in
+23)
+    install_common_packages
+    prepare_docker
     ;;
 
 *)
@@ -70,13 +134,36 @@ case $(lsb_release -sr) in
 esac
 
 # ------------------------------------------------------------------------------
-# Create Cross Compiler
+# Setup Build Environment
 # ------------------------------------------------------------------------------
 
-./tools/scripts/create-cross-compiler.sh
+if [[ ! $noconfigure == "true" ]]; then
+    if [[ $out_of_tree == "true" ]]; then
+        mkdir -p $build_dir
+        pushd $build_dir
+        $hypervisor_dir/configure.sh
+        popd
+    else
+        ./configure.sh $compiler
+    fi
+fi
+
+if [[ $local == "true" ]]; then
+    ./tools/scripts/create-cross-compiler.sh
+fi
 
 # ------------------------------------------------------------------------------
-# Reboot
+# Done
 # ------------------------------------------------------------------------------
 
-echo "WARNING: A reboot is required before you can build the hypervisor!!!!!"
+echo ""
+
+echo "WARNING: A reboot is required to build!!!"
+echo ""
+
+if [[ $out_of_tree == "true" ]]; then
+    echo "To build, run:"
+    echo "    cd $build_dir"
+    echo "    make -j<# cores>"
+    echo ""
+fi

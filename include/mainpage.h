@@ -168,75 +168,48 @@
 /// Finally, we must provide a new list of modules to BFM when starting the
 /// hypervisor. In this example, we simply need to replace the old vcpu_factory
 /// with our new one, but you could add as many new modules as you wish here.
+/// Note that we use the BUILD_ABS macro to simplify pathing. If you use the
+/// make shortcuts, Bareflank will convert these for you. If you run bfm
+/// manually, you will need to run the build_scripts/filter_module_file.sh
+/// script to convert the macros, or use absolute / relative pathing in your
+/// module file.
 ///
 /// @code
 /// # Default Modules
 /// #
 /// # Note: The existing vcpu_factory module is commented out as we will be
 /// # providing our own.
-///
-/// ../../../bfvmm/bin/cross/libmemory_manager.so
-/// ../../../bfvmm/bin/cross/libentry.so
-/// ../../../bfvmm/bin/cross/libserial.so
-/// ../../../bfvmm/bin/cross/libdebug_ring.so
-/// ../../../bfvmm/bin/cross/libintrinsics.so
-/// ../../../bfvmm/bin/cross/libvmxon.so
-/// ../../../bfvmm/bin/cross/libvmcs.so
-/// ../../../bfvmm/bin/cross/libvcpu.so
-/// #../../../bfvmm/bin/cross/libvcpu_factory.so
-/// ../../../bfvmm/bin/cross/libexit_handler.so
-/// ../../../bfvmm/bin/cross/libmisc.so
-/// ../../../bfvmm/bin/cross/libc++.so
+/// %BUILD_ABS%/sysroot/x86_64-elf/lib/libc++.so
+/// %BUILD_ABS%/makefiles/bfvmm/src/debug_ring/bin/cross/libdebug_ring.so
+/// %BUILD_ABS%/makefiles/bfvmm/src/entry/bin/cross/libentry.so
+/// %BUILD_ABS%/makefiles/bfvmm/src/exit_handler/bin/cross/libexit_handler.so
+/// %BUILD_ABS%/makefiles/bfvmm/src/intrinsics/bin/cross/libintrinsics.so
+/// %BUILD_ABS%/makefiles/bfvmm/src/memory_manager/bin/cross/libmemory_manager.so
+/// %BUILD_ABS%/makefiles/bfvmm/src/misc/bin/cross/libmisc.so
+/// %BUILD_ABS%/makefiles/bfvmm/src/serial/bin/cross/libserial.so
+/// %BUILD_ABS%/makefiles/bfvmm/src/vcpu/bin/cross/libvcpu.so
+/// #    %BUILD_ABS%/makefiles/bfvmm/src/vcpu_factory/bin/cross/libvcpu_factory.so
+/// %BUILD_ABS%/makefiles/bfvmm/src/vmcs/bin/cross/libvmcs.so
+/// %BUILD_ABS%/makefiles/bfvmm/src/vmxon/bin/cross/libvmxon.so
 
 /// # Custom Modules
 /// #
 /// # Note: This is where we provide our own vcpu_factory.
-///
-/// ../../../hypervisor_example_cpuidcount/bin/cross/libvcpu_factory_cpuidcount.so
+/// %BUILD_ABS%/makefiles/hypervisor_example_cpuidcount/vcpu_factory_cpuidcount/bin/cross/libvcpu_factory_cpuidcount.so
 /// @endcode
 ///
-/// Currently, Bareflank does not support out of tree compilation, so all
-/// code must be compiled in the Bareflank tree as it contains the build
-/// system. To support extensions, any root level folder named src_* or
-/// hypervisor_* will be compiled along with the rest of Bareflank. Users
-/// code can be cloned into Bareflank's root with one of these names, and
-/// will be compiled. To illustrate how this is done, Bareflank comes
-/// complete with two examples (the one described above, and a second
-/// example that extends the VMCS to add VPID support).
+/// Currently, Bareflank supports both in-tree and out-of-tree compilation.
+/// To use in-tree, simply place your code in a folder at Bareflank's root
+/// starting with hypervisor_* or src_* and run make. To perform out-of-tree
+/// compilation, please see one of the examples as this process is fully
+/// documented there. Also, these examples demonstrate how to code, compile
+/// and run an extension.
 ///
 /// <a href="https://github.com/Bareflank/hypervisor_example_vpid">Bareflank Hypervisor VPID Example</a>
 /// <br>
-/// <a href="https://github.com/Bareflank/hypervisor_example_cpuidcount">Bareflank Hypervisor CPUID Example</a>
-///
-/// To run the CPUID example, start by cloning the example repo into
-/// Bareflank's root folder:
-///
-/// @code
-/// cd ~/hypervisor
-/// git clone https://github.com/Bareflank/hypervisor_example_cpuidcount
-/// @endcode
-///
-/// Once the example repo is cloned, you can build the example, and the rest
-/// of Bareflank on Linux by running:
-///
-/// @code
-/// make
-/// make linux_load
-/// @endcode
-///
-/// You can run the example on Linux by doing the following:
-///
-/// @code
-/// make load MODULES=hypervisor_example_cpuidcount/bin/cpuidcount.modules
-/// make start
-/// @endcode
-///
-/// Finally, to unload the hypervisor, run the following:
-///
-/// @code
-/// make stop
-/// make unload
-/// @endcode
+/// <a href="https://github.com/Bareflank/hypervisor_example_cpuidcount">Bareflank Hypervisor CPUID Count Example</a>
+/// <br>
+/// <a href="https://github.com/Bareflank/hypervisor_example_msr_bitmap">Bareflank Hypervisor MSR Bitmaps Example</a>
 ///
 /// @section vmm_reference VMM Reference
 ///
