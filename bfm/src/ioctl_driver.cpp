@@ -66,7 +66,7 @@ ioctl_driver::process(std::shared_ptr<file> f,
             return this->stop_vmm(ctl);
 
         case command_line_parser_command::dump:
-            return this->dump_vmm(ctl);
+            return this->dump_vmm(ctl, clp->vcpuid());
 
         case command_line_parser_command::status:
             return this->vmm_status(ctl);
@@ -173,7 +173,7 @@ ioctl_driver::stop_vmm(const std::shared_ptr<ioctl> &ctl)
 }
 
 void
-ioctl_driver::dump_vmm(const std::shared_ptr<ioctl> &ctl)
+ioctl_driver::dump_vmm(const std::shared_ptr<ioctl> &ctl, uint64_t vcpuid)
 {
     auto drr = debug_ring_resources_t();
     auto buffer = std::make_unique<char[]>(DEBUG_RING_SIZE);
@@ -187,7 +187,7 @@ ioctl_driver::dump_vmm(const std::shared_ptr<ioctl> &ctl)
         default: throw unknown_status();
     }
 
-    ctl->call_ioctl_dump_vmm(&drr);
+    ctl->call_ioctl_dump_vmm(&drr, vcpuid);
 
     if (debug_ring_read(&drr, buffer.get(), DEBUG_RING_SIZE) > 0)
         std::cout << buffer.get();

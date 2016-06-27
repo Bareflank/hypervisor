@@ -201,10 +201,11 @@ common_stop_vmm(void);
  * to work as it has to do a symbol lookup
  *
  * @param user_drr a pointer to the drr provided by the user
+ * @param vcpuid indicates which drr to get as each vcpu has its own drr
  * @return BF_SUCCESS on success, negative error code on failure
  */
 int64_t
-common_dump_vmm(struct debug_ring_resources_t **user_drr);
+common_dump_vmm(struct debug_ring_resources_t **user_drr, int64_t vcpuid);
 
 #ifdef __cplusplus
 }

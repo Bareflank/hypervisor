@@ -36,12 +36,22 @@ command_line_parser::~command_line_parser()
 {
 }
 
+#include <iostream>
+
 void
 command_line_parser::parse(const std::vector<std::string> &args)
 {
-    for (const auto &arg : args)
+    for (auto arg = args.begin(); arg != args.end(); ++arg)
     {
-        if (arg != "-h" && arg != "--help")
+        if (*arg == "--vcpuid")
+        {
+            if (++arg == args.end())
+                break;
+
+            m_vcpuid = std::stoull(*arg);
+        }
+
+        if (*arg != "-h" && *arg != "--help")
             continue;
 
         return reset();
@@ -82,11 +92,18 @@ command_line_parser::modules() const noexcept
     return m_modules;
 }
 
+uint64_t
+command_line_parser::vcpuid() const noexcept
+{
+    return m_vcpuid;
+}
+
 void
 command_line_parser::reset() noexcept
 {
     m_cmd = command_line_parser_command::help;
     m_modules.clear();
+    m_vcpuid = 0;
 }
 
 void

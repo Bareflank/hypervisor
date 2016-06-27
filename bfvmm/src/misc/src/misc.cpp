@@ -36,11 +36,22 @@ write(int file, const void *buffer, size_t count)
 
         g_vcm->write(-1, str);
         serial_port_intel_x64::instance()->write(str);
+    }
+    else if (file >= bfostream_offset)
+    {
+        auto str = std::string((char *)buffer, count);
+        auto vcpuid = ((file - bfostream_offset) >> bfostream_shift);
+        g_vcm->write(vcpuid, str);
+    }
+    else
+    {
+        g_vcm->write(-1, "write: unknown ostream handle\n");
+        serial_port_intel_x64::instance()->write("write: unknown ostream handle\n");
 
-        return count;
+        return 0;
     }
 
-    return 0;
+    return count;
 }
 
 extern "C" int

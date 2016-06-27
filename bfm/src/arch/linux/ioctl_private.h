@@ -37,7 +37,7 @@ public:
     virtual void call_ioctl_unload_vmm();
     virtual void call_ioctl_start_vmm();
     virtual void call_ioctl_stop_vmm();
-    virtual void call_ioctl_dump_vmm(debug_ring_resources_t *drr);
+    virtual void call_ioctl_dump_vmm(debug_ring_resources_t *drr, uint64_t vcpuid);
     virtual void call_ioctl_vmm_status(int64_t *status);
 
 private:

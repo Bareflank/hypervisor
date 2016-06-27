@@ -127,6 +127,7 @@ public:
     /// Dumps the content's of the VMM's debug ring
     ///
     /// @param drr pointer a debug_ring_resources_t
+    /// @param vcpuid indicates which drr to get (every vcpu has it's own drr)
     ///
     /// @throws invalid_argument_error thrown if drr == 0
     /// @throws ioctl_failed_error thrown if the ioctl failed. Note that this
@@ -134,7 +135,7 @@ public:
     ///    could be because the driver entry reported a failure when executing
     ///    the ioctl.
     ///
-    virtual void call_ioctl_dump_vmm(debug_ring_resources_t *drr);
+    virtual void call_ioctl_dump_vmm(debug_ring_resources_t *drr, uint64_t vcpuid);
 
     /// VMM Status
     ///

@@ -61,6 +61,9 @@ bfm_ut::list()
     this->test_command_line_parser_with_valid_stop();
     this->test_command_line_parser_with_valid_dump();
     this->test_command_line_parser_with_valid_status();
+    this->test_command_line_parser_no_vcpuid();
+    this->test_command_line_parser_invalid_vcpuid();
+    this->test_command_line_parser_valid_vcpuid();
 
     this->test_file_read_with_bad_filename();
     this->test_file_read_with_good_filename();
