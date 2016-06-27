@@ -81,7 +81,7 @@ private:
     void unload_vmm(const std::shared_ptr<ioctl> &ctl);
     void start_vmm(const std::shared_ptr<ioctl> &ctl);
     void stop_vmm(const std::shared_ptr<ioctl> &ctl);
-    void dump_vmm(const std::shared_ptr<ioctl> &ctl);
+    void dump_vmm(const std::shared_ptr<ioctl> &ctl, uint64_t vcpuid);
     void vmm_status(const std::shared_ptr<ioctl> &ctl);
 
     int64_t get_status(const std::shared_ptr<ioctl> &ctl);

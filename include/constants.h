@@ -32,7 +32,7 @@
  * an exit handler is defined for each vCPU).
  */
 #ifndef MAX_VCPUS
-#define MAX_VCPUS (1LL)
+#define MAX_VCPUS (8LL)
 #endif
 
 /*

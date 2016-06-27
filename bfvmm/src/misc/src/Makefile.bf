@@ -25,18 +25,11 @@
 
 TARGET_NAME:=misc
 TARGET_TYPE:=lib
-TARGET_COMPILER:=both
+TARGET_COMPILER:=cross
 
 ################################################################################
 # Compiler Flags
 ################################################################################
-
-NATIVE_CCFLAGS+=
-NATIVE_CXXFLAGS+=
-NATIVE_ASMFLAGS+=
-NATIVE_LDFLAGS+=
-NATIVE_ARFLAGS+=
-NATIVE_DEFINES+=
 
 CROSS_CCFLAGS+=
 CROSS_CXXFLAGS+=
@@ -51,9 +44,6 @@ CROSS_DEFINES+=
 
 CROSS_OBJDIR+=%BUILD_REL%/.build
 CROSS_OUTDIR+=%BUILD_REL%/../bin
-
-NATIVE_OBJDIR+=%BUILD_REL%/.build
-NATIVE_OUTDIR+=%BUILD_REL%/../bin
 
 ################################################################################
 # Sources

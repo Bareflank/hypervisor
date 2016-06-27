@@ -874,6 +874,7 @@ bfm_ut::test_ioctl_driver_process_dump_vmm_unloaded()
 
     mocks.OnCall(clp.get(), command_line_parser::cmd).Return(command_line_parser_command::dump);
     mocks.OnCall(clp.get(), command_line_parser::modules).Return(""_s);
+    mocks.OnCall(clp.get(), command_line_parser::vcpuid).Return(0);
 
     mocks.OnCall(ctl.get(), ioctl::call_ioctl_vmm_status).Do([](auto * status)
     {
@@ -899,6 +900,7 @@ bfm_ut::test_ioctl_driver_process_dump_vmm_unknown_status()
 
     mocks.OnCall(clp.get(), command_line_parser::cmd).Return(command_line_parser_command::dump);
     mocks.OnCall(clp.get(), command_line_parser::modules).Return(""_s);
+    mocks.OnCall(clp.get(), command_line_parser::vcpuid).Return(0);
 
     mocks.OnCall(ctl.get(), ioctl::call_ioctl_vmm_status).Do([](auto * status)
     {
@@ -922,6 +924,7 @@ bfm_ut::test_ioctl_driver_process_dump_dump_failed()
 
     mocks.OnCall(clp.get(), command_line_parser::cmd).Return(command_line_parser_command::dump);
     mocks.OnCall(clp.get(), command_line_parser::modules).Return(""_s);
+    mocks.OnCall(clp.get(), command_line_parser::vcpuid).Return(0);
 
     mocks.OnCall(ctl.get(), ioctl::call_ioctl_vmm_status).Do([](auto * status)
     {
@@ -949,6 +952,7 @@ bfm_ut::test_ioctl_driver_process_dump_success()
 
     mocks.OnCall(clp.get(), command_line_parser::cmd).Return(command_line_parser_command::dump);
     mocks.OnCall(clp.get(), command_line_parser::modules).Return(""_s);
+    mocks.OnCall(clp.get(), command_line_parser::vcpuid).Return(0);
     mocks.OnCall(ctl.get(), ioctl::call_ioctl_dump_vmm);
 
     mocks.OnCall(ctl.get(), ioctl::call_ioctl_vmm_status).Do([](auto * status)

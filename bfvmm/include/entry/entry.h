@@ -26,7 +26,7 @@
 ///
 /// Defines the signature for an entry function.
 ///
-typedef int64_t (*entry_t)(void);
+typedef int64_t (*entry_t)(int64_t op, int64_t vcpuid);
 
 /// Execute With Stack
 ///
@@ -36,12 +36,13 @@ typedef int64_t (*entry_t)(void);
 /// traditional stack frame (using the base pointer), prior to replacing the
 /// stack pointer.
 ///
+/// @param op the operationg to perform
+/// @param vcpuid the vcpu to perform the operation on
 /// @param func entry function to call with new stack
 /// @param stack the new stack
-/// @param size the size of the new stack
 /// @return the return value of the entry function
 ///
-extern "C" int64_t execute_with_stack(entry_t func, void *stack, uint64_t size);
+extern "C" int64_t execute_with_stack(int64_t op, int64_t vcpuid, entry_t func, uintptr_t stack);
 
 /// Init VMM
 ///

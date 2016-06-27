@@ -29,8 +29,14 @@
 #include <linux/module.h>
 #include <linux/vmalloc.h>
 #include <linux/version.h>
+#include <linux/cpumask.h>
+#include <linux/sched.h>
+#include <linux/kallsyms.h>
 
 #include <asm/tlbflush.h>
+
+typedef long (*set_affinity_fn)(pid_t, const struct cpumask *);
+set_affinity_fn set_cpu_affinity = 0;
 
 void *
 platform_alloc(int64_t len)
@@ -137,4 +143,26 @@ platform_stop(void)
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(4,0,0)
     cr4_init_shadow();
 #endif
+}
+
+int64_t
+platform_num_cpus(void)
+{
+    return num_online_cpus();
+}
+
+int64_t
+platform_set_affinity(int64_t affinity)
+{
+    if (!set_cpu_affinity)
+    {
+        set_cpu_affinity = (set_affinity_fn)kallsyms_lookup_name("sched_setaffinity");
+        if (set_cpu_affinity == NULL)
+        {
+            ALERT("Failed to locate sched_setaffinity\n");
+            return -1;
+        }
+    }
+
+    return set_cpu_affinity(current->pid, cpumask_of(affinity));
 }

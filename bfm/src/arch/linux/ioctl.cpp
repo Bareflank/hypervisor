@@ -89,12 +89,12 @@ ioctl::call_ioctl_stop_vmm()
 }
 
 void
-ioctl::call_ioctl_dump_vmm(debug_ring_resources_t *drr)
+ioctl::call_ioctl_dump_vmm(debug_ring_resources_t *drr, uint64_t vcpuid)
 {
     auto d = std::dynamic_pointer_cast<ioctl_private>(m_d);
 
     if (d)
-        d->call_ioctl_dump_vmm(drr);
+        d->call_ioctl_dump_vmm(drr, vcpuid);
 }
 
 void

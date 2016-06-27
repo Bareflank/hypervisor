@@ -116,6 +116,25 @@ void platform_start(void);
  */
 void platform_stop(void);
 
+/**
+ * Get Number of CPUs
+ *
+ * @return returns the total number of CPUs available to the driver.
+ */
+int64_t
+platform_num_cpus(void);
+
+/**
+ * Set CPU affinity
+ *
+ * Changes the current core that the driver is running on.
+ *
+ * @param affinity the cpu number to change to
+ * @return 0 on success, failure otherwise
+ */
+int64_t
+platform_set_affinity(int64_t affinity);
+
 #ifdef __cplusplus
 }
 #endif

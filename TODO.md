@@ -1,4 +1,3 @@
-
 Misc:
 - We need to go through all of the error codes, and map out blocks for each
   module, driver, elf error, etc... This way, when an error bubbles through
@@ -25,7 +24,6 @@ Misc:
 - Some scripts use "-" while others use "_", we should be consistent
 
 Version 1.1 TODO:
-- Need MultiCore support
 - Add Windows support
 - Create custom libc. This first step should be to provide equvilant
   functionality to newlib. Once this is done, the next step should be to break
@@ -42,14 +40,15 @@ Version 1.1 TODO:
 - Uses the following as our default flags to match Clear Linux: -g2 -O3 -pipe
   -fexceptions -fstack-protector -m64 -march=westmere -mtune=native
   -malign-data=abi
-- Fix issue with dwarf4.cpp. The encoding / decoding logic has been updated
-  to fix issue with the -1 << shift, which we should also be fixing.
 - Once we have our own custom C, we should print a backtrace in the unwind
   logic when an exception is throw so that we can see what lead up to the
   exception. This is really important as std::exceptions do not have
   contextual information about where the exception occured.
 
 Version 1.2 TODO:
+- Move to JSON. Once we need to be able to start a guest, we have a lot of
+  information that needs to be parsed (image, ram, number vcpus). We can
+  then move the module_file to json as well.
 - UEFI Support (i.e. type 1)
 - Multiple guest support running http://www.includeos.org/ or some other
   unikernel. Note that the actual guest support will likely be in a different
@@ -57,6 +56,19 @@ Version 1.2 TODO:
   example, some organizational changes to the vcpu to run a guest).
 - Hyperkernel support
 - Provide a means to extend BFM and the drivers
+- When we add hyperkernel support, the vcpuid will take on a different form
+  than it has today. Specifically, we will need to standardize how we plan
+  to decompose the vcpuid. For example, maybe 16bits go to the guest, 16bits
+  go to the vcpu, and 16bits go to the physical cpu. Once this is done,
+  code in the driver will need to strip out the physical cpu part so that
+  it knows what core to be talking to
+- For the hyperkernel, we will need to map out the different use cases,
+  and figure out how we want to add, start and stop a guest. There are some
+  issues here. For example, in a type 2 situation, there is no hypervisor to
+  vmcall too so that code cannot be a vmcall. In a type 1 where the host OS
+  is UEFI and Windows / Linux has been booted, we don't have a driver
+  that can talk to the hypervisor like a type 2 (maybe we can register a
+  UEFI runtime service?)
 
 Version 1.3 TODO:
 - We should consider running a static analysis tool on the code to identify

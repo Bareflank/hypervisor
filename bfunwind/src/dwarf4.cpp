@@ -550,21 +550,21 @@ private_decode_cfi(const fd_entry &fde, register_state *state)
 int64_t
 dwarf4::decode_sleb128(char **addr)
 {
-    uint8_t byte = 0;
+    int64_t byte = 0;
     int64_t shift = 0;
     int64_t result = 0;
 
-    while (1)
+    while (true)
     {
         byte = *((uint8_t *)(*addr)++);
         result |= ((byte & 0x7f) << shift);
-        shift += 7;
         if ((byte & 0x80) == 0)
             break;
+        shift += 7;
     }
 
-    if ((byte & 0x40) != 0)
-        result |= (-1LL) << shift;
+    if ((shift < 0x40) && (byte & 0x40) != 0)
+        result |= - (1LL << shift);
 
     return result;
 }
@@ -572,17 +572,16 @@ dwarf4::decode_sleb128(char **addr)
 uint64_t
 dwarf4::decode_uleb128(char **addr)
 {
-    uint8_t byte = 0;
     uint64_t shift = 0;
     uint64_t result = 0;
 
-    while (1)
+    while (true)
     {
-        byte = *((uint8_t *)(*addr)++);
+        auto byte = *((uint8_t *)(*addr)++);
         result |= ((byte & 0x7f) << shift);
-        shift += 7;
         if ((byte & 0x80) == 0)
             break;
+        shift += 7;
     }
 
     return result;

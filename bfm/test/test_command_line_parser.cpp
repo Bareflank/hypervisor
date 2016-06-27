@@ -286,3 +286,36 @@ bfm_ut::test_command_line_parser_with_valid_status()
     EXPECT_TRUE(g_clp.cmd() == command_line_parser_command::status);
     EXPECT_TRUE(g_clp.modules() == "");
 }
+
+void
+bfm_ut::test_command_line_parser_no_vcpuid()
+{
+    auto args = {"dump"_s, "--vcpuid"_s};
+
+    g_clp.reset();
+    EXPECT_NO_EXCEPTION(g_clp.parse(args));
+
+    EXPECT_TRUE(g_clp.cmd() == command_line_parser_command::dump);
+    EXPECT_TRUE(g_clp.vcpuid() == 0);
+}
+
+void
+bfm_ut::test_command_line_parser_invalid_vcpuid()
+{
+    auto args = {"dump"_s, "--vcpuid"_s, "not_a_number"_s};
+
+    g_clp.reset();
+    EXPECT_EXCEPTION(g_clp.parse(args), std::invalid_argument);
+}
+
+void
+bfm_ut::test_command_line_parser_valid_vcpuid()
+{
+    auto args = {"dump"_s, "--vcpuid"_s, "2"_s};
+
+    g_clp.reset();
+    EXPECT_NO_EXCEPTION(g_clp.parse(args));
+
+    EXPECT_TRUE(g_clp.cmd() == command_line_parser_command::dump);
+    EXPECT_TRUE(g_clp.vcpuid() == 2);
+}

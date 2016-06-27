@@ -121,3 +121,16 @@ void
 platform_stop(void)
 {
 }
+
+int64_t
+platform_num_cpus(void)
+{
+    return 1;
+}
+
+int64_t
+platform_set_affinity(int64_t affinity)
+{
+    (void) affinity;
+    return 0;
+}

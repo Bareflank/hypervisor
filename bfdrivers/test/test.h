@@ -83,6 +83,7 @@ private:
     void test_common_stop_stop_vmm_failure();
 
     void test_common_dump_invalid_drr();
+    void test_common_dump_invalid_vcpuid();
     void test_common_dump_dump_when_unloaded();
     void test_common_dump_dump_when_corrupt();
     void test_common_dump_dump_when_loaded();

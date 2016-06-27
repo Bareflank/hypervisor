@@ -26,16 +26,13 @@ global execute_with_stack:function
 
 section .text
 
-; int64_t execute_with_stack(entry_t func, void *stack, uint64_t size);
+; int64_t execute_with_stack(int64_t op, int64_t vcpuid, entry_t func, uintptr_t stack);
 execute_with_stack:
     push rbp
     mov rbp, rsp
 
-    mov rsp, rsi
-    add rsp, rdx
-    sub rsp, 1
-
-    call rdi
+    mov rsp, rcx
+    call rdx
 
     leave
     ret

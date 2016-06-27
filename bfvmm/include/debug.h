@@ -22,8 +22,10 @@
 #ifndef DEBUG_H
 #define DEBUG_H
 
+#include <unistd.h>
 #include <iomanip>
 #include <iostream>
+#include <sstream>
 
 #define bfcolor_green "\033[1;32m"
 #define bfcolor_red "\033[1;31m"
@@ -34,6 +36,36 @@
 #define bfcolor_error "\033[1;31m"
 #define bfcolor_func "\033[1;36m"
 #define bfcolor_line "\033[1;35m"
+
+#define bfostream_shift 4
+#define bfostream_offset 0x1000
+
+/// Output To Core
+///
+/// All std::cout and std::cerr are sent to a specific debug_ring
+/// based on the vcpuid that you provide, instead of being
+/// broadcast to all of the debug_rings and serial.
+///
+/// @param vcpuid the vcpu to send the output to
+/// @param func a lambda function containing the output to redirect
+///
+template<class T>
+void output_to_vcpu(int64_t vcpuid, T func)
+{
+    auto handle = (vcpuid << bfostream_shift) + bfostream_offset;
+
+    std::stringstream buffer;
+
+    std::streambuf *coutbuf = std::cout.rdbuf(buffer.rdbuf());
+    std::streambuf *cerrbuf = std::cerr.rdbuf(buffer.rdbuf());
+
+    func();
+
+    write(handle, buffer.str().c_str(), buffer.str().length());
+
+    std::cout.rdbuf(coutbuf);
+    std::cerr.rdbuf(cerrbuf);
+}
 
 /// This macro is a shortcut for std::endl
 ///
