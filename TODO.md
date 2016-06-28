@@ -1,11 +1,4 @@
 Misc:
-- We need to go through all of the error codes, and map out blocks for each
-  module, driver, elf error, etc... This way, when an error bubbles through
-  the system, it's easy to identify
-- Destructors for statically created classes are not being called. This should
-  be resolved at some point. Likely this problem will go away once we have a
-  custom libc, as atexit registers the destructor, but is never executed since
-  we cannot use _exit() at the moment.
 - Add support for clang/LLVM
 - Add DWARF4 expression support in the unwinder (this could go away if
   Clang/LLVM doesn't need it either).
@@ -13,15 +6,8 @@ Misc:
   would require a custom libmpx designed for the kernel in a cross platform
   fashion. Might not be possible until the new libc is developed with basic
   pthread mutex support.
-- Modify the common.c code in the driver entry to handle memory protections
-  properly. Specifically, we want to make sure that we are respecting the
-  read/execute and read/write memory protections that are labeled by the
-  ELF program loader.
 - Add system beep code for additional debugging
 - Add support for the PCI debugger
-- Trigger a rebuild if bfcrt changes
-- Trigger a rebuild of libcxx is bfunwind changes
-- Some scripts use "-" while others use "_", we should be consistent
 
 Version 1.1 TODO:
 - Add Windows support
@@ -31,7 +17,6 @@ Version 1.1 TODO:
   unwinder), and libc++.so.
 - Clean up the VMCS checks so that they can be unit tested better, and then
   complete the unit tests
-- All structs used in C++ only should have constructors
 - Uses the following as our default flags to match Clear Linux: -g2 -O3 -pipe
   -fexceptions -fstack-protector -m64 -march=westmere -mtune=native
   -malign-data=abi
@@ -39,6 +24,20 @@ Version 1.1 TODO:
   logic when an exception is throw so that we can see what lead up to the
   exception. This is really important as std::exceptions do not have
   contextual information about where the exception occured.
+- We need to go through all of the error codes, and map out blocks for each
+  module, driver, elf error, etc... This way, when an error bubbles through
+  the system, it's easy to identify
+- Destructors for statically created classes are not being called. This should
+  be resolved at some point. Likely this problem will go away once we have a
+  custom libc, as atexit registers the destructor, but is never executed since
+  we cannot use _exit() at the moment.
+- Modify the common.c code in the driver entry to handle memory protections
+  properly. Specifically, we want to make sure that we are respecting the
+  read/execute and read/write memory protections that are labeled by the
+  ELF program loader.
+- Trigger a rebuild if bfcrt changes
+- Trigger a rebuild of libcxx is bfunwind changes
+- Some scripts use "-" while others use "_", we should be consistent
 
 Version 1.2 TODO:
 - Move to JSON. Once we need to be able to start a guest, we have a lot of
