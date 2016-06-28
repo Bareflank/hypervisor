@@ -506,8 +506,10 @@ private_check_support(struct bfelf_file_t *ef)
     if (ef->ehdr->e_ident[bfei_version] != bfev_current)
         return unsupported_file("unsupported version");
 
-    // if (ef->ehdr->e_ident[bfei_osabi] != bfelfosabi_sysv)
-    //     return unsupported_file("file does not use the system v abi");
+    /*
+     * if (ef->ehdr->e_ident[bfei_osabi] != bfelfosabi_sysv)
+     *     return unsupported_file("file does not use the system v abi");
+     */
 
     if (ef->ehdr->e_ident[bfei_abiversion] != 0)
         return unsupported_file("unsupported abi version");
