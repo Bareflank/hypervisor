@@ -33,7 +33,6 @@ Version 1.1 TODO:
   comments are done properly.
 - Clean up the VMCS checks so that they can be unit tested better, and then
   complete the unit tests
-- All structs used in C++ only should have constructors
 - the debug.h code should use std::cerr were needed
 - per-core debugging should be done
 - #define for line endings for bfendl
