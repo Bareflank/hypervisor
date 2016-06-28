@@ -69,7 +69,9 @@ void output_to_vcpu(int64_t vcpuid, T func)
 
 /// This macro is a shortcut for std::endl
 ///
+#ifndef bfendl
 #define bfendl std::endl
+#endif
 
 /// This macro is a shortcut for std::cout that adds some text and color.
 /// Use it like std::cout
@@ -78,8 +80,10 @@ void output_to_vcpu(int64_t vcpuid, T func)
 /// bfinfo << "hello world" << bfend;
 /// @endcode
 ///
+#ifndef bfinfo
 #define bfinfo \
     std::cout
+#endif
 
 /// This macro is a shortcut for std::cout that adds some text and color.
 /// Use it like std::cout
@@ -88,8 +92,10 @@ void output_to_vcpu(int64_t vcpuid, T func)
 /// bfdebug << "hello world" << bfend;
 /// @endcode
 ///
+#ifndef bfdebug
 #define bfdebug \
     std::cout << bfcolor_debug << "DEBUG" << bfcolor_end << ": "
+#endif
 
 /// This macro is a shortcut for std::cout that adds some text and color.
 /// Use it like std::cout
@@ -98,8 +104,10 @@ void output_to_vcpu(int64_t vcpuid, T func)
 /// bfwarning << "hello world" << bfend;
 /// @endcode
 ///
+#ifndef bfwarning
 #define bfwarning \
-    std::cout << bfcolor_warning << "WARNING" << bfcolor_end << ": "
+    std::cerr << bfcolor_warning << "WARNING" << bfcolor_end << ": "
+#endif
 
 /// This macro is a shortcut for std::cout that adds some text and color.
 /// Use it like std::cout
@@ -108,8 +116,10 @@ void output_to_vcpu(int64_t vcpuid, T func)
 /// bferror << "hello world" << bfend;
 /// @endcode
 ///
+#ifndef bferror
 #define bferror \
-    std::cout << bfcolor_error << "ERROR" << bfcolor_end << ": "
+    std::cerr << bfcolor_error << "ERROR" << bfcolor_end << ": "
+#endif
 
 /// This macro is a shortcut for std::cout that adds some text and color.
 /// Use it like std::cout
@@ -118,7 +128,9 @@ void output_to_vcpu(int64_t vcpuid, T func)
 /// bffatal << "hello world" << bfend;
 /// @endcode
 ///
+#ifndef bffatal
 #define bffatal \
-    std::cout << bfcolor_error << "FATAL ERROR" << bfcolor_end << ": "
+    std::cerr << bfcolor_error << "FATAL ERROR" << bfcolor_end << ": "
+#endif
 
 #endif
