@@ -27,10 +27,15 @@
 #include <exception.h>
 #include <eh_frame_list.h>
 #include <vcpu/vcpu_manager.h>
+#include <memory_manager/memory_manager.h>
 
 // -----------------------------------------------------------------------------
 // Global
 // -----------------------------------------------------------------------------
+
+#define operation_init_vmm 1
+#define operation_start_vmm 2
+#define operation_stop_vmm 3
 
 auto g_eh_frame_list_num = 0ULL;
 eh_frame_t g_eh_frame_list[MAX_NUM_MODULES] = {};
@@ -38,51 +43,6 @@ eh_frame_t g_eh_frame_list[MAX_NUM_MODULES] = {};
 // -----------------------------------------------------------------------------
 // Helpers
 // -----------------------------------------------------------------------------
-
-#define guard(a) \
-    guard_stack([&]() -> int64_t \
-    { return guard_exceptions([&]() { a; }); });
-
-/// Guard Stack
-///
-/// Since we are using userspace style code / libraries (like libc++) in this
-/// code, we could end up overrunning the stack, as we do not have control of
-/// all of the code, and some of it assumes that the stack is very large. This
-/// guard provides a new stack that is much larger, ensuring that the kernel's
-/// stack is not corrupted.
-///
-/// Note: Order matters here. You must catch all exceptions first before
-/// calling this function. Since the execute with stack function uses
-/// assembly, there is no FDE entry for this function which means that stack
-/// unwinding cannot continue past this point.
-///
-/// Note: We can use make_unqiue here because bad_alloc always results in
-/// an abort (i.e. system halt).
-///
-template<typename T> int64_t
-guard_stack(T func)
-{
-    auto ret = ENTRY_ERROR_UNKNOWN;
-    auto stack = std::make_unique<uint64_t[]>(STACK_SIZE);
-
-    // auto num = 0;
-    // for (num = 0; num < STACK_SIZE; num++)
-    //     stack[num] = 0xFFFFFFFFFFFFFFFF;
-
-    ret = execute_with_stack(func, stack.get(), STACK_SIZE << 3);
-
-    // for (num = 0; num < STACK_SIZE; num++)
-    //     if (stack[num] != 0xFFFFFFFFFFFFFFFF)
-    //         break;
-
-    // bfinfo << std::dec;
-    // bfdebug << "    - free heap space: " << (g_mm->free_blocks() >> 4)
-    //         << " kbytes" << bfendl;
-    // bfdebug << "    - free stack space: " << (num >> 7)
-    //         << " kbytes" << bfendl;
-
-    return ret;
-}
 
 /// Guard Exceptions
 ///
@@ -93,12 +53,28 @@ guard_stack(T func)
 /// non-standard exception is thrown, preventing exceptions from moving
 /// beyond this point.
 ///
-template<typename T> int64_t
-guard_exceptions(T func)
+int64_t
+guard_exceptions(int64_t op, int64_t vcpuid)
 {
     try
     {
-        func();
+        switch (op)
+        {
+            case operation_init_vmm:
+                g_vcm->init(vcpuid);
+                break;
+
+            case operation_start_vmm:
+                g_vcm->start(vcpuid);
+                break;
+
+            case operation_stop_vmm:
+                g_vcm->stop(vcpuid);
+                break;
+
+            default:
+                throw std::logic_error("unknown operation");
+        }
 
         return ENTRY_SUCCESS;
     }
@@ -126,6 +102,41 @@ guard_exceptions(T func)
     return ENTRY_ERROR_UNKNOWN;
 }
 
+/// Guard Stack
+///
+/// Since we are using userspace style code / libraries (like libc++) in this
+/// code, we could end up overrunning the stack, as we do not have control of
+/// all of the code, and some of it assumes that the stack is very large. This
+/// guard provides a new stack that is much larger, ensuring that the kernel's
+/// stack is not corrupted.
+///
+/// Note: Order matters here. You must catch all exceptions first before
+/// calling this function. Since the execute with stack function uses
+/// assembly, there is no FDE entry for this function which means that stack
+/// unwinding cannot continue past this point.
+///
+/// Note: We can use make_unqiue here because bad_alloc always results in
+/// an abort (i.e. system halt).
+///
+int64_t
+guard_stack(int64_t op, int64_t vcpuid)
+{
+    auto ret = ENTRY_ERROR_UNKNOWN;
+    auto stack = std::make_unique<uint64_t[]>(STACK_SIZE);
+    auto stack_loc = (uintptr_t)stack.get() + (STACK_SIZE << 3) - 1;
+
+    ret = execute_with_stack(op, vcpuid, guard_exceptions, stack_loc);
+
+    // if (op != operation_init_vmm)
+    // {
+    //     bfinfo << std::dec;
+    //     bfdebug << "    - free heap space: " << (g_mm->free_blocks() >> 4)
+    //             << " kbytes of " << (MAX_BLOCKS >> 4) << " kbytes" << bfendl;
+    // }
+
+    return ret;
+}
+
 // -----------------------------------------------------------------------------
 // Entry Points
 // -----------------------------------------------------------------------------
@@ -133,25 +144,19 @@ guard_exceptions(T func)
 extern "C" int64_t
 init_vmm(int64_t arg)
 {
-    (void) arg;
-
-    return guard(g_vcm->init(0));
+    return guard_stack(operation_init_vmm, arg);
 }
 
 extern "C" int64_t
 start_vmm(int64_t arg)
 {
-    (void) arg;
-
-    return guard(g_vcm->start(0));
+    return guard_stack(operation_start_vmm, arg);
 }
 
 extern "C" int64_t
 stop_vmm(int64_t arg)
 {
-    (void) arg;
-
-    return guard(g_vcm->stop(0));
+    return guard_stack(operation_stop_vmm, arg);
 }
 
 // -----------------------------------------------------------------------------

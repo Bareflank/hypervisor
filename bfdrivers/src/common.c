@@ -40,6 +40,8 @@ struct module_t g_modules[MAX_NUM_MODULES] = {{0}};
 
 struct bfelf_loader_t g_loader;
 
+int64_t g_num_cpus_started = 0;
+
 /* -------------------------------------------------------------------------- */
 /* Helpers                                                                    */
 /* -------------------------------------------------------------------------- */
@@ -584,21 +586,31 @@ common_start_vmm(void)
         return BF_ERROR_VMM_INVALID_STATE;
     }
 
-    ret = execute_symbol("init_vmm", 0);
-    if (ret != BF_SUCCESS)
+    for (g_num_cpus_started = 0; g_num_cpus_started < platform_num_cpus(); g_num_cpus_started++)
     {
-        ALERT("start_vmm: failed to execute init_vmm: %" PRId64 "\n", ret);
-        goto failure;
-    }
+        ret = platform_set_affinity(g_num_cpus_started);
+        if (ret != BFELF_SUCCESS)
+        {
+            ALERT("start_vmm: failed to set affinity: %" PRId64 "\n", ret);
+            goto failure;
+        }
 
-    ret = execute_symbol("start_vmm", 0);
-    if (ret != BF_SUCCESS)
-    {
-        ALERT("start_vmm: failed to execute start_vmm: %" PRId64 "\n", ret);
-        goto failure;
-    }
+        ret = execute_symbol("init_vmm", g_num_cpus_started);
+        if (ret != BF_SUCCESS)
+        {
+            ALERT("start_vmm: failed to execute init_vmm: %" PRId64 "\n", ret);
+            goto failure;
+        }
 
-    platform_start();
+        ret = execute_symbol("start_vmm", g_num_cpus_started);
+        if (ret != BF_SUCCESS)
+        {
+            ALERT("start_vmm: failed to execute start_vmm: %" PRId64 "\n", ret);
+            goto failure;
+        }
+
+        platform_start();
+    }
 
     g_vmm_status = VMM_RUNNING;
     return BF_SUCCESS;
@@ -612,7 +624,8 @@ failure:
 int64_t
 common_stop_vmm(void)
 {
-    int64_t ret;
+    int64_t i = 0;
+    int64_t ret = 0;
 
     if (common_vmm_status() == VMM_CORRUPT)
     {
@@ -630,14 +643,24 @@ common_stop_vmm(void)
         return BF_ERROR_VMM_INVALID_STATE;
     }
 
-    ret = execute_symbol("stop_vmm", 0);
-    if (ret != BFELF_SUCCESS)
+    for (i = g_num_cpus_started - 1; i >= 0 ; i--)
     {
-        ALERT("stop_vmm: failed to execute symbol: %" PRId64 "\n", ret);
-        goto corrupted;
-    }
+        ret = platform_set_affinity(i);
+        if (ret != BFELF_SUCCESS)
+        {
+            ALERT("stop_vmm: failed to set affinity: %" PRId64 "\n", ret);
+            goto corrupted;
+        }
 
-    platform_stop();
+        ret = execute_symbol("stop_vmm", i);
+        if (ret != BFELF_SUCCESS)
+        {
+            ALERT("stop_vmm: failed to execute symbol: %" PRId64 "\n", ret);
+            goto corrupted;
+        }
+
+        platform_stop();
+    }
 
     g_vmm_status = VMM_LOADED;
     return BF_SUCCESS;
@@ -649,7 +672,7 @@ corrupted:
 }
 
 int64_t
-common_dump_vmm(struct debug_ring_resources_t **drr)
+common_dump_vmm(struct debug_ring_resources_t **drr, int64_t vcpuid)
 {
     int64_t ret = 0;
     get_drr_t get_drr = 0;
@@ -671,7 +694,7 @@ common_dump_vmm(struct debug_ring_resources_t **drr)
         return ret;
     }
 
-    *drr = get_drr(0);
+    *drr = get_drr(vcpuid);
     if (*drr == 0)
     {
         ALERT("dump_vmm: failed to get debug ring resources\n");

@@ -172,7 +172,7 @@ Released: April 27, 2016 <br>
 
 Target: September 2016
 
-* Multi-Core Support
+* ~~Multi-Core Support~~
 * Windows Support
 * Updated C++ Environment
 * ~~Isolated VMM~~

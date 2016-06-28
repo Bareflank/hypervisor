@@ -320,6 +320,7 @@ driver_entry_ut::list()
     this->test_common_stop_stop_vmm_failure();
 
     this->test_common_dump_invalid_drr();
+    this->test_common_dump_invalid_vcpuid();
     this->test_common_dump_dump_when_unloaded();
     this->test_common_dump_dump_when_corrupt();
     this->test_common_dump_dump_when_loaded();

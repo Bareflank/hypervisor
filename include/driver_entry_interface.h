@@ -69,6 +69,7 @@ extern "C" {
 #define IOCTL_STOP_VMM_CMD 500
 #define IOCTL_DUMP_VMM_CMD 600
 #define IOCTL_VMM_STATUS_CMD 700
+#define IOCTL_SET_VCPUID_CMD 800
 
 #include <debug_ring_interface.h>
 
@@ -162,6 +163,16 @@ extern "C" {
  */
 #define IOCTL_VMM_STATUS _IOR(BAREFLANK_MAJOR, IOCTL_VMM_STATUS_CMD, int64_t *)
 
+/**
+ * Set VCPUID
+ *
+ * This IOCTL tells the driver entry point what vcpuid the userspace
+ * application would like to focus on.
+ *
+ * @param arg the vcpuid to focus commands on
+ */
+#define IOCTL_SET_VCPUID _IOW(BAREFLANK_MAJOR, IOCTL_SET_VCPUID_CMD, uint64_t *)
+
 #endif
 
 /* ========================================================================== */
@@ -193,6 +204,7 @@ typedef struct bf_ioctl
 #define IOCTL_STOP_VMM IOCTL_STOP_VMM_CMD
 #define IOCTL_DUMP_VMM IOCTL_DUMP_VMM_CMD
 #define IOCTL_VMM_STATUS IOCTL_VMM_STATUS_CMD
+#define IOCTL_SET_VCPUID IOCTL_SET_VCPUID_CMD
 
 #endif
 

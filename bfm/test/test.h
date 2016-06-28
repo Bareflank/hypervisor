@@ -60,6 +60,9 @@ private:
     void test_command_line_parser_with_valid_stop();
     void test_command_line_parser_with_valid_dump();
     void test_command_line_parser_with_valid_status();
+    void test_command_line_parser_no_vcpuid();
+    void test_command_line_parser_invalid_vcpuid();
+    void test_command_line_parser_valid_vcpuid();
 
     void test_file_read_with_bad_filename();
     void test_file_read_with_good_filename();

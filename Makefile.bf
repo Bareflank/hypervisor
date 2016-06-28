@@ -43,6 +43,14 @@ endif
 FILTERED_MODULE_FILE=/tmp/module_file
 
 ################################################################################
+# VCPUID
+################################################################################
+
+ifeq ($(VCPUID),)
+	VCPUID=0
+endif
+
+################################################################################
 # Subdirs
 ################################################################################
 
@@ -115,7 +123,7 @@ stop: force
 	@sudo LD_LIBRARY_PATH=%BUILD_ABS%/makefiles/bfm/bin/native/ %BUILD_ABS%/makefiles/bfm/bin/native/bfm stop
 
 dump: force
-	@sudo LD_LIBRARY_PATH=%BUILD_ABS%/makefiles/bfm/bin/native/ %BUILD_ABS%/makefiles/bfm/bin/native/bfm dump
+	@sudo LD_LIBRARY_PATH=%BUILD_ABS%/makefiles/bfm/bin/native/ %BUILD_ABS%/makefiles/bfm/bin/native/bfm dump --vcpuid $(VCPUID)
 
 status: force
 	@sudo LD_LIBRARY_PATH=%BUILD_ABS%/makefiles/bfm/bin/native/ %BUILD_ABS%/makefiles/bfm/bin/native/bfm status

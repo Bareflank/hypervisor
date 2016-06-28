@@ -104,6 +104,14 @@ public:
     ///
     virtual std::string modules() const noexcept;
 
+    /// vCPU ID
+    ///
+    /// Each guest + core combination has it's own vCPU ID. This command
+    /// lets the user specify which core + guest to target for information.
+    ///
+    /// @return returns the vcpuid provided by the user
+    virtual uint64_t vcpuid() const noexcept;
+
     /// Reset
     ///
     /// Resets the internal state to that of the default constructor
@@ -123,6 +131,7 @@ private:
 
     command_line_parser_command::type m_cmd;
     std::string m_modules;
+    uint64_t m_vcpuid;
 };
 
 #endif

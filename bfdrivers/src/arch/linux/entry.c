@@ -5,8 +5,6 @@
 #include <linux/miscdevice.h>
 #include <linux/vmalloc.h>
 #include <linux/kallsyms.h>
-#include <linux/cpumask.h>
-#include <linux/sched.h>
 #include <linux/notifier.h>
 #include <linux/reboot.h>
 
@@ -26,8 +24,7 @@ int64_t g_num_files = 0;
 char *files[MAX_NUM_MODULES] = {0};
 int64_t files_size[MAX_NUM_MODULES] = { 0 };
 
-typedef long (*set_affinity_fn)(pid_t, const struct cpumask *);
-set_affinity_fn set_cpu_affinity;
+uint64_t g_vcpuid = 0;
 
 /* ========================================================================== */
 /* Misc Device                                                                */
@@ -230,7 +227,7 @@ ioctl_dump_vmm(struct debug_ring_resources_t *user_drr)
     int ret;
     struct debug_ring_resources_t *drr = 0;
 
-    ret = common_dump_vmm(&drr);
+    ret = common_dump_vmm(&drr, g_vcpuid);
     if (ret != BF_SUCCESS)
     {
         ALERT("IOCTL_DUMP_VMM: failed to dump vmm: %d\n", ret);
@@ -271,11 +268,26 @@ ioctl_vmm_status(int64_t *status)
     return BF_IOCTL_SUCCESS;
 }
 
-static void
-helper_fini(void)
+static long
+ioctl_set_vcpuid(uint64_t *vcpuid)
 {
-    set_cpu_affinity(current->pid, cpumask_of(0));
-    common_fini();
+    int ret;
+
+    if (vcpuid == 0)
+    {
+        ALERT("IOCTL_SET_VCPUID: failed with len == NULL\n");
+        return BF_IOCTL_FAILURE;
+    }
+
+    ret = copy_from_user(&g_vcpuid, vcpuid, sizeof(uint64_t));
+    if (ret != 0)
+    {
+        ALERT("IOCTL_SET_VCPUID: failed to copy memory from userspace\n");
+        return BF_IOCTL_FAILURE;
+    }
+
+    DEBUG("IOCTL_SET_VCPUID: succeeded\n");
+    return BF_IOCTL_SUCCESS;
 }
 
 static long
@@ -284,8 +296,6 @@ dev_unlocked_ioctl(struct file *file,
                    unsigned long arg)
 {
     (void) file;
-
-    set_cpu_affinity(current->pid, cpumask_of(0));
 
     switch (cmd)
     {
@@ -312,6 +322,9 @@ dev_unlocked_ioctl(struct file *file,
 
         case IOCTL_VMM_STATUS:
             return ioctl_vmm_status((int64_t *)arg);
+
+        case IOCTL_SET_VCPUID:
+            return ioctl_set_vcpuid((uint64_t *)arg);
 
         default:
             return -EINVAL;
@@ -344,7 +357,7 @@ dev_reboot(struct notifier_block *nb,
     (void) code;
     (void) unused;
 
-    helper_fini();
+    common_fini();
 
     return NOTIFY_DONE;
 }
@@ -360,13 +373,6 @@ dev_init(void)
     int ret;
 
     register_reboot_notifier(&bareflank_notifier_block);
-
-    set_cpu_affinity = (set_affinity_fn)kallsyms_lookup_name("sched_setaffinity");
-    if (set_cpu_affinity == NULL)
-    {
-        ALERT("Failed to locate sched_setaffinity, to avoid problems, not continuing to load bareflank\n");
-        return -1;
-    }
 
     if ((ret = misc_register(&bareflank_dev)) != 0)
     {
@@ -387,7 +393,7 @@ dev_init(void)
 void
 dev_exit(void)
 {
-    helper_fini();
+    common_fini();
 
     misc_deregister(&bareflank_dev);
     unregister_reboot_notifier(&bareflank_notifier_block);

@@ -28,7 +28,7 @@
 
 #define vcpu_execute(a,b) \
     if (a < 0 || a >= MAX_VCPUS) \
-        throw std::out_of_range("vcpu id"); \
+        throw std::out_of_range("vcpu id is out of range"); \
     \
     const auto &vc = m_vcpus[a]; \
     \
@@ -63,7 +63,7 @@ vcpu_manager::start(int64_t vcpuid)
     vcpu_execute(vcpuid, start);
 
     bfdebug << "success: host os is " << bfcolor_green "now " << bfcolor_end
-            << "in a vm" << bfendl;
+            << "in a vm on vcpuid = " << vcpuid << bfendl;
 }
 
 void
@@ -72,7 +72,7 @@ vcpu_manager::stop(int64_t vcpuid)
     vcpu_execute(vcpuid, stop);
 
     bfdebug << "success: host os is " << bfcolor_red "not " << bfcolor_end
-            << "in a vm" << bfendl;
+            << "in a vm on vcpuid = " << vcpuid << bfendl;
 
     m_vcpus[vcpuid].reset();
 }
