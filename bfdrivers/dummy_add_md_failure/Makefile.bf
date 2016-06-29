@@ -23,7 +23,7 @@
 # Target Information
 ################################################################################
 
-TARGET_NAME:=dummy_add_mdl_success
+TARGET_NAME:=dummy_add_md_failure
 TARGET_TYPE:=lib
 TARGET_COMPILER:=cross
 
@@ -49,7 +49,7 @@ CROSS_OUTDIR+=%BUILD_REL%/../bin
 # Sources
 ################################################################################
 
-SOURCES+=dummy_add_mdl_success.cpp
+SOURCES+=dummy_add_md_failure.cpp
 
 INCLUDE_PATHS+=./
 INCLUDE_PATHS+=../include/

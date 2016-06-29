@@ -22,7 +22,6 @@
 #include <test.h>
 #include <constants.h>
 #include <memory_manager/memory_manager.h>
-#include <memory_manager/memory_manager_exceptions.h>
 
 void
 memory_manager_ut::test_memory_manager_malloc_zero()
@@ -235,41 +234,49 @@ memory_manager_ut::test_memory_manager_malloc_alloc_fragment()
 }
 
 void
-memory_manager_ut::test_memory_manager_add_mdl_invalid_mdl()
+memory_manager_ut::test_memory_manager_add_md_invalid_md()
 {
-    EXPECT_EXCEPTION(g_mm->add_mdl(0, 1), std::invalid_argument);
+    EXPECT_EXCEPTION(g_mm->add_md(0), std::invalid_argument);
 }
 
 void
-memory_manager_ut::test_memory_manager_add_mdl_invalid_num()
+memory_manager_ut::test_memory_manager_add_md_invalid_virt()
 {
-    memory_descriptor mdl[1] = {{0, 0, 0}};
+    memory_descriptor md = {(void *)0, (void *)0x54321000, 7};
 
-    EXPECT_EXCEPTION(g_mm->add_mdl(mdl, 0), std::invalid_argument);
+    EXPECT_EXCEPTION(g_mm->add_md(&md), std::invalid_argument);
 }
 
 void
-memory_manager_ut::test_memory_manager_add_mdl_unaligned_physical()
+memory_manager_ut::test_memory_manager_add_md_invalid_phys()
 {
-    memory_descriptor mdl[1] = {{
-            (void *)0x12345123,
-            (void *)0x54321000, 0
-        }
-    };
+    memory_descriptor md = {(void *)0x12345123, (void *)0, 7};
 
-    EXPECT_EXCEPTION(g_mm->add_mdl(mdl, 1), bfn::invalid_mdl_error);
+    EXPECT_EXCEPTION(g_mm->add_md(&md), std::invalid_argument);
 }
 
 void
-memory_manager_ut::test_memory_manager_add_mdl_unaligned_virtual()
+memory_manager_ut::test_memory_manager_add_md_invalid_type()
 {
-    memory_descriptor mdl[1] = {{
-            (void *)0x12345000,
-            (void *)0x54321123, 0
-        }
-    };
+    memory_descriptor md = {(void *)0x12345123, (void *)0x54321000, 0};
 
-    EXPECT_EXCEPTION(g_mm->add_mdl(mdl, 1), bfn::invalid_mdl_error);
+    EXPECT_EXCEPTION(g_mm->add_md(&md), std::invalid_argument);
+}
+
+void
+memory_manager_ut::test_memory_manager_add_md_unaligned_physical()
+{
+    memory_descriptor md = {(void *)0x12345123, (void *)0x54321000, 7};
+
+    EXPECT_EXCEPTION(g_mm->add_md(&md), std::logic_error);
+}
+
+void
+memory_manager_ut::test_memory_manager_add_md_unaligned_virtual()
+{
+    memory_descriptor md = {(void *)0x12345000, (void *)0x54321123, 7};
+
+    EXPECT_EXCEPTION(g_mm->add_md(&md), std::logic_error);
 }
 
 void
@@ -287,77 +294,53 @@ memory_manager_ut::test_memory_manager_phys_to_virt_unknown()
 void
 memory_manager_ut::test_memory_manager_virt_to_phys_random_address()
 {
-    memory_descriptor mdl[1] = {{
-            (void *)0x12345000,
-            (void *)0x54321000, 0
-        }
-    };
+    memory_descriptor md = {(void *)0x12345000, (void *)0x54321000, 7};
 
-    EXPECT_NO_EXCEPTION(g_mm->add_mdl(mdl, 1));
+    EXPECT_NO_EXCEPTION(g_mm->add_md(&md));
     EXPECT_TRUE(g_mm->virt_to_phys((void *)0x54321ABC) == (void *)0x12345ABC);
 }
 
 void
 memory_manager_ut::test_memory_manager_virt_to_phys_upper_limit()
 {
-    memory_descriptor mdl[1] = {{
-            (void *)0x12345000,
-            (void *)0x54321000, 0
-        }
-    };
+    memory_descriptor md = {(void *)0x12345000, (void *)0x54321000, 7};
 
-    EXPECT_NO_EXCEPTION(g_mm->add_mdl(mdl, 1));
+    EXPECT_NO_EXCEPTION(g_mm->add_md(&md));
     EXPECT_TRUE(g_mm->virt_to_phys((void *)0x54321FFF) == (void *)0x12345FFF);
 }
 
 void
 memory_manager_ut::test_memory_manager_virt_to_phys_lower_limit()
 {
-    memory_descriptor mdl[1] = {{
-            (void *)0x12345000,
-            (void *)0x54321000, 0
-        }
-    };
+    memory_descriptor md = {(void *)0x12345000, (void *)0x54321000, 7};
 
-    EXPECT_NO_EXCEPTION(g_mm->add_mdl(mdl, 1));
+    EXPECT_NO_EXCEPTION(g_mm->add_md(&md));
     EXPECT_TRUE(g_mm->virt_to_phys((void *)0x54321000) == (void *)0x12345000);
 }
 
 void
 memory_manager_ut::test_memory_manager_phys_to_virt_random_address()
 {
-    memory_descriptor mdl[1] = {{
-            (void *)0x12345000,
-            (void *)0x54321000, 0
-        }
-    };
+    memory_descriptor md = {(void *)0x12345000, (void *)0x54321000, 7};
 
-    EXPECT_NO_EXCEPTION(g_mm->add_mdl(mdl, 1));
+    EXPECT_NO_EXCEPTION(g_mm->add_md(&md));
     EXPECT_TRUE(g_mm->phys_to_virt((void *)0x12345ABC) == (void *)0x54321ABC);
 }
 
 void
 memory_manager_ut::test_memory_manager_phys_to_virt_upper_limit()
 {
-    memory_descriptor mdl[1] = {{
-            (void *)0x12345000,
-            (void *)0x54321000, 0
-        }
-    };
+    memory_descriptor md = {(void *)0x12345000, (void *)0x54321000, 7};
 
-    EXPECT_NO_EXCEPTION(g_mm->add_mdl(mdl, 1));
+    EXPECT_NO_EXCEPTION(g_mm->add_md(&md));
     EXPECT_TRUE(g_mm->phys_to_virt((void *)0x12345FFF) == (void *)0x54321FFF);
 }
 
 void
 memory_manager_ut::test_memory_manager_phys_to_virt_lower_limit()
 {
-    memory_descriptor mdl[1] = {{
-            (void *)0x12345000,
-            (void *)0x54321000, 0
-        }
-    };
+    memory_descriptor md = {(void *)0x12345000, (void *)0x54321000, 7};
 
-    EXPECT_NO_EXCEPTION(g_mm->add_mdl(mdl, 1));
+    EXPECT_NO_EXCEPTION(g_mm->add_md(&md));
     EXPECT_TRUE(g_mm->phys_to_virt((void *)0x12345000) == (void *)0x54321000);
 }

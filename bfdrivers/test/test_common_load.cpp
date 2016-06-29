@@ -32,7 +32,7 @@ driver_entry_ut::test_common_load_successful_load()
     EXPECT_TRUE(common_add_module(m_dummy_init_vmm_success, m_dummy_init_vmm_success_length) == BF_SUCCESS);
     EXPECT_TRUE(common_add_module(m_dummy_start_vmm_success, m_dummy_start_vmm_success_length) == BF_SUCCESS);
     EXPECT_TRUE(common_add_module(m_dummy_stop_vmm_success, m_dummy_stop_vmm_success_length) == BF_SUCCESS);
-    EXPECT_TRUE(common_add_module(m_dummy_add_mdl_success, m_dummy_add_mdl_success_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_add_module(m_dummy_add_md_success, m_dummy_add_md_success_length) == BF_SUCCESS);
     EXPECT_TRUE(common_add_module(m_dummy_misc, m_dummy_misc_length) == BF_SUCCESS);
     EXPECT_TRUE(common_load_vmm() == BF_SUCCESS);
     EXPECT_TRUE(common_vmm_status() == VMM_LOADED);
@@ -46,7 +46,7 @@ driver_entry_ut::test_common_load_load_when_already_loaded()
     EXPECT_TRUE(common_add_module(m_dummy_init_vmm_success, m_dummy_init_vmm_success_length) == BF_SUCCESS);
     EXPECT_TRUE(common_add_module(m_dummy_start_vmm_success, m_dummy_start_vmm_success_length) == BF_SUCCESS);
     EXPECT_TRUE(common_add_module(m_dummy_stop_vmm_success, m_dummy_stop_vmm_success_length) == BF_SUCCESS);
-    EXPECT_TRUE(common_add_module(m_dummy_add_mdl_success, m_dummy_add_mdl_success_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_add_module(m_dummy_add_md_success, m_dummy_add_md_success_length) == BF_SUCCESS);
     EXPECT_TRUE(common_add_module(m_dummy_misc, m_dummy_misc_length) == BF_SUCCESS);
     EXPECT_TRUE(common_load_vmm() == BF_SUCCESS);
     EXPECT_TRUE(common_load_vmm() == BF_SUCCESS);
@@ -61,7 +61,7 @@ driver_entry_ut::test_common_load_load_when_already_running()
     EXPECT_TRUE(common_add_module(m_dummy_init_vmm_success, m_dummy_init_vmm_success_length) == BF_SUCCESS);
     EXPECT_TRUE(common_add_module(m_dummy_start_vmm_success, m_dummy_start_vmm_success_length) == BF_SUCCESS);
     EXPECT_TRUE(common_add_module(m_dummy_stop_vmm_success, m_dummy_stop_vmm_success_length) == BF_SUCCESS);
-    EXPECT_TRUE(common_add_module(m_dummy_add_mdl_success, m_dummy_add_mdl_success_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_add_module(m_dummy_add_md_success, m_dummy_add_md_success_length) == BF_SUCCESS);
     EXPECT_TRUE(common_add_module(m_dummy_misc, m_dummy_misc_length) == BF_SUCCESS);
     EXPECT_TRUE(common_load_vmm() == BF_SUCCESS);
     EXPECT_TRUE(common_start_vmm() == BF_SUCCESS);
@@ -77,7 +77,7 @@ driver_entry_ut::test_common_load_load_when_corrupt()
     EXPECT_TRUE(common_add_module(m_dummy_init_vmm_success, m_dummy_init_vmm_success_length) == BF_SUCCESS);
     EXPECT_TRUE(common_add_module(m_dummy_start_vmm_success, m_dummy_start_vmm_success_length) == BF_SUCCESS);
     EXPECT_TRUE(common_add_module(m_dummy_stop_vmm_failure, m_dummy_stop_vmm_failure_length) == BF_SUCCESS);
-    EXPECT_TRUE(common_add_module(m_dummy_add_mdl_success, m_dummy_add_mdl_success_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_add_module(m_dummy_add_md_success, m_dummy_add_md_success_length) == BF_SUCCESS);
     EXPECT_TRUE(common_add_module(m_dummy_misc, m_dummy_misc_length) == BF_SUCCESS);
     EXPECT_TRUE(common_load_vmm() == BF_SUCCESS);
     EXPECT_TRUE(common_start_vmm() == BF_SUCCESS);
@@ -110,12 +110,12 @@ driver_entry_ut::test_common_load_fail_due_to_no_modules_added()
 }
 
 void
-driver_entry_ut::test_common_load_add_mdl_failed()
+driver_entry_ut::test_common_load_add_md_failed()
 {
     EXPECT_TRUE(common_add_module(m_dummy_init_vmm_success, m_dummy_init_vmm_success_length) == BF_SUCCESS);
     EXPECT_TRUE(common_add_module(m_dummy_start_vmm_success, m_dummy_start_vmm_success_length) == BF_SUCCESS);
     EXPECT_TRUE(common_add_module(m_dummy_stop_vmm_success, m_dummy_stop_vmm_success_length) == BF_SUCCESS);
-    EXPECT_TRUE(common_add_module(m_dummy_add_mdl_failure, m_dummy_add_mdl_failure_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_add_module(m_dummy_add_md_failure, m_dummy_add_md_failure_length) == BF_SUCCESS);
     EXPECT_TRUE(common_add_module(m_dummy_misc, m_dummy_misc_length) == BF_SUCCESS);
     EXPECT_TRUE(common_load_vmm() == MEMORY_MANAGER_FAILURE);
     EXPECT_TRUE(common_fini() == BF_SUCCESS);

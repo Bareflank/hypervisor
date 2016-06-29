@@ -24,8 +24,8 @@
 #include <fstream>
 #include <sys/mman.h>
 
-const auto c_dummy_add_mdl_failure_filename = "../cross/libdummy_add_mdl_failure.so";
-const auto c_dummy_add_mdl_success_filename = "../cross/libdummy_add_mdl_success.so";
+const auto c_dummy_add_md_failure_filename = "../cross/libdummy_add_md_failure.so";
+const auto c_dummy_add_md_success_filename = "../cross/libdummy_add_md_success.so";
 const auto c_dummy_get_drr_failure_filename = "../cross/libdummy_get_drr_failure.so";
 const auto c_dummy_get_drr_success_filename = "../cross/libdummy_get_drr_success.so";
 const auto c_dummy_init_vmm_failure_filename = "../cross/libdummy_init_vmm_failure.so";
@@ -47,8 +47,8 @@ driver_entry_ut::init()
 {
     auto result = false;
 
-    std::ifstream dummy_add_mdl_failure_ifs(c_dummy_add_mdl_failure_filename, std::ifstream::ate);
-    std::ifstream dummy_add_mdl_success_ifs(c_dummy_add_mdl_success_filename, std::ifstream::ate);
+    std::ifstream dummy_add_md_failure_ifs(c_dummy_add_md_failure_filename, std::ifstream::ate);
+    std::ifstream dummy_add_md_success_ifs(c_dummy_add_md_success_filename, std::ifstream::ate);
     std::ifstream dummy_get_drr_failure_ifs(c_dummy_get_drr_failure_filename, std::ifstream::ate);
     std::ifstream dummy_get_drr_success_ifs(c_dummy_get_drr_success_filename, std::ifstream::ate);
     std::ifstream dummy_init_vmm_failure_ifs(c_dummy_init_vmm_failure_filename, std::ifstream::ate);
@@ -59,8 +59,8 @@ driver_entry_ut::init()
     std::ifstream dummy_stop_vmm_failure_ifs(c_dummy_stop_vmm_failure_filename, std::ifstream::ate);
     std::ifstream dummy_stop_vmm_success_ifs(c_dummy_stop_vmm_success_filename, std::ifstream::ate);
 
-    if (dummy_add_mdl_failure_ifs.is_open() == false ||
-        dummy_add_mdl_failure_ifs.is_open() == false ||
+    if (dummy_add_md_failure_ifs.is_open() == false ||
+        dummy_add_md_failure_ifs.is_open() == false ||
         dummy_get_drr_failure_ifs.is_open() == false ||
         dummy_get_drr_success_ifs.is_open() == false ||
         dummy_init_vmm_failure_ifs.is_open() == false ||
@@ -72,8 +72,8 @@ driver_entry_ut::init()
         dummy_stop_vmm_success_ifs.is_open() == false)
     {
         std::cout << "unable to open one or more dummy libraries: " << std::endl;
-        std::cout << "    - dummy_add_mdl_failure: " << dummy_add_mdl_failure_ifs.is_open() << std::endl;
-        std::cout << "    - dummy_add_mdl_success: " << dummy_add_mdl_success_ifs.is_open() << std::endl;
+        std::cout << "    - dummy_add_md_failure: " << dummy_add_md_failure_ifs.is_open() << std::endl;
+        std::cout << "    - dummy_add_md_success: " << dummy_add_md_success_ifs.is_open() << std::endl;
         std::cout << "    - dummy_get_drr_failure: " << dummy_get_drr_failure_ifs.is_open() << std::endl;
         std::cout << "    - dummy_get_drr_success: " << dummy_get_drr_success_ifs.is_open() << std::endl;
         std::cout << "    - dummy_init_vmm_failure: " << dummy_init_vmm_failure_ifs.is_open() << std::endl;
@@ -86,8 +86,8 @@ driver_entry_ut::init()
         goto close;
     }
 
-    m_dummy_add_mdl_failure_length = dummy_add_mdl_failure_ifs.tellg();
-    m_dummy_add_mdl_success_length = dummy_add_mdl_success_ifs.tellg();
+    m_dummy_add_md_failure_length = dummy_add_md_failure_ifs.tellg();
+    m_dummy_add_md_success_length = dummy_add_md_success_ifs.tellg();
     m_dummy_get_drr_failure_length = dummy_get_drr_failure_ifs.tellg();
     m_dummy_get_drr_success_length = dummy_get_drr_success_ifs.tellg();
     m_dummy_init_vmm_failure_length = dummy_init_vmm_failure_ifs.tellg();
@@ -98,8 +98,8 @@ driver_entry_ut::init()
     m_dummy_stop_vmm_failure_length = dummy_stop_vmm_failure_ifs.tellg();
     m_dummy_stop_vmm_success_length = dummy_stop_vmm_success_ifs.tellg();
 
-    if (m_dummy_add_mdl_failure_length == 0 ||
-        m_dummy_add_mdl_failure_length == 0 ||
+    if (m_dummy_add_md_failure_length == 0 ||
+        m_dummy_add_md_failure_length == 0 ||
         m_dummy_get_drr_failure_length == 0 ||
         m_dummy_get_drr_success_length == 0 ||
         m_dummy_init_vmm_failure_length == 0 ||
@@ -111,8 +111,8 @@ driver_entry_ut::init()
         m_dummy_stop_vmm_success_length == 0)
     {
         std::cout << "one or more of the dummy libraries is empty: " << std::endl;
-        std::cout << "    - dummy_add_mdl_failure: " << m_dummy_add_mdl_failure_length << std::endl;
-        std::cout << "    - dummy_add_mdl_success: " << m_dummy_add_mdl_success_length << std::endl;
+        std::cout << "    - dummy_add_md_failure: " << m_dummy_add_md_failure_length << std::endl;
+        std::cout << "    - dummy_add_md_success: " << m_dummy_add_md_success_length << std::endl;
         std::cout << "    - dummy_get_drr_failure: " << m_dummy_get_drr_failure_length << std::endl;
         std::cout << "    - dummy_get_drr_success: " << m_dummy_get_drr_success_length << std::endl;
         std::cout << "    - dummy_init_vmm_failure: " << m_dummy_init_vmm_failure_length << std::endl;
@@ -125,8 +125,8 @@ driver_entry_ut::init()
         goto close;
     }
 
-    m_dummy_add_mdl_failure = new char[dummy_add_mdl_failure_ifs.tellg()];
-    m_dummy_add_mdl_success = new char[dummy_add_mdl_success_ifs.tellg()];
+    m_dummy_add_md_failure = new char[dummy_add_md_failure_ifs.tellg()];
+    m_dummy_add_md_success = new char[dummy_add_md_success_ifs.tellg()];
     m_dummy_get_drr_failure = new char[dummy_get_drr_failure_ifs.tellg()];
     m_dummy_get_drr_success = new char[dummy_get_drr_success_ifs.tellg()];
     m_dummy_init_vmm_failure = new char[dummy_init_vmm_failure_ifs.tellg()];
@@ -137,8 +137,8 @@ driver_entry_ut::init()
     m_dummy_stop_vmm_failure = new char[dummy_stop_vmm_failure_ifs.tellg()];
     m_dummy_stop_vmm_success = new char[dummy_stop_vmm_success_ifs.tellg()];
 
-    if (m_dummy_add_mdl_failure == NULL ||
-        m_dummy_add_mdl_failure == NULL ||
+    if (m_dummy_add_md_failure == NULL ||
+        m_dummy_add_md_failure == NULL ||
         m_dummy_get_drr_failure == NULL ||
         m_dummy_get_drr_success == NULL ||
         m_dummy_init_vmm_failure == NULL ||
@@ -150,8 +150,8 @@ driver_entry_ut::init()
         m_dummy_stop_vmm_success == NULL)
     {
         std::cout << "unable to allocate space for one or more of the dummy libraries: " << std::endl;
-        std::cout << "    - dummy_add_mdl_failure: " << (void *)m_dummy_add_mdl_failure << std::endl;
-        std::cout << "    - dummy_add_mdl_success: " << (void *)m_dummy_add_mdl_success << std::endl;
+        std::cout << "    - dummy_add_md_failure: " << (void *)m_dummy_add_md_failure << std::endl;
+        std::cout << "    - dummy_add_md_success: " << (void *)m_dummy_add_md_success << std::endl;
         std::cout << "    - dummy_get_drr_failure: " << (void *)m_dummy_get_drr_failure << std::endl;
         std::cout << "    - dummy_get_drr_success: " << (void *)m_dummy_get_drr_success << std::endl;
         std::cout << "    - dummy_init_vmm_failure: " << (void *)m_dummy_init_vmm_failure << std::endl;
@@ -164,8 +164,8 @@ driver_entry_ut::init()
         goto close;
     }
 
-    dummy_add_mdl_failure_ifs.seekg(0);
-    dummy_add_mdl_success_ifs.seekg(0);
+    dummy_add_md_failure_ifs.seekg(0);
+    dummy_add_md_success_ifs.seekg(0);
     dummy_get_drr_failure_ifs.seekg(0);
     dummy_get_drr_success_ifs.seekg(0);
     dummy_init_vmm_failure_ifs.seekg(0);
@@ -176,8 +176,8 @@ driver_entry_ut::init()
     dummy_stop_vmm_failure_ifs.seekg(0);
     dummy_stop_vmm_success_ifs.seekg(0);
 
-    dummy_add_mdl_failure_ifs.read(m_dummy_add_mdl_failure, m_dummy_add_mdl_failure_length);
-    dummy_add_mdl_success_ifs.read(m_dummy_add_mdl_success, m_dummy_add_mdl_success_length);
+    dummy_add_md_failure_ifs.read(m_dummy_add_md_failure, m_dummy_add_md_failure_length);
+    dummy_add_md_success_ifs.read(m_dummy_add_md_success, m_dummy_add_md_success_length);
     dummy_get_drr_failure_ifs.read(m_dummy_get_drr_failure, m_dummy_get_drr_failure_length);
     dummy_get_drr_success_ifs.read(m_dummy_get_drr_success, m_dummy_get_drr_success_length);
     dummy_init_vmm_failure_ifs.read(m_dummy_init_vmm_failure, m_dummy_init_vmm_failure_length);
@@ -188,8 +188,8 @@ driver_entry_ut::init()
     dummy_stop_vmm_failure_ifs.read(m_dummy_stop_vmm_failure, m_dummy_stop_vmm_failure_length);
     dummy_stop_vmm_success_ifs.read(m_dummy_stop_vmm_success, m_dummy_stop_vmm_success_length);
 
-    if (dummy_add_mdl_failure_ifs.fail() == true ||
-        dummy_add_mdl_failure_ifs.fail() == true ||
+    if (dummy_add_md_failure_ifs.fail() == true ||
+        dummy_add_md_failure_ifs.fail() == true ||
         dummy_get_drr_failure_ifs.fail() == true ||
         dummy_get_drr_success_ifs.fail() == true ||
         dummy_init_vmm_failure_ifs.fail() == true ||
@@ -201,8 +201,8 @@ driver_entry_ut::init()
         dummy_stop_vmm_success_ifs.fail() == true)
     {
         std::cout << "unable to load one or more dummy libraries into memory: " << std::endl;
-        std::cout << "    - dummy_add_mdl_failure: " << dummy_add_mdl_failure_ifs.fail() << std::endl;
-        std::cout << "    - dummy_add_mdl_success: " << dummy_add_mdl_success_ifs.fail() << std::endl;
+        std::cout << "    - dummy_add_md_failure: " << dummy_add_md_failure_ifs.fail() << std::endl;
+        std::cout << "    - dummy_add_md_success: " << dummy_add_md_success_ifs.fail() << std::endl;
         std::cout << "    - dummy_get_drr_failure: " << dummy_get_drr_failure_ifs.fail() << std::endl;
         std::cout << "    - dummy_get_drr_success: " << dummy_get_drr_success_ifs.fail() << std::endl;
         std::cout << "    - dummy_init_vmm_failure: " << dummy_init_vmm_failure_ifs.fail() << std::endl;
@@ -219,8 +219,8 @@ driver_entry_ut::init()
 
 close:
 
-    dummy_add_mdl_failure_ifs.close();
-    dummy_add_mdl_success_ifs.close();
+    dummy_add_md_failure_ifs.close();
+    dummy_add_md_success_ifs.close();
     dummy_get_drr_failure_ifs.close();
     dummy_get_drr_success_ifs.close();
     dummy_init_vmm_failure_ifs.close();
@@ -237,11 +237,11 @@ close:
 bool
 driver_entry_ut::fini()
 {
-    if (m_dummy_add_mdl_failure != NULL)
-        delete[] m_dummy_add_mdl_failure;
+    if (m_dummy_add_md_failure != NULL)
+        delete[] m_dummy_add_md_failure;
 
-    if (m_dummy_add_mdl_success != NULL)
-        delete[] m_dummy_add_mdl_success;
+    if (m_dummy_add_md_success != NULL)
+        delete[] m_dummy_add_md_success;
 
     if (m_dummy_get_drr_failure != NULL)
         delete[] m_dummy_get_drr_failure;
@@ -298,7 +298,7 @@ driver_entry_ut::list()
     this->test_common_load_load_when_corrupt();
     this->test_common_load_fail_due_to_relocation_error();
     this->test_common_load_fail_due_to_no_modules_added();
-    this->test_common_load_add_mdl_failed();
+    this->test_common_load_add_md_failed();
 
     this->test_common_unload_unload_when_already_unloaded();
     this->test_common_unload_unload_when_running();
@@ -340,11 +340,6 @@ driver_entry_ut::list()
     this->test_helper_execute_symbol_sym_failed();
     this->test_helper_execute_symbol_sym_success();
     this->test_helper_constructors_success();
-    this->test_helper_add_mdl_invalid_exec();
-    this->test_helper_add_mdl_invalid_size();
-    this->test_helper_add_mdl_1_page();
-    this->test_helper_add_mdl_3_pages();
-    this->test_helper_add_mdl_3_pages_plus();
 
     return verify_no_mem_leaks();
 }

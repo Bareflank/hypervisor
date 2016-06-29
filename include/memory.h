@@ -72,13 +72,13 @@ struct memory_descriptor
 };
 
 /**
- * Add Memory Descriptor List
+ * Add Memory Descriptor
  *
- * This is used by the driver entry to add an MDL to VMM. The driver entry
+ * This is used by the driver entry to add an MD to VMM. The driver entry
  * will need to collect memory descriptors for every page of memory that the
  * VMM is using so that the memory manager can provide mappings as needed.
  */
-typedef int64_t (*add_mdl_t)(struct memory_descriptor *mdl, int64_t num);
+typedef int64_t (*add_md_t)(struct memory_descriptor *md);
 
 #ifdef __cplusplus
 }

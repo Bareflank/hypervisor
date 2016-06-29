@@ -22,10 +22,9 @@
 #include <memory.h>
 
 extern "C" int64_t
-add_mdl(struct memory_descriptor *mdl, int64_t num)
+add_md(struct memory_descriptor *md)
 {
-    (void) mdl;
-    (void) num;
+    (void) md;
 
-    return MEMORY_MANAGER_FAILURE;
+    return MEMORY_MANAGER_SUCCESS;
 }

@@ -21,19 +21,10 @@
 
 #include <memory.h>
 
-int64_t g_num = 0;
-
 extern "C" int64_t
-get_mdl_num(void)
+add_md(struct memory_descriptor *md)
 {
-    return g_num;
-}
+    (void) md;
 
-extern "C" int64_t
-add_mdl(struct memory_descriptor *mdl, int64_t num)
-{
-    (void) mdl;
-
-    g_num = num;
-    return MEMORY_MANAGER_SUCCESS;
+    return MEMORY_MANAGER_FAILURE;
 }

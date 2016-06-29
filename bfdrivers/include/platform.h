@@ -37,7 +37,7 @@ extern "C" {
  * @param len the size of virtual memory to be allocated in bytes.
  * @return a virtual address pointing to the newly allocated memory
  */
-void *platform_alloc(int64_t len);
+void *platform_alloc_rw(int64_t len);
 
 /**
  * Allocate Executable Memory
@@ -47,7 +47,29 @@ void *platform_alloc(int64_t len);
  * @param len the size of virtual memory to be allocated in bytes.
  * @return a virtual address pointing to the newly allocated memory
  */
-void *platform_alloc_exec(int64_t len);
+void *platform_alloc_rwe(int64_t len);
+
+/**
+ * Free Memory
+ *
+ * Used by the common code to free virtual memory that was allocated
+ * using the platform_alloc function.
+ *
+ * @param addr the virtual address returned from platform_alloc
+ * @param len the size of the memory allocated
+ */
+void platform_free_rw(void *addr, int64_t len);
+
+/**
+ * Free Executable Memory
+ *
+ * Used by the common code to free virtual memory that was allocated
+ * using the platform_alloc_exec function.
+ *
+ * @param addr the virtual address returned from platform_alloc_exec
+ * @param len the size of the memory allocated
+ */
+void platform_free_rwe(void *addr, int64_t len);
 
 /**
  * Convert Virtual Address to Physical Address
@@ -61,28 +83,6 @@ void *platform_alloc_exec(int64_t len);
  * @return the physical address assocaited with the provided virtual address
  */
 void *platform_virt_to_phys(void *virt);
-
-/**
- * Free Memory
- *
- * Used by the common code to free virtual memory that was allocated
- * using the platform_alloc function.
- *
- * @param addr the virtual address returned from platform_alloc
- * @param len the size of the memory allocated
- */
-void platform_free(void *addr, int64_t len);
-
-/**
- * Free Executable Memory
- *
- * Used by the common code to free virtual memory that was allocated
- * using the platform_alloc_exec function.
- *
- * @param addr the virtual address returned from platform_alloc_exec
- * @param len the size of the memory allocated
- */
-void platform_free_exec(void *addr, int64_t len);
 
 /**
  * Memset

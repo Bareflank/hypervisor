@@ -27,7 +27,6 @@
 #include <constants.h>
 #include <commit_or_rollback.h>
 #include <memory_manager/memory_manager.h>
-#include <memory_manager/memory_manager_exceptions.h>
 
 // -----------------------------------------------------------------------------
 // Macros
@@ -71,39 +70,6 @@ out_of_memory(void)
 #endif
 
     return 0;
-}
-
-template<typename T> int64_t
-guard_exceptions(T func)
-{
-    try
-    {
-        func();
-
-        return MEMORY_MANAGER_SUCCESS;
-    }
-    catch (bfn::general_exception &ge)
-    {
-        bferror << "----------------------------------------" << bfendl;
-        bferror << "- General Exception Caught             -" << bfendl;
-        bferror << "----------------------------------------" << bfendl;
-        bfinfo << ge << bfendl;
-    }
-    catch (std::exception &e)
-    {
-        bferror << "----------------------------------------" << bfendl;
-        bferror << "- Standard Exception Caught            -" << bfendl;
-        bferror << "----------------------------------------" << bfendl;
-        bfinfo << e.what() << bfendl;
-    }
-    catch (...)
-    {
-        bferror << "----------------------------------------" << bfendl;
-        bferror << "- Unknown Exception Caught             -" << bfendl;
-        bferror << "----------------------------------------" << bfendl;
-    }
-
-    return MEMORY_MANAGER_FAILURE;
 }
 
 // -----------------------------------------------------------------------------
@@ -281,7 +247,6 @@ memory_manager::virt_to_phys(void *virt)
 void *
 memory_manager::phys_to_virt(void *phys)
 {
-
     auto key = (uintptr_t)phys >> MAX_PAGE_SHIFT;
     const auto &md_iter = m_phys_to_virt_map.find(key);
 
@@ -316,35 +281,36 @@ memory_manager::is_block_aligned(int64_t block, int64_t alignment)
 }
 
 void
-memory_manager::add_mdl(memory_descriptor *mdl, int64_t num)
+memory_manager::add_md(memory_descriptor *md)
 {
-    if (mdl == NULL)
-        throw std::invalid_argument("mdl == NULL");
+    if (md == NULL)
+        throw std::invalid_argument("md == NULL");
 
-    if (num == 0)
-        throw std::invalid_argument("num == 0");
+    if (md->virt == 0)
+        throw std::invalid_argument("md->virt == 0");
 
-    for (auto i = 0; i < num; i++)
+    if (md->phys == 0)
+        throw std::invalid_argument("md->phys == 0");
+
+    if (md->type == 0)
+        throw std::invalid_argument("md->type == 0");
+
+    if (((uintptr_t)md->virt & (MAX_PAGE_SIZE - 1)) != 0)
+        throw std::logic_error("virt address is not page aligned");
+
+    if (((uintptr_t)md->phys & (MAX_PAGE_SIZE - 1)) != 0)
+        throw std::logic_error("phys address is not page aligned");
+
+    auto cor1 = commit_or_rollback([&]
     {
-        const auto &md = mdl[i];
+        m_virt_to_phys_map.erase((uintptr_t)md->virt >> MAX_PAGE_SHIFT);
+        m_phys_to_virt_map.erase((uintptr_t)md->phys >> MAX_PAGE_SHIFT);
+    });
 
-        if (((uintptr_t)md.virt & (MAX_PAGE_SIZE - 1)) != 0)
-            throw invalid_mdl("virt address is not page aligned", i);
+    m_virt_to_phys_map[(uintptr_t)md->virt >> MAX_PAGE_SHIFT] = *md;
+    m_phys_to_virt_map[(uintptr_t)md->phys >> MAX_PAGE_SHIFT] = *md;
 
-        if (((uintptr_t)md.phys & (MAX_PAGE_SIZE - 1)) != 0)
-            throw invalid_mdl("phys address is not page aligned", i);
-
-        auto cor1 = commit_or_rollback([&]
-        {
-            m_virt_to_phys_map.erase((uintptr_t)md.virt >> MAX_PAGE_SHIFT);
-            m_phys_to_virt_map.erase((uintptr_t)md.phys >> MAX_PAGE_SHIFT);
-        });
-
-        m_virt_to_phys_map[(uintptr_t)md.virt >> MAX_PAGE_SHIFT] = md;
-        m_phys_to_virt_map[(uintptr_t)md.phys >> MAX_PAGE_SHIFT] = md;
-
-        cor1.commit();
-    }
+    cor1.commit();
 }
 
 memory_manager::memory_manager()
@@ -397,8 +363,26 @@ _realloc_r(struct _reent *reent, void *ptr, size_t size)
 }
 
 extern "C" int64_t
-add_mdl(memory_descriptor *mdl, int64_t num)
+add_md(struct memory_descriptor *md)
 {
-    return guard_exceptions([&]()
-    { g_mm->add_mdl(mdl, num); });
+    try
+    {
+        g_mm->add_md(md);
+        return MEMORY_MANAGER_SUCCESS;
+    }
+    catch (std::exception &e)
+    {
+        bferror << "----------------------------------------" << bfendl;
+        bferror << "- Standard Exception Caught            -" << bfendl;
+        bferror << "----------------------------------------" << bfendl;
+        bfinfo << e.what() << bfendl;
+    }
+    catch (...)
+    {
+        bferror << "----------------------------------------" << bfendl;
+        bferror << "- Unknown Exception Caught             -" << bfendl;
+        bferror << "----------------------------------------" << bfendl;
+    }
+
+    return MEMORY_MANAGER_FAILURE;
 }

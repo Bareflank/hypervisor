@@ -29,32 +29,32 @@
 #include <sys/mman.h>
 #include <constants.h>
 
-int alloc_count = 0;
-int alloc_exec_count = 0;
+int alloc_count_rw = 0;
+int alloc_count_rwe = 0;
 
 #define PAGE_ROUND_UP(x) ( (((uintptr_t)(x)) + MAX_PAGE_SIZE-1)  & (~(MAX_PAGE_SIZE-1)) )
 
 int
 verify_no_mem_leaks(void)
 {
-    printf("alloc_count: %d\n", alloc_count);
-    printf("alloc_exec_count: %d\n", alloc_exec_count);
+    printf("alloc_count_rw: %d\n", alloc_count_rw);
+    printf("alloc_count_rwe: %d\n", alloc_count_rwe);
 
-    return (alloc_count == 0) &&
-           (alloc_exec_count == 0);
+    return (alloc_count_rw == 0) &&
+           (alloc_count_rwe == 0);
 }
 
 void *
-platform_alloc(int64_t len)
+platform_alloc_rw(int64_t len)
 {
-    alloc_count++;
+    alloc_count_rw++;
     return malloc(len);
 }
 
 #include <errno.h>
 
 void *
-platform_alloc_exec(int64_t len)
+platform_alloc_rwe(int64_t len)
 {
     void *addr = 0;
 
@@ -62,36 +62,37 @@ platform_alloc_exec(int64_t len)
     posix_memalign(&addr, MAX_PAGE_SIZE, len);
     if (mprotect(addr, len, PROT_READ | PROT_WRITE | PROT_EXEC) == -1)
     {
-        platform_free_exec(addr, len);
+        platform_free_rw(addr, len);
         return 0;
     }
 
-    alloc_exec_count++;
+    alloc_count_rwe++;
 
     return addr;
+}
+
+void
+platform_free_rw(void *addr, int64_t len)
+{
+    (void)len;
+
+    alloc_count_rw--;
+    free(addr);
+}
+
+void
+platform_free_rwe(void *addr, int64_t len)
+{
+    (void) len;
+
+    alloc_count_rwe--;
+    free(addr);
 }
 
 void *
 platform_virt_to_phys(void *virt)
 {
     return virt;
-}
-
-void
-platform_free(void *addr, int64_t len)
-{
-    (void)len;
-    alloc_count--;
-    free(addr);
-}
-
-void
-platform_free_exec(void *addr, int64_t len)
-{
-    (void) len;
-
-    alloc_exec_count--;
-    free(addr);
 }
 
 void

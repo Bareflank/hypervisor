@@ -170,7 +170,7 @@ public:
     ///     is not the size of a page, if the virtual address is not page
     ///     aligned, or if the physical address is not page aligned.
     ///
-    virtual void add_mdl(memory_descriptor *mdl, int64_t num);
+    virtual void add_md(memory_descriptor *md);
 
     /// Get Virt to Phys Map
     ///
