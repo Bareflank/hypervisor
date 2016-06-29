@@ -8,6 +8,7 @@ Misc:
   pthread mutex support.
 - Add system beep code for additional debugging
 - Add support for the PCI debugger
+- Add support for https://coveralls.io
 
 Version 1.1 TODO:
 - Add Windows support
