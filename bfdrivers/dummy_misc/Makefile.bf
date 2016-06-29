@@ -50,6 +50,7 @@ CROSS_OUTDIR+=%BUILD_REL%/../bin
 ################################################################################
 
 SOURCES+=dummy_misc.cpp
+SOURCES+=%HYPER_ABS%/bfvmm/src/misc/src/execute_entry.asm
 
 INCLUDE_PATHS+=./
 INCLUDE_PATHS+=../include/

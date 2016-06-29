@@ -32,7 +32,8 @@ stubbed_malloc_aligned(size_t size, int64_t alignment)
 {
     void *ptr = NULL;
 
-    posix_memalign(&ptr, alignment, size);
+    if (posix_memalign(&ptr, alignment, size) != 0)
+        return 0;
 
     return (void *)ptr;
 }

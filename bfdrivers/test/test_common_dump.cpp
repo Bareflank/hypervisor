@@ -116,6 +116,6 @@ driver_entry_ut::test_common_dump_get_drr_failure()
     EXPECT_TRUE(common_add_module(m_dummy_get_drr_failure, m_dummy_get_drr_failure_length) == BF_SUCCESS);
     EXPECT_TRUE(common_add_module(m_dummy_misc, m_dummy_misc_length) == BF_SUCCESS);
     EXPECT_TRUE(common_load_vmm() == BF_SUCCESS);
-    EXPECT_TRUE(common_dump_vmm(&g_drr, 0) == BF_ERROR_FAILED_TO_DUMP_DR);
+    EXPECT_TRUE(common_dump_vmm(&g_drr, 0) == GET_DRR_FAILURE);
     EXPECT_TRUE(common_fini() == BF_SUCCESS);
 }

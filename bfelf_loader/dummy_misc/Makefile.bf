@@ -53,6 +53,7 @@ SOURCES+=dummy_misc.cpp
 
 INCLUDE_PATHS+=./
 INCLUDE_PATHS+=../include/
+INCLUDE_PATHS+=%HYPER_ABS%/include/
 
 LIBS+=
 

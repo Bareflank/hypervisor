@@ -224,7 +224,7 @@ public:
     /// @param fde the FDE that describes the CFA pointed to in the state
     /// @param state the current state of the registers
     ///
-    static void unwind(const fd_entry &fde, register_state *state);
+    static void unwind(const fd_entry &fde, register_state *state = 0);
 };
 
 #endif

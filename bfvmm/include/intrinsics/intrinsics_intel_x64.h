@@ -58,6 +58,8 @@ uint64_t __vmlaunch(void);
 // address of the state save area in the GS base MSR. This way, we can use
 // [gs:xxx] to save the general purpose registers.
 
+#pragma pack(push, 1)
+
 struct state_save_intel_x64
 {
     uint64_t rax;                   // 0x000
@@ -82,7 +84,14 @@ struct state_save_intel_x64
     uint64_t vmxon_ptr;             // 0x090
     uint64_t vmcs_ptr;              // 0x098
     uint64_t exit_handler_ptr;      // 0x0A0
+
+    uint64_t xsave_size;            // 0x0A8
+    uint64_t xsave_addr;            // 0x0B0
+    uint64_t xsave_xcr0_eax;        // 0x0B8
+    uint64_t xsave_xcr0_edx;        // 0x0C0
 };
+
+#pragma pack(pop)
 
 // -----------------------------------------------------------------------------
 // C++ Wrapper

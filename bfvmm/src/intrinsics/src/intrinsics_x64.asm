@@ -39,6 +39,8 @@ global __read_cr3:function
 global __write_cr3:function
 global __read_cr4:function
 global __write_cr4:function
+global __read_xcr0:function
+global __write_xcr0:function
 global __read_dr7:function
 global __write_dr7:function
 global __read_es:function
@@ -88,6 +90,9 @@ __cpuid_eax:
     push rbx
 
     mov eax, edi
+    mov ebx, 0x0
+    mov ecx, 0x0
+    mov edx, 0x0
     cpuid
 
     pop rbx
@@ -98,6 +103,9 @@ __cpuid_ebx:
     push rbx
 
     mov eax, edi
+    mov ebx, 0x0
+    mov ecx, 0x0
+    mov edx, 0x0
     cpuid
     mov eax, ebx
 
@@ -109,6 +117,9 @@ __cpuid_ecx:
     push rbx
 
     mov eax, edi
+    mov ebx, 0x0
+    mov ecx, 0x0
+    mov edx, 0x0
     cpuid
     mov eax, ecx
 
@@ -120,6 +131,9 @@ __cpuid_edx:
     push rbx
 
     mov eax, edi
+    mov ebx, 0x0
+    mov ecx, 0x0
+    mov edx, 0x0
     cpuid
     mov eax, edx
 
@@ -243,6 +257,23 @@ __read_cr4:
 ; void __write_cr4(uint64_t val)
 __write_cr4:
     mov cr4, rdi
+    ret
+
+; uint64_t __read_xcr0(void)
+__read_xcr0:
+    mov rcx, 0
+    xgetbv
+    shl rdx, 32
+    or rax, rdx
+    ret
+
+; void __write_xcr0(uint64_t val)
+__write_xcr0:
+    mov rax, rdi
+    mov rdx, rdi
+    shr rdx, 32
+    mov rcx, 0
+    xsetbv
     ret
 
 ; uint64_t __read_dr7(void)

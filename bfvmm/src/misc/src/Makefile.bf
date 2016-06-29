@@ -50,7 +50,7 @@ CROSS_OUTDIR+=%BUILD_REL%/../bin
 ################################################################################
 
 SOURCES+=misc.cpp
-SOURCES+=abi_conversion.asm
+SOURCES+=execute_entry.asm
 
 INCLUDE_PATHS+=./
 INCLUDE_PATHS+=%HYPER_ABS%/include/

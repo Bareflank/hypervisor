@@ -396,6 +396,13 @@ eh_frame::find_fde(register_state *state)
 {
     auto eh_frame_list = get_eh_frame_list();
 
+    // TODO: Lookup the symbol name for RIP. This way, instead of just
+    //       providing an address, we can provide an entire backtrace with
+    //       function names. We could even provide the function name, and
+    //       then a register state dump as well, probably similar to GCC so
+    //       that it's readable.
+    debug("rip: %p\n", (void *)state->get_ip());
+
     for (auto m = 0U; m < MAX_NUM_MODULES; m++)
     {
         for (auto fde = fd_entry(eh_frame_list[m]); fde; ++fde)

@@ -29,6 +29,8 @@
 #include <types.h>
 #endif
 
+#include <error_codes.h>
+
 #pragma pack(push, 1)
 
 #ifdef __cplusplus
@@ -48,7 +50,7 @@ struct section_info_t;
  * @param info a pointer to the section info structure that is used by the
  *     init funcion.
  */
-typedef void (*local_init_t)(struct section_info_t *info);
+typedef int64_t (*local_init_t)(struct section_info_t *info);
 
 /**
  * Local Fini
@@ -61,7 +63,7 @@ typedef void (*local_init_t)(struct section_info_t *info);
  * @param info a pointer to the section info structure that is used by the
  *     fini funcion.
  */
-typedef void (*local_fini_t)(struct section_info_t *info);
+typedef int64_t (*local_fini_t)(struct section_info_t *info);
 
 /**
  * Local Init
@@ -74,7 +76,7 @@ typedef void (*local_fini_t)(struct section_info_t *info);
  * @param info a pointer to the section info structure that is used by the
  *     init funcion.
  */
-void local_init(struct section_info_t *info);
+int64_t local_init(struct section_info_t *info);
 
 /**
  * Local Fini
@@ -87,7 +89,7 @@ void local_init(struct section_info_t *info);
  * @param info a pointer to the section info structure that is used by the
  *     fini funcion.
  */
-void local_fini(struct section_info_t *info);
+int64_t local_fini(struct section_info_t *info);
 
 /**
  * Info Struct

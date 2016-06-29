@@ -28,7 +28,8 @@ void *
 malloc_aligned(size_t size, uint64_t alignment)
 {
     void *ptr = 0;
-    posix_memalign(&ptr, alignment, size);
+    if (posix_memalign(&ptr, alignment, size) != 0)
+        return 0;
     return ptr;
 }
 

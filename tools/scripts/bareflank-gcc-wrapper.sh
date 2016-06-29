@@ -239,8 +239,8 @@ done
 # only thing the hypervisor code should need from the sysroot is the includes.
 
 if [[ $BAREFLANK_WRAPPER_IS_LIBCXX == "true" ]]; then
-    SYSROOT_LIBS+="-lc -lbfc -lbfunwind_static "
-    SYSROOT_LIBS+="-u __cxa_throw_bad_array_new_length"
+    SYSROOT_LIBS+="-lbfunwind_static -lc -lbfc "
+    SYSROOT_LIBS+="-u __cxa_throw_bad_array_new_length "
 fi
 
 SYSROOT_LIB_PATH="-L$BUILD_ABS/makefiles/bfcrt/bin/cross/ -L$BUILD_ABS/makefiles/bfunwind/bin/cross/ -L$BUILD_ABS/sysroot/x86_64-elf/lib/ "

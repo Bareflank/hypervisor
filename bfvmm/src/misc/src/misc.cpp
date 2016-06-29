@@ -30,6 +30,9 @@ write(int file, const void *buffer, size_t count)
     if (buffer == nullptr || count == 0)
         return 0;
 
+    if (file == 0)
+        return 0;
+
     if (file == 1 || file == 2)
     {
         auto str = std::string((char *)buffer, count);
@@ -45,8 +48,10 @@ write(int file, const void *buffer, size_t count)
     }
     else
     {
-        g_vcm->write(-1, "write: unknown ostream handle\n");
-        serial_port_intel_x64::instance()->write("write: unknown ostream handle\n");
+        auto str = std::to_string(file);
+        auto msg = "write: unknown ostream handle: " + str + "\n";
+        g_vcm->write(-1, msg.c_str());
+        serial_port_intel_x64::instance()->write(msg);
 
         return 0;
     }
@@ -62,80 +67,6 @@ fstat(int file, struct stat *sbuf)
 
     errno = -ENOSYS;
     return -1;
-}
-
-#endif
-
-#if defined(NO_HYPER_TEST) || defined(NO_HYPER_LIBCXX_TEST)
-
-#include <stddef.h>
-#include <memory.h>
-#include <constants.h>
-#include <eh_frame_list.h>
-
-extern "C" int
-fstat(int file, struct stat *sbuf)
-{
-    (void) file;
-    (void) sbuf;
-
-    return -1;
-}
-
-extern "C" int64_t
-init_vmm(int64_t arg)
-{
-    (void) arg;
-
-    return 0;
-}
-
-extern "C" int64_t
-start_vmm(int64_t arg)
-{
-    (void) arg;
-
-    return 0;
-}
-
-extern "C" int64_t
-stop_vmm(int64_t arg)
-{
-    (void) arg;
-
-    return 0;
-}
-
-extern "C" int64_t
-add_mdl(memory_descriptor *mdl, int64_t num)
-{
-    (void) mdl;
-    (void) num;
-
-    return 0;
-}
-
-auto g_eh_frame_list_num = 0ULL;
-eh_frame_t g_eh_frame_list[MAX_NUM_MODULES] = {};
-
-extern "C" struct eh_frame_t *
-get_eh_frame_list()
-{
-    return g_eh_frame_list;
-}
-
-extern "C" void
-register_eh_frame(void *addr, uint64_t size)
-{
-    if (addr == nullptr || size == 0)
-        return;
-
-    if (g_eh_frame_list_num >= MAX_NUM_MODULES)
-        return;
-
-    g_eh_frame_list[g_eh_frame_list_num].addr = addr;
-    g_eh_frame_list[g_eh_frame_list_num].size = size;
-    g_eh_frame_list_num++;
 }
 
 #endif
@@ -174,3 +105,102 @@ write(int file, const void *buffer, size_t count)
 }
 
 #endif
+
+#if defined(NO_HYPER_TEST) || defined(NO_HYPER_LIBCXX_TEST)
+
+#include <string.h>
+#include <string.h>
+#include <stddef.h>
+#include <memory.h>
+#include <constants.h>
+#include <eh_frame_list.h>
+
+extern "C" int
+fstat(int file, struct stat *sbuf)
+{
+    (void) file;
+    (void) sbuf;
+
+    return -1;
+}
+
+extern "C" int64_t
+init_vmm(int64_t arg)
+{
+    (void) arg;
+
+    auto msg = "init_vmm\n";
+    write(1, msg, strlen(msg));
+
+    return 0;
+}
+
+extern "C" int64_t
+start_vmm(int64_t arg)
+{
+    (void) arg;
+
+    auto msg = "start_vmm\n";
+    write(1, msg, strlen(msg));
+
+    return 0;
+}
+
+extern "C" int64_t
+stop_vmm(int64_t arg)
+{
+    (void) arg;
+
+    auto msg = "stop_vmm\n";
+    write(1, msg, strlen(msg));
+
+    return 0;
+}
+
+extern "C" int64_t
+add_mdl(memory_descriptor *mdl, int64_t num)
+{
+    (void) mdl;
+    (void) num;
+
+    return 0;
+}
+
+#endif
+
+uintptr_t __stack_chk_guard = 0x595e9fbd94fda766;
+
+extern "C" void
+__stack_chk_fail(void)
+{
+    auto msg = "__stack_chk_fail: buffer overflow detected!!!";
+    write(1, msg, strlen(msg));
+    abort();
+}
+
+#include <eh_frame_list.h>
+
+auto g_eh_frame_list_num = 0ULL;
+eh_frame_t g_eh_frame_list[MAX_NUM_MODULES] = {};
+
+extern "C" struct eh_frame_t *
+get_eh_frame_list()
+{
+    return g_eh_frame_list;
+}
+
+extern "C" int64_t
+register_eh_frame(void *addr, uint64_t size)
+{
+    if (addr == nullptr || size == 0)
+        return REGISTER_EH_FRAME_FAILURE;
+
+    if (g_eh_frame_list_num >= MAX_NUM_MODULES)
+        return REGISTER_EH_FRAME_FAILURE;
+
+    g_eh_frame_list[g_eh_frame_list_num].addr = addr;
+    g_eh_frame_list[g_eh_frame_list_num].size = size;
+    g_eh_frame_list_num++;
+
+    return REGISTER_EH_FRAME_SUCCESS;
+}

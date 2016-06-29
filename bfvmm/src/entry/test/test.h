@@ -55,11 +55,6 @@ private:
     void test_add_mdl_throws_general_exception();
     void test_add_mdl_throws_standard_exception();
     void test_add_mdl_throws_any_exception();
-    void test_get_eh_frame_list_success();
-    void test_register_eh_frame_invalid_addr();
-    void test_register_eh_frame_invalid_size();
-    void test_register_eh_frame_success();
-    void test_register_eh_frame_too_many();
 
 };
 

@@ -162,8 +162,7 @@ public:
     /// and lookup memory access rights. Note that this function should only
     /// by called by the driver entry point prior to initialization.
     ///
-    /// @param mdl a pointer to a memory descriptor array
-    /// @param num the number of memory descriptors in the array
+    /// @param md a pointer to a memory descriptor
     ///
     /// @throws invalid_argument_error thrown if mdl == 0 or num == 0
     /// @throws invalid_mdl_error thrown if a memory descriptor in the list

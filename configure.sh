@@ -131,7 +131,7 @@ setup_environment_variables() {
     fi
 
     if [[ -z "$compiler" ]]; then
-        compiler=gcc_610
+        compiler=gcc_520
     fi
 }
 
@@ -242,7 +242,7 @@ option_run() {
             BUILD_REL=$BUILD_ABS
         fi
         if [[ -z "$compiler" ]]; then
-            compiler=gcc_610
+            compiler=gcc_520
         fi
         IFS=';' read -ra extensions <<< "$extensions"
     fi

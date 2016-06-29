@@ -68,6 +68,9 @@ void __write_cr3(uint64_t val);
 uint64_t __read_cr4(void);
 void __write_cr4(uint64_t val);
 
+uint64_t __read_xcr0(void);
+void __write_xcr0(uint64_t val);
+
 uint64_t __read_dr7(void);
 void __write_dr7(uint64_t val);
 
@@ -196,6 +199,12 @@ public:
 
     virtual void write_cr4(uint64_t val) const noexcept
     { __write_cr4(val); }
+
+    virtual uint64_t read_xcr0() const noexcept
+    { return __read_xcr0(); }
+
+    virtual void write_xcr0(uint64_t val) const noexcept
+    { __write_xcr0(val); }
 
     virtual uint64_t read_dr7() const noexcept
     { return __read_dr7(); }
@@ -373,6 +382,7 @@ public:
 #define IA32_EFER_MSR                                               0xC0000080
 #define IA32_FS_BASE_MSR                                            0xC0000100
 #define IA32_GS_BASE_MSR                                            0xC0000101
+#define IA32_XSS_MSR                                                0x00000DA0
 
 // 64-ia-32-architectures-software-developer-manual, section 6.3.1
 // IA-32 Interrupts and Exceptions

@@ -22,11 +22,17 @@
 #ifndef LOG_H
 #define LOG_H
 
-#ifndef DISABLE_LOGGING
+#ifdef CROSS_COMPILED
+extern "C" int printf(const char *format, ...);
+#else
 #include <stdio.h>
-#define log(...) fprintf(stdout, __VA_ARGS__)
+#endif
+
+#ifndef DISABLE_LOGGING
+#define log(...) printf(__VA_ARGS__);
 #else
 #define log(...)
 #endif
-
 #endif
+
+#define debug(...) printf(__VA_ARGS__);

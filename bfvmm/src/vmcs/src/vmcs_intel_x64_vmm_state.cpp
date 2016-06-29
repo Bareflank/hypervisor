@@ -120,6 +120,7 @@ vmcs_intel_x64_vmm_state::vmcs_intel_x64_vmm_state(const std::shared_ptr<state_s
     m_cr4 = 0;
     m_cr4 |= CR4_PAE_PHYSICAL_ADDRESS_EXTENSIONS;
     m_cr4 |= CR4_VMXE_VMX_ENABLE_BIT;
+    m_cr4 |= CR4_OSXSAVE;
 
     m_rflags = 0;
 

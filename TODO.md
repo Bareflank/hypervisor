@@ -1,7 +1,5 @@
 Misc:
 - Add support for clang/LLVM
-- Add DWARF4 expression support in the unwinder (this could go away if
-  Clang/LLVM doesn't need it either).
 - Add support for Intel's MPX. This doesn't look like a huge amount of work, but
   would require a custom libmpx designed for the kernel in a cross platform
   fashion. Might not be possible until the new libc is developed with basic
@@ -14,22 +12,21 @@ Misc:
   binary and executed, which then starts the VMM. This will evenutally provide
   a better starting point for a dynamic root-of-trust in the future if so
   desired.
+- Speed up linking time by adding -fvisibility=hidden. It was stated that
+  this could effect C++ so we need to find an exmaple of what to do, if
+  anything (might be taken care of by libc++). Also... will need to add
+  visibility macros if we enable this option
 
 Version 1.1 TODO:
 - Add Windows support
+- Add DWARF4 expression support in the unwinder. This is needed as some
+  exceptions are now using expressions.
 - Create custom libc. This first step should be to provide equvilant
   functionality to newlib. Once this is done, the next step should be to break
   apart libc++.so into libc.so, libcxxabi.so (statically linked with the
   unwinder), and libc++.so.
 - Clean up the VMCS checks so that they can be unit tested better, and then
   complete the unit tests
-- Uses the following as our default flags to match Clear Linux: -g2 -O3 -pipe
-  -fexceptions -fstack-protector -m64 -march=westmere -mtune=native
-  -malign-data=abi
-- Once we have our own custom C, we should print a backtrace in the unwind
-  logic when an exception is throw so that we can see what lead up to the
-  exception. This is really important as std::exceptions do not have
-  contextual information about where the exception occured.
 - We need to go through all of the error codes, and map out blocks for each
   module, driver, elf error, etc... This way, when an error bubbles through
   the system, it's easy to identify
@@ -85,3 +82,7 @@ Known Issues:
   disable this check from executing or don't use a kernrel with this enabled.
   This is seen on Fedora as installing the kernel source enables a debug kernel
   by default with this enabled.
+- At the moment, "export PRODUCTION=yes" which enabled -03 is not supported
+  as this generates DWARF4 expressions which is currently not supported. Once
+  this logic is implemented, we will provide more offical support for this
+  feature.

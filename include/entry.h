@@ -29,6 +29,8 @@
 #include <types.h>
 #endif
 
+#include <error_codes.h>
+
 #pragma pack(push, 1)
 
 #ifdef __cplusplus
@@ -36,24 +38,23 @@ extern "C" {
 #endif
 
 /**
- * Entry Error Codes
- */
-#define ENTRY_SUCCESS 0LL
-#define ENTRY_ERROR_VMM_INIT_FAILED -10LL
-#define ENTRY_ERROR_VMM_START_FAILED -20LL
-#define ENTRY_ERROR_VMM_STOP_FAILED -30LL
-#define ENTRY_ERROR_UNKNOWN -40LL
-
-/**
- * Entry Point
+ * Execute Entry Point
  *
- * This typedef defines what an entry point is. All functions that are to
- * be called using the ELF loader should conform to this prototype.
+ * This typedef defines the function that is used to execute other entry
+ * points. Note that there are several types of entry points. For example,
+ * add_mdl, get_drr, init_vmm, start_vmm and stop_vmm are all entry points
+ * and they have different parameter types. As a result, this function has
+ * to be written generically to support all of them
  *
- * @param arg the argument you wish to pass to the entry point
+ * @param stack the stack to use when executing the entry point
+ * @param func the entry point to call
+ * @param arg1 the first argument to the entry point
+ * @param arg2 the second argument to the entry point
  * @return the return value of the entry point
+ *
  */
-typedef int64_t(*entry_point_t)(int64_t);
+typedef int64_t(*execute_entry_t)(void *stack, void *func, uint64_t arg1, uint64_t arg2);
+
 
 #ifdef __cplusplus
 }

@@ -70,8 +70,9 @@ private:
 /// Returns a pointer to a debug_ring_resources_t for a given CPU.
 ///
 /// @param vcpuid defines which debug ring to return
+/// @param drr the resulting debug ring
 /// @return the debug_ring_resources_t for the provided vcpuid
 ///
-extern "C" struct debug_ring_resources_t *get_drr(int64_t vcpuid);
+extern "C" int64_t get_drr(int64_t vcpuid, struct debug_ring_resources_t **drr);
 
 #endif

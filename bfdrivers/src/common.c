@@ -42,6 +42,15 @@ struct bfelf_loader_t g_loader;
 
 int64_t g_num_cpus_started = 0;
 
+void *g_stack = 0;
+void *g_stack_loc = 0;
+
+/* -------------------------------------------------------------------------- */
+/* Entry Points                                                               */
+/* -------------------------------------------------------------------------- */
+
+execute_entry_t execute_entry = 0;
+
 /* -------------------------------------------------------------------------- */
 /* Helpers                                                                    */
 /* -------------------------------------------------------------------------- */
@@ -109,15 +118,15 @@ resolve_symbol(const char *name, void **sym, struct module_t *module)
 }
 
 int64_t
-execute_symbol(const char *sym, int64_t arg)
+execute_symbol(const char *sym, uint64_t arg1, uint64_t arg2, struct module_t *module)
 {
     int64_t ret = 0;
-    entry_point_t entry_point;
+    void *entry_point = 0;
 
     if (sym == 0)
         return BF_ERROR_INVALID_ARG;
 
-    ret = resolve_symbol(sym, (void **)&entry_point, 0);
+    ret = resolve_symbol(sym, &entry_point, module);
     if (ret != BF_SUCCESS)
     {
         ALERT("execute_symbol: failed to resolve entry point: %" PRId64 "\n",
@@ -125,21 +134,14 @@ execute_symbol(const char *sym, int64_t arg)
         return ret;
     }
 
-    ret = entry_point(arg);
+    ret = execute_entry(g_stack_loc, entry_point, arg1, arg2);
     if (ret != ENTRY_SUCCESS)
     {
-        DEBUG("\n");
-        DEBUG("%s failed:\n", sym);
-        DEBUG("    - exit code: %ld\n", (long)ret);
-        DEBUG("\n");
+        ALERT("%s failed:\n", sym);
+        ALERT("    - exit code: %p\n", (void *)ret);
 
         return ret;
     }
-
-    DEBUG("\n");
-    DEBUG("%s executed successfully:\n", sym);
-    DEBUG("    - exit code: %ld\n", (long)ret);
-    DEBUG("\n");
 
     return BF_SUCCESS;
 }
@@ -149,18 +151,9 @@ add_md_to_memory_manager(struct module_t *module)
 {
     int64_t ret = 0;
     bfelf64_word s = 0;
-    add_md_t add_md = 0;
 
     if (module == 0)
         return BF_ERROR_INVALID_ARG;
-
-    ret = resolve_symbol("add_md", (void **)&add_md, 0);
-    if (ret != BF_SUCCESS)
-    {
-        ALERT("add_md_to_memory_manager: failed to locate add_md. "
-              "the symbol is missing or not loaded\n");
-        return ret;
-    }
 
     for (s = 0; s < bfelf_file_num_segments(&module->file); s++)
     {
@@ -192,7 +185,7 @@ add_md_to_memory_manager(struct module_t *module)
             else
                 md.type = MEMORY_TYPE_R | MEMORY_TYPE_W;
 
-            ret = add_md(&md);
+            ret = execute_symbol("add_md", (uint64_t)&md, 0, 0);
             if (ret != MEMORY_MANAGER_SUCCESS)
             {
                 ALERT("add_md_to_memory_manager: failed to add md: %p, %p, 0x%x\n",
@@ -284,7 +277,8 @@ common_reset(void)
 
     for (i = 0; i < g_num_modules; i++)
     {
-        platform_free_rwe(g_modules[i].exec, g_modules[i].size);
+        if (g_modules[i].exec != 0)
+            platform_free_rwe(g_modules[i].exec, g_modules[i].size);
 
         g_modules[i].exec = 0;
         g_modules[i].size = 0;
@@ -295,6 +289,15 @@ common_reset(void)
     g_vmm_status = VMM_UNLOADED;
 
     platform_memset(&g_loader, 0, sizeof(struct bfelf_loader_t));
+
+    execute_entry = 0;
+    g_num_cpus_started = 0;
+
+    if (g_stack != 0)
+        platform_free_rw(g_stack, STACK_SIZE);
+
+    g_stack = 0;
+    g_stack_loc = 0;
 
     return BF_SUCCESS;
 }
@@ -468,9 +471,26 @@ common_load_vmm(void)
         goto failure;
     }
 
+    g_stack = platform_alloc_rw(STACK_SIZE);
+    g_stack_loc = (void *)(((uintptr_t)g_stack + STACK_SIZE - 1) & ~0x0F);
+
+    if (g_stack == 0)
+    {
+        ALERT("load_vmm: failed to allocate stack space\n");
+        ret = BF_ERROR_OUT_OF_MEMORY;
+        goto failure;
+    }
+
+    ret = resolve_symbol("execute_entry", (void **)&execute_entry, 0);
+    if (ret != BF_SUCCESS)
+    {
+        ALERT("load_vmm: failed to locate execute_entry. the symbol is missing "
+              "which means the misc module is missing\n");
+        goto failure;
+    }
+
     for (i = 0; (module = get_module(i)) != 0; i++)
     {
-        local_init_t local_init = 0;
         struct section_info_t info = {0};
 
         ret = bfelf_loader_get_info(&g_loader, &module->file, &info);
@@ -480,15 +500,13 @@ common_load_vmm(void)
             goto failure;
         }
 
-        ret = resolve_symbol("local_init", (void **)&local_init, module);
+        ret = execute_symbol("local_init", (uint64_t)&info, 0, module);
         if (ret != BF_SUCCESS)
         {
             ALERT("load_vmm: failed to locate local_init. the symbol is missing "
                   "which means the modules was not compiled with the wrapper\n");
             goto failure;
         }
-
-        local_init(&info);
     }
 
     for (i = 0; (module = get_module(i)) != 0; i++)
@@ -535,7 +553,6 @@ common_unload_vmm(void)
     {
         for (i = g_num_modules - 1; (module = get_module(i)) != 0; i--)
         {
-            local_fini_t local_fini = 0;
             struct section_info_t info = {0};
 
             ret = bfelf_loader_get_info(&g_loader, &module->file, &info);
@@ -545,15 +562,13 @@ common_unload_vmm(void)
                 goto corrupted;
             }
 
-            ret = resolve_symbol("local_fini", (void **)&local_fini, module);
+            ret = execute_symbol("local_fini", (uint64_t)&info, 0, module);
             if (ret != BF_SUCCESS)
             {
-                ALERT("unload_vmm: failed to locate local_fini. the symbol is missing "
+                ALERT("unload_vmm: failed to locate local_init. the symbol is missing "
                       "which means the modules was not compiled with the wrapper\n");
                 goto corrupted;
             }
-
-            local_fini(&info);
         }
     }
 
@@ -597,17 +612,17 @@ common_start_vmm(void)
             goto failure;
         }
 
-        ret = execute_symbol("init_vmm", g_num_cpus_started);
+        ret = execute_symbol("init_vmm", g_num_cpus_started, 0, 0);
         if (ret != BF_SUCCESS)
         {
-            ALERT("start_vmm: failed to execute init_vmm: %" PRId64 "\n", ret);
+            ALERT("start_vmm: failed to execute init_vmm: %p\n", (void *)ret);
             goto failure;
         }
 
-        ret = execute_symbol("start_vmm", g_num_cpus_started);
+        ret = execute_symbol("start_vmm", g_num_cpus_started, 0, 0);
         if (ret != BF_SUCCESS)
         {
-            ALERT("start_vmm: failed to execute start_vmm: %" PRId64 "\n", ret);
+            ALERT("start_vmm: failed to execute start_vmm: %p\n", (void *)ret);
             goto failure;
         }
 
@@ -654,10 +669,10 @@ common_stop_vmm(void)
             goto corrupted;
         }
 
-        ret = execute_symbol("stop_vmm", i);
+        ret = execute_symbol("stop_vmm", i, 0, 0);
         if (ret != BFELF_SUCCESS)
         {
-            ALERT("stop_vmm: failed to execute symbol: %" PRId64 "\n", ret);
+            ALERT("stop_vmm: failed to execute symbol: %p\n", (void *)ret);
             goto corrupted;
         }
 
@@ -677,7 +692,6 @@ int64_t
 common_dump_vmm(struct debug_ring_resources_t **drr, int64_t vcpuid)
 {
     int64_t ret = 0;
-    get_drr_t get_drr = 0;
 
     if (drr == 0)
         return BF_ERROR_INVALID_ARG;
@@ -688,19 +702,11 @@ common_dump_vmm(struct debug_ring_resources_t **drr, int64_t vcpuid)
         return BF_ERROR_VMM_INVALID_STATE;
     }
 
-    ret = resolve_symbol("get_drr", (void **)&get_drr, 0);
-    if (ret != BF_SUCCESS)
+    ret = execute_symbol("get_drr", (uint64_t)vcpuid, (uint64_t)drr, 0);
+    if (ret != BFELF_SUCCESS)
     {
-        ALERT("dump_vmm: failed to locate get_drr. the symbol is missing "
-              "or not loaded\n");
+        ALERT("dump_vmm: failed to execute symbol: %p\n", (void *)ret);
         return ret;
-    }
-
-    *drr = get_drr(vcpuid);
-    if (*drr == 0)
-    {
-        ALERT("dump_vmm: failed to get debug ring resources\n");
-        return BF_ERROR_FAILED_TO_DUMP_DR;
     }
 
     return BF_SUCCESS;

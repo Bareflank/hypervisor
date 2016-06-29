@@ -23,12 +23,19 @@
 #define ABORT_H
 
 #ifndef DISABLE_ABORT
+
+#ifdef CROSS_COMPILED
+extern "C" void abort(void);
+extern "C" int printf(const char *format, ...);
+#else
 #include <stdio.h>
 #include <stdlib.h>
+#endif
+
 inline void
 private_abort(const char *msg, const char *func, int line)
 {
-    fprintf(stdout, "%s FATAL ERROR [%d]: %s\n", func, line, msg);
+    printf("%s FATAL ERROR [%d]: %s\n", func, line, msg);
     abort();
 }
 #define ABORT(a) private_abort(a,__func__,__LINE__);

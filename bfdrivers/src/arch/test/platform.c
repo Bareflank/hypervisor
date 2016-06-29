@@ -59,7 +59,10 @@ platform_alloc_rwe(int64_t len)
     void *addr = 0;
 
     len = PAGE_ROUND_UP(len);
-    posix_memalign(&addr, MAX_PAGE_SIZE, len);
+
+    if (posix_memalign(&addr, MAX_PAGE_SIZE, len) != 0)
+        return 0;
+
     if (mprotect(addr, len, PROT_READ | PROT_WRITE | PROT_EXEC) == -1)
     {
         platform_free_rw(addr, len);

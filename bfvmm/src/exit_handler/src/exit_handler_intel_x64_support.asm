@@ -52,50 +52,67 @@ exit_handler_entry:
 
     cli
 
-    mov [gs:0x00], rax
-    mov [gs:0x08], rbx
-    mov [gs:0x10], rcx
-    mov [gs:0x18], rdx
-    mov [gs:0x20], rbp
-    mov [gs:0x28], rsi
-    mov [gs:0x30], rdi
-    mov [gs:0x38], r8
-    mov [gs:0x40], r9
-    mov [gs:0x48], r10
-    mov [gs:0x50], r11
-    mov [gs:0x58], r12
-    mov [gs:0x60], r13
-    mov [gs:0x68], r14
-    mov [gs:0x70], r15
+    mov [gs:0x000], rax
+    mov [gs:0x008], rbx
+    mov [gs:0x010], rcx
+    mov [gs:0x018], rdx
+    mov [gs:0x020], rbp
+    mov [gs:0x028], rsi
+    mov [gs:0x030], rdi
+    mov [gs:0x038], r8
+    mov [gs:0x040], r9
+    mov [gs:0x048], r10
+    mov [gs:0x050], r11
+    mov [gs:0x058], r12
+    mov [gs:0x060], r13
+    mov [gs:0x068], r14
+    mov [gs:0x070], r15
+
+    sub rsp, [gs:0x0A8]
+    sub rsp, 0x40
+    and rsp, 0xFFFFFFFFFFFFFF80
+    mov [gs:0x0B0], rsp
+
+    mov rax, [gs:0x0B8]
+    mov rdx, [gs:0x0C0]
+    xsave [rsp]
+
+    sub rsp, 0x10
+    and rsp, 0xFFFFFFFFFFFFFFF0
 
     mov rdi, VMCS_GUEST_RIP
-    vmread [gs:0x78], rdi
+    vmread [gs:0x078], rdi
     mov rdi, VMCS_GUEST_RSP
-    vmread [gs:0x80], rdi
+    vmread [gs:0x080], rdi
 
-    mov rdi, [gs:0x0A0]
+    mov rdi, [gs:0x00A0]
     call exit_handler wrt ..plt
 
     mov rdi, VMCS_GUEST_RSP
-    vmwrite rdi, [gs:0x80]
+    vmwrite rdi, [gs:0x080]
     mov rdi, VMCS_GUEST_RIP
-    vmwrite rdi, [gs:0x78]
+    vmwrite rdi, [gs:0x078]
 
-    mov r15, [gs:0x70]
-    mov r14, [gs:0x68]
-    mov r13, [gs:0x60]
-    mov r12, [gs:0x58]
-    mov r11, [gs:0x50]
-    mov r10, [gs:0x48]
-    mov r9,  [gs:0x40]
-    mov r8,  [gs:0x38]
-    mov rdi, [gs:0x30]
-    mov rsi, [gs:0x28]
-    mov rbp, [gs:0x20]
-    mov rdx, [gs:0x18]
-    mov rcx, [gs:0x10]
-    mov rbx, [gs:0x08]
-    mov rax, [gs:0x00]
+    mov rsi, [gs:0x0B0]
+    mov rax, [gs:0x0B8]
+    mov rdx, [gs:0x0C0]
+    xrstor [rsi]
+
+    mov r15, [gs:0x070]
+    mov r14, [gs:0x068]
+    mov r13, [gs:0x060]
+    mov r12, [gs:0x058]
+    mov r11, [gs:0x050]
+    mov r10, [gs:0x048]
+    mov r9,  [gs:0x040]
+    mov r8,  [gs:0x038]
+    mov rdi, [gs:0x030]
+    mov rsi, [gs:0x028]
+    mov rbp, [gs:0x020]
+    mov rdx, [gs:0x018]
+    mov rcx, [gs:0x010]
+    mov rbx, [gs:0x008]
+    mov rax, [gs:0x000]
 
     sti
 

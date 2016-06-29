@@ -20,6 +20,7 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #include <stdint.h>
+#include <error_codes.h>
 
 int g_misc = 0;
 
@@ -59,10 +60,11 @@ get_misc(void)
     return g_misc;
 }
 
-extern "C" void
+extern "C" int64_t
 register_eh_frame(void *addr, uint64_t size)
 {
     (void) addr;
     (void) size;
-}
 
+    return REGISTER_EH_FRAME_SUCCESS;
+}

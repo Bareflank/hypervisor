@@ -23,11 +23,11 @@
 typedef void (*ctor_t)(void);
 typedef void (*dtor_t)(void);
 
-void
+int64_t
 local_init(struct section_info_t *info)
 {
     if (info == nullptr)
-        return;
+        return CRT_FAILURE;
 
     if (info->ctors_addr != nullptr)
     {
@@ -38,14 +38,18 @@ local_init(struct section_info_t *info)
             ctors[i]();
     }
 
-    register_eh_frame(info->eh_frame_addr, info->eh_frame_size);
+    auto ret = register_eh_frame(info->eh_frame_addr, info->eh_frame_size);
+    if (ret != REGISTER_EH_FRAME_SUCCESS)
+        return ret;
+
+    return CRT_SUCCESS;
 }
 
-void
+int64_t
 local_fini(struct section_info_t *info)
 {
     if (info == 0)
-        return;
+        return CRT_FAILURE;
 
     if (info->dtors_addr != 0)
     {
@@ -55,4 +59,6 @@ local_fini(struct section_info_t *info)
         for (auto i = 0U; i < n && dtors[i] != 0; i++)
             dtors[i]();
     }
+
+    return CRT_SUCCESS;
 }

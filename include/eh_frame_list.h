@@ -24,6 +24,7 @@
 #define EH_FRAME_LIST_H
 
 #include <stdint.h>
+#include <error_codes.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -65,9 +66,10 @@ struct eh_frame_t *get_eh_frame_list();
  *
  * @param addr the address of the eh_frame section
  * @param size the size of the eh_frame section
- *
+ * @return REGISTER_EH_FRAME_SUCCESS on success, REGISTER_EH_FRAME_FAILURE
+ *     on failure
  */
-void register_eh_frame(void *addr, uint64_t size);
+int64_t register_eh_frame(void *addr, uint64_t size);
 
 #ifdef __cplusplus
 }

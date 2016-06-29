@@ -30,14 +30,7 @@ vcpu_intel_x64::vcpu_intel_x64(int64_t id) :
     m_vmcs = std::make_shared<vmcs_intel_x64>(m_intrinsics);
     m_exit_handler = std::make_shared<exit_handler_intel_x64>(m_intrinsics);
 
-    m_state_save = std::make_shared<state_save_intel_x64>();
-    m_state_save->vcpu_ptr = (uint64_t)this;
-    m_state_save->vmxon_ptr = (uint64_t)m_vmxon.get();
-    m_state_save->vmcs_ptr = (uint64_t)m_vmcs.get();
-    m_state_save->exit_handler_ptr = (uint64_t)m_exit_handler.get();
-
-    m_exit_handler->set_vmcs(m_vmcs);
-    m_exit_handler->set_state_save(m_state_save);
+    init();
 }
 
 vcpu_intel_x64::vcpu_intel_x64(int64_t id,
@@ -65,14 +58,7 @@ vcpu_intel_x64::vcpu_intel_x64(int64_t id,
     if (!exit_handler)
         m_exit_handler = std::make_shared<exit_handler_intel_x64>(m_intrinsics);
 
-    m_state_save = std::make_shared<state_save_intel_x64>();
-    m_state_save->vcpu_ptr = (uint64_t)this;
-    m_state_save->vmxon_ptr = (uint64_t)m_vmxon.get();
-    m_state_save->vmcs_ptr = (uint64_t)m_vmcs.get();
-    m_state_save->exit_handler_ptr = (uint64_t)m_exit_handler.get();
-
-    m_exit_handler->set_vmcs(m_vmcs);
-    m_exit_handler->set_state_save(m_state_save);
+    init();
 }
 
 void
@@ -98,4 +84,23 @@ vcpu_intel_x64::stop()
 
     m_vmm_state.reset();
     m_host_vm_state.reset();
+}
+
+void
+vcpu_intel_x64::init()
+{
+    m_state_save = std::make_shared<state_save_intel_x64>();
+    m_state_save->vcpu_ptr = (uint64_t)this;
+    m_state_save->vmxon_ptr = (uint64_t)m_vmxon.get();
+    m_state_save->vmcs_ptr = (uint64_t)m_vmcs.get();
+    m_state_save->exit_handler_ptr = (uint64_t)m_exit_handler.get();
+
+    m_state_save->xsave_size = m_intrinsics->cpuid_ecx(0x0D);
+    m_state_save->xsave_xcr0_eax = m_intrinsics->cpuid_eax(0x0D);
+    m_state_save->xsave_xcr0_edx = 0;
+
+    m_exit_handler->set_vmcs(m_vmcs);
+    m_exit_handler->set_state_save(m_state_save);
+
+    m_intrinsics->write_xcr0(m_state_save->xsave_xcr0_eax);
 }

@@ -99,6 +99,13 @@ NATIVE_CCFLAGS+=-std=c99
 NATIVE_CCFLAGS+=-Wall
 NATIVE_CCFLAGS+=-Wextra
 NATIVE_CCFLAGS+=-Wpedantic
+NATIVE_CCFLAGS+=-pipe
+NATIVE_CCFLAGS+=-fexceptions
+NATIVE_CCFLAGS+=-fstack-protector-strong
+NATIVE_CCFLAGS+=-m64
+NATIVE_CCFLAGS+=-mtune=sandybridge
+NATIVE_CCFLAGS+=-march=sandybridge
+NATIVE_CCFLAGS+=-malign-data=abi
 
 CROSS_CCFLAGS+=-fpic
 CROSS_CCFLAGS+=-ffreestanding
@@ -107,6 +114,19 @@ CROSS_CCFLAGS+=-mno-red-zone
 CROSS_CCFLAGS+=-Wall
 CROSS_CCFLAGS+=-Wextra
 CROSS_CCFLAGS+=-Wpedantic
+CROSS_CCFLAGS+=-pipe
+CROSS_CCFLAGS+=-fexceptions
+CROSS_CCFLAGS+=-fstack-protector-strong
+CROSS_CCFLAGS+=-m64
+CROSS_CCFLAGS+=-mtune=sandybridge
+CROSS_CCFLAGS+=-march=sandybridge
+CROSS_CCFLAGS+=-malign-data=abi
+CROSS_CCFLAGS+=-mstackrealign
+
+#ifeq ($(PRODUCTION),yes)
+#	NATIVE_CCFLAGS+=-O3
+#	CROSS_CCFLAGS+=-O3
+#endif
 
 ################################################################################
 # Default CXX Flags
@@ -117,6 +137,13 @@ NATIVE_CXXFLAGS+=-std=c++14
 NATIVE_CXXFLAGS+=-Wall
 NATIVE_CXXFLAGS+=-Wextra
 NATIVE_CXXFLAGS+=-Wpedantic
+NATIVE_CXXFLAGS+=-pipe
+NATIVE_CXXFLAGS+=-fexceptions
+NATIVE_CXXFLAGS+=-fstack-protector-strong
+NATIVE_CXXFLAGS+=-m64
+NATIVE_CXXFLAGS+=-mtune=sandybridge
+NATIVE_CXXFLAGS+=-march=sandybridge
+NATIVE_CXXFLAGS+=-malign-data=abi
 
 CROSS_CXXFLAGS+=-fpic
 CROSS_CXXFLAGS+=-ffreestanding
@@ -127,6 +154,19 @@ CROSS_CXXFLAGS+=-std=c++14
 CROSS_CXXFLAGS+=-Wall
 CROSS_CXXFLAGS+=-Wextra
 CROSS_CXXFLAGS+=-Wpedantic
+CROSS_CXXFLAGS+=-pipe
+CROSS_CXXFLAGS+=-fexceptions
+CROSS_CXXFLAGS+=-fstack-protector-strong
+CROSS_CXXFLAGS+=-m64
+CROSS_CXXFLAGS+=-mtune=sandybridge
+CROSS_CXXFLAGS+=-march=sandybridge
+CROSS_CXXFLAGS+=-malign-data=abi
+CROSS_CXXFLAGS+=-mstackrealign
+
+#ifeq ($(PRODUCTION),yes)
+#	NATIVE_CXXFLAGS+=-O3
+#	CROSS_CXXFLAGS+=-O3
+#endif
 
 ################################################################################
 # Default ASM Flags

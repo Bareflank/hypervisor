@@ -62,13 +62,21 @@ vcpu_ut::test_vcpu_intel_x64_id_too_large()
 void
 vcpu_ut::test_vcpu_intel_x64_invalid_objects()
 {
+    MockRepository mocks;
     auto dr = std::shared_ptr<debug_ring>();
     auto on = std::shared_ptr<vmxon_intel_x64>();
     auto cs = std::shared_ptr<vmcs_intel_x64>();
     auto eh = std::shared_ptr<exit_handler_intel_x64>();
-    auto in = std::shared_ptr<intrinsics_intel_x64>();
+    auto in = bfn::mock_shared<intrinsics_intel_x64>(mocks);
 
-    EXPECT_NO_EXCEPTION(std::make_shared<vcpu_intel_x64>(0, dr, on, cs, eh, in));
+    mocks.OnCall(in.get(), intrinsics_intel_x64::cpuid_eax).With(0x0D).Return(0);
+    mocks.OnCall(in.get(), intrinsics_intel_x64::cpuid_ecx).With(0x0D).Return(0x10);
+    mocks.OnCall(in.get(), intrinsics_intel_x64::write_xcr0);
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        EXPECT_NO_EXCEPTION(std::make_shared<vcpu_intel_x64>(0, dr, on, cs, eh, in));
+    });
 }
 
 void
@@ -81,9 +89,12 @@ vcpu_ut::test_vcpu_intel_x64_valid()
     auto eh = bfn::mock_shared<exit_handler_intel_x64>(mocks);
     auto in = bfn::mock_shared<intrinsics_intel_x64>(mocks);
 
+    mocks.OnCall(in.get(), intrinsics_intel_x64::cpuid_eax).With(0x0D).Return(0);
+    mocks.OnCall(in.get(), intrinsics_intel_x64::cpuid_ecx).With(0x0D).Return(0x10);
+    mocks.OnCall(in.get(), intrinsics_intel_x64::write_xcr0);
+
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_NO_EXCEPTION(std::make_shared<vcpu_intel_x64>(0));
         EXPECT_NO_EXCEPTION(std::make_shared<vcpu_intel_x64>(0, dr, on, cs, eh, in));
     });
 }
@@ -103,6 +114,10 @@ vcpu_ut::test_vcpu_intel_x64_start_vmxon_start_failed()
     mocks.OnCall(on.get(), vmxon_intel_x64::start).Throw(bfn::general_exception());
     mocks.OnCall(on.get(), vmxon_intel_x64::stop);
 
+    mocks.OnCall(in.get(), intrinsics_intel_x64::cpuid_eax).With(0x0D).Return(0);
+    mocks.OnCall(in.get(), intrinsics_intel_x64::cpuid_ecx).With(0x0D).Return(0x10);
+    mocks.OnCall(in.get(), intrinsics_intel_x64::write_xcr0);
+
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
         EXPECT_EXCEPTION(vc->start(), bfn::general_exception);
@@ -113,7 +128,8 @@ void *
 malloc_aligned(size_t size, uint64_t alignment)
 {
     void *ptr = 0;
-    posix_memalign(&ptr, alignment, size);
+    if (posix_memalign(&ptr, alignment, size) != 0)
+        return 0;
     return ptr;
 }
 
@@ -153,6 +169,10 @@ setup_intrinsics(MockRepository &mocks, intrinsics_intel_x64 *in)
     mocks.OnCall(in, intrinsics_intel_x64::read_idt);
 
     mocks.OnCall(in, intrinsics_intel_x64::read_msr).Return(0);
+
+    mocks.OnCall(in, intrinsics_intel_x64::cpuid_eax).With(0x0D).Return(0);
+    mocks.OnCall(in, intrinsics_intel_x64::cpuid_ecx).With(0x0D).Return(0x10);
+    mocks.OnCall(in, intrinsics_intel_x64::write_xcr0);
 }
 
 void
