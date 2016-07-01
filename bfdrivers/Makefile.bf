@@ -23,8 +23,8 @@
 # Subdirs
 ################################################################################
 
-SUBDIRS += dummy_add_mdl_failure
-SUBDIRS += dummy_add_mdl_success
+SUBDIRS += dummy_add_md_failure
+SUBDIRS += dummy_add_md_success
 SUBDIRS += dummy_get_drr_failure
 SUBDIRS += dummy_get_drr_success
 SUBDIRS += dummy_init_vmm_failure

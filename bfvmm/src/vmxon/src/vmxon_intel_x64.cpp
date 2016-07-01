@@ -175,6 +175,9 @@ vmxon_intel_x64::create_vmxon_region()
     m_vmxon_region = std::unique_ptr<uint32_t>(region);
     m_vmxon_region_phys = (uintptr_t)g_mm->virt_to_phys(region);
 
+    if (m_vmxon_region_phys == 0)
+        throw std::logic_error("m_vmxon_region_phys == nullptr");
+
     region[0] = m_intrinsics->read_msr(IA32_VMX_BASIC_MSR) & 0x7FFFFFFFF;
 
     cor1.commit();

@@ -305,5 +305,5 @@ if [[ $MODE == "link" ]]; then
         LINKER="docker run $DOCKER_ARGS /tmp/compilers/$compiler/bin/x86_64-elf-ld"
     fi
 
-    $LINKER ${ARGS[*]} $SYSROOT_LIB_PATH $SYSROOT_LIBS $BAREFLANK_LIBS -z max-page-size=4096 -z relro -z now
+    $LINKER ${ARGS[*]} $SYSROOT_LIB_PATH $SYSROOT_LIBS $BAREFLANK_LIBS -z max-page-size=4096 -z common-page-size=4096 -z relro -z now
 fi

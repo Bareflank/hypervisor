@@ -39,41 +39,69 @@ typedef long (*set_affinity_fn)(pid_t, const struct cpumask *);
 set_affinity_fn set_cpu_affinity = 0;
 
 void *
-platform_alloc(int64_t len)
+platform_alloc_rw(int64_t len)
 {
     void *addr = NULL;
 
     if (len == 0)
     {
-        ALERT("platform_alloc: invalid length\n");
+        ALERT("platform_alloc_rw: invalid length\n");
         return addr;
     }
 
     addr = vmalloc(len);
 
     if (addr == NULL)
-        ALERT("platform_alloc: failed to vmalloc mem: %lld\n", len);
+        ALERT("platform_alloc_rw: failed to vmalloc mem: %lld\n", len);
 
     return addr;
 }
 
 void *
-platform_alloc_exec(int64_t len)
+platform_alloc_rwe(int64_t len)
 {
     void *addr = NULL;
 
     if (len == 0)
     {
-        ALERT("platform_alloc_exec: invalid length\n");
+        ALERT("platform_alloc_rwe: invalid length\n");
         return addr;
     }
 
     addr = __vmalloc(len, GFP_KERNEL, PAGE_KERNEL_EXEC);
 
     if (addr == NULL)
-        ALERT("platform_alloc_exec: failed to vmalloc executable mem: %lld\n", len);
+        ALERT("platform_alloc_rwe: failed to vmalloc executable mem: %lld\n", len);
 
     return addr;
+}
+
+void
+platform_free_rw(void *addr, int64_t len)
+{
+    (void) len;
+
+    if (addr == NULL)
+    {
+        ALERT("platform_free_rw: invalid address %p\n", addr);
+        return;
+    }
+
+    vfree(addr);
+}
+
+void
+platform_free_rwe(void *addr, int64_t len)
+{
+    (void) len;
+
+    if (addr == NULL)
+    {
+        ALERT("platform_free_rwe: invalid address %p\n", addr);
+        return;
+    }
+
+    vfree(addr);
 }
 
 void *
@@ -83,32 +111,6 @@ platform_virt_to_phys(void *virt)
         return (void *)page_to_phys(vmalloc_to_page(virt));
     else
         return (void *)virt_to_phys(virt);
-}
-
-void
-platform_free(void *addr, int64_t len)
-{
-    (void)len;
-
-    if (addr == NULL)
-    {
-        ALERT("platform_free: invalid address %p\n", addr);
-        return;
-    }
-
-    vfree(addr);
-}
-
-void
-platform_free_exec(void *addr, int64_t len)
-{
-    if (addr == NULL)
-    {
-        ALERT("platform_free_exec: invalid address %p\n", addr);
-        return;
-    }
-
-    vfree(addr);
 }
 
 void

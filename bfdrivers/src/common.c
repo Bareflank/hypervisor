@@ -145,78 +145,81 @@ execute_symbol(const char *sym, int64_t arg)
 }
 
 int64_t
-add_mdl_to_memory_manager(char *exec, uint64_t size, uint64_t type)
+add_md_to_memory_manager(struct module_t *module)
 {
-    int64_t i = 0;
     int64_t ret = 0;
-    int64_t num = 0;
-    int64_t len = 0;
-    uint64_t page = 0;
-    add_mdl_t add_mdl = 0;
-    struct memory_descriptor *mdl;
+    bfelf64_word s = 0;
+    add_md_t add_md = 0;
 
-    if (exec == 0 || size == 0)
+    if (module == 0)
         return BF_ERROR_INVALID_ARG;
 
-    num = (size / MAX_PAGE_SIZE);
-    if (size % MAX_PAGE_SIZE != 0)
-        num++;
-
-    len = num * sizeof(struct memory_descriptor);
-    mdl = (struct memory_descriptor *)platform_alloc(len);
-    if (mdl == 0)
-    {
-        ALERT("add_mdl_to_memory_manager: failed to allocate mdl\n");
-        return BF_ERROR_OUT_OF_MEMORY;
-    }
-
-    for (i = 0; i < num; i++, page += MAX_PAGE_SIZE)
-    {
-        mdl[i].virt = exec + page;
-        mdl[i].phys = platform_virt_to_phys(mdl[i].virt);
-        mdl[i].type = type;
-    }
-
-    ret = resolve_symbol("add_mdl", (void **)&add_mdl, 0);
+    ret = resolve_symbol("add_md", (void **)&add_md, 0);
     if (ret != BF_SUCCESS)
     {
-        ALERT("add_mdl_to_memory_manager: failed to locate add_mdl. "
+        ALERT("add_md_to_memory_manager: failed to locate add_md. "
               "the symbol is missing or not loaded\n");
-        goto failure;
+        return ret;
     }
 
-    ret = add_mdl(mdl, num);
-    if (ret != MEMORY_MANAGER_SUCCESS)
+    for (s = 0; s < bfelf_file_num_segments(&module->file); s++)
     {
-        ALERT("add_mdl_to_memory_manager: failed to add mdl.\n");
-        goto failure;
+        uint64_t exec_s = 0;
+        uint64_t exec_e = 0;
+        struct bfelf_phdr *phdr = 0;
+
+        ret = bfelf_file_get_segment(&module->file, s, &phdr);
+        if (ret != BFELF_SUCCESS)
+        {
+            ALERT("bfelf_file_get_segment failed: %d\n", (int)ret);
+            return 0;
+        }
+
+        exec_s = (uint64_t)module->exec + phdr->p_vaddr;
+        exec_e = (uint64_t)module->exec + phdr->p_vaddr + phdr->p_memsz;
+        exec_s &= ~(MAX_PAGE_SIZE - 1);
+        exec_e &= ~(MAX_PAGE_SIZE - 1);
+
+        for (; exec_s <= exec_e; exec_s += MAX_PAGE_SIZE)
+        {
+            struct memory_descriptor md;
+
+            md.virt = (void *)exec_s;
+            md.phys = platform_virt_to_phys(md.virt);
+
+            if ((phdr->p_flags & bfpf_x) != 0)
+                md.type = MEMORY_TYPE_R | MEMORY_TYPE_E;
+            else
+                md.type = MEMORY_TYPE_R | MEMORY_TYPE_W;
+
+            ret = add_md(&md);
+            if (ret != MEMORY_MANAGER_SUCCESS)
+            {
+                ALERT("add_md_to_memory_manager: failed to add md: %p, %p, 0x%x\n",
+                      md.virt, md.phys, md.type);
+                return ret;
+            }
+        }
     }
 
-    platform_free(mdl, len);
     return BF_SUCCESS;
-
-failure:
-
-    platform_free(mdl, len);
-    return ret;
 }
 
 uint64_t
-get_elf_file_size(struct bfelf_file_t *ef)
+get_elf_file_size(struct module_t *module)
 {
-    bfelf64_word i = 0;
+    bfelf64_word s = 0;
     bfelf64_xword total = 0;
-    bfelf64_xword num_segments = bfelf_file_num_segments(ef);
 
-    if (ef == 0)
+    if (module == 0)
         return 0;
 
-    for (i = 0; i < num_segments; i++)
+    for (s = 0; s < bfelf_file_num_segments(&module->file); s++)
     {
         int64_t ret = 0;
         struct bfelf_phdr *phdr = 0;
 
-        ret = bfelf_file_get_segment(ef, i, &phdr);
+        ret = bfelf_file_get_segment(&module->file, s, &phdr);
         if (ret != BFELF_SUCCESS)
         {
             ALERT("bfelf_file_get_segment failed: %d\n", (int)ret);
@@ -231,27 +234,33 @@ get_elf_file_size(struct bfelf_file_t *ef)
 }
 
 int64_t
-load_elf_file(struct bfelf_file_t *ef, char *exec, uint64_t size)
+load_elf_file(struct module_t *module)
 {
-    bfelf64_word i = 0;
-    bfelf64_xword num_segments = bfelf_file_num_segments(ef);
+    bfelf64_word s = 0;
 
-    if (ef == 0 || exec == 0 || size == 0)
+    if (module == 0)
         return BF_ERROR_INVALID_ARG;
 
-    platform_memset(exec, 0, size);
+    platform_memset(module->exec, 0, module->size);
 
-    for (i = 0; i < num_segments; i++)
+    for (s = 0; s < bfelf_file_num_segments(&module->file); s++)
     {
         int64_t ret = 0;
         struct bfelf_phdr *phdr = 0;
 
-        ret = bfelf_file_get_segment(ef, i, &phdr);
+        char *dst = 0;
+        char *src = 0;
+        int64_t len = 0;
+
+        ret = bfelf_file_get_segment(&module->file, s, &phdr);
         if (ret != BFELF_SUCCESS)
             return ret;
 
-        platform_memcpy(exec + phdr->p_vaddr, ef->file + phdr->p_offset,
-                        phdr->p_filesz);
+        dst = module->exec + phdr->p_vaddr;
+        src = module->file.file + phdr->p_offset;
+        len = phdr->p_filesz;
+
+        platform_memcpy(dst, src, len);
     }
 
     return BF_SUCCESS;
@@ -275,7 +284,7 @@ common_reset(void)
 
     for (i = 0; i < g_num_modules; i++)
     {
-        platform_free_exec(g_modules[i].exec, g_modules[i].size);
+        platform_free_rwe(g_modules[i].exec, g_modules[i].size);
 
         g_modules[i].exec = 0;
         g_modules[i].size = 0;
@@ -375,28 +384,21 @@ common_add_module(char *file, int64_t fsize)
         return ret;
     }
 
-    module->size = get_elf_file_size(&module->file);
+    module->size = get_elf_file_size(module);
     if (module->size == 0)
     {
         ALERT("add_module: failed to get the module's exec size\n");
         return BF_ERROR_FAILED_TO_ADD_FILE;
     }
 
-    module->exec = platform_alloc_exec(module->size);
+    module->exec = platform_alloc_rwe(module->size);
     if (module->exec == 0)
     {
         ALERT("add_module: out of memory\n");
         return 0;
     }
 
-    /*
-     * TODO: Need to set the permissions of memory for the module here.
-     * Once that is done, we need to set the type properly so that it gets
-     * propegated up correctly. Remove me once complete
-     */
-    module->type = MEMORY_TYPE_R | MEMORY_TYPE_W | MEMORY_TYPE_E;
-
-    ret = load_elf_file(&module->file, module->exec, module->size);
+    ret = load_elf_file(module);
     if (ret != BF_SUCCESS)
     {
         ALERT("add_module: failed to load the elf module: %" PRId64 "\n", ret);
@@ -412,7 +414,7 @@ common_add_module(char *file, int64_t fsize)
 
 failure:
 
-    platform_free_exec(module->exec, module->size);
+    platform_free_rwe(module->exec, module->size);
     return ret;
 }
 
@@ -491,7 +493,7 @@ common_load_vmm(void)
 
     for (i = 0; (module = get_module(i)) != 0; i++)
     {
-        ret = add_mdl_to_memory_manager(module->exec, module->size, module->type);
+        ret = add_md_to_memory_manager(module);
         if (ret != BF_SUCCESS)
         {
             ALERT("load_vmm: failed to add memory descriptors: %" PRId64 "\n",

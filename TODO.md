@@ -9,6 +9,11 @@ Misc:
 - Add system beep code for additional debugging
 - Add support for the PCI debugger
 - Add support for https://coveralls.io
+- Re-write the common.c code such that, the ELF loader is not compiled in
+  the driver itself, but instead, the ELF loader is compiled as a flat
+  binary and executed, which then starts the VMM. This will evenutally provide
+  a better starting point for a dynamic root-of-trust in the future if so
+  desired.
 
 Version 1.1 TODO:
 - Add Windows support
@@ -32,10 +37,6 @@ Version 1.1 TODO:
   be resolved at some point. Likely this problem will go away once we have a
   custom libc, as atexit registers the destructor, but is never executed since
   we cannot use _exit() at the moment.
-- Modify the common.c code in the driver entry to handle memory protections
-  properly. Specifically, we want to make sure that we are respecting the
-  read/execute and read/write memory protections that are labeled by the
-  ELF program loader.
 - Trigger a rebuild if bfcrt changes
 - Trigger a rebuild of libcxx is bfunwind changes
 - Some scripts use "-" while others use "_", we should be consistent

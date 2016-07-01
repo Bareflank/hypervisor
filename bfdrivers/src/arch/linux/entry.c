@@ -10,7 +10,6 @@
 
 #include <debug.h>
 #include <common.h>
-#include <platform.h>
 #include <constants.h>
 #include <driver_entry_interface.h>
 
@@ -75,7 +74,7 @@ ioctl_add_module(char *file)
      * memory from userspace as needed.
      */
 
-    buf = platform_alloc(g_module_length);
+    buf = vmalloc(g_module_length);
     if (buf == NULL)
     {
         ALERT("IOCTL_ADD_MODULE: failed to allocate memory for the module\n");
@@ -149,7 +148,7 @@ ioctl_unload_vmm(void)
     }
 
     for (i = 0; i < g_num_files; i++)
-        platform_free(files[i], files_size[i]);
+        vfree(files[i]);
 
     g_num_files = 0;
 
