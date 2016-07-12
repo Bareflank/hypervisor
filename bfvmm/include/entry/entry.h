@@ -22,27 +22,8 @@
 #ifndef ENTRY_H
 #define ENTRY_H
 
-/// Entry Function
-///
-/// Defines the signature for an entry function.
-///
-typedef int64_t (*entry_t)(int64_t op, int64_t vcpuid);
-
-/// Execute With Stack
-///
-/// The following function is written in assembly, and provides the ability to
-/// execute an entry function with a different stack than the one that is
-/// provided by the kernel. To do this, this assembly function creates a
-/// traditional stack frame (using the base pointer), prior to replacing the
-/// stack pointer.
-///
-/// @param op the operationg to perform
-/// @param vcpuid the vcpu to perform the operation on
-/// @param func entry function to call with new stack
-/// @param stack the new stack
-/// @return the return value of the entry function
-///
-extern "C" int64_t execute_with_stack(int64_t op, int64_t vcpuid, entry_t func, uintptr_t stack);
+#include <stdint.h>
+#include <error_codes.h>
 
 /// Init VMM
 ///

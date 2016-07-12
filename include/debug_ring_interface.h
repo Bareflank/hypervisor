@@ -30,6 +30,7 @@
 #endif
 
 #include <constants.h>
+#include <error_codes.h>
 
 #pragma pack(push, 1)
 

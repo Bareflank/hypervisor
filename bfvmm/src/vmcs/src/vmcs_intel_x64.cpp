@@ -434,7 +434,11 @@ vmcs_intel_x64::write_32bit_host_state(const std::shared_ptr<vmcs_intel_x64_stat
 void
 vmcs_intel_x64::write_natural_host_state(const std::shared_ptr<vmcs_intel_x64_state> &state)
 {
-    auto exit_handler_stack = m_exit_handler_stack.get() + STACK_SIZE - 1;
+    uintptr_t exit_handler_stack = (uintptr_t)m_exit_handler_stack.get();
+
+    exit_handler_stack += STACK_SIZE;
+    exit_handler_stack -= 0x0000000000000010;
+    exit_handler_stack &= 0xFFFFFFFFFFFFFFF0;
 
     vmwrite(VMCS_HOST_CR0, state->cr0());
     vmwrite(VMCS_HOST_CR3, state->cr3());

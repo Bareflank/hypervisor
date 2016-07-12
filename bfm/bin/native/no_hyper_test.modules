@@ -2,8 +2,8 @@
 # Default Modules                                                              #
 ################################################################################
 
-../../../bfvmm/bin/cross/libc++.so
-../../../bfvmm/bin/cross/libmemory_manager.so
-../../../bfvmm/bin/cross/libserial.so
-../../../bfvmm/bin/cross/libintrinsics.so
-../../../bfvmm/bin/cross/libmisc.so
+%BUILD_ABS%/sysroot/x86_64-elf/lib/libc++.so.1.0
+%BUILD_ABS%/makefiles/bfvmm/src/intrinsics/bin/cross/libintrinsics.so
+%BUILD_ABS%/makefiles/bfvmm/src/memory_manager/bin/cross/libmemory_manager.so
+%BUILD_ABS%/makefiles/bfvmm/src/misc/bin/cross/libmisc.so
+%BUILD_ABS%/makefiles/bfvmm/src/serial/bin/cross/libserial.so

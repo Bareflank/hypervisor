@@ -588,6 +588,9 @@ dwarf4::decode_uleb128(char **addr)
     return result;
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+
 void
 dwarf4::unwind(const fd_entry &fde, register_state *state)
 {
@@ -595,6 +598,9 @@ dwarf4::unwind(const fd_entry &fde, register_state *state)
     log("- Unwinding -\n");
     log("-------------\n");
     log("\n");
+
+    if (state == 0)
+        return;
 
     auto row = private_decode_cfi(fde, state);
     auto cfa = private_decode_cfa(row, state);
@@ -611,3 +617,5 @@ dwarf4::unwind(const fd_entry &fde, register_state *state)
 
     state->commit(cfa + row.arg_size());
 }
+
+#pragma GCC diagnostic pop

@@ -38,26 +38,31 @@ section .text
 ;
 promote_vmcs_to_root:
 
-    mov rsp, [rdi + 0x80]
-    mov rax, [rdi + 0x78]
+    mov rsi, [rdi + 0x0B0]
+    mov rax, [rdi + 0x0B8]
+    mov rdx, [rdi + 0x0C0]
+    xrstor [rsi]
+
+    mov rsp, [rdi + 0x080]
+    mov rax, [rdi + 0x078]
     push rax
 
-    mov r15, [rdi + 0x70]
-    mov r14, [rdi + 0x68]
-    mov r13, [rdi + 0x60]
-    mov r12, [rdi + 0x58]
-    mov r11, [rdi + 0x50]
-    mov r10, [rdi + 0x48]
-    mov r9,  [rdi + 0x40]
-    mov r8,  [rdi + 0x38]
-    mov rsi, [rdi + 0x28]
-    mov rbp, [rdi + 0x20]
-    mov rdx, [rdi + 0x18]
-    mov rcx, [rdi + 0x10]
-    mov rbx, [rdi + 0x08]
-    mov rax, [rdi + 0x00]
+    mov r15, [rdi + 0x070]
+    mov r14, [rdi + 0x068]
+    mov r13, [rdi + 0x060]
+    mov r12, [rdi + 0x058]
+    mov r11, [rdi + 0x050]
+    mov r10, [rdi + 0x048]
+    mov r9,  [rdi + 0x040]
+    mov r8,  [rdi + 0x038]
+    mov rsi, [rdi + 0x028]
+    mov rbp, [rdi + 0x020]
+    mov rdx, [rdi + 0x018]
+    mov rcx, [rdi + 0x010]
+    mov rbx, [rdi + 0x008]
+    mov rax, [rdi + 0x000]
 
-    mov rdi, [rdi + 0x30]
+    mov rdi, [rdi + 0x030]
 
     sti
     ret

@@ -35,7 +35,7 @@ extern "C"
     struct module_t *get_module(uint64_t index);
     int64_t symbol_length(const char *sym);
     int64_t resolve_symbol(const char *name, void **sym, struct module_t *module);
-    int64_t execute_symbol(const char *sym, int64_t arg);
+    int64_t execute_symbol(const char *sym, uint64_t arg1, uint64_t arg2, struct module_t *module);
     int64_t add_md_to_memory_manager(struct module_t *module);
 
     typedef int64_t (*get_misc_t)(void);
@@ -122,7 +122,7 @@ driver_entry_ut::test_helper_resolve_symbol_missing_symbol()
 void
 driver_entry_ut::test_helper_execute_symbol_invalid_arg()
 {
-    EXPECT_TRUE(execute_symbol(NULL, 0) == BF_ERROR_INVALID_ARG);
+    EXPECT_TRUE(execute_symbol(NULL, 0, 0, 0) == BF_ERROR_INVALID_ARG);
 }
 
 void
@@ -134,7 +134,7 @@ driver_entry_ut::test_helper_execute_symbol_missing_symbol()
     EXPECT_TRUE(common_add_module(m_dummy_add_md_success, m_dummy_add_md_success_length) == BF_SUCCESS);
     EXPECT_TRUE(common_add_module(m_dummy_misc, m_dummy_misc_length) == BF_SUCCESS);
     EXPECT_TRUE(common_load_vmm() == BF_SUCCESS);
-    EXPECT_TRUE(execute_symbol("invalid_symbol", 0) == BFELF_ERROR_NO_SUCH_SYMBOL);
+    EXPECT_TRUE(execute_symbol("invalid_symbol", 0, 0, 0) == BFELF_ERROR_NO_SUCH_SYMBOL);
     EXPECT_TRUE(common_fini() == BF_SUCCESS);
 }
 
@@ -147,7 +147,7 @@ driver_entry_ut::test_helper_execute_symbol_sym_failed()
     EXPECT_TRUE(common_add_module(m_dummy_add_md_success, m_dummy_add_md_success_length) == BF_SUCCESS);
     EXPECT_TRUE(common_add_module(m_dummy_misc, m_dummy_misc_length) == BF_SUCCESS);
     EXPECT_TRUE(common_load_vmm() == BF_SUCCESS);
-    EXPECT_TRUE(execute_symbol("sym_that_returns_failure", 0) == -1);
+    EXPECT_TRUE(execute_symbol("sym_that_returns_failure", 0, 0, 0) == -1);
     EXPECT_TRUE(common_fini() == BF_SUCCESS);
 }
 
@@ -160,7 +160,7 @@ driver_entry_ut::test_helper_execute_symbol_sym_success()
     EXPECT_TRUE(common_add_module(m_dummy_add_md_success, m_dummy_add_md_success_length) == BF_SUCCESS);
     EXPECT_TRUE(common_add_module(m_dummy_misc, m_dummy_misc_length) == BF_SUCCESS);
     EXPECT_TRUE(common_load_vmm() == BF_SUCCESS);
-    EXPECT_TRUE(execute_symbol("sym_that_returns_success", 0) == 0);
+    EXPECT_TRUE(execute_symbol("sym_that_returns_success", 0, 0, 0) == 0);
     EXPECT_TRUE(common_fini() == BF_SUCCESS);
 }
 

@@ -21,6 +21,7 @@
 
 #include <stdint.h>
 #include <dummy_code.h>
+#include <error_codes.h>
 
 derived g_derived;
 
@@ -69,11 +70,13 @@ operator delete(void *ptr)
     (void) ptr;
 }
 
-extern "C" void
+extern "C" int64_t
 register_eh_frame(void *addr, uint64_t size)
 {
     (void) addr;
     (void) size;
+
+    return REGISTER_EH_FRAME_SUCCESS;
 }
 
 void func30() {}

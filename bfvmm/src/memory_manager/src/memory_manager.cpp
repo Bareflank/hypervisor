@@ -25,6 +25,7 @@
 
 #include <debug.h>
 #include <constants.h>
+#include <guard_exceptions.h>
 #include <commit_or_rollback.h>
 #include <memory_manager/memory_manager.h>
 
@@ -365,24 +366,8 @@ _realloc_r(struct _reent *reent, void *ptr, size_t size)
 extern "C" int64_t
 add_md(struct memory_descriptor *md)
 {
-    try
+    return guard_exceptions(MEMORY_MANAGER_FAILURE, [&]()
     {
         g_mm->add_md(md);
-        return MEMORY_MANAGER_SUCCESS;
-    }
-    catch (std::exception &e)
-    {
-        bferror << "----------------------------------------" << bfendl;
-        bferror << "- Standard Exception Caught            -" << bfendl;
-        bferror << "----------------------------------------" << bfendl;
-        bfinfo << e.what() << bfendl;
-    }
-    catch (...)
-    {
-        bferror << "----------------------------------------" << bfendl;
-        bferror << "- Unknown Exception Caught             -" << bfendl;
-        bferror << "----------------------------------------" << bfendl;
-    }
-
-    return MEMORY_MANAGER_FAILURE;
+    });
 }

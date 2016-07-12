@@ -26,15 +26,20 @@
 // Global
 // -----------------------------------------------------------------------------
 
-extern "C" struct debug_ring_resources_t *
-get_drr(int64_t vcpuid)
+extern "C" int64_t
+get_drr(int64_t vcpuid, struct debug_ring_resources_t **drr)
 {
     static debug_ring_resources_t drrs[MAX_VCPUS] = {};
 
     if (vcpuid < 0 || vcpuid >= MAX_VCPUS)
-        return 0;
+        return GET_DRR_FAILURE;
 
-    return &drrs[vcpuid];
+    if (drr == 0)
+        return GET_DRR_FAILURE;
+
+    *drr = &drrs[vcpuid];
+
+    return GET_DRR_SUCCESS;
 }
 
 // -----------------------------------------------------------------------------
@@ -47,7 +52,8 @@ debug_ring::debug_ring(int64_t vcpuid) :
     if (vcpuid < 0 || vcpuid >= MAX_VCPUS)
         return;
 
-    m_drr = get_drr(vcpuid);
+    if (get_drr(vcpuid, &m_drr) != GET_DRR_SUCCESS)
+        return;
 
     m_drr->epos = 0;
     m_drr->spos = 0;

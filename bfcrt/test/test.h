@@ -42,6 +42,7 @@ private:
     void test_local_init_invalid_arg();
     void test_local_init_invalid_addr();
     void test_local_init_invalid_size();
+    void test_local_init_register_eh_frame_failure();
     void test_local_init_valid_stop_at_size();
     void test_local_init_valid_stop_at_null();
     void test_local_fini_invalid_arg();

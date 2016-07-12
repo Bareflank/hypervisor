@@ -57,7 +57,7 @@ void
 debug_ring_ut::test_read_with_null_string()
 {
     debug_ring dr(0);
-    drr = get_drr(0);
+    get_drr(0, &drr);
 
     EXPECT_TRUE(debug_ring_read(drr, NULL, DEBUG_RING_SIZE) == 0);
 }
@@ -66,7 +66,7 @@ void
 debug_ring_ut::test_read_with_zero_length()
 {
     debug_ring dr(0);
-    drr = get_drr(0);
+    get_drr(0, &drr);
 
     EXPECT_TRUE(debug_ring_read(drr, rb, 0) == 0);
 }
@@ -75,7 +75,7 @@ void
 debug_ring_ut::test_write_with_zero_length()
 {
     debug_ring dr(0);
-    drr = get_drr(0);
+    get_drr(0, &drr);
 
     auto wb = "";
 
@@ -86,7 +86,7 @@ void
 debug_ring_ut::test_write_string_to_dr_that_is_larger_than_dr()
 {
     debug_ring dr(0);
-    drr = get_drr(0);
+    get_drr(0, &drr);
 
     init_wb(DEBUG_RING_SIZE);
 
@@ -97,7 +97,7 @@ void
 debug_ring_ut::test_write_string_to_dr_that_is_much_larger_than_dr()
 {
     debug_ring dr(0);
-    drr = get_drr(0);
+    get_drr(0, &drr);
 
     init_wb(DEBUG_RING_SIZE + 50);
 
@@ -108,7 +108,7 @@ void
 debug_ring_ut::test_write_one_small_string_to_dr()
 {
     debug_ring dr(0);
-    drr = get_drr(0);
+    get_drr(0, &drr);
 
     auto wb = "01234";
 
@@ -120,7 +120,7 @@ void
 debug_ring_ut::test_fill_dr()
 {
     debug_ring dr(0);
-    drr = get_drr(0);
+    get_drr(0, &drr);
 
     init_wb(DEBUG_RING_SIZE - 1);
 
@@ -133,7 +133,7 @@ void
 debug_ring_ut::test_overcommit_dr()
 {
     debug_ring dr(0);
-    drr = get_drr(0);
+    get_drr(0, &drr);
 
     init_wb(DEBUG_RING_SIZE - 10, 'A');
     EXPECT_NO_EXCEPTION(dr.write(wb));
@@ -149,7 +149,7 @@ void
 debug_ring_ut::test_overcommit_dr_more_than_once()
 {
     debug_ring dr(0);
-    drr = get_drr(0);
+    get_drr(0, &drr);
 
     init_wb(100, 'A');
     EXPECT_NO_EXCEPTION(dr.write(wb));
@@ -171,7 +171,7 @@ void
 debug_ring_ut::test_read_with_empty_dr()
 {
     debug_ring dr(0);
-    drr = get_drr(0);
+    get_drr(0, &drr);
 
     EXPECT_TRUE(debug_ring_read(drr, rb, DEBUG_RING_SIZE) == 0);
 }
@@ -180,7 +180,7 @@ void
 debug_ring_ut::acceptance_test_stress()
 {
     debug_ring dr(0);
-    drr = get_drr(0);
+    get_drr(0, &drr);
 
     auto wb = "012";
 

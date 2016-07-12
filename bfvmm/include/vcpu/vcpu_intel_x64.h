@@ -108,6 +108,10 @@ public:
 
 private:
 
+    void init();
+
+private:
+
     std::shared_ptr<vmxon_intel_x64> m_vmxon;
     std::shared_ptr<vmcs_intel_x64> m_vmcs;
     std::shared_ptr<exit_handler_intel_x64> m_exit_handler;

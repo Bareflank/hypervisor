@@ -24,11 +24,13 @@
 #include <crt.h>
 #include <eh_frame_list.h>
 
-void
+int64_t
 register_eh_frame(void *addr, uint64_t size)
 {
     (void) addr;
     (void) size;
+
+    return REGISTER_EH_FRAME_SUCCESS;
 }
 
 void
@@ -47,7 +49,7 @@ crt_ut::test_local_init_invalid_arg()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        local_init(0);
+        EXPECT_TRUE(local_init(0) == CRT_FAILURE)
     });
 }
 
@@ -61,7 +63,7 @@ crt_ut::test_local_init_invalid_addr()
     MockRepository mocks;
     mocks.NeverCallFunc(func1);
     mocks.NeverCallFunc(func2);
-    mocks.ExpectCallFunc(register_eh_frame).With((void *)10, 100);
+    mocks.ExpectCallFunc(register_eh_frame).With((void *)10, 100).Return(0);
 
     info.ctors_size = 16;
     info.eh_frame_addr = (void *)10;
@@ -69,7 +71,7 @@ crt_ut::test_local_init_invalid_addr()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        local_init(&info);
+        EXPECT_TRUE(local_init(&info) == CRT_SUCCESS);
     });
 }
 
@@ -83,7 +85,7 @@ crt_ut::test_local_init_invalid_size()
     MockRepository mocks;
     mocks.NeverCallFunc(func1);
     mocks.NeverCallFunc(func2);
-    mocks.ExpectCallFunc(register_eh_frame).With((void *)10, 100);
+    mocks.ExpectCallFunc(register_eh_frame).With((void *)10, 100).Return(0);
 
     void *func_list[2] = {(void *)func1, (void *)func2};
 
@@ -93,7 +95,32 @@ crt_ut::test_local_init_invalid_size()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        local_init(&info);
+        EXPECT_TRUE(local_init(&info) == CRT_SUCCESS);
+    });
+}
+
+void
+crt_ut::test_local_init_register_eh_frame_failure()
+{
+    section_info_t info;
+
+    memset(&info, 0, sizeof(info));
+
+    MockRepository mocks;
+    mocks.ExpectCallFunc(func1);
+    mocks.ExpectCallFunc(func2);
+    mocks.ExpectCallFunc(register_eh_frame).With((void *)10, 100).Return(REGISTER_EH_FRAME_FAILURE);
+
+    void *func_list[2] = {(void *)func1, (void *)func2};
+
+    info.ctors_size = 16;
+    info.ctors_addr = (void *)func_list;
+    info.eh_frame_addr = (void *)10;
+    info.eh_frame_size = 100;
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        EXPECT_TRUE(local_init(&info) == REGISTER_EH_FRAME_FAILURE);
     });
 }
 
@@ -107,7 +134,7 @@ crt_ut::test_local_init_valid_stop_at_size()
     MockRepository mocks;
     mocks.ExpectCallFunc(func1);
     mocks.ExpectCallFunc(func2);
-    mocks.ExpectCallFunc(register_eh_frame).With((void *)10, 100);
+    mocks.ExpectCallFunc(register_eh_frame).With((void *)10, 100).Return(0);
 
     void *func_list[2] = {(void *)func1, (void *)func2};
 
@@ -118,7 +145,7 @@ crt_ut::test_local_init_valid_stop_at_size()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        local_init(&info);
+        EXPECT_TRUE(local_init(&info) == CRT_SUCCESS);
     });
 }
 
@@ -132,7 +159,7 @@ crt_ut::test_local_init_valid_stop_at_null()
     MockRepository mocks;
     mocks.ExpectCallFunc(func1);
     mocks.ExpectCallFunc(func2);
-    mocks.ExpectCallFunc(register_eh_frame).With((void *)10, 100);
+    mocks.ExpectCallFunc(register_eh_frame).With((void *)10, 100).Return(0);
 
     void *func_list[3] = {(void *)func1, (void *)func2, 0};
 
@@ -143,14 +170,14 @@ crt_ut::test_local_init_valid_stop_at_null()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        local_init(&info);
+        EXPECT_TRUE(local_init(&info) == CRT_SUCCESS);
     });
 }
 
 void
 crt_ut::test_local_fini_invalid_arg()
 {
-    local_fini(0);
+    EXPECT_TRUE(local_fini(0) == CRT_FAILURE);
 }
 
 void
@@ -168,7 +195,7 @@ crt_ut::test_local_fini_invalid_addr()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        local_fini(&info);
+        EXPECT_TRUE(local_fini(&info) == CRT_SUCCESS);
     });
 }
 
@@ -189,7 +216,7 @@ crt_ut::test_local_fini_invalid_size()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        local_fini(&info);
+        EXPECT_TRUE(local_fini(&info) == CRT_SUCCESS);
     });
 }
 
@@ -211,7 +238,7 @@ crt_ut::test_local_fini_valid_stop_at_size()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        local_fini(&info);
+        EXPECT_TRUE(local_fini(&info) == CRT_SUCCESS);
     });
 }
 
@@ -233,6 +260,6 @@ crt_ut::test_local_fini_valid_stop_at_null()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        local_fini(&info);
+        EXPECT_TRUE(local_fini(&info) == CRT_SUCCESS);
     });
 }
