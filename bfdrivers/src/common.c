@@ -91,7 +91,7 @@ resolve_symbol(const char *name, void **sym, struct module_t *module)
         return BF_ERROR_NO_MODULES_ADDED;
 
     str.buf = name;
-    str.len = symbol_length(name);
+    str.len = (bfelf64_sword)symbol_length(name);
 
     if (module == 0)
     {
@@ -99,7 +99,7 @@ resolve_symbol(const char *name, void **sym, struct module_t *module)
         if (ret != BFELF_SUCCESS)
         {
             ALERT("%s could not be found: %" PRId64 " - %s\n", name, ret,
-                  bfelf_error(ret));
+                  bfelf_error((bfelf64_sword)ret));
             return ret;
         }
     }
@@ -109,7 +109,7 @@ resolve_symbol(const char *name, void **sym, struct module_t *module)
         if (ret != BFELF_SUCCESS)
         {
             ALERT("%s could not be found: %" PRId64 " - %s\n", name, ret,
-                  bfelf_error(ret));
+                  bfelf_error((bfelf64_sword)ret));
             return ret;
         }
     }
@@ -383,7 +383,7 @@ common_add_module(char *file, int64_t fsize)
     if (ret != BFELF_SUCCESS)
     {
         ALERT("add_module: failed to initialize elf file: %" PRId64 " - %s\n",
-              ret, bfelf_error(ret));
+              ret, bfelf_error((bfelf64_sword)ret));
         return ret;
     }
 
@@ -458,7 +458,7 @@ common_load_vmm(void)
         if (ret != BFELF_SUCCESS)
         {
             ALERT("load_vmm: failed to add elf file to the elf loader: "
-                  "%" PRId64 " - %s\n", ret, bfelf_error(ret));
+                  "%" PRId64 " - %s\n", ret, bfelf_error((bfelf64_sword)ret));
             goto failure;
         }
     }
@@ -467,7 +467,7 @@ common_load_vmm(void)
     if (ret != BFELF_SUCCESS)
     {
         ALERT("load_vmm: failed to relocate the elf loader: %" PRId64 " - %s\n",
-              ret, bfelf_error(ret));
+              ret, bfelf_error((bfelf64_sword)ret));
         goto failure;
     }
 
@@ -603,9 +603,15 @@ common_start_vmm(void)
         return BF_ERROR_VMM_INVALID_STATE;
     }
 
+	uint64_t caller_affinity = 0;
+
     for (g_num_cpus_started = 0; g_num_cpus_started < platform_num_cpus(); g_num_cpus_started++)
     {
         ret = platform_set_affinity(g_num_cpus_started);
+		
+		if (g_num_cpus_started == 0)
+			caller_affinity = ret;
+
         if (ret != BFELF_SUCCESS)
         {
             ALERT("start_vmm: failed to set affinity: %" PRId64 "\n", ret);
@@ -630,7 +636,10 @@ common_start_vmm(void)
     }
 
     g_vmm_status = VMM_RUNNING;
-    return BF_SUCCESS;
+	
+	platform_restore_affinity(caller_affinity);
+    
+	return BF_SUCCESS;
 
 failure:
 
