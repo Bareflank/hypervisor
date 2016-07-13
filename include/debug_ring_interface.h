@@ -23,7 +23,7 @@
 #ifndef DEBUG_RING_INTERFACE_H
 #define DEBUG_RING_INTERFACE_H
 
-#ifndef KERNEL
+#if !defined(KERNEL) && !defined(_WIN32)
 #include <stdint.h>
 #else
 #include <types.h>
