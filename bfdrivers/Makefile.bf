@@ -23,20 +23,22 @@
 # Subdirs
 ################################################################################
 
-SUBDIRS += dummy_add_md_failure
-SUBDIRS += dummy_add_md_success
-SUBDIRS += dummy_get_drr_failure
-SUBDIRS += dummy_get_drr_success
-SUBDIRS += dummy_init_vmm_failure
-SUBDIRS += dummy_init_vmm_success
-SUBDIRS += dummy_misc
-SUBDIRS += dummy_start_vmm_failure
-SUBDIRS += dummy_start_vmm_success
-SUBDIRS += dummy_stop_vmm_failure
-SUBDIRS += dummy_stop_vmm_success
-SUBDIRS += src
-SUBDIRS += bin
-SUBDIRS += test
+ifeq ($(shell uname -s), Linux)
+    SUBDIRS += dummy_add_md_failure
+    SUBDIRS += dummy_add_md_success
+    SUBDIRS += dummy_get_drr_failure
+    SUBDIRS += dummy_get_drr_success
+    SUBDIRS += dummy_init_vmm_failure
+    SUBDIRS += dummy_init_vmm_success
+    SUBDIRS += dummy_misc
+    SUBDIRS += dummy_start_vmm_failure
+    SUBDIRS += dummy_start_vmm_success
+    SUBDIRS += dummy_stop_vmm_failure
+    SUBDIRS += dummy_stop_vmm_success
+    SUBDIRS += src
+    SUBDIRS += bin
+    SUBDIRS += test
+endif
 
 ################################################################################
 # Common
