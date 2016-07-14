@@ -129,6 +129,8 @@ protected:
 
 protected:
 
+    virtual void filter_unsupported(uint64_t msr, uint64_t &ctrl);
+
     virtual void dump_vmcs();
 
     virtual void print_execution_controls();

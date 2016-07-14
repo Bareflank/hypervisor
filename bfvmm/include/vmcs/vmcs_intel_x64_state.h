@@ -104,6 +104,7 @@ public:
     virtual uint64_t ia32_debugctl_msr() const { return 0; }
     virtual uint64_t ia32_pat_msr() const { return 0; }
     virtual uint64_t ia32_efer_msr() const { return 0; }
+    virtual uint64_t ia32_perf_global_ctrl_msr() const { return 0; }
     virtual uint64_t ia32_sysenter_cs_msr() const { return 0; }
     virtual uint64_t ia32_sysenter_esp_msr() const { return 0; }
     virtual uint64_t ia32_sysenter_eip_msr() const { return 0; }

@@ -23,6 +23,7 @@
 #define IOCTL_PRIVATE_H
 
 #include <ioctl.h>
+#include <windows.h>
 
 class ioctl_private : public ioctl_private_base
 {
@@ -31,8 +32,7 @@ public:
     virtual ~ioctl_private();
 
     virtual void open();
-    virtual void call_ioctl_add_module_length(int64_t len);
-    virtual void call_ioctl_add_module(const char *data);
+    virtual void call_ioctl_add_module(const char *data, int64_t len);
     virtual void call_ioctl_load_vmm();
     virtual void call_ioctl_unload_vmm();
     virtual void call_ioctl_start_vmm();
@@ -41,7 +41,7 @@ public:
     virtual void call_ioctl_vmm_status(int64_t *status);
 
 private:
-    int64_t fd;
+    HANDLE fd;
 };
 
 #endif

@@ -364,7 +364,7 @@ exit_handler_intel_x64::handle_hlt()
 void
 exit_handler_intel_x64::handle_invd()
 {
-    m_intrinsics->invd();
+    m_intrinsics->wbinvd();
     advance_rip();
 }
 

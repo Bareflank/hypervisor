@@ -40,7 +40,8 @@ platform_alloc_rw(int64_t len)
 
     addr = ExAllocatePoolWithTag(NonPagedPool, len, BF_TAG);
 
-    if (addr) RtlZeroMemory(addr, len);
+    if (addr == NULL)
+        ALERT("platform_alloc_rw: failed to ExAllocatePoolWithTag mem: %lld\n", len);
 
     return addr;
 }
@@ -48,30 +49,20 @@ platform_alloc_rw(int64_t len)
 void *
 platform_alloc_rwe(int64_t len)
 {
-    void *addr = NULL, *addr_remap = NULL;
+    void *addr = NULL;
 
     if (len == 0)
     {
-        ALERT("platform_alloc_exec: invalid length\n");
+        ALERT("platform_alloc: invalid length\n");
         return addr;
     }
 
-    addr = MmAllocateNonCachedMemory(len);
+    addr = ExAllocatePoolWithTag(NonPagedPoolExecute, len, BF_TAG);
 
-    PMDL mdl = IoAllocateMdl(addr, (ULONG)len, FALSE, FALSE, NULL);
+    if (addr == NULL)
+        ALERT("platform_alloc_rw: failed to ExAllocatePoolWithTag mem: %lld\n", len);
 
-    MmBuildMdlForNonPagedPool(mdl);
-
-    MmProbeAndLockPages(mdl, KernelMode, IoWriteAccess);
-
-    addr_remap = MmMapLockedPagesSpecifyCache(mdl, KernelMode, MmNonCached, addr, FALSE, 0);
-
-    DEBUG("%d\r\n", MmProtectMdlSystemAddress(mdl, PAGE_EXECUTE_READWRITE));
-
-    if (addr_remap == NULL)
-        ALERT("platform_alloc: failed to ExAllocatePoolWithTag mem: %lld\n", len);
-
-    return addr_remap;
+    return addr;
 }
 
 void *
@@ -83,12 +74,13 @@ platform_virt_to_phys(void *virt)
 }
 
 void
-platform_free_rw(void *addr, int64_t size)
+platform_free_rw(void *addr, int64_t len)
 {
-    (void)size;
+    (void) len;
+
     if (addr == NULL)
     {
-        ALERT("platform_free: invalid address %p\n", addr);
+        ALERT("platform_free_rw: invalid address %p\n", addr);
         return;
     }
 
@@ -98,13 +90,15 @@ platform_free_rw(void *addr, int64_t size)
 void
 platform_free_rwe(void *addr, int64_t len)
 {
+    (void) len;
+
     if (addr == NULL)
     {
-        ALERT("platform_free_exec: invalid address %p\n", addr);
+        ALERT("platform_free_rw: invalid address %p\n", addr);
         return;
     }
 
-    MmFreeNonCachedMemory(addr, len);
+    ExFreePoolWithTag(addr, BF_TAG);
 }
 
 void
@@ -141,7 +135,6 @@ int64_t
 platform_num_cpus()
 {
     KAFFINITY k_affin;
-
     return (int64_t)KeQueryActiveProcessorCount(&k_affin);
 }
 

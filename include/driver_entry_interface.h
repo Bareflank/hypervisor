@@ -183,95 +183,94 @@ extern "C" {
 /* Windows Interfaces                                                         */
 /* -------------------------------------------------------------------------- */
 
-#ifdef _WIN32
+#if defined(_WIN32) || defined(__CYGWIN__)
 
 #ifdef KERNEL
 #include <ntddk.h>
 #else
 #include <windows.h>
 #include <initguid.h>
-#include <ntddstor.h>
 #endif
 
 DEFINE_GUID(GUID_DEVINTERFACE_bareflank,
             0x1d9c9218, 0x3c88, 0x4b81, 0x8e, 0x81, 0xb4, 0x62, 0x2a, 0x4d, 0xcb, 0x44);
 
 /**
- * Add Module Length
-*
-* This IOCTL tells the driver entry point what the size of the module to
-* be loaded will be. Note that this cannot be called while the vmm is running.
-*
-* @param arg length of the module to be added in bytes
-*/
+ * Add Module Length (*** DEPRECATED ***)
+ *
+ * This IOCTL tells the driver entry point what the size of the module to
+ * be loaded will be. Note that this cannot be called while the vmm is running.
+ *
+ * @param arg length of the module to be added in bytes
+ */
 #define IOCTL_ADD_MODULE_LENGTH CTL_CODE(BAREFLANK_DEVICETYPE, 0x801, METHOD_BUFFERED, FILE_WRITE_DATA)
 
 /**
-* Add Module
-*
-* This IOCTL instructs the driver entry point to add a module. Note that this
-* cannot be called while the vmm is running. Prior to calling this IOCTL,
-* you must call IOCTL_ADD_MODULE_LENGTH, to inform the driver entry point what
-* the size of the module is.
-*
-* @param arg character buffer containing the module to add
-* @return
-*/
+ * Add Module
+ *
+ * This IOCTL instructs the driver entry point to add a module. Note that this
+ * cannot be called while the vmm is running. Prior to calling this IOCTL,
+ * you must call IOCTL_ADD_MODULE_LENGTH, to inform the driver entry point what
+ * the size of the module is.
+ *
+ * @param arg character buffer containing the module to add
+ * @return
+ */
 #define IOCTL_ADD_MODULE CTL_CODE(BAREFLANK_DEVICETYPE, 0x901, METHOD_IN_DIRECT, FILE_WRITE_DATA)
 
 /**
-* Load VMM
-*
-* This IOCTL tells the driver entry to load the virtual machine monitor. Note
-* that the VMM must be in an unloaded state, and all of the modules must be
-* added using IOCTL_ADD_MODULE
-*/
+ * Load VMM
+ *
+ * This IOCTL tells the driver entry to load the virtual machine monitor. Note
+ * that the VMM must be in an unloaded state, and all of the modules must be
+ * added using IOCTL_ADD_MODULE
+ */
 #define IOCTL_LOAD_VMM CTL_CODE(BAREFLANK_DEVICETYPE, 0xA01, METHOD_BUFFERED, FILE_WRITE_DATA)
 
 /**
-* Unload VMM
-*
-* This IOCTL tells the driver entry to unload the virtual machine monitor.
-* Note that the VMM must be in a loaded state, but not running. This IOCTL
-* will unload the VMM, and remove any modules that were added via
-* IOCTL_ADD_MODULE. If the VMM is to be loaded again, the modules must be
-* added first.
-*/
+ * Unload VMM
+ *
+ * This IOCTL tells the driver entry to unload the virtual machine monitor.
+ * Note that the VMM must be in a loaded state, but not running. This IOCTL
+ * will unload the VMM, and remove any modules that were added via
+ * IOCTL_ADD_MODULE. If the VMM is to be loaded again, the modules must be
+ * added first.
+ */
 #define IOCTL_UNLOAD_VMM CTL_CODE(BAREFLANK_DEVICETYPE, 0xB00, METHOD_BUFFERED, FILE_WRITE_DATA)
 
 /**
-* Start VMM
-*
-* This IOCTL tells the driver entry to start the virtual machine monitor. Note
-* that this cannot be called while the vmm is running. All of the modules
-* should have already been loaded prior to calling this IOCTL using
-* IOCTL_ADD_MODULE
-*/
+ * Start VMM
+ *
+ * This IOCTL tells the driver entry to start the virtual machine monitor. Note
+ * that this cannot be called while the vmm is running. All of the modules
+ * should have already been loaded prior to calling this IOCTL using
+ * IOCTL_ADD_MODULE
+ */
 #define IOCTL_START_VMM CTL_CODE(BAREFLANK_DEVICETYPE, 0xC00, METHOD_BUFFERED, FILE_WRITE_DATA)
 
 /**
-* Stop VMM
-*
-* This IOCTL tells the driver entry to stop the virtual machine monitor. Note
-* that this cannot be called while the vmm is not running.
-*/
+ * Stop VMM
+ *
+ * This IOCTL tells the driver entry to stop the virtual machine monitor. Note
+ * that this cannot be called while the vmm is not running.
+ */
 #define IOCTL_STOP_VMM CTL_CODE(BAREFLANK_DEVICETYPE, 0xD00, METHOD_BUFFERED, FILE_WRITE_DATA)
 
 /**
-* Dump VMM
-*
-* This IOCTL tells the driver entry to dump the contents of the shared debug
-* ring withing the VMM. Note that the VMM must be loaded prior to calling
-* this IOCTL using IOCTL_LOAD_VMM
-*/
+ * Dump VMM
+ *
+ * This IOCTL tells the driver entry to dump the contents of the shared debug
+ * ring withing the VMM. Note that the VMM must be loaded prior to calling
+ * this IOCTL using IOCTL_LOAD_VMM
+ */
 #define IOCTL_DUMP_VMM CTL_CODE(BAREFLANK_DEVICETYPE, 0xE00, METHOD_OUT_DIRECT, FILE_READ_DATA)
 
 /**
-* VMM Status
-*
-* This queries the driver for it's current state. This can be called at any
-* time.
-*/
+ * VMM Status
+ *
+ * This queries the driver for it's current state. This can be called at any
+ * time.
+ */
 #define IOCTL_VMM_STATUS CTL_CODE(BAREFLANK_DEVICETYPE, 0xF00, METHOD_BUFFERED, FILE_READ_DATA)
 
 /**

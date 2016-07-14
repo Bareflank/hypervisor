@@ -138,3 +138,10 @@ platform_set_affinity(int64_t affinity)
     (void) affinity;
     return 0;
 }
+
+void
+platform_restore_affinity(int64_t affinity)
+{
+    (void) affinity;
+}
+

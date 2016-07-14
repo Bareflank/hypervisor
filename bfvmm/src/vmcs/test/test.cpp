@@ -50,17 +50,17 @@ vmcs_ut::list()
     this->test_launch_success();
 
     // VMCS Control checks
-    this->test_check_control_pin_based_ctls_reserved_properly_set_success();
-    this->test_check_control_pin_based_ctls_reserved_properly_set_fail_lower();
-    this->test_check_control_pin_based_ctls_reserved_properly_set_fail_upper();
+    // this->test_check_control_pin_based_ctls_reserved_properly_set_success();
+    // this->test_check_control_pin_based_ctls_reserved_properly_set_fail_lower();
+    // this->test_check_control_pin_based_ctls_reserved_properly_set_fail_upper();
 
-    this->test_check_control_proc_based_ctls_reserved_properly_set_success();
-    this->test_check_control_proc_based_ctls_reserved_properly_set_fail_lower();
-    this->test_check_control_proc_based_ctls_reserved_properly_set_fail_upper();
+    // this->test_check_control_proc_based_ctls_reserved_properly_set_success();
+    // this->test_check_control_proc_based_ctls_reserved_properly_set_fail_lower();
+    // this->test_check_control_proc_based_ctls_reserved_properly_set_fail_upper();
 
-    this->test_check_control_proc_based_ctls2_reserved_properly_set_success();
-    this->test_check_control_proc_based_ctls2_reserved_properly_set_fail_lower();
-    this->test_check_control_proc_based_ctls2_reserved_properly_set_fail_upper();
+    // this->test_check_control_proc_based_ctls2_reserved_properly_set_success();
+    // this->test_check_control_proc_based_ctls2_reserved_properly_set_fail_lower();
+    // this->test_check_control_proc_based_ctls2_reserved_properly_set_fail_upper();
 
     this->test_check_control_cr3_count_less_then_4_fail();
     this->test_check_control_cr3_count_less_then_4_success();

@@ -19,130 +19,178 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-// #include <exception.h>
+#include <exception.h>
 #include <ioctl_private.h>
-// #include <driver_entry_interface.h>
+#include <commit_or_rollback.h>
+#include <driver_entry_interface.h>
 
-// #include <fcntl.h>
-// #include <unistd.h>
-// #include <sys/ioctl.h>
+#include <SetupAPI.h>
 
 // -----------------------------------------------------------------------------
 // Unit Test Seems
 // -----------------------------------------------------------------------------
 
-// int64_t
-// bf_ioctl_open()
-// {
-//     return open("/dev/bareflank", O_RDWR);
-// }
+HANDLE
+bf_ioctl_open()
+{
+    HANDLE hDevInfo;
+    SP_INTERFACE_DEVICE_DETAIL_DATA *deviceDetailData = nullptr;
 
-// int64_t
-// bf_send_ioctl(int64_t fd, unsigned long request)
-// {
-//     return ioctl(fd, request);
-// }
+    SP_DEVINFO_DATA devInfo;
+    devInfo.cbSize = sizeof(SP_DEVINFO_DATA);
 
-// int64_t
-// bf_read_ioctl(int64_t fd, unsigned long request, void *data)
-// {
-//     return ioctl(fd, request, data);
-// }
+    SP_INTERFACE_DEVICE_DATA ifInfo;
+    ifInfo.cbSize = sizeof(SP_INTERFACE_DEVICE_DATA);
 
-// int64_t
-// bf_write_ioctl(int64_t fd, unsigned long request, const void *data)
-// {
-//     return ioctl(fd, request, data);
-// }
+    hDevInfo = SetupDiGetClassDevs(&GUID_DEVINTERFACE_bareflank, 0, 0, DIGCF_DEVICEINTERFACE | DIGCF_PRESENT);
+    if (hDevInfo == INVALID_HANDLE_VALUE)
+        return hDevInfo;
+
+    if (SetupDiEnumDeviceInfo(hDevInfo, 0, &devInfo) == false)
+        return INVALID_HANDLE_VALUE;
+
+    if (SetupDiEnumDeviceInterfaces(hDevInfo, &devInfo, &(GUID_DEVINTERFACE_bareflank), 0, &ifInfo) == false)
+        return INVALID_HANDLE_VALUE;
+
+    DWORD requiredSize = 0;
+
+    if (SetupDiGetDeviceInterfaceDetail(hDevInfo, &ifInfo, NULL, 0, &requiredSize, NULL) == true)
+        return INVALID_HANDLE_VALUE;
+
+    if (GetLastError() != ERROR_INSUFFICIENT_BUFFER)
+        return INVALID_HANDLE_VALUE;
+
+    deviceDetailData = (SP_INTERFACE_DEVICE_DETAIL_DATA *)malloc(requiredSize);
+
+    if (deviceDetailData == nullptr)
+        return INVALID_HANDLE_VALUE;
+
+    auto cor1 = commit_or_rollback([&]
+    { free(deviceDetailData); });
+
+    deviceDetailData->cbSize = sizeof(SP_INTERFACE_DEVICE_DETAIL_DATA);
+
+    if (SetupDiGetDeviceInterfaceDetail(hDevInfo, &ifInfo, deviceDetailData, requiredSize, NULL, NULL) == false)
+        return INVALID_HANDLE_VALUE;
+
+    return CreateFile(deviceDetailData->DevicePath,
+                      GENERIC_READ | GENERIC_WRITE,
+                      0,
+                      NULL,
+                      CREATE_ALWAYS,
+                      FILE_ATTRIBUTE_NORMAL,
+                      NULL);
+}
+
+int64_t
+bf_send_ioctl(HANDLE fd, unsigned long request)
+{
+    if (!DeviceIoControl(fd, request, NULL, 0, NULL, 0, NULL, NULL))
+        return BF_IOCTL_FAILURE;
+
+    return 0;
+}
+
+int64_t
+bf_read_ioctl(HANDLE fd, unsigned long request, void *data, size_t size)
+{
+    if (!DeviceIoControl(fd, request, NULL, 0, data, size, NULL, NULL))
+        return BF_IOCTL_FAILURE;
+
+    return 0;
+}
+
+int64_t
+bf_write_ioctl(HANDLE fd, unsigned long request, const void *data, size_t size)
+{
+    if (!DeviceIoControl(fd, request, (LPVOID)data, size, NULL, 0, NULL, NULL))
+        return BF_IOCTL_FAILURE;
+
+    return 0;
+}
 
 // -----------------------------------------------------------------------------
 // Implementation
 // -----------------------------------------------------------------------------
 
-ioctl_private::ioctl_private()
+ioctl_private::ioctl_private() :
+    fd(INVALID_HANDLE_VALUE)
 {
 }
 
 ioctl_private::~ioctl_private()
 {
-    // if (fd >= 0)
-    //     close(fd);
+    if (fd != INVALID_HANDLE_VALUE)
+        CloseHandle(fd);
 }
 
 void
 ioctl_private::open()
 {
-    // if ((fd = bf_ioctl_open()) < 0)
-    //     throw driver_inaccessible();
+    if ((fd = bf_ioctl_open()) == INVALID_HANDLE_VALUE)
+        throw driver_inaccessible();
 }
 
 void
-ioctl_private::call_ioctl_add_module_length(int64_t len)
+ioctl_private::call_ioctl_add_module(const char *data, int64_t len)
 {
-    // if (len <= 0)
-    //     throw std::invalid_argument("len <= 0");
+    if (data == 0)
+        throw std::invalid_argument("data == NULL");
 
-    // if (bf_write_ioctl(fd, IOCTL_ADD_MODULE_LENGTH, &len) < 0)
-    //     throw ioctl_failed(IOCTL_ADD_MODULE_LENGTH);
-}
+    if (len == 0)
+        throw std::invalid_argument("len == 0");
 
-void
-ioctl_private::call_ioctl_add_module(const char *data)
-{
-    // if (data == 0)
-    //     throw std::invalid_argument("data == NULL");
-
-    // if (bf_write_ioctl(fd, IOCTL_ADD_MODULE, data) < 0)
-    //     throw ioctl_failed(IOCTL_ADD_MODULE);
+    if (bf_write_ioctl(fd, IOCTL_ADD_MODULE, data, len) < 0)
+        throw ioctl_failed(IOCTL_ADD_MODULE);
 }
 
 void
 ioctl_private::call_ioctl_load_vmm()
 {
-    // if (bf_send_ioctl(fd, IOCTL_LOAD_VMM) < 0)
-    //     throw ioctl_failed(IOCTL_LOAD_VMM);
+    if (bf_send_ioctl(fd, IOCTL_LOAD_VMM) < 0)
+        throw ioctl_failed(IOCTL_LOAD_VMM);
 }
 
 void
 ioctl_private::call_ioctl_unload_vmm()
 {
-    // if (bf_send_ioctl(fd, IOCTL_UNLOAD_VMM) < 0)
-    //     throw ioctl_failed(IOCTL_UNLOAD_VMM);
+    if (bf_send_ioctl(fd, IOCTL_UNLOAD_VMM) < 0)
+        throw ioctl_failed(IOCTL_UNLOAD_VMM);
 }
 
 void
 ioctl_private::call_ioctl_start_vmm()
 {
-    // if (bf_send_ioctl(fd, IOCTL_START_VMM) < 0)
-    //     throw ioctl_failed(IOCTL_START_VMM);
+    if (bf_send_ioctl(fd, IOCTL_START_VMM) < 0)
+        throw ioctl_failed(IOCTL_START_VMM);
 }
 
 void
 ioctl_private::call_ioctl_stop_vmm()
 {
-    // if (bf_send_ioctl(fd, IOCTL_STOP_VMM) < 0)
-    //     throw ioctl_failed(IOCTL_STOP_VMM);
+    if (bf_send_ioctl(fd, IOCTL_STOP_VMM) < 0)
+        throw ioctl_failed(IOCTL_STOP_VMM);
 }
 
 void
 ioctl_private::call_ioctl_dump_vmm(debug_ring_resources_t *drr, uint64_t vcpuid)
 {
-    // if (drr == 0)
-    //     throw std::invalid_argument("drr == NULL");
+    if (drr == 0)
+        throw std::invalid_argument("drr == NULL");
 
-    // if (bf_read_ioctl(fd, IOCTL_SET_VCPUID, &vcpuid) < 0)
-    //     throw ioctl_failed(IOCTL_SET_VCPUID);
+    if (bf_write_ioctl(fd, IOCTL_SET_VCPUID, &vcpuid, sizeof(vcpuid)) < 0)
+        throw ioctl_failed(IOCTL_SET_VCPUID);
 
-    // if (bf_read_ioctl(fd, IOCTL_DUMP_VMM, drr) < 0)
-    //     throw ioctl_failed(IOCTL_DUMP_VMM);
+    if (bf_read_ioctl(fd, IOCTL_DUMP_VMM, drr, sizeof(*drr)) < 0)
+        throw ioctl_failed(IOCTL_DUMP_VMM);
 }
 
 void
 ioctl_private::call_ioctl_vmm_status(int64_t *status)
 {
-    // if (status == 0)
-    //     throw std::invalid_argument("status == NULL");
+    if (status == 0)
+        throw std::invalid_argument("status == NULL");
 
-    // if (bf_read_ioctl(fd, IOCTL_VMM_STATUS, status) < 0)
-    //     throw ioctl_failed(IOCTL_VMM_STATUS);
+    if (bf_read_ioctl(fd, IOCTL_VMM_STATUS, status, sizeof(*status)) < 0)
+        throw ioctl_failed(IOCTL_VMM_STATUS);
 }

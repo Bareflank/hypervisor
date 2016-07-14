@@ -46,10 +46,7 @@ ioctl::call_ioctl_add_module(const std::string &str)
     auto d = std::dynamic_pointer_cast<ioctl_private>(m_d);
 
     if (d)
-    {
-        d->call_ioctl_add_module_length(str.length());
-        d->call_ioctl_add_module(str.c_str());
-    }
+        d->call_ioctl_add_module(str.c_str(), str.length());
 }
 
 void

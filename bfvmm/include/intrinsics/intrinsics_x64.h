@@ -38,6 +38,7 @@ void __halt(void);
 void __stop(void);
 
 void __invd(void);
+void __wbinvd(void);
 
 uint32_t __cpuid_eax(uint32_t val);
 uint32_t __cpuid_ebx(uint32_t val);
@@ -142,6 +143,9 @@ public:
 
     virtual void invd() const noexcept
     { __invd(); }
+
+    virtual void wbinvd() const noexcept
+    { __wbinvd(); }
 
     virtual uint32_t cpuid_eax(uint32_t val) const noexcept
     { return __cpuid_eax(val); }
@@ -374,6 +378,7 @@ public:
 
 // 64-ia-32-architectures-software-developer-manual, section 35.1
 // IA-32 Architectural MSRs
+#define IA32_PERF_GLOBAL_CTRL_MSR                                   0x0000038F
 #define IA32_DEBUGCTL_MSR                                           0x000001D9
 #define IA32_SYSENTER_CS_MSR                                        0x00000174
 #define IA32_SYSENTER_ESP_MSR                                       0x00000175

@@ -59,7 +59,8 @@ bf_write_ioctl(int64_t fd, unsigned long request, const void *data)
 // Implementation
 // -----------------------------------------------------------------------------
 
-ioctl_private::ioctl_private()
+ioctl_private::ioctl_private() :
+    fd(0)
 {
 }
 
@@ -130,7 +131,7 @@ ioctl_private::call_ioctl_dump_vmm(debug_ring_resources_t *drr, uint64_t vcpuid)
     if (drr == 0)
         throw std::invalid_argument("drr == NULL");
 
-    if (bf_read_ioctl(fd, IOCTL_SET_VCPUID, &vcpuid) < 0)
+    if (bf_write_ioctl(fd, IOCTL_SET_VCPUID, &vcpuid) < 0)
         throw ioctl_failed(IOCTL_SET_VCPUID);
 
     if (bf_read_ioctl(fd, IOCTL_DUMP_VMM, drr) < 0)

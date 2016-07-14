@@ -22,6 +22,7 @@
 global __halt:function
 global __stop:function
 global __invd:function
+global __wbinvd:function
 global __cpuid_eax:function
 global __cpuid_ebx:function
 global __cpuid_ecx:function
@@ -83,6 +84,11 @@ __stop:
 ; void __invd(void)
 __invd:
     invd
+    ret
+
+; void __wbinvd(void)
+__wbinvd:
+    wbinvd
     ret
 
 ; uint32_t cpuid_eax(uint32_t val)
