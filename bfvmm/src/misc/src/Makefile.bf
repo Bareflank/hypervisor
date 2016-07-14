@@ -25,12 +25,7 @@
 
 TARGET_NAME:=misc
 TARGET_TYPE:=lib
-
-ifeq ($(shell uname -s), Linux)
-    TARGET_COMPILER:=both
-else
-    TARGET_COMPILER:=cross
-endif
+TARGET_COMPILER:=cross
 
 ################################################################################
 # Compiler Flags
