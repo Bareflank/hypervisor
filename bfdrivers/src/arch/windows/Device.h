@@ -39,6 +39,6 @@ WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(DEVICE_CONTEXT, DeviceGetContext)
 NTSTATUS
 bareflankCreateDevice(
     _Inout_ PWDFDEVICE_INIT DeviceInit
-    );
+);
 
 EXTERN_C_END

@@ -603,14 +603,14 @@ common_start_vmm(void)
         return BF_ERROR_VMM_INVALID_STATE;
     }
 
-	uint64_t caller_affinity = 0;
+    uint64_t caller_affinity = 0;
 
     for (g_num_cpus_started = 0; g_num_cpus_started < platform_num_cpus(); g_num_cpus_started++)
     {
         ret = platform_set_affinity(g_num_cpus_started);
-		
-		if (g_num_cpus_started == 0)
-			caller_affinity = ret;
+
+        if (g_num_cpus_started == 0)
+            caller_affinity = ret;
 
         if (ret != BFELF_SUCCESS)
         {
@@ -636,10 +636,10 @@ common_start_vmm(void)
     }
 
     g_vmm_status = VMM_RUNNING;
-	
-	platform_restore_affinity(caller_affinity);
-    
-	return BF_SUCCESS;
+
+    platform_restore_affinity(caller_affinity);
+
+    return BF_SUCCESS;
 
 failure:
 
