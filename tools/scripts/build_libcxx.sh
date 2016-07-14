@@ -46,6 +46,7 @@ export CXXFLAGS="-fno-use-cxa-atexit -fno-threadsafe-statics $CFLAGS"
 export BAREFLANK_WRAPPER_IS_LIBCXX="true"
 
 cmake $BUILD_ABS/source_libcxx/ \
+    -DCMAKE_SYSTEM_NAME=Linux \
     -DLLVM_PATH=$BUILD_ABS/source_llvm \
     -DLIBCXX_CXX_ABI=libcxxabi \
     -DLIBCXX_CXX_ABI_INCLUDE_PATHS=$BUILD_ABS/source_libcxxabi/include \

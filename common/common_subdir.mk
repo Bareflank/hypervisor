@@ -92,7 +92,9 @@ Makefile: $(HYPER_REL)/Makefile.bf
 
 all:
 	@$(MAKE) --no-print-directory build_src
+ifeq ($(shell uname -s), Linux)
 	@$(MAKE) --no-print-directory build_tests
+endif
 
 build_src:
 	@for dir in $(BUILD_SRC_DIRS); do \
@@ -110,7 +112,9 @@ build_src:
 		echo -e $(CO)"<--" $(CS)$(CURRENT_DIR)/$$dir$(CE); \
 	done
 
+ifeq ($(shell uname -s), Linux)
 build_tests:
+
 	@for dir in $(BUILD_TST_DIRS); do \
 		dir=`basename $$dir`; \
 		echo -e $(CI)"-->" $(CS)$(CURRENT_DIR)/$$dir$(CE); \
@@ -125,7 +129,9 @@ build_tests:
 		$(MAKE) --no-print-directory -C $$dir build_tests || exit 1; \
 		echo -e $(CO)"<--" $(CS)$(CURRENT_DIR)/$$dir$(CE); \
 	done
+endif
 
+ifeq ($(shell uname -s), Linux)
 run_tests: force
 	@for dir in $(RUN_DIRS); do \
 		dir=`basename $$dir`; \
@@ -141,6 +147,7 @@ run_tests: force
 		$(MAKE) --no-print-directory -C $$dir run_tests || exit 1; \
 		echo -e $(CO)"<--" $(CS)$(CURRENT_DIR)/$$dir$(CE); \
 	done
+endif
 
 clean:
 	@for dir in $(CLEAN_DIRS); do \
@@ -174,6 +181,7 @@ clean_src:
 		echo -e $(CO)"<--" $(CS)$(CURRENT_DIR)/$$dir$(CE); \
 	done
 
+ifeq ($(shell uname -s), Linux)
 clean_tests:
 	@for dir in $(BUILD_TST_DIRS); do \
 		dir=`basename $$dir`; \
@@ -189,5 +197,6 @@ clean_tests:
 		$(MAKE) --no-print-directory -C $$dir clean_tests; \
 		echo -e $(CO)"<--" $(CS)$(CURRENT_DIR)/$$dir$(CE); \
 	done
+endif
 
 force:;

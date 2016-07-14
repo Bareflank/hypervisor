@@ -25,7 +25,12 @@
 
 TARGET_NAME:=vmcs
 TARGET_TYPE:=lib
-TARGET_COMPILER:=both
+
+ifeq ($(shell uname -s), Linux)
+    TARGET_COMPILER:=both
+else
+    TARGET_COMPILER:=cross
+endif
 
 ################################################################################
 # Compiler Flags

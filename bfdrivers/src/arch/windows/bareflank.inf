@@ -36,7 +36,7 @@ bareflank.sys  = 1,,
 %ManufacturerName%=Standard,NT$ARCH$
 
 [Standard.NT$ARCH$]
-%bareflank.DeviceDesc%=bareflank_Device, Root\bareflank ; TODO: edit hw-id
+%bareflank.DeviceDesc%=bareflank_Device, ROOT\bareflank ; TODO: edit hw-id
 
 [bareflank_Device.NT]
 CopyFiles=Drivers_Dir
@@ -83,8 +83,8 @@ KmdfLibraryVersion = $KMDFVERSION$
 
 [Strings]
 SPSVCINST_ASSOCSERVICE= 0x00000002
-ManufacturerName="<Your manufacturer name>" ;TODO: Replace with your manufacturer name
-ClassName="Samples" ; TODO: edit ClassName
-DiskName = "bareflank Installation Disk"
-bareflank.DeviceDesc = "bareflank Device"
-bareflank.SVCDESC = "bareflank Service"
+ManufacturerName="Bareflank Hypervisor" ;TODO: Replace with your manufacturer name
+ClassName="Hypervisors" ; TODO: edit ClassName
+DiskName = "Bareflank Installation Disk"
+bareflank.DeviceDesc = "Bareflank Hypervisor Device"
+bareflank.SVCDESC = "Bareflank Hypervisor Service"

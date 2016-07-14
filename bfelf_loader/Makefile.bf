@@ -23,11 +23,13 @@
 # Subdirs
 ################################################################################
 
-SUBDIRS += dummy_misc
-SUBDIRS += dummy_code
-SUBDIRS += src
-SUBDIRS += bin
-SUBDIRS += test
+ifeq ($(shell uname -s), Linux)
+    SUBDIRS += dummy_misc
+    SUBDIRS += dummy_code
+    SUBDIRS += src
+    SUBDIRS += bin
+    SUBDIRS += test
+endif
 
 ################################################################################
 # Common
