@@ -7,7 +7,7 @@ Module Name:
 Abstract:
 
    This file contains the device entry points and callbacks.
-    
+
 Environment:
 
     Kernel-mode Driver Framework
@@ -26,7 +26,7 @@ Environment:
 NTSTATUS
 bareflankCreateDevice(
     _Inout_ PWDFDEVICE_INIT DeviceInit
-    )
+)
 /*++
 
 Routine Description:
@@ -55,8 +55,9 @@ Return Value:
     WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&deviceAttributes, DEVICE_CONTEXT);
 
     status = WdfDeviceCreate(&DeviceInit, &deviceAttributes, &device);
-	
-    if (NT_SUCCESS(status)) {
+
+    if (NT_SUCCESS(status))
+    {
         //
         // Get a pointer to the device context structure that we just associated
         // with the device object. We define this structure in the device.h
@@ -78,12 +79,13 @@ Return Value:
         // to us.
         //
         status = WdfDeviceCreateDeviceInterface(
-            device,
-            &GUID_DEVINTERFACE_bareflank,
-            NULL // ReferenceString
-            );
+                     device,
+                     &GUID_DEVINTERFACE_bareflank,
+                     NULL // ReferenceString
+                 );
 
-        if (NT_SUCCESS(status)) {
+        if (NT_SUCCESS(status))
+        {
             //
             // Initialize the I/O Package and any Queues
             //

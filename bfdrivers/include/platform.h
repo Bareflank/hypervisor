@@ -137,7 +137,7 @@ platform_set_affinity(int64_t affinity);
 
 /**
  * Restore CPU affinity
- * 
+ *
  * If an OS requires the cores used by the user space thread
  * to match on return from a call into the kernel (e.g. IOCTL),
  * reset the affinity to it's previous state.

@@ -20,47 +20,160 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-echo "Windows is currently not supported"
-exit 1
-
-# ------------------------------------------------------------------------------
-# Silence
-# ------------------------------------------------------------------------------
-
-# This is used by Travic CI to prevent this script from overwhelming it's
-# output. If there is too much output, Travis CI just gives up. The problem is,
-# Travis CI uses output as a means to know that the script has not died. So
-# we supress output here, and then use a script in Travis CI to ping it's
-# watchdog every so often to keep this script alive.
-
-if [ -n "${SILENCE+1}" ]; then
-  exec 1>~/setup-cygwin_stdout.log
-  exec 2>~/setup-cygwin_stderr.log
-fi
-
 # ------------------------------------------------------------------------------
 # Checks
 # ------------------------------------------------------------------------------
 
-if [ ! -d "bfelf_loader" ]; then
-    echo "The 'setup-cygwin.sh' script must be run from the bareflank repo's root directory"
-    echo $PWD
+case $(uname -o) in
+Cygwin)
+    ;;
+*)
+    echo "This script can only be used with: Cygwin"
+    exit 1
+esac
+
+if [[ ! -d "bfelf_loader" ]]; then
+    echo "This script must be run from bareflank root directory"
     exit 1
 fi
 
-if [ ! -f /usr/bin/setup-x86_64.exe ]; then
-    echo "Cygwin not found: /usr/bin/setup-x64.exe"
-    exit
+# ------------------------------------------------------------------------------
+# Help
+# ------------------------------------------------------------------------------
+
+option_help() {
+    echo -e "Usage: setup-ubuntu.sh [OPTION]"
+    echo -e "Sets up the system to compile / use Bareflank"
+    echo -e ""
+    echo -e "       -h, --help                       show this help menu"
+    echo -e "       -l, --local                      setup local cross compilers"
+    echo -e "       -n, --no-configure               skip the configure step"
+    echo -e "       -g, --compiler <dirname>         directory of cross compiler"
+    echo -e "       -o, --out_of_tree <dirname>      setup out of tree build"
+    echo -e ""
+}
+
+# ------------------------------------------------------------------------------
+# Functions
+# ------------------------------------------------------------------------------
+
+install_common_packages() {
+    setup-x86_64.exe -q -P wget
+    setup-x86_64.exe -q -P make
+    setup-x86_64.exe -q -P gcc-core
+    setup-x86_64.exe -q -P gcc-g++
+    setup-x86_64.exe -q -P diffutils
+    setup-x86_64.exe -q -P libgmp-devel
+    setup-x86_64.exe -q -P libmpfr-devel
+    setup-x86_64.exe -q -P libmpc-devel
+    setup-x86_64.exe -q -P flex
+    setup-x86_64.exe -q -P bison
+    setup-x86_64.exe -q -P nasm
+    setup-x86_64.exe -q -P texinfo
+    setup-x86_64.exe -q -P cmake
+    setup-x86_64.exe -q -P unzip
+}
+
+setup_ewdk() {
+    if [[ ! -d /cygdrive/c/ewdk ]]; then
+        wget https://go.microsoft.com/fwlink/p/?LinkID=699461 -O /tmp/ewdk.zip
+        unzip /tmp/ewdk.zip -d /cygdrive/c/ewdk/
+        chown -R $USER:SYSTEM /cygdrive/c/ewdk
+        icacls.exe `cygpath -w /cygdrive/c/ewdk` /reset /T
+        rm -Rf /tmp/ewdk.zip
+    fi
+}
+
+# ------------------------------------------------------------------------------
+# Arguments
+# ------------------------------------------------------------------------------
+
+while [[ $# -ne 0 ]]; do
+
+    if [[ $1 == "-h" ]] || [[ $1 == "--help" ]]; then
+        option_help
+        exit 0
+    fi
+
+    if [[ $1 == "-l" ]] || [[ $1 == "--local_compilers" ]]; then
+        local="true"
+    fi
+
+    if [[ $1 == "-g" ]] || [[ $1 == "--compiler" ]]; then
+        shift
+        compiler="-g $1"
+    fi
+
+    if [[ $1 == "-n" ]] || [[ $1 == "--no-configure" ]]; then
+        noconfigure="true"
+    fi
+
+    if [[ $1 == "-o" ]] || [[ $1 == "--out_of_tree" ]]; then
+        shift
+        out_of_tree="true"
+        build_dir=$1
+        hypervisor_dir=$PWD
+    fi
+
+    shift
+
+done
+
+# ------------------------------------------------------------------------------
+# Setup System
+# ------------------------------------------------------------------------------
+
+case $(uname -r) in
+2.5.*)
+    install_common_packages
+    setup_ewdk
+    ;;
+
+*)
+    echo "This version of Cygwin is not supported"
+    exit 1
+
+esac
+
+# ------------------------------------------------------------------------------
+# Setup Build Environment
+# ------------------------------------------------------------------------------
+
+if [[ ! $local == "true" ]]; then
+    echo "Docker currently not supported. Use -l to setup local compilers"
+    exit 1
+fi
+
+if [[ ! $noconfigure == "true" ]]; then
+    if [[ $out_of_tree == "true" ]]; then
+        mkdir -p $build_dir
+        pushd $build_dir
+        $hypervisor_dir/configure.sh
+        popd
+    else
+        ./configure.sh $compiler
+    fi
+fi
+
+if [[ $local == "true" ]]; then
+    CROSS_COMPILER=gcc_520 ./tools/scripts/create-cross-compiler.sh
 fi
 
 # ------------------------------------------------------------------------------
-# Install Packages
+# Done
 # ------------------------------------------------------------------------------
 
-/usr/bin/setup-x86_64.exe -q -P wget make gcc-g++ diffutils libgmp-devel libmpfr-devel libmpc-devel libisl-devel nasm texinfo
+echo ""
 
-# ------------------------------------------------------------------------------
-# Create Cross Compiler
-# ------------------------------------------------------------------------------
+echo "WARNING: If you are going to use this machine for testing, you must "
+echo "         turn test signing on yourself:"
+echo ""
+echo "bcdedit.exe /set testsigning ON"
+echo ""
 
-./tools/scripts/create-cross-compiler.sh
+if [[ $out_of_tree == "true" ]]; then
+    echo "To build, run:"
+    echo "    cd $build_dir"
+    echo "    make -j<# cores>"
+    echo ""
+fi

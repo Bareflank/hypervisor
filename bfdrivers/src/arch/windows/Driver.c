@@ -30,7 +30,7 @@ NTSTATUS
 DriverEntry(
     _In_ PDRIVER_OBJECT  DriverObject,
     _In_ PUNICODE_STRING RegistryPath
-    )
+)
 /*++
 
 Routine Description:
@@ -64,7 +64,7 @@ Return Value:
     //
     // Initialize WPP Tracing
     //
-    WPP_INIT_TRACING( DriverObject, RegistryPath );
+    WPP_INIT_TRACING(DriverObject, RegistryPath);
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
 
@@ -74,19 +74,20 @@ Return Value:
     //
     WDF_OBJECT_ATTRIBUTES_INIT(&attributes);
     attributes.EvtCleanupCallback = bareflankEvtDriverContextCleanup;
-	
+
     WDF_DRIVER_CONFIG_INIT(&config,
                            bareflankEvtDeviceAdd
-                           );
+                          );
 
     status = WdfDriverCreate(DriverObject,
                              RegistryPath,
                              &attributes,
                              &config,
                              WDF_NO_HANDLE
-                             );
+                            );
 
-    if (!NT_SUCCESS(status)) {
+    if (!NT_SUCCESS(status))
+    {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER, "WdfDriverCreate failed %!STATUS!", status);
         WPP_CLEANUP(DriverObject);
         return status;
@@ -94,14 +95,14 @@ Return Value:
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit");
 
-	return status;
+    return status;
 }
 
 NTSTATUS
 bareflankEvtDeviceAdd(
     _In_    WDFDRIVER       Driver,
     _Inout_ PWDFDEVICE_INIT DeviceInit
-    )
+)
 /*++
 Routine Description:
 
@@ -127,7 +128,7 @@ Return Value:
 
     PAGED_CODE();
 
-	TRACE();
+    TRACE();
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
 
@@ -141,7 +142,7 @@ Return Value:
 VOID
 bareflankEvtDriverContextCleanup(
     _In_ WDFOBJECT DriverObject
-    )
+)
 /*++
 Routine Description:
 
@@ -159,15 +160,15 @@ Return Value:
 {
     UNREFERENCED_PARAMETER(DriverObject);
 
-    PAGED_CODE ();
+    PAGED_CODE();
 
-	TRACE();
+    TRACE();
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
 
     //
     // Stop WPP Tracing
     //
-    WPP_CLEANUP( WdfDriverWdmGetDriverObject( (WDFDRIVER) DriverObject) );
+    WPP_CLEANUP(WdfDriverWdmGetDriverObject((WDFDRIVER) DriverObject));
 
 }

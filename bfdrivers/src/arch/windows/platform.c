@@ -30,7 +30,7 @@
 void *
 platform_alloc_rw(int64_t len)
 {
-	void *addr = NULL;
+    void *addr = NULL;
 
     if (len == 0)
     {
@@ -38,9 +38,9 @@ platform_alloc_rw(int64_t len)
         return addr;
     }
 
-	addr = ExAllocatePoolWithTag(NonPagedPool, len, BF_TAG);
+    addr = ExAllocatePoolWithTag(NonPagedPool, len, BF_TAG);
 
-	if(addr) RtlZeroMemory(addr, len);
+    if (addr) RtlZeroMemory(addr, len);
 
     return addr;
 }
@@ -48,7 +48,7 @@ platform_alloc_rw(int64_t len)
 void *
 platform_alloc_rwe(int64_t len)
 {
-	void *addr = NULL, *addr_remap = NULL;
+    void *addr = NULL, *addr_remap = NULL;
 
     if (len == 0)
     {
@@ -56,36 +56,36 @@ platform_alloc_rwe(int64_t len)
         return addr;
     }
 
-	addr = MmAllocateNonCachedMemory(len);
+    addr = MmAllocateNonCachedMemory(len);
 
-	PMDL mdl = IoAllocateMdl(addr, (ULONG)len, FALSE, FALSE, NULL);
+    PMDL mdl = IoAllocateMdl(addr, (ULONG)len, FALSE, FALSE, NULL);
 
-	MmBuildMdlForNonPagedPool(mdl);
+    MmBuildMdlForNonPagedPool(mdl);
 
-	MmProbeAndLockPages(mdl, KernelMode, IoWriteAccess);
+    MmProbeAndLockPages(mdl, KernelMode, IoWriteAccess);
 
-	addr_remap = MmMapLockedPagesSpecifyCache(mdl, KernelMode, MmNonCached, addr, FALSE, 0);
+    addr_remap = MmMapLockedPagesSpecifyCache(mdl, KernelMode, MmNonCached, addr, FALSE, 0);
 
-	DEBUG("%d\r\n", MmProtectMdlSystemAddress(mdl, PAGE_EXECUTE_READWRITE));
+    DEBUG("%d\r\n", MmProtectMdlSystemAddress(mdl, PAGE_EXECUTE_READWRITE));
 
-	if (addr_remap == NULL)
-		ALERT("platform_alloc: failed to ExAllocatePoolWithTag mem: %lld\n", len);
+    if (addr_remap == NULL)
+        ALERT("platform_alloc: failed to ExAllocatePoolWithTag mem: %lld\n", len);
 
-	return addr_remap;
+    return addr_remap;
 }
 
 void *
 platform_virt_to_phys(void *virt)
 {
-	PHYSICAL_ADDRESS addr = MmGetPhysicalAddress(virt);
+    PHYSICAL_ADDRESS addr = MmGetPhysicalAddress(virt);
 
-	return (void*)addr.QuadPart;
+    return (void *)addr.QuadPart;
 }
 
 void
 platform_free_rw(void *addr, int64_t size)
 {
-		(void)size;
+    (void)size;
     if (addr == NULL)
     {
         ALERT("platform_free: invalid address %p\n", addr);
@@ -104,7 +104,7 @@ platform_free_rwe(void *addr, int64_t len)
         return;
     }
 
-	MmFreeNonCachedMemory(addr, len);
+    MmFreeNonCachedMemory(addr, len);
 }
 
 void
@@ -122,7 +122,7 @@ platform_memcpy(void *dst, const void *src, int64_t num)
     if (!dst || !src)
         return;
 
-	RtlCopyMemory(dst, src, num);
+    RtlCopyMemory(dst, src, num);
 }
 
 void
@@ -140,20 +140,20 @@ platform_stop()
 int64_t
 platform_num_cpus()
 {
-	KAFFINITY k_affin;
-	
-	return (int64_t)KeQueryActiveProcessorCount(&k_affin);
+    KAFFINITY k_affin;
+
+    return (int64_t)KeQueryActiveProcessorCount(&k_affin);
 }
 
 int64_t
 platform_set_affinity(int64_t affinity)
 {
-	KAFFINITY new_affinity = (1ULL << affinity);
-	return (int64_t)KeSetSystemAffinityThreadEx(new_affinity);
+    KAFFINITY new_affinity = (1ULL << affinity);
+    return (int64_t)KeSetSystemAffinityThreadEx(new_affinity);
 }
 
 void
 platform_restore_affinity(int64_t affinity)
 {
-	KeRevertToUserAffinityThreadEx((KAFFINITY)(affinity));
+    KeRevertToUserAffinityThreadEx((KAFFINITY)(affinity));
 }

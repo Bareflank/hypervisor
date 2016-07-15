@@ -94,39 +94,64 @@ include %HYPER_ABS%/common/common_subdir.mk
 .PHONY: doxygen
 .PHONY: doxygen_clean
 
+ifeq ($(shell uname -s), Linux)
+    SUDO:=sudo
+else
+    SUDO:=
+endif
+
+windows_load: force
+	rm -Rf %BUILD_ABS%/outdir
+	rm -Rf %BUILD_ABS%/intdir
+	SCRIPT_PATH=`cygpath -w %HYPER_ABS%/tools/scripts/build_windows.bat`; \
+	HYPER_ABS_PATH=`cygpath -w %HYPER_ABS%`; \
+	BUILD_ABS_PATH=`cygpath -w %BUILD_ABS%`; \
+	DATE=`date +%m/%d/%Y`; \
+	TIME=`date +%H%M%S`; \
+	cmd.exe /c $$SCRIPT_PATH $$HYPER_ABS_PATH $$BUILD_ABS_PATH $$DATE $$TIME
+	/cygdrive/c/ewdk/Program\ Files/Windows\ Kits/10/bin/x64/certmgr /add `cygpath -w %BUILD_ABS%/outdir/bareflank.cer` /s /r localMachine root
+	/cygdrive/c/ewdk/Program\ Files/Windows\ Kits/10/bin/x64/certmgr /add `cygpath -w %BUILD_ABS%/outdir/bareflank.cer` /s /r localMachine trustedpublisher
+	/cygdrive/c/ewdk/Program\ Files/Windows\ Kits/10/Tools/x64/devcon remove "ROOT\bareflank"
+	/cygdrive/c/ewdk/Program\ Files/Windows\ Kits/10/Tools/x64/devcon install `cygpath -w %BUILD_ABS%/outdir/bareflank/bareflank.inf` "ROOT\bareflank"
+
+windows_unload: force
+	rm -Rf %BUILD_ABS%/outdir
+	rm -Rf %BUILD_ABS%/intdir
+	/cygdrive/c/ewdk/Program\ Files/Windows\ Kits/10/Tools/x64/devcon remove "ROOT\bareflank"
+
 linux_load: force
 	@cd %HYPER_ABS%/bfdrivers/src/arch/linux; \
-	sudo make unload; \
+	$(SUDO) make unload; \
 	make clean; \
 	make; \
-	sudo make load
+	$(SUDO) make load
 
 linux_unload: force
 	@cd %HYPER_ABS%/bfdrivers/src/arch/linux; \
-	sudo make unload; \
+	$(SUDO) make unload; \
 	make clean
 
 linux_clean: linux_unload
 
 load: force
 	@%BUILD_ABS%/build_scripts/filter_module_file.sh $(MODULE_FILE) $(FILTERED_MODULE_FILE)
-	@sudo LD_LIBRARY_PATH=%BUILD_ABS%/makefiles/bfm/bin/native/ %BUILD_ABS%/makefiles/bfm/bin/native/bfm load $(FILTERED_MODULE_FILE)
+	@$(SUDO) LD_LIBRARY_PATH=%BUILD_ABS%/makefiles/bfm/bin/native/ %BUILD_ABS%/makefiles/bfm/bin/native/bfm load $(FILTERED_MODULE_FILE)
 
 unload: force
-	@sudo LD_LIBRARY_PATH=%BUILD_ABS%/makefiles/bfm/bin/native/ %BUILD_ABS%/makefiles/bfm/bin/native/bfm unload
+	@$(SUDO) LD_LIBRARY_PATH=%BUILD_ABS%/makefiles/bfm/bin/native/ %BUILD_ABS%/makefiles/bfm/bin/native/bfm unload
 
 start: force
 	@sync
-	@sudo LD_LIBRARY_PATH=%BUILD_ABS%/makefiles/bfm/bin/native/ %BUILD_ABS%/makefiles/bfm/bin/native/bfm start
+	@$(SUDO) LD_LIBRARY_PATH=%BUILD_ABS%/makefiles/bfm/bin/native/ %BUILD_ABS%/makefiles/bfm/bin/native/bfm start
 
 stop: force
-	@sudo LD_LIBRARY_PATH=%BUILD_ABS%/makefiles/bfm/bin/native/ %BUILD_ABS%/makefiles/bfm/bin/native/bfm stop
+	@$(SUDO) LD_LIBRARY_PATH=%BUILD_ABS%/makefiles/bfm/bin/native/ %BUILD_ABS%/makefiles/bfm/bin/native/bfm stop
 
 dump: force
-	@sudo LD_LIBRARY_PATH=%BUILD_ABS%/makefiles/bfm/bin/native/ %BUILD_ABS%/makefiles/bfm/bin/native/bfm dump --vcpuid $(VCPUID)
+	@$(SUDO) LD_LIBRARY_PATH=%BUILD_ABS%/makefiles/bfm/bin/native/ %BUILD_ABS%/makefiles/bfm/bin/native/bfm dump --vcpuid $(VCPUID)
 
 status: force
-	@sudo LD_LIBRARY_PATH=%BUILD_ABS%/makefiles/bfm/bin/native/ %BUILD_ABS%/makefiles/bfm/bin/native/bfm status
+	@$(SUDO) LD_LIBRARY_PATH=%BUILD_ABS%/makefiles/bfm/bin/native/ %BUILD_ABS%/makefiles/bfm/bin/native/bfm status
 
 quick: load start
 
