@@ -58,20 +58,7 @@ option_help() {
 # ------------------------------------------------------------------------------
 
 install_common_packages() {
-    setup-x86_64.exe -q -P wget
-    setup-x86_64.exe -q -P make
-    setup-x86_64.exe -q -P gcc-core
-    setup-x86_64.exe -q -P gcc-g++
-    setup-x86_64.exe -q -P diffutils
-    setup-x86_64.exe -q -P libgmp-devel
-    setup-x86_64.exe -q -P libmpfr-devel
-    setup-x86_64.exe -q -P libmpc-devel
-    setup-x86_64.exe -q -P flex
-    setup-x86_64.exe -q -P bison
-    setup-x86_64.exe -q -P nasm
-    setup-x86_64.exe -q -P texinfo
-    setup-x86_64.exe -q -P cmake
-    setup-x86_64.exe -q -P unzip
+    setup-x86_64.exe -q --wait -P wget,make,gcc-core,gcc-g++,diffutils,libgmp-devel,libmpfr-devel,libmpc-devel,flex,bison,nasm,texinfo,cmake,unzip
 }
 
 setup_ewdk() {

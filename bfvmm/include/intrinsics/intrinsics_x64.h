@@ -55,9 +55,6 @@ uint64_t __read_rflags(void);
 uint64_t __read_msr(uint32_t msr);
 void __write_msr(uint32_t msr, uint64_t val);
 
-void __read_msr_reg(uint32_t msr, uint32_t *edx, uint32_t *eax);
-void __write_msr_reg(uint32_t msr, uint32_t edx, uint32_t eax);
-
 uint64_t __read_rip(void);
 
 uint64_t __read_cr0(void);
@@ -107,8 +104,8 @@ void __write_gdt(void *gdt);
 void __read_idt(void *idt);
 void __write_idt(void *idt);
 
-void __outb(uint16_t val, uint16_t port);
-void __outw(uint16_t val, uint16_t port);
+void __outb(uint16_t port, uint8_t val);
+void __outw(uint16_t port, uint16_t val);
 
 uint8_t __inb(uint16_t port);
 uint16_t __inw(uint16_t port);
@@ -173,15 +170,6 @@ public:
 
     virtual void write_msr(uint32_t msr, uint64_t val) const noexcept
     { __write_msr(msr, val); }
-
-    virtual void read_msr_reg(uint32_t msr, uint32_t *edx, uint32_t *eax)
-    { __read_msr_reg(msr, edx, eax); }
-
-    virtual void read_msr_reg(uint32_t msr, uint64_t *edx, uint64_t *eax)
-    { __read_msr_reg(msr, (uint32_t *)edx, (uint32_t *)eax); }
-
-    virtual void write_msr_reg(uint32_t msr, uint32_t edx, uint32_t eax)
-    { __write_msr_reg(msr, edx, eax); }
 
     virtual uint64_t read_rip() const noexcept
     { return __read_rip(); }
@@ -280,10 +268,10 @@ public:
     { __write_idt(idt); }
 
     virtual void write_portio_8(uint16_t port, uint8_t value) const noexcept
-    { __outb(value, port); }
+    { __outb(port, value); }
 
     virtual void write_portio_16(uint16_t port, uint16_t value) const noexcept
-    { __outw(value, port); }
+    { __outw(port, value); }
 
     virtual uint8_t read_portio_8(uint16_t port) const noexcept
     { return __inb(port); }

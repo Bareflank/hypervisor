@@ -586,6 +586,7 @@ int64_t
 common_start_vmm(void)
 {
     int64_t ret = 0;
+    int64_t num = 0;
     int64_t caller_affinity = 0;
 
     if (common_vmm_status() == VMM_CORRUPT)
@@ -604,7 +605,11 @@ common_start_vmm(void)
         return BF_ERROR_VMM_INVALID_STATE;
     }
 
-    for (g_num_cpus_started = 0; g_num_cpus_started < platform_num_cpus(); g_num_cpus_started++)
+    num = platform_num_cpus();
+    if (num > MAX_VCPUS)
+        num = MAX_VCPUS;
+
+    for (g_num_cpus_started = 0; g_num_cpus_started < num; g_num_cpus_started++)
     {
         caller_affinity = platform_set_affinity(g_num_cpus_started);
         if (caller_affinity < 0)

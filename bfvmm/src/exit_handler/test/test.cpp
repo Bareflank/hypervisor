@@ -81,6 +81,7 @@ exit_handler_intel_x64_ut::list()
     this->test_vm_exit_reason_rdmsr_debug_ctl();
     this->test_vm_exit_reason_rdmsr_pat();
     this->test_vm_exit_reason_rdmsr_efer();
+    this->test_vm_exit_reason_rdmsr_perf();
     this->test_vm_exit_reason_rdmsr_cs();
     this->test_vm_exit_reason_rdmsr_esp();
     this->test_vm_exit_reason_rdmsr_eip();
@@ -89,6 +90,7 @@ exit_handler_intel_x64_ut::list()
     this->test_vm_exit_reason_wrmsr_debug_ctrl();
     this->test_vm_exit_reason_wrmsr_pat();
     this->test_vm_exit_reason_wrmsr_efer();
+    this->test_vm_exit_reason_wrmsr_perf();
     this->test_vm_exit_reason_wrmsr_cs();
     this->test_vm_exit_reason_wrmsr_esp();
     this->test_vm_exit_reason_wrmsr_eip();

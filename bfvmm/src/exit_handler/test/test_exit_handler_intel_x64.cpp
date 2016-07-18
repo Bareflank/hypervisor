@@ -989,6 +989,38 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_rdmsr_efer()
 }
 
 void
+exit_handler_intel_x64_ut::test_vm_exit_reason_rdmsr_perf()
+{
+    MockRepository mocks;
+    auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
+    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
+
+    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(stubbed_vmread);
+    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(stubbed_vmwrite);
+
+    auto ss = std::make_shared<state_save_intel_x64>();
+    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    eh->set_vmcs(vmcs);
+    eh->set_state_save(ss);
+
+    g_exit_reason = VM_EXIT_REASON_RDMSR;
+
+    mocks.NeverCall(intrinsics.get(), intrinsics_intel_x64::stop);
+
+    g_value = 0x0000000400000003;
+    eh->m_state_save->rcx = IA32_PERF_GLOBAL_CTRL_MSR;
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        eh->dispatch();
+
+        EXPECT_TRUE(g_field == VMCS_GUEST_IA32_PERF_GLOBAL_CTRL_FULL);
+        EXPECT_TRUE(eh->m_state_save->rax == 0x3);
+        EXPECT_TRUE(eh->m_state_save->rdx == 0x4);
+    });
+}
+
+void
 exit_handler_intel_x64_ut::test_vm_exit_reason_rdmsr_cs()
 {
     MockRepository mocks;
@@ -1240,6 +1272,38 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_wrmsr_efer()
         eh->dispatch();
 
         EXPECT_TRUE(g_field == VMCS_GUEST_IA32_EFER_FULL);
+        EXPECT_TRUE(g_value == 0x0000000400000003);
+    });
+}
+
+void
+exit_handler_intel_x64_ut::test_vm_exit_reason_wrmsr_perf()
+{
+    MockRepository mocks;
+    auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
+    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
+
+    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(stubbed_vmread);
+    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(stubbed_vmwrite);
+
+    auto ss = std::make_shared<state_save_intel_x64>();
+    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    eh->set_vmcs(vmcs);
+    eh->set_state_save(ss);
+
+    g_exit_reason = VM_EXIT_REASON_WRMSR;
+
+    mocks.NeverCall(intrinsics.get(), intrinsics_intel_x64::stop);
+
+    eh->m_state_save->rcx = IA32_PERF_GLOBAL_CTRL_MSR;
+    eh->m_state_save->rax = 0x3;
+    eh->m_state_save->rdx = 0x4;
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        eh->dispatch();
+
+        EXPECT_TRUE(g_field == VMCS_GUEST_IA32_PERF_GLOBAL_CTRL_FULL);
         EXPECT_TRUE(g_value == 0x0000000400000003);
     });
 }
