@@ -459,7 +459,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_invd()
     g_exit_reason = VM_EXIT_REASON_INVD;
 
     mocks.NeverCall(intrinsics.get(), intrinsics_intel_x64::stop);
-    mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::invd);
+    mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::wbinvd);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {

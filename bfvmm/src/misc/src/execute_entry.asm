@@ -56,10 +56,17 @@ execute_entry:
     push rbp
     mov rbp, rsp
 
+%ifdef MS64
+    mov rsp, rcx
+    mov r13, rdx
+    mov r14, r8
+    mov r15, r9
+%else
     mov rsp, rdi
     mov r13, rsi
     mov r14, rdx
     mov r15, rcx
+%endif
 
     mov rcx, 0x00
     xgetbv

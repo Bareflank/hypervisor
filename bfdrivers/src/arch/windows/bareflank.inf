@@ -4,23 +4,16 @@
 
 [Version]
 Signature="$WINDOWS NT$"
-Class=Sample ; TODO: edit Class
-ClassGuid={78A1C341-4539-11d3-B88D-00C04FAD5171} ; TODO: edit ClassGuid
+Class=System
+ClassGuid={4d36e97d-e325-11ce-bfc1-08002be10318}
 Provider=%ManufacturerName%
 CatalogFile=bareflank.cat
-DriverVer= ; TODO: set DriverVer in stampinf property pages
+DriverVer=
 
 [DestinationDirs]
-DefaultDestDir = 12
+DefaultDestDir=12
 
 ; ================= Class section =====================
-
-[ClassInstall32]
-Addreg=SampleClassReg
-
-[SampleClassReg]
-HKR,,,0,%ClassName%
-HKR,,Icon,,-5
 
 [SourceDisksNames]
 1 = %DiskName%,,,""
@@ -36,7 +29,7 @@ bareflank.sys  = 1,,
 %ManufacturerName%=Standard,NT$ARCH$
 
 [Standard.NT$ARCH$]
-%bareflank.DeviceDesc%=bareflank_Device, ROOT\bareflank ; TODO: edit hw-id
+%bareflank.DeviceDesc%=bareflank_Device, ROOT\bareflank
 
 [bareflank_Device.NT]
 CopyFiles=Drivers_Dir
@@ -74,7 +67,7 @@ HKR,,CoInstallers32,0x00010000, "WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll,WdfC
 WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll
 
 [SourceDisksFiles]
-WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll=1 ; make sure the number matches with SourceDisksNames
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll=1
 
 [bareflank_Device.NT.Wdf]
 KmdfService =  bareflank, bareflank_wdfsect
@@ -83,8 +76,7 @@ KmdfLibraryVersion = $KMDFVERSION$
 
 [Strings]
 SPSVCINST_ASSOCSERVICE= 0x00000002
-ManufacturerName="Bareflank Hypervisor" ;TODO: Replace with your manufacturer name
-ClassName="Hypervisors" ; TODO: edit ClassName
-DiskName = "Bareflank Installation Disk"
-bareflank.DeviceDesc = "Bareflank Hypervisor Device"
-bareflank.SVCDESC = "Bareflank Hypervisor Service"
+ManufacturerName="Bareflank Hypervisor"
+DiskName = "Bareflank Hypervisor Installation Disk"
+bareflank.DeviceDesc = "Bareflank Hypervisor"
+bareflank.SVCDESC = "Bareflank Hypervisor"

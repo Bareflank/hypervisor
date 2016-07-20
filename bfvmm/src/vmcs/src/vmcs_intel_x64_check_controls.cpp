@@ -65,12 +65,11 @@ vmcs_intel_x64::check_control_pin_based_ctls_reserved_properly_set()
     auto allowed_one = ((ia32_vmx_pinbased_ctls_msr >> 32) & 0x00000000FFFFFFFF);
 
     auto ctls = get_pin_ctls();
-    auto ctls_lower = ((ctls >> 00) & 0x00000000FFFFFFFF);
-    auto ctls_upper = ((ctls >> 32) & 0x00000000FFFFFFFF);
+    auto ctls_lower = (ctls & 0x00000000FFFFFFFF);
 
-    if ((allowed_zero & ctls_lower) != allowed_zero || (allowed_one & ~ctls_upper) != allowed_one)
+    if ((allowed_zero & ctls_lower) != allowed_zero || (ctls_lower & ~allowed_one) != 0)
         throw vmcs_invalid_ctls("pin based", allowed_zero, allowed_one,
-                                ctls_lower, ctls_upper);
+                                ctls_lower, 0);
 }
 
 void
@@ -83,12 +82,11 @@ vmcs_intel_x64::check_control_proc_based_ctls_reserved_properly_set()
     auto allowed_one = ((ia32_vmx_procbased_ctls_msr >> 32) & 0x00000000FFFFFFFF);
 
     auto ctls = get_proc_ctls();
-    auto ctls_lower = ((ctls >> 00) & 0x00000000FFFFFFFF);
-    auto ctls_upper = ((ctls >> 32) & 0x00000000FFFFFFFF);
+    auto ctls_lower = (ctls & 0x00000000FFFFFFFF);
 
-    if ((allowed_zero & ctls_lower) != allowed_zero || (allowed_one & ~ctls_upper) != allowed_one)
+    if ((allowed_zero & ctls_lower) != allowed_zero || (ctls_lower & ~allowed_one) != 0)
         throw vmcs_invalid_ctls("proc based", allowed_zero, allowed_one,
-                                ctls_lower, ctls_upper);
+                                ctls_lower, 0);
 }
 
 void
@@ -101,12 +99,11 @@ vmcs_intel_x64::check_control_proc_based_ctls2_reserved_properly_set()
     auto allowed_one = ((ia32_vmx_procbased_ctls2_msr >> 32) & 0x00000000FFFFFFFF);
 
     auto ctls2 = get_proc2_ctls();
-    auto ctls2_lower = ((ctls2 >> 00) & 0x00000000FFFFFFFF);
-    auto ctls2_upper = ((ctls2 >> 32) & 0x00000000FFFFFFFF);
+    auto ctls2_lower = (ctls2 & 0x00000000FFFFFFFF);
 
-    if ((allowed_zero & ctls2_lower) != allowed_zero || (allowed_one & ~ctls2_upper) != allowed_one)
+    if ((allowed_zero & ctls2_lower) != allowed_zero || (ctls2_lower & ~allowed_one) != 0)
         throw vmcs_invalid_ctls("secondary proc based", allowed_zero, allowed_one,
-                                ctls2_lower, ctls2_upper);
+                                ctls2_lower, 0);
 }
 
 void

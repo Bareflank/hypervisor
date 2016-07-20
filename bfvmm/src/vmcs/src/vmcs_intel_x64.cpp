@@ -113,6 +113,7 @@ vmcs_intel_x64::promote()
     auto ia32_debugctl_msr = vmread(VMCS_GUEST_IA32_DEBUGCTL_FULL);
     auto ia32_pat_msr = vmread(VMCS_GUEST_IA32_PAT_FULL);
     auto ia32_efer_msr = vmread(VMCS_GUEST_IA32_EFER_FULL);
+    auto ia32_perf_global_ctrl_msr = vmread(VMCS_GUEST_IA32_PERF_GLOBAL_CTRL_FULL);
     auto ia32_sysenter_cs_msr = vmread(VMCS_GUEST_IA32_SYSENTER_CS);
     auto ia32_sysenter_esp_msr = vmread(VMCS_GUEST_IA32_SYSENTER_ESP);
     auto ia32_sysenter_eip_msr = vmread(VMCS_GUEST_IA32_SYSENTER_EIP);
@@ -153,13 +154,12 @@ vmcs_intel_x64::promote()
     m_intrinsics->write_msr(IA32_DEBUGCTL_MSR, ia32_debugctl_msr);
     m_intrinsics->write_msr(IA32_PAT_MSR, ia32_pat_msr);
     m_intrinsics->write_msr(IA32_EFER_MSR, ia32_efer_msr);
+    m_intrinsics->write_msr(IA32_PERF_GLOBAL_CTRL_MSR, ia32_perf_global_ctrl_msr);
     m_intrinsics->write_msr(IA32_SYSENTER_CS_MSR, ia32_sysenter_cs_msr);
     m_intrinsics->write_msr(IA32_SYSENTER_ESP_MSR, ia32_sysenter_esp_msr);
     m_intrinsics->write_msr(IA32_SYSENTER_EIP_MSR, ia32_sysenter_eip_msr);
     m_intrinsics->write_msr(IA32_FS_BASE_MSR, ia32_fs_base_msr);
     m_intrinsics->write_msr(IA32_GS_BASE_MSR, ia32_gs_base_msr);
-
-    // unused: VMCS_GUEST_IA32_PERF_GLOBAL_CTRL_FULL
 
     promote_vmcs_to_root(vmread(VMCS_HOST_GS_BASE));
 }
@@ -335,8 +335,8 @@ vmcs_intel_x64::write_64bit_guest_state(const std::shared_ptr<vmcs_intel_x64_sta
     vmwrite(VMCS_GUEST_IA32_DEBUGCTL_FULL, state->ia32_debugctl_msr());
     vmwrite(VMCS_GUEST_IA32_PAT_FULL, state->ia32_pat_msr());
     vmwrite(VMCS_GUEST_IA32_EFER_FULL, state->ia32_efer_msr());
+    vmwrite(VMCS_GUEST_IA32_PERF_GLOBAL_CTRL_FULL, state->ia32_perf_global_ctrl_msr());
 
-    // unused: VMCS_GUEST_IA32_PERF_GLOBAL_CTRL_FULL
     // unused: VMCS_GUEST_PDPTE0_FULL
     // unused: VMCS_GUEST_PDPTE1_FULL
     // unused: VMCS_GUEST_PDPTE2_FULL
@@ -420,9 +420,9 @@ vmcs_intel_x64::write_16bit_host_state(const std::shared_ptr<vmcs_intel_x64_stat
 void
 vmcs_intel_x64::write_64bit_host_state(const std::shared_ptr<vmcs_intel_x64_state> &state)
 {
-    vmwrite(VMCS_HOST_IA32_PERF_GLOBAL_CTRL_FULL, state->ia32_debugctl_msr());
     vmwrite(VMCS_HOST_IA32_PAT_FULL, state->ia32_pat_msr());
     vmwrite(VMCS_HOST_IA32_EFER_FULL, state->ia32_efer_msr());
+    vmwrite(VMCS_HOST_IA32_PERF_GLOBAL_CTRL_FULL, state->ia32_perf_global_ctrl_msr());
 }
 
 void
@@ -469,6 +469,8 @@ vmcs_intel_x64::pin_based_vm_execution_controls()
     // controls |= VM_EXEC_PIN_BASED_ACTIVATE_VMX_PREEMPTION_TIMER;
     // controls |= VM_EXEC_PIN_BASED_PROCESS_POSTED_INTERRUPTS;
 
+    this->filter_unsupported(IA32_VMX_TRUE_PINBASED_CTLS_MSR, controls);
+
     vmwrite(VMCS_PIN_BASED_VM_EXECUTION_CONTROLS, controls);
 }
 
@@ -497,7 +499,9 @@ vmcs_intel_x64::primary_processor_based_vm_execution_controls()
     // controls |= VM_EXEC_P_PROC_BASED_USE_MSR_BITMAPS;
     // controls |= VM_EXEC_P_PROC_BASED_MONITOR_EXITING;
     // controls |= VM_EXEC_P_PROC_BASED_PAUSE_EXITING;
-    // controls |= VM_EXEC_P_PROC_BASED_ACTIVATE_SECONDARY_CONTROLS;
+    controls |= VM_EXEC_P_PROC_BASED_ACTIVATE_SECONDARY_CONTROLS;
+
+    this->filter_unsupported(IA32_VMX_TRUE_PROCBASED_CTLS_MSR, controls);
 
     vmwrite(VMCS_PRIMARY_PROCESSOR_BASED_VM_EXECUTION_CONTROLS, controls);
 }
@@ -510,7 +514,7 @@ vmcs_intel_x64::secondary_processor_based_vm_execution_controls()
     // controls |= VM_EXEC_S_PROC_BASED_VIRTUALIZE_APIC_ACCESSES;
     // controls |= VM_EXEC_S_PROC_BASED_ENABLE_EPT;
     // controls |= VM_EXEC_S_PROC_BASED_DESCRIPTOR_TABLE_EXITING;
-    // controls |= VM_EXEC_S_PROC_BASED_ENABLE_RDTSCP;
+    controls |= VM_EXEC_S_PROC_BASED_ENABLE_RDTSCP;
     // controls |= VM_EXEC_S_PROC_BASED_VIRTUALIZE_X2APIC_MODE;
     // controls |= VM_EXEC_S_PROC_BASED_ENABLE_VPID;
     // controls |= VM_EXEC_S_PROC_BASED_WBINVD_EXITING;
@@ -519,12 +523,14 @@ vmcs_intel_x64::secondary_processor_based_vm_execution_controls()
     // controls |= VM_EXEC_S_PROC_BASED_VIRTUAL_INTERRUPT_DELIVERY;
     // controls |= VM_EXEC_S_PROC_BASED_PAUSE_LOOP_EXITING;
     // controls |= VM_EXEC_S_PROC_BASED_RDRAND_EXITING;
-    // controls |= VM_EXEC_S_PROC_BASED_ENABLE_INVPCID;
+    controls |= VM_EXEC_S_PROC_BASED_ENABLE_INVPCID;
     // controls |= VM_EXEC_S_PROC_BASED_ENABLE_VM_FUNCTIONS;
     // controls |= VM_EXEC_S_PROC_BASED_VMCS_SHADOWING;
     // controls |= VM_EXEC_S_PROC_BASED_RDSEED_EXITING;
     // controls |= VM_EXEC_S_PROC_BASED_EPT_VIOLATION_VE;
-    // controls |= VM_EXEC_S_PROC_BASED_ENABLE_XSAVES_XRSTORS;
+    controls |= VM_EXEC_S_PROC_BASED_ENABLE_XSAVES_XRSTORS;
+
+    this->filter_unsupported(IA32_VMX_PROCBASED_CTLS2_MSR, controls);
 
     vmwrite(VMCS_SECONDARY_PROCESSOR_BASED_VM_EXECUTION_CONTROLS, controls);
 }
@@ -536,13 +542,15 @@ vmcs_intel_x64::vm_exit_controls()
 
     controls |= VM_EXIT_CONTROL_SAVE_DEBUG_CONTROLS;
     controls |= VM_EXIT_CONTROL_HOST_ADDRESS_SPACE_SIZE;
-    // controls |= VM_EXIT_CONTROL_LOAD_IA32_PERF_GLOBAL_CTRL;
+    controls |= VM_EXIT_CONTROL_LOAD_IA32_PERF_GLOBAL_CTRL;
     // controls |= VM_EXIT_CONTROL_ACKNOWLEDGE_INTERRUPT_ON_EXIT;
     controls |= VM_EXIT_CONTROL_SAVE_IA32_PAT;
     controls |= VM_EXIT_CONTROL_LOAD_IA32_PAT;
     controls |= VM_EXIT_CONTROL_SAVE_IA32_EFER;
     controls |= VM_EXIT_CONTROL_LOAD_IA32_EFER;
     // controls |= VM_EXIT_CONTROL_SAVE_VMX_PREEMPTION_TIMER_VALUE;
+
+    this->filter_unsupported(IA32_VMX_TRUE_EXIT_CTLS_MSR, controls);
 
     vmwrite(VMCS_VM_EXIT_CONTROLS, controls);
 }
@@ -556,9 +564,11 @@ vmcs_intel_x64::vm_entry_controls()
     controls |= VM_ENTRY_CONTROL_IA_32E_MODE_GUEST;
     // controls |= VM_ENTRY_CONTROL_ENTRY_TO_SMM;
     // controls |= VM_ENTRY_CONTROL_DEACTIVATE_DUAL_MONITOR_TREATMENT;
-    // controls |= VM_ENTRY_CONTROL_LOAD_IA32_PERF_GLOBAL_CTRL;
+    controls |= VM_ENTRY_CONTROL_LOAD_IA32_PERF_GLOBAL_CTRL;
     controls |= VM_ENTRY_CONTROL_LOAD_IA32_PAT;
     controls |= VM_ENTRY_CONTROL_LOAD_IA32_EFER;
+
+    this->filter_unsupported(IA32_VMX_TRUE_ENTRY_CTLS_MSR, controls);
 
     vmwrite(VMCS_VM_ENTRY_CONTROLS, controls);
 }
@@ -579,4 +589,34 @@ vmcs_intel_x64::vmwrite(uint64_t field, uint64_t value)
 {
     if (m_intrinsics->vmwrite(field, value) == false)
         throw vmcs_write_failure(field, value);
+}
+
+void
+vmcs_intel_x64::filter_unsupported(uint64_t msr, uint64_t &ctrl)
+{
+    auto allowed = m_intrinsics->read_msr(msr);
+    auto allowed0 = ((allowed >> 00) & 0x00000000FFFFFFFF);
+    auto allowed1 = ((allowed >> 32) & 0x00000000FFFFFFFF);
+
+    if ((allowed0 & ctrl) != allowed0)
+    {
+        bfdebug << "vmcs ctrl field mis-configured for msr allowed 0: " << (void *)msr << bfendl;
+        bfdebug << "    - allowed0: " << (void *)allowed0 << bfendl;
+        bfdebug << "    - old ctrl: " << (void *)ctrl << bfendl;
+
+        ctrl |= allowed0;
+
+        bfdebug << "    - new ctrl: " << (void *)ctrl << bfendl;
+    }
+
+    if ((ctrl & ~allowed1) != 0)
+    {
+        bfdebug << "vmcs ctrl field mis-configured for msr allowed 1: " << (void *)msr << bfendl;
+        bfdebug << "    - allowed1: " << (void *)allowed1 << bfendl;
+        bfdebug << "    - old ctrl: " << (void *)ctrl << bfendl;
+
+        ctrl &= allowed1;
+
+        bfdebug << "    - new ctrl: " << (void *)ctrl << bfendl;
+    }
 }

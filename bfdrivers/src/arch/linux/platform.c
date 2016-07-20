@@ -166,5 +166,14 @@ platform_set_affinity(int64_t affinity)
         }
     }
 
-    return set_cpu_affinity(current->pid, cpumask_of(affinity));
+    if (set_cpu_affinity(current->pid, cpumask_of(affinity)) != 0)
+        return -1;
+
+    return 0;
+}
+
+void
+platform_restore_affinity(int64_t affinity)
+{
+    (void) affinity;
 }

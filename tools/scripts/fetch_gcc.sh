@@ -35,6 +35,9 @@ do
 done
 
 tar xf gcc-*.tar.bz2
+sleep 1
+find gcc-*/ -exec touch {} \;
+sleep 1
 mv gcc-*/ src_gcc
 rm gcc-*.tar.bz2
 

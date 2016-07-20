@@ -586,6 +586,7 @@ int64_t
 common_start_vmm(void)
 {
     int64_t ret = 0;
+    int64_t caller_affinity = 0;
 
     if (common_vmm_status() == VMM_CORRUPT)
     {
@@ -603,16 +604,10 @@ common_start_vmm(void)
         return BF_ERROR_VMM_INVALID_STATE;
     }
 
-    uint64_t caller_affinity = 0;
-
     for (g_num_cpus_started = 0; g_num_cpus_started < platform_num_cpus(); g_num_cpus_started++)
     {
-        ret = platform_set_affinity(g_num_cpus_started);
-
-        if (g_num_cpus_started == 0)
-            caller_affinity = ret;
-
-        if (ret != BFELF_SUCCESS)
+        caller_affinity = platform_set_affinity(g_num_cpus_started);
+        if (caller_affinity < 0)
         {
             ALERT("start_vmm: failed to set affinity: %" PRId64 "\n", ret);
             goto failure;
@@ -633,11 +628,10 @@ common_start_vmm(void)
         }
 
         platform_start();
+        platform_restore_affinity(caller_affinity);
     }
 
     g_vmm_status = VMM_RUNNING;
-
-    platform_restore_affinity(caller_affinity);
 
     return BF_SUCCESS;
 
@@ -652,6 +646,7 @@ common_stop_vmm(void)
 {
     int64_t i = 0;
     int64_t ret = 0;
+    int64_t caller_affinity = 0;
 
     if (common_vmm_status() == VMM_CORRUPT)
     {
@@ -671,8 +666,8 @@ common_stop_vmm(void)
 
     for (i = g_num_cpus_started - 1; i >= 0 ; i--)
     {
-        ret = platform_set_affinity(i);
-        if (ret != BFELF_SUCCESS)
+        caller_affinity = platform_set_affinity(i);
+        if (caller_affinity < 0)
         {
             ALERT("stop_vmm: failed to set affinity: %" PRId64 "\n", ret);
             goto corrupted;
@@ -686,6 +681,7 @@ common_stop_vmm(void)
         }
 
         platform_stop();
+        platform_restore_affinity(caller_affinity);
     }
 
     g_vmm_status = VMM_LOADED;
