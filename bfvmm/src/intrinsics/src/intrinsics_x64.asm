@@ -31,8 +31,6 @@ global __cpuid:function
 global __read_rflags:function
 global __read_msr:function
 global __write_msr:function
-global __read_msr_reg:function
-global __write_msr_reg:function
 global __read_rip:function
 global __read_cr0:function
 global __write_cr0:function
@@ -95,10 +93,12 @@ __wbinvd:
 __cpuid_eax:
     push rbx
 
+    xor rax, rax
+    xor rbx, rbx
+    xor rcx, rcx
+    xor rdx, rdx
+
     mov eax, edi
-    mov ebx, 0x0
-    mov ecx, 0x0
-    mov edx, 0x0
     cpuid
 
     pop rbx
@@ -108,10 +108,12 @@ __cpuid_eax:
 __cpuid_ebx:
     push rbx
 
+    xor rax, rax
+    xor rbx, rbx
+    xor rcx, rcx
+    xor rdx, rdx
+
     mov eax, edi
-    mov ebx, 0x0
-    mov ecx, 0x0
-    mov edx, 0x0
     cpuid
     mov eax, ebx
 
@@ -122,10 +124,12 @@ __cpuid_ebx:
 __cpuid_ecx:
     push rbx
 
+    xor rax, rax
+    xor rbx, rbx
+    xor rcx, rcx
+    xor rdx, rdx
+
     mov eax, edi
-    mov ebx, 0x0
-    mov ecx, 0x0
-    mov edx, 0x0
     cpuid
     mov eax, ecx
 
@@ -136,10 +140,12 @@ __cpuid_ecx:
 __cpuid_edx:
     push rbx
 
+    xor rax, rax
+    xor rbx, rbx
+    xor rcx, rcx
+    xor rdx, rdx
+
     mov eax, edi
-    mov ebx, 0x0
-    mov ecx, 0x0
-    mov edx, 0x0
     cpuid
     mov eax, edx
 
@@ -183,7 +189,7 @@ __read_rflags:
 
 ; uint64_t __read_msr(uint32_t msr)
 __read_msr:
-    mov ecx, edi
+    mov rcx, rdi
     rdmsr
     shl rdx, 32
     or rax, rdx
@@ -195,39 +201,9 @@ __write_msr:
     mov rax, rsi
     mov rdx, rsi
     shr rdx, 32
-    mov ecx, edi
+    mov rcx, rdi
     wrmsr
 
-    ret
-
-; void __read_msr_reg(uint32_t msr, uint32_t *edx, uint32_t *eax)
-__read_msr_reg:
-    mov r8, rsi
-    mov r9, rdx
-
-    mov ecx, edi
-
-    rdmsr
-
-    mov [r8], edx
-    mov [r9], eax
-
-    mov rax, 0
-    ret
-
-; void __write_msr_reg(uint32_t msr, uint32_t edx, uint32_t eax)
-__write_msr_reg:
-    mov r8, rdi
-    mov r9, rsi
-    mov r10, rdx
-
-    mov rcx, r8
-    mov rdx, r9
-    mov rax, r10
-
-    wrmsr
-
-    mov rax, 0
     ret
 
 ; uint64_t __read_rip(void)
@@ -294,18 +270,19 @@ __write_dr7:
 
 ; uint16_t __read_es(void)
 __read_es:
-    mov rax, 0
+    xor rax, rax
     mov ax, es
     ret
 
 ; void __write_es(uint16_t val)
 __write_es:
+    xor rax, rax
     mov es, di
     ret
 
 ; uint16_t __read_cs(void)
 __read_cs:
-    mov rax, 0
+    xor rax, rax
     mov ax, cs
     ret
 
@@ -325,7 +302,7 @@ __write_cs:
 
 ; uint16_t __read_ss(void)
 __read_ss:
-    mov rax, 0
+    xor rax, rax
     mov ax, ss
     ret
 
@@ -336,7 +313,7 @@ __write_ss:
 
 ; uint16_t __read_ds(void)
 __read_ds:
-    mov rax, 0
+    xor rax, rax
     mov ax, ds
     ret
 
@@ -347,7 +324,7 @@ __write_ds:
 
 ; uint16_t __read_fs(void)
 __read_fs:
-    mov rax, 0
+    xor rax, rax
     mov ax, fs
     ret
 
@@ -358,7 +335,7 @@ __write_fs:
 
 ; uint16_t __read_gs(void)
 __read_gs:
-    mov rax, 0
+    xor rax, rax
     mov ax, gs
     ret
 
@@ -369,7 +346,7 @@ __write_gs:
 
 ; uint16_t __read_tr(void)
 __read_tr:
-    mov rax, 0
+    xor rax, rax
     str ax
     ret
 
@@ -380,7 +357,7 @@ __write_tr:
 
 ; uint16_t __read_ldtr(void)
 __read_ldtr:
-    mov rax, 0
+    xor rax, rax
     sldt ax
     ret
 
@@ -414,30 +391,30 @@ __write_idt:
     lidt [rdi]
     ret
 
-; void __outb(uint16_t val, uint16_t port)
+; void __outb(uint8_t port, uint16_t val)
 __outb:
-	mov ax, di
-	mov dx, si
-	out dx, al
+    mov dx, di
+    mov ax, si
+    out dx, al
 	ret
 
-; void __outw(uint16_t val, uint16_t port)
+; void __outw(uint16_t port, uint16_t val)
 __outw:
-	mov ax, di
-	mov dx, si
+	mov dx, di
+    mov ax, si
 	out dx, ax
 	ret
 
 ; uint8_t __inb(uint16_t port)
 __inb:
-	mov al, 0
+	xor rax, rax
 	mov dx, di
 	in al, dx
 	ret
 
 ; uint16_t __inw(uint16_t port)
 __inw:
-	mov eax, 0
-	mov edx, edi
+    xor rax, rax
+    mov dx, di
 	in ax, dx
 	ret

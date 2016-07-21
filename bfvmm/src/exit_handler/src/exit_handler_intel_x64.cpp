@@ -454,6 +454,9 @@ exit_handler_intel_x64::handle_rdmsr()
         case IA32_EFER_MSR:
             msr = vmread(VMCS_GUEST_IA32_EFER_FULL);
             break;
+        case IA32_PERF_GLOBAL_CTRL_MSR:
+            msr = vmread(VMCS_GUEST_IA32_PERF_GLOBAL_CTRL_FULL);
+            break;
         case IA32_SYSENTER_CS_MSR:
             msr = vmread(VMCS_GUEST_IA32_SYSENTER_CS);
             break;
@@ -470,28 +473,12 @@ exit_handler_intel_x64::handle_rdmsr()
             msr = vmread(VMCS_GUEST_GS_BASE);
             break;
         default:
+            msr = m_intrinsics->read_msr(m_state_save->rcx);
             break;
     }
 
-    switch (m_state_save->rcx)
-    {
-        case IA32_DEBUGCTL_MSR:
-        case IA32_PAT_MSR:
-        case IA32_EFER_MSR:
-        case IA32_SYSENTER_CS_MSR:
-        case IA32_SYSENTER_ESP_MSR:
-        case IA32_SYSENTER_EIP_MSR:
-        case IA32_FS_BASE_MSR:
-        case IA32_GS_BASE_MSR:
-            m_state_save->rax = ((msr & 0x00000000FFFFFFFF) >> 0);
-            m_state_save->rdx = ((msr & 0xFFFFFFFF00000000) >> 32);
-            break;
-        default:
-            m_intrinsics->read_msr_reg(m_state_save->rcx,
-                                       &m_state_save->rdx,
-                                       &m_state_save->rax);
-            break;
-    }
+    m_state_save->rax = ((msr >> 0x00) & 0x00000000FFFFFFFF);
+    m_state_save->rdx = ((msr >> 0x20) & 0x00000000FFFFFFFF);
 
     advance_rip();
 }
@@ -501,22 +488,8 @@ exit_handler_intel_x64::handle_wrmsr()
 {
     uint64_t msr = 0;
 
-    switch (m_state_save->rcx)
-    {
-        case IA32_DEBUGCTL_MSR:
-        case IA32_PAT_MSR:
-        case IA32_EFER_MSR:
-        case IA32_SYSENTER_CS_MSR:
-        case IA32_SYSENTER_ESP_MSR:
-        case IA32_SYSENTER_EIP_MSR:
-        case IA32_FS_BASE_MSR:
-        case IA32_GS_BASE_MSR:
-            msr |= ((m_state_save->rax << 0) & 0x00000000FFFFFFFF);
-            msr |= ((m_state_save->rdx << 32) & 0xFFFFFFFF00000000);
-            break;
-        default:
-            break;
-    }
+    msr |= ((m_state_save->rax & 0x00000000FFFFFFFF) << 0x00);
+    msr |= ((m_state_save->rdx & 0x00000000FFFFFFFF) << 0x20);
 
     switch (m_state_save->rcx)
     {
@@ -528,6 +501,9 @@ exit_handler_intel_x64::handle_wrmsr()
             break;
         case IA32_EFER_MSR:
             vmwrite(VMCS_GUEST_IA32_EFER_FULL, msr);
+            break;
+        case IA32_PERF_GLOBAL_CTRL_MSR:
+            vmwrite(VMCS_GUEST_IA32_PERF_GLOBAL_CTRL_FULL, msr);
             break;
         case IA32_SYSENTER_CS_MSR:
             vmwrite(VMCS_GUEST_IA32_SYSENTER_CS, msr);
@@ -545,9 +521,7 @@ exit_handler_intel_x64::handle_wrmsr()
             vmwrite(VMCS_GUEST_GS_BASE, msr);
             break;
         default:
-            m_intrinsics->write_msr_reg(m_state_save->rcx,
-                                        m_state_save->rdx,
-                                        m_state_save->rax);
+            m_intrinsics->write_msr(m_state_save->rcx, msr);
             break;
     }
 

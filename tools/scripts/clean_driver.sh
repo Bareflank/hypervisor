@@ -20,23 +20,27 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-pushd /tmp/bareflank/
+%ENV_SOURCE%
 
-rm -Rf nasm-*.tar.bz2
-rm -Rf nasm-*/
-rm -Rf src_nasm
+case $(uname -s) in
+CYGWIN_NT-6.3)
+    rm -Rf $BUILD_ABS/outdir
+    rm -Rf $BUILD_ABS/intdir
+    /cygdrive/c/ewdk/Program\ Files/Windows\ Kits/10/Tools/x64/devcon remove "ROOT\bareflank"
+    ;;
 
-n=0
-until [ $n -ge 5 ]
-do
-    wget $NASM_URL && break
-    n=$[$n+1]
-    sleep 15
-done
+CYGWIN_NT-10.0)
+    rm -Rf $BUILD_ABS/outdir
+    rm -Rf $BUILD_ABS/intdir
+    /cygdrive/c/ewdk/Program\ Files/Windows\ Kits/10/Tools/x64/devcon remove "ROOT\bareflank"
+    ;;
 
-tar xfv nasm-*.tar.bz2
-sleep 1
-mv nasm-*/ src_nasm
-rm nasm-*.tar.bz2
-
-popd
+Linux)
+    cd $HYPER_ABS/bfdrivers/src/arch/linux
+    sudo make unload
+    make clean
+    ;;
+*)
+    echo "OS not supported"
+    exit 1
+esac

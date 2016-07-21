@@ -80,6 +80,7 @@ private:
     void test_vm_exit_reason_rdmsr_debug_ctl();
     void test_vm_exit_reason_rdmsr_pat();
     void test_vm_exit_reason_rdmsr_efer();
+    void test_vm_exit_reason_rdmsr_perf();
     void test_vm_exit_reason_rdmsr_cs();
     void test_vm_exit_reason_rdmsr_esp();
     void test_vm_exit_reason_rdmsr_eip();
@@ -88,6 +89,7 @@ private:
     void test_vm_exit_reason_wrmsr_debug_ctrl();
     void test_vm_exit_reason_wrmsr_pat();
     void test_vm_exit_reason_wrmsr_efer();
+    void test_vm_exit_reason_wrmsr_perf();
     void test_vm_exit_reason_wrmsr_cs();
     void test_vm_exit_reason_wrmsr_esp();
     void test_vm_exit_reason_wrmsr_eip();

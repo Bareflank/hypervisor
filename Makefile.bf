@@ -79,7 +79,10 @@ include %HYPER_ABS%/common/common_subdir.mk
 
 .PHONY: linux_load
 .PHONY: linux_unload
-.PHONY: linux_clean
+.PHONY: windows_load
+.PHONY: windows_unload
+.PHONY: driver_load
+.PHONY: driver_unload
 .PHONY: load
 .PHONY: unload
 .PHONY: start
@@ -101,37 +104,22 @@ else
 endif
 
 windows_load: force
-	rm -Rf %BUILD_ABS%/outdir
-	rm -Rf %BUILD_ABS%/intdir
-	SCRIPT_PATH=`cygpath -w %HYPER_ABS%/tools/scripts/build_windows.bat`; \
-	HYPER_ABS_PATH=`cygpath -w %HYPER_ABS%`; \
-	BUILD_ABS_PATH=`cygpath -w %BUILD_ABS%`; \
-	DATE=`date +%m/%d/%Y`; \
-	TIME=`date +%H%M%S`; \
-	cmd.exe /c $$SCRIPT_PATH $$HYPER_ABS_PATH $$BUILD_ABS_PATH $$DATE $$TIME
-	/cygdrive/c/ewdk/Program\ Files/Windows\ Kits/10/bin/x64/certmgr /add `cygpath -w %BUILD_ABS%/outdir/bareflank.cer` /s /r localMachine root
-	/cygdrive/c/ewdk/Program\ Files/Windows\ Kits/10/bin/x64/certmgr /add `cygpath -w %BUILD_ABS%/outdir/bareflank.cer` /s /r localMachine trustedpublisher
-	/cygdrive/c/ewdk/Program\ Files/Windows\ Kits/10/Tools/x64/devcon remove "ROOT\bareflank"
-	/cygdrive/c/ewdk/Program\ Files/Windows\ Kits/10/Tools/x64/devcon install `cygpath -w %BUILD_ABS%/outdir/bareflank/bareflank.inf` "ROOT\bareflank"
+	@%BUILD_ABS%/build_scripts/build_driver.sh
 
 windows_unload: force
-	rm -Rf %BUILD_ABS%/outdir
-	rm -Rf %BUILD_ABS%/intdir
-	/cygdrive/c/ewdk/Program\ Files/Windows\ Kits/10/Tools/x64/devcon remove "ROOT\bareflank"
+	@%BUILD_ABS%/build_scripts/clean_driver.sh
 
 linux_load: force
-	@cd %HYPER_ABS%/bfdrivers/src/arch/linux; \
-	$(SUDO) make unload; \
-	make clean; \
-	make; \
-	$(SUDO) make load
+	@%BUILD_ABS%/build_scripts/build_driver.sh
 
 linux_unload: force
-	@cd %HYPER_ABS%/bfdrivers/src/arch/linux; \
-	$(SUDO) make unload; \
-	make clean
+	@%BUILD_ABS%/build_scripts/clean_driver.sh
 
-linux_clean: linux_unload
+driver_load:
+	@%BUILD_ABS%/build_scripts/build_driver.sh
+
+driver_unload: force
+	@%BUILD_ABS%/build_scripts/clean_driver.sh
 
 load: force
 	@%BUILD_ABS%/build_scripts/filter_module_file.sh $(MODULE_FILE) $(FILTERED_MODULE_FILE)
