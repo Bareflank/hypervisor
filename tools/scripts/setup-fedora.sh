@@ -44,7 +44,7 @@ fi
 # ------------------------------------------------------------------------------
 
 option_help() {
-    echo -e "Usage: setup-ubuntu.sh [OPTION]"
+    echo -e "Usage: setup-fedora.sh [OPTION]"
     echo -e "Sets up the system to compile / use Bareflank"
     echo -e ""
     echo -e "       -h, --help                       show this help menu"
