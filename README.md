@@ -38,6 +38,13 @@ that the provided code works as expected.
 
 ![](https://travis-ci.org/Bareflank/hypervisor.svg?branch=master)
 
+Currently we have support for:
+- Ubuntu 14.04, 16.04
+- Debian Stretch
+- Fedora 23
+- Windows 10 (experimental)
+- Windows 8.1 (experimental)
+
 ## Motivation
 
 Most people think that hypervisors are meant to virtualize servers and
@@ -103,6 +110,7 @@ a supported platform, you should be able to run the following:
 cd ~/
 git https://github.com/bareflank/hypervisor.git
 cd ~/hypervisor
+git checkout -b v1.0.0
 
 ./tools/scripts/setup-<platform>.sh
 ```
@@ -122,7 +130,7 @@ entry points. Bareflank uses the driver entry point to gain kernel level
 access to the system to load the hypervisor. On Linux, this is as simple as:
 
 ```
-make driver_load
+make linux_load
 make load
 make start
 ```
@@ -139,7 +147,7 @@ to reverse this:
 ```
 make stop
 make unload
-make driver_unload
+make linux_unload
 ```
 
 For more detailed instructions please read the following (based on which OS your using):
