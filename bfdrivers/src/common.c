@@ -91,7 +91,7 @@ resolve_symbol(const char *name, void **sym, struct module_t *module)
         return BF_ERROR_NO_MODULES_ADDED;
 
     str.buf = name;
-    str.len = symbol_length(name);
+    str.len = (bfelf64_sword)symbol_length(name);
 
     if (module == 0)
     {
@@ -99,7 +99,7 @@ resolve_symbol(const char *name, void **sym, struct module_t *module)
         if (ret != BFELF_SUCCESS)
         {
             ALERT("%s could not be found: %" PRId64 " - %s\n", name, ret,
-                  bfelf_error(ret));
+                  bfelf_error((bfelf64_sword)ret));
             return ret;
         }
     }
@@ -109,7 +109,7 @@ resolve_symbol(const char *name, void **sym, struct module_t *module)
         if (ret != BFELF_SUCCESS)
         {
             ALERT("%s could not be found: %" PRId64 " - %s\n", name, ret,
-                  bfelf_error(ret));
+                  bfelf_error((bfelf64_sword)ret));
             return ret;
         }
     }
@@ -383,7 +383,7 @@ common_add_module(char *file, int64_t fsize)
     if (ret != BFELF_SUCCESS)
     {
         ALERT("add_module: failed to initialize elf file: %" PRId64 " - %s\n",
-              ret, bfelf_error(ret));
+              ret, bfelf_error((bfelf64_sword)ret));
         return ret;
     }
 
@@ -458,7 +458,7 @@ common_load_vmm(void)
         if (ret != BFELF_SUCCESS)
         {
             ALERT("load_vmm: failed to add elf file to the elf loader: "
-                  "%" PRId64 " - %s\n", ret, bfelf_error(ret));
+                  "%" PRId64 " - %s\n", ret, bfelf_error((bfelf64_sword)ret));
             goto failure;
         }
     }
@@ -467,7 +467,7 @@ common_load_vmm(void)
     if (ret != BFELF_SUCCESS)
     {
         ALERT("load_vmm: failed to relocate the elf loader: %" PRId64 " - %s\n",
-              ret, bfelf_error(ret));
+              ret, bfelf_error((bfelf64_sword)ret));
         goto failure;
     }
 
@@ -586,6 +586,8 @@ int64_t
 common_start_vmm(void)
 {
     int64_t ret = 0;
+    int64_t num = 0;
+    int64_t caller_affinity = 0;
 
     if (common_vmm_status() == VMM_CORRUPT)
     {
@@ -603,10 +605,14 @@ common_start_vmm(void)
         return BF_ERROR_VMM_INVALID_STATE;
     }
 
-    for (g_num_cpus_started = 0; g_num_cpus_started < platform_num_cpus(); g_num_cpus_started++)
+    num = platform_num_cpus();
+    if (num > MAX_VCPUS)
+        num = MAX_VCPUS;
+
+    for (g_num_cpus_started = 0; g_num_cpus_started < num; g_num_cpus_started++)
     {
-        ret = platform_set_affinity(g_num_cpus_started);
-        if (ret != BFELF_SUCCESS)
+        caller_affinity = platform_set_affinity(g_num_cpus_started);
+        if (caller_affinity < 0)
         {
             ALERT("start_vmm: failed to set affinity: %" PRId64 "\n", ret);
             goto failure;
@@ -627,9 +633,11 @@ common_start_vmm(void)
         }
 
         platform_start();
+        platform_restore_affinity(caller_affinity);
     }
 
     g_vmm_status = VMM_RUNNING;
+
     return BF_SUCCESS;
 
 failure:
@@ -643,6 +651,7 @@ common_stop_vmm(void)
 {
     int64_t i = 0;
     int64_t ret = 0;
+    int64_t caller_affinity = 0;
 
     if (common_vmm_status() == VMM_CORRUPT)
     {
@@ -662,8 +671,8 @@ common_stop_vmm(void)
 
     for (i = g_num_cpus_started - 1; i >= 0 ; i--)
     {
-        ret = platform_set_affinity(i);
-        if (ret != BFELF_SUCCESS)
+        caller_affinity = platform_set_affinity(i);
+        if (caller_affinity < 0)
         {
             ALERT("stop_vmm: failed to set affinity: %" PRId64 "\n", ret);
             goto corrupted;
@@ -677,6 +686,7 @@ common_stop_vmm(void)
         }
 
         platform_stop();
+        platform_restore_affinity(caller_affinity);
     }
 
     g_vmm_status = VMM_LOADED;

@@ -38,6 +38,10 @@ NATIVE_LDFLAGS+=
 NATIVE_ARFLAGS+=
 NATIVE_DEFINES+=
 
+ifeq ($(OS), windows)
+    NATIVE_DEFINES+=-Wl,--enable-auto-import
+endif
+
 ################################################################################
 # Output
 ################################################################################

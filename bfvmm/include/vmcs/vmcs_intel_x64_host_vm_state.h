@@ -91,6 +91,7 @@ public:
     uint64_t ia32_debugctl_msr() const override { return m_ia32_debugctl_msr; }
     uint64_t ia32_pat_msr() const override { return m_ia32_pat_msr; }
     uint64_t ia32_efer_msr() const override { return m_ia32_efer_msr; }
+    uint64_t ia32_perf_global_ctrl_msr() const { return m_ia32_perf_global_ctrl_msr; }
     uint64_t ia32_sysenter_cs_msr() const override { return m_ia32_sysenter_cs_msr; }
     uint64_t ia32_sysenter_esp_msr() const override { return m_ia32_sysenter_esp_msr; }
     uint64_t ia32_sysenter_eip_msr() const override { return m_ia32_sysenter_eip_msr; }
@@ -166,6 +167,7 @@ public:
         PRINT_STATE(m_ia32_debugctl_msr);
         PRINT_STATE(m_ia32_pat_msr);
         PRINT_STATE(m_ia32_efer_msr);
+        PRINT_STATE(m_ia32_perf_global_ctrl_msr);
         PRINT_STATE(m_ia32_sysenter_cs_msr);
         PRINT_STATE(m_ia32_sysenter_esp_msr);
         PRINT_STATE(m_ia32_sysenter_eip_msr);
@@ -206,6 +208,7 @@ private:
     uint64_t m_ia32_debugctl_msr;
     uint64_t m_ia32_pat_msr;
     uint64_t m_ia32_efer_msr;
+    uint64_t m_ia32_perf_global_ctrl_msr;
     uint64_t m_ia32_sysenter_cs_msr;
     uint64_t m_ia32_sysenter_esp_msr;
     uint64_t m_ia32_sysenter_eip_msr;

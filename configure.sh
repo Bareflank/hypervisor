@@ -514,6 +514,8 @@ copy_scripts() {
     copy_script "build_libcxx.sh"
     copy_script "build_libcxxabi.sh"
     copy_script "build_libbfc.sh"
+    copy_script "build_driver.sh"
+    copy_script "clean_driver.sh"
     copy_script "fetch_newlib.sh"
     copy_script "fetch_libcxx.sh"
     copy_script "fetch_libcxxabi.sh"

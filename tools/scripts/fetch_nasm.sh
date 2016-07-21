@@ -34,7 +34,8 @@ do
     sleep 15
 done
 
-tar xf nasm-*.tar.bz2
+tar xfv nasm-*.tar.bz2
+sleep 1
 mv nasm-*/ src_nasm
 rm nasm-*.tar.bz2
 

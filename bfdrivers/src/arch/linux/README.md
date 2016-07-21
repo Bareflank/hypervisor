@@ -12,7 +12,7 @@ If you plan to use an unsupported platform, start by modifying a
 setup-\<platform\>.sh to suit your needs. In some cases, all you have to
 do is enable the platform your using.
 
-To compile bareflank, first start by downloading the repo, and running the
+To compile Bareflank, first start by downloading the repo, and running the
 setup-\<platform\>.sh script
 
 ```
@@ -28,19 +28,19 @@ This can be done by doing the following:
 
 ```
 make
-make linux_load
+make driver_load
 ```
 
 To cleanup everything, run the following:
 
 ```
-make linux_unload
+make driver_unload
 make clean
 ```
 
 ## Usage Instructions
 
-To use the bareflank hypervisor, you will use the bareflank manager (bfm).
+To use the Bareflank hypervisor, you will use the Bareflank manager (bfm).
 This can be done manually by executing:
 
 ```
@@ -61,7 +61,7 @@ sudo LD_LIBRARY_PATH=. ./bfm unload
 popd
 ```
 
-On Linux, you can also run the following shortcuts from the repo's root:
+On Linux, you can also run the following make shortcuts:
 
 ```
 make load
@@ -112,10 +112,10 @@ cd ~/build
 make
 make unittest
 
-make linux_load
+make driver_load
 make quick
 make stop
-make linux_unload
+make driver_unload
 
 ```
 

@@ -38,6 +38,10 @@ NATIVE_LDFLAGS+=
 NATIVE_ARFLAGS+=
 NATIVE_DEFINES+=
 
+ifeq ($(OS), windows)
+    NATIVE_DEFINES+=-Wl,--export-all-symbols
+endif
+
 ################################################################################
 # Output
 ################################################################################
@@ -67,9 +71,11 @@ LIBRARY_PATHS+=
 # Environment Specific
 ################################################################################
 
-WINDOWS_SOURCES+=
-WINDOWS_INCLUDE_PATHS+=
-WINDOWS_LIBS+=
+WINDOWS_SOURCES+=arch/windows/ioctl.cpp
+WINDOWS_SOURCES+=arch/windows/ioctl_private.cpp
+WINDOWS_SOURCES+=arch/windows/stack.cpp
+WINDOWS_INCLUDE_PATHS+=arch/windows/
+WINDOWS_LIBS+=setupapi
 WINDOWS_LIBRARY_PATHS+=
 
 LINUX_SOURCES+=arch/linux/ioctl.cpp

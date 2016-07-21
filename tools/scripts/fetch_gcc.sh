@@ -34,7 +34,8 @@ do
     sleep 15
 done
 
-tar xf gcc-*.tar.bz2
+tar xfv gcc-*.tar.bz2
+sleep 1
 mv gcc-*/ src_gcc
 rm gcc-*.tar.bz2
 

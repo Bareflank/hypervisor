@@ -38,6 +38,7 @@ void __halt(void);
 void __stop(void);
 
 void __invd(void);
+void __wbinvd(void);
 
 uint32_t __cpuid_eax(uint32_t val);
 uint32_t __cpuid_ebx(uint32_t val);
@@ -53,9 +54,6 @@ uint64_t __read_rflags(void);
 
 uint64_t __read_msr(uint32_t msr);
 void __write_msr(uint32_t msr, uint64_t val);
-
-void __read_msr_reg(uint32_t msr, uint32_t *edx, uint32_t *eax);
-void __write_msr_reg(uint32_t msr, uint32_t edx, uint32_t eax);
 
 uint64_t __read_rip(void);
 
@@ -106,8 +104,8 @@ void __write_gdt(void *gdt);
 void __read_idt(void *idt);
 void __write_idt(void *idt);
 
-void __outb(uint16_t val, uint16_t port);
-void __outw(uint16_t val, uint16_t port);
+void __outb(uint16_t port, uint8_t val);
+void __outw(uint16_t port, uint16_t val);
 
 uint8_t __inb(uint16_t port);
 uint16_t __inw(uint16_t port);
@@ -143,6 +141,9 @@ public:
     virtual void invd() const noexcept
     { __invd(); }
 
+    virtual void wbinvd() const noexcept
+    { __wbinvd(); }
+
     virtual uint32_t cpuid_eax(uint32_t val) const noexcept
     { return __cpuid_eax(val); }
 
@@ -169,15 +170,6 @@ public:
 
     virtual void write_msr(uint32_t msr, uint64_t val) const noexcept
     { __write_msr(msr, val); }
-
-    virtual void read_msr_reg(uint32_t msr, uint32_t *edx, uint32_t *eax)
-    { __read_msr_reg(msr, edx, eax); }
-
-    virtual void read_msr_reg(uint32_t msr, uint64_t *edx, uint64_t *eax)
-    { __read_msr_reg(msr, (uint32_t *)edx, (uint32_t *)eax); }
-
-    virtual void write_msr_reg(uint32_t msr, uint32_t edx, uint32_t eax)
-    { __write_msr_reg(msr, edx, eax); }
 
     virtual uint64_t read_rip() const noexcept
     { return __read_rip(); }
@@ -276,10 +268,10 @@ public:
     { __write_idt(idt); }
 
     virtual void write_portio_8(uint16_t port, uint8_t value) const noexcept
-    { __outb(value, port); }
+    { __outb(port, value); }
 
     virtual void write_portio_16(uint16_t port, uint16_t value) const noexcept
-    { __outw(value, port); }
+    { __outw(port, value); }
 
     virtual uint8_t read_portio_8(uint16_t port) const noexcept
     { return __inb(port); }
@@ -374,6 +366,7 @@ public:
 
 // 64-ia-32-architectures-software-developer-manual, section 35.1
 // IA-32 Architectural MSRs
+#define IA32_PERF_GLOBAL_CTRL_MSR                                   0x0000038F
 #define IA32_DEBUGCTL_MSR                                           0x000001D9
 #define IA32_SYSENTER_CS_MSR                                        0x00000174
 #define IA32_SYSENTER_ESP_MSR                                       0x00000175

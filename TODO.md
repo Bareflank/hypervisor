@@ -37,6 +37,12 @@ Version 1.1 TODO:
 - Trigger a rebuild if bfcrt changes
 - Trigger a rebuild of libcxx is bfunwind changes
 - Some scripts use "-" while others use "_", we should be consistent
+- The vcpuid needs to be figured out. Since we need to be able to move VMCS
+  structures from core to core to handle rescheduling a task on a different
+  CPU, there is probably no need to make this complicated. Just need to make
+  sure that the vcpuid is a uint64 everywhere.
+- Need to write a disclaimer about how multi-core is supported, but there is
+  no support for std::mutex at the moment, so there is no thread safety
 
 Version 1.2 TODO:
 - Move to JSON. Once we need to be able to start a guest, we have a lot of
@@ -62,6 +68,7 @@ Version 1.2 TODO:
   is UEFI and Windows / Linux has been booted, we don't have a driver
   that can talk to the hypervisor like a type 2 (maybe we can register a
   UEFI runtime service?)
+- Missing ctrl checks for entry / exit
 
 Version 1.3 TODO:
 - We should consider running a static analysis tool on the code to identify

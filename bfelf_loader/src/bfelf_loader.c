@@ -38,9 +38,15 @@
 #if defined(__linux__)
 #include <linux/module.h>
 #define ALERT(...) printk("[ELF ALERT]: " __VA_ARGS__)
-#else
+#elif defined(__darwin__)
 #define ALERT(...) IOLog("[ELF ALERT]: " __VA_ARGS__)
+#elif defined(_WIN32)
+#include <ntddk.h>
+#pragma warning(disable : 4242)
+#pragma warning(disable : 4244)
+#define ALERT(...) DbgPrintEx(DPFLTR_IHVDRIVER_ID, DPFLTR_ERROR_LEVEL,"[ELF ALERT]: " __VA_ARGS__)
 #endif
+
 #else
 #ifdef __linux__
 #include <stdio.h>

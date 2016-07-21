@@ -54,6 +54,7 @@ vmcs_intel_x64_host_vm_state::vmcs_intel_x64_host_vm_state(const std::shared_ptr
     m_ia32_debugctl_msr = intrinsics->read_msr(IA32_DEBUGCTL_MSR);
     m_ia32_pat_msr = intrinsics->read_msr(IA32_PAT_MSR);
     m_ia32_efer_msr = intrinsics->read_msr(IA32_EFER_MSR);
+    m_ia32_perf_global_ctrl_msr = intrinsics->read_msr(IA32_PERF_GLOBAL_CTRL_MSR);
     m_ia32_sysenter_cs_msr = intrinsics->read_msr(IA32_SYSENTER_CS_MSR);
     m_ia32_sysenter_esp_msr = intrinsics->read_msr(IA32_SYSENTER_ESP_MSR);
     m_ia32_sysenter_eip_msr = intrinsics->read_msr(IA32_SYSENTER_EIP_MSR);

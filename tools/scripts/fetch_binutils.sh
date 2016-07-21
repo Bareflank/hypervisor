@@ -34,7 +34,8 @@ do
     sleep 15
 done
 
-tar xf binutils-*.tar.bz2
+tar xfv binutils-*.tar.bz2
+sleep 1
 mv binutils-*/ src_binutils
 rm -Rf binutils-*.tar.bz2
 

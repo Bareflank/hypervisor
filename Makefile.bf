@@ -79,7 +79,10 @@ include %HYPER_ABS%/common/common_subdir.mk
 
 .PHONY: linux_load
 .PHONY: linux_unload
-.PHONY: linux_clean
+.PHONY: windows_load
+.PHONY: windows_unload
+.PHONY: driver_load
+.PHONY: driver_unload
 .PHONY: load
 .PHONY: unload
 .PHONY: start
@@ -94,39 +97,49 @@ include %HYPER_ABS%/common/common_subdir.mk
 .PHONY: doxygen
 .PHONY: doxygen_clean
 
+ifeq ($(shell uname -s), Linux)
+    SUDO:=sudo
+else
+    SUDO:=
+endif
+
+windows_load: force
+	@%BUILD_ABS%/build_scripts/build_driver.sh
+
+windows_unload: force
+	@%BUILD_ABS%/build_scripts/clean_driver.sh
+
 linux_load: force
-	@cd %HYPER_ABS%/bfdrivers/src/arch/linux; \
-	sudo make unload; \
-	make clean; \
-	make; \
-	sudo make load
+	@%BUILD_ABS%/build_scripts/build_driver.sh
 
 linux_unload: force
-	@cd %HYPER_ABS%/bfdrivers/src/arch/linux; \
-	sudo make unload; \
-	make clean
+	@%BUILD_ABS%/build_scripts/clean_driver.sh
 
-linux_clean: linux_unload
+driver_load:
+	@%BUILD_ABS%/build_scripts/build_driver.sh
+
+driver_unload: force
+	@%BUILD_ABS%/build_scripts/clean_driver.sh
 
 load: force
 	@%BUILD_ABS%/build_scripts/filter_module_file.sh $(MODULE_FILE) $(FILTERED_MODULE_FILE)
-	@sudo LD_LIBRARY_PATH=%BUILD_ABS%/makefiles/bfm/bin/native/ %BUILD_ABS%/makefiles/bfm/bin/native/bfm load $(FILTERED_MODULE_FILE)
+	@$(SUDO) LD_LIBRARY_PATH=%BUILD_ABS%/makefiles/bfm/bin/native/ %BUILD_ABS%/makefiles/bfm/bin/native/bfm load $(FILTERED_MODULE_FILE)
 
 unload: force
-	@sudo LD_LIBRARY_PATH=%BUILD_ABS%/makefiles/bfm/bin/native/ %BUILD_ABS%/makefiles/bfm/bin/native/bfm unload
+	@$(SUDO) LD_LIBRARY_PATH=%BUILD_ABS%/makefiles/bfm/bin/native/ %BUILD_ABS%/makefiles/bfm/bin/native/bfm unload
 
 start: force
 	@sync
-	@sudo LD_LIBRARY_PATH=%BUILD_ABS%/makefiles/bfm/bin/native/ %BUILD_ABS%/makefiles/bfm/bin/native/bfm start
+	@$(SUDO) LD_LIBRARY_PATH=%BUILD_ABS%/makefiles/bfm/bin/native/ %BUILD_ABS%/makefiles/bfm/bin/native/bfm start
 
 stop: force
-	@sudo LD_LIBRARY_PATH=%BUILD_ABS%/makefiles/bfm/bin/native/ %BUILD_ABS%/makefiles/bfm/bin/native/bfm stop
+	@$(SUDO) LD_LIBRARY_PATH=%BUILD_ABS%/makefiles/bfm/bin/native/ %BUILD_ABS%/makefiles/bfm/bin/native/bfm stop
 
 dump: force
-	@sudo LD_LIBRARY_PATH=%BUILD_ABS%/makefiles/bfm/bin/native/ %BUILD_ABS%/makefiles/bfm/bin/native/bfm dump --vcpuid $(VCPUID)
+	@$(SUDO) LD_LIBRARY_PATH=%BUILD_ABS%/makefiles/bfm/bin/native/ %BUILD_ABS%/makefiles/bfm/bin/native/bfm dump --vcpuid $(VCPUID)
 
 status: force
-	@sudo LD_LIBRARY_PATH=%BUILD_ABS%/makefiles/bfm/bin/native/ %BUILD_ABS%/makefiles/bfm/bin/native/bfm status
+	@$(SUDO) LD_LIBRARY_PATH=%BUILD_ABS%/makefiles/bfm/bin/native/ %BUILD_ABS%/makefiles/bfm/bin/native/bfm status
 
 quick: load start
 

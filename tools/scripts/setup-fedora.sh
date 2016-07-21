@@ -149,7 +149,7 @@ if [[ ! $noconfigure == "true" ]]; then
 fi
 
 if [[ $local == "true" ]]; then
-    ./tools/scripts/create-cross-compiler.sh
+    CROSS_COMPILER=gcc_520 ./tools/scripts/create-cross-compiler.sh
 fi
 
 # ------------------------------------------------------------------------------

@@ -50,6 +50,7 @@ if [[ ! -f "$BUILD_ABS/sysroot/x86_64-elf/include/unwind.h" ]]; then
 fi
 
 cmake $BUILD_ABS/source_libcxxabi/ \
+    -DCMAKE_SYSTEM_NAME=Linux \
     -DLLVM_PATH=$BUILD_ABS/source_llvm \
     -DLIBCXXABI_LIBCXX_PATH=$BUILD_ABS/source_libcxx/ \
     -DCMAKE_INSTALL_PREFIX=$BUILD_ABS/sysroot/x86_64-elf/ \

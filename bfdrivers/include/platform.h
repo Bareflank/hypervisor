@@ -130,11 +130,23 @@ platform_num_cpus(void);
  * Changes the current core that the driver is running on.
  *
  * @param affinity the cpu number to change to
- * @return 0 on success, failure otherwise
+ * @return The affinity mask of the CPU before the change
  */
 int64_t
 platform_set_affinity(int64_t affinity);
 
+/**
+ * Restore CPU affinity
+ *
+ * If an OS requires the cores used by the user space thread
+ * to match on return from a call into the kernel (e.g. IOCTL),
+ * reset the affinity to it's previous state.
+ *
+ * @param affinity the cpu affinity mask.
+ *
+ */
+void
+platform_restore_affinity(int64_t affinity_mask);
 #ifdef __cplusplus
 }
 #endif

@@ -73,7 +73,10 @@ fstat(int file, struct stat *sbuf)
 
 #if defined(NO_HYPER_TEST)
 
+#include <debug_ring/debug_ring.h>
 #include <serial/serial_port_intel_x64.h>
+
+debug_ring *dr = nullptr;
 
 extern "C" int
 write(int file, const void *buffer, size_t count)
@@ -83,7 +86,13 @@ write(int file, const void *buffer, size_t count)
 
     if (file == 1 || file == 2)
     {
-        serial_port_intel_x64::instance()->write(std::string((char *)buffer, count));
+        auto str = std::string((char *)buffer, count);
+
+        if (dr == nullptr)
+            dr = new debug_ring(0);
+
+        dr->write(str);
+        serial_port_intel_x64::instance()->write(str);
         return count;
     }
 
@@ -173,7 +182,7 @@ uintptr_t __stack_chk_guard = 0x595e9fbd94fda766;
 extern "C" void
 __stack_chk_fail(void)
 {
-    auto msg = "__stack_chk_fail: buffer overflow detected!!!";
+    auto msg = "__stack_chk_fail: buffer overflow detected!!!\n";
     write(1, msg, strlen(msg));
     abort();
 }

@@ -91,7 +91,10 @@ Bareflank Hypervisor
 NOTE: Our master branch is our working, experimental branch and might be
 unstable. If you would like to use Bareflank, we recommend using a tagged
 release which has been more thoroughly tested. Of course if you happen to
-find a bug, please let us know [here](https://github.com/Bareflank/hypervisor/issues)
+find a bug, please let us know
+[here](https://github.com/Bareflank/hypervisor/issues). These instructions
+might vary from release to release, so if something doesn't work, please
+refer to the instructions provided in the tagged version.
 
 Before you can compile, the build environment must be present. If you are on
 a supported platform, you should be able to run the following:
@@ -100,7 +103,6 @@ a supported platform, you should be able to run the following:
 cd ~/
 git https://github.com/bareflank/hypervisor.git
 cd ~/hypervisor
-git checkout -b v1.0.0
 
 ./tools/scripts/setup-<platform>.sh
 ```
@@ -112,7 +114,7 @@ the cross compilers you can run:
 
 ```
 make
-make unittest
+make run_tests
 ```
 
 To run the hypervisor, you need to first compile, and load one of the driver
@@ -120,7 +122,7 @@ entry points. Bareflank uses the driver entry point to gain kernel level
 access to the system to load the hypervisor. On Linux, this is as simple as:
 
 ```
-make linux_load
+make driver_load
 make load
 make start
 ```
@@ -137,7 +139,7 @@ to reverse this:
 ```
 make stop
 make unload
-make linux_unload
+make driver_unload
 ```
 
 For more detailed instructions please read the following (based on which OS your using):
@@ -173,7 +175,7 @@ Released: April 27, 2016 <br>
 Target: September 2016
 
 * ~~Multi-Core Support~~
-* Windows Support
+* ~~Windows Support~~
 * Updated C++ Environment
 * ~~Isolated VMM~~
 
