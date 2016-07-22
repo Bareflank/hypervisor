@@ -150,7 +150,7 @@ make unload
 make linux_unload
 ```
 
-For more detailed instructions please read the following (based on which OS your using):
+For more detailed instructions please read the following (based on which OS you are using):
 
 [Driver Entry Documentation](https://github.com/Bareflank/hypervisor/tree/master/bfdrivers/src/arch)
 
