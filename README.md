@@ -49,7 +49,7 @@ Currently we have support for:
 
 Most people think that hypervisors are meant to virtualize servers and
 provide a means to run Windows on a Mac, but there is a whole field
-of research were hypervisors are used without guest virtual
+of research where hypervisors are used without guest virtual
 machines. Since a hypervisor is capable of controlling the host OS
 running underneath it, (so called "ring -1"), hypervisors have been
 used for introspection, reverse engineering, anti-virus, containerization,
