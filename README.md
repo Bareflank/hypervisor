@@ -218,8 +218,8 @@ v2.1 (LGPL).
 
 ## Related
 
-If your interested in Bareflank, you might also be interested in the following
-hypervisor projects:
+If you’re interested in Bareflank, you might also be interested in the
+following hypervisor projects:
 
 **MoRE:** <br>
 https://github.com/ainfosec/MoRE
