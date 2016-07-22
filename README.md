@@ -49,7 +49,7 @@ Currently we have support for:
 
 Most people think that hypervisors are meant to virtualize servers and
 provide a means to run Windows on a Mac, but there is a whole field
-of research were hypervisors are used without guest virtual
+of research where hypervisors are used without guest virtual
 machines. Since a hypervisor is capable of controlling the host OS
 running underneath it, (so called "ring -1"), hypervisors have been
 used for introspection, reverse engineering, anti-virus, containerization,
@@ -65,7 +65,7 @@ Bareflank's goal is to provide the scaffolding needed to create any type of
 hypervisor. To support this, Bareflank leverages C++ not only to provide
 a clear method for extending the hypervisor via inheritance, but also to
 provide access to the C++ STL to reduce the time it takes to prototype and
-implement new technologies. For example, suppose your writing an
+implement new technologies. For example, suppose you’re writing an
 introspection hypervisor that needs to store the different system calls that
 are being made in a hash table for fast lookups. Doing this in an existing C
 based hypervisor might require you to create your own hash table implementation.
@@ -115,7 +115,7 @@ git checkout -b v1.0.0
 ./tools/scripts/setup-<platform>.sh
 ```
 
-If you are not on a supported platform, your are more than welcome to modify
+If you are not on a supported platform, you are more than welcome to modify
 an existing setup-\<platform\>.sh script to suite your needs. Its likely
 the hypervisor will work assuming you can get it to compile. Once you have
 the cross compilers you can run:
@@ -150,7 +150,7 @@ make unload
 make linux_unload
 ```
 
-For more detailed instructions please read the following (based on which OS your using):
+For more detailed instructions please read the following (based on which OS you are using):
 
 [Driver Entry Documentation](https://github.com/Bareflank/hypervisor/tree/master/bfdrivers/src/arch)
 
@@ -218,8 +218,8 @@ v2.1 (LGPL).
 
 ## Related
 
-If your interested in Bareflank, you might also be interested in the following
-hypervisor projects:
+If you’re interested in Bareflank, you might also be interested in the
+following hypervisor projects:
 
 **MoRE:** <br>
 https://github.com/ainfosec/MoRE
