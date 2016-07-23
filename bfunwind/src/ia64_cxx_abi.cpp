@@ -26,6 +26,12 @@
 #include <ia64_cxx_abi.h>
 
 // -----------------------------------------------------------------------------
+// Global
+// -----------------------------------------------------------------------------
+
+uint64_t g_phase = 0;
+
+// -----------------------------------------------------------------------------
 // Context
 // -----------------------------------------------------------------------------
 
@@ -102,6 +108,7 @@ private_phase1(_Unwind_Context *context)
     log("============================================================\n");
     log("Phase #1\n\n");
 
+    g_phase = 1;
     private_step(context, 0);
 
     return private_step_loop(context, [](_Unwind_Context * context) -> bool
@@ -129,6 +136,7 @@ private_phase2(_Unwind_Context *context)
     log("============================================================\n");
     log("Phase #2\n\n");
 
+    g_phase = 2;
     private_step(context, 0);
 
     return private_step_loop(context, [](_Unwind_Context * context) -> bool
