@@ -240,7 +240,7 @@ bfelf_loader_ut::load_elf_file(bfelf_file_t *ef)
 
         ret = bfelf_file_get_segment(ef, i, &phdr);
         if (ret != BFELF_SUCCESS)
-            return false;
+            return nullptr;
 
         if (total < phdr->p_vaddr + phdr->p_memsz)
             total = phdr->p_vaddr + phdr->p_memsz;
@@ -260,7 +260,7 @@ bfelf_loader_ut::load_elf_file(bfelf_file_t *ef)
 
         ret = bfelf_file_get_segment(ef, i, &phdr);
         if (ret != BFELF_SUCCESS)
-            return false;
+            return nullptr;
 
         auto exec_p = exec + phdr->p_vaddr;
         auto file_p = ef->file + phdr->p_offset;
