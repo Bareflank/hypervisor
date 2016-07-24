@@ -65,7 +65,7 @@ RUN apt-get install -y cmake
 
 RUN mkdir -p /tools/scripts/
 
-COPY ./tools/scripts/create-cross-compiler.sh /tools/scripts/create-cross-compiler.sh
+COPY ./tools/scripts/create_cross_compiler.sh /tools/scripts/create_cross_compiler.sh
 
 COPY ./tools/scripts/fetch_binutils.sh /tools/scripts/fetch_binutils.sh
 COPY ./tools/scripts/fetch_gcc.sh /tools/scripts/fetch_gcc.sh
@@ -79,4 +79,4 @@ COPY ./tools/scripts/build_nasm.sh /tools/scripts/build_nasm.sh
 # Script
 # ------------------------------------------------------------------------------
 
-RUN CROSS_COMPILER=gcc_530 ./tools/scripts/create-cross-compiler.sh
+RUN CROSS_COMPILER=gcc_530 ./tools/scripts/create_cross_compiler.sh

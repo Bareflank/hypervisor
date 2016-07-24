@@ -15,7 +15,7 @@ env:
 
 install:
 - if [[ -n $(./tools/astyle/linux/run.sh | grep Formatted) ]]; then echo "You must run astyle before submitting a pull request"; exit -1; fi
-- travis_wait 40 ./tools/scripts/setup-ubuntu.sh -g $COMPILER
+- travis_wait 40 ./tools/scripts/setup_ubuntu.sh -g $COMPILER
 
 script:
 - make -j2

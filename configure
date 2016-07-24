@@ -78,8 +78,8 @@ nt() {
 # It's also not detecting when a makefile has changed
 
 check_version() {
-    if [[ -f "$BUILD_ABS/configure_version" ]]; then
-        current_version=`cat $BUILD_ABS/configure_version`
+    if [[ -f "$BUILD_ABS/build_version" ]]; then
+        current_version=`cat $BUILD_ABS/build_version`
     else
         return 0
     fi
@@ -106,7 +106,7 @@ check_env() {
         printf "\"\n" >> $BUILD_ABS/env.sh
     fi
 
-    echo "$version" > $BUILD_ABS/configure_version
+    echo "$version" > $BUILD_ABS/build_version
 }
 
 check_git_working_tree() {
@@ -170,14 +170,14 @@ option_distclean() {
         rm -Rf $BUILD_ABS/makefiles
     fi
 
-    if [[ -f "$BUILD_ABS/configure_version" ]] || \
+    if [[ -f "$BUILD_ABS/build_version" ]] || \
        [[ -f "$BUILD_ABS/env.sh" ]] || \
        [[ -f "$BUILD_ABS/git_working_tree.sh" ]] || \
        [[ -f "$BUILD_ABS/module_file" ]] || \
        [[ -f "$BUILD_ABS/build_scripts" ]]; then
         echo -e "removing:$CB scripts$CE"
         rm -Rf $BUILD_ABS/Makefile
-        rm -Rf $BUILD_ABS/configure_version
+        rm -Rf $BUILD_ABS/build_version
         rm -Rf $BUILD_ABS/env.sh
         rm -Rf $BUILD_ABS/git_working_tree.sh
         rm -Rf $BUILD_ABS/module_file
@@ -508,7 +508,7 @@ copy_script() {
 }
 
 copy_scripts() {
-    copy_script "bareflank-gcc-wrapper.sh"
+    copy_script "bareflank_gcc_wrapper.sh"
     copy_script "filter_module_file.sh"
     copy_script "build_newlib.sh"
     copy_script "build_libcxx.sh"
@@ -530,27 +530,27 @@ copy_scripts() {
 create_wrapper_links () {
     if [[ ! -f "$BUILD_ABS/build_scripts/x86_64-bareflank-gcc" ]]; then
         echo -e "linking compiler script:$CB x86_64-bareflank-gcc$CE"
-        ln -s $BUILD_ABS/build_scripts/bareflank-gcc-wrapper.sh $BUILD_ABS/build_scripts/x86_64-bareflank-gcc
+        ln -s $BUILD_ABS/build_scripts/bareflank_gcc_wrapper.sh $BUILD_ABS/build_scripts/x86_64-bareflank-gcc
     fi
 
     if [[ ! -f "$BUILD_ABS/build_scripts/x86_64-bareflank-g++" ]]; then
         echo -e "linking compiler script:$CB x86_64-bareflank-g++$CE"
-        ln -s $BUILD_ABS/build_scripts/bareflank-gcc-wrapper.sh $BUILD_ABS/build_scripts/x86_64-bareflank-g++
+        ln -s $BUILD_ABS/build_scripts/bareflank_gcc_wrapper.sh $BUILD_ABS/build_scripts/x86_64-bareflank-g++
     fi
 
     if [[ ! -f "$BUILD_ABS/build_scripts/x86_64-bareflank-ar" ]]; then
         echo -e "linking compiler script:$CB x86_64-bareflank-ar$CE"
-        ln -s $BUILD_ABS/build_scripts/bareflank-gcc-wrapper.sh $BUILD_ABS/build_scripts/x86_64-bareflank-ar
+        ln -s $BUILD_ABS/build_scripts/bareflank_gcc_wrapper.sh $BUILD_ABS/build_scripts/x86_64-bareflank-ar
     fi
 
     if [[ ! -f "$BUILD_ABS/build_scripts/x86_64-bareflank-nasm" ]]; then
         echo -e "linking compiler script:$CB x86_64-bareflank-nasm$CE"
-        ln -s $BUILD_ABS/build_scripts/bareflank-gcc-wrapper.sh $BUILD_ABS/build_scripts/x86_64-bareflank-nasm
+        ln -s $BUILD_ABS/build_scripts/bareflank_gcc_wrapper.sh $BUILD_ABS/build_scripts/x86_64-bareflank-nasm
     fi
 
     if [[ ! -f "$BUILD_ABS/build_scripts/x86_64-bareflank-docker" ]]; then
         echo -e "linking compiler script:$CB x86_64-bareflank-docker$CE"
-        ln -s $BUILD_ABS/build_scripts/bareflank-gcc-wrapper.sh $BUILD_ABS/build_scripts/x86_64-bareflank-docker
+        ln -s $BUILD_ABS/build_scripts/bareflank_gcc_wrapper.sh $BUILD_ABS/build_scripts/x86_64-bareflank-docker
     fi
 }
 
@@ -605,9 +605,9 @@ create_root_makefile() {
         rm -Rf $BUILD_ABS/Makefile
         echo -e "default: all" >> $BUILD_ABS/Makefile
         echo -e "Makefile: $HYPER_ABS/Makefile.bf" >> $BUILD_ABS/Makefile
-        echo -e "\t@$HYPER_ABS/configure.sh -r --this-is-make" >> $BUILD_ABS/Makefile
+        echo -e "\t@$HYPER_ABS/configure -r --this-is-make" >> $BUILD_ABS/Makefile
         echo -e "$targets:" >> $BUILD_ABS/Makefile
-        echo -e "\t@$HYPER_ABS/configure.sh -s --this-is-make" >> $BUILD_ABS/Makefile
+        echo -e "\t@$HYPER_ABS/configure -s --this-is-make" >> $BUILD_ABS/Makefile
         echo -e "\t@\$(MAKE) --no-print-directory -C makefiles \$(MAKECMDGOALS)" >> $BUILD_ABS/Makefile
     fi
 }

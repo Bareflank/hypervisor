@@ -44,7 +44,7 @@ lot of time to complete, so please be patient.
 cd ~/
 mkdir build
 cd ~/hypervisor
-./tools/scripts/setup-cygwin.sh -l -o ../build/
+./tools/scripts/setup_cygwin.sh -l -o ../build/
 ```
 
 Once you have a cross compiler setup, you need to build the main source code.
@@ -116,7 +116,7 @@ modules file, you can use the following:
 make [load|quick] MODULES=<path to list>
 ```
 
-Also note that when you run the setup-\<platform\>.sh script, you can ask it
+Also note that when you run the setup_\<platform\>.sh script, you can ask it
 to not configure for you, which allows you to setup an out-of-tree build
 where you can specify your own module file and extensions as follows:
 
@@ -125,7 +125,7 @@ cd ~/
 git clone https://github.com/Bareflank/hypervisor.git
 cd ~/hypervisor
 
-./tools/scripts/setup-ubuntu.sh --no-configure
+./tools/scripts/setup_ubuntu.sh --no-configure
 
 cd ~/
 mkdir build

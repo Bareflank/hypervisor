@@ -9,18 +9,18 @@ NOTE: If you would like to use an unsupported platform, so long as you have
 the latest and greatest docker, and GCC5+, it's likely that a build is
 possble. The above platforms are simply what our developers are testing.
 If you plan to use an unsupported platform, start by modifying a
-setup-\<platform\>.sh to suit your needs. In some cases, all you have to
+setup_\<platform\>.sh to suit your needs. In some cases, all you have to
 do is enable the platform your using.
 
 To compile Bareflank, first start by downloading the repo, and running the
-setup-\<platform\>.sh script
+setup_\<platform\>.sh script
 
 ```
 cd ~/
 git clone https://github.com/Bareflank/hypervisor.git
 cd ~/hypervisor
 
-./tools/scripts/setup-ubuntu.sh
+./tools/scripts/setup_ubuntu.sh
 ```
 
 Once you have a cross compiler setup, you need to build the main source code.
@@ -92,7 +92,7 @@ modules file, you can use the following:
 make [load|quick] MODULES=<path to list>
 ```
 
-Also note that when you run the setup-\<platform\>.sh script, you can ask it
+Also note that when you run the setup_\<platform\>.sh script, you can ask it
 to not configure for you, which allows you to setup an out-of-tree build
 where you can specify your own module file and extensions as follows:
 
@@ -101,7 +101,7 @@ cd ~/
 git clone https://github.com/Bareflank/hypervisor.git
 cd ~/hypervisor
 
-./tools/scripts/setup-ubuntu.sh --no-configure
+./tools/scripts/setup_ubuntu.sh --no-configure
 
 cd ~/
 mkdir build

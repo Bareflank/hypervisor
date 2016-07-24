@@ -112,11 +112,11 @@ git https://github.com/bareflank/hypervisor.git
 cd ~/hypervisor
 git checkout -b v1.0.0
 
-./tools/scripts/setup-<platform>.sh
+./tools/scripts/setup_<platform>.sh
 ```
 
 If you are not on a supported platform, you are more than welcome to modify
-an existing setup-\<platform\>.sh script to suite your needs. Its likely
+an existing setup_\<platform\>.sh script to suite your needs. Its likely
 the hypervisor will work assuming you can get it to compile. Once you have
 the cross compilers you can run:
 

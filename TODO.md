@@ -36,7 +36,6 @@ Version 1.1 TODO:
   we cannot use _exit() at the moment.
 - Trigger a rebuild if bfcrt changes
 - Trigger a rebuild of libcxx is bfunwind changes
-- Some scripts use "-" while others use "_", we should be consistent
 - The vcpuid needs to be figured out. Since we need to be able to move VMCS
   structures from core to core to handle rescheduling a task on a different
   CPU, there is probably no need to make this complicated. Just need to make

@@ -52,7 +52,7 @@ To make all of this work, Bareflank's wrapper script acts like
 GCC and Clang. When "-c" is provided, the code is compiled, and when
 no "-c" is provided, the code is linked.
 
-The create-cross-compiler.sh script compiles this C runtime library as both a
+The build system compiles this C runtime library as both a
 static library and a dynamic library (the dynamic version is not used), and
 places the library in the "sysroot" which is located in
 ~/opt/cross/x86_64-elf/. When each shared library is compiled, the
