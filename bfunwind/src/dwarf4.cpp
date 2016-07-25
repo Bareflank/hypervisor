@@ -46,6 +46,8 @@ template<typename T> T static get(char **p)
         continue; \
     }
 
+#define EXPRESSION_STACK_SIZE 100
+
 // -----------------------------------------------------------------------------
 // Call Frame Information (CFI) Register
 // -----------------------------------------------------------------------------
@@ -212,7 +214,7 @@ private_parse_expression(char *p,
                          register_state *state)
 {
     uint64_t i = 0;
-    uint64_t stack[100];
+    uint64_t stack[EXPRESSION_STACK_SIZE];
 
     stack[i] = initialStackValue;
 
@@ -223,7 +225,7 @@ private_parse_expression(char *p,
         uint8_t opcode = *(uint8_t *)(p);
         p++;
 
-        if (i >= 99)
+        if (i >= EXPRESSION_STACK_SIZE - 1)
             ABORT("out of DWARF expression stack space");
 
         if_opcode(DW_OP_addr,
