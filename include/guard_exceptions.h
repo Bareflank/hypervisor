@@ -37,6 +37,7 @@ guard_exceptions(int64_t error_code, T func)
     }
     catch (bfn::general_exception &ge)
     {
+        bfinfo << bfendl;
         bferror << "----------------------------------------" << bfendl;
         bferror << "- General Exception Caught             -" << bfendl;
         bferror << "----------------------------------------" << bfendl;
@@ -44,6 +45,7 @@ guard_exceptions(int64_t error_code, T func)
     }
     catch (std::exception &e)
     {
+        bfinfo << bfendl;
         bferror << "----------------------------------------" << bfendl;
         bferror << "- Standard Exception Caught            -" << bfendl;
         bferror << "----------------------------------------" << bfendl;
@@ -51,6 +53,7 @@ guard_exceptions(int64_t error_code, T func)
     }
     catch (...)
     {
+        bfinfo << bfendl;
         bferror << "----------------------------------------" << bfendl;
         bferror << "- Unknown Exception Caught             -" << bfendl;
         bferror << "----------------------------------------" << bfendl;

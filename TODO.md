@@ -15,35 +15,31 @@ Misc:
 - Speed up linking time by adding -fvisibility=hidden. It was stated that
   this could effect C++ so we need to find an exmaple of what to do, if
   anything (might be taken care of by libc++). Also... will need to add
-  visibility macros if we enable this option
+  visibility macros if we enable this option, and should disable the GCC
+  flags for BFM and windows for export all.
 
 Version 1.1 TODO:
 - Add Windows support
-- Add DWARF4 expression support in the unwinder. This is needed as some
-  exceptions are now using expressions.
-- Create custom libc. This first step should be to provide equvilant
-  functionality to newlib. Once this is done, the next step should be to break
-  apart libc++.so into libc.so, libcxxabi.so (statically linked with the
-  unwinder), and libc++.so.
-- Clean up the VMCS checks so that they can be unit tested better, and then
-  complete the unit tests
 - We need to go through all of the error codes, and map out blocks for each
   module, driver, elf error, etc... This way, when an error bubbles through
   the system, it's easy to identify
-- Destructors for statically created classes are not being called. This should
-  be resolved at some point. Likely this problem will go away once we have a
-  custom libc, as atexit registers the destructor, but is never executed since
-  we cannot use _exit() at the moment.
 - Trigger a rebuild if bfcrt changes
-- Trigger a rebuild of libcxx is bfunwind changes
 - The vcpuid needs to be figured out. Since we need to be able to move VMCS
   structures from core to core to handle rescheduling a task on a different
   CPU, there is probably no need to make this complicated. Just need to make
   sure that the vcpuid is a uint64 everywhere.
-- Need to write a disclaimer about how multi-core is supported, but there is
-  no support for std::mutex at the moment, so there is no thread safety
 
 Version 1.2 TODO:
+- Clean up the VMCS checks so that they can be unit tested better, and then
+  complete the unit tests
+- Create custom libc. This first step should be to provide equvilant
+  functionality to newlib. Once this is done, the next step should be to break
+  apart libc++.so into libc.so, libcxxabi.so (statically linked with the
+  unwinder), and libc++.so.
+- Destructors for statically created classes are not being called. This should
+  be resolved at some point. Likely this problem will go away once we have a
+  custom libc, as atexit registers the destructor, but is never executed since
+  we cannot use _exit() at the moment.
 - Move to JSON. Once we need to be able to start a guest, we have a lot of
   information that needs to be parsed (image, ram, number vcpus). We can
   then move the module_file to json as well.
@@ -79,16 +75,3 @@ Version 1.3 TODO:
 Version 2.0 TODO:
 - If possible we should implement C++ GSL. Just depends on whether or not
   the GSL is available as well as a checking tool by then.
-
-Known Issues:
-- Kernels that have CONFIG_DEBUG_STACKOVERFLOW enabled will kernel oops when
-  do_IRQ is called because Bareflank uses it's own stack, and this triggers
-  the oops as stack_overflow_check thinks the stack has been overrun. The
-  oops can be safely ignored, but the best solution at the moment is to
-  disable this check from executing or don't use a kernrel with this enabled.
-  This is seen on Fedora as installing the kernel source enables a debug kernel
-  by default with this enabled.
-- At the moment, "export PRODUCTION=yes" which enabled -03 is not supported
-  as this generates DWARF4 expressions which is currently not supported. Once
-  this logic is implemented, we will provide more offical support for this
-  feature.

@@ -25,6 +25,12 @@
 #include <eh_frame.h>
 
 // -----------------------------------------------------------------------------
+// Global
+// -----------------------------------------------------------------------------
+
+extern uint64_t g_phase;
+
+// -----------------------------------------------------------------------------
 // Helpers
 // -----------------------------------------------------------------------------
 
@@ -396,13 +402,6 @@ eh_frame::find_fde(register_state *state)
 {
     auto eh_frame_list = get_eh_frame_list();
 
-    // TODO: Lookup the symbol name for RIP. This way, instead of just
-    //       providing an address, we can provide an entire backtrace with
-    //       function names. We could even provide the function name, and
-    //       then a register state dump as well, probably similar to GCC so
-    //       that it's readable.
-    debug("rip: %p\n", (void *)state->get_ip());
-
     for (auto m = 0U; m < MAX_NUM_MODULES; m++)
     {
         for (auto fde = fd_entry(eh_frame_list[m]); fde; ++fde)
@@ -411,11 +410,22 @@ eh_frame::find_fde(register_state *state)
                 continue;
 
             if (fde.is_in_range(state->get_ip()) == true)
+            {
+                if (g_phase == 1)
+                {
+                    log("\n");
+                    debug("unwinder found rip: %p\n", (void *)state->get_ip());
+                }
+
                 return fde;
+            }
         }
     }
 
-    log("ERROR: failed to locate FDE\n");
+    debug("ERROR: An exception was thrown, but the unwinder was unable to "
+          "locate a stack frame for RIP = %p. Aborting!!!\n",
+          (void *)state->get_ip());
+
     state->dump();
 
     return fd_entry();

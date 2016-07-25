@@ -146,7 +146,7 @@ platform_set_affinity(int64_t affinity);
  *
  */
 void
-platform_restore_affinity(int64_t affinity_mask);
+platform_restore_affinity(int64_t affinity);
 #ifdef __cplusplus
 }
 #endif

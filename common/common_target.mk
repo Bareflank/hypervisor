@@ -106,6 +106,7 @@ NATIVE_CCFLAGS+=-m64
 NATIVE_CCFLAGS+=-mtune=sandybridge
 NATIVE_CCFLAGS+=-march=sandybridge
 NATIVE_CCFLAGS+=-malign-data=abi
+NATIVE_CCFLAGS+=-mstackrealign
 
 CROSS_CCFLAGS+=-fpic
 CROSS_CCFLAGS+=-ffreestanding
@@ -144,6 +145,7 @@ NATIVE_CXXFLAGS+=-m64
 NATIVE_CXXFLAGS+=-mtune=sandybridge
 NATIVE_CXXFLAGS+=-march=sandybridge
 NATIVE_CXXFLAGS+=-malign-data=abi
+NATIVE_CXXFLAGS+=-mstackrealign
 
 CROSS_CXXFLAGS+=-fpic
 CROSS_CXXFLAGS+=-ffreestanding
