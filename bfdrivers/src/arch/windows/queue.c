@@ -41,11 +41,11 @@ uint64_t g_vcpuid = 0;
 /* IO Functions                                                               */
 /* -------------------------------------------------------------------------- */
 
-static long
+static int64_t
 ioctl_add_module(char *file, int64_t len)
 {
-    int64_t ret;
     char *buf;
+    int64_t ret;
 
     if (g_num_pmodules >= MAX_NUM_MODULES)
     {
@@ -66,7 +66,8 @@ ioctl_add_module(char *file, int64_t len)
     ret = common_add_module(buf, len);
     if (ret != BF_SUCCESS)
     {
-        ALERT("IOCTL_ADD_MODULE: failed to add module\n");
+        ALERT("IOCTL_ADD_MODULE: common_add_module failed: %p - %s\n",
+              (void *)ret, ec_to_str(ret));
         goto failed;
     }
 
@@ -86,17 +87,18 @@ failed:
     return BF_IOCTL_FAILURE;
 }
 
-static long
+static int64_t
 ioctl_unload_vmm(void)
 {
     int64_t i;
     int64_t ret;
-    long status = BF_IOCTL_SUCCESS;
+    int64_t status = BF_IOCTL_SUCCESS;
 
     ret = common_unload_vmm();
     if (ret != BF_SUCCESS)
     {
-        ALERT("IOCTL_UNLOAD_VMM: failed to unload vmm: %d\n", ret);
+        ALERT("IOCTL_UNLOAD_VMM: common_unload_vmm failed: %p - %s\n",
+              (void *)ret, ec_to_str(ret));
         status = BF_IOCTL_FAILURE;
     }
 
@@ -112,7 +114,7 @@ ioctl_unload_vmm(void)
     return status;
 }
 
-static long
+static int64_t
 ioctl_load_vmm(void)
 {
     int64_t ret;
@@ -120,7 +122,8 @@ ioctl_load_vmm(void)
     ret = common_load_vmm();
     if (ret != BF_SUCCESS)
     {
-        ALERT("IOCTL_LOAD_VMM: failed to load vmm: %d\n", ret);
+        ALERT("IOCTL_LOAD_VMM: ioctl_load_vmm failed: %p - %s\n",
+              (void *)ret, ec_to_str(ret));
         goto failure;
     }
 
@@ -133,16 +136,17 @@ failure:
     return BF_IOCTL_FAILURE;
 }
 
-static long
+static int64_t
 ioctl_stop_vmm(void)
 {
     int64_t ret;
-    long status = BF_IOCTL_SUCCESS;
+    int64_t status = BF_IOCTL_SUCCESS;
 
     ret = common_stop_vmm();
     if (ret != BF_SUCCESS)
     {
-        ALERT("IOCTL_STOP_VMM: failed to stop vmm: %d\n", ret);
+        ALERT("IOCTL_STOP_VMM: ioctl_stop_vmm failed: %p - %s\n",
+              (void *)ret, ec_to_str(ret));
         status = BF_IOCTL_FAILURE;
     }
 
@@ -152,7 +156,7 @@ ioctl_stop_vmm(void)
     return status;
 }
 
-static long
+static int64_t
 ioctl_start_vmm(void)
 {
     int64_t ret;
@@ -160,7 +164,8 @@ ioctl_start_vmm(void)
     ret = common_start_vmm();
     if (ret != BF_SUCCESS)
     {
-        ALERT("IOCTL_START_VMM: failed to start vmm: %d\n", ret);
+        ALERT("IOCTL_START_VMM: ioctl_start_vmm failed: %p - %s\n",
+              (void *)ret, ec_to_str(ret));
         goto failure;
     }
 
@@ -173,7 +178,7 @@ failure:
     return BF_IOCTL_FAILURE;
 }
 
-static long
+static int64_t
 ioctl_dump_vmm(struct debug_ring_resources_t *user_drr)
 {
     int64_t ret;
@@ -182,7 +187,8 @@ ioctl_dump_vmm(struct debug_ring_resources_t *user_drr)
     ret = common_dump_vmm(&drr, g_vcpuid);
     if (ret != BF_SUCCESS)
     {
-        ALERT("IOCTL_DUMP_VMM: failed to dump vmm: %d\n", ret);
+        ALERT("IOCTL_DUMP_VMM: common_dump_vmm failed: %p - %s\n",
+              (void *)ret, ec_to_str(ret));
         return BF_IOCTL_FAILURE;
     }
 
@@ -192,14 +198,14 @@ ioctl_dump_vmm(struct debug_ring_resources_t *user_drr)
     return BF_IOCTL_SUCCESS;
 }
 
-static long
+static int64_t
 ioctl_vmm_status(int64_t *status)
 {
     int64_t vmm_status = common_vmm_status();
 
     if (status == 0)
     {
-        ALERT("IOCTL_VMM_STATUS: failed with status == NULL\n");
+        ALERT("IOCTL_VMM_STATUS: common_vmm_status failed: NULL\n");
         return BF_IOCTL_FAILURE;
     }
 
@@ -209,7 +215,7 @@ ioctl_vmm_status(int64_t *status)
     return BF_IOCTL_SUCCESS;
 }
 
-static long
+static int64_t
 ioctl_set_vcpuid(uint64_t *vcpuid)
 {
     if (vcpuid == 0)
@@ -260,8 +266,8 @@ bareflankEvtIoDeviceControl(
     size_t in_size = 0;
     size_t out_size = 0;
 
+    int64_t ret = 0;
     NTSTATUS status;
-    uint32_t ret = 0;
 
     UNREFERENCED_PARAMETER(Queue);
 
@@ -322,12 +328,15 @@ bareflankEvtIoDeviceControl(
     if (OutputBufferLength != 0)
         WdfRequestSetInformation(Request, out_size);
 
-    WdfRequestComplete(Request, ret);
+    if (ret != BF_IOCTL_SUCCESS)
+        goto FAIL_IOCTL;
+
+    WdfRequestComplete(Request, STATUS_SUCCESS);
     return;
 
 FAIL_IOCTL:
 
-    WdfRequestComplete(Request, STATUS_INVALID_PARAMETER);
+    WdfRequestComplete(Request, STATUS_FATAL_APP_EXIT);
     return;
 }
 

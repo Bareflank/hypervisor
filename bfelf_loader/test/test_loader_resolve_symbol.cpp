@@ -60,7 +60,7 @@ bfelf_loader_ut::test_bfelf_loader_resolve_symbol_invalid_addr()
 void
 bfelf_loader_ut::test_bfelf_loader_resolve_symbol_no_relocation()
 {
-    auto ret = 0;
+    auto ret = 0LL;
     bfelf_loader_t loader;
 
     memset(&loader, 0, sizeof(loader));
@@ -75,7 +75,7 @@ bfelf_loader_ut::test_bfelf_loader_resolve_symbol_no_relocation()
 void
 bfelf_loader_ut::test_bfelf_loader_resolve_symbol_no_files_added()
 {
-    auto ret = 0;
+    auto ret = 0LL;
     bfelf_loader_t loader;
 
     memset(&loader, 0, sizeof(loader));
@@ -93,7 +93,7 @@ bfelf_loader_ut::test_bfelf_loader_resolve_symbol_no_files_added()
 void
 bfelf_loader_ut::test_bfelf_loader_resolve_symbol_uninitialized_files()
 {
-    auto ret = 0;
+    auto ret = 0LL;
     bfelf_file_t ef1;
     bfelf_file_t ef2;
     bfelf_loader_t loader;
@@ -120,7 +120,7 @@ bfelf_loader_ut::test_bfelf_loader_resolve_symbol_uninitialized_files()
 void
 bfelf_loader_ut::test_bfelf_loader_resolve_no_such_symbol()
 {
-    auto ret = 0;
+    auto ret = 0LL;
     bfelf_file_t dummy_misc_ef;
     bfelf_file_t dummy_code_ef;
 
@@ -155,7 +155,7 @@ bfelf_loader_ut::test_bfelf_loader_resolve_no_such_symbol()
 void
 bfelf_loader_ut::test_bfelf_loader_resolve_zero_length_symbol()
 {
-    auto ret = 0;
+    auto ret = 0LL;
     bfelf_file_t dummy_misc_ef;
     bfelf_file_t dummy_code_ef;
 
@@ -190,7 +190,7 @@ bfelf_loader_ut::test_bfelf_loader_resolve_zero_length_symbol()
 void
 bfelf_loader_ut::test_bfelf_loader_resolve_invalid_symbol_length()
 {
-    auto ret = 0;
+    auto ret = 0LL;
     bfelf_file_t dummy_misc_ef;
     bfelf_file_t dummy_code_ef;
 
@@ -225,7 +225,7 @@ bfelf_loader_ut::test_bfelf_loader_resolve_invalid_symbol_length()
 void
 bfelf_loader_ut::test_bfelf_loader_resolve_symbol_length_too_large()
 {
-    auto ret = 0;
+    auto ret = 0LL;
     bfelf_file_t dummy_misc_ef;
     bfelf_file_t dummy_code_ef;
 
@@ -260,7 +260,7 @@ bfelf_loader_ut::test_bfelf_loader_resolve_symbol_length_too_large()
 void
 bfelf_loader_ut::test_bfelf_loader_resolve_symbol_success()
 {
-    auto ret = 0;
+    auto ret = 0LL;
     bfelf_file_t dummy_misc_ef;
     bfelf_file_t dummy_code_ef;
 
@@ -295,7 +295,7 @@ bfelf_loader_ut::test_bfelf_loader_resolve_symbol_success()
 void
 bfelf_loader_ut::test_bfelf_loader_resolve_no_such_symbol_no_hash()
 {
-    auto ret = 0;
+    auto ret = 0LL;
     bfelf_file_t dummy_misc_ef;
     bfelf_file_t dummy_code_ef;
 
@@ -333,7 +333,7 @@ bfelf_loader_ut::test_bfelf_loader_resolve_no_such_symbol_no_hash()
 void
 bfelf_loader_ut::test_bfelf_loader_resolve_zero_length_symbol_no_hash()
 {
-    auto ret = 0;
+    auto ret = 0LL;
     bfelf_file_t dummy_misc_ef;
     bfelf_file_t dummy_code_ef;
 
@@ -371,7 +371,7 @@ bfelf_loader_ut::test_bfelf_loader_resolve_zero_length_symbol_no_hash()
 void
 bfelf_loader_ut::test_bfelf_loader_resolve_invalid_symbol_length_no_hash()
 {
-    auto ret = 0;
+    auto ret = 0LL;
     bfelf_file_t dummy_misc_ef;
     bfelf_file_t dummy_code_ef;
 
@@ -409,7 +409,7 @@ bfelf_loader_ut::test_bfelf_loader_resolve_invalid_symbol_length_no_hash()
 void
 bfelf_loader_ut::test_bfelf_loader_resolve_symbol_length_too_large_no_hash()
 {
-    auto ret = 0;
+    auto ret = 0LL;
     bfelf_file_t dummy_misc_ef;
     bfelf_file_t dummy_code_ef;
 
@@ -447,7 +447,7 @@ bfelf_loader_ut::test_bfelf_loader_resolve_symbol_length_too_large_no_hash()
 void
 bfelf_loader_ut::test_bfelf_loader_resolve_symbol_success_no_hash()
 {
-    auto ret = 0;
+    auto ret = 0LL;
     bfelf_file_t dummy_misc_ef;
     bfelf_file_t dummy_code_ef;
 
@@ -485,7 +485,7 @@ bfelf_loader_ut::test_bfelf_loader_resolve_symbol_success_no_hash()
 void
 bfelf_loader_ut::test_bfelf_loader_resolve_symbol_real_test()
 {
-    auto ret = 0;
+    auto ret = 0LL;
     bfelf_file_t dummy_misc_ef;
     bfelf_file_t dummy_code_ef;
 

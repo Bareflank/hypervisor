@@ -19,9 +19,7 @@ Misc:
   flags for BFM and windows for export all.
 
 Version 1.1 TODO:
-- We need to go through all of the error codes, and map out blocks for each
-  module, driver, elf error, etc... This way, when an error bubbles through
-  the system, it's easy to identify
+- Add Windows support
 - Trigger a rebuild if bfcrt changes
 - The vcpuid needs to be figured out. Since we need to be able to move VMCS
   structures from core to core to handle rescheduling a task on a different

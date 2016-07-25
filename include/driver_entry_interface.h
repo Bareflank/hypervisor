@@ -31,12 +31,6 @@ extern "C" {
 /* Common                                                                     */
 /* -------------------------------------------------------------------------- */
 
-/**
- * Driver Error Codes
- */
-#define BF_IOCTL_SUCCESS 0
-#define BF_IOCTL_FAILURE -10000
-
 /*
  * Driver Entry State Machine
  *

@@ -29,6 +29,7 @@
 #include <linux/notifier.h>
 #include <linux/reboot.h>
 
+#include <types.h>
 #include <debug.h>
 #include <common.h>
 #include <constants.h>
@@ -73,8 +74,8 @@ dev_release(struct inode *inode, struct file *file)
 static long
 ioctl_add_module(char *file)
 {
-    int ret;
     char *buf;
+    int64_t ret;
 
     if (g_num_files >= MAX_NUM_MODULES)
     {
@@ -112,7 +113,8 @@ ioctl_add_module(char *file)
     ret = common_add_module(buf, g_module_length);
     if (ret != BF_SUCCESS)
     {
-        ALERT("IOCTL_ADD_MODULE: failed to add module\n");
+        ALERT("IOCTL_ADD_MODULE: common_add_module failed: %p - %s\n", \
+              (void *)ret, ec_to_str(ret));
         goto failed;
     }
 
@@ -135,7 +137,7 @@ failed:
 static long
 ioctl_add_module_length(int64_t *len)
 {
-    int ret;
+    int64_t ret;
 
     if (len == 0)
     {
@@ -158,13 +160,14 @@ static long
 ioctl_unload_vmm(void)
 {
     int i;
-    int ret;
+    int64_t ret;
     long status = BF_IOCTL_SUCCESS;
 
     ret = common_unload_vmm();
     if (ret != BF_SUCCESS)
     {
-        ALERT("IOCTL_UNLOAD_VMM: failed to unload vmm: %d\n", ret);
+        ALERT("IOCTL_UNLOAD_VMM: common_unload_vmm failed: %p - %s\n", \
+              (void *)ret, ec_to_str(ret));
         status = BF_IOCTL_FAILURE;
     }
 
@@ -187,12 +190,13 @@ ioctl_unload_vmm(void)
 static long
 ioctl_load_vmm(void)
 {
-    int ret;
+    int64_t ret;
 
     ret = common_load_vmm();
     if (ret != BF_SUCCESS)
     {
-        ALERT("IOCTL_LOAD_VMM: failed to load vmm: %d\n", ret);
+        ALERT("IOCTL_LOAD_VMM: common_load_vmm failed: %p - %s\n", \
+              (void *)ret, ec_to_str(ret));
         goto failure;
     }
 
@@ -208,14 +212,15 @@ failure:
 static long
 ioctl_stop_vmm(void)
 {
-    int ret;
+    int64_t ret;
     long status = BF_IOCTL_SUCCESS;
 
     ret = common_stop_vmm();
 
     if (ret != BF_SUCCESS)
     {
-        ALERT("IOCTL_STOP_VMM: failed to stop vmm: %d\n", ret);
+        ALERT("IOCTL_STOP_VMM: common_stop_vmm failed: %p - %s\n", \
+              (void *)ret, ec_to_str(ret));
         status = BF_IOCTL_FAILURE;
     }
 
@@ -228,12 +233,13 @@ ioctl_stop_vmm(void)
 static long
 ioctl_start_vmm(void)
 {
-    int ret;
+    int64_t ret;
 
     ret = common_start_vmm();
     if (ret != BF_SUCCESS)
     {
-        ALERT("IOCTL_START_VMM: failed to start vmm: %d\n", ret);
+        ALERT("IOCTL_START_VMM: common_start_vmm failed: %p - %s\n", \
+              (void *)ret, ec_to_str(ret));
         goto failure;
     }
 
@@ -249,13 +255,14 @@ failure:
 static long
 ioctl_dump_vmm(struct debug_ring_resources_t *user_drr)
 {
-    int ret;
+    int64_t ret;
     struct debug_ring_resources_t *drr = 0;
 
     ret = common_dump_vmm(&drr, g_vcpuid);
     if (ret != BF_SUCCESS)
     {
-        ALERT("IOCTL_DUMP_VMM: failed to dump vmm: %d\n", ret);
+        ALERT("IOCTL_DUMP_VMM: common_dump_vmm failed: %p - %s\n", \
+              (void *)ret, ec_to_str(ret));
         return BF_IOCTL_FAILURE;
     }
 
@@ -273,12 +280,12 @@ ioctl_dump_vmm(struct debug_ring_resources_t *user_drr)
 static long
 ioctl_vmm_status(int64_t *status)
 {
-    int ret;
+    int64_t ret;
     int64_t vmm_status = common_vmm_status();
 
     if (status == 0)
     {
-        ALERT("IOCTL_VMM_STATUS: failed with status == NULL\n");
+        ALERT("IOCTL_VMM_STATUS: common_vmm_status failed: NULL\n");
         return BF_IOCTL_FAILURE;
     }
 
@@ -296,7 +303,7 @@ ioctl_vmm_status(int64_t *status)
 static long
 ioctl_set_vcpuid(uint64_t *vcpuid)
 {
-    int ret;
+    int64_t ret;
 
     if (vcpuid == 0)
     {

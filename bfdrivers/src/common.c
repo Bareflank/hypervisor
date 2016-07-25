@@ -98,8 +98,7 @@ resolve_symbol(const char *name, void **sym, struct module_t *module)
         ret = bfelf_loader_resolve_symbol(&g_loader, &str, sym);
         if (ret != BFELF_SUCCESS)
         {
-            ALERT("%s could not be found: %" PRId64 " - %s\n", name, ret,
-                  bfelf_error((bfelf64_sword)ret));
+            ALERT("Failed to find: %s\n", name);
             return ret;
         }
     }
@@ -108,8 +107,7 @@ resolve_symbol(const char *name, void **sym, struct module_t *module)
         ret = bfelf_file_resolve_symbol(&module->file, &str, sym);
         if (ret != BFELF_SUCCESS)
         {
-            ALERT("%s could not be found: %" PRId64 " - %s\n", name, ret,
-                  bfelf_error((bfelf64_sword)ret));
+            ALERT("Failed to find: %s\n", name);
             return ret;
         }
     }
@@ -128,18 +126,12 @@ execute_symbol(const char *sym, uint64_t arg1, uint64_t arg2, struct module_t *m
 
     ret = resolve_symbol(sym, &entry_point, module);
     if (ret != BF_SUCCESS)
-    {
-        ALERT("execute_symbol: failed to resolve entry point: %" PRId64 "\n",
-              ret);
         return ret;
-    }
 
     ret = execute_entry(g_stack_loc, entry_point, arg1, arg2);
     if (ret != ENTRY_SUCCESS)
     {
-        ALERT("%s failed:\n", sym);
-        ALERT("    - exit code: %p\n", (void *)ret);
-
+        ALERT("%s failed\n", sym);
         return ret;
     }
 
@@ -163,10 +155,7 @@ add_md_to_memory_manager(struct module_t *module)
 
         ret = bfelf_file_get_segment(&module->file, s, &phdr);
         if (ret != BFELF_SUCCESS)
-        {
-            ALERT("bfelf_file_get_segment failed: %d\n", (int)ret);
-            return 0;
-        }
+            return ret;
 
         exec_s = (uint64_t)module->exec + phdr->p_vaddr;
         exec_e = (uint64_t)module->exec + phdr->p_vaddr + phdr->p_memsz;
@@ -187,11 +176,7 @@ add_md_to_memory_manager(struct module_t *module)
 
             ret = execute_symbol("add_md", (uint64_t)&md, 0, 0);
             if (ret != MEMORY_MANAGER_SUCCESS)
-            {
-                ALERT("add_md_to_memory_manager: failed to add md: %p, %p, 0x%x\n",
-                      md.virt, md.phys, md.type);
                 return ret;
-            }
         }
     }
 
@@ -353,60 +338,34 @@ common_add_module(char *file, int64_t fsize)
      */
 
     if (file == 0 || fsize == 0)
-    {
-        ALERT("add_module: invalid arguments\n");
         return BF_ERROR_INVALID_ARG;
-    }
 
     if (common_vmm_status() == VMM_CORRUPT)
-    {
-        ALERT("add_module: unable to service request, vmm corrupted\n");
         return BF_ERROR_VMM_CORRUPTED;
-    }
 
     if (common_vmm_status() != VMM_UNLOADED)
-    {
-        ALERT("add_module: failed to add module. the vmm must be stopped, "
-              "and unloaded prior to adding modules\n");
         return BF_ERROR_VMM_INVALID_STATE;
-    }
 
     if (g_num_modules >= MAX_NUM_MODULES)
-    {
-        ALERT("add_module: too many modules loaded\n");
         return BF_ERROR_MAX_MODULES_REACHED;
-    }
 
     module = &(g_modules[g_num_modules]);
 
     ret = bfelf_file_init(file, fsize, &module->file);
     if (ret != BFELF_SUCCESS)
-    {
-        ALERT("add_module: failed to initialize elf file: %" PRId64 " - %s\n",
-              ret, bfelf_error((bfelf64_sword)ret));
         return ret;
-    }
 
     module->size = get_elf_file_size(module);
     if (module->size == 0)
-    {
-        ALERT("add_module: failed to get the module's exec size\n");
         return BF_ERROR_FAILED_TO_ADD_FILE;
-    }
 
     module->exec = platform_alloc_rwe(module->size);
     if (module->exec == 0)
-    {
-        ALERT("add_module: out of memory\n");
         return 0;
-    }
 
     ret = load_elf_file(module);
     if (ret != BF_SUCCESS)
-    {
-        ALERT("add_module: failed to load the elf module: %" PRId64 "\n", ret);
         goto failure;
-    }
 
     DEBUG("common_add_module [%d]:\n", (int)g_num_modules);
     DEBUG("    addr = %p\n", (void *)module->exec);
@@ -429,26 +388,22 @@ common_load_vmm(void)
     struct module_t *module = 0;
 
     if (common_vmm_status() == VMM_CORRUPT)
-    {
-        ALERT("load_vmm: unable to service request, vmm corrupted\n");
         return BF_ERROR_VMM_CORRUPTED;
-    }
 
     if (common_vmm_status() == VMM_LOADED)
         return BF_SUCCESS;
 
     if (common_vmm_status() == VMM_RUNNING)
-    {
-        ALERT("load_vmm: failed to load vmm. vmm cannot be loaded while "
-              "another vmm is running\n");
         return BF_ERROR_VMM_INVALID_STATE;
-    }
 
     if (g_num_modules == 0)
-    {
-        ALERT("load_vmm: failed to load vmm. no modules were added\n");
         return BF_ERROR_NO_MODULES_ADDED;
-    }
+
+    g_stack = platform_alloc_rw(STACK_SIZE);
+    g_stack_loc = (void *)(((uintptr_t)g_stack + STACK_SIZE - 1) & ~0x0F);
+
+    if (g_stack == 0)
+        return BF_ERROR_OUT_OF_MEMORY;
 
     platform_memset(&g_loader, 0, sizeof(struct bfelf_loader_t));
 
@@ -456,38 +411,16 @@ common_load_vmm(void)
     {
         ret = bfelf_loader_add(&g_loader, &module->file, module->exec);
         if (ret != BFELF_SUCCESS)
-        {
-            ALERT("load_vmm: failed to add elf file to the elf loader: "
-                  "%" PRId64 " - %s\n", ret, bfelf_error((bfelf64_sword)ret));
             goto failure;
-        }
     }
 
     ret = bfelf_loader_relocate(&g_loader);
     if (ret != BFELF_SUCCESS)
-    {
-        ALERT("load_vmm: failed to relocate the elf loader: %" PRId64 " - %s\n",
-              ret, bfelf_error((bfelf64_sword)ret));
         goto failure;
-    }
-
-    g_stack = platform_alloc_rw(STACK_SIZE);
-    g_stack_loc = (void *)(((uintptr_t)g_stack + STACK_SIZE - 1) & ~0x0F);
-
-    if (g_stack == 0)
-    {
-        ALERT("load_vmm: failed to allocate stack space\n");
-        ret = BF_ERROR_OUT_OF_MEMORY;
-        goto failure;
-    }
 
     ret = resolve_symbol("execute_entry", (void **)&execute_entry, 0);
     if (ret != BF_SUCCESS)
-    {
-        ALERT("load_vmm: failed to locate execute_entry. the symbol is missing "
-              "which means the misc module is missing\n");
         goto failure;
-    }
 
     for (i = 0; (module = get_module(i)) != 0; i++)
     {
@@ -495,29 +428,18 @@ common_load_vmm(void)
 
         ret = bfelf_loader_get_info(&g_loader, &module->file, &info);
         if (ret != BF_SUCCESS)
-        {
-            ALERT("load_vmm: failed to get info: %" PRId64 "\n", ret);
             goto failure;
-        }
 
         ret = execute_symbol("local_init", (uint64_t)&info, 0, module);
         if (ret != BF_SUCCESS)
-        {
-            ALERT("load_vmm: failed to locate local_init. the symbol is missing "
-                  "which means the modules was not compiled with the wrapper\n");
             goto failure;
-        }
     }
 
     for (i = 0; (module = get_module(i)) != 0; i++)
     {
         ret = add_md_to_memory_manager(module);
         if (ret != BF_SUCCESS)
-        {
-            ALERT("load_vmm: failed to add memory descriptors: %" PRId64 "\n",
-                  ret);
             goto failure;
-        }
     }
 
     g_vmm_status = VMM_LOADED;
@@ -537,17 +459,10 @@ common_unload_vmm(void)
     struct module_t *module = 0;
 
     if (common_vmm_status() == VMM_CORRUPT)
-    {
-        ALERT("unload_vmm: unable to service request, vmm corrupted\n");
         return BF_ERROR_VMM_CORRUPTED;
-    }
 
     if (common_vmm_status() == VMM_RUNNING)
-    {
-        ALERT("unload_vmm: failed to unload vmm. cannot unload a vmm that "
-              "is still running\n");
         return BF_ERROR_VMM_INVALID_STATE;
-    }
 
     if (common_vmm_status() == VMM_LOADED)
     {
@@ -557,18 +472,11 @@ common_unload_vmm(void)
 
             ret = bfelf_loader_get_info(&g_loader, &module->file, &info);
             if (ret != BF_SUCCESS)
-            {
-                ALERT("unload_vmm: failed to get info: %" PRId64 "\n", ret);
                 goto corrupted;
-            }
 
             ret = execute_symbol("local_fini", (uint64_t)&info, 0, module);
             if (ret != BF_SUCCESS)
-            {
-                ALERT("unload_vmm: failed to locate local_init. the symbol is missing "
-                      "which means the modules was not compiled with the wrapper\n");
                 goto corrupted;
-            }
         }
     }
 
@@ -590,20 +498,13 @@ common_start_vmm(void)
     int64_t caller_affinity = 0;
 
     if (common_vmm_status() == VMM_CORRUPT)
-    {
-        ALERT("start_vmm: unable to service request, vmm corrupted\n");
         return BF_ERROR_VMM_CORRUPTED;
-    }
 
     if (common_vmm_status() == VMM_RUNNING)
         return BF_SUCCESS;
 
     if (common_vmm_status() == VMM_UNLOADED)
-    {
-        ALERT("start_vmm: failed to start vmm. the vmm must be loaded "
-              "prior to starting\n");
         return BF_ERROR_VMM_INVALID_STATE;
-    }
 
     num = platform_num_cpus();
     if (num > MAX_VCPUS)
@@ -613,24 +514,15 @@ common_start_vmm(void)
     {
         caller_affinity = platform_set_affinity(g_num_cpus_started);
         if (caller_affinity < 0)
-        {
-            ALERT("start_vmm: failed to set affinity: %" PRId64 "\n", ret);
             goto failure;
-        }
 
         ret = execute_symbol("init_vmm", g_num_cpus_started, 0, 0);
         if (ret != BF_SUCCESS)
-        {
-            ALERT("start_vmm: failed to execute init_vmm: %p\n", (void *)ret);
             goto failure;
-        }
 
         ret = execute_symbol("start_vmm", g_num_cpus_started, 0, 0);
         if (ret != BF_SUCCESS)
-        {
-            ALERT("start_vmm: failed to execute start_vmm: %p\n", (void *)ret);
             goto failure;
-        }
 
         platform_start();
         platform_restore_affinity(caller_affinity);
@@ -654,36 +546,23 @@ common_stop_vmm(void)
     int64_t caller_affinity = 0;
 
     if (common_vmm_status() == VMM_CORRUPT)
-    {
-        ALERT("stop_vmm: unable to service request, vmm corrupted\n");
         return BF_ERROR_VMM_CORRUPTED;
-    }
 
     if (common_vmm_status() == VMM_LOADED)
         return BF_SUCCESS;
 
     if (common_vmm_status() == VMM_UNLOADED)
-    {
-        ALERT("stop_vmm: failed to stop vmm. the vmm must be loaded and "
-              "running prior to stoping\n");
         return BF_ERROR_VMM_INVALID_STATE;
-    }
 
     for (i = g_num_cpus_started - 1; i >= 0 ; i--)
     {
         caller_affinity = platform_set_affinity(i);
         if (caller_affinity < 0)
-        {
-            ALERT("stop_vmm: failed to set affinity: %" PRId64 "\n", ret);
             goto corrupted;
-        }
 
         ret = execute_symbol("stop_vmm", i, 0, 0);
         if (ret != BFELF_SUCCESS)
-        {
-            ALERT("stop_vmm: failed to execute symbol: %p\n", (void *)ret);
             goto corrupted;
-        }
 
         platform_stop();
         platform_restore_affinity(caller_affinity);
@@ -707,17 +586,11 @@ common_dump_vmm(struct debug_ring_resources_t **drr, int64_t vcpuid)
         return BF_ERROR_INVALID_ARG;
 
     if (common_vmm_status() == VMM_UNLOADED)
-    {
-        ALERT("dump_vmm: failed to dump vmm as it has not been loaded yet\n");
         return BF_ERROR_VMM_INVALID_STATE;
-    }
 
     ret = execute_symbol("get_drr", (uint64_t)vcpuid, (uint64_t)drr, 0);
     if (ret != BFELF_SUCCESS)
-    {
-        ALERT("dump_vmm: failed to execute symbol: %p\n", (void *)ret);
         return ret;
-    }
 
     return BF_SUCCESS;
 }

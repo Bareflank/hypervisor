@@ -24,35 +24,12 @@
 #define COMMON_H
 
 #include <types.h>
+#include <error_codes.h>
 #include <bfelf_loader.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-/* -------------------------------------------------------------------------- */
-/* Macros                                                                     */
-/* -------------------------------------------------------------------------- */
-
-/*
- * Error Codes
- *
- * Note that these are not the only error codes that could come out of the
- * driver entry. Error codes in supporting software (like the ELF loader)
- * could also show up, so these should be in a range that are easy to
- * identify
- */
-#define BF_SUCCESS 0
-#define BF_ERROR_INVALID_ARG -5001
-#define BF_ERROR_INVALID_INDEX -5002
-#define BF_ERROR_NO_MODULES_ADDED -5010
-#define BF_ERROR_MAX_MODULES_REACHED -5011
-#define BF_ERROR_VMM_INVALID_STATE -5012
-#define BF_ERROR_FAILED_TO_ADD_FILE -5015
-#define BF_ERROR_FAILED_TO_DUMP_DR -5017
-#define BF_ERROR_OUT_OF_MEMORY -5018
-#define BF_ERROR_VMM_CORRUPTED -5100
-#define BF_ERROR_UNKNOWN -5200
 
 /* -------------------------------------------------------------------------- */
 /* Module                                                                     */
