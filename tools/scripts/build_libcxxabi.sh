@@ -57,7 +57,6 @@ cmake $BUILD_ABS/source_libcxxabi/ \
     -DLIBCXXABI_SYSROOT=$BUILD_ABS/sysroot/x86_64-elf/ \
     -DCMAKE_C_COMPILER=$BUILD_ABS/build_scripts/x86_64-bareflank-gcc \
     -DCMAKE_CXX_COMPILER=$BUILD_ABS/build_scripts/x86_64-bareflank-g++ \
-    -DLIBCXXABI_ENABLE_THREADS=OFF \
     -DLIBCXXABI_ENABLE_SHARED=OFF
 
 make -j2

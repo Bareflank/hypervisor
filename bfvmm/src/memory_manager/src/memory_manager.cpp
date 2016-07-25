@@ -74,6 +74,15 @@ out_of_memory(void)
 }
 
 // -----------------------------------------------------------------------------
+// Mutexes
+// -----------------------------------------------------------------------------
+
+#include <mutex>
+
+std::mutex g_malloc_mutex;
+std::mutex g_add_md_mutex;
+
+// -----------------------------------------------------------------------------
 // Implementation
 // -----------------------------------------------------------------------------
 
@@ -88,6 +97,7 @@ int64_t
 memory_manager::free_blocks()
 {
     auto num_blocks = 0;
+    std::lock_guard<std::mutex> guard(g_malloc_mutex);
 
     for (auto i = 0U; i < MAX_BLOCKS; i++)
         if (g_block_allocated[i] == FREE_BLOCK)
@@ -107,6 +117,8 @@ memory_manager::malloc_aligned(size_t size, uint64_t alignment)
 {
     if (size == 0)
         return 0;
+
+    std::lock_guard<std::mutex> guard(g_malloc_mutex);
 
     // This is a really simple "first fit" algorithm. The only optimization
     // that we have here is m_start. This algorithm works by looping from the
@@ -178,6 +190,8 @@ memory_manager::free(void *ptr)
     if (ptr == 0)
         return;
 
+    std::lock_guard<std::mutex> guard(g_malloc_mutex);
+
     // Our version of free is a lot cleaner than most memory manager, but is
     // terribly inefficent with respect to how much memory it consumes for
     // bookeeping. We store the starting block for every virtual address. This
@@ -233,6 +247,8 @@ memory_manager::virt_to_block(void *virt)
 void *
 memory_manager::virt_to_phys(void *virt)
 {
+    std::lock_guard<std::mutex> guard(g_add_md_mutex);
+
     auto key = (uintptr_t)virt >> MAX_PAGE_SHIFT;
     const auto &md_iter = m_virt_to_phys_map.find(key);
 
@@ -248,6 +264,8 @@ memory_manager::virt_to_phys(void *virt)
 void *
 memory_manager::phys_to_virt(void *phys)
 {
+    std::lock_guard<std::mutex> guard(g_add_md_mutex);
+
     auto key = (uintptr_t)phys >> MAX_PAGE_SHIFT;
     const auto &md_iter = m_phys_to_virt_map.find(key);
 
@@ -301,6 +319,8 @@ memory_manager::add_md(memory_descriptor *md)
 
     if (((uintptr_t)md->phys & (MAX_PAGE_SIZE - 1)) != 0)
         throw std::logic_error("phys address is not page aligned");
+
+    std::lock_guard<std::mutex> guard(g_add_md_mutex);
 
     auto cor1 = commit_or_rollback([&]
     {
