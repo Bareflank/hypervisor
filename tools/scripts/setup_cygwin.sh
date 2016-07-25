@@ -24,11 +24,11 @@
 # Checks
 # ------------------------------------------------------------------------------
 
-case $(lsb_release -si) in
-Debian)
+case $(uname -o) in
+Cygwin)
     ;;
 *)
-    echo "This script can only be used with: Debian"
+    echo "This script can only be used with: Cygwin"
     exit 1
 esac
 
@@ -42,7 +42,7 @@ fi
 # ------------------------------------------------------------------------------
 
 option_help() {
-    echo -e "Usage: setup-ubuntu.sh [OPTION]"
+    echo -e "Usage: setup_cygwin.sh [OPTION]"
     echo -e "Sets up the system to compile / use Bareflank"
     echo -e ""
     echo -e "       -h, --help                       show this help menu"
@@ -57,37 +57,18 @@ option_help() {
 # Functions
 # ------------------------------------------------------------------------------
 
-install_apt_tools() {
-    sudo apt-get update
-    sudo apt-get install --yes software-properties-common
-    sudo apt-get install --yes apt-transport-https
-    sudo apt-get install --yes ca-certificates
-}
-
-add_docker_repositories() {
-    sudo apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
-    sudo add-apt-repository "deb https://apt.dockerproject.org/repo debian-$(lsb_release -s -c) main"
-}
-
 install_common_packages() {
-    sudo apt-get update
-    sudo apt-get install --yes build-essential
-    sudo apt-get install --yes linux-headers-amd64
-    sudo apt-get install --yes linux-image-amd64
-    sudo apt-get install --yes libgmp-dev
-    sudo apt-get install --yes libmpc-dev
-    sudo apt-get install --yes libmpfr-dev
-    sudo apt-get install --yes flex
-    sudo apt-get install --yes bison
-    sudo apt-get install --yes nasm
-    sudo apt-get install --yes texinfo
-    sudo apt-get install --yes cmake
-    sudo DEBIAN_FRONTEND=noninteractive apt-get install --yes -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" docker-engine
+    setup-x86_64.exe -q --wait -P wget,make,gcc-core,gcc-g++,diffutils,libgmp-devel,libmpfr-devel,libmpc-devel,flex,bison,nasm,texinfo,cmake,unzip
 }
 
-prepare_docker() {
-    sudo usermod -a -G docker $USER
-    sudo service docker restart
+setup_ewdk() {
+    if [[ ! -d /cygdrive/c/ewdk ]]; then
+        wget https://go.microsoft.com/fwlink/p/?LinkID=699461 -O /tmp/ewdk.zip
+        unzip /tmp/ewdk.zip -d /cygdrive/c/ewdk/
+        chown -R $USER:SYSTEM /cygdrive/c/ewdk
+        icacls.exe `cygpath -w /cygdrive/c/ewdk` /reset /T
+        rm -Rf /tmp/ewdk.zip
+    fi
 }
 
 # ------------------------------------------------------------------------------
@@ -129,16 +110,14 @@ done
 # Setup System
 # ------------------------------------------------------------------------------
 
-case $(lsb_release -sr) in
-testing)
-    install_apt_tools
-    add_docker_repositories
+case $(uname -r) in
+2.5.*)
     install_common_packages
-    prepare_docker
+    setup_ewdk
     ;;
 
 *)
-    echo "This version of Debian is not supported"
+    echo "This version of Cygwin is not supported"
     exit 1
 
 esac
@@ -147,19 +126,24 @@ esac
 # Setup Build Environment
 # ------------------------------------------------------------------------------
 
+if [[ ! $local == "true" ]]; then
+    echo "Docker currently not supported. Use -l to setup local compilers"
+    exit 1
+fi
+
 if [[ ! $noconfigure == "true" ]]; then
     if [[ $out_of_tree == "true" ]]; then
         mkdir -p $build_dir
         pushd $build_dir
-        $hypervisor_dir/configure.sh
+        $hypervisor_dir/configure
         popd
     else
-        ./configure.sh $compiler
+        ./configure $compiler
     fi
 fi
 
 if [[ $local == "true" ]]; then
-    CROSS_COMPILER=gcc_520 ./tools/scripts/create-cross-compiler.sh
+    CROSS_COMPILER=gcc_520 ./tools/scripts/create_cross_compiler.sh
 fi
 
 # ------------------------------------------------------------------------------
@@ -168,8 +152,10 @@ fi
 
 echo ""
 
-echo "WARNING: If you are using ssh, or are logged into a GUI you "
-echo "         might need to exit and log back in to compile!!!"
+echo "WARNING: If you are going to use this machine for testing, you must "
+echo "         turn test signing on yourself:"
+echo ""
+echo "bcdedit.exe /set testsigning ON"
 echo ""
 
 if [[ $out_of_tree == "true" ]]; then

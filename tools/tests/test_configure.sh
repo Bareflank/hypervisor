@@ -112,11 +112,11 @@ verify_exit_status() {
 
 verify_default_created() {
     verify_file_exists $1/Makefile $2
-    verify_file_exists $1/configure_version $2
+    verify_file_exists $1/build_version $2
     verify_file_exists $1/env.sh $2
     verify_file_exists $1/git_working_tree.sh $2
     verify_file_exists $1/module_file $2
-    verify_file_exists $1/build_scripts/bareflank-gcc-wrapper.sh $2
+    verify_file_exists $1/build_scripts/bareflank_gcc_wrapper.sh $2
     verify_file_exists $1/build_scripts/build_libbfc.sh $2
     verify_file_exists $1/build_scripts/build_libcxxabi.sh $2
     verify_file_exists $1/build_scripts/build_libcxx.sh $2
@@ -136,11 +136,11 @@ verify_default_created() {
 
 verify_default_removed() {
     verify_file_does_not_exist $1/Makefile $2
-    verify_file_does_not_exist $1/configure_version $2
+    verify_file_does_not_exist $1/build_version $2
     verify_file_does_not_exist $1/env.sh $2
     verify_file_does_not_exist $1/git_working_tree.sh $2
     verify_file_does_not_exist $1/module_file $2
-    verify_file_does_not_exist $1/build_scripts/bareflank-gcc-wrapper.sh $2
+    verify_file_does_not_exist $1/build_scripts/bareflank_gcc_wrapper.sh $2
     verify_file_does_not_exist $1/build_scripts/build_libbfc.sh $2
     verify_file_does_not_exist $1/build_scripts/build_libcxxabi.sh $2
     verify_file_does_not_exist $1/build_scripts/build_libcxx.sh $2
@@ -218,10 +218,10 @@ test_configure_oot_defaults() {
     print_test $FUNCNAME
     create_oot_environment
     pushd $BR
-    $HR/configure.sh
+    $HR/configure
     verify_default_created $BR $FUNCNAME
     verify_directory_is_empty $BR/extensions $FUNCNAME
-    $HR/configure.sh -c
+    $HR/configure -c
     verify_default_removed $BR $FUNCNAME
     verify_directory_is_empty $BR $FUNCNAME
     popd
@@ -232,11 +232,11 @@ test_configure_oot_defaults_custom_module_file() {
     create_oot_environment
     local MF_CONTENTS=`cat $EXT1/bin/vpid.modules`
     pushd $BR
-    $HR/configure.sh -m $MF
+    $HR/configure -m $MF
     verify_default_created $BR $FUNCNAME
     verify_directory_is_empty $BR/extensions $FUNCNAME
     verify_file_contents "$BR/module_file" "$MF_CONTENTS" $FUNCNAME
-    $HR/configure.sh -c
+    $HR/configure -c
     verify_default_removed $BR $FUNCNAME
     verify_directory_is_empty $BR $FUNCNAME
     popd
@@ -246,10 +246,10 @@ test_configure_oot_defaults_custom_extension() {
     print_test $FUNCNAME
     create_oot_environment
     pushd $BR
-    $HR/configure.sh -e $EXT1
+    $HR/configure -e $EXT1
     verify_default_created $BR $FUNCNAME
     verify_link_exists "$BR/extensions/$EXT1_NAME" $FUNCNAME
-    $HR/configure.sh -c
+    $HR/configure -c
     verify_default_removed $BR $FUNCNAME
     verify_directory_is_empty $BR $FUNCNAME
     popd
@@ -259,11 +259,11 @@ test_configure_oot_defaults_custom_extensions() {
     print_test $FUNCNAME
     create_oot_environment
     pushd $BR
-    $HR/configure.sh -e $EXT1 -e $EXT2
+    $HR/configure -e $EXT1 -e $EXT2
     verify_default_created $BR $FUNCNAME
     verify_link_exists "$BR/extensions/$EXT1_NAME" $FUNCNAME
     verify_link_exists "$BR/extensions/$EXT2_NAME" $FUNCNAME
-    $HR/configure.sh -c
+    $HR/configure -c
     verify_default_removed $BR $FUNCNAME
     verify_directory_is_empty $BR $FUNCNAME
     popd
@@ -274,12 +274,12 @@ test_configure_oot_defaults_custom_module_file_and_extensions() {
     create_oot_environment
     local MF_CONTENTS=`cat $EXT1/bin/vpid.modules`
     pushd $BR
-    $HR/configure.sh -m $MF -e $EXT1 -e $EXT2
+    $HR/configure -m $MF -e $EXT1 -e $EXT2
     verify_default_created $BR $FUNCNAME
     verify_link_exists "$BR/extensions/$EXT1_NAME" $FUNCNAME
     verify_link_exists "$BR/extensions/$EXT2_NAME" $FUNCNAME
     verify_file_contents "$BR/module_file" "$MF_CONTENTS" $FUNCNAME
-    $HR/configure.sh -c
+    $HR/configure -c
     verify_default_removed $BR $FUNCNAME
     verify_directory_is_empty $BR $FUNCNAME
     popd
@@ -289,10 +289,10 @@ test_configure_it_defaults() {
     print_test $FUNCNAME
     create_it_environment
     pushd $TR
-    $HR/configure.sh
+    $HR/configure
     verify_default_created $TR $FUNCNAME
     verify_directory_is_empty $TR/extensions $FUNCNAME
-    $HR/configure.sh -c
+    $HR/configure -c
     verify_default_removed $TR $FUNCNAME
     popd
 }
@@ -302,11 +302,11 @@ test_configure_it_defaults_custom_module_file() {
     create_it_environment
     local MF_CONTENTS=`cat $EXT1/bin/vpid.modules`
     pushd $TR
-    $HR/configure.sh -m $MF
+    $HR/configure -m $MF
     verify_default_created $TR $FUNCNAME
     verify_directory_is_empty $TR/extensions $FUNCNAME
     verify_file_contents "$TR/module_file" "$MF_CONTENTS" $FUNCNAME
-    $HR/configure.sh -c
+    $HR/configure -c
     verify_default_removed $TR $FUNCNAME
     popd
 }
@@ -315,10 +315,10 @@ test_configure_it_defaults_custom_extension() {
     print_test $FUNCNAME
     create_it_environment
     pushd $TR
-    $HR/configure.sh -e $EXT1
+    $HR/configure -e $EXT1
     verify_default_created $TR $FUNCNAME
     verify_link_exists "$TR/extensions/$EXT1_NAME" $FUNCNAME
-    $HR/configure.sh -c
+    $HR/configure -c
     verify_default_removed $TR $FUNCNAME
     popd
 }
@@ -327,11 +327,11 @@ test_configure_it_defaults_custom_extensions() {
     print_test $FUNCNAME
     create_it_environment
     pushd $TR
-    $HR/configure.sh -e $EXT1 -e $EXT2
+    $HR/configure -e $EXT1 -e $EXT2
     verify_default_created $TR $FUNCNAME
     verify_link_exists "$TR/extensions/$EXT1_NAME" $FUNCNAME
     verify_link_exists "$TR/extensions/$EXT2_NAME" $FUNCNAME
-    $HR/configure.sh -c
+    $HR/configure -c
     verify_default_removed $TR $FUNCNAME
     popd
 }
@@ -341,12 +341,12 @@ test_configure_it_defaults_custom_module_file_and_extensions() {
     create_it_environment
     local MF_CONTENTS=`cat $EXT1/bin/vpid.modules`
     pushd $TR
-    $HR/configure.sh -m $MF -e $EXT1 -e $EXT2
+    $HR/configure -m $MF -e $EXT1 -e $EXT2
     verify_default_created $TR $FUNCNAME
     verify_link_exists "$TR/extensions/$EXT1_NAME" $FUNCNAME
     verify_link_exists "$TR/extensions/$EXT2_NAME" $FUNCNAME
     verify_file_contents "$TR/module_file" "$MF_CONTENTS" $FUNCNAME
-    $HR/configure.sh -c
+    $HR/configure -c
     verify_default_removed $TR $FUNCNAME
     popd
 }
@@ -359,7 +359,7 @@ test_build_oot_hypervisor() {
     print_test $FUNCNAME
     create_oot_environment
     pushd $BR
-    $HR/configure.sh -m $MF -e $EXT1
+    $HR/configure -m $MF -e $EXT1
     make -j2
     popd
 }
@@ -368,7 +368,7 @@ test_build_it_hypervisor() {
     print_test $FUNCNAME
     create_it_environment
     pushd $TR
-    $HR/configure.sh -m $MF -e $EXT1
+    $HR/configure -m $MF -e $EXT1
     make -j2
     popd
 }
@@ -381,7 +381,7 @@ test_root_makefile_update_all() {
     print_test $FUNCNAME
     touch_file $HR/Makefile.bf
     pushd $BR
-    $HR/configure.sh -u
+    $HR/configure -u
     popd
     verify_file_is_newer_than $BR/Makefile $HR/Makefile.bf $FUNCNAME
     verify_file_is_newer_than $BR/makefiles/Makefile $HR/Makefile.bf $FUNCNAME
@@ -391,12 +391,12 @@ test_root_makefile_update_scripts() {
     print_test $FUNCNAME
     touch_file $HR/Makefile.bf
     pushd $BR
-    $HR/configure.sh -s
+    $HR/configure -s
     popd
     verify_file_is_older_than $BR/Makefile $HR/Makefile.bf $FUNCNAME
     verify_file_is_older_than $BR/makefiles/Makefile $HR/Makefile.bf $FUNCNAME
     pushd $BR
-    $HR/configure.sh -u
+    $HR/configure -u
     popd
 }
 
@@ -404,7 +404,7 @@ test_root_makefile_update_makefiles() {
     print_test $FUNCNAME
     touch_file $HR/Makefile.bf
     pushd $BR
-    $HR/configure.sh -r
+    $HR/configure -r
     popd
     verify_file_is_newer_than $BR/Makefile $HR/Makefile.bf $FUNCNAME
     verify_file_is_newer_than $BR/makefiles/Makefile $HR/Makefile.bf $FUNCNAME
@@ -429,7 +429,7 @@ test_root_makefile_update_make_subdir() {
     verify_file_is_older_than $BR/Makefile $HR/Makefile.bf $FUNCNAME
     verify_file_is_newer_than $BR/makefiles/Makefile $HR/Makefile.bf $FUNCNAME
     pushd $BR
-    $HR/configure.sh -u
+    $HR/configure -u
     popd
 }
 
@@ -437,7 +437,7 @@ test_module_file_update_all() {
     print_test $FUNCNAME
     touch_file $MF
     pushd $BR
-    $HR/configure.sh -u
+    $HR/configure -u
     popd
     verify_file_is_newer_than $BR/module_file $MF $FUNCNAME
 }
@@ -446,7 +446,7 @@ test_module_file_update_scripts() {
     print_test $FUNCNAME
     touch_file $MF
     pushd $BR
-    $HR/configure.sh -s
+    $HR/configure -s
     popd
     verify_file_is_newer_than $BR/module_file $MF $FUNCNAME
 }
@@ -455,11 +455,11 @@ test_module_file_update_makefiles() {
     print_test $FUNCNAME
     touch_file $MF
     pushd $BR
-    $HR/configure.sh -r
+    $HR/configure -r
     popd
     verify_file_is_older_than $BR/module_file $MF $FUNCNAME
     pushd $BR
-    $HR/configure.sh -u
+    $HR/configure -u
     popd
 }
 
@@ -480,7 +480,7 @@ test_module_file_update_make_subdir() {
     popd
     verify_file_is_older_than $BR/module_file $MF $FUNCNAME
     pushd $BR
-    $HR/configure.sh -u
+    $HR/configure -u
     popd
 }
 
@@ -488,7 +488,7 @@ test_extensions_update_all() {
     print_test $FUNCNAME
     rm -Rf $BR/extensions
     pushd $BR
-    $HR/configure.sh -u
+    $HR/configure -u
     popd
     verify_directory_exists $BR/extensions $FUNCNAME
     verify_link_exists $BR/extensions/hypervisor_example_vpid $FUNCNAME
@@ -498,7 +498,7 @@ test_extensions_update_scripts() {
     print_test $FUNCNAME
     rm -Rf $BR/extensions
     pushd $BR
-    $HR/configure.sh -s
+    $HR/configure -s
     popd
     verify_directory_exists $BR/extensions $FUNCNAME
     verify_link_exists $BR/extensions/hypervisor_example_vpid $FUNCNAME
@@ -508,12 +508,12 @@ test_extensions_update_makefiles() {
     print_test $FUNCNAME
     rm -Rf $BR/extensions
     pushd $BR
-    $HR/configure.sh -r
+    $HR/configure -r
     popd
     verify_directory_does_not_exist $BR/extensions $FUNCNAME
     verify_link_does_not_exist $BR/extensions/hypervisor_example_vpid $FUNCNAME
     pushd $BR
-    $HR/configure.sh -u
+    $HR/configure -u
     popd
 }
 
@@ -536,58 +536,58 @@ test_extensions_update_make_subdir() {
     verify_directory_does_not_exist $BR/extensions $FUNCNAME
     verify_link_does_not_exist $BR/extensions/hypervisor_example_vpid $FUNCNAME
     pushd $BR
-    $HR/configure.sh -u
+    $HR/configure -u
     popd
 }
 
-test_configure_version_update_all() {
+test_build_version_update_all() {
     print_test $FUNCNAME
-    rm -Rf $BR/configure_version
+    rm -Rf $BR/build_version
     pushd $BR
-    $HR/configure.sh -u
+    $HR/configure -u
     popd
-    verify_file_exists $BR/configure_version $FUNCNAME
+    verify_file_exists $BR/build_version $FUNCNAME
 }
 
-test_configure_version_update_scripts() {
+test_build_version_update_scripts() {
     print_test $FUNCNAME
-    rm -Rf $BR/configure_version
+    rm -Rf $BR/build_version
     pushd $BR
-    $HR/configure.sh -s
+    $HR/configure -s
     popd
-    verify_file_exists $BR/configure_version $FUNCNAME
+    verify_file_exists $BR/build_version $FUNCNAME
 }
 
-test_configure_version_update_makefiles() {
+test_build_version_update_makefiles() {
     print_test $FUNCNAME
-    rm -Rf $BR/configure_version
+    rm -Rf $BR/build_version
     pushd $BR
-    $HR/configure.sh -r
+    $HR/configure -r
     popd
-    verify_file_does_not_exist $BR/configure_version $FUNCNAME
+    verify_file_does_not_exist $BR/build_version $FUNCNAME
     pushd $BR
-    $HR/configure.sh -u
+    $HR/configure -u
     popd
 }
 
-test_configure_version_update_make() {
+test_build_version_update_make() {
     print_test $FUNCNAME
-    rm -Rf $BR/configure_version
+    rm -Rf $BR/build_version
     pushd $BR
     make
     popd
-    verify_file_exists $BR/configure_version $FUNCNAME
+    verify_file_exists $BR/build_version $FUNCNAME
 }
 
-test_configure_version_update_make_subdir() {
+test_build_version_update_make_subdir() {
     print_test $FUNCNAME
-    rm -Rf $BR/configure_version
+    rm -Rf $BR/build_version
     pushd $BR/makefiles/bfcrt
     make
     popd
-    verify_file_does_not_exist $BR/configure_version $FUNCNAME
+    verify_file_does_not_exist $BR/build_version $FUNCNAME
     pushd $BR
-    $HR/configure.sh -u
+    $HR/configure -u
     popd
 }
 
@@ -595,7 +595,7 @@ test_git_working_tree_update_all() {
     print_test $FUNCNAME
     rm -Rf $BR/git_working_tree.sh
     pushd $BR
-    $HR/configure.sh -u
+    $HR/configure -u
     popd
     verify_file_exists $BR/git_working_tree.sh $FUNCNAME
 }
@@ -604,7 +604,7 @@ test_git_working_tree_update_scripts() {
     print_test $FUNCNAME
     rm -Rf $BR/git_working_tree.sh
     pushd $BR
-    $HR/configure.sh -s
+    $HR/configure -s
     popd
     verify_file_exists $BR/git_working_tree.sh $FUNCNAME
 }
@@ -613,11 +613,11 @@ test_git_working_tree_update_makefiles() {
     print_test $FUNCNAME
     rm -Rf $BR/git_working_tree.sh
     pushd $BR
-    $HR/configure.sh -r
+    $HR/configure -r
     popd
     verify_file_does_not_exist $BR/git_working_tree.sh $FUNCNAME
     pushd $BR
-    $HR/configure.sh -u
+    $HR/configure -u
     popd
 }
 
@@ -638,7 +638,7 @@ test_git_working_tree_update_make_subdir() {
     popd
     verify_file_does_not_exist $BR/git_working_tree.sh $FUNCNAME
     pushd $BR
-    $HR/configure.sh -u
+    $HR/configure -u
     popd
 }
 
@@ -646,10 +646,10 @@ test_build_scripts_update_all() {
     print_test $FUNCNAME
     rm -Rf $BR/build_scripts
     pushd $BR
-    $HR/configure.sh -u
+    $HR/configure -u
     popd
     verify_directory_exists $BR/build_scripts $FUNCNAME
-    verify_file_exists $BR/build_scripts/bareflank-gcc-wrapper.sh $FUNCNAME
+    verify_file_exists $BR/build_scripts/bareflank_gcc_wrapper.sh $FUNCNAME
     verify_file_exists $BR/build_scripts/build_libbfc.sh $FUNCNAME
     verify_file_exists $BR/build_scripts/build_libcxxabi.sh $FUNCNAME
     verify_file_exists $BR/build_scripts/build_libcxx.sh $FUNCNAME
@@ -670,10 +670,10 @@ test_build_scripts_update_scripts() {
     print_test $FUNCNAME
     rm -Rf $BR/build_scripts
     pushd $BR
-    $HR/configure.sh -s
+    $HR/configure -s
     popd
     verify_directory_exists $BR/build_scripts $FUNCNAME
-    verify_file_exists $BR/build_scripts/bareflank-gcc-wrapper.sh $FUNCNAME
+    verify_file_exists $BR/build_scripts/bareflank_gcc_wrapper.sh $FUNCNAME
     verify_file_exists $BR/build_scripts/build_libbfc.sh $FUNCNAME
     verify_file_exists $BR/build_scripts/build_libcxxabi.sh $FUNCNAME
     verify_file_exists $BR/build_scripts/build_libcxx.sh $FUNCNAME
@@ -694,10 +694,10 @@ test_build_scripts_update_makefiles() {
     print_test $FUNCNAME
     rm -Rf $BR/build_scripts
     pushd $BR
-    $HR/configure.sh -r
+    $HR/configure -r
     popd
     verify_directory_does_not_exist $BR/build_scripts $FUNCNAME
-    verify_file_does_not_exist $BR/build_scripts/bareflank-gcc-wrapper.sh $FUNCNAME
+    verify_file_does_not_exist $BR/build_scripts/bareflank_gcc_wrapper.sh $FUNCNAME
     verify_file_does_not_exist $BR/build_scripts/build_libbfc.sh $FUNCNAME
     verify_file_does_not_exist $BR/build_scripts/build_libcxxabi.sh $FUNCNAME
     verify_file_does_not_exist $BR/build_scripts/build_libcxx.sh $FUNCNAME
@@ -713,7 +713,7 @@ test_build_scripts_update_makefiles() {
     verify_file_does_not_exist $BR/build_scripts/x86_64-bareflank-nasm $FUNCNAME
     verify_file_does_not_exist $BR/build_scripts/x86_64-bareflank-docker $FUNCNAME
     pushd $BR
-    $HR/configure.sh -u
+    $HR/configure -u
     popd
 }
 
@@ -724,7 +724,7 @@ test_build_scripts_update_make() {
     make
     popd
     verify_directory_exists $BR/build_scripts $FUNCNAME
-    verify_file_exists $BR/build_scripts/bareflank-gcc-wrapper.sh $FUNCNAME
+    verify_file_exists $BR/build_scripts/bareflank_gcc_wrapper.sh $FUNCNAME
     verify_file_exists $BR/build_scripts/build_libbfc.sh $FUNCNAME
     verify_file_exists $BR/build_scripts/build_libcxxabi.sh $FUNCNAME
     verify_file_exists $BR/build_scripts/build_libcxx.sh $FUNCNAME
@@ -748,7 +748,7 @@ test_build_scripts_update_make_subdir() {
     make
     popd
     verify_directory_does_not_exist $BR/build_scripts $FUNCNAME
-    verify_file_does_not_exist $BR/build_scripts/bareflank-gcc-wrapper.sh $FUNCNAME
+    verify_file_does_not_exist $BR/build_scripts/bareflank_gcc_wrapper.sh $FUNCNAME
     verify_file_does_not_exist $BR/build_scripts/build_libbfc.sh $FUNCNAME
     verify_file_does_not_exist $BR/build_scripts/build_libcxxabi.sh $FUNCNAME
     verify_file_does_not_exist $BR/build_scripts/build_libcxx.sh $FUNCNAME
@@ -764,7 +764,7 @@ test_build_scripts_update_make_subdir() {
     verify_file_does_not_exist $BR/build_scripts/x86_64-bareflank-nasm $FUNCNAME
     verify_file_does_not_exist $BR/build_scripts/x86_64-bareflank-docker $FUNCNAME
     pushd $BR
-    $HR/configure.sh -u
+    $HR/configure -u
     popd
 }
 
@@ -772,7 +772,7 @@ test_makefile_update_all() {
     print_test $FUNCNAME
     touch_file $HR/bfcrt/src/Makefile.bf
     pushd $BR
-    $HR/configure.sh -u
+    $HR/configure -u
     popd
     verify_file_is_newer_than $BR/makefiles/bfcrt/src/Makefile $HR/bfcrt/src/Makefile.bf $FUNCNAME
 }
@@ -781,11 +781,11 @@ test_makefile_update_scripts() {
     print_test $FUNCNAME
     touch_file $HR/bfcrt/src/Makefile.bf
     pushd $BR
-    $HR/configure.sh -s
+    $HR/configure -s
     popd
     verify_file_is_older_than $BR/makefiles/bfcrt/src/Makefile $HR/bfcrt/src/Makefile.bf $FUNCNAME
     pushd $BR
-    $HR/configure.sh -u
+    $HR/configure -u
     popd
 }
 
@@ -793,11 +793,11 @@ test_makefile_update_makefiles() {
     print_test $FUNCNAME
     touch_file $HR/bfcrt/src/Makefile.bf
     pushd $BR
-    $HR/configure.sh -r
+    $HR/configure -r
     popd
     verify_file_is_older_than $BR/makefiles/bfcrt/src/Makefile $HR/bfcrt/src/Makefile.bf $FUNCNAME
     pushd $BR
-    $HR/configure.sh -u
+    $HR/configure -u
     popd
 }
 
@@ -823,7 +823,7 @@ test_remove_makefiles_update_all() {
     print_test $FUNCNAME
     rm -Rf $BR/makefiles
     pushd $BR
-    $HR/configure.sh -u
+    $HR/configure -u
     popd
     verify_directory_exists $BR/makefiles $FUNCNAME
     verify_file_exists $BR/makefiles/Makefile $FUNCNAME
@@ -834,13 +834,13 @@ test_remove_makefiles_update_scripts() {
     print_test $FUNCNAME
     rm -Rf $BR/makefiles
     pushd $BR
-    $HR/configure.sh -s
+    $HR/configure -s
     popd
     verify_directory_does_not_exist $BR/makefiles $FUNCNAME
     verify_file_does_not_exist $BR/makefiles/Makefile $FUNCNAME
     verify_file_does_not_exist $BR/makefiles/bfcrt/Makefile $FUNCNAME
     pushd $BR
-    $HR/configure.sh -u
+    $HR/configure -u
     make
     popd
 }
@@ -849,13 +849,13 @@ test_remove_makefiles_update_makefiles() {
     print_test $FUNCNAME
     rm -Rf $BR/makefiles
     pushd $BR
-    $HR/configure.sh -r || true
+    $HR/configure -r || true
     popd
     verify_directory_does_not_exist $BR/makefiles $FUNCNAME
     verify_file_does_not_exist $BR/makefiles/Makefile $FUNCNAME
     verify_file_does_not_exist $BR/makefiles/bfcrt/Makefile $FUNCNAME
     pushd $BR
-    $HR/configure.sh -u
+    $HR/configure -u
     make
     popd
 }
@@ -864,7 +864,7 @@ test_remove_directory_update_all() {
     print_test $FUNCNAME
     rm -Rf $BR/makefiles/bfcrt
     pushd $BR
-    $HR/configure.sh -u
+    $HR/configure -u
     popd
     verify_directory_exists $BR/makefiles/bfcrt $FUNCNAME
     verify_directory_exists $BR/makefiles/bfcrt/src $FUNCNAME
@@ -878,7 +878,7 @@ test_remove_directory_update_scripts() {
     print_test $FUNCNAME
     rm -Rf $BR/makefiles/bfcrt
     pushd $BR
-    $HR/configure.sh -s
+    $HR/configure -s
     popd
     verify_directory_does_not_exist $BR/makefiles/bfcrt $FUNCNAME
     verify_directory_does_not_exist $BR/makefiles/bfcrt/src $FUNCNAME
@@ -887,7 +887,7 @@ test_remove_directory_update_scripts() {
     verify_file_does_not_exist $BR/makefiles/bfcrt/src/Makefile $FUNCNAME
     verify_file_does_not_exist $BR/makefiles/bfcrt/test/Makefile $FUNCNAME
     pushd $BR
-    $HR/configure.sh -u
+    $HR/configure -u
     make
     popd
 }
@@ -896,7 +896,7 @@ test_remove_directory_update_makefiles() {
     print_test $FUNCNAME
     rm -Rf $BR/makefiles/bfcrt
     pushd $BR
-    $HR/configure.sh -r
+    $HR/configure -r
     popd
     verify_directory_does_not_exist $BR/makefiles/bfcrt $FUNCNAME
     verify_directory_does_not_exist $BR/makefiles/bfcrt/src $FUNCNAME
@@ -905,7 +905,7 @@ test_remove_directory_update_makefiles() {
     verify_file_does_not_exist $BR/makefiles/bfcrt/src/Makefile $FUNCNAME
     verify_file_does_not_exist $BR/makefiles/bfcrt/test/Makefile $FUNCNAME
     pushd $BR
-    $HR/configure.sh -u
+    $HR/configure -u
     make
     popd
 }
@@ -942,7 +942,7 @@ test_remove_makefile_update_all() {
     print_test $FUNCNAME
     rm -Rf $BR/makefiles/bfcrt/Makefile
     pushd $BR
-    $HR/configure.sh -u
+    $HR/configure -u
     popd
     verify_file_exists $BR/makefiles/bfcrt/Makefile $FUNCNAME
 }
@@ -951,11 +951,11 @@ test_remove_makefile_update_scripts() {
     print_test $FUNCNAME
     rm -Rf $BR/makefiles/bfcrt/Makefile
     pushd $BR
-    $HR/configure.sh -s
+    $HR/configure -s
     popd
     verify_file_does_not_exist $BR/makefiles/bfcrt/Makefile $FUNCNAME
     pushd $BR
-    $HR/configure.sh -u
+    $HR/configure -u
     make
     popd
 }
@@ -964,11 +964,11 @@ test_remove_makefile_update_makefiles() {
     print_test $FUNCNAME
     rm -Rf $BR/makefiles/bfcrt/Makefile
     pushd $BR
-    $HR/configure.sh -r
+    $HR/configure -r
     popd
     verify_file_does_not_exist $BR/makefiles/bfcrt/Makefile $FUNCNAME
     pushd $BR
-    $HR/configure.sh -u
+    $HR/configure -u
     make
     popd
 }
@@ -995,7 +995,7 @@ test_remove_env_script_update_all() {
     print_test $FUNCNAME
     mv $BR/env.sh $BR/backup_env.sh
     pushd $BR
-    $HR/configure.sh -u || exit_status=$?
+    $HR/configure -u || exit_status=$?
     popd
     verify_exit_status $exit_status 2 $FUNCNAME
     mv $BR/backup_env.sh $BR/env.sh
@@ -1005,7 +1005,7 @@ test_remove_env_script_update_scripts() {
     print_test $FUNCNAME
     mv $BR/env.sh $BR/backup_env.sh
     pushd $BR
-    $HR/configure.sh -s || exit_status=$?
+    $HR/configure -s || exit_status=$?
     popd
     verify_exit_status $exit_status 2 $FUNCNAME
     mv $BR/backup_env.sh $BR/env.sh
@@ -1015,7 +1015,7 @@ test_remove_env_script_update_makefiles() {
     print_test $FUNCNAME
     mv $BR/env.sh $BR/backup_env.sh
     pushd $BR
-    $HR/configure.sh -r || exit_status=$?
+    $HR/configure -r || exit_status=$?
     popd
     verify_exit_status $exit_status 2 $FUNCNAME
     mv $BR/backup_env.sh $BR/env.sh
@@ -1048,7 +1048,7 @@ test_move_build_dir_update_all() {
     print_test $FUNCNAME
     mv $BR /tmp/new_loc
     pushd /tmp/new_loc
-    $HR/configure.sh -u || exit_status=$?
+    $HR/configure -u || exit_status=$?
     popd
     verify_exit_status $exit_status 3 $FUNCNAME
     mv /tmp/new_loc $BR
@@ -1058,7 +1058,7 @@ test_move_build_dir_update_scripts() {
     print_test $FUNCNAME
     mv $BR /tmp/new_loc
     pushd /tmp/new_loc
-    $HR/configure.sh -s || exit_status=$?
+    $HR/configure -s || exit_status=$?
     popd
     verify_exit_status $exit_status 3 $FUNCNAME
     mv /tmp/new_loc $BR
@@ -1068,7 +1068,7 @@ test_move_build_dir_update_makefiles() {
     print_test $FUNCNAME
     mv $BR /tmp/new_loc
     pushd /tmp/new_loc
-    $HR/configure.sh -r || exit_status=$?
+    $HR/configure -r || exit_status=$?
     popd
     verify_exit_status $exit_status 3 $FUNCNAME
     mv /tmp/new_loc $BR
@@ -1098,7 +1098,7 @@ test_move_build_dir_clean() {
     print_test $FUNCNAME
     mv $BR /tmp/new_loc
     pushd /tmp/new_loc
-    $HR/configure.sh -c || exit_status=$?
+    $HR/configure -c || exit_status=$?
     popd
     verify_exit_status $exit_status 3 $FUNCNAME
     mv /tmp/new_loc $BR
@@ -1114,12 +1114,12 @@ test_reconfigure_extensions_to_no_extensions() {
     local MF_CONTENTS1=`cat $EXT1/bin/vpid.modules`
     local MF_CONTENTS2=`cat $HR/bfm/bin/native/vmm.modules`
     pushd $BR
-    $HR/configure.sh -m $MF -e $EXT1 -e $EXT2
+    $HR/configure -m $MF -e $EXT1 -e $EXT2
     verify_default_created $BR $FUNCNAME
     verify_link_exists "$BR/extensions/$EXT1_NAME" $FUNCNAME
     verify_link_exists "$BR/extensions/$EXT2_NAME" $FUNCNAME
     verify_file_contents "$BR/module_file" "$MF_CONTENTS1" $FUNCNAME
-    $HR/configure.sh
+    $HR/configure
     verify_default_created $BR $FUNCNAME
     verify_directory_is_empty $BR/extensions $FUNCNAME
     verify_file_contents "$BR/module_file" "$MF_CONTENTS2" $FUNCNAME
@@ -1132,11 +1132,11 @@ test_reconfigure_no_extensions_to_extensions() {
     local MF_CONTENTS1=`cat $EXT1/bin/vpid.modules`
     local MF_CONTENTS2=`cat $HR/bfm/bin/native/vmm.modules`
     pushd $BR
-    $HR/configure.sh
+    $HR/configure
     verify_default_created $BR $FUNCNAME
     verify_directory_is_empty $BR/extensions $FUNCNAME
     verify_file_contents "$BR/module_file" "$MF_CONTENTS2" $FUNCNAME
-    $HR/configure.sh -m $MF -e $EXT1 -e $EXT2
+    $HR/configure -m $MF -e $EXT1 -e $EXT2
     verify_default_created $BR $FUNCNAME
     verify_link_exists "$BR/extensions/$EXT1_NAME" $FUNCNAME
     verify_link_exists "$BR/extensions/$EXT2_NAME" $FUNCNAME
@@ -1154,23 +1154,23 @@ test_version_change_in_root_update_all() {
     local MF_CONTENTS1=`cat $EXT1/bin/vpid.modules`
     local MF_CONTENTS2=`cat $HR/bfm/bin/native/vmm.modules`
     pushd $BR
-    $HR/configure.sh
+    $HR/configure
     verify_default_created $BR $FUNCNAME
     verify_directory_is_empty $BR/extensions $FUNCNAME
     verify_file_contents "$BR/module_file" "$MF_CONTENTS2" $FUNCNAME
     touch_file $BR/timestamp
-    echo "0" > $BR/configure_version
-    $HR/configure.sh -u
+    echo "0" > $BR/build_version
+    $HR/configure -u
     verify_default_created $BR $FUNCNAME
     verify_directory_is_empty $BR/extensions $FUNCNAME
     verify_file_contents "$BR/module_file" "$MF_CONTENTS2" $FUNCNAME
     verify_file_is_newer_than $BR/Makefile $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/Makefile $BR/timestamp $FUNCNAME
-    verify_file_is_newer_than $BR/configure_version $BR/timestamp $FUNCNAME
+    verify_file_is_newer_than $BR/build_version $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/env.sh $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/git_working_tree.sh $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/module_file $BR/timestamp $FUNCNAME
-    verify_file_is_newer_than $BR/build_scripts/bareflank-gcc-wrapper.sh $BR/timestamp $FUNCNAME
+    verify_file_is_newer_than $BR/build_scripts/bareflank_gcc_wrapper.sh $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/build_scripts/build_libbfc.sh $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/build_scripts/build_libcxxabi.sh $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/build_scripts/build_libcxx.sh $BR/timestamp $FUNCNAME
@@ -1194,23 +1194,23 @@ test_version_change_in_root_update_scripts() {
     local MF_CONTENTS1=`cat $EXT1/bin/vpid.modules`
     local MF_CONTENTS2=`cat $HR/bfm/bin/native/vmm.modules`
     pushd $BR
-    $HR/configure.sh
+    $HR/configure
     verify_default_created $BR $FUNCNAME
     verify_directory_is_empty $BR/extensions $FUNCNAME
     verify_file_contents "$BR/module_file" "$MF_CONTENTS2" $FUNCNAME
     touch_file $BR/timestamp
-    echo "0" > $BR/configure_version
-    $HR/configure.sh -s
+    echo "0" > $BR/build_version
+    $HR/configure -s
     verify_default_created $BR $FUNCNAME
     verify_directory_is_empty $BR/extensions $FUNCNAME
     verify_file_contents "$BR/module_file" "$MF_CONTENTS2" $FUNCNAME
     verify_file_is_newer_than $BR/Makefile $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/Makefile $BR/timestamp $FUNCNAME
-    verify_file_is_newer_than $BR/configure_version $BR/timestamp $FUNCNAME
+    verify_file_is_newer_than $BR/build_version $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/env.sh $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/git_working_tree.sh $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/module_file $BR/timestamp $FUNCNAME
-    verify_file_is_newer_than $BR/build_scripts/bareflank-gcc-wrapper.sh $BR/timestamp $FUNCNAME
+    verify_file_is_newer_than $BR/build_scripts/bareflank_gcc_wrapper.sh $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/build_scripts/build_libbfc.sh $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/build_scripts/build_libcxxabi.sh $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/build_scripts/build_libcxx.sh $BR/timestamp $FUNCNAME
@@ -1234,23 +1234,23 @@ test_version_change_in_root_update_makefiles() {
     local MF_CONTENTS1=`cat $EXT1/bin/vpid.modules`
     local MF_CONTENTS2=`cat $HR/bfm/bin/native/vmm.modules`
     pushd $BR
-    $HR/configure.sh
+    $HR/configure
     verify_default_created $BR $FUNCNAME
     verify_directory_is_empty $BR/extensions $FUNCNAME
     verify_file_contents "$BR/module_file" "$MF_CONTENTS2" $FUNCNAME
     touch_file $BR/timestamp
-    echo "0" > $BR/configure_version
-    $HR/configure.sh -r
+    echo "0" > $BR/build_version
+    $HR/configure -r
     verify_default_created $BR $FUNCNAME
     verify_directory_is_empty $BR/extensions $FUNCNAME
     verify_file_contents "$BR/module_file" "$MF_CONTENTS2" $FUNCNAME
     verify_file_is_newer_than $BR/Makefile $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/Makefile $BR/timestamp $FUNCNAME
-    verify_file_is_newer_than $BR/configure_version $BR/timestamp $FUNCNAME
+    verify_file_is_newer_than $BR/build_version $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/env.sh $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/git_working_tree.sh $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/module_file $BR/timestamp $FUNCNAME
-    verify_file_is_newer_than $BR/build_scripts/bareflank-gcc-wrapper.sh $BR/timestamp $FUNCNAME
+    verify_file_is_newer_than $BR/build_scripts/bareflank_gcc_wrapper.sh $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/build_scripts/build_libbfc.sh $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/build_scripts/build_libcxxabi.sh $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/build_scripts/build_libcxx.sh $BR/timestamp $FUNCNAME
@@ -1274,13 +1274,13 @@ test_version_change_in_root_update_make() {
     local MF_CONTENTS1=`cat $EXT1/bin/vpid.modules`
     local MF_CONTENTS2=`cat $HR/bfm/bin/native/vmm.modules`
     pushd $BR
-    $HR/configure.sh
+    $HR/configure
     make
     verify_default_created $BR $FUNCNAME
     verify_directory_is_empty $BR/extensions $FUNCNAME
     verify_file_contents "$BR/module_file" "$MF_CONTENTS2" $FUNCNAME
     touch_file $BR/timestamp
-    echo "0" > $BR/configure_version
+    echo "0" > $BR/build_version
     make || exit_status=$?
     verify_exit_status $exit_status 2 $FUNCNAME
     verify_default_created $BR $FUNCNAME
@@ -1288,11 +1288,11 @@ test_version_change_in_root_update_make() {
     verify_file_contents "$BR/module_file" "$MF_CONTENTS2" $FUNCNAME
     verify_file_is_newer_than $BR/Makefile $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/Makefile $BR/timestamp $FUNCNAME
-    verify_file_is_newer_than $BR/configure_version $BR/timestamp $FUNCNAME
+    verify_file_is_newer_than $BR/build_version $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/env.sh $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/git_working_tree.sh $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/module_file $BR/timestamp $FUNCNAME
-    verify_file_is_newer_than $BR/build_scripts/bareflank-gcc-wrapper.sh $BR/timestamp $FUNCNAME
+    verify_file_is_newer_than $BR/build_scripts/bareflank_gcc_wrapper.sh $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/build_scripts/build_libbfc.sh $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/build_scripts/build_libcxxabi.sh $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/build_scripts/build_libcxx.sh $BR/timestamp $FUNCNAME
@@ -1316,14 +1316,14 @@ test_version_change_in_root_update_make_subdir() {
     local MF_CONTENTS1=`cat $EXT1/bin/vpid.modules`
     local MF_CONTENTS2=`cat $HR/bfm/bin/native/vmm.modules`
     pushd $BR
-    $HR/configure.sh
+    $HR/configure
     make
     verify_default_created $BR $FUNCNAME
     verify_directory_is_empty $BR/extensions $FUNCNAME
     verify_file_contents "$BR/module_file" "$MF_CONTENTS2" $FUNCNAME
     touch_file $BR/timestamp
     touch_file $HR/bfcrt/Makefile.bf
-    echo "0" > $BR/configure_version
+    echo "0" > $BR/build_version
     cd $BR/makefiles/bfcrt
     make || exit_status=$?
     verify_exit_status $exit_status 2 $FUNCNAME
@@ -1332,11 +1332,11 @@ test_version_change_in_root_update_make_subdir() {
     verify_file_contents "$BR/module_file" "$MF_CONTENTS2" $FUNCNAME
     verify_file_is_newer_than $BR/Makefile $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/Makefile $BR/timestamp $FUNCNAME
-    verify_file_is_newer_than $BR/configure_version $BR/timestamp $FUNCNAME
+    verify_file_is_newer_than $BR/build_version $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/env.sh $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/git_working_tree.sh $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/module_file $BR/timestamp $FUNCNAME
-    verify_file_is_newer_than $BR/build_scripts/bareflank-gcc-wrapper.sh $BR/timestamp $FUNCNAME
+    verify_file_is_newer_than $BR/build_scripts/bareflank_gcc_wrapper.sh $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/build_scripts/build_libbfc.sh $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/build_scripts/build_libcxxabi.sh $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/build_scripts/build_libcxx.sh $BR/timestamp $FUNCNAME
@@ -1360,24 +1360,24 @@ test_version_change_in_root_update_all_down_version() {
     local MF_CONTENTS1=`cat $EXT1/bin/vpid.modules`
     local MF_CONTENTS2=`cat $HR/bfm/bin/native/vmm.modules`
     pushd $BR
-    $HR/configure.sh
+    $HR/configure
     verify_default_created $BR $FUNCNAME
     verify_directory_is_empty $BR/extensions $FUNCNAME
     verify_file_contents "$BR/module_file" "$MF_CONTENTS2" $FUNCNAME
     touch_file $BR/timestamp
-    echo "10000" > $BR/configure_version
-    $HR/configure.sh -u --this-is-make  || exit_status=$?
+    echo "10000" > $BR/build_version
+    $HR/configure -u --this-is-make  || exit_status=$?
     verify_exit_status $exit_status 5 $FUNCNAME
     verify_default_created $BR $FUNCNAME
     verify_directory_is_empty $BR/extensions $FUNCNAME
     verify_file_contents "$BR/module_file" "$MF_CONTENTS2" $FUNCNAME
     verify_file_is_newer_than $BR/Makefile $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/Makefile $BR/timestamp $FUNCNAME
-    verify_file_is_newer_than $BR/configure_version $BR/timestamp $FUNCNAME
+    verify_file_is_newer_than $BR/build_version $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/env.sh $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/git_working_tree.sh $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/module_file $BR/timestamp $FUNCNAME
-    verify_file_is_newer_than $BR/build_scripts/bareflank-gcc-wrapper.sh $BR/timestamp $FUNCNAME
+    verify_file_is_newer_than $BR/build_scripts/bareflank_gcc_wrapper.sh $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/build_scripts/build_libbfc.sh $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/build_scripts/build_libcxxabi.sh $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/build_scripts/build_libcxx.sh $BR/timestamp $FUNCNAME
@@ -1403,7 +1403,7 @@ test_extenions() {
     print_test $FUNCNAME
     create_oot_environment
     pushd $BR
-    $HR/configure.sh -m $MF -e $EXT1 -e $EXT2
+    $HR/configure -m $MF -e $EXT1 -e $EXT2
     make
     verify_file_exists $BR/makefiles/hypervisor_example_vpid/vcpu_factory_vpid/bin/cross/libvcpu_factory_vpid.so $FUNCNAME
     verify_file_exists $BR/makefiles/hypervisor_example_cpuidcount/vcpu_factory_cpuidcount/bin/cross/libvcpu_factory_cpuidcount.so $FUNCNAME
@@ -1418,7 +1418,7 @@ test_invalid_module_file() {
     print_test $FUNCNAME
     create_oot_environment
     pushd $BR
-    $HR/configure.sh -m /tmp/missing_module_file.modules || exit_status=$?
+    $HR/configure -m /tmp/missing_module_file.modules || exit_status=$?
     verify_exit_status $exit_status 1 $FUNCNAME
     popd
 }
@@ -1427,7 +1427,7 @@ test_invalid_extension() {
     print_test $FUNCNAME
     create_oot_environment
     pushd $BR
-    $HR/configure.sh -e /tmp/missing_extension || exit_status=$?
+    $HR/configure -e /tmp/missing_extension || exit_status=$?
     verify_exit_status $exit_status 1 $FUNCNAME
     popd
 }
@@ -1447,8 +1447,8 @@ EXT2_NAME="hypervisor_example_cpuidcount"
 EXT1="/tmp/$EXT1_NAME"
 EXT2="/tmp/$EXT2_NAME"
 
-if [[ ! -f configure.sh ]]; then
-    echo "ERROR: The test_configure.sh script must be run from the hypervisor's root folder"
+if [[ ! -f configure ]]; then
+    echo "ERROR: The test_configure script must be run from the hypervisor's root folder"
     exit 1
 fi
 
@@ -1490,11 +1490,11 @@ test_extensions_update_scripts
 test_extensions_update_makefiles
 test_extensions_update_make
 test_extensions_update_make_subdir
-test_configure_version_update_all
-test_configure_version_update_scripts
-test_configure_version_update_makefiles
-test_configure_version_update_make
-test_configure_version_update_make_subdir
+test_build_version_update_all
+test_build_version_update_scripts
+test_build_version_update_makefiles
+test_build_version_update_make
+test_build_version_update_make_subdir
 test_git_working_tree_update_all
 test_git_working_tree_update_scripts
 test_git_working_tree_update_makefiles

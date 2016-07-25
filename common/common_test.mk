@@ -40,7 +40,7 @@ LIBRARY_PATH := $(LIBRARY_PATH):.
 ################################################################################
 
 Makefile: $(HYPER_REL)/Makefile.bf
-	@ BUILD_ABS=$(BUILD_ABS) BUILD_REL=$(BUILD_REL) HYPER_REL=$(HYPER_REL) $(HYPER_ABS)/configure.sh -r --this-is-make
+	@ BUILD_ABS=$(BUILD_ABS) BUILD_REL=$(BUILD_REL) HYPER_REL=$(HYPER_REL) $(HYPER_ABS)/configure -r --this-is-make
 
 .PHONY: run_tests
 

@@ -20,17 +20,15 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-sudo dnf install -y redhat-lsb-core
-
 # ------------------------------------------------------------------------------
 # Checks
 # ------------------------------------------------------------------------------
 
 case $(lsb_release -si) in
-Fedora)
+Ubuntu)
     ;;
 *)
-    echo "This script can only be used with: Fedora"
+    echo "This script can only be used with: Ubuntu"
     exit 1
 esac
 
@@ -44,7 +42,7 @@ fi
 # ------------------------------------------------------------------------------
 
 option_help() {
-    echo -e "Usage: setup-fedora.sh [OPTION]"
+    echo -e "Usage: setup_ubuntu.sh [OPTION]"
     echo -e "Sets up the system to compile / use Bareflank"
     echo -e ""
     echo -e "       -h, --help                       show this help menu"
@@ -59,27 +57,53 @@ option_help() {
 # Functions
 # ------------------------------------------------------------------------------
 
+install_apt_tools() {
+    sudo apt-get update
+    sudo apt-get install --yes software-properties-common
+    sudo apt-get install --yes python-software-properties
+    sudo apt-get install --yes apt-transport-https
+    sudo apt-get install --yes ca-certificates
+}
+
+add_cmake_repositories() {
+    sudo add-apt-repository ppa:george-edison55/cmake-3.x
+}
+
+add_gcc_repositories() {
+    sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+}
+
+add_docker_repositories() {
+    sudo apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
+    sudo add-apt-repository "deb https://apt.dockerproject.org/repo ubuntu-$(lsb_release -s -c) main"
+}
+
 install_common_packages() {
-    sudo dnf groupinstall -y "Development Tools"
-    sudo dnf install -y gcc-c++
-    sudo dnf install -y gmp-devel
-    sudo dnf install -y libmpc-devel
-    sudo dnf install -y mpfr-devel
-    sudo dnf install -y isl-devel
-    sudo dnf install -y cmake
-    sudo dnf install -y nasm
-    sudo dnf install -y texinfo
-    sudo dnf install -y libstdc++-static
-    sudo dnf install -y kernel-devel
-    sudo dnf install -y kernel-headers
-    sudo dnf update -y kernel
-    curl -fsSL https://get.docker.com/ | sh
+    sudo apt-get update
+    sudo apt-get install --yes build-essential
+    sudo apt-get install --yes linux-headers-$(uname -r)
+    sudo apt-get install --yes libgmp-dev
+    sudo apt-get install --yes libmpc-dev
+    sudo apt-get install --yes libmpfr-dev
+    sudo apt-get install --yes flex
+    sudo apt-get install --yes bison
+    sudo apt-get install --yes nasm
+    sudo apt-get install --yes texinfo
+    sudo apt-get install --yes cmake
+    sudo DEBIAN_FRONTEND=noninteractive apt-get install --yes -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" docker-engine
+}
+
+install_g++-5() {
+    sudo apt-get install --yes g++-5
+    sudo rm /usr/bin/gcc
+    sudo rm /usr/bin/g++
+    sudo ln -s /usr/bin/gcc-5 /usr/bin/gcc
+    sudo ln -s /usr/bin/g++-5 /usr/bin/g++
 }
 
 prepare_docker() {
     sudo usermod -a -G docker $USER
-    sudo systemctl start docker
-    sudo systemctl enable docker
+    sudo service docker restart
 }
 
 # ------------------------------------------------------------------------------
@@ -122,13 +146,25 @@ done
 # ------------------------------------------------------------------------------
 
 case $(lsb_release -sr) in
-23)
+16.04)
+    install_apt_tools
+    add_docker_repositories
     install_common_packages
     prepare_docker
     ;;
 
+14.04)
+    install_apt_tools
+    add_cmake_repositories
+    add_gcc_repositories
+    add_docker_repositories
+    install_common_packages
+    install_g++-5
+    prepare_docker
+    ;;
+
 *)
-    echo "This version of Fedora is not supported"
+    echo "This version of Ubuntu is not supported"
     exit 1
 
 esac
@@ -141,15 +177,15 @@ if [[ ! $noconfigure == "true" ]]; then
     if [[ $out_of_tree == "true" ]]; then
         mkdir -p $build_dir
         pushd $build_dir
-        $hypervisor_dir/configure.sh
+        $hypervisor_dir/configure
         popd
     else
-        ./configure.sh $compiler
+        ./configure $compiler
     fi
 fi
 
 if [[ $local == "true" ]]; then
-    CROSS_COMPILER=gcc_520 ./tools/scripts/create-cross-compiler.sh
+    CROSS_COMPILER=gcc_520 ./tools/scripts/create_cross_compiler.sh
 fi
 
 # ------------------------------------------------------------------------------
@@ -158,7 +194,8 @@ fi
 
 echo ""
 
-echo "WARNING: A reboot is required to build!!!"
+echo "WARNING: If you are using ssh, or are logged into a GUI you "
+echo "         might need to exit and log back in to compile!!!"
 echo ""
 
 if [[ $out_of_tree == "true" ]]; then

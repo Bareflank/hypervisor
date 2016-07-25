@@ -20,15 +20,17 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+sudo dnf install -y redhat-lsb-core
+
 # ------------------------------------------------------------------------------
 # Checks
 # ------------------------------------------------------------------------------
 
-case $(uname -o) in
-Cygwin)
+case $(lsb_release -si) in
+Fedora)
     ;;
 *)
-    echo "This script can only be used with: Cygwin"
+    echo "This script can only be used with: Fedora"
     exit 1
 esac
 
@@ -42,7 +44,7 @@ fi
 # ------------------------------------------------------------------------------
 
 option_help() {
-    echo -e "Usage: setup-ubuntu.sh [OPTION]"
+    echo -e "Usage: setup_fedora.sh [OPTION]"
     echo -e "Sets up the system to compile / use Bareflank"
     echo -e ""
     echo -e "       -h, --help                       show this help menu"
@@ -58,17 +60,26 @@ option_help() {
 # ------------------------------------------------------------------------------
 
 install_common_packages() {
-    setup-x86_64.exe -q --wait -P wget,make,gcc-core,gcc-g++,diffutils,libgmp-devel,libmpfr-devel,libmpc-devel,flex,bison,nasm,texinfo,cmake,unzip
+    sudo dnf groupinstall -y "Development Tools"
+    sudo dnf install -y gcc-c++
+    sudo dnf install -y gmp-devel
+    sudo dnf install -y libmpc-devel
+    sudo dnf install -y mpfr-devel
+    sudo dnf install -y isl-devel
+    sudo dnf install -y cmake
+    sudo dnf install -y nasm
+    sudo dnf install -y texinfo
+    sudo dnf install -y libstdc++-static
+    sudo dnf install -y kernel-devel
+    sudo dnf install -y kernel-headers
+    sudo dnf update -y kernel
+    curl -fsSL https://get.docker.com/ | sh
 }
 
-setup_ewdk() {
-    if [[ ! -d /cygdrive/c/ewdk ]]; then
-        wget https://go.microsoft.com/fwlink/p/?LinkID=699461 -O /tmp/ewdk.zip
-        unzip /tmp/ewdk.zip -d /cygdrive/c/ewdk/
-        chown -R $USER:SYSTEM /cygdrive/c/ewdk
-        icacls.exe `cygpath -w /cygdrive/c/ewdk` /reset /T
-        rm -Rf /tmp/ewdk.zip
-    fi
+prepare_docker() {
+    sudo usermod -a -G docker $USER
+    sudo systemctl start docker
+    sudo systemctl enable docker
 }
 
 # ------------------------------------------------------------------------------
@@ -110,14 +121,14 @@ done
 # Setup System
 # ------------------------------------------------------------------------------
 
-case $(uname -r) in
-2.5.*)
+case $(lsb_release -sr) in
+23)
     install_common_packages
-    setup_ewdk
+    prepare_docker
     ;;
 
 *)
-    echo "This version of Cygwin is not supported"
+    echo "This version of Fedora is not supported"
     exit 1
 
 esac
@@ -126,24 +137,19 @@ esac
 # Setup Build Environment
 # ------------------------------------------------------------------------------
 
-if [[ ! $local == "true" ]]; then
-    echo "Docker currently not supported. Use -l to setup local compilers"
-    exit 1
-fi
-
 if [[ ! $noconfigure == "true" ]]; then
     if [[ $out_of_tree == "true" ]]; then
         mkdir -p $build_dir
         pushd $build_dir
-        $hypervisor_dir/configure.sh
+        $hypervisor_dir/configure
         popd
     else
-        ./configure.sh $compiler
+        ./configure $compiler
     fi
 fi
 
 if [[ $local == "true" ]]; then
-    CROSS_COMPILER=gcc_520 ./tools/scripts/create-cross-compiler.sh
+    CROSS_COMPILER=gcc_520 ./tools/scripts/create_cross_compiler.sh
 fi
 
 # ------------------------------------------------------------------------------
@@ -152,10 +158,7 @@ fi
 
 echo ""
 
-echo "WARNING: If you are going to use this machine for testing, you must "
-echo "         turn test signing on yourself:"
-echo ""
-echo "bcdedit.exe /set testsigning ON"
+echo "WARNING: A reboot is required to build!!!"
 echo ""
 
 if [[ $out_of_tree == "true" ]]; then

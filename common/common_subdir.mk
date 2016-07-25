@@ -79,7 +79,7 @@ endif
 ################################################################################
 
 Makefile: $(HYPER_REL)/Makefile.bf
-	@ BUILD_ABS=$(BUILD_ABS) BUILD_REL=$(BUILD_REL) HYPER_REL=$(HYPER_REL) $(HYPER_ABS)/configure.sh -r --this-is-make
+	@ BUILD_ABS=$(BUILD_ABS) BUILD_REL=$(BUILD_REL) HYPER_REL=$(HYPER_REL) $(HYPER_ABS)/configure -r --this-is-make
 
 .PHONY: clean
 .PHONY: clean_src
@@ -105,7 +105,7 @@ build_src:
 		fi; \
 		if [[ ! -f $(CURRENT_DIR)/$$dir/Makefile ]]; then \
 			pushd $(CURRENT_DIR)/$$dir; \
-			BUILD_ABS=$(BUILD_ABS) BUILD_REL=$(BUILD_REL)/$$dir HYPER_REL=$(HYPER_REL)/$$dir $(HYPER_ABS)/configure.sh -r --this-is-make; \
+			BUILD_ABS=$(BUILD_ABS) BUILD_REL=$(BUILD_REL)/$$dir HYPER_REL=$(HYPER_REL)/$$dir $(HYPER_ABS)/configure -r --this-is-make; \
 			popd; \
 		fi; \
 		$(MAKE) --no-print-directory -C $$dir build_src || exit 1; \
@@ -123,7 +123,7 @@ build_tests:
 		fi; \
 		if [[ ! -f $(CURRENT_DIR)/$$dir/Makefile ]]; then \
 			pushd $(CURRENT_DIR)/$$dir; \
-			BUILD_ABS=$(BUILD_ABS) BUILD_REL=$(BUILD_REL)/$$dir HYPER_REL=$(HYPER_REL)/$$dir $(HYPER_ABS)/configure.sh -r --this-is-make; \
+			BUILD_ABS=$(BUILD_ABS) BUILD_REL=$(BUILD_REL)/$$dir HYPER_REL=$(HYPER_REL)/$$dir $(HYPER_ABS)/configure -r --this-is-make; \
 			popd; \
 		fi; \
 		$(MAKE) --no-print-directory -C $$dir build_tests || exit 1; \
@@ -141,7 +141,7 @@ run_tests: force
 		fi; \
 		if [[ ! -f $(CURRENT_DIR)/$$dir/Makefile ]]; then \
 			pushd $(CURRENT_DIR)/$$dir; \
-			BUILD_ABS=$(BUILD_ABS) BUILD_REL=$(BUILD_REL)/$$dir HYPER_REL=$(HYPER_REL)/$$dir $(HYPER_ABS)/configure.sh -r --this-is-make; \
+			BUILD_ABS=$(BUILD_ABS) BUILD_REL=$(BUILD_REL)/$$dir HYPER_REL=$(HYPER_REL)/$$dir $(HYPER_ABS)/configure -r --this-is-make; \
 			popd; \
 		fi; \
 		$(MAKE) --no-print-directory -C $$dir run_tests || exit 1; \
@@ -158,7 +158,7 @@ clean:
 		fi; \
 		if [[ ! -f $(CURRENT_DIR)/$$dir/Makefile ]]; then \
 			pushd $(CURRENT_DIR)/$$dir; \
-			BUILD_ABS=$(BUILD_ABS) BUILD_REL=$(BUILD_REL)/$$dir HYPER_REL=$(HYPER_REL)/$$dir $(HYPER_ABS)/configure.sh -r --this-is-make; \
+			BUILD_ABS=$(BUILD_ABS) BUILD_REL=$(BUILD_REL)/$$dir HYPER_REL=$(HYPER_REL)/$$dir $(HYPER_ABS)/configure -r --this-is-make; \
 			popd; \
 		fi; \
 		$(MAKE) --no-print-directory -C $$dir clean; \
@@ -174,7 +174,7 @@ clean_src:
 		fi; \
 		if [[ ! -f $(CURRENT_DIR)/$$dir/Makefile ]]; then \
 			pushd $(CURRENT_DIR)/$$dir; \
-			BUILD_ABS=$(BUILD_ABS) BUILD_REL=$(BUILD_REL)/$$dir HYPER_REL=$(HYPER_REL)/$$dir $(HYPER_ABS)/configure.sh -r --this-is-make; \
+			BUILD_ABS=$(BUILD_ABS) BUILD_REL=$(BUILD_REL)/$$dir HYPER_REL=$(HYPER_REL)/$$dir $(HYPER_ABS)/configure -r --this-is-make; \
 			popd; \
 		fi; \
 		$(MAKE) --no-print-directory -C $$dir clean_src; \
@@ -191,7 +191,7 @@ clean_tests:
 		fi; \
 		if [[ ! -f $(CURRENT_DIR)/$$dir/Makefile ]]; then \
 			pushd $(CURRENT_DIR)/$$dir; \
-			BUILD_ABS=$(BUILD_ABS) BUILD_REL=$(BUILD_REL)/$$dir HYPER_REL=$(HYPER_REL)/$$dir $(HYPER_ABS)/configure.sh -r --this-is-make; \
+			BUILD_ABS=$(BUILD_ABS) BUILD_REL=$(BUILD_REL)/$$dir HYPER_REL=$(HYPER_REL)/$$dir $(HYPER_ABS)/configure -r --this-is-make; \
 			popd; \
 		fi; \
 		$(MAKE) --no-print-directory -C $$dir clean_tests; \
