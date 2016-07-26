@@ -25,6 +25,9 @@
 #include <exit_handler/exit_handler_intel_x64_support.h>
 #include <exit_handler/exit_handler_intel_x64_exceptions.h>
 
+#include <mutex>
+std::mutex g_unimplemented_handler_mutex;
+
 exit_handler_intel_x64::exit_handler_intel_x64(const std::shared_ptr<intrinsics_intel_x64> &intrinsics) :
     m_intrinsics(intrinsics)
 {
@@ -645,6 +648,8 @@ exit_handler_intel_x64::advance_rip()
 void
 exit_handler_intel_x64::unimplemented_handler()
 {
+    std::lock_guard<std::mutex> guard(g_unimplemented_handler_mutex);
+
     bferror << bfendl;
     bferror << bfendl;
     bferror << "Guest register state: " << bfendl;
@@ -695,6 +700,8 @@ exit_handler_intel_x64::unimplemented_handler()
 
     bferror << bfendl;
     bferror << bfendl;
+
+    g_unimplemented_handler_mutex.unlock();
 
     halt();
 }

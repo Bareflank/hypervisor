@@ -35,7 +35,11 @@ export NEWLIB_DEFINES="-D_HAVE_LONG_DOUBLE -D_LDBL_EQ_DBL -D_POSIX_TIMERS -U__ST
 export LIBBFC_DEFINES="-DSYM_PROVIDED__WRITE -DSYM_PROVIDED__MALLOC -DSYM_PROVIDED__FREE -DSYM_PROVIDED__CALLOC -DSYM_PROVIDED__FSTAT -DSYM_PROVIDED__REALLOC" 2> /dev/null
 export CFLAGS="-fpic -ffreestanding -mno-red-zone $NEWLIB_DEFINES"
 
+cp -Rf $BUILD_ABS/source_libbfc/sysctl.h $BUILD_ABS/sysroot/x86_64-elf/include/sys/
+cp -Rf $BUILD_ABS/source_libbfc/pthread.h $BUILD_ABS/sysroot/x86_64-elf/include/
+
 $BUILD_ABS/build_scripts/x86_64-bareflank-gcc $LIBBFC_DEFINES $CFLAGS -c $BUILD_ABS/source_libbfc/*.c
+$BUILD_ABS/build_scripts/x86_64-bareflank-g++ -std=c++14 $LIBBFC_DEFINES $CFLAGS -c $BUILD_ABS/source_libbfc/*.cpp
 $BUILD_ABS/build_scripts/x86_64-bareflank-ar rcs libbfc.a *.o
 mv libbfc.a $BUILD_ABS/sysroot/x86_64-elf/lib/
 
