@@ -49,6 +49,7 @@ public:
     uint16_t ds() const override { return m_ds; }
     uint16_t fs() const override { return m_fs; }
     uint16_t gs() const override { return m_gs; }
+    uint16_t ldtr() const override { return m_ldtr; }
     uint16_t tr() const override { return m_tr; }
 
     uint64_t cr0() const override { return m_cr0; }
@@ -70,6 +71,7 @@ public:
     uint32_t ds_limit() const override { return m_gdt.limit(m_ds_index); }
     uint32_t fs_limit() const override { return m_gdt.limit(m_fs_index); }
     uint32_t gs_limit() const override { return m_gdt.limit(m_gs_index); }
+    uint32_t ldtr_limit() const override { return m_gdt.limit(m_ldtr_index); }
     uint32_t tr_limit() const override { return m_gdt.limit(m_tr_index); }
 
     uint32_t es_access_rights() const override { return m_gdt.access_rights(m_es_index); }
@@ -78,6 +80,7 @@ public:
     uint32_t ds_access_rights() const override { return m_gdt.access_rights(m_ds_index); }
     uint32_t fs_access_rights() const override { return m_gdt.access_rights(m_fs_index); }
     uint32_t gs_access_rights() const override { return m_gdt.access_rights(m_gs_index); }
+    uint32_t ldtr_access_rights() const override { return m_gdt.access_rights(m_ldtr_index); }
     uint32_t tr_access_rights() const override { return m_gdt.access_rights(m_tr_index); }
 
     uint64_t es_base() const override { return m_gdt.base(m_es_index); }
@@ -86,6 +89,7 @@ public:
     uint64_t ds_base() const override { return m_gdt.base(m_ds_index); }
     uint64_t fs_base() const override { return m_gdt.base(m_fs_index); }
     uint64_t gs_base() const override { return m_gdt.base(m_gs_index); }
+    uint64_t ldtr_base() const override { return m_gdt.base(m_ldtr_index); }
     uint64_t tr_base() const override { return m_gdt.base(m_tr_index); }
 
     uint64_t ia32_debugctl_msr() const override { return m_ia32_debugctl_msr; }
@@ -112,6 +116,7 @@ public:
         PRINT_STATE(m_ds);
         PRINT_STATE(m_fs);
         PRINT_STATE(m_gs);
+        PRINT_STATE(m_ldtr);
         PRINT_STATE(m_tr);
 
         bfdebug << bfendl;
@@ -122,6 +127,7 @@ public:
         PRINT_STATE(ds_base());
         PRINT_STATE(fs_base());
         PRINT_STATE(gs_base());
+        PRINT_STATE(ldtr_base());
         PRINT_STATE(tr_base());
 
         bfdebug << bfendl;
@@ -132,6 +138,7 @@ public:
         PRINT_STATE(ds_limit());
         PRINT_STATE(fs_limit());
         PRINT_STATE(gs_limit());
+        PRINT_STATE(ldtr_limit());
         PRINT_STATE(tr_limit());
 
         bfdebug << bfendl;
@@ -142,6 +149,7 @@ public:
         PRINT_STATE(ds_access_rights());
         PRINT_STATE(fs_access_rights());
         PRINT_STATE(gs_access_rights());
+        PRINT_STATE(ldtr_access_rights());
         PRINT_STATE(tr_access_rights());
 
         bfdebug << bfendl;
@@ -185,6 +193,7 @@ private:
     uint16_t m_ds;
     uint16_t m_fs;
     uint16_t m_gs;
+    uint16_t m_ldtr;
     uint16_t m_tr;
 
     uint16_t m_es_index;
@@ -193,6 +202,7 @@ private:
     uint16_t m_ds_index;
     uint16_t m_fs_index;
     uint16_t m_gs_index;
+    uint16_t m_ldtr_index;
     uint16_t m_tr_index;
 
     uint64_t m_cr0;

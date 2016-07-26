@@ -34,6 +34,7 @@ vmcs_intel_x64_host_vm_state::vmcs_intel_x64_host_vm_state(const std::shared_ptr
     m_ds = intrinsics->read_ds();
     m_fs = intrinsics->read_fs();
     m_gs = intrinsics->read_gs();
+    m_ldtr = intrinsics->read_ldtr();
     m_tr = intrinsics->read_tr();
 
     m_es_index = m_es >> 3;
@@ -42,6 +43,7 @@ vmcs_intel_x64_host_vm_state::vmcs_intel_x64_host_vm_state(const std::shared_ptr
     m_ds_index = m_ds >> 3;
     m_fs_index = m_fs >> 3;
     m_gs_index = m_gs >> 3;
+    m_ldtr_index = m_ldtr >> 3;
     m_tr_index = m_tr >> 3;
 
     m_cr0 = intrinsics->read_cr0();

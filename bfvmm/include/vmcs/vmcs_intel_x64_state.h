@@ -62,6 +62,7 @@ public:
     virtual uint16_t ds() const { return 0; }
     virtual uint16_t fs() const { return 0; }
     virtual uint16_t gs() const { return 0; }
+    virtual uint16_t ldtr() const { return 0; }
     virtual uint16_t tr() const { return 0; }
 
     virtual uint64_t cr0() const { return 0; }
@@ -83,6 +84,7 @@ public:
     virtual uint32_t ds_limit() const { return 0; }
     virtual uint32_t fs_limit() const { return 0; }
     virtual uint32_t gs_limit() const { return 0; }
+    virtual uint32_t ldtr_limit() const { return 0; }
     virtual uint32_t tr_limit() const { return 0; }
 
     virtual uint32_t es_access_rights() const { return 0x10000; }
@@ -91,6 +93,7 @@ public:
     virtual uint32_t ds_access_rights() const { return 0x10000; }
     virtual uint32_t fs_access_rights() const { return 0x10000; }
     virtual uint32_t gs_access_rights() const { return 0x10000; }
+    virtual uint32_t ldtr_access_rights() const { return 0x10000; }
     virtual uint32_t tr_access_rights() const { return 0x10000; }
 
     virtual uint64_t es_base() const { return 0; }
@@ -99,6 +102,7 @@ public:
     virtual uint64_t ds_base() const { return 0; }
     virtual uint64_t fs_base() const { return 0; }
     virtual uint64_t gs_base() const { return 0; }
+    virtual uint64_t ldtr_base() const { return 0; }
     virtual uint64_t tr_base() const { return 0; }
 
     virtual uint64_t ia32_debugctl_msr() const { return 0; }

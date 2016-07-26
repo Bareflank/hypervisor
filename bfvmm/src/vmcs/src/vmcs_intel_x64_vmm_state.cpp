@@ -70,9 +70,9 @@ vmcs_intel_x64_vmm_state::vmcs_intel_x64_vmm_state(const std::shared_ptr<state_s
     m_gdt.set_base(4, (uint64_t)&m_tss);
 
     m_gdt.set_limit(0, 0);
-    m_gdt.set_limit(1, 0xFFFFF);
-    m_gdt.set_limit(2, 0xFFFFF);
-    m_gdt.set_limit(3, 0xFFFFF);
+    m_gdt.set_limit(1, 0xFFFFFFFF);
+    m_gdt.set_limit(2, 0xFFFFFFFF);
+    m_gdt.set_limit(3, 0xFFFFFFFF);
     m_gdt.set_limit(4, sizeof(m_tss));
 
     m_cs_index = 1;
