@@ -19,7 +19,6 @@ Misc:
   flags for BFM and windows for export all.
 
 Version 1.1 TODO:
-- Add Windows support
 - We need to go through all of the error codes, and map out blocks for each
   module, driver, elf error, etc... This way, when an error bubbles through
   the system, it's easy to identify
