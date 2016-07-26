@@ -47,13 +47,9 @@ write(int file, const void *buffer, size_t count)
         bfinfo << std::dec;
     }
 
-<<<<<<< HEAD
     if (file == 1 || file == 2)
     {
-        g_vcm->write(-1, str);
-=======
         g_vcm->write(0, str);
->>>>>>> 1703e73... Posix Thread Mutex Support
         serial_port_intel_x64::instance()->write(str);
     }
     else if (file >= bfostream_offset)
