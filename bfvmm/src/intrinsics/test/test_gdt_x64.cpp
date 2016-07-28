@@ -312,7 +312,7 @@ intrinsics_ut::test_set_limit_descriptor_success()
         gdt_x64 gdt(intrinsics);
 
         EXPECT_NO_EXCEPTION(gdt.set_limit(1, 0xBBBBBBBB12345678));
-        EXPECT_TRUE(g_gdt[1] == 0xFFF4FFFFFFFF5678);
+        EXPECT_TRUE(g_gdt[1] == 0xFFF1FFFFFFFF2345);
     });
 }
 
@@ -361,7 +361,7 @@ intrinsics_ut::test_limit_descriptor_success()
         gdt_x64 gdt(intrinsics);
 
         g_gdt[1] = 0xFFF4FFFFFFFF5678;
-        EXPECT_TRUE(gdt.limit(1) == 0x0000000000045678);
+        EXPECT_TRUE(gdt.limit(1) == 0x0000000045678FFF);
     });
 }
 

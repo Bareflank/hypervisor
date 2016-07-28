@@ -322,9 +322,9 @@ vmcs_intel_x64::write_16bit_guest_state(const std::shared_ptr<vmcs_intel_x64_sta
     vmwrite(VMCS_GUEST_DS_SELECTOR, state->ds());
     vmwrite(VMCS_GUEST_FS_SELECTOR, state->fs());
     vmwrite(VMCS_GUEST_GS_SELECTOR, state->gs());
+    vmwrite(VMCS_GUEST_LDTR_SELECTOR, state->ldtr());
     vmwrite(VMCS_GUEST_TR_SELECTOR, state->tr());
 
-    // unused: VMCS_GUEST_LDTR_SELECTOR
     // unused: VMCS_GUEST_INTERRUPT_STATUS
 }
 
@@ -352,6 +352,7 @@ vmcs_intel_x64::write_32bit_guest_state(const std::shared_ptr<vmcs_intel_x64_sta
     vmwrite(VMCS_GUEST_DS_LIMIT, state->ds_limit());
     vmwrite(VMCS_GUEST_FS_LIMIT, state->fs_limit());
     vmwrite(VMCS_GUEST_GS_LIMIT, state->gs_limit());
+    vmwrite(VMCS_GUEST_LDTR_LIMIT, state->ldtr_limit());
     vmwrite(VMCS_GUEST_TR_LIMIT, state->tr_limit());
 
     vmwrite(VMCS_GUEST_GDTR_LIMIT, state->gdt_limit());
@@ -363,12 +364,11 @@ vmcs_intel_x64::write_32bit_guest_state(const std::shared_ptr<vmcs_intel_x64_sta
     vmwrite(VMCS_GUEST_DS_ACCESS_RIGHTS, state->ds_access_rights());
     vmwrite(VMCS_GUEST_FS_ACCESS_RIGHTS, state->fs_access_rights());
     vmwrite(VMCS_GUEST_GS_ACCESS_RIGHTS, state->gs_access_rights());
-    vmwrite(VMCS_GUEST_LDTR_ACCESS_RIGHTS, 0x10000);
+    vmwrite(VMCS_GUEST_LDTR_ACCESS_RIGHTS, state->ldtr_access_rights());
     vmwrite(VMCS_GUEST_TR_ACCESS_RIGHTS, state->tr_access_rights());
 
     vmwrite(VMCS_GUEST_IA32_SYSENTER_CS, state->ia32_sysenter_cs_msr());
 
-    // unused: VMCS_GUEST_LDTR_LIMIT
     // unused: VMCS_GUEST_INTERRUPTIBILITY_STATE
     // unused: VMCS_GUEST_ACTIVITY_STATE
     // unused: VMCS_GUEST_SMBASE
@@ -388,6 +388,7 @@ vmcs_intel_x64::write_natural_guest_state(const std::shared_ptr<vmcs_intel_x64_s
     vmwrite(VMCS_GUEST_DS_BASE, state->ds_base());
     vmwrite(VMCS_GUEST_FS_BASE, state->ia32_fs_base_msr());
     vmwrite(VMCS_GUEST_GS_BASE, state->ia32_gs_base_msr());
+    vmwrite(VMCS_GUEST_LDTR_BASE, state->ldtr_base());
     vmwrite(VMCS_GUEST_TR_BASE, state->tr_base());
 
     vmwrite(VMCS_GUEST_GDTR_BASE, state->gdt_base());
@@ -399,7 +400,6 @@ vmcs_intel_x64::write_natural_guest_state(const std::shared_ptr<vmcs_intel_x64_s
     vmwrite(VMCS_GUEST_IA32_SYSENTER_ESP, state->ia32_sysenter_esp_msr());
     vmwrite(VMCS_GUEST_IA32_SYSENTER_EIP, state->ia32_sysenter_eip_msr());
 
-    // unused: VMCS_GUEST_LDTR_BASE
     // unused: VMCS_GUEST_RSP, see m_intrinsics->vmlaunch()
     // unused: VMCS_GUEST_RIP, see m_intrinsics->vmlaunch()
     // unused: VMCS_GUEST_PENDING_DEBUG_EXCEPTIONS
@@ -543,7 +543,7 @@ vmcs_intel_x64::vm_exit_controls()
     controls |= VM_EXIT_CONTROL_SAVE_DEBUG_CONTROLS;
     controls |= VM_EXIT_CONTROL_HOST_ADDRESS_SPACE_SIZE;
     controls |= VM_EXIT_CONTROL_LOAD_IA32_PERF_GLOBAL_CTRL;
-    // controls |= VM_EXIT_CONTROL_ACKNOWLEDGE_INTERRUPT_ON_EXIT;
+    controls |= VM_EXIT_CONTROL_ACKNOWLEDGE_INTERRUPT_ON_EXIT;
     controls |= VM_EXIT_CONTROL_SAVE_IA32_PAT;
     controls |= VM_EXIT_CONTROL_LOAD_IA32_PAT;
     controls |= VM_EXIT_CONTROL_SAVE_IA32_EFER;

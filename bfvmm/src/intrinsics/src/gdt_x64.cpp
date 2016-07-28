@@ -19,6 +19,8 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+#include <debug.h>
+
 #include <exception.h>
 #include <intrinsics/gdt_x64.h>
 
@@ -190,6 +192,9 @@ gdt_x64::set_limit(uint16_t index, uint64_t limit)
     // |                             |            Limit 15-00           |
     // ------------------------------------------------------------------
 
+    if ((sd1 & 0x80000000000000) != 0)
+        limit = (limit >> 12);
+
     uint64_t limit_15_00 = ((limit & 0x000000000000FFFF) << 0);
     uint64_t limit_19_16 = ((limit & 0x00000000000F0000) << 32);
 
@@ -217,10 +222,20 @@ gdt_x64::limit(uint16_t index) const
     // |                             |            Limit 15-00           |
     // ------------------------------------------------------------------
 
-    uint64_t limit_15_00 = ((sd1 & 0x000000000000FFFF) >> 0);
-    uint64_t limit_19_16 = ((sd1 & 0x000F000000000000) >> 32);
+    if ((sd1 & 0x80000000000000) != 0)
+    {
+        uint64_t limit_15_00 = ((sd1 & 0x000000000000FFFF) >> 0);
+        uint64_t limit_19_16 = ((sd1 & 0x000F000000000000) >> 32);
 
-    return limit_19_16 | limit_15_00;
+        return ((limit_19_16 | limit_15_00) << 12) | 0x0000000000000FFF;
+    }
+    else
+    {
+        uint64_t limit_15_00 = ((sd1 & 0x000000000000FFFF) >> 0);
+        uint64_t limit_19_16 = ((sd1 & 0x000F000000000000) >> 32);
+
+        return limit_19_16 | limit_15_00;
+    }
 }
 
 void
