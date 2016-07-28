@@ -52,7 +52,7 @@ option_help() {
     echo -e "Sets up the system to compile / use Bareflank"
     echo -e ""
     echo -e "       -h, --help                       show this help menu"
-    echo -e "       -l, --local                      setup local cross compilers"
+    echo -e "       -l, --local_compilers            setup local cross compilers"
     echo -e "       -n, --no-configure               skip the configure step"
     echo -e "       -g, --compiler <dirname>         directory of cross compiler"
     echo -e "       -o, --out_of_tree <dirname>      setup out of tree build"
