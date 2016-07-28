@@ -39,5 +39,7 @@ EXTERN_C_START
 DRIVER_INITIALIZE DriverEntry;
 EVT_WDF_DRIVER_DEVICE_ADD bareflankEvtDeviceAdd;
 EVT_WDF_OBJECT_CONTEXT_CLEANUP bareflankEvtDriverContextCleanup;
+EVT_WDF_DEVICE_D0_ENTRY bareflankEvtDeviceD0Entry;
+EVT_WDF_DEVICE_D0_EXIT bareflankEvtDeviceD0Exit;
 
 EXTERN_C_END
