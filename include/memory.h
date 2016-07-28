@@ -29,17 +29,14 @@
 #include <types.h>
 #endif
 
+#include <constants.h>
+#include <error_codes.h>
+
 #pragma pack(push, 1)
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-/**
- * Memory Manger Error Codes
- */
-#define MEMORY_MANAGER_SUCCESS 0
-#define MEMORY_MANAGER_FAILURE -1LL
 
 /**
  * Memory Types

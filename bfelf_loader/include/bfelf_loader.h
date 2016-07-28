@@ -24,6 +24,7 @@
 #define BFELF_LOADER_H
 
 #include <crt.h>
+#include <error_codes.h>
 
 #if defined(KERNEL) && defined(__linux__)
 #include <linux/types.h>
@@ -81,29 +82,6 @@ typedef int64_t bfelf64_sxword;
 /******************************************************************************/
 /* ELF Error Codes                                                            */
 /******************************************************************************/
-
-#define BFELF_ERROR_START ((bfelf64_sword)-11000)
-
-/*
- * ELF error codes
- *
- * The following define the different error codes that this library might
- * provide given bad input.
- */
-#define BFELF_SUCCESS ((bfelf64_sword)0)
-#define BFELF_ERROR_INVALID_ARG (BFELF_ERROR_START - (bfelf64_sword)1)
-#define BFELF_ERROR_INVALID_FILE (BFELF_ERROR_START - (bfelf64_sword)2)
-#define BFELF_ERROR_INVALID_INDEX (BFELF_ERROR_START - (bfelf64_sword)3)
-#define BFELF_ERROR_INVALID_STRING (BFELF_ERROR_START - (bfelf64_sword)4)
-#define BFELF_ERROR_INVALID_SIGNATURE (BFELF_ERROR_START - (bfelf64_sword)5)
-#define BFELF_ERROR_UNSUPPORTED_FILE (BFELF_ERROR_START - (bfelf64_sword)6)
-#define BFELF_ERROR_INVALID_SEGMENT (BFELF_ERROR_START - (bfelf64_sword)7)
-#define BFELF_ERROR_INVALID_SECTION (BFELF_ERROR_START - (bfelf64_sword)8)
-#define BFELF_ERROR_LOADER_FULL (BFELF_ERROR_START - (bfelf64_sword)9)
-#define BFELF_ERROR_NO_SUCH_SYMBOL (BFELF_ERROR_START - (bfelf64_sword)10)
-#define BFELF_ERROR_MISMATCH (BFELF_ERROR_START - (bfelf64_sword)11)
-#define BFELF_ERROR_UNSUPPORTED_RELA (BFELF_ERROR_START - (bfelf64_sword)12)
-#define BFELF_ERROR_OUT_OF_ORDER (BFELF_ERROR_START - (bfelf64_sword)13)
 
 /**
  * Convert ELF error -> const char *
@@ -198,9 +176,9 @@ struct bfelf_file_t
  * @param ef the ELF file structure to initialize.
  * @return BFELF_SUCCESS on success, negative on error
  */
-bfelf64_sword bfelf_file_init(char *file,
-                              uint64_t fsize,
-                              struct bfelf_file_t *ef);
+int64_t bfelf_file_init(char *file,
+                        uint64_t fsize,
+                        struct bfelf_file_t *ef);
 
 /**
  * Get number of program segments
@@ -213,7 +191,7 @@ bfelf64_sword bfelf_file_init(char *file,
  * @param ef the ELF file
  * @return number of segments on success, negative on error
  */
-bfelf64_sxword bfelf_file_num_segments(struct bfelf_file_t *ef);
+int64_t bfelf_file_num_segments(struct bfelf_file_t *ef);
 
 /**
  * Get program segment
@@ -232,9 +210,9 @@ bfelf64_sxword bfelf_file_num_segments(struct bfelf_file_t *ef);
  * @param phdr where to store the segment's program header
  * @return BFELF_SUCCESS on success, negative on error
  */
-bfelf64_sword bfelf_file_get_segment(struct bfelf_file_t *ef,
-                                     bfelf64_word index,
-                                     struct bfelf_phdr **phdr);
+int64_t bfelf_file_get_segment(struct bfelf_file_t *ef,
+                               bfelf64_word index,
+                               struct bfelf_phdr **phdr);
 
 /**
  * Resolve Symbol
@@ -253,9 +231,9 @@ bfelf64_sword bfelf_file_get_segment(struct bfelf_file_t *ef,
  * @param addr the resulting address if the symbol is successfully resolved
  * @return BFELF_SUCCESS on success, negative on error
  */
-bfelf64_sword bfelf_file_resolve_symbol(struct bfelf_file_t *ef,
-                                        struct e_string_t *name,
-                                        void **addr);
+int64_t bfelf_file_resolve_symbol(struct bfelf_file_t *ef,
+                                  struct e_string_t *name,
+                                  void **addr);
 
 /******************************************************************************/
 /* ELF File Header                                                            */
@@ -678,9 +656,9 @@ struct bfelf_loader_t
  *     is run.
  * @return BFELF_SUCCESS on success, negative on error
  */
-bfelf64_sword bfelf_loader_add(struct bfelf_loader_t *loader,
-                               struct bfelf_file_t *ef,
-                               char *exec);
+int64_t bfelf_loader_add(struct bfelf_loader_t *loader,
+                         struct bfelf_file_t *ef,
+                         char *exec);
 
 /**
  * Relocate ELF Loader
@@ -692,7 +670,7 @@ bfelf64_sword bfelf_loader_add(struct bfelf_loader_t *loader,
  * @param loader the ELF loader
  * @return BFELF_SUCCESS on success, negative on error
  */
-bfelf64_sword bfelf_loader_relocate(struct bfelf_loader_t *loader);
+int64_t bfelf_loader_relocate(struct bfelf_loader_t *loader);
 
 /**
  * Resolve Symbol
@@ -708,9 +686,9 @@ bfelf64_sword bfelf_loader_relocate(struct bfelf_loader_t *loader);
  * @param addr the resulting address if the symbol is successfully resolved
  * @return BFELF_SUCCESS on success, negative on error
  */
-bfelf64_sword bfelf_loader_resolve_symbol(struct bfelf_loader_t *loader,
-        struct e_string_t *name,
-        void **addr);
+int64_t bfelf_loader_resolve_symbol(struct bfelf_loader_t *loader,
+                                    struct e_string_t *name,
+                                    void **addr);
 
 /**
  * Get Info
@@ -728,9 +706,9 @@ bfelf64_sword bfelf_loader_resolve_symbol(struct bfelf_loader_t *loader,
  * @param info the info structore to store the results.
  * @return BFELF_SUCCESS on success, negative on error
  */
-bfelf64_sword bfelf_loader_get_info(struct bfelf_loader_t *loader,
-                                    struct bfelf_file_t *ef,
-                                    struct section_info_t *info);
+int64_t bfelf_loader_get_info(struct bfelf_loader_t *loader,
+                              struct bfelf_file_t *ef,
+                              struct section_info_t *info);
 
 #ifdef __cplusplus
 }

@@ -46,7 +46,6 @@
 #pragma warning(disable : 4244)
 #define ALERT(...) DbgPrintEx(DPFLTR_IHVDRIVER_ID, DPFLTR_ERROR_LEVEL,"[ELF ALERT]: " __VA_ARGS__)
 #endif
-
 #else
 #ifdef __linux__
 #include <stdio.h>
@@ -58,66 +57,18 @@
 /* ELF Error Codes                                                            */
 /* -------------------------------------------------------------------------- */
 
-#define BFSTRINGIFY(a) " (" #a ")"
-
 const char *
 bfelf_error(bfelf64_sword value)
 {
-    switch (value)
-    {
-        case BFELF_SUCCESS:
-            return "Success"
-                   BFSTRINGIFY(BFELF_SUCCESS);
-        case BFELF_ERROR_INVALID_ARG:
-            return "Invalid argument"
-                   BFSTRINGIFY(BFELF_ERROR_INVALID_ARG);
-        case BFELF_ERROR_INVALID_FILE:
-            return "Invalid elf file"
-                   BFSTRINGIFY(BFELF_ERROR_INVALID_FILE);
-        case BFELF_ERROR_INVALID_INDEX:
-            return "Invalid index"
-                   BFSTRINGIFY(BFELF_ERROR_INVALID_INDEX);
-        case BFELF_ERROR_INVALID_STRING:
-            return "Invalid elf string"
-                   BFSTRINGIFY(BFELF_ERROR_INVALID_STRING);
-        case BFELF_ERROR_INVALID_SIGNATURE:
-            return "Invalid header signature"
-                   BFSTRINGIFY(BFELF_ERROR_INVALID_SIGNATURE);
-        case BFELF_ERROR_UNSUPPORTED_FILE:
-            return "Unsupported elf file"
-                   BFSTRINGIFY(BFELF_ERROR_UNSUPPORTED_FILE);
-        case BFELF_ERROR_INVALID_SEGMENT:
-            return "Invalid segment"
-                   BFSTRINGIFY(BFELF_ERROR_INVALID_SEGMENT);
-        case BFELF_ERROR_INVALID_SECTION:
-            return "Invalid section"
-                   BFSTRINGIFY(BFELF_ERROR_INVALID_SECTION);
-        case BFELF_ERROR_LOADER_FULL:
-            return "Loader full"
-                   BFSTRINGIFY(BFELF_ERROR_LOADER_FULL);
-        case BFELF_ERROR_NO_SUCH_SYMBOL:
-            return "No such symbol"
-                   BFSTRINGIFY(BFELF_ERROR_NO_SUCH_SYMBOL);
-        case BFELF_ERROR_MISMATCH:
-            return "String mismatch"
-                   BFSTRINGIFY(BFELF_ERROR_MISMATCH);
-        case BFELF_ERROR_UNSUPPORTED_RELA:
-            return "Unsupported relocation"
-                   BFSTRINGIFY(BFELF_ERROR_UNSUPPORTED_RELA);
-        case BFELF_ERROR_OUT_OF_ORDER:
-            return "ELF API called out of order"
-                   BFSTRINGIFY(BFELF_ERROR_OUT_OF_ORDER);
-        default:
-            return "Undefined";
-    }
+    return ec_to_str(value);
 }
 
-static bfelf64_sword
+static int64_t
 private_error(const char *header,
               const char *msg,
               const char *func,
               int line,
-              bfelf64_sword code)
+              int64_t code)
 {
     ALERT("%s [%d] %s: %s\n", func, line, header, msg);
     return code;
@@ -175,7 +126,7 @@ private_error(const char *header,
 /* ELF Helpers                                                                */
 /* -------------------------------------------------------------------------- */
 
-static bfelf64_sword
+static int64_t
 private_elf_string_equals(struct e_string_t *str1, struct e_string_t *str2)
 {
     bfelf64_sword i = 0;
@@ -199,7 +150,7 @@ private_elf_string_equals(struct e_string_t *str1, struct e_string_t *str2)
     return BFELF_SUCCESS;
 }
 
-static bfelf64_sword
+static int64_t
 private_get_string(struct bfelf_file_t *ef,
                    struct bfelf_shdr *strtab,
                    bfelf64_word offset,
@@ -233,7 +184,7 @@ failure:
 /* ELF Dynamic Symbol Table                                                   */
 /* -------------------------------------------------------------------------- */
 
-static bfelf64_sword
+static int64_t
 private_symbol_by_index(struct bfelf_file_t *ef,
                         bfelf64_word index,
                         struct bfelf_sym **sym)
@@ -262,13 +213,13 @@ private_hash(const char *name)
     return h;
 }
 
-static bfelf64_sword
+static int64_t
 private_check_symbol(struct bfelf_file_t *ef,
                      bfelf64_word index,
                      struct e_string_t *name,
                      struct bfelf_sym **sym)
 {
-    bfelf64_sword ret = 0;
+    int64_t ret = 0;
     struct e_string_t str = {0};
 
     ret = private_symbol_by_index(ef, index, sym);
@@ -291,13 +242,13 @@ failure:
     return BFELF_ERROR_MISMATCH;
 }
 
-static bfelf64_sword
+static int64_t
 private_symbol_by_hash(struct bfelf_file_t *ef,
                        struct e_string_t *name,
                        struct bfelf_sym **sym)
 {
+    int64_t ret = 0;
     bfelf64_word i = 0;
-    bfelf64_sword ret = 0;
     unsigned long x = private_hash(name->buf);
 
     i = ef->bucket[x % ef->nbucket];
@@ -319,13 +270,13 @@ private_symbol_by_hash(struct bfelf_file_t *ef,
     return BFELF_ERROR_NO_SUCH_SYMBOL;
 }
 
-static bfelf64_sword
+static int64_t
 private_symbol_by_name(struct bfelf_file_t *ef,
                        struct e_string_t *name,
                        struct bfelf_sym **sym)
 {
+    int64_t ret = 0;
     bfelf64_word i = 0;
-    bfelf64_sword ret = 0;
 
     if (ef->hashtab != 0)
         return private_symbol_by_hash(ef, name, sym);
@@ -345,14 +296,14 @@ private_symbol_by_name(struct bfelf_file_t *ef,
     return BFELF_ERROR_NO_SUCH_SYMBOL;
 }
 
-static bfelf64_sword
+static int64_t
 private_symbol_global(struct bfelf_loader_t *loader,
                       struct e_string_t *name,
                       struct bfelf_file_t **ef_found,
                       struct bfelf_sym **sym)
 {
+    int64_t ret = 0;
     bfelf64_word i = 0;
-    bfelf64_sword ret = 0;
     struct bfelf_sym *found_sym = 0;
     struct bfelf_file_t *ef_ignore = *ef_found;
 
@@ -393,12 +344,12 @@ private_symbol_global(struct bfelf_loader_t *loader,
 /* ELF Relocations                                                            */
 /* -------------------------------------------------------------------------- */
 
-static bfelf64_sword
+static int64_t
 private_relocate_symbol(struct bfelf_loader_t *loader,
                         struct bfelf_file_t *ef,
                         struct bfelf_rela *rela)
 {
-    bfelf64_sword ret = 0;
+    int64_t ret = 0;
     struct e_string_t name = {0};
     struct bfelf_sym *found_sym = 0;
     struct bfelf_file_t *found_ef = ef;
@@ -447,13 +398,13 @@ private_relocate_symbol(struct bfelf_loader_t *loader,
     return BFELF_SUCCESS;
 }
 
-static bfelf64_sword
+static int64_t
 private_relocate_symbols(struct bfelf_loader_t *loader,
                          struct bfelf_file_t *ef)
 {
+    int64_t ret = 0;
     bfelf64_word r = 0;
     bfelf64_word t = 0;
-    bfelf64_sword ret = 0;
 
     for (t = 0; t < ef->num_rela; t++)
     {
@@ -468,13 +419,12 @@ private_relocate_symbols(struct bfelf_loader_t *loader,
     return BFELF_SUCCESS;
 }
 
-bfelf64_sword
+int64_t
 private_resolve_symbol(struct bfelf_file_t *ef,
                        struct bfelf_sym *sym,
                        void **addr)
 {
     *addr = ef->exec + sym->st_value;
-
     return BFELF_SUCCESS;
 }
 
@@ -482,7 +432,7 @@ private_resolve_symbol(struct bfelf_file_t *ef,
 /* ELF File                                                                   */
 /* -------------------------------------------------------------------------- */
 
-static bfelf64_sword
+static int64_t
 private_check_signature(struct bfelf_file_t *ef)
 {
     if (ef->ehdr->e_ident[bfei_mag0] != 0x7F)
@@ -500,7 +450,7 @@ private_check_signature(struct bfelf_file_t *ef)
     return BFELF_SUCCESS;
 }
 
-static bfelf64_sword
+static int64_t
 private_check_support(struct bfelf_file_t *ef)
 {
     if (ef->ehdr->e_ident[bfei_class] != bfelfclass64)
@@ -536,7 +486,7 @@ private_check_support(struct bfelf_file_t *ef)
     return BFELF_SUCCESS;
 }
 
-static bfelf64_sword
+static int64_t
 private_validate_bounds(struct bfelf_file_t *ef)
 {
     bfelf64_xword phtab_size = ef->ehdr->e_phoff +
@@ -579,13 +529,13 @@ private_get_section(struct bfelf_file_t *ef,
     return &(ef->shdrtab[index]);
 }
 
-static bfelf64_sword
+static int64_t
 private_get_section_by_name(struct bfelf_file_t *ef,
                             struct e_string_t *name,
                             struct bfelf_shdr **shdr)
 {
+    int64_t ret = 0;
     bfelf64_sword i = 0;
-    bfelf64_sword ret = 0;
 
     for (i = 0, *shdr = 0; i < ef->ehdr->e_shnum; i++)
     {
@@ -607,7 +557,7 @@ private_get_section_by_name(struct bfelf_file_t *ef,
     return BFELF_SUCCESS;
 }
 
-static bfelf64_sword
+static int64_t
 private_check_segments(struct bfelf_file_t *ef)
 {
     bfelf64_sword i = 0;
@@ -646,7 +596,7 @@ private_check_segments(struct bfelf_file_t *ef)
     return BFELF_SUCCESS;
 }
 
-static bfelf64_sword
+static int64_t
 private_check_sections(struct bfelf_file_t *ef)
 {
     bfelf64_sword i = 0;
@@ -689,7 +639,7 @@ private_check_sections(struct bfelf_file_t *ef)
     return BFELF_SUCCESS;
 }
 
-static bfelf64_sword
+static int64_t
 private_check_entry(struct bfelf_file_t *ef)
 {
     bfelf64_sword i = 0;
@@ -713,7 +663,7 @@ private_check_entry(struct bfelf_file_t *ef)
     return BFELF_SUCCESS;
 }
 
-static bfelf64_sword
+static int64_t
 private_check_section(struct bfelf_shdr *shdr,
                       bfelf64_word type,
                       bfelf64_xword flags,
@@ -735,11 +685,11 @@ private_check_section(struct bfelf_shdr *shdr,
     return BFELF_SUCCESS;
 }
 
-static bfelf64_sword
+static int64_t
 private_symbol_table_sections(struct bfelf_file_t *ef)
 {
+    int64_t ret = 0;
     bfelf64_sword i = 0;
-    bfelf64_sword ret = 0;
 
     for (i = 0; i < ef->ehdr->e_shnum; i++)
     {
@@ -773,10 +723,10 @@ private_symbol_table_sections(struct bfelf_file_t *ef)
     return BFELF_SUCCESS;
 }
 
-static bfelf64_sword
+static int64_t
 private_get_string_table_sections(struct bfelf_file_t *ef)
 {
-    bfelf64_sword ret = 0;
+    int64_t ret = 0;
 
     ef->strtab = private_get_section(ef, ef->dynsym->sh_link);
     ef->shstrtab = private_get_section(ef, ef->ehdr->e_shstrndx);
@@ -792,7 +742,7 @@ private_get_string_table_sections(struct bfelf_file_t *ef)
     return BFELF_SUCCESS;
 }
 
-static bfelf64_sword
+static int64_t
 private_get_symbol_tables(struct bfelf_file_t *ef)
 {
     ef->symnum = ef->dynsym->sh_size / sizeof(struct bfelf_sym);
@@ -801,11 +751,11 @@ private_get_symbol_tables(struct bfelf_file_t *ef)
     return BFELF_SUCCESS;
 }
 
-static bfelf64_sword
+static int64_t
 private_get_relocation_tables(struct bfelf_file_t *ef)
 {
+    int64_t ret = 0;
     bfelf64_sword i = 0;
-    bfelf64_sword ret = 0;
 
     for (i = 0; i < ef->ehdr->e_shnum; i++)
     {
@@ -836,7 +786,7 @@ private_get_relocation_tables(struct bfelf_file_t *ef)
     return BFELF_SUCCESS;
 }
 
-static bfelf64_sword
+static int64_t
 private_get_hash_table(struct bfelf_file_t *ef)
 {
     if (ef->hashtab)
@@ -861,11 +811,11 @@ private_get_hash_table(struct bfelf_file_t *ef)
     return BFELF_SUCCESS;
 }
 
-bfelf64_sword
+int64_t
 bfelf_file_init(char *file, uint64_t fsize, struct bfelf_file_t *ef)
 {
+    int64_t ret = 0;
     bfelf64_word i = 0;
-    bfelf64_sword ret = 0;
 
     if (!file)
         return invalid_argument("file == NULL");
@@ -940,7 +890,7 @@ failure:
     return ret;
 }
 
-bfelf64_sxword
+int64_t
 bfelf_file_num_segments(struct bfelf_file_t *ef)
 {
     if (!ef)
@@ -949,7 +899,7 @@ bfelf_file_num_segments(struct bfelf_file_t *ef)
     return ef->num_loadable_segments;
 }
 
-bfelf64_sword
+int64_t
 bfelf_file_get_segment(struct bfelf_file_t *ef,
                        bfelf64_word index,
                        struct bfelf_phdr **phdr)
@@ -968,12 +918,12 @@ bfelf_file_get_segment(struct bfelf_file_t *ef,
     return BFELF_SUCCESS;
 }
 
-bfelf64_sword
+int64_t
 bfelf_file_resolve_symbol(struct bfelf_file_t *ef,
                           struct e_string_t *name,
                           void **addr)
 {
-    bfelf64_sword ret = 0;
+    int64_t ret = 0;
     struct bfelf_sym *found_sym = 0;
 
     if (!ef)
@@ -1003,7 +953,7 @@ bfelf_file_resolve_symbol(struct bfelf_file_t *ef,
 /* ELF Loader                                                                 */
 /* -------------------------------------------------------------------------- */
 
-bfelf64_sword
+int64_t
 bfelf_loader_add(struct bfelf_loader_t *loader,
                  struct bfelf_file_t *ef,
                  char *exec)
@@ -1023,11 +973,11 @@ bfelf_loader_add(struct bfelf_loader_t *loader,
     return BFELF_SUCCESS;
 }
 
-bfelf64_sword
+int64_t
 bfelf_loader_relocate(struct bfelf_loader_t *loader)
 {
+    int64_t ret = 0;
     bfelf64_word i = 0;
-    bfelf64_sword ret = 0;
 
     if (!loader)
         return invalid_argument("loader == NULL");
@@ -1049,12 +999,12 @@ bfelf_loader_relocate(struct bfelf_loader_t *loader)
     return BFELF_SUCCESS;
 }
 
-bfelf64_sword
+int64_t
 bfelf_loader_resolve_symbol(struct bfelf_loader_t *loader,
                             struct e_string_t *name,
                             void **addr)
 {
-    bfelf64_sword ret = 0;
+    int64_t ret = 0;
 
     struct bfelf_sym *found_sym = 0;
     struct bfelf_file_t *found_ef = 0;
@@ -1082,12 +1032,12 @@ bfelf_loader_resolve_symbol(struct bfelf_loader_t *loader,
     return BFELF_SUCCESS;
 }
 
-bfelf64_sword
+int64_t
 bfelf_loader_get_info(struct bfelf_loader_t *loader,
                       struct bfelf_file_t *ef,
                       struct section_info_t *info)
 {
-    bfelf64_sword ret = 0;
+    int64_t ret = 0;
     struct bfelf_shdr *shdr = 0;
     struct e_string_t name_ctors = {".ctors", 6};
     struct e_string_t name_dtors = {".dtors", 6};

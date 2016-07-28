@@ -24,7 +24,7 @@
 void
 bfelf_loader_ut::test_bfelf_loader_add_invalid_loader()
 {
-    auto ret = 0;
+    auto ret = 0LL;
     bfelf_file_t dummy_misc_ef;
 
     ret = bfelf_file_init(m_dummy_misc.get(), m_dummy_misc_length, &dummy_misc_ef);
@@ -47,7 +47,7 @@ bfelf_loader_ut::test_bfelf_loader_add_invalid_elf_file()
 void
 bfelf_loader_ut::test_bfelf_loader_add_too_many_files()
 {
-    auto ret = 0;
+    auto ret = 0LL;
     bfelf_file_t dummy_misc_ef;
 
     ret = bfelf_file_init(m_dummy_misc.get(), m_dummy_misc_length, &dummy_misc_ef);
