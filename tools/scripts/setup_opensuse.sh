@@ -5,6 +5,7 @@
 # Copyright (C) 2015 Assured Information Security, Inc.
 # Author: Rian Quinn        <quinnr@ainfosec.com>
 # Author: Brendan Kerrigan  <kerriganb@ainfosec.com>
+# Author: Harry ten Berge   <htenberge@gmail.com>
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -20,13 +21,16 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-sudo zypper install -y lsb-release
-
 # ------------------------------------------------------------------------------
 # Checks
 # ------------------------------------------------------------------------------
 
-case $(lsb_release -si) in
+if [[ ! -f /etc/os-release ]]; then
+   echo "This script requires /etc/os-release (systemd)"
+   exit 1
+fi
+
+case $( grep ^NAME /etc/os-release | cut -d'=' -f 2 ) in
 openSUSE)
     ;;
 *)
@@ -48,7 +52,7 @@ option_help() {
     echo -e "Sets up the system to compile / use Bareflank"
     echo -e ""
     echo -e "       -h, --help                       show this help menu"
-    echo -e "       -l, --local                      setup local cross compilers"
+    echo -e "       -l, --local_compilers            setup local cross compilers"
     echo -e "       -n, --no-configure               skip the configure step"
     echo -e "       -g, --compiler <dirname>         directory of cross compiler"
     echo -e "       -o, --out_of_tree <dirname>      setup out of tree build"
@@ -124,8 +128,8 @@ done
 # Setup System
 # ------------------------------------------------------------------------------
 
-case $(lsb_release -sr) in
-20160625)
+case $( grep ^VERSION= /etc/os-release | cut -d'=' -f 2 | tr -d '"' ) in
+Tumbleweed)
     install_common_packages
     prepare_docker
     ;;
