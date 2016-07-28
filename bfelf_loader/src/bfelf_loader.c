@@ -578,13 +578,8 @@ private_check_segments(struct bfelf_file_t *ef)
         if (phdr->p_vaddr != phdr->p_paddr)
             return invalid_segment("expect p_vaddr == p_paddr");
 
-        /*
-         * At the moment, libc++.so has an alignment of 20, which is really
-         * strange. Will need to find out why at some point
-         *
-         * if (phdr->p_align != 0x1000 && phdr->p_align != 0x200000)
-         *     return invalid_segment("expect 4k or 2M alignment");
-         */
+        if (phdr->p_align != 0x1000 && phdr->p_align != 0x200000)
+            return invalid_segment("expect 4k or 2M alignment");
 
         if (phdr->p_offset >= ef->fsize)
             return invalid_segment("segment offset out of bounds");
