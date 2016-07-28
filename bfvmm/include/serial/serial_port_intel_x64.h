@@ -219,6 +219,13 @@ public:
     ///
     virtual parity_bits_t parity_bits() const noexcept;
 
+    // Port
+    //
+    /// @return the serial device's port
+    ///
+    virtual uint16_t port() const noexcept
+    { return m_port; }
+
     /// Write Character
     ///
     /// Writes a character to the serial device.

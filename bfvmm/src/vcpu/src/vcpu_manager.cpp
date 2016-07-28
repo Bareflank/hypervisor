@@ -19,6 +19,7 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+#include <debug.h>
 #include <exception.h>
 #include <vcpu/vcpu_manager.h>
 
@@ -30,12 +31,21 @@
     if (a < 0 || a >= MAX_VCPUS) \
         throw std::out_of_range("vcpu id is out of range"); \
     \
-    const auto &vc = m_vcpus[a]; \
+    std::lock_guard<std::mutex> guard(g_vcpu_manager_mutex); \
+    auto &vc = m_vcpus[a]; \
+    g_vcpu_manager_mutex.unlock(); \
     \
     if (!vc) \
         throw std::out_of_range("vcpu not yet initialized"); \
     \
     vc->b();
+
+// -----------------------------------------------------------------------------
+// Mutex
+// -----------------------------------------------------------------------------
+
+#include <mutex>
+std::mutex g_vcpu_manager_mutex;
 
 // -----------------------------------------------------------------------------
 // Implementation
@@ -54,7 +64,10 @@ vcpu_manager::init(int64_t vcpuid)
     if (vcpuid < 0 || vcpuid >= MAX_VCPUS)
         throw std::out_of_range("vcpu id");
 
-    m_vcpus[vcpuid] = m_vcpu_factory->make_vcpu(vcpuid);
+    auto vcpu = m_vcpu_factory->make_vcpu(vcpuid);
+
+    std::lock_guard<std::mutex> guard(g_vcpu_manager_mutex);
+    m_vcpus[vcpuid] = vcpu;
 }
 
 void
@@ -74,21 +87,23 @@ vcpu_manager::stop(int64_t vcpuid)
     bfdebug << "success: host os is " << bfcolor_red "not " << bfcolor_end
             << "in a vm on vcpuid = " << vcpuid << bfendl;
 
-    m_vcpus[vcpuid].reset();
+    vc.reset();
 }
 
 void
 vcpu_manager::write(int64_t vcpuid, const std::string &str)
 {
-    if (vcpuid < 0 || vcpuid >= MAX_VCPUS || !m_vcpus[vcpuid])
-    {
-        for (const auto &vc : m_vcpus)
-            if (vc) vc->write(str);
-    }
-    else
-    {
-        m_vcpus[vcpuid]->write(str);
-    }
+    if (vcpuid < 0 || vcpuid >= MAX_VCPUS)
+        vcpuid = 0;
+
+    std::lock_guard<std::mutex> guard(g_vcpu_manager_mutex);
+    const auto &vc = m_vcpus[vcpuid];
+    g_vcpu_manager_mutex.unlock();
+
+    if (!vc)
+        return;
+
+    vc->write(str);
 }
 
 vcpu_manager::vcpu_manager() :

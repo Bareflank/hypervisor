@@ -21,28 +21,39 @@
 
 #if !defined(NO_HYPER_TEST) && !defined(NO_HYPER_LIBCXX_TEST)
 
+#include <debug.h>
 #include <vcpu/vcpu_manager.h>
 #include <serial/serial_port_intel_x64.h>
 
 extern "C" int
 write(int file, const void *buffer, size_t count)
 {
+    static auto been_called_before = false;
+    auto str = std::string((char *)buffer, count);
+
     if (buffer == nullptr || count == 0)
         return 0;
 
     if (file == 0)
         return 0;
 
+    if (been_called_before == false)
+    {
+        been_called_before = true;
+
+        bfinfo << std::hex;
+        bfdebug << "serial_port_intel_x64: open on 0x"
+                << serial_port_intel_x64::instance()->port() << bfendl;
+        bfinfo << std::dec;
+    }
+
     if (file == 1 || file == 2)
     {
-        auto str = std::string((char *)buffer, count);
-
-        g_vcm->write(-1, str);
+        g_vcm->write(0, str);
         serial_port_intel_x64::instance()->write(str);
     }
     else if (file >= bfostream_offset)
     {
-        auto str = std::string((char *)buffer, count);
         auto vcpuid = ((file - bfostream_offset) >> bfostream_shift);
         g_vcm->write(vcpuid, str);
     }
@@ -50,7 +61,7 @@ write(int file, const void *buffer, size_t count)
     {
         auto str = std::to_string(file);
         auto msg = "write: unknown ostream handle: " + str + "\n";
-        g_vcm->write(-1, msg.c_str());
+        g_vcm->write(0, msg.c_str());
         serial_port_intel_x64::instance()->write(msg);
 
         return 0;

@@ -40,7 +40,7 @@ mkdir -p $BUILD_ABS/build_libcxx
 pushd $BUILD_ABS/build_libcxx
 
 export NEWLIB_DEFINES="-D_HAVE_LONG_DOUBLE -D_LDBL_EQ_DBL -D_POSIX_TIMERS -U__STRICT_ANSI__ -DMALLOC_PROVIDED"
-export CFLAGS="-fpic -ffreestanding -mno-red-zone $NEWLIB_DEFINES"
+export CFLAGS="-fpic -ffreestanding -mno-red-zone -DCLOCK_MONOTONIC $NEWLIB_DEFINES"
 export CXXFLAGS="-fno-use-cxa-atexit -fno-threadsafe-statics $CFLAGS"
 
 export BAREFLANK_WRAPPER_IS_LIBCXX="true"
@@ -53,9 +53,7 @@ cmake $BUILD_ABS/source_libcxx/ \
     -DCMAKE_INSTALL_PREFIX=$BUILD_ABS/sysroot/x86_64-elf/ \
     -DLIBCXX_SYSROOT=$BUILD_ABS/sysroot/x86_64-elf/ \
     -DCMAKE_C_COMPILER=$BUILD_ABS/build_scripts/x86_64-bareflank-gcc \
-    -DCMAKE_CXX_COMPILER=$BUILD_ABS/build_scripts/x86_64-bareflank-g++ \
-    -DLIBCXX_ENABLE_THREADS=OFF \
-    -DLIBCXX_ENABLE_MONOTONIC_CLOCK=OFF
+    -DCMAKE_CXX_COMPILER=$BUILD_ABS/build_scripts/x86_64-bareflank-g++
 
 make -j2
 make -j2 install
