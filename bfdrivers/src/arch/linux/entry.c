@@ -402,20 +402,18 @@ static struct notifier_block bareflank_notifier_block =
 int
 dev_init(void)
 {
-    int ret;
-
     register_reboot_notifier(&bareflank_notifier_block);
 
-    if ((ret = misc_register(&bareflank_dev)) != 0)
+    if (misc_register(&bareflank_dev) != 0)
     {
         ALERT("misc_register failed\n");
-        return ret;
+        return -EPERM;
     }
 
-    if ((ret = common_init()) != 0)
+    if (common_init() != 0)
     {
         ALERT("common_init failed\n");
-        return ret;
+        return -EPERM;
     }
 
     DEBUG("dev_init succeeded\n");

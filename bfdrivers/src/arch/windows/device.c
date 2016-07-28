@@ -47,6 +47,5 @@ bareflankCreateDevice(
         return status;
 
     DEBUG("bareflankCreateDevice: success\n");
-
     return status;
 }

@@ -236,6 +236,7 @@ bareflankQueueInitialize(
 )
 {
     WDFQUEUE queue;
+    NTSTATUS status;
     WDF_IO_QUEUE_CONFIG queueConfig;
 
     WDF_IO_QUEUE_CONFIG_INIT_DEFAULT_QUEUE(
@@ -246,10 +247,18 @@ bareflankQueueInitialize(
     queueConfig.EvtIoStop = bareflankEvtIoStop;
     queueConfig.EvtIoDeviceControl = bareflankEvtIoDeviceControl;
 
-    return WdfIoQueueCreate(Device,
-                            &queueConfig,
-                            WDF_NO_OBJECT_ATTRIBUTES,
-                            &queue);
+    status = WdfIoQueueCreate(Device, &queueConfig, WDF_NO_OBJECT_ATTRIBUTES, &queue);
+    if (!NT_SUCCESS(status))
+        return status;
+
+    if (common_init() != BF_SUCCESS)
+    {
+        ALERT("common_init failed\n");
+        return STATUS_ACCESS_DENIED;
+    }
+
+    DEBUG("bareflankQueueInitialize: success\n");
+    return STATUS_SUCCESS;
 }
 
 VOID
@@ -276,7 +285,7 @@ bareflankEvtIoDeviceControl(
         status = WdfRequestRetrieveInputBuffer(Request, InputBufferLength, &in, &in_size);
 
         if (!NT_SUCCESS(status))
-            goto FAIL_IOCTL;
+            goto FAILURE;
     }
 
     if (OutputBufferLength != 0)
@@ -284,7 +293,7 @@ bareflankEvtIoDeviceControl(
         status = WdfRequestRetrieveOutputBuffer(Request, OutputBufferLength, &out, &out_size);
 
         if (!NT_SUCCESS(status))
-            goto FAIL_IOCTL;
+            goto FAILURE;
     }
 
     switch (IoControlCode)
@@ -322,7 +331,7 @@ bareflankEvtIoDeviceControl(
             break;
 
         default:
-            goto FAIL_IOCTL;
+            goto FAILURE;
     }
 
     if (OutputBufferLength != 0)
@@ -334,9 +343,9 @@ bareflankEvtIoDeviceControl(
     WdfRequestComplete(Request, STATUS_SUCCESS);
     return;
 
-FAIL_IOCTL:
+FAILURE:
 
-    WdfRequestComplete(Request, STATUS_FATAL_APP_EXIT);
+    WdfRequestComplete(Request, STATUS_ACCESS_DENIED);
     return;
 }
 
@@ -348,8 +357,8 @@ bareflankEvtIoStop(
 )
 {
     UNREFERENCED_PARAMETER(Queue);
-    UNREFERENCED_PARAMETER(Request);
     UNREFERENCED_PARAMETER(ActionFlags);
 
+    WdfRequestComplete(Request, STATUS_SUCCESS);
     return;
 }
