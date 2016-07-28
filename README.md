@@ -42,8 +42,8 @@ Currently we have support for:
 - Ubuntu 14.04, 16.04
 - Debian Stretch
 - Fedora 23
-- Windows 10 (experimental)
-- Windows 8.1 (experimental)
+- Windows 10
+- Windows 8.1
 
 ## Motivation
 

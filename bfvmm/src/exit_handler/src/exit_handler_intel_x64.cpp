@@ -478,6 +478,24 @@ exit_handler_intel_x64::handle_rdmsr()
         default:
             msr = m_intrinsics->read_msr(m_state_save->rcx);
             break;
+
+        // QUIRK:
+        //
+        // The following is specifically for CPU-Z. For whatever reason, it is
+        // reading the following undefined MSRs, which causes the system to
+        // freeze since attempting to read these MSRs in the exit handler
+        // will cause a GP which is not being caught. The result is, the core
+        // that runs RDMSR on these freezes, the the other cores receive an
+        // INIT signal to reset, and the system dies.
+        //
+
+        case 0x31:
+        case 0x39:
+        case 0x1ae:
+        case 0x1af:
+        case 0x602:
+            msr = 0;
+            break;
     }
 
     m_state_save->rax = ((msr >> 0x00) & 0x00000000FFFFFFFF);
