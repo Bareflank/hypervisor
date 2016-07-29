@@ -25,6 +25,8 @@ Version 1.1 TODO:
   structures from core to core to handle rescheduling a task on a different
   CPU, there is probably no need to make this complicated. Just need to make
   sure that the vcpuid is a uint64 everywhere.
+- The IOCTLs for Windows are too permissive
+- The IOCTLs for Windows do not share the same #'s as Linux
 
 Version 1.2 TODO:
 - Clean up the VMCS checks so that they can be unit tested better, and then
