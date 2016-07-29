@@ -338,7 +338,7 @@ bareflankEvtIoDeviceControl(
         WdfRequestSetInformation(Request, out_size);
 
     if (ret != BF_IOCTL_SUCCESS)
-        goto FAIL_IOCTL;
+        goto FAILURE;
 
     WdfRequestComplete(Request, STATUS_SUCCESS);
     return;
