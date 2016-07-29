@@ -124,10 +124,10 @@ CROSS_CCFLAGS+=-march=sandybridge
 CROSS_CCFLAGS+=-malign-data=abi
 CROSS_CCFLAGS+=-mstackrealign
 
-#ifeq ($(PRODUCTION),yes)
-#	NATIVE_CCFLAGS+=-O3
-#	CROSS_CCFLAGS+=-O3
-#endif
+ifeq ($(PRODUCTION),yes)
+	NATIVE_CCFLAGS+=-O3
+	CROSS_CCFLAGS+=-O3
+endif
 
 ################################################################################
 # Default CXX Flags
@@ -165,10 +165,10 @@ CROSS_CXXFLAGS+=-march=sandybridge
 CROSS_CXXFLAGS+=-malign-data=abi
 CROSS_CXXFLAGS+=-mstackrealign
 
-#ifeq ($(PRODUCTION),yes)
-#	NATIVE_CXXFLAGS+=-O3
-#	CROSS_CXXFLAGS+=-O3
-#endif
+ifeq ($(PRODUCTION),yes)
+	NATIVE_CXXFLAGS+=-O3
+	CROSS_CXXFLAGS+=-O3
+endif
 
 ################################################################################
 # Default ASM Flags

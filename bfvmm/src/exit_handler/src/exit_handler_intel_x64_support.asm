@@ -68,17 +68,22 @@ exit_handler_entry:
     mov [gs:0x068], r14
     mov [gs:0x070], r15
 
-    sub rsp, [gs:0x0A8]
-    sub rsp, 0x40
-    and rsp, 0xFFFFFFFFFFFFFF80
-    mov [gs:0x0B0], rsp
-
-    mov rax, [gs:0x0B8]
-    mov rdx, [gs:0x0C0]
-    xsave [rsp]
-
-    sub rsp, 0x10
-    and rsp, 0xFFFFFFFFFFFFFFF0
+    vmovdqa [gs:0x0C0], ymm0
+    vmovdqa [gs:0x0E0], ymm1
+    vmovdqa [gs:0x100], ymm2
+    vmovdqa [gs:0x120], ymm3
+    vmovdqa [gs:0x140], ymm4
+    vmovdqa [gs:0x160], ymm5
+    vmovdqa [gs:0x180], ymm6
+    vmovdqa [gs:0x1A0], ymm7
+    vmovdqa [gs:0x1C0], ymm8
+    vmovdqa [gs:0x1E0], ymm9
+    vmovdqa [gs:0x200], ymm10
+    vmovdqa [gs:0x220], ymm11
+    vmovdqa [gs:0x240], ymm12
+    vmovdqa [gs:0x260], ymm13
+    vmovdqa [gs:0x280], ymm14
+    vmovdqa [gs:0x2A0], ymm15
 
     mov rdi, VMCS_GUEST_RIP
     vmread [gs:0x078], rdi
@@ -93,10 +98,22 @@ exit_handler_entry:
     mov rdi, VMCS_GUEST_RIP
     vmwrite rdi, [gs:0x078]
 
-    mov rsi, [gs:0x0B0]
-    mov rax, [gs:0x0B8]
-    mov rdx, [gs:0x0C0]
-    xrstor [rsi]
+    vmovdqa ymm15, [gs:0x2A0]
+    vmovdqa ymm14, [gs:0x280]
+    vmovdqa ymm13, [gs:0x260]
+    vmovdqa ymm12, [gs:0x240]
+    vmovdqa ymm11, [gs:0x220]
+    vmovdqa ymm10, [gs:0x200]
+    vmovdqa ymm9,  [gs:0x1E0]
+    vmovdqa ymm8,  [gs:0x1C0]
+    vmovdqa ymm7,  [gs:0x1A0]
+    vmovdqa ymm6,  [gs:0x180]
+    vmovdqa ymm5,  [gs:0x160]
+    vmovdqa ymm4,  [gs:0x140]
+    vmovdqa ymm3,  [gs:0x120]
+    vmovdqa ymm2,  [gs:0x100]
+    vmovdqa ymm1,  [gs:0x0E0]
+    vmovdqa ymm0,  [gs:0x0C0]
 
     mov r15, [gs:0x070]
     mov r14, [gs:0x068]

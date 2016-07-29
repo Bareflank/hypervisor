@@ -85,10 +85,26 @@ struct state_save_intel_x64
     uint64_t vmcs_ptr;              // 0x098
     uint64_t exit_handler_ptr;      // 0x0A0
 
-    uint64_t xsave_size;            // 0x0A8
-    uint64_t xsave_addr;            // 0x0B0
-    uint64_t xsave_xcr0_eax;        // 0x0B8
-    uint64_t xsave_xcr0_edx;        // 0x0C0
+    uint64_t reserved1;             // 0x0A8
+    uint64_t reserved2;             // 0x0B0
+    uint64_t reserved3;             // 0x0B8
+
+    uint64_t ymm00[4];              // 0x0C0
+    uint64_t ymm01[4];              // 0x0E0
+    uint64_t ymm02[4];              // 0x100
+    uint64_t ymm03[4];              // 0x120
+    uint64_t ymm04[4];              // 0x140
+    uint64_t ymm05[4];              // 0x160
+    uint64_t ymm06[4];              // 0x180
+    uint64_t ymm07[4];              // 0x1A0
+    uint64_t ymm08[4];              // 0x1C0
+    uint64_t ymm09[4];              // 0x1E0
+    uint64_t ymm10[4];              // 0x200
+    uint64_t ymm11[4];              // 0x220
+    uint64_t ymm12[4];              // 0x240
+    uint64_t ymm13[4];              // 0x260
+    uint64_t ymm14[4];              // 0x280
+    uint64_t ymm15[4];              // 0x2A0
 };
 
 #pragma pack(pop)

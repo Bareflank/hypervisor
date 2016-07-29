@@ -19,6 +19,9 @@
 ; License along with this library; if not, write to the Free Software
 ; Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+bits 64
+default rel
+
 global __halt:function
 global __stop:function
 global __invd:function
@@ -29,6 +32,7 @@ global __cpuid_ecx:function
 global __cpuid_edx:function
 global __cpuid:function
 global __read_rflags:function
+global __write_rflags:function
 global __read_msr:function
 global __write_msr:function
 global __read_rip:function
@@ -38,8 +42,6 @@ global __read_cr3:function
 global __write_cr3:function
 global __read_cr4:function
 global __write_cr4:function
-global __read_xcr0:function
-global __write_xcr0:function
 global __read_dr7:function
 global __write_dr7:function
 global __read_es:function
@@ -187,6 +189,12 @@ __read_rflags:
     pop rax
     ret
 
+; void __write_rflags(uint64_t val)
+__write_rflags
+    push rdi
+    popf
+    ret
+
 ; uint64_t __read_msr(uint32_t msr)
 __read_msr:
     mov rcx, rdi
@@ -239,23 +247,6 @@ __read_cr4:
 ; void __write_cr4(uint64_t val)
 __write_cr4:
     mov cr4, rdi
-    ret
-
-; uint64_t __read_xcr0(void)
-__read_xcr0:
-    mov rcx, 0
-    xgetbv
-    shl rdx, 32
-    or rax, rdx
-    ret
-
-; void __write_xcr0(uint64_t val)
-__write_xcr0:
-    mov rax, rdi
-    mov rdx, rdi
-    shr rdx, 32
-    mov rcx, 0
-    xsetbv
     ret
 
 ; uint64_t __read_dr7(void)

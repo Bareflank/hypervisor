@@ -27,16 +27,6 @@ global execute_entry:function
 section .text
 
 ; int64_t execute_entry(void *stack, void *func, uint64_t arg1, uint64_t arg2);
-;
-; r08 -> xsave enabled bits
-; r09 -> xsave enabled bits
-; r10 -> size of xsave area
-; r11 -> func return value
-; r12 ->
-; r13 -> func pointer
-; r14 -> arg1
-; r15 -> arg2
-;
 execute_entry:
 
     push rbx
@@ -68,35 +58,40 @@ execute_entry:
     mov r15, rcx
 %endif
 
-    mov rcx, 0x00
-    xgetbv
-    mov r8, rax
-    mov r9, rdx
+    and rsp, 0xFFFFFFFFFFFFFFE0
 
-    mov rax, 0x0D
-    mov rbx, 0x00
-    mov rcx, 0x00
-    mov rdx, 0x00
-    cpuid
-    mov r10, rcx
-
-    sub rsp, r10
-    sub rsp, 0x40
-    and rsp, 0xFFFFFFFFFFFFFF80
-
-    mov rcx, r10
-    mov rax, 0x00
-    mov rdi, rsp
-    rep
-    stosb
-
-    mov rax, r8
-    mov rdx, r9
-    xsave [rsp]
-
-    push r8
-    push r9
-    push r10
+    sub rsp, 0x20
+    vmovdqa [rsp], xmm0
+    sub rsp, 0x20
+    vmovdqa [rsp], ymm1
+    sub rsp, 0x20
+    vmovdqa [rsp], ymm2
+    sub rsp, 0x20
+    vmovdqa [rsp], ymm3
+    sub rsp, 0x20
+    vmovdqa [rsp], ymm4
+    sub rsp, 0x20
+    vmovdqa [rsp], ymm5
+    sub rsp, 0x20
+    vmovdqa [rsp], ymm6
+    sub rsp, 0x20
+    vmovdqa [rsp], ymm7
+    sub rsp, 0x20
+    vmovdqa [rsp], ymm8
+    sub rsp, 0x20
+    vmovdqa [rsp], ymm9
+    sub rsp, 0x20
+    vmovdqa [rsp], ymm10
+    sub rsp, 0x20
+    vmovdqa [rsp], ymm11
+    sub rsp, 0x20
+    vmovdqa [rsp], ymm12
+    sub rsp, 0x20
+    vmovdqa [rsp], ymm13
+    sub rsp, 0x20
+    vmovdqa [rsp], ymm14
+    sub rsp, 0x20
+    vmovdqa [rsp], ymm15
 
     mov rax, 0xABCDEF1234567890
     push rax
@@ -111,13 +106,38 @@ execute_entry:
     cmp rax, rbx
     jne stack_overflow
 
-    pop r10
-    pop r9
-    pop r8
-
-    mov rax, r8
-    mov rdx, r9
-    xrstor [rsp]
+    vmovdqa [rsp], ymm15
+    add rsp, 0x20
+    vmovdqa [rsp], ymm14
+    add rsp, 0x20
+    vmovdqa [rsp], ymm13
+    add rsp, 0x20
+    vmovdqa [rsp], ymm12
+    add rsp, 0x20
+    vmovdqa [rsp], ymm11
+    add rsp, 0x20
+    vmovdqa [rsp], ymm10
+    add rsp, 0x20
+    vmovdqa [rsp], ymm9
+    add rsp, 0x20
+    vmovdqa [rsp], ymm8
+    add rsp, 0x20
+    vmovdqa [rsp], ymm7
+    add rsp, 0x20
+    vmovdqa [rsp], ymm6
+    add rsp, 0x20
+    vmovdqa [rsp], ymm5
+    add rsp, 0x20
+    vmovdqa [rsp], ymm4
+    add rsp, 0x20
+    vmovdqa [rsp], ymm3
+    add rsp, 0x20
+    vmovdqa [rsp], ymm2
+    add rsp, 0x20
+    vmovdqa [rsp], ymm1
+    add rsp, 0x20
+    vmovdqa [rsp], ymm0
+    add rsp, 0x20
 
     mov rax, r11
     leave
