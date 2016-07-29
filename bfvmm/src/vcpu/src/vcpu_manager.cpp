@@ -24,23 +24,6 @@
 #include <vcpu/vcpu_manager.h>
 
 // -----------------------------------------------------------------------------
-// Helpers
-// -----------------------------------------------------------------------------
-
-#define vcpu_execute(a,b) \
-    if (a < 0 || a >= MAX_VCPUS) \
-        throw std::out_of_range("vcpu id is out of range"); \
-    \
-    std::lock_guard<std::mutex> guard(g_vcpu_manager_mutex); \
-    auto &vc = m_vcpus[a]; \
-    g_vcpu_manager_mutex.unlock(); \
-    \
-    if (!vc) \
-        throw std::out_of_range("vcpu not yet initialized"); \
-    \
-    vc->b();
-
-// -----------------------------------------------------------------------------
 // Mutex
 // -----------------------------------------------------------------------------
 
@@ -59,55 +42,69 @@ vcpu_manager::instance()
 }
 
 void
-vcpu_manager::init(int64_t vcpuid)
+vcpu_manager::create_vcpu(uint64_t vcpuid)
 {
-    if (vcpuid < 0 || vcpuid >= MAX_VCPUS)
-        throw std::out_of_range("vcpu id");
-
-    auto vcpu = m_vcpu_factory->make_vcpu(vcpuid);
-
     std::lock_guard<std::mutex> guard(g_vcpu_manager_mutex);
-    m_vcpus[vcpuid] = vcpu;
+    m_vcpus[vcpuid] = m_vcpu_factory->make_vcpu(vcpuid);
 }
 
 void
-vcpu_manager::start(int64_t vcpuid)
+vcpu_manager::delete_vcpu(uint64_t vcpuid)
 {
-    vcpu_execute(vcpuid, start);
+    std::lock_guard<std::mutex> guard(g_vcpu_manager_mutex);
+    m_vcpus.erase(vcpuid);
+}
+
+void
+vcpu_manager::run_vcpu(uint64_t vcpuid)
+{
+    auto vcpu = get_vcpu(vcpuid);
+
+    if (vcpu)
+        vcpu->run();
+    else
+        throw std::invalid_argument("invalid vcpuid");
 
     bfdebug << "success: host os is " << bfcolor_green "now " << bfcolor_end
             << "in a vm on vcpuid = " << vcpuid << bfendl;
 }
 
 void
-vcpu_manager::stop(int64_t vcpuid)
+vcpu_manager::hlt_vcpu(uint64_t vcpuid)
 {
-    vcpu_execute(vcpuid, stop);
+    auto vcpu = get_vcpu(vcpuid);
+
+    if (vcpu)
+        vcpu->hlt();
+    else
+        throw std::invalid_argument("invalid vcpuid");
 
     bfdebug << "success: host os is " << bfcolor_red "not " << bfcolor_end
             << "in a vm on vcpuid = " << vcpuid << bfendl;
-
-    vc.reset();
 }
 
 void
-vcpu_manager::write(int64_t vcpuid, const std::string &str)
+vcpu_manager::write(uint64_t vcpuid, const std::string &str)
 {
-    if (vcpuid < 0 || vcpuid >= MAX_VCPUS)
-        vcpuid = 0;
+    auto vcpu = get_vcpu(vcpuid);
 
-    std::lock_guard<std::mutex> guard(g_vcpu_manager_mutex);
-    const auto &vc = m_vcpus[vcpuid];
-    g_vcpu_manager_mutex.unlock();
-
-    if (!vc)
-        return;
-
-    vc->write(str);
+    if (vcpu)
+        vcpu->write(str);
 }
 
 vcpu_manager::vcpu_manager() :
-    m_vcpus(MAX_VCPUS),
     m_vcpu_factory(std::make_shared<vcpu_factory>())
 {
+}
+
+std::shared_ptr<vcpu>
+vcpu_manager::get_vcpu(uint64_t vcpuid) const
+{
+    std::lock_guard<std::mutex> guard(g_vcpu_manager_mutex);
+    auto iter = m_vcpus.find(vcpuid);
+
+    if (iter == m_vcpus.end())
+        return nullptr;
+
+    return iter->second;
 }

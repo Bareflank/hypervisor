@@ -146,7 +146,7 @@
 ///
 /// @code
 /// std::shared_ptr<vcpu>
-/// vcpu_factory::make_vcpu(int64_t vcpuid)
+/// vcpu_factory::make_vcpu(uint64_t vcpuid)
 /// {
 ///     return std::make_shared<vcpu_intel_x64>(vcpuid,
 ///                                             nullptr,
@@ -217,7 +217,6 @@
 ///
 /// @subsection General
 ///
-/// @ref init_vmm <br>
 /// @ref start_vmm <br>
 /// @ref stop_vmm <br>
 /// @ref vcpu <br>

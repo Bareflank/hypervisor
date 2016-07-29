@@ -42,7 +42,7 @@ extern "C" {
  *
  * This typedef defines the function that is used to execute other entry
  * points. Note that there are several types of entry points. For example,
- * add_mdl, get_drr, init_vmm, start_vmm and stop_vmm are all entry points
+ * add_mdl, get_drr, start_vmm and stop_vmm are all entry points
  * and they have different parameter types. As a result, this function has
  * to be written generically to support all of them
  *

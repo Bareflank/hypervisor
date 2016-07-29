@@ -24,22 +24,30 @@
 
 #include <vcpu/vcpu.h>
 
-vcpu::vcpu(int64_t id) :
-    m_id(id)
+vcpu::vcpu(uint64_t id) :
+    m_id(id),
+    m_is_running(false)
 {
-    if (id < 0 || id >= MAX_VCPUS)
-        throw std::out_of_range("vcpu id");
+    if ((id & RESERVED_VCPUIDS) != 0)
+        throw std::invalid_argument("invalid vcpuid");
 
     m_debug_ring = std::make_shared<debug_ring>(id);
 }
 
-vcpu::vcpu(int64_t id, const std::shared_ptr<debug_ring> &dr) :
+vcpu::vcpu(uint64_t id, const std::shared_ptr<debug_ring> &dr) :
     m_id(id),
-    m_debug_ring(dr)
+    m_debug_ring(dr),
+    m_is_running(false)
 {
-    if (id < 0 || id >= MAX_VCPUS)
-        throw std::out_of_range("vcpu id");
+    if ((id & RESERVED_VCPUIDS) != 0)
+        throw std::invalid_argument("invalid vcpuid");
 
     if (!dr)
         m_debug_ring = std::make_shared<debug_ring>(id);
+}
+
+vcpu::~vcpu()
+{
+    if (m_is_running)
+        this->hlt();
 }

@@ -28,8 +28,6 @@ const auto c_dummy_add_md_failure_filename = "../cross/libdummy_add_md_failure.s
 const auto c_dummy_add_md_success_filename = "../cross/libdummy_add_md_success.so";
 const auto c_dummy_get_drr_failure_filename = "../cross/libdummy_get_drr_failure.so";
 const auto c_dummy_get_drr_success_filename = "../cross/libdummy_get_drr_success.so";
-const auto c_dummy_init_vmm_failure_filename = "../cross/libdummy_init_vmm_failure.so";
-const auto c_dummy_init_vmm_success_filename = "../cross/libdummy_init_vmm_success.so";
 const auto c_dummy_misc_filename = "../cross/libdummy_misc.so";
 const auto c_dummy_start_vmm_failure_filename = "../cross/libdummy_start_vmm_failure.so";
 const auto c_dummy_start_vmm_success_filename = "../cross/libdummy_start_vmm_success.so";
@@ -51,8 +49,6 @@ driver_entry_ut::init()
     std::ifstream dummy_add_md_success_ifs(c_dummy_add_md_success_filename, std::ifstream::ate);
     std::ifstream dummy_get_drr_failure_ifs(c_dummy_get_drr_failure_filename, std::ifstream::ate);
     std::ifstream dummy_get_drr_success_ifs(c_dummy_get_drr_success_filename, std::ifstream::ate);
-    std::ifstream dummy_init_vmm_failure_ifs(c_dummy_init_vmm_failure_filename, std::ifstream::ate);
-    std::ifstream dummy_init_vmm_success_ifs(c_dummy_init_vmm_success_filename, std::ifstream::ate);
     std::ifstream dummy_misc_ifs(c_dummy_misc_filename, std::ifstream::ate);
     std::ifstream dummy_start_vmm_failure_ifs(c_dummy_start_vmm_failure_filename, std::ifstream::ate);
     std::ifstream dummy_start_vmm_success_ifs(c_dummy_start_vmm_success_filename, std::ifstream::ate);
@@ -63,8 +59,6 @@ driver_entry_ut::init()
         dummy_add_md_failure_ifs.is_open() == false ||
         dummy_get_drr_failure_ifs.is_open() == false ||
         dummy_get_drr_success_ifs.is_open() == false ||
-        dummy_init_vmm_failure_ifs.is_open() == false ||
-        dummy_init_vmm_success_ifs.is_open() == false ||
         dummy_misc_ifs.is_open() == false ||
         dummy_start_vmm_failure_ifs.is_open() == false ||
         dummy_start_vmm_success_ifs.is_open() == false ||
@@ -76,8 +70,6 @@ driver_entry_ut::init()
         std::cout << "    - dummy_add_md_success: " << dummy_add_md_success_ifs.is_open() << std::endl;
         std::cout << "    - dummy_get_drr_failure: " << dummy_get_drr_failure_ifs.is_open() << std::endl;
         std::cout << "    - dummy_get_drr_success: " << dummy_get_drr_success_ifs.is_open() << std::endl;
-        std::cout << "    - dummy_init_vmm_failure: " << dummy_init_vmm_failure_ifs.is_open() << std::endl;
-        std::cout << "    - dummy_init_vmm_success: " << dummy_init_vmm_success_ifs.is_open() << std::endl;
         std::cout << "    - dummy_misc: " << dummy_misc_ifs.is_open() << std::endl;
         std::cout << "    - dummy_start_vmm_failure: " << dummy_start_vmm_failure_ifs.is_open() << std::endl;
         std::cout << "    - dummy_start_vmm_success: " << dummy_start_vmm_success_ifs.is_open() << std::endl;
@@ -90,8 +82,6 @@ driver_entry_ut::init()
     m_dummy_add_md_success_length = dummy_add_md_success_ifs.tellg();
     m_dummy_get_drr_failure_length = dummy_get_drr_failure_ifs.tellg();
     m_dummy_get_drr_success_length = dummy_get_drr_success_ifs.tellg();
-    m_dummy_init_vmm_failure_length = dummy_init_vmm_failure_ifs.tellg();
-    m_dummy_init_vmm_success_length = dummy_init_vmm_success_ifs.tellg();
     m_dummy_misc_length = dummy_misc_ifs.tellg();
     m_dummy_start_vmm_failure_length = dummy_start_vmm_failure_ifs.tellg();
     m_dummy_start_vmm_success_length = dummy_start_vmm_success_ifs.tellg();
@@ -102,8 +92,6 @@ driver_entry_ut::init()
         m_dummy_add_md_failure_length == 0 ||
         m_dummy_get_drr_failure_length == 0 ||
         m_dummy_get_drr_success_length == 0 ||
-        m_dummy_init_vmm_failure_length == 0 ||
-        m_dummy_init_vmm_success_length == 0 ||
         m_dummy_misc_length == 0 ||
         m_dummy_start_vmm_failure_length == 0 ||
         m_dummy_start_vmm_success_length == 0 ||
@@ -115,8 +103,6 @@ driver_entry_ut::init()
         std::cout << "    - dummy_add_md_success: " << m_dummy_add_md_success_length << std::endl;
         std::cout << "    - dummy_get_drr_failure: " << m_dummy_get_drr_failure_length << std::endl;
         std::cout << "    - dummy_get_drr_success: " << m_dummy_get_drr_success_length << std::endl;
-        std::cout << "    - dummy_init_vmm_failure: " << m_dummy_init_vmm_failure_length << std::endl;
-        std::cout << "    - dummy_init_vmm_success: " << m_dummy_init_vmm_success_length << std::endl;
         std::cout << "    - dummy_misc: " << m_dummy_misc_length << std::endl;
         std::cout << "    - dummy_start_vmm_failure: " << m_dummy_start_vmm_failure_length << std::endl;
         std::cout << "    - dummy_start_vmm_success: " << m_dummy_start_vmm_success_length << std::endl;
@@ -129,8 +115,6 @@ driver_entry_ut::init()
     m_dummy_add_md_success = new char[dummy_add_md_success_ifs.tellg()];
     m_dummy_get_drr_failure = new char[dummy_get_drr_failure_ifs.tellg()];
     m_dummy_get_drr_success = new char[dummy_get_drr_success_ifs.tellg()];
-    m_dummy_init_vmm_failure = new char[dummy_init_vmm_failure_ifs.tellg()];
-    m_dummy_init_vmm_success = new char[dummy_init_vmm_success_ifs.tellg()];
     m_dummy_misc = new char[dummy_misc_ifs.tellg()];
     m_dummy_start_vmm_failure = new char[dummy_start_vmm_failure_ifs.tellg()];
     m_dummy_start_vmm_success = new char[dummy_start_vmm_success_ifs.tellg()];
@@ -141,8 +125,6 @@ driver_entry_ut::init()
         m_dummy_add_md_failure == NULL ||
         m_dummy_get_drr_failure == NULL ||
         m_dummy_get_drr_success == NULL ||
-        m_dummy_init_vmm_failure == NULL ||
-        m_dummy_init_vmm_success == NULL ||
         m_dummy_misc == NULL ||
         m_dummy_start_vmm_failure == NULL ||
         m_dummy_start_vmm_success == NULL ||
@@ -154,8 +136,6 @@ driver_entry_ut::init()
         std::cout << "    - dummy_add_md_success: " << (void *)m_dummy_add_md_success << std::endl;
         std::cout << "    - dummy_get_drr_failure: " << (void *)m_dummy_get_drr_failure << std::endl;
         std::cout << "    - dummy_get_drr_success: " << (void *)m_dummy_get_drr_success << std::endl;
-        std::cout << "    - dummy_init_vmm_failure: " << (void *)m_dummy_init_vmm_failure << std::endl;
-        std::cout << "    - dummy_init_vmm_success: " << (void *)m_dummy_init_vmm_success << std::endl;
         std::cout << "    - dummy_misc: " << (void *)m_dummy_misc << std::endl;
         std::cout << "    - dummy_start_vmm_failure: " << (void *)m_dummy_start_vmm_failure << std::endl;
         std::cout << "    - dummy_start_vmm_success: " << (void *)m_dummy_start_vmm_success << std::endl;
@@ -168,8 +148,6 @@ driver_entry_ut::init()
     dummy_add_md_success_ifs.seekg(0);
     dummy_get_drr_failure_ifs.seekg(0);
     dummy_get_drr_success_ifs.seekg(0);
-    dummy_init_vmm_failure_ifs.seekg(0);
-    dummy_init_vmm_success_ifs.seekg(0);
     dummy_misc_ifs.seekg(0);
     dummy_start_vmm_failure_ifs.seekg(0);
     dummy_start_vmm_success_ifs.seekg(0);
@@ -180,8 +158,6 @@ driver_entry_ut::init()
     dummy_add_md_success_ifs.read(m_dummy_add_md_success, m_dummy_add_md_success_length);
     dummy_get_drr_failure_ifs.read(m_dummy_get_drr_failure, m_dummy_get_drr_failure_length);
     dummy_get_drr_success_ifs.read(m_dummy_get_drr_success, m_dummy_get_drr_success_length);
-    dummy_init_vmm_failure_ifs.read(m_dummy_init_vmm_failure, m_dummy_init_vmm_failure_length);
-    dummy_init_vmm_success_ifs.read(m_dummy_init_vmm_success, m_dummy_init_vmm_success_length);
     dummy_misc_ifs.read(m_dummy_misc, m_dummy_misc_length);
     dummy_start_vmm_failure_ifs.read(m_dummy_start_vmm_failure, m_dummy_start_vmm_failure_length);
     dummy_start_vmm_success_ifs.read(m_dummy_start_vmm_success, m_dummy_start_vmm_success_length);
@@ -192,8 +168,6 @@ driver_entry_ut::init()
         dummy_add_md_failure_ifs.fail() == true ||
         dummy_get_drr_failure_ifs.fail() == true ||
         dummy_get_drr_success_ifs.fail() == true ||
-        dummy_init_vmm_failure_ifs.fail() == true ||
-        dummy_init_vmm_success_ifs.fail() == true ||
         dummy_misc_ifs.fail() == true ||
         dummy_start_vmm_failure_ifs.fail() == true ||
         dummy_start_vmm_success_ifs.fail() == true ||
@@ -205,8 +179,6 @@ driver_entry_ut::init()
         std::cout << "    - dummy_add_md_success: " << dummy_add_md_success_ifs.fail() << std::endl;
         std::cout << "    - dummy_get_drr_failure: " << dummy_get_drr_failure_ifs.fail() << std::endl;
         std::cout << "    - dummy_get_drr_success: " << dummy_get_drr_success_ifs.fail() << std::endl;
-        std::cout << "    - dummy_init_vmm_failure: " << dummy_init_vmm_failure_ifs.fail() << std::endl;
-        std::cout << "    - dummy_init_vmm_success: " << dummy_init_vmm_success_ifs.fail() << std::endl;
         std::cout << "    - dummy_misc: " << dummy_misc_ifs.fail() << std::endl;
         std::cout << "    - dummy_start_vmm_failure: " << dummy_start_vmm_failure_ifs.fail() << std::endl;
         std::cout << "    - dummy_start_vmm_success: " << dummy_start_vmm_success_ifs.fail() << std::endl;
@@ -223,8 +195,6 @@ close:
     dummy_add_md_success_ifs.close();
     dummy_get_drr_failure_ifs.close();
     dummy_get_drr_success_ifs.close();
-    dummy_init_vmm_failure_ifs.close();
-    dummy_init_vmm_success_ifs.close();
     dummy_misc_ifs.close();
     dummy_start_vmm_failure_ifs.close();
     dummy_start_vmm_success_ifs.close();
@@ -248,12 +218,6 @@ driver_entry_ut::fini()
 
     if (m_dummy_get_drr_success != NULL)
         delete[] m_dummy_get_drr_success;
-
-    if (m_dummy_init_vmm_failure != NULL)
-        delete[] m_dummy_init_vmm_failure;
-
-    if (m_dummy_init_vmm_success != NULL)
-        delete[] m_dummy_init_vmm_success;
 
     if (m_dummy_misc != NULL)
         delete[] m_dummy_misc;
@@ -307,9 +271,7 @@ driver_entry_ut::list()
     this->test_common_start_start_when_unloaded();
     this->test_common_start_start_when_already_running();
     this->test_common_start_start_when_corrupt();
-    this->test_common_start_start_when_init_vmm_missing();
     this->test_common_start_start_when_start_vmm_missing();
-    this->test_common_start_init_vmm_failure();
     this->test_common_start_start_vmm_failure();
 
     this->test_common_stop_stop_when_unloaded();

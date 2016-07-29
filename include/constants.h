@@ -24,18 +24,6 @@
 #define CONSTANTS_H
 
 /*
- * Max Supported vCPUs
- *
- * This defines the maximum number of vCPUs that are supported by the VMM.
- * Note that if this is changed, code withing the VMM will likely have to
- * change as well as the exit handlers are not dynamically allocated (i.e.
- * an exit handler is defined for each vCPU).
- */
-#ifndef MAX_VCPUS
-#define MAX_VCPUS (8LL)
-#endif
-
-/*
  * Cache Line Shift
  *
  * The memory manager at the moment keeps track of blocks using a cache line

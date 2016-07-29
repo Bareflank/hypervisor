@@ -39,10 +39,6 @@ protected:
 
 private:
 
-    void test_init_vmm_success();
-    void test_init_vmm_throws_general_exception();
-    void test_init_vmm_throws_standard_exception();
-    void test_init_vmm_throws_any_exception();
     void test_start_vmm_success();
     void test_start_vmm_throws_general_exception();
     void test_start_vmm_throws_standard_exception();

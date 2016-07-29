@@ -40,7 +40,6 @@ debug_ring_ut::fini()
 bool
 debug_ring_ut::list()
 {
-    this->test_write_with_invalid_dr();
     this->test_read_with_invalid_drr();
     this->test_read_with_null_string();
     this->test_read_with_zero_length();

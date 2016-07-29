@@ -26,23 +26,6 @@
 #include <memory_manager/memory_manager.h>
 
 void
-vcpu_ut::test_vcpu_intel_x64_negative_id()
-{
-    MockRepository mocks;
-    auto dr = bfn::mock_shared<debug_ring>(mocks);
-    auto on = bfn::mock_shared<vmxon_intel_x64>(mocks);
-    auto cs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto eh = bfn::mock_shared<exit_handler_intel_x64>(mocks);
-    auto in = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        EXPECT_EXCEPTION(std::make_shared<vcpu_intel_x64>(-1), std::out_of_range);
-        EXPECT_EXCEPTION(std::make_shared<vcpu_intel_x64>(-1, dr, on, cs, eh, in), std::out_of_range);
-    });
-}
-
-void
 vcpu_ut::test_vcpu_intel_x64_id_too_large()
 {
     MockRepository mocks;
@@ -54,8 +37,8 @@ vcpu_ut::test_vcpu_intel_x64_id_too_large()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_EXCEPTION(std::make_shared<vcpu_intel_x64>(10000), std::out_of_range);
-        EXPECT_EXCEPTION(std::make_shared<vcpu_intel_x64>(10000, dr, on, cs, eh, in), std::out_of_range);
+        EXPECT_EXCEPTION(std::make_shared<vcpu_intel_x64>(RESERVED_VCPUIDS + 1), std::invalid_argument);
+        EXPECT_EXCEPTION(std::make_shared<vcpu_intel_x64>(RESERVED_VCPUIDS + 1, dr, on, cs, eh, in), std::invalid_argument);
     });
 }
 
@@ -100,7 +83,7 @@ vcpu_ut::test_vcpu_intel_x64_valid()
 }
 
 void
-vcpu_ut::test_vcpu_intel_x64_start_vmxon_start_failed()
+vcpu_ut::test_vcpu_intel_x64_run_vmxon_start_failed()
 {
     MockRepository mocks;
     auto dr = bfn::mock_shared<debug_ring>(mocks);
@@ -120,7 +103,7 @@ vcpu_ut::test_vcpu_intel_x64_start_vmxon_start_failed()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_EXCEPTION(vc->start(), bfn::general_exception);
+        EXPECT_EXCEPTION(vc->run(), bfn::general_exception);
     });
 }
 
@@ -176,7 +159,7 @@ setup_intrinsics(MockRepository &mocks, intrinsics_intel_x64 *in)
 }
 
 void
-vcpu_ut::test_vcpu_intel_x64_start_vmcs_launch_failed()
+vcpu_ut::test_vcpu_intel_x64_run_vmcs_launch_failed()
 {
     MockRepository mocks;
     auto mm = mocks.Mock<memory_manager>();
@@ -201,12 +184,12 @@ vcpu_ut::test_vcpu_intel_x64_start_vmcs_launch_failed()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_EXCEPTION(vc->start(), bfn::general_exception);
+        EXPECT_EXCEPTION(vc->run(), bfn::general_exception);
     });
 }
 
 void
-vcpu_ut::test_vcpu_intel_x64_start_success()
+vcpu_ut::test_vcpu_intel_x64_run_success()
 {
     MockRepository mocks;
     auto mm = mocks.Mock<memory_manager>();
@@ -231,12 +214,12 @@ vcpu_ut::test_vcpu_intel_x64_start_success()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_NO_EXCEPTION(vc->start());
+        EXPECT_NO_EXCEPTION(vc->run());
     });
 }
 
 void
-vcpu_ut::test_vcpu_intel_x64_stop()
+vcpu_ut::test_vcpu_intel_x64_hlt()
 {
     MockRepository mocks;
     auto dr = bfn::mock_shared<debug_ring>(mocks);
@@ -251,6 +234,6 @@ vcpu_ut::test_vcpu_intel_x64_stop()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_NO_EXCEPTION(vc->stop());
+        EXPECT_NO_EXCEPTION(vc->hlt());
     });
 }

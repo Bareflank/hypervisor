@@ -22,7 +22,7 @@
 #include <debug_ring_interface.h>
 
 extern "C" int64_t
-get_drr(int64_t vcpuid, struct debug_ring_resources_t **drr)
+get_drr(uint64_t vcpuid, struct debug_ring_resources_t **drr)
 {
     (void) vcpuid;
     (void) drr;

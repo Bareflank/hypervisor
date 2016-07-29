@@ -70,9 +70,7 @@ private:
     void test_common_start_start_when_unloaded();
     void test_common_start_start_when_already_running();
     void test_common_start_start_when_corrupt();
-    void test_common_start_start_when_init_vmm_missing();
     void test_common_start_start_when_start_vmm_missing();
-    void test_common_start_init_vmm_failure();
     void test_common_start_start_vmm_failure();
 
     void test_common_stop_stop_when_unloaded();
@@ -111,8 +109,6 @@ private:
     char *m_dummy_add_md_success;
     char *m_dummy_get_drr_failure;
     char *m_dummy_get_drr_success;
-    char *m_dummy_init_vmm_failure;
-    char *m_dummy_init_vmm_success;
     char *m_dummy_misc;
     char *m_dummy_start_vmm_failure;
     char *m_dummy_start_vmm_success;
@@ -123,8 +119,6 @@ private:
     int32_t m_dummy_add_md_success_length;
     int32_t m_dummy_get_drr_failure_length;
     int32_t m_dummy_get_drr_success_length;
-    int32_t m_dummy_init_vmm_failure_length;
-    int32_t m_dummy_init_vmm_success_length;
     int32_t m_dummy_misc_length;
     int32_t m_dummy_start_vmm_failure_length;
     int32_t m_dummy_start_vmm_success_length;
