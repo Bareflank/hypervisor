@@ -27,6 +27,7 @@ Version 1.1 TODO:
   sure that the vcpuid is a uint64 everywhere.
 - The IOCTLs for Windows are too permissive
 - The IOCTLs for Windows do not share the same #'s as Linux
+- Manually save XMM / YMM registers instead of using XSAVE
 
 Version 1.2 TODO:
 - Clean up the VMCS checks so that they can be unit tested better, and then
