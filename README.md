@@ -167,6 +167,26 @@ For more detailed instructions please read the following (based on which OS you 
 
 [Driver Entry Documentation](https://github.com/Bareflank/hypervisor/tree/master/bfdrivers/src/arch)
 
+## Extended APIs
+
+Bareflank's main goal is to provide the "bare" minimum hypervisor. 
+Since Bareflank supports C++ 11/14, multiple operating systems, 
+and a full toolstack, it's not as simple as say 
+[SimpleVisor](https://github.com/ionescu007/SimpleVisor), but still 
+adheres to the same basic principles of leaving out the complexity 
+of a full blown hypervisor in favor of an implementation that is simple to 
+read and follow. 
+
+It is our goal to provide a hypervisor that others can extend to create 
+their own hypervisors. The purpose of the 
+[Extended APIs](https://github.com/Bareflank/extended_apis) repository , 
+is to provide an extended set of APIs to build your hypervisors from. 
+For more information about this project, plase see
+
+```
+https://github.com/Bareflank/extended_apis
+```
+
 ## Example Extensions
 
 To provide examples of how you might extend Bareflank to provide your own custom
@@ -176,7 +196,7 @@ functionality, we have provided a couple of examples:
 [CPUID Count](https://github.com/Bareflank/hypervisor_example_cpuidcount) <br>
 [MSR Bitmaps](https://github.com/Bareflank/hypervisor_example_msr_bitmap)
 
-## Roadmap (updated 4-27-2016)
+## Roadmap
 
 ### Version 1.0
 
