@@ -38,8 +38,8 @@ that the provided code works as expected.
 
 ![](https://travis-ci.org/Bareflank/hypervisor.svg?branch=master)
 
-Currently we have support for:
-- Ubuntu 14.04, 16.04
+Currently we have support for (64bit only):
+- Ubuntu 16.04, 14.04
 - Debian Stretch
 - Fedora 23
 - Windows 10
@@ -104,7 +104,10 @@ might vary from release to release, so if something doesn't work, please
 refer to the instructions provided in the tagged version.
 
 Before you can compile, the build environment must be present. If you are on
-a supported platform, you should be able to run the following:
+a supported Windows platform, you must first install cygwin, and run a cygwin
+terminal with admin rights. You must also copy the setup-x86_64.exe to 
+"c:\cygwin64\bin". If you are on a supported Linux platform, all you need 
+is a terminal. Once your setup, you should be able to run the following:
 
 ```
 cd ~/
@@ -113,6 +116,15 @@ cd ~/hypervisor
 git checkout -b v1.0.0
 
 ./tools/scripts/setup_<platform>.sh
+```
+
+If you are on Windows, there is one additional step that must be taken 
+to turn on test signing. This step can be skipped if you plan to sign
+the driver with your own signing key. 
+
+```
+bcdedit.exe /set testsigning ON
+<reboot>
 ```
 
 If you are not on a supported platform, you are more than welcome to modify
@@ -127,10 +139,11 @@ make run_tests
 
 To run the hypervisor, you need to first compile, and load one of the driver
 entry points. Bareflank uses the driver entry point to gain kernel level
-access to the system to load the hypervisor. On Linux, this is as simple as:
+access to the system to load the hypervisor. On Windows and Linux, this 
+is as simple as:
 
 ```
-make linux_load
+make driver_load
 make load
 make start
 ```
@@ -147,7 +160,7 @@ to reverse this:
 ```
 make stop
 make unload
-make linux_unload
+make driver_unload
 ```
 
 For more detailed instructions please read the following (based on which OS you are using):
@@ -184,7 +197,6 @@ Target: September 2016
 
 * ~~Multi-Core Support~~
 * ~~Windows Support~~
-* Updated C++ Environment
 * ~~Isolated VMM~~
 
 ### Version 1.2
@@ -194,6 +206,7 @@ Target: Janurary 2017
 * UEFI Support (i.e. type 1)
 * Basic Guest Support
 * BFM / Driver Extension Support
+* Updated C++ Environment
 
 ### Version 1.3
 
