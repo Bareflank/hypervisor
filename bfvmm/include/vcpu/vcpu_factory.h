@@ -58,7 +58,7 @@ public:
     ///
     /// @return returns a pointer to a newly created vCPU.
     ///
-    virtual std::shared_ptr<vcpu> make_vcpu(int64_t vcpuid);
+    virtual std::shared_ptr<vcpu> make_vcpu(uint64_t vcpuid);
 };
 
 #endif

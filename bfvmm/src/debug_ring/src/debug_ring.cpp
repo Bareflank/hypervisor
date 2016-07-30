@@ -19,25 +19,24 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+#include <map>
 #include <debug_ring/debug_ring.h>
-#include <debug_ring/debug_ring_exceptions.h>
 
 // -----------------------------------------------------------------------------
 // Global
 // -----------------------------------------------------------------------------
 
+std::map<uint64_t, std::shared_ptr<debug_ring_resources_t> > g_drrs;
+
 extern "C" int64_t
-get_drr(int64_t vcpuid, struct debug_ring_resources_t **drr)
+get_drr(uint64_t vcpuid, struct debug_ring_resources_t **drr)
 {
-    static debug_ring_resources_t drrs[MAX_VCPUS] = {};
+    auto iter = g_drrs.find(vcpuid);
 
-    if (vcpuid < 0 || vcpuid >= MAX_VCPUS)
+    if (iter == g_drrs.end())
         return GET_DRR_FAILURE;
 
-    if (drr == 0)
-        return GET_DRR_FAILURE;
-
-    *drr = &drrs[vcpuid];
+    *drr = iter->second.get();
 
     return GET_DRR_SUCCESS;
 }
@@ -46,20 +45,16 @@ get_drr(int64_t vcpuid, struct debug_ring_resources_t **drr)
 // Debug Ring Implementation
 // -----------------------------------------------------------------------------
 
-debug_ring::debug_ring(int64_t vcpuid) :
-    m_drr(0)
+debug_ring::debug_ring(uint64_t vcpuid)
 {
-    if (vcpuid < 0 || vcpuid >= MAX_VCPUS)
-        return;
-
-    if (get_drr(vcpuid, &m_drr) != GET_DRR_SUCCESS)
-        return;
+    m_drr = std::make_shared<debug_ring_resources_t>();
 
     m_drr->epos = 0;
     m_drr->spos = 0;
+    m_drr->tag1 = 0xDB60DB60DB60DB60;
+    m_drr->tag2 = 0x06BD06BD06BD06BD;
 
-    for (auto i = 0U; i < DEBUG_RING_SIZE; i++)
-        m_drr->buf[i] = '\0';
+    g_drrs[vcpuid] = m_drr;
 }
 
 void
@@ -71,13 +66,10 @@ debug_ring::write(const std::string &str)
     //       optimized memcpy that used both rep string instructions and
     //       SIMD instructions
 
-    if (m_drr == NULL)
-        throw invalid_debug_ring();
+    if (!m_drr)
+        return;
 
-    if (str.length() >= DEBUG_RING_SIZE)
-        throw std::invalid_argument("str.length() >= DEBUG_RING_SIZE");
-
-    if (str.length() == 0)
+    if (str.length() == 0 || str.length() >= DEBUG_RING_SIZE)
         return;
 
     // The length that we were given is equivalent to strlen, which does not

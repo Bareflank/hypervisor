@@ -22,7 +22,7 @@
 #include <vcpu/vcpu_factory.h>
 
 std::shared_ptr<vcpu>
-vcpu_factory::make_vcpu(int64_t vcpuid)
+vcpu_factory::make_vcpu(uint64_t vcpuid)
 {
     return std::make_shared<vcpu_intel_x64>(vcpuid);
 }

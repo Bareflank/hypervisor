@@ -128,7 +128,7 @@ typedef INT64 int64_t;
 /* -------------------------------------------------------------------------- */
 
 #define BF_IOCTL_SUCCESS sign(SUCCESS)
-#define BF_IOCTL_FAILURE sign(0x8000000100000000)
+#define BF_IOCTL_FAILURE sign(-1)
 
 /* -------------------------------------------------------------------------- */
 /* Stringify Error Codes                                                      */

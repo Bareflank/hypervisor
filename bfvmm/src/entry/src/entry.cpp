@@ -24,28 +24,25 @@
 #include <vcpu/vcpu_manager.h>
 
 extern "C" int64_t
-init_vmm(int64_t arg)
-{
-    return guard_exceptions(ENTRY_ERROR_VMM_INIT_FAILED, [&]()
-    {
-        g_vcm->init(arg);
-    });
-}
-
-extern "C" int64_t
-start_vmm(int64_t arg)
+start_vmm(uint64_t arg)
 {
     return guard_exceptions(ENTRY_ERROR_VMM_START_FAILED, [&]()
     {
-        return g_vcm->start(arg);
+        g_vcm->create_vcpu(arg);
+        g_vcm->run_vcpu(arg);
+
+        return ENTRY_SUCCESS;
     });
 }
 
 extern "C" int64_t
-stop_vmm(int64_t arg)
+stop_vmm(uint64_t arg)
 {
     return guard_exceptions(ENTRY_ERROR_VMM_STOP_FAILED, [&]()
     {
-        return g_vcm->stop(arg);
+        g_vcm->hlt_vcpu(arg);
+        g_vcm->delete_vcpu(arg);
+
+        return ENTRY_SUCCESS;
     });
 }

@@ -28,43 +28,28 @@
 extern "C" int
 write(int file, const void *buffer, size_t count)
 {
-    static auto been_called_before = false;
-    auto str = std::string((char *)buffer, count);
-
     if (buffer == nullptr || count == 0)
         return 0;
 
-    if (file == 0)
+    if (file != 1 && file != 2)
         return 0;
 
-    if (been_called_before == false)
+    std::string str((char *)buffer, count);
+    if (str.length() >= 26 && str.compare(0, 8, "$vcpuid=") == 0)
     {
-        been_called_before = true;
+        str.erase(0, 8);
 
-        bfinfo << std::hex;
-        bfdebug << "serial_port_intel_x64: open on 0x"
-                << serial_port_intel_x64::instance()->port() << bfendl;
-        bfinfo << std::dec;
-    }
+        auto vcpuid_str = str.substr(0, 18);
+        auto vcpuid_num = std::stoull(vcpuid_str, 0, 16);
 
-    if (file == 1 || file == 2)
-    {
-        g_vcm->write(0, str);
-        serial_port_intel_x64::instance()->write(str);
-    }
-    else if (file >= bfostream_offset)
-    {
-        auto vcpuid = ((file - bfostream_offset) >> bfostream_shift);
-        g_vcm->write(vcpuid, str);
+        str.erase(0, 18);
+
+        g_vcm->write(vcpuid_num, str);
     }
     else
     {
-        auto str = std::to_string(file);
-        auto msg = "write: unknown ostream handle: " + str + "\n";
-        g_vcm->write(0, msg.c_str());
-        serial_port_intel_x64::instance()->write(msg);
-
-        return 0;
+        g_vcm->write(0, str);
+        serial_port_intel_x64::instance()->write(str);
     }
 
     return count;
@@ -145,18 +130,7 @@ fstat(int file, struct stat *sbuf)
 }
 
 extern "C" int64_t
-init_vmm(int64_t arg)
-{
-    (void) arg;
-
-    auto msg = "init_vmm\n";
-    write(1, msg, strlen(msg));
-
-    return 0;
-}
-
-extern "C" int64_t
-start_vmm(int64_t arg)
+start_vmm(uint64_t arg)
 {
     (void) arg;
 
@@ -167,7 +141,7 @@ start_vmm(int64_t arg)
 }
 
 extern "C" int64_t
-stop_vmm(int64_t arg)
+stop_vmm(uint64_t arg)
 {
     (void) arg;
 

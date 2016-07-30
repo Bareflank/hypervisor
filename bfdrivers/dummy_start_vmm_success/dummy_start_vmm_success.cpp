@@ -22,7 +22,7 @@
 #include <entry.h>
 
 extern "C" int64_t
-start_vmm(int64_t arg)
+start_vmm(uint64_t arg)
 {
     (void) arg;
 

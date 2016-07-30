@@ -40,39 +40,29 @@ vcpu_ut::fini()
 bool
 vcpu_ut::list()
 {
-    this->test_vcpu_negative_id();
     this->test_vcpu_id_too_large();
     this->test_vcpu_invalid_debug_ring();
     this->test_vcpu_valid();
     this->test_vcpu_write();
 
-    this->test_vcpu_intel_x64_negative_id();
     this->test_vcpu_intel_x64_id_too_large();
     this->test_vcpu_intel_x64_invalid_objects();
     this->test_vcpu_intel_x64_valid();
-    this->test_vcpu_intel_x64_start_vmxon_start_failed();
-    this->test_vcpu_intel_x64_start_vmcs_launch_failed();
-    this->test_vcpu_intel_x64_start_success();
-    this->test_vcpu_intel_x64_stop();
+    this->test_vcpu_intel_x64_run_vmxon_start_failed();
+    this->test_vcpu_intel_x64_run_vmcs_launch_failed();
+    this->test_vcpu_intel_x64_run_success();
+    this->test_vcpu_intel_x64_hlt();
 
     this->test_vcpu_manager_valid();
-    this->test_vcpu_manager_init_negative_vcpuid();
-    this->test_vcpu_manager_init_invalid_vcpuid();
-    this->test_vcpu_manager_init_success();
-    this->test_vcpu_manager_init_success_twice();
-    this->test_vcpu_manager_start_negative_vcpuid();
-    this->test_vcpu_manager_start_invalid_vcpuid();
-    this->test_vcpu_manager_start_uninitialized_vcpuid();
-    this->test_vcpu_manager_start_success();
-    this->test_vcpu_manager_stop_invalid_vcpuid();
-    this->test_vcpu_manager_stop_uninitialized_vcpuid();
-    this->test_vcpu_manager_stop_success();
-    this->test_vcpu_manager_stop_twice();
-    this->test_vcpu_manager_write_negative_vcpuid();
-    this->test_vcpu_manager_write_invalid_vcpuid();
+    this->test_vcpu_manager_create_vcpu_invalid_vcpuid();
+    this->test_vcpu_manager_create_vcpu_success();
+    this->test_vcpu_manager_create_vcpu_success_twice();
+    this->test_vcpu_manager_run_uninitialized_vcpuid();
+    this->test_vcpu_manager_run_success();
+    this->test_vcpu_manager_hlt_uninitialized_vcpuid();
+    this->test_vcpu_manager_hlt_success();
+    this->test_vcpu_manager_hlt_twice();
     this->test_vcpu_manager_write_uninitialized_vcpuid();
-    this->test_vcpu_manager_write_negative_vcpuid_with_valid_vcpu();
-    this->test_vcpu_manager_write_invalid_vcpuid_with_valid_vcpu();
     this->test_vcpu_manager_write_uninitialized_vcpuid_with_valid_vcpu();
     this->test_vcpu_manager_write_success();
 

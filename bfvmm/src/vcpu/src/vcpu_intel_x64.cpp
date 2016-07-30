@@ -22,7 +22,7 @@
 #include <commit_or_rollback.h>
 #include <vcpu/vcpu_intel_x64.h>
 
-vcpu_intel_x64::vcpu_intel_x64(int64_t id) :
+vcpu_intel_x64::vcpu_intel_x64(uint64_t id) :
     vcpu(id)
 {
     m_intrinsics = std::make_shared<intrinsics_intel_x64>();
@@ -33,7 +33,7 @@ vcpu_intel_x64::vcpu_intel_x64(int64_t id) :
     init();
 }
 
-vcpu_intel_x64::vcpu_intel_x64(int64_t id,
+vcpu_intel_x64::vcpu_intel_x64(uint64_t id,
                                const std::shared_ptr<debug_ring> &debug_ring,
                                const std::shared_ptr<vmxon_intel_x64> &vmxon,
                                const std::shared_ptr<vmcs_intel_x64> &vmcs,
@@ -62,7 +62,7 @@ vcpu_intel_x64::vcpu_intel_x64(int64_t id,
 }
 
 void
-vcpu_intel_x64::start()
+vcpu_intel_x64::run()
 {
     auto cor1 = commit_or_rollback([&]
     { m_vmxon->stop(); });
@@ -75,15 +75,19 @@ vcpu_intel_x64::start()
     m_vmcs->launch(m_vmm_state, m_host_vm_state);
 
     cor1.commit();
+
+    vcpu::run();
 }
 
 void
-vcpu_intel_x64::stop()
+vcpu_intel_x64::hlt()
 {
     m_vmxon->stop();
 
     m_vmm_state.reset();
     m_host_vm_state.reset();
+
+    vcpu::hlt();
 }
 
 void

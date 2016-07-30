@@ -23,6 +23,8 @@
 #define DEBUG_RING_H
 
 #include <string>
+#include <memory>
+
 #include <stdint.h>
 #include <debug_ring_interface.h>
 
@@ -39,7 +41,7 @@ public:
 
     /// Default Constructor
     ///
-    debug_ring(int64_t vcpuid);
+    debug_ring(uint64_t vcpuid);
 
     /// Debug Ring Destructor
     ///
@@ -62,7 +64,7 @@ public:
 
 private:
 
-    struct debug_ring_resources_t *m_drr;
+    std::shared_ptr<debug_ring_resources_t> m_drr;
 };
 
 /// Get Debug Ring Resource
@@ -73,6 +75,6 @@ private:
 /// @param drr the resulting debug ring
 /// @return the debug_ring_resources_t for the provided vcpuid
 ///
-extern "C" int64_t get_drr(int64_t vcpuid, struct debug_ring_resources_t **drr);
+extern "C" int64_t get_drr(uint64_t vcpuid, struct debug_ring_resources_t **drr);
 
 #endif

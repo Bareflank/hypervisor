@@ -30,7 +30,6 @@ A summarized explanation of how the VMM is loaded / started is as follows:
 - Add the initialized ELF file to a bfelf_loader_t.
 - Once all ELF files have been added to a loader, relocate. This step processes each symbol in the ELF file's Global Offset Table (GOT) and makes sure that each symbol is relocated in memory, and has a valid address
 - Execute the local_init from the C runtime (see /bfcrt code provided by Bareflank)
-- Execute init_vmm()
 - Execute start_vmm()
 
 When the VMM needs to be stopped / unloaded this process is simply reversed.

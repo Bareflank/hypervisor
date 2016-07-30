@@ -24,21 +24,12 @@
 #include <debug_ring/debug_ring.h>
 
 void
-vcpu_ut::test_vcpu_negative_id()
-{
-    auto dr = std::make_shared<debug_ring>(0);
-
-    EXPECT_EXCEPTION(std::make_shared<vcpu>(-1), std::out_of_range);
-    EXPECT_EXCEPTION(std::make_shared<vcpu>(-1, dr), std::out_of_range);
-}
-
-void
 vcpu_ut::test_vcpu_id_too_large()
 {
     auto dr = std::make_shared<debug_ring>(0);
 
-    EXPECT_EXCEPTION(std::make_shared<vcpu>(10000), std::out_of_range);
-    EXPECT_EXCEPTION(std::make_shared<vcpu>(10000, dr), std::out_of_range);
+    EXPECT_EXCEPTION(std::make_shared<vcpu>(RESERVED_VCPUIDS + 1), std::invalid_argument);
+    EXPECT_EXCEPTION(std::make_shared<vcpu>(RESERVED_VCPUIDS + 1, dr), std::invalid_argument);
 }
 
 void

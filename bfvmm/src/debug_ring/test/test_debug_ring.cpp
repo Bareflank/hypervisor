@@ -21,7 +21,6 @@
 
 #include <test.h>
 #include <debug_ring/debug_ring.h>
-#include <debug_ring/debug_ring_exceptions.h>
 
 debug_ring_resources_t *drr;
 
@@ -35,16 +34,6 @@ init_wb(uint64_t num, char val = 'A')
         wb[i] = val;
 
     wb[num] = 0;
-}
-
-void
-debug_ring_ut::test_write_with_invalid_dr()
-{
-    debug_ring dr(10000);
-
-    auto wb = "01234";
-
-    EXPECT_EXCEPTION(dr.write(wb), bfn::invalid_debug_ring_error);
 }
 
 void
@@ -90,7 +79,7 @@ debug_ring_ut::test_write_string_to_dr_that_is_larger_than_dr()
 
     init_wb(DEBUG_RING_SIZE);
 
-    EXPECT_EXCEPTION(dr.write(wb), std::invalid_argument);
+    EXPECT_NO_EXCEPTION(dr.write(wb));
 }
 
 void
@@ -101,7 +90,7 @@ debug_ring_ut::test_write_string_to_dr_that_is_much_larger_than_dr()
 
     init_wb(DEBUG_RING_SIZE + 50);
 
-    EXPECT_EXCEPTION(dr.write(wb), std::invalid_argument);
+    EXPECT_NO_EXCEPTION(dr.write(wb));
 }
 
 void

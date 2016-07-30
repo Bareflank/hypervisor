@@ -25,19 +25,6 @@
 #include <stdint.h>
 #include <error_codes.h>
 
-/// Init VMM
-///
-/// This function initializes the VMM. The driver entry uses the ELF loader
-/// to call this "C" function from the kernel. Prior to executing this
-/// function, a new stack is provided, and all exceptions are caught prior to
-/// completing. To initialize the VMM, this function calls the vcpu_manager's
-/// init function, which begins the processing of initialization.
-///
-/// @param arg unused (likely will contain the cpu's core # in the future)
-/// @return ENTRY_SUCCESS on success, ENTRY_ERROR_UNKNOWN otherwise.
-///
-extern "C" int64_t init_vmm(int64_t arg);
-
 /// Start VMM
 ///
 /// This function starts the VMM. The driver entry uses the ELF loader
@@ -49,7 +36,7 @@ extern "C" int64_t init_vmm(int64_t arg);
 /// @param arg unused (likely will contain the cpu's core # in the future)
 /// @return ENTRY_SUCCESS on success, ENTRY_ERROR_UNKNOWN otherwise.
 ///
-extern "C" int64_t start_vmm(int64_t arg);
+extern "C" int64_t start_vmm(uint64_t arg);
 
 /// Stop VMM
 ///
@@ -62,6 +49,6 @@ extern "C" int64_t start_vmm(int64_t arg);
 /// @param arg unused (likely will contain the cpu's core # in the future)
 /// @return ENTRY_SUCCESS on success, ENTRY_ERROR_UNKNOWN otherwise.
 ///
-extern "C" int64_t stop_vmm(int64_t arg);
+extern "C" int64_t stop_vmm(uint64_t arg);
 
 #endif

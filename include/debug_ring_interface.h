@@ -44,7 +44,7 @@ extern "C" {
  * This is used by the driver entry to as the function signature for
  * getting it's internal debug ring
  */
-typedef struct debug_ring_resources_t *(*get_drr_t)(int64_t vcpuid);
+typedef struct debug_ring_resources_t *(*get_drr_t)(uint64_t vcpuid);
 
 /**
  * @struct debug_ring_resources_t
@@ -97,7 +97,9 @@ struct debug_ring_resources_t
     uint64_t epos;
     uint64_t spos;
 
+    uint64_t tag1;
     char buf[DEBUG_RING_SIZE];
+    uint64_t tag2;
 };
 
 /**

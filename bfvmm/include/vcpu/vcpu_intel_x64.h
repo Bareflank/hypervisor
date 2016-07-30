@@ -61,7 +61,7 @@ public:
     ///
     /// @param id the id of the vcpu
     ///
-    vcpu_intel_x64(int64_t id);
+    vcpu_intel_x64(uint64_t id);
 
     /// Override Constructor
     ///
@@ -83,7 +83,7 @@ public:
     /// @param intrinsics the intrinsics the vcpu should use. If you
     ///     provide nullptr, a default intrinsics will be created.
     ///
-    vcpu_intel_x64(int64_t id,
+    vcpu_intel_x64(uint64_t id,
                    const std::shared_ptr<debug_ring> &debug_ring,
                    const std::shared_ptr<vmxon_intel_x64> &vmxon,
                    const std::shared_ptr<vmcs_intel_x64> &vmcs,
@@ -94,17 +94,17 @@ public:
     ///
     virtual ~vcpu_intel_x64() {}
 
-    /// Start
+    /// Run
     ///
-    /// Starts the vCPU.
+    /// Executes the vCPU.
     ///
-    virtual void start() override;
+    virtual void run() override;
 
-    /// Stop
+    /// Halt
     ///
-    /// Stops the vCPU.
+    /// Halts the vCPU.
     ///
-    virtual void stop() override;
+    virtual void hlt() override;
 
 private:
 

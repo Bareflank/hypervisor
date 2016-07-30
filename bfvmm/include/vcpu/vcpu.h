@@ -26,21 +26,29 @@
 #include <memory>
 #include <debug_ring/debug_ring.h>
 
+#define RESERVED_VCPUIDS 0xC000000000000000
+
 /// Virtual CPU
 ///
-/// The Virtual CPU represents a "CPU" to the hypervisor. Each core in a
-/// multi-core system has a vCPU associated with it. Each guest VM must also
-/// have a vCPU for each physical CPU on the system, which means that the
-/// total number of vCPUs being managed by the vcpu_manager is
+/// The vCPU represents a "core" for a virtual machine. There are different
+/// types of virtual machines (the host VM and guest VM being good examples)
+/// but in either case, a set of vCPUs must be provided.
 ///
-/// @code
-/// #cores + (#cores * #guests)
-/// @endcode
+/// For the host VM (also called the hardware domain), 1 vCPU must exist
+/// for each physical core. These vCPUs are special. Their IDs are their
+/// physical core #s as assigned by the host OS. This is because the "guest"
+/// port of the ID is 0. The resources these vCPUs are given should match
+/// the resources the host OS is using.
+///
+/// For a guest VM, there can be any number of vCPUs. The first half of the
+/// ID is the guest ID, and the second half of the ID is a unique identifier.
+/// Since a vCPU can be scheduled on any core, the ID does not correlate with
+/// a physical core.
 ///
 /// This generic vCPU class not only provides the base class that architecture
 /// specific vCPUs will be created from, but it also provides some of the base
 /// functionality that is common between all vCPUs. For example, all vCPUs
-/// have an "id" and a debug_ring.
+/// have an ID and a debug_ring.
 ///
 /// Note that these should not be created directly, but instead should be
 /// created by the vcpu_manager, which uses the vcpu_factory to actually
@@ -57,7 +65,7 @@ public:
     /// @param id the id of the vcpu
     /// @throws invalid_argument_error if the id is invalid
     ///
-    vcpu(int64_t id);
+    vcpu(uint64_t id);
 
     /// Override Constructor
     ///
@@ -72,11 +80,11 @@ public:
     ///     a default debug ring will be created.
     /// @throws invalid_argument_error if the id is invalid
     ///
-    vcpu(int64_t id, const std::shared_ptr<debug_ring> &dr);
+    vcpu(uint64_t id, const std::shared_ptr<debug_ring> &dr);
 
     /// Destructor
     ///
-    virtual ~vcpu() {}
+    virtual ~vcpu();
 
     /// vCPU Id
     ///
@@ -85,22 +93,22 @@ public:
     ///
     /// @return the VPU's id
     ///
-    virtual int64_t id() const
+    virtual uint64_t id() const
     { return m_id; }
 
-    /// Start
+    /// Run
     ///
-    /// Starts the vCPU.
+    /// Executes the vCPU.
     ///
-    virtual void start()
-    { }
+    virtual void run()
+    { m_is_running = true; }
 
-    /// Stop
+    /// Halt
     ///
-    /// Stops the vCPU.
+    /// Halts the vCPU.
     ///
-    virtual void stop()
-    { }
+    virtual void hlt()
+    { m_is_running = false; }
 
     /// Write to Log
     ///
@@ -115,8 +123,10 @@ public:
 
 private:
 
-    int64_t m_id;
+    uint64_t m_id;
     std::shared_ptr<debug_ring> m_debug_ring;
+
+    bool m_is_running;
 };
 
 #endif

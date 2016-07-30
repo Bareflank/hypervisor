@@ -22,7 +22,7 @@
 #ifndef VCPU_MANAGER_H
 #define VCPU_MANAGER_H
 
-#include <vector>
+#include <map>
 #include <memory>
 #include <vcpu/vcpu_factory.h>
 
@@ -47,34 +47,40 @@ public:
     ///
     static vcpu_manager *instance();
 
-    /// Init vCPU
+    /// Create vCPU
     ///
-    /// Initializes the vCPU.
+    /// Creates the vCPU.
     ///
     /// @param vcpuid the vcpu to initialize
-    /// @throws invalid_argument_error thrown when the vcpuid is invalid
     ///
-    virtual void init(int64_t vcpuid);
+    virtual void create_vcpu(uint64_t vcpuid);
 
-    /// Start vCPU
+    /// Delete vCPU
     ///
-    /// Starts the vCPU.
-    ///
-    /// @param vcpuid the vcpu to start
-    /// @throws invalid_argument_error thrown when the vcpuid is invalid, or
-    ///     if the vcpuid has yet to be initialized
-    ///
-    virtual void start(int64_t vcpuid);
-
-    /// Stop vCPU
-    ///
-    /// Stops the vCPU.
+    /// Deletes the vCPU.
     ///
     /// @param vcpuid the vcpu to stop
-    /// @throws invalid_argument_error thrown when the vcpuid is invalid, or
-    ///     if the vcpuid has yet to be initialized
+    /// @throws invalid_argument_error thrown when the vcpuid is invalid
     ///
-    virtual void stop(int64_t vcpuid);
+    virtual void delete_vcpu(uint64_t vcpuid);
+
+    /// Run vCPU
+    ///
+    /// Executes the vCPU.
+    ///
+    /// @param vcpuid the vcpu to execute
+    /// @throws invalid_argument_error thrown when the vcpuid is invalid
+    ///
+    virtual void run_vcpu(uint64_t vcpuid);
+
+    /// Halt vCPU
+    ///
+    /// Halts the vCPU.
+    ///
+    /// @param vcpuid the vcpu to halt
+    /// @throws invalid_argument_error thrown when the vcpuid is invalid
+    ///
+    virtual void hlt_vcpu(uint64_t vcpuid);
 
     /// Write to Log
     ///
@@ -85,7 +91,7 @@ public:
     /// @param vcpuid the vcpu's log to write to
     /// @param str the string to write to the log
     ///
-    virtual void write(int64_t vcpuid, const std::string &str);
+    virtual void write(uint64_t vcpuid, const std::string &str);
 
 public:
 
@@ -103,9 +109,12 @@ private:
     ///
     vcpu_manager();
 
+    /// Get vCPU
+    std::shared_ptr<vcpu> get_vcpu(uint64_t vcpuid) const;
+
 private:
 
-    std::vector<std::shared_ptr<vcpu> > m_vcpus;
+    std::map<uint64_t, std::shared_ptr<vcpu> > m_vcpus;
 
 private:
 
