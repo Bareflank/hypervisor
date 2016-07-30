@@ -58,7 +58,7 @@ debug_ring::debug_ring(uint64_t vcpuid)
 }
 
 void
-debug_ring::write(const std::string &str)
+debug_ring::write(const std::string &str) noexcept
 {
     // TODO: A more interesting implementation would use an optimized
     //       memcpy to implement this code. Doing so would increase it's

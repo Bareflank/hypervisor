@@ -91,7 +91,7 @@ public:
     /// @param vcpuid the vcpu's log to write to
     /// @param str the string to write to the log
     ///
-    virtual void write(uint64_t vcpuid, const std::string &str);
+    virtual void write(uint64_t vcpuid, const std::string &str) noexcept;
 
 public:
 

@@ -118,8 +118,7 @@ public:
     ///
     /// @param str the string to write to the log
     ///
-    virtual void write(const std::string &str)
-    { m_debug_ring->write(str); }
+    virtual void write(const std::string &str) noexcept;
 
 private:
 
