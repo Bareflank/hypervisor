@@ -194,7 +194,6 @@ functionality, we have provided a couple of examples:
 
 [Enable VPID](https://github.com/Bareflank/hypervisor_example_vpid) <br>
 [CPUID Count](https://github.com/Bareflank/hypervisor_example_cpuidcount) <br>
-[MSR Bitmaps](https://github.com/Bareflank/hypervisor_example_msr_bitmap)
 
 ## Roadmap
 
