@@ -182,7 +182,7 @@ their own hypervisors. The purpose of the
 [Extended APIs](https://github.com/Bareflank/extended_apis) repository, 
 is to provide an extended set of APIs to build your hypervisors from 
 that simplify common tasks when working with hypervisors.
-For more information about this project, plase see:
+For more information about this project, please see:
 
 ```
 https://github.com/Bareflank/extended_apis
