@@ -9,6 +9,3 @@
   have a hack in the unwinder to deal with this issue, but this hack should be
   removed in the future. Please see:
   https://gcc.gnu.org/bugzilla/show_bug.cgi?id=71978
-- Although sleep appears to work with Windows while Bareflank is running,
-  any attempt to stop Bareflank after the PC has been woken up results in
-  a BSOD.
