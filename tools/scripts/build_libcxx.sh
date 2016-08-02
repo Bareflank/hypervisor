@@ -45,6 +45,12 @@ export CXXFLAGS="-fno-use-cxa-atexit -fno-threadsafe-statics $CFLAGS"
 
 export BAREFLANK_WRAPPER_IS_LIBCXX="true"
 
+if [[ $PRODUCTION == "yes" ]]; then
+    BUILD_TYPE=Release
+else
+    BUILD_TYPE=Debug
+fi
+
 cmake $BUILD_ABS/source_libcxx/ \
     -DCMAKE_SYSTEM_NAME=Linux \
     -DLLVM_PATH=$BUILD_ABS/source_llvm \
@@ -53,7 +59,8 @@ cmake $BUILD_ABS/source_libcxx/ \
     -DCMAKE_INSTALL_PREFIX=$BUILD_ABS/sysroot/x86_64-elf/ \
     -DLIBCXX_SYSROOT=$BUILD_ABS/sysroot/x86_64-elf/ \
     -DCMAKE_C_COMPILER=$BUILD_ABS/build_scripts/x86_64-bareflank-gcc \
-    -DCMAKE_CXX_COMPILER=$BUILD_ABS/build_scripts/x86_64-bareflank-g++
+    -DCMAKE_CXX_COMPILER=$BUILD_ABS/build_scripts/x86_64-bareflank-g++ \
+    -DCMAKE_BUILD_TYPE=$BUILD_TYPE
 
 make -j2
 make -j2 install

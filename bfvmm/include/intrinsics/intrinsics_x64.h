@@ -51,6 +51,7 @@ void __cpuid(uint64_t *rax,
              uint64_t *rdx);
 
 uint64_t __read_rflags(void);
+void __write_rflags(uint64_t val);
 
 uint64_t __read_msr(uint32_t msr);
 void __write_msr(uint32_t msr, uint64_t val);
@@ -65,9 +66,6 @@ void __write_cr3(uint64_t val);
 
 uint64_t __read_cr4(void);
 void __write_cr4(uint64_t val);
-
-uint64_t __read_xcr0(void);
-void __write_xcr0(uint64_t val);
 
 uint64_t __read_dr7(void);
 void __write_dr7(uint64_t val);
@@ -165,6 +163,9 @@ public:
     virtual uint64_t read_rflags() const noexcept
     { return __read_rflags(); }
 
+    virtual void write_rflags(uint64_t val) const noexcept
+    { __write_rflags(val); }
+
     virtual uint64_t read_msr(uint32_t msr) const noexcept
     { return __read_msr(msr); }
 
@@ -191,12 +192,6 @@ public:
 
     virtual void write_cr4(uint64_t val) const noexcept
     { __write_cr4(val); }
-
-    virtual uint64_t read_xcr0() const noexcept
-    { return __read_xcr0(); }
-
-    virtual void write_xcr0(uint64_t val) const noexcept
-    { __write_xcr0(val); }
 
     virtual uint64_t read_dr7() const noexcept
     { return __read_dr7(); }

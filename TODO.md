@@ -19,17 +19,9 @@ Misc:
   flags for BFM and windows for export all.
 
 Version 1.1 TODO:
-- Add Windows support
 - Trigger a rebuild if bfcrt changes
-- The vcpuid needs to be figured out. Since we need to be able to move VMCS
-  structures from core to core to handle rescheduling a task on a different
-  CPU, there is probably no need to make this complicated. Just need to make
-  sure that the vcpuid is a uint64 everywhere.
 - The IOCTLs for Windows are too permissive
 - The IOCTLs for Windows do not share the same #'s as Linux
-- Manually save XMM / YMM registers instead of using XSAVE
-- Do a grep for _tr and make sure all of the LDTR code has been added as 
-  it appears that some is missing
 
 Version 1.2 TODO:
 - Clean up the VMCS checks so that they can be unit tested better, and then

@@ -104,63 +104,6 @@ vmcs_intel_x64::launch(const std::shared_ptr<vmcs_intel_x64_state> &host_state,
 void
 vmcs_intel_x64::promote()
 {
-    auto cor1 = commit_or_rollback([&]
-    {
-        bffatal << "promote failed. unable to rollback state" << bfendl;
-        abort();
-    });
-
-    auto ia32_debugctl_msr = vmread(VMCS_GUEST_IA32_DEBUGCTL_FULL);
-    auto ia32_pat_msr = vmread(VMCS_GUEST_IA32_PAT_FULL);
-    auto ia32_efer_msr = vmread(VMCS_GUEST_IA32_EFER_FULL);
-    auto ia32_perf_global_ctrl_msr = vmread(VMCS_GUEST_IA32_PERF_GLOBAL_CTRL_FULL);
-    auto ia32_sysenter_cs_msr = vmread(VMCS_GUEST_IA32_SYSENTER_CS);
-    auto ia32_sysenter_esp_msr = vmread(VMCS_GUEST_IA32_SYSENTER_ESP);
-    auto ia32_sysenter_eip_msr = vmread(VMCS_GUEST_IA32_SYSENTER_EIP);
-    auto ia32_fs_base_msr = vmread(VMCS_GUEST_FS_BASE);
-    auto ia32_gs_base_msr = vmread(VMCS_GUEST_GS_BASE);
-
-    auto gdt_reg = gdt_reg_x64_t();
-    gdt_reg.base = vmread(VMCS_GUEST_GDTR_BASE);
-    gdt_reg.limit = vmread(VMCS_GUEST_GDTR_LIMIT);
-
-    auto idt_reg = idt_reg_x64_t();
-    idt_reg.base = vmread(VMCS_GUEST_IDTR_BASE);
-    idt_reg.limit = vmread(VMCS_GUEST_IDTR_LIMIT);
-
-    m_intrinsics->write_cr0(vmread(VMCS_GUEST_CR0));
-    m_intrinsics->write_cr3(vmread(VMCS_GUEST_CR3));
-    m_intrinsics->write_cr4(vmread(VMCS_GUEST_CR4));
-    m_intrinsics->write_dr7(vmread(VMCS_GUEST_DR7));
-
-    m_intrinsics->write_gdt(&gdt_reg);
-    m_intrinsics->write_idt(&idt_reg);
-
-    auto gdt = gdt_x64(std::static_pointer_cast<intrinsics_x64>(m_intrinsics));
-    auto tr_index = vmread(VMCS_GUEST_TR_SELECTOR) >> 3;
-    auto tr_access_rights = vmread(VMCS_GUEST_TR_ACCESS_RIGHTS);
-
-    gdt.set_access_rights(tr_index,
-                          tr_access_rights & ~SEGMENT_ACCESS_RIGHTS_TYPE_TSS_BUSY);
-
-    m_intrinsics->write_es(vmread(VMCS_GUEST_ES_SELECTOR));
-    m_intrinsics->write_cs(vmread(VMCS_GUEST_CS_SELECTOR));
-    m_intrinsics->write_ss(vmread(VMCS_GUEST_SS_SELECTOR));
-    m_intrinsics->write_ds(vmread(VMCS_GUEST_DS_SELECTOR));
-    m_intrinsics->write_fs(vmread(VMCS_GUEST_FS_SELECTOR));
-    m_intrinsics->write_gs(vmread(VMCS_GUEST_GS_SELECTOR));
-    m_intrinsics->write_tr(vmread(VMCS_GUEST_TR_SELECTOR));
-
-    m_intrinsics->write_msr(IA32_DEBUGCTL_MSR, ia32_debugctl_msr);
-    m_intrinsics->write_msr(IA32_PAT_MSR, ia32_pat_msr);
-    m_intrinsics->write_msr(IA32_EFER_MSR, ia32_efer_msr);
-    m_intrinsics->write_msr(IA32_PERF_GLOBAL_CTRL_MSR, ia32_perf_global_ctrl_msr);
-    m_intrinsics->write_msr(IA32_SYSENTER_CS_MSR, ia32_sysenter_cs_msr);
-    m_intrinsics->write_msr(IA32_SYSENTER_ESP_MSR, ia32_sysenter_esp_msr);
-    m_intrinsics->write_msr(IA32_SYSENTER_EIP_MSR, ia32_sysenter_eip_msr);
-    m_intrinsics->write_msr(IA32_FS_BASE_MSR, ia32_fs_base_msr);
-    m_intrinsics->write_msr(IA32_GS_BASE_MSR, ia32_gs_base_msr);
-
     promote_vmcs_to_root(vmread(VMCS_HOST_GS_BASE));
 }
 
@@ -437,7 +380,6 @@ vmcs_intel_x64::write_natural_host_state(const std::shared_ptr<vmcs_intel_x64_st
     uintptr_t exit_handler_stack = (uintptr_t)m_exit_handler_stack.get();
 
     exit_handler_stack += STACK_SIZE;
-    exit_handler_stack -= 0x0000000000000010;
     exit_handler_stack &= 0xFFFFFFFFFFFFFFF0;
 
     vmwrite(VMCS_HOST_CR0, state->cr0());

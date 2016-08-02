@@ -49,6 +49,12 @@ if [[ ! -f "$BUILD_ABS/sysroot/x86_64-elf/include/unwind.h" ]]; then
     ln -s $HYPER_ABS/bfunwind/include/ia64_cxx_abi.h $BUILD_ABS/sysroot/x86_64-elf/include/unwind.h
 fi
 
+if [[ $PRODUCTION == "yes" ]]; then
+    BUILD_TYPE=Release
+else
+    BUILD_TYPE=Debug
+fi
+
 cmake $BUILD_ABS/source_libcxxabi/ \
     -DCMAKE_SYSTEM_NAME=Linux \
     -DLLVM_PATH=$BUILD_ABS/source_llvm \
@@ -57,7 +63,8 @@ cmake $BUILD_ABS/source_libcxxabi/ \
     -DLIBCXXABI_SYSROOT=$BUILD_ABS/sysroot/x86_64-elf/ \
     -DCMAKE_C_COMPILER=$BUILD_ABS/build_scripts/x86_64-bareflank-gcc \
     -DCMAKE_CXX_COMPILER=$BUILD_ABS/build_scripts/x86_64-bareflank-g++ \
-    -DLIBCXXABI_ENABLE_SHARED=OFF
+    -DLIBCXXABI_ENABLE_SHARED=OFF \
+    -DCMAKE_BUILD_TYPE=$BUILD_TYPE
 
 make -j2
 make -j2 install

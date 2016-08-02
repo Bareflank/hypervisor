@@ -21,6 +21,7 @@
 
 #include <commit_or_rollback.h>
 #include <vcpu/vcpu_intel_x64.h>
+#include <memory_manager/memory_manager.h>
 
 vcpu_intel_x64::vcpu_intel_x64(uint64_t id) :
     vcpu(id)
@@ -93,18 +94,14 @@ vcpu_intel_x64::hlt()
 void
 vcpu_intel_x64::init()
 {
-    m_state_save = std::make_shared<state_save_intel_x64>();
+    auto region = g_mm->malloc_aligned(sizeof(state_save_intel_x64), 4096);
+
+    m_state_save = std::shared_ptr<state_save_intel_x64>((state_save_intel_x64 *)region);
     m_state_save->vcpu_ptr = (uint64_t)this;
     m_state_save->vmxon_ptr = (uint64_t)m_vmxon.get();
     m_state_save->vmcs_ptr = (uint64_t)m_vmcs.get();
     m_state_save->exit_handler_ptr = (uint64_t)m_exit_handler.get();
 
-    m_state_save->xsave_size = m_intrinsics->cpuid_ecx(0x0D);
-    m_state_save->xsave_xcr0_eax = m_intrinsics->cpuid_eax(0x0D);
-    m_state_save->xsave_xcr0_edx = 0;
-
     m_exit_handler->set_vmcs(m_vmcs);
     m_exit_handler->set_state_save(m_state_save);
-
-    m_intrinsics->write_xcr0(m_state_save->xsave_xcr0_eax);
 }
