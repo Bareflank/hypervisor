@@ -44,15 +44,25 @@ vcpu_manager::instance()
 void
 vcpu_manager::create_vcpu(uint64_t vcpuid)
 {
+    auto vcpu = m_vcpu_factory->make_vcpu(vcpuid);
+
     std::lock_guard<std::mutex> guard(g_vcpu_manager_mutex);
-    m_vcpus[vcpuid] = m_vcpu_factory->make_vcpu(vcpuid);
+    m_vcpus[vcpuid] = vcpu;
 }
 
 void
 vcpu_manager::delete_vcpu(uint64_t vcpuid)
 {
     std::lock_guard<std::mutex> guard(g_vcpu_manager_mutex);
-    m_vcpus.erase(vcpuid);
+    auto iter = m_vcpus.find(vcpuid);
+
+    if (iter == m_vcpus.end())
+        throw std::invalid_argument("invalid vcpuid");
+
+    auto hold_vcpu_until_deleted = iter->second;
+
+    m_vcpus.erase(iter);
+    g_vcpu_manager_mutex.unlock();
 }
 
 void
@@ -84,7 +94,7 @@ vcpu_manager::hlt_vcpu(uint64_t vcpuid)
 }
 
 void
-vcpu_manager::write(uint64_t vcpuid, const std::string &str)
+vcpu_manager::write(uint64_t vcpuid, const std::string &str) noexcept
 {
     auto vcpu = get_vcpu(vcpuid);
 

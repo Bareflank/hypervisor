@@ -51,3 +51,10 @@ vcpu::~vcpu()
     if (m_is_running)
         this->hlt();
 }
+
+void
+vcpu::write(const std::string &str) noexcept
+{
+    if (m_debug_ring)
+        m_debug_ring->write(str);
+}
