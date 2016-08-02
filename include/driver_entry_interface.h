@@ -56,18 +56,18 @@ extern "C" {
 #endif
 
 #ifndef BAREFLANK_DEVICETYPE
-#define BAREFLANK_DEVICETYPE 0xf00d
+#define BAREFLANK_DEVICETYPE 0xF00D
 #endif
 
-#define IOCTL_ADD_MODULE_LENGTH_CMD 101
-#define IOCTL_ADD_MODULE_CMD 100
-#define IOCTL_LOAD_VMM_CMD 200
-#define IOCTL_UNLOAD_VMM_CMD 300
-#define IOCTL_START_VMM_CMD 400
-#define IOCTL_STOP_VMM_CMD 500
-#define IOCTL_DUMP_VMM_CMD 600
-#define IOCTL_VMM_STATUS_CMD 700
-#define IOCTL_SET_VCPUID_CMD 800
+#define IOCTL_ADD_MODULE_LENGTH_CMD 0x801
+#define IOCTL_ADD_MODULE_CMD 0x802
+#define IOCTL_LOAD_VMM_CMD 0x803
+#define IOCTL_UNLOAD_VMM_CMD 0x804
+#define IOCTL_START_VMM_CMD 0x805
+#define IOCTL_STOP_VMM_CMD 0x806
+#define IOCTL_DUMP_VMM_CMD 0x807
+#define IOCTL_VMM_STATUS_CMD 0x808
+#define IOCTL_SET_VCPUID_CMD 0x809
 
 #include <debug_ring_interface.h>
 
@@ -190,16 +190,6 @@ DEFINE_GUID(GUID_DEVINTERFACE_bareflank,
             0x1d9c9218, 0x3c88, 0x4b81, 0x8e, 0x81, 0xb4, 0x62, 0x2a, 0x4d, 0xcb, 0x44);
 
 /**
- * Add Module Length (*** DEPRECATED ***)
- *
- * This IOCTL tells the driver entry point what the size of the module to
- * be loaded will be. Note that this cannot be called while the vmm is running.
- *
- * @param arg length of the module to be added in bytes
- */
-#define IOCTL_ADD_MODULE_LENGTH CTL_CODE(BAREFLANK_DEVICETYPE, 0x801, METHOD_BUFFERED, FILE_WRITE_DATA)
-
-/**
  * Add Module
  *
  * This IOCTL instructs the driver entry point to add a module. Note that this
@@ -210,7 +200,7 @@ DEFINE_GUID(GUID_DEVINTERFACE_bareflank,
  * @param arg character buffer containing the module to add
  * @return
  */
-#define IOCTL_ADD_MODULE CTL_CODE(BAREFLANK_DEVICETYPE, 0x901, METHOD_IN_DIRECT, FILE_WRITE_DATA)
+#define IOCTL_ADD_MODULE CTL_CODE(BAREFLANK_DEVICETYPE, IOCTL_ADD_MODULE_CMD, METHOD_IN_DIRECT, FILE_WRITE_DATA)
 
 /**
  * Load VMM
@@ -219,7 +209,7 @@ DEFINE_GUID(GUID_DEVINTERFACE_bareflank,
  * that the VMM must be in an unloaded state, and all of the modules must be
  * added using IOCTL_ADD_MODULE
  */
-#define IOCTL_LOAD_VMM CTL_CODE(BAREFLANK_DEVICETYPE, 0xA01, METHOD_BUFFERED, FILE_WRITE_DATA)
+#define IOCTL_LOAD_VMM CTL_CODE(BAREFLANK_DEVICETYPE, IOCTL_LOAD_VMM_CMD, METHOD_BUFFERED, 0)
 
 /**
  * Unload VMM
@@ -230,7 +220,7 @@ DEFINE_GUID(GUID_DEVINTERFACE_bareflank,
  * IOCTL_ADD_MODULE. If the VMM is to be loaded again, the modules must be
  * added first.
  */
-#define IOCTL_UNLOAD_VMM CTL_CODE(BAREFLANK_DEVICETYPE, 0xB00, METHOD_BUFFERED, FILE_WRITE_DATA)
+#define IOCTL_UNLOAD_VMM CTL_CODE(BAREFLANK_DEVICETYPE, IOCTL_UNLOAD_VMM_CMD, METHOD_BUFFERED, 0)
 
 /**
  * Start VMM
@@ -240,7 +230,7 @@ DEFINE_GUID(GUID_DEVINTERFACE_bareflank,
  * should have already been loaded prior to calling this IOCTL using
  * IOCTL_ADD_MODULE
  */
-#define IOCTL_START_VMM CTL_CODE(BAREFLANK_DEVICETYPE, 0xC00, METHOD_BUFFERED, FILE_WRITE_DATA)
+#define IOCTL_START_VMM CTL_CODE(BAREFLANK_DEVICETYPE, IOCTL_START_VMM_CMD, METHOD_BUFFERED, 0)
 
 /**
  * Stop VMM
@@ -248,7 +238,7 @@ DEFINE_GUID(GUID_DEVINTERFACE_bareflank,
  * This IOCTL tells the driver entry to stop the virtual machine monitor. Note
  * that this cannot be called while the vmm is not running.
  */
-#define IOCTL_STOP_VMM CTL_CODE(BAREFLANK_DEVICETYPE, 0xD00, METHOD_BUFFERED, FILE_WRITE_DATA)
+#define IOCTL_STOP_VMM CTL_CODE(BAREFLANK_DEVICETYPE, IOCTL_STOP_VMM_CMD, METHOD_BUFFERED, 0)
 
 /**
  * Dump VMM
@@ -257,7 +247,7 @@ DEFINE_GUID(GUID_DEVINTERFACE_bareflank,
  * ring withing the VMM. Note that the VMM must be loaded prior to calling
  * this IOCTL using IOCTL_LOAD_VMM
  */
-#define IOCTL_DUMP_VMM CTL_CODE(BAREFLANK_DEVICETYPE, 0xE00, METHOD_OUT_DIRECT, FILE_READ_DATA)
+#define IOCTL_DUMP_VMM CTL_CODE(BAREFLANK_DEVICETYPE, IOCTL_DUMP_VMM_CMD, METHOD_OUT_DIRECT, FILE_READ_DATA)
 
 /**
  * VMM Status
@@ -265,7 +255,7 @@ DEFINE_GUID(GUID_DEVINTERFACE_bareflank,
  * This queries the driver for it's current state. This can be called at any
  * time.
  */
-#define IOCTL_VMM_STATUS CTL_CODE(BAREFLANK_DEVICETYPE, 0xF00, METHOD_BUFFERED, FILE_READ_DATA)
+#define IOCTL_VMM_STATUS CTL_CODE(BAREFLANK_DEVICETYPE, IOCTL_VMM_STATUS_CMD, METHOD_BUFFERED, FILE_READ_DATA)
 
 /**
  * Set VCPUID
@@ -275,7 +265,7 @@ DEFINE_GUID(GUID_DEVINTERFACE_bareflank,
  *
  * @param arg the vcpuid to focus commands on
  */
-#define IOCTL_SET_VCPUID CTL_CODE(BAREFLANK_DEVICETYPE, 0xF80, METHOD_IN_DIRECT, FILE_WRITE_DATA)
+#define IOCTL_SET_VCPUID CTL_CODE(BAREFLANK_DEVICETYPE, IOCTL_SET_VCPUID_CMD, METHOD_IN_DIRECT, FILE_WRITE_DATA)
 
 #endif
 
