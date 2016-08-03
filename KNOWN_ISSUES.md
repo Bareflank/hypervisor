@@ -5,7 +5,3 @@
   disable this check from executing or don't use a kernrel with this enabled.
   This is seen on Fedora as installing the kernel source enables a debug kernel
   by default with this enabled.
-- At the moment, GCC 6.1 appears to be broken with respect to exceptions. We
-  have a hack in the unwinder to deal with this issue, but this hack should be
-  removed in the future. Please see:
-  https://gcc.gnu.org/bugzilla/show_bug.cgi?id=71978

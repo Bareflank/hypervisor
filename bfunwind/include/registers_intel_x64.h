@@ -170,7 +170,7 @@ public:
 
     void dump() const override
     {
-        uint64_t *rsp = (uint64_t *)m_registers.rsp;
+        // uint64_t *rsp = (uint64_t *)m_registers.rsp;
 
         debug("Register State:\n")
         debug("  rax: 0x%08lx\n", m_registers.rax);
@@ -192,25 +192,25 @@ public:
         debug("  rip: 0x%08lx\n", m_registers.rip);
         debug("\n")
 
-        debug("Stack State:\n")
-        debug("  rsp[-8]: %p\n", (void *)rsp[-8]);
-        debug("  rsp[-7]: %p\n", (void *)rsp[-7]);
-        debug("  rsp[-6]: %p\n", (void *)rsp[-6]);
-        debug("  rsp[-5]: %p\n", (void *)rsp[-5]);
-        debug("  rsp[-4]: %p\n", (void *)rsp[-4]);
-        debug("  rsp[-3]: %p\n", (void *)rsp[-3]);
-        debug("  rsp[-2]: %p\n", (void *)rsp[-2]);
-        debug("  rsp[-1]: %p\n", (void *)rsp[-1]);
-        debug("  rsp[0] : %p\n", (void *)rsp[0]);
-        debug("  rsp[1] : %p\n", (void *)rsp[1]);
-        debug("  rsp[2] : %p\n", (void *)rsp[2]);
-        debug("  rsp[3] : %p\n", (void *)rsp[3]);
-        debug("  rsp[4] : %p\n", (void *)rsp[4]);
-        debug("  rsp[5] : %p\n", (void *)rsp[5]);
-        debug("  rsp[6] : %p\n", (void *)rsp[6]);
-        debug("  rsp[7] : %p\n", (void *)rsp[7]);
-        debug("  rsp[8] : %p\n", (void *)rsp[8]);
-        debug("\n")
+        // debug("Stack State:\n")
+        // debug("  rsp[-8]: %p\n", (void *)rsp[-8]);
+        // debug("  rsp[-7]: %p\n", (void *)rsp[-7]);
+        // debug("  rsp[-6]: %p\n", (void *)rsp[-6]);
+        // debug("  rsp[-5]: %p\n", (void *)rsp[-5]);
+        // debug("  rsp[-4]: %p\n", (void *)rsp[-4]);
+        // debug("  rsp[-3]: %p\n", (void *)rsp[-3]);
+        // debug("  rsp[-2]: %p\n", (void *)rsp[-2]);
+        // debug("  rsp[-1]: %p\n", (void *)rsp[-1]);
+        // debug("  rsp[0] : %p\n", (void *)rsp[0]);
+        // debug("  rsp[1] : %p\n", (void *)rsp[1]);
+        // debug("  rsp[2] : %p\n", (void *)rsp[2]);
+        // debug("  rsp[3] : %p\n", (void *)rsp[3]);
+        // debug("  rsp[4] : %p\n", (void *)rsp[4]);
+        // debug("  rsp[5] : %p\n", (void *)rsp[5]);
+        // debug("  rsp[6] : %p\n", (void *)rsp[6]);
+        // debug("  rsp[7] : %p\n", (void *)rsp[7]);
+        // debug("  rsp[8] : %p\n", (void *)rsp[8]);
+        // debug("\n")
     }
 
 private:
