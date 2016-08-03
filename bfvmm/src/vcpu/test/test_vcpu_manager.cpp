@@ -156,7 +156,7 @@ vcpu_ut::test_vcpu_manager_write_uninitialized_vcpuid_with_valid_vcpu()
     MockRepository mocks;
     g_vcpu = bfn::mock_shared<vcpu>(mocks);
 
-    mocks.OnCall(g_vcpu.get(), vcpu::stop);
+    mocks.OnCall(g_vcpu.get(), vcpu::hlt);
     mocks.NeverCall(g_vcpu.get(), vcpu::write);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
