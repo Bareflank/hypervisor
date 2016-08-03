@@ -26,7 +26,7 @@
 #include <memory>
 #include <debug_ring/debug_ring.h>
 
-#define RESERVED_VCPUIDS 0xC000000000000000
+#define RESERVED_VCPUIDS 0x8000000000000000
 
 /// Virtual CPU
 ///

@@ -46,6 +46,7 @@ template<typename T> T static get(char **p)
         continue; \
     }
 
+#define REMEMBER_STACK_SIZE 10
 #define EXPRESSION_STACK_SIZE 100
 
 // -----------------------------------------------------------------------------
@@ -220,7 +221,7 @@ private_parse_expression(char *p,
 
     char *end = p + dwarf4::decode_uleb128(&p);
 
-    while (p < end)
+    while (p <= end)
     {
         uint8_t opcode = *(uint8_t *)(p);
         p++;
@@ -979,7 +980,7 @@ private_parse_expression(char *p,
 
             stack[++i] = reg + offset;
 
-            log("r%d (%s) %p, offset: %ld\n", 6, state->name(6), (void *)reg,
+            log("r%d (%s) %p, offset: %ld\n", 0, state->name(0), (void *)reg,
             offset);
         })
 
@@ -990,7 +991,7 @@ private_parse_expression(char *p,
 
             stack[++i] = reg + offset;
 
-            log("r%d (%s) %p, offset: %ld\n", 6, state->name(6), (void *)reg,
+            log("r%d (%s) %p, offset: %ld\n", 1, state->name(1), (void *)reg,
             offset);
         })
 
@@ -1001,7 +1002,7 @@ private_parse_expression(char *p,
 
             stack[++i] = reg + offset;
 
-            log("r%d (%s) %p, offset: %ld\n", 6, state->name(6), (void *)reg,
+            log("r%d (%s) %p, offset: %ld\n", 2, state->name(2), (void *)reg,
             offset);
         })
 
@@ -1012,7 +1013,7 @@ private_parse_expression(char *p,
 
             stack[++i] = reg + offset;
 
-            log("r%d (%s) %p, offset: %ld\n", 6, state->name(6), (void *)reg,
+            log("r%d (%s) %p, offset: %ld\n", 3, state->name(3), (void *)reg,
             offset);
         })
 
@@ -1023,7 +1024,7 @@ private_parse_expression(char *p,
 
             stack[++i] = reg + offset;
 
-            log("r%d (%s) %p, offset: %ld\n", 6, state->name(6), (void *)reg,
+            log("r%d (%s) %p, offset: %ld\n", 4, state->name(4), (void *)reg,
             offset);
         })
 
@@ -1034,7 +1035,7 @@ private_parse_expression(char *p,
 
             stack[++i] = reg + offset;
 
-            log("r%d (%s) %p, offset: %ld\n", 6, state->name(6), (void *)reg,
+            log("r%d (%s) %p, offset: %ld\n", 5, state->name(5), (void *)reg,
             offset);
         })
 
@@ -1043,18 +1044,7 @@ private_parse_expression(char *p,
             auto reg = state->get(6);
             auto offset = dwarf4::decode_sleb128(&p);
 
-            // REMOVE ME:
-            //
-            // The following is a dirty hack to address a potential bug with
-            // the GCC 6.1 compiler. Once this issue has been resolved, this
-            // code should be removed as it is not to spec, and will likely
-            // break other code.
-            //
-
-            if (initialStackValue == 0xBABEBABEBABEBABE)
-                stack[++i] = reg - offset;
-            else
-                stack[++i] = reg + offset;
+            stack[++i] = reg + offset;
 
             log("r%d (%s) %p, offset: %ld\n", 6, state->name(6), (void *)reg,
             offset);
@@ -1067,7 +1057,7 @@ private_parse_expression(char *p,
 
             stack[++i] = reg + offset;
 
-            log("r%d (%s) %p, offset: %ld\n", 6, state->name(6), (void *)reg,
+            log("r%d (%s) %p, offset: %ld\n", 7, state->name(7), (void *)reg,
             offset);
         })
 
@@ -1078,7 +1068,7 @@ private_parse_expression(char *p,
 
             stack[++i] = reg + offset;
 
-            log("r%d (%s) %p, offset: %ld\n", 6, state->name(6), (void *)reg,
+            log("r%d (%s) %p, offset: %ld\n", 8, state->name(8), (void *)reg,
             offset);
         })
 
@@ -1089,7 +1079,7 @@ private_parse_expression(char *p,
 
             stack[++i] = reg + offset;
 
-            log("r%d (%s) %p, offset: %ld\n", 6, state->name(6), (void *)reg,
+            log("r%d (%s) %p, offset: %ld\n", 9, state->name(9), (void *)reg,
             offset);
         })
 
@@ -1100,7 +1090,7 @@ private_parse_expression(char *p,
 
             stack[++i] = reg + offset;
 
-            log("r%d (%s) %p, offset: %ld\n", 6, state->name(6), (void *)reg,
+            log("r%d (%s) %p, offset: %ld\n", 10, state->name(10), (void *)reg,
             offset);
         })
 
@@ -1111,7 +1101,7 @@ private_parse_expression(char *p,
 
             stack[++i] = reg + offset;
 
-            log("r%d (%s) %p, offset: %ld\n", 6, state->name(6), (void *)reg,
+            log("r%d (%s) %p, offset: %ld\n", 11, state->name(11), (void *)reg,
             offset);
         })
 
@@ -1122,7 +1112,7 @@ private_parse_expression(char *p,
 
             stack[++i] = reg + offset;
 
-            log("r%d (%s) %p, offset: %ld\n", 6, state->name(6), (void *)reg,
+            log("r%d (%s) %p, offset: %ld\n", 12, state->name(12), (void *)reg,
             offset);
         })
 
@@ -1133,7 +1123,7 @@ private_parse_expression(char *p,
 
             stack[++i] = reg + offset;
 
-            log("r%d (%s) %p, offset: %ld\n", 6, state->name(6), (void *)reg,
+            log("r%d (%s) %p, offset: %ld\n", 13, state->name(13), (void *)reg,
             offset);
         })
 
@@ -1144,7 +1134,7 @@ private_parse_expression(char *p,
 
             stack[++i] = reg + offset;
 
-            log("r%d (%s) %p, offset: %ld\n", 6, state->name(6), (void *)reg,
+            log("r%d (%s) %p, offset: %ld\n", 14, state->name(14), (void *)reg,
             offset);
         })
 
@@ -1155,7 +1145,7 @@ private_parse_expression(char *p,
 
             stack[++i] = reg + offset;
 
-            log("r%d (%s) %p, offset: %ld\n", 6, state->name(6), (void *)reg,
+            log("r%d (%s) %p, offset: %ld\n", 15, state->name(15), (void *)reg,
             offset);
         })
 
@@ -1166,7 +1156,7 @@ private_parse_expression(char *p,
 
             stack[++i] = reg + offset;
 
-            log("r%d (%s) %p, offset: %ld\n", 6, state->name(6), (void *)reg,
+            log("r%d (%s) %p, offset: %ld\n", 16, state->name(16), (void *)reg,
             offset);
         })
 
@@ -1177,7 +1167,7 @@ private_parse_expression(char *p,
 
             stack[++i] = reg + offset;
 
-            log("r%d (%s) %p, offset: %ld\n", 6, state->name(6), (void *)reg,
+            log("r%d (%s) %p, offset: %ld\n", 17, state->name(17), (void *)reg,
             offset);
         })
 
@@ -1188,7 +1178,7 @@ private_parse_expression(char *p,
 
             stack[++i] = reg + offset;
 
-            log("r%d (%s) %p, offset: %ld\n", 6, state->name(6), (void *)reg,
+            log("r%d (%s) %p, offset: %ld\n", 18, state->name(18), (void *)reg,
             offset);
         })
 
@@ -1199,7 +1189,7 @@ private_parse_expression(char *p,
 
             stack[++i] = reg + offset;
 
-            log("r%d (%s) %p, offset: %ld\n", 6, state->name(6), (void *)reg,
+            log("r%d (%s) %p, offset: %ld\n", 19, state->name(19), (void *)reg,
             offset);
         })
 
@@ -1210,7 +1200,7 @@ private_parse_expression(char *p,
 
             stack[++i] = reg + offset;
 
-            log("r%d (%s) %p, offset: %ld\n", 6, state->name(6), (void *)reg,
+            log("r%d (%s) %p, offset: %ld\n", 20, state->name(20), (void *)reg,
             offset);
         })
 
@@ -1221,7 +1211,7 @@ private_parse_expression(char *p,
 
             stack[++i] = reg + offset;
 
-            log("r%d (%s) %p, offset: %ld\n", 6, state->name(6), (void *)reg,
+            log("r%d (%s) %p, offset: %ld\n", 21, state->name(21), (void *)reg,
             offset);
         })
 
@@ -1232,7 +1222,7 @@ private_parse_expression(char *p,
 
             stack[++i] = reg + offset;
 
-            log("r%d (%s) %p, offset: %ld\n", 6, state->name(6), (void *)reg,
+            log("r%d (%s) %p, offset: %ld\n", 22, state->name(22), (void *)reg,
             offset);
         })
 
@@ -1243,7 +1233,7 @@ private_parse_expression(char *p,
 
             stack[++i] = reg + offset;
 
-            log("r%d (%s) %p, offset: %ld\n", 6, state->name(6), (void *)reg,
+            log("r%d (%s) %p, offset: %ld\n", 23, state->name(23), (void *)reg,
             offset);
         })
 
@@ -1254,7 +1244,7 @@ private_parse_expression(char *p,
 
             stack[++i] = reg + offset;
 
-            log("r%d (%s) %p, offset: %ld\n", 6, state->name(6), (void *)reg,
+            log("r%d (%s) %p, offset: %ld\n", 24, state->name(24), (void *)reg,
             offset);
         })
 
@@ -1265,7 +1255,7 @@ private_parse_expression(char *p,
 
             stack[++i] = reg + offset;
 
-            log("r%d (%s) %p, offset: %ld\n", 6, state->name(6), (void *)reg,
+            log("r%d (%s) %p, offset: %ld\n", 25, state->name(25), (void *)reg,
             offset);
         })
 
@@ -1276,7 +1266,7 @@ private_parse_expression(char *p,
 
             stack[++i] = reg + offset;
 
-            log("r%d (%s) %p, offset: %ld\n", 6, state->name(6), (void *)reg,
+            log("r%d (%s) %p, offset: %ld\n", 26, state->name(26), (void *)reg,
             offset);
         })
 
@@ -1287,7 +1277,7 @@ private_parse_expression(char *p,
 
             stack[++i] = reg + offset;
 
-            log("r%d (%s) %p, offset: %ld\n", 6, state->name(6), (void *)reg,
+            log("r%d (%s) %p, offset: %ld\n", 27, state->name(27), (void *)reg,
             offset);
         })
 
@@ -1298,7 +1288,7 @@ private_parse_expression(char *p,
 
             stack[++i] = reg + offset;
 
-            log("r%d (%s) %p, offset: %ld\n", 6, state->name(6), (void *)reg,
+            log("r%d (%s) %p, offset: %ld\n", 28, state->name(28), (void *)reg,
             offset);
         })
 
@@ -1309,7 +1299,7 @@ private_parse_expression(char *p,
 
             stack[++i] = reg + offset;
 
-            log("r%d (%s) %p, offset: %ld\n", 6, state->name(6), (void *)reg,
+            log("r%d (%s) %p, offset: %ld\n", 29, state->name(29), (void *)reg,
             offset);
         })
 
@@ -1320,7 +1310,7 @@ private_parse_expression(char *p,
 
             stack[++i] = reg + offset;
 
-            log("r%d (%s) %p, offset: %ld\n", 6, state->name(6), (void *)reg,
+            log("r%d (%s) %p, offset: %ld\n", 30, state->name(30), (void *)reg,
             offset);
         })
 
@@ -1331,7 +1321,7 @@ private_parse_expression(char *p,
 
             stack[++i] = reg + offset;
 
-            log("r%d (%s) %p, offset: %ld\n", 6, state->name(6), (void *)reg,
+            log("r%d (%s) %p, offset: %ld\n", 31, state->name(31), (void *)reg,
             offset);
         })
 
@@ -1472,7 +1462,7 @@ private_decode_cfa(const cfi_table_row &row, register_state *state)
 
         case cfi_cfa::cfa_expression:
             log("cfa_expression\n");
-            value = private_parse_expression((char *)cfa.value(), 0xBABEBABEBABEBABE, state);
+            value = private_parse_expression((char *)cfa.value(), 0, state);
             break;
     }
 
@@ -1532,6 +1522,8 @@ private_decode_reg(const cfi_register &reg, uint64_t cfa, register_state *state)
     return value;
 }
 
+
+
 void
 private_parse_instruction(cfi_table_row *row,
                           const ci_entry &cie,
@@ -1539,7 +1531,10 @@ private_parse_instruction(cfi_table_row *row,
                           uint64_t *l1,
                           uint64_t *l2,
                           uint64_t pc_begin,
-                          register_state *state)
+                          register_state *state,
+                          uint64_t &rememberIndex,
+                          cfi_table_row *rememberStack,
+                          cfi_table_row *initialRow)
 {
     (void) pc_begin;
     (void) state;
@@ -1572,7 +1567,8 @@ private_parse_instruction(cfi_table_row *row,
 
     if_cfa(DW_CFA_restore,
     {
-        ABORT("register restoration currently not supported");
+        row->set_reg(initialRow->reg(operand));
+        log("r%d (%s)\n", operand, state->name(operand));
     })
 
     if_cfa(DW_CFA_nop,
@@ -1634,7 +1630,9 @@ private_parse_instruction(cfi_table_row *row,
 
     if_cfa(DW_CFA_restore_extended,
     {
-        ABORT("register restoration currently not supported");
+        auto reg = dwarf4::decode_uleb128(p);
+        row->set_reg(initialRow->reg(reg));
+        log("r%d (%s)\n", reg, state->name(reg));
     })
 
     if_cfa(DW_CFA_undefined,
@@ -1662,12 +1660,20 @@ private_parse_instruction(cfi_table_row *row,
 
     if_cfa(DW_CFA_remember_state,
     {
-        ABORT("unsupported in .eh_frame. this should not happen");
+        if (rememberIndex >= REMEMBER_STACK_SIZE)
+            ABORT("remember stack is full. unable to continue unwind");
+
+        rememberStack[rememberIndex++] = *row;
+        log("index %ld\n", rememberIndex);
     })
 
     if_cfa(DW_CFA_restore_state,
     {
-        ABORT("unsupported in .eh_frame. this should not happen");
+        if (rememberIndex == 0)
+            ABORT("remember stack is empty. unable to continue unwind");
+
+        *row = rememberStack[--rememberIndex];
+        log("index %ld\n", rememberIndex);
     })
 
     if_cfa(DW_CFA_def_cfa,
@@ -1800,8 +1806,14 @@ private_parse_instructions(cfi_table_row *row,
     char *p = is_cie ? cie.initial_instructions() : fde.instructions();
     char *end = is_cie ? cie.entry_end() : fde.entry_end();
 
+    uint64_t rememberIndex = 0;
+    cfi_table_row rememberStack[REMEMBER_STACK_SIZE] = {};
+
+    auto initialRow = *row;
+
     while (p < end && l1 >= l2)
-        private_parse_instruction(row, cie, &p, &l1, &l2, pc_begin, state);
+        private_parse_instruction(row, cie, &p, &l1, &l2, pc_begin, state,
+                                  rememberIndex, rememberStack, &initialRow);
 }
 
 cfi_table_row

@@ -33,8 +33,13 @@ public:
     vcpu_factory_ut() {}
     virtual ~vcpu_factory_ut() {}
 
-    virtual std::shared_ptr<vcpu> make_vcpu(uint64_t) override
-    { return g_vcpu; }
+    virtual std::shared_ptr<vcpu> make_vcpu(uint64_t id) override
+    {
+        if ((id & RESERVED_VCPUIDS) != 0)
+            throw std::invalid_argument("invalid vcpuid");
+
+        return g_vcpu;
+    }
 };
 
 void
@@ -135,12 +140,14 @@ vcpu_ut::test_vcpu_manager_hlt_twice()
     g_vcpu = bfn::mock_shared<vcpu>(mocks);
 
     mocks.ExpectCall(g_vcpu.get(), vcpu::hlt);
+    mocks.ExpectCall(g_vcpu.get(), vcpu::hlt);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
         ASSERT_NO_EXCEPTION(g_vcm->create_vcpu(0));
         ASSERT_NO_EXCEPTION(g_vcm->hlt_vcpu(0));
-        ASSERT_EXCEPTION(g_vcm->hlt_vcpu(0), std::invalid_argument);
+        ASSERT_NO_EXCEPTION(g_vcm->hlt_vcpu(0));
+        ASSERT_NO_EXCEPTION(g_vcm->delete_vcpu(0));
     });
 }
 
