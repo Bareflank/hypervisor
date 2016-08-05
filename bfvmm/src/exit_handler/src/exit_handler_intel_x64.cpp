@@ -304,44 +304,40 @@ exit_handler_intel_x64::dispatch()
 void
 exit_handler_intel_x64::halt() noexcept
 {
-    try
-    {
-        std::lock_guard<std::mutex> guard(g_unimplemented_handler_mutex);
+    std::lock_guard<std::mutex> guard(g_unimplemented_handler_mutex);
 
-        bferror << bfendl;
-        bferror << bfendl;
-        bferror << "Guest register state: " << bfendl;
-        bferror << "----------------------------------------------------" << bfendl;
-        bferror << "- m_state_save->rax: " << reinterpret_cast<void *>(m_state_save->rax) << bfendl;
-        bferror << "- m_state_save->rbx: " << reinterpret_cast<void *>(m_state_save->rbx) << bfendl;
-        bferror << "- m_state_save->rcx: " << reinterpret_cast<void *>(m_state_save->rcx) << bfendl;
-        bferror << "- m_state_save->rdx: " << reinterpret_cast<void *>(m_state_save->rdx) << bfendl;
-        bferror << "- m_state_save->rbp: " << reinterpret_cast<void *>(m_state_save->rbp) << bfendl;
-        bferror << "- m_state_save->rsi: " << reinterpret_cast<void *>(m_state_save->rsi) << bfendl;
-        bferror << "- m_state_save->rdi: " << reinterpret_cast<void *>(m_state_save->rdi) << bfendl;
-        bferror << "- m_state_save->r08: " << reinterpret_cast<void *>(m_state_save->r08) << bfendl;
-        bferror << "- m_state_save->r09: " << reinterpret_cast<void *>(m_state_save->r09) << bfendl;
-        bferror << "- m_state_save->r10: " << reinterpret_cast<void *>(m_state_save->r10) << bfendl;
-        bferror << "- m_state_save->r11: " << reinterpret_cast<void *>(m_state_save->r11) << bfendl;
-        bferror << "- m_state_save->r12: " << reinterpret_cast<void *>(m_state_save->r12) << bfendl;
-        bferror << "- m_state_save->r13: " << reinterpret_cast<void *>(m_state_save->r13) << bfendl;
-        bferror << "- m_state_save->r14: " << reinterpret_cast<void *>(m_state_save->r14) << bfendl;
-        bferror << "- m_state_save->r15: " << reinterpret_cast<void *>(m_state_save->r15) << bfendl;
-        bferror << "- m_state_save->rip: " << reinterpret_cast<void *>(m_state_save->rip) << bfendl;
-        bferror << "- m_state_save->rsp: " << reinterpret_cast<void *>(m_state_save->rsp) << bfendl;
+    bferror << bfendl;
+    bferror << bfendl;
+    bferror << "Guest register state: " << bfendl;
+    bferror << "----------------------------------------------------" << bfendl;
+    bferror << "- m_state_save->rax: " << reinterpret_cast<void *>(m_state_save->rax) << bfendl;
+    bferror << "- m_state_save->rbx: " << reinterpret_cast<void *>(m_state_save->rbx) << bfendl;
+    bferror << "- m_state_save->rcx: " << reinterpret_cast<void *>(m_state_save->rcx) << bfendl;
+    bferror << "- m_state_save->rdx: " << reinterpret_cast<void *>(m_state_save->rdx) << bfendl;
+    bferror << "- m_state_save->rbp: " << reinterpret_cast<void *>(m_state_save->rbp) << bfendl;
+    bferror << "- m_state_save->rsi: " << reinterpret_cast<void *>(m_state_save->rsi) << bfendl;
+    bferror << "- m_state_save->rdi: " << reinterpret_cast<void *>(m_state_save->rdi) << bfendl;
+    bferror << "- m_state_save->r08: " << reinterpret_cast<void *>(m_state_save->r08) << bfendl;
+    bferror << "- m_state_save->r09: " << reinterpret_cast<void *>(m_state_save->r09) << bfendl;
+    bferror << "- m_state_save->r10: " << reinterpret_cast<void *>(m_state_save->r10) << bfendl;
+    bferror << "- m_state_save->r11: " << reinterpret_cast<void *>(m_state_save->r11) << bfendl;
+    bferror << "- m_state_save->r12: " << reinterpret_cast<void *>(m_state_save->r12) << bfendl;
+    bferror << "- m_state_save->r13: " << reinterpret_cast<void *>(m_state_save->r13) << bfendl;
+    bferror << "- m_state_save->r14: " << reinterpret_cast<void *>(m_state_save->r14) << bfendl;
+    bferror << "- m_state_save->r15: " << reinterpret_cast<void *>(m_state_save->r15) << bfendl;
+    bferror << "- m_state_save->rip: " << reinterpret_cast<void *>(m_state_save->rip) << bfendl;
+    bferror << "- m_state_save->rsp: " << reinterpret_cast<void *>(m_state_save->rsp) << bfendl;
 
-        bferror << bfendl;
-        bferror << bfendl;
-        bferror << "CPU Halted: " << bfendl;
-        bferror << "----------------------------------------------------" << bfendl;
-        bferror << "- vcpuid: " << m_state_save->vcpuid << bfendl;
+    bferror << bfendl;
+    bferror << bfendl;
+    bferror << "CPU Halted: " << bfendl;
+    bferror << "----------------------------------------------------" << bfendl;
+    bferror << "- vcpuid: " << m_state_save->vcpuid << bfendl;
 
-        bferror << bfendl;
-        bferror << bfendl;
+    bferror << bfendl;
+    bferror << bfendl;
 
-        g_unimplemented_handler_mutex.unlock();
-    }
-    catch (...) { }
+    g_unimplemented_handler_mutex.unlock();
 
     m_intrinsics->stop();
 }

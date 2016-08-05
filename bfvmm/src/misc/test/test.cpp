@@ -19,58 +19,35 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <exception.h>
-#include <vcpu/vcpu.h>
+#include <test.h>
 
-vcpu::vcpu(uint64_t id, const std::shared_ptr<debug_ring> &dr) :
-    m_id(id),
-    m_debug_ring(dr),
-    m_is_running(false),
-    m_is_initialized(false)
+misc_ut::misc_ut()
 {
-    if ((id & VCPUID_RESERVED) != 0)
-        throw std::invalid_argument("invalid vcpuid");
-
-    if (!m_debug_ring) m_debug_ring = std::make_shared<debug_ring>(id);
 }
 
-void
-vcpu::init(void *attr)
+bool
+misc_ut::init()
 {
-    (void) attr;
-
-    m_is_initialized = true;
+    return true;
 }
 
-void
-vcpu::fini(void *attr)
+bool
+misc_ut::fini()
 {
-    (void) attr;
-
-    if (m_is_running == true)
-        this->hlt();
-
-    m_is_initialized = false;
+    return true;
 }
 
-void
-vcpu::run(void *attr)
+bool
+misc_ut::list()
 {
-    (void) attr;
+    this->test_error_codes_valid();
+    this->test_error_codes_unknown();
 
-    m_is_running = true;
+    return true;
 }
 
-void
-vcpu::hlt(void *attr)
+int
+main(int argc, char *argv[])
 {
-    (void) attr;
-
-    m_is_running = false;
-}
-
-void
-vcpu::write(const std::string &str) noexcept
-{
-    m_debug_ring->write(str);
+    return RUN_ALL_TESTS(misc_ut);
 }

@@ -119,6 +119,15 @@ ifeq ($(PRODUCTION),yes)
 	CROSS_CCFLAGS+=-O3
 endif
 
+ifeq ($(TRAVISCI),yes)
+	NATIVE_CCFLAGS+=-fprofile-arcs -ftest-coverage
+endif
+
+ifneq ($(IGNORE_WARNINGS),yes)
+	NATIVE_CCFLAGS+=-Werror
+	CROSS_CCFLAGS+=-Werror
+endif
+
 ################################################################################
 # Default CXX Flags
 ################################################################################
@@ -148,6 +157,15 @@ ifeq ($(PRODUCTION),yes)
 	CROSS_CXXFLAGS+=-O3
 endif
 
+ifeq ($(TRAVISCI),yes)
+	NATIVE_CXXFLAGS+=-fprofile-arcs -ftest-coverage
+endif
+
+ifneq ($(IGNORE_WARNINGS),yes)
+	NATIVE_CXXFLAGS+=-Werror
+	CROSS_CXXFLAGS+=-Werror
+endif
+
 ################################################################################
 # Default ASM Flags
 ################################################################################
@@ -163,6 +181,14 @@ CROSS_ASMFLAGS+=-f elf64
 NATIVE_ARFLAGS+=-rcs
 
 CROSS_ARFLAGS+=rcs
+
+################################################################################
+# Default LD Flags
+################################################################################
+
+ifeq ($(TRAVISCI),yes)
+	NATIVE_LDFLAGS+=-lgcov --coverage
+endif
 
 ################################################################################
 # Target Naming

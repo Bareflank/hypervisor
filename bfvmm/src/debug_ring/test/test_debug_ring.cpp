@@ -27,6 +27,17 @@ debug_ring_resources_t *drr;
 char rb[DEBUG_RING_SIZE];
 char wb[DEBUG_RING_SIZE + 100];
 
+bool out_of_memory = false;
+
+void *
+operator new(std::size_t size)
+{
+    if (out_of_memory == true)
+        throw std::bad_alloc();
+    else
+        return malloc(size);
+}
+
 void
 init_wb(uint64_t num, char val = 'A')
 {
@@ -34,6 +45,35 @@ init_wb(uint64_t num, char val = 'A')
         wb[i] = val;
 
     wb[num] = 0;
+}
+
+void
+debug_ring_ut::test_get_drr_invalid_drr()
+{
+    EXPECT_TRUE(get_drr(0, nullptr) == GET_DRR_FAILURE);
+}
+
+void
+debug_ring_ut::test_get_drr_invalid_vcpuid()
+{
+    EXPECT_TRUE(get_drr(0x1000, &drr) == GET_DRR_FAILURE);
+}
+
+void
+debug_ring_ut::test_constructor_out_of_memory()
+{
+    out_of_memory = true;
+    debug_ring dr(0);
+    out_of_memory = false;
+}
+
+void
+debug_ring_ut::test_write_out_of_memory()
+{
+    out_of_memory = true;
+    debug_ring dr(0);
+    out_of_memory = false;
+    EXPECT_NO_EXCEPTION(dr.write("hello"));
 }
 
 void
@@ -140,19 +180,16 @@ debug_ring_ut::test_overcommit_dr_more_than_once()
     debug_ring dr(0);
     get_drr(0, &drr);
 
-    init_wb(100, 'A');
+    init_wb(DEBUG_RING_SIZE - 150, 'A');
     EXPECT_NO_EXCEPTION(dr.write(wb));
 
-    init_wb(100, 'B');
+    init_wb(DEBUG_RING_SIZE - 150, 'B');
     EXPECT_NO_EXCEPTION(dr.write(wb));
 
-    init_wb(100, 'C');
+    init_wb(DEBUG_RING_SIZE - 150, 'C');
     EXPECT_NO_EXCEPTION(dr.write(wb));
 
-    init_wb(DEBUG_RING_SIZE - 150, 'D');
-    EXPECT_NO_EXCEPTION(dr.write(wb));
-
-    EXPECT_TRUE(debug_ring_read(drr, rb, DEBUG_RING_SIZE) == DEBUG_RING_SIZE - 50);
+    EXPECT_TRUE(debug_ring_read(drr, rb, DEBUG_RING_SIZE) == DEBUG_RING_SIZE - 150);
     EXPECT_TRUE(rb[0] == 'C');
 }
 

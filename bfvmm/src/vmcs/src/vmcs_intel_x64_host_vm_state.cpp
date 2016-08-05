@@ -51,6 +51,8 @@ vmcs_intel_x64_host_vm_state::vmcs_intel_x64_host_vm_state(const std::shared_ptr
     m_cr4 = intrinsics->read_cr4();
     m_dr7 = intrinsics->read_dr7();
 
+    m_cr4 |= CR4_VMXE_VMX_ENABLE_BIT;
+
     m_rflags = intrinsics->read_rflags();
 
     m_ia32_debugctl_msr = intrinsics->read_msr(IA32_DEBUGCTL_MSR);

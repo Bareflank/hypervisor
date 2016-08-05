@@ -31,20 +31,17 @@ std::map<uint64_t, std::shared_ptr<debug_ring_resources_t> > g_drrs;
 extern "C" int64_t
 get_drr(uint64_t vcpuid, struct debug_ring_resources_t **drr) noexcept
 {
-    try
-    {
-        auto iter = g_drrs.find(vcpuid);
+    if (drr == nullptr)
+        return GET_DRR_FAILURE;
 
-        if (iter == g_drrs.end())
-            return GET_DRR_FAILURE;
+    auto iter = g_drrs.find(vcpuid);
 
-        *drr = iter->second.get();
+    if (iter == g_drrs.end())
+        return GET_DRR_FAILURE;
 
-        return GET_DRR_SUCCESS;
-    }
-    catch (...) { }
+    *drr = iter->second.get();
 
-    return GET_DRR_FAILURE;
+    return GET_DRR_SUCCESS;
 }
 
 // -----------------------------------------------------------------------------
@@ -64,7 +61,10 @@ debug_ring::debug_ring(uint64_t vcpuid) noexcept
 
         g_drrs[vcpuid] = m_drr;
     }
-    catch (...) { }
+    catch (...)
+    {
+        m_drr = nullptr;
+    }
 }
 
 void
@@ -89,13 +89,11 @@ debug_ring::write(const std::string &str) noexcept
         auto len = str.length() + 1;
 
         auto epos = m_drr->epos & (DEBUG_RING_SIZE - 1);
-        auto spos = m_drr->spos & (DEBUG_RING_SIZE - 1);
+        auto cpos = m_drr->spos & (DEBUG_RING_SIZE - 1);
         auto space = DEBUG_RING_SIZE - (m_drr->epos - m_drr->spos);
 
         if (space < len)
         {
-            auto cpos = spos;
-
             // Make room for the write. Normally, with a circular buffer, you
             // would just move the start position when a read occurs, but in
             // this case, the vmm needs to be able to write as it wishes to the
@@ -116,18 +114,11 @@ debug_ring::write(const std::string &str) noexcept
                 if (cpos >= DEBUG_RING_SIZE)
                     cpos = 0;
 
-                if (spos >= DEBUG_RING_SIZE)
-                    spos = 0;
-
-                spos++;
                 space++;
                 m_drr->spos++;
 
-                if (m_drr->buf[cpos] == '\0' &&
-                    space >= len)
-                {
+                if (m_drr->buf[cpos] == '\0' && space >= len)
                     break;
-                }
 
                 m_drr->buf[cpos++] = '\0';
             }

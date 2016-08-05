@@ -37,68 +37,17 @@ bool bfelf_loader_ut::init()
     std::ifstream dummy_misc_ifs(c_dummy_misc_filename, std::ifstream::ate);
     std::ifstream dummy_code_ifs(c_dummy_code_filename, std::ifstream::ate);
 
-    auto cor1 = commit_or_rollback([&]
-    {
-        dummy_misc_ifs.close();
-        dummy_code_ifs.close();
-    });
-
-    if (dummy_misc_ifs.is_open() == false ||
-        dummy_code_ifs.is_open() == false)
-    {
-        std::cout << "unable to open one or more dummy libraries: " << std::endl;
-        std::cout << "    - dummy_misc: " << dummy_misc_ifs.is_open() << std::endl;
-        std::cout << "    - dummy_code: " << dummy_code_ifs.is_open() << std::endl;
-        return false;
-    }
-
     m_dummy_misc_length = dummy_misc_ifs.tellg();
     m_dummy_code_length = dummy_code_ifs.tellg();
 
-    if (m_dummy_misc_length == 0 ||
-        m_dummy_code_length == 0)
-    {
-        std::cout << "one or more of the dummy libraries is empty: " << std::endl;
-        std::cout << "    - dummy_misc: " << m_dummy_misc_length << std::endl;
-        std::cout << "    - dummy_code: " << m_dummy_code_length << std::endl;
-        return false;
-    }
-
     m_dummy_misc = std::shared_ptr<char>(new char[m_dummy_misc_length]());
     m_dummy_code = std::shared_ptr<char>(new char[m_dummy_code_length]());
-
-    auto cor2 = commit_or_rollback([&]
-    {
-        m_dummy_misc.reset();
-        m_dummy_code.reset();
-    });
-
-    if (!m_dummy_misc ||
-        !m_dummy_code)
-    {
-        std::cout << "unable to allocate space for one or more of the dummy libraries: " << std::endl;
-        std::cout << "    - dummy_misc: " << (void *)m_dummy_misc.get() << std::endl;
-        std::cout << "    - dummy_code: " << (void *)m_dummy_code.get() << std::endl;
-        return false;
-    }
 
     dummy_misc_ifs.seekg(0);
     dummy_code_ifs.seekg(0);
 
     dummy_misc_ifs.read(m_dummy_misc.get(), m_dummy_misc_length);
     dummy_code_ifs.read(m_dummy_code.get(), m_dummy_code_length);
-
-    if (dummy_misc_ifs.fail() == true ||
-        dummy_code_ifs.fail() == true)
-    {
-        std::cout << "unable to load one or more dummy libraries into memory: " << std::endl;
-        std::cout << "    - dummy_misc: " << dummy_misc_ifs.fail() << std::endl;
-        std::cout << "    - dummy_code: " << dummy_code_ifs.fail() << std::endl;
-        return false;
-    }
-
-    cor1.commit();
-    cor2.commit();
 
     return true;
 }
@@ -202,6 +151,8 @@ bool bfelf_loader_ut::list()
     this->test_bfelf_loader_resolve_symbol_length_too_large_no_hash();
     this->test_bfelf_loader_resolve_symbol_success_no_hash();
     this->test_bfelf_loader_resolve_symbol_real_test();
+    this->test_bfelf_file_resolve_symbol_resolve_fail();
+    this->test_bfelf_loader_resolve_symbol_resolve_fail();
 
     this->test_bfelf_loader_relocate_invalid_loader();
     this->test_bfelf_loader_relocate_no_files_added();
@@ -214,6 +165,25 @@ bool bfelf_loader_ut::list()
     this->test_bfelf_loader_get_info_no_relocation();
     this->test_bfelf_loader_get_info_expected_misc_resources();
     this->test_bfelf_loader_get_info_expected_code_resources();
+    this->test_bfelf_loader_get_info_get_section_name_failure_ctors();
+    this->test_bfelf_loader_get_info_check_section_name_failure_ctors();
+    this->test_bfelf_loader_get_info_get_section_name_failure_dtors();
+    this->test_bfelf_loader_get_info_check_section_name_failure_dtors();
+    this->test_bfelf_loader_get_info_get_section_name_failure_eh_frame();
+    this->test_bfelf_loader_get_info_check_section_name_failure_eh_frame();
+
+    this->test_private_bfelf_error();
+    this->test_private_invalid_symbol_index();
+    this->test_private_corrupt_symbol_table();
+    this->test_private_relocate_invalid_index();
+    this->test_private_relocate_invalid_name();
+    this->test_private_relocate_invalid_relocation();
+    this->test_private_get_section_invalid_name();
+    this->test_private_symbol_table_sections_invalid_dynsym();
+    this->test_private_symbol_table_sections_invalid_hash();
+    this->test_private_string_table_sections_invalid();
+    this->test_private_get_relocation_tables_invalid_type();
+    this->test_private_get_relocation_tables_invalid_section();
 
     return true;
 }
@@ -239,33 +209,33 @@ bfelf_loader_ut::load_elf_file(bfelf_file_t *ef)
         bfelf_phdr *phdr = 0;
 
         ret = bfelf_file_get_segment(ef, i, &phdr);
-        if (ret != BFELF_SUCCESS)
-            return nullptr;
-
-        if (total < phdr->p_vaddr + phdr->p_memsz)
-            total = phdr->p_vaddr + phdr->p_memsz;
+        if (ret == BFELF_SUCCESS)
+        {
+            if (total < phdr->p_vaddr + phdr->p_memsz)
+                total = phdr->p_vaddr + phdr->p_memsz;
+        }
     }
 
     auto exec = (char *)alloc_exec(total);
 
-    if (!exec)
-        return 0;
-
-    memset(exec, 0, total);
-
-    for (auto i = 0U; i < num_segments; i++)
+    if (exec)
     {
-        auto ret = 0;
-        bfelf_phdr *phdr = 0;
+        memset(exec, 0, total);
 
-        ret = bfelf_file_get_segment(ef, i, &phdr);
-        if (ret != BFELF_SUCCESS)
-            return nullptr;
+        for (auto i = 0U; i < num_segments; i++)
+        {
+            auto ret = 0;
+            bfelf_phdr *phdr = 0;
 
-        auto exec_p = exec + phdr->p_vaddr;
-        auto file_p = ef->file + phdr->p_offset;
+            ret = bfelf_file_get_segment(ef, i, &phdr);
+            if (ret == BFELF_SUCCESS)
+            {
+                auto exec_p = exec + phdr->p_vaddr;
+                auto file_p = ef->file + phdr->p_offset;
 
-        memcpy(exec_p, file_p, phdr->p_filesz);
+                memcpy(exec_p, file_p, phdr->p_filesz);
+            }
+        }
     }
 
     return std::shared_ptr<char>(exec, [](void *) {});

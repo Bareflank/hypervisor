@@ -162,10 +162,12 @@
  *
  * Defines how the memory pool is aligned. Note that the larger this is made,
  * the larger the potential size of the module could be. Note that at minimum,
- * this needs to be aligned to the MAX_CACHE_LINE_SIZE
+ * this needs to be aligned to the MAX_CACHE_LINE_SIZE. We currently set this
+ * to MAX_PAGE_SIZE for the unit test as it helps with testing different
+ * alignmnet issues that might come up.
  */
 #ifndef ALIGN_MEMORY
-#define ALIGN_MEMORY __attribute__((aligned(MAX_CACHE_LINE_SIZE)))
+#define ALIGN_MEMORY __attribute__((aligned(MAX_PAGE_SIZE)))
 #endif
 
 /// Stack Size

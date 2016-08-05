@@ -40,7 +40,7 @@ void set_gdt(void *gdt)
 }
 
 void
-intrinsics_ut::test_constructor_no_size()
+intrinsics_ut::test_gdt_constructor_no_size()
 {
     MockRepository mocks;
     auto intrinsics = bfn::mock_shared<intrinsics_x64>(mocks);
@@ -54,7 +54,7 @@ intrinsics_ut::test_constructor_no_size()
 }
 
 void
-intrinsics_ut::test_constructor_zero_size()
+intrinsics_ut::test_gdt_constructor_zero_size()
 {
     gdt_x64 gdt(0);
     EXPECT_TRUE(gdt.base() == 0);
@@ -62,7 +62,7 @@ intrinsics_ut::test_constructor_zero_size()
 }
 
 void
-intrinsics_ut::test_constructor_size()
+intrinsics_ut::test_gdt_constructor_size()
 {
     gdt_x64 gdt(4);
     EXPECT_TRUE(gdt.base() != 0);
@@ -70,7 +70,13 @@ intrinsics_ut::test_constructor_size()
 }
 
 void
-intrinsics_ut::test_base()
+intrinsics_ut::test_gdt_constructor_null_intrinsics()
+{
+    EXPECT_EXCEPTION(gdt_x64(std::shared_ptr<intrinsics_x64>()), std::invalid_argument);
+}
+
+void
+intrinsics_ut::test_gdt_base()
 {
     MockRepository mocks;
     auto intrinsics = bfn::mock_shared<intrinsics_x64>(mocks);
@@ -86,7 +92,7 @@ intrinsics_ut::test_base()
 }
 
 void
-intrinsics_ut::test_limit()
+intrinsics_ut::test_gdt_limit()
 {
     MockRepository mocks;
     auto intrinsics = bfn::mock_shared<intrinsics_x64>(mocks);
@@ -102,7 +108,7 @@ intrinsics_ut::test_limit()
 }
 
 void
-intrinsics_ut::test_set_base_zero_index()
+intrinsics_ut::test_gdt_set_base_zero_index()
 {
     MockRepository mocks;
     auto intrinsics = bfn::mock_shared<intrinsics_x64>(mocks);
@@ -118,7 +124,7 @@ intrinsics_ut::test_set_base_zero_index()
 }
 
 void
-intrinsics_ut::test_set_base_invalid_index()
+intrinsics_ut::test_gdt_set_base_invalid_index()
 {
     MockRepository mocks;
     auto intrinsics = bfn::mock_shared<intrinsics_x64>(mocks);
@@ -134,7 +140,7 @@ intrinsics_ut::test_set_base_invalid_index()
 }
 
 void
-intrinsics_ut::test_set_base_tss_at_end_of_gdt()
+intrinsics_ut::test_gdt_set_base_tss_at_end_of_gdt()
 {
     MockRepository mocks;
     auto intrinsics = bfn::mock_shared<intrinsics_x64>(mocks);
@@ -150,7 +156,7 @@ intrinsics_ut::test_set_base_tss_at_end_of_gdt()
 }
 
 void
-intrinsics_ut::test_set_base_descriptor_success()
+intrinsics_ut::test_gdt_set_base_descriptor_success()
 {
     MockRepository mocks;
     auto intrinsics = bfn::mock_shared<intrinsics_x64>(mocks);
@@ -167,7 +173,7 @@ intrinsics_ut::test_set_base_descriptor_success()
 }
 
 void
-intrinsics_ut::test_set_base_tss_success()
+intrinsics_ut::test_gdt_set_base_tss_success()
 {
     MockRepository mocks;
     auto intrinsics = bfn::mock_shared<intrinsics_x64>(mocks);
@@ -185,7 +191,7 @@ intrinsics_ut::test_set_base_tss_success()
 }
 
 void
-intrinsics_ut::test_base_zero_index()
+intrinsics_ut::test_gdt_base_zero_index()
 {
     MockRepository mocks;
     auto intrinsics = bfn::mock_shared<intrinsics_x64>(mocks);
@@ -201,7 +207,7 @@ intrinsics_ut::test_base_zero_index()
 }
 
 void
-intrinsics_ut::test_base_invalid_index()
+intrinsics_ut::test_gdt_base_invalid_index()
 {
     MockRepository mocks;
     auto intrinsics = bfn::mock_shared<intrinsics_x64>(mocks);
@@ -217,7 +223,7 @@ intrinsics_ut::test_base_invalid_index()
 }
 
 void
-intrinsics_ut::test_base_tss_at_end_of_gdt()
+intrinsics_ut::test_gdt_base_tss_at_end_of_gdt()
 {
     MockRepository mocks;
     auto intrinsics = bfn::mock_shared<intrinsics_x64>(mocks);
@@ -233,7 +239,7 @@ intrinsics_ut::test_base_tss_at_end_of_gdt()
 }
 
 void
-intrinsics_ut::test_base_descriptor_success()
+intrinsics_ut::test_gdt_base_descriptor_success()
 {
     MockRepository mocks;
     auto intrinsics = bfn::mock_shared<intrinsics_x64>(mocks);
@@ -250,7 +256,7 @@ intrinsics_ut::test_base_descriptor_success()
 }
 
 void
-intrinsics_ut::test_base_tss_success()
+intrinsics_ut::test_gdt_base_tss_success()
 {
     MockRepository mocks;
     auto intrinsics = bfn::mock_shared<intrinsics_x64>(mocks);
@@ -268,7 +274,7 @@ intrinsics_ut::test_base_tss_success()
 }
 
 void
-intrinsics_ut::test_set_limit_zero_index()
+intrinsics_ut::test_gdt_set_limit_zero_index()
 {
     MockRepository mocks;
     auto intrinsics = bfn::mock_shared<intrinsics_x64>(mocks);
@@ -284,7 +290,7 @@ intrinsics_ut::test_set_limit_zero_index()
 }
 
 void
-intrinsics_ut::test_set_limit_invalid_index()
+intrinsics_ut::test_gdt_set_limit_invalid_index()
 {
     MockRepository mocks;
     auto intrinsics = bfn::mock_shared<intrinsics_x64>(mocks);
@@ -300,7 +306,7 @@ intrinsics_ut::test_set_limit_invalid_index()
 }
 
 void
-intrinsics_ut::test_set_limit_descriptor_success()
+intrinsics_ut::test_gdt_set_limit_descriptor_success()
 {
     MockRepository mocks;
     auto intrinsics = bfn::mock_shared<intrinsics_x64>(mocks);
@@ -317,7 +323,7 @@ intrinsics_ut::test_set_limit_descriptor_success()
 }
 
 void
-intrinsics_ut::test_limit_zero_index()
+intrinsics_ut::test_gdt_limit_zero_index()
 {
     MockRepository mocks;
     auto intrinsics = bfn::mock_shared<intrinsics_x64>(mocks);
@@ -333,7 +339,7 @@ intrinsics_ut::test_limit_zero_index()
 }
 
 void
-intrinsics_ut::test_limit_invalid_index()
+intrinsics_ut::test_gdt_limit_invalid_index()
 {
     MockRepository mocks;
     auto intrinsics = bfn::mock_shared<intrinsics_x64>(mocks);
@@ -349,7 +355,7 @@ intrinsics_ut::test_limit_invalid_index()
 }
 
 void
-intrinsics_ut::test_limit_descriptor_success()
+intrinsics_ut::test_gdt_limit_descriptor_success()
 {
     MockRepository mocks;
     auto intrinsics = bfn::mock_shared<intrinsics_x64>(mocks);
@@ -366,7 +372,24 @@ intrinsics_ut::test_limit_descriptor_success()
 }
 
 void
-intrinsics_ut::test_set_access_rights_zero_index()
+intrinsics_ut::test_gdt_limit_descriptor_in_bytes_success()
+{
+    MockRepository mocks;
+    auto intrinsics = bfn::mock_shared<intrinsics_x64>(mocks);
+
+    mocks.OnCall(intrinsics.get(), intrinsics_x64::read_gdt).Do(set_gdt);
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        gdt_x64 gdt(intrinsics);
+
+        g_gdt[1] = 0xFF74FFFFFFFF5678;
+        EXPECT_TRUE(gdt.limit(1) == 0x0000000000045678);
+    });
+}
+
+void
+intrinsics_ut::test_gdt_set_access_rights_zero_index()
 {
     MockRepository mocks;
     auto intrinsics = bfn::mock_shared<intrinsics_x64>(mocks);
@@ -382,7 +405,7 @@ intrinsics_ut::test_set_access_rights_zero_index()
 }
 
 void
-intrinsics_ut::test_set_access_rights_invalid_index()
+intrinsics_ut::test_gdt_set_access_rights_invalid_index()
 {
     MockRepository mocks;
     auto intrinsics = bfn::mock_shared<intrinsics_x64>(mocks);
@@ -398,7 +421,7 @@ intrinsics_ut::test_set_access_rights_invalid_index()
 }
 
 void
-intrinsics_ut::test_set_access_rights_descriptor_success()
+intrinsics_ut::test_gdt_set_access_rights_descriptor_success()
 {
     MockRepository mocks;
     auto intrinsics = bfn::mock_shared<intrinsics_x64>(mocks);
@@ -415,7 +438,7 @@ intrinsics_ut::test_set_access_rights_descriptor_success()
 }
 
 void
-intrinsics_ut::test_access_rights_zero_index()
+intrinsics_ut::test_gdt_access_rights_zero_index()
 {
     MockRepository mocks;
     auto intrinsics = bfn::mock_shared<intrinsics_x64>(mocks);
@@ -431,7 +454,7 @@ intrinsics_ut::test_access_rights_zero_index()
 }
 
 void
-intrinsics_ut::test_access_rights_invalid_index()
+intrinsics_ut::test_gdt_access_rights_invalid_index()
 {
     MockRepository mocks;
     auto intrinsics = bfn::mock_shared<intrinsics_x64>(mocks);
@@ -447,7 +470,7 @@ intrinsics_ut::test_access_rights_invalid_index()
 }
 
 void
-intrinsics_ut::test_access_rights_descriptor_success()
+intrinsics_ut::test_gdt_access_rights_descriptor_success()
 {
     MockRepository mocks;
     auto intrinsics = bfn::mock_shared<intrinsics_x64>(mocks);

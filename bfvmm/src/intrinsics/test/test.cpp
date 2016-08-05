@@ -40,33 +40,42 @@ intrinsics_ut::fini()
 bool
 intrinsics_ut::list()
 {
-    this->test_constructor_no_size();
-    this->test_constructor_zero_size();
-    this->test_constructor_size();
-    this->test_set_base_zero_index();
-    this->test_set_base_invalid_index();
-    this->test_set_base_tss_at_end_of_gdt();
-    this->test_set_base_descriptor_success();
-    this->test_set_base_tss_success();
-    this->test_base_zero_index();
-    this->test_base_invalid_index();
-    this->test_base_tss_at_end_of_gdt();
-    this->test_base_descriptor_success();
-    this->test_base_tss_success();
-    this->test_set_limit_zero_index();
-    this->test_set_limit_invalid_index();
-    this->test_set_limit_descriptor_success();
-    this->test_limit_zero_index();
-    this->test_limit_invalid_index();
-    this->test_limit_descriptor_success();
-    this->test_set_access_rights_zero_index();
-    this->test_set_access_rights_invalid_index();
-    this->test_set_access_rights_descriptor_success();
-    this->test_access_rights_zero_index();
-    this->test_access_rights_invalid_index();
-    this->test_access_rights_descriptor_success();
-    this->test_base();
-    this->test_limit();
+    this->test_gdt_constructor_no_size();
+    this->test_gdt_constructor_zero_size();
+    this->test_gdt_constructor_size();
+    this->test_gdt_constructor_null_intrinsics();
+    this->test_gdt_base();
+    this->test_gdt_limit();
+    this->test_gdt_set_base_zero_index();
+    this->test_gdt_set_base_invalid_index();
+    this->test_gdt_set_base_tss_at_end_of_gdt();
+    this->test_gdt_set_base_descriptor_success();
+    this->test_gdt_set_base_tss_success();
+    this->test_gdt_base_zero_index();
+    this->test_gdt_base_invalid_index();
+    this->test_gdt_base_tss_at_end_of_gdt();
+    this->test_gdt_base_descriptor_success();
+    this->test_gdt_base_tss_success();
+    this->test_gdt_set_limit_zero_index();
+    this->test_gdt_set_limit_invalid_index();
+    this->test_gdt_set_limit_descriptor_success();
+    this->test_gdt_limit_zero_index();
+    this->test_gdt_limit_invalid_index();
+    this->test_gdt_limit_descriptor_success();
+    this->test_gdt_limit_descriptor_in_bytes_success();
+    this->test_gdt_set_access_rights_zero_index();
+    this->test_gdt_set_access_rights_invalid_index();
+    this->test_gdt_set_access_rights_descriptor_success();
+    this->test_gdt_access_rights_zero_index();
+    this->test_gdt_access_rights_invalid_index();
+    this->test_gdt_access_rights_descriptor_success();
+
+    this->test_idt_constructor_no_size();
+    this->test_idt_constructor_zero_size();
+    this->test_idt_constructor_size();
+    this->test_idt_constructor_null_intrinsics();
+    this->test_idt_base();
+    this->test_idt_limit();
 
     return true;
 }

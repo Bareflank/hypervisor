@@ -21,7 +21,6 @@
 
 #if !defined(NO_HYPER_TEST) && !defined(NO_HYPER_LIBCXX_TEST)
 
-#include <debug.h>
 #include <vcpu/vcpu_manager.h>
 #include <serial/serial_port_intel_x64.h>
 
@@ -174,6 +173,9 @@ add_mdl(memory_descriptor *mdl, int64_t num) noexcept
 
 uintptr_t __stack_chk_guard = 0x595e9fbd94fda766;
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-result"
+
 extern "C" void
 __stack_chk_fail(void) noexcept
 {
@@ -181,6 +183,8 @@ __stack_chk_fail(void) noexcept
     write(1, msg, strlen(msg));
     abort();
 }
+
+#pragma GCC diagnostic pop
 
 #include <eh_frame_list.h>
 

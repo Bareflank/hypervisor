@@ -44,6 +44,18 @@ bfm_ut::test_command_line_parser_with_no_args()
 }
 
 void
+bfm_ut::test_command_line_parser_with_empty_args()
+{
+    auto args = {" "_s};
+
+    g_clp.reset();
+    EXPECT_NO_EXCEPTION(g_clp.parse(args));
+
+    EXPECT_TRUE(g_clp.cmd() == command_line_parser_command::help);
+    EXPECT_TRUE(g_clp.modules() == "");
+}
+
+void
 bfm_ut::test_command_line_parser_with_unknown_command()
 {
     auto args = {"unknown"_s};
@@ -121,6 +133,18 @@ void
 bfm_ut::test_command_line_parser_with_load_no_modules()
 {
     auto args = {"load"_s};
+
+    g_clp.reset();
+    EXPECT_EXCEPTION(g_clp.parse(args), bfn::missing_argument_error);
+
+    EXPECT_TRUE(g_clp.cmd() == command_line_parser_command::help);
+    EXPECT_TRUE(g_clp.modules() == "");
+}
+
+void
+bfm_ut::test_command_line_parser_with_load_no_modules_empty_arg()
+{
+    auto args = {"load"_s, " "_s};
 
     g_clp.reset();
     EXPECT_EXCEPTION(g_clp.parse(args), bfn::missing_argument_error);

@@ -23,6 +23,22 @@
 
 typedef int (*func_t)(int);
 
+// -----------------------------------------------------------------------------
+// Expose Private Functions
+// -----------------------------------------------------------------------------
+
+extern "C"
+{
+    int64_t
+    private_resolve_symbol(struct bfelf_file_t *ef,
+                           struct bfelf_sym *sym,
+                           void **addr);
+}
+
+// -----------------------------------------------------------------------------
+// Tests
+// -----------------------------------------------------------------------------
+
 void
 bfelf_loader_ut::test_bfelf_loader_resolve_symbol_invalid_loader()
 {
@@ -563,4 +579,90 @@ bfelf_loader_ut::test_bfelf_loader_resolve_symbol_real_test()
 
         local_fini(&info);
     }
+}
+
+void
+bfelf_loader_ut::test_bfelf_file_resolve_symbol_resolve_fail()
+{
+    auto ret = 0LL;
+    bfelf_file_t dummy_misc_ef;
+    bfelf_file_t dummy_code_ef;
+
+    ret = bfelf_file_init(m_dummy_misc.get(), m_dummy_misc_length, &dummy_misc_ef);
+    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    ret = bfelf_file_init(m_dummy_code.get(), m_dummy_code_length, &dummy_code_ef);
+    ASSERT_TRUE(ret == BFELF_SUCCESS);
+
+    m_dummy_misc_exec = load_elf_file(&dummy_misc_ef);
+    ASSERT_TRUE(m_dummy_misc_exec.get() != 0);
+    m_dummy_code_exec = load_elf_file(&dummy_code_ef);
+    ASSERT_TRUE(m_dummy_code_exec.get() != 0);
+
+    bfelf_loader_t loader;
+    memset(&loader, 0, sizeof(loader));
+
+    ret = bfelf_loader_add(&loader, &dummy_misc_ef, m_dummy_misc_exec.get());
+    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    ret = bfelf_loader_add(&loader, &dummy_code_ef, m_dummy_code_exec.get());
+    ASSERT_TRUE(ret == BFELF_SUCCESS);
+
+    ret = bfelf_loader_relocate(&loader);
+    EXPECT_TRUE(ret == BFELF_SUCCESS);
+
+    MockRepository mocks;
+    mocks.OnCallFunc(private_resolve_symbol).Return(-1);
+
+    section_info_t info;
+    local_init_t local_init;
+    e_string_t name = {"local_init", 10};
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        ret = bfelf_loader_get_info(&loader, &dummy_misc_ef, &info);
+        ASSERT_TRUE(ret == BFELF_SUCCESS);
+
+        ret = bfelf_file_resolve_symbol(&dummy_misc_ef, &name, (void **)&local_init);
+        ASSERT_TRUE(ret == -1);
+    });
+}
+
+void
+bfelf_loader_ut::test_bfelf_loader_resolve_symbol_resolve_fail()
+{
+    auto ret = 0LL;
+    bfelf_file_t dummy_misc_ef;
+    bfelf_file_t dummy_code_ef;
+
+    ret = bfelf_file_init(m_dummy_misc.get(), m_dummy_misc_length, &dummy_misc_ef);
+    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    ret = bfelf_file_init(m_dummy_code.get(), m_dummy_code_length, &dummy_code_ef);
+    ASSERT_TRUE(ret == BFELF_SUCCESS);
+
+    m_dummy_misc_exec = load_elf_file(&dummy_misc_ef);
+    ASSERT_TRUE(m_dummy_misc_exec.get() != 0);
+    m_dummy_code_exec = load_elf_file(&dummy_code_ef);
+    ASSERT_TRUE(m_dummy_code_exec.get() != 0);
+
+    bfelf_loader_t loader;
+    memset(&loader, 0, sizeof(loader));
+
+    ret = bfelf_loader_add(&loader, &dummy_misc_ef, m_dummy_misc_exec.get());
+    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    ret = bfelf_loader_add(&loader, &dummy_code_ef, m_dummy_code_exec.get());
+    ASSERT_TRUE(ret == BFELF_SUCCESS);
+
+    ret = bfelf_loader_relocate(&loader);
+    EXPECT_TRUE(ret == BFELF_SUCCESS);
+
+    MockRepository mocks;
+    mocks.OnCallFunc(private_resolve_symbol).Return(-1);
+
+    func_t func;
+    e_string_t name = {"foo", 3};
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        ret = bfelf_loader_resolve_symbol(&loader, &name, (void **)&func);
+        ASSERT_TRUE(ret == -1);
+    });
 }

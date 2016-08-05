@@ -37,6 +37,8 @@ extern "C"
     int64_t resolve_symbol(const char *name, void **sym, struct module_t *module);
     int64_t execute_symbol(const char *sym, uint64_t arg1, uint64_t arg2, struct module_t *module);
     int64_t add_md_to_memory_manager(struct module_t *module);
+    uint64_t get_elf_file_size(struct module_t *module);
+    int64_t load_elf_file(struct module_t *module);
 
     typedef int64_t (*get_misc_t)(void);
 }
@@ -104,6 +106,14 @@ driver_entry_ut::test_helper_resolve_symbol_invalid_sym()
 }
 
 void
+driver_entry_ut::test_helper_resolve_symbol_no_loaded_modules()
+{
+    void *sym;
+
+    EXPECT_TRUE(resolve_symbol("invalid_symbol", &sym, 0) == BF_ERROR_NO_MODULES_ADDED);
+}
+
+void
 driver_entry_ut::test_helper_resolve_symbol_missing_symbol()
 {
     void *sym;
@@ -114,6 +124,23 @@ driver_entry_ut::test_helper_resolve_symbol_missing_symbol()
     EXPECT_TRUE(common_add_module(m_dummy_misc, m_dummy_misc_length) == BF_SUCCESS);
     EXPECT_TRUE(common_load_vmm() == BF_SUCCESS);
     EXPECT_TRUE(resolve_symbol("invalid_symbol", &sym, 0) == BFELF_ERROR_NO_SUCH_SYMBOL);
+    EXPECT_TRUE(common_fini() == BF_SUCCESS);
+}
+
+void
+driver_entry_ut::test_helper_resolve_symbol_missing_symbol_from_module()
+{
+    void *sym;
+
+    EXPECT_TRUE(common_add_module(m_dummy_start_vmm_success, m_dummy_start_vmm_success_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_add_module(m_dummy_stop_vmm_success, m_dummy_stop_vmm_success_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_add_module(m_dummy_add_md_success, m_dummy_add_md_success_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_add_module(m_dummy_misc, m_dummy_misc_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_load_vmm() == BF_SUCCESS);
+
+    auto module = get_module(0);
+
+    EXPECT_TRUE(resolve_symbol("invalid_symbol", &sym, module) == BFELF_ERROR_NO_SUCH_SYMBOL);
     EXPECT_TRUE(common_fini() == BF_SUCCESS);
 }
 
@@ -171,5 +198,61 @@ driver_entry_ut::test_helper_constructors_success()
     EXPECT_TRUE(common_load_vmm() == BF_SUCCESS);
     ASSERT_TRUE(resolve_symbol("get_misc", (void **)&get_misc, 0) == BF_SUCCESS);
     EXPECT_TRUE(get_misc() == 10);
+    EXPECT_TRUE(common_fini() == BF_SUCCESS);
+}
+
+void
+driver_entry_ut::test_helper_add_md_to_memory_manager_null_module()
+{
+    EXPECT_TRUE(add_md_to_memory_manager(nullptr) == BF_ERROR_INVALID_ARG);
+}
+
+void
+driver_entry_ut::test_helper_get_elf_file_size_null_module()
+{
+    EXPECT_TRUE(get_elf_file_size(nullptr) == 0);
+}
+
+void
+driver_entry_ut::test_helper_get_elf_file_size_get_segment_fails()
+{
+    EXPECT_TRUE(common_add_module(m_dummy_start_vmm_success, m_dummy_start_vmm_success_length) == BF_SUCCESS);
+
+    {
+        MockRepository mocks;
+        mocks.ExpectCallFunc(bfelf_file_get_segment).Return(-1);
+
+        RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+        {
+            auto module = get_module(0);
+            EXPECT_TRUE(get_elf_file_size(module) == 0);
+        });
+    }
+
+    EXPECT_TRUE(common_fini() == BF_SUCCESS);
+}
+
+void
+driver_entry_ut::test_helper_load_elf_file_null_module()
+{
+    EXPECT_TRUE(load_elf_file(nullptr) == BF_ERROR_INVALID_ARG);
+}
+
+void
+driver_entry_ut::test_helper_load_elf_file_get_segment_fails()
+{
+    EXPECT_TRUE(common_add_module(m_dummy_start_vmm_success, m_dummy_start_vmm_success_length) == BF_SUCCESS);
+
+    {
+        MockRepository mocks;
+        mocks.ExpectCallFunc(bfelf_file_get_segment).Return(-1);
+
+        RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+        {
+            auto module = get_module(0);
+            EXPECT_TRUE(load_elf_file(module) == -1);
+        });
+    }
+
     EXPECT_TRUE(common_fini() == BF_SUCCESS);
 }

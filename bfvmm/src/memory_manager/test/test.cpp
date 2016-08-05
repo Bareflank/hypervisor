@@ -53,20 +53,27 @@ memory_manager_ut::list()
     this->test_memory_manager_malloc_aligned_ignored_alignment();
     this->test_memory_manager_malloc_aligned();
     this->test_memory_manager_malloc_alloc_fragment();
+    this->test_memory_manager_malloc_alloc_multiple_fragments();
+    this->test_memory_manager_add_md_no_exceptions();
     this->test_memory_manager_add_md_invalid_md();
     this->test_memory_manager_add_md_invalid_virt();
     this->test_memory_manager_add_md_invalid_phys();
     this->test_memory_manager_add_md_invalid_type();
     this->test_memory_manager_add_md_unaligned_physical();
     this->test_memory_manager_add_md_unaligned_virtual();
+    this->test_memory_manager_block_to_virt_unknown();
+    this->test_memory_manager_virt_to_block_unknown();
+    this->test_memory_manager_is_block_aligned_unknown();
     this->test_memory_manager_virt_to_phys_unknown();
     this->test_memory_manager_phys_to_virt_unknown();
     this->test_memory_manager_virt_to_phys_random_address();
     this->test_memory_manager_virt_to_phys_upper_limit();
     this->test_memory_manager_virt_to_phys_lower_limit();
+    this->test_memory_manager_virt_to_phys_map();
     this->test_memory_manager_phys_to_virt_random_address();
     this->test_memory_manager_phys_to_virt_upper_limit();
     this->test_memory_manager_phys_to_virt_lower_limit();
+    this->test_memory_manager_phys_to_virt_map();
 
     this->test_page_table_x64_no_entry();
     this->test_page_table_x64_with_entry();
@@ -77,6 +84,7 @@ memory_manager_ut::list()
     this->test_page_table_x64_add_page_twice_failure();
     this->test_page_table_x64_table_phys_addr_success();
     this->test_page_table_x64_table_phys_addr_failure();
+    this->test_page_table_x64_coveralls_cleanup();
 
     this->test_page_table_entry_x64_null_present();
     this->test_page_table_entry_x64_present();

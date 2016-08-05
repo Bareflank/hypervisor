@@ -26,10 +26,28 @@ serial_port_intel_x64::serial_port_intel_x64(const std::shared_ptr<intrinsics_in
     m_port(port),
     m_intrinsics(intrinsics)
 {
-    uint8_t bits = 0;
-
     if (!m_intrinsics)
         m_intrinsics = std::make_shared<intrinsics_intel_x64>();
+}
+
+serial_port_intel_x64 *
+serial_port_intel_x64::instance(const std::shared_ptr<intrinsics_intel_x64> &intrinsics) noexcept
+{
+    static auto serial = std::shared_ptr<serial_port_intel_x64>();
+
+    if (!serial)
+    {
+        serial = std::make_shared<serial_port_intel_x64>(intrinsics);
+        serial->init();
+    }
+
+    return serial.get();
+}
+
+void
+serial_port_intel_x64::init()
+{
+    uint8_t bits = 0;
 
     this->disable_dlab();
 
@@ -44,13 +62,6 @@ serial_port_intel_x64::serial_port_intel_x64(const std::shared_ptr<intrinsics_in
     this->set_data_bits(DEFAULT_DATA_BITS);
     this->set_stop_bits(DEFAULT_STOP_BITS);
     this->set_parity_bits(DEFAULT_PARITY_BITS);
-}
-
-serial_port_intel_x64 *
-serial_port_intel_x64::instance() noexcept
-{
-    static serial_port_intel_x64 serial(nullptr);
-    return &serial;
 }
 
 void

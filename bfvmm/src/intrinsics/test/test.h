@@ -39,33 +39,42 @@ protected:
 
 private:
 
-    void test_constructor_no_size();
-    void test_constructor_zero_size();
-    void test_constructor_size();
-    void test_base();
-    void test_limit();
-    void test_set_base_zero_index();
-    void test_set_base_invalid_index();
-    void test_set_base_tss_at_end_of_gdt();
-    void test_set_base_descriptor_success();
-    void test_set_base_tss_success();
-    void test_base_zero_index();
-    void test_base_invalid_index();
-    void test_base_tss_at_end_of_gdt();
-    void test_base_descriptor_success();
-    void test_base_tss_success();
-    void test_set_limit_zero_index();
-    void test_set_limit_invalid_index();
-    void test_set_limit_descriptor_success();
-    void test_limit_zero_index();
-    void test_limit_invalid_index();
-    void test_limit_descriptor_success();
-    void test_set_access_rights_zero_index();
-    void test_set_access_rights_invalid_index();
-    void test_set_access_rights_descriptor_success();
-    void test_access_rights_zero_index();
-    void test_access_rights_invalid_index();
-    void test_access_rights_descriptor_success();
+    void test_gdt_constructor_no_size();
+    void test_gdt_constructor_zero_size();
+    void test_gdt_constructor_size();
+    void test_gdt_constructor_null_intrinsics();
+    void test_gdt_base();
+    void test_gdt_limit();
+    void test_gdt_set_base_zero_index();
+    void test_gdt_set_base_invalid_index();
+    void test_gdt_set_base_tss_at_end_of_gdt();
+    void test_gdt_set_base_descriptor_success();
+    void test_gdt_set_base_tss_success();
+    void test_gdt_base_zero_index();
+    void test_gdt_base_invalid_index();
+    void test_gdt_base_tss_at_end_of_gdt();
+    void test_gdt_base_descriptor_success();
+    void test_gdt_base_tss_success();
+    void test_gdt_set_limit_zero_index();
+    void test_gdt_set_limit_invalid_index();
+    void test_gdt_set_limit_descriptor_success();
+    void test_gdt_limit_zero_index();
+    void test_gdt_limit_invalid_index();
+    void test_gdt_limit_descriptor_success();
+    void test_gdt_limit_descriptor_in_bytes_success();
+    void test_gdt_set_access_rights_zero_index();
+    void test_gdt_set_access_rights_invalid_index();
+    void test_gdt_set_access_rights_descriptor_success();
+    void test_gdt_access_rights_zero_index();
+    void test_gdt_access_rights_invalid_index();
+    void test_gdt_access_rights_descriptor_success();
+
+    void test_idt_constructor_no_size();
+    void test_idt_constructor_zero_size();
+    void test_idt_constructor_size();
+    void test_idt_constructor_null_intrinsics();
+    void test_idt_base();
+    void test_idt_limit();
 };
 
 #endif

@@ -25,6 +25,19 @@
 #include <platform.h>
 #include <driver_entry_interface.h>
 
+// -----------------------------------------------------------------------------
+// Expose Private Functions
+// -----------------------------------------------------------------------------
+
+extern "C"
+{
+    int64_t execute_symbol(const char *sym, uint64_t arg1, uint64_t arg2, struct module_t *module);
+}
+
+// -----------------------------------------------------------------------------
+// Tests
+// -----------------------------------------------------------------------------
+
 void
 driver_entry_ut::test_common_unload_unload_when_already_unloaded()
 {
@@ -59,3 +72,48 @@ driver_entry_ut::test_common_unload_unload_when_corrupt()
 
     common_reset();
 }
+
+void
+driver_entry_ut::test_common_unload_loader_get_info_failed()
+{
+    EXPECT_TRUE(common_add_module(m_dummy_start_vmm_success, m_dummy_start_vmm_success_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_add_module(m_dummy_stop_vmm_failure, m_dummy_stop_vmm_failure_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_add_module(m_dummy_add_md_success, m_dummy_add_md_success_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_add_module(m_dummy_misc, m_dummy_misc_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_load_vmm() == BF_SUCCESS);
+
+    {
+        MockRepository mocks;
+        mocks.ExpectCallFunc(bfelf_loader_get_info).Return(-1);
+
+        RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+        {
+            EXPECT_TRUE(common_unload_vmm() == -1);
+        });
+    }
+
+    common_reset();
+}
+
+void
+driver_entry_ut::test_common_unload_execute_symbol_failed()
+{
+    EXPECT_TRUE(common_add_module(m_dummy_start_vmm_success, m_dummy_start_vmm_success_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_add_module(m_dummy_stop_vmm_failure, m_dummy_stop_vmm_failure_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_add_module(m_dummy_add_md_success, m_dummy_add_md_success_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_add_module(m_dummy_misc, m_dummy_misc_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_load_vmm() == BF_SUCCESS);
+
+    {
+        MockRepository mocks;
+        mocks.ExpectCallFunc(execute_symbol).Return(-1);
+
+        RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+        {
+            EXPECT_TRUE(common_unload_vmm() == -1);
+        });
+    }
+
+    common_reset();
+}
+

@@ -322,7 +322,7 @@ common_fini(void)
             ALERT("common_fini: failed to reset\n");
     }
 
-    return ret;
+    return BF_SUCCESS;
 }
 
 int64_t
@@ -361,7 +361,7 @@ common_add_module(char *file, int64_t fsize)
 
     module->exec = platform_alloc_rwe(module->size);
     if (module->exec == 0)
-        return 0;
+        return BF_ERROR_OUT_OF_MEMORY;
 
     ret = load_elf_file(module);
     if (ret != BF_SUCCESS)
@@ -482,6 +482,7 @@ common_unload_vmm(void)
 
     common_reset();
 
+    g_vmm_status = VMM_UNLOADED;
     return BF_SUCCESS;
 
 corrupted:
@@ -507,7 +508,7 @@ common_start_vmm(void)
 
     for (g_num_cpus_started = 0; g_num_cpus_started < platform_num_cpus(); g_num_cpus_started++)
     {
-        caller_affinity = platform_set_affinity(g_num_cpus_started);
+        ret = caller_affinity = platform_set_affinity(g_num_cpus_started);
         if (caller_affinity < 0)
             goto failure;
 
@@ -547,7 +548,7 @@ common_stop_vmm(void)
 
     for (i = g_num_cpus_started - 1; i >= 0 ; i--)
     {
-        caller_affinity = platform_set_affinity(i);
+        ret = caller_affinity = platform_set_affinity(i);
         if (caller_affinity < 0)
             goto corrupted;
 

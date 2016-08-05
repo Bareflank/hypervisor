@@ -19,6 +19,7 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+#include <commit_or_rollback.h>
 #include <vcpu/vcpu_intel_x64.h>
 #include <memory_manager/memory_manager.h>
 
@@ -31,26 +32,35 @@ vcpu_intel_x64::vcpu_intel_x64(uint64_t id,
                                const std::shared_ptr<vmcs_intel_x64_vmm_state> &vmm_state,
                                const std::shared_ptr<vmcs_intel_x64_vmm_state> &guest_state) :
     vcpu(id, debug_ring),
-    m_launched(false),
+    m_vmcs_launched(false),
+    m_vmxon_started(false),
     m_intrinsics(intrinsics),
     m_vmxon(vmxon),
     m_vmcs(vmcs),
     m_exit_handler(exit_handler),
     m_vmm_state(vmm_state),
     m_guest_state(guest_state)
-{ }
+{
+}
 
 void
 vcpu_intel_x64::init(void *attr)
 {
+    auto cor1 = commit_or_rollback([&]
+    {
+        this->fini();
+    });
+
+    auto region = g_mm->malloc_aligned(sizeof(state_save_intel_x64), 4096);
+    m_state_save = std::shared_ptr<state_save_intel_x64>(static_cast<state_save_intel_x64 *>(region));
+
     if (!m_intrinsics) m_intrinsics = std::make_shared<intrinsics_intel_x64>();
     if (!m_vmxon) m_vmxon = std::make_shared<vmxon_intel_x64>(m_intrinsics);
     if (!m_vmcs) m_vmcs = std::make_shared<vmcs_intel_x64>(m_intrinsics);
     if (!m_exit_handler) m_exit_handler = std::make_shared<exit_handler_intel_x64>(m_intrinsics);
+    if (!m_vmm_state) m_vmm_state = std::make_shared<vmcs_intel_x64_vmm_state>(m_state_save);
+    if (!m_guest_state) m_guest_state = std::make_shared<vmcs_intel_x64_host_vm_state>(m_intrinsics);
 
-    auto region = g_mm->malloc_aligned(sizeof(state_save_intel_x64), 4096);
-
-    m_state_save = std::shared_ptr<state_save_intel_x64>(static_cast<state_save_intel_x64 *>(region));
     m_state_save->vcpuid = this->id();
     m_state_save->vmxon_ptr = reinterpret_cast<uint64_t>(m_vmxon.get());
     m_state_save->vmcs_ptr = reinterpret_cast<uint64_t>(m_vmcs.get());
@@ -61,11 +71,7 @@ vcpu_intel_x64::init(void *attr)
     m_exit_handler->set_vmcs(m_vmcs);
     m_exit_handler->set_state_save(m_state_save);
 
-    if (this->is_host_vm_vcpu() == true)
-        m_vmxon->start();
-
-    if (!m_vmm_state) m_vmm_state = std::make_shared<vmcs_intel_x64_vmm_state>(m_state_save);
-    if (!m_guest_state) m_guest_state = std::make_shared<vmcs_intel_x64_host_vm_state>(m_intrinsics);
+    cor1.commit();
 
     vcpu::init(attr);
 }
@@ -73,12 +79,6 @@ vcpu_intel_x64::init(void *attr)
 void
 vcpu_intel_x64::fini(void *attr)
 {
-    if (this->is_initialized() == false)
-        return;
-
-    if (this->is_host_vm_vcpu() == true)
-        m_vmxon->stop();
-
     m_guest_state.reset();
     m_vmm_state.reset();
 
@@ -95,12 +95,27 @@ vcpu_intel_x64::fini(void *attr)
 void
 vcpu_intel_x64::run(void *attr)
 {
-    if (this->is_initialized() == false)
-        return;
+    if (!this->is_initialized())
+        throw std::runtime_error("attempting to run a vcpu that has not been initialized");
 
-    if (m_launched == false)
+    if (!m_vmcs_launched)
     {
+        auto cor1 = commit_or_rollback([&]
+        {
+            if (this->is_host_vm_vcpu() && m_vmxon_started)
+                m_vmxon->stop();
+        });
+
+        if (this->is_host_vm_vcpu())
+        {
+            m_vmxon->start();
+            m_vmxon_started = true;
+        }
+
         m_vmcs->launch(m_vmm_state, m_guest_state);
+        m_vmcs_launched = true;
+
+        cor1.commit();
     }
     else
     {
@@ -108,13 +123,21 @@ vcpu_intel_x64::run(void *attr)
         m_vmcs->resume();
     }
 
-    m_launched = true;
     vcpu::run(attr);
 }
 
 void
 vcpu_intel_x64::hlt(void *attr)
 {
-    m_launched = false;
+    if (!this->is_initialized())
+        return;
+
+    if (this->is_host_vm_vcpu() && m_vmxon_started)
+    {
+        m_vmxon->stop();
+        m_vmxon_started = false;
+    }
+
+    m_vmcs_launched = false;
     vcpu::hlt(attr);
 }

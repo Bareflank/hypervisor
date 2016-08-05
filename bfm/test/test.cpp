@@ -41,6 +41,7 @@ bool
 bfm_ut::list()
 {
     this->test_command_line_parser_with_no_args();
+    this->test_command_line_parser_with_empty_args();
     this->test_command_line_parser_with_unknown_command();
     this->test_command_line_parser_with_unknown_command_maintains_state();
     this->test_command_line_parser_with_unknown_option_single_bar();
@@ -48,6 +49,7 @@ bfm_ut::list()
     this->test_command_line_parser_with_single_bar_help();
     this->test_command_line_parser_with_dual_bar_help();
     this->test_command_line_parser_with_load_no_modules();
+    this->test_command_line_parser_with_load_no_modules_empty_arg();
     this->test_command_line_parser_with_load_no_modules_maintains_state();
     this->test_command_line_parser_with_valid_load();
     this->test_command_line_parser_with_valid_load_unknown_option();
@@ -114,9 +116,11 @@ bfm_ut::list()
     this->test_ioctl_driver_process_stop_stop_failed();
     this->test_ioctl_driver_process_stop_success();
     this->test_ioctl_driver_process_dump_vmm_unloaded();
+    this->test_ioctl_driver_process_dump_vmm_corrupted();
     this->test_ioctl_driver_process_dump_vmm_unknown_status();
     this->test_ioctl_driver_process_dump_dump_failed();
-    this->test_ioctl_driver_process_dump_success();
+    this->test_ioctl_driver_process_dump_success_running();
+    this->test_ioctl_driver_process_dump_success_loaded();
     this->test_ioctl_driver_process_vmm_status_running();
     this->test_ioctl_driver_process_vmm_status_loaded();
     this->test_ioctl_driver_process_vmm_status_unloaded();

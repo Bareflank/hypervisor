@@ -86,6 +86,8 @@ private:
     void test_vm_exit_reason_rdmsr_eip();
     void test_vm_exit_reason_rdmsr_fs_base();
     void test_vm_exit_reason_rdmsr_gs_base();
+    void test_vm_exit_reason_rdmsr_default();
+    void test_vm_exit_reason_rdmsr_ignore();
     void test_vm_exit_reason_wrmsr_debug_ctrl();
     void test_vm_exit_reason_wrmsr_pat();
     void test_vm_exit_reason_wrmsr_efer();
@@ -95,6 +97,7 @@ private:
     void test_vm_exit_reason_wrmsr_eip();
     void test_vm_exit_reason_wrmsr_fs_base();
     void test_vm_exit_reason_wrmsr_gs_base();
+    void test_vm_exit_reason_wrmsr_default();
     void test_vm_exit_reason_vm_entry_failure_invalid_guest_state();
     void test_vm_exit_reason_vm_entry_failure_msr_loading();
     void test_vm_exit_reason_mwait();
@@ -122,7 +125,10 @@ private:
     void test_vm_exit_reason_rdseed();
     void test_vm_exit_reason_xsaves();
     void test_vm_exit_reason_xrstors();
+    void test_vm_exit_reason_to_string();
     void test_halt();
+    void test_vmread_failure();
+    void test_vmwrite_failure();
 };
 
 #endif

@@ -203,6 +203,8 @@ private:
 
 private:
 
+    friend class memory_manager_ut;
+
     virtual void *block_to_virt(int64_t block) noexcept;
     virtual int64_t virt_to_block(void *virt) noexcept;
 

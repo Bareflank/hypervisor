@@ -37,17 +37,20 @@ bool crt_ut::fini()
 
 bool crt_ut::list()
 {
+    this->test_coveralls();
     this->test_local_init_invalid_arg();
     this->test_local_init_invalid_addr();
     this->test_local_init_invalid_size();
     this->test_local_init_register_eh_frame_failure();
     this->test_local_init_valid_stop_at_size();
     this->test_local_init_valid_stop_at_null();
+    this->test_local_init_catch_exception();
     this->test_local_fini_invalid_arg();
     this->test_local_fini_invalid_addr();
     this->test_local_fini_invalid_size();
     this->test_local_fini_valid_stop_at_size();
     this->test_local_fini_valid_stop_at_null();
+    this->test_local_fini_catch_exception();
 
     return true;
 }

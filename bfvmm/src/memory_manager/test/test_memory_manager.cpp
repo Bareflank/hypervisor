@@ -23,6 +23,9 @@
 #include <constants.h>
 #include <memory_manager/memory_manager.h>
 
+extern "C" int64_t
+add_md(struct memory_descriptor *md) noexcept;
+
 void
 memory_manager_ut::test_memory_manager_malloc_zero()
 {
@@ -234,6 +237,23 @@ memory_manager_ut::test_memory_manager_malloc_alloc_fragment()
 }
 
 void
+memory_manager_ut::test_memory_manager_malloc_alloc_multiple_fragments()
+{
+    auto addr1 = g_mm->malloc(64);
+    auto addr2 = g_mm->malloc_aligned(64, 128);
+    auto addr3 = g_mm->malloc(128);
+    g_mm->free(addr1);
+    g_mm->free(addr2);
+    g_mm->free(addr3);
+}
+
+void
+memory_manager_ut::test_memory_manager_add_md_no_exceptions()
+{
+    EXPECT_TRUE(add_md(0) == MEMORY_MANAGER_FAILURE);
+}
+
+void
 memory_manager_ut::test_memory_manager_add_md_invalid_md()
 {
     EXPECT_EXCEPTION(g_mm->add_md(0), std::invalid_argument);
@@ -258,7 +278,7 @@ memory_manager_ut::test_memory_manager_add_md_invalid_phys()
 void
 memory_manager_ut::test_memory_manager_add_md_invalid_type()
 {
-    memory_descriptor md = {reinterpret_cast<void *>(0x12345123), reinterpret_cast<void *>(0x54321000), 0};
+    memory_descriptor md = {reinterpret_cast<void *>(0x12345000), reinterpret_cast<void *>(0x54321000), 0};
 
     EXPECT_EXCEPTION(g_mm->add_md(&md), std::invalid_argument);
 }
@@ -277,6 +297,27 @@ memory_manager_ut::test_memory_manager_add_md_unaligned_virtual()
     memory_descriptor md = {reinterpret_cast<void *>(0x12345000), reinterpret_cast<void *>(0x54321123), 7};
 
     EXPECT_EXCEPTION(g_mm->add_md(&md), std::logic_error);
+}
+
+void
+memory_manager_ut::test_memory_manager_block_to_virt_unknown()
+{
+    EXPECT_TRUE(g_mm->block_to_virt(-1) == 0);
+    EXPECT_TRUE(g_mm->block_to_virt(0x0FFFFFFFFFFFFFFF) == 0);
+}
+
+void
+memory_manager_ut::test_memory_manager_virt_to_block_unknown()
+{
+    EXPECT_TRUE(g_mm->virt_to_block(reinterpret_cast<void *>(0)) == -1);
+    EXPECT_TRUE(g_mm->virt_to_block(reinterpret_cast<void *>(0xFFFFFFFFFFFFFFFF)) == -1);
+}
+
+void
+memory_manager_ut::test_memory_manager_is_block_aligned_unknown()
+{
+    EXPECT_TRUE(g_mm->is_block_aligned(-1, 64) == false);
+    EXPECT_TRUE(g_mm->is_block_aligned(0x0FFFFFFFFFFFFFFF, 64) == false);
 }
 
 void
@@ -319,6 +360,22 @@ memory_manager_ut::test_memory_manager_virt_to_phys_lower_limit()
 }
 
 void
+memory_manager_ut::test_memory_manager_virt_to_phys_map()
+{
+    memory_descriptor md = {reinterpret_cast<void *>(0x12345000), reinterpret_cast<void *>(0x54321000), 7};
+
+    EXPECT_NO_EXCEPTION(g_mm->add_md(&md));
+
+    for (const auto &iter : g_mm->virt_to_phys_map())
+    {
+        EXPECT_TRUE(iter.first == (0x54321000 >> 12));
+        EXPECT_TRUE(iter.second.phys == md.phys);
+        EXPECT_TRUE(iter.second.virt == md.virt);
+        EXPECT_TRUE(iter.second.type == md.type);
+    }
+}
+
+void
 memory_manager_ut::test_memory_manager_phys_to_virt_random_address()
 {
     memory_descriptor md = {reinterpret_cast<void *>(0x12345000), reinterpret_cast<void *>(0x54321000), 7};
@@ -343,4 +400,20 @@ memory_manager_ut::test_memory_manager_phys_to_virt_lower_limit()
 
     EXPECT_NO_EXCEPTION(g_mm->add_md(&md));
     EXPECT_TRUE(g_mm->phys_to_virt(reinterpret_cast<void *>(0x12345000)) == reinterpret_cast<void *>(0x54321000));
+}
+
+void
+memory_manager_ut::test_memory_manager_phys_to_virt_map()
+{
+    memory_descriptor md = {reinterpret_cast<void *>(0x12345000), reinterpret_cast<void *>(0x54321000), 7};
+
+    EXPECT_NO_EXCEPTION(g_mm->add_md(&md));
+
+    for (const auto &iter : g_mm->phys_to_virt_map())
+    {
+        EXPECT_TRUE(iter.first == (0x12345000 >> 12));
+        EXPECT_TRUE(iter.second.phys == md.phys);
+        EXPECT_TRUE(iter.second.virt == md.virt);
+        EXPECT_TRUE(iter.second.type == md.type);
+    }
 }

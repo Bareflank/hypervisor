@@ -86,6 +86,9 @@ typedef int64_t bfelf64_sxword;
 /**
  * Convert ELF error -> const char *
  *
+ * @deprecated This function will be removed in future versions of Bareflank.
+ *     Please use ec_to_str instead.
+ *
  * @param value error code to convert
  * @return const char * version of error code
  */

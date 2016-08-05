@@ -162,14 +162,14 @@ platform_set_affinity(int64_t affinity)
         if (set_cpu_affinity == NULL)
         {
             ALERT("Failed to locate sched_setaffinity\n");
-            return -1;
+            return BF_ERROR_UNKNOWN;
         }
     }
 
     if (set_cpu_affinity(current->pid, cpumask_of(affinity)) != 0)
-        return -1;
+        return BF_ERROR_UNKNOWN;
 
-    return 0;
+    return affinity;
 }
 
 void

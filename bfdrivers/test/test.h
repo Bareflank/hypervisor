@@ -39,6 +39,8 @@ protected:
 
 private:
 
+    void test_common_init();
+
     void test_common_fini_unloaded();
     void test_common_fini_successful_start();
     void test_common_fini_successful_load();
@@ -46,6 +48,9 @@ private:
     void test_common_fini_corrupted();
     void test_common_fini_failed_load();
     void test_common_fini_failed_start();
+    void test_common_fini_unload_failed();
+    void test_common_fini_stop_failed();
+    void test_common_fini_reset_failed();
 
     void test_common_add_module_invalid_file();
     void test_common_add_module_invalid_file_size();
@@ -54,6 +59,9 @@ private:
     void test_common_add_module_add_when_already_running();
     void test_common_add_module_add_when_corrupt();
     void test_common_add_module_add_too_many();
+    void test_common_add_module_get_elf_file_size_fails();
+    void test_common_add_module_platform_alloc_fails();
+    void test_common_add_module_load_elf_fails();
 
     void test_common_load_successful_load();
     void test_common_load_load_when_already_loaded();
@@ -62,16 +70,24 @@ private:
     void test_common_load_fail_due_to_relocation_error();
     void test_common_load_fail_due_to_no_modules_added();
     void test_common_load_add_md_failed();
+    void test_common_load_platform_alloc_failed();
+    void test_common_load_loader_add_failed();
+    void test_common_load_resolve_symbol_failed();
+    void test_common_load_loader_get_info_failed();
+    void test_common_load_execute_symbol_failed();
 
     void test_common_unload_unload_when_already_unloaded();
     void test_common_unload_unload_when_running();
     void test_common_unload_unload_when_corrupt();
+    void test_common_unload_loader_get_info_failed();
+    void test_common_unload_execute_symbol_failed();
 
     void test_common_start_start_when_unloaded();
     void test_common_start_start_when_already_running();
     void test_common_start_start_when_corrupt();
     void test_common_start_start_when_start_vmm_missing();
     void test_common_start_start_vmm_failure();
+    void test_common_start_set_affinity_failed();
 
     void test_common_stop_stop_when_unloaded();
     void test_common_stop_stop_when_not_running();
@@ -79,6 +95,7 @@ private:
     void test_common_stop_stop_when_corrupt();
     void test_common_stop_stop_vmm_missing();
     void test_common_stop_stop_vmm_failure();
+    void test_common_stop_set_affinity_failed();
 
     void test_common_dump_invalid_drr();
     void test_common_dump_invalid_vcpuid();
@@ -95,13 +112,20 @@ private:
     void test_helper_symbol_length_success();
     void test_helper_resolve_symbol_invalid_name();
     void test_helper_resolve_symbol_invalid_sym();
+    void test_helper_resolve_symbol_no_loaded_modules();
     void test_helper_resolve_symbol_missing_symbol();
+    void test_helper_resolve_symbol_missing_symbol_from_module();
     void test_helper_execute_symbol_invalid_arg();
     void test_helper_execute_symbol_missing_symbol();
     void test_helper_execute_symbol_sym_failed();
     void test_helper_execute_symbol_sym_success();
     void test_helper_constructors_success();
     void test_helper_destructors_success();
+    void test_helper_add_md_to_memory_manager_null_module();
+    void test_helper_get_elf_file_size_null_module();
+    void test_helper_get_elf_file_size_get_segment_fails();
+    void test_helper_load_elf_file_null_module();
+    void test_helper_load_elf_file_get_segment_fails();
 
 private:
 

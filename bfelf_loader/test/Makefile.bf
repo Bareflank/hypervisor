@@ -58,6 +58,8 @@ SOURCES+=test_loader_add.cpp
 SOURCES+=test_loader_get_info.cpp
 SOURCES+=test_loader_relocate.cpp
 SOURCES+=test_loader_resolve_symbol.cpp
+SOURCES+=test_loader_resolve_symbol.cpp
+SOURCES+=test_private.cpp
 
 INCLUDE_PATHS+=./
 INCLUDE_PATHS+=../include/

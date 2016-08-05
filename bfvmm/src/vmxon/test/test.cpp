@@ -40,8 +40,9 @@ vmxon_ut::fini()
 bool
 vmxon_ut::list()
 {
-    // vmxon::start
+    this->test_constructor_null_intrinsics();
     this->test_start_success();
+    this->test_start_start_twice();
     this->test_start_execute_vmxon_already_on_failure();
     this->test_start_execute_vmxon_failure();
     this->test_start_check_ia32_vmx_cr4_fixed0_msr_failure();
@@ -53,13 +54,14 @@ vmxon_ut::list()
     this->test_start_check_ia32_vmx_cr0_fixed1_msr();
     this->test_start_check_vmx_capabilities_msr_memtype_failure();
     this->test_start_check_vmx_capabilities_msr_addr_width_failure();
-    this->test_start_vmxon_already_enabled_failure();
+    this->test_start_check_vmx_capabilities_true_based_controls_failure();
     this->test_start_check_cpuid_vmx_supported_failure();
-
-    // vmxon::stop
+    this->test_start_virt_to_phys_failure();
     this->test_stop_success();
+    this->test_stop_stop_twice();
     this->test_stop_vmxoff_check_failure();
     this->test_stop_vmxoff_failure();
+    this->test_coveralls_cleanup();
 
     return true;
 }

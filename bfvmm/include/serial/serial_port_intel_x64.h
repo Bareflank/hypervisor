@@ -140,7 +140,7 @@ public:
 
     /// Default Constructor
     ///
-    serial_port_intel_x64(const std::shared_ptr<intrinsics_intel_x64> &intrinsics,
+    serial_port_intel_x64(const std::shared_ptr<intrinsics_intel_x64> &intrinsics = nullptr,
                           uint16_t port = DEFAULT_COM_PORT) noexcept;
 
     /// Destructor
@@ -151,7 +151,13 @@ public:
     ///
     /// Get an instance to the class.
     ///
-    static serial_port_intel_x64 *instance() noexcept;
+    static serial_port_intel_x64 *instance(const std::shared_ptr<intrinsics_intel_x64> &intrinsics = nullptr) noexcept;
+
+    /// Initialize
+    ///
+    /// Initializes the serial device.
+    ///
+    virtual void init();
 
     /// Set Baud Rate
     ///

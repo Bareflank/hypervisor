@@ -19,6 +19,7 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+#include <debug.h>
 #include <commit_or_rollback.h>
 #include <vmxon/vmxon_intel_x64.h>
 #include <vmxon/vmxon_exceptions_intel_x64.h>
@@ -94,8 +95,10 @@ void
 vmxon_intel_x64::check_vmx_capabilities_msr()
 {
     auto vmx_basic_msr = m_intrinsics->read_msr(IA32_VMX_BASIC_MSR);
+
     auto physical_address_width = (vmx_basic_msr >> 48) & 0x1;
     auto memory_type = (vmx_basic_msr >> 50) & 0xF;
+    auto true_based_controls = (vmx_basic_msr >> 55) & 0x1;
 
     if (physical_address_width != 0)
         throw vmxon_capabilities_failure(
@@ -105,9 +108,9 @@ vmxon_intel_x64::check_vmx_capabilities_msr()
         throw vmxon_capabilities_failure(
             vmx_basic_msr, memory_type);
 
-    if ((vmx_basic_msr & (1ULL << 55)) == 0)
+    if (true_based_controls == 0)
         throw vmxon_capabilities_failure(
-            vmx_basic_msr, 55);
+            vmx_basic_msr, true_based_controls);
 }
 
 void
@@ -206,7 +209,10 @@ void
 vmxon_intel_x64::execute_vmxoff()
 {
     if (m_vmxon_enabled == false)
+    {
+        bfwarning << "execute_vmxoff: VMX operation already disabled" << bfendl;
         return;
+    }
 
     if (m_intrinsics->vmxoff() == false)
         throw vmxon_failure("vmxoff failed");

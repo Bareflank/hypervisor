@@ -560,9 +560,11 @@ protected:
 
 protected:
 
+    friend class vcpu_ut;
     friend class vmcs_ut;
     friend class vcpu_intel_x64;
     friend class exit_handler_intel_x64;
+    friend class exit_handler_intel_x64_ut;
 
     std::shared_ptr<intrinsics_intel_x64> m_intrinsics;
 
@@ -574,7 +576,7 @@ protected:
 
 private:
 
-    void set_state_save(const std::shared_ptr<state_save_intel_x64> &state_save)
+    virtual void set_state_save(const std::shared_ptr<state_save_intel_x64> &state_save)
     { m_state_save = state_save; }
 };
 

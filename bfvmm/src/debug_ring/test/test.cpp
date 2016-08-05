@@ -40,6 +40,10 @@ debug_ring_ut::fini()
 bool
 debug_ring_ut::list()
 {
+    this->test_get_drr_invalid_drr();
+    this->test_get_drr_invalid_vcpuid();
+    this->test_constructor_out_of_memory();
+    this->test_write_out_of_memory();
     this->test_read_with_invalid_drr();
     this->test_read_with_null_string();
     this->test_read_with_zero_length();

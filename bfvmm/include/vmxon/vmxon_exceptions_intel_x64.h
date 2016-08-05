@@ -156,13 +156,13 @@ public:
     }
 
 private:
-    const std::string &m_cr_str;
-    const std::string &m_fixed0_str;
-    const std::string &m_fixed1_str;
+    std::string m_cr_str;
+    std::string m_fixed0_str;
+    std::string m_fixed1_str;
     uint64_t m_cr;
     uint64_t m_fixed0;
     uint64_t m_fixed1;
-    const std::string &m_func;
+    std::string m_func;
     uint64_t m_line;
 };
 

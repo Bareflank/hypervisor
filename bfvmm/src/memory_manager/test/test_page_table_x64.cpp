@@ -232,3 +232,15 @@ memory_manager_ut::test_page_table_x64_table_phys_addr_failure()
         EXPECT_EXCEPTION(pt->table_phys_addr(), std::logic_error);
     });
 }
+
+void
+memory_manager_ut::test_page_table_x64_coveralls_cleanup()
+{
+    MockRepository mocks;
+    mocks.OnCallFunc(posix_memalign).Return(-1);
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        EXPECT_TRUE(malloc_aligned(4096, 4096) == 0);
+    });
+}

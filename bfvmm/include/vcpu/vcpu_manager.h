@@ -49,7 +49,8 @@ public:
 
     /// Create vCPU
     ///
-    /// Creates the vCPU.
+    /// Creates the vCPU. Note that the vCPU is actually created by the
+    /// vCPU factory's make_vcpu function.
     ///
     /// @param vcpuid the vcpu to initialize
     /// @param attr attributes to be passed to the vcpu about what
@@ -90,12 +91,10 @@ public:
 
     /// Write to Log
     ///
-    /// Writes a string 'str' of length 'len' to a vcpuid's internal debug
-    /// ring. If the vcpuid provided is invalid, all of the string is written
-    /// to all of the vcpus
+    /// Write's a string the vCPU's debug ring.
     ///
-    /// @param vcpuid the vcpu's log to write to
-    /// @param str the string to write to the log
+    /// @param vcpuid the vCPU to write to
+    /// @param str the string to write
     ///
     virtual void write(uint64_t vcpuid, const std::string &str) noexcept;
 
@@ -116,7 +115,7 @@ private:
     vcpu_manager();
 
     /// Get vCPU
-    std::shared_ptr<vcpu> get_vcpu(uint64_t vcpuid) const;
+    std::shared_ptr<vcpu> get_vcpu(uint64_t vcpuid) const noexcept;
 
 private:
 

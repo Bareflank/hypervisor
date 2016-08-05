@@ -40,6 +40,7 @@ serial_ut::fini()
 bool
 serial_ut::list()
 {
+    this->test_serial_null_intrinsics();
     this->test_serial_success();
     this->test_serial_set_baud_rate_success();
     this->test_serial_set_baud_rate_unknown();

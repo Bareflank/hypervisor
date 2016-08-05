@@ -35,7 +35,9 @@ entry_ut::test_start_vmm_success()
     mocks.OnCallFunc(vcpu_manager::instance).Return(vcm);
 
     mocks.OnCall(vcm, vcpu_manager::create_vcpu);
+    mocks.OnCall(vcm, vcpu_manager::delete_vcpu);
     mocks.OnCall(vcm, vcpu_manager::run_vcpu);
+    mocks.OnCall(vcm, vcpu_manager::hlt_vcpu);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -51,7 +53,9 @@ entry_ut::test_start_vmm_throws_general_exception()
     mocks.OnCallFunc(vcpu_manager::instance).Return(vcm);
 
     mocks.OnCall(vcm, vcpu_manager::create_vcpu).Throw(bfn::general_exception());
+    mocks.OnCall(vcm, vcpu_manager::delete_vcpu);
     mocks.OnCall(vcm, vcpu_manager::run_vcpu);
+    mocks.OnCall(vcm, vcpu_manager::hlt_vcpu);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -66,8 +70,10 @@ entry_ut::test_start_vmm_throws_standard_exception()
     auto vcm = mocks.Mock<vcpu_manager>();
     mocks.OnCallFunc(vcpu_manager::instance).Return(vcm);
 
-    mocks.OnCall(vcm, vcpu_manager::create_vcpu).Throw(std::exception());
-    mocks.OnCall(vcm, vcpu_manager::run_vcpu);
+    mocks.OnCall(vcm, vcpu_manager::create_vcpu);
+    mocks.OnCall(vcm, vcpu_manager::delete_vcpu);
+    mocks.OnCall(vcm, vcpu_manager::run_vcpu).Throw(std::exception());
+    mocks.OnCall(vcm, vcpu_manager::hlt_vcpu);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -83,7 +89,9 @@ entry_ut::test_start_vmm_throws_any_exception()
     mocks.OnCallFunc(vcpu_manager::instance).Return(vcm);
 
     mocks.OnCall(vcm, vcpu_manager::create_vcpu).Throw(10);
+    mocks.OnCall(vcm, vcpu_manager::delete_vcpu);
     mocks.OnCall(vcm, vcpu_manager::run_vcpu);
+    mocks.OnCall(vcm, vcpu_manager::hlt_vcpu);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -98,8 +106,10 @@ entry_ut::test_stop_vmm_success()
     auto vcm = mocks.Mock<vcpu_manager>();
     mocks.OnCallFunc(vcpu_manager::instance).Return(vcm);
 
-    mocks.OnCall(vcm, vcpu_manager::hlt_vcpu);
+    mocks.OnCall(vcm, vcpu_manager::create_vcpu);
     mocks.OnCall(vcm, vcpu_manager::delete_vcpu);
+    mocks.OnCall(vcm, vcpu_manager::run_vcpu);
+    mocks.OnCall(vcm, vcpu_manager::hlt_vcpu);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -114,8 +124,10 @@ entry_ut::test_stop_vmm_throws_general_exception()
     auto vcm = mocks.Mock<vcpu_manager>();
     mocks.OnCallFunc(vcpu_manager::instance).Return(vcm);
 
-    mocks.OnCall(vcm, vcpu_manager::hlt_vcpu);
+    mocks.OnCall(vcm, vcpu_manager::create_vcpu);
     mocks.OnCall(vcm, vcpu_manager::delete_vcpu).Throw(bfn::general_exception());
+    mocks.OnCall(vcm, vcpu_manager::run_vcpu);
+    mocks.OnCall(vcm, vcpu_manager::hlt_vcpu);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -130,8 +142,10 @@ entry_ut::test_stop_vmm_throws_standard_exception()
     auto vcm = mocks.Mock<vcpu_manager>();
     mocks.OnCallFunc(vcpu_manager::instance).Return(vcm);
 
-    mocks.OnCall(vcm, vcpu_manager::hlt_vcpu);
-    mocks.OnCall(vcm, vcpu_manager::delete_vcpu).Throw(std::exception());
+    mocks.OnCall(vcm, vcpu_manager::create_vcpu);
+    mocks.OnCall(vcm, vcpu_manager::delete_vcpu);
+    mocks.OnCall(vcm, vcpu_manager::run_vcpu);
+    mocks.OnCall(vcm, vcpu_manager::hlt_vcpu).Throw(std::exception());
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -146,8 +160,10 @@ entry_ut::test_stop_vmm_throws_any_exception()
     auto vcm = mocks.Mock<vcpu_manager>();
     mocks.OnCallFunc(vcpu_manager::instance).Return(vcm);
 
-    mocks.OnCall(vcm, vcpu_manager::hlt_vcpu);
+    mocks.OnCall(vcm, vcpu_manager::create_vcpu);
     mocks.OnCall(vcm, vcpu_manager::delete_vcpu).Throw(10);
+    mocks.OnCall(vcm, vcpu_manager::run_vcpu);
+    mocks.OnCall(vcm, vcpu_manager::hlt_vcpu);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {

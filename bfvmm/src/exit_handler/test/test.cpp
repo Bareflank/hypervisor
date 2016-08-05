@@ -87,6 +87,8 @@ exit_handler_intel_x64_ut::list()
     this->test_vm_exit_reason_rdmsr_eip();
     this->test_vm_exit_reason_rdmsr_fs_base();
     this->test_vm_exit_reason_rdmsr_gs_base();
+    this->test_vm_exit_reason_rdmsr_default();
+    this->test_vm_exit_reason_rdmsr_ignore();
     this->test_vm_exit_reason_wrmsr_debug_ctrl();
     this->test_vm_exit_reason_wrmsr_pat();
     this->test_vm_exit_reason_wrmsr_efer();
@@ -96,6 +98,7 @@ exit_handler_intel_x64_ut::list()
     this->test_vm_exit_reason_wrmsr_eip();
     this->test_vm_exit_reason_wrmsr_fs_base();
     this->test_vm_exit_reason_wrmsr_gs_base();
+    this->test_vm_exit_reason_wrmsr_default();
     this->test_vm_exit_reason_vm_entry_failure_invalid_guest_state();
     this->test_vm_exit_reason_vm_entry_failure_msr_loading();
     this->test_vm_exit_reason_mwait();
@@ -123,7 +126,10 @@ exit_handler_intel_x64_ut::list()
     this->test_vm_exit_reason_rdseed();
     this->test_vm_exit_reason_xsaves();
     this->test_vm_exit_reason_xrstors();
+    this->test_vm_exit_reason_to_string();
     this->test_halt();
+    this->test_vmread_failure();
+    this->test_vmwrite_failure();
 
     return true;
 }

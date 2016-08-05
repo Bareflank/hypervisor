@@ -22,6 +22,7 @@
 #include <debug.h>
 #include <exception.h>
 #include <vcpu/vcpu_manager.h>
+#include <commit_or_rollback.h>
 
 // -----------------------------------------------------------------------------
 // Mutex
@@ -44,34 +45,55 @@ vcpu_manager::instance() noexcept
 void
 vcpu_manager::create_vcpu(uint64_t vcpuid, void *attr)
 {
-    auto vcpu = m_vcpu_factory->make_vcpu(vcpuid, attr);
-
+    auto cor1 = commit_or_rollback([&]
     {
-        std::lock_guard<std::mutex> guard(g_vcpu_manager_mutex);
-        m_vcpus[vcpuid] = vcpu;
+        this->delete_vcpu(vcpuid);
+    });
+
+    if (auto vcpu = m_vcpu_factory->make_vcpu(vcpuid, attr))
+    {
+        {
+            std::lock_guard<std::mutex> guard(g_vcpu_manager_mutex);
+            m_vcpus[vcpuid] = vcpu;
+        }
+
+        vcpu->init(attr);
+    }
+    else
+    {
+        throw std::runtime_error("make_vcpu returned a nullptr vcpu");
     }
 
-    vcpu->init(attr);
+    cor1.commit();
 }
 
 void
 vcpu_manager::delete_vcpu(uint64_t vcpuid, void *attr)
 {
-    if (auto vcpu = get_vcpu(vcpuid))
-        vcpu->fini(attr);
-
+    auto cor1 = commit_or_rollback([&]
     {
         std::lock_guard<std::mutex> guard(g_vcpu_manager_mutex);
         m_vcpus.erase(vcpuid);
-    }
+    });
+
+    if (auto vcpu = get_vcpu(vcpuid))
+        vcpu->fini(attr);
 }
 
 void
 vcpu_manager::run_vcpu(uint64_t vcpuid, void *attr)
 {
+    auto cor1 = commit_or_rollback([&]
+    {
+        this->hlt_vcpu(vcpuid);
+    });
+
     if (auto vcpu = get_vcpu(vcpuid))
     {
-        vcpu->run(attr);
+        if (vcpu->is_running() == false)
+            vcpu->run(attr);
+        else
+            return;
 
         if (vcpu->is_guest_vm_vcpu() == true)
             return;
@@ -80,7 +102,11 @@ vcpu_manager::run_vcpu(uint64_t vcpuid, void *attr)
                 << "in a vm on vcpuid = " << vcpuid << bfendl;
     }
     else
+    {
         throw std::invalid_argument("invalid vcpuid");
+    }
+
+    cor1.commit();
 }
 
 void
@@ -104,12 +130,8 @@ vcpu_manager::hlt_vcpu(uint64_t vcpuid, void *attr)
 void
 vcpu_manager::write(uint64_t vcpuid, const std::string &str) noexcept
 {
-    try
-    {
-        if (auto vcpu = get_vcpu(vcpuid))
-            vcpu->write(str);
-    }
-    catch (...) { }
+    if (auto vcpu = get_vcpu(vcpuid))
+        vcpu->write(str);
 }
 
 vcpu_manager::vcpu_manager() :
@@ -118,7 +140,7 @@ vcpu_manager::vcpu_manager() :
 }
 
 std::shared_ptr<vcpu>
-vcpu_manager::get_vcpu(uint64_t vcpuid) const
+vcpu_manager::get_vcpu(uint64_t vcpuid) const noexcept
 {
     std::lock_guard<std::mutex> guard(g_vcpu_manager_mutex);
     auto iter = m_vcpus.find(vcpuid);

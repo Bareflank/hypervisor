@@ -38,7 +38,10 @@ protected:
     bool list() override;
 
 private:
+
+    void test_constructor_null_intrinsics();
     void test_start_success();
+    void test_start_start_twice();
     void test_start_execute_vmxon_already_on_failure();
     void test_start_execute_vmxon_failure();
     void test_start_check_ia32_vmx_cr4_fixed0_msr_failure();
@@ -50,12 +53,14 @@ private:
     void test_start_check_ia32_vmx_cr0_fixed1_msr();
     void test_start_check_vmx_capabilities_msr_memtype_failure();
     void test_start_check_vmx_capabilities_msr_addr_width_failure();
-    void test_start_vmxon_already_enabled_failure();
+    void test_start_check_vmx_capabilities_true_based_controls_failure();
     void test_start_check_cpuid_vmx_supported_failure();
-
+    void test_start_virt_to_phys_failure();
     void test_stop_success();
+    void test_stop_stop_twice();
     void test_stop_vmxoff_check_failure();
     void test_stop_vmxoff_failure();
+    void test_coveralls_cleanup();
 };
 
 #endif

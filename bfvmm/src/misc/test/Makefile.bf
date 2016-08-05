@@ -50,14 +50,13 @@ NATIVE_OUTDIR+=%BUILD_REL%/../bin
 ################################################################################
 
 SOURCES+=test.cpp
-SOURCES+=test_gdt_x64.cpp
-SOURCES+=test_idt_x64.cpp
+SOURCES+=test_error_codes.cpp
 
 INCLUDE_PATHS+=./
 INCLUDE_PATHS+=%HYPER_ABS%/include/
 INCLUDE_PATHS+=%HYPER_ABS%/bfvmm/include/
 
-LIBS+=intrinsics
+LIBS+=
 
 LIBRARY_PATHS+=%BUILD_REL%/../bin/native
 
