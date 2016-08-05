@@ -179,15 +179,15 @@ vmcs_intel_x64::check_control_tpr_shadow_and_virtual_apic()
         if (is_enabled_virtualized_apic() == false)
             throw hardware_unsupported("virtualized apics are disabled or unsupported");
 
-        auto virt_addr = (uint64_t)g_mm->phys_to_virt((void *)phys_addr);
+        auto virt_addr = reinterpret_cast<uint64_t>(g_mm->phys_to_virt(reinterpret_cast<void *>(phys_addr)));
 
         if (virt_addr == 0)
             throw invalid_address("vitual apic virtual addr is NULL", virt_addr);
 
         // This is described in 26.2.1.1
-        auto vtpr = (((uint8_t *)((uint8_t *)virt_addr + 0x80))[0]);
+        auto vtpr = *(reinterpret_cast<uint8_t *>(virt_addr) + 0x80);
         auto vtpr_74 = (vtpr & 0xF0) >> 4;
-        auto tpr_threshold_30 = (uint8_t)(tpr_threshold & 0x000000000000000F);
+        auto tpr_threshold_30 = static_cast<uint8_t>(tpr_threshold & 0x000000000000000F);
 
         if (tpr_threshold_30 > vtpr_74)
             throw vmcs_invalid_field("invalid TPR threshold", tpr_threshold);

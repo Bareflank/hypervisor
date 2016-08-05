@@ -38,7 +38,7 @@ void *
 virt_to_phys(void *)
 {
     static uintptr_t phys = 0x0000000ABCDEF0000;
-    return (void *)(phys + 0x1000);
+    return reinterpret_cast<void *>(phys + 0x1000);
 }
 
 const std::map<uintptr_t, memory_descriptor> &virt_to_phys_map() noexcept

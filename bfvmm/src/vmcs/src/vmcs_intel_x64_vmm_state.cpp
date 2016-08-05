@@ -67,7 +67,7 @@ vmcs_intel_x64_vmm_state::vmcs_intel_x64_vmm_state(const std::shared_ptr<state_s
     m_gdt.set_base(1, 0);
     m_gdt.set_base(2, 0);
     m_gdt.set_base(3, 0);
-    m_gdt.set_base(4, (uint64_t)&m_tss);
+    m_gdt.set_base(4, reinterpret_cast<uint64_t>(&m_tss));
 
     m_gdt.set_limit(0, 0);
     m_gdt.set_limit(1, 0xFFFFFFFF);
@@ -95,7 +95,7 @@ vmcs_intel_x64_vmm_state::vmcs_intel_x64_vmm_state(const std::shared_ptr<state_s
         {
             auto entry = m_pml4->add_page(md.second.virt);
 
-            entry->set_phys_addr((uintptr_t)md.second.phys);
+            entry->set_phys_addr(reinterpret_cast<uintptr_t>(md.second.phys));
             entry->set_present(true);
 
             if ((md.second.type & MEMORY_TYPE_W) != 0)
@@ -128,5 +128,5 @@ vmcs_intel_x64_vmm_state::vmcs_intel_x64_vmm_state(const std::shared_ptr<state_s
     m_ia32_pat_msr = 0;
     m_ia32_efer_msr = IA32_EFER_LME | IA32_EFER_LMA | IA32_EFER_NXE;
     m_ia32_fs_base_msr = 0;
-    m_ia32_gs_base_msr = (uint64_t)state_save.get();
+    m_ia32_gs_base_msr = reinterpret_cast<uint64_t>(state_save.get());
 }

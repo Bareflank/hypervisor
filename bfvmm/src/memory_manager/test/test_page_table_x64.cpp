@@ -37,7 +37,7 @@ void *
 virt_to_phys(void *)
 {
     static uintptr_t phys = 0x0000000ABCDEF0000;
-    return (void *)(phys + 0x1000);
+    return reinterpret_cast<void *>(phys + 0x1000);
 }
 
 void
@@ -113,7 +113,7 @@ memory_manager_ut::test_page_table_x64_add_page_success()
         auto virt = 0x0000123456780000;
         auto pml4 = std::make_shared<page_table_x64>();
 
-        pml4->add_page((void *)(virt));
+        pml4->add_page(reinterpret_cast<void *>(virt));
     });
 }
 
@@ -132,8 +132,8 @@ memory_manager_ut::test_page_table_x64_add_two_pages_no_added_mem_success()
         auto virt = 0x0000123456780000;
         auto pml4 = std::make_shared<page_table_x64>();
 
-        pml4->add_page((void *)(virt));
-        pml4->add_page((void *)(virt + 0x1000));
+        pml4->add_page(reinterpret_cast<void *>(virt));
+        pml4->add_page(reinterpret_cast<void *>(virt + 0x1000));
     });
 }
 
@@ -152,8 +152,8 @@ memory_manager_ut::test_page_table_x64_add_two_pages_with_added_mem_success()
         auto virt = 0x0000123456780000;
         auto pml4 = std::make_shared<page_table_x64>();
 
-        pml4->add_page((void *)(virt));
-        pml4->add_page((void *)(virt + 0x1000000));
+        pml4->add_page(reinterpret_cast<void *>(virt));
+        pml4->add_page(reinterpret_cast<void *>(virt + 0x1000000));
     });
 }
 
@@ -173,7 +173,7 @@ memory_manager_ut::test_page_table_x64_add_many_pages_success()
         auto pml4 = std::make_shared<page_table_x64>();
 
         for (auto i = 0; i < 4096; i++)
-            pml4->add_page((void *)(virt + (i * 0x1000)));
+            pml4->add_page(reinterpret_cast<void *>(virt + (i * 0x1000)));
     });
 }
 
@@ -192,8 +192,8 @@ memory_manager_ut::test_page_table_x64_add_page_twice_failure()
         auto virt = 0x0000123456780000;
         auto pml4 = std::make_shared<page_table_x64>();
 
-        pml4->add_page((void *)(virt));
-        EXPECT_EXCEPTION(pml4->add_page((void *)(virt)), std::logic_error);
+        pml4->add_page(reinterpret_cast<void *>(virt));
+        EXPECT_EXCEPTION(pml4->add_page(reinterpret_cast<void *>(virt)), std::logic_error);
     });
 }
 

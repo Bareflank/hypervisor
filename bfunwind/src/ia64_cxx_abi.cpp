@@ -26,12 +26,6 @@
 #include <ia64_cxx_abi.h>
 
 // -----------------------------------------------------------------------------
-// Global
-// -----------------------------------------------------------------------------
-
-uint64_t g_phase = 0;
-
-// -----------------------------------------------------------------------------
 // Context
 // -----------------------------------------------------------------------------
 
@@ -55,19 +49,17 @@ struct _Unwind_Context
 static _Unwind_Reason_Code
 private_personality(_Unwind_Action action, _Unwind_Context *context)
 {
-    auto pl = context->fde.cie().personality_function();
+    if (auto pl = context->fde.cie().personality_function())
+    {
+        if (auto pr = *(reinterpret_cast<__personality_routine *>(pl)))
+        {
+            return pr(1, action,
+                      context->exception_object->exception_class,
+                      context->exception_object, context);
+        }
+    }
 
-    if (pl == 0)
-        return _URC_CONTINUE_UNWIND;
-
-    auto pr = ((__personality_routine *)pl)[0];
-
-    if (pr == 0)
-        ABORT("personality routine is 0");
-
-    return pr(1, action,
-              context->exception_object->exception_class,
-              context->exception_object, context);
+    return _URC_CONTINUE_UNWIND;
 }
 
 // -----------------------------------------------------------------------------
@@ -77,9 +69,11 @@ private_personality(_Unwind_Action action, _Unwind_Context *context)
 typedef bool (* step_func_t)(_Unwind_Context *context);
 
 _Unwind_Reason_Code
-private_step(_Unwind_Context *context, step_func_t func)
+private_step(_Unwind_Context *context, bool phase1, step_func_t func)
 {
-    if ((context->fde = eh_frame::find_fde(context->state)) == false)
+    context->fde = eh_frame::find_fde(context->state, phase1);
+
+    if (context->fde == false)
         return _URC_END_OF_STACK;
 
     if (func != 0 && func(context) == true)
@@ -91,11 +85,11 @@ private_step(_Unwind_Context *context, step_func_t func)
 }
 
 _Unwind_Reason_Code
-private_step_loop(_Unwind_Context *context, step_func_t func)
+private_step_loop(_Unwind_Context *context, bool phase1, step_func_t func)
 {
     while (1)
     {
-        auto ret = private_step(context, func);
+        auto ret = private_step(context, phase1, func);
         if (ret != _URC_CONTINUE_UNWIND)
             return ret;
     }
@@ -108,10 +102,9 @@ private_phase1(_Unwind_Context *context)
     log("============================================================\n");
     log("Phase #1\n\n");
 
-    g_phase = 1;
-    private_step(context, 0);
+    private_step(context, true, 0);
 
-    return private_step_loop(context, [](_Unwind_Context * context) -> bool
+    return private_step_loop(context, true, [](_Unwind_Context * context) -> bool
     {
         switch (private_personality(_UA_SEARCH_PHASE, context))
         {
@@ -136,10 +129,9 @@ private_phase2(_Unwind_Context *context)
     log("============================================================\n");
     log("Phase #2\n\n");
 
-    g_phase = 2;
-    private_step(context, 0);
+    private_step(context, false, 0);
 
-    return private_step_loop(context, [](_Unwind_Context * context) -> bool
+    return private_step_loop(context, false, [](_Unwind_Context * context) -> bool
     {
         auto action = _UA_CLEANUP_PHASE;
 

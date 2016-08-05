@@ -22,21 +22,30 @@
 #include <entry/entry.h>
 #include <guard_exceptions.h>
 #include <vcpu/vcpu_manager.h>
+#include <commit_or_rollback.h>
 
 extern "C" int64_t
-start_vmm(uint64_t arg)
+start_vmm(uint64_t arg) noexcept
 {
     return guard_exceptions(ENTRY_ERROR_VMM_START_FAILED, [&]()
     {
+        auto cor1 = commit_or_rollback([&]
+        {
+            g_vcm->hlt_vcpu(arg);
+            g_vcm->delete_vcpu(arg);
+        });
+
         g_vcm->create_vcpu(arg);
         g_vcm->run_vcpu(arg);
+
+        cor1.commit();
 
         return ENTRY_SUCCESS;
     });
 }
 
 extern "C" int64_t
-stop_vmm(uint64_t arg)
+stop_vmm(uint64_t arg) noexcept
 {
     return guard_exceptions(ENTRY_ERROR_VMM_STOP_FAILED, [&]()
     {

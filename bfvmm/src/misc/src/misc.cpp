@@ -34,25 +34,31 @@ write(int file, const void *buffer, size_t count)
     if (file != 1 && file != 2)
         return 0;
 
-    std::string str((char *)buffer, count);
-    if (str.length() >= 26 && str.compare(0, 8, "$vcpuid=") == 0)
+    try
     {
-        str.erase(0, 8);
+        std::string str(static_cast<const char *>(buffer), count);
+        if (str.length() >= 26 && str.compare(0, 8, "$vcpuid=") == 0)
+        {
+            str.erase(0, 8);
 
-        auto vcpuid_str = str.substr(0, 18);
-        auto vcpuid_num = std::stoull(vcpuid_str, 0, 16);
+            auto vcpuid_str = str.substr(0, 18);
+            auto vcpuid_num = std::stoull(vcpuid_str, 0, 16);
 
-        str.erase(0, 18);
+            str.erase(0, 18);
 
-        g_vcm->write(vcpuid_num, str);
+            g_vcm->write(vcpuid_num, str);
+            return count;
+        }
+        else
+        {
+            g_vcm->write(0, str);
+            serial_port_intel_x64::instance()->write(str);
+            return count;
+        }
     }
-    else
-    {
-        g_vcm->write(0, str);
-        serial_port_intel_x64::instance()->write(str);
-    }
+    catch (...) { }
 
-    return count;
+    return 0;
 }
 
 extern "C" int
@@ -80,17 +86,21 @@ write(int file, const void *buffer, size_t count)
     if (buffer == nullptr || count == 0)
         return 0;
 
-    if (file == 1 || file == 2)
+    try
     {
-        auto str = std::string((char *)buffer, count);
+        if (file == 1 || file == 2)
+        {
+            auto str = std::string(static_cast<const char *>(buffer), count);
 
-        if (dr == nullptr)
-            dr = new debug_ring(0);
+            if (dr == nullptr)
+                dr = new debug_ring(0);
 
-        dr->write(str);
-        serial_port_intel_x64::instance()->write(str);
-        return count;
+            dr->write(str);
+            serial_port_intel_x64::instance()->write(str);
+            return count;
+        }
     }
+    catch (...) { }
 
     return 0;
 }
@@ -130,7 +140,7 @@ fstat(int file, struct stat *sbuf)
 }
 
 extern "C" int64_t
-start_vmm(uint64_t arg)
+start_vmm(uint64_t arg) noexcept
 {
     (void) arg;
 
@@ -141,7 +151,7 @@ start_vmm(uint64_t arg)
 }
 
 extern "C" int64_t
-stop_vmm(uint64_t arg)
+stop_vmm(uint64_t arg) noexcept
 {
     (void) arg;
 
@@ -152,7 +162,7 @@ stop_vmm(uint64_t arg)
 }
 
 extern "C" int64_t
-add_mdl(memory_descriptor *mdl, int64_t num)
+add_mdl(memory_descriptor *mdl, int64_t num) noexcept
 {
     (void) mdl;
     (void) num;
@@ -165,7 +175,7 @@ add_mdl(memory_descriptor *mdl, int64_t num)
 uintptr_t __stack_chk_guard = 0x595e9fbd94fda766;
 
 extern "C" void
-__stack_chk_fail(void)
+__stack_chk_fail(void) noexcept
 {
     auto msg = "__stack_chk_fail: buffer overflow detected!!!\n";
     write(1, msg, strlen(msg));
@@ -178,13 +188,13 @@ auto g_eh_frame_list_num = 0ULL;
 eh_frame_t g_eh_frame_list[MAX_NUM_MODULES] = {};
 
 extern "C" struct eh_frame_t *
-get_eh_frame_list()
+get_eh_frame_list() noexcept
 {
     return g_eh_frame_list;
 }
 
 extern "C" int64_t
-register_eh_frame(void *addr, uint64_t size)
+register_eh_frame(void *addr, uint64_t size) noexcept
 {
     if (addr == nullptr || size == 0)
         return REGISTER_EH_FRAME_FAILURE;

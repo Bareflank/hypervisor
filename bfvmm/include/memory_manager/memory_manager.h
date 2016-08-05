@@ -78,7 +78,7 @@ public:
     ///
     /// @return number of free blocks.
     ///
-    virtual int64_t free_blocks();
+    virtual int64_t free_blocks() noexcept;
 
     /// Malloc
     ///
@@ -96,7 +96,7 @@ public:
     /// @param size the number of bytes to allocate
     /// @return a pointer to the starting address of the memory allocated.
     ///
-    virtual void *malloc(size_t size);
+    virtual void *malloc(size_t size) noexcept;
 
     /// Malloc Aligned
     ///
@@ -115,7 +115,7 @@ public:
     /// @param alignment the desired alignment
     /// @return a pointer to the starting address of the memory allocated.
     ///
-    virtual void *malloc_aligned(size_t size, uint64_t alignment);
+    virtual void *malloc_aligned(size_t size, uint64_t alignment) noexcept;
 
     /// Free
     ///
@@ -131,7 +131,7 @@ public:
     ///
     /// @param ptr a pointer to memory previously allocated using malloc.
     ///
-    virtual void free(void *ptr);
+    virtual void free(void *ptr) noexcept;
 
     /// Virtual Address To Physical Address
     ///
@@ -199,14 +199,14 @@ private:
 
     /// Default Constructor
     ///
-    memory_manager();
+    memory_manager() noexcept;
 
 private:
 
-    virtual void *block_to_virt(int64_t block);
-    virtual int64_t virt_to_block(void *virt);
+    virtual void *block_to_virt(int64_t block) noexcept;
+    virtual int64_t virt_to_block(void *virt) noexcept;
 
-    virtual bool is_block_aligned(int64_t block, int64_t alignment);
+    virtual bool is_block_aligned(int64_t block, int64_t alignment) noexcept;
 
 private:
 

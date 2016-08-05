@@ -25,7 +25,7 @@
 #include <eh_frame_list.h>
 
 int64_t
-register_eh_frame(void *addr, uint64_t size)
+register_eh_frame(void *addr, uint64_t size) noexcept
 {
     (void) addr;
     (void) size;

@@ -39,10 +39,6 @@ mkdir -p $BUILD_ABS/build_libcxx
 
 pushd $BUILD_ABS/build_libcxx
 
-export NEWLIB_DEFINES="-D_HAVE_LONG_DOUBLE -D_LDBL_EQ_DBL -D_POSIX_TIMERS -U__STRICT_ANSI__ -DMALLOC_PROVIDED"
-export CFLAGS="-fpic -ffreestanding -mno-red-zone -DCLOCK_MONOTONIC $NEWLIB_DEFINES"
-export CXXFLAGS="-fno-use-cxa-atexit -fno-threadsafe-statics $CFLAGS"
-
 export BAREFLANK_WRAPPER_IS_LIBCXX="true"
 
 if [[ $PRODUCTION == "yes" ]]; then

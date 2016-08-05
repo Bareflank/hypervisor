@@ -98,8 +98,8 @@ public:
     virtual std::ostream &print(std::ostream &os) const
     {
         os << "vmxon capabilities not supported:";
-        os << std::endl << "    - " << m_msr_str << ": " << (void *)m_msr;
-        os << std::endl << "    - " << m_field_str << ": " << (void *)m_field;
+        os << std::endl << "    - " << m_msr_str << ": " << reinterpret_cast<void *>(m_msr);
+        os << std::endl << "    - " << m_field_str << ": " << reinterpret_cast<void *>(m_field);
         os << std::endl << "    - func: " << m_func;
         os << std::endl << "    - line: " << m_line;
 
@@ -146,9 +146,9 @@ public:
     virtual std::ostream &print(std::ostream &os) const
     {
         os << "vmxon fixed msr bits not supported:";
-        os << std::endl << "    - " << m_cr_str << ": " << (void *)m_cr;
-        os << std::endl << "    - " << m_fixed0_str << ": " << (void *)m_fixed0;
-        os << std::endl << "    - " << m_fixed1_str << ": " << (void *)m_fixed1;
+        os << std::endl << "    - " << m_cr_str << ": " << reinterpret_cast<void *>(m_cr);
+        os << std::endl << "    - " << m_fixed0_str << ": " << reinterpret_cast<void *>(m_fixed0);
+        os << std::endl << "    - " << m_fixed1_str << ": " << reinterpret_cast<void *>(m_fixed1);
         os << std::endl << "    - func: " << m_func;
         os << std::endl << "    - line: " << m_line;
 

@@ -21,6 +21,7 @@
 
 #include <utility>
 #include <functional>
+#include <guard_exceptions.h>
 
 /// Commit Or Rollback
 ///
@@ -71,10 +72,13 @@ public:
     {
     }
 
-    ~commit_or_rollback()
+    ~commit_or_rollback() noexcept
     {
-        if (!m_committed)
-            m_fail_handler();
+        guard_exceptions(-1, [&]
+        {
+            if (!m_committed)
+                m_fail_handler();
+        });
     }
 
     void commit() noexcept

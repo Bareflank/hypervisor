@@ -26,8 +26,8 @@ idt_x64::idt_x64(uint16_t size)
 {
     auto addr = new uint64_t[size << 1]();
 
-    m_idt_reg.base = (uint64_t)addr;
-    m_idt_reg.limit = (uint16_t)((size << 4) - 1);
+    m_idt_reg.base = reinterpret_cast<uint64_t>(addr);
+    m_idt_reg.limit = static_cast<uint16_t>((size << 4) - 1);
 
     m_size = size << 1;
     m_idt = std::shared_ptr<uint64_t>(addr);
@@ -41,7 +41,7 @@ idt_x64::idt_x64(const std::shared_ptr<intrinsics_x64> &intrinsics)
     intrinsics->read_idt(&m_idt_reg);
 
     m_size = (m_idt_reg.limit + 1) >> 3;
-    m_idt = std::shared_ptr<uint64_t>((uint64_t *)m_idt_reg.base, [](uint64_t *) {});
+    m_idt = std::shared_ptr<uint64_t>(reinterpret_cast<uint64_t *>(m_idt_reg.base), [](uint64_t *) {});
 }
 
 uint64_t

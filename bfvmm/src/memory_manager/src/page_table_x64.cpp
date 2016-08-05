@@ -27,7 +27,7 @@
 page_table_x64::page_table_x64(uintptr_t *entry) :
     page_table_entry_x64(entry)
 {
-    m_table = std::unique_ptr<uintptr_t[]>((uintptr_t *)g_mm->malloc_aligned(PT_SIZE * PTE_SIZE, PT_SIZE * PTE_SIZE));
+    m_table = std::unique_ptr<uintptr_t[]>(static_cast<uintptr_t *>(g_mm->malloc_aligned(PT_SIZE * PTE_SIZE, PT_SIZE * PTE_SIZE)));
     memset(m_table.get(), 0, PT_SIZE * PTE_SIZE);
 
     if (entry != nullptr)
@@ -42,7 +42,7 @@ page_table_x64::page_table_x64(uintptr_t *entry) :
 std::shared_ptr<page_table_entry_x64>
 page_table_x64::add_page(void *virt_addr)
 {
-    return add_page((uintptr_t)virt_addr, PML4_INDEX);
+    return add_page(reinterpret_cast<uintptr_t>(virt_addr), PML4_INDEX);
 }
 
 uintptr_t
@@ -53,7 +53,7 @@ page_table_x64::table_phys_addr() const
     if (addr == nullptr)
         throw std::logic_error("phys_addr: virt_to_phys failed");
 
-    return ((uintptr_t)addr & PTE_PHYS_ADDR_MASK);
+    return (reinterpret_cast<uintptr_t>(addr) & PTE_PHYS_ADDR_MASK);
 }
 
 std::shared_ptr<page_table_entry_x64>

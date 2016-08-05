@@ -41,11 +41,11 @@ public:
 
     /// Default Constructor
     ///
-    debug_ring(uint64_t vcpuid);
+    debug_ring(uint64_t vcpuid) noexcept;
 
     /// Debug Ring Destructor
     ///
-    virtual ~debug_ring() {}
+    virtual ~debug_ring() noexcept {}
 
     /// Write to Debug Ring
     ///
@@ -75,6 +75,6 @@ private:
 /// @param drr the resulting debug ring
 /// @return the debug_ring_resources_t for the provided vcpuid
 ///
-extern "C" int64_t get_drr(uint64_t vcpuid, struct debug_ring_resources_t **drr);
+extern "C" int64_t get_drr(uint64_t vcpuid, struct debug_ring_resources_t **drr) noexcept;
 
 #endif

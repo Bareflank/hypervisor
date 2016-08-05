@@ -2216,15 +2216,15 @@ vmcs_intel_x64::check_guest_vmcs_link_pointer_first_word()
     if (vmcs_link_pointer == 0xFFFFFFFFFFFFFFFF)
         return;
 
-    auto vmcs = g_mm->phys_to_virt((void *)vmcs_link_pointer);
+    auto vmcs = g_mm->phys_to_virt(reinterpret_cast<void *>(vmcs_link_pointer));
 
     if (vmcs == 0)
         throw vmcs_invalid_field("invalid vmcs physical address",
                                  vmcs_link_pointer);
 
     auto basic_msr = m_intrinsics->read_msr(IA32_VMX_BASIC_MSR) & 0x7FFFFFFFF;
-    auto revision_id = (((uint32_t *)vmcs)[0]) & 0x7FFFFFFF;
-    auto vmcs_shadow = (((uint32_t *)vmcs)[0]) & 0x80000000;
+    auto revision_id = *reinterpret_cast<uint32_t *>(vmcs) & 0x7FFFFFFF;
+    auto vmcs_shadow = *reinterpret_cast<uint32_t *>(vmcs) & 0x80000000;
 
     if (basic_msr != revision_id)
         throw vmcs_invalid_field("shadow vmcs must contain CPU's revision id",

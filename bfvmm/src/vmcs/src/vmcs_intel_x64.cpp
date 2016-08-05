@@ -25,6 +25,7 @@
 #include <intrinsics/gdt_x64.h>
 #include <intrinsics/idt_x64.h>
 #include <vmcs/vmcs_intel_x64.h>
+#include <vmcs/vmcs_intel_x64_resume.h>
 #include <vmcs/vmcs_intel_x64_promote.h>
 #include <vmcs/vmcs_intel_x64_exceptions.h>
 #include <memory_manager/memory_manager.h>
@@ -50,11 +51,8 @@ vmcs_intel_x64::launch(const std::shared_ptr<vmcs_intel_x64_state> &host_state,
     this->create_vmcs_region();
     this->create_exit_handler_stack();
 
-    if (m_intrinsics->vmclear(&m_vmcs_region_phys) == false)
-        throw vmcs_failure("failed to clear vmcs");
-
-    if (m_intrinsics->vmptrld(&m_vmcs_region_phys) == false)
-        throw vmcs_failure("failed to load vmcs");
+    this->clear();
+    this->load();
 
     this->write_16bit_guest_state(guest_state);
     this->write_64bit_guest_state(guest_state);
@@ -104,7 +102,31 @@ vmcs_intel_x64::launch(const std::shared_ptr<vmcs_intel_x64_state> &host_state,
 void
 vmcs_intel_x64::promote()
 {
-    promote_vmcs_to_root(vmread(VMCS_HOST_GS_BASE));
+    vmcs_promote(vmread(VMCS_HOST_GS_BASE));
+
+    throw std::runtime_error("vmcs promote failed");
+}
+
+void
+vmcs_intel_x64::resume()
+{
+    vmcs_resume(m_state_save.get());
+
+    throw std::runtime_error("vmcs resume failed");
+}
+
+void
+vmcs_intel_x64::load()
+{
+    if (m_intrinsics->vmptrld(&m_vmcs_region_phys) == false)
+        throw vmcs_failure("failed to load vmcs");
+}
+
+void
+vmcs_intel_x64::clear()
+{
+    if (m_intrinsics->vmclear(&m_vmcs_region_phys) == false)
+        throw vmcs_failure("failed to clear vmcs");
 }
 
 void
@@ -113,10 +135,10 @@ vmcs_intel_x64::create_vmcs_region()
     auto cor1 = commit_or_rollback([&]
     { this->release_vmcs_region(); });
 
-    auto region = (uint32_t *)g_mm->malloc_aligned(4096, 4096);
+    auto region = static_cast<uint32_t *>(g_mm->malloc_aligned(4096, 4096));
 
     m_vmcs_region = std::unique_ptr<uint32_t>(region);
-    m_vmcs_region_phys = (uintptr_t)g_mm->virt_to_phys(region);
+    m_vmcs_region_phys = reinterpret_cast<uintptr_t>(g_mm->virt_to_phys(region));
 
     if (m_vmcs_region_phys == 0)
         throw std::logic_error("m_vmcs_region_phys == nullptr");
@@ -396,8 +418,8 @@ vmcs_intel_x64::write_natural_host_state(const std::shared_ptr<vmcs_intel_x64_st
     vmwrite(VMCS_HOST_IA32_SYSENTER_ESP, state->ia32_sysenter_esp_msr());
     vmwrite(VMCS_HOST_IA32_SYSENTER_EIP, state->ia32_sysenter_eip_msr());
 
-    vmwrite(VMCS_HOST_RSP, (uint64_t)exit_handler_stack);
-    vmwrite(VMCS_HOST_RIP, (uint64_t)exit_handler_entry);
+    vmwrite(VMCS_HOST_RSP, reinterpret_cast<uint64_t>(exit_handler_stack));
+    vmwrite(VMCS_HOST_RIP, reinterpret_cast<uint64_t>(exit_handler_entry));
 }
 
 void
@@ -542,23 +564,23 @@ vmcs_intel_x64::filter_unsupported(uint64_t msr, uint64_t &ctrl)
 
     if ((allowed0 & ctrl) != allowed0)
     {
-        bfdebug << "vmcs ctrl field mis-configured for msr allowed 0: " << (void *)msr << bfendl;
-        bfdebug << "    - allowed0: " << (void *)allowed0 << bfendl;
-        bfdebug << "    - old ctrl: " << (void *)ctrl << bfendl;
+        bfdebug << "vmcs ctrl field mis-configured for msr allowed 0: " << reinterpret_cast<void *>(msr) << bfendl;
+        bfdebug << "    - allowed0: " << reinterpret_cast<void *>(allowed0) << bfendl;
+        bfdebug << "    - old ctrl: " << reinterpret_cast<void *>(ctrl) << bfendl;
 
         ctrl |= allowed0;
 
-        bfdebug << "    - new ctrl: " << (void *)ctrl << bfendl;
+        bfdebug << "    - new ctrl: " << reinterpret_cast<void *>(ctrl) << bfendl;
     }
 
     if ((ctrl & ~allowed1) != 0)
     {
-        bfdebug << "vmcs ctrl field mis-configured for msr allowed 1: " << (void *)msr << bfendl;
-        bfdebug << "    - allowed1: " << (void *)allowed1 << bfendl;
-        bfdebug << "    - old ctrl: " << (void *)ctrl << bfendl;
+        bfdebug << "vmcs ctrl field mis-configured for msr allowed 1: " << reinterpret_cast<void *>(msr) << bfendl;
+        bfdebug << "    - allowed1: " << reinterpret_cast<void *>(allowed1) << bfendl;
+        bfdebug << "    - old ctrl: " << reinterpret_cast<void *>(ctrl) << bfendl;
 
         ctrl &= allowed1;
 
-        bfdebug << "    - new ctrl: " << (void *)ctrl << bfendl;
+        bfdebug << "    - new ctrl: " << reinterpret_cast<void *>(ctrl) << bfendl;
     }
 }

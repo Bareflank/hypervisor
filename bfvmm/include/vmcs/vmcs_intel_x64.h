@@ -68,13 +68,37 @@ public:
     /// Launch
     ///
     /// Launches the VMCS. Note that this will create a new guest VM when
-    /// it is complete.
+    /// it is complete. If this function is run more than once, it will clear
+    /// the VMCS and it's state, starting the VM over again. For this reason
+    /// it should only be called once, unless you intend to clear the VM.
     ///
     /// @throws invalid_vmcs thrown if the VMCS was created without
     ///     intrinsics
     ///
     virtual void launch(const std::shared_ptr<vmcs_intel_x64_state> &host_state,
                         const std::shared_ptr<vmcs_intel_x64_state> &guest_state);
+
+    /// Resume
+    ///
+    /// Resumes the VMCS. Note that this should only be called after a launch,
+    /// otherwise the system will crash. This function should be called
+    /// whenever the eixt handler needs to execute a VM. Note that there are
+    /// two different times that this might happen: when the exit handler is
+    /// done emulating an instruction and needs to return back to the VM,
+    /// or it is time to schedule a different VM to execute (that has
+    /// obviously already been launched)
+    ///
+    /// @note if you are going to resume a VMCS, you must make sure that
+    ///       VMCS has been loaded first. Otherwise, you will end up resuming
+    ///       the currently loaded VMCS with a different state save area. We
+    ///       don't check for this issue as it would require us to query
+    ///       VMX for the currently loaded VMCS which is slow, and it's likely
+    ///       this function will get executed a lot.
+    ///
+    /// @note this function is implemented mainly in assembly as we need to
+    ///       restore the register state very carefully.
+    ///
+    virtual void resume();
 
     /// Promote
     ///
@@ -85,15 +109,37 @@ public:
     /// Instead, the CPU resumes execution on the last instruction executed
     /// by the guest.
     ///
-    /// If this function fails in the middle of it's execution, it calls
-    /// abort. This is done because the process of promoting sets the CPU
-    /// state, and if it dies in the middle, the CPU is left in a corrupt
-    /// state.
-    ///
-    /// @throws invalid_vmcs thrown if the VMCS was created without
-    ///     intrinsics
+    /// @note this function is mainly implemented in raw assembly. The reason
+    ///       for this is, GCC was optimizing errors in it's implementation
+    ///       when "-O3" was enabled. The order of each instruction is very
+    ///       important
     ///
     virtual void promote();
+
+    /// Load
+    ///
+    /// The main purpose of this function is to execute VMPTRLD. Specifically,
+    /// this function loads the VMCS that this class contains into the CPU.
+    /// There are two different times that this is mainly needed. When the
+    /// VMCS is first created, a VM launch is needed to get this VMCS up and
+    /// running. Before the launch can occur, the VMCS needs to be loaded so
+    /// that vm reads / writes are successful (as the CPU needs to know which
+    /// VMCS to read / write to). Once a launch has been done, the VMCS
+    /// contains the VM's state. The next time it needs to be run, a VMRESUME
+    /// must be executed. Once gain, the CPU needs to know which VMCS to use,
+    /// and thus a load is needed.
+    ///
+    virtual void load();
+
+    /// Clear
+    ///
+    /// Clears the VMCS. This should only be needed before a VM launch. But
+    /// can be used to "reset" a guest prior to launching it again. If you
+    /// run a clear, you must run load again as the clear will remove the
+    /// valid bit in the VMCS, rendering future reads / writes to this VMCS
+    /// invalid.
+    ///
+    virtual void clear();
 
 protected:
 
@@ -127,9 +173,9 @@ protected:
     virtual uint64_t vmread(uint64_t field) const;
     virtual void vmwrite(uint64_t field, uint64_t value);
 
-protected:
-
     virtual void filter_unsupported(uint64_t msr, uint64_t &ctrl);
+
+protected:
 
     virtual void dump_vmcs();
 
@@ -515,6 +561,7 @@ protected:
 protected:
 
     friend class vmcs_ut;
+    friend class vcpu_intel_x64;
     friend class exit_handler_intel_x64;
 
     std::shared_ptr<intrinsics_intel_x64> m_intrinsics;
@@ -523,6 +570,12 @@ protected:
     std::unique_ptr<uint32_t> m_vmcs_region;
 
     std::unique_ptr<char[]> m_exit_handler_stack;
+    std::shared_ptr<state_save_intel_x64> m_state_save;
+
+private:
+
+    void set_state_save(const std::shared_ptr<state_save_intel_x64> &state_save)
+    { m_state_save = state_save; }
 };
 
 #endif

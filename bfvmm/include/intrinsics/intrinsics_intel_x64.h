@@ -34,15 +34,15 @@
 extern "C" {
 #endif
 
-uint64_t __vmxon(void *vmxon_region);
-uint64_t __vmxoff(void);
-uint64_t __vmcall(uint64_t value);
-uint64_t __vmclear(void *vmcs_region);
-uint64_t __vmptrld(void *vmcs_region);
-uint64_t __vmptrst(void *vmcs_region);
-uint64_t __vmwrite(uint64_t field, uint64_t val);
-uint64_t __vmread(uint64_t field, uint64_t *val);
-uint64_t __vmlaunch(void);
+uint64_t __vmxon(void *vmxon_region) noexcept;
+uint64_t __vmxoff(void) noexcept;
+uint64_t __vmcall(uint64_t value) noexcept;
+uint64_t __vmclear(void *vmcs_region) noexcept;
+uint64_t __vmptrld(void *vmcs_region) noexcept;
+uint64_t __vmptrst(void *vmcs_region) noexcept;
+uint64_t __vmwrite(uint64_t field, uint64_t val) noexcept;
+uint64_t __vmread(uint64_t field, uint64_t *val) noexcept;
+uint64_t __vmlaunch(void) noexcept;
 
 // -----------------------------------------------------------------------------
 // State Save
@@ -80,7 +80,7 @@ struct state_save_intel_x64
     uint64_t rip;                   // 0x078
     uint64_t rsp;                   // 0x080
 
-    uint64_t vcpu_ptr;              // 0x088
+    uint64_t vcpuid;                // 0x088
     uint64_t vmxon_ptr;             // 0x090
     uint64_t vmcs_ptr;              // 0x098
     uint64_t exit_handler_ptr;      // 0x0A0

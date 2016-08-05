@@ -205,7 +205,7 @@ uint64_t decode_pointer(char **addr, uint64_t encoding);
 class eh_frame
 {
 public:
-    static fd_entry find_fde(register_state *state);
+    static fd_entry find_fde(register_state *state, bool phase1);
 };
 
 /// Common Entry

@@ -34,9 +34,9 @@ void set_gdt(void *gdt)
     g_gdt[2] = 0xFFFF8FFFFFFFFFFF;
     g_gdt[3] = 0x00000000FFFFFFFF;
 
-    auto gdt_reg = (gdt_reg_x64_t *)(gdt);
+    auto gdt_reg = reinterpret_cast<gdt_reg_x64_t *>(gdt);
     gdt_reg->limit = 4 * sizeof(uint64_t);
-    gdt_reg->base = (uint64_t)g_gdt.get();
+    gdt_reg->base = reinterpret_cast<uint64_t>(g_gdt.get());
 }
 
 void
@@ -81,7 +81,7 @@ intrinsics_ut::test_base()
     {
         gdt_x64 gdt(intrinsics);
 
-        EXPECT_TRUE(gdt.base() == (uint64_t)g_gdt.get());
+        EXPECT_TRUE(gdt.base() == reinterpret_cast<uint64_t>(g_gdt.get()));
     });
 }
 

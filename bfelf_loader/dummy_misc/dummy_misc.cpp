@@ -79,6 +79,18 @@ register_eh_frame(void *addr, uint64_t size)
     return REGISTER_EH_FRAME_SUCCESS;
 }
 
+extern "C" void
+__cxa_end_catch(void)
+{  }
+
+extern "C" void
+__cxa_begin_catch(void)
+{  }
+
+extern "C" void
+__gxx_personality_v0(void)
+{  }
+
 void func30() {}
 void func31() {}
 void func32() {}

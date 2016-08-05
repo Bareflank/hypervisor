@@ -33,14 +33,7 @@
 /// Virtual CPU (Intel x86_64)
 ///
 /// The Virtual CPU represents a "CPU" to the hypervisor that is specific to
-/// Intel x86_64. Each core in a multi-core system has a vCPU associated with
-/// it. Each guest VM must also have a vCPU for each physical CPU on the
-/// system, which means that the total number of vCPUs being managed by the
-/// vcpu_manager is
-///
-/// @code
-/// #cores + (#cores * #guests)
-/// @endcode
+/// Intel x86_64.
 ///
 /// This Intel specific vCPU class provides all of the functionality of the
 /// base vCPU, but also adds classes specific to Intel's VT-x including the
@@ -56,14 +49,6 @@ class vcpu_intel_x64 : public vcpu
 public:
 
     /// Constructor
-    ///
-    /// Creates a vCPU with the provided id and default resources.
-    ///
-    /// @param id the id of the vcpu
-    ///
-    vcpu_intel_x64(uint64_t id);
-
-    /// Override Constructor
     ///
     /// Creates a vCPU with the provided resources. This constructor
     /// provides a means to override and repalce the internal resources of the
@@ -82,44 +67,61 @@ public:
     ///     provide nullptr, a default exit handler will be created.
     /// @param intrinsics the intrinsics the vcpu should use. If you
     ///     provide nullptr, a default intrinsics will be created.
+    /// @param vmm_state the vmm state the vcpu should use. If you
+    ///     provide nullptr, a default vmm state will be created.
+    /// @param guest_state the guest state the vcpu should use. If you
+    ///     provide nullptr, a default guest state will be created.
     ///
     vcpu_intel_x64(uint64_t id,
-                   const std::shared_ptr<debug_ring> &debug_ring,
-                   const std::shared_ptr<vmxon_intel_x64> &vmxon,
-                   const std::shared_ptr<vmcs_intel_x64> &vmcs,
-                   const std::shared_ptr<exit_handler_intel_x64> &exit_handler,
-                   const std::shared_ptr<intrinsics_intel_x64> &intrinsics);
+                   const std::shared_ptr<debug_ring> &debug_ring = nullptr,
+                   const std::shared_ptr<intrinsics_intel_x64> &intrinsics = nullptr,
+                   const std::shared_ptr<vmxon_intel_x64> &vmxon = nullptr,
+                   const std::shared_ptr<vmcs_intel_x64> &vmcs = nullptr,
+                   const std::shared_ptr<exit_handler_intel_x64> &exit_handler = nullptr,
+                   const std::shared_ptr<vmcs_intel_x64_vmm_state> &vmm_state = nullptr,
+                   const std::shared_ptr<vmcs_intel_x64_vmm_state> &guest_state = nullptr);
 
     /// Destructor
     ///
     virtual ~vcpu_intel_x64() {}
 
-    /// Run
+    /// Init vCPU
     ///
-    /// Executes the vCPU.
+    /// @see vcpu::init
     ///
-    virtual void run() override;
+    virtual void init(void *attr = nullptr) override;
 
-    /// Halt
+    /// Fini vCPU
     ///
-    /// Halts the vCPU.
+    /// @see vcpu::fini
     ///
-    virtual void hlt() override;
+    virtual void fini(void *attr = nullptr) override;
+
+    /// Run vCPU
+    ///
+    /// @see vcpu::run
+    ///
+    virtual void run(void *attr = nullptr) override;
+
+    /// Halt vCPU
+    ///
+    /// @see vcpu::hlt
+    ///
+    virtual void hlt(void *attr = nullptr) override;
 
 private:
 
-    void init();
+    bool m_launched;
 
-private:
-
+    std::shared_ptr<intrinsics_intel_x64> m_intrinsics;
     std::shared_ptr<vmxon_intel_x64> m_vmxon;
     std::shared_ptr<vmcs_intel_x64> m_vmcs;
     std::shared_ptr<exit_handler_intel_x64> m_exit_handler;
-    std::shared_ptr<intrinsics_intel_x64> m_intrinsics;
+
     std::shared_ptr<state_save_intel_x64> m_state_save;
 
-    std::shared_ptr<vmcs_intel_x64_vmm_state> m_vmm_state;
-    std::shared_ptr<vmcs_intel_x64_host_vm_state> m_host_vm_state;
+    std::shared_ptr<vmcs_intel_x64_state> m_vmm_state;
+    std::shared_ptr<vmcs_intel_x64_state> m_guest_state;
 };
 
 #endif

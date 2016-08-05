@@ -30,23 +30,14 @@ global exit_handler_entry:function
 
 section .text
 
-; VMM Entry Point
+; Exit Handler Entry Point
 ;
-; The exit handler is the actual VMM. It's the peice of code that sits above
-; the guest OS, and monitors what it's doing, and based on the different types
-; of exit conditions, changes the guest's operations to suit it's needs.
-;
-; With respect to VT-x, when the exit occurs, the CPU keeps the state of the
+; With respect to VT-x, when an exit occurs, the CPU keeps the state of the
 ; registers from the guest intact, and gives the state of the registers prior
 ; to vmresume, back to the guest. The only exception to this is RSP and RIP as
 ; these two registers are specific to the VMM (RIP is exit_handler_entry,
 ; and RSP is the exit_handler_stack). So the only job that this entry point
-; has is to preserve the state of the guest, and restore the state of the
-; guest.
-;
-; NOTE: The order of these registers and their indexes depend on the
-;       state save structure in the intrinsics code. If you change that
-;       code, make sure you update this code to reflect the change.
+; has is to preserve the state of the guest
 ;
 exit_handler_entry:
 
@@ -93,44 +84,9 @@ exit_handler_entry:
     mov rdi, [gs:0x00A0]
     call exit_handler wrt ..plt
 
-    mov rdi, VMCS_GUEST_RSP
-    vmwrite rdi, [gs:0x080]
-    mov rdi, VMCS_GUEST_RIP
-    vmwrite rdi, [gs:0x078]
+; The code should never get this far as the exit handler should resume back
+; into the guest using the VMCS's resume function. If we get this far,
+; something really bad has happened as we also halt in exit_handler if the
+; resume doesn't happen.
 
-    vmovdqa ymm15, [gs:0x2A0]
-    vmovdqa ymm14, [gs:0x280]
-    vmovdqa ymm13, [gs:0x260]
-    vmovdqa ymm12, [gs:0x240]
-    vmovdqa ymm11, [gs:0x220]
-    vmovdqa ymm10, [gs:0x200]
-    vmovdqa ymm9,  [gs:0x1E0]
-    vmovdqa ymm8,  [gs:0x1C0]
-    vmovdqa ymm7,  [gs:0x1A0]
-    vmovdqa ymm6,  [gs:0x180]
-    vmovdqa ymm5,  [gs:0x160]
-    vmovdqa ymm4,  [gs:0x140]
-    vmovdqa ymm3,  [gs:0x120]
-    vmovdqa ymm2,  [gs:0x100]
-    vmovdqa ymm1,  [gs:0x0E0]
-    vmovdqa ymm0,  [gs:0x0C0]
-
-    mov r15, [gs:0x070]
-    mov r14, [gs:0x068]
-    mov r13, [gs:0x060]
-    mov r12, [gs:0x058]
-    mov r11, [gs:0x050]
-    mov r10, [gs:0x048]
-    mov r9,  [gs:0x040]
-    mov r8,  [gs:0x038]
-    mov rdi, [gs:0x030]
-    mov rsi, [gs:0x028]
-    mov rbp, [gs:0x020]
-    mov rdx, [gs:0x018]
-    mov rcx, [gs:0x010]
-    mov rbx, [gs:0x008]
-    mov rax, [gs:0x000]
-
-    sti
-
-    vmresume
+    hlt

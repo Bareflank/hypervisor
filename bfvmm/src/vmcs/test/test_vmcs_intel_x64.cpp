@@ -49,7 +49,7 @@ fake_vmread(uint64_t field, uint64_t *val)
     if (val == 0)
         return false;
 
-    std::cout << "[" << fake_vmread_index << "] -> " << (void *)fake_vmread_return[fake_vmread_index] << std::endl;
+    std::cout << "[" << fake_vmread_index << "] -> " << reinterpret_cast<void *>(fake_vmread_return[fake_vmread_index]) << std::endl;
 
     *val = fake_vmread_return[fake_vmread_index];
     fake_vmread_index++;
@@ -129,7 +129,7 @@ vmcs_ut::test_launch_vmclear_failure()
 
     mocks.OnCallFunc(memory_manager::instance).Do(fake_memory_manager);
     mocks.OnCall(mm, memory_manager::malloc_aligned).Do(stubbed_malloc_aligned);
-    mocks.OnCall(mm, memory_manager::virt_to_phys).Return((void *)0xDEADBEEFDEAF1000);
+    mocks.OnCall(mm, memory_manager::virt_to_phys).Return(reinterpret_cast<void *>(0xDEADBEEFDEAF1000));
     mocks.OnCall(in.get(), intrinsics_intel_x64::read_msr).With(IA32_VMX_BASIC_MSR).Return(0xFFFFFFFF);
 
     // Breakage
@@ -163,7 +163,7 @@ vmcs_ut::test_launch_vmptrld_failure()
 
     mocks.OnCallFunc(memory_manager::instance).Do(fake_memory_manager);
     mocks.OnCall(mm, memory_manager::malloc_aligned).Do(stubbed_malloc_aligned);
-    mocks.OnCall(mm, memory_manager::virt_to_phys).Return((void *)0xDEADBEEFDEAF1000);
+    mocks.OnCall(mm, memory_manager::virt_to_phys).Return(reinterpret_cast<void *>(0xDEADBEEFDEAF1000));
 
     mocks.OnCall(in.get(), intrinsics_intel_x64::read_msr).With(IA32_VMX_BASIC_MSR).Return(0xFFFFFFFF);
 
@@ -199,7 +199,7 @@ vmcs_ut::test_launch_vmwrite_failure()
 
     mocks.OnCallFunc(memory_manager::instance).Do(fake_memory_manager);
     mocks.OnCall(mm, memory_manager::malloc_aligned).Do(stubbed_malloc_aligned);
-    mocks.OnCall(mm, memory_manager::virt_to_phys).Return((void *)0xDEADBEEFDEAF1000);
+    mocks.OnCall(mm, memory_manager::virt_to_phys).Return(reinterpret_cast<void *>(0xDEADBEEFDEAF1000));
 
     mocks.OnCall(in.get(), intrinsics_intel_x64::read_msr).With(IA32_VMX_BASIC_MSR).Return(0xFFFFFFFF);
 
@@ -237,7 +237,7 @@ vmcs_ut::test_launch_vmread_failure()
 
     mocks.OnCallFunc(memory_manager::instance).Do(fake_memory_manager);
     mocks.OnCall(mm, memory_manager::malloc_aligned).Do(stubbed_malloc_aligned);
-    mocks.OnCall(mm, memory_manager::virt_to_phys).Return((void *)0xDEADBEEFDEAF1000);
+    mocks.OnCall(mm, memory_manager::virt_to_phys).Return(reinterpret_cast<void *>(0xDEADBEEFDEAF1000));
 
     mocks.OnCall(in.get(), intrinsics_intel_x64::read_msr).With(IA32_VMX_BASIC_MSR).Return(0xFFFFFFFF);
 
@@ -268,7 +268,7 @@ static void setup_success_launch(MockRepository &mocks, intrinsics_intel_x64 *in
 
     mocks.OnCallFunc(memory_manager::instance).Do(fake_memory_manager);
     mocks.OnCall(mm, memory_manager::malloc_aligned).Do(stubbed_malloc_aligned);
-    mocks.OnCall(mm, memory_manager::virt_to_phys).Return((void *)0xDEADBEEFDEAF1000);
+    mocks.OnCall(mm, memory_manager::virt_to_phys).Return(reinterpret_cast<void *>(0xDEADBEEFDEAF1000));
 
     mocks.OnCall(in, intrinsics_intel_x64::read_msr).With(IA32_VMX_BASIC_MSR).Return(0xFFFFFFFF);
 
@@ -857,7 +857,7 @@ vmcs_ut::test_check_control_tpr_shadow_and_virtual_apic_success_enabled()
     mocks.OnCallFunc(memory_manager::instance).Do(fake_memory_manager);
     void *vapic_page = malloc(4096);
     mocks.OnCall(mm, memory_manager::phys_to_virt).Return(vapic_page);
-    uint8_t *ptr2 = (uint8_t *)((uint8_t *)vapic_page + 0x80);
+    uint8_t *ptr2 = reinterpret_cast<uint8_t *>(vapic_page) + 0x80;
     ptr2[0] = 0xF0;
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -1168,7 +1168,7 @@ vmcs_ut::test_check_control_tpr_shadow_and_virtual_apic_fail_enabled_vtpr_range_
     mocks.OnCallFunc(memory_manager::instance).Do(fake_memory_manager);
     void *vapic_page = malloc(4096);
     mocks.OnCall(mm, memory_manager::phys_to_virt).Return(vapic_page);
-    uint8_t *ptr2 = (uint8_t *)((uint8_t *)vapic_page + 0x80);
+    uint8_t *ptr2 = reinterpret_cast<uint8_t *>(vapic_page) + 0x80;
     ptr2[0] = 0x40;
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]

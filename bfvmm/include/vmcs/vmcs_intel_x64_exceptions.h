@@ -92,7 +92,7 @@ public:
     virtual std::ostream &print(std::ostream &os) const
     {
         os << "vmcs read failure:";
-        os << std::endl << "    - field: " << (void *)m_field;
+        os << std::endl << "    - field: " << reinterpret_cast<void *>(m_field);
         os << std::endl << "    - func: " << m_func;
         os << std::endl << "    - line: " << m_line;
 
@@ -128,8 +128,8 @@ public:
     virtual std::ostream &print(std::ostream &os) const
     {
         os << "vmcs write failure:";
-        os << std::endl << "    - field: " << (void *)m_field;
-        os << std::endl << "    - value: " << (void *)m_value;
+        os << std::endl << "    - field: " << reinterpret_cast<void *>(m_field);
+        os << std::endl << "    - value: " << reinterpret_cast<void *>(m_value);
         os << std::endl << "    - func: " << m_func;
         os << std::endl << "    - line: " << m_line;
 
@@ -208,10 +208,10 @@ public:
         os << m_func << " failed:";
         os << std::endl << "    - mesg: " << m_mesg
            << " controls not setup properly";
-        os << std::endl << "    - msr_lower: " << (void *)m_msr_lower;
-        os << std::endl << "    - msr_upper: " << (void *)m_msr_upper;
-        os << std::endl << "    - controls_lower: " << (void *)m_controls_lower;
-        os << std::endl << "    - controls_upper: " << (void *)m_controls_upper;
+        os << std::endl << "    - msr_lower: " << reinterpret_cast<void *>(m_msr_lower);
+        os << std::endl << "    - msr_upper: " << reinterpret_cast<void *>(m_msr_upper);
+        os << std::endl << "    - controls_lower: " << reinterpret_cast<void *>(m_controls_lower);
+        os << std::endl << "    - controls_upper: " << reinterpret_cast<void *>(m_controls_upper);
         os << std::endl << "    - line: " << m_line;
 
         return os;
@@ -253,7 +253,7 @@ public:
     {
         os << m_func << " failed:";
         os << std::endl << "    - mesg: " << m_mesg;
-        os << std::endl << "    - " << m_field_str << ": " << (void *)m_field;
+        os << std::endl << "    - " << m_field_str << ": " << reinterpret_cast<void *>(m_field);
         os << std::endl << "    - line: " << m_line;
 
         return os;
@@ -297,8 +297,8 @@ public:
     {
         os << m_func << " failed:";
         os << std::endl << "    - mesg: " << m_mesg;
-        os << std::endl << "    - " << m_field1_str << ": " << (void *)m_field1;
-        os << std::endl << "    - " << m_field2_str << ": " << (void *)m_field2;
+        os << std::endl << "    - " << m_field1_str << ": " << reinterpret_cast<void *>(m_field1);
+        os << std::endl << "    - " << m_field2_str << ": " << reinterpret_cast<void *>(m_field2);
         os << std::endl << "    - line: " << m_line;
 
         return os;
@@ -343,9 +343,9 @@ public:
         os << m_func << " failed:";
         os << std::endl << "    - mesg: " << m_cr_str
            << " not setup properly";
-        os << std::endl << "    - " << m_cr_str << ": " << (void *)m_cr;
-        os << std::endl << "    - fixed0: " << (void *)m_fixed0;
-        os << std::endl << "    - fixed1: " << (void *)m_fixed1;
+        os << std::endl << "    - " << m_cr_str << ": " << reinterpret_cast<void *>(m_cr);
+        os << std::endl << "    - fixed0: " << reinterpret_cast<void *>(m_fixed0);
+        os << std::endl << "    - fixed1: " << reinterpret_cast<void *>(m_fixed1);
         os << std::endl << "    - line: " << m_line;
 
         return os;

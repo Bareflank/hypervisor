@@ -32,8 +32,8 @@ gdt_x64::gdt_x64(uint16_t size) :
 
     auto addr = new uint64_t[size]();
 
-    m_gdt_reg.base = (uint64_t)addr;
-    m_gdt_reg.limit = (uint16_t)(size << 3);
+    m_gdt_reg.base = reinterpret_cast<uint64_t>(addr);
+    m_gdt_reg.limit = static_cast<uint16_t>(size << 3);
 
     m_size = size;
     m_gdt = std::shared_ptr<uint64_t>(addr);
@@ -48,7 +48,7 @@ gdt_x64::gdt_x64(const std::shared_ptr<intrinsics_x64> &intrinsics) :
     intrinsics->read_gdt(&m_gdt_reg);
 
     m_size = m_gdt_reg.limit >> 3;
-    m_gdt = std::shared_ptr<uint64_t>((uint64_t *)m_gdt_reg.base, [](uint64_t *) {});
+    m_gdt = std::shared_ptr<uint64_t>(reinterpret_cast<uint64_t *>(m_gdt_reg.base), [](uint64_t *) {});
 }
 
 uint64_t

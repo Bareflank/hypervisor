@@ -35,7 +35,7 @@ stubbed_malloc_aligned(size_t size, int64_t alignment)
     if (posix_memalign(&ptr, alignment, size) != 0)
         return 0;
 
-    return (void *)ptr;
+    return ptr;
 }
 
 static memory_manager *
@@ -87,7 +87,7 @@ vmxon_ut::test_start_success()
     // create_vmxon_region
     mocks.OnCallFunc(memory_manager::instance).Do(fake_memory_manager);
     mocks.OnCall(mm, memory_manager::malloc_aligned).Do(stubbed_malloc_aligned);
-    mocks.OnCall(mm, memory_manager::virt_to_phys).Return((void *)0xDEADBEEFDEAF1000);
+    mocks.OnCall(mm, memory_manager::virt_to_phys).Return(reinterpret_cast<void *>(0xDEADBEEFDEAF1000));
 
     // enable_vmx_operation
     Call &cr4_1 = mocks.ExpectCall(intrinsics, intrinsics_intel_x64::read_cr4).After(cr4_0).Return(0);
@@ -145,7 +145,7 @@ vmxon_ut::test_start_execute_vmxon_already_on_failure()
     // create_vmxon_region
     mocks.OnCallFunc(memory_manager::instance).Do(fake_memory_manager);
     mocks.OnCall(mm, memory_manager::malloc_aligned).Do(stubbed_malloc_aligned);
-    mocks.OnCall(mm, memory_manager::virt_to_phys).Return((void *)0xDEADBEEFDEAF1000);
+    mocks.OnCall(mm, memory_manager::virt_to_phys).Return(reinterpret_cast<void *>(0xDEADBEEFDEAF1000));
 
     // enable_vmx_operation
     Call &cr4_1 = mocks.ExpectCall(intrinsics, intrinsics_intel_x64::read_cr4).After(cr4_0).Return(0);
@@ -208,7 +208,7 @@ vmxon_ut::test_start_execute_vmxon_failure()
     // create_vmxon_region
     mocks.OnCallFunc(memory_manager::instance).Do(fake_memory_manager);
     mocks.OnCall(mm, memory_manager::malloc_aligned).Do(stubbed_malloc_aligned);
-    mocks.OnCall(mm, memory_manager::virt_to_phys).Return((void *)0xDEADBEEFDEAF1000);
+    mocks.OnCall(mm, memory_manager::virt_to_phys).Return(reinterpret_cast<void *>(0xDEADBEEFDEAF1000));
 
     // enable_vmx_operation
     Call &cr4_1 = mocks.ExpectCall(intrinsics, intrinsics_intel_x64::read_cr4).After(cr4_0).Return(0);
@@ -271,7 +271,7 @@ vmxon_ut::test_start_check_ia32_vmx_cr4_fixed0_msr_failure()
     // create_vmxon_region
     mocks.OnCallFunc(memory_manager::instance).Do(fake_memory_manager);
     mocks.OnCall(mm, memory_manager::malloc_aligned).Do(stubbed_malloc_aligned);
-    mocks.OnCall(mm, memory_manager::virt_to_phys).Return((void *)0xDEADBEEFDEAF1000);
+    mocks.OnCall(mm, memory_manager::virt_to_phys).Return(reinterpret_cast<void *>(0xDEADBEEFDEAF1000));
 
     // enable_vmx_operation
     Call &cr4_1 = mocks.ExpectCall(intrinsics, intrinsics_intel_x64::read_cr4).After(cr4_0).Return(0);
@@ -331,7 +331,7 @@ vmxon_ut::test_start_check_ia32_vmx_cr4_fixed1_msr_failure()
     // create_vmxon_region
     mocks.OnCallFunc(memory_manager::instance).Do(fake_memory_manager);
     mocks.OnCall(mm, memory_manager::malloc_aligned).Do(stubbed_malloc_aligned);
-    mocks.OnCall(mm, memory_manager::virt_to_phys).Return((void *)0xDEADBEEFDEAF1000);
+    mocks.OnCall(mm, memory_manager::virt_to_phys).Return(reinterpret_cast<void *>(0xDEADBEEFDEAF1000));
 
     // enable_vmx_operation
     Call &cr4_1 = mocks.ExpectCall(intrinsics, intrinsics_intel_x64::read_cr4).After(cr4_0).Return(0);
@@ -394,7 +394,7 @@ vmxon_ut::test_start_enable_vmx_operation_failure()
     // create_vmxon_region
     mocks.OnCallFunc(memory_manager::instance).Do(fake_memory_manager);
     mocks.OnCall(mm, memory_manager::malloc_aligned).Do(stubbed_malloc_aligned);
-    mocks.OnCall(mm, memory_manager::virt_to_phys).Return((void *)0xDEADBEEFDEAF1000);
+    mocks.OnCall(mm, memory_manager::virt_to_phys).Return(reinterpret_cast<void *>(0xDEADBEEFDEAF1000));
 
     // enable_vmx_operation
     Call &cr4_1 = mocks.ExpectCall(intrinsics, intrinsics_intel_x64::read_cr4).After(cr4_0).Return(0);

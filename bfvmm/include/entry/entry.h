@@ -36,7 +36,7 @@
 /// @param arg unused (likely will contain the cpu's core # in the future)
 /// @return ENTRY_SUCCESS on success, ENTRY_ERROR_UNKNOWN otherwise.
 ///
-extern "C" int64_t start_vmm(uint64_t arg);
+extern "C" int64_t start_vmm(uint64_t arg) noexcept;
 
 /// Stop VMM
 ///
@@ -49,6 +49,6 @@ extern "C" int64_t start_vmm(uint64_t arg);
 /// @param arg unused (likely will contain the cpu's core # in the future)
 /// @return ENTRY_SUCCESS on success, ENTRY_ERROR_UNKNOWN otherwise.
 ///
-extern "C" int64_t stop_vmm(uint64_t arg);
+extern "C" int64_t stop_vmm(uint64_t arg) noexcept;
 
 #endif

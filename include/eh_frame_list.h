@@ -55,7 +55,7 @@ struct eh_frame_t
  *
  * @return eh_frame list (of size MAX_NUM_MODULES)
  */
-struct eh_frame_t *get_eh_frame_list();
+struct eh_frame_t *get_eh_frame_list() noexcept;
 
 /**
  * Register EH Framework
@@ -69,7 +69,7 @@ struct eh_frame_t *get_eh_frame_list();
  * @return REGISTER_EH_FRAME_SUCCESS on success, REGISTER_EH_FRAME_FAILURE
  *     on failure
  */
-int64_t register_eh_frame(void *addr, uint64_t size);
+int64_t register_eh_frame(void *addr, uint64_t size) noexcept;
 
 #ifdef __cplusplus
 }

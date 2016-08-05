@@ -25,7 +25,7 @@
 #define PRINT_FIELD(a,b) \
     bfdebug << std::left << std::setw(55) << #b; \
     if (a == true) \
-        bfinfo << (void *)vmread(b) << bfendl; \
+        bfinfo << reinterpret_cast<void *>(vmread(b)) << bfendl; \
     else \
         bfinfo << "unsupported" << bfendl;
 

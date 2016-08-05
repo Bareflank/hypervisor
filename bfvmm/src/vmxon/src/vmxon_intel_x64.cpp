@@ -170,10 +170,10 @@ vmxon_intel_x64::create_vmxon_region()
     auto cor1 = commit_or_rollback([&]
     { this->release_vmxon_region(); });
 
-    auto region = (uint32_t *)g_mm->malloc_aligned(4096, 4096);
+    auto region = static_cast<uint32_t *>(g_mm->malloc_aligned(4096, 4096));
 
     m_vmxon_region = std::unique_ptr<uint32_t>(region);
-    m_vmxon_region_phys = (uintptr_t)g_mm->virt_to_phys(region);
+    m_vmxon_region_phys = reinterpret_cast<uintptr_t>(g_mm->virt_to_phys(region));
 
     if (m_vmxon_region_phys == 0)
         throw std::logic_error("m_vmxon_region_phys == nullptr");

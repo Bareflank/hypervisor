@@ -24,11 +24,13 @@
 
 #include <stdint.h>
 
-/// Promote Guest VMCS state to VMX root mode
+/// Promote VMCS
 ///
-/// Abandon the host state, and jump into the guest state
-/// from the host.
+/// Promote the guest described by this VMCS to VMX-root operation. In
+/// the process of doing this, the VMM's state is lost.
 ///
-extern "C" void promote_vmcs_to_root(uint64_t state_save);
+/// @note this function does not return
+///
+extern "C" void vmcs_promote(uint64_t state_save);
 
 #endif

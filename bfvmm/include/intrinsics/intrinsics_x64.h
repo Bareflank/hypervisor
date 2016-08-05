@@ -34,79 +34,79 @@
 extern "C" {
 #endif
 
-void __halt(void);
-void __stop(void);
+void __halt(void) noexcept;
+void __stop(void) noexcept;
 
-void __invd(void);
-void __wbinvd(void);
+void __invd(void) noexcept;
+void __wbinvd(void) noexcept;
 
-uint32_t __cpuid_eax(uint32_t val);
-uint32_t __cpuid_ebx(uint32_t val);
-uint32_t __cpuid_ecx(uint32_t val);
-uint32_t __cpuid_edx(uint32_t val);
+uint32_t __cpuid_eax(uint32_t val) noexcept;
+uint32_t __cpuid_ebx(uint32_t val) noexcept;
+uint32_t __cpuid_ecx(uint32_t val) noexcept;
+uint32_t __cpuid_edx(uint32_t val) noexcept;
 
 void __cpuid(uint64_t *rax,
              uint64_t *rbx,
              uint64_t *rcx,
-             uint64_t *rdx);
+             uint64_t *rdx) noexcept;
 
-uint64_t __read_rflags(void);
-void __write_rflags(uint64_t val);
+uint64_t __read_rflags(void) noexcept;
+void __write_rflags(uint64_t val) noexcept;
 
-uint64_t __read_msr(uint32_t msr);
-void __write_msr(uint32_t msr, uint64_t val);
+uint64_t __read_msr(uint32_t msr) noexcept;
+void __write_msr(uint32_t msr, uint64_t val) noexcept;
 
-uint64_t __read_rip(void);
+uint64_t __read_rip(void) noexcept;
 
-uint64_t __read_cr0(void);
-void __write_cr0(uint64_t val);
+uint64_t __read_cr0(void) noexcept;
+void __write_cr0(uint64_t val) noexcept;
 
-uint64_t __read_cr3(void);
-void __write_cr3(uint64_t val);
+uint64_t __read_cr3(void) noexcept;
+void __write_cr3(uint64_t val) noexcept;
 
-uint64_t __read_cr4(void);
-void __write_cr4(uint64_t val);
+uint64_t __read_cr4(void) noexcept;
+void __write_cr4(uint64_t val) noexcept;
 
-uint64_t __read_dr7(void);
-void __write_dr7(uint64_t val);
+uint64_t __read_dr7(void) noexcept;
+void __write_dr7(uint64_t val) noexcept;
 
-uint16_t __read_es(void);
-void __write_es(uint16_t val);
+uint16_t __read_es(void) noexcept;
+void __write_es(uint16_t val) noexcept;
 
-uint16_t __read_cs(void);
-void __write_cs(uint16_t val);
+uint16_t __read_cs(void) noexcept;
+void __write_cs(uint16_t val) noexcept;
 
-uint16_t __read_ss(void);
-void __write_ss(uint16_t val);
+uint16_t __read_ss(void) noexcept;
+void __write_ss(uint16_t val) noexcept;
 
-uint16_t __read_ds(void);
-void __write_ds(uint16_t val);
+uint16_t __read_ds(void) noexcept;
+void __write_ds(uint16_t val) noexcept;
 
-uint16_t __read_fs(void);
-void __write_fs(uint16_t val);
+uint16_t __read_fs(void) noexcept;
+void __write_fs(uint16_t val) noexcept;
 
-uint16_t __read_gs(void);
-void __write_gs(uint16_t val);
+uint16_t __read_gs(void) noexcept;
+void __write_gs(uint16_t val) noexcept;
 
-uint16_t __read_tr(void);
-void __write_tr(uint16_t val);
+uint16_t __read_tr(void) noexcept;
+void __write_tr(uint16_t val) noexcept;
 
-uint16_t __read_ldtr(void);
-void __write_ldtr(uint16_t val);
+uint16_t __read_ldtr(void) noexcept;
+void __write_ldtr(uint16_t val) noexcept;
 
-uint64_t __read_rsp(void);
+uint64_t __read_rsp(void) noexcept;
 
-void __read_gdt(void *gdt);
-void __write_gdt(void *gdt);
+void __read_gdt(void *gdt) noexcept;
+void __write_gdt(void *gdt) noexcept;
 
-void __read_idt(void *idt);
-void __write_idt(void *idt);
+void __read_idt(void *idt) noexcept;
+void __write_idt(void *idt) noexcept;
 
-void __outb(uint16_t port, uint8_t val);
-void __outw(uint16_t port, uint16_t val);
+void __outb(uint16_t port, uint8_t val) noexcept;
+void __outw(uint16_t port, uint16_t val) noexcept;
 
-uint8_t __inb(uint16_t port);
-uint16_t __inw(uint16_t port);
+uint8_t __inb(uint16_t port) noexcept;
+uint16_t __inw(uint16_t port) noexcept;
 
 #ifdef __cplusplus
 }

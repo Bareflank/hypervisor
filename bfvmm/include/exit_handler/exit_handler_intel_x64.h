@@ -71,7 +71,7 @@ public:
     /// Called when the exit handler needs to halt the CPU. This would mainly
     /// be due to an error.
     ///
-    virtual void halt();
+    virtual void halt() noexcept;
 
 protected:
 
