@@ -1,6 +1,9 @@
-
 <img src="https://raw.githubusercontent.com/Bareflank/hypervisor/master/doc/images/bareflank_logo.jpg" width="501">
-
+<br>
+<br>
+<br>
+[![GitHub version](https://badge.fury.io/gh/bareflank%2Fhypervisor.svg)](https://badge.fury.io/gh/bareflank%2Fhypervisor)
+![](https://travis-ci.org/Bareflank/hypervisor.svg?branch=master)
 ## Description
 
 The Bareflank Hypervisor is an open source, lightweight hypervisor, lead by
@@ -35,8 +38,6 @@ In addition to Bareflank’s lightweight, modular design, the entire
 hypervisor has been written using test driven development. As such, all
 of Bareflank’s code comes complete with a set of unit tests to validate
 that the provided code works as expected.
-
-![](https://travis-ci.org/Bareflank/hypervisor.svg?branch=master)
 
 Currently we have support for (64bit only):
 - Ubuntu 16.04, 14.04
