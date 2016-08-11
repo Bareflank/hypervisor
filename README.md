@@ -4,6 +4,7 @@
 <br>
 [![GitHub version](https://badge.fury.io/gh/bareflank%2Fhypervisor.svg)](https://badge.fury.io/gh/bareflank%2Fhypervisor)
 ![](https://travis-ci.org/Bareflank/hypervisor.svg?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/rianquinn/hypervisor/badge.svg?branch=generalize_vcpu)](https://coveralls.io/github/rianquinn/hypervisor?branch=generalize_vcpu)
 ## Description
 
 The Bareflank Hypervisor is an open source, lightweight hypervisor, lead by
