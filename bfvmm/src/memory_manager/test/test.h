@@ -73,6 +73,7 @@ private:
     void test_memory_manager_phys_to_virt_upper_limit();
     void test_memory_manager_phys_to_virt_lower_limit();
     void test_memory_manager_phys_to_virt_map();
+    void test_memory_manager_power_of_two_zero();
 
     void test_page_table_x64_no_entry();
     void test_page_table_x64_with_entry();

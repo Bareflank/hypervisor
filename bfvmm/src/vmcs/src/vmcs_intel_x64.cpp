@@ -32,7 +32,8 @@
 #include <exit_handler/exit_handler_intel_x64_support.h>
 
 vmcs_intel_x64::vmcs_intel_x64(const std::shared_ptr<intrinsics_intel_x64> &intrinsics) :
-    m_intrinsics(intrinsics)
+    m_intrinsics(intrinsics),
+    m_vmcs_region_phys(0)
 {
     if (!m_intrinsics)
         m_intrinsics = std::make_shared<intrinsics_intel_x64>();

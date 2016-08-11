@@ -27,7 +27,7 @@ TARGET_NAME:=bfcrt
 TARGET_TYPE:=lib
 
 ifeq ($(shell uname -s), Linux)
-    TARGET_COMPILER:=both
+    TARGET_COMPILER:=both_always
 else
     TARGET_COMPILER:=cross
 endif

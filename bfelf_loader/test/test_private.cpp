@@ -73,11 +73,13 @@ bfelf_loader_ut::test_private_bfelf_error()
 void
 bfelf_loader_ut::test_private_invalid_symbol_index()
 {
-    bfelf_sym *sym;
-    bfelf_file_t ef;
-    e_string_t name;
+    bfelf_sym *sym = nullptr;
+    bfelf_file_t ef = {};
+    e_string_t name = {};
+    bfelf_shdr strtab = {};
 
     ef.symnum = 1;
+    ef.strtab = &strtab;
 
     EXPECT_TRUE(private_check_symbol(&ef, 2, &name, &sym) == BFELF_ERROR_MISMATCH);
 }
@@ -87,21 +89,21 @@ bfelf_loader_ut::test_private_corrupt_symbol_table()
 {
     auto file = "hello";
 
-    bfelf_file_t ef;
-    bfelf_shdr shdr;
-    e_string_t name;
-    bfelf_sym *sym;
+    bfelf_file_t ef = {};
+    bfelf_shdr strtab = {};
+    e_string_t name = {};
+    bfelf_sym *sym = nullptr;
     bfelf_sym symtab[1] = {};
 
     symtab[0].st_name = 0;
 
     ef.file = const_cast<char *>(file);
-    ef.strtab = &shdr;
+    ef.strtab = &strtab;
     ef.symtab = symtab;
     ef.symnum = 1;
 
-    shdr.sh_size = 5;
-    shdr.sh_offset = 0;
+    strtab.sh_size = 5;
+    strtab.sh_offset = 0;
 
     EXPECT_TRUE(private_check_symbol(&ef, 0, &name, &sym) == BFELF_ERROR_MISMATCH);
 }
@@ -112,8 +114,11 @@ bfelf_loader_ut::test_private_relocate_invalid_index()
     bfelf_loader_t loader = {};
     bfelf_file_t ef = {};
     bfelf_rela rela = {};
+    bfelf_shdr strtab = {};
 
     rela.r_info = 0xFFFFFFFF00000000;
+
+    ef.strtab = &strtab;
 
     EXPECT_TRUE(private_relocate_symbol(&loader, &ef, &rela) == BFELF_ERROR_INVALID_INDEX);
 }
@@ -124,7 +129,7 @@ bfelf_loader_ut::test_private_relocate_invalid_name()
     bfelf_loader_t loader = {};
     bfelf_file_t ef = {};
     bfelf_rela rela = {};
-    bfelf_shdr shdr = {};
+    bfelf_shdr strtab = {};
     bfelf_sym symtab[1] = {};
 
     auto file = "hello";
@@ -132,12 +137,12 @@ bfelf_loader_ut::test_private_relocate_invalid_name()
     symtab[0].st_name = 0;
 
     ef.file = const_cast<char *>(file);
-    ef.strtab = &shdr;
+    ef.strtab = &strtab;
     ef.symtab = symtab;
     ef.symnum = 1;
 
-    shdr.sh_size = 5;
-    shdr.sh_offset = 0;
+    strtab.sh_size = 5;
+    strtab.sh_offset = 0;
 
     rela.r_info = 0x0;
 
@@ -153,7 +158,7 @@ bfelf_loader_ut::test_private_relocate_invalid_relocation()
     bfelf_loader_t loader = {};
     bfelf_file_t ef = {};
     bfelf_rela rela = {};
-    bfelf_shdr shdr = {};
+    bfelf_shdr strtab = {};
     bfelf_sym symtab[1] = {};
 
     auto file = "hello";
@@ -163,12 +168,12 @@ bfelf_loader_ut::test_private_relocate_invalid_relocation()
 
     ef.exec = exec;
     ef.file = const_cast<char *>(file);
-    ef.strtab = &shdr;
+    ef.strtab = &strtab;
     ef.symtab = symtab;
     ef.symnum = 1;
 
-    shdr.sh_size = 5;
-    shdr.sh_offset = 0;
+    strtab.sh_size = 5;
+    strtab.sh_offset = 0;
 
     rela.r_info = 0xFFFFFFFF;
     rela.r_offset = 0x0;
@@ -178,7 +183,7 @@ bfelf_loader_ut::test_private_relocate_invalid_relocation()
 
     EXPECT_TRUE(private_relocate_symbol(&loader, &ef, &rela) == BFELF_ERROR_UNSUPPORTED_RELA);
 
-    delete exec;
+    delete[] exec;
 }
 
 void
@@ -190,10 +195,12 @@ bfelf_loader_ut::test_private_get_section_invalid_name()
     bfelf_shdr *shdr = 0;
     bfelf_shdr shstrtab = {};
     bfelf_shdr shdrtab[1] = {};
+    bfelf_shdr strtab = {};
 
     ef.ehdr = &ehdr;
     ef.shdrtab = shdrtab;
     ef.shstrtab = &shstrtab;
+    ef.strtab = &strtab;
 
     ehdr.e_shnum = 1;
 
@@ -213,9 +220,11 @@ bfelf_loader_ut::test_private_symbol_table_sections_invalid_dynsym()
     bfelf_file_t ef = {};
     bfelf64_ehdr ehdr = {};
     bfelf_shdr shdrtab[1] = {};
+    bfelf_shdr strtab = {};
 
     ef.ehdr = &ehdr;
     ef.shdrtab = shdrtab;
+    ef.strtab = &strtab;
 
     ehdr.e_shnum = 1;
 
@@ -236,9 +245,11 @@ bfelf_loader_ut::test_private_symbol_table_sections_invalid_hash()
     bfelf_file_t ef = {};
     bfelf64_ehdr ehdr = {};
     bfelf_shdr shdrtab[1] = {};
+    bfelf_shdr strtab = {};
 
     ef.ehdr = &ehdr;
     ef.shdrtab = shdrtab;
+    ef.strtab = &strtab;
 
     ehdr.e_shnum = 1;
 
@@ -259,9 +270,11 @@ bfelf_loader_ut::test_private_string_table_sections_invalid()
     bfelf_file_t ef = {};
     bfelf64_ehdr ehdr = {};
     bfelf_shdr dynsym = {};
+    bfelf_shdr strtab = {};
 
     ef.ehdr = &ehdr;
     ef.dynsym = &dynsym;
+    ef.strtab = &strtab;
 
     dynsym.sh_link = 0;
     ehdr.e_shstrndx = 0;
@@ -278,9 +291,11 @@ bfelf_loader_ut::test_private_get_relocation_tables_invalid_type()
     bfelf_file_t ef = {};
     bfelf64_ehdr ehdr = {};
     bfelf_shdr shdrtab[1] = {};
+    bfelf_shdr strtab = {};
 
     ef.ehdr = &ehdr;
     ef.shdrtab = shdrtab;
+    ef.strtab = &strtab;
 
     ehdr.e_shnum = 1;
 
@@ -298,10 +313,12 @@ bfelf_loader_ut::test_private_get_relocation_tables_invalid_section()
     bfelf_file_t ef = {};
     bfelf64_ehdr ehdr = {};
     bfelf_shdr shdrtab[1] = {};
+    bfelf_shdr strtab = {};
 
     ef.ehdr = &ehdr;
     ef.shdrtab = shdrtab;
     ef.num_rela = 1;
+    ef.strtab = &strtab;
 
     ehdr.e_shnum = 1;
 

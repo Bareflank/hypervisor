@@ -28,7 +28,9 @@
 const auto c_dummy_misc_filename = "../cross/libdummy_misc.so";
 const auto c_dummy_code_filename = "../cross/libdummy_code.so";
 
-bfelf_loader_ut::bfelf_loader_ut()
+bfelf_loader_ut::bfelf_loader_ut() :
+    m_dummy_misc_length(0),
+    m_dummy_code_length(0)
 {
 }
 

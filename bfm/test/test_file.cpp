@@ -50,6 +50,5 @@ bfm_ut::test_file_read_with_good_filename()
     tmp.close();
 
     EXPECT_TRUE(g_f.read(filename) == std::string(text));
-
-    std::remove(filename);
+    EXPECT_TRUE(std::remove(filename) == 0);
 }

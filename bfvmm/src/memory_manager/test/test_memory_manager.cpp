@@ -417,3 +417,9 @@ memory_manager_ut::test_memory_manager_phys_to_virt_map()
         EXPECT_TRUE(iter.second.type == md.type);
     }
 }
+
+void
+memory_manager_ut::test_memory_manager_power_of_two_zero()
+{
+    EXPECT_TRUE(g_mm->private_is_power_of_2(0) == false);
+}

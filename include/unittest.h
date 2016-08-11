@@ -563,7 +563,11 @@ private:
 
 public:
 
-    unittest() {}
+    unittest() :
+        m_pass(0),
+        m_fail(0)
+    { }
+
     virtual ~unittest() {}
 
     decltype(auto)

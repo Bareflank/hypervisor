@@ -41,11 +41,13 @@ bfelf_loader_ut::test_bfelf_file_num_segments_uninitalized()
 void
 bfelf_loader_ut::test_bfelf_file_num_segments_success()
 {
+    auto ret = 0LL;
     bfelf_file_t ef;
     auto test = get_test();
 
-    bfelf_file_init((char *)&test, sizeof(test), &ef);
+    ret = bfelf_file_init((char *)&test, sizeof(test), &ef);
+    EXPECT_TRUE(ret == BFELF_SUCCESS);
 
-    auto ret = bfelf_file_num_segments(&ef);
+    ret = bfelf_file_num_segments(&ef);
     EXPECT_TRUE(ret > 0);
 }

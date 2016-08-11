@@ -35,6 +35,8 @@ Makefile: $(HYPER_REL)/Makefile.bf
 
 .DEFAULT_GOAL := all
 
+ifneq ($(STATIC_ANALYSIS_ENABLED), true)
+
 all: $(BUILD_ABS)/sysroot/x86_64-elf/lib/libbfc.a
 	@echo > /dev/null
 
@@ -46,6 +48,8 @@ $(BUILD_ABS)/sysroot/x86_64-elf/lib/libbfc.a: $(BUILD_ABS)/sysroot/x86_64-elf/li
 
 build_src: all
 build_tests: all
+
+endif
 
 run_tests:
 	@echo > /dev/null

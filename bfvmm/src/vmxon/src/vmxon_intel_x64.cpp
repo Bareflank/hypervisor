@@ -27,7 +27,8 @@
 
 vmxon_intel_x64::vmxon_intel_x64(const std::shared_ptr<intrinsics_intel_x64> &intrinsics) :
     m_intrinsics(intrinsics),
-    m_vmxon_enabled(false)
+    m_vmxon_enabled(false),
+    m_vmxon_region_phys(0)
 {
     if (!m_intrinsics)
         m_intrinsics = std::make_shared<intrinsics_intel_x64>();

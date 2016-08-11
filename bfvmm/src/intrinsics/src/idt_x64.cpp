@@ -22,7 +22,8 @@
 #include <debug.h>
 #include <intrinsics/idt_x64.h>
 
-idt_x64::idt_x64(uint16_t size)
+idt_x64::idt_x64(uint16_t size) :
+    m_size(0)
 {
     if (size == 0)
         return;
@@ -36,7 +37,8 @@ idt_x64::idt_x64(uint16_t size)
     m_idt = std::shared_ptr<uint64_t>(addr);
 }
 
-idt_x64::idt_x64(const std::shared_ptr<intrinsics_x64> &intrinsics)
+idt_x64::idt_x64(const std::shared_ptr<intrinsics_x64> &intrinsics) :
+    m_size(0)
 {
     if (!intrinsics)
         throw std::invalid_argument("gdt_x64: intrinsics == nullptr");

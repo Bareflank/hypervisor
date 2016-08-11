@@ -278,10 +278,13 @@ memory_manager::phys_to_virt(void *phys)
     return reinterpret_cast<void *>(upper | lower);
 }
 
-static bool
-private_is_power_of_2(uint64_t x)
+bool
+memory_manager::private_is_power_of_2(uint64_t x) noexcept
 {
-    return ((x != 0) && !(x & (x - 1)));
+    if (x <= 0)
+        return false;
+
+    return !(x & (x - 1));
 }
 
 bool
@@ -293,7 +296,7 @@ memory_manager::is_block_aligned(int64_t block, int64_t alignment) noexcept
     if (alignment <= 0)
         return true;
 
-    if (private_is_power_of_2(alignment) == false)
+    if (this->private_is_power_of_2(alignment) == false)
         return false;
 
     return (reinterpret_cast<uint64_t>(block_to_virt(block)) & (alignment - 1)) == 0;
