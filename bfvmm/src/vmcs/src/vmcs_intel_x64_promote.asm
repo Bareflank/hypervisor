@@ -62,7 +62,7 @@ default rel
 %define VMCS_GUEST_CR4                                            0x00006804
 %define VMCS_GUEST_DR7                                            0x0000681A
 
-global promote_vmcs_to_root:function
+global vmcs_promote:function
 
 extern __write_es
 extern __write_cs
@@ -93,7 +93,7 @@ section .text
 ;       state save structure in the intrinsics code. If you change that
 ;       code, make sure you update this code to reflect the change.
 ;
-promote_vmcs_to_root:
+vmcs_promote:
 
     mov r15, rdi
 

@@ -39,6 +39,7 @@ protected:
 
 private:
 
+    void test_serial_null_intrinsics();
     void test_serial_success();
     void test_serial_set_baud_rate_success();
     void test_serial_set_baud_rate_unknown();

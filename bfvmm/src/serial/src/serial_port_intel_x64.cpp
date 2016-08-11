@@ -26,12 +26,30 @@ serial_port_intel_x64::serial_port_intel_x64(const std::shared_ptr<intrinsics_in
     m_port(port),
     m_intrinsics(intrinsics)
 {
-    uint8_t bits = 0;
-
     if (!m_intrinsics)
         m_intrinsics = std::make_shared<intrinsics_intel_x64>();
+}
 
-    disable_dlab();
+serial_port_intel_x64 *
+serial_port_intel_x64::instance(const std::shared_ptr<intrinsics_intel_x64> &intrinsics) noexcept
+{
+    static auto serial = std::shared_ptr<serial_port_intel_x64>();
+
+    if (!serial)
+    {
+        serial = std::make_shared<serial_port_intel_x64>(intrinsics);
+        serial->init();
+    }
+
+    return serial.get();
+}
+
+void
+serial_port_intel_x64::init()
+{
+    uint8_t bits = 0;
+
+    this->disable_dlab();
 
     bits |= FIFO_CONTROL_ENABLE_FIFOS;
     bits |= FIFO_CONTROL_CLEAR_RECIEVE_FIFO;
@@ -40,17 +58,10 @@ serial_port_intel_x64::serial_port_intel_x64(const std::shared_ptr<intrinsics_in
     m_intrinsics->write_portio_8(m_port + INTERRUPT_EN_REG, 0x00);
     m_intrinsics->write_portio_8(m_port + FIFO_CONTROL_REG, bits);
 
-    set_baud_rate(DEFAULT_BAUD_RATE);
-    set_data_bits(DEFAULT_DATA_BITS);
-    set_stop_bits(DEFAULT_STOP_BITS);
-    set_parity_bits(DEFAULT_PARITY_BITS);
-}
-
-serial_port_intel_x64 *
-serial_port_intel_x64::instance() noexcept
-{
-    static serial_port_intel_x64 serial(nullptr);
-    return &serial;
+    this->set_baud_rate(DEFAULT_BAUD_RATE);
+    this->set_data_bits(DEFAULT_DATA_BITS);
+    this->set_stop_bits(DEFAULT_STOP_BITS);
+    this->set_parity_bits(DEFAULT_PARITY_BITS);
 }
 
 void
@@ -62,23 +73,23 @@ serial_port_intel_x64::set_baud_rate(baud_rate_t rate) noexcept
     auto lsb = (rate & 0x000000FF) >> 0;
     auto msb = (rate & 0x0000FF00) >> 8;
 
-    enable_dlab();
+    this->enable_dlab();
 
     m_intrinsics->write_portio_8(m_port + BAUD_RATE_LO_REG, lsb);
     m_intrinsics->write_portio_8(m_port + BAUD_RATE_HI_REG, msb);
 
-    disable_dlab();
+    this->disable_dlab();
 }
 
 serial_port_intel_x64::baud_rate_t
 serial_port_intel_x64::baud_rate() const noexcept
 {
-    enable_dlab();
+    this->enable_dlab();
 
     uint16_t lsb = m_intrinsics->read_portio_8(m_port + BAUD_RATE_LO_REG);
     uint16_t msb = m_intrinsics->read_portio_8(m_port + BAUD_RATE_HI_REG);
 
-    disable_dlab();
+    this->disable_dlab();
 
     switch ((msb << 8) | lsb)
     {

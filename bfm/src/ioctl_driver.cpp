@@ -183,7 +183,7 @@ ioctl_driver::dump_vmm(const std::shared_ptr<ioctl> &ctl, uint64_t vcpuid)
         case VMM_RUNNING: break;
         case VMM_LOADED: break;
         case VMM_UNLOADED: throw invalid_vmm_state("vmm must be loaded first");
-        case VMM_CORRUPT: break;
+        case VMM_CORRUPT: throw corrupt_vmm();
         default: throw unknown_status();
     }
 

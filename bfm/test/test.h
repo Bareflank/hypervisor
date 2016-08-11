@@ -40,6 +40,7 @@ protected:
 private:
 
     void test_command_line_parser_with_no_args();
+    void test_command_line_parser_with_empty_args();
     void test_command_line_parser_with_unknown_command();
     void test_command_line_parser_with_unknown_command_maintains_state();
     void test_command_line_parser_with_unknown_option_single_bar();
@@ -47,6 +48,7 @@ private:
     void test_command_line_parser_with_single_bar_help();
     void test_command_line_parser_with_dual_bar_help();
     void test_command_line_parser_with_load_no_modules();
+    void test_command_line_parser_with_load_no_modules_empty_arg();
     void test_command_line_parser_with_load_no_modules_maintains_state();
     void test_command_line_parser_with_valid_load();
     void test_command_line_parser_with_valid_load_unknown_option();
@@ -113,9 +115,11 @@ private:
     void test_ioctl_driver_process_stop_stop_failed();
     void test_ioctl_driver_process_stop_success();
     void test_ioctl_driver_process_dump_vmm_unloaded();
+    void test_ioctl_driver_process_dump_vmm_corrupted();
     void test_ioctl_driver_process_dump_vmm_unknown_status();
     void test_ioctl_driver_process_dump_dump_failed();
-    void test_ioctl_driver_process_dump_success();
+    void test_ioctl_driver_process_dump_success_running();
+    void test_ioctl_driver_process_dump_success_loaded();
     void test_ioctl_driver_process_vmm_status_running();
     void test_ioctl_driver_process_vmm_status_loaded();
     void test_ioctl_driver_process_vmm_status_unloaded();

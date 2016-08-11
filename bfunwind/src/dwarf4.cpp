@@ -28,7 +28,7 @@
 // -----------------------------------------------------------------------------
 
 template<typename T> T static get(char **p)
-{ auto v = *(T *)(*p); (*p) += sizeof(T); return v;}
+{ auto v = *reinterpret_cast<T *>(*p); (*p) += sizeof(T); return v;}
 
 #define if_cfa(a,b) \
     if (opcode == a) \
@@ -223,7 +223,7 @@ private_parse_expression(char *p,
 
     while (p <= end)
     {
-        uint8_t opcode = *(uint8_t *)(p);
+        uint8_t opcode = *reinterpret_cast<uint8_t *>(p);
         p++;
 
         if (i >= EXPRESSION_STACK_SIZE - 1)
@@ -231,90 +231,90 @@ private_parse_expression(char *p,
 
         if_opcode(DW_OP_addr,
         {
-            stack[++i] = *(uint64_t *)(p);
+            stack[++i] = *reinterpret_cast<uint64_t *>(p);
             p += sizeof(uint64_t);
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_deref,
         {
-            stack[i] = *(uint64_t *)(stack[i]);
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            stack[i] = *reinterpret_cast<uint64_t *>(stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_const1u,
         {
-            stack[++i] = *(uint8_t *)(p);
+            stack[++i] = *reinterpret_cast<uint8_t *>(p);
             p += sizeof(uint8_t);
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_const1s,
         {
-            stack[++i] = *(int8_t *)(p);
+            stack[++i] = *reinterpret_cast<int8_t *>(p);
             p += sizeof(int8_t);
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_const2u,
         {
-            stack[++i] = *(uint16_t *)(p);
+            stack[++i] = *reinterpret_cast<uint16_t *>(p);
             p += sizeof(uint16_t);
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_const2s,
         {
-            stack[++i] = *(int16_t *)(p);
+            stack[++i] = *reinterpret_cast<int16_t *>(p);
             p += sizeof(int16_t);
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_const4u,
         {
-            stack[++i] = *(uint32_t *)(p);
+            stack[++i] = *reinterpret_cast<uint32_t *>(p);
             p += sizeof(uint32_t);
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_const4s,
         {
-            stack[++i] = *(int32_t *)(p);
+            stack[++i] = *reinterpret_cast<int32_t *>(p);
             p += sizeof(int32_t);
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_const8u,
         {
-            stack[++i] = *(uint64_t *)(p);
+            stack[++i] = *reinterpret_cast<uint64_t *>(p);
             p += sizeof(uint64_t);
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_const8s,
         {
-            stack[++i] = *(int64_t *)(p);
+            stack[++i] = *reinterpret_cast<int64_t *>(p);
             p += sizeof(int64_t);
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_constu,
         {
             stack[++i] = dwarf4::decode_uleb128(&p);
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_consts,
         {
             stack[++i] = dwarf4::decode_sleb128(&p);
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_dup,
         {
             auto value = stack[i];
             stack[++i] = value;
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_drop,
@@ -333,12 +333,12 @@ private_parse_expression(char *p,
 
             auto value = stack[i - 1];
             stack[++i] = value;
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_pick,
         {
-            auto index = *(uint8_t *)(p);
+            auto index = *reinterpret_cast<uint8_t *>(p);
             p += sizeof(uint8_t);
 
             if (index > i)
@@ -346,7 +346,7 @@ private_parse_expression(char *p,
 
             auto value = stack[i - index];
             stack[++i] = value;
-            log("stack[%ld]: %p, index: %d\n", i, (void *)stack[i], index);
+            log("stack[%ld]: %p, index: %d\n", i, reinterpret_cast<void *>(stack[i]), index);
         })
 
         if_opcode(DW_OP_swap,
@@ -357,7 +357,7 @@ private_parse_expression(char *p,
             auto value = stack[i];
             stack[i] = stack[i - 1];
             stack[i - 1] = value;
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_rot,
@@ -369,7 +369,7 @@ private_parse_expression(char *p,
             stack[i] = stack[i - 1];
             stack[i - 1] = stack[i - 2];
             stack[i - 2] = value;
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_xderef,
@@ -378,16 +378,16 @@ private_parse_expression(char *p,
                 ABORT("DW_OP_xderef out-of-bounds");
 
             auto value = stack[i--];
-            stack[i] = *(uint64_t *)value;
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            stack[i] = *reinterpret_cast<uint64_t *>(value);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_abs,
         {
-            auto value = (int64_t)stack[i];
+            auto value = static_cast<int64_t>(stack[i]);
             if (value < 0)
-                stack[i] = (uint64_t) - value;
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+                stack[i] = static_cast<int64_t>(-value);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_and,
@@ -397,7 +397,7 @@ private_parse_expression(char *p,
 
             auto value = stack[i--];
             stack[i] &= value;
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_div,
@@ -412,7 +412,7 @@ private_parse_expression(char *p,
 
             auto value = stack[i--];
             stack[i] -= value;
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_mod,
@@ -427,19 +427,19 @@ private_parse_expression(char *p,
 
             auto value = stack[i--];
             stack[i] *= value;
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_neg,
         {
-            stack[i] = (uint64_t)(0 - (int64_t)stack[i]);
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            stack[i] = static_cast<uint64_t>(0 - static_cast<int64_t>(stack[i]));
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_not,
         {
             stack[i] = ~stack[i];
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_or,
@@ -449,7 +449,7 @@ private_parse_expression(char *p,
 
             auto value = stack[i--];
             stack[i] |= value;
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_plus,
@@ -459,13 +459,13 @@ private_parse_expression(char *p,
 
             auto value = stack[i--];
             stack[i] += value;
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_plus_uconst,
         {
             stack[i] += dwarf4::decode_uleb128(&p);
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_shl,
@@ -475,7 +475,7 @@ private_parse_expression(char *p,
 
             auto value = stack[i--];
             stack[i] = stack[i] << value;
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_shr,
@@ -485,7 +485,7 @@ private_parse_expression(char *p,
 
             auto value = stack[i--];
             stack[i] = stack[i] >> value;
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_shra,
@@ -494,9 +494,9 @@ private_parse_expression(char *p,
                 ABORT("DW_OP_shra out-of-bounds");
 
             auto value1 = stack[i--];
-            auto value2 = (int64_t)stack[i];
-            stack[i] = (uint64_t)(value2 >> value1);
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            auto value2 = static_cast<int64_t>(stack[i]);
+            stack[i] = static_cast<uint64_t>(value2 >> value1);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_xor,
@@ -506,15 +506,15 @@ private_parse_expression(char *p,
 
             auto value = stack[i--];
             stack[i] ^= value;
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_skip,
         {
-            int16_t value = *(int16_t *)p;
+            auto value = *reinterpret_cast<int16_t *>(p);
             p += 2;
             p += value;
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_bra,
@@ -522,11 +522,11 @@ private_parse_expression(char *p,
             if (i == 0)
                 ABORT("DW_OP_bra out-of-bounds");
 
-            int16_t value = *(int16_t *)p;
+            auto value = *reinterpret_cast<int16_t *>(p);
             p += 2;
             if (stack[i--])
                 p += value;
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_eq,
@@ -536,7 +536,7 @@ private_parse_expression(char *p,
 
             auto value = stack[i--];
             stack[i] = (stack[i] == value);
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_ge,
@@ -546,7 +546,7 @@ private_parse_expression(char *p,
 
             auto value = stack[i--];
             stack[i] = (stack[i] >= value);
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_gt,
@@ -556,7 +556,7 @@ private_parse_expression(char *p,
 
             auto value = stack[i--];
             stack[i] = (stack[i] > value);
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_le,
@@ -566,7 +566,7 @@ private_parse_expression(char *p,
 
             auto value = stack[i--];
             stack[i] = (stack[i] <= value);
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_lt,
@@ -576,7 +576,7 @@ private_parse_expression(char *p,
 
             auto value = stack[i--];
             stack[i] = (stack[i] < value);
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_ne,
@@ -586,391 +586,391 @@ private_parse_expression(char *p,
 
             auto value = stack[i--];
             stack[i] = (stack[i] != value);
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_lit0,
         {
             stack[++i] = 0;
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_lit1,
         {
             stack[++i] = 1;
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_lit2,
         {
             stack[++i] = 2;
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_lit3,
         {
             stack[++i] = 3;
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_lit4,
         {
             stack[++i] = 4;
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_lit5,
         {
             stack[++i] = 5;
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_lit6,
         {
             stack[++i] = 6;
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_lit7,
         {
             stack[++i] = 7;
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_lit8,
         {
             stack[++i] = 8;
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_lit9,
         {
             stack[++i] = 9;
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_lit10,
         {
             stack[++i] = 10;
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_lit11,
         {
             stack[++i] = 11;
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_lit12,
         {
             stack[++i] = 12;
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_lit13,
         {
             stack[++i] = 13;
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_lit14,
         {
             stack[++i] = 14;
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_lit15,
         {
             stack[++i] = 15;
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_lit16,
         {
             stack[++i] = 16;
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_lit17,
         {
             stack[++i] = 17;
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_lit18,
         {
             stack[++i] = 18;
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_lit19,
         {
             stack[++i] = 19;
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_lit20,
         {
             stack[++i] = 20;
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_lit21,
         {
             stack[++i] = 21;
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_lit22,
         {
             stack[++i] = 22;
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_lit23,
         {
             stack[++i] = 23;
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_lit24,
         {
             stack[++i] = 24;
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_lit25,
         {
             stack[++i] = 25;
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_lit26,
         {
             stack[++i] = 26;
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_lit27,
         {
             stack[++i] = 27;
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_lit28,
         {
             stack[++i] = 28;
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_lit29,
         {
             stack[++i] = 29;
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_lit30,
         {
             stack[++i] = 30;
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_lit31,
         {
             stack[++i] = 31;
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_reg0,
         {
             stack[++i] = state->get(0);
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_reg1,
         {
             stack[++i] = state->get(1);
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_reg2,
         {
             stack[++i] = state->get(2);
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_reg3,
         {
             stack[++i] = state->get(3);
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_reg4,
         {
             stack[++i] = state->get(4);
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_reg5,
         {
             stack[++i] = state->get(5);
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_reg6,
         {
             stack[++i] = state->get(6);
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_reg7,
         {
             stack[++i] = state->get(7);
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_reg8,
         {
             stack[++i] = state->get(8);
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_reg9,
         {
             stack[++i] = state->get(9);
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_reg10,
         {
             stack[++i] = state->get(10);
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_reg11,
         {
             stack[++i] = state->get(11);
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_reg12,
         {
             stack[++i] = state->get(12);
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_reg13,
         {
             stack[++i] = state->get(13);
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_reg14,
         {
             stack[++i] = state->get(14);
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_reg15,
         {
             stack[++i] = state->get(15);
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_reg16,
         {
             stack[++i] = state->get(16);
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_reg17,
         {
             stack[++i] = state->get(17);
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_reg18,
         {
             stack[++i] = state->get(18);
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_reg19,
         {
             stack[++i] = state->get(19);
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_reg20,
         {
             stack[++i] = state->get(20);
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_reg21,
         {
             stack[++i] = state->get(21);
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_reg22,
         {
             stack[++i] = state->get(22);
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_reg23,
         {
             stack[++i] = state->get(23);
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_reg24,
         {
             stack[++i] = state->get(24);
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_reg25,
         {
             stack[++i] = state->get(25);
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_reg26,
         {
             stack[++i] = state->get(26);
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_reg27,
         {
             stack[++i] = state->get(27);
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_reg28,
         {
             stack[++i] = state->get(28);
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_reg29,
         {
             stack[++i] = state->get(29);
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_reg30,
         {
             stack[++i] = state->get(30);
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_reg31,
         {
             stack[++i] = state->get(31);
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_breg0,
@@ -980,7 +980,7 @@ private_parse_expression(char *p,
 
             stack[++i] = reg + offset;
 
-            log("r%d (%s) %p, offset: %ld\n", 0, state->name(0), (void *)reg,
+            log("r%d (%s) %p, offset: %ld\n", 0, state->name(0), reinterpret_cast<void *>(reg),
             offset);
         })
 
@@ -991,7 +991,7 @@ private_parse_expression(char *p,
 
             stack[++i] = reg + offset;
 
-            log("r%d (%s) %p, offset: %ld\n", 1, state->name(1), (void *)reg,
+            log("r%d (%s) %p, offset: %ld\n", 1, state->name(1), reinterpret_cast<void *>(reg),
             offset);
         })
 
@@ -1002,7 +1002,7 @@ private_parse_expression(char *p,
 
             stack[++i] = reg + offset;
 
-            log("r%d (%s) %p, offset: %ld\n", 2, state->name(2), (void *)reg,
+            log("r%d (%s) %p, offset: %ld\n", 2, state->name(2), reinterpret_cast<void *>(reg),
             offset);
         })
 
@@ -1013,7 +1013,7 @@ private_parse_expression(char *p,
 
             stack[++i] = reg + offset;
 
-            log("r%d (%s) %p, offset: %ld\n", 3, state->name(3), (void *)reg,
+            log("r%d (%s) %p, offset: %ld\n", 3, state->name(3), reinterpret_cast<void *>(reg),
             offset);
         })
 
@@ -1024,7 +1024,7 @@ private_parse_expression(char *p,
 
             stack[++i] = reg + offset;
 
-            log("r%d (%s) %p, offset: %ld\n", 4, state->name(4), (void *)reg,
+            log("r%d (%s) %p, offset: %ld\n", 4, state->name(4), reinterpret_cast<void *>(reg),
             offset);
         })
 
@@ -1035,7 +1035,7 @@ private_parse_expression(char *p,
 
             stack[++i] = reg + offset;
 
-            log("r%d (%s) %p, offset: %ld\n", 5, state->name(5), (void *)reg,
+            log("r%d (%s) %p, offset: %ld\n", 5, state->name(5), reinterpret_cast<void *>(reg),
             offset);
         })
 
@@ -1046,7 +1046,7 @@ private_parse_expression(char *p,
 
             stack[++i] = reg + offset;
 
-            log("r%d (%s) %p, offset: %ld\n", 6, state->name(6), (void *)reg,
+            log("r%d (%s) %p, offset: %ld\n", 6, state->name(6), reinterpret_cast<void *>(reg),
             offset);
         })
 
@@ -1057,7 +1057,7 @@ private_parse_expression(char *p,
 
             stack[++i] = reg + offset;
 
-            log("r%d (%s) %p, offset: %ld\n", 7, state->name(7), (void *)reg,
+            log("r%d (%s) %p, offset: %ld\n", 7, state->name(7), reinterpret_cast<void *>(reg),
             offset);
         })
 
@@ -1068,7 +1068,7 @@ private_parse_expression(char *p,
 
             stack[++i] = reg + offset;
 
-            log("r%d (%s) %p, offset: %ld\n", 8, state->name(8), (void *)reg,
+            log("r%d (%s) %p, offset: %ld\n", 8, state->name(8), reinterpret_cast<void *>(reg),
             offset);
         })
 
@@ -1079,7 +1079,7 @@ private_parse_expression(char *p,
 
             stack[++i] = reg + offset;
 
-            log("r%d (%s) %p, offset: %ld\n", 9, state->name(9), (void *)reg,
+            log("r%d (%s) %p, offset: %ld\n", 9, state->name(9), reinterpret_cast<void *>(reg),
             offset);
         })
 
@@ -1090,7 +1090,7 @@ private_parse_expression(char *p,
 
             stack[++i] = reg + offset;
 
-            log("r%d (%s) %p, offset: %ld\n", 10, state->name(10), (void *)reg,
+            log("r%d (%s) %p, offset: %ld\n", 10, state->name(10), reinterpret_cast<void *>(reg),
             offset);
         })
 
@@ -1101,7 +1101,7 @@ private_parse_expression(char *p,
 
             stack[++i] = reg + offset;
 
-            log("r%d (%s) %p, offset: %ld\n", 11, state->name(11), (void *)reg,
+            log("r%d (%s) %p, offset: %ld\n", 11, state->name(11), reinterpret_cast<void *>(reg),
             offset);
         })
 
@@ -1112,7 +1112,7 @@ private_parse_expression(char *p,
 
             stack[++i] = reg + offset;
 
-            log("r%d (%s) %p, offset: %ld\n", 12, state->name(12), (void *)reg,
+            log("r%d (%s) %p, offset: %ld\n", 12, state->name(12), reinterpret_cast<void *>(reg),
             offset);
         })
 
@@ -1123,7 +1123,7 @@ private_parse_expression(char *p,
 
             stack[++i] = reg + offset;
 
-            log("r%d (%s) %p, offset: %ld\n", 13, state->name(13), (void *)reg,
+            log("r%d (%s) %p, offset: %ld\n", 13, state->name(13), reinterpret_cast<void *>(reg),
             offset);
         })
 
@@ -1134,7 +1134,7 @@ private_parse_expression(char *p,
 
             stack[++i] = reg + offset;
 
-            log("r%d (%s) %p, offset: %ld\n", 14, state->name(14), (void *)reg,
+            log("r%d (%s) %p, offset: %ld\n", 14, state->name(14), reinterpret_cast<void *>(reg),
             offset);
         })
 
@@ -1145,7 +1145,7 @@ private_parse_expression(char *p,
 
             stack[++i] = reg + offset;
 
-            log("r%d (%s) %p, offset: %ld\n", 15, state->name(15), (void *)reg,
+            log("r%d (%s) %p, offset: %ld\n", 15, state->name(15), reinterpret_cast<void *>(reg),
             offset);
         })
 
@@ -1156,7 +1156,7 @@ private_parse_expression(char *p,
 
             stack[++i] = reg + offset;
 
-            log("r%d (%s) %p, offset: %ld\n", 16, state->name(16), (void *)reg,
+            log("r%d (%s) %p, offset: %ld\n", 16, state->name(16), reinterpret_cast<void *>(reg),
             offset);
         })
 
@@ -1167,7 +1167,7 @@ private_parse_expression(char *p,
 
             stack[++i] = reg + offset;
 
-            log("r%d (%s) %p, offset: %ld\n", 17, state->name(17), (void *)reg,
+            log("r%d (%s) %p, offset: %ld\n", 17, state->name(17), reinterpret_cast<void *>(reg),
             offset);
         })
 
@@ -1178,7 +1178,7 @@ private_parse_expression(char *p,
 
             stack[++i] = reg + offset;
 
-            log("r%d (%s) %p, offset: %ld\n", 18, state->name(18), (void *)reg,
+            log("r%d (%s) %p, offset: %ld\n", 18, state->name(18), reinterpret_cast<void *>(reg),
             offset);
         })
 
@@ -1189,7 +1189,7 @@ private_parse_expression(char *p,
 
             stack[++i] = reg + offset;
 
-            log("r%d (%s) %p, offset: %ld\n", 19, state->name(19), (void *)reg,
+            log("r%d (%s) %p, offset: %ld\n", 19, state->name(19), reinterpret_cast<void *>(reg),
             offset);
         })
 
@@ -1200,7 +1200,7 @@ private_parse_expression(char *p,
 
             stack[++i] = reg + offset;
 
-            log("r%d (%s) %p, offset: %ld\n", 20, state->name(20), (void *)reg,
+            log("r%d (%s) %p, offset: %ld\n", 20, state->name(20), reinterpret_cast<void *>(reg),
             offset);
         })
 
@@ -1211,7 +1211,7 @@ private_parse_expression(char *p,
 
             stack[++i] = reg + offset;
 
-            log("r%d (%s) %p, offset: %ld\n", 21, state->name(21), (void *)reg,
+            log("r%d (%s) %p, offset: %ld\n", 21, state->name(21), reinterpret_cast<void *>(reg),
             offset);
         })
 
@@ -1222,7 +1222,7 @@ private_parse_expression(char *p,
 
             stack[++i] = reg + offset;
 
-            log("r%d (%s) %p, offset: %ld\n", 22, state->name(22), (void *)reg,
+            log("r%d (%s) %p, offset: %ld\n", 22, state->name(22), reinterpret_cast<void *>(reg),
             offset);
         })
 
@@ -1233,7 +1233,7 @@ private_parse_expression(char *p,
 
             stack[++i] = reg + offset;
 
-            log("r%d (%s) %p, offset: %ld\n", 23, state->name(23), (void *)reg,
+            log("r%d (%s) %p, offset: %ld\n", 23, state->name(23), reinterpret_cast<void *>(reg),
             offset);
         })
 
@@ -1244,7 +1244,7 @@ private_parse_expression(char *p,
 
             stack[++i] = reg + offset;
 
-            log("r%d (%s) %p, offset: %ld\n", 24, state->name(24), (void *)reg,
+            log("r%d (%s) %p, offset: %ld\n", 24, state->name(24), reinterpret_cast<void *>(reg),
             offset);
         })
 
@@ -1255,7 +1255,7 @@ private_parse_expression(char *p,
 
             stack[++i] = reg + offset;
 
-            log("r%d (%s) %p, offset: %ld\n", 25, state->name(25), (void *)reg,
+            log("r%d (%s) %p, offset: %ld\n", 25, state->name(25), reinterpret_cast<void *>(reg),
             offset);
         })
 
@@ -1266,7 +1266,7 @@ private_parse_expression(char *p,
 
             stack[++i] = reg + offset;
 
-            log("r%d (%s) %p, offset: %ld\n", 26, state->name(26), (void *)reg,
+            log("r%d (%s) %p, offset: %ld\n", 26, state->name(26), reinterpret_cast<void *>(reg),
             offset);
         })
 
@@ -1277,7 +1277,7 @@ private_parse_expression(char *p,
 
             stack[++i] = reg + offset;
 
-            log("r%d (%s) %p, offset: %ld\n", 27, state->name(27), (void *)reg,
+            log("r%d (%s) %p, offset: %ld\n", 27, state->name(27), reinterpret_cast<void *>(reg),
             offset);
         })
 
@@ -1288,7 +1288,7 @@ private_parse_expression(char *p,
 
             stack[++i] = reg + offset;
 
-            log("r%d (%s) %p, offset: %ld\n", 28, state->name(28), (void *)reg,
+            log("r%d (%s) %p, offset: %ld\n", 28, state->name(28), reinterpret_cast<void *>(reg),
             offset);
         })
 
@@ -1299,7 +1299,7 @@ private_parse_expression(char *p,
 
             stack[++i] = reg + offset;
 
-            log("r%d (%s) %p, offset: %ld\n", 29, state->name(29), (void *)reg,
+            log("r%d (%s) %p, offset: %ld\n", 29, state->name(29), reinterpret_cast<void *>(reg),
             offset);
         })
 
@@ -1310,7 +1310,7 @@ private_parse_expression(char *p,
 
             stack[++i] = reg + offset;
 
-            log("r%d (%s) %p, offset: %ld\n", 30, state->name(30), (void *)reg,
+            log("r%d (%s) %p, offset: %ld\n", 30, state->name(30), reinterpret_cast<void *>(reg),
             offset);
         })
 
@@ -1321,14 +1321,14 @@ private_parse_expression(char *p,
 
             stack[++i] = reg + offset;
 
-            log("r%d (%s) %p, offset: %ld\n", 31, state->name(31), (void *)reg,
+            log("r%d (%s) %p, offset: %ld\n", 31, state->name(31), reinterpret_cast<void *>(reg),
             offset);
         })
 
         if_opcode(DW_OP_regx,
         {
             stack[++i] = state->get(dwarf4::decode_uleb128(&p));
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_fbreg,
@@ -1340,7 +1340,7 @@ private_parse_expression(char *p,
         {
             stack[++i] = state->get(dwarf4::decode_uleb128(&p));
             stack[i] += dwarf4::decode_sleb128(&p);
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_piece,
@@ -1350,28 +1350,28 @@ private_parse_expression(char *p,
 
         if_opcode(DW_OP_deref_size,
         {
-            switch (*(uint8_t *)p++)
+            switch (*reinterpret_cast<uint8_t *>(p++))
             {
                 case 1:
-                    stack[i] = *(uint8_t *)stack[i];
+                    stack[i] = *reinterpret_cast<uint8_t *>(stack[i]);
                     break;
 
                 case 2:
-                    stack[i] = *(uint16_t *)stack[i];
+                    stack[i] = *reinterpret_cast<uint16_t *>(stack[i]);
                     break;
 
                 case 4:
-                    stack[i] = *(uint32_t *)stack[i];
+                    stack[i] = *reinterpret_cast<uint32_t *>(stack[i]);
                     break;
 
                 case 8:
-                    stack[i] = *(uint64_t *)stack[i];
+                    stack[i] = *reinterpret_cast<uint64_t *>(stack[i]);
                     break;
 
                 default:
                     ABORT("DW_OP_deref_size: invalid size");
             }
-            log("stack[%ld]: %p\n", i, (void *)stack[i]);
+            log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_xderef_size,
@@ -1462,7 +1462,7 @@ private_decode_cfa(const cfi_table_row &row, register_state *state)
 
         case cfi_cfa::cfa_expression:
             log("cfa_expression\n");
-            value = private_parse_expression((char *)cfa.value(), 0, state);
+            value = private_parse_expression(reinterpret_cast<char *>(cfa.value()), 0, state);
             break;
     }
 
@@ -1489,13 +1489,13 @@ private_decode_reg(const cfi_register &reg, uint64_t cfa, register_state *state)
             break;
 
         case rule_offsetn:
-            log("from cfa(0x%08lx) + n(%ld)\n", cfa, (int64_t)reg.value());
-            value = ((uint64_t *)(cfa + (int64_t)reg.value()))[0];
+            log("from cfa(0x%08lx) + n(%ld)\n", cfa, static_cast<int64_t>(reg.value()));
+            value = *reinterpret_cast<uint64_t *>(cfa + static_cast<int64_t>(reg.value()));
             break;
 
         case rule_val_offsetn:
-            log("from val cfa(0x%08lx) + n(%ld)\n", cfa, (int64_t)reg.value());
-            value = cfa + (int64_t)reg.value();
+            log("from val cfa(0x%08lx) + n(%ld)\n", cfa, static_cast<int64_t>(reg.value()));
+            value = cfa + static_cast<int64_t>(reg.value());
             break;
 
         case rule_register:
@@ -1505,12 +1505,13 @@ private_decode_reg(const cfi_register &reg, uint64_t cfa, register_state *state)
 
         case rule_expression:
             log("rule_expression\n");
-            value = *(uint64_t *)private_parse_expression((char *)reg.value(), cfa, state);
+            value = private_parse_expression(reinterpret_cast<char *>(reg.value()), cfa, state);
+            value = *reinterpret_cast<uint64_t *>(value);
             break;
 
         case rule_val_expression:
             log("rule_val_expression\n");
-            value = private_parse_expression((char *)reg.value(), cfa, state);
+            value = private_parse_expression(reinterpret_cast<char *>(reg.value()), cfa, state);
             break;
 
         default:
@@ -1521,8 +1522,6 @@ private_decode_reg(const cfi_register &reg, uint64_t cfa, register_state *state)
 
     return value;
 }
-
-
 
 void
 private_parse_instruction(cfi_table_row *row,
@@ -1539,8 +1538,8 @@ private_parse_instruction(cfi_table_row *row,
     (void) pc_begin;
     (void) state;
 
-    uint8_t opcode = *(uint8_t *)(*p) & 0xC0;
-    uint8_t operand = *(uint8_t *)(*p) & 0x3F;
+    uint8_t opcode = *reinterpret_cast<uint8_t *>(*p) & 0xC0;
+    uint8_t operand = *reinterpret_cast<uint8_t *>(*p) & 0x3F;
 
     if (opcode == 0)
         opcode = operand;
@@ -1549,7 +1548,7 @@ private_parse_instruction(cfi_table_row *row,
 
     if_cfa(DW_CFA_advance_loc,
     {
-        auto loc = (uint64_t)operand * cie.code_alignment();
+        auto loc = static_cast<uint64_t>(operand) * cie.code_alignment();
         if ((*l2 += loc) > *l1)
         {
             log("search complete\n");
@@ -1560,7 +1559,7 @@ private_parse_instruction(cfi_table_row *row,
 
     if_cfa(DW_CFA_offset,
     {
-        auto value = (int64_t)dwarf4::decode_uleb128(p) * cie.data_alignment();
+        auto value = static_cast<int64_t>(dwarf4::decode_uleb128(p)) * cie.data_alignment();
         row->set_reg(cfi_register(operand, rule_offsetn, value));
         log("r%d (%s) at cfa + n(%ld)\n", operand, state->name(operand), value);
     })
@@ -1623,7 +1622,7 @@ private_parse_instruction(cfi_table_row *row,
     if_cfa(DW_CFA_offset_extended,
     {
         auto reg = dwarf4::decode_uleb128(p);
-        auto value = (int64_t)dwarf4::decode_uleb128(p) * cie.data_alignment();
+        auto value = static_cast<int64_t>(dwarf4::decode_uleb128(p)) * cie.data_alignment();
         row->set_reg(cfi_register(reg, rule_offsetn, value));
         log("r%ld (%s) at cfa + n(%ld)\n", reg, state->name(reg), value);
     })
@@ -1632,7 +1631,7 @@ private_parse_instruction(cfi_table_row *row,
     {
         auto reg = dwarf4::decode_uleb128(p);
         row->set_reg(initialRow->reg(reg));
-        log("r%d (%s)\n", reg, state->name(reg));
+        log("r%ld (%s)\n", reg, state->name(reg));
     })
 
     if_cfa(DW_CFA_undefined,
@@ -1706,7 +1705,7 @@ private_parse_instruction(cfi_table_row *row,
     if_cfa(DW_CFA_def_cfa_expression,
     {
         auto cfa = row->cfa();
-        cfa.set_value((uint64_t)*p);
+        cfa.set_value(reinterpret_cast<uint64_t>(*p));
         cfa.set_type(cfi_cfa::cfa_expression);
         row->set_cfa(cfa);
         *p += dwarf4::decode_uleb128(p);
@@ -1716,7 +1715,7 @@ private_parse_instruction(cfi_table_row *row,
     if_cfa(DW_CFA_expression,
     {
         auto reg = dwarf4::decode_uleb128(p);
-        auto value = (uint64_t) * p;
+        auto value = reinterpret_cast<uint64_t>(*p);
         row->set_reg(cfi_register(reg, rule_expression, value));
         *p += dwarf4::decode_uleb128(p);
         log("r%ld (%s) expression cfa %p\n", reg, state->name(reg), *p);
@@ -1752,7 +1751,7 @@ private_parse_instruction(cfi_table_row *row,
     if_cfa(DW_CFA_val_offset,
     {
         auto reg = dwarf4::decode_uleb128(p);
-        auto value = (int64_t)dwarf4::decode_uleb128(p) * cie.data_alignment();
+        auto value = static_cast<int64_t>(dwarf4::decode_uleb128(p)) * cie.data_alignment();
         row->set_reg(cfi_register(reg, rule_val_offsetn, value));
         log("r%ld (%s) at cfa + n(%ld)\n", reg, state->name(reg), value);
     })
@@ -1768,7 +1767,7 @@ private_parse_instruction(cfi_table_row *row,
     if_cfa(DW_CFA_val_expression,
     {
         auto reg = dwarf4::decode_uleb128(p);
-        auto value = (uint64_t) * p;
+        auto value = reinterpret_cast<uint64_t>(*p);
         row->set_reg(cfi_register(reg, rule_val_expression, value));
         *p += dwarf4::decode_uleb128(p);
         log("r%ld (%s) expression cfa %p\n", reg, state->name(reg), *p);
@@ -1784,7 +1783,7 @@ private_parse_instruction(cfi_table_row *row,
     if_cfa(DW_CFA_GNU_negative_offset_extended,
     {
         auto reg = dwarf4::decode_uleb128(p);
-        auto value = (int64_t)dwarf4::decode_uleb128(p) * cie.data_alignment();
+        auto value = static_cast<int64_t>(dwarf4::decode_uleb128(p)) * cie.data_alignment();
         row->set_reg(cfi_register(reg, rule_offsetn, -value));
         log("r%ld (%s) at cfa + n(%ld)\n", reg, state->name(reg), value);
     })
@@ -1806,7 +1805,7 @@ private_parse_instructions(cfi_table_row *row,
     char *p = is_cie ? cie.initial_instructions() : fde.instructions();
     char *end = is_cie ? cie.entry_end() : fde.entry_end();
 
-    uint64_t rememberIndex = 0;
+    uint64_t rememberIndex = 0ULL;
     cfi_table_row rememberStack[REMEMBER_STACK_SIZE] = {};
 
     auto initialRow = *row;
@@ -1824,8 +1823,8 @@ private_decode_cfi(const fd_entry &fde, register_state *state)
 
 #ifndef DISABLE_LOGGING
     auto eh_frame = fde.eh_frame();
-    auto cie_offset1 = (uint64_t)cie.entry_start() - (uint64_t)eh_frame.addr;
-    auto cie_size = (uint64_t)(cie.entry_end() - cie.entry_start());
+    auto cie_offset1 = reinterpret_cast<uint64_t>(cie.entry_start()) - reinterpret_cast<uint64_t>(eh_frame.addr);
+    auto cie_size = static_cast<uint64_t>(cie.entry_end() - cie.entry_start());
 
     log("%08lx ", cie_offset1);
     log("%08lx ", cie_size);
@@ -1837,9 +1836,9 @@ private_decode_cfi(const fd_entry &fde, register_state *state)
     log("\n");
 
 #ifndef DISABLE_LOGGING
-    auto fde_offset1 = (uint64_t)fde.entry_start() - (uint64_t)eh_frame.addr;
-    auto fde_offset2 = (uint64_t)fde.payload_start() - (uint64_t)eh_frame.addr;
-    auto fde_size = (uint64_t)(fde.entry_end() - fde.entry_start());
+    auto fde_offset1 = reinterpret_cast<uint64_t>(fde.entry_start()) - reinterpret_cast<uint64_t>(eh_frame.addr);
+    auto fde_offset2 = reinterpret_cast<uint64_t>(fde.payload_start()) - reinterpret_cast<uint64_t>(eh_frame.addr);
+    auto fde_size = static_cast<uint64_t>(fde.entry_end() - fde.entry_start());
     auto pc_begin = fde.pc_begin();
     auto pc_end = fde.pc_begin() + fde.pc_range();
 
@@ -1871,7 +1870,7 @@ dwarf4::decode_sleb128(char **addr)
 
     while (true)
     {
-        byte = *((uint8_t *)(*addr)++);
+        byte = *(reinterpret_cast<uint8_t *>((*addr)++));
         result |= ((byte & 0x7f) << shift);
         shift += 7;
         if ((byte & 0x80) == 0)
@@ -1893,7 +1892,7 @@ dwarf4::decode_uleb128(char **addr)
 
     while (true)
     {
-        byte = *((uint8_t *)(*addr)++);
+        byte = *(reinterpret_cast<uint8_t *>((*addr)++));
         result |= ((byte & 0x7f) << shift);
         shift += 7;
         if ((byte & 0x80) == 0)

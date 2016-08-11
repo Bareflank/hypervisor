@@ -26,6 +26,20 @@
 #include <constants.h>
 #include <driver_entry_interface.h>
 
+// -----------------------------------------------------------------------------
+// Expose Private Functions
+// -----------------------------------------------------------------------------
+
+extern "C"
+{
+    uint64_t get_elf_file_size(struct module_t *module);
+    int64_t load_elf_file(struct module_t *module);
+}
+
+// -----------------------------------------------------------------------------
+// Tests
+// -----------------------------------------------------------------------------
+
 void
 driver_entry_ut::test_common_add_module_invalid_file()
 {
@@ -95,4 +109,40 @@ driver_entry_ut::test_common_add_module_add_too_many()
 
     EXPECT_TRUE(common_add_module(m_dummy_start_vmm_success, m_dummy_start_vmm_success_length) == BF_ERROR_MAX_MODULES_REACHED);
     EXPECT_TRUE(common_fini() == BF_SUCCESS);
+}
+
+void
+driver_entry_ut::test_common_add_module_get_elf_file_size_fails()
+{
+    MockRepository mocks;
+    mocks.ExpectCallFunc(get_elf_file_size).Return(0);
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        EXPECT_TRUE(common_add_module(m_dummy_start_vmm_success, m_dummy_start_vmm_success_length) == BF_ERROR_FAILED_TO_ADD_FILE);
+    });
+}
+
+void
+driver_entry_ut::test_common_add_module_platform_alloc_fails()
+{
+    MockRepository mocks;
+    mocks.ExpectCallFunc(platform_alloc_rwe).Return(0);
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        EXPECT_TRUE(common_add_module(m_dummy_start_vmm_success, m_dummy_start_vmm_success_length) == BF_ERROR_OUT_OF_MEMORY);
+    });
+}
+
+void
+driver_entry_ut::test_common_add_module_load_elf_fails()
+{
+    MockRepository mocks;
+    mocks.ExpectCallFunc(load_elf_file).Return(-1);
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        EXPECT_TRUE(common_add_module(m_dummy_start_vmm_success, m_dummy_start_vmm_success_length) == -1);
+    });
 }

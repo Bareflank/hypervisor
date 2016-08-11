@@ -45,7 +45,7 @@ public:
     virtual std::ostream &print(std::ostream &os) const
     {
         os << "vmcs read failure:";
-        os << std::endl << "    - field: " << (void *)m_field;
+        os << std::endl << "    - field: " << reinterpret_cast<void *>(m_field);
         os << std::endl << "    - func: " << m_func;
         os << std::endl << "    - line: " << m_line;
 
@@ -81,8 +81,8 @@ public:
     virtual std::ostream &print(std::ostream &os) const
     {
         os << "vmcs write failure:";
-        os << std::endl << "    - field: " << (void *)m_field;
-        os << std::endl << "    - value: " << (void *)m_value;
+        os << std::endl << "    - field: " << reinterpret_cast<void *>(m_field);
+        os << std::endl << "    - value: " << reinterpret_cast<void *>(m_value);
         os << std::endl << "    - func: " << m_func;
         os << std::endl << "    - line: " << m_line;
 

@@ -19,42 +19,58 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <debug.h>
 #include <exception.h>
-
 #include <vcpu/vcpu.h>
-
-vcpu::vcpu(uint64_t id) :
-    m_id(id),
-    m_is_running(false)
-{
-    if ((id & RESERVED_VCPUIDS) != 0)
-        throw std::invalid_argument("invalid vcpuid");
-
-    m_debug_ring = std::make_shared<debug_ring>(id);
-}
 
 vcpu::vcpu(uint64_t id, const std::shared_ptr<debug_ring> &dr) :
     m_id(id),
     m_debug_ring(dr),
-    m_is_running(false)
+    m_is_running(false),
+    m_is_initialized(false)
 {
-    if ((id & RESERVED_VCPUIDS) != 0)
+    if ((id & VCPUID_RESERVED) != 0)
         throw std::invalid_argument("invalid vcpuid");
 
-    if (!dr)
-        m_debug_ring = std::make_shared<debug_ring>(id);
+    if (!m_debug_ring) m_debug_ring = std::make_shared<debug_ring>(id);
 }
 
-vcpu::~vcpu()
+void
+vcpu::init(void *attr)
 {
-    if (m_is_running)
+    (void) attr;
+
+    m_is_initialized = true;
+}
+
+void
+vcpu::fini(void *attr)
+{
+    (void) attr;
+
+    if (m_is_running == true)
         this->hlt();
+
+    m_is_initialized = false;
+}
+
+void
+vcpu::run(void *attr)
+{
+    (void) attr;
+
+    m_is_running = true;
+}
+
+void
+vcpu::hlt(void *attr)
+{
+    (void) attr;
+
+    m_is_running = false;
 }
 
 void
 vcpu::write(const std::string &str) noexcept
 {
-    if (m_debug_ring)
-        m_debug_ring->write(str);
+    m_debug_ring->write(str);
 }

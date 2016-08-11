@@ -45,51 +45,56 @@ public:
     ///
     /// Get an instance to the singleton class.
     ///
-    static vcpu_manager *instance();
+    static vcpu_manager *instance() noexcept;
 
     /// Create vCPU
     ///
-    /// Creates the vCPU.
+    /// Creates the vCPU. Note that the vCPU is actually created by the
+    /// vCPU factory's make_vcpu function.
     ///
     /// @param vcpuid the vcpu to initialize
+    /// @param attr attributes to be passed to the vcpu about what
+    ///     type of vcpu this is
     ///
-    virtual void create_vcpu(uint64_t vcpuid);
+    virtual void create_vcpu(uint64_t vcpuid, void *attr = nullptr);
 
     /// Delete vCPU
     ///
     /// Deletes the vCPU.
     ///
     /// @param vcpuid the vcpu to stop
-    /// @throws invalid_argument_error thrown when the vcpuid is invalid
+    /// @param attr attributes to be passed to the vcpu about what
+    ///     type of vcpu this is
     ///
-    virtual void delete_vcpu(uint64_t vcpuid);
+    virtual void delete_vcpu(uint64_t vcpuid, void *attr = nullptr);
 
     /// Run vCPU
     ///
     /// Executes the vCPU.
     ///
     /// @param vcpuid the vcpu to execute
+    /// @param attr attributes to be passed to the vcpu about what
+    ///     type of vcpu this is
     /// @throws invalid_argument_error thrown when the vcpuid is invalid
     ///
-    virtual void run_vcpu(uint64_t vcpuid);
+    virtual void run_vcpu(uint64_t vcpuid, void *attr = nullptr);
 
     /// Halt vCPU
     ///
     /// Halts the vCPU.
     ///
     /// @param vcpuid the vcpu to halt
-    /// @throws invalid_argument_error thrown when the vcpuid is invalid
+    /// @param attr attributes to be passed to the vcpu about what
+    ///     type of vcpu this is
     ///
-    virtual void hlt_vcpu(uint64_t vcpuid);
+    virtual void hlt_vcpu(uint64_t vcpuid, void *attr = nullptr);
 
     /// Write to Log
     ///
-    /// Writes a string 'str' of length 'len' to a vcpuid's internal debug
-    /// ring. If the vcpuid provided is invalid, all of the string is written
-    /// to all of the vcpus
+    /// Write's a string the vCPU's debug ring.
     ///
-    /// @param vcpuid the vcpu's log to write to
-    /// @param str the string to write to the log
+    /// @param vcpuid the vCPU to write to
+    /// @param str the string to write
     ///
     virtual void write(uint64_t vcpuid, const std::string &str) noexcept;
 
@@ -110,7 +115,7 @@ private:
     vcpu_manager();
 
     /// Get vCPU
-    std::shared_ptr<vcpu> get_vcpu(uint64_t vcpuid) const;
+    std::shared_ptr<vcpu> get_vcpu(uint64_t vcpuid) const noexcept;
 
 private:
 

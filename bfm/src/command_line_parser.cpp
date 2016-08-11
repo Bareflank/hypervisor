@@ -61,7 +61,7 @@ command_line_parser::parse(const std::vector<std::string> &args)
     {
         const auto &arg = args[i];
 
-        if (arg.empty() == true)
+        if (arg.empty() == true || arg.find_first_not_of(" \t") == std::string::npos)
             continue;
 
         if (arg[0] == '-')
@@ -113,7 +113,7 @@ command_line_parser::parse_load(const std::vector<std::string> &args, size_t ind
     {
         const auto &arg = args[i];
 
-        if (arg.empty() == true)
+        if (arg.empty() == true || arg.find_first_not_of(" \t") == std::string::npos)
             continue;
 
         if (arg[0] == '-')

@@ -35,7 +35,7 @@ section_info_t g_info;
 eh_frame_t g_eh_frame_list[MAX_NUM_MODULES] = {{0, 0}};
 
 extern "C" struct eh_frame_t *
-get_eh_frame_list()
+get_eh_frame_list() noexcept
 {
     g_eh_frame_list[0].addr = g_info.eh_frame_addr;
     g_eh_frame_list[0].size = g_info.eh_frame_size;

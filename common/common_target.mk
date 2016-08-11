@@ -108,25 +108,24 @@ NATIVE_CCFLAGS+=-march=sandybridge
 NATIVE_CCFLAGS+=-malign-data=abi
 NATIVE_CCFLAGS+=-mstackrealign
 
-CROSS_CCFLAGS+=-fpic
-CROSS_CCFLAGS+=-ffreestanding
-CROSS_CCFLAGS+=-std=c99
-CROSS_CCFLAGS+=-mno-red-zone
 CROSS_CCFLAGS+=-Wall
 CROSS_CCFLAGS+=-Wextra
 CROSS_CCFLAGS+=-Wpedantic
 CROSS_CCFLAGS+=-pipe
-CROSS_CCFLAGS+=-fexceptions
-CROSS_CCFLAGS+=-fstack-protector-strong
-CROSS_CCFLAGS+=-m64
-CROSS_CCFLAGS+=-mtune=sandybridge
-CROSS_CCFLAGS+=-march=sandybridge
-CROSS_CCFLAGS+=-malign-data=abi
-CROSS_CCFLAGS+=-mstackrealign
+CROSS_CCFLAGS+=$(CONFIGURED_CROSS_CCFLAGS)
 
 ifeq ($(PRODUCTION),yes)
 	NATIVE_CCFLAGS+=-O3
 	CROSS_CCFLAGS+=-O3
+endif
+
+ifeq ($(TRAVISCI),yes)
+	NATIVE_CCFLAGS+=-fprofile-arcs -ftest-coverage
+endif
+
+ifneq ($(IGNORE_WARNINGS),yes)
+	NATIVE_CCFLAGS+=-Werror
+	CROSS_CCFLAGS+=-Werror
 endif
 
 ################################################################################
@@ -147,27 +146,24 @@ NATIVE_CXXFLAGS+=-march=sandybridge
 NATIVE_CXXFLAGS+=-malign-data=abi
 NATIVE_CXXFLAGS+=-mstackrealign
 
-CROSS_CXXFLAGS+=-fpic
-CROSS_CXXFLAGS+=-ffreestanding
-CROSS_CXXFLAGS+=-fno-use-cxa-atexit
-CROSS_CXXFLAGS+=-fno-threadsafe-statics
-CROSS_CXXFLAGS+=-mno-red-zone
-CROSS_CXXFLAGS+=-std=c++14
 CROSS_CXXFLAGS+=-Wall
 CROSS_CXXFLAGS+=-Wextra
 CROSS_CXXFLAGS+=-Wpedantic
 CROSS_CXXFLAGS+=-pipe
-CROSS_CXXFLAGS+=-fexceptions
-CROSS_CXXFLAGS+=-fstack-protector-strong
-CROSS_CXXFLAGS+=-m64
-CROSS_CXXFLAGS+=-mtune=sandybridge
-CROSS_CXXFLAGS+=-march=sandybridge
-CROSS_CXXFLAGS+=-malign-data=abi
-CROSS_CXXFLAGS+=-mstackrealign
+CROSS_CXXFLAGS+=$(CONFIGURED_CROSS_CXXFLAGS)
 
 ifeq ($(PRODUCTION),yes)
 	NATIVE_CXXFLAGS+=-O3
 	CROSS_CXXFLAGS+=-O3
+endif
+
+ifeq ($(TRAVISCI),yes)
+	NATIVE_CXXFLAGS+=-fprofile-arcs -ftest-coverage
+endif
+
+ifneq ($(IGNORE_WARNINGS),yes)
+	NATIVE_CXXFLAGS+=-Werror
+	CROSS_CXXFLAGS+=-Werror
 endif
 
 ################################################################################
@@ -185,6 +181,14 @@ CROSS_ASMFLAGS+=-f elf64
 NATIVE_ARFLAGS+=-rcs
 
 CROSS_ARFLAGS+=rcs
+
+################################################################################
+# Default LD Flags
+################################################################################
+
+ifeq ($(TRAVISCI),yes)
+	NATIVE_LDFLAGS+=-lgcov --coverage
+endif
 
 ################################################################################
 # Target Naming
@@ -401,11 +405,6 @@ endif
 # Define Flags
 ################################################################################
 
-CROSS_DEFINES+=_HAVE_LONG_DOUBLE
-CROSS_DEFINES+=_LDBL_EQ_DBL
-CROSS_DEFINES+=_POSIX_TIMERS
-CROSS_DEFINES+=MALLOC_PROVIDED
-
 CROSS_CCFLAGS+=$(addprefix -D, $(strip $(CROSS_DEFINES)))
 CROSS_CXXFLAGS+=$(addprefix -D, $(strip $(CROSS_DEFINES)))
 
@@ -415,8 +414,6 @@ NATIVE_CXXFLAGS+=$(addprefix -D, $(strip $(NATIVE_DEFINES)))
 ################################################################################
 # Undefines Flags
 ################################################################################
-
-CROSS_UNDEFINES+=__STRICT_ANSI__
 
 CROSS_CCFLAGS+=$(addprefix -U, $(strip $(CROSS_UNDEFINES)))
 CROSS_CXXFLAGS+=$(addprefix -U, $(strip $(CROSS_UNDEFINES)))

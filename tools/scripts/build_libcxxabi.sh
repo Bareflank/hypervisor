@@ -39,10 +39,6 @@ mkdir -p $BUILD_ABS/build_libcxxabi
 
 pushd $BUILD_ABS/build_libcxxabi
 
-export NEWLIB_DEFINES="-D_HAVE_LONG_DOUBLE -D_LDBL_EQ_DBL -D_POSIX_TIMERS -U__STRICT_ANSI__ -DMALLOC_PROVIDED"
-export CFLAGS="-fpic -ffreestanding -mno-red-zone $NEWLIB_DEFINES"
-export CXXFLAGS="-fno-use-cxa-atexit -fno-threadsafe-statics $CFLAGS"
-
 export BAREFLANK_WRAPPER_IS_LIBCXXABI="true"
 
 if [[ ! -f "$BUILD_ABS/sysroot/x86_64-elf/include/unwind.h" ]]; then

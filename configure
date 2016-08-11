@@ -20,7 +20,7 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-version=1
+version=2
 
 # ------------------------------------------------------------------------------
 # Colors
@@ -29,6 +29,14 @@ version=1
 CB='\033[1;34m'
 CR='\033[1;91m'
 CE='\033[0m'
+
+# ------------------------------------------------------------------------------
+# Flags
+# ------------------------------------------------------------------------------
+
+CROSS_COMMONFLAGS="-fpic -ffreestanding -mno-red-zone -fexceptions -fstack-protector-strong -mtune=sandybridge -march=sandybridge -malign-data=abi -mstackrealign -D_HAVE_LONG_DOUBLE -D_LDBL_EQ_DBL -D_POSIX_TIMERS -U__STRICT_ANSI__ -DMALLOC_PROVIDED -DCLOCK_MONOTONIC"
+CROSS_CCFLAGS="-std=c99 $CROSS_COMMONFLAGS"
+CROSS_CXXFLAGS="-std=c++14 -fno-use-cxa-atexit -fno-threadsafe-statics $CROSS_COMMONFLAGS"
 
 # ------------------------------------------------------------------------------
 # Environment
@@ -101,6 +109,8 @@ check_env() {
         echo "export LLVM_RELEASE=\"release_38\"" >> $BUILD_ABS/env.sh
         echo "export module_file=\"$module_file\"" >> $BUILD_ABS/env.sh
         echo "export compiler=\"$compiler\"" >> $BUILD_ABS/env.sh
+        echo "export CFLAGS=\"$CROSS_CCFLAGS\"" >> $BUILD_ABS/env.sh
+        echo "export CXXFLAGS=\"$CROSS_CXXFLAGS\"" >> $BUILD_ABS/env.sh
         printf "export extensions=\"" >> $BUILD_ABS/env.sh
         printf "%s;" "${extensions[@]}" >> $BUILD_ABS/env.sh
         printf "\"\n" >> $BUILD_ABS/env.sh
@@ -388,6 +398,8 @@ copy_makefile() {
     echo -e "BUILD_ABS:=$BUILD_ABS" >> $1/Makefile.tmp
     echo -e "HYPER_REL:=$2" >> $1/Makefile.tmp
     echo -e "BUILD_REL:=$1" >> $1/Makefile.tmp
+    echo -e "CONFIGURED_CROSS_CCFLAGS:=$CROSS_CCFLAGS" >> $1/Makefile.tmp
+    echo -e "CONFIGURED_CROSS_CXXFLAGS:=$CROSS_CXXFLAGS" >> $1/Makefile.tmp
     echo -e "MAKEFILE_ABS:=\$(dir \$(abspath \$(lastword \$(MAKEFILE_LIST))))" >> $1/Makefile.tmp
     echo -e "ifneq (\$(dir \$(BUILD_REL)/), \$(MAKEFILE_ABS))" >> $1/Makefile.tmp
     echo -e "    \$(error Build system has moved which is not supported!!!)" >> $1/Makefile.tmp

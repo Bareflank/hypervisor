@@ -97,6 +97,8 @@
                 caught_str = typeid(ge).name(); \
                 expecting_str = typeid(b).name(); \
             } \
+            else \
+                std::cout << "caught: " << ge << std::endl; \
         } \
         catch(std::exception &e) \
         { \
@@ -107,6 +109,8 @@
                 caught_str = typeid(e).name(); \
                 expecting_str = typeid(b).name(); \
             } \
+            else \
+                std::cout << "caught: " << e << std::endl; \
         } \
         catch(...) \
         { \
@@ -218,6 +222,8 @@
                 caught_str = typeid(ge).name(); \
                 expecting_str = typeid(b).name(); \
             } \
+            else \
+                std::cout << "caught: " << ge << std::endl; \
         } \
         catch(std::exception &e) \
         { \
@@ -228,6 +234,8 @@
                 caught_str = typeid(e).name(); \
                 expecting_str = typeid(b).name(); \
             } \
+            else \
+                std::cout << "caught: " << e << std::endl; \
         } \
         catch(...) \
         { \

@@ -137,6 +137,8 @@ private:
     void test_bfelf_loader_resolve_symbol_length_too_large_no_hash();
     void test_bfelf_loader_resolve_symbol_success_no_hash();
     void test_bfelf_loader_resolve_symbol_real_test();
+    void test_bfelf_file_resolve_symbol_resolve_fail();
+    void test_bfelf_loader_resolve_symbol_resolve_fail();
 
     void test_bfelf_loader_relocate_invalid_loader();
     void test_bfelf_loader_relocate_no_files_added();
@@ -149,6 +151,25 @@ private:
     void test_bfelf_loader_get_info_no_relocation();
     void test_bfelf_loader_get_info_expected_misc_resources();
     void test_bfelf_loader_get_info_expected_code_resources();
+    void test_bfelf_loader_get_info_get_section_name_failure_ctors();
+    void test_bfelf_loader_get_info_check_section_name_failure_ctors();
+    void test_bfelf_loader_get_info_get_section_name_failure_dtors();
+    void test_bfelf_loader_get_info_check_section_name_failure_dtors();
+    void test_bfelf_loader_get_info_get_section_name_failure_eh_frame();
+    void test_bfelf_loader_get_info_check_section_name_failure_eh_frame();
+
+    void test_private_bfelf_error();
+    void test_private_invalid_symbol_index();
+    void test_private_corrupt_symbol_table();
+    void test_private_relocate_invalid_index();
+    void test_private_relocate_invalid_name();
+    void test_private_relocate_invalid_relocation();
+    void test_private_get_section_invalid_name();
+    void test_private_symbol_table_sections_invalid_dynsym();
+    void test_private_symbol_table_sections_invalid_hash();
+    void test_private_string_table_sections_invalid();
+    void test_private_get_relocation_tables_invalid_type();
+    void test_private_get_relocation_tables_invalid_section();
 
 private:
 

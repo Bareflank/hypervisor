@@ -19,65 +19,21 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <debug.h>
+#include <guard_exceptions.h>
 #include <exit_handler/exit_handler_intel_x64.h>
 #include <exit_handler/exit_handler_intel_x64_entry.h>
-#include <exit_handler/exit_handler_intel_x64_support.h>
-#include <exit_handler/exit_handler_intel_x64_exceptions.h>
-
-// -----------------------------------------------------------------------------
-// Helpers
-// -----------------------------------------------------------------------------
-
-/// Guard Exceptions
-///
-/// The following attempts to catch all of the different types of execptions
-/// that could be thrown. The default bareflank implementation only throws
-/// general exceptions. Libc++ however could also throw a standard exception,
-/// which also needs to be caught. We also provide a catch all incase a
-/// non-standard exception is thrown, preventing exceptions from moving
-/// beyond this point.
-///
-template<typename T> bool
-guard_exceptions(T func)
-{
-    try
-    {
-        func();
-
-        return true;
-    }
-    catch (bfn::general_exception &ge)
-    {
-        bferror << "----------------------------------------" << bfendl;
-        bferror << "- General Exception Caught             -" << bfendl;
-        bferror << "----------------------------------------" << bfendl;
-        bfinfo << ge << bfendl;
-    }
-    catch (std::exception &e)
-    {
-        bferror << "----------------------------------------" << bfendl;
-        bferror << "- Standard Exception Caught            -" << bfendl;
-        bferror << "----------------------------------------" << bfendl;
-        bfinfo << e.what() << bfendl;
-    }
-    catch (...)
-    {
-        bferror << "----------------------------------------" << bfendl;
-        bferror << "- Unknown Exception Caught             -" << bfendl;
-        bferror << "----------------------------------------" << bfendl;
-    }
-
-    return false;
-}
 
 // -----------------------------------------------------------------------------
 // Implementation
 // -----------------------------------------------------------------------------
 
 extern "C" void
-exit_handler(exit_handler_intel_x64 *exit_handler)
+exit_handler(exit_handler_intel_x64 *exit_handler) noexcept
 {
-    if (guard_exceptions([&]() { exit_handler->dispatch(); }) == false)
+    guard_exceptions(-1, [&]()
+    {
+        exit_handler->dispatch();
+    });
+
     exit_handler->halt();
 }

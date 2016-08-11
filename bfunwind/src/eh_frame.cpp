@@ -25,12 +25,6 @@
 #include <eh_frame.h>
 
 // -----------------------------------------------------------------------------
-// Global
-// -----------------------------------------------------------------------------
-
-extern uint64_t g_phase;
-
-// -----------------------------------------------------------------------------
 // Helpers
 // -----------------------------------------------------------------------------
 
@@ -53,7 +47,7 @@ decode_pointer(char **addr, uint64_t encoding)
             break;
 
         case DW_EH_PE_pcrel:
-            result += (uint64_t) * addr;
+            result += reinterpret_cast<uint64_t>(*addr);
             break;
 
         case DW_EH_PE_textrel:
@@ -79,45 +73,45 @@ decode_pointer(char **addr, uint64_t encoding)
     switch (encoding & 0x0F)
     {
         case DW_EH_PE_absptr:
-            result += (uint64_t) * (void **)*addr;
+            result += *reinterpret_cast<uintptr_t *>(*addr);
             *addr += sizeof(void *);
             break;
 
         case DW_EH_PE_uleb128:
-            result += (uint64_t)dwarf4::decode_uleb128(addr);
+            result += dwarf4::decode_uleb128(addr);
             break;
 
         case DW_EH_PE_udata2:
-            result += (uint64_t) * (uint16_t *)*addr;
+            result += *reinterpret_cast<uint16_t *>(*addr);
             *addr += sizeof(uint16_t);
             break;
 
         case DW_EH_PE_udata4:
-            result += (uint64_t) * (uint32_t *)*addr;
+            result += *reinterpret_cast<uint32_t *>(*addr);
             *addr += sizeof(uint32_t);
             break;
 
         case DW_EH_PE_udata8:
-            result += (uint64_t) * (uint64_t *)*addr;
+            result += *reinterpret_cast<uint64_t *>(*addr);
             *addr += sizeof(uint64_t);
             break;
 
         case DW_EH_PE_sleb128:
-            result += (uint64_t)dwarf4::decode_sleb128(addr);
+            result += dwarf4::decode_sleb128(addr);
             break;
 
         case DW_EH_PE_sdata2:
-            result += (uint64_t) * (int16_t *)*addr;
+            result += *reinterpret_cast<int16_t *>(*addr);
             *addr += sizeof(int16_t);
             break;
 
         case DW_EH_PE_sdata4:
-            result += (uint64_t) * (int32_t *)*addr;
+            result += *reinterpret_cast<int32_t *>(*addr);
             *addr += sizeof(int32_t);
             break;
 
         case DW_EH_PE_sdata8:
-            result += (uint64_t) * (int64_t *)*addr;
+            result += *reinterpret_cast<int64_t *>(*addr);
             *addr += sizeof(int64_t);
             break;
 
@@ -157,7 +151,7 @@ common_entry &common_entry::operator++()
     if (m_entry_start == 0)
         return *this;
 
-    if (m_entry_end + 4 < (char *)m_eh_frame.addr + m_eh_frame.size)
+    if (m_entry_end + 4 < reinterpret_cast<char *>(m_eh_frame.addr) + m_eh_frame.size)
         parse(m_entry_end);
     else
         parse(0);
@@ -176,14 +170,14 @@ common_entry::parse(char *addr)
     if (m_entry_start < m_eh_frame.addr)
         goto failure;
 
-    if (((uint32_t *)(m_entry_start))[0] != 0xFFFFFFFF)
+    if (*reinterpret_cast<uint32_t *>(m_entry_start) != 0xFFFFFFFF)
     {
-        len = ((uint32_t *)(m_entry_start + 0))[0];
+        len = *reinterpret_cast<uint32_t *>(m_entry_start + 0);
         m_payload_start = m_entry_start + 4;
     }
     else
     {
-        len = ((uint64_t *)(m_entry_start + 4))[0];
+        len = *reinterpret_cast<uint64_t *>(m_entry_start + 4);
         m_payload_start = m_entry_start + 12;
     }
 
@@ -193,10 +187,10 @@ common_entry::parse(char *addr)
     m_payload_end = m_payload_start + len;
     m_entry_end = m_payload_end;
 
-    if (m_entry_end > (char *)m_eh_frame.addr + m_eh_frame.size)
+    if (m_entry_end > reinterpret_cast<char *>(m_eh_frame.addr) + m_eh_frame.size)
         goto failure;
 
-    m_is_cie = (((uint32_t *)(m_payload_start))[0] == 0);
+    m_is_cie = (*reinterpret_cast<uint32_t *>(m_payload_start) == 0);
     return;
 
 failure:
@@ -238,7 +232,7 @@ ci_entry::ci_entry(const eh_frame_t &eh_frame) :
     m_personality_function(0),
     m_initial_instructions(0)
 {
-    parse((char *)eh_frame.addr);
+    parse(reinterpret_cast<char *>(eh_frame.addr));
 }
 
 ci_entry::ci_entry(const eh_frame_t &eh_frame, void *addr) :
@@ -254,7 +248,7 @@ ci_entry::ci_entry(const eh_frame_t &eh_frame, void *addr) :
     m_personality_function(0),
     m_initial_instructions(0)
 {
-    parse((char *)addr);
+    parse(reinterpret_cast<char *>(addr));
 }
 
 void
@@ -290,17 +284,17 @@ ci_entry::parse(char *addr)
             switch (m_augmentation_string[i])
             {
                 case 'L':
-                    m_lsda_encoding = *(uint8_t *)p++;
+                    m_lsda_encoding = *reinterpret_cast<uint8_t *>(p++);
                     break;
 
                 case 'P':
-                    m_personality_encoding = *(uint8_t *)p++;
+                    m_personality_encoding = *reinterpret_cast<uint8_t *>(p++);
                     m_personality_function =
                         decode_pointer(&p, m_personality_encoding);
                     break;
 
                 case 'R':
-                    m_pointer_encoding = *(uint8_t *)p++;
+                    m_pointer_encoding = *reinterpret_cast<uint8_t *>(p++);
                     break;
 
                 default:
@@ -358,7 +352,7 @@ fd_entry::parse(char *addr)
         return;
 
     auto p = payload_start();
-    auto p_cie = (char *)((uint64_t)p - * (uint32_t *)p);
+    auto p_cie = reinterpret_cast<char *>(reinterpret_cast<uint64_t>(p) - *reinterpret_cast<uint32_t *>(p));
 
     m_cie = ci_entry(eh_frame(), p_cie);
     p += sizeof(uint32_t);
@@ -398,7 +392,7 @@ fd_entry::parse(char *addr)
 // -----------------------------------------------------------------------------
 
 fd_entry
-eh_frame::find_fde(register_state *state)
+eh_frame::find_fde(register_state *state, bool phase1)
 {
     auto eh_frame_list = get_eh_frame_list();
 
@@ -411,11 +405,10 @@ eh_frame::find_fde(register_state *state)
 
             if (fde.is_in_range(state->get_ip()) == true)
             {
-                if (g_phase == 1)
-                {
-                    log("\n");
-                    debug("unwinder found rip: %p\n", (void *)state->get_ip());
-                }
+                if (phase1 == true)
+                    debug("unwinder found rip: %p, fde: %p\n",
+                          reinterpret_cast<void *>(state->get_ip()),
+                          reinterpret_cast<void *>(fde.pc_begin()));
 
                 return fde;
             }
@@ -423,8 +416,12 @@ eh_frame::find_fde(register_state *state)
     }
 
     debug("ERROR: An exception was thrown, but the unwinder was unable to "
-          "locate a stack frame for RIP = %p. Aborting!!!\n",
-          (void *)state->get_ip());
+          "locate a stack frame for RIP = %p. Possible reasons include\n",
+          reinterpret_cast<void *>(state->get_ip()));
+    debug("  - Throwing from a destructor\n");
+    debug("  - Throwing from a function labeled noexcept\n");
+    debug("  - Bug in the unwinder\n");
+    debug("\n\nAborting!!!\n\n")
 
     state->dump();
 

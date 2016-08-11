@@ -297,11 +297,48 @@ exit_handler_intel_x64::dispatch()
             unimplemented_handler();
             break;
     };
+
+    m_vmcs->resume();
 }
 
 void
-exit_handler_intel_x64::halt()
+exit_handler_intel_x64::halt() noexcept
 {
+    std::lock_guard<std::mutex> guard(g_unimplemented_handler_mutex);
+
+    bferror << bfendl;
+    bferror << bfendl;
+    bferror << "Guest register state: " << bfendl;
+    bferror << "----------------------------------------------------" << bfendl;
+    bferror << "- m_state_save->rax: " << reinterpret_cast<void *>(m_state_save->rax) << bfendl;
+    bferror << "- m_state_save->rbx: " << reinterpret_cast<void *>(m_state_save->rbx) << bfendl;
+    bferror << "- m_state_save->rcx: " << reinterpret_cast<void *>(m_state_save->rcx) << bfendl;
+    bferror << "- m_state_save->rdx: " << reinterpret_cast<void *>(m_state_save->rdx) << bfendl;
+    bferror << "- m_state_save->rbp: " << reinterpret_cast<void *>(m_state_save->rbp) << bfendl;
+    bferror << "- m_state_save->rsi: " << reinterpret_cast<void *>(m_state_save->rsi) << bfendl;
+    bferror << "- m_state_save->rdi: " << reinterpret_cast<void *>(m_state_save->rdi) << bfendl;
+    bferror << "- m_state_save->r08: " << reinterpret_cast<void *>(m_state_save->r08) << bfendl;
+    bferror << "- m_state_save->r09: " << reinterpret_cast<void *>(m_state_save->r09) << bfendl;
+    bferror << "- m_state_save->r10: " << reinterpret_cast<void *>(m_state_save->r10) << bfendl;
+    bferror << "- m_state_save->r11: " << reinterpret_cast<void *>(m_state_save->r11) << bfendl;
+    bferror << "- m_state_save->r12: " << reinterpret_cast<void *>(m_state_save->r12) << bfendl;
+    bferror << "- m_state_save->r13: " << reinterpret_cast<void *>(m_state_save->r13) << bfendl;
+    bferror << "- m_state_save->r14: " << reinterpret_cast<void *>(m_state_save->r14) << bfendl;
+    bferror << "- m_state_save->r15: " << reinterpret_cast<void *>(m_state_save->r15) << bfendl;
+    bferror << "- m_state_save->rip: " << reinterpret_cast<void *>(m_state_save->rip) << bfendl;
+    bferror << "- m_state_save->rsp: " << reinterpret_cast<void *>(m_state_save->rsp) << bfendl;
+
+    bferror << bfendl;
+    bferror << bfendl;
+    bferror << "CPU Halted: " << bfendl;
+    bferror << "----------------------------------------------------" << bfendl;
+    bferror << "- vcpuid: " << m_state_save->vcpuid << bfendl;
+
+    bferror << bfendl;
+    bferror << bfendl;
+
+    g_unimplemented_handler_mutex.unlock();
+
     m_intrinsics->stop();
 }
 
@@ -670,44 +707,22 @@ exit_handler_intel_x64::unimplemented_handler()
 
     bferror << bfendl;
     bferror << bfendl;
-    bferror << "Guest register state: " << bfendl;
-    bferror << "----------------------------------------------------" << bfendl;
-    bferror << "m_state_save->rax: " << (void *)m_state_save->rax << bfendl;
-    bferror << "m_state_save->rbx: " << (void *)m_state_save->rbx << bfendl;
-    bferror << "m_state_save->rcx: " << (void *)m_state_save->rcx << bfendl;
-    bferror << "m_state_save->rdx: " << (void *)m_state_save->rdx << bfendl;
-    bferror << "m_state_save->rbp: " << (void *)m_state_save->rbp << bfendl;
-    bferror << "m_state_save->rsi: " << (void *)m_state_save->rsi << bfendl;
-    bferror << "m_state_save->rdi: " << (void *)m_state_save->rdi << bfendl;
-    bferror << "m_state_save->r08: " << (void *)m_state_save->r08 << bfendl;
-    bferror << "m_state_save->r09: " << (void *)m_state_save->r09 << bfendl;
-    bferror << "m_state_save->r10: " << (void *)m_state_save->r10 << bfendl;
-    bferror << "m_state_save->r11: " << (void *)m_state_save->r11 << bfendl;
-    bferror << "m_state_save->r12: " << (void *)m_state_save->r12 << bfendl;
-    bferror << "m_state_save->r13: " << (void *)m_state_save->r13 << bfendl;
-    bferror << "m_state_save->r14: " << (void *)m_state_save->r14 << bfendl;
-    bferror << "m_state_save->r15: " << (void *)m_state_save->r15 << bfendl;
-    bferror << "m_state_save->rip: " << (void *)m_state_save->rip << bfendl;
-    bferror << "m_state_save->rsp: " << (void *)m_state_save->rsp << bfendl;
-
-    bferror << bfendl;
-    bferror << bfendl;
     bferror << "Unimplemented Exit Handler: " << bfendl;
     bferror << "----------------------------------------------------" << bfendl;
     bferror << "- exit reason: "
-            << (void *)m_exit_reason << bfendl;
+            << reinterpret_cast<void *>(m_exit_reason) << bfendl;
     bferror << "- exit reason string: "
             << exit_reason_to_str(m_exit_reason & 0x0000FFFF) << bfendl;
     bferror << "- exit qualification: "
-            << (void *)m_exit_qualification << bfendl;
+            << reinterpret_cast<void *>(m_exit_qualification) << bfendl;
     bferror << "- instruction length: "
-            << (void *)m_exit_instruction_length << bfendl;
+            << reinterpret_cast<void *>(m_exit_instruction_length) << bfendl;
     bferror << "- instruction information: "
-            << (void *)m_exit_instruction_information << bfendl;
-    bferror << bfendl;
+            << reinterpret_cast<void *>(m_exit_instruction_information) << bfendl;
 
     if ((m_exit_reason & 0x80000000) != 0)
     {
+        bferror << bfendl;
         bferror << "VM-entry failure detected!!!" << bfendl;
         bferror << bfendl;
 
@@ -716,12 +731,9 @@ exit_handler_intel_x64::unimplemented_handler()
         m_vmcs->check_vmcs_host_state();
     }
 
-    bferror << bfendl;
-    bferror << bfendl;
-
     g_unimplemented_handler_mutex.unlock();
 
-    halt();
+    this->halt();
 }
 
 const char *

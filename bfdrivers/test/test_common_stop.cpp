@@ -106,3 +106,27 @@ driver_entry_ut::test_common_stop_stop_vmm_failure()
 
     common_reset();
 }
+
+void
+driver_entry_ut::test_common_stop_set_affinity_failed()
+{
+    EXPECT_TRUE(common_add_module(m_dummy_start_vmm_success, m_dummy_start_vmm_success_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_add_module(m_dummy_stop_vmm_success, m_dummy_stop_vmm_success_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_add_module(m_dummy_add_md_success, m_dummy_add_md_success_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_add_module(m_dummy_misc, m_dummy_misc_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_load_vmm() == BF_SUCCESS);
+    EXPECT_TRUE(common_start_vmm() == BF_SUCCESS);
+
+    {
+        MockRepository mocks;
+        mocks.ExpectCallFunc(platform_set_affinity).Return(-1);
+
+        RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+        {
+            EXPECT_TRUE(common_stop_vmm() == -1);
+        });
+    }
+
+    common_reset();
+}
+

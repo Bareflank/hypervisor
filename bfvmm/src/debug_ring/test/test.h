@@ -39,6 +39,10 @@ protected:
 
 private:
 
+    void test_get_drr_invalid_drr();
+    void test_get_drr_invalid_vcpuid();
+    void test_constructor_out_of_memory();
+    void test_write_out_of_memory();
     void test_read_with_invalid_drr();
     void test_read_with_null_string();
     void test_read_with_zero_length();

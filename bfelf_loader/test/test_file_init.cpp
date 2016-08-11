@@ -339,13 +339,13 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_segment_addresses()
 void
 bfelf_loader_ut::test_bfelf_file_init_invalid_segment_alignment()
 {
-    // bfelf_file_t ef;
-    // auto test = get_test();
+    bfelf_file_t ef;
+    auto test = get_test();
 
-    // test.phdrtab.re_segment1.p_align = 0xDEADBEEF;
+    test.phdrtab.re_segment1.p_align = 0xDEADBEEF;
 
-    // auto ret = bfelf_file_init((char *)&test, sizeof(test), &ef);
-    // EXPECT_TRUE(ret == BFELF_ERROR_INVALID_SEGMENT);
+    auto ret = bfelf_file_init((char *)&test, sizeof(test), &ef);
+    EXPECT_TRUE(ret == BFELF_ERROR_INVALID_SEGMENT);
 }
 
 void

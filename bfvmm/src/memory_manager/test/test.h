@@ -52,20 +52,27 @@ private:
     void test_memory_manager_malloc_aligned_ignored_alignment();
     void test_memory_manager_malloc_aligned();
     void test_memory_manager_malloc_alloc_fragment();
+    void test_memory_manager_malloc_alloc_multiple_fragments();
+    void test_memory_manager_add_md_no_exceptions();
     void test_memory_manager_add_md_invalid_md();
     void test_memory_manager_add_md_invalid_virt();
     void test_memory_manager_add_md_invalid_phys();
     void test_memory_manager_add_md_invalid_type();
     void test_memory_manager_add_md_unaligned_physical();
     void test_memory_manager_add_md_unaligned_virtual();
+    void test_memory_manager_block_to_virt_unknown();
+    void test_memory_manager_virt_to_block_unknown();
+    void test_memory_manager_is_block_aligned_unknown();
     void test_memory_manager_virt_to_phys_unknown();
     void test_memory_manager_phys_to_virt_unknown();
     void test_memory_manager_virt_to_phys_random_address();
     void test_memory_manager_virt_to_phys_upper_limit();
     void test_memory_manager_virt_to_phys_lower_limit();
+    void test_memory_manager_virt_to_phys_map();
     void test_memory_manager_phys_to_virt_random_address();
     void test_memory_manager_phys_to_virt_upper_limit();
     void test_memory_manager_phys_to_virt_lower_limit();
+    void test_memory_manager_phys_to_virt_map();
 
     void test_page_table_x64_no_entry();
     void test_page_table_x64_with_entry();
@@ -76,6 +83,7 @@ private:
     void test_page_table_x64_add_page_twice_failure();
     void test_page_table_x64_table_phys_addr_success();
     void test_page_table_x64_table_phys_addr_failure();
+    void test_page_table_x64_coveralls_cleanup();
 
     void test_page_table_entry_x64_null_present();
     void test_page_table_entry_x64_present();

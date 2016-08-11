@@ -29,13 +29,20 @@ local_init(struct section_info_t *info)
     if (info == nullptr)
         return CRT_FAILURE;
 
-    if (info->ctors_addr != nullptr)
+    try
     {
-        auto n = info->ctors_size >> 3;
-        auto ctors = (ctor_t *)info->ctors_addr;
+        if (info->ctors_addr != nullptr)
+        {
+            auto n = info->ctors_size >> 3;
+            auto ctors = (ctor_t *)info->ctors_addr;
 
-        for (auto i = 0U; i < n && ctors[i] != 0; i++)
-            ctors[i]();
+            for (auto i = 0U; i < n && ctors[i] != 0; i++)
+                ctors[i]();
+        }
+    }
+    catch (...)
+    {
+        return CRT_FAILURE;
     }
 
     auto ret = register_eh_frame(info->eh_frame_addr, info->eh_frame_size);
@@ -51,13 +58,20 @@ local_fini(struct section_info_t *info)
     if (info == 0)
         return CRT_FAILURE;
 
-    if (info->dtors_addr != 0)
+    try
     {
-        auto n = info->dtors_size >> 3;
-        auto dtors = (dtor_t *)info->dtors_addr;
+        if (info->dtors_addr != 0)
+        {
+            auto n = info->dtors_size >> 3;
+            auto dtors = (dtor_t *)info->dtors_addr;
 
-        for (auto i = 0U; i < n && dtors[i] != 0; i++)
-            dtors[i]();
+            for (auto i = 0U; i < n && dtors[i] != 0; i++)
+                dtors[i]();
+        }
+    }
+    catch (...)
+    {
+        return CRT_FAILURE;
     }
 
     return CRT_SUCCESS;

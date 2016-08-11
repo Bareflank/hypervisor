@@ -30,6 +30,6 @@
 /// finished it's job, it hands control to this function, which trampolines
 /// to a C++ exit handler dispatch which will ultamitely handle the VM exit
 ///
-extern "C" void exit_handler(exit_handler_intel_x64 *exit_handler);
+extern "C" void exit_handler(exit_handler_intel_x64 *exit_handler) noexcept;
 
 #endif

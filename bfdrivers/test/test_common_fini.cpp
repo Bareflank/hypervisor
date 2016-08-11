@@ -107,3 +107,75 @@ driver_entry_ut::test_common_fini_failed_start()
     EXPECT_TRUE(common_fini() == BF_SUCCESS);
     EXPECT_TRUE(common_vmm_status() == VMM_UNLOADED);
 }
+
+void
+driver_entry_ut::test_common_fini_unload_failed()
+{
+    EXPECT_TRUE(common_add_module(m_dummy_start_vmm_success, m_dummy_start_vmm_success_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_add_module(m_dummy_stop_vmm_success, m_dummy_stop_vmm_success_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_add_module(m_dummy_add_md_success, m_dummy_add_md_success_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_add_module(m_dummy_misc, m_dummy_misc_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_load_vmm() == BF_SUCCESS);
+
+    {
+        MockRepository mocks;
+        mocks.ExpectCallFunc(common_unload_vmm).Return(-1);
+
+        RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+        {
+            EXPECT_TRUE(common_fini() == BF_SUCCESS);
+        });
+    }
+
+    EXPECT_TRUE(common_fini() == BF_SUCCESS);
+    EXPECT_TRUE(common_vmm_status() == VMM_UNLOADED);
+}
+
+void
+driver_entry_ut::test_common_fini_stop_failed()
+{
+    EXPECT_TRUE(common_add_module(m_dummy_start_vmm_success, m_dummy_start_vmm_success_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_add_module(m_dummy_stop_vmm_success, m_dummy_stop_vmm_success_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_add_module(m_dummy_add_md_success, m_dummy_add_md_success_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_add_module(m_dummy_misc, m_dummy_misc_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_load_vmm() == BF_SUCCESS);
+    EXPECT_TRUE(common_start_vmm() == BF_SUCCESS);
+
+    {
+        MockRepository mocks;
+        mocks.ExpectCallFunc(common_stop_vmm).Return(-1);
+
+        RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+        {
+            EXPECT_TRUE(common_fini() == BF_SUCCESS);
+        });
+    }
+
+    EXPECT_TRUE(common_fini() == BF_SUCCESS);
+    EXPECT_TRUE(common_vmm_status() == VMM_UNLOADED);
+}
+
+void
+driver_entry_ut::test_common_fini_reset_failed()
+{
+    EXPECT_TRUE(common_add_module(m_dummy_start_vmm_success, m_dummy_start_vmm_success_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_add_module(m_dummy_stop_vmm_success, m_dummy_stop_vmm_success_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_add_module(m_dummy_add_md_success, m_dummy_add_md_success_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_add_module(m_dummy_misc, m_dummy_misc_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_load_vmm() == BF_SUCCESS);
+    EXPECT_TRUE(common_start_vmm() == BF_SUCCESS);
+
+    {
+        MockRepository mocks;
+        mocks.ExpectCallFunc(common_reset).Return(-1);
+        mocks.ExpectCallFunc(common_reset).Return(-1);
+
+        RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+        {
+            EXPECT_TRUE(common_fini() == BF_SUCCESS);
+        });
+    }
+
+    EXPECT_TRUE(common_fini() == BF_SUCCESS);
+    EXPECT_TRUE(common_vmm_status() == VMM_UNLOADED);
+}

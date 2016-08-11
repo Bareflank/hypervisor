@@ -22,6 +22,7 @@
 #include <debug.h>
 #include <exception.h>
 #include <vcpu/vcpu_manager.h>
+#include <commit_or_rollback.h>
 
 // -----------------------------------------------------------------------------
 // Mutex
@@ -35,70 +36,101 @@ std::mutex g_vcpu_manager_mutex;
 // -----------------------------------------------------------------------------
 
 vcpu_manager *
-vcpu_manager::instance()
+vcpu_manager::instance() noexcept
 {
     static vcpu_manager self;
     return &self;
 }
 
 void
-vcpu_manager::create_vcpu(uint64_t vcpuid)
+vcpu_manager::create_vcpu(uint64_t vcpuid, void *attr)
 {
-    auto vcpu = m_vcpu_factory->make_vcpu(vcpuid);
+    auto cor1 = commit_or_rollback([&]
+    {
+        this->delete_vcpu(vcpuid);
+    });
 
-    std::lock_guard<std::mutex> guard(g_vcpu_manager_mutex);
-    m_vcpus[vcpuid] = vcpu;
-}
+    if (auto vcpu = m_vcpu_factory->make_vcpu(vcpuid, attr))
+    {
+        {
+            std::lock_guard<std::mutex> guard(g_vcpu_manager_mutex);
+            m_vcpus[vcpuid] = vcpu;
+        }
 
-void
-vcpu_manager::delete_vcpu(uint64_t vcpuid)
-{
-    std::lock_guard<std::mutex> guard(g_vcpu_manager_mutex);
-    auto iter = m_vcpus.find(vcpuid);
-
-    if (iter == m_vcpus.end())
-        throw std::invalid_argument("invalid vcpuid");
-
-    auto hold_vcpu_until_deleted = iter->second;
-
-    m_vcpus.erase(iter);
-    g_vcpu_manager_mutex.unlock();
-}
-
-void
-vcpu_manager::run_vcpu(uint64_t vcpuid)
-{
-    auto vcpu = get_vcpu(vcpuid);
-
-    if (vcpu)
-        vcpu->run();
+        vcpu->init(attr);
+    }
     else
-        throw std::invalid_argument("invalid vcpuid");
+    {
+        throw std::runtime_error("make_vcpu returned a nullptr vcpu");
+    }
 
-    bfdebug << "success: host os is " << bfcolor_green "now " << bfcolor_end
-            << "in a vm on vcpuid = " << vcpuid << bfendl;
+    cor1.commit();
 }
 
 void
-vcpu_manager::hlt_vcpu(uint64_t vcpuid)
+vcpu_manager::delete_vcpu(uint64_t vcpuid, void *attr)
 {
-    auto vcpu = get_vcpu(vcpuid);
+    auto cor1 = commit_or_rollback([&]
+    {
+        std::lock_guard<std::mutex> guard(g_vcpu_manager_mutex);
+        m_vcpus.erase(vcpuid);
+    });
 
-    if (vcpu)
-        vcpu->hlt();
+    if (auto vcpu = get_vcpu(vcpuid))
+        vcpu->fini(attr);
+}
+
+void
+vcpu_manager::run_vcpu(uint64_t vcpuid, void *attr)
+{
+    auto cor1 = commit_or_rollback([&]
+    {
+        this->hlt_vcpu(vcpuid);
+    });
+
+    if (auto vcpu = get_vcpu(vcpuid))
+    {
+        if (vcpu->is_running() == false)
+            vcpu->run(attr);
+        else
+            return;
+
+        if (vcpu->is_guest_vm_vcpu() == true)
+            return;
+
+        bfdebug << "success: host os is " << bfcolor_green "now " << bfcolor_end
+                << "in a vm on vcpuid = " << vcpuid << bfendl;
+    }
     else
+    {
         throw std::invalid_argument("invalid vcpuid");
+    }
 
-    bfdebug << "success: host os is " << bfcolor_red "not " << bfcolor_end
-            << "in a vm on vcpuid = " << vcpuid << bfendl;
+    cor1.commit();
+}
+
+void
+vcpu_manager::hlt_vcpu(uint64_t vcpuid, void *attr)
+{
+    if (auto vcpu = get_vcpu(vcpuid))
+    {
+        if (vcpu->is_running() == true)
+            vcpu->hlt(attr);
+        else
+            return;
+
+        if (vcpu->is_guest_vm_vcpu() == true)
+            return;
+
+        bfdebug << "success: host os is " << bfcolor_red "not " << bfcolor_end
+                << "in a vm on vcpuid = " << vcpuid << bfendl;
+    }
 }
 
 void
 vcpu_manager::write(uint64_t vcpuid, const std::string &str) noexcept
 {
-    auto vcpu = get_vcpu(vcpuid);
-
-    if (vcpu)
+    if (auto vcpu = get_vcpu(vcpuid))
         vcpu->write(str);
 }
 
@@ -108,7 +140,7 @@ vcpu_manager::vcpu_manager() :
 }
 
 std::shared_ptr<vcpu>
-vcpu_manager::get_vcpu(uint64_t vcpuid) const
+vcpu_manager::get_vcpu(uint64_t vcpuid) const noexcept
 {
     std::lock_guard<std::mutex> guard(g_vcpu_manager_mutex);
     auto iter = m_vcpus.find(vcpuid);

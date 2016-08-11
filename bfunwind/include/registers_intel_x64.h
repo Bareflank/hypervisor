@@ -112,7 +112,7 @@ public:
         if (index >= max_num_registers())
             ABORT("register index out of bounds");
 
-        return ((uint64_t *)&m_registers)[index];
+        return reinterpret_cast<const uint64_t *>(&m_registers)[index];
     }
 
     register_state &set(uint64_t index, uint64_t value) override
@@ -120,7 +120,7 @@ public:
         if (index >= max_num_registers())
             ABORT("register index out of bounds");
 
-        ((uint64_t *)&m_tmp_registers)[index] = value;
+        reinterpret_cast<uint64_t *>(&m_tmp_registers)[index] = value;
 
         return *this;
     }
