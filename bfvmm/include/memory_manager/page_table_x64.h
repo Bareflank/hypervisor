@@ -22,10 +22,11 @@
 #ifndef PAGE_TABLE_X64_H
 #define PAGE_TABLE_X64_H
 
-#include <array>
 #include <vector>
 #include <memory>
 #include <memory_manager/page_table_entry_x64.h>
+
+#include <gsl/gsl>
 
 class page_table_x64 : public page_table_entry_x64
 {
@@ -37,13 +38,13 @@ public:
     /// this entry so that you can modify the properties of this page table
     /// as needed.
     ///
-    /// @param entry the parent page table entry that points to this table
+    /// @param pte the parent page table entry that points to this table
     ///
-    page_table_x64(uintptr_t *entry = nullptr);
+    page_table_x64(uintptr_t *pte = nullptr);
 
     /// Destructor
     ///
-    virtual ~page_table_x64() {}
+    ~page_table_x64() override = default;
 
     /// Add Page
     ///
@@ -57,16 +58,7 @@ public:
     /// @return the resulting page. Note that this page is blank, and it's
     ///     properties (like present) should be set by the caller
     ///
-    virtual std::shared_ptr<page_table_entry_x64> add_page(void *virt_addr);
-
-    /// Table Physical Address
-    ///
-    /// @return returns the physical address of the page table that this
-    ///     page table contains. Note that this is different than the
-    ///     physical address that is stored in the parent entry that this
-    ///     entry points to, and for a page will not be the same.
-    ///
-    virtual uintptr_t table_phys_addr() const;
+    virtual std::shared_ptr<page_table_entry_x64> add_page(uintptr_t virt_addr);
 
 private:
 
@@ -74,8 +66,12 @@ private:
 
 private:
 
-    std::unique_ptr<uintptr_t[]> m_table;
-    std::array<std::shared_ptr<page_table_entry_x64>, PT_SIZE> m_entries;
+    gsl::span<uintptr_t> m_pt;
+    std::unique_ptr<uintptr_t[]> m_pt_owner;
+
+    std::vector<std::shared_ptr<page_table_entry_x64> > m_ptes;
+
+    uintptr_t m_cr3_shadow;
 };
 
 #endif

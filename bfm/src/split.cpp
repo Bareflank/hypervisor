@@ -27,7 +27,7 @@ split(const std::string &str, char delimiter)
     std::istringstream ss(str);
     std::vector<std::string> result;
 
-    if (str.empty() == true)
+    if (str.empty())
         return result;
 
     while (!ss.eof())

@@ -21,32 +21,19 @@
 
 #include <dummy_code.h>
 
-base::base()
-{
-}
-
-base::~base()
-{
-}
-
-int base::foo(int arg)
+int base::foo(int arg) noexcept
 {
     (void) arg;
 
     return 0;
 }
 
-derived::derived() :
+derived::derived() noexcept :
     m_member(1000)
 {
 }
 
-derived::~derived()
-{
-}
-
-int derived::foo(int arg)
+int derived::foo(int arg) noexcept
 {
     return arg + m_member;
 }
-

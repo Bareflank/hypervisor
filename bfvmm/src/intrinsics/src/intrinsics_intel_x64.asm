@@ -31,50 +31,50 @@ global __vmlaunch:function
 
 section .text
 
-; uint64_t __vmxon(void *vmxon_region)
+; bool __vmxon(void *vmxon_region)
 __vmxon:
     vmxon [rdi]
     jbe __vmx_failure
     jmp __vmx_success
 
-; uint64_t __vmxoff(void)
+; bool __vmxoff(void)
 __vmxoff:
     vmxoff
     jbe __vmx_failure
     jmp __vmx_success
 
-; uint64_t __vmcall(uint64_t value)
+; bool __vmcall(uint64_t value)
 __vmcall:
     mov rax, rdi
     vmcall
     jbe __vmx_failure
     jmp __vmx_success
 
-; uint64_t __vmclear(void *vmcs_region)
+; bool __vmclear(void *vmcs_region)
 __vmclear:
     vmclear [rdi]
     jbe __vmx_failure
     jmp __vmx_success
 
-; uint64_t __vmptrld(void *vmcs_region)
+; bool __vmptrld(void *vmcs_region)
 __vmptrld:
     vmptrld [rdi]
     jbe __vmx_failure
     jmp __vmx_success
 
-; uint64_t __vmptrst(void *vmcs_region)
+; bool __vmptrst(void *vmcs_region)
 __vmptrst:
     vmptrst [rdi]
     jbe __vmx_failure
     jmp __vmx_success
 
-; uint64_t __vmwrite(uint64_t field, uint64_t val)
+; bool __vmwrite(uint64_t field, uint64_t val)
 __vmwrite:
     vmwrite rdi, rsi
     jbe __vmx_failure
     jmp __vmx_success
 
-; uint64_t __vmread(uint64_t field, uint64_t *val)
+; bool __vmread(uint64_t field, uint64_t *val)
 __vmread:
     vmread [rsi], rdi
     jbe __vmx_failure
@@ -90,7 +90,7 @@ __vmx_success:
     mov rax, 0x1
     ret
 
-; uint64_t __vmlaunch(void)
+; bool __vmlaunch(void)
 ;
 ; Since bareflank consists of nothing more than a bunch of shared libraries,
 ; all of the code is position independent, which makes getting the actual

@@ -39,7 +39,7 @@ bfm_ut::test_ioctl_driver_process_invalid_file()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_EXCEPTION(g_driver.process(NULL, ctl, clp), std::invalid_argument);
+        EXPECT_EXCEPTION(g_driver.process(nullptr, ctl, clp), std::invalid_argument);
     });
 }
 
@@ -54,7 +54,7 @@ bfm_ut::test_ioctl_driver_process_invalid_ioctl()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_EXCEPTION(g_driver.process(f, NULL, clp), std::invalid_argument);
+        EXPECT_EXCEPTION(g_driver.process(f, nullptr, clp), std::invalid_argument);
     });
 }
 
@@ -69,7 +69,7 @@ bfm_ut::test_ioctl_driver_process_invalid_command_line_parser()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_EXCEPTION(g_driver.process(f, ctl, NULL), std::invalid_argument);
+        EXPECT_EXCEPTION(g_driver.process(f, ctl, nullptr), std::invalid_argument);
     });
 }
 

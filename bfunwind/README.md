@@ -40,14 +40,4 @@ Currently the unwind library only has support for x86_64, and has only been test
 
 ## Notes
 
-Since Bareflank makes heavy use of C++ exceptions for handling error conditions, "state" must be handled appropriately. Like other error handling schemes, if an error occurs in the middle of committing state (i.e. writing to member variables, writing to a database, etc...), state changes must be rolled back to provide an all or nothing commit. In C based kernel logic, it's typical to see a lot of "goto" statements to unroll changes that must be cleaned up if an error occurs. In C++, RAII is used instead (if that term is new to you, google it as it's an important C++ pattern). To provide automatic rollback logic in the presence of exceptions, a "commit_or_rollback" class is provided in /include.
-
-[commit_or_rollback](https://github.com/Bareflank/hypervisor/blob/master/include/commit_or_rollback.h)
-
-The commit_or_rollback code allows you to create a class that will execute a function intended to rollback an operation if that class is not "committed" prior to it's destruction. A good example of how this works is in the VMXON code:
-
-[vmxon](https://github.com/Bareflank/hypervisor/blob/master/bfvmm/src/vmxon/src/vmxon_intel_x64.cpp#L35)
-
-When the VMXON code creates the VMXON region, state has been created. Just prior to creating this region, a commit_or_rollback  (COR) class is created, with a rollback lambda function that releases the region. The last thing the function does it commit the COR. If an error occurs (such as an exception is thrown), the commit function will never be executed, thus when the COR is destroyed, it will execute the rollback function, automatically releasing the VMXON region. These commit_or_rollback function classes will be seen through out the code to ensure that state is handled properly in the event of an error, and can be used by a user of Bareflank to provided similar state guarantees.
-
 During the development of this code, one bug was found that is worth mentioning here. In the System V spec, the register order is rax, _rdx_, rcx, rbx, etc..., not rax, _rbx_, rcx, rdx. When you read the code, you will see this reflected in the source, and it is by design, as this is how the spec is written, if you change the order of these reigsters to reflect the Intel Manual, the code will not work properly.

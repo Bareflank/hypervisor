@@ -87,6 +87,9 @@ vmcs_intel_x64_vmm_state::vmcs_intel_x64_vmm_state(const std::shared_ptr<state_s
     m_gs = m_gs_index << 3;
     m_tr = m_tr_index << 3;
 
+    // TODO: We need to guard the additions to the page tables here. Just
+    // in case more than one core attempts to change these at the same time.
+
     if (!m_pml4)
     {
         m_pml4 = std::make_shared<page_table_x64>();
@@ -95,7 +98,7 @@ vmcs_intel_x64_vmm_state::vmcs_intel_x64_vmm_state(const std::shared_ptr<state_s
         {
             auto entry = m_pml4->add_page(md.second.virt);
 
-            entry->set_phys_addr(reinterpret_cast<uintptr_t>(md.second.phys));
+            entry->set_phys_addr(md.second.phys);
             entry->set_present(true);
 
             if ((md.second.type & MEMORY_TYPE_W) != 0)
@@ -116,7 +119,7 @@ vmcs_intel_x64_vmm_state::vmcs_intel_x64_vmm_state(const std::shared_ptr<state_s
     m_cr0 |= CR0_NE_NUMERIC_ERROR;
     m_cr0 |= CR0_PG_PAGING;
 
-    m_cr3 = m_pml4->table_phys_addr();
+    m_cr3 = m_pml4->phys_addr();
 
     m_cr4 = 0;
     m_cr4 |= CR4_PAE_PHYSICAL_ADDRESS_EXTENSIONS;
@@ -128,5 +131,5 @@ vmcs_intel_x64_vmm_state::vmcs_intel_x64_vmm_state(const std::shared_ptr<state_s
     m_ia32_pat_msr = 0;
     m_ia32_efer_msr = IA32_EFER_LME | IA32_EFER_LMA | IA32_EFER_NXE;
     m_ia32_fs_base_msr = 0;
-    m_ia32_gs_base_msr = reinterpret_cast<uint64_t>(state_save.get());
+    m_ia32_gs_base_msr = reinterpret_cast<uintptr_t>(state_save.get());
 }

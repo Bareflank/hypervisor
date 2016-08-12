@@ -19,9 +19,10 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+#include <gsl/gsl>
+
 #include <exception.h>
 #include <ioctl_private.h>
-#include <commit_or_rollback.h>
 #include <driver_entry_interface.h>
 
 #include <SetupAPI.h>
@@ -65,7 +66,7 @@ bf_ioctl_open()
     if (deviceDetailData == nullptr)
         return INVALID_HANDLE_VALUE;
 
-    auto cor1 = commit_or_rollback([&]
+    auto fa1 = gsl::finally([&]
     { free(deviceDetailData); });
 
     deviceDetailData->cbSize = sizeof(SP_INTERFACE_DEVICE_DETAIL_DATA);
@@ -134,7 +135,7 @@ ioctl_private::open()
 void
 ioctl_private::call_ioctl_add_module(const char *data, int64_t len)
 {
-    if (data == 0)
+    if (data == nullptr)
         throw std::invalid_argument("data == NULL");
 
     if (len == 0)
@@ -175,7 +176,7 @@ ioctl_private::call_ioctl_stop_vmm()
 void
 ioctl_private::call_ioctl_dump_vmm(debug_ring_resources_t *drr, uint64_t vcpuid)
 {
-    if (drr == 0)
+    if (drr == nullptr)
         throw std::invalid_argument("drr == NULL");
 
     if (bf_write_ioctl(fd, IOCTL_SET_VCPUID, &vcpuid, sizeof(vcpuid)) < 0)
@@ -188,7 +189,7 @@ ioctl_private::call_ioctl_dump_vmm(debug_ring_resources_t *drr, uint64_t vcpuid)
 void
 ioctl_private::call_ioctl_vmm_status(int64_t *status)
 {
-    if (status == 0)
+    if (status == nullptr)
         throw std::invalid_argument("status == NULL");
 
     if (bf_read_ioctl(fd, IOCTL_VMM_STATUS, status, sizeof(*status)) < 0)

@@ -19,33 +19,25 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <iostream>
+#include <gsl/gsl>
 
+#include <iostream>
 #include <exception.h>
 #include <ioctl_driver.h>
-#include <commit_or_rollback.h>
 #include <driver_entry_interface.h>
-
-ioctl_driver::ioctl_driver() noexcept
-{
-}
-
-ioctl_driver::~ioctl_driver()
-{
-}
 
 void
 ioctl_driver::process(std::shared_ptr<file> f,
                       std::shared_ptr<ioctl> ctl,
                       std::shared_ptr<command_line_parser> clp)
 {
-    if (f == 0)
+    if (f == nullptr)
         throw std::invalid_argument("f == NULL");
 
-    if (ctl == 0)
+    if (ctl == nullptr)
         throw std::invalid_argument("ctl == NULL");
 
-    if (clp == 0)
+    if (clp == nullptr)
         throw std::invalid_argument("clp == NULL");
 
     switch (clp->cmd())
@@ -109,14 +101,14 @@ ioctl_driver::load_vmm(const std::shared_ptr<file> &f,
             throw unknown_status();
     }
 
-    auto cor1 = commit_or_rollback([&]
+    auto fa1 = gsl::finally([&]
     { unload_vmm(ctl); });
 
     for (const auto &module : split(f->read(clp->modules()), '\n'))
     {
         auto trimmed = trim(module);
 
-        if (trimmed.empty() == true)
+        if (trimmed.empty())
             continue;
 
         ctl->call_ioctl_add_module(f->read(trimmed));
@@ -124,7 +116,7 @@ ioctl_driver::load_vmm(const std::shared_ptr<file> &f,
 
     ctl->call_ioctl_load_vmm();
 
-    cor1.commit();
+    fa1.ignore();
 }
 
 void

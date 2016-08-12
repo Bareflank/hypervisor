@@ -48,11 +48,11 @@ public:
 
     /// Default Constructor
     ///
-    vcpu_factory() {}
+    vcpu_factory() noexcept = default;
 
     /// Destructor
     ///
-    virtual ~vcpu_factory() {}
+    virtual ~vcpu_factory() = default;
 
     /// Make vCPU
     ///

@@ -66,7 +66,7 @@ public:
 
     /// Command Line Parser Destructor
     ///
-    virtual ~command_line_parser();
+    virtual ~command_line_parser() = default;
 
     /// Parse Command Line
     ///

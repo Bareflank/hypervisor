@@ -26,7 +26,7 @@
 
 #define PRINT_STATE(a) \
     bfdebug << std::left << std::setw(35) << #a \
-            << std::hex << "0x" << a << std::dec << bfendl;
+            << std::hex << "0x" << (a) << std::dec << bfendl;
 
 /// VMCS State
 ///
@@ -53,8 +53,8 @@ class vmcs_intel_x64_state
 {
 public:
 
-    vmcs_intel_x64_state() {}
-    virtual ~vmcs_intel_x64_state() {}
+    vmcs_intel_x64_state() = default;
+    virtual ~vmcs_intel_x64_state() = default;
 
     virtual uint16_t es() const { return 0; }
     virtual uint16_t cs() const { return 0; }

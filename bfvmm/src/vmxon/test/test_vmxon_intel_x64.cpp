@@ -21,14 +21,13 @@
 
 #include <test.h>
 #include <vmxon/vmxon_intel_x64.h>
-#include <vmxon/vmxon_exceptions_intel_x64.h>
 #include <memory_manager/memory_manager.h>
 
 static uint64_t g_cr0 = 0;
 static uint64_t g_cr4 = 0;
 
 static uint64_t
-read_cr0(void)
+read_cr0()
 { return g_cr0; }
 
 // static void
@@ -36,27 +35,19 @@ read_cr0(void)
 // { g_cr0 = cr0; }
 
 static uint64_t
-read_cr4(void)
+read_cr4()
 { return g_cr4; }
 
 static void
 write_cr4(uint64_t cr4)
 { g_cr4 = cr4; }
 
-static void *
-malloc_aligned(size_t size, uint64_t alignment)
+static uintptr_t
+virt_to_phys_ptr(void *ptr)
 {
-    void *ptr = 0;
-    if (posix_memalign(&ptr, alignment, size) != 0)
-        return 0;
-    return ptr;
-}
+    (void) ptr;
 
-static void *
-virt_to_phys(void *)
-{
-    static uintptr_t phys = 0x0000000ABCDEF0000;
-    return reinterpret_cast<void *>(phys + 0x1000);
+    return 0x0000000ABCDEF0000;
 }
 
 void
@@ -97,8 +88,7 @@ setup_intrinsics(MockRepository &mocks, memory_manager *mm, intrinsics_intel_x64
 
     // Emulate the memory manager
     mocks.OnCallFunc(memory_manager::instance).Return(mm);
-    mocks.OnCall(mm, memory_manager::malloc_aligned).Do(malloc_aligned);
-    mocks.OnCall(mm, memory_manager::virt_to_phys).Do(virt_to_phys);
+    mocks.OnCallOverload(mm, (uintptr_t(memory_manager::*)(void *))&memory_manager::virt_to_phys).Do(virt_to_phys_ptr);
 }
 
 void
@@ -133,7 +123,7 @@ vmxon_ut::test_start_start_twice()
 
         EXPECT_NO_EXCEPTION(vmxon.start());
         g_cr4 = 0;
-        EXPECT_EXCEPTION(vmxon.start(), bfn::vmxon_failure_error);
+        EXPECT_EXCEPTION(vmxon.start(), std::logic_error);
     });
 }
 
@@ -152,7 +142,7 @@ vmxon_ut::test_start_execute_vmxon_already_on_failure()
     {
         vmxon_intel_x64 vmxon(in);
 
-        EXPECT_EXCEPTION(vmxon.start(), bfn::vmxon_failure_error);
+        EXPECT_EXCEPTION(vmxon.start(), std::logic_error);
     });
 }
 
@@ -171,7 +161,7 @@ vmxon_ut::test_start_execute_vmxon_failure()
     {
         vmxon_intel_x64 vmxon(in);
 
-        EXPECT_EXCEPTION(vmxon.start(), bfn::vmxon_failure_error);
+        EXPECT_EXCEPTION(vmxon.start(), std::logic_error);
     });
 }
 
@@ -190,7 +180,7 @@ vmxon_ut::test_start_check_ia32_vmx_cr4_fixed0_msr_failure()
     {
         vmxon_intel_x64 vmxon(in);
 
-        EXPECT_EXCEPTION(vmxon.start(), bfn::vmxon_fixed_msr_failure_error);
+        EXPECT_EXCEPTION(vmxon.start(), std::logic_error);
     });
 }
 
@@ -210,7 +200,7 @@ vmxon_ut::test_start_check_ia32_vmx_cr4_fixed1_msr_failure()
     {
         vmxon_intel_x64 vmxon(in);
 
-        EXPECT_EXCEPTION(vmxon.start(), bfn::vmxon_fixed_msr_failure_error);
+        EXPECT_EXCEPTION(vmxon.start(), std::logic_error);
     });
 }
 
@@ -229,7 +219,7 @@ vmxon_ut::test_start_enable_vmx_operation_failure()
     {
         vmxon_intel_x64 vmxon(in);
 
-        EXPECT_EXCEPTION(vmxon.start(), bfn::vmxon_failure_error);
+        EXPECT_EXCEPTION(vmxon.start(), std::logic_error);
     });
 }
 
@@ -248,7 +238,7 @@ vmxon_ut::test_start_v8086_disabled_failure()
     {
         vmxon_intel_x64 vmxon(in);
 
-        EXPECT_EXCEPTION(vmxon.start(), bfn::vmxon_failure_error);
+        EXPECT_EXCEPTION(vmxon.start(), std::logic_error);
     });
 }
 
@@ -267,7 +257,7 @@ vmxon_ut::test_start_check_ia32_feature_control_msr()
     {
         vmxon_intel_x64 vmxon(in);
 
-        EXPECT_EXCEPTION(vmxon.start(), bfn::vmxon_failure_error);
+        EXPECT_EXCEPTION(vmxon.start(), std::logic_error);
     });
 }
 
@@ -286,7 +276,7 @@ vmxon_ut::test_start_check_ia32_vmx_cr0_fixed0_msr()
     {
         vmxon_intel_x64 vmxon(in);
 
-        EXPECT_EXCEPTION(vmxon.start(), bfn::vmxon_fixed_msr_failure_error);
+        EXPECT_EXCEPTION(vmxon.start(), std::logic_error);
     });
 }
 
@@ -306,7 +296,7 @@ vmxon_ut::test_start_check_ia32_vmx_cr0_fixed1_msr()
     {
         vmxon_intel_x64 vmxon(in);
 
-        EXPECT_EXCEPTION(vmxon.start(), bfn::vmxon_fixed_msr_failure_error);
+        EXPECT_EXCEPTION(vmxon.start(), std::logic_error);
     });
 }
 
@@ -325,7 +315,7 @@ vmxon_ut::test_start_check_vmx_capabilities_msr_memtype_failure()
     {
         vmxon_intel_x64 vmxon(in);
 
-        EXPECT_EXCEPTION(vmxon.start(), bfn::vmxon_capabilities_failure_error);
+        EXPECT_EXCEPTION(vmxon.start(), std::logic_error);
     });
 }
 
@@ -344,7 +334,7 @@ vmxon_ut::test_start_check_vmx_capabilities_msr_addr_width_failure()
     {
         vmxon_intel_x64 vmxon(in);
 
-        EXPECT_EXCEPTION(vmxon.start(), bfn::vmxon_capabilities_failure_error);
+        EXPECT_EXCEPTION(vmxon.start(), std::logic_error);
     });
 }
 
@@ -363,7 +353,7 @@ vmxon_ut::test_start_check_vmx_capabilities_true_based_controls_failure()
     {
         vmxon_intel_x64 vmxon(in);
 
-        EXPECT_EXCEPTION(vmxon.start(), bfn::vmxon_capabilities_failure_error);
+        EXPECT_EXCEPTION(vmxon.start(), std::logic_error);
     });
 }
 
@@ -382,7 +372,7 @@ vmxon_ut::test_start_check_cpuid_vmx_supported_failure()
     {
         vmxon_intel_x64 vmxon(in);
 
-        EXPECT_EXCEPTION(vmxon.start(), bfn::vmxon_failure_error);
+        EXPECT_EXCEPTION(vmxon.start(), std::logic_error);
     });
 }
 
@@ -395,7 +385,7 @@ vmxon_ut::test_start_virt_to_phys_failure()
 
     setup_intrinsics(mocks, mm, in.get());
 
-    mocks.OnCall(mm, memory_manager::virt_to_phys).Return(0);
+    mocks.OnCallOverload(mm, (uintptr_t(memory_manager::*)(void *))&memory_manager::virt_to_phys).Return(0);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -457,7 +447,7 @@ vmxon_ut::test_stop_vmxoff_check_failure()
 
         vmxon.start();
         mocks.OnCall(in.get(), intrinsics_intel_x64::write_cr4);
-        EXPECT_EXCEPTION(vmxon.stop(), bfn::vmxon_failure_error);
+        EXPECT_EXCEPTION(vmxon.stop(), std::logic_error);
     });
 }
 
@@ -477,22 +467,6 @@ vmxon_ut::test_stop_vmxoff_failure()
         vmxon_intel_x64 vmxon(in);
 
         vmxon.start();
-        EXPECT_EXCEPTION(vmxon.stop(), bfn::vmxon_failure_error);
-    });
-}
-
-void
-vmxon_ut::test_coveralls_cleanup()
-{
-    MockRepository mocks;
-    mocks.OnCallFunc(posix_memalign).Return(-1);
-
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        auto ptr = malloc_aligned(4096, 4096);
-        EXPECT_TRUE(ptr == nullptr);
-
-        if (ptr)
-            free(ptr);
+        EXPECT_EXCEPTION(vmxon.stop(), std::logic_error);
     });
 }

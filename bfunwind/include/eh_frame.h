@@ -239,7 +239,7 @@ public:
 
     /// Default Move Constructor
     ///
-    common_entry(common_entry &&) = default;
+    common_entry(common_entry &&) noexcept = default;
 
     /// Default Copy Constructor
     ///
@@ -247,11 +247,11 @@ public:
 
     /// Default Move Assignment Operator
     ///
-    virtual common_entry &operator=(common_entry &&) = default;
+    common_entry &operator=(common_entry &&) noexcept = default;
 
     /// Default Copy Assignment Operator
     ///
-    virtual common_entry &operator=(const common_entry &) = default;
+    common_entry &operator=(const common_entry &) = default;
 
     /// Next CIE/FDE
     ///
@@ -386,7 +386,7 @@ public:
 
     /// Default Move Constructor
     ///
-    ci_entry(ci_entry &&) = default;
+    ci_entry(ci_entry &&) noexcept = default;
 
     /// Default Copy Constructor
     ///
@@ -394,11 +394,11 @@ public:
 
     /// Default Move Assignment Operator
     ///
-    virtual ci_entry &operator=(ci_entry &&) = default;
+    ci_entry &operator=(ci_entry &&) noexcept = default;
 
     /// Default Copy Assignment Operator
     ///
-    virtual ci_entry &operator=(const ci_entry &) = default;
+    ci_entry &operator=(const ci_entry &) = default;
 
     /// Augmentation String
     ///
@@ -535,7 +535,7 @@ public:
 
     /// Default Move Constructor
     ///
-    fd_entry(fd_entry &&) = default;
+    fd_entry(fd_entry &&) noexcept = default;
 
     /// Default Copy Constructor
     ///
@@ -543,11 +543,11 @@ public:
 
     /// Default Move Assignment Operator
     ///
-    virtual fd_entry &operator=(fd_entry &&) = default;
+    fd_entry &operator=(fd_entry &&) noexcept = default;
 
     /// Default Copy Assignment Operator
     ///
-    virtual fd_entry &operator=(const fd_entry &) = default;
+    fd_entry &operator=(const fd_entry &) = default;
 
     /// Is PC In Range
     ///

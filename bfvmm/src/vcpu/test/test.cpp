@@ -31,10 +31,10 @@ class vcpu_factory_ut : public vcpu_factory
 {
 public:
 
-    vcpu_factory_ut() {}
-    virtual ~vcpu_factory_ut() {}
+    vcpu_factory_ut() noexcept = default;
+    ~vcpu_factory_ut() override = default;
 
-    virtual std::shared_ptr<vcpu> make_vcpu(uint64_t id, void *attr) override
+    std::shared_ptr<vcpu> make_vcpu(uint64_t id, void *attr) override
     {
         (void) id;
         (void) attr;
@@ -53,10 +53,48 @@ vcpu_ut::vcpu_ut()
 bool
 vcpu_ut::init()
 {
+    g_vcm->set_factory(nullptr);
+    EXPECT_EXCEPTION(g_vcm->create_vcpu(0), std::runtime_error);
+
     make_vcpu_throws = false;
     g_vcm->set_factory(std::make_shared<vcpu_factory_ut>());
 
     return true;
+}
+
+#ifndef __clang__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-result"
+#endif
+
+void *
+operator new(std::size_t size)
+{
+    if ((size & (MAX_PAGE_SIZE - 1)) == 0)
+    {
+        void *ptr = nullptr;
+        posix_memalign(&ptr, MAX_PAGE_SIZE, size);
+        return ptr;
+    }
+
+    return malloc(size);
+}
+
+#ifndef __clang__
+#pragma GCC diagnostic pop
+#endif
+
+void
+operator delete(void *ptr, std::size_t size) throw()
+{
+    (void) size;
+    free(ptr);
+}
+
+void
+operator delete(void *ptr) throw()
+{
+    free(ptr);
 }
 
 bool
@@ -126,7 +164,6 @@ vcpu_ut::list()
     this->test_vcpu_intel_x64_hlt_valid();
     this->test_vcpu_intel_x64_hlt_valid_is_host_vcpu();
     this->test_vcpu_intel_x64_hlt_vmxon_throws();
-    this->test_vcpu_intel_x64_coveralls_cleanup();
 
     this->test_vcpu_manager_create_valid();
     this->test_vcpu_manager_create_valid_twice_overwrites();

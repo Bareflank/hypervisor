@@ -49,7 +49,7 @@
 template<class T>
 void output_to_vcpu(uint64_t vcpuid, T func)
 {
-    std::cout << "$vcpuid=" << std::setw(18) << (void *)vcpuid;
+    std::cout << "$vcpuid=" << std::setw(18) << reinterpret_cast<void *>(vcpuid);
     func();
 }
 

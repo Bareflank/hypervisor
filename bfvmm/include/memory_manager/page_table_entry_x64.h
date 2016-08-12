@@ -47,6 +47,10 @@
 #define PTE_FLAGS_G (0x1ULL << 8)
 #define PTE_FLAGS_NX (0x1ULL << 63)
 
+#define PT_BYTES (PT_SIZE * PTE_SIZE)
+
+#include <gsl/gsl>
+
 // -----------------------------------------------------------------------------
 // Definition
 // -----------------------------------------------------------------------------
@@ -58,11 +62,12 @@ public:
     /// Default Constructor
     ///
     /// @param entry the entry that this page table entry encapsulates.
-    page_table_entry_x64(uintptr_t *entry = nullptr) noexcept;
+    ///
+    page_table_entry_x64(gsl::not_null<uintptr_t *> pte) noexcept;
 
     /// Destructor
     ///
-    virtual ~page_table_entry_x64() {}
+    virtual ~page_table_entry_x64() = default;
 
     /// Present
     ///
@@ -202,7 +207,7 @@ public:
 
 private:
 
-    uintptr_t *m_entry;
+    gsl::not_null<uintptr_t *> m_pte;
 };
 
 #endif

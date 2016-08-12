@@ -161,7 +161,8 @@ template <class T>
 class ExceptionWrapper : public ExceptionHolder {
 	T exception;
 public:
-	ExceptionWrapper(T ex) : exception(ex) {}
+    ExceptionWrapper(const T &ex) : exception(ex) {}
+	ExceptionWrapper(T &&ex) : exception(std::move(ex)) {}
 	void rethrow() { throw exception; }
 };
 
@@ -1191,7 +1192,7 @@ int virtual_function_index(unsigned char *func)
 		{ // mov ecx, this; jump [eax + v/Ib/Iw]
 		case 0x20ff018b: return 0;
 #ifdef _WIN32
-		case 0x0424448b: 
+		case 0x0424448b:
 			if (func[7] == 0x20)
 				return 0;
 			return *(unsigned char *)(func + 8) / sizeof(void*);
@@ -4248,7 +4249,7 @@ noexcept(false)
 			{
 				latentException->rethrow();
 			}
-			catch(BASE_EXCEPTION e)
+			catch(BASE_EXCEPTION &e)
 			{
 				printf("Latent exception masked!\nException:\n%s\n", e.what());
 			}

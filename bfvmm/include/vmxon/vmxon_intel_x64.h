@@ -43,11 +43,11 @@ public:
 
     /// Default Constructor
     ///
-    vmxon_intel_x64(const std::shared_ptr<intrinsics_intel_x64> &intrinsics = nullptr);
+    vmxon_intel_x64(std::shared_ptr<intrinsics_intel_x64> intrinsics = nullptr);
 
     /// Destructor
     ///
-    virtual ~vmxon_intel_x64() {}
+    virtual ~vmxon_intel_x64() = default;
 
     /// Start VMXON
     ///
@@ -89,7 +89,7 @@ private:
 
     bool m_vmxon_enabled;
     uintptr_t m_vmxon_region_phys;
-    std::unique_ptr<uint32_t> m_vmxon_region;
+    std::unique_ptr<uint32_t[]> m_vmxon_region;
 };
 
 #endif

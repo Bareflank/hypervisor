@@ -108,14 +108,14 @@ public:
     ///     a default debug ring will be created.
     /// @throws invalid_argument_error if the id is invalid
     ///
-    vcpu(uint64_t id, const std::shared_ptr<debug_ring> &dr = nullptr);
+    vcpu(uint64_t id, std::shared_ptr<debug_ring> dr = nullptr);
 
     /// Destructor
     ///
     /// Note that the destructor is not used. Avoid placing logic in the
     /// destructor of any subclasses.
     ///
-    virtual ~vcpu() {}
+    virtual ~vcpu() = default;
 
     /// Init vCPU
     ///

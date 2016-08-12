@@ -37,15 +37,15 @@ const auto c_dummy_stop_vmm_success_filename = "../cross/libdummy_stop_vmm_succe
 extern "C" int verify_no_mem_leaks(void);
 
 driver_entry_ut::driver_entry_ut() :
-    m_dummy_add_md_failure(0),
-    m_dummy_add_md_success(0),
-    m_dummy_get_drr_failure(0),
-    m_dummy_get_drr_success(0),
-    m_dummy_misc(0),
-    m_dummy_start_vmm_failure(0),
-    m_dummy_start_vmm_success(0),
-    m_dummy_stop_vmm_failure(0),
-    m_dummy_stop_vmm_success(0),
+    m_dummy_add_md_failure(nullptr),
+    m_dummy_add_md_success(nullptr),
+    m_dummy_get_drr_failure(nullptr),
+    m_dummy_get_drr_success(nullptr),
+    m_dummy_misc(nullptr),
+    m_dummy_start_vmm_failure(nullptr),
+    m_dummy_start_vmm_success(nullptr),
+    m_dummy_stop_vmm_failure(nullptr),
+    m_dummy_stop_vmm_success(nullptr),
     m_dummy_add_md_failure_length(0),
     m_dummy_add_md_success_length(0),
     m_dummy_get_drr_failure_length(0),
@@ -117,31 +117,31 @@ driver_entry_ut::init()
 bool
 driver_entry_ut::fini()
 {
-    if (m_dummy_add_md_failure != NULL)
+    if (m_dummy_add_md_failure != nullptr)
         delete[] m_dummy_add_md_failure;
 
-    if (m_dummy_add_md_success != NULL)
+    if (m_dummy_add_md_success != nullptr)
         delete[] m_dummy_add_md_success;
 
-    if (m_dummy_get_drr_failure != NULL)
+    if (m_dummy_get_drr_failure != nullptr)
         delete[] m_dummy_get_drr_failure;
 
-    if (m_dummy_get_drr_success != NULL)
+    if (m_dummy_get_drr_success != nullptr)
         delete[] m_dummy_get_drr_success;
 
-    if (m_dummy_misc != NULL)
+    if (m_dummy_misc != nullptr)
         delete[] m_dummy_misc;
 
-    if (m_dummy_start_vmm_failure != NULL)
+    if (m_dummy_start_vmm_failure != nullptr)
         delete[] m_dummy_start_vmm_failure;
 
-    if (m_dummy_start_vmm_success != NULL)
+    if (m_dummy_start_vmm_success != nullptr)
         delete[] m_dummy_start_vmm_success;
 
-    if (m_dummy_stop_vmm_failure != NULL)
+    if (m_dummy_stop_vmm_failure != nullptr)
         delete[] m_dummy_stop_vmm_failure;
 
-    if (m_dummy_stop_vmm_success != NULL)
+    if (m_dummy_stop_vmm_success != nullptr)
         delete[] m_dummy_stop_vmm_success;
 
     return true;
@@ -237,7 +237,7 @@ driver_entry_ut::list()
     this->test_helper_load_elf_file_null_module();
     this->test_helper_load_elf_file_get_segment_fails();
 
-    return verify_no_mem_leaks();
+    return verify_no_mem_leaks() != 0;
 }
 
 int

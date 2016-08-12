@@ -42,11 +42,11 @@ public:
 
     /// Default Constructor
     ///
-    ioctl_driver() noexcept;
+    ioctl_driver() noexcept = default;
 
     /// Destructor
     ///
-    virtual ~ioctl_driver();
+    virtual ~ioctl_driver() = default;
 
     /// Process
     ///

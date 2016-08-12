@@ -32,7 +32,7 @@ class bfelf_loader_ut : public unittest
 public:
 
     bfelf_loader_ut();
-    ~bfelf_loader_ut() {}
+    ~bfelf_loader_ut() override = default;
 
 protected:
 

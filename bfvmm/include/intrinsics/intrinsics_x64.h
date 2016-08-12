@@ -127,8 +127,8 @@ class intrinsics_x64
 {
 public:
 
-    intrinsics_x64() noexcept {}
-    virtual ~intrinsics_x64() {}
+    intrinsics_x64() noexcept = default;
+    virtual ~intrinsics_x64() = default;
 
     virtual void halt() const noexcept
     { __halt(); }

@@ -30,7 +30,7 @@ bfelf_loader_ut::test_bfelf_loader_add_invalid_loader()
     ret = bfelf_file_init(m_dummy_misc.get(), m_dummy_misc_length, &dummy_misc_ef);
     ASSERT_TRUE(ret == BFELF_SUCCESS);
 
-    ret = bfelf_loader_add(0, &dummy_misc_ef, m_dummy_misc_exec.get());
+    ret = bfelf_loader_add(nullptr, &dummy_misc_ef, m_dummy_misc_exec.get());
     EXPECT_TRUE(ret == BFELF_ERROR_INVALID_ARG);
 }
 
@@ -40,7 +40,7 @@ bfelf_loader_ut::test_bfelf_loader_add_invalid_elf_file()
     bfelf_loader_t loader;
     memset(&loader, 0, sizeof(loader));
 
-    auto ret = bfelf_loader_add(&loader, 0, m_dummy_misc_exec.get());
+    auto ret = bfelf_loader_add(&loader, nullptr, m_dummy_misc_exec.get());
     EXPECT_TRUE(ret == BFELF_ERROR_INVALID_ARG);
 }
 

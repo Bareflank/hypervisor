@@ -19,10 +19,11 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+#include <gsl/gsl>
+
 #include <debug.h>
 #include <exception.h>
 #include <vcpu/vcpu_manager.h>
-#include <commit_or_rollback.h>
 
 // -----------------------------------------------------------------------------
 // Mutex
@@ -45,10 +46,11 @@ vcpu_manager::instance() noexcept
 void
 vcpu_manager::create_vcpu(uint64_t vcpuid, void *attr)
 {
-    auto cor1 = commit_or_rollback([&]
-    {
-        this->delete_vcpu(vcpuid);
-    });
+    if (!m_vcpu_factory)
+        throw std::runtime_error("invalid vcpu factory");
+
+    auto fa1 = gsl::finally([&]
+    { this->delete_vcpu(vcpuid); });
 
     if (auto vcpu = m_vcpu_factory->make_vcpu(vcpuid, attr))
     {
@@ -64,13 +66,13 @@ vcpu_manager::create_vcpu(uint64_t vcpuid, void *attr)
         throw std::runtime_error("make_vcpu returned a nullptr vcpu");
     }
 
-    cor1.commit();
+    fa1.ignore();
 }
 
 void
 vcpu_manager::delete_vcpu(uint64_t vcpuid, void *attr)
 {
-    auto cor1 = commit_or_rollback([&]
+    auto fa1 = gsl::finally([&]
     {
         std::lock_guard<std::mutex> guard(g_vcpu_manager_mutex);
         m_vcpus.erase(vcpuid);
@@ -83,19 +85,17 @@ vcpu_manager::delete_vcpu(uint64_t vcpuid, void *attr)
 void
 vcpu_manager::run_vcpu(uint64_t vcpuid, void *attr)
 {
-    auto cor1 = commit_or_rollback([&]
-    {
-        this->hlt_vcpu(vcpuid);
-    });
+    auto fa1 = gsl::finally([&]
+    { this->hlt_vcpu(vcpuid); });
 
     if (auto vcpu = get_vcpu(vcpuid))
     {
-        if (vcpu->is_running() == false)
+        if (!vcpu->is_running())
             vcpu->run(attr);
         else
             return;
 
-        if (vcpu->is_guest_vm_vcpu() == true)
+        if (vcpu->is_guest_vm_vcpu())
             return;
 
         bfdebug << "success: host os is " << bfcolor_green "now " << bfcolor_end
@@ -106,7 +106,7 @@ vcpu_manager::run_vcpu(uint64_t vcpuid, void *attr)
         throw std::invalid_argument("invalid vcpuid");
     }
 
-    cor1.commit();
+    fa1.ignore();
 }
 
 void
@@ -114,12 +114,12 @@ vcpu_manager::hlt_vcpu(uint64_t vcpuid, void *attr)
 {
     if (auto vcpu = get_vcpu(vcpuid))
     {
-        if (vcpu->is_running() == true)
+        if (vcpu->is_running())
             vcpu->hlt(attr);
         else
             return;
 
-        if (vcpu->is_guest_vm_vcpu() == true)
+        if (vcpu->is_guest_vm_vcpu())
             return;
 
         bfdebug << "success: host os is " << bfcolor_red "not " << bfcolor_end
@@ -134,7 +134,7 @@ vcpu_manager::write(uint64_t vcpuid, const std::string &str) noexcept
         vcpu->write(str);
 }
 
-vcpu_manager::vcpu_manager() :
+vcpu_manager::vcpu_manager() noexcept :
     m_vcpu_factory(std::make_shared<vcpu_factory>())
 {
 }

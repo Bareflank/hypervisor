@@ -24,6 +24,9 @@
 #include <crt.h>
 #include <eh_frame_list.h>
 
+typedef void (*ctor_t)();
+typedef void (*dtor_t)();
+
 int64_t
 register_eh_frame(void *addr, uint64_t size) noexcept
 {
@@ -57,13 +60,14 @@ crt_ut::test_local_init_invalid_arg()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_TRUE(local_init(0) == CRT_FAILURE)
+        EXPECT_TRUE(local_init(nullptr) == CRT_FAILURE)
     });
 }
 
 void
 crt_ut::test_local_init_invalid_addr()
 {
+    int addr = 0;
     section_info_t info;
 
     memset(&info, 0, sizeof(info));
@@ -71,10 +75,10 @@ crt_ut::test_local_init_invalid_addr()
     MockRepository mocks;
     mocks.NeverCallFunc(func1);
     mocks.NeverCallFunc(func2);
-    mocks.ExpectCallFunc(register_eh_frame).With((void *)10, 100).Return(0);
+    mocks.ExpectCallFunc(register_eh_frame).With(&addr, 100).Return(0);
 
     info.ctors_size = 16;
-    info.eh_frame_addr = (void *)10;
+    info.eh_frame_addr = &addr;
     info.eh_frame_size = 100;
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -86,6 +90,7 @@ crt_ut::test_local_init_invalid_addr()
 void
 crt_ut::test_local_init_invalid_size()
 {
+    int addr = 0;
     section_info_t info;
 
     memset(&info, 0, sizeof(info));
@@ -93,12 +98,12 @@ crt_ut::test_local_init_invalid_size()
     MockRepository mocks;
     mocks.NeverCallFunc(func1);
     mocks.NeverCallFunc(func2);
-    mocks.ExpectCallFunc(register_eh_frame).With((void *)10, 100).Return(0);
+    mocks.ExpectCallFunc(register_eh_frame).With(&addr, 100).Return(0);
 
-    void *func_list[2] = {(void *)func1, (void *)func2};
+    ctor_t func_list[2] = {static_cast<ctor_t>(func1), static_cast<ctor_t>(func2)};
 
-    info.ctors_addr = (void *)func_list;
-    info.eh_frame_addr = (void *)10;
+    info.ctors_addr = static_cast<void *>(func_list);
+    info.eh_frame_addr = &addr;
     info.eh_frame_size = 100;
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -110,6 +115,7 @@ crt_ut::test_local_init_invalid_size()
 void
 crt_ut::test_local_init_register_eh_frame_failure()
 {
+    int addr = 0;
     section_info_t info;
 
     memset(&info, 0, sizeof(info));
@@ -117,13 +123,13 @@ crt_ut::test_local_init_register_eh_frame_failure()
     MockRepository mocks;
     mocks.ExpectCallFunc(func1);
     mocks.ExpectCallFunc(func2);
-    mocks.ExpectCallFunc(register_eh_frame).With((void *)10, 100).Return(REGISTER_EH_FRAME_FAILURE);
+    mocks.ExpectCallFunc(register_eh_frame).With(&addr, 100).Return(REGISTER_EH_FRAME_FAILURE);
 
-    void *func_list[2] = {(void *)func1, (void *)func2};
+    ctor_t func_list[2] = {static_cast<ctor_t>(func1), static_cast<ctor_t>(func2)};
 
     info.ctors_size = 16;
-    info.ctors_addr = (void *)func_list;
-    info.eh_frame_addr = (void *)10;
+    info.ctors_addr = static_cast<void *>(func_list);
+    info.eh_frame_addr = &addr;
     info.eh_frame_size = 100;
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -135,6 +141,7 @@ crt_ut::test_local_init_register_eh_frame_failure()
 void
 crt_ut::test_local_init_valid_stop_at_size()
 {
+    int addr = 0;
     section_info_t info;
 
     memset(&info, 0, sizeof(info));
@@ -142,13 +149,13 @@ crt_ut::test_local_init_valid_stop_at_size()
     MockRepository mocks;
     mocks.ExpectCallFunc(func1);
     mocks.ExpectCallFunc(func2);
-    mocks.ExpectCallFunc(register_eh_frame).With((void *)10, 100).Return(0);
+    mocks.ExpectCallFunc(register_eh_frame).With(&addr, 100).Return(0);
 
-    void *func_list[2] = {(void *)func1, (void *)func2};
+    ctor_t func_list[2] = {static_cast<ctor_t>(func1), static_cast<ctor_t>(func2)};
 
-    info.ctors_addr = (void *)func_list;
+    info.ctors_addr = static_cast<void *>(func_list);
     info.ctors_size = 16;
-    info.eh_frame_addr = (void *)10;
+    info.eh_frame_addr = &addr;
     info.eh_frame_size = 100;
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -160,6 +167,7 @@ crt_ut::test_local_init_valid_stop_at_size()
 void
 crt_ut::test_local_init_valid_stop_at_null()
 {
+    int addr = 0;
     section_info_t info;
 
     memset(&info, 0, sizeof(info));
@@ -167,13 +175,13 @@ crt_ut::test_local_init_valid_stop_at_null()
     MockRepository mocks;
     mocks.ExpectCallFunc(func1);
     mocks.ExpectCallFunc(func2);
-    mocks.ExpectCallFunc(register_eh_frame).With((void *)10, 100).Return(0);
+    mocks.ExpectCallFunc(register_eh_frame).With(&addr, 100).Return(0);
 
-    void *func_list[3] = {(void *)func1, (void *)func2, 0};
+    ctor_t func_list[3] = {static_cast<ctor_t>(func1), static_cast<ctor_t>(func2), nullptr};
 
-    info.ctors_addr = (void *)func_list;
+    info.ctors_addr = static_cast<void *>(func_list);
     info.ctors_size = 32;
-    info.eh_frame_addr = (void *)10;
+    info.eh_frame_addr = &addr;
     info.eh_frame_size = 100;
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -185,6 +193,7 @@ crt_ut::test_local_init_valid_stop_at_null()
 void
 crt_ut::test_local_init_catch_exception()
 {
+    int addr = 0;
     section_info_t info;
 
     memset(&info, 0, sizeof(info));
@@ -192,13 +201,13 @@ crt_ut::test_local_init_catch_exception()
     MockRepository mocks;
     mocks.ExpectCallFunc(func1);
     mocks.ExpectCallFunc(func2).Throw(std::runtime_error("error"));
-    mocks.OnCallFunc(register_eh_frame).With((void *)10, 100).Return(0);
+    mocks.OnCallFunc(register_eh_frame).With(&addr, 100).Return(0);
 
-    void *func_list[2] = {(void *)func1, (void *)func2};
+    ctor_t func_list[2] = {static_cast<ctor_t>(func1), static_cast<ctor_t>(func2)};
 
-    info.ctors_addr = (void *)func_list;
+    info.ctors_addr = static_cast<void *>(func_list);
     info.ctors_size = 16;
-    info.eh_frame_addr = (void *)10;
+    info.eh_frame_addr = &addr;
     info.eh_frame_size = 100;
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -210,7 +219,7 @@ crt_ut::test_local_init_catch_exception()
 void
 crt_ut::test_local_fini_invalid_arg()
 {
-    EXPECT_TRUE(local_fini(0) == CRT_FAILURE);
+    EXPECT_TRUE(local_fini(nullptr) == CRT_FAILURE);
 }
 
 void
@@ -243,9 +252,9 @@ crt_ut::test_local_fini_invalid_size()
     mocks.NeverCallFunc(func1);
     mocks.NeverCallFunc(func2);
 
-    void *func_list[2] = {(void *)func1, (void *)func2};
+    dtor_t func_list[2] = {static_cast<dtor_t>(func1), static_cast<dtor_t>(func2)};
 
-    info.dtors_addr = (void *)func_list;
+    info.dtors_addr = static_cast<void *>(func_list);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -264,9 +273,9 @@ crt_ut::test_local_fini_valid_stop_at_size()
     mocks.ExpectCallFunc(func1);
     mocks.ExpectCallFunc(func2);
 
-    void *func_list[2] = {(void *)func1, (void *)func2};
+    dtor_t func_list[2] = {static_cast<dtor_t>(func1), static_cast<dtor_t>(func2)};
 
-    info.dtors_addr = (void *)func_list;
+    info.dtors_addr = static_cast<void *>(func_list);
     info.dtors_size = 16;
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -286,9 +295,9 @@ crt_ut::test_local_fini_valid_stop_at_null()
     mocks.ExpectCallFunc(func1);
     mocks.ExpectCallFunc(func2);
 
-    void *func_list[3] = {(void *)func1, (void *)func2, 0};
+    dtor_t func_list[3] = {static_cast<dtor_t>(func1), static_cast<dtor_t>(func2), nullptr};
 
-    info.dtors_addr = (void *)func_list;
+    info.dtors_addr = static_cast<void *>(func_list);
     info.dtors_size = 32;
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -300,6 +309,7 @@ crt_ut::test_local_fini_valid_stop_at_null()
 void
 crt_ut::test_local_fini_catch_exception()
 {
+    int addr = 0;
     section_info_t info;
 
     memset(&info, 0, sizeof(info));
@@ -307,13 +317,13 @@ crt_ut::test_local_fini_catch_exception()
     MockRepository mocks;
     mocks.ExpectCallFunc(func1);
     mocks.ExpectCallFunc(func2).Throw(std::runtime_error("error"));
-    mocks.OnCallFunc(register_eh_frame).With((void *)10, 100).Return(0);
+    mocks.OnCallFunc(register_eh_frame).With(&addr, 100).Return(0);
 
-    void *func_list[2] = {(void *)func1, (void *)func2};
+    dtor_t func_list[2] = {static_cast<dtor_t>(func1), static_cast<dtor_t>(func2)};
 
-    info.dtors_addr = (void *)func_list;
+    info.dtors_addr = static_cast<void *>(func_list);
     info.dtors_size = 16;
-    info.eh_frame_addr = (void *)10;
+    info.eh_frame_addr = &addr;
     info.eh_frame_size = 100;
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -321,4 +331,3 @@ crt_ut::test_local_fini_catch_exception()
         EXPECT_TRUE(local_fini(&info) == CRT_FAILURE);
     });
 }
-

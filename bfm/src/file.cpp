@@ -22,21 +22,13 @@
 #include <file.h>
 #include <exception.h>
 
-file::file()
-{
-}
-
-file::~file()
-{
-}
-
 std::string
 file::read(const std::string &filename) const
 {
     std::fstream fstream;
 
     fstream.open(filename, std::ios_base::in);
-    if (fstream.good() == false)
+    if (!fstream.good())
         throw invalid_file(filename);
 
     auto contents = std::string(std::istreambuf_iterator<char>(fstream),

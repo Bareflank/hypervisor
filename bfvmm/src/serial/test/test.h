@@ -29,7 +29,7 @@ class serial_ut : public unittest
 public:
 
     serial_ut();
-    ~serial_ut() {}
+    ~serial_ut() override = default;
 
 protected:
 

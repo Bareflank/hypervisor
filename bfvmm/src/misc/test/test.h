@@ -29,7 +29,7 @@ class misc_ut : public unittest
 public:
 
     misc_ut();
-    ~misc_ut() {}
+    ~misc_ut() override = default;
 
 protected:
 

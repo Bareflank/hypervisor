@@ -19,6 +19,7 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+#include <stddef.h>
 #include <stdint.h>
 #include <dummy_code.h>
 #include <error_codes.h>
@@ -64,8 +65,17 @@ foo(int arg)
     return g_derived.foo(arg);
 }
 
+void *
+operator new(size_t size)
+{
+    (void) size;
+
+    static int mem = 0;
+    return &mem;
+}
+
 void
-operator delete(void *ptr)
+operator delete(void *ptr) throw()
 {
     (void) ptr;
 }

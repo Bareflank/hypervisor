@@ -21,6 +21,8 @@
 
 #include <test.h>
 
+#include <gsl/gsl>
+
 // -----------------------------------------------------------------------------
 // Expose Private Functions
 // -----------------------------------------------------------------------------
@@ -95,11 +97,11 @@ bfelf_loader_ut::test_private_corrupt_symbol_table()
     bfelf_sym *sym = nullptr;
     bfelf_sym symtab[1] = {};
 
-    symtab[0].st_name = 0;
+    gsl::at(symtab, 0).st_name = 0;
 
-    ef.file = const_cast<char *>(file);
+    ef.file = file;
     ef.strtab = &strtab;
-    ef.symtab = symtab;
+    ef.symtab = static_cast<bfelf_sym *>(symtab);
     ef.symnum = 1;
 
     strtab.sh_size = 5;
@@ -134,11 +136,9 @@ bfelf_loader_ut::test_private_relocate_invalid_name()
 
     auto file = "hello";
 
-    symtab[0].st_name = 0;
-
-    ef.file = const_cast<char *>(file);
+    ef.file = file;
     ef.strtab = &strtab;
-    ef.symtab = symtab;
+    ef.symtab = static_cast<bfelf_sym *>(symtab);
     ef.symnum = 1;
 
     strtab.sh_size = 5;
@@ -146,8 +146,8 @@ bfelf_loader_ut::test_private_relocate_invalid_name()
 
     rela.r_info = 0x0;
 
-    symtab[0].st_name = 0xFFFFF;
-    symtab[0].st_value = 0x0;
+    gsl::at(symtab, 0).st_name = 0xFFFFF;
+    gsl::at(symtab, 0).st_value = 0x0;
 
     EXPECT_TRUE(private_relocate_symbol(&loader, &ef, &rela) == BFELF_ERROR_INVALID_FILE);
 }
@@ -164,12 +164,10 @@ bfelf_loader_ut::test_private_relocate_invalid_relocation()
     auto file = "hello";
     auto exec = new char[1];
 
-    symtab[0].st_name = 0;
-
     ef.exec = exec;
-    ef.file = const_cast<char *>(file);
+    ef.file = file;
     ef.strtab = &strtab;
-    ef.symtab = symtab;
+    ef.symtab = static_cast<bfelf_sym *>(symtab);
     ef.symnum = 1;
 
     strtab.sh_size = 5;
@@ -178,8 +176,8 @@ bfelf_loader_ut::test_private_relocate_invalid_relocation()
     rela.r_info = 0xFFFFFFFF;
     rela.r_offset = 0x0;
 
-    symtab[0].st_name = 0xFFFFF;
-    symtab[0].st_value = 0x1;
+    gsl::at(symtab, 0).st_name = 0xFFFFF;
+    gsl::at(symtab, 0).st_value = 0x1;
 
     EXPECT_TRUE(private_relocate_symbol(&loader, &ef, &rela) == BFELF_ERROR_UNSUPPORTED_RELA);
 
@@ -192,19 +190,19 @@ bfelf_loader_ut::test_private_get_section_invalid_name()
     bfelf_file_t ef = {};
     e_string_t name = {};
     bfelf64_ehdr ehdr = {};
-    bfelf_shdr *shdr = 0;
+    bfelf_shdr *shdr = nullptr;
     bfelf_shdr shstrtab = {};
     bfelf_shdr shdrtab[1] = {};
     bfelf_shdr strtab = {};
 
     ef.ehdr = &ehdr;
-    ef.shdrtab = shdrtab;
+    ef.shdrtab = static_cast<bfelf_shdr *>(shdrtab);
     ef.shstrtab = &shstrtab;
     ef.strtab = &strtab;
 
     ehdr.e_shnum = 1;
 
-    ef.shdrtab[0].sh_name = 0;
+    gsl::at(shdrtab, 0).sh_name = 0;
 
     shstrtab.sh_size = 0;
 
@@ -223,12 +221,12 @@ bfelf_loader_ut::test_private_symbol_table_sections_invalid_dynsym()
     bfelf_shdr strtab = {};
 
     ef.ehdr = &ehdr;
-    ef.shdrtab = shdrtab;
+    ef.shdrtab = static_cast<bfelf_shdr *>(shdrtab);
     ef.strtab = &strtab;
 
     ehdr.e_shnum = 1;
 
-    shdrtab[0].sh_type = bfsht_dynsym;
+    gsl::at(shdrtab, 0).sh_type = bfsht_dynsym;
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -248,12 +246,12 @@ bfelf_loader_ut::test_private_symbol_table_sections_invalid_hash()
     bfelf_shdr strtab = {};
 
     ef.ehdr = &ehdr;
-    ef.shdrtab = shdrtab;
+    ef.shdrtab = static_cast<bfelf_shdr *>(shdrtab);
     ef.strtab = &strtab;
 
     ehdr.e_shnum = 1;
 
-    shdrtab[0].sh_type = bfsht_hash;
+    gsl::at(shdrtab, 0).sh_type = bfsht_hash;
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -294,12 +292,12 @@ bfelf_loader_ut::test_private_get_relocation_tables_invalid_type()
     bfelf_shdr strtab = {};
 
     ef.ehdr = &ehdr;
-    ef.shdrtab = shdrtab;
+    ef.shdrtab = static_cast<bfelf_shdr *>(shdrtab);
     ef.strtab = &strtab;
 
     ehdr.e_shnum = 1;
 
-    shdrtab[0].sh_type = bfsht_rel;
+    gsl::at(shdrtab, 0).sh_type = bfsht_rel;
 
     EXPECT_TRUE(private_get_relocation_tables(&ef) == BFELF_ERROR_UNSUPPORTED_RELA);
 }
@@ -316,13 +314,13 @@ bfelf_loader_ut::test_private_get_relocation_tables_invalid_section()
     bfelf_shdr strtab = {};
 
     ef.ehdr = &ehdr;
-    ef.shdrtab = shdrtab;
+    ef.shdrtab = static_cast<bfelf_shdr *>(shdrtab);
     ef.num_rela = 1;
     ef.strtab = &strtab;
 
     ehdr.e_shnum = 1;
 
-    shdrtab[0].sh_type = bfsht_rela;
+    gsl::at(shdrtab, 0).sh_type = bfsht_rela;
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {

@@ -98,11 +98,11 @@ public:
 
     virtual ~register_state_intel_x64() {}
 
-    register_state_intel_x64(register_state_intel_x64 &&) = default;
+    register_state_intel_x64(register_state_intel_x64 &&) noexcept = default;
     register_state_intel_x64(const register_state_intel_x64 &) = default;
 
-    virtual register_state_intel_x64 &operator=(register_state_intel_x64 &&) = default;
-    virtual register_state_intel_x64 &operator=(const register_state_intel_x64 &) = default;
+    register_state_intel_x64 &operator=(register_state_intel_x64 &&) noexcept = default;
+    register_state_intel_x64 &operator=(const register_state_intel_x64 &) = default;
 
     virtual uint64_t get_ip() const override
     { return m_registers.rip; }

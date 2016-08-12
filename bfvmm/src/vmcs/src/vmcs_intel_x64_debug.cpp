@@ -20,12 +20,13 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #include <debug.h>
+#include <view_as_pointer.h>
 #include <vmcs/vmcs_intel_x64.h>
 
 #define PRINT_FIELD(a,b) \
     bfdebug << std::left << std::setw(55) << #b; \
-    if (a == true) \
-        bfinfo << reinterpret_cast<void *>(vmread(b)) << bfendl; \
+    if ((a) == true) \
+        bfinfo << view_as_pointer(vmread(b)) << bfendl; \
     else \
         bfinfo << "unsupported" << bfendl;
 
@@ -36,6 +37,28 @@ vmcs_intel_x64::dump_vmcs()
     bfdebug << "- VMCS Dump                            -" << bfendl;
     bfdebug << "----------------------------------------" << bfendl;
 
+    this->dump_vmcs_16bit_control_state();
+    this->dump_vmcs_16bit_guest_state();
+    this->dump_vmcs_16bit_host_state();
+    this->dump_vmcs_64bit_control_state();
+    this->dump_vmcs_64bit_readonly_state();
+    this->dump_vmcs_64bit_guest_state();
+    this->dump_vmcs_64bit_host_state();
+    this->dump_vmcs_32bit_control_state();
+    this->dump_vmcs_32bit_readonly_state();
+    this->dump_vmcs_32bit_guest_state();
+    this->dump_vmcs_32bit_host_state();
+    this->dump_vmcs_natural_control_state();
+    this->dump_vmcs_natural_readonly_state();
+    this->dump_vmcs_natural_guest_state();
+    this->dump_vmcs_natural_host_state();
+
+    bfdebug << bfendl;
+}
+
+void
+vmcs_intel_x64::dump_vmcs_16bit_control_state()
+{
     bfdebug << bfendl;
     bfdebug << "16bit Control Fields:" << bfendl;
     PRINT_FIELD(is_supported_vpid(),
@@ -44,7 +67,11 @@ vmcs_intel_x64::dump_vmcs()
                 VMCS_POSTED_INTERRUPT_NOTIFICATION_VECTOR);
     PRINT_FIELD(is_supported_ept_violation_ve(),
                 VMCS_EPTP_INDEX);
+}
 
+void
+vmcs_intel_x64::dump_vmcs_16bit_guest_state()
+{
     bfdebug << bfendl;
     bfdebug << "16bit Guest State Fields:" << bfendl;
     PRINT_FIELD(true, VMCS_GUEST_ES_SELECTOR);
@@ -57,7 +84,11 @@ vmcs_intel_x64::dump_vmcs()
     PRINT_FIELD(true, VMCS_GUEST_TR_SELECTOR);
     PRINT_FIELD(is_supported_virtual_interrupt_delivery(),
                 VMCS_GUEST_INTERRUPT_STATUS);
+}
 
+void
+vmcs_intel_x64::dump_vmcs_16bit_host_state()
+{
     bfdebug << bfendl;
     bfdebug << "16bit Host State Fields:" << bfendl;
     PRINT_FIELD(true, VMCS_HOST_ES_SELECTOR);
@@ -67,7 +98,11 @@ vmcs_intel_x64::dump_vmcs()
     PRINT_FIELD(true, VMCS_HOST_FS_SELECTOR);
     PRINT_FIELD(true, VMCS_HOST_GS_SELECTOR);
     PRINT_FIELD(true, VMCS_HOST_TR_SELECTOR);
+}
 
+void
+vmcs_intel_x64::dump_vmcs_64bit_control_state()
+{
     bfdebug << bfendl;
     bfdebug << "64bit Control Fields:" << bfendl;
     PRINT_FIELD(true, VMCS_ADDRESS_OF_IO_BITMAP_A_FULL);
@@ -144,14 +179,22 @@ vmcs_intel_x64::dump_vmcs()
                 VMCS_XSS_EXITING_BITMAP_FULL);
     PRINT_FIELD(is_supported_xsave_xrestore(),
                 VMCS_XSS_EXITING_BITMAP_HIGH);
+}
 
+void
+vmcs_intel_x64::dump_vmcs_64bit_readonly_state()
+{
     bfdebug << bfendl;
     bfdebug << "64bit Read-Only Data Fields:" << bfendl;
     PRINT_FIELD(is_supported_ept(),
                 VMCS_GUEST_PHYSICAL_ADDRESS_FULL);
     PRINT_FIELD(is_supported_ept(),
                 VMCS_GUEST_PHYSICAL_ADDRESS_HIGH);
+}
 
+void
+vmcs_intel_x64::dump_vmcs_64bit_guest_state()
+{
     bfdebug << bfendl;
     bfdebug << "64bit Guest State Fields:" << bfendl;
     PRINT_FIELD(true, VMCS_VMCS_LINK_POINTER_FULL);
@@ -186,7 +229,11 @@ vmcs_intel_x64::dump_vmcs()
                 VMCS_GUEST_PDPTE3_FULL);
     PRINT_FIELD(is_supported_ept(),
                 VMCS_GUEST_PDPTE3_HIGH);
+}
 
+void
+vmcs_intel_x64::dump_vmcs_64bit_host_state()
+{
     bfdebug << bfendl;
     bfdebug << "64bit Host State Fields:" << bfendl;
     PRINT_FIELD(is_supported_load_ia32_pat_on_exit(),
@@ -201,7 +248,11 @@ vmcs_intel_x64::dump_vmcs()
                 VMCS_HOST_IA32_PERF_GLOBAL_CTRL_FULL);
     PRINT_FIELD(is_supported_load_ia32_perf_global_ctrl_on_exit(),
                 VMCS_HOST_IA32_PERF_GLOBAL_CTRL_HIGH);
+}
 
+void
+vmcs_intel_x64::dump_vmcs_32bit_control_state()
+{
     bfdebug << bfendl;
     bfdebug << "32bit Control Fields:" << bfendl;
     PRINT_FIELD(true, VMCS_PIN_BASED_VM_EXECUTION_CONTROLS);
@@ -226,7 +277,11 @@ vmcs_intel_x64::dump_vmcs()
                 VMCS_PLE_GAP);
     PRINT_FIELD(is_supported_pause_loop_exiting(),
                 VMCS_PLE_WINDOW);
+}
 
+void
+vmcs_intel_x64::dump_vmcs_32bit_readonly_state()
+{
     bfdebug << bfendl;
     bfdebug << "32bit Read-Only Fields:" << bfendl;
     PRINT_FIELD(true, VMCS_VM_INSTRUCTION_ERROR);
@@ -237,7 +292,11 @@ vmcs_intel_x64::dump_vmcs()
     PRINT_FIELD(true, VMCS_IDT_VECTORING_ERROR_CODE);
     PRINT_FIELD(true, VMCS_VM_EXIT_INSTRUCTION_LENGTH);
     PRINT_FIELD(true, VMCS_VM_EXIT_INSTRUCTION_INFORMATION);
+}
 
+void
+vmcs_intel_x64::dump_vmcs_32bit_guest_state()
+{
     bfdebug << bfendl;
     bfdebug << "32bit Guest State Fields:" << bfendl;
     PRINT_FIELD(true, VMCS_GUEST_ES_LIMIT);
@@ -264,11 +323,19 @@ vmcs_intel_x64::dump_vmcs()
     PRINT_FIELD(true, VMCS_GUEST_IA32_SYSENTER_CS);
     PRINT_FIELD(is_supported_vmx_preemption_timer(),
                 VMCS_VMX_PREEMPTION_TIMER_VALUE);
+}
 
+void
+vmcs_intel_x64::dump_vmcs_32bit_host_state()
+{
     bfdebug << bfendl;
     bfdebug << "32bit Host State Fields:" << bfendl;
     PRINT_FIELD(true, VMCS_HOST_IA32_SYSENTER_CS);
+}
 
+void
+vmcs_intel_x64::dump_vmcs_natural_control_state()
+{
     bfdebug << bfendl;
     bfdebug << "Natural Width Control Fields:" << bfendl;
     PRINT_FIELD(true, VMCS_CR0_GUEST_HOST_MASK);
@@ -279,7 +346,11 @@ vmcs_intel_x64::dump_vmcs()
     PRINT_FIELD(true, VMCS_CR3_TARGET_VALUE_1);
     PRINT_FIELD(true, VMCS_CR3_TARGET_VALUE_2);
     PRINT_FIELD(true, VMCS_CR3_TARGET_VALUE_31);
+}
 
+void
+vmcs_intel_x64::dump_vmcs_natural_readonly_state()
+{
     bfdebug << bfendl;
     bfdebug << "Natural Width Read-Only Fields:" << bfendl;
     PRINT_FIELD(true, VMCS_EXIT_QUALIFICATION);
@@ -288,7 +359,11 @@ vmcs_intel_x64::dump_vmcs()
     PRINT_FIELD(true, VMCS_IO_RDI);
     PRINT_FIELD(true, VMCS_IO_RIP);
     PRINT_FIELD(true, VMCS_GUEST_LINEAR_ADDRESS);
+}
 
+void
+vmcs_intel_x64::dump_vmcs_natural_guest_state()
+{
     bfdebug << bfendl;
     bfdebug << "Natural Width Guest State Fields:" << bfendl;
     PRINT_FIELD(true, VMCS_GUEST_CR0);
@@ -311,7 +386,11 @@ vmcs_intel_x64::dump_vmcs()
     PRINT_FIELD(true, VMCS_GUEST_PENDING_DEBUG_EXCEPTIONS);
     PRINT_FIELD(true, VMCS_GUEST_IA32_SYSENTER_ESP);
     PRINT_FIELD(true, VMCS_GUEST_IA32_SYSENTER_EIP);
+}
 
+void
+vmcs_intel_x64::dump_vmcs_natural_host_state()
+{
     bfdebug << bfendl;
     bfdebug << "Natural Width Host State Fields:" << bfendl;
     PRINT_FIELD(true, VMCS_HOST_CR0);
@@ -326,8 +405,6 @@ vmcs_intel_x64::dump_vmcs()
     PRINT_FIELD(true, VMCS_HOST_IA32_SYSENTER_EIP);
     PRINT_FIELD(true, VMCS_HOST_RSP);
     PRINT_FIELD(true, VMCS_HOST_RIP);
-
-    bfdebug << bfendl;
 }
 
 void
@@ -341,7 +418,7 @@ vmcs_intel_x64::print_execution_controls()
 }
 
 #define PRINT_CONTROL(a) \
-    if ((controls & a) != 0) \
+    if ((controls & (a)) != 0) \
         bfdebug << #a << bfendl;
 
 void

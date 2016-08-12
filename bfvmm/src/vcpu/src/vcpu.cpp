@@ -22,9 +22,9 @@
 #include <exception.h>
 #include <vcpu/vcpu.h>
 
-vcpu::vcpu(uint64_t id, const std::shared_ptr<debug_ring> &dr) :
+vcpu::vcpu(uint64_t id, std::shared_ptr<debug_ring> dr) :
     m_id(id),
-    m_debug_ring(dr),
+    m_debug_ring(std::move(dr)),
     m_is_running(false),
     m_is_initialized(false)
 {
@@ -47,7 +47,7 @@ vcpu::fini(void *attr)
 {
     (void) attr;
 
-    if (m_is_running == true)
+    if (m_is_running)
         this->hlt();
 
     m_is_initialized = false;

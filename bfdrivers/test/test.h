@@ -29,7 +29,7 @@ class driver_entry_ut : public unittest
 public:
 
     driver_entry_ut();
-    ~driver_entry_ut() {}
+    ~driver_entry_ut() override = default;
 
 protected:
 

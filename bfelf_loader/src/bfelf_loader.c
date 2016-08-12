@@ -216,7 +216,7 @@ private_check_symbol(struct bfelf_file_t *ef,
                      struct bfelf_sym **sym)
 {
     int64_t ret = 0;
-    struct e_string_t str = {0};
+    struct e_string_t str = {0, 0};
 
     ret = private_symbol_by_index(ef, index, sym);
     if (ret != BFELF_SUCCESS)
@@ -340,7 +340,7 @@ private_relocate_symbol(struct bfelf_loader_t *loader,
                         struct bfelf_rela *rela)
 {
     int64_t ret = 0;
-    struct e_string_t name = {0};
+    struct e_string_t name = {0, 0};
     struct bfelf_sym *found_sym = 0;
     struct bfelf_file_t *found_ef = ef;
     bfelf64_addr *ptr = (bfelf64_addr *)(ef->exec + rela->r_offset);
@@ -529,7 +529,7 @@ private_get_section_by_name(struct bfelf_file_t *ef,
 
     for (i = 0, *shdr = 0; i < ef->ehdr->e_shnum; i++)
     {
-        struct e_string_t _name = {0};
+        struct e_string_t _name = {0, 0};
         struct bfelf_shdr *_shdr = private_get_section(ef, i);
 
         ret = private_get_string(ef, ef->shstrtab, _shdr->sh_name, &_name);
@@ -795,7 +795,7 @@ private_get_hash_table(struct bfelf_file_t *ef)
 }
 
 int64_t
-bfelf_file_init(char *file, uint64_t fsize, struct bfelf_file_t *ef)
+bfelf_file_init(const char *file, uint64_t fsize, struct bfelf_file_t *ef)
 {
     int64_t ret = 0;
     bfelf64_word i = 0;

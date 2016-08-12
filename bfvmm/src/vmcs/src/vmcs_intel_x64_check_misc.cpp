@@ -20,7 +20,6 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #include <vmcs/vmcs_intel_x64.h>
-#include <vmcs/vmcs_intel_x64_exceptions.h>
 
 std::string
 vmcs_intel_x64::get_vm_instruction_error()
@@ -134,7 +133,7 @@ vmcs_intel_x64::get_proc_ctls() const
 uint64_t
 vmcs_intel_x64::get_proc2_ctls() const
 {
-    if (is_enabled_secondary_controls() == false)
+    if (!is_enabled_secondary_controls())
         return 0;
 
     return vmread(VMCS_SECONDARY_PROCESSOR_BASED_VM_EXECUTION_CONTROLS);
@@ -155,13 +154,7 @@ vmcs_intel_x64::get_entry_ctls() const
 bool
 vmcs_intel_x64::is_address_canonical(uint64_t addr)
 {
-    if (((addr <= 0x00007FFFFFFFFFFF)) ||
-        ((addr >= 0xFFFF800000000000) && (addr <= 0xFFFFFFFFFFFFFFFF)))
-    {
-        return true;
-    }
-
-    return false;
+    return (((addr <= 0x00007FFFFFFFFFFF)) || ((addr >= 0xFFFF800000000000) && (addr <= 0xFFFFFFFFFFFFFFFF)));
 }
 
 bool
@@ -176,10 +169,7 @@ vmcs_intel_x64::is_physical_address_valid(uint64_t addr)
     auto bits = (m_intrinsics->cpuid_eax(0x80000008) & 0x00000000000000FF);
     auto mask = (0xFFFFFFFFFFFFFFFFULL >> bits) << bits;
 
-    if ((addr & mask) == 0)
-        return true;
-
-    return false;
+    return ((addr & mask) == 0);
 }
 
 bool
@@ -244,7 +234,7 @@ vmcs_intel_x64::is_enabled_external_interrupt_exiting() const
     if ((ctls & VM_EXEC_PIN_BASED_EXTERNAL_INTERRUPT_EXITING) == 0)
         return false;
 
-    if (is_supported_external_interrupt_exiting() == false)
+    if (!is_supported_external_interrupt_exiting())
         return false;
 
     return true;
@@ -258,7 +248,7 @@ vmcs_intel_x64::is_enabled_nmi_exiting() const
     if ((ctls & VM_EXEC_PIN_BASED_NMI_EXITING) == 0)
         return false;
 
-    if (is_supported_nmi_exiting() == false)
+    if (!is_supported_nmi_exiting())
         return false;
 
     return true;
@@ -272,7 +262,7 @@ vmcs_intel_x64::is_enabled_virtual_nmis() const
     if ((ctls & VM_EXEC_PIN_BASED_VIRTUAL_NMIS) == 0)
         return false;
 
-    if (is_supported_virtual_nmis() == false)
+    if (!is_supported_virtual_nmis())
         return false;
 
     return true;
@@ -286,7 +276,7 @@ vmcs_intel_x64::is_enabled_vmx_preemption_timer() const
     if ((ctls & VM_EXEC_PIN_BASED_ACTIVATE_VMX_PREEMPTION_TIMER) == 0)
         return false;
 
-    if (is_supported_vmx_preemption_timer() == false)
+    if (!is_supported_vmx_preemption_timer())
         return false;
 
     return true;
@@ -300,7 +290,7 @@ vmcs_intel_x64::is_enabled_posted_interrupts() const
     if ((ctls & VM_EXEC_PIN_BASED_PROCESS_POSTED_INTERRUPTS) == 0)
         return false;
 
-    if (is_supported_posted_interrupts() == false)
+    if (!is_supported_posted_interrupts())
         return false;
 
     return true;
@@ -314,7 +304,7 @@ vmcs_intel_x64::is_enabled_interrupt_window_exiting() const
     if ((ctls & VM_EXEC_P_PROC_BASED_INTERRUPT_WINDOW_EXITING) == 0)
         return false;
 
-    if (is_supported_interrupt_window_exiting() == false)
+    if (!is_supported_interrupt_window_exiting())
         return false;
 
     return true;
@@ -328,7 +318,7 @@ vmcs_intel_x64::is_enabled_tsc_offsetting() const
     if ((ctls & VM_EXEC_P_PROC_BASED_USE_TSC_OFFSETTING) == 0)
         return false;
 
-    if (is_supported_tsc_offsetting() == false)
+    if (!is_supported_tsc_offsetting())
         return false;
 
     return true;
@@ -342,7 +332,7 @@ vmcs_intel_x64::is_enabled_hlt_exiting() const
     if ((ctls & VM_EXEC_P_PROC_BASED_HLT_EXITING) == 0)
         return false;
 
-    if (is_supported_hlt_exiting() == false)
+    if (!is_supported_hlt_exiting())
         return false;
 
     return true;
@@ -356,7 +346,7 @@ vmcs_intel_x64::is_enabled_invlpg_exiting() const
     if ((ctls & VM_EXEC_P_PROC_BASED_INVLPG_EXITING) == 0)
         return false;
 
-    if (is_supported_invlpg_exiting() == false)
+    if (!is_supported_invlpg_exiting())
         return false;
 
     return true;
@@ -370,7 +360,7 @@ vmcs_intel_x64::is_enabled_mwait_exiting() const
     if ((ctls & VM_EXEC_P_PROC_BASED_MWAIT_EXITING) == 0)
         return false;
 
-    if (is_supported_mwait_exiting() == false)
+    if (!is_supported_mwait_exiting())
         return false;
 
     return true;
@@ -384,7 +374,7 @@ vmcs_intel_x64::is_enabled_rdpmc_exiting() const
     if ((ctls & VM_EXEC_P_PROC_BASED_RDPMC_EXITING) == 0)
         return false;
 
-    if (is_supported_rdpmc_exiting() == false)
+    if (!is_supported_rdpmc_exiting())
         return false;
 
     return true;
@@ -398,7 +388,7 @@ vmcs_intel_x64::is_enabled_rdtsc_exiting() const
     if ((ctls & VM_EXEC_P_PROC_BASED_RDTSC_EXITING) == 0)
         return false;
 
-    if (is_supported_rdtsc_exiting() == false)
+    if (!is_supported_rdtsc_exiting())
         return false;
 
     return true;
@@ -412,7 +402,7 @@ vmcs_intel_x64::is_enabled_cr3_load_exiting() const
     if ((ctls & VM_EXEC_P_PROC_BASED_CR3_LOAD_EXITING) == 0)
         return false;
 
-    if (is_supported_cr3_load_exiting() == false)
+    if (!is_supported_cr3_load_exiting())
         return false;
 
     return true;
@@ -426,7 +416,7 @@ vmcs_intel_x64::is_enabled_cr3_store_exiting() const
     if ((ctls & VM_EXEC_P_PROC_BASED_CR3_STORE_EXITING) == 0)
         return false;
 
-    if (is_supported_cr3_store_exiting() == false)
+    if (!is_supported_cr3_store_exiting())
         return false;
 
     return true;
@@ -440,7 +430,7 @@ vmcs_intel_x64::is_enabled_cr8_load_exiting() const
     if ((ctls & VM_EXEC_P_PROC_BASED_CR8_LOAD_EXITING) == 0)
         return false;
 
-    if (is_supported_cr8_load_exiting() == false)
+    if (!is_supported_cr8_load_exiting())
         return false;
 
     return true;
@@ -454,7 +444,7 @@ vmcs_intel_x64::is_enabled_cr8_store_exiting() const
     if ((ctls & VM_EXEC_P_PROC_BASED_CR8_STORE_EXITING) == 0)
         return false;
 
-    if (is_supported_cr8_store_exiting() == false)
+    if (!is_supported_cr8_store_exiting())
         return false;
 
     return true;
@@ -468,7 +458,7 @@ vmcs_intel_x64::is_enabled_tpr_shadow() const
     if ((ctls & VM_EXEC_P_PROC_BASED_USE_TPR_SHADOW) == 0)
         return false;
 
-    if (is_supported_tpr_shadow() == false)
+    if (!is_supported_tpr_shadow())
         return false;
 
     return true;
@@ -482,7 +472,7 @@ vmcs_intel_x64::is_enabled_nmi_window_exiting() const
     if ((ctls & VM_EXEC_P_PROC_BASED_NMI_WINDOW_EXITING) == 0)
         return false;
 
-    if (is_supported_nmi_window_exiting() == false)
+    if (!is_supported_nmi_window_exiting())
         return false;
 
     return true;
@@ -496,7 +486,7 @@ vmcs_intel_x64::is_enabled_mov_dr_exiting() const
     if ((ctls & VM_EXEC_P_PROC_BASED_MOV_DR_EXITING) == 0)
         return false;
 
-    if (is_supported_mov_dr_exiting() == false)
+    if (!is_supported_mov_dr_exiting())
         return false;
 
     return true;
@@ -510,7 +500,7 @@ vmcs_intel_x64::is_enabled_unconditional_io_exiting() const
     if ((ctls & VM_EXEC_P_PROC_BASED_UNCONDITIONAL_IO_EXITING) == 0)
         return false;
 
-    if (is_supported_unconditional_io_exiting() == false)
+    if (!is_supported_unconditional_io_exiting())
         return false;
 
     return true;
@@ -524,7 +514,7 @@ vmcs_intel_x64::is_enabled_io_bitmaps() const
     if ((ctls & VM_EXEC_P_PROC_BASED_USE_IO_BITMAPS) == 0)
         return false;
 
-    if (is_supported_io_bitmaps() == false)
+    if (!is_supported_io_bitmaps())
         return false;
 
     return true;
@@ -538,7 +528,7 @@ vmcs_intel_x64::is_enabled_monitor_trap_flag() const
     if ((ctls & VM_EXEC_P_PROC_BASED_MONITOR_TRAP_FLAG) == 0)
         return false;
 
-    if (is_supported_monitor_trap_flag() == false)
+    if (!is_supported_monitor_trap_flag())
         return false;
 
     return true;
@@ -552,7 +542,7 @@ vmcs_intel_x64::is_enabled_msr_bitmaps() const
     if ((ctls & VM_EXEC_P_PROC_BASED_USE_MSR_BITMAPS) == 0)
         return false;
 
-    if (is_supported_msr_bitmaps() == false)
+    if (!is_supported_msr_bitmaps())
         return false;
 
     return true;
@@ -566,7 +556,7 @@ vmcs_intel_x64::is_enabled_monitor_exiting() const
     if ((ctls & VM_EXEC_P_PROC_BASED_MONITOR_EXITING) == 0)
         return false;
 
-    if (is_supported_monitor_exiting() == false)
+    if (!is_supported_monitor_exiting())
         return false;
 
     return true;
@@ -580,7 +570,7 @@ vmcs_intel_x64::is_enabled_pause_exiting() const
     if ((ctls & VM_EXEC_P_PROC_BASED_PAUSE_EXITING) == 0)
         return false;
 
-    if (is_supported_pause_exiting() == false)
+    if (!is_supported_pause_exiting())
         return false;
 
     return true;
@@ -594,7 +584,7 @@ vmcs_intel_x64::is_enabled_secondary_controls() const
     if ((ctls & VM_EXEC_P_PROC_BASED_ACTIVATE_SECONDARY_CONTROLS) == 0)
         return false;
 
-    if (is_supported_secondary_controls() == false)
+    if (!is_supported_secondary_controls())
         return false;
 
     return true;
@@ -608,7 +598,7 @@ vmcs_intel_x64::is_enabled_virtualized_apic() const
     if ((ctls & VM_EXEC_S_PROC_BASED_VIRTUALIZE_APIC_ACCESSES) == 0)
         return false;
 
-    if (is_supported_virtualized_apic() == false)
+    if (!is_supported_virtualized_apic())
         return false;
 
     return true;
@@ -622,7 +612,7 @@ vmcs_intel_x64::is_enabled_ept() const
     if ((ctls & VM_EXEC_S_PROC_BASED_ENABLE_EPT) == 0)
         return false;
 
-    if (is_supported_ept() == false)
+    if (!is_supported_ept())
         return false;
 
     return true;
@@ -636,7 +626,7 @@ vmcs_intel_x64::is_enabled_descriptor_table_exiting() const
     if ((ctls & VM_EXEC_S_PROC_BASED_DESCRIPTOR_TABLE_EXITING) == 0)
         return false;
 
-    if (is_supported_descriptor_table_exiting() == false)
+    if (!is_supported_descriptor_table_exiting())
         return false;
 
     return true;
@@ -650,7 +640,7 @@ vmcs_intel_x64::is_enabled_rdtscp() const
     if ((ctls & VM_EXEC_S_PROC_BASED_ENABLE_RDTSCP) == 0)
         return false;
 
-    if (is_supported_rdtscp() == false)
+    if (!is_supported_rdtscp())
         return false;
 
     return true;
@@ -664,7 +654,7 @@ vmcs_intel_x64::is_enabled_x2apic_mode() const
     if ((ctls & VM_EXEC_S_PROC_BASED_VIRTUALIZE_X2APIC_MODE) == 0)
         return false;
 
-    if (is_supported_x2apic_mode() == false)
+    if (!is_supported_x2apic_mode())
         return false;
 
     return true;
@@ -678,7 +668,7 @@ vmcs_intel_x64::is_enabled_vpid() const
     if ((ctls & VM_EXEC_S_PROC_BASED_ENABLE_VPID) == 0)
         return false;
 
-    if (is_supported_vpid() == false)
+    if (!is_supported_vpid())
         return false;
 
     return true;
@@ -692,7 +682,7 @@ vmcs_intel_x64::is_enabled_wbinvd_exiting() const
     if ((ctls & VM_EXEC_S_PROC_BASED_WBINVD_EXITING) == 0)
         return false;
 
-    if (is_supported_wbinvd_exiting() == false)
+    if (!is_supported_wbinvd_exiting())
         return false;
 
     return true;
@@ -706,7 +696,7 @@ vmcs_intel_x64::is_enabled_unrestricted_guests() const
     if ((ctls & VM_EXEC_S_PROC_BASED_UNRESTRICTED_GUEST) == 0)
         return false;
 
-    if (is_supported_unrestricted_guests() == false)
+    if (!is_supported_unrestricted_guests())
         return false;
 
     return true;
@@ -720,7 +710,7 @@ vmcs_intel_x64::is_enabled_apic_register_virtualization() const
     if ((ctls & VM_EXEC_S_PROC_BASED_APIC_REGISTER_VIRTUALIZATION) == 0)
         return false;
 
-    if (is_supported_apic_register_virtualization() == false)
+    if (!is_supported_apic_register_virtualization())
         return false;
 
     return true;
@@ -734,7 +724,7 @@ vmcs_intel_x64::is_enabled_virtual_interrupt_delivery() const
     if ((ctls & VM_EXEC_S_PROC_BASED_VIRTUAL_INTERRUPT_DELIVERY) == 0)
         return false;
 
-    if (is_supported_virtual_interrupt_delivery() == false)
+    if (!is_supported_virtual_interrupt_delivery())
         return false;
 
     return true;
@@ -748,7 +738,7 @@ vmcs_intel_x64::is_enabled_pause_loop_exiting() const
     if ((ctls & VM_EXEC_S_PROC_BASED_PAUSE_LOOP_EXITING) == 0)
         return false;
 
-    if (is_supported_pause_loop_exiting() == false)
+    if (!is_supported_pause_loop_exiting())
         return false;
 
     return true;
@@ -762,7 +752,7 @@ vmcs_intel_x64::is_enabled_rdrand_exiting() const
     if ((ctls & VM_EXEC_S_PROC_BASED_RDRAND_EXITING) == 0)
         return false;
 
-    if (is_supported_rdrand_exiting() == false)
+    if (!is_supported_rdrand_exiting())
         return false;
 
     return true;
@@ -776,7 +766,7 @@ vmcs_intel_x64::is_enabled_invpcid() const
     if ((ctls & VM_EXEC_S_PROC_BASED_ENABLE_INVPCID) == 0)
         return false;
 
-    if (is_supported_invpcid() == false)
+    if (!is_supported_invpcid())
         return false;
 
     return true;
@@ -790,7 +780,7 @@ vmcs_intel_x64::is_enabled_vm_functions() const
     if ((ctls & VM_EXEC_S_PROC_BASED_ENABLE_VM_FUNCTIONS) == 0)
         return false;
 
-    if (is_supported_vm_functions() == false)
+    if (!is_supported_vm_functions())
         return false;
 
     return true;
@@ -804,7 +794,7 @@ vmcs_intel_x64::is_enabled_vmcs_shadowing() const
     if ((ctls & VM_EXEC_S_PROC_BASED_VMCS_SHADOWING) == 0)
         return false;
 
-    if (is_supported_vmcs_shadowing() == false)
+    if (!is_supported_vmcs_shadowing())
         return false;
 
     return true;
@@ -818,7 +808,7 @@ vmcs_intel_x64::is_enabled_rdseed_exiting() const
     if ((ctls & VM_EXEC_S_PROC_BASED_RDSEED_EXITING) == 0)
         return false;
 
-    if (is_supported_rdseed_exiting() == false)
+    if (!is_supported_rdseed_exiting())
         return false;
 
     return true;
@@ -832,7 +822,7 @@ vmcs_intel_x64::is_enabled_ept_violation_ve() const
     if ((ctls & VM_EXEC_S_PROC_BASED_EPT_VIOLATION_VE) == 0)
         return false;
 
-    if (is_supported_ept_violation_ve() == false)
+    if (!is_supported_ept_violation_ve())
         return false;
 
     return true;
@@ -846,7 +836,7 @@ vmcs_intel_x64::is_enabled_xsave_xrestore() const
     if ((ctls & VM_EXEC_S_PROC_BASED_ENABLE_XSAVES_XRSTORS) == 0)
         return false;
 
-    if (is_supported_xsave_xrestore() == false)
+    if (!is_supported_xsave_xrestore())
         return false;
 
     return true;
@@ -860,7 +850,7 @@ vmcs_intel_x64::is_enabled_save_debug_controls_on_exit() const
     if ((ctls & VM_EXIT_CONTROL_SAVE_DEBUG_CONTROLS) == 0)
         return false;
 
-    if (is_supported_save_debug_controls_on_exit() == false)
+    if (!is_supported_save_debug_controls_on_exit())
         return false;
 
     return true;
@@ -874,7 +864,7 @@ vmcs_intel_x64::is_enabled_host_address_space_size() const
     if ((ctls & VM_EXIT_CONTROL_HOST_ADDRESS_SPACE_SIZE) == 0)
         return false;
 
-    if (is_supported_host_address_space_size() == false)
+    if (!is_supported_host_address_space_size())
         return false;
 
     return true;
@@ -888,7 +878,7 @@ vmcs_intel_x64::is_enabled_load_ia32_perf_global_ctrl_on_exit() const
     if ((ctls & VM_EXIT_CONTROL_LOAD_IA32_PERF_GLOBAL_CTRL) == 0)
         return false;
 
-    if (is_supported_load_ia32_perf_global_ctrl_on_exit() == false)
+    if (!is_supported_load_ia32_perf_global_ctrl_on_exit())
         return false;
 
     return true;
@@ -902,7 +892,7 @@ vmcs_intel_x64::is_enabled_ack_interrupt_on_exit() const
     if ((ctls & VM_EXIT_CONTROL_ACKNOWLEDGE_INTERRUPT_ON_EXIT) == 0)
         return false;
 
-    if (is_supported_ack_interrupt_on_exit() == false)
+    if (!is_supported_ack_interrupt_on_exit())
         return false;
 
     return true;
@@ -916,7 +906,7 @@ vmcs_intel_x64::is_enabled_save_ia32_pat_on_exit() const
     if ((ctls & VM_EXIT_CONTROL_SAVE_IA32_PAT) == 0)
         return false;
 
-    if (is_supported_save_ia32_pat_on_exit() == false)
+    if (!is_supported_save_ia32_pat_on_exit())
         return false;
 
     return true;
@@ -930,7 +920,7 @@ vmcs_intel_x64::is_enabled_load_ia32_pat_on_exit() const
     if ((ctls & VM_EXIT_CONTROL_LOAD_IA32_PAT) == 0)
         return false;
 
-    if (is_supported_load_ia32_pat_on_exit() == false)
+    if (!is_supported_load_ia32_pat_on_exit())
         return false;
 
     return true;
@@ -944,7 +934,7 @@ vmcs_intel_x64::is_enabled_save_ia32_efer_on_exit() const
     if ((ctls & VM_EXIT_CONTROL_SAVE_IA32_EFER) == 0)
         return false;
 
-    if (is_supported_save_ia32_efer_on_exit() == false)
+    if (!is_supported_save_ia32_efer_on_exit())
         return false;
 
     return true;
@@ -958,7 +948,7 @@ vmcs_intel_x64::is_enabled_load_ia32_efer_on_exit() const
     if ((ctls & VM_EXIT_CONTROL_LOAD_IA32_EFER) == 0)
         return false;
 
-    if (is_supported_load_ia32_efer_on_exit() == false)
+    if (!is_supported_load_ia32_efer_on_exit())
         return false;
 
     return true;
@@ -972,7 +962,7 @@ vmcs_intel_x64::is_enabled_save_vmx_preemption_timer_on_exit() const
     if ((ctls & VM_EXIT_CONTROL_SAVE_VMX_PREEMPTION_TIMER_VALUE) == 0)
         return false;
 
-    if (is_supported_save_vmx_preemption_timer_on_exit() == false)
+    if (!is_supported_save_vmx_preemption_timer_on_exit())
         return false;
 
     return true;
@@ -986,7 +976,7 @@ vmcs_intel_x64::is_enabled_load_debug_controls_on_entry() const
     if ((ctls & VM_ENTRY_CONTROL_LOAD_DEBUG_CONTROLS) == 0)
         return false;
 
-    if (is_supported_load_debug_controls_on_entry() == false)
+    if (!is_supported_load_debug_controls_on_entry())
         return false;
 
     return true;
@@ -1000,7 +990,7 @@ vmcs_intel_x64::is_enabled_ia_32e_mode_guest() const
     if ((ctls & VM_ENTRY_CONTROL_IA_32E_MODE_GUEST) == 0)
         return false;
 
-    if (is_supported_ia_32e_mode_guest() == false)
+    if (!is_supported_ia_32e_mode_guest())
         return false;
 
     return true;
@@ -1014,7 +1004,7 @@ vmcs_intel_x64::is_enabled_entry_to_smm() const
     if ((ctls & VM_ENTRY_CONTROL_ENTRY_TO_SMM) == 0)
         return false;
 
-    if (is_supported_entry_to_smm() == false)
+    if (!is_supported_entry_to_smm())
         return false;
 
     return true;
@@ -1028,7 +1018,7 @@ vmcs_intel_x64::is_enabled_deactivate_dual_monitor_treatment() const
     if ((ctls & VM_ENTRY_CONTROL_DEACTIVATE_DUAL_MONITOR_TREATMENT) == 0)
         return false;
 
-    if (is_supported_deactivate_dual_monitor_treatment() == false)
+    if (!is_supported_deactivate_dual_monitor_treatment())
         return false;
 
     return true;
@@ -1042,7 +1032,7 @@ vmcs_intel_x64::is_enabled_load_ia32_perf_global_ctrl_on_entry() const
     if ((ctls & VM_ENTRY_CONTROL_LOAD_IA32_PERF_GLOBAL_CTRL) == 0)
         return false;
 
-    if (is_supported_load_ia32_perf_global_ctrl_on_entry() == false)
+    if (!is_supported_load_ia32_perf_global_ctrl_on_entry())
         return false;
 
     return true;
@@ -1056,7 +1046,7 @@ vmcs_intel_x64::is_enabled_load_ia32_pat_on_entry() const
     if ((ctls & VM_ENTRY_CONTROL_LOAD_IA32_PAT) == 0)
         return false;
 
-    if (is_supported_load_ia32_pat_on_entry() == false)
+    if (!is_supported_load_ia32_pat_on_entry())
         return false;
 
     return true;
@@ -1070,7 +1060,7 @@ vmcs_intel_x64::is_enabled_load_ia32_efer_on_entry() const
     if ((ctls & VM_ENTRY_CONTROL_LOAD_IA32_EFER) == 0)
         return false;
 
-    if (is_supported_load_ia32_efer_on_entry() == false)
+    if (!is_supported_load_ia32_efer_on_entry())
         return false;
 
     return true;
@@ -1082,8 +1072,7 @@ vmcs_intel_x64::is_supported_external_interrupt_exiting() const
     auto ia32_vmx_pinbased_ctls_msr =
         m_intrinsics->read_msr(IA32_VMX_TRUE_PINBASED_CTLS_MSR);
 
-    return ia32_vmx_pinbased_ctls_msr &
-           (VM_EXEC_PIN_BASED_EXTERNAL_INTERRUPT_EXITING << 32);
+    return (ia32_vmx_pinbased_ctls_msr & (VM_EXEC_PIN_BASED_EXTERNAL_INTERRUPT_EXITING << 32)) != 0;
 }
 
 bool
@@ -1092,8 +1081,7 @@ vmcs_intel_x64::is_supported_nmi_exiting() const
     auto ia32_vmx_pinbased_ctls_msr =
         m_intrinsics->read_msr(IA32_VMX_TRUE_PINBASED_CTLS_MSR);
 
-    return ia32_vmx_pinbased_ctls_msr &
-           (VM_EXEC_PIN_BASED_NMI_EXITING << 32);
+    return (ia32_vmx_pinbased_ctls_msr & (VM_EXEC_PIN_BASED_NMI_EXITING << 32)) != 0;
 }
 
 bool
@@ -1102,8 +1090,7 @@ vmcs_intel_x64::is_supported_virtual_nmis() const
     auto ia32_vmx_pinbased_ctls_msr =
         m_intrinsics->read_msr(IA32_VMX_TRUE_PINBASED_CTLS_MSR);
 
-    return ia32_vmx_pinbased_ctls_msr &
-           (VM_EXEC_PIN_BASED_VIRTUAL_NMIS << 32);
+    return (ia32_vmx_pinbased_ctls_msr & (VM_EXEC_PIN_BASED_VIRTUAL_NMIS << 32)) != 0;
 }
 
 bool
@@ -1112,8 +1099,7 @@ vmcs_intel_x64::is_supported_vmx_preemption_timer() const
     auto ia32_vmx_pinbased_ctls_msr =
         m_intrinsics->read_msr(IA32_VMX_TRUE_PINBASED_CTLS_MSR);
 
-    return ia32_vmx_pinbased_ctls_msr &
-           (VM_EXEC_PIN_BASED_ACTIVATE_VMX_PREEMPTION_TIMER << 32);
+    return (ia32_vmx_pinbased_ctls_msr & (VM_EXEC_PIN_BASED_ACTIVATE_VMX_PREEMPTION_TIMER << 32)) != 0;
 }
 
 bool
@@ -1122,8 +1108,7 @@ vmcs_intel_x64::is_supported_posted_interrupts() const
     auto ia32_vmx_pinbased_ctls_msr =
         m_intrinsics->read_msr(IA32_VMX_TRUE_PINBASED_CTLS_MSR);
 
-    return ia32_vmx_pinbased_ctls_msr &
-           (VM_EXEC_PIN_BASED_PROCESS_POSTED_INTERRUPTS << 32);
+    return (ia32_vmx_pinbased_ctls_msr & (VM_EXEC_PIN_BASED_PROCESS_POSTED_INTERRUPTS << 32)) != 0;
 }
 
 bool
@@ -1132,8 +1117,7 @@ vmcs_intel_x64::is_supported_interrupt_window_exiting() const
     auto ia32_vmx_procbased_ctls_msr =
         m_intrinsics->read_msr(IA32_VMX_TRUE_PROCBASED_CTLS_MSR);
 
-    return ia32_vmx_procbased_ctls_msr &
-           (VM_EXEC_P_PROC_BASED_INTERRUPT_WINDOW_EXITING << 32);
+    return (ia32_vmx_procbased_ctls_msr & (VM_EXEC_P_PROC_BASED_INTERRUPT_WINDOW_EXITING << 32)) != 0;
 }
 
 bool
@@ -1142,8 +1126,7 @@ vmcs_intel_x64::is_supported_tsc_offsetting() const
     auto ia32_vmx_procbased_ctls_msr =
         m_intrinsics->read_msr(IA32_VMX_TRUE_PROCBASED_CTLS_MSR);
 
-    return ia32_vmx_procbased_ctls_msr &
-           (VM_EXEC_P_PROC_BASED_USE_TSC_OFFSETTING << 32);
+    return (ia32_vmx_procbased_ctls_msr & (VM_EXEC_P_PROC_BASED_USE_TSC_OFFSETTING << 32)) != 0;
 }
 
 bool
@@ -1152,8 +1135,7 @@ vmcs_intel_x64::is_supported_hlt_exiting() const
     auto ia32_vmx_procbased_ctls_msr =
         m_intrinsics->read_msr(IA32_VMX_TRUE_PROCBASED_CTLS_MSR);
 
-    return ia32_vmx_procbased_ctls_msr &
-           (VM_EXEC_P_PROC_BASED_HLT_EXITING << 32);
+    return (ia32_vmx_procbased_ctls_msr & (VM_EXEC_P_PROC_BASED_HLT_EXITING << 32)) != 0;
 }
 
 bool
@@ -1162,8 +1144,7 @@ vmcs_intel_x64::is_supported_invlpg_exiting() const
     auto ia32_vmx_procbased_ctls_msr =
         m_intrinsics->read_msr(IA32_VMX_TRUE_PROCBASED_CTLS_MSR);
 
-    return ia32_vmx_procbased_ctls_msr &
-           (VM_EXEC_P_PROC_BASED_INVLPG_EXITING << 32);
+    return (ia32_vmx_procbased_ctls_msr & (VM_EXEC_P_PROC_BASED_INVLPG_EXITING << 32)) != 0;
 }
 
 bool
@@ -1172,8 +1153,7 @@ vmcs_intel_x64::is_supported_mwait_exiting() const
     auto ia32_vmx_procbased_ctls_msr =
         m_intrinsics->read_msr(IA32_VMX_TRUE_PROCBASED_CTLS_MSR);
 
-    return ia32_vmx_procbased_ctls_msr &
-           (VM_EXEC_P_PROC_BASED_MWAIT_EXITING << 32);
+    return (ia32_vmx_procbased_ctls_msr & (VM_EXEC_P_PROC_BASED_MWAIT_EXITING << 32)) != 0;
 }
 
 bool
@@ -1182,8 +1162,7 @@ vmcs_intel_x64::is_supported_rdpmc_exiting() const
     auto ia32_vmx_procbased_ctls_msr =
         m_intrinsics->read_msr(IA32_VMX_TRUE_PROCBASED_CTLS_MSR);
 
-    return ia32_vmx_procbased_ctls_msr &
-           (VM_EXEC_P_PROC_BASED_RDPMC_EXITING << 32);
+    return (ia32_vmx_procbased_ctls_msr & (VM_EXEC_P_PROC_BASED_RDPMC_EXITING << 32)) != 0;
 }
 
 bool
@@ -1192,8 +1171,7 @@ vmcs_intel_x64::is_supported_rdtsc_exiting() const
     auto ia32_vmx_procbased_ctls_msr =
         m_intrinsics->read_msr(IA32_VMX_TRUE_PROCBASED_CTLS_MSR);
 
-    return ia32_vmx_procbased_ctls_msr &
-           (VM_EXEC_P_PROC_BASED_RDTSC_EXITING << 32);
+    return (ia32_vmx_procbased_ctls_msr & (VM_EXEC_P_PROC_BASED_RDTSC_EXITING << 32)) != 0;
 }
 
 bool
@@ -1202,8 +1180,7 @@ vmcs_intel_x64::is_supported_cr3_load_exiting() const
     auto ia32_vmx_procbased_ctls_msr =
         m_intrinsics->read_msr(IA32_VMX_TRUE_PROCBASED_CTLS_MSR);
 
-    return ia32_vmx_procbased_ctls_msr &
-           (VM_EXEC_P_PROC_BASED_CR3_LOAD_EXITING << 32);
+    return (ia32_vmx_procbased_ctls_msr & (VM_EXEC_P_PROC_BASED_CR3_LOAD_EXITING << 32)) != 0;
 }
 
 bool
@@ -1212,8 +1189,7 @@ vmcs_intel_x64::is_supported_cr3_store_exiting() const
     auto ia32_vmx_procbased_ctls_msr =
         m_intrinsics->read_msr(IA32_VMX_TRUE_PROCBASED_CTLS_MSR);
 
-    return ia32_vmx_procbased_ctls_msr &
-           (VM_EXEC_P_PROC_BASED_CR3_STORE_EXITING << 32);
+    return (ia32_vmx_procbased_ctls_msr & (VM_EXEC_P_PROC_BASED_CR3_STORE_EXITING << 32)) != 0;
 }
 
 bool
@@ -1222,8 +1198,7 @@ vmcs_intel_x64::is_supported_cr8_load_exiting() const
     auto ia32_vmx_procbased_ctls_msr =
         m_intrinsics->read_msr(IA32_VMX_TRUE_PROCBASED_CTLS_MSR);
 
-    return ia32_vmx_procbased_ctls_msr &
-           (VM_EXEC_P_PROC_BASED_CR8_LOAD_EXITING << 32);
+    return (ia32_vmx_procbased_ctls_msr & (VM_EXEC_P_PROC_BASED_CR8_LOAD_EXITING << 32)) != 0;
 }
 
 bool
@@ -1232,8 +1207,7 @@ vmcs_intel_x64::is_supported_cr8_store_exiting() const
     auto ia32_vmx_procbased_ctls_msr =
         m_intrinsics->read_msr(IA32_VMX_TRUE_PROCBASED_CTLS_MSR);
 
-    return ia32_vmx_procbased_ctls_msr &
-           (VM_EXEC_P_PROC_BASED_CR8_STORE_EXITING << 32);
+    return (ia32_vmx_procbased_ctls_msr & (VM_EXEC_P_PROC_BASED_CR8_STORE_EXITING << 32)) != 0;
 }
 
 bool
@@ -1242,8 +1216,7 @@ vmcs_intel_x64::is_supported_tpr_shadow() const
     auto ia32_vmx_procbased_ctls_msr =
         m_intrinsics->read_msr(IA32_VMX_TRUE_PROCBASED_CTLS_MSR);
 
-    return ia32_vmx_procbased_ctls_msr &
-           (VM_EXEC_P_PROC_BASED_USE_TPR_SHADOW << 32);
+    return (ia32_vmx_procbased_ctls_msr & (VM_EXEC_P_PROC_BASED_USE_TPR_SHADOW << 32)) != 0;
 }
 
 bool
@@ -1252,8 +1225,7 @@ vmcs_intel_x64::is_supported_nmi_window_exiting() const
     auto ia32_vmx_procbased_ctls_msr =
         m_intrinsics->read_msr(IA32_VMX_TRUE_PROCBASED_CTLS_MSR);
 
-    return ia32_vmx_procbased_ctls_msr &
-           (VM_EXEC_P_PROC_BASED_NMI_WINDOW_EXITING << 32);
+    return (ia32_vmx_procbased_ctls_msr & (VM_EXEC_P_PROC_BASED_NMI_WINDOW_EXITING << 32)) != 0;
 }
 
 bool
@@ -1262,8 +1234,7 @@ vmcs_intel_x64::is_supported_mov_dr_exiting() const
     auto ia32_vmx_procbased_ctls_msr =
         m_intrinsics->read_msr(IA32_VMX_TRUE_PROCBASED_CTLS_MSR);
 
-    return ia32_vmx_procbased_ctls_msr &
-           (VM_EXEC_P_PROC_BASED_MOV_DR_EXITING << 32);
+    return (ia32_vmx_procbased_ctls_msr & (VM_EXEC_P_PROC_BASED_MOV_DR_EXITING << 32)) != 0;
 }
 
 bool
@@ -1272,8 +1243,7 @@ vmcs_intel_x64::is_supported_unconditional_io_exiting() const
     auto ia32_vmx_procbased_ctls_msr =
         m_intrinsics->read_msr(IA32_VMX_TRUE_PROCBASED_CTLS_MSR);
 
-    return ia32_vmx_procbased_ctls_msr &
-           (VM_EXEC_P_PROC_BASED_UNCONDITIONAL_IO_EXITING << 32);
+    return (ia32_vmx_procbased_ctls_msr & (VM_EXEC_P_PROC_BASED_UNCONDITIONAL_IO_EXITING << 32)) != 0;
 }
 
 bool
@@ -1282,8 +1252,7 @@ vmcs_intel_x64::is_supported_io_bitmaps() const
     auto ia32_vmx_procbased_ctls_msr =
         m_intrinsics->read_msr(IA32_VMX_TRUE_PROCBASED_CTLS_MSR);
 
-    return ia32_vmx_procbased_ctls_msr &
-           (VM_EXEC_P_PROC_BASED_USE_IO_BITMAPS << 32);
+    return (ia32_vmx_procbased_ctls_msr & (VM_EXEC_P_PROC_BASED_USE_IO_BITMAPS << 32)) != 0;
 }
 
 bool
@@ -1292,8 +1261,7 @@ vmcs_intel_x64::is_supported_monitor_trap_flag() const
     auto ia32_vmx_procbased_ctls_msr =
         m_intrinsics->read_msr(IA32_VMX_TRUE_PROCBASED_CTLS_MSR);
 
-    return ia32_vmx_procbased_ctls_msr &
-           (VM_EXEC_P_PROC_BASED_MONITOR_TRAP_FLAG << 32);
+    return (ia32_vmx_procbased_ctls_msr & (VM_EXEC_P_PROC_BASED_MONITOR_TRAP_FLAG << 32)) != 0;
 }
 
 bool
@@ -1302,8 +1270,7 @@ vmcs_intel_x64::is_supported_msr_bitmaps() const
     auto ia32_vmx_procbased_ctls_msr =
         m_intrinsics->read_msr(IA32_VMX_TRUE_PROCBASED_CTLS_MSR);
 
-    return ia32_vmx_procbased_ctls_msr &
-           (VM_EXEC_P_PROC_BASED_USE_MSR_BITMAPS << 32);
+    return (ia32_vmx_procbased_ctls_msr & (VM_EXEC_P_PROC_BASED_USE_MSR_BITMAPS << 32)) != 0;
 }
 
 bool
@@ -1312,8 +1279,7 @@ vmcs_intel_x64::is_supported_monitor_exiting() const
     auto ia32_vmx_procbased_ctls_msr =
         m_intrinsics->read_msr(IA32_VMX_TRUE_PROCBASED_CTLS_MSR);
 
-    return ia32_vmx_procbased_ctls_msr &
-           (VM_EXEC_P_PROC_BASED_MONITOR_EXITING << 32);
+    return (ia32_vmx_procbased_ctls_msr & (VM_EXEC_P_PROC_BASED_MONITOR_EXITING << 32)) != 0;
 }
 
 bool
@@ -1322,8 +1288,7 @@ vmcs_intel_x64::is_supported_pause_exiting() const
     auto ia32_vmx_procbased_ctls_msr =
         m_intrinsics->read_msr(IA32_VMX_TRUE_PROCBASED_CTLS_MSR);
 
-    return ia32_vmx_procbased_ctls_msr &
-           (VM_EXEC_P_PROC_BASED_PAUSE_EXITING << 32);
+    return (ia32_vmx_procbased_ctls_msr & (VM_EXEC_P_PROC_BASED_PAUSE_EXITING << 32)) != 0;
 }
 
 bool
@@ -1332,8 +1297,7 @@ vmcs_intel_x64::is_supported_secondary_controls() const
     auto ia32_vmx_procbased_ctls_msr =
         m_intrinsics->read_msr(IA32_VMX_TRUE_PROCBASED_CTLS_MSR);
 
-    return ia32_vmx_procbased_ctls_msr &
-           (VM_EXEC_P_PROC_BASED_ACTIVATE_SECONDARY_CONTROLS << 32);
+    return (ia32_vmx_procbased_ctls_msr & (VM_EXEC_P_PROC_BASED_ACTIVATE_SECONDARY_CONTROLS << 32)) != 0;
 }
 
 bool
@@ -1342,8 +1306,7 @@ vmcs_intel_x64::is_supported_virtualized_apic() const
     auto ia32_vmx_procbased_ctls2_msr =
         m_intrinsics->read_msr(IA32_VMX_PROCBASED_CTLS2_MSR);
 
-    return ia32_vmx_procbased_ctls2_msr &
-           (VM_EXEC_S_PROC_BASED_VIRTUALIZE_APIC_ACCESSES << 32);
+    return (ia32_vmx_procbased_ctls2_msr & (VM_EXEC_S_PROC_BASED_VIRTUALIZE_APIC_ACCESSES << 32)) != 0;
 }
 
 bool
@@ -1352,8 +1315,7 @@ vmcs_intel_x64::is_supported_ept() const
     auto ia32_vmx_procbased_ctls2_msr =
         m_intrinsics->read_msr(IA32_VMX_PROCBASED_CTLS2_MSR);
 
-    return ia32_vmx_procbased_ctls2_msr &
-           (VM_EXEC_S_PROC_BASED_ENABLE_EPT << 32);
+    return (ia32_vmx_procbased_ctls2_msr & (VM_EXEC_S_PROC_BASED_ENABLE_EPT << 32)) != 0;
 }
 
 bool
@@ -1362,8 +1324,7 @@ vmcs_intel_x64::is_supported_descriptor_table_exiting() const
     auto ia32_vmx_procbased_ctls2_msr =
         m_intrinsics->read_msr(IA32_VMX_PROCBASED_CTLS2_MSR);
 
-    return ia32_vmx_procbased_ctls2_msr &
-           (VM_EXEC_S_PROC_BASED_DESCRIPTOR_TABLE_EXITING << 32);
+    return (ia32_vmx_procbased_ctls2_msr & (VM_EXEC_S_PROC_BASED_DESCRIPTOR_TABLE_EXITING << 32)) != 0;
 }
 
 bool
@@ -1372,8 +1333,7 @@ vmcs_intel_x64::is_supported_rdtscp() const
     auto ia32_vmx_procbased_ctls2_msr =
         m_intrinsics->read_msr(IA32_VMX_PROCBASED_CTLS2_MSR);
 
-    return ia32_vmx_procbased_ctls2_msr &
-           (VM_EXEC_S_PROC_BASED_ENABLE_RDTSCP << 32);
+    return (ia32_vmx_procbased_ctls2_msr & (VM_EXEC_S_PROC_BASED_ENABLE_RDTSCP << 32)) != 0;
 }
 
 bool
@@ -1382,8 +1342,7 @@ vmcs_intel_x64::is_supported_x2apic_mode() const
     auto ia32_vmx_procbased_ctls2_msr =
         m_intrinsics->read_msr(IA32_VMX_PROCBASED_CTLS2_MSR);
 
-    return ia32_vmx_procbased_ctls2_msr &
-           (VM_EXEC_S_PROC_BASED_VIRTUALIZE_X2APIC_MODE << 32);
+    return (ia32_vmx_procbased_ctls2_msr & (VM_EXEC_S_PROC_BASED_VIRTUALIZE_X2APIC_MODE << 32)) != 0;
 }
 
 bool
@@ -1392,8 +1351,7 @@ vmcs_intel_x64::is_supported_vpid() const
     auto ia32_vmx_procbased_ctls2_msr =
         m_intrinsics->read_msr(IA32_VMX_PROCBASED_CTLS2_MSR);
 
-    return ia32_vmx_procbased_ctls2_msr &
-           (VM_EXEC_S_PROC_BASED_ENABLE_VPID << 32);
+    return (ia32_vmx_procbased_ctls2_msr & (VM_EXEC_S_PROC_BASED_ENABLE_VPID << 32)) != 0;
 }
 
 bool
@@ -1402,8 +1360,7 @@ vmcs_intel_x64::is_supported_wbinvd_exiting() const
     auto ia32_vmx_procbased_ctls2_msr =
         m_intrinsics->read_msr(IA32_VMX_PROCBASED_CTLS2_MSR);
 
-    return ia32_vmx_procbased_ctls2_msr &
-           (VM_EXEC_S_PROC_BASED_WBINVD_EXITING << 32);
+    return (ia32_vmx_procbased_ctls2_msr & (VM_EXEC_S_PROC_BASED_WBINVD_EXITING << 32)) != 0;
 }
 
 bool
@@ -1412,8 +1369,7 @@ vmcs_intel_x64::is_supported_unrestricted_guests() const
     auto ia32_vmx_procbased_ctls2_msr =
         m_intrinsics->read_msr(IA32_VMX_PROCBASED_CTLS2_MSR);
 
-    return ia32_vmx_procbased_ctls2_msr &
-           (VM_EXEC_S_PROC_BASED_UNRESTRICTED_GUEST << 32);
+    return (ia32_vmx_procbased_ctls2_msr & (VM_EXEC_S_PROC_BASED_UNRESTRICTED_GUEST << 32)) != 0;
 }
 
 bool
@@ -1422,8 +1378,7 @@ vmcs_intel_x64::is_supported_apic_register_virtualization() const
     auto ia32_vmx_procbased_ctls2_msr =
         m_intrinsics->read_msr(IA32_VMX_PROCBASED_CTLS2_MSR);
 
-    return ia32_vmx_procbased_ctls2_msr &
-           (VM_EXEC_S_PROC_BASED_APIC_REGISTER_VIRTUALIZATION << 32);
+    return (ia32_vmx_procbased_ctls2_msr & (VM_EXEC_S_PROC_BASED_APIC_REGISTER_VIRTUALIZATION << 32)) != 0;
 }
 
 bool
@@ -1432,8 +1387,7 @@ vmcs_intel_x64::is_supported_virtual_interrupt_delivery() const
     auto ia32_vmx_procbased_ctls2_msr =
         m_intrinsics->read_msr(IA32_VMX_PROCBASED_CTLS2_MSR);
 
-    return ia32_vmx_procbased_ctls2_msr &
-           (VM_EXEC_S_PROC_BASED_VIRTUAL_INTERRUPT_DELIVERY << 32);
+    return (ia32_vmx_procbased_ctls2_msr & (VM_EXEC_S_PROC_BASED_VIRTUAL_INTERRUPT_DELIVERY << 32)) != 0;
 }
 
 bool
@@ -1442,8 +1396,7 @@ vmcs_intel_x64::is_supported_pause_loop_exiting() const
     auto ia32_vmx_procbased_ctls2_msr =
         m_intrinsics->read_msr(IA32_VMX_PROCBASED_CTLS2_MSR);
 
-    return ia32_vmx_procbased_ctls2_msr &
-           (VM_EXEC_S_PROC_BASED_PAUSE_LOOP_EXITING << 32);
+    return (ia32_vmx_procbased_ctls2_msr & (VM_EXEC_S_PROC_BASED_PAUSE_LOOP_EXITING << 32)) != 0;
 }
 
 bool
@@ -1452,8 +1405,7 @@ vmcs_intel_x64::is_supported_rdrand_exiting() const
     auto ia32_vmx_procbased_ctls2_msr =
         m_intrinsics->read_msr(IA32_VMX_PROCBASED_CTLS2_MSR);
 
-    return ia32_vmx_procbased_ctls2_msr &
-           (VM_EXEC_S_PROC_BASED_RDRAND_EXITING << 32);
+    return (ia32_vmx_procbased_ctls2_msr & (VM_EXEC_S_PROC_BASED_RDRAND_EXITING << 32)) != 0;
 }
 
 bool
@@ -1462,8 +1414,7 @@ vmcs_intel_x64::is_supported_invpcid() const
     auto ia32_vmx_procbased_ctls2_msr =
         m_intrinsics->read_msr(IA32_VMX_PROCBASED_CTLS2_MSR);
 
-    return ia32_vmx_procbased_ctls2_msr &
-           (VM_EXEC_S_PROC_BASED_ENABLE_INVPCID << 32);
+    return (ia32_vmx_procbased_ctls2_msr & (VM_EXEC_S_PROC_BASED_ENABLE_INVPCID << 32)) != 0;
 }
 
 bool
@@ -1472,8 +1423,7 @@ vmcs_intel_x64::is_supported_vm_functions() const
     auto ia32_vmx_procbased_ctls2_msr =
         m_intrinsics->read_msr(IA32_VMX_PROCBASED_CTLS2_MSR);
 
-    return ia32_vmx_procbased_ctls2_msr &
-           (VM_EXEC_S_PROC_BASED_ENABLE_VM_FUNCTIONS << 32);
+    return (ia32_vmx_procbased_ctls2_msr & (VM_EXEC_S_PROC_BASED_ENABLE_VM_FUNCTIONS << 32)) != 0;
 }
 
 bool
@@ -1482,8 +1432,7 @@ vmcs_intel_x64::is_supported_vmcs_shadowing() const
     auto ia32_vmx_procbased_ctls2_msr =
         m_intrinsics->read_msr(IA32_VMX_PROCBASED_CTLS2_MSR);
 
-    return ia32_vmx_procbased_ctls2_msr &
-           (VM_EXEC_S_PROC_BASED_VMCS_SHADOWING << 32);
+    return (ia32_vmx_procbased_ctls2_msr & (VM_EXEC_S_PROC_BASED_VMCS_SHADOWING << 32)) != 0;
 }
 
 bool
@@ -1492,8 +1441,7 @@ vmcs_intel_x64::is_supported_rdseed_exiting() const
     auto ia32_vmx_procbased_ctls2_msr =
         m_intrinsics->read_msr(IA32_VMX_PROCBASED_CTLS2_MSR);
 
-    return ia32_vmx_procbased_ctls2_msr &
-           (VM_EXEC_S_PROC_BASED_RDSEED_EXITING << 32);
+    return (ia32_vmx_procbased_ctls2_msr & (VM_EXEC_S_PROC_BASED_RDSEED_EXITING << 32)) != 0;
 }
 
 bool
@@ -1502,8 +1450,7 @@ vmcs_intel_x64::is_supported_ept_violation_ve() const
     auto ia32_vmx_procbased_ctls2_msr =
         m_intrinsics->read_msr(IA32_VMX_PROCBASED_CTLS2_MSR);
 
-    return ia32_vmx_procbased_ctls2_msr &
-           (VM_EXEC_S_PROC_BASED_EPT_VIOLATION_VE << 32);
+    return (ia32_vmx_procbased_ctls2_msr & (VM_EXEC_S_PROC_BASED_EPT_VIOLATION_VE << 32)) != 0;
 }
 
 bool
@@ -1512,8 +1459,7 @@ vmcs_intel_x64::is_supported_xsave_xrestore() const
     auto ia32_vmx_procbased_ctls2_msr =
         m_intrinsics->read_msr(IA32_VMX_PROCBASED_CTLS2_MSR);
 
-    return ia32_vmx_procbased_ctls2_msr &
-           (VM_EXEC_S_PROC_BASED_ENABLE_XSAVES_XRSTORS << 32);
+    return (ia32_vmx_procbased_ctls2_msr & (VM_EXEC_S_PROC_BASED_ENABLE_XSAVES_XRSTORS << 32)) != 0;
 }
 
 bool
@@ -1522,8 +1468,7 @@ vmcs_intel_x64::is_supported_save_debug_controls_on_exit() const
     auto ia32_vmx_exit_ctls_msr =
         m_intrinsics->read_msr(IA32_VMX_TRUE_EXIT_CTLS_MSR);
 
-    return ia32_vmx_exit_ctls_msr &
-           (VM_EXIT_CONTROL_SAVE_DEBUG_CONTROLS << 32);
+    return (ia32_vmx_exit_ctls_msr & (VM_EXIT_CONTROL_SAVE_DEBUG_CONTROLS << 32)) != 0;
 }
 
 bool
@@ -1532,8 +1477,7 @@ vmcs_intel_x64::is_supported_host_address_space_size() const
     auto ia32_vmx_exit_ctls_msr =
         m_intrinsics->read_msr(IA32_VMX_TRUE_EXIT_CTLS_MSR);
 
-    return ia32_vmx_exit_ctls_msr &
-           (VM_EXIT_CONTROL_HOST_ADDRESS_SPACE_SIZE << 32);
+    return (ia32_vmx_exit_ctls_msr & (VM_EXIT_CONTROL_HOST_ADDRESS_SPACE_SIZE << 32)) != 0;
 }
 
 bool
@@ -1542,8 +1486,7 @@ vmcs_intel_x64::is_supported_load_ia32_perf_global_ctrl_on_exit() const
     auto ia32_vmx_exit_ctls_msr =
         m_intrinsics->read_msr(IA32_VMX_TRUE_EXIT_CTLS_MSR);
 
-    return ia32_vmx_exit_ctls_msr &
-           (VM_EXIT_CONTROL_LOAD_IA32_PERF_GLOBAL_CTRL << 32);
+    return (ia32_vmx_exit_ctls_msr & (VM_EXIT_CONTROL_LOAD_IA32_PERF_GLOBAL_CTRL << 32)) != 0;
 }
 
 bool
@@ -1552,8 +1495,7 @@ vmcs_intel_x64::is_supported_ack_interrupt_on_exit() const
     auto ia32_vmx_exit_ctls_msr =
         m_intrinsics->read_msr(IA32_VMX_TRUE_EXIT_CTLS_MSR);
 
-    return ia32_vmx_exit_ctls_msr &
-           (VM_EXIT_CONTROL_ACKNOWLEDGE_INTERRUPT_ON_EXIT << 32);
+    return (ia32_vmx_exit_ctls_msr & (VM_EXIT_CONTROL_ACKNOWLEDGE_INTERRUPT_ON_EXIT << 32)) != 0;
 }
 
 bool
@@ -1562,8 +1504,7 @@ vmcs_intel_x64::is_supported_save_ia32_pat_on_exit() const
     auto ia32_vmx_exit_ctls_msr =
         m_intrinsics->read_msr(IA32_VMX_TRUE_EXIT_CTLS_MSR);
 
-    return ia32_vmx_exit_ctls_msr &
-           (VM_EXIT_CONTROL_SAVE_IA32_PAT << 32);
+    return (ia32_vmx_exit_ctls_msr & (VM_EXIT_CONTROL_SAVE_IA32_PAT << 32)) != 0;
 }
 
 bool
@@ -1572,8 +1513,7 @@ vmcs_intel_x64::is_supported_load_ia32_pat_on_exit() const
     auto ia32_vmx_exit_ctls_msr =
         m_intrinsics->read_msr(IA32_VMX_TRUE_EXIT_CTLS_MSR);
 
-    return ia32_vmx_exit_ctls_msr &
-           (VM_EXIT_CONTROL_LOAD_IA32_PAT << 32);
+    return (ia32_vmx_exit_ctls_msr & (VM_EXIT_CONTROL_LOAD_IA32_PAT << 32)) != 0;
 }
 
 bool
@@ -1582,8 +1522,7 @@ vmcs_intel_x64::is_supported_save_ia32_efer_on_exit() const
     auto ia32_vmx_exit_ctls_msr =
         m_intrinsics->read_msr(IA32_VMX_TRUE_EXIT_CTLS_MSR);
 
-    return ia32_vmx_exit_ctls_msr &
-           (VM_EXIT_CONTROL_SAVE_IA32_EFER << 32);
+    return (ia32_vmx_exit_ctls_msr & (VM_EXIT_CONTROL_SAVE_IA32_EFER << 32)) != 0;
 }
 
 bool
@@ -1592,8 +1531,7 @@ vmcs_intel_x64::is_supported_load_ia32_efer_on_exit() const
     auto ia32_vmx_exit_ctls_msr =
         m_intrinsics->read_msr(IA32_VMX_TRUE_EXIT_CTLS_MSR);
 
-    return ia32_vmx_exit_ctls_msr &
-           (VM_EXIT_CONTROL_LOAD_IA32_EFER << 32);
+    return (ia32_vmx_exit_ctls_msr & (VM_EXIT_CONTROL_LOAD_IA32_EFER << 32)) != 0;
 }
 
 bool
@@ -1602,8 +1540,7 @@ vmcs_intel_x64::is_supported_save_vmx_preemption_timer_on_exit() const
     auto ia32_vmx_exit_ctls_msr =
         m_intrinsics->read_msr(IA32_VMX_TRUE_EXIT_CTLS_MSR);
 
-    return ia32_vmx_exit_ctls_msr &
-           (VM_EXIT_CONTROL_SAVE_VMX_PREEMPTION_TIMER_VALUE << 32);
+    return (ia32_vmx_exit_ctls_msr & (VM_EXIT_CONTROL_SAVE_VMX_PREEMPTION_TIMER_VALUE << 32)) != 0;
 }
 
 bool
@@ -1612,8 +1549,7 @@ vmcs_intel_x64::is_supported_load_debug_controls_on_entry() const
     auto ia32_vmx_entry_ctls_msr =
         m_intrinsics->read_msr(IA32_VMX_TRUE_ENTRY_CTLS_MSR);
 
-    return ia32_vmx_entry_ctls_msr &
-           (VM_ENTRY_CONTROL_LOAD_DEBUG_CONTROLS << 32);
+    return (ia32_vmx_entry_ctls_msr & (VM_ENTRY_CONTROL_LOAD_DEBUG_CONTROLS << 32)) != 0;
 }
 
 bool
@@ -1622,8 +1558,7 @@ vmcs_intel_x64::is_supported_ia_32e_mode_guest() const
     auto ia32_vmx_entry_ctls_msr =
         m_intrinsics->read_msr(IA32_VMX_TRUE_ENTRY_CTLS_MSR);
 
-    return ia32_vmx_entry_ctls_msr &
-           (VM_ENTRY_CONTROL_IA_32E_MODE_GUEST << 32);
+    return (ia32_vmx_entry_ctls_msr & (VM_ENTRY_CONTROL_IA_32E_MODE_GUEST << 32)) != 0;
 }
 
 bool
@@ -1632,8 +1567,7 @@ vmcs_intel_x64::is_supported_entry_to_smm() const
     auto ia32_vmx_entry_ctls_msr =
         m_intrinsics->read_msr(IA32_VMX_TRUE_ENTRY_CTLS_MSR);
 
-    return ia32_vmx_entry_ctls_msr &
-           (VM_ENTRY_CONTROL_ENTRY_TO_SMM << 32);
+    return (ia32_vmx_entry_ctls_msr & (VM_ENTRY_CONTROL_ENTRY_TO_SMM << 32)) != 0;
 }
 
 bool
@@ -1642,8 +1576,7 @@ vmcs_intel_x64::is_supported_deactivate_dual_monitor_treatment() const
     auto ia32_vmx_entry_ctls_msr =
         m_intrinsics->read_msr(IA32_VMX_TRUE_ENTRY_CTLS_MSR);
 
-    return ia32_vmx_entry_ctls_msr &
-           (VM_ENTRY_CONTROL_DEACTIVATE_DUAL_MONITOR_TREATMENT << 32);
+    return (ia32_vmx_entry_ctls_msr & (VM_ENTRY_CONTROL_DEACTIVATE_DUAL_MONITOR_TREATMENT << 32)) != 0;
 }
 
 bool
@@ -1652,8 +1585,7 @@ vmcs_intel_x64::is_supported_load_ia32_perf_global_ctrl_on_entry() const
     auto ia32_vmx_entry_ctls_msr =
         m_intrinsics->read_msr(IA32_VMX_TRUE_ENTRY_CTLS_MSR);
 
-    return ia32_vmx_entry_ctls_msr &
-           (VM_ENTRY_CONTROL_LOAD_IA32_PERF_GLOBAL_CTRL << 32);
+    return (ia32_vmx_entry_ctls_msr & (VM_ENTRY_CONTROL_LOAD_IA32_PERF_GLOBAL_CTRL << 32)) != 0;
 }
 
 bool
@@ -1662,8 +1594,7 @@ vmcs_intel_x64::is_supported_load_ia32_pat_on_entry() const
     auto ia32_vmx_entry_ctls_msr =
         m_intrinsics->read_msr(IA32_VMX_TRUE_ENTRY_CTLS_MSR);
 
-    return ia32_vmx_entry_ctls_msr &
-           (VM_ENTRY_CONTROL_LOAD_IA32_PAT << 32);
+    return (ia32_vmx_entry_ctls_msr & (VM_ENTRY_CONTROL_LOAD_IA32_PAT << 32)) != 0;
 }
 
 bool
@@ -1672,21 +1603,19 @@ vmcs_intel_x64::is_supported_load_ia32_efer_on_entry() const
     auto ia32_vmx_entry_ctls_msr =
         m_intrinsics->read_msr(IA32_VMX_TRUE_ENTRY_CTLS_MSR);
 
-    return ia32_vmx_entry_ctls_msr &
-           (VM_ENTRY_CONTROL_LOAD_IA32_EFER << 32);
+    return (ia32_vmx_entry_ctls_msr & (VM_ENTRY_CONTROL_LOAD_IA32_EFER << 32)) != 0;
 }
 
 bool
 vmcs_intel_x64::is_supported_eptp_switching() const
 {
-    if (this->is_supported_secondary_controls() == false)
+    if (!this->is_supported_secondary_controls())
         return false;
 
-    if (this->is_supported_vm_functions() == false)
+    if (!this->is_supported_vm_functions())
         return false;
 
-    return (vmread(VMCS_VM_FUNCTION_CONTROLS_FULL) &
-            VM_FUNCTION_CONTROL_EPTP_SWITCHING);
+    return ((vmread(VMCS_VM_FUNCTION_CONTROLS_FULL) & VM_FUNCTION_CONTROL_EPTP_SWITCHING) != 0);
 }
 
 bool

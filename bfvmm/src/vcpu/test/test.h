@@ -29,7 +29,7 @@ class vcpu_ut : public unittest
 public:
 
     vcpu_ut();
-    ~vcpu_ut() {}
+    ~vcpu_ut() override = default;
 
 protected:
 
@@ -97,7 +97,6 @@ private:
     void test_vcpu_intel_x64_hlt_valid();
     void test_vcpu_intel_x64_hlt_valid_is_host_vcpu();
     void test_vcpu_intel_x64_hlt_vmxon_throws();
-    void test_vcpu_intel_x64_coveralls_cleanup();
 
     void test_vcpu_manager_create_valid();
     void test_vcpu_manager_create_valid_twice_overwrites();

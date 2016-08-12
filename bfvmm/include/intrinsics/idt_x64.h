@@ -22,7 +22,7 @@
 #ifndef IDT_X64_H
 #define IDT_X64_H
 
-#include <memory>
+#include <gsl/gsl>
 #include <intrinsics/intrinsics_x64.h>
 
 // -----------------------------------------------------------------------------
@@ -91,7 +91,7 @@ public:
 
     /// Destructor
     ///
-    virtual ~idt_x64() {}
+    virtual ~idt_x64() = default;
 
     /// GDT Base Address
     ///
@@ -107,9 +107,10 @@ public:
 
 private:
 
-    uint16_t m_size;
     idt_reg_x64_t m_idt_reg;
-    std::shared_ptr<uint64_t> m_idt;
+
+    gsl::span<uint64_t> m_idt;
+    std::unique_ptr<uint64_t[]> m_idt_owner;
 };
 
 #endif

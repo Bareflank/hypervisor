@@ -80,42 +80,29 @@
 #endif
 
 /*
- * Max Blocks
+ * Max Heap Pool
  *
- * This defines the maximum number of blocks that the memory manager will store
- * for new / delete. This value will also be used to define the alloc/free
- * bookkeeping. Note that each block is a cache line. Also note that we define
- * the total number of blocks using the max page size, which will ensure that
- * our mem pool is both a multiple of the cache line size, and of the page
- * size.
+ * This defines the internal memory that the hypervisor allocates to use
+ * during setup by new/delete. Note that things like the debug_ring and
+ * anything that uses a std::container uses this heap so it does need to
+ * have some size to it. Pages do not come from this pool.
+ *
+ * Note: defined in bytes (defaults to 8MB)
  */
-#ifndef MAX_BLOCKS
-#define MAX_BLOCKS (16ULL * MAX_PAGE_SIZE)
+#ifndef MAX_HEAP_POOL
+#define MAX_HEAP_POOL (256 * MAX_PAGE_SIZE)
 #endif
 
 /*
- * Convience Macros
- *
- * These macros provide some useful information about how the memory manager
- * is defined. These should not be set by the compiler, but instead, are here
- * to calculate stats about how the compiler setup the other macros.
- */
-#define BLOCKS_PER_PAGE (MAX_PAGE_SIZE / MAX_CACHE_LINE_SIZE)
-#define TOTAL_NUM_PAGES (MAX_BLOCKS / BLOCKS_PER_PAGE)
-
-/*
- * Max Internal Mem Pool
+ * Max Page Pool
  *
  * This defines the internal memory that the hypervisor allocates to use
- * during setup by new/delete. Note that this is not the same
- * memory that is used by each guest VM as this memory will be provided by
- * the driver entry points when talking to the hypervisor as memory must
- * be reserved by the host OS for this purpose.
+ * for allocating pages.
  *
- * Note: defined in bytes
+ * Note: defined in bytes (defaults to 8MB)
  */
-#ifndef MAX_MEM_POOL
-#define MAX_MEM_POOL (MAX_CACHE_LINE_SIZE * MAX_BLOCKS)
+#ifndef MAX_PAGE_POOL
+#define MAX_PAGE_POOL (256)
 #endif
 
 /*
@@ -156,19 +143,6 @@
  * Note: defined in bytes
  */
 #define DEBUG_RING_SIZE (1 << DEBUG_RING_SHIFT)
-
-/**
- * Alignment
- *
- * Defines how the memory pool is aligned. Note that the larger this is made,
- * the larger the potential size of the module could be. Note that at minimum,
- * this needs to be aligned to the MAX_CACHE_LINE_SIZE. We currently set this
- * to MAX_PAGE_SIZE for the unit test as it helps with testing different
- * alignmnet issues that might come up.
- */
-#ifndef ALIGN_MEMORY
-#define ALIGN_MEMORY __attribute__((aligned(MAX_PAGE_SIZE)))
-#endif
 
 /// Stack Size
 ///

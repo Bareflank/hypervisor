@@ -19,41 +19,29 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <debug.h>
-#include <string.h>
+#include <gsl/gsl>
+
 #include <memory_manager/memory_manager.h>
 #include <memory_manager/page_table_x64.h>
 
-page_table_x64::page_table_x64(uintptr_t *entry) :
-    page_table_entry_x64(entry)
+page_table_x64::page_table_x64(uintptr_t *pte) :
+    page_table_entry_x64(pte != nullptr ? pte : & m_cr3_shadow),
+    m_ptes(PT_SIZE),
+    m_cr3_shadow(0)
 {
-    m_table = std::unique_ptr<uintptr_t[]>(static_cast<uintptr_t *>(g_mm->malloc_aligned(PT_SIZE * PTE_SIZE, PT_SIZE * PTE_SIZE)));
-    memset(m_table.get(), 0, PT_SIZE * PTE_SIZE);
+    m_pt_owner = std::make_unique<uintptr_t[]>(4096 / sizeof(uintptr_t));
+    m_pt = gsl::span<uintptr_t>(m_pt_owner.get(), PT_SIZE);
 
-    if (entry != nullptr)
-    {
-        this->set_phys_addr(this->table_phys_addr());
-        this->set_present(true);
-        this->set_rw(true);
-        this->set_us(true);
-    }
+    this->set_phys_addr(g_mm->virt_to_phys(m_pt_owner.get()));
+    this->set_present(true);
+    this->set_rw(true);
+    this->set_us(true);
 }
 
 std::shared_ptr<page_table_entry_x64>
-page_table_x64::add_page(void *virt_addr)
+page_table_x64::add_page(uintptr_t virt_addr)
 {
-    return add_page(reinterpret_cast<uintptr_t>(virt_addr), PML4_INDEX);
-}
-
-uintptr_t
-page_table_x64::table_phys_addr() const
-{
-    auto addr = g_mm->virt_to_phys(m_table.get());
-
-    if (addr == nullptr)
-        throw std::logic_error("phys_addr: virt_to_phys failed");
-
-    return (reinterpret_cast<uintptr_t>(addr) & PTE_PHYS_ADDR_MASK);
+    return add_page(virt_addr, PML4_INDEX);
 }
 
 std::shared_ptr<page_table_entry_x64>
@@ -63,18 +51,24 @@ page_table_x64::add_page(uintptr_t virt_addr, uint64_t bits)
 
     if (bits > PT_INDEX)
     {
-        auto entry = std::dynamic_pointer_cast<page_table_x64>(m_entries[index]);
+        auto pte = std::dynamic_pointer_cast<page_table_x64>(m_ptes[index]);
 
-        if (!entry)
-            m_entries[index] = entry = std::make_shared<page_table_x64>(&m_table[index]);
+        if (pte)
+            return pte->add_page(virt_addr, bits - BITS_PER_INDEX);
 
-        return entry->add_page(virt_addr, bits - BITS_PER_INDEX);
+        pte = std::make_shared<page_table_x64>(&m_pt[index]);
+        m_ptes[index] = pte;
+
+        return pte->add_page(virt_addr, bits - BITS_PER_INDEX);
     }
-    else
-    {
-        if (m_entries[index])
-            throw std::logic_error("add_page: page mapping already exists");
 
-        return (m_entries[index] = std::make_shared<page_table_entry_x64>(&m_table[index]));
-    }
+    auto pte = m_ptes[index];
+
+    if (pte)
+        throw std::logic_error("add_page: page mapping already exists");
+
+    pte = std::make_shared<page_table_entry_x64>(&m_pt[index]);
+    m_ptes[index] = pte;
+
+    return pte;
 }

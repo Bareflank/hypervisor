@@ -127,7 +127,7 @@ decode_pointer(char **addr, uint64_t encoding)
 // -----------------------------------------------------------------------------
 
 common_entry::common_entry() :
-    m_is_cie(0),
+    m_is_cie(false),
     m_entry_start(0),
     m_entry_end(0),
     m_payload_start(0),
@@ -137,7 +137,7 @@ common_entry::common_entry() :
 }
 
 common_entry::common_entry(const eh_frame_t &eh_frame) :
-    m_is_cie(0),
+    m_is_cie(false),
     m_entry_start(0),
     m_entry_end(0),
     m_payload_start(0),
@@ -256,10 +256,10 @@ ci_entry::parse(char *addr)
 {
     common_entry::parse(addr);
 
-    if (*this == false)
+    if (!*this)
         return;
 
-    if (is_cie() == false)
+    if (!is_cie())
         return;
 
     auto p = payload_start();
@@ -345,10 +345,10 @@ fd_entry::parse(char *addr)
 {
     common_entry::parse(addr);
 
-    if (*this == false)
+    if (!*this)
         return;
 
-    if (is_fde() == false)
+    if (!is_fde())
         return;
 
     auto p = payload_start();
@@ -403,9 +403,9 @@ eh_frame::find_fde(register_state *state, bool phase1)
             if (fde.is_cie())
                 continue;
 
-            if (fde.is_in_range(state->get_ip()) == true)
+            if (fde.is_in_range(state->get_ip()))
             {
-                if (phase1 == true)
+                if (phase1)
                     debug("unwinder found rip: %p, fde: %p\n",
                           reinterpret_cast<void *>(state->get_ip()),
                           reinterpret_cast<void *>(fde.pc_begin()));

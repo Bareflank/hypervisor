@@ -22,6 +22,8 @@
 #ifndef TEST_ELF
 #define TEST_ELF
 
+#pragma GCC system_header
+
 #include <bfelf_loader.h>
 
 struct test_dynsym

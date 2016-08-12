@@ -29,7 +29,7 @@ class exit_handler_intel_x64_ut : public unittest
 public:
 
     exit_handler_intel_x64_ut();
-    ~exit_handler_intel_x64_ut() {}
+    ~exit_handler_intel_x64_ut() override = default;
 
 protected:
 

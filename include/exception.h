@@ -58,13 +58,11 @@ public:
 
     /// Default Constructor
     ///
-    general_exception() noexcept
-    {}
+    general_exception() noexcept = default;
 
     /// Destructor
     ///
-    virtual ~general_exception()
-    {}
+    ~general_exception() override = default;
 
     /// What
     ///
@@ -73,7 +71,7 @@ public:
     /// still being able to support catching STL exceptions as well. This
     /// should not be used directly. Instead, use the stream operator.
     ///
-    virtual const char *what() const throw()
+    const char *what() const noexcept override
     { return typeid(*this).name(); }
 
 public:
@@ -116,11 +114,11 @@ namespace bfn
 class unknown_command_error : public bfn::general_exception
 {
 public:
-    unknown_command_error(const std::string &mesg) :
-        m_mesg(mesg)
+    unknown_command_error(std::string mesg) :
+        m_mesg(std::move(mesg))
     {}
 
-    virtual std::ostream &print(std::ostream &os) const
+    std::ostream &print(std::ostream &os) const override
     { return os << "unknown command: `" << m_mesg << "`"; }
 
 private:
@@ -136,7 +134,7 @@ private:
 class missing_argument_error : public bfn::general_exception
 {
 public:
-    virtual std::ostream &print(std::ostream &os) const
+    std::ostream &print(std::ostream &os) const override
     { return os << "missing argument"; }
 };
 
@@ -149,11 +147,11 @@ public:
 class invalid_file_error : public bfn::general_exception
 {
 public:
-    invalid_file_error(const std::string &mesg) :
-        m_mesg(mesg)
+    invalid_file_error(std::string mesg) :
+        m_mesg(std::move(mesg))
     {}
 
-    virtual std::ostream &print(std::ostream &os) const
+    std::ostream &print(std::ostream &os) const override
     { return os << "invalid filename: `" << m_mesg << "`"; }
 
 private:
@@ -169,7 +167,7 @@ private:
 class driver_inaccessible_error : public bfn::general_exception
 {
 public:
-    virtual std::ostream &print(std::ostream &os) const
+    std::ostream &print(std::ostream &os) const override
     {
         os << "bareflank driver inaccessible:";
         os << std::endl << "    - check that the bareflank driver is loaded";
@@ -188,11 +186,11 @@ public:
 class ioctl_failed_error : public bfn::general_exception
 {
 public:
-    ioctl_failed_error(const std::string &ioctl) :
-        m_ioctl(ioctl)
+    ioctl_failed_error(std::string ioctl) :
+        m_ioctl(std::move(ioctl))
     {}
 
-    virtual std::ostream &print(std::ostream &os) const
+    std::ostream &print(std::ostream &os) const override
     { return os << "ioctl failed: `" << m_ioctl << "`"; }
 
 private:
@@ -208,7 +206,7 @@ private:
 class corrupt_vmm_error : public bfn::general_exception
 {
 public:
-    virtual std::ostream &print(std::ostream &os) const
+    std::ostream &print(std::ostream &os) const override
     { return os << "unable to process request. vmm is in a corrupt state"; }
 };
 
@@ -221,7 +219,7 @@ public:
 class unknown_status_error : public bfn::general_exception
 {
 public:
-    virtual std::ostream &print(std::ostream &os) const
+    std::ostream &print(std::ostream &os) const override
     { return os << "unable to process request. vmm status unknown"; }
 };
 
@@ -234,11 +232,11 @@ public:
 class invalid_vmm_state_error : public bfn::general_exception
 {
 public:
-    invalid_vmm_state_error(const std::string &mesg) :
-        m_mesg(mesg)
+    invalid_vmm_state_error(std::string mesg) :
+        m_mesg(std::move(mesg))
     {}
 
-    virtual std::ostream &print(std::ostream &os) const
+    std::ostream &print(std::ostream &os) const override
     { return os << m_mesg; }
 
 private:
@@ -246,98 +244,6 @@ private:
 };
 
 #define invalid_vmm_state(a) bfn::invalid_vmm_state_error(a)
-
-// -----------------------------------------------------------------------------
-// Invalid Alignment
-// -----------------------------------------------------------------------------
-
-class invalid_alignment_error : public bfn::general_exception
-{
-public:
-    invalid_alignment_error(const std::string &mesg,
-                            uint64_t addr) :
-        m_mesg(mesg),
-        m_addr(addr)
-    {}
-
-    virtual std::ostream &print(std::ostream &os) const
-    {
-        os << "invalid address alignment: ";
-        os << std::endl << "    - mesg: " << m_mesg;
-        os << std::endl << "    - addr: " << m_addr;
-
-        return os;
-    }
-
-private:
-    std::string m_mesg;
-    uint64_t m_addr;
-};
-
-#define invalid_alignment(a,b) bfn::invalid_alignment_error(a,b)
-
-// -----------------------------------------------------------------------------
-// Invalid Address
-// -----------------------------------------------------------------------------
-
-class invalid_address_error : public bfn::general_exception
-{
-public:
-    invalid_address_error(const std::string &mesg,
-                          uint64_t addr) :
-        m_mesg(mesg),
-        m_addr(addr)
-    {}
-
-    virtual std::ostream &print(std::ostream &os) const
-    {
-        os << "invalid address: ";
-        os << std::endl << "    - mesg: " << m_mesg;
-        os << std::endl << "    - addr: " << m_addr;
-
-        return os;
-    }
-
-private:
-    std::string m_mesg;
-    uint64_t m_addr;
-};
-
-#define invalid_address(a,b) bfn::invalid_address_error(a,b)
-
-// -----------------------------------------------------------------------------
-// Hardware Unsupported
-// -----------------------------------------------------------------------------
-
-class hardware_unsupported_error : public bfn::general_exception
-{
-public:
-    hardware_unsupported_error(const std::string &mesg,
-                               const std::string &func,
-                               uint64_t line) :
-        m_mesg(mesg),
-        m_func(func),
-        m_line(line)
-    {}
-
-    virtual std::ostream &print(std::ostream &os) const
-    {
-        os << "hardware unsupported: ";
-        os << std::endl << "    - mesg: " << m_mesg;
-        os << std::endl << "    - func: " << m_func;
-        os << std::endl << "    - line: " << m_line;
-
-        return os;
-    }
-
-private:
-    std::string m_mesg;
-    std::string m_func;
-    uint64_t m_line;
-};
-
-#define hardware_unsupported(a) \
-    bfn::hardware_unsupported_error(a,__func__,__LINE__)
 
 }
 
