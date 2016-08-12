@@ -241,6 +241,10 @@ memory_manager_ut::test_page_table_x64_coveralls_cleanup()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_TRUE(malloc_aligned(4096, 4096) == 0);
+        auto ptr = malloc_aligned(4096, 4096);
+        EXPECT_TRUE(ptr == nullptr);
+
+        if (ptr)
+            free(ptr);
     });
 }

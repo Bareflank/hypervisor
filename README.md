@@ -5,6 +5,10 @@
 [![GitHub version](https://badge.fury.io/gh/bareflank%2Fhypervisor.svg)](https://badge.fury.io/gh/bareflank%2Fhypervisor)
 ![](https://travis-ci.org/Bareflank/hypervisor.svg?branch=master)
 [![Coverage Status](https://coveralls.io/repos/github/Bareflank/hypervisor/badge.svg?branch=master)](https://coveralls.io/github/Bareflank/hypervisor?branch=master)
+<a href="https://scan.coverity.com/projects/bareflank-hypervisor">
+  <img alt="Coverity Scan Build Status"
+       src="https://scan.coverity.com/projects/9857/badge.svg"/>
+</a>
 ## Description
 
 The Bareflank Hypervisor is an open source, lightweight hypervisor, lead by
@@ -107,8 +111,8 @@ refer to the instructions provided in the tagged version.
 
 Before you can compile, the build environment must be present. If you are on
 a supported Windows platform, you must first install cygwin, and run a cygwin
-terminal with admin rights. You must also copy the setup-x86_64.exe to 
-"c:\cygwin64\bin". If you are on a supported Linux platform, all you need 
+terminal with admin rights. You must also copy the setup-x86_64.exe to
+"c:\cygwin64\bin". If you are on a supported Linux platform, all you need
 is a terminal. Once your setup, you should be able to run the following:
 
 ```
@@ -120,9 +124,9 @@ git checkout -b v1.0.0
 ./tools/scripts/setup_<platform>.sh
 ```
 
-If you are on Windows, there is one additional step that must be taken 
+If you are on Windows, there is one additional step that must be taken
 to turn on test signing. This step can be skipped if you plan to sign
-the driver with your own signing key. 
+the driver with your own signing key.
 
 ```
 bcdedit.exe /set testsigning ON
@@ -141,7 +145,7 @@ make run_tests
 
 To run the hypervisor, you need to first compile, and load one of the driver
 entry points. Bareflank uses the driver entry point to gain kernel level
-access to the system to load the hypervisor. On Windows and Linux, this 
+access to the system to load the hypervisor. On Windows and Linux, this
 is as simple as:
 
 ```
@@ -171,18 +175,18 @@ For more detailed instructions please read the following (based on which OS you 
 
 ## Extended APIs
 
-Bareflank's main goal is to provide the "bare" minimum hypervisor. 
-Since Bareflank supports C++ 11/14, multiple operating systems, 
-and a full toolstack, it's not as simple as say 
-[SimpleVisor](https://github.com/ionescu007/SimpleVisor), but still 
-adheres to the same basic principles of leaving out the complexity 
-of a full blown hypervisor in favor of an implementation that is simple to 
-read and follow. 
+Bareflank's main goal is to provide the "bare" minimum hypervisor.
+Since Bareflank supports C++ 11/14, multiple operating systems,
+and a full toolstack, it's not as simple as say
+[SimpleVisor](https://github.com/ionescu007/SimpleVisor), but still
+adheres to the same basic principles of leaving out the complexity
+of a full blown hypervisor in favor of an implementation that is simple to
+read and follow.
 
-It is our goal to provide a hypervisor that others can extend to create 
-their own hypervisors. The purpose of the 
-[Extended APIs](https://github.com/Bareflank/extended_apis) repository, 
-is to provide an extended set of APIs to build your hypervisors from 
+It is our goal to provide a hypervisor that others can extend to create
+their own hypervisors. The purpose of the
+[Extended APIs](https://github.com/Bareflank/extended_apis) repository,
+is to provide an extended set of APIs to build your hypervisors from
 that simplify common tasks when working with hypervisors.
 For more information about this project, please see:
 

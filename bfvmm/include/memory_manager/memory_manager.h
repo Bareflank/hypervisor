@@ -208,6 +208,7 @@ private:
     virtual void *block_to_virt(int64_t block) noexcept;
     virtual int64_t virt_to_block(void *virt) noexcept;
 
+    virtual bool private_is_power_of_2(uint64_t x) noexcept;
     virtual bool is_block_aligned(int64_t block, int64_t alignment) noexcept;
 
 private:

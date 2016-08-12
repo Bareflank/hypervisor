@@ -36,7 +36,25 @@ const auto c_dummy_stop_vmm_success_filename = "../cross/libdummy_stop_vmm_succe
 
 extern "C" int verify_no_mem_leaks(void);
 
-driver_entry_ut::driver_entry_ut()
+driver_entry_ut::driver_entry_ut() :
+    m_dummy_add_md_failure(0),
+    m_dummy_add_md_success(0),
+    m_dummy_get_drr_failure(0),
+    m_dummy_get_drr_success(0),
+    m_dummy_misc(0),
+    m_dummy_start_vmm_failure(0),
+    m_dummy_start_vmm_success(0),
+    m_dummy_stop_vmm_failure(0),
+    m_dummy_stop_vmm_success(0),
+    m_dummy_add_md_failure_length(0),
+    m_dummy_add_md_success_length(0),
+    m_dummy_get_drr_failure_length(0),
+    m_dummy_get_drr_success_length(0),
+    m_dummy_misc_length(0),
+    m_dummy_start_vmm_failure_length(0),
+    m_dummy_start_vmm_success_length(0),
+    m_dummy_stop_vmm_failure_length(0),
+    m_dummy_stop_vmm_success_length(0)
 {
 }
 

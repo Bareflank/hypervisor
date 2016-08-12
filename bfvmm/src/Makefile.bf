@@ -28,12 +28,15 @@ PARENT_SUBDIRS += entry
 PARENT_SUBDIRS += exit_handler
 PARENT_SUBDIRS += intrinsics
 PARENT_SUBDIRS += memory_manager
-PARENT_SUBDIRS += misc
 PARENT_SUBDIRS += serial
 PARENT_SUBDIRS += vcpu
 PARENT_SUBDIRS += vcpu_factory
 PARENT_SUBDIRS += vmcs
 PARENT_SUBDIRS += vmxon
+
+ifneq ($(STATIC_ANALYSIS_ENABLED), true)
+    PARENT_SUBDIRS += misc
+endif
 
 ################################################################################
 # Common

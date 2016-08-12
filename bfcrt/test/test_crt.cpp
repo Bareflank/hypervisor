@@ -203,7 +203,7 @@ crt_ut::test_local_init_catch_exception()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_NO_EXCEPTION(local_init(&info));
+        EXPECT_TRUE(local_init(&info) == CRT_FAILURE);
     });
 }
 
@@ -318,7 +318,7 @@ crt_ut::test_local_fini_catch_exception()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_NO_EXCEPTION(local_fini(&info));
+        EXPECT_TRUE(local_fini(&info) == CRT_FAILURE);
     });
 }
 

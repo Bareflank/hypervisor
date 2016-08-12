@@ -385,6 +385,7 @@ common_load_vmm(void)
 {
     int64_t i = 0;
     int64_t ret = 0;
+    int64_t ignore_ret = 0;
     struct module_t *module = 0;
 
     if (common_vmm_status() == VMM_CORRUPT)
@@ -447,7 +448,9 @@ common_load_vmm(void)
 
 failure:
 
-    common_unload_vmm();
+    ignore_ret = common_unload_vmm();
+    (void) ignore_ret;
+
     return ret;
 }
 
@@ -495,6 +498,7 @@ int64_t
 common_start_vmm(void)
 {
     int64_t ret = 0;
+    int64_t ignore_ret = 0;
     int64_t caller_affinity = 0;
 
     if (common_vmm_status() == VMM_CORRUPT)
@@ -526,7 +530,9 @@ common_start_vmm(void)
 
 failure:
 
-    common_stop_vmm();
+    ignore_ret = common_stop_vmm();
+    (void) ignore_ret;
+
     return ret;
 }
 

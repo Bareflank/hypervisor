@@ -36,6 +36,16 @@ ifeq ($(TARGET_COMPILER), cross)
 endif
 
 ifeq ($(TARGET_COMPILER), both)
+	ifeq ($(STATIC_ANALYSIS_ENABLED), true)
+		TARGET_CROSS_COMPILED:=
+		TARGET_NATIVE_COMPILED:=true
+	else
+		TARGET_CROSS_COMPILED:=true
+		TARGET_NATIVE_COMPILED:=true
+	endif
+endif
+
+ifeq ($(TARGET_COMPILER), both_always)
 	TARGET_CROSS_COMPILED:=true
 	TARGET_NATIVE_COMPILED:=true
 endif

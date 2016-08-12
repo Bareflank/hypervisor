@@ -237,6 +237,22 @@ public:
     ///
     virtual ~common_entry() {}
 
+    /// Default Move Constructor
+    ///
+    common_entry(common_entry &&) = default;
+
+    /// Default Copy Constructor
+    ///
+    common_entry(const common_entry &) = default;
+
+    /// Default Move Assignment Operator
+    ///
+    virtual common_entry &operator=(common_entry &&) = default;
+
+    /// Default Copy Assignment Operator
+    ///
+    virtual common_entry &operator=(const common_entry &) = default;
+
     /// Next CIE/FDE
     ///
     /// Moves to the next CIE/FDE in the list. If the CIE/FDE is invalid, this
@@ -246,41 +262,41 @@ public:
     ///
     /// @return next CIE/FDE
     ///
-    common_entry &operator++();
+    virtual common_entry &operator++();
 
     /// Valid
     ///
     /// @return returns true if the CIE/FDE is valid
     ///
-    operator bool() const
+    virtual operator bool() const
     { return m_entry_start != 0; }
 
     /// Is CIE
     ///
     /// @return returns true if this is a CIE
     ///
-    bool is_cie() const
+    virtual bool is_cie() const
     { return m_is_cie; }
 
     /// Is FDE
     ///
     /// @return returns true is this is an FDE
     ///
-    bool is_fde() const
+    virtual bool is_fde() const
     { return !m_is_cie; }
 
     /// Entry Start
     ///
     /// @return returns the start of the CIE/FDE in memory
     ///
-    char *entry_start() const
+    virtual char *entry_start() const
     { return m_entry_start; }
 
     /// Entry End
     ///
     /// @return returns the end of the CIE/FDE in memory
     ///
-    char *entry_end() const
+    virtual char *entry_end() const
     { return m_entry_end; }
 
     /// Payload Start
@@ -288,7 +304,7 @@ public:
     /// @return returns the start of the CIE/FDE's payload in memory, which
     /// is the portion of the CIE/FDE that does not contain the length field
     ///
-    char *payload_start() const
+    virtual char *payload_start() const
     { return m_payload_start; }
 
     /// Payload End
@@ -297,14 +313,14 @@ public:
     /// is the portion of the CIE/FDE that does not contain the length field.
     /// Note that this should be the same as entry_end
     ///
-    char *payload_end() const
+    virtual char *payload_end() const
     { return m_payload_end; }
 
     /// EH Framework
     ///
     /// @return returns the .eh_frame associated with this CIE/FDE
     ///
-    eh_frame_t eh_frame() const
+    virtual eh_frame_t eh_frame() const
     { return m_eh_frame; }
 
 protected:
@@ -368,6 +384,22 @@ public:
     ///
     virtual ~ci_entry() {}
 
+    /// Default Move Constructor
+    ///
+    ci_entry(ci_entry &&) = default;
+
+    /// Default Copy Constructor
+    ///
+    ci_entry(const ci_entry &) = default;
+
+    /// Default Move Assignment Operator
+    ///
+    virtual ci_entry &operator=(ci_entry &&) = default;
+
+    /// Default Copy Assignment Operator
+    ///
+    virtual ci_entry &operator=(const ci_entry &) = default;
+
     /// Augmentation String
     ///
     /// Each CIE can provide different types of information, and to provide a
@@ -379,7 +411,7 @@ public:
     ///
     /// @return pointer to the augmentation string
     ///
-    char augmentation_string(uint64_t index) const
+    virtual char augmentation_string(uint64_t index) const
     { return m_augmentation_string[index]; }
 
     /// Code Alignment
@@ -387,7 +419,7 @@ public:
     /// @return returns how the code is aligned. On x86_64, this is usually
     /// just 1, which means it's pointless.
     ///
-    uint64_t code_alignment() const
+    virtual uint64_t code_alignment() const
     { return m_code_alignment; }
 
     /// Data Alignment
@@ -396,7 +428,7 @@ public:
     /// -8 bytes, which means that each register is 8 bytes, growing down
     /// from the CFA
     ///
-    int64_t data_alignment() const
+    virtual int64_t data_alignment() const
     { return m_data_alignment; }
 
     /// Return Address Register
@@ -404,7 +436,7 @@ public:
     /// @return returns the instruction pointer register index. The System
     /// V 64bit ABI defines this as 16 (rip)
     ///
-    uint64_t return_address_reg() const
+    virtual uint64_t return_address_reg() const
     { return m_return_address_reg; }
 
     /// Pointer Encoding
@@ -413,21 +445,21 @@ public:
     /// the eh_frame spec (not the DWARF spec) and is usually a PC relative
     /// encoding, as x86_64 code is relocatable.
     ///
-    uint64_t pointer_encoding() const
+    virtual uint64_t pointer_encoding() const
     { return m_pointer_encoding; }
 
     /// LSDA Encoding
     ///
     /// @return returns how the LSDA is encoded
     ///
-    uint64_t lsda_encoding() const
+    virtual uint64_t lsda_encoding() const
     { return m_lsda_encoding; }
 
     /// Personality Encoding
     ///
     /// @return returns how the personality function's pointer is encoded.
     ///
-    uint64_t personality_encoding() const
+    virtual uint64_t personality_encoding() const
     { return m_personality_encoding; }
 
     /// Personality Function
@@ -436,7 +468,7 @@ public:
     /// function tells the unwinder when to stop searching for the catch
     /// blocks
     ///
-    uint64_t personality_function() const
+    virtual uint64_t personality_function() const
     { return m_personality_function; }
 
     /// Initial Instructions
@@ -444,7 +476,7 @@ public:
     /// @return returns a pointer to the initial DWARF instructions that
     /// usually define the function prologs that the compiler creates
     ///
-    char *initial_instructions() const
+    virtual char *initial_instructions() const
     { return m_initial_instructions; }
 
 protected:
@@ -501,6 +533,22 @@ public:
     ///
     virtual ~fd_entry() {}
 
+    /// Default Move Constructor
+    ///
+    fd_entry(fd_entry &&) = default;
+
+    /// Default Copy Constructor
+    ///
+    fd_entry(const fd_entry &) = default;
+
+    /// Default Move Assignment Operator
+    ///
+    virtual fd_entry &operator=(fd_entry &&) = default;
+
+    /// Default Copy Assignment Operator
+    ///
+    virtual fd_entry &operator=(const fd_entry &) = default;
+
     /// Is PC In Range
     ///
     /// Note: the range for the PC is not 0 indexed (fails if you attempt
@@ -513,21 +561,21 @@ public:
     /// @return returns true if this FDE contains the instructions for the
     ///     PC provided.
     ///
-    bool is_in_range(uint64_t pc) const
+    virtual bool is_in_range(uint64_t pc) const
     { return (pc > m_pc_begin) && (pc <= m_pc_begin + m_pc_range); }
 
     /// PC Begin
     ///
     /// @return returns the beginning of the FDE's range
     ///
-    uint64_t pc_begin() const
+    virtual uint64_t pc_begin() const
     { return m_pc_begin; }
 
     /// PC Range
     ///
     /// @return returns the range of the FDE
     ///
-    uint64_t pc_range() const
+    virtual uint64_t pc_range() const
     { return m_pc_range; }
 
     /// LSDA Location
@@ -535,7 +583,7 @@ public:
     /// @return returns the location of the LSDA given the encoding defined
     ///     in the CIE
     ///
-    uint64_t lsda() const
+    virtual uint64_t lsda() const
     { return m_lsda; }
 
     /// Instructions
@@ -543,14 +591,14 @@ public:
     /// @return returns the location of the DWARF instructions that define how
     ///     to unwind the CFA that this FDE defines.
     ///
-    char *instructions() const
+    virtual char *instructions() const
     { return m_instructions; }
 
     /// CIE
     ///
     /// @return returns the CIE associated with this FDE.
     ///
-    const ci_entry &cie() const
+    virtual const ci_entry &cie() const
     { return m_cie; }
 
 protected:

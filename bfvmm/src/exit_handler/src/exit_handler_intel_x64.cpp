@@ -29,7 +29,11 @@
 std::mutex g_unimplemented_handler_mutex;
 
 exit_handler_intel_x64::exit_handler_intel_x64(const std::shared_ptr<intrinsics_intel_x64> &intrinsics) :
-    m_intrinsics(intrinsics)
+    m_intrinsics(intrinsics),
+    m_exit_reason(0),
+    m_exit_qualification(0),
+    m_exit_instruction_length(0),
+    m_exit_instruction_information(0)
 {
     if (!m_intrinsics)
         m_intrinsics = std::make_shared<intrinsics_intel_x64>();

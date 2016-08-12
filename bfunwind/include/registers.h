@@ -50,7 +50,23 @@ public:
 
     /// Destructor
     ///
-    virtual ~register_state() {}
+    virtual ~register_state() = default;
+
+    /// Default Move Constructor
+    ///
+    register_state(register_state &&) = default;
+
+    /// Default Copy Constructor
+    ///
+    register_state(const register_state &) = default;
+
+    /// Default Move Assignment Operator
+    ///
+    virtual register_state &operator=(register_state &&) = default;
+
+    /// Default Copy Assignment Operator
+    ///
+    virtual register_state &operator=(const register_state &) = default;
 
     /// Get Instruction Pointer
     ///

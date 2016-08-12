@@ -90,24 +90,30 @@ void __load_registers_intel_x64(registers_intel_x64_t *state);
 class register_state_intel_x64 : public register_state
 {
 public:
-    register_state_intel_x64(registers_intel_x64_t registers)
-    {
-        m_registers = registers;
-        m_tmp_registers = registers;
-    }
+    register_state_intel_x64(const registers_intel_x64_t &registers) :
+        m_registers(registers),
+        m_tmp_registers(registers)
+
+    { }
 
     virtual ~register_state_intel_x64() {}
 
-    uint64_t get_ip() const override
+    register_state_intel_x64(register_state_intel_x64 &&) = default;
+    register_state_intel_x64(const register_state_intel_x64 &) = default;
+
+    virtual register_state_intel_x64 &operator=(register_state_intel_x64 &&) = default;
+    virtual register_state_intel_x64 &operator=(const register_state_intel_x64 &) = default;
+
+    virtual uint64_t get_ip() const override
     { return m_registers.rip; }
 
-    register_state &set_ip(uint64_t value) override
+    virtual register_state &set_ip(uint64_t value) override
     {
         m_tmp_registers.rip = value;
         return *this;
     }
 
-    uint64_t get(uint64_t index) const override
+    virtual uint64_t get(uint64_t index) const override
     {
         if (index >= max_num_registers())
             ABORT("register index out of bounds");
@@ -115,7 +121,7 @@ public:
         return reinterpret_cast<const uint64_t *>(&m_registers)[index];
     }
 
-    register_state &set(uint64_t index, uint64_t value) override
+    virtual register_state &set(uint64_t index, uint64_t value) override
     {
         if (index >= max_num_registers())
             ABORT("register index out of bounds");
@@ -125,22 +131,22 @@ public:
         return *this;
     }
 
-    void commit() override
+    virtual void commit() override
     { m_registers = m_tmp_registers; }
 
-    void commit(uint64_t cfa) override
+    virtual void commit(uint64_t cfa) override
     {
         m_tmp_registers.rsp = cfa;
         commit();
     }
 
-    void resume() override
+    virtual void resume() override
     { __load_registers_intel_x64(&m_registers); }
 
-    uint64_t max_num_registers() const override
+    virtual uint64_t max_num_registers() const override
     { return 17; }
 
-    const char *name(uint64_t index) const override
+    virtual const char *name(uint64_t index) const override
     {
         if (index >= max_num_registers())
             ABORT("register index out of bounds");
@@ -168,7 +174,7 @@ public:
         }
     }
 
-    void dump() const override
+    virtual void dump() const override
     {
         // uint64_t *rsp = (uint64_t *)m_registers.rsp;
 

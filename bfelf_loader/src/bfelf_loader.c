@@ -479,10 +479,10 @@ private_check_support(struct bfelf_file_t *ef)
 int64_t
 private_validate_bounds(struct bfelf_file_t *ef)
 {
-    bfelf64_xword phtab_size = ef->ehdr->e_phoff +
-                               (ef->ehdr->e_phentsize * ef->ehdr->e_phnum);
-    bfelf64_xword shtab_size = ef->ehdr->e_shoff +
-                               (ef->ehdr->e_shentsize * ef->ehdr->e_shnum);
+    bfelf64_xword phtab_size = (bfelf64_xword)(ef->ehdr->e_phoff) +
+                               (bfelf64_xword)(ef->ehdr->e_phentsize * ef->ehdr->e_phnum);
+    bfelf64_xword shtab_size = (bfelf64_xword)(ef->ehdr->e_shoff) +
+                               (bfelf64_xword)(ef->ehdr->e_shentsize * ef->ehdr->e_shnum);
 
     if (ef->ehdr->e_ehsize != sizeof(struct bfelf64_ehdr))
         return invalid_file("unexpected header size");
