@@ -49,7 +49,7 @@ class vmcs_intel_x64_vmm_state : public vmcs_intel_x64_state
 public:
 
     vmcs_intel_x64_vmm_state(const std::shared_ptr<state_save_intel_x64> &state_save);
-    ~vmcs_intel_x64_vmm_state() {}
+    ~vmcs_intel_x64_vmm_state() override = default;
 
     uint16_t cs() const override { return m_cs; }
     uint16_t ss() const override { return m_ss; }

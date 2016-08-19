@@ -63,8 +63,8 @@ extern "C" {
  */
 struct memory_descriptor
 {
-    void *phys;
-    void *virt;
+    uint64_t phys;
+    uint64_t virt;
     uint8_t type;
 };
 

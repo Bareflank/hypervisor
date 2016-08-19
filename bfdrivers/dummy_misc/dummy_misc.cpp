@@ -19,6 +19,7 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+#include <stddef.h>
 #include <stdint.h>
 #include <error_codes.h>
 
@@ -27,7 +28,7 @@ int g_misc = 0;
 class test
 {
 public:
-    test()
+    test() noexcept
     { g_misc = 10; }
 
     virtual ~test()
@@ -36,21 +37,34 @@ public:
 
 test g_test;
 
+void *
+operator new(size_t size)
+{
+    (void) size;
+
+    static int mem = 0;
+    return &mem;
+}
+
 void
-operator delete(void *ptr)
+operator delete(void *ptr) throw()
 {
     (void) ptr;
 }
 
 extern "C" int64_t
-sym_that_returns_failure(int64_t)
+sym_that_returns_failure(int64_t val)
 {
+    (void) val;
+
     return -1;
 }
 
 extern "C" int64_t
-sym_that_returns_success(int64_t)
+sym_that_returns_success(int64_t val)
 {
+    (void) val;
+
     return 0;
 }
 

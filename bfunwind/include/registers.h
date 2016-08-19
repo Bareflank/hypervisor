@@ -54,7 +54,7 @@ public:
 
     /// Default Move Constructor
     ///
-    register_state(register_state &&) = default;
+    register_state(register_state &&) noexcept = default;
 
     /// Default Copy Constructor
     ///
@@ -62,11 +62,11 @@ public:
 
     /// Default Move Assignment Operator
     ///
-    virtual register_state &operator=(register_state &&) = default;
+    register_state &operator=(register_state &&) noexcept = default;
 
     /// Default Copy Assignment Operator
     ///
-    virtual register_state &operator=(const register_state &) = default;
+    register_state &operator=(const register_state &) = default;
 
     /// Get Instruction Pointer
     ///

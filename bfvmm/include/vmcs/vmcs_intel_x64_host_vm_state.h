@@ -41,7 +41,7 @@ class vmcs_intel_x64_host_vm_state : public vmcs_intel_x64_state
 public:
 
     vmcs_intel_x64_host_vm_state(const std::shared_ptr<intrinsics_intel_x64> &intrinsics);
-    ~vmcs_intel_x64_host_vm_state() {}
+    ~vmcs_intel_x64_host_vm_state() override = default;
 
     uint16_t es() const override { return m_es; }
     uint16_t cs() const override { return m_cs; }
@@ -95,7 +95,7 @@ public:
     uint64_t ia32_debugctl_msr() const override { return m_ia32_debugctl_msr; }
     uint64_t ia32_pat_msr() const override { return m_ia32_pat_msr; }
     uint64_t ia32_efer_msr() const override { return m_ia32_efer_msr; }
-    uint64_t ia32_perf_global_ctrl_msr() const { return m_ia32_perf_global_ctrl_msr; }
+    uint64_t ia32_perf_global_ctrl_msr() const override { return m_ia32_perf_global_ctrl_msr; }
     uint64_t ia32_sysenter_cs_msr() const override { return m_ia32_sysenter_cs_msr; }
     uint64_t ia32_sysenter_esp_msr() const override { return m_ia32_sysenter_esp_msr; }
     uint64_t ia32_sysenter_eip_msr() const override { return m_ia32_sysenter_eip_msr; }

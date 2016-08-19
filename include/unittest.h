@@ -22,8 +22,6 @@
 #ifndef UNITTEST_H
 #define UNITTEST_H
 
-#define NO_HIPPOMOCKS_NAMESPACE
-
 #ifdef OS_LINUX
 #define LINUX_TARGET
 #endif
@@ -31,6 +29,10 @@
 #include <stdlib.h>
 #include <iostream>
 #include <exception.h>
+
+#define NO_HIPPOMOCKS_NAMESPACE
+
+#pragma GCC system_header
 #include <hippomocks.h>
 
 /// Expect True
@@ -47,7 +49,7 @@
 ///
 #define EXPECT_TRUE(condition) \
     if((condition)) { this->inc_pass(); } \
-    else { this->expect_failed(#condition, __PRETTY_FUNCTION__, __LINE__); }
+    else { this->expect_failed(#condition, static_cast<const char *>(__PRETTY_FUNCTION__), __LINE__); }
 
 /// Expect False
 ///
@@ -63,7 +65,7 @@
 ///
 #define EXPECT_FALSE(condition) \
     if(!(condition)) { this->inc_pass(); } \
-    else { this->expect_failed(#condition, __PRETTY_FUNCTION__, __LINE__); }
+    else { this->expect_failed(#condition, static_cast<const char *>(__PRETTY_FUNCTION__), __LINE__); }
 
 /// Expect Exception
 ///
@@ -118,15 +120,15 @@
             wrong_exception = true; \
             std::cerr << "unknown exception caught" << std::endl; \
         } \
-        if(caught == false) \
+        if(!caught) \
         { \
-            this->expect_failed("no exception was caught", __PRETTY_FUNCTION__, __LINE__); \
+            this->expect_failed("no exception was caught", static_cast<const char *>(__PRETTY_FUNCTION__), __LINE__); \
         } \
         else \
         { \
-            if (wrong_exception == true) \
+            if (wrong_exception) \
             { \
-                this->expect_failed("wrong exception caught", __PRETTY_FUNCTION__, __LINE__); \
+                this->expect_failed("wrong exception caught", static_cast<const char *>(__PRETTY_FUNCTION__), __LINE__); \
                 std::cerr << "    - caught: " << caught_str << std::endl; \
                 std::cerr << "    - expecting: " << expecting_str << std::endl; \
             } \
@@ -172,7 +174,7 @@
 ///
 #define ASSERT_TRUE(condition) \
     if((condition)) { this->inc_pass(); } \
-    else { this->assert_failed(#condition, __PRETTY_FUNCTION__, __LINE__); }
+    else { this->assert_failed(#condition, static_cast<const char *>(__PRETTY_FUNCTION__), __LINE__); }
 
 /// Assert False
 ///
@@ -188,7 +190,7 @@
 ///
 #define ASSERT_FALSE(condition) \
     if(!(condition)) { this->inc_pass(); } \
-    else { this->assert_failed(#condition, __PRETTY_FUNCTION__, __LINE__); }
+    else { this->assert_failed(#condition, static_cast<const char *>(__PRETTY_FUNCTION__), __LINE__); }
 
 /// Assert Exception
 ///
@@ -243,15 +245,15 @@
             wrong_exception = true; \
             std::cerr << "unknown exception caught" << std::endl; \
         } \
-        if(caught == false) \
+        if(!caught) \
         { \
-            this->assert_failed("no exception was caught", __PRETTY_FUNCTION__, __LINE__); \
+            this->assert_failed("no exception was caught", static_cast<const char *>(__PRETTY_FUNCTION__), __LINE__); \
         } \
         else \
         { \
-            if (wrong_exception == true) \
+            if (wrong_exception) \
             { \
-                this->assert_failed("wrong exception caught", __PRETTY_FUNCTION__, __LINE__); \
+                this->assert_failed("wrong exception caught", static_cast<const char *>(__PRETTY_FUNCTION__), __LINE__); \
                 std::cerr << "    - caught: " << caught_str << std::endl; \
                 std::cerr << "    - expecting: " << expecting_str << std::endl; \
             } \
@@ -312,7 +314,7 @@
 ///
 ///
 #define RUN_UNITTEST_WITH_MOCKS(a,b) \
-    this->run_unittest_with_mocks(a,b, __PRETTY_FUNCTION__, __LINE__);
+    this->run_unittest_with_mocks(a,b, static_cast<const char *>(__PRETTY_FUNCTION__), __LINE__);
 
 /// Run Unit Tests
 ///
@@ -511,6 +513,13 @@ protected:
         inc_pass();
 
         mocks.reset();
+
+        // There is an issue with clang-tidy were is basically doesn't see the
+        // call to this from hippomocks, so we run it here to silence the
+        // warnings. Hippomocks currently doesn't support the reuse of the
+        // mocking engine after a call to reset, so it's safe to run this as
+        // any code that tries to use the mocking engine will fail regardless.
+        MockRepoInstanceHolder<0>::instance = 0;
     }
 
     // -------------------------------------------------------------------------

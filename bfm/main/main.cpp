@@ -25,6 +25,8 @@
 #include <iostream>
 #include <exception.h>
 
+#include <gsl/gsl>
+
 #include <command_line_parser.h>
 #include <file.h>
 #include <ioctl.h>
@@ -129,9 +131,10 @@ main(int argc, const char *argv[])
     try
     {
         std::vector<std::string> args;
+        gsl::span<const char *> args_span{argv, argc};
 
         for (auto i = 1; i < argc; i++)
-            args.push_back(std::string(argv[i]));
+            args.push_back(args_span[i]);
 
         return protected_main(args);
     }

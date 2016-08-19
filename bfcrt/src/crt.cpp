@@ -20,8 +20,8 @@
 #include <crt.h>
 #include <eh_frame_list.h>
 
-typedef void (*ctor_t)(void);
-typedef void (*dtor_t)(void);
+typedef void (*ctor_t)();
+typedef void (*dtor_t)();
 
 int64_t
 local_init(struct section_info_t *info)
@@ -34,9 +34,9 @@ local_init(struct section_info_t *info)
         if (info->ctors_addr != nullptr)
         {
             auto n = info->ctors_size >> 3;
-            auto ctors = (ctor_t *)info->ctors_addr;
+            auto ctors = static_cast<ctor_t *>(info->ctors_addr);
 
-            for (auto i = 0U; i < n && ctors[i] != 0; i++)
+            for (auto i = 0U; i < n && ctors[i] != nullptr; i++)
                 ctors[i]();
         }
     }
@@ -55,17 +55,17 @@ local_init(struct section_info_t *info)
 int64_t
 local_fini(struct section_info_t *info)
 {
-    if (info == 0)
+    if (info == nullptr)
         return CRT_FAILURE;
 
     try
     {
-        if (info->dtors_addr != 0)
+        if (info->dtors_addr != nullptr)
         {
             auto n = info->dtors_size >> 3;
-            auto dtors = (dtor_t *)info->dtors_addr;
+            auto dtors = static_cast<dtor_t *>(info->dtors_addr);
 
-            for (auto i = 0U; i < n && dtors[i] != 0; i++)
+            for (auto i = 0U; i < n && dtors[i] != nullptr; i++)
                 dtors[i]();
         }
     }

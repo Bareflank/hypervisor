@@ -27,7 +27,7 @@ bfelf_loader_ut::test_bfelf_file_init_success()
     bfelf_file_t ef;
     auto test = get_test();
 
-    auto ret = bfelf_file_init((char *)&test, sizeof(test), &ef);
+    auto ret = bfelf_file_init(reinterpret_cast<char *>(&test), sizeof(test), &ef);
     EXPECT_TRUE(ret == BFELF_SUCCESS);
 }
 
@@ -37,7 +37,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_file_arg()
     bfelf_file_t ef;
     auto test = get_test();
 
-    auto ret = bfelf_file_init(0, sizeof(test), &ef);
+    auto ret = bfelf_file_init(nullptr, sizeof(test), &ef);
     EXPECT_TRUE(ret == BFELF_ERROR_INVALID_ARG);
 }
 
@@ -47,7 +47,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_file_size_arg()
     bfelf_file_t ef;
     auto test = get_test();
 
-    auto ret = bfelf_file_init((char *)&test, 0, &ef);
+    auto ret = bfelf_file_init(reinterpret_cast<char *>(&test), 0, &ef);
     EXPECT_TRUE(ret == BFELF_ERROR_INVALID_ARG);
 }
 
@@ -56,7 +56,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_elf_file()
 {
     auto test = get_test();
 
-    auto ret = bfelf_file_init((char *)&test, sizeof(test), 0);
+    auto ret = bfelf_file_init(reinterpret_cast<char *>(&test), sizeof(test), nullptr);
     EXPECT_TRUE(ret == BFELF_ERROR_INVALID_ARG);
 }
 
@@ -68,7 +68,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_magic_0()
 
     test.header.e_ident[bfei_mag0] = 0;
 
-    auto ret = bfelf_file_init((char *)&test, sizeof(test), &ef);
+    auto ret = bfelf_file_init(reinterpret_cast<char *>(&test), sizeof(test), &ef);
     EXPECT_TRUE(ret == BFELF_ERROR_INVALID_SIGNATURE);
 }
 
@@ -80,7 +80,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_magic_1()
 
     test.header.e_ident[bfei_mag1] = 0;
 
-    auto ret = bfelf_file_init((char *)&test, sizeof(test), &ef);
+    auto ret = bfelf_file_init(reinterpret_cast<char *>(&test), sizeof(test), &ef);
     EXPECT_TRUE(ret == BFELF_ERROR_INVALID_SIGNATURE);
 }
 
@@ -92,7 +92,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_magic_2()
 
     test.header.e_ident[bfei_mag2] = 0;
 
-    auto ret = bfelf_file_init((char *)&test, sizeof(test), &ef);
+    auto ret = bfelf_file_init(reinterpret_cast<char *>(&test), sizeof(test), &ef);
     EXPECT_TRUE(ret == BFELF_ERROR_INVALID_SIGNATURE);
 }
 
@@ -104,7 +104,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_magic_3()
 
     test.header.e_ident[bfei_mag3] = 0;
 
-    auto ret = bfelf_file_init((char *)&test, sizeof(test), &ef);
+    auto ret = bfelf_file_init(reinterpret_cast<char *>(&test), sizeof(test), &ef);
     EXPECT_TRUE(ret == BFELF_ERROR_INVALID_SIGNATURE);
 }
 
@@ -116,7 +116,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_class()
 
     test.header.e_ident[bfei_class] = 0x4;
 
-    auto ret = bfelf_file_init((char *)&test, sizeof(test), &ef);
+    auto ret = bfelf_file_init(reinterpret_cast<char *>(&test), sizeof(test), &ef);
     EXPECT_TRUE(ret == BFELF_ERROR_UNSUPPORTED_FILE);
 }
 
@@ -128,7 +128,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_data()
 
     test.header.e_ident[bfei_data] = 0x8;
 
-    auto ret = bfelf_file_init((char *)&test, sizeof(test), &ef);
+    auto ret = bfelf_file_init(reinterpret_cast<char *>(&test), sizeof(test), &ef);
     EXPECT_TRUE(ret == BFELF_ERROR_UNSUPPORTED_FILE);
 }
 
@@ -140,7 +140,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_ident_version()
 
     test.header.e_ident[bfei_version] = 0x15;
 
-    auto ret = bfelf_file_init((char *)&test, sizeof(test), &ef);
+    auto ret = bfelf_file_init(reinterpret_cast<char *>(&test), sizeof(test), &ef);
     EXPECT_TRUE(ret == BFELF_ERROR_UNSUPPORTED_FILE);
 }
 
@@ -152,7 +152,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_osabi()
 
     // test.header.e_ident[bfei_osabi] = 0x16;
 
-    // auto ret = bfelf_file_init((char *)&test, sizeof(test), &ef);
+    // auto ret = bfelf_file_init(reinterpret_cast<char *>(&test), sizeof(test), &ef);
     // EXPECT_TRUE(ret == BFELF_ERROR_UNSUPPORTED_FILE);
 }
 
@@ -164,7 +164,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_abiversion()
 
     test.header.e_ident[bfei_abiversion] = 0x23;
 
-    auto ret = bfelf_file_init((char *)&test, sizeof(test), &ef);
+    auto ret = bfelf_file_init(reinterpret_cast<char *>(&test), sizeof(test), &ef);
     EXPECT_TRUE(ret == BFELF_ERROR_UNSUPPORTED_FILE);
 }
 
@@ -176,7 +176,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_type()
 
     test.header.e_type = 0xDEAD;
 
-    auto ret = bfelf_file_init((char *)&test, sizeof(test), &ef);
+    auto ret = bfelf_file_init(reinterpret_cast<char *>(&test), sizeof(test), &ef);
     EXPECT_TRUE(ret == BFELF_ERROR_UNSUPPORTED_FILE);
 }
 
@@ -188,7 +188,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_machine()
 
     test.header.e_machine = 0xDEAD;
 
-    auto ret = bfelf_file_init((char *)&test, sizeof(test), &ef);
+    auto ret = bfelf_file_init(reinterpret_cast<char *>(&test), sizeof(test), &ef);
     EXPECT_TRUE(ret == BFELF_ERROR_UNSUPPORTED_FILE);
 }
 
@@ -200,7 +200,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_version()
 
     test.header.e_version = 0xDEAD;
 
-    auto ret = bfelf_file_init((char *)&test, sizeof(test), &ef);
+    auto ret = bfelf_file_init(reinterpret_cast<char *>(&test), sizeof(test), &ef);
     EXPECT_TRUE(ret == BFELF_ERROR_UNSUPPORTED_FILE);
 }
 
@@ -212,7 +212,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_flags()
 
     test.header.e_flags = 0xDEAD;
 
-    auto ret = bfelf_file_init((char *)&test, sizeof(test), &ef);
+    auto ret = bfelf_file_init(reinterpret_cast<char *>(&test), sizeof(test), &ef);
     EXPECT_TRUE(ret == BFELF_ERROR_UNSUPPORTED_FILE);
 }
 
@@ -224,7 +224,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_header_size()
 
     test.header.e_ehsize = 0xDEAD;
 
-    auto ret = bfelf_file_init((char *)&test, sizeof(test), &ef);
+    auto ret = bfelf_file_init(reinterpret_cast<char *>(&test), sizeof(test), &ef);
     EXPECT_TRUE(ret == BFELF_ERROR_INVALID_FILE);
 }
 
@@ -236,7 +236,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_program_header_size()
 
     test.header.e_phentsize = 0xDEAD;
 
-    auto ret = bfelf_file_init((char *)&test, sizeof(test), &ef);
+    auto ret = bfelf_file_init(reinterpret_cast<char *>(&test), sizeof(test), &ef);
     EXPECT_TRUE(ret == BFELF_ERROR_INVALID_FILE);
 }
 
@@ -248,7 +248,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_section_header_size()
 
     test.header.e_shentsize = 0xDEAD;
 
-    auto ret = bfelf_file_init((char *)&test, sizeof(test), &ef);
+    auto ret = bfelf_file_init(reinterpret_cast<char *>(&test), sizeof(test), &ef);
     EXPECT_TRUE(ret == BFELF_ERROR_INVALID_FILE);
 }
 
@@ -260,7 +260,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_program_header_offset()
 
     test.header.e_phoff = 0xDEADBEEF;
 
-    auto ret = bfelf_file_init((char *)&test, sizeof(test), &ef);
+    auto ret = bfelf_file_init(reinterpret_cast<char *>(&test), sizeof(test), &ef);
     EXPECT_TRUE(ret == BFELF_ERROR_INVALID_FILE);
 }
 
@@ -272,7 +272,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_section_header_offset()
 
     test.header.e_shoff = 0xDEADBEEF;
 
-    auto ret = bfelf_file_init((char *)&test, sizeof(test), &ef);
+    auto ret = bfelf_file_init(reinterpret_cast<char *>(&test), sizeof(test), &ef);
     EXPECT_TRUE(ret == BFELF_ERROR_INVALID_FILE);
 }
 
@@ -284,7 +284,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_program_header_num()
 
     test.header.e_phnum = 0xDEAD;
 
-    auto ret = bfelf_file_init((char *)&test, sizeof(test), &ef);
+    auto ret = bfelf_file_init(reinterpret_cast<char *>(&test), sizeof(test), &ef);
     EXPECT_TRUE(ret == BFELF_ERROR_INVALID_FILE);
 }
 
@@ -296,7 +296,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_section_header_num()
 
     test.header.e_shnum = 0xDEAD;
 
-    auto ret = bfelf_file_init((char *)&test, sizeof(test), &ef);
+    auto ret = bfelf_file_init(reinterpret_cast<char *>(&test), sizeof(test), &ef);
     EXPECT_TRUE(ret == BFELF_ERROR_INVALID_FILE);
 }
 
@@ -308,7 +308,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_section_header_string_table_index(
 
     test.header.e_shstrndx = 0xDEAD;
 
-    auto ret = bfelf_file_init((char *)&test, sizeof(test), &ef);
+    auto ret = bfelf_file_init(reinterpret_cast<char *>(&test), sizeof(test), &ef);
     EXPECT_TRUE(ret == BFELF_ERROR_INVALID_FILE);
 }
 
@@ -320,7 +320,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_segment_file_size()
 
     test.phdrtab.re_segment1.p_filesz = 0xDEADBEEF;
 
-    auto ret = bfelf_file_init((char *)&test, sizeof(test), &ef);
+    auto ret = bfelf_file_init(reinterpret_cast<char *>(&test), sizeof(test), &ef);
     EXPECT_TRUE(ret == BFELF_ERROR_INVALID_SEGMENT);
 }
 
@@ -332,7 +332,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_segment_addresses()
 
     test.phdrtab.re_segment1.p_vaddr = 0xDEADBEEF;
 
-    auto ret = bfelf_file_init((char *)&test, sizeof(test), &ef);
+    auto ret = bfelf_file_init(reinterpret_cast<char *>(&test), sizeof(test), &ef);
     EXPECT_TRUE(ret == BFELF_ERROR_INVALID_SEGMENT);
 }
 
@@ -344,7 +344,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_segment_alignment()
 
     test.phdrtab.re_segment1.p_align = 0xDEADBEEF;
 
-    auto ret = bfelf_file_init((char *)&test, sizeof(test), &ef);
+    auto ret = bfelf_file_init(reinterpret_cast<char *>(&test), sizeof(test), &ef);
     EXPECT_TRUE(ret == BFELF_ERROR_INVALID_SEGMENT);
 }
 
@@ -356,7 +356,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_segment_offset()
 
     test.phdrtab.re_segment1.p_offset = 0xDEADBEEF;
 
-    auto ret = bfelf_file_init((char *)&test, sizeof(test), &ef);
+    auto ret = bfelf_file_init(reinterpret_cast<char *>(&test), sizeof(test), &ef);
     EXPECT_TRUE(ret == BFELF_ERROR_INVALID_SEGMENT);
 }
 
@@ -368,7 +368,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_section_offset()
 
     test.shdrtab.hashtab.sh_offset = 0xDEADBEEF;
 
-    auto ret = bfelf_file_init((char *)&test, sizeof(test), &ef);
+    auto ret = bfelf_file_init(reinterpret_cast<char *>(&test), sizeof(test), &ef);
     EXPECT_TRUE(ret == BFELF_ERROR_INVALID_SECTION);
 }
 
@@ -380,7 +380,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_section_size()
 
     test.shdrtab.hashtab.sh_size = 0xDEADBEEF;
 
-    auto ret = bfelf_file_init((char *)&test, sizeof(test), &ef);
+    auto ret = bfelf_file_init(reinterpret_cast<char *>(&test), sizeof(test), &ef);
     EXPECT_TRUE(ret == BFELF_ERROR_INVALID_SECTION);
 }
 
@@ -392,7 +392,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_section_name()
 
     test.shdrtab.hashtab.sh_name = 0xDEAD;
 
-    auto ret = bfelf_file_init((char *)&test, sizeof(test), &ef);
+    auto ret = bfelf_file_init(reinterpret_cast<char *>(&test), sizeof(test), &ef);
     EXPECT_TRUE(ret == BFELF_ERROR_INVALID_SECTION);
 }
 
@@ -404,7 +404,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_section_link()
 
     test.shdrtab.hashtab.sh_link = 0xDEAD;
 
-    auto ret = bfelf_file_init((char *)&test, sizeof(test), &ef);
+    auto ret = bfelf_file_init(reinterpret_cast<char *>(&test), sizeof(test), &ef);
     EXPECT_TRUE(ret == BFELF_ERROR_INVALID_SECTION);
 }
 
@@ -417,7 +417,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_segment_address()
     test.phdrtab.re_segment1.p_paddr = 0xDEAD;
     test.phdrtab.re_segment1.p_vaddr = 0xDEAD;
 
-    auto ret = bfelf_file_init((char *)&test, sizeof(test), &ef);
+    auto ret = bfelf_file_init(reinterpret_cast<char *>(&test), sizeof(test), &ef);
     EXPECT_TRUE(ret == BFELF_ERROR_INVALID_SECTION);
 }
 
@@ -430,7 +430,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_segment_size()
     test.phdrtab.re_segment1.p_memsz = 0x275;
     test.phdrtab.re_segment1.p_filesz = 0x275;
 
-    auto ret = bfelf_file_init((char *)&test, sizeof(test), &ef);
+    auto ret = bfelf_file_init(reinterpret_cast<char *>(&test), sizeof(test), &ef);
     EXPECT_TRUE(ret == BFELF_ERROR_INVALID_SECTION);
 }
 
@@ -442,7 +442,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_entry()
 
     test.header.e_entry = 0xDEADBEEF;
 
-    auto ret = bfelf_file_init((char *)&test, sizeof(test), &ef);
+    auto ret = bfelf_file_init(reinterpret_cast<char *>(&test), sizeof(test), &ef);
     EXPECT_TRUE(ret == BFELF_ERROR_INVALID_FILE);
 }
 
@@ -454,7 +454,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_section_type()
 
     test.shdrtab.shstrtab.sh_type = 0xDEAD;
 
-    auto ret = bfelf_file_init((char *)&test, sizeof(test), &ef);
+    auto ret = bfelf_file_init(reinterpret_cast<char *>(&test), sizeof(test), &ef);
     EXPECT_TRUE(ret == BFELF_ERROR_INVALID_SECTION);
 }
 
@@ -466,7 +466,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_section_flags()
 
     test.shdrtab.shstrtab.sh_flags = 0xDEAD;
 
-    auto ret = bfelf_file_init((char *)&test, sizeof(test), &ef);
+    auto ret = bfelf_file_init(reinterpret_cast<char *>(&test), sizeof(test), &ef);
     EXPECT_TRUE(ret == BFELF_ERROR_INVALID_SECTION);
 }
 
@@ -478,7 +478,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_section_address_alignment()
 
     test.shdrtab.shstrtab.sh_addralign = 0xDEAD;
 
-    auto ret = bfelf_file_init((char *)&test, sizeof(test), &ef);
+    auto ret = bfelf_file_init(reinterpret_cast<char *>(&test), sizeof(test), &ef);
     EXPECT_TRUE(ret == BFELF_ERROR_INVALID_SECTION);
 }
 
@@ -490,7 +490,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_section_entry_size()
 
     test.shdrtab.shstrtab.sh_entsize = 0xDEAD;
 
-    auto ret = bfelf_file_init((char *)&test, sizeof(test), &ef);
+    auto ret = bfelf_file_init(reinterpret_cast<char *>(&test), sizeof(test), &ef);
     EXPECT_TRUE(ret == BFELF_ERROR_INVALID_SECTION);
 }
 
@@ -502,7 +502,7 @@ bfelf_loader_ut::test_bfelf_file_init_missing_dynsym()
 
     test.shdrtab.dynsym.sh_type = 0xDEAD;
 
-    auto ret = bfelf_file_init((char *)&test, sizeof(test), &ef);
+    auto ret = bfelf_file_init(reinterpret_cast<char *>(&test), sizeof(test), &ef);
     EXPECT_TRUE(ret == BFELF_ERROR_INVALID_FILE);
 }
 
@@ -514,7 +514,7 @@ bfelf_loader_ut::test_bfelf_file_init_too_many_program_segments()
 
     test.phdrtab.too_many.p_type = bfpt_load;
 
-    auto ret = bfelf_file_init((char *)&test, sizeof(test), &ef);
+    auto ret = bfelf_file_init(reinterpret_cast<char *>(&test), sizeof(test), &ef);
     EXPECT_TRUE(ret == BFELF_ERROR_LOADER_FULL);
 }
 
@@ -526,7 +526,7 @@ bfelf_loader_ut::test_bfelf_file_init_too_many_relocation_tables()
 
     test.shdrtab.too_many.sh_type = bfsht_rela;
 
-    auto ret = bfelf_file_init((char *)&test, sizeof(test), &ef);
+    auto ret = bfelf_file_init(reinterpret_cast<char *>(&test), sizeof(test), &ef);
     EXPECT_TRUE(ret == BFELF_ERROR_LOADER_FULL);
 }
 
@@ -538,7 +538,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_hash_table_size1()
 
     test.shdrtab.hashtab.sh_size = 1;
 
-    auto ret = bfelf_file_init((char *)&test, sizeof(test), &ef);
+    auto ret = bfelf_file_init(reinterpret_cast<char *>(&test), sizeof(test), &ef);
     EXPECT_TRUE(ret == BFELF_ERROR_INVALID_SECTION);
 }
 
@@ -550,7 +550,7 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_hash_table_size2()
 
     test.hashtab.nbucket = 0xDEAD;
 
-    auto ret = bfelf_file_init((char *)&test, sizeof(test), &ef);
+    auto ret = bfelf_file_init(reinterpret_cast<char *>(&test), sizeof(test), &ef);
     EXPECT_TRUE(ret == BFELF_ERROR_INVALID_SECTION);
 }
 
@@ -562,6 +562,6 @@ bfelf_loader_ut::test_bfelf_file_init_invalid_hash_table_size3()
 
     test.hashtab.nchain = 0xDEAD;
 
-    auto ret = bfelf_file_init((char *)&test, sizeof(test), &ef);
+    auto ret = bfelf_file_init(reinterpret_cast<char *>(&test), sizeof(test), &ef);
     EXPECT_TRUE(ret == BFELF_ERROR_INVALID_SECTION);
 }

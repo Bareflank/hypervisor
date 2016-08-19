@@ -59,11 +59,11 @@ public:
 
     /// Default Constructor
     ///
-    vmcs_intel_x64(const std::shared_ptr<intrinsics_intel_x64> &intrinsics = nullptr);
+    vmcs_intel_x64(std::shared_ptr<intrinsics_intel_x64> intrinsics = nullptr);
 
     /// Destructor
     ///
-    virtual ~vmcs_intel_x64() {}
+    virtual ~vmcs_intel_x64() = default;
 
     /// Launch
     ///
@@ -178,6 +178,21 @@ protected:
 protected:
 
     virtual void dump_vmcs();
+    virtual void dump_vmcs_16bit_control_state();
+    virtual void dump_vmcs_16bit_guest_state();
+    virtual void dump_vmcs_16bit_host_state();
+    virtual void dump_vmcs_64bit_control_state();
+    virtual void dump_vmcs_64bit_readonly_state();
+    virtual void dump_vmcs_64bit_guest_state();
+    virtual void dump_vmcs_64bit_host_state();
+    virtual void dump_vmcs_32bit_control_state();
+    virtual void dump_vmcs_32bit_readonly_state();
+    virtual void dump_vmcs_32bit_guest_state();
+    virtual void dump_vmcs_32bit_host_state();
+    virtual void dump_vmcs_natural_control_state();
+    virtual void dump_vmcs_natural_readonly_state();
+    virtual void dump_vmcs_natural_guest_state();
+    virtual void dump_vmcs_natural_host_state();
 
     virtual void print_execution_controls();
     virtual void print_pin_based_vm_execution_controls();
@@ -568,8 +583,8 @@ protected:
 
     std::shared_ptr<intrinsics_intel_x64> m_intrinsics;
 
-    uint64_t m_vmcs_region_phys;
-    std::unique_ptr<uint32_t> m_vmcs_region;
+    uintptr_t m_vmcs_region_phys;
+    std::unique_ptr<uint32_t[]> m_vmcs_region;
 
     std::unique_ptr<char[]> m_exit_handler_stack;
     std::shared_ptr<state_save_intel_x64> m_state_save;

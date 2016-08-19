@@ -20,16 +20,16 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #include <debug.h>
+#include <view_as_pointer.h>
 #include <exit_handler/exit_handler_intel_x64.h>
 #include <exit_handler/exit_handler_intel_x64_entry.h>
 #include <exit_handler/exit_handler_intel_x64_support.h>
-#include <exit_handler/exit_handler_intel_x64_exceptions.h>
 
 #include <mutex>
 std::mutex g_unimplemented_handler_mutex;
 
-exit_handler_intel_x64::exit_handler_intel_x64(const std::shared_ptr<intrinsics_intel_x64> &intrinsics) :
-    m_intrinsics(intrinsics),
+exit_handler_intel_x64::exit_handler_intel_x64(std::shared_ptr<intrinsics_intel_x64> intrinsics) :
+    m_intrinsics(std::move(intrinsics)),
     m_exit_reason(0),
     m_exit_qualification(0),
     m_exit_instruction_length(0),
@@ -37,10 +37,6 @@ exit_handler_intel_x64::exit_handler_intel_x64(const std::shared_ptr<intrinsics_
 {
     if (!m_intrinsics)
         m_intrinsics = std::make_shared<intrinsics_intel_x64>();
-}
-
-exit_handler_intel_x64::~exit_handler_intel_x64()
-{
 }
 
 void
@@ -314,23 +310,23 @@ exit_handler_intel_x64::halt() noexcept
     bferror << bfendl;
     bferror << "Guest register state: " << bfendl;
     bferror << "----------------------------------------------------" << bfendl;
-    bferror << "- m_state_save->rax: " << reinterpret_cast<void *>(m_state_save->rax) << bfendl;
-    bferror << "- m_state_save->rbx: " << reinterpret_cast<void *>(m_state_save->rbx) << bfendl;
-    bferror << "- m_state_save->rcx: " << reinterpret_cast<void *>(m_state_save->rcx) << bfendl;
-    bferror << "- m_state_save->rdx: " << reinterpret_cast<void *>(m_state_save->rdx) << bfendl;
-    bferror << "- m_state_save->rbp: " << reinterpret_cast<void *>(m_state_save->rbp) << bfendl;
-    bferror << "- m_state_save->rsi: " << reinterpret_cast<void *>(m_state_save->rsi) << bfendl;
-    bferror << "- m_state_save->rdi: " << reinterpret_cast<void *>(m_state_save->rdi) << bfendl;
-    bferror << "- m_state_save->r08: " << reinterpret_cast<void *>(m_state_save->r08) << bfendl;
-    bferror << "- m_state_save->r09: " << reinterpret_cast<void *>(m_state_save->r09) << bfendl;
-    bferror << "- m_state_save->r10: " << reinterpret_cast<void *>(m_state_save->r10) << bfendl;
-    bferror << "- m_state_save->r11: " << reinterpret_cast<void *>(m_state_save->r11) << bfendl;
-    bferror << "- m_state_save->r12: " << reinterpret_cast<void *>(m_state_save->r12) << bfendl;
-    bferror << "- m_state_save->r13: " << reinterpret_cast<void *>(m_state_save->r13) << bfendl;
-    bferror << "- m_state_save->r14: " << reinterpret_cast<void *>(m_state_save->r14) << bfendl;
-    bferror << "- m_state_save->r15: " << reinterpret_cast<void *>(m_state_save->r15) << bfendl;
-    bferror << "- m_state_save->rip: " << reinterpret_cast<void *>(m_state_save->rip) << bfendl;
-    bferror << "- m_state_save->rsp: " << reinterpret_cast<void *>(m_state_save->rsp) << bfendl;
+    bferror << "- m_state_save->rax: " << view_as_pointer(m_state_save->rax) << bfendl;
+    bferror << "- m_state_save->rbx: " << view_as_pointer(m_state_save->rbx) << bfendl;
+    bferror << "- m_state_save->rcx: " << view_as_pointer(m_state_save->rcx) << bfendl;
+    bferror << "- m_state_save->rdx: " << view_as_pointer(m_state_save->rdx) << bfendl;
+    bferror << "- m_state_save->rbp: " << view_as_pointer(m_state_save->rbp) << bfendl;
+    bferror << "- m_state_save->rsi: " << view_as_pointer(m_state_save->rsi) << bfendl;
+    bferror << "- m_state_save->rdi: " << view_as_pointer(m_state_save->rdi) << bfendl;
+    bferror << "- m_state_save->r08: " << view_as_pointer(m_state_save->r08) << bfendl;
+    bferror << "- m_state_save->r09: " << view_as_pointer(m_state_save->r09) << bfendl;
+    bferror << "- m_state_save->r10: " << view_as_pointer(m_state_save->r10) << bfendl;
+    bferror << "- m_state_save->r11: " << view_as_pointer(m_state_save->r11) << bfendl;
+    bferror << "- m_state_save->r12: " << view_as_pointer(m_state_save->r12) << bfendl;
+    bferror << "- m_state_save->r13: " << view_as_pointer(m_state_save->r13) << bfendl;
+    bferror << "- m_state_save->r14: " << view_as_pointer(m_state_save->r14) << bfendl;
+    bferror << "- m_state_save->r15: " << view_as_pointer(m_state_save->r15) << bfendl;
+    bferror << "- m_state_save->rip: " << view_as_pointer(m_state_save->rip) << bfendl;
+    bferror << "- m_state_save->rsp: " << view_as_pointer(m_state_save->rsp) << bfendl;
 
     bferror << bfendl;
     bferror << bfendl;
@@ -714,15 +710,15 @@ exit_handler_intel_x64::unimplemented_handler()
     bferror << "Unimplemented Exit Handler: " << bfendl;
     bferror << "----------------------------------------------------" << bfendl;
     bferror << "- exit reason: "
-            << reinterpret_cast<void *>(m_exit_reason) << bfendl;
+            << view_as_pointer(m_exit_reason) << bfendl;
     bferror << "- exit reason string: "
             << exit_reason_to_str(m_exit_reason & 0x0000FFFF) << bfendl;
     bferror << "- exit qualification: "
-            << reinterpret_cast<void *>(m_exit_qualification) << bfendl;
+            << view_as_pointer(m_exit_qualification) << bfendl;
     bferror << "- instruction length: "
-            << reinterpret_cast<void *>(m_exit_instruction_length) << bfendl;
+            << view_as_pointer(m_exit_instruction_length) << bfendl;
     bferror << "- instruction information: "
-            << reinterpret_cast<void *>(m_exit_instruction_information) << bfendl;
+            << view_as_pointer(m_exit_instruction_information) << bfendl;
 
     if ((m_exit_reason & 0x80000000) != 0)
     {
@@ -935,8 +931,13 @@ exit_handler_intel_x64::vmread(uint64_t field) const
 {
     uint64_t value = 0;
 
-    if (m_intrinsics->vmread(field, &value) == false)
-        throw exit_handler_read_failure(field);
+    if (!m_intrinsics->vmread(field, &value))
+    {
+        bferror << "exit_handler_intel_x64::vmread failed:" << bfendl;
+        bferror << "    - field: " << view_as_pointer(field) << bfendl;
+
+        throw std::runtime_error("vmread failed");
+    }
 
     return value;
 }
@@ -944,6 +945,12 @@ exit_handler_intel_x64::vmread(uint64_t field) const
 void
 exit_handler_intel_x64::vmwrite(uint64_t field, uint64_t value)
 {
-    if (m_intrinsics->vmwrite(field, value) == false)
-        throw exit_handler_write_failure(field, value);
+    if (!m_intrinsics->vmwrite(field, value))
+    {
+        bferror << "exit_handler_intel_x64::vmwrite failed:" << bfendl;
+        bferror << "    - field: " << view_as_pointer(field) << bfendl;
+        bferror << "    - value: " << view_as_pointer(value) << bfendl;
+
+        throw std::runtime_error("vmwrite failed");
+    }
 }

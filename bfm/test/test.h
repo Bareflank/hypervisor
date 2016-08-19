@@ -29,7 +29,7 @@ class bfm_ut : public unittest
 public:
 
     bfm_ut();
-    ~bfm_ut() {}
+    ~bfm_ut() override = default;
 
 protected:
 

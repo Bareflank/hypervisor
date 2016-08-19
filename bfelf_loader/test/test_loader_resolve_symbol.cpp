@@ -45,7 +45,7 @@ bfelf_loader_ut::test_bfelf_loader_resolve_symbol_invalid_loader()
     func_t func;
     e_string_t name = {"foo", 3};
 
-    auto ret = bfelf_loader_resolve_symbol(0, &name, (void **)&func);
+    auto ret = bfelf_loader_resolve_symbol(nullptr, &name, reinterpret_cast<void **>(&func));
     EXPECT_TRUE(ret == BFELF_ERROR_INVALID_ARG);
 }
 
@@ -57,7 +57,7 @@ bfelf_loader_ut::test_bfelf_loader_resolve_symbol_invalid_name()
 
     memset(&loader, 0, sizeof(loader));
 
-    auto ret = bfelf_loader_resolve_symbol(&loader, 0, (void **)&func);
+    auto ret = bfelf_loader_resolve_symbol(&loader, nullptr, reinterpret_cast<void **>(&func));
     EXPECT_TRUE(ret == BFELF_ERROR_INVALID_ARG);
 }
 
@@ -69,7 +69,7 @@ bfelf_loader_ut::test_bfelf_loader_resolve_symbol_invalid_addr()
 
     memset(&loader, 0, sizeof(loader));
 
-    auto ret = bfelf_loader_resolve_symbol(&loader, &name, 0);
+    auto ret = bfelf_loader_resolve_symbol(&loader, &name, nullptr);
     EXPECT_TRUE(ret == BFELF_ERROR_INVALID_ARG);
 }
 
@@ -84,7 +84,7 @@ bfelf_loader_ut::test_bfelf_loader_resolve_symbol_no_relocation()
     func_t func;
     e_string_t name = {"foo", 3};
 
-    ret = bfelf_loader_resolve_symbol(&loader, &name, (void **)&func);
+    ret = bfelf_loader_resolve_symbol(&loader, &name, reinterpret_cast<void **>(&func));
     EXPECT_TRUE(ret == BFELF_ERROR_OUT_OF_ORDER);
 }
 
@@ -102,7 +102,7 @@ bfelf_loader_ut::test_bfelf_loader_resolve_symbol_no_files_added()
     func_t func;
     e_string_t name = {"foo", 3};
 
-    ret = bfelf_loader_resolve_symbol(&loader, &name, (void **)&func);
+    ret = bfelf_loader_resolve_symbol(&loader, &name, reinterpret_cast<void **>(&func));
     EXPECT_TRUE(ret == BFELF_ERROR_NO_SUCH_SYMBOL);
 }
 
@@ -118,9 +118,9 @@ bfelf_loader_ut::test_bfelf_loader_resolve_symbol_uninitialized_files()
     memset(&ef2, 0, sizeof(ef2));
     memset(&loader, 0, sizeof(loader));
 
-    ret = bfelf_loader_add(&loader, &ef1, 0);
+    ret = bfelf_loader_add(&loader, &ef1, nullptr);
     EXPECT_TRUE(ret == BFELF_SUCCESS);
-    ret = bfelf_loader_add(&loader, &ef2, 0);
+    ret = bfelf_loader_add(&loader, &ef2, nullptr);
     EXPECT_TRUE(ret == BFELF_SUCCESS);
 
     ret = bfelf_loader_relocate(&loader);
@@ -129,7 +129,7 @@ bfelf_loader_ut::test_bfelf_loader_resolve_symbol_uninitialized_files()
     func_t func;
     e_string_t name = {"foo", 3};
 
-    ret = bfelf_loader_resolve_symbol(&loader, &name, (void **)&func);
+    ret = bfelf_loader_resolve_symbol(&loader, &name, reinterpret_cast<void **>(&func));
     EXPECT_TRUE(ret == BFELF_ERROR_NO_SUCH_SYMBOL);
 }
 
@@ -146,9 +146,9 @@ bfelf_loader_ut::test_bfelf_loader_resolve_no_such_symbol()
     ASSERT_TRUE(ret == BFELF_SUCCESS);
 
     m_dummy_misc_exec = load_elf_file(&dummy_misc_ef);
-    ASSERT_TRUE(m_dummy_misc_exec.get() != 0);
+    ASSERT_TRUE(m_dummy_misc_exec);
     m_dummy_code_exec = load_elf_file(&dummy_code_ef);
-    ASSERT_TRUE(m_dummy_code_exec.get() != 0);
+    ASSERT_TRUE(m_dummy_code_exec);
 
     bfelf_loader_t loader;
     memset(&loader, 0, sizeof(loader));
@@ -164,7 +164,7 @@ bfelf_loader_ut::test_bfelf_loader_resolve_no_such_symbol()
     func_t func;
     e_string_t name = {"fighters", 8};
 
-    ret = bfelf_loader_resolve_symbol(&loader, &name, (void **)&func);
+    ret = bfelf_loader_resolve_symbol(&loader, &name, reinterpret_cast<void **>(&func));
     EXPECT_TRUE(ret == BFELF_ERROR_NO_SUCH_SYMBOL);
 }
 
@@ -181,9 +181,9 @@ bfelf_loader_ut::test_bfelf_loader_resolve_zero_length_symbol()
     ASSERT_TRUE(ret == BFELF_SUCCESS);
 
     m_dummy_misc_exec = load_elf_file(&dummy_misc_ef);
-    ASSERT_TRUE(m_dummy_misc_exec.get() != 0);
+    ASSERT_TRUE(m_dummy_misc_exec);
     m_dummy_code_exec = load_elf_file(&dummy_code_ef);
-    ASSERT_TRUE(m_dummy_code_exec.get() != 0);
+    ASSERT_TRUE(m_dummy_code_exec);
 
     bfelf_loader_t loader;
     memset(&loader, 0, sizeof(loader));
@@ -199,7 +199,7 @@ bfelf_loader_ut::test_bfelf_loader_resolve_zero_length_symbol()
     func_t func;
     e_string_t name = {"foo", 0};
 
-    ret = bfelf_loader_resolve_symbol(&loader, &name, (void **)&func);
+    ret = bfelf_loader_resolve_symbol(&loader, &name, reinterpret_cast<void **>(&func));
     EXPECT_TRUE(ret == BFELF_ERROR_NO_SUCH_SYMBOL);
 }
 
@@ -216,9 +216,9 @@ bfelf_loader_ut::test_bfelf_loader_resolve_invalid_symbol_length()
     ASSERT_TRUE(ret == BFELF_SUCCESS);
 
     m_dummy_misc_exec = load_elf_file(&dummy_misc_ef);
-    ASSERT_TRUE(m_dummy_misc_exec.get() != 0);
+    ASSERT_TRUE(m_dummy_misc_exec);
     m_dummy_code_exec = load_elf_file(&dummy_code_ef);
-    ASSERT_TRUE(m_dummy_code_exec.get() != 0);
+    ASSERT_TRUE(m_dummy_code_exec);
 
     bfelf_loader_t loader;
     memset(&loader, 0, sizeof(loader));
@@ -234,7 +234,7 @@ bfelf_loader_ut::test_bfelf_loader_resolve_invalid_symbol_length()
     func_t func;
     e_string_t name = {"foo", 2};
 
-    ret = bfelf_loader_resolve_symbol(&loader, &name, (void **)&func);
+    ret = bfelf_loader_resolve_symbol(&loader, &name, reinterpret_cast<void **>(&func));
     EXPECT_TRUE(ret == BFELF_ERROR_NO_SUCH_SYMBOL);
 }
 
@@ -251,9 +251,9 @@ bfelf_loader_ut::test_bfelf_loader_resolve_symbol_length_too_large()
     ASSERT_TRUE(ret == BFELF_SUCCESS);
 
     m_dummy_misc_exec = load_elf_file(&dummy_misc_ef);
-    ASSERT_TRUE(m_dummy_misc_exec.get() != 0);
+    ASSERT_TRUE(m_dummy_misc_exec);
     m_dummy_code_exec = load_elf_file(&dummy_code_ef);
-    ASSERT_TRUE(m_dummy_code_exec.get() != 0);
+    ASSERT_TRUE(m_dummy_code_exec);
 
     bfelf_loader_t loader;
     memset(&loader, 0, sizeof(loader));
@@ -269,7 +269,7 @@ bfelf_loader_ut::test_bfelf_loader_resolve_symbol_length_too_large()
     func_t func;
     e_string_t name = {"foo", 1000};
 
-    ret = bfelf_loader_resolve_symbol(&loader, &name, (void **)&func);
+    ret = bfelf_loader_resolve_symbol(&loader, &name, reinterpret_cast<void **>(&func));
     EXPECT_TRUE(ret == BFELF_ERROR_NO_SUCH_SYMBOL);
 }
 
@@ -286,9 +286,9 @@ bfelf_loader_ut::test_bfelf_loader_resolve_symbol_success()
     ASSERT_TRUE(ret == BFELF_SUCCESS);
 
     m_dummy_misc_exec = load_elf_file(&dummy_misc_ef);
-    ASSERT_TRUE(m_dummy_misc_exec.get() != 0);
+    ASSERT_TRUE(m_dummy_misc_exec);
     m_dummy_code_exec = load_elf_file(&dummy_code_ef);
-    ASSERT_TRUE(m_dummy_code_exec.get() != 0);
+    ASSERT_TRUE(m_dummy_code_exec);
 
     bfelf_loader_t loader;
     memset(&loader, 0, sizeof(loader));
@@ -304,7 +304,7 @@ bfelf_loader_ut::test_bfelf_loader_resolve_symbol_success()
     func_t func;
     e_string_t name = {"foo", 3};
 
-    ret = bfelf_loader_resolve_symbol(&loader, &name, (void **)&func);
+    ret = bfelf_loader_resolve_symbol(&loader, &name, reinterpret_cast<void **>(&func));
     EXPECT_TRUE(ret == BFELF_SUCCESS);
 }
 
@@ -320,13 +320,13 @@ bfelf_loader_ut::test_bfelf_loader_resolve_no_such_symbol_no_hash()
     ret = bfelf_file_init(m_dummy_code.get(), m_dummy_code_length, &dummy_code_ef);
     ASSERT_TRUE(ret == BFELF_SUCCESS);
 
-    dummy_misc_ef.hashtab = 0;
-    dummy_code_ef.hashtab = 0;
+    dummy_misc_ef.hashtab = nullptr;
+    dummy_code_ef.hashtab = nullptr;
 
     m_dummy_misc_exec = load_elf_file(&dummy_misc_ef);
-    ASSERT_TRUE(m_dummy_misc_exec.get() != 0);
+    ASSERT_TRUE(m_dummy_misc_exec);
     m_dummy_code_exec = load_elf_file(&dummy_code_ef);
-    ASSERT_TRUE(m_dummy_code_exec.get() != 0);
+    ASSERT_TRUE(m_dummy_code_exec);
 
     bfelf_loader_t loader;
     memset(&loader, 0, sizeof(loader));
@@ -342,7 +342,7 @@ bfelf_loader_ut::test_bfelf_loader_resolve_no_such_symbol_no_hash()
     func_t func;
     e_string_t name = {"fighters", 8};
 
-    ret = bfelf_loader_resolve_symbol(&loader, &name, (void **)&func);
+    ret = bfelf_loader_resolve_symbol(&loader, &name, reinterpret_cast<void **>(&func));
     EXPECT_TRUE(ret == BFELF_ERROR_NO_SUCH_SYMBOL);
 }
 
@@ -358,13 +358,13 @@ bfelf_loader_ut::test_bfelf_loader_resolve_zero_length_symbol_no_hash()
     ret = bfelf_file_init(m_dummy_code.get(), m_dummy_code_length, &dummy_code_ef);
     ASSERT_TRUE(ret == BFELF_SUCCESS);
 
-    dummy_misc_ef.hashtab = 0;
-    dummy_code_ef.hashtab = 0;
+    dummy_misc_ef.hashtab = nullptr;
+    dummy_code_ef.hashtab = nullptr;
 
     m_dummy_misc_exec = load_elf_file(&dummy_misc_ef);
-    ASSERT_TRUE(m_dummy_misc_exec.get() != 0);
+    ASSERT_TRUE(m_dummy_misc_exec);
     m_dummy_code_exec = load_elf_file(&dummy_code_ef);
-    ASSERT_TRUE(m_dummy_code_exec.get() != 0);
+    ASSERT_TRUE(m_dummy_code_exec);
 
     bfelf_loader_t loader;
     memset(&loader, 0, sizeof(loader));
@@ -380,7 +380,7 @@ bfelf_loader_ut::test_bfelf_loader_resolve_zero_length_symbol_no_hash()
     func_t func;
     e_string_t name = {"foo", 0};
 
-    ret = bfelf_loader_resolve_symbol(&loader, &name, (void **)&func);
+    ret = bfelf_loader_resolve_symbol(&loader, &name, reinterpret_cast<void **>(&func));
     EXPECT_TRUE(ret == BFELF_ERROR_NO_SUCH_SYMBOL);
 }
 
@@ -396,13 +396,13 @@ bfelf_loader_ut::test_bfelf_loader_resolve_invalid_symbol_length_no_hash()
     ret = bfelf_file_init(m_dummy_code.get(), m_dummy_code_length, &dummy_code_ef);
     ASSERT_TRUE(ret == BFELF_SUCCESS);
 
-    dummy_misc_ef.hashtab = 0;
-    dummy_code_ef.hashtab = 0;
+    dummy_misc_ef.hashtab = nullptr;
+    dummy_code_ef.hashtab = nullptr;
 
     m_dummy_misc_exec = load_elf_file(&dummy_misc_ef);
-    ASSERT_TRUE(m_dummy_misc_exec.get() != 0);
+    ASSERT_TRUE(m_dummy_misc_exec);
     m_dummy_code_exec = load_elf_file(&dummy_code_ef);
-    ASSERT_TRUE(m_dummy_code_exec.get() != 0);
+    ASSERT_TRUE(m_dummy_code_exec);
 
     bfelf_loader_t loader;
     memset(&loader, 0, sizeof(loader));
@@ -418,7 +418,7 @@ bfelf_loader_ut::test_bfelf_loader_resolve_invalid_symbol_length_no_hash()
     func_t func;
     e_string_t name = {"foo", 2};
 
-    ret = bfelf_loader_resolve_symbol(&loader, &name, (void **)&func);
+    ret = bfelf_loader_resolve_symbol(&loader, &name, reinterpret_cast<void **>(&func));
     EXPECT_TRUE(ret == BFELF_ERROR_NO_SUCH_SYMBOL);
 }
 
@@ -434,13 +434,13 @@ bfelf_loader_ut::test_bfelf_loader_resolve_symbol_length_too_large_no_hash()
     ret = bfelf_file_init(m_dummy_code.get(), m_dummy_code_length, &dummy_code_ef);
     ASSERT_TRUE(ret == BFELF_SUCCESS);
 
-    dummy_misc_ef.hashtab = 0;
-    dummy_code_ef.hashtab = 0;
+    dummy_misc_ef.hashtab = nullptr;
+    dummy_code_ef.hashtab = nullptr;
 
     m_dummy_misc_exec = load_elf_file(&dummy_misc_ef);
-    ASSERT_TRUE(m_dummy_misc_exec.get() != 0);
+    ASSERT_TRUE(m_dummy_misc_exec);
     m_dummy_code_exec = load_elf_file(&dummy_code_ef);
-    ASSERT_TRUE(m_dummy_code_exec.get() != 0);
+    ASSERT_TRUE(m_dummy_code_exec);
 
     bfelf_loader_t loader;
     memset(&loader, 0, sizeof(loader));
@@ -456,7 +456,7 @@ bfelf_loader_ut::test_bfelf_loader_resolve_symbol_length_too_large_no_hash()
     func_t func;
     e_string_t name = {"foo", 1000};
 
-    ret = bfelf_loader_resolve_symbol(&loader, &name, (void **)&func);
+    ret = bfelf_loader_resolve_symbol(&loader, &name, reinterpret_cast<void **>(&func));
     EXPECT_TRUE(ret == BFELF_ERROR_NO_SUCH_SYMBOL);
 }
 
@@ -472,13 +472,13 @@ bfelf_loader_ut::test_bfelf_loader_resolve_symbol_success_no_hash()
     ret = bfelf_file_init(m_dummy_code.get(), m_dummy_code_length, &dummy_code_ef);
     ASSERT_TRUE(ret == BFELF_SUCCESS);
 
-    dummy_misc_ef.hashtab = 0;
-    dummy_code_ef.hashtab = 0;
+    dummy_misc_ef.hashtab = nullptr;
+    dummy_code_ef.hashtab = nullptr;
 
     m_dummy_misc_exec = load_elf_file(&dummy_misc_ef);
-    ASSERT_TRUE(m_dummy_misc_exec.get() != 0);
+    ASSERT_TRUE(m_dummy_misc_exec);
     m_dummy_code_exec = load_elf_file(&dummy_code_ef);
-    ASSERT_TRUE(m_dummy_code_exec.get() != 0);
+    ASSERT_TRUE(m_dummy_code_exec);
 
     bfelf_loader_t loader;
     memset(&loader, 0, sizeof(loader));
@@ -494,7 +494,7 @@ bfelf_loader_ut::test_bfelf_loader_resolve_symbol_success_no_hash()
     func_t func;
     e_string_t name = {"foo", 3};
 
-    ret = bfelf_loader_resolve_symbol(&loader, &name, (void **)&func);
+    ret = bfelf_loader_resolve_symbol(&loader, &name, reinterpret_cast<void **>(&func));
     EXPECT_TRUE(ret == BFELF_SUCCESS);
 }
 
@@ -511,9 +511,9 @@ bfelf_loader_ut::test_bfelf_loader_resolve_symbol_real_test()
     ASSERT_TRUE(ret == BFELF_SUCCESS);
 
     m_dummy_misc_exec = load_elf_file(&dummy_misc_ef);
-    ASSERT_TRUE(m_dummy_misc_exec.get() != 0);
+    ASSERT_TRUE(m_dummy_misc_exec);
     m_dummy_code_exec = load_elf_file(&dummy_code_ef);
-    ASSERT_TRUE(m_dummy_code_exec.get() != 0);
+    ASSERT_TRUE(m_dummy_code_exec);
 
     bfelf_loader_t loader;
     memset(&loader, 0, sizeof(loader));
@@ -534,7 +534,7 @@ bfelf_loader_ut::test_bfelf_loader_resolve_symbol_real_test()
         ret = bfelf_loader_get_info(&loader, &dummy_misc_ef, &info);
         ASSERT_TRUE(ret == BFELF_SUCCESS);
 
-        ret = bfelf_file_resolve_symbol(&dummy_misc_ef, &name, (void **)&local_init);
+        ret = bfelf_file_resolve_symbol(&dummy_misc_ef, &name, reinterpret_cast<void **>(&local_init));
         ASSERT_TRUE(ret == BFELF_SUCCESS);
 
         local_init(&info);
@@ -542,7 +542,7 @@ bfelf_loader_ut::test_bfelf_loader_resolve_symbol_real_test()
         ret = bfelf_loader_get_info(&loader, &dummy_code_ef, &info);
         ASSERT_TRUE(ret == BFELF_SUCCESS);
 
-        ret = bfelf_file_resolve_symbol(&dummy_misc_ef, &name, (void **)&local_init);
+        ret = bfelf_file_resolve_symbol(&dummy_misc_ef, &name, reinterpret_cast<void **>(&local_init));
         ASSERT_TRUE(ret == BFELF_SUCCESS);
 
         local_init(&info);
@@ -552,7 +552,7 @@ bfelf_loader_ut::test_bfelf_loader_resolve_symbol_real_test()
         func_t func;
         e_string_t name = {"foo", 3};
 
-        ret = bfelf_loader_resolve_symbol(&loader, &name, (void **)&func);
+        ret = bfelf_loader_resolve_symbol(&loader, &name, reinterpret_cast<void **>(&func));
         ASSERT_TRUE(ret == BFELF_SUCCESS);
 
         EXPECT_TRUE(func(5) == 1005);
@@ -566,7 +566,7 @@ bfelf_loader_ut::test_bfelf_loader_resolve_symbol_real_test()
         ret = bfelf_loader_get_info(&loader, &dummy_misc_ef, &info);
         ASSERT_TRUE(ret == BFELF_SUCCESS);
 
-        ret = bfelf_file_resolve_symbol(&dummy_misc_ef, &name, (void **)&local_fini);
+        ret = bfelf_file_resolve_symbol(&dummy_misc_ef, &name, reinterpret_cast<void **>(&local_fini));
         ASSERT_TRUE(ret == BFELF_SUCCESS);
 
         local_fini(&info);
@@ -574,7 +574,7 @@ bfelf_loader_ut::test_bfelf_loader_resolve_symbol_real_test()
         ret = bfelf_loader_get_info(&loader, &dummy_code_ef, &info);
         ASSERT_TRUE(ret == BFELF_SUCCESS);
 
-        ret = bfelf_file_resolve_symbol(&dummy_misc_ef, &name, (void **)&local_fini);
+        ret = bfelf_file_resolve_symbol(&dummy_misc_ef, &name, reinterpret_cast<void **>(&local_fini));
         ASSERT_TRUE(ret == BFELF_SUCCESS);
 
         local_fini(&info);
@@ -594,9 +594,9 @@ bfelf_loader_ut::test_bfelf_file_resolve_symbol_resolve_fail()
     ASSERT_TRUE(ret == BFELF_SUCCESS);
 
     m_dummy_misc_exec = load_elf_file(&dummy_misc_ef);
-    ASSERT_TRUE(m_dummy_misc_exec.get() != 0);
+    ASSERT_TRUE(m_dummy_misc_exec);
     m_dummy_code_exec = load_elf_file(&dummy_code_ef);
-    ASSERT_TRUE(m_dummy_code_exec.get() != 0);
+    ASSERT_TRUE(m_dummy_code_exec);
 
     bfelf_loader_t loader;
     memset(&loader, 0, sizeof(loader));
@@ -621,7 +621,7 @@ bfelf_loader_ut::test_bfelf_file_resolve_symbol_resolve_fail()
         ret = bfelf_loader_get_info(&loader, &dummy_misc_ef, &info);
         ASSERT_TRUE(ret == BFELF_SUCCESS);
 
-        ret = bfelf_file_resolve_symbol(&dummy_misc_ef, &name, (void **)&local_init);
+        ret = bfelf_file_resolve_symbol(&dummy_misc_ef, &name, reinterpret_cast<void **>(&local_init));
         ASSERT_TRUE(ret == -1);
     });
 }
@@ -639,9 +639,9 @@ bfelf_loader_ut::test_bfelf_loader_resolve_symbol_resolve_fail()
     ASSERT_TRUE(ret == BFELF_SUCCESS);
 
     m_dummy_misc_exec = load_elf_file(&dummy_misc_ef);
-    ASSERT_TRUE(m_dummy_misc_exec.get() != 0);
+    ASSERT_TRUE(m_dummy_misc_exec);
     m_dummy_code_exec = load_elf_file(&dummy_code_ef);
-    ASSERT_TRUE(m_dummy_code_exec.get() != 0);
+    ASSERT_TRUE(m_dummy_code_exec);
 
     bfelf_loader_t loader;
     memset(&loader, 0, sizeof(loader));
@@ -662,7 +662,7 @@ bfelf_loader_ut::test_bfelf_loader_resolve_symbol_resolve_fail()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        ret = bfelf_loader_resolve_symbol(&loader, &name, (void **)&func);
+        ret = bfelf_loader_resolve_symbol(&loader, &name, reinterpret_cast<void **>(&func));
         ASSERT_TRUE(ret == -1);
     });
 }

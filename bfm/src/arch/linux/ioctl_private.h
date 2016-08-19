@@ -28,7 +28,7 @@ class ioctl_private : public ioctl_private_base
 {
 public:
     ioctl_private();
-    virtual ~ioctl_private();
+    ~ioctl_private() override;
 
     virtual void open();
     virtual void call_ioctl_add_module_length(int64_t len);

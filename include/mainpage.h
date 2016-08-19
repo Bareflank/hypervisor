@@ -223,7 +223,6 @@
 /// @ref vcpu_factory <br>
 /// @ref vcpu_manager <br>
 /// @ref memory_manager <br>
-/// @ref commit_or_rollback <br>
 ///
 /// @subsection Intel x86_64 Specific
 ///

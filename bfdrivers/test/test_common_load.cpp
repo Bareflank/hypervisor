@@ -139,7 +139,7 @@ driver_entry_ut::test_common_load_platform_alloc_failed()
 
     {
         MockRepository mocks;
-        mocks.ExpectCallFunc(platform_alloc_rw).Return(0);
+        mocks.ExpectCallFunc(platform_alloc_rw).Return(nullptr);
 
         RUN_UNITTEST_WITH_MOCKS(mocks, [&]
         {

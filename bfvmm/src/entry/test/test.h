@@ -29,7 +29,7 @@ class entry_ut : public unittest
 public:
 
     entry_ut();
-    ~entry_ut() {}
+    ~entry_ut() override = default;
 
 protected:
 

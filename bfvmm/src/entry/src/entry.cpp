@@ -19,17 +19,18 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+#include <gsl/gsl>
+
 #include <entry/entry.h>
 #include <guard_exceptions.h>
 #include <vcpu/vcpu_manager.h>
-#include <commit_or_rollback.h>
 
 extern "C" int64_t
 start_vmm(uint64_t arg) noexcept
 {
     return guard_exceptions(ENTRY_ERROR_VMM_START_FAILED, [&]()
     {
-        auto cor1 = commit_or_rollback([&]
+        auto fa1 = gsl::finally([&]
         {
             g_vcm->hlt_vcpu(arg);
             g_vcm->delete_vcpu(arg);
@@ -38,7 +39,7 @@ start_vmm(uint64_t arg) noexcept
         g_vcm->create_vcpu(arg);
         g_vcm->run_vcpu(arg);
 
-        cor1.commit();
+        fa1.ignore();
 
         return ENTRY_SUCCESS;
     });

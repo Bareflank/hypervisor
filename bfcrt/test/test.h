@@ -29,7 +29,7 @@ class crt_ut : public unittest
 public:
 
     crt_ut();
-    ~crt_ut() {}
+    ~crt_ut() override = default;
 
 protected:
 

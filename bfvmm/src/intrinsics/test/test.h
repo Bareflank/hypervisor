@@ -29,7 +29,7 @@ class intrinsics_ut : public unittest
 public:
 
     intrinsics_ut();
-    ~intrinsics_ut() {}
+    ~intrinsics_ut() override = default;
 
 protected:
 

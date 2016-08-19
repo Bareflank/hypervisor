@@ -30,8 +30,19 @@
 template<typename T> T static get(char **p)
 { auto v = *reinterpret_cast<T *>(*p); (*p) += sizeof(T); return v;}
 
+// TODO: We should attempt to convert these to lambda functions in the
+//       future as clang-tidy is getting upset about "b" not being enclosed
+//       in a (). Converting these to functions that take a lambda should
+//       remove the need for a macro. To do this, a couple of things will
+//       need to be done:
+//       - An opcode -> str function will be needed as we currently leverage
+//         the macro to stringify the opcodes
+//       - The embedded return / continue will need to be removed, which will
+//         help with reability in some ways, but hurt in others.
+//       - Remove the exception from clang-tidy once this is addressed.
+
 #define if_cfa(a,b) \
-    if (opcode == a) \
+    if (opcode == (a)) \
     { \
         log("  %s: ", #a); \
         b \
@@ -39,7 +50,7 @@ template<typename T> T static get(char **p)
     }
 
 #define if_opcode(a,b) \
-    if (opcode == a) \
+    if (opcode == (a)) \
     { \
         log("    - %s: ", #a); \
         b \
@@ -238,6 +249,9 @@ private_parse_expression(char *p,
 
         if_opcode(DW_OP_deref,
         {
+            if (stack[i] == 0)
+                ABORT("DW_OP_deref: attempted to dereference nullptr");
+
             stack[i] = *reinterpret_cast<uint64_t *>(stack[i]);
             log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
@@ -378,6 +392,10 @@ private_parse_expression(char *p,
                 ABORT("DW_OP_xderef out-of-bounds");
 
             auto value = stack[i--];
+
+            if (value == 0)
+                ABORT("DW_OP_deref: attempted to dereference nullptr");
+
             stack[i] = *reinterpret_cast<uint64_t *>(value);
             log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
@@ -1350,6 +1368,9 @@ private_parse_expression(char *p,
 
         if_opcode(DW_OP_deref_size,
         {
+            if (stack[i] == 0)
+                ABORT("DW_OP_deref: attempted to dereference nullptr");
+
             switch (*reinterpret_cast<uint8_t *>(p++))
             {
                 case 1:
@@ -1371,6 +1392,7 @@ private_parse_expression(char *p,
                 default:
                     ABORT("DW_OP_deref_size: invalid size");
             }
+
             log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
@@ -1902,8 +1924,10 @@ dwarf4::decode_uleb128(char **addr)
     return result;
 }
 
+#ifndef __clang__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#endif
 
 void
 dwarf4::unwind(const fd_entry &fde, register_state *state)
@@ -1932,4 +1956,6 @@ dwarf4::unwind(const fd_entry &fde, register_state *state)
     state->commit(cfa + row.arg_size());
 }
 
+#ifndef __clang__
 #pragma GCC diagnostic pop
+#endif

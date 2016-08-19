@@ -22,6 +22,8 @@
 #include <map>
 #include <debug_ring/debug_ring.h>
 
+#include <gsl/gsl>
+
 // -----------------------------------------------------------------------------
 // Global
 // -----------------------------------------------------------------------------
@@ -117,10 +119,10 @@ debug_ring::write(const std::string &str) noexcept
                 space++;
                 m_drr->spos++;
 
-                if (m_drr->buf[cpos] == '\0' && space >= len)
+                if (gsl::at(m_drr->buf, cpos) == '\0' && space >= len)
                     break;
 
-                m_drr->buf[cpos++] = '\0';
+                gsl::at(m_drr->buf, cpos++) = '\0';
             }
         }
 
@@ -129,7 +131,7 @@ debug_ring::write(const std::string &str) noexcept
             if (epos >= DEBUG_RING_SIZE)
                 epos = 0;
 
-            m_drr->buf[epos] = str[i];
+            gsl::at(m_drr->buf, epos) = str[i];
 
             epos++;
             m_drr->epos++;

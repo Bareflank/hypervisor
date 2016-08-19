@@ -29,7 +29,7 @@ class memory_manager_ut : public unittest
 public:
 
     memory_manager_ut();
-    ~memory_manager_ut() {}
+    ~memory_manager_ut() override = default;
 
 protected:
 
@@ -39,20 +39,36 @@ protected:
 
 private:
 
+    // Test the smae things for pages (single page, multiple pages)
+    // Malloc a bunc of pages, free them, and then malloc one giant page
+    //    to prove that we can unfragment memory. Do this in
+
     void test_memory_manager_malloc_zero();
-    void test_memory_manager_malloc_valid();
-    void test_memory_manager_multiple_malloc_should_be_contiguous();
-    void test_memory_manager_malloc_free_malloc();
-    void test_memory_manager_malloc_page_is_page_aligned();
     void test_memory_manager_free_zero();
-    void test_memory_manager_free_random();
-    void test_memory_manager_free_twice();
-    void test_memory_manager_malloc_all_of_memory();
-    void test_memory_manager_malloc_all_of_memory_fragmented();
-    void test_memory_manager_malloc_aligned_ignored_alignment();
-    void test_memory_manager_malloc_aligned();
-    void test_memory_manager_malloc_alloc_fragment();
-    void test_memory_manager_malloc_alloc_multiple_fragments();
+    void test_memory_manager_malloc_heap_valid();
+    void test_memory_manager_multiple_malloc_heap_should_be_contiguous();
+    void test_memory_manager_malloc_heap_free_malloc();
+    void test_memory_manager_free_heap_twice();
+    void test_memory_manager_malloc_heap_all_of_memory();
+    void test_memory_manager_malloc_heap_all_of_memory_one_block();
+    void test_memory_manager_malloc_heap_all_memory_fragmented();
+    void test_memory_manager_malloc_heap_too_much_memory_one_block();
+    void test_memory_manager_malloc_heap_too_much_memory_non_block_size();
+    void test_memory_manager_malloc_heap_really_small_fragment();
+    void test_memory_manager_malloc_heap_sparse_fragments();
+    void test_memory_manager_malloc_heap_massive();
+    void test_memory_manager_malloc_heap_resize_fragments();
+    void test_memory_manager_malloc_page_valid();
+    void test_memory_manager_multiple_malloc_page_should_be_contiguous();
+    void test_memory_manager_malloc_page_free_malloc();
+    void test_memory_manager_free_page_twice();
+    void test_memory_manager_malloc_page_all_of_memory();
+    void test_memory_manager_malloc_page_all_of_memory_one_block();
+    void test_memory_manager_malloc_page_all_memory_fragmented();
+    void test_memory_manager_malloc_page_too_much_memory_one_block();
+    void test_memory_manager_malloc_page_sparse_fragments();
+    void test_memory_manager_malloc_page_resize_fragments();
+    void test_memory_manager_malloc_page_alignment();
     void test_memory_manager_add_md_no_exceptions();
     void test_memory_manager_add_md_invalid_md();
     void test_memory_manager_add_md_invalid_virt();
@@ -60,20 +76,18 @@ private:
     void test_memory_manager_add_md_invalid_type();
     void test_memory_manager_add_md_unaligned_physical();
     void test_memory_manager_add_md_unaligned_virtual();
-    void test_memory_manager_block_to_virt_unknown();
-    void test_memory_manager_virt_to_block_unknown();
-    void test_memory_manager_is_block_aligned_unknown();
     void test_memory_manager_virt_to_phys_unknown();
     void test_memory_manager_phys_to_virt_unknown();
     void test_memory_manager_virt_to_phys_random_address();
+    void test_memory_manager_virt_to_phys_nullptr();
     void test_memory_manager_virt_to_phys_upper_limit();
     void test_memory_manager_virt_to_phys_lower_limit();
     void test_memory_manager_virt_to_phys_map();
     void test_memory_manager_phys_to_virt_random_address();
+    void test_memory_manager_phys_to_virt_nullptr();
     void test_memory_manager_phys_to_virt_upper_limit();
     void test_memory_manager_phys_to_virt_lower_limit();
     void test_memory_manager_phys_to_virt_map();
-    void test_memory_manager_power_of_two_zero();
 
     void test_page_table_x64_no_entry();
     void test_page_table_x64_with_entry();
@@ -84,29 +98,17 @@ private:
     void test_page_table_x64_add_page_twice_failure();
     void test_page_table_x64_table_phys_addr_success();
     void test_page_table_x64_table_phys_addr_failure();
-    void test_page_table_x64_coveralls_cleanup();
 
-    void test_page_table_entry_x64_null_present();
     void test_page_table_entry_x64_present();
-    void test_page_table_entry_x64_null_rw();
     void test_page_table_entry_x64_rw();
-    void test_page_table_entry_x64_null_us();
     void test_page_table_entry_x64_us();
-    void test_page_table_entry_x64_null_pwt();
     void test_page_table_entry_x64_pwt();
-    void test_page_table_entry_x64_null_pcd();
     void test_page_table_entry_x64_pcd();
-    void test_page_table_entry_x64_null_accessed();
     void test_page_table_entry_x64_accessed();
-    void test_page_table_entry_x64_null_dirty();
     void test_page_table_entry_x64_dirty();
-    void test_page_table_entry_x64_null_pat();
     void test_page_table_entry_x64_pat();
-    void test_page_table_entry_x64_null_global();
     void test_page_table_entry_x64_global();
-    void test_page_table_entry_x64_null_nx();
     void test_page_table_entry_x64_nx();
-    void test_page_table_entry_x64_null_phys_addr();
     void test_page_table_entry_x64_phys_addr();
 };
 

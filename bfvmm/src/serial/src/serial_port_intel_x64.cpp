@@ -21,10 +21,10 @@
 
 #include <serial/serial_port_intel_x64.h>
 
-serial_port_intel_x64::serial_port_intel_x64(const std::shared_ptr<intrinsics_intel_x64> &intrinsics,
+serial_port_intel_x64::serial_port_intel_x64(std::shared_ptr<intrinsics_intel_x64> intrinsics,
         uint16_t port) noexcept :
     m_port(port),
-    m_intrinsics(intrinsics)
+    m_intrinsics(std::move(intrinsics))
 {
     if (!m_intrinsics)
         m_intrinsics = std::make_shared<intrinsics_intel_x64>();
@@ -222,7 +222,7 @@ serial_port_intel_x64::parity_bits() const noexcept
 void
 serial_port_intel_x64::write(char c) noexcept
 {
-    while (line_status_empty_transmitter() == false);
+    while (!line_status_empty_transmitter());
 
     m_intrinsics->write_portio_8(m_port, c);
 }

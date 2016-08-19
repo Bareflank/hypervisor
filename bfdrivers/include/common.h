@@ -119,7 +119,7 @@ common_fini(void);
  * @return BF_SUCCESS on success, negative error code on failure
  */
 int64_t
-common_add_module(char *file, int64_t fsize);
+common_add_module(const char *file, int64_t fsize);
 
 /**
  * Load VMM
@@ -176,12 +176,12 @@ common_stop_vmm(void);
  * from the VMM. Note that the VMM must at least be loaded for this function
  * to work as it has to do a symbol lookup
  *
- * @param user_drr a pointer to the drr provided by the user
+ * @param drr a pointer to the drr provided by the user
  * @param vcpuid indicates which drr to get as each vcpu has its own drr
  * @return BF_SUCCESS on success, negative error code on failure
  */
 int64_t
-common_dump_vmm(struct debug_ring_resources_t **user_drr, uint64_t vcpuid);
+common_dump_vmm(struct debug_ring_resources_t **drr, uint64_t vcpuid);
 
 #ifdef __cplusplus
 }

@@ -24,9 +24,9 @@
 void
 bfelf_loader_ut::test_bfelf_file_get_segment_invalid_ef()
 {
-    bfelf_phdr *phdr = 0;
+    bfelf_phdr *phdr = nullptr;
 
-    auto ret = bfelf_file_get_segment(0, 0, &phdr);
+    auto ret = bfelf_file_get_segment(nullptr, 0, &phdr);
     EXPECT_TRUE(ret == BFELF_ERROR_INVALID_ARG);
 }
 
@@ -35,10 +35,10 @@ bfelf_loader_ut::test_bfelf_file_get_segment_invalid_index()
 {
     auto ret = 0LL;
     bfelf_file_t ef;
-    bfelf_phdr *phdr = 0;
+    bfelf_phdr *phdr = nullptr;
     auto test = get_test();
 
-    ret = bfelf_file_init((char *)&test, sizeof(test), &ef);
+    ret = bfelf_file_init(reinterpret_cast<char *>(&test), sizeof(test), &ef);
     EXPECT_TRUE(ret == BFELF_SUCCESS);
 
     ret = bfelf_file_get_segment(&ef, 10, &phdr);
@@ -52,10 +52,10 @@ bfelf_loader_ut::test_bfelf_file_get_segment_invalid_phdr()
     bfelf_file_t ef;
     auto test = get_test();
 
-    ret = bfelf_file_init((char *)&test, sizeof(test), &ef);
+    ret = bfelf_file_init(reinterpret_cast<char *>(&test), sizeof(test), &ef);
     EXPECT_TRUE(ret == BFELF_SUCCESS);
 
-    ret = bfelf_file_get_segment(&ef, 0, 0);
+    ret = bfelf_file_get_segment(&ef, 0, nullptr);
     EXPECT_TRUE(ret == BFELF_ERROR_INVALID_ARG);
 }
 
@@ -64,10 +64,10 @@ bfelf_loader_ut::test_bfelf_file_get_segment_success()
 {
     auto ret = 0LL;
     bfelf_file_t ef;
-    bfelf_phdr *phdr = 0;
+    bfelf_phdr *phdr = nullptr;
     auto test = get_test();
 
-    ret = bfelf_file_init((char *)&test, sizeof(test), &ef);
+    ret = bfelf_file_init(reinterpret_cast<char *>(&test), sizeof(test), &ef);
     EXPECT_TRUE(ret == BFELF_SUCCESS);
 
     ret = bfelf_file_get_segment(&ef, 0, &phdr);

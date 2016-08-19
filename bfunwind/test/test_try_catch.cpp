@@ -40,7 +40,7 @@ auto g_raii_count = 0;
 class raii
 {
 public:
-    raii() {}
+    raii() = default;
     ~raii() { g_raii_count++; }
 };
 
@@ -68,8 +68,10 @@ void
 throw_custom_exception_func()
 { throw bfn::general_exception(); }
 
-std::ostream &operator<<(std::ostream &os, const raii &)
+std::ostream &operator<<(std::ostream &os, const raii &unused)
 {
+    (void) unused;
+
     throw_exception_func();
     return os;
 }
@@ -113,7 +115,7 @@ bfunwind_ut::test_catch_all()
         caught = true;
     }
 
-    EXPECT_TRUE(caught == true);
+    EXPECT_TRUE(caught);
 }
 
 void
@@ -129,12 +131,12 @@ bfunwind_ut::test_catch_bool()
     catch (bool val)
     {
         caught = true;
-        EXPECT_TRUE(val == true);
+        EXPECT_TRUE(val);
     }
     catch (...)
     {}
 
-    EXPECT_TRUE(caught == true);
+    EXPECT_TRUE(caught);
 }
 
 void
@@ -155,7 +157,7 @@ bfunwind_ut::test_catch_int()
     catch (...)
     {}
 
-    EXPECT_TRUE(caught == true);
+    EXPECT_TRUE(caught);
 }
 
 void
@@ -176,7 +178,7 @@ bfunwind_ut::test_catch_cstr()
     catch (...)
     {}
 
-    EXPECT_TRUE(caught == true);
+    EXPECT_TRUE(caught);
 }
 
 void
@@ -197,7 +199,7 @@ bfunwind_ut::test_catch_string()
     catch (...)
     {}
 
-    EXPECT_TRUE(caught == true);
+    EXPECT_TRUE(caught);
 }
 
 void
@@ -217,7 +219,7 @@ bfunwind_ut::test_catch_exception()
     catch (...)
     {}
 
-    EXPECT_TRUE(caught == true);
+    EXPECT_TRUE(caught);
 }
 
 void
@@ -237,7 +239,7 @@ bfunwind_ut::test_catch_custom_exception()
     catch (...)
     {}
 
-    EXPECT_TRUE(caught == true);
+    EXPECT_TRUE(caught);
 }
 
 void
@@ -254,7 +256,7 @@ bfunwind_ut::test_catch_multiple_catches_per_function()
         caught = true;
     }
 
-    EXPECT_TRUE(caught == true);
+    EXPECT_TRUE(caught);
     caught = false;
 
     try
@@ -266,7 +268,7 @@ bfunwind_ut::test_catch_multiple_catches_per_function()
         caught = true;
     }
 
-    EXPECT_TRUE(caught == true);
+    EXPECT_TRUE(caught);
     caught = false;
 
     try
@@ -278,7 +280,7 @@ bfunwind_ut::test_catch_multiple_catches_per_function()
         caught = true;
     }
 
-    EXPECT_TRUE(caught == true);
+    EXPECT_TRUE(caught);
 }
 
 void
@@ -302,7 +304,7 @@ bfunwind_ut::test_catch_raii()
         caught = true;
     }
 
-    EXPECT_TRUE(caught == true);
+    EXPECT_TRUE(caught);
     EXPECT_TRUE(g_raii_count == 5);
 }
 
@@ -321,7 +323,7 @@ bfunwind_ut::test_catch_throw_from_stream()
         caught = true;
     }
 
-    EXPECT_TRUE(caught == true);
+    EXPECT_TRUE(caught);
 }
 
 void
@@ -348,8 +350,8 @@ bfunwind_ut::test_catch_nested_throw_in_catch()
         caught2 = true;
     }
 
-    EXPECT_TRUE(caught1 == true);
-    EXPECT_TRUE(caught2 == true);
+    EXPECT_TRUE(caught1);
+    EXPECT_TRUE(caught2);
 }
 
 void
@@ -376,8 +378,8 @@ bfunwind_ut::test_catch_nested_throw_outside_catch()
         caught2 = true;
     }
 
-    EXPECT_TRUE(caught1 == true);
-    EXPECT_TRUE(caught2 == true);
+    EXPECT_TRUE(caught1);
+    EXPECT_TRUE(caught2);
 }
 
 void
@@ -402,8 +404,8 @@ bfunwind_ut::test_catch_nested_throw_uncaught()
         caught2 = true;
     }
 
-    EXPECT_TRUE(caught1 == false);
-    EXPECT_TRUE(caught2 == true);
+    EXPECT_FALSE(caught1);
+    EXPECT_TRUE(caught2);
 }
 
 void
@@ -429,8 +431,8 @@ bfunwind_ut::test_catch_nested_throw_rethrow()
         caught2 = true;
     }
 
-    EXPECT_TRUE(caught1 == true);
-    EXPECT_TRUE(caught2 == true);
+    EXPECT_TRUE(caught1);
+    EXPECT_TRUE(caught2);
 }
 
 void
@@ -438,13 +440,13 @@ bfunwind_ut::test_catch_throw_with_lots_of_register_mods()
 {
     auto caught = false;
 
-    register auto r01 = 1;
-    register auto r02 = 2;
-    register auto r03 = 3;
-    register auto r04 = 4;
-    register auto r05 = 5;
-    register auto r06 = 6;
-    register auto r07 = 7;
+    auto r01 = 1;
+    auto r02 = 2;
+    auto r03 = 3;
+    auto r04 = 4;
+    auto r05 = 5;
+    auto r06 = 6;
+    auto r07 = 7;
 
     try
     {
@@ -455,7 +457,7 @@ bfunwind_ut::test_catch_throw_with_lots_of_register_mods()
         caught = true;
     }
 
-    EXPECT_TRUE(caught == true);
+    EXPECT_TRUE(caught);
     EXPECT_TRUE(r01 == 1);
     EXPECT_TRUE(r02 == 2);
     EXPECT_TRUE(r03 == 3);
@@ -466,13 +468,13 @@ bfunwind_ut::test_catch_throw_with_lots_of_register_mods()
 
     caught = false;
 
-    register auto r11 = 1;
-    register auto r12 = 2;
-    register auto r13 = 3;
-    register auto r14 = 4;
-    register auto r15 = 5;
-    register auto r16 = 6;
-    register auto r17 = 7;
+    auto r11 = 1;
+    auto r12 = 2;
+    auto r13 = 3;
+    auto r14 = 4;
+    auto r15 = 5;
+    auto r16 = 6;
+    auto r17 = 7;
 
     try
     {
@@ -483,7 +485,7 @@ bfunwind_ut::test_catch_throw_with_lots_of_register_mods()
         caught = true;
     }
 
-    EXPECT_TRUE(caught == true);
+    EXPECT_TRUE(caught);
     EXPECT_TRUE(r11 == 1);
     EXPECT_TRUE(r12 == 2);
     EXPECT_TRUE(r13 == 3);

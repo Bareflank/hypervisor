@@ -140,12 +140,12 @@ public:
 
     /// Default Constructor
     ///
-    serial_port_intel_x64(const std::shared_ptr<intrinsics_intel_x64> &intrinsics = nullptr,
+    serial_port_intel_x64(std::shared_ptr<intrinsics_intel_x64> intrinsics = nullptr,
                           uint16_t port = DEFAULT_COM_PORT) noexcept;
 
     /// Destructor
     ///
-    virtual ~serial_port_intel_x64() {}
+    virtual ~serial_port_intel_x64() = default;
 
     /// Get Instance
     ///

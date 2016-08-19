@@ -21,6 +21,41 @@
 
 #include <test.h>
 
+#ifndef __clang__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-result"
+#endif
+
+void *
+operator new(std::size_t size)
+{
+    if ((size & (MAX_PAGE_SIZE - 1)) == 0)
+    {
+        void *ptr = nullptr;
+        posix_memalign(&ptr, MAX_PAGE_SIZE, size);
+        return ptr;
+    }
+
+    return malloc(size);
+}
+
+#ifndef __clang__
+#pragma GCC diagnostic pop
+#endif
+
+void
+operator delete(void *ptr, std::size_t size) throw()
+{
+    (void) size;
+    free(ptr);
+}
+
+void
+operator delete(void *ptr) throw()
+{
+    free(ptr);
+}
+
 memory_manager_ut::memory_manager_ut()
 {
 }
@@ -41,19 +76,31 @@ bool
 memory_manager_ut::list()
 {
     this->test_memory_manager_malloc_zero();
-    this->test_memory_manager_malloc_valid();
-    this->test_memory_manager_multiple_malloc_should_be_contiguous();
-    this->test_memory_manager_malloc_free_malloc();
-    this->test_memory_manager_malloc_page_is_page_aligned();
     this->test_memory_manager_free_zero();
-    this->test_memory_manager_free_random();
-    this->test_memory_manager_free_twice();
-    this->test_memory_manager_malloc_all_of_memory();
-    this->test_memory_manager_malloc_all_of_memory_fragmented();
-    this->test_memory_manager_malloc_aligned_ignored_alignment();
-    this->test_memory_manager_malloc_aligned();
-    this->test_memory_manager_malloc_alloc_fragment();
-    this->test_memory_manager_malloc_alloc_multiple_fragments();
+    this->test_memory_manager_malloc_heap_valid();
+    this->test_memory_manager_multiple_malloc_heap_should_be_contiguous();
+    this->test_memory_manager_malloc_heap_free_malloc();
+    this->test_memory_manager_free_heap_twice();
+    this->test_memory_manager_malloc_heap_all_of_memory();
+    this->test_memory_manager_malloc_heap_all_of_memory_one_block();
+    this->test_memory_manager_malloc_heap_all_memory_fragmented();
+    this->test_memory_manager_malloc_heap_too_much_memory_one_block();
+    this->test_memory_manager_malloc_heap_too_much_memory_non_block_size();
+    this->test_memory_manager_malloc_heap_really_small_fragment();
+    this->test_memory_manager_malloc_heap_sparse_fragments();
+    this->test_memory_manager_malloc_heap_massive();
+    this->test_memory_manager_malloc_heap_resize_fragments();
+    this->test_memory_manager_malloc_page_valid();
+    this->test_memory_manager_multiple_malloc_page_should_be_contiguous();
+    this->test_memory_manager_malloc_page_free_malloc();
+    this->test_memory_manager_free_page_twice();
+    this->test_memory_manager_malloc_page_all_of_memory();
+    this->test_memory_manager_malloc_page_all_of_memory_one_block();
+    this->test_memory_manager_malloc_page_all_memory_fragmented();
+    this->test_memory_manager_malloc_page_too_much_memory_one_block();
+    this->test_memory_manager_malloc_page_sparse_fragments();
+    this->test_memory_manager_malloc_page_resize_fragments();
+    this->test_memory_manager_malloc_page_alignment();
     this->test_memory_manager_add_md_no_exceptions();
     this->test_memory_manager_add_md_invalid_md();
     this->test_memory_manager_add_md_invalid_virt();
@@ -61,20 +108,18 @@ memory_manager_ut::list()
     this->test_memory_manager_add_md_invalid_type();
     this->test_memory_manager_add_md_unaligned_physical();
     this->test_memory_manager_add_md_unaligned_virtual();
-    this->test_memory_manager_block_to_virt_unknown();
-    this->test_memory_manager_virt_to_block_unknown();
-    this->test_memory_manager_is_block_aligned_unknown();
     this->test_memory_manager_virt_to_phys_unknown();
     this->test_memory_manager_phys_to_virt_unknown();
     this->test_memory_manager_virt_to_phys_random_address();
+    this->test_memory_manager_virt_to_phys_nullptr();
     this->test_memory_manager_virt_to_phys_upper_limit();
     this->test_memory_manager_virt_to_phys_lower_limit();
     this->test_memory_manager_virt_to_phys_map();
     this->test_memory_manager_phys_to_virt_random_address();
+    this->test_memory_manager_phys_to_virt_nullptr();
     this->test_memory_manager_phys_to_virt_upper_limit();
     this->test_memory_manager_phys_to_virt_lower_limit();
     this->test_memory_manager_phys_to_virt_map();
-    this->test_memory_manager_power_of_two_zero();
 
     this->test_page_table_x64_no_entry();
     this->test_page_table_x64_with_entry();
@@ -85,29 +130,17 @@ memory_manager_ut::list()
     this->test_page_table_x64_add_page_twice_failure();
     this->test_page_table_x64_table_phys_addr_success();
     this->test_page_table_x64_table_phys_addr_failure();
-    this->test_page_table_x64_coveralls_cleanup();
 
-    this->test_page_table_entry_x64_null_present();
     this->test_page_table_entry_x64_present();
-    this->test_page_table_entry_x64_null_rw();
     this->test_page_table_entry_x64_rw();
-    this->test_page_table_entry_x64_null_us();
     this->test_page_table_entry_x64_us();
-    this->test_page_table_entry_x64_null_pwt();
     this->test_page_table_entry_x64_pwt();
-    this->test_page_table_entry_x64_null_pcd();
     this->test_page_table_entry_x64_pcd();
-    this->test_page_table_entry_x64_null_accessed();
     this->test_page_table_entry_x64_accessed();
-    this->test_page_table_entry_x64_null_dirty();
     this->test_page_table_entry_x64_dirty();
-    this->test_page_table_entry_x64_null_pat();
     this->test_page_table_entry_x64_pat();
-    this->test_page_table_entry_x64_null_global();
     this->test_page_table_entry_x64_global();
-    this->test_page_table_entry_x64_null_nx();
     this->test_page_table_entry_x64_nx();
-    this->test_page_table_entry_x64_null_phys_addr();
     this->test_page_table_entry_x64_phys_addr();
 
     return true;

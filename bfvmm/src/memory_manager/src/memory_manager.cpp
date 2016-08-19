@@ -23,55 +23,35 @@
 #include <unistd.h>
 #include <string.h>
 
+#include <array>
+#include <gsl/gsl>
+
 #include <debug.h>
 #include <constants.h>
 #include <guard_exceptions.h>
-#include <commit_or_rollback.h>
 #include <memory_manager/memory_manager.h>
 
 // -----------------------------------------------------------------------------
 // Macros
 // -----------------------------------------------------------------------------
 
-#define FREE_BLOCK (-1)
+#define ALLOCATED 0x8000000000000000
 
 // -----------------------------------------------------------------------------
 // Global Memory
 // -----------------------------------------------------------------------------
 
-// The following defines the entire memory pool. This pool will be used by the
-// VMM to create the different resources that it needs, which is mainly given
-// out using new/delete. If space runs out, this will need to be increased.
-uint8_t g_mem_pool[MAX_MEM_POOL] ALIGN_MEMORY = {0};
+struct mmpage_t
+{ uint8_t mem[MAX_PAGE_SIZE]; };
 
-// The memory pool itself is given out in blocks. Any attempt to new / delete
-// will always allocate at least a block of memory, which is usually set to a
-// cache line size. This stores whether a block is allocated or not. Note that
-// the way we know if a block is allocated, is it's not set to FREE_BLOCK.
-// We use the value stored here to tell us what the starting address is when a
-// block is allocated. This greatly simplifies freeing memory at the expense of
-// a lot of memory needed to manage memory.
-int64_t g_block_allocated[MAX_BLOCKS] = {0};
+uint64_t g_heap_pool_owner[MAX_HEAP_POOL] __attribute__((aligned(MAX_PAGE_SIZE))) = {};
+gsl::span<uint64_t> g_heap_pool{g_heap_pool_owner};
 
-// -----------------------------------------------------------------------------
-// Helpers
-// -----------------------------------------------------------------------------
+mmpage_t g_page_pool_owner[MAX_PAGE_POOL] __attribute__((aligned(MAX_PAGE_SIZE))) = {};
+gsl::span<mmpage_t> g_page_pool{g_page_pool_owner};
 
-void *
-out_of_memory(void) noexcept
-{
-
-#if defined(OUT_OF_MEMORY_ABORT)
-
-    const char *msg = "FATAL ERROR: Out of memory!!!";
-
-    write(0, msg, strlen(msg));
-    abort();
-
-#endif
-
-    return 0;
-}
+uint64_t g_page_allocated_owner[MAX_PAGE_POOL] __attribute__((aligned(MAX_PAGE_SIZE))) = {};
+gsl::span<uint64_t> g_page_allocated{g_page_allocated_owner};
 
 // -----------------------------------------------------------------------------
 // Mutexes
@@ -93,219 +73,264 @@ memory_manager::instance() noexcept
     return &self;
 }
 
-int64_t
-memory_manager::free_blocks() noexcept
-{
-    auto num_blocks = 0;
-    std::lock_guard<std::mutex> guard(g_malloc_mutex);
-
-    for (auto i = 0ULL; i < MAX_BLOCKS; i++)
-        if (g_block_allocated[i] == FREE_BLOCK)
-            num_blocks++;
-
-    return num_blocks;
-}
-
 void *
 memory_manager::malloc(size_t size) noexcept
 {
-    return malloc_aligned(size, size == MAX_PAGE_SIZE ? MAX_PAGE_SIZE : 0);
-}
-
-void *
-memory_manager::malloc_aligned(size_t size, uint64_t alignment) noexcept
-{
     if (size == 0)
-        return 0;
+        return nullptr;
 
-    std::lock_guard<std::mutex> guard(g_malloc_mutex);
-
-    // This is a really simple "first fit" algorithm. The only optimization
-    // that we have here is m_start. This algorithm works by looping from
-    // the start of the list of blocks, and looking for a contiguous set of
-    // blocks, that matches the provided alignment. Once we find the set of
-    // blocks the user is asking for, we set each block to "allocated" by
-    // providing the start block for the chunk of memory that was allocated.
-    // Free will use this "start" block to identify the starting block for
-    // any allocated virtual address.
+    // We ensure that when allocating memory that if it is a multiple of a page,
+    // we use the page pool instead of the heap. The page pool is page aligned
+    // which is needed for a lot of tasks.
     //
-    // m_start defines the starting position to search the list of blocks.
-    // Without m_start, we would start from 0, and loop to MAX_BLOCKS on
-    // every allocation. In practice, we don't need to start from 0, as each
-    // block is likely to be consumed as we allocate more and more memory.
-    // It's not until the first hole or "fragmentation" occurs, that m_start
-    // must stop until the fragmentation is removed.
+    // Note that when creating a shared_ptr, the reference counter is allocated
+    // with the memory which means that if you std::make_shared<page>() you
+    // will allocate more than a page, resulting in unaligned memory. The
+    // solution to this is to new the memory, and pass the resulting ptr to
+    // share_ptr constructor (which will create it's own reference on it's own)
+    //
+    // Note the heap uses a header to keep track of each segment, while the
+    // page pool uses a seperate allocated buffer. The page pool needs it's
+    // own buffer to ensure each page is page aligned.
 
-    auto count = 0ULL;
-    auto block = 0ULL;
-    auto reset = 0ULL;
-    auto num_blocks = size >> MAX_CACHE_LINE_SHIFT;
+    if ((size & (MAX_PAGE_SIZE - 1)) == 0)
+        return malloc_page(size);
 
-    if ((size & (MAX_CACHE_LINE_SIZE - 1)) != 0)
-        num_blocks++;
-
-    for (auto b = m_start; b < MAX_BLOCKS && count < num_blocks; b++)
-    {
-        if (g_block_allocated[b] == FREE_BLOCK)
-        {
-            if (count == 0)
-            {
-                if (is_block_aligned(b, alignment) == false)
-                {
-                    reset = 1;
-                    continue;
-                }
-
-                block = b;
-            }
-
-            count++;
-
-            if (reset == 0 && b > m_start)
-                m_start = b;
-        }
-        else
-        {
-            if (count > 0)
-                reset = 1;
-
-            count = 0;
-        }
-    }
-
-    if (count == num_blocks)
-    {
-        for (auto b = block; b < MAX_BLOCKS && b < num_blocks + block; b++)
-            g_block_allocated[b] = block;
-
-        return block_to_virt(block);
-    }
-
-    return out_of_memory();
+    return malloc_heap(size);
 }
 
 void
 memory_manager::free(void *ptr) noexcept
 {
-    if (ptr == 0)
+    if (ptr == nullptr)
         return;
 
-    std::lock_guard<std::mutex> guard(g_malloc_mutex);
+    if (g_heap_pool.contains(static_cast<uint64_t *>(ptr)))
+        free_heap(ptr);
 
-    // Our version of free is a lot cleaner than most memory manager, but is
-    // terribly inefficent with respect to how much memory it consumes for
-    // bookeeping. We store the starting block for every virtual address.
-    // This means that if you were to delete a base class for a subclass
-    // that did not specify "virtual" for the base class, all of memory
-    // would still be deleted. This is because we know where the starting
-    // address should be even if the virtual address that was provided is
-    // offset from the virtual address that was actually allocated.
-    //
-    // Also note that we need to adjust m_start if we freed memory that
-    // opened up a "fragmentation" in list of allocated blocks.
-
-    auto block = virt_to_block(ptr);
-
-    if (block < 0 || static_cast<uint32_t>(block) >= MAX_BLOCKS)
-        return;
-
-    auto start = g_block_allocated[block];
-
-    if (start < 0 || static_cast<uint32_t>(start) >= MAX_BLOCKS)
-        return;
-
-    for (auto b = static_cast<uint32_t>(start); b < MAX_BLOCKS; b++)
-    {
-        if (b < m_start)
-            m_start = b;
-
-        if (g_block_allocated[b] != start)
-            break;
-
-        g_block_allocated[b] = FREE_BLOCK;
-    }
+    if (g_page_pool.contains(static_cast<mmpage_t *>(ptr)))
+        free_page(ptr);
 }
 
-void *
-memory_manager::block_to_virt(int64_t block) noexcept
-{
-    if (block < 0 || static_cast<uint32_t>(block) >= MAX_BLOCKS)
-        return 0;
-
-    return g_mem_pool + (block * MAX_CACHE_LINE_SIZE);
-}
-
-int64_t
-memory_manager::virt_to_block(void *virt) noexcept
-{
-    if (virt < g_mem_pool || virt >= g_mem_pool + MAX_MEM_POOL)
-        return -1;
-
-    return (reinterpret_cast<uint8_t *>(virt) - g_mem_pool) >> MAX_CACHE_LINE_SHIFT;
-}
-
-void *
-memory_manager::virt_to_phys(void *virt)
+uintptr_t
+memory_manager::virt_to_phys(uintptr_t virt)
 {
     std::lock_guard<std::mutex> guard(g_add_md_mutex);
 
-    auto key = reinterpret_cast<uintptr_t>(virt) >> MAX_PAGE_SHIFT;
-    const auto &md_iter = m_virt_to_phys_map.find(key);
+    const auto &md_iter = m_virt_to_phys_map.find(virt >> MAX_PAGE_SHIFT);
 
     if (md_iter == m_virt_to_phys_map.end())
         return 0;
 
-    auto upper = (reinterpret_cast<uintptr_t>(md_iter->second.phys) & ~(MAX_PAGE_SIZE - 1));
-    auto lower = (reinterpret_cast<uintptr_t>(virt) & (MAX_PAGE_SIZE - 1));
+    auto upper = md_iter->second.phys & ~(MAX_PAGE_SIZE - 1);
+    auto lower = virt & (MAX_PAGE_SIZE - 1);
 
-    return reinterpret_cast<void *>(upper | lower);
+    return upper | lower;
+}
+
+uintptr_t
+memory_manager::virt_to_phys(void *virt)
+{
+    return this->virt_to_phys(reinterpret_cast<uintptr_t>(virt));
 }
 
 void *
-memory_manager::phys_to_virt(void *phys)
+memory_manager::virt_to_phys_ptr(uintptr_t virt)
+{
+    return reinterpret_cast<void *>(this->virt_to_phys(virt));
+}
+
+void *
+memory_manager::virt_to_phys_ptr(void *virt)
+{
+    return reinterpret_cast<void *>(this->virt_to_phys(virt));
+}
+
+uintptr_t
+memory_manager::phys_to_virt(uintptr_t phys)
 {
     std::lock_guard<std::mutex> guard(g_add_md_mutex);
 
-    auto key = reinterpret_cast<uintptr_t>(phys) >> MAX_PAGE_SHIFT;
-    const auto &md_iter = m_phys_to_virt_map.find(key);
+    const auto &md_iter = m_phys_to_virt_map.find(phys >> MAX_PAGE_SHIFT);
 
     if (md_iter == m_phys_to_virt_map.end())
         return 0;
 
-    auto upper = (reinterpret_cast<uintptr_t>(md_iter->second.virt) & ~(MAX_PAGE_SIZE - 1));
-    auto lower = (reinterpret_cast<uintptr_t>(phys) & (MAX_PAGE_SIZE - 1));
+    auto upper = md_iter->second.virt & ~(MAX_PAGE_SIZE - 1);
+    auto lower = phys & (MAX_PAGE_SIZE - 1);
 
-    return reinterpret_cast<void *>(upper | lower);
+    return upper | lower;
 }
 
-bool
-memory_manager::private_is_power_of_2(uint64_t x) noexcept
+uintptr_t
+memory_manager::phys_to_virt(void *phys)
 {
-    if (x <= 0)
-        return false;
-
-    return !(x & (x - 1));
+    return this->phys_to_virt(reinterpret_cast<uintptr_t>(phys));
 }
 
-bool
-memory_manager::is_block_aligned(int64_t block, int64_t alignment) noexcept
+void *
+memory_manager::phys_to_virt_ptr(uintptr_t phys)
 {
-    if (block < 0 || static_cast<uint32_t>(block) >= MAX_BLOCKS)
-        return false;
+    return reinterpret_cast<void *>(this->phys_to_virt(phys));
+}
 
-    if (alignment <= 0)
-        return true;
+void *
+memory_manager::phys_to_virt_ptr(void *phys)
+{
+    return reinterpret_cast<void *>(this->phys_to_virt(phys));
+}
 
-    if (this->private_is_power_of_2(alignment) == false)
-        return false;
+void *
+memory_manager::malloc_heap(size_t size) noexcept
+{
+    int64_t blocks = (size & (0x7)) != 0 ? (size >> 3) + 2 : (size >> 3) + 1;
 
-    return (reinterpret_cast<uint64_t>(block_to_virt(block)) & (alignment - 1)) == 0;
+    if (blocks > g_heap_pool.size())
+        return nullptr;
+
+    std::lock_guard<std::mutex> guard(g_malloc_mutex);
+
+    int64_t sidx = m_heap_index;
+    int64_t cidx = m_heap_index;
+    int64_t fragment_size = 0;
+
+    auto fa1 = gsl::finally([&]
+    {
+        m_heap_index = sidx + blocks;
+    });
+
+    auto fa2 = gsl::finally([&]
+    {
+        g_heap_pool[sidx] = blocks | ALLOCATED;
+    });
+
+    while (cidx < g_heap_pool.size() && sidx + blocks <= g_heap_pool.size())
+    {
+        if (g_heap_pool[cidx] == 0)
+            return &g_heap_pool[sidx + 1];
+
+        auto allocated = ((g_heap_pool[cidx] & ALLOCATED) == 0);
+
+        if (allocated)
+        {
+            fragment_size += g_heap_pool[cidx];
+
+            if (fragment_size == blocks)
+                return &g_heap_pool[sidx + 1];
+
+            if (fragment_size < blocks)
+                fa1.ignore();
+
+            if (fragment_size > blocks)
+            {
+                g_heap_pool[sidx + blocks] = fragment_size - blocks;
+                return &g_heap_pool[sidx + 1];
+            }
+        }
+
+        cidx += (g_heap_pool[cidx] & ~ALLOCATED);
+
+        if (!allocated)
+        {
+            sidx = cidx;
+            fragment_size = 0;
+        }
+    }
+
+    fa1.ignore();
+    fa2.ignore();
+
+    return nullptr;
+}
+
+void *
+memory_manager::malloc_page(size_t size) noexcept
+{
+    int64_t pages = size >> 12;
+
+    if (pages > g_page_allocated.size())
+        return nullptr;
+
+    std::lock_guard<std::mutex> guard(g_malloc_mutex);
+
+    int64_t sidx = m_page_index;
+    int64_t cidx = m_page_index;
+    int64_t fragment_size = 0;
+
+    auto fa1 = gsl::finally([&]
+    {
+        m_page_index = sidx + pages;
+    });
+
+    auto fa2 = gsl::finally([&]
+    {
+        g_page_allocated[sidx] = pages | ALLOCATED;
+    });
+
+    while (cidx < g_page_pool.size() && sidx + pages <= g_page_pool.size())
+    {
+        if (g_page_allocated[cidx] == 0)
+            return &g_page_pool[sidx];
+
+        auto allocated = ((g_page_allocated[cidx] & ALLOCATED) == 0);
+
+        if (allocated)
+        {
+            fragment_size += g_page_allocated[cidx];
+
+            if (fragment_size == pages)
+                return &g_page_pool[sidx];
+
+            if (fragment_size < pages)
+                fa1.ignore();
+
+            if (fragment_size > pages)
+            {
+                g_page_allocated[sidx + pages] = fragment_size - pages;
+                return &g_page_pool[sidx];
+            }
+        }
+
+        cidx += (g_page_allocated[cidx] & ~ALLOCATED);
+
+        if (!allocated)
+        {
+            sidx = cidx;
+            fragment_size = 0;
+        }
+    }
+
+    fa1.ignore();
+    fa2.ignore();
+
+    return nullptr;
+}
+
+void
+memory_manager::free_heap(void *ptr) noexcept
+{
+    auto idx = g_heap_pool.index_from_ptr(static_cast<uint64_t *>(ptr)) - 1;
+
+    g_heap_pool[idx] &= ~ALLOCATED;
+
+    if (m_heap_index > static_cast<uint64_t>(idx))
+        m_heap_index = idx;
+}
+void
+memory_manager::free_page(void *ptr) noexcept
+{
+    auto idx = g_page_pool.index_from_ptr(static_cast<mmpage_t *>(ptr));
+
+    g_page_allocated[idx] &= ~ALLOCATED;
+
+    if (m_page_index > static_cast<uint64_t>(idx))
+        m_page_index = idx;
 }
 
 void
 memory_manager::add_md(memory_descriptor *md)
 {
-    if (md == NULL)
+    if (md == nullptr)
         throw std::invalid_argument("md == NULL");
 
     if (md->virt == 0)
@@ -320,7 +345,7 @@ memory_manager::add_md(memory_descriptor *md)
     if ((reinterpret_cast<uintptr_t>(md->phys) & (MAX_PAGE_SIZE - 1)) != 0)
         throw std::logic_error("phys address is not page aligned");
 
-    auto cor1 = commit_or_rollback([&]
+    auto fa1 = gsl::finally([&]
     {
         std::lock_guard<std::mutex> guard(g_add_md_mutex);
 
@@ -338,18 +363,24 @@ memory_manager::add_md(memory_descriptor *md)
         m_phys_to_virt_map[reinterpret_cast<uintptr_t>(md->phys) >> MAX_PAGE_SHIFT] = *md;
     }
 
-    cor1.commit();
+    fa1.ignore();
 }
 
-memory_manager::memory_manager() noexcept
+void
+memory_manager::clear() noexcept
 {
-    m_start = 0;
+    m_heap_index = 0;
+    m_page_index = 0;
 
-    for (auto i = 0ULL; i < MAX_MEM_POOL; i++)
-        g_mem_pool[i] = 0;
+    __builtin_memset(static_cast<void *>(g_heap_pool_owner), 0, MAX_HEAP_POOL * sizeof(uint64_t));
+    __builtin_memset(static_cast<void *>(g_page_pool_owner), 0, MAX_PAGE_POOL * sizeof(mmpage_t));
+    __builtin_memset(static_cast<void *>(g_page_allocated_owner), 0, MAX_PAGE_POOL * sizeof(uint64_t));
+}
 
-    for (auto i = 0ULL; i < MAX_BLOCKS; i++)
-        g_block_allocated[i] = FREE_BLOCK;
+memory_manager::memory_manager() noexcept :
+    m_heap_index(0),
+    m_page_index(0)
+{
 }
 
 extern "C" int64_t
@@ -368,13 +399,8 @@ _malloc_r(struct _reent *reent, size_t size)
 {
     (void) reent;
 
-    if (auto ptr = static_cast<char *>(g_mm->malloc(size)))
-    {
-        for (auto i = 0ULL; i < size; i++)
-            ptr[i] = 0;
-
-        return ptr;
-    }
+    if (auto ptr = g_mm->malloc(size))
+        return __builtin_memset(ptr, 0, size);
 
     return nullptr;
 }

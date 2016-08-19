@@ -31,7 +31,7 @@ debug_ring_resources_t *g_drr;
 void
 driver_entry_ut::test_common_dump_invalid_drr()
 {
-    EXPECT_TRUE(common_dump_vmm(0, 0) == BF_ERROR_INVALID_ARG);
+    EXPECT_TRUE(common_dump_vmm(nullptr, 0) == BF_ERROR_INVALID_ARG);
 }
 
 void

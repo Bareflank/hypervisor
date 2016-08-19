@@ -21,205 +21,139 @@
 
 #include <memory_manager/page_table_entry_x64.h>
 
-page_table_entry_x64::page_table_entry_x64(uintptr_t *entry) noexcept :
-    m_entry(entry)
+page_table_entry_x64::page_table_entry_x64(gsl::not_null<uintptr_t *> pte) noexcept :
+    m_pte(pte)
 {
 }
 
 bool
 page_table_entry_x64::present() const noexcept
 {
-    if (m_entry == nullptr)
-        return false;
-
-    return (*m_entry & PTE_FLAGS_P);
+    return (*m_pte & PTE_FLAGS_P) != 0;
 }
 
 void
 page_table_entry_x64::set_present(bool enabled) noexcept
 {
-    if (m_entry == nullptr)
-        return;
-
-    enabled ? *m_entry |= PTE_FLAGS_P : *m_entry &= ~PTE_FLAGS_P;
+    enabled ? *m_pte |= PTE_FLAGS_P : *m_pte &= ~PTE_FLAGS_P;
 }
 
 bool
 page_table_entry_x64::rw() const noexcept
 {
-    if (m_entry == nullptr)
-        return false;
-
-    return (*m_entry & PTE_FLAGS_RW);
+    return (*m_pte & PTE_FLAGS_RW) != 0;
 }
 
 void
 page_table_entry_x64::set_rw(bool enabled) noexcept
 {
-    if (m_entry == nullptr)
-        return;
-
-    enabled ? *m_entry |= PTE_FLAGS_RW : *m_entry &= ~PTE_FLAGS_RW;
+    enabled ? *m_pte |= PTE_FLAGS_RW : *m_pte &= ~PTE_FLAGS_RW;
 }
 
 bool
 page_table_entry_x64::us() const noexcept
 {
-    if (m_entry == nullptr)
-        return false;
-
-    return (*m_entry & PTE_FLAGS_US);
+    return (*m_pte & PTE_FLAGS_US) != 0;
 }
 
 void
 page_table_entry_x64::set_us(bool enabled) noexcept
 {
-    if (m_entry == nullptr)
-        return;
-
-    enabled ? *m_entry |= PTE_FLAGS_US : *m_entry &= ~PTE_FLAGS_US;
+    enabled ? *m_pte |= PTE_FLAGS_US : *m_pte &= ~PTE_FLAGS_US;
 }
 
 bool
 page_table_entry_x64::pwt() const noexcept
 {
-    if (m_entry == nullptr)
-        return false;
-
-    return (*m_entry & PTE_FLAGS_PWT);
+    return (*m_pte & PTE_FLAGS_PWT) != 0;
 }
 
 void
 page_table_entry_x64::set_pwt(bool enabled) noexcept
 {
-    if (m_entry == nullptr)
-        return;
-
-    enabled ? *m_entry |= PTE_FLAGS_PWT : *m_entry &= ~PTE_FLAGS_PWT;
+    enabled ? *m_pte |= PTE_FLAGS_PWT : *m_pte &= ~PTE_FLAGS_PWT;
 }
 
 bool
 page_table_entry_x64::pcd() const noexcept
 {
-    if (m_entry == nullptr)
-        return false;
-
-    return (*m_entry & PTE_FLAGS_PCD);
+    return (*m_pte & PTE_FLAGS_PCD) != 0;
 }
 
 void
 page_table_entry_x64::set_pcd(bool enabled) noexcept
 {
-    if (m_entry == nullptr)
-        return;
-
-    enabled ? *m_entry |= PTE_FLAGS_PCD : *m_entry &= ~PTE_FLAGS_PCD;
+    enabled ? *m_pte |= PTE_FLAGS_PCD : *m_pte &= ~PTE_FLAGS_PCD;
 }
 
 bool
 page_table_entry_x64::accessed() const noexcept
 {
-    if (m_entry == nullptr)
-        return false;
-
-    return (*m_entry & PTE_FLAGS_A);
+    return (*m_pte & PTE_FLAGS_A) != 0;
 }
 
 void
 page_table_entry_x64::set_accessed(bool enabled) noexcept
 {
-    if (m_entry == nullptr)
-        return;
-
-    enabled ? *m_entry |= PTE_FLAGS_A : *m_entry &= ~PTE_FLAGS_A;
+    enabled ? *m_pte |= PTE_FLAGS_A : *m_pte &= ~PTE_FLAGS_A;
 }
 
 bool
 page_table_entry_x64::dirty() const noexcept
 {
-    if (m_entry == nullptr)
-        return false;
-
-    return (*m_entry & PTE_FLAGS_D);
+    return (*m_pte & PTE_FLAGS_D) != 0;
 }
 
 void
 page_table_entry_x64::set_dirty(bool enabled) noexcept
 {
-    if (m_entry == nullptr)
-        return;
-
-    enabled ? *m_entry |= PTE_FLAGS_D : *m_entry &= ~PTE_FLAGS_D;
+    enabled ? *m_pte |= PTE_FLAGS_D : *m_pte &= ~PTE_FLAGS_D;
 }
 
 bool
 page_table_entry_x64::pat() const noexcept
 {
-    if (m_entry == nullptr)
-        return false;
-
-    return (*m_entry & PTE_FLAGS_PAT);
+    return (*m_pte & PTE_FLAGS_PAT) != 0;
 }
 
 void
 page_table_entry_x64::set_pat(bool enabled) noexcept
 {
-    if (m_entry == nullptr)
-        return;
-
-    enabled ? *m_entry |= PTE_FLAGS_PAT : *m_entry &= ~PTE_FLAGS_PAT;
+    enabled ? *m_pte |= PTE_FLAGS_PAT : *m_pte &= ~PTE_FLAGS_PAT;
 }
 
 bool
 page_table_entry_x64::global() const noexcept
 {
-    if (m_entry == nullptr)
-        return false;
-
-    return (*m_entry & PTE_FLAGS_G);
+    return (*m_pte & PTE_FLAGS_G) != 0;
 }
 
 void
 page_table_entry_x64::set_global(bool enabled) noexcept
 {
-    if (m_entry == nullptr)
-        return;
-
-    enabled ? *m_entry |= PTE_FLAGS_G : *m_entry &= ~PTE_FLAGS_G;
+    enabled ? *m_pte |= PTE_FLAGS_G : *m_pte &= ~PTE_FLAGS_G;
 }
 
 uintptr_t
 page_table_entry_x64::phys_addr() const noexcept
 {
-    if (m_entry == nullptr)
-        return 0;
-
-    return (*m_entry & PTE_PHYS_ADDR_MASK);
+    return (*m_pte & PTE_PHYS_ADDR_MASK);
 }
 
 void
 page_table_entry_x64::set_phys_addr(uintptr_t addr) noexcept
 {
-    if (m_entry == nullptr)
-        return;
-
-    *m_entry = (*m_entry & ~PTE_PHYS_ADDR_MASK) | (addr & PTE_PHYS_ADDR_MASK);
+    *m_pte = (*m_pte & ~PTE_PHYS_ADDR_MASK) | (addr & PTE_PHYS_ADDR_MASK);
 }
 
 bool
 page_table_entry_x64::nx() const noexcept
 {
-    if (m_entry == nullptr)
-        return false;
-
-    return (*m_entry & PTE_FLAGS_NX);
+    return (*m_pte & PTE_FLAGS_NX) != 0;
 }
 
 void
 page_table_entry_x64::set_nx(bool enabled) noexcept
 {
-    if (m_entry == nullptr)
-        return;
-
-    enabled ? *m_entry |= PTE_FLAGS_NX : *m_entry &= ~PTE_FLAGS_NX;
+    enabled ? *m_pte |= PTE_FLAGS_NX : *m_pte &= ~PTE_FLAGS_NX;
 }

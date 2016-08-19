@@ -20,7 +20,6 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #include <exception.h>
-
 #include <command_line_parser.h>
 
 // -----------------------------------------------------------------------------
@@ -31,12 +30,6 @@ command_line_parser::command_line_parser() noexcept
 {
     reset();
 }
-
-command_line_parser::~command_line_parser()
-{
-}
-
-#include <iostream>
 
 void
 command_line_parser::parse(const std::vector<std::string> &args)
@@ -61,7 +54,7 @@ command_line_parser::parse(const std::vector<std::string> &args)
     {
         const auto &arg = args[i];
 
-        if (arg.empty() == true || arg.find_first_not_of(" \t") == std::string::npos)
+        if (arg.empty() || arg.find_first_not_of(" \t") == std::string::npos)
             continue;
 
         if (arg[0] == '-')
@@ -113,7 +106,7 @@ command_line_parser::parse_load(const std::vector<std::string> &args, size_t ind
     {
         const auto &arg = args[i];
 
-        if (arg.empty() == true || arg.find_first_not_of(" \t") == std::string::npos)
+        if (arg.empty() || arg.find_first_not_of(" \t") == std::string::npos)
             continue;
 
         if (arg[0] == '-')
@@ -177,4 +170,3 @@ command_line_parser::parse_status(const std::vector<std::string> &args, size_t i
     m_cmd = command_line_parser_command::status;
     m_modules.clear();
 }
-

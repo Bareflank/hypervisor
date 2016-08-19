@@ -31,11 +31,10 @@
 /// - malloc / free memory
 /// - virt_to_phys / phys_to_virt conversions
 ///
-/// To support malloc / free, the memory manager has a buffer that is
-/// created at compile time that is can pull from and provide to the rest
-/// of the VMM. If the memory manager runs out of memory, the system is
-/// halted. To increase memory, adjust the number of blocks that are reserved
-/// in constants.h.
+/// To support malloc / free, the memory manager is given both heap memory
+/// and a page pool. If a malloc is requested whose size is a multiple of
+/// MAX_PAGE_SIZE, the page pool is used. All other requests come from the
+/// heap.
 ///
 /// To support virt / phys mappings, the memory manager has an add_mdl
 /// function that is called by the driver entry. Each time the driver entry
@@ -59,7 +58,7 @@ public:
 
     /// Destructor
     ///
-    virtual ~memory_manager() {}
+    virtual ~memory_manager() = default;
 
     /// Get Singleton Instance
     ///
@@ -67,55 +66,26 @@ public:
     ///
     static memory_manager *instance() noexcept;
 
-    /// Free Blocks
-    ///
-    /// This class can be used to determine the total number of free blocks
-    /// that the memory mamnager has left. Using this function, you can
-    /// determine how much memory has been allocated, as well as how much
-    /// memory is free. Not that that, although this will tell you how much
-    /// is free, it cannot tell you if that memory can be allocated, since the
-    /// free blocks could be highly fragemented.
-    ///
-    /// @return number of free blocks.
-    ///
-    virtual int64_t free_blocks() noexcept;
-
     /// Malloc
     ///
-    /// Allocates a block of size bytes of memory, returning a pointer to the
-    /// beginning of the block. The content of the newly allocated block of
-    /// memory is not initialized. If size is 0, this function returns 0. If
-    /// the size if equal to MAX_PAGE_SIZE, the memory returned is guaranteed
-    /// to be aligned to MAX_PAGE_SIZE. Although this function will accept any
-    /// size granularity, the minimum size that will be allocated is always
-    /// MAX_CACHE_LINE_SIZE.
+    /// Allocates memory. If the requested size is a multiple of MAX_PAGE_SIZE
+    /// the page pool is used to allocated the memory which likely has more
+    /// memory, and the resulting addresses are page aligned. All other
+    /// requests come from the heap.
     ///
-    /// Note that this function generally should not be used directly, but
+    /// @note that this function generally should not be used directly, but
     /// instead new / delete should be used.
     ///
+    /// @note when execuitng std::make_shared, the malloc is likely to be
+    /// larger than the requested amount, as the reference counter is malloc'd
+    /// as well. If page alignment is required, first new, and pass the
+    /// resulting pointer to std::shared_ptr.
+    ///
     /// @param size the number of bytes to allocate
-    /// @return a pointer to the starting address of the memory allocated.
+    /// @return a pointer to the starting address of the memory allocated. The
+    ///     pointer is page aligned if size is a multiple of MAX_PAGE_SIZE
     ///
     virtual void *malloc(size_t size) noexcept;
-
-    /// Malloc Aligned
-    ///
-    /// Allocates a block of size bytes of memory, returning a pointer to the
-    /// beginning of the block. The content of the newly allocated block of
-    /// memory is not initialized. If size is 0, this function returns 0.
-    /// Although this function will accept any size granularity, the minimum
-    /// size that will be allocated is always MAX_CACHE_LINE_SIZE.
-    ///
-    /// Unlike malloc, this function allows the programmer to specify that
-    /// desired alignment of memory. When possible, malloc should be used
-    /// instead indirectly by using new / delete as these already provide
-    /// MAX_PAGE_SIZE alignment.
-    ///
-    /// @param size the number of bytes to allocate
-    /// @param alignment the desired alignment
-    /// @return a pointer to the starting address of the memory allocated.
-    ///
-    virtual void *malloc_aligned(size_t size, uint64_t alignment) noexcept;
 
     /// Free
     ///
@@ -142,7 +112,40 @@ public:
     /// @param virt virtual address to convert
     /// @return physical address
     ///
-    virtual void *virt_to_phys(void *virt);
+    virtual uintptr_t virt_to_phys(uintptr_t virt);
+
+    /// Virtual Address To Physical Address
+    ///
+    /// Given a virtual address, returns a physical address. If the memory
+    /// manager does not have a memory descriptor for the provided address,
+    /// or the provided address is 0, 0 is returned.
+    ///
+    /// @param virt virtual address to convert
+    /// @return physical address
+    ///
+    virtual uintptr_t virt_to_phys(void *virt);
+
+    /// Virtual Address To Physical Address
+    ///
+    /// Given a virtual address, returns a physical address. If the memory
+    /// manager does not have a memory descriptor for the provided address,
+    /// or the provided address is 0, 0 is returned.
+    ///
+    /// @param virt virtual address to convert
+    /// @return physical address
+    ///
+    virtual void *virt_to_phys_ptr(uintptr_t virt);
+
+    /// Virtual Address To Physical Address
+    ///
+    /// Given a virtual address, returns a physical address. If the memory
+    /// manager does not have a memory descriptor for the provided address,
+    /// or the provided address is 0, 0 is returned.
+    ///
+    /// @param virt virtual address to convert
+    /// @return physical address
+    ///
+    virtual void *virt_to_phys_ptr(void *virt);
 
     /// Physical Address To Virtual Address
     ///
@@ -153,7 +156,40 @@ public:
     /// @param phys physical address to convert
     /// @return virtual address
     ///
-    virtual void *phys_to_virt(void *phys);
+    virtual uintptr_t phys_to_virt(uintptr_t phys);
+
+    /// Physical Address To Virtual Address
+    ///
+    /// Given a physical address, returns a virtual address. If the memory
+    /// manager does not have a memory descriptor for the provided address,
+    /// or the provided address is 0, 0 is returned.
+    ///
+    /// @param phys physical address to convert
+    /// @return virtual address
+    ///
+    virtual uintptr_t phys_to_virt(void *phys);
+
+    /// Physical Address To Virtual Address
+    ///
+    /// Given a physical address, returns a virtual address. If the memory
+    /// manager does not have a memory descriptor for the provided address,
+    /// or the provided address is 0, 0 is returned.
+    ///
+    /// @param phys physical address to convert
+    /// @return virtual address
+    ///
+    virtual void *phys_to_virt_ptr(uintptr_t phys);
+
+    /// Physical Address To Virtual Address
+    ///
+    /// Given a physical address, returns a virtual address. If the memory
+    /// manager does not have a memory descriptor for the provided address,
+    /// or the provided address is 0, 0 is returned.
+    ///
+    /// @param phys physical address to convert
+    /// @return virtual address
+    ///
+    virtual void *phys_to_virt_ptr(void *phys);
 
     /// Adds Memory Descriptor List
     ///
@@ -197,23 +233,25 @@ public:
 
 private:
 
+    friend class memory_manager_ut;
+
+    virtual void *malloc_heap(size_t size) noexcept;
+    virtual void *malloc_page(size_t size) noexcept;
+    virtual void free_heap(void *ptr) noexcept;
+    virtual void free_page(void *ptr) noexcept;
+
+    virtual void clear() noexcept;
+
+private:
+
     /// Default Constructor
     ///
     memory_manager() noexcept;
 
 private:
 
-    friend class memory_manager_ut;
-
-    virtual void *block_to_virt(int64_t block) noexcept;
-    virtual int64_t virt_to_block(void *virt) noexcept;
-
-    virtual bool private_is_power_of_2(uint64_t x) noexcept;
-    virtual bool is_block_aligned(int64_t block, int64_t alignment) noexcept;
-
-private:
-
-    uint32_t m_start;
+    uint64_t m_heap_index;
+    uint64_t m_page_index;
 
     std::map<uintptr_t, memory_descriptor> m_virt_to_phys_map;
     std::map<uintptr_t, memory_descriptor> m_phys_to_virt_map;

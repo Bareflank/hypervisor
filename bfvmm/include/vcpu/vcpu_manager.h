@@ -39,7 +39,7 @@ public:
 
     /// Destructor
     ///
-    ~vcpu_manager() {}
+    virtual ~vcpu_manager() = default;
 
     /// Get Singleton Instance
     ///
@@ -112,7 +112,7 @@ private:
 
     /// Default Constructor
     ///
-    vcpu_manager();
+    vcpu_manager() noexcept;
 
     /// Get vCPU
     std::shared_ptr<vcpu> get_vcpu(uint64_t vcpuid) const noexcept;

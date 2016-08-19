@@ -40,8 +40,7 @@ verify_no_mem_leaks(void)
     printf("alloc_count_rw: %d\n", alloc_count_rw);
     printf("alloc_count_rwe: %d\n", alloc_count_rwe);
 
-    return (alloc_count_rw == 0) &&
-           (alloc_count_rwe == 0);
+    return (alloc_count_rw == 0) && (alloc_count_rwe == 0);
 }
 
 void *

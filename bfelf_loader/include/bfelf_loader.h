@@ -26,6 +26,8 @@
 #include <crt.h>
 #include <error_codes.h>
 
+#pragma GCC system_header
+
 #if defined(KERNEL) && defined(__linux__)
 #include <linux/types.h>
 #else
@@ -136,7 +138,7 @@ struct relatab_t
  */
 struct bfelf_file_t
 {
-    char *file;
+    const char *file;
     char *exec;
     uint64_t fsize;
 
@@ -179,7 +181,7 @@ struct bfelf_file_t
  * @param ef the ELF file structure to initialize.
  * @return BFELF_SUCCESS on success, negative on error
  */
-int64_t bfelf_file_init(char *file,
+int64_t bfelf_file_init(const char *file,
                         uint64_t fsize,
                         struct bfelf_file_t *ef);
 

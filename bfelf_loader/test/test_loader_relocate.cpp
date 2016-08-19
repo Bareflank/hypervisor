@@ -24,7 +24,7 @@
 void
 bfelf_loader_ut::test_bfelf_loader_relocate_invalid_loader()
 {
-    auto ret = bfelf_loader_relocate(0);
+    auto ret = bfelf_loader_relocate(nullptr);
     EXPECT_TRUE(ret == BFELF_ERROR_INVALID_ARG);
 }
 
@@ -50,10 +50,10 @@ bfelf_loader_ut::test_bfelf_loader_relocate_uninitialized_files()
     memset(&ef2, 0, sizeof(ef2));
     memset(&loader, 0, sizeof(loader));
 
-    ret = bfelf_loader_add(&loader, &ef1, 0);
+    ret = bfelf_loader_add(&loader, &ef1, nullptr);
     EXPECT_TRUE(ret == BFELF_SUCCESS);
 
-    ret = bfelf_loader_add(&loader, &ef2, 0);
+    ret = bfelf_loader_add(&loader, &ef2, nullptr);
     EXPECT_TRUE(ret == BFELF_SUCCESS);
 
     ret = bfelf_loader_relocate(&loader);
@@ -72,10 +72,10 @@ bfelf_loader_ut::test_bfelf_loader_relocate_twice()
     memset(&ef2, 0, sizeof(ef2));
     memset(&loader, 0, sizeof(loader));
 
-    ret = bfelf_loader_add(&loader, &ef1, 0);
+    ret = bfelf_loader_add(&loader, &ef1, nullptr);
     EXPECT_TRUE(ret == BFELF_SUCCESS);
 
-    ret = bfelf_loader_add(&loader, &ef2, 0);
+    ret = bfelf_loader_add(&loader, &ef2, nullptr);
     EXPECT_TRUE(ret == BFELF_SUCCESS);
 
     ret = bfelf_loader_relocate(&loader);

@@ -19,20 +19,19 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+#include <gsl/gsl>
+
 #include <debug.h>
 #include <constants.h>
-#include <commit_or_rollback.h>
-#include <intrinsics/gdt_x64.h>
-#include <intrinsics/idt_x64.h>
+#include <view_as_pointer.h>
 #include <vmcs/vmcs_intel_x64.h>
 #include <vmcs/vmcs_intel_x64_resume.h>
 #include <vmcs/vmcs_intel_x64_promote.h>
-#include <vmcs/vmcs_intel_x64_exceptions.h>
 #include <memory_manager/memory_manager.h>
 #include <exit_handler/exit_handler_intel_x64_support.h>
 
-vmcs_intel_x64::vmcs_intel_x64(const std::shared_ptr<intrinsics_intel_x64> &intrinsics) :
-    m_intrinsics(intrinsics),
+vmcs_intel_x64::vmcs_intel_x64(std::shared_ptr<intrinsics_intel_x64> intrinsics) :
+    m_intrinsics(std::move(intrinsics)),
     m_vmcs_region_phys(0)
 {
     if (!m_intrinsics)
@@ -43,7 +42,7 @@ void
 vmcs_intel_x64::launch(const std::shared_ptr<vmcs_intel_x64_state> &host_state,
                        const std::shared_ptr<vmcs_intel_x64_state> &guest_state)
 {
-    auto cor1 = commit_or_rollback([&]
+    auto fa1 = gsl::finally([&]
     {
         this->release_vmcs_region();
         this->release_exit_handler_stack();
@@ -76,7 +75,7 @@ vmcs_intel_x64::launch(const std::shared_ptr<vmcs_intel_x64_state> &host_state,
     this->vm_exit_controls();
     this->vm_entry_controls();
 
-    if (m_intrinsics->vmlaunch() == false)
+    if (!m_intrinsics->vmlaunch())
     {
         this->dump_vmcs();
 
@@ -94,10 +93,14 @@ vmcs_intel_x64::launch(const std::shared_ptr<vmcs_intel_x64_state> &host_state,
         this->check_vmcs_guest_state();
         this->check_vmcs_host_state();
 
-        throw vmcs_launch_failure(this->get_vm_instruction_error());
+        bferror << "vmlaunch failed:" << bfendl;
+        bferror << "    - vm_instruction_error: "
+                << this->get_vm_instruction_error() << bfendl;
+
+        throw std::runtime_error("vmcs launch failed");
     }
 
-    cor1.commit();
+    fa1.ignore();
 }
 
 void
@@ -119,34 +122,33 @@ vmcs_intel_x64::resume()
 void
 vmcs_intel_x64::load()
 {
-    if (m_intrinsics->vmptrld(&m_vmcs_region_phys) == false)
-        throw vmcs_failure("failed to load vmcs");
+    if (!m_intrinsics->vmptrld(&m_vmcs_region_phys))
+        throw std::runtime_error("vmcs load failed");
 }
 
 void
 vmcs_intel_x64::clear()
 {
-    if (m_intrinsics->vmclear(&m_vmcs_region_phys) == false)
-        throw vmcs_failure("failed to clear vmcs");
+    if (!m_intrinsics->vmclear(&m_vmcs_region_phys))
+        throw std::runtime_error("vmcs clear failed");
 }
 
 void
 vmcs_intel_x64::create_vmcs_region()
 {
-    auto cor1 = commit_or_rollback([&]
+    auto fa1 = gsl::finally([&]
     { this->release_vmcs_region(); });
 
-    auto region = static_cast<uint32_t *>(g_mm->malloc_aligned(4096, 4096));
-
-    m_vmcs_region = std::unique_ptr<uint32_t>(region);
-    m_vmcs_region_phys = reinterpret_cast<uintptr_t>(g_mm->virt_to_phys(region));
+    m_vmcs_region = std::make_unique<uint32_t[]>(1024);
+    m_vmcs_region_phys = g_mm->virt_to_phys(m_vmcs_region.get());
 
     if (m_vmcs_region_phys == 0)
         throw std::logic_error("m_vmcs_region_phys == nullptr");
 
-    region[0] = m_intrinsics->read_msr(IA32_VMX_BASIC_MSR) & 0x7FFFFFFFF;
+    gsl::span<uint32_t> id{m_vmcs_region.get(), 1024};
+    id[0] = m_intrinsics->read_msr(IA32_VMX_BASIC_MSR) & 0x7FFFFFFFF;
 
-    cor1.commit();
+    fa1.ignore();
 }
 
 void
@@ -162,12 +164,12 @@ vmcs_intel_x64::release_vmcs_region()
 void
 vmcs_intel_x64::create_exit_handler_stack()
 {
-    auto cor1 = commit_or_rollback([&]
+    auto fa1 = gsl::finally([&]
     { this->release_exit_handler_stack(); });
 
     m_exit_handler_stack = std::make_unique<char[]>(STACK_SIZE);
 
-    cor1.commit();
+    fa1.ignore();
 }
 
 void
@@ -400,7 +402,7 @@ vmcs_intel_x64::write_32bit_host_state(const std::shared_ptr<vmcs_intel_x64_stat
 void
 vmcs_intel_x64::write_natural_host_state(const std::shared_ptr<vmcs_intel_x64_state> &state)
 {
-    uintptr_t exit_handler_stack = (uintptr_t)m_exit_handler_stack.get();
+    auto exit_handler_stack = reinterpret_cast<uintptr_t>(m_exit_handler_stack.get());
 
     exit_handler_stack += STACK_SIZE;
     exit_handler_stack &= 0xFFFFFFFFFFFFFFF0;
@@ -419,8 +421,8 @@ vmcs_intel_x64::write_natural_host_state(const std::shared_ptr<vmcs_intel_x64_st
     vmwrite(VMCS_HOST_IA32_SYSENTER_ESP, state->ia32_sysenter_esp_msr());
     vmwrite(VMCS_HOST_IA32_SYSENTER_EIP, state->ia32_sysenter_eip_msr());
 
-    vmwrite(VMCS_HOST_RSP, reinterpret_cast<uint64_t>(exit_handler_stack));
-    vmwrite(VMCS_HOST_RIP, reinterpret_cast<uint64_t>(exit_handler_entry));
+    vmwrite(VMCS_HOST_RSP, reinterpret_cast<uintptr_t>(exit_handler_stack));
+    vmwrite(VMCS_HOST_RIP, reinterpret_cast<uintptr_t>(exit_handler_entry));
 }
 
 void
@@ -543,8 +545,13 @@ vmcs_intel_x64::vmread(uint64_t field) const
 {
     uint64_t value = 0;
 
-    if (m_intrinsics->vmread(field, &value) == false)
-        throw vmcs_read_failure(field);
+    if (!m_intrinsics->vmread(field, &value))
+    {
+        bferror << "vmcs_intel_x64::vmread failed:" << bfendl;
+        bferror << "    - field: " << view_as_pointer(field) << bfendl;
+
+        throw std::runtime_error("vmread failed");
+    }
 
     return value;
 }
@@ -552,8 +559,14 @@ vmcs_intel_x64::vmread(uint64_t field) const
 void
 vmcs_intel_x64::vmwrite(uint64_t field, uint64_t value)
 {
-    if (m_intrinsics->vmwrite(field, value) == false)
-        throw vmcs_write_failure(field, value);
+    if (!m_intrinsics->vmwrite(field, value))
+    {
+        bferror << "vmcs_intel_x64::vmwrite failed:" << bfendl;
+        bferror << "    - field: " << view_as_pointer(field) << bfendl;
+        bferror << "    - value: " << view_as_pointer(value) << bfendl;
+
+        throw std::runtime_error("vmwrite failed");
+    }
 }
 
 void
@@ -565,23 +578,23 @@ vmcs_intel_x64::filter_unsupported(uint64_t msr, uint64_t &ctrl)
 
     if ((allowed0 & ctrl) != allowed0)
     {
-        bfdebug << "vmcs ctrl field mis-configured for msr allowed 0: " << reinterpret_cast<void *>(msr) << bfendl;
-        bfdebug << "    - allowed0: " << reinterpret_cast<void *>(allowed0) << bfendl;
-        bfdebug << "    - old ctrl: " << reinterpret_cast<void *>(ctrl) << bfendl;
+        bfdebug << "vmcs ctrl field mis-configured for msr allowed 0: " << view_as_pointer(msr) << bfendl;
+        bfdebug << "    - allowed0: " << view_as_pointer(allowed0) << bfendl;
+        bfdebug << "    - old ctrl: " << view_as_pointer(ctrl) << bfendl;
 
         ctrl |= allowed0;
 
-        bfdebug << "    - new ctrl: " << reinterpret_cast<void *>(ctrl) << bfendl;
+        bfdebug << "    - new ctrl: " << view_as_pointer(ctrl) << bfendl;
     }
 
     if ((ctrl & ~allowed1) != 0)
     {
-        bfdebug << "vmcs ctrl field mis-configured for msr allowed 1: " << reinterpret_cast<void *>(msr) << bfendl;
-        bfdebug << "    - allowed1: " << reinterpret_cast<void *>(allowed1) << bfendl;
-        bfdebug << "    - old ctrl: " << reinterpret_cast<void *>(ctrl) << bfendl;
+        bfdebug << "vmcs ctrl field mis-configured for msr allowed 1: " << view_as_pointer(msr) << bfendl;
+        bfdebug << "    - allowed1: " << view_as_pointer(allowed1) << bfendl;
+        bfdebug << "    - old ctrl: " << view_as_pointer(ctrl) << bfendl;
 
         ctrl &= allowed1;
 
-        bfdebug << "    - new ctrl: " << reinterpret_cast<void *>(ctrl) << bfendl;
+        bfdebug << "    - new ctrl: " << view_as_pointer(ctrl) << bfendl;
     }
 }

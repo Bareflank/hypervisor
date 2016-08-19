@@ -19,10 +19,11 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+#include <gsl/gsl>
+
 #include <test.h>
 #include <constants.h>
 #include <eh_frame_list.h>
-#include <commit_or_rollback.h>
 
 #include <fstream>
 #include <sys/mman.h>
@@ -32,7 +33,7 @@
 // -----------------------------------------------------------------------------
 
 section_info_t g_info;
-eh_frame_t g_eh_frame_list[MAX_NUM_MODULES] = {{0, 0}};
+eh_frame_t g_eh_frame_list[MAX_NUM_MODULES] = {{nullptr, 0}};
 
 extern "C" struct eh_frame_t *
 get_eh_frame_list() noexcept
@@ -40,7 +41,7 @@ get_eh_frame_list() noexcept
     g_eh_frame_list[0].addr = g_info.eh_frame_addr;
     g_eh_frame_list[0].size = g_info.eh_frame_size;
 
-    return g_eh_frame_list;
+    return static_cast<struct eh_frame_t *>(g_eh_frame_list);
 }
 
 // -----------------------------------------------------------------------------
@@ -58,12 +59,10 @@ bool bfunwind_ut::init()
 {
     std::ifstream self_ifs(c_self_filename, std::ifstream::ate);
 
-    auto cor1 = commit_or_rollback([&]
-    {
-        self_ifs.close();
-    });
+    auto fa1 = gsl::finally([&]
+    { self_ifs.close(); });
 
-    if (self_ifs.is_open() == false)
+    if (!self_ifs.is_open())
     {
         std::cout << "unable to open one or more dummy libraries: " << std::endl;
         std::cout << "    - self: " << self_ifs.is_open() << std::endl;
@@ -81,10 +80,8 @@ bool bfunwind_ut::init()
 
     m_self = std::shared_ptr<char>(new char[m_self_length]());
 
-    auto cor2 = commit_or_rollback([&]
-    {
-        m_self.reset();
-    });
+    auto fa2 = gsl::finally([&]
+    { m_self.reset(); });
 
     if (!m_self)
     {
@@ -96,15 +93,15 @@ bool bfunwind_ut::init()
     self_ifs.seekg(0);
     self_ifs.read(m_self.get(), m_self_length);
 
-    if (self_ifs.fail() == true)
+    if (self_ifs.fail())
     {
         std::cout << "unable to load one or more dummy libraries into memory: " << std::endl;
         std::cout << "    - self: " << self_ifs.fail() << std::endl;
         return false;
     }
 
-    cor1.commit();
-    cor2.commit();
+    fa1.ignore();
+    fa2.ignore();
 
     auto ret = 0;
     bfelf_file_t self_ef;

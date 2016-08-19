@@ -20,8 +20,6 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #include <test.h>
-#include <commit_or_rollback.h>
-
 #include <fstream>
 #include <sys/mman.h>
 
@@ -193,7 +191,7 @@ bool bfelf_loader_ut::list()
 void *
 alloc_exec(int32_t size)
 {
-    auto addr = mmap(0, size, PROT_READ | PROT_WRITE | PROT_EXEC,
+    auto addr = mmap(nullptr, size, PROT_READ | PROT_WRITE | PROT_EXEC,
                      MAP_PRIVATE | MAP_ANON, -1, 0);
 
     return memset(addr, 0, size);
@@ -208,7 +206,7 @@ bfelf_loader_ut::load_elf_file(bfelf_file_t *ef)
     for (auto i = 0U; i < num_segments; i++)
     {
         auto ret = 0;
-        bfelf_phdr *phdr = 0;
+        bfelf_phdr *phdr = nullptr;
 
         ret = bfelf_file_get_segment(ef, i, &phdr);
         if (ret == BFELF_SUCCESS)
@@ -218,24 +216,24 @@ bfelf_loader_ut::load_elf_file(bfelf_file_t *ef)
         }
     }
 
-    auto exec = (char *)alloc_exec(total);
+    auto exec = static_cast<char *>(alloc_exec(total));
 
-    if (exec)
+    if (exec != nullptr)
     {
         memset(exec, 0, total);
 
         for (auto i = 0U; i < num_segments; i++)
         {
             auto ret = 0;
-            bfelf_phdr *phdr = 0;
+            bfelf_phdr *phdr = nullptr;
 
             ret = bfelf_file_get_segment(ef, i, &phdr);
             if (ret == BFELF_SUCCESS)
             {
                 auto exec_p = exec + phdr->p_vaddr;
-                auto file_p = ef->file + phdr->p_offset;
+                auto file_p = reinterpret_cast<uintptr_t>(ef->file) + phdr->p_offset;
 
-                memcpy(exec_p, file_p, phdr->p_filesz);
+                memcpy(exec_p, reinterpret_cast<void *>(file_p), phdr->p_filesz);
             }
         }
     }
@@ -243,7 +241,7 @@ bfelf_loader_ut::load_elf_file(bfelf_file_t *ef)
     return std::shared_ptr<char>(exec, [](void *) {});
 }
 
-#define offset(a,b) (((uintptr_t)&a) - ((uintptr_t)&b))
+#define offset(a,b) ( (reinterpret_cast<uintptr_t>(&(a))) - (reinterpret_cast<uintptr_t>(&(b))) )
 
 bfelf_test
 bfelf_loader_ut::get_test() const

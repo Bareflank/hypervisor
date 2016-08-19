@@ -23,30 +23,26 @@
 #include <intrinsics/idt_x64.h>
 
 idt_x64::idt_x64(uint16_t size) :
-    m_size(0)
+    m_idt_owner(std::make_unique<uint64_t[]>(size))
 {
     if (size == 0)
         return;
 
-    auto addr = new uint64_t[size << 1]();
+    m_idt = gsl::span<uint64_t>(m_idt_owner.get(), size);
 
-    m_idt_reg.base = reinterpret_cast<uint64_t>(addr);
-    m_idt_reg.limit = static_cast<uint16_t>((size << 3) - 1);
-
-    m_size = size << 1;
-    m_idt = std::shared_ptr<uint64_t>(addr);
+    m_idt_reg.base = reinterpret_cast<uint64_t>(m_idt_owner.get());
+    m_idt_reg.limit = (size << 3) - 1;
 }
 
-idt_x64::idt_x64(const std::shared_ptr<intrinsics_x64> &intrinsics) :
-    m_size(0)
+idt_x64::idt_x64(const std::shared_ptr<intrinsics_x64> &intrinsics)
 {
     if (!intrinsics)
-        throw std::invalid_argument("gdt_x64: intrinsics == nullptr");
+        throw std::invalid_argument("idt_x64: intrinsics == nullptr");
 
     intrinsics->read_idt(&m_idt_reg);
 
-    m_size = (m_idt_reg.limit + 1) >> 3;
-    m_idt = std::shared_ptr<uint64_t>(reinterpret_cast<uint64_t *>(m_idt_reg.base), [](uint64_t *) {});
+    m_idt_owner = nullptr;
+    m_idt = gsl::span<uint64_t>(reinterpret_cast<uint64_t *>(m_idt_reg.base), ((m_idt_reg.limit + 1) >> 3));
 }
 
 uint64_t

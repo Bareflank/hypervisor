@@ -73,41 +73,41 @@ public:
     ///     provide nullptr, a default guest state will be created.
     ///
     vcpu_intel_x64(uint64_t id,
-                   const std::shared_ptr<debug_ring> &debug_ring = nullptr,
-                   const std::shared_ptr<intrinsics_intel_x64> &intrinsics = nullptr,
-                   const std::shared_ptr<vmxon_intel_x64> &vmxon = nullptr,
-                   const std::shared_ptr<vmcs_intel_x64> &vmcs = nullptr,
-                   const std::shared_ptr<exit_handler_intel_x64> &exit_handler = nullptr,
-                   const std::shared_ptr<vmcs_intel_x64_vmm_state> &vmm_state = nullptr,
-                   const std::shared_ptr<vmcs_intel_x64_vmm_state> &guest_state = nullptr);
+                   std::shared_ptr<debug_ring> debug_ring = nullptr,
+                   std::shared_ptr<intrinsics_intel_x64> intrinsics = nullptr,
+                   std::shared_ptr<vmxon_intel_x64> vmxon = nullptr,
+                   std::shared_ptr<vmcs_intel_x64> vmcs = nullptr,
+                   std::shared_ptr<exit_handler_intel_x64> exit_handler = nullptr,
+                   std::shared_ptr<vmcs_intel_x64_vmm_state> vmm_state = nullptr,
+                   std::shared_ptr<vmcs_intel_x64_vmm_state> guest_state = nullptr);
 
     /// Destructor
     ///
-    virtual ~vcpu_intel_x64() {}
+    ~vcpu_intel_x64() override = default;
 
     /// Init vCPU
     ///
     /// @see vcpu::init
     ///
-    virtual void init(void *attr = nullptr) override;
+    void init(void *attr = nullptr) override;
 
     /// Fini vCPU
     ///
     /// @see vcpu::fini
     ///
-    virtual void fini(void *attr = nullptr) override;
+    void fini(void *attr = nullptr) override;
 
     /// Run vCPU
     ///
     /// @see vcpu::run
     ///
-    virtual void run(void *attr = nullptr) override;
+    void run(void *attr = nullptr) override;
 
     /// Halt vCPU
     ///
     /// @see vcpu::hlt
     ///
-    virtual void hlt(void *attr = nullptr) override;
+    void hlt(void *attr = nullptr) override;
 
 private:
 

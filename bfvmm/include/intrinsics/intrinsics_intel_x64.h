@@ -34,15 +34,15 @@
 extern "C" {
 #endif
 
-uint64_t __vmxon(void *vmxon_region) noexcept;
-uint64_t __vmxoff(void) noexcept;
-uint64_t __vmcall(uint64_t value) noexcept;
-uint64_t __vmclear(void *vmcs_region) noexcept;
-uint64_t __vmptrld(void *vmcs_region) noexcept;
-uint64_t __vmptrst(void *vmcs_region) noexcept;
-uint64_t __vmwrite(uint64_t field, uint64_t val) noexcept;
-uint64_t __vmread(uint64_t field, uint64_t *val) noexcept;
-uint64_t __vmlaunch(void) noexcept;
+bool __vmxon(void *vmxon_region) noexcept;
+bool __vmxoff(void) noexcept;
+bool __vmcall(uint64_t value) noexcept;
+bool __vmclear(void *vmcs_region) noexcept;
+bool __vmptrld(void *vmcs_region) noexcept;
+bool __vmptrst(void *vmcs_region) noexcept;
+bool __vmwrite(uint64_t field, uint64_t val) noexcept;
+bool __vmread(uint64_t field, uint64_t *val) noexcept;
+bool __vmlaunch(void) noexcept;
 
 // -----------------------------------------------------------------------------
 // State Save
@@ -105,6 +105,8 @@ struct state_save_intel_x64
     uint64_t ymm13[4];              // 0x260
     uint64_t ymm14[4];              // 0x280
     uint64_t ymm15[4];              // 0x2A0
+
+    uint64_t remaining_space_in_page[0x1A8];
 };
 
 #pragma pack(pop)
@@ -126,8 +128,8 @@ class intrinsics_intel_x64 : public intrinsics_x64
 {
 public:
 
-    intrinsics_intel_x64() noexcept {}
-    virtual ~intrinsics_intel_x64() {}
+    intrinsics_intel_x64() noexcept = default;
+    ~intrinsics_intel_x64() override = default;
 
     virtual bool vmxon(void *vmxon_region) const noexcept
     { return __vmxon(vmxon_region); }

@@ -27,7 +27,7 @@ bfm_ut::test_split_empty_string()
 {
     auto fields = split(std::string(), ' ');
 
-    EXPECT_TRUE(fields.empty() == true);
+    EXPECT_TRUE(fields.empty());
 }
 
 void

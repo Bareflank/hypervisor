@@ -33,8 +33,8 @@
 class ioctl_private_base
 {
 public:
-    ioctl_private_base() {}
-    virtual ~ioctl_private_base() {}
+    ioctl_private_base() = default;
+    virtual ~ioctl_private_base() = default;
 };
 
 /// IOCTL
@@ -53,7 +53,7 @@ public:
 
     /// Destructor
     ///
-    virtual ~ioctl();
+    virtual ~ioctl() = default;
 
     /// Open
     ///

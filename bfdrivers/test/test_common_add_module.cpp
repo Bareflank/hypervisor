@@ -43,7 +43,7 @@ extern "C"
 void
 driver_entry_ut::test_common_add_module_invalid_file()
 {
-    EXPECT_TRUE(common_add_module(0, m_dummy_misc_length) == BF_ERROR_INVALID_ARG);
+    EXPECT_TRUE(common_add_module(nullptr, m_dummy_misc_length) == BF_ERROR_INVALID_ARG);
 }
 
 void
@@ -55,7 +55,7 @@ driver_entry_ut::test_common_add_module_invalid_file_size()
 void
 driver_entry_ut::test_common_add_module_garbage_module()
 {
-    char file[] = "this is clearly not an ELF file!!!";
+    auto file = "this is clearly not an ELF file!!!";
 
     EXPECT_TRUE(common_add_module(file, strlen(file)) == BFELF_ERROR_INVALID_ARG);
 }
@@ -127,7 +127,7 @@ void
 driver_entry_ut::test_common_add_module_platform_alloc_fails()
 {
     MockRepository mocks;
-    mocks.ExpectCallFunc(platform_alloc_rwe).Return(0);
+    mocks.ExpectCallFunc(platform_alloc_rwe).Return(nullptr);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {

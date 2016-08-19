@@ -36,7 +36,7 @@
 int64_t g_vmm_status = VMM_UNLOADED;
 
 uint64_t g_num_modules = 0;
-struct module_t g_modules[MAX_NUM_MODULES] = {{0}};
+struct module_t g_modules[MAX_NUM_MODULES];
 
 struct bfelf_loader_t g_loader;
 
@@ -82,7 +82,7 @@ int64_t
 resolve_symbol(const char *name, void **sym, struct module_t *module)
 {
     int64_t ret;
-    struct e_string_t str = {0};
+    struct e_string_t str = {0, 0};
 
     if (name == 0 || sym == 0)
         return BF_ERROR_INVALID_ARG;
@@ -166,8 +166,8 @@ add_md_to_memory_manager(struct module_t *module)
         {
             struct memory_descriptor md;
 
-            md.virt = (void *)exec_s;
-            md.phys = platform_virt_to_phys(md.virt);
+            md.virt = exec_s;
+            md.phys = (uint64_t)platform_virt_to_phys((void *)md.virt);
 
             if ((phdr->p_flags & bfpf_x) != 0)
                 md.type = MEMORY_TYPE_R | MEMORY_TYPE_E;
@@ -226,8 +226,8 @@ load_elf_file(struct module_t *module)
         int64_t ret = 0;
         struct bfelf_phdr *phdr = 0;
 
+        const char *src = 0;
         char *dst = 0;
-        char *src = 0;
         int64_t len = 0;
 
         ret = bfelf_file_get_segment(&module->file, s, &phdr);
@@ -258,17 +258,14 @@ int64_t
 common_reset(void)
 {
     uint64_t i;
-    struct bfelf_file_t file = {0};
 
     for (i = 0; i < g_num_modules; i++)
     {
         if (g_modules[i].exec != 0)
             platform_free_rwe(g_modules[i].exec, g_modules[i].size);
-
-        g_modules[i].exec = 0;
-        g_modules[i].size = 0;
-        g_modules[i].file = file;
     }
+
+    platform_memset(&g_modules, 0, sizeof(g_modules));
 
     g_num_modules = 0;
     g_vmm_status = VMM_UNLOADED;
@@ -290,7 +287,7 @@ common_reset(void)
 int64_t
 common_init(void)
 {
-    return BF_SUCCESS;
+    return common_reset();
 }
 
 int64_t
@@ -326,7 +323,7 @@ common_fini(void)
 }
 
 int64_t
-common_add_module(char *file, int64_t fsize)
+common_add_module(const char *file, int64_t fsize)
 {
     int64_t ret = 0;
     struct module_t *module = 0;
@@ -425,7 +422,7 @@ common_load_vmm(void)
 
     for (i = 0; (module = get_module(i)) != 0; i++)
     {
-        struct section_info_t info = {0};
+        struct section_info_t info = {0, 0, 0, 0, 0, 0};
 
         ret = bfelf_loader_get_info(&g_loader, &module->file, &info);
         if (ret != BF_SUCCESS)
@@ -471,7 +468,7 @@ common_unload_vmm(void)
     {
         for (i = g_num_modules - 1; (module = get_module(i)) != 0; i--)
         {
-            struct section_info_t info = {0};
+            struct section_info_t info = {0, 0, 0, 0, 0, 0};
 
             ret = bfelf_loader_get_info(&g_loader, &module->file, &info);
             if (ret != BF_SUCCESS)

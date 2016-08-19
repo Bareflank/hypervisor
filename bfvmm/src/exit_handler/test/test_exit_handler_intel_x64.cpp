@@ -23,7 +23,6 @@
 #include <vmcs/vmcs_intel_x64.h>
 #include <exit_handler/exit_handler_intel_x64.h>
 #include <exit_handler/exit_handler_intel_x64_support.h>
-#include <exit_handler/exit_handler_intel_x64_exceptions.h>
 
 uint64_t g_field = 0;
 uint64_t g_value = 0;
@@ -2417,7 +2416,7 @@ exit_handler_intel_x64_ut::test_vmread_failure()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_EXCEPTION(eh->dispatch(), bfn::exit_handler_read_failure_error);
+        EXPECT_EXCEPTION(eh->dispatch(), std::runtime_error);
     });
 }
 
@@ -2447,6 +2446,6 @@ exit_handler_intel_x64_ut::test_vmwrite_failure()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_EXCEPTION(eh->dispatch(), bfn::exit_handler_write_failure_error);
+        EXPECT_EXCEPTION(eh->dispatch(), std::runtime_error);
     });
 }

@@ -23,6 +23,8 @@
 #ifndef DEBUG_RING_INTERFACE_H
 #define DEBUG_RING_INTERFACE_H
 
+#pragma GCC system_header
+
 #if !defined(KERNEL) && !defined(_WIN32)
 #include <stdint.h>
 #else

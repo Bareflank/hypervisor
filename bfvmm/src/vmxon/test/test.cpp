@@ -21,6 +21,41 @@
 
 #include <test.h>
 
+#ifndef __clang__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-result"
+#endif
+
+void *
+operator new(std::size_t size)
+{
+    if ((size & (MAX_PAGE_SIZE - 1)) == 0)
+    {
+        void *ptr = nullptr;
+        posix_memalign(&ptr, MAX_PAGE_SIZE, size);
+        return ptr;
+    }
+
+    return malloc(size);
+}
+
+#ifndef __clang__
+#pragma GCC diagnostic pop
+#endif
+
+void
+operator delete(void *ptr, std::size_t size) throw()
+{
+    (void) size;
+    free(ptr);
+}
+
+void
+operator delete(void *ptr) throw()
+{
+    operator delete(ptr, std::size_t(0));
+}
+
 vmxon_ut::vmxon_ut()
 {
 }
@@ -61,7 +96,6 @@ vmxon_ut::list()
     this->test_stop_stop_twice();
     this->test_stop_vmxoff_check_failure();
     this->test_stop_vmxoff_failure();
-    this->test_coveralls_cleanup();
 
     return true;
 }

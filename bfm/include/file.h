@@ -38,11 +38,11 @@ public:
     /// File Constructor
     ///
     /// Creates a file class that can be used to working with files.
-    file();
+    file() noexcept = default;
 
     /// File Destructor
     ///
-    virtual ~file();
+    virtual ~file() = default;
 
     /// Read
     ///

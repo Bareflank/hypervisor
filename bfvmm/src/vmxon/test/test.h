@@ -29,7 +29,7 @@ class vmxon_ut : public unittest
 public:
 
     vmxon_ut();
-    ~vmxon_ut() {}
+    ~vmxon_ut() override = default;
 
 protected:
 
@@ -60,7 +60,6 @@ private:
     void test_stop_stop_twice();
     void test_stop_vmxoff_check_failure();
     void test_stop_vmxoff_failure();
-    void test_coveralls_cleanup();
 };
 
 #endif

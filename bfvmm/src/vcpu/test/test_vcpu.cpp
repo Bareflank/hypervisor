@@ -38,7 +38,7 @@ vcpu_ut::test_vcpu_null_debug_ring()
 void
 vcpu_ut::test_vcpu_valid()
 {
-    auto dr = std::shared_ptr<debug_ring>(0);
+    auto dr = std::shared_ptr<debug_ring>(nullptr);
 
     EXPECT_NO_EXCEPTION(std::make_shared<vcpu>(0, dr));
 }
@@ -53,7 +53,7 @@ vcpu_ut::test_vcpu_write_empty_string()
     vc->write("");
     get_drr(0, &drr);
 
-    EXPECT_TRUE(debug_ring_read(drr, rb, DEBUG_RING_SIZE) == 0);
+    EXPECT_TRUE(debug_ring_read(drr, static_cast<char *>(rb), DEBUG_RING_SIZE) == 0);
 }
 
 void
@@ -66,7 +66,7 @@ vcpu_ut::test_vcpu_write_hello_world()
     vc->write("hello world");
     get_drr(0, &drr);
 
-    EXPECT_TRUE(debug_ring_read(drr, rb, DEBUG_RING_SIZE) == 11);
+    EXPECT_TRUE(debug_ring_read(drr, static_cast<char *>(rb), DEBUG_RING_SIZE) == 11);
 }
 
 class test_vcpu: public vcpu
@@ -79,7 +79,7 @@ public:
         write("hello world");
     }
 
-    ~test_vcpu()
+    ~test_vcpu() override
     {
         write("hello world");
     }
@@ -93,7 +93,7 @@ vcpu_ut::test_vcpu_write_from_constructor()
     auto vc = std::make_shared<test_vcpu>(0);
 
     get_drr(0, &drr);
-    EXPECT_TRUE(debug_ring_read(drr, rb, DEBUG_RING_SIZE) == 11);
+    EXPECT_TRUE(debug_ring_read(drr, static_cast<char *>(rb), DEBUG_RING_SIZE) == 11);
 }
 
 void
@@ -107,7 +107,7 @@ vcpu_ut::test_vcpu_write_from_destructor()
     }
 
     get_drr(0, &drr);
-    EXPECT_TRUE(debug_ring_read(drr, rb, DEBUG_RING_SIZE) == 22);
+    EXPECT_TRUE(debug_ring_read(drr, static_cast<char *>(rb), DEBUG_RING_SIZE) == 22);
 }
 
 void
@@ -115,9 +115,9 @@ vcpu_ut::test_vcpu_init_null_attr()
 {
     auto vc = std::make_shared<vcpu>(0);
 
-    EXPECT_TRUE(vc->is_initialized() == false);
+    EXPECT_FALSE(vc->is_initialized());
     vc->init(nullptr);
-    EXPECT_TRUE(vc->is_initialized() == true);
+    EXPECT_TRUE(vc->is_initialized());
 }
 
 void
@@ -126,9 +126,9 @@ vcpu_ut::test_vcpu_init_valid_attr()
     int i = 0;
     auto vc = std::make_shared<vcpu>(0);
 
-    EXPECT_TRUE(vc->is_initialized() == false);
+    EXPECT_FALSE(vc->is_initialized());
     vc->init(&i);
-    EXPECT_TRUE(vc->is_initialized() == true);
+    EXPECT_TRUE(vc->is_initialized());
 }
 
 void
@@ -138,9 +138,9 @@ vcpu_ut::test_vcpu_fini_null_attr()
 
     vc->init();
 
-    EXPECT_TRUE(vc->is_initialized() == true);
+    EXPECT_TRUE(vc->is_initialized());
     vc->fini(nullptr);
-    EXPECT_TRUE(vc->is_initialized() == false);
+    EXPECT_FALSE(vc->is_initialized());
 }
 
 void
@@ -151,9 +151,9 @@ vcpu_ut::test_vcpu_fini_valid_attr()
 
     vc->init();
 
-    EXPECT_TRUE(vc->is_initialized() == true);
+    EXPECT_TRUE(vc->is_initialized());
     vc->fini(&i);
-    EXPECT_TRUE(vc->is_initialized() == false);
+    EXPECT_FALSE(vc->is_initialized());
 }
 
 void
@@ -161,11 +161,11 @@ vcpu_ut::test_vcpu_fini_without_init_without_run()
 {
     auto vc = std::make_shared<vcpu>(0);
 
-    EXPECT_TRUE(vc->is_running() == false);
-    EXPECT_TRUE(vc->is_initialized() == false);
+    EXPECT_FALSE(vc->is_running());
+    EXPECT_FALSE(vc->is_initialized());
     vc->fini();
-    EXPECT_TRUE(vc->is_running() == false);
-    EXPECT_TRUE(vc->is_initialized() == false);
+    EXPECT_FALSE(vc->is_running());
+    EXPECT_FALSE(vc->is_initialized());
 }
 
 void
@@ -175,11 +175,11 @@ vcpu_ut::test_vcpu_fini_with_init_without_run()
 
     vc->init();
 
-    EXPECT_TRUE(vc->is_running() == false);
-    EXPECT_TRUE(vc->is_initialized() == true);
+    EXPECT_FALSE(vc->is_running());
+    EXPECT_TRUE(vc->is_initialized());
     vc->fini();
-    EXPECT_TRUE(vc->is_running() == false);
-    EXPECT_TRUE(vc->is_initialized() == false);
+    EXPECT_FALSE(vc->is_running());
+    EXPECT_FALSE(vc->is_initialized());
 }
 
 void
@@ -189,11 +189,11 @@ vcpu_ut::test_vcpu_fini_without_init_with_run()
 
     vc->run();
 
-    EXPECT_TRUE(vc->is_running() == true);
-    EXPECT_TRUE(vc->is_initialized() == false);
+    EXPECT_TRUE(vc->is_running());
+    EXPECT_FALSE(vc->is_initialized());
     vc->fini();
-    EXPECT_TRUE(vc->is_running() == false);
-    EXPECT_TRUE(vc->is_initialized() == false);
+    EXPECT_FALSE(vc->is_running());
+    EXPECT_FALSE(vc->is_initialized());
 }
 
 void
@@ -204,11 +204,11 @@ vcpu_ut::test_vcpu_fini_with_init_with_run()
     vc->init();
     vc->run();
 
-    EXPECT_TRUE(vc->is_running() == true);
-    EXPECT_TRUE(vc->is_initialized() == true);
+    EXPECT_TRUE(vc->is_running());
+    EXPECT_TRUE(vc->is_initialized());
     vc->fini();
-    EXPECT_TRUE(vc->is_running() == false);
-    EXPECT_TRUE(vc->is_initialized() == false);
+    EXPECT_FALSE(vc->is_running());
+    EXPECT_FALSE(vc->is_initialized());
 }
 
 void
@@ -216,9 +216,9 @@ vcpu_ut::test_vcpu_run_null_attr()
 {
     auto vc = std::make_shared<vcpu>(0);
 
-    EXPECT_TRUE(vc->is_running() == false);
+    EXPECT_FALSE(vc->is_running());
     vc->run(nullptr);
-    EXPECT_TRUE(vc->is_running() == true);
+    EXPECT_TRUE(vc->is_running());
 }
 
 void
@@ -227,9 +227,9 @@ vcpu_ut::test_vcpu_run_valid_attr()
     int i = 0;
     auto vc = std::make_shared<vcpu>(0);
 
-    EXPECT_TRUE(vc->is_running() == false);
+    EXPECT_FALSE(vc->is_running());
     vc->run(&i);
-    EXPECT_TRUE(vc->is_running() == true);
+    EXPECT_TRUE(vc->is_running());
 }
 
 void
@@ -237,9 +237,9 @@ vcpu_ut::test_vcpu_run_without_init()
 {
     auto vc = std::make_shared<vcpu>(0);
 
-    EXPECT_TRUE(vc->is_running() == false);
+    EXPECT_FALSE(vc->is_running());
     vc->run();
-    EXPECT_TRUE(vc->is_running() == true);
+    EXPECT_TRUE(vc->is_running());
 }
 
 void
@@ -249,9 +249,9 @@ vcpu_ut::test_vcpu_run_with_init()
 
     vc->init();
 
-    EXPECT_TRUE(vc->is_running() == false);
+    EXPECT_FALSE(vc->is_running());
     vc->run();
-    EXPECT_TRUE(vc->is_running() == true);
+    EXPECT_TRUE(vc->is_running());
 }
 
 void
@@ -259,9 +259,9 @@ vcpu_ut::test_vcpu_hlt_null_attr()
 {
     auto vc = std::make_shared<vcpu>(0);
 
-    EXPECT_TRUE(vc->is_running() == false);
+    EXPECT_FALSE(vc->is_running());
     vc->hlt(nullptr);
-    EXPECT_TRUE(vc->is_running() == false);
+    EXPECT_FALSE(vc->is_running());
 }
 
 void
@@ -270,9 +270,9 @@ vcpu_ut::test_vcpu_hlt_valid_attr()
     int i = 0;
     auto vc = std::make_shared<vcpu>(0);
 
-    EXPECT_TRUE(vc->is_running() == false);
+    EXPECT_FALSE(vc->is_running());
     vc->hlt(&i);
-    EXPECT_TRUE(vc->is_running() == false);
+    EXPECT_FALSE(vc->is_running());
 }
 
 void
@@ -280,9 +280,9 @@ vcpu_ut::test_vcpu_hlt_without_run()
 {
     auto vc = std::make_shared<vcpu>(0);
 
-    EXPECT_TRUE(vc->is_running() == false);
+    EXPECT_FALSE(vc->is_running());
     vc->hlt();
-    EXPECT_TRUE(vc->is_running() == false);
+    EXPECT_FALSE(vc->is_running());
 }
 
 void
@@ -292,9 +292,9 @@ vcpu_ut::test_vcpu_hlt_with_run()
 
     vc->run();
 
-    EXPECT_TRUE(vc->is_running() == true);
+    EXPECT_TRUE(vc->is_running());
     vc->hlt();
-    EXPECT_TRUE(vc->is_running() == false);
+    EXPECT_FALSE(vc->is_running());
 }
 
 void
@@ -310,7 +310,7 @@ vcpu_ut::test_vcpu_is_bootstrap_vcpu()
 {
     auto vc = std::make_shared<vcpu>(0);
 
-    EXPECT_TRUE(vc->is_bootstrap_vcpu() == true);
+    EXPECT_TRUE(vc->is_bootstrap_vcpu());
 }
 
 void
@@ -318,7 +318,7 @@ vcpu_ut::test_vcpu_is_not_bootstrap_vcpu()
 {
     auto vc = std::make_shared<vcpu>(1);
 
-    EXPECT_TRUE(vc->is_bootstrap_vcpu() == false);
+    EXPECT_FALSE(vc->is_bootstrap_vcpu());
 }
 
 void
@@ -326,7 +326,7 @@ vcpu_ut::test_vcpu_is_host_vm_vcpu()
 {
     auto vc = std::make_shared<vcpu>(1);
 
-    EXPECT_TRUE(vc->is_host_vm_vcpu() == true);
+    EXPECT_TRUE(vc->is_host_vm_vcpu());
 }
 
 void
@@ -334,7 +334,7 @@ vcpu_ut::test_vcpu_is_not_host_vm_vcpu()
 {
     auto vc = std::make_shared<vcpu>(0x0000000100000000);
 
-    EXPECT_TRUE(vc->is_host_vm_vcpu() == false);
+    EXPECT_FALSE(vc->is_host_vm_vcpu());
 }
 
 void
@@ -342,7 +342,7 @@ vcpu_ut::test_vcpu_is_guest_vm_vcpu()
 {
     auto vc = std::make_shared<vcpu>(0x0000000100000000);
 
-    EXPECT_TRUE(vc->is_guest_vm_vcpu() == true);
+    EXPECT_TRUE(vc->is_guest_vm_vcpu());
 }
 
 void
@@ -350,7 +350,7 @@ vcpu_ut::test_vcpu_is_not_guest_vm_vcpu()
 {
     auto vc = std::make_shared<vcpu>(1);
 
-    EXPECT_TRUE(vc->is_guest_vm_vcpu() == false);
+    EXPECT_FALSE(vc->is_guest_vm_vcpu());
 }
 
 void
@@ -359,7 +359,7 @@ vcpu_ut::test_vcpu_is_running_vm_vcpu()
     auto vc = std::make_shared<vcpu>(0);
 
     vc->run();
-    EXPECT_TRUE(vc->is_running() == true);
+    EXPECT_TRUE(vc->is_running());
 }
 
 void
@@ -367,7 +367,7 @@ vcpu_ut::test_vcpu_is_not_running_vm_vcpu()
 {
     auto vc = std::make_shared<vcpu>(0);
 
-    EXPECT_TRUE(vc->is_running() == false);
+    EXPECT_FALSE(vc->is_running());
 }
 
 void
@@ -376,7 +376,7 @@ vcpu_ut::test_vcpu_is_initialized_vm_vcpu()
     auto vc = std::make_shared<vcpu>(0);
 
     vc->init();
-    EXPECT_TRUE(vc->is_initialized() == true);
+    EXPECT_TRUE(vc->is_initialized());
 }
 
 void
@@ -384,5 +384,5 @@ vcpu_ut::test_vcpu_is_not_initialized_vm_vcpu()
 {
     auto vc = std::make_shared<vcpu>(0);
 
-    EXPECT_TRUE(vc->is_initialized() == false);
+    EXPECT_FALSE(vc->is_initialized());
 }

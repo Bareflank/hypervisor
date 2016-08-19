@@ -22,54 +22,26 @@
 #include <test.h>
 #include <serial/serial_port_intel_x64.h>
 
-static uint8_t g_baud_rate_lo = 0;
-static uint8_t g_baud_rate_hi = 0;
-static uint8_t g_fifo_control = 0;
-static uint8_t g_line_control = 0;
+#include <map>
+static std::map<uint16_t, uint8_t> g_ports;
 
 static uint8_t
-read_baud_rate_lo(uint16_t)
-{ return g_baud_rate_lo; }
+read_portio_8(uint16_t port)
+{
+    return g_ports[port];
+}
 
 static void
-write_baud_rate_lo(uint16_t, uint8_t val)
-{ g_baud_rate_lo = val; }
-
-static uint8_t
-read_baud_rate_hi(uint16_t)
-{ return g_baud_rate_hi; }
-
-static void
-write_baud_rate_hi(uint16_t, uint8_t val)
-{ g_baud_rate_hi = val; }
-
-// uint8_t
-// read_fifo_control(uint16_t)
-// { return g_fifo_control; }
-
-static void
-write_fifo_control(uint16_t, uint8_t val)
-{ g_fifo_control = val; }
-
-static uint8_t
-read_line_control(uint16_t)
-{ return g_line_control; }
-
-static void
-write_line_control(uint16_t, uint8_t val)
-{ g_line_control = val; }
+write_portio_8(uint16_t port, uint8_t val)
+{
+    g_ports[port] = val;
+}
 
 static void
 setup_intrinsics(MockRepository &mocks, intrinsics_intel_x64 *in)
 {
-    mocks.OnCall(in, intrinsics_intel_x64::read_portio_8).With(DEFAULT_COM_PORT + BAUD_RATE_LO_REG).Do(read_baud_rate_lo);
-    mocks.OnCall(in, intrinsics_intel_x64::write_portio_8).With(DEFAULT_COM_PORT + BAUD_RATE_LO_REG, _).Do(write_baud_rate_lo);
-    mocks.OnCall(in, intrinsics_intel_x64::read_portio_8).With(DEFAULT_COM_PORT + BAUD_RATE_HI_REG).Do(read_baud_rate_hi);
-    mocks.OnCall(in, intrinsics_intel_x64::write_portio_8).With(DEFAULT_COM_PORT + BAUD_RATE_HI_REG, _).Do(write_baud_rate_hi);
-    // mocks.OnCall(in, intrinsics_intel_x64::read_portio_8).With(DEFAULT_COM_PORT + FIFO_CONTROL_REG).Do(read_fifo_control);
-    mocks.OnCall(in, intrinsics_intel_x64::write_portio_8).With(DEFAULT_COM_PORT + FIFO_CONTROL_REG, _).Do(write_fifo_control);
-    mocks.OnCall(in, intrinsics_intel_x64::read_portio_8).With(DEFAULT_COM_PORT + LINE_CONTROL_REG).Do(read_line_control);
-    mocks.OnCall(in, intrinsics_intel_x64::write_portio_8).With(DEFAULT_COM_PORT + LINE_CONTROL_REG, _).Do(write_line_control);
+    mocks.OnCall(in, intrinsics_intel_x64::read_portio_8).Do(read_portio_8);
+    mocks.OnCall(in, intrinsics_intel_x64::write_portio_8).Do(write_portio_8);
 }
 
 void
@@ -94,14 +66,14 @@ serial_ut::test_serial_success()
         EXPECT_TRUE(serial_port_intel_x64::instance(intrinsics)->stop_bits() == serial_port_intel_x64::DEFAULT_STOP_BITS);
         EXPECT_TRUE(serial_port_intel_x64::instance(intrinsics)->parity_bits() == serial_port_intel_x64::DEFAULT_PARITY_BITS);
 
-        EXPECT_TRUE((g_baud_rate_lo) == ((serial_port_intel_x64::DEFAULT_BAUD_RATE & 0x00FF) >> 0));
-        EXPECT_TRUE((g_baud_rate_hi) == ((serial_port_intel_x64::DEFAULT_BAUD_RATE & 0xFF00) >> 8));
-        EXPECT_TRUE((g_fifo_control & FIFO_CONTROL_ENABLE_FIFOS) != 0);
-        EXPECT_TRUE((g_fifo_control & FIFO_CONTROL_CLEAR_RECIEVE_FIFO) != 0);
-        EXPECT_TRUE((g_fifo_control & FIFO_CONTROL_CLEAR_TRANSMIT_FIFO) != 0);
-        EXPECT_TRUE((g_line_control & LINE_CONTROL_DATA_MASK) == serial_port_intel_x64::DEFAULT_DATA_BITS);
-        EXPECT_TRUE((g_line_control & LINE_CONTROL_STOP_MASK) == serial_port_intel_x64::DEFAULT_STOP_BITS);
-        EXPECT_TRUE((g_line_control & LINE_CONTROL_PARITY_MASK) == serial_port_intel_x64::DEFAULT_PARITY_BITS);
+        EXPECT_TRUE((g_ports[DEFAULT_COM_PORT + BAUD_RATE_LO_REG]) == ((serial_port_intel_x64::DEFAULT_BAUD_RATE & 0x00FF) >> 0));
+        EXPECT_TRUE((g_ports[DEFAULT_COM_PORT + BAUD_RATE_HI_REG]) == ((serial_port_intel_x64::DEFAULT_BAUD_RATE & 0xFF00) >> 8));
+        EXPECT_TRUE((g_ports[DEFAULT_COM_PORT + FIFO_CONTROL_REG] & FIFO_CONTROL_ENABLE_FIFOS) != 0);
+        EXPECT_TRUE((g_ports[DEFAULT_COM_PORT + FIFO_CONTROL_REG] & FIFO_CONTROL_CLEAR_RECIEVE_FIFO) != 0);
+        EXPECT_TRUE((g_ports[DEFAULT_COM_PORT + FIFO_CONTROL_REG] & FIFO_CONTROL_CLEAR_TRANSMIT_FIFO) != 0);
+        EXPECT_TRUE((g_ports[DEFAULT_COM_PORT + LINE_CONTROL_REG] & LINE_CONTROL_DATA_MASK) == serial_port_intel_x64::DEFAULT_DATA_BITS);
+        EXPECT_TRUE((g_ports[DEFAULT_COM_PORT + LINE_CONTROL_REG] & LINE_CONTROL_STOP_MASK) == serial_port_intel_x64::DEFAULT_STOP_BITS);
+        EXPECT_TRUE((g_ports[DEFAULT_COM_PORT + LINE_CONTROL_REG] & LINE_CONTROL_PARITY_MASK) == serial_port_intel_x64::DEFAULT_PARITY_BITS);
     });
 }
 

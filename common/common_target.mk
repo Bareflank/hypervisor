@@ -115,7 +115,6 @@ NATIVE_CCFLAGS+=-fstack-protector-strong
 NATIVE_CCFLAGS+=-m64
 NATIVE_CCFLAGS+=-mtune=sandybridge
 NATIVE_CCFLAGS+=-march=sandybridge
-NATIVE_CCFLAGS+=-malign-data=abi
 NATIVE_CCFLAGS+=-mstackrealign
 
 CROSS_CCFLAGS+=-Wall
@@ -153,7 +152,6 @@ NATIVE_CXXFLAGS+=-fstack-protector-strong
 NATIVE_CXXFLAGS+=-m64
 NATIVE_CXXFLAGS+=-mtune=sandybridge
 NATIVE_CXXFLAGS+=-march=sandybridge
-NATIVE_CXXFLAGS+=-malign-data=abi
 NATIVE_CXXFLAGS+=-mstackrealign
 
 CROSS_CXXFLAGS+=-Wall

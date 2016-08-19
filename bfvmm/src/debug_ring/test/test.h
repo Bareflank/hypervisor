@@ -29,7 +29,7 @@ class debug_ring_ut : public unittest
 public:
 
     debug_ring_ut();
-    ~debug_ring_ut() {}
+    ~debug_ring_ut() override = default;
 
 protected:
 

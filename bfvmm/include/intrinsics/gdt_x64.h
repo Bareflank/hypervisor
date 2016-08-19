@@ -22,7 +22,7 @@
 #ifndef GDT_X64_H
 #define GDT_X64_H
 
-#include <memory>
+#include <gsl/gsl>
 #include <intrinsics/intrinsics_x64.h>
 
 // -----------------------------------------------------------------------------
@@ -126,7 +126,7 @@ public:
 
     /// Destructor
     ///
-    virtual ~gdt_x64() {}
+    virtual ~gdt_x64() noexcept = default;
 
     /// GDT Base Address
     ///
@@ -224,9 +224,10 @@ public:
 
 private:
 
-    uint16_t m_size;
     gdt_reg_x64_t m_gdt_reg;
-    std::shared_ptr<uint64_t> m_gdt;
+
+    gsl::span<uint64_t> m_gdt;
+    std::unique_ptr<uint64_t[]> m_gdt_owner;
 };
 
 #endif

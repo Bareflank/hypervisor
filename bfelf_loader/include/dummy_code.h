@@ -25,19 +25,19 @@
 class base
 {
 public:
-    base();
-    virtual ~base();
+    base() noexcept = default;
+    virtual ~base() = default;
 
-    virtual int foo(int);
+    virtual int foo(int arg) noexcept;
 };
 
 class derived : public base
 {
 public:
-    derived();
-    ~derived();
+    derived() noexcept;
+    ~derived() override = default;
 
-    int foo(int);
+    int foo(int arg) noexcept override;
 
 private:
 

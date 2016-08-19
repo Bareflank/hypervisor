@@ -30,7 +30,7 @@ class bfunwind_ut : public unittest
 public:
 
     bfunwind_ut();
-    ~bfunwind_ut() {}
+    ~bfunwind_ut() override = default;
 
 protected:
 

@@ -158,7 +158,7 @@ bfm_ut::test_ioctl_dump_vmm_with_invalid_drr()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_EXCEPTION(g_ctl.call_ioctl_dump_vmm(0, 0), std::invalid_argument);
+        EXPECT_EXCEPTION(g_ctl.call_ioctl_dump_vmm(nullptr, 0), std::invalid_argument);
     });
 }
 
@@ -188,7 +188,7 @@ bfm_ut::test_ioctl_vmm_status_with_invalid_drr()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_EXCEPTION(g_ctl.call_ioctl_vmm_status(0), std::invalid_argument);
+        EXPECT_EXCEPTION(g_ctl.call_ioctl_vmm_status(nullptr), std::invalid_argument);
     });
 }
 

@@ -25,30 +25,26 @@
 #include <intrinsics/gdt_x64.h>
 
 gdt_x64::gdt_x64(uint16_t size) :
-    m_size(0)
+    m_gdt_owner(std::make_unique<uint64_t[]>(size))
 {
     if (size == 0)
         return;
 
-    auto addr = new uint64_t[size]();
+    m_gdt = gsl::span<uint64_t>(m_gdt_owner.get(), size);
 
-    m_gdt_reg.base = reinterpret_cast<uint64_t>(addr);
-    m_gdt_reg.limit = static_cast<uint16_t>(size << 3);
-
-    m_size = size;
-    m_gdt = std::shared_ptr<uint64_t>(addr);
+    m_gdt_reg.base = reinterpret_cast<uint64_t>(m_gdt_owner.get());
+    m_gdt_reg.limit = (size << 3);
 }
 
-gdt_x64::gdt_x64(const std::shared_ptr<intrinsics_x64> &intrinsics) :
-    m_size(0)
+gdt_x64::gdt_x64(const std::shared_ptr<intrinsics_x64> &intrinsics)
 {
     if (!intrinsics)
         throw std::invalid_argument("gdt_x64: intrinsics == nullptr");
 
     intrinsics->read_gdt(&m_gdt_reg);
 
-    m_size = m_gdt_reg.limit >> 3;
-    m_gdt = std::shared_ptr<uint64_t>(reinterpret_cast<uint64_t *>(m_gdt_reg.base), [](uint64_t *) {});
+    m_gdt_owner = nullptr;
+    m_gdt = gsl::span<uint64_t>(reinterpret_cast<uint64_t *>(m_gdt_reg.base), (m_gdt_reg.limit >> 3));
 }
 
 uint64_t
@@ -72,11 +68,11 @@ gdt_x64::set_base(uint16_t index, uint64_t addr)
     uint64_t sd1 = 0;
     uint64_t sd2 = 0;
 
-    if (index >= m_size)
+    if (index >= m_gdt.size())
         throw std::invalid_argument("index out of range");
 
-    sd1 = m_gdt.get()[index];
-    if (index + 1 < m_size) sd2 = m_gdt.get()[index + 1];
+    sd1 = m_gdt[index];
+    if (index + 1 < m_gdt.size()) sd2 = m_gdt[index + 1];
 
     sd1 = (sd1 & 0x00FFFF000000FFFF);
     sd2 = (sd2 & 0xFFFFFFFF00000000);
@@ -107,15 +103,15 @@ gdt_x64::set_base(uint16_t index, uint64_t addr)
 
     if ((sd1 & 0x100000000000) == 0)
     {
-        if (index + 1 >= m_size)
+        if (index + 1 >= m_gdt.size())
             throw std::invalid_argument("index does not point to a valid TSS");
 
-        m_gdt.get()[index + 0] = sd1 | base_31_24 | base_23_16 | base_15_00;
-        m_gdt.get()[index + 1] = sd2 | base_63_32;
+        m_gdt[index + 0] = sd1 | base_31_24 | base_23_16 | base_15_00;
+        m_gdt[index + 1] = sd2 | base_63_32;
     }
     else
     {
-        m_gdt.get()[index + 0] = sd1 | base_31_24 | base_23_16 | base_15_00;
+        m_gdt[index + 0] = sd1 | base_31_24 | base_23_16 | base_15_00;
     }
 }
 
@@ -128,11 +124,11 @@ gdt_x64::base(uint16_t index) const
     uint64_t sd1 = 0;
     uint64_t sd2 = 0;
 
-    if (index >= m_size)
+    if (index >= m_gdt.size())
         throw std::invalid_argument("index out of range");
 
-    sd1 = m_gdt.get()[index];
-    if (index + 1 < m_size) sd2 = m_gdt.get()[index + 1];
+    sd1 = m_gdt[index];
+    if (index + 1 < m_gdt.size()) sd2 = m_gdt[index + 1];
 
     // The segment base description can be found in the intel's software
     // developer's manual, volume 3, chapter 3.4.5 as well as volume 3,
@@ -160,15 +156,13 @@ gdt_x64::base(uint16_t index) const
 
     if ((sd1 & 0x100000000000) == 0)
     {
-        if (index + 1 >= m_size)
+        if (index + 1 >= m_gdt.size())
             throw std::invalid_argument("index does not point to a valid TSS");
 
         return base_63_32 | base_31_24 | base_23_16 | base_15_00;
     }
-    else
-    {
-        return base_31_24 | base_23_16 | base_15_00;
-    }
+
+    return base_31_24 | base_23_16 | base_15_00;
 }
 
 void
@@ -177,10 +171,10 @@ gdt_x64::set_limit(uint16_t index, uint64_t limit)
     if (index == 0)
         return;
 
-    if (index >= m_size)
+    if (index >= m_gdt.size())
         throw std::invalid_argument("index out of range");
 
-    uint64_t sd1 = (m_gdt.get()[index] & 0xFFF0FFFFFFFF0000);
+    uint64_t sd1 = (m_gdt[index] & 0xFFF0FFFFFFFF0000);
 
     // The segment limit description can be found in the intel's software
     // developer's manual, volume 3, chapter 3.4.5 as well as volume 3,
@@ -198,7 +192,7 @@ gdt_x64::set_limit(uint16_t index, uint64_t limit)
     uint64_t limit_15_00 = ((limit & 0x000000000000FFFF) << 0);
     uint64_t limit_19_16 = ((limit & 0x00000000000F0000) << 32);
 
-    m_gdt.get()[index] = sd1 | limit_19_16 | limit_15_00;
+    m_gdt[index] = sd1 | limit_19_16 | limit_15_00;
 }
 
 uint64_t
@@ -207,10 +201,10 @@ gdt_x64::limit(uint16_t index) const
     if (index == 0)
         return 0;
 
-    if (index >= m_size)
+    if (index >= m_gdt.size())
         throw std::invalid_argument("index out of range");
 
-    uint64_t sd1 = m_gdt.get()[index];
+    uint64_t sd1 = m_gdt[index];
 
     // The segment limit description can be found in the intel's software
     // developer's manual, volume 3, chapter 3.4.5 as well as volume 3,
@@ -229,13 +223,11 @@ gdt_x64::limit(uint16_t index) const
 
         return ((limit_19_16 | limit_15_00) << 12) | 0x0000000000000FFF;
     }
-    else
-    {
-        uint64_t limit_15_00 = ((sd1 & 0x000000000000FFFF) >> 0);
-        uint64_t limit_19_16 = ((sd1 & 0x000F000000000000) >> 32);
 
-        return limit_19_16 | limit_15_00;
-    }
+    uint64_t limit_15_00 = ((sd1 & 0x000000000000FFFF) >> 0);
+    uint64_t limit_19_16 = ((sd1 & 0x000F000000000000) >> 32);
+
+    return limit_19_16 | limit_15_00;
 }
 
 void
@@ -244,10 +236,10 @@ gdt_x64::set_access_rights(uint16_t index, uint64_t access_rights)
     if (index == 0)
         return;
 
-    if (index >= m_size)
+    if (index >= m_gdt.size())
         throw std::invalid_argument("index out of range");
 
-    uint64_t sd1 = (m_gdt.get()[index] & 0xFF0F00FFFFFFFFFF);
+    uint64_t sd1 = (m_gdt[index] & 0xFF0F00FFFFFFFFFF);
 
     // The segment access description can be found in the intel's software
     // developer's manual, volume 3, chapter 3.4.5 as well as volume 3,
@@ -263,7 +255,7 @@ gdt_x64::set_access_rights(uint16_t index, uint64_t access_rights)
     uint64_t access_rights_07_00 = ((access_rights & 0x00000000000000FF) << 40);
     uint64_t access_rights_15_12 = ((access_rights & 0x000000000000F000) << 40);
 
-    m_gdt.get()[index] = sd1 | access_rights_15_12 | access_rights_07_00;
+    m_gdt[index] = sd1 | access_rights_15_12 | access_rights_07_00;
 }
 
 uint64_t
@@ -277,10 +269,10 @@ gdt_x64::access_rights(uint16_t index) const
     if (index == 0)
         return 0x10000;
 
-    if (index >= m_size)
+    if (index >= m_gdt.size())
         throw std::invalid_argument("index out of range");
 
-    uint64_t sd1 = m_gdt.get()[index];
+    uint64_t sd1 = m_gdt[index];
 
     // The segment access description can be found in the intel's software
     // developer's manual, volume 3, chapter 3.4.5 as well as volume 3,
