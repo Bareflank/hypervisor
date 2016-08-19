@@ -40,6 +40,9 @@ vmcs_ut::fini()
 bool
 vmcs_ut::list()
 {
+    // Base vmcs tests
+    this->test_launch_success();
+
     return true;
 }
 
