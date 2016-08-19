@@ -3,7 +3,8 @@
 <br>
 <br>
 [![GitHub version](https://badge.fury.io/gh/bareflank%2Fhypervisor.svg)](https://badge.fury.io/gh/bareflank%2Fhypervisor)
-![](https://travis-ci.org/Bareflank/hypervisor.svg?branch=master)
+[![Build Status](https://travis-ci.org/Bareflank/hypervisor.svg?branch=master)](https://travis-ci.org/Bareflank/hypervisor)
+[![Build Status](https://ci.appveyor.com/api/projects/status/r82c37nc634tnsv9?svg=true)](https://ci.appveyor.com/project/rianquinn/hypervisor-13oyg)
 [![Coverage Status](https://coveralls.io/repos/github/Bareflank/hypervisor/badge.svg?branch=master)](https://coveralls.io/github/Bareflank/hypervisor?branch=master)
 <a href="https://scan.coverity.com/projects/bareflank-hypervisor">
   <img alt="Coverity Scan Build Status"
