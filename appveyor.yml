@@ -1,0 +1,49 @@
+#
+# Custom environment variables
+#
+environment:
+    global:
+        CYG_ROOT: C:\cygwin64
+        CYG_MIRROR: http://cygwin.mirror.constant.com
+        CYG_CACHE: C:\cygwin64\var\cache\setup
+        CYG_BASH: C:\cygwin64\bin\bash
+
+#
+# Cache Cygwin files to speed up build
+#
+cache:
+    - '%CYG_CACHE%'
+
+#
+# Do a shallow clone of the repo to speed up build
+#
+clone_depth: 1
+
+#
+# Setup Cygwin
+#
+install:
+    - ps: 'Start-FileDownload "https://cygwin.com/setup-x86_64.exe" -FileName "setup-x86_64.exe"'
+    - 'setup-x86_64.exe --quiet-mode --no-shortcuts --only-site --root "%CYG_ROOT%" --site "%CYG_MIRROR%" --local-package-dir "%CYG_CACHE%" --packages gcc-core,gcc-g++'
+    - 'copy setup-x86_64.exe %CYG_ROOT%\bin\'
+    - '%CYG_BASH% -lc "cygcheck -dc cygwin"'
+
+#
+# Build Bareflank
+#
+build_script:
+    - 'echo Building...'
+    - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER; ./tools/scripts/setup_cygwin.sh -l" > NUL 2>&1'
+    - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER; make -j2"'
+
+#
+# Only build the master branch
+#
+branches:
+  only:
+    - master
+
+#
+# Disable tests for now
+#
+test: off
