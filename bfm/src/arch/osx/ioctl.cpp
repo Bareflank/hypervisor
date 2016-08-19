@@ -28,10 +28,6 @@ ioctl::ioctl() noexcept
     m_d = std::make_shared<ioctl_private>();
 }
 
-ioctl::~ioctl()
-{
-}
-
 void
 ioctl::open()
 {
