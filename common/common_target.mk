@@ -45,11 +45,6 @@ ifeq ($(TARGET_COMPILER), both)
 	endif
 endif
 
-ifeq ($(TARGET_COMPILER), both_always)
-	TARGET_CROSS_COMPILED:=true
-	TARGET_NATIVE_COMPILED:=true
-endif
-
 ################################################################################
 # OS Detection
 ################################################################################
@@ -128,7 +123,7 @@ ifeq ($(PRODUCTION),yes)
 	CROSS_CCFLAGS+=-O3
 endif
 
-ifeq ($(TRAVISCI),yes)
+ifeq ($(COVERALLS),yes)
 	NATIVE_CCFLAGS+=-fprofile-arcs -ftest-coverage
 endif
 
@@ -165,7 +160,7 @@ ifeq ($(PRODUCTION),yes)
 	CROSS_CXXFLAGS+=-O3
 endif
 
-ifeq ($(TRAVISCI),yes)
+ifeq ($(COVERALLS),yes)
 	NATIVE_CXXFLAGS+=-fprofile-arcs -ftest-coverage
 endif
 
@@ -194,7 +189,7 @@ CROSS_ARFLAGS+=rcs
 # Default LD Flags
 ################################################################################
 
-ifeq ($(TRAVISCI),yes)
+ifeq ($(COVERALLS),yes)
 	NATIVE_LDFLAGS+=-lgcov --coverage
 endif
 

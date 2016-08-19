@@ -24,7 +24,7 @@
 #include <vmcs/vmcs_intel_x64.h>
 
 #define PRINT_FIELD(a,b) \
-    bfdebug << std::left << std::setw(55) << #b; \
+    bfdebug << #b << ": "; \
     if ((a) == true) \
         bfinfo << view_as_pointer(vmread(b)) << bfendl; \
     else \

@@ -1,28 +1,152 @@
+#
+# Configuration
+#
+
 language: cpp
 
-services:
-- docker
+dist: trusty
+sudo: required
 
-compiler:
-- gcc
-
+#
+# Global
+#
 env:
-- COMPILER=gcc_510
-- COMPILER=gcc_520
-- COMPILER=gcc_530
-- COMPILER=gcc_540
-- COMPILER=gcc_610
+  global:
+    # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
+    #   via the "travis encrypt" command using the project repo's public key
+    - secure: "af7WejqMTjeh2jNz/WhtNZRbRqMDvvzUVAZOLulzkWV6U+VFMq4vn/RDM5P9SwyIjDUUwUqhnr9SEOkr33H7XjoSynG2alcnC27R5EshY0K6NvPmoWsECrVFr8M9J7w4NupbAh8a/e6TGeAVi5Pxc3rhn0TicL570JXrBYedkIXALmOT26URDqEpzrarXh5FmQvluvKoSrlLz2GCVw3S6FjRSS5AnGCDpgLvTJRSsAdHHdx+2tNG8iicNaAjn5+4cFoKwX1EfQJvoUMARAOM/qpz1tw04DgGO/Pu7uBhKUU0fCE0Sw2MkG8fmpm+HaCAzFm7OApYbhIYl7H/o4S3NL1vvMVAqg3DLF+/mfxJjW9TSvxiJXqILsA1lC8Ghxz7KKzdbNiKSUX0uUY6gq1MhJ9iySBsUVPeQwKmAbfge67IdY9lLOlYrFQma7JVap+ZwK9mozzW+w/MjHULYspLN6vi8s4zFBoEEga9CRv/jxmctf8eC6NJuFDtu8nPtEhywquzsnX/BY/YZkLGYr8wKXp6WL8vQWzRx5HCSg0suWFS3uPEMhq54IMZzrfP7TeCXF6nNUkOD63t2vllmx6diQi4jEV7zzORT3LaIW2Yirxg6p4mnUQXA8tWgEY1BDAGIzv1pGgu+qEWqHw7sWmjueN4UGAr0iokDP/V3UZIb5w="
 
-before_install:
-- pip install --user git+git://github.com/eddyxu/cpp-coveralls.git
+#
+# Build Matrix
+#
+matrix:
+  include:
 
-install:
-- if [[ -n $(./tools/astyle/linux/run.sh | grep Formatted) ]]; then echo "You must run astyle before submitting a pull request"; exit -1; fi
-- travis_wait 40 ./tools/scripts/setup_ubuntu.sh -g $COMPILER
+  #
+  # Astyle
+  #
+  - os: linux
+    compiler: gcc
+    env:
+      - TEST="Astyle"
+    script:
+      - if [[ -n $(./tools/astyle/linux/run.sh | grep Formatted) ]]; then echo "You must run astyle before submitting a pull request"; exit -1; fi
 
-script:
-- TRAVISCI=yes make -j2
-- make unittest
+  #
+  # Coveralls
+  #
+  - os: linux
+    compiler: gcc
+    env:
+      - TEST="Coveralls"
+    services:
+      - docker
+    before_install:
+      - pip install --user git+git://github.com/eddyxu/cpp-coveralls.git
+    install:
+      - travis_wait 40 ./tools/scripts/setup_ubuntu.sh
+    script:
+      - COVERALLS=yes make -j2
+      - make test
+    after_success:
+      - coveralls --build-root makefiles -e build_libbfc -e build_libcxx -e build_libcxxabi -e build_newlib -e build_scripts -e common -e doc -e extensions -e source_libbfc -e source_libcxx -e source_libcxxabi -e source_llvm -e source_newlib -e sysroot -e tools -e bfc -e bfcxx -e bfdrivers/src/arch -e bfm/src/arch -e include/hippomocks.h -e include/unittest.h -e bfunwind -e bfvmm/src/vcpu_factory/src/vcpu_factory.cpp -e bfvmm/include/intrinsics/intrinsics_x64.h -e bfvmm/include/intrinsics/intrinsics_intel_x64.h -e include/gsl -e include/exception.h -e bfvmm/src/vmcs -e bfvmm/include/vmcs --gcov-options '\-lp'
 
-after_success:
-- coveralls --build-root makefiles -e build_libbfc -e build_libcxx -e build_libcxxabi -e build_newlib -e build_scripts -e common -e doc -e extensions -e source_libbfc -e source_libcxx -e source_libcxxabi -e source_llvm -e source_newlib -e sysroot -e tools -e bfc -e bfcxx -e bfdrivers/src/arch -e bfm/src/arch -e include/hippomocks.h -e include/unittest.h -e bfunwind -e bfvmm/src/vcpu_factory/src/vcpu_factory.cpp -e bfvmm/include/intrinsics/intrinsics_x64.h -e bfvmm/include/intrinsics/intrinsics_intel_x64.h -e include/gsl -e include/exception.h -e bfvmm/src/vmcs -e bfvmm/include/vmcs --gcov-options '\-lp'
+  #
+  # Coverity
+  #
+  - os: linux
+    compiler: gcc
+    env:
+      - TEST="Coverity"
+        STATIC_ANALYSIS_ENABLED=true
+    before_install:
+      - echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-certificates.crt
+    addons:
+      apt:
+        sources: ['ubuntu-toolchain-r-test']
+        packages: ['g++-5', 'nasm']
+      coverity_scan:
+        project:
+          name: "Bareflank/hypervisor"
+          description: "Travis CI Build"
+        notification_email: rianquinn@gmail.com
+        build_command_prepend: "sudo cp $(which gcc-5) $(which gcc); sudo cp $(which g++-5) $(which g++); ./configure"
+        build_command: "make"
+        branch_pattern: coverity_scan
+    script:
+      - echo "Done"
+
+  #
+  # GCC 5.1.0
+  #
+  - os: linux
+    compiler: gcc
+    env:
+      - TEST="GCC 5.1.0"
+    services:
+      - docker
+    install:
+      - travis_wait 40 ./tools/scripts/setup_ubuntu.sh -g gcc_510
+    script:
+      - make -j2
+      - make test
+
+  #
+  # GCC 5.2.0
+  #
+  - os: linux
+    compiler: gcc
+    env:
+      - TEST="GCC 5.2.0"
+    services:
+      - docker
+    install:
+      - travis_wait 40 ./tools/scripts/setup_ubuntu.sh -g gcc_520
+    script:
+      - make -j2
+      - make test
+
+  #
+  # GCC 5.3.0
+  #
+  - os: linux
+    compiler: gcc
+    env:
+      - TEST="GCC 5.3.0"
+    services:
+      - docker
+    install:
+      - travis_wait 40 ./tools/scripts/setup_ubuntu.sh -g gcc_530
+    script:
+      - make -j2
+      - make test
+
+  #
+  # GCC 5.4.0
+  #
+  - os: linux
+    compiler: gcc
+    env:
+      - TEST="GCC 5.4.0"
+    services:
+      - docker
+    install:
+      - travis_wait 40 ./tools/scripts/setup_ubuntu.sh -g gcc_540
+    script:
+      - make -j2
+      - make test
+
+  #
+  # GCC 6.1.0
+  #
+  - os: linux
+    compiler: gcc
+    env:
+      - TEST="GCC 6.1.0"
+    services:
+      - docker
+    install:
+      - travis_wait 40 ./tools/scripts/setup_ubuntu.sh -g gcc_610
+    script:
+      - make -j2
+      - make test

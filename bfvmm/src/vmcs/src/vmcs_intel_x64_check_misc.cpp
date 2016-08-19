@@ -154,7 +154,7 @@ vmcs_intel_x64::get_entry_ctls() const
 bool
 vmcs_intel_x64::is_address_canonical(uint64_t addr)
 {
-    return (((addr <= 0x00007FFFFFFFFFFF)) || ((addr >= 0xFFFF800000000000) && (addr <= 0xFFFFFFFFFFFFFFFF)));
+    return ((addr <= 0x00007FFFFFFFFFFF) || (addr >= 0xFFFF800000000000));
 }
 
 bool

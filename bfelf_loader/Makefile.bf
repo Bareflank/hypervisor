@@ -24,8 +24,10 @@
 ################################################################################
 
 ifeq ($(shell uname -s), Linux)
-    SUBDIRS += dummy_misc
-    SUBDIRS += dummy_code
+    ifneq ($(STATIC_ANALYSIS_ENABLED), true)
+        SUBDIRS += dummy_misc
+        SUBDIRS += dummy_code
+    endif
     SUBDIRS += src
     SUBDIRS += bin
     SUBDIRS += test

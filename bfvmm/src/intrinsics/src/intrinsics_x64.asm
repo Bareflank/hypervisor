@@ -190,7 +190,7 @@ __read_rflags:
     ret
 
 ; void __write_rflags(uint64_t val)
-__write_rflags
+__write_rflags:
     push rdi
     popf
     ret
