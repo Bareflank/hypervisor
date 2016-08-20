@@ -27,6 +27,7 @@
 - Offical Windows 10 and Windows 8.1 Support
 - Offical OpenSUSE support
 - DWARF Expression support
+- Multi-Core support
 - Posix Mutex support (provides std::mutex)
 - Coveralls support
 - Coverity support
