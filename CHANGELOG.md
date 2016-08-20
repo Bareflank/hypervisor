@@ -4,9 +4,9 @@
 ### Added
 - New GDT class that provides a cleaner abstraction of the GDT
 - New IDT class that provides a cleaner abstraction of the IDT
+- New Page Table class that provides a cleaner abstraction of the Page Tables 
 - New VMCS state classes that organize the creation of the VMM's state, as
-  well as the Host VM's state. Future versions will also add a Guest VM
-  state as well
+  well as the Host VM's state. 
 - New state save logic for the exit handler to support multi-core. The state
   save area is placed in "GS" allowing the exit handler to access CPU specific
   state logic in a reentrant, thread-safe manner without the need for lookups
@@ -16,9 +16,21 @@
 - The VMM now uses it's own GDT instead of the GDT provided by the Host OS.
 - The VMM now uses it's own IDT instead of the IDT provided by the Host OS.
 - The VMM now uses it's own CR0 instead of the CR0 provided by the Host OS.
+- The VMM now uses it's own CR3 instead of the CR3 provided by the Host OS.
 - The VMM now uses it's own CR4 instead of the CR4 provided by the Host OS.
 - The VMM now uses it's own RFLAGS instead of the RFLAGS provided by the Host OS.
 - The VMM now uses it's own EFER MSR instead of the EFER MSR provided by the Host OS.
+- New vCPU APIs that provide that ability to pass around a "void *" for extension
+  support
+- Support for "-O3" optimizations
+- Support for SSE/AVX code in the VMM
+- Offical Windows 10 and Windows 8.1 Support
+- Offical OpenSUSE support
+- DWARF Expression support
+- Posix Mutex support (provides std::mutex)
+- Coveralls support
+- Coverity support
+- AppVeyor support
 
 ### Changed
 - The VMCS state classes are now shared by pointer (i.e. shared_ptr)
@@ -27,6 +39,8 @@
   compilation, but also to provide support for docker. With this new system,
   it is possible to stand up the hypervisor in less than 10 minutes from start
   to finish, while also maintaining multiple build systems for testing
+- A lot of source code has been changed to address findings from Coverity 
+  and Clang-Tidy
 
 ### Fixed
 - If a VM-entry failure occurred, the exit handler would incorrectly read
@@ -35,6 +49,7 @@
 - Some of the macros in the intrinsics file were causing unsigned integers
   because they hit touched bit 31. The macros have been expanded to 64 bits
   to prevent this
+- CPU-z support has been added via a Read MSR quirk. 
 
 ### Removed
 - The old GDT logic that was in the intrinsics_x64 has been removed. Please
