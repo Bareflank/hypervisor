@@ -96,6 +96,7 @@ include %HYPER_ABS%/common/common_subdir.mk
 .PHONY: astyle_clean
 .PHONY: doxygen
 .PHONY: doxygen_clean
+.PHONY: test
 
 ifeq ($(shell uname -s), Linux)
     SUDO:=sudo
@@ -153,6 +154,7 @@ loop: force
 	done \
 
 unittest: run_tests
+test: run_tests
 
 astyle:
 	@cd %HYPER_ABS%; \
@@ -169,3 +171,5 @@ doxygen:
 doxygen_clean:
 	@cd %HYPER_ABS%; \
 	%HYPER_ABS%/tools/doxygen/linux/run.sh clean
+
+
