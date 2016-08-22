@@ -68,7 +68,11 @@ Although an RFC can take on any format, please ensure that an RFC includes the f
 
 Although an RFC should contain as much information as possible to reduce the number of questions likely to be asked by the community, it should also be as brief as possible. RFCs that are too long will likely see limited community involvement, resulting in a higher risk of push back during the submission of any proposed changes.
 
-## Commit Message Format
+## Pull Requests / Commit Message Format
+
+Anyone can submit a pull request to the project. All pull requests must satisfy the requirements defined in the governance documentation. If the pull request includes source code, tests for the source code must also be included (usually in the form of unit tests). All CI tests must also return without error, demonstrating that not only does the source code contain the proper tests to validate it’s implementation, but these tests succeed.
+
+This project uses Astyle to format the source code, and the project provides a configuration file (astyle.conf) that should be used. Prior to submitting changes to the project, all source code should be run through Astyle to verify that the proper formatting rules are applied. If this is not done, Travis CI will fail when the PR is submitted. 
 
 All commits to the project should have the following commit format. The information used in this commit format provides the community with a means to create the project’s changelog, as well as identify what each commit addresses.
 
@@ -101,16 +105,6 @@ that this new API works as intended.
 
 Signed-off-by: John Smith <smithj@company.com>
 ```
-
-## Pull Requests
-
-Anyone can submit a pull request to the project. All pull requests must satisfy the requirements defined in the governance documentation. If the pull request includes source code, tests for the source code must also be included (usually in the form of unit tests). All CI tests must also return without error, demonstrating that not only does the source code contain the proper tests to validate it’s implementation, but these tests succeed. 
-
-## Astyle
-
-This project uses Astyle to format the source code, and the project provides a configuration file (astyle.conf) that should be used.
-
-Prior to submitting changes to the project, all source code should be run through Astyle to verify that the proper formatting rules are applied. 
 
 ## Case
 
