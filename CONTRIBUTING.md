@@ -29,9 +29,9 @@ https://groups.google.com/forum/#!forum/bareflank
 
 If a feature request already exists, please use the existing feature request message, and add a “+1” comment to show your desire for the feature. Features requests with higher community support are more likely to be added to the roadmap. 
 
-## Reporting Issues
+## Reporting Issues / Vulnerabilities
 
-All issues should be submitted to the following issue tracker:
+All issues and vulnerabilities should be submitted to the following issue tracker:
 
 **Bug Tracking:** <br>
 https://github.com/Bareflank/hypervisor/issues
@@ -48,7 +48,7 @@ When submitting an issue, please include the following documentation:
 
 ## Request for Comments
 
-Prior to submitting changes to the project, a Request for Comments (RFC) is highly advised. An RFC provides the community with an opportunity to provide feedback prior to submission. The submitter should view the RFC as a chance to gain community support early, reducing the likelihood of pushback during submission.
+Prior to submitting changes to the project, a Request for Comments (RFC) is highly advised. An RFC provides the community with an opportunity to provide feedback prior to submission. The submitter should view the RFC as a chance to gain community support early, reducing the likelihood of push back during submission.
 
 All RFCs should be submitted to the project’s mailing list or GitHub bug tracker with “RFC:” prepended to the message’s title. Doing so provides a means for community members to filter and comment on the RFC, ask questions, and provide input.
 
