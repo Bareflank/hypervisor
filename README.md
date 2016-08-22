@@ -242,15 +242,6 @@ Target: June 2017
 * 64bit ARM Support
 * Intel Nested Virtualization Support
 
-## Contributing
-
-We are always looking for feedback, feature requests, bug reports, and
-help with writing the code itself. If you would like to participate in
-this project, the following Wiki page provides more information on how
-to do so:
-
-https://github.com/Bareflank/hypervisor/wiki/Contributing
-
 ## License
 
 The Bareflank Hypervisor is licensed under the GNU Lesser General Public License
