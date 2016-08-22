@@ -106,12 +106,6 @@ that this new API works as intended.
 Signed-off-by: John Smith <smithj@company.com>
 ```
 
-## Case
-
-All code and filenames for this project should be written in snake case. Macros should be written in screaming snake case. Please see the following for an example:
-
-[Snake Case](https://en.wikipedia.org/wiki/Snake_case)
-
 ## API Documentation
 
 All functions should be documented using Doxygen style comment blocks. Each comment block should define the following:
@@ -125,10 +119,6 @@ All functions should be documented using Doxygen style comment blocks. Each comm
 Since comments are kept to a minimum, the function’s comment block is a great place to put notes about the function’s implementation. For more information about Doxygen, please see:
 
 [Doxygen Manual](http://www.stack.nl/~dimitri/doxygen/)
-
-## Compilation / Installation / Usage Documentation
-
-Any changes to the project that impact how the project is compiled, installed, or used should also include updates to the associated documentation. 
 
 ## Tagged Releases
 
