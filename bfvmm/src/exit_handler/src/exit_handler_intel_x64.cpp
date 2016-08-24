@@ -513,7 +513,7 @@ exit_handler_intel_x64::handle_rdmsr()
             msr = vmread(VMCS_GUEST_GS_BASE);
             break;
         default:
-            msr = m_intrinsics->read_msr(m_state_save->rcx);
+            msr = m_intrinsics->read_msr(static_cast<uint32_t>(m_state_save->rcx));
             break;
 
         // QUIRK:
@@ -579,7 +579,7 @@ exit_handler_intel_x64::handle_wrmsr()
             vmwrite(VMCS_GUEST_GS_BASE, msr);
             break;
         default:
-            m_intrinsics->write_msr(m_state_save->rcx, msr);
+            m_intrinsics->write_msr(static_cast<uint32_t>(m_state_save->rcx), msr);
             break;
     }
 

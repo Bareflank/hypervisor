@@ -37,8 +37,8 @@ bool bfelf_loader_ut::init()
     std::ifstream dummy_misc_ifs(c_dummy_misc_filename, std::ifstream::ate);
     std::ifstream dummy_code_ifs(c_dummy_code_filename, std::ifstream::ate);
 
-    m_dummy_misc_length = dummy_misc_ifs.tellg();
-    m_dummy_code_length = dummy_code_ifs.tellg();
+    m_dummy_misc_length = static_cast<uint64_t>(dummy_misc_ifs.tellg());
+    m_dummy_code_length = static_cast<uint64_t>(dummy_code_ifs.tellg());
 
     m_dummy_misc = std::shared_ptr<char>(new char[m_dummy_misc_length]());
     m_dummy_code = std::shared_ptr<char>(new char[m_dummy_code_length]());
@@ -46,8 +46,8 @@ bool bfelf_loader_ut::init()
     dummy_misc_ifs.seekg(0);
     dummy_code_ifs.seekg(0);
 
-    dummy_misc_ifs.read(m_dummy_misc.get(), m_dummy_misc_length);
-    dummy_code_ifs.read(m_dummy_code.get(), m_dummy_code_length);
+    dummy_misc_ifs.read(m_dummy_misc.get(), static_cast<int64_t>(m_dummy_misc_length));
+    dummy_code_ifs.read(m_dummy_code.get(), static_cast<int64_t>(m_dummy_code_length));
 
     return true;
 }
@@ -169,6 +169,10 @@ bool bfelf_loader_ut::list()
     this->test_bfelf_loader_get_info_check_section_name_failure_ctors();
     this->test_bfelf_loader_get_info_get_section_name_failure_dtors();
     this->test_bfelf_loader_get_info_check_section_name_failure_dtors();
+    this->test_bfelf_loader_get_info_get_section_name_failure_init_array();
+    this->test_bfelf_loader_get_info_check_section_name_failure_init_array();
+    this->test_bfelf_loader_get_info_get_section_name_failure_fini_array();
+    this->test_bfelf_loader_get_info_check_section_name_failure_fini_array();
     this->test_bfelf_loader_get_info_get_section_name_failure_eh_frame();
     this->test_bfelf_loader_get_info_check_section_name_failure_eh_frame();
 
@@ -184,12 +188,13 @@ bool bfelf_loader_ut::list()
     this->test_private_string_table_sections_invalid();
     this->test_private_get_relocation_tables_invalid_type();
     this->test_private_get_relocation_tables_invalid_section();
+    this->test_private_hash();
 
     return true;
 }
 
 void *
-alloc_exec(int32_t size)
+alloc_exec(size_t size)
 {
     auto addr = mmap(nullptr, size, PROT_READ | PROT_WRITE | PROT_EXEC,
                      MAP_PRIVATE | MAP_ANON, -1, 0);
@@ -201,11 +206,11 @@ std::shared_ptr<char>
 bfelf_loader_ut::load_elf_file(bfelf_file_t *ef)
 {
     bfelf64_xword total = 0;
-    bfelf64_xword num_segments = bfelf_file_num_segments(ef);
+    int64_t num_segments = bfelf_file_num_segments(ef);
 
-    for (auto i = 0U; i < num_segments; i++)
+    for (auto i = 0; i < num_segments; i++)
     {
-        auto ret = 0;
+        int64_t ret = 0;
         bfelf_phdr *phdr = nullptr;
 
         ret = bfelf_file_get_segment(ef, i, &phdr);
@@ -224,7 +229,7 @@ bfelf_loader_ut::load_elf_file(bfelf_file_t *ef)
 
         for (auto i = 0U; i < num_segments; i++)
         {
-            auto ret = 0;
+            int64_t ret = 0;
             bfelf_phdr *phdr = nullptr;
 
             ret = bfelf_file_get_segment(ef, i, &phdr);
@@ -309,7 +314,7 @@ bfelf_loader_ut::get_test() const
     test.phdrtab.rw_segment2.p_memsz = 0x500;
     test.phdrtab.rw_segment2.p_align = 0x1000;
 
-    test.shdrtab.shstrtab.sh_name = offset(test.shstrtab.name4, test.shstrtab);
+    test.shdrtab.shstrtab.sh_name = static_cast<bfelf64_word>(offset(test.shstrtab.name4, test.shstrtab));
     test.shdrtab.shstrtab.sh_type = bfsht_strtab;
     test.shdrtab.shstrtab.sh_flags = 0;
     test.shdrtab.shstrtab.sh_addr = 0x250;
@@ -319,7 +324,7 @@ bfelf_loader_ut::get_test() const
     test.shdrtab.shstrtab.sh_addralign = 1;
     test.shdrtab.shstrtab.sh_entsize = 0;
 
-    test.shdrtab.dynsym.sh_name = offset(test.shstrtab.name1, test.shstrtab);
+    test.shdrtab.dynsym.sh_name = static_cast<bfelf64_word>(offset(test.shstrtab.name1, test.shstrtab));
     test.shdrtab.dynsym.sh_type = bfsht_dynsym;
     test.shdrtab.dynsym.sh_flags = bfshf_a;
     test.shdrtab.dynsym.sh_addr = 0x250;
@@ -329,7 +334,7 @@ bfelf_loader_ut::get_test() const
     test.shdrtab.dynsym.sh_addralign = 8;
     test.shdrtab.dynsym.sh_entsize = sizeof(bfelf_sym);
 
-    test.shdrtab.hashtab.sh_name = offset(test.shstrtab.name2, test.shstrtab);
+    test.shdrtab.hashtab.sh_name = static_cast<bfelf64_word>(offset(test.shstrtab.name2, test.shstrtab));
     test.shdrtab.hashtab.sh_type = bfsht_hash;
     test.shdrtab.hashtab.sh_flags = bfshf_a;
     test.shdrtab.hashtab.sh_addr = 0x250;
@@ -339,7 +344,7 @@ bfelf_loader_ut::get_test() const
     test.shdrtab.hashtab.sh_addralign = 8;
     test.shdrtab.hashtab.sh_entsize = 0x4;
 
-    test.shdrtab.strtab.sh_name = offset(test.shstrtab.name3, test.shstrtab);
+    test.shdrtab.strtab.sh_name = static_cast<bfelf64_word>(offset(test.shstrtab.name3, test.shstrtab));
     test.shdrtab.strtab.sh_type = bfsht_strtab;
     test.shdrtab.strtab.sh_flags = bfshf_a;
     test.shdrtab.strtab.sh_addr = 0x250;
@@ -349,7 +354,7 @@ bfelf_loader_ut::get_test() const
     test.shdrtab.strtab.sh_addralign = 1;
     test.shdrtab.strtab.sh_entsize = 0;
 
-    test.shdrtab.relatab1.sh_name = offset(test.shstrtab.name5, test.shstrtab);
+    test.shdrtab.relatab1.sh_name = static_cast<bfelf64_word>(offset(test.shstrtab.name5, test.shstrtab));
     test.shdrtab.relatab1.sh_type = bfsht_rela;
     test.shdrtab.relatab1.sh_flags = bfshf_ai;
     test.shdrtab.relatab1.sh_addr = 0x250;
@@ -359,7 +364,7 @@ bfelf_loader_ut::get_test() const
     test.shdrtab.relatab1.sh_addralign = 8;
     test.shdrtab.relatab1.sh_entsize = sizeof(bfelf_rela);
 
-    test.shdrtab.relatab2.sh_name = offset(test.shstrtab.name5, test.shstrtab);
+    test.shdrtab.relatab2.sh_name = static_cast<bfelf64_word>(offset(test.shstrtab.name5, test.shstrtab));
     test.shdrtab.relatab2.sh_type = bfsht_rela;
     test.shdrtab.relatab2.sh_flags = bfshf_ai;
     test.shdrtab.relatab2.sh_addr = 0x250;
@@ -369,7 +374,7 @@ bfelf_loader_ut::get_test() const
     test.shdrtab.relatab2.sh_addralign = 8;
     test.shdrtab.relatab2.sh_entsize = sizeof(bfelf_rela);
 
-    test.shdrtab.relatab3.sh_name = offset(test.shstrtab.name5, test.shstrtab);
+    test.shdrtab.relatab3.sh_name = static_cast<bfelf64_word>(offset(test.shstrtab.name5, test.shstrtab));
     test.shdrtab.relatab3.sh_type = bfsht_rela;
     test.shdrtab.relatab3.sh_flags = bfshf_ai;
     test.shdrtab.relatab3.sh_addr = 0x250;
@@ -379,7 +384,7 @@ bfelf_loader_ut::get_test() const
     test.shdrtab.relatab3.sh_addralign = 8;
     test.shdrtab.relatab3.sh_entsize = sizeof(bfelf_rela);
 
-    test.shdrtab.relatab4.sh_name = offset(test.shstrtab.name5, test.shstrtab);
+    test.shdrtab.relatab4.sh_name = static_cast<bfelf64_word>(offset(test.shstrtab.name5, test.shstrtab));
     test.shdrtab.relatab4.sh_type = bfsht_rela;
     test.shdrtab.relatab4.sh_flags = bfshf_ai;
     test.shdrtab.relatab4.sh_addr = 0x250;
@@ -389,7 +394,7 @@ bfelf_loader_ut::get_test() const
     test.shdrtab.relatab4.sh_addralign = 8;
     test.shdrtab.relatab4.sh_entsize = sizeof(bfelf_rela);
 
-    test.shdrtab.relatab5.sh_name = offset(test.shstrtab.name5, test.shstrtab);
+    test.shdrtab.relatab5.sh_name = static_cast<bfelf64_word>(offset(test.shstrtab.name5, test.shstrtab));
     test.shdrtab.relatab5.sh_type = bfsht_rela;
     test.shdrtab.relatab5.sh_flags = bfshf_ai;
     test.shdrtab.relatab5.sh_addr = 0x250;
@@ -399,7 +404,7 @@ bfelf_loader_ut::get_test() const
     test.shdrtab.relatab5.sh_addralign = 8;
     test.shdrtab.relatab5.sh_entsize = sizeof(bfelf_rela);
 
-    test.shdrtab.relatab6.sh_name = offset(test.shstrtab.name5, test.shstrtab);
+    test.shdrtab.relatab6.sh_name = static_cast<bfelf64_word>(offset(test.shstrtab.name5, test.shstrtab));
     test.shdrtab.relatab6.sh_type = bfsht_rela;
     test.shdrtab.relatab6.sh_flags = bfshf_ai;
     test.shdrtab.relatab6.sh_addr = 0x250;
@@ -409,7 +414,7 @@ bfelf_loader_ut::get_test() const
     test.shdrtab.relatab6.sh_addralign = 8;
     test.shdrtab.relatab6.sh_entsize = sizeof(bfelf_rela);
 
-    test.shdrtab.relatab7.sh_name = offset(test.shstrtab.name5, test.shstrtab);
+    test.shdrtab.relatab7.sh_name = static_cast<bfelf64_word>(offset(test.shstrtab.name5, test.shstrtab));
     test.shdrtab.relatab7.sh_type = bfsht_rela;
     test.shdrtab.relatab7.sh_flags = bfshf_ai;
     test.shdrtab.relatab7.sh_addr = 0x250;
@@ -419,7 +424,7 @@ bfelf_loader_ut::get_test() const
     test.shdrtab.relatab7.sh_addralign = 8;
     test.shdrtab.relatab7.sh_entsize = sizeof(bfelf_rela);
 
-    test.shdrtab.relatab8.sh_name = offset(test.shstrtab.name5, test.shstrtab);
+    test.shdrtab.relatab8.sh_name = static_cast<bfelf64_word>(offset(test.shstrtab.name5, test.shstrtab));
     test.shdrtab.relatab8.sh_type = bfsht_rela;
     test.shdrtab.relatab8.sh_flags = bfshf_ai;
     test.shdrtab.relatab8.sh_addr = 0x250;

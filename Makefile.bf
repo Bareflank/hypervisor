@@ -158,11 +158,11 @@ test: run_tests
 
 astyle:
 	@cd %HYPER_ABS%; \
-	%HYPER_ABS%/tools/astyle/linux/run.sh
+	%HYPER_ABS%/tools/astyle/run.sh
 
 astyle_clean:
 	@cd %HYPER_ABS%; \
-	%HYPER_ABS%/tools/astyle/linux/run.sh clean
+	%HYPER_ABS%/tools/astyle/run.sh clean
 
 doxygen:
 	@cd %HYPER_ABS%; \

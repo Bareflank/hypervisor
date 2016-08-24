@@ -20,6 +20,7 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #include <log.h>
+#include <misc.h>
 #include <abort.h>
 #include <dwarf4.h>
 #include <eh_frame.h>
@@ -97,21 +98,21 @@ decode_pointer(char **addr, uint64_t encoding)
             break;
 
         case DW_EH_PE_sleb128:
-            result += dwarf4::decode_sleb128(addr);
+            result = add_offset(result, dwarf4::decode_sleb128(addr));
             break;
 
         case DW_EH_PE_sdata2:
-            result += *reinterpret_cast<int16_t *>(*addr);
+            result = add_offset(result, *reinterpret_cast<int16_t *>(*addr));
             *addr += sizeof(int16_t);
             break;
 
         case DW_EH_PE_sdata4:
-            result += *reinterpret_cast<int32_t *>(*addr);
+            result = add_offset(result, *reinterpret_cast<int32_t *>(*addr));
             *addr += sizeof(int32_t);
             break;
 
         case DW_EH_PE_sdata8:
-            result += *reinterpret_cast<int64_t *>(*addr);
+            result = add_offset(result, *reinterpret_cast<int64_t *>(*addr));
             *addr += sizeof(int64_t);
             break;
 
@@ -326,7 +327,7 @@ fd_entry::fd_entry(const eh_frame_t &eh_frame) :
     m_lsda(0),
     m_instructions(0)
 {
-    parse((char *)eh_frame.addr);
+    parse(reinterpret_cast<char *>(eh_frame.addr));
 }
 
 fd_entry::fd_entry(const eh_frame_t &eh_frame, void *addr) :
@@ -337,7 +338,7 @@ fd_entry::fd_entry(const eh_frame_t &eh_frame, void *addr) :
     m_lsda(0),
     m_instructions(0)
 {
-    parse((char *)addr);
+    parse(reinterpret_cast<char *>(addr));
 }
 
 void
@@ -392,7 +393,7 @@ fd_entry::parse(char *addr)
 // -----------------------------------------------------------------------------
 
 fd_entry
-eh_frame::find_fde(register_state *state, bool phase1)
+eh_frame::find_fde(register_state *state)
 {
     auto eh_frame_list = get_eh_frame_list();
 
@@ -404,14 +405,7 @@ eh_frame::find_fde(register_state *state, bool phase1)
                 continue;
 
             if (fde.is_in_range(state->get_ip()))
-            {
-                if (phase1)
-                    debug("unwinder found rip: %p, fde: %p\n",
-                          reinterpret_cast<void *>(state->get_ip()),
-                          reinterpret_cast<void *>(fde.pc_begin()));
-
                 return fde;
-            }
         }
     }
 

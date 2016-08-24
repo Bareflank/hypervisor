@@ -21,27 +21,19 @@
 
 #include <test.h>
 
-#ifndef __clang__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-result"
-#endif
-
 void *
 operator new(std::size_t size)
 {
     if ((size & (MAX_PAGE_SIZE - 1)) == 0)
     {
         void *ptr = nullptr;
-        posix_memalign(&ptr, MAX_PAGE_SIZE, size);
+        auto ignored_ret = posix_memalign(&ptr, MAX_PAGE_SIZE, size);
+        (void) ignored_ret;
         return ptr;
     }
 
     return malloc(size);
 }
-
-#ifndef __clang__
-#pragma GCC diagnostic pop
-#endif
 
 void
 operator delete(void *ptr, std::size_t size) throw()

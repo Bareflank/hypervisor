@@ -31,7 +31,7 @@ idt_x64::idt_x64(uint16_t size) :
     m_idt = gsl::span<uint64_t>(m_idt_owner.get(), size);
 
     m_idt_reg.base = reinterpret_cast<uint64_t>(m_idt_owner.get());
-    m_idt_reg.limit = (size << 3) - 1;
+    m_idt_reg.limit = static_cast<uint16_t>(static_cast<uint32_t>(size << 3) - 1);
 }
 
 idt_x64::idt_x64(const std::shared_ptr<intrinsics_x64> &intrinsics)

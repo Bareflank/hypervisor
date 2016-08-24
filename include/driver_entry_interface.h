@@ -91,7 +91,7 @@ extern "C" {
  *
  * @param arg length of the module to be added in bytes
  */
-#define IOCTL_ADD_MODULE_LENGTH _IOW(BAREFLANK_MAJOR, IOCTL_ADD_MODULE_LENGTH_CMD, int64_t *)
+#define IOCTL_ADD_MODULE_LENGTH _IOW(BAREFLANK_MAJOR, IOCTL_ADD_MODULE_LENGTH_CMD, uint64_t *)
 
 /**
  * Add Module

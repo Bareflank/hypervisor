@@ -28,9 +28,9 @@
 // -----------------------------------------------------------------------------
 
 int64_t bf_ioctl_open();
-int64_t bf_send_ioctl(int64_t fd, unsigned long request);
-int64_t bf_read_ioctl(int64_t fd, unsigned long request, void *data);
-int64_t bf_write_ioctl(int64_t fd, unsigned long request, const void *data);
+int64_t bf_send_ioctl(int fd, unsigned long request);
+int64_t bf_read_ioctl(int fd, unsigned long request, void *data);
+int64_t bf_write_ioctl(int fd, unsigned long request, const void *data);
 
 // -----------------------------------------------------------------------------
 // Global Data

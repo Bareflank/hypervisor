@@ -44,8 +44,6 @@ private:
     void test_vcpu_valid();
     void test_vcpu_write_empty_string();
     void test_vcpu_write_hello_world();
-    void test_vcpu_write_from_constructor();
-    void test_vcpu_write_from_destructor();
     void test_vcpu_init_null_attr();
     void test_vcpu_init_valid_attr();
     void test_vcpu_fini_null_attr();

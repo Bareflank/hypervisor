@@ -22,40 +22,156 @@
 
 # Note:
 #
-# This is just a development tool and is not a supported script. If you do
-# want to use this, it's only been tested on Ubuntu 16.04 with
-# clang-tidy-3.8 installed.
+# To use this script, you need to create a compilation database, which
+# can be done by installing bear on your system, and running make with
+# bear:
 #
-# Also note that at a minimum, this shows which clang-tidy analysis options
-# have been run against the code.
+#   STATIC_ANALYSIS_ENABLED=true bear make
 #
-# Ignore:
+# Once you have compiled Bareflank and created a compilation database,
+# you should be able to run this script which will tell you if there are
+# any issues with the code. The following describes what we turned off
+# and why:
 #
 # - CastToStruct: we disable this at the moment because we are doing a lot
 #   of legit casting in the ELF loader, as this is really how the spec is
 #   written.
 #
 # - UnreachableCode: we disable this because it seems to output buggy
-#   results. Furthermore, its not really needed since Coveralls tells us
-#   if code cannot be reached, which is also evidence this check is not
+#   results. For some reason, anything with a try catch block, this seems
+#   to get triggered. Furthermore, its not really needed since Coveralls tells
+#   us if code cannot be reached, which is also evidence this check is not
 #   working right, as it has a lot of false positives.
-#
-# - VirtualCall: this does't work with hippomocks as a lot of functions are
-#   labled virtual so that they can be mocked, which causes this to create
-#   false positives.
 #
 # - reinterpret-cast: There are legit cases where we need reinterpret_cast.
 #   As a result, we have disabled this. That being said, each instance were
 #   it is used has been reviewed, and determined to be needed. The remaining
 #   instances were removed in place of safer code.
 #
-# - braces-around-statements: We use this a lot
+# - braces-around-statements: Simply disagree with this one, and has
+#   actually been proposed and declined for the C++ Core Guidelines. Instead,
+#   analysis tools should detect incorrect indentation when these types
+#   of errors occur.
+#
+# - cert-err60-cpp: This not only triggers an issue with Hippomocks, but is
+#   also triggering on std::run_time and std::logic_error on Travis CI,
+#   so we have it turned off where needed.
+#
+# Additional Note:
+#
+# Currently we have -Wcast-align disabled for C as clang-tidy does not have
+# a way to turn this off and it complains about the ELF loader. This means
+# that right now, we only support archiectures with byte alignment.
 #
 
-run-clang-tidy-3.8.py -checks=clan*,-clang-analyzer-alpha.core.CastToStruct,-clang-analyzer-alpha.deadcode.UnreachableCode,-clang-analyzer-alpha.cplusplus.VirtualCall $PWD
-run-clang-tidy-3.8.py -checks=cert*,-clang-analyzer* $PWD
-run-clang-tidy-3.8.py -checks=misc*,-clang-analyzer* $PWD
-run-clang-tidy-3.8.py -checks=perf*,-clang-analyzer* $PWD
-run-clang-tidy-3.8.py -checks=cppc*,-clang-analyzer*,-cppcoreguidelines-pro-type-reinterpret-cast $PWD
-run-clang-tidy-3.8.py -checks=read*,-clang-analyzer*,-readability-braces-around-statements $PWD
-run-clang-tidy-3.8.py -checks=mode*,-clang-analyzer* $PWD
+if [[ ! -d "bfelf_loader" ]]; then
+    echo "This script must be run from bareflank root directory"
+    exit 1
+fi
+
+#
+# Output
+#
+OUTPUT=$PWD/verify_source_results.txt
+
+#
+# Cleanup
+#
+rm -Rf $OUTPUT
+
+#
+# Header
+#
+header() {
+    echo "[ --- Verifying: $1 --- ]"
+}
+
+#
+# Run Clang Tidy
+#
+run_clang_tidy() {
+    run-clang-tidy-3.8.py -checks=$1 $PWD >> $OUTPUT 2> /dev/null
+    if [[ -n $(grep "warning: " $OUTPUT) ]] || [[ -n $(grep "error: " $OUTPUT) ]]; then
+        echo ""
+        echo "############################"
+        echo "# Clang-Tidy Checks Failed #"
+        echo "############################"
+        echo ""
+        grep --color=auto "warning: " $OUTPUT
+        exit -1;
+    else
+        echo -e "\xE2\x9C\x93 passed: $1";
+    fi
+
+    rm -Rf $OUTPUT
+}
+
+#
+# bfcrt
+#
+pushd bfcrt > /dev/null
+header $PWD
+run_clang_tidy "clan*,-clang-analyzer-alpha.deadcode.UnreachableCode"
+run_clang_tidy "cert*,-clang-analyzer*,-cert-err60-cpp"
+run_clang_tidy "misc*,-clang-analyzer*"
+run_clang_tidy "perf*,-clang-analyzer*"
+run_clang_tidy "cppc*,-clang-analyzer*,-cppcoreguidelines-pro-type-reinterpret-cast"
+run_clang_tidy "read*,-clang-analyzer*,-readability-braces-around-statements"
+run_clang_tidy "mode*,-clang-analyzer*"
+popd > /dev/null
+
+#
+# bfdrivers
+#
+pushd bfdrivers > /dev/null
+header $PWD
+run_clang_tidy "clan*,-clang-analyzer-alpha.deadcode.UnreachableCode"
+run_clang_tidy "cert*,-clang-analyzer*,-cert-err60-cpp"
+run_clang_tidy "misc*,-clang-analyzer*"
+run_clang_tidy "perf*,-clang-analyzer*"
+run_clang_tidy "cppc*,-clang-analyzer*,-cppcoreguidelines-pro-type-reinterpret-cast"
+run_clang_tidy "read*,-clang-analyzer*,-readability-braces-around-statements"
+run_clang_tidy "mode*,-clang-analyzer*"
+popd > /dev/null
+
+#
+# bfelf_loader
+#
+pushd bfelf_loader > /dev/null
+header $PWD
+run_clang_tidy "clan*,-clang-analyzer-alpha.core.CastToStruct"
+run_clang_tidy "cert*,-clang-analyzer*,-cert-err60-cpp"
+run_clang_tidy "misc*,-clang-analyzer*"
+run_clang_tidy "perf*,-clang-analyzer*"
+run_clang_tidy "cppc*,-clang-analyzer*,-cppcoreguidelines-pro-type-reinterpret-cast"
+run_clang_tidy "read*,-clang-analyzer*,-readability-braces-around-statements"
+run_clang_tidy "mode*,-clang-analyzer*"
+popd > /dev/null
+
+#
+# bfm
+#
+pushd bfm > /dev/null
+header $PWD
+run_clang_tidy "clan*,-clang-analyzer-alpha.deadcode.UnreachableCode"
+run_clang_tidy "cert*,-clang-analyzer*,-cert-err60-cpp"
+run_clang_tidy "misc*,-clang-analyzer*"
+run_clang_tidy "perf*,-clang-analyzer*"
+run_clang_tidy "cppc*,-clang-analyzer*,-cppcoreguidelines-pro-type-reinterpret-cast"
+run_clang_tidy "read*,-clang-analyzer*,-readability-braces-around-statements"
+run_clang_tidy "mode*,-clang-analyzer*"
+popd > /dev/null
+
+#
+# bfvmm
+#
+pushd bfvmm > /dev/null
+header $PWD
+run_clang_tidy "clan*,-clang-analyzer-alpha.deadcode.UnreachableCode"
+run_clang_tidy "cert*,-clang-analyzer*,-cert-err60-cpp"
+run_clang_tidy "misc*,-clang-analyzer*"
+run_clang_tidy "perf*,-clang-analyzer*"
+run_clang_tidy "cppc*,-clang-analyzer*,-cppcoreguidelines-pro-type-reinterpret-cast"
+run_clang_tidy "read*,-clang-analyzer*,-readability-braces-around-statements"
+run_clang_tidy "mode*,-clang-analyzer*"
+popd > /dev/null

@@ -24,6 +24,7 @@
 #include <test.h>
 #include <constants.h>
 #include <eh_frame_list.h>
+#include <view_as_pointer.h>
 
 #include <fstream>
 #include <sys/mman.h>
@@ -71,7 +72,7 @@ bool bfunwind_ut::init()
 
     m_self_length = self_ifs.tellg();
 
-    if (m_self_length == 0)
+    if (m_self_length <= 0)
     {
         std::cout << "one or more of the dummy libraries is empty: " << std::endl;
         std::cout << "    - self: " << m_self_length << std::endl;
@@ -86,7 +87,7 @@ bool bfunwind_ut::init()
     if (!m_self)
     {
         std::cout << "unable to allocate space for one or more of the dummy libraries: " << std::endl;
-        std::cout << "    - self: " << (void *)m_self.get() << std::endl;
+        std::cout << "    - self: " << m_self.get() << std::endl;
         return false;
     }
 
@@ -103,10 +104,10 @@ bool bfunwind_ut::init()
     fa1.ignore();
     fa2.ignore();
 
-    auto ret = 0;
+    int64_t ret = 0;
     bfelf_file_t self_ef;
 
-    ret = bfelf_file_init(m_self.get(), m_self_length, &self_ef);
+    ret = bfelf_file_init(m_self.get(), static_cast<uint64_t>(m_self_length), &self_ef);
     ASSERT_TRUE(ret == BFELF_SUCCESS);
 
     bfelf_loader_t loader;

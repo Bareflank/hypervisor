@@ -21,27 +21,19 @@
 
 #include <test.h>
 
-#ifndef __clang__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-result"
-#endif
-
 void *
 operator new(std::size_t size)
 {
     if ((size & (MAX_PAGE_SIZE - 1)) == 0)
     {
         void *ptr = nullptr;
-        posix_memalign(&ptr, MAX_PAGE_SIZE, size);
+        auto ignored_ret = posix_memalign(&ptr, MAX_PAGE_SIZE, size);
+        (void) ignored_ret;
         return ptr;
     }
 
     return malloc(size);
 }
-
-#ifndef __clang__
-#pragma GCC diagnostic pop
-#endif
 
 void
 operator delete(void *ptr, std::size_t size) throw()
@@ -108,17 +100,17 @@ memory_manager_ut::list()
     this->test_memory_manager_add_md_invalid_type();
     this->test_memory_manager_add_md_unaligned_physical();
     this->test_memory_manager_add_md_unaligned_virtual();
-    this->test_memory_manager_virt_to_phys_unknown();
-    this->test_memory_manager_phys_to_virt_unknown();
-    this->test_memory_manager_virt_to_phys_random_address();
-    this->test_memory_manager_virt_to_phys_nullptr();
-    this->test_memory_manager_virt_to_phys_upper_limit();
-    this->test_memory_manager_virt_to_phys_lower_limit();
+    this->test_memory_manager_virtint_to_physint_unknown();
+    this->test_memory_manager_physint_to_virtint_unknown();
+    this->test_memory_manager_virtint_to_physint_random_address();
+    this->test_memory_manager_virtint_to_physint_nullptr();
+    this->test_memory_manager_virtint_to_physint_upper_limit();
+    this->test_memory_manager_virtint_to_physint_lower_limit();
     this->test_memory_manager_virt_to_phys_map();
-    this->test_memory_manager_phys_to_virt_random_address();
-    this->test_memory_manager_phys_to_virt_nullptr();
-    this->test_memory_manager_phys_to_virt_upper_limit();
-    this->test_memory_manager_phys_to_virt_lower_limit();
+    this->test_memory_manager_physint_to_virtint_random_address();
+    this->test_memory_manager_physint_to_virtint_nullptr();
+    this->test_memory_manager_physint_to_virtint_upper_limit();
+    this->test_memory_manager_physint_to_virtint_lower_limit();
     this->test_memory_manager_phys_to_virt_map();
 
     this->test_page_table_x64_no_entry();

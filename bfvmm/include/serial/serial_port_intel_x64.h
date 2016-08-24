@@ -109,8 +109,7 @@ public:
         baud_rate_19200 = 0x0006,
         baud_rate_38400 = 0x0003,
         baud_rate_57600 = 0x0002,
-        baud_rate_115200 = 0x0001,
-        baud_rate_unknown = 0x0000
+        baud_rate_115200 = 0x0001
     };
 
     enum data_bits_t

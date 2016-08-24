@@ -183,7 +183,7 @@ public:
     /// @param index the index of the GDT descriptor
     /// @param limit the descriptors limit
     ///
-    virtual void set_limit(uint16_t index, uint64_t limit);
+    virtual void set_limit(uint16_t index, uint32_t limit);
 
     /// Get Descriptor Limit
     ///
@@ -192,7 +192,7 @@ public:
     /// @param index the index of the GDT descriptor
     /// @return the descriptors limit
     ///
-    virtual uint64_t limit(uint16_t index) const;
+    virtual uint32_t limit(uint16_t index) const;
 
     /// Set Descriptor Access Rights
     ///
@@ -211,7 +211,7 @@ public:
     /// @param index the index of the GDT descriptor
     /// @param access_rights the access rights for this descriptor
     ///
-    virtual void set_access_rights(uint16_t index, uint64_t access_rights);
+    virtual void set_access_rights(uint16_t index, uint32_t access_rights);
 
     /// Get Descriptor Access Rights
     ///
@@ -220,7 +220,7 @@ public:
     /// @param index the index of the GDT descriptor
     /// @return the descriptors access rights
     ///
-    virtual uint64_t access_rights(uint16_t index) const;
+    virtual uint32_t access_rights(uint16_t index) const;
 
 private:
 

@@ -130,28 +130,6 @@ serial_ut::test_serial_set_baud_rate_success()
 }
 
 void
-serial_ut::test_serial_set_baud_rate_unknown()
-{
-    MockRepository mocks;
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    setup_intrinsics(mocks, intrinsics.get());
-
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        auto serial = std::make_shared<serial_port_intel_x64>(intrinsics);
-        serial->init();
-
-        serial->set_baud_rate(serial_port_intel_x64::baud_rate_unknown);
-        EXPECT_TRUE(serial->baud_rate() == serial_port_intel_x64::DEFAULT_BAUD_RATE);
-        serial->set_baud_rate((serial_port_intel_x64::baud_rate_t)0x0);
-        EXPECT_TRUE(serial->baud_rate() == serial_port_intel_x64::DEFAULT_BAUD_RATE);
-        serial->set_baud_rate((serial_port_intel_x64::baud_rate_t)0xBEEF);
-        EXPECT_TRUE(serial->baud_rate() == serial_port_intel_x64::baud_rate_unknown);
-    });
-}
-
-void
 serial_ut::test_serial_set_data_bits_success()
 {
     MockRepository mocks;
@@ -189,7 +167,7 @@ serial_ut::test_serial_set_data_bits_success_extra_bits()
         serial->init();
 
         auto bits = serial_port_intel_x64::DEFAULT_DATA_BITS | ~LINE_CONTROL_DATA_MASK;
-        serial->set_data_bits((serial_port_intel_x64::data_bits_t)(bits));
+        serial->set_data_bits(static_cast<serial_port_intel_x64::data_bits_t>(bits));
 
         EXPECT_TRUE(serial->data_bits() == serial_port_intel_x64::DEFAULT_DATA_BITS);
         EXPECT_TRUE(serial->stop_bits() == serial_port_intel_x64::DEFAULT_STOP_BITS);
@@ -231,7 +209,7 @@ serial_ut::test_serial_set_stop_bits_success_extra_bits()
         serial->init();
 
         auto bits = serial_port_intel_x64::DEFAULT_STOP_BITS | ~LINE_CONTROL_STOP_MASK;
-        serial->set_stop_bits((serial_port_intel_x64::stop_bits_t)(bits));
+        serial->set_stop_bits(static_cast<serial_port_intel_x64::stop_bits_t>(bits));
 
         EXPECT_TRUE(serial->data_bits() == serial_port_intel_x64::DEFAULT_DATA_BITS);
         EXPECT_TRUE(serial->stop_bits() == serial_port_intel_x64::DEFAULT_STOP_BITS);
@@ -279,7 +257,7 @@ serial_ut::test_serial_set_parity_bits_success_extra_bits()
         serial->init();
 
         auto bits = serial_port_intel_x64::DEFAULT_PARITY_BITS | ~LINE_CONTROL_PARITY_MASK;
-        serial->set_parity_bits((serial_port_intel_x64::parity_bits_t)(bits));
+        serial->set_parity_bits(static_cast<serial_port_intel_x64::parity_bits_t>(bits));
 
         EXPECT_TRUE(serial->data_bits() == serial_port_intel_x64::DEFAULT_DATA_BITS);
         EXPECT_TRUE(serial->stop_bits() == serial_port_intel_x64::DEFAULT_STOP_BITS);
@@ -315,8 +293,10 @@ serial_ut::test_serial_write_string()
 
     setup_intrinsics(mocks, intrinsics.get());
 
-    mocks.OnCalls(intrinsics.get(), intrinsics_intel_x64::read_portio_8, strlen(msg) + 1).With(DEFAULT_COM_PORT + LINE_STATUS_REG).Return(0xFF);
-    mocks.ExpectCalls(intrinsics.get(), intrinsics_intel_x64::write_portio_8, strlen(msg) + 1).With(DEFAULT_COM_PORT, _);
+    auto len = static_cast<uint32_t>(strlen(msg) + 1);
+
+    mocks.OnCalls(intrinsics.get(), intrinsics_intel_x64::read_portio_8, len).With(DEFAULT_COM_PORT + LINE_STATUS_REG).Return(0xFF);
+    mocks.ExpectCalls(intrinsics.get(), intrinsics_intel_x64::write_portio_8, len).With(DEFAULT_COM_PORT, _);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {

@@ -112,7 +112,7 @@ public:
     /// @param virt virtual address to convert
     /// @return physical address
     ///
-    virtual uintptr_t virt_to_phys(uintptr_t virt);
+    virtual uintptr_t virtint_to_physint(uintptr_t virt);
 
     /// Virtual Address To Physical Address
     ///
@@ -123,7 +123,7 @@ public:
     /// @param virt virtual address to convert
     /// @return physical address
     ///
-    virtual uintptr_t virt_to_phys(void *virt);
+    virtual uintptr_t virtptr_to_physint(void *virt);
 
     /// Virtual Address To Physical Address
     ///
@@ -134,7 +134,7 @@ public:
     /// @param virt virtual address to convert
     /// @return physical address
     ///
-    virtual void *virt_to_phys_ptr(uintptr_t virt);
+    virtual void *virtint_to_physptr(uintptr_t virt);
 
     /// Virtual Address To Physical Address
     ///
@@ -145,7 +145,7 @@ public:
     /// @param virt virtual address to convert
     /// @return physical address
     ///
-    virtual void *virt_to_phys_ptr(void *virt);
+    virtual void *virtptr_to_physptr(void *virt);
 
     /// Physical Address To Virtual Address
     ///
@@ -156,7 +156,7 @@ public:
     /// @param phys physical address to convert
     /// @return virtual address
     ///
-    virtual uintptr_t phys_to_virt(uintptr_t phys);
+    virtual uintptr_t physint_to_virtint(uintptr_t phys);
 
     /// Physical Address To Virtual Address
     ///
@@ -167,7 +167,7 @@ public:
     /// @param phys physical address to convert
     /// @return virtual address
     ///
-    virtual uintptr_t phys_to_virt(void *phys);
+    virtual uintptr_t physptr_to_virtint(void *phys);
 
     /// Physical Address To Virtual Address
     ///
@@ -178,7 +178,7 @@ public:
     /// @param phys physical address to convert
     /// @return virtual address
     ///
-    virtual void *phys_to_virt_ptr(uintptr_t phys);
+    virtual void *physint_to_virtptr(uintptr_t phys);
 
     /// Physical Address To Virtual Address
     ///
@@ -189,7 +189,7 @@ public:
     /// @param phys physical address to convert
     /// @return virtual address
     ///
-    virtual void *phys_to_virt_ptr(void *phys);
+    virtual void *physptr_to_virtptr(void *phys);
 
     /// Adds Memory Descriptor List
     ///
@@ -235,8 +235,8 @@ private:
 
     friend class memory_manager_ut;
 
-    virtual void *malloc_heap(size_t size) noexcept;
-    virtual void *malloc_page(size_t size) noexcept;
+    virtual void *malloc_heap(int64_t size) noexcept;
+    virtual void *malloc_page(int64_t size) noexcept;
     virtual void free_heap(void *ptr) noexcept;
     virtual void free_page(void *ptr) noexcept;
 
@@ -250,8 +250,8 @@ private:
 
 private:
 
-    uint64_t m_heap_index;
-    uint64_t m_page_index;
+    int64_t m_heap_index;
+    int64_t m_page_index;
 
     std::map<uintptr_t, memory_descriptor> m_virt_to_phys_map;
     std::map<uintptr_t, memory_descriptor> m_phys_to_virt_map;

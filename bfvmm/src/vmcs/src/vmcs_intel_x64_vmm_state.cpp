@@ -81,11 +81,11 @@ vmcs_intel_x64_vmm_state::vmcs_intel_x64_vmm_state(const std::shared_ptr<state_s
     m_gs_index = 3;
     m_tr_index = 4;
 
-    m_cs = m_cs_index << 3;
-    m_ss = m_ss_index << 3;
-    m_fs = m_fs_index << 3;
-    m_gs = m_gs_index << 3;
-    m_tr = m_tr_index << 3;
+    m_cs = static_cast<uint16_t>(m_cs_index << 3);
+    m_ss = static_cast<uint16_t>(m_ss_index << 3);
+    m_fs = static_cast<uint16_t>(m_fs_index << 3);
+    m_gs = static_cast<uint16_t>(m_gs_index << 3);
+    m_tr = static_cast<uint16_t>(m_tr_index << 3);
 
     // TODO: We need to guard the additions to the page tables here. Just
     // in case more than one core attempts to change these at the same time.

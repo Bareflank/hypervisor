@@ -140,13 +140,13 @@ vmcs_intel_x64::create_vmcs_region()
     { this->release_vmcs_region(); });
 
     m_vmcs_region = std::make_unique<uint32_t[]>(1024);
-    m_vmcs_region_phys = g_mm->virt_to_phys(m_vmcs_region.get());
+    m_vmcs_region_phys = g_mm->virtptr_to_physint(m_vmcs_region.get());
 
     if (m_vmcs_region_phys == 0)
         throw std::logic_error("m_vmcs_region_phys == nullptr");
 
     gsl::span<uint32_t> id{m_vmcs_region.get(), 1024};
-    id[0] = m_intrinsics->read_msr(IA32_VMX_BASIC_MSR) & 0x7FFFFFFFF;
+    id[0] = static_cast<uint32_t>(m_intrinsics->read_msr(IA32_VMX_BASIC_MSR) & 0x7FFFFFFFF);
 
     fa1.ignore();
 }
@@ -570,7 +570,7 @@ vmcs_intel_x64::vmwrite(uint64_t field, uint64_t value)
 }
 
 void
-vmcs_intel_x64::filter_unsupported(uint64_t msr, uint64_t &ctrl)
+vmcs_intel_x64::filter_unsupported(uint32_t msr, uint64_t &ctrl)
 {
     auto allowed = m_intrinsics->read_msr(msr);
     auto allowed0 = ((allowed >> 00) & 0x00000000FFFFFFFF);

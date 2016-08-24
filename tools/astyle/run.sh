@@ -23,22 +23,22 @@
 
 set -e
 
-ASTYLE=./tools/astyle/linux/astyle/build/gcc/bin/astyle
+ASTYLE=./tools/astyle/astyle/build/gcc/bin/astyle
 
 if [ $# -gt 0 ]; then
     if [ $1 = "clean" ]; then
 
-        rm -Rf ./tools/astyle/linux/astyle
+        rm -Rf ./tools/astyle/astyle
         exit
     fi
 fi
 
 if [ ! -f $ASTYLE ]; then
 
-	pushd ./tools/astyle/linux/
+	pushd ./tools/astyle/
 	rm -Rf astyle
 
-	tar xvf astyle_2.05.1_linux.tar.gz
+	tar xvf astyle.tar.gz
 	cd astyle/build/gcc
 
 	make -j

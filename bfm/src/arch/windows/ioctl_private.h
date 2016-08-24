@@ -32,7 +32,7 @@ public:
     ~ioctl_private() override;
 
     virtual void open();
-    virtual void call_ioctl_add_module(const char *data, int64_t len);
+    virtual void call_ioctl_add_module(const char *data, uint64_t len);
     virtual void call_ioctl_load_vmm();
     virtual void call_ioctl_unload_vmm();
     virtual void call_ioctl_start_vmm();

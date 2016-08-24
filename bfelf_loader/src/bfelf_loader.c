@@ -129,7 +129,7 @@ private_error(const char *header,
 int64_t
 private_elf_string_equals(struct e_string_t *str1, struct e_string_t *str2)
 {
-    bfelf64_sword i = 0;
+    bfelf64_xword i = 0;
 
     if (str1->len != str2->len)
         return BFELF_ERROR_MISMATCH;
@@ -152,7 +152,10 @@ private_get_string(struct bfelf_file_t *ef,
                    bfelf64_word offset,
                    struct e_string_t *str)
 {
-    bfelf64_sword max = strtab->sh_size - offset;
+    bfelf64_xword max = strtab->sh_size - offset;
+
+    if (offset > strtab->sh_size)
+        goto failure;
 
     str->buf = ef->file + strtab->sh_offset + offset;
     str->len = 0;
@@ -182,7 +185,7 @@ failure:
 
 int64_t
 private_symbol_by_index(struct bfelf_file_t *ef,
-                        bfelf64_word index,
+                        bfelf64_xword index,
                         struct bfelf_sym **sym)
 {
     if (index >= ef->symnum)
@@ -200,9 +203,17 @@ private_hash(const char *name)
 
     while (*name)
     {
-        h = (h << 4) + *name++;
+        char c = *name++;
+        unsigned char uc = (unsigned char)c;
+
+        if (c >= 0)
+            h = (h << 4) + uc;
+        else
+            h = (h << 4) - uc;
+
         if ((g = (h & 0xf0000000)))
             h ^= g >> 24;
+
         h &= 0x0fffffff;
     }
 
@@ -507,14 +518,14 @@ private_validate_bounds(struct bfelf_file_t *ef)
 
 struct bfelf_phdr *
 private_get_segment(struct bfelf_file_t *ef,
-                    bfelf64_sword index)
+                    bfelf64_xword index)
 {
     return &(ef->phdrtab[index]);
 }
 
 struct bfelf_shdr *
 private_get_section(struct bfelf_file_t *ef,
-                    bfelf64_sword index)
+                    bfelf64_xword index)
 {
     return &(ef->shdrtab[index]);
 }
@@ -525,7 +536,7 @@ private_get_section_by_name(struct bfelf_file_t *ef,
                             struct bfelf_shdr **shdr)
 {
     int64_t ret = 0;
-    bfelf64_sword i = 0;
+    bfelf64_xword i = 0;
 
     for (i = 0, *shdr = 0; i < ef->ehdr->e_shnum; i++)
     {
@@ -550,7 +561,7 @@ private_get_section_by_name(struct bfelf_file_t *ef,
 int64_t
 private_check_segments(struct bfelf_file_t *ef)
 {
-    bfelf64_sword i = 0;
+    bfelf64_xword i = 0;
 
     for (i = 0; i < ef->ehdr->e_phnum; i++)
     {
@@ -584,8 +595,8 @@ private_check_segments(struct bfelf_file_t *ef)
 int64_t
 private_check_sections(struct bfelf_file_t *ef)
 {
-    bfelf64_sword i = 0;
-    bfelf64_sword j = 0;
+    bfelf64_xword i = 0;
+    bfelf64_xword j = 0;
     struct bfelf_shdr *shstrtab = private_get_section(ef, ef->ehdr->e_shstrndx);
 
     for (i = 0; i < ef->ehdr->e_shnum; i++)
@@ -627,7 +638,7 @@ private_check_sections(struct bfelf_file_t *ef)
 int64_t
 private_check_entry(struct bfelf_file_t *ef)
 {
-    bfelf64_sword i = 0;
+    bfelf64_xword i = 0;
     bfelf64_sword valid_addr = 0;
 
     for (i = 0; i < ef->ehdr->e_phnum; i++)
@@ -664,7 +675,7 @@ private_check_section(struct bfelf_shdr *shdr,
     if (shdr->sh_addralign != addralign)
         return invalid_section("address alignment mismatch");
 
-    if (shdr->sh_entsize != entsize)
+    if (shdr->sh_entsize != 0 && shdr->sh_entsize != entsize)
         return invalid_section("entry size mismatch");
 
     return BFELF_SUCCESS;
@@ -674,7 +685,7 @@ int64_t
 private_symbol_table_sections(struct bfelf_file_t *ef)
 {
     int64_t ret = 0;
-    bfelf64_sword i = 0;
+    bfelf64_xword i = 0;
 
     for (i = 0; i < ef->ehdr->e_shnum; i++)
     {
@@ -738,7 +749,7 @@ int64_t
 private_get_relocation_tables(struct bfelf_file_t *ef)
 {
     int64_t ret = 0;
-    bfelf64_sword i = 0;
+    bfelf64_xword i = 0;
 
     for (i = 0; i < ef->ehdr->e_shnum; i++)
     {
@@ -774,7 +785,7 @@ private_get_hash_table(struct bfelf_file_t *ef)
 {
     if (ef->hashtab)
     {
-        bfelf64_word total = 0;
+        bfelf64_xword total = 0;
         bfelf64_word *p = (bfelf64_word *)(ef->hashtab->sh_offset + ef->file);
 
         if (sizeof(bfelf64_word) * 2 > ef->hashtab->sh_size)
@@ -882,7 +893,7 @@ bfelf_file_num_segments(struct bfelf_file_t *ef)
 
 int64_t
 bfelf_file_get_segment(struct bfelf_file_t *ef,
-                       bfelf64_word index,
+                       int64_t index,
                        struct bfelf_phdr **phdr)
 {
     if (!ef)
@@ -1022,7 +1033,10 @@ bfelf_loader_get_info(struct bfelf_loader_t *loader,
     struct bfelf_shdr *shdr = 0;
     struct e_string_t name_ctors = {".ctors", 6};
     struct e_string_t name_dtors = {".dtors", 6};
+    struct e_string_t name_init_array = {".init_array", 11};
+    struct e_string_t name_fini_array = {".fini_array", 11};
     struct e_string_t name_eh_frame = {".eh_frame", 9};
+    struct section_info_t blank_info = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
     if (!loader)
         return invalid_argument("loader == NULL");
@@ -1035,6 +1049,8 @@ bfelf_loader_get_info(struct bfelf_loader_t *loader,
 
     if (loader->relocated == 0)
         return out_of_order("you need to call bfelf_loader_relocate first");
+
+    *info = blank_info;
 
     ret = private_get_section_by_name(ef, &name_ctors, &shdr);
     if (ret != BFELF_SUCCESS)
@@ -1064,6 +1080,34 @@ bfelf_loader_get_info(struct bfelf_loader_t *loader,
         info->dtors_size = shdr->sh_size;
     }
 
+    ret = private_get_section_by_name(ef, &name_init_array, &shdr);
+    if (ret != BFELF_SUCCESS)
+        goto failure;
+
+    if (shdr != 0)
+    {
+        ret = private_check_section(shdr, bfsht_init_array, bfshf_wa, 8, 8);
+        if (ret != BFELF_SUCCESS)
+            goto failure;
+
+        info->init_array_addr = shdr->sh_addr + ef->exec;
+        info->init_array_size = shdr->sh_size;
+    }
+
+    ret = private_get_section_by_name(ef, &name_fini_array, &shdr);
+    if (ret != BFELF_SUCCESS)
+        goto failure;
+
+    if (shdr != 0)
+    {
+        ret = private_check_section(shdr, bfsht_fini_array, bfshf_wa, 8, 8);
+        if (ret != BFELF_SUCCESS)
+            goto failure;
+
+        info->fini_array_addr = shdr->sh_addr + ef->exec;
+        info->fini_array_size = shdr->sh_size;
+    }
+
     ret = private_get_section_by_name(ef, &name_eh_frame, &shdr);
     if (ret != BFELF_SUCCESS)
         goto failure;
@@ -1082,14 +1126,6 @@ bfelf_loader_get_info(struct bfelf_loader_t *loader,
 
 failure:
 
-    info->ctors_addr = 0;
-    info->ctors_size = 0;
-
-    info->dtors_addr = 0;
-    info->dtors_size = 0;
-
-    info->eh_frame_addr = 0;
-    info->eh_frame_size = 0;
-
+    *info = blank_info;
     return ret;
 }

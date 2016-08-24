@@ -166,6 +166,32 @@ if [[ -z "$CROSS_COMPILER" ]] || [[ $CROSS_COMPILER == "gcc_610" ]]; then
 fi
 
 # ------------------------------------------------------------------------------
+# GCC 6.2
+# ------------------------------------------------------------------------------
+
+if [[ -z "$CROSS_COMPILER" ]] || [[ $CROSS_COMPILER == "gcc_620" ]]; then
+
+    export PREFIX="$HOME/compilers/gcc_620/"
+
+    rm -Rf $PREFIX
+    mkdir -p $PREFIX
+
+    export PATH="$PREFIX/bin:$ORIGINAL_PATH"
+    export BINUTILS_URL="http://ftp.gnu.org/gnu/binutils/binutils-2.27.tar.bz2"
+    export GCC_URL="https://ftp.gnu.org/gnu/gcc/gcc-6.2.0/gcc-6.2.0.tar.bz2"
+    export NASM_URL="http://www.nasm.us/pub/nasm/releasebuilds/2.12.02/nasm-2.12.02.tar.bz2"
+
+    ./tools/scripts/fetch_binutils.sh
+    ./tools/scripts/fetch_gcc.sh
+    ./tools/scripts/fetch_nasm.sh
+
+    ./tools/scripts/build_binutils.sh
+    ./tools/scripts/build_gcc.sh
+    ./tools/scripts/build_nasm.sh
+
+fi
+
+# ------------------------------------------------------------------------------
 # Cleanup
 # ------------------------------------------------------------------------------
 

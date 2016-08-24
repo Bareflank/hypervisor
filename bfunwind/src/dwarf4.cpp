@@ -20,6 +20,7 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #include <log.h>
+#include <misc.h>
 #include <abort.h>
 #include <dwarf4.h>
 
@@ -158,7 +159,7 @@ public:
     cfi_table_row() :
         m_arg_size(0)
     {
-        for (auto i = 0; i < MAX_NUM_REGISTERS; i++)
+        for (auto i = 0U; i < MAX_NUM_REGISTERS; i++)
             m_registers[i].set_index(i);
     }
 
@@ -258,42 +259,42 @@ private_parse_expression(char *p,
 
         if_opcode(DW_OP_const1u,
         {
-            stack[++i] = *reinterpret_cast<uint8_t *>(p);
+            stack[++i] = static_cast<uint64_t>(*reinterpret_cast<uint8_t *>(p));
             p += sizeof(uint8_t);
             log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_const1s,
         {
-            stack[++i] = *reinterpret_cast<int8_t *>(p);
+            stack[++i] = static_cast<uint64_t>(*reinterpret_cast<int8_t *>(p));
             p += sizeof(int8_t);
             log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_const2u,
         {
-            stack[++i] = *reinterpret_cast<uint16_t *>(p);
+            stack[++i] = static_cast<uint64_t>(*reinterpret_cast<uint16_t *>(p));
             p += sizeof(uint16_t);
             log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_const2s,
         {
-            stack[++i] = *reinterpret_cast<int16_t *>(p);
+            stack[++i] = static_cast<uint64_t>(*reinterpret_cast<int16_t *>(p));
             p += sizeof(int16_t);
             log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_const4u,
         {
-            stack[++i] = *reinterpret_cast<uint32_t *>(p);
+            stack[++i] = static_cast<uint64_t>(*reinterpret_cast<uint32_t *>(p));
             p += sizeof(uint32_t);
             log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
         if_opcode(DW_OP_const4s,
         {
-            stack[++i] = *reinterpret_cast<int32_t *>(p);
+            stack[++i] = static_cast<uint64_t>(*reinterpret_cast<int32_t *>(p));
             p += sizeof(int32_t);
             log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
@@ -307,7 +308,7 @@ private_parse_expression(char *p,
 
         if_opcode(DW_OP_const8s,
         {
-            stack[++i] = *reinterpret_cast<int64_t *>(p);
+            stack[++i] = static_cast<uint64_t>(*reinterpret_cast<int64_t *>(p));
             p += sizeof(int64_t);
             log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
@@ -320,7 +321,7 @@ private_parse_expression(char *p,
 
         if_opcode(DW_OP_consts,
         {
-            stack[++i] = dwarf4::decode_sleb128(&p);
+            stack[++i] = static_cast<uint64_t>(dwarf4::decode_sleb128(&p));
             log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
@@ -404,7 +405,7 @@ private_parse_expression(char *p,
         {
             auto value = static_cast<int64_t>(stack[i]);
             if (value < 0)
-                stack[i] = static_cast<int64_t>(-value);
+                stack[i] = static_cast<uint64_t>(-value);
             log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
@@ -996,7 +997,7 @@ private_parse_expression(char *p,
             auto reg = state->get(0);
             auto offset = dwarf4::decode_sleb128(&p);
 
-            stack[++i] = reg + offset;
+            stack[++i] = add_offset(reg, offset);
 
             log("r%d (%s) %p, offset: %ld\n", 0, state->name(0), reinterpret_cast<void *>(reg),
             offset);
@@ -1007,7 +1008,7 @@ private_parse_expression(char *p,
             auto reg = state->get(1);
             auto offset = dwarf4::decode_sleb128(&p);
 
-            stack[++i] = reg + offset;
+            stack[++i] = add_offset(reg, offset);
 
             log("r%d (%s) %p, offset: %ld\n", 1, state->name(1), reinterpret_cast<void *>(reg),
             offset);
@@ -1018,7 +1019,7 @@ private_parse_expression(char *p,
             auto reg = state->get(2);
             auto offset = dwarf4::decode_sleb128(&p);
 
-            stack[++i] = reg + offset;
+            stack[++i] = add_offset(reg, offset);
 
             log("r%d (%s) %p, offset: %ld\n", 2, state->name(2), reinterpret_cast<void *>(reg),
             offset);
@@ -1029,7 +1030,7 @@ private_parse_expression(char *p,
             auto reg = state->get(3);
             auto offset = dwarf4::decode_sleb128(&p);
 
-            stack[++i] = reg + offset;
+            stack[++i] = add_offset(reg, offset);
 
             log("r%d (%s) %p, offset: %ld\n", 3, state->name(3), reinterpret_cast<void *>(reg),
             offset);
@@ -1040,7 +1041,7 @@ private_parse_expression(char *p,
             auto reg = state->get(4);
             auto offset = dwarf4::decode_sleb128(&p);
 
-            stack[++i] = reg + offset;
+            stack[++i] = add_offset(reg, offset);
 
             log("r%d (%s) %p, offset: %ld\n", 4, state->name(4), reinterpret_cast<void *>(reg),
             offset);
@@ -1051,7 +1052,7 @@ private_parse_expression(char *p,
             auto reg = state->get(5);
             auto offset = dwarf4::decode_sleb128(&p);
 
-            stack[++i] = reg + offset;
+            stack[++i] = add_offset(reg, offset);
 
             log("r%d (%s) %p, offset: %ld\n", 5, state->name(5), reinterpret_cast<void *>(reg),
             offset);
@@ -1062,7 +1063,7 @@ private_parse_expression(char *p,
             auto reg = state->get(6);
             auto offset = dwarf4::decode_sleb128(&p);
 
-            stack[++i] = reg + offset;
+            stack[++i] = add_offset(reg, offset);
 
             log("r%d (%s) %p, offset: %ld\n", 6, state->name(6), reinterpret_cast<void *>(reg),
             offset);
@@ -1073,7 +1074,7 @@ private_parse_expression(char *p,
             auto reg = state->get(7);
             auto offset = dwarf4::decode_sleb128(&p);
 
-            stack[++i] = reg + offset;
+            stack[++i] = add_offset(reg, offset);
 
             log("r%d (%s) %p, offset: %ld\n", 7, state->name(7), reinterpret_cast<void *>(reg),
             offset);
@@ -1084,7 +1085,7 @@ private_parse_expression(char *p,
             auto reg = state->get(8);
             auto offset = dwarf4::decode_sleb128(&p);
 
-            stack[++i] = reg + offset;
+            stack[++i] = add_offset(reg, offset);
 
             log("r%d (%s) %p, offset: %ld\n", 8, state->name(8), reinterpret_cast<void *>(reg),
             offset);
@@ -1095,7 +1096,7 @@ private_parse_expression(char *p,
             auto reg = state->get(9);
             auto offset = dwarf4::decode_sleb128(&p);
 
-            stack[++i] = reg + offset;
+            stack[++i] = add_offset(reg, offset);
 
             log("r%d (%s) %p, offset: %ld\n", 9, state->name(9), reinterpret_cast<void *>(reg),
             offset);
@@ -1106,7 +1107,7 @@ private_parse_expression(char *p,
             auto reg = state->get(10);
             auto offset = dwarf4::decode_sleb128(&p);
 
-            stack[++i] = reg + offset;
+            stack[++i] = add_offset(reg, offset);
 
             log("r%d (%s) %p, offset: %ld\n", 10, state->name(10), reinterpret_cast<void *>(reg),
             offset);
@@ -1117,7 +1118,7 @@ private_parse_expression(char *p,
             auto reg = state->get(11);
             auto offset = dwarf4::decode_sleb128(&p);
 
-            stack[++i] = reg + offset;
+            stack[++i] = add_offset(reg, offset);
 
             log("r%d (%s) %p, offset: %ld\n", 11, state->name(11), reinterpret_cast<void *>(reg),
             offset);
@@ -1128,7 +1129,7 @@ private_parse_expression(char *p,
             auto reg = state->get(12);
             auto offset = dwarf4::decode_sleb128(&p);
 
-            stack[++i] = reg + offset;
+            stack[++i] = add_offset(reg, offset);
 
             log("r%d (%s) %p, offset: %ld\n", 12, state->name(12), reinterpret_cast<void *>(reg),
             offset);
@@ -1139,7 +1140,7 @@ private_parse_expression(char *p,
             auto reg = state->get(13);
             auto offset = dwarf4::decode_sleb128(&p);
 
-            stack[++i] = reg + offset;
+            stack[++i] = add_offset(reg, offset);
 
             log("r%d (%s) %p, offset: %ld\n", 13, state->name(13), reinterpret_cast<void *>(reg),
             offset);
@@ -1150,7 +1151,7 @@ private_parse_expression(char *p,
             auto reg = state->get(14);
             auto offset = dwarf4::decode_sleb128(&p);
 
-            stack[++i] = reg + offset;
+            stack[++i] = add_offset(reg, offset);
 
             log("r%d (%s) %p, offset: %ld\n", 14, state->name(14), reinterpret_cast<void *>(reg),
             offset);
@@ -1161,7 +1162,7 @@ private_parse_expression(char *p,
             auto reg = state->get(15);
             auto offset = dwarf4::decode_sleb128(&p);
 
-            stack[++i] = reg + offset;
+            stack[++i] = add_offset(reg, offset);
 
             log("r%d (%s) %p, offset: %ld\n", 15, state->name(15), reinterpret_cast<void *>(reg),
             offset);
@@ -1172,7 +1173,7 @@ private_parse_expression(char *p,
             auto reg = state->get(16);
             auto offset = dwarf4::decode_sleb128(&p);
 
-            stack[++i] = reg + offset;
+            stack[++i] = add_offset(reg, offset);
 
             log("r%d (%s) %p, offset: %ld\n", 16, state->name(16), reinterpret_cast<void *>(reg),
             offset);
@@ -1183,7 +1184,7 @@ private_parse_expression(char *p,
             auto reg = state->get(17);
             auto offset = dwarf4::decode_sleb128(&p);
 
-            stack[++i] = reg + offset;
+            stack[++i] = add_offset(reg, offset);
 
             log("r%d (%s) %p, offset: %ld\n", 17, state->name(17), reinterpret_cast<void *>(reg),
             offset);
@@ -1194,7 +1195,7 @@ private_parse_expression(char *p,
             auto reg = state->get(18);
             auto offset = dwarf4::decode_sleb128(&p);
 
-            stack[++i] = reg + offset;
+            stack[++i] = add_offset(reg, offset);
 
             log("r%d (%s) %p, offset: %ld\n", 18, state->name(18), reinterpret_cast<void *>(reg),
             offset);
@@ -1205,7 +1206,7 @@ private_parse_expression(char *p,
             auto reg = state->get(19);
             auto offset = dwarf4::decode_sleb128(&p);
 
-            stack[++i] = reg + offset;
+            stack[++i] = add_offset(reg, offset);
 
             log("r%d (%s) %p, offset: %ld\n", 19, state->name(19), reinterpret_cast<void *>(reg),
             offset);
@@ -1216,7 +1217,7 @@ private_parse_expression(char *p,
             auto reg = state->get(20);
             auto offset = dwarf4::decode_sleb128(&p);
 
-            stack[++i] = reg + offset;
+            stack[++i] = add_offset(reg, offset);
 
             log("r%d (%s) %p, offset: %ld\n", 20, state->name(20), reinterpret_cast<void *>(reg),
             offset);
@@ -1227,7 +1228,7 @@ private_parse_expression(char *p,
             auto reg = state->get(21);
             auto offset = dwarf4::decode_sleb128(&p);
 
-            stack[++i] = reg + offset;
+            stack[++i] = add_offset(reg, offset);
 
             log("r%d (%s) %p, offset: %ld\n", 21, state->name(21), reinterpret_cast<void *>(reg),
             offset);
@@ -1238,7 +1239,7 @@ private_parse_expression(char *p,
             auto reg = state->get(22);
             auto offset = dwarf4::decode_sleb128(&p);
 
-            stack[++i] = reg + offset;
+            stack[++i] = add_offset(reg, offset);
 
             log("r%d (%s) %p, offset: %ld\n", 22, state->name(22), reinterpret_cast<void *>(reg),
             offset);
@@ -1249,7 +1250,7 @@ private_parse_expression(char *p,
             auto reg = state->get(23);
             auto offset = dwarf4::decode_sleb128(&p);
 
-            stack[++i] = reg + offset;
+            stack[++i] = add_offset(reg, offset);
 
             log("r%d (%s) %p, offset: %ld\n", 23, state->name(23), reinterpret_cast<void *>(reg),
             offset);
@@ -1260,7 +1261,7 @@ private_parse_expression(char *p,
             auto reg = state->get(24);
             auto offset = dwarf4::decode_sleb128(&p);
 
-            stack[++i] = reg + offset;
+            stack[++i] = add_offset(reg, offset);
 
             log("r%d (%s) %p, offset: %ld\n", 24, state->name(24), reinterpret_cast<void *>(reg),
             offset);
@@ -1271,7 +1272,7 @@ private_parse_expression(char *p,
             auto reg = state->get(25);
             auto offset = dwarf4::decode_sleb128(&p);
 
-            stack[++i] = reg + offset;
+            stack[++i] = add_offset(reg, offset);
 
             log("r%d (%s) %p, offset: %ld\n", 25, state->name(25), reinterpret_cast<void *>(reg),
             offset);
@@ -1282,7 +1283,7 @@ private_parse_expression(char *p,
             auto reg = state->get(26);
             auto offset = dwarf4::decode_sleb128(&p);
 
-            stack[++i] = reg + offset;
+            stack[++i] = add_offset(reg, offset);
 
             log("r%d (%s) %p, offset: %ld\n", 26, state->name(26), reinterpret_cast<void *>(reg),
             offset);
@@ -1293,7 +1294,7 @@ private_parse_expression(char *p,
             auto reg = state->get(27);
             auto offset = dwarf4::decode_sleb128(&p);
 
-            stack[++i] = reg + offset;
+            stack[++i] = add_offset(reg, offset);
 
             log("r%d (%s) %p, offset: %ld\n", 27, state->name(27), reinterpret_cast<void *>(reg),
             offset);
@@ -1304,7 +1305,7 @@ private_parse_expression(char *p,
             auto reg = state->get(28);
             auto offset = dwarf4::decode_sleb128(&p);
 
-            stack[++i] = reg + offset;
+            stack[++i] = add_offset(reg, offset);
 
             log("r%d (%s) %p, offset: %ld\n", 28, state->name(28), reinterpret_cast<void *>(reg),
             offset);
@@ -1315,7 +1316,7 @@ private_parse_expression(char *p,
             auto reg = state->get(29);
             auto offset = dwarf4::decode_sleb128(&p);
 
-            stack[++i] = reg + offset;
+            stack[++i] = add_offset(reg, offset);
 
             log("r%d (%s) %p, offset: %ld\n", 29, state->name(29), reinterpret_cast<void *>(reg),
             offset);
@@ -1326,7 +1327,7 @@ private_parse_expression(char *p,
             auto reg = state->get(30);
             auto offset = dwarf4::decode_sleb128(&p);
 
-            stack[++i] = reg + offset;
+            stack[++i] = add_offset(reg, offset);
 
             log("r%d (%s) %p, offset: %ld\n", 30, state->name(30), reinterpret_cast<void *>(reg),
             offset);
@@ -1337,7 +1338,7 @@ private_parse_expression(char *p,
             auto reg = state->get(31);
             auto offset = dwarf4::decode_sleb128(&p);
 
-            stack[++i] = reg + offset;
+            stack[++i] = add_offset(reg, offset);
 
             log("r%d (%s) %p, offset: %ld\n", 31, state->name(31), reinterpret_cast<void *>(reg),
             offset);
@@ -1357,7 +1358,7 @@ private_parse_expression(char *p,
         if_opcode(DW_OP_bregx,
         {
             stack[++i] = state->get(dwarf4::decode_uleb128(&p));
-            stack[i] += dwarf4::decode_sleb128(&p);
+            stack[i] = add_offset(stack[i], dwarf4::decode_sleb128(&p));
             log("stack[%ld]: %p\n", i, reinterpret_cast<void *>(stack[i]));
         })
 
@@ -1479,7 +1480,7 @@ private_decode_cfa(const cfi_table_row &row, register_state *state)
     {
         case cfi_cfa::cfa_register:
             log("cfa_register\n");
-            value = state->get(cfa.value()) + cfa.offset();
+            value = add_offset(state->get(cfa.value()), cfa.offset());
             break;
 
         case cfi_cfa::cfa_expression:
@@ -1504,6 +1505,7 @@ private_decode_reg(const cfi_register &reg, uint64_t cfa, register_state *state)
     {
         case rule_undefined:
             ABORT("unable to get register value for unused register");
+            break;
 
         case rule_same_value:
             log("from r%ld\n", reg.index());
@@ -1512,12 +1514,12 @@ private_decode_reg(const cfi_register &reg, uint64_t cfa, register_state *state)
 
         case rule_offsetn:
             log("from cfa(0x%08lx) + n(%ld)\n", cfa, static_cast<int64_t>(reg.value()));
-            value = *reinterpret_cast<uint64_t *>(cfa + static_cast<int64_t>(reg.value()));
+            value = *reinterpret_cast<uint64_t *>(add_offset(cfa, static_cast<int64_t>(reg.value())));
             break;
 
         case rule_val_offsetn:
             log("from val cfa(0x%08lx) + n(%ld)\n", cfa, static_cast<int64_t>(reg.value()));
-            value = cfa + static_cast<int64_t>(reg.value());
+            value = add_offset(cfa, static_cast<int64_t>(reg.value()));
             break;
 
         case rule_register:
@@ -1582,7 +1584,7 @@ private_parse_instruction(cfi_table_row *row,
     if_cfa(DW_CFA_offset,
     {
         auto value = static_cast<int64_t>(dwarf4::decode_uleb128(p)) * cie.data_alignment();
-        row->set_reg(cfi_register(operand, rule_offsetn, value));
+        row->set_reg(cfi_register(operand, rule_offsetn, static_cast<uint64_t>(value)));
         log("r%d (%s) at cfa + n(%ld)\n", operand, state->name(operand), value);
     })
 
@@ -1645,7 +1647,7 @@ private_parse_instruction(cfi_table_row *row,
     {
         auto reg = dwarf4::decode_uleb128(p);
         auto value = static_cast<int64_t>(dwarf4::decode_uleb128(p)) * cie.data_alignment();
-        row->set_reg(cfi_register(reg, rule_offsetn, value));
+        row->set_reg(cfi_register(reg, rule_offsetn, static_cast<uint64_t>(value)));
         log("r%ld (%s) at cfa + n(%ld)\n", reg, state->name(reg), value);
     })
 
@@ -1701,7 +1703,7 @@ private_parse_instruction(cfi_table_row *row,
     {
         auto cfa = row->cfa();
         cfa.set_value(dwarf4::decode_uleb128(p));
-        cfa.set_offset(dwarf4::decode_uleb128(p));
+        cfa.set_offset(static_cast<int64_t>(dwarf4::decode_uleb128(p)));
         row->set_cfa(cfa);
         log("r%ld (%s) ofs %ld\n", cfa.value(),
         state->name(cfa.value()),
@@ -1719,7 +1721,7 @@ private_parse_instruction(cfi_table_row *row,
     if_cfa(DW_CFA_def_cfa_offset,
     {
         auto cfa = row->cfa();
-        cfa.set_offset(dwarf4::decode_uleb128(p));
+        cfa.set_offset(static_cast<int64_t>(dwarf4::decode_uleb128(p)));
         row->set_cfa(cfa);
         log("%ld\n", cfa.offset());
     })
@@ -1747,7 +1749,7 @@ private_parse_instruction(cfi_table_row *row,
     {
         auto reg = dwarf4::decode_uleb128(p);
         auto value = dwarf4::decode_sleb128(p) * cie.data_alignment();
-        row->set_reg(cfi_register(reg, rule_offsetn, value));
+        row->set_reg(cfi_register(reg, rule_offsetn, static_cast<uint64_t>(value)));
         log("r%ld (%s) at cfa + n(%ld)\n", reg, state->name(reg), value);
     })
 
@@ -1774,7 +1776,7 @@ private_parse_instruction(cfi_table_row *row,
     {
         auto reg = dwarf4::decode_uleb128(p);
         auto value = static_cast<int64_t>(dwarf4::decode_uleb128(p)) * cie.data_alignment();
-        row->set_reg(cfi_register(reg, rule_val_offsetn, value));
+        row->set_reg(cfi_register(reg, rule_val_offsetn, static_cast<uint64_t>(value)));
         log("r%ld (%s) at cfa + n(%ld)\n", reg, state->name(reg), value);
     })
 
@@ -1782,7 +1784,7 @@ private_parse_instruction(cfi_table_row *row,
     {
         auto reg = dwarf4::decode_uleb128(p);
         auto value = dwarf4::decode_sleb128(p) * cie.data_alignment();
-        row->set_reg(cfi_register(reg, rule_val_offsetn, value));
+        row->set_reg(cfi_register(reg, rule_val_offsetn, static_cast<uint64_t>(value)));
         log("r%ld (%s) at cfa + n(%ld)\n", reg, state->name(reg), value);
     })
 
@@ -1806,7 +1808,7 @@ private_parse_instruction(cfi_table_row *row,
     {
         auto reg = dwarf4::decode_uleb128(p);
         auto value = static_cast<int64_t>(dwarf4::decode_uleb128(p)) * cie.data_alignment();
-        row->set_reg(cfi_register(reg, rule_offsetn, -value));
+        row->set_reg(cfi_register(reg, rule_offsetn, static_cast<uint64_t>(-value)));
         log("r%ld (%s) at cfa + n(%ld)\n", reg, state->name(reg), value);
     })
 
@@ -1924,10 +1926,8 @@ dwarf4::decode_uleb128(char **addr)
     return result;
 }
 
-#ifndef __clang__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
-#endif
 
 void
 dwarf4::unwind(const fd_entry &fde, register_state *state)
@@ -1956,6 +1956,4 @@ dwarf4::unwind(const fd_entry &fde, register_state *state)
     state->commit(cfa + row.arg_size());
 }
 
-#ifndef __clang__
 #pragma GCC diagnostic pop
-#endif

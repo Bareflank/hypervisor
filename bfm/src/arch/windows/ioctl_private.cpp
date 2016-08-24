@@ -61,7 +61,7 @@ bf_ioctl_open()
     if (GetLastError() != ERROR_INSUFFICIENT_BUFFER)
         return INVALID_HANDLE_VALUE;
 
-    deviceDetailData = (SP_INTERFACE_DEVICE_DETAIL_DATA *)malloc(requiredSize);
+    deviceDetailData = static_cast<SP_INTERFACE_DEVICE_DETAIL_DATA *>(malloc(requiredSize));
 
     if (deviceDetailData == nullptr)
         return INVALID_HANDLE_VALUE;
@@ -84,7 +84,7 @@ bf_ioctl_open()
 }
 
 int64_t
-bf_send_ioctl(HANDLE fd, unsigned long request)
+bf_send_ioctl(HANDLE fd, DWORD request)
 {
     if (!DeviceIoControl(fd, request, NULL, 0, NULL, 0, NULL, NULL))
         return BF_IOCTL_FAILURE;
@@ -93,7 +93,7 @@ bf_send_ioctl(HANDLE fd, unsigned long request)
 }
 
 int64_t
-bf_read_ioctl(HANDLE fd, unsigned long request, void *data, size_t size)
+bf_read_ioctl(HANDLE fd, DWORD request, void *data, DWORD size)
 {
     if (!DeviceIoControl(fd, request, NULL, 0, data, size, NULL, NULL))
         return BF_IOCTL_FAILURE;
@@ -102,9 +102,9 @@ bf_read_ioctl(HANDLE fd, unsigned long request, void *data, size_t size)
 }
 
 int64_t
-bf_write_ioctl(HANDLE fd, unsigned long request, const void *data, size_t size)
+bf_write_ioctl(HANDLE fd, DWORD request, const void *data, DWORD size)
 {
-    if (!DeviceIoControl(fd, request, (LPVOID)data, size, NULL, 0, NULL, NULL))
+    if (!DeviceIoControl(fd, request, NULL, 0, const_cast<void *>(data), size, NULL, NULL))
         return BF_IOCTL_FAILURE;
 
     return 0;
@@ -132,8 +132,15 @@ ioctl_private::open()
         throw driver_inaccessible();
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wconversion"
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+
+// We turn off the conversion warnings here as Window's IOCTL macros are
+// tripping them which we cannot fix.
+
 void
-ioctl_private::call_ioctl_add_module(const char *data, int64_t len)
+ioctl_private::call_ioctl_add_module(const char *data, uint64_t len)
 {
     if (data == nullptr)
         throw std::invalid_argument("data == NULL");
@@ -141,35 +148,35 @@ ioctl_private::call_ioctl_add_module(const char *data, int64_t len)
     if (len == 0)
         throw std::invalid_argument("len == 0");
 
-    if (bf_write_ioctl(fd, IOCTL_ADD_MODULE, data, len) < 0)
+    if (bf_write_ioctl(fd, IOCTL_ADD_MODULE, data, len) == BF_IOCTL_FAILURE)
         throw ioctl_failed(IOCTL_ADD_MODULE);
 }
 
 void
 ioctl_private::call_ioctl_load_vmm()
 {
-    if (bf_send_ioctl(fd, IOCTL_LOAD_VMM) < 0)
+    if (bf_send_ioctl(fd, IOCTL_LOAD_VMM) == BF_IOCTL_FAILURE)
         throw ioctl_failed(IOCTL_LOAD_VMM);
 }
 
 void
 ioctl_private::call_ioctl_unload_vmm()
 {
-    if (bf_send_ioctl(fd, IOCTL_UNLOAD_VMM) < 0)
+    if (bf_send_ioctl(fd, IOCTL_UNLOAD_VMM) == BF_IOCTL_FAILURE)
         throw ioctl_failed(IOCTL_UNLOAD_VMM);
 }
 
 void
 ioctl_private::call_ioctl_start_vmm()
 {
-    if (bf_send_ioctl(fd, IOCTL_START_VMM) < 0)
+    if (bf_send_ioctl(fd, IOCTL_START_VMM) == BF_IOCTL_FAILURE)
         throw ioctl_failed(IOCTL_START_VMM);
 }
 
 void
 ioctl_private::call_ioctl_stop_vmm()
 {
-    if (bf_send_ioctl(fd, IOCTL_STOP_VMM) < 0)
+    if (bf_send_ioctl(fd, IOCTL_STOP_VMM) == BF_IOCTL_FAILURE)
         throw ioctl_failed(IOCTL_STOP_VMM);
 }
 
@@ -179,10 +186,10 @@ ioctl_private::call_ioctl_dump_vmm(debug_ring_resources_t *drr, uint64_t vcpuid)
     if (drr == nullptr)
         throw std::invalid_argument("drr == NULL");
 
-    if (bf_write_ioctl(fd, IOCTL_SET_VCPUID, &vcpuid, sizeof(vcpuid)) < 0)
+    if (bf_write_ioctl(fd, IOCTL_SET_VCPUID, &vcpuid, sizeof(vcpuid)) == BF_IOCTL_FAILURE)
         throw ioctl_failed(IOCTL_SET_VCPUID);
 
-    if (bf_read_ioctl(fd, IOCTL_DUMP_VMM, drr, sizeof(*drr)) < 0)
+    if (bf_read_ioctl(fd, IOCTL_DUMP_VMM, drr, sizeof(*drr)) == BF_IOCTL_FAILURE)
         throw ioctl_failed(IOCTL_DUMP_VMM);
 }
 
@@ -192,6 +199,8 @@ ioctl_private::call_ioctl_vmm_status(int64_t *status)
     if (status == nullptr)
         throw std::invalid_argument("status == NULL");
 
-    if (bf_read_ioctl(fd, IOCTL_VMM_STATUS, status, sizeof(*status)) < 0)
+    if (bf_read_ioctl(fd, IOCTL_VMM_STATUS, status, sizeof(*status)) == BF_IOCTL_FAILURE)
         throw ioctl_failed(IOCTL_VMM_STATUS);
 }
+
+#pragma GCC diagnostic pop

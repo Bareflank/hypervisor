@@ -155,6 +155,10 @@ private:
     void test_bfelf_loader_get_info_check_section_name_failure_ctors();
     void test_bfelf_loader_get_info_get_section_name_failure_dtors();
     void test_bfelf_loader_get_info_check_section_name_failure_dtors();
+    void test_bfelf_loader_get_info_get_section_name_failure_init_array();
+    void test_bfelf_loader_get_info_check_section_name_failure_init_array();
+    void test_bfelf_loader_get_info_get_section_name_failure_fini_array();
+    void test_bfelf_loader_get_info_check_section_name_failure_fini_array();
     void test_bfelf_loader_get_info_get_section_name_failure_eh_frame();
     void test_bfelf_loader_get_info_check_section_name_failure_eh_frame();
 
@@ -170,13 +174,14 @@ private:
     void test_private_string_table_sections_invalid();
     void test_private_get_relocation_tables_invalid_type();
     void test_private_get_relocation_tables_invalid_section();
+    void test_private_hash();
 
 private:
 
     std::shared_ptr<char> m_dummy_misc;
     std::shared_ptr<char> m_dummy_code;
-    int64_t m_dummy_misc_length;
-    int64_t m_dummy_code_length;
+    uint64_t m_dummy_misc_length;
+    uint64_t m_dummy_code_length;
 
     std::shared_ptr<char> m_dummy_misc_exec;
     std::shared_ptr<char> m_dummy_code_exec;

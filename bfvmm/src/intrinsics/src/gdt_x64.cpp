@@ -33,7 +33,7 @@ gdt_x64::gdt_x64(uint16_t size) :
     m_gdt = gsl::span<uint64_t>(m_gdt_owner.get(), size);
 
     m_gdt_reg.base = reinterpret_cast<uint64_t>(m_gdt_owner.get());
-    m_gdt_reg.limit = (size << 3);
+    m_gdt_reg.limit = static_cast<uint16_t>(size << 3);
 }
 
 gdt_x64::gdt_x64(const std::shared_ptr<intrinsics_x64> &intrinsics)
@@ -166,7 +166,7 @@ gdt_x64::base(uint16_t index) const
 }
 
 void
-gdt_x64::set_limit(uint16_t index, uint64_t limit)
+gdt_x64::set_limit(uint16_t index, uint32_t limit)
 {
     if (index == 0)
         return;
@@ -189,13 +189,13 @@ gdt_x64::set_limit(uint16_t index, uint64_t limit)
     if ((sd1 & 0x80000000000000) != 0)
         limit = (limit >> 12);
 
-    uint64_t limit_15_00 = ((limit & 0x000000000000FFFF) << 0);
-    uint64_t limit_19_16 = ((limit & 0x00000000000F0000) << 32);
+    uint64_t limit_15_00 = ((static_cast<uint64_t>(limit) & 0x000000000000FFFF) << 0);
+    uint64_t limit_19_16 = ((static_cast<uint64_t>(limit) & 0x00000000000F0000) << 32);
 
     m_gdt[index] = sd1 | limit_19_16 | limit_15_00;
 }
 
-uint64_t
+uint32_t
 gdt_x64::limit(uint16_t index) const
 {
     if (index == 0)
@@ -218,20 +218,20 @@ gdt_x64::limit(uint16_t index) const
 
     if ((sd1 & 0x80000000000000) != 0)
     {
-        uint64_t limit_15_00 = ((sd1 & 0x000000000000FFFF) >> 0);
-        uint64_t limit_19_16 = ((sd1 & 0x000F000000000000) >> 32);
+        uint32_t limit_15_00 = static_cast<uint32_t>((sd1 & 0x000000000000FFFF) >> 0);
+        uint32_t limit_19_16 = static_cast<uint32_t>((sd1 & 0x000F000000000000) >> 32);
 
         return ((limit_19_16 | limit_15_00) << 12) | 0x0000000000000FFF;
     }
 
-    uint64_t limit_15_00 = ((sd1 & 0x000000000000FFFF) >> 0);
-    uint64_t limit_19_16 = ((sd1 & 0x000F000000000000) >> 32);
+    uint32_t limit_15_00 = static_cast<uint32_t>((sd1 & 0x000000000000FFFF) >> 0);
+    uint32_t limit_19_16 = static_cast<uint32_t>((sd1 & 0x000F000000000000) >> 32);
 
     return limit_19_16 | limit_15_00;
 }
 
 void
-gdt_x64::set_access_rights(uint16_t index, uint64_t access_rights)
+gdt_x64::set_access_rights(uint16_t index, uint32_t access_rights)
 {
     if (index == 0)
         return;
@@ -252,13 +252,13 @@ gdt_x64::set_access_rights(uint16_t index, uint64_t access_rights)
     // ------------------------------------------------------------------
     //
 
-    uint64_t access_rights_07_00 = ((access_rights & 0x00000000000000FF) << 40);
-    uint64_t access_rights_15_12 = ((access_rights & 0x000000000000F000) << 40);
+    uint64_t access_rights_07_00 = ((static_cast<uint64_t>(access_rights) & 0x00000000000000FF) << 40);
+    uint64_t access_rights_15_12 = ((static_cast<uint64_t>(access_rights) & 0x000000000000F000) << 40);
 
     m_gdt[index] = sd1 | access_rights_15_12 | access_rights_07_00;
 }
 
-uint64_t
+uint32_t
 gdt_x64::access_rights(uint16_t index) const
 {
     // Note that unlike the other functions, when the selector is for the
@@ -285,8 +285,8 @@ gdt_x64::access_rights(uint16_t index) const
     // ------------------------------------------------------------------
     //
 
-    uint64_t access_rights_07_00 = ((sd1 & 0x0000FF0000000000) >> 40);
-    uint64_t access_rights_15_12 = ((sd1 & 0x00F0000000000000) >> 40);
+    uint32_t access_rights_07_00 = static_cast<uint32_t>((sd1 & 0x0000FF0000000000) >> 40);
+    uint32_t access_rights_15_12 = static_cast<uint32_t>((sd1 & 0x00F0000000000000) >> 40);
 
     return access_rights_15_12 | access_rights_07_00;
 }

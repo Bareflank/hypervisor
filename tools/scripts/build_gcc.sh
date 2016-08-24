@@ -25,6 +25,9 @@ mkdir -p /tmp/bareflank/build_gcc
 
 pushd /tmp/bareflank/build_gcc
 
+export CFLAGS="-DNO_IMPLICIT_EXTERN_C=1"
+export CXXFLAGS="-DNO_IMPLICIT_EXTERN_C=1"
+
 ../src_gcc/configure --target=x86_64-elf --prefix="$PREFIX" --disable-nls --enable-languages=c,c++ --without-headers --without-isl
 
 make -j2 all-gcc

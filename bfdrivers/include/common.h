@@ -119,7 +119,7 @@ common_fini(void);
  * @return BF_SUCCESS on success, negative error code on failure
  */
 int64_t
-common_add_module(const char *file, int64_t fsize);
+common_add_module(const char *file, uint64_t fsize);
 
 /**
  * Load VMM

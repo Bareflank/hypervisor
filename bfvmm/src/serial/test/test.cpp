@@ -43,7 +43,6 @@ serial_ut::list()
     this->test_serial_null_intrinsics();
     this->test_serial_success();
     this->test_serial_set_baud_rate_success();
-    this->test_serial_set_baud_rate_unknown();
     this->test_serial_set_data_bits_success();
     this->test_serial_set_data_bits_success_extra_bits();
     this->test_serial_set_stop_bits_success();

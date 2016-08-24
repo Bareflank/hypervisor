@@ -29,9 +29,9 @@ memory_manager_ut::test_page_table_entry_x64_present()
     auto pte = std::make_shared<page_table_entry_x64>(&entry);
 
     pte->set_present(true);
-    EXPECT_TRUE(pte->present() == true);
+    EXPECT_TRUE(pte->present());
     pte->set_present(false);
-    EXPECT_TRUE(pte->present() == false);
+    EXPECT_FALSE(pte->present());
 }
 
 void
@@ -41,9 +41,9 @@ memory_manager_ut::test_page_table_entry_x64_rw()
     auto pte = std::make_shared<page_table_entry_x64>(&entry);
 
     pte->set_rw(true);
-    EXPECT_TRUE(pte->rw() == true);
+    EXPECT_TRUE(pte->rw());
     pte->set_rw(false);
-    EXPECT_TRUE(pte->rw() == false);
+    EXPECT_FALSE(pte->rw());
 }
 
 void
@@ -53,9 +53,9 @@ memory_manager_ut::test_page_table_entry_x64_us()
     auto pte = std::make_shared<page_table_entry_x64>(&entry);
 
     pte->set_us(true);
-    EXPECT_TRUE(pte->us() == true);
+    EXPECT_TRUE(pte->us());
     pte->set_us(false);
-    EXPECT_TRUE(pte->us() == false);
+    EXPECT_FALSE(pte->us());
 }
 
 void
@@ -65,9 +65,9 @@ memory_manager_ut::test_page_table_entry_x64_pwt()
     auto pte = std::make_shared<page_table_entry_x64>(&entry);
 
     pte->set_pwt(true);
-    EXPECT_TRUE(pte->pwt() == true);
+    EXPECT_TRUE(pte->pwt());
     pte->set_pwt(false);
-    EXPECT_TRUE(pte->pwt() == false);
+    EXPECT_FALSE(pte->pwt());
 }
 
 void
@@ -77,9 +77,9 @@ memory_manager_ut::test_page_table_entry_x64_pcd()
     auto pte = std::make_shared<page_table_entry_x64>(&entry);
 
     pte->set_pcd(true);
-    EXPECT_TRUE(pte->pcd() == true);
+    EXPECT_TRUE(pte->pcd());
     pte->set_pcd(false);
-    EXPECT_TRUE(pte->pcd() == false);
+    EXPECT_FALSE(pte->pcd());
 }
 
 void
@@ -89,9 +89,9 @@ memory_manager_ut::test_page_table_entry_x64_accessed()
     auto pte = std::make_shared<page_table_entry_x64>(&entry);
 
     pte->set_accessed(true);
-    EXPECT_TRUE(pte->accessed() == true);
+    EXPECT_TRUE(pte->accessed());
     pte->set_accessed(false);
-    EXPECT_TRUE(pte->accessed() == false);
+    EXPECT_FALSE(pte->accessed());
 }
 
 void
@@ -101,9 +101,9 @@ memory_manager_ut::test_page_table_entry_x64_dirty()
     auto pte = std::make_shared<page_table_entry_x64>(&entry);
 
     pte->set_dirty(true);
-    EXPECT_TRUE(pte->dirty() == true);
+    EXPECT_TRUE(pte->dirty());
     pte->set_dirty(false);
-    EXPECT_TRUE(pte->dirty() == false);
+    EXPECT_FALSE(pte->dirty());
 }
 
 void
@@ -113,9 +113,9 @@ memory_manager_ut::test_page_table_entry_x64_pat()
     auto pte = std::make_shared<page_table_entry_x64>(&entry);
 
     pte->set_pat(true);
-    EXPECT_TRUE(pte->pat() == true);
+    EXPECT_TRUE(pte->pat());
     pte->set_pat(false);
-    EXPECT_TRUE(pte->pat() == false);
+    EXPECT_FALSE(pte->pat());
 }
 
 void
@@ -125,9 +125,9 @@ memory_manager_ut::test_page_table_entry_x64_global()
     auto pte = std::make_shared<page_table_entry_x64>(&entry);
 
     pte->set_global(true);
-    EXPECT_TRUE(pte->global() == true);
+    EXPECT_TRUE(pte->global());
     pte->set_global(false);
-    EXPECT_TRUE(pte->global() == false);
+    EXPECT_FALSE(pte->global());
 }
 
 void
@@ -137,9 +137,9 @@ memory_manager_ut::test_page_table_entry_x64_nx()
     auto pte = std::make_shared<page_table_entry_x64>(&entry);
 
     pte->set_nx(true);
-    EXPECT_TRUE(pte->nx() == true);
+    EXPECT_TRUE(pte->nx());
     pte->set_nx(false);
-    EXPECT_TRUE(pte->nx() == false);
+    EXPECT_FALSE(pte->nx());
 }
 
 void

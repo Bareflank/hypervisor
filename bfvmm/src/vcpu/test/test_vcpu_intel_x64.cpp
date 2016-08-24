@@ -26,7 +26,7 @@
 #include <memory_manager/memory_manager.h>
 
 static uintptr_t
-virt_to_phys_ptr(void *ptr)
+virtptr_to_physint(void *ptr)
 {
     (void) ptr;
 
@@ -122,7 +122,7 @@ vcpu_ut::test_vcpu_intel_x64_init_null_params_valid_intrinsics()
     mocks.OnCall(in.get(), intrinsics_intel_x64::read_msr).Return(0);
 
     mocks.OnCallFunc(memory_manager::instance).Return(mm);
-    mocks.OnCallOverload(mm, (uintptr_t(memory_manager::*)(void *))&memory_manager::virt_to_phys).Do(virt_to_phys_ptr);
+    mocks.OnCall(mm, memory_manager::virtptr_to_physint).Do(virtptr_to_physint);
     mocks.OnCall(mm, memory_manager::virt_to_phys_map).Do(virt_to_phys_map);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -150,7 +150,7 @@ vcpu_ut::test_vcpu_intel_x64_init_valid_params_null_intrinsics()
     mocks.OnCall(eh.get(), exit_handler_intel_x64::set_state_save);
 
     mocks.OnCallFunc(memory_manager::instance).Return(mm);
-    mocks.OnCallOverload(mm, (uintptr_t(memory_manager::*)(void *))&memory_manager::virt_to_phys).Do(virt_to_phys_ptr);
+    mocks.OnCall(mm, memory_manager::virtptr_to_physint).Do(virtptr_to_physint);
     mocks.OnCall(mm, memory_manager::virt_to_phys_map).Do(virt_to_phys_map);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -179,7 +179,7 @@ vcpu_ut::test_vcpu_intel_x64_init_valid()
     mocks.OnCall(eh.get(), exit_handler_intel_x64::set_state_save);
 
     mocks.OnCallFunc(memory_manager::instance).Return(mm);
-    mocks.OnCallOverload(mm, (uintptr_t(memory_manager::*)(void *))&memory_manager::virt_to_phys).Do(virt_to_phys_ptr);
+    mocks.OnCall(mm, memory_manager::virtptr_to_physint).Do(virtptr_to_physint);
     mocks.OnCall(mm, memory_manager::virt_to_phys_map).Do(virt_to_phys_map);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -208,7 +208,7 @@ vcpu_ut::test_vcpu_intel_x64_init_vmcs_throws()
     mocks.OnCall(eh.get(), exit_handler_intel_x64::set_state_save);
 
     mocks.OnCallFunc(memory_manager::instance).Return(mm);
-    mocks.OnCallOverload(mm, (uintptr_t(memory_manager::*)(void *))&memory_manager::virt_to_phys).Do(virt_to_phys_ptr);
+    mocks.OnCall(mm, memory_manager::virtptr_to_physint).Do(virtptr_to_physint);
     mocks.OnCall(mm, memory_manager::virt_to_phys_map).Do(virt_to_phys_map);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -247,7 +247,7 @@ vcpu_ut::test_vcpu_intel_x64_fini_null_params_valid_intrinsics()
     mocks.OnCall(in.get(), intrinsics_intel_x64::read_msr).Return(0);
 
     mocks.OnCallFunc(memory_manager::instance).Return(mm);
-    mocks.OnCallOverload(mm, (uintptr_t(memory_manager::*)(void *))&memory_manager::virt_to_phys).Do(virt_to_phys_ptr);
+    mocks.OnCall(mm, memory_manager::virtptr_to_physint).Do(virtptr_to_physint);
     mocks.OnCall(mm, memory_manager::virt_to_phys_map).Do(virt_to_phys_map);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -276,7 +276,7 @@ vcpu_ut::test_vcpu_intel_x64_fini_valid_params_null_intrinsics()
     mocks.OnCall(eh.get(), exit_handler_intel_x64::set_state_save);
 
     mocks.OnCallFunc(memory_manager::instance).Return(mm);
-    mocks.OnCallOverload(mm, (uintptr_t(memory_manager::*)(void *))&memory_manager::virt_to_phys).Do(virt_to_phys_ptr);
+    mocks.OnCall(mm, memory_manager::virtptr_to_physint).Do(virtptr_to_physint);
     mocks.OnCall(mm, memory_manager::virt_to_phys_map).Do(virt_to_phys_map);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -306,7 +306,7 @@ vcpu_ut::test_vcpu_intel_x64_fini_valid()
     mocks.OnCall(eh.get(), exit_handler_intel_x64::set_state_save);
 
     mocks.OnCallFunc(memory_manager::instance).Return(mm);
-    mocks.OnCallOverload(mm, (uintptr_t(memory_manager::*)(void *))&memory_manager::virt_to_phys).Do(virt_to_phys_ptr);
+    mocks.OnCall(mm, memory_manager::virtptr_to_physint).Do(virtptr_to_physint);
     mocks.OnCall(mm, memory_manager::virt_to_phys_map).Do(virt_to_phys_map);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -361,7 +361,7 @@ vcpu_ut::test_vcpu_intel_x64_run_launch()
     mocks.OnCall(eh.get(), exit_handler_intel_x64::set_state_save);
 
     mocks.OnCallFunc(memory_manager::instance).Return(mm);
-    mocks.OnCallOverload(mm, (uintptr_t(memory_manager::*)(void *))&memory_manager::virt_to_phys).Do(virt_to_phys_ptr);
+    mocks.OnCall(mm, memory_manager::virtptr_to_physint).Do(virtptr_to_physint);
     mocks.OnCall(mm, memory_manager::virt_to_phys_map).Do(virt_to_phys_map);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -397,7 +397,7 @@ vcpu_ut::test_vcpu_intel_x64_run_launch_is_host_vcpu()
     mocks.OnCall(eh.get(), exit_handler_intel_x64::set_state_save);
 
     mocks.OnCallFunc(memory_manager::instance).Return(mm);
-    mocks.OnCallOverload(mm, (uintptr_t(memory_manager::*)(void *))&memory_manager::virt_to_phys).Do(virt_to_phys_ptr);
+    mocks.OnCall(mm, memory_manager::virtptr_to_physint).Do(virtptr_to_physint);
     mocks.OnCall(mm, memory_manager::virt_to_phys_map).Do(virt_to_phys_map);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -433,7 +433,7 @@ vcpu_ut::test_vcpu_intel_x64_run_resume()
     mocks.OnCall(eh.get(), exit_handler_intel_x64::set_state_save);
 
     mocks.OnCallFunc(memory_manager::instance).Return(mm);
-    mocks.OnCallOverload(mm, (uintptr_t(memory_manager::*)(void *))&memory_manager::virt_to_phys).Do(virt_to_phys_ptr);
+    mocks.OnCall(mm, memory_manager::virtptr_to_physint).Do(virtptr_to_physint);
     mocks.OnCall(mm, memory_manager::virt_to_phys_map).Do(virt_to_phys_map);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -470,7 +470,7 @@ vcpu_ut::test_vcpu_intel_x64_run_no_init()
     mocks.OnCall(eh.get(), exit_handler_intel_x64::set_state_save);
 
     mocks.OnCallFunc(memory_manager::instance).Return(mm);
-    mocks.OnCallOverload(mm, (uintptr_t(memory_manager::*)(void *))&memory_manager::virt_to_phys).Do(virt_to_phys_ptr);
+    mocks.OnCall(mm, memory_manager::virtptr_to_physint).Do(virtptr_to_physint);
     mocks.OnCall(mm, memory_manager::virt_to_phys_map).Do(virt_to_phys_map);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -505,7 +505,7 @@ vcpu_ut::test_vcpu_intel_x64_run_vmxon_throws()
     mocks.OnCall(eh.get(), exit_handler_intel_x64::set_state_save);
 
     mocks.OnCallFunc(memory_manager::instance).Return(mm);
-    mocks.OnCallOverload(mm, (uintptr_t(memory_manager::*)(void *))&memory_manager::virt_to_phys).Do(virt_to_phys_ptr);
+    mocks.OnCall(mm, memory_manager::virtptr_to_physint).Do(virtptr_to_physint);
     mocks.OnCall(mm, memory_manager::virt_to_phys_map).Do(virt_to_phys_map);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -541,7 +541,7 @@ vcpu_ut::test_vcpu_intel_x64_run_vmcs_throws()
     mocks.OnCall(eh.get(), exit_handler_intel_x64::set_state_save);
 
     mocks.OnCallFunc(memory_manager::instance).Return(mm);
-    mocks.OnCallOverload(mm, (uintptr_t(memory_manager::*)(void *))&memory_manager::virt_to_phys).Do(virt_to_phys_ptr);
+    mocks.OnCall(mm, memory_manager::virtptr_to_physint).Do(virtptr_to_physint);
     mocks.OnCall(mm, memory_manager::virt_to_phys_map).Do(virt_to_phys_map);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -577,7 +577,7 @@ vcpu_ut::test_vcpu_intel_x64_hlt_no_init()
     mocks.OnCall(eh.get(), exit_handler_intel_x64::set_state_save);
 
     mocks.OnCallFunc(memory_manager::instance).Return(mm);
-    mocks.OnCallOverload(mm, (uintptr_t(memory_manager::*)(void *))&memory_manager::virt_to_phys).Do(virt_to_phys_ptr);
+    mocks.OnCall(mm, memory_manager::virtptr_to_physint).Do(virtptr_to_physint);
     mocks.OnCall(mm, memory_manager::virt_to_phys_map).Do(virt_to_phys_map);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -612,7 +612,7 @@ vcpu_ut::test_vcpu_intel_x64_hlt_no_run()
     mocks.OnCall(eh.get(), exit_handler_intel_x64::set_state_save);
 
     mocks.OnCallFunc(memory_manager::instance).Return(mm);
-    mocks.OnCallOverload(mm, (uintptr_t(memory_manager::*)(void *))&memory_manager::virt_to_phys).Do(virt_to_phys_ptr);
+    mocks.OnCall(mm, memory_manager::virtptr_to_physint).Do(virtptr_to_physint);
     mocks.OnCall(mm, memory_manager::virt_to_phys_map).Do(virt_to_phys_map);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -648,7 +648,7 @@ vcpu_ut::test_vcpu_intel_x64_hlt_valid()
     mocks.OnCall(eh.get(), exit_handler_intel_x64::set_state_save);
 
     mocks.OnCallFunc(memory_manager::instance).Return(mm);
-    mocks.OnCallOverload(mm, (uintptr_t(memory_manager::*)(void *))&memory_manager::virt_to_phys).Do(virt_to_phys_ptr);
+    mocks.OnCall(mm, memory_manager::virtptr_to_physint).Do(virtptr_to_physint);
     mocks.OnCall(mm, memory_manager::virt_to_phys_map).Do(virt_to_phys_map);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -685,7 +685,7 @@ vcpu_ut::test_vcpu_intel_x64_hlt_valid_is_host_vcpu()
     mocks.OnCall(eh.get(), exit_handler_intel_x64::set_state_save);
 
     mocks.OnCallFunc(memory_manager::instance).Return(mm);
-    mocks.OnCallOverload(mm, (uintptr_t(memory_manager::*)(void *))&memory_manager::virt_to_phys).Do(virt_to_phys_ptr);
+    mocks.OnCall(mm, memory_manager::virtptr_to_physint).Do(virtptr_to_physint);
     mocks.OnCall(mm, memory_manager::virt_to_phys_map).Do(virt_to_phys_map);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -722,7 +722,7 @@ vcpu_ut::test_vcpu_intel_x64_hlt_vmxon_throws()
     mocks.OnCall(eh.get(), exit_handler_intel_x64::set_state_save);
 
     mocks.OnCallFunc(memory_manager::instance).Return(mm);
-    mocks.OnCallOverload(mm, (uintptr_t(memory_manager::*)(void *))&memory_manager::virt_to_phys).Do(virt_to_phys_ptr);
+    mocks.OnCall(mm, memory_manager::virtptr_to_physint).Do(virtptr_to_physint);
     mocks.OnCall(mm, memory_manager::virt_to_phys_map).Do(virt_to_phys_map);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]

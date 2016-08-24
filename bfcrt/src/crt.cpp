@@ -22,6 +22,8 @@
 
 typedef void (*ctor_t)();
 typedef void (*dtor_t)();
+typedef void (*init_array_t)();
+typedef void (*fini_array_t)();
 
 int64_t
 local_init(struct section_info_t *info)
@@ -38,6 +40,15 @@ local_init(struct section_info_t *info)
 
             for (auto i = 0U; i < n && ctors[i] != nullptr; i++)
                 ctors[i]();
+        }
+
+        if (info->init_array_addr != nullptr)
+        {
+            auto n = info->init_array_size >> 3;
+            auto init_array = static_cast<init_array_t *>(info->init_array_addr);
+
+            for (auto i = 0U; i < n && init_array[i] != nullptr; i++)
+                init_array[i]();
         }
     }
     catch (...)
@@ -60,6 +71,15 @@ local_fini(struct section_info_t *info)
 
     try
     {
+        if (info->fini_array_addr != nullptr)
+        {
+            auto n = info->fini_array_size >> 3;
+            auto fini_array = static_cast<fini_array_t *>(info->fini_array_addr);
+
+            for (auto i = 0U; i < n && fini_array[i] != nullptr; i++)
+                fini_array[i]();
+        }
+
         if (info->dtors_addr != nullptr)
         {
             auto n = info->dtors_size >> 3;

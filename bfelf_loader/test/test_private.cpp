@@ -60,6 +60,9 @@ extern "C"
 
     int64_t
     private_get_relocation_tables(struct bfelf_file_t *ef);
+
+    unsigned long
+    private_hash(const char *name);
 }
 
 // -----------------------------------------------------------------------------
@@ -326,4 +329,12 @@ bfelf_loader_ut::test_private_get_relocation_tables_invalid_section()
     {
         EXPECT_TRUE(private_get_relocation_tables(&ef) == -1);
     });
+}
+
+void
+bfelf_loader_ut::test_private_hash()
+{
+    const char name[2] = {static_cast<char>(-1), static_cast<char>(0)};
+
+    EXPECT_TRUE(private_hash(static_cast<const char *>(name)) != 0);
 }

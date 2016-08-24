@@ -34,7 +34,7 @@ CE='\033[0m'
 # Flags
 # ------------------------------------------------------------------------------
 
-CROSS_COMMONFLAGS="-fpic -ffreestanding -mno-red-zone -fexceptions -fstack-protector-strong -mtune=sandybridge -march=sandybridge -mstackrealign -D_HAVE_LONG_DOUBLE -D_LDBL_EQ_DBL -D_POSIX_TIMERS -U__STRICT_ANSI__ -DMALLOC_PROVIDED -DCLOCK_MONOTONIC"
+CROSS_COMMONFLAGS="-fpic -ffreestanding -mno-red-zone -fexceptions -fstack-protector-strong -D_FORTIFY_SOURCE=2 -mtune=sandybridge -march=sandybridge -mstackrealign -D_HAVE_LONG_DOUBLE -D_LDBL_EQ_DBL -D_POSIX_TIMERS -U__STRICT_ANSI__ -DMALLOC_PROVIDED -DCLOCK_MONOTONIC"
 CROSS_CCFLAGS="-std=c99 $CROSS_COMMONFLAGS"
 CROSS_CXXFLAGS="-std=c++14 -fno-use-cxa-atexit -fno-threadsafe-statics $CROSS_COMMONFLAGS"
 

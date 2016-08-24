@@ -35,7 +35,7 @@
 
 int64_t g_vmm_status = VMM_UNLOADED;
 
-uint64_t g_num_modules = 0;
+int64_t g_num_modules = 0;
 struct module_t g_modules[MAX_NUM_MODULES];
 
 struct bfelf_loader_t g_loader;
@@ -43,7 +43,7 @@ struct bfelf_loader_t g_loader;
 int64_t g_num_cpus_started = 0;
 
 void *g_stack = 0;
-void *g_stack_loc = 0;
+uint64_t g_stack_loc = 0;
 
 /* -------------------------------------------------------------------------- */
 /* Entry Points                                                               */
@@ -56,18 +56,18 @@ execute_entry_t execute_entry = 0;
 /* -------------------------------------------------------------------------- */
 
 struct module_t *
-get_module(uint64_t index)
+get_module(int64_t index)
 {
-    if (index >= g_num_modules)
+    if (index < 0 || index >= g_num_modules)
         return 0;
 
     return &(g_modules[index]);
 }
 
-int64_t
+uint64_t
 symbol_length(const char *sym)
 {
-    int64_t len = 0;
+    uint64_t len = 0;
 
     if (sym == 0)
         return 0;
@@ -91,7 +91,7 @@ resolve_symbol(const char *name, void **sym, struct module_t *module)
         return BF_ERROR_NO_MODULES_ADDED;
 
     str.buf = name;
-    str.len = (bfelf64_sword)symbol_length(name);
+    str.len = symbol_length(name);
 
     if (module == 0)
     {
@@ -228,7 +228,7 @@ load_elf_file(struct module_t *module)
 
         const char *src = 0;
         char *dst = 0;
-        int64_t len = 0;
+        uint64_t len = 0;
 
         ret = bfelf_file_get_segment(&module->file, s, &phdr);
         if (ret != BFELF_SUCCESS)
@@ -257,7 +257,7 @@ common_vmm_status(void)
 int64_t
 common_reset(void)
 {
-    uint64_t i;
+    int64_t i;
 
     for (i = 0; i < g_num_modules; i++)
     {
@@ -323,7 +323,7 @@ common_fini(void)
 }
 
 int64_t
-common_add_module(const char *file, int64_t fsize)
+common_add_module(const char *file, uint64_t fsize)
 {
     int64_t ret = 0;
     struct module_t *module = 0;
@@ -398,10 +398,12 @@ common_load_vmm(void)
         return BF_ERROR_NO_MODULES_ADDED;
 
     g_stack = platform_alloc_rw(STACK_SIZE);
-    g_stack_loc = (void *)(((uintptr_t)g_stack + STACK_SIZE - 1) & ~0x0F);
-
     if (g_stack == 0)
         return BF_ERROR_OUT_OF_MEMORY;
+
+    g_stack_loc = (uint64_t)g_stack + STACK_SIZE;
+    g_stack_loc = g_stack_loc - 1;
+    g_stack_loc = g_stack_loc & 0xFFFFFFFFFFFFFFF0;
 
     platform_memset(&g_loader, 0, sizeof(struct bfelf_loader_t));
 
@@ -422,7 +424,7 @@ common_load_vmm(void)
 
     for (i = 0; (module = get_module(i)) != 0; i++)
     {
-        struct section_info_t info = {0, 0, 0, 0, 0, 0};
+        struct section_info_t info = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
         ret = bfelf_loader_get_info(&g_loader, &module->file, &info);
         if (ret != BF_SUCCESS)
@@ -468,7 +470,7 @@ common_unload_vmm(void)
     {
         for (i = g_num_modules - 1; (module = get_module(i)) != 0; i--)
         {
-            struct section_info_t info = {0, 0, 0, 0, 0, 0};
+            struct section_info_t info = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
             ret = bfelf_loader_get_info(&g_loader, &module->file, &info);
             if (ret != BF_SUCCESS)
@@ -513,7 +515,7 @@ common_start_vmm(void)
         if (caller_affinity < 0)
             goto failure;
 
-        ret = execute_symbol("start_vmm", g_num_cpus_started, 0, 0);
+        ret = execute_symbol("start_vmm", (uint64_t)g_num_cpus_started, 0, 0);
         if (ret != BF_SUCCESS)
             goto failure;
 
@@ -555,7 +557,7 @@ common_stop_vmm(void)
         if (caller_affinity < 0)
             goto corrupted;
 
-        ret = execute_symbol("stop_vmm", i, 0, 0);
+        ret = execute_symbol("stop_vmm", (uint64_t)i, 0, 0);
         if (ret != BFELF_SUCCESS)
             goto corrupted;
 

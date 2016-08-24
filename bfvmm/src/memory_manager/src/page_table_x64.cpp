@@ -32,7 +32,7 @@ page_table_x64::page_table_x64(uintptr_t *pte) :
     m_pt_owner = std::make_unique<uintptr_t[]>(4096 / sizeof(uintptr_t));
     m_pt = gsl::span<uintptr_t>(m_pt_owner.get(), PT_SIZE);
 
-    this->set_phys_addr(g_mm->virt_to_phys(m_pt_owner.get()));
+    this->set_phys_addr(g_mm->virtptr_to_physint(m_pt_owner.get()));
     this->set_present(true);
     this->set_rw(true);
     this->set_us(true);
@@ -48,6 +48,7 @@ std::shared_ptr<page_table_entry_x64>
 page_table_x64::add_page(uintptr_t virt_addr, uint64_t bits)
 {
     auto index = (virt_addr & ((INDEX_MASK) << bits)) >> bits;
+    auto signed_index = static_cast<int64_t>(index);
 
     if (bits > PT_INDEX)
     {
@@ -56,7 +57,7 @@ page_table_x64::add_page(uintptr_t virt_addr, uint64_t bits)
         if (pte)
             return pte->add_page(virt_addr, bits - BITS_PER_INDEX);
 
-        pte = std::make_shared<page_table_x64>(&m_pt[index]);
+        pte = std::make_shared<page_table_x64>(&m_pt[signed_index]);
         m_ptes[index] = pte;
 
         return pte->add_page(virt_addr, bits - BITS_PER_INDEX);
@@ -67,7 +68,7 @@ page_table_x64::add_page(uintptr_t virt_addr, uint64_t bits)
     if (pte)
         throw std::logic_error("add_page: page mapping already exists");
 
-    pte = std::make_shared<page_table_entry_x64>(&m_pt[index]);
+    pte = std::make_shared<page_table_entry_x64>(&m_pt[signed_index]);
     m_ptes[index] = pte;
 
     return pte;

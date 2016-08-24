@@ -317,6 +317,8 @@ void
 memory_manager_ut::test_memory_manager_malloc_heap_massive()
 {
     EXPECT_TRUE(g_mm->malloc(0xFFFFFFFFFFFFFFFF) == nullptr);
+    EXPECT_TRUE(g_mm->malloc((MAX_HEAP_POOL + 10U) * 8) == nullptr);
+    EXPECT_TRUE(g_mm->malloc((MAX_PAGE_POOL + MAX_PAGE_SIZE) * 4096) == nullptr);
     g_mm->clear();
 }
 
@@ -792,50 +794,51 @@ memory_manager_ut::test_memory_manager_add_md_unaligned_virtual()
 }
 
 void
-memory_manager_ut::test_memory_manager_virt_to_phys_unknown()
+memory_manager_ut::test_memory_manager_virtint_to_physint_unknown()
 {
-    EXPECT_TRUE(g_mm->virt_to_phys(0x54321000) == 0);
+    EXPECT_TRUE(g_mm->virtint_to_physint(0x54321000) == 0);
 }
 
 void
-memory_manager_ut::test_memory_manager_phys_to_virt_unknown()
+memory_manager_ut::test_memory_manager_physint_to_virtint_unknown()
 {
-    EXPECT_TRUE(g_mm->phys_to_virt(0x12346000) == 0);
+    EXPECT_TRUE(g_mm->physint_to_virtint(0x12346000) == 0);
 }
 
 void
-memory_manager_ut::test_memory_manager_virt_to_phys_random_address()
+memory_manager_ut::test_memory_manager_virtint_to_physint_random_address()
 {
     memory_descriptor md = {0x12345000, 0x54321000, 7};
 
     EXPECT_NO_EXCEPTION(g_mm->add_md(&md));
-    EXPECT_TRUE(g_mm->virt_to_phys(0x54321ABC) == 0x12345ABC);
+    EXPECT_TRUE(g_mm->virtint_to_physint(0x54321ABC) == 0x12345ABC);
 }
 
 void
-memory_manager_ut::test_memory_manager_virt_to_phys_nullptr()
+memory_manager_ut::test_memory_manager_virtint_to_physint_nullptr()
 {
-    EXPECT_TRUE(g_mm->virt_to_phys(nullptr) == 0);
-    EXPECT_TRUE(g_mm->virt_to_phys_ptr(static_cast<uintptr_t>(0)) == 0);
-    EXPECT_TRUE(g_mm->virt_to_phys_ptr(nullptr) == 0);
+    EXPECT_TRUE(g_mm->virtint_to_physint(0) == 0);
+    EXPECT_TRUE(g_mm->virtptr_to_physint(nullptr) == 0);
+    EXPECT_TRUE(g_mm->virtint_to_physptr(0) == nullptr);
+    EXPECT_TRUE(g_mm->virtptr_to_physptr(nullptr) == nullptr);
 }
 
 void
-memory_manager_ut::test_memory_manager_virt_to_phys_upper_limit()
-{
-    memory_descriptor md = {0x12345000, 0x54321000, 7};
-
-    EXPECT_NO_EXCEPTION(g_mm->add_md(&md));
-    EXPECT_TRUE(g_mm->virt_to_phys(0x54321FFF) == 0x12345FFF);
-}
-
-void
-memory_manager_ut::test_memory_manager_virt_to_phys_lower_limit()
+memory_manager_ut::test_memory_manager_virtint_to_physint_upper_limit()
 {
     memory_descriptor md = {0x12345000, 0x54321000, 7};
 
     EXPECT_NO_EXCEPTION(g_mm->add_md(&md));
-    EXPECT_TRUE(g_mm->virt_to_phys(0x54321000) == 0x12345000);
+    EXPECT_TRUE(g_mm->virtint_to_physint(0x54321FFF) == 0x12345FFF);
+}
+
+void
+memory_manager_ut::test_memory_manager_virtint_to_physint_lower_limit()
+{
+    memory_descriptor md = {0x12345000, 0x54321000, 7};
+
+    EXPECT_NO_EXCEPTION(g_mm->add_md(&md));
+    EXPECT_TRUE(g_mm->virtint_to_physint(0x54321000) == 0x12345000);
 }
 
 void
@@ -855,38 +858,39 @@ memory_manager_ut::test_memory_manager_virt_to_phys_map()
 }
 
 void
-memory_manager_ut::test_memory_manager_phys_to_virt_random_address()
+memory_manager_ut::test_memory_manager_physint_to_virtint_random_address()
 {
     memory_descriptor md = {0x12345000, 0x54321000, 7};
 
     EXPECT_NO_EXCEPTION(g_mm->add_md(&md));
-    EXPECT_TRUE(g_mm->phys_to_virt(0x12345ABC) == 0x54321ABC);
+    EXPECT_TRUE(g_mm->physint_to_virtint(0x12345ABC) == 0x54321ABC);
 }
 
 void
-memory_manager_ut::test_memory_manager_phys_to_virt_nullptr()
+memory_manager_ut::test_memory_manager_physint_to_virtint_nullptr()
 {
-    EXPECT_TRUE(g_mm->phys_to_virt(nullptr) == 0);
-    EXPECT_TRUE(g_mm->phys_to_virt_ptr(static_cast<uintptr_t>(0)) == 0);
-    EXPECT_TRUE(g_mm->phys_to_virt_ptr(nullptr) == 0);
+    EXPECT_TRUE(g_mm->physint_to_virtint(0) == 0);
+    EXPECT_TRUE(g_mm->physptr_to_virtint(nullptr) == 0);
+    EXPECT_TRUE(g_mm->physint_to_virtptr(0) == nullptr);
+    EXPECT_TRUE(g_mm->physptr_to_virtptr(nullptr) == nullptr);
 }
 
 void
-memory_manager_ut::test_memory_manager_phys_to_virt_upper_limit()
-{
-    memory_descriptor md = {0x12345000, 0x54321000, 7};
-
-    EXPECT_NO_EXCEPTION(g_mm->add_md(&md));
-    EXPECT_TRUE(g_mm->phys_to_virt(0x12345FFF) == 0x54321FFF);
-}
-
-void
-memory_manager_ut::test_memory_manager_phys_to_virt_lower_limit()
+memory_manager_ut::test_memory_manager_physint_to_virtint_upper_limit()
 {
     memory_descriptor md = {0x12345000, 0x54321000, 7};
 
     EXPECT_NO_EXCEPTION(g_mm->add_md(&md));
-    EXPECT_TRUE(g_mm->phys_to_virt(0x12345000) == 0x54321000);
+    EXPECT_TRUE(g_mm->physint_to_virtint(0x12345FFF) == 0x54321FFF);
+}
+
+void
+memory_manager_ut::test_memory_manager_physint_to_virtint_lower_limit()
+{
+    memory_descriptor md = {0x12345000, 0x54321000, 7};
+
+    EXPECT_NO_EXCEPTION(g_mm->add_md(&md));
+    EXPECT_TRUE(g_mm->physint_to_virtint(0x12345000) == 0x54321000);
 }
 
 void

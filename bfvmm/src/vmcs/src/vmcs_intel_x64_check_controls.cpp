@@ -199,7 +199,7 @@ vmcs_intel_x64::check_control_tpr_shadow_and_virtual_apic()
         if (!is_enabled_virtualized_apic())
             throw std::logic_error("tpr_shadow is enabled, but virtual apic is disabled");
 
-        auto virt_addr = static_cast<uint8_t *>(g_mm->phys_to_virt_ptr(phys_addr));
+        auto virt_addr = static_cast<uint8_t *>(g_mm->physint_to_virtptr(phys_addr));
 
         if (virt_addr == nullptr)
             throw std::logic_error("virtual apic virtual addr is NULL");

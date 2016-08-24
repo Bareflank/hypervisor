@@ -19,28 +19,30 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#ifndef ABORT_H
-#define ABORT_H
+#ifndef MISC_H
+#define MISC_H
 
-#ifndef DISABLE_ABORT
+#include <abort.h>
+#include <stdint.h>
 
-#ifdef CROSS_COMPILED
-extern "C" void abort(void);
-extern "C" int printf(const char *format, ...);
-#else
-#include <stdio.h>
-#include <stdlib.h>
-#endif
+inline uint64_t abs(int64_t value)
+{ return value >= 0 ? static_cast<uint64_t>(value) : static_cast<uint64_t>(-value); }
 
-inline void
-private_abort(const char *msg, const char *func, int line)
+inline uint64_t
+add_offset(uint64_t value, int64_t offset)
 {
-    printf("%s FATAL ERROR [%d]: %s\n", func, line, msg);
-    abort();
+    auto abs_offset = abs(offset);
+
+    if (offset >= 0)
+        return value + abs_offset;
+    else
+    {
+        if (value >= abs_offset)
+            return value - abs_offset;
+    }
+
+    ABORT("attempted add an offset that would result in overflow");
+    return 0;
 }
-#define ABORT(a) { private_abort(a,__func__,__LINE__); __builtin_unreachable(); }
-#else
-#define ABORT(a) { while(1); __builtin_unreachable(); }
-#endif
 
 #endif

@@ -90,7 +90,7 @@
  * Note: defined in bytes (defaults to 8MB)
  */
 #ifndef MAX_HEAP_POOL
-#define MAX_HEAP_POOL (256 * MAX_PAGE_SIZE)
+#define MAX_HEAP_POOL (256ULL * MAX_PAGE_SIZE)
 #endif
 
 /*
@@ -102,7 +102,7 @@
  * Note: defined in bytes (defaults to 8MB)
  */
 #ifndef MAX_PAGE_POOL
-#define MAX_PAGE_POOL (256)
+#define MAX_PAGE_POOL (256ULL)
 #endif
 
 /*
@@ -113,7 +113,7 @@
  * value changes.
  */
 #ifndef MAX_NUM_MODULES
-#define MAX_NUM_MODULES (25ULL)
+#define MAX_NUM_MODULES (25LL)
 #endif
 
 /**
