@@ -143,7 +143,7 @@ vmcs_intel_x64::check_guest_verify_ia_32e_mode_disabled()
 void
 vmcs_intel_x64::check_guest_cr3_for_unsupported_bits()
 {
-    auto cr3 = vmread(VMCS_GUEST_CR0);
+    auto cr3 = vmread(VMCS_GUEST_CR3);
 
     if (!is_physical_address_valid(cr3))
         throw std::logic_error("guest cr3 too large");
