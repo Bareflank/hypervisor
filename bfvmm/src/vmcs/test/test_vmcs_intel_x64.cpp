@@ -4,7 +4,7 @@
 // Copyright (C) 2015 Assured Information Security, Inc.
 // Author: Rian Quinn        <quinnr@ainfosec.com>
 // Author: Brendan Kerrigan  <kerriganb@ainfosec.com>
-// Author: Connor Davis <davisc@ainfosec.com>
+// Author: Connor Davis      <davisc@ainfosec.com>
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -24,12 +24,133 @@
 #include <vmcs/vmcs_intel_x64.h>
 #include <memory_manager/memory_manager.h>
 
+static std::map<uint32_t, uint64_t> g_msrs;
+static std::map<uint64_t, uint64_t> g_vmcs_fields;
+
+static uint64_t
+read_msr(uint32_t msr)
+{
+    return g_msrs[msr];
+}
+
+static void
+write_msr(uint32_t msr, uint64_t val)
+{
+    g_msrs[msr] = val;
+}
+
+static bool
+vmread(uint64_t field, uint64_t *val)
+{
+    *val = g_vmcs_fields[field];
+    return true;
+}
+
+static bool
+vmwrite(uint64_t field, uint64_t val)
+{
+    g_vmcs_fields[field] = val;
+    return true;
+}
+
+static uint16_t
+get_16bit_state()
+{
+    return 0;
+}
+
+static uint32_t
+get_32bit_state()
+{
+    return 0;
+}
+
+static uint64_t
+get_64bit_state()
+{
+    return 0;
+}
+
+static void
+dump()
+{
+}
+
 static uintptr_t
 virt_to_phys_ptr(void *ptr)
 {
     (void) ptr;
 
     return 0x0000000ABCDEF0000;
+}
+
+static void
+setup_vmcs_x64_state_intrinsics(MockRepository &mocks, vmcs_intel_x64_state *state_in)
+{
+    // Setup 16 bit state functions
+    mocks.OnCall(state_in, vmcs_intel_x64_state::es).Do(get_16bit_state);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::cs).Do(get_16bit_state);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::ss).Do(get_16bit_state);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::ds).Do(get_16bit_state);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::ds).Do(get_16bit_state);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::fs).Do(get_16bit_state);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::gs).Do(get_16bit_state);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::ldtr).Do(get_16bit_state);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::tr).Do(get_16bit_state);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::gdt_limit).Do(get_16bit_state);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::idt_limit).Do(get_16bit_state);
+
+    // Setup 32 bit state functions
+    mocks.OnCall(state_in, vmcs_intel_x64_state::es_limit).Do(get_32bit_state);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::cs_limit).Do(get_32bit_state);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::ss_limit).Do(get_32bit_state);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::ds_limit).Do(get_32bit_state);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::ds_limit).Do(get_32bit_state);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::fs_limit).Do(get_32bit_state);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::gs_limit).Do(get_32bit_state);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::ldtr_limit).Do(get_32bit_state);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::tr_limit).Do(get_32bit_state);
+
+    mocks.OnCall(state_in, vmcs_intel_x64_state::es_access_rights).Do(get_32bit_state);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::cs_access_rights).Do(get_32bit_state);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::ss_access_rights).Do(get_32bit_state);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::ds_access_rights).Do(get_32bit_state);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::ds_access_rights).Do(get_32bit_state);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::fs_access_rights).Do(get_32bit_state);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::gs_access_rights).Do(get_32bit_state);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::ldtr_access_rights).Do(get_32bit_state);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::tr_access_rights).Do(get_32bit_state);
+
+    // Setup 64 bit state functions
+    mocks.OnCall(state_in, vmcs_intel_x64_state::cr0).Do(get_64bit_state);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::cr3).Do(get_64bit_state);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::cr4).Do(get_64bit_state);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::dr7).Do(get_64bit_state);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::rflags).Do(get_64bit_state);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::gdt_base).Do(get_64bit_state);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::idt_base).Do(get_64bit_state);
+
+    mocks.OnCall(state_in, vmcs_intel_x64_state::es_base).Do(get_64bit_state);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::cs_base).Do(get_64bit_state);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::ss_base).Do(get_64bit_state);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::ds_base).Do(get_64bit_state);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::ds_base).Do(get_64bit_state);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::fs_base).Do(get_64bit_state);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::gs_base).Do(get_64bit_state);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::ldtr_base).Do(get_64bit_state);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::tr_base).Do(get_64bit_state);
+
+    mocks.OnCall(state_in, vmcs_intel_x64_state::ia32_debugctl_msr).Do(get_64bit_state);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::ia32_pat_msr).Do(get_64bit_state);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::ia32_efer_msr).Do(get_64bit_state);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::ia32_perf_global_ctrl_msr).Do(get_64bit_state);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::ia32_sysenter_cs_msr).Do(get_64bit_state);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::ia32_sysenter_esp_msr).Do(get_64bit_state);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::ia32_sysenter_eip_msr).Do(get_64bit_state);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::ia32_fs_base_msr).Do(get_64bit_state);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::ia32_gs_base_msr).Do(get_64bit_state);
+
+    mocks.OnCall(state_in, vmcs_intel_x64_state::dump).Do(dump);
 }
 
 static void
@@ -48,6 +169,11 @@ setup_vmcs_intrinsics(MockRepository &mocks, memory_manager *mm, intrinsics_inte
     mocks.OnCall(in, intrinsics_intel_x64::read_msr).With(IA32_VMX_TRUE_ENTRY_CTLS_MSR).Return(0x55555555aaaaAAAA);
     mocks.OnCall(in, intrinsics_intel_x64::vmread).Return(0x5555555555555555);
 
+    mocks.OnCall(in, intrinsics_intel_x64::read_msr).Do(read_msr);
+    mocks.OnCall(in, intrinsics_intel_x64::write_msr).Do(write_msr);
+    mocks.OnCall(in, intrinsics_intel_x64::vmread).Do(vmread);
+    mocks.OnCall(in, intrinsics_intel_x64::vmwrite).Do(vmwrite);
+
     // Make the default return of the vm* calls true
     mocks.OnCall(in, intrinsics_intel_x64::vmclear).Return(true);
     mocks.OnCall(in, intrinsics_intel_x64::vmptrld).Return(true);
@@ -61,15 +187,16 @@ vmcs_ut::test_launch_success()
     MockRepository mocks;
     auto mm = mocks.Mock<memory_manager>();
     auto in = bfn::mock_shared<intrinsics_intel_x64>(mocks);
+    auto host_state = bfn::mock_shared<vmcs_intel_x64_state>(mocks);
+    auto guest_state = bfn::mock_shared<vmcs_intel_x64_state>(mocks);
 
     setup_vmcs_intrinsics(mocks, mm, in.get());
+    setup_vmcs_x64_state_intrinsics(mocks, host_state.get());
+    setup_vmcs_x64_state_intrinsics(mocks, guest_state.get());
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
         vmcs_intel_x64 vmcs(in);
-
-        auto host_state = std::make_shared<vmcs_intel_x64_state>();
-        auto guest_state = std::make_shared<vmcs_intel_x64_state>();
 
         EXPECT_NO_EXCEPTION(vmcs.launch(host_state, guest_state));
     });
