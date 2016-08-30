@@ -198,14 +198,6 @@ setup_vmcs_intrinsics(MockRepository &mocks, memory_manager *mm, intrinsics_inte
     mocks.OnCallOverload(mm, (uintptr_t(memory_manager::*)(void *))&memory_manager::virt_to_phys).Do(virt_to_phys_ptr);
 
     // Setup MSR and vmread returns to mock a successful vmcs_intel_x64::filter_unsupported
-    mocks.OnCall(in, intrinsics_intel_x64::read_msr).With(IA32_VMX_BASIC_MSR).Return(0x7fffFFFF);
-    mocks.OnCall(in, intrinsics_intel_x64::read_msr).With(IA32_VMX_TRUE_PINBASED_CTLS_MSR).Return(0x55555555aaaaAAAA);
-    mocks.OnCall(in, intrinsics_intel_x64::read_msr).With(IA32_VMX_TRUE_PROCBASED_CTLS_MSR).Return(0x55555555aaaaAAAA);
-    mocks.OnCall(in, intrinsics_intel_x64::read_msr).With(IA32_VMX_PROCBASED_CTLS2_MSR).Return(0x55555555aaaaAAAA);
-    mocks.OnCall(in, intrinsics_intel_x64::read_msr).With(IA32_VMX_TRUE_EXIT_CTLS_MSR).Return(0x55555555aaaaAAAA);
-    mocks.OnCall(in, intrinsics_intel_x64::read_msr).With(IA32_VMX_TRUE_ENTRY_CTLS_MSR).Return(0x55555555aaaaAAAA);
-    mocks.OnCall(in, intrinsics_intel_x64::vmread).Return(0x5555555555555555);
-
     mocks.OnCall(in, intrinsics_intel_x64::read_msr).Do(read_msr);
     mocks.OnCall(in, intrinsics_intel_x64::write_msr).Do(write_msr);
     mocks.OnCall(in, intrinsics_intel_x64::vmread).Do(vmread);
@@ -214,7 +206,6 @@ setup_vmcs_intrinsics(MockRepository &mocks, memory_manager *mm, intrinsics_inte
     // Make the default return of the vm* calls true
     mocks.OnCall(in, intrinsics_intel_x64::vmclear).Return(true);
     mocks.OnCall(in, intrinsics_intel_x64::vmptrld).Return(true);
-    mocks.OnCall(in, intrinsics_intel_x64::vmwrite).Return(true);
     mocks.OnCall(in, intrinsics_intel_x64::vmlaunch).Return(true);
 }
 
