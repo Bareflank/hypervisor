@@ -26,6 +26,7 @@
 
 static std::map<uint32_t, uint64_t> g_msrs;
 static std::map<uint64_t, uint64_t> g_vmcs_fields;
+bool virt_to_phys_return_nullptr = false;
 
 static uint64_t
 read_msr(uint32_t msr)
@@ -113,9 +114,12 @@ static uint64_t ia32_fs_base_msr() { return 0; }
 static uint64_t ia32_gs_base_msr() { return 0; }
 
 static uintptr_t
-virt_to_phys_ptr(void *ptr)
+virtptr_to_physint(void *ptr)
 {
     (void) ptr;
+
+    if (virt_to_phys_return_nullptr)
+        return 0;
 
     return 0x0000000ABCDEF0000;
 }
@@ -193,7 +197,7 @@ setup_vmcs_intrinsics(MockRepository &mocks, memory_manager *mm, intrinsics_inte
 {
     // Emulate the memory manager
     mocks.OnCallFunc(memory_manager::instance).Return(mm);
-    mocks.OnCallOverload(mm, (uintptr_t(memory_manager::*)(void *))&memory_manager::virt_to_phys).Do(virt_to_phys_ptr);
+    mocks.OnCall(mm, memory_manager::virtptr_to_physint).Do(virtptr_to_physint);
 
     // Setup MSR and vmread returns to mock a successful vmcs_intel_x64::filter_unsupported
     mocks.OnCall(in, intrinsics_intel_x64::read_msr).Do(read_msr);
