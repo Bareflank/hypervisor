@@ -10,6 +10,7 @@
   <img alt="Coverity Scan Build Status"
        src="https://scan.coverity.com/projects/9857/badge.svg"/>
 </a>
+[![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/325/badge)](https://bestpractices.coreinfrastructure.org/projects/325)
 ## Description
 
 The Bareflank Hypervisor is an open source, lightweight hypervisor, lead by
