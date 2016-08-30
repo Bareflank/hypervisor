@@ -112,8 +112,6 @@ static uint64_t ia32_sysenter_eip_msr() { return 0; }
 static uint64_t ia32_fs_base_msr() { return 0; }
 static uint64_t ia32_gs_base_msr() { return 0; }
 
-static void dump() {}
-
 static uintptr_t
 virt_to_phys_ptr(void *ptr)
 {
@@ -187,7 +185,7 @@ setup_vmcs_x64_state_intrinsics(MockRepository &mocks, vmcs_intel_x64_state *sta
     mocks.OnCall(state_in, vmcs_intel_x64_state::ia32_fs_base_msr).Do(ia32_fs_base_msr);
     mocks.OnCall(state_in, vmcs_intel_x64_state::ia32_gs_base_msr).Do(ia32_gs_base_msr);
 
-    mocks.OnCall(state_in, vmcs_intel_x64_state::dump).Do(dump);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::dump);
 }
 
 static void
