@@ -53,7 +53,7 @@ extern "C" {
  * @return the return value of the entry point
  *
  */
-typedef int64_t(*execute_entry_t)(void *stack, void *func, uint64_t arg1, uint64_t arg2);
+typedef int64_t(*execute_entry_t)(uint64_t stack, void *func, uint64_t arg1, uint64_t arg2);
 
 
 #ifdef __cplusplus

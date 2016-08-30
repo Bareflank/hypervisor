@@ -264,7 +264,7 @@ fi
 # This is a dirty hack that is needed for libcxx and libcxxabi. Basically, if
 # they can see the headers in the sysroot, they gets all sorts of mad.
 if [[ ! $BAREFLANK_WRAPPER_IS_LIBCXXABI == "true" && ! $BAREFLANK_WRAPPER_IS_LIBCXX == "true" ]]; then
-    SYSROOT_INC_PATH="-I$BUILD_ABS/sysroot/x86_64-elf/include/c++/v1/ $SYSROOT_INC_PATH"
+    SYSROOT_INC_PATH="-isystem $BUILD_ABS/sysroot/x86_64-elf/include/c++/v1/ $SYSROOT_INC_PATH"
 fi
 
 # ------------------------------------------------------------------------------

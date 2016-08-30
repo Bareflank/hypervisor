@@ -33,6 +33,7 @@ extern "C" int printf(const char *format, ...);
 #else
 #define log(...)
 #endif
-#endif
 
 #define debug(...) printf(__VA_ARGS__);
+
+#endif

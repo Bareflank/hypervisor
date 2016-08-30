@@ -66,74 +66,75 @@ private_personality(_Unwind_Action action, _Unwind_Context *context)
 // Implementation
 // -----------------------------------------------------------------------------
 
-typedef bool (* step_func_t)(_Unwind_Context *context);
-
-_Unwind_Reason_Code
-private_step(_Unwind_Context *context, bool phase1, step_func_t func)
+static _Unwind_Reason_Code
+find_and_store_fde(_Unwind_Context *context)
 {
-    context->fde = eh_frame::find_fde(context->state, phase1);
-
-    if (context->fde == false)
+    if (!(context->fde = eh_frame::find_fde(context->state)))
         return _URC_END_OF_STACK;
 
-    if (func != 0 && func(context) == true)
-        return _URC_NO_REASON;
-
-    dwarf4::unwind(context->fde, context->state);
-
     return _URC_CONTINUE_UNWIND;
-}
-
-_Unwind_Reason_Code
-private_step_loop(_Unwind_Context *context, bool phase1, step_func_t func)
-{
-    while (1)
-    {
-        auto ret = private_step(context, phase1, func);
-        if (ret != _URC_CONTINUE_UNWIND)
-            return ret;
-    }
 }
 
 static _Unwind_Reason_Code
 private_phase1(_Unwind_Context *context)
 {
+    auto result = _URC_CONTINUE_UNWIND;
+
     log("\n");
     log("============================================================\n");
     log("Phase #1\n\n");
 
-    private_step(context, true, 0);
+    result = find_and_store_fde(context);
+    if (result != _URC_CONTINUE_UNWIND)
+        return result;
 
-    return private_step_loop(context, true, [](_Unwind_Context * context) -> bool
+    dwarf4::unwind(context->fde, context->state);
+
+    while (1)
     {
+        result = find_and_store_fde(context);
+        if (result != _URC_CONTINUE_UNWIND)
+            return result;
+
         switch (private_personality(_UA_SEARCH_PHASE, context))
         {
             case _URC_HANDLER_FOUND:
                 context->exception_object->private_1 = context->fde.pc_begin();
-                return true;
+                return _URC_NO_REASON;
 
             case _URC_CONTINUE_UNWIND:
-                return false;
+                break;
 
             default:
                 ABORT("phase 1 personality routine failed");
-                return true;
         }
-    });
+
+        dwarf4::unwind(context->fde, context->state);
+    }
 }
 
 static _Unwind_Reason_Code
 private_phase2(_Unwind_Context *context)
 {
+    auto result = _URC_CONTINUE_UNWIND;
+
     log("\n");
     log("============================================================\n");
     log("Phase #2\n\n");
 
-    private_step(context, false, 0);
+    result = find_and_store_fde(context);
+    if (result != _URC_CONTINUE_UNWIND)
+        return result;
 
-    return private_step_loop(context, false, [](_Unwind_Context * context) -> bool
+    dwarf4::unwind(context->fde, context->state);
+
+    while (1)
     {
         auto action = _UA_CLEANUP_PHASE;
+
+        result = find_and_store_fde(context);
+        if (result != _URC_CONTINUE_UNWIND)
+            return result;
 
         if (context->exception_object->private_1 == context->fde.pc_begin())
             action |= _UA_HANDLER_FRAME;
@@ -141,16 +142,17 @@ private_phase2(_Unwind_Context *context)
         switch (private_personality(action, context))
         {
             case _URC_INSTALL_CONTEXT:
-                context->state->resume();
+                context->state->resume(); __builtin_unreachable();
 
             case _URC_CONTINUE_UNWIND:
-                return false;
+                break;
 
             default:
                 ABORT("phase 2 personality routine failed");
-                return true;
         }
-    });
+
+        dwarf4::unwind(context->fde, context->state);
+    }
 }
 
 extern "C" _Unwind_Reason_Code
@@ -204,13 +206,13 @@ _Unwind_DeleteException(_Unwind_Exception *exception_object)
 extern "C" uintptr_t
 _Unwind_GetGR(_Unwind_Context *context, int index)
 {
-    return context->state->get(index);
+    return context->state->get(static_cast<uint64_t>(index));
 }
 
 extern "C" void
 _Unwind_SetGR(_Unwind_Context *context, int index, uintptr_t value)
 {
-    context->state->set(index, value);
+    context->state->set(static_cast<uint64_t>(index), value);
     context->state->commit();
 }
 

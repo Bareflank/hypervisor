@@ -19,6 +19,8 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+#include <gsl/gsl>
+
 #include <test.h>
 #include <vmxon/vmxon_intel_x64.h>
 #include <memory_manager/memory_manager.h>
@@ -42,10 +44,15 @@ static void
 write_cr4(uint64_t cr4)
 { g_cr4 = cr4; }
 
+bool virt_to_phys_return_nullptr = false;
+
 static uintptr_t
-virt_to_phys_ptr(void *ptr)
+virtptr_to_physint(void *ptr)
 {
     (void) ptr;
+
+    if (virt_to_phys_return_nullptr)
+        return 0;
 
     return 0x0000000ABCDEF0000;
 }
@@ -88,7 +95,7 @@ setup_intrinsics(MockRepository &mocks, memory_manager *mm, intrinsics_intel_x64
 
     // Emulate the memory manager
     mocks.OnCallFunc(memory_manager::instance).Return(mm);
-    mocks.OnCallOverload(mm, (uintptr_t(memory_manager::*)(void *))&memory_manager::virt_to_phys).Do(virt_to_phys_ptr);
+    mocks.OnCall(mm, memory_manager::virtptr_to_physint).Do(virtptr_to_physint);
 }
 
 void
@@ -385,7 +392,12 @@ vmxon_ut::test_start_virt_to_phys_failure()
 
     setup_intrinsics(mocks, mm, in.get());
 
-    mocks.OnCallOverload(mm, (uintptr_t(memory_manager::*)(void *))&memory_manager::virt_to_phys).Return(0);
+    auto fa = gsl::finally([&]
+    {
+        virt_to_phys_return_nullptr = false;
+    });
+
+    virt_to_phys_return_nullptr = true;
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {

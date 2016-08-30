@@ -37,7 +37,7 @@ extern "C" {
  * @param len the size of virtual memory to be allocated in bytes.
  * @return a virtual address pointing to the newly allocated memory
  */
-void *platform_alloc_rw(int64_t len);
+void *platform_alloc_rw(uint64_t len);
 
 /**
  * Allocate Executable Memory
@@ -47,7 +47,7 @@ void *platform_alloc_rw(int64_t len);
  * @param len the size of virtual memory to be allocated in bytes.
  * @return a virtual address pointing to the newly allocated memory
  */
-void *platform_alloc_rwe(int64_t len);
+void *platform_alloc_rwe(uint64_t len);
 
 /**
  * Free Memory
@@ -58,7 +58,7 @@ void *platform_alloc_rwe(int64_t len);
  * @param addr the virtual address returned from platform_alloc
  * @param len the size of the memory allocated
  */
-void platform_free_rw(void *addr, int64_t len);
+void platform_free_rw(void *addr, uint64_t len);
 
 /**
  * Free Executable Memory
@@ -69,7 +69,7 @@ void platform_free_rw(void *addr, int64_t len);
  * @param addr the virtual address returned from platform_alloc_exec
  * @param len the size of the memory allocated
  */
-void platform_free_rwe(void *addr, int64_t len);
+void platform_free_rwe(void *addr, uint64_t len);
 
 /**
  * Convert Virtual Address to Physical Address
@@ -91,7 +91,7 @@ void *platform_virt_to_phys(void *virt);
  * @param value the value to set each byte to
  * @param num the number of bytes to set
  */
-void platform_memset(void *ptr, char value, int64_t num);
+void platform_memset(void *ptr, char value, uint64_t num);
 
 /**
  * Memcpy
@@ -100,7 +100,7 @@ void platform_memset(void *ptr, char value, int64_t num);
  * @param src a pointer to the memory to copy from
  * @param num the number of bytes to copy
  */
-void platform_memcpy(void *dst, const void *src, int64_t num);
+void platform_memcpy(void *dst, const void *src, uint64_t num);
 
 /**
  * Start

@@ -115,7 +115,7 @@ struct bfelf64_ehdr;
 struct e_string_t
 {
     const char *buf;
-    bfelf64_sword len;
+    bfelf64_xword len;
 };
 
 /*
@@ -126,7 +126,7 @@ struct e_string_t
  */
 struct relatab_t
 {
-    bfelf64_word num;
+    bfelf64_xword num;
     struct bfelf_rela *tab;
 };
 
@@ -142,7 +142,7 @@ struct bfelf_file_t
     char *exec;
     uint64_t fsize;
 
-    uint64_t num_loadable_segments;
+    int64_t num_loadable_segments;
     struct bfelf_phdr *loadable_segments[BFELF_MAX_SEGMENTS];
 
     struct bfelf64_ehdr *ehdr;
@@ -159,7 +159,7 @@ struct bfelf_file_t
     bfelf64_word *bucket;
     bfelf64_word *chain;
 
-    bfelf64_word symnum;
+    bfelf64_xword symnum;
     struct bfelf_sym *symtab;
 
     bfelf64_word num_rela;
@@ -216,7 +216,7 @@ int64_t bfelf_file_num_segments(struct bfelf_file_t *ef);
  * @return BFELF_SUCCESS on success, negative on error
  */
 int64_t bfelf_file_get_segment(struct bfelf_file_t *ef,
-                               bfelf64_word index,
+                               int64_t index,
                                struct bfelf_phdr **phdr);
 
 /**
@@ -409,6 +409,8 @@ struct bfelf64_ehdr
 #define bfsht_rel ((bfelf64_word)9)
 #define bfsht_shlib ((bfelf64_word)10)
 #define bfsht_dynsym ((bfelf64_word)11)
+#define bfsht_init_array ((bfelf64_word)14)
+#define bfsht_fini_array ((bfelf64_word)15)
 #define bfsht_loos ((bfelf64_word)0x60000000)
 #define bfsht_hios ((bfelf64_word)0x6FFFFFFF)
 #define bfsht_loproc ((bfelf64_word)0x70000000)

@@ -19,15 +19,22 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+#include <gsl/gsl>
+
 #include <test.h>
 #include <stdlib.h>
 #include <memory_manager/page_table_x64.h>
 #include <memory_manager/memory_manager.h>
 
+bool virt_to_phys_return_nullptr = false;
+
 static uintptr_t
-virt_to_phys_ptr(void *ptr)
+virtptr_to_physint(void *ptr)
 {
     (void) ptr;
+
+    if (virt_to_phys_return_nullptr)
+        return 0;
 
     return 0x0000000ABCDEF0000;
 }
@@ -38,7 +45,8 @@ memory_manager_ut::test_page_table_x64_no_entry()
     MockRepository mocks;
     auto mm = mocks.Mock<memory_manager>();
     mocks.OnCallFunc(memory_manager::instance).Return(mm);
-    mocks.OnCallOverload(mm, (uintptr_t(memory_manager::*)(void *))&memory_manager::virt_to_phys).Do(virt_to_phys_ptr);
+    mocks.OnCall(mm, memory_manager::virtptr_to_physint).Do(virtptr_to_physint);
+
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -66,7 +74,8 @@ memory_manager_ut::test_page_table_x64_with_entry()
     MockRepository mocks;
     auto mm = mocks.Mock<memory_manager>();
     mocks.OnCallFunc(memory_manager::instance).Return(mm);
-    mocks.OnCallOverload(mm, (uintptr_t(memory_manager::*)(void *))&memory_manager::virt_to_phys).Do(virt_to_phys_ptr);
+    mocks.OnCall(mm, memory_manager::virtptr_to_physint).Do(virtptr_to_physint);
+
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -92,11 +101,12 @@ memory_manager_ut::test_page_table_x64_add_page_success()
     MockRepository mocks;
     auto mm = mocks.Mock<memory_manager>();
     mocks.OnCallFunc(memory_manager::instance).Return(mm);
-    mocks.OnCallOverload(mm, (uintptr_t(memory_manager::*)(void *))&memory_manager::virt_to_phys).Do(virt_to_phys_ptr);
+    mocks.OnCall(mm, memory_manager::virtptr_to_physint).Do(virtptr_to_physint);
+
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        auto virt = 0x0000123456780000;
+        auto virt = 0x0000123456780000ULL;
         auto pml4 = std::make_shared<page_table_x64>();
 
         pml4->add_page(virt);
@@ -109,11 +119,12 @@ memory_manager_ut::test_page_table_x64_add_two_pages_no_added_mem_success()
     MockRepository mocks;
     auto mm = mocks.Mock<memory_manager>();
     mocks.OnCallFunc(memory_manager::instance).Return(mm);
-    mocks.OnCallOverload(mm, (uintptr_t(memory_manager::*)(void *))&memory_manager::virt_to_phys).Do(virt_to_phys_ptr);
+    mocks.OnCall(mm, memory_manager::virtptr_to_physint).Do(virtptr_to_physint);
+
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        auto virt = 0x0000123456780000;
+        auto virt = 0x0000123456780000ULL;
         auto pml4 = std::make_shared<page_table_x64>();
 
         pml4->add_page(virt);
@@ -127,11 +138,12 @@ memory_manager_ut::test_page_table_x64_add_two_pages_with_added_mem_success()
     MockRepository mocks;
     auto mm = mocks.Mock<memory_manager>();
     mocks.OnCallFunc(memory_manager::instance).Return(mm);
-    mocks.OnCallOverload(mm, (uintptr_t(memory_manager::*)(void *))&memory_manager::virt_to_phys).Do(virt_to_phys_ptr);
+    mocks.OnCall(mm, memory_manager::virtptr_to_physint).Do(virtptr_to_physint);
+
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        auto virt = 0x0000123456780000;
+        auto virt = 0x0000123456780000ULL;
         auto pml4 = std::make_shared<page_table_x64>();
 
         pml4->add_page(virt);
@@ -145,15 +157,16 @@ memory_manager_ut::test_page_table_x64_add_many_pages_success()
     MockRepository mocks;
     auto mm = mocks.Mock<memory_manager>();
     mocks.OnCallFunc(memory_manager::instance).Return(mm);
-    mocks.OnCallOverload(mm, (uintptr_t(memory_manager::*)(void *))&memory_manager::virt_to_phys).Do(virt_to_phys_ptr);
+    mocks.OnCall(mm, memory_manager::virtptr_to_physint).Do(virtptr_to_physint);
+
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        auto virt = 0x0000123456780000;
+        auto virt = 0x0000123456780000ULL;
         auto pml4 = std::make_shared<page_table_x64>();
 
-        for (auto i = 0; i < 4096; i++)
-            pml4->add_page(virt + (i * 0x1000));
+        for (auto i = 0U; i < 4096; i++)
+            pml4->add_page(virt + (i * 0x1000U));
     });
 }
 
@@ -163,11 +176,12 @@ memory_manager_ut::test_page_table_x64_add_page_twice_failure()
     MockRepository mocks;
     auto mm = mocks.Mock<memory_manager>();
     mocks.OnCallFunc(memory_manager::instance).Return(mm);
-    mocks.OnCallOverload(mm, (uintptr_t(memory_manager::*)(void *))&memory_manager::virt_to_phys).Do(virt_to_phys_ptr);
+    mocks.OnCall(mm, memory_manager::virtptr_to_physint).Do(virtptr_to_physint);
+
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        auto virt = 0x0000123456780000;
+        auto virt = 0x0000123456780000ULL;
         auto pml4 = std::make_shared<page_table_x64>();
 
         pml4->add_page(virt);
@@ -181,7 +195,8 @@ memory_manager_ut::test_page_table_x64_table_phys_addr_success()
     MockRepository mocks;
     auto mm = mocks.Mock<memory_manager>();
     mocks.OnCallFunc(memory_manager::instance).Return(mm);
-    mocks.OnCallOverload(mm, (uintptr_t(memory_manager::*)(void *))&memory_manager::virt_to_phys).Do(virt_to_phys_ptr);
+    mocks.OnCall(mm, memory_manager::virtptr_to_physint).Do(virtptr_to_physint);
+
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -197,7 +212,14 @@ memory_manager_ut::test_page_table_x64_table_phys_addr_failure()
     MockRepository mocks;
     auto mm = mocks.Mock<memory_manager>();
     mocks.OnCallFunc(memory_manager::instance).Return(mm);
-    mocks.OnCallOverload(mm, (uintptr_t(memory_manager::*)(void *))&memory_manager::virt_to_phys).Return(0);
+    mocks.OnCall(mm, memory_manager::virtptr_to_physint).Do(virtptr_to_physint);
+
+    auto fa = gsl::finally([&]
+    {
+        virt_to_phys_return_nullptr = false;
+    });
+
+    virt_to_phys_return_nullptr = true;
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {

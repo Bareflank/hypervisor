@@ -166,13 +166,13 @@ vmxon_intel_x64::create_vmxon_region()
     { this->release_vmxon_region(); });
 
     m_vmxon_region = std::make_unique<uint32_t[]>(1024);
-    m_vmxon_region_phys = g_mm->virt_to_phys(m_vmxon_region.get());
+    m_vmxon_region_phys = g_mm->virtptr_to_physint(m_vmxon_region.get());
 
     if (m_vmxon_region_phys == 0)
         throw std::logic_error("m_vmxon_region_phys == nullptr");
 
     gsl::span<uint32_t> id{m_vmxon_region.get(), 1024};
-    id[0] = m_intrinsics->read_msr(IA32_VMX_BASIC_MSR) & 0x7FFFFFFFF;
+    id[0] = static_cast<uint32_t>(m_intrinsics->read_msr(IA32_VMX_BASIC_MSR) & 0x7FFFFFFFF);
 
     fa1.ignore();
 }

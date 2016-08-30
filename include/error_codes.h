@@ -41,7 +41,11 @@ typedef INT64 int64_t;
 /* Helper Macros                                                              */
 /* -------------------------------------------------------------------------- */
 
+#ifdef __cplusplus
+#define sign(a) static_cast<int64_t>(a)
+#else
 #define sign(a) ((int64_t)(a))
+#endif
 
 /* -------------------------------------------------------------------------- */
 /* Success                                                                    */

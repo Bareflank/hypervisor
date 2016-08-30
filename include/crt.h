@@ -105,6 +105,12 @@ struct section_info_t
     void *dtors_addr;
     uint64_t dtors_size;
 
+    void *init_array_addr;
+    uint64_t init_array_size;
+
+    void *fini_array_addr;
+    uint64_t fini_array_size;
+
     void *eh_frame_addr;
     uint64_t eh_frame_size;
 };

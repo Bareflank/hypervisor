@@ -32,7 +32,7 @@ TARGET_COMPILER:=native
 ################################################################################
 
 NATIVE_CCFLAGS+=
-NATIVE_CXXFLAGS+=
+NATIVE_CXXFLAGS+=-Wno-unused-result
 NATIVE_ASMFLAGS+=
 NATIVE_LDFLAGS+=
 NATIVE_ARFLAGS+=

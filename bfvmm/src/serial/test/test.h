@@ -42,7 +42,6 @@ private:
     void test_serial_null_intrinsics();
     void test_serial_success();
     void test_serial_set_baud_rate_success();
-    void test_serial_set_baud_rate_unknown();
     void test_serial_set_data_bits_success();
     void test_serial_set_data_bits_success_extra_bits();
     void test_serial_set_stop_bits_success();

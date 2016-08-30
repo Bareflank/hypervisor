@@ -94,7 +94,7 @@ bfelf_loader_ut::test_bfelf_loader_get_info_no_relocation()
 void
 bfelf_loader_ut::test_bfelf_loader_get_info_expected_misc_resources()
 {
-    auto ret = 0;
+    auto ret = 0LL;
     bfelf_file_t dummy_misc_ef;
     bfelf_file_t dummy_code_ef;
 
@@ -124,11 +124,11 @@ bfelf_loader_ut::test_bfelf_loader_get_info_expected_misc_resources()
     ret = bfelf_loader_get_info(&loader, &dummy_misc_ef, &info);
     ASSERT_TRUE(ret == BFELF_SUCCESS);
 
-    EXPECT_TRUE(info.ctors_addr != nullptr);
-    EXPECT_TRUE(info.ctors_size != 0);
+    EXPECT_TRUE(info.ctors_addr != nullptr || info.init_array_addr != nullptr);
+    EXPECT_TRUE(info.ctors_size != 0 || info.init_array_size != 0);
 
-    EXPECT_TRUE(info.dtors_addr != nullptr);
-    EXPECT_TRUE(info.dtors_size != 0);
+    EXPECT_TRUE(info.dtors_addr != nullptr || info.init_array_addr != nullptr);
+    EXPECT_TRUE(info.dtors_size != 0 || info.init_array_size != 0);
 
     EXPECT_TRUE(info.eh_frame_addr != nullptr);
     EXPECT_TRUE(info.eh_frame_size != 0);
@@ -137,7 +137,7 @@ bfelf_loader_ut::test_bfelf_loader_get_info_expected_misc_resources()
 void
 bfelf_loader_ut::test_bfelf_loader_get_info_expected_code_resources()
 {
-    auto ret = 0;
+    auto ret = 0LL;
     bfelf_file_t dummy_misc_ef;
     bfelf_file_t dummy_code_ef;
 
@@ -181,7 +181,7 @@ bfelf_loader_ut::test_bfelf_loader_get_info_expected_code_resources()
 void
 bfelf_loader_ut::test_bfelf_loader_get_info_get_section_name_failure_ctors()
 {
-    auto ret = 0;
+    auto ret = 0LL;
     bfelf_file_t dummy_misc_ef;
     bfelf_file_t dummy_code_ef;
 
@@ -222,7 +222,7 @@ bfelf_loader_ut::test_bfelf_loader_get_info_get_section_name_failure_ctors()
 void
 bfelf_loader_ut::test_bfelf_loader_get_info_check_section_name_failure_ctors()
 {
-    auto ret = 0;
+    auto ret = 0LL;
     bfelf_file_t dummy_misc_ef;
     bfelf_file_t dummy_code_ef;
 
@@ -268,7 +268,7 @@ bfelf_loader_ut::test_bfelf_loader_get_info_check_section_name_failure_ctors()
 void
 bfelf_loader_ut::test_bfelf_loader_get_info_get_section_name_failure_dtors()
 {
-    auto ret = 0;
+    auto ret = 0LL;
     bfelf_file_t dummy_misc_ef;
     bfelf_file_t dummy_code_ef;
 
@@ -314,7 +314,7 @@ bfelf_loader_ut::test_bfelf_loader_get_info_get_section_name_failure_dtors()
 void
 bfelf_loader_ut::test_bfelf_loader_get_info_check_section_name_failure_dtors()
 {
-    auto ret = 0;
+    auto ret = 0LL;
     bfelf_file_t dummy_misc_ef;
     bfelf_file_t dummy_code_ef;
 
@@ -363,9 +363,9 @@ bfelf_loader_ut::test_bfelf_loader_get_info_check_section_name_failure_dtors()
 }
 
 void
-bfelf_loader_ut::test_bfelf_loader_get_info_get_section_name_failure_eh_frame()
+bfelf_loader_ut::test_bfelf_loader_get_info_get_section_name_failure_init_array()
 {
-    auto ret = 0;
+    auto ret = 0LL;
     bfelf_file_t dummy_misc_ef;
     bfelf_file_t dummy_code_ef;
 
@@ -414,9 +414,9 @@ bfelf_loader_ut::test_bfelf_loader_get_info_get_section_name_failure_eh_frame()
 }
 
 void
-bfelf_loader_ut::test_bfelf_loader_get_info_check_section_name_failure_eh_frame()
+bfelf_loader_ut::test_bfelf_loader_get_info_check_section_name_failure_init_array()
 {
-    auto ret = 0;
+    auto ret = 0LL;
     bfelf_file_t dummy_misc_ef;
     bfelf_file_t dummy_code_ef;
 
@@ -445,6 +445,250 @@ bfelf_loader_ut::test_bfelf_loader_get_info_check_section_name_failure_eh_frame(
     memset(&info, 0, sizeof(info));
 
     MockRepository mocks;
+    mocks.ExpectCallFunc(private_get_section_by_name).Do([&](auto, auto, auto * shdr)
+    {
+        *shdr = nullptr;
+        return BFELF_SUCCESS;
+    });
+    mocks.ExpectCallFunc(private_get_section_by_name).Do([&](auto, auto, auto * shdr)
+    {
+        *shdr = nullptr;
+        return BFELF_SUCCESS;
+    });
+    mocks.ExpectCallFunc(private_get_section_by_name).Do([&](auto, auto, auto * shdr)
+    {
+        *shdr = reinterpret_cast<bfelf_shdr *>(shdr);
+        return BFELF_SUCCESS;
+    });
+    mocks.ExpectCallFunc(private_check_section).Return(-1);
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        ret = bfelf_loader_get_info(&loader, &dummy_code_ef, &info);
+        ASSERT_TRUE(ret == -1);
+    });
+}
+
+void
+bfelf_loader_ut::test_bfelf_loader_get_info_get_section_name_failure_fini_array()
+{
+    auto ret = 0LL;
+    bfelf_file_t dummy_misc_ef;
+    bfelf_file_t dummy_code_ef;
+
+    ret = bfelf_file_init(m_dummy_misc.get(), m_dummy_misc_length, &dummy_misc_ef);
+    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    ret = bfelf_file_init(m_dummy_code.get(), m_dummy_code_length, &dummy_code_ef);
+    ASSERT_TRUE(ret == BFELF_SUCCESS);
+
+    m_dummy_misc_exec = load_elf_file(&dummy_misc_ef);
+    ASSERT_TRUE(m_dummy_misc_exec);
+    m_dummy_code_exec = load_elf_file(&dummy_code_ef);
+    ASSERT_TRUE(m_dummy_code_exec);
+
+    bfelf_loader_t loader;
+    memset(&loader, 0, sizeof(loader));
+
+    ret = bfelf_loader_add(&loader, &dummy_misc_ef, m_dummy_misc_exec.get());
+    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    ret = bfelf_loader_add(&loader, &dummy_code_ef, m_dummy_code_exec.get());
+    ASSERT_TRUE(ret == BFELF_SUCCESS);
+
+    ret = bfelf_loader_relocate(&loader);
+    EXPECT_TRUE(ret == BFELF_SUCCESS);
+
+    section_info_t info;
+    memset(&info, 0, sizeof(info));
+
+    MockRepository mocks;
+    mocks.ExpectCallFunc(private_get_section_by_name).Do([&](auto, auto, auto * shdr)
+    {
+        *shdr = nullptr;
+        return BFELF_SUCCESS;
+    });
+    mocks.ExpectCallFunc(private_get_section_by_name).Do([&](auto, auto, auto * shdr)
+    {
+        *shdr = nullptr;
+        return BFELF_SUCCESS;
+    });
+    mocks.ExpectCallFunc(private_get_section_by_name).Do([&](auto, auto, auto * shdr)
+    {
+        *shdr = nullptr;
+        return BFELF_SUCCESS;
+    });
+    mocks.ExpectCallFunc(private_get_section_by_name).Return(-1);
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        ret = bfelf_loader_get_info(&loader, &dummy_code_ef, &info);
+        ASSERT_TRUE(ret == -1);
+    });
+}
+
+void
+bfelf_loader_ut::test_bfelf_loader_get_info_check_section_name_failure_fini_array()
+{
+    auto ret = 0LL;
+    bfelf_file_t dummy_misc_ef;
+    bfelf_file_t dummy_code_ef;
+
+    ret = bfelf_file_init(m_dummy_misc.get(), m_dummy_misc_length, &dummy_misc_ef);
+    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    ret = bfelf_file_init(m_dummy_code.get(), m_dummy_code_length, &dummy_code_ef);
+    ASSERT_TRUE(ret == BFELF_SUCCESS);
+
+    m_dummy_misc_exec = load_elf_file(&dummy_misc_ef);
+    ASSERT_TRUE(m_dummy_misc_exec);
+    m_dummy_code_exec = load_elf_file(&dummy_code_ef);
+    ASSERT_TRUE(m_dummy_code_exec);
+
+    bfelf_loader_t loader;
+    memset(&loader, 0, sizeof(loader));
+
+    ret = bfelf_loader_add(&loader, &dummy_misc_ef, m_dummy_misc_exec.get());
+    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    ret = bfelf_loader_add(&loader, &dummy_code_ef, m_dummy_code_exec.get());
+    ASSERT_TRUE(ret == BFELF_SUCCESS);
+
+    ret = bfelf_loader_relocate(&loader);
+    EXPECT_TRUE(ret == BFELF_SUCCESS);
+
+    section_info_t info;
+    memset(&info, 0, sizeof(info));
+
+    MockRepository mocks;
+    mocks.ExpectCallFunc(private_get_section_by_name).Do([&](auto, auto, auto * shdr)
+    {
+        *shdr = nullptr;
+        return BFELF_SUCCESS;
+    });
+    mocks.ExpectCallFunc(private_get_section_by_name).Do([&](auto, auto, auto * shdr)
+    {
+        *shdr = nullptr;
+        return BFELF_SUCCESS;
+    });
+    mocks.ExpectCallFunc(private_get_section_by_name).Do([&](auto, auto, auto * shdr)
+    {
+        *shdr = nullptr;
+        return BFELF_SUCCESS;
+    });
+    mocks.ExpectCallFunc(private_get_section_by_name).Do([&](auto, auto, auto * shdr)
+    {
+        *shdr = reinterpret_cast<bfelf_shdr *>(shdr);
+        return BFELF_SUCCESS;
+    });
+    mocks.ExpectCallFunc(private_check_section).Return(-1);
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        ret = bfelf_loader_get_info(&loader, &dummy_code_ef, &info);
+        ASSERT_TRUE(ret == -1);
+    });
+}
+
+void
+bfelf_loader_ut::test_bfelf_loader_get_info_get_section_name_failure_eh_frame()
+{
+    auto ret = 0LL;
+    bfelf_file_t dummy_misc_ef;
+    bfelf_file_t dummy_code_ef;
+
+    ret = bfelf_file_init(m_dummy_misc.get(), m_dummy_misc_length, &dummy_misc_ef);
+    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    ret = bfelf_file_init(m_dummy_code.get(), m_dummy_code_length, &dummy_code_ef);
+    ASSERT_TRUE(ret == BFELF_SUCCESS);
+
+    m_dummy_misc_exec = load_elf_file(&dummy_misc_ef);
+    ASSERT_TRUE(m_dummy_misc_exec);
+    m_dummy_code_exec = load_elf_file(&dummy_code_ef);
+    ASSERT_TRUE(m_dummy_code_exec);
+
+    bfelf_loader_t loader;
+    memset(&loader, 0, sizeof(loader));
+
+    ret = bfelf_loader_add(&loader, &dummy_misc_ef, m_dummy_misc_exec.get());
+    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    ret = bfelf_loader_add(&loader, &dummy_code_ef, m_dummy_code_exec.get());
+    ASSERT_TRUE(ret == BFELF_SUCCESS);
+
+    ret = bfelf_loader_relocate(&loader);
+    EXPECT_TRUE(ret == BFELF_SUCCESS);
+
+    section_info_t info;
+    memset(&info, 0, sizeof(info));
+
+    MockRepository mocks;
+    mocks.ExpectCallFunc(private_get_section_by_name).Do([&](auto, auto, auto * shdr)
+    {
+        *shdr = nullptr;
+        return BFELF_SUCCESS;
+    });
+    mocks.ExpectCallFunc(private_get_section_by_name).Do([&](auto, auto, auto * shdr)
+    {
+        *shdr = nullptr;
+        return BFELF_SUCCESS;
+    });
+    mocks.ExpectCallFunc(private_get_section_by_name).Do([&](auto, auto, auto * shdr)
+    {
+        *shdr = nullptr;
+        return BFELF_SUCCESS;
+    });
+    mocks.ExpectCallFunc(private_get_section_by_name).Do([&](auto, auto, auto * shdr)
+    {
+        *shdr = nullptr;
+        return BFELF_SUCCESS;
+    });
+    mocks.ExpectCallFunc(private_get_section_by_name).Return(-1);
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        ret = bfelf_loader_get_info(&loader, &dummy_code_ef, &info);
+        ASSERT_TRUE(ret == -1);
+    });
+}
+
+void
+bfelf_loader_ut::test_bfelf_loader_get_info_check_section_name_failure_eh_frame()
+{
+    auto ret = 0LL;
+    bfelf_file_t dummy_misc_ef;
+    bfelf_file_t dummy_code_ef;
+
+    ret = bfelf_file_init(m_dummy_misc.get(), m_dummy_misc_length, &dummy_misc_ef);
+    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    ret = bfelf_file_init(m_dummy_code.get(), m_dummy_code_length, &dummy_code_ef);
+    ASSERT_TRUE(ret == BFELF_SUCCESS);
+
+    m_dummy_misc_exec = load_elf_file(&dummy_misc_ef);
+    ASSERT_TRUE(m_dummy_misc_exec);
+    m_dummy_code_exec = load_elf_file(&dummy_code_ef);
+    ASSERT_TRUE(m_dummy_code_exec);
+
+    bfelf_loader_t loader;
+    memset(&loader, 0, sizeof(loader));
+
+    ret = bfelf_loader_add(&loader, &dummy_misc_ef, m_dummy_misc_exec.get());
+    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    ret = bfelf_loader_add(&loader, &dummy_code_ef, m_dummy_code_exec.get());
+    ASSERT_TRUE(ret == BFELF_SUCCESS);
+
+    ret = bfelf_loader_relocate(&loader);
+    EXPECT_TRUE(ret == BFELF_SUCCESS);
+
+    section_info_t info;
+    memset(&info, 0, sizeof(info));
+
+    MockRepository mocks;
+    mocks.ExpectCallFunc(private_get_section_by_name).Do([&](auto, auto, auto * shdr)
+    {
+        *shdr = nullptr;
+        return BFELF_SUCCESS;
+    });
+    mocks.ExpectCallFunc(private_get_section_by_name).Do([&](auto, auto, auto * shdr)
+    {
+        *shdr = nullptr;
+        return BFELF_SUCCESS;
+    });
     mocks.ExpectCallFunc(private_get_section_by_name).Do([&](auto, auto, auto * shdr)
     {
         *shdr = nullptr;

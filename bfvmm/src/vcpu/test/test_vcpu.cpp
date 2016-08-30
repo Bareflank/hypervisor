@@ -69,47 +69,6 @@ vcpu_ut::test_vcpu_write_hello_world()
     EXPECT_TRUE(debug_ring_read(drr, static_cast<char *>(rb), DEBUG_RING_SIZE) == 11);
 }
 
-class test_vcpu: public vcpu
-{
-public:
-
-    test_vcpu(uint64_t vcpuid) :
-        vcpu(vcpuid)
-    {
-        write("hello world");
-    }
-
-    ~test_vcpu() override
-    {
-        write("hello world");
-    }
-};
-
-void
-vcpu_ut::test_vcpu_write_from_constructor()
-{
-    char rb[DEBUG_RING_SIZE];
-    debug_ring_resources_t *drr = nullptr;
-    auto vc = std::make_shared<test_vcpu>(0);
-
-    get_drr(0, &drr);
-    EXPECT_TRUE(debug_ring_read(drr, static_cast<char *>(rb), DEBUG_RING_SIZE) == 11);
-}
-
-void
-vcpu_ut::test_vcpu_write_from_destructor()
-{
-    char rb[DEBUG_RING_SIZE];
-    debug_ring_resources_t *drr = nullptr;
-
-    {
-        auto vc = std::make_shared<test_vcpu>(0);
-    }
-
-    get_drr(0, &drr);
-    EXPECT_TRUE(debug_ring_read(drr, static_cast<char *>(rb), DEBUG_RING_SIZE) == 22);
-}
-
 void
 vcpu_ut::test_vcpu_init_null_attr()
 {

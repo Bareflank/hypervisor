@@ -139,15 +139,15 @@ private:
     char *m_dummy_stop_vmm_failure;
     char *m_dummy_stop_vmm_success;
 
-    int32_t m_dummy_add_md_failure_length;
-    int32_t m_dummy_add_md_success_length;
-    int32_t m_dummy_get_drr_failure_length;
-    int32_t m_dummy_get_drr_success_length;
-    int32_t m_dummy_misc_length;
-    int32_t m_dummy_start_vmm_failure_length;
-    int32_t m_dummy_start_vmm_success_length;
-    int32_t m_dummy_stop_vmm_failure_length;
-    int32_t m_dummy_stop_vmm_success_length;
+    uint64_t m_dummy_add_md_failure_length;
+    uint64_t m_dummy_add_md_success_length;
+    uint64_t m_dummy_get_drr_failure_length;
+    uint64_t m_dummy_get_drr_success_length;
+    uint64_t m_dummy_misc_length;
+    uint64_t m_dummy_start_vmm_failure_length;
+    uint64_t m_dummy_start_vmm_success_length;
+    uint64_t m_dummy_stop_vmm_failure_length;
+    uint64_t m_dummy_stop_vmm_success_length;
 };
 
 #endif

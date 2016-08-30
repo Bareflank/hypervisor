@@ -39,11 +39,11 @@
 /* Global                                                                     */
 /* -------------------------------------------------------------------------- */
 
-int64_t g_module_length = 0;
+uint64_t g_module_length = 0;
 
 int64_t g_num_files = 0;
 char *files[MAX_NUM_MODULES] = {0};
-int64_t files_size[MAX_NUM_MODULES] = { 0 };
+uint64_t files_size[MAX_NUM_MODULES] = { 0 };
 
 uint64_t g_vcpuid = 0;
 
@@ -135,7 +135,7 @@ failed:
 }
 
 static long
-ioctl_add_module_length(int64_t *len)
+ioctl_add_module_length(uint64_t *len)
 {
     int64_t ret;
 
@@ -145,7 +145,7 @@ ioctl_add_module_length(int64_t *len)
         return BF_IOCTL_FAILURE;
     }
 
-    ret = copy_from_user(&g_module_length, len, sizeof(int64_t));
+    ret = copy_from_user(&g_module_length, len, sizeof(uint64_t));
     if (ret != 0)
     {
         ALERT("IOCTL_ADD_MODULE_LENGTH: failed to copy memory from userspace\n");
@@ -335,7 +335,7 @@ dev_unlocked_ioctl(struct file *file,
             return ioctl_add_module((char *)arg);
 
         case IOCTL_ADD_MODULE_LENGTH:
-            return ioctl_add_module_length((int64_t *)arg);
+            return ioctl_add_module_length((uint64_t *)arg);
 
         case IOCTL_LOAD_VMM:
             return ioctl_load_vmm();

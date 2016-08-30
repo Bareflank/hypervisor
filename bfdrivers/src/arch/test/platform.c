@@ -44,7 +44,7 @@ verify_no_mem_leaks(void)
 }
 
 void *
-platform_alloc_rw(int64_t len)
+platform_alloc_rw(uint64_t len)
 {
     alloc_count_rw++;
     return malloc(len);
@@ -53,7 +53,7 @@ platform_alloc_rw(int64_t len)
 #include <errno.h>
 
 void *
-platform_alloc_rwe(int64_t len)
+platform_alloc_rwe(uint64_t len)
 {
     void *addr = 0;
 
@@ -74,7 +74,7 @@ platform_alloc_rwe(int64_t len)
 }
 
 void
-platform_free_rw(void *addr, int64_t len)
+platform_free_rw(void *addr, uint64_t len)
 {
     (void)len;
 
@@ -83,7 +83,7 @@ platform_free_rw(void *addr, int64_t len)
 }
 
 void
-platform_free_rwe(void *addr, int64_t len)
+platform_free_rwe(void *addr, uint64_t len)
 {
     (void) len;
 
@@ -98,7 +98,7 @@ platform_virt_to_phys(void *virt)
 }
 
 void
-platform_memset(void *ptr, char value, int64_t num)
+platform_memset(void *ptr, char value, uint64_t num)
 {
     if (!ptr)
         return;
@@ -107,7 +107,7 @@ platform_memset(void *ptr, char value, int64_t num)
 }
 
 void
-platform_memcpy(void *dst, const void *src, int64_t num)
+platform_memcpy(void *dst, const void *src, uint64_t num)
 {
     if (!dst || !src)
         return;

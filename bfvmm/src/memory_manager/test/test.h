@@ -76,17 +76,17 @@ private:
     void test_memory_manager_add_md_invalid_type();
     void test_memory_manager_add_md_unaligned_physical();
     void test_memory_manager_add_md_unaligned_virtual();
-    void test_memory_manager_virt_to_phys_unknown();
-    void test_memory_manager_phys_to_virt_unknown();
-    void test_memory_manager_virt_to_phys_random_address();
-    void test_memory_manager_virt_to_phys_nullptr();
-    void test_memory_manager_virt_to_phys_upper_limit();
-    void test_memory_manager_virt_to_phys_lower_limit();
+    void test_memory_manager_virtint_to_physint_unknown();
+    void test_memory_manager_physint_to_virtint_unknown();
+    void test_memory_manager_virtint_to_physint_random_address();
+    void test_memory_manager_virtint_to_physint_nullptr();
+    void test_memory_manager_virtint_to_physint_upper_limit();
+    void test_memory_manager_virtint_to_physint_lower_limit();
     void test_memory_manager_virt_to_phys_map();
-    void test_memory_manager_phys_to_virt_random_address();
-    void test_memory_manager_phys_to_virt_nullptr();
-    void test_memory_manager_phys_to_virt_upper_limit();
-    void test_memory_manager_phys_to_virt_lower_limit();
+    void test_memory_manager_physint_to_virtint_random_address();
+    void test_memory_manager_physint_to_virtint_nullptr();
+    void test_memory_manager_physint_to_virtint_upper_limit();
+    void test_memory_manager_physint_to_virtint_lower_limit();
     void test_memory_manager_phys_to_virt_map();
 
     void test_page_table_x64_no_entry();

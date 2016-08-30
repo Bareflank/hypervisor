@@ -41,7 +41,7 @@ bfelf_loader_ut::test_bfelf_loader_relocate_no_files_added()
 void
 bfelf_loader_ut::test_bfelf_loader_relocate_uninitialized_files()
 {
-    auto ret = 0;
+    auto ret = 0LL;
     bfelf_file_t ef1;
     bfelf_file_t ef2;
     bfelf_loader_t loader;
@@ -63,7 +63,7 @@ bfelf_loader_ut::test_bfelf_loader_relocate_uninitialized_files()
 void
 bfelf_loader_ut::test_bfelf_loader_relocate_twice()
 {
-    auto ret = 0;
+    auto ret = 0LL;
     bfelf_file_t ef1;
     bfelf_file_t ef2;
     bfelf_loader_t loader;

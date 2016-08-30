@@ -24,6 +24,7 @@
 #include <string.h>
 
 #include <array>
+#include <limits>
 #include <gsl/gsl>
 
 #include <debug.h>
@@ -35,7 +36,7 @@
 // Macros
 // -----------------------------------------------------------------------------
 
-#define ALLOCATED 0x8000000000000000
+#define ALLOCATED 0x8000000000000000ULL
 
 // -----------------------------------------------------------------------------
 // Global Memory
@@ -79,6 +80,9 @@ memory_manager::malloc(size_t size) noexcept
     if (size == 0)
         return nullptr;
 
+    if (size > static_cast<size_t>(std::numeric_limits<int64_t>::max()))
+        return nullptr;
+
     // We ensure that when allocating memory that if it is a multiple of a page,
     // we use the page pool instead of the heap. The page pool is page aligned
     // which is needed for a lot of tasks.
@@ -94,9 +98,9 @@ memory_manager::malloc(size_t size) noexcept
     // own buffer to ensure each page is page aligned.
 
     if ((size & (MAX_PAGE_SIZE - 1)) == 0)
-        return malloc_page(size);
+        return malloc_page(static_cast<int64_t>(size));
 
-    return malloc_heap(size);
+    return malloc_heap(static_cast<int64_t>(size));
 }
 
 void
@@ -113,7 +117,7 @@ memory_manager::free(void *ptr) noexcept
 }
 
 uintptr_t
-memory_manager::virt_to_phys(uintptr_t virt)
+memory_manager::virtint_to_physint(uintptr_t virt)
 {
     std::lock_guard<std::mutex> guard(g_add_md_mutex);
 
@@ -129,25 +133,25 @@ memory_manager::virt_to_phys(uintptr_t virt)
 }
 
 uintptr_t
-memory_manager::virt_to_phys(void *virt)
+memory_manager::virtptr_to_physint(void *virt)
 {
-    return this->virt_to_phys(reinterpret_cast<uintptr_t>(virt));
+    return this->virtint_to_physint(reinterpret_cast<uintptr_t>(virt));
 }
 
 void *
-memory_manager::virt_to_phys_ptr(uintptr_t virt)
+memory_manager::virtint_to_physptr(uintptr_t virt)
 {
-    return reinterpret_cast<void *>(this->virt_to_phys(virt));
+    return reinterpret_cast<void *>(this->virtint_to_physint(virt));
 }
 
 void *
-memory_manager::virt_to_phys_ptr(void *virt)
+memory_manager::virtptr_to_physptr(void *virt)
 {
-    return reinterpret_cast<void *>(this->virt_to_phys(virt));
+    return reinterpret_cast<void *>(this->virtptr_to_physint(virt));
 }
 
 uintptr_t
-memory_manager::phys_to_virt(uintptr_t phys)
+memory_manager::physint_to_virtint(uintptr_t phys)
 {
     std::lock_guard<std::mutex> guard(g_add_md_mutex);
 
@@ -163,25 +167,25 @@ memory_manager::phys_to_virt(uintptr_t phys)
 }
 
 uintptr_t
-memory_manager::phys_to_virt(void *phys)
+memory_manager::physptr_to_virtint(void *phys)
 {
-    return this->phys_to_virt(reinterpret_cast<uintptr_t>(phys));
+    return this->physint_to_virtint(reinterpret_cast<uintptr_t>(phys));
 }
 
 void *
-memory_manager::phys_to_virt_ptr(uintptr_t phys)
+memory_manager::physint_to_virtptr(uintptr_t phys)
 {
-    return reinterpret_cast<void *>(this->phys_to_virt(phys));
+    return reinterpret_cast<void *>(this->physint_to_virtint(phys));
 }
 
 void *
-memory_manager::phys_to_virt_ptr(void *phys)
+memory_manager::physptr_to_virtptr(void *phys)
 {
-    return reinterpret_cast<void *>(this->phys_to_virt(phys));
+    return reinterpret_cast<void *>(this->physptr_to_virtint(phys));
 }
 
 void *
-memory_manager::malloc_heap(size_t size) noexcept
+memory_manager::malloc_heap(int64_t size) noexcept
 {
     int64_t blocks = (size & (0x7)) != 0 ? (size >> 3) + 2 : (size >> 3) + 1;
 
@@ -201,7 +205,7 @@ memory_manager::malloc_heap(size_t size) noexcept
 
     auto fa2 = gsl::finally([&]
     {
-        g_heap_pool[sidx] = blocks | ALLOCATED;
+        g_heap_pool[sidx] = static_cast<uint64_t>(blocks) | ALLOCATED;
     });
 
     while (cidx < g_heap_pool.size() && sidx + blocks <= g_heap_pool.size())
@@ -213,7 +217,7 @@ memory_manager::malloc_heap(size_t size) noexcept
 
         if (allocated)
         {
-            fragment_size += g_heap_pool[cidx];
+            fragment_size += static_cast<int64_t>(g_heap_pool[cidx]);
 
             if (fragment_size == blocks)
                 return &g_heap_pool[sidx + 1];
@@ -223,12 +227,12 @@ memory_manager::malloc_heap(size_t size) noexcept
 
             if (fragment_size > blocks)
             {
-                g_heap_pool[sidx + blocks] = fragment_size - blocks;
+                g_heap_pool[sidx + blocks] = static_cast<uint64_t>(fragment_size - blocks);
                 return &g_heap_pool[sidx + 1];
             }
         }
 
-        cidx += (g_heap_pool[cidx] & ~ALLOCATED);
+        cidx += static_cast<int64_t>(g_heap_pool[cidx] & ~ALLOCATED);
 
         if (!allocated)
         {
@@ -244,7 +248,7 @@ memory_manager::malloc_heap(size_t size) noexcept
 }
 
 void *
-memory_manager::malloc_page(size_t size) noexcept
+memory_manager::malloc_page(int64_t size) noexcept
 {
     int64_t pages = size >> 12;
 
@@ -264,7 +268,7 @@ memory_manager::malloc_page(size_t size) noexcept
 
     auto fa2 = gsl::finally([&]
     {
-        g_page_allocated[sidx] = pages | ALLOCATED;
+        g_page_allocated[sidx] = static_cast<uint64_t>(pages) | ALLOCATED;
     });
 
     while (cidx < g_page_pool.size() && sidx + pages <= g_page_pool.size())
@@ -276,7 +280,7 @@ memory_manager::malloc_page(size_t size) noexcept
 
         if (allocated)
         {
-            fragment_size += g_page_allocated[cidx];
+            fragment_size += static_cast<int64_t>(g_page_allocated[cidx]);
 
             if (fragment_size == pages)
                 return &g_page_pool[sidx];
@@ -286,12 +290,12 @@ memory_manager::malloc_page(size_t size) noexcept
 
             if (fragment_size > pages)
             {
-                g_page_allocated[sidx + pages] = fragment_size - pages;
+                g_page_allocated[sidx + pages] = static_cast<uint64_t>(fragment_size - pages);
                 return &g_page_pool[sidx];
             }
         }
 
-        cidx += (g_page_allocated[cidx] & ~ALLOCATED);
+        cidx += static_cast<int64_t>(g_page_allocated[cidx] & ~ALLOCATED);
 
         if (!allocated)
         {
@@ -313,7 +317,7 @@ memory_manager::free_heap(void *ptr) noexcept
 
     g_heap_pool[idx] &= ~ALLOCATED;
 
-    if (m_heap_index > static_cast<uint64_t>(idx))
+    if (m_heap_index > idx)
         m_heap_index = idx;
 }
 void
@@ -323,7 +327,7 @@ memory_manager::free_page(void *ptr) noexcept
 
     g_page_allocated[idx] &= ~ALLOCATED;
 
-    if (m_page_index > static_cast<uint64_t>(idx))
+    if (m_page_index > idx)
         m_page_index = idx;
 }
 

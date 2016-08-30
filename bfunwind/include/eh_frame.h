@@ -205,7 +205,7 @@ uint64_t decode_pointer(char **addr, uint64_t encoding);
 class eh_frame
 {
 public:
-    static fd_entry find_fde(register_state *state, bool phase1);
+    static fd_entry find_fde(register_state *state);
 };
 
 /// Common Entry
@@ -485,7 +485,7 @@ protected:
 public:
     const char *m_augmentation_string;
     uint64_t m_code_alignment;
-    uint64_t m_data_alignment;
+    int64_t m_data_alignment;
     uint64_t m_return_address_reg;
     uint64_t m_pointer_encoding;
     uint64_t m_lsda_encoding;

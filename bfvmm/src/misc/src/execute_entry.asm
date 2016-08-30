@@ -26,7 +26,7 @@ global execute_entry:function
 
 section .text
 
-; int64_t execute_entry(void *stack, void *func, uint64_t arg1, uint64_t arg2);
+; int64_t execute_entry(uint64_t stack, void *func, uint64_t arg1, uint64_t arg2);
 execute_entry:
 
     push rbx

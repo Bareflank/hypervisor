@@ -121,9 +121,9 @@ debug_ring_ut::test_write_with_zero_length()
     debug_ring dr(0);
     get_drr(0, &drr);
 
-    auto wb = "";
+    auto zero_len_wb = "";
 
-    EXPECT_NO_EXCEPTION(dr.write(static_cast<const char *>(wb)));
+    EXPECT_NO_EXCEPTION(dr.write(static_cast<const char *>(zero_len_wb)));
 }
 
 void
@@ -154,9 +154,9 @@ debug_ring_ut::test_write_one_small_string_to_dr()
     debug_ring dr(0);
     get_drr(0, &drr);
 
-    auto wb = "01234";
+    auto small_wb = "01234";
 
-    EXPECT_NO_EXCEPTION(dr.write(static_cast<const char *>(wb)));
+    EXPECT_NO_EXCEPTION(dr.write(static_cast<const char *>(small_wb)));
     EXPECT_TRUE(debug_ring_read(drr, static_cast<char *>(rb), DEBUG_RING_SIZE) == 5);
 }
 
@@ -223,17 +223,17 @@ debug_ring_ut::acceptance_test_stress()
     debug_ring dr(0);
     get_drr(0, &drr);
 
-    auto wb = "012";
+    auto small_wb = "012";
 
     for (auto i = 0U; i < DEBUG_RING_SIZE; i++)
-        dr.write(static_cast<const char *>(wb));
+        dr.write(static_cast<const char *>(small_wb));
 
     // The total number of bytes that we read out, should be equal to
     // the total number of strings that can fit into the debug ring, minus
     // the '\0' for each string (as they are stripped).
 
-    auto num = DEBUG_RING_SIZE / (strlen(static_cast<const char *>(wb)) + 1);
-    auto total = num * strlen(static_cast<const char *>(wb));
+    auto num = DEBUG_RING_SIZE / (strlen(static_cast<const char *>(small_wb)) + 1);
+    auto total = num * strlen(static_cast<const char *>(small_wb));
 
     EXPECT_TRUE(debug_ring_read(drr, static_cast<char *>(rb), DEBUG_RING_SIZE) == total);
     EXPECT_TRUE(rb[0] == '0');

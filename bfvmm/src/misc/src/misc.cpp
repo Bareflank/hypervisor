@@ -46,13 +46,13 @@ write(int file, const void *buffer, size_t count)
             str.erase(0, 18);
 
             g_vcm->write(vcpuid_num, str);
-            return count;
+            return static_cast<int>(count);
         }
         else
         {
             g_vcm->write(0, str);
             serial_port_intel_x64::instance()->write(str);
-            return count;
+            return static_cast<int>(count);
         }
     }
     catch (...) { }

@@ -58,11 +58,11 @@ public:
     /// @return the resulting page. Note that this page is blank, and it's
     ///     properties (like present) should be set by the caller
     ///
-    virtual std::shared_ptr<page_table_entry_x64> add_page(uintptr_t virt_addr);
+    std::shared_ptr<page_table_entry_x64> add_page(uintptr_t virt_addr);
 
 private:
 
-    virtual std::shared_ptr<page_table_entry_x64> add_page(uintptr_t virt_addr, uint64_t bits);
+    std::shared_ptr<page_table_entry_x64> add_page(uintptr_t virt_addr, uint64_t bits);
 
 private:
 

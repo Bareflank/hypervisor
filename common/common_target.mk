@@ -104,17 +104,34 @@ NATIVE_CCFLAGS+=-std=c99
 NATIVE_CCFLAGS+=-Wall
 NATIVE_CCFLAGS+=-Wextra
 NATIVE_CCFLAGS+=-Wpedantic
+NATIVE_CCFLAGS+=-Wshadow
+NATIVE_CCFLAGS+=-Wconversion
+NATIVE_CCFLAGS+=-Wsign-conversion
 NATIVE_CCFLAGS+=-pipe
 NATIVE_CCFLAGS+=-fexceptions
 NATIVE_CCFLAGS+=-fstack-protector-strong
+NATIVE_CCFLAGS+=-D_FORTIFY_SOURCE=2
 NATIVE_CCFLAGS+=-m64
 NATIVE_CCFLAGS+=-mtune=sandybridge
 NATIVE_CCFLAGS+=-march=sandybridge
 NATIVE_CCFLAGS+=-mstackrealign
 
+ifeq ($(DYNAMIC_ANALYSIS_ENABLED), true)
+	ifneq ($(NO_ADDRESS_SANATIZE), true)
+		NATIVE_CCFLAGS+=-fsanitize=address
+	endif
+	NATIVE_CCFLAGS+=-fsanitize=undefined
+	NATIVE_CCFLAGS+=-fno-sanitize=vptr
+	NATIVE_CCFLAGS+=-fno-sanitize=alignment
+endif
+
 CROSS_CCFLAGS+=-Wall
 CROSS_CCFLAGS+=-Wextra
 CROSS_CCFLAGS+=-Wpedantic
+CROSS_CCFLAGS+=-Wshadow
+CROSS_CCFLAGS+=-Wcast-align
+CROSS_CCFLAGS+=-Wconversion
+CROSS_CCFLAGS+=-Wsign-conversion
 CROSS_CCFLAGS+=-pipe
 CROSS_CCFLAGS+=$(CONFIGURED_CROSS_CCFLAGS)
 
@@ -123,7 +140,7 @@ ifeq ($(PRODUCTION),yes)
 	CROSS_CCFLAGS+=-O3
 endif
 
-ifeq ($(COVERALLS),yes)
+ifeq ($(COVERALLS), true)
 	NATIVE_CCFLAGS+=-fprofile-arcs -ftest-coverage
 endif
 
@@ -141,17 +158,43 @@ NATIVE_CXXFLAGS+=-std=c++14
 NATIVE_CXXFLAGS+=-Wall
 NATIVE_CXXFLAGS+=-Wextra
 NATIVE_CXXFLAGS+=-Wpedantic
+NATIVE_CXXFLAGS+=-Wctor-dtor-privacy
+NATIVE_CXXFLAGS+=-Wshadow
+NATIVE_CXXFLAGS+=-Wnon-virtual-dtor
+NATIVE_CXXFLAGS+=-Wold-style-cast
+NATIVE_CXXFLAGS+=-Wcast-align
+NATIVE_CXXFLAGS+=-Woverloaded-virtual
+NATIVE_CXXFLAGS+=-Wconversion
+NATIVE_CXXFLAGS+=-Wsign-conversion
 NATIVE_CXXFLAGS+=-pipe
 NATIVE_CXXFLAGS+=-fexceptions
 NATIVE_CXXFLAGS+=-fstack-protector-strong
+NATIVE_CXXFLAGS+=-D_FORTIFY_SOURCE=2
 NATIVE_CXXFLAGS+=-m64
 NATIVE_CXXFLAGS+=-mtune=sandybridge
 NATIVE_CXXFLAGS+=-march=sandybridge
 NATIVE_CXXFLAGS+=-mstackrealign
 
+ifeq ($(DYNAMIC_ANALYSIS_ENABLED), true)
+	ifneq ($(NO_ADDRESS_SANATIZE), true)
+		NATIVE_CXXFLAGS+=-fsanitize=address
+	endif
+	NATIVE_CXXFLAGS+=-fsanitize=undefined
+	NATIVE_CXXFLAGS+=-fno-sanitize=vptr
+	NATIVE_CXXFLAGS+=-fno-sanitize=alignment
+endif
+
 CROSS_CXXFLAGS+=-Wall
 CROSS_CXXFLAGS+=-Wextra
 CROSS_CXXFLAGS+=-Wpedantic
+CROSS_CXXFLAGS+=-Wctor-dtor-privacy
+CROSS_CXXFLAGS+=-Wshadow
+CROSS_CXXFLAGS+=-Wnon-virtual-dtor
+CROSS_CXXFLAGS+=-Wold-style-cast
+CROSS_CXXFLAGS+=-Wcast-align
+CROSS_CXXFLAGS+=-Woverloaded-virtual
+CROSS_CXXFLAGS+=-Wconversion
+CROSS_CXXFLAGS+=-Wsign-conversion
 CROSS_CXXFLAGS+=-pipe
 CROSS_CXXFLAGS+=$(CONFIGURED_CROSS_CXXFLAGS)
 
@@ -160,7 +203,7 @@ ifeq ($(PRODUCTION),yes)
 	CROSS_CXXFLAGS+=-O3
 endif
 
-ifeq ($(COVERALLS),yes)
+ifeq ($(COVERALLS), true)
 	NATIVE_CXXFLAGS+=-fprofile-arcs -ftest-coverage
 endif
 
@@ -189,8 +232,17 @@ CROSS_ARFLAGS+=rcs
 # Default LD Flags
 ################################################################################
 
-ifeq ($(COVERALLS),yes)
+ifeq ($(COVERALLS), true)
 	NATIVE_LDFLAGS+=-lgcov --coverage
+endif
+
+ifeq ($(DYNAMIC_ANALYSIS_ENABLED), true)
+	ifneq ($(NO_ADDRESS_SANATIZE), true)
+		NATIVE_LDFLAGS+=-fsanitize=address
+	endif
+	NATIVE_LDFLAGS+=-fsanitize=undefined
+	NATIVE_LDFLAGS+=-fno-sanitize=vptr
+	NATIVE_LDFLAGS+=-fno-sanitize=alignment
 endif
 
 ################################################################################

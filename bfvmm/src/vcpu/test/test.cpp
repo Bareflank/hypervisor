@@ -62,27 +62,19 @@ vcpu_ut::init()
     return true;
 }
 
-#ifndef __clang__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-result"
-#endif
-
 void *
 operator new(std::size_t size)
 {
     if ((size & (MAX_PAGE_SIZE - 1)) == 0)
     {
         void *ptr = nullptr;
-        posix_memalign(&ptr, MAX_PAGE_SIZE, size);
+        auto ignored_ret = posix_memalign(&ptr, MAX_PAGE_SIZE, size);
+        (void) ignored_ret;
         return ptr;
     }
 
     return malloc(size);
 }
-
-#ifndef __clang__
-#pragma GCC diagnostic pop
-#endif
 
 void
 operator delete(void *ptr, std::size_t size) throw()
@@ -111,8 +103,6 @@ vcpu_ut::list()
     this->test_vcpu_valid();
     this->test_vcpu_write_empty_string();
     this->test_vcpu_write_hello_world();
-    this->test_vcpu_write_from_constructor();
-    this->test_vcpu_write_from_destructor();
     this->test_vcpu_init_null_attr();
     this->test_vcpu_init_valid_attr();
     this->test_vcpu_fini_null_attr();

@@ -31,26 +31,26 @@
 // Unit Test Seems
 // -----------------------------------------------------------------------------
 
-int64_t
+int
 bf_ioctl_open()
 {
     return open("/dev/bareflank", O_RDWR);
 }
 
 int64_t
-bf_send_ioctl(int64_t fd, unsigned long request)
+bf_send_ioctl(int fd, unsigned long request)
 {
     return ioctl(fd, request);
 }
 
 int64_t
-bf_read_ioctl(int64_t fd, unsigned long request, void *data)
+bf_read_ioctl(int fd, unsigned long request, void *data)
 {
     return ioctl(fd, request, data);
 }
 
 int64_t
-bf_write_ioctl(int64_t fd, unsigned long request, const void *data)
+bf_write_ioctl(int fd, unsigned long request, const void *data)
 {
     return ioctl(fd, request, data);
 }
@@ -78,7 +78,7 @@ ioctl_private::open()
 }
 
 void
-ioctl_private::call_ioctl_add_module_length(int64_t len)
+ioctl_private::call_ioctl_add_module_length(uint64_t len)
 {
     if (len <= 0)
         throw std::invalid_argument("len <= 0");

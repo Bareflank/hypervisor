@@ -173,7 +173,7 @@ protected:
     virtual uint64_t vmread(uint64_t field) const;
     virtual void vmwrite(uint64_t field, uint64_t value);
 
-    virtual void filter_unsupported(uint64_t msr, uint64_t &ctrl);
+    virtual void filter_unsupported(uint32_t msr, uint64_t &ctrl);
 
 protected:
 

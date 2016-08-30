@@ -2107,7 +2107,7 @@ vmcs_intel_x64::check_guest_vmcs_link_pointer_first_word()
     if (vmcs_link_pointer == 0xFFFFFFFFFFFFFFFF)
         return;
 
-    auto vmcs = g_mm->phys_to_virt_ptr(vmcs_link_pointer);
+    auto vmcs = g_mm->physint_to_virtptr(vmcs_link_pointer);
 
     if (vmcs == nullptr)
         throw std::logic_error("invalid vmcs physical address");

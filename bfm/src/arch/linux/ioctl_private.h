@@ -31,7 +31,7 @@ public:
     ~ioctl_private() override;
 
     virtual void open();
-    virtual void call_ioctl_add_module_length(int64_t len);
+    virtual void call_ioctl_add_module_length(uint64_t len);
     virtual void call_ioctl_add_module(const char *data);
     virtual void call_ioctl_load_vmm();
     virtual void call_ioctl_unload_vmm();
@@ -41,7 +41,7 @@ public:
     virtual void call_ioctl_vmm_status(int64_t *status);
 
 private:
-    int64_t fd;
+    int fd;
 };
 
 #endif
