@@ -44,14 +44,31 @@ also create proprietary extensions if so desired.
 In addition to Bareflank’s lightweight, modular design, the entire
 hypervisor has been written using test driven development. As such, all
 of Bareflank’s code comes complete with a set of unit tests to validate
-that the provided code works as expected.
+that the provided code works as expected. These tests are validated using
+[Coveralls](https://coveralls.io/github/Bareflank/hypervisor), and 
+[Travis CI](https://travis-ci.org/Bareflank/hypervisor) has been setup to 
+test styling via 
+[Astyle](http://astyle.sourceforge.net), and static / dynamic analysis
+via [Coverity](https://scan.coverity.com/projects/bareflank-hypervisor),
+[Clang Tidy](http://clang.llvm.org/extra/clang-tidy/), and [Google's 
+Sanitizers](https://github.com/google/sanitizers). In addition, we adhere 
+to the 
+[CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/325),
+and the 
+[C++ Core Guidelines](https://github.com/isocpp/CppCoreGuidelines/blob/master/CppCoreGuidelines.md)
+including support for the [Guideline Support Library](https://github.com/Microsoft/GSL).
 
-Currently we have support for (64bit only):
+Currently we have support for the following 64bit host operating systems on Intel _SandyBridge_ and above hardware:
 - Ubuntu 16.04, 14.04
 - Debian Stretch
 - Fedora 23
 - Windows 10
 - Windows 8.1
+
+In the future, we would also like to support:
+- macOS
+- UEFI
+- ARM (64bit)
 
 ## Motivation
 
@@ -142,7 +159,7 @@ the cross compilers you can run:
 
 ```
 make
-make run_tests
+make test
 ```
 
 To run the hypervisor, you need to first compile, and load one of the driver
@@ -233,7 +250,6 @@ Target: Janurary 2017
 
 * UEFI Support (i.e. type 1)
 * Basic Guest Support
-* BFM / Driver Extension Support
 * Updated C++ Environment
 
 ### Version 1.3
