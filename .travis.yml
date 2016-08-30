@@ -67,8 +67,8 @@ matrix:
           name: "Bareflank/hypervisor"
           description: "Travis CI Build"
         notification_email: rianquinn@gmail.com
-        build_command_prepend: "sudo cp $(which gcc-5) $(which gcc); sudo cp $(which g++-5) $(which g++); ./configure"
-        build_command: "STATIC_ANALYSIS_ENABLED=true make"
+        build_command_prepend: "sudo cp $(which gcc-5) $(which gcc); sudo cp $(which g++-5) $(which g++); ./configure; export STATIC_ANALYSIS_ENABLED=true"
+        build_command: "make"
         branch_pattern: coverity_scan
     script:
       - echo "Done"
