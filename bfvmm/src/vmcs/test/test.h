@@ -39,6 +39,7 @@ protected:
 
 private:
 
+    void test_launch_success();
 };
 
 #endif
