@@ -59,6 +59,20 @@ void func27() {}
 void func28() {}
 void func29() {}
 
+static int g_something = 0;
+
+__attribute__((constructor))
+static void ctor_func()
+{
+    g_something++;
+}
+
+__attribute__((destructor))
+static void dtor_func()
+{
+    g_something--;
+}
+
 extern "C" int __attribute__((weak))
 foo(int arg)
 {

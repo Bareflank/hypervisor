@@ -214,7 +214,7 @@ memory_manager_ut::test_page_table_x64_table_phys_addr_failure()
     mocks.OnCallFunc(memory_manager::instance).Return(mm);
     mocks.OnCall(mm, memory_manager::virtptr_to_physint).Do(virtptr_to_physint);
 
-    auto fa = gsl::finally([&]
+    auto ___ = gsl::finally([&]
     {
         virt_to_phys_return_nullptr = false;
     });

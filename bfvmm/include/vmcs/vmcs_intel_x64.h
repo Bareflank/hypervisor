@@ -144,10 +144,10 @@ public:
 protected:
 
     virtual void create_vmcs_region();
-    virtual void release_vmcs_region();
+    virtual void release_vmcs_region() noexcept;
 
     virtual void create_exit_handler_stack();
-    virtual void release_exit_handler_stack();
+    virtual void release_exit_handler_stack() noexcept;
 
     virtual void write_16bit_control_state(const std::shared_ptr<vmcs_intel_x64_state> &state);
     virtual void write_64bit_control_state(const std::shared_ptr<vmcs_intel_x64_state> &state);

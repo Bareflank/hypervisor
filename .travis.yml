@@ -28,7 +28,7 @@ matrix:
     env:
       - TEST="Astyle"
     script:
-      - if [[ -n $(./tools/astyle/linux/run.sh | grep Formatted) ]]; then echo "You must run astyle before submitting a pull request"; exit -1; fi
+      - if [[ -n $(./tools/astyle/run.sh | grep Formatted) ]]; then echo "You must run astyle before submitting a pull request"; exit -1; fi
 
   #
   # Coveralls

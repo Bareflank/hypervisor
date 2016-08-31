@@ -66,7 +66,7 @@ bf_ioctl_open()
     if (deviceDetailData == nullptr)
         return INVALID_HANDLE_VALUE;
 
-    auto fa1 = gsl::finally([&]
+    auto ___ = gsl::finally([&]
     { free(deviceDetailData); });
 
     deviceDetailData->cbSize = sizeof(SP_INTERFACE_DEVICE_DETAIL_DATA);

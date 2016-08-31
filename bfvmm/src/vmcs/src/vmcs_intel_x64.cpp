@@ -42,14 +42,15 @@ void
 vmcs_intel_x64::launch(const std::shared_ptr<vmcs_intel_x64_state> &host_state,
                        const std::shared_ptr<vmcs_intel_x64_state> &guest_state)
 {
-    auto fa1 = gsl::finally([&]
-    {
-        this->release_vmcs_region();
-        this->release_exit_handler_stack();
-    });
-
     this->create_vmcs_region();
+
+    auto ___ = gsl::on_failure([&]
+    { this->release_vmcs_region(); });
+
     this->create_exit_handler_stack();
+
+    auto ___ = gsl::on_failure([&]
+    { this->release_exit_handler_stack(); });
 
     this->clear();
     this->load();
@@ -77,17 +78,20 @@ vmcs_intel_x64::launch(const std::shared_ptr<vmcs_intel_x64_state> &host_state,
 
     if (!m_intrinsics->vmlaunch())
     {
-        this->dump_vmcs();
+        auto ___ = gsl::finally([&]
+        {
+            this->dump_vmcs();
 
-        this->print_execution_controls();
-        this->print_pin_based_vm_execution_controls();
-        this->print_primary_processor_based_vm_execution_controls();
-        this->print_secondary_processor_based_vm_execution_controls();
-        this->print_vm_exit_control_fields();
-        this->print_vm_entry_control_fields();
+            this->print_execution_controls();
+            this->print_pin_based_vm_execution_controls();
+            this->print_primary_processor_based_vm_execution_controls();
+            this->print_secondary_processor_based_vm_execution_controls();
+            this->print_vm_exit_control_fields();
+            this->print_vm_entry_control_fields();
 
-        host_state->dump();
-        guest_state->dump();
+            host_state->dump();
+            guest_state->dump();
+        });
 
         this->check_vmcs_control_state();
         this->check_vmcs_guest_state();
@@ -99,8 +103,6 @@ vmcs_intel_x64::launch(const std::shared_ptr<vmcs_intel_x64_state> &host_state,
 
         throw std::runtime_error("vmcs launch failed");
     }
-
-    fa1.ignore();
 }
 
 void
@@ -136,7 +138,7 @@ vmcs_intel_x64::clear()
 void
 vmcs_intel_x64::create_vmcs_region()
 {
-    auto fa1 = gsl::finally([&]
+    auto ___ = gsl::on_failure([&]
     { this->release_vmcs_region(); });
 
     m_vmcs_region = std::make_unique<uint32_t[]>(1024);
@@ -147,33 +149,23 @@ vmcs_intel_x64::create_vmcs_region()
 
     gsl::span<uint32_t> id{m_vmcs_region.get(), 1024};
     id[0] = static_cast<uint32_t>(m_intrinsics->read_msr(IA32_VMX_BASIC_MSR) & 0x7FFFFFFFF);
-
-    fa1.ignore();
 }
 
 void
-vmcs_intel_x64::release_vmcs_region()
+vmcs_intel_x64::release_vmcs_region() noexcept
 {
-    if (m_vmcs_region_phys != 0)
-    {
-        m_vmcs_region.reset();
-        m_vmcs_region_phys = 0;
-    }
+    m_vmcs_region.reset();
+    m_vmcs_region_phys = 0;
 }
 
 void
 vmcs_intel_x64::create_exit_handler_stack()
 {
-    auto fa1 = gsl::finally([&]
-    { this->release_exit_handler_stack(); });
-
     m_exit_handler_stack = std::make_unique<char[]>(STACK_SIZE);
-
-    fa1.ignore();
 }
 
 void
-vmcs_intel_x64::release_exit_handler_stack()
+vmcs_intel_x64::release_exit_handler_stack() noexcept
 {
     m_exit_handler_stack.reset();
 }

@@ -30,16 +30,12 @@ start_vmm(uint64_t arg) noexcept
 {
     return guard_exceptions(ENTRY_ERROR_VMM_START_FAILED, [&]()
     {
-        auto fa1 = gsl::finally([&]
-        {
-            g_vcm->hlt_vcpu(arg);
-            g_vcm->delete_vcpu(arg);
-        });
-
         g_vcm->create_vcpu(arg);
-        g_vcm->run_vcpu(arg);
 
-        fa1.ignore();
+        auto ___ = gsl::on_failure([&]
+        { g_vcm->delete_vcpu(arg); });
+
+        g_vcm->run_vcpu(arg);
 
         return ENTRY_SUCCESS;
     });

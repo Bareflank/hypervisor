@@ -34,7 +34,6 @@ vcpu_intel_x64::vcpu_intel_x64(uint64_t id,
                                std::shared_ptr<vmcs_intel_x64_vmm_state> guest_state) :
     vcpu(id, debug_ring),
     m_vmcs_launched(false),
-    m_vmxon_started(false),
     m_intrinsics(std::move(intrinsics)),
     m_vmxon(std::move(vmxon)),
     m_vmcs(std::move(vmcs)),
@@ -47,7 +46,7 @@ vcpu_intel_x64::vcpu_intel_x64(uint64_t id,
 void
 vcpu_intel_x64::init(void *attr)
 {
-    auto fa1 = gsl::finally([&]
+    auto ___ = gsl::on_failure([&]
     { this->fini(); });
 
     auto ss = new state_save_intel_x64();
@@ -69,8 +68,6 @@ vcpu_intel_x64::init(void *attr)
 
     m_exit_handler->set_vmcs(m_vmcs);
     m_exit_handler->set_state_save(m_state_save);
-
-    fa1.ignore();
 
     vcpu::init(attr);
 }
@@ -99,22 +96,19 @@ vcpu_intel_x64::run(void *attr)
 
     if (!m_vmcs_launched)
     {
-        auto fa1 = gsl::finally([&]
+        auto ___ = gsl::on_success([&]
+        { m_vmcs_launched = true; });
+
+        if (this->is_host_vm_vcpu())
+            m_vmxon->start();
+
+        auto ___ = gsl::on_failure([&]
         {
-            if (this->is_host_vm_vcpu() && m_vmxon_started)
+            if (this->is_host_vm_vcpu())
                 m_vmxon->stop();
         });
 
-        if (this->is_host_vm_vcpu())
-        {
-            m_vmxon->start();
-            m_vmxon_started = true;
-        }
-
         m_vmcs->launch(m_vmm_state, m_guest_state);
-        m_vmcs_launched = true;
-
-        fa1.ignore();
     }
     else
     {
@@ -131,12 +125,14 @@ vcpu_intel_x64::hlt(void *attr)
     if (!this->is_initialized())
         return;
 
-    if (this->is_host_vm_vcpu() && m_vmxon_started)
+    if (m_vmcs_launched)
     {
-        m_vmxon->stop();
-        m_vmxon_started = false;
+        auto ___ = gsl::on_success([&]
+        { m_vmcs_launched = false; });
+
+        if (this->is_host_vm_vcpu())
+            m_vmxon->stop();
     }
 
-    m_vmcs_launched = false;
     vcpu::hlt(attr);
 }

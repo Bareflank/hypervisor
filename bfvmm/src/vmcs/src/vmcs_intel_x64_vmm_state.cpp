@@ -32,6 +32,9 @@ vmcs_intel_x64_vmm_state::vmcs_intel_x64_vmm_state(const std::shared_ptr<state_s
     if (!state_save)
         throw std::invalid_argument("state_save == nullptr");
 
+    m_thread_storage = std::make_unique<uintptr_t[]>(512);
+    m_thread_storage[0] = reinterpret_cast<uintptr_t>(m_thread_storage.get());
+
     uint16_t cs_access_rights = 0;
     uint16_t ss_access_rights = 0;
     uint16_t ds_access_rights = 0;
@@ -130,6 +133,6 @@ vmcs_intel_x64_vmm_state::vmcs_intel_x64_vmm_state(const std::shared_ptr<state_s
 
     m_ia32_pat_msr = 0;
     m_ia32_efer_msr = IA32_EFER_LME | IA32_EFER_LMA | IA32_EFER_NXE;
-    m_ia32_fs_base_msr = 0;
+    m_ia32_fs_base_msr = reinterpret_cast<uintptr_t>(m_thread_storage.get());
     m_ia32_gs_base_msr = reinterpret_cast<uintptr_t>(state_save.get());
 }
