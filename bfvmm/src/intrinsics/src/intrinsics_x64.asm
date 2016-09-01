@@ -69,6 +69,7 @@ global __outb:function
 global __inb:function
 global __outw:function
 global __inw:function
+global __tls_base:function
 
 section .text
 
@@ -409,3 +410,9 @@ __inw:
     mov dx, di
 	in ax, dx
 	ret
+
+; uint64_t __tls_base(void)
+__tls_base:
+    mov rax, [fs:0x0]
+    add rax, 0x8
+    ret

@@ -46,29 +46,21 @@ vmxon_intel_x64::start()
     this->check_ia32_feature_control_msr();
     this->check_v8086_disabled();
 
-    auto fa1 = gsl::finally([&]
-    { this->release_vmxon_region(); });
-
     this->create_vmxon_region();
 
-    auto fa2 = gsl::finally([&]
-    { this->disable_vmx_operation(); });
+    auto ___ = gsl::on_failure([&]
+    { this->release_vmxon_region(); });
 
     this->enable_vmx_operation();
+
+    auto ___ = gsl::on_failure([&]
+    { this->disable_vmx_operation(); });
 
     if (!this->is_vmx_operation_enabled())
         throw std::logic_error("failed to enable VMXON");
 
     this->check_ia32_vmx_cr4_fixed_msr();
-
-    auto fa3 = gsl::finally([&]
-    { this->execute_vmxoff(); });
-
     this->execute_vmxon();
-
-    fa1.ignore();
-    fa2.ignore();
-    fa3.ignore();
 }
 
 void
@@ -148,13 +140,13 @@ vmxon_intel_x64::check_v8086_disabled()
 }
 
 void
-vmxon_intel_x64::enable_vmx_operation()
+vmxon_intel_x64::enable_vmx_operation() noexcept
 {
     m_intrinsics->write_cr4(m_intrinsics->read_cr4() | CR4_VMXE_VMX_ENABLE_BIT);
 }
 
 void
-vmxon_intel_x64::disable_vmx_operation()
+vmxon_intel_x64::disable_vmx_operation() noexcept
 {
     m_intrinsics->write_cr4(m_intrinsics->read_cr4() & ~CR4_VMXE_VMX_ENABLE_BIT);
 }
@@ -162,7 +154,7 @@ vmxon_intel_x64::disable_vmx_operation()
 void
 vmxon_intel_x64::create_vmxon_region()
 {
-    auto fa1 = gsl::finally([&]
+    auto ___ = gsl::on_failure([&]
     { this->release_vmxon_region(); });
 
     m_vmxon_region = std::make_unique<uint32_t[]>(1024);
@@ -173,12 +165,10 @@ vmxon_intel_x64::create_vmxon_region()
 
     gsl::span<uint32_t> id{m_vmxon_region.get(), 1024};
     id[0] = static_cast<uint32_t>(m_intrinsics->read_msr(IA32_VMX_BASIC_MSR) & 0x7FFFFFFFF);
-
-    fa1.ignore();
 }
 
 void
-vmxon_intel_x64::release_vmxon_region()
+vmxon_intel_x64::release_vmxon_region() noexcept
 {
     m_vmxon_region.reset();
     m_vmxon_region_phys = 0;

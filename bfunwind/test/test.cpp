@@ -19,8 +19,6 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <gsl/gsl>
-
 #include <test.h>
 #include <constants.h>
 #include <eh_frame_list.h>
@@ -59,50 +57,10 @@ bfunwind_ut::bfunwind_ut() :
 bool bfunwind_ut::init()
 {
     std::ifstream self_ifs(c_self_filename, std::ifstream::ate);
-
-    auto fa1 = gsl::finally([&]
-    { self_ifs.close(); });
-
-    if (!self_ifs.is_open())
-    {
-        std::cout << "unable to open one or more dummy libraries: " << std::endl;
-        std::cout << "    - self: " << self_ifs.is_open() << std::endl;
-        return false;
-    }
-
     m_self_length = self_ifs.tellg();
-
-    if (m_self_length <= 0)
-    {
-        std::cout << "one or more of the dummy libraries is empty: " << std::endl;
-        std::cout << "    - self: " << m_self_length << std::endl;
-        return false;
-    }
-
     m_self = std::shared_ptr<char>(new char[m_self_length]());
-
-    auto fa2 = gsl::finally([&]
-    { m_self.reset(); });
-
-    if (!m_self)
-    {
-        std::cout << "unable to allocate space for one or more of the dummy libraries: " << std::endl;
-        std::cout << "    - self: " << m_self.get() << std::endl;
-        return false;
-    }
-
     self_ifs.seekg(0);
     self_ifs.read(m_self.get(), m_self_length);
-
-    if (self_ifs.fail())
-    {
-        std::cout << "unable to load one or more dummy libraries into memory: " << std::endl;
-        std::cout << "    - self: " << self_ifs.fail() << std::endl;
-        return false;
-    }
-
-    fa1.ignore();
-    fa2.ignore();
 
     int64_t ret = 0;
     bfelf_file_t self_ef;

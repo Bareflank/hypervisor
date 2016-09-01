@@ -108,6 +108,8 @@ void __outw(uint16_t port, uint16_t val) noexcept;
 uint8_t __inb(uint16_t port) noexcept;
 uint16_t __inw(uint16_t port) noexcept;
 
+uint64_t __tls_base(void) noexcept;
+
 #ifdef __cplusplus
 }
 #endif

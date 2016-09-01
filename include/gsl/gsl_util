@@ -19,6 +19,12 @@
 #ifndef GSL_UTIL_H
 #define GSL_UTIL_H
 
+#include "gsl_assert" // Ensures/Expects
+#include <array>
+#include <exception>
+#include <type_traits>
+#include <utility>
+
 ////////////////////////////////////////////////////////////////////////////////
 /// BAREFLANK - proposed API changes to support Bareflank
 ////////////////////////////////////////////////////////////////////////////////
@@ -28,12 +34,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 /// BAREFLANK - proposed API changes to support Bareflank
 ////////////////////////////////////////////////////////////////////////////////
-
-#include "gsl_assert" // Ensures/Expects
-#include <array>
-#include <exception>
-#include <type_traits>
-#include <utility>
 
 #ifdef _MSC_VER
 
@@ -64,6 +64,10 @@ namespace gsl
 // GSL.util: utilities
 //
 
+#define concat1(a,b) a ## b
+#define concat2(a,b) concat1(a,b)
+#define ___ concat2(dont_care, __COUNTER__)
+
 // final_act allows you to ensure something gets run at the end of a scope
 template <class F>
 class final_act
@@ -79,7 +83,7 @@ public:
     final_act(const final_act&) = delete;
     final_act& operator=(const final_act&) = delete;
 
-    ~final_act() noexcept
+    virtual ~final_act() noexcept
     {
         ////////////////////////////////////////////////////////////////////////
         /// BAREFLANK - proposed API changes to support Bareflank
@@ -91,11 +95,11 @@ public:
         }
         catch (std::exception &e)
         {
-            std::cerr << "finally threw exception: " << e.what() << std::endl;
+            std::cerr << "std::exception caught in ~final_act: " << e.what() << std::endl;
         }
-        catch(...)
+        catch (...)
         {
-            std::cerr << "finally threw exception" << std::endl;
+            std::cerr << "unknown exception caught in ~final_act!!!" << std::endl;
         }
 
         ////////////////////////////////////////////////////////////////////////
@@ -103,22 +107,58 @@ public:
         ////////////////////////////////////////////////////////////////////////
     }
 
-    ////////////////////////////////////////////////////////////////////////////
-    /// BAREFLANK - proposed API changes to support Bareflank
-    ////////////////////////////////////////////////////////////////////////////
-
-    // Not sure why, but the GSL doesn't have a way to ignore the final act
-    // if something bad happens, so we added this functionality.
-
-    void ignore() noexcept { invoke_ = false; }
-
-    ////////////////////////////////////////////////////////////////////////////
-    /// BAREFLANK - proposed API changes to support Bareflank
-    ////////////////////////////////////////////////////////////////////////////
+    void dismiss() noexcept
+    {
+        invoke_ = false;
+    }
 
 private:
     F f_;
     bool invoke_;
+};
+
+template <class F>
+class final_act_success : public final_act<F>
+{
+public:
+    explicit final_act_success(F &&func) noexcept :
+        final_act<F>(std::move(func))
+    { }
+
+    final_act_success(final_act_success &&other) noexcept :
+        final_act<F>(std::move(other))
+    { }
+
+    final_act_success(const final_act_success &) = delete;
+    final_act_success& operator=(const final_act_success &) = delete;
+
+    ~final_act_success() override
+    {
+        if (std::uncaught_exception())
+            this->dismiss();
+    }
+};
+
+template<class F>
+class final_act_failure : public final_act<F>
+{
+public:
+    explicit final_act_failure(F &&func) noexcept :
+        final_act<F>(std::move(func))
+    { }
+
+    final_act_failure(final_act_failure &&other) noexcept :
+        final_act<F>(std::move(other))
+    { }
+
+    final_act_failure(const final_act_failure &) = delete;
+    final_act_failure& operator=(const final_act_failure &) = delete;
+
+    ~final_act_failure() override
+    {
+        if (!std::uncaught_exception())
+            this->dismiss();
+    }
 };
 
 // finally() - convenience function to generate a final_act
@@ -132,6 +172,32 @@ template <class F>
 inline final_act<F> finally(F&& f) noexcept
 {
     return final_act<F>(std::forward<F>(f));
+}
+
+// on_success() - convenience function to generate a final_act_success
+template <class F>
+inline final_act_success<F> on_success(const F& f) noexcept
+{
+    return final_act_success<F>(f);
+}
+
+template <class F>
+inline final_act_success<F> on_success(F&& f) noexcept
+{
+    return final_act_success<F>(std::forward<F>(f));
+}
+
+// on_failure() - convenience function to generate a final_act_failure
+template <class F>
+inline final_act_failure<F> on_failure(const F& f) noexcept
+{
+    return final_act_failure<F>(f);
+}
+
+template <class F>
+inline final_act_failure<F> on_failure(F&& f) noexcept
+{
+    return final_act_failure<F>(std::forward<F>(f));
 }
 
 // narrow_cast(): a searchable way to do narrowing casts of values

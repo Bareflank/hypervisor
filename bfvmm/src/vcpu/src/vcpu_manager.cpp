@@ -22,7 +22,6 @@
 #include <gsl/gsl>
 
 #include <debug.h>
-#include <exception.h>
 #include <vcpu/vcpu_manager.h>
 
 // -----------------------------------------------------------------------------
@@ -49,9 +48,6 @@ vcpu_manager::create_vcpu(uint64_t vcpuid, void *attr)
     if (!m_vcpu_factory)
         throw std::runtime_error("invalid vcpu factory");
 
-    auto fa1 = gsl::finally([&]
-    { this->delete_vcpu(vcpuid); });
-
     if (auto vcpu = m_vcpu_factory->make_vcpu(vcpuid, attr))
     {
         {
@@ -59,20 +55,24 @@ vcpu_manager::create_vcpu(uint64_t vcpuid, void *attr)
             m_vcpus[vcpuid] = vcpu;
         }
 
+        auto ___ = gsl::on_failure([&]
+        {
+            std::lock_guard<std::mutex> guard(g_vcpu_manager_mutex);
+            m_vcpus.erase(vcpuid);
+        });
+
         vcpu->init(attr);
     }
     else
     {
         throw std::runtime_error("make_vcpu returned a nullptr vcpu");
     }
-
-    fa1.ignore();
 }
 
 void
 vcpu_manager::delete_vcpu(uint64_t vcpuid, void *attr)
 {
-    auto fa1 = gsl::finally([&]
+    auto ___ = gsl::finally([&]
     {
         std::lock_guard<std::mutex> guard(g_vcpu_manager_mutex);
         m_vcpus.erase(vcpuid);
@@ -85,15 +85,12 @@ vcpu_manager::delete_vcpu(uint64_t vcpuid, void *attr)
 void
 vcpu_manager::run_vcpu(uint64_t vcpuid, void *attr)
 {
-    auto fa1 = gsl::finally([&]
-    { this->hlt_vcpu(vcpuid); });
-
     if (auto vcpu = get_vcpu(vcpuid))
     {
         if (!vcpu->is_running())
             vcpu->run(attr);
         else
-            return;
+            throw std::logic_error("vcpu is already running");
 
         if (vcpu->is_guest_vm_vcpu())
             return;
@@ -105,8 +102,6 @@ vcpu_manager::run_vcpu(uint64_t vcpuid, void *attr)
     {
         throw std::invalid_argument("invalid vcpuid");
     }
-
-    fa1.ignore();
 }
 
 void

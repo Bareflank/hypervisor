@@ -392,7 +392,7 @@ vmxon_ut::test_start_virt_to_phys_failure()
 
     setup_intrinsics(mocks, mm, in.get());
 
-    auto fa = gsl::finally([&]
+    auto ___ = gsl::finally([&]
     {
         virt_to_phys_return_nullptr = false;
     });

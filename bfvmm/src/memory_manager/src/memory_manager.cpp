@@ -199,14 +199,10 @@ memory_manager::malloc_heap(int64_t size) noexcept
     int64_t fragment_size = 0;
 
     auto fa1 = gsl::finally([&]
-    {
-        m_heap_index = sidx + blocks;
-    });
+    { m_heap_index = sidx + blocks; });
 
     auto fa2 = gsl::finally([&]
-    {
-        g_heap_pool[sidx] = static_cast<uint64_t>(blocks) | ALLOCATED;
-    });
+    { g_heap_pool[sidx] = static_cast<uint64_t>(blocks) | ALLOCATED; });
 
     while (cidx < g_heap_pool.size() && sidx + blocks <= g_heap_pool.size())
     {
@@ -223,7 +219,7 @@ memory_manager::malloc_heap(int64_t size) noexcept
                 return &g_heap_pool[sidx + 1];
 
             if (fragment_size < blocks)
-                fa1.ignore();
+                fa1.dismiss();
 
             if (fragment_size > blocks)
             {
@@ -241,8 +237,8 @@ memory_manager::malloc_heap(int64_t size) noexcept
         }
     }
 
-    fa1.ignore();
-    fa2.ignore();
+    fa1.dismiss();
+    fa2.dismiss();
 
     return nullptr;
 }
@@ -262,14 +258,10 @@ memory_manager::malloc_page(int64_t size) noexcept
     int64_t fragment_size = 0;
 
     auto fa1 = gsl::finally([&]
-    {
-        m_page_index = sidx + pages;
-    });
+    { m_page_index = sidx + pages; });
 
     auto fa2 = gsl::finally([&]
-    {
-        g_page_allocated[sidx] = static_cast<uint64_t>(pages) | ALLOCATED;
-    });
+    { g_page_allocated[sidx] = static_cast<uint64_t>(pages) | ALLOCATED; });
 
     while (cidx < g_page_pool.size() && sidx + pages <= g_page_pool.size())
     {
@@ -286,7 +278,7 @@ memory_manager::malloc_page(int64_t size) noexcept
                 return &g_page_pool[sidx];
 
             if (fragment_size < pages)
-                fa1.ignore();
+                fa1.dismiss();
 
             if (fragment_size > pages)
             {
@@ -304,8 +296,8 @@ memory_manager::malloc_page(int64_t size) noexcept
         }
     }
 
-    fa1.ignore();
-    fa2.ignore();
+    fa1.dismiss();
+    fa2.dismiss();
 
     return nullptr;
 }
@@ -349,7 +341,7 @@ memory_manager::add_md(memory_descriptor *md)
     if ((reinterpret_cast<uintptr_t>(md->phys) & (MAX_PAGE_SIZE - 1)) != 0)
         throw std::logic_error("phys address is not page aligned");
 
-    auto fa1 = gsl::finally([&]
+    auto ___ = gsl::on_failure([&]
     {
         std::lock_guard<std::mutex> guard(g_add_md_mutex);
 
@@ -366,8 +358,6 @@ memory_manager::add_md(memory_descriptor *md)
         m_virt_to_phys_map[reinterpret_cast<uintptr_t>(md->virt) >> MAX_PAGE_SHIFT] = *md;
         m_phys_to_virt_map[reinterpret_cast<uintptr_t>(md->phys) >> MAX_PAGE_SHIFT] = *md;
     }
-
-    fa1.ignore();
 }
 
 void

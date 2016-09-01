@@ -112,7 +112,6 @@ public:
 private:
 
     bool m_vmcs_launched;
-    bool m_vmxon_started;
 
     std::shared_ptr<intrinsics_intel_x64> m_intrinsics;
     std::shared_ptr<vmxon_intel_x64> m_vmxon;

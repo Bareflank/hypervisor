@@ -101,7 +101,7 @@ ioctl_driver::load_vmm(const std::shared_ptr<file> &f,
             throw unknown_status();
     }
 
-    auto fa1 = gsl::finally([&]
+    auto ___ = gsl::on_failure([&]
     { unload_vmm(ctl); });
 
     for (const auto &module : split(f->read(clp->modules()), '\n'))
@@ -115,8 +115,6 @@ ioctl_driver::load_vmm(const std::shared_ptr<file> &f,
     }
 
     ctl->call_ioctl_load_vmm();
-
-    fa1.ignore();
 }
 
 void
