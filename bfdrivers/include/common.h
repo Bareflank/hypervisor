@@ -137,7 +137,7 @@ common_load_vmm(void);
 /**
  * Unload VMM
  *
- * This function unloads the vmm. Once the VMM is unloaded, all of the symboles
+ * This function unloads the vmm. Once the VMM is unloaded, all of the symbols
  * for the VMM are removed from memory, and are no longer accessible. The VMM
  * cannot be unloaded unless the VMM is already loaded, but is not running.
  *
