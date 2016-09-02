@@ -39,7 +39,17 @@ protected:
 
 private:
 
+    void test_constructor_null_intrinsics();
     void test_launch_success();
+    void test_launch_vmlaunch_failure();
+    void test_launch_create_vmcs_region_failure();
+    void test_launch_create_exit_handler_stack_failure();
+    void test_launch_clear_failure();
+    void test_launch_load_failure();
+    void test_promote_failure();
+    void test_resume_failure();
+    void test_vmread_failure();
+    void test_vmwrite_failure();
 };
 
 #endif

@@ -282,8 +282,8 @@ public:
 // -----------------------------------------------------------------------------
 
 // Selector Fields
-#define SELECTOR_TI_FLAG                                            (0x0004)
-#define SELECTOR_RPL_FLAG                                           (0x0003)
+#define SELECTOR_TI_FLAG                                            (0x0004UL)
+#define SELECTOR_RPL_FLAG                                           (0x0003UL)
 #define SELECTOR_INDEX                                              (0xFFF8)
 #define SELECTOR_UNUSABLE                                           (1 << 16)
 

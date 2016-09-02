@@ -40,8 +40,17 @@ vmcs_ut::fini()
 bool
 vmcs_ut::list()
 {
-    // Base vmcs tests
+    this->test_constructor_null_intrinsics();
     this->test_launch_success();
+    this->test_launch_vmlaunch_failure();
+    this->test_launch_create_vmcs_region_failure();
+    this->test_launch_create_exit_handler_stack_failure();
+    this->test_launch_clear_failure();
+    this->test_launch_load_failure();
+    this->test_promote_failure();
+    this->test_resume_failure();
+    this->test_vmread_failure();
+    this->test_vmwrite_failure();
 
     return true;
 }
