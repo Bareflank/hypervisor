@@ -26,6 +26,7 @@
 #include <types.h>
 #include <error_codes.h>
 #include <bfelf_loader.h>
+#include <debug_ring_interface.h>
 
 #ifdef __cplusplus
 extern "C" {

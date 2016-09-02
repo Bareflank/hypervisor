@@ -167,7 +167,7 @@ popd > /dev/null
 #
 pushd bfvmm > /dev/null
 header $PWD
-run_clang_tidy "clan*,-clang-analyzer-alpha.deadcode.UnreachableCode"
+run_clang_tidy "clan*,-clang-analyzer-alpha.deadcode.UnreachableCode,-clang-analyzer-unix.MismatchedDeallocator"
 run_clang_tidy "cert*,-clang-analyzer*,-cert-err60-cpp"
 run_clang_tidy "misc*,-clang-analyzer*"
 run_clang_tidy "perf*,-clang-analyzer*"

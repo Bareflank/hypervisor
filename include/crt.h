@@ -23,12 +23,7 @@
 #ifndef CRT_H
 #define CRT_H
 
-#ifndef KERNEL
-#include <stdint.h>
-#else
 #include <types.h>
-#endif
-
 #include <error_codes.h>
 
 #pragma pack(push, 1)

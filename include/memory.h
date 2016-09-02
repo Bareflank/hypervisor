@@ -23,12 +23,7 @@
 #ifndef MEMORY_H
 #define MEMORY_H
 
-#ifndef KERNEL
-#include <stdint.h>
-#else
 #include <types.h>
-#endif
-
 #include <constants.h>
 #include <error_codes.h>
 

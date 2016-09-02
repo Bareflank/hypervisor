@@ -21,8 +21,85 @@
 
 #include <test.h>
 
+size_t g_new_throws_bad_alloc = 0;
+
+static void *
+malloc_aligned(std::size_t size)
+{
+    int ret = 0;
+    void *ptr = nullptr;
+
+    ret = posix_memalign(&ptr, MAX_PAGE_SIZE, size);
+    (void) ret;
+
+    return ptr;
+}
+
+static void *
+custom_new(std::size_t size)
+{
+    if (size == g_new_throws_bad_alloc)
+        throw std::bad_alloc();
+
+    if ((size & (MAX_PAGE_SIZE - 1)) == 0)
+        return malloc_aligned(size);
+
+    return malloc(size);
+}
+
+static void
+custom_delete(void *ptr)
+{
+    free(ptr);
+}
+
+void *
+operator new[](std::size_t size)
+{
+    return custom_new(size);
+}
+
+void *
+operator new(std::size_t size)
+{
+    return custom_new(size);
+}
+
+void
+operator delete(void *ptr, std::size_t /* size */) throw()
+{
+    custom_delete(ptr);
+}
+
+void
+operator delete(void *ptr) throw()
+{
+    custom_delete(ptr);
+}
+
+void
+operator delete[](void *ptr) throw()
+{
+    custom_delete(ptr);
+}
+
+void
+operator delete[](void *ptr, std::size_t /* size */) throw()
+{
+    custom_delete(ptr);
+}
+
 vmcs_ut::vmcs_ut()
 {
+    auto mem1 = new char;
+    auto mem2 = new char[10];
+    delete mem1;
+    delete[] mem2;
+
+    operator delete(nullptr);
+    operator delete(nullptr, sizeof(char));
+    operator delete[](nullptr);
+    operator delete[](nullptr, sizeof(char));
 }
 
 bool

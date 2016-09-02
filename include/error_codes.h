@@ -23,19 +23,7 @@
 #ifndef ERROR_CODES_H
 #define ERROR_CODES_H
 
-#if !defined(KERNEL) && !defined(_WIN32)
-#include <stdint.h>
-#endif
-
-#if defined(KERNEL) && defined(__linux__)
-#include <linux/types.h>
-#define PRId64 "lld"
-#endif
-
-#if defined(_WIN32)
-#include <basetsd.h>
-typedef INT64 int64_t;
-#endif
+#include <types.h>
 
 /* -------------------------------------------------------------------------- */
 /* Helper Macros                                                              */
