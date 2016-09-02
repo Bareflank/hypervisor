@@ -759,6 +759,20 @@ vmcs_intel_x64::is_enabled_rdrand_exiting() const
 }
 
 bool
+vmcs_intel_x64::is_enabled_pml() const
+{
+    auto ctls = get_proc2_ctls();
+
+    if ((ctls & VM_EXEC_S_PROC_BASED_ENABLE_PML) == 0)
+        return false;
+
+    if (!is_supported_pml())
+        return false;
+
+    return true;
+}
+
+bool
 vmcs_intel_x64::is_enabled_invpcid() const
 {
     auto ctls = get_proc2_ctls();
@@ -1445,6 +1459,15 @@ vmcs_intel_x64::is_supported_rdseed_exiting() const
 }
 
 bool
+vmcs_intel_x64::is_supported_pml() const
+{
+    auto ia32_vmx_procbased_ctls2_msr =
+        m_intrinsics->read_msr(IA32_VMX_PROCBASED_CTLS2_MSR);
+
+    return (ia32_vmx_procbased_ctls2_msr & (VM_EXEC_S_PROC_BASED_ENABLE_PML << 32)) != 0;
+}
+
+bool
 vmcs_intel_x64::is_supported_ept_violation_ve() const
 {
     auto ia32_vmx_procbased_ctls2_msr =
@@ -1616,6 +1639,14 @@ vmcs_intel_x64::is_supported_eptp_switching() const
         return false;
 
     return ((vmread(VMCS_VM_FUNCTION_CONTROLS_FULL) & VM_FUNCTION_CONTROL_EPTP_SWITCHING) != 0);
+}
+
+bool
+vmcs_intel_x64::is_supported_event_injection_instr_length_of_0() const
+{
+    auto ia32_vmx_misc = m_intrinsics->read_msr(IA32_VMX_MISC_MSR);
+
+    return ((ia32_vmx_misc & IA32_VMX_MISC_INJECTION_WITH_INSTR_LENGTH_0) != 0);
 }
 
 bool
