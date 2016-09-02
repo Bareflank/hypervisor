@@ -22,25 +22,32 @@
 #ifndef ABORT_H
 #define ABORT_H
 
-#ifndef DISABLE_ABORT
-
 #ifdef CROSS_COMPILED
 extern "C" void abort(void);
 extern "C" int printf(const char *format, ...);
+extern "C" unsigned int write(int fd, const void *buf, unsigned int count);
 #else
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #endif
 
 inline void
 private_abort(const char *msg, const char *func, int line)
 {
+    (void) msg;
+    (void) func;
+    (void) line;
+
+#ifdef DISABLE_LOGGING
+    auto ignored = write(1, "abort called in the unwinder", 28);
+    (void) ignored;
+#else
     printf("%s FATAL ERROR [%d]: %s\n", func, line, msg);
+#endif
+
     abort();
 }
 #define ABORT(a) { private_abort(a,__func__,__LINE__); __builtin_unreachable(); }
-#else
-#define ABORT(a) { while(1); __builtin_unreachable(); }
-#endif
 
 #endif

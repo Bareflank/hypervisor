@@ -96,7 +96,7 @@ public:
 
     { }
 
-    virtual ~register_state_intel_x64() {}
+    ~register_state_intel_x64() override = default;
 
     register_state_intel_x64(register_state_intel_x64 &&) noexcept = default;
     register_state_intel_x64(const register_state_intel_x64 &) = default;
@@ -104,16 +104,16 @@ public:
     register_state_intel_x64 &operator=(register_state_intel_x64 &&) noexcept = default;
     register_state_intel_x64 &operator=(const register_state_intel_x64 &) = default;
 
-    virtual uint64_t get_ip() const override
+    uint64_t get_ip() const override
     { return m_registers.rip; }
 
-    virtual register_state &set_ip(uint64_t value) override
+    register_state &set_ip(uint64_t value) override
     {
         m_tmp_registers.rip = value;
         return *this;
     }
 
-    virtual uint64_t get(uint64_t index) const override
+    uint64_t get(uint64_t index) const override
     {
         if (index >= max_num_registers())
             ABORT("register index out of bounds");
@@ -121,7 +121,7 @@ public:
         return reinterpret_cast<const uint64_t *>(&m_registers)[index];
     }
 
-    virtual register_state &set(uint64_t index, uint64_t value) override
+    register_state &set(uint64_t index, uint64_t value) override
     {
         if (index >= max_num_registers())
             ABORT("register index out of bounds");
@@ -131,22 +131,22 @@ public:
         return *this;
     }
 
-    virtual void commit() override
+    void commit() override
     { m_registers = m_tmp_registers; }
 
-    virtual void commit(uint64_t cfa) override
+    void commit(uint64_t cfa) override
     {
         m_tmp_registers.rsp = cfa;
         commit();
     }
 
-    virtual void resume() override
+    void resume() override
     { __load_registers_intel_x64(&m_registers); }
 
-    virtual uint64_t max_num_registers() const override
+    uint64_t max_num_registers() const override
     { return 17; }
 
-    virtual const char *name(uint64_t index) const override
+    const char *name(uint64_t index) const override
     {
         if (index >= max_num_registers())
             ABORT("register index out of bounds");
@@ -174,49 +174,27 @@ public:
         }
     }
 
-    virtual void dump() const override
+    void dump() const override
     {
-        // uint64_t *rsp = (uint64_t *)m_registers.rsp;
-
-        debug("Register State:\n")
-        debug("  rax: 0x%08lx\n", m_registers.rax);
-        debug("  rdx: 0x%08lx\n", m_registers.rdx);
-        debug("  rcx: 0x%08lx\n", m_registers.rcx);
-        debug("  rbx: 0x%08lx\n", m_registers.rbx);
-        debug("  rdi: 0x%08lx\n", m_registers.rdi);
-        debug("  rsi: 0x%08lx\n", m_registers.rsi);
-        debug("  rbp: 0x%08lx\n", m_registers.rbp);
-        debug("  rsp: 0x%08lx\n", m_registers.rsp);
-        debug("  r08: 0x%08lx\n", m_registers.r08);
-        debug("  r09: 0x%08lx\n", m_registers.r09);
-        debug("  r10: 0x%08lx\n", m_registers.r10);
-        debug("  r11: 0x%08lx\n", m_registers.r11);
-        debug("  r12: 0x%08lx\n", m_registers.r12);
-        debug("  r13: 0x%08lx\n", m_registers.r13);
-        debug("  r14: 0x%08lx\n", m_registers.r14);
-        debug("  r15: 0x%08lx\n", m_registers.r15);
-        debug("  rip: 0x%08lx\n", m_registers.rip);
-        debug("\n")
-
-        // debug("Stack State:\n")
-        // debug("  rsp[-8]: %p\n", (void *)rsp[-8]);
-        // debug("  rsp[-7]: %p\n", (void *)rsp[-7]);
-        // debug("  rsp[-6]: %p\n", (void *)rsp[-6]);
-        // debug("  rsp[-5]: %p\n", (void *)rsp[-5]);
-        // debug("  rsp[-4]: %p\n", (void *)rsp[-4]);
-        // debug("  rsp[-3]: %p\n", (void *)rsp[-3]);
-        // debug("  rsp[-2]: %p\n", (void *)rsp[-2]);
-        // debug("  rsp[-1]: %p\n", (void *)rsp[-1]);
-        // debug("  rsp[0] : %p\n", (void *)rsp[0]);
-        // debug("  rsp[1] : %p\n", (void *)rsp[1]);
-        // debug("  rsp[2] : %p\n", (void *)rsp[2]);
-        // debug("  rsp[3] : %p\n", (void *)rsp[3]);
-        // debug("  rsp[4] : %p\n", (void *)rsp[4]);
-        // debug("  rsp[5] : %p\n", (void *)rsp[5]);
-        // debug("  rsp[6] : %p\n", (void *)rsp[6]);
-        // debug("  rsp[7] : %p\n", (void *)rsp[7]);
-        // debug("  rsp[8] : %p\n", (void *)rsp[8]);
-        // debug("\n")
+        log("Register State:\n")
+        log("  rax: 0x%08lx\n", m_registers.rax);
+        log("  rdx: 0x%08lx\n", m_registers.rdx);
+        log("  rcx: 0x%08lx\n", m_registers.rcx);
+        log("  rbx: 0x%08lx\n", m_registers.rbx);
+        log("  rdi: 0x%08lx\n", m_registers.rdi);
+        log("  rsi: 0x%08lx\n", m_registers.rsi);
+        log("  rbp: 0x%08lx\n", m_registers.rbp);
+        log("  rsp: 0x%08lx\n", m_registers.rsp);
+        log("  r08: 0x%08lx\n", m_registers.r08);
+        log("  r09: 0x%08lx\n", m_registers.r09);
+        log("  r10: 0x%08lx\n", m_registers.r10);
+        log("  r11: 0x%08lx\n", m_registers.r11);
+        log("  r12: 0x%08lx\n", m_registers.r12);
+        log("  r13: 0x%08lx\n", m_registers.r13);
+        log("  r14: 0x%08lx\n", m_registers.r14);
+        log("  r15: 0x%08lx\n", m_registers.r15);
+        log("  rip: 0x%08lx\n", m_registers.rip);
+        log("\n")
     }
 
 private:

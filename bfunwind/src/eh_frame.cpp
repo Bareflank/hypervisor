@@ -129,43 +129,43 @@ decode_pointer(char **addr, uint64_t encoding)
 
 common_entry::common_entry() :
     m_is_cie(false),
-    m_entry_start(0),
-    m_entry_end(0),
-    m_payload_start(0),
-    m_payload_end(0),
-    m_eh_frame{0, 0}
+    m_entry_start(nullptr),
+    m_entry_end(nullptr),
+    m_payload_start(nullptr),
+    m_payload_end(nullptr),
+    m_eh_frame{nullptr, 0}
 {
 }
 
 common_entry::common_entry(const eh_frame_t &eh_frame) :
     m_is_cie(false),
-    m_entry_start(0),
-    m_entry_end(0),
-    m_payload_start(0),
-    m_payload_end(0),
+    m_entry_start(nullptr),
+    m_entry_end(nullptr),
+    m_payload_start(nullptr),
+    m_payload_end(nullptr),
     m_eh_frame(eh_frame)
 {
 }
 
 common_entry &common_entry::operator++()
 {
-    if (m_entry_start == 0)
+    if (m_entry_start == nullptr)
         return *this;
 
     if (m_entry_end + 4 < reinterpret_cast<char *>(m_eh_frame.addr) + m_eh_frame.size)
         parse(m_entry_end);
     else
-        parse(0);
+        parse(nullptr);
 
     return *this;
 }
 
 void
-common_entry::parse(char *addr)
+common_entry::non_virtual_parse(char *addr)
 {
     auto len = 0ULL;
 
-    if ((m_entry_start = addr) == 0)
+    if ((m_entry_start = addr) == nullptr)
         goto failure;
 
     if (m_entry_start < m_eh_frame.addr)
@@ -197,10 +197,10 @@ common_entry::parse(char *addr)
 failure:
 
     m_is_cie = false;
-    m_entry_start = 0;
-    m_entry_end = 0;
-    m_payload_start = 0;
-    m_payload_end = 0;
+    m_entry_start = nullptr;
+    m_entry_end = nullptr;
+    m_payload_start = nullptr;
+    m_payload_end = nullptr;
 }
 
 // -----------------------------------------------------------------------------
@@ -208,7 +208,7 @@ failure:
 // -----------------------------------------------------------------------------
 
 ci_entry::ci_entry() :
-    m_augmentation_string(0),
+    m_augmentation_string(nullptr),
     m_code_alignment(0),
     m_data_alignment(0),
     m_return_address_reg(0),
@@ -216,14 +216,14 @@ ci_entry::ci_entry() :
     m_lsda_encoding(0),
     m_personality_encoding(0),
     m_personality_function(0),
-    m_initial_instructions(0)
+    m_initial_instructions(nullptr)
 {
 }
 
 ci_entry::ci_entry(const eh_frame_t &eh_frame) :
     common_entry(eh_frame),
 
-    m_augmentation_string(0),
+    m_augmentation_string(nullptr),
     m_code_alignment(0),
     m_data_alignment(0),
     m_return_address_reg(0),
@@ -231,15 +231,15 @@ ci_entry::ci_entry(const eh_frame_t &eh_frame) :
     m_lsda_encoding(0),
     m_personality_encoding(0),
     m_personality_function(0),
-    m_initial_instructions(0)
+    m_initial_instructions(nullptr)
 {
-    parse(reinterpret_cast<char *>(eh_frame.addr));
+    non_virtual_parse(reinterpret_cast<char *>(eh_frame.addr));
 }
 
 ci_entry::ci_entry(const eh_frame_t &eh_frame, void *addr) :
     common_entry(eh_frame),
 
-    m_augmentation_string(0),
+    m_augmentation_string(nullptr),
     m_code_alignment(0),
     m_data_alignment(0),
     m_return_address_reg(0),
@@ -247,15 +247,21 @@ ci_entry::ci_entry(const eh_frame_t &eh_frame, void *addr) :
     m_lsda_encoding(0),
     m_personality_encoding(0),
     m_personality_function(0),
-    m_initial_instructions(0)
+    m_initial_instructions(nullptr)
 {
-    parse(reinterpret_cast<char *>(addr));
+    non_virtual_parse(reinterpret_cast<char *>(addr));
 }
 
 void
 ci_entry::parse(char *addr)
 {
-    common_entry::parse(addr);
+    non_virtual_parse(addr);
+}
+
+void
+ci_entry::non_virtual_parse(char *addr)
+{
+    common_entry::non_virtual_parse(addr);
 
     if (!*this)
         return;
@@ -315,7 +321,7 @@ fd_entry::fd_entry() :
     m_pc_begin(0),
     m_pc_range(0),
     m_lsda(0),
-    m_instructions(0)
+    m_instructions(nullptr)
 {
 }
 
@@ -325,9 +331,9 @@ fd_entry::fd_entry(const eh_frame_t &eh_frame) :
     m_pc_begin(0),
     m_pc_range(0),
     m_lsda(0),
-    m_instructions(0)
+    m_instructions(nullptr)
 {
-    parse(reinterpret_cast<char *>(eh_frame.addr));
+    non_virtual_parse(reinterpret_cast<char *>(eh_frame.addr));
 }
 
 fd_entry::fd_entry(const eh_frame_t &eh_frame, void *addr) :
@@ -336,15 +342,21 @@ fd_entry::fd_entry(const eh_frame_t &eh_frame, void *addr) :
     m_pc_begin(0),
     m_pc_range(0),
     m_lsda(0),
-    m_instructions(0)
+    m_instructions(nullptr)
 {
-    parse(reinterpret_cast<char *>(addr));
+    non_virtual_parse(reinterpret_cast<char *>(addr));
 }
 
 void
 fd_entry::parse(char *addr)
 {
-    common_entry::parse(addr);
+    non_virtual_parse(addr);
+}
+
+void
+fd_entry::non_virtual_parse(char *addr)
+{
+    common_entry::non_virtual_parse(addr);
 
     if (!*this)
         return;
@@ -409,13 +421,13 @@ eh_frame::find_fde(register_state *state)
         }
     }
 
-    debug("ERROR: An exception was thrown, but the unwinder was unable to "
-          "locate a stack frame for RIP = %p. Possible reasons include\n",
-          reinterpret_cast<void *>(state->get_ip()));
-    debug("  - Throwing from a destructor\n");
-    debug("  - Throwing from a function labeled noexcept\n");
-    debug("  - Bug in the unwinder\n");
-    debug("\n\nAborting!!!\n\n")
+    log("ERROR: An exception was thrown, but the unwinder was unable to "
+        "locate a stack frame for RIP = %p. Possible reasons include\n",
+        reinterpret_cast<void *>(state->get_ip()));
+    log("  - Throwing from a destructor\n");
+    log("  - Throwing from a function labeled noexcept\n");
+    log("  - Bug in the unwinder\n");
+    log("\n\nAborting!!!\n\n")
 
     state->dump();
 

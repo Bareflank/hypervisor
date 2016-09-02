@@ -17,11 +17,13 @@ Misc:
   anything (might be taken care of by libc++). Also... will need to add
   visibility macros if we enable this option, and should disable the GCC
   flags for BFM and windows for export all.
+- Implement a custom version of the GSL in the unwinder. This way span and
+  string_view can be used and the bounds checks can be cleaned up.
 
 Version 1.2 TODO:
 - Clean up the VMCS checks so that they can be unit tested better, and then
   complete the unit tests
-- Add a make install / uninstall and provide a Windows installer for the 
+- Add a make install / uninstall and provide a Windows installer for the
   drivers.
 - Create custom libc. This first step should be to provide equvilant
   functionality to newlib. Once this is done, the next step should be to break
@@ -38,4 +40,4 @@ Version 1.2 TODO:
   example, some organizational changes to the vcpu to run a guest).
 - Hyperkernel support
 - Fully unittest C++ inside the VMM to verify which portions of C++ we plan
-  to support actually work. 
+  to support actually work.

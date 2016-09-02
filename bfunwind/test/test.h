@@ -59,7 +59,7 @@ private:
 private:
 
     std::shared_ptr<char> m_self;
-    int64_t m_self_length;
+    uint64_t m_self_length;
 };
 
 #endif

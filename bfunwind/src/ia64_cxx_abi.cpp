@@ -80,17 +80,13 @@ private_phase1(_Unwind_Context *context)
 {
     auto result = _URC_CONTINUE_UNWIND;
 
-    log("\n");
-    log("============================================================\n");
-    log("Phase #1\n\n");
-
     result = find_and_store_fde(context);
     if (result != _URC_CONTINUE_UNWIND)
         return result;
 
     dwarf4::unwind(context->fde, context->state);
 
-    while (1)
+    while (true)
     {
         result = find_and_store_fde(context);
         if (result != _URC_CONTINUE_UNWIND)
@@ -118,17 +114,13 @@ private_phase2(_Unwind_Context *context)
 {
     auto result = _URC_CONTINUE_UNWIND;
 
-    log("\n");
-    log("============================================================\n");
-    log("Phase #2\n\n");
-
     result = find_and_store_fde(context);
     if (result != _URC_CONTINUE_UNWIND)
         return result;
 
     dwarf4::unwind(context->fde, context->state);
 
-    while (1)
+    while (true)
     {
         auto action = _UA_CLEANUP_PHASE;
 
@@ -198,7 +190,7 @@ _Unwind_Resume(_Unwind_Exception *exception_object)
 extern "C" void
 _Unwind_DeleteException(_Unwind_Exception *exception_object)
 {
-    if (exception_object->exception_cleanup != 0)
+    if (exception_object->exception_cleanup != nullptr)
         (*exception_object->exception_cleanup)(_URC_FOREIGN_EXCEPTION_CAUGHT,
                                                exception_object);
 }
@@ -244,7 +236,7 @@ _Unwind_GetRegionStart(_Unwind_Context *context)
 extern "C" uintptr_t
 _Unwind_GetIPInfo(_Unwind_Context *context, int *ip_before_insn)
 {
-    if (ip_before_insn == 0)
+    if (ip_before_insn == nullptr)
         ABORT("ip_before_insn == 0");
 
     *ip_before_insn = 0;

@@ -34,6 +34,4 @@ extern "C" int printf(const char *format, ...);
 #define log(...)
 #endif
 
-#define debug(...) printf(__VA_ARGS__);
-
 #endif
