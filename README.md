@@ -136,7 +136,7 @@ is a terminal. Once your setup, you should be able to run the following:
 
 ```
 cd ~/
-git https://github.com/bareflank/hypervisor.git
+git clone https://github.com/bareflank/hypervisor.git
 cd ~/hypervisor
 git checkout -b v1.0.0
 
