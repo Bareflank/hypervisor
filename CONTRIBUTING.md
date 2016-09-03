@@ -74,6 +74,31 @@ Anyone can submit a pull request to the project. All pull requests must satisfy 
 
 This project uses Astyle to format the source code, and the project provides a configuration file (astyle.conf) that should be used. Prior to submitting changes to the project, all source code should be run through Astyle to verify that the proper formatting rules are applied. If this is not done, Travis CI will fail when the PR is submitted. To format the code run "make astyle" and "make astyle_clean" when complete. 
 
+Clang Tidy and Google's Sanitizers are used to perform static / dynamic analysis. If a PR fails because of these checks you can run them locally, or review the Travis CI log. To perform the Clang Tidy checks on Linux, install [bear](https://github.com/rizsotto/Bear) and run:
+
+```
+make clean
+STATIC_ANALYSIS_ENABLED=true bear make
+make tidy
+```
+
+To perform the Google Sanitizer checks run:
+
+```
+make clean
+DYNAMIC_ANALYSIS_ENABLED=true make
+make test
+```
+
+Prior to submitting a PR, please rebase your git history to a single commit. To do this:
+
+```
+git fetch <upstream remote>
+git rebase -i <upstream remote>/master
+    "pick -> r" for the top commit
+    "pick -> f" for the rest of the commits
+```
+
 All commits to the project should have the following commit format. The information used in this commit format provides the community with a means to create the project’s changelog, as well as identify what each commit addresses.
 
 - Title (50 characters or less)
