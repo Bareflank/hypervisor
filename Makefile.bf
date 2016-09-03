@@ -172,4 +172,7 @@ doxygen_clean:
 	@cd %HYPER_ABS%; \
 	%HYPER_ABS%/tools/doxygen/linux/run.sh clean
 
+tidy:
+	@cd %HYPER_ABS%; \
+	%HYPER_ABS%/tools/scripts/verify_source.sh
 
