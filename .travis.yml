@@ -84,7 +84,7 @@ matrix:
       - docker
     addons:
       apt:
-        sources: [ 'ubuntu-toolchain-r-test', 'llvm-toolchain-precise-3.8' ]
+        sources: [ 'ubuntu-toolchain-r-test', 'llvm-toolchain-trusty-3.8' ]
         packages: [ 'clang-3.8', 'clang-tidy-3.8' ]
     install:
       - travis_wait 40 ./tools/scripts/setup_ubuntu.sh
@@ -93,7 +93,7 @@ matrix:
       - sudo ln -s /usr/bin/clang-tidy-3.8 /usr/bin/clang-tidy
     script:
       - STATIC_ANALYSIS_ENABLED=true bear make
-      - ./tools/scripts/verify_source.sh
+      - make tidy
 
   #
   # Google Sanitizers
