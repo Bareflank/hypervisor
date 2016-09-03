@@ -72,7 +72,7 @@ Although an RFC should contain as much information as possible to reduce the num
 
 Anyone can submit a pull request to the project. All pull requests must satisfy the requirements defined in the governance documentation. If the pull request includes source code, tests for the source code must also be included (usually in the form of unit tests). All CI tests must also return without error, demonstrating that not only does the source code contain the proper tests to validate it’s implementation, but these tests succeed.
 
-This project uses Astyle to format the source code, and the project provides a configuration file (astyle.conf) that should be used. Prior to submitting changes to the project, all source code should be run through Astyle to verify that the proper formatting rules are applied. If this is not done, Travis CI will fail when the PR is submitted. 
+This project uses Astyle to format the source code, and the project provides a configuration file (astyle.conf) that should be used. Prior to submitting changes to the project, all source code should be run through Astyle to verify that the proper formatting rules are applied. If this is not done, Travis CI will fail when the PR is submitted. To format the code run "make astyle" and "make astyle_clean" when complete. 
 
 All commits to the project should have the following commit format. The information used in this commit format provides the community with a means to create the project’s changelog, as well as identify what each commit addresses.
 
