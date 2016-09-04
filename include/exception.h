@@ -35,7 +35,7 @@ namespace bfn
 // -----------------------------------------------------------------------------
 
 /// The following defines a general exception used in Bareflank. This should
-/// not thrown and instead, an exception that inherits from this should be
+/// not be thrown and instead, an exception that inherits from this should be
 /// thrown that provides more decent output. This exception type can however
 /// be inherited from, and caught. There are two main reasons why this exception
 /// is used instead of using std::exception directly:
@@ -49,7 +49,7 @@ namespace bfn
 ///   at least it's simple to use.
 ///
 /// - Having a different type than std::exception gives us a simple means to
-///   detect when the execption is something that we defined, vs something that
+///   detect when the exception is something that we defined, vs something that
 ///   came from the STL.
 ///
 class general_exception : public std::exception
