@@ -50,15 +50,15 @@ extern "C" {
  *
  * A memory descriptor provides information about a block of memory.
  * Typically, each page of memory that the VMM uses will have a memory
- * descriptor assocaited with it. The VMM will use this information to create
- * it's resources, as well as generate page tables as needed.
+ * descriptor associated with it. The VMM will use this information to create
+ * its resources, as well as generate page tables as needed.
  *
  * @var memory_descriptor::phys
  *     the starting physical address of the block of memory
  * @var memory_descriptor::virt
  *     the starting virtual address of the block of memory
  * @var memory_descriptor::type
- *     the type of meory block. This is likely archiecture specific as
+ *     the type of memory block. This is likely architecture specific as
  *     this holds information about access rights, etc...
  */
 struct memory_descriptor
