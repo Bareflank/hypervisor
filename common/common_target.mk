@@ -243,6 +243,8 @@ ifeq ($(DYNAMIC_ANALYSIS_ENABLED), true)
 	NATIVE_LDFLAGS+=-fsanitize=undefined
 	NATIVE_LDFLAGS+=-fno-sanitize=vptr
 	NATIVE_LDFLAGS+=-fno-sanitize=alignment
+	NATIVE_LDFLAGS+=-fuse-ld=gold
+	NATIVE_LDFLAGS+=-Wl,--no-as-needed
 endif
 
 ################################################################################

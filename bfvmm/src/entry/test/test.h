@@ -42,15 +42,13 @@ private:
     void test_start_vmm_success();
     void test_start_vmm_throws_general_exception();
     void test_start_vmm_throws_standard_exception();
+    void test_start_vmm_throws_bad_alloc();
     void test_start_vmm_throws_any_exception();
     void test_stop_vmm_success();
     void test_stop_vmm_throws_general_exception();
     void test_stop_vmm_throws_standard_exception();
+    void test_stop_vmm_throws_bad_alloc();
     void test_stop_vmm_throws_any_exception();
-    void test_add_mdl_success();
-    void test_add_mdl_throws_general_exception();
-    void test_add_mdl_throws_standard_exception();
-    void test_add_mdl_throws_any_exception();
 
 };
 

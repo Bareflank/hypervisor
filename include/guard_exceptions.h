@@ -43,6 +43,10 @@ guard_exceptions(int64_t error_code, T func)
         bferror << "----------------------------------------" << bfendl;
         bferror << ge << bfendl;
     }
+    catch (std::bad_alloc &e)
+    {
+        return BF_BAD_ALLOC;
+    }
     catch (std::exception &e)
     {
         bfinfo << bfendl;

@@ -66,11 +66,11 @@ install_apt_tools() {
 }
 
 add_cmake_repositories() {
-    sudo add-apt-repository ppa:george-edison55/cmake-3.x
+    sudo add-apt-repository ppa:george-edison55/cmake-3.x -y
 }
 
 add_gcc_repositories() {
-    sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+    sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
 }
 
 add_docker_repositories() {
@@ -93,12 +93,15 @@ install_common_packages() {
     sudo DEBIAN_FRONTEND=noninteractive apt-get install --yes -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" docker-engine
 }
 
-install_g++-5() {
-    sudo apt-get install --yes g++-5
+install_g++-6() {
+    sudo apt-get update
+    sudo apt-get install --yes gcc-snapshot
+    sudo apt-get install --yes gcc-6
+    sudo apt-get install --yes g++-6
     sudo rm /usr/bin/gcc
     sudo rm /usr/bin/g++
-    sudo ln -s /usr/bin/gcc-5 /usr/bin/gcc
-    sudo ln -s /usr/bin/g++-5 /usr/bin/g++
+    sudo ln -s /usr/bin/gcc-6 /usr/bin/gcc
+    sudo ln -s /usr/bin/g++-6 /usr/bin/g++
 }
 
 prepare_docker() {
@@ -159,7 +162,7 @@ case $(lsb_release -sr) in
     add_gcc_repositories
     add_docker_repositories
     install_common_packages
-    install_g++-5
+    install_g++-6
     prepare_docker
     ;;
 

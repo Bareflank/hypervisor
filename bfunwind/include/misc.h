@@ -25,13 +25,13 @@
 #include <abort.h>
 #include <stdint.h>
 
-inline uint64_t abs(int64_t value)
+inline uint64_t bfabs(int64_t value)
 { return value >= 0 ? static_cast<uint64_t>(value) : static_cast<uint64_t>(-value); }
 
 inline uint64_t
 add_offset(uint64_t value, int64_t offset)
 {
-    auto abs_offset = abs(offset);
+    auto abs_offset = bfabs(offset);
 
     if (offset >= 0)
         return value + abs_offset;
