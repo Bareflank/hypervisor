@@ -43,10 +43,12 @@ entry_ut::list()
     this->test_start_vmm_success();
     this->test_start_vmm_throws_general_exception();
     this->test_start_vmm_throws_standard_exception();
+    this->test_start_vmm_throws_bad_alloc();
     this->test_start_vmm_throws_any_exception();
     this->test_stop_vmm_success();
     this->test_stop_vmm_throws_general_exception();
     this->test_stop_vmm_throws_standard_exception();
+    this->test_stop_vmm_throws_bad_alloc();
     this->test_stop_vmm_throws_any_exception();
 
     return true;

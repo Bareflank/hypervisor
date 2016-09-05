@@ -106,6 +106,7 @@ matrix:
       - docker
     install:
       - travis_wait 40 ./tools/scripts/setup_ubuntu.sh
+      - sudo apt-get upgrade --yes
     script:
       - DYNAMIC_ANALYSIS_ENABLED=true make
       - make test
