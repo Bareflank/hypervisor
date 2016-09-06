@@ -10,7 +10,9 @@ A Bareflank driver consists of the host OS specific part, and the common.c part.
 
 [entry.c](https://github.com/Bareflank/hypervisor/blob/master/bfdrivers/src/arch/linux/entry.c)
 <br>
-[Common](https://github.com/Bareflank/hypervisor/blob/master/bfdrivers/src/common.c)
+[platform.c](https://github.com/Bareflank/hypervisor/blob/master/bfdrivers/src/arch/linux/platform.c)
+<br>
+[common.c](https://github.com/Bareflank/hypervisor/blob/master/bfdrivers/src/common.c)
 
 The common.c part is the bulk of the driver entry, and this code is shared between all of the driver entries, and comes complete with it's own unit test. When BFM IOCTL's to the driver entry, the driver entry receives the IOCTL, and calls the associated common_xxx logic. Anything that must be done that is host OS specific must be done in the "arch" portion of the driver.
 
