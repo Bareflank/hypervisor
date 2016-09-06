@@ -8,7 +8,7 @@ The Bareflank drivers (also referred to as the driver entries), are the drivers 
 
 A Bareflank driver consists of the host OS specific part, and the common.c part. On Linux, this is:
 
-[Linux entry.c](https://github.com/Bareflank/hypervisor/blob/master/bfdrivers/src/arch/linux/entry.c)
+[entry.c](https://github.com/Bareflank/hypervisor/blob/master/bfdrivers/src/arch/linux/entry.c)
 <br>
 [Common](https://github.com/Bareflank/hypervisor/blob/master/bfdrivers/src/common.c)
 
