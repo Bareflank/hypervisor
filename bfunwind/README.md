@@ -36,7 +36,7 @@ The stack is unwound using the DWARF code, and control is handed back to the ia6
 
 ## Limitations
 
-Currently the unwind library only has support for x86_64, and has only been tested on Intel (although it's unlikely changes are needed to support AMD64). The unwind library also does not have support for DWARF expressions. Currently expression support has not been needed, but if GCC generates code that does in fact use DWARF expressions, a thrown exception would fail in the unwinder with a call to abort if it's available. Like the rest of Bareflank, the unwinder assumes that if allocations fail, the system will be halted (i.e. there is no support for gracefully failing an out-of-memory error).
+Currently the unwind library only has support for x86_64, and has only been tested on Intel (although it's unlikely changes are needed to support AMD64).
 
 ## Notes
 
