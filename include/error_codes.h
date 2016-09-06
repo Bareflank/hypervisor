@@ -135,6 +135,12 @@ typedef INT64 int64_t;
 #define BF_IOCTL_FAILURE sign(-1)
 
 /* -------------------------------------------------------------------------- */
+/* Bad Alloc                                                                  */
+/* -------------------------------------------------------------------------- */
+
+#define BF_BAD_ALLOC sign(0x8000000100000000)
+
+/* -------------------------------------------------------------------------- */
 /* Stringify Error Codes                                                      */
 /* -------------------------------------------------------------------------- */
 
@@ -186,6 +192,8 @@ ec_to_str(int64_t value)
             EC_CASE(BF_ERROR_OUT_OF_MEMORY);
             EC_CASE(BF_ERROR_VMM_CORRUPTED);
             EC_CASE(BF_ERROR_UNKNOWN);
+
+            EC_CASE(BF_BAD_ALLOC);
 
             EC_CASE(BF_IOCTL_FAILURE);
 
