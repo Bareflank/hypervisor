@@ -27,10 +27,12 @@
 #include <vmcs/vmcs_intel_x64_resume.h>
 #include <memory_manager/memory_manager.h>
 
+extern size_t g_new_throws_bad_alloc;
+
 static std::map<uint32_t, uint64_t> g_msrs;
 static std::map<uint64_t, uint64_t> g_vmcs_fields;
 static uint8_t span[0x81];
-static bool virt_to_phys_return_nullptr = false;
+static bool g_virt_to_phys_return_nullptr = false;
 
 static void
 vmcs_promote_fail(bool state_save)
@@ -133,7 +135,7 @@ virtptr_to_physint(void *ptr)
 {
     (void) ptr;
 
-    if (virt_to_phys_return_nullptr)
+    if (g_virt_to_phys_return_nullptr)
         return 0;
 
     return 0x0000000ABCDEF0000;
@@ -177,7 +179,6 @@ setup_vmcs_host_segment_and_descriptor_table_registers()
     g_vmcs_fields[VMCS_HOST_GDTR_BASE] = 0x0000000010000000;
     g_vmcs_fields[VMCS_HOST_IDTR_BASE] = 0x0000000010000000;
     g_vmcs_fields[VMCS_HOST_TR_BASE] = 0x0000000010000000;
-
 }
 
 static void
@@ -200,7 +201,6 @@ setup_vmcs_guest_control_and_debug_fields()
     g_vmcs_fields[VMCS_GUEST_IA32_PAT_FULL] = 0x0;
     g_vmcs_fields[VMCS_GUEST_IA32_EFER_FULL] = IA32_EFER_LME | IA32_EFER_LMA;
     g_vmcs_fields[VMCS_GUEST_IA32_DEBUGCTL_FULL] = 0x0;
-
 }
 
 static void
@@ -304,7 +304,6 @@ setup_vm_entry_control_fields()
     g_vmcs_fields[VMCS_VM_ENTRY_EXCEPTION_ERROR_CODE] = 0x0;
     g_vmcs_fields[VMCS_VM_ENTRY_MSR_LOAD_COUNT] = 0xff0000;
     g_vmcs_fields[VMCS_VM_ENTRY_MSR_LOAD_ADDRESS_FULL] = 0x0000000010000000;
-
 }
 
 static void
@@ -432,7 +431,6 @@ setup_vmcs_intrinsics(MockRepository &mocks, memory_manager *mm, intrinsics_inte
     mocks.OnCall(in, intrinsics_intel_x64::vmlaunch).Return(true);
     mocks.OnCall(in, intrinsics_intel_x64::vmwrite).Return(true);
     mocks.OnCall(in, intrinsics_intel_x64::vmread).Return(true);
-
 }
 
 void
@@ -497,12 +495,10 @@ vmcs_ut::test_launch_create_vmcs_region_failure()
     setup_vmcs_x64_state_intrinsics(mocks, host_state.get());
     setup_vmcs_x64_state_intrinsics(mocks, guest_state.get());
 
-    auto fa = gsl::finally([&]
-    {
-        virt_to_phys_return_nullptr = false;
-    });
+    auto ___ = gsl::finally([&]
+    { g_virt_to_phys_return_nullptr = false; });
 
-    virt_to_phys_return_nullptr = true;
+    g_virt_to_phys_return_nullptr = true;
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -522,13 +518,16 @@ vmcs_ut::test_launch_create_exit_handler_stack_failure()
     auto guest_state = bfn::mock_shared<vmcs_intel_x64_state>(mocks);
 
     setup_vmcs_intrinsics(mocks, mm, in.get());
-    mocks.OnCallFunc(std::make_unique<char[]>).With(STACK_SIZE).Throw(std::exception());
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
         vmcs_intel_x64 vmcs(in);
 
-        EXPECT_EXCEPTION(vmcs.launch(host_state, guest_state), std::exception);
+        auto ___ = gsl::finally([&]
+        { g_new_throws_bad_alloc = 0; });
+
+        g_new_throws_bad_alloc = STACK_SIZE;
+        EXPECT_EXCEPTION(vmcs.launch(host_state, guest_state), std::bad_alloc);
     });
 }
 

@@ -23,6 +23,9 @@
 #ifndef DRIVER_ENTRY_INTERFACE_H
 #define DRIVER_ENTRY_INTERFACE_H
 
+#include <types.h>
+#include <debug_ring_interface.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -69,19 +72,11 @@ extern "C" {
 #define IOCTL_VMM_STATUS_CMD 0x808
 #define IOCTL_SET_VCPUID_CMD 0x809
 
-#include <debug_ring_interface.h>
-
 /* -------------------------------------------------------------------------- */
 /* Linux Interfaces                                                           */
 /* -------------------------------------------------------------------------- */
 
 #ifdef __linux__
-
-#ifndef KERNEL
-#include <stdint.h>
-#else
-#include <types.h>
-#endif
 
 /**
  * Add Module Length
@@ -179,12 +174,7 @@ extern "C" {
 
 #if defined(_WIN32) || defined(__CYGWIN__)
 
-#ifdef KERNEL
-#include <ntddk.h>
-#else
-#include <windows.h>
 #include <initguid.h>
-#endif
 
 DEFINE_GUID(GUID_DEVINTERFACE_bareflank,
             0x1d9c9218, 0x3c88, 0x4b81, 0x8e, 0x81, 0xb4, 0x62, 0x2a, 0x4d, 0xcb, 0x44);
@@ -274,7 +264,6 @@ DEFINE_GUID(GUID_DEVINTERFACE_bareflank,
 /* -------------------------------------------------------------------------- */
 
 #ifdef __APPLE__
-#include <stdint.h>
 
 typedef struct bf_ioctl
 {

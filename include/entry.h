@@ -23,12 +23,7 @@
 #ifndef ENTRY_INTERFACE_H
 #define ENTRY_INTERFACE_H
 
-#ifndef KERNEL
-#include <stdint.h>
-#else
 #include <types.h>
-#endif
-
 #include <error_codes.h>
 
 #pragma pack(push, 1)

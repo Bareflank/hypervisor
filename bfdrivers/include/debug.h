@@ -23,8 +23,6 @@
 #ifndef DEBUG_H
 #define DEBUG_H
 
-#include <driver_entry_interface.h>
-
 #ifndef KERNEL
 #include <stdio.h>
 #define INFO(...)

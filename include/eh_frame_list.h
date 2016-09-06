@@ -23,7 +23,7 @@
 #ifndef EH_FRAME_LIST_H
 #define EH_FRAME_LIST_H
 
-#include <stdint.h>
+#include <types.h>
 #include <error_codes.h>
 
 #ifdef __cplusplus
