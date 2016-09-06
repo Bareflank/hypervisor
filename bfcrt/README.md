@@ -3,10 +3,10 @@
 ## Description
 
 Modern compilers provide C runtime libraries designed to aid the compiler in
-performing certain tasks (for GCC, this is the ctrstuff.c in libgcc).
+performing certain tasks (for GCC, this is the crtstuff.c in libgcc).
 Three different functions that most of these libraries perform:
-- Global Construction (executing functions defined in the ".ctors" section)
-- Global Destruction (executing functions defined in the ".dtors" section)
+- Global Construction (executing functions defined in the ".ctors" and ".init_array" section)
+- Global Destruction (executing functions defined in the ".dtors" and ".fini_array" section)
 - Register Exception Framework Section (".eh_frame" section)
 
 Although it is possible for the ELF loader to do these tasks for an executable,
@@ -17,7 +17,7 @@ them in the context of the VMM, but can also use this code within a VM if
 needed. For Bareflank, all of the C++ objects that are globally defined, have
 constructors / destructors that need to be executed from a global perspective.
 Each ".eh_frame" section in the ELF binary also needs to be registered with
-the unwind code to provide exception support.
+the unwinder code to provide exception support.
 
 ## How It's Used
 
@@ -28,21 +28,20 @@ Each cross compiled shared library is compiled using the bareflank-gcc-wrapper.
 If you look at a GCC compiler (and even Clang/LLVM), both compilation
 and linking is done with GCC. When linking is required, GCC calls LD (the
 linker) on your behalf, and adds ctrbegin.o and crtend.o to your
-executable (which it gets from ctrstuff.c). These additional object files
+executable (which it gets from crtstuff.c). These additional object files
 provide the above described functionality. There are 4 different ELF sections
-that need to be executed here (two of which we currently support)
+that need to be executed here:
 - ctors
 - dtors
 - init_array
 - fini_array
 
-GCC appears to use CTORS/DTORS while Clang/LLVM appears to use init_array
-/fini_array. These sections are all the same; a list of void (*func)(void)
+These sections are all the same; a list of void (*func)(void)
 function pointers. When each module is loaded, the CTORS/init_array functions
 all need to be executed, while during destruction, DTORS/fini_array functions
 need to be executed. Finally, each ELF module has a ".eh_frame" section (even
 for C code sometimes), that contains stack unwinding information that is
-needed by the unwind library. The ELF loader gathers the location and size
+needed by the unwinder. The ELF loader gathers the location and size
 of each of these sections, which in turn is used by the CRT library to
 setup/teardown a module:
 
@@ -54,8 +53,7 @@ no "-c" is provided, the code is linked.
 
 The build system compiles this C runtime library as both a
 static library and a dynamic library (the dynamic version is not used), and
-places the library in the "sysroot" which is located in
-~/opt/cross/x86_64-elf/. When each shared library is compiled, the
+places the library in the "sysroot". When each shared library is compiled, the
 gcc wrapper script adds the static C runtime library during linking, which
 means that every cross compiled shared library has the following two functions
 added:
