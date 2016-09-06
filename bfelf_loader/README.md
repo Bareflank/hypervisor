@@ -6,7 +6,7 @@ When source code is compiled, the compiler must compile the source into a format
 
 [ELF64 spec](https://uclibc.org/docs/elf-64-gen.pdf)
 
-The entire VMM is a set of shared libraries (also called dynamically linked libraries in Windows), that are compiled to the ELF format using GCC or Clang/LLVM. In fact, the VMM has no "binary" executable like a typical application; everything is a shared library. To load and execute the VMM modules, Bareflank provides a custom ELF loader that can be used in the kernel (currently Linux is supported, but Windows and UEFI support is coming).
+The entire VMM is a set of shared libraries (also called dynamically linked libraries in Windows), that are compiled to the ELF format using GCC or Clang/LLVM. In fact, the VMM has no "binary" executable like a typical application; everything is a shared library. To load and execute the VMM modules, Bareflank provides a custom ELF loader that can be used in the kernel.
 
 ## How It is Used
 
