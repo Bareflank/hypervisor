@@ -24,7 +24,7 @@ clone_depth: 1
 #
 install:
     - ps: 'Start-FileDownload "https://cygwin.com/setup-x86_64.exe" -FileName "setup-x86_64.exe"'
-    - 'setup-x86_64.exe --quiet-mode --no-shortcuts --only-site --root "%CYG_ROOT%" --site "%CYG_MIRROR%" --local-package-dir "%CYG_CACHE%" --packages gcc-core,gcc-g++'
+    - 'setup-x86_64.exe --quiet-mode --no-shortcuts --only-site --root "%CYG_ROOT%" --site "%CYG_MIRROR%" --local-package-dir "%CYG_CACHE%" --packages git'
     - 'copy setup-x86_64.exe %CYG_ROOT%\bin\'
     - '%CYG_BASH% -lc "cygcheck -dc cygwin"'
 
@@ -33,7 +33,7 @@ install:
 #
 build_script:
     - 'echo Building...'
-    - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER; ./tools/scripts/setup_cygwin.sh -l" > NUL 2>&1'
+    - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER; ./tools/scripts/setup_cygwin.sh -l"'
     - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER; make -j2"'
 
 #

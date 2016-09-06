@@ -32,4 +32,7 @@ do
     sleep 15
 done
 
+cd source_libcxxabi
+patch -p1 < $HYPER_ABS/tools/patches/libcxxabi.patch
+
 popd
