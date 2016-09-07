@@ -58,7 +58,7 @@ private:
 
 private:
 
-    std::shared_ptr<char> m_self;
+    std::unique_ptr<char[]> m_self;
     uint64_t m_self_length;
 };
 

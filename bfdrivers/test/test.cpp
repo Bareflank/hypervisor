@@ -81,15 +81,15 @@ driver_entry_ut::init()
     m_dummy_stop_vmm_failure_length = static_cast<uint64_t>(dummy_stop_vmm_failure_ifs.tellg());
     m_dummy_stop_vmm_success_length = static_cast<uint64_t>(dummy_stop_vmm_success_ifs.tellg());
 
-    m_dummy_add_md_failure = new char[m_dummy_add_md_failure_length];
-    m_dummy_add_md_success = new char[m_dummy_add_md_success_length];
-    m_dummy_get_drr_failure = new char[m_dummy_get_drr_failure_length];
-    m_dummy_get_drr_success = new char[m_dummy_get_drr_success_length];
-    m_dummy_misc = new char[m_dummy_misc_length];
-    m_dummy_start_vmm_failure = new char[m_dummy_start_vmm_failure_length];
-    m_dummy_start_vmm_success = new char[m_dummy_start_vmm_success_length];
-    m_dummy_stop_vmm_failure = new char[m_dummy_stop_vmm_failure_length];
-    m_dummy_stop_vmm_success = new char[m_dummy_stop_vmm_success_length];
+    m_dummy_add_md_failure = std::make_unique<char[]>(m_dummy_add_md_failure_length);
+    m_dummy_add_md_success = std::make_unique<char[]>(m_dummy_add_md_success_length);
+    m_dummy_get_drr_failure = std::make_unique<char[]>(m_dummy_get_drr_failure_length);
+    m_dummy_get_drr_success = std::make_unique<char[]>(m_dummy_get_drr_success_length);
+    m_dummy_misc = std::make_unique<char[]>(m_dummy_misc_length);
+    m_dummy_start_vmm_failure = std::make_unique<char[]>(m_dummy_start_vmm_failure_length);
+    m_dummy_start_vmm_success = std::make_unique<char[]>(m_dummy_start_vmm_success_length);
+    m_dummy_stop_vmm_failure = std::make_unique<char[]>(m_dummy_stop_vmm_failure_length);
+    m_dummy_stop_vmm_success = std::make_unique<char[]>(m_dummy_stop_vmm_success_length);
 
     dummy_add_md_failure_ifs.seekg(0);
     dummy_add_md_success_ifs.seekg(0);
@@ -101,15 +101,15 @@ driver_entry_ut::init()
     dummy_stop_vmm_failure_ifs.seekg(0);
     dummy_stop_vmm_success_ifs.seekg(0);
 
-    dummy_add_md_failure_ifs.read(m_dummy_add_md_failure, static_cast<int64_t>(m_dummy_add_md_failure_length));
-    dummy_add_md_success_ifs.read(m_dummy_add_md_success, static_cast<int64_t>(m_dummy_add_md_success_length));
-    dummy_get_drr_failure_ifs.read(m_dummy_get_drr_failure, static_cast<int64_t>(m_dummy_get_drr_failure_length));
-    dummy_get_drr_success_ifs.read(m_dummy_get_drr_success, static_cast<int64_t>(m_dummy_get_drr_success_length));
-    dummy_misc_ifs.read(m_dummy_misc, static_cast<int64_t>(m_dummy_misc_length));
-    dummy_start_vmm_failure_ifs.read(m_dummy_start_vmm_failure, static_cast<int64_t>(m_dummy_start_vmm_failure_length));
-    dummy_start_vmm_success_ifs.read(m_dummy_start_vmm_success, static_cast<int64_t>(m_dummy_start_vmm_success_length));
-    dummy_stop_vmm_failure_ifs.read(m_dummy_stop_vmm_failure, static_cast<int64_t>(m_dummy_stop_vmm_failure_length));
-    dummy_stop_vmm_success_ifs.read(m_dummy_stop_vmm_success, static_cast<int64_t>(m_dummy_stop_vmm_success_length));
+    dummy_add_md_failure_ifs.read(m_dummy_add_md_failure.get(), static_cast<int64_t>(m_dummy_add_md_failure_length));
+    dummy_add_md_success_ifs.read(m_dummy_add_md_success.get(), static_cast<int64_t>(m_dummy_add_md_success_length));
+    dummy_get_drr_failure_ifs.read(m_dummy_get_drr_failure.get(), static_cast<int64_t>(m_dummy_get_drr_failure_length));
+    dummy_get_drr_success_ifs.read(m_dummy_get_drr_success.get(), static_cast<int64_t>(m_dummy_get_drr_success_length));
+    dummy_misc_ifs.read(m_dummy_misc.get(), static_cast<int64_t>(m_dummy_misc_length));
+    dummy_start_vmm_failure_ifs.read(m_dummy_start_vmm_failure.get(), static_cast<int64_t>(m_dummy_start_vmm_failure_length));
+    dummy_start_vmm_success_ifs.read(m_dummy_start_vmm_success.get(), static_cast<int64_t>(m_dummy_start_vmm_success_length));
+    dummy_stop_vmm_failure_ifs.read(m_dummy_stop_vmm_failure.get(), static_cast<int64_t>(m_dummy_stop_vmm_failure_length));
+    dummy_stop_vmm_success_ifs.read(m_dummy_stop_vmm_success.get(), static_cast<int64_t>(m_dummy_stop_vmm_success_length));
 
     return true;
 }
@@ -117,33 +117,6 @@ driver_entry_ut::init()
 bool
 driver_entry_ut::fini()
 {
-    if (m_dummy_add_md_failure != nullptr)
-        delete[] m_dummy_add_md_failure;
-
-    if (m_dummy_add_md_success != nullptr)
-        delete[] m_dummy_add_md_success;
-
-    if (m_dummy_get_drr_failure != nullptr)
-        delete[] m_dummy_get_drr_failure;
-
-    if (m_dummy_get_drr_success != nullptr)
-        delete[] m_dummy_get_drr_success;
-
-    if (m_dummy_misc != nullptr)
-        delete[] m_dummy_misc;
-
-    if (m_dummy_start_vmm_failure != nullptr)
-        delete[] m_dummy_start_vmm_failure;
-
-    if (m_dummy_start_vmm_success != nullptr)
-        delete[] m_dummy_start_vmm_success;
-
-    if (m_dummy_stop_vmm_failure != nullptr)
-        delete[] m_dummy_stop_vmm_failure;
-
-    if (m_dummy_stop_vmm_success != nullptr)
-        delete[] m_dummy_stop_vmm_success;
-
     return true;
 }
 

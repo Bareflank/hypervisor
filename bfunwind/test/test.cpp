@@ -58,7 +58,7 @@ bool bfunwind_ut::init()
 {
     std::ifstream self_ifs(c_self_filename, std::ifstream::ate);
     m_self_length = static_cast<uint64_t>(self_ifs.tellg());
-    m_self = std::shared_ptr<char>(new char[m_self_length]());
+    m_self = std::make_unique<char[]>(m_self_length);
     self_ifs.seekg(0);
     self_ifs.read(m_self.get(), static_cast<int64_t>(m_self_length));
 

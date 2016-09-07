@@ -129,15 +129,15 @@ private:
 
 private:
 
-    char *m_dummy_add_md_failure;
-    char *m_dummy_add_md_success;
-    char *m_dummy_get_drr_failure;
-    char *m_dummy_get_drr_success;
-    char *m_dummy_misc;
-    char *m_dummy_start_vmm_failure;
-    char *m_dummy_start_vmm_success;
-    char *m_dummy_stop_vmm_failure;
-    char *m_dummy_stop_vmm_success;
+    std::unique_ptr<char[]> m_dummy_add_md_failure;
+    std::unique_ptr<char[]> m_dummy_add_md_success;
+    std::unique_ptr<char[]> m_dummy_get_drr_failure;
+    std::unique_ptr<char[]> m_dummy_get_drr_success;
+    std::unique_ptr<char[]> m_dummy_misc;
+    std::unique_ptr<char[]> m_dummy_start_vmm_failure;
+    std::unique_ptr<char[]> m_dummy_start_vmm_success;
+    std::unique_ptr<char[]> m_dummy_stop_vmm_failure;
+    std::unique_ptr<char[]> m_dummy_stop_vmm_success;
 
     uint64_t m_dummy_add_md_failure_length;
     uint64_t m_dummy_add_md_success_length;
