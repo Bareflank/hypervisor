@@ -37,7 +37,7 @@ idt_x64::idt_x64(uint16_t size) :
 idt_x64::idt_x64(const std::shared_ptr<intrinsics_x64> &intrinsics)
 {
     if (!intrinsics)
-        throw std::invalid_argument("idt_x64: intrinsics == nullptr");
+        throw std::invalid_argument("idt_x64: intrinsics is null");
 
     intrinsics->read_idt(&m_idt_reg);
 

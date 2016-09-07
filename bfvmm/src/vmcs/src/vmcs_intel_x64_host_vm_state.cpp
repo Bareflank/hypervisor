@@ -26,7 +26,7 @@ vmcs_intel_x64_host_vm_state::vmcs_intel_x64_host_vm_state(const std::shared_ptr
     m_idt(std::static_pointer_cast<intrinsics_x64>(intrinsics))
 {
     if (!intrinsics)
-        throw std::invalid_argument("intrinsics == nullptr");
+        throw std::invalid_argument("intrinsics is null");
 
     m_es = intrinsics->read_es();
     m_cs = intrinsics->read_cs();

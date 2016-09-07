@@ -2109,7 +2109,7 @@ vmcs_intel_x64::check_guest_vmcs_link_pointer_first_word()
 
     auto vmcs = g_mm->physint_to_virtptr(vmcs_link_pointer);
 
-    if (vmcs == nullptr)
+    if (!vmcs)
         throw std::logic_error("invalid vmcs physical address");
 
     auto basic_msr = m_intrinsics->read_msr(IA32_VMX_BASIC_MSR) & 0x7FFFFFFFF;

@@ -161,7 +161,7 @@ vmxon_intel_x64::create_vmxon_region()
     m_vmxon_region_phys = g_mm->virtptr_to_physint(m_vmxon_region.get());
 
     if (m_vmxon_region_phys == 0)
-        throw std::logic_error("m_vmxon_region_phys == nullptr");
+        throw std::logic_error("m_vmxon_region_phys is null");
 
     gsl::span<uint32_t> id{m_vmxon_region.get(), 1024};
     id[0] = static_cast<uint32_t>(m_intrinsics->read_msr(IA32_VMX_BASIC_MSR) & 0x7FFFFFFFF);

@@ -27,7 +27,7 @@
 extern "C" int
 write(int file, const void *buffer, size_t count)
 {
-    if (buffer == nullptr || count == 0)
+    if (!buffer || count == 0)
         return 0;
 
     if (file != 1 && file != 2)
@@ -82,7 +82,7 @@ debug_ring *dr = nullptr;
 extern "C" int
 write(int file, const void *buffer, size_t count)
 {
-    if (buffer == nullptr || count == 0)
+    if (!buffer || count == 0)
         return 0;
 
     try
@@ -91,7 +91,7 @@ write(int file, const void *buffer, size_t count)
         {
             auto str = std::string(static_cast<const char *>(buffer), count);
 
-            if (dr == nullptr)
+            if (!dr)
                 dr = new debug_ring(0);
 
             dr->write(str);
@@ -200,7 +200,7 @@ get_eh_frame_list() noexcept
 extern "C" int64_t
 register_eh_frame(void *addr, uint64_t size) noexcept
 {
-    if (addr == nullptr || size == 0)
+    if (!addr || size == 0)
         return REGISTER_EH_FRAME_FAILURE;
 
     if (g_eh_frame_list_num >= MAX_NUM_MODULES)
