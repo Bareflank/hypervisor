@@ -20,7 +20,6 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #include <gsl/gsl>
-
 #include <view_as_pointer.h>
 #include <vmcs/vmcs_intel_x64.h>
 #include <memory_manager/memory_manager.h>
@@ -463,7 +462,7 @@ void
 vmcs_intel_x64::checks_on_vm_exit_control_fields()
 {
     check_control_vm_exit_ctls_reserved_properly_set();
-    check_control_activate_and_save_premeption_timer_must_be_0();
+    check_control_activate_and_save_preemption_timer_must_be_0();
     check_control_exit_msr_store_address();
     check_control_exit_msr_load_address();
 }
@@ -492,7 +491,7 @@ vmcs_intel_x64::check_control_vm_exit_ctls_reserved_properly_set()
 }
 
 void
-vmcs_intel_x64::check_control_activate_and_save_premeption_timer_must_be_0()
+vmcs_intel_x64::check_control_activate_and_save_preemption_timer_must_be_0()
 {
     auto vmx_preemption_timer = is_enabled_vmx_preemption_timer();
     auto save_vmx_preemption_timer_on_exit = is_enabled_save_vmx_preemption_timer_on_exit();
@@ -577,7 +576,7 @@ vmcs_intel_x64::check_control_vm_entry_ctls_reserved_properly_set()
         bferror << "    - allowed_one: " << view_as_pointer(allowed_one) << bfendl;
         bferror << "    - ctls: " << view_as_pointer(ctls) << bfendl;
 
-        throw std::logic_error("invalid exit controls");
+        throw std::logic_error("invalid entry controls");
     }
 }
 

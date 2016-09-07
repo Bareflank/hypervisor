@@ -53,6 +53,38 @@ vmcs_ut::list()
     this->test_vmread_failure();
     this->test_vmwrite_failure();
 
+    this->test_check_control_pin_based_ctls_reserved_properly_set();
+    this->test_check_control_proc_based_ctls_reserved_properly_set();
+    this->test_check_control_proc_based_ctls2_reserved_properly_set();
+    this->test_check_control_cr3_count_less_than_4();
+    this->test_check_control_io_bitmap_address_bits();
+    this->test_check_control_msr_bitmap_address_bits();
+    this->test_check_control_tpr_shadow_and_virtual_apic();
+    this->test_check_control_nmi_exiting_and_virtual_nmi();
+    this->test_check_control_virtual_nmi_and_nmi_window();
+    this->test_check_control_virtual_apic_address_bits();
+    this->test_check_control_x2apic_mode_and_virtual_apic_access();
+    this->test_check_control_virtual_interrupt_and_external_interrupt();
+    this->test_check_control_process_posted_interrupt_checks();
+    this->test_check_control_vpid_checks();
+    this->test_check_control_enable_ept_checks();
+    this->test_check_control_enable_pml_checks();
+    this->test_check_control_unrestricted_guests();
+    this->test_check_control_enable_vm_functions();
+    this->test_check_control_enable_vmcs_shadowing();
+    this->test_check_control_enable_ept_violation_checks();
+    this->test_check_control_vm_exit_ctls_reserved_properly_set();
+    this->test_check_control_activate_and_save_preemption_timer_must_be_0();
+    this->test_check_control_exit_msr_store_address();
+    this->test_check_control_exit_msr_load_address();
+    this->test_check_control_vm_entry_ctls_reserved_properly_set();
+    this->test_check_control_event_injection_type_vector_checks();
+    this->test_check_control_event_injection_delivery_ec_checks();
+    this->test_check_control_event_injection_reserved_bits_checks();
+    this->test_check_control_event_injection_ec_checks();
+    this->test_check_control_event_injection_instr_length_checks();
+    this->test_check_control_entry_msr_load_address();
+
     return true;
 }
 

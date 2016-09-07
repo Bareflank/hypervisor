@@ -562,7 +562,7 @@ protected:
 
     virtual void checks_on_vm_exit_control_fields();
     virtual void check_control_vm_exit_ctls_reserved_properly_set();
-    virtual void check_control_activate_and_save_premeption_timer_must_be_0();
+    virtual void check_control_activate_and_save_preemption_timer_must_be_0();
     virtual void check_control_exit_msr_store_address();
     virtual void check_control_exit_msr_load_address();
 

@@ -73,10 +73,10 @@ memory_manager_ut::test_memory_manager_multiple_malloc_heap_should_be_contiguous
     addr3 = pool.alloc((1 << 3));
     addr4 = pool.alloc((1 << 3));
 
-    EXPECT_TRUE(addr1 == 100 + ((1 << 3) * 0));  // 100
-    EXPECT_TRUE(addr2 == 100 + ((1 << 3) * 1));  // 108
-    EXPECT_TRUE(addr3 == 100 + ((1 << 3) * 2));  // 116
-    EXPECT_TRUE(addr4 == 100 + ((1 << 3) * 3));  // 124
+    this->expect_true(addr1 == 100 + ((1 << 3) * 0));  // 100
+    this->expect_true(addr2 == 100 + ((1 << 3) * 1));  // 108
+    this->expect_true(addr3 == 100 + ((1 << 3) * 2));  // 116
+    this->expect_true(addr4 == 100 + ((1 << 3) * 3));  // 124
 
     pool.free(addr1);
     pool.free(addr2);
@@ -88,10 +88,10 @@ memory_manager_ut::test_memory_manager_multiple_malloc_heap_should_be_contiguous
     addr3 = pool.alloc((1 << 3) + 2);
     addr4 = pool.alloc((1 << 3) * 4);
 
-    EXPECT_TRUE(addr1 == 132 + ((1 << 3) * 0));  // 132
-    EXPECT_TRUE(addr2 == 132 + ((1 << 3) * 2));  // 148
-    EXPECT_TRUE(addr3 == 132 + ((1 << 3) * 4));  // 164
-    EXPECT_TRUE(addr4 == 132 + ((1 << 3) * 6));  // 180
+    this->expect_true(addr1 == 132 + ((1 << 3) * 0));  // 132
+    this->expect_true(addr2 == 132 + ((1 << 3) * 2));  // 148
+    this->expect_true(addr3 == 132 + ((1 << 3) * 4));  // 164
+    this->expect_true(addr4 == 132 + ((1 << 3) * 6));  // 180
 
     pool.free(addr1);
     pool.free(addr2);
@@ -126,7 +126,7 @@ void
 memory_manager_ut::test_memory_manager_malloc_heap_all_of_memory_one_block()
 {
     mem_pool<128, 3> pool(100);
-    EXPECT_TRUE(pool.alloc(128) == 100);
+    this->expect_true(pool.alloc(128) == 100);
 }
 
 void
@@ -141,7 +141,7 @@ memory_manager_ut::test_memory_manager_malloc_heap_all_memory_fragmented()
     for (const auto &addr : addrs)
         pool.free(addr);
 
-    EXPECT_TRUE(pool.alloc(128) == 100);
+    this->expect_true(pool.alloc(128) == 100);
 }
 
 void
@@ -171,8 +171,8 @@ memory_manager_ut::test_memory_manager_size_out_of_bounds()
 {
     mem_pool<128, 3> pool(100);
 
-    EXPECT_TRUE(pool.size(0) == 0);
-    EXPECT_TRUE(g_mm->size(nullptr) == 0);
+    this->expect_true(pool.size(0) == 0);
+    this->expect_true(g_mm->size(nullptr) == 0);
 }
 
 void
@@ -180,7 +180,7 @@ memory_manager_ut::test_memory_manager_size_unallocated()
 {
     mem_pool<128, 3> pool(100);
 
-    EXPECT_TRUE(pool.size(100) == 0);
+    this->expect_true(pool.size(100) == 0);
 }
 
 void
@@ -189,7 +189,7 @@ memory_manager_ut::test_memory_manager_size()
     mem_pool<128, 3> pool(100);
 
     pool.alloc(8);
-    EXPECT_TRUE(pool.size(100) == 8);
+    this->expect_true(pool.size(100) == 8);
 }
 
 void
@@ -197,10 +197,10 @@ memory_manager_ut::test_memory_manager_contains_out_of_bounds()
 {
     mem_pool<128, 3> pool(100);
 
-    EXPECT_FALSE(pool.contains(0));
-    EXPECT_FALSE(pool.contains(99));
-    EXPECT_FALSE(pool.contains(228));
-    EXPECT_FALSE(pool.contains(500));
+    this->expect_false(pool.contains(0));
+    this->expect_false(pool.contains(99));
+    this->expect_false(pool.contains(228));
+    this->expect_false(pool.contains(500));
 }
 
 void
@@ -208,14 +208,14 @@ memory_manager_ut::test_memory_manager_contains()
 {
     mem_pool<128, 3> pool(100);
 
-    EXPECT_TRUE(pool.contains(100));
-    EXPECT_TRUE(pool.contains(227));
+    this->expect_true(pool.contains(100));
+    this->expect_true(pool.contains(227));
 }
 
 void
 memory_manager_ut::test_memory_manager_malloc_out_of_memory()
 {
-    EXPECT_TRUE(g_mm->alloc(0xFFFFFFFFFFFFFF00) == nullptr);
+    this->expect_true(g_mm->alloc(0xFFFFFFFFFFFFFF00) == nullptr);
 }
 
 void
@@ -223,8 +223,8 @@ memory_manager_ut::test_memory_manager_malloc_heap()
 {
     auto ptr = g_mm->alloc(MAX_CACHE_LINE_SIZE);
 
-    EXPECT_TRUE(ptr != nullptr);
-    EXPECT_TRUE(g_mm->size(ptr) == MAX_CACHE_LINE_SIZE);
+    this->expect_true(ptr != nullptr);
+    this->expect_true(g_mm->size(ptr) == MAX_CACHE_LINE_SIZE);
 
     g_mm->free(ptr);
 }
@@ -234,8 +234,8 @@ memory_manager_ut::test_memory_manager_malloc_page()
 {
     auto ptr = g_mm->alloc(MAX_PAGE_SIZE);
 
-    EXPECT_TRUE(ptr != nullptr);
-    EXPECT_TRUE(g_mm->size(ptr) == MAX_PAGE_SIZE);
+    this->expect_true(ptr != nullptr);
+    this->expect_true(g_mm->size(ptr) == MAX_PAGE_SIZE);
 
     g_mm->free(ptr);
 }
@@ -243,7 +243,7 @@ memory_manager_ut::test_memory_manager_malloc_page()
 void
 memory_manager_ut::test_memory_manager_add_md_no_exceptions()
 {
-    EXPECT_TRUE(add_md(nullptr) == MEMORY_MANAGER_FAILURE);
+    this->expect_true(add_md(nullptr) == MEMORY_MANAGER_FAILURE);
 }
 
 void
@@ -295,13 +295,13 @@ memory_manager_ut::test_memory_manager_add_md_unaligned_virtual()
 void
 memory_manager_ut::test_memory_manager_virtint_to_physint_unknown()
 {
-    EXPECT_TRUE(g_mm->virtint_to_physint(0x54321000) == 0);
+    this->expect_true(g_mm->virtint_to_physint(0x54321000) == 0);
 }
 
 void
 memory_manager_ut::test_memory_manager_physint_to_virtint_unknown()
 {
-    EXPECT_TRUE(g_mm->physint_to_virtint(0x12346000) == 0);
+    this->expect_true(g_mm->physint_to_virtint(0x12346000) == 0);
 }
 
 void
@@ -310,16 +310,16 @@ memory_manager_ut::test_memory_manager_virtint_to_physint_random_address()
     memory_descriptor md = {0x12345000, 0x54321000, 7};
 
     EXPECT_NO_EXCEPTION(g_mm->add_md(&md));
-    EXPECT_TRUE(g_mm->virtint_to_physint(0x54321ABC) == 0x12345ABC);
+    this->expect_true(g_mm->virtint_to_physint(0x54321ABC) == 0x12345ABC);
 }
 
 void
 memory_manager_ut::test_memory_manager_virtint_to_physint_nullptr()
 {
-    EXPECT_TRUE(g_mm->virtint_to_physint(0) == 0);
-    EXPECT_TRUE(g_mm->virtptr_to_physint(nullptr) == 0);
-    EXPECT_TRUE(g_mm->virtint_to_physptr(0) == nullptr);
-    EXPECT_TRUE(g_mm->virtptr_to_physptr(nullptr) == nullptr);
+    this->expect_true(g_mm->virtint_to_physint(0) == 0);
+    this->expect_true(g_mm->virtptr_to_physint(nullptr) == 0);
+    this->expect_true(g_mm->virtint_to_physptr(0) == nullptr);
+    this->expect_true(g_mm->virtptr_to_physptr(nullptr) == nullptr);
 }
 
 void
@@ -328,7 +328,7 @@ memory_manager_ut::test_memory_manager_virtint_to_physint_upper_limit()
     memory_descriptor md = {0x12345000, 0x54321000, 7};
 
     EXPECT_NO_EXCEPTION(g_mm->add_md(&md));
-    EXPECT_TRUE(g_mm->virtint_to_physint(0x54321FFF) == 0x12345FFF);
+    this->expect_true(g_mm->virtint_to_physint(0x54321FFF) == 0x12345FFF);
 }
 
 void
@@ -337,7 +337,7 @@ memory_manager_ut::test_memory_manager_virtint_to_physint_lower_limit()
     memory_descriptor md = {0x12345000, 0x54321000, 7};
 
     EXPECT_NO_EXCEPTION(g_mm->add_md(&md));
-    EXPECT_TRUE(g_mm->virtint_to_physint(0x54321000) == 0x12345000);
+    this->expect_true(g_mm->virtint_to_physint(0x54321000) == 0x12345000);
 }
 
 void
@@ -349,10 +349,10 @@ memory_manager_ut::test_memory_manager_virt_to_phys_map()
 
     for (const auto &iter : g_mm->virt_to_phys_map())
     {
-        EXPECT_TRUE(iter.first == (0x54321000 >> 12));
-        EXPECT_TRUE(iter.second.phys == md.phys);
-        EXPECT_TRUE(iter.second.virt == md.virt);
-        EXPECT_TRUE(iter.second.type == md.type);
+        this->expect_true(iter.first == (0x54321000 >> 12));
+        this->expect_true(iter.second.phys == md.phys);
+        this->expect_true(iter.second.virt == md.virt);
+        this->expect_true(iter.second.type == md.type);
     }
 }
 
@@ -362,16 +362,16 @@ memory_manager_ut::test_memory_manager_physint_to_virtint_random_address()
     memory_descriptor md = {0x12345000, 0x54321000, 7};
 
     EXPECT_NO_EXCEPTION(g_mm->add_md(&md));
-    EXPECT_TRUE(g_mm->physint_to_virtint(0x12345ABC) == 0x54321ABC);
+    this->expect_true(g_mm->physint_to_virtint(0x12345ABC) == 0x54321ABC);
 }
 
 void
 memory_manager_ut::test_memory_manager_physint_to_virtint_nullptr()
 {
-    EXPECT_TRUE(g_mm->physint_to_virtint(0) == 0);
-    EXPECT_TRUE(g_mm->physptr_to_virtint(nullptr) == 0);
-    EXPECT_TRUE(g_mm->physint_to_virtptr(0) == nullptr);
-    EXPECT_TRUE(g_mm->physptr_to_virtptr(nullptr) == nullptr);
+    this->expect_true(g_mm->physint_to_virtint(0) == 0);
+    this->expect_true(g_mm->physptr_to_virtint(nullptr) == 0);
+    this->expect_true(g_mm->physint_to_virtptr(0) == nullptr);
+    this->expect_true(g_mm->physptr_to_virtptr(nullptr) == nullptr);
 }
 
 void
@@ -380,7 +380,7 @@ memory_manager_ut::test_memory_manager_physint_to_virtint_upper_limit()
     memory_descriptor md = {0x12345000, 0x54321000, 7};
 
     EXPECT_NO_EXCEPTION(g_mm->add_md(&md));
-    EXPECT_TRUE(g_mm->physint_to_virtint(0x12345FFF) == 0x54321FFF);
+    this->expect_true(g_mm->physint_to_virtint(0x12345FFF) == 0x54321FFF);
 }
 
 void
@@ -389,7 +389,7 @@ memory_manager_ut::test_memory_manager_physint_to_virtint_lower_limit()
     memory_descriptor md = {0x12345000, 0x54321000, 7};
 
     EXPECT_NO_EXCEPTION(g_mm->add_md(&md));
-    EXPECT_TRUE(g_mm->physint_to_virtint(0x12345000) == 0x54321000);
+    this->expect_true(g_mm->physint_to_virtint(0x12345000) == 0x54321000);
 }
 
 void
@@ -401,9 +401,9 @@ memory_manager_ut::test_memory_manager_phys_to_virt_map()
 
     for (const auto &iter : g_mm->phys_to_virt_map())
     {
-        EXPECT_TRUE(iter.first == (0x12345000 >> 12));
-        EXPECT_TRUE(iter.second.phys == md.phys);
-        EXPECT_TRUE(iter.second.virt == md.virt);
-        EXPECT_TRUE(iter.second.type == md.type);
+        this->expect_true(iter.first == (0x12345000 >> 12));
+        this->expect_true(iter.second.phys == md.phys);
+        this->expect_true(iter.second.virt == md.virt);
+        this->expect_true(iter.second.type == md.type);
     }
 }

@@ -22,17 +22,16 @@
 
 #include <gsl/gsl>
 #include <test.h>
-#include <vmcs/vmcs_intel_x64.h>
 #include <vmcs/vmcs_intel_x64_promote.h>
 #include <vmcs/vmcs_intel_x64_resume.h>
-#include <memory_manager/memory_manager.h>
 
 extern size_t g_new_throws_bad_alloc;
 
-static std::map<uint32_t, uint64_t> g_msrs;
-static std::map<uint64_t, uint64_t> g_vmcs_fields;
-static uint8_t span[0x81];
-static bool g_virt_to_phys_return_nullptr = false;
+std::map<uint32_t, uint64_t> g_msrs;
+std::map<uint64_t, uint64_t> g_vmcs_fields;
+uint8_t span[0x81] = {0};
+bool g_virt_to_phys_return_nullptr = false;
+bool g_phys_to_virt_return_nullptr = false;
 
 static void
 vmcs_promote_fail(bool state_save)
@@ -48,13 +47,13 @@ vmcs_resume_fail(state_save_intel_x64 *state_save)
     return;
 }
 
-static uint64_t
+uint64_t
 read_msr(uint32_t msr)
 {
     return g_msrs[msr];
 }
 
-static bool
+bool
 vmread(uint64_t field, uint64_t *val)
 {
     *val = g_vmcs_fields[field];
@@ -141,12 +140,25 @@ virtptr_to_physint(void *ptr)
     return 0x0000000ABCDEF0000;
 }
 
-static void *
+void *
 physint_to_virtptr(uintptr_t phys)
 {
     (void) phys;
 
+    if (g_phys_to_virt_return_nullptr)
+        return nullptr;
+
     return static_cast<void *>(&span);
+}
+
+void
+setup_mock(MockRepository &mocks, memory_manager *mm, intrinsics_intel_x64 *in)
+{
+    mocks.OnCall(in, intrinsics_intel_x64::read_msr).Do(read_msr);
+    mocks.OnCall(in, intrinsics_intel_x64::vmread).Do(vmread);
+    mocks.OnCall(in, intrinsics_intel_x64::cpuid_eax).With(0x80000008).Return(32);
+    mocks.OnCallFunc(memory_manager::instance).Return(mm);
+    mocks.OnCall(mm, memory_manager::physint_to_virtptr).Do(physint_to_virtptr);
 }
 
 static void
@@ -260,7 +272,7 @@ setup_vmcs_guest_fields()
     setup_vmcs_guest_non_register_state();
 }
 
-static void
+void
 setup_vm_execution_control_fields()
 {
     g_vmcs_fields[VMCS_PIN_BASED_VM_EXECUTION_CONTROLS] = 0xffffFFFFffffFF7F;
@@ -285,7 +297,7 @@ setup_vm_execution_control_fields()
     g_vmcs_fields[VMCS_VIRTUALIZATION_EXCEPTION_INFORMATION_ADDRESS_FULL] = 0x0000000010000000;
 }
 
-static void
+void
 setup_vm_exit_control_fields()
 {
     g_vmcs_fields[VMCS_VM_EXIT_CONTROLS] = 0xffffFFFFffffFFFF;
@@ -295,7 +307,7 @@ setup_vm_exit_control_fields()
     g_vmcs_fields[VMCS_VM_EXIT_MSR_LOAD_ADDRESS_FULL] = 0x1000;
 }
 
-static void
+void
 setup_vm_entry_control_fields()
 {
     g_vmcs_fields[VMCS_VM_ENTRY_CONTROLS] = 0xffffFFFFffffFFFF;
@@ -307,7 +319,7 @@ setup_vm_entry_control_fields()
     g_vmcs_fields[VMCS_VM_ENTRY_MSR_LOAD_ADDRESS_FULL] = 0x0000000010000000;
 }
 
-static void
+void
 setup_msrs()
 {
     g_msrs[IA32_VMX_BASIC_MSR] = 0x7ffFFFF;
