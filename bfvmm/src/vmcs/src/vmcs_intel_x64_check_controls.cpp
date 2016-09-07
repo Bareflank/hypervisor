@@ -201,7 +201,7 @@ vmcs_intel_x64::check_control_tpr_shadow_and_virtual_apic()
 
         auto virt_addr = static_cast<uint8_t *>(g_mm->physint_to_virtptr(phys_addr));
 
-        if (virt_addr == nullptr)
+        if (!virt_addr)
             throw std::logic_error("virtual apic virtual addr is NULL");
 
         auto virt_addr_span = gsl::span<uint8_t>(virt_addr, 0x81);

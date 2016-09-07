@@ -68,14 +68,14 @@ driver_entry_ut::test_helper_common_vmm_status()
 void
 driver_entry_ut::test_helper_get_file_invalid_index()
 {
-    EXPECT_TRUE(get_module(10000) == nullptr);
+    EXPECT_FALSE(get_module(10000));
 }
 
 void
 driver_entry_ut::test_helper_get_file_success()
 {
     EXPECT_TRUE(common_add_module(m_dummy_start_vmm_success, m_dummy_start_vmm_success_length) == BF_SUCCESS);
-    EXPECT_TRUE(get_module(0) != nullptr);
+    EXPECT_TRUE(get_module(0));
     EXPECT_TRUE(common_fini() == BF_SUCCESS);
 }
 

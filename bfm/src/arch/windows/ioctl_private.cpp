@@ -63,7 +63,7 @@ bf_ioctl_open()
 
     deviceDetailData = static_cast<SP_INTERFACE_DEVICE_DETAIL_DATA *>(malloc(requiredSize));
 
-    if (deviceDetailData == nullptr)
+    if (!deviceDetailData)
         return INVALID_HANDLE_VALUE;
 
     auto ___ = gsl::finally([&]
@@ -142,7 +142,7 @@ ioctl_private::open()
 void
 ioctl_private::call_ioctl_add_module(const char *data, uint64_t len)
 {
-    if (data == nullptr)
+    if (!data)
         throw std::invalid_argument("data == NULL");
 
     if (len == 0)
@@ -183,7 +183,7 @@ ioctl_private::call_ioctl_stop_vmm()
 void
 ioctl_private::call_ioctl_dump_vmm(debug_ring_resources_t *drr, uint64_t vcpuid)
 {
-    if (drr == nullptr)
+    if (!drr)
         throw std::invalid_argument("drr == NULL");
 
     if (bf_write_ioctl(fd, IOCTL_SET_VCPUID, &vcpuid, sizeof(vcpuid)) == BF_IOCTL_FAILURE)
@@ -196,7 +196,7 @@ ioctl_private::call_ioctl_dump_vmm(debug_ring_resources_t *drr, uint64_t vcpuid)
 void
 ioctl_private::call_ioctl_vmm_status(int64_t *status)
 {
-    if (status == nullptr)
+    if (!status)
         throw std::invalid_argument("status == NULL");
 
     if (bf_read_ioctl(fd, IOCTL_VMM_STATUS, status, sizeof(*status)) == BF_IOCTL_FAILURE)

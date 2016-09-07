@@ -31,13 +31,13 @@ ioctl_driver::process(std::shared_ptr<file> f,
                       std::shared_ptr<ioctl> ctl,
                       std::shared_ptr<command_line_parser> clp)
 {
-    if (f == nullptr)
+    if (!f)
         throw std::invalid_argument("f == NULL");
 
-    if (ctl == nullptr)
+    if (!ctl)
         throw std::invalid_argument("ctl == NULL");
 
-    if (clp == nullptr)
+    if (!clp)
         throw std::invalid_argument("clp == NULL");
 
     switch (clp->cmd())

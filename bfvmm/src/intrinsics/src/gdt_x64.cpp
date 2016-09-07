@@ -39,7 +39,7 @@ gdt_x64::gdt_x64(uint16_t size) :
 gdt_x64::gdt_x64(const std::shared_ptr<intrinsics_x64> &intrinsics)
 {
     if (!intrinsics)
-        throw std::invalid_argument("gdt_x64: intrinsics == nullptr");
+        throw std::invalid_argument("gdt_x64: intrinsics is null");
 
     intrinsics->read_gdt(&m_gdt_reg);
 

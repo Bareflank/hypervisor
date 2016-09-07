@@ -25,7 +25,7 @@
 #include <memory_manager/page_table_x64.h>
 
 page_table_x64::page_table_x64(uintptr_t *pte) :
-    page_table_entry_x64(pte != nullptr ? pte : & m_cr3_shadow),
+    page_table_entry_x64(pte ? pte : & m_cr3_shadow),
     m_ptes(PT_SIZE),
     m_cr3_shadow(0)
 {

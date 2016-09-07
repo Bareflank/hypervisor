@@ -32,7 +32,7 @@ add_md(struct memory_descriptor *md) noexcept;
 void
 memory_manager_ut::test_memory_manager_malloc_zero()
 {
-    EXPECT_TRUE(g_mm->malloc(0) == nullptr);
+    EXPECT_FALSE(g_mm->malloc(0));
 }
 
 void
@@ -44,7 +44,7 @@ memory_manager_ut::test_memory_manager_free_zero()
 void
 memory_manager_ut::test_memory_manager_malloc_heap_valid()
 {
-    EXPECT_TRUE(g_mm->malloc(sizeof(uint64_t)) != nullptr);
+    EXPECT_TRUE(g_mm->malloc(sizeof(uint64_t)));
 
     g_mm->clear();
 }
@@ -155,8 +155,8 @@ memory_manager_ut::test_memory_manager_malloc_heap_all_of_memory()
     auto fill_mem_pool = g_mm->malloc(sizeof(uint64_t));
     auto mem_pool_full = g_mm->malloc(sizeof(uint64_t));
 
-    EXPECT_TRUE(fill_mem_pool != nullptr);
-    EXPECT_TRUE(mem_pool_full == nullptr);
+    EXPECT_TRUE(fill_mem_pool);
+    EXPECT_FALSE(mem_pool_full);
 
     g_mm->free(fill_mem_pool);
     g_mm->free(mem_pool_full);
@@ -170,8 +170,8 @@ memory_manager_ut::test_memory_manager_malloc_heap_all_of_memory()
     fill_mem_pool = g_mm->malloc(sizeof(uint64_t));
     mem_pool_full = g_mm->malloc(sizeof(uint64_t));
 
-    EXPECT_TRUE(fill_mem_pool != nullptr);
-    EXPECT_TRUE(mem_pool_full == nullptr);
+    EXPECT_TRUE(fill_mem_pool);
+    EXPECT_FALSE(mem_pool_full);
 
     g_mm->clear();
 }
@@ -179,7 +179,7 @@ memory_manager_ut::test_memory_manager_malloc_heap_all_of_memory()
 void
 memory_manager_ut::test_memory_manager_malloc_heap_all_of_memory_one_block()
 {
-    EXPECT_TRUE(g_mm->malloc((MAX_HEAP_POOL - 1) * sizeof(uint64_t)) != nullptr);
+    EXPECT_TRUE(g_mm->malloc((MAX_HEAP_POOL - 1) * sizeof(uint64_t)));
     g_mm->clear();
 }
 
@@ -194,7 +194,7 @@ memory_manager_ut::test_memory_manager_malloc_heap_all_memory_fragmented()
     for (const auto &addr : addrs)
         g_mm->free(addr);
 
-    EXPECT_TRUE(g_mm->malloc((MAX_HEAP_POOL - 1) * sizeof(uint64_t)) != nullptr);
+    EXPECT_TRUE(g_mm->malloc((MAX_HEAP_POOL - 1) * sizeof(uint64_t)));
 
     g_mm->clear();
 }
@@ -202,7 +202,7 @@ memory_manager_ut::test_memory_manager_malloc_heap_all_memory_fragmented()
 void
 memory_manager_ut::test_memory_manager_malloc_heap_too_much_memory_one_block()
 {
-    EXPECT_TRUE(g_mm->malloc((MAX_HEAP_POOL) * sizeof(uint64_t)) == nullptr);
+    EXPECT_FALSE(g_mm->malloc((MAX_HEAP_POOL) * sizeof(uint64_t)));
     g_mm->clear();
 }
 
@@ -210,7 +210,7 @@ void
 memory_manager_ut::test_memory_manager_malloc_heap_too_much_memory_non_block_size()
 {
     g_mm->malloc((MAX_HEAP_POOL - 2) * sizeof(uint64_t));
-    EXPECT_TRUE(g_mm->malloc(100) == nullptr);
+    EXPECT_FALSE(g_mm->malloc(100));
 
     g_mm->clear();
 }
@@ -316,9 +316,9 @@ memory_manager_ut::test_memory_manager_malloc_heap_sparse_fragments()
 void
 memory_manager_ut::test_memory_manager_malloc_heap_massive()
 {
-    EXPECT_TRUE(g_mm->malloc(0xFFFFFFFFFFFFFFFF) == nullptr);
-    EXPECT_TRUE(g_mm->malloc((MAX_HEAP_POOL + 10U) * 8) == nullptr);
-    EXPECT_TRUE(g_mm->malloc((MAX_PAGE_POOL + MAX_PAGE_SIZE) * 4096) == nullptr);
+    EXPECT_FALSE(g_mm->malloc(0xFFFFFFFFFFFFFFFF));
+    EXPECT_FALSE(g_mm->malloc((MAX_HEAP_POOL + 10U) * 8));
+    EXPECT_FALSE(g_mm->malloc((MAX_PAGE_POOL + MAX_PAGE_SIZE) * 4096));
     g_mm->clear();
 }
 
@@ -408,7 +408,7 @@ memory_manager_ut::test_memory_manager_malloc_heap_resize_fragments()
 void
 memory_manager_ut::test_memory_manager_malloc_page_valid()
 {
-    EXPECT_TRUE(g_mm->malloc(0x1000) != nullptr);
+    EXPECT_TRUE(g_mm->malloc(0x1000));
 
     g_mm->clear();
 }
@@ -519,8 +519,8 @@ memory_manager_ut::test_memory_manager_malloc_page_all_of_memory()
     auto fill_mem_pool = g_mm->malloc(0x1000);
     auto mem_pool_full = g_mm->malloc(0x1000);
 
-    EXPECT_TRUE(fill_mem_pool != nullptr);
-    EXPECT_TRUE(mem_pool_full == nullptr);
+    EXPECT_TRUE(fill_mem_pool);
+    EXPECT_FALSE(mem_pool_full);
 
     g_mm->free(fill_mem_pool);
     g_mm->free(mem_pool_full);
@@ -534,8 +534,8 @@ memory_manager_ut::test_memory_manager_malloc_page_all_of_memory()
     fill_mem_pool = g_mm->malloc(0x1000);
     mem_pool_full = g_mm->malloc(0x1000);
 
-    EXPECT_TRUE(fill_mem_pool != nullptr);
-    EXPECT_TRUE(mem_pool_full == nullptr);
+    EXPECT_TRUE(fill_mem_pool);
+    EXPECT_FALSE(mem_pool_full);
 
     g_mm->clear();
 }
@@ -543,7 +543,7 @@ memory_manager_ut::test_memory_manager_malloc_page_all_of_memory()
 void
 memory_manager_ut::test_memory_manager_malloc_page_all_of_memory_one_block()
 {
-    EXPECT_TRUE(g_mm->malloc(MAX_PAGE_POOL * 0x1000) != nullptr);
+    EXPECT_TRUE(g_mm->malloc(MAX_PAGE_POOL * 0x1000));
     g_mm->clear();
 }
 
@@ -558,7 +558,7 @@ memory_manager_ut::test_memory_manager_malloc_page_all_memory_fragmented()
     for (const auto &addr : addrs)
         g_mm->free(addr);
 
-    EXPECT_TRUE(g_mm->malloc(MAX_PAGE_POOL * 0x1000) != nullptr);
+    EXPECT_TRUE(g_mm->malloc(MAX_PAGE_POOL * 0x1000));
 
     g_mm->clear();
 }
@@ -566,7 +566,7 @@ memory_manager_ut::test_memory_manager_malloc_page_all_memory_fragmented()
 void
 memory_manager_ut::test_memory_manager_malloc_page_too_much_memory_one_block()
 {
-    EXPECT_TRUE(g_mm->malloc((MAX_PAGE_POOL + 1) * 0x1000) == nullptr);
+    EXPECT_FALSE(g_mm->malloc((MAX_PAGE_POOL + 1) * 0x1000));
     g_mm->clear();
 }
 
@@ -819,8 +819,8 @@ memory_manager_ut::test_memory_manager_virtint_to_physint_nullptr()
 {
     EXPECT_TRUE(g_mm->virtint_to_physint(0) == 0);
     EXPECT_TRUE(g_mm->virtptr_to_physint(nullptr) == 0);
-    EXPECT_TRUE(g_mm->virtint_to_physptr(0) == nullptr);
-    EXPECT_TRUE(g_mm->virtptr_to_physptr(nullptr) == nullptr);
+    EXPECT_FALSE(g_mm->virtint_to_physptr(0));
+    EXPECT_FALSE(g_mm->virtptr_to_physptr(nullptr));
 }
 
 void
@@ -871,8 +871,8 @@ memory_manager_ut::test_memory_manager_physint_to_virtint_nullptr()
 {
     EXPECT_TRUE(g_mm->physint_to_virtint(0) == 0);
     EXPECT_TRUE(g_mm->physptr_to_virtint(nullptr) == 0);
-    EXPECT_TRUE(g_mm->physint_to_virtptr(0) == nullptr);
-    EXPECT_TRUE(g_mm->physptr_to_virtptr(nullptr) == nullptr);
+    EXPECT_FALSE(g_mm->physint_to_virtptr(0));
+    EXPECT_FALSE(g_mm->physptr_to_virtptr(nullptr));
 }
 
 void

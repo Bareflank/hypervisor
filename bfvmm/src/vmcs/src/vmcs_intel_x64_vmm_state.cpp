@@ -30,7 +30,7 @@ vmcs_intel_x64_vmm_state::vmcs_intel_x64_vmm_state(const std::shared_ptr<state_s
     m_idt(256)
 {
     if (!state_save)
-        throw std::invalid_argument("state_save == nullptr");
+        throw std::invalid_argument("state_save is null");
 
     m_thread_storage = std::make_unique<uintptr_t[]>(512);
     m_thread_storage[0] = reinterpret_cast<uintptr_t>(m_thread_storage.get());

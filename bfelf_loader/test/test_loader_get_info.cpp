@@ -124,13 +124,13 @@ bfelf_loader_ut::test_bfelf_loader_get_info_expected_misc_resources()
     ret = bfelf_loader_get_info(&loader, &dummy_misc_ef, &info);
     ASSERT_TRUE(ret == BFELF_SUCCESS);
 
-    EXPECT_TRUE(info.ctors_addr != nullptr || info.init_array_addr != nullptr);
+    EXPECT_TRUE(info.ctors_addr || info.init_array_addr);
     EXPECT_TRUE(info.ctors_size != 0 || info.init_array_size != 0);
 
-    EXPECT_TRUE(info.dtors_addr != nullptr || info.init_array_addr != nullptr);
+    EXPECT_TRUE(info.dtors_addr || info.init_array_addr);
     EXPECT_TRUE(info.dtors_size != 0 || info.init_array_size != 0);
 
-    EXPECT_TRUE(info.eh_frame_addr != nullptr);
+    EXPECT_TRUE(info.eh_frame_addr);
     EXPECT_TRUE(info.eh_frame_size != 0);
 }
 
@@ -168,13 +168,13 @@ bfelf_loader_ut::test_bfelf_loader_get_info_expected_code_resources()
     ret = bfelf_loader_get_info(&loader, &dummy_code_ef, &info);
     ASSERT_TRUE(ret == BFELF_SUCCESS);
 
-    EXPECT_TRUE(info.ctors_addr == nullptr);
+    EXPECT_FALSE(info.ctors_addr);
     EXPECT_TRUE(info.ctors_size == 0);
 
-    EXPECT_TRUE(info.dtors_addr == nullptr);
+    EXPECT_FALSE(info.dtors_addr);
     EXPECT_TRUE(info.dtors_size == 0);
 
-    EXPECT_TRUE(info.eh_frame_addr != nullptr);
+    EXPECT_TRUE(info.eh_frame_addr);
     EXPECT_TRUE(info.eh_frame_size != 0);
 }
 

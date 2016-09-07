@@ -90,7 +90,7 @@ ioctl_private::call_ioctl_add_module_length(uint64_t len)
 void
 ioctl_private::call_ioctl_add_module(const char *data)
 {
-    if (data == nullptr)
+    if (!data)
         throw std::invalid_argument("data == NULL");
 
     if (bf_write_ioctl(fd, IOCTL_ADD_MODULE, data) < 0)
@@ -128,7 +128,7 @@ ioctl_private::call_ioctl_stop_vmm()
 void
 ioctl_private::call_ioctl_dump_vmm(debug_ring_resources_t *drr, uint64_t vcpuid)
 {
-    if (drr == nullptr)
+    if (!drr)
         throw std::invalid_argument("drr == NULL");
 
     if (bf_write_ioctl(fd, IOCTL_SET_VCPUID, &vcpuid) < 0)
@@ -141,7 +141,7 @@ ioctl_private::call_ioctl_dump_vmm(debug_ring_resources_t *drr, uint64_t vcpuid)
 void
 ioctl_private::call_ioctl_vmm_status(int64_t *status)
 {
-    if (status == nullptr)
+    if (!status)
         throw std::invalid_argument("status == NULL");
 
     if (bf_read_ioctl(fd, IOCTL_VMM_STATUS, status) < 0)

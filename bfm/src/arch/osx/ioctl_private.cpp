@@ -195,7 +195,7 @@ ioctl_private::call_ioctl_add_module(const char *data)
 {
     int fd = 0;
 
-    if (data == nullptr)
+    if (!data)
         throw unknown_command("data == NULL");
 
     if (bf_write_ioctl(fd, IOCTL_ADD_MODULE, (void *)data) < 0)
@@ -243,7 +243,7 @@ ioctl_private::call_ioctl_dump_vmm(debug_ring_resources_t *drr)
 {
     int fd = 0;
 
-    if (drr == nullptr)
+    if (!drr)
         throw unknown_command("drr == NULL");
 
     if (bf_read_ioctl(fd, IOCTL_DUMP_VMM, drr) < 0)
@@ -255,7 +255,7 @@ ioctl_private::call_ioctl_vmm_status(int64_t *status)
 {
     int fd = 0;
 
-    if (status == nullptr)
+    if (!status)
         throw unknown_command("status == NULL");
 
     if (bf_read_ioctl(fd, IOCTL_VMM_STATUS, status) < 0)

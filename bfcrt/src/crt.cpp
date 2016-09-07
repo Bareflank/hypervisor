@@ -28,26 +28,26 @@ typedef void (*fini_array_t)();
 int64_t
 local_init(struct section_info_t *info)
 {
-    if (info == nullptr)
+    if (!info)
         return CRT_FAILURE;
 
     try
     {
-        if (info->ctors_addr != nullptr)
+        if (info->ctors_addr)
         {
             auto n = info->ctors_size >> 3;
             auto ctors = static_cast<ctor_t *>(info->ctors_addr);
 
-            for (auto i = 0U; i < n && ctors[i] != nullptr; i++)
+            for (auto i = 0U; i < n && ctors[i]; i++)
                 ctors[i]();
         }
 
-        if (info->init_array_addr != nullptr)
+        if (info->init_array_addr)
         {
             auto n = info->init_array_size >> 3;
             auto init_array = static_cast<init_array_t *>(info->init_array_addr);
 
-            for (auto i = 0U; i < n && init_array[i] != nullptr; i++)
+            for (auto i = 0U; i < n && init_array[i]; i++)
                 init_array[i]();
         }
     }
@@ -66,26 +66,26 @@ local_init(struct section_info_t *info)
 int64_t
 local_fini(struct section_info_t *info)
 {
-    if (info == nullptr)
+    if (!info)
         return CRT_FAILURE;
 
     try
     {
-        if (info->fini_array_addr != nullptr)
+        if (info->fini_array_addr)
         {
             auto n = info->fini_array_size >> 3;
             auto fini_array = static_cast<fini_array_t *>(info->fini_array_addr);
 
-            for (auto i = 0U; i < n && fini_array[i] != nullptr; i++)
+            for (auto i = 0U; i < n && fini_array[i]; i++)
                 fini_array[i]();
         }
 
-        if (info->dtors_addr != nullptr)
+        if (info->dtors_addr)
         {
             auto n = info->dtors_size >> 3;
             auto dtors = static_cast<dtor_t *>(info->dtors_addr);
 
-            for (auto i = 0U; i < n && dtors[i] != nullptr; i++)
+            for (auto i = 0U; i < n && dtors[i]; i++)
                 dtors[i]();
         }
     }

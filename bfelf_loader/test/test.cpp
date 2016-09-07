@@ -223,7 +223,7 @@ bfelf_loader_ut::load_elf_file(bfelf_file_t *ef)
 
     auto exec = static_cast<char *>(alloc_exec(total));
 
-    if (exec != nullptr)
+    if (exec)
     {
         memset(exec, 0, total);
 

@@ -117,31 +117,31 @@ driver_entry_ut::init()
 bool
 driver_entry_ut::fini()
 {
-    if (m_dummy_add_md_failure != nullptr)
+    if (m_dummy_add_md_failure)
         delete[] m_dummy_add_md_failure;
 
-    if (m_dummy_add_md_success != nullptr)
+    if (m_dummy_add_md_success)
         delete[] m_dummy_add_md_success;
 
-    if (m_dummy_get_drr_failure != nullptr)
+    if (m_dummy_get_drr_failure)
         delete[] m_dummy_get_drr_failure;
 
-    if (m_dummy_get_drr_success != nullptr)
+    if (m_dummy_get_drr_success)
         delete[] m_dummy_get_drr_success;
 
-    if (m_dummy_misc != nullptr)
+    if (m_dummy_misc)
         delete[] m_dummy_misc;
 
-    if (m_dummy_start_vmm_failure != nullptr)
+    if (m_dummy_start_vmm_failure)
         delete[] m_dummy_start_vmm_failure;
 
-    if (m_dummy_start_vmm_success != nullptr)
+    if (m_dummy_start_vmm_success)
         delete[] m_dummy_start_vmm_success;
 
-    if (m_dummy_stop_vmm_failure != nullptr)
+    if (m_dummy_stop_vmm_failure)
         delete[] m_dummy_stop_vmm_failure;
 
-    if (m_dummy_stop_vmm_success != nullptr)
+    if (m_dummy_stop_vmm_success)
         delete[] m_dummy_stop_vmm_success;
 
     return true;

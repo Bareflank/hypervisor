@@ -106,7 +106,7 @@ memory_manager::malloc(size_t size) noexcept
 void
 memory_manager::free(void *ptr) noexcept
 {
-    if (ptr == nullptr)
+    if (!ptr)
         return;
 
     if (g_heap_pool.contains(static_cast<uint64_t *>(ptr)))
@@ -326,7 +326,7 @@ memory_manager::free_page(void *ptr) noexcept
 void
 memory_manager::add_md(memory_descriptor *md)
 {
-    if (md == nullptr)
+    if (!md)
         throw std::invalid_argument("md == NULL");
 
     if (md->virt == 0)
