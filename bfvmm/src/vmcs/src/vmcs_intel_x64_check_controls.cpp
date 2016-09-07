@@ -51,6 +51,7 @@ vmcs_intel_x64::checks_on_vm_execution_control_fields()
     check_control_process_posted_interrupt_checks();
     check_control_vpid_checks();
     check_control_enable_ept_checks();
+    check_control_enable_pml_checks();
     check_control_unrestricted_guests();
     check_control_enable_vm_functions();
     check_control_enable_vmcs_shadowing();
@@ -188,16 +189,16 @@ vmcs_intel_x64::check_control_tpr_shadow_and_virtual_apic()
         if (!is_physical_address_valid(phys_addr))
             throw std::logic_error("virtual apic addr too large");
 
-        if (!is_enabled_virtual_interrupt_delivery())
-            throw std::logic_error("tpr_shadow is enabled, but virtual interrupt delivery is disabled");
+        if (is_enabled_virtual_interrupt_delivery())
+            throw std::logic_error("tpr_shadow is enabled, but virtual interrupt delivery is enabled");
 
         auto tpr_threshold = vmread(VMCS_TPR_THRESHOLD);
 
         if ((tpr_threshold & 0x00000000FFFFFFF0) != 0)
             throw std::logic_error("bits 31:4 of the tpr threshold must be 0");
 
-        if (!is_enabled_virtualized_apic())
-            throw std::logic_error("tpr_shadow is enabled, but virtual apic is disabled");
+        if (is_enabled_virtualized_apic())
+            throw std::logic_error("tpr_shadow is enabled, but virtual apic is enabled");
 
         auto virt_addr = static_cast<uint8_t *>(g_mm->physint_to_virtptr(phys_addr));
 
@@ -355,8 +356,26 @@ vmcs_intel_x64::check_control_enable_ept_checks()
     if ((eptp & EPTP_ACCESSED_DIRTY_FLAGS_ENABLED) != 0 && ad == 0)
         throw std::logic_error("hardware does not support dirty / accessed flags for ept");
 
-    if ((eptp & 0xFFFF000000000000) != 0 || (eptp & 0x0000000000000F80) != 0)
+    if ((eptp & 0x0000000000000F80) != 0)
         throw std::logic_error("bits 11:7 and 63:48 of the eptp must be 0");
+
+    if (!is_physical_address_valid(eptp))
+        throw std::logic_error("eptp must be a valid physical address");
+}
+
+void
+vmcs_intel_x64::check_control_enable_pml_checks()
+{
+    auto pml_addr = vmread(VMCS_PML_ADDRESS_FULL);
+
+    if (is_enabled_pml() && !is_enabled_ept())
+        throw std::logic_error("ept must be enabled if pml is enabled");
+
+    if (!is_physical_address_valid(pml_addr))
+        throw std::logic_error("pml address must be a valid physical address");
+
+    if ((pml_addr & 0x0000000000000FFF) != 0)
+        throw std::logic_error("bits 11:0 of the pml address must be 0");
 }
 
 void
@@ -698,8 +717,11 @@ vmcs_intel_x64::check_control_event_injection_instr_length_checks()
             return;
     }
 
-    if ((instruction_length < 1) || (instruction_length > 15))
-        throw std::logic_error("instruction length must be in the range of 1-15 if type is 4, 5, 6");
+    if (instruction_length == 0 && !is_supported_event_injection_instr_length_of_0())
+        throw std::logic_error("instruction length must be greater than zero");
+
+    if (instruction_length > 15)
+        throw std::logic_error("instruction length must be in the range of 0-15 if type is 4, 5, 6");
 }
 
 void

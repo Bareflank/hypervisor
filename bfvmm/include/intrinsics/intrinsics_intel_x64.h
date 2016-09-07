@@ -166,6 +166,7 @@ public:
 // VMX MSRs
 // intel's software developer's manual, volume 3, appendix A.1
 #define IA32_VMX_BASIC_MSR                                        0x00000480
+#define IA32_VMX_MISC_MSR                                         0x00000485
 #define IA32_VMX_CR0_FIXED0_MSR                                   0x00000486
 #define IA32_VMX_CR0_FIXED1_MSR                                   0x00000487
 #define IA32_VMX_CR4_FIXED0_MSR                                   0x00000488
@@ -180,7 +181,7 @@ public:
 #define IA32_VMX_VMFUNC_MSR                                       0x00000491
 
 // The VMCS fields are defined in the intel's software developer's manual,
-// volumn 3, appendix B. An explaination of these fields can be found in
+// volume 3, appendix B. An explaination of these fields can be found in
 // volume 3, chapter 24
 
 // 16bit Control Fields
@@ -223,6 +224,8 @@ public:
 #define VMCS_VM_ENTRY_MSR_LOAD_ADDRESS_HIGH                       0x0000200B
 #define VMCS_EXECUTIVE_VMCS_POINTER_FULL                          0x0000200C
 #define VMCS_EXECUTIVE_VMCS_POINTER_HIGH                          0x0000200D
+#define VMCS_PML_ADDRESS_FULL                                     0x0000200E
+#define VMCS_PML_ADDRESS_HIGH                                     0x0000200F
 #define VMCS_TSC_OFFSET_FULL                                      0x00002010
 #define VMCS_TSC_OFFSET_HIGH                                      0x00002011
 #define VMCS_VIRTUAL_APIC_ADDRESS_FULL                            0x00002012
@@ -448,6 +451,7 @@ public:
 #define VM_EXEC_S_PROC_BASED_ENABLE_VM_FUNCTIONS                  (1ULL << 13)
 #define VM_EXEC_S_PROC_BASED_VMCS_SHADOWING                       (1ULL << 14)
 #define VM_EXEC_S_PROC_BASED_RDSEED_EXITING                       (1ULL << 16)
+#define VM_EXEC_S_PROC_BASED_ENABLE_PML                           (1ULL << 17)
 #define VM_EXEC_S_PROC_BASED_EPT_VIOLATION_VE                     (1ULL << 18)
 #define VM_EXEC_S_PROC_BASED_ENABLE_XSAVES_XRSTORS                (1ULL << 20)
 
@@ -595,4 +599,7 @@ public:
 #define EPTP_PAGE_WALK_LENGTH                              0x0000000000000038
 #define EPTP_ACCESSED_DIRTY_FLAGS_ENABLED                  0x0000000000000040
 
+// Miscellaneous Data
+// intel's software developer's manual, volume 3, appendix A.6
+#define IA32_VMX_MISC_INJECTION_WITH_INSTR_LENGTH_0        0x0000000040000000
 #endif

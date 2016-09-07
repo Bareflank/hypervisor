@@ -270,6 +270,7 @@ protected:
     virtual bool is_enabled_rdseed_exiting() const;
     virtual bool is_enabled_ept_violation_ve() const;
     virtual bool is_enabled_xsave_xrestore() const;
+    virtual bool is_enabled_pml() const;
 
     virtual bool is_enabled_save_debug_controls_on_exit() const;
     virtual bool is_enabled_host_address_space_size() const;
@@ -335,6 +336,7 @@ protected:
     virtual bool is_supported_rdseed_exiting() const;
     virtual bool is_supported_ept_violation_ve() const;
     virtual bool is_supported_xsave_xrestore() const;
+    virtual bool is_supported_pml() const;
 
     virtual bool is_supported_save_debug_controls_on_exit() const;
     virtual bool is_supported_host_address_space_size() const;
@@ -355,6 +357,7 @@ protected:
     virtual bool is_supported_load_ia32_efer_on_entry() const;
 
     virtual bool is_supported_eptp_switching() const;
+    virtual bool is_supported_event_injection_instr_length_of_0() const;
 
     virtual void check_vmcs_host_state();
     virtual void check_vmcs_guest_state();
@@ -555,6 +558,7 @@ protected:
     virtual void check_control_enable_vm_functions();
     virtual void check_control_enable_vmcs_shadowing();
     virtual void check_control_enable_ept_violation_checks();
+    virtual void check_control_enable_pml_checks();
 
     virtual void checks_on_vm_exit_control_fields();
     virtual void check_control_vm_exit_ctls_reserved_properly_set();
