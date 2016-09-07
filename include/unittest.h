@@ -100,7 +100,7 @@
                 expecting_str = typeid(b).name(); \
             } \
             else \
-                std::cout << "caught: " << ge << std::endl; \
+                std::cout << "caught: " << ge << '\n'; \
         } \
         catch(std::exception &e) \
         { \
@@ -112,13 +112,13 @@
                 expecting_str = typeid(b).name(); \
             } \
             else \
-                std::cout << "caught: " << e << std::endl; \
+                std::cout << "caught: " << e << '\n'; \
         } \
         catch(...) \
         { \
             caught = true; \
             wrong_exception = true; \
-            std::cerr << "unknown exception caught" << std::endl; \
+            std::cerr << "unknown exception caught" << '\n'; \
         } \
         if(!caught) \
         { \
@@ -129,8 +129,8 @@
             if (wrong_exception) \
             { \
                 this->expect_failed("wrong exception caught", static_cast<const char *>(__PRETTY_FUNCTION__), __LINE__); \
-                std::cerr << "    - caught: " << caught_str << std::endl; \
-                std::cerr << "    - expecting: " << expecting_str << std::endl; \
+                std::cerr << "    - caught: " << caught_str << '\n'; \
+                std::cerr << "    - expecting: " << expecting_str << '\n'; \
             } \
             else \
                 this->inc_pass(); \
@@ -225,7 +225,7 @@
                 expecting_str = typeid(b).name(); \
             } \
             else \
-                std::cout << "caught: " << ge << std::endl; \
+                std::cout << "caught: " << ge << '\n'; \
         } \
         catch(std::exception &e) \
         { \
@@ -237,13 +237,13 @@
                 expecting_str = typeid(b).name(); \
             } \
             else \
-                std::cout << "caught: " << e << std::endl; \
+                std::cout << "caught: " << e << '\n'; \
         } \
         catch(...) \
         { \
             caught = true; \
             wrong_exception = true; \
-            std::cerr << "unknown exception caught" << std::endl; \
+            std::cerr << "unknown exception caught" << '\n'; \
         } \
         if(!caught) \
         { \
@@ -254,8 +254,8 @@
             if (wrong_exception) \
             { \
                 this->assert_failed("wrong exception caught", static_cast<const char *>(__PRETTY_FUNCTION__), __LINE__); \
-                std::cerr << "    - caught: " << caught_str << std::endl; \
-                std::cerr << "    - expecting: " << expecting_str << std::endl; \
+                std::cerr << "    - caught: " << caught_str << '\n'; \
+                std::cerr << "    - expecting: " << expecting_str << '\n'; \
             } \
             else \
                 this->inc_pass(); \
@@ -547,13 +547,13 @@ private:
     {
         if (m_fail > 0)
         {
-            std::cout << std::endl;
+            std::cout << '\n';
             std::cout << "totals: ";
             std::cout << m_pass << " passed, ";
             std::cout << "\033[1;31m";
             std::cout << m_fail << " failed";
             std::cout << "\033[0m";
-            std::cout << std::endl;
+            std::cout << '\n';
 
             return false;
         }
@@ -564,7 +564,7 @@ private:
             std::cout << m_pass << " passed, ";
             std::cout << "\033[0m";
             std::cout << m_fail << " failed";
-            std::cout << std::endl;
+            std::cout << '\n';
 
             return true;
         }
@@ -587,7 +587,7 @@ public:
 
         if (this->init() == false)
         {
-            std::cout << "\033[1;31mFAILED\033[0m: init" << std::endl;
+            std::cout << "\033[1;31mFAILED\033[0m: init" << '\n';
             return EXIT_FAILURE;
         }
 
@@ -595,7 +595,7 @@ public:
         {
             if (this->list() == false)
             {
-                std::cout << "\033[1;31mFAILED\033[0m: list" << std::endl;
+                std::cout << "\033[1;31mFAILED\033[0m: list" << '\n';
                 return EXIT_FAILURE;
             }
         }
@@ -605,7 +605,7 @@ public:
 
         if (this->fini() == false)
         {
-            std::cout << "\033[1;31mFAILED\033[0m: fini" << std::endl;
+            std::cout << "\033[1;31mFAILED\033[0m: fini" << '\n';
             return EXIT_FAILURE;
         }
 
@@ -618,8 +618,8 @@ public:
     void
     expect_failed(const char *condition, const char *func, int line)
     {
-        std::cout << "\033[1;31mFAILED\033[0m: [" << line << "]: " << func << std::endl;
-        std::cout << "    - condition: " << condition << std::endl;
+        std::cout << "\033[1;31mFAILED\033[0m: [" << line << "]: " << func << '\n';
+        std::cout << "    - condition: " << condition << '\n';
         this->inc_fail();
     }
 

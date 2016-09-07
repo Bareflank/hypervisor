@@ -316,7 +316,7 @@ bfunwind_ut::test_catch_throw_from_stream()
     try
     {
         auto raii1 = raii();
-        std::cout << raii1 << std::endl;
+        std::cout << raii1 << '\n';
     }
     catch (std::exception &e)
     {

@@ -35,29 +35,29 @@
 void
 terminate()
 {
-    std::cerr << "FATAL ERROR: terminate called" << std::endl;
+    std::cerr << "FATAL ERROR: terminate called" << '\n';
     abort();
 }
 
 void
 new_handler()
 {
-    std::cerr << "FATAL ERROR: out of memory" << std::endl;
+    std::cerr << "FATAL ERROR: out of memory" << '\n';
     std::terminate();
 }
 
 void
 help()
 {
-    std::cout << "Usage: bfm [OPTION]... load... list_of_modules..." << std::endl;
-    std::cout << "  or:  bfm [OPTION]... unload..." << std::endl;
-    std::cout << "  or:  bfm [OPTION]... start..." << std::endl;
-    std::cout << "  or:  bfm [OPTION]... stop..." << std::endl;
-    std::cout << "  or:  bfm [OPTION]... dump..." << std::endl;
-    std::cout << "  or:  bfm [OPTION]... status..." << std::endl;
-    std::cout << "Controls or queries the bareflank hypervisor" << std::endl;
-    std::cout << std::endl;
-    std::cout << "       -h, --help      show this help menu" << std::endl;
+    std::cout << "Usage: bfm [OPTION]... load... list_of_modules..." << '\n';
+    std::cout << "  or:  bfm [OPTION]... unload..." << '\n';
+    std::cout << "  or:  bfm [OPTION]... start..." << '\n';
+    std::cout << "  or:  bfm [OPTION]... stop..." << '\n';
+    std::cout << "  or:  bfm [OPTION]... dump..." << '\n';
+    std::cout << "  or:  bfm [OPTION]... status..." << '\n';
+    std::cout << "Controls or queries the bareflank hypervisor" << '\n';
+    std::cout << '\n';
+    std::cout << "       -h, --help      show this help menu" << '\n';
 }
 
 int
@@ -74,8 +74,8 @@ protected_main(const std::vector<std::string> &args)
     }
     catch (bfn::general_exception &ge)
     {
-        std::cerr << "bfm: " << ge << std::endl;
-        std::cerr << "Try `bfm --help' for more information." << std::endl;
+        std::cerr << "bfm: " << ge << '\n';
+        std::cerr << "Try `bfm --help' for more information." << '\n';
 
         return EXIT_FAILURE;
     }
@@ -97,7 +97,7 @@ protected_main(const std::vector<std::string> &args)
     }
     catch (bfn::general_exception &ge)
     {
-        std::cerr << "bfm: " << ge << std::endl;
+        std::cerr << "bfm: " << ge << '\n';
 
         return EXIT_FAILURE;
     }
@@ -114,7 +114,7 @@ protected_main(const std::vector<std::string> &args)
     }
     catch (bfn::general_exception &ge)
     {
-        std::cerr << "bfm: " << ge << std::endl;
+        std::cerr << "bfm: " << ge << '\n';
 
         return EXIT_FAILURE;
     }
@@ -140,12 +140,12 @@ main(int argc, const char *argv[])
     }
     catch (std::exception &e)
     {
-        std::cerr << "Caught unhandled exception:" << std::endl;
-        std::cerr << "    - what(): " << e.what() << std::endl;
+        std::cerr << "Caught unhandled exception:" << '\n';
+        std::cerr << "    - what(): " << e.what() << '\n';
     }
     catch (...)
     {
-        std::cerr << "Caught unknown exception" << std::endl;
+        std::cerr << "Caught unknown exception" << '\n';
     }
 
     return EXIT_FAILURE;

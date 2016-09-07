@@ -53,7 +53,7 @@ void output_to_vcpu(uint64_t vcpuid, T func)
     func();
 }
 
-/// This macro is a shortcut for std::endl
+/// Newline macro
 ///
 #ifndef bfendl
 #define bfendl '\n'
