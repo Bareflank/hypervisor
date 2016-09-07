@@ -46,7 +46,7 @@ public:
 
     /// Default Constructor
     ///
-    register_state() {}
+    register_state() = default;
 
     /// Destructor
     ///

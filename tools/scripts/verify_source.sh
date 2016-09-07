@@ -33,15 +33,19 @@
 # any issues with the code. The following describes what we turned off
 # and why:
 #
-# - CastToStruct: we disable this at the moment because we are doing a lot
-#   of legit casting in the ELF loader, as this is really how the spec is
-#   written.
+# - CastToStruct: Currently, this is only disabled in the ELF loader as
+#   the spec requires us to do this. For all other code this is disabled.
 #
 # - UnreachableCode: we disable this because it seems to output buggy
 #   results. For some reason, anything with a try catch block, this seems
 #   to get triggered. Furthermore, its not really needed since Coveralls tells
 #   us if code cannot be reached, which is also evidence this check is not
 #   working right, as it has a lot of false positives.
+#
+# - misc-noexcept-move-constructor: Like the above, this is known to be
+#   buggy which is a shame because it's useful. Basically, if a move
+#   constructor is set to "= default" which check fires even if noexcept is
+#   provided (at least with 3.8)
 #
 # - reinterpret-cast: There are legit cases where we need reinterpret_cast.
 #   As a result, we have disabled this. That being said, each instance were
@@ -56,6 +60,23 @@
 # - cert-err60-cpp: This not only triggers an issue with Hippomocks, but is
 #   also triggering on std::run_time and std::logic_error on Travis CI,
 #   so we have it turned off where needed.
+#
+# - bounds-pointer-arithmetic
+# - bounds-constant-array-index
+# - bounds-array-to-pointer-decay
+#
+#   We disabled the above only for the unwinder, and this is because the
+#   unwinder needs to be implemented without using C++ librarys, which
+#   includes the GSL, so there is no easy way to avoid these errors. Someday
+#   we could implement a portion of the GSL inside the unwinder itself and
+#   place it in the GSL namespace. This would provide the checks they are
+#   looking for and please the linter, but for now these are simply disabled.
+#   It should be noted that under the hood, glibc is not using C++ so the
+#   code has the same issues.
+#
+# - modernize-pass-by-value: Also only turned off by the unwinder, this is
+#   a performance issue that cannot be addressed because it requires the STL
+#   which we cannot use in the unwinder.
 #
 # Additional Note:
 #
@@ -97,7 +118,7 @@ run_clang_tidy() {
         echo "# Clang-Tidy Checks Failed #"
         echo "############################"
         echo ""
-        grep --color=auto "warning: " $OUTPUT
+        grep -E --color=auto "warning: |error: " $OUTPUT
         exit -1;
     else
         echo -e "\xE2\x9C\x93 passed: $1";
@@ -160,6 +181,20 @@ run_clang_tidy "perf*,-clang-analyzer*"
 run_clang_tidy "cppc*,-clang-analyzer*,-cppcoreguidelines-pro-type-reinterpret-cast"
 run_clang_tidy "read*,-clang-analyzer*,-readability-braces-around-statements"
 run_clang_tidy "mode*,-clang-analyzer*"
+popd > /dev/null
+
+#
+# bfunwind
+#
+pushd bfunwind > /dev/null
+header $PWD
+run_clang_tidy "clan*,-clang-analyzer-alpha.deadcode.UnreachableCode"
+run_clang_tidy "cert*,-clang-analyzer*,-cert-err60-cpp"
+run_clang_tidy "misc*,-clang-analyzer*,-misc-noexcept-move-constructor"
+run_clang_tidy "perf*,-clang-analyzer*"
+run_clang_tidy "cppc*,-clang-analyzer*,-cppcoreguidelines-pro-type-reinterpret-cast,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-cppcoreguidelines-pro-bounds-constant-array-index,-cppcoreguidelines-pro-bounds-array-to-pointer-decay"
+run_clang_tidy "read*,-clang-analyzer*,-readability-braces-around-statements"
+run_clang_tidy "mode*,-clang-analyzer*,-modernize-pass-by-value"
 popd > /dev/null
 
 #
