@@ -58,7 +58,19 @@ option_help() {
 # ------------------------------------------------------------------------------
 
 install_common_packages() {
-    setup-x86_64.exe -q --wait -P wget,make,gcc-core,gcc-g++,diffutils,libgmp-devel,libmpfr-devel,libmpc-devel,flex,bison,nasm,texinfo,cmake,unzip,bash-completion
+    setup-x86_64.exe -q --wait -P wget,make,gcc-core,gcc-g++,diffutils,libgmp-devel,libmpfr-devel,libmpc-devel,flex,bison,nasm,texinfo,unzip,git-completion,bash-completion,patch,ncurses,libncurses-devel
+}
+
+install_cmake() {
+    rm -Rf cmake-*
+    wget https://cmake.org/files/v3.6/cmake-3.6.1.tar.gz
+    tar xf cmake-*
+    pushd cmake-*
+    ./configure
+    make
+    make install
+    popd
+    rm -Rf cmake-*
 }
 
 setup_ewdk() {
@@ -111,8 +123,15 @@ done
 # ------------------------------------------------------------------------------
 
 case $(uname -r) in
+2.6.*)
+    install_common_packages
+    install_cmake
+    setup_ewdk
+    ;;
+
 2.5.*)
     install_common_packages
+    install_cmake
     setup_ewdk
     ;;
 

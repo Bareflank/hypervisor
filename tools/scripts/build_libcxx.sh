@@ -56,7 +56,9 @@ cmake $BUILD_ABS/source_libcxx/ \
     -DLIBCXX_SYSROOT=$BUILD_ABS/sysroot/x86_64-elf/ \
     -DCMAKE_C_COMPILER=$BUILD_ABS/build_scripts/x86_64-bareflank-gcc \
     -DCMAKE_CXX_COMPILER=$BUILD_ABS/build_scripts/x86_64-bareflank-g++ \
-    -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+    -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
+    -DLIBCXX_HAS_PTHREAD_API=ON \
+    -DLIBCXX_ENABLE_EXPERIMENTAL_LIBRARY=OFF
 
 make -j2
 make -j2 install

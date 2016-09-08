@@ -20,7 +20,7 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-version=2
+version=3
 
 # ------------------------------------------------------------------------------
 # Colors
@@ -106,7 +106,7 @@ check_env() {
         echo -e "creating script:$CB env.sh$CE"
         echo "export BUILD_ABS=\"$BUILD_ABS\"" >> $BUILD_ABS/env.sh
         echo "export HYPER_ABS=\"$HYPER_ABS\"" >> $BUILD_ABS/env.sh
-        echo "export LLVM_RELEASE=\"release_38\"" >> $BUILD_ABS/env.sh
+        echo "export LLVM_RELEASE=\"release_39\"" >> $BUILD_ABS/env.sh
         echo "export module_file=\"$module_file\"" >> $BUILD_ABS/env.sh
         echo "export compiler=\"$compiler\"" >> $BUILD_ABS/env.sh
         echo "export CFLAGS=\"$CROSS_CCFLAGS\"" >> $BUILD_ABS/env.sh

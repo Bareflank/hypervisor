@@ -60,10 +60,10 @@ cmake $BUILD_ABS/source_libcxxabi/ \
     -DCMAKE_C_COMPILER=$BUILD_ABS/build_scripts/x86_64-bareflank-gcc \
     -DCMAKE_CXX_COMPILER=$BUILD_ABS/build_scripts/x86_64-bareflank-g++ \
     -DLIBCXXABI_ENABLE_SHARED=OFF \
-    -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+    -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
+    -DLIBCXXABI_HAS_PTHREAD_API=ON
 
 make -j2
 make -j2 install
 
 popd
-
