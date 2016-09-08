@@ -178,8 +178,8 @@ private:
 
 private:
 
-    std::shared_ptr<char> m_dummy_misc;
-    std::shared_ptr<char> m_dummy_code;
+    std::unique_ptr<char[]> m_dummy_misc;
+    std::unique_ptr<char[]> m_dummy_code;
     uint64_t m_dummy_misc_length;
     uint64_t m_dummy_code_length;
 

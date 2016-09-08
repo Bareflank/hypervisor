@@ -40,8 +40,8 @@ bool bfelf_loader_ut::init()
     m_dummy_misc_length = static_cast<uint64_t>(dummy_misc_ifs.tellg());
     m_dummy_code_length = static_cast<uint64_t>(dummy_code_ifs.tellg());
 
-    m_dummy_misc = std::shared_ptr<char>(new char[m_dummy_misc_length]());
-    m_dummy_code = std::shared_ptr<char>(new char[m_dummy_code_length]());
+    m_dummy_misc = std::make_unique<char[]>(m_dummy_misc_length);
+    m_dummy_code = std::make_unique<char[]>(m_dummy_code_length);
 
     dummy_misc_ifs.seekg(0);
     dummy_code_ifs.seekg(0);
