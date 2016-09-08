@@ -53,10 +53,10 @@ void output_to_vcpu(uint64_t vcpuid, T func)
     func();
 }
 
-/// This macro is a shortcut for std::endl
+/// Newline macro
 ///
 #ifndef bfendl
-#define bfendl std::endl
+#define bfendl '\n'
 #endif
 
 /// This macro is a shortcut for std::cout that adds some text and color.
