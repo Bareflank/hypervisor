@@ -39,13 +39,13 @@ enum type
 };
 }
 
-/// Comand Line Parser
+/// Command Line Parser
 ///
 /// The command line parser is responsible for taking the command line
 /// arguments that are given to main(), and parse them for the bareflank
 /// manager. All of the commands that are accepted, should be contained in
-/// class. Other classes can use the information that this class gathers to
-/// decide how to operate.
+/// this class. Other classes can use the information that this class gathers
+/// to decide how to operate.
 ///
 /// This class contains a function called is_valid, that is responsbile
 /// for deciding if the commands provided make sense. Use this function along
@@ -72,7 +72,7 @@ public:
     ///
     /// Parses the command line. Upon successfull completion, resets the
     /// internal state to resemble the provided arguments. On failure, this
-    /// function has a strong no-effect guarentte, and throws an exception.
+    /// function has a strong no-effect guarantee, and throws an exception.
     /// If an empty list is provided, this function resets the internal state
     /// to that of the default constructor
     ///
@@ -106,7 +106,7 @@ public:
 
     /// vCPU ID
     ///
-    /// Each guest + core combination has it's own vCPU ID. This command
+    /// Each guest + core combination has its own vCPU ID. This command
     /// lets the user specify which core + guest to target for information.
     ///
     /// @return returns the vcpuid provided by the user
