@@ -131,8 +131,7 @@ vcpu_manager::write(uint64_t vcpuid, const std::string &str) noexcept
 
 vcpu_manager::vcpu_manager() noexcept :
     m_vcpu_factory(std::make_shared<vcpu_factory>())
-{
-}
+{ }
 
 std::shared_ptr<vcpu>
 vcpu_manager::get_vcpu(uint64_t vcpuid) const noexcept

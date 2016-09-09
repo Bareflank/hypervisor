@@ -24,6 +24,7 @@
 #define PLATFORM_H
 
 #include <types.h>
+#include <vmcall_interface.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -147,6 +148,23 @@ platform_set_affinity(int64_t affinity);
  */
 void
 platform_restore_affinity(int64_t affinity);
+
+/**
+ * VMCall
+ *
+ * @param regs the vmcall registers used in the vmcall
+ */
+void
+platform_vmcall(struct vmcall_registers_t *regs);
+
+/**
+ * VMCall Event
+ *
+ * @param regs the vmcall registers used in the vmcall
+ */
+void
+platform_vmcall_event(struct vmcall_registers_t *regs);
+
 #ifdef __cplusplus
 }
 #endif

@@ -28,17 +28,28 @@
 class ioctl_private : public ioctl_private_base
 {
 public:
+
+    using module_len_type = size_t;
+    using module_data_type = const char *;
+    using drr_pointer = ioctl::drr_pointer;
+    using cpuid_type = ioctl::cpuid_type;
+    using vcpuid_type = ioctl::vcpuid_type;
+    using status_pointer = ioctl::status_pointer;
+    using registers_pointer = ioctl::registers_pointer;
+    using handle_type = int;
+
     ioctl_private();
     ~ioctl_private() override;
 
     virtual void open();
-    virtual void call_ioctl_add_module(const char *data, uint64_t len);
+    virtual void call_ioctl_add_module(gsl::not_null<module_data_type> data, module_len_type len);
     virtual void call_ioctl_load_vmm();
     virtual void call_ioctl_unload_vmm();
     virtual void call_ioctl_start_vmm();
     virtual void call_ioctl_stop_vmm();
-    virtual void call_ioctl_dump_vmm(debug_ring_resources_t *drr, uint64_t vcpuid);
-    virtual void call_ioctl_vmm_status(int64_t *status);
+    virtual void call_ioctl_dump_vmm(gsl::not_null<drr_pointer> drr, vcpuid_type vcpuid);
+    virtual void call_ioctl_vmm_status(gsl::not_null<status_pointer> status);
+    virtual void call_ioctl_vmcall(gsl::not_null<registers_pointer> regs, cpuid_type cpuid);
 
 private:
     HANDLE fd;

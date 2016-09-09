@@ -87,6 +87,9 @@
     <ClInclude Include="queue.h" />
     <ClInclude Include="trace.h" />
   </ItemGroup>
+  <ItemGroup>
+    <MASM Include="vmcall.asm" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

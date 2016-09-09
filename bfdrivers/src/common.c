@@ -136,6 +136,23 @@ execute_symbol(const char *sym, uint64_t arg1, uint64_t arg2, uint64_t cpuid)
 }
 
 int64_t
+add_raw_md_to_memory_manager(uint64_t virt, uint64_t type)
+{
+    int64_t ret = 0;
+    struct memory_descriptor md = {0, 0, 0};
+
+    md.virt = virt;
+    md.phys = (uint64_t)platform_virt_to_phys((void *)md.virt);
+    md.type = type;
+
+    ret = execute_symbol("add_md", (uint64_t)&md, 0, 0);
+    if (ret != MEMORY_MANAGER_SUCCESS)
+        return ret;
+
+    return BF_SUCCESS;
+}
+
+int64_t
 add_md_to_memory_manager(struct module_t *module)
 {
     int64_t ret = 0;
@@ -161,17 +178,11 @@ add_md_to_memory_manager(struct module_t *module)
 
         for (; exec_s <= exec_e; exec_s += MAX_PAGE_SIZE)
         {
-            struct memory_descriptor md;
-
-            md.virt = exec_s;
-            md.phys = (uint64_t)platform_virt_to_phys((void *)md.virt);
-
             if ((phdr->p_flags & bfpf_x) != 0)
-                md.type = MEMORY_TYPE_R | MEMORY_TYPE_E;
+                ret = add_raw_md_to_memory_manager(exec_s, MEMORY_TYPE_R | MEMORY_TYPE_E);
             else
-                md.type = MEMORY_TYPE_R | MEMORY_TYPE_W;
+                ret = add_raw_md_to_memory_manager(exec_s, MEMORY_TYPE_R | MEMORY_TYPE_W);
 
-            ret = execute_symbol("add_md", (uint64_t)&md, 0, 0);
             if (ret != MEMORY_MANAGER_SUCCESS)
                 return ret;
         }
@@ -450,6 +461,8 @@ common_load_vmm(void)
             goto failure;
     }
 
+    add_raw_md_to_memory_manager((uint64_t)g_tls, MEMORY_TYPE_R | MEMORY_TYPE_W);
+
     g_vmm_status = VMM_LOADED;
     return BF_SUCCESS;
 
@@ -597,6 +610,33 @@ common_dump_vmm(struct debug_ring_resources_t **drr, uint64_t vcpuid)
     ret = execute_symbol("get_drr", (uint64_t)vcpuid, (uint64_t)drr, 0);
     if (ret != BFELF_SUCCESS)
         return ret;
+
+    return BF_SUCCESS;
+}
+
+int64_t
+common_vmcall(struct vmcall_registers_t *regs, uint64_t cpuid)
+{
+    int64_t ret = 0;
+    int64_t caller_affinity = 0;
+    int64_t signed_cpuid = (int64_t)cpuid;
+
+    if (regs == 0)
+        return BF_ERROR_INVALID_ARG;
+
+    if (signed_cpuid < 0 || signed_cpuid >= g_num_cpus_started)
+        return BF_ERROR_INVALID_ARG;
+
+    ret = caller_affinity = platform_set_affinity((int64_t)cpuid);
+    if (caller_affinity < 0)
+        return ret;
+
+    if (regs->r00 == VMCALL_EVENT)
+        platform_vmcall_event(regs);
+    else
+        platform_vmcall(regs);
+
+    platform_restore_affinity(caller_affinity);
 
     return BF_SUCCESS;
 }

@@ -23,8 +23,10 @@
 #define IOCTL_H
 
 #include <memory>
-#include <stdint.h>
-#include <driver_entry_interface.h>
+
+#include <file.h>
+#include <vmcall_interface.h>
+#include <debug_ring_interface.h>
 
 /// IOCTL Private Base
 ///
@@ -47,11 +49,27 @@ class ioctl
 {
 public:
 
+    using binary_data = file::binary_data;
+    using drr_type = debug_ring_resources_t;
+    using drr_pointer = drr_type *;
+    using cpuid_type = uint64_t;
+    using vcpuid_type = uint64_t;
+    using status_type = int64_t;
+    using status_pointer = status_type *;
+    using registers_type = struct vmcall_registers_t;
+    using registers_pointer = registers_type *;
+
     /// Default Constructor
     ///
-    ioctl() noexcept;
+    /// @expects none
+    /// @ensures none
+    ///
+    ioctl();
 
     /// Destructor
+    ///
+    /// @expects none
+    /// @ensures none
     ///
     virtual ~ioctl() = default;
 
@@ -59,8 +77,8 @@ public:
     ///
     /// Open a connection to the bareflank driver.
     ///
-    /// @throws driver_inaccessible_error thrown when the ioctl class is unable
-    ///     to open a connection to the bareflank driver.
+    /// @expects none
+    /// @ensures none
     ///
     virtual void open();
 
@@ -68,24 +86,19 @@ public:
     ///
     /// Add a module to the driver entry.
     ///
-    /// @param str ELF file to be added to the driver entry
+    /// @param module_data ELF file to be added to the driver entry
     ///
-    /// @throws invalid_argument_error thrown if data == nullptr, or len <= 0
-    /// @throws ioctl_failed_error thrown if the ioctl failed. Note that this
-    ///    could have been because bfm was unable to ioctl the driver, or it
-    ///    could be because the driver entry reported a failure when executing
-    ///    the ioctl.
+    /// @expects none
+    /// @ensures none
     ///
-    virtual void call_ioctl_add_module(const std::string &str);
+    virtual void call_ioctl_add_module(const binary_data &module_data);
 
     /// Load VMM
     ///
     /// Loads the VMM
     ///
-    /// @throws ioctl_failed_error thrown if the ioctl failed. Note that this
-    ///    could have been because bfm was unable to ioctl the driver, or it
-    ///    could be because the driver entry reported a failure when executing
-    ///    the ioctl.
+    /// @expects none
+    /// @ensures none
     ///
     virtual void call_ioctl_load_vmm();
 
@@ -93,10 +106,8 @@ public:
     ///
     /// Unloads the VMM
     ///
-    /// @throws ioctl_failed_error thrown if the ioctl failed. Note that this
-    ///    could have been because bfm was unable to ioctl the driver, or it
-    ///    could be because the driver entry reported a failure when executing
-    ///    the ioctl.
+    /// @expects none
+    /// @ensures none
     ///
     virtual void call_ioctl_unload_vmm();
 
@@ -104,10 +115,8 @@ public:
     ///
     /// Starts the VMM
     ///
-    /// @throws ioctl_failed_error thrown if the ioctl failed. Note that this
-    ///    could have been because bfm was unable to ioctl the driver, or it
-    ///    could be because the driver entry reported a failure when executing
-    ///    the ioctl.
+    /// @expects none
+    /// @ensures none
     ///
     virtual void call_ioctl_start_vmm();
 
@@ -115,10 +124,8 @@ public:
     ///
     /// Stops the VMM
     ///
-    /// @throws ioctl_failed_error thrown if the ioctl failed. Note that this
-    ///    could have been because bfm was unable to ioctl the driver, or it
-    ///    could be because the driver entry reported a failure when executing
-    ///    the ioctl.
+    /// @expects none
+    /// @ensures none
     ///
     virtual void call_ioctl_stop_vmm();
 
@@ -126,33 +133,40 @@ public:
     ///
     /// Dumps the contents of the VMM's debug ring
     ///
+    /// @expects drr != null;
+    /// @ensures none
+    ///
     /// @param drr pointer a debug_ring_resources_t
     /// @param vcpuid indicates which drr to get (every vcpu has its own drr)
     ///
-    /// @throws invalid_argument_error thrown if drr == nullptr
-    /// @throws ioctl_failed_error thrown if the ioctl failed. Note that this
-    ///    could have been because bfm was unable to ioctl the driver, or it
-    ///    could be because the driver entry reported a failure when executing
-    ///    the ioctl.
-    ///
-    virtual void call_ioctl_dump_vmm(debug_ring_resources_t *drr, uint64_t vcpuid);
+    virtual void call_ioctl_dump_vmm(gsl::not_null<drr_pointer> drr, vcpuid_type vcpuid);
 
     /// VMM Status
     ///
     /// Get the status of the VMM
     ///
-    /// @param status pointer to provide the status to
+    /// @expects status != nullptr
+    /// @ensures none
     ///
-    /// @throws invalid_argument_error thrown if status == nullptr
-    /// @throws ioctl_failed_error thrown if the ioctl failed. Note that this
-    ///    could have been because bfm was unable to ioctl the driver, or it
-    ///    could be because the driver entry reported a failure when executing
-    ///    the ioctl.
+    /// @param status pointer to status variable to store the results
     ///
-    virtual void call_ioctl_vmm_status(int64_t *status);
+    virtual void call_ioctl_vmm_status(gsl::not_null<status_pointer> status);
+
+    /// VMCall
+    ///
+    /// Performs a VMCall
+    ///
+    /// @expects status != nullptr
+    /// @ensures none
+    ///
+    /// @param regs register values to send to the hypervisor
+    /// @param cpuid indicates which vcpu to vmcall
+    ///
+    virtual void call_ioctl_vmcall(gsl::not_null<registers_pointer> regs, cpuid_type cpuid);
 
 private:
-    std::shared_ptr<ioctl_private_base> m_d;
+
+    std::unique_ptr<ioctl_private_base> m_d;
 };
 
 #endif

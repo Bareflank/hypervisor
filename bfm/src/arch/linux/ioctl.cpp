@@ -22,82 +22,72 @@
 #include <ioctl.h>
 #include <ioctl_private.h>
 
-ioctl::ioctl() noexcept
-{
-    m_d = std::make_shared<ioctl_private>();
-}
+ioctl::ioctl() :
+    m_d {std::make_unique<ioctl_private>()}
+{ }
 
 void
 ioctl::open()
 {
-    auto d = std::dynamic_pointer_cast<ioctl_private>(m_d);
-
-    if (d)
+    if (auto d = dynamic_cast<ioctl_private *>(m_d.get()))
         d->open();
 }
 
 void
-ioctl::call_ioctl_add_module(const std::string &str)
+ioctl::call_ioctl_add_module(const binary_data &module_data)
 {
-    auto d = std::dynamic_pointer_cast<ioctl_private>(m_d);
-
-    if (d)
+    if (auto d = dynamic_cast<ioctl_private *>(m_d.get()))
     {
-        d->call_ioctl_add_module_length(str.length());
-        d->call_ioctl_add_module(str.c_str());
+        d->call_ioctl_add_module_length(module_data.size());
+        d->call_ioctl_add_module(module_data.data());
     }
 }
 
 void
 ioctl::call_ioctl_load_vmm()
 {
-    auto d = std::dynamic_pointer_cast<ioctl_private>(m_d);
-
-    if (d)
+    if (auto d = dynamic_cast<ioctl_private *>(m_d.get()))
         d->call_ioctl_load_vmm();
 }
 
 void
 ioctl::call_ioctl_unload_vmm()
 {
-    auto d = std::dynamic_pointer_cast<ioctl_private>(m_d);
-
-    if (d)
+    if (auto d = dynamic_cast<ioctl_private *>(m_d.get()))
         d->call_ioctl_unload_vmm();
 }
 
 void
 ioctl::call_ioctl_start_vmm()
 {
-    auto d = std::dynamic_pointer_cast<ioctl_private>(m_d);
-
-    if (d)
+    if (auto d = dynamic_cast<ioctl_private *>(m_d.get()))
         d->call_ioctl_start_vmm();
 }
 
 void
 ioctl::call_ioctl_stop_vmm()
 {
-    auto d = std::dynamic_pointer_cast<ioctl_private>(m_d);
-
-    if (d)
+    if (auto d = dynamic_cast<ioctl_private *>(m_d.get()))
         d->call_ioctl_stop_vmm();
 }
 
 void
-ioctl::call_ioctl_dump_vmm(debug_ring_resources_t *drr, uint64_t vcpuid)
+ioctl::call_ioctl_dump_vmm(gsl::not_null<drr_pointer> drr, vcpuid_type vcpuid)
 {
-    auto d = std::dynamic_pointer_cast<ioctl_private>(m_d);
-
-    if (d)
+    if (auto d = dynamic_cast<ioctl_private *>(m_d.get()))
         d->call_ioctl_dump_vmm(drr, vcpuid);
 }
 
 void
-ioctl::call_ioctl_vmm_status(int64_t *status)
+ioctl::call_ioctl_vmm_status(gsl::not_null<status_pointer> status)
 {
-    auto d = std::dynamic_pointer_cast<ioctl_private>(m_d);
-
-    if (d)
+    if (auto d = dynamic_cast<ioctl_private *>(m_d.get()))
         d->call_ioctl_vmm_status(status);
+}
+
+void
+ioctl::call_ioctl_vmcall(gsl::not_null<registers_pointer> regs, cpuid_type cpuid)
+{
+    if (auto d = dynamic_cast<ioctl_private *>(m_d.get()))
+        d->call_ioctl_vmcall(regs, cpuid);
 }

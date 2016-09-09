@@ -23,187 +23,162 @@
 #include <ioctl.h>
 #include <debug_ring_interface.h>
 
-// -----------------------------------------------------------------------------
-// Expose Private Functions
-// -----------------------------------------------------------------------------
+int g_ioctl_open = 0;
+int g_send_ioctl = 0;
+int g_read_ioctl = 0;
+int g_write_ioctl = 0;
 
-int64_t bf_ioctl_open();
-int64_t bf_send_ioctl(int fd, unsigned long request);
-int64_t bf_read_ioctl(int fd, unsigned long request, void *data);
-int64_t bf_write_ioctl(int fd, unsigned long request, const void *data);
+int64_t bf_ioctl_open()
+{ return g_ioctl_open; }
 
-// -----------------------------------------------------------------------------
-// Global Data
-// -----------------------------------------------------------------------------
+int64_t bf_send_ioctl(int fd, unsigned long request)
+{ (void) fd; (void) request; return g_send_ioctl; }
 
-ioctl g_ctl;
-debug_ring_resources_t g_drr;
+int64_t bf_read_ioctl(int fd, unsigned long request, void *data)
+{ (void) fd; (void) request; (void) data; return g_read_ioctl; }
 
-// -----------------------------------------------------------------------------
-// Tests
-// -----------------------------------------------------------------------------
+int64_t bf_write_ioctl(int fd, unsigned long request, const void *data)
+{ (void) fd; (void) request; (void) data; return g_write_ioctl; }
+
+static auto operator"" _die(const char *str, std::size_t len)
+{ (void)str; (void)len; return std::make_shared<bfn::driver_inaccessible_error>(); }
+
+static auto operator"" _ife(const char *str, std::size_t len)
+{ (void)str; (void)len; return std::make_shared<bfn::ioctl_failed_error>(""); }
 
 void
 bfm_ut::test_ioctl_driver_inaccessible()
 {
-    MockRepository mocks;
+    auto &&ctl = ioctl{};
 
-    mocks.OnCallFunc(bf_ioctl_open).Return(-1);
+    g_ioctl_open = -1;
+    auto ___ = gsl::finally([&] { g_ioctl_open = 0; });
 
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        EXPECT_EXCEPTION(g_ctl.open(), bfn::driver_inaccessible_error);
-    });
+    this->expect_exception([&] { ctl.open(); }, ""_die);
 }
 
 void
 bfm_ut::test_ioctl_add_module_with_invalid_length()
 {
-    MockRepository mocks;
-
-    mocks.OnCallFunc(bf_send_ioctl).Return(0);
-    mocks.OnCallFunc(bf_read_ioctl).Return(0);
-    mocks.OnCallFunc(bf_write_ioctl).Return(0);
-
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        EXPECT_EXCEPTION(g_ctl.call_ioctl_add_module(""_s), std::invalid_argument);
-    });
+    auto &&ctl = ioctl{};
+    this->expect_exception([&] { ctl.call_ioctl_add_module({}); }, ""_ut_ffe);
 }
 
 void
 bfm_ut::test_ioctl_add_module_failed()
 {
-    auto data = "hello world"_s;
-    MockRepository mocks;
+    auto &&data = {'h', 'e', 'l', 'l', 'o'};
+    auto &&ctl = ioctl{};
 
-    mocks.OnCallFunc(bf_send_ioctl).Return(-1);
-    mocks.OnCallFunc(bf_read_ioctl).Return(-1);
-    mocks.OnCallFunc(bf_write_ioctl).Return(-1);
+    g_write_ioctl = -1;
+    auto ___ = gsl::finally([&] { g_write_ioctl = 0; });
 
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        EXPECT_EXCEPTION(g_ctl.call_ioctl_add_module(data), bfn::ioctl_failed_error);
-    });
+    this->expect_exception([&] { ctl.call_ioctl_add_module(data); }, ""_ife);
 }
 
 void
 bfm_ut::test_ioctl_load_vmm_failed()
 {
-    MockRepository mocks;
+    auto &&ctl = ioctl{};
 
-    mocks.OnCallFunc(bf_send_ioctl).Return(-1);
-    mocks.OnCallFunc(bf_read_ioctl).Return(-1);
-    mocks.OnCallFunc(bf_write_ioctl).Return(-1);
+    g_send_ioctl = -1;
+    auto ___ = gsl::finally([&] { g_send_ioctl = 0; });
 
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        EXPECT_EXCEPTION(g_ctl.call_ioctl_load_vmm(), bfn::ioctl_failed_error);
-    });
+    this->expect_exception([&] { ctl.call_ioctl_load_vmm(); }, ""_ife);
 }
 
 void
 bfm_ut::test_ioctl_unload_vmm_failed()
 {
-    MockRepository mocks;
+    auto &&ctl = ioctl{};
 
-    mocks.OnCallFunc(bf_send_ioctl).Return(-1);
-    mocks.OnCallFunc(bf_read_ioctl).Return(-1);
-    mocks.OnCallFunc(bf_write_ioctl).Return(-1);
+    g_send_ioctl = -1;
+    auto ___ = gsl::finally([&] { g_send_ioctl = 0; });
 
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        EXPECT_EXCEPTION(g_ctl.call_ioctl_unload_vmm(), bfn::ioctl_failed_error);
-    });
+    this->expect_exception([&] { ctl.call_ioctl_unload_vmm(); }, ""_ife);
 }
 
 void
 bfm_ut::test_ioctl_start_vmm_failed()
 {
-    MockRepository mocks;
+    auto &&ctl = ioctl{};
 
-    mocks.OnCallFunc(bf_send_ioctl).Return(-1);
-    mocks.OnCallFunc(bf_read_ioctl).Return(-1);
-    mocks.OnCallFunc(bf_write_ioctl).Return(-1);
+    g_send_ioctl = -1;
+    auto ___ = gsl::finally([&] { g_send_ioctl = 0; });
 
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        EXPECT_EXCEPTION(g_ctl.call_ioctl_start_vmm(), bfn::ioctl_failed_error);
-    });
+    this->expect_exception([&] { ctl.call_ioctl_start_vmm(); }, ""_ife);
 }
 
 void
 bfm_ut::test_ioctl_stop_vmm_failed()
 {
-    MockRepository mocks;
+    auto &&ctl = ioctl{};
 
-    mocks.OnCallFunc(bf_send_ioctl).Return(-1);
-    mocks.OnCallFunc(bf_read_ioctl).Return(-1);
-    mocks.OnCallFunc(bf_write_ioctl).Return(-1);
+    g_send_ioctl = -1;
+    auto ___ = gsl::finally([&] { g_send_ioctl = 0; });
 
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        EXPECT_EXCEPTION(g_ctl.call_ioctl_stop_vmm(), bfn::ioctl_failed_error);
-    });
+    this->expect_exception([&] { ctl.call_ioctl_stop_vmm(); }, ""_ife);
 }
 
 void
 bfm_ut::test_ioctl_dump_vmm_with_invalid_drr()
 {
-    MockRepository mocks;
+    auto &&drr = ioctl::drr_pointer{nullptr};
+    auto &&ctl = ioctl{};
 
-    mocks.OnCallFunc(bf_send_ioctl).Return(0);
-    mocks.OnCallFunc(bf_read_ioctl).Return(0);
-    mocks.OnCallFunc(bf_write_ioctl).Return(0);
-
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        EXPECT_EXCEPTION(g_ctl.call_ioctl_dump_vmm(nullptr, 0), std::invalid_argument);
-    });
+    this->expect_exception([&] { ctl.call_ioctl_dump_vmm(drr, 0); }, ""_ut_ffe);
 }
 
 void
 bfm_ut::test_ioctl_dump_vmm_failed()
 {
-    MockRepository mocks;
+    auto &&drr = ioctl::drr_type{};
+    auto &&ctl = ioctl{};
 
-    mocks.OnCallFunc(bf_send_ioctl).Return(-1);
-    mocks.OnCallFunc(bf_read_ioctl).Return(-1);
-    mocks.OnCallFunc(bf_write_ioctl).Return(-1);
+    g_read_ioctl = -1;
+    auto ___ = gsl::finally([&] { g_read_ioctl = 0; });
 
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        EXPECT_EXCEPTION(g_ctl.call_ioctl_dump_vmm(&g_drr, 0), bfn::ioctl_failed_error);
-    });
+    this->expect_exception([&] { ctl.call_ioctl_dump_vmm(&drr, 0); }, ""_ife);
 }
 
 void
-bfm_ut::test_ioctl_vmm_status_with_invalid_drr()
+bfm_ut::test_ioctl_vmm_status_with_invalid_status()
 {
-    MockRepository mocks;
+    auto &&status = ioctl::status_pointer{nullptr};
+    auto &&ctl = ioctl{};
 
-    mocks.OnCallFunc(bf_send_ioctl).Return(0);
-    mocks.OnCallFunc(bf_read_ioctl).Return(0);
-    mocks.OnCallFunc(bf_write_ioctl).Return(0);
-
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        EXPECT_EXCEPTION(g_ctl.call_ioctl_vmm_status(nullptr), std::invalid_argument);
-    });
+    this->expect_exception([&] { ctl.call_ioctl_vmm_status(status); }, ""_ut_ffe);
 }
 
 void
 bfm_ut::test_ioctl_vmm_status_failed()
 {
-    int64_t status;
-    MockRepository mocks;
+    auto &&status = ioctl::status_type{};
+    auto &&ctl = ioctl{};
 
-    mocks.OnCallFunc(bf_send_ioctl).Return(-1);
-    mocks.OnCallFunc(bf_read_ioctl).Return(-1);
-    mocks.OnCallFunc(bf_write_ioctl).Return(-1);
+    g_read_ioctl = -1;
+    auto ___ = gsl::finally([&] { g_read_ioctl = 0; });
 
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        EXPECT_EXCEPTION(g_ctl.call_ioctl_vmm_status(&status), bfn::ioctl_failed_error);
-    });
+    this->expect_exception([&] { ctl.call_ioctl_vmm_status(&status); }, ""_ife);
+}
+
+void
+bfm_ut::test_ioctl_vmm_vmcall_with_invalid_registers()
+{
+    auto &&reigsters = ioctl::registers_pointer{nullptr};
+    auto &&ctl = ioctl{};
+
+    this->expect_exception([&] { ctl.call_ioctl_vmcall(reigsters, 0); }, ""_ut_ffe);
+}
+
+void
+bfm_ut::test_ioctl_vmm_vmcall_failed()
+{
+    auto &&registers = ioctl::registers_type{};
+    auto &&ctl = ioctl{};
+
+    g_write_ioctl = -1;
+    auto ___ = gsl::finally([&] { g_write_ioctl = 0; });
+
+    this->expect_exception([&] { ctl.call_ioctl_vmcall(&registers, 0); }, ""_ife);
 }

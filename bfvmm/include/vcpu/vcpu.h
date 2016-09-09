@@ -37,7 +37,7 @@
 ///
 /// For the host VM (also called the hardware domain), 1 vCPU must exist
 /// for each physical core. These vCPUs are special. Their IDs are their
-/// physical core #s as assigned by the host OS. This is because the "guest"
+/// physical core nums as assigned by the host OS. This is because the "guest"
 /// part of the ID is 0. The resources these vCPUs are given should match
 /// the resources the host OS is using. Whether this is a type 1 or type 2
 /// configuration, the host OS is usually the OS that is already running when

@@ -21,16 +21,19 @@
 
 #include <gsl/gsl>
 
-#include <memory_manager/memory_manager.h>
 #include <memory_manager/page_table_x64.h>
+#include <memory_manager/memory_manager_x64.h>
 
-page_table_x64::page_table_x64(uintptr_t *pte) :
-    page_table_entry_x64(pte != nullptr ? pte : & m_cr3_shadow),
-    m_ptes(PT_SIZE),
-    m_cr3_shadow(0)
+using namespace x64;
+
+page_table_x64::page_table_x64(pointer pte) :
+    page_table_entry_x64(pte != nullptr ? pte : (&m_cr3_shadow)),
+    m_size(0),
+    m_cr3_shadow(0),
+    m_ptes(page_table::num_entries)
 {
-    m_pt_owner = std::make_unique<uintptr_t[]>(4096 / sizeof(uintptr_t));
-    m_pt = gsl::span<uintptr_t>(m_pt_owner.get(), PT_SIZE);
+    m_pt_owner = std::make_unique<integer_pointer[]>(page_table::num_entries);
+    m_pt = gsl::span<integer_pointer>(m_pt_owner, page_table::num_entries);
 
     this->set_phys_addr(g_mm->virtptr_to_physint(m_pt_owner.get()));
     this->set_present(true);
@@ -38,38 +41,94 @@ page_table_x64::page_table_x64(uintptr_t *pte) :
     this->set_us(true);
 }
 
-std::shared_ptr<page_table_entry_x64>
-page_table_x64::add_page(uintptr_t virt_addr)
+page_table_x64::size_type
+page_table_x64::global_size() const noexcept
 {
-    return add_page(virt_addr, PML4_INDEX);
+    auto size = m_size;
+
+    for (const auto &pte : m_ptes)
+    {
+        if (auto pt = std::dynamic_pointer_cast<page_table_x64>(pte))
+            size += pt->global_size();
+    }
+
+    return size;
 }
 
 std::shared_ptr<page_table_entry_x64>
-page_table_x64::add_page(uintptr_t virt_addr, uint64_t bits)
+page_table_x64::add_page_x64(integer_pointer virt_addr)
 {
-    auto index = (virt_addr & ((INDEX_MASK) << bits)) >> bits;
-    auto signed_index = static_cast<int64_t>(index);
+    expects(virt_addr != 0);
+    return add_page_x64(virt_addr, page_table::pml4::from);
+}
 
-    if (bits > PT_INDEX)
+void
+page_table_x64::remove_page_x64(integer_pointer virt_addr)
+{
+    expects(virt_addr != 0);
+    remove_page_x64(virt_addr, page_table::pml4::from);
+}
+
+template<class T> std::shared_ptr<T>
+page_table_x64::add_pte(pointer p)
+{
+    m_size++;
+    return std::make_shared<T>(p);
+}
+
+template<class T> std::shared_ptr<T>
+page_table_x64::remove_pte()
+{
+    m_size--;
+    return nullptr;
+}
+
+std::shared_ptr<page_table_entry_x64>
+page_table_x64::add_page_x64(integer_pointer virt_addr, integer_pointer bits)
+{
+    auto index = page_table::index(virt_addr, bits);
+
+    if (bits > page_table::pt::from)
     {
-        auto pte = std::dynamic_pointer_cast<page_table_x64>(m_ptes[index]);
+        auto iter = bfn::find(m_ptes, index);
+        if (!*iter)
+            *iter = add_pte<page_table_x64>(&m_pt.at(index));
 
-        if (pte)
-            return pte->add_page(virt_addr, bits - BITS_PER_INDEX);
-
-        pte = std::make_shared<page_table_x64>(&m_pt[signed_index]);
-        m_ptes[index] = pte;
-
-        return pte->add_page(virt_addr, bits - BITS_PER_INDEX);
+        if (auto pte = std::static_pointer_cast<page_table_x64>(*iter))
+            return pte->add_page_x64(virt_addr, bits - page_table::pt::size);
     }
 
-    auto pte = m_ptes[index];
+    auto iter = bfn::find(m_ptes, index);
+    if (*iter)
+        throw std::runtime_error("add_page_x64: page mapping already exists");
 
-    if (pte)
-        throw std::logic_error("add_page: page mapping already exists");
+    return *iter = add_pte<page_table_entry_x64>(&m_pt.at(index));
+}
 
-    pte = std::make_shared<page_table_entry_x64>(&m_pt[signed_index]);
-    m_ptes[index] = pte;
+void
+page_table_x64::remove_page_x64(integer_pointer virt_addr, integer_pointer bits)
+{
+    auto index = page_table::index(virt_addr, bits);
 
-    return pte;
+    if (bits > page_table::pt::from)
+    {
+        auto iter = bfn::find(m_ptes, index);
+        if (!*iter)
+            throw std::runtime_error("remove_page_x64: invalid virtual address");
+
+        if (auto pte = std::static_pointer_cast<page_table_x64>(*iter))
+        {
+            pte->remove_page_x64(virt_addr, bits - page_table::pt::size);
+            if (pte->empty())
+                *iter = remove_pte<page_table_entry_x64>();
+
+            return;
+        }
+    }
+
+    auto iter = bfn::find(m_ptes, index);
+    if (!*iter)
+        throw std::runtime_error("remove_page_x64: invalid virtual address");
+
+    *iter = remove_pte<page_table_entry_x64>();
 }

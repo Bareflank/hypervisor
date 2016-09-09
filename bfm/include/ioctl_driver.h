@@ -25,7 +25,6 @@
 #include <command_line_parser.h>
 #include <file.h>
 #include <ioctl.h>
-#include <split.h>
 
 /// IOCTL Driver
 ///
@@ -36,17 +35,35 @@
 ///
 /// If certain conditions are not meet, the IOCTL driver will error out on
 /// it's attempt to process, and return an error.
+///
 class ioctl_driver
 {
 public:
 
+    using status_type = ioctl::status_type;
+    using registers_type = command_line_parser::registers_type;
+
     /// Default Constructor
     ///
-    ioctl_driver() noexcept = default;
+    /// @expects f != nullptr
+    /// @expects ctl != nullptr
+    /// @expects clp != nullptr
+    /// @ensures none
+    ///
+    /// @param f file class used to read/write from/to the filesystem
+    /// @param ctl ioctl class used to communicate with the driver entry
+    /// @param clp command line parser used to parse user input
+    ///
+    ioctl_driver(gsl::not_null<file *> f,
+                 gsl::not_null<ioctl *> ctl,
+                 gsl::not_null<command_line_parser *> clp);
 
     /// Destructor
     ///
-    virtual ~ioctl_driver() = default;
+    /// @expects none
+    /// @ensures none
+    ///
+    ~ioctl_driver() = default;
 
     /// Process
     ///
@@ -54,37 +71,37 @@ public:
     /// construction. If the IOCTL driver has a problem during processing,
     /// this function will return with an error.
     ///
-    /// @param f file class used to read from the filesystem
-    /// @param ctl ioctl class used to communicate with the driver entry
-    /// @param clp command line parser used to parse user input
+    /// @expects none
+    /// @ensures none
     ///
-    /// @throws invalid_argument_error thrown if f == 0, ctl == 0 or clp == 0
-    /// @throws corrupt_vmm_error thrown if the VMM is in a corrupt state.
-    ///     The VMM gets into a corrupt state when a stop or unload fails.
-    ///     Once this happens, dump still works, but everthing else will fail.
-    /// @throws unknown_status_error if the VMM is in an unknown state. This
-    ///     should never happen. If it doesn, the driver is not working right
-    /// @throws invalid_vmm_state_error if the VMM is in an invalid state. This
-    ///     usually happens because the clp states the user wanted to start or
-    ///     dump but forgot to load the VMM first.
-    ///
-    virtual void process(std::shared_ptr<file> f,
-                         std::shared_ptr<ioctl> ctl,
-                         std::shared_ptr<command_line_parser> clp);
+    void process();
 
 private:
 
-    void load_vmm(const std::shared_ptr<file> &f,
-                  const std::shared_ptr<ioctl> &ctl,
-                  const std::shared_ptr<command_line_parser> &clp);
+    void load_vmm();
+    void unload_vmm();
+    void start_vmm();
+    void stop_vmm();
+    void dump_vmm();
+    void vmm_status();
+    void vmcall();
 
-    void unload_vmm(const std::shared_ptr<ioctl> &ctl);
-    void start_vmm(const std::shared_ptr<ioctl> &ctl);
-    void stop_vmm(const std::shared_ptr<ioctl> &ctl);
-    void dump_vmm(const std::shared_ptr<ioctl> &ctl, uint64_t vcpuid);
-    void vmm_status(const std::shared_ptr<ioctl> &ctl);
+    void vmcall_send_regs(registers_type &regs);
+    void vmcall_versions(registers_type &regs);
+    void vmcall_registers(registers_type &regs);
+    void vmcall_data(registers_type &regs);
+    void vmcall_data_string(registers_type &regs);
+    void vmcall_data_binary(registers_type &regs);
+    void vmcall_event(registers_type &regs);
+    void vmcall_unittest(registers_type &regs);
 
-    int64_t get_status(const std::shared_ptr<ioctl> &ctl);
+    status_type get_status() const;
+
+private:
+
+    gsl::not_null<file *> m_file;
+    gsl::not_null<ioctl *> m_ioctl;
+    gsl::not_null<command_line_parser *> m_clp;
 };
 
 #endif

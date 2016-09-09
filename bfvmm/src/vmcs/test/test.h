@@ -27,7 +27,7 @@
 #include <functional>
 #include <memory>
 #include <vmcs/vmcs_intel_x64.h>
-#include <memory_manager/memory_manager.h>
+#include <memory_manager/memory_manager_x64.h>
 
 #define run_vmcs_test(cfg, ...) run_vmcs_test_with_args(gsl::cstring_span<>(__PRETTY_FUNCTION__), __LINE__, cfg, __VA_ARGS__)
 
@@ -46,7 +46,7 @@ extern uint8_t span[0x81];
 extern bool g_virt_to_phys_return_nullptr;
 extern bool g_phys_to_virt_return_nullptr;
 
-void setup_mock(MockRepository &mocks, memory_manager *mm);
+void setup_mock(MockRepository &mocks, memory_manager_x64 *mm);
 void enable_proc_ctl(uint64_t control);
 void enable_proc_ctl2(uint64_t control);
 void enable_pin_ctl(uint64_t control);
@@ -81,7 +81,7 @@ protected:
         for (const auto &path : cfg)
         {
             MockRepository mocks;
-            auto mm = mocks.Mock<memory_manager>();
+            auto mm = mocks.Mock<memory_manager_x64>();
 
             setup_mock(mocks, mm);
             path.setup();

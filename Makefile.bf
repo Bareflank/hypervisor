@@ -43,8 +43,12 @@ endif
 FILTERED_MODULE_FILE=/tmp/module_file
 
 ################################################################################
-# VCPUID
+# CPUID / VCPUID
 ################################################################################
+
+ifeq ($(CPUID),)
+	CPUID=0
+endif
 
 ifeq ($(VCPUID),)
 	VCPUID=0
@@ -141,6 +145,12 @@ dump: force
 
 status: force
 	@$(SUDO) LD_LIBRARY_PATH=%BUILD_ABS%/makefiles/bfm/bin/native/ %BUILD_ABS%/makefiles/bfm/bin/native/bfm status
+
+vmcall: force
+	@$(SUDO) LD_LIBRARY_PATH=%BUILD_ABS%/makefiles/bfm/bin/native/ %BUILD_ABS%/makefiles/bfm/bin/native/bfm vmcall --cpuid $(CPUID) ${ARGS}
+
+help: force
+	@$(SUDO) LD_LIBRARY_PATH=%BUILD_ABS%/makefiles/bfm/bin/native/ %BUILD_ABS%/makefiles/bfm/bin/native/bfm --help
 
 quick: load start
 

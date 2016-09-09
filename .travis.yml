@@ -30,6 +30,15 @@ matrix:
       - if [[ -n $(./tools/astyle/run.sh | grep Formatted) ]]; then echo "You must run astyle before submitting a pull request"; exit -1; fi
 
   #
+  # Git Check
+  #
+  - os: linux
+    env:
+      - TEST="Git Check"
+    script:
+      - if [[ -n $(git diff --check HEAD^) ]]; then echo "You must remove whitespace before submitting a pull request"; exit -1; fi
+
+  #
   # Coveralls
   #
   - os: linux
@@ -46,29 +55,6 @@ matrix:
       - make test
     after_success:
       - coveralls --build-root makefiles -e build_libbfc -e build_libcxx -e build_libcxxabi -e build_newlib -e source_libbfc -e source_libcxx -e source_libcxxabi -e source_llvm -e source_newlib -e sysroot -e bfdrivers/src/arch -e bfm/src/arch -e include/hippomocks.h -e include/json.h -e include/unittest.h -e include/new_delete.h -e include/gsl -e include/exception.h -e bfunwind -e bfvmm/src/intrinsics -e bfvmm/src/vcpu_factory/src/vcpu_factory.cpp -e bfvmm/src/vmcs/src/vmcs_intel_x64_check_guest.cpp -e bfvmm/src/vmcs/src/vmcs_intel_x64_check_misc.cpp -e bfvmm/src/vmcs/src/vmcs_intel_x64_debug.cpp -e  bfvmm/src/vmcs/src/vmcs_intel_x64_host_vm_state.cpp -e bfvmm/src/vmcs/src/vmcs_intel_x64_promote.asm -e bfvmm/src/vmcs/src/vmcs_intel_x64_resume.asm -e bfvmm/src/vmcs/src/vmcs_intel_x64_vmm_state.cpp -e bfvmm/include/vmcs/vmcs_intel_x64_host_vm_state.h -e bfvmm/include/vmcs/vmcs_intel_x64_promote.h -e bfvmm/include/vmcs/vmcs_intel_x64_resume.h -e bfvmm/include/vmcs/vmcs_intel_x64_state.h -e bfvmm/include/vmcs/vmcs_intel_x64_vmm_state.h --gcov-options '\-lp'
-
-  #
-  # Coverity
-  #
-  - os: linux
-    env:
-      - TEST="Coverity"
-    before_install:
-      - echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-certificates.crt
-    addons:
-      apt:
-        sources: ['ubuntu-toolchain-r-test']
-        packages: ['g++-5', 'nasm']
-      coverity_scan:
-        project:
-          name: "Bareflank/hypervisor"
-          description: "Travis CI Build"
-        notification_email: rianquinn@gmail.com
-        build_command_prepend: "sudo cp $(which gcc-5) $(which gcc); sudo cp $(which g++-5) $(which g++); ./configure; export STATIC_ANALYSIS_ENABLED=true"
-        build_command: "make"
-        branch_pattern: coverity_scan
-    script:
-      - echo "Done"
 
   #
   # Clang Tidy
@@ -104,6 +90,29 @@ matrix:
     script:
       - DYNAMIC_ANALYSIS_ENABLED=true make
       - make test
+
+  #
+  # Coverity
+  #
+  - os: linux
+    env:
+      - TEST="Coverity"
+    before_install:
+      - echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-certificates.crt
+    addons:
+      apt:
+        sources: ['ubuntu-toolchain-r-test']
+        packages: ['g++-5', 'nasm']
+      coverity_scan:
+        project:
+          name: "Bareflank/hypervisor"
+          description: "Travis CI Build"
+        notification_email: rianquinn@gmail.com
+        build_command_prepend: "sudo cp $(which gcc-5) $(which gcc); sudo cp $(which g++-5) $(which g++); ./configure; export STATIC_ANALYSIS_ENABLED=true"
+        build_command: "make"
+        branch_pattern: coverity_scan
+    script:
+      - echo "Done"
 
   #
   # GCC 5.1.0

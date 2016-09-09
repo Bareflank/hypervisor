@@ -20,6 +20,7 @@
 // License along with this library; if not, write to the Free Software
 
 #include <test.h>
+#include <memory_manager/memory_manager_x64.h>
 
 using namespace intel_x64;
 
@@ -141,9 +142,9 @@ void
 vmcs_ut::test_check_control_ctls_reserved_properly_set()
 {
     MockRepository mocks;
-    auto mm = mocks.Mock<memory_manager>();
+    auto mm = mocks.Mock<memory_manager_x64>();
 
-    mocks.OnCallFunc(memory_manager::instance).Return(mm);
+    mocks.OnCallFunc(memory_manager_x64::instance).Return(mm);
 
     g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] = 0xffffffff00000000UL;
     vmcs::vm_entry_controls::set(0x1234UL);

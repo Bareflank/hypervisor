@@ -58,6 +58,7 @@ SOURCES+=test_common_load.cpp
 SOURCES+=test_common_start.cpp
 SOURCES+=test_common_stop.cpp
 SOURCES+=test_common_unload.cpp
+SOURCES+=test_common_vmcall.cpp
 SOURCES+=test_helpers.cpp
 
 INCLUDE_PATHS+=./

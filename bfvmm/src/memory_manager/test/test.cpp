@@ -20,33 +20,9 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #include <test.h>
+#include <new_delete.h>
 
-void *
-operator new(std::size_t size)
-{
-    if ((size & (MAX_PAGE_SIZE - 1)) == 0)
-    {
-        void *ptr = nullptr;
-        auto ignored_ret = posix_memalign(&ptr, MAX_PAGE_SIZE, size);
-        (void) ignored_ret;
-        return ptr;
-    }
-
-    return malloc(size);
-}
-
-void
-operator delete(void *ptr, std::size_t size) throw()
-{
-    (void) size;
-    free(ptr);
-}
-
-void
-operator delete(void *ptr) throw()
-{
-    free(ptr);
-}
+#include <exception>
 
 memory_manager_ut::memory_manager_ut()
 {
@@ -67,53 +43,52 @@ memory_manager_ut::fini()
 bool
 memory_manager_ut::list()
 {
-    this->test_memory_manager_free_zero();
-    this->test_memory_manager_free_heap_twice();
-    this->test_memory_manager_malloc_zero();
-    this->test_memory_manager_multiple_malloc_heap_should_be_contiguous();
-    this->test_memory_manager_malloc_heap_all_of_memory();
-    this->test_memory_manager_malloc_heap_all_of_memory_one_block();
-    this->test_memory_manager_malloc_heap_all_memory_fragmented();
-    this->test_memory_manager_malloc_heap_too_much_memory_one_block();
-    this->test_memory_manager_malloc_heap_too_much_memory_non_block_size();
-    this->test_memory_manager_malloc_heap_massive();
-    this->test_memory_manager_size_out_of_bounds();
-    this->test_memory_manager_size_unallocated();
-    this->test_memory_manager_size();
-    this->test_memory_manager_contains_out_of_bounds();
-    this->test_memory_manager_contains();
-    this->test_memory_manager_malloc_out_of_memory();
-    this->test_memory_manager_malloc_heap();
-    this->test_memory_manager_malloc_page();
-    this->test_memory_manager_add_md_no_exceptions();
-    this->test_memory_manager_add_md_invalid_md();
-    this->test_memory_manager_add_md_invalid_virt();
-    this->test_memory_manager_add_md_invalid_phys();
-    this->test_memory_manager_add_md_invalid_type();
-    this->test_memory_manager_add_md_unaligned_physical();
-    this->test_memory_manager_add_md_unaligned_virtual();
-    this->test_memory_manager_virtint_to_physint_unknown();
-    this->test_memory_manager_physint_to_virtint_unknown();
-    this->test_memory_manager_virtint_to_physint_random_address();
-    this->test_memory_manager_virtint_to_physint_nullptr();
-    this->test_memory_manager_virtint_to_physint_upper_limit();
-    this->test_memory_manager_virtint_to_physint_lower_limit();
-    this->test_memory_manager_virt_to_phys_map();
-    this->test_memory_manager_physint_to_virtint_random_address();
-    this->test_memory_manager_physint_to_virtint_nullptr();
-    this->test_memory_manager_physint_to_virtint_upper_limit();
-    this->test_memory_manager_physint_to_virtint_lower_limit();
-    this->test_memory_manager_phys_to_virt_map();
+    this->test_mem_pool_free_zero();
+    this->test_mem_pool_free_heap_twice();
+    this->test_mem_pool_invalid_pool();
+    this->test_mem_pool_malloc_zero();
+    this->test_mem_pool_multiple_malloc_heap_should_be_contiguous();
+    this->test_mem_pool_malloc_heap_all_of_memory();
+    this->test_mem_pool_malloc_heap_all_of_memory_one_block();
+    this->test_mem_pool_malloc_heap_all_memory_fragmented();
+    this->test_mem_pool_malloc_heap_too_much_memory_one_block();
+    this->test_mem_pool_malloc_heap_too_much_memory_non_block_size();
+    this->test_mem_pool_malloc_heap_massive();
+    this->test_mem_pool_size_out_of_bounds();
+    this->test_mem_pool_size_unallocated();
+    this->test_mem_pool_size();
+    this->test_mem_pool_contains_out_of_bounds();
+    this->test_mem_pool_contains();
+
+    this->test_memory_manager_x64_size_out_of_bounds();
+    this->test_memory_manager_x64_malloc_out_of_memory();
+    this->test_memory_manager_x64_malloc_heap();
+    this->test_memory_manager_x64_malloc_page();
+    this->test_memory_manager_x64_malloc_map();
+    this->test_memory_manager_x64_add_md();
+    this->test_memory_manager_x64_add_md_invalid_virt();
+    this->test_memory_manager_x64_add_md_invalid_phys();
+    this->test_memory_manager_x64_add_md_invalid_type();
+    this->test_memory_manager_x64_add_md_unaligned_physical();
+    this->test_memory_manager_x64_add_md_unaligned_virtual();
+    this->test_memory_manager_x64_remove_md_invalid_virt();
+    this->test_memory_manager_x64_virtint_to_physint_failure();
+    this->test_memory_manager_x64_physint_to_virtint_failure();
+    this->test_memory_manager_x64_virtint_to_attrint_failure();
+    this->test_memory_manager_x64_virtint_to_physint_random_address();
+    this->test_memory_manager_x64_virtint_to_physint_nullptr();
+    this->test_memory_manager_x64_physint_to_virtint_random_address();
+    this->test_memory_manager_x64_physint_to_virtint_nullptr();
+    this->test_memory_manager_x64_virtint_to_attrint_random_address();
+    this->test_memory_manager_x64_virtint_to_attrint_nullptr();
 
     this->test_page_table_x64_no_entry();
     this->test_page_table_x64_with_entry();
-    this->test_page_table_x64_add_page_success();
-    this->test_page_table_x64_add_two_pages_no_added_mem_success();
-    this->test_page_table_x64_add_two_pages_with_added_mem_success();
-    this->test_page_table_x64_add_many_pages_success();
+    this->test_page_table_x64_add_remove_page_success();
+    this->test_page_table_x64_add_remove_many_pages_success();
     this->test_page_table_x64_add_page_twice_failure();
-    this->test_page_table_x64_table_phys_addr_success();
-    this->test_page_table_x64_table_phys_addr_failure();
+    this->test_page_table_x64_remove_page_twice_failure();
+    this->test_page_table_x64_remove_page_unknown_failure();
 
     this->test_page_table_entry_x64_present();
     this->test_page_table_entry_x64_rw();
@@ -123,9 +98,42 @@ memory_manager_ut::list()
     this->test_page_table_entry_x64_accessed();
     this->test_page_table_entry_x64_dirty();
     this->test_page_table_entry_x64_pat();
+    this->test_page_table_entry_x64_ps();
     this->test_page_table_entry_x64_global();
     this->test_page_table_entry_x64_nx();
     this->test_page_table_entry_x64_phys_addr();
+
+    this->test_unique_map_ptr_x64_default_constructor();
+    this->test_unique_map_ptr_x64_phys_constructor_invalid_args();
+    this->test_unique_map_ptr_x64_phys_constructor_mm_map_fails();
+    this->test_unique_map_ptr_x64_phys_constructor_success();
+    this->test_unique_map_ptr_x64_phys_range_constructor_invalid_args();
+    this->test_unique_map_ptr_x64_phys_range_constructor_mm_map_fails();
+    this->test_unique_map_ptr_x64_phys_range_constructor_success();
+    this->test_unique_map_ptr_x64_virt_cr3_constructor_invalid_args();
+    this->test_unique_map_ptr_x64_virt_cr3_constructor_mm_map_fails();
+    this->test_unique_map_ptr_x64_virt_cr3_constructor_success();
+    this->test_unique_map_ptr_x64_virt_cr3_constructor_success_large_page();
+    this->test_unique_map_ptr_x64_virt_cr3_constructor_not_present();
+    this->test_unique_map_ptr_x64_virt_cr3_constructor_invalid_phys_addr();
+    this->test_unique_map_ptr_x64_copy_constructor();
+    this->test_unique_map_ptr_x64_move_operator_valid();
+    this->test_unique_map_ptr_x64_move_operator_invalid();
+    this->test_unique_map_ptr_x64_reference_operators();
+    this->test_unique_map_ptr_x64_release();
+    this->test_unique_map_ptr_x64_reset();
+    this->test_unique_map_ptr_x64_swap();
+    this->test_unique_map_ptr_x64_flush();
+    this->test_unique_map_ptr_x64_comparison();
+    this->test_unique_map_ptr_x64_make_failure();
+
+    this->test_root_page_table_x64_init_failure();
+    this->test_root_page_table_x64_init_success();
+    this->test_root_page_table_x64_phys_addr();
+    this->test_root_page_table_x64_map_failure();
+    this->test_root_page_table_x64_map_add_md_failure();
+    this->test_root_page_table_x64_map_unmap_success();
+    this->test_root_page_table_x64_map_unmap_twice_success();
 
     return true;
 }

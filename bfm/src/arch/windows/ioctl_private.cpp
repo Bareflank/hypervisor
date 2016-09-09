@@ -110,6 +110,15 @@ bf_write_ioctl(HANDLE fd, DWORD request, const void *data, DWORD size)
     return 0;
 }
 
+int64_t
+bf_read_write_ioctl(HANDLE fd, DWORD request, void *data, DWORD size)
+{
+    if (!DeviceIoControl(fd, request, data, size, data, size, NULL, NULL))
+        return BF_IOCTL_FAILURE;
+
+    return 0;
+}
+
 // -----------------------------------------------------------------------------
 // Implementation
 // -----------------------------------------------------------------------------
@@ -136,17 +145,10 @@ ioctl_private::open()
 #pragma GCC diagnostic ignored "-Wconversion"
 #pragma GCC diagnostic ignored "-Wsign-conversion"
 
-// We turn off the conversion warnings here as Window's IOCTL macros are
-// tripping them which we cannot fix.
-
 void
-ioctl_private::call_ioctl_add_module(const char *data, uint64_t len)
+ioctl_private::call_ioctl_add_module(gsl::not_null<module_data_type> data, module_len_type len)
 {
-    if (data == nullptr)
-        throw std::invalid_argument("data == NULL");
-
-    if (len == 0)
-        throw std::invalid_argument("len == 0");
+    expects(len > 0);
 
     if (bf_write_ioctl(fd, IOCTL_ADD_MODULE, data, len) == BF_IOCTL_FAILURE)
         throw ioctl_failed(IOCTL_ADD_MODULE);
@@ -181,11 +183,8 @@ ioctl_private::call_ioctl_stop_vmm()
 }
 
 void
-ioctl_private::call_ioctl_dump_vmm(debug_ring_resources_t *drr, uint64_t vcpuid)
+ioctl_private::call_ioctl_dump_vmm(gsl::not_null<drr_pointer> drr, vcpuid_type vcpuid)
 {
-    if (drr == nullptr)
-        throw std::invalid_argument("drr == NULL");
-
     if (bf_write_ioctl(fd, IOCTL_SET_VCPUID, &vcpuid, sizeof(vcpuid)) == BF_IOCTL_FAILURE)
         throw ioctl_failed(IOCTL_SET_VCPUID);
 
@@ -194,13 +193,20 @@ ioctl_private::call_ioctl_dump_vmm(debug_ring_resources_t *drr, uint64_t vcpuid)
 }
 
 void
-ioctl_private::call_ioctl_vmm_status(int64_t *status)
+ioctl_private::call_ioctl_vmm_status(gsl::not_null<status_pointer> status)
 {
-    if (status == nullptr)
-        throw std::invalid_argument("status == NULL");
-
     if (bf_read_ioctl(fd, IOCTL_VMM_STATUS, status, sizeof(*status)) == BF_IOCTL_FAILURE)
         throw ioctl_failed(IOCTL_VMM_STATUS);
+}
+
+void
+ioctl_private::call_ioctl_vmcall(gsl::not_null<registers_pointer> regs, cpuid_type cpuid)
+{
+    if (bf_write_ioctl(fd, IOCTL_SET_CPUID, &cpuid, sizeof(cpuid)) == BF_IOCTL_FAILURE)
+        throw ioctl_failed(IOCTL_SET_CPUID);
+
+    if (bf_read_write_ioctl(fd, IOCTL_VMCALL, regs, sizeof(*regs)) == BF_IOCTL_FAILURE)
+        throw ioctl_failed(IOCTL_VMCALL);
 }
 
 #pragma GCC diagnostic pop

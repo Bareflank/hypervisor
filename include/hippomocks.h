@@ -459,9 +459,9 @@ struct printArg
 {
 	static inline void print(std::ostream &os, T arg, bool withComma)
 	{
-		if (withComma)
-			os << ",";
-		os << arg;
+		// if (withComma)
+		// 	os << ",";
+		// os << arg;
 	}
 };
 

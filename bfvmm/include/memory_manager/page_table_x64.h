@@ -22,15 +22,19 @@
 #ifndef PAGE_TABLE_X64_H
 #define PAGE_TABLE_X64_H
 
+#include <gsl/gsl>
+
 #include <vector>
 #include <memory>
 #include <memory_manager/page_table_entry_x64.h>
 
-#include <gsl/gsl>
-
 class page_table_x64 : public page_table_entry_x64
 {
 public:
+
+    using pointer = uintptr_t *;
+    using integer_pointer = uintptr_t;
+    using size_type = std::size_t;
 
     /// Constructor
     ///
@@ -38,13 +42,29 @@ public:
     /// this entry so that you can modify the properties of this page table
     /// as needed.
     ///
+    /// @expects none
+    /// @ensures none
+    ///
     /// @param pte the parent page table entry that points to this table
     ///
-    page_table_x64(uintptr_t *pte = nullptr);
+    page_table_x64(pointer pte = nullptr);
 
     /// Destructor
     ///
+    /// @expects none
+    /// @ensures none
+    ///
     ~page_table_x64() override = default;
+
+    /// Global Size
+    ///
+    /// @expects none
+    /// @ensures none
+    ///
+    /// @return returns the number of entries in the entire page table
+    ///     tree. Note that this function is expensive.
+    ///
+    size_type global_size() const noexcept;
 
     /// Add Page
     ///
@@ -54,24 +74,57 @@ public:
     /// will parse through the different levels making sure the virtual
     /// address provided is valid.
     ///
-    /// @param virt_addr the virtual address to add to the set of page tables.
-    /// @return the resulting page. Note that this page is blank, and it's
+    /// @expects virt_addr != 0;
+    /// @ensures none
+    ///
+    /// @param virt_addr the virtual address to the page to add
+    /// @return the resulting pte. Note that this pte is blank, and it's
     ///     properties (like present) should be set by the caller
     ///
-    std::shared_ptr<page_table_entry_x64> add_page(uintptr_t virt_addr);
+    std::shared_ptr<page_table_entry_x64> add_page_x64(integer_pointer virt_addr);
+
+    /// Remove Page
+    ///
+    /// Removes a page from the page table. Note that this function cleans
+    /// up as it goes, removing empty page tables if they are detected. For
+    /// this reason, this operation can be expensive if mapping / unmapping
+    /// occurs side by side with addresses that are similar (page tables will
+    /// be needlessly removed)
+    ///
+    /// @expects virt_addr != 0;
+    /// @ensures none
+    ///
+    /// @param virt_addr the virtual address of the page to remove
+    ///
+    void remove_page_x64(integer_pointer virt_addr);
 
 private:
 
-    std::shared_ptr<page_table_entry_x64> add_page(uintptr_t virt_addr, uint64_t bits);
+    template<class T> std::shared_ptr<T> add_pte(pointer p);
+    template<class T> std::shared_ptr<T> remove_pte();
+
+    std::shared_ptr<page_table_entry_x64> add_page_x64(integer_pointer virt_addr, integer_pointer bits);
+    void remove_page_x64(integer_pointer virt_addr, integer_pointer bits);
+
+    auto empty() const noexcept
+    { return m_size == 0; }
 
 private:
 
-    gsl::span<uintptr_t> m_pt;
-    std::unique_ptr<uintptr_t[]> m_pt_owner;
+    gsl::span<integer_pointer> m_pt;
+    std::unique_ptr<integer_pointer[]> m_pt_owner;
 
-    std::vector<std::shared_ptr<page_table_entry_x64> > m_ptes;
+    size_type m_size;
+    integer_pointer m_cr3_shadow;
+    std::vector<std::shared_ptr<page_table_entry_x64>> m_ptes;
 
-    uintptr_t m_cr3_shadow;
+public:
+
+    page_table_x64(page_table_x64 &&) noexcept = default;
+    page_table_x64 &operator=(page_table_x64 &&) noexcept = default;
+
+    page_table_x64(const page_table_x64 &) = delete;
+    page_table_x64 &operator=(const page_table_x64 &) = delete;
 };
 
 #endif

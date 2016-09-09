@@ -70,7 +70,9 @@ extern "C" {
 #define IOCTL_STOP_VMM_CMD 0x806
 #define IOCTL_DUMP_VMM_CMD 0x807
 #define IOCTL_VMM_STATUS_CMD 0x808
-#define IOCTL_SET_VCPUID_CMD 0x809
+#define IOCTL_SET_CPUID_CMD 0x809
+#define IOCTL_SET_VCPUID_CMD 0x80A
+#define IOCTL_VMCALL_CMD 0x80B
 
 /* -------------------------------------------------------------------------- */
 /* Linux Interfaces                                                           */
@@ -157,6 +159,16 @@ extern "C" {
 #define IOCTL_VMM_STATUS _IOR(BAREFLANK_MAJOR, IOCTL_VMM_STATUS_CMD, int64_t *)
 
 /**
+ * Set CPUID
+ *
+ * This IOCTL tells the driver entry point what cpuid the userspace
+ * application would like to focus on.
+ *
+ * @param arg the cpuid to focus commands on
+ */
+#define IOCTL_SET_CPUID _IOW(BAREFLANK_MAJOR, IOCTL_SET_CPUID_CMD, uint64_t *)
+
+/**
  * Set VCPUID
  *
  * This IOCTL tells the driver entry point what vcpuid the userspace
@@ -165,6 +177,15 @@ extern "C" {
  * @param arg the vcpuid to focus commands on
  */
 #define IOCTL_SET_VCPUID _IOW(BAREFLANK_MAJOR, IOCTL_SET_VCPUID_CMD, uint64_t *)
+
+/**
+ * VMCall
+ *
+ * This IOCTL tells the driver entry point to bounce a VMCall to the VMM
+ *
+ * @param arg the vmcall register struct
+ */
+#define IOCTL_VMCALL _IOW(BAREFLANK_MAJOR, IOCTL_VMCALL_CMD, struct vmcall_registers_t *)
 
 #endif
 
@@ -248,6 +269,16 @@ DEFINE_GUID(GUID_DEVINTERFACE_bareflank,
 #define IOCTL_VMM_STATUS CTL_CODE(BAREFLANK_DEVICETYPE, IOCTL_VMM_STATUS_CMD, METHOD_BUFFERED, FILE_READ_DATA)
 
 /**
+ * Set CPUID
+ *
+ * This IOCTL tells the driver entry point what vcpuid the userspace
+ * application would like to focus on.
+ *
+ * @param arg the vcpuid to focus commands on
+ */
+#define IOCTL_SET_CPUID CTL_CODE(BAREFLANK_DEVICETYPE, IOCTL_SET_CPUID_CMD, METHOD_IN_DIRECT, FILE_WRITE_DATA)
+
+/**
  * Set VCPUID
  *
  * This IOCTL tells the driver entry point what vcpuid the userspace
@@ -256,6 +287,15 @@ DEFINE_GUID(GUID_DEVINTERFACE_bareflank,
  * @param arg the vcpuid to focus commands on
  */
 #define IOCTL_SET_VCPUID CTL_CODE(BAREFLANK_DEVICETYPE, IOCTL_SET_VCPUID_CMD, METHOD_IN_DIRECT, FILE_WRITE_DATA)
+
+/**
+ * VMCall
+ *
+ * This IOCTL tells the driver entry point to bounce a VMCall to the VMM
+ *
+ * @param arg the vmcall register struct
+ */
+#define IOCTL_VMCALL CTL_CODE(BAREFLANK_DEVICETYPE, IOCTL_VMCALL_CMD, METHOD_IN_DIRECT, FILE_WRITE_DATA)
 
 #endif
 

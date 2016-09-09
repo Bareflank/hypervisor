@@ -19,141 +19,108 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+#include <bitmanip.h>
 #include <memory_manager/page_table_entry_x64.h>
 
-page_table_entry_x64::page_table_entry_x64(gsl::not_null<uintptr_t *> pte) noexcept :
-    m_pte(pte)
-{
-}
+#include <intrinsics/x64.h>
+using namespace x64;
+
+page_table_entry_x64::page_table_entry_x64(const gsl::not_null<pointer> &pte) noexcept :
+    m_pte(pte.get())
+{ }
 
 bool
 page_table_entry_x64::present() const noexcept
-{
-    return (*m_pte & PTE_FLAGS_P) != 0;
-}
+{ return is_bit_set(*m_pte, 0); }
 
 void
 page_table_entry_x64::set_present(bool enabled) noexcept
-{
-    enabled ? *m_pte |= PTE_FLAGS_P : *m_pte &= ~PTE_FLAGS_P;
-}
+{ *m_pte = enabled ? set_bit(*m_pte, 0) : clear_bit(*m_pte, 0); }
 
 bool
 page_table_entry_x64::rw() const noexcept
-{
-    return (*m_pte & PTE_FLAGS_RW) != 0;
-}
+{ return is_bit_set(*m_pte, 1); }
 
 void
 page_table_entry_x64::set_rw(bool enabled) noexcept
-{
-    enabled ? *m_pte |= PTE_FLAGS_RW : *m_pte &= ~PTE_FLAGS_RW;
-}
+{ *m_pte = enabled ? set_bit(*m_pte, 1) : clear_bit(*m_pte, 1); }
 
 bool
 page_table_entry_x64::us() const noexcept
-{
-    return (*m_pte & PTE_FLAGS_US) != 0;
-}
+{ return is_bit_set(*m_pte, 2); }
 
 void
 page_table_entry_x64::set_us(bool enabled) noexcept
-{
-    enabled ? *m_pte |= PTE_FLAGS_US : *m_pte &= ~PTE_FLAGS_US;
-}
+{ *m_pte = enabled ? set_bit(*m_pte, 2) : clear_bit(*m_pte, 2); }
 
 bool
 page_table_entry_x64::pwt() const noexcept
-{
-    return (*m_pte & PTE_FLAGS_PWT) != 0;
-}
+{ return is_bit_set(*m_pte, 3); }
 
 void
 page_table_entry_x64::set_pwt(bool enabled) noexcept
-{
-    enabled ? *m_pte |= PTE_FLAGS_PWT : *m_pte &= ~PTE_FLAGS_PWT;
-}
+{ *m_pte = enabled ? set_bit(*m_pte, 3) : clear_bit(*m_pte, 3); }
 
 bool
 page_table_entry_x64::pcd() const noexcept
-{
-    return (*m_pte & PTE_FLAGS_PCD) != 0;
-}
+{ return is_bit_set(*m_pte, 4); }
 
 void
 page_table_entry_x64::set_pcd(bool enabled) noexcept
-{
-    enabled ? *m_pte |= PTE_FLAGS_PCD : *m_pte &= ~PTE_FLAGS_PCD;
-}
+{ *m_pte = enabled ? set_bit(*m_pte, 4) : clear_bit(*m_pte, 4); }
 
 bool
 page_table_entry_x64::accessed() const noexcept
-{
-    return (*m_pte & PTE_FLAGS_A) != 0;
-}
+{ return is_bit_set(*m_pte, 5); }
 
 void
 page_table_entry_x64::set_accessed(bool enabled) noexcept
-{
-    enabled ? *m_pte |= PTE_FLAGS_A : *m_pte &= ~PTE_FLAGS_A;
-}
+{ *m_pte = enabled ? set_bit(*m_pte, 5) : clear_bit(*m_pte, 5); }
 
 bool
 page_table_entry_x64::dirty() const noexcept
-{
-    return (*m_pte & PTE_FLAGS_D) != 0;
-}
+{ return is_bit_set(*m_pte, 6); }
 
 void
 page_table_entry_x64::set_dirty(bool enabled) noexcept
-{
-    enabled ? *m_pte |= PTE_FLAGS_D : *m_pte &= ~PTE_FLAGS_D;
-}
+{ *m_pte = enabled ? set_bit(*m_pte, 6) : clear_bit(*m_pte, 6); }
+
+bool
+page_table_entry_x64::ps() const noexcept
+{ return is_bit_set(*m_pte, 7); }
+
+void
+page_table_entry_x64::set_ps(bool enabled) noexcept
+{ *m_pte = enabled ? set_bit(*m_pte, 7) : clear_bit(*m_pte, 7); }
 
 bool
 page_table_entry_x64::pat() const noexcept
-{
-    return (*m_pte & PTE_FLAGS_PAT) != 0;
-}
+{ return is_bit_set(*m_pte, 7); }
 
 void
 page_table_entry_x64::set_pat(bool enabled) noexcept
-{
-    enabled ? *m_pte |= PTE_FLAGS_PAT : *m_pte &= ~PTE_FLAGS_PAT;
-}
+{ *m_pte = enabled ? set_bit(*m_pte, 7) : clear_bit(*m_pte, 7); }
 
 bool
 page_table_entry_x64::global() const noexcept
-{
-    return (*m_pte & PTE_FLAGS_G) != 0;
-}
+{ return is_bit_set(*m_pte, 8); }
 
 void
 page_table_entry_x64::set_global(bool enabled) noexcept
-{
-    enabled ? *m_pte |= PTE_FLAGS_G : *m_pte &= ~PTE_FLAGS_G;
-}
+{ *m_pte = enabled ? set_bit(*m_pte, 8) : clear_bit(*m_pte, 8); }
 
-uintptr_t
+page_table_entry_x64::integer_pointer
 page_table_entry_x64::phys_addr() const noexcept
-{
-    return (*m_pte & PTE_PHYS_ADDR_MASK);
-}
+{ return get_bits(*m_pte, 0x000FFFFFFFFFF000UL); }
 
 void
-page_table_entry_x64::set_phys_addr(uintptr_t addr) noexcept
-{
-    *m_pte = (*m_pte & ~PTE_PHYS_ADDR_MASK) | (addr & PTE_PHYS_ADDR_MASK);
-}
+page_table_entry_x64::set_phys_addr(integer_pointer addr) noexcept
+{ *m_pte = set_bits(*m_pte, 0x000FFFFFFFFFF000UL, addr); }
 
 bool
 page_table_entry_x64::nx() const noexcept
-{
-    return (*m_pte & PTE_FLAGS_NX) != 0;
-}
+{ return is_bit_set(*m_pte, 63); }
 
 void
 page_table_entry_x64::set_nx(bool enabled) noexcept
-{
-    enabled ? *m_pte |= PTE_FLAGS_NX : *m_pte &= ~PTE_FLAGS_NX;
-}
+{ *m_pte = enabled ? set_bit(*m_pte, 63) : clear_bit(*m_pte, 63); }

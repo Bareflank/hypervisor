@@ -19,18 +19,38 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+#include <gsl/gsl>
+
 #include <vector>
 #include <string>
 #include <memory>
 #include <iostream>
 #include <exception.h>
 
-#include <gsl/gsl>
-
 #include <command_line_parser.h>
 #include <file.h>
 #include <ioctl.h>
 #include <ioctl_driver.h>
+
+#if !defined(__CYGWIN__) && !defined(_WIN32)
+
+#include <sys/mman.h>
+
+void
+flush()
+{
+    mlockall(MCL_CURRENT);
+    munlockall();
+}
+
+#else
+
+void
+flush()
+{
+}
+
+#endif
 
 void
 terminate()
@@ -49,24 +69,43 @@ new_handler()
 void
 help()
 {
-    std::cout << "Usage: bfm [OPTION]... load... list_of_modules..." << '\n';
-    std::cout << "  or:  bfm [OPTION]... unload..." << '\n';
-    std::cout << "  or:  bfm [OPTION]... start..." << '\n';
-    std::cout << "  or:  bfm [OPTION]... stop..." << '\n';
-    std::cout << "  or:  bfm [OPTION]... dump..." << '\n';
-    std::cout << "  or:  bfm [OPTION]... status..." << '\n';
-    std::cout << "Controls or queries the bareflank hypervisor" << '\n';
-    std::cout << '\n';
-    std::cout << "       -h, --help      show this help menu" << '\n';
+    std::cout << "Usage: bfm [OPTION]... load... list_of_modules..." << std::endl;
+    std::cout << "  or:  bfm [OPTION]... unload..." << std::endl;
+    std::cout << "  or:  bfm [OPTION]... start..." << std::endl;
+    std::cout << "  or:  bfm [OPTION]... stop..." << std::endl;
+    std::cout << "  or:  bfm [OPTION]... dump..." << std::endl;
+    std::cout << "  or:  bfm [OPTION]... status..." << std::endl;
+    std::cout << "  or:  bfm [OPTION]... vmcall versions index..." << std::endl;
+    std::cout << "  or:  bfm [OPTION]... vmcall registers r2 r3...r15" << std::endl;
+    std::cout << "  or:  bfm [OPTION]... vmcall string type \"\"..." << std::endl;
+    std::cout << "  or:  bfm [OPTION]... vmcall data type ifile ofile..." << std::endl;
+    std::cout << "  or:  bfm [OPTION]... vmcall unittest index..." << std::endl;
+    std::cout << "  or:  bfm [OPTION]... vmcall event index..." << std::endl;
+    std::cout << "Controls or queries the bareflank hypervisor" << std::endl;
+    std::cout << std::endl;
+    std::cout << "       -h, --help      show this help menu" << std::endl;
+    std::cout << "           --cpuid     indicate the requested cpuid" << std::endl;
+    std::cout << "           --vcpuid    indicate the requested vcpuid" << std::endl;
+    std::cout << std::endl;
+    std::cout << " vmcall string types:" << std::endl;
+    std::cout << "       unformatted     unformatted string" << std::endl;
+    std::cout << "       json            json formatted string" << std::endl;
+    std::cout << std::endl;
+    std::cout << " vmcall binary types:" << std::endl;
+    std::cout << "       unformatted     unformatted binary data" << std::endl;
+    std::cout << std::endl;
+    std::cout << " vmcall notes:" << std::endl;
+    std::cout << "       - registers are represented in hex" << std::endl;
+    std::cout << "       - data / string uuids equal 0" << std::endl;
 }
 
 int
-protected_main(const std::vector<std::string> &args)
+protected_main(const command_line_parser::arg_list_type &args)
 {
     // -------------------------------------------------------------------------
     // Command Line Parser
 
-    auto clp = std::make_shared<command_line_parser>();
+    auto &&clp = std::make_unique<command_line_parser>();
 
     try
     {
@@ -89,7 +128,7 @@ protected_main(const std::vector<std::string> &args)
     // -------------------------------------------------------------------------
     // IO Controller
 
-    auto ctl = std::make_shared<ioctl>();
+    auto &&ctl = std::make_unique<ioctl>();
 
     try
     {
@@ -103,14 +142,23 @@ protected_main(const std::vector<std::string> &args)
     }
 
     // -------------------------------------------------------------------------
-    // IOCTR Driver
+    // Page-In Memory
 
-    auto f = std::make_shared<file>();
-    auto driver = std::make_shared<ioctl_driver>();
+    // TODO: In the future, we should create an RAII class that locks just the
+    // pages being mapped to the hypervisor, which will need to be page
+    // aligned. For now, this should work on most system
+
+    flush();
+
+    // -------------------------------------------------------------------------
+    // IOCTR Driver
 
     try
     {
-        driver->process(f, ctl, clp);
+        auto &&f = std::make_unique<file>();
+        auto &&driver = std::make_unique<ioctl_driver>(f.get(), ctl.get(), clp.get());
+
+        driver->process();
     }
     catch (bfn::general_exception &ge)
     {
@@ -130,8 +178,8 @@ main(int argc, const char *argv[])
 
     try
     {
-        std::vector<std::string> args;
-        gsl::span<const char *> args_span{argv, argc};
+        command_line_parser::arg_list_type args;
+        auto args_span = gsl::make_span(argv, argc);
 
         for (auto i = 1; i < argc; i++)
             args.push_back(args_span[i]);

@@ -23,8 +23,9 @@
 #define VMCS_INTEL_X64_VMM_STATE_H
 
 #include <memory>
+
+#include <debug.h>
 #include <vmcs/vmcs_intel_x64_state.h>
-#include <exit_handler/state_save_intel_x64.h>
 
 #include <intrinsics/gdt_x64.h>
 #include <intrinsics/idt_x64.h>
@@ -48,7 +49,7 @@ class vmcs_intel_x64_vmm_state : public vmcs_intel_x64_state
 {
 public:
 
-    vmcs_intel_x64_vmm_state(const std::shared_ptr<state_save_intel_x64> &state_save);
+    vmcs_intel_x64_vmm_state();
     ~vmcs_intel_x64_vmm_state() override = default;
 
     uint16_t cs() const override { return m_cs; }
@@ -87,10 +88,7 @@ public:
     uint64_t gs_base() const override { return m_gdt.base(m_gs_index); }
     uint64_t tr_base() const override { return m_gdt.base(m_tr_index); }
 
-    uint64_t ia32_pat_msr() const override { return m_ia32_pat_msr; }
     uint64_t ia32_efer_msr() const override { return m_ia32_efer_msr; }
-    uint64_t ia32_fs_base_msr() const override { return m_ia32_fs_base_msr; }
-    uint64_t ia32_gs_base_msr() const override { return m_ia32_gs_base_msr; }
 
     void dump() const override
     {
@@ -100,59 +98,56 @@ public:
 
         bfdebug << bfendl;
         bfdebug << "segment selectors:" << bfendl;
-        PRINT_STATE(m_cs);
-        PRINT_STATE(m_ss);
-        PRINT_STATE(m_fs);
-        PRINT_STATE(m_gs);
-        PRINT_STATE(m_tr);
+        bfdebug << std::setw(35) << view_as_pointer(m_cs) << bfendl;
+        bfdebug << std::setw(35) << view_as_pointer(m_ss) << bfendl;
+        bfdebug << std::setw(35) << view_as_pointer(m_fs) << bfendl;
+        bfdebug << std::setw(35) << view_as_pointer(m_gs) << bfendl;
+        bfdebug << std::setw(35) << view_as_pointer(m_tr) << bfendl;
 
         bfdebug << bfendl;
         bfdebug << "segment base:" << bfendl;
-        PRINT_STATE(cs_base());
-        PRINT_STATE(ss_base());
-        PRINT_STATE(fs_base());
-        PRINT_STATE(gs_base());
-        PRINT_STATE(tr_base());
+        bfdebug << std::setw(35) << view_as_pointer(cs_base()) << bfendl;
+        bfdebug << std::setw(35) << view_as_pointer(ss_base()) << bfendl;
+        bfdebug << std::setw(35) << view_as_pointer(fs_base()) << bfendl;
+        bfdebug << std::setw(35) << view_as_pointer(gs_base()) << bfendl;
+        bfdebug << std::setw(35) << view_as_pointer(tr_base()) << bfendl;
 
         bfdebug << bfendl;
         bfdebug << "segment limit:" << bfendl;
-        PRINT_STATE(cs_limit());
-        PRINT_STATE(ss_limit());
-        PRINT_STATE(fs_limit());
-        PRINT_STATE(gs_limit());
-        PRINT_STATE(tr_limit());
+        bfdebug << std::setw(35) << view_as_pointer(cs_limit()) << bfendl;
+        bfdebug << std::setw(35) << view_as_pointer(ss_limit()) << bfendl;
+        bfdebug << std::setw(35) << view_as_pointer(fs_limit()) << bfendl;
+        bfdebug << std::setw(35) << view_as_pointer(gs_limit()) << bfendl;
+        bfdebug << std::setw(35) << view_as_pointer(tr_limit()) << bfendl;
 
         bfdebug << bfendl;
         bfdebug << "segment acess rights:" << bfendl;
-        PRINT_STATE(cs_access_rights());
-        PRINT_STATE(ss_access_rights());
-        PRINT_STATE(fs_access_rights());
-        PRINT_STATE(gs_access_rights());
-        PRINT_STATE(tr_access_rights());
+        bfdebug << std::setw(35) << view_as_pointer(cs_access_rights()) << bfendl;
+        bfdebug << std::setw(35) << view_as_pointer(ss_access_rights()) << bfendl;
+        bfdebug << std::setw(35) << view_as_pointer(fs_access_rights()) << bfendl;
+        bfdebug << std::setw(35) << view_as_pointer(gs_access_rights()) << bfendl;
+        bfdebug << std::setw(35) << view_as_pointer(tr_access_rights()) << bfendl;
 
         bfdebug << bfendl;
         bfdebug << "registers:" << bfendl;
-        PRINT_STATE(m_cr0);
-        PRINT_STATE(m_cr3);
-        PRINT_STATE(m_cr4);
+        bfdebug << std::setw(35) << view_as_pointer(m_cr0) << bfendl;
+        bfdebug << std::setw(35) << view_as_pointer(m_cr3) << bfendl;
+        bfdebug << std::setw(35) << view_as_pointer(m_cr4) << bfendl;
 
         bfdebug << bfendl;
         bfdebug << "flags:" << bfendl;
-        PRINT_STATE(m_rflags);
+        bfdebug << std::setw(35) << view_as_pointer(m_rflags) << bfendl;
 
         bfdebug << bfendl;
         bfdebug << "gdt/idt:" << bfendl;
-        PRINT_STATE(m_gdt.base());
-        PRINT_STATE(m_gdt.limit());
-        PRINT_STATE(m_idt.base());
-        PRINT_STATE(m_idt.limit());
+        bfdebug << std::setw(35) << view_as_pointer(m_gdt.base()) << bfendl;
+        bfdebug << std::setw(35) << view_as_pointer(m_gdt.limit()) << bfendl;
+        bfdebug << std::setw(35) << view_as_pointer(m_idt.base()) << bfendl;
+        bfdebug << std::setw(35) << view_as_pointer(m_idt.limit()) << bfendl;
 
         bfdebug << bfendl;
         bfdebug << "model specific registers:" << bfendl;
-        PRINT_STATE(m_ia32_pat_msr);
-        PRINT_STATE(m_ia32_efer_msr);
-        PRINT_STATE(m_ia32_fs_base_msr);
-        PRINT_STATE(m_ia32_gs_base_msr);
+        bfdebug << std::setw(35) << view_as_pointer(m_ia32_efer_msr) << bfendl;
 
         bfdebug << bfendl;
     }
@@ -181,10 +176,7 @@ private:
     gdt_x64 m_gdt;
     idt_x64 m_idt;
 
-    uint64_t m_ia32_pat_msr;
     uint64_t m_ia32_efer_msr;
-    uint64_t m_ia32_fs_base_msr;
-    uint64_t m_ia32_gs_base_msr;
 };
 
 #endif

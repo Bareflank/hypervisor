@@ -64,8 +64,6 @@ public:
     ///     provide nullptr, a default vmcs will be created.
     /// @param exit_handler the exit handler the vcpu should use. If you
     ///     provide nullptr, a default exit handler will be created.
-    /// @param intrinsics the intrinsics the vcpu should use. If you
-    ///     provide nullptr, a default intrinsics will be created.
     /// @param vmm_state the vmm state the vcpu should use. If you
     ///     provide nullptr, a default vmm state will be created.
     /// @param guest_state the guest state the vcpu should use. If you

@@ -30,7 +30,9 @@
 using namespace x64;
 using namespace intel_x64;
 
-vmcs_intel_x64_host_vm_state::vmcs_intel_x64_host_vm_state()
+vmcs_intel_x64_host_vm_state::vmcs_intel_x64_host_vm_state() :
+    m_gdt{},
+    m_idt{}
 {
     m_es = segment_register::es::get();
     m_cs = segment_register::cs::get();

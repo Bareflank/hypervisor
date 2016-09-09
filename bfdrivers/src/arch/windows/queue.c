@@ -35,6 +35,7 @@ struct pmodule_t
 int64_t g_num_pmodules = 0;
 struct pmodule_t pmodules[MAX_NUM_MODULES] = { 0 };
 
+uint64_t g_cpuid = 0;
 uint64_t g_vcpuid = 0;
 
 /* -------------------------------------------------------------------------- */
@@ -216,6 +217,21 @@ ioctl_vmm_status(int64_t *status)
 }
 
 static int64_t
+ioctl_set_cpuid(uint64_t *cpuid)
+{
+    if (cpuid == 0)
+    {
+        ALERT("IOCTL_SET_CPUID: failed with len == NULL\n");
+        return BF_IOCTL_FAILURE;
+    }
+
+    g_cpuid = *cpuid;
+
+    DEBUG("IOCTL_SET_CPUID: succeeded\n");
+    return BF_IOCTL_SUCCESS;
+}
+
+static int64_t
 ioctl_set_vcpuid(uint64_t *vcpuid)
 {
     if (vcpuid == 0)
@@ -227,6 +243,23 @@ ioctl_set_vcpuid(uint64_t *vcpuid)
     g_vcpuid = *vcpuid;
 
     DEBUG("IOCTL_SET_VCPUID: succeeded\n");
+    return BF_IOCTL_SUCCESS;
+}
+
+static int64_t
+ioctl_vmcall(struct vmcall_registers_t *inregs, struct vmcall_registers_t *outregs)
+{
+    int64_t ret;
+
+    ret = common_vmcall(inregs, g_cpuid);
+    if (ret != 0)
+    {
+        ALERT("IOCTL_VMCALL: common_vmcall failed: %p - %s\n", \
+              (void *)ret, ec_to_str(ret));
+        return BF_IOCTL_FAILURE;
+    }
+
+    RtlCopyMemory(outregs, inregs, sizeof(struct vmcall_registers_t));
     return BF_IOCTL_SUCCESS;
 }
 
@@ -326,8 +359,16 @@ bareflankEvtIoDeviceControl(
             ret = ioctl_vmm_status((int64_t *)out);
             break;
 
+        case IOCTL_SET_CPUID:
+            ret = ioctl_set_cpuid((uint64_t *)in);
+            break;
+
         case IOCTL_SET_VCPUID:
             ret = ioctl_set_vcpuid((uint64_t *)in);
+            break;
+
+        case IOCTL_VMCALL:
+            ret = ioctl_vmcall((struct vmcall_registers_t *)in, (struct vmcall_registers_t *)out);
             break;
 
         default:

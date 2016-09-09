@@ -19,7 +19,15 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+#include <gsl/gsl>
+
+#include <json.h>
 #include <debug.h>
+#include <constants.h>
+#include <error_codes.h>
+#include <guard_exceptions.h>
+#include <memory_manager/map_ptr_x64.h>
+#include <memory_manager/memory_manager_x64.h>
 #include <exit_handler/exit_handler_intel_x64.h>
 #include <exit_handler/exit_handler_intel_x64_entry.h>
 #include <exit_handler/exit_handler_intel_x64_support.h>
@@ -435,7 +443,90 @@ exit_handler_intel_x64::handle_rsm()
 
 void
 exit_handler_intel_x64::handle_vmcall()
-{ unimplemented_handler(); }
+{
+    auto &&ret = BF_VMCALL_FAILURE;
+    auto &&regs = vmcall_registers_t{};
+
+    auto ___ = gsl::finally([&]
+    {
+        m_state_save->rdx = static_cast < decltype(m_state_save->rdx) > (ret);
+        advance_rip();
+    });
+
+    if (m_state_save->rdx != VMCALL_MAGIC_NUMBER)
+        return;
+
+    switch (m_state_save->rax)
+    {
+        case VMCALL_EVENT:
+            regs.r02 = m_state_save->rcx;
+            break;
+
+        default:
+            regs.r02 = m_state_save->rcx;
+            regs.r03 = m_state_save->rbx;
+            regs.r04 = m_state_save->rsi;
+            regs.r05 = m_state_save->r08;
+            regs.r06 = m_state_save->r09;
+            regs.r07 = m_state_save->r10;
+            regs.r08 = m_state_save->r11;
+            regs.r09 = m_state_save->r12;
+            regs.r10 = m_state_save->r13;
+            regs.r11 = m_state_save->r14;
+            regs.r12 = m_state_save->r15;
+            break;
+    };
+
+    ret = guard_exceptions(BF_VMCALL_FAILURE, [&]
+    {
+        switch (m_state_save->rax)
+        {
+            case VMCALL_VERSIONS:
+                handle_vmcall_versions(regs);
+                break;
+
+            case VMCALL_REGISTERS:
+                handle_vmcall_registers(regs);
+                break;
+
+            case VMCALL_DATA:
+                handle_vmcall_data(regs);
+                break;
+
+            case VMCALL_EVENT:
+                handle_vmcall_event(regs);
+                break;
+
+            case VMCALL_UNITTEST:
+                handle_vmcall_unittest(regs);
+                break;
+
+            default:
+                throw std::runtime_error("unknown vmcall opcode");
+        };
+    });
+
+    switch (m_state_save->rax)
+    {
+        case VMCALL_EVENT:
+            m_state_save->rcx = regs.r02;
+            break;
+
+        default:
+            m_state_save->r15 = regs.r12;
+            m_state_save->r14 = regs.r11;
+            m_state_save->r13 = regs.r10;
+            m_state_save->r12 = regs.r09;
+            m_state_save->r11 = regs.r08;
+            m_state_save->r10 = regs.r07;
+            m_state_save->r09 = regs.r06;
+            m_state_save->r08 = regs.r05;
+            m_state_save->rsi = regs.r04;
+            m_state_save->rbx = regs.r03;
+            m_state_save->rcx = regs.r02;
+            break;
+    };
+}
 
 void
 exit_handler_intel_x64::handle_vmclear()
@@ -490,7 +581,7 @@ exit_handler_intel_x64::handle_io_instruction()
 void
 exit_handler_intel_x64::handle_rdmsr()
 {
-    uint64_t msr = 0;
+    msrs::value_type msr = 0;
 
     switch (m_state_save->rcx)
     {
@@ -553,7 +644,7 @@ exit_handler_intel_x64::handle_rdmsr()
 void
 exit_handler_intel_x64::handle_wrmsr()
 {
-    uint64_t msr = 0;
+    msrs::value_type msr = 0;
 
     msr |= ((m_state_save->rax & 0x00000000FFFFFFFF) << 0x00);
     msr |= ((m_state_save->rdx & 0x00000000FFFFFFFF) << 0x20);
@@ -704,13 +795,13 @@ exit_handler_intel_x64::handle_xrstors()
 { unimplemented_handler(); }
 
 void
-exit_handler_intel_x64::advance_rip()
+exit_handler_intel_x64::advance_rip() noexcept
 {
     m_state_save->rip += m_exit_instruction_length;
 }
 
 void
-exit_handler_intel_x64::unimplemented_handler()
+exit_handler_intel_x64::unimplemented_handler() noexcept
 {
     std::lock_guard<std::mutex> guard(g_unimplemented_handler_mutex);
 
@@ -735,9 +826,12 @@ exit_handler_intel_x64::unimplemented_handler()
         bferror << "VM-entry failure detected!!!" << bfendl;
         bferror << bfendl;
 
-        m_vmcs->check_vmcs_control_state();
-        m_vmcs->check_vmcs_guest_state();
-        m_vmcs->check_vmcs_host_state();
+        guard_exceptions([&]
+        {
+            m_vmcs->check_vmcs_control_state();
+            m_vmcs->check_vmcs_guest_state();
+            m_vmcs->check_vmcs_host_state();
+        });
     }
 
     g_unimplemented_handler_mutex.unlock();
@@ -933,4 +1027,133 @@ exit_handler_intel_x64::exit_reason_to_str(uint64_t exit_reason)
         default:
             return "unknown";
     };
+}
+
+void
+exit_handler_intel_x64::handle_vmcall_versions(vmcall_registers_t &regs)
+{
+    switch (regs.r02)
+    {
+        case VMCALL_VERSION_PROTOCOL:
+            regs.r03 = VMCALL_VERSION;
+            regs.r04 = 0;
+            regs.r05 = 0;
+            break;
+
+        case VMCALL_VERSION_BAREFLANK:
+            regs.r03 = BAREFLANK_VERSION_MAJOR;
+            regs.r04 = BAREFLANK_VERSION_MINOR;
+            regs.r05 = BAREFLANK_VERSION_PATCH;
+            break;
+
+        case VMCALL_VERSION_USER:
+            regs.r03 = USER_VERSION_MAJOR;
+            regs.r04 = USER_VERSION_MINOR;
+            regs.r05 = USER_VERSION_PATCH;
+            break;
+
+        default:
+            throw std::runtime_error("unknown vmcall version index");
+    }
+}
+
+void
+exit_handler_intel_x64::handle_vmcall_registers(vmcall_registers_t &regs)
+{
+    bfdebug << "vmcall registers:" << bfendl;
+    bfdebug << "r02: " << view_as_pointer(regs.r02) << bfendl;
+    bfdebug << "r03: " << view_as_pointer(regs.r03) << bfendl;
+    bfdebug << "r04: " << view_as_pointer(regs.r04) << bfendl;
+    bfdebug << "r05: " << view_as_pointer(regs.r05) << bfendl;
+    bfdebug << "r06: " << view_as_pointer(regs.r06) << bfendl;
+    bfdebug << "r07: " << view_as_pointer(regs.r07) << bfendl;
+    bfdebug << "r08: " << view_as_pointer(regs.r08) << bfendl;
+    bfdebug << "r09: " << view_as_pointer(regs.r09) << bfendl;
+    bfdebug << "r10: " << view_as_pointer(regs.r10) << bfendl;
+    bfdebug << "r11: " << view_as_pointer(regs.r11) << bfendl;
+    bfdebug << "r12: " << view_as_pointer(regs.r12) << bfendl;
+}
+
+void
+exit_handler_intel_x64::handle_vmcall_data(vmcall_registers_t &regs)
+{
+    expects(regs.r05 != 0);
+    expects(regs.r08 != 0);
+    expects(regs.r06 != 0);
+    expects(regs.r09 != 0);
+    expects(regs.r09 >= regs.r06);
+    expects(regs.r06 <= VMCALL_IN_BUFFER_SIZE);
+    expects(regs.r09 <= VMCALL_OUT_BUFFER_SIZE);
+
+    switch (regs.r04)
+    {
+        case VMCALL_DATA_STRING_UNFORMATTED:
+        {
+            auto &&istr = bfn::make_unique_map_x64<char>(regs.r05, vmcs::guest_cr3::get(), regs.r06);
+            auto &&ostr = bfn::make_unique_map_x64<char>(regs.r08, vmcs::guest_cr3::get(), regs.r09);
+
+            bfdebug << "received in vmm: " << std::string(istr.get(), regs.r06) << bfendl;
+
+            __builtin_memset(ostr.get(), 0, regs.r09);
+            __builtin_memcpy(ostr.get(), istr.get(), regs.r06);
+
+            regs.r07 = VMCALL_DATA_STRING_UNFORMATTED;
+            regs.r09 = regs.r06;
+
+            break;
+        }
+
+        case VMCALL_DATA_STRING_JSON:
+        {
+            auto &&istr = bfn::make_unique_map_x64<char>(regs.r05, vmcs::guest_cr3::get(), regs.r06);
+            auto &&ostr = bfn::make_unique_map_x64<char>(regs.r08, vmcs::guest_cr3::get(), regs.r09);
+
+            bfdebug << "received in vmm: " << json::parse(std::string(istr.get(), regs.r06)) << bfendl;
+
+            __builtin_memset(ostr.get(), 0, regs.r09);
+            __builtin_memcpy(ostr.get(), istr.get(), regs.r06);
+
+            regs.r07 = VMCALL_DATA_STRING_JSON;
+            regs.r09 = regs.r06;
+
+            break;
+        }
+
+        case VMCALL_DATA_BINARY_UNFORMATTED:
+        {
+            auto &&istr = bfn::make_unique_map_x64<char>(regs.r05, vmcs::guest_cr3::get(), regs.r06);
+            auto &&ostr = bfn::make_unique_map_x64<char>(regs.r08, vmcs::guest_cr3::get(), regs.r09);
+
+            __builtin_memset(ostr.get(), 0, regs.r09);
+            __builtin_memcpy(ostr.get(), istr.get(), regs.r06);
+
+            regs.r07 = VMCALL_DATA_BINARY_UNFORMATTED;
+            regs.r09 = regs.r06;
+
+            bfdebug << "received binary data:" << bfendl;
+            bfdebug << "    - in_addr: " << view_as_pointer(regs.r05) << bfendl;
+            bfdebug << "    - in_size: " << regs.r06 << bfendl;
+            bfdebug << "    - out_addr: " << view_as_pointer(regs.r08) << bfendl;
+            bfdebug << "    - out_size: " << regs.r09 << bfendl;
+
+            break;
+        }
+
+        default:
+            throw std::runtime_error("unknown vmcall data type");
+    }
+}
+
+void
+exit_handler_intel_x64::handle_vmcall_event(vmcall_registers_t &regs)
+{
+    bfdebug << "vmcall event:" << bfendl;
+    bfdebug << "r02: " << view_as_pointer(regs.r02) << bfendl;
+}
+
+void
+exit_handler_intel_x64::handle_vmcall_unittest(vmcall_registers_t &regs)
+{
+    bfdebug << "vmcall unittest:" << bfendl;
+    bfdebug << "r02: " << view_as_pointer(regs.r02) << bfendl;
 }

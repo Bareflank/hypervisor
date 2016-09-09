@@ -20,6 +20,7 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #include <vcpu/vcpu_factory.h>
+#include <vcpu/vcpu_intel_x64.h>
 
 std::shared_ptr<vcpu>
 vcpu_factory::make_vcpu(uint64_t vcpuid, void *attr)

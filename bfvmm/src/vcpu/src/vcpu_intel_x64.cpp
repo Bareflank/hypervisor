@@ -20,9 +20,7 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #include <gsl/gsl>
-
 #include <vcpu/vcpu_intel_x64.h>
-#include <memory_manager/memory_manager.h>
 
 vcpu_intel_x64::vcpu_intel_x64(uint64_t id,
                                std::shared_ptr<debug_ring> debug_ring,
@@ -47,13 +45,11 @@ vcpu_intel_x64::init(void *attr)
     auto ___ = gsl::on_failure([&]
     { this->fini(); });
 
-    auto ss = new state_save_intel_x64();
-    m_state_save = std::shared_ptr<state_save_intel_x64>(ss);
-
+    if (!m_state_save) m_state_save = gsl::make_shared<state_save_intel_x64>();
     if (!m_vmxon) m_vmxon = std::make_shared<vmxon_intel_x64>();
     if (!m_vmcs) m_vmcs = std::make_shared<vmcs_intel_x64>();
     if (!m_exit_handler) m_exit_handler = std::make_shared<exit_handler_intel_x64>();
-    if (!m_vmm_state) m_vmm_state = std::make_shared<vmcs_intel_x64_vmm_state>(m_state_save);
+    if (!m_vmm_state) m_vmm_state = std::make_shared<vmcs_intel_x64_vmm_state>();
     if (!m_guest_state) m_guest_state = std::make_shared<vmcs_intel_x64_host_vm_state>();
 
     m_state_save->vcpuid = this->id();
@@ -72,15 +68,6 @@ vcpu_intel_x64::init(void *attr)
 void
 vcpu_intel_x64::fini(void *attr)
 {
-    m_guest_state.reset();
-    m_vmm_state.reset();
-
-    m_exit_handler.reset();
-    m_vmcs.reset();
-    m_vmxon.reset();
-
-    m_state_save.reset();
-
     vcpu::fini(attr);
 }
 

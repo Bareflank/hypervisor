@@ -53,7 +53,7 @@ malloc_aligned(std::size_t size)
 static void *
 custom_new(std::size_t size)
 {
-    if (size == g_new_throws_bad_alloc)
+    if (size == g_new_throws_bad_alloc || size == 0xFFFFFFFFFFFFFFFF)
         throw std::bad_alloc();
 
     if ((size & (MAX_PAGE_SIZE - 1)) == 0)

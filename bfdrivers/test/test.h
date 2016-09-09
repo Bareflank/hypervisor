@@ -106,6 +106,11 @@ private:
     void test_common_dump_get_drr_missing();
     void test_common_dump_get_drr_failure();
 
+    void test_common_vmcall_invalid_args();
+    void test_common_vmcall_set_affinity_failure();
+    void test_common_vmcall_success();
+    void test_common_vmcall_success_event();
+
     void test_helper_common_vmm_status();
     void test_helper_get_file_invalid_index();
     void test_helper_get_file_success();

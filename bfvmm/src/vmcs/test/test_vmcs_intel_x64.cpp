@@ -177,18 +177,18 @@ setup_vmcs_x64_state_intrinsics(MockRepository &mocks, vmcs_intel_x64_state *sta
 }
 
 static void
-setup_vmcs_intrinsics(MockRepository &mocks, memory_manager *mm)
+setup_vmcs_intrinsics(MockRepository &mocks, memory_manager_x64 *mm)
 {
-    mocks.OnCallFunc(memory_manager::instance).Return(mm);
-    mocks.OnCall(mm, memory_manager::virtptr_to_physint).Do(virtptr_to_physint);
-    mocks.OnCall(mm, memory_manager::physint_to_virtptr).Do(physint_to_virtptr);
+    mocks.OnCallFunc(memory_manager_x64::instance).Return(mm);
+    mocks.OnCall(mm, memory_manager_x64::virtptr_to_physint).Do(virtptr_to_physint);
+    mocks.OnCall(mm, memory_manager_x64::physint_to_virtptr).Do(physint_to_virtptr);
 }
 
 void
 vmcs_ut::test_launch_success()
 {
     MockRepository mocks;
-    auto mm = mocks.Mock<memory_manager>();
+    auto mm = mocks.Mock<memory_manager_x64>();
     auto host_state = bfn::mock_shared<vmcs_intel_x64_state>(mocks);
     auto guest_state = bfn::mock_shared<vmcs_intel_x64_state>(mocks);
 
@@ -209,7 +209,7 @@ void
 vmcs_ut::test_launch_vmlaunch_failure()
 {
     MockRepository mocks;
-    auto mm = mocks.Mock<memory_manager>();
+    auto mm = mocks.Mock<memory_manager_x64>();
     auto host_state = bfn::mock_shared<vmcs_intel_x64_state>(mocks);
     auto guest_state = bfn::mock_shared<vmcs_intel_x64_state>(mocks);
 
@@ -239,7 +239,7 @@ void
 vmcs_ut::test_launch_create_vmcs_region_failure()
 {
     MockRepository mocks;
-    auto mm = mocks.Mock<memory_manager>();
+    auto mm = mocks.Mock<memory_manager_x64>();
     auto host_state = bfn::mock_shared<vmcs_intel_x64_state>(mocks);
     auto guest_state = bfn::mock_shared<vmcs_intel_x64_state>(mocks);
 
@@ -255,8 +255,7 @@ vmcs_ut::test_launch_create_vmcs_region_failure()
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
         vmcs_intel_x64 vmcs{};
-
-        EXPECT_EXCEPTION(vmcs.launch(host_state, guest_state), std::logic_error);
+        this->expect_exception([&]{ vmcs.launch(host_state, guest_state); }, ""_ut_ffe);
     });
 }
 
@@ -264,7 +263,7 @@ void
 vmcs_ut::test_launch_create_exit_handler_stack_failure()
 {
     MockRepository mocks;
-    auto mm = mocks.Mock<memory_manager>();
+    auto mm = mocks.Mock<memory_manager_x64>();
     auto host_state = bfn::mock_shared<vmcs_intel_x64_state>(mocks);
     auto guest_state = bfn::mock_shared<vmcs_intel_x64_state>(mocks);
 
@@ -286,7 +285,7 @@ void
 vmcs_ut::test_launch_clear_failure()
 {
     MockRepository mocks;
-    auto mm = mocks.Mock<memory_manager>();
+    auto mm = mocks.Mock<memory_manager_x64>();
     auto host_state = bfn::mock_shared<vmcs_intel_x64_state>(mocks);
     auto guest_state = bfn::mock_shared<vmcs_intel_x64_state>(mocks);
 
@@ -308,7 +307,7 @@ void
 vmcs_ut::test_launch_load_failure()
 {
     MockRepository mocks;
-    auto mm = mocks.Mock<memory_manager>();
+    auto mm = mocks.Mock<memory_manager_x64>();
     auto host_state = bfn::mock_shared<vmcs_intel_x64_state>(mocks);
     auto guest_state = bfn::mock_shared<vmcs_intel_x64_state>(mocks);
 

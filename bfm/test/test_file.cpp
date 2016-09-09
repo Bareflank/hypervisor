@@ -19,36 +19,60 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+#include <test.h>
+
+#include <file.h>
 #include <exception.h>
 
-#include <test.h>
-#include <file.h>
-
-// This is not a true unit test since we are not providing the file
-// class with a mock of fstream. Our attempts at doing that were not
-// successful. These tests at least help us prove that the file class
-// is going to work as intended.
-
-file g_f;
+static auto operator"" _ife(const char *str, std::size_t len)
+{ (void)str; (void)len; return std::make_shared<bfn::invalid_file_error>(""); }
 
 void
 bfm_ut::test_file_read_with_bad_filename()
 {
-    auto filename = "/tmp/bad_filename.txt";
+    auto &&f = file{};
+    auto &&filename = "/blah/bad_filename.txt"_s;
 
-    EXPECT_EXCEPTION(g_f.read(filename), bfn::invalid_file_error);
+    this->expect_exception([&] { f.read_text(""); }, ""_ut_ffe);
+    this->expect_exception([&] { f.read_binary(""); }, ""_ut_ffe);
+
+    this->expect_exception([&] { f.read_text(filename); }, ""_ife);
+    this->expect_exception([&] { f.read_binary(filename); }, ""_ife);
 }
 
 void
-bfm_ut::test_file_read_with_good_filename()
+bfm_ut::test_file_write_with_bad_filename()
 {
-    auto text = "blah";
-    auto filename = "/tmp/bfm_test.txt";
+    auto &&f = file{};
+    auto &&filename = "/blah/bad_filename.txt"_s;
 
-    std::ofstream tmp(filename);
-    tmp << text;
-    tmp.close();
+    auto &&text_data = "hello"_s;
+    auto &&binary_data = {'h', 'e', 'l', 'l', 'o'};
 
-    EXPECT_TRUE(g_f.read(filename) == std::string(text));
-    EXPECT_TRUE(std::remove(filename) == 0);
+    this->expect_exception([&] { f.write_text("", text_data); }, ""_ut_ffe);
+    this->expect_exception([&] { f.write_binary("", binary_data); }, ""_ut_ffe);
+
+    this->expect_exception([&] { f.write_text(filename, ""); }, ""_ut_ffe);
+    this->expect_exception([&] { f.write_binary(filename, {}); }, ""_ut_ffe);
+
+    this->expect_exception([&] { f.write_text(filename, text_data); }, ""_ife);
+    this->expect_exception([&] { f.write_binary(filename, binary_data); }, ""_ife);
+}
+
+void
+bfm_ut::test_file_read_write_success()
+{
+    auto &&f = file{};
+    auto &&filename = "/tmp/test_file.txt"_s;
+
+    auto &&text_data = "hello"_s;
+    auto &&binary_data = {'h', 'e', 'l', 'l', 'o'};
+
+    this->expect_no_exception([&] { f.write_text(filename, text_data); });
+    this->expect_true(f.read_text(filename) == text_data);
+
+    this->expect_no_exception([&] { f.write_binary(filename, binary_data); });
+    this->expect_true(f.read_binary(filename) == file::binary_data(binary_data));
+
+    std::remove(filename.c_str());
 }

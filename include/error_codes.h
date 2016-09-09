@@ -30,9 +30,9 @@
 /* -------------------------------------------------------------------------- */
 
 #ifdef __cplusplus
-#define sign(a) static_cast<int64_t>(a)
+#define ec_sign(a) static_cast<int64_t>(a)
 #else
-#define sign(a) ((int64_t)(a))
+#define ec_sign(a) ((int64_t)(a))
 #endif
 
 /* -------------------------------------------------------------------------- */
@@ -45,88 +45,95 @@
 /* Entry Error Codes                                                          */
 /* -------------------------------------------------------------------------- */
 
-#define ENTRY_SUCCESS sign(SUCCESS)
-#define ENTRY_ERROR_STACK_OVERFLOW sign(0x8000000000000010)
-#define ENTRY_ERROR_VMM_INIT_FAILED sign(0x8000000000000020)
-#define ENTRY_ERROR_VMM_START_FAILED sign(0x8000000000000030)
-#define ENTRY_ERROR_VMM_STOP_FAILED sign(0x8000000000000040)
-#define ENTRY_ERROR_UNKNOWN sign(0x8000000000000050)
+#define ENTRY_SUCCESS ec_sign(SUCCESS)
+#define ENTRY_ERROR_STACK_OVERFLOW ec_sign(0x8000000000000010)
+#define ENTRY_ERROR_VMM_INIT_FAILED ec_sign(0x8000000000000020)
+#define ENTRY_ERROR_VMM_START_FAILED ec_sign(0x8000000000000030)
+#define ENTRY_ERROR_VMM_STOP_FAILED ec_sign(0x8000000000000040)
+#define ENTRY_ERROR_UNKNOWN ec_sign(0x8000000000000050)
 
 /* -------------------------------------------------------------------------- */
 /* C Runtime Error Codes                                                      */
 /* -------------------------------------------------------------------------- */
 
-#define CRT_SUCCESS sign(SUCCESS)
-#define CRT_FAILURE sign(0x8000000000000100)
+#define CRT_SUCCESS ec_sign(SUCCESS)
+#define CRT_FAILURE ec_sign(0x8000000000000100)
 
 /* -------------------------------------------------------------------------- */
 /* Unwinder Error Codes                                                       */
 /* -------------------------------------------------------------------------- */
 
-#define REGISTER_EH_FRAME_SUCCESS sign(SUCCESS)
-#define REGISTER_EH_FRAME_FAILURE sign(0x8000000000001000)
+#define REGISTER_EH_FRAME_SUCCESS ec_sign(SUCCESS)
+#define REGISTER_EH_FRAME_FAILURE ec_sign(0x8000000000001000)
 
 /* -------------------------------------------------------------------------- */
 /* Debug Ring Error Codes                                                     */
 /* -------------------------------------------------------------------------- */
 
-#define GET_DRR_SUCCESS sign(SUCCESS)
-#define GET_DRR_FAILURE sign(0x8000000000010000)
+#define GET_DRR_SUCCESS ec_sign(SUCCESS)
+#define GET_DRR_FAILURE ec_sign(0x8000000000010000)
 
 /* -------------------------------------------------------------------------- */
 /* ELF Loader Error Codes                                                     */
 /* -------------------------------------------------------------------------- */
 
-#define BFELF_SUCCESS sign(SUCCESS)
-#define BFELF_ERROR_INVALID_ARG sign(0x8000000000100000)
-#define BFELF_ERROR_INVALID_FILE sign(0x8000000000200000)
-#define BFELF_ERROR_INVALID_INDEX sign(0x8000000000300000)
-#define BFELF_ERROR_INVALID_STRING sign(0x8000000000400000)
-#define BFELF_ERROR_INVALID_SIGNATURE sign(0x8000000000500000)
-#define BFELF_ERROR_UNSUPPORTED_FILE sign(0x8000000000600000)
-#define BFELF_ERROR_INVALID_SEGMENT sign(0x8000000000700000)
-#define BFELF_ERROR_INVALID_SECTION sign(0x8000000000800000)
-#define BFELF_ERROR_LOADER_FULL sign(0x8000000000900000)
-#define BFELF_ERROR_NO_SUCH_SYMBOL sign(0x8000000000A00000)
-#define BFELF_ERROR_MISMATCH sign(0x8000000000B00000)
-#define BFELF_ERROR_UNSUPPORTED_RELA sign(0x8000000000C00000)
-#define BFELF_ERROR_OUT_OF_ORDER sign(0x8000000000D00000)
+#define BFELF_SUCCESS ec_sign(SUCCESS)
+#define BFELF_ERROR_INVALID_ARG ec_sign(0x8000000000100000)
+#define BFELF_ERROR_INVALID_FILE ec_sign(0x8000000000200000)
+#define BFELF_ERROR_INVALID_INDEX ec_sign(0x8000000000300000)
+#define BFELF_ERROR_INVALID_STRING ec_sign(0x8000000000400000)
+#define BFELF_ERROR_INVALID_SIGNATURE ec_sign(0x8000000000500000)
+#define BFELF_ERROR_UNSUPPORTED_FILE ec_sign(0x8000000000600000)
+#define BFELF_ERROR_INVALID_SEGMENT ec_sign(0x8000000000700000)
+#define BFELF_ERROR_INVALID_SECTION ec_sign(0x8000000000800000)
+#define BFELF_ERROR_LOADER_FULL ec_sign(0x8000000000900000)
+#define BFELF_ERROR_NO_SUCH_SYMBOL ec_sign(0x8000000000A00000)
+#define BFELF_ERROR_MISMATCH ec_sign(0x8000000000B00000)
+#define BFELF_ERROR_UNSUPPORTED_RELA ec_sign(0x8000000000C00000)
+#define BFELF_ERROR_OUT_OF_ORDER ec_sign(0x8000000000D00000)
 
 /* -------------------------------------------------------------------------- */
 /* Memory Manager Error Codes                                                 */
 /* -------------------------------------------------------------------------- */
 
-#define MEMORY_MANAGER_SUCCESS sign(SUCCESS)
-#define MEMORY_MANAGER_FAILURE sign(0x8000000001000000)
+#define MEMORY_MANAGER_SUCCESS ec_sign(SUCCESS)
+#define MEMORY_MANAGER_FAILURE ec_sign(0x8000000001000000)
 
 /* -------------------------------------------------------------------------- */
 /* Common Error Codes                                                         */
 /* -------------------------------------------------------------------------- */
 
-#define BF_SUCCESS sign(SUCCESS)
-#define BF_ERROR_INVALID_ARG sign(0x8000000010000000)
-#define BF_ERROR_INVALID_INDEX sign(0x8000000020000000)
-#define BF_ERROR_NO_MODULES_ADDED sign(0x8000000030000000)
-#define BF_ERROR_MAX_MODULES_REACHED sign(0x8000000040000000)
-#define BF_ERROR_VMM_INVALID_STATE sign(0x8000000050000000)
-#define BF_ERROR_FAILED_TO_ADD_FILE sign(0x8000000060000000)
-#define BF_ERROR_FAILED_TO_DUMP_DR sign(0x8000000070000000)
-#define BF_ERROR_OUT_OF_MEMORY sign(0x8000000080000000)
-#define BF_ERROR_VMM_CORRUPTED sign(0x8000000090000000)
-#define BF_ERROR_UNKNOWN sign(0x80000000A0000000)
+#define BF_SUCCESS ec_sign(SUCCESS)
+#define BF_ERROR_INVALID_ARG ec_sign(0x8000000010000000)
+#define BF_ERROR_INVALID_INDEX ec_sign(0x8000000020000000)
+#define BF_ERROR_NO_MODULES_ADDED ec_sign(0x8000000030000000)
+#define BF_ERROR_MAX_MODULES_REACHED ec_sign(0x8000000040000000)
+#define BF_ERROR_VMM_INVALID_STATE ec_sign(0x8000000050000000)
+#define BF_ERROR_FAILED_TO_ADD_FILE ec_sign(0x8000000060000000)
+#define BF_ERROR_FAILED_TO_DUMP_DR ec_sign(0x8000000070000000)
+#define BF_ERROR_OUT_OF_MEMORY ec_sign(0x8000000080000000)
+#define BF_ERROR_VMM_CORRUPTED ec_sign(0x8000000090000000)
+#define BF_ERROR_UNKNOWN ec_sign(0x80000000A0000000)
 
 /* -------------------------------------------------------------------------- */
 /* IOCTL Error Codes                                                          */
 /* -------------------------------------------------------------------------- */
 
-#define BF_IOCTL_SUCCESS sign(SUCCESS)
-#define BF_IOCTL_FAILURE sign(-1)
+#define BF_IOCTL_SUCCESS ec_sign(SUCCESS)
+#define BF_IOCTL_FAILURE ec_sign(-1)
 
 /* -------------------------------------------------------------------------- */
 /* Bad Alloc                                                                  */
 /* -------------------------------------------------------------------------- */
 
-#define BF_BAD_ALLOC sign(0x8000000100000000)
+#define BF_BAD_ALLOC ec_sign(0x8000000100000000)
+
+/* -------------------------------------------------------------------------- */
+/* VMCall                                                                     */
+/* -------------------------------------------------------------------------- */
+
+#define BF_VMCALL_SUCCESS ec_sign(SUCCESS)
+#define BF_VMCALL_FAILURE ec_sign(0x8000001000000000)
 
 /* -------------------------------------------------------------------------- */
 /* Stringify Error Codes                                                      */
@@ -141,21 +148,15 @@ ec_to_str(int64_t value)
     switch (value)
     {
             EC_CASE(SUCCESS);
-
             EC_CASE(ENTRY_ERROR_STACK_OVERFLOW);
             EC_CASE(ENTRY_ERROR_VMM_INIT_FAILED);
             EC_CASE(ENTRY_ERROR_VMM_START_FAILED);
             EC_CASE(ENTRY_ERROR_VMM_STOP_FAILED);
             EC_CASE(ENTRY_ERROR_UNKNOWN);
-
             EC_CASE(CRT_FAILURE);
-
             EC_CASE(REGISTER_EH_FRAME_FAILURE);
-
             EC_CASE(GET_DRR_FAILURE);
-
             EC_CASE(MEMORY_MANAGER_FAILURE);
-
             EC_CASE(BFELF_ERROR_INVALID_ARG);
             EC_CASE(BFELF_ERROR_INVALID_FILE);
             EC_CASE(BFELF_ERROR_INVALID_INDEX);
@@ -169,7 +170,6 @@ ec_to_str(int64_t value)
             EC_CASE(BFELF_ERROR_MISMATCH);
             EC_CASE(BFELF_ERROR_UNSUPPORTED_RELA);
             EC_CASE(BFELF_ERROR_OUT_OF_ORDER);
-
             EC_CASE(BF_ERROR_INVALID_ARG);
             EC_CASE(BF_ERROR_INVALID_INDEX);
             EC_CASE(BF_ERROR_NO_MODULES_ADDED);
@@ -180,9 +180,7 @@ ec_to_str(int64_t value)
             EC_CASE(BF_ERROR_OUT_OF_MEMORY);
             EC_CASE(BF_ERROR_VMM_CORRUPTED);
             EC_CASE(BF_ERROR_UNKNOWN);
-
             EC_CASE(BF_BAD_ALLOC);
-
             EC_CASE(BF_IOCTL_FAILURE);
 
         default:

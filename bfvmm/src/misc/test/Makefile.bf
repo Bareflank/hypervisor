@@ -51,6 +51,10 @@ NATIVE_OUTDIR+=%BUILD_REL%/../bin
 
 SOURCES+=test.cpp
 SOURCES+=test_error_codes.cpp
+SOURCES+=test_string.cpp
+SOURCES+=test_vector.cpp
+SOURCES+=test_guard_exceptions.cpp
+SOURCES+=test_bitmanip.cpp
 
 INCLUDE_PATHS+=./
 INCLUDE_PATHS+=%HYPER_ABS%/include/

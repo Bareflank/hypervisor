@@ -61,7 +61,6 @@ NATIVE_OUTDIR+=%BUILD_REL%/../bin
 SOURCES+=command_line_parser.cpp
 SOURCES+=file.cpp
 SOURCES+=ioctl_driver.cpp
-SOURCES+=split.cpp
 SOURCES+=%HYPER_ABS%/src/debug_ring_interface.c
 
 INCLUDE_PATHS+=./
@@ -83,6 +82,7 @@ WINDOWS_INCLUDE_PATHS+=arch/windows/
 WINDOWS_LIBS+=setupapi
 WINDOWS_LIBRARY_PATHS+=
 WINDOWS_CCFLAGS+=-fms-extensions
+WINDOWS_CXXFLAGS+=-fms-extensions
 WINDOWS_CXXFLAGS+=-fms-extensions
 
 ifeq ($(STATIC_ANALYSIS_ENABLED), true)

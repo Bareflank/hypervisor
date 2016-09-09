@@ -598,10 +598,14 @@ set_vm_control_if_allowed(T val, uint64_t msr_addr, uint64_t ctls_addr,
 }
 
 // *INDENT-OFF*
+
 namespace intel_x64
 {
 namespace vmcs
 {
+
+using field_type = uint64_t;
+using value_type = uint64_t;
 
 // -----------------------------------------------------------------------------
 // 16bit Control Fields

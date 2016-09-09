@@ -54,13 +54,12 @@ SOURCES+=test_command_line_parser.cpp
 SOURCES+=test_file.cpp
 SOURCES+=test_ioctl.cpp
 SOURCES+=test_ioctl_driver.cpp
-SOURCES+=test_split.cpp
 
 INCLUDE_PATHS+=./
 INCLUDE_PATHS+=../include/
 INCLUDE_PATHS+=%HYPER_ABS%/include/
 
-LIBS+=bfm_static
+LIBS+=bfm
 
 LIBRARY_PATHS+=%BUILD_REL%/../bin/native/
 

@@ -55,8 +55,29 @@ inline auto operator"" _ut_ree(const char *str, std::size_t len)
 inline auto operator"" _ut_lee(const char *str, std::size_t len)
 { (void)len; return std::make_shared<std::logic_error>(str); }
 
+inline auto operator"" _ut_iae(const char *str, std::size_t len)
+{ (void)len; return std::make_shared<std::invalid_argument>(str); }
+
+inline auto operator"" _ut_ore(const char *str, std::size_t len)
+{ (void)len; return std::make_shared<std::out_of_range>(str); }
+
 inline auto operator"" _ut_ffe(const char *str, std::size_t len)
 { (void)len; return std::make_shared<gsl::fail_fast>(str); }
+
+inline auto operator"" _ut_bae(const char *str, std::size_t len)
+{ (void)str; (void)len; return std::make_shared<std::bad_alloc>(); }
+
+template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
+auto make_ptr(const T ptr)
+{ return reinterpret_cast<void *>(ptr); }
+
+template<class P, class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
+auto make_ptr(const T ptr)
+{ return reinterpret_cast<P *>(ptr); }
+
+template<class T, class = typename std::enable_if<std::is_pointer<T>::value>::type>
+auto make_uintptr(const T ptr)
+{ return reinterpret_cast<uintptr_t>(ptr); }
 
 /// Expect True
 ///
@@ -488,33 +509,20 @@ no_delete(T *)
 namespace bfn
 {
 
-    /// Mock Shared
-    ///
-    /// Use this function to create a mocked version of a shared pointer. This
-    /// works similar to make_shared, but creates a shared pointer that is created
-    /// by Hippnomocks. Note that you must provide a mock class, and when that
-    /// class is destroyed, the pointers being held by shared_ptr are no longer
-    /// valid.
-    ///
-    /// @code
-    /// MockRepository mocks;
-    /// auto in = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-    /// @endcode
-    ///
-    template<class T> std::shared_ptr<T>
-    mock_shared(MockRepository &mocks)
-    { return std::shared_ptr<T>(mocks.Mock<T>(), no_delete<T>); }
+/// Mock Shared
+///
+/// Use this function to create a mocked version of a shared pointer.
+///
+/// @code
+/// MockRepository mocks;
+/// auto in = bfn::mock_shared<intrinsics_intel_x64>(mocks);
+/// @endcode
+///
+template<class T> auto
+mock_shared(MockRepository &mocks)
+{ return std::shared_ptr<T>(mocks.Mock<T>(), no_delete<T>); }
 
 }
-
-// The latests and greatest GCC does not have support for c++14 literals, so
-// we need to define them ourselves. Of course it complains if the literal is
-// not defined with a "_" so we have our own custom literal here. This should
-// be able to be removed once GCC decides to get with the times.
-
-inline std::string
-operator ""_s(const char *str, std::size_t len)
-{ return std::string(str, len); }
 
 static void
 check_exception_type(struct exception_state &state, const std::exception &caught, const std::exception &expected)
@@ -698,7 +706,7 @@ protected:
                 std::cerr << "    - caught: " << '\n';
                 std::cerr << "        - type: " << state.caught_str << '\n';
                 std::cerr << "        - what: " << state.what << '\n';
-                std::cerr << "    - expecting: " << state.expecting_str << 'n';
+                std::cerr << "    - expecting: " << state.expecting_str << '\n';
             }
             else
             {
@@ -706,6 +714,8 @@ protected:
             }
         }
     }
+
+public:
 
     /// Expect Exception With Args
     ///
@@ -867,8 +877,13 @@ protected:
     void
     expect_true_with_args(bool condition, gsl::cstring_span<> condition_text, gsl::cstring_span<> func, int line)
     {
-        if (condition) { this->inc_pass(); }
-        else { this->expect_failed(condition_text.data(), func.data(), line); }
+        if (condition)
+        {
+            this->inc_pass();
+            return;
+        }
+
+        this->expect_failed(condition_text.data(), func.data(), line);
     }
 
     /// Expect false with args
@@ -888,8 +903,13 @@ protected:
     void
     expect_false_with_args(bool condition, gsl::cstring_span<> condition_text, gsl::cstring_span<> func, int line)
     {
-        if (!condition) { this->inc_pass(); }
-        else { this->expect_failed(condition_text.data(), func.data(), line); }
+        if (!condition)
+        {
+            this->inc_pass();
+            return;
+        }
+
+        this->expect_failed(condition_text.data(), func.data(), line);
     }
 
 protected:
@@ -970,8 +990,17 @@ public:
                 return EXIT_FAILURE;
             }
         }
+        catch (std::exception &e)
+        {
+            std::cout << "unexpected exception was caught: " << e.what() << '\n';
+            std::cout << "\033[1;31mFAILED\033[0m: list" << '\n';
+            return EXIT_FAILURE;
+        }
         catch (...)
         {
+            std::cout << "unexpected exception was caught: unknown" << '\n';
+            std::cout << "\033[1;31mFAILED\033[0m: list" << '\n';
+            return EXIT_FAILURE;
         }
 
         if (this->fini() == false)

@@ -35,6 +35,7 @@ int alloc_count_rwe = 0;
 #define PAGE_ROUND_UP(x) ( (((uintptr_t)(x)) + MAX_PAGE_SIZE-1)  & (~(MAX_PAGE_SIZE-1)) )
 
 uint64_t g_malloc_fails = 0;
+uint64_t g_set_afinity_fails = 0;
 
 int
 verify_no_mem_leaks(void)
@@ -143,6 +144,10 @@ int64_t
 platform_set_affinity(int64_t affinity)
 {
     (void) affinity;
+
+    if (g_set_afinity_fails != 0)
+        return -1;
+
     return 0;
 }
 
@@ -152,3 +157,14 @@ platform_restore_affinity(int64_t affinity)
     (void) affinity;
 }
 
+void
+platform_vmcall(struct vmcall_registers_t *regs)
+{
+    (void) regs;
+}
+
+void
+platform_vmcall_event(struct vmcall_registers_t *regs)
+{
+    (void) regs;
+}

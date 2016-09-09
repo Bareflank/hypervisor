@@ -57,12 +57,12 @@ INCLUDE_PATHS+=%HYPER_ABS%/include/
 INCLUDE_PATHS+=%HYPER_ABS%/bfvmm/include/
 
 LIBS+=vmxon
-LIBS+=intrinsics
 LIBS+=memory_manager
+LIBS+=intrinsics
 
 LIBRARY_PATHS+=%BUILD_REL%/../bin/native/
-LIBRARY_PATHS+=%BUILD_REL%/../../intrinsics/bin/native
 LIBRARY_PATHS+=%BUILD_REL%/../../memory_manager/bin/native
+LIBRARY_PATHS+=%BUILD_REL%/../../intrinsics/bin/native
 
 ################################################################################
 # Environment Specific
