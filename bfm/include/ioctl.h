@@ -57,7 +57,7 @@ public:
 
     /// Open
     ///
-    /// Open's a connection to the bareflank driver.
+    /// Open a connection to the bareflank driver.
     ///
     /// @throws driver_inaccessible_error thrown when the ioctl class is unable
     ///     to open a connection to the bareflank driver.
@@ -66,11 +66,11 @@ public:
 
     /// Add Module
     ///
-    /// Add's a module to the driver entry.
+    /// Add a module to the driver entry.
     ///
     /// @param str ELF file to be added to the driver entry
     ///
-    /// @throws invalid_argument_error thrown if data == 0, or len <= 0
+    /// @throws invalid_argument_error thrown if data == nullptr, or len <= 0
     /// @throws ioctl_failed_error thrown if the ioctl failed. Note that this
     ///    could have been because bfm was unable to ioctl the driver, or it
     ///    could be because the driver entry reported a failure when executing
@@ -124,12 +124,12 @@ public:
 
     /// Dump VMM
     ///
-    /// Dumps the content's of the VMM's debug ring
+    /// Dumps the contents of the VMM's debug ring
     ///
     /// @param drr pointer a debug_ring_resources_t
-    /// @param vcpuid indicates which drr to get (every vcpu has it's own drr)
+    /// @param vcpuid indicates which drr to get (every vcpu has its own drr)
     ///
-    /// @throws invalid_argument_error thrown if drr == 0
+    /// @throws invalid_argument_error thrown if drr == nullptr
     /// @throws ioctl_failed_error thrown if the ioctl failed. Note that this
     ///    could have been because bfm was unable to ioctl the driver, or it
     ///    could be because the driver entry reported a failure when executing
@@ -139,11 +139,11 @@ public:
 
     /// VMM Status
     ///
-    /// Get's the status of the VMM
+    /// Get the status of the VMM
     ///
     /// @param status pointer to provide the status to
     ///
-    /// @throws invalid_argument_error thrown if status == 0
+    /// @throws invalid_argument_error thrown if status == nullptr
     /// @throws ioctl_failed_error thrown if the ioctl failed. Note that this
     ///    could have been because bfm was unable to ioctl the driver, or it
     ///    could be because the driver entry reported a failure when executing
