@@ -33,7 +33,7 @@
 /// delimiter.
 ///
 /// @param str the string to split
-/// @param delimiter the character to search for the seperates the str
+/// @param delimiter the character that separates the str into tokens
 /// @return str, broken up into a vector or strings, delimited by the
 ///         provided delimiter
 std::vector<std::string> split(const std::string &str, char delimiter);
