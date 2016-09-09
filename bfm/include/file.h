@@ -30,7 +30,7 @@
 /// This class is responsible for working with a file. Specifically, this
 /// class wraps calls to ifstream and fstream to simplify their interface
 /// as well as provide an implementation for the rest of the Bareflank
-/// Manager, such that testing is eaiser.
+/// Manager, such that testing is easier.
 class file
 {
 public:
