@@ -11,7 +11,7 @@ Three different functions that most of these libraries perform:
 
 Although it is possible for the ELF loader to do these tasks for an executable,
 from a security / containment perspective, it's better for the executable
-itself to perform these task's in it's own isolated environment. Bareflank,
+itself to perform these tasks in its own isolated environment. Bareflank,
 like everything else, needs to perform these same tasks, and thus performs
 them in the context of the VMM, but can also use this code within a VM if
 needed. For Bareflank, all of the C++ objects that are globally defined, have
