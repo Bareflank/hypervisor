@@ -22,6 +22,8 @@
 #ifndef VIEW_AS_POINTER
 #define VIEW_AS_POINTER
 
+#include <type_traits>
+
 // There are basically two different ways to print an integer as a pointer
 // (i.e. 0xXXXXXXXXXXXXXXXX).
 //
@@ -35,8 +37,8 @@
 //   dereferenced, it should not be an issue.
 //
 
-template<class T>
-void *view_as_pointer(const T &val)
+template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
+void *view_as_pointer(const T val)
 { return reinterpret_cast<void *>(val); }
 
 #endif
