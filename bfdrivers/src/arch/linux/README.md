@@ -7,7 +7,7 @@ Supported Linux distributions are:
 
 NOTE: If you would like to use an unsupported platform, so long as you have
 the latest and greatest docker, and GCC5+, it's likely that a build is
-possble. The above platforms are simply what our developers are testing.
+possible. The above platforms are simply what our developers are testing.
 If you plan to use an unsupported platform, start by modifying a
 setup_\<platform\>.sh to suit your needs. In some cases, all you have to
 do is enable the platform your using.
