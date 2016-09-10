@@ -41,7 +41,7 @@ extern "C" {
  *  driver entry is unloaded, it means that the VMM has not been placed in
  *  memory. The loaded state means that the VMM is in memory, and relocated.
  *  In this state, symbol lookups are possible, and thus things like the VMM
- *  dump comand work. The running state means that the VMM is actually running.
+ *  dump command work. The running state means that the VMM is actually running.
  *  The goal of the state machine is to ensure that the driver keeps track of
  *  the state of the VMM, and handles its transition properly.
  */
@@ -151,7 +151,7 @@ extern "C" {
 /**
  * VMM Status
  *
- * This queries the driver for it's current state. This can be called at any
+ * This queries the driver for its current state. This can be called at any
  * time.
  */
 #define IOCTL_VMM_STATUS _IOR(BAREFLANK_MAJOR, IOCTL_VMM_STATUS_CMD, int64_t *)
@@ -242,7 +242,7 @@ DEFINE_GUID(GUID_DEVINTERFACE_bareflank,
 /**
  * VMM Status
  *
- * This queries the driver for it's current state. This can be called at any
+ * This queries the driver for its current state. This can be called at any
  * time.
  */
 #define IOCTL_VMM_STATUS CTL_CODE(BAREFLANK_DEVICETYPE, IOCTL_VMM_STATUS_CMD, METHOD_BUFFERED, FILE_READ_DATA)
