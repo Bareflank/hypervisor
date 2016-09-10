@@ -24,7 +24,7 @@ bcdedit.exe /set testsigning ON
 <reboot>
 ```
 
-One you have installed cygwin, copied the installer to cygwin's bin directory,
+Once you have installed cygwin, copied the installer to cygwin's bin directory,
 turned test signing on, rebooted, and opened a cygwin terminal with admin
 rights, download the repo doing the following:
 
