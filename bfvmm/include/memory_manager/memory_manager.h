@@ -46,10 +46,10 @@
 /// Finally, this module also provides the libc functions that are needed by
 /// libc++ for new / delete. For this reason, this modules is required to get
 /// libc++ working, which is needed by, pretty much the rest of the VMM
-/// including the serial code. Therefore, if there is issues with the
+/// including the serial code. Therefore, if there are issues with the
 /// memory mamaner, the process of debugging the memory manager is not simple,
 /// as you must get rid of all of the other modules, and work with the
-/// memory manager directly until it's working as needed (i.e. why unit
+/// memory manager directly until its working as needed (i.e. why unit
 /// testing can be very helpful here).
 ///
 class memory_manager
@@ -69,14 +69,14 @@ public:
     /// Malloc
     ///
     /// Allocates memory. If the requested size is a multiple of MAX_PAGE_SIZE
-    /// the page pool is used to allocated the memory which likely has more
+    /// the page pool is used to allocate the memory which likely has more
     /// memory, and the resulting addresses are page aligned. All other
     /// requests come from the heap.
     ///
     /// @note that this function generally should not be used directly, but
     /// instead new / delete should be used.
     ///
-    /// @note when execuitng std::make_shared, the malloc is likely to be
+    /// @note when executing std::make_shared, the malloc is likely to be
     /// larger than the requested amount, as the reference counter is malloc'd
     /// as well. If page alignment is required, first new, and pass the
     /// resulting pointer to std::shared_ptr.
@@ -92,7 +92,7 @@ public:
     /// Deallocates a block of memory previously allocated by a call to malloc,
     /// making it available again for further allocations. If ptr does not
     /// point to memory that was previously allocated, the call is ignored.
-    /// If ptr is 0, the call is also ignored. If ptr points to an offset into
+    /// If ptr == nullptr, the call is also ignored. If ptr points to an offset into
     /// memory that was previously allocated by a call to malloc, this function
     /// will free all of the memory allocated.
     ///
@@ -118,7 +118,7 @@ public:
     ///
     /// Given a virtual address, returns a physical address. If the memory
     /// manager does not have a memory descriptor for the provided address,
-    /// or the provided address is 0, 0 is returned.
+    /// or the provided address is nullptr, 0 is returned.
     ///
     /// @param virt virtual address to convert
     /// @return physical address
@@ -129,7 +129,7 @@ public:
     ///
     /// Given a virtual address, returns a physical address. If the memory
     /// manager does not have a memory descriptor for the provided address,
-    /// or the provided address is 0, 0 is returned.
+    /// or the provided address is 0, nullptr is returned.
     ///
     /// @param virt virtual address to convert
     /// @return physical address
@@ -140,7 +140,7 @@ public:
     ///
     /// Given a virtual address, returns a physical address. If the memory
     /// manager does not have a memory descriptor for the provided address,
-    /// or the provided address is 0, 0 is returned.
+    /// or the provided address is nullptr, nullptr is returned.
     ///
     /// @param virt virtual address to convert
     /// @return physical address
@@ -162,7 +162,7 @@ public:
     ///
     /// Given a physical address, returns a virtual address. If the memory
     /// manager does not have a memory descriptor for the provided address,
-    /// or the provided address is 0, 0 is returned.
+    /// or the provided address is nullptr, 0 is returned.
     ///
     /// @param phys physical address to convert
     /// @return virtual address
@@ -173,7 +173,7 @@ public:
     ///
     /// Given a physical address, returns a virtual address. If the memory
     /// manager does not have a memory descriptor for the provided address,
-    /// or the provided address is 0, 0 is returned.
+    /// or the provided address is 0, nullptr is returned.
     ///
     /// @param phys physical address to convert
     /// @return virtual address
@@ -184,7 +184,7 @@ public:
     ///
     /// Given a physical address, returns a virtual address. If the memory
     /// manager does not have a memory descriptor for the provided address,
-    /// or the provided address is 0, 0 is returned.
+    /// or the provided address is nullptr, nullptr is returned.
     ///
     /// @param phys physical address to convert
     /// @return virtual address
@@ -261,7 +261,7 @@ private:
 ///
 /// The following macro can be used to quickly call the memory manager as
 /// this class will likely be called by a lot of code. This call is guaranteed
-/// to not be NULL
+/// to not be nullptr
 ///
 #define g_mm memory_manager::instance()
 
