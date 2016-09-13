@@ -67,32 +67,24 @@ memory_manager_ut::fini()
 bool
 memory_manager_ut::list()
 {
-    this->test_memory_manager_malloc_zero();
     this->test_memory_manager_free_zero();
-    this->test_memory_manager_malloc_heap_valid();
-    this->test_memory_manager_multiple_malloc_heap_should_be_contiguous();
-    this->test_memory_manager_malloc_heap_free_malloc();
     this->test_memory_manager_free_heap_twice();
+    this->test_memory_manager_malloc_zero();
+    this->test_memory_manager_multiple_malloc_heap_should_be_contiguous();
     this->test_memory_manager_malloc_heap_all_of_memory();
     this->test_memory_manager_malloc_heap_all_of_memory_one_block();
     this->test_memory_manager_malloc_heap_all_memory_fragmented();
     this->test_memory_manager_malloc_heap_too_much_memory_one_block();
     this->test_memory_manager_malloc_heap_too_much_memory_non_block_size();
-    this->test_memory_manager_malloc_heap_really_small_fragment();
-    this->test_memory_manager_malloc_heap_sparse_fragments();
     this->test_memory_manager_malloc_heap_massive();
-    this->test_memory_manager_malloc_heap_resize_fragments();
-    this->test_memory_manager_malloc_page_valid();
-    this->test_memory_manager_multiple_malloc_page_should_be_contiguous();
-    this->test_memory_manager_malloc_page_free_malloc();
-    this->test_memory_manager_free_page_twice();
-    this->test_memory_manager_malloc_page_all_of_memory();
-    this->test_memory_manager_malloc_page_all_of_memory_one_block();
-    this->test_memory_manager_malloc_page_all_memory_fragmented();
-    this->test_memory_manager_malloc_page_too_much_memory_one_block();
-    this->test_memory_manager_malloc_page_sparse_fragments();
-    this->test_memory_manager_malloc_page_resize_fragments();
-    this->test_memory_manager_malloc_page_alignment();
+    this->test_memory_manager_size_out_of_bounds();
+    this->test_memory_manager_size_unallocated();
+    this->test_memory_manager_size();
+    this->test_memory_manager_contains_out_of_bounds();
+    this->test_memory_manager_contains();
+    this->test_memory_manager_malloc_out_of_memory();
+    this->test_memory_manager_malloc_heap();
+    this->test_memory_manager_malloc_page();
     this->test_memory_manager_add_md_no_exceptions();
     this->test_memory_manager_add_md_invalid_md();
     this->test_memory_manager_add_md_invalid_virt();

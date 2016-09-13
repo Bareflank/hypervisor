@@ -78,12 +78,12 @@ vcpu_intel_x64::fini(void *attr)
     m_guest_state.reset();
     m_vmm_state.reset();
 
-    m_state_save.reset();
-
     m_exit_handler.reset();
     m_vmcs.reset();
     m_vmxon.reset();
     m_intrinsics.reset();
+
+    m_state_save.reset();
 
     vcpu::fini(attr);
 }

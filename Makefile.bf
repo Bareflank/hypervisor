@@ -174,5 +174,5 @@ doxygen_clean:
 
 tidy:
 	@cd %HYPER_ABS%; \
-	%HYPER_ABS%/tools/scripts/verify_source.sh
+	%BUILD_ABS%/build_scripts/verify_source.sh
 

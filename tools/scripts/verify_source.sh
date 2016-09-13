@@ -128,9 +128,23 @@ run_clang_tidy() {
 }
 
 #
-# bfcrt
+# bfvmm
 #
-pushd bfcrt > /dev/null
+pushd bfvmm > /dev/null
+header $PWD
+run_clang_tidy "clan*,-clang-analyzer-alpha.deadcode.UnreachableCode,-clang-analyzer-unix.MismatchedDeallocator"
+run_clang_tidy "cert*,-clang-analyzer*,-cert-err60-cpp"
+run_clang_tidy "misc*,-clang-analyzer*"
+run_clang_tidy "perf*,-clang-analyzer*"
+run_clang_tidy "cppc*,-clang-analyzer*,-cppcoreguidelines-pro-type-reinterpret-cast"
+run_clang_tidy "read*,-clang-analyzer*,-readability-braces-around-statements"
+run_clang_tidy "mode*,-clang-analyzer*"
+popd > /dev/null
+
+#
+# bfm
+#
+pushd bfm > /dev/null
 header $PWD
 run_clang_tidy "clan*,-clang-analyzer-alpha.deadcode.UnreachableCode"
 run_clang_tidy "cert*,-clang-analyzer*,-cert-err60-cpp"
@@ -156,11 +170,11 @@ run_clang_tidy "mode*,-clang-analyzer*"
 popd > /dev/null
 
 #
-# bfelf_loader
+# bfcrt
 #
-pushd bfelf_loader > /dev/null
+pushd bfcrt > /dev/null
 header $PWD
-run_clang_tidy "clan*,-clang-analyzer-alpha.core.CastToStruct"
+run_clang_tidy "clan*,-clang-analyzer-alpha.deadcode.UnreachableCode"
 run_clang_tidy "cert*,-clang-analyzer*,-cert-err60-cpp"
 run_clang_tidy "misc*,-clang-analyzer*"
 run_clang_tidy "perf*,-clang-analyzer*"
@@ -170,11 +184,11 @@ run_clang_tidy "mode*,-clang-analyzer*"
 popd > /dev/null
 
 #
-# bfm
+# bfelf_loader
 #
-pushd bfm > /dev/null
+pushd bfelf_loader > /dev/null
 header $PWD
-run_clang_tidy "clan*,-clang-analyzer-alpha.deadcode.UnreachableCode"
+run_clang_tidy "clan*,-clang-analyzer-alpha.core.CastToStruct"
 run_clang_tidy "cert*,-clang-analyzer*,-cert-err60-cpp"
 run_clang_tidy "misc*,-clang-analyzer*"
 run_clang_tidy "perf*,-clang-analyzer*"
@@ -195,18 +209,4 @@ run_clang_tidy "perf*,-clang-analyzer*"
 run_clang_tidy "cppc*,-clang-analyzer*,-cppcoreguidelines-pro-type-reinterpret-cast,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-cppcoreguidelines-pro-bounds-constant-array-index,-cppcoreguidelines-pro-bounds-array-to-pointer-decay"
 run_clang_tidy "read*,-clang-analyzer*,-readability-braces-around-statements"
 run_clang_tidy "mode*,-clang-analyzer*,-modernize-pass-by-value"
-popd > /dev/null
-
-#
-# bfvmm
-#
-pushd bfvmm > /dev/null
-header $PWD
-run_clang_tidy "clan*,-clang-analyzer-alpha.deadcode.UnreachableCode,-clang-analyzer-unix.MismatchedDeallocator"
-run_clang_tidy "cert*,-clang-analyzer*,-cert-err60-cpp"
-run_clang_tidy "misc*,-clang-analyzer*"
-run_clang_tidy "perf*,-clang-analyzer*"
-run_clang_tidy "cppc*,-clang-analyzer*,-cppcoreguidelines-pro-type-reinterpret-cast"
-run_clang_tidy "read*,-clang-analyzer*,-readability-braces-around-statements"
-run_clang_tidy "mode*,-clang-analyzer*"
 popd > /dev/null

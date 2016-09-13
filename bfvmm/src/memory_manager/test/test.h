@@ -39,36 +39,24 @@ protected:
 
 private:
 
-    // Test the smae things for pages (single page, multiple pages)
-    // Malloc a bunc of pages, free them, and then malloc one giant page
-    //    to prove that we can unfragment memory. Do this in
-
-    void test_memory_manager_malloc_zero();
     void test_memory_manager_free_zero();
-    void test_memory_manager_malloc_heap_valid();
-    void test_memory_manager_multiple_malloc_heap_should_be_contiguous();
-    void test_memory_manager_malloc_heap_free_malloc();
     void test_memory_manager_free_heap_twice();
+    void test_memory_manager_malloc_zero();
+    void test_memory_manager_multiple_malloc_heap_should_be_contiguous();
     void test_memory_manager_malloc_heap_all_of_memory();
     void test_memory_manager_malloc_heap_all_of_memory_one_block();
     void test_memory_manager_malloc_heap_all_memory_fragmented();
     void test_memory_manager_malloc_heap_too_much_memory_one_block();
     void test_memory_manager_malloc_heap_too_much_memory_non_block_size();
-    void test_memory_manager_malloc_heap_really_small_fragment();
-    void test_memory_manager_malloc_heap_sparse_fragments();
     void test_memory_manager_malloc_heap_massive();
-    void test_memory_manager_malloc_heap_resize_fragments();
-    void test_memory_manager_malloc_page_valid();
-    void test_memory_manager_multiple_malloc_page_should_be_contiguous();
-    void test_memory_manager_malloc_page_free_malloc();
-    void test_memory_manager_free_page_twice();
-    void test_memory_manager_malloc_page_all_of_memory();
-    void test_memory_manager_malloc_page_all_of_memory_one_block();
-    void test_memory_manager_malloc_page_all_memory_fragmented();
-    void test_memory_manager_malloc_page_too_much_memory_one_block();
-    void test_memory_manager_malloc_page_sparse_fragments();
-    void test_memory_manager_malloc_page_resize_fragments();
-    void test_memory_manager_malloc_page_alignment();
+    void test_memory_manager_size_out_of_bounds();
+    void test_memory_manager_size_unallocated();
+    void test_memory_manager_size();
+    void test_memory_manager_contains_out_of_bounds();
+    void test_memory_manager_contains();
+    void test_memory_manager_malloc_out_of_memory();
+    void test_memory_manager_malloc_heap();
+    void test_memory_manager_malloc_page();
     void test_memory_manager_add_md_no_exceptions();
     void test_memory_manager_add_md_invalid_md();
     void test_memory_manager_add_md_invalid_virt();
