@@ -78,11 +78,19 @@ CROSS_OUTDIR:=$(CROSS_OUTDIR)/cross
 # Exectuables
 ################################################################################
 
-NATIVE_CC:=gcc
-NATIVE_CXX:=g++
-NATIVE_ASM:=nasm
-NATIVE_LD:=g++
-NATIVE_AR:=ar
+ifeq ($(USE_LLVM_CLANG), true)
+	NATIVE_CC:=clang
+	NATIVE_CXX:=clang++
+	NATIVE_ASM:=nasm
+	NATIVE_LD:=clang++
+	NATIVE_AR:=ar
+else
+	NATIVE_CC:=gcc
+	NATIVE_CXX:=g++
+	NATIVE_ASM:=nasm
+	NATIVE_LD:=g++
+	NATIVE_AR:=ar
+endif
 
 CROSS_CC:=$(BUILD_ABS)/build_scripts/x86_64-bareflank-gcc
 CROSS_CXX:=$(BUILD_ABS)/build_scripts/x86_64-bareflank-g++
@@ -111,8 +119,8 @@ NATIVE_CCFLAGS+=-pipe
 NATIVE_CCFLAGS+=-fexceptions
 NATIVE_CCFLAGS+=-fstack-protector-strong
 NATIVE_CCFLAGS+=-m64
-NATIVE_CCFLAGS+=-mtune=sandybridge
-NATIVE_CCFLAGS+=-march=sandybridge
+NATIVE_CCFLAGS+=-mtune=native
+NATIVE_CCFLAGS+=-march=native
 NATIVE_CCFLAGS+=-mstackrealign
 
 ifeq ($(DYNAMIC_ANALYSIS_ENABLED), true)
@@ -135,7 +143,6 @@ CROSS_CCFLAGS+=-pipe
 CROSS_CCFLAGS+=$(CONFIGURED_CROSS_CCFLAGS)
 
 ifeq ($(PRODUCTION),yes)
-	NATIVE_CCFLAGS+=-D_FORTIFY_SOURCE=2
 	NATIVE_CCFLAGS+=-O3
 	CROSS_CCFLAGS+=-O3
 endif
@@ -170,8 +177,8 @@ NATIVE_CXXFLAGS+=-pipe
 NATIVE_CXXFLAGS+=-fexceptions
 NATIVE_CXXFLAGS+=-fstack-protector-strong
 NATIVE_CXXFLAGS+=-m64
-NATIVE_CXXFLAGS+=-mtune=sandybridge
-NATIVE_CXXFLAGS+=-march=sandybridge
+NATIVE_CXXFLAGS+=-mtune=native
+NATIVE_CXXFLAGS+=-march=native
 NATIVE_CXXFLAGS+=-mstackrealign
 
 ifeq ($(DYNAMIC_ANALYSIS_ENABLED), true)
@@ -198,7 +205,6 @@ CROSS_CXXFLAGS+=-pipe
 CROSS_CXXFLAGS+=$(CONFIGURED_CROSS_CXXFLAGS)
 
 ifeq ($(PRODUCTION),yes)
-	NATIVE_CXXFLAGS+=-D_FORTIFY_SOURCE=2
 	NATIVE_CXXFLAGS+=-O3
 	CROSS_CXXFLAGS+=-O3
 endif

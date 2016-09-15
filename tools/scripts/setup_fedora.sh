@@ -68,6 +68,7 @@ install_common_packages() {
     sudo dnf install -y isl-devel
     sudo dnf install -y cmake
     sudo dnf install -y nasm
+    sudo dnf install -y clang
     sudo dnf install -y texinfo
     sudo dnf install -y libstdc++-static
     sudo dnf install -y kernel-devel
@@ -97,9 +98,13 @@ while [[ $# -ne 0 ]]; do
         local="true"
     fi
 
-    if [[ $1 == "-g" ]] || [[ $1 == "--compiler" ]]; then
+    if [[ $1 == "--compiler" ]]; then
         shift
-        compiler="-g $1"
+        compiler="--compiler $1"
+    fi
+
+    if [[ $1 == "--use_llvm_clang" ]]; then
+        use_llvm_clang="--use_llvm_clang"
     fi
 
     if [[ $1 == "-n" ]] || [[ $1 == "--no-configure" ]]; then
@@ -144,7 +149,7 @@ if [[ ! $noconfigure == "true" ]]; then
         $hypervisor_dir/configure
         popd
     else
-        ./configure $compiler
+        ./configure $compiler $use_llvm_clang
     fi
 fi
 

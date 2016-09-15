@@ -63,17 +63,33 @@ COMPILER="unsupported"
 
 if [[ $0 == *"gcc" ]]; then
     if [[ $LOCAL_COMPILER == "true" ]]; then
-        COMPILER="$HOME/compilers/$compiler/bin/x86_64-elf-gcc"
+        if [[ $USE_LLVM_CLANG == "true" ]]; then
+            COMPILER="$HOME/compilers/$compiler/bin/clang --target=x86_64-elf -D__need_size_t -D__need_ptrdiff_t"
+        else
+            COMPILER="$HOME/compilers/$compiler/bin/x86_64-elf-gcc"
+        fi
     else
-        COMPILER="docker run $DOCKER_ARGS /tmp/compilers/$compiler/bin/x86_64-elf-gcc"
+        if [[ $USE_LLVM_CLANG == "true" ]]; then
+            COMPILER="docker run $DOCKER_ARGS /tmp/compilers/$compiler/bin/clang --target=x86_64-elf -D__need_size_t -D__need_ptrdiff_t"
+        else
+            COMPILER="docker run $DOCKER_ARGS /tmp/compilers/$compiler/bin/x86_64-elf-gcc"
+        fi
     fi
 fi
 
 if [[ $0 == *"g++" ]]; then
     if [[ $LOCAL_COMPILER == "true" ]]; then
-        COMPILER="$HOME/compilers/$compiler/bin/x86_64-elf-g++"
+        if [[ $USE_LLVM_CLANG == "true" ]]; then
+            COMPILER="$HOME/compilers/$compiler/bin/clang++ --target=x86_64-elf -D__need_size_t -D__need_ptrdiff_t"
+        else
+            COMPILER="$HOME/compilers/$compiler/bin/x86_64-elf-g++"
+        fi
     else
-        COMPILER="docker run $DOCKER_ARGS /tmp/compilers/$compiler/bin/x86_64-elf-g++"
+        if [[ $USE_LLVM_CLANG == "true" ]]; then
+            COMPILER="docker run $DOCKER_ARGS /tmp/compilers/$compiler/bin/clang++ --target=x86_64-elf -D__need_size_t -D__need_ptrdiff_t"
+        else
+            COMPILER="docker run $DOCKER_ARGS /tmp/compilers/$compiler/bin/x86_64-elf-g++"
+        fi
     fi
 fi
 
@@ -221,7 +237,6 @@ do
         # changes the permissions from RE/RW -> RWE which is really bad.
         if [[ $ARG == "-std"* ]]; then continue; fi
         if [[ $ARG == "-nodefaultlibs" ]]; then continue; fi
-
     fi
 
     ARGS[$i]=$ARG
@@ -249,7 +264,7 @@ SYSROOT_LIB_PATH="-L$BUILD_ABS/makefiles/bfcrt/bin/cross/ -L$BUILD_ABS/makefiles
 # Sysroot Includes
 # ------------------------------------------------------------------------------
 
-SYSROOT_INC_PATH="-isystem $HOME/compilers/$compiler/x86_64-elf/include/ -isystem $BUILD_ABS/sysroot/x86_64-elf/include/ "
+SYSROOT_INC_PATH="-isystem $HOME/compilers/$compiler/x86_64-elf/include/ -isystem $BUILD_ABS/sysroot/x86_64-elf/include/ -isystem $BUILD_ABS/sysroot/x86_64-elf/include/c++/v1/ "
 
 # REMOVE ME ***
 # This is a dirty hack that makes sure the newlib header is there. This should
@@ -259,12 +274,6 @@ SYSROOT_INC_PATH="-isystem $HOME/compilers/$compiler/x86_64-elf/include/ -isyste
 # change once installed. This will also get fixed once we have our own newlib
 if [[ -f "$BUILD_ABS/sysroot/x86_64-elf/include/newlib.h" ]]; then
     SYSROOT_INC_PATH="-include $BUILD_ABS/sysroot/x86_64-elf/include/newlib.h $SYSROOT_INC_PATH"
-fi
-
-# This is a dirty hack that is needed for libcxx and libcxxabi. Basically, if
-# they can see the headers in the sysroot, they gets all sorts of mad.
-if [[ ! $BAREFLANK_WRAPPER_IS_LIBCXXABI == "true" && ! $BAREFLANK_WRAPPER_IS_LIBCXX == "true" ]]; then
-    SYSROOT_INC_PATH="-isystem $BUILD_ABS/sysroot/x86_64-elf/include/c++/v1/ $SYSROOT_INC_PATH"
 fi
 
 # ------------------------------------------------------------------------------
@@ -281,17 +290,17 @@ fi
 # Execute
 # ------------------------------------------------------------------------------
 
-if [ ! -z "$VERBOSE" ]; then
-    echo "ARGS: $@"
-    echo "MODE: $MODE"
-    echo "COMPILER: $COMPILER"
-    echo "FILTERED ARGS: ${ARGS[*]}"
-    echo "SYSROOT_LIBS: $SYSROOT_LIBS"
-    echo "SYSROOT_LIB_PATH: $SYSROOT_LIB_PATH"
-    echo "SYSROOT_INC_PATH: $SYSROOT_INC_PATH"
-    echo "BAREFLANK_LIBS: $BAREFLANK_LIBS"
-    echo ""
-fi
+# if [ ! -z "$VERBOSE" ]; then
+#     echo "ARGS: ${ARGS[*]}"
+#     echo "MODE: $MODE"
+#     echo "COMPILER: $COMPILER"
+#     echo "FILTERED ARGS: ${ARGS[*]}"
+#     echo "SYSROOT_LIBS: $SYSROOT_LIBS"
+#     echo "SYSROOT_LIB_PATH: $SYSROOT_LIB_PATH"
+#     echo "SYSROOT_INC_PATH: $SYSROOT_INC_PATH"
+#     echo "BAREFLANK_LIBS: $BAREFLANK_LIBS"
+#     echo ""
+# fi
 
 if [[ $MODE == "compile" ]]; then
     $COMPILER $SYSROOT_INC_PATH ${ARGS[*]}

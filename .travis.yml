@@ -24,7 +24,6 @@ matrix:
   # Astyle
   #
   - os: linux
-    compiler: gcc
     env:
       - TEST="Astyle"
     script:
@@ -34,7 +33,6 @@ matrix:
   # Coveralls
   #
   - os: linux
-    compiler: gcc
     env:
       - TEST="Coveralls"
     services:
@@ -53,7 +51,6 @@ matrix:
   # Coverity
   #
   - os: linux
-    compiler: gcc
     env:
       - TEST="Coverity"
     before_install:
@@ -77,7 +74,6 @@ matrix:
   # Clang Tidy
   #
   - os: linux
-    compiler: gcc
     env:
       - TEST="Clang Tidy"
     services:
@@ -99,7 +95,6 @@ matrix:
   # Google Sanitizers
   #
   - os: linux
-    compiler: gcc
     env:
       - TEST="Google Sanitizers"
     services:
@@ -114,13 +109,13 @@ matrix:
   # GCC 5.1.0
   #
   - os: linux
-    compiler: gcc
     env:
       - TEST="GCC 5.1.0"
     services:
       - docker
     install:
-      - travis_wait 40 ./tools/scripts/setup_ubuntu.sh -g gcc_510
+      - travis_wait 40 ./tools/scripts/setup_ubuntu.sh --compiler gcc_510
+      - cat env.sh
     script:
       - make
       - make test
@@ -129,13 +124,13 @@ matrix:
   # GCC 5.2.0
   #
   - os: linux
-    compiler: gcc
     env:
       - TEST="GCC 5.2.0"
     services:
       - docker
     install:
-      - travis_wait 40 ./tools/scripts/setup_ubuntu.sh -g gcc_520
+      - travis_wait 40 ./tools/scripts/setup_ubuntu.sh --compiler gcc_520
+      - cat env.sh
     script:
       - make
       - make test
@@ -144,13 +139,13 @@ matrix:
   # GCC 5.3.0
   #
   - os: linux
-    compiler: gcc
     env:
       - TEST="GCC 5.3.0"
     services:
       - docker
     install:
-      - travis_wait 40 ./tools/scripts/setup_ubuntu.sh -g gcc_530
+      - travis_wait 40 ./tools/scripts/setup_ubuntu.sh --compiler gcc_530
+      - cat env.sh
     script:
       - make
       - make test
@@ -159,13 +154,13 @@ matrix:
   # GCC 5.4.0
   #
   - os: linux
-    compiler: gcc
     env:
       - TEST="GCC 5.4.0"
     services:
       - docker
     install:
-      - travis_wait 40 ./tools/scripts/setup_ubuntu.sh -g gcc_540
+      - travis_wait 40 ./tools/scripts/setup_ubuntu.sh --compiler gcc_540
+      - cat env.sh
     script:
       - make
       - make test
@@ -174,13 +169,13 @@ matrix:
   # GCC 6.1.0
   #
   - os: linux
-    compiler: gcc
     env:
       - TEST="GCC 6.1.0"
     services:
       - docker
     install:
-      - travis_wait 40 ./tools/scripts/setup_ubuntu.sh -g gcc_610
+      - travis_wait 40 ./tools/scripts/setup_ubuntu.sh --compiler gcc_610
+      - cat env.sh
     script:
       - make
       - make test
@@ -189,14 +184,43 @@ matrix:
   # GCC 6.2.0
   #
   - os: linux
-    compiler: gcc
     env:
       - TEST="GCC 6.2.0"
     services:
       - docker
     install:
-      - travis_wait 40 ./tools/scripts/setup_ubuntu.sh -g gcc_620
+      - travis_wait 40 ./tools/scripts/setup_ubuntu.sh --compiler gcc_620
+      - cat env.sh
     script:
       - make
       - make test
 
+  #
+  # Clang 3.8
+  #
+  - os: linux
+    env:
+      - TEST="Clang 3.8"
+    services:
+      - docker
+    install:
+      - travis_wait 40 ./tools/scripts/setup_ubuntu.sh --compiler gcc_520 --use_llvm_clang
+      - cat env.sh
+    script:
+      - make
+      - make test
+
+  #
+  # Clang 3.9
+  #
+  - os: linux
+    env:
+      - TEST="Clang 3.9"
+    services:
+      - docker
+    install:
+      - travis_wait 40 ./tools/scripts/setup_ubuntu.sh --compiler gcc_620 --use_llvm_clang
+      - cat env.sh
+    script:
+      - make
+      - make test

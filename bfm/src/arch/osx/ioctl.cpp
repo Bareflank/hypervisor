@@ -21,7 +21,6 @@
 
 #include <ioctl.h>
 #include <ioctl_private.h>
-#include <iostream>
 
 ioctl::ioctl() noexcept
 {
@@ -44,8 +43,6 @@ ioctl::call_ioctl_add_module(const std::string &str)
 
     if (d)
     {
-        std::cout << str.length() << "\n";
-
         d->call_ioctl_add_module_length(str.length());
         d->call_ioctl_add_module(str.c_str());
     }

@@ -20,14 +20,24 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-%ENV_SOURCE%
+pushd /tmp/bareflank/
 
-pushd $BUILD_ABS
+rm -Rf source_llvm
 
 n=0
 until [ $n -ge 5 ]
 do
     git clone --depth 1 -b $LLVM_RELEASE http://llvm.org/git/llvm source_llvm && break
+    n=$[$n+1]
+    sleep 15
+done
+
+cd source_llvm/tools
+
+n=0
+until [ $n -ge 5 ]
+do
+    git clone --depth 1 -b $LLVM_RELEASE http://llvm.org/git/clang.git && break
     n=$[$n+1]
     sleep 15
 done

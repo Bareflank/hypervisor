@@ -42,6 +42,11 @@ ifeq ($(OS), windows)
     NATIVE_DEFINES+=-Wl,--enable-auto-import
 endif
 
+ifeq ($(PRODUCTION),yes)
+    NATIVE_CCFLAGS+=-O3
+    NATIVE_CXXFLAGS+=-O3
+endif
+
 ################################################################################
 # Output
 ################################################################################

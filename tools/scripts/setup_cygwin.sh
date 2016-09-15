@@ -58,7 +58,7 @@ option_help() {
 # ------------------------------------------------------------------------------
 
 install_common_packages() {
-    setup-x86_64.exe -q --wait -P wget,make,gcc-core,gcc-g++,diffutils,libgmp-devel,libmpfr-devel,libmpc-devel,flex,bison,nasm,texinfo,unzip,git-completion,bash-completion,patch,ncurses,libncurses-devel
+    setup-x86_64.exe -q --wait -P wget,make,gcc-core,gcc-g++,diffutils,libgmp-devel,libmpfr-devel,libmpc-devel,flex,bison,nasm,texinfo,unzip,git-completion,bash-completion,patch,ncurses,libncurses-devel,clang
 }
 
 install_cmake() {
@@ -98,9 +98,13 @@ while [[ $# -ne 0 ]]; do
         local="true"
     fi
 
-    if [[ $1 == "-g" ]] || [[ $1 == "--compiler" ]]; then
+    if [[ $1 == "--compiler" ]]; then
         shift
-        compiler="-g $1"
+        compiler="--compiler $1"
+    fi
+
+    if [[ $1 == "--use_llvm_clang" ]]; then
+        use_llvm_clang="--use_llvm_clang"
     fi
 
     if [[ $1 == "-n" ]] || [[ $1 == "--no-configure" ]]; then
@@ -117,6 +121,11 @@ while [[ $# -ne 0 ]]; do
     shift
 
 done
+
+if [[ ! $local == "true" ]]; then
+    echo "Docker currently not supported. Use -l to setup local compilers"
+    exit 1
+fi
 
 # ------------------------------------------------------------------------------
 # Setup System
@@ -145,11 +154,6 @@ esac
 # Setup Build Environment
 # ------------------------------------------------------------------------------
 
-if [[ ! $local == "true" ]]; then
-    echo "Docker currently not supported. Use -l to setup local compilers"
-    exit 1
-fi
-
 if [[ ! $noconfigure == "true" ]]; then
     if [[ $out_of_tree == "true" ]]; then
         mkdir -p $build_dir
@@ -157,7 +161,7 @@ if [[ ! $noconfigure == "true" ]]; then
         $hypervisor_dir/configure
         popd
     else
-        ./configure $compiler
+        ./configure $compiler $use_llvm_clang
     fi
 fi
 

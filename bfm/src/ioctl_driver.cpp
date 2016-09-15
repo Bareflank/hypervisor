@@ -24,7 +24,6 @@
 #include <iostream>
 #include <exception.h>
 #include <ioctl_driver.h>
-#include <driver_entry_interface.h>
 
 void
 ioctl_driver::process(std::shared_ptr<file> f,

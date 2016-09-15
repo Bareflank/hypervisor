@@ -25,6 +25,7 @@
 #include <file.h>
 #include <ioctl.h>
 #include <ioctl_driver.h>
+#include <driver_entry_interface.h>
 
 ioctl_driver g_driver;
 

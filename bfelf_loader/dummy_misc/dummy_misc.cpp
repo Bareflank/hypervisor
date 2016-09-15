@@ -115,6 +115,13 @@ extern "C" void
 __gxx_personality_v0(void)
 {  }
 
+extern "C" int
+atexit(void (*function)(void))
+{
+    (void) function;
+    return 0;
+}
+
 void func30() {}
 void func31() {}
 void func32() {}

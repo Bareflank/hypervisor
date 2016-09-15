@@ -24,21 +24,10 @@
 #define BFELF_LOADER_H
 
 #include <crt.h>
+#include <types.h>
 #include <error_codes.h>
 
 #pragma GCC system_header
-
-#if defined(KERNEL) && defined(__linux__)
-#include <linux/types.h>
-#else
-#ifdef __linux__
-#include <inttypes.h>
-#endif
-#endif
-
-#if defined(KERNEL) && defined(__osx__)
-#include <stdint.h>
-#endif
 
 #pragma pack(push, 1)
 
@@ -414,6 +403,7 @@ struct bfelf64_ehdr
 #define bfsht_loos ((bfelf64_word)0x60000000)
 #define bfsht_hios ((bfelf64_word)0x6FFFFFFF)
 #define bfsht_loproc ((bfelf64_word)0x70000000)
+#define bfsht_x86_64_unwind ((bfelf64_word)0x70000001)
 #define bfsht_hiproc ((bfelf64_word)0x7FFFFFFF)
 
 /*

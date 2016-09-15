@@ -666,7 +666,15 @@ private_check_section(struct bfelf_shdr *shdr,
                       bfelf64_xword addralign,
                       bfelf64_xword entsize)
 {
-    if (shdr->sh_type != type)
+    /*
+     * All of the section types that we support exist in the lower 8 bits.
+     * The exception to that is SHT_X86_64_UNWIND which is a processor
+     * specific type for SHT_PROGBITS defined in the 64bit System V ABI.
+     * Since we look for SHT_PROGBITS when we see SHT_X86_64_UNWIND, the below
+     * mask fixes the issue.
+     */
+
+    if ((shdr->sh_type & 0xFF) != type)
         return invalid_section("type mismatch");
 
     if ((shdr->sh_flags & ~flags) != 0)

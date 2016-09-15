@@ -104,6 +104,17 @@ install_g++-6() {
     sudo ln -s /usr/bin/g++-6 /usr/bin/g++
 }
 
+install_clang_1404() {
+    wget http://llvm.org/releases/3.8.1/clang+llvm-3.8.1-x86_64-linux-gnu-ubuntu-14.04.tar.xz
+    tar xf clang*
+    sudo cp -R clang*/* /usr/local/
+    rm -Rf clang*
+}
+
+install_clang() {
+    sudo apt-get install --yes clang
+}
+
 prepare_docker() {
     sudo usermod -a -G docker $USER
     sudo service docker restart
@@ -124,9 +135,13 @@ while [[ $# -ne 0 ]]; do
         local="true"
     fi
 
-    if [[ $1 == "-g" ]] || [[ $1 == "--compiler" ]]; then
+    if [[ $1 == "--compiler" ]]; then
         shift
-        compiler="-g $1"
+        compiler="--compiler $1"
+    fi
+
+    if [[ $1 == "--use_llvm_clang" ]]; then
+        use_llvm_clang="--use_llvm_clang"
     fi
 
     if [[ $1 == "-n" ]] || [[ $1 == "--no-configure" ]]; then
@@ -153,6 +168,7 @@ case $(lsb_release -sr) in
     install_apt_tools
     add_docker_repositories
     install_common_packages
+    install_clang_1604
     prepare_docker
     ;;
 
@@ -163,6 +179,7 @@ case $(lsb_release -sr) in
     add_docker_repositories
     install_common_packages
     install_g++-6
+    install_clang_1404
     prepare_docker
     ;;
 
@@ -183,7 +200,7 @@ if [[ ! $noconfigure == "true" ]]; then
         $hypervisor_dir/configure
         popd
     else
-        ./configure $compiler
+        ./configure $compiler $use_llvm_clang
     fi
 fi
 
