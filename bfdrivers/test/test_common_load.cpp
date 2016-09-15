@@ -19,6 +19,8 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+#include <gsl/gsl>
+
 #include <test.h>
 
 #include <memory.h>
@@ -32,9 +34,11 @@
 
 extern "C"
 {
-    int64_t resolve_symbol(const char *name, void **sym, struct module_t *module);
-    int64_t execute_symbol(const char *sym, uint64_t arg1, uint64_t arg2, struct module_t *module);
+    int64_t resolve_symbol(const char *name, void **sym);
+    int64_t execute_symbol(const char *sym, uint64_t arg1, uint64_t arg2, uint64_t cpuid);
 }
+
+extern uint64_t g_malloc_fails;
 
 // -----------------------------------------------------------------------------
 // Tests
@@ -130,23 +134,34 @@ driver_entry_ut::test_common_load_add_md_failed()
 }
 
 void
-driver_entry_ut::test_common_load_platform_alloc_failed()
+driver_entry_ut::test_common_load_tls_platform_alloc_failed()
 {
+    g_malloc_fails = THREAD_LOCAL_STORAGE_SIZE;
+
+    auto ___ = gsl::finally([&]
+    { g_malloc_fails = 0; });
+
     EXPECT_TRUE(common_add_module(m_dummy_start_vmm_success.get(), m_dummy_start_vmm_success_length) == BF_SUCCESS);
     EXPECT_TRUE(common_add_module(m_dummy_stop_vmm_success.get(), m_dummy_stop_vmm_success_length) == BF_SUCCESS);
     EXPECT_TRUE(common_add_module(m_dummy_add_md_success.get(), m_dummy_add_md_success_length) == BF_SUCCESS);
     EXPECT_TRUE(common_add_module(m_dummy_misc.get(), m_dummy_misc_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_load_vmm() == BF_ERROR_OUT_OF_MEMORY);
+    EXPECT_TRUE(common_fini() == BF_SUCCESS);
+}
 
-    {
-        MockRepository mocks;
-        mocks.ExpectCallFunc(platform_alloc_rw).Return(nullptr);
+void
+driver_entry_ut::test_common_load_stack_platform_alloc_failed()
+{
+    g_malloc_fails = STACK_SIZE * 2;
 
-        RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-        {
-            EXPECT_TRUE(common_load_vmm() == BF_ERROR_OUT_OF_MEMORY);
-        });
-    }
+    auto ___ = gsl::finally([&]
+    { g_malloc_fails = 0; });
 
+    EXPECT_TRUE(common_add_module(m_dummy_start_vmm_success.get(), m_dummy_start_vmm_success_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_add_module(m_dummy_stop_vmm_success.get(), m_dummy_stop_vmm_success_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_add_module(m_dummy_add_md_success.get(), m_dummy_add_md_success_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_add_module(m_dummy_misc.get(), m_dummy_misc_length) == BF_SUCCESS);
+    EXPECT_TRUE(common_load_vmm() == BF_ERROR_OUT_OF_MEMORY);
     EXPECT_TRUE(common_fini() == BF_SUCCESS);
 }
 

@@ -31,7 +31,7 @@
 
 extern "C"
 {
-    int64_t execute_symbol(const char *sym, uint64_t arg1, uint64_t arg2, struct module_t *module);
+    int64_t execute_symbol(const char *sym, uint64_t arg1, uint64_t arg2, uint64_t cpuid);
 }
 
 // -----------------------------------------------------------------------------

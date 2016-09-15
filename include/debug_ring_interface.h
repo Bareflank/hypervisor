@@ -25,12 +25,7 @@
 
 #pragma GCC system_header
 
-#if !defined(KERNEL) && !defined(_WIN32)
-#include <stdint.h>
-#else
 #include <types.h>
-#endif
-
 #include <constants.h>
 #include <error_codes.h>
 

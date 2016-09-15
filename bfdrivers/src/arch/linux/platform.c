@@ -150,7 +150,12 @@ platform_stop(void)
 int64_t
 platform_num_cpus(void)
 {
-    return num_online_cpus();
+    int64_t num_cpus = num_online_cpus();
+
+    if (num_cpus < 0)
+        return 0;
+
+    return num_cpus;
 }
 
 int64_t

@@ -23,6 +23,7 @@
 
 #include <debug.h>
 #include <constants.h>
+#include <thread_context.h>
 #include <view_as_pointer.h>
 #include <vmcs/vmcs_intel_x64.h>
 #include <vmcs/vmcs_intel_x64_resume.h>
@@ -161,7 +162,7 @@ vmcs_intel_x64::release_vmcs_region() noexcept
 void
 vmcs_intel_x64::create_exit_handler_stack()
 {
-    m_exit_handler_stack = std::make_unique<char[]>(STACK_SIZE);
+    m_exit_handler_stack = std::make_unique<char[]>(STACK_SIZE * 2);
 }
 
 void
@@ -396,8 +397,13 @@ vmcs_intel_x64::write_natural_host_state(const std::shared_ptr<vmcs_intel_x64_st
 {
     auto exit_handler_stack = reinterpret_cast<uintptr_t>(m_exit_handler_stack.get());
 
-    exit_handler_stack += STACK_SIZE;
-    exit_handler_stack &= 0xFFFFFFFFFFFFFFF0;
+    auto stack_top = exit_handler_stack + (STACK_SIZE * 2);
+    stack_top = (stack_top & ~(STACK_SIZE - 1)) - 1;
+    exit_handler_stack = stack_top - sizeof(thread_context_t) - 1;
+
+    auto tc = reinterpret_cast<thread_context_t *>(stack_top - sizeof(thread_context_t));
+    tc->cpuid = thread_context_cpuid();
+    tc->tlsptr = thread_context_tlsptr();
 
     vmwrite(VMCS_HOST_CR0, state->cr0());
     vmwrite(VMCS_HOST_CR3, state->cr3());
@@ -590,3 +596,9 @@ vmcs_intel_x64::filter_unsupported(uint32_t msr, uint64_t &ctrl)
         bfdebug << "    - new ctrl: " << view_as_pointer(ctrl) << bfendl;
     }
 }
+
+uint64_t __attribute__((weak)) thread_context_cpuid(void)
+{ return 0; }
+
+uint64_t __attribute__((weak)) thread_context_tlsptr(void)
+{ return 0; }

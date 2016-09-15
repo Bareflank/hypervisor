@@ -185,8 +185,6 @@ private:
     uint64_t m_ia32_efer_msr;
     uint64_t m_ia32_fs_base_msr;
     uint64_t m_ia32_gs_base_msr;
-
-    std::unique_ptr<uintptr_t[]> m_thread_storage;
 };
 
 #endif

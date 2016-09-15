@@ -35,6 +35,7 @@ if [[ ! -d "$BUILD_ABS/source_llvm" ]]; then
 fi
 
 rm -Rf $BUILD_ABS/build_libcxx
+rm -Rf $BUILD_ABS/sysroot/x86_64-elf/include/c++/
 mkdir -p $BUILD_ABS/build_libcxx
 
 pushd $BUILD_ABS/build_libcxx

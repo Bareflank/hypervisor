@@ -41,8 +41,9 @@ export CXXFLAGS="-fno-use-cxa-atexit -fno-threadsafe-statics $CFLAGS"
 
 export PATH="$HOME/compilers/$compiler/bin:$PATH"
 
-../source_newlib/configure --target=x86_64-elf --prefix=$BUILD_ABS/sysroot/
-make -j2
-make -j2 install
+echo "Building newlib. Please wait..."
+../source_newlib/configure --target=x86_64-elf --prefix=$BUILD_ABS/sysroot/ 1>/dev/null 2>/dev/null
+make -j2 1>/dev/null 2>/dev/null
+make -j2 install 1>/dev/null 2>/dev/null
 
 popd
