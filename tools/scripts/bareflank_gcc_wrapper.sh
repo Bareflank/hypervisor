@@ -53,6 +53,7 @@ DOCKER_ARGS="$DOCKER_ARGS -v $HYPER_ABS:$HYPER_ABS -v $BUILD_ABS:$BUILD_ABS -u $
 
 if [[ -f "$HOME/compilers/$compiler/bin/x86_64-elf-gcc" ]]; then
     LOCAL_COMPILER="true"
+    export PATH="$HOME/compilers/$compiler/bin/:$PATH"
 fi
 
 # ------------------------------------------------------------------------------
@@ -63,33 +64,33 @@ COMPILER="unsupported"
 
 if [[ $0 == *"gcc" ]]; then
     if [[ $LOCAL_COMPILER == "true" ]]; then
-        if [[ $USE_LLVM_CLANG == "true" ]]; then
-            COMPILER="$HOME/compilers/$compiler/bin/clang --target=x86_64-elf -D__need_size_t -D__need_ptrdiff_t"
-        else
-            COMPILER="$HOME/compilers/$compiler/bin/x86_64-elf-gcc"
-        fi
+        COMPILER="$HOME/compilers/$compiler/bin/x86_64-elf-gcc"
     else
-        if [[ $USE_LLVM_CLANG == "true" ]]; then
-            COMPILER="docker run $DOCKER_ARGS /tmp/compilers/$compiler/bin/clang --target=x86_64-elf -D__need_size_t -D__need_ptrdiff_t"
-        else
-            COMPILER="docker run $DOCKER_ARGS /tmp/compilers/$compiler/bin/x86_64-elf-gcc"
-        fi
+        COMPILER="docker run $DOCKER_ARGS /tmp/compilers/$compiler/bin/x86_64-elf-gcc"
+    fi
+fi
+
+if [[ $0 == *"clang" ]]; then
+    if [[ $LOCAL_COMPILER == "true" ]]; then
+        COMPILER="$HOME/compilers/$compiler/bin/clang --target=x86_64-elf -D__need_size_t -D__need_ptrdiff_t"
+    else
+        COMPILER="docker run $DOCKER_ARGS /tmp/compilers/$compiler/bin/clang --target=x86_64-elf -D__need_size_t -D__need_ptrdiff_t"
     fi
 fi
 
 if [[ $0 == *"g++" ]]; then
     if [[ $LOCAL_COMPILER == "true" ]]; then
-        if [[ $USE_LLVM_CLANG == "true" ]]; then
-            COMPILER="$HOME/compilers/$compiler/bin/clang++ --target=x86_64-elf -D__need_size_t -D__need_ptrdiff_t"
-        else
-            COMPILER="$HOME/compilers/$compiler/bin/x86_64-elf-g++"
-        fi
+        COMPILER="$HOME/compilers/$compiler/bin/x86_64-elf-g++"
     else
-        if [[ $USE_LLVM_CLANG == "true" ]]; then
-            COMPILER="docker run $DOCKER_ARGS /tmp/compilers/$compiler/bin/clang++ --target=x86_64-elf -D__need_size_t -D__need_ptrdiff_t"
-        else
-            COMPILER="docker run $DOCKER_ARGS /tmp/compilers/$compiler/bin/x86_64-elf-g++"
-        fi
+        COMPILER="docker run $DOCKER_ARGS /tmp/compilers/$compiler/bin/x86_64-elf-g++"
+    fi
+fi
+
+if [[ $0 == *"clang++" ]]; then
+    if [[ $LOCAL_COMPILER == "true" ]]; then
+        COMPILER="$HOME/compilers/$compiler/bin/clang++ --target=x86_64-elf -D__need_size_t -D__need_ptrdiff_t"
+    else
+        COMPILER="docker run $DOCKER_ARGS /tmp/compilers/$compiler/bin/clang++ --target=x86_64-elf -D__need_size_t -D__need_ptrdiff_t"
     fi
 fi
 
@@ -290,17 +291,17 @@ fi
 # Execute
 # ------------------------------------------------------------------------------
 
-# if [ ! -z "$VERBOSE" ]; then
-#     echo "ARGS: ${ARGS[*]}"
-#     echo "MODE: $MODE"
-#     echo "COMPILER: $COMPILER"
-#     echo "FILTERED ARGS: ${ARGS[*]}"
-#     echo "SYSROOT_LIBS: $SYSROOT_LIBS"
-#     echo "SYSROOT_LIB_PATH: $SYSROOT_LIB_PATH"
-#     echo "SYSROOT_INC_PATH: $SYSROOT_INC_PATH"
-#     echo "BAREFLANK_LIBS: $BAREFLANK_LIBS"
-#     echo ""
-# fi
+if [ ! -z "$VERBOSE" ]; then
+    echo "ARGS: ${ARGS[*]}"
+    echo "MODE: $MODE"
+    echo "COMPILER: $COMPILER"
+    echo "FILTERED ARGS: ${ARGS[*]}"
+    echo "SYSROOT_LIBS: $SYSROOT_LIBS"
+    echo "SYSROOT_LIB_PATH: $SYSROOT_LIB_PATH"
+    echo "SYSROOT_INC_PATH: $SYSROOT_INC_PATH"
+    echo "BAREFLANK_LIBS: $BAREFLANK_LIBS"
+    echo ""
+fi
 
 if [[ $MODE == "compile" ]]; then
     $COMPILER $SYSROOT_INC_PATH ${ARGS[*]}

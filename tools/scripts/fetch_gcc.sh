@@ -29,7 +29,7 @@ rm -Rf src_gcc
 n=0
 until [ $n -ge 5 ]
 do
-    wget $GCC_URL && break
+    wget -nv $GCC_URL && break
     n=$[$n+1]
     sleep 15
 done

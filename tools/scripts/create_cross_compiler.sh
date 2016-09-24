@@ -39,7 +39,7 @@ mkdir -p /tmp/bareflank/
 # GCC 5.1
 # ------------------------------------------------------------------------------
 
-if [[ -z "$CROSS_COMPILER" ]] || [[ $CROSS_COMPILER == "gcc_510" ]]; then
+if [[ -z "$CROSS_COMPILER" ]] || [[ $CROSS_COMPILER == *"gcc_510"* ]]; then
 
     export PREFIX="$HOME/compilers/gcc_510/"
 
@@ -65,7 +65,7 @@ fi
 # GCC 5.2 / Clang 3.8
 # ------------------------------------------------------------------------------
 
-if [[ -z "$CROSS_COMPILER" ]] || [[ $CROSS_COMPILER == "gcc_520" ]]; then
+if [[ -z "$CROSS_COMPILER" ]] || [[ $CROSS_COMPILER == *"gcc_520"* ]]; then
 
     export PREFIX="$HOME/compilers/gcc_520/"
     export LLVM_RELEASE="release_38"
@@ -93,7 +93,7 @@ fi
 # GCC 5.3
 # ------------------------------------------------------------------------------
 
-if [[ -z "$CROSS_COMPILER" ]] || [[ $CROSS_COMPILER == "gcc_530" ]]; then
+if [[ -z "$CROSS_COMPILER" ]] || [[ $CROSS_COMPILER == *"gcc_530"* ]]; then
 
     export PREFIX="$HOME/compilers/gcc_530/"
 
@@ -119,7 +119,7 @@ fi
 # GCC 5.4
 # ------------------------------------------------------------------------------
 
-if [[ -z "$CROSS_COMPILER" ]] || [[ $CROSS_COMPILER == "gcc_540" ]]; then
+if [[ -z "$CROSS_COMPILER" ]] || [[ $CROSS_COMPILER == *"gcc_540"* ]]; then
 
     export PREFIX="$HOME/compilers/gcc_540/"
 
@@ -145,7 +145,7 @@ fi
 # GCC 6.1
 # ------------------------------------------------------------------------------
 
-if [[ -z "$CROSS_COMPILER" ]] || [[ $CROSS_COMPILER == "gcc_610" ]]; then
+if [[ -z "$CROSS_COMPILER" ]] || [[ $CROSS_COMPILER == *"gcc_610"* ]]; then
 
     export PREFIX="$HOME/compilers/gcc_610/"
 
@@ -171,7 +171,7 @@ fi
 # GCC 6.2 / Clang 3.9
 # ------------------------------------------------------------------------------
 
-if [[ -z "$CROSS_COMPILER" ]] || [[ $CROSS_COMPILER == "gcc_620" ]]; then
+if [[ -z "$CROSS_COMPILER" ]] || [[ $CROSS_COMPILER == *"gcc_620"* ]]; then
 
     export PREFIX="$HOME/compilers/gcc_620/"
     export LLVM_RELEASE="release_39"

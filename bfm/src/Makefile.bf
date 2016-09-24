@@ -43,8 +43,8 @@ ifeq ($(OS), windows)
 endif
 
 ifeq ($(PRODUCTION),yes)
-    NATIVE_CCFLAGS+=-O3
-    NATIVE_CXXFLAGS+=-O3
+    NATIVE_CCFLAGS+=-O3 -D_FORTIFY_SOURCE=2
+    NATIVE_CXXFLAGS+=-O3 -DGSL_UNENFORCED_ON_CONTRACT_VIOLATION -D_FORTIFY_SOURCE=2
 endif
 
 ################################################################################
@@ -82,6 +82,8 @@ WINDOWS_SOURCES+=arch/windows/stack.cpp
 WINDOWS_INCLUDE_PATHS+=arch/windows/
 WINDOWS_LIBS+=setupapi
 WINDOWS_LIBRARY_PATHS+=
+WINDOWS_CCFLAGS+=-fms-extensions
+WINDOWS_CXXFLAGS+=-fms-extensions
 
 ifeq ($(STATIC_ANALYSIS_ENABLED), true)
     LINUX_SOURCES+=arch/test/ioctl.cpp
