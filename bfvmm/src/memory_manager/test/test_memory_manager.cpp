@@ -21,6 +21,7 @@
 
 #include <test.h>
 #include <constants.h>
+#include <memory_manager/mem_pool.h>
 #include <memory_manager/memory_manager.h>
 
 #include <vector>
@@ -30,715 +31,213 @@ extern "C" int64_t
 add_md(struct memory_descriptor *md) noexcept;
 
 void
-memory_manager_ut::test_memory_manager_malloc_zero()
-{
-    EXPECT_TRUE(g_mm->malloc(0) == nullptr);
-}
-
-void
 memory_manager_ut::test_memory_manager_free_zero()
 {
-    g_mm->free(nullptr);
-}
+    mem_pool<128, 3> pool(100);
 
-void
-memory_manager_ut::test_memory_manager_malloc_heap_valid()
-{
-    EXPECT_TRUE(g_mm->malloc(sizeof(uint64_t)) != nullptr);
-
-    g_mm->clear();
-}
-
-void
-memory_manager_ut::test_memory_manager_multiple_malloc_heap_should_be_contiguous()
-{
-    auto addr1 = static_cast<uint64_t *>(g_mm->malloc(sizeof(uint64_t)));
-    auto addr2 = static_cast<uint64_t *>(g_mm->malloc(sizeof(uint64_t)));
-    auto addr3 = static_cast<uint64_t *>(g_mm->malloc(sizeof(uint64_t)));
-    auto addr4 = static_cast<uint64_t *>(g_mm->malloc(sizeof(uint64_t)));
-
-    EXPECT_TRUE(addr2 == addr1 + 2);
-    EXPECT_TRUE(addr3 == addr2 + 2);
-    EXPECT_TRUE(addr4 == addr3 + 2);
-
-    g_mm->clear();
-
-    auto addr5 = static_cast<uint64_t *>(g_mm->malloc(10));
-    auto addr6 = static_cast<uint64_t *>(g_mm->malloc(10));
-    auto addr7 = static_cast<uint64_t *>(g_mm->malloc(10));
-    auto addr8 = static_cast<uint64_t *>(g_mm->malloc(10));
-
-    EXPECT_TRUE(addr6 == addr5 + 3);
-    EXPECT_TRUE(addr7 == addr6 + 3);
-    EXPECT_TRUE(addr8 == addr7 + 3);
-
-    g_mm->clear();
-}
-
-void
-memory_manager_ut::test_memory_manager_malloc_heap_free_malloc()
-{
-    void *addr1 = nullptr;
-    void *addr2 = nullptr;
-
-    g_mm->malloc(sizeof(uint64_t));
-    addr1 = g_mm->malloc(sizeof(uint64_t));
-    g_mm->free(addr1);
-    addr2 = g_mm->malloc(sizeof(uint64_t));
-
-    EXPECT_TRUE(addr2 == addr1);
-    g_mm->clear();
-
-    g_mm->malloc(sizeof(uint64_t));
-    addr1 = g_mm->malloc(sizeof(uint64_t));
-    g_mm->malloc(sizeof(uint64_t));
-    g_mm->free(addr1);
-    addr2 = g_mm->malloc(sizeof(uint64_t));
-
-    EXPECT_TRUE(addr2 == addr1);
-    g_mm->clear();
-
-    g_mm->malloc(sizeof(uint64_t));
-    addr1 = g_mm->malloc(sizeof(uint64_t));
-    g_mm->free(addr1);
-    addr2 = g_mm->malloc(10);
-
-    EXPECT_TRUE(addr1 == addr2);
-    g_mm->clear();
-
-    g_mm->malloc(sizeof(uint64_t));
-    addr1 = g_mm->malloc(sizeof(uint64_t));
-    g_mm->malloc(sizeof(uint64_t));
-    g_mm->free(addr1);
-    addr2 = g_mm->malloc(10);
-
-    EXPECT_TRUE(addr1 != addr2);
-    g_mm->clear();
-
-    g_mm->malloc(sizeof(uint64_t));
-    addr1 = g_mm->malloc(10);
-    g_mm->free(addr1);
-    addr2 = g_mm->malloc(sizeof(uint64_t));
-
-    EXPECT_TRUE(addr1 == addr2);
-    g_mm->clear();
-
-    g_mm->malloc(sizeof(uint64_t));
-    addr1 = g_mm->malloc(10);
-    g_mm->malloc(sizeof(uint64_t));
-    g_mm->free(addr1);
-    addr2 = g_mm->malloc(sizeof(uint64_t));
-
-    EXPECT_TRUE(addr1 == addr2);
-    g_mm->clear();
+    pool.free(0);
+    pool.free(0xFFFFFFFFFFFFFFFF);
 }
 
 void
 memory_manager_ut::test_memory_manager_free_heap_twice()
 {
-    auto addr1 = g_mm->malloc(sizeof(uint64_t));
+    mem_pool<128, 3> pool(100);
 
-    g_mm->free(addr1);
-    g_mm->free(addr1);
+    auto addr1 = pool.alloc(1 << 3);
 
-    g_mm->clear();
+    pool.free(addr1);
+    pool.free(addr1);
+}
+
+void
+memory_manager_ut::test_memory_manager_malloc_zero()
+{
+    mem_pool<128, 3> pool(100);
+
+    EXPECT_EXCEPTION(pool.alloc(0), std::bad_alloc);
+}
+
+void
+memory_manager_ut::test_memory_manager_multiple_malloc_heap_should_be_contiguous()
+{
+    mem_pool<128, 3> pool(100);
+
+    uintptr_t addr1 = 0;
+    uintptr_t addr2 = 0;
+    uintptr_t addr3 = 0;
+    uintptr_t addr4 = 0;
+
+    addr1 = pool.alloc((1 << 3));
+    addr2 = pool.alloc((1 << 3));
+    addr3 = pool.alloc((1 << 3));
+    addr4 = pool.alloc((1 << 3));
+
+    EXPECT_TRUE(addr1 == 100 + ((1 << 3) * 0));  // 100
+    EXPECT_TRUE(addr2 == 100 + ((1 << 3) * 1));  // 108
+    EXPECT_TRUE(addr3 == 100 + ((1 << 3) * 2));  // 116
+    EXPECT_TRUE(addr4 == 100 + ((1 << 3) * 3));  // 124
+
+    pool.free(addr1);
+    pool.free(addr2);
+    pool.free(addr3);
+    pool.free(addr4);
+
+    addr1 = pool.alloc((1 << 3) + 2);
+    addr2 = pool.alloc((1 << 3) + 2);
+    addr3 = pool.alloc((1 << 3) + 2);
+    addr4 = pool.alloc((1 << 3) * 4);
+
+    EXPECT_TRUE(addr1 == 132 + ((1 << 3) * 0));  // 132
+    EXPECT_TRUE(addr2 == 132 + ((1 << 3) * 2));  // 148
+    EXPECT_TRUE(addr3 == 132 + ((1 << 3) * 4));  // 164
+    EXPECT_TRUE(addr4 == 132 + ((1 << 3) * 6));  // 180
+
+    pool.free(addr1);
+    pool.free(addr2);
+    pool.free(addr3);
+    pool.free(addr4);
 }
 
 void
 memory_manager_ut::test_memory_manager_malloc_heap_all_of_memory()
 {
-    std::vector<void *> addrs;
+    mem_pool<128, 3> pool(100);
+    std::vector<uintptr_t> addrs;
 
-    for (auto i = 0U; i < MAX_HEAP_POOL / 2 - 1; i++)
-        addrs.push_back(g_mm->malloc(sizeof(uint64_t)));
+    for (auto i = 0; i < 16; i++)
+        addrs.push_back(pool.alloc(1 << 3));
 
-    auto fill_mem_pool = g_mm->malloc(sizeof(uint64_t));
-    auto mem_pool_full = g_mm->malloc(sizeof(uint64_t));
-
-    EXPECT_TRUE(fill_mem_pool != nullptr);
-    EXPECT_TRUE(mem_pool_full == nullptr);
-
-    g_mm->free(fill_mem_pool);
-    g_mm->free(mem_pool_full);
+    EXPECT_EXCEPTION(pool.alloc(1 << 3), std::bad_alloc);
 
     for (const auto &addr : addrs)
-        g_mm->free(addr);
+        pool.free(addr);
 
-    for (auto i = 0U; i < MAX_HEAP_POOL / 2 - 1; i++)
-        addrs[i] = g_mm->malloc(sizeof(uint64_t));
+    for (auto i = 0; i < 16; i++)
+        addrs.push_back(pool.alloc(1 << 3));
 
-    fill_mem_pool = g_mm->malloc(sizeof(uint64_t));
-    mem_pool_full = g_mm->malloc(sizeof(uint64_t));
+    EXPECT_EXCEPTION(pool.alloc(1 << 3), std::bad_alloc);
 
-    EXPECT_TRUE(fill_mem_pool != nullptr);
-    EXPECT_TRUE(mem_pool_full == nullptr);
-
-    g_mm->clear();
+    for (const auto &addr : addrs)
+        pool.free(addr);
 }
 
 void
 memory_manager_ut::test_memory_manager_malloc_heap_all_of_memory_one_block()
 {
-    EXPECT_TRUE(g_mm->malloc((MAX_HEAP_POOL - 1) * sizeof(uint64_t)) != nullptr);
-    g_mm->clear();
+    mem_pool<128, 3> pool(100);
+    EXPECT_TRUE(pool.alloc(128) == 100);
 }
 
 void
 memory_manager_ut::test_memory_manager_malloc_heap_all_memory_fragmented()
 {
-    std::vector<void *> addrs;
+    mem_pool<128, 3> pool(100);
+    std::vector<uintptr_t> addrs;
 
-    for (auto i = 0U; i < MAX_HEAP_POOL / 2; i++)
-        addrs.push_back(g_mm->malloc(sizeof(uint64_t)));
+    for (auto i = 0; i < 16; i++)
+        addrs.push_back(pool.alloc(1 << 3));
 
     for (const auto &addr : addrs)
-        g_mm->free(addr);
+        pool.free(addr);
 
-    EXPECT_TRUE(g_mm->malloc((MAX_HEAP_POOL - 1) * sizeof(uint64_t)) != nullptr);
-
-    g_mm->clear();
+    EXPECT_TRUE(pool.alloc(128) == 100);
 }
 
 void
 memory_manager_ut::test_memory_manager_malloc_heap_too_much_memory_one_block()
 {
-    EXPECT_TRUE(g_mm->malloc((MAX_HEAP_POOL) * sizeof(uint64_t)) == nullptr);
-    g_mm->clear();
+    mem_pool<128, 3> pool(100);
+    EXPECT_EXCEPTION(pool.alloc(136), std::bad_alloc);
 }
 
 void
 memory_manager_ut::test_memory_manager_malloc_heap_too_much_memory_non_block_size()
 {
-    g_mm->malloc((MAX_HEAP_POOL - 2) * sizeof(uint64_t));
-    EXPECT_TRUE(g_mm->malloc(100) == nullptr);
-
-    g_mm->clear();
-}
-
-void
-memory_manager_ut::test_memory_manager_malloc_heap_really_small_fragment()
-{
-    g_mm->malloc(sizeof(uint64_t));
-    auto addr1 = g_mm->malloc(sizeof(uint64_t));
-    auto addr2 = g_mm->malloc(sizeof(uint64_t));
-    g_mm->malloc(sizeof(uint64_t));
-    auto addr3 = g_mm->malloc(sizeof(uint64_t));
-    g_mm->free(addr1);
-    g_mm->free(addr2);
-    g_mm->free(addr3);
-    auto addr4 = g_mm->malloc(10);
-    auto addr5 = g_mm->malloc(sizeof(uint64_t));
-
-    EXPECT_TRUE(addr4 == addr1);
-    EXPECT_TRUE(addr5 == addr3);
-    g_mm->clear();
-}
-
-void
-memory_manager_ut::test_memory_manager_malloc_heap_sparse_fragments()
-{
-    void *addr1 = nullptr;
-    void *addr2 = nullptr;
-    void *addr3 = nullptr;
-    void *addr4 = nullptr;
-
-    g_mm->malloc(sizeof(uint64_t));
-    addr1 = g_mm->malloc(sizeof(uint64_t));
-    g_mm->malloc(sizeof(uint64_t));
-    addr2 = g_mm->malloc(sizeof(uint64_t));
-    g_mm->malloc(sizeof(uint64_t));
-    g_mm->free(addr1);
-    g_mm->free(addr2);
-    addr3 = g_mm->malloc(sizeof(uint64_t));
-    addr4 = g_mm->malloc(sizeof(uint64_t));
-
-    EXPECT_TRUE(addr3 == addr1);
-    EXPECT_TRUE(addr4 == addr2);
-    g_mm->clear();
-
-    g_mm->malloc(sizeof(uint64_t));
-    addr1 = g_mm->malloc(10);
-    g_mm->malloc(sizeof(uint64_t));
-    addr2 = g_mm->malloc(sizeof(uint64_t));
-    g_mm->malloc(sizeof(uint64_t));
-    g_mm->free(addr1);
-    g_mm->free(addr2);
-    addr3 = g_mm->malloc(10);
-    addr4 = g_mm->malloc(sizeof(uint64_t));
-
-    EXPECT_TRUE(addr3 == addr1);
-    EXPECT_TRUE(addr4 == addr2);
-    g_mm->clear();
-
-    g_mm->malloc(sizeof(uint64_t));
-    addr1 = g_mm->malloc(10);
-    g_mm->malloc(sizeof(uint64_t));
-    addr2 = g_mm->malloc(sizeof(uint64_t));
-    g_mm->malloc(sizeof(uint64_t));
-    g_mm->free(addr1);
-    g_mm->free(addr2);
-    addr3 = g_mm->malloc(sizeof(uint64_t));
-    addr4 = g_mm->malloc(10);
-
-    EXPECT_TRUE(addr3 == addr1);
-    EXPECT_TRUE(addr4 != addr1);
-    g_mm->clear();
-
-    g_mm->malloc(sizeof(uint64_t));
-    addr1 = g_mm->malloc(sizeof(uint64_t));
-    g_mm->malloc(sizeof(uint64_t));
-    addr2 = g_mm->malloc(10);
-    g_mm->malloc(sizeof(uint64_t));
-    g_mm->free(addr1);
-    g_mm->free(addr2);
-    addr3 = g_mm->malloc(10);
-    addr4 = g_mm->malloc(sizeof(uint64_t));
-
-    EXPECT_TRUE(addr3 == addr2);
-    EXPECT_TRUE(addr4 == addr1);
-    g_mm->clear();
-
-    g_mm->malloc(sizeof(uint64_t));
-    addr1 = g_mm->malloc(sizeof(uint64_t));
-    g_mm->malloc(sizeof(uint64_t));
-    addr2 = g_mm->malloc(10);
-    g_mm->malloc(sizeof(uint64_t));
-    g_mm->free(addr1);
-    g_mm->free(addr2);
-    addr3 = g_mm->malloc(sizeof(uint64_t));
-    addr4 = g_mm->malloc(10);
-
-    EXPECT_TRUE(addr3 == addr1);
-    EXPECT_TRUE(addr4 == addr2);
-    g_mm->clear();
+    mem_pool<128, 3> pool(100);
+    EXPECT_EXCEPTION(pool.alloc(129), std::bad_alloc);
 }
 
 void
 memory_manager_ut::test_memory_manager_malloc_heap_massive()
 {
-    EXPECT_TRUE(g_mm->malloc(0xFFFFFFFFFFFFFFFF) == nullptr);
-    EXPECT_TRUE(g_mm->malloc((MAX_HEAP_POOL + 10U) * 8) == nullptr);
-    EXPECT_TRUE(g_mm->malloc((MAX_PAGE_POOL + MAX_PAGE_SIZE) * 4096) == nullptr);
-    g_mm->clear();
+    mem_pool<128, 3> pool(100);
+
+    EXPECT_EXCEPTION(pool.alloc(0xFFFFFFFFFFFFFFFF), std::bad_alloc);
 }
 
 void
-memory_manager_ut::test_memory_manager_malloc_heap_resize_fragments()
+memory_manager_ut::test_memory_manager_size_out_of_bounds()
 {
-    void *addr1 = nullptr;
-    void *addr2 = nullptr;
-    void *addr3 = nullptr;
-    void *addr4 = nullptr;
-    void *addr5 = nullptr;
-    void *addr6 = nullptr;
+    mem_pool<128, 3> pool(100);
 
-    g_mm->malloc(sizeof(uint64_t));
-    addr1 = g_mm->malloc(8);
-    addr2 = g_mm->malloc(24);
-    g_mm->free(addr1);
-    g_mm->free(addr2);
-    addr3 = g_mm->malloc(16);
-    addr4 = g_mm->malloc(16);
-    g_mm->malloc(sizeof(uint64_t));
-    g_mm->free(addr3);
-    g_mm->free(addr4);
-    addr5 = g_mm->malloc(8);
-    addr6 = g_mm->malloc(24);
-
-    EXPECT_TRUE(addr5 == addr1);
-    EXPECT_TRUE(addr6 == addr2);
-    EXPECT_TRUE(addr5 == addr3);
-    g_mm->clear();
-
-    g_mm->malloc(sizeof(uint64_t));
-    addr1 = g_mm->malloc(24);
-    addr2 = g_mm->malloc(8);
-    g_mm->free(addr1);
-    g_mm->free(addr2);
-    addr3 = g_mm->malloc(16);
-    addr4 = g_mm->malloc(16);
-    g_mm->malloc(sizeof(uint64_t));
-    g_mm->free(addr3);
-    g_mm->free(addr4);
-    addr5 = g_mm->malloc(24);
-    addr6 = g_mm->malloc(8);
-
-    EXPECT_TRUE(addr5 == addr1);
-    EXPECT_TRUE(addr6 == addr2);
-    EXPECT_TRUE(addr5 == addr3);
-    g_mm->clear();
-
-    g_mm->malloc(sizeof(uint64_t));
-    addr1 = g_mm->malloc(16);
-    addr2 = g_mm->malloc(16);
-    g_mm->free(addr1);
-    g_mm->free(addr2);
-    addr3 = g_mm->malloc(8);
-    addr4 = g_mm->malloc(24);
-    g_mm->malloc(sizeof(uint64_t));
-    g_mm->free(addr3);
-    g_mm->free(addr4);
-    addr5 = g_mm->malloc(16);
-    addr6 = g_mm->malloc(16);
-
-    EXPECT_TRUE(addr5 == addr1);
-    EXPECT_TRUE(addr6 == addr2);
-    EXPECT_TRUE(addr5 == addr3);
-    g_mm->clear();
-
-    g_mm->malloc(sizeof(uint64_t));
-    addr1 = g_mm->malloc(16);
-    addr2 = g_mm->malloc(16);
-    g_mm->free(addr1);
-    g_mm->free(addr2);
-    addr3 = g_mm->malloc(24);
-    addr4 = g_mm->malloc(8);
-    g_mm->malloc(sizeof(uint64_t));
-    g_mm->free(addr3);
-    g_mm->free(addr4);
-    addr5 = g_mm->malloc(16);
-    addr6 = g_mm->malloc(16);
-
-    EXPECT_TRUE(addr5 == addr1);
-    EXPECT_TRUE(addr6 == addr2);
-    EXPECT_TRUE(addr5 == addr3);
-    g_mm->clear();
+    EXPECT_TRUE(pool.size(0) == 0);
+    EXPECT_TRUE(g_mm->size(nullptr) == 0);
 }
 
 void
-memory_manager_ut::test_memory_manager_malloc_page_valid()
+memory_manager_ut::test_memory_manager_size_unallocated()
 {
-    EXPECT_TRUE(g_mm->malloc(0x1000) != nullptr);
+    mem_pool<128, 3> pool(100);
 
-    g_mm->clear();
+    EXPECT_TRUE(pool.size(100) == 0);
 }
 
 void
-memory_manager_ut::test_memory_manager_multiple_malloc_page_should_be_contiguous()
+memory_manager_ut::test_memory_manager_size()
 {
-    auto addr1 = static_cast<uint8_t *>(g_mm->malloc(0x1000));
-    auto addr2 = static_cast<uint8_t *>(g_mm->malloc(0x1000));
-    auto addr3 = static_cast<uint8_t *>(g_mm->malloc(0x1000));
-    auto addr4 = static_cast<uint8_t *>(g_mm->malloc(0x1000));
+    mem_pool<128, 3> pool(100);
 
-    EXPECT_TRUE(addr2 == addr1 + 0x1000);
-    EXPECT_TRUE(addr3 == addr2 + 0x1000);
-    EXPECT_TRUE(addr4 == addr3 + 0x1000);
-
-    g_mm->clear();
-
-    auto addr5 = static_cast<uint8_t *>(g_mm->malloc(0x2000));
-    auto addr6 = static_cast<uint8_t *>(g_mm->malloc(0x2000));
-    auto addr7 = static_cast<uint8_t *>(g_mm->malloc(0x2000));
-    auto addr8 = static_cast<uint8_t *>(g_mm->malloc(0x2000));
-
-    EXPECT_TRUE(addr6 == addr5 + 0x2000);
-    EXPECT_TRUE(addr7 == addr6 + 0x2000);
-    EXPECT_TRUE(addr8 == addr7 + 0x2000);
-
-    g_mm->clear();
+    pool.alloc(8);
+    EXPECT_TRUE(pool.size(100) == 8);
 }
 
 void
-memory_manager_ut::test_memory_manager_malloc_page_free_malloc()
+memory_manager_ut::test_memory_manager_contains_out_of_bounds()
 {
-    void *addr1 = nullptr;
-    void *addr2 = nullptr;
+    mem_pool<128, 3> pool(100);
 
-    g_mm->malloc(0x1000);
-    addr1 = g_mm->malloc(0x1000);
-    g_mm->free(addr1);
-    addr2 = g_mm->malloc(0x1000);
-
-    EXPECT_TRUE(addr2 == addr1);
-    g_mm->clear();
-
-    g_mm->malloc(0x1000);
-    addr1 = g_mm->malloc(0x1000);
-    g_mm->malloc(0x1000);
-    g_mm->free(addr1);
-    addr2 = g_mm->malloc(0x1000);
-
-    EXPECT_TRUE(addr2 == addr1);
-    g_mm->clear();
-
-    g_mm->malloc(0x1000);
-    addr1 = g_mm->malloc(0x1000);
-    g_mm->free(addr1);
-    addr2 = g_mm->malloc(0x2000);
-
-    EXPECT_TRUE(addr1 == addr2);
-    g_mm->clear();
-
-    g_mm->malloc(0x1000);
-    addr1 = g_mm->malloc(0x1000);
-    g_mm->malloc(0x1000);
-    g_mm->free(addr1);
-    addr2 = g_mm->malloc(0x2000);
-
-    EXPECT_TRUE(addr1 != addr2);
-    g_mm->clear();
-
-    g_mm->malloc(0x1000);
-    addr1 = g_mm->malloc(0x2000);
-    g_mm->free(addr1);
-    addr2 = g_mm->malloc(0x1000);
-
-    EXPECT_TRUE(addr1 == addr2);
-    g_mm->clear();
-
-    g_mm->malloc(0x1000);
-    addr1 = g_mm->malloc(0x2000);
-    g_mm->malloc(0x1000);
-    g_mm->free(addr1);
-    addr2 = g_mm->malloc(0x1000);
-
-    EXPECT_TRUE(addr1 == addr2);
-    g_mm->clear();
+    EXPECT_FALSE(pool.contains(0));
+    EXPECT_FALSE(pool.contains(99));
+    EXPECT_FALSE(pool.contains(228));
+    EXPECT_FALSE(pool.contains(500));
 }
 
 void
-memory_manager_ut::test_memory_manager_free_page_twice()
+memory_manager_ut::test_memory_manager_contains()
 {
-    auto addr1 = g_mm->malloc(0x1000);
+    mem_pool<128, 3> pool(100);
 
-    g_mm->free(addr1);
-    g_mm->free(addr1);
-
-    g_mm->clear();
+    EXPECT_TRUE(pool.contains(100));
+    EXPECT_TRUE(pool.contains(227));
 }
 
 void
-memory_manager_ut::test_memory_manager_malloc_page_all_of_memory()
+memory_manager_ut::test_memory_manager_malloc_out_of_memory()
 {
-    std::vector<void *> addrs;
-
-    for (auto i = 0U; i < MAX_PAGE_POOL - 1; i++)
-        addrs.push_back(g_mm->malloc(0x1000));
-
-    auto fill_mem_pool = g_mm->malloc(0x1000);
-    auto mem_pool_full = g_mm->malloc(0x1000);
-
-    EXPECT_TRUE(fill_mem_pool != nullptr);
-    EXPECT_TRUE(mem_pool_full == nullptr);
-
-    g_mm->free(fill_mem_pool);
-    g_mm->free(mem_pool_full);
-
-    for (const auto &addr : addrs)
-        g_mm->free(addr);
-
-    for (auto i = 0U; i < MAX_PAGE_POOL - 1; i++)
-        addrs[i] = g_mm->malloc(0x1000);
-
-    fill_mem_pool = g_mm->malloc(0x1000);
-    mem_pool_full = g_mm->malloc(0x1000);
-
-    EXPECT_TRUE(fill_mem_pool != nullptr);
-    EXPECT_TRUE(mem_pool_full == nullptr);
-
-    g_mm->clear();
+    EXPECT_TRUE(g_mm->alloc(0xFFFFFFFFFFFFFF00) == nullptr);
 }
 
 void
-memory_manager_ut::test_memory_manager_malloc_page_all_of_memory_one_block()
+memory_manager_ut::test_memory_manager_malloc_heap()
 {
-    EXPECT_TRUE(g_mm->malloc(MAX_PAGE_POOL * 0x1000) != nullptr);
-    g_mm->clear();
+    auto ptr = g_mm->alloc(MAX_CACHE_LINE_SIZE);
+
+    EXPECT_TRUE(ptr != nullptr);
+    EXPECT_TRUE(g_mm->size(ptr) == MAX_CACHE_LINE_SIZE);
+
+    g_mm->free(ptr);
 }
 
 void
-memory_manager_ut::test_memory_manager_malloc_page_all_memory_fragmented()
+memory_manager_ut::test_memory_manager_malloc_page()
 {
-    std::vector<void *> addrs;
+    auto ptr = g_mm->alloc(MAX_PAGE_SIZE);
 
-    for (auto i = 0U; i < MAX_PAGE_POOL; i++)
-        addrs.push_back(g_mm->malloc(0x1000));
+    EXPECT_TRUE(ptr != nullptr);
+    EXPECT_TRUE(g_mm->size(ptr) == MAX_PAGE_SIZE);
 
-    for (const auto &addr : addrs)
-        g_mm->free(addr);
-
-    EXPECT_TRUE(g_mm->malloc(MAX_PAGE_POOL * 0x1000) != nullptr);
-
-    g_mm->clear();
-}
-
-void
-memory_manager_ut::test_memory_manager_malloc_page_too_much_memory_one_block()
-{
-    EXPECT_TRUE(g_mm->malloc((MAX_PAGE_POOL + 1) * 0x1000) == nullptr);
-    g_mm->clear();
-}
-
-void
-memory_manager_ut::test_memory_manager_malloc_page_sparse_fragments()
-{
-    void *addr1 = nullptr;
-    void *addr2 = nullptr;
-    void *addr3 = nullptr;
-    void *addr4 = nullptr;
-
-    g_mm->malloc(0x1000);
-    addr1 = g_mm->malloc(0x1000);
-    g_mm->malloc(0x1000);
-    addr2 = g_mm->malloc(0x1000);
-    g_mm->malloc(0x1000);
-    g_mm->free(addr1);
-    g_mm->free(addr2);
-    addr3 = g_mm->malloc(0x1000);
-    addr4 = g_mm->malloc(0x1000);
-
-    EXPECT_TRUE(addr3 == addr1);
-    EXPECT_TRUE(addr4 == addr2);
-    g_mm->clear();
-
-    g_mm->malloc(0x1000);
-    addr1 = g_mm->malloc(0x2000);
-    g_mm->malloc(0x1000);
-    addr2 = g_mm->malloc(0x1000);
-    g_mm->malloc(0x1000);
-    g_mm->free(addr1);
-    g_mm->free(addr2);
-    addr3 = g_mm->malloc(0x2000);
-    addr4 = g_mm->malloc(0x1000);
-
-    EXPECT_TRUE(addr3 == addr1);
-    EXPECT_TRUE(addr4 == addr2);
-    g_mm->clear();
-
-    g_mm->malloc(0x1000);
-    addr1 = g_mm->malloc(0x2000);
-    g_mm->malloc(0x1000);
-    addr2 = g_mm->malloc(0x1000);
-    g_mm->malloc(0x1000);
-    g_mm->free(addr1);
-    g_mm->free(addr2);
-    addr3 = g_mm->malloc(0x1000);
-    addr4 = g_mm->malloc(0x2000);
-
-    EXPECT_TRUE(addr3 == addr1);
-    EXPECT_TRUE(addr4 != addr1);
-    g_mm->clear();
-
-    g_mm->malloc(0x1000);
-    addr1 = g_mm->malloc(0x1000);
-    g_mm->malloc(0x1000);
-    addr2 = g_mm->malloc(0x2000);
-    g_mm->malloc(0x1000);
-    g_mm->free(addr1);
-    g_mm->free(addr2);
-    addr3 = g_mm->malloc(0x2000);
-    addr4 = g_mm->malloc(0x1000);
-
-    EXPECT_TRUE(addr3 == addr2);
-    EXPECT_TRUE(addr4 == addr1);
-    g_mm->clear();
-
-    g_mm->malloc(0x1000);
-    addr1 = g_mm->malloc(0x1000);
-    g_mm->malloc(0x1000);
-    addr2 = g_mm->malloc(0x2000);
-    g_mm->malloc(0x1000);
-    g_mm->free(addr1);
-    g_mm->free(addr2);
-    addr3 = g_mm->malloc(0x1000);
-    addr4 = g_mm->malloc(0x2000);
-
-    EXPECT_TRUE(addr3 == addr1);
-    EXPECT_TRUE(addr4 == addr2);
-    g_mm->clear();
-}
-
-void
-memory_manager_ut::test_memory_manager_malloc_page_resize_fragments()
-{
-    void *addr1 = nullptr;
-    void *addr2 = nullptr;
-    void *addr3 = nullptr;
-    void *addr4 = nullptr;
-    void *addr5 = nullptr;
-    void *addr6 = nullptr;
-
-    g_mm->malloc(0x1000);
-    addr1 = g_mm->malloc(0x1000);
-    addr2 = g_mm->malloc(0x3000);
-    g_mm->free(addr1);
-    g_mm->free(addr2);
-    addr3 = g_mm->malloc(0x2000);
-    addr4 = g_mm->malloc(0x2000);
-    g_mm->malloc(0x1000);
-    g_mm->free(addr3);
-    g_mm->free(addr4);
-    addr5 = g_mm->malloc(0x1000);
-    addr6 = g_mm->malloc(0x3000);
-
-    EXPECT_TRUE(addr5 == addr1);
-    EXPECT_TRUE(addr6 == addr2);
-    EXPECT_TRUE(addr5 == addr3);
-    g_mm->clear();
-
-    g_mm->malloc(0x1000);
-    addr1 = g_mm->malloc(0x3000);
-    addr2 = g_mm->malloc(0x1000);
-    g_mm->free(addr1);
-    g_mm->free(addr2);
-    addr3 = g_mm->malloc(0x2000);
-    addr4 = g_mm->malloc(0x2000);
-    g_mm->malloc(0x1000);
-    g_mm->free(addr3);
-    g_mm->free(addr4);
-    addr5 = g_mm->malloc(0x3000);
-    addr6 = g_mm->malloc(0x1000);
-
-    EXPECT_TRUE(addr5 == addr1);
-    EXPECT_TRUE(addr6 == addr2);
-    EXPECT_TRUE(addr5 == addr3);
-    g_mm->clear();
-
-    g_mm->malloc(0x1000);
-    addr1 = g_mm->malloc(0x2000);
-    addr2 = g_mm->malloc(0x2000);
-    g_mm->free(addr1);
-    g_mm->free(addr2);
-    addr3 = g_mm->malloc(0x1000);
-    addr4 = g_mm->malloc(0x3000);
-    g_mm->malloc(0x1000);
-    g_mm->free(addr3);
-    g_mm->free(addr4);
-    addr5 = g_mm->malloc(0x2000);
-    addr6 = g_mm->malloc(0x2000);
-
-    EXPECT_TRUE(addr5 == addr1);
-    EXPECT_TRUE(addr6 == addr2);
-    EXPECT_TRUE(addr5 == addr3);
-    g_mm->clear();
-
-    g_mm->malloc(0x1000);
-    addr1 = g_mm->malloc(0x2000);
-    addr2 = g_mm->malloc(0x2000);
-    g_mm->free(addr1);
-    g_mm->free(addr2);
-    addr3 = g_mm->malloc(0x3000);
-    addr4 = g_mm->malloc(0x1000);
-    g_mm->malloc(0x1000);
-    g_mm->free(addr3);
-    g_mm->free(addr4);
-    addr5 = g_mm->malloc(0x2000);
-    addr6 = g_mm->malloc(0x2000);
-
-    EXPECT_TRUE(addr5 == addr1);
-    EXPECT_TRUE(addr6 == addr2);
-    EXPECT_TRUE(addr5 == addr3);
-    g_mm->clear();
-}
-
-void
-memory_manager_ut::test_memory_manager_malloc_page_alignment()
-{
-    EXPECT_TRUE((reinterpret_cast<uintptr_t>(g_mm->malloc(0x1000)) & (MAX_PAGE_SIZE - 1)) == 0);
-    EXPECT_TRUE((reinterpret_cast<uintptr_t>(g_mm->malloc(0x2000)) & (MAX_PAGE_SIZE - 1)) == 0);
-    EXPECT_TRUE((reinterpret_cast<uintptr_t>(g_mm->malloc(0x3000)) & (MAX_PAGE_SIZE - 1)) == 0);
-    EXPECT_TRUE((reinterpret_cast<uintptr_t>(g_mm->malloc(0x4000)) & (MAX_PAGE_SIZE - 1)) == 0);
+    g_mm->free(ptr);
 }
 
 void

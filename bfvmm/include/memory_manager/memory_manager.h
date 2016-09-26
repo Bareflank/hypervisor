@@ -23,16 +23,15 @@
 #define MEMORY_MANAGER_H
 
 #include <map>
-#include <stddef.h>
 #include <stdint.h>
 #include <memory.h>
 
 /// The memory manager has two specific functions:
-/// - malloc / free memory
+/// - alloc / free memory
 /// - virt_to_phys / phys_to_virt conversions
 ///
-/// To support malloc / free, the memory manager is given both heap memory
-/// and a page pool. If a malloc is requested whose size is a multiple of
+/// To support alloc / free, the memory manager is given both heap memory
+/// and a page pool. If a alloc is requested whose size is a multiple of
 /// MAX_PAGE_SIZE, the page pool is used. All other requests come from the
 /// heap.
 ///
@@ -76,8 +75,8 @@ public:
     /// @note that this function generally should not be used directly, but
     /// instead new / delete should be used.
     ///
-    /// @note when executing std::make_shared, the malloc is likely to be
-    /// larger than the requested amount, as the reference counter is malloc'd
+    /// @note when executing std::make_shared, the alloc is likely to be
+    /// larger than the requested amount, as the reference counter is alloc'd
     /// as well. If page alignment is required, first new, and pass the
     /// resulting pointer to std::shared_ptr.
     ///
@@ -85,23 +84,33 @@ public:
     /// @return a pointer to the starting address of the memory allocated. The
     ///     pointer is page aligned if size is a multiple of MAX_PAGE_SIZE
     ///
-    virtual void *malloc(size_t size) noexcept;
+    virtual void *alloc(size_t size) noexcept;
 
     /// Free
     ///
-    /// Deallocates a block of memory previously allocated by a call to malloc,
+    /// Deallocates a block of memory previously allocated by a call to alloc,
     /// making it available again for further allocations. If ptr does not
     /// point to memory that was previously allocated, the call is ignored.
     /// If ptr == nullptr, the call is also ignored. If ptr points to an offset into
-    /// memory that was previously allocated by a call to malloc, this function
+    /// memory that was previously allocated by a call to alloc, this function
     /// will free all of the memory allocated.
     ///
     /// Note that this function generally should not be used directly, but
     /// instead new / delete should be used.
     ///
-    /// @param ptr a pointer to memory previously allocated using malloc.
+    /// @param ptr a pointer to memory previously allocated using alloc.
     ///
     virtual void free(void *ptr) noexcept;
+
+    /// Size
+    ///
+    /// Returns the size of previously allocated memory. If the provided
+    /// pointer does not point to memory that has been allocated or is
+    /// outside the bounds of the memory pool, this function returns 0.
+    ///
+    /// @param ptr a pointer to memory previously allocated using alloc.
+    ///
+    virtual uintptr_t size(void *ptr) const noexcept;
 
     /// Virtual Address To Physical Address
     ///
@@ -235,23 +244,13 @@ private:
 
     friend class memory_manager_ut;
 
-    virtual void *malloc_heap(int64_t size) noexcept;
-    virtual void *malloc_page(int64_t size) noexcept;
-    virtual void free_heap(void *ptr) noexcept;
-    virtual void free_page(void *ptr) noexcept;
-
-    virtual void clear() noexcept;
-
 private:
 
     /// Default Constructor
     ///
-    memory_manager() noexcept;
+    memory_manager() noexcept = default;
 
 private:
-
-    int64_t m_heap_index;
-    int64_t m_page_index;
 
     std::map<uintptr_t, memory_descriptor> m_virt_to_phys_map;
     std::map<uintptr_t, memory_descriptor> m_phys_to_virt_map;

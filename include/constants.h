@@ -87,10 +87,10 @@
  * anything that uses a std::container uses this heap so it does need to
  * have some size to it. Pages do not come from this pool.
  *
- * Note: defined in bytes (defaults to 8MB)
+ * Note: defined in bytes
  */
 #ifndef MAX_HEAP_POOL
-#define MAX_HEAP_POOL (256ULL * MAX_PAGE_SIZE)
+#define MAX_HEAP_POOL (256ULL * MAX_PAGE_SIZE * MAX_CACHE_LINE_SIZE)
 #endif
 
 /*
@@ -102,7 +102,7 @@
  * Note: defined in bytes (defaults to 8MB)
  */
 #ifndef MAX_PAGE_POOL
-#define MAX_PAGE_POOL (256ULL)
+#define MAX_PAGE_POOL (256ULL * MAX_PAGE_SIZE)
 #endif
 
 /*
