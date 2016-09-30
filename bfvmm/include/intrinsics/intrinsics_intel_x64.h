@@ -589,9 +589,9 @@ public:
 
 // VPID and EPT Capabilities
 // intel's software developer's manual, volume 3, appendix A.10
-#define IA32_VMX_EPT_VPID_CAP_UC                                  (1 << 8)
-#define IA32_VMX_EPT_VPID_CAP_WB                                  (1 << 14)
-#define IA32_VMX_EPT_VPID_CAP_AD                                  (1 << 21)
+#define IA32_VMX_EPT_VPID_CAP_UC                                  (1ULL << 8)
+#define IA32_VMX_EPT_VPID_CAP_WB                                  (1ULL << 14)
+#define IA32_VMX_EPT_VPID_CAP_AD                                  (1ULL << 21)
 
 // EPTP Format
 // intel's software developer's manual, volume 3, appendix 24.6.11
