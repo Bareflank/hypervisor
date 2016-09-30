@@ -4,9 +4,9 @@
 ### Added
 - New GDT class that provides a cleaner abstraction of the GDT
 - New IDT class that provides a cleaner abstraction of the IDT
-- New Page Table class that provides a cleaner abstraction of the Page Tables 
+- New Page Table class that provides a cleaner abstraction of the Page Tables
 - New VMCS state classes that organize the creation of the VMM's state, as
-  well as the Host VM's state. 
+  well as the Host VM's state.
 - New state save logic for the exit handler to support multi-core. The state
   save area is placed in "GS" allowing the exit handler to access CPU specific
   state logic in a reentrant, thread-safe manner without the need for lookups
@@ -32,6 +32,8 @@
 - Coveralls support
 - Coverity support
 - AppVeyor support
+- Clang Tidy 3.8 support
+- Clang / LLVM 3.8 and 3.9 support
 
 ### Changed
 - The VMCS state classes are now shared by pointer (i.e. shared_ptr)
@@ -40,7 +42,7 @@
   compilation, but also to provide support for docker. With this new system,
   it is possible to stand up the hypervisor in less than 10 minutes from start
   to finish, while also maintaining multiple build systems for testing
-- A lot of source code has been changed to address findings from Coverity 
+- A lot of source code has been changed to address findings from Coverity
   and Clang-Tidy
 
 ### Fixed
@@ -50,7 +52,7 @@
 - Some of the macros in the intrinsics file were causing unsigned integers
   because they hit touched bit 31. The macros have been expanded to 64 bits
   to prevent this
-- CPU-z support has been added via a Read MSR quirk. 
+- CPU-z support has been added via a Read MSR quirk.
 
 ### Removed
 - The old GDT logic that was in the intrinsics_x64 has been removed. Please

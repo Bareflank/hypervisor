@@ -78,17 +78,33 @@ CROSS_OUTDIR:=$(CROSS_OUTDIR)/cross
 # Exectuables
 ################################################################################
 
-NATIVE_CC:=gcc
-NATIVE_CXX:=g++
-NATIVE_ASM:=nasm
-NATIVE_LD:=g++
-NATIVE_AR:=ar
+ifeq ($(USE_LLVM_CLANG)$(shell uname -o),true Cygwin)
+	NATIVE_CC:=clang
+	NATIVE_CXX:=clang++
+	NATIVE_ASM:=nasm
+	NATIVE_LD:=clang++
+	NATIVE_AR:=ar
+else
+	NATIVE_CC:=gcc
+	NATIVE_CXX:=g++
+	NATIVE_ASM:=nasm
+	NATIVE_LD:=g++
+	NATIVE_AR:=ar
+endif
 
-CROSS_CC:=$(BUILD_ABS)/build_scripts/x86_64-bareflank-gcc
-CROSS_CXX:=$(BUILD_ABS)/build_scripts/x86_64-bareflank-g++
-CROSS_ASM:=$(BUILD_ABS)/build_scripts/x86_64-bareflank-nasm
-CROSS_LD:=$(BUILD_ABS)/build_scripts/x86_64-bareflank-g++
-CROSS_AR:=$(BUILD_ABS)/build_scripts/x86_64-bareflank-ar
+ifeq ($(USE_LLVM_CLANG), true)
+	CROSS_CC:=$(BUILD_ABS)/build_scripts/x86_64-bareflank-clang
+	CROSS_CXX:=$(BUILD_ABS)/build_scripts/x86_64-bareflank-clang++
+	CROSS_ASM:=$(BUILD_ABS)/build_scripts/x86_64-bareflank-nasm
+	CROSS_LD:=$(BUILD_ABS)/build_scripts/x86_64-bareflank-clang++
+	CROSS_AR:=$(BUILD_ABS)/build_scripts/x86_64-bareflank-ar
+else
+	CROSS_CC:=$(BUILD_ABS)/build_scripts/x86_64-bareflank-gcc
+	CROSS_CXX:=$(BUILD_ABS)/build_scripts/x86_64-bareflank-g++
+	CROSS_ASM:=$(BUILD_ABS)/build_scripts/x86_64-bareflank-nasm
+	CROSS_LD:=$(BUILD_ABS)/build_scripts/x86_64-bareflank-g++
+	CROSS_AR:=$(BUILD_ABS)/build_scripts/x86_64-bareflank-ar
+endif
 
 RM:=rm -rf
 MD:=mkdir -p
@@ -99,21 +115,22 @@ RMDIR:=rmdir --ignore-fail-on-non-empty -p
 # Default CC Flags
 ################################################################################
 
-NATIVE_CCFLAGS+=-fpic
-NATIVE_CCFLAGS+=-std=c99
+# Most of the compiler flags are already provided in the configure script.
+# We add warnings here to prevent warnings from being compiled into some of
+# our dependecies like Libc++ which would break if all of these warnings
+# were turned on. For more compiler flags, please see the configure script.
+# Also note that the naming of the flags variables is done in such a way that
+# alows uses to add flags to their bash environments prior to compilation
+# to customize the builds system, while also suppliying these flags to our
+# dependencies.
+
 NATIVE_CCFLAGS+=-Wall
 NATIVE_CCFLAGS+=-Wextra
 NATIVE_CCFLAGS+=-Wpedantic
 NATIVE_CCFLAGS+=-Wshadow
 NATIVE_CCFLAGS+=-Wconversion
 NATIVE_CCFLAGS+=-Wsign-conversion
-NATIVE_CCFLAGS+=-pipe
-NATIVE_CCFLAGS+=-fexceptions
-NATIVE_CCFLAGS+=-fstack-protector-strong
-NATIVE_CCFLAGS+=-m64
-NATIVE_CCFLAGS+=-mtune=sandybridge
-NATIVE_CCFLAGS+=-march=sandybridge
-NATIVE_CCFLAGS+=-mstackrealign
+NATIVE_CCFLAGS+=$(CONFIGURED_NATIVE_CCFLAGS)
 
 ifeq ($(DYNAMIC_ANALYSIS_ENABLED), true)
 	ifneq ($(NO_ADDRESS_SANATIZE), true)
@@ -131,13 +148,11 @@ CROSS_CCFLAGS+=-Wshadow
 CROSS_CCFLAGS+=-Wcast-align
 CROSS_CCFLAGS+=-Wconversion
 CROSS_CCFLAGS+=-Wsign-conversion
-CROSS_CCFLAGS+=-pipe
 CROSS_CCFLAGS+=$(CONFIGURED_CROSS_CCFLAGS)
 
 ifeq ($(PRODUCTION),yes)
-	NATIVE_CCFLAGS+=-D_FORTIFY_SOURCE=2
-	NATIVE_CCFLAGS+=-O3
-	CROSS_CCFLAGS+=-O3
+	NATIVE_CCFLAGS+=-O3 -D_FORTIFY_SOURCE=2
+	CROSS_CCFLAGS+=-O3 -D_FORTIFY_SOURCE=2
 endif
 
 ifeq ($(COVERALLS), true)
@@ -149,12 +164,31 @@ ifneq ($(IGNORE_WARNINGS),yes)
 	CROSS_CCFLAGS+=-Werror
 endif
 
+ifeq ($(TARGET_NATIVE_COMPILED), true)
+	ifeq ($(OS), windows)
+		NATIVE_CCFLAGS+=$(WINDOWS_CCFLAGS)
+	endif
+	ifeq ($(OS), linux)
+		NATIVE_CCFLAGS+=$(LINUX_CCFLAGS)
+	endif
+	ifeq ($(OS), osx)
+		NATIVE_CCFLAGS+=$(OSX_CCFLAGS)
+	endif
+endif
+
 ################################################################################
 # Default CXX Flags
 ################################################################################
 
-NATIVE_CXXFLAGS+=-fpic
-NATIVE_CXXFLAGS+=-std=c++14
+# Most of the compiler flags are already provided in the configure script.
+# We add warnings here to prevent warnings from being compiled into some of
+# our dependecies like Libc++ which would break if all of these warnings
+# were turned on. For more compiler flags, please see the configure script.
+# Also note that the naming of the flags variables is done in such a way that
+# alows uses to add flags to their bash environments prior to compilation
+# to customize the builds system, while also suppliying these flags to our
+# dependencies.
+
 NATIVE_CXXFLAGS+=-Wall
 NATIVE_CXXFLAGS+=-Wextra
 NATIVE_CXXFLAGS+=-Wpedantic
@@ -166,13 +200,7 @@ NATIVE_CXXFLAGS+=-Wcast-align
 NATIVE_CXXFLAGS+=-Woverloaded-virtual
 NATIVE_CXXFLAGS+=-Wconversion
 NATIVE_CXXFLAGS+=-Wsign-conversion
-NATIVE_CXXFLAGS+=-pipe
-NATIVE_CXXFLAGS+=-fexceptions
-NATIVE_CXXFLAGS+=-fstack-protector-strong
-NATIVE_CXXFLAGS+=-m64
-NATIVE_CXXFLAGS+=-mtune=sandybridge
-NATIVE_CXXFLAGS+=-march=sandybridge
-NATIVE_CXXFLAGS+=-mstackrealign
+NATIVE_CXXFLAGS+=$(CONFIGURED_NATIVE_CXXFLAGS)
 
 ifeq ($(DYNAMIC_ANALYSIS_ENABLED), true)
 	ifneq ($(NO_ADDRESS_SANATIZE), true)
@@ -194,13 +222,11 @@ CROSS_CXXFLAGS+=-Wcast-align
 CROSS_CXXFLAGS+=-Woverloaded-virtual
 CROSS_CXXFLAGS+=-Wconversion
 CROSS_CXXFLAGS+=-Wsign-conversion
-CROSS_CXXFLAGS+=-pipe
 CROSS_CXXFLAGS+=$(CONFIGURED_CROSS_CXXFLAGS)
 
 ifeq ($(PRODUCTION),yes)
-	NATIVE_CXXFLAGS+=-D_FORTIFY_SOURCE=2
-	NATIVE_CXXFLAGS+=-O3
-	CROSS_CXXFLAGS+=-O3
+	NATIVE_CXXFLAGS+=-O3 -DGSL_UNENFORCED_ON_CONTRACT_VIOLATION -D_FORTIFY_SOURCE=2
+	CROSS_CXXFLAGS+=-O3 -DGSL_UNENFORCED_ON_CONTRACT_VIOLATION -D_FORTIFY_SOURCE=2
 endif
 
 ifeq ($(COVERALLS), true)
@@ -210,6 +236,18 @@ endif
 ifneq ($(IGNORE_WARNINGS),yes)
 	NATIVE_CXXFLAGS+=-Werror
 	CROSS_CXXFLAGS+=-Werror
+endif
+
+ifeq ($(TARGET_NATIVE_COMPILED), true)
+	ifeq ($(OS), windows)
+		NATIVE_CXXFLAGS+=$(WINDOWS_CXXFLAGS)
+	endif
+	ifeq ($(OS), linux)
+		NATIVE_CXXFLAGS+=$(LINUX_CXXFLAGS)
+	endif
+	ifeq ($(OS), osx)
+		NATIVE_CXXFLAGS+=$(OSX_CXXFLAGS)
+	endif
 endif
 
 ################################################################################
@@ -461,6 +499,18 @@ endif
 ################################################################################
 # Define Flags
 ################################################################################
+
+ifeq ($(TARGET_NATIVE_COMPILED), true)
+	ifeq ($(OS), windows)
+		NATIVE_DEFINES+=$(WINDOWS_DEFINES)
+	endif
+	ifeq ($(OS), linux)
+		NATIVE_DEFINES+=$(LINUX_DEFINES)
+	endif
+	ifeq ($(OS), osx)
+		NATIVE_DEFINES+=$(OSX_DEFINES)
+	endif
+endif
 
 CROSS_CCFLAGS+=$(addprefix -D, $(strip $(CROSS_DEFINES)))
 CROSS_CXXFLAGS+=$(addprefix -D, $(strip $(CROSS_DEFINES)))

@@ -39,7 +39,7 @@ mkdir -p /tmp/bareflank/
 # GCC 5.1
 # ------------------------------------------------------------------------------
 
-if [[ -z "$CROSS_COMPILER" ]] || [[ $CROSS_COMPILER == "gcc_510" ]]; then
+if [[ -z "$CROSS_COMPILER" ]] || [[ $CROSS_COMPILER == *"gcc_510"* ]]; then
 
     export PREFIX="$HOME/compilers/gcc_510/"
 
@@ -62,12 +62,13 @@ if [[ -z "$CROSS_COMPILER" ]] || [[ $CROSS_COMPILER == "gcc_510" ]]; then
 fi
 
 # ------------------------------------------------------------------------------
-# GCC 5.2
+# GCC 5.2 / Clang 3.8
 # ------------------------------------------------------------------------------
 
-if [[ -z "$CROSS_COMPILER" ]] || [[ $CROSS_COMPILER == "gcc_520" ]]; then
+if [[ -z "$CROSS_COMPILER" ]] || [[ $CROSS_COMPILER == *"gcc_520"* ]]; then
 
     export PREFIX="$HOME/compilers/gcc_520/"
+    export LLVM_RELEASE="release_38"
 
     rm -Rf $PREFIX
     mkdir -p $PREFIX
@@ -77,21 +78,22 @@ if [[ -z "$CROSS_COMPILER" ]] || [[ $CROSS_COMPILER == "gcc_520" ]]; then
     export GCC_URL="https://ftp.gnu.org/gnu/gcc/gcc-5.2.0/gcc-5.2.0.tar.bz2"
     export NASM_URL="http://www.nasm.us/pub/nasm/releasebuilds/2.12.01/nasm-2.12.01.tar.bz2"
 
+    ./tools/scripts/fetch_clang.sh
     ./tools/scripts/fetch_binutils.sh
     ./tools/scripts/fetch_gcc.sh
     ./tools/scripts/fetch_nasm.sh
 
+    ./tools/scripts/build_clang.sh
     ./tools/scripts/build_binutils.sh
     ./tools/scripts/build_gcc.sh
     ./tools/scripts/build_nasm.sh
-
 fi
 
 # ------------------------------------------------------------------------------
 # GCC 5.3
 # ------------------------------------------------------------------------------
 
-if [[ -z "$CROSS_COMPILER" ]] || [[ $CROSS_COMPILER == "gcc_530" ]]; then
+if [[ -z "$CROSS_COMPILER" ]] || [[ $CROSS_COMPILER == *"gcc_530"* ]]; then
 
     export PREFIX="$HOME/compilers/gcc_530/"
 
@@ -117,7 +119,7 @@ fi
 # GCC 5.4
 # ------------------------------------------------------------------------------
 
-if [[ -z "$CROSS_COMPILER" ]] || [[ $CROSS_COMPILER == "gcc_540" ]]; then
+if [[ -z "$CROSS_COMPILER" ]] || [[ $CROSS_COMPILER == *"gcc_540"* ]]; then
 
     export PREFIX="$HOME/compilers/gcc_540/"
 
@@ -143,7 +145,7 @@ fi
 # GCC 6.1
 # ------------------------------------------------------------------------------
 
-if [[ -z "$CROSS_COMPILER" ]] || [[ $CROSS_COMPILER == "gcc_610" ]]; then
+if [[ -z "$CROSS_COMPILER" ]] || [[ $CROSS_COMPILER == *"gcc_610"* ]]; then
 
     export PREFIX="$HOME/compilers/gcc_610/"
 
@@ -166,12 +168,13 @@ if [[ -z "$CROSS_COMPILER" ]] || [[ $CROSS_COMPILER == "gcc_610" ]]; then
 fi
 
 # ------------------------------------------------------------------------------
-# GCC 6.2
+# GCC 6.2 / Clang 3.9
 # ------------------------------------------------------------------------------
 
-if [[ -z "$CROSS_COMPILER" ]] || [[ $CROSS_COMPILER == "gcc_620" ]]; then
+if [[ -z "$CROSS_COMPILER" ]] || [[ $CROSS_COMPILER == *"gcc_620"* ]]; then
 
     export PREFIX="$HOME/compilers/gcc_620/"
+    export LLVM_RELEASE="release_39"
 
     rm -Rf $PREFIX
     mkdir -p $PREFIX
@@ -181,14 +184,15 @@ if [[ -z "$CROSS_COMPILER" ]] || [[ $CROSS_COMPILER == "gcc_620" ]]; then
     export GCC_URL="https://ftp.gnu.org/gnu/gcc/gcc-6.2.0/gcc-6.2.0.tar.bz2"
     export NASM_URL="http://www.nasm.us/pub/nasm/releasebuilds/2.12.02/nasm-2.12.02.tar.bz2"
 
+    ./tools/scripts/fetch_clang.sh
     ./tools/scripts/fetch_binutils.sh
     ./tools/scripts/fetch_gcc.sh
     ./tools/scripts/fetch_nasm.sh
 
+    ./tools/scripts/build_clang.sh
     ./tools/scripts/build_binutils.sh
     ./tools/scripts/build_gcc.sh
     ./tools/scripts/build_nasm.sh
-
 fi
 
 # ------------------------------------------------------------------------------

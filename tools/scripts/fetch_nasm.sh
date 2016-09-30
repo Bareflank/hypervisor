@@ -29,7 +29,7 @@ rm -Rf src_nasm
 n=0
 until [ $n -ge 5 ]
 do
-    wget $NASM_URL && break
+    wget -nv $NASM_URL && break
     n=$[$n+1]
     sleep 15
 done

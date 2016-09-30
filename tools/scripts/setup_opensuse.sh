@@ -74,6 +74,7 @@ install_common_packages() {
     sudo zypper install -y cmake
 
     sudo zypper install -y nasm
+    sudo zypper install -y clang
     sudo zypper install -y texinfo
     sudo zypper install -y glibc-devel-static
     sudo zypper install -y kernel-devel
@@ -104,9 +105,13 @@ while [[ $# -ne 0 ]]; do
         local="true"
     fi
 
-    if [[ $1 == "-g" ]] || [[ $1 == "--compiler" ]]; then
+    if [[ $1 == "--compiler" ]]; then
         shift
-        compiler="-g $1"
+        compiler="--compiler $1"
+    fi
+
+    if [[ $1 == "--use_llvm_clang" ]]; then
+        use_llvm_clang="--use_llvm_clang"
     fi
 
     if [[ $1 == "-n" ]] || [[ $1 == "--no-configure" ]]; then
@@ -151,7 +156,7 @@ if [[ ! $noconfigure == "true" ]]; then
         $hypervisor_dir/configure.sh
         popd
     else
-        ./configure.sh $compiler
+        ./configure.sh $compiler $use_llvm_clang
     fi
 fi
 

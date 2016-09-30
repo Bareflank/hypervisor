@@ -20,7 +20,7 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-version=3
+version=5
 
 # ------------------------------------------------------------------------------
 # Colors
@@ -34,9 +34,45 @@ CE='\033[0m'
 # Flags
 # ------------------------------------------------------------------------------
 
-CROSS_COMMONFLAGS="-fpic -ffreestanding -mno-red-zone -fexceptions -fstack-protector-strong -D_FORTIFY_SOURCE=2 -mtune=sandybridge -march=sandybridge -mstackrealign -D_HAVE_LONG_DOUBLE -D_LDBL_EQ_DBL -D_POSIX_TIMERS -U__STRICT_ANSI__ -DMALLOC_PROVIDED -DCLOCK_MONOTONIC"
-CROSS_CCFLAGS="-std=c99 $CROSS_COMMONFLAGS"
-CROSS_CXXFLAGS="-std=c++14 -fno-use-cxa-atexit -fno-threadsafe-statics $CROSS_COMMONFLAGS"
+COMMON_FLAGS=""
+COMMON_FLAGS="$COMMON_FLAGS -fpic"
+COMMON_FLAGS="$COMMON_FLAGS -fexceptions"
+COMMON_FLAGS="$COMMON_FLAGS -fstack-protector-strong"
+COMMON_FLAGS="$COMMON_FLAGS -mstackrealign"
+COMMON_FLAGS="$COMMON_FLAGS -mmmx"
+COMMON_FLAGS="$COMMON_FLAGS -msse"
+COMMON_FLAGS="$COMMON_FLAGS -msse2"
+COMMON_FLAGS="$COMMON_FLAGS -msse3"
+COMMON_FLAGS="$COMMON_FLAGS -mssse3"
+COMMON_FLAGS="$COMMON_FLAGS -msse4.1"
+COMMON_FLAGS="$COMMON_FLAGS -msse4.2"
+COMMON_FLAGS="$COMMON_FLAGS -msse4"
+COMMON_FLAGS="$COMMON_FLAGS -mavx"
+COMMON_FLAGS="$COMMON_FLAGS -maes"
+
+CROSS_COMMON_FLAGS="$COMMON_FLAGS"
+CROSS_COMMON_FLAGS="$CROSS_COMMON_FLAGS -ffreestanding"
+CROSS_COMMON_FLAGS="$CROSS_COMMON_FLAGS -mno-red-zone"
+CROSS_COMMON_FLAGS="$CROSS_COMMON_FLAGS -D_HAVE_LONG_DOUBLE"
+CROSS_COMMON_FLAGS="$CROSS_COMMON_FLAGS -D_LDBL_EQ_DBL"
+CROSS_COMMON_FLAGS="$CROSS_COMMON_FLAGS -D_POSIX_TIMERS"
+CROSS_COMMON_FLAGS="$CROSS_COMMON_FLAGS -U__STRICT_ANSI__"
+CROSS_COMMON_FLAGS="$CROSS_COMMON_FLAGS -DMALLOC_PROVIDED"
+CROSS_COMMON_FLAGS="$CROSS_COMMON_FLAGS -DCLOCK_MONOTONIC"
+
+CROSS_CCFLAGS="$CROSS_COMMON_FLAGS"
+CROSS_CCFLAGS="$CROSS_CCFLAGS -std=c99"
+
+CROSS_CXXFLAGS="$CROSS_COMMON_FLAGS"
+CROSS_CXXFLAGS="$CROSS_CXXFLAGS -std=c++14"
+CROSS_CXXFLAGS="$CROSS_CXXFLAGS -fno-use-cxa-atexit"
+CROSS_CXXFLAGS="$CROSS_CXXFLAGS -fno-threadsafe-statics"
+
+NATIVE_CCFLAGS="$COMMON_FLAGS"
+NATIVE_CCFLAGS="$NATIVE_CCFLAGS -std=c99"
+
+NATIVE_CXXFLAGS="$COMMON_FLAGS"
+NATIVE_CXXFLAGS="$NATIVE_CXXFLAGS -std=c++14"
 
 # ------------------------------------------------------------------------------
 # Environment
@@ -109,6 +145,7 @@ check_env() {
         echo "export LLVM_RELEASE=\"release_39\"" >> $BUILD_ABS/env.sh
         echo "export module_file=\"$module_file\"" >> $BUILD_ABS/env.sh
         echo "export compiler=\"$compiler\"" >> $BUILD_ABS/env.sh
+        echo "export USE_LLVM_CLANG=\"$USE_LLVM_CLANG\"" >> $BUILD_ABS/env.sh
         echo "export CFLAGS=\"$CROSS_CCFLAGS\"" >> $BUILD_ABS/env.sh
         echo "export CXXFLAGS=\"$CROSS_CXXFLAGS\"" >> $BUILD_ABS/env.sh
         printf "export extensions=\"" >> $BUILD_ABS/env.sh
@@ -139,10 +176,6 @@ setup_environment_variables() {
     if [[ -z "$module_file" ]]; then
         module_file=$HYPER_ABS/bfm/bin/native/vmm.modules
     fi
-
-    if [[ -z "$compiler" ]]; then
-        compiler=gcc_520
-    fi
 }
 
 # ------------------------------------------------------------------------------
@@ -160,7 +193,8 @@ option_help() {
     echo -e "       -r, --update_makefiles           updates makefiles only"
     echo -e "       -m, --module_file <filename>     module_file to use"
     echo -e "       -e, --extension <dirname>        directory of extension"
-    echo -e "       -g, --compiler <dirname>         directory of cross compiler"
+    echo -e "           --compiler <dirname>         directory of cross compiler"
+    echo -e "           --use_llvm_clang             use LLVM / Clang where possible"
     echo -e ""
 }
 
@@ -398,8 +432,11 @@ copy_makefile() {
     echo -e "BUILD_ABS:=$BUILD_ABS" >> $1/Makefile.tmp
     echo -e "HYPER_REL:=$2" >> $1/Makefile.tmp
     echo -e "BUILD_REL:=$1" >> $1/Makefile.tmp
+    echo -e "USE_LLVM_CLANG:=$USE_LLVM_CLANG" >> $1/Makefile.tmp
     echo -e "CONFIGURED_CROSS_CCFLAGS:=$CROSS_CCFLAGS" >> $1/Makefile.tmp
     echo -e "CONFIGURED_CROSS_CXXFLAGS:=$CROSS_CXXFLAGS" >> $1/Makefile.tmp
+    echo -e "CONFIGURED_NATIVE_CCFLAGS:=$NATIVE_CCFLAGS" >> $1/Makefile.tmp
+    echo -e "CONFIGURED_NATIVE_CXXFLAGS:=$NATIVE_CXXFLAGS" >> $1/Makefile.tmp
     echo -e "MAKEFILE_ABS:=\$(dir \$(abspath \$(lastword \$(MAKEFILE_LIST))))" >> $1/Makefile.tmp
     echo -e "ifneq (\$(dir \$(BUILD_REL)/), \$(MAKEFILE_ABS))" >> $1/Makefile.tmp
     echo -e "    \$(error Build system has moved which is not supported!!!)" >> $1/Makefile.tmp
@@ -551,6 +588,16 @@ create_wrapper_links () {
         ln -s $BUILD_ABS/build_scripts/bareflank_gcc_wrapper.sh $BUILD_ABS/build_scripts/x86_64-bareflank-g++
     fi
 
+    if [[ ! -f "$BUILD_ABS/build_scripts/x86_64-bareflank-clang" ]]; then
+        echo -e "linking compiler script:$CB x86_64-bareflank-clang$CE"
+        ln -s $BUILD_ABS/build_scripts/bareflank_gcc_wrapper.sh $BUILD_ABS/build_scripts/x86_64-bareflank-clang
+    fi
+
+    if [[ ! -f "$BUILD_ABS/build_scripts/x86_64-bareflank-clang++" ]]; then
+        echo -e "linking compiler script:$CB x86_64-bareflank-clang++$CE"
+        ln -s $BUILD_ABS/build_scripts/bareflank_gcc_wrapper.sh $BUILD_ABS/build_scripts/x86_64-bareflank-clang++
+    fi
+
     if [[ ! -f "$BUILD_ABS/build_scripts/x86_64-bareflank-ar" ]]; then
         echo -e "linking compiler script:$CB x86_64-bareflank-ar$CE"
         ln -s $BUILD_ABS/build_scripts/bareflank_gcc_wrapper.sh $BUILD_ABS/build_scripts/x86_64-bareflank-ar
@@ -629,6 +676,8 @@ create_root_makefile() {
 # Filter Arguments
 # ------------------------------------------------------------------------------
 
+compiler="gcc_520"
+
 i=0
 extensions[$i]=
 
@@ -670,6 +719,10 @@ while [[ $# -ne 0 ]]; do
         this_is_make="true"
     fi
 
+    if [[ $1 == "--use_llvm_clang" ]]; then
+        USE_LLVM_CLANG="true"
+    fi
+
     if [[ $1 == "-m" ]] || [[ $1 == "--module_file" ]]; then
         shift
 
@@ -681,7 +734,7 @@ while [[ $# -ne 0 ]]; do
         module_file=`realpath $1`
     fi
 
-    if [[ $1 == "-g" ]] || [[ $1 == "--compiler" ]]; then
+    if [[ $1 == "--compiler" ]]; then
         shift
         compiler=$1
     fi
@@ -701,5 +754,10 @@ while [[ $# -ne 0 ]]; do
     shift
 
 done
+
+if [[ $USE_LLVM_CLANG == "true" ]] && [[ $compiler != "gcc_520" ]] && [[ $compiler != "gcc_620" ]]; then
+    echo "ERROR: Clang is only supported with GCC 5.2 and GCC 6.2"
+    exit 1
+fi
 
 option_run

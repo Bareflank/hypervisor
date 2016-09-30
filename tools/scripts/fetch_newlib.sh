@@ -27,7 +27,7 @@ pushd $BUILD_ABS
 n=0
 until [ $n -ge 5 ]
 do
-    wget ftp://sourceware.org/pub/newlib/newlib-2.3.0.20160104.tar.gz && break
+    wget -nv ftp://sourceware.org/pub/newlib/newlib-2.3.0.20160104.tar.gz && break
     n=$[$n+1]
     sleep 15
 done

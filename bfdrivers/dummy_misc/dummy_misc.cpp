@@ -94,3 +94,10 @@ __cxa_begin_catch(void)
 extern "C" void
 __gxx_personality_v0(void)
 {  }
+
+extern "C" int
+atexit(void (*function)(void))
+{
+    (void) function;
+    return 0;
+}

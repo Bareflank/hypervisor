@@ -29,7 +29,7 @@ rm -Rf src_binutils
 n=0
 until [ $n -ge 5 ]
 do
-    wget $BINUTILS_URL && break
+    wget -nv $BINUTILS_URL && break
     n=$[$n+1]
     sleep 15
 done

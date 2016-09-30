@@ -212,3 +212,12 @@ register_eh_frame(void *addr, uint64_t size) noexcept
 
     return REGISTER_EH_FRAME_SUCCESS;
 }
+
+extern "C" int
+___xpg_strerror_r(int errnum, char *buf, size_t buflen)
+{
+    (void) errnum;
+
+    __builtin_memset(buf, 0, buflen);
+    return 0;
+}

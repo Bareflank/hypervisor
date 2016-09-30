@@ -65,22 +65,22 @@ execute_entry:
     mov r15, rcx
 %endif
 
-%ifndef UNITTEST
-    mov rcx, 0xC0000100
-    rdmsr
-    shl rdx, 32
-    or rax, rdx
-    mov r12, rax
+; %ifndef UNITTEST
+;     mov rcx, 0xC0000100
+;     rdmsr
+;     shl rdx, 32
+;     or rax, rdx
+;     mov r12, rax
 
-    mov rax, thread_storage
-    mov rdx, thread_storage
-    shr rdx, 32
-    mov rcx, 0xC0000100
-    wrmsr
+;     mov rax, thread_storage
+;     mov rdx, thread_storage
+;     shr rdx, 32
+;     mov rcx, 0xC0000100
+;     wrmsr
 
-    mov rax, thread_storage
-    mov [rax], rax
-%endif
+;     mov rax, thread_storage
+;     mov [rax], rax
+; %endif
 
     and rsp, 0xFFFFFFFFFFFFFFE0
 
@@ -163,13 +163,13 @@ execute_entry:
     vmovdqa [rsp], ymm0
     add rsp, 0x20
 
-%ifndef UNITTEST
-    mov rax, r12
-    mov rdx, r12
-    shr rdx, 32
-    mov rcx, 0xC0000100
-    wrmsr
-%endif
+; %ifndef UNITTEST
+;     mov rax, r12
+;     mov rdx, r12
+;     shr rdx, 32
+;     mov rcx, 0xC0000100
+;     wrmsr
+; %endif
 
     mov rax, r11
     leave

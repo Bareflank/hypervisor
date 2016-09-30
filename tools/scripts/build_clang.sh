@@ -20,16 +20,17 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-%ENV_SOURCE%
+rm -Rf /tmp/bareflank/build_clang
+mkdir -p /tmp/bareflank/build_clang
 
-pushd $BUILD_ABS
+pushd /tmp/bareflank/build_clang
 
-n=0
-until [ $n -ge 5 ]
-do
-    git clone --depth 1 -b $LLVM_RELEASE http://llvm.org/git/llvm source_llvm && break
-    n=$[$n+1]
-    sleep 15
-done
+cmake -DCMAKE_BUILD_TYPE:STRING=Release -DLLVM_TARGETS_TO_BUILD="X86" -DCMAKE_INSTALL_PREFIX=$PREFIX ../source_llvm/
+
+make -j2
+make install
 
 popd
+
+
+

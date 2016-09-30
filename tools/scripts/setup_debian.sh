@@ -80,6 +80,7 @@ install_common_packages() {
     sudo apt-get install --yes flex
     sudo apt-get install --yes bison
     sudo apt-get install --yes nasm
+    sudo apt-get install --yes clang
     sudo apt-get install --yes texinfo
     sudo apt-get install --yes cmake
     sudo DEBIAN_FRONTEND=noninteractive apt-get install --yes -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" docker-engine
@@ -105,9 +106,13 @@ while [[ $# -ne 0 ]]; do
         local="true"
     fi
 
-    if [[ $1 == "-g" ]] || [[ $1 == "--compiler" ]]; then
+    if [[ $1 == "--compiler" ]]; then
         shift
-        compiler="-g $1"
+        compiler="--compiler $1"
+    fi
+
+    if [[ $1 == "--use_llvm_clang" ]]; then
+        use_llvm_clang="--use_llvm_clang"
     fi
 
     if [[ $1 == "-n" ]] || [[ $1 == "--no-configure" ]]; then
@@ -154,7 +159,7 @@ if [[ ! $noconfigure == "true" ]]; then
         $hypervisor_dir/configure
         popd
     else
-        ./configure $compiler
+        ./configure $compiler $use_llvm_clang
     fi
 fi
 

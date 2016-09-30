@@ -58,12 +58,12 @@ option_help() {
 # ------------------------------------------------------------------------------
 
 install_common_packages() {
-    setup-x86_64.exe -q --wait -P wget,make,gcc-core,gcc-g++,diffutils,libgmp-devel,libmpfr-devel,libmpc-devel,flex,bison,nasm,texinfo,unzip,git-completion,bash-completion,patch,ncurses,libncurses-devel
+    setup-x86_64.exe -q --wait -P wget,make,gcc-core,gcc-g++,diffutils,libgmp-devel,libmpfr-devel,libmpc-devel,flex,bison,nasm,texinfo,unzip,git-completion,bash-completion,patch,ncurses,libncurses-devel,clang
 }
 
 install_cmake() {
     rm -Rf cmake-*
-    wget https://cmake.org/files/v3.6/cmake-3.6.1.tar.gz
+    wget https://cmake.org/files/v3.6/cmake-3.6.2.tar.gz
     tar xf cmake-*
     pushd cmake-*
     ./configure
@@ -75,11 +75,22 @@ install_cmake() {
 
 setup_ewdk() {
     if [[ ! -d /cygdrive/c/ewdk ]]; then
-        wget https://go.microsoft.com/fwlink/p/?LinkID=699461 -O /tmp/ewdk.zip
-        unzip /tmp/ewdk.zip -d /cygdrive/c/ewdk/
+        wget -nv -O /tmp/ewdk.zip "https://go.microsoft.com/fwlink/p/?LinkID=699461"
+        unzip -qq /tmp/ewdk.zip -d /cygdrive/c/ewdk/
         chown -R $USER:SYSTEM /cygdrive/c/ewdk
-        icacls.exe `cygpath -w /cygdrive/c/ewdk` /reset /T
+        icacls.exe `cygpath -w /cygdrive/c/ewdk` /reset /T /Q
         rm -Rf /tmp/ewdk.zip
+    fi
+}
+
+setup_cross_compilers() {
+    if [[ ! -f $HOME/bareflank_windows_cross_compilers.tar.gz ]]; then
+        wget -nv -O $HOME/bareflank_windows_cross_compilers.tar.gz "http://138.68.60.235/bareflank_windows_cross_compilers.tar.gz"
+    fi
+    if [[ ! -d $HOME/compilers ]]; then
+        pushd $HOME
+        tar xf bareflank_windows_cross_compilers.tar.gz compilers
+        popd
     fi
 }
 
@@ -95,12 +106,24 @@ while [[ $# -ne 0 ]]; do
     fi
 
     if [[ $1 == "-l" ]] || [[ $1 == "--local_compilers" ]]; then
-        local="true"
+        local_compilers="true"
     fi
 
-    if [[ $1 == "-g" ]] || [[ $1 == "--compiler" ]]; then
+    if [[ $1 == "-d" ]] || [[ $1 == "--download_compilers" ]]; then
+        download_compilers="true"
+    fi
+
+    if [[ $1 == "--compiler" ]]; then
         shift
-        compiler="-g $1"
+        compiler="--compiler $1"
+    fi
+
+    if [[ $1 == "--no_ewdk" ]]; then
+        no_ewdk="true"
+    fi
+
+    if [[ $1 == "--use_llvm_clang" ]]; then
+        use_llvm_clang="--use_llvm_clang"
     fi
 
     if [[ $1 == "-n" ]] || [[ $1 == "--no-configure" ]]; then
@@ -118,6 +141,11 @@ while [[ $# -ne 0 ]]; do
 
 done
 
+if [[ ! $download_compilers == "true" ]]; then
+    echo "Docker currently not supported. Use -d to download local compilers"
+    exit 1
+fi
+
 # ------------------------------------------------------------------------------
 # Setup System
 # ------------------------------------------------------------------------------
@@ -126,13 +154,13 @@ case $(uname -r) in
 2.6.*)
     install_common_packages
     install_cmake
-    setup_ewdk
+    if [[ ! $no_ewdk == "true" ]]; then setup_ewdk; fi
     ;;
 
 2.5.*)
     install_common_packages
     install_cmake
-    setup_ewdk
+    if [[ ! $no_ewdk == "true" ]]; then setup_ewdk; fi
     ;;
 
 *)
@@ -145,9 +173,14 @@ esac
 # Setup Build Environment
 # ------------------------------------------------------------------------------
 
-if [[ ! $local == "true" ]]; then
-    echo "Docker currently not supported. Use -l to setup local compilers"
-    exit 1
+if [[ $local_compilers == "true" ]]; then
+    echo "Setting up local compilers"
+    CROSS_COMPILER=gcc_520 ./tools/scripts/create_cross_compiler.sh
+fi
+
+if [[ $download_compilers == "true" ]]; then
+    echo "Downloading local compilers"
+    setup_cross_compilers
 fi
 
 if [[ ! $noconfigure == "true" ]]; then
@@ -157,12 +190,8 @@ if [[ ! $noconfigure == "true" ]]; then
         $hypervisor_dir/configure
         popd
     else
-        ./configure $compiler
+        ./configure $compiler $use_llvm_clang
     fi
-fi
-
-if [[ $local == "true" ]]; then
-    CROSS_COMPILER=gcc_520 ./tools/scripts/create_cross_compiler.sh
 fi
 
 # ------------------------------------------------------------------------------

@@ -20,9 +20,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#include <platform.h>
+#include <ntddk.h>
 
 #include <debug.h>
+#include <platform.h>
 
 #define BF_TAG 'BFLK'
 #define BF_NX_TAG 'BFNX'
