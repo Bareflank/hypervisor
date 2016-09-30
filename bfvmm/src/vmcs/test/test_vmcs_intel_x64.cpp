@@ -27,12 +27,6 @@
 
 extern size_t g_new_throws_bad_alloc;
 
-std::map<uint32_t, uint64_t> g_msrs;
-std::map<uint64_t, uint64_t> g_vmcs_fields;
-uint8_t span[0x81] = {0};
-bool g_virt_to_phys_return_nullptr = false;
-bool g_phys_to_virt_return_nullptr = false;
-
 static void
 vmcs_promote_fail(bool state_save)
 {
@@ -45,29 +39,6 @@ vmcs_resume_fail(state_save_intel_x64 *state_save)
 {
     (void) state_save;
     return;
-}
-
-uint64_t
-read_msr(uint32_t msr)
-{
-    return g_msrs[msr];
-}
-
-bool
-vmread(uint64_t field, uint64_t *val)
-{
-    *val = g_vmcs_fields[field];
-    return true;
-}
-
-uint32_t
-cpuid_eax(uint32_t val)
-{
-    switch (val)
-    {
-        default:
-            return 0xff;
-    }
 }
 
 static uint16_t es() { return 0; }
@@ -128,38 +99,6 @@ static uint64_t ia32_sysenter_esp_msr() { return 0; }
 static uint64_t ia32_sysenter_eip_msr() { return 0; }
 static uint64_t ia32_fs_base_msr() { return 0; }
 static uint64_t ia32_gs_base_msr() { return 0; }
-
-static uintptr_t
-virtptr_to_physint(void *ptr)
-{
-    (void) ptr;
-
-    if (g_virt_to_phys_return_nullptr)
-        return 0;
-
-    return 0x0000000ABCDEF0000;
-}
-
-void *
-physint_to_virtptr(uintptr_t phys)
-{
-    (void) phys;
-
-    if (g_phys_to_virt_return_nullptr)
-        return nullptr;
-
-    return static_cast<void *>(&span);
-}
-
-void
-setup_mock(MockRepository &mocks, memory_manager *mm, intrinsics_intel_x64 *in)
-{
-    mocks.OnCall(in, intrinsics_intel_x64::read_msr).Do(read_msr);
-    mocks.OnCall(in, intrinsics_intel_x64::vmread).Do(vmread);
-    mocks.OnCall(in, intrinsics_intel_x64::cpuid_eax).With(0x80000008).Return(32);
-    mocks.OnCallFunc(memory_manager::instance).Return(mm);
-    mocks.OnCall(mm, memory_manager::physint_to_virtptr).Do(physint_to_virtptr);
-}
 
 static void
 setup_vmcs_host_control_registers_and_msrs()
