@@ -25,6 +25,7 @@
 #include <constants.h>
 #include <view_as_pointer.h>
 #include <vmcs/vmcs_intel_x64.h>
+#include <vmcs/vmcs_intel_x64_ftos.h>
 #include <vmcs/vmcs_intel_x64_resume.h>
 #include <vmcs/vmcs_intel_x64_promote.h>
 #include <memory_manager/memory_manager.h>
@@ -540,7 +541,7 @@ vmcs_intel_x64::vmread(uint64_t field) const
     if (!m_intrinsics->vmread(field, &value))
     {
         bferror << "vmcs_intel_x64::vmread failed:" << bfendl;
-        bferror << "    - field: " << view_as_pointer(field) << bfendl;
+        bferror << "    - field: " << vmcs_field_to_str(field) << bfendl;
 
         throw std::runtime_error("vmread failed");
     }
@@ -554,7 +555,7 @@ vmcs_intel_x64::vmwrite(uint64_t field, uint64_t value)
     if (!m_intrinsics->vmwrite(field, value))
     {
         bferror << "vmcs_intel_x64::vmwrite failed:" << bfendl;
-        bferror << "    - field: " << view_as_pointer(field) << bfendl;
+        bferror << "    - field: " << vmcs_field_to_str(field) << bfendl;
         bferror << "    - value: " << view_as_pointer(value) << bfendl;
 
         throw std::runtime_error("vmwrite failed");
