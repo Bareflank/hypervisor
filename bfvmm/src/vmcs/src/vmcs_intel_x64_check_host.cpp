@@ -91,7 +91,7 @@ vmcs_intel_x64::check_host_cr3_for_unsupported_bits()
 void
 vmcs_intel_x64::check_host_ia32_sysenter_esp_canonical_address()
 {
-    auto esp = vmread(VMCS_HOST_IA32_SYSENTER_EIP);
+    auto esp = vmread(VMCS_HOST_IA32_SYSENTER_ESP);
 
     if (!is_address_canonical(esp))
         throw std::logic_error("host sysenter esp must be canonical");
@@ -125,14 +125,14 @@ vmcs_intel_x64::check_host_verify_load_ia32_pat()
     if (!is_enabled_load_ia32_pat_on_exit())
         return;
 
-    auto pat0 = vmread(VMCS_HOST_IA32_PAT_FULL) & 0x00000000000000FF >> 0;
-    auto pat1 = vmread(VMCS_HOST_IA32_PAT_FULL) & 0x000000000000FF00 >> 8;
-    auto pat2 = vmread(VMCS_HOST_IA32_PAT_FULL) & 0x0000000000FF0000 >> 16;
-    auto pat3 = vmread(VMCS_HOST_IA32_PAT_FULL) & 0x00000000FF000000 >> 24;
-    auto pat4 = vmread(VMCS_HOST_IA32_PAT_FULL) & 0x000000FF00000000 >> 32;
-    auto pat5 = vmread(VMCS_HOST_IA32_PAT_FULL) & 0x0000FF0000000000 >> 40;
-    auto pat6 = vmread(VMCS_HOST_IA32_PAT_FULL) & 0x00FF000000000000 >> 48;
-    auto pat7 = vmread(VMCS_HOST_IA32_PAT_FULL) & 0xFF00000000000000 >> 56;
+    auto pat0 = (vmread(VMCS_HOST_IA32_PAT_FULL) & 0x00000000000000FF) >> 0;
+    auto pat1 = (vmread(VMCS_HOST_IA32_PAT_FULL) & 0x000000000000FF00) >> 8;
+    auto pat2 = (vmread(VMCS_HOST_IA32_PAT_FULL) & 0x0000000000FF0000) >> 16;
+    auto pat3 = (vmread(VMCS_HOST_IA32_PAT_FULL) & 0x00000000FF000000) >> 24;
+    auto pat4 = (vmread(VMCS_HOST_IA32_PAT_FULL) & 0x000000FF00000000) >> 32;
+    auto pat5 = (vmread(VMCS_HOST_IA32_PAT_FULL) & 0x0000FF0000000000) >> 40;
+    auto pat6 = (vmread(VMCS_HOST_IA32_PAT_FULL) & 0x00FF000000000000) >> 48;
+    auto pat7 = (vmread(VMCS_HOST_IA32_PAT_FULL) & 0xFF00000000000000) >> 56;
 
     if (!check_pat(pat0))
         throw std::logic_error("pat0 has an invalid memory type");
@@ -347,7 +347,7 @@ vmcs_intel_x64::check_host_idtr_canonical_base_address()
 void
 vmcs_intel_x64::check_host_tr_canonical_base_address()
 {
-    auto tr_base = vmread(VMCS_HOST_FS_BASE);
+    auto tr_base = vmread(VMCS_HOST_TR_BASE);
 
     if (!is_address_canonical(tr_base))
         throw std::logic_error("host tr base must be canonical");

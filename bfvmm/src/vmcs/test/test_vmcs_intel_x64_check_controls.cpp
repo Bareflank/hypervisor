@@ -21,69 +21,7 @@
 
 #include <test.h>
 
-
-extern std::map<uint32_t, uint64_t> g_msrs;
-extern std::map<uint64_t, uint64_t> g_vmcs_fields;
-extern bool g_phys_to_virt_return_nullptr;
-
 static struct control_flow_path path;
-
-static void
-enable_proc_ctl(uint64_t control)
-{
-    g_vmcs_fields[VMCS_PRIMARY_PROCESSOR_BASED_VM_EXECUTION_CONTROLS] |= control;
-    g_msrs[IA32_VMX_TRUE_PROCBASED_CTLS_MSR] |= control << 32;
-}
-
-static void
-enable_proc_ctl2(uint64_t control)
-{
-    enable_proc_ctl(VM_EXEC_P_PROC_BASED_ACTIVATE_SECONDARY_CONTROLS);
-    g_vmcs_fields[VMCS_SECONDARY_PROCESSOR_BASED_VM_EXECUTION_CONTROLS] |= control;
-    g_msrs[IA32_VMX_PROCBASED_CTLS2_MSR] |= control << 32;
-}
-
-static void
-enable_pin_ctl(uint64_t control)
-{
-    g_vmcs_fields[VMCS_PIN_BASED_VM_EXECUTION_CONTROLS] |= control;
-    g_msrs[IA32_VMX_TRUE_PINBASED_CTLS_MSR] |= control << 32;
-}
-
-static void
-disable_proc_ctl(uint64_t control)
-{
-    g_vmcs_fields[VMCS_PRIMARY_PROCESSOR_BASED_VM_EXECUTION_CONTROLS] &= ~control;
-    g_msrs[IA32_VMX_TRUE_PROCBASED_CTLS_MSR] &= ~control;
-}
-
-static void
-disable_proc_ctl2(uint64_t control)
-{
-    g_vmcs_fields[VMCS_SECONDARY_PROCESSOR_BASED_VM_EXECUTION_CONTROLS] &= ~control;
-    g_msrs[IA32_VMX_PROCBASED_CTLS2_MSR] &= ~control;
-}
-
-static void
-disable_pin_ctl(uint64_t control)
-{
-    g_vmcs_fields[VMCS_PIN_BASED_VM_EXECUTION_CONTROLS] &= ~control;
-    g_msrs[IA32_VMX_TRUE_PINBASED_CTLS_MSR] &= ~control;
-}
-
-static void
-disable_exit_ctl(uint64_t control)
-{
-    g_vmcs_fields[VMCS_VM_EXIT_CONTROLS] &= ~control;
-    g_msrs[IA32_VMX_TRUE_EXIT_CTLS_MSR] &= ~control;
-}
-
-static void
-enable_exit_ctl(uint64_t control)
-{
-    g_vmcs_fields[VMCS_VM_EXIT_CONTROLS] |= control;
-    g_msrs[IA32_VMX_TRUE_EXIT_CTLS_MSR] |= control << 32;
-}
 
 static void
 setup_check_control_pin_based_ctls_reserved_properly_set_paths(std::vector<struct control_flow_path> &cfg)

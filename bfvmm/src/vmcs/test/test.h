@@ -34,11 +34,32 @@
 struct control_flow_path
 {
     std::function<void()> setup;
-    std::shared_ptr<const std::exception> exception;
+    std::shared_ptr<std::exception> exception;
     bool throws_exception;
 };
 
+extern std::map<uint32_t, uint64_t> g_msrs;
+extern std::map<uint64_t, uint64_t> g_vmcs_fields;
+extern uint8_t span[0x81];
+extern bool g_virt_to_phys_return_nullptr;
+extern bool g_phys_to_virt_return_nullptr;
+
 void setup_mock(MockRepository &mocks, memory_manager *mm, intrinsics_intel_x64 *in);
+void enable_proc_ctl(uint64_t control);
+void enable_proc_ctl2(uint64_t control);
+void enable_pin_ctl(uint64_t control);
+void enable_exit_ctl(uint64_t control);
+void enable_entry_ctl(uint64_t control);
+void disable_proc_ctl(uint64_t control);
+void disable_proc_ctl2(uint64_t control);
+void disable_pin_ctl(uint64_t control);
+void disable_exit_ctl(uint64_t control);
+void disable_entry_ctl(uint64_t control);
+uint64_t read_msr(uint32_t msr);
+bool vmread(uint64_t field, uint64_t *val);
+uint32_t cpuid_eax(uint32_t val);
+uintptr_t virtptr_to_physint(void *ptr);
+void *physint_to_virtptr(uintptr_t phys);
 
 class vmcs_ut : public unittest
 {
@@ -125,6 +146,34 @@ private:
     void test_check_control_event_injection_ec_checks();
     void test_check_control_event_injection_instr_length_checks();
     void test_check_control_entry_msr_load_address();
+
+    void test_check_host_cr0_for_unsupported_bits();
+    void test_check_host_cr4_for_unsupported_bits();
+    void test_check_host_cr3_for_unsupported_bits();
+    void test_check_host_ia32_sysenter_esp_canonical_address();
+    void test_check_host_ia32_sysenter_eip_canonical_address();
+    void test_check_host_verify_load_ia32_perf_global_ctrl();
+    void test_check_host_verify_load_ia32_pat();
+    void test_check_host_verify_load_ia32_efer();
+    void test_check_host_es_selector_rpl_ti_equal_zero();
+    void test_check_host_cs_selector_rpl_ti_equal_zero();
+    void test_check_host_ss_selector_rpl_ti_equal_zero();
+    void test_check_host_ds_selector_rpl_ti_equal_zero();
+    void test_check_host_fs_selector_rpl_ti_equal_zero();
+    void test_check_host_gs_selector_rpl_ti_equal_zero();
+    void test_check_host_tr_selector_rpl_ti_equal_zero();
+    void test_check_host_cs_not_equal_zero();
+    void test_check_host_tr_not_equal_zero();
+    void test_check_host_ss_not_equal_zero();
+    void test_check_host_fs_canonical_base_address();
+    void test_check_host_gs_canonical_base_address();
+    void test_check_host_gdtr_canonical_base_address();
+    void test_check_host_idtr_canonical_base_address();
+    void test_check_host_tr_canonical_base_address();
+    void test_check_host_if_outside_ia32e_mode();
+    void test_check_host_vmcs_host_address_space_size_is_set();
+    void test_check_host_host_address_space_disabled();
+    void test_check_host_host_address_space_enabled();
 };
 
 #endif
