@@ -251,7 +251,7 @@ bfm_ut::test_ioctl_driver_process_load_bad_module_filename()
     mocks.OnCall(f.get(), file::read).Do([](auto filename) -> auto
     {
         if (filename.compare("modules"_s) == 0)
-            return "1\n2\n3\n"_s;
+            return "{\"modules\":[\"1\",\"2\",\"3\"]}"_s;
         if (filename.compare("2"_s) == 0)
             throw invalid_file(""_s);
         return "good"_s;
@@ -285,7 +285,7 @@ bfm_ut::test_ioctl_driver_process_load_add_module_failed()
     mocks.OnCall(f.get(), file::read).Do([](auto filename) -> auto
     {
         if (filename.compare("modules"_s) == 0)
-            return " \n1\n2\n3\n"_s;
+            return "{\"modules\":[\"1\",\"2\",\"3\"]}"_s;
         if (filename.compare("2"_s) == 0)
             return "bad"_s;
         return "good"_s;
@@ -316,7 +316,7 @@ bfm_ut::test_ioctl_driver_process_load_load_failed()
 
     mocks.OnCall(clp.get(), command_line_parser::cmd).Return(command_line_parser_command::load);
     mocks.OnCall(clp.get(), command_line_parser::modules).Return("modules"_s);
-    mocks.OnCall(f.get(), file::read).Return(""_s);
+    mocks.OnCall(f.get(), file::read).Return("{\"modules\":[\"1\"]}"_s);
     mocks.OnCall(ctl.get(), ioctl::call_ioctl_add_module);
 
     mocks.OnCall(ctl.get(), ioctl::call_ioctl_vmm_status).Do([](auto * status)
@@ -347,7 +347,7 @@ bfm_ut::test_ioctl_driver_process_load_success()
 
     mocks.OnCall(clp.get(), command_line_parser::cmd).Return(command_line_parser_command::load);
     mocks.OnCall(clp.get(), command_line_parser::modules).Return("modules"_s);
-    mocks.OnCall(f.get(), file::read).Return(""_s);
+    mocks.OnCall(f.get(), file::read).Return("{\"modules\":[\"1\"]}"_s);
     mocks.OnCall(ctl.get(), ioctl::call_ioctl_add_module);
     mocks.OnCall(ctl.get(), ioctl::call_ioctl_load_vmm);
 

@@ -1,16 +1,17 @@
-################################################################################
-# Default Modules                                                              #
-################################################################################
-
-%BUILD_ABS%/sysroot/x86_64-elf/lib/libc++.so.1.0
-%BUILD_ABS%/makefiles/bfvmm/src/debug_ring/bin/cross/libdebug_ring.so
-%BUILD_ABS%/makefiles/bfvmm/src/entry/bin/cross/libentry.so
-%BUILD_ABS%/makefiles/bfvmm/src/exit_handler/bin/cross/libexit_handler.so
-%BUILD_ABS%/makefiles/bfvmm/src/intrinsics/bin/cross/libintrinsics.so
-%BUILD_ABS%/makefiles/bfvmm/src/memory_manager/bin/cross/libmemory_manager.so
-%BUILD_ABS%/makefiles/bfvmm/src/misc/bin/cross/libmisc.so
-%BUILD_ABS%/makefiles/bfvmm/src/serial/bin/cross/libserial.so
-%BUILD_ABS%/makefiles/bfvmm/src/vcpu/bin/cross/libvcpu.so
-%BUILD_ABS%/makefiles/bfvmm/src/vcpu_factory/bin/cross/libvcpu_factory.so
-%BUILD_ABS%/makefiles/bfvmm/src/vmcs/bin/cross/libvmcs.so
-%BUILD_ABS%/makefiles/bfvmm/src/vmxon/bin/cross/libvmxon.so
+{
+    "modules" :
+    [
+        "%BUILD_ABS%/sysroot/x86_64-elf/lib/libc++.so.1.0",
+        "%BUILD_ABS%/makefiles/bfvmm/src/debug_ring/bin/cross/libdebug_ring.so",
+        "%BUILD_ABS%/makefiles/bfvmm/src/entry/bin/cross/libentry.so",
+        "%BUILD_ABS%/makefiles/bfvmm/src/exit_handler/bin/cross/libexit_handler.so",
+        "%BUILD_ABS%/makefiles/bfvmm/src/intrinsics/bin/cross/libintrinsics.so",
+        "%BUILD_ABS%/makefiles/bfvmm/src/memory_manager/bin/cross/libmemory_manager.so",
+        "%BUILD_ABS%/makefiles/bfvmm/src/misc/bin/cross/libmisc.so",
+        "%BUILD_ABS%/makefiles/bfvmm/src/serial/bin/cross/libserial.so",
+        "%BUILD_ABS%/makefiles/bfvmm/src/vcpu/bin/cross/libvcpu.so",
+        "%BUILD_ABS%/makefiles/bfvmm/src/vcpu_factory/bin/cross/libvcpu_factory.so",
+        "%BUILD_ABS%/makefiles/bfvmm/src/vmcs/bin/cross/libvmcs.so",
+        "%BUILD_ABS%/makefiles/bfvmm/src/vmxon/bin/cross/libvmxon.so"
+    ]
+}

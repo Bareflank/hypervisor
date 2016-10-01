@@ -22,6 +22,8 @@
 #include <gsl/gsl>
 
 #include <iostream>
+
+#include <json.h>
 #include <exception.h>
 #include <ioctl_driver.h>
 
@@ -64,20 +66,6 @@ ioctl_driver::process(std::shared_ptr<file> f,
     }
 }
 
-std::string
-trim(const std::string &str)
-{
-    auto comment = str.substr(0, str.find_first_of('#'));
-
-    auto f = comment.find_first_not_of(" \t");
-    auto l = comment.find_last_not_of(" \t");
-
-    if (f == std::string::npos)
-        return std::string();
-
-    return str.substr(f, (l - f + 1));
-}
-
 void
 ioctl_driver::load_vmm(const std::shared_ptr<file> &f,
                        const std::shared_ptr<ioctl> &ctl,
@@ -103,15 +91,10 @@ ioctl_driver::load_vmm(const std::shared_ptr<file> &f,
     auto ___ = gsl::on_failure([&]
     { unload_vmm(ctl); });
 
-    for (const auto &module : split(f->read(clp->modules()), '\n'))
-    {
-        auto trimmed = trim(module);
+    auto modules = json::parse(f->read(clp->modules()));
 
-        if (trimmed.empty())
-            continue;
-
-        ctl->call_ioctl_add_module(f->read(trimmed));
-    }
+    for (const auto &module : modules["modules"])
+        ctl->call_ioctl_add_module(f->read(module));
 
     ctl->call_ioctl_load_vmm();
 }
