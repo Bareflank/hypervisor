@@ -27,7 +27,7 @@ bfm_ut::test_split_empty_string()
 {
     auto fields = split(std::string(), ' ');
 
-    EXPECT_TRUE(fields.empty());
+    this->expect_true(fields.empty());
 }
 
 void
@@ -37,7 +37,7 @@ bfm_ut::test_split_with_non_existing_delimiter()
     auto fields = split(str, 'z');
 
     ASSERT_TRUE(fields.size() == 1);
-    EXPECT_TRUE(fields[0] == str);
+    this->expect_true(fields[0] == str);
 }
 
 void
@@ -47,12 +47,12 @@ bfm_ut::test_split_with_delimiter()
     auto fields = split(str, ' ');
 
     ASSERT_TRUE(fields.size() == 8);
-    EXPECT_TRUE(fields[0] == "the");
-    EXPECT_TRUE(fields[1] == "cow");
-    EXPECT_TRUE(fields[2] == "is");
-    EXPECT_TRUE(fields[3] == "blue");
-    EXPECT_TRUE(fields[4] == "for");
-    EXPECT_TRUE(fields[5] == "this");
-    EXPECT_TRUE(fields[6] == "is");
-    EXPECT_TRUE(fields[7] == "true");
+    this->expect_true(fields[0] == "the");
+    this->expect_true(fields[1] == "cow");
+    this->expect_true(fields[2] == "is");
+    this->expect_true(fields[3] == "blue");
+    this->expect_true(fields[4] == "for");
+    this->expect_true(fields[5] == "this");
+    this->expect_true(fields[6] == "is");
+    this->expect_true(fields[7] == "true");
 }

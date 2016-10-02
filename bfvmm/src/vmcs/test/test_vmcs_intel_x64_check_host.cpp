@@ -35,7 +35,7 @@ setup_check_host_cr0_for_unsupported_bits_paths(std::vector<struct control_flow_
 
     path.setup = [&] { g_msrs[msrs::ia32_vmx_cr0_fixed0::addr] = 1; };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("invalid cr0"));
+    path.exception = std::make_shared<std::logic_error>("invalid cr0");
     cfg.push_back(path);
 }
 
@@ -48,7 +48,7 @@ setup_check_host_cr4_for_unsupported_bits_paths(std::vector<struct control_flow_
 
     path.setup = [&] { g_msrs[msrs::ia32_vmx_cr4_fixed0::addr] = 1; };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("invalid cr4"));
+    path.exception = std::make_shared<std::logic_error>("invalid cr4");
     cfg.push_back(path);
 }
 
@@ -57,7 +57,7 @@ setup_check_host_cr3_for_unsupported_bits_paths(std::vector<struct control_flow_
 {
     path.setup = [&] { g_vmcs_fields[vmcs::host_cr3::addr] = 0xff00000000000000; };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("host cr3 too large"));
+    path.exception = std::make_shared<std::logic_error>("host cr3 too large");
     cfg.push_back(path);
 
     path.setup = [&] { g_vmcs_fields[vmcs::host_cr3::addr] = 0x1000; };
@@ -74,7 +74,7 @@ setup_check_host_ia32_sysenter_esp_canonical_address_paths(std::vector<struct co
 
     path.setup = [&] { g_vmcs_fields[VMCS_HOST_IA32_SYSENTER_ESP] = 0x800000000000; };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("host sysenter esp must be canonical"));
+    path.exception = std::make_shared<std::logic_error>("host sysenter esp must be canonical");
     cfg.push_back(path);
 }
 
@@ -87,7 +87,7 @@ setup_check_host_ia32_sysenter_eip_canonical_address_paths(std::vector<struct co
 
     path.setup = [&] { g_vmcs_fields[VMCS_HOST_IA32_SYSENTER_EIP] = 0x800000000000; };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("host sysenter eip must be canonical"));
+    path.exception = std::make_shared<std::logic_error>("host sysenter eip must be canonical");
     cfg.push_back(path);
 }
 
@@ -100,7 +100,7 @@ setup_check_host_verify_load_ia32_perf_global_ctrl_paths(std::vector<struct cont
 
     path.setup = [&] { enable_exit_ctl(VM_EXIT_CONTROL_LOAD_IA32_PERF_GLOBAL_CTRL); g_vmcs_fields[VMCS_HOST_IA32_PERF_GLOBAL_CTRL_FULL] = 0xc; };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("perf global ctrl msr reserved bits must be 0"));
+    path.exception = std::make_shared<std::logic_error>("perf global ctrl msr reserved bits must be 0");
     cfg.push_back(path);
 
     path.setup = [&] { g_vmcs_fields[VMCS_HOST_IA32_PERF_GLOBAL_CTRL_FULL] = 0; };
@@ -117,42 +117,42 @@ setup_check_host_verify_load_ia32_pat_paths(std::vector<struct control_flow_path
 
     path.setup = [&] { enable_exit_ctl(VM_EXIT_CONTROL_LOAD_IA32_PAT); g_vmcs_fields[VMCS_HOST_IA32_PAT_FULL] = 2ULL; };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("pat0 has an invalid memory type"));
+    path.exception = std::make_shared<std::logic_error>("pat0 has an invalid memory type");
     cfg.push_back(path);
 
     path.setup = [&] { g_vmcs_fields[VMCS_HOST_IA32_PAT_FULL] = 2ULL << 8; };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("pat1 has an invalid memory type"));
+    path.exception = std::make_shared<std::logic_error>("pat1 has an invalid memory type");
     cfg.push_back(path);
 
     path.setup = [&] { g_vmcs_fields[VMCS_HOST_IA32_PAT_FULL] = 2ULL << 16; };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("pat2 has an invalid memory type"));
+    path.exception = std::make_shared<std::logic_error>("pat2 has an invalid memory type");
     cfg.push_back(path);
 
     path.setup = [&] { g_vmcs_fields[VMCS_HOST_IA32_PAT_FULL] = 2ULL << 24; };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("pat3 has an invalid memory type"));
+    path.exception = std::make_shared<std::logic_error>("pat3 has an invalid memory type");
     cfg.push_back(path);
 
     path.setup = [&] { g_vmcs_fields[VMCS_HOST_IA32_PAT_FULL] = 2ULL << 32; };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("pat4 has an invalid memory type"));
+    path.exception = std::make_shared<std::logic_error>("pat4 has an invalid memory type");
     cfg.push_back(path);
 
     path.setup = [&] { g_vmcs_fields[VMCS_HOST_IA32_PAT_FULL] = 2ULL << 40; };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("pat5 has an invalid memory type"));
+    path.exception = std::make_shared<std::logic_error>("pat5 has an invalid memory type");
     cfg.push_back(path);
 
     path.setup = [&] { g_vmcs_fields[VMCS_HOST_IA32_PAT_FULL] = 2ULL << 48; };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("pat6 has an invalid memory type"));
+    path.exception = std::make_shared<std::logic_error>("pat6 has an invalid memory type");
     cfg.push_back(path);
 
     path.setup = [&] { g_vmcs_fields[VMCS_HOST_IA32_PAT_FULL] = 2ULL << 56; };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("pat7 has an invalid memory type"));
+    path.exception = std::make_shared<std::logic_error>("pat7 has an invalid memory type");
     cfg.push_back(path);
 
     path.setup = [&] { g_vmcs_fields[VMCS_HOST_IA32_PAT_FULL] = 0; };
@@ -169,17 +169,17 @@ setup_check_host_verify_load_ia32_efer_paths(std::vector<struct control_flow_pat
 
     path.setup = [&] { enable_exit_ctl(VM_EXIT_CONTROL_LOAD_IA32_EFER); g_vmcs_fields[VMCS_HOST_IA32_EFER_FULL] = 0xe; };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("ia32 efer msr reserved buts must be 0 if load ia32 efer entry is enabled"));
+    path.exception = std::make_shared<std::logic_error>("ia32 efer msr reserved buts must be 0 if load ia32 efer entry is enabled");
     cfg.push_back(path);
 
     path.setup = [&] { disable_exit_ctl(VM_EXIT_CONTROL_HOST_ADDRESS_SPACE_SIZE); g_vmcs_fields[VMCS_HOST_IA32_EFER_FULL] = IA32_EFER_LMA; };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("host addr space is 0, but efer.lma is 1"));
+    path.exception = std::make_shared<std::logic_error>("host addr space is 0, but efer.lma is 1");
     cfg.push_back(path);
 
     path.setup = [&] { enable_exit_ctl(VM_EXIT_CONTROL_HOST_ADDRESS_SPACE_SIZE); g_vmcs_fields[VMCS_HOST_IA32_EFER_FULL] = 0; };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("host addr space is 1, but efer.lma is 0"));
+    path.exception = std::make_shared<std::logic_error>("host addr space is 1, but efer.lma is 0");
     cfg.push_back(path);
 
     path.setup = [&] { g_vmcs_fields[VMCS_HOST_IA32_EFER_FULL] = IA32_EFER_LMA; g_vmcs_fields[vmcs::host_cr0::addr] = 0; };
@@ -188,12 +188,12 @@ setup_check_host_verify_load_ia32_efer_paths(std::vector<struct control_flow_pat
 
     path.setup = [&] { g_vmcs_fields[vmcs::host_cr0::addr] = cr0::paging::mask; };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("efer.lme is 0, but efer.lma is 1"));
+    path.exception = std::make_shared<std::logic_error>("efer.lme is 0, but efer.lma is 1");
     cfg.push_back(path);
 
     path.setup = [&] { disable_exit_ctl(VM_EXIT_CONTROL_HOST_ADDRESS_SPACE_SIZE); g_vmcs_fields[VMCS_HOST_IA32_EFER_FULL] = IA32_EFER_LME; };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("efer.lme is 1, but efer.lma is 0"));
+    path.exception = std::make_shared<std::logic_error>("efer.lme is 1, but efer.lma is 0");
     cfg.push_back(path);
 
     path.setup = [&] { g_vmcs_fields[VMCS_HOST_IA32_EFER_FULL] = 0; };
@@ -210,7 +210,7 @@ setup_check_host_es_selector_rpl_ti_equal_zero_paths(std::vector<struct control_
 
     path.setup = [&] { g_vmcs_fields[vmcs::host_es_selector::addr] = SELECTOR_RPL_FLAG; };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("host rpl / tr's es flag must be 0"));
+    path.exception = std::make_shared<std::logic_error>("host rpl / tr's es flag must be 0");
     cfg.push_back(path);
 }
 
@@ -223,7 +223,7 @@ setup_check_host_cs_selector_rpl_ti_equal_zero_paths(std::vector<struct control_
 
     path.setup = [&] { g_vmcs_fields[vmcs::host_cs_selector::addr] = SELECTOR_RPL_FLAG; };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("host rpl / tr's cs flag must be 0"));
+    path.exception = std::make_shared<std::logic_error>("host rpl / tr's cs flag must be 0");
     cfg.push_back(path);
 }
 
@@ -236,7 +236,7 @@ setup_check_host_ss_selector_rpl_ti_equal_zero_paths(std::vector<struct control_
 
     path.setup = [&] { g_vmcs_fields[vmcs::host_ss_selector::addr] = SELECTOR_RPL_FLAG; };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("host rpl / tr's ss flag must be 0"));
+    path.exception = std::make_shared<std::logic_error>("host rpl / tr's ss flag must be 0");
     cfg.push_back(path);
 }
 
@@ -249,7 +249,7 @@ setup_check_host_ds_selector_rpl_ti_equal_zero_paths(std::vector<struct control_
 
     path.setup = [&] { g_vmcs_fields[vmcs::host_ds_selector::addr] = SELECTOR_RPL_FLAG; };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("host rpl / tr's ds flag must be 0"));
+    path.exception = std::make_shared<std::logic_error>("host rpl / tr's ds flag must be 0");
     cfg.push_back(path);
 }
 
@@ -262,7 +262,7 @@ setup_check_host_fs_selector_rpl_ti_equal_zero_paths(std::vector<struct control_
 
     path.setup = [&] { g_vmcs_fields[vmcs::host_fs_selector::addr] = SELECTOR_RPL_FLAG; };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("host rpl / tr's fs flag must be 0"));
+    path.exception = std::make_shared<std::logic_error>("host rpl / tr's fs flag must be 0");
     cfg.push_back(path);
 }
 
@@ -275,7 +275,7 @@ setup_check_host_gs_selector_rpl_ti_equal_zero_paths(std::vector<struct control_
 
     path.setup = [&] { g_vmcs_fields[vmcs::host_gs_selector::addr] = SELECTOR_RPL_FLAG; };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("host rpl / tr's gs flag must be 0"));
+    path.exception = std::make_shared<std::logic_error>("host rpl / tr's gs flag must be 0");
     cfg.push_back(path);
 }
 
@@ -288,7 +288,7 @@ setup_check_host_tr_selector_rpl_ti_equal_zero_paths(std::vector<struct control_
 
     path.setup = [&] { g_vmcs_fields[vmcs::host_tr_selector::addr] = SELECTOR_RPL_FLAG; };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("host rpl / tr's tr flag must be 0"));
+    path.exception = std::make_shared<std::logic_error>("host rpl / tr's tr flag must be 0");
     cfg.push_back(path);
 }
 
@@ -301,7 +301,7 @@ setup_check_host_cs_not_equal_zero_paths(std::vector<struct control_flow_path> &
 
     path.setup = [&] { g_vmcs_fields[vmcs::host_cs_selector::addr] = 0; };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("host cs cannot equal 0"));
+    path.exception = std::make_shared<std::logic_error>("host cs cannot equal 0");
     cfg.push_back(path);
 }
 
@@ -314,7 +314,7 @@ setup_check_host_tr_not_equal_zero_paths(std::vector<struct control_flow_path> &
 
     path.setup = [&] { g_vmcs_fields[vmcs::host_tr_selector::addr] = 0; };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("host tr cannot equal 0"));
+    path.exception = std::make_shared<std::logic_error>("host tr cannot equal 0");
     cfg.push_back(path);
 }
 
@@ -327,7 +327,7 @@ setup_check_host_ss_not_equal_zero_paths(std::vector<struct control_flow_path> &
 
     path.setup = [&] { disable_exit_ctl(VM_EXIT_CONTROL_HOST_ADDRESS_SPACE_SIZE); g_vmcs_fields[vmcs::host_ss_selector::addr] = 0; };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("host ss cannot equal 0"));
+    path.exception = std::make_shared<std::logic_error>("host ss cannot equal 0");
     cfg.push_back(path);
 
     path.setup = [&] { g_vmcs_fields[vmcs::host_ss_selector::addr] = 1; };
@@ -344,7 +344,7 @@ setup_check_host_fs_canonical_base_address_paths(std::vector<struct control_flow
 
     path.setup = [&] { g_vmcs_fields[VMCS_HOST_FS_BASE] = 0x800000000000; };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("host fs base must be canonical"));
+    path.exception = std::make_shared<std::logic_error>("host fs base must be canonical");
     cfg.push_back(path);
 }
 
@@ -357,7 +357,7 @@ setup_check_host_gs_canonical_base_address_paths(std::vector<struct control_flow
 
     path.setup = [&] { g_vmcs_fields[VMCS_HOST_GS_BASE] = 0x800000000000; };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("host gs base must be canonical"));
+    path.exception = std::make_shared<std::logic_error>("host gs base must be canonical");
     cfg.push_back(path);
 }
 
@@ -370,7 +370,7 @@ setup_check_host_gdtr_canonical_base_address_paths(std::vector<struct control_fl
 
     path.setup = [&] { g_vmcs_fields[VMCS_HOST_GDTR_BASE] = 0x800000000000; };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("host gdtr base must be canonical"));
+    path.exception = std::make_shared<std::logic_error>("host gdtr base must be canonical");
     cfg.push_back(path);
 }
 
@@ -383,7 +383,7 @@ setup_check_host_idtr_canonical_base_address_paths(std::vector<struct control_fl
 
     path.setup = [&] { g_vmcs_fields[VMCS_HOST_IDTR_BASE] = 0x800000000000; };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("host idtr base must be canonical"));
+    path.exception = std::make_shared<std::logic_error>("host idtr base must be canonical");
     cfg.push_back(path);
 }
 
@@ -396,7 +396,7 @@ setup_check_host_tr_canonical_base_address_paths(std::vector<struct control_flow
 
     path.setup = [&] { g_vmcs_fields[VMCS_HOST_TR_BASE] = 0x800000000000; };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("host tr base must be canonical"));
+    path.exception = std::make_shared<std::logic_error>("host tr base must be canonical");
     cfg.push_back(path);
 }
 
@@ -409,12 +409,12 @@ setup_check_host_if_outside_ia32e_mode_paths(std::vector<struct control_flow_pat
 
     path.setup = [&] { g_msrs[IA32_EFER_MSR] = 0; enable_entry_ctl(VM_ENTRY_CONTROL_IA_32E_MODE_GUEST); };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("ia 32e mode must be 0 if efer.lma == 0"));
+    path.exception = std::make_shared<std::logic_error>("ia 32e mode must be 0 if efer.lma == 0");
     cfg.push_back(path);
 
     path.setup = [&] { disable_entry_ctl(VM_ENTRY_CONTROL_IA_32E_MODE_GUEST); enable_exit_ctl(VM_EXIT_CONTROL_HOST_ADDRESS_SPACE_SIZE); };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("host addr space must be 0 if efer.lma == 0"));
+    path.exception = std::make_shared<std::logic_error>("host addr space must be 0 if efer.lma == 0");
     cfg.push_back(path);
 
     path.setup = [&] { disable_exit_ctl(VM_EXIT_CONTROL_HOST_ADDRESS_SPACE_SIZE); };
@@ -431,7 +431,7 @@ setup_check_host_vmcs_host_address_space_size_is_set_paths(std::vector<struct co
 
     path.setup = [&] { g_msrs[IA32_EFER_MSR] = IA32_EFER_LMA; disable_exit_ctl(VM_EXIT_CONTROL_HOST_ADDRESS_SPACE_SIZE); };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("host addr space must be 1 if efer.lma == 1"));
+    path.exception = std::make_shared<std::logic_error>("host addr space must be 1 if efer.lma == 1");
     cfg.push_back(path);
 
     path.setup = [&] { enable_exit_ctl(VM_EXIT_CONTROL_HOST_ADDRESS_SPACE_SIZE); };
@@ -448,17 +448,17 @@ setup_check_host_host_address_space_disabled_paths(std::vector<struct control_fl
 
     path.setup = [&] { disable_exit_ctl(VM_EXIT_CONTROL_HOST_ADDRESS_SPACE_SIZE); enable_entry_ctl(VM_ENTRY_CONTROL_IA_32E_MODE_GUEST); };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("ia 32e mode must be disabled if host addr space is disabled"));
+    path.exception = std::make_shared<std::logic_error>("ia 32e mode must be disabled if host addr space is disabled");
     cfg.push_back(path);
 
     path.setup = [&] { disable_entry_ctl(VM_ENTRY_CONTROL_IA_32E_MODE_GUEST); g_vmcs_fields[vmcs::host_cr4::addr] = cr4::pcid_enable_bit::mask; };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("cr4 pcide must be disabled if host addr space is disabled"));
+    path.exception = std::make_shared<std::logic_error>("cr4 pcide must be disabled if host addr space is disabled");
     cfg.push_back(path);
 
     path.setup = [&] { g_vmcs_fields[vmcs::host_cr4::addr] = 0; g_vmcs_fields[VMCS_HOST_RIP] = 0xf000000000; };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("rip bits 63:32 must be 0 if host addr space is disabled"));
+    path.exception = std::make_shared<std::logic_error>("rip bits 63:32 must be 0 if host addr space is disabled");
     cfg.push_back(path);
 
     path.setup = [&] { g_vmcs_fields[VMCS_HOST_RIP] = 0; };
@@ -475,12 +475,12 @@ setup_check_host_host_address_space_enabled_paths(std::vector<struct control_flo
 
     path.setup = [&] { enable_exit_ctl(VM_EXIT_CONTROL_HOST_ADDRESS_SPACE_SIZE); g_vmcs_fields[vmcs::host_cr4::addr] = 0; };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("cr4 pae must be enabled if host addr space is enabled"));
+    path.exception = std::make_shared<std::logic_error>("cr4 pae must be enabled if host addr space is enabled");
     cfg.push_back(path);
 
     path.setup = [&] { g_vmcs_fields[vmcs::host_cr4::addr] = cr4::physical_address_extensions::mask; g_vmcs_fields[VMCS_HOST_RIP] = 0x800000000000; };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("host rip must be canonical"));
+    path.exception = std::make_shared<std::logic_error>("host rip must be canonical");
     cfg.push_back(path);
 
     path.setup = [&] { g_vmcs_fields[VMCS_HOST_RIP] = 0; };

@@ -299,7 +299,7 @@ vmcs_intel_x64::check_control_process_posted_interrupt_checks()
 
     auto vector = vmcs::posted_interrupt_notification_vector::get();
 
-    if ((vector & 0xFFFFFFFFFFFFFF00) != 0)
+    if ((vector & 0xFF00) != 0)
         throw std::logic_error("bits 15:8 of the notification vector must "
                                "be 0 if posted interrupts is 1");
 
@@ -637,7 +637,7 @@ vmcs_intel_x64::check_control_event_injection_delivery_ec_checks()
             break;
 
         default:
-            throw std::logic_error("vector must indicate exception that would nomrally "
+            throw std::logic_error("vector must indicate exception that would normally "
                                    "deliver an error code if deliver error code bit is set");
     }
 }

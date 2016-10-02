@@ -25,7 +25,7 @@ void
 bfelf_loader_ut::test_bfelf_file_num_segments_invalid_ef()
 {
     auto ret = bfelf_file_num_segments(nullptr);
-    EXPECT_TRUE(ret == BFELF_ERROR_INVALID_ARG);
+    this->expect_true(ret == BFELF_ERROR_INVALID_ARG);
 }
 
 void
@@ -35,7 +35,7 @@ bfelf_loader_ut::test_bfelf_file_num_segments_uninitalized()
     memset(&ef, 0, sizeof(ef));
 
     auto ret = bfelf_file_num_segments(&ef);
-    EXPECT_TRUE(ret == 0);
+    this->expect_true(ret == 0);
 }
 
 void
@@ -46,8 +46,8 @@ bfelf_loader_ut::test_bfelf_file_num_segments_success()
     auto test = get_test();
 
     ret = bfelf_file_init(reinterpret_cast<char *>(&test), sizeof(test), &ef);
-    EXPECT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     ret = bfelf_file_num_segments(&ef);
-    EXPECT_TRUE(ret > 0);
+    this->expect_true(ret > 0);
 }

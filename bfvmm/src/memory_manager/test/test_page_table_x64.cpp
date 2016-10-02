@@ -52,17 +52,17 @@ memory_manager_ut::test_page_table_x64_no_entry()
     {
         auto pt = std::make_shared<page_table_x64>();
 
-        EXPECT_TRUE(pt->phys_addr() != 0);
-        EXPECT_TRUE(pt->present());
-        EXPECT_TRUE(pt->rw());
-        EXPECT_TRUE(pt->us());
-        EXPECT_FALSE(pt->pwt());
-        EXPECT_FALSE(pt->pcd());
-        EXPECT_FALSE(pt->accessed());
-        EXPECT_FALSE(pt->dirty());
-        EXPECT_FALSE(pt->pat());
-        EXPECT_FALSE(pt->global());
-        EXPECT_FALSE(pt->nx());
+        this->expect_true(pt->phys_addr() != 0);
+        this->expect_true(pt->present());
+        this->expect_true(pt->rw());
+        this->expect_true(pt->us());
+        this->expect_false(pt->pwt());
+        this->expect_false(pt->pcd());
+        this->expect_false(pt->accessed());
+        this->expect_false(pt->dirty());
+        this->expect_false(pt->pat());
+        this->expect_false(pt->global());
+        this->expect_false(pt->nx());
     });
 }
 
@@ -81,17 +81,17 @@ memory_manager_ut::test_page_table_x64_with_entry()
     {
         auto pt = std::make_shared<page_table_x64>(&entry);
 
-        EXPECT_TRUE(pt->phys_addr() != 0);
-        EXPECT_TRUE(pt->present());
-        EXPECT_TRUE(pt->rw());
-        EXPECT_TRUE(pt->us());
-        EXPECT_FALSE(pt->pwt());
-        EXPECT_FALSE(pt->pcd());
-        EXPECT_FALSE(pt->accessed());
-        EXPECT_FALSE(pt->dirty());
-        EXPECT_FALSE(pt->pat());
-        EXPECT_FALSE(pt->global());
-        EXPECT_FALSE(pt->nx());
+        this->expect_true(pt->phys_addr() != 0);
+        this->expect_true(pt->present());
+        this->expect_true(pt->rw());
+        this->expect_true(pt->us());
+        this->expect_false(pt->pwt());
+        this->expect_false(pt->pcd());
+        this->expect_false(pt->accessed());
+        this->expect_false(pt->dirty());
+        this->expect_false(pt->pat());
+        this->expect_false(pt->global());
+        this->expect_false(pt->nx());
     });
 }
 
@@ -185,7 +185,9 @@ memory_manager_ut::test_page_table_x64_add_page_twice_failure()
         auto pml4 = std::make_shared<page_table_x64>();
 
         pml4->add_page(virt);
-        EXPECT_EXCEPTION(pml4->add_page(virt), std::logic_error);
+
+        auto e = std::make_shared<std::logic_error>("add_page: page mapping already exists");
+        this->expect_exception([&] { pml4->add_page(virt); }, e);
     });
 }
 
@@ -202,7 +204,7 @@ memory_manager_ut::test_page_table_x64_table_phys_addr_success()
     {
         auto pt = std::make_shared<page_table_x64>();
 
-        EXPECT_TRUE(pt->phys_addr() != 0);
+        this->expect_true(pt->phys_addr() != 0);
     });
 }
 
@@ -225,6 +227,6 @@ memory_manager_ut::test_page_table_x64_table_phys_addr_failure()
     {
         auto pt = std::make_shared<page_table_x64>();
 
-        EXPECT_TRUE(pt->phys_addr() == 0);
+        this->expect_true(pt->phys_addr() == 0);
     });
 }

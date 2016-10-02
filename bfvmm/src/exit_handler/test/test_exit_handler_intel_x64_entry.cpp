@@ -35,7 +35,7 @@ exit_handler_intel_x64_ut::test_entry_valid()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_NO_EXCEPTION(exit_handler(eh.get()));
+        this->expect_no_exception([&] { exit_handler(eh.get()); });
     });
 }
 
@@ -50,7 +50,7 @@ exit_handler_intel_x64_ut::test_entry_throws_general_exception()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_NO_EXCEPTION(exit_handler(eh.get()));
+        this->expect_no_exception([&] { exit_handler(eh.get()); });
     });
 }
 
@@ -65,7 +65,7 @@ exit_handler_intel_x64_ut::test_entry_throws_standard_exception()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_NO_EXCEPTION(exit_handler(eh.get()));
+        this->expect_no_exception([&] { exit_handler(eh.get()); });
     });
 }
 
@@ -80,6 +80,6 @@ exit_handler_intel_x64_ut::test_entry_throws_any_exception()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_NO_EXCEPTION(exit_handler(eh.get()));
+        this->expect_no_exception([&] { exit_handler(eh.get()); });
     });
 }

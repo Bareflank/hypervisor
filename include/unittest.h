@@ -27,6 +27,7 @@
 #endif
 
 #include <stdlib.h>
+#include <string>
 #include <iostream>
 #include <exception.h>
 #include <gsl/gsl>
@@ -43,24 +44,9 @@ struct exception_state
     bool wrong_exception;
     std::string caught_str;
     std::string expecting_str;
-    std::string what;
+    std::string caught_what;
+    std::string expecting_what;
 };
-
-/// Expect True
-///
-/// This macro verifies a unit test to be true. If the unit test is not
-/// true, the unit test reports a failue and continues testing.
-///
-/// @code
-///
-/// EXPECT_TRUE(1 == 0) // unit test fails
-/// EXPECT_TRUE(1 == 1) // unit test passes
-///
-/// @endcode
-///
-#define EXPECT_TRUE(condition) \
-    if((condition)) { this->inc_pass(); } \
-    else { this->expect_failed(#condition, static_cast<const char *>(__PRETTY_FUNCTION__), __LINE__); }
 
 /// Expect True
 ///
@@ -78,22 +64,6 @@ struct exception_state
 
 /// Expect False
 ///
-/// This macro verifies a unit test to be false. If the unit test is not
-/// false, the unit test reports a failue and continues testing.
-///
-/// @code
-///
-/// EXPECT_FALSE(1 == 1) // unit test fails
-/// EXPECT_FALSE(1 == 0) // unit test passes
-///
-/// @endcode
-///
-#define EXPECT_FALSE(condition) \
-    if(!(condition)) { this->inc_pass(); } \
-    else { this->expect_failed(#condition, static_cast<const char *>(__PRETTY_FUNCTION__), __LINE__); }
-
-/// Expect False
-///
 /// This macro passes the boolean condition c along with the caller's name and line information
 /// to expect_false_with_args. This macro must be invoked on the unittest object using this.
 ///
@@ -108,81 +78,6 @@ struct exception_state
 
 /// Expect Exception
 ///
-/// This macro verifies a unit test throws an exception. If the unit
-/// test throws an exception, the unit test reports a failue and continues
-/// testing.
-///
-/// @code
-///
-/// EXPECT_EXCEPTION(blah.do_something(), std::exception) // unit test fails if no throw()
-///
-/// @endcode
-///
-#define EXPECT_EXCEPTION(a, b) \
-    { \
-        bool caught = false; \
-        bool wrong_exception = false; \
-        std::string caught_str; \
-        std::string expecting_str; \
-        std::string what; \
-        try{ a; } \
-        catch(BaseException &be) \
-        { \
-            throw; \
-        } \
-        catch(bfn::general_exception &ge) \
-        { \
-            caught = true; \
-            if (strcmp(typeid(ge).name(), typeid(b).name()) != 0) \
-            { \
-                wrong_exception = true; \
-                caught_str = typeid(ge).name(); \
-                expecting_str = typeid(b).name(); \
-                what = ge.what(); \
-            } \
-            else \
-                std::cout << "caught: " << ge << '\n'; \
-        } \
-        catch(std::exception &e) \
-        { \
-            caught = true; \
-            if (strcmp(typeid(e).name(), typeid(b).name()) != 0) \
-            { \
-                wrong_exception = true; \
-                caught_str = typeid(e).name(); \
-                expecting_str = typeid(b).name(); \
-                what = e.what(); \
-            } \
-            else \
-                std::cout << "caught: " << e << '\n'; \
-        } \
-        catch(...) \
-        { \
-            caught = true; \
-            wrong_exception = true; \
-            std::cerr << "unknown exception caught" << '\n'; \
-        } \
-        if(!caught) \
-        { \
-            this->expect_failed("no exception was caught", static_cast<const char *>(__PRETTY_FUNCTION__), __LINE__); \
-        } \
-        else \
-        { \
-            if (wrong_exception) \
-            { \
-                this->expect_failed("wrong exception caught", static_cast<const char *>(__PRETTY_FUNCTION__), __LINE__); \
-                std::cerr << "    - caught: " << '\n'; \
-                std::cerr << "        - type: " << caught_str << '\n'; \
-                std::cerr << "        - what: " << what << '\n'; \
-                std::cerr << "    - expecting: " << expecting_str << '\n'; \
-            } \
-            else \
-                this->inc_pass(); \
-        } \
-    }
-
-/// Expect Exception
-///
 /// This macro is used to pass the function name and line number to
 /// expect_exception_with_args. The argument f is a function that
 /// takes no arguments and returns void. The argument e is a
@@ -190,8 +85,8 @@ struct exception_state
 /// as the exception in the throw statement in function-under-test.
 ///
 /// If the caller wishes to pass a function that takes arguments
-/// they must first std::bind the arguments (with appropriate forwarding as
-/// needed), and pass the result of the bind to expect_exception_with_args.
+/// they must first std::bind the arguments or create a lambda with
+/// the desired call, and pass the result to expect_exception.
 ///
 /// @code
 ///
@@ -213,8 +108,8 @@ struct exception_state
 /// auto f1 = std::bind(&Foo::bar, &foo, arg1, arg1);
 /// auto f2 = std::bind(g, arg1, arg2);
 ///
-/// auto e1 = std::shared_ptr<std::exception>(new std::runtime_error("addition error"));
-/// auto e2 = std::shared_ptr<std::exception>(new std::logic_error("error"));
+/// auto e1 = std::make_shared<std::runtime_error>("addition error"));
+/// auto e2 = std::make_shared<std::logic_error>("error"));
 ///
 /// // unit test succeeds since foo.bar(arg1, arg1) throws runtime_error
 /// this->expect_exception(f1, e1);
@@ -229,39 +124,15 @@ struct exception_state
 ///
 #define expect_exception(f, e) expect_exception_with_args(f, e, __PRETTY_FUNCTION__, __LINE__)
 
-
-/// Expect No Exception
-///
-/// This macro verifies a unit test does not throw an exception. If the unit
-/// test does not throw an exception, the unit test reports a failue and
-/// continues testing.
-///
-/// @code
-///
-/// EXPECT_NO_EXCEPTION(blah.do_something()) // unit test fails if throw()
-///
-/// @endcode
-///
-#define EXPECT_NO_EXCEPTION(a) \
-    { \
-        bool caught = false; \
-        try{ a; } \
-        catch(BaseException &be) { throw; } \
-        catch(bfn::general_exception &ge) { caught = true; } \
-        catch(std::exception &e) { caught = true; } \
-        catch(...) { caught = true; } \
-        EXPECT_FALSE(caught); \
-    }
-
 /// Expect No Exception
 ///
 /// This macro is used to pass the function name and line number to
 /// expect_no_exception_with_args. The argument f is
-/// a function that takes no arguments and returns void.
+/// a callable object that returns void and takes no arguments
 ///
 /// If the caller wishes to pass a function that takes arguments
-/// they must first std::bind the arguments (with appropriate forwarding as
-/// needed), and pass the result of the bind to expect_no_exception_with_args.
+/// they must first std::bind the arguments or create a lambda with
+/// the desired call, and pass the result to expect_no_exception.
 ///
 /// @code
 ///
@@ -436,7 +307,7 @@ struct exception_state
 ///
 /// RUN_UNITTEST_WITH_MOCKS(mocks, [&]
 /// {
-///     EXPECT_TRUE(blah2->do_something(blah1) == true);
+///     this->expect_true(blah2->do_something(blah1) == true);
 /// });
 ///
 /// @endcode
@@ -506,18 +377,21 @@ static void
 check_exception_type(struct exception_state &state, const std::exception &caught, const std::exception &expected)
 {
     state.caught = true;
+    state.caught_str = std::string(typeid(caught).name());
+    state.caught_what = caught.what();
+    state.expecting_str = std::string(typeid(expected).name());
+    state.expecting_what = expected.what();
 
-    if (typeid(caught) != typeid(expected))
+    if (typeid(caught) != typeid(expected) || strcmp(caught.what(), expected.what()) != 0)
     {
         state.wrong_exception = true;
-        state.caught_str = std::string(typeid(caught).name());
-        state.expecting_str = std::string(typeid(expected).name());
-        state.what = std::string(caught.what());
     }
     else
+    {
         std::cout << "caught: " << '\n';
-    std::cout << "    - type: " << caught << '\n';
-    std::cout << "    - what: " << caught.what() << '\n';
+        std::cout << "    - type: " << state.caught_str << '\n';
+        std::cout << "    - what: " << state.caught_what << '\n';
+    }
 }
 
 /// Unit Test
@@ -532,10 +406,10 @@ check_exception_type(struct exception_state &state, const std::exception &caught
 /// @ref debug_ring_ut
 ///
 /// The unit test macros should be used when creating a unit test.
-/// @ref EXPECT_TRUE <br>
-/// @ref EXPECT_FALSE <br>
-/// @ref EXPECT_EXCEPTION <br>
-/// @ref EXPECT_NO_EXCEPTION <br>
+/// @ref expect_true <br>
+/// @ref expect_false <br>
+/// @ref expect_exception <br>
+/// @ref expect_no_exception <br>
 /// @ref ASSERT_TRUE <br>
 /// @ref ASSERT_FALSE <br>
 /// @ref ASSERT_EXCEPTION <br>
@@ -670,21 +544,35 @@ protected:
     }
 
     void
-    compare_exceptions(const struct exception_state &state, gsl::cstring_span<> func, int line)
+    compare_exceptions(const struct exception_state &state, gsl::cstring_span<> func, int line, int path_id = -1)
     {
+        std::string not_caught = "no exception was caught";
+        std::string wrong_caught = "wrong exception caught";
+
+        if (path_id >= 0)
+        {
+            not_caught.append(std::string(" on path number ") + std::to_string(path_id));
+            wrong_caught.append(std::string(" on path number ") + std::to_string(path_id));
+        }
+
         if (!state.caught)
         {
-            this->expect_failed("no exception was caught", func.data(), line);
+            this->expect_failed(not_caught.c_str(), func.data(), line);
+            std::cerr << "    - expecting: " << '\n';
+            std::cout << "        - type: " << state.expecting_str << '\n';
+            std::cout << "        - what: " << state.expecting_what << '\n';
         }
         else
         {
             if (state.wrong_exception)
             {
-                this->expect_failed("wrong exception caught", func.data(), line);
-                std::cerr << "    - caught: " << 'n';
+                this->expect_failed(wrong_caught.c_str(), func.data(), line);
+                std::cerr << "    - caught: " << '\n';
                 std::cout << "        - type: " << state.caught_str << '\n';
-                std::cout << "        - what: " << state.what << '\n';
-                std::cerr << "    - expecting: " << state.expecting_str << 'n';
+                std::cout << "        - what: " << state.caught_what << '\n';
+                std::cerr << "    - expecting: " << '\n';
+                std::cout << "        - type: " << state.expecting_str << '\n';
+                std::cout << "        - what: " << state.expecting_what << '\n';
             }
             else
             {
@@ -702,8 +590,7 @@ protected:
     /// The first argument is a function that takes no
     /// arguments and returns void.  If the caller wishes to pass a function
     /// that takes arguments, they must first std::bind the arguments
-    /// (with appropriate forwarding as needed), and pass the result of the bind
-    /// to expect_exception_with_args.
+    /// or create a lambda, and pass the result to expect_exception_with_args.
     ///
     /// The second argument is a shared_ptr to an instance of a std::exception
     /// for which the dynamic type is the same as the type seen in the throw statement
@@ -733,8 +620,8 @@ protected:
     /// auto f1 = std::bind(&Foo::bar, &foo, arg1, arg1);
     /// auto f2 = std::bind(g, arg1, arg2);
     ///
-    /// auto e1 = std::shared_ptr<std::exception>(new std::runtime_error("addition error"));
-    /// auto e2 = std::shared_ptr<std::exception>(new std::logic_error("error"));
+    /// auto e1 = std::make_shared<std::runtime_error>("addition error"));
+    /// auto e2 = std::make_shared<std::logic_error>("error"));
     ///
     /// // unit test succeeds since foo.bar(arg1, arg1) throws runtime_error
     /// this->expect_exception_with_args(f1, e1, func, 50);
@@ -748,7 +635,7 @@ protected:
     /// @endcode
     ///
     template <typename F> void
-    expect_exception_with_args(F &&f, std::shared_ptr<const std::exception> expected, gsl::cstring_span<> func, int line)
+    expect_exception_with_args(F &&f, std::shared_ptr<const std::exception> expected, gsl::cstring_span<> func, int line, int path_id = -1)
     {
         struct exception_state state = { false, false, "",  "" };
 
@@ -760,10 +647,12 @@ protected:
         {
             state.caught = true;
             state.wrong_exception = true;
+            state.caught_str = "unknown";
+            state.expecting_str = std::string(typeid(expected).name());
             std::cerr << "unknown exception caught" << '\n';
         }
 
-        compare_exceptions(state, func, line);
+        compare_exceptions(state, func, line, path_id);
     }
 
     /// Expect No Exception With Args
@@ -775,8 +664,7 @@ protected:
     /// The first argument is a function that takes no arguments and
     /// returns void.  If the caller wishes to pass a function
     /// that takes arguments, they must first std::bind the arguments
-    /// (with appropriate forwarding as needed), and pass the result of the bind
-    /// to expect_no_exception_with_args.
+    /// or create a lambda, and pass the result expect_no_exception_with_args
     ///
     /// The second and third arguments correspond to __PRETTY_FUNCTION__ and __LINE__
     /// passed in from the expect_no_exception macro.
@@ -806,18 +694,34 @@ protected:
     /// @endcode
     ///
     template <typename F> void
-    expect_no_exception_with_args(F &&f, gsl::cstring_span<> func, int line)
+    expect_no_exception_with_args(F &&f, gsl::cstring_span<> func, int line, int path_id = -1)
     {
         struct exception_state state = { false, false, "",  "" };
 
         try { f(); }
         catch (BaseException &be) { throw; }
-        catch (bfn::general_exception &ge) { state.caught = true; }
-        catch (std::exception &e) { state.caught = true; }
-        catch (...) { state.caught = true; }
+        catch (bfn::general_exception &ge)
+        {
+            state.caught = true;
+            state.caught_str = std::string("caught ") + typeid(ge).name() + "- " + ge.what();
+        }
+        catch (std::exception &e)
+        {
+            state.caught = true;
+            state.caught_str = std::string("caught ") + typeid(e).name() + "- " + e.what();
+        }
+        catch (...)
+        {
+            state.caught = true;
+            state.caught_str = "caught unkown exception";
+        }
 
-        this->expect_false_with_args(state.caught, "caught", func, line);
+        if (path_id >= 0)
+            state.caught_str.append(std::string(" on path number ") + std::to_string(path_id));
+
+        this->expect_false_with_args(state.caught, gsl::string_span<>(state.caught_str), func, line);
     }
+
 
     /// Expect true with args
     ///

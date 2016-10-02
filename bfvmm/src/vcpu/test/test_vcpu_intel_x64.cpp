@@ -24,6 +24,7 @@
 #include <vcpu/vcpu_intel_x64.h>
 #include <debug_ring/debug_ring.h>
 #include <memory_manager/memory_manager.h>
+#include <utility>
 
 extern "C" uint64_t
 __read_cr0(void) noexcept
@@ -59,7 +60,8 @@ virt_to_phys_map() noexcept
 void
 vcpu_ut::test_vcpu_intel_x64_invalid_id()
 {
-    EXPECT_EXCEPTION(std::make_shared<vcpu_intel_x64>(VCPUID_RESERVED), std::invalid_argument);
+    auto e = std::make_shared<std::invalid_argument>("invalid vcpuid");
+    this->expect_exception([&] { std::make_shared<vcpu_intel_x64>(VCPUID_RESERVED); }, e);
 }
 
 void
@@ -70,7 +72,7 @@ vcpu_ut::test_vcpu_intel_x64_null_params_valid_intrinsics()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_NO_EXCEPTION(std::make_shared<vcpu_intel_x64>(0, nullptr, in, nullptr, nullptr, nullptr, nullptr, nullptr));
+        this->expect_no_exception([&] { std::make_shared<vcpu_intel_x64>(0, nullptr, in, nullptr, nullptr, nullptr, nullptr, nullptr); });
     });
 }
 
@@ -87,7 +89,7 @@ vcpu_ut::test_vcpu_intel_x64_valid_params_null_intrinsics()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_NO_EXCEPTION(std::make_shared<vcpu_intel_x64>(0, dr, nullptr, on, cs, eh, vs, gs));
+        this->expect_no_exception([&] { std::make_shared<vcpu_intel_x64>(0, dr, nullptr, on, cs, eh, vs, gs); });
     });
 }
 
@@ -105,7 +107,7 @@ vcpu_ut::test_vcpu_intel_x64_valid()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_NO_EXCEPTION(std::make_shared<vcpu_intel_x64>(0, dr, in, on, cs, eh, vs, gs));
+        this->expect_no_exception([&] { std::make_shared<vcpu_intel_x64>(0, dr, in, on, cs, eh, vs, gs); });
     });
 }
 
@@ -225,7 +227,8 @@ vcpu_ut::test_vcpu_intel_x64_init_vmcs_throws()
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
         auto vc = std::make_shared<vcpu_intel_x64>(0, dr, nullptr, on, cs, eh, vs, gs);
-        EXPECT_EXCEPTION(vc->init(), std::logic_error);
+        auto e = std::make_shared<std::logic_error>("error");
+        this->expect_exception([&] { vc->init(); }, e);
     });
 }
 
@@ -482,7 +485,8 @@ vcpu_ut::test_vcpu_intel_x64_run_no_init()
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
         auto vc = std::make_shared<vcpu_intel_x64>(0, dr, in, on, cs, eh, vs, gs);
-        EXPECT_EXCEPTION(vc->run(), std::runtime_error);
+        auto e = std::make_shared<std::runtime_error>("attempting to run a vcpu that has not been initialized");
+        this->expect_exception([&] { vc->run(); }, e);
     });
 }
 
@@ -518,7 +522,8 @@ vcpu_ut::test_vcpu_intel_x64_run_vmxon_throws()
     {
         auto vc = std::make_shared<vcpu_intel_x64>(0, dr, in, on, cs, eh, vs, gs);
         vc->init();
-        EXPECT_EXCEPTION(vc->run(), std::runtime_error);
+        auto e = std::make_shared<std::runtime_error>("error");
+        this->expect_exception([&] { vc->run(); }, e);
     });
 }
 
@@ -554,7 +559,8 @@ vcpu_ut::test_vcpu_intel_x64_run_vmcs_throws()
     {
         auto vc = std::make_shared<vcpu_intel_x64>(0, dr, in, on, cs, eh, vs, gs);
         vc->init();
-        EXPECT_EXCEPTION(vc->run(), std::runtime_error);
+        auto e = std::make_shared<std::runtime_error>("error");
+        this->expect_exception([&] { vc->run(); }, e);
     });
 }
 
@@ -736,6 +742,7 @@ vcpu_ut::test_vcpu_intel_x64_hlt_vmxon_throws()
         auto vc = std::make_shared<vcpu_intel_x64>(0, dr, in, on, cs, eh, vs, gs);
         vc->init();
         vc->run();
-        EXPECT_EXCEPTION(vc->hlt(), std::runtime_error);
+        auto e = std::make_shared<std::runtime_error>("error");
+        this->expect_exception([&] { vc->hlt(); }, e);
     });
 }

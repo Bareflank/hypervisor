@@ -40,7 +40,8 @@ bfm_ut::test_ioctl_driver_process_invalid_file()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_EXCEPTION(g_driver.process(nullptr, ctl, clp), std::invalid_argument);
+        auto e = std::make_shared<std::invalid_argument>("f == NULL");
+        this->expect_exception([&] { g_driver.process(nullptr, ctl, clp); }, e);
     });
 }
 
@@ -55,7 +56,8 @@ bfm_ut::test_ioctl_driver_process_invalid_ioctl()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_EXCEPTION(g_driver.process(f, nullptr, clp), std::invalid_argument);
+        auto e = std::make_shared<std::invalid_argument>("ctl == NULL");
+        this->expect_exception([&] { g_driver.process(f, nullptr, clp); }, e);
     });
 }
 
@@ -70,7 +72,8 @@ bfm_ut::test_ioctl_driver_process_invalid_command_line_parser()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_EXCEPTION(g_driver.process(f, ctl, nullptr), std::invalid_argument);
+        auto e = std::make_shared<std::invalid_argument>("clp == NULL");
+        this->expect_exception([&] { g_driver.process(f, ctl, nullptr); }, e);
     });
 }
 
@@ -88,7 +91,7 @@ bfm_ut::test_ioctl_driver_process_help()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_NO_EXCEPTION(g_driver.process(f, ctl, clp));
+        this->expect_no_exception([&] { g_driver.process(f, ctl, clp); });
     });
 }
 
@@ -120,7 +123,8 @@ bfm_ut::test_ioctl_driver_process_load_vmm_running()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_EXCEPTION(g_driver.process(f, ctl, clp), bfn::invalid_file_error);
+        auto e = std::make_shared<bfn::invalid_file_error>("driver process load vmm running");
+        this->expect_exception([&] { g_driver.process(f, ctl, clp); }, e);
     });
 }
 
@@ -151,7 +155,8 @@ bfm_ut::test_ioctl_driver_process_load_vmm_loaded()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_EXCEPTION(g_driver.process(f, ctl, clp), bfn::invalid_file_error);
+        auto e = std::make_shared<bfn::invalid_file_error>("driver process load vmm loaded");
+        this->expect_exception([&] { g_driver.process(f, ctl, clp); }, e);
     });
 }
 
@@ -174,7 +179,8 @@ bfm_ut::test_ioctl_driver_process_load_vmm_corrupt()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_EXCEPTION(g_driver.process(f, ctl, clp), bfn::corrupt_vmm_error);
+        auto e = std::make_shared<bfn::corrupt_vmm_error>();
+        this->expect_exception([&] { g_driver.process(f, ctl, clp); }, e);
     });
 }
 
@@ -197,7 +203,8 @@ bfm_ut::test_ioctl_driver_process_load_vmm_unknown_status()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_EXCEPTION(g_driver.process(f, ctl, clp), bfn::unknown_status_error);
+        auto e = std::make_shared<bfn::unknown_status_error>();
+        this->expect_exception([&] { g_driver.process(f, ctl, clp); }, e);
     });
 }
 
@@ -226,7 +233,8 @@ bfm_ut::test_ioctl_driver_process_load_bad_modules_filename()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_EXCEPTION(g_driver.process(f, ctl, clp), bfn::invalid_file_error);
+        auto e = std::make_shared<bfn::invalid_file_error>("driver process load bad modules filename");
+        this->expect_exception([&] { g_driver.process(f, ctl, clp); }, e);
     });
 }
 
@@ -261,7 +269,8 @@ bfm_ut::test_ioctl_driver_process_load_bad_module_filename()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_EXCEPTION(g_driver.process(f, ctl, clp), bfn::invalid_file_error);
+        auto e = std::make_shared<bfn::invalid_file_error>("driver process load bad module filename");
+        this->expect_exception([&] { g_driver.process(f, ctl, clp); }, e);
     });
 }
 
@@ -301,7 +310,8 @@ bfm_ut::test_ioctl_driver_process_load_add_module_failed()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_EXCEPTION(g_driver.process(f, ctl, clp), bfn::ioctl_failed_error);
+        auto e = std::make_shared<bfn::ioctl_failed_error>("driver process load add module failed");
+        this->expect_exception([&] { g_driver.process(f, ctl, clp); }, e);
     });
 }
 
@@ -332,7 +342,8 @@ bfm_ut::test_ioctl_driver_process_load_load_failed()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_EXCEPTION(g_driver.process(f, ctl, clp), bfn::ioctl_failed_error);
+        auto e = std::make_shared<bfn::ioctl_failed_error>("driver process load load failed");
+        this->expect_exception([&] { g_driver.process(f, ctl, clp); }, e);
     });
 }
 
@@ -360,7 +371,7 @@ bfm_ut::test_ioctl_driver_process_load_success()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_NO_EXCEPTION(g_driver.process(f, ctl, clp));
+        this->expect_no_exception([&] { g_driver.process(f, ctl, clp); });
     });
 }
 
@@ -388,7 +399,7 @@ bfm_ut::test_ioctl_driver_process_unload_vmm_running()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_NO_EXCEPTION(g_driver.process(f, ctl, clp));
+        this->expect_no_exception([&] { g_driver.process(f, ctl, clp); });
     });
 }
 
@@ -415,7 +426,7 @@ bfm_ut::test_ioctl_driver_process_unload_vmm_loaded()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_NO_EXCEPTION(g_driver.process(f, ctl, clp));
+        this->expect_no_exception([&] { g_driver.process(f, ctl, clp); });
     });
 }
 
@@ -441,7 +452,7 @@ bfm_ut::test_ioctl_driver_process_unload_vmm_unloaded()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_NO_EXCEPTION(g_driver.process(f, ctl, clp));
+        this->expect_no_exception([&] { g_driver.process(f, ctl, clp); });
     });
 }
 
@@ -464,7 +475,8 @@ bfm_ut::test_ioctl_driver_process_unload_vmm_corrupt()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_EXCEPTION(g_driver.process(f, ctl, clp), bfn::corrupt_vmm_error);
+        auto e = std::make_shared<bfn::corrupt_vmm_error>();
+        this->expect_exception([&] { g_driver.process(f, ctl, clp); }, e);
     });
 }
 
@@ -487,7 +499,8 @@ bfm_ut::test_ioctl_driver_process_unload_vmm_unknown_status()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_EXCEPTION(g_driver.process(f, ctl, clp), bfn::unknown_status_error);
+        auto e = std::make_shared<bfn::unknown_status_error>();
+        this->expect_exception([&] { g_driver.process(f, ctl, clp); }, e);
     });
 }
 
@@ -514,7 +527,8 @@ bfm_ut::test_ioctl_driver_process_unload_unload_failed()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_EXCEPTION(g_driver.process(f, ctl, clp), bfn::ioctl_failed_error);
+        auto e = std::make_shared<bfn::ioctl_failed_error>("driver process unload unload failed");
+        this->expect_exception([&] { g_driver.process(f, ctl, clp); }, e);
     });
 }
 
@@ -538,7 +552,7 @@ bfm_ut::test_ioctl_driver_process_unload_success()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_NO_EXCEPTION(g_driver.process(f, ctl, clp));
+        this->expect_no_exception([&] { g_driver.process(f, ctl, clp); });
     });
 }
 
@@ -564,7 +578,7 @@ bfm_ut::test_ioctl_driver_process_start_vmm_running()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_NO_EXCEPTION(g_driver.process(f, ctl, clp));
+        this->expect_no_exception([&] { g_driver.process(f, ctl, clp); });
     });
 }
 
@@ -590,7 +604,7 @@ bfm_ut::test_ioctl_driver_process_start_vmm_loaded()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_NO_EXCEPTION(g_driver.process(f, ctl, clp));
+        this->expect_no_exception([&] { g_driver.process(f, ctl, clp); });
     });
 }
 
@@ -616,7 +630,8 @@ bfm_ut::test_ioctl_driver_process_start_vmm_unloaded()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_EXCEPTION(g_driver.process(f, ctl, clp), bfn::invalid_vmm_state_error);
+        auto e = std::make_shared<bfn::invalid_vmm_state_error>("driver process start vmm unloaded");
+        this->expect_exception([&] { g_driver.process(f, ctl, clp); }, e);
     });
 }
 
@@ -639,7 +654,8 @@ bfm_ut::test_ioctl_driver_process_start_vmm_corrupt()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_EXCEPTION(g_driver.process(f, ctl, clp), bfn::corrupt_vmm_error);
+        auto e = std::make_shared<bfn::corrupt_vmm_error>();
+        this->expect_exception([&] { g_driver.process(f, ctl, clp); }, e);
     });
 }
 
@@ -662,7 +678,8 @@ bfm_ut::test_ioctl_driver_process_start_vmm_unknown_status()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_EXCEPTION(g_driver.process(f, ctl, clp), bfn::unknown_status_error);
+        auto e = std::make_shared<bfn::unknown_status_error>();
+        this->expect_exception([&] { g_driver.process(f, ctl, clp); }, e);
     });
 }
 
@@ -689,7 +706,8 @@ bfm_ut::test_ioctl_driver_process_start_start_failed()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_EXCEPTION(g_driver.process(f, ctl, clp), bfn::ioctl_failed_error);
+        auto e = std::make_shared<bfn::ioctl_failed_error>("driver process start start failed");
+        this->expect_exception([&] { g_driver.process(f, ctl, clp); }, e);
     });
 }
 
@@ -713,7 +731,7 @@ bfm_ut::test_ioctl_driver_process_start_success()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_NO_EXCEPTION(g_driver.process(f, ctl, clp));
+        this->expect_no_exception([&] { g_driver.process(f, ctl, clp); });
     });
 }
 
@@ -738,7 +756,7 @@ bfm_ut::test_ioctl_driver_process_stop_vmm_loaded()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_NO_EXCEPTION(g_driver.process(f, ctl, clp));
+        this->expect_no_exception([&] { g_driver.process(f, ctl, clp); });
     });
 }
 
@@ -763,7 +781,7 @@ bfm_ut::test_ioctl_driver_process_stop_vmm_unloaded()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_NO_EXCEPTION(g_driver.process(f, ctl, clp));
+        this->expect_no_exception([&] { g_driver.process(f, ctl, clp); });
     });
 }
 
@@ -786,7 +804,8 @@ bfm_ut::test_ioctl_driver_process_stop_vmm_corrupt()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_EXCEPTION(g_driver.process(f, ctl, clp), bfn::corrupt_vmm_error);
+        auto e = std::make_shared<bfn::corrupt_vmm_error>();
+        this->expect_exception([&] { g_driver.process(f, ctl, clp); }, e);
     });
 }
 
@@ -809,7 +828,8 @@ bfm_ut::test_ioctl_driver_process_stop_vmm_unknown_status()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_EXCEPTION(g_driver.process(f, ctl, clp), bfn::unknown_status_error);
+        auto e = std::make_shared<bfn::unknown_status_error>();
+        this->expect_exception([&] { g_driver.process(f, ctl, clp); }, e);
     });
 }
 
@@ -836,7 +856,8 @@ bfm_ut::test_ioctl_driver_process_stop_stop_failed()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_EXCEPTION(g_driver.process(f, ctl, clp), bfn::ioctl_failed_error);
+        auto e = std::make_shared<bfn::ioctl_failed_error>("driver process stop stop failed");
+        this->expect_exception([&] { g_driver.process(f, ctl, clp); }, e);
     });
 }
 
@@ -860,7 +881,7 @@ bfm_ut::test_ioctl_driver_process_stop_success()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_NO_EXCEPTION(g_driver.process(f, ctl, clp));
+        this->expect_no_exception([&] { g_driver.process(f, ctl, clp); });
     });
 }
 
@@ -886,7 +907,8 @@ bfm_ut::test_ioctl_driver_process_dump_vmm_unloaded()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_EXCEPTION(g_driver.process(f, ctl, clp), bfn::invalid_vmm_state_error);
+        auto e = std::make_shared<bfn::invalid_vmm_state_error>("driver process dump vmm unloaded");
+        this->expect_exception([&] { g_driver.process(f, ctl, clp); }, e);
     });
 }
 
@@ -910,7 +932,8 @@ bfm_ut::test_ioctl_driver_process_dump_vmm_corrupted()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_EXCEPTION(g_driver.process(f, ctl, clp), bfn::corrupt_vmm_error);
+        auto e = std::make_shared<bfn::corrupt_vmm_error>();
+        this->expect_exception([&] { g_driver.process(f, ctl, clp); }, e);
     });
 }
 
@@ -934,7 +957,8 @@ bfm_ut::test_ioctl_driver_process_dump_vmm_unknown_status()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_EXCEPTION(g_driver.process(f, ctl, clp), bfn::unknown_status_error);
+        auto e = std::make_shared<bfn::unknown_status_error>();
+        this->expect_exception([&] { g_driver.process(f, ctl, clp); }, e);
     });
 }
 
@@ -962,7 +986,8 @@ bfm_ut::test_ioctl_driver_process_dump_dump_failed()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_EXCEPTION(g_driver.process(f, ctl, clp), bfn::ioctl_failed_error);
+        auto e = std::make_shared<bfn::ioctl_failed_error>("driver process dump dump failed");
+        this->expect_exception([&] { g_driver.process(f, ctl, clp); }, e);
     });
 }
 
@@ -995,7 +1020,7 @@ bfm_ut::test_ioctl_driver_process_dump_success_running()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_NO_EXCEPTION(g_driver.process(f, ctl, clp));
+        this->expect_no_exception([&] { g_driver.process(f, ctl, clp); });
     });
 }
 
@@ -1028,7 +1053,7 @@ bfm_ut::test_ioctl_driver_process_dump_success_loaded()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_NO_EXCEPTION(g_driver.process(f, ctl, clp));
+        this->expect_no_exception([&] { g_driver.process(f, ctl, clp); });
     });
 }
 
@@ -1051,7 +1076,7 @@ bfm_ut::test_ioctl_driver_process_vmm_status_running()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_NO_EXCEPTION(g_driver.process(f, ctl, clp));
+        this->expect_no_exception([&] { g_driver.process(f, ctl, clp); });
     });
 }
 
@@ -1074,7 +1099,7 @@ bfm_ut::test_ioctl_driver_process_vmm_status_loaded()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_NO_EXCEPTION(g_driver.process(f, ctl, clp));
+        this->expect_no_exception([&] { g_driver.process(f, ctl, clp); });
     });
 }
 
@@ -1097,7 +1122,7 @@ bfm_ut::test_ioctl_driver_process_vmm_status_unloaded()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_NO_EXCEPTION(g_driver.process(f, ctl, clp));
+        this->expect_no_exception([&] { g_driver.process(f, ctl, clp); });
     });
 }
 
@@ -1120,7 +1145,7 @@ bfm_ut::test_ioctl_driver_process_vmm_status_corrupt()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_NO_EXCEPTION(g_driver.process(f, ctl, clp));
+        this->expect_no_exception([&] { g_driver.process(f, ctl, clp); });
     });
 }
 
@@ -1143,6 +1168,7 @@ bfm_ut::test_ioctl_driver_process_vmm_status_unknown_status()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_EXCEPTION(g_driver.process(f, ctl, clp), bfn::unknown_status_error);
+        auto e = std::make_shared<bfn::unknown_status_error>();
+        this->expect_exception([&] { g_driver.process(f, ctl, clp); }, e);
     });
 }

@@ -52,7 +52,8 @@ bfm_ut::test_ioctl_driver_inaccessible()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_EXCEPTION(g_ctl.open(), bfn::driver_inaccessible_error);
+        auto e = std::make_shared<bfn::driver_inaccessible_error>();
+        this->expect_exception([&] { g_ctl.open(); }, e);
     });
 }
 
@@ -67,7 +68,8 @@ bfm_ut::test_ioctl_add_module_with_invalid_length()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_EXCEPTION(g_ctl.call_ioctl_add_module(""_s), std::invalid_argument);
+        auto e = std::make_shared<std::invalid_argument>("len <= 0");
+        this->expect_exception([&] { g_ctl.call_ioctl_add_module(""_s); }, e);
     });
 }
 
@@ -83,7 +85,8 @@ bfm_ut::test_ioctl_add_module_failed()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_EXCEPTION(g_ctl.call_ioctl_add_module(data), bfn::ioctl_failed_error);
+        auto e = std::make_shared<bfn::ioctl_failed_error>("ioctl add module failed"_s);
+        this->expect_exception([&] { g_ctl.call_ioctl_add_module(data); }, e);
     });
 }
 
@@ -98,7 +101,8 @@ bfm_ut::test_ioctl_load_vmm_failed()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_EXCEPTION(g_ctl.call_ioctl_load_vmm(), bfn::ioctl_failed_error);
+        auto e = std::make_shared<bfn::ioctl_failed_error>("ioctl load vmm failed"_s);
+        this->expect_exception([&] { g_ctl.call_ioctl_load_vmm(); }, e);
     });
 }
 
@@ -113,7 +117,8 @@ bfm_ut::test_ioctl_unload_vmm_failed()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_EXCEPTION(g_ctl.call_ioctl_unload_vmm(), bfn::ioctl_failed_error);
+        auto e = std::make_shared<bfn::ioctl_failed_error>("ioctl unload vmm failed"_s);
+        this->expect_exception([&] { g_ctl.call_ioctl_unload_vmm(); }, e);
     });
 }
 
@@ -128,7 +133,8 @@ bfm_ut::test_ioctl_start_vmm_failed()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_EXCEPTION(g_ctl.call_ioctl_start_vmm(), bfn::ioctl_failed_error);
+        auto e = std::make_shared<bfn::ioctl_failed_error>("ioctl start vmm failed"_s);
+        this->expect_exception([&] { g_ctl.call_ioctl_start_vmm(); }, e);
     });
 }
 
@@ -143,7 +149,8 @@ bfm_ut::test_ioctl_stop_vmm_failed()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_EXCEPTION(g_ctl.call_ioctl_stop_vmm(), bfn::ioctl_failed_error);
+        auto e = std::make_shared<bfn::ioctl_failed_error>("ioctl stop vmm failed"_s);
+        this->expect_exception([&] { g_ctl.call_ioctl_stop_vmm(); }, e);
     });
 }
 
@@ -158,7 +165,8 @@ bfm_ut::test_ioctl_dump_vmm_with_invalid_drr()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_EXCEPTION(g_ctl.call_ioctl_dump_vmm(nullptr, 0), std::invalid_argument);
+        auto e = std::make_shared<std::invalid_argument>("drr == NULL");
+        this->expect_exception([&] { g_ctl.call_ioctl_dump_vmm(nullptr, 0); }, e);
     });
 }
 
@@ -173,7 +181,8 @@ bfm_ut::test_ioctl_dump_vmm_failed()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_EXCEPTION(g_ctl.call_ioctl_dump_vmm(&g_drr, 0), bfn::ioctl_failed_error);
+        auto e = std::make_shared<bfn::ioctl_failed_error>("ioctl dump vmm failed"_s);
+        this->expect_exception([&] { g_ctl.call_ioctl_dump_vmm(&g_drr, 0); }, e);
     });
 }
 
@@ -188,7 +197,8 @@ bfm_ut::test_ioctl_vmm_status_with_invalid_drr()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_EXCEPTION(g_ctl.call_ioctl_vmm_status(nullptr), std::invalid_argument);
+        auto e = std::make_shared<std::invalid_argument>("status == NULL");
+        this->expect_exception([&] { g_ctl.call_ioctl_vmm_status(nullptr); }, e);
     });
 }
 
@@ -204,6 +214,7 @@ bfm_ut::test_ioctl_vmm_status_failed()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_EXCEPTION(g_ctl.call_ioctl_vmm_status(&status), bfn::ioctl_failed_error);
+        auto e = std::make_shared<bfn::ioctl_failed_error>("ioctl vmm status failed"_s);
+        this->expect_exception([&] { g_ctl.call_ioctl_vmm_status(&status); }, e);
     });
 }

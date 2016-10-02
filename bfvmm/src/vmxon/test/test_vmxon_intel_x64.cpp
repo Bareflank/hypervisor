@@ -83,7 +83,8 @@ virtptr_to_physint(void *ptr)
 void
 vmxon_ut::test_constructor_null_intrinsics()
 {
-    EXPECT_NO_EXCEPTION(vmxon_intel_x64(nullptr));
+    auto f = [&] { vmxon_intel_x64(nullptr); };
+    this->expect_no_exception(f);
 }
 
 static void
@@ -125,7 +126,7 @@ vmxon_ut::test_start_success()
     {
         vmxon_intel_x64 vmxon(in);
 
-        EXPECT_NO_EXCEPTION(vmxon.start());
+        this->expect_no_exception([&] { vmxon.start(); });
     });
 }
 
@@ -142,9 +143,11 @@ vmxon_ut::test_start_start_twice()
     {
         vmxon_intel_x64 vmxon(in);
 
-        EXPECT_NO_EXCEPTION(vmxon.start());
+        this->expect_no_exception([&] { vmxon.start(); });
         g_cr4 = 0;
-        EXPECT_EXCEPTION(vmxon.start(), std::logic_error);
+
+        auto e = std::make_shared<std::logic_error>("vmxon has already been executed");
+        this->expect_exception([&] { vmxon.start(); }, e);
     });
 }
 
@@ -163,7 +166,8 @@ vmxon_ut::test_start_execute_vmxon_already_on_failure()
     {
         vmxon_intel_x64 vmxon(in);
 
-        EXPECT_EXCEPTION(vmxon.start(), std::logic_error);
+        auto e = std::make_shared<std::logic_error>("vmxon already enabled");
+        this->expect_exception([&] { vmxon.start(); }, e);
     });
 }
 
@@ -182,7 +186,8 @@ vmxon_ut::test_start_execute_vmxon_failure()
     {
         vmxon_intel_x64 vmxon(in);
 
-        EXPECT_EXCEPTION(vmxon.start(), std::logic_error);
+        auto e = std::make_shared<std::logic_error>("vmxon failed");
+        this->expect_exception([&] { vmxon.start(); }, e);
     });
 }
 
@@ -201,7 +206,8 @@ vmxon_ut::test_start_check_ia32_vmx_cr4_fixed0_msr_failure()
     {
         vmxon_intel_x64 vmxon(in);
 
-        EXPECT_EXCEPTION(vmxon.start(), std::logic_error);
+        auto e = std::make_shared<std::logic_error>("invalid cr4");
+        this->expect_exception([&] { vmxon.start(); }, e);
     });
 }
 
@@ -221,7 +227,8 @@ vmxon_ut::test_start_check_ia32_vmx_cr4_fixed1_msr_failure()
     {
         vmxon_intel_x64 vmxon(in);
 
-        EXPECT_EXCEPTION(vmxon.start(), std::logic_error);
+        auto e = std::make_shared<std::logic_error>("invalid cr4");
+        this->expect_exception([&] { vmxon.start(); }, e);
     });
 }
 
@@ -243,7 +250,8 @@ vmxon_ut::test_start_enable_vmx_operation_failure()
     {
         vmxon_intel_x64 vmxon(in);
 
-        EXPECT_EXCEPTION(vmxon.start(), std::logic_error);
+        auto e = std::make_shared<std::logic_error>("failed to enable VMXON");
+        this->expect_exception([&] { vmxon.start(); }, e);
     });
 }
 
@@ -265,7 +273,8 @@ vmxon_ut::test_start_v8086_disabled_failure()
     {
         vmxon_intel_x64 vmxon(in);
 
-        EXPECT_EXCEPTION(vmxon.start(), std::logic_error);
+        auto e = std::make_shared<std::logic_error>("v8086 mode is not supported");
+        this->expect_exception([&] { vmxon.start(); }, e);
     });
 }
 
@@ -284,7 +293,8 @@ vmxon_ut::test_start_check_ia32_feature_control_msr()
     {
         vmxon_intel_x64 vmxon(in);
 
-        EXPECT_EXCEPTION(vmxon.start(), std::logic_error);
+        auto e = std::make_shared<std::logic_error>("vmx lock bit == 0 is unsupported");
+        this->expect_exception([&] { vmxon.start(); }, e);
     });
 }
 
@@ -303,7 +313,8 @@ vmxon_ut::test_start_check_ia32_vmx_cr0_fixed0_msr()
     {
         vmxon_intel_x64 vmxon(in);
 
-        EXPECT_EXCEPTION(vmxon.start(), std::logic_error);
+        auto e = std::make_shared<std::logic_error>("invalid cr0");
+        this->expect_exception([&] { vmxon.start(); }, e);
     });
 }
 
@@ -323,7 +334,8 @@ vmxon_ut::test_start_check_ia32_vmx_cr0_fixed1_msr()
     {
         vmxon_intel_x64 vmxon(in);
 
-        EXPECT_EXCEPTION(vmxon.start(), std::logic_error);
+        auto e = std::make_shared<std::logic_error>("invalid cr0");
+        this->expect_exception([&] { vmxon.start(); }, e);
     });
 }
 
@@ -342,7 +354,8 @@ vmxon_ut::test_start_check_vmx_capabilities_msr_memtype_failure()
     {
         vmxon_intel_x64 vmxon(in);
 
-        EXPECT_EXCEPTION(vmxon.start(), std::logic_error);
+        auto e = std::make_shared<std::logic_error>("invalid memory type");
+        this->expect_exception([&] { vmxon.start(); }, e);
     });
 }
 
@@ -361,7 +374,8 @@ vmxon_ut::test_start_check_vmx_capabilities_msr_addr_width_failure()
     {
         vmxon_intel_x64 vmxon(in);
 
-        EXPECT_EXCEPTION(vmxon.start(), std::logic_error);
+        auto e = std::make_shared<std::logic_error>("invalid physical address width");
+        this->expect_exception([&] { vmxon.start(); }, e);
     });
 }
 
@@ -380,7 +394,8 @@ vmxon_ut::test_start_check_vmx_capabilities_true_based_controls_failure()
     {
         vmxon_intel_x64 vmxon(in);
 
-        EXPECT_EXCEPTION(vmxon.start(), std::logic_error);
+        auto e = std::make_shared<std::logic_error>("invalid vmx true based controls");
+        this->expect_exception([&] { vmxon.start(); }, e);
     });
 }
 
@@ -399,7 +414,8 @@ vmxon_ut::test_start_check_cpuid_vmx_supported_failure()
     {
         vmxon_intel_x64 vmxon(in);
 
-        EXPECT_EXCEPTION(vmxon.start(), std::logic_error);
+        auto e = std::make_shared<std::logic_error>("VMX extensions not supported");
+        this->expect_exception([&] { vmxon.start(); }, e);
     });
 }
 
@@ -423,7 +439,8 @@ vmxon_ut::test_start_virt_to_phys_failure()
     {
         vmxon_intel_x64 vmxon(in);
 
-        EXPECT_EXCEPTION(vmxon.start(), std::logic_error);
+        auto e = std::make_shared<std::logic_error>("m_vmxon_region_phys == nullptr");
+        this->expect_exception([&] { vmxon.start(); }, e);
     });
 }
 
@@ -441,7 +458,7 @@ vmxon_ut::test_stop_success()
         vmxon_intel_x64 vmxon(in);
 
         vmxon.start();
-        EXPECT_NO_EXCEPTION(vmxon.stop());
+        this->expect_no_exception([&] { vmxon.stop(); });
     });
 }
 
@@ -459,8 +476,8 @@ vmxon_ut::test_stop_stop_twice()
         vmxon_intel_x64 vmxon(in);
 
         vmxon.start();
-        EXPECT_NO_EXCEPTION(vmxon.stop());
-        EXPECT_NO_EXCEPTION(vmxon.stop());
+        this->expect_no_exception([&] { vmxon.stop(); });
+        this->expect_no_exception([&] { vmxon.stop(); });
     });
 }
 
@@ -484,7 +501,8 @@ vmxon_ut::test_stop_vmxoff_check_failure()
         auto ___ = gsl::finally([&]
         { g_write_cr4_fails = false; });
 
-        EXPECT_EXCEPTION(vmxon.stop(), std::logic_error);
+        auto e = std::make_shared<std::logic_error>("failed to disable VMXON");
+        this->expect_exception([&] { vmxon.stop(); }, e);
     });
 }
 
@@ -504,6 +522,7 @@ vmxon_ut::test_stop_vmxoff_failure()
         vmxon_intel_x64 vmxon(in);
 
         vmxon.start();
-        EXPECT_EXCEPTION(vmxon.stop(), std::logic_error);
+        auto e = std::make_shared<std::logic_error>("vmxoff failed");
+        this->expect_exception([&] { vmxon.stop(); }, e);
     });
 }

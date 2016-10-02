@@ -57,22 +57,23 @@ void
 intrinsics_ut::test_gdt_constructor_zero_size()
 {
     gdt_x64 gdt(0);
-    EXPECT_TRUE(gdt.base() == 0);
-    EXPECT_TRUE(gdt.limit() == 0);
+    this->expect_true(gdt.base() == 0);
+    this->expect_true(gdt.limit() == 0);
 }
 
 void
 intrinsics_ut::test_gdt_constructor_size()
 {
     gdt_x64 gdt(4);
-    EXPECT_TRUE(gdt.base() != 0);
-    EXPECT_TRUE(gdt.limit() == 4 * sizeof(uint64_t));
+    this->expect_true(gdt.base() != 0);
+    this->expect_true(gdt.limit() == 4 * sizeof(uint64_t));
 }
 
 void
 intrinsics_ut::test_gdt_constructor_null_intrinsics()
 {
-    EXPECT_EXCEPTION(gdt_x64(std::shared_ptr<intrinsics_x64>()), std::invalid_argument);
+    auto e = std::make_shared<std::invalid_argument>("gdt_x64: intrinsics == nullptr");
+    this->expect_exception([&] { gdt_x64(std::shared_ptr<intrinsics_x64>()); }, e);
 }
 
 void
@@ -87,7 +88,7 @@ intrinsics_ut::test_gdt_base()
     {
         gdt_x64 gdt(intrinsics);
 
-        EXPECT_TRUE(gdt.base() == reinterpret_cast<uint64_t>(g_gdt.get()));
+        this->expect_true(gdt.base() == reinterpret_cast<uint64_t>(g_gdt.get()));
     });
 }
 
@@ -103,7 +104,7 @@ intrinsics_ut::test_gdt_limit()
     {
         gdt_x64 gdt(intrinsics);
 
-        EXPECT_TRUE(gdt.limit() == 4 * sizeof(uint64_t));
+        this->expect_true(gdt.limit() == 4 * sizeof(uint64_t));
     });
 }
 
@@ -119,7 +120,7 @@ intrinsics_ut::test_gdt_set_base_zero_index()
     {
         gdt_x64 gdt(intrinsics);
 
-        EXPECT_NO_EXCEPTION(gdt.set_base(0, 0x10));
+        this->expect_no_exception([&] { gdt.set_base(0, 0x10); });
     });
 }
 
@@ -135,7 +136,8 @@ intrinsics_ut::test_gdt_set_base_invalid_index()
     {
         gdt_x64 gdt(intrinsics);
 
-        EXPECT_EXCEPTION(gdt.set_base(1000, 0x10), std::invalid_argument);
+        auto e = std::make_shared<std::invalid_argument>("index out of range");
+        this->expect_exception([&] { gdt.set_base(1000, 0x10); }, e);
     });
 }
 
@@ -151,7 +153,8 @@ intrinsics_ut::test_gdt_set_base_tss_at_end_of_gdt()
     {
         gdt_x64 gdt(intrinsics);
 
-        EXPECT_EXCEPTION(gdt.set_base(3, 0x10), std::invalid_argument);
+        auto e = std::make_shared<std::invalid_argument>("index does not point to a valid TSS");
+        this->expect_exception([&] { gdt.set_base(3, 0x10); }, e);
     });
 }
 
@@ -167,8 +170,8 @@ intrinsics_ut::test_gdt_set_base_descriptor_success()
     {
         gdt_x64 gdt(intrinsics);
 
-        EXPECT_NO_EXCEPTION(gdt.set_base(1, 0xBBBBBBBB12345678));
-        EXPECT_TRUE(g_gdt[1] == 0x12FFFF345678FFFF);
+        this->expect_no_exception([&] { gdt.set_base(1, 0xBBBBBBBB12345678); });
+        this->expect_true(g_gdt[1] == 0x12FFFF345678FFFF);
     });
 }
 
@@ -184,9 +187,9 @@ intrinsics_ut::test_gdt_set_base_tss_success()
     {
         gdt_x64 gdt(intrinsics);
 
-        EXPECT_NO_EXCEPTION(gdt.set_base(2, 0x1234567812345678));
-        EXPECT_TRUE(g_gdt[2] == 0x12FF8F345678FFFF);
-        EXPECT_TRUE(g_gdt[3] == 0x0000000012345678);
+        this->expect_no_exception([&] { gdt.set_base(2, 0x1234567812345678); });
+        this->expect_true(g_gdt[2] == 0x12FF8F345678FFFF);
+        this->expect_true(g_gdt[3] == 0x0000000012345678);
     });
 }
 
@@ -202,7 +205,7 @@ intrinsics_ut::test_gdt_base_zero_index()
     {
         gdt_x64 gdt(intrinsics);
 
-        EXPECT_TRUE(gdt.base(0) == 0);
+        this->expect_true(gdt.base(0) == 0);
     });
 }
 
@@ -218,7 +221,8 @@ intrinsics_ut::test_gdt_base_invalid_index()
     {
         gdt_x64 gdt(intrinsics);
 
-        EXPECT_EXCEPTION(gdt.base(1000), std::invalid_argument);
+        auto e = std::make_shared<std::invalid_argument>("index out of range");
+        this->expect_exception([&] { gdt.base(1000); }, e);
     });
 }
 
@@ -234,7 +238,8 @@ intrinsics_ut::test_gdt_base_tss_at_end_of_gdt()
     {
         gdt_x64 gdt(intrinsics);
 
-        EXPECT_EXCEPTION(gdt.base(3), std::invalid_argument);
+        auto e = std::make_shared<std::invalid_argument>("index does not point to a valid TSS");
+        this->expect_exception([&] { gdt.base(3); }, e);
     });
 }
 
@@ -251,7 +256,7 @@ intrinsics_ut::test_gdt_base_descriptor_success()
         gdt_x64 gdt(intrinsics);
 
         g_gdt[1] = 0x12FFFF345678FFFF;
-        EXPECT_TRUE(gdt.base(1) == 0x0000000012345678);
+        this->expect_true(gdt.base(1) == 0x0000000012345678);
     });
 }
 
@@ -269,7 +274,7 @@ intrinsics_ut::test_gdt_base_tss_success()
 
         g_gdt[2] = 0x12FF8F345678FFFF;
         g_gdt[3] = 0x0000000012345678;
-        EXPECT_TRUE(gdt.base(2) == 0x1234567812345678);
+        this->expect_true(gdt.base(2) == 0x1234567812345678);
     });
 }
 
@@ -285,7 +290,7 @@ intrinsics_ut::test_gdt_set_limit_zero_index()
     {
         gdt_x64 gdt(intrinsics);
 
-        EXPECT_NO_EXCEPTION(gdt.set_limit(0, 0x10));
+        this->expect_no_exception([&] { gdt.set_limit(0, 0x10); });
     });
 }
 
@@ -301,7 +306,8 @@ intrinsics_ut::test_gdt_set_limit_invalid_index()
     {
         gdt_x64 gdt(intrinsics);
 
-        EXPECT_EXCEPTION(gdt.set_limit(1000, 0x10), std::invalid_argument);
+        auto e = std::make_shared<std::invalid_argument>("index out of range");
+        this->expect_exception([&] { gdt.set_limit(1000, 0x10); }, e);
     });
 }
 
@@ -317,8 +323,8 @@ intrinsics_ut::test_gdt_set_limit_descriptor_success()
     {
         gdt_x64 gdt(intrinsics);
 
-        EXPECT_NO_EXCEPTION(gdt.set_limit(1, 0x12345678));
-        EXPECT_TRUE(g_gdt[1] == 0xFFF1FFFFFFFF2345);
+        this->expect_no_exception([&] { gdt.set_limit(1, 0x12345678); });
+        this->expect_true(g_gdt[1] == 0xFFF1FFFFFFFF2345);
     });
 }
 
@@ -334,7 +340,7 @@ intrinsics_ut::test_gdt_limit_zero_index()
     {
         gdt_x64 gdt(intrinsics);
 
-        EXPECT_TRUE(gdt.limit(0) == 0);
+        this->expect_true(gdt.limit(0) == 0);
     });
 }
 
@@ -350,7 +356,8 @@ intrinsics_ut::test_gdt_limit_invalid_index()
     {
         gdt_x64 gdt(intrinsics);
 
-        EXPECT_EXCEPTION(gdt.limit(1000), std::invalid_argument);
+        auto e = std::make_shared<std::invalid_argument>("index out of range");
+        this->expect_exception([&] { gdt.limit(1000); }, e);
     });
 }
 
@@ -367,7 +374,7 @@ intrinsics_ut::test_gdt_limit_descriptor_success()
         gdt_x64 gdt(intrinsics);
 
         g_gdt[1] = 0xFFF4FFFFFFFF5678;
-        EXPECT_TRUE(gdt.limit(1) == 0x0000000045678FFF);
+        this->expect_true(gdt.limit(1) == 0x0000000045678FFF);
     });
 }
 
@@ -384,7 +391,7 @@ intrinsics_ut::test_gdt_limit_descriptor_in_bytes_success()
         gdt_x64 gdt(intrinsics);
 
         g_gdt[1] = 0xFF74FFFFFFFF5678;
-        EXPECT_TRUE(gdt.limit(1) == 0x0000000000045678);
+        this->expect_true(gdt.limit(1) == 0x0000000000045678);
     });
 }
 
@@ -400,7 +407,7 @@ intrinsics_ut::test_gdt_set_access_rights_zero_index()
     {
         gdt_x64 gdt(intrinsics);
 
-        EXPECT_NO_EXCEPTION(gdt.set_access_rights(0, 0x10));
+        this->expect_no_exception([&] { gdt.set_access_rights(0, 0x10); });
     });
 }
 
@@ -416,7 +423,8 @@ intrinsics_ut::test_gdt_set_access_rights_invalid_index()
     {
         gdt_x64 gdt(intrinsics);
 
-        EXPECT_EXCEPTION(gdt.set_access_rights(1000, 0x10), std::invalid_argument);
+        auto e = std::make_shared<std::invalid_argument>("index out of range");
+        this->expect_exception([&] { gdt.set_access_rights(1000, 0x10); }, e);
     });
 }
 
@@ -432,8 +440,8 @@ intrinsics_ut::test_gdt_set_access_rights_descriptor_success()
     {
         gdt_x64 gdt(intrinsics);
 
-        EXPECT_NO_EXCEPTION(gdt.set_access_rights(1, 0x12345678));
-        EXPECT_TRUE(g_gdt[1] == 0xFF5F78FFFFFFFFFF);
+        this->expect_no_exception([&] { gdt.set_access_rights(1, 0x12345678); });
+        this->expect_true(g_gdt[1] == 0xFF5F78FFFFFFFFFF);
     });
 }
 
@@ -449,7 +457,7 @@ intrinsics_ut::test_gdt_access_rights_zero_index()
     {
         gdt_x64 gdt(intrinsics);
 
-        EXPECT_TRUE(gdt.access_rights(0) == 0x10000);
+        this->expect_true(gdt.access_rights(0) == 0x10000);
     });
 }
 
@@ -465,7 +473,8 @@ intrinsics_ut::test_gdt_access_rights_invalid_index()
     {
         gdt_x64 gdt(intrinsics);
 
-        EXPECT_EXCEPTION(gdt.access_rights(1000), std::invalid_argument);
+        auto e = std::make_shared<std::invalid_argument>("index out of range");
+        this->expect_exception([&] { gdt.access_rights(1000); }, e);
     });
 }
 
@@ -482,6 +491,6 @@ intrinsics_ut::test_gdt_access_rights_descriptor_success()
         gdt_x64 gdt(intrinsics);
 
         g_gdt[1] = 0xFF5F78FFFFFFFFFF;
-        EXPECT_TRUE(gdt.access_rights(1) == 0x0000000000005078);
+        this->expect_true(gdt.access_rights(1) == 0x0000000000005078);
     });
 }
