@@ -31,7 +31,7 @@ bfelf_loader_ut::test_bfelf_loader_add_invalid_loader()
     ASSERT_TRUE(ret == BFELF_SUCCESS);
 
     ret = bfelf_loader_add(nullptr, &dummy_misc_ef, m_dummy_misc_exec.get());
-    EXPECT_TRUE(ret == BFELF_ERROR_INVALID_ARG);
+    this->expect_true(ret == BFELF_ERROR_INVALID_ARG);
 }
 
 void
@@ -41,7 +41,7 @@ bfelf_loader_ut::test_bfelf_loader_add_invalid_elf_file()
     memset(&loader, 0, sizeof(loader));
 
     auto ret = bfelf_loader_add(&loader, nullptr, m_dummy_misc_exec.get());
-    EXPECT_TRUE(ret == BFELF_ERROR_INVALID_ARG);
+    this->expect_true(ret == BFELF_ERROR_INVALID_ARG);
 }
 
 void
@@ -59,9 +59,9 @@ bfelf_loader_ut::test_bfelf_loader_add_too_many_files()
     for (auto i = 0; i < BFELF_MAX_MODULES; i++)
     {
         ret = bfelf_loader_add(&loader, &dummy_misc_ef, m_dummy_misc_exec.get());
-        EXPECT_TRUE(ret == BFELF_SUCCESS);
+        this->expect_true(ret == BFELF_SUCCESS);
     }
 
     ret = bfelf_loader_add(&loader, &dummy_misc_ef, m_dummy_misc_exec.get());
-    EXPECT_TRUE(ret == BFELF_ERROR_LOADER_FULL);
+    this->expect_true(ret == BFELF_ERROR_LOADER_FULL);
 }

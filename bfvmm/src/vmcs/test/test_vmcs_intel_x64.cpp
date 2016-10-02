@@ -330,7 +330,7 @@ vmcs_ut::test_launch_success()
     {
         vmcs_intel_x64 vmcs{};
 
-        EXPECT_NO_EXCEPTION(vmcs.launch(host_state, guest_state));
+        this->expect_no_exception([&] { vmcs.launch(host_state, guest_state); });
     });
 }
 
@@ -360,7 +360,7 @@ vmcs_ut::test_launch_vmlaunch_failure()
         for (const auto &sub_path : cfg)
             sub_path.setup();
 
-        EXPECT_EXCEPTION(vmcs.launch(host_state, guest_state), std::runtime_error);
+        this->expect_exception([&] { vmcs.launch(host_state, guest_state); }, ""_ut_ree);
     });
 }
 
@@ -406,7 +406,8 @@ vmcs_ut::test_launch_create_exit_handler_stack_failure()
         { g_new_throws_bad_alloc = 0; });
 
         g_new_throws_bad_alloc = STACK_SIZE * 2;
-        EXPECT_EXCEPTION(vmcs.launch(host_state, guest_state), std::bad_alloc);
+
+        this->expect_exception([&] { vmcs.launch(host_state, guest_state); }, ""_ut_bae);
     });
 }
 
@@ -428,7 +429,7 @@ vmcs_ut::test_launch_clear_failure()
         { g_vmclear_fails = false; });
 
         g_vmclear_fails = true;
-        EXPECT_EXCEPTION(vmcs.launch(host_state, guest_state), std::runtime_error);
+        this->expect_exception([&]{ vmcs.launch(host_state, guest_state); }, ""_ut_ree);
     });
 }
 
@@ -450,7 +451,7 @@ vmcs_ut::test_launch_load_failure()
         { g_vmload_fails = false; });
 
         g_vmload_fails = true;
-        EXPECT_EXCEPTION(vmcs.launch(host_state, guest_state), std::runtime_error);
+        this->expect_exception([&]{ vmcs.launch(host_state, guest_state); }, ""_ut_ree);
     });
 }
 
@@ -464,7 +465,7 @@ vmcs_ut::test_promote_failure()
     {
         vmcs_intel_x64 vmcs{};
 
-        EXPECT_EXCEPTION(vmcs.promote(), std::runtime_error);
+        this->expect_exception([&] { vmcs.promote(); }, ""_ut_ree);
     });
 }
 
@@ -477,8 +478,7 @@ vmcs_ut::test_resume_failure()
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
         vmcs_intel_x64 vmcs{};
-
-        EXPECT_EXCEPTION(vmcs.resume(), std::runtime_error);
+        this->expect_exception([&] { vmcs.resume(); }, ""_ut_ree);
     });
 }
 
@@ -488,8 +488,7 @@ vmcs_ut::test_get_vmcs_field()
     constexpr const auto name = "field";
     auto exists = true;
 
-    this->expect_exception([&] { get_vmcs_field(0U, name, !exists); },
-                           std::make_shared<std::logic_error>("field doesn't exist"));
+    this->expect_exception([&] { get_vmcs_field(0U, name, !exists); }, ""_ut_lee);
 
     g_vmcs_fields[0U] = 42U;
     this->expect_true(get_vmcs_field(0U, name, exists) == 42U);
@@ -515,8 +514,7 @@ vmcs_ut::test_set_vmcs_field()
     auto exists = true;
     g_vmcs_fields[0U] = 0U;
 
-    this->expect_exception([&] { set_vmcs_field(1U, 0U, name, !exists); },
-                           std::make_shared<std::logic_error>("doesn't exist"));
+    this->expect_exception([&] { set_vmcs_field(1U, 0U, name, !exists); }, ""_ut_lee);
     this->expect_true(g_vmcs_fields[0U] == 0U);
 
     this->expect_no_exception([&] { set_vmcs_field(1U, 0U, name, exists); });
@@ -553,24 +551,21 @@ vmcs_ut::test_set_vm_control()
     auto ctls_addr = 0UL;
     auto msr_addr = 0U;
 
-    this->expect_exception([&] { set_vm_control(1UL, msr_addr, ctls_addr, name, mask, !exists); },
-                           std::make_shared<std::logic_error>("vmcs field doesn't exist"));
+    this->expect_exception([&] { set_vm_control(1UL, msr_addr, ctls_addr, name, mask, !exists); }, ""_ut_lee);
 
     g_msrs[msr_addr] = ~mask;
     this->expect_no_exception([&] { set_vm_control(0UL, msr_addr, ctls_addr, name, mask, exists); });
     this->expect_true((g_vmcs_fields[ctls_addr] & mask) == 0UL);
 
     g_msrs[msr_addr] = mask;
-    this->expect_exception([&] { set_vm_control(0UL, msr_addr, ctls_addr, name, mask, exists); },
-                           std::make_shared<std::logic_error>("control is not allowed to be cleared to 0"));
+    this->expect_exception([&] { set_vm_control(0UL, msr_addr, ctls_addr, name, mask, exists); }, ""_ut_lee);
 
     g_msrs[msr_addr] = mask << 32;
     this->expect_no_exception([&] { set_vm_control(1UL, msr_addr, ctls_addr, name, mask, exists); });
     this->expect_true((g_vmcs_fields[ctls_addr] & mask) != 0UL);
 
     g_msrs[msr_addr] = ~(mask << 32);
-    this->expect_exception([&] { set_vm_control(1UL, msr_addr, ctls_addr, name, mask, exists); },
-                           std::make_shared<std::logic_error>("control is not allowed to be set to 1"));
+    this->expect_exception([&] { set_vm_control(1UL, msr_addr, ctls_addr, name, mask, exists); }, ""_ut_lee);
 }
 
 void
@@ -611,17 +606,14 @@ vmcs_ut::test_set_vm_function_control()
     auto ctls_addr = 0UL;
     auto msr_addr = 0U;
 
-    this->expect_exception([&] { set_vm_function_control(true, msr_addr, ctls_addr, name, mask, !exists); },
-                           std::make_shared<std::logic_error>("vm_functions controls doesn't exist"));
-
+    this->expect_exception([&] { set_vm_function_control(true, msr_addr, ctls_addr, name, mask, !exists); }, ""_ut_lee);
     this->expect_no_exception([&] { set_vm_function_control(false, msr_addr, ctls_addr, name, mask, exists); });
 
     g_msrs[msr_addr] = mask;
     this->expect_no_exception([&] { set_vm_function_control(true, msr_addr, ctls_addr, name, mask, exists); });
 
     g_msrs[msr_addr] = ~mask;
-    this->expect_exception([&] { set_vm_function_control(true, msr_addr, ctls_addr, name, mask, exists); },
-                           std::make_shared<std::logic_error>("control is not allowed to be set to 1"));
+    this->expect_exception([&] { set_vm_function_control(true, msr_addr, ctls_addr, name, mask, exists); }, ""_ut_lee);
 }
 
 void

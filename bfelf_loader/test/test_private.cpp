@@ -72,7 +72,7 @@ extern "C"
 void
 bfelf_loader_ut::test_private_bfelf_error()
 {
-    EXPECT_TRUE(bfelf_error(0) == "SUCCESS"_s);
+    this->expect_true(bfelf_error(0) == "SUCCESS"_s);
 }
 
 void
@@ -86,7 +86,7 @@ bfelf_loader_ut::test_private_invalid_symbol_index()
     ef.symnum = 1;
     ef.strtab = &strtab;
 
-    EXPECT_TRUE(private_check_symbol(&ef, 2, &name, &sym) == BFELF_ERROR_MISMATCH);
+    this->expect_true(private_check_symbol(&ef, 2, &name, &sym) == BFELF_ERROR_MISMATCH);
 }
 
 void
@@ -110,7 +110,7 @@ bfelf_loader_ut::test_private_corrupt_symbol_table()
     strtab.sh_size = 5;
     strtab.sh_offset = 0;
 
-    EXPECT_TRUE(private_check_symbol(&ef, 0, &name, &sym) == BFELF_ERROR_MISMATCH);
+    this->expect_true(private_check_symbol(&ef, 0, &name, &sym) == BFELF_ERROR_MISMATCH);
 }
 
 void
@@ -125,7 +125,7 @@ bfelf_loader_ut::test_private_relocate_invalid_index()
 
     ef.strtab = &strtab;
 
-    EXPECT_TRUE(private_relocate_symbol(&loader, &ef, &rela) == BFELF_ERROR_INVALID_INDEX);
+    this->expect_true(private_relocate_symbol(&loader, &ef, &rela) == BFELF_ERROR_INVALID_INDEX);
 }
 
 void
@@ -152,7 +152,7 @@ bfelf_loader_ut::test_private_relocate_invalid_name()
     gsl::at(symtab, 0).st_name = 0xFFFFF;
     gsl::at(symtab, 0).st_value = 0x0;
 
-    EXPECT_TRUE(private_relocate_symbol(&loader, &ef, &rela) == BFELF_ERROR_INVALID_FILE);
+    this->expect_true(private_relocate_symbol(&loader, &ef, &rela) == BFELF_ERROR_INVALID_FILE);
 }
 
 void
@@ -182,7 +182,7 @@ bfelf_loader_ut::test_private_relocate_invalid_relocation()
     gsl::at(symtab, 0).st_name = 0xFFFFF;
     gsl::at(symtab, 0).st_value = 0x1;
 
-    EXPECT_TRUE(private_relocate_symbol(&loader, &ef, &rela) == BFELF_ERROR_UNSUPPORTED_RELA);
+    this->expect_true(private_relocate_symbol(&loader, &ef, &rela) == BFELF_ERROR_UNSUPPORTED_RELA);
 }
 
 void
@@ -207,7 +207,7 @@ bfelf_loader_ut::test_private_get_section_invalid_name()
 
     shstrtab.sh_size = 0;
 
-    EXPECT_TRUE(private_get_section_by_name(&ef, &name, &shdr) == BFELF_ERROR_INVALID_FILE);
+    this->expect_true(private_get_section_by_name(&ef, &name, &shdr) == BFELF_ERROR_INVALID_FILE);
 }
 
 void
@@ -231,7 +231,7 @@ bfelf_loader_ut::test_private_symbol_table_sections_invalid_dynsym()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_TRUE(private_symbol_table_sections(&ef) == -1);
+        this->expect_true(private_symbol_table_sections(&ef) == -1);
     });
 }
 
@@ -256,7 +256,7 @@ bfelf_loader_ut::test_private_symbol_table_sections_invalid_hash()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_TRUE(private_symbol_table_sections(&ef) == -1);
+        this->expect_true(private_symbol_table_sections(&ef) == -1);
     });
 }
 
@@ -280,7 +280,7 @@ bfelf_loader_ut::test_private_string_table_sections_invalid()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_TRUE(private_get_string_table_sections(&ef) == -1);
+        this->expect_true(private_get_string_table_sections(&ef) == -1);
     });
 }
 
@@ -300,7 +300,7 @@ bfelf_loader_ut::test_private_get_relocation_tables_invalid_type()
 
     gsl::at(shdrtab, 0).sh_type = bfsht_rel;
 
-    EXPECT_TRUE(private_get_relocation_tables(&ef) == BFELF_ERROR_UNSUPPORTED_RELA);
+    this->expect_true(private_get_relocation_tables(&ef) == BFELF_ERROR_UNSUPPORTED_RELA);
 }
 
 void
@@ -325,7 +325,7 @@ bfelf_loader_ut::test_private_get_relocation_tables_invalid_section()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_TRUE(private_get_relocation_tables(&ef) == -1);
+        this->expect_true(private_get_relocation_tables(&ef) == -1);
     });
 }
 
@@ -334,5 +334,5 @@ bfelf_loader_ut::test_private_hash()
 {
     const char name[2] = {static_cast<char>(-1), static_cast<char>(0)};
 
-    EXPECT_TRUE(private_hash(static_cast<const char *>(name)) != 0);
+    this->expect_true(private_hash(static_cast<const char *>(name)) != 0);
 }

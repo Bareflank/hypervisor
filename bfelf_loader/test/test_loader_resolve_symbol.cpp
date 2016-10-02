@@ -46,7 +46,7 @@ bfelf_loader_ut::test_bfelf_loader_resolve_symbol_invalid_loader()
     e_string_t name = {"foo", 3};
 
     auto ret = bfelf_loader_resolve_symbol(nullptr, &name, reinterpret_cast<void **>(&func));
-    EXPECT_TRUE(ret == BFELF_ERROR_INVALID_ARG);
+    this->expect_true(ret == BFELF_ERROR_INVALID_ARG);
 }
 
 void
@@ -58,7 +58,7 @@ bfelf_loader_ut::test_bfelf_loader_resolve_symbol_invalid_name()
     memset(&loader, 0, sizeof(loader));
 
     auto ret = bfelf_loader_resolve_symbol(&loader, nullptr, reinterpret_cast<void **>(&func));
-    EXPECT_TRUE(ret == BFELF_ERROR_INVALID_ARG);
+    this->expect_true(ret == BFELF_ERROR_INVALID_ARG);
 }
 
 void
@@ -70,7 +70,7 @@ bfelf_loader_ut::test_bfelf_loader_resolve_symbol_invalid_addr()
     memset(&loader, 0, sizeof(loader));
 
     auto ret = bfelf_loader_resolve_symbol(&loader, &name, nullptr);
-    EXPECT_TRUE(ret == BFELF_ERROR_INVALID_ARG);
+    this->expect_true(ret == BFELF_ERROR_INVALID_ARG);
 }
 
 void
@@ -85,7 +85,7 @@ bfelf_loader_ut::test_bfelf_loader_resolve_symbol_no_relocation()
     e_string_t name = {"foo", 3};
 
     ret = bfelf_loader_resolve_symbol(&loader, &name, reinterpret_cast<void **>(&func));
-    EXPECT_TRUE(ret == BFELF_ERROR_OUT_OF_ORDER);
+    this->expect_true(ret == BFELF_ERROR_OUT_OF_ORDER);
 }
 
 void
@@ -97,13 +97,13 @@ bfelf_loader_ut::test_bfelf_loader_resolve_symbol_no_files_added()
     memset(&loader, 0, sizeof(loader));
 
     ret = bfelf_loader_relocate(&loader);
-    EXPECT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     func_t func;
     e_string_t name = {"foo", 3};
 
     ret = bfelf_loader_resolve_symbol(&loader, &name, reinterpret_cast<void **>(&func));
-    EXPECT_TRUE(ret == BFELF_ERROR_NO_SUCH_SYMBOL);
+    this->expect_true(ret == BFELF_ERROR_NO_SUCH_SYMBOL);
 }
 
 void
@@ -119,18 +119,18 @@ bfelf_loader_ut::test_bfelf_loader_resolve_symbol_uninitialized_files()
     memset(&loader, 0, sizeof(loader));
 
     ret = bfelf_loader_add(&loader, &ef1, nullptr);
-    EXPECT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
     ret = bfelf_loader_add(&loader, &ef2, nullptr);
-    EXPECT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     ret = bfelf_loader_relocate(&loader);
-    EXPECT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     func_t func;
     e_string_t name = {"foo", 3};
 
     ret = bfelf_loader_resolve_symbol(&loader, &name, reinterpret_cast<void **>(&func));
-    EXPECT_TRUE(ret == BFELF_ERROR_NO_SUCH_SYMBOL);
+    this->expect_true(ret == BFELF_ERROR_NO_SUCH_SYMBOL);
 }
 
 void
@@ -159,13 +159,13 @@ bfelf_loader_ut::test_bfelf_loader_resolve_no_such_symbol()
     ASSERT_TRUE(ret == BFELF_SUCCESS);
 
     ret = bfelf_loader_relocate(&loader);
-    EXPECT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     func_t func;
     e_string_t name = {"fighters", 8};
 
     ret = bfelf_loader_resolve_symbol(&loader, &name, reinterpret_cast<void **>(&func));
-    EXPECT_TRUE(ret == BFELF_ERROR_NO_SUCH_SYMBOL);
+    this->expect_true(ret == BFELF_ERROR_NO_SUCH_SYMBOL);
 }
 
 void
@@ -194,13 +194,13 @@ bfelf_loader_ut::test_bfelf_loader_resolve_zero_length_symbol()
     ASSERT_TRUE(ret == BFELF_SUCCESS);
 
     ret = bfelf_loader_relocate(&loader);
-    EXPECT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     func_t func;
     e_string_t name = {"foo", 0};
 
     ret = bfelf_loader_resolve_symbol(&loader, &name, reinterpret_cast<void **>(&func));
-    EXPECT_TRUE(ret == BFELF_ERROR_NO_SUCH_SYMBOL);
+    this->expect_true(ret == BFELF_ERROR_NO_SUCH_SYMBOL);
 }
 
 void
@@ -229,13 +229,13 @@ bfelf_loader_ut::test_bfelf_loader_resolve_invalid_symbol_length()
     ASSERT_TRUE(ret == BFELF_SUCCESS);
 
     ret = bfelf_loader_relocate(&loader);
-    EXPECT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     func_t func;
     e_string_t name = {"foo", 2};
 
     ret = bfelf_loader_resolve_symbol(&loader, &name, reinterpret_cast<void **>(&func));
-    EXPECT_TRUE(ret == BFELF_ERROR_NO_SUCH_SYMBOL);
+    this->expect_true(ret == BFELF_ERROR_NO_SUCH_SYMBOL);
 }
 
 void
@@ -264,13 +264,13 @@ bfelf_loader_ut::test_bfelf_loader_resolve_symbol_length_too_large()
     ASSERT_TRUE(ret == BFELF_SUCCESS);
 
     ret = bfelf_loader_relocate(&loader);
-    EXPECT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     func_t func;
     e_string_t name = {"foo", 1000};
 
     ret = bfelf_loader_resolve_symbol(&loader, &name, reinterpret_cast<void **>(&func));
-    EXPECT_TRUE(ret == BFELF_ERROR_NO_SUCH_SYMBOL);
+    this->expect_true(ret == BFELF_ERROR_NO_SUCH_SYMBOL);
 }
 
 void
@@ -299,13 +299,13 @@ bfelf_loader_ut::test_bfelf_loader_resolve_symbol_success()
     ASSERT_TRUE(ret == BFELF_SUCCESS);
 
     ret = bfelf_loader_relocate(&loader);
-    EXPECT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     func_t func;
     e_string_t name = {"foo", 3};
 
     ret = bfelf_loader_resolve_symbol(&loader, &name, reinterpret_cast<void **>(&func));
-    EXPECT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 }
 
 void
@@ -337,13 +337,13 @@ bfelf_loader_ut::test_bfelf_loader_resolve_no_such_symbol_no_hash()
     ASSERT_TRUE(ret == BFELF_SUCCESS);
 
     ret = bfelf_loader_relocate(&loader);
-    EXPECT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     func_t func;
     e_string_t name = {"fighters", 8};
 
     ret = bfelf_loader_resolve_symbol(&loader, &name, reinterpret_cast<void **>(&func));
-    EXPECT_TRUE(ret == BFELF_ERROR_NO_SUCH_SYMBOL);
+    this->expect_true(ret == BFELF_ERROR_NO_SUCH_SYMBOL);
 }
 
 void
@@ -375,13 +375,13 @@ bfelf_loader_ut::test_bfelf_loader_resolve_zero_length_symbol_no_hash()
     ASSERT_TRUE(ret == BFELF_SUCCESS);
 
     ret = bfelf_loader_relocate(&loader);
-    EXPECT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     func_t func;
     e_string_t name = {"foo", 0};
 
     ret = bfelf_loader_resolve_symbol(&loader, &name, reinterpret_cast<void **>(&func));
-    EXPECT_TRUE(ret == BFELF_ERROR_NO_SUCH_SYMBOL);
+    this->expect_true(ret == BFELF_ERROR_NO_SUCH_SYMBOL);
 }
 
 void
@@ -413,13 +413,13 @@ bfelf_loader_ut::test_bfelf_loader_resolve_invalid_symbol_length_no_hash()
     ASSERT_TRUE(ret == BFELF_SUCCESS);
 
     ret = bfelf_loader_relocate(&loader);
-    EXPECT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     func_t func;
     e_string_t name = {"foo", 2};
 
     ret = bfelf_loader_resolve_symbol(&loader, &name, reinterpret_cast<void **>(&func));
-    EXPECT_TRUE(ret == BFELF_ERROR_NO_SUCH_SYMBOL);
+    this->expect_true(ret == BFELF_ERROR_NO_SUCH_SYMBOL);
 }
 
 void
@@ -451,13 +451,13 @@ bfelf_loader_ut::test_bfelf_loader_resolve_symbol_length_too_large_no_hash()
     ASSERT_TRUE(ret == BFELF_SUCCESS);
 
     ret = bfelf_loader_relocate(&loader);
-    EXPECT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     func_t func;
     e_string_t name = {"foo", 1000};
 
     ret = bfelf_loader_resolve_symbol(&loader, &name, reinterpret_cast<void **>(&func));
-    EXPECT_TRUE(ret == BFELF_ERROR_NO_SUCH_SYMBOL);
+    this->expect_true(ret == BFELF_ERROR_NO_SUCH_SYMBOL);
 }
 
 void
@@ -489,13 +489,13 @@ bfelf_loader_ut::test_bfelf_loader_resolve_symbol_success_no_hash()
     ASSERT_TRUE(ret == BFELF_SUCCESS);
 
     ret = bfelf_loader_relocate(&loader);
-    EXPECT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     func_t func;
     e_string_t name = {"foo", 3};
 
     ret = bfelf_loader_resolve_symbol(&loader, &name, reinterpret_cast<void **>(&func));
-    EXPECT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 }
 
 void
@@ -524,7 +524,7 @@ bfelf_loader_ut::test_bfelf_loader_resolve_symbol_real_test()
     ASSERT_TRUE(ret == BFELF_SUCCESS);
 
     ret = bfelf_loader_relocate(&loader);
-    EXPECT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     {
         section_info_t info;
@@ -555,7 +555,7 @@ bfelf_loader_ut::test_bfelf_loader_resolve_symbol_real_test()
         ret = bfelf_loader_resolve_symbol(&loader, &name, reinterpret_cast<void **>(&func));
         ASSERT_TRUE(ret == BFELF_SUCCESS);
 
-        EXPECT_TRUE(func(5) == 1005);
+        this->expect_true(func(5) == 1005);
     }
 
     {
@@ -607,7 +607,7 @@ bfelf_loader_ut::test_bfelf_file_resolve_symbol_resolve_fail()
     ASSERT_TRUE(ret == BFELF_SUCCESS);
 
     ret = bfelf_loader_relocate(&loader);
-    EXPECT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     MockRepository mocks;
     mocks.OnCallFunc(private_resolve_symbol).Return(-1);
@@ -652,7 +652,7 @@ bfelf_loader_ut::test_bfelf_loader_resolve_symbol_resolve_fail()
     ASSERT_TRUE(ret == BFELF_SUCCESS);
 
     ret = bfelf_loader_relocate(&loader);
-    EXPECT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     MockRepository mocks;
     mocks.OnCallFunc(private_resolve_symbol).Return(-1);

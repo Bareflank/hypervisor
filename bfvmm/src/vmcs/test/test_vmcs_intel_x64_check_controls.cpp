@@ -160,8 +160,7 @@ vmcs_ut::test_check_control_ctls_reserved_properly_set()
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
         vmcs_intel_x64 vmcs{};
-
-        EXPECT_NO_EXCEPTION(vmcs.check_control_ctls_reserved_properly_set(msr_addr, ctls, name));
+        this->expect_no_exception([&]{ vmcs.check_control_ctls_reserved_properly_set(msr_addr, ctls, name); });
     });
 }
 
@@ -174,11 +173,11 @@ setup_check_control_pin_based_ctls_reserved_properly_set_paths(std::vector<struc
 
     path.setup = [&] { g_msrs[msrs::ia32_vmx_true_pinbased_ctls::addr] = 1; };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("invalid pin_based_vm_execution_controls"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&] { vmcs::pin_based_vm_execution_controls::set(1UL); };
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("invalid pin_based_vm_execution_controls"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 }
 
@@ -191,11 +190,11 @@ setup_check_control_proc_based_ctls_reserved_properly_set_paths(std::vector<stru
 
     path.setup = [&] { g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = 1; };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("invalid primary_processor_based_vm_execution_controls"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&] { vmcs::primary_processor_based_vm_execution_controls::set(1UL); };
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("invalid primary_processor_based_vm_execution_controls"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 }
 
@@ -204,7 +203,7 @@ setup_check_control_proc_based_ctls2_reserved_properly_set_paths(std::vector<str
 {
     path.setup = [&] { g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = ~(msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask << 32); };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("secondary controls field doesn't exist"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&]
@@ -217,7 +216,7 @@ setup_check_control_proc_based_ctls2_reserved_properly_set_paths(std::vector<str
 
     path.setup = [&] { g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] |= 1; vmcs::secondary_processor_based_vm_execution_controls::set(0UL); };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("invalid secondary_processor_based_vm_execution_controls"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&]
@@ -236,7 +235,7 @@ setup_check_control_proc_based_ctls2_reserved_properly_set_paths(std::vector<str
 
     path.setup = [&] { vmcs::primary_processor_based_vm_execution_controls::activate_secondary_controls::enable(); };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("invalid secondary_processor_based_vm_execution_controls"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 }
 
@@ -249,7 +248,7 @@ setup_check_control_cr3_count_less_than_4_paths(std::vector<struct control_flow_
 
     path.setup = [&] { vmcs::cr3_target_count::set(5UL); };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("cr3 target count > 4"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 }
 
@@ -262,22 +261,22 @@ setup_check_control_io_bitmap_address_bits_paths(std::vector<struct control_flow
 
     path.setup = [&] { enable_proc_ctl(vmcs::primary_processor_based_vm_execution_controls::use_io_bitmaps::mask); vmcs::address_of_io_bitmap_a::set(0x1U); };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("io bitmap a addr not page aligned"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&] { vmcs::address_of_io_bitmap_a::set(0xff00000000000000U); vmcs::address_of_io_bitmap_b::set(0x1U); };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("io bitmap b addr not page aligned"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&] { vmcs::address_of_io_bitmap_b::set(0xff00000000000000U); };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("io bitmap a addr too large"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&] { vmcs::address_of_io_bitmap_a::set(0x1000U); };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("io bitmap b addr too large"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&] { vmcs::address_of_io_bitmap_b::set(0x1000U); };
@@ -303,12 +302,12 @@ setup_check_control_msr_bitmap_address_bits_paths(std::vector<struct control_flo
         vmcs::address_of_msr_bitmaps::set(0x1U);
     };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("msr bitmap addr not page aligned"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&] { vmcs::address_of_msr_bitmaps::set(0xff00000000000000U); };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("msr bitmap addr too large"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&] { vmcs::address_of_msr_bitmaps::set(0x1000U); };
@@ -328,17 +327,17 @@ setup_check_control_tpr_shadow_and_virtual_apic_paths(std::vector<struct control
         vmcs::virtual_apic_address::set(0U);
     };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("virtual apic physical addr is NULL"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&] { vmcs::virtual_apic_address::set(1U); };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("virtual apic addr not 4k aligned"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&] { vmcs::virtual_apic_address::set(0xff00000000000000U); };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("virtual apic addr too large"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&]
@@ -347,7 +346,7 @@ setup_check_control_tpr_shadow_and_virtual_apic_paths(std::vector<struct control
         enable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::virtual_interrupt_delivery::mask);
     };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("tpr_shadow is enabled, but virtual interrupt delivery is enabled"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&]
@@ -357,7 +356,7 @@ setup_check_control_tpr_shadow_and_virtual_apic_paths(std::vector<struct control
         vmcs::tpr_threshold::set(0xffffffffffffffffUL);
     };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("bits 31:4 of the tpr threshold must be 0"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&]
@@ -366,7 +365,7 @@ setup_check_control_tpr_shadow_and_virtual_apic_paths(std::vector<struct control
         enable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::virtualize_apic_accesses::mask);
     };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("tpr_shadow is enabled, but virtual apic is enabled"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&]
@@ -375,7 +374,7 @@ setup_check_control_tpr_shadow_and_virtual_apic_paths(std::vector<struct control
         g_phys_to_virt_return_nullptr = true;
     };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("virtual apic virtual addr is NULL"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&] { g_phys_to_virt_return_nullptr = false; };
@@ -384,7 +383,7 @@ setup_check_control_tpr_shadow_and_virtual_apic_paths(std::vector<struct control
 
     path.setup = [&] { vmcs::tpr_threshold::set(0xfUL); };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("invalid TPR threshold"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     // control paths when tpr shadow is disabled
@@ -402,7 +401,7 @@ setup_check_control_tpr_shadow_and_virtual_apic_paths(std::vector<struct control
         enable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::virtualize_x2apic_mode::mask);
     };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("virtualize_x2apic_mode must be disabled if tpr shadow is disabled"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&]
@@ -411,7 +410,7 @@ setup_check_control_tpr_shadow_and_virtual_apic_paths(std::vector<struct control
         enable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::apic_register_virtualization::mask);
     };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("apic_register_virtualization must be disabled if tpr shadow is disabled"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&]
@@ -420,7 +419,7 @@ setup_check_control_tpr_shadow_and_virtual_apic_paths(std::vector<struct control
         enable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::virtual_interrupt_delivery::mask);
     };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("virtual interrupt delivery must be disabled if tpr shadow is disabled"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&] { disable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::virtual_interrupt_delivery::mask); };
@@ -441,7 +440,7 @@ setup_check_control_nmi_exiting_and_virtual_nmi_paths(std::vector<struct control
         enable_pin_ctl(vmcs::pin_based_vm_execution_controls::virtual_nmis::mask);
     };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("virtual NMI must be 0 if NMI exiting is 0"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&] { disable_pin_ctl(vmcs::pin_based_vm_execution_controls::virtual_nmis::mask); };
@@ -462,7 +461,7 @@ setup_check_control_virtual_nmi_and_nmi_window_paths(std::vector<struct control_
         enable_proc_ctl(vmcs::primary_processor_based_vm_execution_controls::nmi_window_exiting::mask);
     };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("NMI window exiting must be 0 if virtual NMI is 0"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&] { disable_proc_ctl(vmcs::primary_processor_based_vm_execution_controls::nmi_window_exiting::mask); };
@@ -493,17 +492,17 @@ setup_check_control_virtual_apic_address_bits_paths(std::vector<struct control_f
         vmcs::apic_access_address::set(0U);
     };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("apic access physical addr is NULL"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&] { vmcs::apic_access_address::set(1U); };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("apic access addr not 4k aligned"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&] { vmcs::apic_access_address::set(0xff00000000000000U); };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("apic access addr too large"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&] { vmcs::apic_access_address::set(0x1000U); };
@@ -532,7 +531,7 @@ setup_check_control_x2apic_mode_and_virtual_apic_access_paths(std::vector<struct
         enable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::virtualize_apic_accesses::mask);
     };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("apic accesses must be 0 if x2 apic mode is 1"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&] { disable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::virtualize_x2apic_mode::mask); };
@@ -561,7 +560,7 @@ setup_check_control_virtual_interrupt_and_external_interrupt_paths(std::vector<s
         disable_pin_ctl(vmcs::pin_based_vm_execution_controls::external_interrupt_exiting::mask);
     };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("external interrupt exiting must be 1 if virtual interrupt delivery is 1"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&] { enable_pin_ctl(vmcs::pin_based_vm_execution_controls::external_interrupt_exiting::mask); };
@@ -586,7 +585,7 @@ setup_check_control_process_posted_interrupt_checks_paths(std::vector<struct con
         disable_proc_ctl(vmcs::primary_processor_based_vm_execution_controls::activate_secondary_controls::mask);
     };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("virtual interrupt delivery must be 1 if posted interrupts is 1"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&]
@@ -595,7 +594,7 @@ setup_check_control_process_posted_interrupt_checks_paths(std::vector<struct con
         disable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::virtual_interrupt_delivery::mask);
     };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("virtual interrupt delivery must be 1 if posted interrupts is 1"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&]
@@ -604,7 +603,7 @@ setup_check_control_process_posted_interrupt_checks_paths(std::vector<struct con
         disable_exit_ctl(vmcs::vm_exit_controls::acknowledge_interrupt_on_exit::mask);
     };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("ack interrupt on exit must be 1 if posted interrupts is 1"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&]
@@ -613,7 +612,7 @@ setup_check_control_process_posted_interrupt_checks_paths(std::vector<struct con
         g_vmcs_fields[vmcs::posted_interrupt_notification_vector::addr] = 0x100;
     };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("bits 15:8 of the notification vector must be 0 if posted interrupts is 1"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&]
@@ -622,12 +621,12 @@ setup_check_control_process_posted_interrupt_checks_paths(std::vector<struct con
         vmcs::posted_interrupt_descriptor_address::set(1U);
     };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("bits 5:0 of the interrupt descriptor addr must be 0 if posted interrupts is 1"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&] { vmcs::posted_interrupt_descriptor_address::set(0xff00000000000000U); };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("interrupt descriptor addr too large"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&] { vmcs::posted_interrupt_descriptor_address::set(0x1000U); };
@@ -656,7 +655,7 @@ setup_check_control_vpid_checks_paths(std::vector<struct control_flow_path> &cfg
         g_vmcs_fields[vmcs::virtual_processor_identifier::addr] = 0;
     };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("vpid cannot equal 0"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&] { g_vmcs_fields[vmcs::virtual_processor_identifier::addr] = 1; };
@@ -693,17 +692,17 @@ setup_check_control_enable_ept_checks_paths(std::vector<struct control_flow_path
         msrs::ia32_vmx_ept_vpid_cap::memory_type_write_back_supported::mask);
     };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("hardware does not support ept memory type: uncachable"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&] { vmcs::ept_pointer::memory_type::set(vmcs::ept_pointer::memory_type::write_back); };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("hardware does not support ept memory type: write-back"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&] { vmcs::ept_pointer::memory_type::set(3U); };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("unknown eptp memory type"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&]
@@ -713,7 +712,7 @@ setup_check_control_enable_ept_checks_paths(std::vector<struct control_flow_path
         vmcs::ept_pointer::page_walk_length_minus_one::set(0U);
     };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("the ept walk-through length must be 1 less than 4, i.e. 3"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&]
@@ -722,7 +721,7 @@ setup_check_control_enable_ept_checks_paths(std::vector<struct control_flow_path
         vmcs::ept_pointer::accessed_and_dirty_flags::enable();
     };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("hardware does not support dirty / accessed flags for ept"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&]
@@ -731,7 +730,7 @@ setup_check_control_enable_ept_checks_paths(std::vector<struct control_flow_path
         vmcs::ept_pointer::reserved::set(0xFF0U);
     };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("bits 11:7 and 63:48 of the eptp must be 0"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 }
 
@@ -756,7 +755,7 @@ setup_check_control_enable_pml_checks_paths(std::vector<struct control_flow_path
         disable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::enable_ept::mask);
     };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("ept must be enabled if pml is enabled"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&]
@@ -765,12 +764,12 @@ setup_check_control_enable_pml_checks_paths(std::vector<struct control_flow_path
         vmcs::pml_address::set(0xff00000000000000U);
     };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("pml address must be a valid physical address"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&] { vmcs::pml_address::set(1U); };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("bits 11:0 of the pml address must be 0"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&] { vmcs::pml_address::set(0x1000U); };
@@ -799,7 +798,7 @@ setup_check_control_unrestricted_guests_paths(std::vector<struct control_flow_pa
         disable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::enable_ept::mask);
     };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("enable ept must be 1 if unrestricted guest is 1"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&] { enable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::enable_ept::mask); };
@@ -837,7 +836,7 @@ setup_check_control_enable_vm_functions_paths(std::vector<struct control_flow_pa
         g_msrs[msrs::ia32_vmx_vmfunc::addr] = 0;
     };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("unsupported vm function control bit set"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&] { vmcs::vm_function_controls::set(0U); };
@@ -853,7 +852,7 @@ setup_check_control_enable_vm_functions_paths(std::vector<struct control_flow_pa
         disable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::enable_ept::mask);
     };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("enable ept must be 1 if eptp switching is 1"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&]
@@ -862,12 +861,12 @@ setup_check_control_enable_vm_functions_paths(std::vector<struct control_flow_pa
         vmcs::eptp_list_address::set_if_exists(1U);
     };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("bits 11:0 must be 0 for eptp list address"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&] { vmcs::eptp_list_address::set(0xff00000000000000U); };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("eptp list address addr too large"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&] { vmcs::eptp_list_address::set(0x1000U); };
@@ -896,7 +895,7 @@ setup_check_control_enable_vmcs_shadowing_paths(std::vector<struct control_flow_
         vmcs::vmread_bitmap_address::set(1U);
     };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("bits 11:0 must be 0 for the vmcs read bitmap address"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&]
@@ -905,17 +904,17 @@ setup_check_control_enable_vmcs_shadowing_paths(std::vector<struct control_flow_
         vmcs::vmwrite_bitmap_address::set(1U);
     };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("bits 11:0 must be 0 for the vmcs write bitmap address"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&] { vmcs::vmwrite_bitmap_address::set(0xff00000000000000U); };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("vmcs read bitmap address addr too large"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&] { vmcs::vmread_bitmap_address::set(0x1000U); };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("vmcs write bitmap address addr too large"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&] { vmcs::vmwrite_bitmap_address::set(0x1000U); };
@@ -944,12 +943,12 @@ setup_check_control_enable_ept_violation_checks_paths(std::vector<struct control
         vmcs::virtualization_exception_information_address::set(1U);
     };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("bits 11:0 must be 0 for the vmcs virt except info address"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&] { vmcs::virtualization_exception_information_address::set(0xff00000000000000U); };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("vmcs virt except info address addr too large"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&] { vmcs::virtualization_exception_information_address::set(0x1000U); };
@@ -966,7 +965,7 @@ setup_check_control_vm_exit_ctls_reserved_properly_set_paths(std::vector<struct 
 
     path.setup = [&] { g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] = 1; };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("invalid vm_exit_controls"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&] { g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] = 0xffffffff00000000UL; };
@@ -987,7 +986,7 @@ setup_check_control_activate_and_save_preemption_timer_must_be_0_paths(std::vect
         enable_exit_ctl(vmcs::vm_exit_controls::save_vmx_preemption_timer_value::mask);
     };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("save vmx preemption timer must be 0 if activate vmx preemption timer is 0"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&] { disable_exit_ctl(vmcs::vm_exit_controls::save_vmx_preemption_timer_value::mask); };
@@ -1004,17 +1003,17 @@ setup_check_control_exit_msr_store_address_paths(std::vector<struct control_flow
 
     path.setup = [&] { vmcs::vm_exit_msr_store_count::set(16UL); vmcs::vm_exit_msr_store_address::set(0xfU); };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("bits 3:0 must be 0 for the exit msr store address"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&] { vmcs::vm_exit_msr_store_address::set(0xff00000000000000U); };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("exit msr store addr too large"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&] { vmcs::vm_exit_msr_store_address::set(0xfffffff0U); };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("end of exit msr store area too large"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&] { vmcs::vm_exit_msr_store_address::set(0x10U); };
@@ -1031,17 +1030,17 @@ setup_check_control_exit_msr_load_address_paths(std::vector<struct control_flow_
 
     path.setup = [&] { vmcs::vm_exit_msr_load_count::set(16UL); vmcs::vm_exit_msr_load_address::set(0xfU); };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("bits 3:0 must be 0 for the exit msr load address"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&] { vmcs::vm_exit_msr_load_address::set(0xff00000000000000U); };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("exit msr load addr too large"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&] { vmcs::vm_exit_msr_load_address::set(0xfffffff0U); };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("end of exit msr load area too large"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&] { vmcs::vm_exit_msr_load_address::set(0x10U); };
@@ -1058,7 +1057,7 @@ setup_check_control_vm_entry_ctls_reserved_properly_set_paths(std::vector<struct
 
     path.setup = [&] { g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] = 1; };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("invalid vm_entry_controls"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&] { g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] = 0xffffffff00000000; };
@@ -1077,7 +1076,7 @@ setup_check_control_event_injection_type_vector_checks_paths(std::vector<struct 
 
     path.setup = [&] { valid_bit::enable(); interruption_type::set(interruption_type::reserved); };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("interrupt information field type of 1 is reserved"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&]
@@ -1086,17 +1085,17 @@ setup_check_control_event_injection_type_vector_checks_paths(std::vector<struct 
         g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = 0;
     };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("interrupt information field type of 7 is reserved on this hardware"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&] { interruption_type::set(interruption_type::non_maskable_interrupt); vector::set(0xFFUL); };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("interrupt information field vector must be 2 if the type field is 2 (NMI)"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&] { interruption_type::set(interruption_type::hardware_exception); };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("interrupt information field vector must be 0->31 if the type field is 3 (HE)"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&]
@@ -1105,7 +1104,7 @@ setup_check_control_event_injection_type_vector_checks_paths(std::vector<struct 
         g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = msrs::ia32_vmx_true_procbased_ctls::monitor_trap_flag::mask << 32;
     };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("interrupt information field vector must be 0 if the type field is 7 (other)"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&] { vector::set(0UL); };
@@ -1130,19 +1129,17 @@ setup_check_control_event_injection_delivery_ec_checks_paths(std::vector<struct 
         enable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::unrestricted_guest::mask);
     };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("unrestricted guest must be 0 or PE must be enabled in cr0"
-                     "if deliver error code bit is set"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&] { disable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::unrestricted_guest::mask); interruption_type::set(interruption_type::non_maskable_interrupt); };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("interrupt information field type must be 3 if deliver error code bit is set"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&] { interruption_type::set(interruption_type::hardware_exception); };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("vector must indicate exception that would normally deliver"
-                     "an error code if deliver error code bit is set"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&] { vector::set(0x8UL); };
@@ -1151,7 +1148,7 @@ setup_check_control_event_injection_delivery_ec_checks_paths(std::vector<struct 
 
     path.setup = [&] { deliver_error_code_bit::disable(); };
     path.throws_exception = true;
-    path.exception = std::make_shared<std::logic_error>("deliver_error_code_bit must be 1");
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 }
 
@@ -1170,7 +1167,7 @@ setup_check_control_event_injection_reserved_bits_checks_paths(std::vector<struc
 
     path.setup = [&] { reserved::set(1UL); };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("reserved bits of the interrupt info field must be 0"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 }
 
@@ -1189,8 +1186,7 @@ setup_check_control_event_injection_ec_checks_paths(std::vector<struct control_f
 
     path.setup = [&] { deliver_error_code_bit::enable(); vmcs::vm_entry_exception_error_code::set(0x8000UL); };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("bits 31:15 of the exception error code field must be 0"
-                     " if deliver error code bit is set in the interrupt info field"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&] { vmcs::vm_entry_exception_error_code::set(0UL); };
@@ -1222,12 +1218,12 @@ setup_check_control_event_injection_instr_length_checks_paths(std::vector<struct
         g_msrs[msrs::ia32_vmx_misc::addr] = 0;
     };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("instruction length must be greater than zero"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&] { vmcs::vm_entry_instruction_length::set(16UL); };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("instruction length must be in the range of 0-15 if type is 4, 5, 6"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&] { vmcs::vm_entry_instruction_length::set(1UL); };
@@ -1244,17 +1240,17 @@ setup_check_control_entry_msr_load_address_paths(std::vector<struct control_flow
 
     path.setup = [&] { vmcs::vm_entry_msr_load_count::set(16UL); vmcs::vm_entry_msr_load_address::set(0xfU); };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("bits 3:0 must be 0 for the entry msr load address"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&] { vmcs::vm_entry_msr_load_address::set(0xff00000000000000U); };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("entry msr load addr too large"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&] { vmcs::vm_entry_msr_load_address::set(0xfffffff0U); };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("end of entry msr load area too large"));
+    path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&] { vmcs::vm_entry_msr_load_address::set(0x10U); };
