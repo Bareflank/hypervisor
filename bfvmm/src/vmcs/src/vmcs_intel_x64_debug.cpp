@@ -23,6 +23,8 @@
 #include <view_as_pointer.h>
 #include <vmcs/vmcs_intel_x64.h>
 
+#if 0
+
 #define PRINT_FIELD(a,b) \
     bfdebug << #b << ": "; \
     if ((a) == true) \
@@ -550,3 +552,5 @@ vmcs_intel_x64::print_vm_entry_control_fields()
 
     bfdebug << bfendl;
 }
+
+#endif

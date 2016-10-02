@@ -25,8 +25,11 @@
 #include <vmxon/vmxon_intel_x64.h>
 #include <memory_manager/memory_manager.h>
 
+using namespace intel_x64;
+
 static uint64_t g_cr0 = 0;
 static uint64_t g_cr4 = 0;
+static std::map<uint32_t, uint64_t> g_msrs;
 
 static uint64_t
 read_cr0()
@@ -43,6 +46,12 @@ read_cr4()
 static void
 write_cr4(uint64_t cr4)
 { g_cr4 = cr4; }
+
+extern "C" uint64_t
+__read_msr(uint32_t msr) noexcept
+{
+    return g_msrs[msr];
+}
 
 bool virt_to_phys_return_nullptr = false;
 
@@ -70,15 +79,15 @@ setup_intrinsics(MockRepository &mocks, memory_manager *mm, intrinsics_intel_x64
     g_cr4 = 0x0;
 
     // Place no restrictions on the control registers.
-    mocks.OnCall(in, intrinsics_intel_x64::read_msr).With(IA32_VMX_CR0_FIXED0_MSR).Return(0x0);
-    mocks.OnCall(in, intrinsics_intel_x64::read_msr).With(IA32_VMX_CR0_FIXED1_MSR).Return(0xFFFFFFFFFFFFFFFF);
-    mocks.OnCall(in, intrinsics_intel_x64::read_msr).With(IA32_VMX_CR4_FIXED0_MSR).Return(0x0);
-    mocks.OnCall(in, intrinsics_intel_x64::read_msr).With(IA32_VMX_CR4_FIXED1_MSR).Return(0xFFFFFFFFFFFFFFFF);
+    g_msrs[msrs::ia32_vmx_cr0_fixed0::addr] = 0x0;
+    g_msrs[msrs::ia32_vmx_cr0_fixed1::addr] = 0xFFFFFFFFFFFFFFFF;
+    g_msrs[msrs::ia32_vmx_cr4_fixed0::addr] = 0x0;
+    g_msrs[msrs::ia32_vmx_cr4_fixed1::addr] = 0xFFFFFFFFFFFFFFFF;
 
     // Enable VMX operation
+    g_msrs[msrs::ia32_vmx_basic::addr] = (1ULL << 55) | (6ULL << 50);
+    g_msrs[msrs::ia32_feature_control::addr] = (0x1ULL << 0);
     mocks.OnCall(in, intrinsics_intel_x64::cpuid_ecx).With(1).Return((1 << 5));
-    mocks.OnCall(in, intrinsics_intel_x64::read_msr).With(IA32_VMX_BASIC_MSR).Return((1ULL << 55) | (6ULL << 50));
-    mocks.OnCall(in, intrinsics_intel_x64::read_msr).With(IA32_FEATURE_CONTROL_MSR).Return((0x1ULL << 0));
 
     // v8086 emulation must be disabled
     mocks.OnCall(in, intrinsics_intel_x64::read_rflags).Return(~RFLAGS_VM_VIRTUAL_8086_MODE);
@@ -181,7 +190,7 @@ vmxon_ut::test_start_check_ia32_vmx_cr4_fixed0_msr_failure()
 
     setup_intrinsics(mocks, mm, in.get());
 
-    mocks.OnCall(in.get(), intrinsics_intel_x64::read_msr).With(IA32_VMX_CR4_FIXED0_MSR).Return(0x1);
+    g_msrs[msrs::ia32_vmx_cr4_fixed0::addr] = 0x1;
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -201,7 +210,7 @@ vmxon_ut::test_start_check_ia32_vmx_cr4_fixed1_msr_failure()
     setup_intrinsics(mocks, mm, in.get());
 
     g_cr4 = 0x1;
-    mocks.OnCall(in.get(), intrinsics_intel_x64::read_msr).With(IA32_VMX_CR4_FIXED1_MSR).Return(0xFFFFFFFFFFFFFFF0);
+    g_msrs[msrs::ia32_vmx_cr4_fixed1::addr] = 0xFFFFFFFFFFFFFFF0;
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -258,7 +267,7 @@ vmxon_ut::test_start_check_ia32_feature_control_msr()
 
     setup_intrinsics(mocks, mm, in.get());
 
-    mocks.OnCall(in.get(), intrinsics_intel_x64::read_msr).With(IA32_FEATURE_CONTROL_MSR).Return(0);
+    g_msrs[msrs::ia32_feature_control::addr] = 0;
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -277,7 +286,7 @@ vmxon_ut::test_start_check_ia32_vmx_cr0_fixed0_msr()
 
     setup_intrinsics(mocks, mm, in.get());
 
-    mocks.OnCall(in.get(), intrinsics_intel_x64::read_msr).With(IA32_VMX_CR0_FIXED0_MSR).Return(0x1);
+    g_msrs[msrs::ia32_vmx_cr0_fixed0::addr] = 0x1;
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -297,7 +306,7 @@ vmxon_ut::test_start_check_ia32_vmx_cr0_fixed1_msr()
     setup_intrinsics(mocks, mm, in.get());
 
     g_cr0 = 0x1;
-    mocks.OnCall(in.get(), intrinsics_intel_x64::read_msr).With(IA32_VMX_CR0_FIXED1_MSR).Return(0xFFFFFFFFFFFFFFF0);
+    g_msrs[msrs::ia32_vmx_cr0_fixed1::addr] = 0xFFFFFFFFFFFFFFF0;
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -316,7 +325,7 @@ vmxon_ut::test_start_check_vmx_capabilities_msr_memtype_failure()
 
     setup_intrinsics(mocks, mm, in.get());
 
-    mocks.OnCall(in.get(), intrinsics_intel_x64::read_msr).With(IA32_VMX_BASIC_MSR).Return((1ULL << 55));
+    g_msrs[msrs::ia32_vmx_basic::addr] = (1ULL << 55);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -335,7 +344,7 @@ vmxon_ut::test_start_check_vmx_capabilities_msr_addr_width_failure()
 
     setup_intrinsics(mocks, mm, in.get());
 
-    mocks.OnCall(in.get(), intrinsics_intel_x64::read_msr).With(IA32_VMX_BASIC_MSR).Return((1ULL << 55) | (6ULL << 50) | (1ULL << 48));
+    g_msrs[msrs::ia32_vmx_basic::addr] = (1ULL << 55) | (6ULL << 50) | (1ULL << 48);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -354,7 +363,7 @@ vmxon_ut::test_start_check_vmx_capabilities_true_based_controls_failure()
 
     setup_intrinsics(mocks, mm, in.get());
 
-    mocks.OnCall(in.get(), intrinsics_intel_x64::read_msr).With(IA32_VMX_BASIC_MSR).Return((6ULL << 50));
+    g_msrs[msrs::ia32_vmx_basic::addr] = (6ULL << 50);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {

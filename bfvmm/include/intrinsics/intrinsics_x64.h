@@ -23,98 +23,83 @@
 #define INTRINSICS_X64_H
 
 #include <stdint.h>
+#include <intrinsics/x64.h>
 
 // -----------------------------------------------------------------------------
 // Intrinsics
 // -----------------------------------------------------------------------------
 
-#pragma pack(push, 1)
+extern "C" void __halt(void) noexcept;
+extern "C" void __stop(void) noexcept;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+extern "C" void __invd(void) noexcept;
+extern "C" void __wbinvd(void) noexcept;
 
-void __halt(void) noexcept;
-void __stop(void) noexcept;
+extern "C" uint32_t __cpuid_eax(uint32_t val) noexcept;
+extern "C" uint32_t __cpuid_ebx(uint32_t val) noexcept;
+extern "C" uint32_t __cpuid_ecx(uint32_t val) noexcept;
+extern "C" uint32_t __cpuid_edx(uint32_t val) noexcept;
+extern "C" void __cpuid(uint64_t *rax, uint64_t *rbx, uint64_t *rcx, uint64_t *rdx) noexcept;
 
-void __invd(void) noexcept;
-void __wbinvd(void) noexcept;
+extern "C" uint64_t __read_rflags(void) noexcept;
+extern "C" void __write_rflags(uint64_t val) noexcept;
 
-uint32_t __cpuid_eax(uint32_t val) noexcept;
-uint32_t __cpuid_ebx(uint32_t val) noexcept;
-uint32_t __cpuid_ecx(uint32_t val) noexcept;
-uint32_t __cpuid_edx(uint32_t val) noexcept;
+extern "C" uint64_t __read_msr(uint32_t msr) noexcept;
+extern "C" void __write_msr(uint32_t msr, uint64_t val) noexcept;
 
-void __cpuid(uint64_t *rax,
-             uint64_t *rbx,
-             uint64_t *rcx,
-             uint64_t *rdx) noexcept;
+extern "C" uint64_t __read_rip(void) noexcept;
 
-uint64_t __read_rflags(void) noexcept;
-void __write_rflags(uint64_t val) noexcept;
+extern "C" uint64_t __read_cr0(void) noexcept;
+extern "C" void __write_cr0(uint64_t val) noexcept;
 
-uint64_t __read_msr(uint32_t msr) noexcept;
-void __write_msr(uint32_t msr, uint64_t val) noexcept;
+extern "C" uint64_t __read_cr3(void) noexcept;
+extern "C" void __write_cr3(uint64_t val) noexcept;
 
-uint64_t __read_rip(void) noexcept;
+extern "C" uint64_t __read_cr4(void) noexcept;
+extern "C" void __write_cr4(uint64_t val) noexcept;
 
-uint64_t __read_cr0(void) noexcept;
-void __write_cr0(uint64_t val) noexcept;
+extern "C" uint64_t __read_dr7(void) noexcept;
+extern "C" void __write_dr7(uint64_t val) noexcept;
 
-uint64_t __read_cr3(void) noexcept;
-void __write_cr3(uint64_t val) noexcept;
+extern "C" uint16_t __read_es(void) noexcept;
+extern "C" void __write_es(uint16_t val) noexcept;
 
-uint64_t __read_cr4(void) noexcept;
-void __write_cr4(uint64_t val) noexcept;
+extern "C" uint16_t __read_cs(void) noexcept;
+extern "C" void __write_cs(uint16_t val) noexcept;
 
-uint64_t __read_dr7(void) noexcept;
-void __write_dr7(uint64_t val) noexcept;
+extern "C" uint16_t __read_ss(void) noexcept;
+extern "C" void __write_ss(uint16_t val) noexcept;
 
-uint16_t __read_es(void) noexcept;
-void __write_es(uint16_t val) noexcept;
+extern "C" uint16_t __read_ds(void) noexcept;
+extern "C" void __write_ds(uint16_t val) noexcept;
 
-uint16_t __read_cs(void) noexcept;
-void __write_cs(uint16_t val) noexcept;
+extern "C" uint16_t __read_fs(void) noexcept;
+extern "C" void __write_fs(uint16_t val) noexcept;
 
-uint16_t __read_ss(void) noexcept;
-void __write_ss(uint16_t val) noexcept;
+extern "C" uint16_t __read_gs(void) noexcept;
+extern "C" void __write_gs(uint16_t val) noexcept;
 
-uint16_t __read_ds(void) noexcept;
-void __write_ds(uint16_t val) noexcept;
+extern "C" uint16_t __read_tr(void) noexcept;
+extern "C" void __write_tr(uint16_t val) noexcept;
 
-uint16_t __read_fs(void) noexcept;
-void __write_fs(uint16_t val) noexcept;
+extern "C" uint16_t __read_ldtr(void) noexcept;
+extern "C" void __write_ldtr(uint16_t val) noexcept;
 
-uint16_t __read_gs(void) noexcept;
-void __write_gs(uint16_t val) noexcept;
+extern "C" uint64_t __read_rsp(void) noexcept;
 
-uint16_t __read_tr(void) noexcept;
-void __write_tr(uint16_t val) noexcept;
+extern "C" void __read_gdt(void *gdt) noexcept;
+extern "C" void __write_gdt(void *gdt) noexcept;
 
-uint16_t __read_ldtr(void) noexcept;
-void __write_ldtr(uint16_t val) noexcept;
+extern "C" void __read_idt(void *idt) noexcept;
+extern "C" void __write_idt(void *idt) noexcept;
 
-uint64_t __read_rsp(void) noexcept;
+extern "C" void __outb(uint16_t port, uint8_t val) noexcept;
+extern "C" void __outw(uint16_t port, uint16_t val) noexcept;
 
-void __read_gdt(void *gdt) noexcept;
-void __write_gdt(void *gdt) noexcept;
+extern "C" uint8_t __inb(uint16_t port) noexcept;
+extern "C" uint16_t __inw(uint16_t port) noexcept;
 
-void __read_idt(void *idt) noexcept;
-void __write_idt(void *idt) noexcept;
-
-void __outb(uint16_t port, uint8_t val) noexcept;
-void __outw(uint16_t port, uint16_t val) noexcept;
-
-uint8_t __inb(uint16_t port) noexcept;
-uint16_t __inw(uint16_t port) noexcept;
-
-uint64_t __tls_base(void) noexcept;
-
-#ifdef __cplusplus
-}
-#endif
-
-#pragma pack(pop)
+extern "C" uint64_t __tls_base(void) noexcept;
 
 // -----------------------------------------------------------------------------
 // C++ Wrapper

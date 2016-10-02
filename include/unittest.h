@@ -43,6 +43,7 @@ struct exception_state
     bool wrong_exception;
     std::string caught_str;
     std::string expecting_str;
+    std::string what;
 };
 
 /// Expect True
@@ -123,6 +124,7 @@ struct exception_state
         bool wrong_exception = false; \
         std::string caught_str; \
         std::string expecting_str; \
+        std::string what; \
         try{ a; } \
         catch(BaseException &be) \
         { \
@@ -136,6 +138,7 @@ struct exception_state
                 wrong_exception = true; \
                 caught_str = typeid(ge).name(); \
                 expecting_str = typeid(b).name(); \
+                what = ge.what(); \
             } \
             else \
                 std::cout << "caught: " << ge << '\n'; \
@@ -148,6 +151,7 @@ struct exception_state
                 wrong_exception = true; \
                 caught_str = typeid(e).name(); \
                 expecting_str = typeid(b).name(); \
+                what = e.what(); \
             } \
             else \
                 std::cout << "caught: " << e << '\n'; \
@@ -167,7 +171,9 @@ struct exception_state
             if (wrong_exception) \
             { \
                 this->expect_failed("wrong exception caught", static_cast<const char *>(__PRETTY_FUNCTION__), __LINE__); \
-                std::cerr << "    - caught: " << caught_str << '\n'; \
+                std::cerr << "    - caught: " << '\n'; \
+                std::cerr << "        - type: " << caught_str << '\n'; \
+                std::cerr << "        - what: " << what << '\n'; \
                 std::cerr << "    - expecting: " << expecting_str << '\n'; \
             } \
             else \
@@ -506,9 +512,12 @@ check_exception_type(struct exception_state &state, const std::exception &caught
         state.wrong_exception = true;
         state.caught_str = std::string(typeid(caught).name());
         state.expecting_str = std::string(typeid(expected).name());
+        state.what = std::string(caught.what());
     }
     else
-        std::cout << "caught: " << caught << '\n';
+        std::cout << "caught: " << '\n';
+    std::cout << "    - type: " << caught << '\n';
+    std::cout << "    - what: " << caught.what() << '\n';
 }
 
 /// Unit Test
@@ -672,7 +681,9 @@ protected:
             if (state.wrong_exception)
             {
                 this->expect_failed("wrong exception caught", func.data(), line);
-                std::cerr << "    - caught: " << state.caught_str << 'n';
+                std::cerr << "    - caught: " << 'n';
+                std::cout << "        - type: " << state.caught_str << '\n';
+                std::cout << "        - what: " << state.what << '\n';
                 std::cerr << "    - expecting: " << state.expecting_str << 'n';
             }
             else

@@ -55,8 +55,6 @@ void disable_proc_ctl2(uint64_t control);
 void disable_pin_ctl(uint64_t control);
 void disable_exit_ctl(uint64_t control);
 void disable_entry_ctl(uint64_t control);
-uint64_t read_msr(uint32_t msr);
-bool vmread(uint64_t field, uint64_t *val);
 uint32_t cpuid_eax(uint32_t val);
 uintptr_t virtptr_to_physint(void *ptr);
 void *physint_to_virtptr(uintptr_t phys);

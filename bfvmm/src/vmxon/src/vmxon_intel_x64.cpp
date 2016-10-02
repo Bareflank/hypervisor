@@ -25,6 +25,8 @@
 #include <vmxon/vmxon_intel_x64.h>
 #include <memory_manager/memory_manager.h>
 
+using namespace intel_x64;
+
 vmxon_intel_x64::vmxon_intel_x64(std::shared_ptr<intrinsics_intel_x64> intrinsics) :
     m_intrinsics(std::move(intrinsics)),
     m_vmxon_enabled(false),
@@ -85,19 +87,13 @@ vmxon_intel_x64::check_cpuid_vmx_supported()
 void
 vmxon_intel_x64::check_vmx_capabilities_msr()
 {
-    auto vmx_basic_msr = m_intrinsics->read_msr(IA32_VMX_BASIC_MSR);
-
-    auto physical_address_width = (vmx_basic_msr >> 48) & 0x1;
-    auto memory_type = (vmx_basic_msr >> 50) & 0xF;
-    auto true_based_controls = (vmx_basic_msr >> 55) & 0x1;
-
-    if (physical_address_width != 0)
+    if (msrs::ia32_vmx_basic::physical_address_width::get() != 0)
         throw std::logic_error("invalid physical address width");
 
-    if (memory_type != 6)
+    if (msrs::ia32_vmx_basic::memory_type::get() != x64::memory_type::write_back)
         throw std::logic_error("invalid memory type");
 
-    if (true_based_controls == 0)
+    if (msrs::ia32_vmx_basic::true_based_controls::get() == 0)
         throw std::logic_error("invalid vmx true based controls");
 }
 
@@ -105,8 +101,8 @@ void
 vmxon_intel_x64::check_ia32_vmx_cr0_fixed_msr()
 {
     auto cr0 = m_intrinsics->read_cr0();
-    auto ia32_vmx_cr0_fixed0 = m_intrinsics->read_msr(IA32_VMX_CR0_FIXED0_MSR);
-    auto ia32_vmx_cr0_fixed1 = m_intrinsics->read_msr(IA32_VMX_CR0_FIXED1_MSR);
+    auto ia32_vmx_cr0_fixed0 = msrs::ia32_vmx_cr0_fixed0::get();
+    auto ia32_vmx_cr0_fixed1 = msrs::ia32_vmx_cr0_fixed1::get();
 
     if (0 != ((~cr0 & ia32_vmx_cr0_fixed0) | (cr0 & ~ia32_vmx_cr0_fixed1)))
         throw std::logic_error("invalid cr0");
@@ -116,8 +112,8 @@ void
 vmxon_intel_x64::check_ia32_vmx_cr4_fixed_msr()
 {
     auto cr4 = m_intrinsics->read_cr4();
-    auto ia32_vmx_cr4_fixed0 = m_intrinsics->read_msr(IA32_VMX_CR4_FIXED0_MSR);
-    auto ia32_vmx_cr4_fixed1 = m_intrinsics->read_msr(IA32_VMX_CR4_FIXED1_MSR);
+    auto ia32_vmx_cr4_fixed0 = msrs::ia32_vmx_cr4_fixed0::get();
+    auto ia32_vmx_cr4_fixed1 = msrs::ia32_vmx_cr4_fixed1::get();
 
     if (0 != ((~cr4 & ia32_vmx_cr4_fixed0) | (cr4 & ~ia32_vmx_cr4_fixed1)))
         throw std::logic_error("invalid cr4");
@@ -126,9 +122,7 @@ vmxon_intel_x64::check_ia32_vmx_cr4_fixed_msr()
 void
 vmxon_intel_x64::check_ia32_feature_control_msr()
 {
-    auto vmx_lock_bit = m_intrinsics->read_msr(IA32_FEATURE_CONTROL_MSR);
-
-    if ((vmx_lock_bit & (1 << 0)) == 0)
+    if (msrs::ia32_feature_control::lock_bit::get() == 0)
         throw std::logic_error("vmx lock bit == 0 is unsupported");
 }
 
@@ -164,7 +158,7 @@ vmxon_intel_x64::create_vmxon_region()
         throw std::logic_error("m_vmxon_region_phys == nullptr");
 
     gsl::span<uint32_t> id{m_vmxon_region.get(), 1024};
-    id[0] = static_cast<uint32_t>(m_intrinsics->read_msr(IA32_VMX_BASIC_MSR) & 0x7FFFFFFFF);
+    id[0] = msrs::ia32_vmx_basic::revision_id::get();
 }
 
 void

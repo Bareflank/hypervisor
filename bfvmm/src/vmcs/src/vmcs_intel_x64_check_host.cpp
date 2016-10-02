@@ -22,6 +22,8 @@
 #include <view_as_pointer.h>
 #include <vmcs/vmcs_intel_x64.h>
 
+using namespace intel_x64;
+
 void
 vmcs_intel_x64::check_vmcs_host_state()
 {
@@ -47,8 +49,8 @@ void
 vmcs_intel_x64::check_host_cr0_for_unsupported_bits()
 {
     auto cr0 = vmread(VMCS_HOST_CR0);
-    auto ia32_vmx_cr0_fixed0 = m_intrinsics->read_msr(IA32_VMX_CR0_FIXED0_MSR);
-    auto ia32_vmx_cr0_fixed1 = m_intrinsics->read_msr(IA32_VMX_CR0_FIXED1_MSR);
+    auto ia32_vmx_cr0_fixed0 = msrs::ia32_vmx_cr0_fixed0::get();
+    auto ia32_vmx_cr0_fixed1 = msrs::ia32_vmx_cr0_fixed1::get();
 
     if (0 != ((~cr0 & ia32_vmx_cr0_fixed0) | (cr0 & ~ia32_vmx_cr0_fixed1)))
     {
@@ -65,8 +67,8 @@ void
 vmcs_intel_x64::check_host_cr4_for_unsupported_bits()
 {
     auto cr4 = vmread(VMCS_HOST_CR4);
-    auto ia32_vmx_cr4_fixed0 = m_intrinsics->read_msr(IA32_VMX_CR4_FIXED0_MSR);
-    auto ia32_vmx_cr4_fixed1 = m_intrinsics->read_msr(IA32_VMX_CR4_FIXED1_MSR);
+    auto ia32_vmx_cr4_fixed0 = msrs::ia32_vmx_cr4_fixed0::get();
+    auto ia32_vmx_cr4_fixed1 = msrs::ia32_vmx_cr4_fixed1::get();
 
     if (0 != ((~cr4 & ia32_vmx_cr4_fixed0) | (cr4 & ~ia32_vmx_cr4_fixed1)))
     {
@@ -218,7 +220,7 @@ vmcs_intel_x64::check_host_segment_and_descriptor_table_registers()
 void
 vmcs_intel_x64::check_host_es_selector_rpl_ti_equal_zero()
 {
-    auto es = vmread(VMCS_HOST_ES_SELECTOR);
+    auto es = vmcs::host_es_selector::get();
 
     if ((es & (SELECTOR_RPL_FLAG | SELECTOR_TI_FLAG)) != 0)
         throw std::logic_error("host rpl / tr's es flag must be 0");
@@ -227,7 +229,7 @@ vmcs_intel_x64::check_host_es_selector_rpl_ti_equal_zero()
 void
 vmcs_intel_x64::check_host_cs_selector_rpl_ti_equal_zero()
 {
-    auto cs = vmread(VMCS_HOST_CS_SELECTOR);
+    auto cs = vmcs::host_cs_selector::get();
 
     if ((cs & (SELECTOR_RPL_FLAG | SELECTOR_TI_FLAG)) != 0)
         throw std::logic_error("host rpl / tr's cs flag must be 0");
@@ -236,7 +238,7 @@ vmcs_intel_x64::check_host_cs_selector_rpl_ti_equal_zero()
 void
 vmcs_intel_x64::check_host_ss_selector_rpl_ti_equal_zero()
 {
-    auto ss = vmread(VMCS_HOST_SS_SELECTOR);
+    auto ss = vmcs::host_ss_selector::get();
 
     if ((ss & (SELECTOR_RPL_FLAG | SELECTOR_TI_FLAG)) != 0)
         throw std::logic_error("host rpl / tr's ss flag must be 0");
@@ -245,7 +247,7 @@ vmcs_intel_x64::check_host_ss_selector_rpl_ti_equal_zero()
 void
 vmcs_intel_x64::check_host_ds_selector_rpl_ti_equal_zero()
 {
-    auto ds = vmread(VMCS_HOST_DS_SELECTOR);
+    auto ds = vmcs::host_ds_selector::get();
 
     if ((ds & (SELECTOR_RPL_FLAG | SELECTOR_TI_FLAG)) != 0)
         throw std::logic_error("host rpl / tr's ds flag must be 0");
@@ -254,7 +256,7 @@ vmcs_intel_x64::check_host_ds_selector_rpl_ti_equal_zero()
 void
 vmcs_intel_x64::check_host_fs_selector_rpl_ti_equal_zero()
 {
-    auto fs = vmread(VMCS_HOST_FS_SELECTOR);
+    auto fs = vmcs::host_fs_selector::get();
 
     if ((fs & (SELECTOR_RPL_FLAG | SELECTOR_TI_FLAG)) != 0)
         throw std::logic_error("host rpl / tr's fs flag must be 0");
@@ -263,7 +265,7 @@ vmcs_intel_x64::check_host_fs_selector_rpl_ti_equal_zero()
 void
 vmcs_intel_x64::check_host_gs_selector_rpl_ti_equal_zero()
 {
-    auto gs = vmread(VMCS_HOST_GS_SELECTOR);
+    auto gs = vmcs::host_gs_selector::get();
 
     if ((gs & (SELECTOR_RPL_FLAG | SELECTOR_TI_FLAG)) != 0)
         throw std::logic_error("host rpl / tr's gs flag must be 0");
@@ -272,7 +274,7 @@ vmcs_intel_x64::check_host_gs_selector_rpl_ti_equal_zero()
 void
 vmcs_intel_x64::check_host_tr_selector_rpl_ti_equal_zero()
 {
-    auto tr = vmread(VMCS_HOST_TR_SELECTOR);
+    auto tr = vmcs::host_tr_selector::get();
 
     if ((tr & (SELECTOR_RPL_FLAG | SELECTOR_TI_FLAG)) != 0)
         throw std::logic_error("host rpl / tr's tr flag must be 0");
@@ -281,30 +283,24 @@ vmcs_intel_x64::check_host_tr_selector_rpl_ti_equal_zero()
 void
 vmcs_intel_x64::check_host_cs_not_equal_zero()
 {
-    auto cs = vmread(VMCS_HOST_CS_SELECTOR);
-
-    if (cs == 0x0000)
+    if (vmcs::host_cs_selector::get() == 0)
         throw std::logic_error("host cs cannot equal 0");
 }
 
 void
 vmcs_intel_x64::check_host_tr_not_equal_zero()
 {
-    auto tr = vmread(VMCS_HOST_TR_SELECTOR);
-
-    if (tr == 0x0000)
+    if (vmcs::host_tr_selector::get() == 0)
         throw std::logic_error("host tr cannot equal 0");
 }
 
 void
 vmcs_intel_x64::check_host_ss_not_equal_zero()
 {
-    auto ss = vmread(VMCS_HOST_SS_SELECTOR);
-
     if (is_enabled_host_address_space_size())
         return;
 
-    if (ss == 0x0000)
+    if (vmcs::host_ss_selector::get() == 0)
         throw std::logic_error("host ss cannot equal 0");
 }
 

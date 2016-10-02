@@ -25,7 +25,11 @@
 #include <vmcs/vmcs_intel_x64_promote.h>
 #include <vmcs/vmcs_intel_x64_resume.h>
 
+using namespace intel_x64;
+
 extern size_t g_new_throws_bad_alloc;
+extern bool g_vmread_fails;
+extern bool g_vmwrite_fails;
 
 static void
 vmcs_promote_fail(bool state_save)
@@ -41,14 +45,14 @@ vmcs_resume_fail(state_save_intel_x64 *state_save)
     return;
 }
 
-static uint16_t es() { return 0; }
-static uint16_t cs() { return 0; }
-static uint16_t ss() { return 0; }
-static uint16_t ds() { return 0; }
-static uint16_t fs() { return 0; }
-static uint16_t gs() { return 0; }
-static uint16_t ldtr() { return 0; }
-static uint16_t tr() { return 0; }
+static uint16_t es() { return 0x10; }
+static uint16_t cs() { return 0x10; }
+static uint16_t ss() { return 0x10; }
+static uint16_t ds() { return 0x10; }
+static uint16_t fs() { return 0x10; }
+static uint16_t gs() { return 0x10; }
+static uint16_t ldtr() { return 0x10; }
+static uint16_t tr() { return 0x10; }
 
 static uint64_t cr0() { return 0; }
 static uint64_t cr3() { return 0; }
@@ -117,14 +121,6 @@ setup_vmcs_host_control_registers_and_msrs()
 static void
 setup_vmcs_host_segment_and_descriptor_table_registers()
 {
-    g_vmcs_fields[VMCS_HOST_ES_SELECTOR] = ~(SELECTOR_RPL_FLAG | SELECTOR_TI_FLAG);
-    g_vmcs_fields[VMCS_HOST_CS_SELECTOR] = ~(SELECTOR_RPL_FLAG | SELECTOR_TI_FLAG);
-    g_vmcs_fields[VMCS_HOST_SS_SELECTOR] = ~(SELECTOR_RPL_FLAG | SELECTOR_TI_FLAG);
-    g_vmcs_fields[VMCS_HOST_DS_SELECTOR] = ~(SELECTOR_RPL_FLAG | SELECTOR_TI_FLAG);
-    g_vmcs_fields[VMCS_HOST_FS_SELECTOR] = ~(SELECTOR_RPL_FLAG | SELECTOR_TI_FLAG);
-    g_vmcs_fields[VMCS_HOST_GS_SELECTOR] = ~(SELECTOR_RPL_FLAG | SELECTOR_TI_FLAG);
-    g_vmcs_fields[VMCS_HOST_TR_SELECTOR] = ~(SELECTOR_RPL_FLAG | SELECTOR_TI_FLAG);
-
     g_vmcs_fields[VMCS_HOST_FS_BASE] = 0x0000000010000000;
     g_vmcs_fields[VMCS_HOST_GS_BASE] = 0x0000000010000000;
     g_vmcs_fields[VMCS_HOST_GDTR_BASE] = 0x0000000010000000;
@@ -224,9 +220,9 @@ setup_vm_execution_control_fields()
     g_vmcs_fields[VMCS_VIRTUAL_APIC_ADDRESS_FULL] = 0x0000000000001000;
     g_vmcs_fields[VMCS_TPR_THRESHOLD] = 0x0000000F00000000;
     g_vmcs_fields[VMCS_APIC_ACCESS_ADDRESS_FULL] = 0x0000000010000000;
-    g_vmcs_fields[VMCS_POSTED_INTERRUPT_NOTIFICATION_VECTOR] = 0x0000000000000000;
+    g_vmcs_fields[vmcs::posted_interrupt_notification_vector::addr] = 0x0000000000000000;
     g_vmcs_fields[VMCS_POSTED_INTERRUPT_DESCRIPTOR_ADDRESS_FULL] = 0x0000000010000000;
-    g_vmcs_fields[VMCS_VIRTUAL_PROCESSOR_IDENTIFIER] = 0x0000000000000002;
+    g_vmcs_fields[vmcs::virtual_processor_identifier::addr] = 0x0000000000000002;
     g_vmcs_fields[VMCS_EPT_POINTER_FULL] = 0x000000000000001e;
     g_vmcs_fields[VMCS_PML_ADDRESS_FULL] = 0x0000000000000000;
     g_vmcs_fields[VMCS_VM_FUNCTION_CONTROLS_FULL] = 0xffffFFFFffffFFFF;
@@ -261,19 +257,22 @@ setup_vm_entry_control_fields()
 void
 setup_msrs()
 {
-    g_msrs[IA32_VMX_BASIC_MSR] = 0x7ffFFFF;
-    g_msrs[IA32_VMX_TRUE_PINBASED_CTLS_MSR] = 0xffffFFFF01010101;
-    g_msrs[IA32_VMX_TRUE_PROCBASED_CTLS_MSR] = 0xffffFFFF01010101;
-    g_msrs[IA32_VMX_PROCBASED_CTLS2_MSR] = 0xffffFdeefffffdee;
-    g_msrs[IA32_VMX_EPT_VPID_CAP_MSR] = IA32_VMX_EPT_VPID_CAP_UC | IA32_VMX_EPT_VPID_CAP_WB | IA32_VMX_EPT_VPID_CAP_AD;
-    g_msrs[IA32_VMX_VMFUNC_MSR] = 0xffffFFFFffffFFFF;
-    g_msrs[IA32_VMX_TRUE_EXIT_CTLS_MSR] = 0xffffFFFF01010101;
-    g_msrs[IA32_VMX_TRUE_ENTRY_CTLS_MSR] = 0xffffFFFF01010101;
+    g_msrs[msrs::ia32_vmx_basic::addr] = 0x7ffFFFF;
+    g_msrs[msrs::ia32_vmx_true_pinbased_ctls::addr] = 0xffffFFFF01010101;
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = 0xffffFFFF01010101;
+    g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = 0xffffFdeefffffdee;
+    g_msrs[msrs::ia32_vmx_ept_vpid_cap::addr] = 0x0000000000000000;
+    g_msrs[msrs::ia32_vmx_ept_vpid_cap::addr] |= msrs::ia32_vmx_ept_vpid_cap::memory_type_uncacheable_supported::mask;
+    g_msrs[msrs::ia32_vmx_ept_vpid_cap::addr] |= msrs::ia32_vmx_ept_vpid_cap::memory_type_write_back_supported::mask;
+    g_msrs[msrs::ia32_vmx_ept_vpid_cap::addr] |= msrs::ia32_vmx_ept_vpid_cap::accessed_dirty_support::mask;
+    g_msrs[msrs::ia32_vmx_vmfunc::addr] = 0xffffFFFFffffFFFF;
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] = 0xffffFFFF01010101;
+    g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] = 0xffffFFFF01010101;
 
-    g_msrs[IA32_VMX_CR0_FIXED0_MSR] = 0x0;
-    g_msrs[IA32_VMX_CR0_FIXED1_MSR] = 0xffffFFFFffffFFFF;
-    g_msrs[IA32_VMX_CR4_FIXED0_MSR] = 0x0;
-    g_msrs[IA32_VMX_CR4_FIXED1_MSR] = 0xffffFFFFffffFFFF;
+    g_msrs[msrs::ia32_vmx_cr0_fixed0::addr] = 0x0;
+    g_msrs[msrs::ia32_vmx_cr0_fixed1::addr] = 0xffffFFFFffffFFFF;
+    g_msrs[msrs::ia32_vmx_cr4_fixed0::addr] = 0x0;
+    g_msrs[msrs::ia32_vmx_cr4_fixed1::addr] = 0xffffFFFFffffFFFF;
 
     g_msrs[IA32_EFER_MSR] = IA32_EFER_LMA;
 }
@@ -363,19 +362,18 @@ setup_vmcs_launch_failure(MockRepository &mocks, intrinsics_intel_x64 *in)
     setup_vmcs_fields();
 
     Call &vmlaunch = mocks.OnCall(in, intrinsics_intel_x64::vmlaunch).Return(false);
-    mocks.OnCall(in, intrinsics_intel_x64::read_msr).After(vmlaunch).Do(read_msr);
-    mocks.OnCall(in, intrinsics_intel_x64::vmread).After(vmlaunch).Do(vmread);
+    mocks.OnCall(in, intrinsics_intel_x64::read_msr).After(vmlaunch).Do(__read_msr);
+    mocks.OnCall(in, intrinsics_intel_x64::vmread).After(vmlaunch).Do(__vmread);
 }
 
 static void
 setup_vmcs_intrinsics(MockRepository &mocks, memory_manager *mm, intrinsics_intel_x64 *in)
 {
-    // Emulate the memory manager
     mocks.OnCallFunc(memory_manager::instance).Return(mm);
     mocks.OnCall(mm, memory_manager::virtptr_to_physint).Do(virtptr_to_physint);
     mocks.OnCall(mm, memory_manager::physint_to_virtptr).Do(physint_to_virtptr);
 
-    mocks.OnCall(in, intrinsics_intel_x64::read_msr).Do(read_msr);
+    mocks.OnCall(in, intrinsics_intel_x64::read_msr).Do(__read_msr);
     mocks.OnCall(in, intrinsics_intel_x64::cpuid_eax).Do(cpuid_eax);
 
     mocks.OnCall(in, intrinsics_intel_x64::vmclear).Return(true);
@@ -562,6 +560,11 @@ vmcs_ut::test_vmread_failure()
     MockRepository mocks;
     auto in = bfn::mock_shared<intrinsics_intel_x64>(mocks);
 
+    g_vmread_fails = true;
+
+    auto ___ = gsl::finally([&]
+    { g_vmread_fails = false; });
+
     mocks.OnCall(in.get(), intrinsics_intel_x64::vmread).Return(false);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -578,6 +581,11 @@ vmcs_ut::test_vmwrite_failure()
 {
     MockRepository mocks;
     auto in = bfn::mock_shared<intrinsics_intel_x64>(mocks);
+
+    g_vmwrite_fails = true;
+
+    auto ___ = gsl::finally([&]
+    { g_vmwrite_fails = false; });
 
     mocks.OnCall(in.get(), intrinsics_intel_x64::vmwrite).Return(false);
 

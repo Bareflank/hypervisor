@@ -66,8 +66,6 @@ NATIVE_OUTDIR+=%BUILD_REL%/../bin
 
 SOURCES+=gdt_x64.cpp
 SOURCES+=idt_x64.cpp
-SOURCES+=intrinsics_x64.asm
-SOURCES+=intrinsics_intel_x64.asm
 
 INCLUDE_PATHS+=./
 INCLUDE_PATHS+=%HYPER_ABS%/include/
@@ -81,7 +79,8 @@ LIBRARY_PATHS+=
 # Environment Specific
 ################################################################################
 
-VMM_SOURCES+=
+VMM_SOURCES+=intrinsics_x64.asm
+VMM_SOURCES+=intrinsics_intel_x64.asm
 VMM_INCLUDE_PATHS+=
 VMM_LIBS+=
 VMM_LIBRARY_PATHS+=
@@ -91,7 +90,8 @@ WINDOWS_INCLUDE_PATHS+=
 WINDOWS_LIBS+=
 WINDOWS_LIBRARY_PATHS+=
 
-LINUX_SOURCES+=
+LINUX_SOURCES+=intrinsics_x64_mock.cpp
+LINUX_SOURCES+=intrinsics_intel_x64_mock.cpp
 LINUX_INCLUDE_PATHS+=
 LINUX_LIBS+=
 LINUX_LIBRARY_PATHS+=
