@@ -13,6 +13,8 @@
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/325/badge)](https://bestpractices.coreinfrastructure.org/projects/325)
 ## Description
 
+[![Join the chat at https://gitter.im/Bareflank-hypervisor/Lobby](https://badges.gitter.im/Bareflank-hypervisor/Lobby.svg)](https://gitter.im/Bareflank-hypervisor/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 The Bareflank Hypervisor is an open source, lightweight hypervisor, lead by
 Assured Information Security, Inc. that provides the scaffolding needed to
 rapidly prototype new hypervisors. To ease development, Bareflank
