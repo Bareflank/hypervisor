@@ -245,6 +245,9 @@ vmcs_ut::list()
     this->test_check_host_host_address_space_disabled();
     this->test_check_host_host_address_space_enabled();
 
+    this->test_vmcs_field_to_str_valid();
+    this->test_vmcs_field_to_str_unknown();
+
     return true;
 }
 

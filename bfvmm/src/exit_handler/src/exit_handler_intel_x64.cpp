@@ -21,6 +21,7 @@
 
 #include <debug.h>
 #include <view_as_pointer.h>
+#include <vmcs/vmcs_intel_x64_ftos.h>
 #include <exit_handler/exit_handler_intel_x64.h>
 #include <exit_handler/exit_handler_intel_x64_entry.h>
 #include <exit_handler/exit_handler_intel_x64_support.h>
@@ -934,7 +935,7 @@ exit_handler_intel_x64::vmread(uint64_t field) const
     if (!m_intrinsics->vmread(field, &value))
     {
         bferror << "exit_handler_intel_x64::vmread failed:" << bfendl;
-        bferror << "    - field: " << view_as_pointer(field) << bfendl;
+        bferror << "    - field: " << vmcs_field_to_str(field) << bfendl;
 
         throw std::runtime_error("vmread failed");
     }
@@ -948,7 +949,7 @@ exit_handler_intel_x64::vmwrite(uint64_t field, uint64_t value)
     if (!m_intrinsics->vmwrite(field, value))
     {
         bferror << "exit_handler_intel_x64::vmwrite failed:" << bfendl;
-        bferror << "    - field: " << view_as_pointer(field) << bfendl;
+        bferror << "    - field: " << vmcs_field_to_str(field) << bfendl;
         bferror << "    - value: " << view_as_pointer(value) << bfendl;
 
         throw std::runtime_error("vmwrite failed");

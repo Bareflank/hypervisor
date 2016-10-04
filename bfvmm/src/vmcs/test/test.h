@@ -174,6 +174,9 @@ private:
     void test_check_host_vmcs_host_address_space_size_is_set();
     void test_check_host_host_address_space_disabled();
     void test_check_host_host_address_space_enabled();
+
+    void test_vmcs_field_to_str_valid();
+    void test_vmcs_field_to_str_unknown();
 };
 
 #endif
