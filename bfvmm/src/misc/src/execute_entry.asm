@@ -24,13 +24,6 @@ default rel
 
 global execute_entry:function
 
-; This function is not thread safe, so we do not need to worry about setting
-; up thread specific storage. The pthread logic will need a place to store
-; variables, so in this case, it's global. If this function is executed
-; on multiple cores simultaneously, this approach could cause issues.
-section .bss
-    thread_storage: resb 4096
-
 section .text
 
 ; int64_t execute_entry(uint64_t stack, void *func, uint64_t arg1, uint64_t arg2);
@@ -64,23 +57,6 @@ execute_entry:
     mov r14, rdx
     mov r15, rcx
 %endif
-
-; %ifndef UNITTEST
-;     mov rcx, 0xC0000100
-;     rdmsr
-;     shl rdx, 32
-;     or rax, rdx
-;     mov r12, rax
-
-;     mov rax, thread_storage
-;     mov rdx, thread_storage
-;     shr rdx, 32
-;     mov rcx, 0xC0000100
-;     wrmsr
-
-;     mov rax, thread_storage
-;     mov [rax], rax
-; %endif
 
     and rsp, 0xFFFFFFFFFFFFFFE0
 
@@ -162,14 +138,6 @@ execute_entry:
     add rsp, 0x20
     vmovdqa [rsp], ymm0
     add rsp, 0x20
-
-; %ifndef UNITTEST
-;     mov rax, r12
-;     mov rdx, r12
-;     shr rdx, 32
-;     mov rcx, 0xC0000100
-;     wrmsr
-; %endif
 
     mov rax, r11
     leave

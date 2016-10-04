@@ -78,11 +78,27 @@ if [[ $0 == *"clang" ]]; then
     fi
 fi
 
+if [[ $0 == *"clang" ]]; then
+    if [[ $LOCAL_COMPILER == "true" ]]; then
+        COMPILER="$HOME/compilers/$compiler/bin/clang --target=x86_64-elf -D__need_size_t -D__need_ptrdiff_t"
+    else
+        COMPILER="docker run $DOCKER_ARGS /tmp/compilers/$compiler/bin/clang --target=x86_64-elf -D__need_size_t -D__need_ptrdiff_t"
+    fi
+fi
+
 if [[ $0 == *"g++" ]]; then
     if [[ $LOCAL_COMPILER == "true" ]]; then
         COMPILER="$HOME/compilers/$compiler/bin/x86_64-elf-g++"
     else
         COMPILER="docker run $DOCKER_ARGS /tmp/compilers/$compiler/bin/x86_64-elf-g++"
+    fi
+fi
+
+if [[ $0 == *"clang++" ]]; then
+    if [[ $LOCAL_COMPILER == "true" ]]; then
+        COMPILER="$HOME/compilers/$compiler/bin/clang++ --target=x86_64-elf -D__need_size_t -D__need_ptrdiff_t"
+    else
+        COMPILER="docker run $DOCKER_ARGS /tmp/compilers/$compiler/bin/clang++ --target=x86_64-elf -D__need_size_t -D__need_ptrdiff_t"
     fi
 fi
 
@@ -213,6 +229,11 @@ ARGS[$i]=
 
 for ARG in "${CONVERTED_ARGS[@]}"
 do
+
+    # This basically just gets rid of some warnings while configuring
+    # libc++ and the libc++abi. Since we know we are using these, we can
+    # ignore this which gets rid of the warnings.
+    if [[ $ARG == "-stdlib=libc++" ]]; then continue; fi
 
     if [[ $MODE == "link" ]]; then
 

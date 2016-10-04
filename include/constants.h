@@ -144,18 +144,53 @@
  */
 #define DEBUG_RING_SIZE (1 << DEBUG_RING_SHIFT)
 
-/// Stack Size
-///
-/// Each entry function is guarded with a custom stack to prevent stack
-/// overflows from corrupting the kernel, as well as providing a larger stack
-/// that common in userspace code, but not in the kernel. If stack corruption
-/// is occuring, this function likely needs to be increased. Note one stack
-/// frame is allocated per CPU, so only increase this if needed.
-///
-/// Note: define in 64bits (i.e. an array of uint64_t)
-///
+/**
+ * Stack Size
+ *
+ * Each entry function is guarded with a custom stack to prevent stack
+ * overflows from corrupting the kernel, as well as providing a larger stack
+ * that common in userspace code, but not in the kernel. If stack corruption
+ * is occuring, this function likely needs to be increased. Note one stack
+ * frame is allocated per CPU, so only increase this if needed.
+ *
+ * Note: Must be defined using a bit shift as we will mask to get the
+ *       bottom of the stack if needed.
+ *
+ * Note: This is hard coded in the thread_context.asm as there is no way to
+ *       use this include in NASM. If you change this, you must change this
+ *       in this file as well.
+ */
 #ifndef STACK_SIZE
-#define STACK_SIZE 0x8000
+#define STACK_SIZE (1ULL << 15)
+#endif
+
+/**
+ * Thread Local Storage (TLS) Size
+ *
+ * Bareflank doesn't support threads, but it does support Multi-Core, and
+ * this we need a way to store CPU specific information. Certain libc++
+ * operations (for example, std::uncaught_exceptions) needs to use this CPU
+ * specific storage so that the cores are not interfering with each other.
+ * So as far as the code is concerned, TLS is being used, even if a "thread"
+ * in the traditional sense isn't.
+ *
+ * Note: Defined in bytes
+ */
+#ifndef THREAD_LOCAL_STORAGE_SIZE
+#define THREAD_LOCAL_STORAGE_SIZE (0x1000ULL)
+#endif
+
+/**
+ * Stack Reserved
+ *
+ * The bottom of the stack is reserved for storing useful information
+ * (similar to the Linux kernel). The followign defines how much of the
+ * stack is reserved.
+ *
+ * Note: Defined in bytes
+ */
+#ifndef STACK_RESERVED
+#define STACK_RESERVED (0x20)
 #endif
 
 #endif

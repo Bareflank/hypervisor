@@ -154,7 +154,8 @@ driver_entry_ut::list()
     this->test_common_load_fail_due_to_relocation_error();
     this->test_common_load_fail_due_to_no_modules_added();
     this->test_common_load_add_md_failed();
-    this->test_common_load_platform_alloc_failed();
+    this->test_common_load_tls_platform_alloc_failed();
+    this->test_common_load_stack_platform_alloc_failed();
     this->test_common_load_loader_add_failed();
     this->test_common_load_resolve_symbol_failed();
     this->test_common_load_loader_get_info_failed();
@@ -198,7 +199,6 @@ driver_entry_ut::list()
     this->test_helper_resolve_symbol_invalid_sym();
     this->test_helper_resolve_symbol_no_loaded_modules();
     this->test_helper_resolve_symbol_missing_symbol();
-    this->test_helper_resolve_symbol_missing_symbol_from_module();
     this->test_helper_execute_symbol_invalid_arg();
     this->test_helper_execute_symbol_missing_symbol();
     this->test_helper_execute_symbol_sym_failed();

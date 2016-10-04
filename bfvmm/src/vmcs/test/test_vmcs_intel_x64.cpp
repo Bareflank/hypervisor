@@ -478,7 +478,7 @@ vmcs_ut::test_launch_create_exit_handler_stack_failure()
         auto ___ = gsl::finally([&]
         { g_new_throws_bad_alloc = 0; });
 
-        g_new_throws_bad_alloc = STACK_SIZE;
+        g_new_throws_bad_alloc = STACK_SIZE * 2;
         EXPECT_EXCEPTION(vmcs.launch(host_state, guest_state), std::bad_alloc);
     });
 }

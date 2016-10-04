@@ -34,8 +34,8 @@ extern "C"
 {
     struct module_t *get_module(uint64_t index);
     int64_t symbol_length(const char *sym);
-    int64_t resolve_symbol(const char *name, void **sym, struct module_t *module);
-    int64_t execute_symbol(const char *sym, uint64_t arg1, uint64_t arg2, struct module_t *module);
+    int64_t resolve_symbol(const char *name, void **sym);
+    int64_t execute_symbol(const char *sym, uint64_t arg1, uint64_t arg2, uint64_t cpuid);
     int64_t add_md_to_memory_manager(struct module_t *module);
     uint64_t get_elf_file_size(struct module_t *module);
     int64_t load_elf_file(struct module_t *module);
@@ -96,13 +96,13 @@ driver_entry_ut::test_helper_resolve_symbol_invalid_name()
 {
     void *sym;
 
-    EXPECT_TRUE(resolve_symbol(nullptr, &sym, nullptr) == BF_ERROR_INVALID_ARG);
+    EXPECT_TRUE(resolve_symbol(nullptr, &sym) == BF_ERROR_INVALID_ARG);
 }
 
 void
 driver_entry_ut::test_helper_resolve_symbol_invalid_sym()
 {
-    EXPECT_TRUE(resolve_symbol("sym", nullptr, nullptr) == BF_ERROR_INVALID_ARG);
+    EXPECT_TRUE(resolve_symbol("sym", nullptr) == BF_ERROR_INVALID_ARG);
 }
 
 void
@@ -110,7 +110,7 @@ driver_entry_ut::test_helper_resolve_symbol_no_loaded_modules()
 {
     void *sym;
 
-    EXPECT_TRUE(resolve_symbol("invalid_symbol", &sym, nullptr) == BF_ERROR_NO_MODULES_ADDED);
+    EXPECT_TRUE(resolve_symbol("invalid_symbol", &sym) == BF_ERROR_NO_MODULES_ADDED);
 }
 
 void
@@ -123,31 +123,14 @@ driver_entry_ut::test_helper_resolve_symbol_missing_symbol()
     EXPECT_TRUE(common_add_module(m_dummy_add_md_success.get(), m_dummy_add_md_success_length) == BF_SUCCESS);
     EXPECT_TRUE(common_add_module(m_dummy_misc.get(), m_dummy_misc_length) == BF_SUCCESS);
     EXPECT_TRUE(common_load_vmm() == BF_SUCCESS);
-    EXPECT_TRUE(resolve_symbol("invalid_symbol", &sym, nullptr) == BFELF_ERROR_NO_SUCH_SYMBOL);
-    EXPECT_TRUE(common_fini() == BF_SUCCESS);
-}
-
-void
-driver_entry_ut::test_helper_resolve_symbol_missing_symbol_from_module()
-{
-    void *sym;
-
-    EXPECT_TRUE(common_add_module(m_dummy_start_vmm_success.get(), m_dummy_start_vmm_success_length) == BF_SUCCESS);
-    EXPECT_TRUE(common_add_module(m_dummy_stop_vmm_success.get(), m_dummy_stop_vmm_success_length) == BF_SUCCESS);
-    EXPECT_TRUE(common_add_module(m_dummy_add_md_success.get(), m_dummy_add_md_success_length) == BF_SUCCESS);
-    EXPECT_TRUE(common_add_module(m_dummy_misc.get(), m_dummy_misc_length) == BF_SUCCESS);
-    EXPECT_TRUE(common_load_vmm() == BF_SUCCESS);
-
-    auto module = get_module(0);
-
-    EXPECT_TRUE(resolve_symbol("invalid_symbol", &sym, module) == BFELF_ERROR_NO_SUCH_SYMBOL);
+    EXPECT_TRUE(resolve_symbol("invalid_symbol", &sym) == BFELF_ERROR_NO_SUCH_SYMBOL);
     EXPECT_TRUE(common_fini() == BF_SUCCESS);
 }
 
 void
 driver_entry_ut::test_helper_execute_symbol_invalid_arg()
 {
-    EXPECT_TRUE(execute_symbol(nullptr, 0, 0, nullptr) == BF_ERROR_INVALID_ARG);
+    EXPECT_TRUE(execute_symbol(nullptr, 0, 0, 0) == BF_ERROR_INVALID_ARG);
 }
 
 void
@@ -158,7 +141,7 @@ driver_entry_ut::test_helper_execute_symbol_missing_symbol()
     EXPECT_TRUE(common_add_module(m_dummy_add_md_success.get(), m_dummy_add_md_success_length) == BF_SUCCESS);
     EXPECT_TRUE(common_add_module(m_dummy_misc.get(), m_dummy_misc_length) == BF_SUCCESS);
     EXPECT_TRUE(common_load_vmm() == BF_SUCCESS);
-    EXPECT_TRUE(execute_symbol("invalid_symbol", 0, 0, nullptr) == BFELF_ERROR_NO_SUCH_SYMBOL);
+    EXPECT_TRUE(execute_symbol("invalid_symbol", 0, 0, 0) == BFELF_ERROR_NO_SUCH_SYMBOL);
     EXPECT_TRUE(common_fini() == BF_SUCCESS);
 }
 
@@ -170,7 +153,7 @@ driver_entry_ut::test_helper_execute_symbol_sym_failed()
     EXPECT_TRUE(common_add_module(m_dummy_add_md_success.get(), m_dummy_add_md_success_length) == BF_SUCCESS);
     EXPECT_TRUE(common_add_module(m_dummy_misc.get(), m_dummy_misc_length) == BF_SUCCESS);
     EXPECT_TRUE(common_load_vmm() == BF_SUCCESS);
-    EXPECT_TRUE(execute_symbol("sym_that_returns_failure", 0, 0, nullptr) == -1);
+    EXPECT_TRUE(execute_symbol("sym_that_returns_failure", 0, 0, 0) == -1);
     EXPECT_TRUE(common_fini() == BF_SUCCESS);
 }
 
@@ -182,7 +165,7 @@ driver_entry_ut::test_helper_execute_symbol_sym_success()
     EXPECT_TRUE(common_add_module(m_dummy_add_md_success.get(), m_dummy_add_md_success_length) == BF_SUCCESS);
     EXPECT_TRUE(common_add_module(m_dummy_misc.get(), m_dummy_misc_length) == BF_SUCCESS);
     EXPECT_TRUE(common_load_vmm() == BF_SUCCESS);
-    EXPECT_TRUE(execute_symbol("sym_that_returns_success", 0, 0, nullptr) == 0);
+    EXPECT_TRUE(execute_symbol("sym_that_returns_success", 0, 0, 0) == 0);
     EXPECT_TRUE(common_fini() == BF_SUCCESS);
 }
 
@@ -196,7 +179,7 @@ driver_entry_ut::test_helper_constructors_success()
     EXPECT_TRUE(common_add_module(m_dummy_add_md_success.get(), m_dummy_add_md_success_length) == BF_SUCCESS);
     EXPECT_TRUE(common_add_module(m_dummy_misc.get(), m_dummy_misc_length) == BF_SUCCESS);
     EXPECT_TRUE(common_load_vmm() == BF_SUCCESS);
-    ASSERT_TRUE(resolve_symbol("get_misc", reinterpret_cast<void **>(&get_misc), nullptr) == BF_SUCCESS);
+    ASSERT_TRUE(resolve_symbol("get_misc", reinterpret_cast<void **>(&get_misc)) == BF_SUCCESS);
     EXPECT_TRUE(get_misc() == 10);
     EXPECT_TRUE(common_fini() == BF_SUCCESS);
 }

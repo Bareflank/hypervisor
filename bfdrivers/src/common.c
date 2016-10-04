@@ -27,6 +27,7 @@
 #include <entry.h>
 #include <memory.h>
 #include <constants.h>
+#include <thread_context.h>
 #include <driver_entry_interface.h>
 
 /* -------------------------------------------------------------------------- */
@@ -42,8 +43,12 @@ struct bfelf_loader_t g_loader;
 
 int64_t g_num_cpus_started = 0;
 
+void *g_tls = 0;
 void *g_stack = 0;
-uint64_t g_stack_loc = 0;
+
+uint64_t g_tls_size = 0;
+uint64_t g_stack_size = 0;
+uint64_t g_stack_top = 0;
 
 /* -------------------------------------------------------------------------- */
 /* Entry Points                                                               */
@@ -79,7 +84,7 @@ symbol_length(const char *sym)
 }
 
 int64_t
-resolve_symbol(const char *name, void **sym, struct module_t *module)
+resolve_symbol(const char *name, void **sym)
 {
     int64_t ret;
     struct e_string_t str = {0, 0};
@@ -87,48 +92,40 @@ resolve_symbol(const char *name, void **sym, struct module_t *module)
     if (name == 0 || sym == 0)
         return BF_ERROR_INVALID_ARG;
 
-    if (module == 0 && g_num_modules == 0)
+    if (g_num_modules == 0)
         return BF_ERROR_NO_MODULES_ADDED;
 
     str.buf = name;
     str.len = symbol_length(name);
 
-    if (module == 0)
+    ret = bfelf_loader_resolve_symbol(&g_loader, &str, sym);
+    if (ret != BFELF_SUCCESS)
     {
-        ret = bfelf_loader_resolve_symbol(&g_loader, &str, sym);
-        if (ret != BFELF_SUCCESS)
-        {
-            ALERT("Failed to find: %s\n", name);
-            return ret;
-        }
-    }
-    else
-    {
-        ret = bfelf_file_resolve_symbol(&module->file, &str, sym);
-        if (ret != BFELF_SUCCESS)
-        {
-            ALERT("Failed to find: %s\n", name);
-            return ret;
-        }
+        ALERT("Failed to find: %s\n", name);
+        return ret;
     }
 
     return BF_SUCCESS;
 }
 
 int64_t
-execute_symbol(const char *sym, uint64_t arg1, uint64_t arg2, struct module_t *module)
+execute_symbol(const char *sym, uint64_t arg1, uint64_t arg2, uint64_t cpuid)
 {
     int64_t ret = 0;
     void *entry_point = 0;
+    struct thread_context_t *tc = (struct thread_context_t *)(g_stack_top - sizeof(struct thread_context_t));
 
     if (sym == 0)
         return BF_ERROR_INVALID_ARG;
 
-    ret = resolve_symbol(sym, &entry_point, module);
+    ret = resolve_symbol(sym, &entry_point);
     if (ret != BF_SUCCESS)
         return ret;
 
-    ret = execute_entry(g_stack_loc, entry_point, arg1, arg2);
+    tc->cpuid = cpuid;
+    tc->tlsptr = (uint64_t)g_tls + (THREAD_LOCAL_STORAGE_SIZE * cpuid);
+
+    ret = execute_entry(g_stack_top - sizeof(struct thread_context_t) - 1, entry_point, arg1, arg2);
     if (ret != ENTRY_SUCCESS)
     {
         ALERT("%s failed\n", sym);
@@ -275,11 +272,15 @@ common_reset(void)
     execute_entry = 0;
     g_num_cpus_started = 0;
 
-    if (g_stack != 0)
-        platform_free_rw(g_stack, STACK_SIZE);
+    if (g_tls != 0)
+        platform_free_rw(g_tls, g_tls_size);
 
+    if (g_stack != 0)
+        platform_free_rw(g_stack, g_stack_size);
+
+    g_tls = 0;
     g_stack = 0;
-    g_stack_loc = 0;
+    g_stack_top = 0;
 
     return BF_SUCCESS;
 }
@@ -397,14 +398,21 @@ common_load_vmm(void)
     if (g_num_modules == 0)
         return BF_ERROR_NO_MODULES_ADDED;
 
-    g_stack = platform_alloc_rw(STACK_SIZE);
+    g_tls_size = THREAD_LOCAL_STORAGE_SIZE * (uint64_t)platform_num_cpus();
+    g_stack_size = STACK_SIZE * 2;
+
+    g_tls = platform_alloc_rw(g_tls_size);
+    if (g_tls == 0)
+        return BF_ERROR_OUT_OF_MEMORY;
+
+    g_stack = platform_alloc_rw(g_stack_size);
     if (g_stack == 0)
         return BF_ERROR_OUT_OF_MEMORY;
 
-    g_stack_loc = (uint64_t)g_stack + STACK_SIZE;
-    g_stack_loc = g_stack_loc - 1;
-    g_stack_loc = g_stack_loc & 0xFFFFFFFFFFFFFFF0;
+    g_stack_top = (uint64_t)g_stack + g_stack_size;
+    g_stack_top = (g_stack_top & ~(STACK_SIZE - 1)) - 1;
 
+    platform_memset(g_tls, 0, g_tls_size);
     platform_memset(&g_loader, 0, sizeof(struct bfelf_loader_t));
 
     for (i = 0; (module = get_module(i)) != 0; i++)
@@ -418,7 +426,7 @@ common_load_vmm(void)
     if (ret != BFELF_SUCCESS)
         goto failure;
 
-    ret = resolve_symbol("execute_entry", (void **)&execute_entry, 0);
+    ret = resolve_symbol("execute_entry", (void **)&execute_entry);
     if (ret != BF_SUCCESS)
         goto failure;
 
@@ -430,7 +438,7 @@ common_load_vmm(void)
         if (ret != BF_SUCCESS)
             goto failure;
 
-        ret = execute_symbol("local_init", (uint64_t)&info, 0, module);
+        ret = execute_symbol("local_init", (uint64_t)&info, 0, 0);
         if (ret != BF_SUCCESS)
             goto failure;
     }
@@ -476,7 +484,7 @@ common_unload_vmm(void)
             if (ret != BF_SUCCESS)
                 goto corrupted;
 
-            ret = execute_symbol("local_fini", (uint64_t)&info, 0, module);
+            ret = execute_symbol("local_fini", (uint64_t)&info, 0, 0);
             if (ret != BF_SUCCESS)
                 goto corrupted;
         }
@@ -497,6 +505,7 @@ int64_t
 common_start_vmm(void)
 {
     int64_t ret = 0;
+    int64_t cpuid = 0;
     int64_t ignore_ret = 0;
     int64_t caller_affinity = 0;
 
@@ -509,13 +518,13 @@ common_start_vmm(void)
     if (common_vmm_status() == VMM_UNLOADED)
         return BF_ERROR_VMM_INVALID_STATE;
 
-    for (g_num_cpus_started = 0; g_num_cpus_started < platform_num_cpus(); g_num_cpus_started++)
+    for (cpuid = 0, g_num_cpus_started = 0; cpuid < platform_num_cpus(); cpuid++, g_num_cpus_started++)
     {
-        ret = caller_affinity = platform_set_affinity(g_num_cpus_started);
+        ret = caller_affinity = platform_set_affinity(cpuid);
         if (caller_affinity < 0)
             goto failure;
 
-        ret = execute_symbol("start_vmm", (uint64_t)g_num_cpus_started, 0, 0);
+        ret = execute_symbol("start_vmm", (uint64_t)cpuid, 0, (uint64_t)cpuid);
         if (ret != BF_SUCCESS)
             goto failure;
 
@@ -538,8 +547,8 @@ failure:
 int64_t
 common_stop_vmm(void)
 {
-    int64_t i = 0;
     int64_t ret = 0;
+    int64_t cpuid = 0;
     int64_t caller_affinity = 0;
 
     if (common_vmm_status() == VMM_CORRUPT)
@@ -551,13 +560,13 @@ common_stop_vmm(void)
     if (common_vmm_status() == VMM_UNLOADED)
         return BF_ERROR_VMM_INVALID_STATE;
 
-    for (i = g_num_cpus_started - 1; i >= 0 ; i--)
+    for (cpuid = g_num_cpus_started - 1; cpuid >= 0 ; cpuid--)
     {
-        ret = caller_affinity = platform_set_affinity(i);
+        ret = caller_affinity = platform_set_affinity(cpuid);
         if (caller_affinity < 0)
             goto corrupted;
 
-        ret = execute_symbol("stop_vmm", (uint64_t)i, 0, 0);
+        ret = execute_symbol("stop_vmm", (uint64_t)cpuid, 0, (uint64_t)cpuid);
         if (ret != BFELF_SUCCESS)
             goto corrupted;
 

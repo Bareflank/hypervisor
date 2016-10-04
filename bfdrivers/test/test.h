@@ -70,7 +70,8 @@ private:
     void test_common_load_fail_due_to_relocation_error();
     void test_common_load_fail_due_to_no_modules_added();
     void test_common_load_add_md_failed();
-    void test_common_load_platform_alloc_failed();
+    void test_common_load_tls_platform_alloc_failed();
+    void test_common_load_stack_platform_alloc_failed();
     void test_common_load_loader_add_failed();
     void test_common_load_resolve_symbol_failed();
     void test_common_load_loader_get_info_failed();
@@ -114,7 +115,6 @@ private:
     void test_helper_resolve_symbol_invalid_sym();
     void test_helper_resolve_symbol_no_loaded_modules();
     void test_helper_resolve_symbol_missing_symbol();
-    void test_helper_resolve_symbol_missing_symbol_from_module();
     void test_helper_execute_symbol_invalid_arg();
     void test_helper_execute_symbol_missing_symbol();
     void test_helper_execute_symbol_sym_failed();

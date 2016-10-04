@@ -1,12 +1,10 @@
 Misc:
-- Add support for clang/LLVM
 - Add support for Intel's MPX. This doesn't look like a huge amount of work, but
   would require a custom libmpx designed for the kernel in a cross platform
   fashion. Might not be possible until the new libc is developed with basic
   pthread mutex support.
 - Add system beep code for additional debugging
 - Add support for the PCI debugger
-- Add support for https://coveralls.io
 - Re-write the common.c code such that, the ELF loader is not compiled in
   the driver itself, but instead, the ELF loader is compiled as a flat
   binary and executed, which then starts the VMM. This will evenutally provide
@@ -17,8 +15,9 @@ Misc:
   anything (might be taken care of by libc++). Also... will need to add
   visibility macros if we enable this option, and should disable the GCC
   flags for BFM and windows for export all.
-- Implement a custom version of the GSL in the unwinder. This way span and
-  string_view can be used and the bounds checks can be cleaned up.
+- Move the unwinder and the C runtime library into shared libraries, and
+  compile them after libc++. This will provide access to the standard library,
+  and the GSL for both libraries which should simply the code drastically.
 
 Version 1.2 TODO:
 - Clean up the VMCS checks so that they can be unit tested better, and then
@@ -41,3 +40,14 @@ Version 1.2 TODO:
 - Hyperkernel support
 - Fully unittest C++ inside the VMM to verify which portions of C++ we plan
   to support actually work.
+
+Version 1.2+ TODO:
+- Once we have EPT in the Extended APIs, we need the ability to prevent the
+  host OS from touching the VMM. Once the C++ code has finished execution on
+  startup, we need to VMCall to the hypervisor to lockdown memory. To do
+  this we will need to provide a list of memory arrays to lock down, which
+  needs to include the modules and memory allocated in the driver like the
+  TLS data. We will likely need to change how we handle the debug ring once
+  a lockdown is done as a VMCall will be needed to access it. Also, we will
+  need to think about how this will be done if people want to use Intel's
+  TXT to launch in the type 1 case and UEFI.

@@ -34,6 +34,8 @@ int alloc_count_rwe = 0;
 
 #define PAGE_ROUND_UP(x) ( (((uintptr_t)(x)) + MAX_PAGE_SIZE-1)  & (~(MAX_PAGE_SIZE-1)) )
 
+uint64_t g_malloc_fails = 0;
+
 int
 verify_no_mem_leaks(void)
 {
@@ -46,6 +48,9 @@ verify_no_mem_leaks(void)
 void *
 platform_alloc_rw(uint64_t len)
 {
+    if (g_malloc_fails == len)
+        return 0;
+
     alloc_count_rw++;
     return malloc(len);
 }
@@ -56,6 +61,9 @@ void *
 platform_alloc_rwe(uint64_t len)
 {
     void *addr = 0;
+
+    if (g_malloc_fails == len)
+        return 0;
 
     len = PAGE_ROUND_UP(len);
 
