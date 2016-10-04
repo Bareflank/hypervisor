@@ -96,7 +96,7 @@ write(int file, const void *buffer, size_t count)
 
             dr->write(str);
             serial_port_intel_x64::instance()->write(str);
-            return count;
+            return static_cast<int>(count);
         }
     }
     catch (...) { }
@@ -108,6 +108,8 @@ write(int file, const void *buffer, size_t count)
 
 #if defined(NO_HYPER_LIBCXX_TEST)
 
+#include <stddef.h>
+
 extern "C" int
 write(int file, const void *buffer, size_t count)
 {
@@ -118,11 +120,52 @@ write(int file, const void *buffer, size_t count)
     return 0;
 }
 
+extern "C" void
+abort(void)
+{
+    while (true);
+}
+
+extern "C" void
+__cxa_end_catch(void)
+{  }
+
+extern "C" void
+__cxa_begin_catch(void)
+{  }
+
+extern "C" void
+__gxx_personality_v0(void)
+{  }
+
+namespace std
+{
+void terminate()
+{ }
+}
+
+extern "C" void *
+memset(void *s, int c, size_t n)
+{
+    (void) s;
+    (void) c;
+    (void) n;
+
+    return nullptr;
+}
+
+extern "C" size_t
+strlen(const char *str)
+{
+    (void) str;
+
+    return 0;
+}
+
 #endif
 
 #if defined(NO_HYPER_TEST) || defined(NO_HYPER_LIBCXX_TEST)
 
-#include <string.h>
 #include <string.h>
 #include <stddef.h>
 #include <memory.h>
@@ -161,10 +204,9 @@ stop_vmm(uint64_t arg) noexcept
 }
 
 extern "C" int64_t
-add_mdl(memory_descriptor *mdl, int64_t num) noexcept
+add_md(memory_descriptor *md) noexcept
 {
-    (void) mdl;
-    (void) num;
+    (void) md;
 
     return 0;
 }
