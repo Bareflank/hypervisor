@@ -22,6 +22,8 @@
 #include <test.h>
 #include <new_delete.h>
 
+using namespace intel_x64;
+
 std::map<uint32_t, uint64_t> g_msrs;
 std::map<uint64_t, uint64_t> g_vmcs_fields;
 uint8_t span[0x81] = {0};
@@ -31,8 +33,8 @@ bool g_phys_to_virt_return_nullptr = false;
 void
 setup_mock(MockRepository &mocks, memory_manager *mm, intrinsics_intel_x64 *in)
 {
-    mocks.OnCall(in, intrinsics_intel_x64::read_msr).Do(read_msr);
-    mocks.OnCall(in, intrinsics_intel_x64::vmread).Do(vmread);
+    mocks.OnCall(in, intrinsics_intel_x64::vmread).Do(__vmread);
+    mocks.OnCall(in, intrinsics_intel_x64::read_msr).Do(__read_msr);
     mocks.OnCall(in, intrinsics_intel_x64::cpuid_eax).With(0x80000008).Return(32);
     mocks.OnCallFunc(memory_manager::instance).Return(mm);
     mocks.OnCall(mm, memory_manager::physint_to_virtptr).Do(physint_to_virtptr);
@@ -42,7 +44,7 @@ void
 enable_proc_ctl(uint64_t control)
 {
     g_vmcs_fields[VMCS_PRIMARY_PROCESSOR_BASED_VM_EXECUTION_CONTROLS] |= control;
-    g_msrs[IA32_VMX_TRUE_PROCBASED_CTLS_MSR] |= control << 32;
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] |= control << 32;
 }
 
 void
@@ -50,75 +52,91 @@ enable_proc_ctl2(uint64_t control)
 {
     enable_proc_ctl(VM_EXEC_P_PROC_BASED_ACTIVATE_SECONDARY_CONTROLS);
     g_vmcs_fields[VMCS_SECONDARY_PROCESSOR_BASED_VM_EXECUTION_CONTROLS] |= control;
-    g_msrs[IA32_VMX_PROCBASED_CTLS2_MSR] |= control << 32;
+    g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] |= control << 32;
 }
 
 void
 enable_pin_ctl(uint64_t control)
 {
     g_vmcs_fields[VMCS_PIN_BASED_VM_EXECUTION_CONTROLS] |= control;
-    g_msrs[IA32_VMX_TRUE_PINBASED_CTLS_MSR] |= control << 32;
+    g_msrs[msrs::ia32_vmx_true_pinbased_ctls::addr] |= control << 32;
 }
 
 void
 disable_proc_ctl(uint64_t control)
 {
     g_vmcs_fields[VMCS_PRIMARY_PROCESSOR_BASED_VM_EXECUTION_CONTROLS] &= ~control;
-    g_msrs[IA32_VMX_TRUE_PROCBASED_CTLS_MSR] &= ~control;
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] &= ~control;
 }
 
 void
 disable_proc_ctl2(uint64_t control)
 {
     g_vmcs_fields[VMCS_SECONDARY_PROCESSOR_BASED_VM_EXECUTION_CONTROLS] &= ~control;
-    g_msrs[IA32_VMX_PROCBASED_CTLS2_MSR] &= ~control;
+    g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] &= ~control;
 }
 
 void
 disable_pin_ctl(uint64_t control)
 {
     g_vmcs_fields[VMCS_PIN_BASED_VM_EXECUTION_CONTROLS] &= ~control;
-    g_msrs[IA32_VMX_TRUE_PINBASED_CTLS_MSR] &= ~control;
+    g_msrs[msrs::ia32_vmx_true_pinbased_ctls::addr] &= ~control;
 }
 
 void
 disable_exit_ctl(uint64_t control)
 {
     g_vmcs_fields[VMCS_VM_EXIT_CONTROLS] &= ~control;
-    g_msrs[IA32_VMX_TRUE_EXIT_CTLS_MSR] &= ~control;
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] &= ~control;
 }
 
 void
 enable_exit_ctl(uint64_t control)
 {
     g_vmcs_fields[VMCS_VM_EXIT_CONTROLS] |= control;
-    g_msrs[IA32_VMX_TRUE_EXIT_CTLS_MSR] |= control << 32;
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] |= control << 32;
 }
 
 void
 disable_entry_ctl(uint64_t control)
 {
     g_vmcs_fields[VMCS_VM_ENTRY_CONTROLS] &= ~control;
-    g_msrs[IA32_VMX_TRUE_ENTRY_CTLS_MSR] &= ~control;
+    g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] &= ~control;
 }
 
 void
 enable_entry_ctl(uint64_t control)
 {
     g_vmcs_fields[VMCS_VM_ENTRY_CONTROLS] |= control;
-    g_msrs[IA32_VMX_TRUE_ENTRY_CTLS_MSR] |= control << 32;
+    g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] |= control << 32;
 }
 
-uint64_t
-read_msr(uint32_t msr)
+extern "C" uint64_t
+__read_msr(uint32_t msr) noexcept
 {
     return g_msrs[msr];
 }
 
+bool g_vmread_fails = false;
+bool g_vmwrite_fails = false;
+
 bool
-vmread(uint64_t field, uint64_t *val)
+__vmread(uint64_t field, uint64_t *val) noexcept
 {
+    if (g_vmread_fails)
+        return false;
+
     *val = g_vmcs_fields[field];
+    return true;
+}
+
+bool
+__vmwrite(uint64_t field, uint64_t val) noexcept
+{
+    if (g_vmwrite_fails)
+        return false;
+
+    g_vmcs_fields[field] = val;
     return true;
 }
 

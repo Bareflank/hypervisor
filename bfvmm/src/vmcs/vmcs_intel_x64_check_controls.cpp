@@ -24,8 +24,6 @@
 #include <vmcs/vmcs_intel_x64.h>
 #include <memory_manager/memory_manager.h>
 
-using namespace intel_x64;
-
 void
 vmcs_intel_x64::check_vmcs_control_state()
 {
@@ -62,7 +60,8 @@ vmcs_intel_x64::checks_on_vm_execution_control_fields()
 void
 vmcs_intel_x64::check_control_pin_based_ctls_reserved_properly_set()
 {
-    auto ia32_vmx_pinbased_ctls_msr = msrs::ia32_vmx_true_pinbased_ctls::get();
+    auto ia32_vmx_pinbased_ctls_msr =
+        m_intrinsics->read_msr(IA32_VMX_TRUE_PINBASED_CTLS_MSR);
 
     auto allowed_zero = ((ia32_vmx_pinbased_ctls_msr >> 00) & 0x00000000FFFFFFFF);
     auto allowed_one = ((ia32_vmx_pinbased_ctls_msr >> 32) & 0x00000000FFFFFFFF);
@@ -84,7 +83,8 @@ vmcs_intel_x64::check_control_pin_based_ctls_reserved_properly_set()
 void
 vmcs_intel_x64::check_control_proc_based_ctls_reserved_properly_set()
 {
-    auto ia32_vmx_procbased_ctls_msr = msrs::ia32_vmx_true_procbased_ctls::get();
+    auto ia32_vmx_procbased_ctls_msr =
+        m_intrinsics->read_msr(IA32_VMX_TRUE_PROCBASED_CTLS_MSR);
 
     auto allowed_zero = ((ia32_vmx_procbased_ctls_msr >> 00) & 0x00000000FFFFFFFF);
     auto allowed_one = ((ia32_vmx_procbased_ctls_msr >> 32) & 0x00000000FFFFFFFF);
@@ -106,7 +106,8 @@ vmcs_intel_x64::check_control_proc_based_ctls_reserved_properly_set()
 void
 vmcs_intel_x64::check_control_proc_based_ctls2_reserved_properly_set()
 {
-    auto ia32_vmx_procbased_ctls2_msr = msrs::ia32_vmx_procbased_ctls2::get();
+    auto ia32_vmx_procbased_ctls2_msr =
+        m_intrinsics->read_msr(IA32_VMX_PROCBASED_CTLS2_MSR);
 
     auto allowed_zero = ((ia32_vmx_procbased_ctls2_msr >> 00) & 0x00000000FFFFFFFF);
     auto allowed_one = ((ia32_vmx_procbased_ctls2_msr >> 32) & 0x00000000FFFFFFFF);
@@ -297,7 +298,7 @@ vmcs_intel_x64::check_control_process_posted_interrupt_checks()
         throw std::logic_error("ack interrupt on exit must be 1 "
                                "if posted interrupts is 1");
 
-    auto vector = vmcs::posted_interrupt_notification_vector::get();
+    auto vector = vmread(VMCS_POSTED_INTERRUPT_NOTIFICATION_VECTOR);
 
     if ((vector & 0xFFFFFFFFFFFFFF00) != 0)
         throw std::logic_error("bits 15:8 of the notification vector must "
@@ -319,7 +320,7 @@ vmcs_intel_x64::check_control_vpid_checks()
     if (!is_enabled_vpid())
         return;
 
-    if (vmcs::virtual_processor_identifier::get() == 0)
+    if (vmread(VMCS_VIRTUAL_PROCESSOR_IDENTIFIER) == 0)
         throw std::logic_error("vpid cannot equal 0");
 }
 
@@ -331,22 +332,36 @@ vmcs_intel_x64::check_control_enable_ept_checks()
 
     auto eptp = vmread(VMCS_EPT_POINTER_FULL);
 
-    if ((eptp & EPTP_MEMORY_TYPE) == 0 && msrs::ia32_vmx_ept_vpid_cap::memory_type_uncacheable_supported::get() == 0)
+    auto ia32_vmx_ept_vpid_cap_msr =
+        m_intrinsics->read_msr(IA32_VMX_EPT_VPID_CAP_MSR);
+
+    auto uncacheable = (ia32_vmx_ept_vpid_cap_msr & IA32_VMX_EPT_VPID_CAP_UC);
+    auto write_back = (ia32_vmx_ept_vpid_cap_msr & IA32_VMX_EPT_VPID_CAP_WB);
+
+    // switch(eptp_ept_paging_structure_memory_type(eptp))
+    // {
+    //     case 0:
+    //         if
+    // }
+
+    if ( == 0 && uncacheable == 0)
         throw std::logic_error("hardware does not support ept memory type: uncachable");
 
-    if ((eptp & EPTP_MEMORY_TYPE) == 6 && msrs::ia32_vmx_ept_vpid_cap::memory_type_write_back_supported::get() == 0)
+    if (eptp_ept_paging_structure_memory_type(eptp) == 6 && write_back == 0)
         throw std::logic_error("hardware does not support ept memory type: write-back");
 
-    if ((eptp & EPTP_MEMORY_TYPE) != 0 && (eptp & EPTP_MEMORY_TYPE) != 6)
+    if (eptp_ept_paging_structure_memory_type(eptp) != 0 && eptp_ept_paging_structure_memory_type(eptp) != 6)
         throw std::logic_error("unknown eptp memory type");
 
-    if ((eptp & EPTP_PAGE_WALK_LENGTH) >> 3 != 3)
+    if (eptp_ept_page_walk_length(eptp) != 3)
         throw std::logic_error("the ept walk-through length must be 1 less than 4, i.e. 3");
 
-    if ((eptp & EPTP_ACCESSED_DIRTY_FLAGS_ENABLED) != 0 && msrs::ia32_vmx_ept_vpid_cap::accessed_dirty_support::get() == 0)
+    auto ad = (ia32_vmx_ept_vpid_cap_msr & IA32_VMX_EPT_VPID_CAP_AD);
+
+    if (eptp_ept_accessed_dirty_flags_enabled(eptp) && ad == 0)
         throw std::logic_error("hardware does not support dirty / accessed flags for ept");
 
-    if ((eptp & 0x0000000000000F80) != 0)
+    if (!eptp_reserved_are_cleared(eptp))
         throw std::logic_error("bits 11:7 and 63:48 of the eptp must be 0");
 
     if (!is_physical_address_valid(eptp))
@@ -384,8 +399,11 @@ vmcs_intel_x64::check_control_enable_vm_functions()
     if (!is_enabled_vm_functions())
         return;
 
-    auto ia32_vmx_vmfunc_msr = msrs::ia32_vmx_vmfunc::get();
-    auto vmcs_vm_function_controls = vmread(VMCS_VM_FUNCTION_CONTROLS_FULL);
+    auto vmcs_vm_function_controls =
+        vmread(VMCS_VM_FUNCTION_CONTROLS_FULL);
+
+    auto ia32_vmx_vmfunc_msr =
+        m_intrinsics->read_msr(IA32_VMX_VMFUNC_MSR);
 
     if ((~ia32_vmx_vmfunc_msr & vmcs_vm_function_controls) != 0)
         throw std::logic_error("unsupported vm function control bit set");
@@ -458,7 +476,8 @@ vmcs_intel_x64::checks_on_vm_exit_control_fields()
 void
 vmcs_intel_x64::check_control_vm_exit_ctls_reserved_properly_set()
 {
-    auto ia32_vmx_exit_ctls_msr = msrs::ia32_vmx_true_exit_ctls::get();
+    auto ia32_vmx_exit_ctls_msr =
+        m_intrinsics->read_msr(IA32_VMX_TRUE_EXIT_CTLS_MSR);
 
     auto allowed_zero = ((ia32_vmx_exit_ctls_msr >> 00) & 0x00000000FFFFFFFF);
     auto allowed_one = ((ia32_vmx_exit_ctls_msr >> 32) & 0x00000000FFFFFFFF);
@@ -547,7 +566,8 @@ vmcs_intel_x64::checks_on_vm_entry_control_fields()
 void
 vmcs_intel_x64::check_control_vm_entry_ctls_reserved_properly_set()
 {
-    auto ia32_vmx_entry_ctls_msr = msrs::ia32_vmx_true_entry_ctls::get();
+    auto ia32_vmx_entry_ctls_msr =
+        m_intrinsics->read_msr(IA32_VMX_TRUE_ENTRY_CTLS_MSR);
 
     auto allowed_zero = ((ia32_vmx_entry_ctls_msr >> 00) & 0x00000000FFFFFFFF);
     auto allowed_one = ((ia32_vmx_entry_ctls_msr >> 32) & 0x00000000FFFFFFFF);

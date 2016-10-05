@@ -23,6 +23,7 @@
 #define VMCS_INTEL_X64_H
 
 #include <memory>
+#include <view_as_pointer.h>
 #include <vmcs/vmcs_intel_x64_state.h>
 #include <intrinsics/intrinsics_intel_x64.h>
 
@@ -177,6 +178,8 @@ protected:
 
 protected:
 
+#if 0
+
     virtual void dump_vmcs();
     virtual void dump_vmcs_16bit_control_state();
     virtual void dump_vmcs_16bit_guest_state();
@@ -200,6 +203,8 @@ protected:
     virtual void print_secondary_processor_based_vm_execution_controls();
     virtual void print_vm_exit_control_fields();
     virtual void print_vm_entry_control_fields();
+
+#endif
 
     virtual std::string get_vm_instruction_error();
 
@@ -598,5 +603,486 @@ private:
     virtual void set_state_save(const std::shared_ptr<state_save_intel_x64> &state_save)
     { m_state_save = state_save; }
 };
+
+// -----------------------------------------------------------------------------
+// VMCS Fields
+// -----------------------------------------------------------------------------
+
+// *INDENT-OFF*
+
+namespace intel_x64
+{
+namespace vmcs
+{
+
+// -----------------------------------------------------------------------------
+// Helpers
+// -----------------------------------------------------------------------------
+
+inline uint64_t
+vmread(uint64_t field, const std::string &name)
+{
+    uint64_t value;
+
+    if (!__vmread(field, &value))
+    {
+        bferror << "vmread failed:" << bfendl;
+        bferror << "    - field: " << name << bfendl;
+
+        throw std::runtime_error("vmread failed");
+    }
+
+    return value;
+}
+
+inline void
+vmwrite(uint64_t field, uint64_t value, const std::string &name)
+{
+    if (!__vmwrite(field, value))
+    {
+        bferror << "vmwrite failed:" << bfendl;
+        bferror << "    - field: " << name << bfendl;
+        bferror << "    - value: " << view_as_pointer(value) << bfendl;
+
+        throw std::runtime_error("vmwrite failed");
+    }
+}
+
+// -----------------------------------------------------------------------------
+// 16bit Control Fields
+// -----------------------------------------------------------------------------
+
+namespace virtual_processor_identifier
+{
+constexpr const auto addr = 0x0000000000000000UL;
+constexpr const auto name = "virtual_processor_identifier";
+
+inline auto get()
+{ return vmread(addr, name); }
+
+template<class T> constexpr auto set(T val)
+{ return vmwrite(addr, val, name); }
+}
+
+namespace posted_interrupt_notification_vector
+{
+constexpr const auto addr = 0x0000000000000002UL;
+constexpr const auto name = "posted_interrupt_notification_vector";
+
+inline auto get()
+{ return vmread(addr, name); }
+
+template<class T> constexpr auto set(T val)
+{ return vmwrite(addr, val, name); }
+}
+
+namespace eptp_index
+{
+constexpr const auto addr = 0x0000000000000004UL;
+constexpr const auto name = "eptp_index";
+
+inline auto get()
+{ return vmread(addr, name); }
+
+template<class T> constexpr auto set(T val)
+{ return vmwrite(addr, val, name); }
+}
+
+// -----------------------------------------------------------------------------
+// 16bit Guest State Fields
+// -----------------------------------------------------------------------------
+
+namespace guest_es_selector
+{
+    constexpr const auto addr = 0x0000000000000800UL;
+    constexpr const auto name = "guest_es_selector";
+
+    inline auto get()
+    { return vmread(addr, name); }
+
+    template<class T> constexpr auto set(T val)
+    { return vmwrite(addr, val, name); }
+}
+
+namespace guest_cs_selector
+{
+    constexpr const auto addr = 0x0000000000000802UL;
+    constexpr const auto name = "guest_cs_selector";
+
+    inline auto get()
+    { return vmread(addr, name); }
+
+    template<class T> constexpr auto set(T val)
+    { return vmwrite(addr, val, name); }
+}
+
+namespace guest_ss_selector
+{
+    constexpr const auto addr = 0x0000000000000804UL;
+    constexpr const auto name = "guest_ss_selector";
+
+    inline auto get()
+    { return vmread(addr, name); }
+
+    template<class T> constexpr auto set(T val)
+    { return vmwrite(addr, val, name); }
+}
+
+namespace guest_ds_selector
+{
+    constexpr const auto addr = 0x0000000000000806UL;
+    constexpr const auto name = "guest_ds_selector";
+
+    inline auto get()
+    { return vmread(addr, name); }
+
+    template<class T> constexpr auto set(T val)
+    { return vmwrite(addr, val, name); }
+}
+
+namespace guest_fs_selector
+{
+    constexpr const auto addr = 0x0000000000000808UL;
+    constexpr const auto name = "guest_fs_selector";
+
+    inline auto get()
+    { return vmread(addr, name); }
+
+    template<class T> constexpr auto set(T val)
+    { return vmwrite(addr, val, name); }
+}
+
+namespace guest_gs_selector
+{
+    constexpr const auto addr = 0x000000000000080AUL;
+    constexpr const auto name = "guest_gs_selector";
+
+    inline auto get()
+    { return vmread(addr, name); }
+
+    template<class T> constexpr auto set(T val)
+    { return vmwrite(addr, val, name); }
+}
+
+namespace guest_ldtr_selector
+{
+    constexpr const auto addr = 0x000000000000080CUL;
+    constexpr const auto name = "guest_ldtr_selector";
+
+    inline auto get()
+    { return vmread(addr, name); }
+
+    template<class T> constexpr auto set(T val)
+    { return vmwrite(addr, val, name); }
+}
+
+namespace guest_tr_selector
+{
+    constexpr const auto addr = 0x000000000000080EUL;
+    constexpr const auto name = "guest_tr_selector";
+
+    inline auto get()
+    { return vmread(addr, name); }
+
+    template<class T> constexpr auto set(T val)
+    { return vmwrite(addr, val, name); }
+}
+
+namespace guest_interrupt_status
+{
+    constexpr const auto addr = 0x0000000000000810UL;
+    constexpr const auto name = "guest_interrupt_status";
+
+    inline auto get()
+    { return vmread(addr, name); }
+
+    template<class T> constexpr auto set(T val)
+    { return vmwrite(addr, val, name); }
+}
+
+// -----------------------------------------------------------------------------
+// 16bit Host State Fields
+// -----------------------------------------------------------------------------
+
+namespace host_es_selector
+{
+    constexpr const auto addr = 0x0000000000000C00UL;
+    constexpr const auto name = "host_es_selector";
+
+    inline auto get()
+    { return vmread(addr, name); }
+
+    template<class T> constexpr auto set(T val)
+    { return vmwrite(addr, val, name); }
+}
+
+namespace host_cs_selector
+{
+    constexpr const auto addr = 0x0000000000000C02UL;
+    constexpr const auto name = "host_cs_selector";
+
+    inline auto get()
+    { return vmread(addr, name); }
+
+    template<class T> constexpr auto set(T val)
+    { return vmwrite(addr, val, name); }
+}
+
+namespace host_ss_selector
+{
+    constexpr const auto addr = 0x0000000000000C04UL;
+    constexpr const auto name = "host_ss_selector";
+
+    inline auto get()
+    { return vmread(addr, name); }
+
+    template<class T> constexpr auto set(T val)
+    { return vmwrite(addr, val, name); }
+}
+
+namespace host_ds_selector
+{
+    constexpr const auto addr = 0x0000000000000C06UL;
+    constexpr const auto name = "host_ds_selector";
+
+    inline auto get()
+    { return vmread(addr, name); }
+
+    template<class T> constexpr auto set(T val)
+    { return vmwrite(addr, val, name); }
+}
+
+namespace host_fs_selector
+{
+    constexpr const auto addr = 0x0000000000000C08UL;
+    constexpr const auto name = "host_fs_selector";
+
+    inline auto get()
+    { return vmread(addr, name); }
+
+    template<class T> constexpr auto set(T val)
+    { return vmwrite(addr, val, name); }
+}
+
+namespace host_gs_selector
+{
+    constexpr const auto addr = 0x0000000000000C0AUL;
+    constexpr const auto name = "host_gs_selector";
+
+    inline auto get()
+    { return vmread(addr, name); }
+
+    template<class T> constexpr auto set(T val)
+    { return vmwrite(addr, val, name); }
+}
+
+namespace host_tr_selector
+{
+    constexpr const auto addr = 0x0000000000000C0CUL;
+    constexpr const auto name = "host_tr_selector";
+
+    inline auto get()
+    { return vmread(addr, name); }
+
+    template<class T> constexpr auto set(T val)
+    { return vmwrite(addr, val, name); }
+}
+
+}
+}
+
+// *INDENT-ON*
+
+// 64bit Control Fields
+constexpr const auto VMCS_ADDRESS_OF_IO_BITMAP_A_FULL                          = 0x0000000000002000UL;
+constexpr const auto VMCS_ADDRESS_OF_IO_BITMAP_A_HIGH                          = 0x0000000000002001UL;
+constexpr const auto VMCS_ADDRESS_OF_IO_BITMAP_B_FULL                          = 0x0000000000002002UL;
+constexpr const auto VMCS_ADDRESS_OF_IO_BITMAP_B_HIGH                          = 0x0000000000002003UL;
+constexpr const auto VMCS_ADDRESS_OF_MSR_BITMAPS_FULL                          = 0x0000000000002004UL;
+constexpr const auto VMCS_ADDRESS_OF_MSR_BITMAPS_HIGH                          = 0x0000000000002005UL;
+constexpr const auto VMCS_VM_EXIT_MSR_STORE_ADDRESS_FULL                       = 0x0000000000002006UL;
+constexpr const auto VMCS_VM_EXIT_MSR_STORE_ADDRESS_HIGH                       = 0x0000000000002007UL;
+constexpr const auto VMCS_VM_EXIT_MSR_LOAD_ADDRESS_FULL                        = 0x0000000000002008UL;
+constexpr const auto VMCS_VM_EXIT_MSR_LOAD_ADDRESS_HIGH                        = 0x0000000000002009UL;
+constexpr const auto VMCS_VM_ENTRY_MSR_LOAD_ADDRESS_FULL                       = 0x000000000000200AUL;
+constexpr const auto VMCS_VM_ENTRY_MSR_LOAD_ADDRESS_HIGH                       = 0x000000000000200BUL;
+constexpr const auto VMCS_EXECUTIVE_VMCS_POINTER_FULL                          = 0x000000000000200CUL;
+constexpr const auto VMCS_EXECUTIVE_VMCS_POINTER_HIGH                          = 0x000000000000200DUL;
+constexpr const auto VMCS_PML_ADDRESS_FULL                                     = 0x000000000000200EUL;
+constexpr const auto VMCS_PML_ADDRESS_HIGH                                     = 0x000000000000200FUL;
+constexpr const auto VMCS_TSC_OFFSET_FULL                                      = 0x0000000000002010UL;
+constexpr const auto VMCS_TSC_OFFSET_HIGH                                      = 0x0000000000002011UL;
+constexpr const auto VMCS_VIRTUAL_APIC_ADDRESS_FULL                            = 0x0000000000002012UL;
+constexpr const auto VMCS_VIRTUAL_APIC_ADDRESS_HIGH                            = 0x0000000000002013UL;
+constexpr const auto VMCS_APIC_ACCESS_ADDRESS_FULL                             = 0x0000000000002014UL;
+constexpr const auto VMCS_APIC_ACCESS_ADDRESS_HIGH                             = 0x0000000000002015UL;
+constexpr const auto VMCS_POSTED_INTERRUPT_DESCRIPTOR_ADDRESS_FULL             = 0x0000000000002016UL;
+constexpr const auto VMCS_POSTED_INTERRUPT_DESCRIPTOR_ADDRESS_HIGH             = 0x0000000000002017UL;
+constexpr const auto VMCS_VM_FUNCTION_CONTROLS_FULL                            = 0x0000000000002018UL;
+constexpr const auto VMCS_VM_FUNCTION_CONTROLS_HIGH                            = 0x0000000000002019UL;
+constexpr const auto VMCS_EPT_POINTER_FULL                                     = 0x000000000000201AUL;
+constexpr const auto VMCS_EPT_POINTER_HIGH                                     = 0x000000000000201BUL;
+constexpr const auto VMCS_EOI_EXIT_BITMAP_0_FULL                               = 0x000000000000201CUL;
+constexpr const auto VMCS_EOI_EXIT_BITMAP_0_HIGH                               = 0x000000000000201DUL;
+constexpr const auto VMCS_EOI_EXIT_BITMAP_1_FULL                               = 0x000000000000201EUL;
+constexpr const auto VMCS_EOI_EXIT_BITMAP_1_HIGH                               = 0x000000000000201FUL;
+constexpr const auto VMCS_EOI_EXIT_BITMAP_2_FULL                               = 0x0000000000002020UL;
+constexpr const auto VMCS_EOI_EXIT_BITMAP_2_HIGH                               = 0x0000000000002021UL;
+constexpr const auto VMCS_EOI_EXIT_BITMAP_3_FULL                               = 0x0000000000002022UL;
+constexpr const auto VMCS_EOI_EXIT_BITMAP_3_HIGH                               = 0x0000000000002023UL;
+constexpr const auto VMCS_EPTP_LIST_ADDRESS_FULL                               = 0x0000000000002024UL;
+constexpr const auto VMCS_EPTP_LIST_ADDRESS_HIGH                               = 0x0000000000002025UL;
+constexpr const auto VMCS_VMREAD_BITMAP_ADDRESS_FULL                           = 0x0000000000002026UL;
+constexpr const auto VMCS_VMREAD_BITMAP_ADDRESS_HIGH                           = 0x0000000000002027UL;
+constexpr const auto VMCS_VMWRITE_BITMAP_ADDRESS_FULL                          = 0x0000000000002028UL;
+constexpr const auto VMCS_VMWRITE_BITMAP_ADDRESS_HIGH                          = 0x0000000000002029UL;
+constexpr const auto VMCS_VIRTUALIZATION_EXCEPTION_INFORMATION_ADDRESS_FULL    = 0x000000000000202AUL;
+constexpr const auto VMCS_VIRTUALIZATION_EXCEPTION_INFORMATION_ADDRESS_HIGH    = 0x000000000000202BUL;
+constexpr const auto VMCS_XSS_EXITING_BITMAP_FULL                              = 0x000000000000202CUL;
+constexpr const auto VMCS_XSS_EXITING_BITMAP_HIGH                              = 0x000000000000202DUL;
+
+// 64bit Read-Only Data Fields
+constexpr const auto VMCS_GUEST_PHYSICAL_ADDRESS_FULL                          = 0x0000000000002400UL;
+constexpr const auto VMCS_GUEST_PHYSICAL_ADDRESS_HIGH                          = 0x0000000000002401UL;
+
+// 64bit Guest State Fields
+constexpr const auto VMCS_VMCS_LINK_POINTER_FULL                               = 0x0000000000002800UL;
+constexpr const auto VMCS_VMCS_LINK_POINTER_HIGH                               = 0x0000000000002801UL;
+constexpr const auto VMCS_GUEST_IA32_DEBUGCTL_FULL                             = 0x0000000000002802UL;
+constexpr const auto VMCS_GUEST_IA32_DEBUGCTL_HIGH                             = 0x0000000000002803UL;
+constexpr const auto VMCS_GUEST_IA32_PAT_FULL                                  = 0x0000000000002804UL;
+constexpr const auto VMCS_GUEST_IA32_PAT_HIGH                                  = 0x0000000000002805UL;
+constexpr const auto VMCS_GUEST_IA32_EFER_FULL                                 = 0x0000000000002806UL;
+constexpr const auto VMCS_GUEST_IA32_EFER_HIGH                                 = 0x0000000000002807UL;
+constexpr const auto VMCS_GUEST_IA32_PERF_GLOBAL_CTRL_FULL                     = 0x0000000000002808UL;
+constexpr const auto VMCS_GUEST_IA32_PERF_GLOBAL_CTRL_HIGH                     = 0x0000000000002809UL;
+constexpr const auto VMCS_GUEST_PDPTE0_FULL                                    = 0x000000000000280AUL;
+constexpr const auto VMCS_GUEST_PDPTE0_HIGH                                    = 0x000000000000280BUL;
+constexpr const auto VMCS_GUEST_PDPTE1_FULL                                    = 0x000000000000280CUL;
+constexpr const auto VMCS_GUEST_PDPTE1_HIGH                                    = 0x000000000000280DUL;
+constexpr const auto VMCS_GUEST_PDPTE2_FULL                                    = 0x000000000000280EUL;
+constexpr const auto VMCS_GUEST_PDPTE2_HIGH                                    = 0x000000000000280FUL;
+constexpr const auto VMCS_GUEST_PDPTE3_FULL                                    = 0x0000000000002810UL;
+constexpr const auto VMCS_GUEST_PDPTE3_HIGH                                    = 0x0000000000002811UL;
+
+// 64bit Host State Fields
+constexpr const auto VMCS_HOST_IA32_PAT_FULL                                   = 0x0000000000002C00UL;
+constexpr const auto VMCS_HOST_IA32_PAT_HIGH                                   = 0x0000000000002C01UL;
+constexpr const auto VMCS_HOST_IA32_EFER_FULL                                  = 0x0000000000002C02UL;
+constexpr const auto VMCS_HOST_IA32_EFER_HIGH                                  = 0x0000000000002C03UL;
+constexpr const auto VMCS_HOST_IA32_PERF_GLOBAL_CTRL_FULL                      = 0x0000000000002C04UL;
+constexpr const auto VMCS_HOST_IA32_PERF_GLOBAL_CTRL_HIGH                      = 0x0000000000002C05UL;
+
+// 32bit Control Fields
+constexpr const auto VMCS_PIN_BASED_VM_EXECUTION_CONTROLS                      = 0x0000000000004000UL;
+constexpr const auto VMCS_PRIMARY_PROCESSOR_BASED_VM_EXECUTION_CONTROLS        = 0x0000000000004002UL;
+constexpr const auto VMCS_EXCEPTION_BITMAP                                     = 0x0000000000004004UL;
+constexpr const auto VMCS_PAGE_FAULT_ERROR_CODE_MASK                           = 0x0000000000004006UL;
+constexpr const auto VMCS_PAGE_FAULT_ERROR_CODE_MATCH                          = 0x0000000000004008UL;
+constexpr const auto VMCS_CR3_TARGET_COUNT                                     = 0x000000000000400AUL;
+constexpr const auto VMCS_VM_EXIT_CONTROLS                                     = 0x000000000000400CUL;
+constexpr const auto VMCS_VM_EXIT_MSR_STORE_COUNT                              = 0x000000000000400EUL;
+constexpr const auto VMCS_VM_EXIT_MSR_LOAD_COUNT                               = 0x0000000000004010UL;
+constexpr const auto VMCS_VM_ENTRY_CONTROLS                                    = 0x0000000000004012UL;
+constexpr const auto VMCS_VM_ENTRY_MSR_LOAD_COUNT                              = 0x0000000000004014UL;
+constexpr const auto VMCS_VM_ENTRY_INTERRUPTION_INFORMATION_FIELD              = 0x0000000000004016UL;
+constexpr const auto VMCS_VM_ENTRY_EXCEPTION_ERROR_CODE                        = 0x0000000000004018UL;
+constexpr const auto VMCS_VM_ENTRY_INSTRUCTION_LENGTH                          = 0x000000000000401AUL;
+constexpr const auto VMCS_TPR_THRESHOLD                                        = 0x000000000000401CUL;
+constexpr const auto VMCS_SECONDARY_PROCESSOR_BASED_VM_EXECUTION_CONTROLS      = 0x000000000000401EUL;
+constexpr const auto VMCS_PLE_GAP                                              = 0x0000000000004020UL;
+constexpr const auto VMCS_PLE_WINDOW                                           = 0x0000000000004022UL;
+
+// 32bit Read-Only Fields
+constexpr const auto VMCS_VM_INSTRUCTION_ERROR                                 = 0x0000000000004400UL;
+constexpr const auto VMCS_EXIT_REASON                                          = 0x0000000000004402UL;
+constexpr const auto VMCS_VM_EXIT_INTERRUPTION_INFORMATION                     = 0x0000000000004404UL;
+constexpr const auto VMCS_VM_EXIT_INTERRUPTION_ERROR_CODE                      = 0x0000000000004406UL;
+constexpr const auto VMCS_IDT_VECTORING_INFORMATION_FIELD                      = 0x0000000000004408UL;
+constexpr const auto VMCS_IDT_VECTORING_ERROR_CODE                             = 0x000000000000440AUL;
+constexpr const auto VMCS_VM_EXIT_INSTRUCTION_LENGTH                           = 0x000000000000440CUL;
+constexpr const auto VMCS_VM_EXIT_INSTRUCTION_INFORMATION                      = 0x000000000000440EUL;
+
+// 32bit Guest State Fields
+constexpr const auto VMCS_GUEST_ES_LIMIT                                       = 0x0000000000004800UL;
+constexpr const auto VMCS_GUEST_CS_LIMIT                                       = 0x0000000000004802UL;
+constexpr const auto VMCS_GUEST_SS_LIMIT                                       = 0x0000000000004804UL;
+constexpr const auto VMCS_GUEST_DS_LIMIT                                       = 0x0000000000004806UL;
+constexpr const auto VMCS_GUEST_FS_LIMIT                                       = 0x0000000000004808UL;
+constexpr const auto VMCS_GUEST_GS_LIMIT                                       = 0x000000000000480AUL;
+constexpr const auto VMCS_GUEST_LDTR_LIMIT                                     = 0x000000000000480CUL;
+constexpr const auto VMCS_GUEST_TR_LIMIT                                       = 0x000000000000480EUL;
+constexpr const auto VMCS_GUEST_GDTR_LIMIT                                     = 0x0000000000004810UL;
+constexpr const auto VMCS_GUEST_IDTR_LIMIT                                     = 0x0000000000004812UL;
+constexpr const auto VMCS_GUEST_ES_ACCESS_RIGHTS                               = 0x0000000000004814UL;
+constexpr const auto VMCS_GUEST_CS_ACCESS_RIGHTS                               = 0x0000000000004816UL;
+constexpr const auto VMCS_GUEST_SS_ACCESS_RIGHTS                               = 0x0000000000004818UL;
+constexpr const auto VMCS_GUEST_DS_ACCESS_RIGHTS                               = 0x000000000000481AUL;
+constexpr const auto VMCS_GUEST_FS_ACCESS_RIGHTS                               = 0x000000000000481CUL;
+constexpr const auto VMCS_GUEST_GS_ACCESS_RIGHTS                               = 0x000000000000481EUL;
+constexpr const auto VMCS_GUEST_LDTR_ACCESS_RIGHTS                             = 0x0000000000004820UL;
+constexpr const auto VMCS_GUEST_TR_ACCESS_RIGHTS                               = 0x0000000000004822UL;
+constexpr const auto VMCS_GUEST_INTERRUPTIBILITY_STATE                         = 0x0000000000004824UL;
+constexpr const auto VMCS_GUEST_ACTIVITY_STATE                                 = 0x0000000000004826UL;
+constexpr const auto VMCS_GUEST_SMBASE                                         = 0x0000000000004828UL;
+constexpr const auto VMCS_GUEST_IA32_SYSENTER_CS                               = 0x000000000000482AUL;
+constexpr const auto VMCS_VMX_PREEMPTION_TIMER_VALUE                           = 0x000000000000482EUL;
+
+// 32bit Host State Fields
+constexpr const auto VMCS_HOST_IA32_SYSENTER_CS                                = 0x0000000000004C00UL;
+
+// Natural Width Control Fields
+constexpr const auto VMCS_CR0_GUEST_HOST_MASK                                  = 0x0000000000006000UL;
+constexpr const auto VMCS_CR4_GUEST_HOST_MASK                                  = 0x0000000000006002UL;
+constexpr const auto VMCS_CR0_READ_SHADOW                                      = 0x0000000000006004UL;
+constexpr const auto VMCS_CR4_READ_SHADOW                                      = 0x0000000000006006UL;
+constexpr const auto VMCS_CR3_TARGET_VALUE_0                                   = 0x0000000000006008UL;
+constexpr const auto VMCS_CR3_TARGET_VALUE_1                                   = 0x000000000000600AUL;
+constexpr const auto VMCS_CR3_TARGET_VALUE_2                                   = 0x000000000000600CUL;
+constexpr const auto VMCS_CR3_TARGET_VALUE_31                                  = 0x000000000000600EUL;
+
+// Natural Width Read-Only Fields
+constexpr const auto VMCS_EXIT_QUALIFICATION                                   = 0x0000000000006400UL;
+constexpr const auto VMCS_IO_RCX                                               = 0x0000000000006402UL;
+constexpr const auto VMCS_IO_RSI                                               = 0x0000000000006404UL;
+constexpr const auto VMCS_IO_RDI                                               = 0x0000000000006406UL;
+constexpr const auto VMCS_IO_RIP                                               = 0x0000000000006408UL;
+constexpr const auto VMCS_GUEST_LINEAR_ADDRESS                                 = 0x000000000000640AUL;
+
+// Natural Width Guest State Fields
+constexpr const auto VMCS_GUEST_CR0                                            = 0x0000000000006800UL;
+constexpr const auto VMCS_GUEST_CR3                                            = 0x0000000000006802UL;
+constexpr const auto VMCS_GUEST_CR4                                            = 0x0000000000006804UL;
+constexpr const auto VMCS_GUEST_ES_BASE                                        = 0x0000000000006806UL;
+constexpr const auto VMCS_GUEST_CS_BASE                                        = 0x0000000000006808UL;
+constexpr const auto VMCS_GUEST_SS_BASE                                        = 0x000000000000680AUL;
+constexpr const auto VMCS_GUEST_DS_BASE                                        = 0x000000000000680CUL;
+constexpr const auto VMCS_GUEST_FS_BASE                                        = 0x000000000000680EUL;
+constexpr const auto VMCS_GUEST_GS_BASE                                        = 0x0000000000006810UL;
+constexpr const auto VMCS_GUEST_LDTR_BASE                                      = 0x0000000000006812UL;
+constexpr const auto VMCS_GUEST_TR_BASE                                        = 0x0000000000006814UL;
+constexpr const auto VMCS_GUEST_GDTR_BASE                                      = 0x0000000000006816UL;
+constexpr const auto VMCS_GUEST_IDTR_BASE                                      = 0x0000000000006818UL;
+constexpr const auto VMCS_GUEST_DR7                                            = 0x000000000000681AUL;
+constexpr const auto VMCS_GUEST_RSP                                            = 0x000000000000681CUL;
+constexpr const auto VMCS_GUEST_RIP                                            = 0x000000000000681EUL;
+constexpr const auto VMCS_GUEST_RFLAGS                                         = 0x0000000000006820UL;
+constexpr const auto VMCS_GUEST_PENDING_DEBUG_EXCEPTIONS                       = 0x0000000000006822UL;
+constexpr const auto VMCS_GUEST_IA32_SYSENTER_ESP                              = 0x0000000000006824UL;
+constexpr const auto VMCS_GUEST_IA32_SYSENTER_EIP                              = 0x0000000000006826UL;
+
+// Natural Width Host State Fields
+constexpr const auto VMCS_HOST_CR0                                             = 0x0000000000006C00UL;
+constexpr const auto VMCS_HOST_CR3                                             = 0x0000000000006C02UL;
+constexpr const auto VMCS_HOST_CR4                                             = 0x0000000000006C04UL;
+constexpr const auto VMCS_HOST_FS_BASE                                         = 0x0000000000006C06UL;
+constexpr const auto VMCS_HOST_GS_BASE                                         = 0x0000000000006C08UL;
+constexpr const auto VMCS_HOST_TR_BASE                                         = 0x0000000000006C0AUL;
+constexpr const auto VMCS_HOST_GDTR_BASE                                       = 0x0000000000006C0CUL;
+constexpr const auto VMCS_HOST_IDTR_BASE                                       = 0x0000000000006C0EUL;
+constexpr const auto VMCS_HOST_IA32_SYSENTER_ESP                               = 0x0000000000006C10UL;
+constexpr const auto VMCS_HOST_IA32_SYSENTER_EIP                               = 0x0000000000006C12UL;
+constexpr const auto VMCS_HOST_RSP                                             = 0x0000000000006C14UL;
+constexpr const auto VMCS_HOST_RIP                                             = 0x0000000000006C16UL;
 
 #endif

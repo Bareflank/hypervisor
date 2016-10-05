@@ -23,15 +23,13 @@
 
 #include <debug.h>
 #include <constants.h>
-#include <thread_context.h>
 #include <view_as_pointer.h>
 #include <vmcs/vmcs_intel_x64.h>
+#include <vmcs/vmcs_intel_x64_ftos.h>
 #include <vmcs/vmcs_intel_x64_resume.h>
 #include <vmcs/vmcs_intel_x64_promote.h>
 #include <memory_manager/memory_manager.h>
 #include <exit_handler/exit_handler_intel_x64_support.h>
-
-using namespace intel_x64;
 
 vmcs_intel_x64::vmcs_intel_x64(std::shared_ptr<intrinsics_intel_x64> intrinsics) :
     m_intrinsics(std::move(intrinsics)),
@@ -81,15 +79,8 @@ vmcs_intel_x64::launch(const std::shared_ptr<vmcs_intel_x64_state> &host_state,
 
     if (!m_intrinsics->vmlaunch())
     {
-        bferror << "vmlaunch failed:" << bfendl;
-        bferror << "    - vm_instruction_error: "
-                << this->get_vm_instruction_error() << bfendl;
-
         auto ___ = gsl::finally([&]
         {
-
-#if 0
-
             this->dump_vmcs();
 
             this->print_execution_controls();
@@ -99,8 +90,6 @@ vmcs_intel_x64::launch(const std::shared_ptr<vmcs_intel_x64_state> &host_state,
             this->print_vm_exit_control_fields();
             this->print_vm_entry_control_fields();
 
-#endif
-
             host_state->dump();
             guest_state->dump();
         });
@@ -108,6 +97,10 @@ vmcs_intel_x64::launch(const std::shared_ptr<vmcs_intel_x64_state> &host_state,
         this->check_vmcs_control_state();
         this->check_vmcs_guest_state();
         this->check_vmcs_host_state();
+
+        bferror << "vmlaunch failed:" << bfendl;
+        bferror << "    - vm_instruction_error: "
+                << this->get_vm_instruction_error() << bfendl;
 
         throw std::runtime_error("vmcs launch failed");
     }
@@ -156,7 +149,7 @@ vmcs_intel_x64::create_vmcs_region()
         throw std::logic_error("m_vmcs_region_phys == nullptr");
 
     gsl::span<uint32_t> id{m_vmcs_region.get(), 1024};
-    id[0] = msrs::ia32_vmx_basic::revision_id::get();
+    id[0] = static_cast<uint32_t>(m_intrinsics->read_msr(intel_64::msr::ia32_vmx_basic) & 0x7FFFFFFFF);
 }
 
 void
@@ -169,7 +162,7 @@ vmcs_intel_x64::release_vmcs_region() noexcept
 void
 vmcs_intel_x64::create_exit_handler_stack()
 {
-    m_exit_handler_stack = std::make_unique<char[]>(STACK_SIZE * 2);
+    m_exit_handler_stack = std::make_unique<char[]>(STACK_SIZE);
 }
 
 void
@@ -225,10 +218,14 @@ vmcs_intel_x64::write_32bit_control_state(const std::shared_ptr<vmcs_intel_x64_s
     uint64_t lower;
     uint64_t upper;
 
-    auto ia32_vmx_pinbased_ctls_msr = msrs::ia32_vmx_true_pinbased_ctls::get();
-    auto ia32_vmx_procbased_ctls_msr = msrs::ia32_vmx_true_procbased_ctls::get();
-    auto ia32_vmx_exit_ctls_msr = msrs::ia32_vmx_true_exit_ctls::get();
-    auto ia32_vmx_entry_ctls_msr = msrs::ia32_vmx_true_entry_ctls::get();
+    auto ia32_vmx_pinbased_ctls_msr =
+        m_intrinsics->read_msr(IA32_VMX_TRUE_PINBASED_CTLS_MSR);
+    auto ia32_vmx_procbased_ctls_msr =
+        m_intrinsics->read_msr(IA32_VMX_TRUE_PROCBASED_CTLS_MSR);
+    auto ia32_vmx_exit_ctls_msr =
+        m_intrinsics->read_msr(IA32_VMX_TRUE_EXIT_CTLS_MSR);
+    auto ia32_vmx_entry_ctls_msr =
+        m_intrinsics->read_msr(IA32_VMX_TRUE_ENTRY_CTLS_MSR);
 
     lower = ((ia32_vmx_pinbased_ctls_msr >> 0) & 0x00000000FFFFFFFF);
     upper = ((ia32_vmx_pinbased_ctls_msr >> 32) & 0x00000000FFFFFFFF);
@@ -280,14 +277,14 @@ vmcs_intel_x64::write_natural_control_state(const std::shared_ptr<vmcs_intel_x64
 void
 vmcs_intel_x64::write_16bit_guest_state(const std::shared_ptr<vmcs_intel_x64_state> &state)
 {
-    vmcs::guest_es_selector::set(state->es());
-    vmcs::guest_cs_selector::set(state->cs());
-    vmcs::guest_ss_selector::set(state->ss());
-    vmcs::guest_ds_selector::set(state->ds());
-    vmcs::guest_fs_selector::set(state->fs());
-    vmcs::guest_gs_selector::set(state->gs());
-    vmcs::guest_ldtr_selector::set(state->ldtr());
-    vmcs::guest_tr_selector::set(state->tr());
+    vmwrite(VMCS_GUEST_ES_SELECTOR, state->es());
+    vmwrite(VMCS_GUEST_CS_SELECTOR, state->cs());
+    vmwrite(VMCS_GUEST_SS_SELECTOR, state->ss());
+    vmwrite(VMCS_GUEST_DS_SELECTOR, state->ds());
+    vmwrite(VMCS_GUEST_FS_SELECTOR, state->fs());
+    vmwrite(VMCS_GUEST_GS_SELECTOR, state->gs());
+    vmwrite(VMCS_GUEST_LDTR_SELECTOR, state->ldtr());
+    vmwrite(VMCS_GUEST_TR_SELECTOR, state->tr());
 
     // unused: VMCS_GUEST_INTERRUPT_STATUS
 }
@@ -372,13 +369,13 @@ vmcs_intel_x64::write_natural_guest_state(const std::shared_ptr<vmcs_intel_x64_s
 void
 vmcs_intel_x64::write_16bit_host_state(const std::shared_ptr<vmcs_intel_x64_state> &state)
 {
-    vmcs::host_es_selector::set(state->es());
-    vmcs::host_cs_selector::set(state->cs());
-    vmcs::host_ss_selector::set(state->ss());
-    vmcs::host_ds_selector::set(state->ds());
-    vmcs::host_fs_selector::set(state->fs());
-    vmcs::host_gs_selector::set(state->gs());
-    vmcs::host_tr_selector::set(state->tr());
+    vmwrite(VMCS_HOST_ES_SELECTOR, state->es());
+    vmwrite(VMCS_HOST_CS_SELECTOR, state->cs());
+    vmwrite(VMCS_HOST_SS_SELECTOR, state->ss());
+    vmwrite(VMCS_HOST_DS_SELECTOR, state->ds());
+    vmwrite(VMCS_HOST_FS_SELECTOR, state->fs());
+    vmwrite(VMCS_HOST_GS_SELECTOR, state->gs());
+    vmwrite(VMCS_HOST_TR_SELECTOR, state->tr());
 }
 
 void
@@ -400,13 +397,8 @@ vmcs_intel_x64::write_natural_host_state(const std::shared_ptr<vmcs_intel_x64_st
 {
     auto exit_handler_stack = reinterpret_cast<uintptr_t>(m_exit_handler_stack.get());
 
-    auto stack_top = exit_handler_stack + (STACK_SIZE * 2);
-    stack_top = (stack_top & ~(STACK_SIZE - 1)) - 1;
-    exit_handler_stack = stack_top - sizeof(thread_context_t) - 1;
-
-    auto tc = reinterpret_cast<thread_context_t *>(stack_top - sizeof(thread_context_t));
-    tc->cpuid = thread_context_cpuid();
-    tc->tlsptr = thread_context_tlsptr();
+    exit_handler_stack += STACK_SIZE;
+    exit_handler_stack &= 0xFFFFFFFFFFFFFFF0;
 
     vmwrite(VMCS_HOST_CR0, state->cr0());
     vmwrite(VMCS_HOST_CR3, state->cr3());
@@ -437,7 +429,7 @@ vmcs_intel_x64::pin_based_vm_execution_controls()
     // controls |= VM_EXEC_PIN_BASED_ACTIVATE_VMX_PREEMPTION_TIMER;
     // controls |= VM_EXEC_PIN_BASED_PROCESS_POSTED_INTERRUPTS;
 
-    this->filter_unsupported(msrs::ia32_vmx_true_pinbased_ctls::addr, controls);
+    this->filter_unsupported(IA32_VMX_TRUE_PINBASED_CTLS_MSR, controls);
 
     vmwrite(VMCS_PIN_BASED_VM_EXECUTION_CONTROLS, controls);
 }
@@ -469,7 +461,7 @@ vmcs_intel_x64::primary_processor_based_vm_execution_controls()
     // controls |= VM_EXEC_P_PROC_BASED_PAUSE_EXITING;
     controls |= VM_EXEC_P_PROC_BASED_ACTIVATE_SECONDARY_CONTROLS;
 
-    this->filter_unsupported(msrs::ia32_vmx_true_procbased_ctls::addr, controls);
+    this->filter_unsupported(IA32_VMX_TRUE_PROCBASED_CTLS_MSR, controls);
 
     vmwrite(VMCS_PRIMARY_PROCESSOR_BASED_VM_EXECUTION_CONTROLS, controls);
 }
@@ -498,7 +490,7 @@ vmcs_intel_x64::secondary_processor_based_vm_execution_controls()
     // controls |= VM_EXEC_S_PROC_BASED_EPT_VIOLATION_VE;
     controls |= VM_EXEC_S_PROC_BASED_ENABLE_XSAVES_XRSTORS;
 
-    this->filter_unsupported(msrs::ia32_vmx_procbased_ctls2::addr, controls);
+    this->filter_unsupported(IA32_VMX_PROCBASED_CTLS2_MSR, controls);
 
     vmwrite(VMCS_SECONDARY_PROCESSOR_BASED_VM_EXECUTION_CONTROLS, controls);
 }
@@ -518,7 +510,7 @@ vmcs_intel_x64::vm_exit_controls()
     controls |= VM_EXIT_CONTROL_LOAD_IA32_EFER;
     // controls |= VM_EXIT_CONTROL_SAVE_VMX_PREEMPTION_TIMER_VALUE;
 
-    this->filter_unsupported(msrs::ia32_vmx_true_exit_ctls::addr, controls);
+    this->filter_unsupported(IA32_VMX_TRUE_EXIT_CTLS_MSR, controls);
 
     vmwrite(VMCS_VM_EXIT_CONTROLS, controls);
 }
@@ -536,7 +528,7 @@ vmcs_intel_x64::vm_entry_controls()
     controls |= VM_ENTRY_CONTROL_LOAD_IA32_PAT;
     controls |= VM_ENTRY_CONTROL_LOAD_IA32_EFER;
 
-    this->filter_unsupported(msrs::ia32_vmx_true_entry_ctls::addr, controls);
+    this->filter_unsupported(IA32_VMX_TRUE_ENTRY_CTLS_MSR, controls);
 
     vmwrite(VMCS_VM_ENTRY_CONTROLS, controls);
 }
@@ -549,7 +541,7 @@ vmcs_intel_x64::vmread(uint64_t field) const
     if (!m_intrinsics->vmread(field, &value))
     {
         bferror << "vmcs_intel_x64::vmread failed:" << bfendl;
-        bferror << "    - field: " << view_as_pointer(field) << bfendl;
+        bferror << "    - field: " << vmcs_field_to_str(field) << bfendl;
 
         throw std::runtime_error("vmread failed");
     }
@@ -563,7 +555,7 @@ vmcs_intel_x64::vmwrite(uint64_t field, uint64_t value)
     if (!m_intrinsics->vmwrite(field, value))
     {
         bferror << "vmcs_intel_x64::vmwrite failed:" << bfendl;
-        bferror << "    - field: " << view_as_pointer(field) << bfendl;
+        bferror << "    - field: " << vmcs_field_to_str(field) << bfendl;
         bferror << "    - value: " << view_as_pointer(value) << bfendl;
 
         throw std::runtime_error("vmwrite failed");
@@ -599,9 +591,3 @@ vmcs_intel_x64::filter_unsupported(uint32_t msr, uint64_t &ctrl)
         bfdebug << "    - new ctrl: " << view_as_pointer(ctrl) << bfendl;
     }
 }
-
-uint64_t __attribute__((weak)) thread_context_cpuid(void)
-{ return 0; }
-
-uint64_t __attribute__((weak)) thread_context_tlsptr(void)
-{ return 0; }

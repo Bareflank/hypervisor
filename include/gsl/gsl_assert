@@ -74,4 +74,7 @@ struct fail_fast : public std::runtime_error
 
 #endif
 
+#define expects(cond) Expects(cond)
+#define ensures(cond) Ensures(cond)
+
 #endif // GSL_CONTRACTS_H

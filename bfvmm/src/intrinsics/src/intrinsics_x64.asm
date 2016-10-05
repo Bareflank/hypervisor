@@ -22,76 +22,28 @@
 bits 64
 default rel
 
-global __halt:function
-global __stop:function
-global __invd:function
-global __wbinvd:function
-global __cpuid_eax:function
-global __cpuid_ebx:function
-global __cpuid_ecx:function
-global __cpuid_edx:function
-global __cpuid:function
-global __read_rflags:function
-global __write_rflags:function
-global __read_msr:function
-global __write_msr:function
-global __read_rip:function
-global __read_cr0:function
-global __write_cr0:function
-global __read_cr3:function
-global __write_cr3:function
-global __read_cr4:function
-global __write_cr4:function
-global __read_dr7:function
-global __write_dr7:function
-global __read_es:function
-global __write_es:function
-global __read_cs:function
-global __write_cs:function
-global __read_ss:function
-global __write_ss:function
-global __read_ds:function
-global __write_ds:function
-global __read_fs:function
-global __write_fs:function
-global __read_gs:function
-global __write_gs:function
-global __read_tr:function
-global __write_tr:function
-global __read_ldtr:function
-global __write_ldtr:function
-global __read_rsp:function
-global __read_gdt:function
-global __write_gdt:function
-global __read_idt:function
-global __write_idt:function
-global __outb:function
-global __inb:function
-global __outw:function
-global __inw:function
-
 section .text
 
-; void __halt(void)
+global __halt:function
 __halt:
     hlt
 
-; void __stop(void)
+global __stop:function
 __stop:
     cli
     hlt
 
-; void __invd(void)
+global __invd:function
 __invd:
     invd
     ret
 
-; void __wbinvd(void)
+global __wbinvd:function
 __wbinvd:
     wbinvd
     ret
 
-; uint32_t cpuid_eax(uint32_t val)
+global __cpuid_eax:function
 __cpuid_eax:
     push rbx
 
@@ -106,7 +58,7 @@ __cpuid_eax:
     pop rbx
     ret
 
-; uint32_t cpuid_ebx(uint32_t val)
+global __cpuid_ebx:function
 __cpuid_ebx:
     push rbx
 
@@ -122,7 +74,7 @@ __cpuid_ebx:
     pop rbx
     ret
 
-; uint32_t cpuid_ecx(uint32_t val)
+global __cpuid_ecx:function
 __cpuid_ecx:
     push rbx
 
@@ -138,7 +90,7 @@ __cpuid_ecx:
     pop rbx
     ret
 
-; uint32_t cpuid_edx(uint32_t val)
+global __cpuid_edx:function
 __cpuid_edx:
     push rbx
 
@@ -154,10 +106,7 @@ __cpuid_edx:
     pop rbx
     ret
 
-; void __cpuid(uint64_t *rax,
-;              uint64_t *rbx,
-;              uint64_t *rcx,
-;              uint64_t *rdx);
+global __cpuid:function
 __cpuid:
     push rbx
 
@@ -183,19 +132,19 @@ __cpuid:
     pop rbx
     ret
 
-; uint64_t read_rflags(void)
+global __read_rflags:function
 __read_rflags:
     pushfq
     pop rax
     ret
 
-; void __write_rflags(uint64_t val)
+global __write_rflags:function
 __write_rflags:
     push rdi
     popf
     ret
 
-; uint64_t __read_msr(uint32_t msr)
+global __read_msr:function
 __read_msr:
     mov rcx, rdi
     rdmsr
@@ -204,7 +153,7 @@ __read_msr:
 
     ret
 
-; void __write_msr(uint32_t msr, uint64_t val)
+global __write_msr:function
 __write_msr:
     mov rax, rsi
     mov rdx, rsi
@@ -214,196 +163,197 @@ __write_msr:
 
     ret
 
-; uint64_t __read_rip(void)
+global __read_rip:function
 __read_rip:
     lea rax, [rel $]
     ret
 
-; uint64_t __read_cr0(void)
+global __read_cr0:function
 __read_cr0:
     mov rax, cr0
     ret
 
-; void __write_cr0(uint64_t val)
+global __write_cr0:function
 __write_cr0:
     mov cr0, rdi
     ret
 
-; uint64_t __read_cr3(void)
+global __read_cr3:function
 __read_cr3:
     mov rax, cr3
     ret
 
-; void __write_cr3(uint64_t val)
+global __write_cr3:function
 __write_cr3:
     mov cr3, rdi
     ret
 
-; uint64_t __read_cr4(void)
+global __read_cr4:function
 __read_cr4:
     mov rax, cr4
     ret
 
-; void __write_cr4(uint64_t val)
+global __write_cr4:function
 __write_cr4:
     mov cr4, rdi
     ret
 
-; uint64_t __read_dr7(void)
+global __read_dr7:function
 __read_dr7:
     mov rax, dr7
     ret
 
-; void __write_dr7(uint64_t val)
+global __write_dr7:function
 __write_dr7:
     mov dr7, rdi
     ret
 
-; uint16_t __read_es(void)
+global __read_es:function
 __read_es:
     xor rax, rax
     mov ax, es
     ret
 
-; void __write_es(uint16_t val)
+global __write_es:function
 __write_es:
     xor rax, rax
     mov es, di
     ret
 
-; uint16_t __read_cs(void)
+global __read_cs:function
 __read_cs:
     xor rax, rax
     mov ax, cs
     ret
 
-; void __write_cs(uint16_t val)
-;
-; The added 0x48 is an undocumented issue with NASM. Basically, even though
-; BITS 64 is used, and we are compiling for 64bit, NASM does not add the
-; REX prefix to the retf instruction. As a result, we need to hand jam it in,
-; otherwise NASM will compile a 32bit instruction, and the data on the stack
-; will be wrong
+global __write_cs:function
 __write_cs:
+
+    ; The added 0x48 is an undocumented issue with NASM. Basically, even though
+    ; BITS 64 is used, and we are compiling for 64bit, NASM does not add the
+    ; REX prefix to the retf instruction. As a result, we need to hand jam it
+    ; in otherwise NASM will compile a 32bit instruction, and the data on the
+    ; stack will be wrong
+
     pop rax
     push di
     push rax
     db 0x48
     retf
 
-; uint16_t __read_ss(void)
+global __read_ss:function
 __read_ss:
     xor rax, rax
     mov ax, ss
     ret
 
-; void __write_ss(uint16_t val)
+global __write_ss:function
 __write_ss:
     mov ss, di
     ret
 
-; uint16_t __read_ds(void)
+global __read_ds:function
 __read_ds:
     xor rax, rax
     mov ax, ds
     ret
 
-; void __write_ds(uint16_t val)
+global __write_ds:function
 __write_ds:
     mov ds, di
     ret
 
-; uint16_t __read_fs(void)
+global __read_fs:function
 __read_fs:
     xor rax, rax
     mov ax, fs
     ret
 
-; void __write_fs(uint16_t val)
+global __write_fs:function
 __write_fs:
     mov fs, di
     ret
 
-; uint16_t __read_gs(void)
+global __read_gs:function
 __read_gs:
     xor rax, rax
     mov ax, gs
     ret
 
-; void __write_gs(uint16_t val)
+global __write_gs:function
 __write_gs:
     mov gs, di
     ret
 
-; uint16_t __read_tr(void)
+global __read_tr:function
 __read_tr:
     xor rax, rax
     str ax
     ret
 
-; void __write_tr(uint16_t val)
+global __write_tr:function
 __write_tr:
     ltr di
     ret
 
-; uint16_t __read_ldtr(void)
+global __read_ldtr:function
 __read_ldtr:
     xor rax, rax
     sldt ax
     ret
 
-; void __write_ldtr(uint16_t val)
+global __write_ldtr:function
 __write_ldtr:
     lldt di
     ret
 
-; uint64_t __read_rsp(void)
+global __read_rsp:function
 __read_rsp:
     mov rax, rsp
     ret
 
-; void __read_gdt(void *gdt)
+global __read_gdt:function
 __read_gdt:
     sgdt [rdi]
     ret
 
-; void __write_gdt(void *gdt)
+global __write_gdt:function
 __write_gdt:
     lgdt [rdi]
     ret
 
-; void __read_idt(void *idt)
+global __read_idt:function
 __read_idt:
     sidt [rdi]
     ret
 
-; void __write_idt(void *idt)
+global __write_idt:function
 __write_idt:
     lidt [rdi]
     ret
 
-; void __outb(uint8_t port, uint16_t val)
+global __outb:function
 __outb:
     mov dx, di
     mov ax, si
     out dx, al
 	ret
 
-; void __outw(uint16_t port, uint16_t val)
+global __outw:function
 __outw:
 	mov dx, di
     mov ax, si
 	out dx, ax
 	ret
 
-; uint8_t __inb(uint16_t port)
+global __inb:function
 __inb:
 	xor rax, rax
 	mov dx, di
 	in al, dx
 	ret
 
-; uint16_t __inw(uint16_t port)
+global __inw:function
 __inw:
     xor rax, rax
     mov dx, di

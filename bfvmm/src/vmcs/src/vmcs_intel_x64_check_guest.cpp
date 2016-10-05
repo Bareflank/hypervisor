@@ -23,6 +23,8 @@
 #include <vmcs/vmcs_intel_x64.h>
 #include <memory_manager/memory_manager.h>
 
+using namespace intel_x64;
+
 void
 vmcs_intel_x64::check_vmcs_guest_state()
 {
@@ -55,8 +57,8 @@ void
 vmcs_intel_x64::check_guest_cr0_for_unsupported_bits()
 {
     auto cr0 = vmread(VMCS_GUEST_CR0);
-    auto ia32_vmx_cr0_fixed0 = m_intrinsics->read_msr(IA32_VMX_CR0_FIXED0_MSR);
-    auto ia32_vmx_cr0_fixed1 = m_intrinsics->read_msr(IA32_VMX_CR0_FIXED1_MSR);
+    auto ia32_vmx_cr0_fixed0 = msrs::ia32_vmx_cr0_fixed0::get();
+    auto ia32_vmx_cr0_fixed1 = msrs::ia32_vmx_cr0_fixed1::get();
 
     if (0 != ((~cr0 & ia32_vmx_cr0_fixed0) | (cr0 & ~ia32_vmx_cr0_fixed1)))
     {
@@ -85,8 +87,8 @@ void
 vmcs_intel_x64::check_guest_cr4_for_unsupported_bits()
 {
     auto cr4 = vmread(VMCS_GUEST_CR4);
-    auto ia32_vmx_cr4_fixed0 = m_intrinsics->read_msr(IA32_VMX_CR4_FIXED0_MSR);
-    auto ia32_vmx_cr4_fixed1 = m_intrinsics->read_msr(IA32_VMX_CR4_FIXED1_MSR);
+    auto ia32_vmx_cr4_fixed0 = msrs::ia32_vmx_cr4_fixed0::get();
+    auto ia32_vmx_cr4_fixed1 = msrs::ia32_vmx_cr4_fixed1::get();
 
     if (0 != ((~cr4 & ia32_vmx_cr4_fixed0) | (cr4 & ~ia32_vmx_cr4_fixed1)))
     {
@@ -359,7 +361,7 @@ vmcs_intel_x64::checks_on_guest_segment_registers()
 void
 vmcs_intel_x64::check_guest_tr_ti_bit_equals_0()
 {
-    auto tr = vmread(VMCS_GUEST_TR_SELECTOR);
+    auto tr = vmcs::guest_tr_selector::get();
 
     if ((tr & SELECTOR_TI_FLAG) != 0)
         throw std::logic_error("guest tr's ti flag must be zero");
@@ -368,7 +370,7 @@ vmcs_intel_x64::check_guest_tr_ti_bit_equals_0()
 void
 vmcs_intel_x64::check_guest_ldtr_ti_bit_equals_0()
 {
-    auto ldtr = vmread(VMCS_GUEST_LDTR_SELECTOR);
+    auto ldtr = vmcs::guest_ldtr_selector::get();
 
     if (!is_ldtr_usable())
         return;
@@ -386,8 +388,8 @@ vmcs_intel_x64::check_guest_ss_and_cs_rpl_are_the_same()
     if (is_enabled_unrestricted_guests())
         return;
 
-    auto ss = vmread(VMCS_GUEST_SS_SELECTOR);
-    auto cs = vmread(VMCS_GUEST_CS_SELECTOR);
+    auto ss = vmcs::guest_ss_selector::get();
+    auto cs = vmcs::guest_cs_selector::get();
 
     if ((ss & SELECTOR_RPL_FLAG) != (cs & SELECTOR_RPL_FLAG))
         throw std::logic_error("ss and cs rpl must be the same");
@@ -399,7 +401,7 @@ vmcs_intel_x64::check_guest_cs_base_is_shifted()
     if (!is_enabled_v8086())
         return;
 
-    auto cs = vmread(VMCS_GUEST_CS_SELECTOR);
+    auto cs = vmcs::guest_cs_selector::get();
     auto cs_base = vmread(VMCS_GUEST_CS_BASE);
 
     if ((cs << 4) != cs_base)
@@ -412,7 +414,7 @@ vmcs_intel_x64::check_guest_ss_base_is_shifted()
     if (!is_enabled_v8086())
         return;
 
-    auto ss = vmread(VMCS_GUEST_SS_SELECTOR);
+    auto ss = vmcs::guest_ss_selector::get();
     auto ss_base = vmread(VMCS_GUEST_SS_BASE);
 
     if ((ss << 4) != ss_base)
@@ -425,7 +427,7 @@ vmcs_intel_x64::check_guest_ds_base_is_shifted()
     if (!is_enabled_v8086())
         return;
 
-    auto ds = vmread(VMCS_GUEST_DS_SELECTOR);
+    auto ds = vmcs::guest_ds_selector::get();
     auto ds_base = vmread(VMCS_GUEST_DS_BASE);
 
     if ((ds << 4) != ds_base)
@@ -438,7 +440,7 @@ vmcs_intel_x64::check_guest_es_base_is_shifted()
     if (!is_enabled_v8086())
         return;
 
-    auto es = vmread(VMCS_GUEST_ES_SELECTOR);
+    auto es = vmcs::guest_es_selector::get();
     auto es_base = vmread(VMCS_GUEST_ES_BASE);
 
     if ((es << 4) != es_base)
@@ -451,7 +453,7 @@ vmcs_intel_x64::check_guest_fs_base_is_shifted()
     if (!is_enabled_v8086())
         return;
 
-    auto fs = vmread(VMCS_GUEST_FS_SELECTOR);
+    auto fs = vmcs::guest_fs_selector::get();
     auto fs_base = vmread(VMCS_GUEST_FS_BASE);
 
     if ((fs << 4) != fs_base)
@@ -464,7 +466,7 @@ vmcs_intel_x64::check_guest_gs_base_is_shifted()
     if (!is_enabled_v8086())
         return;
 
-    auto gs = vmread(VMCS_GUEST_GS_SELECTOR);
+    auto gs = vmcs::guest_gs_selector::get();
     auto gs_base = vmread(VMCS_GUEST_GS_BASE);
 
     if ((gs << 4) != gs_base)
@@ -964,7 +966,7 @@ vmcs_intel_x64::check_guest_cs_dpl_adheres_to_ss_dpl()
 void
 vmcs_intel_x64::check_guest_ss_dpl_must_equal_rpl()
 {
-    auto ss = vmread(VMCS_GUEST_SS_SELECTOR);
+    auto ss = vmcs::guest_ss_selector::get();
     auto ss_access = vmread(VMCS_GUEST_SS_ACCESS_RIGHTS);
 
     if (is_enabled_unrestricted_guests())
@@ -997,7 +999,7 @@ vmcs_intel_x64::check_guest_ss_dpl_must_equal_zero()
 void
 vmcs_intel_x64::check_guest_ds_dpl()
 {
-    auto ds = vmread(VMCS_GUEST_DS_SELECTOR);
+    auto ds = vmcs::guest_ds_selector::get();
     auto ds_access = vmread(VMCS_GUEST_DS_ACCESS_RIGHTS);
 
     if (is_enabled_unrestricted_guests())
@@ -1022,7 +1024,7 @@ vmcs_intel_x64::check_guest_ds_dpl()
 void
 vmcs_intel_x64::check_guest_es_dpl()
 {
-    auto es = vmread(VMCS_GUEST_ES_SELECTOR);
+    auto es = vmcs::guest_es_selector::get();
     auto es_access = vmread(VMCS_GUEST_ES_ACCESS_RIGHTS);
 
     if (is_enabled_unrestricted_guests())
@@ -1047,7 +1049,7 @@ vmcs_intel_x64::check_guest_es_dpl()
 void
 vmcs_intel_x64::check_guest_fs_dpl()
 {
-    auto fs = vmread(VMCS_GUEST_FS_SELECTOR);
+    auto fs = vmcs::guest_fs_selector::get();
     auto fs_access = vmread(VMCS_GUEST_FS_ACCESS_RIGHTS);
 
     if (is_enabled_unrestricted_guests())
@@ -1072,7 +1074,7 @@ vmcs_intel_x64::check_guest_fs_dpl()
 void
 vmcs_intel_x64::check_guest_gs_dpl()
 {
-    auto gs = vmread(VMCS_GUEST_GS_SELECTOR);
+    auto gs = vmcs::guest_gs_selector::get();
     auto gs_access = vmread(VMCS_GUEST_GS_ACCESS_RIGHTS);
 
     if (is_enabled_unrestricted_guests())
@@ -2112,11 +2114,10 @@ vmcs_intel_x64::check_guest_vmcs_link_pointer_first_word()
     if (vmcs == nullptr)
         throw std::logic_error("invalid vmcs physical address");
 
-    auto basic_msr = m_intrinsics->read_msr(IA32_VMX_BASIC_MSR) & 0x7FFFFFFFF;
     auto revision_id = *static_cast<uint32_t *>(vmcs) & 0x7FFFFFFF;
     auto vmcs_shadow = *static_cast<uint32_t *>(vmcs) & 0x80000000;
 
-    if (basic_msr != revision_id)
+    if (revision_id != msrs::ia32_vmx_basic::revision_id::get())
         throw std::logic_error("shadow vmcs must contain CPU's revision id");
 
     if (!is_enabled_vmcs_shadowing())
