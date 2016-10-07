@@ -27,6 +27,8 @@ using namespace intel_x64;
 std::map<uint32_t, uint64_t> g_msrs;
 std::map<uint64_t, uint64_t> g_vmcs_fields;
 uint8_t span[0x81] = {0};
+bool g_vmread_fails = false;
+bool g_vmwrite_fails = false;
 bool g_virt_to_phys_return_nullptr = false;
 bool g_phys_to_virt_return_nullptr = false;
 
@@ -113,12 +115,7 @@ enable_entry_ctl(uint64_t control)
 
 extern "C" uint64_t
 __read_msr(uint32_t msr) noexcept
-{
-    return g_msrs[msr];
-}
-
-bool g_vmread_fails = false;
-bool g_vmwrite_fails = false;
+{ return g_msrs[msr]; }
 
 bool
 __vmread(uint64_t field, uint64_t *val) noexcept
@@ -242,6 +239,72 @@ vmcs_ut::list()
     this->test_vmcs_guest_rflags_reserved();
     this->test_vmcs_guest_rflags_always_disabled();
     this->test_vmcs_guest_rflags_always_enabled();
+    this->test_vmcs_guest_cr0();
+    this->test_vmcs_guest_cr0_protection_enable();
+    this->test_vmcs_guest_cr0_monitor_coprocessor();
+    this->test_vmcs_guest_cr0_emulation();
+    this->test_vmcs_guest_cr0_task_switched();
+    this->test_vmcs_guest_cr0_extension_type();
+    this->test_vmcs_guest_cr0_numeric_error();
+    this->test_vmcs_guest_cr0_write_protect();
+    this->test_vmcs_guest_cr0_alignment_mask();
+    this->test_vmcs_guest_cr0_not_write_through();
+    this->test_vmcs_guest_cr0_cache_disable();
+    this->test_vmcs_guest_cr0_paging();
+    this->test_vmcs_guest_cr3();
+    this->test_vmcs_guest_cr4();
+    this->test_vmcs_guest_cr4_v8086_mode_extensions();
+    this->test_vmcs_guest_cr4_protected_mode_virtual_interrupts();
+    this->test_vmcs_guest_cr4_time_stamp_disable();
+    this->test_vmcs_guest_cr4_debugging_extensions();
+    this->test_vmcs_guest_cr4_page_size_extensions();
+    this->test_vmcs_guest_cr4_physical_address_extensions();
+    this->test_vmcs_guest_cr4_machine_check_enable();
+    this->test_vmcs_guest_cr4_page_global_enable();
+    this->test_vmcs_guest_cr4_performance_monitor_counter_enable();
+    this->test_vmcs_guest_cr4_osfxsr();
+    this->test_vmcs_guest_cr4_osxmmexcpt();
+    this->test_vmcs_guest_cr4_vmx_enable_bit();
+    this->test_vmcs_guest_cr4_smx_enable_bit();
+    this->test_vmcs_guest_cr4_fsgsbase_enable_bit();
+    this->test_vmcs_guest_cr4_pcid_enable_bit();
+    this->test_vmcs_guest_cr4_osxsave();
+    this->test_vmcs_guest_cr4_smep_enable_bit();
+    this->test_vmcs_guest_cr4_smap_enable_bit();
+    this->test_vmcs_guest_cr4_protection_key_enable_bit();
+    this->test_vmcs_host_cr0();
+    this->test_vmcs_host_cr0_protection_enable();
+    this->test_vmcs_host_cr0_monitor_coprocessor();
+    this->test_vmcs_host_cr0_emulation();
+    this->test_vmcs_host_cr0_task_switched();
+    this->test_vmcs_host_cr0_extension_type();
+    this->test_vmcs_host_cr0_numeric_error();
+    this->test_vmcs_host_cr0_write_protect();
+    this->test_vmcs_host_cr0_alignment_mask();
+    this->test_vmcs_host_cr0_not_write_through();
+    this->test_vmcs_host_cr0_cache_disable();
+    this->test_vmcs_host_cr0_paging();
+    this->test_vmcs_host_cr3();
+    this->test_vmcs_host_cr4();
+    this->test_vmcs_host_cr4_v8086_mode_extensions();
+    this->test_vmcs_host_cr4_protected_mode_virtual_interrupts();
+    this->test_vmcs_host_cr4_time_stamp_disable();
+    this->test_vmcs_host_cr4_debugging_extensions();
+    this->test_vmcs_host_cr4_page_size_extensions();
+    this->test_vmcs_host_cr4_physical_address_extensions();
+    this->test_vmcs_host_cr4_machine_check_enable();
+    this->test_vmcs_host_cr4_page_global_enable();
+    this->test_vmcs_host_cr4_performance_monitor_counter_enable();
+    this->test_vmcs_host_cr4_osfxsr();
+    this->test_vmcs_host_cr4_osxmmexcpt();
+    this->test_vmcs_host_cr4_vmx_enable_bit();
+    this->test_vmcs_host_cr4_smx_enable_bit();
+    this->test_vmcs_host_cr4_fsgsbase_enable_bit();
+    this->test_vmcs_host_cr4_pcid_enable_bit();
+    this->test_vmcs_host_cr4_osxsave();
+    this->test_vmcs_host_cr4_smep_enable_bit();
+    this->test_vmcs_host_cr4_smap_enable_bit();
+    this->test_vmcs_host_cr4_protection_key_enable_bit();
 
     this->test_check_control_pin_based_ctls_reserved_properly_set();
     this->test_check_control_proc_based_ctls_reserved_properly_set();

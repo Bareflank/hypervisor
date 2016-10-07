@@ -342,9 +342,9 @@ vmcs_intel_x64::write_32bit_guest_state(const std::shared_ptr<vmcs_intel_x64_sta
 void
 vmcs_intel_x64::write_natural_guest_state(const std::shared_ptr<vmcs_intel_x64_state> &state)
 {
-    vmwrite(VMCS_GUEST_CR0, state->cr0());
-    vmwrite(VMCS_GUEST_CR3, state->cr3());
-    vmwrite(VMCS_GUEST_CR4, state->cr4());
+    vmcs::guest_cr0::set(state->cr0());
+    vmcs::guest_cr3::set(state->cr3());
+    vmcs::guest_cr4::set(state->cr4());
 
     vmwrite(VMCS_GUEST_ES_BASE, state->es_base());
     vmwrite(VMCS_GUEST_CS_BASE, state->cs_base());
@@ -359,7 +359,7 @@ vmcs_intel_x64::write_natural_guest_state(const std::shared_ptr<vmcs_intel_x64_s
     vmwrite(VMCS_GUEST_IDTR_BASE, state->idt_base());
 
     vmwrite(VMCS_GUEST_DR7, state->dr7());
-    vmwrite(vmcs::guest_rflags::addr, state->rflags());
+    vmcs::guest_rflags::set(state->rflags());
 
     vmwrite(VMCS_GUEST_IA32_SYSENTER_ESP, state->ia32_sysenter_esp_msr());
     vmwrite(VMCS_GUEST_IA32_SYSENTER_EIP, state->ia32_sysenter_eip_msr());
@@ -408,9 +408,9 @@ vmcs_intel_x64::write_natural_host_state(const std::shared_ptr<vmcs_intel_x64_st
     tc->cpuid = thread_context_cpuid();
     tc->tlsptr = thread_context_tlsptr();
 
-    vmwrite(VMCS_HOST_CR0, state->cr0());
-    vmwrite(VMCS_HOST_CR3, state->cr3());
-    vmwrite(VMCS_HOST_CR4, state->cr4());
+    vmcs::host_cr0::set(state->cr0());
+    vmcs::host_cr3::set(state->cr3());
+    vmcs::host_cr4::set(state->cr4());
 
     vmwrite(VMCS_HOST_FS_BASE, state->ia32_fs_base_msr());
     vmwrite(VMCS_HOST_GS_BASE, state->ia32_gs_base_msr());

@@ -29,7 +29,7 @@ static struct control_flow_path path;
 static void
 setup_check_host_cr0_for_unsupported_bits_paths(std::vector<struct control_flow_path> &cfg)
 {
-    path.setup = [&] { g_vmcs_fields[VMCS_HOST_CR0] = 0; g_msrs[msrs::ia32_vmx_cr0_fixed0::addr] = 0; };
+    path.setup = [&] { g_vmcs_fields[vmcs::host_cr0::addr] = 0; g_msrs[msrs::ia32_vmx_cr0_fixed0::addr] = 0; };
     path.throws_exception = false;
     cfg.push_back(path);
 
@@ -42,7 +42,7 @@ setup_check_host_cr0_for_unsupported_bits_paths(std::vector<struct control_flow_
 static void
 setup_check_host_cr4_for_unsupported_bits_paths(std::vector<struct control_flow_path> &cfg)
 {
-    path.setup = [&] { g_vmcs_fields[VMCS_HOST_CR4] = 0; g_msrs[msrs::ia32_vmx_cr4_fixed0::addr] = 0; };
+    path.setup = [&] { g_vmcs_fields[vmcs::host_cr4::addr] = 0; g_msrs[msrs::ia32_vmx_cr4_fixed0::addr] = 0; };
     path.throws_exception = false;
     cfg.push_back(path);
 
@@ -55,12 +55,12 @@ setup_check_host_cr4_for_unsupported_bits_paths(std::vector<struct control_flow_
 static void
 setup_check_host_cr3_for_unsupported_bits_paths(std::vector<struct control_flow_path> &cfg)
 {
-    path.setup = [&] { g_vmcs_fields[VMCS_HOST_CR3] = 0xff00000000000000; };
+    path.setup = [&] { g_vmcs_fields[vmcs::host_cr3::addr] = 0xff00000000000000; };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("host cr3 too large"));
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_HOST_CR3] = 0x1000; };
+    path.setup = [&] { g_vmcs_fields[vmcs::host_cr3::addr] = 0x1000; };
     path.throws_exception = false;
     cfg.push_back(path);
 }
@@ -182,11 +182,11 @@ setup_check_host_verify_load_ia32_efer_paths(std::vector<struct control_flow_pat
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("host addr space is 1, but efer.lma is 0"));
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_HOST_IA32_EFER_FULL] = IA32_EFER_LMA; g_vmcs_fields[VMCS_HOST_CR0] = 0; };
+    path.setup = [&] { g_vmcs_fields[VMCS_HOST_IA32_EFER_FULL] = IA32_EFER_LMA; g_vmcs_fields[vmcs::host_cr0::addr] = 0; };
     path.throws_exception = false;
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_HOST_CR0] = CR0_PG_PAGING; };
+    path.setup = [&] { g_vmcs_fields[vmcs::host_cr0::addr] = cr0::paging::mask; };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("efer.lme is 0, but efer.lma is 1"));
     cfg.push_back(path);
@@ -451,12 +451,12 @@ setup_check_host_host_address_space_disabled_paths(std::vector<struct control_fl
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("ia 32e mode must be disabled if host addr space is disabled"));
     cfg.push_back(path);
 
-    path.setup = [&] { disable_entry_ctl(VM_ENTRY_CONTROL_IA_32E_MODE_GUEST); g_vmcs_fields[VMCS_HOST_CR4] = CR4_PCIDE_PCID_ENABLE_BIT; };
+    path.setup = [&] { disable_entry_ctl(VM_ENTRY_CONTROL_IA_32E_MODE_GUEST); g_vmcs_fields[vmcs::host_cr4::addr] = cr4::pcid_enable_bit::mask; };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("cr4 pcide must be disabled if host addr space is disabled"));
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_HOST_CR4] = 0; g_vmcs_fields[VMCS_HOST_RIP] = 0xf000000000; };
+    path.setup = [&] { g_vmcs_fields[vmcs::host_cr4::addr] = 0; g_vmcs_fields[VMCS_HOST_RIP] = 0xf000000000; };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("rip bits 63:32 must be 0 if host addr space is disabled"));
     cfg.push_back(path);
@@ -473,12 +473,12 @@ setup_check_host_host_address_space_enabled_paths(std::vector<struct control_flo
     path.throws_exception = false;
     cfg.push_back(path);
 
-    path.setup = [&] { enable_exit_ctl(VM_EXIT_CONTROL_HOST_ADDRESS_SPACE_SIZE); g_vmcs_fields[VMCS_HOST_CR4] = 0; };
+    path.setup = [&] { enable_exit_ctl(VM_EXIT_CONTROL_HOST_ADDRESS_SPACE_SIZE); g_vmcs_fields[vmcs::host_cr4::addr] = 0; };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("cr4 pae must be enabled if host addr space is enabled"));
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_HOST_CR4] = CR4_PAE_PHYSICAL_ADDRESS_EXTENSIONS; g_vmcs_fields[VMCS_HOST_RIP] = 0x800000000000; };
+    path.setup = [&] { g_vmcs_fields[vmcs::host_cr4::addr] = cr4::physical_address_extensions::mask; g_vmcs_fields[VMCS_HOST_RIP] = 0x800000000000; };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("host rip must be canonical"));
     cfg.push_back(path);

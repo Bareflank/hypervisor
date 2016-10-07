@@ -100,7 +100,7 @@ vmxon_intel_x64::check_vmx_capabilities_msr()
 void
 vmxon_intel_x64::check_ia32_vmx_cr0_fixed_msr()
 {
-    auto cr0 = m_intrinsics->read_cr0();
+    auto cr0 = cr0::get();
     auto ia32_vmx_cr0_fixed0 = msrs::ia32_vmx_cr0_fixed0::get();
     auto ia32_vmx_cr0_fixed1 = msrs::ia32_vmx_cr0_fixed1::get();
 
@@ -111,7 +111,7 @@ vmxon_intel_x64::check_ia32_vmx_cr0_fixed_msr()
 void
 vmxon_intel_x64::check_ia32_vmx_cr4_fixed_msr()
 {
-    auto cr4 = m_intrinsics->read_cr4();
+    auto cr4 = cr4::get();
     auto ia32_vmx_cr4_fixed0 = msrs::ia32_vmx_cr4_fixed0::get();
     auto ia32_vmx_cr4_fixed1 = msrs::ia32_vmx_cr4_fixed1::get();
 
@@ -136,13 +136,13 @@ vmxon_intel_x64::check_v8086_disabled()
 void
 vmxon_intel_x64::enable_vmx_operation() noexcept
 {
-    m_intrinsics->write_cr4(m_intrinsics->read_cr4() | CR4_VMXE_VMX_ENABLE_BIT);
+    cr4::vmx_enable_bit::set(1UL);
 }
 
 void
 vmxon_intel_x64::disable_vmx_operation() noexcept
 {
-    m_intrinsics->write_cr4(m_intrinsics->read_cr4() & ~CR4_VMXE_VMX_ENABLE_BIT);
+    cr4::vmx_enable_bit::set(0UL);
 }
 
 void
@@ -198,5 +198,5 @@ vmxon_intel_x64::execute_vmxoff()
 bool
 vmxon_intel_x64::is_vmx_operation_enabled()
 {
-    return (m_intrinsics->read_cr4() & CR4_VMXE_VMX_ENABLE_BIT) != 0;
+    return cr4::vmx_enable_bit::get() != 0;
 }

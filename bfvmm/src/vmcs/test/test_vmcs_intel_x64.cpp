@@ -49,9 +49,9 @@ vmcs_resume_fail(state_save_intel_x64 *state_save)
 static void
 setup_vmcs_host_control_registers_and_msrs()
 {
-    g_vmcs_fields[VMCS_HOST_CR0] = 0xffffFFFFffffFFFF;
-    g_vmcs_fields[VMCS_HOST_CR3] = 0x0000000010000000;
-    g_vmcs_fields[VMCS_HOST_CR4] = 0xffffFFFFffffFFFF;
+    g_vmcs_fields[vmcs::host_cr0::addr] = 0xffffFFFFffffFFFF;
+    g_vmcs_fields[vmcs::host_cr3::addr] = 0x0000000010000000;
+    g_vmcs_fields[vmcs::host_cr4::addr] = 0xffffFFFFffffFFFF;
     g_vmcs_fields[VMCS_HOST_IA32_SYSENTER_ESP] = 0x0000000010000000;
     g_vmcs_fields[VMCS_HOST_IA32_SYSENTER_EIP] = 0x0000000010000000;
     g_vmcs_fields[VMCS_HOST_IA32_PERF_GLOBAL_CTRL_FULL] = 0x0;
@@ -80,9 +80,9 @@ setup_vmcs_host_fields()
 static void
 setup_vmcs_guest_control_and_debug_fields()
 {
-    g_vmcs_fields[VMCS_GUEST_CR0] = 0xffffFFFFffffFFFF;
-    g_vmcs_fields[VMCS_GUEST_CR3] = 0x0000000000001000;
-    g_vmcs_fields[VMCS_GUEST_CR4] = 0xffffFFFFfffdFFFF;
+    g_vmcs_fields[vmcs::guest_cr0::addr] = 0xffffFFFFffffFFFF;
+    g_vmcs_fields[vmcs::guest_cr3::addr] = 0x0000000000001000;
+    g_vmcs_fields[vmcs::guest_cr4::addr] = 0xffffFFFFfffdFFFF;
     g_vmcs_fields[VMCS_GUEST_DR7] = 0x00000000ffffFFFF;
     g_vmcs_fields[VMCS_GUEST_IA32_SYSENTER_ESP] = 0x0000000010000000;
     g_vmcs_fields[VMCS_GUEST_IA32_SYSENTER_EIP] = 0x0000000010000000;
@@ -190,7 +190,7 @@ setup_vm_entry_control_fields()
     g_vmcs_fields[VMCS_VM_ENTRY_CONTROLS] = 0xffffFFFFffffFFFF;
     g_vmcs_fields[VMCS_VM_ENTRY_INTERRUPTION_INFORMATION_FIELD] = VM_INTERRUPT_INFORMATION_VALID;
     g_vmcs_fields[VMCS_VM_ENTRY_INTERRUPTION_INFORMATION_FIELD] |= VM_INTERRUPT_INFORMATION_DELIVERY_ERROR | 0x308;
-    g_vmcs_fields[VMCS_GUEST_CR0] = CRO_PE_PROTECTION_ENABLE;
+    g_vmcs_fields[vmcs::guest_cr0::addr] = cr0::protection_enable::mask;
     g_vmcs_fields[VMCS_VM_ENTRY_EXCEPTION_ERROR_CODE] = 0x0;
     g_vmcs_fields[VMCS_VM_ENTRY_MSR_LOAD_COUNT] = 0xff0000;
     g_vmcs_fields[VMCS_VM_ENTRY_MSR_LOAD_ADDRESS_FULL] = 0x0000000010000000;
@@ -263,11 +263,22 @@ setup_vmcs_x64_state_intrinsics(MockRepository &mocks, vmcs_intel_x64_state *sta
     mocks.OnCall(state_in, vmcs_intel_x64_state::ldtr_access_rights).Return(0x10000);
     mocks.OnCall(state_in, vmcs_intel_x64_state::tr_access_rights).Return(0x10000);
 
-    mocks.OnCall(state_in, vmcs_intel_x64_state::cr0).Return(0);
+    auto cr0 = 0UL;
+    cr0 |= cr0::paging::mask;
+    cr0 |= cr0::protection_enable::mask;
+
+    auto cr4 = 0UL;
+    cr4 |= cr4::physical_address_extensions::mask;
+
+    auto rflags = 0UL;
+    rflags |= rflags::always_enabled::mask;
+    rflags |= rflags::interrupt_enable_flag::mask;
+
+    mocks.OnCall(state_in, vmcs_intel_x64_state::cr0).Return(cr0);
     mocks.OnCall(state_in, vmcs_intel_x64_state::cr3).Return(0);
-    mocks.OnCall(state_in, vmcs_intel_x64_state::cr4).Return(0);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::cr4).Return(cr4);
     mocks.OnCall(state_in, vmcs_intel_x64_state::dr7).Return(0);
-    mocks.OnCall(state_in, vmcs_intel_x64_state::rflags).Return(0);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::rflags).Return(rflags);
     mocks.OnCall(state_in, vmcs_intel_x64_state::gdt_base).Return(0);
     mocks.OnCall(state_in, vmcs_intel_x64_state::idt_base).Return(0);
 
@@ -739,13 +750,6 @@ vmcs_ut::test_vmcs_host_tr_selector()
     this->expect_true(vmcs::host_tr_selector::is_supported());
 }
 
-
-// REMOVE ME:
-//
-// Make sure that once the other tests are added, that the guest rflags
-// tests are in the right order with the other tests
-//
-
 void
 vmcs_ut::test_vmcs_guest_rflags()
 {
@@ -959,4 +963,466 @@ vmcs_ut::test_vmcs_guest_rflags_always_enabled()
 
     vmcs::guest_rflags::always_enabled::set(0UL);
     this->expect_true(vmcs::guest_rflags::always_enabled::get() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_cr0()
+{
+    vmcs::guest_cr0::set(100UL);
+    this->expect_true(vmcs::guest_cr0::get() == 100UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_cr0_protection_enable()
+{
+    vmcs::guest_cr0::protection_enable::set(1UL);
+    this->expect_true(vmcs::guest_cr0::protection_enable::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_cr0_monitor_coprocessor()
+{
+    vmcs::guest_cr0::monitor_coprocessor::set(1UL);
+    this->expect_true(vmcs::guest_cr0::monitor_coprocessor::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_cr0_emulation()
+{
+    vmcs::guest_cr0::emulation::set(1UL);
+    this->expect_true(vmcs::guest_cr0::emulation::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_cr0_task_switched()
+{
+    vmcs::guest_cr0::task_switched::set(1UL);
+    this->expect_true(vmcs::guest_cr0::task_switched::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_cr0_extension_type()
+{
+    vmcs::guest_cr0::extension_type::set(1UL);
+    this->expect_true(vmcs::guest_cr0::extension_type::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_cr0_numeric_error()
+{
+    vmcs::guest_cr0::numeric_error::set(1UL);
+    this->expect_true(vmcs::guest_cr0::numeric_error::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_cr0_write_protect()
+{
+    vmcs::guest_cr0::write_protect::set(1UL);
+    this->expect_true(vmcs::guest_cr0::write_protect::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_cr0_alignment_mask()
+{
+    vmcs::guest_cr0::alignment_mask::set(1UL);
+    this->expect_true(vmcs::guest_cr0::alignment_mask::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_cr0_not_write_through()
+{
+    vmcs::guest_cr0::not_write_through::set(1UL);
+    this->expect_true(vmcs::guest_cr0::not_write_through::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_cr0_cache_disable()
+{
+    vmcs::guest_cr0::cache_disable::set(1UL);
+    this->expect_true(vmcs::guest_cr0::cache_disable::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_cr0_paging()
+{
+    vmcs::guest_cr0::paging::set(1UL);
+    this->expect_true(vmcs::guest_cr0::paging::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_cr3()
+{
+    vmcs::guest_cr3::set(100UL);
+    this->expect_true(vmcs::guest_cr3::get() == 100UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_cr4()
+{
+    vmcs::guest_cr4::set(100UL);
+    this->expect_true(vmcs::guest_cr4::get() == 100UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_cr4_v8086_mode_extensions()
+{
+    vmcs::guest_cr4::v8086_mode_extensions::set(1UL);
+    this->expect_true(vmcs::guest_cr4::v8086_mode_extensions::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_cr4_protected_mode_virtual_interrupts()
+{
+    vmcs::guest_cr4::protected_mode_virtual_interrupts::set(1UL);
+    this->expect_true(vmcs::guest_cr4::protected_mode_virtual_interrupts::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_cr4_time_stamp_disable()
+{
+    vmcs::guest_cr4::time_stamp_disable::set(1UL);
+    this->expect_true(vmcs::guest_cr4::time_stamp_disable::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_cr4_debugging_extensions()
+{
+    vmcs::guest_cr4::debugging_extensions::set(1UL);
+    this->expect_true(vmcs::guest_cr4::debugging_extensions::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_cr4_page_size_extensions()
+{
+    vmcs::guest_cr4::page_size_extensions::set(1UL);
+    this->expect_true(vmcs::guest_cr4::page_size_extensions::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_cr4_physical_address_extensions()
+{
+    vmcs::guest_cr4::physical_address_extensions::set(1UL);
+    this->expect_true(vmcs::guest_cr4::physical_address_extensions::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_cr4_machine_check_enable()
+{
+    vmcs::guest_cr4::machine_check_enable::set(1UL);
+    this->expect_true(vmcs::guest_cr4::machine_check_enable::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_cr4_page_global_enable()
+{
+    vmcs::guest_cr4::page_global_enable::set(1UL);
+    this->expect_true(vmcs::guest_cr4::page_global_enable::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_cr4_performance_monitor_counter_enable()
+{
+    vmcs::guest_cr4::performance_monitor_counter_enable::set(1UL);
+    this->expect_true(vmcs::guest_cr4::performance_monitor_counter_enable::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_cr4_osfxsr()
+{
+    vmcs::guest_cr4::osfxsr::set(1UL);
+    this->expect_true(vmcs::guest_cr4::osfxsr::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_cr4_osxmmexcpt()
+{
+    vmcs::guest_cr4::osxmmexcpt::set(1UL);
+    this->expect_true(vmcs::guest_cr4::osxmmexcpt::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_cr4_vmx_enable_bit()
+{
+    vmcs::guest_cr4::vmx_enable_bit::set(1UL);
+    this->expect_true(vmcs::guest_cr4::vmx_enable_bit::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_cr4_smx_enable_bit()
+{
+    vmcs::guest_cr4::smx_enable_bit::set(1UL);
+    this->expect_true(vmcs::guest_cr4::smx_enable_bit::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_cr4_fsgsbase_enable_bit()
+{
+    vmcs::guest_cr4::fsgsbase_enable_bit::set(1UL);
+    this->expect_true(vmcs::guest_cr4::fsgsbase_enable_bit::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_cr4_pcid_enable_bit()
+{
+    vmcs::guest_cr4::pcid_enable_bit::set(1UL);
+    this->expect_true(vmcs::guest_cr4::pcid_enable_bit::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_cr4_osxsave()
+{
+    vmcs::guest_cr4::osxsave::set(1UL);
+    this->expect_true(vmcs::guest_cr4::osxsave::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_cr4_smep_enable_bit()
+{
+    vmcs::guest_cr4::smep_enable_bit::set(1UL);
+    this->expect_true(vmcs::guest_cr4::smep_enable_bit::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_cr4_smap_enable_bit()
+{
+    vmcs::guest_cr4::smap_enable_bit::set(1UL);
+    this->expect_true(vmcs::guest_cr4::smap_enable_bit::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_cr4_protection_key_enable_bit()
+{
+    vmcs::guest_cr4::protection_key_enable_bit::set(1UL);
+    this->expect_true(vmcs::guest_cr4::protection_key_enable_bit::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_cr0()
+{
+    vmcs::host_cr0::set(100UL);
+    this->expect_true(vmcs::host_cr0::get() == 100UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_cr0_protection_enable()
+{
+    vmcs::host_cr0::protection_enable::set(1UL);
+    this->expect_true(vmcs::host_cr0::protection_enable::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_cr0_monitor_coprocessor()
+{
+    vmcs::host_cr0::monitor_coprocessor::set(1UL);
+    this->expect_true(vmcs::host_cr0::monitor_coprocessor::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_cr0_emulation()
+{
+    vmcs::host_cr0::emulation::set(1UL);
+    this->expect_true(vmcs::host_cr0::emulation::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_cr0_task_switched()
+{
+    vmcs::host_cr0::task_switched::set(1UL);
+    this->expect_true(vmcs::host_cr0::task_switched::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_cr0_extension_type()
+{
+    vmcs::host_cr0::extension_type::set(1UL);
+    this->expect_true(vmcs::host_cr0::extension_type::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_cr0_numeric_error()
+{
+    vmcs::host_cr0::numeric_error::set(1UL);
+    this->expect_true(vmcs::host_cr0::numeric_error::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_cr0_write_protect()
+{
+    vmcs::host_cr0::write_protect::set(1UL);
+    this->expect_true(vmcs::host_cr0::write_protect::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_cr0_alignment_mask()
+{
+    vmcs::host_cr0::alignment_mask::set(1UL);
+    this->expect_true(vmcs::host_cr0::alignment_mask::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_cr0_not_write_through()
+{
+    vmcs::host_cr0::not_write_through::set(1UL);
+    this->expect_true(vmcs::host_cr0::not_write_through::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_cr0_cache_disable()
+{
+    vmcs::host_cr0::cache_disable::set(1UL);
+    this->expect_true(vmcs::host_cr0::cache_disable::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_cr0_paging()
+{
+    vmcs::host_cr0::paging::set(1UL);
+    this->expect_true(vmcs::host_cr0::paging::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_cr3()
+{
+    vmcs::host_cr3::set(100UL);
+    this->expect_true(vmcs::host_cr3::get() == 100UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_cr4()
+{
+    vmcs::host_cr4::set(100UL);
+    this->expect_true(vmcs::host_cr4::get() == 100UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_cr4_v8086_mode_extensions()
+{
+    vmcs::host_cr4::v8086_mode_extensions::set(1UL);
+    this->expect_true(vmcs::host_cr4::v8086_mode_extensions::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_cr4_protected_mode_virtual_interrupts()
+{
+    vmcs::host_cr4::protected_mode_virtual_interrupts::set(1UL);
+    this->expect_true(vmcs::host_cr4::protected_mode_virtual_interrupts::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_cr4_time_stamp_disable()
+{
+    vmcs::host_cr4::time_stamp_disable::set(1UL);
+    this->expect_true(vmcs::host_cr4::time_stamp_disable::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_cr4_debugging_extensions()
+{
+    vmcs::host_cr4::debugging_extensions::set(1UL);
+    this->expect_true(vmcs::host_cr4::debugging_extensions::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_cr4_page_size_extensions()
+{
+    vmcs::host_cr4::page_size_extensions::set(1UL);
+    this->expect_true(vmcs::host_cr4::page_size_extensions::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_cr4_physical_address_extensions()
+{
+    vmcs::host_cr4::physical_address_extensions::set(1UL);
+    this->expect_true(vmcs::host_cr4::physical_address_extensions::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_cr4_machine_check_enable()
+{
+    vmcs::host_cr4::machine_check_enable::set(1UL);
+    this->expect_true(vmcs::host_cr4::machine_check_enable::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_cr4_page_global_enable()
+{
+    vmcs::host_cr4::page_global_enable::set(1UL);
+    this->expect_true(vmcs::host_cr4::page_global_enable::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_cr4_performance_monitor_counter_enable()
+{
+    vmcs::host_cr4::performance_monitor_counter_enable::set(1UL);
+    this->expect_true(vmcs::host_cr4::performance_monitor_counter_enable::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_cr4_osfxsr()
+{
+    vmcs::host_cr4::osfxsr::set(1UL);
+    this->expect_true(vmcs::host_cr4::osfxsr::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_cr4_osxmmexcpt()
+{
+    vmcs::host_cr4::osxmmexcpt::set(1UL);
+    this->expect_true(vmcs::host_cr4::osxmmexcpt::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_cr4_vmx_enable_bit()
+{
+    vmcs::host_cr4::vmx_enable_bit::set(1UL);
+    this->expect_true(vmcs::host_cr4::vmx_enable_bit::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_cr4_smx_enable_bit()
+{
+    vmcs::host_cr4::smx_enable_bit::set(1UL);
+    this->expect_true(vmcs::host_cr4::smx_enable_bit::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_cr4_fsgsbase_enable_bit()
+{
+    vmcs::host_cr4::fsgsbase_enable_bit::set(1UL);
+    this->expect_true(vmcs::host_cr4::fsgsbase_enable_bit::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_cr4_pcid_enable_bit()
+{
+    vmcs::host_cr4::pcid_enable_bit::set(1UL);
+    this->expect_true(vmcs::host_cr4::pcid_enable_bit::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_cr4_osxsave()
+{
+    vmcs::host_cr4::osxsave::set(1UL);
+    this->expect_true(vmcs::host_cr4::osxsave::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_cr4_smep_enable_bit()
+{
+    vmcs::host_cr4::smep_enable_bit::set(1UL);
+    this->expect_true(vmcs::host_cr4::smep_enable_bit::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_cr4_smap_enable_bit()
+{
+    vmcs::host_cr4::smap_enable_bit::set(1UL);
+    this->expect_true(vmcs::host_cr4::smap_enable_bit::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_cr4_protection_key_enable_bit()
+{
+    vmcs::host_cr4::protection_key_enable_bit::set(1UL);
+    this->expect_true(vmcs::host_cr4::protection_key_enable_bit::get() == 1UL);
 }

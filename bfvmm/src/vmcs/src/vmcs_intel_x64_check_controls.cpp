@@ -611,14 +611,12 @@ vmcs_intel_x64::check_control_event_injection_delivery_ec_checks()
     if ((interrupt_info_field & VM_INTERRUPT_INFORMATION_DELIVERY_ERROR) == 0)
         return;
 
-    auto cr0 = vmread(VMCS_GUEST_CR0);
-
     auto type = (interrupt_info_field & VM_INTERRUPT_INFORMATION_TYPE) >> 8;
     auto vector = (interrupt_info_field & VM_INTERRUPT_INFORMATION_VECTOR) >> 0;
 
     if (is_enabled_unrestricted_guests())
     {
-        if ((cr0 & CRO_PE_PROTECTION_ENABLE) == 0)
+        if (vmcs::guest_cr0::protection_enable::get() == 0)
             throw std::logic_error("unrestricted guest must be 0 or PE must "
                                    "be enabled in cr0 if deliver error code bit is set");
     }

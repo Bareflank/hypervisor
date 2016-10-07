@@ -26,6 +26,11 @@
 #include <memory>
 #include <intrinsics/intrinsics_intel_x64.h>
 
+#define COM1_PORT 0x3f8
+#define COM2_PORT 0x2f8
+#define COM3_PORT 0x3e8
+#define COM4_PORT 0x2e8
+
 #ifndef DEFAULT_COM_PORT
 #define DEFAULT_COM_PORT COM1_PORT
 #endif

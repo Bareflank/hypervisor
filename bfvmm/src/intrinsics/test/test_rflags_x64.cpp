@@ -28,9 +28,7 @@ uint64_t g_rflags = 0;
 
 extern "C" uint64_t
 __read_rflags(void) noexcept
-{
-    return g_rflags;
-}
+{ return g_rflags; }
 
 void
 intrinsics_ut::test_rflags_x64()

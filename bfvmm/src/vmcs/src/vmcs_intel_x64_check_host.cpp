@@ -48,7 +48,7 @@ vmcs_intel_x64::check_host_control_registers_and_msrs()
 void
 vmcs_intel_x64::check_host_cr0_for_unsupported_bits()
 {
-    auto cr0 = vmread(VMCS_HOST_CR0);
+    auto cr0 = vmcs::host_cr0::get();
     auto ia32_vmx_cr0_fixed0 = msrs::ia32_vmx_cr0_fixed0::get();
     auto ia32_vmx_cr0_fixed1 = msrs::ia32_vmx_cr0_fixed1::get();
 
@@ -66,7 +66,7 @@ vmcs_intel_x64::check_host_cr0_for_unsupported_bits()
 void
 vmcs_intel_x64::check_host_cr4_for_unsupported_bits()
 {
-    auto cr4 = vmread(VMCS_HOST_CR4);
+    auto cr4 = vmcs::host_cr4::get();
     auto ia32_vmx_cr4_fixed0 = msrs::ia32_vmx_cr4_fixed0::get();
     auto ia32_vmx_cr4_fixed1 = msrs::ia32_vmx_cr4_fixed1::get();
 
@@ -84,9 +84,7 @@ vmcs_intel_x64::check_host_cr4_for_unsupported_bits()
 void
 vmcs_intel_x64::check_host_cr3_for_unsupported_bits()
 {
-    auto cr3 = vmread(VMCS_HOST_CR3);
-
-    if (!is_physical_address_valid(cr3))
+    if (!is_physical_address_valid(vmcs::host_cr3::get()))
         throw std::logic_error("host cr3 too large");
 }
 
@@ -173,7 +171,6 @@ vmcs_intel_x64::check_host_verify_load_ia32_efer()
         throw std::logic_error("ia32 efer msr reserved buts must be 0 if "
                                "load ia32 efer entry is enabled");
 
-    auto cr0 = vmread(VMCS_HOST_CR0);
     auto lma = (efer & IA32_EFER_LMA);
     auto lme = (efer & IA32_EFER_LME);
 
@@ -183,7 +180,7 @@ vmcs_intel_x64::check_host_verify_load_ia32_efer()
     if (is_enabled_host_address_space_size() && lma == 0)
         throw std::logic_error("host addr space is 1, but efer.lma is 0");
 
-    if ((cr0 & CR0_PG_PAGING) == 0)
+    if (vmcs::host_cr0::paging::get() == 0)
         return;
 
     if (lme == 0 && lma != 0)
@@ -394,9 +391,7 @@ vmcs_intel_x64::check_host_host_address_space_disabled()
     if (is_enabled_ia_32e_mode_guest())
         throw std::logic_error("ia 32e mode must be disabled if host addr space is disabled");
 
-    auto cr4 = vmread(VMCS_HOST_CR4);
-
-    if ((cr4 & CR4_PCIDE_PCID_ENABLE_BIT) != 0)
+    if (vmcs::host_cr4::pcid_enable_bit::get() != 0)
         throw std::logic_error("cr4 pcide must be disabled if host addr space is disabled");
 
     auto rip = vmread(VMCS_HOST_RIP);
@@ -411,9 +406,7 @@ vmcs_intel_x64::check_host_host_address_space_enabled()
     if (!is_enabled_host_address_space_size())
         return;
 
-    auto cr4 = vmread(VMCS_HOST_CR4);
-
-    if ((cr4 & CR4_PAE_PHYSICAL_ADDRESS_EXTENSIONS) == 0)
+    if (vmcs::host_cr4::physical_address_extensions::get() == 0)
         throw std::logic_error("cr4 pae must be enabled if host addr space is enabled");
 
     auto rip = vmread(VMCS_HOST_RIP);

@@ -56,7 +56,7 @@ vmcs_intel_x64::checks_on_guest_control_registers_debug_registers_and_msrs()
 void
 vmcs_intel_x64::check_guest_cr0_for_unsupported_bits()
 {
-    auto cr0 = vmread(VMCS_GUEST_CR0);
+    auto cr0 = vmcs::guest_cr0::get();
     auto ia32_vmx_cr0_fixed0 = msrs::ia32_vmx_cr0_fixed0::get();
     auto ia32_vmx_cr0_fixed1 = msrs::ia32_vmx_cr0_fixed1::get();
 
@@ -74,19 +74,17 @@ vmcs_intel_x64::check_guest_cr0_for_unsupported_bits()
 void
 vmcs_intel_x64::check_guest_cr0_verify_paging_enabled()
 {
-    auto cr0 = vmread(VMCS_GUEST_CR0);
-
-    if ((cr0 & CR0_PG_PAGING) == 0)
+    if (vmcs::guest_cr0::paging::get() == 0)
         return;
 
-    if ((cr0 & CRO_PE_PROTECTION_ENABLE) == 0)
+    if (vmcs::guest_cr0::protection_enable::get() == 0)
         throw std::logic_error("PE must be enabled in cr0 if PG is enabled");
 }
 
 void
 vmcs_intel_x64::check_guest_cr4_for_unsupported_bits()
 {
-    auto cr4 = vmread(VMCS_GUEST_CR4);
+    auto cr4 = vmcs::guest_cr4::get();
     auto ia32_vmx_cr4_fixed0 = msrs::ia32_vmx_cr4_fixed0::get();
     auto ia32_vmx_cr4_fixed1 = msrs::ia32_vmx_cr4_fixed1::get();
 
@@ -120,13 +118,10 @@ vmcs_intel_x64::check_guest_verify_ia_32e_mode_enabled()
     if (!is_enabled_ia_32e_mode_guest())
         return;
 
-    auto cr0 = vmread(VMCS_GUEST_CR0);
-    auto cr4 = vmread(VMCS_GUEST_CR4);
-
-    if ((cr0 & CR0_PG_PAGING) == 0)
+    if (vmcs::guest_cr0::paging::get() == 0)
         throw std::logic_error("paging must be enabled if ia 32e guest mode is enabled");
 
-    if ((cr4 & CR4_PAE_PHYSICAL_ADDRESS_EXTENSIONS) == 0)
+    if (vmcs::guest_cr4::physical_address_extensions::get() == 0)
         throw std::logic_error("pae must be enabled if ia 32e guest mode is enabled");
 }
 
@@ -136,18 +131,14 @@ vmcs_intel_x64::check_guest_verify_ia_32e_mode_disabled()
     if (is_enabled_ia_32e_mode_guest())
         return;
 
-    auto cr4 = vmread(VMCS_GUEST_CR4);
-
-    if ((cr4 & CR4_PCIDE_PCID_ENABLE_BIT) != 0)
+    if (vmcs::guest_cr4::pcid_enable_bit::get() != 0)
         throw std::logic_error("pcide in cr4 must be disabled if ia 32e guest mode is disabled");
 }
 
 void
 vmcs_intel_x64::check_guest_cr3_for_unsupported_bits()
 {
-    auto cr3 = vmread(VMCS_GUEST_CR3);
-
-    if (!is_physical_address_valid(cr3))
+    if (!is_physical_address_valid(vmcs::guest_cr3::get()))
         throw std::logic_error("guest cr3 too large");
 }
 
@@ -246,7 +237,6 @@ vmcs_intel_x64::check_guest_verify_load_ia32_efer()
         throw std::logic_error("ia32 efer msr reserved buts must be 0 if "
                                "load ia32 efer entry is enabled");
 
-    auto cr0 = vmread(VMCS_GUEST_CR0);
     auto lma = (efer & IA32_EFER_LMA);
     auto lme = (efer & IA32_EFER_LME);
 
@@ -256,7 +246,7 @@ vmcs_intel_x64::check_guest_verify_load_ia32_efer()
     if (is_enabled_ia_32e_mode_guest() && lma == 0)
         throw std::logic_error("ia 32e mode is 1, but efer.lma is 0");
 
-    if ((cr0 & CR0_PG_PAGING) == 0)
+    if (vmcs::guest_cr0::paging::get() == 0)
         return;
 
     if (lme == 0 && lma != 0)
@@ -982,11 +972,10 @@ vmcs_intel_x64::check_guest_ss_dpl_must_equal_rpl()
 void
 vmcs_intel_x64::check_guest_ss_dpl_must_equal_zero()
 {
-    auto cr0 = vmread(VMCS_GUEST_CR0);
     auto cs_access = vmread(VMCS_GUEST_CS_ACCESS_RIGHTS);
     auto ss_access = vmread(VMCS_GUEST_SS_ACCESS_RIGHTS);
 
-    auto pe = (cr0 & CRO_PE_PROTECTION_ENABLE);
+    auto pe = vmcs::guest_cr0::protection_enable::get();
     auto cs_type = (cs_access & SEGMENT_ACCESS_RIGHTS_TYPE);
 
     if (cs_type != 3 && pe != 0)
@@ -1662,10 +1651,7 @@ vmcs_intel_x64::check_guest_rflags_reserved_bits()
 void
 vmcs_intel_x64::check_guest_rflags_vm_bit()
 {
-    auto cr0 = vmread(VMCS_GUEST_CR0);
-    auto pe = cr0 & CRO_PE_PROTECTION_ENABLE;
-
-    if (!is_enabled_ia_32e_mode_guest() && pe == 1)
+    if (!is_enabled_ia_32e_mode_guest() && vmcs::guest_cr0::protection_enable::get() == 1)
         return;
 
     if (vmcs::guest_rflags::virtual_8086_mode::get() != 0)

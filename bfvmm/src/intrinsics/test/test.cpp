@@ -212,6 +212,40 @@ intrinsics_ut::list()
     this->test_rflags_x64_always_disabled();
     this->test_rflags_x64_always_enabled();
 
+    this->test_cr0();
+    this->test_cr0_protection_enable();
+    this->test_cr0_monitor_coprocessor();
+    this->test_cr0_emulation();
+    this->test_cr0_task_switched();
+    this->test_cr0_extension_type();
+    this->test_cr0_numeric_error();
+    this->test_cr0_write_protect();
+    this->test_cr0_alignment_mask();
+    this->test_cr0_not_write_through();
+    this->test_cr0_cache_disable();
+    this->test_cr0_paging();
+    this->test_cr3();
+    this->test_cr4();
+    this->test_cr4_v8086_mode_extensions();
+    this->test_cr4_protected_mode_virtual_interrupts();
+    this->test_cr4_time_stamp_disable();
+    this->test_cr4_debugging_extensions();
+    this->test_cr4_page_size_extensions();
+    this->test_cr4_physical_address_extensions();
+    this->test_cr4_machine_check_enable();
+    this->test_cr4_page_global_enable();
+    this->test_cr4_performance_monitor_counter_enable();
+    this->test_cr4_osfxsr();
+    this->test_cr4_osxmmexcpt();
+    this->test_cr4_vmx_enable_bit();
+    this->test_cr4_smx_enable_bit();
+    this->test_cr4_fsgsbase_enable_bit();
+    this->test_cr4_pcid_enable_bit();
+    this->test_cr4_osxsave();
+    this->test_cr4_smep_enable_bit();
+    this->test_cr4_smap_enable_bit();
+    this->test_cr4_protection_key_enable_bit();
+
     return true;
 }
 
