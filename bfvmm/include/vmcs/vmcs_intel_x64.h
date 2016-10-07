@@ -654,38 +654,47 @@ vmwrite(uint64_t field, uint64_t value, const std::string &name)
 
 namespace virtual_processor_identifier
 {
-constexpr const auto addr = 0x0000000000000000UL;
-constexpr const auto name = "virtual_processor_identifier";
+    constexpr const auto addr = 0x0000000000000000UL;
+    constexpr const auto name = "virtual_processor_identifier";
 
-inline auto get()
-{ return vmread(addr, name); }
+    inline auto get()
+    { return vmread(addr, name); }
 
-template<class T> constexpr auto set(T val)
-{ return vmwrite(addr, val, name); }
+    template<class T> constexpr void set(T val)
+    { vmwrite(addr, val, name); }
+
+    inline bool is_supported() noexcept
+    { return msrs::ia32_vmx_procbased_ctls2::enable_vpid::get() == 1; }
 }
 
 namespace posted_interrupt_notification_vector
 {
-constexpr const auto addr = 0x0000000000000002UL;
-constexpr const auto name = "posted_interrupt_notification_vector";
+    constexpr const auto addr = 0x0000000000000002UL;
+    constexpr const auto name = "posted_interrupt_notification_vector";
 
-inline auto get()
-{ return vmread(addr, name); }
+    inline auto get()
+    { return vmread(addr, name); }
 
-template<class T> constexpr auto set(T val)
-{ return vmwrite(addr, val, name); }
+    template<class T> constexpr auto set(T val)
+    { return vmwrite(addr, val, name); }
+
+    inline bool is_supported() noexcept
+    { return msrs::ia32_vmx_true_pinbased_ctls::process_posted_interrupts::get() == 1; }
 }
 
 namespace eptp_index
 {
-constexpr const auto addr = 0x0000000000000004UL;
-constexpr const auto name = "eptp_index";
+    constexpr const auto addr = 0x0000000000000004UL;
+    constexpr const auto name = "eptp_index";
 
-inline auto get()
-{ return vmread(addr, name); }
+    inline auto get()
+    { return vmread(addr, name); }
 
-template<class T> constexpr auto set(T val)
-{ return vmwrite(addr, val, name); }
+    template<class T> constexpr auto set(T val)
+    { return vmwrite(addr, val, name); }
+
+    inline bool is_supported() noexcept
+    { return msrs::ia32_vmx_procbased_ctls2::ept_violation_ve::get() == 1; }
 }
 
 // -----------------------------------------------------------------------------
@@ -702,6 +711,9 @@ namespace guest_es_selector
 
     template<class T> constexpr auto set(T val)
     { return vmwrite(addr, val, name); }
+
+    inline bool is_supported() noexcept
+    { return true; }
 }
 
 namespace guest_cs_selector
@@ -714,6 +726,9 @@ namespace guest_cs_selector
 
     template<class T> constexpr auto set(T val)
     { return vmwrite(addr, val, name); }
+
+    inline bool is_supported() noexcept
+    { return true; }
 }
 
 namespace guest_ss_selector
@@ -726,6 +741,9 @@ namespace guest_ss_selector
 
     template<class T> constexpr auto set(T val)
     { return vmwrite(addr, val, name); }
+
+    inline bool is_supported() noexcept
+    { return true; }
 }
 
 namespace guest_ds_selector
@@ -738,6 +756,9 @@ namespace guest_ds_selector
 
     template<class T> constexpr auto set(T val)
     { return vmwrite(addr, val, name); }
+
+    inline bool is_supported() noexcept
+    { return true; }
 }
 
 namespace guest_fs_selector
@@ -750,6 +771,9 @@ namespace guest_fs_selector
 
     template<class T> constexpr auto set(T val)
     { return vmwrite(addr, val, name); }
+
+    inline bool is_supported() noexcept
+    { return true; }
 }
 
 namespace guest_gs_selector
@@ -762,6 +786,9 @@ namespace guest_gs_selector
 
     template<class T> constexpr auto set(T val)
     { return vmwrite(addr, val, name); }
+
+    inline bool is_supported() noexcept
+    { return true; }
 }
 
 namespace guest_ldtr_selector
@@ -774,6 +801,9 @@ namespace guest_ldtr_selector
 
     template<class T> constexpr auto set(T val)
     { return vmwrite(addr, val, name); }
+
+    inline bool is_supported() noexcept
+    { return true; }
 }
 
 namespace guest_tr_selector
@@ -786,6 +816,9 @@ namespace guest_tr_selector
 
     template<class T> constexpr auto set(T val)
     { return vmwrite(addr, val, name); }
+
+    inline bool is_supported() noexcept
+    { return true; }
 }
 
 namespace guest_interrupt_status
@@ -798,6 +831,9 @@ namespace guest_interrupt_status
 
     template<class T> constexpr auto set(T val)
     { return vmwrite(addr, val, name); }
+
+    inline bool is_supported() noexcept
+    { return msrs::ia32_vmx_procbased_ctls2::virtual_interrupt_delivery::get() == 1; }
 }
 
 // -----------------------------------------------------------------------------
@@ -814,6 +850,9 @@ namespace host_es_selector
 
     template<class T> constexpr auto set(T val)
     { return vmwrite(addr, val, name); }
+
+    inline bool is_supported() noexcept
+    { return true; }
 }
 
 namespace host_cs_selector
@@ -826,6 +865,9 @@ namespace host_cs_selector
 
     template<class T> constexpr auto set(T val)
     { return vmwrite(addr, val, name); }
+
+    inline bool is_supported() noexcept
+    { return true; }
 }
 
 namespace host_ss_selector
@@ -838,6 +880,9 @@ namespace host_ss_selector
 
     template<class T> constexpr auto set(T val)
     { return vmwrite(addr, val, name); }
+
+    inline bool is_supported() noexcept
+    { return true; }
 }
 
 namespace host_ds_selector
@@ -850,6 +895,9 @@ namespace host_ds_selector
 
     template<class T> constexpr auto set(T val)
     { return vmwrite(addr, val, name); }
+
+    inline bool is_supported() noexcept
+    { return true; }
 }
 
 namespace host_fs_selector
@@ -862,6 +910,9 @@ namespace host_fs_selector
 
     template<class T> constexpr auto set(T val)
     { return vmwrite(addr, val, name); }
+
+    inline bool is_supported() noexcept
+    { return true; }
 }
 
 namespace host_gs_selector
@@ -874,6 +925,9 @@ namespace host_gs_selector
 
     template<class T> constexpr auto set(T val)
     { return vmwrite(addr, val, name); }
+
+    inline bool is_supported() noexcept
+    { return true; }
 }
 
 namespace host_tr_selector
@@ -886,6 +940,9 @@ namespace host_tr_selector
 
     template<class T> constexpr auto set(T val)
     { return vmwrite(addr, val, name); }
+
+    inline bool is_supported() noexcept
+    { return true; }
 }
 
 }

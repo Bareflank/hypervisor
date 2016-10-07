@@ -52,6 +52,7 @@ NATIVE_OUTDIR+=%BUILD_REL%/../bin
 SOURCES+=test.cpp
 SOURCES+=test_gdt_x64.cpp
 SOURCES+=test_idt_x64.cpp
+SOURCES+=test_msrs_intel_x64.cpp
 
 INCLUDE_PATHS+=./
 INCLUDE_PATHS+=%HYPER_ABS%/include/

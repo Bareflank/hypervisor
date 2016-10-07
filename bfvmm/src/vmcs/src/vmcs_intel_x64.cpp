@@ -156,7 +156,7 @@ vmcs_intel_x64::create_vmcs_region()
         throw std::logic_error("m_vmcs_region_phys == nullptr");
 
     gsl::span<uint32_t> id{m_vmcs_region.get(), 1024};
-    id[0] = msrs::ia32_vmx_basic::revision_id::get();
+    id[0] = gsl::narrow_cast<uint32_t>(msrs::ia32_vmx_basic::revision_id::get());
 }
 
 void

@@ -81,10 +81,10 @@ debug_ring::write(const std::string &str) noexcept
         //       SIMD instructions
 
         if (!m_drr)
-            return;
+            throw std::invalid_argument("m_drr == nullptr");
 
         if (str.length() == 0 || str.length() >= DEBUG_RING_SIZE)
-            return;
+            throw std::invalid_argument("invalid string length");
 
         // The length that we were given is equivalent to strlen, which does not
         // include the '\0', so we add one to the length to account for that.
