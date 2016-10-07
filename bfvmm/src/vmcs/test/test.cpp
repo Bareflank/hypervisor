@@ -202,6 +202,25 @@ vmcs_ut::list()
     this->test_resume_failure();
     this->test_vmread_failure();
     this->test_vmwrite_failure();
+    this->test_vmcs_virtual_processor_identifier();
+    this->test_vmcs_posted_interrupt_notification_vector();
+    this->test_vmcs_eptp_index();
+    this->test_vmcs_guest_es_selector();
+    this->test_vmcs_guest_cs_selector();
+    this->test_vmcs_guest_ss_selector();
+    this->test_vmcs_guest_ds_selector();
+    this->test_vmcs_guest_fs_selector();
+    this->test_vmcs_guest_gs_selector();
+    this->test_vmcs_guest_ldtr_selector();
+    this->test_vmcs_guest_tr_selector();
+    this->test_vmcs_guest_interrupt_status();
+    this->test_vmcs_host_es_selector();
+    this->test_vmcs_host_cs_selector();
+    this->test_vmcs_host_ss_selector();
+    this->test_vmcs_host_ds_selector();
+    this->test_vmcs_host_fs_selector();
+    this->test_vmcs_host_gs_selector();
+    this->test_vmcs_host_tr_selector();
 
     this->test_check_control_pin_based_ctls_reserved_properly_set();
     this->test_check_control_proc_based_ctls_reserved_properly_set();

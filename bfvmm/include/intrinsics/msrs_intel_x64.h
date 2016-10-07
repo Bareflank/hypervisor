@@ -22,8 +22,6 @@
 #ifndef MSRS_INTEL_X64_h
 #define MSRS_INTEL_X64_h
 
-#include <gsl/gsl>
-
 extern "C" uint64_t __read_msr(uint32_t msr) noexcept;
 
 // *INDENT-OFF*
@@ -51,7 +49,7 @@ namespace msrs
             constexpr const auto name = "lock_bit";
 
             inline auto get() noexcept
-            { return gsl::narrow_cast<uint32_t>((__read_msr(addr) & mask) >> from); }
+            { return (__read_msr(addr) & mask) >> from; }
         }
 
         namespace enable_vmx_inside_smx
@@ -61,7 +59,7 @@ namespace msrs
             constexpr const auto name = "enable_vmx_inside_smx";
 
             inline auto get() noexcept
-            { return gsl::narrow_cast<uint32_t>((__read_msr(addr) & mask) >> from); }
+            { return (__read_msr(addr) & mask) >> from; }
         }
 
         namespace enable_vmx_outside_smx
@@ -71,7 +69,7 @@ namespace msrs
             constexpr const auto name = "enable_vmx_outside_smx";
 
             inline auto get() noexcept
-            { return gsl::narrow_cast<uint32_t>((__read_msr(addr) & mask) >> from); }
+            { return (__read_msr(addr) & mask) >> from; }
         }
     }
 
@@ -90,7 +88,7 @@ namespace msrs
             constexpr const auto name = "revision_id";
 
             inline auto get() noexcept
-            { return gsl::narrow_cast<uint32_t>((__read_msr(addr) & mask) >> from); }
+            { return (__read_msr(addr) & mask) >> from; }
         }
 
         namespace vmxon_vmcs_region_size
@@ -100,7 +98,7 @@ namespace msrs
             constexpr const auto name = "vmxon_vmcs_region_size";
 
             inline auto get() noexcept
-            { return gsl::narrow_cast<uint32_t>((__read_msr(addr) & mask) >> from); }
+            { return (__read_msr(addr) & mask) >> from; }
         }
 
         namespace physical_address_width
@@ -110,7 +108,7 @@ namespace msrs
             constexpr const auto name = "physical_address_width";
 
             inline auto get() noexcept
-            { return gsl::narrow_cast<uint32_t>((__read_msr(addr) & mask) >> from); }
+            { return (__read_msr(addr) & mask) >> from; }
         }
 
         namespace dual_monitor_mode_support
@@ -120,7 +118,7 @@ namespace msrs
             constexpr const auto name = "dual_monitor_mode_support";
 
             inline auto get() noexcept
-            { return gsl::narrow_cast<uint32_t>((__read_msr(addr) & mask) >> from); }
+            { return (__read_msr(addr) & mask) >> from; }
         }
 
         namespace memory_type
@@ -130,7 +128,7 @@ namespace msrs
             constexpr const auto name = "memory_type";
 
             inline auto get() noexcept
-            { return gsl::narrow_cast<uint32_t>((__read_msr(addr) & mask) >> from); }
+            { return (__read_msr(addr) & mask) >> from; }
         }
 
         namespace ins_outs_exit_information
@@ -140,7 +138,7 @@ namespace msrs
             constexpr const auto name = "ins_outs_exit_information";
 
             inline auto get() noexcept
-            { return gsl::narrow_cast<uint32_t>((__read_msr(addr) & mask) >> from); }
+            { return (__read_msr(addr) & mask) >> from; }
         }
 
         namespace true_based_controls
@@ -150,7 +148,7 @@ namespace msrs
             constexpr const auto name = "true_based_controls";
 
             inline auto get() noexcept
-            { return gsl::narrow_cast<uint32_t>((__read_msr(addr) & mask) >> from); }
+            { return (__read_msr(addr) & mask) >> from; }
         }
     }
 
@@ -169,7 +167,7 @@ namespace msrs
             constexpr const auto name = "preemption_timer_decrement";
 
             inline auto get() noexcept
-            { return gsl::narrow_cast<uint32_t>((__read_msr(addr) & mask) >> from); }
+            { return (__read_msr(addr) & mask) >> from; }
         }
 
         namespace store_efer_lma_on_vm_exit
@@ -179,7 +177,7 @@ namespace msrs
             constexpr const auto name = "store_efer_lma_on_vm_exit";
 
             inline auto get() noexcept
-            { return gsl::narrow_cast<uint32_t>((__read_msr(addr) & mask) >> from); }
+            { return (__read_msr(addr) & mask) >> from; }
         }
 
         namespace activity_state_hlt_support
@@ -189,7 +187,7 @@ namespace msrs
             constexpr const auto name = "activity_state_hlt_support";
 
             inline auto get() noexcept
-            { return gsl::narrow_cast<uint32_t>((__read_msr(addr) & mask) >> from); }
+            { return (__read_msr(addr) & mask) >> from; }
         }
 
         namespace activity_state_shutdown_support
@@ -199,7 +197,7 @@ namespace msrs
             constexpr const auto name = "activity_state_shutdown_support";
 
             inline auto get() noexcept
-            { return gsl::narrow_cast<uint32_t>((__read_msr(addr) & mask) >> from); }
+            { return (__read_msr(addr) & mask) >> from; }
         }
 
         namespace activity_state_wait_for_sipi_support
@@ -209,7 +207,7 @@ namespace msrs
             constexpr const auto name = "activity_state_wait_for_sipi_support";
 
             inline auto get() noexcept
-            { return gsl::narrow_cast<uint32_t>((__read_msr(addr) & mask) >> from); }
+            { return (__read_msr(addr) & mask) >> from; }
         }
 
         namespace processor_trace_support
@@ -219,7 +217,7 @@ namespace msrs
             constexpr const auto name = "processor_trace_support";
 
             inline auto get() noexcept
-            { return gsl::narrow_cast<uint32_t>((__read_msr(addr) & mask) >> from); }
+            { return (__read_msr(addr) & mask) >> from; }
         }
 
         namespace rdmsr_in_smm_support
@@ -229,7 +227,7 @@ namespace msrs
             constexpr const auto name = "rdmsr_in_smm_support";
 
             inline auto get() noexcept
-            { return gsl::narrow_cast<uint32_t>((__read_msr(addr) & mask) >> from); }
+            { return (__read_msr(addr) & mask) >> from; }
         }
 
         namespace cr3_targets
@@ -239,7 +237,7 @@ namespace msrs
             constexpr const auto name = "cr3_targets";
 
             inline auto get() noexcept
-            { return gsl::narrow_cast<uint32_t>((__read_msr(addr) & mask) >> from); }
+            { return (__read_msr(addr) & mask) >> from; }
         }
 
         namespace max_num_msr_load_store_on_exit
@@ -249,7 +247,7 @@ namespace msrs
             constexpr const auto name = "max_num_msr_load_store_on_exit";
 
             inline auto get() noexcept
-            { return gsl::narrow_cast<uint32_t>((__read_msr(addr) & mask) >> from); }
+            { return (__read_msr(addr) & mask) >> from; }
         }
 
         namespace vmxoff_blocked_smi_support
@@ -259,7 +257,7 @@ namespace msrs
             constexpr const auto name = "vmxoff_blocked_smi_support";
 
             inline auto get() noexcept
-            { return gsl::narrow_cast<uint32_t>((__read_msr(addr) & mask) >> from); }
+            { return (__read_msr(addr) & mask) >> from; }
         }
 
         namespace vmwrite_all_fields_support
@@ -269,7 +267,7 @@ namespace msrs
             constexpr const auto name = "vmwrite_all_fields_support";
 
             inline auto get() noexcept
-            { return gsl::narrow_cast<uint32_t>((__read_msr(addr) & mask) >> from); }
+            { return (__read_msr(addr) & mask) >> from; }
         }
 
         namespace injection_with_instruction_length_of_zero
@@ -279,7 +277,7 @@ namespace msrs
             constexpr const auto name = "injection_with_instruction_length_of_zero";
 
             inline auto get() noexcept
-            { return gsl::narrow_cast<uint32_t>((__read_msr(addr) & mask) >> from); }
+            { return (__read_msr(addr) & mask) >> from; }
         }
     }
 
@@ -326,6 +324,196 @@ namespace msrs
 
         inline auto get() noexcept
         { return __read_msr(addr); }
+
+        namespace virtualize_apic_accesses
+        {
+            constexpr const auto mask = 0x0000000000000001UL;
+            constexpr const auto from = 0;
+            constexpr const auto name = "virtualize_apic_accesses";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+        }
+
+        namespace enable_ept
+        {
+            constexpr const auto mask = 0x0000000000000002UL;
+            constexpr const auto from = 1;
+            constexpr const auto name = "enable_ept";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+        }
+
+        namespace descriptor_table_exiting
+        {
+            constexpr const auto mask = 0x0000000000000004UL;
+            constexpr const auto from = 2;
+            constexpr const auto name = "descriptor_table_exiting";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+        }
+
+        namespace enable_rdtscp
+        {
+            constexpr const auto mask = 0x0000000000000008UL;
+            constexpr const auto from = 3;
+            constexpr const auto name = "enable_rdtscp";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+        }
+
+        namespace virtualize_x2apic_mode
+        {
+            constexpr const auto mask = 0x0000000000000010UL;
+            constexpr const auto from = 4;
+            constexpr const auto name = "virtualize_x2apic_mode";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+        }
+
+        namespace enable_vpid
+        {
+            constexpr const auto mask = 0x0000000000000020UL;
+            constexpr const auto from = 5;
+            constexpr const auto name = "enable_vpid";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+        }
+
+        namespace wbinvd_exiting
+        {
+            constexpr const auto mask = 0x0000000000000040UL;
+            constexpr const auto from = 6;
+            constexpr const auto name = "wbinvd_exiting";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+        }
+
+        namespace unrestricted_guest
+        {
+            constexpr const auto mask = 0x0000000000000080UL;
+            constexpr const auto from = 7;
+            constexpr const auto name = "unrestricted_guest";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+        }
+
+        namespace apic_register_virtualization
+        {
+            constexpr const auto mask = 0x0000000000000100UL;
+            constexpr const auto from = 8;
+            constexpr const auto name = "apic_register_virtualization";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+        }
+
+        namespace virtual_interrupt_delivery
+        {
+            constexpr const auto mask = 0x0000000000000200UL;
+            constexpr const auto from = 9;
+            constexpr const auto name = "virtual_interrupt_delivery";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+        }
+
+        namespace pause_loop_exiting
+        {
+            constexpr const auto mask = 0x0000000000000400UL;
+            constexpr const auto from = 10;
+            constexpr const auto name = "pause_loop_exiting";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+        }
+
+        namespace rdrand_exiting
+        {
+            constexpr const auto mask = 0x0000000000000800UL;
+            constexpr const auto from = 11;
+            constexpr const auto name = "rdrand_exiting";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+        }
+
+        namespace enable_invpcid
+        {
+            constexpr const auto mask = 0x0000000000001000UL;
+            constexpr const auto from = 12;
+            constexpr const auto name = "enable_invpcid";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+        }
+
+        namespace enable_vm_functions
+        {
+            constexpr const auto mask = 0x0000000000002000UL;
+            constexpr const auto from = 13;
+            constexpr const auto name = "enable_vm_functions";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+        }
+
+        namespace vmcs_shadowing
+        {
+            constexpr const auto mask = 0x0000000000004000UL;
+            constexpr const auto from = 14;
+            constexpr const auto name = "vmcs_shadowing";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+        }
+
+        namespace rdseed_exiting
+        {
+            constexpr const auto mask = 0x0000000000010000UL;
+            constexpr const auto from = 16;
+            constexpr const auto name = "rdseed_exiting";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+        }
+
+        namespace enable_pml
+        {
+            constexpr const auto mask = 0x0000000000020000UL;
+            constexpr const auto from = 17;
+            constexpr const auto name = "enable_pml";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+        }
+
+        namespace ept_violation_ve
+        {
+            constexpr const auto mask = 0x0000000000040000UL;
+            constexpr const auto from = 18;
+            constexpr const auto name = "ept_violation_ve";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+        }
+
+        namespace enable_xsaves_xrstors
+        {
+            constexpr const auto mask = 0x0000000000100000UL;
+            constexpr const auto from = 20;
+            constexpr const auto name = "enable_xsaves_xrstors";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+        }
     }
 
     namespace ia32_vmx_ept_vpid_cap
@@ -343,7 +531,7 @@ namespace msrs
             constexpr const auto name = "execute_only_translation";
 
             inline auto get() noexcept
-            { return gsl::narrow_cast<uint32_t>((__read_msr(addr) & mask) >> from); }
+            { return (__read_msr(addr) & mask) >> from; }
         }
 
         namespace page_walk_length_of_4
@@ -353,7 +541,7 @@ namespace msrs
             constexpr const auto name = "page_walk_length_of_4";
 
             inline auto get() noexcept
-            { return gsl::narrow_cast<uint32_t>((__read_msr(addr) & mask) >> from); }
+            { return (__read_msr(addr) & mask) >> from; }
         }
 
         namespace memory_type_uncacheable_supported
@@ -363,7 +551,7 @@ namespace msrs
             constexpr const auto name = "memory_type_uncacheable_supported";
 
             inline auto get() noexcept
-            { return gsl::narrow_cast<uint32_t>((__read_msr(addr) & mask) >> from); }
+            { return (__read_msr(addr) & mask) >> from; }
         }
 
         namespace memory_type_write_back_supported
@@ -373,7 +561,7 @@ namespace msrs
             constexpr const auto name = "memory_type_write_back_supported";
 
             inline auto get() noexcept
-            { return gsl::narrow_cast<uint32_t>((__read_msr(addr) & mask) >> from); }
+            { return (__read_msr(addr) & mask) >> from; }
         }
 
         namespace pde_2mb_support
@@ -383,7 +571,7 @@ namespace msrs
             constexpr const auto name = "pde_2mb_support";
 
             inline auto get() noexcept
-            { return gsl::narrow_cast<uint32_t>((__read_msr(addr) & mask) >> from); }
+            { return (__read_msr(addr) & mask) >> from; }
         }
 
         namespace pdpte_1mb_support
@@ -393,7 +581,7 @@ namespace msrs
             constexpr const auto name = "pdpte_1mb_support";
 
             inline auto get() noexcept
-            { return gsl::narrow_cast<uint32_t>((__read_msr(addr) & mask) >> from); }
+            { return (__read_msr(addr) & mask) >> from; }
         }
 
         namespace invept_support
@@ -403,7 +591,7 @@ namespace msrs
             constexpr const auto name = "invept_support";
 
             inline auto get() noexcept
-            { return gsl::narrow_cast<uint32_t>((__read_msr(addr) & mask) >> from); }
+            { return (__read_msr(addr) & mask) >> from; }
         }
 
         namespace accessed_dirty_support
@@ -413,7 +601,7 @@ namespace msrs
             constexpr const auto name = "accessed_dirty_support";
 
             inline auto get() noexcept
-            { return gsl::narrow_cast<uint32_t>((__read_msr(addr) & mask) >> from); }
+            { return (__read_msr(addr) & mask) >> from; }
         }
 
         namespace invept_single_context_support
@@ -423,7 +611,7 @@ namespace msrs
             constexpr const auto name = "invept_single_context_support";
 
             inline auto get() noexcept
-            { return gsl::narrow_cast<uint32_t>((__read_msr(addr) & mask) >> from); }
+            { return (__read_msr(addr) & mask) >> from; }
         }
 
         namespace invept_all_context_support
@@ -433,7 +621,7 @@ namespace msrs
             constexpr const auto name = "invept_all_context_support";
 
             inline auto get() noexcept
-            { return gsl::narrow_cast<uint32_t>((__read_msr(addr) & mask) >> from); }
+            { return (__read_msr(addr) & mask) >> from; }
         }
 
         namespace invvpid_support
@@ -443,7 +631,7 @@ namespace msrs
             constexpr const auto name = "invvpid_support";
 
             inline auto get() noexcept
-            { return gsl::narrow_cast<uint32_t>((__read_msr(addr) & mask) >> from); }
+            { return (__read_msr(addr) & mask) >> from; }
         }
 
         namespace invvpid_individual_address_support
@@ -453,7 +641,7 @@ namespace msrs
             constexpr const auto name = "invvpid_individual_address_support";
 
             inline auto get() noexcept
-            { return gsl::narrow_cast<uint32_t>((__read_msr(addr) & mask) >> from); }
+            { return (__read_msr(addr) & mask) >> from; }
         }
 
         namespace invvpid_single_context_support
@@ -463,7 +651,7 @@ namespace msrs
             constexpr const auto name = "invvpid_single_context_support";
 
             inline auto get() noexcept
-            { return gsl::narrow_cast<uint32_t>((__read_msr(addr) & mask) >> from); }
+            { return (__read_msr(addr) & mask) >> from; }
         }
 
         namespace invvpid_all_context_support
@@ -473,7 +661,7 @@ namespace msrs
             constexpr const auto name = "invvpid_all_context_support";
 
             inline auto get() noexcept
-            { return gsl::narrow_cast<uint32_t>((__read_msr(addr) & mask) >> from); }
+            { return (__read_msr(addr) & mask) >> from; }
         }
 
         namespace invvpid_single_context_retaining_globals_support
@@ -483,7 +671,7 @@ namespace msrs
             constexpr const auto name = "invvpid_single_context_retaining_globals_support";
 
             inline auto get() noexcept
-            { return gsl::narrow_cast<uint32_t>((__read_msr(addr) & mask) >> from); }
+            { return (__read_msr(addr) & mask) >> from; }
         }
     }
 
@@ -494,6 +682,56 @@ namespace msrs
 
         inline auto get() noexcept
         { return __read_msr(addr); }
+
+        namespace external_interrupt_exiting
+        {
+            constexpr const auto mask = 0x0000000000000001UL;
+            constexpr const auto from = 0;
+            constexpr const auto name = "external_interrupt_exiting";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+        }
+
+        namespace nmi_exiting
+        {
+            constexpr const auto mask = 0x0000000000000008UL;
+            constexpr const auto from = 3;
+            constexpr const auto name = "nmi_exiting";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+        }
+
+        namespace virtual_nmis
+        {
+            constexpr const auto mask = 0x0000000000000020UL;
+            constexpr const auto from = 5;
+            constexpr const auto name = "virtual_nmis";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+        }
+
+        namespace activate_vmx_preemption_timer
+        {
+            constexpr const auto mask = 0x0000000000000040UL;
+            constexpr const auto from = 6;
+            constexpr const auto name = "activate_vmx_preemption_timer";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+        }
+
+        namespace process_posted_interrupts
+        {
+            constexpr const auto mask = 0x0000000000000080UL;
+            constexpr const auto from = 7;
+            constexpr const auto name = "process_posted_interrupts";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+        }
     }
 
     namespace ia32_vmx_true_procbased_ctls
@@ -503,6 +741,216 @@ namespace msrs
 
         inline auto get() noexcept
         { return __read_msr(addr); }
+
+        namespace interrupt_window_exiting
+        {
+            constexpr const auto mask = 0x0000000000000004UL;
+            constexpr const auto from = 2;
+            constexpr const auto name = "interrupt_window_exiting";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+        }
+
+        namespace use_tsc_offsetting
+        {
+            constexpr const auto mask = 0x0000000000000008UL;
+            constexpr const auto from = 2;
+            constexpr const auto name = "use_tsc_offsetting";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+        }
+
+        namespace hlt_exiting
+        {
+            constexpr const auto mask = 0x0000000000000080UL;
+            constexpr const auto from = 7;
+            constexpr const auto name = "hlt_exiting";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+        }
+
+        namespace invlpg_exiting
+        {
+            constexpr const auto mask = 0x0000000000000200UL;
+            constexpr const auto from = 9;
+            constexpr const auto name = "invlpg_exiting";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+        }
+
+        namespace mwait_exiting
+        {
+            constexpr const auto mask = 0x0000000000000400UL;
+            constexpr const auto from = 10;
+            constexpr const auto name = "mwait_exiting";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+        }
+
+        namespace rdpmc_exiting
+        {
+            constexpr const auto mask = 0x0000000000000800UL;
+            constexpr const auto from = 11;
+            constexpr const auto name = "rdpmc_exiting";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+        }
+
+        namespace rdtsc_exiting
+        {
+            constexpr const auto mask = 0x0000000000001000UL;
+            constexpr const auto from = 12;
+            constexpr const auto name = "rdtsc_exiting";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+        }
+
+        namespace cr3_load_exiting
+        {
+            constexpr const auto mask = 0x0000000000008000UL;
+            constexpr const auto from = 15;
+            constexpr const auto name = "cr3_load_exiting";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+        }
+
+        namespace cr3_store_exiting
+        {
+            constexpr const auto mask = 0x0000000000010000UL;
+            constexpr const auto from = 16;
+            constexpr const auto name = "cr3_store_exiting";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+        }
+
+        namespace cr8_load_exiting
+        {
+            constexpr const auto mask = 0x0000000000080000UL;
+            constexpr const auto from = 19;
+            constexpr const auto name = "cr8_load_exiting";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+        }
+
+        namespace cr8_store_exiting
+        {
+            constexpr const auto mask = 0x0000000000100000UL;
+            constexpr const auto from = 20;
+            constexpr const auto name = "cr8_store_exiting";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+        }
+
+        namespace use_tpr_shadow
+        {
+            constexpr const auto mask = 0x0000000000200000UL;
+            constexpr const auto from = 21;
+            constexpr const auto name = "use_tpr_shadow";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+        }
+
+        namespace nmi_window_exiting
+        {
+            constexpr const auto mask = 0x0000000000400000UL;
+            constexpr const auto from = 22;
+            constexpr const auto name = "nmi_window_exiting";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+        }
+
+        namespace mov_dr_exiting
+        {
+            constexpr const auto mask = 0x0000000000800000UL;
+            constexpr const auto from = 23;
+            constexpr const auto name = "mov_dr_exiting";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+        }
+
+        namespace unconditional_io_exiting
+        {
+            constexpr const auto mask = 0x0000000001000000UL;
+            constexpr const auto from = 24;
+            constexpr const auto name = "unconditional_io_exiting";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+        }
+
+        namespace use_io_bitmaps
+        {
+            constexpr const auto mask = 0x0000000002000000UL;
+            constexpr const auto from = 25;
+            constexpr const auto name = "use_io_bitmaps";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+        }
+
+        namespace monitor_trap_flag
+        {
+            constexpr const auto mask = 0x0000000008000000UL;
+            constexpr const auto from = 27;
+            constexpr const auto name = "monitor_trap_flag";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+        }
+
+        namespace use_msr_bitmaps
+        {
+            constexpr const auto mask = 0x0000000010000000UL;
+            constexpr const auto from = 28;
+            constexpr const auto name = "use_msr_bitmaps";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+        }
+
+        namespace monitor_exiting
+        {
+            constexpr const auto mask = 0x0000000020000000UL;
+            constexpr const auto from = 29;
+            constexpr const auto name = "monitor_exiting";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+        }
+
+        namespace pause_exiting
+        {
+            constexpr const auto mask = 0x0000000040000000UL;
+            constexpr const auto from = 30;
+            constexpr const auto name = "pause_exiting";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+        }
+
+        namespace activate_secondary_controls
+        {
+            constexpr const auto mask = 0x0000000080000000UL;
+            constexpr const auto from = 31;
+            constexpr const auto name = "activate_secondary_controls";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+        }
     }
 
     namespace ia32_vmx_true_exit_ctls
@@ -512,6 +960,96 @@ namespace msrs
 
         inline auto get() noexcept
         { return __read_msr(addr); }
+
+        namespace save_debug_controls
+        {
+            constexpr const auto mask = 0x0000000000000004UL;
+            constexpr const auto from = 2;
+            constexpr const auto name = "save_debug_controls";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+        }
+
+        namespace host_address_space_size
+        {
+            constexpr const auto mask = 0x0000000000000200UL;
+            constexpr const auto from = 9;
+            constexpr const auto name = "host_address_space_size";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+        }
+
+        namespace load_ia32_perf_global_ctrl
+        {
+            constexpr const auto mask = 0x0000000000001000UL;
+            constexpr const auto from = 12;
+            constexpr const auto name = "load_ia32_perf_global_ctrl";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+        }
+
+        namespace acknowledge_interrupt_on_exit
+        {
+            constexpr const auto mask = 0x0000000000008000UL;
+            constexpr const auto from = 15;
+            constexpr const auto name = "acknowledge_interrupt_on_exit";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+        }
+
+        namespace save_ia32_pat
+        {
+            constexpr const auto mask = 0x0000000000040000UL;
+            constexpr const auto from = 18;
+            constexpr const auto name = "save_ia32_pat";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+        }
+
+        namespace load_ia32_pat
+        {
+            constexpr const auto mask = 0x0000000000080000UL;
+            constexpr const auto from = 19;
+            constexpr const auto name = "load_ia32_pat";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+        }
+
+        namespace save_ia32_efer
+        {
+            constexpr const auto mask = 0x0000000000100000UL;
+            constexpr const auto from = 20;
+            constexpr const auto name = "save_ia32_efer";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+        }
+
+        namespace load_ia32_efer
+        {
+            constexpr const auto mask = 0x0000000000200000UL;
+            constexpr const auto from = 21;
+            constexpr const auto name = "load_ia32_efer";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+        }
+
+        namespace save_vmx_preemption_timer_value
+        {
+            constexpr const auto mask = 0x0000000000400000UL;
+            constexpr const auto from = 22;
+            constexpr const auto name = "save_vmx_preemption_timer_value";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+        }
     }
 
     namespace ia32_vmx_true_entry_ctls
@@ -521,6 +1059,76 @@ namespace msrs
 
         inline auto get() noexcept
         { return __read_msr(addr); }
+
+        namespace load_debug_controls
+        {
+            constexpr const auto mask = 0x0000000000000004UL;
+            constexpr const auto from = 2;
+            constexpr const auto name = "load_debug_controls";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+        }
+
+        namespace ia_32e_mode_guest
+        {
+            constexpr const auto mask = 0x0000000000000200UL;
+            constexpr const auto from = 9;
+            constexpr const auto name = "ia_32e_mode_guest";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+        }
+
+        namespace entry_to_smm
+        {
+            constexpr const auto mask = 0x0000000000000400UL;
+            constexpr const auto from = 10;
+            constexpr const auto name = "entry_to_smm";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+        }
+
+        namespace deactivate_dual_monitor_treatment
+        {
+            constexpr const auto mask = 0x0000000000000800UL;
+            constexpr const auto from = 11;
+            constexpr const auto name = "deactivate_dual_monitor_treatment";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+        }
+
+        namespace load_ia32_perf_global_ctrl
+        {
+            constexpr const auto mask = 0x0000000000002000UL;
+            constexpr const auto from = 13;
+            constexpr const auto name = "load_ia32_perf_global_ctrl";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+        }
+
+        namespace load_ia32_pat
+        {
+            constexpr const auto mask = 0x0000000000004000UL;
+            constexpr const auto from = 14;
+            constexpr const auto name = "load_ia32_pat";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+        }
+
+        namespace load_ia32_efer
+        {
+            constexpr const auto mask = 0x0000000000008000UL;
+            constexpr const auto from = 15;
+            constexpr const auto name = "load_ia32_efer";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+        }
     }
 
     namespace ia32_vmx_vmfunc

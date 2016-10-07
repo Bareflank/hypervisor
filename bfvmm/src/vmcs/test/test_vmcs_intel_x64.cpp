@@ -565,8 +565,13 @@ vmcs_ut::test_vmread_failure()
     auto ___ = gsl::finally([&]
     { g_vmread_fails = false; });
 
+    auto e = std::make_shared<std::runtime_error>("");
+    this->expect_exception([&] { vmcs::virtual_processor_identifier::get(); }, e);
+
+    // REMOVEME
     mocks.OnCall(in.get(), intrinsics_intel_x64::vmread).Return(false);
 
+    // REMOVEME
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
         vmcs_intel_x64 vmcs(in);
@@ -587,8 +592,13 @@ vmcs_ut::test_vmwrite_failure()
     auto ___ = gsl::finally([&]
     { g_vmwrite_fails = false; });
 
+    auto e = std::make_shared<std::runtime_error>("");
+    this->expect_exception([&] { vmcs::virtual_processor_identifier::set(100UL); }, e);
+
+    // REMOVEME
     mocks.OnCall(in.get(), intrinsics_intel_x64::vmwrite).Return(false);
 
+    // REMOVEME
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
         vmcs_intel_x64 vmcs(in);
@@ -597,4 +607,195 @@ vmcs_ut::test_vmwrite_failure()
 
         EXPECT_EXCEPTION(vmcs.vmwrite(field, value), std::runtime_error);
     });
+}
+
+void
+vmcs_ut::test_vmcs_virtual_processor_identifier()
+{
+    vmcs::virtual_processor_identifier::set(100UL);
+    g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = msrs::ia32_vmx_procbased_ctls2::enable_vpid::mask;
+
+    this->expect_true(vmcs::virtual_processor_identifier::get() == 100UL);
+    this->expect_true(vmcs::virtual_processor_identifier::is_supported());
+
+    g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = 0x0;
+
+    this->expect_false(vmcs::virtual_processor_identifier::is_supported());
+}
+
+void
+vmcs_ut::test_vmcs_posted_interrupt_notification_vector()
+{
+    vmcs::posted_interrupt_notification_vector::set(100UL);
+    g_msrs[msrs::ia32_vmx_true_pinbased_ctls::addr] = msrs::ia32_vmx_true_pinbased_ctls::process_posted_interrupts::mask;
+
+    this->expect_true(vmcs::posted_interrupt_notification_vector::get() == 100UL);
+    this->expect_true(vmcs::posted_interrupt_notification_vector::is_supported());
+
+    g_msrs[msrs::ia32_vmx_true_pinbased_ctls::addr] = 0x0;
+
+    this->expect_false(vmcs::posted_interrupt_notification_vector::is_supported());
+}
+
+void
+vmcs_ut::test_vmcs_eptp_index()
+{
+    vmcs::eptp_index::set(100UL);
+    g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = msrs::ia32_vmx_procbased_ctls2::ept_violation_ve::mask;
+
+    this->expect_true(vmcs::eptp_index::get() == 100UL);
+    this->expect_true(vmcs::eptp_index::is_supported());
+
+    g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = 0x0;
+
+    this->expect_false(vmcs::eptp_index::is_supported());
+}
+
+void
+vmcs_ut::test_vmcs_guest_es_selector()
+{
+    vmcs::guest_es_selector::set(100UL);
+
+    this->expect_true(vmcs::guest_es_selector::get() == 100UL);
+    this->expect_true(vmcs::guest_es_selector::is_supported());
+}
+
+void
+vmcs_ut::test_vmcs_guest_cs_selector()
+{
+    vmcs::guest_cs_selector::set(100UL);
+
+    this->expect_true(vmcs::guest_cs_selector::get() == 100UL);
+    this->expect_true(vmcs::guest_cs_selector::is_supported());
+}
+
+void
+vmcs_ut::test_vmcs_guest_ss_selector()
+{
+    vmcs::guest_ss_selector::set(100UL);
+
+    this->expect_true(vmcs::guest_ss_selector::get() == 100UL);
+    this->expect_true(vmcs::guest_ss_selector::is_supported());
+}
+
+void
+vmcs_ut::test_vmcs_guest_ds_selector()
+{
+    vmcs::guest_ds_selector::set(100UL);
+
+    this->expect_true(vmcs::guest_ds_selector::get() == 100UL);
+    this->expect_true(vmcs::guest_ds_selector::is_supported());
+}
+
+void
+vmcs_ut::test_vmcs_guest_fs_selector()
+{
+    vmcs::guest_fs_selector::set(100UL);
+
+    this->expect_true(vmcs::guest_fs_selector::get() == 100UL);
+    this->expect_true(vmcs::guest_fs_selector::is_supported());
+}
+
+void
+vmcs_ut::test_vmcs_guest_gs_selector()
+{
+    vmcs::guest_gs_selector::set(100UL);
+
+    this->expect_true(vmcs::guest_gs_selector::get() == 100UL);
+    this->expect_true(vmcs::guest_gs_selector::is_supported());
+}
+
+void
+vmcs_ut::test_vmcs_guest_ldtr_selector()
+{
+    vmcs::guest_ldtr_selector::set(100UL);
+
+    this->expect_true(vmcs::guest_ldtr_selector::get() == 100UL);
+    this->expect_true(vmcs::guest_ldtr_selector::is_supported());
+}
+
+void
+vmcs_ut::test_vmcs_guest_tr_selector()
+{
+    vmcs::guest_tr_selector::set(100UL);
+
+    this->expect_true(vmcs::guest_tr_selector::get() == 100UL);
+    this->expect_true(vmcs::guest_tr_selector::is_supported());
+}
+
+void
+vmcs_ut::test_vmcs_guest_interrupt_status()
+{
+    vmcs::guest_interrupt_status::set(100UL);
+    g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = msrs::ia32_vmx_procbased_ctls2::virtual_interrupt_delivery::mask;
+
+    this->expect_true(vmcs::guest_interrupt_status::get() == 100UL);
+    this->expect_true(vmcs::guest_interrupt_status::is_supported());
+
+    g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = 0x0;
+
+    this->expect_false(vmcs::guest_interrupt_status::is_supported());
+}
+
+void
+vmcs_ut::test_vmcs_host_es_selector()
+{
+    vmcs::host_es_selector::set(100UL);
+
+    this->expect_true(vmcs::host_es_selector::get() == 100UL);
+    this->expect_true(vmcs::host_es_selector::is_supported());
+}
+
+void
+vmcs_ut::test_vmcs_host_cs_selector()
+{
+    vmcs::host_cs_selector::set(100UL);
+
+    this->expect_true(vmcs::host_cs_selector::get() == 100UL);
+    this->expect_true(vmcs::host_cs_selector::is_supported());
+}
+
+void
+vmcs_ut::test_vmcs_host_ss_selector()
+{
+    vmcs::host_ss_selector::set(100UL);
+
+    this->expect_true(vmcs::host_ss_selector::get() == 100UL);
+    this->expect_true(vmcs::host_ss_selector::is_supported());
+}
+
+void
+vmcs_ut::test_vmcs_host_ds_selector()
+{
+    vmcs::host_ds_selector::set(100UL);
+
+    this->expect_true(vmcs::host_ds_selector::get() == 100UL);
+    this->expect_true(vmcs::host_ds_selector::is_supported());
+}
+
+void
+vmcs_ut::test_vmcs_host_fs_selector()
+{
+    vmcs::host_fs_selector::set(100UL);
+
+    this->expect_true(vmcs::host_fs_selector::get() == 100UL);
+    this->expect_true(vmcs::host_fs_selector::is_supported());
+}
+
+void
+vmcs_ut::test_vmcs_host_gs_selector()
+{
+    vmcs::host_gs_selector::set(100UL);
+
+    this->expect_true(vmcs::host_gs_selector::get() == 100UL);
+    this->expect_true(vmcs::host_gs_selector::is_supported());
+}
+
+void
+vmcs_ut::test_vmcs_host_tr_selector()
+{
+    vmcs::host_tr_selector::set(100UL);
+
+    this->expect_true(vmcs::host_tr_selector::get() == 100UL);
+    this->expect_true(vmcs::host_tr_selector::is_supported());
 }

@@ -85,6 +85,8 @@
 # that right now, we only support archiectures with byte alignment.
 #
 
+%ENV_SOURCE%
+
 if [[ ! -d "bfelf_loader" ]]; then
     echo "This script must be run from bareflank root directory"
     exit 1
@@ -96,9 +98,21 @@ fi
 OUTPUT=$PWD/verify_source_results.txt
 
 #
+# Make sure we can run this script
+#
+if [[ ! -f "$BUILD_ABS/compile_commands.json" ]]; then
+    echo "ERROR: database is missing. Did you run 'STATIC_ANALYSIS_ENABLED=true bear make'?"
+    exit 1
+fi
+
+#
 # Cleanup
 #
 rm -Rf $OUTPUT
+
+if [[ ! $BUILD_ABS == $HYPER_ABS ]]; then
+    cp -Rf $BUILD_ABS/compile_commands.json $HYPER_ABS/compile_commands.json
+fi
 
 #
 # Header
@@ -210,3 +224,10 @@ run_clang_tidy "cppc*,-clang-analyzer*,-cppcoreguidelines-pro-type-reinterpret-c
 run_clang_tidy "read*,-clang-analyzer*,-readability-braces-around-statements"
 run_clang_tidy "mode*,-clang-analyzer*,-modernize-pass-by-value"
 popd > /dev/null
+
+#
+# Cleanup
+#
+if [[ ! $BUILD_ABS == $HYPER_ABS ]]; then
+    rm -Rf $HYPER_ABS/compile_commands.json
+fi

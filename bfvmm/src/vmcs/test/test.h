@@ -112,6 +112,25 @@ private:
     void test_resume_failure();
     void test_vmread_failure();
     void test_vmwrite_failure();
+    void test_vmcs_virtual_processor_identifier();
+    void test_vmcs_posted_interrupt_notification_vector();
+    void test_vmcs_eptp_index();
+    void test_vmcs_guest_es_selector();
+    void test_vmcs_guest_cs_selector();
+    void test_vmcs_guest_ss_selector();
+    void test_vmcs_guest_ds_selector();
+    void test_vmcs_guest_fs_selector();
+    void test_vmcs_guest_gs_selector();
+    void test_vmcs_guest_ldtr_selector();
+    void test_vmcs_guest_tr_selector();
+    void test_vmcs_guest_interrupt_status();
+    void test_vmcs_host_es_selector();
+    void test_vmcs_host_cs_selector();
+    void test_vmcs_host_ss_selector();
+    void test_vmcs_host_ds_selector();
+    void test_vmcs_host_fs_selector();
+    void test_vmcs_host_gs_selector();
+    void test_vmcs_host_tr_selector();
 
     void test_check_control_pin_based_ctls_reserved_properly_set();
     void test_check_control_proc_based_ctls_reserved_properly_set();
