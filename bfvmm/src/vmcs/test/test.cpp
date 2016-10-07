@@ -221,6 +221,27 @@ vmcs_ut::list()
     this->test_vmcs_host_fs_selector();
     this->test_vmcs_host_gs_selector();
     this->test_vmcs_host_tr_selector();
+    this->test_vmcs_guest_rflags();
+    this->test_vmcs_guest_rflags_carry_flag();
+    this->test_vmcs_guest_rflags_parity_flag();
+    this->test_vmcs_guest_rflags_auxiliary_carry_flag();
+    this->test_vmcs_guest_rflags_zero_flag();
+    this->test_vmcs_guest_rflags_sign_flag();
+    this->test_vmcs_guest_rflags_trap_flag();
+    this->test_vmcs_guest_rflags_interrupt_enable_flag();
+    this->test_vmcs_guest_rflags_direction_flag();
+    this->test_vmcs_guest_rflags_overflow_flag();
+    this->test_vmcs_guest_rflags_privilege_level();
+    this->test_vmcs_guest_rflags_nested_task();
+    this->test_vmcs_guest_rflags_resume_flag();
+    this->test_vmcs_guest_rflags_virtual_8086_mode();
+    this->test_vmcs_guest_rflags_alignment_check_access_control();
+    this->test_vmcs_guest_rflags_virtual_interupt_flag();
+    this->test_vmcs_guest_rflags_virtual_interupt_pending();
+    this->test_vmcs_guest_rflags_id_flag();
+    this->test_vmcs_guest_rflags_reserved();
+    this->test_vmcs_guest_rflags_always_disabled();
+    this->test_vmcs_guest_rflags_always_enabled();
 
     this->test_check_control_pin_based_ctls_reserved_properly_set();
     this->test_check_control_proc_based_ctls_reserved_properly_set();

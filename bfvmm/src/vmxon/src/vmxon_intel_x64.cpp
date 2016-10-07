@@ -129,7 +129,7 @@ vmxon_intel_x64::check_ia32_feature_control_msr()
 void
 vmxon_intel_x64::check_v8086_disabled()
 {
-    if ((m_intrinsics->read_rflags() & RFLAGS_VM_VIRTUAL_8086_MODE) != 0)
+    if (rflags::virtual_8086_mode::get() != 0)
         throw std::logic_error("v8086 mode is not supported");
 }
 

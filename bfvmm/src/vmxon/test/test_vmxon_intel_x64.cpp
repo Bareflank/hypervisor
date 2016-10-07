@@ -29,6 +29,7 @@ using namespace intel_x64;
 
 static uint64_t g_cr0 = 0;
 static uint64_t g_cr4 = 0;
+static uint64_t g_rflags = 0;
 static std::map<uint32_t, uint64_t> g_msrs;
 
 static uint64_t
@@ -51,6 +52,12 @@ extern "C" uint64_t
 __read_msr(uint32_t msr) noexcept
 {
     return g_msrs[msr];
+}
+
+extern "C" uint64_t
+__read_rflags(void) noexcept
+{
+    return g_rflags;
 }
 
 bool virt_to_phys_return_nullptr = false;
@@ -88,9 +95,6 @@ setup_intrinsics(MockRepository &mocks, memory_manager *mm, intrinsics_intel_x64
     g_msrs[msrs::ia32_vmx_basic::addr] = (1ULL << 55) | (6ULL << 50);
     g_msrs[msrs::ia32_feature_control::addr] = (0x1ULL << 0);
     mocks.OnCall(in, intrinsics_intel_x64::cpuid_ecx).With(1).Return((1 << 5));
-
-    // v8086 emulation must be disabled
-    mocks.OnCall(in, intrinsics_intel_x64::read_rflags).Return(~RFLAGS_VM_VIRTUAL_8086_MODE);
 
     // Emulate the control registers
     mocks.OnCall(in, intrinsics_intel_x64::read_cr0).Do(read_cr0);
@@ -248,7 +252,10 @@ vmxon_ut::test_start_v8086_disabled_failure()
 
     setup_intrinsics(mocks, mm, in.get());
 
-    mocks.OnCall(in.get(), intrinsics_intel_x64::read_rflags).Return(0xFFFFFFFFFFFFFFFF);
+    g_rflags = 0xFFFFFFFFFFFFFFFF;
+
+    auto ___ = gsl::finally([&]
+    { g_rflags = 0x0; });
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {

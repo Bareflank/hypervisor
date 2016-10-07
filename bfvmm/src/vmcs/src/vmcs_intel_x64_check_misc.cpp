@@ -225,7 +225,7 @@ vmcs_intel_x64::is_ldtr_usable()
 bool
 vmcs_intel_x64::is_enabled_v8086() const
 {
-    return (vmread(VMCS_GUEST_RFLAGS) & RFLAGS_VM_VIRTUAL_8086_MODE) != 0;
+    return vmcs::guest_rflags::virtual_8086_mode::get() == 1;
 }
 
 bool

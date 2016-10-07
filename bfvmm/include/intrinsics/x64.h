@@ -24,11 +24,11 @@
 
 namespace x64
 {
-namespace memory_type
-{
-constexpr const auto uncacheable = 0;
-constexpr const auto write_back = 6;
-}
+    namespace memory_type
+    {
+        constexpr const auto uncacheable = 0;
+        constexpr const auto write_back = 6;
+    }
 }
 
 #endif

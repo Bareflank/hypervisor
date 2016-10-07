@@ -19,8 +19,8 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#ifndef MSRS_INTEL_X64_h
-#define MSRS_INTEL_X64_h
+#ifndef MSRS_INTEL_X64_H
+#define MSRS_INTEL_X64_H
 
 extern "C" uint64_t __read_msr(uint32_t msr) noexcept;
 
@@ -30,10 +30,6 @@ namespace intel_x64
 {
 namespace msrs
 {
-    template<class I, class T> constexpr auto
-    read_msr(I in, T msr)
-    { return in->read_msr(msr); }
-
     namespace ia32_feature_control
     {
         constexpr const auto addr = 0x0000003AU;

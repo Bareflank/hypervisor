@@ -21,9 +21,10 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #include <gsl/gsl>
+
 #include <test.h>
-#include <vmcs/vmcs_intel_x64_promote.h>
 #include <vmcs/vmcs_intel_x64_resume.h>
+#include <vmcs/vmcs_intel_x64_promote.h>
 
 using namespace intel_x64;
 
@@ -44,65 +45,6 @@ vmcs_resume_fail(state_save_intel_x64 *state_save)
     (void) state_save;
     return;
 }
-
-static uint16_t es() { return 0x10; }
-static uint16_t cs() { return 0x10; }
-static uint16_t ss() { return 0x10; }
-static uint16_t ds() { return 0x10; }
-static uint16_t fs() { return 0x10; }
-static uint16_t gs() { return 0x10; }
-static uint16_t ldtr() { return 0x10; }
-static uint16_t tr() { return 0x10; }
-
-static uint64_t cr0() { return 0; }
-static uint64_t cr3() { return 0; }
-static uint64_t cr4() { return 0; }
-static uint64_t dr7() { return 0; }
-
-static uint64_t rflags() { return 0; }
-
-static uint64_t gdt_base() { return 0; }
-static uint64_t idt_base() { return 0; }
-
-static uint16_t gdt_limit() { return 0; }
-static uint16_t idt_limit() { return 0; }
-
-static uint32_t es_limit() { return 0; }
-static uint32_t cs_limit() { return 0; }
-static uint32_t ss_limit() { return 0; }
-static uint32_t ds_limit() { return 0; }
-static uint32_t fs_limit() { return 0; }
-static uint32_t gs_limit() { return 0; }
-static uint32_t ldtr_limit() { return 0; }
-static uint32_t tr_limit() { return 0; }
-
-static uint32_t es_access_rights() { return 0x10000; }
-static uint32_t cs_access_rights() { return 0x10000; }
-static uint32_t ss_access_rights() { return 0x10000; }
-static uint32_t ds_access_rights() { return 0x10000; }
-static uint32_t fs_access_rights() { return 0x10000; }
-static uint32_t gs_access_rights() { return 0x10000; }
-static uint32_t ldtr_access_rights() { return 0x10000; }
-static uint32_t tr_access_rights() { return 0x10000; }
-
-static uint64_t es_base() { return 0; }
-static uint64_t cs_base() { return 0; }
-static uint64_t ss_base() { return 0; }
-static uint64_t ds_base() { return 0; }
-static uint64_t fs_base() { return 0; }
-static uint64_t gs_base() { return 0; }
-static uint64_t ldtr_base() { return 0; }
-static uint64_t tr_base() { return 0; }
-
-static uint64_t ia32_debugctl_msr() { return 0; }
-static uint64_t ia32_pat_msr() { return 0; }
-static uint64_t ia32_efer_msr() { return 0; }
-static uint64_t ia32_perf_global_ctrl_msr() { return 0; }
-static uint64_t ia32_sysenter_cs_msr() { return 0; }
-static uint64_t ia32_sysenter_esp_msr() { return 0; }
-static uint64_t ia32_sysenter_eip_msr() { return 0; }
-static uint64_t ia32_fs_base_msr() { return 0; }
-static uint64_t ia32_gs_base_msr() { return 0; }
 
 static void
 setup_vmcs_host_control_registers_and_msrs()
@@ -184,7 +126,7 @@ static void
 setup_vmcs_guest_rip_and_rflags()
 {
     g_vmcs_fields[VMCS_GUEST_RIP] = 0x0000000000ff0000;
-    g_vmcs_fields[VMCS_GUEST_RFLAGS] = 0x2 | RFLAGS_IF_INTERRUPT_ENABLE_FLAG;
+    g_vmcs_fields[vmcs::guest_rflags::addr] = rflags::always_enabled::mask | rflags::interrupt_enable_flag::mask;
     g_vmcs_fields[VMCS_VM_ENTRY_INTERRUPTION_INFORMATION_FIELD] = VM_INTERRUPT_INFORMATION_VALID;
 }
 
@@ -290,67 +232,64 @@ setup_vmcs_fields()
 static void
 setup_vmcs_x64_state_intrinsics(MockRepository &mocks, vmcs_intel_x64_state *state_in)
 {
-    // Setup 16 bit state functions
-    mocks.OnCall(state_in, vmcs_intel_x64_state::es).Do(es);
-    mocks.OnCall(state_in, vmcs_intel_x64_state::cs).Do(cs);
-    mocks.OnCall(state_in, vmcs_intel_x64_state::ss).Do(ss);
-    mocks.OnCall(state_in, vmcs_intel_x64_state::ds).Do(ds);
-    mocks.OnCall(state_in, vmcs_intel_x64_state::fs).Do(fs);
-    mocks.OnCall(state_in, vmcs_intel_x64_state::gs).Do(gs);
-    mocks.OnCall(state_in, vmcs_intel_x64_state::ldtr).Do(ldtr);
-    mocks.OnCall(state_in, vmcs_intel_x64_state::tr).Do(tr);
-    mocks.OnCall(state_in, vmcs_intel_x64_state::gdt_limit).Do(gdt_limit);
-    mocks.OnCall(state_in, vmcs_intel_x64_state::idt_limit).Do(idt_limit);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::es).Return(0x10);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::cs).Return(0x10);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::ss).Return(0x10);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::ds).Return(0x10);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::fs).Return(0x10);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::gs).Return(0x10);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::ldtr).Return(0x10);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::tr).Return(0x10);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::gdt_limit).Return(0);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::idt_limit).Return(0);
 
-    // Setup 32 bit state functions
-    mocks.OnCall(state_in, vmcs_intel_x64_state::es_limit).Do(es_limit);
-    mocks.OnCall(state_in, vmcs_intel_x64_state::cs_limit).Do(cs_limit);
-    mocks.OnCall(state_in, vmcs_intel_x64_state::ss_limit).Do(ss_limit);
-    mocks.OnCall(state_in, vmcs_intel_x64_state::ds_limit).Do(ds_limit);
-    mocks.OnCall(state_in, vmcs_intel_x64_state::ds_limit).Do(ds_limit);
-    mocks.OnCall(state_in, vmcs_intel_x64_state::fs_limit).Do(fs_limit);
-    mocks.OnCall(state_in, vmcs_intel_x64_state::gs_limit).Do(gs_limit);
-    mocks.OnCall(state_in, vmcs_intel_x64_state::ldtr_limit).Do(ldtr_limit);
-    mocks.OnCall(state_in, vmcs_intel_x64_state::tr_limit).Do(tr_limit);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::es_limit).Return(0);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::cs_limit).Return(0);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::ss_limit).Return(0);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::ds_limit).Return(0);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::ds_limit).Return(0);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::fs_limit).Return(0);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::gs_limit).Return(0);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::ldtr_limit).Return(0);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::tr_limit).Return(0);
 
-    mocks.OnCall(state_in, vmcs_intel_x64_state::es_access_rights).Do(es_access_rights);
-    mocks.OnCall(state_in, vmcs_intel_x64_state::cs_access_rights).Do(cs_access_rights);
-    mocks.OnCall(state_in, vmcs_intel_x64_state::ss_access_rights).Do(ss_access_rights);
-    mocks.OnCall(state_in, vmcs_intel_x64_state::ds_access_rights).Do(ds_access_rights);
-    mocks.OnCall(state_in, vmcs_intel_x64_state::ds_access_rights).Do(ds_access_rights);
-    mocks.OnCall(state_in, vmcs_intel_x64_state::fs_access_rights).Do(fs_access_rights);
-    mocks.OnCall(state_in, vmcs_intel_x64_state::gs_access_rights).Do(gs_access_rights);
-    mocks.OnCall(state_in, vmcs_intel_x64_state::ldtr_access_rights).Do(ldtr_access_rights);
-    mocks.OnCall(state_in, vmcs_intel_x64_state::tr_access_rights).Do(tr_access_rights);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::es_access_rights).Return(0x10000);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::cs_access_rights).Return(0x10000);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::ss_access_rights).Return(0x10000);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::ds_access_rights).Return(0x10000);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::ds_access_rights).Return(0x10000);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::fs_access_rights).Return(0x10000);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::gs_access_rights).Return(0x10000);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::ldtr_access_rights).Return(0x10000);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::tr_access_rights).Return(0x10000);
 
-    // Setup 64 bit state functions
-    mocks.OnCall(state_in, vmcs_intel_x64_state::cr0).Do(cr0);
-    mocks.OnCall(state_in, vmcs_intel_x64_state::cr3).Do(cr3);
-    mocks.OnCall(state_in, vmcs_intel_x64_state::cr4).Do(cr4);
-    mocks.OnCall(state_in, vmcs_intel_x64_state::dr7).Do(dr7);
-    mocks.OnCall(state_in, vmcs_intel_x64_state::rflags).Do(rflags);
-    mocks.OnCall(state_in, vmcs_intel_x64_state::gdt_base).Do(gdt_base);
-    mocks.OnCall(state_in, vmcs_intel_x64_state::idt_base).Do(idt_base);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::cr0).Return(0);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::cr3).Return(0);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::cr4).Return(0);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::dr7).Return(0);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::rflags).Return(0);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::gdt_base).Return(0);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::idt_base).Return(0);
 
-    mocks.OnCall(state_in, vmcs_intel_x64_state::es_base).Do(es_base);
-    mocks.OnCall(state_in, vmcs_intel_x64_state::cs_base).Do(cs_base);
-    mocks.OnCall(state_in, vmcs_intel_x64_state::ss_base).Do(ss_base);
-    mocks.OnCall(state_in, vmcs_intel_x64_state::ds_base).Do(ds_base);
-    mocks.OnCall(state_in, vmcs_intel_x64_state::ds_base).Do(ds_base);
-    mocks.OnCall(state_in, vmcs_intel_x64_state::fs_base).Do(fs_base);
-    mocks.OnCall(state_in, vmcs_intel_x64_state::gs_base).Do(gs_base);
-    mocks.OnCall(state_in, vmcs_intel_x64_state::ldtr_base).Do(ldtr_base);
-    mocks.OnCall(state_in, vmcs_intel_x64_state::tr_base).Do(tr_base);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::es_base).Return(0);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::cs_base).Return(0);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::ss_base).Return(0);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::ds_base).Return(0);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::ds_base).Return(0);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::fs_base).Return(0);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::gs_base).Return(0);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::ldtr_base).Return(0);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::tr_base).Return(0);
 
-    mocks.OnCall(state_in, vmcs_intel_x64_state::ia32_debugctl_msr).Do(ia32_debugctl_msr);
-    mocks.OnCall(state_in, vmcs_intel_x64_state::ia32_pat_msr).Do(ia32_pat_msr);
-    mocks.OnCall(state_in, vmcs_intel_x64_state::ia32_efer_msr).Do(ia32_efer_msr);
-    mocks.OnCall(state_in, vmcs_intel_x64_state::ia32_perf_global_ctrl_msr).Do(ia32_perf_global_ctrl_msr);
-    mocks.OnCall(state_in, vmcs_intel_x64_state::ia32_sysenter_cs_msr).Do(ia32_sysenter_cs_msr);
-    mocks.OnCall(state_in, vmcs_intel_x64_state::ia32_sysenter_esp_msr).Do(ia32_sysenter_esp_msr);
-    mocks.OnCall(state_in, vmcs_intel_x64_state::ia32_sysenter_eip_msr).Do(ia32_sysenter_eip_msr);
-    mocks.OnCall(state_in, vmcs_intel_x64_state::ia32_fs_base_msr).Do(ia32_fs_base_msr);
-    mocks.OnCall(state_in, vmcs_intel_x64_state::ia32_gs_base_msr).Do(ia32_gs_base_msr);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::ia32_debugctl_msr).Return(0);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::ia32_pat_msr).Return(0);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::ia32_efer_msr).Return(0);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::ia32_perf_global_ctrl_msr).Return(0);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::ia32_sysenter_cs_msr).Return(0);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::ia32_sysenter_esp_msr).Return(0);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::ia32_sysenter_eip_msr).Return(0);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::ia32_fs_base_msr).Return(0);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::ia32_gs_base_msr).Return(0);
 
     mocks.OnCall(state_in, vmcs_intel_x64_state::dump);
 }
@@ -798,4 +737,226 @@ vmcs_ut::test_vmcs_host_tr_selector()
 
     this->expect_true(vmcs::host_tr_selector::get() == 100UL);
     this->expect_true(vmcs::host_tr_selector::is_supported());
+}
+
+
+// REMOVE ME:
+//
+// Make sure that once the other tests are added, that the guest rflags
+// tests are in the right order with the other tests
+//
+
+void
+vmcs_ut::test_vmcs_guest_rflags()
+{
+    vmcs::guest_rflags::set(100UL);
+
+    this->expect_true(vmcs::guest_rflags::get() == 100UL);
+    this->expect_true(vmcs::guest_rflags::is_supported());
+}
+
+void
+vmcs_ut::test_vmcs_guest_rflags_carry_flag()
+{
+    vmcs::guest_rflags::carry_flag::set(1UL);
+    this->expect_true(vmcs::guest_rflags::carry_flag::get() == 1UL);
+
+    vmcs::guest_rflags::carry_flag::set(0UL);
+    this->expect_true(vmcs::guest_rflags::carry_flag::get() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_rflags_parity_flag()
+{
+    vmcs::guest_rflags::parity_flag::set(1UL);
+    this->expect_true(vmcs::guest_rflags::parity_flag::get() == 1UL);
+
+    vmcs::guest_rflags::parity_flag::set(0UL);
+    this->expect_true(vmcs::guest_rflags::parity_flag::get() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_rflags_auxiliary_carry_flag()
+{
+    vmcs::guest_rflags::auxiliary_carry_flag::set(1UL);
+    this->expect_true(vmcs::guest_rflags::auxiliary_carry_flag::get() == 1UL);
+
+    vmcs::guest_rflags::auxiliary_carry_flag::set(0UL);
+    this->expect_true(vmcs::guest_rflags::auxiliary_carry_flag::get() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_rflags_zero_flag()
+{
+    vmcs::guest_rflags::zero_flag::set(1UL);
+    this->expect_true(vmcs::guest_rflags::zero_flag::get() == 1UL);
+
+    vmcs::guest_rflags::zero_flag::set(0UL);
+    this->expect_true(vmcs::guest_rflags::zero_flag::get() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_rflags_sign_flag()
+{
+    vmcs::guest_rflags::sign_flag::set(1UL);
+    this->expect_true(vmcs::guest_rflags::sign_flag::get() == 1UL);
+
+    vmcs::guest_rflags::sign_flag::set(0UL);
+    this->expect_true(vmcs::guest_rflags::sign_flag::get() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_rflags_trap_flag()
+{
+    vmcs::guest_rflags::trap_flag::set(1UL);
+    this->expect_true(vmcs::guest_rflags::trap_flag::get() == 1UL);
+
+    vmcs::guest_rflags::trap_flag::set(0UL);
+    this->expect_true(vmcs::guest_rflags::trap_flag::get() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_rflags_interrupt_enable_flag()
+{
+    vmcs::guest_rflags::interrupt_enable_flag::set(1UL);
+    this->expect_true(vmcs::guest_rflags::interrupt_enable_flag::get() == 1UL);
+
+    vmcs::guest_rflags::interrupt_enable_flag::set(0UL);
+    this->expect_true(vmcs::guest_rflags::interrupt_enable_flag::get() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_rflags_direction_flag()
+{
+    vmcs::guest_rflags::direction_flag::set(1UL);
+    this->expect_true(vmcs::guest_rflags::direction_flag::get() == 1UL);
+
+    vmcs::guest_rflags::direction_flag::set(0UL);
+    this->expect_true(vmcs::guest_rflags::direction_flag::get() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_rflags_overflow_flag()
+{
+    vmcs::guest_rflags::overflow_flag::set(1UL);
+    this->expect_true(vmcs::guest_rflags::overflow_flag::get() == 1UL);
+
+    vmcs::guest_rflags::overflow_flag::set(0UL);
+    this->expect_true(vmcs::guest_rflags::overflow_flag::get() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_rflags_privilege_level()
+{
+    vmcs::guest_rflags::privilege_level::set(1UL);
+    this->expect_true(vmcs::guest_rflags::privilege_level::get() == 1UL);
+
+    vmcs::guest_rflags::privilege_level::set(2UL);
+    this->expect_true(vmcs::guest_rflags::privilege_level::get() == 2UL);
+
+    vmcs::guest_rflags::privilege_level::set(3UL);
+    this->expect_true(vmcs::guest_rflags::privilege_level::get() == 3UL);
+
+    vmcs::guest_rflags::privilege_level::set(0UL);
+    this->expect_true(vmcs::guest_rflags::privilege_level::get() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_rflags_nested_task()
+{
+    vmcs::guest_rflags::nested_task::set(1UL);
+    this->expect_true(vmcs::guest_rflags::nested_task::get() == 1UL);
+
+    vmcs::guest_rflags::nested_task::set(0UL);
+    this->expect_true(vmcs::guest_rflags::nested_task::get() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_rflags_resume_flag()
+{
+    vmcs::guest_rflags::resume_flag::set(1UL);
+    this->expect_true(vmcs::guest_rflags::resume_flag::get() == 1UL);
+
+    vmcs::guest_rflags::resume_flag::set(0UL);
+    this->expect_true(vmcs::guest_rflags::resume_flag::get() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_rflags_virtual_8086_mode()
+{
+    vmcs::guest_rflags::virtual_8086_mode::set(1UL);
+    this->expect_true(vmcs::guest_rflags::virtual_8086_mode::get() == 1UL);
+
+    vmcs::guest_rflags::virtual_8086_mode::set(0UL);
+    this->expect_true(vmcs::guest_rflags::virtual_8086_mode::get() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_rflags_alignment_check_access_control()
+{
+    vmcs::guest_rflags::alignment_check_access_control::set(1UL);
+    this->expect_true(vmcs::guest_rflags::alignment_check_access_control::get() == 1UL);
+
+    vmcs::guest_rflags::alignment_check_access_control::set(0UL);
+    this->expect_true(vmcs::guest_rflags::alignment_check_access_control::get() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_rflags_virtual_interupt_flag()
+{
+    vmcs::guest_rflags::virtual_interupt_flag::set(1UL);
+    this->expect_true(vmcs::guest_rflags::virtual_interupt_flag::get() == 1UL);
+
+    vmcs::guest_rflags::virtual_interupt_flag::set(0UL);
+    this->expect_true(vmcs::guest_rflags::virtual_interupt_flag::get() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_rflags_virtual_interupt_pending()
+{
+    vmcs::guest_rflags::virtual_interupt_pending::set(1UL);
+    this->expect_true(vmcs::guest_rflags::virtual_interupt_pending::get() == 1UL);
+
+    vmcs::guest_rflags::virtual_interupt_pending::set(0UL);
+    this->expect_true(vmcs::guest_rflags::virtual_interupt_pending::get() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_rflags_id_flag()
+{
+    vmcs::guest_rflags::id_flag::set(1UL);
+    this->expect_true(vmcs::guest_rflags::id_flag::get() == 1UL);
+
+    vmcs::guest_rflags::id_flag::set(0UL);
+    this->expect_true(vmcs::guest_rflags::id_flag::get() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_rflags_reserved()
+{
+    vmcs::guest_rflags::reserved::set(0x100000000UL);
+    this->expect_true(vmcs::guest_rflags::reserved::get() == 0x100000000UL);
+
+    vmcs::guest_rflags::reserved::set(0UL);
+    this->expect_true(vmcs::guest_rflags::reserved::get() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_rflags_always_disabled()
+{
+    vmcs::guest_rflags::always_disabled::set(0x100000000UL);
+    this->expect_true(vmcs::guest_rflags::always_disabled::get() == 0x100000000UL);
+
+    vmcs::guest_rflags::always_disabled::set(0UL);
+    this->expect_true(vmcs::guest_rflags::always_disabled::get() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_rflags_always_enabled()
+{
+    vmcs::guest_rflags::always_enabled::set(1UL);
+    this->expect_true(vmcs::guest_rflags::always_enabled::get() == 1UL);
+
+    vmcs::guest_rflags::always_enabled::set(0UL);
+    this->expect_true(vmcs::guest_rflags::always_enabled::get() == 0UL);
 }

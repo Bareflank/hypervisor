@@ -27,6 +27,8 @@
 #include <typeinfo>
 #include <stdexcept>
 
+// *INDENT-OFF*
+
 namespace bfn
 {
 
@@ -246,5 +248,7 @@ private:
 #define invalid_vmm_state(a) bfn::invalid_vmm_state_error(a)
 
 }
+
+// *INDENT-ON*
 
 #endif

@@ -474,22 +474,22 @@ no_delete(T *)
 namespace bfn
 {
 
-/// Mock Shared
-///
-/// Use this function to create a mocked version of a shared pointer. This
-/// works similar to make_shared, but creates a shared pointer that is created
-/// by Hippnomocks. Note that you must provide a mock class, and when that
-/// class is destroyed, the pointers being held by shared_ptr are no longer
-/// valid.
-///
-/// @code
-/// MockRepository mocks;
-/// auto in = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-/// @endcode
-///
-template<class T> std::shared_ptr<T>
-mock_shared(MockRepository &mocks)
-{ return std::shared_ptr<T>(mocks.Mock<T>(), no_delete<T>); }
+    /// Mock Shared
+    ///
+    /// Use this function to create a mocked version of a shared pointer. This
+    /// works similar to make_shared, but creates a shared pointer that is created
+    /// by Hippnomocks. Note that you must provide a mock class, and when that
+    /// class is destroyed, the pointers being held by shared_ptr are no longer
+    /// valid.
+    ///
+    /// @code
+    /// MockRepository mocks;
+    /// auto in = bfn::mock_shared<intrinsics_intel_x64>(mocks);
+    /// @endcode
+    ///
+    template<class T> std::shared_ptr<T>
+    mock_shared(MockRepository &mocks)
+    { return std::shared_ptr<T>(mocks.Mock<T>(), no_delete<T>); }
 
 }
 

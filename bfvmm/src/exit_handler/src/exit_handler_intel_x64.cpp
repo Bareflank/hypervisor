@@ -25,6 +25,8 @@
 #include <exit_handler/exit_handler_intel_x64_entry.h>
 #include <exit_handler/exit_handler_intel_x64_support.h>
 
+using namespace intel_x64;
+
 #include <mutex>
 std::mutex g_unimplemented_handler_mutex;
 
@@ -53,243 +55,243 @@ exit_handler_intel_x64::dispatch()
 
     switch (m_exit_reason & 0x0000FFFF)
     {
-        case VM_EXIT_REASON_EXCEPTION_OR_NON_MASKABLE_INTERRUPT:
+        case exit_reason::exception_or_non_maskable_interrupt:
             handle_exception_or_non_maskable_interrupt();
             break;
 
-        case VM_EXIT_REASON_EXTERNAL_INTERRUPT:
+        case exit_reason::external_interrupt:
             handle_external_interrupt();
             break;
 
-        case VM_EXIT_REASON_TRIPLE_FAULT:
+        case exit_reason::triple_fault:
             handle_triple_fault();
             break;
 
-        case VM_EXIT_REASON_INIT_SIGNAL:
+        case exit_reason::init_signal:
             handle_init_signal();
             break;
 
-        case VM_EXIT_REASON_SIPI:
+        case exit_reason::sipi:
             handle_sipi();
             break;
 
-        case VM_EXIT_REASON_SMI:
+        case exit_reason::smi:
             handle_smi();
             break;
 
-        case VM_EXIT_REASON_OTHER_SMI:
+        case exit_reason::other_smi:
             handle_other_smi();
             break;
 
-        case VM_EXIT_REASON_INTERRUPT_WINDOW:
+        case exit_reason::interrupt_window:
             handle_interrupt_window();
             break;
 
-        case VM_EXIT_REASON_NMI_WINDOW:
+        case exit_reason::nmi_window:
             handle_nmi_window();
             break;
 
-        case VM_EXIT_REASON_TASK_SWITCH:
+        case exit_reason::task_switch:
             handle_task_switch();
             break;
 
-        case VM_EXIT_REASON_CPUID:
+        case exit_reason::cpuid:
             handle_cpuid();
             break;
 
-        case VM_EXIT_REASON_GETSEC:
+        case exit_reason::getsec:
             handle_getsec();
             break;
 
-        case VM_EXIT_REASON_HLT:
+        case exit_reason::hlt:
             handle_hlt();
             break;
 
-        case VM_EXIT_REASON_INVD:
+        case exit_reason::invd:
             handle_invd();
             break;
 
-        case VM_EXIT_REASON_INVLPG:
+        case exit_reason::invlpg:
             handle_invlpg();
             break;
 
-        case VM_EXIT_REASON_RDPMC:
+        case exit_reason::rdpmc:
             handle_rdpmc();
             break;
 
-        case VM_EXIT_REASON_RDTSC:
+        case exit_reason::rdtsc:
             handle_rdtsc();
             break;
 
-        case VM_EXIT_REASON_RSM:
+        case exit_reason::rsm:
             handle_rsm();
             break;
 
-        case VM_EXIT_REASON_VMCALL:
+        case exit_reason::vmcall:
             handle_vmcall();
             break;
 
-        case VM_EXIT_REASON_VMCLEAR:
+        case exit_reason::vmclear:
             handle_vmclear();
             break;
 
-        case VM_EXIT_REASON_VMLAUNCH:
+        case exit_reason::vmlaunch:
             handle_vmlaunch();
             break;
 
-        case VM_EXIT_REASON_VMPTRLD:
+        case exit_reason::vmptrld:
             handle_vmptrld();
             break;
 
-        case VM_EXIT_REASON_VMPTRST:
+        case exit_reason::vmptrst:
             handle_vmptrst();
             break;
 
-        case VM_EXIT_REASON_VMREAD:
+        case exit_reason::vmread:
             handle_vmread();
             break;
 
-        case VM_EXIT_REASON_VMRESUME:
+        case exit_reason::vmresume:
             handle_vmresume();
             break;
 
-        case VM_EXIT_REASON_VMWRITE:
+        case exit_reason::vmwrite:
             handle_vmwrite();
             break;
 
-        case VM_EXIT_REASON_VMXOFF:
+        case exit_reason::vmxoff:
             handle_vmxoff();
             break;
 
-        case VM_EXIT_REASON_VMXON:
+        case exit_reason::vmxon:
             handle_vmxon();
             break;
 
-        case VM_EXIT_REASON_CONTROL_REGISTER_ACCESSES:
+        case exit_reason::control_register_accesses:
             handle_control_register_accesses();
             break;
 
-        case VM_EXIT_REASON_MOV_DR:
+        case exit_reason::mov_dr:
             handle_mov_dr();
             break;
 
-        case VM_EXIT_REASON_IO_INSTRUCTION:
+        case exit_reason::io_instruction:
             handle_io_instruction();
             break;
 
-        case VM_EXIT_REASON_RDMSR:
+        case exit_reason::rdmsr:
             handle_rdmsr();
             break;
 
-        case VM_EXIT_REASON_WRMSR:
+        case exit_reason::wrmsr:
             handle_wrmsr();
             break;
 
-        case VM_EXIT_REASON_VM_ENTRY_FAILURE_INVALID_GUEST_STATE:
+        case exit_reason::vm_entry_failure_invalid_guest_state:
             handle_vm_entry_failure_invalid_guest_state();
             break;
 
-        case VM_EXIT_REASON_VM_ENTRY_FAILURE_MSR_LOADING:
+        case exit_reason::vm_entry_failure_msr_loading:
             handle_vm_entry_failure_msr_loading();
             break;
 
-        case VM_EXIT_REASON_MWAIT:
+        case exit_reason::mwait:
             handle_mwait();
             break;
 
-        case VM_EXIT_REASON_MONITOR_TRAP_FLAG:
+        case exit_reason::monitor_trap_flag:
             handle_monitor_trap_flag();
             break;
 
-        case VM_EXIT_REASON_MONITOR:
+        case exit_reason::monitor:
             handle_monitor();
             break;
 
-        case VM_EXIT_REASON_PAUSE:
+        case exit_reason::pause:
             handle_pause();
             break;
 
-        case VM_EXIT_REASON_VM_ENTRY_FAILURE_MACHINE_CHECK_EVENT:
+        case exit_reason::vm_entry_failure_machine_check_event:
             handle_vm_entry_failure_machine_check_event();
             break;
 
-        case VM_EXIT_REASON_TPR_BELOW_THRESHOLD:
+        case exit_reason::tpr_below_threshold:
             handle_tpr_below_threshold();
             break;
 
-        case VM_EXIT_REASON_APIC_ACCESS:
+        case exit_reason::apic_access:
             handle_apic_access();
             break;
 
-        case VM_EXIT_REASON_VIRTUALIZED_EOI:
+        case exit_reason::virtualized_eoi:
             handle_virtualized_eoi();
             break;
 
-        case VM_EXIT_REASON_ACCESS_TO_GDTR_OR_IDTR:
+        case exit_reason::access_to_gdtr_or_idtr:
             handle_access_to_gdtr_or_idtr();
             break;
 
-        case VM_EXIT_REASON_ACCESS_TO_LDTR_OR_TR:
+        case exit_reason::access_to_ldtr_or_tr:
             handle_access_to_ldtr_or_tr();
             break;
 
-        case VM_EXIT_REASON_EPT_VIOLATION:
+        case exit_reason::ept_violation:
             handle_ept_violation();
             break;
 
-        case VM_EXIT_REASON_EPT_MISCONFIGURATION:
+        case exit_reason::ept_misconfiguration:
             handle_ept_misconfiguration();
             break;
 
-        case VM_EXIT_REASON_INVEPT:
+        case exit_reason::invept:
             handle_invept();
             break;
 
-        case VM_EXIT_REASON_RDTSCP:
+        case exit_reason::rdtscp:
             handle_rdtscp();
             break;
 
-        case VM_EXIT_REASON_VMX_PREEMPTION_TIMER_EXPIRED:
+        case exit_reason::vmx_preemption_timer_expired:
             handle_vmx_preemption_timer_expired();
             break;
 
-        case VM_EXIT_REASON_INVVPID:
+        case exit_reason::invvpid:
             handle_invvpid();
             break;
 
-        case VM_EXIT_REASON_WBINVD:
+        case exit_reason::wbinvd:
             handle_wbinvd();
             break;
 
-        case VM_EXIT_REASON_XSETBV:
+        case exit_reason::xsetbv:
             handle_xsetbv();
             break;
 
-        case VM_EXIT_REASON_APIC_WRITE:
+        case exit_reason::apic_write:
             handle_apic_write();
             break;
 
-        case VM_EXIT_REASON_RDRAND:
+        case exit_reason::rdrand:
             handle_rdrand();
             break;
 
-        case VM_EXIT_REASON_INVPCID:
+        case exit_reason::invpcid:
             handle_invpcid();
             break;
 
-        case VM_EXIT_REASON_VMFUNC:
+        case exit_reason::vmfunc:
             handle_vmfunc();
             break;
 
-        case VM_EXIT_REASON_RDSEED:
+        case exit_reason::rdseed:
             handle_rdseed();
             break;
 
-        case VM_EXIT_REASON_XSAVES:
+        case exit_reason::xsaves:
             handle_xsaves();
             break;
 
-        case VM_EXIT_REASON_XRSTORS:
+        case exit_reason::xrstors:
             handle_xrstors();
             break;
 
@@ -736,193 +738,193 @@ exit_handler_intel_x64::unimplemented_handler()
     this->halt();
 }
 
-const char *
+std::string
 exit_handler_intel_x64::exit_reason_to_str(uint64_t exit_reason)
 {
     switch (exit_reason)
     {
-        case VM_EXIT_REASON_EXCEPTION_OR_NON_MASKABLE_INTERRUPT:
-            return "VM_EXIT_REASON_EXCEPTION_OR_NON_MASKABLE_INTERRUPT";
+        case exit_reason::exception_or_non_maskable_interrupt:
+            return "exception_or_non_maskable_interrupt";
 
-        case VM_EXIT_REASON_EXTERNAL_INTERRUPT:
-            return "VM_EXIT_REASON_EXTERNAL_INTERRUPT";
+        case exit_reason::external_interrupt:
+            return "external_interrupt";
 
-        case VM_EXIT_REASON_TRIPLE_FAULT:
-            return "VM_EXIT_REASON_TRIPLE_FAULT";
+        case exit_reason::triple_fault:
+            return "triple_fault";
 
-        case VM_EXIT_REASON_INIT_SIGNAL:
-            return "VM_EXIT_REASON_INIT_SIGNAL";
+        case exit_reason::init_signal:
+            return "init_signal";
 
-        case VM_EXIT_REASON_SIPI:
-            return "VM_EXIT_REASON_SIPI";
+        case exit_reason::sipi:
+            return "sipi";
 
-        case VM_EXIT_REASON_SMI:
-            return "VM_EXIT_REASON_SMI";
+        case exit_reason::smi:
+            return "smi";
 
-        case VM_EXIT_REASON_OTHER_SMI:
-            return "VM_EXIT_REASON_OTHER_SMI";
+        case exit_reason::other_smi:
+            return "other_smi";
 
-        case VM_EXIT_REASON_INTERRUPT_WINDOW:
-            return "VM_EXIT_REASON_INTERRUPT_WINDOW";
+        case exit_reason::interrupt_window:
+            return "interrupt_window";
 
-        case VM_EXIT_REASON_NMI_WINDOW:
-            return "VM_EXIT_REASON_NMI_WINDOW";
+        case exit_reason::nmi_window:
+            return "nmi_window";
 
-        case VM_EXIT_REASON_TASK_SWITCH:
-            return "VM_EXIT_REASON_TASK_SWITCH";
+        case exit_reason::task_switch:
+            return "task_switch";
 
-        case VM_EXIT_REASON_CPUID:
-            return "VM_EXIT_REASON_CPUID";
+        case exit_reason::cpuid:
+            return "cpuid";
 
-        case VM_EXIT_REASON_GETSEC:
-            return "VM_EXIT_REASON_GETSEC";
+        case exit_reason::getsec:
+            return "getsec";
 
-        case VM_EXIT_REASON_HLT:
-            return "VM_EXIT_REASON_HLT";
+        case exit_reason::hlt:
+            return "hlt";
 
-        case VM_EXIT_REASON_INVD:
-            return "VM_EXIT_REASON_INVD";
+        case exit_reason::invd:
+            return "invd";
 
-        case VM_EXIT_REASON_INVLPG:
-            return "VM_EXIT_REASON_INVLPG";
+        case exit_reason::invlpg:
+            return "invlpg";
 
-        case VM_EXIT_REASON_RDPMC:
-            return "VM_EXIT_REASON_RDPMC";
+        case exit_reason::rdpmc:
+            return "rdpmc";
 
-        case VM_EXIT_REASON_RDTSC:
-            return "VM_EXIT_REASON_RDTSC";
+        case exit_reason::rdtsc:
+            return "rdtsc";
 
-        case VM_EXIT_REASON_RSM:
-            return "VM_EXIT_REASON_RSM";
+        case exit_reason::rsm:
+            return "rsm";
 
-        case VM_EXIT_REASON_VMCALL:
-            return "VM_EXIT_REASON_VMCALL";
+        case exit_reason::vmcall:
+            return "vmcall";
 
-        case VM_EXIT_REASON_VMCLEAR:
-            return "VM_EXIT_REASON_VMCLEAR";
+        case exit_reason::vmclear:
+            return "vmclear";
 
-        case VM_EXIT_REASON_VMLAUNCH:
-            return "VM_EXIT_REASON_VMLAUNCH";
+        case exit_reason::vmlaunch:
+            return "vmlaunch";
 
-        case VM_EXIT_REASON_VMPTRLD:
-            return "VM_EXIT_REASON_VMPTRLD";
+        case exit_reason::vmptrld:
+            return "vmptrld";
 
-        case VM_EXIT_REASON_VMPTRST:
-            return "VM_EXIT_REASON_VMPTRST";
+        case exit_reason::vmptrst:
+            return "vmptrst";
 
-        case VM_EXIT_REASON_VMREAD:
-            return "VM_EXIT_REASON_VMREAD";
+        case exit_reason::vmread:
+            return "vmread";
 
-        case VM_EXIT_REASON_VMRESUME:
-            return "VM_EXIT_REASON_VMRESUME";
+        case exit_reason::vmresume:
+            return "vmresume";
 
-        case VM_EXIT_REASON_VMWRITE:
-            return "VM_EXIT_REASON_VMWRITE";
+        case exit_reason::vmwrite:
+            return "vmwrite";
 
-        case VM_EXIT_REASON_VMXOFF:
-            return "VM_EXIT_REASON_VMXOFF";
+        case exit_reason::vmxoff:
+            return "vmxoff";
 
-        case VM_EXIT_REASON_VMXON:
-            return "VM_EXIT_REASON_VMXON";
+        case exit_reason::vmxon:
+            return "vmxon";
 
-        case VM_EXIT_REASON_CONTROL_REGISTER_ACCESSES:
-            return "VM_EXIT_REASON_CONTROL_REGISTER_ACCESSES";
+        case exit_reason::control_register_accesses:
+            return "control_register_accesses";
 
-        case VM_EXIT_REASON_MOV_DR:
-            return "VM_EXIT_REASON_MOV_DR";
+        case exit_reason::mov_dr:
+            return "mov_dr";
 
-        case VM_EXIT_REASON_IO_INSTRUCTION:
-            return "VM_EXIT_REASON_IO_INSTRUCTION";
+        case exit_reason::io_instruction:
+            return "io_instruction";
 
-        case VM_EXIT_REASON_RDMSR:
-            return "VM_EXIT_REASON_RDMSR";
+        case exit_reason::rdmsr:
+            return "rdmsr";
 
-        case VM_EXIT_REASON_WRMSR:
-            return "VM_EXIT_REASON_WRMSR";
+        case exit_reason::wrmsr:
+            return "wrmsr";
 
-        case VM_EXIT_REASON_VM_ENTRY_FAILURE_INVALID_GUEST_STATE:
-            return "VM_EXIT_REASON_VM_ENTRY_FAILURE_INVALID_GUEST_STATE";
+        case exit_reason::vm_entry_failure_invalid_guest_state:
+            return "vm_entry_failure_invalid_guest_state";
 
-        case VM_EXIT_REASON_VM_ENTRY_FAILURE_MSR_LOADING:
-            return "VM_EXIT_REASON_VM_ENTRY_FAILURE_MSR_LOADING";
+        case exit_reason::vm_entry_failure_msr_loading:
+            return "vm_entry_failure_msr_loading";
 
-        case VM_EXIT_REASON_MWAIT:
-            return "VM_EXIT_REASON_MWAIT";
+        case exit_reason::mwait:
+            return "mwait";
 
-        case VM_EXIT_REASON_MONITOR_TRAP_FLAG:
-            return "VM_EXIT_REASON_MONITOR_TRAP_FLAG";
+        case exit_reason::monitor_trap_flag:
+            return "monitor_trap_flag";
 
-        case VM_EXIT_REASON_MONITOR:
-            return "VM_EXIT_REASON_MONITOR";
+        case exit_reason::monitor:
+            return "monitor";
 
-        case VM_EXIT_REASON_PAUSE:
-            return "VM_EXIT_REASON_PAUSE";
+        case exit_reason::pause:
+            return "pause";
 
-        case VM_EXIT_REASON_VM_ENTRY_FAILURE_MACHINE_CHECK_EVENT:
-            return "VM_EXIT_REASON_VM_ENTRY_FAILURE_MACHINE_CHECK_EVENT";
+        case exit_reason::vm_entry_failure_machine_check_event:
+            return "vm_entry_failure_machine_check_event";
 
-        case VM_EXIT_REASON_TPR_BELOW_THRESHOLD:
-            return "VM_EXIT_REASON_TPR_BELOW_THRESHOLD";
+        case exit_reason::tpr_below_threshold:
+            return "tpr_below_threshold";
 
-        case VM_EXIT_REASON_APIC_ACCESS:
-            return "VM_EXIT_REASON_APIC_ACCESS";
+        case exit_reason::apic_access:
+            return "apic_access";
 
-        case VM_EXIT_REASON_VIRTUALIZED_EOI:
-            return "VM_EXIT_REASON_VIRTUALIZED_EOI";
+        case exit_reason::virtualized_eoi:
+            return "virtualized_eoi";
 
-        case VM_EXIT_REASON_ACCESS_TO_GDTR_OR_IDTR:
-            return "VM_EXIT_REASON_ACCESS_TO_GDTR_OR_IDTR";
+        case exit_reason::access_to_gdtr_or_idtr:
+            return "access_to_gdtr_or_idtr";
 
-        case VM_EXIT_REASON_ACCESS_TO_LDTR_OR_TR:
-            return "VM_EXIT_REASON_ACCESS_TO_LDTR_OR_TR";
+        case exit_reason::access_to_ldtr_or_tr:
+            return "access_to_ldtr_or_tr";
 
-        case VM_EXIT_REASON_EPT_VIOLATION:
-            return "VM_EXIT_REASON_EPT_VIOLATION";
+        case exit_reason::ept_violation:
+            return "ept_violation";
 
-        case VM_EXIT_REASON_EPT_MISCONFIGURATION:
-            return "VM_EXIT_REASON_EPT_MISCONFIGURATION";
+        case exit_reason::ept_misconfiguration:
+            return "ept_misconfiguration";
 
-        case VM_EXIT_REASON_INVEPT:
-            return "VM_EXIT_REASON_INVEPT";
+        case exit_reason::invept:
+            return "invept";
 
-        case VM_EXIT_REASON_RDTSCP:
-            return "VM_EXIT_REASON_RDTSCP";
+        case exit_reason::rdtscp:
+            return "rdtscp";
 
-        case VM_EXIT_REASON_VMX_PREEMPTION_TIMER_EXPIRED:
-            return "VM_EXIT_REASON_VMX_PREEMPTION_TIMER_EXPIRED";
+        case exit_reason::vmx_preemption_timer_expired:
+            return "vmx_preemption_timer_expired";
 
-        case VM_EXIT_REASON_INVVPID:
-            return "VM_EXIT_REASON_INVVPID";
+        case exit_reason::invvpid:
+            return "invvpid";
 
-        case VM_EXIT_REASON_WBINVD:
-            return "VM_EXIT_REASON_WBINVD";
+        case exit_reason::wbinvd:
+            return "wbinvd";
 
-        case VM_EXIT_REASON_XSETBV:
-            return "VM_EXIT_REASON_XSETBV";
+        case exit_reason::xsetbv:
+            return "xsetbv";
 
-        case VM_EXIT_REASON_APIC_WRITE:
-            return "VM_EXIT_REASON_APIC_WRITE";
+        case exit_reason::apic_write:
+            return "apic_write";
 
-        case VM_EXIT_REASON_RDRAND:
-            return "VM_EXIT_REASON_RDRAND";
+        case exit_reason::rdrand:
+            return "rdrand";
 
-        case VM_EXIT_REASON_INVPCID:
-            return "VM_EXIT_REASON_INVPCID";
+        case exit_reason::invpcid:
+            return "invpcid";
 
-        case VM_EXIT_REASON_VMFUNC:
-            return "VM_EXIT_REASON_VMFUNC";
+        case exit_reason::vmfunc:
+            return "vmfunc";
 
-        case VM_EXIT_REASON_RDSEED:
-            return "VM_EXIT_REASON_RDSEED";
+        case exit_reason::rdseed:
+            return "rdseed";
 
-        case VM_EXIT_REASON_XSAVES:
-            return "VM_EXIT_REASON_XSAVES";
+        case exit_reason::xsaves:
+            return "xsaves";
 
-        case VM_EXIT_REASON_XRSTORS:
-            return "VM_EXIT_REASON_XRSTORS";
+        case exit_reason::xrstors:
+            return "xrstors";
 
         default:
-            return "UNKNOWN";
+            return "unknown";
     };
 }
 
