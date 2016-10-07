@@ -218,6 +218,8 @@ protected:
     virtual bool is_linear_address_valid(uint64_t addr);
     virtual bool is_physical_address_valid(uint64_t addr);
 
+    // REMOVE ME: This should be moved to the VMCS namespace code into a
+    // function called is_usable()
     virtual bool is_cs_usable();
     virtual bool is_ss_usable();
     virtual bool is_ds_usable();
@@ -227,6 +229,8 @@ protected:
     virtual bool is_tr_usable();
     virtual bool is_ldtr_usable();
 
+    // REMOVE ME: All is enabled functions should be removed as they are
+    // not needed once we have a get() function for each bit
     virtual bool is_enabled_v8086() const;
 
     virtual bool is_enabled_external_interrupt_exiting() const;
@@ -295,6 +299,8 @@ protected:
     virtual bool is_enabled_load_ia32_pat_on_entry() const;
     virtual bool is_enabled_load_ia32_efer_on_entry() const;
 
+    // REMOVE ME: All is_supported functions should be removed as they are
+    // not needed once the VMCS fields have their own is_supported
     virtual bool is_supported_external_interrupt_exiting() const;
     virtual bool is_supported_nmi_exiting() const;
     virtual bool is_supported_virtual_nmis() const;
@@ -948,9 +954,10 @@ namespace host_tr_selector
 }
 }
 
-// *INDENT-ON*
-
+// -----------------------------------------------------------------------------
 // 64bit Control Fields
+// -----------------------------------------------------------------------------
+
 constexpr const auto VMCS_ADDRESS_OF_IO_BITMAP_A_FULL                          = 0x0000000000002000UL;
 constexpr const auto VMCS_ADDRESS_OF_IO_BITMAP_A_HIGH                          = 0x0000000000002001UL;
 constexpr const auto VMCS_ADDRESS_OF_IO_BITMAP_B_FULL                          = 0x0000000000002002UL;
@@ -998,11 +1005,17 @@ constexpr const auto VMCS_VIRTUALIZATION_EXCEPTION_INFORMATION_ADDRESS_HIGH    =
 constexpr const auto VMCS_XSS_EXITING_BITMAP_FULL                              = 0x000000000000202CUL;
 constexpr const auto VMCS_XSS_EXITING_BITMAP_HIGH                              = 0x000000000000202DUL;
 
+// -----------------------------------------------------------------------------
 // 64bit Read-Only Data Fields
+// -----------------------------------------------------------------------------
+
 constexpr const auto VMCS_GUEST_PHYSICAL_ADDRESS_FULL                          = 0x0000000000002400UL;
 constexpr const auto VMCS_GUEST_PHYSICAL_ADDRESS_HIGH                          = 0x0000000000002401UL;
 
+// -----------------------------------------------------------------------------
 // 64bit Guest State Fields
+// -----------------------------------------------------------------------------
+
 constexpr const auto VMCS_VMCS_LINK_POINTER_FULL                               = 0x0000000000002800UL;
 constexpr const auto VMCS_VMCS_LINK_POINTER_HIGH                               = 0x0000000000002801UL;
 constexpr const auto VMCS_GUEST_IA32_DEBUGCTL_FULL                             = 0x0000000000002802UL;
@@ -1022,7 +1035,10 @@ constexpr const auto VMCS_GUEST_PDPTE2_HIGH                                    =
 constexpr const auto VMCS_GUEST_PDPTE3_FULL                                    = 0x0000000000002810UL;
 constexpr const auto VMCS_GUEST_PDPTE3_HIGH                                    = 0x0000000000002811UL;
 
+// -----------------------------------------------------------------------------
 // 64bit Host State Fields
+// -----------------------------------------------------------------------------
+
 constexpr const auto VMCS_HOST_IA32_PAT_FULL                                   = 0x0000000000002C00UL;
 constexpr const auto VMCS_HOST_IA32_PAT_HIGH                                   = 0x0000000000002C01UL;
 constexpr const auto VMCS_HOST_IA32_EFER_FULL                                  = 0x0000000000002C02UL;
@@ -1030,7 +1046,10 @@ constexpr const auto VMCS_HOST_IA32_EFER_HIGH                                  =
 constexpr const auto VMCS_HOST_IA32_PERF_GLOBAL_CTRL_FULL                      = 0x0000000000002C04UL;
 constexpr const auto VMCS_HOST_IA32_PERF_GLOBAL_CTRL_HIGH                      = 0x0000000000002C05UL;
 
+// -----------------------------------------------------------------------------
 // 32bit Control Fields
+// -----------------------------------------------------------------------------
+
 constexpr const auto VMCS_PIN_BASED_VM_EXECUTION_CONTROLS                      = 0x0000000000004000UL;
 constexpr const auto VMCS_PRIMARY_PROCESSOR_BASED_VM_EXECUTION_CONTROLS        = 0x0000000000004002UL;
 constexpr const auto VMCS_EXCEPTION_BITMAP                                     = 0x0000000000004004UL;
@@ -1050,7 +1069,10 @@ constexpr const auto VMCS_SECONDARY_PROCESSOR_BASED_VM_EXECUTION_CONTROLS      =
 constexpr const auto VMCS_PLE_GAP                                              = 0x0000000000004020UL;
 constexpr const auto VMCS_PLE_WINDOW                                           = 0x0000000000004022UL;
 
+// -----------------------------------------------------------------------------
 // 32bit Read-Only Fields
+// -----------------------------------------------------------------------------
+
 constexpr const auto VMCS_VM_INSTRUCTION_ERROR                                 = 0x0000000000004400UL;
 constexpr const auto VMCS_EXIT_REASON                                          = 0x0000000000004402UL;
 constexpr const auto VMCS_VM_EXIT_INTERRUPTION_INFORMATION                     = 0x0000000000004404UL;
@@ -1060,7 +1082,10 @@ constexpr const auto VMCS_IDT_VECTORING_ERROR_CODE                             =
 constexpr const auto VMCS_VM_EXIT_INSTRUCTION_LENGTH                           = 0x000000000000440CUL;
 constexpr const auto VMCS_VM_EXIT_INSTRUCTION_INFORMATION                      = 0x000000000000440EUL;
 
-// 32bit Guest State Fields
+// -----------------------------------------------------------------------------
+// 32bit Read-Only Fields
+// -----------------------------------------------------------------------------
+
 constexpr const auto VMCS_GUEST_ES_LIMIT                                       = 0x0000000000004800UL;
 constexpr const auto VMCS_GUEST_CS_LIMIT                                       = 0x0000000000004802UL;
 constexpr const auto VMCS_GUEST_SS_LIMIT                                       = 0x0000000000004804UL;
@@ -1085,10 +1110,16 @@ constexpr const auto VMCS_GUEST_SMBASE                                         =
 constexpr const auto VMCS_GUEST_IA32_SYSENTER_CS                               = 0x000000000000482AUL;
 constexpr const auto VMCS_VMX_PREEMPTION_TIMER_VALUE                           = 0x000000000000482EUL;
 
+// -----------------------------------------------------------------------------
 // 32bit Host State Fields
+// -----------------------------------------------------------------------------
+
 constexpr const auto VMCS_HOST_IA32_SYSENTER_CS                                = 0x0000000000004C00UL;
 
+// -----------------------------------------------------------------------------
 // Natural Width Control Fields
+// -----------------------------------------------------------------------------
+
 constexpr const auto VMCS_CR0_GUEST_HOST_MASK                                  = 0x0000000000006000UL;
 constexpr const auto VMCS_CR4_GUEST_HOST_MASK                                  = 0x0000000000006002UL;
 constexpr const auto VMCS_CR0_READ_SHADOW                                      = 0x0000000000006004UL;
@@ -1098,7 +1129,10 @@ constexpr const auto VMCS_CR3_TARGET_VALUE_1                                   =
 constexpr const auto VMCS_CR3_TARGET_VALUE_2                                   = 0x000000000000600CUL;
 constexpr const auto VMCS_CR3_TARGET_VALUE_31                                  = 0x000000000000600EUL;
 
+// -----------------------------------------------------------------------------
 // Natural Width Read-Only Fields
+// -----------------------------------------------------------------------------
+
 constexpr const auto VMCS_EXIT_QUALIFICATION                                   = 0x0000000000006400UL;
 constexpr const auto VMCS_IO_RCX                                               = 0x0000000000006402UL;
 constexpr const auto VMCS_IO_RSI                                               = 0x0000000000006404UL;
@@ -1106,7 +1140,10 @@ constexpr const auto VMCS_IO_RDI                                               =
 constexpr const auto VMCS_IO_RIP                                               = 0x0000000000006408UL;
 constexpr const auto VMCS_GUEST_LINEAR_ADDRESS                                 = 0x000000000000640AUL;
 
+// -----------------------------------------------------------------------------
 // Natural Width Guest State Fields
+// -----------------------------------------------------------------------------
+
 constexpr const auto VMCS_GUEST_CR0                                            = 0x0000000000006800UL;
 constexpr const auto VMCS_GUEST_CR3                                            = 0x0000000000006802UL;
 constexpr const auto VMCS_GUEST_CR4                                            = 0x0000000000006804UL;
@@ -1123,12 +1160,305 @@ constexpr const auto VMCS_GUEST_IDTR_BASE                                      =
 constexpr const auto VMCS_GUEST_DR7                                            = 0x000000000000681AUL;
 constexpr const auto VMCS_GUEST_RSP                                            = 0x000000000000681CUL;
 constexpr const auto VMCS_GUEST_RIP                                            = 0x000000000000681EUL;
-constexpr const auto VMCS_GUEST_RFLAGS                                         = 0x0000000000006820UL;
+
+// REMOVE ME
+//
+// Once all of these VMCS fields have been converted over to the new sceme,
+// there should just be one overall namespace. This is only here so that the
+// guest rflags is in the right order for now, without causing the other
+// definitions from being placed in the namespace.
+//
+namespace intel_x64
+{
+namespace vmcs
+{
+
+namespace guest_rflags
+{
+    constexpr const auto addr = 0x0000000000006820UL;
+    constexpr const auto name = "guest_rflags";
+
+    inline auto get()
+    { return vmread(addr, name); }
+
+    template<class T> constexpr auto set(T val)
+    { return vmwrite(addr, val, name); }
+
+    inline bool is_supported() noexcept
+    { return true; }
+
+    namespace carry_flag
+    {
+        constexpr const auto mask = 0x0000000000000001UL;
+        constexpr const auto from = 0;
+        constexpr const auto name = "carry_flag";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> constexpr auto set(T val)
+        { return vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+
+    namespace parity_flag
+    {
+        constexpr const auto mask = 0x0000000000000004UL;
+        constexpr const auto from = 2;
+        constexpr const auto name = "parity_flag";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> constexpr auto set(T val)
+        { return vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+
+    namespace auxiliary_carry_flag
+    {
+        constexpr const auto mask = 0x0000000000000010UL;
+        constexpr const auto from = 4;
+        constexpr const auto name = "auxiliary_carry_flag";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> constexpr auto set(T val)
+        { return vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+
+    namespace zero_flag
+    {
+        constexpr const auto mask = 0x0000000000000040UL;
+        constexpr const auto from = 6;
+        constexpr const auto name = "zero_flag";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> constexpr auto set(T val)
+        { return vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+
+    namespace sign_flag
+    {
+        constexpr const auto mask = 0x0000000000000080UL;
+        constexpr const auto from = 7;
+        constexpr const auto name = "sign_flag";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> constexpr auto set(T val)
+        { return vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+
+    namespace trap_flag
+    {
+        constexpr const auto mask = 0x0000000000000100UL;
+        constexpr const auto from = 8;
+        constexpr const auto name = "trap_flag";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> constexpr auto set(T val)
+        { return vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+
+    namespace interrupt_enable_flag
+    {
+        constexpr const auto mask = 0x0000000000000200UL;
+        constexpr const auto from = 9;
+        constexpr const auto name = "interrupt_enable_flag";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> constexpr auto set(T val)
+        { return vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+
+    namespace direction_flag
+    {
+        constexpr const auto mask = 0x0000000000000400UL;
+        constexpr const auto from = 10;
+        constexpr const auto name = "direction_flag";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> constexpr auto set(T val)
+        { return vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+
+    namespace overflow_flag
+    {
+        constexpr const auto mask = 0x0000000000000800UL;
+        constexpr const auto from = 11;
+        constexpr const auto name = "overflow_flag";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> constexpr auto set(T val)
+        { return vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+
+    namespace privilege_level
+    {
+        constexpr const auto mask = 0x0000000000003000UL;
+        constexpr const auto from = 12;
+        constexpr const auto name = "privilege_level";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> constexpr auto set(T val)
+        { return vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+
+    namespace nested_task
+    {
+        constexpr const auto mask = 0x0000000000004000UL;
+        constexpr const auto from = 14;
+        constexpr const auto name = "nested_task";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> constexpr auto set(T val)
+        { return vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+
+    namespace resume_flag
+    {
+        constexpr const auto mask = 0x0000000000010000UL;
+        constexpr const auto from = 16;
+        constexpr const auto name = "resume_flag";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> constexpr auto set(T val)
+        { return vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+
+    namespace virtual_8086_mode
+    {
+        constexpr const auto mask = 0x0000000000020000UL;
+        constexpr const auto from = 17;
+        constexpr const auto name = "virtual_8086_mode";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> constexpr auto set(T val)
+        { return vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+
+    namespace alignment_check_access_control
+    {
+        constexpr const auto mask = 0x0000000000040000UL;
+        constexpr const auto from = 18;
+        constexpr const auto name = "alignment_check_access_control";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> constexpr auto set(T val)
+        { return vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+
+    namespace virtual_interupt_flag
+    {
+        constexpr const auto mask = 0x0000000000080000UL;
+        constexpr const auto from = 19;
+        constexpr const auto name = "virtual_interupt_flag";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> constexpr auto set(T val)
+        { return vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+
+    namespace virtual_interupt_pending
+    {
+        constexpr const auto mask = 0x0000000000100000UL;
+        constexpr const auto from = 20;
+        constexpr const auto name = "virtual_interupt_pending";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> constexpr auto set(T val)
+        { return vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+
+    namespace id_flag
+    {
+        constexpr const auto mask = 0x0000000000200000UL;
+        constexpr const auto from = 21;
+        constexpr const auto name = "id_flag";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> constexpr auto set(T val)
+        { return vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+
+    namespace reserved
+    {
+        constexpr const auto mask = 0xFFFFFFFFFFC08028UL;
+        constexpr const auto from = 0;
+        constexpr const auto name = "reserved";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> constexpr auto set(T val)
+        { return vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+
+    namespace always_disabled
+    {
+        constexpr const auto mask = 0xFFFFFFFFFFC08028UL;
+        constexpr const auto from = 0;
+        constexpr const auto name = "always_disabled";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> constexpr auto set(T val)
+        { return vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+
+    namespace always_enabled
+    {
+        constexpr const auto mask = 0x0000000000000002UL;
+        constexpr const auto from = 1;
+        constexpr const auto name = "always_enabled";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> constexpr auto set(T val)
+        { return vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+}
+
+}
+}
+
 constexpr const auto VMCS_GUEST_PENDING_DEBUG_EXCEPTIONS                       = 0x0000000000006822UL;
 constexpr const auto VMCS_GUEST_IA32_SYSENTER_ESP                              = 0x0000000000006824UL;
 constexpr const auto VMCS_GUEST_IA32_SYSENTER_EIP                              = 0x0000000000006826UL;
 
+// -----------------------------------------------------------------------------
 // Natural Width Host State Fields
+// -----------------------------------------------------------------------------
+
 constexpr const auto VMCS_HOST_CR0                                             = 0x0000000000006C00UL;
 constexpr const auto VMCS_HOST_CR3                                             = 0x0000000000006C02UL;
 constexpr const auto VMCS_HOST_CR4                                             = 0x0000000000006C04UL;
@@ -1141,5 +1471,7 @@ constexpr const auto VMCS_HOST_IA32_SYSENTER_ESP                               =
 constexpr const auto VMCS_HOST_IA32_SYSENTER_EIP                               = 0x0000000000006C12UL;
 constexpr const auto VMCS_HOST_RSP                                             = 0x0000000000006C14UL;
 constexpr const auto VMCS_HOST_RIP                                             = 0x0000000000006C16UL;
+
+// *INDENT-ON*
 
 #endif

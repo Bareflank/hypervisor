@@ -190,6 +190,28 @@ intrinsics_ut::list()
     this->test_ia32_vmx_true_entry_ctls_load_ia32_efer();
     this->test_ia32_vmx_vmfunc();
 
+    this->test_rflags_x64();
+    this->test_rflags_x64_carry_flag();
+    this->test_rflags_x64_parity_flag();
+    this->test_rflags_x64_auxiliary_carry_flag();
+    this->test_rflags_x64_zero_flag();
+    this->test_rflags_x64_sign_flag();
+    this->test_rflags_x64_trap_flag();
+    this->test_rflags_x64_interrupt_enable_flag();
+    this->test_rflags_x64_direction_flag();
+    this->test_rflags_x64_overflow_flag();
+    this->test_rflags_x64_privilege_level();
+    this->test_rflags_x64_nested_task();
+    this->test_rflags_x64_resume_flag();
+    this->test_rflags_x64_virtual_8086_mode();
+    this->test_rflags_x64_alignment_check_access_control();
+    this->test_rflags_x64_virtual_interupt_flag();
+    this->test_rflags_x64_virtual_interupt_pending();
+    this->test_rflags_x64_id_flag();
+    this->test_rflags_x64_reserved();
+    this->test_rflags_x64_always_disabled();
+    this->test_rflags_x64_always_enabled();
+
     return true;
 }
 

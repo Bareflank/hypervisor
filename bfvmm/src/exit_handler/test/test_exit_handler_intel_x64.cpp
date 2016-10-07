@@ -24,6 +24,8 @@
 #include <exit_handler/exit_handler_intel_x64.h>
 #include <exit_handler/exit_handler_intel_x64_support.h>
 
+using namespace intel_x64;
+
 uint64_t g_field = 0;
 uint64_t g_value = 0;
 uint64_t g_exit_reason = 0;
@@ -114,7 +116,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_exception_or_non_maskable_interru
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_EXCEPTION_OR_NON_MASKABLE_INTERRUPT;
+    g_exit_reason = exit_reason::exception_or_non_maskable_interrupt;
 
     mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
@@ -140,7 +142,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_external_interrupt()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_EXTERNAL_INTERRUPT;
+    g_exit_reason = exit_reason::external_interrupt;
 
     mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
@@ -166,7 +168,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_triple_fault()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_TRIPLE_FAULT;
+    g_exit_reason = exit_reason::triple_fault;
 
     mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
@@ -192,7 +194,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_init_signal()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_INIT_SIGNAL;
+    g_exit_reason = exit_reason::init_signal;
 
     mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
@@ -218,7 +220,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_sipi()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_SIPI;
+    g_exit_reason = exit_reason::sipi;
 
     mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
@@ -244,7 +246,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_smi()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_SMI;
+    g_exit_reason = exit_reason::smi;
 
     mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
@@ -270,7 +272,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_other_smi()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_OTHER_SMI;
+    g_exit_reason = exit_reason::other_smi;
 
     mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
@@ -296,7 +298,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_interrupt_window()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_INTERRUPT_WINDOW;
+    g_exit_reason = exit_reason::interrupt_window;
 
     mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
@@ -322,7 +324,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_nmi_window()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_NMI_WINDOW;
+    g_exit_reason = exit_reason::nmi_window;
 
     mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
@@ -348,7 +350,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_task_switch()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_TASK_SWITCH;
+    g_exit_reason = exit_reason::task_switch;
 
     mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
@@ -375,7 +377,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_cpuid()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_CPUID;
+    g_exit_reason = exit_reason::cpuid;
 
     mocks.NeverCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
@@ -401,7 +403,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_getsec()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_GETSEC;
+    g_exit_reason = exit_reason::getsec;
 
     mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
@@ -427,7 +429,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_hlt()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_HLT;
+    g_exit_reason = exit_reason::hlt;
 
     mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
@@ -453,7 +455,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_invd()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_INVD;
+    g_exit_reason = exit_reason::invd;
 
     mocks.NeverCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::wbinvd);
@@ -480,7 +482,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_invlpg()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_INVLPG;
+    g_exit_reason = exit_reason::invlpg;
 
     mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
@@ -506,7 +508,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_rdpmc()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_RDPMC;
+    g_exit_reason = exit_reason::rdpmc;
 
     mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
@@ -532,7 +534,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_rdtsc()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_RDTSC;
+    g_exit_reason = exit_reason::rdtsc;
 
     mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
@@ -558,7 +560,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_rsm()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_RSM;
+    g_exit_reason = exit_reason::rsm;
 
     mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
@@ -584,7 +586,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_vmcall()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_VMCALL;
+    g_exit_reason = exit_reason::vmcall;
 
     mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
@@ -610,7 +612,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_vmclear()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_VMCLEAR;
+    g_exit_reason = exit_reason::vmclear;
 
     mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
@@ -636,7 +638,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_vmlaunch()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_VMLAUNCH;
+    g_exit_reason = exit_reason::vmlaunch;
 
     mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
@@ -662,7 +664,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_vmptrld()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_VMPTRLD;
+    g_exit_reason = exit_reason::vmptrld;
 
     mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
@@ -688,7 +690,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_vmptrst()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_VMPTRST;
+    g_exit_reason = exit_reason::vmptrst;
 
     mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
@@ -714,7 +716,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_vmread()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_VMREAD;
+    g_exit_reason = exit_reason::vmread;
 
     mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
@@ -740,7 +742,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_vmresume()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_VMRESUME;
+    g_exit_reason = exit_reason::vmresume;
 
     mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
@@ -766,7 +768,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_vmwrite()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_VMWRITE;
+    g_exit_reason = exit_reason::vmwrite;
 
     mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
@@ -792,7 +794,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_vmxoff()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_VMXOFF;
+    g_exit_reason = exit_reason::vmxoff;
 
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::promote);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
@@ -818,7 +820,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_vmxon()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_VMXON;
+    g_exit_reason = exit_reason::vmxon;
 
     mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
@@ -844,7 +846,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_control_register_accesses()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_CONTROL_REGISTER_ACCESSES;
+    g_exit_reason = exit_reason::control_register_accesses;
 
     mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
@@ -870,7 +872,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_mov_dr()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_MOV_DR;
+    g_exit_reason = exit_reason::mov_dr;
 
     mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
@@ -896,7 +898,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_io_instruction()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_IO_INSTRUCTION;
+    g_exit_reason = exit_reason::io_instruction;
 
     mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
@@ -922,7 +924,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_rdmsr_debug_ctl()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_RDMSR;
+    g_exit_reason = exit_reason::rdmsr;
 
     mocks.NeverCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
@@ -955,7 +957,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_rdmsr_pat()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_RDMSR;
+    g_exit_reason = exit_reason::rdmsr;
 
     mocks.NeverCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
@@ -988,7 +990,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_rdmsr_efer()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_RDMSR;
+    g_exit_reason = exit_reason::rdmsr;
 
     mocks.NeverCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
@@ -1021,7 +1023,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_rdmsr_perf()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_RDMSR;
+    g_exit_reason = exit_reason::rdmsr;
 
     mocks.NeverCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
@@ -1054,7 +1056,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_rdmsr_cs()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_RDMSR;
+    g_exit_reason = exit_reason::rdmsr;
 
     mocks.NeverCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
@@ -1087,7 +1089,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_rdmsr_esp()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_RDMSR;
+    g_exit_reason = exit_reason::rdmsr;
 
     mocks.NeverCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
@@ -1120,7 +1122,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_rdmsr_eip()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_RDMSR;
+    g_exit_reason = exit_reason::rdmsr;
 
     mocks.NeverCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
@@ -1153,7 +1155,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_rdmsr_fs_base()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_RDMSR;
+    g_exit_reason = exit_reason::rdmsr;
 
     mocks.NeverCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
@@ -1186,7 +1188,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_rdmsr_gs_base()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_RDMSR;
+    g_exit_reason = exit_reason::rdmsr;
 
     mocks.NeverCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
@@ -1219,7 +1221,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_rdmsr_default()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_RDMSR;
+    g_exit_reason = exit_reason::rdmsr;
 
     mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::read_msr).With(0x10).Return(0x0000000A00000009);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
@@ -1251,7 +1253,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_rdmsr_ignore()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_RDMSR;
+    g_exit_reason = exit_reason::rdmsr;
 
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
     mocks.NeverCall(intrinsics.get(), intrinsics_intel_x64::read_msr).With(0x31);
@@ -1283,7 +1285,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_wrmsr_debug_ctrl()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_WRMSR;
+    g_exit_reason = exit_reason::wrmsr;
 
     mocks.NeverCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
@@ -1316,7 +1318,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_wrmsr_pat()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_WRMSR;
+    g_exit_reason = exit_reason::wrmsr;
 
     mocks.NeverCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
@@ -1349,7 +1351,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_wrmsr_efer()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_WRMSR;
+    g_exit_reason = exit_reason::wrmsr;
 
     mocks.NeverCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
@@ -1382,7 +1384,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_wrmsr_perf()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_WRMSR;
+    g_exit_reason = exit_reason::wrmsr;
 
     mocks.NeverCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
@@ -1415,7 +1417,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_wrmsr_cs()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_WRMSR;
+    g_exit_reason = exit_reason::wrmsr;
 
     mocks.NeverCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
@@ -1448,7 +1450,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_wrmsr_esp()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_WRMSR;
+    g_exit_reason = exit_reason::wrmsr;
 
     mocks.NeverCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
@@ -1481,7 +1483,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_wrmsr_eip()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_WRMSR;
+    g_exit_reason = exit_reason::wrmsr;
 
     mocks.NeverCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
@@ -1514,7 +1516,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_wrmsr_fs_base()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_WRMSR;
+    g_exit_reason = exit_reason::wrmsr;
 
     mocks.NeverCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
@@ -1547,7 +1549,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_wrmsr_gs_base()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_WRMSR;
+    g_exit_reason = exit_reason::wrmsr;
 
     mocks.NeverCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
@@ -1580,7 +1582,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_wrmsr_default()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_WRMSR;
+    g_exit_reason = exit_reason::wrmsr;
 
     mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::write_msr).With(0x10, 0x0000000A00000009);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
@@ -1611,7 +1613,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_vm_entry_failure_invalid_guest_st
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_VM_ENTRY_FAILURE_INVALID_GUEST_STATE;
+    g_exit_reason = exit_reason::vm_entry_failure_invalid_guest_state;
 
     mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
@@ -1637,7 +1639,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_vm_entry_failure_msr_loading()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_VM_ENTRY_FAILURE_MSR_LOADING;
+    g_exit_reason = exit_reason::vm_entry_failure_msr_loading;
 
     mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
@@ -1663,7 +1665,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_mwait()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_MWAIT;
+    g_exit_reason = exit_reason::mwait;
 
     mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
@@ -1689,7 +1691,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_monitor_trap_flag()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_MONITOR_TRAP_FLAG;
+    g_exit_reason = exit_reason::monitor_trap_flag;
 
     mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
@@ -1715,7 +1717,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_monitor()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_MONITOR;
+    g_exit_reason = exit_reason::monitor;
 
     mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
@@ -1741,7 +1743,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_pause()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_PAUSE;
+    g_exit_reason = exit_reason::pause;
 
     mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
@@ -1767,7 +1769,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_vm_entry_failure_machine_check_ev
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_VM_ENTRY_FAILURE_MACHINE_CHECK_EVENT;
+    g_exit_reason = exit_reason::vm_entry_failure_machine_check_event;
 
     mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
@@ -1793,7 +1795,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_tpr_below_threshold()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_TPR_BELOW_THRESHOLD;
+    g_exit_reason = exit_reason::tpr_below_threshold;
 
     mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
@@ -1819,7 +1821,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_apic_access()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_APIC_ACCESS;
+    g_exit_reason = exit_reason::apic_access;
 
     mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
@@ -1845,7 +1847,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_virtualized_eoi()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_VIRTUALIZED_EOI;
+    g_exit_reason = exit_reason::virtualized_eoi;
 
     mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
@@ -1871,7 +1873,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_access_to_gdtr_or_idtr()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_ACCESS_TO_GDTR_OR_IDTR;
+    g_exit_reason = exit_reason::access_to_gdtr_or_idtr;
 
     mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
@@ -1897,7 +1899,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_access_to_ldtr_or_tr()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_ACCESS_TO_LDTR_OR_TR;
+    g_exit_reason = exit_reason::access_to_ldtr_or_tr;
 
     mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
@@ -1923,7 +1925,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_ept_violation()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_EPT_VIOLATION;
+    g_exit_reason = exit_reason::ept_violation;
 
     mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
@@ -1949,7 +1951,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_ept_misconfiguration()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_EPT_MISCONFIGURATION;
+    g_exit_reason = exit_reason::ept_misconfiguration;
 
     mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
@@ -1975,7 +1977,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_invept()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_INVEPT;
+    g_exit_reason = exit_reason::invept;
 
     mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
@@ -2001,7 +2003,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_rdtscp()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_RDTSCP;
+    g_exit_reason = exit_reason::rdtscp;
 
     mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
@@ -2027,7 +2029,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_vmx_preemption_timer_expired()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_VMX_PREEMPTION_TIMER_EXPIRED;
+    g_exit_reason = exit_reason::vmx_preemption_timer_expired;
 
     mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
@@ -2053,7 +2055,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_invvpid()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_INVVPID;
+    g_exit_reason = exit_reason::invvpid;
 
     mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
@@ -2079,7 +2081,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_wbinvd()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_WBINVD;
+    g_exit_reason = exit_reason::wbinvd;
 
     mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
@@ -2105,7 +2107,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_xsetbv()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_XSETBV;
+    g_exit_reason = exit_reason::xsetbv;
 
     mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
@@ -2131,7 +2133,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_apic_write()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_APIC_WRITE;
+    g_exit_reason = exit_reason::apic_write;
 
     mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
@@ -2157,7 +2159,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_rdrand()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_RDRAND;
+    g_exit_reason = exit_reason::rdrand;
 
     mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
@@ -2183,7 +2185,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_invpcid()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_INVPCID;
+    g_exit_reason = exit_reason::invpcid;
 
     mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
@@ -2209,7 +2211,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_vmfunc()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_VMFUNC;
+    g_exit_reason = exit_reason::vmfunc;
 
     mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
@@ -2235,7 +2237,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_rdseed()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_RDSEED;
+    g_exit_reason = exit_reason::rdseed;
 
     mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
@@ -2261,7 +2263,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_xsaves()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_XSAVES;
+    g_exit_reason = exit_reason::xsaves;
 
     mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
@@ -2287,7 +2289,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_xrstors()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_XRSTORS | 0x80000000;
+    g_exit_reason = exit_reason::xrstors | 0x80000000;
 
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::check_vmcs_control_state);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::check_vmcs_guest_state);
@@ -2301,74 +2303,72 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_xrstors()
     });
 }
 
-#define STRINGIFY_MACRO(a) std::string(#a)
-
 void
 exit_handler_intel_x64_ut::test_vm_exit_reason_to_string()
 {
     auto eh = std::make_unique<exit_handler_intel_x64>();
 
-    EXPECT_TRUE(eh->exit_reason_to_str(VM_EXIT_REASON_EXCEPTION_OR_NON_MASKABLE_INTERRUPT) == STRINGIFY_MACRO(VM_EXIT_REASON_EXCEPTION_OR_NON_MASKABLE_INTERRUPT));
-    EXPECT_TRUE(eh->exit_reason_to_str(VM_EXIT_REASON_EXTERNAL_INTERRUPT) == STRINGIFY_MACRO(VM_EXIT_REASON_EXTERNAL_INTERRUPT));
-    EXPECT_TRUE(eh->exit_reason_to_str(VM_EXIT_REASON_TRIPLE_FAULT) == STRINGIFY_MACRO(VM_EXIT_REASON_TRIPLE_FAULT));
-    EXPECT_TRUE(eh->exit_reason_to_str(VM_EXIT_REASON_INIT_SIGNAL) == STRINGIFY_MACRO(VM_EXIT_REASON_INIT_SIGNAL));
-    EXPECT_TRUE(eh->exit_reason_to_str(VM_EXIT_REASON_SIPI) == STRINGIFY_MACRO(VM_EXIT_REASON_SIPI));
-    EXPECT_TRUE(eh->exit_reason_to_str(VM_EXIT_REASON_SMI) == STRINGIFY_MACRO(VM_EXIT_REASON_SMI));
-    EXPECT_TRUE(eh->exit_reason_to_str(VM_EXIT_REASON_OTHER_SMI) == STRINGIFY_MACRO(VM_EXIT_REASON_OTHER_SMI));
-    EXPECT_TRUE(eh->exit_reason_to_str(VM_EXIT_REASON_INTERRUPT_WINDOW) == STRINGIFY_MACRO(VM_EXIT_REASON_INTERRUPT_WINDOW));
-    EXPECT_TRUE(eh->exit_reason_to_str(VM_EXIT_REASON_NMI_WINDOW) == STRINGIFY_MACRO(VM_EXIT_REASON_NMI_WINDOW));
-    EXPECT_TRUE(eh->exit_reason_to_str(VM_EXIT_REASON_TASK_SWITCH) == STRINGIFY_MACRO(VM_EXIT_REASON_TASK_SWITCH));
-    EXPECT_TRUE(eh->exit_reason_to_str(VM_EXIT_REASON_CPUID) == STRINGIFY_MACRO(VM_EXIT_REASON_CPUID));
-    EXPECT_TRUE(eh->exit_reason_to_str(VM_EXIT_REASON_GETSEC) == STRINGIFY_MACRO(VM_EXIT_REASON_GETSEC));
-    EXPECT_TRUE(eh->exit_reason_to_str(VM_EXIT_REASON_HLT) == STRINGIFY_MACRO(VM_EXIT_REASON_HLT));
-    EXPECT_TRUE(eh->exit_reason_to_str(VM_EXIT_REASON_INVD) == STRINGIFY_MACRO(VM_EXIT_REASON_INVD));
-    EXPECT_TRUE(eh->exit_reason_to_str(VM_EXIT_REASON_INVLPG) == STRINGIFY_MACRO(VM_EXIT_REASON_INVLPG));
-    EXPECT_TRUE(eh->exit_reason_to_str(VM_EXIT_REASON_RDPMC) == STRINGIFY_MACRO(VM_EXIT_REASON_RDPMC));
-    EXPECT_TRUE(eh->exit_reason_to_str(VM_EXIT_REASON_RDTSC) == STRINGIFY_MACRO(VM_EXIT_REASON_RDTSC));
-    EXPECT_TRUE(eh->exit_reason_to_str(VM_EXIT_REASON_RSM) == STRINGIFY_MACRO(VM_EXIT_REASON_RSM));
-    EXPECT_TRUE(eh->exit_reason_to_str(VM_EXIT_REASON_VMCALL) == STRINGIFY_MACRO(VM_EXIT_REASON_VMCALL));
-    EXPECT_TRUE(eh->exit_reason_to_str(VM_EXIT_REASON_VMCLEAR) == STRINGIFY_MACRO(VM_EXIT_REASON_VMCLEAR));
-    EXPECT_TRUE(eh->exit_reason_to_str(VM_EXIT_REASON_VMLAUNCH) == STRINGIFY_MACRO(VM_EXIT_REASON_VMLAUNCH));
-    EXPECT_TRUE(eh->exit_reason_to_str(VM_EXIT_REASON_VMPTRLD) == STRINGIFY_MACRO(VM_EXIT_REASON_VMPTRLD));
-    EXPECT_TRUE(eh->exit_reason_to_str(VM_EXIT_REASON_VMPTRST) == STRINGIFY_MACRO(VM_EXIT_REASON_VMPTRST));
-    EXPECT_TRUE(eh->exit_reason_to_str(VM_EXIT_REASON_VMREAD) == STRINGIFY_MACRO(VM_EXIT_REASON_VMREAD));
-    EXPECT_TRUE(eh->exit_reason_to_str(VM_EXIT_REASON_VMRESUME) == STRINGIFY_MACRO(VM_EXIT_REASON_VMRESUME));
-    EXPECT_TRUE(eh->exit_reason_to_str(VM_EXIT_REASON_VMWRITE) == STRINGIFY_MACRO(VM_EXIT_REASON_VMWRITE));
-    EXPECT_TRUE(eh->exit_reason_to_str(VM_EXIT_REASON_VMXOFF) == STRINGIFY_MACRO(VM_EXIT_REASON_VMXOFF));
-    EXPECT_TRUE(eh->exit_reason_to_str(VM_EXIT_REASON_VMXON) == STRINGIFY_MACRO(VM_EXIT_REASON_VMXON));
-    EXPECT_TRUE(eh->exit_reason_to_str(VM_EXIT_REASON_CONTROL_REGISTER_ACCESSES) == STRINGIFY_MACRO(VM_EXIT_REASON_CONTROL_REGISTER_ACCESSES));
-    EXPECT_TRUE(eh->exit_reason_to_str(VM_EXIT_REASON_MOV_DR) == STRINGIFY_MACRO(VM_EXIT_REASON_MOV_DR));
-    EXPECT_TRUE(eh->exit_reason_to_str(VM_EXIT_REASON_IO_INSTRUCTION) == STRINGIFY_MACRO(VM_EXIT_REASON_IO_INSTRUCTION));
-    EXPECT_TRUE(eh->exit_reason_to_str(VM_EXIT_REASON_RDMSR) == STRINGIFY_MACRO(VM_EXIT_REASON_RDMSR));
-    EXPECT_TRUE(eh->exit_reason_to_str(VM_EXIT_REASON_WRMSR) == STRINGIFY_MACRO(VM_EXIT_REASON_WRMSR));
-    EXPECT_TRUE(eh->exit_reason_to_str(VM_EXIT_REASON_VM_ENTRY_FAILURE_INVALID_GUEST_STATE) == STRINGIFY_MACRO(VM_EXIT_REASON_VM_ENTRY_FAILURE_INVALID_GUEST_STATE));
-    EXPECT_TRUE(eh->exit_reason_to_str(VM_EXIT_REASON_VM_ENTRY_FAILURE_MSR_LOADING) == STRINGIFY_MACRO(VM_EXIT_REASON_VM_ENTRY_FAILURE_MSR_LOADING));
-    EXPECT_TRUE(eh->exit_reason_to_str(VM_EXIT_REASON_MWAIT) == STRINGIFY_MACRO(VM_EXIT_REASON_MWAIT));
-    EXPECT_TRUE(eh->exit_reason_to_str(VM_EXIT_REASON_MONITOR_TRAP_FLAG) == STRINGIFY_MACRO(VM_EXIT_REASON_MONITOR_TRAP_FLAG));
-    EXPECT_TRUE(eh->exit_reason_to_str(VM_EXIT_REASON_MONITOR) == STRINGIFY_MACRO(VM_EXIT_REASON_MONITOR));
-    EXPECT_TRUE(eh->exit_reason_to_str(VM_EXIT_REASON_PAUSE) == STRINGIFY_MACRO(VM_EXIT_REASON_PAUSE));
-    EXPECT_TRUE(eh->exit_reason_to_str(VM_EXIT_REASON_VM_ENTRY_FAILURE_MACHINE_CHECK_EVENT) == STRINGIFY_MACRO(VM_EXIT_REASON_VM_ENTRY_FAILURE_MACHINE_CHECK_EVENT));
-    EXPECT_TRUE(eh->exit_reason_to_str(VM_EXIT_REASON_TPR_BELOW_THRESHOLD) == STRINGIFY_MACRO(VM_EXIT_REASON_TPR_BELOW_THRESHOLD));
-    EXPECT_TRUE(eh->exit_reason_to_str(VM_EXIT_REASON_APIC_ACCESS) == STRINGIFY_MACRO(VM_EXIT_REASON_APIC_ACCESS));
-    EXPECT_TRUE(eh->exit_reason_to_str(VM_EXIT_REASON_VIRTUALIZED_EOI) == STRINGIFY_MACRO(VM_EXIT_REASON_VIRTUALIZED_EOI));
-    EXPECT_TRUE(eh->exit_reason_to_str(VM_EXIT_REASON_ACCESS_TO_GDTR_OR_IDTR) == STRINGIFY_MACRO(VM_EXIT_REASON_ACCESS_TO_GDTR_OR_IDTR));
-    EXPECT_TRUE(eh->exit_reason_to_str(VM_EXIT_REASON_ACCESS_TO_LDTR_OR_TR) == STRINGIFY_MACRO(VM_EXIT_REASON_ACCESS_TO_LDTR_OR_TR));
-    EXPECT_TRUE(eh->exit_reason_to_str(VM_EXIT_REASON_EPT_VIOLATION) == STRINGIFY_MACRO(VM_EXIT_REASON_EPT_VIOLATION));
-    EXPECT_TRUE(eh->exit_reason_to_str(VM_EXIT_REASON_EPT_MISCONFIGURATION) == STRINGIFY_MACRO(VM_EXIT_REASON_EPT_MISCONFIGURATION));
-    EXPECT_TRUE(eh->exit_reason_to_str(VM_EXIT_REASON_INVEPT) == STRINGIFY_MACRO(VM_EXIT_REASON_INVEPT));
-    EXPECT_TRUE(eh->exit_reason_to_str(VM_EXIT_REASON_RDTSCP) == STRINGIFY_MACRO(VM_EXIT_REASON_RDTSCP));
-    EXPECT_TRUE(eh->exit_reason_to_str(VM_EXIT_REASON_VMX_PREEMPTION_TIMER_EXPIRED) == STRINGIFY_MACRO(VM_EXIT_REASON_VMX_PREEMPTION_TIMER_EXPIRED));
-    EXPECT_TRUE(eh->exit_reason_to_str(VM_EXIT_REASON_INVVPID) == STRINGIFY_MACRO(VM_EXIT_REASON_INVVPID));
-    EXPECT_TRUE(eh->exit_reason_to_str(VM_EXIT_REASON_WBINVD) == STRINGIFY_MACRO(VM_EXIT_REASON_WBINVD));
-    EXPECT_TRUE(eh->exit_reason_to_str(VM_EXIT_REASON_XSETBV) == STRINGIFY_MACRO(VM_EXIT_REASON_XSETBV));
-    EXPECT_TRUE(eh->exit_reason_to_str(VM_EXIT_REASON_APIC_WRITE) == STRINGIFY_MACRO(VM_EXIT_REASON_APIC_WRITE));
-    EXPECT_TRUE(eh->exit_reason_to_str(VM_EXIT_REASON_RDRAND) == STRINGIFY_MACRO(VM_EXIT_REASON_RDRAND));
-    EXPECT_TRUE(eh->exit_reason_to_str(VM_EXIT_REASON_INVPCID) == STRINGIFY_MACRO(VM_EXIT_REASON_INVPCID));
-    EXPECT_TRUE(eh->exit_reason_to_str(VM_EXIT_REASON_VMFUNC) == STRINGIFY_MACRO(VM_EXIT_REASON_VMFUNC));
-    EXPECT_TRUE(eh->exit_reason_to_str(VM_EXIT_REASON_RDSEED) == STRINGIFY_MACRO(VM_EXIT_REASON_RDSEED));
-    EXPECT_TRUE(eh->exit_reason_to_str(VM_EXIT_REASON_XSAVES) == STRINGIFY_MACRO(VM_EXIT_REASON_XSAVES));
-    EXPECT_TRUE(eh->exit_reason_to_str(VM_EXIT_REASON_XRSTORS) == STRINGIFY_MACRO(VM_EXIT_REASON_XRSTORS));
-    EXPECT_TRUE(eh->exit_reason_to_str(0x100000) == STRINGIFY_MACRO(UNKNOWN));
+    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::exception_or_non_maskable_interrupt) == "exception_or_non_maskable_interrupt"_s);
+    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::external_interrupt) == "external_interrupt"_s);
+    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::triple_fault) == "triple_fault"_s);
+    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::init_signal) == "init_signal"_s);
+    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::sipi) == "sipi"_s);
+    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::smi) == "smi"_s);
+    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::other_smi) == "other_smi"_s);
+    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::interrupt_window) == "interrupt_window"_s);
+    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::nmi_window) == "nmi_window"_s);
+    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::task_switch) == "task_switch"_s);
+    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::cpuid) == "cpuid"_s);
+    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::getsec) == "getsec"_s);
+    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::hlt) == "hlt"_s);
+    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::invd) == "invd"_s);
+    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::invlpg) == "invlpg"_s);
+    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::rdpmc) == "rdpmc"_s);
+    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::rdtsc) == "rdtsc"_s);
+    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::rsm) == "rsm"_s);
+    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::vmcall) == "vmcall"_s);
+    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::vmclear) == "vmclear"_s);
+    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::vmlaunch) == "vmlaunch"_s);
+    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::vmptrld) == "vmptrld"_s);
+    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::vmptrst) == "vmptrst"_s);
+    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::vmread) == "vmread"_s);
+    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::vmresume) == "vmresume"_s);
+    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::vmwrite) == "vmwrite"_s);
+    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::vmxoff) == "vmxoff"_s);
+    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::vmxon) == "vmxon"_s);
+    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::control_register_accesses) == "control_register_accesses"_s);
+    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::mov_dr) == "mov_dr"_s);
+    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::io_instruction) == "io_instruction"_s);
+    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::rdmsr) == "rdmsr"_s);
+    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::wrmsr) == "wrmsr"_s);
+    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::vm_entry_failure_invalid_guest_state) == "vm_entry_failure_invalid_guest_state"_s);
+    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::vm_entry_failure_msr_loading) == "vm_entry_failure_msr_loading"_s);
+    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::mwait) == "mwait"_s);
+    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::monitor_trap_flag) == "monitor_trap_flag"_s);
+    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::monitor) == "monitor"_s);
+    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::pause) == "pause"_s);
+    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::vm_entry_failure_machine_check_event) == "vm_entry_failure_machine_check_event"_s);
+    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::tpr_below_threshold) == "tpr_below_threshold"_s);
+    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::apic_access) == "apic_access"_s);
+    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::virtualized_eoi) == "virtualized_eoi"_s);
+    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::access_to_gdtr_or_idtr) == "access_to_gdtr_or_idtr"_s);
+    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::access_to_ldtr_or_tr) == "access_to_ldtr_or_tr"_s);
+    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::ept_violation) == "ept_violation"_s);
+    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::ept_misconfiguration) == "ept_misconfiguration"_s);
+    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::invept) == "invept"_s);
+    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::rdtscp) == "rdtscp"_s);
+    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::vmx_preemption_timer_expired) == "vmx_preemption_timer_expired"_s);
+    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::invvpid) == "invvpid"_s);
+    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::wbinvd) == "wbinvd"_s);
+    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::xsetbv) == "xsetbv"_s);
+    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::apic_write) == "apic_write"_s);
+    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::rdrand) == "rdrand"_s);
+    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::invpcid) == "invpcid"_s);
+    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::vmfunc) == "vmfunc"_s);
+    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::rdseed) == "rdseed"_s);
+    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::xsaves) == "xsaves"_s);
+    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::xrstors) == "xrstors"_s);
+    EXPECT_TRUE(eh->exit_reason_to_str(0x100000) == "unknown"_s);
 }
 
 void
@@ -2406,7 +2406,7 @@ exit_handler_intel_x64_ut::test_vmread_failure()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_RDMSR;
+    g_exit_reason = exit_reason::rdmsr;
 
     mocks.NeverCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.NeverCall(vmcs.get(), vmcs_intel_x64::resume);
@@ -2435,7 +2435,7 @@ exit_handler_intel_x64_ut::test_vmwrite_failure()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
-    g_exit_reason = VM_EXIT_REASON_WRMSR;
+    g_exit_reason = exit_reason::wrmsr;
 
     mocks.NeverCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.NeverCall(vmcs.get(), vmcs_intel_x64::resume);

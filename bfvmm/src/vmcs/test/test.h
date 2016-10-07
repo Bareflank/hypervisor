@@ -131,6 +131,27 @@ private:
     void test_vmcs_host_fs_selector();
     void test_vmcs_host_gs_selector();
     void test_vmcs_host_tr_selector();
+    void test_vmcs_guest_rflags();
+    void test_vmcs_guest_rflags_carry_flag();
+    void test_vmcs_guest_rflags_parity_flag();
+    void test_vmcs_guest_rflags_auxiliary_carry_flag();
+    void test_vmcs_guest_rflags_zero_flag();
+    void test_vmcs_guest_rflags_sign_flag();
+    void test_vmcs_guest_rflags_trap_flag();
+    void test_vmcs_guest_rflags_interrupt_enable_flag();
+    void test_vmcs_guest_rflags_direction_flag();
+    void test_vmcs_guest_rflags_overflow_flag();
+    void test_vmcs_guest_rflags_privilege_level();
+    void test_vmcs_guest_rflags_nested_task();
+    void test_vmcs_guest_rflags_resume_flag();
+    void test_vmcs_guest_rflags_virtual_8086_mode();
+    void test_vmcs_guest_rflags_alignment_check_access_control();
+    void test_vmcs_guest_rflags_virtual_interupt_flag();
+    void test_vmcs_guest_rflags_virtual_interupt_pending();
+    void test_vmcs_guest_rflags_id_flag();
+    void test_vmcs_guest_rflags_reserved();
+    void test_vmcs_guest_rflags_always_disabled();
+    void test_vmcs_guest_rflags_always_enabled();
 
     void test_check_control_pin_based_ctls_reserved_properly_set();
     void test_check_control_proc_based_ctls_reserved_properly_set();

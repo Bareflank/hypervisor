@@ -359,7 +359,7 @@ vmcs_intel_x64::write_natural_guest_state(const std::shared_ptr<vmcs_intel_x64_s
     vmwrite(VMCS_GUEST_IDTR_BASE, state->idt_base());
 
     vmwrite(VMCS_GUEST_DR7, state->dr7());
-    vmwrite(VMCS_GUEST_RFLAGS, state->rflags());
+    vmwrite(vmcs::guest_rflags::addr, state->rflags());
 
     vmwrite(VMCS_GUEST_IA32_SYSENTER_ESP, state->ia32_sysenter_esp_msr());
     vmwrite(VMCS_GUEST_IA32_SYSENTER_EIP, state->ia32_sysenter_eip_msr());

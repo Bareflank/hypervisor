@@ -24,6 +24,7 @@
 
 #include <stdint.h>
 #include <intrinsics/x64.h>
+#include <intrinsics/rflags_x64.h>
 
 // -----------------------------------------------------------------------------
 // Intrinsics
@@ -289,26 +290,6 @@ public:
 #define SEGMENT_ACCESS_RIGHTS_DB                                    (0x4000)
 #define SEGMENT_ACCESS_RIGHTS_GRANULARITY                           (0x8000)
 #define SEGMENT_ACCESS_RIGHTS_GRANULARITY_PAGES                     (0x8000)
-
-// RFLAGS
-// 64-ia-32-architectures-software-developer-manual, section 3.4.3
-#define RFLAGS_CF_CARRY_FLAG                                        (1ULL << 0)
-#define RFLAGS_PF_PARITY_FLAG                                       (1ULL << 2)
-#define RFLAGS_AF_AUXILIARY_CARRY_FLAG                              (1ULL << 4)
-#define RFLAGS_ZF_ZERO_FLAG                                         (1ULL << 6)
-#define RFLAGS_SF_SIGN_FLAG                                         (1ULL << 7)
-#define RFLAGS_TF_TRAP_FLAG                                         (1ULL << 8)
-#define RFLAGS_IF_INTERRUPT_ENABLE_FLAG                             (1ULL << 9)
-#define RFLAGS_DF_DIRECTION_FLAG                                    (1ULL << 10)
-#define RFLAGS_OF_OVERFLOW_FLAG                                     (1ULL << 11)
-#define RFLAGS_IOPL_PRIVILEGE_LEVEL                                 (3ULL << 12)
-#define RFLAGS_NT_NESTED_TASK                                       (1ULL << 14)
-#define RFLAGS_RF_RESUME_FLAG                                       (1ULL << 16)
-#define RFLAGS_VM_VIRTUAL_8086_MODE                                 (1ULL << 17)
-#define RFLAGS_AC_ALIGNMENT_CHECK_ACCESS_CONTROL                    (1ULL << 18)
-#define RFLAGS_VIF_VIRTUAL_INTERUPT_FLAG                            (1ULL << 19)
-#define RFLAGS_VIP_VIRTUAL_INTERUPT_PENDING                         (1ULL << 20)
-#define RFLAGS_ID_ID_FLAG                                           (1ULL << 21)
 
 // CR0
 // 64-ia-32-architectures-software-developer-manual, section 2.5

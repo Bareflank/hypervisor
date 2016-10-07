@@ -137,10 +137,11 @@ protected:
     virtual void handle_xrstors();
 
     virtual void advance_rip();
-    void unimplemented_handler();
+    virtual void unimplemented_handler();
 
-    const char *exit_reason_to_str(uint64_t exit_reason);
+    virtual std::string exit_reason_to_str(uint64_t exit_reason);
 
+    // REMOVE ME:
     virtual uint64_t vmread(uint64_t field) const;
     virtual void vmwrite(uint64_t field, uint64_t value);
 
@@ -150,6 +151,7 @@ protected:
     friend class vcpu_intel_x64;
     friend class exit_handler_intel_x64_ut;
 
+    // REMOVE ME:
     std::shared_ptr<intrinsics_intel_x64> m_intrinsics;
 
     uint64_t m_exit_reason;
@@ -168,5 +170,80 @@ private:
     virtual void set_state_save(const std::shared_ptr<state_save_intel_x64> &state_save)
     { m_state_save = state_save; }
 };
+
+// -----------------------------------------------------------------------------
+// Exit Handler Exit Reasons
+// -----------------------------------------------------------------------------
+
+// *INDENT-OFF*
+
+namespace intel_x64
+{
+namespace exit_reason
+{
+    constexpr const auto exception_or_non_maskable_interrupt            = 0UL;
+    constexpr const auto external_interrupt                             = 1UL;
+    constexpr const auto triple_fault                                   = 2UL;
+    constexpr const auto init_signal                                    = 3UL;
+    constexpr const auto sipi                                           = 4UL;
+    constexpr const auto smi                                            = 5UL;
+    constexpr const auto other_smi                                      = 6UL;
+    constexpr const auto interrupt_window                               = 7UL;
+    constexpr const auto nmi_window                                     = 8UL;
+    constexpr const auto task_switch                                    = 9UL;
+    constexpr const auto cpuid                                          = 10UL;
+    constexpr const auto getsec                                         = 11UL;
+    constexpr const auto hlt                                            = 12UL;
+    constexpr const auto invd                                           = 13UL;
+    constexpr const auto invlpg                                         = 14UL;
+    constexpr const auto rdpmc                                          = 15UL;
+    constexpr const auto rdtsc                                          = 16UL;
+    constexpr const auto rsm                                            = 17UL;
+    constexpr const auto vmcall                                         = 18UL;
+    constexpr const auto vmclear                                        = 19UL;
+    constexpr const auto vmlaunch                                       = 20UL;
+    constexpr const auto vmptrld                                        = 21UL;
+    constexpr const auto vmptrst                                        = 22UL;
+    constexpr const auto vmread                                         = 23UL;
+    constexpr const auto vmresume                                       = 24UL;
+    constexpr const auto vmwrite                                        = 25UL;
+    constexpr const auto vmxoff                                         = 26UL;
+    constexpr const auto vmxon                                          = 27UL;
+    constexpr const auto control_register_accesses                      = 28UL;
+    constexpr const auto mov_dr                                         = 29UL;
+    constexpr const auto io_instruction                                 = 30UL;
+    constexpr const auto rdmsr                                          = 31UL;
+    constexpr const auto wrmsr                                          = 32UL;
+    constexpr const auto vm_entry_failure_invalid_guest_state           = 33UL;
+    constexpr const auto vm_entry_failure_msr_loading                   = 34UL;
+    constexpr const auto mwait                                          = 36UL;
+    constexpr const auto monitor_trap_flag                              = 37UL;
+    constexpr const auto monitor                                        = 39UL;
+    constexpr const auto pause                                          = 40UL;
+    constexpr const auto vm_entry_failure_machine_check_event           = 41UL;
+    constexpr const auto tpr_below_threshold                            = 43UL;
+    constexpr const auto apic_access                                    = 44UL;
+    constexpr const auto virtualized_eoi                                = 45UL;
+    constexpr const auto access_to_gdtr_or_idtr                         = 46UL;
+    constexpr const auto access_to_ldtr_or_tr                           = 47UL;
+    constexpr const auto ept_violation                                  = 48UL;
+    constexpr const auto ept_misconfiguration                           = 49UL;
+    constexpr const auto invept                                         = 50UL;
+    constexpr const auto rdtscp                                         = 51UL;
+    constexpr const auto vmx_preemption_timer_expired                   = 52UL;
+    constexpr const auto invvpid                                        = 53UL;
+    constexpr const auto wbinvd                                         = 54UL;
+    constexpr const auto xsetbv                                         = 55UL;
+    constexpr const auto apic_write                                     = 56UL;
+    constexpr const auto rdrand                                         = 57UL;
+    constexpr const auto invpcid                                        = 58UL;
+    constexpr const auto vmfunc                                         = 59UL;
+    constexpr const auto rdseed                                         = 61UL;
+    constexpr const auto xsaves                                         = 63UL;
+    constexpr const auto xrstors                                        = 64UL;
+}
+}
+
+// *INDENT-ON*
 
 #endif

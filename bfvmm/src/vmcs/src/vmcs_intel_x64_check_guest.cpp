@@ -1652,24 +1652,23 @@ vmcs_intel_x64::check_guest_rip_valid_addr()
 void
 vmcs_intel_x64::check_guest_rflags_reserved_bits()
 {
-    auto rflags = vmread(VMCS_GUEST_RFLAGS);
+    if (vmcs::guest_rflags::reserved::get() != 0)
+        throw std::logic_error("reserved bits in rflags must be 0");
 
-    if ((rflags & 0xFFFFFFFFFFC08028) != 0 || (rflags & 0x2) == 0)
-        throw std::logic_error("reserved bits in rflags must be 0, and bit 1 must be 1");
+    if (vmcs::guest_rflags::always_enabled::get() != 1)
+        throw std::logic_error("always enabled bits in rflags must be 1");
 }
 
 void
 vmcs_intel_x64::check_guest_rflags_vm_bit()
 {
     auto cr0 = vmread(VMCS_GUEST_CR0);
-    auto rflags = vmread(VMCS_GUEST_RFLAGS);
-
     auto pe = cr0 & CRO_PE_PROTECTION_ENABLE;
 
     if (!is_enabled_ia_32e_mode_guest() && pe == 1)
         return;
 
-    if ((rflags & RFLAGS_VM_VIRTUAL_8086_MODE) != 0)
+    if (vmcs::guest_rflags::virtual_8086_mode::get() != 0)
         throw std::logic_error("rflags VM must be 0 if ia 32e mode is 1 or PE is 0");
 }
 
@@ -1687,9 +1686,7 @@ vmcs_intel_x64::check_guest_rflag_interrupt_enable()
     if (type != VM_INTERRUPTION_TYPE_EXTERNAL)
         return;
 
-    auto rflags = vmread(VMCS_GUEST_RFLAGS);
-
-    if ((rflags & RFLAGS_IF_INTERRUPT_ENABLE_FLAG) == 0)
+    if (vmcs::guest_rflags::interrupt_enable_flag::get() == 0)
         throw std::logic_error("rflags IF must be 1 if the valid bit is 1 and interrupt type is external");
 }
 
@@ -1906,9 +1903,7 @@ vmcs_intel_x64::check_guest_interruptability_state_sti()
     auto interruptability_state =
         vmread(VMCS_GUEST_INTERRUPTIBILITY_STATE);
 
-    auto rflags = vmread(VMCS_GUEST_RFLAGS);
-
-    if ((rflags & RFLAGS_IF_INTERRUPT_ENABLE_FLAG) != 0)
+    if (vmcs::guest_rflags::interrupt_enable_flag::get() != 0)
         return;
 
     auto sti = interruptability_state & VM_INTERRUPTABILITY_STATE_STI;
@@ -2062,10 +2057,9 @@ vmcs_intel_x64::check_guest_pending_debug_exceptions_dbg_ctl()
 
     auto bs = pending_debug_exceptions & PENDING_DEBUG_EXCEPTION_BS;
 
-    auto rflags = vmread(VMCS_GUEST_RFLAGS);
     auto vmcs_ia32_debugctl = vmread(VMCS_GUEST_IA32_DEBUGCTL_FULL);
 
-    auto tf = rflags & RFLAGS_TF_TRAP_FLAG;
+    auto tf = vmcs::guest_rflags::trap_flag::get();
     auto btf = vmcs_ia32_debugctl & IA32_DEBUGCTL_BTF;
 
     if (bs == 0 && tf != 0 && btf == 0)

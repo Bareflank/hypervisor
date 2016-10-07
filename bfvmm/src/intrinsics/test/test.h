@@ -188,6 +188,28 @@ private:
     void test_ia32_vmx_true_entry_ctls_load_ia32_pat();
     void test_ia32_vmx_true_entry_ctls_load_ia32_efer();
     void test_ia32_vmx_vmfunc();
+
+    void test_rflags_x64();
+    void test_rflags_x64_carry_flag();
+    void test_rflags_x64_parity_flag();
+    void test_rflags_x64_auxiliary_carry_flag();
+    void test_rflags_x64_zero_flag();
+    void test_rflags_x64_sign_flag();
+    void test_rflags_x64_trap_flag();
+    void test_rflags_x64_interrupt_enable_flag();
+    void test_rflags_x64_direction_flag();
+    void test_rflags_x64_overflow_flag();
+    void test_rflags_x64_privilege_level();
+    void test_rflags_x64_nested_task();
+    void test_rflags_x64_resume_flag();
+    void test_rflags_x64_virtual_8086_mode();
+    void test_rflags_x64_alignment_check_access_control();
+    void test_rflags_x64_virtual_interupt_flag();
+    void test_rflags_x64_virtual_interupt_pending();
+    void test_rflags_x64_id_flag();
+    void test_rflags_x64_reserved();
+    void test_rflags_x64_always_disabled();
+    void test_rflags_x64_always_enabled();
 };
 
 #endif
