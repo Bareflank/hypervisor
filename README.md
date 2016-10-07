@@ -119,6 +119,11 @@ Checkout the latest demo for how to compile, use and extend the
 Bareflank Hypervisor
 
 [![Bareflank Demonstration Video](http://img.youtube.com/vi/YgQdECPzDkQ/0.jpg)](https://www.youtube.com/watch?v=YgQdECPzDkQ)
+
+## Additional Videos
+
+CppCon 2016: Making C++ and the STL Work in the Linux / Windows Kernels <br>
+
 [![CppCon 2016](http://img.youtube.com/vi/uQSQy-7lveQ/0.jpg)](https://www.youtube.com/watch?v=uQSQy-7lveQ)
 
 ## Compilation Instructions
