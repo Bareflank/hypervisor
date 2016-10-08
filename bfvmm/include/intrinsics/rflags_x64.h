@@ -23,6 +23,7 @@
 #define RFLAGS_X64_H
 
 extern "C" uint64_t __read_rflags(void) noexcept;
+extern "C" void __write_rflags(uint64_t val) noexcept;
 
 // *INDENT-OFF*
 

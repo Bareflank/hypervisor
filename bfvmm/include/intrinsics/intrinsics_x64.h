@@ -42,22 +42,10 @@ extern "C" uint32_t __cpuid_ecx(uint32_t val) noexcept;
 extern "C" uint32_t __cpuid_edx(uint32_t val) noexcept;
 extern "C" void __cpuid(uint64_t *rax, uint64_t *rbx, uint64_t *rcx, uint64_t *rdx) noexcept;
 
-extern "C" uint64_t __read_rflags(void) noexcept;
-extern "C" void __write_rflags(uint64_t val) noexcept;
-
 extern "C" uint64_t __read_msr(uint32_t msr) noexcept;
 extern "C" void __write_msr(uint32_t msr, uint64_t val) noexcept;
 
 extern "C" uint64_t __read_rip(void) noexcept;
-
-extern "C" uint64_t __read_cr0(void) noexcept;
-extern "C" void __write_cr0(uint64_t val) noexcept;
-
-extern "C" uint64_t __read_cr3(void) noexcept;
-extern "C" void __write_cr3(uint64_t val) noexcept;
-
-extern "C" uint64_t __read_cr4(void) noexcept;
-extern "C" void __write_cr4(uint64_t val) noexcept;
 
 extern "C" uint64_t __read_dr7(void) noexcept;
 extern "C" void __write_dr7(uint64_t val) noexcept;
@@ -148,12 +136,6 @@ public:
                        uint64_t *rdx) const noexcept
     { __cpuid(rax, rbx, rcx, rdx); }
 
-    virtual uint64_t read_rflags() const noexcept
-    { return __read_rflags(); }
-
-    virtual void write_rflags(uint64_t val) const noexcept
-    { __write_rflags(val); }
-
     virtual uint64_t read_msr(uint32_t msr) const noexcept
     { return __read_msr(msr); }
 
@@ -162,24 +144,6 @@ public:
 
     virtual uint64_t read_rip() const noexcept
     { return __read_rip(); }
-
-    virtual uint64_t read_cr0() const noexcept
-    { return __read_cr0(); }
-
-    virtual void write_cr0(uint64_t val) const noexcept
-    { __write_cr0(val); }
-
-    virtual uint64_t read_cr3() const noexcept
-    { return __read_cr3(); }
-
-    virtual void write_cr3(uint64_t val) const noexcept
-    { __write_cr3(val); }
-
-    virtual uint64_t read_cr4() const noexcept
-    { return __read_cr4(); }
-
-    virtual void write_cr4(uint64_t val) const noexcept
-    { __write_cr4(val); }
 
     virtual uint64_t read_dr7() const noexcept
     { return __read_dr7(); }
@@ -291,42 +255,6 @@ public:
 #define SEGMENT_ACCESS_RIGHTS_GRANULARITY                           (0x8000)
 #define SEGMENT_ACCESS_RIGHTS_GRANULARITY_PAGES                     (0x8000)
 
-// CR0
-// 64-ia-32-architectures-software-developer-manual, section 2.5
-#define CRO_PE_PROTECTION_ENABLE                                    (1ULL << 0)
-#define CR0_MP_MONITOR_COPROCESSOR                                  (1ULL << 1)
-#define CR0_EM_EMULATION                                            (1ULL << 2)
-#define CR0_TS_TASK_SWITCHED                                        (1ULL << 3)
-#define CR0_ET_EXTENSION_TYPE                                       (1ULL << 4)
-#define CR0_NE_NUMERIC_ERROR                                        (1ULL << 5)
-#define CR0_WP_WRITE_PROTECT                                        (1ULL << 16)
-#define CR0_AM_ALIGNMENT_MASK                                       (1ULL << 18)
-#define CR0_NW_NOT_WRITE_THROUGH                                    (1ULL << 29)
-#define CR0_CD_CACHE_DISABLE                                        (1ULL << 30)
-#define CR0_PG_PAGING                                               (1ULL << 31)
-
-// CR4
-// 64-ia-32-architectures-software-developer-manual, section 2.5
-#define CR4_VME_VIRTUAL8086_MODE_EXTENSIONS                         (1ULL << 0)
-#define CR4_PVI_PROTECTED_MODE_VIRTUAL_INTERRUPTS                   (1ULL << 1)
-#define CR4_TSD_TIME_STAMP_DISABLE                                  (1ULL << 2)
-#define CR4_DE_DEBUGGING_EXTENSIONS                                 (1ULL << 3)
-#define CR4_PSE_PAGE_SIZE_EXTENSIONS                                (1ULL << 4)
-#define CR4_PAE_PHYSICAL_ADDRESS_EXTENSIONS                         (1ULL << 5)
-#define CR4_MACHINE_CHECK_ENABLE                                    (1ULL << 6)
-#define CR4_PGE_PAGE_GLOBAL_ENABLE                                  (1ULL << 7)
-#define CR4_PCE_PERFORMANCE_MONITOR_COUNTER_ENABLE                  (1ULL << 8)
-#define CR4_OSFXSR                                                  (1ULL << 9)
-#define CR4_OSXMMEXCPT                                              (1ULL << 10)
-#define CR4_VMXE_VMX_ENABLE_BIT                                     (1ULL << 13)
-#define CR4_SMXE_SMX_ENABLE_BIT                                     (1ULL << 14)
-#define CR4_FSGSBASE_ENABLE_BIT                                     (1ULL << 16)
-#define CR4_PCIDE_PCID_ENABLE_BIT                                   (1ULL << 17)
-#define CR4_OSXSAVE                                                 (1ULL << 18)
-#define CR4_SMEP_SMEP_ENABLE_BIT                                    (1ULL << 20)
-#define CR4_SMAP_SMAP_ENABLE_BIT                                    (1ULL << 21)
-#define CR4_PKE_PROTECTION_KEY_ENABLE_BIT                           (1ULL << 22)
-
 // 64-ia-32-architectures-software-developer-manual, section 35.1
 // IA-32 Architectural MSRs
 #define IA32_PERF_GLOBAL_CTRL_MSR                                   0x0000038F
@@ -384,12 +312,5 @@ public:
 #define IA32_EFER_LME                                               (1ULL << 8)
 #define IA32_EFER_LMA                                               (1ULL << 10)
 #define IA32_EFER_NXE                                               (1ULL << 11)
-
-// Serial COM Port Addresses
-// http://wiki.osdev.org/Serial_Ports
-#define COM1_PORT                                                   0x3f8
-#define COM2_PORT                                                   0x2f8
-#define COM3_PORT                                                   0x3e8
-#define COM4_PORT                                                   0x2e8
 
 #endif

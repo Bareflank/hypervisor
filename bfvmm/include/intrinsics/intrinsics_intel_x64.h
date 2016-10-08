@@ -24,6 +24,7 @@
 
 #include <stdint.h>
 #include <iostream>
+#include <intrinsics/crs_intel_x64.h>
 #include <intrinsics/msrs_intel_x64.h>
 #include <intrinsics/intrinsics_x64.h>
 

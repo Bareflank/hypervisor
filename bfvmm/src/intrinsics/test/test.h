@@ -210,6 +210,41 @@ private:
     void test_rflags_x64_reserved();
     void test_rflags_x64_always_disabled();
     void test_rflags_x64_always_enabled();
+
+    void test_cr0();
+    void test_cr0_protection_enable();
+    void test_cr0_monitor_coprocessor();
+    void test_cr0_emulation();
+    void test_cr0_task_switched();
+    void test_cr0_extension_type();
+    void test_cr0_numeric_error();
+    void test_cr0_write_protect();
+    void test_cr0_alignment_mask();
+    void test_cr0_not_write_through();
+    void test_cr0_cache_disable();
+    void test_cr0_paging();
+    void test_cr3();
+    void test_cr4();
+    void test_cr4_v8086_mode_extensions();
+    void test_cr4_protected_mode_virtual_interrupts();
+    void test_cr4_time_stamp_disable();
+    void test_cr4_debugging_extensions();
+    void test_cr4_page_size_extensions();
+    void test_cr4_physical_address_extensions();
+    void test_cr4_machine_check_enable();
+    void test_cr4_page_global_enable();
+    void test_cr4_performance_monitor_counter_enable();
+    void test_cr4_osfxsr();
+    void test_cr4_osxmmexcpt();
+    void test_cr4_vmx_enable_bit();
+    void test_cr4_smx_enable_bit();
+    void test_cr4_fsgsbase_enable_bit();
+    void test_cr4_pcid_enable_bit();
+    void test_cr4_osxsave();
+    void test_cr4_smep_enable_bit();
+    void test_cr4_smap_enable_bit();
+    void test_cr4_protection_key_enable_bit();
+
 };
 
 #endif

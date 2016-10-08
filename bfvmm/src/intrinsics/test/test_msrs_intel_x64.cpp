@@ -28,9 +28,7 @@ std::map<uint32_t, uint64_t> g_msrs;
 
 extern "C" uint64_t
 __read_msr(uint32_t msr) noexcept
-{
-    return g_msrs[msr];
-}
+{ return g_msrs[msr]; }
 
 void
 intrinsics_ut::test_ia32_feature_control()

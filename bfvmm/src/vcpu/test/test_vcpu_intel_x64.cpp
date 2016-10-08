@@ -25,6 +25,22 @@
 #include <debug_ring/debug_ring.h>
 #include <memory_manager/memory_manager.h>
 
+extern "C" uint64_t
+__read_cr0(void) noexcept
+{ return 0; }
+
+extern "C" uint64_t
+__read_cr3(void) noexcept
+{ return 0; }
+
+extern "C" uint64_t
+__read_cr4(void) noexcept
+{ return 0; }
+
+extern "C" uint64_t
+__read_rflags(void) noexcept
+{ return 0; }
+
 static uintptr_t
 virtptr_to_physint(void *ptr)
 {
@@ -109,12 +125,7 @@ vcpu_ut::test_vcpu_intel_x64_init_null_params_valid_intrinsics()
     mocks.OnCall(in.get(), intrinsics_intel_x64::read_ldtr).Return(0);
     mocks.OnCall(in.get(), intrinsics_intel_x64::read_tr).Return(0);
 
-    mocks.OnCall(in.get(), intrinsics_intel_x64::read_cr0).Return(0);
-    mocks.OnCall(in.get(), intrinsics_intel_x64::read_cr3).Return(0);
-    mocks.OnCall(in.get(), intrinsics_intel_x64::read_cr4).Return(0);
     mocks.OnCall(in.get(), intrinsics_intel_x64::read_dr7).Return(0);
-
-    mocks.OnCall(in.get(), intrinsics_intel_x64::read_rflags).Return(0);
 
     mocks.OnCall(in.get(), intrinsics_intel_x64::read_gdt);
     mocks.OnCall(in.get(), intrinsics_intel_x64::read_idt);
@@ -234,12 +245,7 @@ vcpu_ut::test_vcpu_intel_x64_fini_null_params_valid_intrinsics()
     mocks.OnCall(in.get(), intrinsics_intel_x64::read_ldtr).Return(0);
     mocks.OnCall(in.get(), intrinsics_intel_x64::read_tr).Return(0);
 
-    mocks.OnCall(in.get(), intrinsics_intel_x64::read_cr0).Return(0);
-    mocks.OnCall(in.get(), intrinsics_intel_x64::read_cr3).Return(0);
-    mocks.OnCall(in.get(), intrinsics_intel_x64::read_cr4).Return(0);
     mocks.OnCall(in.get(), intrinsics_intel_x64::read_dr7).Return(0);
-
-    mocks.OnCall(in.get(), intrinsics_intel_x64::read_rflags).Return(0);
 
     mocks.OnCall(in.get(), intrinsics_intel_x64::read_gdt);
     mocks.OnCall(in.get(), intrinsics_intel_x64::read_idt);

@@ -21,6 +21,8 @@
 
 #include <vmcs/vmcs_intel_x64_host_vm_state.h>
 
+using namespace intel_x64;
+
 vmcs_intel_x64_host_vm_state::vmcs_intel_x64_host_vm_state(const std::shared_ptr<intrinsics_intel_x64> &intrinsics) :
     m_gdt(std::static_pointer_cast<intrinsics_x64>(intrinsics)),
     m_idt(std::static_pointer_cast<intrinsics_x64>(intrinsics))
@@ -37,6 +39,9 @@ vmcs_intel_x64_host_vm_state::vmcs_intel_x64_host_vm_state(const std::shared_ptr
     m_ldtr = intrinsics->read_ldtr();
     m_tr = intrinsics->read_tr();
 
+    // REMOVE ME: The bit shift should go into the namespace logic. When you
+    // do this, make sure the VMCS logic also has this as it could be useful
+    // there too
     m_es_index = static_cast<uint16_t>(m_es >> 3);
     m_cs_index = static_cast<uint16_t>(m_cs >> 3);
     m_ss_index = static_cast<uint16_t>(m_ss >> 3);
@@ -46,14 +51,12 @@ vmcs_intel_x64_host_vm_state::vmcs_intel_x64_host_vm_state(const std::shared_ptr
     m_ldtr_index = static_cast<uint16_t>(m_ldtr >> 3);
     m_tr_index = static_cast<uint16_t>(m_tr >> 3);
 
-    m_cr0 = intrinsics->read_cr0();
-    m_cr3 = intrinsics->read_cr3();
-    m_cr4 = intrinsics->read_cr4();
+    m_cr0 = cr0::get();
+    m_cr3 = cr3::get();
+    m_cr4 = cr4::get() | cr4::vmx_enable_bit::mask;
     m_dr7 = intrinsics->read_dr7();
 
-    m_cr4 |= CR4_VMXE_VMX_ENABLE_BIT;
-
-    m_rflags = intrinsics->read_rflags();
+    m_rflags = rflags::get();
 
     m_ia32_debugctl_msr = intrinsics->read_msr(IA32_DEBUGCTL_MSR);
     m_ia32_pat_msr = intrinsics->read_msr(IA32_PAT_MSR);

@@ -681,8 +681,8 @@ namespace posted_interrupt_notification_vector
     inline auto get()
     { return vmread(addr, name); }
 
-    template<class T> constexpr auto set(T val)
-    { return vmwrite(addr, val, name); }
+    template<class T> void set(T val)
+    { vmwrite(addr, val, name); }
 
     inline bool is_supported() noexcept
     { return msrs::ia32_vmx_true_pinbased_ctls::process_posted_interrupts::get() == 1; }
@@ -696,8 +696,8 @@ namespace eptp_index
     inline auto get()
     { return vmread(addr, name); }
 
-    template<class T> constexpr auto set(T val)
-    { return vmwrite(addr, val, name); }
+    template<class T> void set(T val)
+    { vmwrite(addr, val, name); }
 
     inline bool is_supported() noexcept
     { return msrs::ia32_vmx_procbased_ctls2::ept_violation_ve::get() == 1; }
@@ -715,8 +715,8 @@ namespace guest_es_selector
     inline auto get()
     { return vmread(addr, name); }
 
-    template<class T> constexpr auto set(T val)
-    { return vmwrite(addr, val, name); }
+    template<class T> void set(T val)
+    { vmwrite(addr, val, name); }
 
     inline bool is_supported() noexcept
     { return true; }
@@ -730,8 +730,8 @@ namespace guest_cs_selector
     inline auto get()
     { return vmread(addr, name); }
 
-    template<class T> constexpr auto set(T val)
-    { return vmwrite(addr, val, name); }
+    template<class T> void set(T val)
+    { vmwrite(addr, val, name); }
 
     inline bool is_supported() noexcept
     { return true; }
@@ -745,8 +745,8 @@ namespace guest_ss_selector
     inline auto get()
     { return vmread(addr, name); }
 
-    template<class T> constexpr auto set(T val)
-    { return vmwrite(addr, val, name); }
+    template<class T> void set(T val)
+    { vmwrite(addr, val, name); }
 
     inline bool is_supported() noexcept
     { return true; }
@@ -760,8 +760,8 @@ namespace guest_ds_selector
     inline auto get()
     { return vmread(addr, name); }
 
-    template<class T> constexpr auto set(T val)
-    { return vmwrite(addr, val, name); }
+    template<class T> void set(T val)
+    { vmwrite(addr, val, name); }
 
     inline bool is_supported() noexcept
     { return true; }
@@ -775,8 +775,8 @@ namespace guest_fs_selector
     inline auto get()
     { return vmread(addr, name); }
 
-    template<class T> constexpr auto set(T val)
-    { return vmwrite(addr, val, name); }
+    template<class T> void set(T val)
+    { vmwrite(addr, val, name); }
 
     inline bool is_supported() noexcept
     { return true; }
@@ -790,8 +790,8 @@ namespace guest_gs_selector
     inline auto get()
     { return vmread(addr, name); }
 
-    template<class T> constexpr auto set(T val)
-    { return vmwrite(addr, val, name); }
+    template<class T> void set(T val)
+    { vmwrite(addr, val, name); }
 
     inline bool is_supported() noexcept
     { return true; }
@@ -805,8 +805,8 @@ namespace guest_ldtr_selector
     inline auto get()
     { return vmread(addr, name); }
 
-    template<class T> constexpr auto set(T val)
-    { return vmwrite(addr, val, name); }
+    template<class T> void set(T val)
+    { vmwrite(addr, val, name); }
 
     inline bool is_supported() noexcept
     { return true; }
@@ -820,8 +820,8 @@ namespace guest_tr_selector
     inline auto get()
     { return vmread(addr, name); }
 
-    template<class T> constexpr auto set(T val)
-    { return vmwrite(addr, val, name); }
+    template<class T> void set(T val)
+    { vmwrite(addr, val, name); }
 
     inline bool is_supported() noexcept
     { return true; }
@@ -835,8 +835,8 @@ namespace guest_interrupt_status
     inline auto get()
     { return vmread(addr, name); }
 
-    template<class T> constexpr auto set(T val)
-    { return vmwrite(addr, val, name); }
+    template<class T> void set(T val)
+    { vmwrite(addr, val, name); }
 
     inline bool is_supported() noexcept
     { return msrs::ia32_vmx_procbased_ctls2::virtual_interrupt_delivery::get() == 1; }
@@ -854,8 +854,8 @@ namespace host_es_selector
     inline auto get()
     { return vmread(addr, name); }
 
-    template<class T> constexpr auto set(T val)
-    { return vmwrite(addr, val, name); }
+    template<class T> void set(T val)
+    { vmwrite(addr, val, name); }
 
     inline bool is_supported() noexcept
     { return true; }
@@ -869,8 +869,8 @@ namespace host_cs_selector
     inline auto get()
     { return vmread(addr, name); }
 
-    template<class T> constexpr auto set(T val)
-    { return vmwrite(addr, val, name); }
+    template<class T> void set(T val)
+    { vmwrite(addr, val, name); }
 
     inline bool is_supported() noexcept
     { return true; }
@@ -884,8 +884,8 @@ namespace host_ss_selector
     inline auto get()
     { return vmread(addr, name); }
 
-    template<class T> constexpr auto set(T val)
-    { return vmwrite(addr, val, name); }
+    template<class T> void set(T val)
+    { vmwrite(addr, val, name); }
 
     inline bool is_supported() noexcept
     { return true; }
@@ -899,8 +899,8 @@ namespace host_ds_selector
     inline auto get()
     { return vmread(addr, name); }
 
-    template<class T> constexpr auto set(T val)
-    { return vmwrite(addr, val, name); }
+    template<class T> void set(T val)
+    { vmwrite(addr, val, name); }
 
     inline bool is_supported() noexcept
     { return true; }
@@ -914,8 +914,8 @@ namespace host_fs_selector
     inline auto get()
     { return vmread(addr, name); }
 
-    template<class T> constexpr auto set(T val)
-    { return vmwrite(addr, val, name); }
+    template<class T> void set(T val)
+    { vmwrite(addr, val, name); }
 
     inline bool is_supported() noexcept
     { return true; }
@@ -929,8 +929,8 @@ namespace host_gs_selector
     inline auto get()
     { return vmread(addr, name); }
 
-    template<class T> constexpr auto set(T val)
-    { return vmwrite(addr, val, name); }
+    template<class T> void set(T val)
+    { vmwrite(addr, val, name); }
 
     inline bool is_supported() noexcept
     { return true; }
@@ -944,8 +944,8 @@ namespace host_tr_selector
     inline auto get()
     { return vmread(addr, name); }
 
-    template<class T> constexpr auto set(T val)
-    { return vmwrite(addr, val, name); }
+    template<class T> void set(T val)
+    { vmwrite(addr, val, name); }
 
     inline bool is_supported() noexcept
     { return true; }
@@ -1144,9 +1144,456 @@ constexpr const auto VMCS_GUEST_LINEAR_ADDRESS                                 =
 // Natural Width Guest State Fields
 // -----------------------------------------------------------------------------
 
-constexpr const auto VMCS_GUEST_CR0                                            = 0x0000000000006800UL;
-constexpr const auto VMCS_GUEST_CR3                                            = 0x0000000000006802UL;
-constexpr const auto VMCS_GUEST_CR4                                            = 0x0000000000006804UL;
+// REMOVE ME
+//
+// Once all of these VMCS fields have been converted over to the new sceme,
+// there should just be one overall namespace. This is only here so that the
+// host crs is in the right order for now, without causing the other
+// definitions from being placed in the namespace.
+//
+namespace intel_x64
+{
+namespace vmcs
+{
+
+namespace guest_cr0
+{
+    constexpr const auto addr = 0x0000000000006800UL;
+    constexpr const auto name = "guest_cr0";
+
+    inline auto get()
+    { return vmread(addr, name); }
+
+    template<class T> void set(T val)
+    { vmwrite(addr, val, name); }
+
+    inline bool is_supported() noexcept
+    { return true; }
+
+    namespace protection_enable
+    {
+        constexpr const auto mask = 0x0000000000000001UL;
+        constexpr const auto from = 0;
+        constexpr const auto name = "protection_enable";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+
+    namespace monitor_coprocessor
+    {
+        constexpr const auto mask = 0x0000000000000002UL;
+        constexpr const auto from = 1;
+        constexpr const auto name = "monitor_coprocessor";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+
+    namespace emulation
+    {
+        constexpr const auto mask = 0x0000000000000004UL;
+        constexpr const auto from = 2;
+        constexpr const auto name = "emulation";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+
+    namespace task_switched
+    {
+        constexpr const auto mask = 0x0000000000000008UL;
+        constexpr const auto from = 3;
+        constexpr const auto name = "task_switched";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+
+    namespace extension_type
+    {
+        constexpr const auto mask = 0x0000000000000010UL;
+        constexpr const auto from = 4;
+        constexpr const auto name = "extension_type";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+
+    namespace numeric_error
+    {
+        constexpr const auto mask = 0x0000000000000020UL;
+        constexpr const auto from = 5;
+        constexpr const auto name = "numeric_error";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+
+    namespace write_protect
+    {
+        constexpr const auto mask = 0x0000000000010000UL;
+        constexpr const auto from = 16;
+        constexpr const auto name = "write_protect";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+
+    namespace alignment_mask
+    {
+        constexpr const auto mask = 0x0000000000040000UL;
+        constexpr const auto from = 18;
+        constexpr const auto name = "alignment_mask";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+
+    namespace not_write_through
+    {
+        constexpr const auto mask = 0x0000000020000000UL;
+        constexpr const auto from = 29;
+        constexpr const auto name = "not_write_through";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+
+    namespace cache_disable
+    {
+        constexpr const auto mask = 0x0000000040000000UL;
+        constexpr const auto from = 30;
+        constexpr const auto name = "cache_disable";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+
+    namespace paging
+    {
+        constexpr const auto mask = 0x0000000080000000UL;
+        constexpr const auto from = 31;
+        constexpr const auto name = "paging";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+}
+
+namespace guest_cr3
+{
+    constexpr const auto addr = 0x0000000000006802UL;
+    constexpr const auto name = "guest_cr3";
+
+    inline auto get()
+    { return vmread(addr, name); }
+
+    template<class T> void set(T val)
+    { vmwrite(addr, val, name); }
+
+    inline bool is_supported() noexcept
+    { return true; }
+}
+
+namespace guest_cr4
+{
+    constexpr const auto addr = 0x0000000000006804UL;
+    constexpr const auto name = "guest_cr4";
+
+    inline auto get()
+    { return vmread(addr, name); }
+
+    template<class T> void set(T val)
+    { vmwrite(addr, val, name); }
+
+    inline bool is_supported() noexcept
+    { return true; }
+
+    namespace v8086_mode_extensions
+    {
+        constexpr const auto mask = 0x0000000000000001UL;
+        constexpr const auto from = 0;
+        constexpr const auto name = "v8086_mode_extensions";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+
+    namespace protected_mode_virtual_interrupts
+    {
+        constexpr const auto mask = 0x0000000000000002UL;
+        constexpr const auto from = 1;
+        constexpr const auto name = "protected_mode_virtual_interrupts";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+
+    namespace time_stamp_disable
+    {
+        constexpr const auto mask = 0x0000000000000004UL;
+        constexpr const auto from = 2;
+        constexpr const auto name = "time_stamp_disable";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+
+    namespace debugging_extensions
+    {
+        constexpr const auto mask = 0x0000000000000008UL;
+        constexpr const auto from = 3;
+        constexpr const auto name = "debugging_extensions";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+
+    namespace page_size_extensions
+    {
+        constexpr const auto mask = 0x0000000000000010UL;
+        constexpr const auto from = 4;
+        constexpr const auto name = "page_size_extensions";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+
+    namespace physical_address_extensions
+    {
+        constexpr const auto mask = 0x0000000000000020UL;
+        constexpr const auto from = 5;
+        constexpr const auto name = "physical_address_extensions";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+
+    namespace machine_check_enable
+    {
+        constexpr const auto mask = 0x0000000000000040UL;
+        constexpr const auto from = 6;
+        constexpr const auto name = "machine_check_enable";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+
+    namespace page_global_enable
+    {
+        constexpr const auto mask = 0x0000000000000080UL;
+        constexpr const auto from = 7;
+        constexpr const auto name = "page_global_enable";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+
+    namespace performance_monitor_counter_enable
+    {
+        constexpr const auto mask = 0x0000000000000100UL;
+        constexpr const auto from = 8;
+        constexpr const auto name = "performance_monitor_counter_enable";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+
+    namespace osfxsr
+    {
+        constexpr const auto mask = 0x0000000000000200UL;
+        constexpr const auto from = 9;
+        constexpr const auto name = "osfxsr";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+
+    namespace osxmmexcpt
+    {
+        constexpr const auto mask = 0x0000000000000400UL;
+        constexpr const auto from = 10;
+        constexpr const auto name = "osxmmexcpt";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+
+    namespace vmx_enable_bit
+    {
+        constexpr const auto mask = 0x0000000000002000UL;
+        constexpr const auto from = 13;
+        constexpr const auto name = "vmx_enable_bit";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+
+    namespace smx_enable_bit
+    {
+        constexpr const auto mask = 0x0000000000004000UL;
+        constexpr const auto from = 14;
+        constexpr const auto name = "smx_enable_bit";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+
+    namespace fsgsbase_enable_bit
+    {
+        constexpr const auto mask = 0x0000000000010000UL;
+        constexpr const auto from = 16;
+        constexpr const auto name = "fsgsbase_enable_bit";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+
+    namespace pcid_enable_bit
+    {
+        constexpr const auto mask = 0x0000000000020000UL;
+        constexpr const auto from = 17;
+        constexpr const auto name = "pcid_enable_bit";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+
+    namespace osxsave
+    {
+        constexpr const auto mask = 0x0000000000040000UL;
+        constexpr const auto from = 18;
+        constexpr const auto name = "osxsave";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+
+    namespace smep_enable_bit
+    {
+        constexpr const auto mask = 0x0000000000100000UL;
+        constexpr const auto from = 20;
+        constexpr const auto name = "smep_enable_bit";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+
+    namespace smap_enable_bit
+    {
+        constexpr const auto mask = 0x0000000000200000UL;
+        constexpr const auto from = 21;
+        constexpr const auto name = "smap_enable_bit";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+
+    namespace protection_key_enable_bit
+    {
+        constexpr const auto mask = 0x0000000000400000UL;
+        constexpr const auto from = 22;
+        constexpr const auto name = "protection_key_enable_bit";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+}
+
+}
+}
+
 constexpr const auto VMCS_GUEST_ES_BASE                                        = 0x0000000000006806UL;
 constexpr const auto VMCS_GUEST_CS_BASE                                        = 0x0000000000006808UL;
 constexpr const auto VMCS_GUEST_SS_BASE                                        = 0x000000000000680AUL;
@@ -1181,8 +1628,8 @@ namespace guest_rflags
     inline auto get()
     { return vmread(addr, name); }
 
-    template<class T> constexpr auto set(T val)
-    { return vmwrite(addr, val, name); }
+    template<class T> void set(T val)
+    { vmwrite(addr, val, name); }
 
     inline bool is_supported() noexcept
     { return true; }
@@ -1196,8 +1643,8 @@ namespace guest_rflags
         inline auto get()
         { return (vmread(addr, name) & mask) >> from; }
 
-        template<class T> constexpr auto set(T val)
-        { return vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace parity_flag
@@ -1209,8 +1656,8 @@ namespace guest_rflags
         inline auto get()
         { return (vmread(addr, name) & mask) >> from; }
 
-        template<class T> constexpr auto set(T val)
-        { return vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace auxiliary_carry_flag
@@ -1222,8 +1669,8 @@ namespace guest_rflags
         inline auto get()
         { return (vmread(addr, name) & mask) >> from; }
 
-        template<class T> constexpr auto set(T val)
-        { return vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace zero_flag
@@ -1235,8 +1682,8 @@ namespace guest_rflags
         inline auto get()
         { return (vmread(addr, name) & mask) >> from; }
 
-        template<class T> constexpr auto set(T val)
-        { return vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace sign_flag
@@ -1248,8 +1695,8 @@ namespace guest_rflags
         inline auto get()
         { return (vmread(addr, name) & mask) >> from; }
 
-        template<class T> constexpr auto set(T val)
-        { return vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace trap_flag
@@ -1261,8 +1708,8 @@ namespace guest_rflags
         inline auto get()
         { return (vmread(addr, name) & mask) >> from; }
 
-        template<class T> constexpr auto set(T val)
-        { return vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace interrupt_enable_flag
@@ -1274,8 +1721,8 @@ namespace guest_rflags
         inline auto get()
         { return (vmread(addr, name) & mask) >> from; }
 
-        template<class T> constexpr auto set(T val)
-        { return vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace direction_flag
@@ -1287,8 +1734,8 @@ namespace guest_rflags
         inline auto get()
         { return (vmread(addr, name) & mask) >> from; }
 
-        template<class T> constexpr auto set(T val)
-        { return vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace overflow_flag
@@ -1300,8 +1747,8 @@ namespace guest_rflags
         inline auto get()
         { return (vmread(addr, name) & mask) >> from; }
 
-        template<class T> constexpr auto set(T val)
-        { return vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace privilege_level
@@ -1313,8 +1760,8 @@ namespace guest_rflags
         inline auto get()
         { return (vmread(addr, name) & mask) >> from; }
 
-        template<class T> constexpr auto set(T val)
-        { return vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace nested_task
@@ -1326,8 +1773,8 @@ namespace guest_rflags
         inline auto get()
         { return (vmread(addr, name) & mask) >> from; }
 
-        template<class T> constexpr auto set(T val)
-        { return vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace resume_flag
@@ -1339,8 +1786,8 @@ namespace guest_rflags
         inline auto get()
         { return (vmread(addr, name) & mask) >> from; }
 
-        template<class T> constexpr auto set(T val)
-        { return vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace virtual_8086_mode
@@ -1352,8 +1799,8 @@ namespace guest_rflags
         inline auto get()
         { return (vmread(addr, name) & mask) >> from; }
 
-        template<class T> constexpr auto set(T val)
-        { return vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace alignment_check_access_control
@@ -1365,8 +1812,8 @@ namespace guest_rflags
         inline auto get()
         { return (vmread(addr, name) & mask) >> from; }
 
-        template<class T> constexpr auto set(T val)
-        { return vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace virtual_interupt_flag
@@ -1378,8 +1825,8 @@ namespace guest_rflags
         inline auto get()
         { return (vmread(addr, name) & mask) >> from; }
 
-        template<class T> constexpr auto set(T val)
-        { return vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace virtual_interupt_pending
@@ -1391,8 +1838,8 @@ namespace guest_rflags
         inline auto get()
         { return (vmread(addr, name) & mask) >> from; }
 
-        template<class T> constexpr auto set(T val)
-        { return vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace id_flag
@@ -1404,8 +1851,8 @@ namespace guest_rflags
         inline auto get()
         { return (vmread(addr, name) & mask) >> from; }
 
-        template<class T> constexpr auto set(T val)
-        { return vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace reserved
@@ -1417,8 +1864,8 @@ namespace guest_rflags
         inline auto get()
         { return (vmread(addr, name) & mask) >> from; }
 
-        template<class T> constexpr auto set(T val)
-        { return vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace always_disabled
@@ -1430,8 +1877,8 @@ namespace guest_rflags
         inline auto get()
         { return (vmread(addr, name) & mask) >> from; }
 
-        template<class T> constexpr auto set(T val)
-        { return vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace always_enabled
@@ -1443,8 +1890,8 @@ namespace guest_rflags
         inline auto get()
         { return (vmread(addr, name) & mask) >> from; }
 
-        template<class T> constexpr auto set(T val)
-        { return vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 }
 
@@ -1459,9 +1906,456 @@ constexpr const auto VMCS_GUEST_IA32_SYSENTER_EIP                              =
 // Natural Width Host State Fields
 // -----------------------------------------------------------------------------
 
-constexpr const auto VMCS_HOST_CR0                                             = 0x0000000000006C00UL;
-constexpr const auto VMCS_HOST_CR3                                             = 0x0000000000006C02UL;
-constexpr const auto VMCS_HOST_CR4                                             = 0x0000000000006C04UL;
+// REMOVE ME
+//
+// Once all of these VMCS fields have been converted over to the new sceme,
+// there should just be one overall namespace. This is only here so that the
+// host crs is in the right order for now, without causing the other
+// definitions from being placed in the namespace.
+//
+namespace intel_x64
+{
+namespace vmcs
+{
+
+namespace host_cr0
+{
+    constexpr const auto addr = 0x0000000000006C00UL;
+    constexpr const auto name = "host_cr0";
+
+    inline auto get()
+    { return vmread(addr, name); }
+
+    template<class T> void set(T val)
+    { vmwrite(addr, val, name); }
+
+    inline bool is_supported() noexcept
+    { return true; }
+
+    namespace protection_enable
+    {
+        constexpr const auto mask = 0x0000000000000001UL;
+        constexpr const auto from = 0;
+        constexpr const auto name = "protection_enable";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+
+    namespace monitor_coprocessor
+    {
+        constexpr const auto mask = 0x0000000000000002UL;
+        constexpr const auto from = 1;
+        constexpr const auto name = "monitor_coprocessor";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+
+    namespace emulation
+    {
+        constexpr const auto mask = 0x0000000000000004UL;
+        constexpr const auto from = 2;
+        constexpr const auto name = "emulation";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+
+    namespace task_switched
+    {
+        constexpr const auto mask = 0x0000000000000008UL;
+        constexpr const auto from = 3;
+        constexpr const auto name = "task_switched";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+
+    namespace extension_type
+    {
+        constexpr const auto mask = 0x0000000000000010UL;
+        constexpr const auto from = 4;
+        constexpr const auto name = "extension_type";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+
+    namespace numeric_error
+    {
+        constexpr const auto mask = 0x0000000000000020UL;
+        constexpr const auto from = 5;
+        constexpr const auto name = "numeric_error";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+
+    namespace write_protect
+    {
+        constexpr const auto mask = 0x0000000000010000UL;
+        constexpr const auto from = 16;
+        constexpr const auto name = "write_protect";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+
+    namespace alignment_mask
+    {
+        constexpr const auto mask = 0x0000000000040000UL;
+        constexpr const auto from = 18;
+        constexpr const auto name = "alignment_mask";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+
+    namespace not_write_through
+    {
+        constexpr const auto mask = 0x0000000020000000UL;
+        constexpr const auto from = 29;
+        constexpr const auto name = "not_write_through";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+
+    namespace cache_disable
+    {
+        constexpr const auto mask = 0x0000000040000000UL;
+        constexpr const auto from = 30;
+        constexpr const auto name = "cache_disable";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+
+    namespace paging
+    {
+        constexpr const auto mask = 0x0000000080000000UL;
+        constexpr const auto from = 31;
+        constexpr const auto name = "paging";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+}
+
+namespace host_cr3
+{
+    constexpr const auto addr = 0x0000000000006C02UL;
+    constexpr const auto name = "host_cr3";
+
+    inline auto get()
+    { return vmread(addr, name); }
+
+    template<class T> void set(T val)
+    { vmwrite(addr, val, name); }
+
+    inline bool is_supported() noexcept
+    { return true; }
+}
+
+namespace host_cr4
+{
+    constexpr const auto addr = 0x0000000000006C04UL;
+    constexpr const auto name = "host_cr4";
+
+    inline auto get()
+    { return vmread(addr, name); }
+
+    template<class T> void set(T val)
+    { vmwrite(addr, val, name); }
+
+    inline bool is_supported() noexcept
+    { return true; }
+
+    namespace v8086_mode_extensions
+    {
+        constexpr const auto mask = 0x0000000000000001UL;
+        constexpr const auto from = 0;
+        constexpr const auto name = "v8086_mode_extensions";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+
+    namespace protected_mode_virtual_interrupts
+    {
+        constexpr const auto mask = 0x0000000000000002UL;
+        constexpr const auto from = 1;
+        constexpr const auto name = "protected_mode_virtual_interrupts";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+
+    namespace time_stamp_disable
+    {
+        constexpr const auto mask = 0x0000000000000004UL;
+        constexpr const auto from = 2;
+        constexpr const auto name = "time_stamp_disable";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+
+    namespace debugging_extensions
+    {
+        constexpr const auto mask = 0x0000000000000008UL;
+        constexpr const auto from = 3;
+        constexpr const auto name = "debugging_extensions";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+
+    namespace page_size_extensions
+    {
+        constexpr const auto mask = 0x0000000000000010UL;
+        constexpr const auto from = 4;
+        constexpr const auto name = "page_size_extensions";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+
+    namespace physical_address_extensions
+    {
+        constexpr const auto mask = 0x0000000000000020UL;
+        constexpr const auto from = 5;
+        constexpr const auto name = "physical_address_extensions";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+
+    namespace machine_check_enable
+    {
+        constexpr const auto mask = 0x0000000000000040UL;
+        constexpr const auto from = 6;
+        constexpr const auto name = "machine_check_enable";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+
+    namespace page_global_enable
+    {
+        constexpr const auto mask = 0x0000000000000080UL;
+        constexpr const auto from = 7;
+        constexpr const auto name = "page_global_enable";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+
+    namespace performance_monitor_counter_enable
+    {
+        constexpr const auto mask = 0x0000000000000100UL;
+        constexpr const auto from = 8;
+        constexpr const auto name = "performance_monitor_counter_enable";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+
+    namespace osfxsr
+    {
+        constexpr const auto mask = 0x0000000000000200UL;
+        constexpr const auto from = 9;
+        constexpr const auto name = "osfxsr";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+
+    namespace osxmmexcpt
+    {
+        constexpr const auto mask = 0x0000000000000400UL;
+        constexpr const auto from = 10;
+        constexpr const auto name = "osxmmexcpt";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+
+    namespace vmx_enable_bit
+    {
+        constexpr const auto mask = 0x0000000000002000UL;
+        constexpr const auto from = 13;
+        constexpr const auto name = "vmx_enable_bit";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+
+    namespace smx_enable_bit
+    {
+        constexpr const auto mask = 0x0000000000004000UL;
+        constexpr const auto from = 14;
+        constexpr const auto name = "smx_enable_bit";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+
+    namespace fsgsbase_enable_bit
+    {
+        constexpr const auto mask = 0x0000000000010000UL;
+        constexpr const auto from = 16;
+        constexpr const auto name = "fsgsbase_enable_bit";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+
+    namespace pcid_enable_bit
+    {
+        constexpr const auto mask = 0x0000000000020000UL;
+        constexpr const auto from = 17;
+        constexpr const auto name = "pcid_enable_bit";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+
+    namespace osxsave
+    {
+        constexpr const auto mask = 0x0000000000040000UL;
+        constexpr const auto from = 18;
+        constexpr const auto name = "osxsave";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+
+    namespace smep_enable_bit
+    {
+        constexpr const auto mask = 0x0000000000100000UL;
+        constexpr const auto from = 20;
+        constexpr const auto name = "smep_enable_bit";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+
+    namespace smap_enable_bit
+    {
+        constexpr const auto mask = 0x0000000000200000UL;
+        constexpr const auto from = 21;
+        constexpr const auto name = "smap_enable_bit";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+
+    namespace protection_key_enable_bit
+    {
+        constexpr const auto mask = 0x0000000000400000UL;
+        constexpr const auto from = 22;
+        constexpr const auto name = "protection_key_enable_bit";
+
+        inline auto get()
+        { return (vmread(addr, name) & mask) >> from; }
+
+        template<class T> void set(T val)
+        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+}
+
+}
+}
+
 constexpr const auto VMCS_HOST_FS_BASE                                         = 0x0000000000006C06UL;
 constexpr const auto VMCS_HOST_GS_BASE                                         = 0x0000000000006C08UL;
 constexpr const auto VMCS_HOST_TR_BASE                                         = 0x0000000000006C0AUL;

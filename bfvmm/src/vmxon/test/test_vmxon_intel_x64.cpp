@@ -32,21 +32,28 @@ static uint64_t g_cr4 = 0;
 static uint64_t g_rflags = 0;
 static std::map<uint32_t, uint64_t> g_msrs;
 
-static uint64_t
-read_cr0()
-{ return g_cr0; }
+bool g_write_cr4_fails = false;
 
-// static void
-// write_cr0(uint64_t cr0)
-// { g_cr0 = cr0; }
+extern "C" uint64_t
+__read_cr0(void) noexcept
+{
+    return g_cr0;
+}
 
-static uint64_t
-read_cr4()
-{ return g_cr4; }
+extern "C" uint64_t
+__read_cr4(void) noexcept
+{
+    return g_cr4;
+}
 
-static void
-write_cr4(uint64_t cr4)
-{ g_cr4 = cr4; }
+extern "C" void
+__write_cr4(uint64_t val) noexcept
+{
+    if (g_write_cr4_fails)
+        return;
+
+    g_cr4 = val;
+}
 
 extern "C" uint64_t
 __read_msr(uint32_t msr) noexcept
@@ -95,12 +102,6 @@ setup_intrinsics(MockRepository &mocks, memory_manager *mm, intrinsics_intel_x64
     g_msrs[msrs::ia32_vmx_basic::addr] = (1ULL << 55) | (6ULL << 50);
     g_msrs[msrs::ia32_feature_control::addr] = (0x1ULL << 0);
     mocks.OnCall(in, intrinsics_intel_x64::cpuid_ecx).With(1).Return((1 << 5));
-
-    // Emulate the control registers
-    mocks.OnCall(in, intrinsics_intel_x64::read_cr0).Do(read_cr0);
-    // mocks.OnCall(in, intrinsics_intel_x64::write_cr0).Do(write_cr0);
-    mocks.OnCall(in, intrinsics_intel_x64::read_cr4).Do(read_cr4);
-    mocks.OnCall(in, intrinsics_intel_x64::write_cr4).Do(write_cr4);
 
     // By default, the VMX instructions are successful
     mocks.OnCall(in, intrinsics_intel_x64::vmxon).Return(true);
@@ -156,7 +157,7 @@ vmxon_ut::test_start_execute_vmxon_already_on_failure()
 
     setup_intrinsics(mocks, mm, in.get());
 
-    g_cr4 = CR4_VMXE_VMX_ENABLE_BIT;
+    g_cr4 = cr4::vmx_enable_bit::mask;
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -233,7 +234,10 @@ vmxon_ut::test_start_enable_vmx_operation_failure()
 
     setup_intrinsics(mocks, mm, in.get());
 
-    mocks.OnCall(in.get(), intrinsics_intel_x64::write_cr4);
+    g_write_cr4_fails = true;
+
+    auto ___ = gsl::finally([&]
+    { g_write_cr4_fails = false; });
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -474,7 +478,12 @@ vmxon_ut::test_stop_vmxoff_check_failure()
         vmxon_intel_x64 vmxon(in);
 
         vmxon.start();
-        mocks.OnCall(in.get(), intrinsics_intel_x64::write_cr4);
+
+        g_write_cr4_fails = true;
+
+        auto ___ = gsl::finally([&]
+        { g_write_cr4_fails = false; });
+
         EXPECT_EXCEPTION(vmxon.stop(), std::logic_error);
     });
 }

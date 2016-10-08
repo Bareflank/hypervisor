@@ -23,6 +23,8 @@
 #include <memory_manager/memory_manager.h>
 #include <memory_manager/page_table_x64.h>
 
+using namespace intel_x64;
+
 std::shared_ptr<page_table_x64> m_pml4;
 
 vmcs_intel_x64_vmm_state::vmcs_intel_x64_vmm_state(const std::shared_ptr<state_save_intel_x64> &state_save) :
@@ -114,17 +116,17 @@ vmcs_intel_x64_vmm_state::vmcs_intel_x64_vmm_state(const std::shared_ptr<state_s
     }
 
     m_cr0 = 0;
-    m_cr0 |= CRO_PE_PROTECTION_ENABLE;
-    m_cr0 |= CR0_MP_MONITOR_COPROCESSOR;
-    m_cr0 |= CR0_NE_NUMERIC_ERROR;
-    m_cr0 |= CR0_PG_PAGING;
+    m_cr0 |= cr0::protection_enable::mask;
+    m_cr0 |= cr0::monitor_coprocessor::mask;
+    m_cr0 |= cr0::numeric_error::mask;
+    m_cr0 |= cr0::paging::mask;
 
     m_cr3 = m_pml4->phys_addr();
 
     m_cr4 = 0;
-    m_cr4 |= CR4_PAE_PHYSICAL_ADDRESS_EXTENSIONS;
-    m_cr4 |= CR4_VMXE_VMX_ENABLE_BIT;
-    m_cr4 |= CR4_OSXSAVE;
+    m_cr4 |= cr4::physical_address_extensions::mask;
+    m_cr4 |= cr4::vmx_enable_bit::mask;
+    m_cr4 |= cr4::osxsave::mask;
 
     m_rflags = 0;
 

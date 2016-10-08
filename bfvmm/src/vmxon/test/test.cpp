@@ -20,33 +20,7 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #include <test.h>
-
-void *
-operator new(std::size_t size)
-{
-    if ((size & (MAX_PAGE_SIZE - 1)) == 0)
-    {
-        void *ptr = nullptr;
-        auto ignored_ret = posix_memalign(&ptr, MAX_PAGE_SIZE, size);
-        (void) ignored_ret;
-        return ptr;
-    }
-
-    return malloc(size);
-}
-
-void
-operator delete(void *ptr, std::size_t size) throw()
-{
-    (void) size;
-    free(ptr);
-}
-
-void
-operator delete(void *ptr) throw()
-{
-    operator delete(ptr, std::size_t(0));
-}
+#include <new_delete.h>
 
 vmxon_ut::vmxon_ut()
 {

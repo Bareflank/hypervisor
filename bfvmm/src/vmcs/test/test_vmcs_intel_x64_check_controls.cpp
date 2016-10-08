@@ -673,7 +673,7 @@ setup_check_control_event_injection_delivery_ec_checks_paths(std::vector<struct 
     path.setup = [&]
     {
         g_vmcs_fields[VMCS_VM_ENTRY_INTERRUPTION_INFORMATION_FIELD] |= VM_INTERRUPT_INFORMATION_DELIVERY_ERROR;
-        g_vmcs_fields[VMCS_GUEST_CR0] = 0;
+        g_vmcs_fields[vmcs::guest_cr0::addr] = 0;
         enable_proc_ctl2(VM_EXEC_S_PROC_BASED_UNRESTRICTED_GUEST);
     };
     path.throws_exception = true;
