@@ -114,8 +114,8 @@ enable_entry_ctl(uint64_t control)
 }
 
 extern "C" uint64_t
-__read_msr(uint32_t msr) noexcept
-{ return g_msrs[msr]; }
+__read_msr(uint32_t addr) noexcept
+{ return g_msrs[addr]; }
 
 bool
 __vmread(uint64_t field, uint64_t *val) noexcept
@@ -305,6 +305,32 @@ vmcs_ut::list()
     this->test_vmcs_host_cr4_smep_enable_bit();
     this->test_vmcs_host_cr4_smap_enable_bit();
     this->test_vmcs_host_cr4_protection_key_enable_bit();
+    this->test_vmcs_guest_ia32_debugctl();
+    this->test_vmcs_guest_ia32_debugctl_lbr();
+    this->test_vmcs_guest_ia32_debugctl_btf();
+    this->test_vmcs_guest_ia32_debugctl_tr();
+    this->test_vmcs_guest_ia32_debugctl_bts();
+    this->test_vmcs_guest_ia32_debugctl_btint();
+    this->test_vmcs_guest_ia32_debugctl_bt_off_os();
+    this->test_vmcs_guest_ia32_debugctl_bt_off_user();
+    this->test_vmcs_guest_ia32_debugctl_freeze_lbrs_on_pmi();
+    this->test_vmcs_guest_ia32_debugctl_freeze_perfmon_on_pmi();
+    this->test_vmcs_guest_ia32_debugctl_enable_uncore_pmi();
+    this->test_vmcs_guest_ia32_debugctl_freeze_while_smm();
+    this->test_vmcs_guest_ia32_debugctl_rtm_debug();
+    this->test_vmcs_guest_ia32_debugctl_reserved();
+    this->test_vmcs_guest_ia32_efer();
+    this->test_vmcs_guest_ia32_efer_sce();
+    this->test_vmcs_guest_ia32_efer_lme();
+    this->test_vmcs_guest_ia32_efer_lma();
+    this->test_vmcs_guest_ia32_efer_nxe();
+    this->test_vmcs_guest_ia32_efer_reserved();
+    this->test_vmcs_host_ia32_efer();
+    this->test_vmcs_host_ia32_efer_sce();
+    this->test_vmcs_host_ia32_efer_lme();
+    this->test_vmcs_host_ia32_efer_lma();
+    this->test_vmcs_host_ia32_efer_nxe();
+    this->test_vmcs_host_ia32_efer_reserved();
 
     this->test_check_control_pin_based_ctls_reserved_properly_set();
     this->test_check_control_proc_based_ctls_reserved_properly_set();

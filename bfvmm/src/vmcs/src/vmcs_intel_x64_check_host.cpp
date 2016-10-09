@@ -113,7 +113,7 @@ vmcs_intel_x64::check_host_verify_load_ia32_perf_global_ctrl()
         return;
 
     auto vmcs_ia32_perf_global_ctrl =
-        vmread(VMCS_HOST_IA32_PERF_GLOBAL_CTRL_FULL);
+        vmread(VMCS_HOST_IA32_PERF_GLOBAL_CTRL);
 
     if ((vmcs_ia32_perf_global_ctrl & 0xFFFFFFF8FFFFFFFC) != 0)
         throw std::logic_error("perf global ctrl msr reserved bits must be 0");
@@ -125,14 +125,14 @@ vmcs_intel_x64::check_host_verify_load_ia32_pat()
     if (!is_enabled_load_ia32_pat_on_exit())
         return;
 
-    auto pat0 = (vmread(VMCS_HOST_IA32_PAT_FULL) & 0x00000000000000FF) >> 0;
-    auto pat1 = (vmread(VMCS_HOST_IA32_PAT_FULL) & 0x000000000000FF00) >> 8;
-    auto pat2 = (vmread(VMCS_HOST_IA32_PAT_FULL) & 0x0000000000FF0000) >> 16;
-    auto pat3 = (vmread(VMCS_HOST_IA32_PAT_FULL) & 0x00000000FF000000) >> 24;
-    auto pat4 = (vmread(VMCS_HOST_IA32_PAT_FULL) & 0x000000FF00000000) >> 32;
-    auto pat5 = (vmread(VMCS_HOST_IA32_PAT_FULL) & 0x0000FF0000000000) >> 40;
-    auto pat6 = (vmread(VMCS_HOST_IA32_PAT_FULL) & 0x00FF000000000000) >> 48;
-    auto pat7 = (vmread(VMCS_HOST_IA32_PAT_FULL) & 0xFF00000000000000) >> 56;
+    auto pat0 = (vmread(VMCS_HOST_IA32_PAT) & 0x00000000000000FF) >> 0;
+    auto pat1 = (vmread(VMCS_HOST_IA32_PAT) & 0x000000000000FF00) >> 8;
+    auto pat2 = (vmread(VMCS_HOST_IA32_PAT) & 0x0000000000FF0000) >> 16;
+    auto pat3 = (vmread(VMCS_HOST_IA32_PAT) & 0x00000000FF000000) >> 24;
+    auto pat4 = (vmread(VMCS_HOST_IA32_PAT) & 0x000000FF00000000) >> 32;
+    auto pat5 = (vmread(VMCS_HOST_IA32_PAT) & 0x0000FF0000000000) >> 40;
+    auto pat6 = (vmread(VMCS_HOST_IA32_PAT) & 0x00FF000000000000) >> 48;
+    auto pat7 = (vmread(VMCS_HOST_IA32_PAT) & 0xFF00000000000000) >> 56;
 
     if (!check_pat(pat0))
         throw std::logic_error("pat0 has an invalid memory type");
@@ -165,14 +165,12 @@ vmcs_intel_x64::check_host_verify_load_ia32_efer()
     if (!is_enabled_load_ia32_efer_on_exit())
         return;
 
-    auto efer = vmread(VMCS_HOST_IA32_EFER_FULL);
-
-    if ((efer & 0xFFFFFFFFFFFFF2FE) != 0)
+    if (vmcs::host_ia32_efer::reserved::get() != 0)
         throw std::logic_error("ia32 efer msr reserved buts must be 0 if "
                                "load ia32 efer entry is enabled");
 
-    auto lma = (efer & IA32_EFER_LMA);
-    auto lme = (efer & IA32_EFER_LME);
+    auto lma = vmcs::host_ia32_efer::lma::get();
+    auto lme = vmcs::host_ia32_efer::lme::get();
 
     if (!is_enabled_host_address_space_size() && lma != 0)
         throw std::logic_error("host addr space is 0, but efer.lma is 1");
@@ -358,9 +356,7 @@ vmcs_intel_x64::check_host_checks_related_to_address_space_size()
 void
 vmcs_intel_x64::check_host_if_outside_ia32e_mode()
 {
-    auto ia32_efer_msr = m_intrinsics->read_msr(IA32_EFER_MSR);
-
-    if ((ia32_efer_msr & IA32_EFER_LMA) != 0)
+    if (msrs::ia32_efer::lma::get() != 0)
         return;
 
     if (is_enabled_ia_32e_mode_guest())
@@ -373,9 +369,7 @@ vmcs_intel_x64::check_host_if_outside_ia32e_mode()
 void
 vmcs_intel_x64::check_host_vmcs_host_address_space_size_is_set()
 {
-    auto ia32_efer_msr = m_intrinsics->read_msr(IA32_EFER_MSR);
-
-    if ((ia32_efer_msr & IA32_EFER_LMA) == 0)
+    if (msrs::ia32_efer::lma::get() == 0)
         return;
 
     if (!is_enabled_host_address_space_size())

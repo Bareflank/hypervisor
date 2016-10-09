@@ -105,10 +105,7 @@ vmcs_intel_x64::check_guest_load_debug_controls_verify_reserved()
     if (!is_enabled_load_debug_controls_on_entry())
         return;
 
-    auto vmcs_ia32_debugctl =
-        vmread(VMCS_GUEST_IA32_DEBUGCTL_FULL);
-
-    if ((vmcs_ia32_debugctl & 0xFFFFFFFFFFFF003C) != 0)
+    if (vmcs::guest_ia32_debugctl::reserved::get() != 0)
         throw std::logic_error("debug ctrl msr reserved bits must be 0");
 }
 
@@ -179,7 +176,7 @@ vmcs_intel_x64::check_guest_verify_load_ia32_perf_global_ctrl()
         return;
 
     auto vmcs_ia32_perf_global_ctrl =
-        vmread(VMCS_GUEST_IA32_PERF_GLOBAL_CTRL_FULL);
+        vmread(VMCS_GUEST_IA32_PERF_GLOBAL_CTRL);
 
     if ((vmcs_ia32_perf_global_ctrl & 0xFFFFFFF8FFFFFFFC) != 0)
         throw std::logic_error("perf global ctrl msr reserved bits must be 0");
@@ -191,14 +188,14 @@ vmcs_intel_x64::check_guest_verify_load_ia32_pat()
     if (!is_enabled_load_ia32_pat_on_entry())
         return;
 
-    auto pat0 = vmread(VMCS_GUEST_IA32_PAT_FULL) & 0x00000000000000FF >> 0;
-    auto pat1 = vmread(VMCS_GUEST_IA32_PAT_FULL) & 0x000000000000FF00 >> 8;
-    auto pat2 = vmread(VMCS_GUEST_IA32_PAT_FULL) & 0x0000000000FF0000 >> 16;
-    auto pat3 = vmread(VMCS_GUEST_IA32_PAT_FULL) & 0x00000000FF000000 >> 24;
-    auto pat4 = vmread(VMCS_GUEST_IA32_PAT_FULL) & 0x000000FF00000000 >> 32;
-    auto pat5 = vmread(VMCS_GUEST_IA32_PAT_FULL) & 0x0000FF0000000000 >> 40;
-    auto pat6 = vmread(VMCS_GUEST_IA32_PAT_FULL) & 0x00FF000000000000 >> 48;
-    auto pat7 = vmread(VMCS_GUEST_IA32_PAT_FULL) & 0xFF00000000000000 >> 56;
+    auto pat0 = vmread(VMCS_GUEST_IA32_PAT) & 0x00000000000000FF >> 0;
+    auto pat1 = vmread(VMCS_GUEST_IA32_PAT) & 0x000000000000FF00 >> 8;
+    auto pat2 = vmread(VMCS_GUEST_IA32_PAT) & 0x0000000000FF0000 >> 16;
+    auto pat3 = vmread(VMCS_GUEST_IA32_PAT) & 0x00000000FF000000 >> 24;
+    auto pat4 = vmread(VMCS_GUEST_IA32_PAT) & 0x000000FF00000000 >> 32;
+    auto pat5 = vmread(VMCS_GUEST_IA32_PAT) & 0x0000FF0000000000 >> 40;
+    auto pat6 = vmread(VMCS_GUEST_IA32_PAT) & 0x00FF000000000000 >> 48;
+    auto pat7 = vmread(VMCS_GUEST_IA32_PAT) & 0xFF00000000000000 >> 56;
 
     if (!check_pat(pat0))
         throw std::logic_error("pat0 has an invalid memory type");
@@ -231,14 +228,12 @@ vmcs_intel_x64::check_guest_verify_load_ia32_efer()
     if (!is_enabled_load_ia32_efer_on_entry())
         return;
 
-    auto efer = vmread(VMCS_GUEST_IA32_EFER_FULL);
-
-    if ((efer & 0xFFFFFFFFFFFFF2FE) != 0)
+    if (vmcs::guest_ia32_efer::reserved::get() != 0)
         throw std::logic_error("ia32 efer msr reserved buts must be 0 if "
                                "load ia32 efer entry is enabled");
 
-    auto lma = (efer & IA32_EFER_LMA);
-    auto lme = (efer & IA32_EFER_LME);
+    auto lma = vmcs::guest_ia32_efer::lma::get();
+    auto lme = vmcs::guest_ia32_efer::lme::get();
 
     if (!is_enabled_ia_32e_mode_guest() && lma != 0)
         throw std::logic_error("ia 32e mode is 0, but efer.lma is 1");
@@ -1644,7 +1639,7 @@ vmcs_intel_x64::check_guest_rflags_reserved_bits()
     if (vmcs::guest_rflags::reserved::get() != 0)
         throw std::logic_error("reserved bits in rflags must be 0");
 
-    if (vmcs::guest_rflags::always_enabled::get() != 1)
+    if (vmcs::guest_rflags::always_enabled::get() == 0)
         throw std::logic_error("always enabled bits in rflags must be 1");
 }
 
@@ -2043,10 +2038,8 @@ vmcs_intel_x64::check_guest_pending_debug_exceptions_dbg_ctl()
 
     auto bs = pending_debug_exceptions & PENDING_DEBUG_EXCEPTION_BS;
 
-    auto vmcs_ia32_debugctl = vmread(VMCS_GUEST_IA32_DEBUGCTL_FULL);
-
     auto tf = vmcs::guest_rflags::trap_flag::get();
-    auto btf = vmcs_ia32_debugctl & IA32_DEBUGCTL_BTF;
+    auto btf = vmcs::guest_ia32_debugctl::btf::get();
 
     if (bs == 0 && tf != 0 && btf == 0)
         throw std::logic_error("pending debug exception bs must be 1 if "
@@ -2060,7 +2053,7 @@ vmcs_intel_x64::check_guest_pending_debug_exceptions_dbg_ctl()
 void
 vmcs_intel_x64::check_guest_vmcs_link_pointer_bits_11_0()
 {
-    auto vmcs_link_pointer = vmread(VMCS_VMCS_LINK_POINTER_FULL);
+    auto vmcs_link_pointer = vmread(VMCS_VMCS_LINK_POINTER);
 
     if (vmcs_link_pointer == 0xFFFFFFFFFFFFFFFF)
         return;
@@ -2072,7 +2065,7 @@ vmcs_intel_x64::check_guest_vmcs_link_pointer_bits_11_0()
 void
 vmcs_intel_x64::check_guest_vmcs_link_pointer_valid_addr()
 {
-    auto vmcs_link_pointer = vmread(VMCS_VMCS_LINK_POINTER_FULL);
+    auto vmcs_link_pointer = vmread(VMCS_VMCS_LINK_POINTER);
 
     if (vmcs_link_pointer == 0xFFFFFFFFFFFFFFFF)
         return;
@@ -2084,7 +2077,7 @@ vmcs_intel_x64::check_guest_vmcs_link_pointer_valid_addr()
 void
 vmcs_intel_x64::check_guest_vmcs_link_pointer_first_word()
 {
-    auto vmcs_link_pointer = vmread(VMCS_VMCS_LINK_POINTER_FULL);
+    auto vmcs_link_pointer = vmread(VMCS_VMCS_LINK_POINTER);
 
     if (vmcs_link_pointer == 0xFFFFFFFFFFFFFFFF)
         return;

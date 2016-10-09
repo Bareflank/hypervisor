@@ -227,7 +227,7 @@ namespace rflags
     namespace always_enabled
     {
         constexpr const auto mask = 0x0000000000000002UL;
-        constexpr const auto from = 1;
+        constexpr const auto from = 0;
         constexpr const auto name = "always_enabled";
 
         inline auto get() noexcept

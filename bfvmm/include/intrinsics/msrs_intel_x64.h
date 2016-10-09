@@ -22,7 +22,8 @@
 #ifndef MSRS_INTEL_X64_H
 #define MSRS_INTEL_X64_H
 
-extern "C" uint64_t __read_msr(uint32_t msr) noexcept;
+extern "C" uint64_t __read_msr(uint32_t addr) noexcept;
+extern "C" void __write_msr(uint32_t addr, uint64_t val) noexcept;
 
 // *INDENT-OFF*
 
@@ -38,6 +39,9 @@ namespace msrs
         inline auto get() noexcept
         { return __read_msr(addr); }
 
+        template<class T> void set(T val) noexcept
+        { __write_msr(addr, val); }
+
         namespace lock_bit
         {
             constexpr const auto mask = 0x0000000000000001UL;
@@ -46,6 +50,9 @@ namespace msrs
 
             inline auto get() noexcept
             { return (__read_msr(addr) & mask) >> from; }
+
+            template<class T> void set(T val) noexcept
+            { __write_msr(addr, (__read_msr(addr) & ~mask) | ((val << from) & mask)); }
         }
 
         namespace enable_vmx_inside_smx
@@ -56,6 +63,9 @@ namespace msrs
 
             inline auto get() noexcept
             { return (__read_msr(addr) & mask) >> from; }
+
+            template<class T> void set(T val) noexcept
+            { __write_msr(addr, (__read_msr(addr) & ~mask) | ((val << from) & mask)); }
         }
 
         namespace enable_vmx_outside_smx
@@ -66,6 +76,562 @@ namespace msrs
 
             inline auto get() noexcept
             { return (__read_msr(addr) & mask) >> from; }
+
+            template<class T> void set(T val) noexcept
+            { __write_msr(addr, (__read_msr(addr) & ~mask) | ((val << from) & mask)); }
+        }
+
+        namespace senter_local_function_enables
+        {
+            constexpr const auto mask = 0x0000000000007F00UL;
+            constexpr const auto from = 8;
+            constexpr const auto name = "senter_local_function_enables";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+
+            template<class T> void set(T val) noexcept
+            { __write_msr(addr, (__read_msr(addr) & ~mask) | ((val << from) & mask)); }
+        }
+
+        namespace senter_gloabl_function_enable
+        {
+            constexpr const auto mask = 0x0000000000008000UL;
+            constexpr const auto from = 15;
+            constexpr const auto name = "senter_gloabl_function_enables";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+
+            template<class T> void set(T val) noexcept
+            { __write_msr(addr, (__read_msr(addr) & ~mask) | ((val << from) & mask)); }
+        }
+
+        namespace sgx_launch_control_enable
+        {
+            constexpr const auto mask = 0x0000000000020000UL;
+            constexpr const auto from = 17;
+            constexpr const auto name = "sgx_launch_control_enable";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+
+            template<class T> void set(T val) noexcept
+            { __write_msr(addr, (__read_msr(addr) & ~mask) | ((val << from) & mask)); }
+        }
+
+        namespace sgx_global_enable
+        {
+            constexpr const auto mask = 0x0000000000040000UL;
+            constexpr const auto from = 18;
+            constexpr const auto name = "sgx_global_enable";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+
+            template<class T> void set(T val) noexcept
+            { __write_msr(addr, (__read_msr(addr) & ~mask) | ((val << from) & mask)); }
+        }
+
+        namespace lmce
+        {
+            constexpr const auto mask = 0x0000000000100000UL;
+            constexpr const auto from = 20;
+            constexpr const auto name = "lmce";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+
+            template<class T> void set(T val) noexcept
+            { __write_msr(addr, (__read_msr(addr) & ~mask) | ((val << from) & mask)); }
+        }
+    }
+
+    namespace ia32_sysenter_cs
+    {
+        constexpr const auto addr = 0x00000174U;
+        constexpr const auto name = "ia32_sysenter_cs";
+
+        inline auto get() noexcept
+        { return __read_msr(addr); }
+
+        template<class T> void set(T val) noexcept
+        { __write_msr(addr, val); }
+    }
+
+    namespace ia32_sysenter_esp
+    {
+        constexpr const auto addr = 0x00000175U;
+        constexpr const auto name = "ia32_sysenter_esp";
+
+        inline auto get() noexcept
+        { return __read_msr(addr); }
+
+        template<class T> void set(T val) noexcept
+        { __write_msr(addr, val); }
+    }
+
+    namespace ia32_sysenter_eip
+    {
+        constexpr const auto addr = 0x00000176;
+        constexpr const auto name = "ia32_sysenter_eip";
+
+        inline auto get() noexcept
+        { return __read_msr(addr); }
+
+        template<class T> void set(T val) noexcept
+        { __write_msr(addr, val); }
+    }
+
+    namespace ia32_debugctl
+    {
+        constexpr const auto addr = 0x000001D9U;
+        constexpr const auto name = "ia32_debugctl";
+
+        inline auto get() noexcept
+        { return __read_msr(addr); }
+
+        template<class T> void set(T val) noexcept
+        { __write_msr(addr, val); }
+
+        namespace lbr
+        {
+            constexpr const auto mask = 0x0000000000000001UL;
+            constexpr const auto from = 0;
+            constexpr const auto name = "lbr";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+
+            template<class T> void set(T val) noexcept
+            { __write_msr(addr, (__read_msr(addr) & ~mask) | ((val << from) & mask)); }
+        }
+
+        namespace btf
+        {
+            constexpr const auto mask = 0x0000000000000002UL;
+            constexpr const auto from = 1;
+            constexpr const auto name = "btf";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+
+            template<class T> void set(T val) noexcept
+            { __write_msr(addr, (__read_msr(addr) & ~mask) | ((val << from) & mask)); }
+        }
+
+        namespace tr
+        {
+            constexpr const auto mask = 0x0000000000000040UL;
+            constexpr const auto from = 6;
+            constexpr const auto name = "tr";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+
+            template<class T> void set(T val) noexcept
+            { __write_msr(addr, (__read_msr(addr) & ~mask) | ((val << from) & mask)); }
+        }
+
+        namespace bts
+        {
+            constexpr const auto mask = 0x0000000000000080UL;
+            constexpr const auto from = 7;
+            constexpr const auto name = "bts";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+
+            template<class T> void set(T val) noexcept
+            { __write_msr(addr, (__read_msr(addr) & ~mask) | ((val << from) & mask)); }
+        }
+
+        namespace btint
+        {
+            constexpr const auto mask = 0x0000000000000100UL;
+            constexpr const auto from = 8;
+            constexpr const auto name = "btint";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+
+            template<class T> void set(T val) noexcept
+            { __write_msr(addr, (__read_msr(addr) & ~mask) | ((val << from) & mask)); }
+        }
+
+        namespace bt_off_os
+        {
+            constexpr const auto mask = 0x0000000000000200UL;
+            constexpr const auto from = 9;
+            constexpr const auto name = "bt_off_os";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+
+            template<class T> void set(T val) noexcept
+            { __write_msr(addr, (__read_msr(addr) & ~mask) | ((val << from) & mask)); }
+        }
+
+        namespace bt_off_user
+        {
+            constexpr const auto mask = 0x0000000000000400UL;
+            constexpr const auto from = 10;
+            constexpr const auto name = "bt_off_user";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+
+            template<class T> void set(T val) noexcept
+            { __write_msr(addr, (__read_msr(addr) & ~mask) | ((val << from) & mask)); }
+        }
+
+        namespace freeze_lbrs_on_pmi
+        {
+            constexpr const auto mask = 0x0000000000000800UL;
+            constexpr const auto from = 11;
+            constexpr const auto name = "freeze_lbrs_on_pmi";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+
+            template<class T> void set(T val) noexcept
+            { __write_msr(addr, (__read_msr(addr) & ~mask) | ((val << from) & mask)); }
+        }
+
+        namespace freeze_perfmon_on_pmi
+        {
+            constexpr const auto mask = 0x0000000000001000UL;
+            constexpr const auto from = 12;
+            constexpr const auto name = "freeze_perfmon_on_pmi";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+
+            template<class T> void set(T val) noexcept
+            { __write_msr(addr, (__read_msr(addr) & ~mask) | ((val << from) & mask)); }
+        }
+
+        namespace enable_uncore_pmi
+        {
+            constexpr const auto mask = 0x0000000000002000UL;
+            constexpr const auto from = 13;
+            constexpr const auto name = "enable_uncore_pmi";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+
+            template<class T> void set(T val) noexcept
+            { __write_msr(addr, (__read_msr(addr) & ~mask) | ((val << from) & mask)); }
+        }
+
+        namespace freeze_while_smm
+        {
+            constexpr const auto mask = 0x0000000000004000UL;
+            constexpr const auto from = 14;
+            constexpr const auto name = "freeze_while_smm";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+
+            template<class T> void set(T val) noexcept
+            { __write_msr(addr, (__read_msr(addr) & ~mask) | ((val << from) & mask)); }
+        }
+
+        namespace rtm_debug
+        {
+            constexpr const auto mask = 0x0000000000008000UL;
+            constexpr const auto from = 15;
+            constexpr const auto name = "rtm_debug";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+
+            template<class T> void set(T val) noexcept
+            { __write_msr(addr, (__read_msr(addr) & ~mask) | ((val << from) & mask)); }
+        }
+
+        namespace reserved
+        {
+            constexpr const auto mask = 0xFFFFFFFFFFFF003CUL;
+            constexpr const auto from = 0;
+            constexpr const auto name = "reserved";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+
+            template<class T> void set(T val) noexcept
+            { __write_msr(addr, (__read_msr(addr) & ~mask) | ((val << from) & mask)); }
+        }
+    }
+
+    namespace ia32_pat
+    {
+        constexpr const auto addr = 0x00000277U;
+        constexpr const auto name = "ia32_pat";
+
+        inline auto get() noexcept
+        { return __read_msr(addr); }
+
+        template<class T> void set(T val) noexcept
+        { __write_msr(addr, val); }
+
+        namespace pa0
+        {
+            constexpr const auto mask = 0x0000000000000007UL;
+            constexpr const auto from = 0;
+            constexpr const auto name = "pa0";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+
+            template<class T> void set(T val) noexcept
+            { __write_msr(addr, (__read_msr(addr) & ~mask) | ((val << from) & mask)); }
+        }
+
+        namespace pa1
+        {
+            constexpr const auto mask = 0x0000000000000700UL;
+            constexpr const auto from = 8;
+            constexpr const auto name = "pa1";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+
+            template<class T> void set(T val) noexcept
+            { __write_msr(addr, (__read_msr(addr) & ~mask) | ((val << from) & mask)); }
+        }
+
+        namespace pa2
+        {
+            constexpr const auto mask = 0x0000000000070000UL;
+            constexpr const auto from = 16;
+            constexpr const auto name = "pa2";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+
+            template<class T> void set(T val) noexcept
+            { __write_msr(addr, (__read_msr(addr) & ~mask) | ((val << from) & mask)); }
+        }
+
+        namespace pa3
+        {
+            constexpr const auto mask = 0x0000000007000000UL;
+            constexpr const auto from = 24;
+            constexpr const auto name = "pa3";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+
+            template<class T> void set(T val) noexcept
+            { __write_msr(addr, (__read_msr(addr) & ~mask) | ((val << from) & mask)); }
+        }
+
+        namespace pa4
+        {
+            constexpr const auto mask = 0x0000000700000000UL;
+            constexpr const auto from = 32;
+            constexpr const auto name = "pa4";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+
+            template<class T> void set(T val) noexcept
+            { __write_msr(addr, (__read_msr(addr) & ~mask) | ((val << from) & mask)); }
+        }
+
+        namespace pa5
+        {
+            constexpr const auto mask = 0x0000070000000000UL;
+            constexpr const auto from = 40;
+            constexpr const auto name = "pa5";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+
+            template<class T> void set(T val) noexcept
+            { __write_msr(addr, (__read_msr(addr) & ~mask) | ((val << from) & mask)); }
+        }
+
+        namespace pa6
+        {
+            constexpr const auto mask = 0x0007000000000000UL;
+            constexpr const auto from = 48;
+            constexpr const auto name = "pa6";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+
+            template<class T> void set(T val) noexcept
+            { __write_msr(addr, (__read_msr(addr) & ~mask) | ((val << from) & mask)); }
+        }
+
+        namespace pa7
+        {
+            constexpr const auto mask = 0x0700000000000000UL;
+            constexpr const auto from = 56;
+            constexpr const auto name = "pa7";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+
+            template<class T> void set(T val) noexcept
+            { __write_msr(addr, (__read_msr(addr) & ~mask) | ((val << from) & mask)); }
+        }
+    }
+
+    namespace ia32_perf_global_ctrl
+    {
+        constexpr const auto addr = 0x0000038FU;
+        constexpr const auto name = "ia32_perf_global_ctrl";
+
+        inline auto get() noexcept
+        { return __read_msr(addr); }
+
+        template<class T> void set(T val) noexcept
+        { __write_msr(addr, val); }
+
+        namespace pmc0
+        {
+            constexpr const auto mask = 0x0000000000000001UL;
+            constexpr const auto from = 0;
+            constexpr const auto name = "pmc0";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+
+            template<class T> void set(T val) noexcept
+            { __write_msr(addr, (__read_msr(addr) & ~mask) | ((val << from) & mask)); }
+        }
+
+        namespace pmc1
+        {
+            constexpr const auto mask = 0x0000000000000002UL;
+            constexpr const auto from = 1;
+            constexpr const auto name = "pmc1";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+
+            template<class T> void set(T val) noexcept
+            { __write_msr(addr, (__read_msr(addr) & ~mask) | ((val << from) & mask)); }
+        }
+
+        namespace pmc2
+        {
+            constexpr const auto mask = 0x0000000000000004UL;
+            constexpr const auto from = 2;
+            constexpr const auto name = "pmc2";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+
+            template<class T> void set(T val) noexcept
+            { __write_msr(addr, (__read_msr(addr) & ~mask) | ((val << from) & mask)); }
+        }
+
+        namespace pmc3
+        {
+            constexpr const auto mask = 0x0000000000000008UL;
+            constexpr const auto from = 3;
+            constexpr const auto name = "pmc3";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+
+            template<class T> void set(T val) noexcept
+            { __write_msr(addr, (__read_msr(addr) & ~mask) | ((val << from) & mask)); }
+        }
+
+        namespace pmc4
+        {
+            constexpr const auto mask = 0x0000000000000010UL;
+            constexpr const auto from = 4;
+            constexpr const auto name = "pmc4";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+
+            template<class T> void set(T val) noexcept
+            { __write_msr(addr, (__read_msr(addr) & ~mask) | ((val << from) & mask)); }
+        }
+
+        namespace pmc5
+        {
+            constexpr const auto mask = 0x0000000000000020UL;
+            constexpr const auto from = 5;
+            constexpr const auto name = "pmc5";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+
+            template<class T> void set(T val) noexcept
+            { __write_msr(addr, (__read_msr(addr) & ~mask) | ((val << from) & mask)); }
+        }
+
+        namespace pmc6
+        {
+            constexpr const auto mask = 0x0000000000000040UL;
+            constexpr const auto from = 6;
+            constexpr const auto name = "pmc6";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+
+            template<class T> void set(T val) noexcept
+            { __write_msr(addr, (__read_msr(addr) & ~mask) | ((val << from) & mask)); }
+        }
+
+        namespace pmc7
+        {
+            constexpr const auto mask = 0x0000000000000080UL;
+            constexpr const auto from = 7;
+            constexpr const auto name = "pmc7";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+
+            template<class T> void set(T val) noexcept
+            { __write_msr(addr, (__read_msr(addr) & ~mask) | ((val << from) & mask)); }
+        }
+
+        namespace fixed_ctr0
+        {
+            constexpr const auto mask = 0x0000000100000000UL;
+            constexpr const auto from = 32;
+            constexpr const auto name = "fixed_ctr0";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+
+            template<class T> void set(T val) noexcept
+            { __write_msr(addr, (__read_msr(addr) & ~mask) | ((val << from) & mask)); }
+        }
+
+        namespace fixed_ctr1
+        {
+            constexpr const auto mask = 0x0000000200000000UL;
+            constexpr const auto from = 33;
+            constexpr const auto name = "fixed_ctr1";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+
+            template<class T> void set(T val) noexcept
+            { __write_msr(addr, (__read_msr(addr) & ~mask) | ((val << from) & mask)); }
+        }
+
+        namespace fixed_ctr2
+        {
+            constexpr const auto mask = 0x0000000400000000UL;
+            constexpr const auto from = 34;
+            constexpr const auto name = "fixed_ctr2";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+
+            template<class T> void set(T val) noexcept
+            { __write_msr(addr, (__read_msr(addr) & ~mask) | ((val << from) & mask)); }
         }
     }
 
@@ -1134,6 +1700,107 @@ namespace msrs
 
         inline auto get() noexcept
         { return __read_msr(addr); }
+    }
+
+    namespace ia32_efer
+    {
+        constexpr const auto addr = 0xC0000080U;
+        constexpr const auto name = "ia32_efer";
+
+        inline auto get() noexcept
+        { return __read_msr(addr); }
+
+        template<class T> void set(T val) noexcept
+        { __write_msr(addr, val); }
+
+        namespace sce
+        {
+            constexpr const auto mask = 0x0000000000000001UL;
+            constexpr const auto from = 0;
+            constexpr const auto name = "sce";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+
+            template<class T> void set(T val) noexcept
+            { __write_msr(addr, (__read_msr(addr) & ~mask) | ((val << from) & mask)); }
+        }
+
+        namespace lme
+        {
+            constexpr const auto mask = 0x0000000000000100UL;
+            constexpr const auto from = 8;
+            constexpr const auto name = "lme";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+
+            template<class T> void set(T val) noexcept
+            { __write_msr(addr, (__read_msr(addr) & ~mask) | ((val << from) & mask)); }
+        }
+
+        namespace lma
+        {
+            constexpr const auto mask = 0x0000000000000400UL;
+            constexpr const auto from = 10;
+            constexpr const auto name = "lma";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+
+            template<class T> void set(T val) noexcept
+            { __write_msr(addr, (__read_msr(addr) & ~mask) | ((val << from) & mask)); }
+        }
+
+        namespace nxe
+        {
+            constexpr const auto mask = 0x0000000000000800UL;
+            constexpr const auto from = 11;
+            constexpr const auto name = "lma";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+
+            template<class T> void set(T val) noexcept
+            { __write_msr(addr, (__read_msr(addr) & ~mask) | ((val << from) & mask)); }
+        }
+
+        namespace reserved
+        {
+            constexpr const auto mask = 0xFFFFFFFFFFFFF2FEUL;
+            constexpr const auto from = 0;
+            constexpr const auto name = "reserved";
+
+            inline auto get() noexcept
+            { return (__read_msr(addr) & mask) >> from; }
+
+            template<class T> void set(T val) noexcept
+            { __write_msr(addr, (__read_msr(addr) & ~mask) | ((val << from) & mask)); }
+        }
+    }
+
+    namespace ia32_fs_base
+    {
+        constexpr const auto addr = 0xC0000100U;
+        constexpr const auto name = "ia32_fs_base";
+
+        inline auto get() noexcept
+        { return __read_msr(addr); }
+
+        template<class T> void set(T val) noexcept
+        { __write_msr(addr, val); }
+    }
+
+    namespace ia32_gs_base
+    {
+        constexpr const auto addr = 0xC0000101U;
+        constexpr const auto name = "ia32_gs_base";
+
+        inline auto get() noexcept
+        { return __read_msr(addr); }
+
+        template<class T> void set(T val) noexcept
+        { __write_msr(addr, val); }
     }
 }
 }

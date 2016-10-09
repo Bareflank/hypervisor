@@ -98,12 +98,12 @@ setup_check_host_verify_load_ia32_perf_global_ctrl_paths(std::vector<struct cont
     path.throws_exception = false;
     cfg.push_back(path);
 
-    path.setup = [&] { enable_exit_ctl(VM_EXIT_CONTROL_LOAD_IA32_PERF_GLOBAL_CTRL); g_vmcs_fields[VMCS_HOST_IA32_PERF_GLOBAL_CTRL_FULL] = 0xc; };
+    path.setup = [&] { enable_exit_ctl(VM_EXIT_CONTROL_LOAD_IA32_PERF_GLOBAL_CTRL); g_vmcs_fields[VMCS_HOST_IA32_PERF_GLOBAL_CTRL] = 0xc; };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("perf global ctrl msr reserved bits must be 0"));
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_HOST_IA32_PERF_GLOBAL_CTRL_FULL] = 0; };
+    path.setup = [&] { g_vmcs_fields[VMCS_HOST_IA32_PERF_GLOBAL_CTRL] = 0; };
     path.throws_exception = false;
     cfg.push_back(path);
 }
@@ -115,47 +115,47 @@ setup_check_host_verify_load_ia32_pat_paths(std::vector<struct control_flow_path
     path.throws_exception = false;
     cfg.push_back(path);
 
-    path.setup = [&] { enable_exit_ctl(VM_EXIT_CONTROL_LOAD_IA32_PAT); g_vmcs_fields[VMCS_HOST_IA32_PAT_FULL] = 2ULL; };
+    path.setup = [&] { enable_exit_ctl(VM_EXIT_CONTROL_LOAD_IA32_PAT); g_vmcs_fields[VMCS_HOST_IA32_PAT] = 2ULL; };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("pat0 has an invalid memory type"));
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_HOST_IA32_PAT_FULL] = 2ULL << 8; };
+    path.setup = [&] { g_vmcs_fields[VMCS_HOST_IA32_PAT] = 2ULL << 8; };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("pat1 has an invalid memory type"));
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_HOST_IA32_PAT_FULL] = 2ULL << 16; };
+    path.setup = [&] { g_vmcs_fields[VMCS_HOST_IA32_PAT] = 2ULL << 16; };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("pat2 has an invalid memory type"));
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_HOST_IA32_PAT_FULL] = 2ULL << 24; };
+    path.setup = [&] { g_vmcs_fields[VMCS_HOST_IA32_PAT] = 2ULL << 24; };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("pat3 has an invalid memory type"));
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_HOST_IA32_PAT_FULL] = 2ULL << 32; };
+    path.setup = [&] { g_vmcs_fields[VMCS_HOST_IA32_PAT] = 2ULL << 32; };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("pat4 has an invalid memory type"));
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_HOST_IA32_PAT_FULL] = 2ULL << 40; };
+    path.setup = [&] { g_vmcs_fields[VMCS_HOST_IA32_PAT] = 2ULL << 40; };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("pat5 has an invalid memory type"));
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_HOST_IA32_PAT_FULL] = 2ULL << 48; };
+    path.setup = [&] { g_vmcs_fields[VMCS_HOST_IA32_PAT] = 2ULL << 48; };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("pat6 has an invalid memory type"));
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_HOST_IA32_PAT_FULL] = 2ULL << 56; };
+    path.setup = [&] { g_vmcs_fields[VMCS_HOST_IA32_PAT] = 2ULL << 56; };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("pat7 has an invalid memory type"));
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_HOST_IA32_PAT_FULL] = 0; };
+    path.setup = [&] { g_vmcs_fields[VMCS_HOST_IA32_PAT] = 0; };
     path.throws_exception = false;
     cfg.push_back(path);
 }
@@ -167,22 +167,22 @@ setup_check_host_verify_load_ia32_efer_paths(std::vector<struct control_flow_pat
     path.throws_exception = false;
     cfg.push_back(path);
 
-    path.setup = [&] { enable_exit_ctl(VM_EXIT_CONTROL_LOAD_IA32_EFER); g_vmcs_fields[VMCS_HOST_IA32_EFER_FULL] = 0xe; };
+    path.setup = [&] { enable_exit_ctl(VM_EXIT_CONTROL_LOAD_IA32_EFER); g_vmcs_fields[vmcs::host_ia32_efer::addr] = 0xe; };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("ia32 efer msr reserved buts must be 0 if load ia32 efer entry is enabled"));
     cfg.push_back(path);
 
-    path.setup = [&] { disable_exit_ctl(VM_EXIT_CONTROL_HOST_ADDRESS_SPACE_SIZE); g_vmcs_fields[VMCS_HOST_IA32_EFER_FULL] = IA32_EFER_LMA; };
+    path.setup = [&] { disable_exit_ctl(VM_EXIT_CONTROL_HOST_ADDRESS_SPACE_SIZE); g_vmcs_fields[vmcs::host_ia32_efer::addr] = msrs::ia32_efer::lma::mask; };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("host addr space is 0, but efer.lma is 1"));
     cfg.push_back(path);
 
-    path.setup = [&] { enable_exit_ctl(VM_EXIT_CONTROL_HOST_ADDRESS_SPACE_SIZE); g_vmcs_fields[VMCS_HOST_IA32_EFER_FULL] = 0; };
+    path.setup = [&] { enable_exit_ctl(VM_EXIT_CONTROL_HOST_ADDRESS_SPACE_SIZE); g_vmcs_fields[vmcs::host_ia32_efer::addr] = 0; };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("host addr space is 1, but efer.lma is 0"));
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_HOST_IA32_EFER_FULL] = IA32_EFER_LMA; g_vmcs_fields[vmcs::host_cr0::addr] = 0; };
+    path.setup = [&] { g_vmcs_fields[vmcs::host_ia32_efer::addr] = msrs::ia32_efer::lma::mask; g_vmcs_fields[vmcs::host_cr0::addr] = 0; };
     path.throws_exception = false;
     cfg.push_back(path);
 
@@ -191,12 +191,12 @@ setup_check_host_verify_load_ia32_efer_paths(std::vector<struct control_flow_pat
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("efer.lme is 0, but efer.lma is 1"));
     cfg.push_back(path);
 
-    path.setup = [&] { disable_exit_ctl(VM_EXIT_CONTROL_HOST_ADDRESS_SPACE_SIZE); g_vmcs_fields[VMCS_HOST_IA32_EFER_FULL] = IA32_EFER_LME; };
+    path.setup = [&] { disable_exit_ctl(VM_EXIT_CONTROL_HOST_ADDRESS_SPACE_SIZE); g_vmcs_fields[vmcs::host_ia32_efer::addr] = msrs::ia32_efer::lme::mask; };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("efer.lme is 1, but efer.lma is 0"));
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_HOST_IA32_EFER_FULL] = 0; };
+    path.setup = [&] { g_vmcs_fields[vmcs::host_ia32_efer::addr] = 0; };
     path.throws_exception = false;
     cfg.push_back(path);
 }
@@ -403,11 +403,11 @@ setup_check_host_tr_canonical_base_address_paths(std::vector<struct control_flow
 static void
 setup_check_host_if_outside_ia32e_mode_paths(std::vector<struct control_flow_path> &cfg)
 {
-    path.setup = [&] { g_msrs[IA32_EFER_MSR] = IA32_EFER_LMA; };
+    path.setup = [&] { g_msrs[msrs::ia32_efer::addr] = msrs::ia32_efer::lma::mask; };
     path.throws_exception = false;
     cfg.push_back(path);
 
-    path.setup = [&] { g_msrs[IA32_EFER_MSR] = 0; enable_entry_ctl(VM_ENTRY_CONTROL_IA_32E_MODE_GUEST); };
+    path.setup = [&] { g_msrs[msrs::ia32_efer::addr] = 0; enable_entry_ctl(VM_ENTRY_CONTROL_IA_32E_MODE_GUEST); };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("ia 32e mode must be 0 if efer.lma == 0"));
     cfg.push_back(path);
@@ -425,11 +425,11 @@ setup_check_host_if_outside_ia32e_mode_paths(std::vector<struct control_flow_pat
 static void
 setup_check_host_vmcs_host_address_space_size_is_set_paths(std::vector<struct control_flow_path> &cfg)
 {
-    path.setup = [&] { g_msrs[IA32_EFER_MSR] = 0; };
+    path.setup = [&] { g_msrs[msrs::ia32_efer::addr] = 0; };
     path.throws_exception = false;
     cfg.push_back(path);
 
-    path.setup = [&] { g_msrs[IA32_EFER_MSR] = IA32_EFER_LMA; disable_exit_ctl(VM_EXIT_CONTROL_HOST_ADDRESS_SPACE_SIZE); };
+    path.setup = [&] { g_msrs[msrs::ia32_efer::addr] = msrs::ia32_efer::lma::mask; disable_exit_ctl(VM_EXIT_CONTROL_HOST_ADDRESS_SPACE_SIZE); };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("host addr space must be 1 if efer.lma == 1"));
     cfg.push_back(path);

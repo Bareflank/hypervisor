@@ -193,28 +193,28 @@ vmcs_intel_x64::write_64bit_control_state(const std::shared_ptr<vmcs_intel_x64_s
 {
     (void) state;
 
-    // unused: VMCS_ADDRESS_OF_IO_BITMAP_A_FULL
-    // unused: VMCS_ADDRESS_OF_IO_BITMAP_B_FULL
-    // unused: VMCS_ADDRESS_OF_MSR_BITMAPS_FULL
-    // unused: VMCS_VM_EXIT_MSR_STORE_ADDRESS_FULL
-    // unused: VMCS_VM_EXIT_MSR_LOAD_ADDRESS_FULL
-    // unused: VMCS_VM_ENTRY_MSR_LOAD_ADDRESS_FULL
-    // unused: VMCS_EXECUTIVE_VMCS_POINTER_FULL
-    // unused: VMCS_TSC_OFFSET_FULL
-    // unused: VMCS_VIRTUAL_APIC_ADDRESS_FULL
-    // unused: VMCS_APIC_ACCESS_ADDRESS_FULL
-    // unused: VMCS_POSTED_INTERRUPT_DESCRIPTOR_ADDRESS_FULL
-    // unused: VMCS_VM_FUNCTION_CONTROLS_FULL
-    // unused: VMCS_EPT_POINTER_FULL
-    // unused: VMCS_EOI_EXIT_BITMAP_0_FULL
-    // unused: VMCS_EOI_EXIT_BITMAP_1_FULL
-    // unused: VMCS_EOI_EXIT_BITMAP_2_FULL
-    // unused: VMCS_EOI_EXIT_BITMAP_3_FULL
-    // unused: VMCS_EPTP_LIST_ADDRESS_FULL
-    // unused: VMCS_VMREAD_BITMAP_ADDRESS_FULL
-    // unused: VMCS_VMWRITE_BITMAP_ADDRESS_FULL
-    // unused: VMCS_VIRTUALIZATION_EXCEPTION_INFORMATION_ADDRESS_FULL
-    // unused: VMCS_XSS_EXITING_BITMAP_FULL
+    // unused: VMCS_ADDRESS_OF_IO_BITMAP_A
+    // unused: VMCS_ADDRESS_OF_IO_BITMAP_B
+    // unused: VMCS_ADDRESS_OF_MSR_BITMAPS
+    // unused: VMCS_VM_EXIT_MSR_STORE_ADDRESS
+    // unused: VMCS_VM_EXIT_MSR_LOAD_ADDRESS
+    // unused: VMCS_VM_ENTRY_MSR_LOAD_ADDRESS
+    // unused: VMCS_EXECUTIVE_VMCS_POINTER
+    // unused: VMCS_TSC_OFFSET
+    // unused: VMCS_VIRTUAL_APIC_ADDRESS
+    // unused: VMCS_APIC_ACCESS_ADDRESS
+    // unused: VMCS_POSTED_INTERRUPT_DESCRIPTOR_ADDRESS
+    // unused: VMCS_VM_FUNCTION_CONTROLS
+    // unused: VMCS_EPT_POINTER
+    // unused: VMCS_EOI_EXIT_BITMAP_0
+    // unused: VMCS_EOI_EXIT_BITMAP_1
+    // unused: VMCS_EOI_EXIT_BITMAP_2
+    // unused: VMCS_EOI_EXIT_BITMAP_3
+    // unused: VMCS_EPTP_LIST_ADDRESS
+    // unused: VMCS_VMREAD_BITMAP_ADDRESS
+    // unused: VMCS_VMWRITE_BITMAP_ADDRESS
+    // unused: VMCS_VIRTUALIZATION_EXCEPTION_INFORMATION_ADDRESS
+    // unused: VMCS_XSS_EXITING_BITMAP
 }
 
 void
@@ -295,16 +295,16 @@ vmcs_intel_x64::write_16bit_guest_state(const std::shared_ptr<vmcs_intel_x64_sta
 void
 vmcs_intel_x64::write_64bit_guest_state(const std::shared_ptr<vmcs_intel_x64_state> &state)
 {
-    vmwrite(VMCS_VMCS_LINK_POINTER_FULL, 0xFFFFFFFFFFFFFFFF);
-    vmwrite(VMCS_GUEST_IA32_DEBUGCTL_FULL, state->ia32_debugctl_msr());
-    vmwrite(VMCS_GUEST_IA32_PAT_FULL, state->ia32_pat_msr());
-    vmwrite(VMCS_GUEST_IA32_EFER_FULL, state->ia32_efer_msr());
-    vmwrite(VMCS_GUEST_IA32_PERF_GLOBAL_CTRL_FULL, state->ia32_perf_global_ctrl_msr());
+    vmwrite(VMCS_VMCS_LINK_POINTER, 0xFFFFFFFFFFFFFFFF);
+    vmcs::guest_ia32_debugctl::set(state->ia32_debugctl_msr());
+    vmwrite(VMCS_GUEST_IA32_PAT, state->ia32_pat_msr());
+    vmcs::guest_ia32_efer::set(state->ia32_efer_msr());
+    vmwrite(VMCS_GUEST_IA32_PERF_GLOBAL_CTRL, state->ia32_perf_global_ctrl_msr());
 
-    // unused: VMCS_GUEST_PDPTE0_FULL
-    // unused: VMCS_GUEST_PDPTE1_FULL
-    // unused: VMCS_GUEST_PDPTE2_FULL
-    // unused: VMCS_GUEST_PDPTE3_FULL
+    // unused: VMCS_GUEST_PDPTE0
+    // unused: VMCS_GUEST_PDPTE1
+    // unused: VMCS_GUEST_PDPTE2
+    // unused: VMCS_GUEST_PDPTE3
 }
 
 void
@@ -384,9 +384,9 @@ vmcs_intel_x64::write_16bit_host_state(const std::shared_ptr<vmcs_intel_x64_stat
 void
 vmcs_intel_x64::write_64bit_host_state(const std::shared_ptr<vmcs_intel_x64_state> &state)
 {
-    vmwrite(VMCS_HOST_IA32_PAT_FULL, state->ia32_pat_msr());
-    vmwrite(VMCS_HOST_IA32_EFER_FULL, state->ia32_efer_msr());
-    vmwrite(VMCS_HOST_IA32_PERF_GLOBAL_CTRL_FULL, state->ia32_perf_global_ctrl_msr());
+    vmwrite(VMCS_HOST_IA32_PAT, state->ia32_pat_msr());
+    vmcs::host_ia32_efer::set(state->ia32_efer_msr());
+    vmwrite(VMCS_HOST_IA32_PERF_GLOBAL_CTRL, state->ia32_perf_global_ctrl_msr());
 }
 
 void

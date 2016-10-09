@@ -84,27 +84,27 @@ setup_check_control_io_bitmap_address_bits_paths(std::vector<struct control_flow
     path.throws_exception = false;
     cfg.push_back(path);
 
-    path.setup = [&] { enable_proc_ctl(VM_EXEC_P_PROC_BASED_USE_IO_BITMAPS); g_vmcs_fields[VMCS_ADDRESS_OF_IO_BITMAP_A_FULL] = 0x1; };
+    path.setup = [&] { enable_proc_ctl(VM_EXEC_P_PROC_BASED_USE_IO_BITMAPS); g_vmcs_fields[VMCS_ADDRESS_OF_IO_BITMAP_A] = 0x1; };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("io bitmap a addr not page aligned"));
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_ADDRESS_OF_IO_BITMAP_A_FULL] = 0xff00000000000000; g_vmcs_fields[VMCS_ADDRESS_OF_IO_BITMAP_B_FULL] = 0x1; };
+    path.setup = [&] { g_vmcs_fields[VMCS_ADDRESS_OF_IO_BITMAP_A] = 0xff00000000000000; g_vmcs_fields[VMCS_ADDRESS_OF_IO_BITMAP_B] = 0x1; };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("io bitmap b addr not page aligned"));
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_ADDRESS_OF_IO_BITMAP_B_FULL] = 0xff00000000000000; };
+    path.setup = [&] { g_vmcs_fields[VMCS_ADDRESS_OF_IO_BITMAP_B] = 0xff00000000000000; };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("io bitmap a addr too large"));
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_ADDRESS_OF_IO_BITMAP_A_FULL] = 0x1000; };
+    path.setup = [&] { g_vmcs_fields[VMCS_ADDRESS_OF_IO_BITMAP_A] = 0x1000; };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("io bitmap b addr too large"));
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_ADDRESS_OF_IO_BITMAP_B_FULL] = 0x1000; };
+    path.setup = [&] { g_vmcs_fields[VMCS_ADDRESS_OF_IO_BITMAP_B] = 0x1000; };
     path.throws_exception = false;
     cfg.push_back(path);
 }
@@ -116,17 +116,17 @@ setup_check_control_msr_bitmap_address_bits_paths(std::vector<struct control_flo
     path.throws_exception = false;
     cfg.push_back(path);
 
-    path.setup = [&] { enable_proc_ctl(VM_EXEC_P_PROC_BASED_USE_MSR_BITMAPS); g_vmcs_fields[VMCS_ADDRESS_OF_MSR_BITMAPS_FULL] = 0x1; };
+    path.setup = [&] { enable_proc_ctl(VM_EXEC_P_PROC_BASED_USE_MSR_BITMAPS); g_vmcs_fields[VMCS_ADDRESS_OF_MSR_BITMAPS] = 0x1; };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("msr bitmap addr not page aligned"));
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_ADDRESS_OF_MSR_BITMAPS_FULL] = 0xff00000000000000; };
+    path.setup = [&] { g_vmcs_fields[VMCS_ADDRESS_OF_MSR_BITMAPS] = 0xff00000000000000; };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("msr bitmap addr too large"));
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_ADDRESS_OF_MSR_BITMAPS_FULL] = 0x1000; };
+    path.setup = [&] { g_vmcs_fields[VMCS_ADDRESS_OF_MSR_BITMAPS] = 0x1000; };
     path.throws_exception = false;
     cfg.push_back(path);
 }
@@ -135,22 +135,22 @@ static void
 setup_check_control_tpr_shadow_and_virtual_apic_paths(std::vector<struct control_flow_path> &cfg)
 {
     // control paths when tpr shadow is enabled
-    path.setup = [&] { enable_proc_ctl(VM_EXEC_P_PROC_BASED_USE_TPR_SHADOW); g_vmcs_fields[VMCS_VIRTUAL_APIC_ADDRESS_FULL] = 0; };
+    path.setup = [&] { enable_proc_ctl(VM_EXEC_P_PROC_BASED_USE_TPR_SHADOW); g_vmcs_fields[VMCS_VIRTUAL_APIC_ADDRESS] = 0; };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("virtual apic physical addr is NULL"));
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_VIRTUAL_APIC_ADDRESS_FULL] = 1; };
+    path.setup = [&] { g_vmcs_fields[VMCS_VIRTUAL_APIC_ADDRESS] = 1; };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("virtual apic addr not 4k aligned"));
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_VIRTUAL_APIC_ADDRESS_FULL] = 0xff00000000000000; };
+    path.setup = [&] { g_vmcs_fields[VMCS_VIRTUAL_APIC_ADDRESS] = 0xff00000000000000; };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("virtual apic addr too large"));
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_VIRTUAL_APIC_ADDRESS_FULL] = 0x1000; enable_proc_ctl2(VM_EXEC_S_PROC_BASED_VIRTUAL_INTERRUPT_DELIVERY); };
+    path.setup = [&] { g_vmcs_fields[VMCS_VIRTUAL_APIC_ADDRESS] = 0x1000; enable_proc_ctl2(VM_EXEC_S_PROC_BASED_VIRTUAL_INTERRUPT_DELIVERY); };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("tpr_shadow is enabled, but virtual interrupt delivery is enabled"));
     cfg.push_back(path);
@@ -233,22 +233,22 @@ setup_check_control_virtual_apic_address_bits_paths(std::vector<struct control_f
     path.throws_exception = false;
     cfg.push_back(path);
 
-    path.setup = [&] { enable_proc_ctl2(VM_EXEC_S_PROC_BASED_VIRTUALIZE_APIC_ACCESSES); g_vmcs_fields[VMCS_APIC_ACCESS_ADDRESS_FULL] = 0; };
+    path.setup = [&] { enable_proc_ctl2(VM_EXEC_S_PROC_BASED_VIRTUALIZE_APIC_ACCESSES); g_vmcs_fields[VMCS_APIC_ACCESS_ADDRESS] = 0; };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("apic access physical addr is NULL"));
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_APIC_ACCESS_ADDRESS_FULL] = 1; };
+    path.setup = [&] { g_vmcs_fields[VMCS_APIC_ACCESS_ADDRESS] = 1; };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("apic access addr not 4k aligned"));
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_APIC_ACCESS_ADDRESS_FULL] = 0xff00000000000000; };
+    path.setup = [&] { g_vmcs_fields[VMCS_APIC_ACCESS_ADDRESS] = 0xff00000000000000; };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("apic access addr too large"));
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_APIC_ACCESS_ADDRESS_FULL] = 0x1000; };
+    path.setup = [&] { g_vmcs_fields[VMCS_APIC_ACCESS_ADDRESS] = 0x1000; };
     path.throws_exception = false;
     cfg.push_back(path);
 }
@@ -301,17 +301,17 @@ setup_check_control_process_posted_interrupt_checks_paths(std::vector<struct con
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("bits 15:8 of the notification vector must be 0 if posted interrupts is 1"));
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[vmcs::posted_interrupt_notification_vector::addr] = 0; g_vmcs_fields[VMCS_POSTED_INTERRUPT_DESCRIPTOR_ADDRESS_FULL] = 1; };
+    path.setup = [&] { g_vmcs_fields[vmcs::posted_interrupt_notification_vector::addr] = 0; g_vmcs_fields[VMCS_POSTED_INTERRUPT_DESCRIPTOR_ADDRESS] = 1; };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("bits 5:0 of the interrupt descriptor addr must be 0 if posted interrupts is 1"));
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_POSTED_INTERRUPT_DESCRIPTOR_ADDRESS_FULL] = 0xff00000000000000; };
+    path.setup = [&] { g_vmcs_fields[VMCS_POSTED_INTERRUPT_DESCRIPTOR_ADDRESS] = 0xff00000000000000; };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("interrupt descriptor addr too large"));
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_POSTED_INTERRUPT_DESCRIPTOR_ADDRESS_FULL] = 0x1000; };
+    path.setup = [&] { g_vmcs_fields[VMCS_POSTED_INTERRUPT_DESCRIPTOR_ADDRESS] = 0x1000; };
     path.throws_exception = false;
     cfg.push_back(path);
 }
@@ -343,44 +343,44 @@ setup_check_control_enable_ept_checks_paths(std::vector<struct control_flow_path
     path.setup = [&]
     {
         enable_proc_ctl2(VM_EXEC_S_PROC_BASED_ENABLE_EPT);
-        g_vmcs_fields[VMCS_EPT_POINTER_FULL] = 0;
+        g_vmcs_fields[VMCS_EPT_POINTER] = 0;
         g_msrs[msrs::ia32_vmx_ept_vpid_cap::addr] = ~(IA32_VMX_EPT_VPID_CAP_UC | IA32_VMX_EPT_VPID_CAP_WB);
     };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("hardware does not support ept memory type: uncachable"));
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_EPT_POINTER_FULL] = 6; };
+    path.setup = [&] { g_vmcs_fields[VMCS_EPT_POINTER] = 6; };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("hardware does not support ept memory type: write-back"));
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_EPT_POINTER_FULL] = 3; };
+    path.setup = [&] { g_vmcs_fields[VMCS_EPT_POINTER] = 3; };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("unknown eptp memory type"));
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_EPT_POINTER_FULL] = 0xfe; g_msrs[msrs::ia32_vmx_ept_vpid_cap::addr] = IA32_VMX_EPT_VPID_CAP_WB; };
+    path.setup = [&] { g_vmcs_fields[VMCS_EPT_POINTER] = 0xfe; g_msrs[msrs::ia32_vmx_ept_vpid_cap::addr] = IA32_VMX_EPT_VPID_CAP_WB; };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("the ept walk-through length must be 1 less than 4, i.e. 3"));
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_EPT_POINTER_FULL] = 0x5e; };
+    path.setup = [&] { g_vmcs_fields[VMCS_EPT_POINTER] = 0x5e; };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("hardware does not support dirty / accessed flags for ept"));
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_EPT_POINTER_FULL] = 0x9e; };
+    path.setup = [&] { g_vmcs_fields[VMCS_EPT_POINTER] = 0x9e; };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("bits 11:7 and 63:48 of the eptp must be 0"));
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_EPT_POINTER_FULL] = 0xf00000000000001e; };
+    path.setup = [&] { g_vmcs_fields[VMCS_EPT_POINTER] = 0xf00000000000001e; };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("eptp must be a valid physical address"));
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_EPT_POINTER_FULL] = 0x1e; };
+    path.setup = [&] { g_vmcs_fields[VMCS_EPT_POINTER] = 0x1e; };
     path.throws_exception = false;
     cfg.push_back(path);
 }
@@ -393,17 +393,17 @@ setup_check_control_enable_pml_checks_paths(std::vector<struct control_flow_path
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("ept must be enabled if pml is enabled"));
     cfg.push_back(path);
 
-    path.setup = [&] { disable_proc_ctl2(VM_EXEC_S_PROC_BASED_ENABLE_PML); g_vmcs_fields[VMCS_PML_ADDRESS_FULL] = 0xff00000000000000; };
+    path.setup = [&] { disable_proc_ctl2(VM_EXEC_S_PROC_BASED_ENABLE_PML); g_vmcs_fields[VMCS_PML_ADDRESS] = 0xff00000000000000; };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("pml address must be a valid physical address"));
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_PML_ADDRESS_FULL] = 1; };
+    path.setup = [&] { g_vmcs_fields[VMCS_PML_ADDRESS] = 1; };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("bits 11:0 of the pml address must be 0"));
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_PML_ADDRESS_FULL] = 0x1000; };
+    path.setup = [&] { g_vmcs_fields[VMCS_PML_ADDRESS] = 0x1000; };
     path.throws_exception = false;
     cfg.push_back(path);
 }
@@ -435,20 +435,20 @@ setup_check_control_enable_vm_functions_paths(std::vector<struct control_flow_pa
     path.setup = [&]
     {
         enable_proc_ctl2(VM_EXEC_S_PROC_BASED_ENABLE_VM_FUNCTIONS);
-        g_vmcs_fields[VMCS_VM_FUNCTION_CONTROLS_FULL] = 1;
+        g_vmcs_fields[VMCS_VM_FUNCTION_CONTROLS] = 1;
         g_msrs[msrs::ia32_vmx_vmfunc::addr] = 0;
     };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("unsupported vm function control bit set"));
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_VM_FUNCTION_CONTROLS_FULL] = 0; };
+    path.setup = [&] { g_vmcs_fields[VMCS_VM_FUNCTION_CONTROLS] = 0; };
     path.throws_exception = false;
     cfg.push_back(path);
 
     path.setup = [&]
     {
-        g_vmcs_fields[VMCS_VM_FUNCTION_CONTROLS_FULL] = VM_FUNCTION_CONTROL_EPTP_SWITCHING;
+        g_vmcs_fields[VMCS_VM_FUNCTION_CONTROLS] = VM_FUNCTION_CONTROL_EPTP_SWITCHING;
         g_msrs[msrs::ia32_vmx_vmfunc::addr] = VM_FUNCTION_CONTROL_EPTP_SWITCHING;
         disable_proc_ctl2(VM_EXEC_S_PROC_BASED_ENABLE_EPT);
     };
@@ -456,17 +456,17 @@ setup_check_control_enable_vm_functions_paths(std::vector<struct control_flow_pa
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("enable ept must be 1 if eptp switching is 1"));
     cfg.push_back(path);
 
-    path.setup = [&] { enable_proc_ctl2(VM_EXEC_S_PROC_BASED_ENABLE_EPT); g_vmcs_fields[VMCS_EPTP_LIST_ADDRESS_FULL] = 1; };
+    path.setup = [&] { enable_proc_ctl2(VM_EXEC_S_PROC_BASED_ENABLE_EPT); g_vmcs_fields[VMCS_EPTP_LIST_ADDRESS] = 1; };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("bits 11:0 must be 0 for eptp list address"));
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_EPTP_LIST_ADDRESS_FULL] = 0xff00000000000000; };
+    path.setup = [&] { g_vmcs_fields[VMCS_EPTP_LIST_ADDRESS] = 0xff00000000000000; };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("eptp list address addr too large"));
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_EPTP_LIST_ADDRESS_FULL] = 0x1000; };
+    path.setup = [&] { g_vmcs_fields[VMCS_EPTP_LIST_ADDRESS] = 0x1000; };
     path.throws_exception = false;
     cfg.push_back(path);
 }
@@ -478,27 +478,27 @@ setup_check_control_enable_vmcs_shadowing_paths(std::vector<struct control_flow_
     path.throws_exception = false;
     cfg.push_back(path);
 
-    path.setup = [&] { enable_proc_ctl2(VM_EXEC_S_PROC_BASED_VMCS_SHADOWING); g_vmcs_fields[VMCS_VMREAD_BITMAP_ADDRESS_FULL] = 1; };
+    path.setup = [&] { enable_proc_ctl2(VM_EXEC_S_PROC_BASED_VMCS_SHADOWING); g_vmcs_fields[VMCS_VMREAD_BITMAP_ADDRESS] = 1; };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("bits 11:0 must be 0 for the vmcs read bitmap address"));
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_VMREAD_BITMAP_ADDRESS_FULL] = 0xff00000000000000; g_vmcs_fields[VMCS_VMWRITE_BITMAP_ADDRESS_FULL] = 1; };
+    path.setup = [&] { g_vmcs_fields[VMCS_VMREAD_BITMAP_ADDRESS] = 0xff00000000000000; g_vmcs_fields[VMCS_VMWRITE_BITMAP_ADDRESS] = 1; };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("bits 11:0 must be 0 for the vmcs write bitmap address"));
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_VMWRITE_BITMAP_ADDRESS_FULL] = 0xff00000000000000; };
+    path.setup = [&] { g_vmcs_fields[VMCS_VMWRITE_BITMAP_ADDRESS] = 0xff00000000000000; };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("vmcs read bitmap address addr too large"));
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_VMREAD_BITMAP_ADDRESS_FULL] = 0x1000; };
+    path.setup = [&] { g_vmcs_fields[VMCS_VMREAD_BITMAP_ADDRESS] = 0x1000; };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("vmcs write bitmap address addr too large"));
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_VMWRITE_BITMAP_ADDRESS_FULL] = 0x1000; };
+    path.setup = [&] { g_vmcs_fields[VMCS_VMWRITE_BITMAP_ADDRESS] = 0x1000; };
     path.throws_exception = false;
     cfg.push_back(path);
 }
@@ -510,17 +510,17 @@ setup_check_control_enable_ept_violation_checks_paths(std::vector<struct control
     path.throws_exception = false;
     cfg.push_back(path);
 
-    path.setup = [&] { enable_proc_ctl2(VM_EXEC_S_PROC_BASED_EPT_VIOLATION_VE); g_vmcs_fields[VMCS_VIRTUALIZATION_EXCEPTION_INFORMATION_ADDRESS_FULL] = 1; };
+    path.setup = [&] { enable_proc_ctl2(VM_EXEC_S_PROC_BASED_EPT_VIOLATION_VE); g_vmcs_fields[VMCS_VIRTUALIZATION_EXCEPTION_INFORMATION_ADDRESS] = 1; };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("bits 11:0 must be 0 for the vmcs virt except info address"));
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_VIRTUALIZATION_EXCEPTION_INFORMATION_ADDRESS_FULL] = 0xff00000000000000; };
+    path.setup = [&] { g_vmcs_fields[VMCS_VIRTUALIZATION_EXCEPTION_INFORMATION_ADDRESS] = 0xff00000000000000; };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("vmcs virt except info address addr too large"));
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_VIRTUALIZATION_EXCEPTION_INFORMATION_ADDRESS_FULL] = 0x1000; };
+    path.setup = [&] { g_vmcs_fields[VMCS_VIRTUALIZATION_EXCEPTION_INFORMATION_ADDRESS] = 0x1000; };
     path.throws_exception = false;
     cfg.push_back(path);
 }
@@ -558,22 +558,22 @@ setup_check_control_exit_msr_store_address_paths(std::vector<struct control_flow
     path.throws_exception = false;
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_VM_EXIT_MSR_STORE_COUNT] = 16; g_vmcs_fields[VMCS_VM_EXIT_MSR_STORE_ADDRESS_FULL] = 0xf; };
+    path.setup = [&] { g_vmcs_fields[VMCS_VM_EXIT_MSR_STORE_COUNT] = 16; g_vmcs_fields[VMCS_VM_EXIT_MSR_STORE_ADDRESS] = 0xf; };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("bits 3:0 must be 0 for the exit msr store address"));
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_VM_EXIT_MSR_STORE_ADDRESS_FULL] = 0xff00000000000000; };
+    path.setup = [&] { g_vmcs_fields[VMCS_VM_EXIT_MSR_STORE_ADDRESS] = 0xff00000000000000; };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("exit msr store addr too large"));
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_VM_EXIT_MSR_STORE_ADDRESS_FULL] = 0xfffffff0; };
+    path.setup = [&] { g_vmcs_fields[VMCS_VM_EXIT_MSR_STORE_ADDRESS] = 0xfffffff0; };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("end of exit msr store area too large"));
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_VM_EXIT_MSR_STORE_ADDRESS_FULL] = 0x10; };
+    path.setup = [&] { g_vmcs_fields[VMCS_VM_EXIT_MSR_STORE_ADDRESS] = 0x10; };
     path.throws_exception = false;
     cfg.push_back(path);
 }
@@ -585,22 +585,22 @@ setup_check_control_exit_msr_load_address_paths(std::vector<struct control_flow_
     path.throws_exception = false;
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_VM_EXIT_MSR_LOAD_COUNT] = 16; g_vmcs_fields[VMCS_VM_EXIT_MSR_LOAD_ADDRESS_FULL] = 0xf; };
+    path.setup = [&] { g_vmcs_fields[VMCS_VM_EXIT_MSR_LOAD_COUNT] = 16; g_vmcs_fields[VMCS_VM_EXIT_MSR_LOAD_ADDRESS] = 0xf; };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("bits 3:0 must be 0 for the exit msr load address"));
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_VM_EXIT_MSR_LOAD_ADDRESS_FULL] = 0xff00000000000000; };
+    path.setup = [&] { g_vmcs_fields[VMCS_VM_EXIT_MSR_LOAD_ADDRESS] = 0xff00000000000000; };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("exit msr load addr too large"));
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_VM_EXIT_MSR_LOAD_ADDRESS_FULL] = 0xfffffff0; };
+    path.setup = [&] { g_vmcs_fields[VMCS_VM_EXIT_MSR_LOAD_ADDRESS] = 0xfffffff0; };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("end of exit msr load area too large"));
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_VM_EXIT_MSR_LOAD_ADDRESS_FULL] = 0x10; };
+    path.setup = [&] { g_vmcs_fields[VMCS_VM_EXIT_MSR_LOAD_ADDRESS] = 0x10; };
     path.throws_exception = false;
     cfg.push_back(path);
 }
@@ -778,22 +778,22 @@ setup_check_control_entry_msr_load_address_paths(std::vector<struct control_flow
     path.throws_exception = false;
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_VM_ENTRY_MSR_LOAD_COUNT] = 16; g_vmcs_fields[VMCS_VM_ENTRY_MSR_LOAD_ADDRESS_FULL] = 0xf; };
+    path.setup = [&] { g_vmcs_fields[VMCS_VM_ENTRY_MSR_LOAD_COUNT] = 16; g_vmcs_fields[VMCS_VM_ENTRY_MSR_LOAD_ADDRESS] = 0xf; };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("bits 3:0 must be 0 for the entry msr load address"));
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_VM_ENTRY_MSR_LOAD_ADDRESS_FULL] = 0xff00000000000000; };
+    path.setup = [&] { g_vmcs_fields[VMCS_VM_ENTRY_MSR_LOAD_ADDRESS] = 0xff00000000000000; };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("entry msr load addr too large"));
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_VM_ENTRY_MSR_LOAD_ADDRESS_FULL] = 0xfffffff0; };
+    path.setup = [&] { g_vmcs_fields[VMCS_VM_ENTRY_MSR_LOAD_ADDRESS] = 0xfffffff0; };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("end of entry msr load area too large"));
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_VM_ENTRY_MSR_LOAD_ADDRESS_FULL] = 0x10; };
+    path.setup = [&] { g_vmcs_fields[VMCS_VM_ENTRY_MSR_LOAD_ADDRESS] = 0x10; };
     path.throws_exception = false;
     cfg.push_back(path);
 }

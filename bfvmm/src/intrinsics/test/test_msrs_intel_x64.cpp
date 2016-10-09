@@ -27,44 +27,340 @@ using namespace intel_x64;
 std::map<uint32_t, uint64_t> g_msrs;
 
 extern "C" uint64_t
-__read_msr(uint32_t msr) noexcept
-{ return g_msrs[msr]; }
+__read_msr(uint32_t addr) noexcept
+{ return g_msrs[addr]; }
+
+extern "C" void
+__write_msr(uint32_t addr, uint64_t val) noexcept
+{ g_msrs[addr] = val; }
 
 void
 intrinsics_ut::test_ia32_feature_control()
 {
-    g_msrs[msrs::ia32_feature_control::addr] = 100UL;
+    msrs::ia32_feature_control::set(100UL);
     this->expect_true(msrs::ia32_feature_control::get() == 100UL);
 }
 
 void
 intrinsics_ut::test_ia32_feature_control_lock_bit()
 {
-    auto mask = msrs::ia32_feature_control::lock_bit::mask;
-    auto from = msrs::ia32_feature_control::lock_bit::from;
-
-    g_msrs[msrs::ia32_feature_control::addr] = mask;
-    this->expect_true(msrs::ia32_feature_control::lock_bit::get() == mask >> from);
+    msrs::ia32_feature_control::lock_bit::set(1UL);
+    this->expect_true(msrs::ia32_feature_control::lock_bit::get() == 1UL);
 }
 
 void
 intrinsics_ut::test_ia32_feature_control_enable_vmx_inside_smx()
 {
-    auto mask = msrs::ia32_feature_control::enable_vmx_inside_smx::mask;
-    auto from = msrs::ia32_feature_control::enable_vmx_inside_smx::from;
-
-    g_msrs[msrs::ia32_feature_control::addr] = mask;
-    this->expect_true(msrs::ia32_feature_control::enable_vmx_inside_smx::get() == mask >> from);
+    msrs::ia32_feature_control::enable_vmx_inside_smx::set(1UL);
+    this->expect_true(msrs::ia32_feature_control::enable_vmx_inside_smx::get() == 1UL);
 }
 
 void
 intrinsics_ut::test_ia32_feature_control_enable_vmx_outside_smx()
 {
-    auto mask = msrs::ia32_feature_control::enable_vmx_outside_smx::mask;
-    auto from = msrs::ia32_feature_control::enable_vmx_outside_smx::from;
+    msrs::ia32_feature_control::enable_vmx_outside_smx::set(1UL);
+    this->expect_true(msrs::ia32_feature_control::enable_vmx_outside_smx::get() == 1UL);
+}
 
-    g_msrs[msrs::ia32_feature_control::addr] = mask;
-    this->expect_true(msrs::ia32_feature_control::enable_vmx_outside_smx::get() == mask >> from);
+void
+intrinsics_ut::test_ia32_feature_control_senter_local_function_enables()
+{
+    msrs::ia32_feature_control::senter_local_function_enables::set(6UL);
+    this->expect_true(msrs::ia32_feature_control::senter_local_function_enables::get() == 6UL);
+}
+
+void
+intrinsics_ut::test_ia32_feature_control_senter_gloabl_function_enable()
+{
+    msrs::ia32_feature_control::senter_gloabl_function_enable::set(1UL);
+    this->expect_true(msrs::ia32_feature_control::senter_gloabl_function_enable::get() == 1UL);
+}
+
+void
+intrinsics_ut::test_ia32_feature_control_sgx_launch_control_enable()
+{
+    msrs::ia32_feature_control::sgx_launch_control_enable::set(1UL);
+    this->expect_true(msrs::ia32_feature_control::sgx_launch_control_enable::get() == 1UL);
+}
+
+void
+intrinsics_ut::test_ia32_feature_control_sgx_global_enable()
+{
+    msrs::ia32_feature_control::sgx_global_enable::set(1UL);
+    this->expect_true(msrs::ia32_feature_control::sgx_global_enable::get() == 1UL);
+}
+
+void
+intrinsics_ut::test_ia32_feature_control_lmce()
+{
+    msrs::ia32_feature_control::lmce::set(1UL);
+    this->expect_true(msrs::ia32_feature_control::lmce::get() == 1UL);
+}
+
+void
+intrinsics_ut::test_ia32_sysenter_cs()
+{
+    msrs::ia32_sysenter_cs::set(100UL);
+    this->expect_true(msrs::ia32_sysenter_cs::get() == 100UL);
+}
+
+void
+intrinsics_ut::test_ia32_sysenter_esp()
+{
+    msrs::ia32_sysenter_esp::set(100UL);
+    this->expect_true(msrs::ia32_sysenter_esp::get() == 100UL);
+}
+
+void
+intrinsics_ut::test_ia32_sysenter_eip()
+{
+    msrs::ia32_sysenter_eip::set(100UL);
+    this->expect_true(msrs::ia32_sysenter_eip::get() == 100UL);
+}
+
+void
+intrinsics_ut::test_ia32_debugctl()
+{
+    msrs::ia32_debugctl::set(100UL);
+    this->expect_true(msrs::ia32_debugctl::get() == 100UL);
+}
+
+void
+intrinsics_ut::test_ia32_debugctl_lbr()
+{
+    msrs::ia32_debugctl::lbr::set(1UL);
+    this->expect_true(msrs::ia32_debugctl::lbr::get() == 1UL);
+}
+
+void
+intrinsics_ut::test_ia32_debugctl_btf()
+{
+    msrs::ia32_debugctl::btf::set(1UL);
+    this->expect_true(msrs::ia32_debugctl::btf::get() == 1UL);
+}
+
+void
+intrinsics_ut::test_ia32_debugctl_tr()
+{
+    msrs::ia32_debugctl::tr::set(1UL);
+    this->expect_true(msrs::ia32_debugctl::tr::get() == 1UL);
+}
+
+void
+intrinsics_ut::test_ia32_debugctl_bts()
+{
+    msrs::ia32_debugctl::bts::set(1UL);
+    this->expect_true(msrs::ia32_debugctl::bts::get() == 1UL);
+}
+
+void
+intrinsics_ut::test_ia32_debugctl_btint()
+{
+    msrs::ia32_debugctl::btint::set(1UL);
+    this->expect_true(msrs::ia32_debugctl::btint::get() == 1UL);
+}
+
+void
+intrinsics_ut::test_ia32_debugctl_bt_off_os()
+{
+    msrs::ia32_debugctl::bt_off_os::set(1UL);
+    this->expect_true(msrs::ia32_debugctl::bt_off_os::get() == 1UL);
+}
+
+void
+intrinsics_ut::test_ia32_debugctl_bt_off_user()
+{
+    msrs::ia32_debugctl::bt_off_user::set(1UL);
+    this->expect_true(msrs::ia32_debugctl::bt_off_user::get() == 1UL);
+}
+
+void
+intrinsics_ut::test_ia32_debugctl_freeze_lbrs_on_pmi()
+{
+    msrs::ia32_debugctl::freeze_lbrs_on_pmi::set(1UL);
+    this->expect_true(msrs::ia32_debugctl::freeze_lbrs_on_pmi::get() == 1UL);
+}
+
+void
+intrinsics_ut::test_ia32_debugctl_freeze_perfmon_on_pmi()
+{
+    msrs::ia32_debugctl::freeze_perfmon_on_pmi::set(1UL);
+    this->expect_true(msrs::ia32_debugctl::freeze_perfmon_on_pmi::get() == 1UL);
+}
+
+void
+intrinsics_ut::test_ia32_debugctl_enable_uncore_pmi()
+{
+    msrs::ia32_debugctl::enable_uncore_pmi::set(1UL);
+    this->expect_true(msrs::ia32_debugctl::enable_uncore_pmi::get() == 1UL);
+}
+
+void
+intrinsics_ut::test_ia32_debugctl_freeze_while_smm()
+{
+    msrs::ia32_debugctl::freeze_while_smm::set(1UL);
+    this->expect_true(msrs::ia32_debugctl::freeze_while_smm::get() == 1UL);
+}
+
+void
+intrinsics_ut::test_ia32_debugctl_rtm_debug()
+{
+    msrs::ia32_debugctl::rtm_debug::set(1UL);
+    this->expect_true(msrs::ia32_debugctl::rtm_debug::get() == 1UL);
+}
+
+void
+intrinsics_ut::test_ia32_debugctl_reserved()
+{
+    msrs::ia32_debugctl::reserved::set(0x100000000UL);
+    this->expect_true(msrs::ia32_debugctl::reserved::get() == 0x100000000UL);
+}
+
+void
+intrinsics_ut::test_ia32_pat()
+{
+    msrs::ia32_pat::set(100UL);
+    this->expect_true(msrs::ia32_pat::get() == 100UL);
+}
+
+void
+intrinsics_ut::test_ia32_pat_pa0()
+{
+    msrs::ia32_pat::pa0::set(1UL);
+    this->expect_true(msrs::ia32_pat::pa0::get() == 1UL);
+}
+
+void
+intrinsics_ut::test_ia32_pat_pa1()
+{
+    msrs::ia32_pat::pa1::set(1UL);
+    this->expect_true(msrs::ia32_pat::pa1::get() == 1UL);
+}
+
+void
+intrinsics_ut::test_ia32_pat_pa2()
+{
+    msrs::ia32_pat::pa2::set(1UL);
+    this->expect_true(msrs::ia32_pat::pa2::get() == 1UL);
+}
+
+void
+intrinsics_ut::test_ia32_pat_pa3()
+{
+    msrs::ia32_pat::pa3::set(1UL);
+    this->expect_true(msrs::ia32_pat::pa3::get() == 1UL);
+}
+
+void
+intrinsics_ut::test_ia32_pat_pa4()
+{
+    msrs::ia32_pat::pa4::set(1UL);
+    this->expect_true(msrs::ia32_pat::pa4::get() == 1UL);
+}
+
+void
+intrinsics_ut::test_ia32_pat_pa5()
+{
+    msrs::ia32_pat::pa5::set(1UL);
+    this->expect_true(msrs::ia32_pat::pa5::get() == 1UL);
+}
+
+void
+intrinsics_ut::test_ia32_pat_pa6()
+{
+    msrs::ia32_pat::pa6::set(1UL);
+    this->expect_true(msrs::ia32_pat::pa6::get() == 1UL);
+}
+
+void
+intrinsics_ut::test_ia32_pat_pa7()
+{
+    msrs::ia32_pat::pa7::set(1UL);
+    this->expect_true(msrs::ia32_pat::pa7::get() == 1UL);
+}
+
+void
+intrinsics_ut::test_ia32_perf_global_ctrl()
+{
+    msrs::ia32_perf_global_ctrl::set(100UL);
+    this->expect_true(msrs::ia32_perf_global_ctrl::get() == 100UL);
+}
+
+void
+intrinsics_ut::test_ia32_perf_global_ctrl_pmc0()
+{
+    msrs::ia32_perf_global_ctrl::pmc0::set(1UL);
+    this->expect_true(msrs::ia32_perf_global_ctrl::pmc0::get() == 1UL);
+}
+
+void
+intrinsics_ut::test_ia32_perf_global_ctrl_pmc1()
+{
+    msrs::ia32_perf_global_ctrl::pmc1::set(1UL);
+    this->expect_true(msrs::ia32_perf_global_ctrl::pmc1::get() == 1UL);
+}
+
+void
+intrinsics_ut::test_ia32_perf_global_ctrl_pmc2()
+{
+    msrs::ia32_perf_global_ctrl::pmc2::set(1UL);
+    this->expect_true(msrs::ia32_perf_global_ctrl::pmc2::get() == 1UL);
+}
+
+void
+intrinsics_ut::test_ia32_perf_global_ctrl_pmc3()
+{
+    msrs::ia32_perf_global_ctrl::pmc3::set(1UL);
+    this->expect_true(msrs::ia32_perf_global_ctrl::pmc3::get() == 1UL);
+}
+
+void
+intrinsics_ut::test_ia32_perf_global_ctrl_pmc4()
+{
+    msrs::ia32_perf_global_ctrl::pmc4::set(1UL);
+    this->expect_true(msrs::ia32_perf_global_ctrl::pmc4::get() == 1UL);
+}
+
+void
+intrinsics_ut::test_ia32_perf_global_ctrl_pmc5()
+{
+    msrs::ia32_perf_global_ctrl::pmc5::set(1UL);
+    this->expect_true(msrs::ia32_perf_global_ctrl::pmc5::get() == 1UL);
+}
+
+void
+intrinsics_ut::test_ia32_perf_global_ctrl_pmc6()
+{
+    msrs::ia32_perf_global_ctrl::pmc6::set(1UL);
+    this->expect_true(msrs::ia32_perf_global_ctrl::pmc6::get() == 1UL);
+}
+
+void
+intrinsics_ut::test_ia32_perf_global_ctrl_pmc7()
+{
+    msrs::ia32_perf_global_ctrl::pmc7::set(1UL);
+    this->expect_true(msrs::ia32_perf_global_ctrl::pmc7::get() == 1UL);
+}
+
+void
+intrinsics_ut::test_ia32_perf_global_ctrl_fixed_ctr0()
+{
+    msrs::ia32_perf_global_ctrl::fixed_ctr0::set(1UL);
+    this->expect_true(msrs::ia32_perf_global_ctrl::fixed_ctr0::get() == 1UL);
+}
+
+void
+intrinsics_ut::test_ia32_perf_global_ctrl_fixed_ctr1()
+{
+    msrs::ia32_perf_global_ctrl::fixed_ctr1::set(1UL);
+    this->expect_true(msrs::ia32_perf_global_ctrl::fixed_ctr1::get() == 1UL);
+}
+
+void
+intrinsics_ut::test_ia32_perf_global_ctrl_fixed_ctr2()
+{
+    msrs::ia32_perf_global_ctrl::fixed_ctr2::set(1UL);
+    this->expect_true(msrs::ia32_perf_global_ctrl::fixed_ctr2::get() == 1UL);
 }
 
 void
@@ -1106,4 +1402,60 @@ intrinsics_ut::test_ia32_vmx_vmfunc()
 {
     g_msrs[msrs::ia32_vmx_vmfunc::addr] = 100UL;
     this->expect_true(msrs::ia32_vmx_vmfunc::get() == 100UL);
+}
+
+void
+intrinsics_ut::test_ia32_efer()
+{
+    msrs::ia32_efer::set(100UL);
+    this->expect_true(msrs::ia32_efer::get() == 100UL);
+}
+
+void
+intrinsics_ut::test_ia32_efer_sce()
+{
+    msrs::ia32_efer::sce::set(1UL);
+    this->expect_true(msrs::ia32_efer::sce::get() == 1UL);
+}
+
+void
+intrinsics_ut::test_ia32_efer_lme()
+{
+    msrs::ia32_efer::lme::set(1UL);
+    this->expect_true(msrs::ia32_efer::lme::get() == 1UL);
+}
+
+void
+intrinsics_ut::test_ia32_efer_lma()
+{
+    msrs::ia32_efer::lma::set(1UL);
+    this->expect_true(msrs::ia32_efer::lma::get() == 1UL);
+}
+
+void
+intrinsics_ut::test_ia32_efer_nxe()
+{
+    msrs::ia32_efer::nxe::set(1UL);
+    this->expect_true(msrs::ia32_efer::nxe::get() == 1UL);
+}
+
+void
+intrinsics_ut::test_ia32_efer_reserved()
+{
+    msrs::ia32_efer::reserved::set(0x10000UL);
+    this->expect_true(msrs::ia32_efer::reserved::get() == 0x10000UL);
+}
+
+void
+intrinsics_ut::test_ia32_fs_base()
+{
+    msrs::ia32_fs_base::set(100UL);
+    this->expect_true(msrs::ia32_fs_base::get() == 100UL);
+}
+
+void
+intrinsics_ut::test_ia32_gs_base()
+{
+    msrs::ia32_gs_base::set(100UL);
+    this->expect_true(msrs::ia32_gs_base::get() == 100UL);
 }

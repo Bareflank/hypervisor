@@ -487,31 +487,31 @@ exit_handler_intel_x64::handle_rdmsr()
 
     switch (m_state_save->rcx)
     {
-        case IA32_DEBUGCTL_MSR:
-            msr = vmread(VMCS_GUEST_IA32_DEBUGCTL_FULL);
+        case msrs::ia32_debugctl::addr:
+            msr = vmcs::guest_ia32_debugctl::get();
             break;
-        case IA32_PAT_MSR:
-            msr = vmread(VMCS_GUEST_IA32_PAT_FULL);
+        case msrs::ia32_pat::addr:
+            msr = vmread(VMCS_GUEST_IA32_PAT);
             break;
-        case IA32_EFER_MSR:
-            msr = vmread(VMCS_GUEST_IA32_EFER_FULL);
+        case msrs::ia32_efer::addr:
+            msr = vmcs::guest_ia32_efer::get();
             break;
-        case IA32_PERF_GLOBAL_CTRL_MSR:
-            msr = vmread(VMCS_GUEST_IA32_PERF_GLOBAL_CTRL_FULL);
+        case msrs::ia32_perf_global_ctrl::addr:
+            msr = vmread(VMCS_GUEST_IA32_PERF_GLOBAL_CTRL);
             break;
-        case IA32_SYSENTER_CS_MSR:
+        case msrs::ia32_sysenter_cs::addr:
             msr = vmread(VMCS_GUEST_IA32_SYSENTER_CS);
             break;
-        case IA32_SYSENTER_ESP_MSR:
+        case msrs::ia32_sysenter_esp::addr:
             msr = vmread(VMCS_GUEST_IA32_SYSENTER_ESP);
             break;
-        case IA32_SYSENTER_EIP_MSR:
+        case msrs::ia32_sysenter_eip::addr:
             msr = vmread(VMCS_GUEST_IA32_SYSENTER_EIP);
             break;
-        case IA32_FS_BASE_MSR:
+        case msrs::ia32_fs_base::addr:
             msr = vmread(VMCS_GUEST_FS_BASE);
             break;
-        case IA32_GS_BASE_MSR:
+        case msrs::ia32_gs_base::addr:
             msr = vmread(VMCS_GUEST_GS_BASE);
             break;
         default:
@@ -553,31 +553,31 @@ exit_handler_intel_x64::handle_wrmsr()
 
     switch (m_state_save->rcx)
     {
-        case IA32_DEBUGCTL_MSR:
-            vmwrite(VMCS_GUEST_IA32_DEBUGCTL_FULL, msr);
+        case msrs::ia32_debugctl::addr:
+            vmcs::guest_ia32_debugctl::set(msr);
             break;
-        case IA32_PAT_MSR:
-            vmwrite(VMCS_GUEST_IA32_PAT_FULL, msr);
+        case msrs::ia32_pat::addr:
+            vmwrite(VMCS_GUEST_IA32_PAT, msr);
             break;
-        case IA32_EFER_MSR:
-            vmwrite(VMCS_GUEST_IA32_EFER_FULL, msr);
+        case msrs::ia32_efer::addr:
+            vmcs::guest_ia32_efer::set(msr);
             break;
-        case IA32_PERF_GLOBAL_CTRL_MSR:
-            vmwrite(VMCS_GUEST_IA32_PERF_GLOBAL_CTRL_FULL, msr);
+        case msrs::ia32_perf_global_ctrl::addr:
+            vmwrite(VMCS_GUEST_IA32_PERF_GLOBAL_CTRL, msr);
             break;
-        case IA32_SYSENTER_CS_MSR:
+        case msrs::ia32_sysenter_cs::addr:
             vmwrite(VMCS_GUEST_IA32_SYSENTER_CS, msr);
             break;
-        case IA32_SYSENTER_ESP_MSR:
+        case msrs::ia32_sysenter_esp::addr:
             vmwrite(VMCS_GUEST_IA32_SYSENTER_ESP, msr);
             break;
-        case IA32_SYSENTER_EIP_MSR:
+        case msrs::ia32_sysenter_eip::addr:
             vmwrite(VMCS_GUEST_IA32_SYSENTER_EIP, msr);
             break;
-        case IA32_FS_BASE_MSR:
+        case msrs::ia32_fs_base::addr:
             vmwrite(VMCS_GUEST_FS_BASE, msr);
             break;
-        case IA32_GS_BASE_MSR:
+        case msrs::ia32_gs_base::addr:
             vmwrite(VMCS_GUEST_GS_BASE, msr);
             break;
         default:

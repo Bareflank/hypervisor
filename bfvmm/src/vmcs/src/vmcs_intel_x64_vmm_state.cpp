@@ -130,8 +130,12 @@ vmcs_intel_x64_vmm_state::vmcs_intel_x64_vmm_state(const std::shared_ptr<state_s
 
     m_rflags = 0;
 
+    m_ia32_efer_msr = 0;
+    m_ia32_efer_msr |= msrs::ia32_efer::lme::mask;
+    m_ia32_efer_msr |= msrs::ia32_efer::lma::mask;
+    m_ia32_efer_msr |= msrs::ia32_efer::nxe::mask;
+
     m_ia32_pat_msr = 0;
-    m_ia32_efer_msr = IA32_EFER_LME | IA32_EFER_LMA | IA32_EFER_NXE;
     m_ia32_fs_base_msr = 0;
     m_ia32_gs_base_msr = reinterpret_cast<uintptr_t>(state_save.get());
 }

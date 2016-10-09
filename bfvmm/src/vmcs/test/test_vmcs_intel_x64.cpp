@@ -54,9 +54,9 @@ setup_vmcs_host_control_registers_and_msrs()
     g_vmcs_fields[vmcs::host_cr4::addr] = 0xffffFFFFffffFFFF;
     g_vmcs_fields[VMCS_HOST_IA32_SYSENTER_ESP] = 0x0000000010000000;
     g_vmcs_fields[VMCS_HOST_IA32_SYSENTER_EIP] = 0x0000000010000000;
-    g_vmcs_fields[VMCS_HOST_IA32_PERF_GLOBAL_CTRL_FULL] = 0x0;
-    g_vmcs_fields[VMCS_HOST_IA32_PAT_FULL] = 0x0;
-    g_vmcs_fields[VMCS_HOST_IA32_EFER_FULL] = IA32_EFER_LME | IA32_EFER_LMA;
+    g_vmcs_fields[VMCS_HOST_IA32_PERF_GLOBAL_CTRL] = 0x0;
+    g_vmcs_fields[VMCS_HOST_IA32_PAT] = 0x0;
+    g_vmcs_fields[vmcs::host_ia32_efer::addr] = msrs::ia32_efer::lme::mask | msrs::ia32_efer::lma::mask;
     g_vmcs_fields[VMCS_HOST_RIP] = 0x0000000010000000;
 }
 
@@ -86,10 +86,10 @@ setup_vmcs_guest_control_and_debug_fields()
     g_vmcs_fields[VMCS_GUEST_DR7] = 0x00000000ffffFFFF;
     g_vmcs_fields[VMCS_GUEST_IA32_SYSENTER_ESP] = 0x0000000010000000;
     g_vmcs_fields[VMCS_GUEST_IA32_SYSENTER_EIP] = 0x0000000010000000;
-    g_vmcs_fields[VMCS_GUEST_IA32_PERF_GLOBAL_CTRL_FULL] = 0x0;
-    g_vmcs_fields[VMCS_GUEST_IA32_PAT_FULL] = 0x0;
-    g_vmcs_fields[VMCS_GUEST_IA32_EFER_FULL] = IA32_EFER_LME | IA32_EFER_LMA;
-    g_vmcs_fields[VMCS_GUEST_IA32_DEBUGCTL_FULL] = 0x0;
+    g_vmcs_fields[VMCS_GUEST_IA32_PERF_GLOBAL_CTRL] = 0x0;
+    g_vmcs_fields[VMCS_GUEST_IA32_PAT] = 0x0;
+    g_vmcs_fields[vmcs::guest_ia32_efer::addr] = msrs::ia32_efer::lme::mask | msrs::ia32_efer::lma::mask;
+    g_vmcs_fields[vmcs::guest_ia32_debugctl::addr] = 0x0;
 }
 
 static void
@@ -135,7 +135,7 @@ setup_vmcs_guest_non_register_state()
 {
     g_vmcs_fields[VMCS_GUEST_ACTIVITY_STATE] = 0x0;
     g_vmcs_fields[VMCS_GUEST_INTERRUPTIBILITY_STATE] = VM_INTERRUPTABILITY_STATE_SMI;
-    g_vmcs_fields[VMCS_VMCS_LINK_POINTER_FULL] = 0xffffFFFFffffFFFF;
+    g_vmcs_fields[VMCS_VMCS_LINK_POINTER] = 0xffffFFFFffffFFFF;
 
 }
 
@@ -156,22 +156,22 @@ setup_vm_execution_control_fields()
     g_vmcs_fields[VMCS_PRIMARY_PROCESSOR_BASED_VM_EXECUTION_CONTROLS] = 0xffffFFFFffffFFFF;
     g_vmcs_fields[VMCS_SECONDARY_PROCESSOR_BASED_VM_EXECUTION_CONTROLS] = 0xffffFFFFffffFdee;
     g_vmcs_fields[VMCS_CR3_TARGET_COUNT] = 3;
-    g_vmcs_fields[VMCS_ADDRESS_OF_IO_BITMAP_A_FULL] = 0x0000000000000000;
-    g_vmcs_fields[VMCS_ADDRESS_OF_IO_BITMAP_B_FULL] = 0x0000000000000000;
-    g_vmcs_fields[VMCS_ADDRESS_OF_MSR_BITMAPS_FULL] = 0x0000000000000000;
-    g_vmcs_fields[VMCS_VIRTUAL_APIC_ADDRESS_FULL] = 0x0000000000001000;
+    g_vmcs_fields[VMCS_ADDRESS_OF_IO_BITMAP_A] = 0x0000000000000000;
+    g_vmcs_fields[VMCS_ADDRESS_OF_IO_BITMAP_B] = 0x0000000000000000;
+    g_vmcs_fields[VMCS_ADDRESS_OF_MSR_BITMAPS] = 0x0000000000000000;
+    g_vmcs_fields[VMCS_VIRTUAL_APIC_ADDRESS] = 0x0000000000001000;
     g_vmcs_fields[VMCS_TPR_THRESHOLD] = 0x0000000F00000000;
-    g_vmcs_fields[VMCS_APIC_ACCESS_ADDRESS_FULL] = 0x0000000010000000;
+    g_vmcs_fields[VMCS_APIC_ACCESS_ADDRESS] = 0x0000000010000000;
     g_vmcs_fields[vmcs::posted_interrupt_notification_vector::addr] = 0x0000000000000000;
-    g_vmcs_fields[VMCS_POSTED_INTERRUPT_DESCRIPTOR_ADDRESS_FULL] = 0x0000000010000000;
+    g_vmcs_fields[VMCS_POSTED_INTERRUPT_DESCRIPTOR_ADDRESS] = 0x0000000010000000;
     g_vmcs_fields[vmcs::virtual_processor_identifier::addr] = 0x0000000000000002;
-    g_vmcs_fields[VMCS_EPT_POINTER_FULL] = 0x000000000000001e;
-    g_vmcs_fields[VMCS_PML_ADDRESS_FULL] = 0x0000000000000000;
-    g_vmcs_fields[VMCS_VM_FUNCTION_CONTROLS_FULL] = 0xffffFFFFffffFFFF;
-    g_vmcs_fields[VMCS_EPTP_LIST_ADDRESS_FULL] = 0x0000000010000000;
-    g_vmcs_fields[VMCS_VMREAD_BITMAP_ADDRESS_FULL] = 0x0000000010000000;
-    g_vmcs_fields[VMCS_VMWRITE_BITMAP_ADDRESS_FULL] = 0x0000000010000000;
-    g_vmcs_fields[VMCS_VIRTUALIZATION_EXCEPTION_INFORMATION_ADDRESS_FULL] = 0x0000000010000000;
+    g_vmcs_fields[VMCS_EPT_POINTER] = 0x000000000000001e;
+    g_vmcs_fields[VMCS_PML_ADDRESS] = 0x0000000000000000;
+    g_vmcs_fields[VMCS_VM_FUNCTION_CONTROLS] = 0xffffFFFFffffFFFF;
+    g_vmcs_fields[VMCS_EPTP_LIST_ADDRESS] = 0x0000000010000000;
+    g_vmcs_fields[VMCS_VMREAD_BITMAP_ADDRESS] = 0x0000000010000000;
+    g_vmcs_fields[VMCS_VMWRITE_BITMAP_ADDRESS] = 0x0000000010000000;
+    g_vmcs_fields[VMCS_VIRTUALIZATION_EXCEPTION_INFORMATION_ADDRESS] = 0x0000000010000000;
 }
 
 void
@@ -179,9 +179,9 @@ setup_vm_exit_control_fields()
 {
     g_vmcs_fields[VMCS_VM_EXIT_CONTROLS] = 0xffffFFFFffffFFFF;
     g_vmcs_fields[VMCS_VM_EXIT_MSR_STORE_COUNT] = 0xff0000;
-    g_vmcs_fields[VMCS_VM_EXIT_MSR_STORE_ADDRESS_FULL] = 0x1000;
+    g_vmcs_fields[VMCS_VM_EXIT_MSR_STORE_ADDRESS] = 0x1000;
     g_vmcs_fields[VMCS_VM_EXIT_MSR_LOAD_COUNT] = 0xff0000;
-    g_vmcs_fields[VMCS_VM_EXIT_MSR_LOAD_ADDRESS_FULL] = 0x1000;
+    g_vmcs_fields[VMCS_VM_EXIT_MSR_LOAD_ADDRESS] = 0x1000;
 }
 
 void
@@ -193,7 +193,7 @@ setup_vm_entry_control_fields()
     g_vmcs_fields[vmcs::guest_cr0::addr] = cr0::protection_enable::mask;
     g_vmcs_fields[VMCS_VM_ENTRY_EXCEPTION_ERROR_CODE] = 0x0;
     g_vmcs_fields[VMCS_VM_ENTRY_MSR_LOAD_COUNT] = 0xff0000;
-    g_vmcs_fields[VMCS_VM_ENTRY_MSR_LOAD_ADDRESS_FULL] = 0x0000000010000000;
+    g_vmcs_fields[VMCS_VM_ENTRY_MSR_LOAD_ADDRESS] = 0x0000000010000000;
 }
 
 void
@@ -216,7 +216,7 @@ setup_msrs()
     g_msrs[msrs::ia32_vmx_cr4_fixed0::addr] = 0x0;
     g_msrs[msrs::ia32_vmx_cr4_fixed1::addr] = 0xffffFFFFffffFFFF;
 
-    g_msrs[IA32_EFER_MSR] = IA32_EFER_LMA;
+    g_msrs[msrs::ia32_efer::addr] = msrs::ia32_efer::lma::mask;
 }
 
 static void
@@ -292,9 +292,13 @@ setup_vmcs_x64_state_intrinsics(MockRepository &mocks, vmcs_intel_x64_state *sta
     mocks.OnCall(state_in, vmcs_intel_x64_state::ldtr_base).Return(0);
     mocks.OnCall(state_in, vmcs_intel_x64_state::tr_base).Return(0);
 
+    auto efer = 0UL;
+    efer |= msrs::ia32_efer::lme::mask;
+    efer |= msrs::ia32_efer::lma::mask;
+
     mocks.OnCall(state_in, vmcs_intel_x64_state::ia32_debugctl_msr).Return(0);
     mocks.OnCall(state_in, vmcs_intel_x64_state::ia32_pat_msr).Return(0);
-    mocks.OnCall(state_in, vmcs_intel_x64_state::ia32_efer_msr).Return(0);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::ia32_efer_msr).Return(efer);
     mocks.OnCall(state_in, vmcs_intel_x64_state::ia32_perf_global_ctrl_msr).Return(0);
     mocks.OnCall(state_in, vmcs_intel_x64_state::ia32_sysenter_cs_msr).Return(0);
     mocks.OnCall(state_in, vmcs_intel_x64_state::ia32_sysenter_esp_msr).Return(0);
@@ -958,8 +962,8 @@ vmcs_ut::test_vmcs_guest_rflags_always_disabled()
 void
 vmcs_ut::test_vmcs_guest_rflags_always_enabled()
 {
-    vmcs::guest_rflags::always_enabled::set(1UL);
-    this->expect_true(vmcs::guest_rflags::always_enabled::get() == 1UL);
+    vmcs::guest_rflags::always_enabled::set(2UL);
+    this->expect_true(vmcs::guest_rflags::always_enabled::get() == 2UL);
 
     vmcs::guest_rflags::always_enabled::set(0UL);
     this->expect_true(vmcs::guest_rflags::always_enabled::get() == 0UL);
@@ -1425,4 +1429,186 @@ vmcs_ut::test_vmcs_host_cr4_protection_key_enable_bit()
 {
     vmcs::host_cr4::protection_key_enable_bit::set(1UL);
     this->expect_true(vmcs::host_cr4::protection_key_enable_bit::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_ia32_debugctl()
+{
+    vmcs::guest_ia32_debugctl::set(100UL);
+    this->expect_true(vmcs::guest_ia32_debugctl::get() == 100UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_ia32_debugctl_lbr()
+{
+    vmcs::guest_ia32_debugctl::lbr::set(1UL);
+    this->expect_true(vmcs::guest_ia32_debugctl::lbr::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_ia32_debugctl_btf()
+{
+    vmcs::guest_ia32_debugctl::btf::set(1UL);
+    this->expect_true(vmcs::guest_ia32_debugctl::btf::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_ia32_debugctl_tr()
+{
+    vmcs::guest_ia32_debugctl::tr::set(1UL);
+    this->expect_true(vmcs::guest_ia32_debugctl::tr::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_ia32_debugctl_bts()
+{
+    vmcs::guest_ia32_debugctl::bts::set(1UL);
+    this->expect_true(vmcs::guest_ia32_debugctl::bts::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_ia32_debugctl_btint()
+{
+    vmcs::guest_ia32_debugctl::btint::set(1UL);
+    this->expect_true(vmcs::guest_ia32_debugctl::btint::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_ia32_debugctl_bt_off_os()
+{
+    vmcs::guest_ia32_debugctl::bt_off_os::set(1UL);
+    this->expect_true(vmcs::guest_ia32_debugctl::bt_off_os::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_ia32_debugctl_bt_off_user()
+{
+    vmcs::guest_ia32_debugctl::bt_off_user::set(1UL);
+    this->expect_true(vmcs::guest_ia32_debugctl::bt_off_user::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_ia32_debugctl_freeze_lbrs_on_pmi()
+{
+    vmcs::guest_ia32_debugctl::freeze_lbrs_on_pmi::set(1UL);
+    this->expect_true(vmcs::guest_ia32_debugctl::freeze_lbrs_on_pmi::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_ia32_debugctl_freeze_perfmon_on_pmi()
+{
+    vmcs::guest_ia32_debugctl::freeze_perfmon_on_pmi::set(1UL);
+    this->expect_true(vmcs::guest_ia32_debugctl::freeze_perfmon_on_pmi::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_ia32_debugctl_enable_uncore_pmi()
+{
+    vmcs::guest_ia32_debugctl::enable_uncore_pmi::set(1UL);
+    this->expect_true(vmcs::guest_ia32_debugctl::enable_uncore_pmi::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_ia32_debugctl_freeze_while_smm()
+{
+    vmcs::guest_ia32_debugctl::freeze_while_smm::set(1UL);
+    this->expect_true(vmcs::guest_ia32_debugctl::freeze_while_smm::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_ia32_debugctl_rtm_debug()
+{
+    vmcs::guest_ia32_debugctl::rtm_debug::set(1UL);
+    this->expect_true(vmcs::guest_ia32_debugctl::rtm_debug::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_ia32_debugctl_reserved()
+{
+    vmcs::guest_ia32_debugctl::reserved::set(0x10000UL);
+    this->expect_true(vmcs::guest_ia32_debugctl::reserved::get() == 0x10000UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_ia32_efer()
+{
+    vmcs::guest_ia32_efer::set(100UL);
+    this->expect_true(vmcs::guest_ia32_efer::get() == 100UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_ia32_efer_sce()
+{
+    vmcs::guest_ia32_efer::sce::set(1UL);
+    this->expect_true(vmcs::guest_ia32_efer::sce::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_ia32_efer_lme()
+{
+    vmcs::guest_ia32_efer::lme::set(1UL);
+    this->expect_true(vmcs::guest_ia32_efer::lme::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_ia32_efer_lma()
+{
+    vmcs::guest_ia32_efer::lma::set(1UL);
+    this->expect_true(vmcs::guest_ia32_efer::lma::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_ia32_efer_nxe()
+{
+    vmcs::guest_ia32_efer::nxe::set(1UL);
+    this->expect_true(vmcs::guest_ia32_efer::nxe::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_ia32_efer_reserved()
+{
+    vmcs::guest_ia32_efer::reserved::set(0x10000UL);
+    this->expect_true(vmcs::guest_ia32_efer::reserved::get() == 0x10000UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_ia32_efer()
+{
+    vmcs::host_ia32_efer::set(100UL);
+    this->expect_true(vmcs::host_ia32_efer::get() == 100UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_ia32_efer_sce()
+{
+    vmcs::host_ia32_efer::sce::set(1UL);
+    this->expect_true(vmcs::host_ia32_efer::sce::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_ia32_efer_lme()
+{
+    vmcs::host_ia32_efer::lme::set(1UL);
+    this->expect_true(vmcs::host_ia32_efer::lme::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_ia32_efer_lma()
+{
+    vmcs::host_ia32_efer::lma::set(1UL);
+    this->expect_true(vmcs::host_ia32_efer::lma::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_ia32_efer_nxe()
+{
+    vmcs::host_ia32_efer::nxe::set(1UL);
+    this->expect_true(vmcs::host_ia32_efer::nxe::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_ia32_efer_reserved()
+{
+    vmcs::host_ia32_efer::reserved::set(0x10000UL);
+    this->expect_true(vmcs::host_ia32_efer::reserved::get() == 0x10000UL);
 }
