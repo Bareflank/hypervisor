@@ -43,12 +43,12 @@
 /// conversions.
 ///
 /// Finally, this module also provides the libc functions that are needed by
-/// libc++ for new / delete. For this reason, this modules is required to get
+/// libc++ for new / delete. For this reason, this module is required to get
 /// libc++ working, which is needed by, pretty much the rest of the VMM
 /// including the serial code. Therefore, if there are issues with the
-/// memory mamaner, the process of debugging the memory manager is not simple,
+/// memory manager, the process of debugging the memory manager is not simple,
 /// as you must get rid of all of the other modules, and work with the
-/// memory manager directly until its working as needed (i.e. why unit
+/// memory manager directly until it's working as needed (i.e. why unit
 /// testing can be very helpful here).
 ///
 class memory_manager
