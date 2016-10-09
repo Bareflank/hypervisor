@@ -111,6 +111,13 @@ install_clang_1404() {
     rm -Rf clang*
 }
 
+install_clang_1604() {
+    wget http://llvm.org/releases/3.8.1/clang+llvm-3.8.1-x86_64-linux-gnu-ubuntu-16.04.tar.xz
+    tar xf clang*
+    sudo cp -R clang*/* /usr/local/
+    rm -Rf clang*
+}
+
 install_clang() {
     sudo apt-get install --yes clang
 }
