@@ -55,7 +55,7 @@
 /// ID is the guest ID, and the second half of the ID is a unique identifier.
 /// The goal with Bareflank is to allow any number of virtual cores, regardless
 /// of the physical core configuration. To support this, vCPUs
-/// can be scheduled on any core, the and the ID does not correlate with
+/// can be scheduled on any core, and the ID does not correlate with
 /// a physical core. It's up to the vCPU implementation to figure out how to
 /// schedule a core on the proper vCPU. In the case of Intel, this means that
 /// the VMCS class and the exit handler will have to store their own physical
@@ -67,7 +67,7 @@
 /// specific vCPUs will be created from, but it also provides some of the base
 /// functionality that is common between all vCPUs.
 ///
-/// Each vCPU is given it's own debug ring. The bootstrap core is a special
+/// Each vCPU is given its own debug ring. The bootstrap core is a special
 /// core. All std::cout that is not wrapped in the output_to_vcpu function
 /// is redirected to serial and the bootstrap core, which is vcpuid == 0,
 /// or the first vCPU to be created on the host OS. Each debug ring provides
@@ -100,7 +100,7 @@ public:
     /// Creates a vCPU with the provided id and debug ring. This constructor
     /// provides a means to override and repalce the internal resources of the
     /// vCPU. Note that if one of the resources is set to nullptr, a default
-    /// will be constructed in it's place, providing a means to select which
+    /// will be constructed in its place, providing a means to select which
     /// internal components to override.
     ///
     /// @param id the id of the vcpu
@@ -150,7 +150,7 @@ public:
     /// Executes the vCPU. The vCPU can be in two different states prior to
     /// executing this function. When the vCPU is first created, the run
     /// function "starts" the vCPU's execution from a default state. If the
-    /// vCPU was halted, running the vCPU again "resumes" it's execution.
+    /// vCPU was halted, running the vCPU again "resumes" its execution.
     /// When a VM exit occurs, the exit handler might be asked by the control
     /// VM to schedule a different vCPU. When this happens, it will likely
     /// call this function.
