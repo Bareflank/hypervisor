@@ -37,10 +37,10 @@ bfm_ut::test_command_line_parser_with_no_args()
     auto args = {""_s};
 
     g_clp.reset();
-    EXPECT_NO_EXCEPTION(g_clp.parse(args));
+    this->expect_no_exception([&] { g_clp.parse(args); });
 
-    EXPECT_TRUE(g_clp.cmd() == command_line_parser_command::help);
-    EXPECT_TRUE(g_clp.modules() == "");
+    this->expect_true(g_clp.cmd() == command_line_parser_command::help);
+    this->expect_true(g_clp.modules() == "");
 }
 
 void
@@ -49,22 +49,24 @@ bfm_ut::test_command_line_parser_with_empty_args()
     auto args = {" "_s};
 
     g_clp.reset();
-    EXPECT_NO_EXCEPTION(g_clp.parse(args));
+    this->expect_no_exception([&] { g_clp.parse(args); });
 
-    EXPECT_TRUE(g_clp.cmd() == command_line_parser_command::help);
-    EXPECT_TRUE(g_clp.modules() == "");
+    this->expect_true(g_clp.cmd() == command_line_parser_command::help);
+    this->expect_true(g_clp.modules() == "");
 }
 
 void
 bfm_ut::test_command_line_parser_with_unknown_command()
 {
     auto args = {"unknown"_s};
+    auto e = std::make_shared<bfn::unknown_command_error>("command line parse with unknown command"_s);
 
     g_clp.reset();
-    EXPECT_EXCEPTION(g_clp.parse(args), bfn::unknown_command_error);
 
-    EXPECT_TRUE(g_clp.cmd() == command_line_parser_command::help);
-    EXPECT_TRUE(g_clp.modules() == "");
+    this->expect_exception([&] { g_clp.parse(args); }, e);
+
+    this->expect_true(g_clp.cmd() == command_line_parser_command::help);
+    this->expect_true(g_clp.modules() == "");
 }
 
 void
@@ -72,13 +74,14 @@ bfm_ut::test_command_line_parser_with_unknown_command_maintains_state()
 {
     auto args1 = {"unload"_s};
     auto args2 = {"unknown"_s};
+    auto e = std::make_shared<bfn::unknown_command_error>("command line parse with unknown command maintains state"_s);
 
     g_clp.reset();
-    EXPECT_NO_EXCEPTION(g_clp.parse(args1));
-    EXPECT_EXCEPTION(g_clp.parse(args2), bfn::unknown_command_error);
+    this->expect_no_exception([&] { g_clp.parse(args1); });
+    this->expect_exception([&] { g_clp.parse(args2); }, e);
 
-    EXPECT_TRUE(g_clp.cmd() == command_line_parser_command::unload);
-    EXPECT_TRUE(g_clp.modules() == "");
+    this->expect_true(g_clp.cmd() == command_line_parser_command::unload);
+    this->expect_true(g_clp.modules() == "");
 }
 
 void
@@ -87,10 +90,10 @@ bfm_ut::test_command_line_parser_with_unknown_option_single_bar()
     auto args = {"-unknown"_s};
 
     g_clp.reset();
-    EXPECT_NO_EXCEPTION(g_clp.parse(args));
+    this->expect_no_exception([&] { g_clp.parse(args); });
 
-    EXPECT_TRUE(g_clp.cmd() == command_line_parser_command::help);
-    EXPECT_TRUE(g_clp.modules() == "");
+    this->expect_true(g_clp.cmd() == command_line_parser_command::help);
+    this->expect_true(g_clp.modules() == "");
 }
 
 void
@@ -99,10 +102,10 @@ bfm_ut::test_command_line_parser_with_unknown_option_dual_bar()
     auto args = {"--unknown"_s};
 
     g_clp.reset();
-    EXPECT_NO_EXCEPTION(g_clp.parse(args));
+    this->expect_no_exception([&] { g_clp.parse(args); });
 
-    EXPECT_TRUE(g_clp.cmd() == command_line_parser_command::help);
-    EXPECT_TRUE(g_clp.modules() == "");
+    this->expect_true(g_clp.cmd() == command_line_parser_command::help);
+    this->expect_true(g_clp.modules() == "");
 }
 
 void
@@ -111,10 +114,10 @@ bfm_ut::test_command_line_parser_with_single_bar_help()
     auto args = {"-h"_s};
 
     g_clp.reset();
-    EXPECT_NO_EXCEPTION(g_clp.parse(args));
+    this->expect_no_exception([&] { g_clp.parse(args); });
 
-    EXPECT_TRUE(g_clp.cmd() == command_line_parser_command::help);
-    EXPECT_TRUE(g_clp.modules() == "");
+    this->expect_true(g_clp.cmd() == command_line_parser_command::help);
+    this->expect_true(g_clp.modules() == "");
 }
 
 void
@@ -123,34 +126,37 @@ bfm_ut::test_command_line_parser_with_dual_bar_help()
     auto args = {"--help"_s};
 
     g_clp.reset();
-    EXPECT_NO_EXCEPTION(g_clp.parse(args));
+    this->expect_no_exception([&] { g_clp.parse(args); });
 
-    EXPECT_TRUE(g_clp.cmd() == command_line_parser_command::help);
-    EXPECT_TRUE(g_clp.modules() == "");
+    this->expect_true(g_clp.cmd() == command_line_parser_command::help);
+    this->expect_true(g_clp.modules() == "");
 }
 
 void
 bfm_ut::test_command_line_parser_with_load_no_modules()
 {
     auto args = {"load"_s};
+    auto e = std::make_shared<bfn::missing_argument_error>();
 
     g_clp.reset();
-    EXPECT_EXCEPTION(g_clp.parse(args), bfn::missing_argument_error);
 
-    EXPECT_TRUE(g_clp.cmd() == command_line_parser_command::help);
-    EXPECT_TRUE(g_clp.modules() == "");
+    this->expect_exception([&] { g_clp.parse(args); }, e);
+
+    this->expect_true(g_clp.cmd() == command_line_parser_command::help);
+    this->expect_true(g_clp.modules() == "");
 }
 
 void
 bfm_ut::test_command_line_parser_with_load_no_modules_empty_arg()
 {
     auto args = {"load"_s, " "_s};
+    auto e = std::make_shared<bfn::missing_argument_error>();
 
     g_clp.reset();
-    EXPECT_EXCEPTION(g_clp.parse(args), bfn::missing_argument_error);
+    this->expect_exception([&] { g_clp.parse(args); }, e);
 
-    EXPECT_TRUE(g_clp.cmd() == command_line_parser_command::help);
-    EXPECT_TRUE(g_clp.modules() == "");
+    this->expect_true(g_clp.cmd() == command_line_parser_command::help);
+    this->expect_true(g_clp.modules() == "");
 }
 
 void
@@ -158,13 +164,14 @@ bfm_ut::test_command_line_parser_with_load_no_modules_maintains_state()
 {
     auto args1 = {"unload"_s};
     auto args2 = {"load"_s};
+    auto e = std::make_shared<bfn::missing_argument_error>();
 
     g_clp.reset();
-    EXPECT_NO_EXCEPTION(g_clp.parse(args1));
-    EXPECT_EXCEPTION(g_clp.parse(args2), bfn::missing_argument_error);
+    this->expect_no_exception([&] { g_clp.parse(args1); });
+    this->expect_exception([&] { g_clp.parse(args2); }, e);
 
-    EXPECT_TRUE(g_clp.cmd() == command_line_parser_command::unload);
-    EXPECT_TRUE(g_clp.modules() == "");
+    this->expect_true(g_clp.cmd() == command_line_parser_command::unload);
+    this->expect_true(g_clp.modules() == "");
 }
 
 void
@@ -173,10 +180,10 @@ bfm_ut::test_command_line_parser_with_valid_load()
     auto args = {"load"_s, "filename"_s};
 
     g_clp.reset();
-    EXPECT_NO_EXCEPTION(g_clp.parse(args));
+    this->expect_no_exception([&] { g_clp.parse(args); });
 
-    EXPECT_TRUE(g_clp.cmd() == command_line_parser_command::load);
-    EXPECT_TRUE(g_clp.modules() == "filename");
+    this->expect_true(g_clp.cmd() == command_line_parser_command::load);
+    this->expect_true(g_clp.modules() == "filename");
 }
 
 void
@@ -185,10 +192,10 @@ bfm_ut::test_command_line_parser_with_valid_load_unknown_option()
     auto args = {"load"_s, "--unknow_option"_s, "filename"_s};
 
     g_clp.reset();
-    EXPECT_NO_EXCEPTION(g_clp.parse(args));
+    this->expect_no_exception([&] { g_clp.parse(args); });
 
-    EXPECT_TRUE(g_clp.cmd() == command_line_parser_command::load);
-    EXPECT_TRUE(g_clp.modules() == "filename");
+    this->expect_true(g_clp.cmd() == command_line_parser_command::load);
+    this->expect_true(g_clp.modules() == "filename");
 }
 
 void
@@ -197,10 +204,10 @@ bfm_ut::test_command_line_parser_with_single_bar_help_unknown_option()
     auto args = {"-h"_s, "unknown"_s};
 
     g_clp.reset();
-    EXPECT_NO_EXCEPTION(g_clp.parse(args));
+    this->expect_no_exception([&] { g_clp.parse(args); });
 
-    EXPECT_TRUE(g_clp.cmd() == command_line_parser_command::help);
-    EXPECT_TRUE(g_clp.modules() == "");
+    this->expect_true(g_clp.cmd() == command_line_parser_command::help);
+    this->expect_true(g_clp.modules() == "");
 }
 
 void
@@ -209,22 +216,23 @@ bfm_ut::test_command_line_parser_with_dual_bar_help_unknown_option()
     auto args = {"--help"_s, "unknown"_s};
 
     g_clp.reset();
-    EXPECT_NO_EXCEPTION(g_clp.parse(args));
+    this->expect_no_exception([&] { g_clp.parse(args); });
 
-    EXPECT_TRUE(g_clp.cmd() == command_line_parser_command::help);
-    EXPECT_TRUE(g_clp.modules() == "");
+    this->expect_true(g_clp.cmd() == command_line_parser_command::help);
+    this->expect_true(g_clp.modules() == "");
 }
 
 void
 bfm_ut::test_command_line_parser_with_unknown_command_before_valid_load()
 {
     auto args = {"unknown_cmd"_s, "load"_s, "filename"_s};
+    auto e = std::make_shared<bfn::unknown_command_error>("clp with unknown command before valid load");
 
     g_clp.reset();
-    EXPECT_EXCEPTION(g_clp.parse(args), bfn::unknown_command_error);
+    this->expect_exception([&] { g_clp.parse(args); }, e);
 
-    EXPECT_TRUE(g_clp.cmd() == command_line_parser_command::help);
-    EXPECT_TRUE(g_clp.modules() == "");
+    this->expect_true(g_clp.cmd() == command_line_parser_command::help);
+    this->expect_true(g_clp.modules() == "");
 }
 
 void
@@ -233,10 +241,10 @@ bfm_ut::test_command_line_parser_with_unknown_command_after_valid_load()
     auto args = {"load"_s, "filename"_s, "unknown_cmd"_s};
 
     g_clp.reset();
-    EXPECT_NO_EXCEPTION(g_clp.parse(args));
+    this->expect_no_exception([&] { g_clp.parse(args); });
 
-    EXPECT_TRUE(g_clp.cmd() == command_line_parser_command::load);
-    EXPECT_TRUE(g_clp.modules() == "filename");
+    this->expect_true(g_clp.cmd() == command_line_parser_command::load);
+    this->expect_true(g_clp.modules() == "filename");
 }
 
 void
@@ -245,10 +253,10 @@ bfm_ut::test_command_line_parser_with_help_and_valid_load()
     auto args = {"-h"_s, "load"_s, "filename"_s};
 
     g_clp.reset();
-    EXPECT_NO_EXCEPTION(g_clp.parse(args));
+    this->expect_no_exception([&] { g_clp.parse(args); });
 
-    EXPECT_TRUE(g_clp.cmd() == command_line_parser_command::help);
-    EXPECT_TRUE(g_clp.modules() == "");
+    this->expect_true(g_clp.cmd() == command_line_parser_command::help);
+    this->expect_true(g_clp.modules() == "");
 }
 
 void
@@ -257,10 +265,10 @@ bfm_ut::test_command_line_parser_with_valid_unload()
     auto args = {"unload"_s};
 
     g_clp.reset();
-    EXPECT_NO_EXCEPTION(g_clp.parse(args));
+    this->expect_no_exception([&] { g_clp.parse(args); });
 
-    EXPECT_TRUE(g_clp.cmd() == command_line_parser_command::unload);
-    EXPECT_TRUE(g_clp.modules() == "");
+    this->expect_true(g_clp.cmd() == command_line_parser_command::unload);
+    this->expect_true(g_clp.modules() == "");
 }
 
 void
@@ -269,10 +277,10 @@ bfm_ut::test_command_line_parser_with_valid_start()
     auto args = {"start"_s};
 
     g_clp.reset();
-    EXPECT_NO_EXCEPTION(g_clp.parse(args));
+    this->expect_no_exception([&] { g_clp.parse(args); });
 
-    EXPECT_TRUE(g_clp.cmd() == command_line_parser_command::start);
-    EXPECT_TRUE(g_clp.modules() == "");
+    this->expect_true(g_clp.cmd() == command_line_parser_command::start);
+    this->expect_true(g_clp.modules() == "");
 }
 
 void
@@ -281,10 +289,10 @@ bfm_ut::test_command_line_parser_with_valid_stop()
     auto args = {"stop"_s};
 
     g_clp.reset();
-    EXPECT_NO_EXCEPTION(g_clp.parse(args));
+    this->expect_no_exception([&] { g_clp.parse(args); });
 
-    EXPECT_TRUE(g_clp.cmd() == command_line_parser_command::stop);
-    EXPECT_TRUE(g_clp.modules() == "");
+    this->expect_true(g_clp.cmd() == command_line_parser_command::stop);
+    this->expect_true(g_clp.modules() == "");
 }
 
 void
@@ -293,10 +301,10 @@ bfm_ut::test_command_line_parser_with_valid_dump()
     auto args = {"dump"_s};
 
     g_clp.reset();
-    EXPECT_NO_EXCEPTION(g_clp.parse(args));
+    this->expect_no_exception([&] { g_clp.parse(args); });
 
-    EXPECT_TRUE(g_clp.cmd() == command_line_parser_command::dump);
-    EXPECT_TRUE(g_clp.modules() == "");
+    this->expect_true(g_clp.cmd() == command_line_parser_command::dump);
+    this->expect_true(g_clp.modules() == "");
 }
 
 void
@@ -305,10 +313,10 @@ bfm_ut::test_command_line_parser_with_valid_status()
     auto args = {"status"_s};
 
     g_clp.reset();
-    EXPECT_NO_EXCEPTION(g_clp.parse(args));
+    this->expect_no_exception([&] { g_clp.parse(args); });
 
-    EXPECT_TRUE(g_clp.cmd() == command_line_parser_command::status);
-    EXPECT_TRUE(g_clp.modules() == "");
+    this->expect_true(g_clp.cmd() == command_line_parser_command::status);
+    this->expect_true(g_clp.modules() == "");
 }
 
 void
@@ -317,19 +325,21 @@ bfm_ut::test_command_line_parser_no_vcpuid()
     auto args = {"dump"_s, "--vcpuid"_s};
 
     g_clp.reset();
-    EXPECT_NO_EXCEPTION(g_clp.parse(args));
+    this->expect_no_exception([&] { g_clp.parse(args); });
 
-    EXPECT_TRUE(g_clp.cmd() == command_line_parser_command::dump);
-    EXPECT_TRUE(g_clp.vcpuid() == 0);
+    this->expect_true(g_clp.cmd() == command_line_parser_command::dump);
+    this->expect_true(g_clp.vcpuid() == 0);
 }
 
 void
 bfm_ut::test_command_line_parser_invalid_vcpuid()
 {
     auto args = {"dump"_s, "--vcpuid"_s, "not_a_number"_s};
+    auto e = std::make_shared<std::invalid_argument>("stoull");
 
     g_clp.reset();
-    EXPECT_EXCEPTION(g_clp.parse(args), std::invalid_argument);
+    this->expect_exception([&] { g_clp.parse(args); }, e);
+
 }
 
 void
@@ -338,8 +348,8 @@ bfm_ut::test_command_line_parser_valid_vcpuid()
     auto args = {"dump"_s, "--vcpuid"_s, "2"_s};
 
     g_clp.reset();
-    EXPECT_NO_EXCEPTION(g_clp.parse(args));
+    this->expect_no_exception([&] { g_clp.parse(args); });
 
-    EXPECT_TRUE(g_clp.cmd() == command_line_parser_command::dump);
-    EXPECT_TRUE(g_clp.vcpuid() == 2);
+    this->expect_true(g_clp.cmd() == command_line_parser_command::dump);
+    this->expect_true(g_clp.vcpuid() == 2);
 }

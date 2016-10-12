@@ -72,7 +72,7 @@ void
 exit_handler_intel_x64_ut::test_invalid_intrinics()
 {
     auto null_intrinsics = std::shared_ptr<intrinsics_intel_x64>();
-    EXPECT_NO_EXCEPTION(std::make_unique<exit_handler_intel_x64>(null_intrinsics));
+    this->expect_no_exception([&] { std::make_unique<exit_handler_intel_x64>(null_intrinsics); });
 }
 
 void
@@ -936,9 +936,9 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_rdmsr_debug_ctl()
     {
         eh->dispatch();
 
-        EXPECT_TRUE(g_field == VMCS_GUEST_IA32_DEBUGCTL_FULL);
-        EXPECT_TRUE(eh->m_state_save->rax == 0x1);
-        EXPECT_TRUE(eh->m_state_save->rdx == 0x2);
+        this->expect_true(g_field == VMCS_GUEST_IA32_DEBUGCTL_FULL);
+        this->expect_true(eh->m_state_save->rax == 0x1);
+        this->expect_true(eh->m_state_save->rdx == 0x2);
     });
 }
 
@@ -969,9 +969,9 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_rdmsr_pat()
     {
         eh->dispatch();
 
-        EXPECT_TRUE(g_field == VMCS_GUEST_IA32_PAT_FULL);
-        EXPECT_TRUE(eh->m_state_save->rax == 0x2);
-        EXPECT_TRUE(eh->m_state_save->rdx == 0x3);
+        this->expect_true(g_field == VMCS_GUEST_IA32_PAT_FULL);
+        this->expect_true(eh->m_state_save->rax == 0x2);
+        this->expect_true(eh->m_state_save->rdx == 0x3);
     });
 }
 
@@ -1002,9 +1002,9 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_rdmsr_efer()
     {
         eh->dispatch();
 
-        EXPECT_TRUE(g_field == VMCS_GUEST_IA32_EFER_FULL);
-        EXPECT_TRUE(eh->m_state_save->rax == 0x3);
-        EXPECT_TRUE(eh->m_state_save->rdx == 0x4);
+        this->expect_true(g_field == VMCS_GUEST_IA32_EFER_FULL);
+        this->expect_true(eh->m_state_save->rax == 0x3);
+        this->expect_true(eh->m_state_save->rdx == 0x4);
     });
 }
 
@@ -1035,9 +1035,9 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_rdmsr_perf()
     {
         eh->dispatch();
 
-        EXPECT_TRUE(g_field == VMCS_GUEST_IA32_PERF_GLOBAL_CTRL_FULL);
-        EXPECT_TRUE(eh->m_state_save->rax == 0x3);
-        EXPECT_TRUE(eh->m_state_save->rdx == 0x4);
+        this->expect_true(g_field == VMCS_GUEST_IA32_PERF_GLOBAL_CTRL_FULL);
+        this->expect_true(eh->m_state_save->rax == 0x3);
+        this->expect_true(eh->m_state_save->rdx == 0x4);
     });
 }
 
@@ -1068,9 +1068,9 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_rdmsr_cs()
     {
         eh->dispatch();
 
-        EXPECT_TRUE(g_field == VMCS_GUEST_IA32_SYSENTER_CS);
-        EXPECT_TRUE(eh->m_state_save->rax == 0x4);
-        EXPECT_TRUE(eh->m_state_save->rdx == 0x5);
+        this->expect_true(g_field == VMCS_GUEST_IA32_SYSENTER_CS);
+        this->expect_true(eh->m_state_save->rax == 0x4);
+        this->expect_true(eh->m_state_save->rdx == 0x5);
     });
 }
 
@@ -1101,9 +1101,9 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_rdmsr_esp()
     {
         eh->dispatch();
 
-        EXPECT_TRUE(g_field == VMCS_GUEST_IA32_SYSENTER_ESP);
-        EXPECT_TRUE(eh->m_state_save->rax == 0x5);
-        EXPECT_TRUE(eh->m_state_save->rdx == 0x6);
+        this->expect_true(g_field == VMCS_GUEST_IA32_SYSENTER_ESP);
+        this->expect_true(eh->m_state_save->rax == 0x5);
+        this->expect_true(eh->m_state_save->rdx == 0x6);
     });
 }
 
@@ -1134,9 +1134,9 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_rdmsr_eip()
     {
         eh->dispatch();
 
-        EXPECT_TRUE(g_field == VMCS_GUEST_IA32_SYSENTER_EIP);
-        EXPECT_TRUE(eh->m_state_save->rax == 0x6);
-        EXPECT_TRUE(eh->m_state_save->rdx == 0x7);
+        this->expect_true(g_field == VMCS_GUEST_IA32_SYSENTER_EIP);
+        this->expect_true(eh->m_state_save->rax == 0x6);
+        this->expect_true(eh->m_state_save->rdx == 0x7);
     });
 }
 
@@ -1167,9 +1167,9 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_rdmsr_fs_base()
     {
         eh->dispatch();
 
-        EXPECT_TRUE(g_field == VMCS_GUEST_FS_BASE);
-        EXPECT_TRUE(eh->m_state_save->rax == 0x7);
-        EXPECT_TRUE(eh->m_state_save->rdx == 0x8);
+        this->expect_true(g_field == VMCS_GUEST_FS_BASE);
+        this->expect_true(eh->m_state_save->rax == 0x7);
+        this->expect_true(eh->m_state_save->rdx == 0x8);
     });
 }
 
@@ -1200,9 +1200,9 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_rdmsr_gs_base()
     {
         eh->dispatch();
 
-        EXPECT_TRUE(g_field == VMCS_GUEST_GS_BASE);
-        EXPECT_TRUE(eh->m_state_save->rax == 0x8);
-        EXPECT_TRUE(eh->m_state_save->rdx == 0x9);
+        this->expect_true(g_field == VMCS_GUEST_GS_BASE);
+        this->expect_true(eh->m_state_save->rax == 0x8);
+        this->expect_true(eh->m_state_save->rdx == 0x9);
     });
 }
 
@@ -1233,8 +1233,8 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_rdmsr_default()
     {
         eh->dispatch();
 
-        EXPECT_TRUE(eh->m_state_save->rax == 0x9);
-        EXPECT_TRUE(eh->m_state_save->rdx == 0xA);
+        this->expect_true(eh->m_state_save->rax == 0x9);
+        this->expect_true(eh->m_state_save->rdx == 0xA);
     });
 }
 
@@ -1265,8 +1265,8 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_rdmsr_ignore()
     {
         eh->dispatch();
 
-        EXPECT_TRUE(eh->m_state_save->rax == 0);
-        EXPECT_TRUE(eh->m_state_save->rdx == 0);
+        this->expect_true(eh->m_state_save->rax == 0);
+        this->expect_true(eh->m_state_save->rdx == 0);
     });
 }
 
@@ -1298,8 +1298,8 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_wrmsr_debug_ctrl()
     {
         eh->dispatch();
 
-        EXPECT_TRUE(g_field == VMCS_GUEST_IA32_DEBUGCTL_FULL);
-        EXPECT_TRUE(g_value == 0x0000000200000001);
+        this->expect_true(g_field == VMCS_GUEST_IA32_DEBUGCTL_FULL);
+        this->expect_true(g_value == 0x0000000200000001);
     });
 }
 
@@ -1331,8 +1331,8 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_wrmsr_pat()
     {
         eh->dispatch();
 
-        EXPECT_TRUE(g_field == VMCS_GUEST_IA32_PAT_FULL);
-        EXPECT_TRUE(g_value == 0x0000000300000002);
+        this->expect_true(g_field == VMCS_GUEST_IA32_PAT_FULL);
+        this->expect_true(g_value == 0x0000000300000002);
     });
 }
 
@@ -1364,8 +1364,8 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_wrmsr_efer()
     {
         eh->dispatch();
 
-        EXPECT_TRUE(g_field == VMCS_GUEST_IA32_EFER_FULL);
-        EXPECT_TRUE(g_value == 0x0000000400000003);
+        this->expect_true(g_field == VMCS_GUEST_IA32_EFER_FULL);
+        this->expect_true(g_value == 0x0000000400000003);
     });
 }
 
@@ -1397,8 +1397,8 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_wrmsr_perf()
     {
         eh->dispatch();
 
-        EXPECT_TRUE(g_field == VMCS_GUEST_IA32_PERF_GLOBAL_CTRL_FULL);
-        EXPECT_TRUE(g_value == 0x0000000400000003);
+        this->expect_true(g_field == VMCS_GUEST_IA32_PERF_GLOBAL_CTRL_FULL);
+        this->expect_true(g_value == 0x0000000400000003);
     });
 }
 
@@ -1430,8 +1430,8 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_wrmsr_cs()
     {
         eh->dispatch();
 
-        EXPECT_TRUE(g_field == VMCS_GUEST_IA32_SYSENTER_CS);
-        EXPECT_TRUE(g_value == 0x0000000500000004);
+        this->expect_true(g_field == VMCS_GUEST_IA32_SYSENTER_CS);
+        this->expect_true(g_value == 0x0000000500000004);
     });
 }
 
@@ -1463,8 +1463,8 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_wrmsr_esp()
     {
         eh->dispatch();
 
-        EXPECT_TRUE(g_field == VMCS_GUEST_IA32_SYSENTER_ESP);
-        EXPECT_TRUE(g_value == 0x0000000600000005);
+        this->expect_true(g_field == VMCS_GUEST_IA32_SYSENTER_ESP);
+        this->expect_true(g_value == 0x0000000600000005);
     });
 }
 
@@ -1496,8 +1496,8 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_wrmsr_eip()
     {
         eh->dispatch();
 
-        EXPECT_TRUE(g_field == VMCS_GUEST_IA32_SYSENTER_EIP);
-        EXPECT_TRUE(g_value == 0x0000000700000006);
+        this->expect_true(g_field == VMCS_GUEST_IA32_SYSENTER_EIP);
+        this->expect_true(g_value == 0x0000000700000006);
     });
 }
 
@@ -1529,8 +1529,8 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_wrmsr_fs_base()
     {
         eh->dispatch();
 
-        EXPECT_TRUE(g_field == VMCS_GUEST_FS_BASE);
-        EXPECT_TRUE(g_value == 0x0000000800000007);
+        this->expect_true(g_field == VMCS_GUEST_FS_BASE);
+        this->expect_true(g_value == 0x0000000800000007);
     });
 }
 
@@ -1562,8 +1562,8 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_wrmsr_gs_base()
     {
         eh->dispatch();
 
-        EXPECT_TRUE(g_field == VMCS_GUEST_GS_BASE);
-        EXPECT_TRUE(g_value == 0x0000000900000008);
+        this->expect_true(g_field == VMCS_GUEST_GS_BASE);
+        this->expect_true(g_value == 0x0000000900000008);
     });
 }
 
@@ -2308,67 +2308,67 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_to_string()
 {
     auto eh = std::make_unique<exit_handler_intel_x64>();
 
-    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::exception_or_non_maskable_interrupt) == "exception_or_non_maskable_interrupt"_s);
-    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::external_interrupt) == "external_interrupt"_s);
-    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::triple_fault) == "triple_fault"_s);
-    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::init_signal) == "init_signal"_s);
-    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::sipi) == "sipi"_s);
-    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::smi) == "smi"_s);
-    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::other_smi) == "other_smi"_s);
-    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::interrupt_window) == "interrupt_window"_s);
-    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::nmi_window) == "nmi_window"_s);
-    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::task_switch) == "task_switch"_s);
-    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::cpuid) == "cpuid"_s);
-    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::getsec) == "getsec"_s);
-    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::hlt) == "hlt"_s);
-    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::invd) == "invd"_s);
-    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::invlpg) == "invlpg"_s);
-    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::rdpmc) == "rdpmc"_s);
-    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::rdtsc) == "rdtsc"_s);
-    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::rsm) == "rsm"_s);
-    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::vmcall) == "vmcall"_s);
-    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::vmclear) == "vmclear"_s);
-    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::vmlaunch) == "vmlaunch"_s);
-    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::vmptrld) == "vmptrld"_s);
-    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::vmptrst) == "vmptrst"_s);
-    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::vmread) == "vmread"_s);
-    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::vmresume) == "vmresume"_s);
-    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::vmwrite) == "vmwrite"_s);
-    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::vmxoff) == "vmxoff"_s);
-    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::vmxon) == "vmxon"_s);
-    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::control_register_accesses) == "control_register_accesses"_s);
-    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::mov_dr) == "mov_dr"_s);
-    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::io_instruction) == "io_instruction"_s);
-    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::rdmsr) == "rdmsr"_s);
-    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::wrmsr) == "wrmsr"_s);
-    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::vm_entry_failure_invalid_guest_state) == "vm_entry_failure_invalid_guest_state"_s);
-    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::vm_entry_failure_msr_loading) == "vm_entry_failure_msr_loading"_s);
-    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::mwait) == "mwait"_s);
-    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::monitor_trap_flag) == "monitor_trap_flag"_s);
-    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::monitor) == "monitor"_s);
-    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::pause) == "pause"_s);
-    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::vm_entry_failure_machine_check_event) == "vm_entry_failure_machine_check_event"_s);
-    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::tpr_below_threshold) == "tpr_below_threshold"_s);
-    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::apic_access) == "apic_access"_s);
-    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::virtualized_eoi) == "virtualized_eoi"_s);
-    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::access_to_gdtr_or_idtr) == "access_to_gdtr_or_idtr"_s);
-    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::access_to_ldtr_or_tr) == "access_to_ldtr_or_tr"_s);
-    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::ept_violation) == "ept_violation"_s);
-    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::ept_misconfiguration) == "ept_misconfiguration"_s);
-    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::invept) == "invept"_s);
-    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::rdtscp) == "rdtscp"_s);
-    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::vmx_preemption_timer_expired) == "vmx_preemption_timer_expired"_s);
-    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::invvpid) == "invvpid"_s);
-    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::wbinvd) == "wbinvd"_s);
-    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::xsetbv) == "xsetbv"_s);
-    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::apic_write) == "apic_write"_s);
-    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::rdrand) == "rdrand"_s);
-    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::invpcid) == "invpcid"_s);
-    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::vmfunc) == "vmfunc"_s);
-    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::rdseed) == "rdseed"_s);
-    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::xsaves) == "xsaves"_s);
-    EXPECT_TRUE(eh->exit_reason_to_str(exit_reason::xrstors) == "xrstors"_s);
-    EXPECT_TRUE(eh->exit_reason_to_str(0x100000) == "unknown"_s);
+    this->expect_true(eh->exit_reason_to_str(exit_reason::exception_or_non_maskable_interrupt) == "exception_or_non_maskable_interrupt"_s);
+    this->expect_true(eh->exit_reason_to_str(exit_reason::external_interrupt) == "external_interrupt"_s);
+    this->expect_true(eh->exit_reason_to_str(exit_reason::triple_fault) == "triple_fault"_s);
+    this->expect_true(eh->exit_reason_to_str(exit_reason::init_signal) == "init_signal"_s);
+    this->expect_true(eh->exit_reason_to_str(exit_reason::sipi) == "sipi"_s);
+    this->expect_true(eh->exit_reason_to_str(exit_reason::smi) == "smi"_s);
+    this->expect_true(eh->exit_reason_to_str(exit_reason::other_smi) == "other_smi"_s);
+    this->expect_true(eh->exit_reason_to_str(exit_reason::interrupt_window) == "interrupt_window"_s);
+    this->expect_true(eh->exit_reason_to_str(exit_reason::nmi_window) == "nmi_window"_s);
+    this->expect_true(eh->exit_reason_to_str(exit_reason::task_switch) == "task_switch"_s);
+    this->expect_true(eh->exit_reason_to_str(exit_reason::cpuid) == "cpuid"_s);
+    this->expect_true(eh->exit_reason_to_str(exit_reason::getsec) == "getsec"_s);
+    this->expect_true(eh->exit_reason_to_str(exit_reason::hlt) == "hlt"_s);
+    this->expect_true(eh->exit_reason_to_str(exit_reason::invd) == "invd"_s);
+    this->expect_true(eh->exit_reason_to_str(exit_reason::invlpg) == "invlpg"_s);
+    this->expect_true(eh->exit_reason_to_str(exit_reason::rdpmc) == "rdpmc"_s);
+    this->expect_true(eh->exit_reason_to_str(exit_reason::rdtsc) == "rdtsc"_s);
+    this->expect_true(eh->exit_reason_to_str(exit_reason::rsm) == "rsm"_s);
+    this->expect_true(eh->exit_reason_to_str(exit_reason::vmcall) == "vmcall"_s);
+    this->expect_true(eh->exit_reason_to_str(exit_reason::vmclear) == "vmclear"_s);
+    this->expect_true(eh->exit_reason_to_str(exit_reason::vmlaunch) == "vmlaunch"_s);
+    this->expect_true(eh->exit_reason_to_str(exit_reason::vmptrld) == "vmptrld"_s);
+    this->expect_true(eh->exit_reason_to_str(exit_reason::vmptrst) == "vmptrst"_s);
+    this->expect_true(eh->exit_reason_to_str(exit_reason::vmread) == "vmread"_s);
+    this->expect_true(eh->exit_reason_to_str(exit_reason::vmresume) == "vmresume"_s);
+    this->expect_true(eh->exit_reason_to_str(exit_reason::vmwrite) == "vmwrite"_s);
+    this->expect_true(eh->exit_reason_to_str(exit_reason::vmxoff) == "vmxoff"_s);
+    this->expect_true(eh->exit_reason_to_str(exit_reason::vmxon) == "vmxon"_s);
+    this->expect_true(eh->exit_reason_to_str(exit_reason::control_register_accesses) == "control_register_accesses"_s);
+    this->expect_true(eh->exit_reason_to_str(exit_reason::mov_dr) == "mov_dr"_s);
+    this->expect_true(eh->exit_reason_to_str(exit_reason::io_instruction) == "io_instruction"_s);
+    this->expect_true(eh->exit_reason_to_str(exit_reason::rdmsr) == "rdmsr"_s);
+    this->expect_true(eh->exit_reason_to_str(exit_reason::wrmsr) == "wrmsr"_s);
+    this->expect_true(eh->exit_reason_to_str(exit_reason::vm_entry_failure_invalid_guest_state) == "vm_entry_failure_invalid_guest_state"_s);
+    this->expect_true(eh->exit_reason_to_str(exit_reason::vm_entry_failure_msr_loading) == "vm_entry_failure_msr_loading"_s);
+    this->expect_true(eh->exit_reason_to_str(exit_reason::mwait) == "mwait"_s);
+    this->expect_true(eh->exit_reason_to_str(exit_reason::monitor_trap_flag) == "monitor_trap_flag"_s);
+    this->expect_true(eh->exit_reason_to_str(exit_reason::monitor) == "monitor"_s);
+    this->expect_true(eh->exit_reason_to_str(exit_reason::pause) == "pause"_s);
+    this->expect_true(eh->exit_reason_to_str(exit_reason::vm_entry_failure_machine_check_event) == "vm_entry_failure_machine_check_event"_s);
+    this->expect_true(eh->exit_reason_to_str(exit_reason::tpr_below_threshold) == "tpr_below_threshold"_s);
+    this->expect_true(eh->exit_reason_to_str(exit_reason::apic_access) == "apic_access"_s);
+    this->expect_true(eh->exit_reason_to_str(exit_reason::virtualized_eoi) == "virtualized_eoi"_s);
+    this->expect_true(eh->exit_reason_to_str(exit_reason::access_to_gdtr_or_idtr) == "access_to_gdtr_or_idtr"_s);
+    this->expect_true(eh->exit_reason_to_str(exit_reason::access_to_ldtr_or_tr) == "access_to_ldtr_or_tr"_s);
+    this->expect_true(eh->exit_reason_to_str(exit_reason::ept_violation) == "ept_violation"_s);
+    this->expect_true(eh->exit_reason_to_str(exit_reason::ept_misconfiguration) == "ept_misconfiguration"_s);
+    this->expect_true(eh->exit_reason_to_str(exit_reason::invept) == "invept"_s);
+    this->expect_true(eh->exit_reason_to_str(exit_reason::rdtscp) == "rdtscp"_s);
+    this->expect_true(eh->exit_reason_to_str(exit_reason::vmx_preemption_timer_expired) == "vmx_preemption_timer_expired"_s);
+    this->expect_true(eh->exit_reason_to_str(exit_reason::invvpid) == "invvpid"_s);
+    this->expect_true(eh->exit_reason_to_str(exit_reason::wbinvd) == "wbinvd"_s);
+    this->expect_true(eh->exit_reason_to_str(exit_reason::xsetbv) == "xsetbv"_s);
+    this->expect_true(eh->exit_reason_to_str(exit_reason::apic_write) == "apic_write"_s);
+    this->expect_true(eh->exit_reason_to_str(exit_reason::rdrand) == "rdrand"_s);
+    this->expect_true(eh->exit_reason_to_str(exit_reason::invpcid) == "invpcid"_s);
+    this->expect_true(eh->exit_reason_to_str(exit_reason::vmfunc) == "vmfunc"_s);
+    this->expect_true(eh->exit_reason_to_str(exit_reason::rdseed) == "rdseed"_s);
+    this->expect_true(eh->exit_reason_to_str(exit_reason::xsaves) == "xsaves"_s);
+    this->expect_true(eh->exit_reason_to_str(exit_reason::xrstors) == "xrstors"_s);
+    this->expect_true(eh->exit_reason_to_str(0x100000) == "unknown"_s);
 }
 
 void
@@ -2416,7 +2416,7 @@ exit_handler_intel_x64_ut::test_vmread_failure()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_EXCEPTION(eh->dispatch(), std::runtime_error);
+        this->expect_exception([&] { eh->dispatch(); }, std::make_shared<std::runtime_error>("vmread failed"));
     });
 }
 
@@ -2446,6 +2446,6 @@ exit_handler_intel_x64_ut::test_vmwrite_failure()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_EXCEPTION(eh->dispatch(), std::runtime_error);
+        this->expect_exception([&] { eh->dispatch(); }, std::make_shared<std::runtime_error>("vmwrite failed"));
     });
 }

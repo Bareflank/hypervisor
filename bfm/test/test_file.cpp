@@ -35,8 +35,10 @@ void
 bfm_ut::test_file_read_with_bad_filename()
 {
     auto filename = "/tmp/bad_filename.txt";
+    auto e = std::make_shared<bfn::invalid_file_error>("file read with bad filename"_s);
 
-    EXPECT_EXCEPTION(g_f.read(filename), bfn::invalid_file_error);
+    this->expect_exception([&] { g_f.read(filename); }, e);
+
 }
 
 void
@@ -49,6 +51,6 @@ bfm_ut::test_file_read_with_good_filename()
     tmp << text;
     tmp.close();
 
-    EXPECT_TRUE(g_f.read(filename) == std::string(text));
-    EXPECT_TRUE(std::remove(filename) == 0);
+    this->expect_true(g_f.read(filename) == std::string(text));
+    this->expect_true(std::remove(filename) == 0);
 }

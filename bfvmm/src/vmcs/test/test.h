@@ -77,13 +77,15 @@ protected:
                             const std::vector<struct control_flow_path> &cfg,
                             R(vmcs_intel_x64::*mf)(Args...), Args &&... args)
     {
-        for (const auto &path : cfg)
+        for (int i = 0; static_cast<size_t>(i) < cfg.size(); i++)
         {
             MockRepository mocks;
             auto mm = mocks.Mock<memory_manager>();
             auto in = bfn::mock_shared<intrinsics_intel_x64>(mocks);
 
             setup_mock(mocks, mm, in.get());
+
+            auto path = cfg[static_cast<size_t>(i)];
             path.setup();
 
             RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -92,9 +94,9 @@ protected:
                 auto func = std::bind(std::forward<decltype(mf)>(mf), &vmcs, std::forward<Args>(args)...);
 
                 if (path.throws_exception)
-                    this->expect_exception_with_args(std::forward<decltype(func)>(func), path.exception, fut, line);
+                    this->expect_exception_with_args(func, path.exception, fut, line, i);
                 else
-                    this->expect_no_exception_with_args(std::forward<decltype(func)>(func), fut, line);
+                    this->expect_no_exception_with_args(func, fut, line, i);
             });
         }
     }

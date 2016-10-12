@@ -57,22 +57,23 @@ void
 intrinsics_ut::test_idt_constructor_zero_size()
 {
     idt_x64 idt(0);
-    EXPECT_TRUE(idt.base() == 0);
-    EXPECT_TRUE(idt.limit() == 0);
+    this->expect_true(idt.base() == 0);
+    this->expect_true(idt.limit() == 0);
 }
 
 void
 intrinsics_ut::test_idt_constructor_size()
 {
     idt_x64 idt(4);
-    EXPECT_TRUE(idt.base() != 0);
-    EXPECT_TRUE(idt.limit() == (4 * sizeof(uint64_t)) - 1);
+    this->expect_true(idt.base() != 0);
+    this->expect_true(idt.limit() == (4 * sizeof(uint64_t)) - 1);
 }
 
 void
 intrinsics_ut::test_idt_constructor_null_intrinsics()
 {
-    EXPECT_EXCEPTION(idt_x64(std::shared_ptr<intrinsics_x64>()), std::invalid_argument);
+    auto e = std::make_shared<std::invalid_argument>("idt_x64: intrinsics == nullptr");
+    this->expect_exception([&] { idt_x64(std::shared_ptr<intrinsics_x64>()); }, e);
 }
 
 void
@@ -87,7 +88,7 @@ intrinsics_ut::test_idt_base()
     {
         idt_x64 idt(intrinsics);
 
-        EXPECT_TRUE(idt.base() == reinterpret_cast<uint64_t>(g_idt.get()));
+        this->expect_true(idt.base() == reinterpret_cast<uint64_t>(g_idt.get()));
     });
 }
 
@@ -103,6 +104,6 @@ intrinsics_ut::test_idt_limit()
     {
         idt_x64 idt(intrinsics);
 
-        EXPECT_TRUE(idt.limit() == (4 * sizeof(uint64_t)) - 1);
+        this->expect_true(idt.limit() == (4 * sizeof(uint64_t)) - 1);
     });
 }

@@ -55,7 +55,8 @@ memory_manager_ut::test_memory_manager_malloc_zero()
 {
     mem_pool<128, 3> pool(100);
 
-    EXPECT_EXCEPTION(pool.alloc(0), std::bad_alloc);
+    auto e = std::make_shared<std::bad_alloc>();
+    this->expect_exception([&] { pool.alloc(0); }, e);
 }
 
 void
@@ -108,7 +109,8 @@ memory_manager_ut::test_memory_manager_malloc_heap_all_of_memory()
     for (auto i = 0; i < 16; i++)
         addrs.push_back(pool.alloc(1 << 3));
 
-    EXPECT_EXCEPTION(pool.alloc(1 << 3), std::bad_alloc);
+    auto e = std::make_shared<std::bad_alloc>();
+    this->expect_exception([&] { pool.alloc(1 << 3); }, e);
 
     for (const auto &addr : addrs)
         pool.free(addr);
@@ -116,7 +118,7 @@ memory_manager_ut::test_memory_manager_malloc_heap_all_of_memory()
     for (auto i = 0; i < 16; i++)
         addrs.push_back(pool.alloc(1 << 3));
 
-    EXPECT_EXCEPTION(pool.alloc(1 << 3), std::bad_alloc);
+    this->expect_exception([&] { pool.alloc(1 << 3); }, e);
 
     for (const auto &addr : addrs)
         pool.free(addr);
@@ -148,22 +150,27 @@ void
 memory_manager_ut::test_memory_manager_malloc_heap_too_much_memory_one_block()
 {
     mem_pool<128, 3> pool(100);
-    EXPECT_EXCEPTION(pool.alloc(136), std::bad_alloc);
+    auto e = std::shared_ptr<std::exception>(new std::bad_alloc());
+
+    this->expect_exception([&] { pool.alloc(136); }, e);
 }
 
 void
 memory_manager_ut::test_memory_manager_malloc_heap_too_much_memory_non_block_size()
 {
     mem_pool<128, 3> pool(100);
-    EXPECT_EXCEPTION(pool.alloc(129), std::bad_alloc);
+    auto e = std::shared_ptr<std::exception>(new std::bad_alloc());
+
+    this->expect_exception([&] { pool.alloc(129); }, e);
 }
 
 void
 memory_manager_ut::test_memory_manager_malloc_heap_massive()
 {
     mem_pool<128, 3> pool(100);
+    auto e = std::shared_ptr<std::exception>(new std::bad_alloc());
 
-    EXPECT_EXCEPTION(pool.alloc(0xFFFFFFFFFFFFFFFF), std::bad_alloc);
+    this->expect_exception([&] { pool.alloc(0xFFFFFFFFFFFFFFFF); }, e);
 }
 
 void
@@ -249,7 +256,8 @@ memory_manager_ut::test_memory_manager_add_md_no_exceptions()
 void
 memory_manager_ut::test_memory_manager_add_md_invalid_md()
 {
-    EXPECT_EXCEPTION(g_mm->add_md(nullptr), std::invalid_argument);
+    auto e = std::make_shared<std::invalid_argument>("md == NULL");
+    this->expect_exception([&] { g_mm->add_md(nullptr); }, e);
 }
 
 void
@@ -257,7 +265,8 @@ memory_manager_ut::test_memory_manager_add_md_invalid_virt()
 {
     memory_descriptor md = {0, 0x54321000, 7};
 
-    EXPECT_EXCEPTION(g_mm->add_md(&md), std::invalid_argument);
+    auto e = std::make_shared<std::invalid_argument>("md->phys == 0");
+    this->expect_exception([&] { g_mm->add_md(&md); }, e);
 }
 
 void
@@ -265,7 +274,8 @@ memory_manager_ut::test_memory_manager_add_md_invalid_phys()
 {
     memory_descriptor md = {0x12345123, 0, 7};
 
-    EXPECT_EXCEPTION(g_mm->add_md(&md), std::invalid_argument);
+    auto e = std::make_shared<std::invalid_argument>("md->virt == 0");
+    this->expect_exception([&] { g_mm->add_md(&md); }, e);
 }
 
 void
@@ -273,7 +283,8 @@ memory_manager_ut::test_memory_manager_add_md_invalid_type()
 {
     memory_descriptor md = {0x12345000, 0x54321000, 0};
 
-    EXPECT_EXCEPTION(g_mm->add_md(&md), std::invalid_argument);
+    auto e = std::make_shared<std::invalid_argument>("md->type == 0");
+    this->expect_exception([&] { g_mm->add_md(&md); }, e);
 }
 
 void
@@ -281,7 +292,8 @@ memory_manager_ut::test_memory_manager_add_md_unaligned_physical()
 {
     memory_descriptor md = {0x12345123, 0x54321000, 7};
 
-    EXPECT_EXCEPTION(g_mm->add_md(&md), std::logic_error);
+    auto e = std::make_shared<std::logic_error>("phys address is not page aligned");
+    this->expect_exception([&] { g_mm->add_md(&md); }, e);
 }
 
 void
@@ -289,7 +301,8 @@ memory_manager_ut::test_memory_manager_add_md_unaligned_virtual()
 {
     memory_descriptor md = {0x12345000, 0x54321123, 7};
 
-    EXPECT_EXCEPTION(g_mm->add_md(&md), std::logic_error);
+    auto e = std::make_shared<std::logic_error>("virt address is not page aligned");
+    this->expect_exception([&] { g_mm->add_md(&md); }, e);
 }
 
 void
@@ -309,7 +322,7 @@ memory_manager_ut::test_memory_manager_virtint_to_physint_random_address()
 {
     memory_descriptor md = {0x12345000, 0x54321000, 7};
 
-    EXPECT_NO_EXCEPTION(g_mm->add_md(&md));
+    this->expect_no_exception([&] { g_mm->add_md(&md); });
     this->expect_true(g_mm->virtint_to_physint(0x54321ABC) == 0x12345ABC);
 }
 
@@ -327,7 +340,7 @@ memory_manager_ut::test_memory_manager_virtint_to_physint_upper_limit()
 {
     memory_descriptor md = {0x12345000, 0x54321000, 7};
 
-    EXPECT_NO_EXCEPTION(g_mm->add_md(&md));
+    this->expect_no_exception([&] { g_mm->add_md(&md); });
     this->expect_true(g_mm->virtint_to_physint(0x54321FFF) == 0x12345FFF);
 }
 
@@ -336,7 +349,7 @@ memory_manager_ut::test_memory_manager_virtint_to_physint_lower_limit()
 {
     memory_descriptor md = {0x12345000, 0x54321000, 7};
 
-    EXPECT_NO_EXCEPTION(g_mm->add_md(&md));
+    this->expect_no_exception([&] { g_mm->add_md(&md); });
     this->expect_true(g_mm->virtint_to_physint(0x54321000) == 0x12345000);
 }
 
@@ -345,7 +358,7 @@ memory_manager_ut::test_memory_manager_virt_to_phys_map()
 {
     memory_descriptor md = {0x12345000, 0x54321000, 7};
 
-    EXPECT_NO_EXCEPTION(g_mm->add_md(&md));
+    this->expect_no_exception([&] { g_mm->add_md(&md); });
 
     for (const auto &iter : g_mm->virt_to_phys_map())
     {
@@ -361,7 +374,7 @@ memory_manager_ut::test_memory_manager_physint_to_virtint_random_address()
 {
     memory_descriptor md = {0x12345000, 0x54321000, 7};
 
-    EXPECT_NO_EXCEPTION(g_mm->add_md(&md));
+    this->expect_no_exception([&] { g_mm->add_md(&md); });
     this->expect_true(g_mm->physint_to_virtint(0x12345ABC) == 0x54321ABC);
 }
 
@@ -379,7 +392,7 @@ memory_manager_ut::test_memory_manager_physint_to_virtint_upper_limit()
 {
     memory_descriptor md = {0x12345000, 0x54321000, 7};
 
-    EXPECT_NO_EXCEPTION(g_mm->add_md(&md));
+    this->expect_no_exception([&] { g_mm->add_md(&md); });
     this->expect_true(g_mm->physint_to_virtint(0x12345FFF) == 0x54321FFF);
 }
 
@@ -388,7 +401,7 @@ memory_manager_ut::test_memory_manager_physint_to_virtint_lower_limit()
 {
     memory_descriptor md = {0x12345000, 0x54321000, 7};
 
-    EXPECT_NO_EXCEPTION(g_mm->add_md(&md));
+    this->expect_no_exception([&] { g_mm->add_md(&md); });
     this->expect_true(g_mm->physint_to_virtint(0x12345000) == 0x54321000);
 }
 
@@ -397,7 +410,7 @@ memory_manager_ut::test_memory_manager_phys_to_virt_map()
 {
     memory_descriptor md = {0x12345000, 0x54321000, 7};
 
-    EXPECT_NO_EXCEPTION(g_mm->add_md(&md));
+    this->expect_no_exception([&] { g_mm->add_md(&md); });
 
     for (const auto &iter : g_mm->phys_to_virt_map())
     {

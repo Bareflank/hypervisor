@@ -54,7 +54,8 @@ bool
 vcpu_ut::init()
 {
     g_vcm->set_factory(nullptr);
-    EXPECT_EXCEPTION(g_vcm->create_vcpu(0), std::runtime_error);
+    auto e = std::make_shared<std::runtime_error>("invalid vcpu factory");
+    this->expect_exception([&] { g_vcm->create_vcpu(0); }, e);
 
     make_vcpu_throws = false;
     g_vcm->set_factory(std::make_shared<vcpu_factory_ut>());
