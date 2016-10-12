@@ -73,7 +73,7 @@
 /// or the first vCPU to be created on the host OS. Each debug ring provides
 /// a set of tags that can be used to identify the debug ring from a memory
 /// dump. The vCPU ID is also provided so that you can figure out which
-/// debug ring your looking at.
+/// debug ring you're looking at.
 ///
 /// The init, fini, run and hlt functions must be executed in the proper
 /// order. Each vCPU must be initialized and finalized. The destructor for
@@ -98,7 +98,7 @@ public:
     /// Constructor
     ///
     /// Creates a vCPU with the provided id and debug ring. This constructor
-    /// provides a means to override and repalce the internal resources of the
+    /// provides a means to override and replace the internal resources of the
     /// vCPU. Note that if one of the resources is set to nullptr, a default
     /// will be constructed in its place, providing a means to select which
     /// internal components to override.
@@ -124,7 +124,7 @@ public:
     /// and fini are used in place of the constructor / destructor for some
     /// logic that certainly could generate an exception.
     ///
-    /// @note: subclasses must class this function if it overloaded
+    /// @note: subclasses must call this function if it's overridden
     ///
     /// @param attr attributes to be passed to the vcpu about what
     ///     type of vcpu this is
@@ -138,7 +138,7 @@ public:
     /// and fini are used in place of the constructor / destructor for some
     /// logic that certainly could generate an exception.
     ///
-    /// @note: subclasses must class this function if it overloaded
+    /// @note: subclasses must call this function if it's overridden
     ///
     /// @param attr attributes to be passed to the vcpu about what
     ///     type of vcpu this is
@@ -155,7 +155,7 @@ public:
     /// VM to schedule a different vCPU. When this happens, it will likely
     /// call this function.
     ///
-    /// @note: subclasses must class this function if it overloaded
+    /// @note: subclasses must call this function if it's overridden
     ///
     /// @param attr attributes to be passed to the vcpu about what
     ///     type of vcpu this is
@@ -178,7 +178,7 @@ public:
     /// host-only case. On tear down, the VMM needs to promote the host OS
     /// back to root operation prior to disabling the hypervisor completely.
     ///
-    /// @note: subclasses must class this function if it overloaded
+    /// @note: subclasses must call this function if it's overridden
     ///
     /// @param attr attributes to be passed to the vcpu about what
     ///     type of vcpu this is
@@ -229,7 +229,7 @@ public:
 
     /// Write to Debug Ring
     ///
-    /// Each vCPU has it's own debug ring. If this is the bootstrap core
+    /// Each vCPU has its own debug ring. If this is the bootstrap core
     /// (vcpuid == 0), all std::cout / std::cerr calls go to this vCPU.
     /// To redirect output to a core other than the bootstrap core, use the
     /// output_to_vcpu function in debug.h.
