@@ -53,7 +53,7 @@ public:
     /// Creates a vCPU with the provided resources. This constructor
     /// provides a means to override and repalce the internal resources of the
     /// vCPU. Note that if one of the resources is set to NULL, a default
-    /// will be constructed in it's place, providing a means to select which
+    /// will be constructed in its place, providing a means to select which
     /// internal components to override.
     ///
     /// @param id the id of the vcpu
