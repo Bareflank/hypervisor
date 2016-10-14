@@ -40,7 +40,7 @@ namespace cr0
     inline auto get() noexcept
     { return __read_cr0(); }
 
-    template<class T> constexpr auto set(T val) noexcept
+    template<class T> void set(T val) noexcept
     { __write_cr0(val); }
 
     namespace protection_enable
@@ -192,7 +192,7 @@ namespace cr3
     inline auto get() noexcept
     { return __read_cr3(); }
 
-    template<class T> constexpr auto set(T val) noexcept
+    template<class T> void set(T val) noexcept
     { __write_cr3(val); }
 }
 
@@ -201,7 +201,7 @@ namespace cr4
     inline auto get() noexcept
     { return __read_cr4(); }
 
-    template<class T> constexpr auto set(T val) noexcept
+    template<class T> void set(T val) noexcept
     { __write_cr4(val); }
 
     namespace v8086_mode_extensions

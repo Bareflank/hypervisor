@@ -56,9 +56,9 @@ __write_cr4(uint64_t val) noexcept
 }
 
 extern "C" uint64_t
-__read_msr(uint32_t msr) noexcept
+__read_msr(uint32_t addr) noexcept
 {
-    return g_msrs[msr];
+    return g_msrs[addr];
 }
 
 extern "C" uint64_t

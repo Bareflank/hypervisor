@@ -42,8 +42,8 @@ extern "C" uint32_t __cpuid_ecx(uint32_t val) noexcept;
 extern "C" uint32_t __cpuid_edx(uint32_t val) noexcept;
 extern "C" void __cpuid(uint64_t *rax, uint64_t *rbx, uint64_t *rcx, uint64_t *rdx) noexcept;
 
-extern "C" uint64_t __read_msr(uint32_t msr) noexcept;
-extern "C" void __write_msr(uint32_t msr, uint64_t val) noexcept;
+extern "C" uint64_t __read_msr(uint32_t addr) noexcept;
+extern "C" void __write_msr(uint32_t addr, uint64_t val) noexcept;
 
 extern "C" uint64_t __read_rip(void) noexcept;
 
@@ -136,11 +136,11 @@ public:
                        uint64_t *rdx) const noexcept
     { __cpuid(rax, rbx, rcx, rdx); }
 
-    virtual uint64_t read_msr(uint32_t msr) const noexcept
-    { return __read_msr(msr); }
+    virtual uint64_t read_msr(uint32_t addr) const noexcept
+    { return __read_msr(addr); }
 
-    virtual void write_msr(uint32_t msr, uint64_t val) const noexcept
-    { __write_msr(msr, val); }
+    virtual void write_msr(uint32_t addr, uint64_t val) const noexcept
+    { __write_msr(addr, val); }
 
     virtual uint64_t read_rip() const noexcept
     { return __read_rip(); }
@@ -255,19 +255,6 @@ public:
 #define SEGMENT_ACCESS_RIGHTS_GRANULARITY                           (0x8000)
 #define SEGMENT_ACCESS_RIGHTS_GRANULARITY_PAGES                     (0x8000)
 
-// 64-ia-32-architectures-software-developer-manual, section 35.1
-// IA-32 Architectural MSRs
-#define IA32_PERF_GLOBAL_CTRL_MSR                                   0x0000038F
-#define IA32_DEBUGCTL_MSR                                           0x000001D9
-#define IA32_SYSENTER_CS_MSR                                        0x00000174
-#define IA32_SYSENTER_ESP_MSR                                       0x00000175
-#define IA32_SYSENTER_EIP_MSR                                       0x00000176
-#define IA32_PAT_MSR                                                0x00000277
-#define IA32_EFER_MSR                                               0xC0000080
-#define IA32_FS_BASE_MSR                                            0xC0000100
-#define IA32_GS_BASE_MSR                                            0xC0000101
-#define IA32_XSS_MSR                                                0x00000DA0
-
 // 64-ia-32-architectures-software-developer-manual, section 6.3.1
 // IA-32 Interrupts and Exceptions
 #define INTERRUPT_DIVIDE_ERROR                                      (0)
@@ -291,26 +278,40 @@ public:
 #define INTERRUPT_SIMD_FLOATING_POINT_EXCEPTION                     (19)
 #define INTERRUPT_VIRTUALIZATION_EXCEPTION                          (20)
 
-// Debug Control
-// 64-ia-32-architectures-software-developer-manual, section 35.1
-#define IA32_DEBUGCTL_LBR                                           (1ULL << 0)
-#define IA32_DEBUGCTL_BTF                                           (1ULL << 1)
-#define IA32_DEBUGCTL_TR                                            (1ULL << 6)
-#define IA32_DEBUGCTL_BTS                                           (1ULL << 7)
-#define IA32_DEBUGCTL_BTINT                                         (1ULL << 8)
-#define IA32_DEBUGCTL_BTS_OFF_OS                                    (1ULL << 9)
-#define IA32_DEBUGCTL_BTS_OFF_USER                                  (1ULL << 10)
-#define IA32_DEBUGCTL_FREEZE_LBRS_ON_PMI                            (1ULL << 11)
-#define IA32_DEBUGCTL_FREEZE_PERFMON_ON_PMI                         (1ULL << 12)
-#define IA32_DEBUGCTL_ENABLE_UNCORE_PMI                             (1ULL << 13)
-#define IA32_DEBUGCTL_FREEZE_WHILE_SMM                              (1ULL << 14)
-#define IA32_DEBUGCTL_RTM_DEBUG                                     (1ULL << 15)
 
-// EFER
-// 64-ia-32-architectures-software-developer-manual, section 35.1
-#define IA32_EFER_SCE                                               (1ULL << 0)
-#define IA32_EFER_LME                                               (1ULL << 8)
-#define IA32_EFER_LMA                                               (1ULL << 10)
-#define IA32_EFER_NXE                                               (1ULL << 11)
+// // 64-ia-32-architectures-software-developer-manual, section 35.1
+// // IA-32 Architectural MSRs
+// #define IA32_PERF_GLOBAL_CTRL_MSR                                   0x0000038F
+// #define IA32_DEBUGCTL_MSR                                           0x000001D9
+// #define IA32_SYSENTER_CS_MSR                                        0x00000174
+// #define IA32_SYSENTER_ESP_MSR                                       0x00000175
+// #define IA32_SYSENTER_EIP_MSR                                       0x00000176
+// #define IA32_PAT_MSR                                                0x00000277
+// #define IA32_EFER_MSR                                               0xC0000080
+// #define IA32_FS_BASE_MSR                                            0xC0000100
+// #define IA32_GS_BASE_MSR                                            0xC0000101
+// #define IA32_XSS_MSR                                                0x00000DA0
+
+// // Debug Control
+// // 64-ia-32-architectures-software-developer-manual, section 35.1
+// #define IA32_DEBUGCTL_LBR                                           (1ULL << 0)
+// #define IA32_DEBUGCTL_BTF                                           (1ULL << 1)
+// #define IA32_DEBUGCTL_TR                                            (1ULL << 6)
+// #define IA32_DEBUGCTL_BTS                                           (1ULL << 7)
+// #define IA32_DEBUGCTL_BTINT                                         (1ULL << 8)
+// #define IA32_DEBUGCTL_BTS_OFF_OS                                    (1ULL << 9)
+// #define IA32_DEBUGCTL_BTS_OFF_USER                                  (1ULL << 10)
+// #define IA32_DEBUGCTL_FREEZE_LBRS_ON_PMI                            (1ULL << 11)
+// #define IA32_DEBUGCTL_FREEZE_PERFMON_ON_PMI                         (1ULL << 12)
+// #define IA32_DEBUGCTL_ENABLE_UNCORE_PMI                             (1ULL << 13)
+// #define IA32_DEBUGCTL_FREEZE_WHILE_SMM                              (1ULL << 14)
+// #define IA32_DEBUGCTL_RTM_DEBUG                                     (1ULL << 15)
+
+// // EFER
+// // 64-ia-32-architectures-software-developer-manual, section 35.1
+// #define IA32_EFER_SCE                                               (1ULL << 0)
+// #define IA32_EFER_LME                                               (1ULL << 8)
+// #define IA32_EFER_LMA                                               (1ULL << 10)
+// #define IA32_EFER_NXE                                               (1ULL << 11)
 
 #endif

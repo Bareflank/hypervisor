@@ -174,5 +174,5 @@ void
 intrinsics_ut::test_rflags_x64_always_enabled()
 {
     g_rflags = rflags::always_enabled::mask;
-    this->expect_true(rflags::always_enabled::get() == 0x00000000000000001L);
+    this->expect_true(rflags::always_enabled::get() == rflags::always_enabled::mask);
 }

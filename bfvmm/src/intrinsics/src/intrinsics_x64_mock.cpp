@@ -111,18 +111,18 @@ __attribute__((weak)) __write_rflags(uint64_t val) noexcept
 }
 
 extern "C" uint64_t
-__attribute__((weak)) __read_msr(uint32_t msr) noexcept
+__attribute__((weak)) __read_msr(uint32_t addr) noexcept
 {
     std::cerr << static_cast<const char *>(__PRETTY_FUNCTION__) << " called with: " << '\n';
-    std::cerr << "    - msr: " << view_as_pointer(msr) << '\n';
+    std::cerr << "    - msr: " << view_as_pointer(addr) << '\n';
     abort();
 }
 
 extern "C" void
-__attribute__((weak)) __write_msr(uint32_t msr, uint64_t val) noexcept
+__attribute__((weak)) __write_msr(uint32_t addr, uint64_t val) noexcept
 {
     std::cerr << static_cast<const char *>(__PRETTY_FUNCTION__) << " called with: " << '\n';
-    std::cerr << "    - msr: " << view_as_pointer(msr) << '\n';
+    std::cerr << "    - msr: " << view_as_pointer(addr) << '\n';
     std::cerr << "    - val: " << view_as_pointer(val) << '\n';
     abort();
 }

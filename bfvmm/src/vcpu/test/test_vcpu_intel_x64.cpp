@@ -26,6 +26,10 @@
 #include <memory_manager/memory_manager.h>
 
 extern "C" uint64_t
+__read_msr(uint32_t addr) noexcept
+{ (void) addr; return 0; }
+
+extern "C" uint64_t
 __read_cr0(void) noexcept
 { return 0; }
 
@@ -129,8 +133,6 @@ vcpu_ut::test_vcpu_intel_x64_init_null_params_valid_intrinsics()
 
     mocks.OnCall(in.get(), intrinsics_intel_x64::read_gdt);
     mocks.OnCall(in.get(), intrinsics_intel_x64::read_idt);
-
-    mocks.OnCall(in.get(), intrinsics_intel_x64::read_msr).Return(0);
 
     mocks.OnCallFunc(memory_manager::instance).Return(mm);
     mocks.OnCall(mm, memory_manager::virtptr_to_physint).Do(virtptr_to_physint);
@@ -249,8 +251,6 @@ vcpu_ut::test_vcpu_intel_x64_fini_null_params_valid_intrinsics()
 
     mocks.OnCall(in.get(), intrinsics_intel_x64::read_gdt);
     mocks.OnCall(in.get(), intrinsics_intel_x64::read_idt);
-
-    mocks.OnCall(in.get(), intrinsics_intel_x64::read_msr).Return(0);
 
     mocks.OnCallFunc(memory_manager::instance).Return(mm);
     mocks.OnCall(mm, memory_manager::virtptr_to_physint).Do(virtptr_to_physint);

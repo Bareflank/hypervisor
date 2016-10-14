@@ -58,13 +58,13 @@ vmcs_intel_x64_host_vm_state::vmcs_intel_x64_host_vm_state(const std::shared_ptr
 
     m_rflags = rflags::get();
 
-    m_ia32_debugctl_msr = intrinsics->read_msr(IA32_DEBUGCTL_MSR);
-    m_ia32_pat_msr = intrinsics->read_msr(IA32_PAT_MSR);
-    m_ia32_efer_msr = intrinsics->read_msr(IA32_EFER_MSR);
-    m_ia32_perf_global_ctrl_msr = intrinsics->read_msr(IA32_PERF_GLOBAL_CTRL_MSR);
-    m_ia32_sysenter_cs_msr = intrinsics->read_msr(IA32_SYSENTER_CS_MSR);
-    m_ia32_sysenter_esp_msr = intrinsics->read_msr(IA32_SYSENTER_ESP_MSR);
-    m_ia32_sysenter_eip_msr = intrinsics->read_msr(IA32_SYSENTER_EIP_MSR);
-    m_ia32_fs_base_msr = intrinsics->read_msr(IA32_FS_BASE_MSR);
-    m_ia32_gs_base_msr = intrinsics->read_msr(IA32_GS_BASE_MSR);
+    m_ia32_debugctl_msr = msrs::ia32_debugctl::get();
+    m_ia32_pat_msr = msrs::ia32_pat::get();
+    m_ia32_efer_msr = msrs::ia32_efer::get();
+    m_ia32_perf_global_ctrl_msr = msrs::ia32_perf_global_ctrl::get();
+    m_ia32_sysenter_cs_msr = msrs::ia32_sysenter_cs::get();
+    m_ia32_sysenter_esp_msr = msrs::ia32_sysenter_esp::get();
+    m_ia32_sysenter_eip_msr = msrs::ia32_sysenter_eip::get();
+    m_ia32_fs_base_msr = msrs::ia32_fs_base::get();
+    m_ia32_gs_base_msr = msrs::ia32_gs_base::get();
 }
