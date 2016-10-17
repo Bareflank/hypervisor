@@ -40,10 +40,12 @@ intrinsics_ut::fini()
 bool
 intrinsics_ut::list()
 {
+    this->test_gdt_reg_set_get();
+    this->test_gdt_reg_base_set_get();
+    this->test_gdt_reg_limit_set_get();
     this->test_gdt_constructor_no_size();
     this->test_gdt_constructor_zero_size();
     this->test_gdt_constructor_size();
-    this->test_gdt_constructor_null_intrinsics();
     this->test_gdt_base();
     this->test_gdt_limit();
     this->test_gdt_set_base_zero_index();
@@ -70,13 +72,16 @@ intrinsics_ut::list()
     this->test_gdt_access_rights_invalid_index();
     this->test_gdt_access_rights_descriptor_success();
 
+    this->test_idt_reg_set_get();
+    this->test_idt_reg_base_set_get();
+    this->test_idt_reg_limit_set_get();
     this->test_idt_constructor_no_size();
     this->test_idt_constructor_zero_size();
     this->test_idt_constructor_size();
-    this->test_idt_constructor_null_intrinsics();
     this->test_idt_base();
     this->test_idt_limit();
 
+    this->test_general_msr_access();
     this->test_ia32_feature_control();
     this->test_ia32_feature_control_lock_bit();
     this->test_ia32_feature_control_enable_vmx_inside_smx();

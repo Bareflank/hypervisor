@@ -23,9 +23,11 @@
 #include <gsl/gsl>
 
 #include <test.h>
+#include <intrinsics/tss_x64.h>
 #include <vmcs/vmcs_intel_x64_resume.h>
 #include <vmcs/vmcs_intel_x64_promote.h>
 
+using namespace x64;
 using namespace intel_x64;
 
 extern size_t g_new_throws_bad_alloc;
@@ -95,22 +97,14 @@ setup_vmcs_guest_control_and_debug_fields()
 static void
 setup_vmcs_guest_segment_registers()
 {
-    g_vmcs_fields[VMCS_GUEST_CS_ACCESS_RIGHTS] = 0x9 | SEGMENT_ACCESS_RIGHTS_SYSTEM_DESCRIPTOR | SEGMENT_ACCESS_RIGHTS_PRESENT | SEGMENT_ACCESS_RIGHTS_DPL;
-    g_vmcs_fields[VMCS_GUEST_SS_ACCESS_RIGHTS] = 0x3 | SEGMENT_ACCESS_RIGHTS_SYSTEM_DESCRIPTOR | SEGMENT_ACCESS_RIGHTS_PRESENT | SEGMENT_ACCESS_RIGHTS_DPL;
-    g_vmcs_fields[VMCS_GUEST_DS_ACCESS_RIGHTS] = 0x3 | SEGMENT_ACCESS_RIGHTS_SYSTEM_DESCRIPTOR | SEGMENT_ACCESS_RIGHTS_PRESENT;
-    g_vmcs_fields[VMCS_GUEST_ES_ACCESS_RIGHTS] = 0x3 | SEGMENT_ACCESS_RIGHTS_SYSTEM_DESCRIPTOR | SEGMENT_ACCESS_RIGHTS_PRESENT;
-    g_vmcs_fields[VMCS_GUEST_FS_ACCESS_RIGHTS] = 0x3 | SEGMENT_ACCESS_RIGHTS_SYSTEM_DESCRIPTOR | SEGMENT_ACCESS_RIGHTS_PRESENT;
-    g_vmcs_fields[VMCS_GUEST_GS_ACCESS_RIGHTS] = 0x3 | SEGMENT_ACCESS_RIGHTS_SYSTEM_DESCRIPTOR | SEGMENT_ACCESS_RIGHTS_PRESENT;
-    g_vmcs_fields[VMCS_GUEST_TR_ACCESS_RIGHTS] = 0xb | SEGMENT_ACCESS_RIGHTS_PRESENT;
-    g_vmcs_fields[VMCS_GUEST_LDTR_ACCESS_RIGHTS] = 0x2 | SEGMENT_ACCESS_RIGHTS_PRESENT;
-
-    g_vmcs_fields[VMCS_GUEST_CS_LIMIT] = 0x00000100;
-    g_vmcs_fields[VMCS_GUEST_SS_LIMIT] = 0x00000100;
-    g_vmcs_fields[VMCS_GUEST_DS_LIMIT] = 0x00000100;
-    g_vmcs_fields[VMCS_GUEST_ES_LIMIT] = 0x00000100;
-    g_vmcs_fields[VMCS_GUEST_FS_LIMIT] = 0x00000100;
-    g_vmcs_fields[VMCS_GUEST_TR_LIMIT] = 0x00000100;
-    g_vmcs_fields[VMCS_GUEST_LDTR_LIMIT] = 0x00000100;
+    g_vmcs_fields[VMCS_GUEST_CS_LIMIT] = 0xFFFFFFFF;
+    g_vmcs_fields[VMCS_GUEST_SS_LIMIT] = 0xFFFFFFFF;
+    g_vmcs_fields[VMCS_GUEST_DS_LIMIT] = 0xFFFFFFFF;
+    g_vmcs_fields[VMCS_GUEST_ES_LIMIT] = 0xFFFFFFFF;
+    g_vmcs_fields[VMCS_GUEST_FS_LIMIT] = 0xFFFFFFFF;
+    g_vmcs_fields[VMCS_GUEST_GS_LIMIT] = 0xFFFFFFFF;
+    g_vmcs_fields[VMCS_GUEST_TR_LIMIT] = sizeof(tss_x64);
+    g_vmcs_fields[VMCS_GUEST_LDTR_LIMIT] = 0xFFFFFFFF;
 }
 
 static void
@@ -136,7 +130,6 @@ setup_vmcs_guest_non_register_state()
     g_vmcs_fields[VMCS_GUEST_ACTIVITY_STATE] = 0x0;
     g_vmcs_fields[VMCS_GUEST_INTERRUPTIBILITY_STATE] = VM_INTERRUPTABILITY_STATE_SMI;
     g_vmcs_fields[VMCS_VMCS_LINK_POINTER] = 0xffffFFFFffffFFFF;
-
 }
 
 static void
@@ -240,28 +233,27 @@ setup_vmcs_x64_state_intrinsics(MockRepository &mocks, vmcs_intel_x64_state *sta
     mocks.OnCall(state_in, vmcs_intel_x64_state::gs).Return(0x10);
     mocks.OnCall(state_in, vmcs_intel_x64_state::ldtr).Return(0x10);
     mocks.OnCall(state_in, vmcs_intel_x64_state::tr).Return(0x10);
+
     mocks.OnCall(state_in, vmcs_intel_x64_state::gdt_limit).Return(0);
     mocks.OnCall(state_in, vmcs_intel_x64_state::idt_limit).Return(0);
 
     mocks.OnCall(state_in, vmcs_intel_x64_state::es_limit).Return(0);
-    mocks.OnCall(state_in, vmcs_intel_x64_state::cs_limit).Return(0);
-    mocks.OnCall(state_in, vmcs_intel_x64_state::ss_limit).Return(0);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::cs_limit).Return(0xFFFFFFFF);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::ss_limit).Return(0xFFFFFFFF);
     mocks.OnCall(state_in, vmcs_intel_x64_state::ds_limit).Return(0);
-    mocks.OnCall(state_in, vmcs_intel_x64_state::ds_limit).Return(0);
-    mocks.OnCall(state_in, vmcs_intel_x64_state::fs_limit).Return(0);
-    mocks.OnCall(state_in, vmcs_intel_x64_state::gs_limit).Return(0);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::fs_limit).Return(0xFFFFFFFF);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::gs_limit).Return(0xFFFFFFFF);
     mocks.OnCall(state_in, vmcs_intel_x64_state::ldtr_limit).Return(0);
-    mocks.OnCall(state_in, vmcs_intel_x64_state::tr_limit).Return(0);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::tr_limit).Return(sizeof(tss_x64));
 
-    mocks.OnCall(state_in, vmcs_intel_x64_state::es_access_rights).Return(0x10000);
-    mocks.OnCall(state_in, vmcs_intel_x64_state::cs_access_rights).Return(0x10000);
-    mocks.OnCall(state_in, vmcs_intel_x64_state::ss_access_rights).Return(0x10000);
-    mocks.OnCall(state_in, vmcs_intel_x64_state::ds_access_rights).Return(0x10000);
-    mocks.OnCall(state_in, vmcs_intel_x64_state::ds_access_rights).Return(0x10000);
-    mocks.OnCall(state_in, vmcs_intel_x64_state::fs_access_rights).Return(0x10000);
-    mocks.OnCall(state_in, vmcs_intel_x64_state::gs_access_rights).Return(0x10000);
-    mocks.OnCall(state_in, vmcs_intel_x64_state::ldtr_access_rights).Return(0x10000);
-    mocks.OnCall(state_in, vmcs_intel_x64_state::tr_access_rights).Return(0x10000);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::es_access_rights).Return(access_rights::unusable);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::cs_access_rights).Return(access_rights::ring0_cs_descriptor);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::ss_access_rights).Return(access_rights::ring0_ss_descriptor);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::ds_access_rights).Return(access_rights::unusable);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::fs_access_rights).Return(access_rights::ring0_fs_descriptor);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::gs_access_rights).Return(access_rights::ring0_gs_descriptor);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::ldtr_access_rights).Return(access_rights::unusable);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::tr_access_rights).Return(access_rights::ring0_tr_descriptor);
 
     auto cr0 = 0UL;
     cr0 |= cr0::paging::mask;
@@ -316,7 +308,6 @@ setup_vmcs_launch_failure(MockRepository &mocks, intrinsics_intel_x64 *in)
     setup_vmcs_fields();
 
     Call &vmlaunch = mocks.OnCall(in, intrinsics_intel_x64::vmlaunch).Return(false);
-    mocks.OnCall(in, intrinsics_intel_x64::read_msr).After(vmlaunch).Do(__read_msr);
     mocks.OnCall(in, intrinsics_intel_x64::vmread).After(vmlaunch).Do(__vmread);
 }
 
@@ -327,7 +318,6 @@ setup_vmcs_intrinsics(MockRepository &mocks, memory_manager *mm, intrinsics_inte
     mocks.OnCall(mm, memory_manager::virtptr_to_physint).Do(virtptr_to_physint);
     mocks.OnCall(mm, memory_manager::physint_to_virtptr).Do(physint_to_virtptr);
 
-    mocks.OnCall(in, intrinsics_intel_x64::read_msr).Do(__read_msr);
     mocks.OnCall(in, intrinsics_intel_x64::cpuid_eax).Do(cpuid_eax);
 
     mocks.OnCall(in, intrinsics_intel_x64::vmclear).Return(true);
@@ -570,11 +560,11 @@ vmcs_ut::test_vmcs_virtual_processor_identifier()
     g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = msrs::ia32_vmx_procbased_ctls2::enable_vpid::mask;
 
     this->expect_true(vmcs::virtual_processor_identifier::get() == 100UL);
-    this->expect_true(vmcs::virtual_processor_identifier::is_supported());
+    this->expect_true(vmcs::virtual_processor_identifier::exists());
 
     g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = 0x0;
 
-    this->expect_false(vmcs::virtual_processor_identifier::is_supported());
+    this->expect_false(vmcs::virtual_processor_identifier::exists());
 }
 
 void
@@ -584,11 +574,11 @@ vmcs_ut::test_vmcs_posted_interrupt_notification_vector()
     g_msrs[msrs::ia32_vmx_true_pinbased_ctls::addr] = msrs::ia32_vmx_true_pinbased_ctls::process_posted_interrupts::mask;
 
     this->expect_true(vmcs::posted_interrupt_notification_vector::get() == 100UL);
-    this->expect_true(vmcs::posted_interrupt_notification_vector::is_supported());
+    this->expect_true(vmcs::posted_interrupt_notification_vector::exists());
 
     g_msrs[msrs::ia32_vmx_true_pinbased_ctls::addr] = 0x0;
 
-    this->expect_false(vmcs::posted_interrupt_notification_vector::is_supported());
+    this->expect_false(vmcs::posted_interrupt_notification_vector::exists());
 }
 
 void
@@ -598,11 +588,11 @@ vmcs_ut::test_vmcs_eptp_index()
     g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = msrs::ia32_vmx_procbased_ctls2::ept_violation_ve::mask;
 
     this->expect_true(vmcs::eptp_index::get() == 100UL);
-    this->expect_true(vmcs::eptp_index::is_supported());
+    this->expect_true(vmcs::eptp_index::exists());
 
     g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = 0x0;
 
-    this->expect_false(vmcs::eptp_index::is_supported());
+    this->expect_false(vmcs::eptp_index::exists());
 }
 
 void
@@ -611,7 +601,7 @@ vmcs_ut::test_vmcs_guest_es_selector()
     vmcs::guest_es_selector::set(100UL);
 
     this->expect_true(vmcs::guest_es_selector::get() == 100UL);
-    this->expect_true(vmcs::guest_es_selector::is_supported());
+    this->expect_true(vmcs::guest_es_selector::exists());
 }
 
 void
@@ -620,7 +610,7 @@ vmcs_ut::test_vmcs_guest_cs_selector()
     vmcs::guest_cs_selector::set(100UL);
 
     this->expect_true(vmcs::guest_cs_selector::get() == 100UL);
-    this->expect_true(vmcs::guest_cs_selector::is_supported());
+    this->expect_true(vmcs::guest_cs_selector::exists());
 }
 
 void
@@ -629,7 +619,7 @@ vmcs_ut::test_vmcs_guest_ss_selector()
     vmcs::guest_ss_selector::set(100UL);
 
     this->expect_true(vmcs::guest_ss_selector::get() == 100UL);
-    this->expect_true(vmcs::guest_ss_selector::is_supported());
+    this->expect_true(vmcs::guest_ss_selector::exists());
 }
 
 void
@@ -638,7 +628,7 @@ vmcs_ut::test_vmcs_guest_ds_selector()
     vmcs::guest_ds_selector::set(100UL);
 
     this->expect_true(vmcs::guest_ds_selector::get() == 100UL);
-    this->expect_true(vmcs::guest_ds_selector::is_supported());
+    this->expect_true(vmcs::guest_ds_selector::exists());
 }
 
 void
@@ -647,7 +637,7 @@ vmcs_ut::test_vmcs_guest_fs_selector()
     vmcs::guest_fs_selector::set(100UL);
 
     this->expect_true(vmcs::guest_fs_selector::get() == 100UL);
-    this->expect_true(vmcs::guest_fs_selector::is_supported());
+    this->expect_true(vmcs::guest_fs_selector::exists());
 }
 
 void
@@ -656,7 +646,7 @@ vmcs_ut::test_vmcs_guest_gs_selector()
     vmcs::guest_gs_selector::set(100UL);
 
     this->expect_true(vmcs::guest_gs_selector::get() == 100UL);
-    this->expect_true(vmcs::guest_gs_selector::is_supported());
+    this->expect_true(vmcs::guest_gs_selector::exists());
 }
 
 void
@@ -665,7 +655,7 @@ vmcs_ut::test_vmcs_guest_ldtr_selector()
     vmcs::guest_ldtr_selector::set(100UL);
 
     this->expect_true(vmcs::guest_ldtr_selector::get() == 100UL);
-    this->expect_true(vmcs::guest_ldtr_selector::is_supported());
+    this->expect_true(vmcs::guest_ldtr_selector::exists());
 }
 
 void
@@ -674,7 +664,7 @@ vmcs_ut::test_vmcs_guest_tr_selector()
     vmcs::guest_tr_selector::set(100UL);
 
     this->expect_true(vmcs::guest_tr_selector::get() == 100UL);
-    this->expect_true(vmcs::guest_tr_selector::is_supported());
+    this->expect_true(vmcs::guest_tr_selector::exists());
 }
 
 void
@@ -684,11 +674,11 @@ vmcs_ut::test_vmcs_guest_interrupt_status()
     g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = msrs::ia32_vmx_procbased_ctls2::virtual_interrupt_delivery::mask;
 
     this->expect_true(vmcs::guest_interrupt_status::get() == 100UL);
-    this->expect_true(vmcs::guest_interrupt_status::is_supported());
+    this->expect_true(vmcs::guest_interrupt_status::exists());
 
     g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = 0x0;
 
-    this->expect_false(vmcs::guest_interrupt_status::is_supported());
+    this->expect_false(vmcs::guest_interrupt_status::exists());
 }
 
 void
@@ -697,7 +687,7 @@ vmcs_ut::test_vmcs_host_es_selector()
     vmcs::host_es_selector::set(100UL);
 
     this->expect_true(vmcs::host_es_selector::get() == 100UL);
-    this->expect_true(vmcs::host_es_selector::is_supported());
+    this->expect_true(vmcs::host_es_selector::exists());
 }
 
 void
@@ -706,7 +696,7 @@ vmcs_ut::test_vmcs_host_cs_selector()
     vmcs::host_cs_selector::set(100UL);
 
     this->expect_true(vmcs::host_cs_selector::get() == 100UL);
-    this->expect_true(vmcs::host_cs_selector::is_supported());
+    this->expect_true(vmcs::host_cs_selector::exists());
 }
 
 void
@@ -715,7 +705,7 @@ vmcs_ut::test_vmcs_host_ss_selector()
     vmcs::host_ss_selector::set(100UL);
 
     this->expect_true(vmcs::host_ss_selector::get() == 100UL);
-    this->expect_true(vmcs::host_ss_selector::is_supported());
+    this->expect_true(vmcs::host_ss_selector::exists());
 }
 
 void
@@ -724,7 +714,7 @@ vmcs_ut::test_vmcs_host_ds_selector()
     vmcs::host_ds_selector::set(100UL);
 
     this->expect_true(vmcs::host_ds_selector::get() == 100UL);
-    this->expect_true(vmcs::host_ds_selector::is_supported());
+    this->expect_true(vmcs::host_ds_selector::exists());
 }
 
 void
@@ -733,7 +723,7 @@ vmcs_ut::test_vmcs_host_fs_selector()
     vmcs::host_fs_selector::set(100UL);
 
     this->expect_true(vmcs::host_fs_selector::get() == 100UL);
-    this->expect_true(vmcs::host_fs_selector::is_supported());
+    this->expect_true(vmcs::host_fs_selector::exists());
 }
 
 void
@@ -742,7 +732,7 @@ vmcs_ut::test_vmcs_host_gs_selector()
     vmcs::host_gs_selector::set(100UL);
 
     this->expect_true(vmcs::host_gs_selector::get() == 100UL);
-    this->expect_true(vmcs::host_gs_selector::is_supported());
+    this->expect_true(vmcs::host_gs_selector::exists());
 }
 
 void
@@ -751,7 +741,7 @@ vmcs_ut::test_vmcs_host_tr_selector()
     vmcs::host_tr_selector::set(100UL);
 
     this->expect_true(vmcs::host_tr_selector::get() == 100UL);
-    this->expect_true(vmcs::host_tr_selector::is_supported());
+    this->expect_true(vmcs::host_tr_selector::exists());
 }
 
 void
@@ -760,7 +750,7 @@ vmcs_ut::test_vmcs_guest_rflags()
     vmcs::guest_rflags::set(100UL);
 
     this->expect_true(vmcs::guest_rflags::get() == 100UL);
-    this->expect_true(vmcs::guest_rflags::is_supported());
+    this->expect_true(vmcs::guest_rflags::exists());
 }
 
 void
@@ -1611,4 +1601,628 @@ vmcs_ut::test_vmcs_host_ia32_efer_reserved()
 {
     vmcs::host_ia32_efer::reserved::set(0x10000UL);
     this->expect_true(vmcs::host_ia32_efer::reserved::get() == 0x10000UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_es_access_rights()
+{
+    vmcs::guest_es_access_rights::set(100UL);
+    this->expect_true(vmcs::guest_es_access_rights::exists());
+    this->expect_true(vmcs::guest_es_access_rights::get() == 100UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_es_access_rights_type()
+{
+    vmcs::guest_es_access_rights::type::set(1UL);
+    this->expect_true(vmcs::guest_es_access_rights::type::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_es_access_rights_s()
+{
+    vmcs::guest_es_access_rights::s::set(1UL);
+    this->expect_true(vmcs::guest_es_access_rights::s::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_es_access_rights_dpl()
+{
+    vmcs::guest_es_access_rights::dpl::set(1UL);
+    this->expect_true(vmcs::guest_es_access_rights::dpl::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_es_access_rights_present()
+{
+    vmcs::guest_es_access_rights::present::set(1UL);
+    this->expect_true(vmcs::guest_es_access_rights::present::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_es_access_rights_avl()
+{
+    vmcs::guest_es_access_rights::avl::set(1UL);
+    this->expect_true(vmcs::guest_es_access_rights::avl::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_es_access_rights_l()
+{
+    vmcs::guest_es_access_rights::l::set(1UL);
+    this->expect_true(vmcs::guest_es_access_rights::l::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_es_access_rights_db()
+{
+    vmcs::guest_es_access_rights::db::set(1UL);
+    this->expect_true(vmcs::guest_es_access_rights::db::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_es_access_rights_granularity()
+{
+    vmcs::guest_es_access_rights::granularity::set(1UL);
+    this->expect_true(vmcs::guest_es_access_rights::granularity::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_es_access_rights_reserved()
+{
+    vmcs::guest_es_access_rights::reserved::set(0x10000U);
+    this->expect_true(vmcs::guest_es_access_rights::reserved::get() == 0x10000U);
+}
+
+void
+vmcs_ut::test_vmcs_guest_es_access_rights_unusable()
+{
+    vmcs::guest_es_access_rights::unusable::set(1UL);
+    this->expect_true(vmcs::guest_es_access_rights::unusable::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_cs_access_rights()
+{
+    vmcs::guest_cs_access_rights::set(100UL);
+    this->expect_true(vmcs::guest_cs_access_rights::exists());
+    this->expect_true(vmcs::guest_cs_access_rights::get() == 100UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_cs_access_rights_type()
+{
+    vmcs::guest_cs_access_rights::type::set(1UL);
+    this->expect_true(vmcs::guest_cs_access_rights::type::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_cs_access_rights_s()
+{
+    vmcs::guest_cs_access_rights::s::set(1UL);
+    this->expect_true(vmcs::guest_cs_access_rights::s::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_cs_access_rights_dpl()
+{
+    vmcs::guest_cs_access_rights::dpl::set(1UL);
+    this->expect_true(vmcs::guest_cs_access_rights::dpl::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_cs_access_rights_present()
+{
+    vmcs::guest_cs_access_rights::present::set(1UL);
+    this->expect_true(vmcs::guest_cs_access_rights::present::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_cs_access_rights_avl()
+{
+    vmcs::guest_cs_access_rights::avl::set(1UL);
+    this->expect_true(vmcs::guest_cs_access_rights::avl::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_cs_access_rights_l()
+{
+    vmcs::guest_cs_access_rights::l::set(1UL);
+    this->expect_true(vmcs::guest_cs_access_rights::l::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_cs_access_rights_db()
+{
+    vmcs::guest_cs_access_rights::db::set(1UL);
+    this->expect_true(vmcs::guest_cs_access_rights::db::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_cs_access_rights_granularity()
+{
+    vmcs::guest_cs_access_rights::granularity::set(1UL);
+    this->expect_true(vmcs::guest_cs_access_rights::granularity::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_cs_access_rights_reserved()
+{
+    vmcs::guest_cs_access_rights::reserved::set(0x10000U);
+    this->expect_true(vmcs::guest_cs_access_rights::reserved::get() == 0x10000U);
+}
+
+void
+vmcs_ut::test_vmcs_guest_cs_access_rights_unusable()
+{
+    vmcs::guest_cs_access_rights::unusable::set(1UL);
+    this->expect_true(vmcs::guest_cs_access_rights::unusable::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_ss_access_rights()
+{
+    vmcs::guest_ss_access_rights::set(100UL);
+    this->expect_true(vmcs::guest_ss_access_rights::exists());
+    this->expect_true(vmcs::guest_ss_access_rights::get() == 100UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_ss_access_rights_type()
+{
+    vmcs::guest_ss_access_rights::type::set(1UL);
+    this->expect_true(vmcs::guest_ss_access_rights::type::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_ss_access_rights_s()
+{
+    vmcs::guest_ss_access_rights::s::set(1UL);
+    this->expect_true(vmcs::guest_ss_access_rights::s::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_ss_access_rights_dpl()
+{
+    vmcs::guest_ss_access_rights::dpl::set(1UL);
+    this->expect_true(vmcs::guest_ss_access_rights::dpl::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_ss_access_rights_present()
+{
+    vmcs::guest_ss_access_rights::present::set(1UL);
+    this->expect_true(vmcs::guest_ss_access_rights::present::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_ss_access_rights_avl()
+{
+    vmcs::guest_ss_access_rights::avl::set(1UL);
+    this->expect_true(vmcs::guest_ss_access_rights::avl::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_ss_access_rights_l()
+{
+    vmcs::guest_ss_access_rights::l::set(1UL);
+    this->expect_true(vmcs::guest_ss_access_rights::l::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_ss_access_rights_db()
+{
+    vmcs::guest_ss_access_rights::db::set(1UL);
+    this->expect_true(vmcs::guest_ss_access_rights::db::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_ss_access_rights_granularity()
+{
+    vmcs::guest_ss_access_rights::granularity::set(1UL);
+    this->expect_true(vmcs::guest_ss_access_rights::granularity::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_ss_access_rights_reserved()
+{
+    vmcs::guest_ss_access_rights::reserved::set(0x10000U);
+    this->expect_true(vmcs::guest_ss_access_rights::reserved::get() == 0x10000U);
+}
+
+void
+vmcs_ut::test_vmcs_guest_ss_access_rights_unusable()
+{
+    vmcs::guest_ss_access_rights::unusable::set(1UL);
+    this->expect_true(vmcs::guest_ss_access_rights::unusable::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_ds_access_rights()
+{
+    vmcs::guest_ds_access_rights::set(100UL);
+    this->expect_true(vmcs::guest_ds_access_rights::exists());
+    this->expect_true(vmcs::guest_ds_access_rights::get() == 100UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_ds_access_rights_type()
+{
+    vmcs::guest_ds_access_rights::type::set(1UL);
+    this->expect_true(vmcs::guest_ds_access_rights::type::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_ds_access_rights_s()
+{
+    vmcs::guest_ds_access_rights::s::set(1UL);
+    this->expect_true(vmcs::guest_ds_access_rights::s::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_ds_access_rights_dpl()
+{
+    vmcs::guest_ds_access_rights::dpl::set(1UL);
+    this->expect_true(vmcs::guest_ds_access_rights::dpl::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_ds_access_rights_present()
+{
+    vmcs::guest_ds_access_rights::present::set(1UL);
+    this->expect_true(vmcs::guest_ds_access_rights::present::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_ds_access_rights_avl()
+{
+    vmcs::guest_ds_access_rights::avl::set(1UL);
+    this->expect_true(vmcs::guest_ds_access_rights::avl::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_ds_access_rights_l()
+{
+    vmcs::guest_ds_access_rights::l::set(1UL);
+    this->expect_true(vmcs::guest_ds_access_rights::l::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_ds_access_rights_db()
+{
+    vmcs::guest_ds_access_rights::db::set(1UL);
+    this->expect_true(vmcs::guest_ds_access_rights::db::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_ds_access_rights_granularity()
+{
+    vmcs::guest_ds_access_rights::granularity::set(1UL);
+    this->expect_true(vmcs::guest_ds_access_rights::granularity::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_ds_access_rights_reserved()
+{
+    vmcs::guest_ds_access_rights::reserved::set(0x10000U);
+    this->expect_true(vmcs::guest_ds_access_rights::reserved::get() == 0x10000U);
+}
+
+void
+vmcs_ut::test_vmcs_guest_ds_access_rights_unusable()
+{
+    vmcs::guest_ds_access_rights::unusable::set(1UL);
+    this->expect_true(vmcs::guest_ds_access_rights::unusable::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_fs_access_rights()
+{
+    vmcs::guest_fs_access_rights::set(100UL);
+    this->expect_true(vmcs::guest_fs_access_rights::exists());
+    this->expect_true(vmcs::guest_fs_access_rights::get() == 100UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_fs_access_rights_type()
+{
+    vmcs::guest_fs_access_rights::type::set(1UL);
+    this->expect_true(vmcs::guest_fs_access_rights::type::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_fs_access_rights_s()
+{
+    vmcs::guest_fs_access_rights::s::set(1UL);
+    this->expect_true(vmcs::guest_fs_access_rights::s::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_fs_access_rights_dpl()
+{
+    vmcs::guest_fs_access_rights::dpl::set(1UL);
+    this->expect_true(vmcs::guest_fs_access_rights::dpl::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_fs_access_rights_present()
+{
+    vmcs::guest_fs_access_rights::present::set(1UL);
+    this->expect_true(vmcs::guest_fs_access_rights::present::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_fs_access_rights_avl()
+{
+    vmcs::guest_fs_access_rights::avl::set(1UL);
+    this->expect_true(vmcs::guest_fs_access_rights::avl::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_fs_access_rights_l()
+{
+    vmcs::guest_fs_access_rights::l::set(1UL);
+    this->expect_true(vmcs::guest_fs_access_rights::l::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_fs_access_rights_db()
+{
+    vmcs::guest_fs_access_rights::db::set(1UL);
+    this->expect_true(vmcs::guest_fs_access_rights::db::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_fs_access_rights_granularity()
+{
+    vmcs::guest_fs_access_rights::granularity::set(1UL);
+    this->expect_true(vmcs::guest_fs_access_rights::granularity::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_fs_access_rights_reserved()
+{
+    vmcs::guest_fs_access_rights::reserved::set(0x10000U);
+    this->expect_true(vmcs::guest_fs_access_rights::reserved::get() == 0x10000U);
+}
+
+void
+vmcs_ut::test_vmcs_guest_fs_access_rights_unusable()
+{
+    vmcs::guest_fs_access_rights::unusable::set(1UL);
+    this->expect_true(vmcs::guest_fs_access_rights::unusable::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_gs_access_rights()
+{
+    vmcs::guest_gs_access_rights::set(100UL);
+    this->expect_true(vmcs::guest_gs_access_rights::exists());
+    this->expect_true(vmcs::guest_gs_access_rights::get() == 100UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_gs_access_rights_type()
+{
+    vmcs::guest_gs_access_rights::type::set(1UL);
+    this->expect_true(vmcs::guest_gs_access_rights::type::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_gs_access_rights_s()
+{
+    vmcs::guest_gs_access_rights::s::set(1UL);
+    this->expect_true(vmcs::guest_gs_access_rights::s::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_gs_access_rights_dpl()
+{
+    vmcs::guest_gs_access_rights::dpl::set(1UL);
+    this->expect_true(vmcs::guest_gs_access_rights::dpl::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_gs_access_rights_present()
+{
+    vmcs::guest_gs_access_rights::present::set(1UL);
+    this->expect_true(vmcs::guest_gs_access_rights::present::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_gs_access_rights_avl()
+{
+    vmcs::guest_gs_access_rights::avl::set(1UL);
+    this->expect_true(vmcs::guest_gs_access_rights::avl::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_gs_access_rights_l()
+{
+    vmcs::guest_gs_access_rights::l::set(1UL);
+    this->expect_true(vmcs::guest_gs_access_rights::l::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_gs_access_rights_db()
+{
+    vmcs::guest_gs_access_rights::db::set(1UL);
+    this->expect_true(vmcs::guest_gs_access_rights::db::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_gs_access_rights_granularity()
+{
+    vmcs::guest_gs_access_rights::granularity::set(1UL);
+    this->expect_true(vmcs::guest_gs_access_rights::granularity::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_gs_access_rights_reserved()
+{
+    vmcs::guest_gs_access_rights::reserved::set(0x10000U);
+    this->expect_true(vmcs::guest_gs_access_rights::reserved::get() == 0x10000U);
+}
+
+void
+vmcs_ut::test_vmcs_guest_gs_access_rights_unusable()
+{
+    vmcs::guest_gs_access_rights::unusable::set(1UL);
+    this->expect_true(vmcs::guest_gs_access_rights::unusable::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_ldtr_access_rights()
+{
+    vmcs::guest_ldtr_access_rights::set(100UL);
+    this->expect_true(vmcs::guest_ldtr_access_rights::exists());
+    this->expect_true(vmcs::guest_ldtr_access_rights::get() == 100UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_ldtr_access_rights_type()
+{
+    vmcs::guest_ldtr_access_rights::type::set(1UL);
+    this->expect_true(vmcs::guest_ldtr_access_rights::type::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_ldtr_access_rights_s()
+{
+    vmcs::guest_ldtr_access_rights::s::set(1UL);
+    this->expect_true(vmcs::guest_ldtr_access_rights::s::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_ldtr_access_rights_dpl()
+{
+    vmcs::guest_ldtr_access_rights::dpl::set(1UL);
+    this->expect_true(vmcs::guest_ldtr_access_rights::dpl::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_ldtr_access_rights_present()
+{
+    vmcs::guest_ldtr_access_rights::present::set(1UL);
+    this->expect_true(vmcs::guest_ldtr_access_rights::present::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_ldtr_access_rights_avl()
+{
+    vmcs::guest_ldtr_access_rights::avl::set(1UL);
+    this->expect_true(vmcs::guest_ldtr_access_rights::avl::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_ldtr_access_rights_l()
+{
+    vmcs::guest_ldtr_access_rights::l::set(1UL);
+    this->expect_true(vmcs::guest_ldtr_access_rights::l::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_ldtr_access_rights_db()
+{
+    vmcs::guest_ldtr_access_rights::db::set(1UL);
+    this->expect_true(vmcs::guest_ldtr_access_rights::db::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_ldtr_access_rights_granularity()
+{
+    vmcs::guest_ldtr_access_rights::granularity::set(1UL);
+    this->expect_true(vmcs::guest_ldtr_access_rights::granularity::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_ldtr_access_rights_reserved()
+{
+    vmcs::guest_ldtr_access_rights::reserved::set(0x10000U);
+    this->expect_true(vmcs::guest_ldtr_access_rights::reserved::get() == 0x10000U);
+}
+
+void
+vmcs_ut::test_vmcs_guest_ldtr_access_rights_unusable()
+{
+    vmcs::guest_ldtr_access_rights::unusable::set(1UL);
+    this->expect_true(vmcs::guest_ldtr_access_rights::unusable::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_tr_access_rights()
+{
+    vmcs::guest_tr_access_rights::set(100UL);
+    this->expect_true(vmcs::guest_tr_access_rights::exists());
+    this->expect_true(vmcs::guest_tr_access_rights::get() == 100UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_tr_access_rights_type()
+{
+    vmcs::guest_tr_access_rights::type::set(1UL);
+    this->expect_true(vmcs::guest_tr_access_rights::type::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_tr_access_rights_s()
+{
+    vmcs::guest_tr_access_rights::s::set(1UL);
+    this->expect_true(vmcs::guest_tr_access_rights::s::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_tr_access_rights_dpl()
+{
+    vmcs::guest_tr_access_rights::dpl::set(1UL);
+    this->expect_true(vmcs::guest_tr_access_rights::dpl::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_tr_access_rights_present()
+{
+    vmcs::guest_tr_access_rights::present::set(1UL);
+    this->expect_true(vmcs::guest_tr_access_rights::present::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_tr_access_rights_avl()
+{
+    vmcs::guest_tr_access_rights::avl::set(1UL);
+    this->expect_true(vmcs::guest_tr_access_rights::avl::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_tr_access_rights_l()
+{
+    vmcs::guest_tr_access_rights::l::set(1UL);
+    this->expect_true(vmcs::guest_tr_access_rights::l::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_tr_access_rights_db()
+{
+    vmcs::guest_tr_access_rights::db::set(1UL);
+    this->expect_true(vmcs::guest_tr_access_rights::db::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_tr_access_rights_granularity()
+{
+    vmcs::guest_tr_access_rights::granularity::set(1UL);
+    this->expect_true(vmcs::guest_tr_access_rights::granularity::get() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_tr_access_rights_reserved()
+{
+    vmcs::guest_tr_access_rights::reserved::set(0x10000U);
+    this->expect_true(vmcs::guest_tr_access_rights::reserved::get() == 0x10000U);
+}
+
+void
+vmcs_ut::test_vmcs_guest_tr_access_rights_unusable()
+{
+    vmcs::guest_tr_access_rights::unusable::set(1UL);
+    this->expect_true(vmcs::guest_tr_access_rights::unusable::get() == 1UL);
 }

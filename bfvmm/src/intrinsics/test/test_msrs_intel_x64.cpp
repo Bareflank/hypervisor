@@ -35,6 +35,13 @@ __write_msr(uint32_t addr, uint64_t val) noexcept
 { g_msrs[addr] = val; }
 
 void
+intrinsics_ut::test_general_msr_access()
+{
+    msrs::set(0x1, 100UL);
+    this->expect_true(msrs::get(0x1) == 100UL);
+}
+
+void
 intrinsics_ut::test_ia32_feature_control()
 {
     msrs::ia32_feature_control::set(100UL);

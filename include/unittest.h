@@ -26,10 +26,13 @@
 #define LINUX_TARGET
 #endif
 
-#include <stdlib.h>
-#include <iostream>
-#include <exception.h>
 #include <gsl/gsl>
+
+#include <cstdlib>
+#include <iostream>
+
+#include <exception.h>
+#include <view_as_pointer.h>
 
 #define NO_HIPPOMOCKS_NAMESPACE
 

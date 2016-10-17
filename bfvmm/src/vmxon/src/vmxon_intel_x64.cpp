@@ -158,7 +158,7 @@ vmxon_intel_x64::create_vmxon_region()
         throw std::logic_error("m_vmxon_region_phys == nullptr");
 
     gsl::span<uint32_t> id{m_vmxon_region.get(), 1024};
-    id[0] = gsl::narrow_cast<uint32_t>(msrs::ia32_vmx_basic::revision_id::get());
+    id[0] = gsl::narrow<uint32_t>(msrs::ia32_vmx_basic::revision_id::get());
 }
 
 void

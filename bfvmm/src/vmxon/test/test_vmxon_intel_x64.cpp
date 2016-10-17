@@ -36,15 +36,11 @@ bool g_write_cr4_fails = false;
 
 extern "C" uint64_t
 __read_cr0(void) noexcept
-{
-    return g_cr0;
-}
+{ return g_cr0; }
 
 extern "C" uint64_t
 __read_cr4(void) noexcept
-{
-    return g_cr4;
-}
+{ return g_cr4; }
 
 extern "C" void
 __write_cr4(uint64_t val) noexcept
@@ -57,15 +53,11 @@ __write_cr4(uint64_t val) noexcept
 
 extern "C" uint64_t
 __read_msr(uint32_t addr) noexcept
-{
-    return g_msrs[addr];
-}
+{ return g_msrs[addr]; }
 
 extern "C" uint64_t
 __read_rflags(void) noexcept
-{
-    return g_rflags;
-}
+{ return g_rflags; }
 
 bool virt_to_phys_return_nullptr = false;
 

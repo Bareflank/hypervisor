@@ -39,10 +39,12 @@ protected:
 
 private:
 
+    void test_gdt_reg_set_get();
+    void test_gdt_reg_base_set_get();
+    void test_gdt_reg_limit_set_get();
     void test_gdt_constructor_no_size();
     void test_gdt_constructor_zero_size();
     void test_gdt_constructor_size();
-    void test_gdt_constructor_null_intrinsics();
     void test_gdt_base();
     void test_gdt_limit();
     void test_gdt_set_base_zero_index();
@@ -69,13 +71,16 @@ private:
     void test_gdt_access_rights_invalid_index();
     void test_gdt_access_rights_descriptor_success();
 
+    void test_idt_reg_set_get();
+    void test_idt_reg_base_set_get();
+    void test_idt_reg_limit_set_get();
     void test_idt_constructor_no_size();
     void test_idt_constructor_zero_size();
     void test_idt_constructor_size();
-    void test_idt_constructor_null_intrinsics();
     void test_idt_base();
     void test_idt_limit();
 
+    void test_general_msr_access();
     void test_ia32_feature_control();
     void test_ia32_feature_control_lock_bit();
     void test_ia32_feature_control_enable_vmx_inside_smx();

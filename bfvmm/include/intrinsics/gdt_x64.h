@@ -23,30 +23,105 @@
 #define GDT_X64_H
 
 #include <gsl/gsl>
+
+#include <vector>
 #include <intrinsics/intrinsics_x64.h>
 
 // -----------------------------------------------------------------------------
 // Global Descriptor Table Register
 // -----------------------------------------------------------------------------
 
-// The CPU gets the base address and limit (number of entries) of the
-// global descriptor table by using the lgdt/sgdt instructions, which take
-// a memory address that points to the structure below.
-
 #pragma pack(push, 1)
 
 struct gdt_reg_x64_t
 {
     uint16_t limit;
-    uint64_t base;
+    uint64_t *base;
 
-    gdt_reg_x64_t() :
+    gdt_reg_x64_t() noexcept :
         limit(0),
-        base(0)
+        base(nullptr)
     {}
 };
 
 #pragma pack(pop)
+
+// -----------------------------------------------------------------------------
+// Intrinsics
+// -----------------------------------------------------------------------------
+
+extern "C" void __read_gdt(gdt_reg_x64_t *gdt_reg) noexcept;
+extern "C" void __write_gdt(gdt_reg_x64_t *gdt_reg) noexcept;
+
+// -----------------------------------------------------------------------------
+// GDT Functions
+// -----------------------------------------------------------------------------
+
+// *INDENT-OFF*
+
+namespace x64
+{
+namespace gdt
+{
+    inline auto get() noexcept
+    {
+        gdt_reg_x64_t reg;
+        __read_gdt(&reg);
+
+        return reg;
+    }
+
+    template<class B, class L> void set(B base, L limit) noexcept
+    {
+        gdt_reg_x64_t reg;
+
+        reg.base = base;
+        reg.limit = gsl::narrow<uint16_t>(limit);
+
+        __write_gdt(&reg);
+    }
+
+    namespace base
+    {
+        inline auto get() noexcept
+        {
+            gdt_reg_x64_t reg;
+            __read_gdt(&reg);
+
+            return reg.base;
+        }
+
+        template<class T> void set(T val) noexcept
+        {
+            gdt_reg_x64_t reg;
+            __read_gdt(&reg);
+
+            reg.base = val;
+            __write_gdt(&reg);
+        }
+    }
+
+    namespace limit
+    {
+        inline auto get() noexcept
+        {
+            gdt_reg_x64_t reg;
+            __read_gdt(&reg);
+
+            return reg.limit;
+        }
+
+        template<class T> void set(T val) noexcept
+        {
+            gdt_reg_x64_t reg;
+            __read_gdt(&reg);
+
+            reg.limit = gsl::narrow<uint16_t>(val);
+            __write_gdt(&reg);
+        }
+    }
+}
+}
 
 // -----------------------------------------------------------------------------
 // Global Descriptor Table
@@ -109,6 +184,18 @@ public:
 
     /// Constructor
     ///
+    /// Creates a GDT based on the GDT currently in hardware.
+    ///
+    /// @note This copies the current GDT. Therefore, the set functions do not
+    ///     modify the GDT that is in hardware, but instead modify the copy.
+    ///     If you want to modify the GDT that is in hardware, create a new
+    ///     GDT using an alternate constructor, and set the hardware to use
+    ///     that GDT instead.
+    ///
+    gdt_x64();
+
+    /// Constructor
+    ///
     /// Creates a new GDT, with size defining the number of descriptors
     /// in the GDT.
     ///
@@ -116,29 +203,23 @@ public:
     ///
     gdt_x64(uint16_t size);
 
-    /// Constructor
-    ///
-    /// Wraps around the GDT that is currently stored in the hardware.
-    ///
-    /// @param intrinsics the intrinsics class to use
-    ///
-    gdt_x64(const std::shared_ptr<intrinsics_x64> &intrinsics);
-
     /// Destructor
     ///
-    virtual ~gdt_x64() noexcept = default;
+    ~gdt_x64() noexcept = default;
 
     /// GDT Base Address
     ///
     /// @return returns the base address of the GDT itself.
     ///
-    virtual uint64_t base() const;
+    auto base() const
+    { return reinterpret_cast<uint64_t>(m_gdt_reg.base); }
 
     /// GDT Limit
     ///
     /// @return returns the size of the GDT itself in bytes
     ///
-    virtual uint16_t limit() const;
+    auto limit() const
+    { return m_gdt_reg.limit; }
 
     /// Set Descriptor Base Address
     ///
@@ -155,7 +236,7 @@ public:
     /// @param addr the base address. For code/data descriptor this needs to
     ///     be 0, and for a TSS this is a 64bit virtual address.
     ///
-    virtual void set_base(uint16_t index, uint64_t addr);
+    void set_base(uint16_t index, uint64_t addr);
 
     /// Get Descriptor Base Address
     ///
@@ -171,7 +252,7 @@ public:
     /// @param index the index of the GDT descriptor
     /// @return the base address
     ///
-    virtual uint64_t base(uint16_t index) const;
+    uint64_t base(uint16_t index) const;
 
     /// Set Descriptor Limit
     ///
@@ -183,7 +264,7 @@ public:
     /// @param index the index of the GDT descriptor
     /// @param limit the descriptors limit
     ///
-    virtual void set_limit(uint16_t index, uint32_t limit);
+    void set_limit(uint16_t index, uint32_t limit);
 
     /// Get Descriptor Limit
     ///
@@ -192,7 +273,7 @@ public:
     /// @param index the index of the GDT descriptor
     /// @return the descriptors limit
     ///
-    virtual uint32_t limit(uint16_t index) const;
+    uint32_t limit(uint16_t index) const;
 
     /// Set Descriptor Access Rights
     ///
@@ -211,7 +292,7 @@ public:
     /// @param index the index of the GDT descriptor
     /// @param access_rights the access rights for this descriptor
     ///
-    virtual void set_access_rights(uint16_t index, uint32_t access_rights);
+    void set_access_rights(uint16_t index, uint32_t access_rights);
 
     /// Get Descriptor Access Rights
     ///
@@ -220,14 +301,14 @@ public:
     /// @param index the index of the GDT descriptor
     /// @return the descriptors access rights
     ///
-    virtual uint32_t access_rights(uint16_t index) const;
+    uint32_t access_rights(uint16_t index) const;
 
 private:
 
-    gdt_reg_x64_t m_gdt_reg;
+    friend class intrinsics_ut;
 
-    gsl::span<uint64_t> m_gdt;
-    std::unique_ptr<uint64_t[]> m_gdt_owner;
+    gdt_reg_x64_t m_gdt_reg;
+    std::vector<uint64_t> m_gdt;
 };
 
 #endif

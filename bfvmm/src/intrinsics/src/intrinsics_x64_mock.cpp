@@ -24,6 +24,9 @@
 #include <iostream>
 #include <view_as_pointer.h>
 
+#include <intrinsics/gdt_x64.h>
+#include <intrinsics/idt_x64.h>
+
 extern "C" void
 __attribute__((weak)) __halt(void) noexcept
 {
@@ -310,34 +313,34 @@ __attribute__((weak)) __read_rsp(void) noexcept
 }
 
 extern "C" void
-__attribute__((weak)) __read_gdt(void *gdt) noexcept
+__attribute__((weak)) __read_gdt(gdt_reg_x64_t *gdt_reg) noexcept
 {
     std::cerr << static_cast<const char *>(__PRETTY_FUNCTION__) << " called with: " << '\n';
-    std::cerr << "    - gdt: " << gdt << '\n';
+    std::cerr << "    - gdt_reg: " << gdt_reg << '\n';
     abort();
 }
 
 extern "C" void
-__attribute__((weak)) __write_gdt(void *gdt) noexcept
+__attribute__((weak)) __write_gdt(gdt_reg_x64_t *gdt_reg) noexcept
 {
     std::cerr << static_cast<const char *>(__PRETTY_FUNCTION__) << " called with: " << '\n';
-    std::cerr << "    - gdt: " << gdt << '\n';
+    std::cerr << "    - gdt_reg: " << gdt_reg << '\n';
     abort();
 }
 
 extern "C" void
-__attribute__((weak)) __read_idt(void *idt) noexcept
+__attribute__((weak)) __read_idt(idt_reg_x64_t *idt_reg) noexcept
 {
     std::cerr << static_cast<const char *>(__PRETTY_FUNCTION__) << " called with: " << '\n';
-    std::cerr << "    - idt: " << idt << '\n';
+    std::cerr << "    - idt_reg: " << idt_reg << '\n';
     abort();
 }
 
 extern "C" void
-__attribute__((weak)) __write_idt(void *idt) noexcept
+__attribute__((weak)) __write_idt(idt_reg_x64_t *idt_reg) noexcept
 {
     std::cerr << static_cast<const char *>(__PRETTY_FUNCTION__) << " called with: " << '\n';
-    std::cerr << "    - idt: " << idt << '\n';
+    std::cerr << "    - idt_reg: " << idt_reg << '\n';
     abort();
 }
 

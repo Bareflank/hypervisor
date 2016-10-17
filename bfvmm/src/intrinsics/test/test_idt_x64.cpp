@@ -19,44 +19,64 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+#include <gsl/gsl>
+
 #include <test.h>
 #include <intrinsics/idt_x64.h>
 
-std::unique_ptr<uint64_t[]> g_idt;
-
-void set_idt(void *idt)
+std::vector<uint64_t> g_idt =
 {
-    if (!g_idt)
-        g_idt = std::make_unique<uint64_t[]>(4);
+    0xFFFFFFFFFFFFFFFF,
+    0xFFFFFFFFFFFFFFFF,
+    0xFFFFFFFFFFFFFFFF,
+    0xFFFFFFFFFFFFFFFF
+};
 
-    g_idt[0] = 0xFFFFFFFFFFFFFFFF;
-    g_idt[1] = 0xFFFFFFFFFFFFFFFF;
-    g_idt[2] = 0xFFFFFFFFFFFFFFFF;
-    g_idt[3] = 0xFFFFFFFFFFFFFFFF;
+idt_reg_x64_t g_idt_reg;
 
-    auto idt_reg = reinterpret_cast<idt_reg_x64_t *>(idt);
-    idt_reg->limit = (4 * sizeof(uint64_t)) - 1;
-    idt_reg->base = reinterpret_cast<uint64_t>(g_idt.get());
+extern "C" void
+__read_idt(idt_reg_x64_t *idt_reg) noexcept
+{ *idt_reg = g_idt_reg; }
+
+extern "C" void
+__write_idt(idt_reg_x64_t *idt_reg) noexcept
+{ g_idt_reg = *idt_reg; }
+
+void
+intrinsics_ut::test_idt_reg_set_get()
+{
+    x64::idt::set(g_idt.data(), (4 << 3) - 1);
+
+    this->expect_true(x64::idt::get().base == g_idt.data());
+    this->expect_true(x64::idt::get().limit == (4 << 3) - 1);
+}
+
+void
+intrinsics_ut::test_idt_reg_base_set_get()
+{
+    x64::idt::base::set(g_idt.data());
+
+    this->expect_true(x64::idt::base::get() == g_idt.data());
+}
+
+void
+intrinsics_ut::test_idt_reg_limit_set_get()
+{
+    x64::idt::limit::set((4 << 3) - 1);
+
+    this->expect_true(x64::idt::limit::get() == (4 << 3) - 1);
 }
 
 void
 intrinsics_ut::test_idt_constructor_no_size()
 {
-    MockRepository mocks;
-    auto intrinsics = bfn::mock_shared<intrinsics_x64>(mocks);
-
-    mocks.ExpectCall(intrinsics.get(), intrinsics_x64::read_idt).Do(set_idt);
-
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        idt_x64 idt(intrinsics);
-    });
+    idt_x64 idt;
 }
 
 void
 intrinsics_ut::test_idt_constructor_zero_size()
 {
-    idt_x64 idt(0);
+    idt_x64 idt{0};
     EXPECT_TRUE(idt.base() == 0);
     EXPECT_TRUE(idt.limit() == 0);
 }
@@ -64,45 +84,23 @@ intrinsics_ut::test_idt_constructor_zero_size()
 void
 intrinsics_ut::test_idt_constructor_size()
 {
-    idt_x64 idt(4);
+    idt_x64 idt{4};
     EXPECT_TRUE(idt.base() != 0);
     EXPECT_TRUE(idt.limit() == (4 * sizeof(uint64_t)) - 1);
 }
 
 void
-intrinsics_ut::test_idt_constructor_null_intrinsics()
-{
-    EXPECT_EXCEPTION(idt_x64(std::shared_ptr<intrinsics_x64>()), std::invalid_argument);
-}
-
-void
 intrinsics_ut::test_idt_base()
 {
-    MockRepository mocks;
-    auto intrinsics = bfn::mock_shared<intrinsics_x64>(mocks);
+    idt_x64 idt;
 
-    mocks.ExpectCall(intrinsics.get(), intrinsics_x64::read_idt).Do(set_idt);
-
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        idt_x64 idt(intrinsics);
-
-        EXPECT_TRUE(idt.base() == reinterpret_cast<uint64_t>(g_idt.get()));
-    });
+    EXPECT_TRUE(idt.base() == reinterpret_cast<uint64_t>(g_idt.data()));
 }
 
 void
 intrinsics_ut::test_idt_limit()
 {
-    MockRepository mocks;
-    auto intrinsics = bfn::mock_shared<intrinsics_x64>(mocks);
+    idt_x64 idt;
 
-    mocks.ExpectCall(intrinsics.get(), intrinsics_x64::read_idt).Do(set_idt);
-
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        idt_x64 idt(intrinsics);
-
-        EXPECT_TRUE(idt.limit() == (4 * sizeof(uint64_t)) - 1);
-    });
+    EXPECT_TRUE(idt.limit() == (4 * sizeof(uint64_t)) - 1);
 }

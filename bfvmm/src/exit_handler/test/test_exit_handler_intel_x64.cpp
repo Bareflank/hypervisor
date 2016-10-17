@@ -33,6 +33,8 @@ uint64_t g_exit_qualification = 0;
 uint64_t g_exit_instruction_length = 0;
 uint64_t g_exit_instruction_information = 0;
 
+static std::map<uint32_t, uint64_t> g_msrs;
+
 bool
 __vmread(uint64_t field, uint64_t *val) noexcept
 {
@@ -67,6 +69,14 @@ __vmwrite(uint64_t field, uint64_t val) noexcept
 
     return true;
 }
+
+extern "C" uint64_t
+__read_msr(uint32_t addr) noexcept
+{ return g_msrs[addr]; }
+
+extern "C" void
+__write_msr(uint32_t addr, uint64_t val) noexcept
+{ g_msrs[addr] = val; }
 
 void
 exit_handler_intel_x64_ut::test_invalid_intrinics()
@@ -1221,9 +1231,9 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_rdmsr_default()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
+    g_msrs[0x10] = 0x0000000A00000009;
     g_exit_reason = exit_reason::rdmsr;
 
-    mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::read_msr).With(0x10).Return(0x0000000A00000009);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
     mocks.NeverCall(intrinsics.get(), intrinsics_intel_x64::stop);
 
@@ -1253,10 +1263,10 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_rdmsr_ignore()
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
+    g_msrs[0x31] = 0x0;
     g_exit_reason = exit_reason::rdmsr;
 
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
-    mocks.NeverCall(intrinsics.get(), intrinsics_intel_x64::read_msr).With(0x31);
     mocks.NeverCall(intrinsics.get(), intrinsics_intel_x64::stop);
 
     eh->m_state_save->rcx = 0x31;
@@ -1584,7 +1594,6 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_wrmsr_default()
 
     g_exit_reason = exit_reason::wrmsr;
 
-    mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::write_msr).With(0x10, 0x0000000A00000009);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
     mocks.NeverCall(intrinsics.get(), intrinsics_intel_x64::stop);
 

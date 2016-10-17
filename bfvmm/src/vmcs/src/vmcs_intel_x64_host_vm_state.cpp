@@ -23,9 +23,7 @@
 
 using namespace intel_x64;
 
-vmcs_intel_x64_host_vm_state::vmcs_intel_x64_host_vm_state(const std::shared_ptr<intrinsics_intel_x64> &intrinsics) :
-    m_gdt(std::static_pointer_cast<intrinsics_x64>(intrinsics)),
-    m_idt(std::static_pointer_cast<intrinsics_x64>(intrinsics))
+vmcs_intel_x64_host_vm_state::vmcs_intel_x64_host_vm_state(const std::shared_ptr<intrinsics_intel_x64> &intrinsics)
 {
     if (!intrinsics)
         throw std::invalid_argument("intrinsics == nullptr");

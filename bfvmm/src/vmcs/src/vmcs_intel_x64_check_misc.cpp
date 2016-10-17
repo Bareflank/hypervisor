@@ -175,54 +175,6 @@ vmcs_intel_x64::is_physical_address_valid(uint64_t addr)
 }
 
 bool
-vmcs_intel_x64::is_cs_usable()
-{
-    return (vmread(VMCS_GUEST_CS_ACCESS_RIGHTS) & SELECTOR_UNUSABLE) == 0;
-}
-
-bool
-vmcs_intel_x64::is_ss_usable()
-{
-    return (vmread(VMCS_GUEST_SS_ACCESS_RIGHTS) & SELECTOR_UNUSABLE) == 0;
-}
-
-bool
-vmcs_intel_x64::is_ds_usable()
-{
-    return (vmread(VMCS_GUEST_DS_ACCESS_RIGHTS) & SELECTOR_UNUSABLE) == 0;
-}
-
-bool
-vmcs_intel_x64::is_es_usable()
-{
-    return (vmread(VMCS_GUEST_ES_ACCESS_RIGHTS) & SELECTOR_UNUSABLE) == 0;
-}
-
-bool
-vmcs_intel_x64::is_gs_usable()
-{
-    return (vmread(VMCS_GUEST_GS_ACCESS_RIGHTS) & SELECTOR_UNUSABLE) == 0;
-}
-
-bool
-vmcs_intel_x64::is_fs_usable()
-{
-    return (vmread(VMCS_GUEST_FS_ACCESS_RIGHTS) & SELECTOR_UNUSABLE) == 0;
-}
-
-bool
-vmcs_intel_x64::is_tr_usable()
-{
-    return (vmread(VMCS_GUEST_TR_ACCESS_RIGHTS) & SELECTOR_UNUSABLE) == 0;
-}
-
-bool
-vmcs_intel_x64::is_ldtr_usable()
-{
-    return (vmread(VMCS_GUEST_LDTR_ACCESS_RIGHTS) & SELECTOR_UNUSABLE) == 0;
-}
-
-bool
 vmcs_intel_x64::is_enabled_v8086() const
 {
     return vmcs::guest_rflags::virtual_8086_mode::get() == 1;

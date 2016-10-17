@@ -156,7 +156,7 @@ vmcs_intel_x64::create_vmcs_region()
         throw std::logic_error("m_vmcs_region_phys == nullptr");
 
     gsl::span<uint32_t> id{m_vmcs_region.get(), 1024};
-    id[0] = gsl::narrow_cast<uint32_t>(msrs::ia32_vmx_basic::revision_id::get());
+    id[0] = gsl::narrow<uint32_t>(msrs::ia32_vmx_basic::revision_id::get());
 }
 
 void
@@ -322,14 +322,14 @@ vmcs_intel_x64::write_32bit_guest_state(const std::shared_ptr<vmcs_intel_x64_sta
     vmwrite(VMCS_GUEST_GDTR_LIMIT, state->gdt_limit());
     vmwrite(VMCS_GUEST_IDTR_LIMIT, state->idt_limit());
 
-    vmwrite(VMCS_GUEST_ES_ACCESS_RIGHTS, state->es_access_rights());
-    vmwrite(VMCS_GUEST_CS_ACCESS_RIGHTS, state->cs_access_rights());
-    vmwrite(VMCS_GUEST_SS_ACCESS_RIGHTS, state->ss_access_rights());
-    vmwrite(VMCS_GUEST_DS_ACCESS_RIGHTS, state->ds_access_rights());
-    vmwrite(VMCS_GUEST_FS_ACCESS_RIGHTS, state->fs_access_rights());
-    vmwrite(VMCS_GUEST_GS_ACCESS_RIGHTS, state->gs_access_rights());
-    vmwrite(VMCS_GUEST_LDTR_ACCESS_RIGHTS, state->ldtr_access_rights());
-    vmwrite(VMCS_GUEST_TR_ACCESS_RIGHTS, state->tr_access_rights());
+    vmcs::guest_es_access_rights::set(state->es_access_rights());
+    vmcs::guest_cs_access_rights::set(state->cs_access_rights());
+    vmcs::guest_ss_access_rights::set(state->ss_access_rights());
+    vmcs::guest_ds_access_rights::set(state->ds_access_rights());
+    vmcs::guest_fs_access_rights::set(state->fs_access_rights());
+    vmcs::guest_gs_access_rights::set(state->gs_access_rights());
+    vmcs::guest_ldtr_access_rights::set(state->ldtr_access_rights());
+    vmcs::guest_tr_access_rights::set(state->tr_access_rights());
 
     vmwrite(VMCS_GUEST_IA32_SYSENTER_CS, state->ia32_sysenter_cs_msr());
 
@@ -573,7 +573,10 @@ vmcs_intel_x64::vmwrite(uint64_t field, uint64_t value)
 void
 vmcs_intel_x64::filter_unsupported(uint32_t msr, uint64_t &ctrl)
 {
-    auto allowed = m_intrinsics->read_msr(msr);
+    // REMOVE ME: This function should be removed in facvor of
+    // each function being able to detect if they are supported or not.
+
+    auto allowed = msrs::get(msr);
     auto allowed0 = ((allowed >> 00) & 0x00000000FFFFFFFF);
     auto allowed1 = ((allowed >> 32) & 0x00000000FFFFFFFF);
 
