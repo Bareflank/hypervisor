@@ -23,6 +23,8 @@
 #define IDT_X64_H
 
 #include <gsl/gsl>
+
+#include <vector>
 #include <intrinsics/intrinsics_x64.h>
 
 // -----------------------------------------------------------------------------
@@ -38,15 +40,92 @@
 struct idt_reg_x64_t
 {
     uint16_t limit;
-    uint64_t base;
+    uint64_t *base;
 
-    idt_reg_x64_t() :
+    idt_reg_x64_t() noexcept :
         limit(0),
-        base(0)
+        base(nullptr)
     {}
 };
 
 #pragma pack(pop)
+
+// -----------------------------------------------------------------------------
+// Intrinsics
+// -----------------------------------------------------------------------------
+
+extern "C" void __read_idt(idt_reg_x64_t *idt_reg) noexcept;
+extern "C" void __write_idt(idt_reg_x64_t *idt_reg) noexcept;
+
+// -----------------------------------------------------------------------------
+// GDT Functions
+// -----------------------------------------------------------------------------
+
+// *INDENT-OFF*
+
+namespace x64
+{
+namespace idt
+{
+    inline auto get() noexcept
+    {
+        idt_reg_x64_t reg;
+        __read_idt(&reg);
+
+        return reg;
+    }
+
+    template<class B, class L> void set(B base, L limit) noexcept
+    {
+        idt_reg_x64_t reg;
+
+        reg.base = base;
+        reg.limit = gsl::narrow<uint16_t>(limit);
+
+        __write_idt(&reg);
+    }
+
+    namespace base
+    {
+        inline auto get() noexcept
+        {
+            idt_reg_x64_t reg;
+            __read_idt(&reg);
+
+            return reg.base;
+        }
+
+        template<class T> void set(T val) noexcept
+        {
+            idt_reg_x64_t reg;
+            __read_idt(&reg);
+
+            reg.base = val;
+            __write_idt(&reg);
+        }
+    }
+
+    namespace limit
+    {
+        inline auto get() noexcept
+        {
+            idt_reg_x64_t reg;
+            __read_idt(&reg);
+
+            return reg.limit;
+        }
+
+        template<class T> void set(T val) noexcept
+        {
+            idt_reg_x64_t reg;
+            __read_idt(&reg);
+
+            reg.limit = gsl::narrow<uint16_t>(val);
+            __write_idt(&reg);
+        }
+    }
+}
+}
 
 // -----------------------------------------------------------------------------
 // Interrupt Descriptor Table
@@ -74,6 +153,12 @@ public:
 
     /// Constructor
     ///
+    /// Wraps around the IDT that is currently stored in the hardware.
+    ///
+    idt_x64();
+
+    /// Constructor
+    ///
     /// Creates a new IDT, with size defining the number of descriptors
     /// in the IDT.
     ///
@@ -81,36 +166,30 @@ public:
     ///
     idt_x64(uint16_t size);
 
-    /// Constructor
-    ///
-    /// Wraps around the IDT that is currently stored in the hardware.
-    ///
-    /// @param intrinsics the intrinsics class to use
-    ///
-    idt_x64(const std::shared_ptr<intrinsics_x64> &intrinsics);
-
     /// Destructor
     ///
-    virtual ~idt_x64() = default;
+    ~idt_x64() = default;
 
     /// GDT Base Address
     ///
     /// @return returns the base address of the GDT itself.
     ///
-    virtual uint64_t base() const;
+    auto base() const
+    { return reinterpret_cast<uint64_t>(m_idt_reg.base); }
 
     /// GDT Limit
     ///
     /// @return returns the size of the GDT itself in bytes
     ///
-    virtual uint16_t limit() const;
+    auto limit() const
+    { return m_idt_reg.limit; }
 
 private:
 
-    idt_reg_x64_t m_idt_reg;
+    friend class intrinsics_ut;
 
-    gsl::span<uint64_t> m_idt;
-    std::unique_ptr<uint64_t[]> m_idt_owner;
+    idt_reg_x64_t m_idt_reg;
+    std::vector<uint64_t> m_idt;
 };
 
 #endif

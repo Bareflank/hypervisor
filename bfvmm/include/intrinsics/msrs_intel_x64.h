@@ -22,6 +22,8 @@
 #ifndef MSRS_INTEL_X64_H
 #define MSRS_INTEL_X64_H
 
+#include <gsl/gsl>
+
 extern "C" uint64_t __read_msr(uint32_t addr) noexcept;
 extern "C" void __write_msr(uint32_t addr, uint64_t val) noexcept;
 
@@ -31,6 +33,12 @@ namespace intel_x64
 {
 namespace msrs
 {
+    template<class A> inline auto get(A addr) noexcept
+    { return __read_msr(gsl::narrow<uint32_t>(addr)); }
+
+    template<class A, class T> void set(A addr, T val) noexcept
+    { __write_msr(gsl::narrow<uint32_t>(addr), val); }
+
     namespace ia32_feature_control
     {
         constexpr const auto addr = 0x0000003AU;

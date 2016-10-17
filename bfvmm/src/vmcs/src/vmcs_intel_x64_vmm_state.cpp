@@ -23,65 +23,44 @@
 #include <memory_manager/memory_manager.h>
 #include <memory_manager/page_table_x64.h>
 
+using namespace x64;
 using namespace intel_x64;
 
 std::shared_ptr<page_table_x64> m_pml4;
 
 vmcs_intel_x64_vmm_state::vmcs_intel_x64_vmm_state(const std::shared_ptr<state_save_intel_x64> &state_save) :
-    m_gdt(6),
+    m_gdt(7),
     m_idt(256)
 {
     if (!state_save)
         throw std::invalid_argument("state_save == nullptr");
 
-    uint16_t cs_access_rights = 0;
-    uint16_t ss_access_rights = 0;
-    uint16_t ds_access_rights = 0;
-    uint16_t tr_access_rights = 0;
-
-    cs_access_rights |= SEGMENT_ACCESS_RIGHTS_TYPE_RE;
-    cs_access_rights |= SEGMENT_ACCESS_RIGHTS_CODE_DATA_DESCRIPTOR;
-    cs_access_rights |= SEGMENT_ACCESS_RIGHTS_PRESENT;
-    cs_access_rights |= SEGMENT_ACCESS_RIGHTS_L;
-    cs_access_rights |= SEGMENT_ACCESS_RIGHTS_GRANULARITY_PAGES;
-
-    ss_access_rights |= SEGMENT_ACCESS_RIGHTS_TYPE_RW;
-    ss_access_rights |= SEGMENT_ACCESS_RIGHTS_CODE_DATA_DESCRIPTOR;
-    ss_access_rights |= SEGMENT_ACCESS_RIGHTS_PRESENT;
-    ss_access_rights |= SEGMENT_ACCESS_RIGHTS_DB;
-    ss_access_rights |= SEGMENT_ACCESS_RIGHTS_GRANULARITY_PAGES;
-
-    ds_access_rights |= SEGMENT_ACCESS_RIGHTS_TYPE_RW;
-    ds_access_rights |= SEGMENT_ACCESS_RIGHTS_CODE_DATA_DESCRIPTOR;
-    ds_access_rights |= SEGMENT_ACCESS_RIGHTS_PRESENT;
-    ds_access_rights |= SEGMENT_ACCESS_RIGHTS_GRANULARITY_PAGES;
-
-    tr_access_rights |= SEGMENT_ACCESS_RIGHTS_TYPE_TSS_AVAILABLE;
-    tr_access_rights |= SEGMENT_ACCESS_RIGHTS_PRESENT;
-
     m_gdt.set_access_rights(0, 0);
-    m_gdt.set_access_rights(1, cs_access_rights);
-    m_gdt.set_access_rights(2, ss_access_rights);
-    m_gdt.set_access_rights(3, ds_access_rights);
-    m_gdt.set_access_rights(4, tr_access_rights);
+    m_gdt.set_access_rights(1, access_rights::ring0_cs_descriptor);
+    m_gdt.set_access_rights(2, access_rights::ring0_ss_descriptor);
+    m_gdt.set_access_rights(3, access_rights::ring0_fs_descriptor);
+    m_gdt.set_access_rights(4, access_rights::ring0_gs_descriptor);
+    m_gdt.set_access_rights(5, access_rights::ring0_tr_descriptor);
 
     m_gdt.set_base(0, 0);
     m_gdt.set_base(1, 0);
     m_gdt.set_base(2, 0);
     m_gdt.set_base(3, 0);
-    m_gdt.set_base(4, reinterpret_cast<uint64_t>(&m_tss));
+    m_gdt.set_base(4, 0);
+    m_gdt.set_base(5, reinterpret_cast<uint64_t>(&m_tss));
 
     m_gdt.set_limit(0, 0);
     m_gdt.set_limit(1, 0xFFFFFFFF);
     m_gdt.set_limit(2, 0xFFFFFFFF);
     m_gdt.set_limit(3, 0xFFFFFFFF);
-    m_gdt.set_limit(4, sizeof(m_tss));
+    m_gdt.set_limit(4, 0xFFFFFFFF);
+    m_gdt.set_limit(5, sizeof(m_tss));
 
     m_cs_index = 1;
     m_ss_index = 2;
     m_fs_index = 3;
-    m_gs_index = 3;
-    m_tr_index = 4;
+    m_gs_index = 4;
+    m_tr_index = 5;
 
     m_cs = static_cast<uint16_t>(m_cs_index << 3);
     m_ss = static_cast<uint16_t>(m_ss_index << 3);

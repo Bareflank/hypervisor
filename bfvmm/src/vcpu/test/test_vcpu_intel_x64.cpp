@@ -45,6 +45,14 @@ extern "C" uint64_t
 __read_rflags(void) noexcept
 { return 0; }
 
+extern "C" void
+__read_gdt(gdt_reg_x64_t *gdt_reg) noexcept
+{ (void) gdt_reg; }
+
+extern "C" void
+__read_idt(idt_reg_x64_t *idt_reg) noexcept
+{ (void) idt_reg; }
+
 static uintptr_t
 virtptr_to_physint(void *ptr)
 {
@@ -130,9 +138,6 @@ vcpu_ut::test_vcpu_intel_x64_init_null_params_valid_intrinsics()
     mocks.OnCall(in.get(), intrinsics_intel_x64::read_tr).Return(0);
 
     mocks.OnCall(in.get(), intrinsics_intel_x64::read_dr7).Return(0);
-
-    mocks.OnCall(in.get(), intrinsics_intel_x64::read_gdt);
-    mocks.OnCall(in.get(), intrinsics_intel_x64::read_idt);
 
     mocks.OnCallFunc(memory_manager::instance).Return(mm);
     mocks.OnCall(mm, memory_manager::virtptr_to_physint).Do(virtptr_to_physint);
@@ -248,9 +253,6 @@ vcpu_ut::test_vcpu_intel_x64_fini_null_params_valid_intrinsics()
     mocks.OnCall(in.get(), intrinsics_intel_x64::read_tr).Return(0);
 
     mocks.OnCall(in.get(), intrinsics_intel_x64::read_dr7).Return(0);
-
-    mocks.OnCall(in.get(), intrinsics_intel_x64::read_gdt);
-    mocks.OnCall(in.get(), intrinsics_intel_x64::read_idt);
 
     mocks.OnCallFunc(memory_manager::instance).Return(mm);
     mocks.OnCall(mm, memory_manager::virtptr_to_physint).Do(virtptr_to_physint);

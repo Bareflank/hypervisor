@@ -163,11 +163,6 @@ __write_msr:
 
     ret
 
-global __read_rip:function
-__read_rip:
-    lea rax, [rel $]
-    ret
-
 global __read_cr0:function
 __read_cr0:
     mov rax, cr0
@@ -305,11 +300,6 @@ __read_ldtr:
 global __write_ldtr:function
 __write_ldtr:
     lldt di
-    ret
-
-global __read_rsp:function
-__read_rsp:
-    mov rax, rsp
     ret
 
 global __read_gdt:function

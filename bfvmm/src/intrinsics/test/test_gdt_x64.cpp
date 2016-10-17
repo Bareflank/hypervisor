@@ -19,469 +19,283 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+#include <gsl/gsl>
+
 #include <test.h>
 #include <intrinsics/gdt_x64.h>
 
-std::unique_ptr<uint64_t[]> g_gdt;
-
-void set_gdt(void *gdt)
+std::vector<uint64_t> g_gdt =
 {
-    if (!g_gdt)
-        g_gdt = std::make_unique<uint64_t[]>(4);
+    0x0,
+    0xFFFFFFFFFFFFFFFF,
+    0xFFFF8FFFFFFFFFFF,
+    0x00000000FFFFFFFF
+};
 
-    g_gdt[0] = 0x0;
-    g_gdt[1] = 0xFFFFFFFFFFFFFFFF;
-    g_gdt[2] = 0xFFFF8FFFFFFFFFFF;
-    g_gdt[3] = 0x00000000FFFFFFFF;
+gdt_reg_x64_t g_gdt_reg;
 
-    auto gdt_reg = reinterpret_cast<gdt_reg_x64_t *>(gdt);
-    gdt_reg->limit = 4 * sizeof(uint64_t);
-    gdt_reg->base = reinterpret_cast<uint64_t>(g_gdt.get());
+extern "C" void
+__read_gdt(gdt_reg_x64_t *gdt_reg) noexcept
+{ *gdt_reg = g_gdt_reg; }
+
+extern "C" void
+__write_gdt(gdt_reg_x64_t *gdt_reg) noexcept
+{ g_gdt_reg = *gdt_reg; }
+
+void
+intrinsics_ut::test_gdt_reg_set_get()
+{
+    x64::gdt::set(g_gdt.data(), 4 << 3);
+
+    this->expect_true(x64::gdt::get().base == g_gdt.data());
+    this->expect_true(x64::gdt::get().limit == 4 << 3);
+}
+
+void
+intrinsics_ut::test_gdt_reg_base_set_get()
+{
+    x64::gdt::base::set(g_gdt.data());
+
+    this->expect_true(x64::gdt::base::get() == g_gdt.data());
+}
+
+void
+intrinsics_ut::test_gdt_reg_limit_set_get()
+{
+    x64::gdt::limit::set(4 << 3);
+
+    this->expect_true(x64::gdt::limit::get() == 4 << 3);
 }
 
 void
 intrinsics_ut::test_gdt_constructor_no_size()
 {
-    MockRepository mocks;
-    auto intrinsics = bfn::mock_shared<intrinsics_x64>(mocks);
-
-    mocks.ExpectCall(intrinsics.get(), intrinsics_x64::read_gdt).Do(set_gdt);
-
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        gdt_x64 gdt(intrinsics);
-    });
+    gdt_x64 gdt;
 }
 
 void
 intrinsics_ut::test_gdt_constructor_zero_size()
 {
-    gdt_x64 gdt(0);
-    EXPECT_TRUE(gdt.base() == 0);
-    EXPECT_TRUE(gdt.limit() == 0);
+    gdt_x64 gdt{0};
+    this->expect_true(gdt.base() == 0);
+    this->expect_true(gdt.limit() == 0);
 }
 
 void
 intrinsics_ut::test_gdt_constructor_size()
 {
-    gdt_x64 gdt(4);
-    EXPECT_TRUE(gdt.base() != 0);
-    EXPECT_TRUE(gdt.limit() == 4 * sizeof(uint64_t));
-}
-
-void
-intrinsics_ut::test_gdt_constructor_null_intrinsics()
-{
-    EXPECT_EXCEPTION(gdt_x64(std::shared_ptr<intrinsics_x64>()), std::invalid_argument);
+    gdt_x64 gdt{4};
+    this->expect_true(gdt.base() != 0);
+    this->expect_true(gdt.limit() == 4 * sizeof(uint64_t));
 }
 
 void
 intrinsics_ut::test_gdt_base()
 {
-    MockRepository mocks;
-    auto intrinsics = bfn::mock_shared<intrinsics_x64>(mocks);
+    gdt_x64 gdt;
 
-    mocks.ExpectCall(intrinsics.get(), intrinsics_x64::read_gdt).Do(set_gdt);
-
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        gdt_x64 gdt(intrinsics);
-
-        EXPECT_TRUE(gdt.base() == reinterpret_cast<uint64_t>(g_gdt.get()));
-    });
+    this->expect_true(gdt.base() == reinterpret_cast<uint64_t>(g_gdt.data()));
 }
 
 void
 intrinsics_ut::test_gdt_limit()
 {
-    MockRepository mocks;
-    auto intrinsics = bfn::mock_shared<intrinsics_x64>(mocks);
+    gdt_x64 gdt;
 
-    mocks.ExpectCall(intrinsics.get(), intrinsics_x64::read_gdt).Do(set_gdt);
-
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        gdt_x64 gdt(intrinsics);
-
-        EXPECT_TRUE(gdt.limit() == 4 * sizeof(uint64_t));
-    });
+    this->expect_true(gdt.limit() == 4 * sizeof(uint64_t));
 }
 
 void
 intrinsics_ut::test_gdt_set_base_zero_index()
 {
-    MockRepository mocks;
-    auto intrinsics = bfn::mock_shared<intrinsics_x64>(mocks);
+    gdt_x64 gdt;
 
-    mocks.OnCall(intrinsics.get(), intrinsics_x64::read_gdt).Do(set_gdt);
-
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        gdt_x64 gdt(intrinsics);
-
-        EXPECT_NO_EXCEPTION(gdt.set_base(0, 0x10));
-    });
+    EXPECT_NO_EXCEPTION(gdt.set_base(0, 0x10));
 }
 
 void
 intrinsics_ut::test_gdt_set_base_invalid_index()
 {
-    MockRepository mocks;
-    auto intrinsics = bfn::mock_shared<intrinsics_x64>(mocks);
+    gdt_x64 gdt;
 
-    mocks.OnCall(intrinsics.get(), intrinsics_x64::read_gdt).Do(set_gdt);
-
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        gdt_x64 gdt(intrinsics);
-
-        EXPECT_EXCEPTION(gdt.set_base(1000, 0x10), std::invalid_argument);
-    });
+    EXPECT_EXCEPTION(gdt.set_base(1000, 0x10), std::invalid_argument);
 }
 
 void
 intrinsics_ut::test_gdt_set_base_tss_at_end_of_gdt()
 {
-    MockRepository mocks;
-    auto intrinsics = bfn::mock_shared<intrinsics_x64>(mocks);
+    gdt_x64 gdt;
 
-    mocks.OnCall(intrinsics.get(), intrinsics_x64::read_gdt).Do(set_gdt);
-
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        gdt_x64 gdt(intrinsics);
-
-        EXPECT_EXCEPTION(gdt.set_base(3, 0x10), std::invalid_argument);
-    });
+    EXPECT_EXCEPTION(gdt.set_base(3, 0x10), std::invalid_argument);
 }
 
 void
 intrinsics_ut::test_gdt_set_base_descriptor_success()
 {
-    MockRepository mocks;
-    auto intrinsics = bfn::mock_shared<intrinsics_x64>(mocks);
+    gdt_x64 gdt;
 
-    mocks.OnCall(intrinsics.get(), intrinsics_x64::read_gdt).Do(set_gdt);
-
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        gdt_x64 gdt(intrinsics);
-
-        EXPECT_NO_EXCEPTION(gdt.set_base(1, 0xBBBBBBBB12345678));
-        EXPECT_TRUE(g_gdt[1] == 0x12FFFF345678FFFF);
-    });
+    EXPECT_NO_EXCEPTION(gdt.set_base(1, 0xBBBBBBBB12345678));
+    this->expect_true(gdt.m_gdt.at(1) == 0x12FFFF345678FFFF);
 }
 
 void
 intrinsics_ut::test_gdt_set_base_tss_success()
 {
-    MockRepository mocks;
-    auto intrinsics = bfn::mock_shared<intrinsics_x64>(mocks);
+    gdt_x64 gdt;
 
-    mocks.OnCall(intrinsics.get(), intrinsics_x64::read_gdt).Do(set_gdt);
-
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        gdt_x64 gdt(intrinsics);
-
-        EXPECT_NO_EXCEPTION(gdt.set_base(2, 0x1234567812345678));
-        EXPECT_TRUE(g_gdt[2] == 0x12FF8F345678FFFF);
-        EXPECT_TRUE(g_gdt[3] == 0x0000000012345678);
-    });
+    EXPECT_NO_EXCEPTION(gdt.set_base(2, 0x1234567812345678));
+    this->expect_true(gdt.m_gdt.at(2) == 0x12FF8F345678FFFF);
+    this->expect_true(gdt.m_gdt.at(3) == 0x0000000012345678);
 }
 
 void
 intrinsics_ut::test_gdt_base_zero_index()
 {
-    MockRepository mocks;
-    auto intrinsics = bfn::mock_shared<intrinsics_x64>(mocks);
+    gdt_x64 gdt;
 
-    mocks.OnCall(intrinsics.get(), intrinsics_x64::read_gdt).Do(set_gdt);
-
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        gdt_x64 gdt(intrinsics);
-
-        EXPECT_TRUE(gdt.base(0) == 0);
-    });
+    this->expect_true(gdt.base(0) == 0);
 }
 
 void
 intrinsics_ut::test_gdt_base_invalid_index()
 {
-    MockRepository mocks;
-    auto intrinsics = bfn::mock_shared<intrinsics_x64>(mocks);
+    gdt_x64 gdt;
 
-    mocks.OnCall(intrinsics.get(), intrinsics_x64::read_gdt).Do(set_gdt);
-
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        gdt_x64 gdt(intrinsics);
-
-        EXPECT_EXCEPTION(gdt.base(1000), std::invalid_argument);
-    });
+    EXPECT_EXCEPTION(gdt.base(1000), std::invalid_argument);
 }
 
 void
 intrinsics_ut::test_gdt_base_tss_at_end_of_gdt()
 {
-    MockRepository mocks;
-    auto intrinsics = bfn::mock_shared<intrinsics_x64>(mocks);
+    gdt_x64 gdt;
 
-    mocks.OnCall(intrinsics.get(), intrinsics_x64::read_gdt).Do(set_gdt);
-
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        gdt_x64 gdt(intrinsics);
-
-        EXPECT_EXCEPTION(gdt.base(3), std::invalid_argument);
-    });
+    EXPECT_EXCEPTION(gdt.base(3), std::invalid_argument);
 }
 
 void
 intrinsics_ut::test_gdt_base_descriptor_success()
 {
-    MockRepository mocks;
-    auto intrinsics = bfn::mock_shared<intrinsics_x64>(mocks);
+    gdt_x64 gdt;
 
-    mocks.OnCall(intrinsics.get(), intrinsics_x64::read_gdt).Do(set_gdt);
-
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        gdt_x64 gdt(intrinsics);
-
-        g_gdt[1] = 0x12FFFF345678FFFF;
-        EXPECT_TRUE(gdt.base(1) == 0x0000000012345678);
-    });
+    gdt.m_gdt.at(1) = 0x12FFFF345678FFFF;
+    this->expect_true(gdt.base(1) == 0x0000000012345678);
 }
 
 void
 intrinsics_ut::test_gdt_base_tss_success()
 {
-    MockRepository mocks;
-    auto intrinsics = bfn::mock_shared<intrinsics_x64>(mocks);
+    gdt_x64 gdt;
 
-    mocks.OnCall(intrinsics.get(), intrinsics_x64::read_gdt).Do(set_gdt);
-
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        gdt_x64 gdt(intrinsics);
-
-        g_gdt[2] = 0x12FF8F345678FFFF;
-        g_gdt[3] = 0x0000000012345678;
-        EXPECT_TRUE(gdt.base(2) == 0x1234567812345678);
-    });
+    gdt.m_gdt.at(2) = 0x12FF8F345678FFFF;
+    gdt.m_gdt.at(3) = 0x0000000012345678;
+    this->expect_true(gdt.base(2) == 0x1234567812345678);
 }
 
 void
 intrinsics_ut::test_gdt_set_limit_zero_index()
 {
-    MockRepository mocks;
-    auto intrinsics = bfn::mock_shared<intrinsics_x64>(mocks);
+    gdt_x64 gdt;
 
-    mocks.OnCall(intrinsics.get(), intrinsics_x64::read_gdt).Do(set_gdt);
-
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        gdt_x64 gdt(intrinsics);
-
-        EXPECT_NO_EXCEPTION(gdt.set_limit(0, 0x10));
-    });
+    EXPECT_NO_EXCEPTION(gdt.set_limit(0, 0x10));
 }
 
 void
 intrinsics_ut::test_gdt_set_limit_invalid_index()
 {
-    MockRepository mocks;
-    auto intrinsics = bfn::mock_shared<intrinsics_x64>(mocks);
+    gdt_x64 gdt;
 
-    mocks.OnCall(intrinsics.get(), intrinsics_x64::read_gdt).Do(set_gdt);
-
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        gdt_x64 gdt(intrinsics);
-
-        EXPECT_EXCEPTION(gdt.set_limit(1000, 0x10), std::invalid_argument);
-    });
+    EXPECT_EXCEPTION(gdt.set_limit(1000, 0x10), std::invalid_argument);
 }
 
 void
 intrinsics_ut::test_gdt_set_limit_descriptor_success()
 {
-    MockRepository mocks;
-    auto intrinsics = bfn::mock_shared<intrinsics_x64>(mocks);
+    gdt_x64 gdt;
 
-    mocks.OnCall(intrinsics.get(), intrinsics_x64::read_gdt).Do(set_gdt);
-
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        gdt_x64 gdt(intrinsics);
-
-        EXPECT_NO_EXCEPTION(gdt.set_limit(1, 0x12345678));
-        EXPECT_TRUE(g_gdt[1] == 0xFFF1FFFFFFFF2345);
-    });
+    EXPECT_NO_EXCEPTION(gdt.set_limit(1, 0x12345678));
+    this->expect_true(gdt.m_gdt.at(1) == 0xFFF1FFFFFFFF2345);
 }
 
 void
 intrinsics_ut::test_gdt_limit_zero_index()
 {
-    MockRepository mocks;
-    auto intrinsics = bfn::mock_shared<intrinsics_x64>(mocks);
+    gdt_x64 gdt;
 
-    mocks.OnCall(intrinsics.get(), intrinsics_x64::read_gdt).Do(set_gdt);
-
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        gdt_x64 gdt(intrinsics);
-
-        EXPECT_TRUE(gdt.limit(0) == 0);
-    });
+    this->expect_true(gdt.limit(0) == 0);
 }
 
 void
 intrinsics_ut::test_gdt_limit_invalid_index()
 {
-    MockRepository mocks;
-    auto intrinsics = bfn::mock_shared<intrinsics_x64>(mocks);
+    gdt_x64 gdt;
 
-    mocks.OnCall(intrinsics.get(), intrinsics_x64::read_gdt).Do(set_gdt);
-
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        gdt_x64 gdt(intrinsics);
-
-        EXPECT_EXCEPTION(gdt.limit(1000), std::invalid_argument);
-    });
+    EXPECT_EXCEPTION(gdt.limit(1000), std::invalid_argument);
 }
 
 void
 intrinsics_ut::test_gdt_limit_descriptor_success()
 {
-    MockRepository mocks;
-    auto intrinsics = bfn::mock_shared<intrinsics_x64>(mocks);
+    gdt_x64 gdt;
 
-    mocks.OnCall(intrinsics.get(), intrinsics_x64::read_gdt).Do(set_gdt);
-
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        gdt_x64 gdt(intrinsics);
-
-        g_gdt[1] = 0xFFF4FFFFFFFF5678;
-        EXPECT_TRUE(gdt.limit(1) == 0x0000000045678FFF);
-    });
+    gdt.m_gdt.at(1) = 0xFFF4FFFFFFFF5678;
+    this->expect_true(gdt.limit(1) == 0x0000000045678FFF);
 }
 
 void
 intrinsics_ut::test_gdt_limit_descriptor_in_bytes_success()
 {
-    MockRepository mocks;
-    auto intrinsics = bfn::mock_shared<intrinsics_x64>(mocks);
+    gdt_x64 gdt;
 
-    mocks.OnCall(intrinsics.get(), intrinsics_x64::read_gdt).Do(set_gdt);
-
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        gdt_x64 gdt(intrinsics);
-
-        g_gdt[1] = 0xFF74FFFFFFFF5678;
-        EXPECT_TRUE(gdt.limit(1) == 0x0000000000045678);
-    });
+    gdt.m_gdt.at(1) = 0xFF74FFFFFFFF5678;
+    this->expect_true(gdt.limit(1) == 0x0000000000045678);
 }
 
 void
 intrinsics_ut::test_gdt_set_access_rights_zero_index()
 {
-    MockRepository mocks;
-    auto intrinsics = bfn::mock_shared<intrinsics_x64>(mocks);
+    gdt_x64 gdt;
 
-    mocks.OnCall(intrinsics.get(), intrinsics_x64::read_gdt).Do(set_gdt);
-
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        gdt_x64 gdt(intrinsics);
-
-        EXPECT_NO_EXCEPTION(gdt.set_access_rights(0, 0x10));
-    });
+    EXPECT_NO_EXCEPTION(gdt.set_access_rights(0, 0x10));
 }
 
 void
 intrinsics_ut::test_gdt_set_access_rights_invalid_index()
 {
-    MockRepository mocks;
-    auto intrinsics = bfn::mock_shared<intrinsics_x64>(mocks);
+    gdt_x64 gdt;
 
-    mocks.OnCall(intrinsics.get(), intrinsics_x64::read_gdt).Do(set_gdt);
-
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        gdt_x64 gdt(intrinsics);
-
-        EXPECT_EXCEPTION(gdt.set_access_rights(1000, 0x10), std::invalid_argument);
-    });
+    EXPECT_EXCEPTION(gdt.set_access_rights(1000, 0x10), std::invalid_argument);
 }
 
 void
 intrinsics_ut::test_gdt_set_access_rights_descriptor_success()
 {
-    MockRepository mocks;
-    auto intrinsics = bfn::mock_shared<intrinsics_x64>(mocks);
+    gdt_x64 gdt;
 
-    mocks.OnCall(intrinsics.get(), intrinsics_x64::read_gdt).Do(set_gdt);
-
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        gdt_x64 gdt(intrinsics);
-
-        EXPECT_NO_EXCEPTION(gdt.set_access_rights(1, 0x12345678));
-        EXPECT_TRUE(g_gdt[1] == 0xFF5F78FFFFFFFFFF);
-    });
+    EXPECT_NO_EXCEPTION(gdt.set_access_rights(1, 0x12345678));
+    this->expect_true(gdt.m_gdt.at(1) == 0xFF5F78FFFFFFFFFF);
 }
 
 void
 intrinsics_ut::test_gdt_access_rights_zero_index()
 {
-    MockRepository mocks;
-    auto intrinsics = bfn::mock_shared<intrinsics_x64>(mocks);
+    gdt_x64 gdt;
 
-    mocks.OnCall(intrinsics.get(), intrinsics_x64::read_gdt).Do(set_gdt);
-
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        gdt_x64 gdt(intrinsics);
-
-        EXPECT_TRUE(gdt.access_rights(0) == 0x10000);
-    });
+    this->expect_true(gdt.access_rights(0) == 0x10000);
 }
 
 void
 intrinsics_ut::test_gdt_access_rights_invalid_index()
 {
-    MockRepository mocks;
-    auto intrinsics = bfn::mock_shared<intrinsics_x64>(mocks);
+    gdt_x64 gdt;
 
-    mocks.OnCall(intrinsics.get(), intrinsics_x64::read_gdt).Do(set_gdt);
-
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        gdt_x64 gdt(intrinsics);
-
-        EXPECT_EXCEPTION(gdt.access_rights(1000), std::invalid_argument);
-    });
+    EXPECT_EXCEPTION(gdt.access_rights(1000), std::invalid_argument);
 }
 
 void
 intrinsics_ut::test_gdt_access_rights_descriptor_success()
 {
-    MockRepository mocks;
-    auto intrinsics = bfn::mock_shared<intrinsics_x64>(mocks);
+    gdt_x64 gdt;
 
-    mocks.OnCall(intrinsics.get(), intrinsics_x64::read_gdt).Do(set_gdt);
-
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        gdt_x64 gdt(intrinsics);
-
-        g_gdt[1] = 0xFF5F78FFFFFFFFFF;
-        EXPECT_TRUE(gdt.access_rights(1) == 0x0000000000005078);
-    });
+    gdt.m_gdt.at(1) = 0xFF5F78FFFFFFFFFF;
+    this->expect_true(gdt.access_rights(1) == 0x0000000000005078);
 }

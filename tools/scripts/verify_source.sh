@@ -34,7 +34,7 @@
 # and why:
 #
 # - CastToStruct: Currently, this is only disabled in the ELF loader as
-#   the spec requires us to do this. For all other code this is disabled.
+#   the spec requires us to do this. For all other code this is enabled.
 #
 # - UnreachableCode: we disable this because it seems to output buggy
 #   results. For some reason, anything with a try catch block, this seems
@@ -146,7 +146,7 @@ run_clang_tidy() {
 #
 pushd bfvmm > /dev/null
 header $PWD
-run_clang_tidy "clan*,-clang-analyzer-alpha.deadcode.UnreachableCode,-clang-analyzer-unix.MismatchedDeallocator"
+run_clang_tidy "clan*,-clang-analyzer-alpha.deadcode.UnreachableCode"
 run_clang_tidy "cert*,-clang-analyzer*,-cert-err60-cpp"
 run_clang_tidy "misc*,-clang-analyzer*"
 run_clang_tidy "perf*,-clang-analyzer*"

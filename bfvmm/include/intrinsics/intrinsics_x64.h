@@ -42,11 +42,6 @@ extern "C" uint32_t __cpuid_ecx(uint32_t val) noexcept;
 extern "C" uint32_t __cpuid_edx(uint32_t val) noexcept;
 extern "C" void __cpuid(uint64_t *rax, uint64_t *rbx, uint64_t *rcx, uint64_t *rdx) noexcept;
 
-extern "C" uint64_t __read_msr(uint32_t addr) noexcept;
-extern "C" void __write_msr(uint32_t addr, uint64_t val) noexcept;
-
-extern "C" uint64_t __read_rip(void) noexcept;
-
 extern "C" uint64_t __read_dr7(void) noexcept;
 extern "C" void __write_dr7(uint64_t val) noexcept;
 
@@ -74,21 +69,11 @@ extern "C" void __write_tr(uint16_t val) noexcept;
 extern "C" uint16_t __read_ldtr(void) noexcept;
 extern "C" void __write_ldtr(uint16_t val) noexcept;
 
-extern "C" uint64_t __read_rsp(void) noexcept;
-
-extern "C" void __read_gdt(void *gdt) noexcept;
-extern "C" void __write_gdt(void *gdt) noexcept;
-
-extern "C" void __read_idt(void *idt) noexcept;
-extern "C" void __write_idt(void *idt) noexcept;
-
 extern "C" void __outb(uint16_t port, uint8_t val) noexcept;
 extern "C" void __outw(uint16_t port, uint16_t val) noexcept;
 
 extern "C" uint8_t __inb(uint16_t port) noexcept;
 extern "C" uint16_t __inw(uint16_t port) noexcept;
-
-extern "C" uint64_t __tls_base(void) noexcept;
 
 // -----------------------------------------------------------------------------
 // C++ Wrapper
@@ -135,15 +120,6 @@ public:
                        uint64_t *rcx,
                        uint64_t *rdx) const noexcept
     { __cpuid(rax, rbx, rcx, rdx); }
-
-    virtual uint64_t read_msr(uint32_t addr) const noexcept
-    { return __read_msr(addr); }
-
-    virtual void write_msr(uint32_t addr, uint64_t val) const noexcept
-    { __write_msr(addr, val); }
-
-    virtual uint64_t read_rip() const noexcept
-    { return __read_rip(); }
 
     virtual uint64_t read_dr7() const noexcept
     { return __read_dr7(); }
@@ -199,21 +175,6 @@ public:
     virtual void write_ldtr(uint16_t val) const noexcept
     { return __write_ldtr(val); }
 
-    virtual uint64_t read_rsp() const noexcept
-    { return __read_rsp(); }
-
-    virtual void read_gdt(void *gdt) const noexcept
-    { __read_gdt(gdt); }
-
-    virtual void write_gdt(void *gdt) const noexcept
-    { __write_gdt(gdt); }
-
-    virtual void read_idt(void *idt) const noexcept
-    { __read_idt(idt); }
-
-    virtual void write_idt(void *idt) const noexcept
-    { __write_idt(idt); }
-
     virtual void write_portio_8(uint16_t port, uint8_t value) const noexcept
     { __outb(port, value); }
 
@@ -237,24 +198,6 @@ public:
 #define SELECTOR_INDEX                                              (0xFFF8)
 #define SELECTOR_UNUSABLE                                           (1 << 16)
 
-// Segment Access Rights
-#define SEGMENT_ACCESS_RIGHTS_TYPE                                  (0x000F)
-#define SEGMENT_ACCESS_RIGHTS_TYPE_TSS_BUSY                         (0x0002)
-#define SEGMENT_ACCESS_RIGHTS_TYPE_RW                               (0x0002)
-#define SEGMENT_ACCESS_RIGHTS_TYPE_RWA                              (0x0003)
-#define SEGMENT_ACCESS_RIGHTS_TYPE_RE                               (0x000A)
-#define SEGMENT_ACCESS_RIGHTS_TYPE_REA                              (0x000B)
-#define SEGMENT_ACCESS_RIGHTS_TYPE_TSS_AVAILABLE                    (0x0009)
-#define SEGMENT_ACCESS_RIGHTS_CODE_DATA_DESCRIPTOR                  (0x0010)
-#define SEGMENT_ACCESS_RIGHTS_SYSTEM_DESCRIPTOR                     (0x0010)
-#define SEGMENT_ACCESS_RIGHTS_DPL                                   (0x0060)
-#define SEGMENT_ACCESS_RIGHTS_PRESENT                               (0x0080)
-#define SEGMENT_ACCESS_RIGHTS_RESERVED                              (0x0F00)
-#define SEGMENT_ACCESS_RIGHTS_L                                     (0x2000)
-#define SEGMENT_ACCESS_RIGHTS_DB                                    (0x4000)
-#define SEGMENT_ACCESS_RIGHTS_GRANULARITY                           (0x8000)
-#define SEGMENT_ACCESS_RIGHTS_GRANULARITY_PAGES                     (0x8000)
-
 // 64-ia-32-architectures-software-developer-manual, section 6.3.1
 // IA-32 Interrupts and Exceptions
 #define INTERRUPT_DIVIDE_ERROR                                      (0)
@@ -277,41 +220,5 @@ public:
 #define INTERRUPT_MACHINE_CHECK                                     (18)
 #define INTERRUPT_SIMD_FLOATING_POINT_EXCEPTION                     (19)
 #define INTERRUPT_VIRTUALIZATION_EXCEPTION                          (20)
-
-
-// // 64-ia-32-architectures-software-developer-manual, section 35.1
-// // IA-32 Architectural MSRs
-// #define IA32_PERF_GLOBAL_CTRL_MSR                                   0x0000038F
-// #define IA32_DEBUGCTL_MSR                                           0x000001D9
-// #define IA32_SYSENTER_CS_MSR                                        0x00000174
-// #define IA32_SYSENTER_ESP_MSR                                       0x00000175
-// #define IA32_SYSENTER_EIP_MSR                                       0x00000176
-// #define IA32_PAT_MSR                                                0x00000277
-// #define IA32_EFER_MSR                                               0xC0000080
-// #define IA32_FS_BASE_MSR                                            0xC0000100
-// #define IA32_GS_BASE_MSR                                            0xC0000101
-// #define IA32_XSS_MSR                                                0x00000DA0
-
-// // Debug Control
-// // 64-ia-32-architectures-software-developer-manual, section 35.1
-// #define IA32_DEBUGCTL_LBR                                           (1ULL << 0)
-// #define IA32_DEBUGCTL_BTF                                           (1ULL << 1)
-// #define IA32_DEBUGCTL_TR                                            (1ULL << 6)
-// #define IA32_DEBUGCTL_BTS                                           (1ULL << 7)
-// #define IA32_DEBUGCTL_BTINT                                         (1ULL << 8)
-// #define IA32_DEBUGCTL_BTS_OFF_OS                                    (1ULL << 9)
-// #define IA32_DEBUGCTL_BTS_OFF_USER                                  (1ULL << 10)
-// #define IA32_DEBUGCTL_FREEZE_LBRS_ON_PMI                            (1ULL << 11)
-// #define IA32_DEBUGCTL_FREEZE_PERFMON_ON_PMI                         (1ULL << 12)
-// #define IA32_DEBUGCTL_ENABLE_UNCORE_PMI                             (1ULL << 13)
-// #define IA32_DEBUGCTL_FREEZE_WHILE_SMM                              (1ULL << 14)
-// #define IA32_DEBUGCTL_RTM_DEBUG                                     (1ULL << 15)
-
-// // EFER
-// // 64-ia-32-architectures-software-developer-manual, section 35.1
-// #define IA32_EFER_SCE                                               (1ULL << 0)
-// #define IA32_EFER_LME                                               (1ULL << 8)
-// #define IA32_EFER_LMA                                               (1ULL << 10)
-// #define IA32_EFER_NXE                                               (1ULL << 11)
 
 #endif

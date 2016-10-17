@@ -23,6 +23,7 @@
 #define VMCS_INTEL_X64_STATE_H
 
 #include <debug.h>
+#include <intrinsics/x64.h>
 
 #define PRINT_STATE(a) \
     bfdebug << std::left << std::setw(35) << #a \
@@ -87,14 +88,14 @@ public:
     virtual uint32_t ldtr_limit() const { return 0; }
     virtual uint32_t tr_limit() const { return 0; }
 
-    virtual uint32_t es_access_rights() const { return 0x10000; }
-    virtual uint32_t cs_access_rights() const { return 0x10000; }
-    virtual uint32_t ss_access_rights() const { return 0x10000; }
-    virtual uint32_t ds_access_rights() const { return 0x10000; }
-    virtual uint32_t fs_access_rights() const { return 0x10000; }
-    virtual uint32_t gs_access_rights() const { return 0x10000; }
-    virtual uint32_t ldtr_access_rights() const { return 0x10000; }
-    virtual uint32_t tr_access_rights() const { return 0x10000; }
+    virtual uint32_t es_access_rights() const { return x64::access_rights::unusable; }
+    virtual uint32_t cs_access_rights() const { return x64::access_rights::unusable; }
+    virtual uint32_t ss_access_rights() const { return x64::access_rights::unusable; }
+    virtual uint32_t ds_access_rights() const { return x64::access_rights::unusable; }
+    virtual uint32_t fs_access_rights() const { return x64::access_rights::unusable; }
+    virtual uint32_t gs_access_rights() const { return x64::access_rights::unusable; }
+    virtual uint32_t ldtr_access_rights() const { return x64::access_rights::unusable; }
+    virtual uint32_t tr_access_rights() const { return x64::access_rights::unusable; }
 
     virtual uint64_t es_base() const { return 0; }
     virtual uint64_t cs_base() const { return 0; }
