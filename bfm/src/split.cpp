@@ -22,19 +22,21 @@
 #include <split.h>
 
 std::vector<std::string>
-split(const std::string &str, char delimiter)
+split(const std::string &str, const char delimiter)
 {
-    std::istringstream ss(str);
     std::vector<std::string> result;
 
     if (str.empty())
         return result;
 
-    while (!ss.eof())
-    {
-        std::string field;
-        std::getline(ss, field, delimiter);
+    result.reserve(str.size() / 2U);
 
+    std::istringstream ss(str);
+    std::string field;
+
+    while (not ss.eof())
+    {
+        std::getline(ss, field, delimiter);
         result.push_back(field);
     }
 
