@@ -36,6 +36,6 @@
 /// @param delimiter the character that separates the str into tokens
 /// @return str, broken up into a vector or strings, delimited by the
 ///         provided delimiter
-std::vector<std::string> split(const std::string &str, char delimiter);
+std::vector<std::string> split(const std::string &str, const char delimiter);
 
 #endif
