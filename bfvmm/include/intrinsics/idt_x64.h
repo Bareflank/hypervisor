@@ -31,10 +31,6 @@
 // Interrupt Descriptor Table Register
 // -----------------------------------------------------------------------------
 
-// The CPU gets the base address and limit (number of entries) of the
-// interrupt descriptor table by using the lidt/sidt instructions, which take
-// a memory address that points to the structure below.
-
 #pragma pack(push, 1)
 
 struct idt_reg_x64_t
@@ -80,7 +76,7 @@ namespace idt
         idt_reg_x64_t reg;
 
         reg.base = base;
-        reg.limit = gsl::narrow<uint16_t>(limit);
+        reg.limit = gsl::narrow_cast<uint16_t>(limit);
 
         __write_idt(&reg);
     }
@@ -120,7 +116,7 @@ namespace idt
             idt_reg_x64_t reg;
             __read_idt(&reg);
 
-            reg.limit = gsl::narrow<uint16_t>(val);
+            reg.limit = gsl::narrow_cast<uint16_t>(val);
             __write_idt(&reg);
         }
     }

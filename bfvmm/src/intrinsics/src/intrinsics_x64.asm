@@ -280,17 +280,6 @@ __write_gs:
     mov gs, di
     ret
 
-global __read_tr:function
-__read_tr:
-    xor rax, rax
-    str ax
-    ret
-
-global __write_tr:function
-__write_tr:
-    ltr di
-    ret
-
 global __read_ldtr:function
 __read_ldtr:
     xor rax, rax
@@ -300,6 +289,17 @@ __read_ldtr:
 global __write_ldtr:function
 __write_ldtr:
     lldt di
+    ret
+
+global __read_tr:function
+__read_tr:
+    xor rax, rax
+    str ax
+    ret
+
+global __write_tr:function
+__write_tr:
+    ltr di
     ret
 
 global __read_gdt:function
@@ -322,6 +322,20 @@ __write_idt:
     lidt [rdi]
     ret
 
+global __inb:function
+__inb:
+    xor rax, rax
+    mov dx, di
+    in al, dx
+    ret
+
+global __inw:function
+__inw:
+    xor rax, rax
+    mov dx, di
+    in ax, dx
+    ret
+
 global __outb:function
 __outb:
     mov dx, di
@@ -334,18 +348,4 @@ __outw:
 	mov dx, di
     mov ax, si
 	out dx, ax
-	ret
-
-global __inb:function
-__inb:
-	xor rax, rax
-	mov dx, di
-	in al, dx
-	ret
-
-global __inw:function
-__inw:
-    xor rax, rax
-    mov dx, di
-	in ax, dx
 	ret

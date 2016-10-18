@@ -19,8 +19,10 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+#include <intrinsics/srs_x64.h>
 #include <vmcs/vmcs_intel_x64_host_vm_state.h>
 
+using namespace x64;
 using namespace intel_x64;
 
 vmcs_intel_x64_host_vm_state::vmcs_intel_x64_host_vm_state(const std::shared_ptr<intrinsics_intel_x64> &intrinsics)
@@ -28,26 +30,26 @@ vmcs_intel_x64_host_vm_state::vmcs_intel_x64_host_vm_state(const std::shared_ptr
     if (!intrinsics)
         throw std::invalid_argument("intrinsics == nullptr");
 
-    m_es = intrinsics->read_es();
-    m_cs = intrinsics->read_cs();
-    m_ss = intrinsics->read_ss();
-    m_ds = intrinsics->read_ds();
-    m_fs = intrinsics->read_fs();
-    m_gs = intrinsics->read_gs();
-    m_ldtr = intrinsics->read_ldtr();
-    m_tr = intrinsics->read_tr();
+    m_es = segment_register::es::get();
+    m_cs = segment_register::cs::get();
+    m_ss = segment_register::ss::get();
+    m_ds = segment_register::ds::get();
+    m_fs = segment_register::fs::get();
+    m_gs = segment_register::gs::get();
+    m_ldtr = segment_register::ldtr::get();
+    m_tr = segment_register::tr::get();
 
     // REMOVE ME: The bit shift should go into the namespace logic. When you
     // do this, make sure the VMCS logic also has this as it could be useful
     // there too
-    m_es_index = static_cast<uint16_t>(m_es >> 3);
-    m_cs_index = static_cast<uint16_t>(m_cs >> 3);
-    m_ss_index = static_cast<uint16_t>(m_ss >> 3);
-    m_ds_index = static_cast<uint16_t>(m_ds >> 3);
-    m_fs_index = static_cast<uint16_t>(m_fs >> 3);
-    m_gs_index = static_cast<uint16_t>(m_gs >> 3);
-    m_ldtr_index = static_cast<uint16_t>(m_ldtr >> 3);
-    m_tr_index = static_cast<uint16_t>(m_tr >> 3);
+    m_es_index = segment_register::es::index::get();
+    m_cs_index = segment_register::cs::index::get();
+    m_ss_index = segment_register::ss::index::get();
+    m_ds_index = segment_register::ds::index::get();
+    m_fs_index = segment_register::fs::index::get();
+    m_gs_index = segment_register::gs::index::get();
+    m_ldtr_index = segment_register::ldtr::index::get();
+    m_tr_index = segment_register::tr::index::get();
 
     m_cr0 = cr0::get();
     m_cr3 = cr3::get();

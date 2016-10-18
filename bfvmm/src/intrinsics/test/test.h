@@ -301,6 +301,41 @@ private:
     void test_cr4_smap_enable_bit();
     void test_cr4_protection_key_enable_bit();
 
+    void test_srs_x64_es();
+    void test_srs_x64_es_rpl();
+    void test_srs_x64_es_ti();
+    void test_srs_x64_es_index();
+    void test_srs_x64_cs();
+    void test_srs_x64_cs_rpl();
+    void test_srs_x64_cs_ti();
+    void test_srs_x64_cs_index();
+    void test_srs_x64_ss();
+    void test_srs_x64_ss_rpl();
+    void test_srs_x64_ss_ti();
+    void test_srs_x64_ss_index();
+    void test_srs_x64_ds();
+    void test_srs_x64_ds_rpl();
+    void test_srs_x64_ds_ti();
+    void test_srs_x64_ds_index();
+    void test_srs_x64_fs();
+    void test_srs_x64_fs_rpl();
+    void test_srs_x64_fs_ti();
+    void test_srs_x64_fs_index();
+    void test_srs_x64_gs();
+    void test_srs_x64_gs_rpl();
+    void test_srs_x64_gs_ti();
+    void test_srs_x64_gs_index();
+    void test_srs_x64_ldtr();
+    void test_srs_x64_ldtr_rpl();
+    void test_srs_x64_ldtr_ti();
+    void test_srs_x64_ldtr_index();
+    void test_srs_x64_tr();
+    void test_srs_x64_tr_rpl();
+    void test_srs_x64_tr_ti();
+    void test_srs_x64_tr_index();
+
+    void test_portio_x64_byte();
+    void test_portio_x64_word();
 };
 
 #endif

@@ -22,6 +22,9 @@
 #include <test.h>
 #include <string>
 
+#include <intrinsics/srs_x64.h>
+
+using namespace x64;
 using namespace intel_x64;
 
 static struct control_flow_path path;
@@ -202,95 +205,187 @@ setup_check_host_verify_load_ia32_efer_paths(std::vector<struct control_flow_pat
 }
 
 static void
-setup_check_host_es_selector_rpl_ti_equal_zero_paths(std::vector<struct control_flow_path> &cfg)
+setup_check_host_es_selector_rpl_equal_zero_paths(std::vector<struct control_flow_path> &cfg)
 {
     path.setup = [&] { g_vmcs_fields[vmcs::host_es_selector::addr] = 0; };
     path.throws_exception = false;
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[vmcs::host_es_selector::addr] = SELECTOR_RPL_FLAG; };
+    path.setup = [&] { g_vmcs_fields[vmcs::host_es_selector::addr] = segment_register::es::rpl::mask; };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("host rpl / tr's es flag must be 0"));
+    path.exception = std::shared_ptr<std::exception>(new std::logic_error("host es rpl flag must be 0"));
     cfg.push_back(path);
 }
 
 static void
-setup_check_host_cs_selector_rpl_ti_equal_zero_paths(std::vector<struct control_flow_path> &cfg)
+setup_check_host_cs_selector_rpl_equal_zero_paths(std::vector<struct control_flow_path> &cfg)
 {
     path.setup = [&] { g_vmcs_fields[vmcs::host_cs_selector::addr] = 0; };
     path.throws_exception = false;
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[vmcs::host_cs_selector::addr] = SELECTOR_RPL_FLAG; };
+    path.setup = [&] { g_vmcs_fields[vmcs::host_cs_selector::addr] = segment_register::cs::rpl::mask; };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("host rpl / tr's cs flag must be 0"));
+    path.exception = std::shared_ptr<std::exception>(new std::logic_error("host cs rpl flag must be 0"));
     cfg.push_back(path);
 }
 
 static void
-setup_check_host_ss_selector_rpl_ti_equal_zero_paths(std::vector<struct control_flow_path> &cfg)
+setup_check_host_ss_selector_rpl_equal_zero_paths(std::vector<struct control_flow_path> &cfg)
 {
     path.setup = [&] { g_vmcs_fields[vmcs::host_ss_selector::addr] = 0; };
     path.throws_exception = false;
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[vmcs::host_ss_selector::addr] = SELECTOR_RPL_FLAG; };
+    path.setup = [&] { g_vmcs_fields[vmcs::host_ss_selector::addr] = segment_register::ss::rpl::mask; };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("host rpl / tr's ss flag must be 0"));
+    path.exception = std::shared_ptr<std::exception>(new std::logic_error("host ss rpl flag must be 0"));
     cfg.push_back(path);
 }
 
 static void
-setup_check_host_ds_selector_rpl_ti_equal_zero_paths(std::vector<struct control_flow_path> &cfg)
+setup_check_host_ds_selector_rpl_equal_zero_paths(std::vector<struct control_flow_path> &cfg)
 {
     path.setup = [&] { g_vmcs_fields[vmcs::host_ds_selector::addr] = 0; };
     path.throws_exception = false;
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[vmcs::host_ds_selector::addr] = SELECTOR_RPL_FLAG; };
+    path.setup = [&] { g_vmcs_fields[vmcs::host_ds_selector::addr] = segment_register::ds::rpl::mask; };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("host rpl / tr's ds flag must be 0"));
+    path.exception = std::shared_ptr<std::exception>(new std::logic_error("host ds rpl flag must be 0"));
     cfg.push_back(path);
 }
 
 static void
-setup_check_host_fs_selector_rpl_ti_equal_zero_paths(std::vector<struct control_flow_path> &cfg)
+setup_check_host_fs_selector_rpl_equal_zero_paths(std::vector<struct control_flow_path> &cfg)
 {
     path.setup = [&] { g_vmcs_fields[vmcs::host_fs_selector::addr] = 0;};
     path.throws_exception = false;
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[vmcs::host_fs_selector::addr] = SELECTOR_RPL_FLAG; };
+    path.setup = [&] { g_vmcs_fields[vmcs::host_fs_selector::addr] = segment_register::fs::rpl::mask; };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("host rpl / tr's fs flag must be 0"));
+    path.exception = std::shared_ptr<std::exception>(new std::logic_error("host fs rpl flag must be 0"));
     cfg.push_back(path);
 }
 
 static void
-setup_check_host_gs_selector_rpl_ti_equal_zero_paths(std::vector<struct control_flow_path> &cfg)
+setup_check_host_gs_selector_rpl_equal_zero_paths(std::vector<struct control_flow_path> &cfg)
 {
     path.setup = [&] { g_vmcs_fields[vmcs::host_gs_selector::addr] = 0; };
     path.throws_exception = false;
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[vmcs::host_gs_selector::addr] = SELECTOR_RPL_FLAG; };
+    path.setup = [&] { g_vmcs_fields[vmcs::host_gs_selector::addr] = segment_register::gs::rpl::mask; };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("host rpl / tr's gs flag must be 0"));
+    path.exception = std::shared_ptr<std::exception>(new std::logic_error("host gs rpl flag must be 0"));
     cfg.push_back(path);
 }
 
 static void
-setup_check_host_tr_selector_rpl_ti_equal_zero_paths(std::vector<struct control_flow_path> &cfg)
+setup_check_host_tr_selector_rpl_equal_zero_paths(std::vector<struct control_flow_path> &cfg)
 {
     path.setup = [&] { g_vmcs_fields[vmcs::host_tr_selector::addr] = 0; };
     path.throws_exception = false;
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[vmcs::host_tr_selector::addr] = SELECTOR_RPL_FLAG; };
+    path.setup = [&] { g_vmcs_fields[vmcs::host_tr_selector::addr] = segment_register::tr::rpl::mask; };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("host rpl / tr's tr flag must be 0"));
+    path.exception = std::shared_ptr<std::exception>(new std::logic_error("host tr rpl flag must be 0"));
     cfg.push_back(path);
 }
+
+static void
+setup_check_host_es_selector_ti_equal_zero_paths(std::vector<struct control_flow_path> &cfg)
+{
+    path.setup = [&] { g_vmcs_fields[vmcs::host_es_selector::addr] = 0; };
+    path.throws_exception = false;
+    cfg.push_back(path);
+
+    path.setup = [&] { g_vmcs_fields[vmcs::host_es_selector::addr] = segment_register::es::ti::mask; };
+    path.throws_exception = true;
+    path.exception = std::shared_ptr<std::exception>(new std::logic_error("host es ti flag must be 0"));
+    cfg.push_back(path);
+}
+
+static void
+setup_check_host_cs_selector_ti_equal_zero_paths(std::vector<struct control_flow_path> &cfg)
+{
+    path.setup = [&] { g_vmcs_fields[vmcs::host_cs_selector::addr] = 0; };
+    path.throws_exception = false;
+    cfg.push_back(path);
+
+    path.setup = [&] { g_vmcs_fields[vmcs::host_cs_selector::addr] = segment_register::cs::ti::mask; };
+    path.throws_exception = true;
+    path.exception = std::shared_ptr<std::exception>(new std::logic_error("host cs ti flag must be 0"));
+    cfg.push_back(path);
+}
+
+static void
+setup_check_host_ss_selector_ti_equal_zero_paths(std::vector<struct control_flow_path> &cfg)
+{
+    path.setup = [&] { g_vmcs_fields[vmcs::host_ss_selector::addr] = 0; };
+    path.throws_exception = false;
+    cfg.push_back(path);
+
+    path.setup = [&] { g_vmcs_fields[vmcs::host_ss_selector::addr] = segment_register::ss::ti::mask; };
+    path.throws_exception = true;
+    path.exception = std::shared_ptr<std::exception>(new std::logic_error("host ss ti flag must be 0"));
+    cfg.push_back(path);
+}
+
+static void
+setup_check_host_ds_selector_ti_equal_zero_paths(std::vector<struct control_flow_path> &cfg)
+{
+    path.setup = [&] { g_vmcs_fields[vmcs::host_ds_selector::addr] = 0; };
+    path.throws_exception = false;
+    cfg.push_back(path);
+
+    path.setup = [&] { g_vmcs_fields[vmcs::host_ds_selector::addr] = segment_register::ds::ti::mask; };
+    path.throws_exception = true;
+    path.exception = std::shared_ptr<std::exception>(new std::logic_error("host ds ti flag must be 0"));
+    cfg.push_back(path);
+}
+
+static void
+setup_check_host_fs_selector_ti_equal_zero_paths(std::vector<struct control_flow_path> &cfg)
+{
+    path.setup = [&] { g_vmcs_fields[vmcs::host_fs_selector::addr] = 0;};
+    path.throws_exception = false;
+    cfg.push_back(path);
+
+    path.setup = [&] { g_vmcs_fields[vmcs::host_fs_selector::addr] = segment_register::fs::ti::mask; };
+    path.throws_exception = true;
+    path.exception = std::shared_ptr<std::exception>(new std::logic_error("host fs ti flag must be 0"));
+    cfg.push_back(path);
+}
+
+static void
+setup_check_host_gs_selector_ti_equal_zero_paths(std::vector<struct control_flow_path> &cfg)
+{
+    path.setup = [&] { g_vmcs_fields[vmcs::host_gs_selector::addr] = 0; };
+    path.throws_exception = false;
+    cfg.push_back(path);
+
+    path.setup = [&] { g_vmcs_fields[vmcs::host_gs_selector::addr] = segment_register::gs::ti::mask; };
+    path.throws_exception = true;
+    path.exception = std::shared_ptr<std::exception>(new std::logic_error("host gs ti flag must be 0"));
+    cfg.push_back(path);
+}
+
+static void
+setup_check_host_tr_selector_ti_equal_zero_paths(std::vector<struct control_flow_path> &cfg)
+{
+    path.setup = [&] { g_vmcs_fields[vmcs::host_tr_selector::addr] = 0; };
+    path.throws_exception = false;
+    cfg.push_back(path);
+
+    path.setup = [&] { g_vmcs_fields[vmcs::host_tr_selector::addr] = segment_register::tr::ti::mask; };
+    path.throws_exception = true;
+    path.exception = std::shared_ptr<std::exception>(new std::logic_error("host tr ti flag must be 0"));
+    cfg.push_back(path);
+}
+
 
 static void
 setup_check_host_cs_not_equal_zero_paths(std::vector<struct control_flow_path> &cfg)
@@ -561,64 +656,127 @@ vmcs_ut::test_check_host_verify_load_ia32_efer()
 }
 
 void
-vmcs_ut::test_check_host_es_selector_rpl_ti_equal_zero()
+vmcs_ut::test_check_host_es_selector_rpl_equal_zero()
 {
     std::vector<struct control_flow_path> cfg;
-    setup_check_host_es_selector_rpl_ti_equal_zero_paths(cfg);
+    setup_check_host_es_selector_rpl_equal_zero_paths(cfg);
 
     this->run_vmcs_test(cfg, &vmcs_intel_x64::check_host_es_selector_rpl_ti_equal_zero);
 }
 
 void
-vmcs_ut::test_check_host_cs_selector_rpl_ti_equal_zero()
+vmcs_ut::test_check_host_cs_selector_rpl_equal_zero()
 {
     std::vector<struct control_flow_path> cfg;
-    setup_check_host_cs_selector_rpl_ti_equal_zero_paths(cfg);
+    setup_check_host_cs_selector_rpl_equal_zero_paths(cfg);
 
     this->run_vmcs_test(cfg, &vmcs_intel_x64::check_host_cs_selector_rpl_ti_equal_zero);
 }
 
 void
-vmcs_ut::test_check_host_ss_selector_rpl_ti_equal_zero()
+vmcs_ut::test_check_host_ss_selector_rpl_equal_zero()
 {
     std::vector<struct control_flow_path> cfg;
-    setup_check_host_ss_selector_rpl_ti_equal_zero_paths(cfg);
+    setup_check_host_ss_selector_rpl_equal_zero_paths(cfg);
 
     this->run_vmcs_test(cfg, &vmcs_intel_x64::check_host_ss_selector_rpl_ti_equal_zero);
 }
 
 void
-vmcs_ut::test_check_host_ds_selector_rpl_ti_equal_zero()
+vmcs_ut::test_check_host_ds_selector_rpl_equal_zero()
 {
     std::vector<struct control_flow_path> cfg;
-    setup_check_host_ds_selector_rpl_ti_equal_zero_paths(cfg);
+    setup_check_host_ds_selector_rpl_equal_zero_paths(cfg);
 
     this->run_vmcs_test(cfg, &vmcs_intel_x64::check_host_ds_selector_rpl_ti_equal_zero);
 }
 
 void
-vmcs_ut::test_check_host_fs_selector_rpl_ti_equal_zero()
+vmcs_ut::test_check_host_fs_selector_rpl_equal_zero()
 {
     std::vector<struct control_flow_path> cfg;
-    setup_check_host_fs_selector_rpl_ti_equal_zero_paths(cfg);
+    setup_check_host_fs_selector_rpl_equal_zero_paths(cfg);
 
     this->run_vmcs_test(cfg, &vmcs_intel_x64::check_host_fs_selector_rpl_ti_equal_zero);
 }
 
 void
-vmcs_ut::test_check_host_gs_selector_rpl_ti_equal_zero()
+vmcs_ut::test_check_host_gs_selector_rpl_equal_zero()
 {
     std::vector<struct control_flow_path> cfg;
-    setup_check_host_gs_selector_rpl_ti_equal_zero_paths(cfg);
+    setup_check_host_gs_selector_rpl_equal_zero_paths(cfg);
 
     this->run_vmcs_test(cfg, &vmcs_intel_x64::check_host_gs_selector_rpl_ti_equal_zero);
 }
 
 void
-vmcs_ut::test_check_host_tr_selector_rpl_ti_equal_zero()
+vmcs_ut::test_check_host_tr_selector_rpl_equal_zero()
 {
     std::vector<struct control_flow_path> cfg;
-    setup_check_host_tr_selector_rpl_ti_equal_zero_paths(cfg);
+    setup_check_host_tr_selector_rpl_equal_zero_paths(cfg);
+
+    this->run_vmcs_test(cfg, &vmcs_intel_x64::check_host_tr_selector_rpl_ti_equal_zero);
+}
+
+void
+vmcs_ut::test_check_host_es_selector_ti_equal_zero()
+{
+    std::vector<struct control_flow_path> cfg;
+    setup_check_host_es_selector_ti_equal_zero_paths(cfg);
+
+    this->run_vmcs_test(cfg, &vmcs_intel_x64::check_host_es_selector_rpl_ti_equal_zero);
+}
+
+void
+vmcs_ut::test_check_host_cs_selector_ti_equal_zero()
+{
+    std::vector<struct control_flow_path> cfg;
+    setup_check_host_cs_selector_ti_equal_zero_paths(cfg);
+
+    this->run_vmcs_test(cfg, &vmcs_intel_x64::check_host_cs_selector_rpl_ti_equal_zero);
+}
+
+void
+vmcs_ut::test_check_host_ss_selector_ti_equal_zero()
+{
+    std::vector<struct control_flow_path> cfg;
+    setup_check_host_ss_selector_ti_equal_zero_paths(cfg);
+
+    this->run_vmcs_test(cfg, &vmcs_intel_x64::check_host_ss_selector_rpl_ti_equal_zero);
+}
+
+void
+vmcs_ut::test_check_host_ds_selector_ti_equal_zero()
+{
+    std::vector<struct control_flow_path> cfg;
+    setup_check_host_ds_selector_ti_equal_zero_paths(cfg);
+
+    this->run_vmcs_test(cfg, &vmcs_intel_x64::check_host_ds_selector_rpl_ti_equal_zero);
+}
+
+void
+vmcs_ut::test_check_host_fs_selector_ti_equal_zero()
+{
+    std::vector<struct control_flow_path> cfg;
+    setup_check_host_fs_selector_ti_equal_zero_paths(cfg);
+
+    this->run_vmcs_test(cfg, &vmcs_intel_x64::check_host_fs_selector_rpl_ti_equal_zero);
+}
+
+void
+vmcs_ut::test_check_host_gs_selector_ti_equal_zero()
+{
+    std::vector<struct control_flow_path> cfg;
+    setup_check_host_gs_selector_ti_equal_zero_paths(cfg);
+
+    this->run_vmcs_test(cfg, &vmcs_intel_x64::check_host_gs_selector_rpl_ti_equal_zero);
+}
+
+void
+vmcs_ut::test_check_host_tr_selector_ti_equal_zero()
+{
+    std::vector<struct control_flow_path> cfg;
+    setup_check_host_tr_selector_ti_equal_zero_paths(cfg);
 
     this->run_vmcs_test(cfg, &vmcs_intel_x64::check_host_tr_selector_rpl_ti_equal_zero);
 }

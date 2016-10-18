@@ -27,7 +27,7 @@ extern "C" void __write_rflags(uint64_t val) noexcept;
 
 // *INDENT-OFF*
 
-namespace intel_x64
+namespace x64
 {
 namespace rflags
 {

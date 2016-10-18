@@ -302,6 +302,42 @@ intrinsics_ut::list()
     this->test_cr4_smap_enable_bit();
     this->test_cr4_protection_key_enable_bit();
 
+    this->test_srs_x64_es();
+    this->test_srs_x64_es_rpl();
+    this->test_srs_x64_es_ti();
+    this->test_srs_x64_es_index();
+    this->test_srs_x64_cs();
+    this->test_srs_x64_cs_rpl();
+    this->test_srs_x64_cs_ti();
+    this->test_srs_x64_cs_index();
+    this->test_srs_x64_ss();
+    this->test_srs_x64_ss_rpl();
+    this->test_srs_x64_ss_ti();
+    this->test_srs_x64_ss_index();
+    this->test_srs_x64_ds();
+    this->test_srs_x64_ds_rpl();
+    this->test_srs_x64_ds_ti();
+    this->test_srs_x64_ds_index();
+    this->test_srs_x64_fs();
+    this->test_srs_x64_fs_rpl();
+    this->test_srs_x64_fs_ti();
+    this->test_srs_x64_fs_index();
+    this->test_srs_x64_gs();
+    this->test_srs_x64_gs_rpl();
+    this->test_srs_x64_gs_ti();
+    this->test_srs_x64_gs_index();
+    this->test_srs_x64_ldtr();
+    this->test_srs_x64_ldtr_rpl();
+    this->test_srs_x64_ldtr_ti();
+    this->test_srs_x64_ldtr_index();
+    this->test_srs_x64_tr();
+    this->test_srs_x64_tr_rpl();
+    this->test_srs_x64_tr_ti();
+    this->test_srs_x64_tr_index();
+
+    this->test_portio_x64_byte();
+    this->test_portio_x64_word();
+
     return true;
 }
 

@@ -278,20 +278,6 @@ __attribute__((weak)) __write_gs(uint16_t val) noexcept
 }
 
 extern "C" uint16_t
-__attribute__((weak)) __read_tr(void) noexcept
-{
-    std::cerr << static_cast<const char *>(__PRETTY_FUNCTION__) << " called" << '\n';
-    abort();
-}
-
-extern "C" void
-__attribute__((weak)) __write_tr(uint16_t val) noexcept
-{
-    std::cerr << static_cast<const char *>(__PRETTY_FUNCTION__) << " called with: " << view_as_pointer(val) << '\n';
-    abort();
-}
-
-extern "C" uint16_t
 __attribute__((weak)) __read_ldtr(void) noexcept
 {
     std::cerr << static_cast<const char *>(__PRETTY_FUNCTION__) << " called" << '\n';
@@ -300,6 +286,20 @@ __attribute__((weak)) __read_ldtr(void) noexcept
 
 extern "C" void
 __attribute__((weak)) __write_ldtr(uint16_t val) noexcept
+{
+    std::cerr << static_cast<const char *>(__PRETTY_FUNCTION__) << " called with: " << view_as_pointer(val) << '\n';
+    abort();
+}
+
+extern "C" uint16_t
+__attribute__((weak)) __read_tr(void) noexcept
+{
+    std::cerr << static_cast<const char *>(__PRETTY_FUNCTION__) << " called" << '\n';
+    abort();
+}
+
+extern "C" void
+__attribute__((weak)) __write_tr(uint16_t val) noexcept
 {
     std::cerr << static_cast<const char *>(__PRETTY_FUNCTION__) << " called with: " << view_as_pointer(val) << '\n';
     abort();
@@ -344,6 +344,22 @@ __attribute__((weak)) __write_idt(idt_reg_x64_t *idt_reg) noexcept
     abort();
 }
 
+extern "C" uint8_t
+__attribute__((weak)) __inb(uint16_t port) noexcept
+{
+    std::cerr << static_cast<const char *>(__PRETTY_FUNCTION__) << " called with: " << '\n';
+    std::cerr << "    - port: " << view_as_pointer(port) << '\n';
+    abort();
+}
+
+extern "C" uint16_t
+__attribute__((weak)) __inw(uint16_t port) noexcept
+{
+    std::cerr << static_cast<const char *>(__PRETTY_FUNCTION__) << " called with: " << '\n';
+    std::cerr << "    - port: " << view_as_pointer(port) << '\n';
+    abort();
+}
+
 extern "C" void
 __attribute__((weak)) __outb(uint16_t port, uint8_t val) noexcept
 {
@@ -359,21 +375,5 @@ __attribute__((weak)) __outw(uint16_t port, uint16_t val) noexcept
     std::cerr << static_cast<const char *>(__PRETTY_FUNCTION__) << " called with: " << '\n';
     std::cerr << "    - port: " << view_as_pointer(port) << '\n';
     std::cerr << "    - val: " << view_as_pointer(val) << '\n';
-    abort();
-}
-
-extern "C" uint8_t
-__attribute__((weak)) __inb(uint16_t port) noexcept
-{
-    std::cerr << static_cast<const char *>(__PRETTY_FUNCTION__) << " called with: " << '\n';
-    std::cerr << "    - port: " << view_as_pointer(port) << '\n';
-    abort();
-}
-
-extern "C" uint16_t
-__attribute__((weak)) __inw(uint16_t port) noexcept
-{
-    std::cerr << static_cast<const char *>(__PRETTY_FUNCTION__) << " called with: " << '\n';
-    std::cerr << "    - port: " << view_as_pointer(port) << '\n';
     abort();
 }

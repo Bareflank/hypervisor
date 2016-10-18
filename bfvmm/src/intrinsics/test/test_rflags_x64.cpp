@@ -22,7 +22,7 @@
 #include <test.h>
 #include <intrinsics/rflags_x64.h>
 
-using namespace intel_x64;
+using namespace x64;
 
 uint64_t g_rflags = 0;
 
