@@ -53,6 +53,38 @@ extern "C" void
 __read_idt(idt_reg_x64_t *idt_reg) noexcept
 { (void) idt_reg; }
 
+extern "C" uint16_t
+__read_es(void) noexcept
+{ return 0; }
+
+extern "C" uint16_t
+__read_cs(void) noexcept
+{ return 0; }
+
+extern "C" uint16_t
+__read_ss(void) noexcept
+{ return 0; }
+
+extern "C" uint16_t
+__read_ds(void) noexcept
+{ return 0; }
+
+extern "C" uint16_t
+__read_fs(void) noexcept
+{ return 0; }
+
+extern "C" uint16_t
+__read_gs(void) noexcept
+{ return 0; }
+
+extern "C" uint16_t
+__read_ldtr(void) noexcept
+{ return 0; }
+
+extern "C" uint16_t
+__read_tr(void) noexcept
+{ return 0; }
+
 static uintptr_t
 virtptr_to_physint(void *ptr)
 {
@@ -127,15 +159,6 @@ vcpu_ut::test_vcpu_intel_x64_init_null_params_valid_intrinsics()
     MockRepository mocks;
     auto mm = mocks.Mock<memory_manager>();
     auto in = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(in.get(), intrinsics_intel_x64::read_es).Return(0);
-    mocks.OnCall(in.get(), intrinsics_intel_x64::read_cs).Return(0);
-    mocks.OnCall(in.get(), intrinsics_intel_x64::read_ss).Return(0);
-    mocks.OnCall(in.get(), intrinsics_intel_x64::read_ds).Return(0);
-    mocks.OnCall(in.get(), intrinsics_intel_x64::read_fs).Return(0);
-    mocks.OnCall(in.get(), intrinsics_intel_x64::read_gs).Return(0);
-    mocks.OnCall(in.get(), intrinsics_intel_x64::read_ldtr).Return(0);
-    mocks.OnCall(in.get(), intrinsics_intel_x64::read_tr).Return(0);
 
     mocks.OnCall(in.get(), intrinsics_intel_x64::read_dr7).Return(0);
 
@@ -242,15 +265,6 @@ vcpu_ut::test_vcpu_intel_x64_fini_null_params_valid_intrinsics()
     MockRepository mocks;
     auto mm = mocks.Mock<memory_manager>();
     auto in = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(in.get(), intrinsics_intel_x64::read_es).Return(0);
-    mocks.OnCall(in.get(), intrinsics_intel_x64::read_cs).Return(0);
-    mocks.OnCall(in.get(), intrinsics_intel_x64::read_ss).Return(0);
-    mocks.OnCall(in.get(), intrinsics_intel_x64::read_ds).Return(0);
-    mocks.OnCall(in.get(), intrinsics_intel_x64::read_fs).Return(0);
-    mocks.OnCall(in.get(), intrinsics_intel_x64::read_gs).Return(0);
-    mocks.OnCall(in.get(), intrinsics_intel_x64::read_ldtr).Return(0);
-    mocks.OnCall(in.get(), intrinsics_intel_x64::read_tr).Return(0);
 
     mocks.OnCall(in.get(), intrinsics_intel_x64::read_dr7).Return(0);
 

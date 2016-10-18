@@ -25,6 +25,7 @@
 #include <vmxon/vmxon_intel_x64.h>
 #include <memory_manager/memory_manager.h>
 
+using namespace x64;
 using namespace intel_x64;
 
 vmxon_intel_x64::vmxon_intel_x64(std::shared_ptr<intrinsics_intel_x64> intrinsics) :

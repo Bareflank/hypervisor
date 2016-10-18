@@ -215,64 +215,71 @@ vmcs_intel_x64::check_host_segment_and_descriptor_table_registers()
 void
 vmcs_intel_x64::check_host_es_selector_rpl_ti_equal_zero()
 {
-    auto es = vmcs::host_es_selector::get();
+    if (vmcs::host_es_selector::ti::get() != 0)
+        throw std::logic_error("host es ti flag must be 0");
 
-    if ((es & (SELECTOR_RPL_FLAG | SELECTOR_TI_FLAG)) != 0)
-        throw std::logic_error("host rpl / tr's es flag must be 0");
+    if (vmcs::host_es_selector::rpl::get() != 0)
+        throw std::logic_error("host es rpl flag must be 0");
 }
 
 void
 vmcs_intel_x64::check_host_cs_selector_rpl_ti_equal_zero()
 {
-    auto cs = vmcs::host_cs_selector::get();
+    if (vmcs::host_cs_selector::ti::get() != 0)
+        throw std::logic_error("host cs ti flag must be 0");
 
-    if ((cs & (SELECTOR_RPL_FLAG | SELECTOR_TI_FLAG)) != 0)
-        throw std::logic_error("host rpl / tr's cs flag must be 0");
+    if (vmcs::host_cs_selector::rpl::get() != 0)
+        throw std::logic_error("host cs rpl flag must be 0");
 }
 
 void
 vmcs_intel_x64::check_host_ss_selector_rpl_ti_equal_zero()
 {
-    auto ss = vmcs::host_ss_selector::get();
+    if (vmcs::host_ss_selector::ti::get() != 0)
+        throw std::logic_error("host ss ti flag must be 0");
 
-    if ((ss & (SELECTOR_RPL_FLAG | SELECTOR_TI_FLAG)) != 0)
-        throw std::logic_error("host rpl / tr's ss flag must be 0");
+    if (vmcs::host_ss_selector::rpl::get() != 0)
+        throw std::logic_error("host ss rpl flag must be 0");
 }
 
 void
 vmcs_intel_x64::check_host_ds_selector_rpl_ti_equal_zero()
 {
-    auto ds = vmcs::host_ds_selector::get();
+    if (vmcs::host_ds_selector::ti::get() != 0)
+        throw std::logic_error("host ds ti flag must be 0");
 
-    if ((ds & (SELECTOR_RPL_FLAG | SELECTOR_TI_FLAG)) != 0)
-        throw std::logic_error("host rpl / tr's ds flag must be 0");
+    if (vmcs::host_ds_selector::rpl::get() != 0)
+        throw std::logic_error("host ds rpl flag must be 0");
 }
 
 void
 vmcs_intel_x64::check_host_fs_selector_rpl_ti_equal_zero()
 {
-    auto fs = vmcs::host_fs_selector::get();
+    if (vmcs::host_fs_selector::ti::get() != 0)
+        throw std::logic_error("host fs ti flag must be 0");
 
-    if ((fs & (SELECTOR_RPL_FLAG | SELECTOR_TI_FLAG)) != 0)
-        throw std::logic_error("host rpl / tr's fs flag must be 0");
+    if (vmcs::host_fs_selector::rpl::get() != 0)
+        throw std::logic_error("host fs rpl flag must be 0");
 }
 
 void
 vmcs_intel_x64::check_host_gs_selector_rpl_ti_equal_zero()
 {
-    auto gs = vmcs::host_gs_selector::get();
+    if (vmcs::host_gs_selector::ti::get() != 0)
+        throw std::logic_error("host gs ti flag must be 0");
 
-    if ((gs & (SELECTOR_RPL_FLAG | SELECTOR_TI_FLAG)) != 0)
-        throw std::logic_error("host rpl / tr's gs flag must be 0");
+    if (vmcs::host_gs_selector::rpl::get() != 0)
+        throw std::logic_error("host gs rpl flag must be 0");
 }
 
 void
 vmcs_intel_x64::check_host_tr_selector_rpl_ti_equal_zero()
 {
-    auto tr = vmcs::host_tr_selector::get();
+    if (vmcs::host_tr_selector::ti::get() != 0)
+        throw std::logic_error("host tr ti flag must be 0");
 
-    if ((tr & (SELECTOR_RPL_FLAG | SELECTOR_TI_FLAG)) != 0)
-        throw std::logic_error("host rpl / tr's tr flag must be 0");
+    if (vmcs::host_tr_selector::rpl::get() != 0)
+        throw std::logic_error("host tr rpl flag must be 0");
 }
 
 void

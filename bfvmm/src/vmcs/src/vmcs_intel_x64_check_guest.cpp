@@ -339,21 +339,17 @@ vmcs_intel_x64::checks_on_guest_segment_registers()
 void
 vmcs_intel_x64::check_guest_tr_ti_bit_equals_0()
 {
-    auto tr = vmcs::guest_tr_selector::get();
-
-    if ((tr & SELECTOR_TI_FLAG) != 0)
+    if (vmcs::guest_tr_selector::ti::get() != 0)
         throw std::logic_error("guest tr's ti flag must be zero");
 }
 
 void
 vmcs_intel_x64::check_guest_ldtr_ti_bit_equals_0()
 {
-    auto ldtr = vmcs::guest_ldtr_selector::get();
-
     if (vmcs::guest_ldtr_access_rights::unusable::get() != 0)
         return;
 
-    if ((ldtr & SELECTOR_TI_FLAG) != 0)
+    if (vmcs::guest_ldtr_selector::ti::get() != 0)
         throw std::logic_error("guest ldtr's ti flag must be zero");
 }
 
@@ -366,10 +362,7 @@ vmcs_intel_x64::check_guest_ss_and_cs_rpl_are_the_same()
     if (is_enabled_unrestricted_guests())
         return;
 
-    auto ss = vmcs::guest_ss_selector::get();
-    auto cs = vmcs::guest_cs_selector::get();
-
-    if ((ss & SELECTOR_RPL_FLAG) != (cs & SELECTOR_RPL_FLAG))
+    if (vmcs::guest_ss_selector::rpl::get() != vmcs::guest_cs_selector::rpl::get())
         throw std::logic_error("ss and cs rpl must be the same");
 }
 
@@ -911,13 +904,11 @@ vmcs_intel_x64::check_guest_cs_dpl_adheres_to_ss_dpl()
 void
 vmcs_intel_x64::check_guest_ss_dpl_must_equal_rpl()
 {
-    auto ss = vmcs::guest_ss_selector::get();
-
     if (is_enabled_unrestricted_guests())
         return;
 
+    auto ss_rpl = vmcs::guest_ss_selector::rpl::get();
     auto ss_dpl = vmcs::guest_ss_access_rights::dpl::get();
-    auto ss_rpl = (ss & SELECTOR_RPL_FLAG) >> 0;
 
     if (ss_dpl != ss_rpl)
         throw std::logic_error("if unrestricted guest mode is disabled ss dpl must equal ss rpl");
@@ -943,8 +934,6 @@ vmcs_intel_x64::check_guest_ss_dpl_must_equal_zero()
 void
 vmcs_intel_x64::check_guest_ds_dpl()
 {
-    auto ds = vmcs::guest_ds_selector::get();
-
     if (is_enabled_unrestricted_guests())
         return;
 
@@ -963,8 +952,8 @@ vmcs_intel_x64::check_guest_ds_dpl()
             break;
     }
 
+    auto ds_rpl = vmcs::guest_ds_selector::rpl::get();
     auto ds_dpl = vmcs::guest_ds_access_rights::dpl::get();
-    auto ds_rpl = (ds & SELECTOR_RPL_FLAG) >> 0;
 
     if (ds_dpl < ds_rpl)
         throw std::logic_error("if unrestricted guest mode is disabled, "
@@ -976,8 +965,6 @@ vmcs_intel_x64::check_guest_ds_dpl()
 void
 vmcs_intel_x64::check_guest_es_dpl()
 {
-    auto es = vmcs::guest_es_selector::get();
-
     if (is_enabled_unrestricted_guests())
         return;
 
@@ -996,8 +983,8 @@ vmcs_intel_x64::check_guest_es_dpl()
             break;
     }
 
+    auto es_rpl = vmcs::guest_es_selector::rpl::get();
     auto es_dpl = vmcs::guest_es_access_rights::dpl::get();
-    auto es_rpl = (es & SELECTOR_RPL_FLAG) >> 0;
 
     if (es_dpl < es_rpl)
         throw std::logic_error("if unrestricted guest mode is disabled, "
@@ -1009,8 +996,6 @@ vmcs_intel_x64::check_guest_es_dpl()
 void
 vmcs_intel_x64::check_guest_fs_dpl()
 {
-    auto fs = vmcs::guest_fs_selector::get();
-
     if (is_enabled_unrestricted_guests())
         return;
 
@@ -1029,8 +1014,8 @@ vmcs_intel_x64::check_guest_fs_dpl()
             break;
     }
 
+    auto fs_rpl = vmcs::guest_fs_selector::rpl::get();
     auto fs_dpl = vmcs::guest_fs_access_rights::dpl::get();
-    auto fs_rpl = (fs & SELECTOR_RPL_FLAG) >> 0;
 
     if (fs_dpl < fs_rpl)
         throw std::logic_error("if unrestricted guest mode is disabled, "
@@ -1042,8 +1027,6 @@ vmcs_intel_x64::check_guest_fs_dpl()
 void
 vmcs_intel_x64::check_guest_gs_dpl()
 {
-    auto gs = vmcs::guest_gs_selector::get();
-
     if (is_enabled_unrestricted_guests())
         return;
 
@@ -1062,8 +1045,8 @@ vmcs_intel_x64::check_guest_gs_dpl()
             break;
     }
 
+    auto gs_rpl = vmcs::guest_gs_selector::rpl::get();
     auto gs_dpl = vmcs::guest_gs_access_rights::dpl::get();
-    auto gs_rpl = (gs & SELECTOR_RPL_FLAG) >> 0;
 
     if (gs_dpl < gs_rpl)
         throw std::logic_error("if unrestricted guest mode is disabled, "
@@ -1630,10 +1613,10 @@ vmcs_intel_x64::check_guest_hlt_valid_interrupts()
             return;
 
         case VM_INTERRUPTION_TYPE_HARDWARE:
-            if (vector == INTERRUPT_DEBUG_EXCEPTION)
+            if (vector == interrupt::debug_exception)
                 return;
 
-            if (vector == INTERRUPT_MACHINE_CHECK)
+            if (vector == interrupt::machine_check)
                 return;
 
             break;
@@ -1674,7 +1657,7 @@ vmcs_intel_x64::check_guest_shutdown_valid_interrupts()
             return;
 
         case VM_INTERRUPTION_TYPE_HARDWARE:
-            if (vector == INTERRUPT_MACHINE_CHECK)
+            if (vector == interrupt::machine_check)
                 return;
 
             break;

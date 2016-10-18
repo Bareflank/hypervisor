@@ -605,12 +605,72 @@ vmcs_ut::test_vmcs_guest_es_selector()
 }
 
 void
+vmcs_ut::test_vmcs_guest_es_selector_rpl()
+{
+    vmcs::guest_es_selector::rpl::set(1UL);
+    this->expect_true(vmcs::guest_es_selector::rpl::get() == 1UL);
+
+    vmcs::guest_es_selector::rpl::set(0UL);
+    this->expect_true(vmcs::guest_es_selector::rpl::get() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_es_selector_ti()
+{
+    vmcs::guest_es_selector::ti::set(1UL);
+    this->expect_true(vmcs::guest_es_selector::ti::get() == 1UL);
+
+    vmcs::guest_es_selector::ti::set(0UL);
+    this->expect_true(vmcs::guest_es_selector::ti::get() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_es_selector_index()
+{
+    vmcs::guest_es_selector::index::set(1UL);
+    this->expect_true(vmcs::guest_es_selector::index::get() == 1UL);
+
+    vmcs::guest_es_selector::index::set(0UL);
+    this->expect_true(vmcs::guest_es_selector::index::get() == 0UL);
+}
+
+void
 vmcs_ut::test_vmcs_guest_cs_selector()
 {
     vmcs::guest_cs_selector::set(100UL);
 
     this->expect_true(vmcs::guest_cs_selector::get() == 100UL);
     this->expect_true(vmcs::guest_cs_selector::exists());
+}
+
+void
+vmcs_ut::test_vmcs_guest_cs_selector_rpl()
+{
+    vmcs::guest_cs_selector::rpl::set(1UL);
+    this->expect_true(vmcs::guest_cs_selector::rpl::get() == 1UL);
+
+    vmcs::guest_cs_selector::rpl::set(0UL);
+    this->expect_true(vmcs::guest_cs_selector::rpl::get() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_cs_selector_ti()
+{
+    vmcs::guest_cs_selector::ti::set(1UL);
+    this->expect_true(vmcs::guest_cs_selector::ti::get() == 1UL);
+
+    vmcs::guest_cs_selector::ti::set(0UL);
+    this->expect_true(vmcs::guest_cs_selector::ti::get() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_cs_selector_index()
+{
+    vmcs::guest_cs_selector::index::set(1UL);
+    this->expect_true(vmcs::guest_cs_selector::index::get() == 1UL);
+
+    vmcs::guest_cs_selector::index::set(0UL);
+    this->expect_true(vmcs::guest_cs_selector::index::get() == 0UL);
 }
 
 void
@@ -623,12 +683,72 @@ vmcs_ut::test_vmcs_guest_ss_selector()
 }
 
 void
+vmcs_ut::test_vmcs_guest_ss_selector_rpl()
+{
+    vmcs::guest_ss_selector::rpl::set(1UL);
+    this->expect_true(vmcs::guest_ss_selector::rpl::get() == 1UL);
+
+    vmcs::guest_ss_selector::rpl::set(0UL);
+    this->expect_true(vmcs::guest_ss_selector::rpl::get() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_ss_selector_ti()
+{
+    vmcs::guest_ss_selector::ti::set(1UL);
+    this->expect_true(vmcs::guest_ss_selector::ti::get() == 1UL);
+
+    vmcs::guest_ss_selector::ti::set(0UL);
+    this->expect_true(vmcs::guest_ss_selector::ti::get() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_ss_selector_index()
+{
+    vmcs::guest_ss_selector::index::set(1UL);
+    this->expect_true(vmcs::guest_ss_selector::index::get() == 1UL);
+
+    vmcs::guest_ss_selector::index::set(0UL);
+    this->expect_true(vmcs::guest_ss_selector::index::get() == 0UL);
+}
+
+void
 vmcs_ut::test_vmcs_guest_ds_selector()
 {
     vmcs::guest_ds_selector::set(100UL);
 
     this->expect_true(vmcs::guest_ds_selector::get() == 100UL);
     this->expect_true(vmcs::guest_ds_selector::exists());
+}
+
+void
+vmcs_ut::test_vmcs_guest_ds_selector_rpl()
+{
+    vmcs::guest_ds_selector::rpl::set(1UL);
+    this->expect_true(vmcs::guest_ds_selector::rpl::get() == 1UL);
+
+    vmcs::guest_ds_selector::rpl::set(0UL);
+    this->expect_true(vmcs::guest_ds_selector::rpl::get() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_ds_selector_ti()
+{
+    vmcs::guest_ds_selector::ti::set(1UL);
+    this->expect_true(vmcs::guest_ds_selector::ti::get() == 1UL);
+
+    vmcs::guest_ds_selector::ti::set(0UL);
+    this->expect_true(vmcs::guest_ds_selector::ti::get() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_ds_selector_index()
+{
+    vmcs::guest_ds_selector::index::set(1UL);
+    this->expect_true(vmcs::guest_ds_selector::index::get() == 1UL);
+
+    vmcs::guest_ds_selector::index::set(0UL);
+    this->expect_true(vmcs::guest_ds_selector::index::get() == 0UL);
 }
 
 void
@@ -641,12 +761,72 @@ vmcs_ut::test_vmcs_guest_fs_selector()
 }
 
 void
+vmcs_ut::test_vmcs_guest_fs_selector_rpl()
+{
+    vmcs::guest_fs_selector::rpl::set(1UL);
+    this->expect_true(vmcs::guest_fs_selector::rpl::get() == 1UL);
+
+    vmcs::guest_fs_selector::rpl::set(0UL);
+    this->expect_true(vmcs::guest_fs_selector::rpl::get() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_fs_selector_ti()
+{
+    vmcs::guest_fs_selector::ti::set(1UL);
+    this->expect_true(vmcs::guest_fs_selector::ti::get() == 1UL);
+
+    vmcs::guest_fs_selector::ti::set(0UL);
+    this->expect_true(vmcs::guest_fs_selector::ti::get() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_fs_selector_index()
+{
+    vmcs::guest_fs_selector::index::set(1UL);
+    this->expect_true(vmcs::guest_fs_selector::index::get() == 1UL);
+
+    vmcs::guest_fs_selector::index::set(0UL);
+    this->expect_true(vmcs::guest_fs_selector::index::get() == 0UL);
+}
+
+void
 vmcs_ut::test_vmcs_guest_gs_selector()
 {
     vmcs::guest_gs_selector::set(100UL);
 
     this->expect_true(vmcs::guest_gs_selector::get() == 100UL);
     this->expect_true(vmcs::guest_gs_selector::exists());
+}
+
+void
+vmcs_ut::test_vmcs_guest_gs_selector_rpl()
+{
+    vmcs::guest_gs_selector::rpl::set(1UL);
+    this->expect_true(vmcs::guest_gs_selector::rpl::get() == 1UL);
+
+    vmcs::guest_gs_selector::rpl::set(0UL);
+    this->expect_true(vmcs::guest_gs_selector::rpl::get() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_gs_selector_ti()
+{
+    vmcs::guest_gs_selector::ti::set(1UL);
+    this->expect_true(vmcs::guest_gs_selector::ti::get() == 1UL);
+
+    vmcs::guest_gs_selector::ti::set(0UL);
+    this->expect_true(vmcs::guest_gs_selector::ti::get() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_gs_selector_index()
+{
+    vmcs::guest_gs_selector::index::set(1UL);
+    this->expect_true(vmcs::guest_gs_selector::index::get() == 1UL);
+
+    vmcs::guest_gs_selector::index::set(0UL);
+    this->expect_true(vmcs::guest_gs_selector::index::get() == 0UL);
 }
 
 void
@@ -659,12 +839,72 @@ vmcs_ut::test_vmcs_guest_ldtr_selector()
 }
 
 void
+vmcs_ut::test_vmcs_guest_ldtr_selector_rpl()
+{
+    vmcs::guest_ldtr_selector::rpl::set(1UL);
+    this->expect_true(vmcs::guest_ldtr_selector::rpl::get() == 1UL);
+
+    vmcs::guest_ldtr_selector::rpl::set(0UL);
+    this->expect_true(vmcs::guest_ldtr_selector::rpl::get() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_ldtr_selector_ti()
+{
+    vmcs::guest_ldtr_selector::ti::set(1UL);
+    this->expect_true(vmcs::guest_ldtr_selector::ti::get() == 1UL);
+
+    vmcs::guest_ldtr_selector::ti::set(0UL);
+    this->expect_true(vmcs::guest_ldtr_selector::ti::get() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_ldtr_selector_index()
+{
+    vmcs::guest_ldtr_selector::index::set(1UL);
+    this->expect_true(vmcs::guest_ldtr_selector::index::get() == 1UL);
+
+    vmcs::guest_ldtr_selector::index::set(0UL);
+    this->expect_true(vmcs::guest_ldtr_selector::index::get() == 0UL);
+}
+
+void
 vmcs_ut::test_vmcs_guest_tr_selector()
 {
     vmcs::guest_tr_selector::set(100UL);
 
     this->expect_true(vmcs::guest_tr_selector::get() == 100UL);
     this->expect_true(vmcs::guest_tr_selector::exists());
+}
+
+void
+vmcs_ut::test_vmcs_guest_tr_selector_rpl()
+{
+    vmcs::guest_tr_selector::rpl::set(1UL);
+    this->expect_true(vmcs::guest_tr_selector::rpl::get() == 1UL);
+
+    vmcs::guest_tr_selector::rpl::set(0UL);
+    this->expect_true(vmcs::guest_tr_selector::rpl::get() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_tr_selector_ti()
+{
+    vmcs::guest_tr_selector::ti::set(1UL);
+    this->expect_true(vmcs::guest_tr_selector::ti::get() == 1UL);
+
+    vmcs::guest_tr_selector::ti::set(0UL);
+    this->expect_true(vmcs::guest_tr_selector::ti::get() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_tr_selector_index()
+{
+    vmcs::guest_tr_selector::index::set(1UL);
+    this->expect_true(vmcs::guest_tr_selector::index::get() == 1UL);
+
+    vmcs::guest_tr_selector::index::set(0UL);
+    this->expect_true(vmcs::guest_tr_selector::index::get() == 0UL);
 }
 
 void
@@ -691,12 +931,72 @@ vmcs_ut::test_vmcs_host_es_selector()
 }
 
 void
+vmcs_ut::test_vmcs_host_es_selector_rpl()
+{
+    vmcs::guest_es_selector::rpl::set(1UL);
+    this->expect_true(vmcs::guest_es_selector::rpl::get() == 1UL);
+
+    vmcs::guest_es_selector::rpl::set(0UL);
+    this->expect_true(vmcs::guest_es_selector::rpl::get() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_es_selector_ti()
+{
+    vmcs::guest_es_selector::ti::set(1UL);
+    this->expect_true(vmcs::guest_es_selector::ti::get() == 1UL);
+
+    vmcs::guest_es_selector::ti::set(0UL);
+    this->expect_true(vmcs::guest_es_selector::ti::get() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_es_selector_index()
+{
+    vmcs::guest_es_selector::index::set(1UL);
+    this->expect_true(vmcs::guest_es_selector::index::get() == 1UL);
+
+    vmcs::guest_es_selector::index::set(0UL);
+    this->expect_true(vmcs::guest_es_selector::index::get() == 0UL);
+}
+
+void
 vmcs_ut::test_vmcs_host_cs_selector()
 {
     vmcs::host_cs_selector::set(100UL);
 
     this->expect_true(vmcs::host_cs_selector::get() == 100UL);
     this->expect_true(vmcs::host_cs_selector::exists());
+}
+
+void
+vmcs_ut::test_vmcs_host_cs_selector_rpl()
+{
+    vmcs::guest_cs_selector::rpl::set(1UL);
+    this->expect_true(vmcs::guest_cs_selector::rpl::get() == 1UL);
+
+    vmcs::guest_cs_selector::rpl::set(0UL);
+    this->expect_true(vmcs::guest_cs_selector::rpl::get() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_cs_selector_ti()
+{
+    vmcs::guest_cs_selector::ti::set(1UL);
+    this->expect_true(vmcs::guest_cs_selector::ti::get() == 1UL);
+
+    vmcs::guest_cs_selector::ti::set(0UL);
+    this->expect_true(vmcs::guest_cs_selector::ti::get() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_cs_selector_index()
+{
+    vmcs::guest_cs_selector::index::set(1UL);
+    this->expect_true(vmcs::guest_cs_selector::index::get() == 1UL);
+
+    vmcs::guest_cs_selector::index::set(0UL);
+    this->expect_true(vmcs::guest_cs_selector::index::get() == 0UL);
 }
 
 void
@@ -709,12 +1009,72 @@ vmcs_ut::test_vmcs_host_ss_selector()
 }
 
 void
+vmcs_ut::test_vmcs_host_ss_selector_rpl()
+{
+    vmcs::guest_ss_selector::rpl::set(1UL);
+    this->expect_true(vmcs::guest_ss_selector::rpl::get() == 1UL);
+
+    vmcs::guest_ss_selector::rpl::set(0UL);
+    this->expect_true(vmcs::guest_ss_selector::rpl::get() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_ss_selector_ti()
+{
+    vmcs::guest_ss_selector::ti::set(1UL);
+    this->expect_true(vmcs::guest_ss_selector::ti::get() == 1UL);
+
+    vmcs::guest_ss_selector::ti::set(0UL);
+    this->expect_true(vmcs::guest_ss_selector::ti::get() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_ss_selector_index()
+{
+    vmcs::guest_ss_selector::index::set(1UL);
+    this->expect_true(vmcs::guest_ss_selector::index::get() == 1UL);
+
+    vmcs::guest_ss_selector::index::set(0UL);
+    this->expect_true(vmcs::guest_ss_selector::index::get() == 0UL);
+}
+
+void
 vmcs_ut::test_vmcs_host_ds_selector()
 {
     vmcs::host_ds_selector::set(100UL);
 
     this->expect_true(vmcs::host_ds_selector::get() == 100UL);
     this->expect_true(vmcs::host_ds_selector::exists());
+}
+
+void
+vmcs_ut::test_vmcs_host_ds_selector_rpl()
+{
+    vmcs::guest_ds_selector::rpl::set(1UL);
+    this->expect_true(vmcs::guest_ds_selector::rpl::get() == 1UL);
+
+    vmcs::guest_ds_selector::rpl::set(0UL);
+    this->expect_true(vmcs::guest_ds_selector::rpl::get() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_ds_selector_ti()
+{
+    vmcs::guest_ds_selector::ti::set(1UL);
+    this->expect_true(vmcs::guest_ds_selector::ti::get() == 1UL);
+
+    vmcs::guest_ds_selector::ti::set(0UL);
+    this->expect_true(vmcs::guest_ds_selector::ti::get() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_ds_selector_index()
+{
+    vmcs::guest_ds_selector::index::set(1UL);
+    this->expect_true(vmcs::guest_ds_selector::index::get() == 1UL);
+
+    vmcs::guest_ds_selector::index::set(0UL);
+    this->expect_true(vmcs::guest_ds_selector::index::get() == 0UL);
 }
 
 void
@@ -727,6 +1087,36 @@ vmcs_ut::test_vmcs_host_fs_selector()
 }
 
 void
+vmcs_ut::test_vmcs_host_fs_selector_rpl()
+{
+    vmcs::guest_fs_selector::rpl::set(1UL);
+    this->expect_true(vmcs::guest_fs_selector::rpl::get() == 1UL);
+
+    vmcs::guest_fs_selector::rpl::set(0UL);
+    this->expect_true(vmcs::guest_fs_selector::rpl::get() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_fs_selector_ti()
+{
+    vmcs::guest_fs_selector::ti::set(1UL);
+    this->expect_true(vmcs::guest_fs_selector::ti::get() == 1UL);
+
+    vmcs::guest_fs_selector::ti::set(0UL);
+    this->expect_true(vmcs::guest_fs_selector::ti::get() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_fs_selector_index()
+{
+    vmcs::guest_fs_selector::index::set(1UL);
+    this->expect_true(vmcs::guest_fs_selector::index::get() == 1UL);
+
+    vmcs::guest_fs_selector::index::set(0UL);
+    this->expect_true(vmcs::guest_fs_selector::index::get() == 0UL);
+}
+
+void
 vmcs_ut::test_vmcs_host_gs_selector()
 {
     vmcs::host_gs_selector::set(100UL);
@@ -736,12 +1126,72 @@ vmcs_ut::test_vmcs_host_gs_selector()
 }
 
 void
+vmcs_ut::test_vmcs_host_gs_selector_rpl()
+{
+    vmcs::guest_gs_selector::rpl::set(1UL);
+    this->expect_true(vmcs::guest_gs_selector::rpl::get() == 1UL);
+
+    vmcs::guest_gs_selector::rpl::set(0UL);
+    this->expect_true(vmcs::guest_gs_selector::rpl::get() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_gs_selector_ti()
+{
+    vmcs::guest_gs_selector::ti::set(1UL);
+    this->expect_true(vmcs::guest_gs_selector::ti::get() == 1UL);
+
+    vmcs::guest_gs_selector::ti::set(0UL);
+    this->expect_true(vmcs::guest_gs_selector::ti::get() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_gs_selector_index()
+{
+    vmcs::guest_gs_selector::index::set(1UL);
+    this->expect_true(vmcs::guest_gs_selector::index::get() == 1UL);
+
+    vmcs::guest_gs_selector::index::set(0UL);
+    this->expect_true(vmcs::guest_gs_selector::index::get() == 0UL);
+}
+
+void
 vmcs_ut::test_vmcs_host_tr_selector()
 {
     vmcs::host_tr_selector::set(100UL);
 
     this->expect_true(vmcs::host_tr_selector::get() == 100UL);
     this->expect_true(vmcs::host_tr_selector::exists());
+}
+
+void
+vmcs_ut::test_vmcs_host_tr_selector_rpl()
+{
+    vmcs::guest_tr_selector::rpl::set(1UL);
+    this->expect_true(vmcs::guest_tr_selector::rpl::get() == 1UL);
+
+    vmcs::guest_tr_selector::rpl::set(0UL);
+    this->expect_true(vmcs::guest_tr_selector::rpl::get() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_tr_selector_ti()
+{
+    vmcs::guest_tr_selector::ti::set(1UL);
+    this->expect_true(vmcs::guest_tr_selector::ti::get() == 1UL);
+
+    vmcs::guest_tr_selector::ti::set(0UL);
+    this->expect_true(vmcs::guest_tr_selector::ti::get() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_tr_selector_index()
+{
+    vmcs::guest_tr_selector::index::set(1UL);
+    this->expect_true(vmcs::guest_tr_selector::index::get() == 1UL);
+
+    vmcs::guest_tr_selector::index::set(0UL);
+    this->expect_true(vmcs::guest_tr_selector::index::get() == 0UL);
 }
 
 void

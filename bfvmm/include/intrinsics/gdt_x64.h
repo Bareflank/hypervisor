@@ -76,7 +76,7 @@ namespace gdt
         gdt_reg_x64_t reg;
 
         reg.base = base;
-        reg.limit = gsl::narrow<uint16_t>(limit);
+        reg.limit = gsl::narrow_cast<uint16_t>(limit);
 
         __write_gdt(&reg);
     }
@@ -116,7 +116,7 @@ namespace gdt
             gdt_reg_x64_t reg;
             __read_gdt(&reg);
 
-            reg.limit = gsl::narrow<uint16_t>(val);
+            reg.limit = gsl::narrow_cast<uint16_t>(val);
             __write_gdt(&reg);
         }
     }

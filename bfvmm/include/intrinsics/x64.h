@@ -74,6 +74,30 @@ namespace access_rights
 
     constexpr const auto unusable                                = 0x00010000U;
 }
+
+namespace interrupt
+{
+    constexpr const auto divide_error                                    = 0U;
+    constexpr const auto debug_exception                                 = 1U;
+    constexpr const auto nmi_interrupt                                   = 2U;
+    constexpr const auto breakpoint                                      = 3U;
+    constexpr const auto overflow                                        = 4U;
+    constexpr const auto bound_range_exceeded                            = 5U;
+    constexpr const auto invalid_opcode                                  = 6U;
+    constexpr const auto device_not_available                            = 7U;
+    constexpr const auto double_fault                                    = 8U;
+    constexpr const auto coprocessor_segment_overrun                     = 9U;
+    constexpr const auto invalid_tss                                     = 10U;
+    constexpr const auto segment_not_present                             = 11U;
+    constexpr const auto stack_segment_fault                             = 12U;
+    constexpr const auto general_protection                              = 13U;
+    constexpr const auto page_fault                                      = 14U;
+    constexpr const auto floating_point_error                            = 16U;
+    constexpr const auto alignment_check                                 = 17U;
+    constexpr const auto machine_check                                   = 18U;
+    constexpr const auto simd_floating_point_exception                   = 19U;
+    constexpr const auto virtualization_exception                        = 20U;
+}
 }
 
 // *INDENT-ON*

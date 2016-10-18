@@ -34,10 +34,10 @@ namespace intel_x64
 namespace msrs
 {
     template<class A> inline auto get(A addr) noexcept
-    { return __read_msr(gsl::narrow<uint32_t>(addr)); }
+    { return __read_msr(gsl::narrow_cast<uint32_t>(addr)); }
 
     template<class A, class T> void set(A addr, T val) noexcept
-    { __write_msr(gsl::narrow<uint32_t>(addr), val); }
+    { __write_msr(gsl::narrow_cast<uint32_t>(addr), val); }
 
     namespace ia32_feature_control
     {

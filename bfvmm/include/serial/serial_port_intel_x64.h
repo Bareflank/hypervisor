@@ -24,12 +24,13 @@
 
 #include <string>
 #include <memory>
-#include <intrinsics/intrinsics_intel_x64.h>
 
-#define COM1_PORT 0x3f8
-#define COM2_PORT 0x2f8
-#define COM3_PORT 0x3e8
-#define COM4_PORT 0x2e8
+#include <intrinsics/portio_x64.h>
+
+#define COM1_PORT 0x3F8U
+#define COM2_PORT 0x2F8U
+#define COM3_PORT 0x3E8U
+#define COM4_PORT 0x2E8U
 
 #ifndef DEFAULT_COM_PORT
 #define DEFAULT_COM_PORT COM1_PORT
@@ -51,28 +52,28 @@
 #define DEFAULT_PARITY_BITS parity_none
 #endif
 
-#define DLAB                                                          (1 << 7)
+#define DLAB                                                          (1U << 7)
 
-#define BAUD_RATE_LO_REG                                              (0)
-#define BAUD_RATE_HI_REG                                              (1)
-#define INTERRUPT_EN_REG                                              (1)
-#define FIFO_CONTROL_REG                                              (2)
-#define LINE_CONTROL_REG                                              (3)
-#define LINE_STATUS_REG                                               (5)
+#define BAUD_RATE_LO_REG                                              (0U)
+#define BAUD_RATE_HI_REG                                              (1U)
+#define INTERRUPT_EN_REG                                              (1U)
+#define FIFO_CONTROL_REG                                              (2U)
+#define LINE_CONTROL_REG                                              (3U)
+#define LINE_STATUS_REG                                               (5U)
 
-#define FIFO_CONTROL_ENABLE_FIFOS                                     (1 << 0)
-#define FIFO_CONTROL_CLEAR_RECIEVE_FIFO                               (1 << 1)
-#define FIFO_CONTROL_CLEAR_TRANSMIT_FIFO                              (1 << 2)
-#define FIFO_CONTROL_DMA_MODE_SELECT                                  (1 << 3)
+#define FIFO_CONTROL_ENABLE_FIFOS                                     (1U << 0)
+#define FIFO_CONTROL_CLEAR_RECIEVE_FIFO                               (1U << 1)
+#define FIFO_CONTROL_CLEAR_TRANSMIT_FIFO                              (1U << 2)
+#define FIFO_CONTROL_DMA_MODE_SELECT                                  (1U << 3)
 
-#define LINE_STATUS_DATA_READY                                        (1 << 0)
-#define LINE_STATUS_OVERRUN_ERROR                                     (1 << 1)
-#define LINE_STATUS_PARITY_ERROR                                      (1 << 2)
-#define LINE_STATUS_FRAMING_ERROR                                     (1 << 3)
-#define LINE_STATUS_BREAK_INTERRUPT                                   (1 << 4)
-#define LINE_STATUS_EMPTY_TRANSMITTER                                 (1 << 5)
-#define LINE_STATUS_EMPTY_DATA                                        (1 << 6)
-#define LINE_STATUS_RECIEVED_FIFO_ERROR                               (1 << 7)
+#define LINE_STATUS_DATA_READY                                        (1U << 0)
+#define LINE_STATUS_OVERRUN_ERROR                                     (1U << 1)
+#define LINE_STATUS_PARITY_ERROR                                      (1U << 2)
+#define LINE_STATUS_FRAMING_ERROR                                     (1U << 3)
+#define LINE_STATUS_BREAK_INTERRUPT                                   (1U << 4)
+#define LINE_STATUS_EMPTY_TRANSMITTER                                 (1U << 5)
+#define LINE_STATUS_EMPTY_DATA                                        (1U << 6)
+#define LINE_STATUS_RECIEVED_FIFO_ERROR                               (1U << 7)
 
 #define LINE_CONTROL_DATA_MASK                                        (0x03)
 #define LINE_CONTROL_STOP_MASK                                        (0x04)
@@ -122,13 +123,13 @@ public:
         char_length_5 = 0x00,
         char_length_6 = 0x01,
         char_length_7 = 0x02,
-        char_length_8 = 0x03,
+        char_length_8 = 0x03
     };
 
     enum stop_bits_t
     {
         stop_bits_1 = 0x00,
-        stop_bits_2 = 0x04,
+        stop_bits_2 = 0x04
     };
 
     enum parity_bits_t
@@ -144,24 +145,17 @@ public:
 
     /// Default Constructor
     ///
-    serial_port_intel_x64(std::shared_ptr<intrinsics_intel_x64> intrinsics = nullptr,
-                          uint16_t port = DEFAULT_COM_PORT) noexcept;
+    serial_port_intel_x64(uint16_t port = DEFAULT_COM_PORT) noexcept;
 
     /// Destructor
     ///
-    virtual ~serial_port_intel_x64() = default;
+    ~serial_port_intel_x64() = default;
 
     /// Get Instance
     ///
     /// Get an instance to the class.
     ///
-    static serial_port_intel_x64 *instance(const std::shared_ptr<intrinsics_intel_x64> &intrinsics = nullptr) noexcept;
-
-    /// Initialize
-    ///
-    /// Initializes the serial device.
-    ///
-    virtual void init();
+    static serial_port_intel_x64 *instance() noexcept;
 
     /// Set Baud Rate
     ///
@@ -172,7 +166,7 @@ public:
     ///
     /// @param rate desired baud rate
     ///
-    virtual void set_baud_rate(baud_rate_t rate) noexcept;
+    void set_baud_rate(baud_rate_t rate) noexcept;
 
     /// Buad Rate
     ///
@@ -182,7 +176,7 @@ public:
     ///
     /// @return the baud rate
     ///
-    virtual baud_rate_t baud_rate() const noexcept;
+    baud_rate_t baud_rate() const noexcept;
 
     /// Set Data Bits
     ///
@@ -191,13 +185,13 @@ public:
     ///
     /// @param bits the desired data bits
     ///
-    virtual void set_data_bits(data_bits_t bits) noexcept;
+    void set_data_bits(data_bits_t bits) noexcept;
 
     /// Data Bits
     ///
     /// @return the serial device's data bits
     ///
-    virtual data_bits_t data_bits() const noexcept;
+    data_bits_t data_bits() const noexcept;
 
     /// Set Stop Bits
     ///
@@ -206,13 +200,13 @@ public:
     ///
     /// @param bits the desired stop bits
     ///
-    virtual void set_stop_bits(stop_bits_t bits) noexcept;
+    void set_stop_bits(stop_bits_t bits) noexcept;
 
     /// Stop Bits
     ///
     /// @return the serial device's stop bits
     ///
-    virtual stop_bits_t stop_bits() const noexcept;
+    stop_bits_t stop_bits() const noexcept;
 
     /// Set Parity Bits
     ///
@@ -221,19 +215,19 @@ public:
     ///
     /// @param bits the desired parity bits
     ///
-    virtual void set_parity_bits(parity_bits_t bits) noexcept;
+    void set_parity_bits(parity_bits_t bits) noexcept;
 
     /// Parity Bits
     ///
     /// @return the serial device's parity bits
     ///
-    virtual parity_bits_t parity_bits() const noexcept;
+    parity_bits_t parity_bits() const noexcept;
 
     // Port
     //
     /// @return the serial device's port
     ///
-    virtual uint16_t port() const noexcept
+    uint16_t port() const noexcept
     { return m_port; }
 
     /// Write Character
@@ -242,7 +236,7 @@ public:
     ///
     /// @param c character to write
     ///
-    virtual void write(char c) noexcept;
+    void write(char c) noexcept;
 
     /// Write String
     ///
@@ -250,7 +244,7 @@ public:
     ///
     /// @param str string to write
     ///
-    virtual void write(const std::string &str) noexcept;
+    void write(const std::string &str) noexcept;
 
 public:
 
@@ -272,7 +266,6 @@ private:
 private:
 
     uint16_t m_port;
-    std::shared_ptr<intrinsics_intel_x64> m_intrinsics;
 };
 
 #endif
