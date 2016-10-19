@@ -33,8 +33,7 @@
 using namespace x64;
 using namespace intel_x64;
 
-vmcs_intel_x64::vmcs_intel_x64() :
-    m_vmcs_region_phys(0)
+vmcs_intel_x64::vmcs_intel_x64() : m_vmcs_region_phys(0)
 {
 }
 
@@ -222,19 +221,19 @@ vmcs_intel_x64::write_32bit_control_state(const std::shared_ptr<vmcs_intel_x64_s
 
     lower = ((ia32_vmx_pinbased_ctls_msr >> 0) & 0x00000000FFFFFFFF);
     upper = ((ia32_vmx_pinbased_ctls_msr >> 32) & 0x00000000FFFFFFFF);
-    vm::write(VMCS_PIN_BASED_VM_EXECUTION_CONTROLS, lower & upper);
+    vmcs::pin_based_vm_execution_controls::set(lower & upper);
 
     lower = ((ia32_vmx_procbased_ctls_msr >> 0) & 0x00000000FFFFFFFF);
     upper = ((ia32_vmx_procbased_ctls_msr >> 32) & 0x00000000FFFFFFFF);
-    vm::write(VMCS_PRIMARY_PROCESSOR_BASED_VM_EXECUTION_CONTROLS, lower & upper);
+    vmcs::primary_processor_based_vm_execution_controls::set(lower & upper);
 
     lower = ((ia32_vmx_exit_ctls_msr >> 0) & 0x00000000FFFFFFFF);
     upper = ((ia32_vmx_exit_ctls_msr >> 32) & 0x00000000FFFFFFFF);
-    vm::write(VMCS_VM_EXIT_CONTROLS, lower & upper);
+    vmcs::vm_exit_controls::set(lower & upper);
 
     lower = ((ia32_vmx_entry_ctls_msr >> 0) & 0x00000000FFFFFFFF);
     upper = ((ia32_vmx_entry_ctls_msr >> 32) & 0x00000000FFFFFFFF);
-    vm::write(VMCS_VM_ENTRY_CONTROLS, lower & upper);
+    vmcs::vm_entry_controls::set(lower & upper);
 
     // unused: VMCS_EXCEPTION_BITMAP
     // unused: VMCS_PAGE_FAULT_ERROR_CODE_MASK
@@ -419,49 +418,49 @@ vmcs_intel_x64::write_natural_host_state(const std::shared_ptr<vmcs_intel_x64_st
 void
 vmcs_intel_x64::pin_based_vm_execution_controls()
 {
-    auto controls = vm::read(VMCS_PIN_BASED_VM_EXECUTION_CONTROLS);
+    using namespace vmcs::pin_based_vm_execution_controls;
 
-    // controls |= VM_EXEC_PIN_BASED_EXTERNAL_INTERRUPT_EXITING;
-    // controls |= VM_EXEC_PIN_BASED_NMI_EXITING;
-    // controls |= VM_EXEC_PIN_BASED_VIRTUAL_NMIS;
-    // controls |= VM_EXEC_PIN_BASED_ACTIVATE_VMX_PREEMPTION_TIMER;
-    // controls |= VM_EXEC_PIN_BASED_PROCESS_POSTED_INTERRUPTS;
+    auto controls = get();
 
-    this->filter_unsupported(msrs::ia32_vmx_true_pinbased_ctls::addr, controls);
+    // external_interrupt_exiting::enable();
+    // nmi_exiting::enable();
+    // virtual_nmis::enable();
+    // activate_vmx_preemption_timer::enable();
+    // process_posted_interrupts::enable();
 
-    vm::write(VMCS_PIN_BASED_VM_EXECUTION_CONTROLS, controls);
+    set(controls);
 }
 
 void
 vmcs_intel_x64::primary_processor_based_vm_execution_controls()
 {
-    auto controls = vm::read(VMCS_PRIMARY_PROCESSOR_BASED_VM_EXECUTION_CONTROLS);
+    using namespace vmcs::primary_processor_based_vm_execution_controls;
 
-    // controls |= VM_EXEC_P_PROC_BASED_INTERRUPT_WINDOW_EXITING;
-    // controls |= VM_EXEC_P_PROC_BASED_USE_TSC_OFFSETTING;
-    // controls |= VM_EXEC_P_PROC_BASED_HLT_EXITING;
-    // controls |= VM_EXEC_P_PROC_BASED_INVLPG_EXITING;
-    // controls |= VM_EXEC_P_PROC_BASED_MWAIT_EXITING;
-    // controls |= VM_EXEC_P_PROC_BASED_RDPMC_EXITING;
-    // controls |= VM_EXEC_P_PROC_BASED_RDTSC_EXITING;
-    // controls |= VM_EXEC_P_PROC_BASED_CR3_LOAD_EXITING;
-    // controls |= VM_EXEC_P_PROC_BASED_CR3_STORE_EXITING;
-    // controls |= VM_EXEC_P_PROC_BASED_CR8_LOAD_EXITING;
-    // controls |= VM_EXEC_P_PROC_BASED_CR8_STORE_EXITING;
-    // controls |= VM_EXEC_P_PROC_BASED_USE_TPR_SHADOW;
-    // controls |= VM_EXEC_P_PROC_BASED_NMI_WINDOW_EXITING;
-    // controls |= VM_EXEC_P_PROC_BASED_MOV_DR_EXITING;
-    // controls |= VM_EXEC_P_PROC_BASED_UNCONDITIONAL_IO_EXITING;
-    // controls |= VM_EXEC_P_PROC_BASED_USE_IO_BITMAPS;
-    // controls |= VM_EXEC_P_PROC_BASED_MONITOR_TRAP_FLAG;
-    // controls |= VM_EXEC_P_PROC_BASED_USE_MSR_BITMAPS;
-    // controls |= VM_EXEC_P_PROC_BASED_MONITOR_EXITING;
-    // controls |= VM_EXEC_P_PROC_BASED_PAUSE_EXITING;
-    controls |= VM_EXEC_P_PROC_BASED_ACTIVATE_SECONDARY_CONTROLS;
+    auto controls = get();
 
-    this->filter_unsupported(msrs::ia32_vmx_true_procbased_ctls::addr, controls);
+    // interrupt_window_exiting::enable();
+    // use_tsc_offsetting::enable();
+    // hlt_exiting::enable();
+    // invlpg_exiting::enable();
+    // mwait_exiting::enable();
+    // rdpmc_exiting::enable();
+    // rdtsc_exiting::enable();
+    // cr3_load_exiting::enable();
+    // cr3_store_exiting::enable();
+    // cr8_load_exiting::enable();
+    // cr8_store_exiting::enable();
+    // use_tpr_shadow::enable();
+    // nmi_window_exiting::enable();
+    // mov_dr_exiting::enable();
+    // unconditional_io_exiting::enable();
+    // use_io_bitmaps::enable();
+    // monitor_trap_flag::enable();
+    // use_msr_bitmaps::enable();
+    // monitor_exiting::enable();
+    // pause_exiting::enable();
+    // activate_secondary_controls::enable();
 
-    vm::write(VMCS_PRIMARY_PROCESSOR_BASED_VM_EXECUTION_CONTROLS, controls);
+    set(controls);
 }
 
 void
@@ -496,50 +495,52 @@ vmcs_intel_x64::secondary_processor_based_vm_execution_controls()
 void
 vmcs_intel_x64::vm_exit_controls()
 {
-    auto controls = vm::read(VMCS_VM_EXIT_CONTROLS);
+    using namespace vmcs::vm_exit_controls;
 
-    controls |= VM_EXIT_CONTROL_SAVE_DEBUG_CONTROLS;
-    controls |= VM_EXIT_CONTROL_HOST_ADDRESS_SPACE_SIZE;
-    controls |= VM_EXIT_CONTROL_LOAD_IA32_PERF_GLOBAL_CTRL;
-    controls |= VM_EXIT_CONTROL_ACKNOWLEDGE_INTERRUPT_ON_EXIT;
-    controls |= VM_EXIT_CONTROL_SAVE_IA32_PAT;
-    controls |= VM_EXIT_CONTROL_LOAD_IA32_PAT;
-    controls |= VM_EXIT_CONTROL_SAVE_IA32_EFER;
-    controls |= VM_EXIT_CONTROL_LOAD_IA32_EFER;
-    // controls |= VM_EXIT_CONTROL_SAVE_VMX_PREEMPTION_TIMER_VALUE;
+    auto controls = get();
 
-    this->filter_unsupported(msrs::ia32_vmx_true_exit_ctls::addr, controls);
+    save_debug_controls::enable();
+    host_address_space_size::enable();
+    load_ia32_perf_global_ctrl::enable();
+    acknowledge_interrupt_on_exit::enable();
+    save_ia32_pat::enable();
+    load_ia32_pat::enable();
+    save_ia32_efer::enable();
+    load_ia32_efer::enable();
+    // save_vmx_preemption_timer_value::enable();
 
-    vm::write(VMCS_VM_EXIT_CONTROLS, controls);
+    set(controls);
 }
 
 void
 vmcs_intel_x64::vm_entry_controls()
 {
-    auto controls = vm::read(VMCS_VM_ENTRY_CONTROLS);
+    using namespace vmcs::vm_entry_controls;
 
-    controls |= VM_ENTRY_CONTROL_LOAD_DEBUG_CONTROLS;
-    controls |= VM_ENTRY_CONTROL_IA_32E_MODE_GUEST;
-    // controls |= VM_ENTRY_CONTROL_ENTRY_TO_SMM;
-    // controls |= VM_ENTRY_CONTROL_DEACTIVATE_DUAL_MONITOR_TREATMENT;
-    controls |= VM_ENTRY_CONTROL_LOAD_IA32_PERF_GLOBAL_CTRL;
-    controls |= VM_ENTRY_CONTROL_LOAD_IA32_PAT;
-    controls |= VM_ENTRY_CONTROL_LOAD_IA32_EFER;
+    auto controls = get();
 
-    this->filter_unsupported(msrs::ia32_vmx_true_entry_ctls::addr, controls);
+    load_debug_controls::enable();
+    ia_32e_mode_guest::enable();
+    // entry_to_smm::enable();
+    // deactivate_dual_monitor_treatment::enable();
+    load_ia32_perf_global_ctrl::enable();
+    load_ia32_pat::enable();
+    load_ia32_efer::enable();
 
-    vm::write(VMCS_VM_ENTRY_CONTROLS, controls);
+    set(controls);
 }
 
 void
 vmcs_intel_x64::filter_unsupported(uint32_t msr, uint64_t &ctrl)
 {
+    (void)ctrl;
+    (void)msr;
     // REMOVE ME: This function should be removed in facvor of
     // each function being able to detect if they are supported or not.
 
-    auto allowed = msrs::get(msr);
+    // auto allowed = msrs::get(msr);
     // auto allowed0 = ((allowed >> 00) & 0x00000000FFFFFFFF);
-    auto allowed1 = ((allowed >> 32) & 0x00000000FFFFFFFF);
+    // auto allowed1 = ((allowed >> 32) & 0x00000000FFFFFFFF);
 
     // if ((allowed0 & ctrl) != allowed0)
     // {
@@ -552,14 +553,14 @@ vmcs_intel_x64::filter_unsupported(uint32_t msr, uint64_t &ctrl)
     //     bfdebug << "    - new ctrl: " << view_as_pointer(ctrl) << bfendl;
     // }
 
-    if ((ctrl & ~allowed1) != 0)
-    {
-        bfdebug << "vmcs ctrl field mis-configured for msr allowed 1: " << view_as_pointer(msr) << bfendl;
-        bfdebug << "    - allowed1: " << view_as_pointer(allowed1) << bfendl;
-        bfdebug << "    - old ctrl: " << view_as_pointer(ctrl) << bfendl;
+    // if ((ctrl & ~allowed1) != 0)
+    // {
+    //     bfdebug << "vmcs ctrl field mis-configured for msr allowed 1: " << view_as_pointer(msr) << bfendl;
+    //     bfdebug << "    - allowed1: " << view_as_pointer(allowed1) << bfendl;
+    //     bfdebug << "    - old ctrl: " << view_as_pointer(ctrl) << bfendl;
 
-        ctrl &= allowed1;
+    //     ctrl &= allowed1;
 
-        bfdebug << "    - new ctrl: " << view_as_pointer(ctrl) << bfendl;
-    }
+    //     bfdebug << "    - new ctrl: " << view_as_pointer(ctrl) << bfendl;
+    // }
 }

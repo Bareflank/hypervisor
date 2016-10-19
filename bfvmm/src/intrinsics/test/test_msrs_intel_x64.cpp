@@ -959,8 +959,10 @@ intrinsics_ut::test_ia32_vmx_ept_vpid_cap_invvpid_single_context_retaining_globa
 void
 intrinsics_ut::test_ia32_vmx_true_pinbased_ctls()
 {
-    g_msrs[msrs::ia32_vmx_true_pinbased_ctls::addr] = 100UL;
-    this->expect_true(msrs::ia32_vmx_true_pinbased_ctls::get() == 100UL);
+    g_msrs[msrs::ia32_vmx_true_pinbased_ctls::addr] = 0x1000000011111111UL;
+    this->expect_true(msrs::ia32_vmx_true_pinbased_ctls::get() == 0x1000000011111111UL);
+    this->expect_true(msrs::ia32_vmx_true_pinbased_ctls::allowed0() == 0x11111111UL);
+    this->expect_true(msrs::ia32_vmx_true_pinbased_ctls::allowed1() == 0x10000000UL);
 }
 
 void
@@ -971,6 +973,16 @@ intrinsics_ut::test_ia32_vmx_true_pinbased_ctls_external_interrupt_exiting()
 
     g_msrs[msrs::ia32_vmx_true_pinbased_ctls::addr] = mask;
     this->expect_true(msrs::ia32_vmx_true_pinbased_ctls::external_interrupt_exiting::get() == mask >> from);
+    this->expect_false(msrs::ia32_vmx_true_pinbased_ctls::external_interrupt_exiting::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_pinbased_ctls::addr] = ~mask;
+    this->expect_true(msrs::ia32_vmx_true_pinbased_ctls::external_interrupt_exiting::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_pinbased_ctls::addr] = mask << 32;
+    this->expect_true(msrs::ia32_vmx_true_pinbased_ctls::external_interrupt_exiting::is_allowed1());
+
+    g_msrs[msrs::ia32_vmx_true_pinbased_ctls::addr] = ~(mask << 32);
+    this->expect_false(msrs::ia32_vmx_true_pinbased_ctls::external_interrupt_exiting::is_allowed1());
 }
 
 void
@@ -981,6 +993,16 @@ intrinsics_ut::test_ia32_vmx_true_pinbased_ctls_nmi_exiting()
 
     g_msrs[msrs::ia32_vmx_true_pinbased_ctls::addr] = mask;
     this->expect_true(msrs::ia32_vmx_true_pinbased_ctls::nmi_exiting::get() == mask >> from);
+    this->expect_false(msrs::ia32_vmx_true_pinbased_ctls::nmi_exiting::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_pinbased_ctls::addr] = ~mask;
+    this->expect_true(msrs::ia32_vmx_true_pinbased_ctls::nmi_exiting::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_pinbased_ctls::addr] = mask << 32;
+    this->expect_true(msrs::ia32_vmx_true_pinbased_ctls::nmi_exiting::is_allowed1());
+
+    g_msrs[msrs::ia32_vmx_true_pinbased_ctls::addr] = ~(mask << 32);
+    this->expect_false(msrs::ia32_vmx_true_pinbased_ctls::nmi_exiting::is_allowed1());
 }
 
 void
@@ -991,6 +1013,16 @@ intrinsics_ut::test_ia32_vmx_true_pinbased_ctls_virtual_nmis()
 
     g_msrs[msrs::ia32_vmx_true_pinbased_ctls::addr] = mask;
     this->expect_true(msrs::ia32_vmx_true_pinbased_ctls::virtual_nmis::get() == mask >> from);
+    this->expect_false(msrs::ia32_vmx_true_pinbased_ctls::virtual_nmis::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_pinbased_ctls::addr] = ~mask;
+    this->expect_true(msrs::ia32_vmx_true_pinbased_ctls::virtual_nmis::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_pinbased_ctls::addr] = mask << 32;
+    this->expect_true(msrs::ia32_vmx_true_pinbased_ctls::virtual_nmis::is_allowed1());
+
+    g_msrs[msrs::ia32_vmx_true_pinbased_ctls::addr] = ~(mask << 32);
+    this->expect_false(msrs::ia32_vmx_true_pinbased_ctls::virtual_nmis::is_allowed1());
 }
 
 void
@@ -1001,6 +1033,16 @@ intrinsics_ut::test_ia32_vmx_true_pinbased_ctls_activate_vmx_preemption_timer()
 
     g_msrs[msrs::ia32_vmx_true_pinbased_ctls::addr] = mask;
     this->expect_true(msrs::ia32_vmx_true_pinbased_ctls::activate_vmx_preemption_timer::get() == mask >> from);
+    this->expect_false(msrs::ia32_vmx_true_pinbased_ctls::activate_vmx_preemption_timer::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_pinbased_ctls::addr] = ~mask;
+    this->expect_true(msrs::ia32_vmx_true_pinbased_ctls::activate_vmx_preemption_timer::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_pinbased_ctls::addr] = mask << 32;
+    this->expect_true(msrs::ia32_vmx_true_pinbased_ctls::activate_vmx_preemption_timer::is_allowed1());
+
+    g_msrs[msrs::ia32_vmx_true_pinbased_ctls::addr] = ~(mask << 32);
+    this->expect_false(msrs::ia32_vmx_true_pinbased_ctls::activate_vmx_preemption_timer::is_allowed1());
 }
 
 void
@@ -1011,13 +1053,25 @@ intrinsics_ut::test_ia32_vmx_true_pinbased_ctls_process_posted_interrupts()
 
     g_msrs[msrs::ia32_vmx_true_pinbased_ctls::addr] = mask;
     this->expect_true(msrs::ia32_vmx_true_pinbased_ctls::process_posted_interrupts::get() == mask >> from);
+    this->expect_false(msrs::ia32_vmx_true_pinbased_ctls::process_posted_interrupts::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_pinbased_ctls::addr] = ~mask;
+    this->expect_true(msrs::ia32_vmx_true_pinbased_ctls::process_posted_interrupts::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_pinbased_ctls::addr] = mask << 32;
+    this->expect_true(msrs::ia32_vmx_true_pinbased_ctls::process_posted_interrupts::is_allowed1());
+
+    g_msrs[msrs::ia32_vmx_true_pinbased_ctls::addr] = ~(mask << 32);
+    this->expect_false(msrs::ia32_vmx_true_pinbased_ctls::process_posted_interrupts::is_allowed1());
 }
 
 void
 intrinsics_ut::test_ia32_vmx_true_procbased_ctls()
 {
-    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = 100UL;
-    this->expect_true(msrs::ia32_vmx_true_procbased_ctls::get() == 100UL);
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = 0x1000000011111111UL;
+    this->expect_true(msrs::ia32_vmx_true_procbased_ctls::get() == 0x1000000011111111UL);
+    this->expect_true(msrs::ia32_vmx_true_procbased_ctls::allowed0() == 0x11111111UL);
+    this->expect_true(msrs::ia32_vmx_true_procbased_ctls::allowed1() == 0x10000000UL);
 }
 
 void
@@ -1028,6 +1082,16 @@ intrinsics_ut::test_ia32_vmx_true_procbased_ctls_interrupt_window_exiting()
 
     g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = mask;
     this->expect_true(msrs::ia32_vmx_true_procbased_ctls::interrupt_window_exiting::get() == mask >> from);
+    this->expect_false(msrs::ia32_vmx_true_procbased_ctls::interrupt_window_exiting::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = ~mask;
+    this->expect_true(msrs::ia32_vmx_true_procbased_ctls::interrupt_window_exiting::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = mask << 32;
+    this->expect_true(msrs::ia32_vmx_true_procbased_ctls::interrupt_window_exiting::is_allowed1());
+
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = ~(mask << 32);
+    this->expect_false(msrs::ia32_vmx_true_procbased_ctls::interrupt_window_exiting::is_allowed1());
 }
 
 void
@@ -1038,6 +1102,16 @@ intrinsics_ut::test_ia32_vmx_true_procbased_ctls_use_tsc_offsetting()
 
     g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = mask;
     this->expect_true(msrs::ia32_vmx_true_procbased_ctls::use_tsc_offsetting::get() == mask >> from);
+    this->expect_false(msrs::ia32_vmx_true_procbased_ctls::use_tsc_offsetting::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = ~mask;
+    this->expect_true(msrs::ia32_vmx_true_procbased_ctls::use_tsc_offsetting::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = mask << 32;
+    this->expect_true(msrs::ia32_vmx_true_procbased_ctls::use_tsc_offsetting::is_allowed1());
+
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = ~(mask << 32);
+    this->expect_false(msrs::ia32_vmx_true_procbased_ctls::use_tsc_offsetting::is_allowed1());
 }
 
 void
@@ -1048,6 +1122,16 @@ intrinsics_ut::test_ia32_vmx_true_procbased_ctls_hlt_exiting()
 
     g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = mask;
     this->expect_true(msrs::ia32_vmx_true_procbased_ctls::hlt_exiting::get() == mask >> from);
+    this->expect_false(msrs::ia32_vmx_true_procbased_ctls::hlt_exiting::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = ~mask;
+    this->expect_true(msrs::ia32_vmx_true_procbased_ctls::hlt_exiting::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = mask << 32;
+    this->expect_true(msrs::ia32_vmx_true_procbased_ctls::hlt_exiting::is_allowed1());
+
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = ~(mask << 32);
+    this->expect_false(msrs::ia32_vmx_true_procbased_ctls::hlt_exiting::is_allowed1());
 }
 
 void
@@ -1058,6 +1142,16 @@ intrinsics_ut::test_ia32_vmx_true_procbased_ctls_invlpg_exiting()
 
     g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = mask;
     this->expect_true(msrs::ia32_vmx_true_procbased_ctls::invlpg_exiting::get() == mask >> from);
+    this->expect_false(msrs::ia32_vmx_true_procbased_ctls::invlpg_exiting::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = ~mask;
+    this->expect_true(msrs::ia32_vmx_true_procbased_ctls::invlpg_exiting::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = mask << 32;
+    this->expect_true(msrs::ia32_vmx_true_procbased_ctls::invlpg_exiting::is_allowed1());
+
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = ~(mask << 32);
+    this->expect_false(msrs::ia32_vmx_true_procbased_ctls::invlpg_exiting::is_allowed1());
 }
 
 void
@@ -1068,6 +1162,16 @@ intrinsics_ut::test_ia32_vmx_true_procbased_ctls_mwait_exiting()
 
     g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = mask;
     this->expect_true(msrs::ia32_vmx_true_procbased_ctls::mwait_exiting::get() == mask >> from);
+    this->expect_false(msrs::ia32_vmx_true_procbased_ctls::mwait_exiting::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = ~mask;
+    this->expect_true(msrs::ia32_vmx_true_procbased_ctls::mwait_exiting::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = mask << 32;
+    this->expect_true(msrs::ia32_vmx_true_procbased_ctls::mwait_exiting::is_allowed1());
+
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = ~(mask << 32);
+    this->expect_false(msrs::ia32_vmx_true_procbased_ctls::mwait_exiting::is_allowed1());
 }
 
 void
@@ -1078,6 +1182,16 @@ intrinsics_ut::test_ia32_vmx_true_procbased_ctls_rdpmc_exiting()
 
     g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = mask;
     this->expect_true(msrs::ia32_vmx_true_procbased_ctls::rdpmc_exiting::get() == mask >> from);
+    this->expect_false(msrs::ia32_vmx_true_procbased_ctls::rdpmc_exiting::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = ~mask;
+    this->expect_true(msrs::ia32_vmx_true_procbased_ctls::rdpmc_exiting::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = mask << 32;
+    this->expect_true(msrs::ia32_vmx_true_procbased_ctls::rdpmc_exiting::is_allowed1());
+
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = ~(mask << 32);
+    this->expect_false(msrs::ia32_vmx_true_procbased_ctls::rdpmc_exiting::is_allowed1());
 }
 
 void
@@ -1088,6 +1202,16 @@ intrinsics_ut::test_ia32_vmx_true_procbased_ctls_rdtsc_exiting()
 
     g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = mask;
     this->expect_true(msrs::ia32_vmx_true_procbased_ctls::rdtsc_exiting::get() == mask >> from);
+    this->expect_false(msrs::ia32_vmx_true_procbased_ctls::rdtsc_exiting::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = ~mask;
+    this->expect_true(msrs::ia32_vmx_true_procbased_ctls::rdtsc_exiting::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = mask << 32;
+    this->expect_true(msrs::ia32_vmx_true_procbased_ctls::rdtsc_exiting::is_allowed1());
+
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = ~(mask << 32);
+    this->expect_false(msrs::ia32_vmx_true_procbased_ctls::rdtsc_exiting::is_allowed1());
 }
 
 void
@@ -1098,6 +1222,16 @@ intrinsics_ut::test_ia32_vmx_true_procbased_ctls_cr3_load_exiting()
 
     g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = mask;
     this->expect_true(msrs::ia32_vmx_true_procbased_ctls::cr3_load_exiting::get() == mask >> from);
+    this->expect_false(msrs::ia32_vmx_true_procbased_ctls::cr3_load_exiting::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = ~mask;
+    this->expect_true(msrs::ia32_vmx_true_procbased_ctls::cr3_load_exiting::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = mask << 32;
+    this->expect_true(msrs::ia32_vmx_true_procbased_ctls::cr3_load_exiting::is_allowed1());
+
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = ~(mask << 32);
+    this->expect_false(msrs::ia32_vmx_true_procbased_ctls::cr3_load_exiting::is_allowed1());
 }
 
 void
@@ -1108,6 +1242,16 @@ intrinsics_ut::test_ia32_vmx_true_procbased_ctls_cr3_store_exiting()
 
     g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = mask;
     this->expect_true(msrs::ia32_vmx_true_procbased_ctls::cr3_store_exiting::get() == mask >> from);
+    this->expect_false(msrs::ia32_vmx_true_procbased_ctls::cr3_store_exiting::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = ~mask;
+    this->expect_true(msrs::ia32_vmx_true_procbased_ctls::cr3_store_exiting::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = mask << 32;
+    this->expect_true(msrs::ia32_vmx_true_procbased_ctls::cr3_store_exiting::is_allowed1());
+
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = ~(mask << 32);
+    this->expect_false(msrs::ia32_vmx_true_procbased_ctls::cr3_store_exiting::is_allowed1());
 }
 
 void
@@ -1118,6 +1262,16 @@ intrinsics_ut::test_ia32_vmx_true_procbased_ctls_cr8_load_exiting()
 
     g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = mask;
     this->expect_true(msrs::ia32_vmx_true_procbased_ctls::cr8_load_exiting::get() == mask >> from);
+    this->expect_false(msrs::ia32_vmx_true_procbased_ctls::cr8_load_exiting::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = ~mask;
+    this->expect_true(msrs::ia32_vmx_true_procbased_ctls::cr8_load_exiting::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = mask << 32;
+    this->expect_true(msrs::ia32_vmx_true_procbased_ctls::cr8_load_exiting::is_allowed1());
+
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = ~(mask << 32);
+    this->expect_false(msrs::ia32_vmx_true_procbased_ctls::cr8_load_exiting::is_allowed1());
 }
 
 void
@@ -1128,6 +1282,16 @@ intrinsics_ut::test_ia32_vmx_true_procbased_ctls_cr8_store_exiting()
 
     g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = mask;
     this->expect_true(msrs::ia32_vmx_true_procbased_ctls::cr8_store_exiting::get() == mask >> from);
+    this->expect_false(msrs::ia32_vmx_true_procbased_ctls::cr8_store_exiting::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = ~mask;
+    this->expect_true(msrs::ia32_vmx_true_procbased_ctls::cr8_store_exiting::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = mask << 32;
+    this->expect_true(msrs::ia32_vmx_true_procbased_ctls::cr8_store_exiting::is_allowed1());
+
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = ~(mask << 32);
+    this->expect_false(msrs::ia32_vmx_true_procbased_ctls::cr8_store_exiting::is_allowed1());
 }
 
 void
@@ -1138,6 +1302,16 @@ intrinsics_ut::test_ia32_vmx_true_procbased_ctls_use_tpr_shadow()
 
     g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = mask;
     this->expect_true(msrs::ia32_vmx_true_procbased_ctls::use_tpr_shadow::get() == mask >> from);
+    this->expect_false(msrs::ia32_vmx_true_procbased_ctls::use_tpr_shadow::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = ~mask;
+    this->expect_true(msrs::ia32_vmx_true_procbased_ctls::use_tpr_shadow::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = mask << 32;
+    this->expect_true(msrs::ia32_vmx_true_procbased_ctls::use_tpr_shadow::is_allowed1());
+
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = ~(mask << 32);
+    this->expect_false(msrs::ia32_vmx_true_procbased_ctls::use_tpr_shadow::is_allowed1());
 }
 
 void
@@ -1148,6 +1322,16 @@ intrinsics_ut::test_ia32_vmx_true_procbased_ctls_nmi_window_exiting()
 
     g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = mask;
     this->expect_true(msrs::ia32_vmx_true_procbased_ctls::nmi_window_exiting::get() == mask >> from);
+    this->expect_false(msrs::ia32_vmx_true_procbased_ctls::nmi_window_exiting::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = ~mask;
+    this->expect_true(msrs::ia32_vmx_true_procbased_ctls::nmi_window_exiting::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = mask << 32;
+    this->expect_true(msrs::ia32_vmx_true_procbased_ctls::nmi_window_exiting::is_allowed1());
+
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = ~(mask << 32);
+    this->expect_false(msrs::ia32_vmx_true_procbased_ctls::nmi_window_exiting::is_allowed1());
 }
 
 void
@@ -1158,6 +1342,16 @@ intrinsics_ut::test_ia32_vmx_true_procbased_ctls_mov_dr_exiting()
 
     g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = mask;
     this->expect_true(msrs::ia32_vmx_true_procbased_ctls::mov_dr_exiting::get() == mask >> from);
+    this->expect_false(msrs::ia32_vmx_true_procbased_ctls::mov_dr_exiting::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = ~mask;
+    this->expect_true(msrs::ia32_vmx_true_procbased_ctls::mov_dr_exiting::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = mask << 32;
+    this->expect_true(msrs::ia32_vmx_true_procbased_ctls::mov_dr_exiting::is_allowed1());
+
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = ~(mask << 32);
+    this->expect_false(msrs::ia32_vmx_true_procbased_ctls::mov_dr_exiting::is_allowed1());
 }
 
 void
@@ -1168,6 +1362,16 @@ intrinsics_ut::test_ia32_vmx_true_procbased_ctls_unconditional_io_exiting()
 
     g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = mask;
     this->expect_true(msrs::ia32_vmx_true_procbased_ctls::unconditional_io_exiting::get() == mask >> from);
+    this->expect_false(msrs::ia32_vmx_true_procbased_ctls::unconditional_io_exiting::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = ~mask;
+    this->expect_true(msrs::ia32_vmx_true_procbased_ctls::unconditional_io_exiting::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = mask << 32;
+    this->expect_true(msrs::ia32_vmx_true_procbased_ctls::unconditional_io_exiting::is_allowed1());
+
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = ~(mask << 32);
+    this->expect_false(msrs::ia32_vmx_true_procbased_ctls::unconditional_io_exiting::is_allowed1());
 }
 
 void
@@ -1178,6 +1382,16 @@ intrinsics_ut::test_ia32_vmx_true_procbased_ctls_use_io_bitmaps()
 
     g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = mask;
     this->expect_true(msrs::ia32_vmx_true_procbased_ctls::use_io_bitmaps::get() == mask >> from);
+    this->expect_false(msrs::ia32_vmx_true_procbased_ctls::use_io_bitmaps::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = ~mask;
+    this->expect_true(msrs::ia32_vmx_true_procbased_ctls::use_io_bitmaps::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = mask << 32;
+    this->expect_true(msrs::ia32_vmx_true_procbased_ctls::use_io_bitmaps::is_allowed1());
+
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = ~(mask << 32);
+    this->expect_false(msrs::ia32_vmx_true_procbased_ctls::use_io_bitmaps::is_allowed1());
 }
 
 void
@@ -1188,6 +1402,16 @@ intrinsics_ut::test_ia32_vmx_true_procbased_ctls_monitor_trap_flag()
 
     g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = mask;
     this->expect_true(msrs::ia32_vmx_true_procbased_ctls::monitor_trap_flag::get() == mask >> from);
+    this->expect_false(msrs::ia32_vmx_true_procbased_ctls::monitor_trap_flag::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = ~mask;
+    this->expect_true(msrs::ia32_vmx_true_procbased_ctls::monitor_trap_flag::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = mask << 32;
+    this->expect_true(msrs::ia32_vmx_true_procbased_ctls::monitor_trap_flag::is_allowed1());
+
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = ~(mask << 32);
+    this->expect_false(msrs::ia32_vmx_true_procbased_ctls::monitor_trap_flag::is_allowed1());
 }
 
 void
@@ -1198,6 +1422,16 @@ intrinsics_ut::test_ia32_vmx_true_procbased_ctls_use_msr_bitmaps()
 
     g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = mask;
     this->expect_true(msrs::ia32_vmx_true_procbased_ctls::use_msr_bitmaps::get() == mask >> from);
+    this->expect_false(msrs::ia32_vmx_true_procbased_ctls::use_msr_bitmaps::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = ~mask;
+    this->expect_true(msrs::ia32_vmx_true_procbased_ctls::use_msr_bitmaps::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = mask << 32;
+    this->expect_true(msrs::ia32_vmx_true_procbased_ctls::use_msr_bitmaps::is_allowed1());
+
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = ~(mask << 32);
+    this->expect_false(msrs::ia32_vmx_true_procbased_ctls::use_msr_bitmaps::is_allowed1());
 }
 
 void
@@ -1208,6 +1442,16 @@ intrinsics_ut::test_ia32_vmx_true_procbased_ctls_monitor_exiting()
 
     g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = mask;
     this->expect_true(msrs::ia32_vmx_true_procbased_ctls::monitor_exiting::get() == mask >> from);
+    this->expect_false(msrs::ia32_vmx_true_procbased_ctls::monitor_exiting::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = ~mask;
+    this->expect_true(msrs::ia32_vmx_true_procbased_ctls::monitor_exiting::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = mask << 32;
+    this->expect_true(msrs::ia32_vmx_true_procbased_ctls::monitor_exiting::is_allowed1());
+
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = ~(mask << 32);
+    this->expect_false(msrs::ia32_vmx_true_procbased_ctls::monitor_exiting::is_allowed1());
 }
 
 void
@@ -1218,6 +1462,16 @@ intrinsics_ut::test_ia32_vmx_true_procbased_ctls_pause_exiting()
 
     g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = mask;
     this->expect_true(msrs::ia32_vmx_true_procbased_ctls::pause_exiting::get() == mask >> from);
+    this->expect_false(msrs::ia32_vmx_true_procbased_ctls::pause_exiting::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = ~mask;
+    this->expect_true(msrs::ia32_vmx_true_procbased_ctls::pause_exiting::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = mask << 32;
+    this->expect_true(msrs::ia32_vmx_true_procbased_ctls::pause_exiting::is_allowed1());
+
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = ~(mask << 32);
+    this->expect_false(msrs::ia32_vmx_true_procbased_ctls::pause_exiting::is_allowed1());
 }
 
 void
@@ -1228,13 +1482,25 @@ intrinsics_ut::test_ia32_vmx_true_procbased_ctls_activate_secondary_controls()
 
     g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = mask;
     this->expect_true(msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::get() == mask >> from);
+    this->expect_false(msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = ~mask;
+    this->expect_true(msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = mask << 32;
+    this->expect_true(msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::is_allowed1());
+
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = ~(mask << 32);
+    this->expect_false(msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::is_allowed1());
 }
 
 void
 intrinsics_ut::test_ia32_vmx_true_exit_ctls()
 {
-    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] = 100UL;
-    this->expect_true(msrs::ia32_vmx_true_exit_ctls::get() == 100UL);
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] = 0x1000000011111111UL;
+    this->expect_true(msrs::ia32_vmx_true_exit_ctls::get() == 0x1000000011111111UL);
+    this->expect_true(msrs::ia32_vmx_true_exit_ctls::allowed0() == 0x11111111UL);
+    this->expect_true(msrs::ia32_vmx_true_exit_ctls::allowed1() == 0x10000000UL);
 }
 
 void
@@ -1245,6 +1511,16 @@ intrinsics_ut::test_ia32_vmx_true_exit_ctls_save_debug_controls()
 
     g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] = mask;
     this->expect_true(msrs::ia32_vmx_true_exit_ctls::save_debug_controls::get() == mask >> from);
+    this->expect_false(msrs::ia32_vmx_true_exit_ctls::save_debug_controls::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] = ~mask;
+    this->expect_true(msrs::ia32_vmx_true_exit_ctls::save_debug_controls::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] = mask << 32;
+    this->expect_true(msrs::ia32_vmx_true_exit_ctls::save_debug_controls::is_allowed1());
+
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] = ~(mask << 32);
+    this->expect_false(msrs::ia32_vmx_true_exit_ctls::save_debug_controls::is_allowed1());
 }
 
 void
@@ -1255,6 +1531,16 @@ intrinsics_ut::test_ia32_vmx_true_exit_ctls_host_address_space_size()
 
     g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] = mask;
     this->expect_true(msrs::ia32_vmx_true_exit_ctls::host_address_space_size::get() == mask >> from);
+    this->expect_false(msrs::ia32_vmx_true_exit_ctls::host_address_space_size::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] = ~mask;
+    this->expect_true(msrs::ia32_vmx_true_exit_ctls::host_address_space_size::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] = mask << 32;
+    this->expect_true(msrs::ia32_vmx_true_exit_ctls::host_address_space_size::is_allowed1());
+
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] = ~(mask << 32);
+    this->expect_false(msrs::ia32_vmx_true_exit_ctls::host_address_space_size::is_allowed1());
 }
 
 void
@@ -1265,6 +1551,16 @@ intrinsics_ut::test_ia32_vmx_true_exit_ctls_load_ia32_perf_global_ctrl()
 
     g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] = mask;
     this->expect_true(msrs::ia32_vmx_true_exit_ctls::load_ia32_perf_global_ctrl::get() == mask >> from);
+    this->expect_false(msrs::ia32_vmx_true_exit_ctls::load_ia32_perf_global_ctrl::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] = ~mask;
+    this->expect_true(msrs::ia32_vmx_true_exit_ctls::load_ia32_perf_global_ctrl::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] = mask << 32;
+    this->expect_true(msrs::ia32_vmx_true_exit_ctls::load_ia32_perf_global_ctrl::is_allowed1());
+
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] = ~(mask << 32);
+    this->expect_false(msrs::ia32_vmx_true_exit_ctls::load_ia32_perf_global_ctrl::is_allowed1());
 }
 
 void
@@ -1275,6 +1571,16 @@ intrinsics_ut::test_ia32_vmx_true_exit_ctls_acknowledge_interrupt_on_exit()
 
     g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] = mask;
     this->expect_true(msrs::ia32_vmx_true_exit_ctls::acknowledge_interrupt_on_exit::get() == mask >> from);
+    this->expect_false(msrs::ia32_vmx_true_exit_ctls::acknowledge_interrupt_on_exit::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] = ~mask;
+    this->expect_true(msrs::ia32_vmx_true_exit_ctls::acknowledge_interrupt_on_exit::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] = mask << 32;
+    this->expect_true(msrs::ia32_vmx_true_exit_ctls::acknowledge_interrupt_on_exit::is_allowed1());
+
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] = ~(mask << 32);
+    this->expect_false(msrs::ia32_vmx_true_exit_ctls::acknowledge_interrupt_on_exit::is_allowed1());
 }
 
 void
@@ -1285,6 +1591,16 @@ intrinsics_ut::test_ia32_vmx_true_exit_ctls_save_ia32_pat()
 
     g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] = mask;
     this->expect_true(msrs::ia32_vmx_true_exit_ctls::save_ia32_pat::get() == mask >> from);
+    this->expect_false(msrs::ia32_vmx_true_exit_ctls::save_ia32_pat::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] = ~mask;
+    this->expect_true(msrs::ia32_vmx_true_exit_ctls::save_ia32_pat::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] = mask << 32;
+    this->expect_true(msrs::ia32_vmx_true_exit_ctls::save_ia32_pat::is_allowed1());
+
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] = ~(mask << 32);
+    this->expect_false(msrs::ia32_vmx_true_exit_ctls::save_ia32_pat::is_allowed1());
 }
 
 void
@@ -1295,6 +1611,16 @@ intrinsics_ut::test_ia32_vmx_true_exit_ctls_load_ia32_pat()
 
     g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] = mask;
     this->expect_true(msrs::ia32_vmx_true_exit_ctls::load_ia32_pat::get() == mask >> from);
+    this->expect_false(msrs::ia32_vmx_true_exit_ctls::load_ia32_pat::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] = ~mask;
+    this->expect_true(msrs::ia32_vmx_true_exit_ctls::load_ia32_pat::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] = mask << 32;
+    this->expect_true(msrs::ia32_vmx_true_exit_ctls::load_ia32_pat::is_allowed1());
+
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] = ~(mask << 32);
+    this->expect_false(msrs::ia32_vmx_true_exit_ctls::load_ia32_pat::is_allowed1());
 }
 
 void
@@ -1305,6 +1631,16 @@ intrinsics_ut::test_ia32_vmx_true_exit_ctls_save_ia32_efer()
 
     g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] = mask;
     this->expect_true(msrs::ia32_vmx_true_exit_ctls::save_ia32_efer::get() == mask >> from);
+    this->expect_false(msrs::ia32_vmx_true_exit_ctls::save_ia32_efer::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] = ~mask;
+    this->expect_true(msrs::ia32_vmx_true_exit_ctls::save_ia32_efer::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] = mask << 32;
+    this->expect_true(msrs::ia32_vmx_true_exit_ctls::save_ia32_efer::is_allowed1());
+
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] = ~(mask << 32);
+    this->expect_false(msrs::ia32_vmx_true_exit_ctls::save_ia32_efer::is_allowed1());
 }
 
 void
@@ -1315,6 +1651,16 @@ intrinsics_ut::test_ia32_vmx_true_exit_ctls_load_ia32_efer()
 
     g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] = mask;
     this->expect_true(msrs::ia32_vmx_true_exit_ctls::load_ia32_efer::get() == mask >> from);
+    this->expect_false(msrs::ia32_vmx_true_exit_ctls::load_ia32_efer::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] = ~mask;
+    this->expect_true(msrs::ia32_vmx_true_exit_ctls::load_ia32_efer::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] = mask << 32;
+    this->expect_true(msrs::ia32_vmx_true_exit_ctls::load_ia32_efer::is_allowed1());
+
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] = ~(mask << 32);
+    this->expect_false(msrs::ia32_vmx_true_exit_ctls::load_ia32_efer::is_allowed1());
 }
 
 void
@@ -1325,13 +1671,25 @@ intrinsics_ut::test_ia32_vmx_true_exit_ctls_save_vmx_preemption_timer_value()
 
     g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] = mask;
     this->expect_true(msrs::ia32_vmx_true_exit_ctls::save_vmx_preemption_timer_value::get() == mask >> from);
+    this->expect_false(msrs::ia32_vmx_true_exit_ctls::save_vmx_preemption_timer_value::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] = ~mask;
+    this->expect_true(msrs::ia32_vmx_true_exit_ctls::save_vmx_preemption_timer_value::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] = mask << 32;
+    this->expect_true(msrs::ia32_vmx_true_exit_ctls::save_vmx_preemption_timer_value::is_allowed1());
+
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] = ~(mask << 32);
+    this->expect_false(msrs::ia32_vmx_true_exit_ctls::save_vmx_preemption_timer_value::is_allowed1());
 }
 
 void
 intrinsics_ut::test_ia32_vmx_true_entry_ctls()
 {
-    g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] = 100UL;
-    this->expect_true(msrs::ia32_vmx_true_entry_ctls::get() == 100UL);
+    g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] = 0x1000000011111111UL;
+    this->expect_true(msrs::ia32_vmx_true_entry_ctls::get() == 0x1000000011111111UL);
+    this->expect_true(msrs::ia32_vmx_true_entry_ctls::allowed0() == 0x11111111UL);
+    this->expect_true(msrs::ia32_vmx_true_entry_ctls::allowed1() == 0x10000000UL);
 }
 
 void
@@ -1342,6 +1700,16 @@ intrinsics_ut::test_ia32_vmx_true_entry_ctls_load_debug_controls()
 
     g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] = mask;
     this->expect_true(msrs::ia32_vmx_true_entry_ctls::load_debug_controls::get() == mask >> from);
+    this->expect_false(msrs::ia32_vmx_true_entry_ctls::load_debug_controls::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] = ~mask;
+    this->expect_true(msrs::ia32_vmx_true_entry_ctls::load_debug_controls::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] = mask << 32;
+    this->expect_true(msrs::ia32_vmx_true_entry_ctls::load_debug_controls::is_allowed1());
+
+    g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] = ~(mask << 32);
+    this->expect_false(msrs::ia32_vmx_true_entry_ctls::load_debug_controls::is_allowed1());
 }
 
 void
@@ -1352,6 +1720,16 @@ intrinsics_ut::test_ia32_vmx_true_entry_ctls_ia_32e_mode_guest()
 
     g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] = mask;
     this->expect_true(msrs::ia32_vmx_true_entry_ctls::ia_32e_mode_guest::get() == mask >> from);
+    this->expect_false(msrs::ia32_vmx_true_entry_ctls::ia_32e_mode_guest::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] = ~mask;
+    this->expect_true(msrs::ia32_vmx_true_entry_ctls::ia_32e_mode_guest::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] = mask << 32;
+    this->expect_true(msrs::ia32_vmx_true_entry_ctls::ia_32e_mode_guest::is_allowed1());
+
+    g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] = ~(mask << 32);
+    this->expect_false(msrs::ia32_vmx_true_entry_ctls::ia_32e_mode_guest::is_allowed1());
 }
 
 void
@@ -1362,6 +1740,16 @@ intrinsics_ut::test_ia32_vmx_true_entry_ctls_entry_to_smm()
 
     g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] = mask;
     this->expect_true(msrs::ia32_vmx_true_entry_ctls::entry_to_smm::get() == mask >> from);
+    this->expect_false(msrs::ia32_vmx_true_entry_ctls::entry_to_smm::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] = ~mask;
+    this->expect_true(msrs::ia32_vmx_true_entry_ctls::entry_to_smm::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] = mask << 32;
+    this->expect_true(msrs::ia32_vmx_true_entry_ctls::entry_to_smm::is_allowed1());
+
+    g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] = ~(mask << 32);
+    this->expect_false(msrs::ia32_vmx_true_entry_ctls::entry_to_smm::is_allowed1());
 }
 
 void
@@ -1372,6 +1760,16 @@ intrinsics_ut::test_ia32_vmx_true_entry_ctls_deactivate_dual_monitor_treatment()
 
     g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] = mask;
     this->expect_true(msrs::ia32_vmx_true_entry_ctls::deactivate_dual_monitor_treatment::get() == mask >> from);
+    this->expect_false(msrs::ia32_vmx_true_entry_ctls::deactivate_dual_monitor_treatment::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] = ~mask;
+    this->expect_true(msrs::ia32_vmx_true_entry_ctls::deactivate_dual_monitor_treatment::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] = mask << 32;
+    this->expect_true(msrs::ia32_vmx_true_entry_ctls::deactivate_dual_monitor_treatment::is_allowed1());
+
+    g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] = ~(mask << 32);
+    this->expect_false(msrs::ia32_vmx_true_entry_ctls::deactivate_dual_monitor_treatment::is_allowed1());
 }
 
 void
@@ -1382,6 +1780,16 @@ intrinsics_ut::test_ia32_vmx_true_entry_ctls_load_ia32_perf_global_ctrl()
 
     g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] = mask;
     this->expect_true(msrs::ia32_vmx_true_entry_ctls::load_ia32_perf_global_ctrl::get() == mask >> from);
+    this->expect_false(msrs::ia32_vmx_true_entry_ctls::load_ia32_perf_global_ctrl::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] = ~mask;
+    this->expect_true(msrs::ia32_vmx_true_entry_ctls::load_ia32_perf_global_ctrl::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] = mask << 32;
+    this->expect_true(msrs::ia32_vmx_true_entry_ctls::load_ia32_perf_global_ctrl::is_allowed1());
+
+    g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] = ~(mask << 32);
+    this->expect_false(msrs::ia32_vmx_true_entry_ctls::load_ia32_perf_global_ctrl::is_allowed1());
 }
 
 void
@@ -1392,6 +1800,16 @@ intrinsics_ut::test_ia32_vmx_true_entry_ctls_load_ia32_pat()
 
     g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] = mask;
     this->expect_true(msrs::ia32_vmx_true_entry_ctls::load_ia32_pat::get() == mask >> from);
+    this->expect_false(msrs::ia32_vmx_true_entry_ctls::load_ia32_pat::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] = ~mask;
+    this->expect_true(msrs::ia32_vmx_true_entry_ctls::load_ia32_pat::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] = mask << 32;
+    this->expect_true(msrs::ia32_vmx_true_entry_ctls::load_ia32_pat::is_allowed1());
+
+    g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] = ~(mask << 32);
+    this->expect_false(msrs::ia32_vmx_true_entry_ctls::load_ia32_pat::is_allowed1());
 }
 
 void
@@ -1402,6 +1820,16 @@ intrinsics_ut::test_ia32_vmx_true_entry_ctls_load_ia32_efer()
 
     g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] = mask;
     this->expect_true(msrs::ia32_vmx_true_entry_ctls::load_ia32_efer::get() == mask >> from);
+    this->expect_false(msrs::ia32_vmx_true_entry_ctls::load_ia32_efer::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] = ~mask;
+    this->expect_true(msrs::ia32_vmx_true_entry_ctls::load_ia32_efer::is_allowed0());
+
+    g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] = mask << 32;
+    this->expect_true(msrs::ia32_vmx_true_entry_ctls::load_ia32_efer::is_allowed1());
+
+    g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] = ~(mask << 32);
+    this->expect_false(msrs::ia32_vmx_true_entry_ctls::load_ia32_efer::is_allowed1());
 }
 
 void

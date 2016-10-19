@@ -29,6 +29,7 @@
 #include <intrinsics/vmx_intel_x64.h>
 #include <intrinsics/msrs_intel_x64.h>
 
+
 /// Intel x86_64 VMCS
 ///
 /// The following provides the basic VMCS implementation as defined by the
@@ -208,11 +209,7 @@ protected:
     virtual std::string get_vm_instruction_error();
 
     // REMOVE ME: These should be removed in favor of the namespace logic
-    virtual uint64_t get_pin_ctls() const;
-    virtual uint64_t get_proc_ctls() const;
     virtual uint64_t get_proc2_ctls() const;
-    virtual uint64_t get_exit_ctls() const;
-    virtual uint64_t get_entry_ctls() const;
 
     // REMOVE ME: These should be placed in the x64 namespace instead
     virtual bool is_address_canonical(uint64_t addr);
@@ -222,34 +219,6 @@ protected:
     // REMOVE ME: All is enabled functions should be removed as they are
     // not needed once we have a get() function for each bit
     virtual bool is_enabled_v8086() const;
-
-    virtual bool is_enabled_external_interrupt_exiting() const;
-    virtual bool is_enabled_nmi_exiting() const;
-    virtual bool is_enabled_virtual_nmis() const;
-    virtual bool is_enabled_vmx_preemption_timer() const;
-    virtual bool is_enabled_posted_interrupts() const;
-
-    virtual bool is_enabled_interrupt_window_exiting() const;
-    virtual bool is_enabled_tsc_offsetting() const;
-    virtual bool is_enabled_hlt_exiting() const;
-    virtual bool is_enabled_invlpg_exiting() const;
-    virtual bool is_enabled_mwait_exiting() const;
-    virtual bool is_enabled_rdpmc_exiting() const;
-    virtual bool is_enabled_rdtsc_exiting() const;
-    virtual bool is_enabled_cr3_load_exiting() const;
-    virtual bool is_enabled_cr3_store_exiting() const;
-    virtual bool is_enabled_cr8_load_exiting() const;
-    virtual bool is_enabled_cr8_store_exiting() const;
-    virtual bool is_enabled_tpr_shadow() const;
-    virtual bool is_enabled_nmi_window_exiting() const;
-    virtual bool is_enabled_mov_dr_exiting() const;
-    virtual bool is_enabled_unconditional_io_exiting() const;
-    virtual bool is_enabled_io_bitmaps() const;
-    virtual bool is_enabled_monitor_trap_flag() const;
-    virtual bool is_enabled_msr_bitmaps() const;
-    virtual bool is_enabled_monitor_exiting() const;
-    virtual bool is_enabled_pause_exiting() const;
-    virtual bool is_enabled_secondary_controls() const;
 
     virtual bool is_enabled_virtualized_apic() const;
     virtual bool is_enabled_ept() const;
@@ -271,53 +240,8 @@ protected:
     virtual bool is_enabled_xsave_xrestore() const;
     virtual bool is_enabled_pml() const;
 
-    virtual bool is_enabled_save_debug_controls_on_exit() const;
-    virtual bool is_enabled_host_address_space_size() const;
-    virtual bool is_enabled_load_ia32_perf_global_ctrl_on_exit() const;
-    virtual bool is_enabled_ack_interrupt_on_exit() const;
-    virtual bool is_enabled_save_ia32_pat_on_exit() const;
-    virtual bool is_enabled_load_ia32_pat_on_exit() const;
-    virtual bool is_enabled_save_ia32_efer_on_exit() const;
-    virtual bool is_enabled_load_ia32_efer_on_exit() const;
-    virtual bool is_enabled_save_vmx_preemption_timer_on_exit() const;
-
-    virtual bool is_enabled_load_debug_controls_on_entry() const;
-    virtual bool is_enabled_ia_32e_mode_guest() const;
-    virtual bool is_enabled_entry_to_smm() const;
-    virtual bool is_enabled_deactivate_dual_monitor_treatment() const;
-    virtual bool is_enabled_load_ia32_perf_global_ctrl_on_entry() const;
-    virtual bool is_enabled_load_ia32_pat_on_entry() const;
-    virtual bool is_enabled_load_ia32_efer_on_entry() const;
-
     // REMOVE ME: All is_supported functions should be removed as they are
     // not needed once the VMCS fields have their own is_supported
-    virtual bool is_supported_external_interrupt_exiting() const;
-    virtual bool is_supported_nmi_exiting() const;
-    virtual bool is_supported_virtual_nmis() const;
-    virtual bool is_supported_vmx_preemption_timer() const;
-    virtual bool is_supported_posted_interrupts() const;
-
-    virtual bool is_supported_interrupt_window_exiting() const;
-    virtual bool is_supported_tsc_offsetting() const;
-    virtual bool is_supported_hlt_exiting() const;
-    virtual bool is_supported_invlpg_exiting() const;
-    virtual bool is_supported_mwait_exiting() const;
-    virtual bool is_supported_rdpmc_exiting() const;
-    virtual bool is_supported_rdtsc_exiting() const;
-    virtual bool is_supported_cr3_load_exiting() const;
-    virtual bool is_supported_cr3_store_exiting() const;
-    virtual bool is_supported_cr8_load_exiting() const;
-    virtual bool is_supported_cr8_store_exiting() const;
-    virtual bool is_supported_tpr_shadow() const;
-    virtual bool is_supported_nmi_window_exiting() const;
-    virtual bool is_supported_mov_dr_exiting() const;
-    virtual bool is_supported_unconditional_io_exiting() const;
-    virtual bool is_supported_io_bitmaps() const;
-    virtual bool is_supported_monitor_trap_flag() const;
-    virtual bool is_supported_msr_bitmaps() const;
-    virtual bool is_supported_monitor_exiting() const;
-    virtual bool is_supported_pause_exiting() const;
-    virtual bool is_supported_secondary_controls() const;
 
     virtual bool is_supported_virtualized_apic() const;
     virtual bool is_supported_ept() const;
@@ -338,24 +262,6 @@ protected:
     virtual bool is_supported_ept_violation_ve() const;
     virtual bool is_supported_xsave_xrestore() const;
     virtual bool is_supported_pml() const;
-
-    virtual bool is_supported_save_debug_controls_on_exit() const;
-    virtual bool is_supported_host_address_space_size() const;
-    virtual bool is_supported_load_ia32_perf_global_ctrl_on_exit() const;
-    virtual bool is_supported_ack_interrupt_on_exit() const;
-    virtual bool is_supported_save_ia32_pat_on_exit() const;
-    virtual bool is_supported_load_ia32_pat_on_exit() const;
-    virtual bool is_supported_save_ia32_efer_on_exit() const;
-    virtual bool is_supported_load_ia32_efer_on_exit() const;
-    virtual bool is_supported_save_vmx_preemption_timer_on_exit() const;
-
-    virtual bool is_supported_load_debug_controls_on_entry() const;
-    virtual bool is_supported_ia_32e_mode_guest() const;
-    virtual bool is_supported_entry_to_smm() const;
-    virtual bool is_supported_deactivate_dual_monitor_treatment() const;
-    virtual bool is_supported_load_ia32_perf_global_ctrl_on_entry() const;
-    virtual bool is_supported_load_ia32_pat_on_entry() const;
-    virtual bool is_supported_load_ia32_efer_on_entry() const;
 
     virtual bool is_supported_eptp_switching() const;
     virtual bool is_supported_event_injection_instr_length_of_0() const;
@@ -535,6 +441,7 @@ protected:
     virtual void check_guest_vmcs_link_pointer_in_smm();
 
     virtual void checks_on_vm_execution_control_fields();
+    virtual void check_control_ctls_reserved_properly_set(uint64_t msr_addr, uint64_t ctls, const std::string &name);
     virtual void check_control_pin_based_ctls_reserved_properly_set();
     virtual void check_control_proc_based_ctls_reserved_properly_set();
     virtual void check_control_proc_based_ctls2_reserved_properly_set();
@@ -597,8 +504,67 @@ private:
 // VMCS Fields
 // -----------------------------------------------------------------------------
 
-// *INDENT-OFF*
+template <class T> void
+set_vm_control(T val, uint64_t msr_addr, uint64_t ctls_addr,
+               const std::string &name, uint64_t mask)
+{
+    using namespace intel_x64;
 
+    bool is_allowed0 = (msrs::get(msr_addr) & mask) == 0;
+    bool is_allowed1 = (msrs::get(msr_addr) & (mask << 32)) != 0;
+
+    if (val == 0)
+    {
+        if (!is_allowed0)
+            throw std::logic_error(std::string(name) + " is not allowed to be cleared to 0");
+
+        vm::write(ctls_addr, (vm::read(ctls_addr, name) & ~mask), name);
+    }
+    else
+    {
+        if (!is_allowed1)
+            throw std::logic_error(std::string(name) + " is not allowed to be set to 1");
+
+        vm::write(ctls_addr, (vm::read(ctls_addr, name) | mask), name);
+    }
+}
+
+template <class T> void
+set_vm_control_if_allowed(T val, uint64_t msr_addr, uint64_t ctls_addr,
+                          const std::string &name, uint64_t mask, bool verbose) noexcept
+{
+    using namespace intel_x64;
+
+    bool is_allowed0 = (msrs::get(msr_addr) & mask) == 0;
+    bool is_allowed1 = (msrs::get(msr_addr) & (mask << 32)) != 0;
+
+    if (val == 0)
+    {
+        if (is_allowed0)
+        {
+            vm::write(ctls_addr, (vm::read(ctls_addr, name) & ~mask), name);
+        }
+        else
+        {
+            if (verbose)
+                bfwarning << std::string(name) + " is not allowed to be cleared to 0" << bfendl;
+        }
+    }
+    else
+    {
+        if (is_allowed1)
+        {
+            vm::write(ctls_addr, (vm::read(ctls_addr, name) | mask), name);
+        }
+        else
+        {
+            if (verbose)
+                bfwarning << std::string(name) + " is not allowed to be set to 1" << bfendl;
+        }
+    }
+}
+
+// *INDENT-OFF*
 namespace intel_x64
 {
 namespace vmcs
@@ -1917,20 +1883,1528 @@ constexpr const auto VMCS_HOST_IA32_PERF_GLOBAL_CTRL                      = 0x00
 // 32bit Control Fields
 // -----------------------------------------------------------------------------
 
-constexpr const auto VMCS_PIN_BASED_VM_EXECUTION_CONTROLS                      = 0x0000000000004000UL;
-constexpr const auto VMCS_PRIMARY_PROCESSOR_BASED_VM_EXECUTION_CONTROLS        = 0x0000000000004002UL;
-constexpr const auto VMCS_EXCEPTION_BITMAP                                     = 0x0000000000004004UL;
-constexpr const auto VMCS_PAGE_FAULT_ERROR_CODE_MASK                           = 0x0000000000004006UL;
-constexpr const auto VMCS_PAGE_FAULT_ERROR_CODE_MATCH                          = 0x0000000000004008UL;
-constexpr const auto VMCS_CR3_TARGET_COUNT                                     = 0x000000000000400AUL;
-constexpr const auto VMCS_VM_EXIT_CONTROLS                                     = 0x000000000000400CUL;
-constexpr const auto VMCS_VM_EXIT_MSR_STORE_COUNT                              = 0x000000000000400EUL;
-constexpr const auto VMCS_VM_EXIT_MSR_LOAD_COUNT                               = 0x0000000000004010UL;
-constexpr const auto VMCS_VM_ENTRY_CONTROLS                                    = 0x0000000000004012UL;
-constexpr const auto VMCS_VM_ENTRY_MSR_LOAD_COUNT                              = 0x0000000000004014UL;
-constexpr const auto VMCS_VM_ENTRY_INTERRUPTION_INFORMATION_FIELD              = 0x0000000000004016UL;
-constexpr const auto VMCS_VM_ENTRY_EXCEPTION_ERROR_CODE                        = 0x0000000000004018UL;
-constexpr const auto VMCS_VM_ENTRY_INSTRUCTION_LENGTH                          = 0x000000000000401AUL;
+namespace intel_x64
+{
+namespace vmcs
+{
+
+namespace pin_based_vm_execution_controls
+{
+    constexpr const auto addr = 0x0000000000004000UL;
+    constexpr const auto name = "pin_based_vm_execution_controls";
+    constexpr const auto msr_addr = msrs::ia32_vmx_true_pinbased_ctls::addr;
+
+    inline auto get()
+    { return vm::read(addr, name); }
+
+    template<class T> void set(T val)
+    { vm::write(addr, val, name); }
+
+    inline bool exists() noexcept
+    { return true; }
+
+    namespace external_interrupt_exiting
+    {
+        constexpr const auto mask = 0x0000000000000001UL;
+        constexpr const auto from = 0;
+        constexpr const auto name = "external_interrupt_exiting";
+
+        inline bool
+        is_enabled()
+        { return (vm::read(addr, name) & mask) != 0; }
+
+        template <class T> void set(T val)
+        { set_vm_control(val, msr_addr, addr, name, mask); }
+
+        template <class T> void set_if_allowed(T val, bool verbose) noexcept
+        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+
+        inline void enable()
+        { set(1UL); }
+
+        inline void disable()
+        { set(0UL); }
+
+        inline void enable_if_allowed(bool verbose = false) noexcept
+        { set_if_allowed(1UL, verbose); }
+
+        inline void disable_if_allowed(bool verbose = false) noexcept 
+        { set_if_allowed(0UL, verbose); }
+    }
+
+    namespace nmi_exiting
+    {
+        constexpr const auto mask = 0x0000000000000008UL;
+        constexpr const auto from = 3;
+        constexpr const auto name = "nmi_exiting";
+
+        inline bool
+        is_enabled()
+        { return (vm::read(addr, name) & mask) != 0; }
+
+        template <class T> void set(T val)
+        { set_vm_control(val, msr_addr, addr, name, mask); }
+
+        template <class T> void set_if_allowed(T val, bool verbose) noexcept
+        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+
+        inline void enable()
+        { set(1UL); }
+
+        inline void disable()
+        { set(0UL); }
+
+        inline void enable_if_allowed(bool verbose = false) noexcept
+        { set_if_allowed(1UL, verbose); }
+
+        inline void disable_if_allowed(bool verbose = false) noexcept 
+        { set_if_allowed(0UL, verbose); }
+    }
+
+    namespace virtual_nmis
+    {
+        constexpr const auto mask = 0x0000000000000020UL;
+        constexpr const auto from = 5;
+        constexpr const auto name = "virtual_nmis";
+
+        inline bool
+        is_enabled()
+        { return (vm::read(addr, name) & mask) != 0; }
+
+        template <class T> void set(T val)
+        { set_vm_control(val, msr_addr, addr, name, mask); }
+
+        template <class T> void set_if_allowed(T val, bool verbose) noexcept
+        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+
+        inline void enable()
+        { set(1UL); }
+
+        inline void disable()
+        { set(0UL); }
+
+        inline void enable_if_allowed(bool verbose = false) noexcept
+        { set_if_allowed(1UL, verbose); }
+
+        inline void disable_if_allowed(bool verbose = false) noexcept 
+        { set_if_allowed(0UL, verbose); }
+    }
+
+    namespace activate_vmx_preemption_timer
+    {
+        constexpr const auto mask = 0x0000000000000040UL;
+        constexpr const auto from = 6;
+        constexpr const auto name = "activate_vmx_preemption_timer";
+
+        inline bool
+        is_enabled()
+        { return (vm::read(addr, name) & mask) != 0; }
+
+        template <class T> void set(T val)
+        { set_vm_control(val, msr_addr, addr, name, mask); }
+
+        template <class T> void set_if_allowed(T val, bool verbose) noexcept
+        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+
+        inline void enable()
+        { set(1UL); }
+
+        inline void disable()
+        { set(0UL); }
+
+        inline void enable_if_allowed(bool verbose = false) noexcept
+        { set_if_allowed(1UL, verbose); }
+
+        inline void disable_if_allowed(bool verbose = false) noexcept 
+        { set_if_allowed(0UL, verbose); }
+    }
+
+    namespace process_posted_interrupts
+    {
+        constexpr const auto mask = 0x0000000000000080UL;
+        constexpr const auto from = 7;
+        constexpr const auto name = "process_posted_interrupts";
+
+        inline bool
+        is_enabled()
+        { return (vm::read(addr, name) & mask) != 0; }
+
+        template <class T> void set(T val)
+        { set_vm_control(val, msr_addr, addr, name, mask); }
+
+        template <class T> void set_if_allowed(T val, bool verbose) noexcept
+        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+
+        inline void enable()
+        { set(1UL); }
+
+        inline void disable()
+        { set(0UL); }
+
+        inline void enable_if_allowed(bool verbose = false) noexcept
+        { set_if_allowed(1UL, verbose); }
+
+        inline void disable_if_allowed(bool verbose = false) noexcept 
+        { set_if_allowed(0UL, verbose); }
+    }
+}
+
+namespace primary_processor_based_vm_execution_controls
+{
+    constexpr const auto addr = 0x0000000000004002UL;
+    constexpr const auto name = "primary_processor_based_vm_execution_controls";
+    constexpr const auto msr_addr = msrs::ia32_vmx_true_procbased_ctls::addr;
+
+    inline auto get()
+    { return vm::read(addr, name); }
+
+    template<class T> void set(T val)
+    { vm::write(addr, val, name); }
+
+    inline bool exists() noexcept
+    { return true; }
+
+    namespace interrupt_window_exiting
+    {
+        constexpr const auto mask = 0x0000000000000004UL;
+        constexpr const auto from = 2;
+        constexpr const auto name = "interrupt_window_exiting";
+
+        inline bool
+        is_enabled()
+        { return (vm::read(addr, name) & mask) != 0; }
+
+        template <class T> void set(T val)
+        { set_vm_control(val, msr_addr, addr, name, mask); }
+
+        template <class T> void set_if_allowed(T val, bool verbose) noexcept
+        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+
+        inline void enable()
+        { set(1UL); }
+
+        inline void disable()
+        { set(0UL); }
+
+        inline void enable_if_allowed(bool verbose = false) noexcept
+        { set_if_allowed(1UL, verbose); }
+
+        inline void disable_if_allowed(bool verbose = false) noexcept 
+        { set_if_allowed(0UL, verbose); }
+    }
+
+    namespace use_tsc_offsetting
+    {
+        constexpr const auto mask = 0x0000000000000008UL;
+        constexpr const auto from = 3;
+        constexpr const auto name = "use_tsc_offsetting";
+
+        inline bool
+        is_enabled()
+        { return (vm::read(addr, name) & mask) != 0; }
+
+        template <class T> void set(T val)
+        { set_vm_control(val, msr_addr, addr, name, mask); }
+
+        template <class T> void set_if_allowed(T val, bool verbose) noexcept
+        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+
+        inline void enable()
+        { set(1UL); }
+
+        inline void disable()
+        { set(0UL); }
+
+        inline void enable_if_allowed(bool verbose = false) noexcept
+        { set_if_allowed(1UL, verbose); }
+
+        inline void disable_if_allowed(bool verbose = false) noexcept 
+        { set_if_allowed(0UL, verbose); }
+    }
+
+    namespace hlt_exiting
+    {
+        constexpr const auto mask = 0x0000000000000080UL;
+        constexpr const auto from = 7;
+        constexpr const auto name = "hlt_exiting";
+
+        inline bool
+        is_enabled()
+        { return (vm::read(addr, name) & mask) != 0; }
+
+        template <class T> void set(T val)
+        { set_vm_control(val, msr_addr, addr, name, mask); }
+
+        template <class T> void set_if_allowed(T val, bool verbose) noexcept
+        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+
+        inline void enable()
+        { set(1UL); }
+
+        inline void disable()
+        { set(0UL); }
+
+        inline void enable_if_allowed(bool verbose = false) noexcept
+        { set_if_allowed(1UL, verbose); }
+
+        inline void disable_if_allowed(bool verbose = false) noexcept 
+        { set_if_allowed(0UL, verbose); }
+    }
+
+    namespace invlpg_exiting
+    {
+        constexpr const auto mask = 0x0000000000000200UL;
+        constexpr const auto from = 9;
+        constexpr const auto name = "invlpg_exiting";
+
+        inline bool
+        is_enabled()
+        { return (vm::read(addr, name) & mask) != 0; }
+
+        template <class T> void set(T val)
+        { set_vm_control(val, msr_addr, addr, name, mask); }
+
+        template <class T> void set_if_allowed(T val, bool verbose) noexcept
+        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+
+        inline void enable()
+        { set(1UL); }
+
+        inline void disable()
+        { set(0UL); }
+
+        inline void enable_if_allowed(bool verbose = false) noexcept
+        { set_if_allowed(1UL, verbose); }
+
+        inline void disable_if_allowed(bool verbose = false) noexcept 
+        { set_if_allowed(0UL, verbose); }
+    }
+
+    namespace mwait_exiting
+    {
+        constexpr const auto mask = 0x0000000000000400UL;
+        constexpr const auto from = 10;
+        constexpr const auto name = "mwait_exiting";
+
+        inline bool
+        is_enabled()
+        { return (vm::read(addr, name) & mask) != 0; }
+
+        template <class T> void set(T val)
+        { set_vm_control(val, msr_addr, addr, name, mask); }
+
+        template <class T> void set_if_allowed(T val, bool verbose) noexcept
+        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+
+        inline void enable()
+        { set(1UL); }
+
+        inline void disable()
+        { set(0UL); }
+
+        inline void enable_if_allowed(bool verbose = false) noexcept
+        { set_if_allowed(1UL, verbose); }
+
+        inline void disable_if_allowed(bool verbose = false) noexcept 
+        { set_if_allowed(0UL, verbose); }
+    }
+
+    namespace rdpmc_exiting
+    {
+        constexpr const auto mask = 0x0000000000000800UL;
+        constexpr const auto from = 11;
+        constexpr const auto name = "rdpmc_exiting";
+
+        inline bool
+        is_enabled()
+        { return (vm::read(addr, name) & mask) != 0; }
+
+        template <class T> void set(T val)
+        { set_vm_control(val, msr_addr, addr, name, mask); }
+
+        template <class T> void set_if_allowed(T val, bool verbose) noexcept
+        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+
+        inline void enable()
+        { set(1UL); }
+
+        inline void disable()
+        { set(0UL); }
+
+        inline void enable_if_allowed(bool verbose = false) noexcept
+        { set_if_allowed(1UL, verbose); }
+
+        inline void disable_if_allowed(bool verbose = false) noexcept 
+        { set_if_allowed(0UL, verbose); }
+    }
+
+    namespace rdtsc_exiting
+    {
+        constexpr const auto mask = 0x0000000000001000UL;
+        constexpr const auto from = 12;
+        constexpr const auto name = "rdtsc_exiting";
+
+        inline bool
+        is_enabled()
+        { return (vm::read(addr, name) & mask) != 0; }
+
+        template <class T> void set(T val)
+        { set_vm_control(val, msr_addr, addr, name, mask); }
+
+        template <class T> void set_if_allowed(T val, bool verbose) noexcept
+        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+
+        inline void enable()
+        { set(1UL); }
+
+        inline void disable()
+        { set(0UL); }
+
+        inline void enable_if_allowed(bool verbose = false) noexcept
+        { set_if_allowed(1UL, verbose); }
+
+        inline void disable_if_allowed(bool verbose = false) noexcept 
+        { set_if_allowed(0UL, verbose); }
+    }
+
+    namespace cr3_load_exiting
+    {
+        constexpr const auto mask = 0x0000000000008000UL;
+        constexpr const auto from = 15;
+        constexpr const auto name = "cr3_load_exiting";
+
+        inline bool
+        is_enabled()
+        { return (vm::read(addr, name) & mask) != 0; }
+
+        template <class T> void set(T val)
+        { set_vm_control(val, msr_addr, addr, name, mask); }
+
+        template <class T> void set_if_allowed(T val, bool verbose) noexcept
+        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+
+        inline void enable()
+        { set(1UL); }
+
+        inline void disable()
+        { set(0UL); }
+
+        inline void enable_if_allowed(bool verbose = false) noexcept
+        { set_if_allowed(1UL, verbose); }
+
+        inline void disable_if_allowed(bool verbose = false) noexcept 
+        { set_if_allowed(0UL, verbose); }
+    }
+
+    namespace cr3_store_exiting
+    {
+        constexpr const auto mask = 0x0000000000010000UL;
+        constexpr const auto from = 16;
+        constexpr const auto name = "cr3_store_exiting";
+
+        inline bool
+        is_enabled()
+        { return (vm::read(addr, name) & mask) != 0; }
+
+        template <class T> void set(T val)
+        { set_vm_control(val, msr_addr, addr, name, mask); }
+
+        template <class T> void set_if_allowed(T val, bool verbose) noexcept
+        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+
+        inline void enable()
+        { set(1UL); }
+
+        inline void disable()
+        { set(0UL); }
+
+        inline void enable_if_allowed(bool verbose = false) noexcept
+        { set_if_allowed(1UL, verbose); }
+
+        inline void disable_if_allowed(bool verbose = false) noexcept 
+        { set_if_allowed(0UL, verbose); }
+    }
+
+    namespace cr8_load_exiting
+    {
+        constexpr const auto mask = 0x0000000000080000UL;
+        constexpr const auto from = 19;
+        constexpr const auto name = "cr8_load_exiting";
+
+        inline bool
+        is_enabled()
+        { return (vm::read(addr, name) & mask) != 0; }
+
+        template <class T> void set(T val)
+        { set_vm_control(val, msr_addr, addr, name, mask); }
+
+        template <class T> void set_if_allowed(T val, bool verbose) noexcept
+        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+
+        inline void enable()
+        { set(1UL); }
+
+        inline void disable()
+        { set(0UL); }
+
+        inline void enable_if_allowed(bool verbose = false) noexcept
+        { set_if_allowed(1UL, verbose); }
+
+        inline void disable_if_allowed(bool verbose = false) noexcept 
+        { set_if_allowed(0UL, verbose); }
+    }
+
+    namespace cr8_store_exiting
+    {
+        constexpr const auto mask = 0x0000000000100000UL;
+        constexpr const auto from = 20;
+        constexpr const auto name = "cr8_store_exiting";
+
+        inline bool
+        is_enabled()
+        { return (vm::read(addr, name) & mask) != 0; }
+
+        template <class T> void set(T val)
+        { set_vm_control(val, msr_addr, addr, name, mask); }
+
+        template <class T> void set_if_allowed(T val, bool verbose) noexcept
+        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+
+        inline void enable()
+        { set(1UL); }
+
+        inline void disable()
+        { set(0UL); }
+
+        inline void enable_if_allowed(bool verbose = false) noexcept
+        { set_if_allowed(1UL, verbose); }
+
+        inline void disable_if_allowed(bool verbose = false) noexcept 
+        { set_if_allowed(0UL, verbose); }
+    }
+
+    namespace use_tpr_shadow
+    {
+        constexpr const auto mask = 0x0000000000200000UL;
+        constexpr const auto from = 21;
+        constexpr const auto name = "use_tpr_shadow";
+
+        inline bool
+        is_enabled()
+        { return (vm::read(addr, name) & mask) != 0; }
+
+        template <class T> void set(T val)
+        { set_vm_control(val, msr_addr, addr, name, mask); }
+
+        template <class T> void set_if_allowed(T val, bool verbose) noexcept
+        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+
+        inline void enable()
+        { set(1UL); }
+
+        inline void disable()
+        { set(0UL); }
+
+        inline void enable_if_allowed(bool verbose = false) noexcept
+        { set_if_allowed(1UL, verbose); }
+
+        inline void disable_if_allowed(bool verbose = false) noexcept 
+        { set_if_allowed(0UL, verbose); }
+    }
+
+    namespace nmi_window_exiting
+    {
+        constexpr const auto mask = 0x0000000000400000UL;
+        constexpr const auto from = 22;
+        constexpr const auto name = "nmi_window_exiting";
+
+        inline bool
+        is_enabled()
+        { return (vm::read(addr, name) & mask) != 0; }
+
+        template <class T> void set(T val)
+        { set_vm_control(val, msr_addr, addr, name, mask); }
+
+        template <class T> void set_if_allowed(T val, bool verbose) noexcept
+        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+
+        inline void enable()
+        { set(1UL); }
+
+        inline void disable()
+        { set(0UL); }
+
+        inline void enable_if_allowed(bool verbose = false) noexcept
+        { set_if_allowed(1UL, verbose); }
+
+        inline void disable_if_allowed(bool verbose = false) noexcept 
+        { set_if_allowed(0UL, verbose); }
+    }
+
+    namespace mov_dr_exiting
+    {
+        constexpr const auto mask = 0x0000000000800000UL;
+        constexpr const auto from = 23;
+        constexpr const auto name = "mov_dr_exiting";
+
+        inline bool
+        is_enabled()
+        { return (vm::read(addr, name) & mask) != 0; }
+
+        template <class T> void set(T val)
+        { set_vm_control(val, msr_addr, addr, name, mask); }
+
+        template <class T> void set_if_allowed(T val, bool verbose) noexcept
+        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+
+        inline void enable()
+        { set(1UL); }
+
+        inline void disable()
+        { set(0UL); }
+
+        inline void enable_if_allowed(bool verbose = false) noexcept
+        { set_if_allowed(1UL, verbose); }
+
+        inline void disable_if_allowed(bool verbose = false) noexcept 
+        { set_if_allowed(0UL, verbose); }
+    }
+
+    namespace unconditional_io_exiting
+    {
+        constexpr const auto mask = 0x0000000001000000UL;
+        constexpr const auto from = 24;
+        constexpr const auto name = "unconditional_io_exiting";
+
+        inline bool
+        is_enabled()
+        { return (vm::read(addr, name) & mask) != 0; }
+
+        template <class T> void set(T val)
+        { set_vm_control(val, msr_addr, addr, name, mask); }
+
+        template <class T> void set_if_allowed(T val, bool verbose) noexcept
+        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+
+        inline void enable()
+        { set(1UL); }
+
+        inline void disable()
+        { set(0UL); }
+
+        inline void enable_if_allowed(bool verbose = false) noexcept
+        { set_if_allowed(1UL, verbose); }
+
+        inline void disable_if_allowed(bool verbose = false) noexcept 
+        { set_if_allowed(0UL, verbose); }
+    }
+
+    namespace use_io_bitmaps
+    {
+        constexpr const auto mask = 0x0000000002000000UL;
+        constexpr const auto from = 25;
+        constexpr const auto name = "use_io_bitmaps";
+
+        inline bool
+        is_enabled()
+        { return (vm::read(addr, name) & mask) != 0; }
+
+        template <class T> void set(T val)
+        { set_vm_control(val, msr_addr, addr, name, mask); }
+
+        template <class T> void set_if_allowed(T val, bool verbose) noexcept
+        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+
+        inline void enable()
+        { set(1UL); }
+
+        inline void disable()
+        { set(0UL); }
+
+        inline void enable_if_allowed(bool verbose = false) noexcept
+        { set_if_allowed(1UL, verbose); }
+
+        inline void disable_if_allowed(bool verbose = false) noexcept 
+        { set_if_allowed(0UL, verbose); }
+    }
+
+    namespace monitor_trap_flag
+    {
+        constexpr const auto mask = 0x0000000008000000UL;
+        constexpr const auto from = 27;
+        constexpr const auto name = "monitor_trap_flag";
+
+        inline bool
+        is_enabled()
+        { return (vm::read(addr, name) & mask) != 0; }
+
+        template <class T> void set(T val)
+        { set_vm_control(val, msr_addr, addr, name, mask); }
+
+        template <class T> void set_if_allowed(T val, bool verbose) noexcept
+        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+
+        inline void enable()
+        { set(1UL); }
+
+        inline void disable()
+        { set(0UL); }
+
+        inline void enable_if_allowed(bool verbose = false) noexcept
+        { set_if_allowed(1UL, verbose); }
+
+        inline void disable_if_allowed(bool verbose = false) noexcept 
+        { set_if_allowed(0UL, verbose); }
+    }
+
+    namespace use_msr_bitmaps
+    {
+        constexpr const auto mask = 0x0000000010000000UL;
+        constexpr const auto from = 28;
+        constexpr const auto name = "use_msr_bitmaps";
+
+        inline bool
+        is_enabled()
+        { return (vm::read(addr, name) & mask) != 0; }
+
+        template <class T> void set(T val)
+        { set_vm_control(val, msr_addr, addr, name, mask); }
+
+        template <class T> void set_if_allowed(T val, bool verbose) noexcept
+        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+
+        inline void enable()
+        { set(1UL); }
+
+        inline void disable()
+        { set(0UL); }
+
+        inline void enable_if_allowed(bool verbose = false) noexcept
+        { set_if_allowed(1UL, verbose); }
+
+        inline void disable_if_allowed(bool verbose = false) noexcept 
+        { set_if_allowed(0UL, verbose); }
+    }
+
+    namespace monitor_exiting
+    {
+        constexpr const auto mask = 0x0000000020000000UL;
+        constexpr const auto from = 29;
+        constexpr const auto name = "monitor_exiting";
+
+        inline bool
+        is_enabled()
+        { return (vm::read(addr, name) & mask) != 0; }
+
+        template <class T> void set(T val)
+        { set_vm_control(val, msr_addr, addr, name, mask); }
+
+        template <class T> void set_if_allowed(T val, bool verbose) noexcept
+        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+
+        inline void enable()
+        { set(1UL); }
+
+        inline void disable()
+        { set(0UL); }
+
+        inline void enable_if_allowed(bool verbose = false) noexcept
+        { set_if_allowed(1UL, verbose); }
+
+        inline void disable_if_allowed(bool verbose = false) noexcept 
+        { set_if_allowed(0UL, verbose); }
+    }
+
+    namespace pause_exiting
+    {
+        constexpr const auto mask = 0x0000000040000000UL;
+        constexpr const auto from = 30;
+        constexpr const auto name = "pause_exiting";
+
+        inline bool
+        is_enabled()
+        { return (vm::read(addr, name) & mask) != 0; }
+
+        template <class T> void set(T val)
+        { set_vm_control(val, msr_addr, addr, name, mask); }
+
+        template <class T> void set_if_allowed(T val, bool verbose) noexcept
+        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+
+        inline void enable()
+        { set(1UL); }
+
+        inline void disable()
+        { set(0UL); }
+
+        inline void enable_if_allowed(bool verbose = false) noexcept
+        { set_if_allowed(1UL, verbose); }
+
+        inline void disable_if_allowed(bool verbose = false) noexcept 
+        { set_if_allowed(0UL, verbose); }
+    }
+
+    namespace activate_secondary_controls
+    {
+        constexpr const auto mask = 0x0000000080000000UL;
+        constexpr const auto from = 31;
+        constexpr const auto name = "activate_secondary_controls";
+
+        inline bool
+        is_enabled()
+        { return (vm::read(addr, name) & mask) != 0; }
+
+        template <class T> void set(T val)
+        { set_vm_control(val, msr_addr, addr, name, mask); }
+
+        template <class T> void set_if_allowed(T val, bool verbose) noexcept
+        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+
+        inline void enable()
+        { set(1UL); }
+
+        inline void disable()
+        { set(0UL); }
+
+        inline void enable_if_allowed(bool verbose = false) noexcept
+        { set_if_allowed(1UL, verbose); }
+
+        inline void disable_if_allowed(bool verbose = false) noexcept 
+        { set_if_allowed(0UL, verbose); }
+    }
+}
+
+namespace exception_bitmap
+{
+    constexpr const auto addr = 0x0000000000004004UL;
+    constexpr const auto name = "execption_bitmap";
+
+    inline auto get()
+    { return vm::read(addr, name); }
+
+    template<class T> void set(T val)
+    { vm::write(addr, val, name); }
+
+    inline bool exists() noexcept
+    { return true; }
+}
+
+namespace page_fault_error_code_mask
+{
+    constexpr const auto addr = 0x0000000000004006UL;
+    constexpr const auto name = "page_fault_error_code_mask";
+
+    inline auto get()
+    { return vm::read(addr, name); }
+
+    template<class T> void set(T val)
+    { vm::write(addr, val, name); }
+
+    inline bool exists() noexcept
+    { return true; }
+}
+
+namespace page_fault_error_code_match
+{
+    constexpr const auto addr = 0x0000000000004008UL;
+    constexpr const auto name = "page_fault_error_code_match";
+
+    inline auto get()
+    { return vm::read(addr, name); }
+
+    template<class T> void set(T val)
+    { vm::write(addr, val, name); }
+
+    inline bool exists() noexcept
+    { return true; }
+}
+
+namespace cr3_target_count
+{
+    constexpr const auto addr = 0x000000000000400AUL;
+    constexpr const auto name = "cr3_target_count";
+
+    inline auto get()
+    { return vm::read(addr, name); }
+
+    template<class T> void set(T val)
+    { vm::write(addr, val, name); }
+
+    inline bool exists() noexcept
+    { return true; }
+}
+
+namespace vm_exit_controls
+{
+    constexpr const auto addr = 0x000000000000400CUL;
+    constexpr const auto name = "vm_exit_controls";
+    constexpr const auto msr_addr = msrs::ia32_vmx_true_exit_ctls::addr;
+
+    inline auto get()
+    { return vm::read(addr, name); }
+
+    template<class T> void set(T val)
+    { vm::write(addr, val, name); }
+
+    inline bool exists() noexcept
+    { return true; }
+
+    namespace save_debug_controls
+    {
+        constexpr const auto mask = 0x0000000000000004UL;
+        constexpr const auto from = 2;
+        constexpr const auto name = "save_debug_controls";
+
+        inline bool
+        is_enabled()
+        { return (vm::read(addr, name) & mask) != 0; }
+
+        template <class T> void set(T val)
+        { set_vm_control(val, msr_addr, addr, name, mask); }
+
+        template <class T> void set_if_allowed(T val, bool verbose) noexcept
+        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+
+        inline void enable()
+        { set(1UL); }
+
+        inline void disable()
+        { set(0UL); }
+
+        inline void enable_if_allowed(bool verbose = false) noexcept
+        { set_if_allowed(1UL, verbose); }
+
+        inline void disable_if_allowed(bool verbose = false) noexcept 
+        { set_if_allowed(0UL, verbose); }
+    }
+
+    namespace host_address_space_size
+    {
+        constexpr const auto mask = 0x0000000000000200UL;
+        constexpr const auto from = 9;
+        constexpr const auto name = "host_address_space_size";
+
+        inline bool
+        is_enabled()
+        { return (vm::read(addr, name) & mask) != 0; }
+
+        template <class T> void set(T val)
+        { set_vm_control(val, msr_addr, addr, name, mask); }
+
+        template <class T> void set_if_allowed(T val, bool verbose) noexcept
+        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+
+        inline void enable()
+        { set(1UL); }
+
+        inline void disable()
+        { set(0UL); }
+
+        inline void enable_if_allowed(bool verbose = false) noexcept
+        { set_if_allowed(1UL, verbose); }
+
+        inline void disable_if_allowed(bool verbose = false) noexcept 
+        { set_if_allowed(0UL, verbose); }
+    }
+
+    namespace load_ia32_perf_global_ctrl
+    {
+        constexpr const auto mask = 0x0000000000001000UL;
+        constexpr const auto from = 12;
+        constexpr const auto name = "load_ia32_perf_global_ctrl";
+
+        inline bool
+        is_enabled()
+        { return (vm::read(addr, name) & mask) != 0; }
+
+        template <class T> void set(T val)
+        { set_vm_control(val, msr_addr, addr, name, mask); }
+
+        template <class T> void set_if_allowed(T val, bool verbose) noexcept
+        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+
+        inline void enable()
+        { set(1UL); }
+
+        inline void disable()
+        { set(0UL); }
+
+        inline void enable_if_allowed(bool verbose = false) noexcept
+        { set_if_allowed(1UL, verbose); }
+
+        inline void disable_if_allowed(bool verbose = false) noexcept 
+        { set_if_allowed(0UL, verbose); }
+    }
+
+    namespace acknowledge_interrupt_on_exit
+    {
+        constexpr const auto mask = 0x0000000000008000UL;
+        constexpr const auto from = 15;
+        constexpr const auto name = "acknowledge_interrupt_on_exit";
+
+        inline bool
+        is_enabled()
+        { return (vm::read(addr, name) & mask) != 0; }
+
+        template <class T> void set(T val)
+        { set_vm_control(val, msr_addr, addr, name, mask); }
+
+        template <class T> void set_if_allowed(T val, bool verbose) noexcept
+        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+
+        inline void enable()
+        { set(1UL); }
+
+        inline void disable()
+        { set(0UL); }
+
+        inline void enable_if_allowed(bool verbose = false) noexcept
+        { set_if_allowed(1UL, verbose); }
+
+        inline void disable_if_allowed(bool verbose = false) noexcept 
+        { set_if_allowed(0UL, verbose); }
+    }
+
+    namespace save_ia32_pat
+    {
+        constexpr const auto mask = 0x0000000000040000UL;
+        constexpr const auto from = 18;
+        constexpr const auto name = "save_ia32_pat";
+
+        inline bool
+        is_enabled()
+        { return (vm::read(addr, name) & mask) != 0; }
+
+        template <class T> void set(T val)
+        { set_vm_control(val, msr_addr, addr, name, mask); }
+
+        template <class T> void set_if_allowed(T val, bool verbose) noexcept
+        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+
+        inline void enable()
+        { set(1UL); }
+
+        inline void disable()
+        { set(0UL); }
+
+        inline void enable_if_allowed(bool verbose = false) noexcept
+        { set_if_allowed(1UL, verbose); }
+
+        inline void disable_if_allowed(bool verbose = false) noexcept 
+        { set_if_allowed(0UL, verbose); }
+    }
+
+    namespace load_ia32_pat
+    {
+        constexpr const auto mask = 0x0000000000080000UL;
+        constexpr const auto from = 19;
+        constexpr const auto name = "load_ia32_pat";
+
+        inline bool
+        is_enabled()
+        { return (vm::read(addr, name) & mask) != 0; }
+
+        template <class T> void set(T val)
+        { set_vm_control(val, msr_addr, addr, name, mask); }
+
+        template <class T> void set_if_allowed(T val, bool verbose) noexcept
+        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+
+        inline void enable()
+        { set(1UL); }
+
+        inline void disable()
+        { set(0UL); }
+
+        inline void enable_if_allowed(bool verbose = false) noexcept
+        { set_if_allowed(1UL, verbose); }
+
+        inline void disable_if_allowed(bool verbose = false) noexcept 
+        { set_if_allowed(0UL, verbose); }
+    }
+
+    namespace save_ia32_efer
+    {
+        constexpr const auto mask = 0x0000000000100000UL;
+        constexpr const auto from = 20;
+        constexpr const auto name = "save_ia32_efer";
+
+        inline bool
+        is_enabled()
+        { return (vm::read(addr, name) & mask) != 0; }
+
+        template <class T> void set(T val)
+        { set_vm_control(val, msr_addr, addr, name, mask); }
+
+        template <class T> void set_if_allowed(T val, bool verbose) noexcept
+        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+
+        inline void enable()
+        { set(1UL); }
+
+        inline void disable()
+        { set(0UL); }
+
+        inline void enable_if_allowed(bool verbose = false) noexcept
+        { set_if_allowed(1UL, verbose); }
+
+        inline void disable_if_allowed(bool verbose = false) noexcept 
+        { set_if_allowed(0UL, verbose); }
+    }
+
+    namespace load_ia32_efer
+    {
+        constexpr const auto mask = 0x0000000000200000UL;
+        constexpr const auto from = 21;
+        constexpr const auto name = "load_ia32_efer";
+
+        inline bool
+        is_enabled()
+        { return (vm::read(addr, name) & mask) != 0; }
+
+        template <class T> void set(T val)
+        { set_vm_control(val, msr_addr, addr, name, mask); }
+
+        template <class T> void set_if_allowed(T val, bool verbose) noexcept
+        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+
+        inline void enable()
+        { set(1UL); }
+
+        inline void disable()
+        { set(0UL); }
+
+        inline void enable_if_allowed(bool verbose = false) noexcept
+        { set_if_allowed(1UL, verbose); }
+
+        inline void disable_if_allowed(bool verbose = false) noexcept 
+        { set_if_allowed(0UL, verbose); }
+    }
+
+    namespace save_vmx_preemption_timer_value
+    {
+        constexpr const auto mask = 0x0000000000400000UL;
+        constexpr const auto from = 22;
+        constexpr const auto name = "save_vmx_preemption_timer_value";
+
+        inline bool
+        is_enabled()
+        { return (vm::read(addr, name) & mask) != 0; }
+
+        template <class T> void set(T val)
+        { set_vm_control(val, msr_addr, addr, name, mask); }
+
+        template <class T> void set_if_allowed(T val, bool verbose) noexcept
+        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+
+        inline void enable()
+        { set(1UL); }
+
+        inline void disable()
+        { set(0UL); }
+
+        inline void enable_if_allowed(bool verbose = false) noexcept
+        { set_if_allowed(1UL, verbose); }
+
+        inline void disable_if_allowed(bool verbose = false) noexcept 
+        { set_if_allowed(0UL, verbose); }
+    }
+}
+
+namespace vm_exit_msr_store_count
+{
+    constexpr const auto addr = 0x000000000000400EUL;
+    constexpr const auto name = "vm_exit_msr_store_count";
+
+    inline auto get()
+    { return vm::read(addr, name); }
+
+    template <class T> void set(T val)
+    { vm::write(addr, val, name); }
+
+    inline bool exists()
+    { return true; }
+}
+
+namespace vm_exit_msr_load_count
+{
+    constexpr const auto addr = 0x0000000000004010UL;
+    constexpr const auto name = "vm_exit_msr_load_count";
+
+    inline auto get()
+    { return vm::read(addr, name); }
+
+    template <class T> void set(T val)
+    { vm::write(addr, val, name); }
+
+    inline bool exists()
+    { return true; }
+}
+
+namespace vm_entry_controls
+{
+    constexpr const auto addr = 0x0000000000004012UL;
+    constexpr const auto name = "vm_entry_controls";
+    constexpr const auto msr_addr = msrs::ia32_vmx_true_entry_ctls::addr;
+
+    inline auto get()
+    { return vm::read(addr, name); }
+
+    template<class T> void set(T val)
+    { vm::write(addr, val, name); }
+
+    inline bool exists() noexcept
+    { return true; }
+
+    namespace load_debug_controls
+    {
+        constexpr const auto mask = 0x0000000000000004UL;
+        constexpr const auto from = 2;
+        constexpr const auto name = "load_debug_controls";
+
+        inline bool
+        is_enabled()
+        { return (vm::read(addr, name) & mask) != 0; }
+
+        template <class T> void set(T val)
+        { set_vm_control(val, msr_addr, addr, name, mask); }
+
+        template <class T> void set_if_allowed(T val, bool verbose) noexcept
+        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+
+        inline void enable()
+        { set(1UL); }
+
+        inline void disable()
+        { set(0UL); }
+
+        inline void enable_if_allowed(bool verbose = false) noexcept
+        { set_if_allowed(1UL, verbose); }
+
+        inline void disable_if_allowed(bool verbose = false) noexcept 
+        { set_if_allowed(0UL, verbose); }
+    }
+
+    namespace ia_32e_mode_guest
+    {
+        constexpr const auto mask = 0x0000000000000200UL;
+        constexpr const auto from = 9;
+        constexpr const auto name = "ia_32e_mode_guest";
+
+        inline bool
+        is_enabled()
+        { return (vm::read(addr, name) & mask) != 0; }
+
+        template <class T> void set(T val)
+        { set_vm_control(val, msr_addr, addr, name, mask); }
+
+        template <class T> void set_if_allowed(T val, bool verbose) noexcept
+        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+
+        inline void enable()
+        { set(1UL); }
+
+        inline void disable()
+        { set(0UL); }
+
+        inline void enable_if_allowed(bool verbose = false) noexcept
+        { set_if_allowed(1UL, verbose); }
+
+        inline void disable_if_allowed(bool verbose = false) noexcept 
+        { set_if_allowed(0UL, verbose); }
+    }
+
+    namespace entry_to_smm
+    {
+        constexpr const auto mask = 0x0000000000000400UL;
+        constexpr const auto from = 10;
+        constexpr const auto name = "entry_to_smm";
+
+        inline bool
+        is_enabled()
+        { return (vm::read(addr, name) & mask) != 0; }
+
+        template <class T> void set(T val)
+        { set_vm_control(val, msr_addr, addr, name, mask); }
+
+        template <class T> void set_if_allowed(T val, bool verbose) noexcept
+        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+
+        inline void enable()
+        { set(1UL); }
+
+        inline void disable()
+        { set(0UL); }
+
+        inline void enable_if_allowed(bool verbose = false) noexcept
+        { set_if_allowed(1UL, verbose); }
+
+        inline void disable_if_allowed(bool verbose = false) noexcept 
+        { set_if_allowed(0UL, verbose); }
+    }
+
+    namespace deactivate_dual_monitor_treatment
+    {
+        constexpr const auto mask = 0x0000000000000800UL;
+        constexpr const auto from = 11;
+        constexpr const auto name = "deactivate_dual_monitor_treatment";
+
+        inline bool
+        is_enabled()
+        { return (vm::read(addr, name) & mask) != 0; }
+
+        template <class T> void set(T val)
+        { set_vm_control(val, msr_addr, addr, name, mask); }
+
+        template <class T> void set_if_allowed(T val, bool verbose) noexcept
+        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+
+        inline void enable()
+        { set(1UL); }
+
+        inline void disable()
+        { set(0UL); }
+
+        inline void enable_if_allowed(bool verbose = false) noexcept
+        { set_if_allowed(1UL, verbose); }
+
+        inline void disable_if_allowed(bool verbose = false) noexcept 
+        { set_if_allowed(0UL, verbose); }
+    }
+
+    namespace load_ia32_perf_global_ctrl
+    {
+        constexpr const auto mask = 0x0000000000002000UL;
+        constexpr const auto from = 13;
+        constexpr const auto name = "load_ia32_perf_global_ctrl";
+
+        inline bool
+        is_enabled()
+        { return (vm::read(addr, name) & mask) != 0; }
+
+        template <class T> void set(T val)
+        { set_vm_control(val, msr_addr, addr, name, mask); }
+
+        template <class T> void set_if_allowed(T val, bool verbose) noexcept
+        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+
+        inline void enable()
+        { set(1UL); }
+
+        inline void disable()
+        { set(0UL); }
+
+        inline void enable_if_allowed(bool verbose = false) noexcept
+        { set_if_allowed(1UL, verbose); }
+
+        inline void disable_if_allowed(bool verbose = false) noexcept 
+        { set_if_allowed(0UL, verbose); }
+    }
+
+    namespace load_ia32_pat
+    {
+        constexpr const auto mask = 0x0000000000004000UL;
+        constexpr const auto from = 14;
+        constexpr const auto name = "load_ia32_pat";
+
+        inline bool
+        is_enabled()
+        { return (vm::read(addr, name) & mask) != 0; }
+
+        template <class T> void set(T val)
+        { set_vm_control(val, msr_addr, addr, name, mask); }
+
+        template <class T> void set_if_allowed(T val, bool verbose) noexcept
+        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+
+        inline void enable()
+        { set(1UL); }
+
+        inline void disable()
+        { set(0UL); }
+
+        inline void enable_if_allowed(bool verbose = false) noexcept
+        { set_if_allowed(1UL, verbose); }
+
+        inline void disable_if_allowed(bool verbose = false) noexcept 
+        { set_if_allowed(0UL, verbose); }
+    }
+
+    namespace load_ia32_efer
+    {
+        constexpr const auto mask = 0x0000000000008000UL;
+        constexpr const auto from = 15;
+        constexpr const auto name = "load_ia32_efer";
+
+        inline bool
+        is_enabled()
+        { return (vm::read(addr, name) & mask) != 0; }
+
+        template <class T> void set(T val)
+        { set_vm_control(val, msr_addr, addr, name, mask); }
+
+        template <class T> void set_if_allowed(T val, bool verbose) noexcept
+        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+
+        inline void enable()
+        { set(1UL); }
+
+        inline void disable()
+        { set(0UL); }
+
+        inline void enable_if_allowed(bool verbose = false) noexcept
+        { set_if_allowed(1UL, verbose); }
+
+        inline void disable_if_allowed(bool verbose = false) noexcept 
+        { set_if_allowed(0UL, verbose); }
+    }
+}
+
+namespace vm_entry_msr_load_count
+{
+    constexpr const auto addr = 0x0000000000004014UL;
+    constexpr const auto name = "vm_entry_msr_load_count";
+
+    inline auto get()
+    { return vm::read(addr, name); }
+
+    template <class T> void set(T val)
+    { vm::write(addr, val, name); }
+
+    inline bool exists()
+    { return true; }
+}
+
+namespace vm_entry_interruption_information_field
+{
+    constexpr const auto addr = 0x0000000000004016UL;
+    constexpr const auto name = "vm_entry_interruption_information_field";
+
+    inline auto get()
+    { return vm::read(addr, name); }
+
+    template <class T> void set(T val)
+    { vm::write(addr, val, name); }
+
+    inline bool exists()
+    { return true; }
+
+    namespace vector
+    {
+        constexpr const auto mask = 0x000000FFUL;
+        constexpr const auto from = 0;
+        constexpr const auto name = "vector";
+
+        inline auto get()
+        { return (vm::read(addr, name) & mask); }
+
+        template <class T> void set(T val)
+        { vm::write(addr, ((vm::read(addr, name) & ~mask) | (val & mask)), name); }
+    }
+
+    namespace type
+    {
+        constexpr const auto mask = 0x00000700UL;
+        constexpr const auto from = 8;
+        constexpr const auto name = "type";
+
+        constexpr const auto external_interrupt = 0UL;
+        constexpr const auto reserved = 1UL;
+        constexpr const auto non_maskable_interrupt = 2UL;
+        constexpr const auto hardware_exception = 3UL;
+        constexpr const auto software_interrupt = 4UL;
+        constexpr const auto privileged_software_exception = 5UL;
+        constexpr const auto software_exception = 6UL;
+        constexpr const auto other_event = 7UL;
+
+        inline auto get()
+        { return (vm::read(addr, name) & mask) >> from; }
+
+        template <class T> void set(T val)
+        { vm::write(addr, ((vm::read(addr, name) & ~mask) | ((val << from) & mask)), name); }
+    }
+
+    namespace deliver_error_code_bit
+    {
+        constexpr const auto mask = 0x00000800UL;
+        constexpr const auto from = 11;
+        constexpr const auto name = "deliver_error_code_bit";
+
+        inline bool is_set()
+        { return (vm::read(addr, name) & mask) != 0; }
+
+        inline void set()
+        { vm::write(addr, (vm::read(addr, name) | mask), name); }
+
+        inline void clear()
+        { vm::write(addr, (vm::read(addr, name) & ~mask), name); }
+    }
+
+    namespace reserved
+    {
+        constexpr const auto mask = 0x7FFFF000UL;
+        constexpr const auto from = 12;
+        constexpr const auto name = "reserved";
+
+        inline auto get()
+        { return (vm::read(addr, name) & mask) >> from; }
+
+        template <class T> void set(T val)
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+
+    namespace valid_bit
+    {
+        constexpr const auto mask = 0x80000000UL;
+        constexpr const auto from = 31;
+        constexpr const auto name = "valid_bit";
+
+        inline bool is_set()
+        { return (vm::read(addr, name) & mask) != 0; }
+
+        inline void set()
+        { vm::write(addr, (vm::read(addr, name) | mask), name); }
+
+        inline void clear()
+        { vm::write(addr, (vm::read(addr, name) & ~mask), name); }
+    }
+}
+
+namespace vm_entry_exception_error_code
+{
+    constexpr const auto addr = 0x0000000000004018UL;
+    constexpr const auto name = "vm_entry_exception_error_code";
+
+    inline auto get()
+    { return vm::read(addr, name); }
+
+    template <class T> void set(T val)
+    { vm::write(addr, val, name); }
+
+    inline bool exists()
+    { return true; }
+}
+
+namespace vm_entry_instruction_length
+{
+    constexpr const auto addr = 0x000000000000401AUL;
+    constexpr const auto name = "vm_entry_instruction_length";
+
+    inline auto get()
+    { return vm::read(addr, name); }
+
+    template <class T> void set(T val)
+    { vm::write(addr, val, name); }
+
+    inline bool exists()
+    { return true; }
+}
+
+
+} //vmcs
+} //intel_x64
+
+
 constexpr const auto VMCS_TPR_THRESHOLD                                        = 0x000000000000401CUL;
 constexpr const auto VMCS_SECONDARY_PROCESSOR_BASED_VM_EXECUTION_CONTROLS      = 0x000000000000401EUL;
 constexpr const auto VMCS_PLE_GAP                                              = 0x0000000000004020UL;

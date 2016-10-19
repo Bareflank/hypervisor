@@ -47,14 +47,14 @@ setup_mock(MockRepository &mocks, memory_manager *mm)
 void
 enable_proc_ctl(uint64_t control)
 {
-    g_vmcs_fields[VMCS_PRIMARY_PROCESSOR_BASED_VM_EXECUTION_CONTROLS] |= control;
-    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] |= control << 32;
+    auto ctls = vmcs::primary_processor_based_vm_execution_controls::get();
+    vmcs::primary_processor_based_vm_execution_controls::set(ctls | control);
 }
 
 void
 enable_proc_ctl2(uint64_t control)
 {
-    enable_proc_ctl(VM_EXEC_P_PROC_BASED_ACTIVATE_SECONDARY_CONTROLS);
+    enable_proc_ctl(vmcs::primary_processor_based_vm_execution_controls::activate_secondary_controls::mask);
     g_vmcs_fields[VMCS_SECONDARY_PROCESSOR_BASED_VM_EXECUTION_CONTROLS] |= control;
     g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] |= control << 32;
 }
@@ -62,15 +62,15 @@ enable_proc_ctl2(uint64_t control)
 void
 enable_pin_ctl(uint64_t control)
 {
-    g_vmcs_fields[VMCS_PIN_BASED_VM_EXECUTION_CONTROLS] |= control;
-    g_msrs[msrs::ia32_vmx_true_pinbased_ctls::addr] |= control << 32;
+    auto ctls = vmcs::pin_based_vm_execution_controls::get();
+    vmcs::pin_based_vm_execution_controls::set(ctls | control);
 }
 
 void
 disable_proc_ctl(uint64_t control)
 {
-    g_vmcs_fields[VMCS_PRIMARY_PROCESSOR_BASED_VM_EXECUTION_CONTROLS] &= ~control;
-    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] &= ~control;
+    auto ctls = vmcs::primary_processor_based_vm_execution_controls::get();
+    vmcs::primary_processor_based_vm_execution_controls::set(ctls & ~control);
 }
 
 void
@@ -83,36 +83,36 @@ disable_proc_ctl2(uint64_t control)
 void
 disable_pin_ctl(uint64_t control)
 {
-    g_vmcs_fields[VMCS_PIN_BASED_VM_EXECUTION_CONTROLS] &= ~control;
-    g_msrs[msrs::ia32_vmx_true_pinbased_ctls::addr] &= ~control;
+    auto ctls = vmcs::pin_based_vm_execution_controls::get();
+    vmcs::pin_based_vm_execution_controls::set(ctls & ~control);
 }
 
 void
 disable_exit_ctl(uint64_t control)
 {
-    g_vmcs_fields[VMCS_VM_EXIT_CONTROLS] &= ~control;
-    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] &= ~control;
+    auto ctls = vmcs::vm_exit_controls::get();
+    vmcs::vm_exit_controls::set(ctls & ~control);
 }
 
 void
 enable_exit_ctl(uint64_t control)
 {
-    g_vmcs_fields[VMCS_VM_EXIT_CONTROLS] |= control;
-    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] |= control << 32;
+    auto ctls = vmcs::vm_exit_controls::get();
+    vmcs::vm_exit_controls::set(ctls | control);
 }
 
 void
 disable_entry_ctl(uint64_t control)
 {
-    g_vmcs_fields[VMCS_VM_ENTRY_CONTROLS] &= ~control;
-    g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] &= ~control;
+    auto ctls = vmcs::vm_entry_controls::get();
+    vmcs::vm_entry_controls::set(ctls & ~control);
 }
 
 void
 enable_entry_ctl(uint64_t control)
 {
-    g_vmcs_fields[VMCS_VM_ENTRY_CONTROLS] |= control;
-    g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] |= control << 32;
+    auto ctls = vmcs::vm_entry_controls::get();
+    vmcs::vm_entry_controls::set(ctls | control);
 }
 
 extern "C" uint64_t
@@ -463,6 +463,67 @@ vmcs_ut::list()
     this->test_vmcs_guest_tr_access_rights_granularity();
     this->test_vmcs_guest_tr_access_rights_reserved();
     this->test_vmcs_guest_tr_access_rights_unusable();
+    this->test_vmcs_pin_based_vm_execution_controls();
+    this->test_vmcs_pin_based_vm_execution_controls_external_interrupt_exiting();
+    this->test_vmcs_pin_based_vm_execution_controls_nmi_exiting();
+    this->test_vmcs_pin_based_vm_execution_controls_virtual_nmis();
+    this->test_vmcs_pin_based_vm_execution_controls_activate_vmx_preemption_timer();
+    this->test_vmcs_pin_based_vm_execution_controls_process_posted_interrupts();
+    this->test_vmcs_primary_processor_based_vm_execution_controls();
+    this->test_vmcs_primary_processor_based_vm_execution_controls_interrupt_window_exiting();
+    this->test_vmcs_primary_processor_based_vm_execution_controls_use_tsc_offsetting();
+    this->test_vmcs_primary_processor_based_vm_execution_controls_hlt_exiting();
+    this->test_vmcs_primary_processor_based_vm_execution_controls_invlpg_exiting();
+    this->test_vmcs_primary_processor_based_vm_execution_controls_mwait_exiting();
+    this->test_vmcs_primary_processor_based_vm_execution_controls_rdpmc_exiting();
+    this->test_vmcs_primary_processor_based_vm_execution_controls_rdtsc_exiting();
+    this->test_vmcs_primary_processor_based_vm_execution_controls_cr3_load_exiting();
+    this->test_vmcs_primary_processor_based_vm_execution_controls_cr3_store_exiting();
+    this->test_vmcs_primary_processor_based_vm_execution_controls_cr8_load_exiting();
+    this->test_vmcs_primary_processor_based_vm_execution_controls_cr8_store_exiting();
+    this->test_vmcs_primary_processor_based_vm_execution_controls_use_tpr_shadow();
+    this->test_vmcs_primary_processor_based_vm_execution_controls_mov_dr_exiting();
+    this->test_vmcs_primary_processor_based_vm_execution_controls_unconditional_io_exiting();
+    this->test_vmcs_primary_processor_based_vm_execution_controls_nmi_window_exiting();
+    this->test_vmcs_primary_processor_based_vm_execution_controls_use_io_bitmaps();
+    this->test_vmcs_primary_processor_based_vm_execution_controls_monitor_trap_flag();
+    this->test_vmcs_primary_processor_based_vm_execution_controls_use_msr_bitmaps();
+    this->test_vmcs_primary_processor_based_vm_execution_controls_monitor_exiting();
+    this->test_vmcs_primary_processor_based_vm_execution_controls_pause_exiting();
+    this->test_vmcs_primary_processor_based_vm_execution_controls_activate_secondary_controls();
+    this->test_vmcs_exception_bitmap();
+    this->test_vmcs_page_fault_error_code_mask();
+    this->test_vmcs_page_fault_error_code_match();
+    this->test_vmcs_cr3_target_count();
+    this->test_vmcs_vm_exit_controls();
+    this->test_vmcs_vm_exit_controls_save_debug_controls();
+    this->test_vmcs_vm_exit_controls_host_address_space_size();
+    this->test_vmcs_vm_exit_controls_load_ia32_perf_global_ctrl();
+    this->test_vmcs_vm_exit_controls_acknowledge_interrupt_on_exit();
+    this->test_vmcs_vm_exit_controls_save_ia32_pat();
+    this->test_vmcs_vm_exit_controls_load_ia32_pat();
+    this->test_vmcs_vm_exit_controls_save_ia32_efer();
+    this->test_vmcs_vm_exit_controls_load_ia32_efer();
+    this->test_vmcs_vm_exit_controls_save_vmx_preemption_timer_value();
+    this->test_vmcs_vm_exit_msr_store_count();
+    this->test_vmcs_vm_exit_msr_load_count();
+    this->test_vmcs_vm_entry_controls();
+    this->test_vmcs_vm_entry_controls_load_debug_controls();
+    this->test_vmcs_vm_entry_controls_ia_32e_mode_guest();
+    this->test_vmcs_vm_entry_controls_entry_to_smm();
+    this->test_vmcs_vm_entry_controls_deactivate_dual_monitor_treatment();
+    this->test_vmcs_vm_entry_controls_load_ia32_perf_global_ctrl();
+    this->test_vmcs_vm_entry_controls_load_ia32_pat();
+    this->test_vmcs_vm_entry_controls_load_ia32_efer();
+    this->test_vmcs_vm_entry_msr_load_count();
+    this->test_vmcs_vm_entry_interruption_information_field();
+    this->test_vmcs_vm_entry_interruption_information_field_vector();
+    this->test_vmcs_vm_entry_interruption_information_field_type();
+    this->test_vmcs_vm_entry_interruption_information_field_deliver_error_code_bit();
+    this->test_vmcs_vm_entry_interruption_information_field_reserved();
+    this->test_vmcs_vm_entry_interruption_information_field_valid_bit();
+    this->test_vmcs_vm_entry_exception_error_code();
+    this->test_vmcs_vm_entry_instruction_length();
 
     this->test_check_control_pin_based_ctls_reserved_properly_set();
     this->test_check_control_proc_based_ctls_reserved_properly_set();
@@ -526,6 +587,7 @@ vmcs_ut::list()
     this->test_check_host_gdtr_canonical_base_address();
     this->test_check_host_idtr_canonical_base_address();
     this->test_check_host_tr_canonical_base_address();
+    this->test_check_host_checks_related_to_address_space_size();
     this->test_check_host_if_outside_ia32e_mode();
     this->test_check_host_vmcs_host_address_space_size_is_set();
     this->test_check_host_host_address_space_disabled();

@@ -60,49 +60,54 @@ vmcs_intel_x64::checks_on_vm_execution_control_fields()
 }
 
 void
+vmcs_intel_x64::check_control_ctls_reserved_properly_set(uint64_t msr_addr, uint64_t ctls,
+        const std::string &name)
+{
+    using namespace intel_x64;
+
+    auto allowed0 = (msrs::get(msr_addr) & 0x00000000FFFFFFFFUL);
+    auto allowed1 = ((msrs::get(msr_addr) >> 32) & 0x00000000FFFFFFFFUL);
+
+    if ((allowed0 & ctls) != allowed0)
+    {
+        bferror << " failed: check_control_ctls_reserved_properly_set" << bfendl;
+        bferror << "    - allowed0: " << view_as_pointer(allowed0) << bfendl;
+        bferror << "    - bad ctls: " << view_as_pointer(ctls) << bfendl;
+
+        throw std::logic_error(std::string("invalid ") + name);
+    }
+
+    if ((ctls & ~allowed1) != 0UL)
+    {
+        bferror << " failed: check_control_ctls_reserved_properly_set" << bfendl;
+        bferror << "    - allowed1: " << view_as_pointer(allowed1) << bfendl;
+        bferror << "    - bad ctls: " << view_as_pointer(ctls) << bfendl;
+
+        throw std::logic_error(std::string("invalid ") + name);
+    }
+}
+
+void
 vmcs_intel_x64::check_control_pin_based_ctls_reserved_properly_set()
 {
-    auto ia32_vmx_pinbased_ctls_msr = msrs::ia32_vmx_true_pinbased_ctls::get();
+    auto msr_addr = msrs::ia32_vmx_true_pinbased_ctls::addr;
+    auto ctls = vmcs::pin_based_vm_execution_controls::get();
+    auto name = vmcs::pin_based_vm_execution_controls::name;
 
-    auto allowed_zero = ((ia32_vmx_pinbased_ctls_msr >> 00) & 0x00000000FFFFFFFF);
-    auto allowed_one = ((ia32_vmx_pinbased_ctls_msr >> 32) & 0x00000000FFFFFFFF);
-
-    auto ctls = get_pin_ctls();
-    auto ctls_lower = (ctls & 0x00000000FFFFFFFF);
-
-    if ((allowed_zero & ctls_lower) != allowed_zero || (ctls_lower & ~allowed_one) != 0)
-    {
-        bferror << " failed: check_control_pin_based_ctls_reserved_properly_set" << bfendl;
-        bferror << "    - allowed_zero: " << view_as_pointer(allowed_zero) << bfendl;
-        bferror << "    - allowed_one: " << view_as_pointer(allowed_one) << bfendl;
-        bferror << "    - ctls: " << view_as_pointer(ctls) << bfendl;
-
-        throw std::logic_error("invalid pin based controls");
-    }
+    this->check_control_ctls_reserved_properly_set(msr_addr, ctls, name);
 }
 
 void
 vmcs_intel_x64::check_control_proc_based_ctls_reserved_properly_set()
 {
-    auto ia32_vmx_procbased_ctls_msr = msrs::ia32_vmx_true_procbased_ctls::get();
+    auto msr_addr = msrs::ia32_vmx_true_procbased_ctls::addr;
+    auto ctls = vmcs::primary_processor_based_vm_execution_controls::get();
+    auto name = vmcs::primary_processor_based_vm_execution_controls::name;
 
-    auto allowed_zero = ((ia32_vmx_procbased_ctls_msr >> 00) & 0x00000000FFFFFFFF);
-    auto allowed_one = ((ia32_vmx_procbased_ctls_msr >> 32) & 0x00000000FFFFFFFF);
-
-    auto ctls = get_proc_ctls();
-    auto ctls_lower = (ctls & 0x00000000FFFFFFFF);
-
-    if ((allowed_zero & ctls_lower) != allowed_zero || (ctls_lower & ~allowed_one) != 0)
-    {
-        bferror << " failed: check_control_proc_based_ctls_reserved_properly_set" << bfendl;
-        bferror << "    - allowed_zero: " << view_as_pointer(allowed_zero) << bfendl;
-        bferror << "    - allowed_one: " << view_as_pointer(allowed_one) << bfendl;
-        bferror << "    - ctls: " << view_as_pointer(ctls) << bfendl;
-
-        throw std::logic_error("invalid proc based controls");
-    }
+    this->check_control_ctls_reserved_properly_set(msr_addr, ctls, name);
 }
 
+// TODO: this will be updated on the next PR
 void
 vmcs_intel_x64::check_control_proc_based_ctls2_reserved_properly_set()
 {
@@ -128,16 +133,14 @@ vmcs_intel_x64::check_control_proc_based_ctls2_reserved_properly_set()
 void
 vmcs_intel_x64::check_control_cr3_count_less_then_4()
 {
-    auto cr3_target_count = vm::read(VMCS_CR3_TARGET_COUNT);
-
-    if (cr3_target_count > 4)
+    if (vmcs::cr3_target_count::get() > 4)
         throw std::logic_error("cr3 target count > 4");
 }
 
 void
 vmcs_intel_x64::check_control_io_bitmap_address_bits()
 {
-    if (!is_enabled_io_bitmaps())
+    if (!vmcs::primary_processor_based_vm_execution_controls::use_io_bitmaps::is_enabled())
         return;
 
     auto addr_a = vm::read(VMCS_ADDRESS_OF_IO_BITMAP_A);
@@ -159,7 +162,7 @@ vmcs_intel_x64::check_control_io_bitmap_address_bits()
 void
 vmcs_intel_x64::check_control_msr_bitmap_address_bits()
 {
-    if (!is_enabled_msr_bitmaps())
+    if (!vmcs::primary_processor_based_vm_execution_controls::use_msr_bitmaps::is_enabled())
         return;
 
     auto addr = vm::read(VMCS_ADDRESS_OF_MSR_BITMAPS);
@@ -174,7 +177,7 @@ vmcs_intel_x64::check_control_msr_bitmap_address_bits()
 void
 vmcs_intel_x64::check_control_tpr_shadow_and_virtual_apic()
 {
-    if (is_enabled_tpr_shadow())
+    if (vmcs::primary_processor_based_vm_execution_controls::use_tpr_shadow::is_enabled())
     {
         auto phys_addr = vm::read(VMCS_VIRTUAL_APIC_ADDRESS);
 
@@ -227,20 +230,19 @@ vmcs_intel_x64::check_control_tpr_shadow_and_virtual_apic()
 void
 vmcs_intel_x64::check_control_nmi_exiting_and_virtual_nmi()
 {
-    auto nmi_exiting = is_enabled_nmi_exiting();
-    auto virtual_nmis = is_enabled_virtual_nmis();
+    using namespace vmcs::pin_based_vm_execution_controls;
 
-    if (!nmi_exiting && virtual_nmis)
+    if (!nmi_exiting::is_enabled() && virtual_nmis::is_enabled())
         throw std::logic_error("virtual NMI must be 0 if NMI exiting is 0");
 }
 
 void
 vmcs_intel_x64::check_control_virtual_nmi_and_nmi_window()
 {
-    auto virtual_nmis = is_enabled_virtual_nmis();
-    auto nmi_window_exiting = is_enabled_nmi_window_exiting();
+    using namespace vmcs::pin_based_vm_execution_controls;
+    using namespace vmcs::primary_processor_based_vm_execution_controls;
 
-    if (!virtual_nmis && nmi_window_exiting)
+    if (!virtual_nmis::is_enabled() && nmi_window_exiting::is_enabled())
         throw std::logic_error("NMI window exiting must be 0 if virtual NMI is 0");
 }
 
@@ -275,25 +277,26 @@ vmcs_intel_x64::check_control_x2apic_mode_and_virtual_apic_access()
 void
 vmcs_intel_x64::check_control_virtual_interrupt_and_external_interrupt()
 {
-    auto virtual_interrupt_delivery = is_enabled_virtual_interrupt_delivery();
-    auto external_interrupt_exiting = is_enabled_external_interrupt_exiting();
+    using namespace vmcs::pin_based_vm_execution_controls;
 
-    if (virtual_interrupt_delivery && !external_interrupt_exiting)
-        throw std::logic_error("external interrupt exiting must be 1 "
-                               "if virtual interrupt delivery is 1");
+    auto virtual_interrupt_delivery = is_enabled_virtual_interrupt_delivery();
+
+    if (virtual_interrupt_delivery && !external_interrupt_exiting::is_enabled())
+        throw std::logic_error("external_interrupt_exiting must be 1 "
+                               "if virtual_interrupt_delivery is 1");
 }
 
 void
 vmcs_intel_x64::check_control_process_posted_interrupt_checks()
 {
-    if (!is_enabled_posted_interrupts())
+    if (!vmcs::pin_based_vm_execution_controls::process_posted_interrupts::is_enabled())
         return;
 
     if (!is_enabled_virtual_interrupt_delivery())
         throw std::logic_error("virtual interrupt delivery must be 1 "
                                "if posted interrupts is 1");
 
-    if (!is_enabled_ack_interrupt_on_exit())
+    if (!vmcs::vm_exit_controls::acknowledge_interrupt_on_exit::is_enabled())
         throw std::logic_error("ack interrupt on exit must be 1 "
                                "if posted interrupts is 1");
 
@@ -326,15 +329,17 @@ vmcs_intel_x64::check_control_vpid_checks()
 void
 vmcs_intel_x64::check_control_enable_ept_checks()
 {
+    using namespace msrs::ia32_vmx_ept_vpid_cap;
+
     if (!is_enabled_ept())
         return;
 
     auto eptp = vm::read(VMCS_EPT_POINTER);
 
-    if ((eptp & EPTP_MEMORY_TYPE) == 0 && msrs::ia32_vmx_ept_vpid_cap::memory_type_uncacheable_supported::get() == 0)
+    if ((eptp & EPTP_MEMORY_TYPE) == 0 && memory_type_uncacheable_supported::get() == 0)
         throw std::logic_error("hardware does not support ept memory type: uncachable");
 
-    if ((eptp & EPTP_MEMORY_TYPE) == 6 && msrs::ia32_vmx_ept_vpid_cap::memory_type_write_back_supported::get() == 0)
+    if ((eptp & EPTP_MEMORY_TYPE) == 6 && memory_type_write_back_supported::get() == 0)
         throw std::logic_error("hardware does not support ept memory type: write-back");
 
     if ((eptp & EPTP_MEMORY_TYPE) != 0 && (eptp & EPTP_MEMORY_TYPE) != 6)
@@ -343,7 +348,7 @@ vmcs_intel_x64::check_control_enable_ept_checks()
     if ((eptp & EPTP_PAGE_WALK_LENGTH) >> 3 != 3)
         throw std::logic_error("the ept walk-through length must be 1 less than 4, i.e. 3");
 
-    if ((eptp & EPTP_ACCESSED_DIRTY_FLAGS_ENABLED) != 0 && msrs::ia32_vmx_ept_vpid_cap::accessed_dirty_support::get() == 0)
+    if ((eptp & EPTP_ACCESSED_DIRTY_FLAGS_ENABLED) != 0 && accessed_dirty_support::get() == 0)
         throw std::logic_error("hardware does not support dirty / accessed flags for ept");
 
     if ((eptp & 0x0000000000000F80) != 0)
@@ -458,32 +463,20 @@ vmcs_intel_x64::checks_on_vm_exit_control_fields()
 void
 vmcs_intel_x64::check_control_vm_exit_ctls_reserved_properly_set()
 {
-    auto ia32_vmx_exit_ctls_msr = msrs::ia32_vmx_true_exit_ctls::get();
+    auto msr_addr = msrs::ia32_vmx_true_exit_ctls::addr;
+    auto ctls = vmcs::vm_exit_controls::get();
+    auto name = vmcs::vm_exit_controls::name;
 
-    auto allowed_zero = ((ia32_vmx_exit_ctls_msr >> 00) & 0x00000000FFFFFFFF);
-    auto allowed_one = ((ia32_vmx_exit_ctls_msr >> 32) & 0x00000000FFFFFFFF);
-
-    auto ctls = get_exit_ctls();
-    auto ctls_lower = (ctls & 0x00000000FFFFFFFF);
-
-    if ((allowed_zero & ctls_lower) != allowed_zero || (ctls_lower & ~allowed_one) != 0)
-    {
-        bferror << " failed: check_control_vm_exit_ctls_reserved_properly_set" << bfendl;
-        bferror << "    - allowed_zero: " << view_as_pointer(allowed_zero) << bfendl;
-        bferror << "    - allowed_one: " << view_as_pointer(allowed_one) << bfendl;
-        bferror << "    - ctls: " << view_as_pointer(ctls) << bfendl;
-
-        throw std::logic_error("invalid exit controls");
-    }
+    this->check_control_ctls_reserved_properly_set(msr_addr, ctls, name);
 }
 
 void
 vmcs_intel_x64::check_control_activate_and_save_preemption_timer_must_be_0()
 {
-    auto vmx_preemption_timer = is_enabled_vmx_preemption_timer();
-    auto save_vmx_preemption_timer_on_exit = is_enabled_save_vmx_preemption_timer_on_exit();
+    using namespace vmcs::pin_based_vm_execution_controls;
+    using namespace vmcs::vm_exit_controls;
 
-    if (!vmx_preemption_timer && save_vmx_preemption_timer_on_exit)
+    if (!activate_vmx_preemption_timer::is_enabled() && save_vmx_preemption_timer_value::is_enabled())
         throw std::logic_error("save vmx preemption timer must be 0 "
                                "if activate vmx preemption timer is 0");
 }
@@ -491,7 +484,7 @@ vmcs_intel_x64::check_control_activate_and_save_preemption_timer_must_be_0()
 void
 vmcs_intel_x64::check_control_exit_msr_store_address()
 {
-    auto msr_store_count = vm::read(VMCS_VM_EXIT_MSR_STORE_COUNT);
+    auto msr_store_count = vmcs::vm_exit_msr_store_count::get();
 
     if (msr_store_count == 0)
         return;
@@ -513,7 +506,7 @@ vmcs_intel_x64::check_control_exit_msr_store_address()
 void
 vmcs_intel_x64::check_control_exit_msr_load_address()
 {
-    auto msr_load_count = vm::read(VMCS_VM_EXIT_MSR_LOAD_COUNT);
+    auto msr_load_count = vmcs::vm_exit_msr_load_count::get();
 
     if (msr_load_count == 0)
         return;
@@ -547,54 +540,41 @@ vmcs_intel_x64::checks_on_vm_entry_control_fields()
 void
 vmcs_intel_x64::check_control_vm_entry_ctls_reserved_properly_set()
 {
-    auto ia32_vmx_entry_ctls_msr = msrs::ia32_vmx_true_entry_ctls::get();
+    auto msr_addr = msrs::ia32_vmx_true_entry_ctls::addr;
+    auto ctls = vmcs::vm_entry_controls::get();
+    auto name = vmcs::vm_entry_controls::name;
 
-    auto allowed_zero = ((ia32_vmx_entry_ctls_msr >> 00) & 0x00000000FFFFFFFF);
-    auto allowed_one = ((ia32_vmx_entry_ctls_msr >> 32) & 0x00000000FFFFFFFF);
-
-    auto ctls = get_entry_ctls();
-    auto ctls_lower = (ctls & 0x00000000FFFFFFFF);
-
-    if ((allowed_zero & ctls_lower) != allowed_zero || (ctls_lower & ~allowed_one) != 0)
-    {
-        bferror << " failed: check_control_vm_entry_ctls_reserved_properly_set" << bfendl;
-        bferror << "    - allowed_zero: " << view_as_pointer(allowed_zero) << bfendl;
-        bferror << "    - allowed_one: " << view_as_pointer(allowed_one) << bfendl;
-        bferror << "    - ctls: " << view_as_pointer(ctls) << bfendl;
-
-        throw std::logic_error("invalid entry controls");
-    }
+    this->check_control_ctls_reserved_properly_set(msr_addr, ctls, name);
 }
 
 void
 vmcs_intel_x64::check_control_event_injection_type_vector_checks()
 {
-    auto interrupt_info_field =
-        vm::read(VMCS_VM_ENTRY_INTERRUPTION_INFORMATION_FIELD);
+    using namespace vmcs::vm_entry_interruption_information_field;
+    using namespace msrs::ia32_vmx_true_procbased_ctls;
 
-    if ((interrupt_info_field & VM_INTERRUPT_INFORMATION_VALID) == 0)
+    if (!valid_bit::is_set())
         return;
 
-    auto type = (interrupt_info_field & VM_INTERRUPT_INFORMATION_TYPE) >> 8;
+    auto vector = vector::get();
+    auto type = type::get();
 
-    if (type == 1)
+    if (type == type::reserved)
         throw std::logic_error("interrupt information field type of 1 is reserved");
 
-    if (!is_supported_monitor_trap_flag() && type == 7)
+    if (!monitor_trap_flag::is_allowed1() && type == type::other_event)
         throw std::logic_error("interrupt information field type of 7 "
                                "is reserved on this hardware");
 
-    auto vector = interrupt_info_field & VM_INTERRUPT_INFORMATION_VECTOR;
-
-    if (type == 2 && vector != 2)
+    if (type == type::non_maskable_interrupt && vector != 2)
         throw std::logic_error("interrupt information field vector must be "
                                "2 if the type field is 2 (NMI)");
 
-    if (type == 3 && vector > 31)
+    if (type == type::hardware_exception && vector > 31)
         throw std::logic_error("interrupt information field vector must be "
-                               "0->31 if the type field is 3 (HE)");
+                               "at most 31 if the type field is 3 (HE)");
 
-    if (type == 7 && vector != 0)
+    if (type == type::other_event && vector != 0)
         throw std::logic_error("interrupt information field vector must be "
                                "0 if the type field is 7 (other)");
 }
@@ -602,28 +582,24 @@ vmcs_intel_x64::check_control_event_injection_type_vector_checks()
 void
 vmcs_intel_x64::check_control_event_injection_delivery_ec_checks()
 {
-    auto interrupt_info_field =
-        vm::read(VMCS_VM_ENTRY_INTERRUPTION_INFORMATION_FIELD);
+    using namespace vmcs::vm_entry_interruption_information_field;
 
-    if ((interrupt_info_field & VM_INTERRUPT_INFORMATION_VALID) == 0)
+    if (!valid_bit::is_set())
         return;
 
-    if ((interrupt_info_field & VM_INTERRUPT_INFORMATION_DELIVERY_ERROR) == 0)
-        return;
-
-    auto type = (interrupt_info_field & VM_INTERRUPT_INFORMATION_TYPE) >> 8;
-    auto vector = (interrupt_info_field & VM_INTERRUPT_INFORMATION_VECTOR) >> 0;
+    auto type = type::get();
+    auto vector = vector::get();
 
     if (is_enabled_unrestricted_guests())
     {
-        if (vmcs::guest_cr0::protection_enable::get() == 0)
+        if (vmcs::guest_cr0::protection_enable::get() == 0 && deliver_error_code_bit::is_set())
             throw std::logic_error("unrestricted guest must be 0 or PE must "
-                                   "be enabled in cr0 if deliver error code bit is set");
+                                   "be enabled in cr0 if deliver_error_code_bit is set");
     }
 
-    if (type != 3)
+    if (type != type::hardware_exception && deliver_error_code_bit::is_set())
         throw std::logic_error("interrupt information field type must be "
-                               "3 if deliver error code bit is set");
+                               "3 if deliver_error_code_bit is set");
 
     switch (vector)
     {
@@ -637,40 +613,39 @@ vmcs_intel_x64::check_control_event_injection_delivery_ec_checks()
             break;
 
         default:
-            throw std::logic_error("vector must indicate exception that would nomrally "
-                                   "deliver an error code if deliver error code bit is set");
+            if (deliver_error_code_bit::is_set())
+                throw std::logic_error("vector must indicate exception that would normally "
+                                       "deliver an error code if deliver_error_code_bit is set");
     }
+
+    if (!deliver_error_code_bit::is_set())
+        throw std::logic_error("deliver_error_code_bit must be 1");
 }
 
 void
 vmcs_intel_x64::check_control_event_injection_reserved_bits_checks()
 {
-    auto interrupt_info_field =
-        vm::read(VMCS_VM_ENTRY_INTERRUPTION_INFORMATION_FIELD);
+    using namespace vmcs::vm_entry_interruption_information_field;
 
-    if ((interrupt_info_field & VM_INTERRUPT_INFORMATION_VALID) == 0)
+    if (!valid_bit::is_set())
         return;
 
-    if ((interrupt_info_field & 0x000000007FFFF000) != 0)
+    if (reserved::get() != 0)
         throw std::logic_error("reserved bits of the interrupt info field must be 0");
 }
 
 void
 vmcs_intel_x64::check_control_event_injection_ec_checks()
 {
-    auto interrupt_info_field =
-        vm::read(VMCS_VM_ENTRY_INTERRUPTION_INFORMATION_FIELD);
+    using namespace vmcs::vm_entry_interruption_information_field;
 
-    auto exception_error_code =
-        vm::read(VMCS_VM_ENTRY_EXCEPTION_ERROR_CODE);
-
-    if ((interrupt_info_field & VM_INTERRUPT_INFORMATION_VALID) == 0)
+    if (!valid_bit::is_set())
         return;
 
-    if ((interrupt_info_field & VM_INTERRUPT_INFORMATION_DELIVERY_ERROR) == 0)
+    if (!deliver_error_code_bit::is_set())
         return;
 
-    if ((exception_error_code & 0x00000000FFFF8000) != 0)
+    if ((vmcs::vm_entry_exception_error_code::get() & 0x00000000FFFF8000UL) != 0)
         throw std::logic_error("bits 31:15 of the exception error code field must be 0 "
                                "if deliver error code bit is set in the interrupt info field");
 }
@@ -678,22 +653,19 @@ vmcs_intel_x64::check_control_event_injection_ec_checks()
 void
 vmcs_intel_x64::check_control_event_injection_instr_length_checks()
 {
-    auto interrupt_info_field =
-        vm::read(VMCS_VM_ENTRY_INTERRUPTION_INFORMATION_FIELD);
+    using namespace vmcs::vm_entry_interruption_information_field;
 
-    auto instruction_length =
-        vm::read(VMCS_VM_ENTRY_INSTRUCTION_LENGTH);
-
-    if ((interrupt_info_field & VM_INTERRUPT_INFORMATION_VALID) == 0)
+    if (!valid_bit::is_set())
         return;
 
-    auto type = (interrupt_info_field & VM_INTERRUPT_INFORMATION_TYPE) >> 8;
+    auto type = type::get();
+    auto instruction_length = vmcs::vm_entry_instruction_length::get();
 
     switch (type)
     {
-        case 4: // Software interrupt
-        case 5: // Privileged software exception
-        case 6: // Software exception
+        case type::software_interrupt:
+        case type::privileged_software_exception:
+        case type::software_exception:
             break;
 
         default:
@@ -710,7 +682,7 @@ vmcs_intel_x64::check_control_event_injection_instr_length_checks()
 void
 vmcs_intel_x64::check_control_entry_msr_load_address()
 {
-    auto msr_load_count = vm::read(VMCS_VM_ENTRY_MSR_LOAD_COUNT);
+    auto msr_load_count = vmcs::vm_entry_msr_load_count::get();
 
     if (msr_load_count == 0)
         return;

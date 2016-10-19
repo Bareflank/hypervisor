@@ -1253,6 +1253,12 @@ namespace msrs
         inline auto get() noexcept
         { return __read_msr(addr); }
 
+        inline auto allowed0()
+        { return (__read_msr(addr) & 0x00000000FFFFFFFFUL); }
+
+        inline auto allowed1()
+        { return ((__read_msr(addr) & 0xFFFFFFFF00000000UL) >> 32); }
+
         namespace external_interrupt_exiting
         {
             constexpr const auto mask = 0x0000000000000001UL;
@@ -1261,6 +1267,12 @@ namespace msrs
 
             inline auto get() noexcept
             { return (__read_msr(addr) & mask) >> from; }
+
+            inline bool is_allowed0() noexcept
+            { return (__read_msr(addr) & mask) == 0; }
+
+            inline bool is_allowed1() noexcept
+            { return (__read_msr(addr) & (mask << 32)) != 0; }
         }
 
         namespace nmi_exiting
@@ -1271,6 +1283,12 @@ namespace msrs
 
             inline auto get() noexcept
             { return (__read_msr(addr) & mask) >> from; }
+
+            inline bool is_allowed0() noexcept
+            { return (__read_msr(addr) & mask) == 0; }
+
+            inline bool is_allowed1() noexcept
+            { return (__read_msr(addr) & (mask << 32)) != 0; }
         }
 
         namespace virtual_nmis
@@ -1281,6 +1299,12 @@ namespace msrs
 
             inline auto get() noexcept
             { return (__read_msr(addr) & mask) >> from; }
+
+            inline bool is_allowed0() noexcept
+            { return (__read_msr(addr) & mask) == 0; }
+
+            inline bool is_allowed1() noexcept
+            { return (__read_msr(addr) & (mask << 32)) != 0; }
         }
 
         namespace activate_vmx_preemption_timer
@@ -1291,6 +1315,12 @@ namespace msrs
 
             inline auto get() noexcept
             { return (__read_msr(addr) & mask) >> from; }
+
+            inline bool is_allowed0() noexcept
+            { return (__read_msr(addr) & mask) == 0; }
+
+            inline bool is_allowed1() noexcept
+            { return (__read_msr(addr) & (mask << 32)) != 0; }
         }
 
         namespace process_posted_interrupts
@@ -1301,6 +1331,12 @@ namespace msrs
 
             inline auto get() noexcept
             { return (__read_msr(addr) & mask) >> from; }
+
+            inline bool is_allowed0() noexcept
+            { return (__read_msr(addr) & mask) == 0; }
+
+            inline bool is_allowed1() noexcept
+            { return (__read_msr(addr) & (mask << 32)) != 0; }
         }
     }
 
@@ -1312,6 +1348,12 @@ namespace msrs
         inline auto get() noexcept
         { return __read_msr(addr); }
 
+        inline auto allowed0()
+        { return (__read_msr(addr) & 0x00000000FFFFFFFFUL); }
+
+        inline auto allowed1()
+        { return ((__read_msr(addr) & 0xFFFFFFFF00000000UL) >> 32); }
+
         namespace interrupt_window_exiting
         {
             constexpr const auto mask = 0x0000000000000004UL;
@@ -1320,6 +1362,12 @@ namespace msrs
 
             inline auto get() noexcept
             { return (__read_msr(addr) & mask) >> from; }
+
+            inline bool is_allowed0() noexcept
+            { return (__read_msr(addr) & mask) == 0; }
+
+            inline bool is_allowed1() noexcept
+            { return (__read_msr(addr) & (mask << 32)) != 0; }
         }
 
         namespace use_tsc_offsetting
@@ -1330,6 +1378,12 @@ namespace msrs
 
             inline auto get() noexcept
             { return (__read_msr(addr) & mask) >> from; }
+
+            inline bool is_allowed0() noexcept
+            { return (__read_msr(addr) & mask) == 0; }
+
+            inline bool is_allowed1() noexcept
+            { return (__read_msr(addr) & (mask << 32)) != 0; }
         }
 
         namespace hlt_exiting
@@ -1340,6 +1394,12 @@ namespace msrs
 
             inline auto get() noexcept
             { return (__read_msr(addr) & mask) >> from; }
+
+            inline bool is_allowed0() noexcept
+            { return (__read_msr(addr) & mask) == 0; }
+
+            inline bool is_allowed1() noexcept
+            { return (__read_msr(addr) & (mask << 32)) != 0; }
         }
 
         namespace invlpg_exiting
@@ -1350,6 +1410,12 @@ namespace msrs
 
             inline auto get() noexcept
             { return (__read_msr(addr) & mask) >> from; }
+
+            inline bool is_allowed0() noexcept
+            { return (__read_msr(addr) & mask) == 0; }
+
+            inline bool is_allowed1() noexcept
+            { return (__read_msr(addr) & (mask << 32)) != 0; }
         }
 
         namespace mwait_exiting
@@ -1360,6 +1426,12 @@ namespace msrs
 
             inline auto get() noexcept
             { return (__read_msr(addr) & mask) >> from; }
+
+            inline bool is_allowed0() noexcept
+            { return (__read_msr(addr) & mask) == 0; }
+
+            inline bool is_allowed1() noexcept
+            { return (__read_msr(addr) & (mask << 32)) != 0; }
         }
 
         namespace rdpmc_exiting
@@ -1370,6 +1442,12 @@ namespace msrs
 
             inline auto get() noexcept
             { return (__read_msr(addr) & mask) >> from; }
+
+            inline bool is_allowed0() noexcept
+            { return (__read_msr(addr) & mask) == 0; }
+
+            inline bool is_allowed1() noexcept
+            { return (__read_msr(addr) & (mask << 32)) != 0; }
         }
 
         namespace rdtsc_exiting
@@ -1380,6 +1458,12 @@ namespace msrs
 
             inline auto get() noexcept
             { return (__read_msr(addr) & mask) >> from; }
+
+            inline bool is_allowed0() noexcept
+            { return (__read_msr(addr) & mask) == 0; }
+
+            inline bool is_allowed1() noexcept
+            { return (__read_msr(addr) & (mask << 32)) != 0; }
         }
 
         namespace cr3_load_exiting
@@ -1390,6 +1474,12 @@ namespace msrs
 
             inline auto get() noexcept
             { return (__read_msr(addr) & mask) >> from; }
+
+            inline bool is_allowed0() noexcept
+            { return (__read_msr(addr) & mask) == 0; }
+
+            inline bool is_allowed1() noexcept
+            { return (__read_msr(addr) & (mask << 32)) != 0; }
         }
 
         namespace cr3_store_exiting
@@ -1400,6 +1490,12 @@ namespace msrs
 
             inline auto get() noexcept
             { return (__read_msr(addr) & mask) >> from; }
+
+            inline bool is_allowed0() noexcept
+            { return (__read_msr(addr) & mask) == 0; }
+
+            inline bool is_allowed1() noexcept
+            { return (__read_msr(addr) & (mask << 32)) != 0; }
         }
 
         namespace cr8_load_exiting
@@ -1410,6 +1506,12 @@ namespace msrs
 
             inline auto get() noexcept
             { return (__read_msr(addr) & mask) >> from; }
+
+            inline bool is_allowed0() noexcept
+            { return (__read_msr(addr) & mask) == 0; }
+
+            inline bool is_allowed1() noexcept
+            { return (__read_msr(addr) & (mask << 32)) != 0; }
         }
 
         namespace cr8_store_exiting
@@ -1420,6 +1522,12 @@ namespace msrs
 
             inline auto get() noexcept
             { return (__read_msr(addr) & mask) >> from; }
+
+            inline bool is_allowed0() noexcept
+            { return (__read_msr(addr) & mask) == 0; }
+
+            inline bool is_allowed1() noexcept
+            { return (__read_msr(addr) & (mask << 32)) != 0; }
         }
 
         namespace use_tpr_shadow
@@ -1430,6 +1538,12 @@ namespace msrs
 
             inline auto get() noexcept
             { return (__read_msr(addr) & mask) >> from; }
+
+            inline bool is_allowed0() noexcept
+            { return (__read_msr(addr) & mask) == 0; }
+
+            inline bool is_allowed1() noexcept
+            { return (__read_msr(addr) & (mask << 32)) != 0; }
         }
 
         namespace nmi_window_exiting
@@ -1440,6 +1554,12 @@ namespace msrs
 
             inline auto get() noexcept
             { return (__read_msr(addr) & mask) >> from; }
+
+            inline bool is_allowed0() noexcept
+            { return (__read_msr(addr) & mask) == 0; }
+
+            inline bool is_allowed1() noexcept
+            { return (__read_msr(addr) & (mask << 32)) != 0; }
         }
 
         namespace mov_dr_exiting
@@ -1450,6 +1570,12 @@ namespace msrs
 
             inline auto get() noexcept
             { return (__read_msr(addr) & mask) >> from; }
+
+            inline bool is_allowed0() noexcept
+            { return (__read_msr(addr) & mask) == 0; }
+
+            inline bool is_allowed1() noexcept
+            { return (__read_msr(addr) & (mask << 32)) != 0; }
         }
 
         namespace unconditional_io_exiting
@@ -1460,6 +1586,12 @@ namespace msrs
 
             inline auto get() noexcept
             { return (__read_msr(addr) & mask) >> from; }
+
+            inline bool is_allowed0() noexcept
+            { return (__read_msr(addr) & mask) == 0; }
+
+            inline bool is_allowed1() noexcept
+            { return (__read_msr(addr) & (mask << 32)) != 0; }
         }
 
         namespace use_io_bitmaps
@@ -1470,6 +1602,12 @@ namespace msrs
 
             inline auto get() noexcept
             { return (__read_msr(addr) & mask) >> from; }
+
+            inline bool is_allowed0() noexcept
+            { return (__read_msr(addr) & mask) == 0; }
+
+            inline bool is_allowed1() noexcept
+            { return (__read_msr(addr) & (mask << 32)) != 0; }
         }
 
         namespace monitor_trap_flag
@@ -1480,6 +1618,12 @@ namespace msrs
 
             inline auto get() noexcept
             { return (__read_msr(addr) & mask) >> from; }
+
+            inline bool is_allowed0() noexcept
+            { return (__read_msr(addr) & mask) == 0; }
+
+            inline bool is_allowed1() noexcept
+            { return (__read_msr(addr) & (mask << 32)) != 0; }
         }
 
         namespace use_msr_bitmaps
@@ -1490,6 +1634,12 @@ namespace msrs
 
             inline auto get() noexcept
             { return (__read_msr(addr) & mask) >> from; }
+
+            inline bool is_allowed0() noexcept
+            { return (__read_msr(addr) & mask) == 0; }
+
+            inline bool is_allowed1() noexcept
+            { return (__read_msr(addr) & (mask << 32)) != 0; }
         }
 
         namespace monitor_exiting
@@ -1500,6 +1650,12 @@ namespace msrs
 
             inline auto get() noexcept
             { return (__read_msr(addr) & mask) >> from; }
+
+            inline bool is_allowed0() noexcept
+            { return (__read_msr(addr) & mask) == 0; }
+
+            inline bool is_allowed1() noexcept
+            { return (__read_msr(addr) & (mask << 32)) != 0; }
         }
 
         namespace pause_exiting
@@ -1510,6 +1666,12 @@ namespace msrs
 
             inline auto get() noexcept
             { return (__read_msr(addr) & mask) >> from; }
+
+            inline bool is_allowed0() noexcept
+            { return (__read_msr(addr) & mask) == 0; }
+
+            inline bool is_allowed1() noexcept
+            { return (__read_msr(addr) & (mask << 32)) != 0; }
         }
 
         namespace activate_secondary_controls
@@ -1520,6 +1682,12 @@ namespace msrs
 
             inline auto get() noexcept
             { return (__read_msr(addr) & mask) >> from; }
+
+            inline bool is_allowed0() noexcept
+            { return (__read_msr(addr) & mask) == 0; }
+
+            inline bool is_allowed1() noexcept
+            { return (__read_msr(addr) & (mask << 32)) != 0; }
         }
     }
 
@@ -1531,6 +1699,12 @@ namespace msrs
         inline auto get() noexcept
         { return __read_msr(addr); }
 
+        inline auto allowed0()
+        { return (__read_msr(addr) & 0x00000000FFFFFFFFUL); }
+
+        inline auto allowed1()
+        { return ((__read_msr(addr) & 0xFFFFFFFF00000000UL) >> 32); }
+
         namespace save_debug_controls
         {
             constexpr const auto mask = 0x0000000000000004UL;
@@ -1539,6 +1713,12 @@ namespace msrs
 
             inline auto get() noexcept
             { return (__read_msr(addr) & mask) >> from; }
+
+            inline bool is_allowed0() noexcept
+            { return (__read_msr(addr) & mask) == 0; }
+
+            inline bool is_allowed1() noexcept
+            { return (__read_msr(addr) & (mask << 32)) != 0; }
         }
 
         namespace host_address_space_size
@@ -1549,6 +1729,12 @@ namespace msrs
 
             inline auto get() noexcept
             { return (__read_msr(addr) & mask) >> from; }
+
+            inline bool is_allowed0() noexcept
+            { return (__read_msr(addr) & mask) == 0; }
+
+            inline bool is_allowed1() noexcept
+            { return (__read_msr(addr) & (mask << 32)) != 0; }
         }
 
         namespace load_ia32_perf_global_ctrl
@@ -1559,6 +1745,12 @@ namespace msrs
 
             inline auto get() noexcept
             { return (__read_msr(addr) & mask) >> from; }
+
+            inline bool is_allowed0() noexcept
+            { return (__read_msr(addr) & mask) == 0; }
+
+            inline bool is_allowed1() noexcept
+            { return (__read_msr(addr) & (mask << 32)) != 0; }
         }
 
         namespace acknowledge_interrupt_on_exit
@@ -1569,6 +1761,12 @@ namespace msrs
 
             inline auto get() noexcept
             { return (__read_msr(addr) & mask) >> from; }
+
+            inline bool is_allowed0() noexcept
+            { return (__read_msr(addr) & mask) == 0; }
+
+            inline bool is_allowed1() noexcept
+            { return (__read_msr(addr) & (mask << 32)) != 0; }
         }
 
         namespace save_ia32_pat
@@ -1579,6 +1777,12 @@ namespace msrs
 
             inline auto get() noexcept
             { return (__read_msr(addr) & mask) >> from; }
+
+            inline bool is_allowed0() noexcept
+            { return (__read_msr(addr) & mask) == 0; }
+
+            inline bool is_allowed1() noexcept
+            { return (__read_msr(addr) & (mask << 32)) != 0; }
         }
 
         namespace load_ia32_pat
@@ -1589,6 +1793,12 @@ namespace msrs
 
             inline auto get() noexcept
             { return (__read_msr(addr) & mask) >> from; }
+
+            inline bool is_allowed0() noexcept
+            { return (__read_msr(addr) & mask) == 0; }
+
+            inline bool is_allowed1() noexcept
+            { return (__read_msr(addr) & (mask << 32)) != 0; }
         }
 
         namespace save_ia32_efer
@@ -1599,6 +1809,12 @@ namespace msrs
 
             inline auto get() noexcept
             { return (__read_msr(addr) & mask) >> from; }
+
+            inline bool is_allowed0() noexcept
+            { return (__read_msr(addr) & mask) == 0; }
+
+            inline bool is_allowed1() noexcept
+            { return (__read_msr(addr) & (mask << 32)) != 0; }
         }
 
         namespace load_ia32_efer
@@ -1609,6 +1825,12 @@ namespace msrs
 
             inline auto get() noexcept
             { return (__read_msr(addr) & mask) >> from; }
+
+            inline bool is_allowed0() noexcept
+            { return (__read_msr(addr) & mask) == 0; }
+
+            inline bool is_allowed1() noexcept
+            { return (__read_msr(addr) & (mask << 32)) != 0; }
         }
 
         namespace save_vmx_preemption_timer_value
@@ -1619,6 +1841,12 @@ namespace msrs
 
             inline auto get() noexcept
             { return (__read_msr(addr) & mask) >> from; }
+
+            inline bool is_allowed0() noexcept
+            { return (__read_msr(addr) & mask) == 0; }
+
+            inline bool is_allowed1() noexcept
+            { return (__read_msr(addr) & (mask << 32)) != 0; }
         }
     }
 
@@ -1630,6 +1858,12 @@ namespace msrs
         inline auto get() noexcept
         { return __read_msr(addr); }
 
+        inline auto allowed0()
+        { return (__read_msr(addr) & 0x00000000FFFFFFFFUL); }
+
+        inline auto allowed1()
+        { return ((__read_msr(addr) & 0xFFFFFFFF00000000UL) >> 32); }
+
         namespace load_debug_controls
         {
             constexpr const auto mask = 0x0000000000000004UL;
@@ -1638,6 +1872,12 @@ namespace msrs
 
             inline auto get() noexcept
             { return (__read_msr(addr) & mask) >> from; }
+
+            inline bool is_allowed0() noexcept
+            { return (__read_msr(addr) & mask) == 0; }
+
+            inline bool is_allowed1() noexcept
+            { return (__read_msr(addr) & (mask << 32)) != 0; }
         }
 
         namespace ia_32e_mode_guest
@@ -1648,6 +1888,12 @@ namespace msrs
 
             inline auto get() noexcept
             { return (__read_msr(addr) & mask) >> from; }
+
+            inline bool is_allowed0() noexcept
+            { return (__read_msr(addr) & mask) == 0; }
+
+            inline bool is_allowed1() noexcept
+            { return (__read_msr(addr) & (mask << 32)) != 0; }
         }
 
         namespace entry_to_smm
@@ -1658,6 +1904,12 @@ namespace msrs
 
             inline auto get() noexcept
             { return (__read_msr(addr) & mask) >> from; }
+
+            inline bool is_allowed0() noexcept
+            { return (__read_msr(addr) & mask) == 0; }
+
+            inline bool is_allowed1() noexcept
+            { return (__read_msr(addr) & (mask << 32)) != 0; }
         }
 
         namespace deactivate_dual_monitor_treatment
@@ -1668,6 +1920,12 @@ namespace msrs
 
             inline auto get() noexcept
             { return (__read_msr(addr) & mask) >> from; }
+
+            inline bool is_allowed0() noexcept
+            { return (__read_msr(addr) & mask) == 0; }
+
+            inline bool is_allowed1() noexcept
+            { return (__read_msr(addr) & (mask << 32)) != 0; }
         }
 
         namespace load_ia32_perf_global_ctrl
@@ -1678,6 +1936,12 @@ namespace msrs
 
             inline auto get() noexcept
             { return (__read_msr(addr) & mask) >> from; }
+
+            inline bool is_allowed0() noexcept
+            { return (__read_msr(addr) & mask) == 0; }
+
+            inline bool is_allowed1() noexcept
+            { return (__read_msr(addr) & (mask << 32)) != 0; }
         }
 
         namespace load_ia32_pat
@@ -1688,6 +1952,12 @@ namespace msrs
 
             inline auto get() noexcept
             { return (__read_msr(addr) & mask) >> from; }
+
+            inline bool is_allowed0() noexcept
+            { return (__read_msr(addr) & mask) == 0; }
+
+            inline bool is_allowed1() noexcept
+            { return (__read_msr(addr) & (mask << 32)) != 0; }
         }
 
         namespace load_ia32_efer
@@ -1698,6 +1968,12 @@ namespace msrs
 
             inline auto get() noexcept
             { return (__read_msr(addr) & mask) >> from; }
+
+            inline bool is_allowed0() noexcept
+            { return (__read_msr(addr) & mask) == 0; }
+
+            inline bool is_allowed1() noexcept
+            { return (__read_msr(addr) & (mask << 32)) != 0; }
         }
     }
 
