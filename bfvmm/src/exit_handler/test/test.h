@@ -44,7 +44,6 @@ private:
     void test_entry_throws_standard_exception();
     void test_entry_throws_any_exception();
 
-    void test_invalid_intrinics();
     void test_vm_exit_reason_unknown();
     void test_vm_exit_reason_exception_or_non_maskable_interrupt();
     void test_vm_exit_reason_external_interrupt();
@@ -127,8 +126,6 @@ private:
     void test_vm_exit_reason_xrstors();
     void test_vm_exit_reason_to_string();
     void test_halt();
-    void test_vmread_failure();
-    void test_vmwrite_failure();
 };
 
 #endif

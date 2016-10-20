@@ -24,11 +24,11 @@
 
 #include <memory>
 #include <vmcs/vmcs_intel_x64_state.h>
+#include <exit_handler/state_save_intel_x64.h>
 
 #include <intrinsics/gdt_x64.h>
 #include <intrinsics/idt_x64.h>
 #include <intrinsics/tss_x64.h>
-#include <intrinsics/intrinsics_intel_x64.h>
 
 /// VMCS VMM State
 ///

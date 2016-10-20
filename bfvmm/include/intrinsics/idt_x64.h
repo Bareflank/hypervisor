@@ -25,7 +25,8 @@
 #include <gsl/gsl>
 
 #include <vector>
-#include <intrinsics/intrinsics_x64.h>
+#include <algorithm>
+#include <exception>
 
 // -----------------------------------------------------------------------------
 // Interrupt Descriptor Table Register
@@ -123,6 +124,8 @@ namespace idt
 }
 }
 
+// *INDENT-ON*
+
 // -----------------------------------------------------------------------------
 // Interrupt Descriptor Table
 // -----------------------------------------------------------------------------
@@ -151,7 +154,11 @@ public:
     ///
     /// Wraps around the IDT that is currently stored in the hardware.
     ///
-    idt_x64();
+    idt_x64()
+    {
+        m_idt_reg.base = x64::idt::base::get();
+        m_idt_reg.limit = x64::idt::limit::get();
+    }
 
     /// Constructor
     ///
@@ -160,7 +167,15 @@ public:
     ///
     /// @param size number of entries in the IDT
     ///
-    idt_x64(uint16_t size);
+    idt_x64(uint16_t size) :
+        m_idt(size)
+    {
+        if (size == 0)
+            return;
+
+        m_idt_reg.base = m_idt.data();
+        m_idt_reg.limit = gsl::narrow<uint16_t>((size << 3) - 1);
+    }
 
     /// Destructor
     ///

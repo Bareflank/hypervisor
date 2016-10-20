@@ -44,7 +44,7 @@ extern uint8_t span[0x81];
 extern bool g_virt_to_phys_return_nullptr;
 extern bool g_phys_to_virt_return_nullptr;
 
-void setup_mock(MockRepository &mocks, memory_manager *mm, intrinsics_intel_x64 *in);
+void setup_mock(MockRepository &mocks, memory_manager *mm);
 void enable_proc_ctl(uint64_t control);
 void enable_proc_ctl2(uint64_t control);
 void enable_pin_ctl(uint64_t control);
@@ -55,7 +55,6 @@ void disable_proc_ctl2(uint64_t control);
 void disable_pin_ctl(uint64_t control);
 void disable_exit_ctl(uint64_t control);
 void disable_entry_ctl(uint64_t control);
-uint32_t cpuid_eax(uint32_t val);
 uintptr_t virtptr_to_physint(void *ptr);
 void *physint_to_virtptr(uintptr_t phys);
 
@@ -81,14 +80,13 @@ protected:
         {
             MockRepository mocks;
             auto mm = mocks.Mock<memory_manager>();
-            auto in = bfn::mock_shared<intrinsics_intel_x64>(mocks);
 
-            setup_mock(mocks, mm, in.get());
+            setup_mock(mocks, mm);
             path.setup();
 
             RUN_UNITTEST_WITH_MOCKS(mocks, [&]
             {
-                vmcs_intel_x64 vmcs(in);
+                vmcs_intel_x64 vmcs{};
                 auto func = std::bind(std::forward<decltype(mf)>(mf), &vmcs, std::forward<Args>(args)...);
 
                 if (path.throws_exception)
@@ -101,7 +99,6 @@ protected:
 
 private:
 
-    void test_constructor_null_intrinsics();
     void test_launch_success();
     void test_launch_vmlaunch_failure();
     void test_launch_create_vmcs_region_failure();
@@ -110,8 +107,6 @@ private:
     void test_launch_load_failure();
     void test_promote_failure();
     void test_resume_failure();
-    void test_vmread_failure();
-    void test_vmwrite_failure();
     void test_vmcs_virtual_processor_identifier();
     void test_vmcs_posted_interrupt_notification_vector();
     void test_vmcs_eptp_index();

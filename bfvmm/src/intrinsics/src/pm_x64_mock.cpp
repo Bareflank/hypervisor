@@ -19,22 +19,19 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <intrinsics/idt_x64.h>
+#include <gsl/gsl>
+#include <debug.h>
 
-using namespace x64;
-
-idt_x64::idt_x64()
+extern "C" void
+__attribute__((weak)) __halt(void) noexcept
 {
-    m_idt_reg.base = idt::base::get();
-    m_idt_reg.limit = idt::limit::get();
+    std::cerr << __FUNC__ << " called" << '\n';
+    abort();
 }
 
-idt_x64::idt_x64(uint16_t size) :
-    m_idt(size)
+extern "C" void
+__attribute__((weak)) __stop(void) noexcept
 {
-    if (size == 0)
-        return;
-
-    m_idt_reg.base = m_idt.data();
-    m_idt_reg.limit = gsl::narrow<uint16_t>((size << 3) - 1);
+    std::cerr << __FUNC__ << " called" << '\n';
+    abort();
 }

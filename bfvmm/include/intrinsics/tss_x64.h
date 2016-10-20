@@ -24,13 +24,6 @@
 
 #include <stdint.h>
 
-// On x86_64, each CPU needs it's on TSS even though task switching is not
-// supported. This struct provides the TSS layout, but most of this is / never
-// will be used by Bareflank since we only support 64bit.
-//
-// Note that documentation about the TSS can be found in the Intel Manual
-// Volume 3, section 7.7 Task Management In 64bit Mode
-
 #pragma pack(push, 1)
 
 struct tss_x64

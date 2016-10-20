@@ -26,8 +26,8 @@
 #include <exception.h>
 #include <error_codes.h>
 
-template<class T> int64_t
-guard_exceptions(int64_t error_code, T func)
+template<class T, class E> E
+guard_exceptions(E error_code, T func)
 {
     try
     {
@@ -64,6 +64,12 @@ guard_exceptions(int64_t error_code, T func)
     }
 
     return error_code;
+}
+
+template<class T> void
+guard_exceptions(T &&func)
+{
+    guard_exceptions(0L, std::forward<T>(func));
 }
 
 #endif

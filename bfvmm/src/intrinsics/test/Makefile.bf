@@ -50,6 +50,10 @@ NATIVE_OUTDIR+=%BUILD_REL%/../bin
 ################################################################################
 
 SOURCES+=test.cpp
+SOURCES+=test_debug_x64.cpp
+SOURCES+=test_cache_x64.cpp
+SOURCES+=test_pm_x64.cpp
+SOURCES+=test_cpuid_x64.cpp
 SOURCES+=test_gdt_x64.cpp
 SOURCES+=test_idt_x64.cpp
 SOURCES+=test_msrs_intel_x64.cpp
@@ -57,6 +61,7 @@ SOURCES+=test_rflags_x64.cpp
 SOURCES+=test_crs_intel_x64.cpp
 SOURCES+=test_srs_x64.cpp
 SOURCES+=test_portio_x64.cpp
+SOURCES+=test_vmx_intel_x64.cpp
 
 INCLUDE_PATHS+=./
 INCLUDE_PATHS+=%HYPER_ABS%/include/

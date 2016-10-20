@@ -45,7 +45,6 @@ exit_handler_intel_x64_ut::list()
     this->test_entry_throws_standard_exception();
     this->test_entry_throws_any_exception();
 
-    this->test_invalid_intrinics();
     this->test_vm_exit_reason_unknown();
     this->test_vm_exit_reason_exception_or_non_maskable_interrupt();
     this->test_vm_exit_reason_external_interrupt();
@@ -128,8 +127,6 @@ exit_handler_intel_x64_ut::list()
     this->test_vm_exit_reason_xrstors();
     this->test_vm_exit_reason_to_string();
     this->test_halt();
-    this->test_vmread_failure();
-    this->test_vmwrite_failure();
 
     return true;
 }

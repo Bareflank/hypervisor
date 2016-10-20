@@ -26,7 +26,6 @@
 
 vcpu_intel_x64::vcpu_intel_x64(uint64_t id,
                                std::shared_ptr<debug_ring> debug_ring,
-                               std::shared_ptr<intrinsics_intel_x64> intrinsics,
                                std::shared_ptr<vmxon_intel_x64> vmxon,
                                std::shared_ptr<vmcs_intel_x64> vmcs,
                                std::shared_ptr<exit_handler_intel_x64> exit_handler,
@@ -34,7 +33,6 @@ vcpu_intel_x64::vcpu_intel_x64(uint64_t id,
                                std::shared_ptr<vmcs_intel_x64_vmm_state> guest_state) :
     vcpu(id, debug_ring),
     m_vmcs_launched(false),
-    m_intrinsics(std::move(intrinsics)),
     m_vmxon(std::move(vmxon)),
     m_vmcs(std::move(vmcs)),
     m_exit_handler(std::move(exit_handler)),
@@ -52,12 +50,11 @@ vcpu_intel_x64::init(void *attr)
     auto ss = new state_save_intel_x64();
     m_state_save = std::shared_ptr<state_save_intel_x64>(ss);
 
-    if (!m_intrinsics) m_intrinsics = std::make_shared<intrinsics_intel_x64>();
-    if (!m_vmxon) m_vmxon = std::make_shared<vmxon_intel_x64>(m_intrinsics);
-    if (!m_vmcs) m_vmcs = std::make_shared<vmcs_intel_x64>(m_intrinsics);
-    if (!m_exit_handler) m_exit_handler = std::make_shared<exit_handler_intel_x64>(m_intrinsics);
+    if (!m_vmxon) m_vmxon = std::make_shared<vmxon_intel_x64>();
+    if (!m_vmcs) m_vmcs = std::make_shared<vmcs_intel_x64>();
+    if (!m_exit_handler) m_exit_handler = std::make_shared<exit_handler_intel_x64>();
     if (!m_vmm_state) m_vmm_state = std::make_shared<vmcs_intel_x64_vmm_state>(m_state_save);
-    if (!m_guest_state) m_guest_state = std::make_shared<vmcs_intel_x64_host_vm_state>(m_intrinsics);
+    if (!m_guest_state) m_guest_state = std::make_shared<vmcs_intel_x64_host_vm_state>();
 
     m_state_save->vcpuid = this->id();
     m_state_save->vmxon_ptr = reinterpret_cast<uintptr_t>(m_vmxon.get());
@@ -81,7 +78,6 @@ vcpu_intel_x64::fini(void *attr)
     m_exit_handler.reset();
     m_vmcs.reset();
     m_vmxon.reset();
-    m_intrinsics.reset();
 
     m_state_save.reset();
 

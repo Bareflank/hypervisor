@@ -41,7 +41,6 @@ vmxon_ut::fini()
 bool
 vmxon_ut::list()
 {
-    this->test_constructor_null_intrinsics();
     this->test_start_success();
     this->test_start_start_twice();
     this->test_start_execute_vmxon_already_on_failure();

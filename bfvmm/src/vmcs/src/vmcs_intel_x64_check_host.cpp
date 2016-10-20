@@ -19,7 +19,6 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <view_as_pointer.h>
 #include <vmcs/vmcs_intel_x64.h>
 
 using namespace intel_x64;
@@ -91,7 +90,7 @@ vmcs_intel_x64::check_host_cr3_for_unsupported_bits()
 void
 vmcs_intel_x64::check_host_ia32_sysenter_esp_canonical_address()
 {
-    auto esp = vmread(VMCS_HOST_IA32_SYSENTER_ESP);
+    auto esp = vm::read(VMCS_HOST_IA32_SYSENTER_ESP);
 
     if (!is_address_canonical(esp))
         throw std::logic_error("host sysenter esp must be canonical");
@@ -100,7 +99,7 @@ vmcs_intel_x64::check_host_ia32_sysenter_esp_canonical_address()
 void
 vmcs_intel_x64::check_host_ia32_sysenter_eip_canonical_address()
 {
-    auto eip = vmread(VMCS_HOST_IA32_SYSENTER_EIP);
+    auto eip = vm::read(VMCS_HOST_IA32_SYSENTER_EIP);
 
     if (!is_address_canonical(eip))
         throw std::logic_error("host sysenter eip must be canonical");
@@ -113,7 +112,7 @@ vmcs_intel_x64::check_host_verify_load_ia32_perf_global_ctrl()
         return;
 
     auto vmcs_ia32_perf_global_ctrl =
-        vmread(VMCS_HOST_IA32_PERF_GLOBAL_CTRL);
+        vm::read(VMCS_HOST_IA32_PERF_GLOBAL_CTRL);
 
     if ((vmcs_ia32_perf_global_ctrl & 0xFFFFFFF8FFFFFFFC) != 0)
         throw std::logic_error("perf global ctrl msr reserved bits must be 0");
@@ -125,14 +124,14 @@ vmcs_intel_x64::check_host_verify_load_ia32_pat()
     if (!is_enabled_load_ia32_pat_on_exit())
         return;
 
-    auto pat0 = (vmread(VMCS_HOST_IA32_PAT) & 0x00000000000000FF) >> 0;
-    auto pat1 = (vmread(VMCS_HOST_IA32_PAT) & 0x000000000000FF00) >> 8;
-    auto pat2 = (vmread(VMCS_HOST_IA32_PAT) & 0x0000000000FF0000) >> 16;
-    auto pat3 = (vmread(VMCS_HOST_IA32_PAT) & 0x00000000FF000000) >> 24;
-    auto pat4 = (vmread(VMCS_HOST_IA32_PAT) & 0x000000FF00000000) >> 32;
-    auto pat5 = (vmread(VMCS_HOST_IA32_PAT) & 0x0000FF0000000000) >> 40;
-    auto pat6 = (vmread(VMCS_HOST_IA32_PAT) & 0x00FF000000000000) >> 48;
-    auto pat7 = (vmread(VMCS_HOST_IA32_PAT) & 0xFF00000000000000) >> 56;
+    auto pat0 = (vm::read(VMCS_HOST_IA32_PAT) & 0x00000000000000FF) >> 0;
+    auto pat1 = (vm::read(VMCS_HOST_IA32_PAT) & 0x000000000000FF00) >> 8;
+    auto pat2 = (vm::read(VMCS_HOST_IA32_PAT) & 0x0000000000FF0000) >> 16;
+    auto pat3 = (vm::read(VMCS_HOST_IA32_PAT) & 0x00000000FF000000) >> 24;
+    auto pat4 = (vm::read(VMCS_HOST_IA32_PAT) & 0x000000FF00000000) >> 32;
+    auto pat5 = (vm::read(VMCS_HOST_IA32_PAT) & 0x0000FF0000000000) >> 40;
+    auto pat6 = (vm::read(VMCS_HOST_IA32_PAT) & 0x00FF000000000000) >> 48;
+    auto pat7 = (vm::read(VMCS_HOST_IA32_PAT) & 0xFF00000000000000) >> 56;
 
     if (!check_pat(pat0))
         throw std::logic_error("pat0 has an invalid memory type");
@@ -309,7 +308,7 @@ vmcs_intel_x64::check_host_ss_not_equal_zero()
 void
 vmcs_intel_x64::check_host_fs_canonical_base_address()
 {
-    auto fs_base = vmread(VMCS_HOST_FS_BASE);
+    auto fs_base = vm::read(VMCS_HOST_FS_BASE);
 
     if (!is_address_canonical(fs_base))
         throw std::logic_error("host fs base must be canonical");
@@ -318,7 +317,7 @@ vmcs_intel_x64::check_host_fs_canonical_base_address()
 void
 vmcs_intel_x64::check_host_gs_canonical_base_address()
 {
-    auto gs_base = vmread(VMCS_HOST_GS_BASE);
+    auto gs_base = vm::read(VMCS_HOST_GS_BASE);
 
     if (!is_address_canonical(gs_base))
         throw std::logic_error("host gs base must be canonical");
@@ -327,7 +326,7 @@ vmcs_intel_x64::check_host_gs_canonical_base_address()
 void
 vmcs_intel_x64::check_host_gdtr_canonical_base_address()
 {
-    auto gdtr_base = vmread(VMCS_HOST_GDTR_BASE);
+    auto gdtr_base = vm::read(VMCS_HOST_GDTR_BASE);
 
     if (!is_address_canonical(gdtr_base))
         throw std::logic_error("host gdtr base must be canonical");
@@ -336,7 +335,7 @@ vmcs_intel_x64::check_host_gdtr_canonical_base_address()
 void
 vmcs_intel_x64::check_host_idtr_canonical_base_address()
 {
-    auto idtr_base = vmread(VMCS_HOST_IDTR_BASE);
+    auto idtr_base = vm::read(VMCS_HOST_IDTR_BASE);
 
     if (!is_address_canonical(idtr_base))
         throw std::logic_error("host idtr base must be canonical");
@@ -345,7 +344,7 @@ vmcs_intel_x64::check_host_idtr_canonical_base_address()
 void
 vmcs_intel_x64::check_host_tr_canonical_base_address()
 {
-    auto tr_base = vmread(VMCS_HOST_TR_BASE);
+    auto tr_base = vm::read(VMCS_HOST_TR_BASE);
 
     if (!is_address_canonical(tr_base))
         throw std::logic_error("host tr base must be canonical");
@@ -395,7 +394,7 @@ vmcs_intel_x64::check_host_host_address_space_disabled()
     if (vmcs::host_cr4::pcid_enable_bit::get() != 0)
         throw std::logic_error("cr4 pcide must be disabled if host addr space is disabled");
 
-    auto rip = vmread(VMCS_HOST_RIP);
+    auto rip = vm::read(VMCS_HOST_RIP);
 
     if ((rip & 0xFFFFFFFF00000000) != 0)
         throw std::logic_error("rip bits 63:32 must be 0 if host addr space is disabled");
@@ -410,7 +409,7 @@ vmcs_intel_x64::check_host_host_address_space_enabled()
     if (vmcs::host_cr4::physical_address_extensions::get() == 0)
         throw std::logic_error("cr4 pae must be enabled if host addr space is enabled");
 
-    auto rip = vmread(VMCS_HOST_RIP);
+    auto rip = vm::read(VMCS_HOST_RIP);
 
     if (!is_address_canonical(rip))
         throw std::logic_error("host rip must be canonical");

@@ -336,6 +336,72 @@ private:
 
     void test_portio_x64_byte();
     void test_portio_x64_word();
+
+    void test_vmx_intel_x64_vmxon_nullptr();
+    void test_vmx_intel_x64_vmxon_failure();
+    void test_vmx_intel_x64_vmxon_success();
+    void test_vmx_intel_x64_vmxoff_failure();
+    void test_vmx_intel_x64_vmxoff_success();
+    void test_vmx_intel_x64_vmclear_nullptr();
+    void test_vmx_intel_x64_vmclear_failure();
+    void test_vmx_intel_x64_vmclear_success();
+    void test_vmx_intel_x64_vmload_nullptr();
+    void test_vmx_intel_x64_vmload_failure();
+    void test_vmx_intel_x64_vmload_success();
+    void test_vmx_intel_x64_vmreset_nullptr();
+    void test_vmx_intel_x64_vmreset_failure();
+    void test_vmx_intel_x64_vmreset_success();
+    void test_vmx_intel_x64_vmread_failure();
+    void test_vmx_intel_x64_vmwrite_failure();
+    void test_vmx_intel_x64_vmread_vmwrite_succcess();
+    void test_vmx_intel_x64_vmlaunch_failure();
+    void test_vmx_intel_x64_vmlaunch_success();
+
+    void test_cpuid_x64_cpuid();
+    void test_cpuid_x64_cpuid_eax();
+    void test_cpuid_x64_cpuid_ebx();
+    void test_cpuid_x64_cpuid_ecx();
+    void test_cpuid_x64_cpuid_edx();
+    void test_cpuid_x64_cpuid_addr_size_phys();
+    void test_cpuid_x64_cpuid_addr_size_linear();
+    void test_cpuid_x64_cpuid_feature_information_ecx_sse3();
+    void test_cpuid_x64_cpuid_feature_information_ecx_pclmulqdq();
+    void test_cpuid_x64_cpuid_feature_information_ecx_dtes64();
+    void test_cpuid_x64_cpuid_feature_information_ecx_monitor();
+    void test_cpuid_x64_cpuid_feature_information_ecx_ds_cpl();
+    void test_cpuid_x64_cpuid_feature_information_ecx_vmx();
+    void test_cpuid_x64_cpuid_feature_information_ecx_smx();
+    void test_cpuid_x64_cpuid_feature_information_ecx_eist();
+    void test_cpuid_x64_cpuid_feature_information_ecx_tm2();
+    void test_cpuid_x64_cpuid_feature_information_ecx_ssse3();
+    void test_cpuid_x64_cpuid_feature_information_ecx_cnxt_id();
+    void test_cpuid_x64_cpuid_feature_information_ecx_sdbg();
+    void test_cpuid_x64_cpuid_feature_information_ecx_fma();
+    void test_cpuid_x64_cpuid_feature_information_ecx_cmpxchg16b();
+    void test_cpuid_x64_cpuid_feature_information_ecx_xtpr_update_control();
+    void test_cpuid_x64_cpuid_feature_information_ecx_pdcm();
+    void test_cpuid_x64_cpuid_feature_information_ecx_pcid();
+    void test_cpuid_x64_cpuid_feature_information_ecx_dca();
+    void test_cpuid_x64_cpuid_feature_information_ecx_sse41();
+    void test_cpuid_x64_cpuid_feature_information_ecx_sse42();
+    void test_cpuid_x64_cpuid_feature_information_ecx_x2apic();
+    void test_cpuid_x64_cpuid_feature_information_ecx_movbe();
+    void test_cpuid_x64_cpuid_feature_information_ecx_popcnt();
+    void test_cpuid_x64_cpuid_feature_information_ecx_tsc_deadline();
+    void test_cpuid_x64_cpuid_feature_information_ecx_aesni();
+    void test_cpuid_x64_cpuid_feature_information_ecx_xsave();
+    void test_cpuid_x64_cpuid_feature_information_ecx_osxsave();
+    void test_cpuid_x64_cpuid_feature_information_ecx_avx();
+    void test_cpuid_x64_cpuid_feature_information_ecx_f16c();
+    void test_cpuid_x64_cpuid_feature_information_ecx_rdrand();
+
+    void test_pm_x64_halt();
+    void test_pm_x64_stop();
+
+    void test_cache_x64_invd();
+    void test_cache_x64_wbinvd();
+
+    void test_debug_x64_dr7();
 };
 
 #endif

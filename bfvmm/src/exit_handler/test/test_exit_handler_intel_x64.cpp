@@ -78,11 +78,21 @@ extern "C" void
 __write_msr(uint32_t addr, uint64_t val) noexcept
 { g_msrs[addr] = val; }
 
-void
-exit_handler_intel_x64_ut::test_invalid_intrinics()
+extern "C" void
+__stop(void) noexcept
+{ }
+
+extern "C" void
+__wbinvd(void) noexcept
+{ }
+
+extern "C" void
+__cpuid(void *eax, void *ebx, void *ecx, void *edx) noexcept
 {
-    auto null_intrinsics = std::shared_ptr<intrinsics_intel_x64>();
-    EXPECT_NO_EXCEPTION(std::make_unique<exit_handler_intel_x64>(null_intrinsics));
+    (void) eax;
+    (void) ebx;
+    (void) ecx;
+    (void) edx;
 }
 
 void
@@ -90,19 +100,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_unknown()
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
     g_exit_reason = 0x0000BEEF;
-
-    mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -116,19 +120,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_exception_or_non_maskable_interru
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
     g_exit_reason = exit_reason::exception_or_non_maskable_interrupt;
-
-    mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -142,19 +140,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_external_interrupt()
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
     g_exit_reason = exit_reason::external_interrupt;
-
-    mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -168,19 +160,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_triple_fault()
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
     g_exit_reason = exit_reason::triple_fault;
-
-    mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -194,19 +180,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_init_signal()
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
     g_exit_reason = exit_reason::init_signal;
-
-    mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -220,19 +200,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_sipi()
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
     g_exit_reason = exit_reason::sipi;
-
-    mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -246,19 +220,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_smi()
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
     g_exit_reason = exit_reason::smi;
-
-    mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -272,19 +240,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_other_smi()
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
     g_exit_reason = exit_reason::other_smi;
-
-    mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -298,19 +260,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_interrupt_window()
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
     g_exit_reason = exit_reason::interrupt_window;
-
-    mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -324,19 +280,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_nmi_window()
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
     g_exit_reason = exit_reason::nmi_window;
-
-    mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -350,19 +300,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_task_switch()
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
     g_exit_reason = exit_reason::task_switch;
-
-    mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -376,20 +320,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_cpuid()
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::cpuid);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
     g_exit_reason = exit_reason::cpuid;
-
-    mocks.NeverCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -403,19 +340,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_getsec()
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
     g_exit_reason = exit_reason::getsec;
-
-    mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -429,19 +360,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_hlt()
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
     g_exit_reason = exit_reason::hlt;
-
-    mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -455,20 +380,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_invd()
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
     g_exit_reason = exit_reason::invd;
-
-    mocks.NeverCall(intrinsics.get(), intrinsics_intel_x64::stop);
-    mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::wbinvd);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -482,19 +400,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_invlpg()
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
     g_exit_reason = exit_reason::invlpg;
-
-    mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -508,19 +420,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_rdpmc()
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
     g_exit_reason = exit_reason::rdpmc;
-
-    mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -534,19 +440,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_rdtsc()
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
     g_exit_reason = exit_reason::rdtsc;
-
-    mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -560,19 +460,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_rsm()
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
     g_exit_reason = exit_reason::rsm;
-
-    mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -586,19 +480,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_vmcall()
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
     g_exit_reason = exit_reason::vmcall;
-
-    mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -612,19 +500,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_vmclear()
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
     g_exit_reason = exit_reason::vmclear;
-
-    mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -638,19 +520,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_vmlaunch()
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
     g_exit_reason = exit_reason::vmlaunch;
-
-    mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -664,19 +540,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_vmptrld()
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
     g_exit_reason = exit_reason::vmptrld;
-
-    mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -690,19 +560,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_vmptrst()
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
     g_exit_reason = exit_reason::vmptrst;
-
-    mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -716,19 +580,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_vmread()
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
     g_exit_reason = exit_reason::vmread;
-
-    mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -742,19 +600,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_vmresume()
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
     g_exit_reason = exit_reason::vmresume;
-
-    mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -768,19 +620,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_vmwrite()
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
     g_exit_reason = exit_reason::vmwrite;
-
-    mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -794,13 +640,9 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_vmxoff()
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
@@ -820,19 +662,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_vmxon()
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
     g_exit_reason = exit_reason::vmxon;
-
-    mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -846,19 +682,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_control_register_accesses()
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
     g_exit_reason = exit_reason::control_register_accesses;
-
-    mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -872,19 +702,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_mov_dr()
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
     g_exit_reason = exit_reason::mov_dr;
-
-    mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -898,19 +722,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_io_instruction()
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
     g_exit_reason = exit_reason::io_instruction;
-
-    mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -924,19 +742,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_rdmsr_debug_ctl()
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
     g_exit_reason = exit_reason::rdmsr;
-
-    mocks.NeverCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
 
     g_value = 0x0000000200000001;
@@ -957,19 +769,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_rdmsr_pat()
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
     g_exit_reason = exit_reason::rdmsr;
-
-    mocks.NeverCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
 
     g_value = 0x0000000300000002;
@@ -990,19 +796,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_rdmsr_efer()
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
     g_exit_reason = exit_reason::rdmsr;
-
-    mocks.NeverCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
 
     g_value = 0x0000000400000003;
@@ -1023,19 +823,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_rdmsr_perf()
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
     g_exit_reason = exit_reason::rdmsr;
-
-    mocks.NeverCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
 
     g_value = 0x0000000400000003;
@@ -1056,19 +850,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_rdmsr_cs()
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
     g_exit_reason = exit_reason::rdmsr;
-
-    mocks.NeverCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
 
     g_value = 0x0000000500000004;
@@ -1089,19 +877,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_rdmsr_esp()
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
     g_exit_reason = exit_reason::rdmsr;
-
-    mocks.NeverCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
 
     g_value = 0x0000000600000005;
@@ -1122,19 +904,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_rdmsr_eip()
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
     g_exit_reason = exit_reason::rdmsr;
-
-    mocks.NeverCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
 
     g_value = 0x0000000700000006;
@@ -1155,19 +931,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_rdmsr_fs_base()
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
     g_exit_reason = exit_reason::rdmsr;
-
-    mocks.NeverCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
 
     g_value = 0x0000000800000007;
@@ -1188,19 +958,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_rdmsr_gs_base()
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
     g_exit_reason = exit_reason::rdmsr;
-
-    mocks.NeverCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
 
     g_value = 0x0000000900000008;
@@ -1221,13 +985,9 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_rdmsr_default()
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
@@ -1235,8 +995,6 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_rdmsr_default()
     g_exit_reason = exit_reason::rdmsr;
 
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
-    mocks.NeverCall(intrinsics.get(), intrinsics_intel_x64::stop);
-
     eh->m_state_save->rcx = 0x10;
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -1253,13 +1011,9 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_rdmsr_ignore()
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
@@ -1267,8 +1021,6 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_rdmsr_ignore()
     g_exit_reason = exit_reason::rdmsr;
 
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
-    mocks.NeverCall(intrinsics.get(), intrinsics_intel_x64::stop);
-
     eh->m_state_save->rcx = 0x31;
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -1285,19 +1037,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_wrmsr_debug_ctrl()
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
     g_exit_reason = exit_reason::wrmsr;
-
-    mocks.NeverCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
 
     eh->m_state_save->rcx = msrs::ia32_debugctl::addr;
@@ -1318,19 +1064,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_wrmsr_pat()
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
     g_exit_reason = exit_reason::wrmsr;
-
-    mocks.NeverCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
 
     eh->m_state_save->rcx = msrs::ia32_pat::addr;
@@ -1351,19 +1091,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_wrmsr_efer()
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
     g_exit_reason = exit_reason::wrmsr;
-
-    mocks.NeverCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
 
     eh->m_state_save->rcx = msrs::ia32_efer::addr;
@@ -1384,19 +1118,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_wrmsr_perf()
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
     g_exit_reason = exit_reason::wrmsr;
-
-    mocks.NeverCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
 
     eh->m_state_save->rcx = msrs::ia32_perf_global_ctrl::addr;
@@ -1417,19 +1145,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_wrmsr_cs()
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
     g_exit_reason = exit_reason::wrmsr;
-
-    mocks.NeverCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
 
     eh->m_state_save->rcx = msrs::ia32_sysenter_cs::addr;
@@ -1450,19 +1172,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_wrmsr_esp()
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
     g_exit_reason = exit_reason::wrmsr;
-
-    mocks.NeverCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
 
     eh->m_state_save->rcx = msrs::ia32_sysenter_esp::addr;
@@ -1483,19 +1199,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_wrmsr_eip()
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
     g_exit_reason = exit_reason::wrmsr;
-
-    mocks.NeverCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
 
     eh->m_state_save->rcx = msrs::ia32_sysenter_eip::addr;
@@ -1516,19 +1226,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_wrmsr_fs_base()
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
     g_exit_reason = exit_reason::wrmsr;
-
-    mocks.NeverCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
 
     eh->m_state_save->rcx = msrs::ia32_fs_base::addr;
@@ -1549,19 +1253,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_wrmsr_gs_base()
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
     g_exit_reason = exit_reason::wrmsr;
-
-    mocks.NeverCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
 
     eh->m_state_save->rcx = msrs::ia32_gs_base::addr;
@@ -1582,21 +1280,15 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_wrmsr_default()
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
     g_exit_reason = exit_reason::wrmsr;
 
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
-    mocks.NeverCall(intrinsics.get(), intrinsics_intel_x64::stop);
-
     eh->m_state_save->rcx = 0x10;
     eh->m_state_save->rax = 0x9;
     eh->m_state_save->rdx = 0xA;
@@ -1612,19 +1304,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_vm_entry_failure_invalid_guest_st
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
     g_exit_reason = exit_reason::vm_entry_failure_invalid_guest_state;
-
-    mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -1638,19 +1324,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_vm_entry_failure_msr_loading()
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
     g_exit_reason = exit_reason::vm_entry_failure_msr_loading;
-
-    mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -1664,19 +1344,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_mwait()
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
     g_exit_reason = exit_reason::mwait;
-
-    mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -1690,19 +1364,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_monitor_trap_flag()
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
     g_exit_reason = exit_reason::monitor_trap_flag;
-
-    mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -1716,19 +1384,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_monitor()
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
     g_exit_reason = exit_reason::monitor;
-
-    mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -1742,19 +1404,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_pause()
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
     g_exit_reason = exit_reason::pause;
-
-    mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -1768,19 +1424,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_vm_entry_failure_machine_check_ev
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
     g_exit_reason = exit_reason::vm_entry_failure_machine_check_event;
-
-    mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -1794,19 +1444,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_tpr_below_threshold()
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
     g_exit_reason = exit_reason::tpr_below_threshold;
-
-    mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -1820,19 +1464,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_apic_access()
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
     g_exit_reason = exit_reason::apic_access;
-
-    mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -1846,19 +1484,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_virtualized_eoi()
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
     g_exit_reason = exit_reason::virtualized_eoi;
-
-    mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -1872,19 +1504,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_access_to_gdtr_or_idtr()
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
     g_exit_reason = exit_reason::access_to_gdtr_or_idtr;
-
-    mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -1898,19 +1524,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_access_to_ldtr_or_tr()
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
     g_exit_reason = exit_reason::access_to_ldtr_or_tr;
-
-    mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -1924,19 +1544,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_ept_violation()
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
     g_exit_reason = exit_reason::ept_violation;
-
-    mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -1950,19 +1564,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_ept_misconfiguration()
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
     g_exit_reason = exit_reason::ept_misconfiguration;
-
-    mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -1976,19 +1584,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_invept()
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
     g_exit_reason = exit_reason::invept;
-
-    mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -2002,19 +1604,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_rdtscp()
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
     g_exit_reason = exit_reason::rdtscp;
-
-    mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -2028,19 +1624,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_vmx_preemption_timer_expired()
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
     g_exit_reason = exit_reason::vmx_preemption_timer_expired;
-
-    mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -2054,19 +1644,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_invvpid()
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
     g_exit_reason = exit_reason::invvpid;
-
-    mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -2080,19 +1664,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_wbinvd()
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
     g_exit_reason = exit_reason::wbinvd;
-
-    mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -2106,19 +1684,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_xsetbv()
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
     g_exit_reason = exit_reason::xsetbv;
-
-    mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -2132,19 +1704,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_apic_write()
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
     g_exit_reason = exit_reason::apic_write;
-
-    mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -2158,19 +1724,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_rdrand()
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
     g_exit_reason = exit_reason::rdrand;
-
-    mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -2184,19 +1744,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_invpcid()
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
     g_exit_reason = exit_reason::invpcid;
-
-    mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -2210,19 +1764,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_vmfunc()
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
     g_exit_reason = exit_reason::vmfunc;
-
-    mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -2236,19 +1784,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_rdseed()
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
     g_exit_reason = exit_reason::rdseed;
-
-    mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -2262,19 +1804,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_xsaves()
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
     g_exit_reason = exit_reason::xsaves;
-
-    mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -2288,22 +1824,17 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_xrstors()
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
 
     g_exit_reason = exit_reason::xrstors | 0x80000000;
 
-    mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::check_vmcs_control_state);
-    mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::check_vmcs_guest_state);
-    mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::check_vmcs_host_state);
-    mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
+    mocks.OnCall(vmcs.get(), vmcs_intel_x64::check_vmcs_control_state);
+    mocks.OnCall(vmcs.get(), vmcs_intel_x64::check_vmcs_guest_state);
+    mocks.OnCall(vmcs.get(), vmcs_intel_x64::check_vmcs_host_state);
     mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -2385,80 +1916,14 @@ exit_handler_intel_x64_ut::test_halt()
 {
     MockRepository mocks;
     auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
 
     auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
+    auto eh = std::make_unique<exit_handler_intel_x64>();
     eh->set_vmcs(vmcs);
     eh->set_state_save(ss);
-
-    mocks.ExpectCall(intrinsics.get(), intrinsics_intel_x64::stop);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
         eh->halt();
-    });
-}
-
-void
-exit_handler_intel_x64_ut::test_vmread_failure()
-{
-    MockRepository mocks;
-    auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Return(false);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Do(__vmwrite);
-
-    auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
-    eh->set_vmcs(vmcs);
-    eh->set_state_save(ss);
-
-    g_exit_reason = exit_reason::rdmsr;
-
-    mocks.NeverCall(intrinsics.get(), intrinsics_intel_x64::stop);
-    mocks.NeverCall(vmcs.get(), vmcs_intel_x64::resume);
-
-    g_value = 0x0000000200000001;
-    eh->m_state_save->rcx = msrs::ia32_debugctl::addr;
-
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        EXPECT_EXCEPTION(eh->dispatch(), std::runtime_error);
-    });
-}
-
-
-// REMOVE ME: Once the exit handler no longer need it's own vmread / vmwrite
-// set of fucntions tests tests can be deleted
-
-void
-exit_handler_intel_x64_ut::test_vmwrite_failure()
-{
-    MockRepository mocks;
-    auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto intrinsics = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(intrinsics.get(), intrinsics_intel_x64::vmwrite).Return(false);
-
-    auto ss = std::make_shared<state_save_intel_x64>();
-    auto eh = std::make_unique<exit_handler_intel_x64>(intrinsics);
-    eh->set_vmcs(vmcs);
-    eh->set_state_save(ss);
-
-    g_exit_reason = exit_reason::wrmsr;
-
-    mocks.NeverCall(intrinsics.get(), intrinsics_intel_x64::stop);
-    mocks.NeverCall(vmcs.get(), vmcs_intel_x64::resume);
-
-    eh->m_state_save->rcx = msrs::ia32_fs_base::addr;
-    eh->m_state_save->rax = 0x1;
-    eh->m_state_save->rdx = 0x2;
-
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        EXPECT_EXCEPTION(eh->dispatch(), std::runtime_error);
     });
 }

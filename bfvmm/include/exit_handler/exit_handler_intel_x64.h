@@ -24,7 +24,6 @@
 
 #include <memory>
 #include <vmcs/vmcs_intel_x64.h>
-#include <intrinsics/intrinsics_intel_x64.h>
 
 // -----------------------------------------------------------------------------
 // Exit Handler
@@ -53,7 +52,7 @@ public:
     /// @param intrinsics the intriniscs class to be used by this class
     /// @throws invalid argument if the intrinsics class is null.
     ///
-    exit_handler_intel_x64(std::shared_ptr<intrinsics_intel_x64> intrinsics = nullptr);
+    exit_handler_intel_x64();
 
     /// Destructor
     ///
@@ -141,18 +140,11 @@ protected:
 
     virtual std::string exit_reason_to_str(uint64_t exit_reason);
 
-    // REMOVE ME:
-    virtual uint64_t vmread(uint64_t field) const;
-    virtual void vmwrite(uint64_t field, uint64_t value);
-
 protected:
 
     friend class vcpu_ut;
     friend class vcpu_intel_x64;
     friend class exit_handler_intel_x64_ut;
-
-    // REMOVE ME:
-    std::shared_ptr<intrinsics_intel_x64> m_intrinsics;
 
     uint64_t m_exit_reason;
     uint64_t m_exit_qualification;
