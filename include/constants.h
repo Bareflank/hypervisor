@@ -184,7 +184,7 @@
  * Stack Reserved
  *
  * The bottom of the stack is reserved for storing useful information
- * (similar to the Linux kernel). The followign defines how much of the
+ * (similar to the Linux kernel). The following defines how much of the
  * stack is reserved.
  *
  * Note: Defined in bytes
