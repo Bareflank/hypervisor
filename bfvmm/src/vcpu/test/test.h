@@ -73,15 +73,13 @@ private:
     void test_vcpu_is_not_initialized_vm_vcpu();
 
     void test_vcpu_intel_x64_invalid_id();
-    void test_vcpu_intel_x64_null_params_valid_intrinsics();
-    void test_vcpu_intel_x64_valid_params_null_intrinsics();
     void test_vcpu_intel_x64_valid();
-    void test_vcpu_intel_x64_init_null_params_valid_intrinsics();
-    void test_vcpu_intel_x64_init_valid_params_null_intrinsics();
+    void test_vcpu_intel_x64_init_null_params();
+    void test_vcpu_intel_x64_init_valid_params();
     void test_vcpu_intel_x64_init_valid();
     void test_vcpu_intel_x64_init_vmcs_throws();
-    void test_vcpu_intel_x64_fini_null_params_valid_intrinsics();
-    void test_vcpu_intel_x64_fini_valid_params_null_intrinsics();
+    void test_vcpu_intel_x64_fini_null_params();
+    void test_vcpu_intel_x64_fini_valid_params();
     void test_vcpu_intel_x64_fini_valid();
     void test_vcpu_intel_x64_fini_no_init();
     void test_vcpu_intel_x64_run_launch();

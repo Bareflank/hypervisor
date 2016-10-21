@@ -28,7 +28,6 @@
 #include <vmcs/vmcs_intel_x64_vmm_state.h>
 #include <vmcs/vmcs_intel_x64_host_vm_state.h>
 #include <exit_handler/exit_handler_intel_x64.h>
-#include <intrinsics/intrinsics_intel_x64.h>
 
 /// Virtual CPU (Intel x86_64)
 ///
@@ -74,7 +73,6 @@ public:
     ///
     vcpu_intel_x64(uint64_t id,
                    std::shared_ptr<debug_ring> debug_ring = nullptr,
-                   std::shared_ptr<intrinsics_intel_x64> intrinsics = nullptr,
                    std::shared_ptr<vmxon_intel_x64> vmxon = nullptr,
                    std::shared_ptr<vmcs_intel_x64> vmcs = nullptr,
                    std::shared_ptr<exit_handler_intel_x64> exit_handler = nullptr,
@@ -113,13 +111,10 @@ private:
 
     bool m_vmcs_launched;
 
-    std::shared_ptr<intrinsics_intel_x64> m_intrinsics;
     std::shared_ptr<vmxon_intel_x64> m_vmxon;
     std::shared_ptr<vmcs_intel_x64> m_vmcs;
     std::shared_ptr<exit_handler_intel_x64> m_exit_handler;
-
     std::shared_ptr<state_save_intel_x64> m_state_save;
-
     std::shared_ptr<vmcs_intel_x64_state> m_vmm_state;
     std::shared_ptr<vmcs_intel_x64_state> m_guest_state;
 };

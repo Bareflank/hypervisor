@@ -23,6 +23,9 @@
 #include <memory_manager/memory_manager.h>
 #include <memory_manager/page_table_x64.h>
 
+#include <intrinsics/crs_intel_x64.h>
+#include <intrinsics/msrs_intel_x64.h>
+
 using namespace x64;
 using namespace intel_x64;
 
@@ -62,11 +65,11 @@ vmcs_intel_x64_vmm_state::vmcs_intel_x64_vmm_state(const std::shared_ptr<state_s
     m_gs_index = 4;
     m_tr_index = 5;
 
-    m_cs = static_cast<uint16_t>(m_cs_index << 3);
-    m_ss = static_cast<uint16_t>(m_ss_index << 3);
-    m_fs = static_cast<uint16_t>(m_fs_index << 3);
-    m_gs = static_cast<uint16_t>(m_gs_index << 3);
-    m_tr = static_cast<uint16_t>(m_tr_index << 3);
+    m_cs = gsl::narrow_cast<uint16_t>(m_cs_index << 3);
+    m_ss = gsl::narrow_cast<uint16_t>(m_ss_index << 3);
+    m_fs = gsl::narrow_cast<uint16_t>(m_fs_index << 3);
+    m_gs = gsl::narrow_cast<uint16_t>(m_gs_index << 3);
+    m_tr = gsl::narrow_cast<uint16_t>(m_tr_index << 3);
 
     // TODO: We need to guard the additions to the page tables here. Just
     // in case more than one core attempts to change these at the same time.

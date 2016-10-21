@@ -25,16 +25,20 @@
 #include <vmxon/vmxon_intel_x64.h>
 #include <memory_manager/memory_manager.h>
 
+#include <intrinsics/x64.h>
+#include <intrinsics/cpuid_x64.h>
+#include <intrinsics/rflags_x64.h>
+#include <intrinsics/crs_intel_x64.h>
+#include <intrinsics/vmx_intel_x64.h>
+#include <intrinsics/msrs_intel_x64.h>
+
 using namespace x64;
 using namespace intel_x64;
 
-vmxon_intel_x64::vmxon_intel_x64(std::shared_ptr<intrinsics_intel_x64> intrinsics) :
-    m_intrinsics(std::move(intrinsics)),
+vmxon_intel_x64::vmxon_intel_x64() :
     m_vmxon_enabled(false),
     m_vmxon_region_phys(0)
 {
-    if (!m_intrinsics)
-        m_intrinsics = std::make_shared<intrinsics_intel_x64>();
 }
 
 void
@@ -81,7 +85,7 @@ vmxon_intel_x64::stop()
 void
 vmxon_intel_x64::check_cpuid_vmx_supported()
 {
-    if ((m_intrinsics->cpuid_ecx(1) & (1 << 5)) == 0)
+    if (cpuid::feature_information::ecx::vmx::get() == 0)
         throw std::logic_error("VMX extensions not supported");
 }
 
@@ -137,13 +141,13 @@ vmxon_intel_x64::check_v8086_disabled()
 void
 vmxon_intel_x64::enable_vmx_operation() noexcept
 {
-    cr4::vmx_enable_bit::set(1UL);
+    cr4::vmx_enable_bit::set(1U);
 }
 
 void
 vmxon_intel_x64::disable_vmx_operation() noexcept
 {
-    cr4::vmx_enable_bit::set(0UL);
+    cr4::vmx_enable_bit::set(0U);
 }
 
 void
@@ -172,28 +176,28 @@ vmxon_intel_x64::release_vmxon_region() noexcept
 void
 vmxon_intel_x64::execute_vmxon()
 {
+    auto ___ = gsl::on_success([&]
+    { m_vmxon_enabled = true; });
+
     if (m_vmxon_enabled)
         throw std::logic_error("vmxon has already been executed");
 
-    if (!m_intrinsics->vmxon(&m_vmxon_region_phys))
-        throw std::logic_error("vmxon failed");
-
-    m_vmxon_enabled = true;
+    vmx::on(&m_vmxon_region_phys);
 }
 
 void
 vmxon_intel_x64::execute_vmxoff()
 {
+    auto ___ = gsl::on_success([&]
+    { m_vmxon_enabled = false; });
+
     if (!m_vmxon_enabled)
     {
         bfwarning << "execute_vmxoff: VMX operation already disabled" << bfendl;
         return;
     }
 
-    if (!m_intrinsics->vmxoff())
-        throw std::logic_error("vmxoff failed");
-
-    m_vmxon_enabled = false;
+    vmx::off();
 }
 
 bool

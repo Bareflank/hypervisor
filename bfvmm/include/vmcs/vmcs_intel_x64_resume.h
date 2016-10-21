@@ -23,7 +23,7 @@
 #define VMCS_INTEL_X64_RESUME_H
 
 #include <stdint.h>
-#include <intrinsics/intrinsics_intel_x64.h>
+#include <exit_handler/state_save_intel_x64.h>
 
 /// Resume VMCS
 ///

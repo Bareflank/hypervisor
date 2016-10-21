@@ -27,7 +27,6 @@
 
 #include <intrinsics/gdt_x64.h>
 #include <intrinsics/idt_x64.h>
-#include <intrinsics/intrinsics_intel_x64.h>
 
 /// VMCS Host VM State
 ///
@@ -40,7 +39,7 @@ class vmcs_intel_x64_host_vm_state : public vmcs_intel_x64_state
 {
 public:
 
-    vmcs_intel_x64_host_vm_state(const std::shared_ptr<intrinsics_intel_x64> &intrinsics);
+    vmcs_intel_x64_host_vm_state();
     ~vmcs_intel_x64_host_vm_state() override = default;
 
     uint16_t es() const override { return m_es; }

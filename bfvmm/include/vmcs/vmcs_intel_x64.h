@@ -23,9 +23,11 @@
 #define VMCS_INTEL_X64_H
 
 #include <memory>
-#include <view_as_pointer.h>
 #include <vmcs/vmcs_intel_x64_state.h>
-#include <intrinsics/intrinsics_intel_x64.h>
+#include <exit_handler/state_save_intel_x64.h>
+
+#include <intrinsics/vmx_intel_x64.h>
+#include <intrinsics/msrs_intel_x64.h>
 
 /// Intel x86_64 VMCS
 ///
@@ -60,7 +62,7 @@ public:
 
     /// Default Constructor
     ///
-    vmcs_intel_x64(std::shared_ptr<intrinsics_intel_x64> intrinsics = nullptr);
+    vmcs_intel_x64();
 
     /// Destructor
     ///
@@ -170,9 +172,6 @@ protected:
     virtual void secondary_processor_based_vm_execution_controls();
     virtual void vm_exit_controls();
     virtual void vm_entry_controls();
-
-    virtual uint64_t vmread(uint64_t field) const;
-    virtual void vmwrite(uint64_t field, uint64_t value);
 
     virtual void filter_unsupported(uint32_t msr, uint64_t &ctrl);
 
@@ -582,8 +581,6 @@ protected:
     friend class exit_handler_intel_x64;
     friend class exit_handler_intel_x64_ut;
 
-    std::shared_ptr<intrinsics_intel_x64> m_intrinsics;
-
     uintptr_t m_vmcs_region_phys;
     std::unique_ptr<uint32_t[]> m_vmcs_region;
 
@@ -608,39 +605,6 @@ namespace vmcs
 {
 
 // -----------------------------------------------------------------------------
-// Helpers
-// -----------------------------------------------------------------------------
-
-inline uint64_t
-vmread(uint64_t field, const std::string &name)
-{
-    uint64_t value;
-
-    if (!__vmread(field, &value))
-    {
-        bferror << "vmread failed:" << bfendl;
-        bferror << "    - field: " << name << bfendl;
-
-        throw std::runtime_error("vmread failed");
-    }
-
-    return value;
-}
-
-inline void
-vmwrite(uint64_t field, uint64_t value, const std::string &name)
-{
-    if (!__vmwrite(field, value))
-    {
-        bferror << "vmwrite failed:" << bfendl;
-        bferror << "    - field: " << name << bfendl;
-        bferror << "    - value: " << view_as_pointer(value) << bfendl;
-
-        throw std::runtime_error("vmwrite failed");
-    }
-}
-
-// -----------------------------------------------------------------------------
 // 16bit Control Fields
 // -----------------------------------------------------------------------------
 
@@ -650,10 +614,10 @@ namespace virtual_processor_identifier
     constexpr const auto name = "virtual_processor_identifier";
 
     inline auto get()
-    { return vmread(addr, name); }
+    { return vm::read(addr, name); }
 
     template<class T> constexpr void set(T val)
-    { vmwrite(addr, val, name); }
+    { vm::write(addr, val, name); }
 
     inline bool exists() noexcept
     { return msrs::ia32_vmx_procbased_ctls2::enable_vpid::get() == 1; }
@@ -665,10 +629,10 @@ namespace posted_interrupt_notification_vector
     constexpr const auto name = "posted_interrupt_notification_vector";
 
     inline auto get()
-    { return vmread(addr, name); }
+    { return vm::read(addr, name); }
 
     template<class T> void set(T val)
-    { vmwrite(addr, val, name); }
+    { vm::write(addr, val, name); }
 
     inline bool exists() noexcept
     { return msrs::ia32_vmx_true_pinbased_ctls::process_posted_interrupts::get() == 1; }
@@ -680,10 +644,10 @@ namespace eptp_index
     constexpr const auto name = "eptp_index";
 
     inline auto get()
-    { return vmread(addr, name); }
+    { return vm::read(addr, name); }
 
     template<class T> void set(T val)
-    { vmwrite(addr, val, name); }
+    { vm::write(addr, val, name); }
 
     inline bool exists() noexcept
     { return msrs::ia32_vmx_procbased_ctls2::ept_violation_ve::get() == 1; }
@@ -699,10 +663,10 @@ namespace guest_es_selector
     constexpr const auto name = "guest_es_selector";
 
     inline auto get()
-    { return vmread(addr, name); }
+    { return vm::read(addr, name); }
 
     template<class T> void set(T val)
-    { vmwrite(addr, val, name); }
+    { vm::write(addr, val, name); }
 
     inline bool exists() noexcept
     { return true; }
@@ -714,10 +678,10 @@ namespace guest_es_selector
         constexpr const auto name = "rpl";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace ti
@@ -727,10 +691,10 @@ namespace guest_es_selector
         constexpr const auto name = "ti";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace index
@@ -740,10 +704,10 @@ namespace guest_es_selector
         constexpr const auto name = "index";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 }
 
@@ -753,10 +717,10 @@ namespace guest_cs_selector
     constexpr const auto name = "guest_cs_selector";
 
     inline auto get()
-    { return vmread(addr, name); }
+    { return vm::read(addr, name); }
 
     template<class T> void set(T val)
-    { vmwrite(addr, val, name); }
+    { vm::write(addr, val, name); }
 
     inline bool exists() noexcept
     { return true; }
@@ -768,10 +732,10 @@ namespace guest_cs_selector
         constexpr const auto name = "rpl";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace ti
@@ -781,10 +745,10 @@ namespace guest_cs_selector
         constexpr const auto name = "ti";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace index
@@ -794,10 +758,10 @@ namespace guest_cs_selector
         constexpr const auto name = "index";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 }
 
@@ -807,10 +771,10 @@ namespace guest_ss_selector
     constexpr const auto name = "guest_ss_selector";
 
     inline auto get()
-    { return vmread(addr, name); }
+    { return vm::read(addr, name); }
 
     template<class T> void set(T val)
-    { vmwrite(addr, val, name); }
+    { vm::write(addr, val, name); }
 
     inline bool exists() noexcept
     { return true; }
@@ -822,10 +786,10 @@ namespace guest_ss_selector
         constexpr const auto name = "rpl";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace ti
@@ -835,10 +799,10 @@ namespace guest_ss_selector
         constexpr const auto name = "ti";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace index
@@ -848,10 +812,10 @@ namespace guest_ss_selector
         constexpr const auto name = "index";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 }
 
@@ -861,10 +825,10 @@ namespace guest_ds_selector
     constexpr const auto name = "guest_ds_selector";
 
     inline auto get()
-    { return vmread(addr, name); }
+    { return vm::read(addr, name); }
 
     template<class T> void set(T val)
-    { vmwrite(addr, val, name); }
+    { vm::write(addr, val, name); }
 
     inline bool exists() noexcept
     { return true; }
@@ -876,10 +840,10 @@ namespace guest_ds_selector
         constexpr const auto name = "rpl";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace ti
@@ -889,10 +853,10 @@ namespace guest_ds_selector
         constexpr const auto name = "ti";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace index
@@ -902,10 +866,10 @@ namespace guest_ds_selector
         constexpr const auto name = "index";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 }
 
@@ -915,10 +879,10 @@ namespace guest_fs_selector
     constexpr const auto name = "guest_fs_selector";
 
     inline auto get()
-    { return vmread(addr, name); }
+    { return vm::read(addr, name); }
 
     template<class T> void set(T val)
-    { vmwrite(addr, val, name); }
+    { vm::write(addr, val, name); }
 
     inline bool exists() noexcept
     { return true; }
@@ -930,10 +894,10 @@ namespace guest_fs_selector
         constexpr const auto name = "rpl";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace ti
@@ -943,10 +907,10 @@ namespace guest_fs_selector
         constexpr const auto name = "ti";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace index
@@ -956,10 +920,10 @@ namespace guest_fs_selector
         constexpr const auto name = "index";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 }
 
@@ -969,10 +933,10 @@ namespace guest_gs_selector
     constexpr const auto name = "guest_gs_selector";
 
     inline auto get()
-    { return vmread(addr, name); }
+    { return vm::read(addr, name); }
 
     template<class T> void set(T val)
-    { vmwrite(addr, val, name); }
+    { vm::write(addr, val, name); }
 
     inline bool exists() noexcept
     { return true; }
@@ -984,10 +948,10 @@ namespace guest_gs_selector
         constexpr const auto name = "rpl";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace ti
@@ -997,10 +961,10 @@ namespace guest_gs_selector
         constexpr const auto name = "ti";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace index
@@ -1010,10 +974,10 @@ namespace guest_gs_selector
         constexpr const auto name = "index";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 }
 
@@ -1023,10 +987,10 @@ namespace guest_ldtr_selector
     constexpr const auto name = "guest_ldtr_selector";
 
     inline auto get()
-    { return vmread(addr, name); }
+    { return vm::read(addr, name); }
 
     template<class T> void set(T val)
-    { vmwrite(addr, val, name); }
+    { vm::write(addr, val, name); }
 
     inline bool exists() noexcept
     { return true; }
@@ -1038,10 +1002,10 @@ namespace guest_ldtr_selector
         constexpr const auto name = "rpl";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace ti
@@ -1051,10 +1015,10 @@ namespace guest_ldtr_selector
         constexpr const auto name = "ti";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace index
@@ -1064,10 +1028,10 @@ namespace guest_ldtr_selector
         constexpr const auto name = "index";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 }
 
@@ -1077,10 +1041,10 @@ namespace guest_tr_selector
     constexpr const auto name = "guest_tr_selector";
 
     inline auto get()
-    { return vmread(addr, name); }
+    { return vm::read(addr, name); }
 
     template<class T> void set(T val)
-    { vmwrite(addr, val, name); }
+    { vm::write(addr, val, name); }
 
     inline bool exists() noexcept
     { return true; }
@@ -1092,10 +1056,10 @@ namespace guest_tr_selector
         constexpr const auto name = "rpl";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace ti
@@ -1105,10 +1069,10 @@ namespace guest_tr_selector
         constexpr const auto name = "ti";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace index
@@ -1118,10 +1082,10 @@ namespace guest_tr_selector
         constexpr const auto name = "index";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 }
 
@@ -1131,10 +1095,10 @@ namespace guest_interrupt_status
     constexpr const auto name = "guest_interrupt_status";
 
     inline auto get()
-    { return vmread(addr, name); }
+    { return vm::read(addr, name); }
 
     template<class T> void set(T val)
-    { vmwrite(addr, val, name); }
+    { vm::write(addr, val, name); }
 
     inline bool exists() noexcept
     { return msrs::ia32_vmx_procbased_ctls2::virtual_interrupt_delivery::get() == 1; }
@@ -1150,10 +1114,10 @@ namespace host_es_selector
     constexpr const auto name = "host_es_selector";
 
     inline auto get()
-    { return vmread(addr, name); }
+    { return vm::read(addr, name); }
 
     template<class T> void set(T val)
-    { vmwrite(addr, val, name); }
+    { vm::write(addr, val, name); }
 
     inline bool exists() noexcept
     { return true; }
@@ -1165,10 +1129,10 @@ namespace host_es_selector
         constexpr const auto name = "rpl";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace ti
@@ -1178,10 +1142,10 @@ namespace host_es_selector
         constexpr const auto name = "ti";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace index
@@ -1191,10 +1155,10 @@ namespace host_es_selector
         constexpr const auto name = "index";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 }
 
@@ -1204,10 +1168,10 @@ namespace host_cs_selector
     constexpr const auto name = "host_cs_selector";
 
     inline auto get()
-    { return vmread(addr, name); }
+    { return vm::read(addr, name); }
 
     template<class T> void set(T val)
-    { vmwrite(addr, val, name); }
+    { vm::write(addr, val, name); }
 
     inline bool exists() noexcept
     { return true; }
@@ -1219,10 +1183,10 @@ namespace host_cs_selector
         constexpr const auto name = "rpl";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace ti
@@ -1232,10 +1196,10 @@ namespace host_cs_selector
         constexpr const auto name = "ti";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace index
@@ -1245,10 +1209,10 @@ namespace host_cs_selector
         constexpr const auto name = "index";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 }
 
@@ -1258,10 +1222,10 @@ namespace host_ss_selector
     constexpr const auto name = "host_ss_selector";
 
     inline auto get()
-    { return vmread(addr, name); }
+    { return vm::read(addr, name); }
 
     template<class T> void set(T val)
-    { vmwrite(addr, val, name); }
+    { vm::write(addr, val, name); }
 
     inline bool exists() noexcept
     { return true; }
@@ -1273,10 +1237,10 @@ namespace host_ss_selector
         constexpr const auto name = "rpl";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace ti
@@ -1286,10 +1250,10 @@ namespace host_ss_selector
         constexpr const auto name = "ti";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace index
@@ -1299,10 +1263,10 @@ namespace host_ss_selector
         constexpr const auto name = "index";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 }
 
@@ -1312,10 +1276,10 @@ namespace host_ds_selector
     constexpr const auto name = "host_ds_selector";
 
     inline auto get()
-    { return vmread(addr, name); }
+    { return vm::read(addr, name); }
 
     template<class T> void set(T val)
-    { vmwrite(addr, val, name); }
+    { vm::write(addr, val, name); }
 
     inline bool exists() noexcept
     { return true; }
@@ -1327,10 +1291,10 @@ namespace host_ds_selector
         constexpr const auto name = "rpl";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace ti
@@ -1340,10 +1304,10 @@ namespace host_ds_selector
         constexpr const auto name = "ti";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace index
@@ -1353,10 +1317,10 @@ namespace host_ds_selector
         constexpr const auto name = "index";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 }
 
@@ -1366,10 +1330,10 @@ namespace host_fs_selector
     constexpr const auto name = "host_fs_selector";
 
     inline auto get()
-    { return vmread(addr, name); }
+    { return vm::read(addr, name); }
 
     template<class T> void set(T val)
-    { vmwrite(addr, val, name); }
+    { vm::write(addr, val, name); }
 
     inline bool exists() noexcept
     { return true; }
@@ -1381,10 +1345,10 @@ namespace host_fs_selector
         constexpr const auto name = "rpl";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace ti
@@ -1394,10 +1358,10 @@ namespace host_fs_selector
         constexpr const auto name = "ti";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace index
@@ -1407,10 +1371,10 @@ namespace host_fs_selector
         constexpr const auto name = "index";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 }
 
@@ -1420,10 +1384,10 @@ namespace host_gs_selector
     constexpr const auto name = "host_gs_selector";
 
     inline auto get()
-    { return vmread(addr, name); }
+    { return vm::read(addr, name); }
 
     template<class T> void set(T val)
-    { vmwrite(addr, val, name); }
+    { vm::write(addr, val, name); }
 
     inline bool exists() noexcept
     { return true; }
@@ -1435,10 +1399,10 @@ namespace host_gs_selector
         constexpr const auto name = "rpl";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace ti
@@ -1448,10 +1412,10 @@ namespace host_gs_selector
         constexpr const auto name = "ti";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace index
@@ -1461,10 +1425,10 @@ namespace host_gs_selector
         constexpr const auto name = "index";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 }
 
@@ -1474,10 +1438,10 @@ namespace host_tr_selector
     constexpr const auto name = "host_tr_selector";
 
     inline auto get()
-    { return vmread(addr, name); }
+    { return vm::read(addr, name); }
 
     template<class T> void set(T val)
-    { vmwrite(addr, val, name); }
+    { vm::write(addr, val, name); }
 
     inline bool exists() noexcept
     { return true; }
@@ -1489,10 +1453,10 @@ namespace host_tr_selector
         constexpr const auto name = "rpl";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace ti
@@ -1502,10 +1466,10 @@ namespace host_tr_selector
         constexpr const auto name = "ti";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace index
@@ -1515,10 +1479,10 @@ namespace host_tr_selector
         constexpr const auto name = "index";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 }
 
@@ -1576,10 +1540,10 @@ namespace guest_ia32_debugctl
     constexpr const auto name = "guest_ia32_debugctl";
 
     inline auto get()
-    { return vmread(addr, name); }
+    { return vm::read(addr, name); }
 
     template<class T> void set(T val)
-    { vmwrite(addr, val, name); }
+    { vm::write(addr, val, name); }
 
     inline bool exists() noexcept
     { return true; }
@@ -1591,10 +1555,10 @@ namespace guest_ia32_debugctl
         constexpr const auto name = "lbr";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace btf
@@ -1604,10 +1568,10 @@ namespace guest_ia32_debugctl
         constexpr const auto name = "btf";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace tr
@@ -1617,10 +1581,10 @@ namespace guest_ia32_debugctl
         constexpr const auto name = "tr";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace bts
@@ -1630,10 +1594,10 @@ namespace guest_ia32_debugctl
         constexpr const auto name = "bts";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace btint
@@ -1643,10 +1607,10 @@ namespace guest_ia32_debugctl
         constexpr const auto name = "btint";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace bt_off_os
@@ -1656,10 +1620,10 @@ namespace guest_ia32_debugctl
         constexpr const auto name = "bt_off_os";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace bt_off_user
@@ -1669,10 +1633,10 @@ namespace guest_ia32_debugctl
         constexpr const auto name = "bt_off_user";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace freeze_lbrs_on_pmi
@@ -1682,10 +1646,10 @@ namespace guest_ia32_debugctl
         constexpr const auto name = "freeze_lbrs_on_pmi";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace freeze_perfmon_on_pmi
@@ -1695,10 +1659,10 @@ namespace guest_ia32_debugctl
         constexpr const auto name = "freeze_perfmon_on_pmi";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace enable_uncore_pmi
@@ -1708,10 +1672,10 @@ namespace guest_ia32_debugctl
         constexpr const auto name = "enable_uncore_pmi";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace freeze_while_smm
@@ -1721,10 +1685,10 @@ namespace guest_ia32_debugctl
         constexpr const auto name = "freeze_while_smm";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace rtm_debug
@@ -1734,10 +1698,10 @@ namespace guest_ia32_debugctl
         constexpr const auto name = "rtm_debug";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace reserved
@@ -1747,10 +1711,10 @@ namespace guest_ia32_debugctl
         constexpr const auto name = "reserved";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 }
 
@@ -1770,10 +1734,10 @@ namespace guest_ia32_efer
     constexpr const auto name = "guest_ia32_efer";
 
     inline auto get()
-    { return vmread(addr, name); }
+    { return vm::read(addr, name); }
 
     template<class T> void set(T val)
-    { vmwrite(addr, val, name); }
+    { vm::write(addr, val, name); }
 
     inline bool exists() noexcept
     { return msrs::ia32_vmx_true_entry_ctls::load_ia32_efer::get() == 1; }
@@ -1785,10 +1749,10 @@ namespace guest_ia32_efer
         constexpr const auto name = "sce";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace lme
@@ -1798,10 +1762,10 @@ namespace guest_ia32_efer
         constexpr const auto name = "lme";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace lma
@@ -1811,10 +1775,10 @@ namespace guest_ia32_efer
         constexpr const auto name = "lma";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace nxe
@@ -1824,10 +1788,10 @@ namespace guest_ia32_efer
         constexpr const auto name = "nxe";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace reserved
@@ -1837,10 +1801,10 @@ namespace guest_ia32_efer
         constexpr const auto name = "reserved";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 }
 
@@ -1870,10 +1834,10 @@ namespace host_ia32_efer
     constexpr const auto name = "host_ia32_efer";
 
     inline auto get()
-    { return vmread(addr, name); }
+    { return vm::read(addr, name); }
 
     template<class T> void set(T val)
-    { vmwrite(addr, val, name); }
+    { vm::write(addr, val, name); }
 
     inline bool exists() noexcept
     { return msrs::ia32_vmx_true_exit_ctls::load_ia32_efer::get() == 1; }
@@ -1885,10 +1849,10 @@ namespace host_ia32_efer
         constexpr const auto name = "sce";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace lme
@@ -1898,10 +1862,10 @@ namespace host_ia32_efer
         constexpr const auto name = "lme";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace lma
@@ -1911,10 +1875,10 @@ namespace host_ia32_efer
         constexpr const auto name = "lma";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace nxe
@@ -1924,10 +1888,10 @@ namespace host_ia32_efer
         constexpr const auto name = "nxe";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace reserved
@@ -1937,10 +1901,10 @@ namespace host_ia32_efer
         constexpr const auto name = "reserved";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 }
 
@@ -2011,10 +1975,10 @@ namespace guest_es_access_rights
     constexpr const auto name = "guest_es_access_rights";
 
     inline auto get()
-    { return vmread(addr, name); }
+    { return vm::read(addr, name); }
 
     template<class T> void set(T val)
-    { vmwrite(addr, val, name); }
+    { vm::write(addr, val, name); }
 
     inline bool exists() noexcept
     { return true; }
@@ -2026,10 +1990,10 @@ namespace guest_es_access_rights
         constexpr const auto name = "type";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace s
@@ -2039,10 +2003,10 @@ namespace guest_es_access_rights
         constexpr const auto name = "s";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace dpl
@@ -2052,10 +2016,10 @@ namespace guest_es_access_rights
         constexpr const auto name = "dpl";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace present
@@ -2065,10 +2029,10 @@ namespace guest_es_access_rights
         constexpr const auto name = "present";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace avl
@@ -2078,10 +2042,10 @@ namespace guest_es_access_rights
         constexpr const auto name = "avl";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace l
@@ -2091,10 +2055,10 @@ namespace guest_es_access_rights
         constexpr const auto name = "l";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace db
@@ -2104,10 +2068,10 @@ namespace guest_es_access_rights
         constexpr const auto name = "db";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace granularity
@@ -2117,10 +2081,10 @@ namespace guest_es_access_rights
         constexpr const auto name = "granularity";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace reserved
@@ -2130,10 +2094,10 @@ namespace guest_es_access_rights
         constexpr const auto name = "reserved";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace unusable
@@ -2143,10 +2107,10 @@ namespace guest_es_access_rights
         constexpr const auto name = "unusable";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 }
 
@@ -2156,10 +2120,10 @@ namespace guest_cs_access_rights
     constexpr const auto name = "guest_cs_access_rights";
 
     inline auto get()
-    { return vmread(addr, name); }
+    { return vm::read(addr, name); }
 
     template<class T> void set(T val)
-    { vmwrite(addr, val, name); }
+    { vm::write(addr, val, name); }
 
     inline bool exists() noexcept
     { return true; }
@@ -2171,10 +2135,10 @@ namespace guest_cs_access_rights
         constexpr const auto name = "type";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace s
@@ -2184,10 +2148,10 @@ namespace guest_cs_access_rights
         constexpr const auto name = "s";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace dpl
@@ -2197,10 +2161,10 @@ namespace guest_cs_access_rights
         constexpr const auto name = "dpl";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace present
@@ -2210,10 +2174,10 @@ namespace guest_cs_access_rights
         constexpr const auto name = "present";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace avl
@@ -2223,10 +2187,10 @@ namespace guest_cs_access_rights
         constexpr const auto name = "avl";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace l
@@ -2236,10 +2200,10 @@ namespace guest_cs_access_rights
         constexpr const auto name = "l";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace db
@@ -2249,10 +2213,10 @@ namespace guest_cs_access_rights
         constexpr const auto name = "db";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace granularity
@@ -2262,10 +2226,10 @@ namespace guest_cs_access_rights
         constexpr const auto name = "granularity";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace reserved
@@ -2275,10 +2239,10 @@ namespace guest_cs_access_rights
         constexpr const auto name = "reserved";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace unusable
@@ -2288,10 +2252,10 @@ namespace guest_cs_access_rights
         constexpr const auto name = "unusable";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 }
 
@@ -2301,10 +2265,10 @@ namespace guest_ss_access_rights
     constexpr const auto name = "guest_ss_access_rights";
 
     inline auto get()
-    { return vmread(addr, name); }
+    { return vm::read(addr, name); }
 
     template<class T> void set(T val)
-    { vmwrite(addr, val, name); }
+    { vm::write(addr, val, name); }
 
     inline bool exists() noexcept
     { return true; }
@@ -2316,10 +2280,10 @@ namespace guest_ss_access_rights
         constexpr const auto name = "type";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace s
@@ -2329,10 +2293,10 @@ namespace guest_ss_access_rights
         constexpr const auto name = "s";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace dpl
@@ -2342,10 +2306,10 @@ namespace guest_ss_access_rights
         constexpr const auto name = "dpl";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace present
@@ -2355,10 +2319,10 @@ namespace guest_ss_access_rights
         constexpr const auto name = "present";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace avl
@@ -2368,10 +2332,10 @@ namespace guest_ss_access_rights
         constexpr const auto name = "avl";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace l
@@ -2381,10 +2345,10 @@ namespace guest_ss_access_rights
         constexpr const auto name = "l";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace db
@@ -2394,10 +2358,10 @@ namespace guest_ss_access_rights
         constexpr const auto name = "db";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace granularity
@@ -2407,10 +2371,10 @@ namespace guest_ss_access_rights
         constexpr const auto name = "granularity";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace reserved
@@ -2420,10 +2384,10 @@ namespace guest_ss_access_rights
         constexpr const auto name = "reserved";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace unusable
@@ -2433,10 +2397,10 @@ namespace guest_ss_access_rights
         constexpr const auto name = "unusable";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 }
 
@@ -2446,10 +2410,10 @@ namespace guest_ds_access_rights
     constexpr const auto name = "guest_ds_access_rights";
 
     inline auto get()
-    { return vmread(addr, name); }
+    { return vm::read(addr, name); }
 
     template<class T> void set(T val)
-    { vmwrite(addr, val, name); }
+    { vm::write(addr, val, name); }
 
     inline bool exists() noexcept
     { return true; }
@@ -2461,10 +2425,10 @@ namespace guest_ds_access_rights
         constexpr const auto name = "type";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace s
@@ -2474,10 +2438,10 @@ namespace guest_ds_access_rights
         constexpr const auto name = "s";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace dpl
@@ -2487,10 +2451,10 @@ namespace guest_ds_access_rights
         constexpr const auto name = "dpl";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace present
@@ -2500,10 +2464,10 @@ namespace guest_ds_access_rights
         constexpr const auto name = "present";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace avl
@@ -2513,10 +2477,10 @@ namespace guest_ds_access_rights
         constexpr const auto name = "avl";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace l
@@ -2526,10 +2490,10 @@ namespace guest_ds_access_rights
         constexpr const auto name = "l";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace db
@@ -2539,10 +2503,10 @@ namespace guest_ds_access_rights
         constexpr const auto name = "db";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace granularity
@@ -2552,10 +2516,10 @@ namespace guest_ds_access_rights
         constexpr const auto name = "granularity";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace reserved
@@ -2565,10 +2529,10 @@ namespace guest_ds_access_rights
         constexpr const auto name = "reserved";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace unusable
@@ -2578,10 +2542,10 @@ namespace guest_ds_access_rights
         constexpr const auto name = "unusable";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 }
 
@@ -2591,10 +2555,10 @@ namespace guest_fs_access_rights
     constexpr const auto name = "guest_fs_access_rights";
 
     inline auto get()
-    { return vmread(addr, name); }
+    { return vm::read(addr, name); }
 
     template<class T> void set(T val)
-    { vmwrite(addr, val, name); }
+    { vm::write(addr, val, name); }
 
     inline bool exists() noexcept
     { return true; }
@@ -2606,10 +2570,10 @@ namespace guest_fs_access_rights
         constexpr const auto name = "type";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace s
@@ -2619,10 +2583,10 @@ namespace guest_fs_access_rights
         constexpr const auto name = "s";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace dpl
@@ -2632,10 +2596,10 @@ namespace guest_fs_access_rights
         constexpr const auto name = "dpl";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace present
@@ -2645,10 +2609,10 @@ namespace guest_fs_access_rights
         constexpr const auto name = "present";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace avl
@@ -2658,10 +2622,10 @@ namespace guest_fs_access_rights
         constexpr const auto name = "avl";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace l
@@ -2671,10 +2635,10 @@ namespace guest_fs_access_rights
         constexpr const auto name = "l";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace db
@@ -2684,10 +2648,10 @@ namespace guest_fs_access_rights
         constexpr const auto name = "db";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace granularity
@@ -2697,10 +2661,10 @@ namespace guest_fs_access_rights
         constexpr const auto name = "granularity";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace reserved
@@ -2710,10 +2674,10 @@ namespace guest_fs_access_rights
         constexpr const auto name = "reserved";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace unusable
@@ -2723,10 +2687,10 @@ namespace guest_fs_access_rights
         constexpr const auto name = "unusable";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 }
 
@@ -2736,10 +2700,10 @@ namespace guest_gs_access_rights
     constexpr const auto name = "guest_gs_access_rights";
 
     inline auto get()
-    { return vmread(addr, name); }
+    { return vm::read(addr, name); }
 
     template<class T> void set(T val)
-    { vmwrite(addr, val, name); }
+    { vm::write(addr, val, name); }
 
     inline bool exists() noexcept
     { return true; }
@@ -2751,10 +2715,10 @@ namespace guest_gs_access_rights
         constexpr const auto name = "type";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace s
@@ -2764,10 +2728,10 @@ namespace guest_gs_access_rights
         constexpr const auto name = "s";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace dpl
@@ -2777,10 +2741,10 @@ namespace guest_gs_access_rights
         constexpr const auto name = "dpl";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace present
@@ -2790,10 +2754,10 @@ namespace guest_gs_access_rights
         constexpr const auto name = "present";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace avl
@@ -2803,10 +2767,10 @@ namespace guest_gs_access_rights
         constexpr const auto name = "avl";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace l
@@ -2816,10 +2780,10 @@ namespace guest_gs_access_rights
         constexpr const auto name = "l";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace db
@@ -2829,10 +2793,10 @@ namespace guest_gs_access_rights
         constexpr const auto name = "db";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace granularity
@@ -2842,10 +2806,10 @@ namespace guest_gs_access_rights
         constexpr const auto name = "granularity";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace reserved
@@ -2855,10 +2819,10 @@ namespace guest_gs_access_rights
         constexpr const auto name = "reserved";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace unusable
@@ -2868,10 +2832,10 @@ namespace guest_gs_access_rights
         constexpr const auto name = "unusable";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 }
 
@@ -2881,10 +2845,10 @@ namespace guest_ldtr_access_rights
     constexpr const auto name = "guest_ldtr_access_rights";
 
     inline auto get()
-    { return vmread(addr, name); }
+    { return vm::read(addr, name); }
 
     template<class T> void set(T val)
-    { vmwrite(addr, val, name); }
+    { vm::write(addr, val, name); }
 
     inline bool exists() noexcept
     { return true; }
@@ -2896,10 +2860,10 @@ namespace guest_ldtr_access_rights
         constexpr const auto name = "type";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace s
@@ -2909,10 +2873,10 @@ namespace guest_ldtr_access_rights
         constexpr const auto name = "s";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace dpl
@@ -2922,10 +2886,10 @@ namespace guest_ldtr_access_rights
         constexpr const auto name = "dpl";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace present
@@ -2935,10 +2899,10 @@ namespace guest_ldtr_access_rights
         constexpr const auto name = "present";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace avl
@@ -2948,10 +2912,10 @@ namespace guest_ldtr_access_rights
         constexpr const auto name = "avl";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace l
@@ -2961,10 +2925,10 @@ namespace guest_ldtr_access_rights
         constexpr const auto name = "l";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace db
@@ -2974,10 +2938,10 @@ namespace guest_ldtr_access_rights
         constexpr const auto name = "db";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace granularity
@@ -2987,10 +2951,10 @@ namespace guest_ldtr_access_rights
         constexpr const auto name = "granularity";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace reserved
@@ -3000,10 +2964,10 @@ namespace guest_ldtr_access_rights
         constexpr const auto name = "reserved";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace unusable
@@ -3013,10 +2977,10 @@ namespace guest_ldtr_access_rights
         constexpr const auto name = "unusable";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 }
 
@@ -3026,10 +2990,10 @@ namespace guest_tr_access_rights
     constexpr const auto name = "guest_tr_access_rights";
 
     inline auto get()
-    { return vmread(addr, name); }
+    { return vm::read(addr, name); }
 
     template<class T> void set(T val)
-    { vmwrite(addr, val, name); }
+    { vm::write(addr, val, name); }
 
     inline bool exists() noexcept
     { return true; }
@@ -3041,10 +3005,10 @@ namespace guest_tr_access_rights
         constexpr const auto name = "type";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace s
@@ -3054,10 +3018,10 @@ namespace guest_tr_access_rights
         constexpr const auto name = "s";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace dpl
@@ -3067,10 +3031,10 @@ namespace guest_tr_access_rights
         constexpr const auto name = "dpl";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace present
@@ -3080,10 +3044,10 @@ namespace guest_tr_access_rights
         constexpr const auto name = "present";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace avl
@@ -3093,10 +3057,10 @@ namespace guest_tr_access_rights
         constexpr const auto name = "avl";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace l
@@ -3106,10 +3070,10 @@ namespace guest_tr_access_rights
         constexpr const auto name = "l";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace db
@@ -3119,10 +3083,10 @@ namespace guest_tr_access_rights
         constexpr const auto name = "db";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace granularity
@@ -3132,10 +3096,10 @@ namespace guest_tr_access_rights
         constexpr const auto name = "granularity";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace reserved
@@ -3145,10 +3109,10 @@ namespace guest_tr_access_rights
         constexpr const auto name = "reserved";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace unusable
@@ -3158,10 +3122,10 @@ namespace guest_tr_access_rights
         constexpr const auto name = "unusable";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 }
 
@@ -3219,10 +3183,10 @@ namespace guest_cr0
     constexpr const auto name = "guest_cr0";
 
     inline auto get()
-    { return vmread(addr, name); }
+    { return vm::read(addr, name); }
 
     template<class T> void set(T val)
-    { vmwrite(addr, val, name); }
+    { vm::write(addr, val, name); }
 
     inline bool exists() noexcept
     { return true; }
@@ -3234,10 +3198,10 @@ namespace guest_cr0
         constexpr const auto name = "protection_enable";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace monitor_coprocessor
@@ -3247,10 +3211,10 @@ namespace guest_cr0
         constexpr const auto name = "monitor_coprocessor";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace emulation
@@ -3260,10 +3224,10 @@ namespace guest_cr0
         constexpr const auto name = "emulation";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace task_switched
@@ -3273,10 +3237,10 @@ namespace guest_cr0
         constexpr const auto name = "task_switched";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace extension_type
@@ -3286,10 +3250,10 @@ namespace guest_cr0
         constexpr const auto name = "extension_type";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace numeric_error
@@ -3299,10 +3263,10 @@ namespace guest_cr0
         constexpr const auto name = "numeric_error";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace write_protect
@@ -3312,10 +3276,10 @@ namespace guest_cr0
         constexpr const auto name = "write_protect";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace alignment_mask
@@ -3325,10 +3289,10 @@ namespace guest_cr0
         constexpr const auto name = "alignment_mask";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace not_write_through
@@ -3338,10 +3302,10 @@ namespace guest_cr0
         constexpr const auto name = "not_write_through";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace cache_disable
@@ -3351,10 +3315,10 @@ namespace guest_cr0
         constexpr const auto name = "cache_disable";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace paging
@@ -3364,10 +3328,10 @@ namespace guest_cr0
         constexpr const auto name = "paging";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 }
 
@@ -3377,10 +3341,10 @@ namespace guest_cr3
     constexpr const auto name = "guest_cr3";
 
     inline auto get()
-    { return vmread(addr, name); }
+    { return vm::read(addr, name); }
 
     template<class T> void set(T val)
-    { vmwrite(addr, val, name); }
+    { vm::write(addr, val, name); }
 
     inline bool exists() noexcept
     { return true; }
@@ -3392,10 +3356,10 @@ namespace guest_cr4
     constexpr const auto name = "guest_cr4";
 
     inline auto get()
-    { return vmread(addr, name); }
+    { return vm::read(addr, name); }
 
     template<class T> void set(T val)
-    { vmwrite(addr, val, name); }
+    { vm::write(addr, val, name); }
 
     inline bool exists() noexcept
     { return true; }
@@ -3407,10 +3371,10 @@ namespace guest_cr4
         constexpr const auto name = "v8086_mode_extensions";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace protected_mode_virtual_interrupts
@@ -3420,10 +3384,10 @@ namespace guest_cr4
         constexpr const auto name = "protected_mode_virtual_interrupts";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace time_stamp_disable
@@ -3433,10 +3397,10 @@ namespace guest_cr4
         constexpr const auto name = "time_stamp_disable";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace debugging_extensions
@@ -3446,10 +3410,10 @@ namespace guest_cr4
         constexpr const auto name = "debugging_extensions";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace page_size_extensions
@@ -3459,10 +3423,10 @@ namespace guest_cr4
         constexpr const auto name = "page_size_extensions";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace physical_address_extensions
@@ -3472,10 +3436,10 @@ namespace guest_cr4
         constexpr const auto name = "physical_address_extensions";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace machine_check_enable
@@ -3485,10 +3449,10 @@ namespace guest_cr4
         constexpr const auto name = "machine_check_enable";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace page_global_enable
@@ -3498,10 +3462,10 @@ namespace guest_cr4
         constexpr const auto name = "page_global_enable";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace performance_monitor_counter_enable
@@ -3511,10 +3475,10 @@ namespace guest_cr4
         constexpr const auto name = "performance_monitor_counter_enable";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace osfxsr
@@ -3524,10 +3488,10 @@ namespace guest_cr4
         constexpr const auto name = "osfxsr";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace osxmmexcpt
@@ -3537,10 +3501,10 @@ namespace guest_cr4
         constexpr const auto name = "osxmmexcpt";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace vmx_enable_bit
@@ -3550,10 +3514,10 @@ namespace guest_cr4
         constexpr const auto name = "vmx_enable_bit";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace smx_enable_bit
@@ -3563,10 +3527,10 @@ namespace guest_cr4
         constexpr const auto name = "smx_enable_bit";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace fsgsbase_enable_bit
@@ -3576,10 +3540,10 @@ namespace guest_cr4
         constexpr const auto name = "fsgsbase_enable_bit";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace pcid_enable_bit
@@ -3589,10 +3553,10 @@ namespace guest_cr4
         constexpr const auto name = "pcid_enable_bit";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace osxsave
@@ -3602,10 +3566,10 @@ namespace guest_cr4
         constexpr const auto name = "osxsave";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace smep_enable_bit
@@ -3615,10 +3579,10 @@ namespace guest_cr4
         constexpr const auto name = "smep_enable_bit";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace smap_enable_bit
@@ -3628,10 +3592,10 @@ namespace guest_cr4
         constexpr const auto name = "smap_enable_bit";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace protection_key_enable_bit
@@ -3641,10 +3605,10 @@ namespace guest_cr4
         constexpr const auto name = "protection_key_enable_bit";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 }
 
@@ -3683,10 +3647,10 @@ namespace guest_rflags
     constexpr const auto name = "guest_rflags";
 
     inline auto get()
-    { return vmread(addr, name); }
+    { return vm::read(addr, name); }
 
     template<class T> void set(T val)
-    { vmwrite(addr, val, name); }
+    { vm::write(addr, val, name); }
 
     inline bool exists() noexcept
     { return true; }
@@ -3698,10 +3662,10 @@ namespace guest_rflags
         constexpr const auto name = "carry_flag";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace parity_flag
@@ -3711,10 +3675,10 @@ namespace guest_rflags
         constexpr const auto name = "parity_flag";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace auxiliary_carry_flag
@@ -3724,10 +3688,10 @@ namespace guest_rflags
         constexpr const auto name = "auxiliary_carry_flag";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace zero_flag
@@ -3737,10 +3701,10 @@ namespace guest_rflags
         constexpr const auto name = "zero_flag";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace sign_flag
@@ -3750,10 +3714,10 @@ namespace guest_rflags
         constexpr const auto name = "sign_flag";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace trap_flag
@@ -3763,10 +3727,10 @@ namespace guest_rflags
         constexpr const auto name = "trap_flag";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace interrupt_enable_flag
@@ -3776,10 +3740,10 @@ namespace guest_rflags
         constexpr const auto name = "interrupt_enable_flag";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace direction_flag
@@ -3789,10 +3753,10 @@ namespace guest_rflags
         constexpr const auto name = "direction_flag";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace overflow_flag
@@ -3802,10 +3766,10 @@ namespace guest_rflags
         constexpr const auto name = "overflow_flag";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace privilege_level
@@ -3815,10 +3779,10 @@ namespace guest_rflags
         constexpr const auto name = "privilege_level";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace nested_task
@@ -3828,10 +3792,10 @@ namespace guest_rflags
         constexpr const auto name = "nested_task";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace resume_flag
@@ -3841,10 +3805,10 @@ namespace guest_rflags
         constexpr const auto name = "resume_flag";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace virtual_8086_mode
@@ -3854,10 +3818,10 @@ namespace guest_rflags
         constexpr const auto name = "virtual_8086_mode";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace alignment_check_access_control
@@ -3867,10 +3831,10 @@ namespace guest_rflags
         constexpr const auto name = "alignment_check_access_control";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace virtual_interupt_flag
@@ -3880,10 +3844,10 @@ namespace guest_rflags
         constexpr const auto name = "virtual_interupt_flag";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace virtual_interupt_pending
@@ -3893,10 +3857,10 @@ namespace guest_rflags
         constexpr const auto name = "virtual_interupt_pending";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace id_flag
@@ -3906,10 +3870,10 @@ namespace guest_rflags
         constexpr const auto name = "id_flag";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace reserved
@@ -3919,10 +3883,10 @@ namespace guest_rflags
         constexpr const auto name = "reserved";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace always_disabled
@@ -3932,10 +3896,10 @@ namespace guest_rflags
         constexpr const auto name = "always_disabled";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace always_enabled
@@ -3945,10 +3909,10 @@ namespace guest_rflags
         constexpr const auto name = "always_enabled";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 }
 
@@ -3974,10 +3938,10 @@ namespace host_cr0
     constexpr const auto name = "host_cr0";
 
     inline auto get()
-    { return vmread(addr, name); }
+    { return vm::read(addr, name); }
 
     template<class T> void set(T val)
-    { vmwrite(addr, val, name); }
+    { vm::write(addr, val, name); }
 
     inline bool exists() noexcept
     { return true; }
@@ -3989,10 +3953,10 @@ namespace host_cr0
         constexpr const auto name = "protection_enable";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace monitor_coprocessor
@@ -4002,10 +3966,10 @@ namespace host_cr0
         constexpr const auto name = "monitor_coprocessor";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace emulation
@@ -4015,10 +3979,10 @@ namespace host_cr0
         constexpr const auto name = "emulation";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace task_switched
@@ -4028,10 +3992,10 @@ namespace host_cr0
         constexpr const auto name = "task_switched";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace extension_type
@@ -4041,10 +4005,10 @@ namespace host_cr0
         constexpr const auto name = "extension_type";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace numeric_error
@@ -4054,10 +4018,10 @@ namespace host_cr0
         constexpr const auto name = "numeric_error";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace write_protect
@@ -4067,10 +4031,10 @@ namespace host_cr0
         constexpr const auto name = "write_protect";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace alignment_mask
@@ -4080,10 +4044,10 @@ namespace host_cr0
         constexpr const auto name = "alignment_mask";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace not_write_through
@@ -4093,10 +4057,10 @@ namespace host_cr0
         constexpr const auto name = "not_write_through";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace cache_disable
@@ -4106,10 +4070,10 @@ namespace host_cr0
         constexpr const auto name = "cache_disable";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace paging
@@ -4119,10 +4083,10 @@ namespace host_cr0
         constexpr const auto name = "paging";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 }
 
@@ -4132,10 +4096,10 @@ namespace host_cr3
     constexpr const auto name = "host_cr3";
 
     inline auto get()
-    { return vmread(addr, name); }
+    { return vm::read(addr, name); }
 
     template<class T> void set(T val)
-    { vmwrite(addr, val, name); }
+    { vm::write(addr, val, name); }
 
     inline bool exists() noexcept
     { return true; }
@@ -4147,10 +4111,10 @@ namespace host_cr4
     constexpr const auto name = "host_cr4";
 
     inline auto get()
-    { return vmread(addr, name); }
+    { return vm::read(addr, name); }
 
     template<class T> void set(T val)
-    { vmwrite(addr, val, name); }
+    { vm::write(addr, val, name); }
 
     inline bool exists() noexcept
     { return true; }
@@ -4162,10 +4126,10 @@ namespace host_cr4
         constexpr const auto name = "v8086_mode_extensions";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace protected_mode_virtual_interrupts
@@ -4175,10 +4139,10 @@ namespace host_cr4
         constexpr const auto name = "protected_mode_virtual_interrupts";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace time_stamp_disable
@@ -4188,10 +4152,10 @@ namespace host_cr4
         constexpr const auto name = "time_stamp_disable";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace debugging_extensions
@@ -4201,10 +4165,10 @@ namespace host_cr4
         constexpr const auto name = "debugging_extensions";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace page_size_extensions
@@ -4214,10 +4178,10 @@ namespace host_cr4
         constexpr const auto name = "page_size_extensions";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace physical_address_extensions
@@ -4227,10 +4191,10 @@ namespace host_cr4
         constexpr const auto name = "physical_address_extensions";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace machine_check_enable
@@ -4240,10 +4204,10 @@ namespace host_cr4
         constexpr const auto name = "machine_check_enable";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace page_global_enable
@@ -4253,10 +4217,10 @@ namespace host_cr4
         constexpr const auto name = "page_global_enable";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace performance_monitor_counter_enable
@@ -4266,10 +4230,10 @@ namespace host_cr4
         constexpr const auto name = "performance_monitor_counter_enable";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace osfxsr
@@ -4279,10 +4243,10 @@ namespace host_cr4
         constexpr const auto name = "osfxsr";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace osxmmexcpt
@@ -4292,10 +4256,10 @@ namespace host_cr4
         constexpr const auto name = "osxmmexcpt";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace vmx_enable_bit
@@ -4305,10 +4269,10 @@ namespace host_cr4
         constexpr const auto name = "vmx_enable_bit";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace smx_enable_bit
@@ -4318,10 +4282,10 @@ namespace host_cr4
         constexpr const auto name = "smx_enable_bit";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace fsgsbase_enable_bit
@@ -4331,10 +4295,10 @@ namespace host_cr4
         constexpr const auto name = "fsgsbase_enable_bit";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace pcid_enable_bit
@@ -4344,10 +4308,10 @@ namespace host_cr4
         constexpr const auto name = "pcid_enable_bit";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace osxsave
@@ -4357,10 +4321,10 @@ namespace host_cr4
         constexpr const auto name = "osxsave";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace smep_enable_bit
@@ -4370,10 +4334,10 @@ namespace host_cr4
         constexpr const auto name = "smep_enable_bit";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace smap_enable_bit
@@ -4383,10 +4347,10 @@ namespace host_cr4
         constexpr const auto name = "smap_enable_bit";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 
     namespace protection_key_enable_bit
@@ -4396,10 +4360,10 @@ namespace host_cr4
         constexpr const auto name = "protection_key_enable_bit";
 
         inline auto get()
-        { return (vmread(addr, name) & mask) >> from; }
+        { return (vm::read(addr, name) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vmwrite(addr, (vmread(addr, name) & ~mask) | ((val << from) & mask), name); }
+        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
 }
 
@@ -4417,5 +4381,162 @@ constexpr const auto VMCS_HOST_RSP                                             =
 constexpr const auto VMCS_HOST_RIP                                             = 0x0000000000006C16UL;
 
 // *INDENT-ON*
+
+
+
+
+
+
+
+//////////////
+//////////////
+///
+///
+/// REMOVE ME
+///
+///
+//////////////
+//////////////
+
+
+
+// Pin-Based VM-Execution Controls
+// intel's software developers manual, volume 3, chapter 24.6.1.
+#define VM_EXEC_PIN_BASED_EXTERNAL_INTERRUPT_EXITING              (1ULL << 0)
+#define VM_EXEC_PIN_BASED_NMI_EXITING                             (1ULL << 3)
+#define VM_EXEC_PIN_BASED_VIRTUAL_NMIS                            (1ULL << 5)
+#define VM_EXEC_PIN_BASED_ACTIVATE_VMX_PREEMPTION_TIMER           (1ULL << 6)
+#define VM_EXEC_PIN_BASED_PROCESS_POSTED_INTERRUPTS               (1ULL << 7)
+
+// Primary Processor-Based VM-Execution Controls
+// intel's software developers manual, volume 3, chapter 24.6.2
+#define VM_EXEC_P_PROC_BASED_INTERRUPT_WINDOW_EXITING             (1ULL << 2)
+#define VM_EXEC_P_PROC_BASED_USE_TSC_OFFSETTING                   (1ULL << 3)
+#define VM_EXEC_P_PROC_BASED_HLT_EXITING                          (1ULL << 7)
+#define VM_EXEC_P_PROC_BASED_INVLPG_EXITING                       (1ULL << 9)
+#define VM_EXEC_P_PROC_BASED_MWAIT_EXITING                        (1ULL << 10)
+#define VM_EXEC_P_PROC_BASED_RDPMC_EXITING                        (1ULL << 11)
+#define VM_EXEC_P_PROC_BASED_RDTSC_EXITING                        (1ULL << 12)
+#define VM_EXEC_P_PROC_BASED_CR3_LOAD_EXITING                     (1ULL << 15)
+#define VM_EXEC_P_PROC_BASED_CR3_STORE_EXITING                    (1ULL << 16)
+#define VM_EXEC_P_PROC_BASED_CR8_LOAD_EXITING                     (1ULL << 19)
+#define VM_EXEC_P_PROC_BASED_CR8_STORE_EXITING                    (1ULL << 20)
+#define VM_EXEC_P_PROC_BASED_USE_TPR_SHADOW                       (1ULL << 21)
+#define VM_EXEC_P_PROC_BASED_NMI_WINDOW_EXITING                   (1ULL << 22)
+#define VM_EXEC_P_PROC_BASED_MOV_DR_EXITING                       (1ULL << 23)
+#define VM_EXEC_P_PROC_BASED_UNCONDITIONAL_IO_EXITING             (1ULL << 24)
+#define VM_EXEC_P_PROC_BASED_USE_IO_BITMAPS                       (1ULL << 25)
+#define VM_EXEC_P_PROC_BASED_MONITOR_TRAP_FLAG                    (1ULL << 27)
+#define VM_EXEC_P_PROC_BASED_USE_MSR_BITMAPS                      (1ULL << 28)
+#define VM_EXEC_P_PROC_BASED_MONITOR_EXITING                      (1ULL << 29)
+#define VM_EXEC_P_PROC_BASED_PAUSE_EXITING                        (1ULL << 30)
+#define VM_EXEC_P_PROC_BASED_ACTIVATE_SECONDARY_CONTROLS          (1ULL << 31)
+
+// Secondary Processor-Based VM-Execution Controls
+// intel's software developers manual, volume 3, chapter 24.6.2
+#define VM_EXEC_S_PROC_BASED_VIRTUALIZE_APIC_ACCESSES             (1ULL << 0)
+#define VM_EXEC_S_PROC_BASED_ENABLE_EPT                           (1ULL << 1)
+#define VM_EXEC_S_PROC_BASED_DESCRIPTOR_TABLE_EXITING             (1ULL << 2)
+#define VM_EXEC_S_PROC_BASED_ENABLE_RDTSCP                        (1ULL << 3)
+#define VM_EXEC_S_PROC_BASED_VIRTUALIZE_X2APIC_MODE               (1ULL << 4)
+#define VM_EXEC_S_PROC_BASED_ENABLE_VPID                          (1ULL << 5)
+#define VM_EXEC_S_PROC_BASED_WBINVD_EXITING                       (1ULL << 6)
+#define VM_EXEC_S_PROC_BASED_UNRESTRICTED_GUEST                   (1ULL << 7)
+#define VM_EXEC_S_PROC_BASED_APIC_REGISTER_VIRTUALIZATION         (1ULL << 8)
+#define VM_EXEC_S_PROC_BASED_VIRTUAL_INTERRUPT_DELIVERY           (1ULL << 9)
+#define VM_EXEC_S_PROC_BASED_PAUSE_LOOP_EXITING                   (1ULL << 10)
+#define VM_EXEC_S_PROC_BASED_RDRAND_EXITING                       (1ULL << 11)
+#define VM_EXEC_S_PROC_BASED_ENABLE_INVPCID                       (1ULL << 12)
+#define VM_EXEC_S_PROC_BASED_ENABLE_VM_FUNCTIONS                  (1ULL << 13)
+#define VM_EXEC_S_PROC_BASED_VMCS_SHADOWING                       (1ULL << 14)
+#define VM_EXEC_S_PROC_BASED_RDSEED_EXITING                       (1ULL << 16)
+#define VM_EXEC_S_PROC_BASED_ENABLE_PML                           (1ULL << 17)
+#define VM_EXEC_S_PROC_BASED_EPT_VIOLATION_VE                     (1ULL << 18)
+#define VM_EXEC_S_PROC_BASED_ENABLE_XSAVES_XRSTORS                (1ULL << 20)
+
+// VM-Exit Control Fields
+// intel's software developers manual, volume 3, chapter 24.7.1
+#define VM_EXIT_CONTROL_SAVE_DEBUG_CONTROLS                       (1ULL << 2)
+#define VM_EXIT_CONTROL_HOST_ADDRESS_SPACE_SIZE                   (1ULL << 9)
+#define VM_EXIT_CONTROL_LOAD_IA32_PERF_GLOBAL_CTRL                (1ULL << 12)
+#define VM_EXIT_CONTROL_ACKNOWLEDGE_INTERRUPT_ON_EXIT             (1ULL << 15)
+#define VM_EXIT_CONTROL_SAVE_IA32_PAT                             (1ULL << 18)
+#define VM_EXIT_CONTROL_LOAD_IA32_PAT                             (1ULL << 19)
+#define VM_EXIT_CONTROL_SAVE_IA32_EFER                            (1ULL << 20)
+#define VM_EXIT_CONTROL_LOAD_IA32_EFER                            (1ULL << 21)
+#define VM_EXIT_CONTROL_SAVE_VMX_PREEMPTION_TIMER_VALUE           (1ULL << 22)
+
+// VM-Entry Control Fields
+// intel's software developers manual, volume 3, chapter 24.8.1
+#define VM_ENTRY_CONTROL_LOAD_DEBUG_CONTROLS                      (1ULL << 2)
+#define VM_ENTRY_CONTROL_IA_32E_MODE_GUEST                        (1ULL << 9)
+#define VM_ENTRY_CONTROL_ENTRY_TO_SMM                             (1ULL << 10)
+#define VM_ENTRY_CONTROL_DEACTIVATE_DUAL_MONITOR_TREATMENT        (1ULL << 11)
+#define VM_ENTRY_CONTROL_LOAD_IA32_PERF_GLOBAL_CTRL               (1ULL << 13)
+#define VM_ENTRY_CONTROL_LOAD_IA32_PAT                            (1ULL << 14)
+#define VM_ENTRY_CONTROL_LOAD_IA32_EFER                           (1ULL << 15)
+
+// VM-Function Control Fields
+#define VM_FUNCTION_CONTROL_EPTP_SWITCHING                        (1ULL << 0)
+
+// VM Activity State
+// intel's software developers manual, volume 3, 24.4.2
+#define VM_ACTIVITY_STATE_ACTIVE                                  (0)
+#define VM_ACTIVITY_STATE_HLT                                     (1)
+#define VM_ACTIVITY_STATE_SHUTDOWN                                (2)
+#define VM_ACTIVITY_STATE_WAIT_FOR_SIPI                           (3)
+
+// VM Interrupability State
+// intel's software developers manual, volume 3, 24.4.2
+#define VM_INTERRUPTABILITY_STATE_STI                             (1 << 0)
+#define VM_INTERRUPTABILITY_STATE_MOV_SS                          (1 << 1)
+#define VM_INTERRUPTABILITY_STATE_SMI                             (1 << 2)
+#define VM_INTERRUPTABILITY_STATE_NMI                             (1 << 3)
+
+// VM Interrupt Information Fields
+// intel's software developers manual, volume 3, 24.8.3
+#define VM_INTERRUPT_INFORMATION_VECTOR                           (0x000000FF)
+#define VM_INTERRUPT_INFORMATION_TYPE                             (0x00000700)
+#define VM_INTERRUPT_INFORMATION_DELIVERY_ERROR                   (0x00000800)
+#define VM_INTERRUPT_INFORMATION_VALID                            (0x80000000)
+
+// VM Interruption Types
+// intel's software developers manual, volume 3, 24.8.3
+#define VM_INTERRUPTION_TYPE_EXTERNAL                             (0)
+#define VM_INTERRUPTION_TYPE_NMI                                  (2)
+#define VM_INTERRUPTION_TYPE_HARDWARE                             (3)
+#define VM_INTERRUPTION_TYPE_SOFTWARE_INTERRUPT                   (4)
+#define VM_INTERRUPTION_TYPE_PRIVILEGED_SOFTWARE_EXCEPTION        (5)
+#define VM_INTERRUPTION_TYPE_SOFTWARE_EXCEPTION                   (6)
+#define VM_INTERRUPTION_TYPE_OTHER                                (7)
+
+// MTF VM Exit
+// intel's software developers manual, volume 3, 26.5.2
+#define MTF_VM_EXIT                                               (0)
+
+// Pending Debug Exceptions
+// intel's software developers manual, volume 3, 24.4.2
+#define PENDING_DEBUG_EXCEPTION_B0                                (1 << 0)
+#define PENDING_DEBUG_EXCEPTION_B1                                (1 << 1)
+#define PENDING_DEBUG_EXCEPTION_B2                                (1 << 2)
+#define PENDING_DEBUG_EXCEPTION_B3                                (1 << 3)
+#define PENDING_DEBUG_EXCEPTION_ENABLED_BREAKPOINT                (1 << 12)
+#define PENDING_DEBUG_EXCEPTION_BS                                (1 << 14)
+
+// VPID and EPT Capabilities
+// intel's software developer's manual, volume 3, appendix A.10
+#define IA32_VMX_EPT_VPID_CAP_UC                                  (1ULL << 8)
+#define IA32_VMX_EPT_VPID_CAP_WB                                  (1ULL << 14)
+#define IA32_VMX_EPT_VPID_CAP_AD                                  (1ULL << 21)
+
+// EPTP Format
+// intel's software developer's manual, volume 3, appendix 24.6.11
+#define EPTP_MEMORY_TYPE                                   0x0000000000000007
+#define EPTP_PAGE_WALK_LENGTH                              0x0000000000000038
+#define EPTP_ACCESSED_DIRTY_FLAGS_ENABLED                  0x0000000000000040
+
+
+
+
 
 #endif

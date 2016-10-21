@@ -22,21 +22,24 @@
 #include <test.h>
 #include <new_delete.h>
 
+#include <intrinsics/cpuid_x64.h>
+
+using namespace x64;
 using namespace intel_x64;
 
 std::map<uint32_t, uint64_t> g_msrs;
 std::map<uint64_t, uint64_t> g_vmcs_fields;
 uint8_t span[0x81] = {0};
-bool g_vmread_fails = false;
-bool g_vmwrite_fails = false;
+
+bool g_vmclear_fails = false;
+bool g_vmload_fails = false;
+bool g_vmlaunch_fails = false;
 bool g_virt_to_phys_return_nullptr = false;
 bool g_phys_to_virt_return_nullptr = false;
 
 void
-setup_mock(MockRepository &mocks, memory_manager *mm, intrinsics_intel_x64 *in)
+setup_mock(MockRepository &mocks, memory_manager *mm)
 {
-    mocks.OnCall(in, intrinsics_intel_x64::vmread).Do(__vmread);
-    mocks.OnCall(in, intrinsics_intel_x64::cpuid_eax).With(0x80000008).Return(32);
     mocks.OnCallFunc(memory_manager::instance).Return(mm);
     mocks.OnCall(mm, memory_manager::physint_to_virtptr).Do(physint_to_virtptr);
 }
@@ -116,12 +119,13 @@ extern "C" uint64_t
 __read_msr(uint32_t addr) noexcept
 { return g_msrs[addr]; }
 
+extern "C" uint32_t
+__cpuid_eax(uint32_t val) noexcept
+{ (void)val; return 32; }
+
 bool
 __vmread(uint64_t field, uint64_t *val) noexcept
 {
-    if (g_vmread_fails)
-        return false;
-
     *val = g_vmcs_fields[field];
     return true;
 }
@@ -129,22 +133,21 @@ __vmread(uint64_t field, uint64_t *val) noexcept
 bool
 __vmwrite(uint64_t field, uint64_t val) noexcept
 {
-    if (g_vmwrite_fails)
-        return false;
-
     g_vmcs_fields[field] = val;
     return true;
 }
 
-uint32_t
-cpuid_eax(uint32_t val)
-{
-    switch (val)
-    {
-        default:
-            return 0xff;
-    }
-}
+extern "C" bool
+__vmclear(void *ptr) noexcept
+{ (void)ptr; return !g_vmclear_fails; }
+
+extern "C" bool
+__vmptrld(void *ptr) noexcept
+{ (void)ptr; return !g_vmload_fails; }
+
+extern "C" bool
+__vmlaunch(void) noexcept
+{ return !g_vmlaunch_fails; }
 
 uintptr_t
 virtptr_to_physint(void *ptr)
@@ -187,7 +190,6 @@ vmcs_ut::fini()
 bool
 vmcs_ut::list()
 {
-    this->test_constructor_null_intrinsics();
     this->test_launch_success();
     this->test_launch_vmlaunch_failure();
     this->test_launch_create_vmcs_region_failure();
@@ -196,8 +198,6 @@ vmcs_ut::list()
     this->test_launch_load_failure();
     this->test_promote_failure();
     this->test_resume_failure();
-    this->test_vmread_failure();
-    this->test_vmwrite_failure();
     this->test_vmcs_virtual_processor_identifier();
     this->test_vmcs_posted_interrupt_notification_vector();
     this->test_vmcs_eptp_index();

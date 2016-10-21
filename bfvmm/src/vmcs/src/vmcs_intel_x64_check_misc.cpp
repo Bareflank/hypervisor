@@ -20,13 +20,15 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #include <vmcs/vmcs_intel_x64.h>
+#include <intrinsics/cpuid_x64.h>
 
+using namespace x64;
 using namespace intel_x64;
 
 std::string
 vmcs_intel_x64::get_vm_instruction_error()
 {
-    switch (vmread(VMCS_VM_INSTRUCTION_ERROR))
+    switch (vm::read(VMCS_VM_INSTRUCTION_ERROR))
     {
         case 1:
             return "VMCALL executed in VMX root operation";
@@ -123,13 +125,13 @@ vmcs_intel_x64::get_vm_instruction_error()
 uint64_t
 vmcs_intel_x64::get_pin_ctls() const
 {
-    return vmread(VMCS_PIN_BASED_VM_EXECUTION_CONTROLS);
+    return vm::read(VMCS_PIN_BASED_VM_EXECUTION_CONTROLS);
 }
 
 uint64_t
 vmcs_intel_x64::get_proc_ctls() const
 {
-    return vmread(VMCS_PRIMARY_PROCESSOR_BASED_VM_EXECUTION_CONTROLS);
+    return vm::read(VMCS_PRIMARY_PROCESSOR_BASED_VM_EXECUTION_CONTROLS);
 }
 
 uint64_t
@@ -138,19 +140,19 @@ vmcs_intel_x64::get_proc2_ctls() const
     if (!is_enabled_secondary_controls())
         return 0;
 
-    return vmread(VMCS_SECONDARY_PROCESSOR_BASED_VM_EXECUTION_CONTROLS);
+    return vm::read(VMCS_SECONDARY_PROCESSOR_BASED_VM_EXECUTION_CONTROLS);
 }
 
 uint64_t
 vmcs_intel_x64::get_exit_ctls() const
 {
-    return vmread(VMCS_VM_EXIT_CONTROLS);
+    return vm::read(VMCS_VM_EXIT_CONTROLS);
 }
 
 uint64_t
 vmcs_intel_x64::get_entry_ctls() const
 {
-    return vmread(VMCS_VM_ENTRY_CONTROLS);
+    return vm::read(VMCS_VM_ENTRY_CONTROLS);
 }
 
 bool
@@ -168,7 +170,7 @@ vmcs_intel_x64::is_linear_address_valid(uint64_t addr)
 bool
 vmcs_intel_x64::is_physical_address_valid(uint64_t addr)
 {
-    auto bits = (m_intrinsics->cpuid_eax(0x80000008) & 0x00000000000000FF);
+    auto bits = cpuid::addr_size::phys::get();
     auto mask = (0xFFFFFFFFFFFFFFFFULL >> bits) << bits;
 
     return ((addr & mask) == 0);
@@ -1409,7 +1411,7 @@ vmcs_intel_x64::is_supported_eptp_switching() const
     if (!this->is_supported_vm_functions())
         return false;
 
-    return ((vmread(VMCS_VM_FUNCTION_CONTROLS) & VM_FUNCTION_CONTROL_EPTP_SWITCHING) != 0);
+    return ((vm::read(VMCS_VM_FUNCTION_CONTROLS) & VM_FUNCTION_CONTROL_EPTP_SWITCHING) != 0);
 }
 
 bool

@@ -39,7 +39,6 @@ protected:
 
 private:
 
-    void test_constructor_null_intrinsics();
     void test_start_success();
     void test_start_start_twice();
     void test_start_execute_vmxon_already_on_failure();

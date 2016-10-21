@@ -19,7 +19,6 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <view_as_pointer.h>
 #include <vmcs/vmcs_intel_x64.h>
 #include <memory_manager/memory_manager.h>
 
@@ -146,7 +145,7 @@ vmcs_intel_x64::check_guest_load_debug_controls_verify_dr7()
     if (!is_enabled_load_debug_controls_on_entry())
         return;
 
-    auto dr7 = vmread(VMCS_GUEST_DR7);
+    auto dr7 = vm::read(VMCS_GUEST_DR7);
 
     if ((dr7 & 0xFFFFFFFF00000000) != 0)
         throw std::logic_error("bits 63:32 of dr7 must be 0 if load debug controls is 1");
@@ -155,7 +154,7 @@ vmcs_intel_x64::check_guest_load_debug_controls_verify_dr7()
 void
 vmcs_intel_x64::check_guest_ia32_sysenter_esp_canonical_address()
 {
-    auto esp = vmread(VMCS_GUEST_IA32_SYSENTER_ESP);
+    auto esp = vm::read(VMCS_GUEST_IA32_SYSENTER_ESP);
 
     if (!is_address_canonical(esp))
         throw std::logic_error("guest sysenter esp must be canonical");
@@ -164,7 +163,7 @@ vmcs_intel_x64::check_guest_ia32_sysenter_esp_canonical_address()
 void
 vmcs_intel_x64::check_guest_ia32_sysenter_eip_canonical_address()
 {
-    auto eip = vmread(VMCS_GUEST_IA32_SYSENTER_EIP);
+    auto eip = vm::read(VMCS_GUEST_IA32_SYSENTER_EIP);
 
     if (!is_address_canonical(eip))
         throw std::logic_error("guest sysenter eip must be canonical");
@@ -177,7 +176,7 @@ vmcs_intel_x64::check_guest_verify_load_ia32_perf_global_ctrl()
         return;
 
     auto vmcs_ia32_perf_global_ctrl =
-        vmread(VMCS_GUEST_IA32_PERF_GLOBAL_CTRL);
+        vm::read(VMCS_GUEST_IA32_PERF_GLOBAL_CTRL);
 
     if ((vmcs_ia32_perf_global_ctrl & 0xFFFFFFF8FFFFFFFC) != 0)
         throw std::logic_error("perf global ctrl msr reserved bits must be 0");
@@ -189,14 +188,14 @@ vmcs_intel_x64::check_guest_verify_load_ia32_pat()
     if (!is_enabled_load_ia32_pat_on_entry())
         return;
 
-    auto pat0 = vmread(VMCS_GUEST_IA32_PAT) & 0x00000000000000FF >> 0;
-    auto pat1 = vmread(VMCS_GUEST_IA32_PAT) & 0x000000000000FF00 >> 8;
-    auto pat2 = vmread(VMCS_GUEST_IA32_PAT) & 0x0000000000FF0000 >> 16;
-    auto pat3 = vmread(VMCS_GUEST_IA32_PAT) & 0x00000000FF000000 >> 24;
-    auto pat4 = vmread(VMCS_GUEST_IA32_PAT) & 0x000000FF00000000 >> 32;
-    auto pat5 = vmread(VMCS_GUEST_IA32_PAT) & 0x0000FF0000000000 >> 40;
-    auto pat6 = vmread(VMCS_GUEST_IA32_PAT) & 0x00FF000000000000 >> 48;
-    auto pat7 = vmread(VMCS_GUEST_IA32_PAT) & 0xFF00000000000000 >> 56;
+    auto pat0 = vm::read(VMCS_GUEST_IA32_PAT) & 0x00000000000000FF >> 0;
+    auto pat1 = vm::read(VMCS_GUEST_IA32_PAT) & 0x000000000000FF00 >> 8;
+    auto pat2 = vm::read(VMCS_GUEST_IA32_PAT) & 0x0000000000FF0000 >> 16;
+    auto pat3 = vm::read(VMCS_GUEST_IA32_PAT) & 0x00000000FF000000 >> 24;
+    auto pat4 = vm::read(VMCS_GUEST_IA32_PAT) & 0x000000FF00000000 >> 32;
+    auto pat5 = vm::read(VMCS_GUEST_IA32_PAT) & 0x0000FF0000000000 >> 40;
+    auto pat6 = vm::read(VMCS_GUEST_IA32_PAT) & 0x00FF000000000000 >> 48;
+    auto pat7 = vm::read(VMCS_GUEST_IA32_PAT) & 0xFF00000000000000 >> 56;
 
     if (!check_pat(pat0))
         throw std::logic_error("pat0 has an invalid memory type");
@@ -373,7 +372,7 @@ vmcs_intel_x64::check_guest_cs_base_is_shifted()
         return;
 
     auto cs = vmcs::guest_cs_selector::get();
-    auto cs_base = vmread(VMCS_GUEST_CS_BASE);
+    auto cs_base = vm::read(VMCS_GUEST_CS_BASE);
 
     if ((cs << 4) != cs_base)
         throw std::logic_error("if virtual 8086 mode is enabled, cs base must be cs shifted 4 bits");
@@ -386,7 +385,7 @@ vmcs_intel_x64::check_guest_ss_base_is_shifted()
         return;
 
     auto ss = vmcs::guest_ss_selector::get();
-    auto ss_base = vmread(VMCS_GUEST_SS_BASE);
+    auto ss_base = vm::read(VMCS_GUEST_SS_BASE);
 
     if ((ss << 4) != ss_base)
         throw std::logic_error("if virtual 8086 mode is enabled, ss base must be ss shifted 4 bits");
@@ -399,7 +398,7 @@ vmcs_intel_x64::check_guest_ds_base_is_shifted()
         return;
 
     auto ds = vmcs::guest_ds_selector::get();
-    auto ds_base = vmread(VMCS_GUEST_DS_BASE);
+    auto ds_base = vm::read(VMCS_GUEST_DS_BASE);
 
     if ((ds << 4) != ds_base)
         throw std::logic_error("if virtual 8086 mode is enabled, ds base must be ds shifted 4 bits");
@@ -412,7 +411,7 @@ vmcs_intel_x64::check_guest_es_base_is_shifted()
         return;
 
     auto es = vmcs::guest_es_selector::get();
-    auto es_base = vmread(VMCS_GUEST_ES_BASE);
+    auto es_base = vm::read(VMCS_GUEST_ES_BASE);
 
     if ((es << 4) != es_base)
         throw std::logic_error("if virtual 8086 mode is enabled, es base must be es shifted 4 bits");
@@ -425,7 +424,7 @@ vmcs_intel_x64::check_guest_fs_base_is_shifted()
         return;
 
     auto fs = vmcs::guest_fs_selector::get();
-    auto fs_base = vmread(VMCS_GUEST_FS_BASE);
+    auto fs_base = vm::read(VMCS_GUEST_FS_BASE);
 
     if ((fs << 4) != fs_base)
         throw std::logic_error("if virtual 8086 mode is enabled, fs base must be fs shifted 4 bits");
@@ -438,7 +437,7 @@ vmcs_intel_x64::check_guest_gs_base_is_shifted()
         return;
 
     auto gs = vmcs::guest_gs_selector::get();
-    auto gs_base = vmread(VMCS_GUEST_GS_BASE);
+    auto gs_base = vm::read(VMCS_GUEST_GS_BASE);
 
     if ((gs << 4) != gs_base)
         throw std::logic_error("if virtual 8086 mode is enabled, gs base must be gs shift 4 bits");
@@ -447,7 +446,7 @@ vmcs_intel_x64::check_guest_gs_base_is_shifted()
 void
 vmcs_intel_x64::check_guest_tr_base_is_canonical()
 {
-    auto tr_base = vmread(VMCS_GUEST_TR_BASE);
+    auto tr_base = vm::read(VMCS_GUEST_TR_BASE);
 
     if (!is_address_canonical(tr_base))
         throw std::logic_error("guest tr base non-canonical");
@@ -456,7 +455,7 @@ vmcs_intel_x64::check_guest_tr_base_is_canonical()
 void
 vmcs_intel_x64::check_guest_fs_base_is_canonical()
 {
-    auto fs_base = vmread(VMCS_GUEST_FS_BASE);
+    auto fs_base = vm::read(VMCS_GUEST_FS_BASE);
 
     if (!is_address_canonical(fs_base))
         throw std::logic_error("guest fs base non-canonical");
@@ -465,7 +464,7 @@ vmcs_intel_x64::check_guest_fs_base_is_canonical()
 void
 vmcs_intel_x64::check_guest_gs_base_is_canonical()
 {
-    auto gs_base = vmread(VMCS_GUEST_GS_BASE);
+    auto gs_base = vm::read(VMCS_GUEST_GS_BASE);
 
     if (!is_address_canonical(gs_base))
         throw std::logic_error("guest gs base non-canonical");
@@ -474,7 +473,7 @@ vmcs_intel_x64::check_guest_gs_base_is_canonical()
 void
 vmcs_intel_x64::check_guest_ldtr_base_is_canonical()
 {
-    auto ldtr_base = vmread(VMCS_GUEST_LDTR_BASE);
+    auto ldtr_base = vm::read(VMCS_GUEST_LDTR_BASE);
 
     if (vmcs::guest_ldtr_access_rights::unusable::get() != 0)
         return;
@@ -486,7 +485,7 @@ vmcs_intel_x64::check_guest_ldtr_base_is_canonical()
 void
 vmcs_intel_x64::check_guest_cs_base_upper_dword_0()
 {
-    auto cs_base = vmread(VMCS_GUEST_CS_BASE);
+    auto cs_base = vm::read(VMCS_GUEST_CS_BASE);
 
     if ((cs_base & 0xFFFFFFFF00000000) != 0)
         throw std::logic_error("guest cs base bits 63:32 must be 0");
@@ -495,7 +494,7 @@ vmcs_intel_x64::check_guest_cs_base_upper_dword_0()
 void
 vmcs_intel_x64::check_guest_ss_base_upper_dword_0()
 {
-    auto ss_base = vmread(VMCS_GUEST_SS_BASE);
+    auto ss_base = vm::read(VMCS_GUEST_SS_BASE);
 
     if (vmcs::guest_ds_access_rights::unusable::get() != 0)
         return;
@@ -507,7 +506,7 @@ vmcs_intel_x64::check_guest_ss_base_upper_dword_0()
 void
 vmcs_intel_x64::check_guest_ds_base_upper_dword_0()
 {
-    auto ds_base = vmread(VMCS_GUEST_DS_BASE);
+    auto ds_base = vm::read(VMCS_GUEST_DS_BASE);
 
     if (vmcs::guest_ds_access_rights::unusable::get() != 0)
         return;
@@ -519,7 +518,7 @@ vmcs_intel_x64::check_guest_ds_base_upper_dword_0()
 void
 vmcs_intel_x64::check_guest_es_base_upper_dword_0()
 {
-    auto es_base = vmread(VMCS_GUEST_ES_BASE);
+    auto es_base = vm::read(VMCS_GUEST_ES_BASE);
 
     if (vmcs::guest_es_access_rights::unusable::get() != 0)
         return;
@@ -534,7 +533,7 @@ vmcs_intel_x64::check_guest_cs_limit()
     if (!is_enabled_v8086())
         return;
 
-    auto cs_limit = vmread(VMCS_GUEST_CS_LIMIT);
+    auto cs_limit = vm::read(VMCS_GUEST_CS_LIMIT);
 
     if (cs_limit != 0x000000000000FFFF)
         throw std::logic_error("if virtual 8086 mode is enabled, cs limit must be 0xFFFF");
@@ -546,7 +545,7 @@ vmcs_intel_x64::check_guest_ss_limit()
     if (!is_enabled_v8086())
         return;
 
-    auto ss_limit = vmread(VMCS_GUEST_SS_LIMIT);
+    auto ss_limit = vm::read(VMCS_GUEST_SS_LIMIT);
 
     if (ss_limit != 0x000000000000FFFF)
         throw std::logic_error("if virtual 8086 mode is enabled, ss limit must be 0xFFFF");
@@ -558,7 +557,7 @@ vmcs_intel_x64::check_guest_ds_limit()
     if (!is_enabled_v8086())
         return;
 
-    auto ds_limit = vmread(VMCS_GUEST_DS_LIMIT);
+    auto ds_limit = vm::read(VMCS_GUEST_DS_LIMIT);
 
     if (ds_limit != 0x000000000000FFFF)
         throw std::logic_error("if virtual 8086 mode is enabled, ds limit must be 0xFFFF");
@@ -570,7 +569,7 @@ vmcs_intel_x64::check_guest_es_limit()
     if (!is_enabled_v8086())
         return;
 
-    auto es_limit = vmread(VMCS_GUEST_ES_LIMIT);
+    auto es_limit = vm::read(VMCS_GUEST_ES_LIMIT);
 
     if (es_limit != 0x000000000000FFFF)
         throw std::logic_error("if virtual 8086 mode is enabled, es limit must be 0xFFFF");
@@ -582,7 +581,7 @@ vmcs_intel_x64::check_guest_gs_limit()
     if (!is_enabled_v8086())
         return;
 
-    auto gs_limit = vmread(VMCS_GUEST_GS_LIMIT);
+    auto gs_limit = vm::read(VMCS_GUEST_GS_LIMIT);
 
     if (gs_limit != 0x000000000000FFFF)
         throw std::logic_error("if virtual 8086 mode is enabled, gs limit must be 0xFFFF");
@@ -594,7 +593,7 @@ vmcs_intel_x64::check_guest_fs_limit()
     if (!is_enabled_v8086())
         return;
 
-    auto fs_limit = vmread(VMCS_GUEST_FS_LIMIT);
+    auto fs_limit = vm::read(VMCS_GUEST_FS_LIMIT);
 
     if (fs_limit != 0x000000000000FFFF)
         throw std::logic_error("if virtual 8086 mode is enabled, fs limit must be 0xFFFF");
@@ -1185,7 +1184,7 @@ vmcs_intel_x64::check_guest_cs_db_must_be_0_if_l_equals_1()
 void
 vmcs_intel_x64::check_guest_cs_granularity()
 {
-    auto cs_limit = vmread(VMCS_GUEST_CS_LIMIT);
+    auto cs_limit = vm::read(VMCS_GUEST_CS_LIMIT);
     auto g = vmcs::guest_cs_access_rights::granularity::get();
 
     if ((cs_limit & 0x00000FFF) != 0x00000FFF && g != 0)
@@ -1198,7 +1197,7 @@ vmcs_intel_x64::check_guest_cs_granularity()
 void
 vmcs_intel_x64::check_guest_ss_granularity()
 {
-    auto ss_limit = vmread(VMCS_GUEST_SS_LIMIT);
+    auto ss_limit = vm::read(VMCS_GUEST_SS_LIMIT);
     auto g = vmcs::guest_ss_access_rights::granularity::get();
 
     if (vmcs::guest_ss_access_rights::unusable::get() != 0)
@@ -1214,7 +1213,7 @@ vmcs_intel_x64::check_guest_ss_granularity()
 void
 vmcs_intel_x64::check_guest_ds_granularity()
 {
-    auto ds_limit = vmread(VMCS_GUEST_DS_LIMIT);
+    auto ds_limit = vm::read(VMCS_GUEST_DS_LIMIT);
     auto g = vmcs::guest_ds_access_rights::granularity::get();
 
     if (vmcs::guest_ds_access_rights::unusable::get() != 0)
@@ -1230,7 +1229,7 @@ vmcs_intel_x64::check_guest_ds_granularity()
 void
 vmcs_intel_x64::check_guest_es_granularity()
 {
-    auto es_limit = vmread(VMCS_GUEST_ES_LIMIT);
+    auto es_limit = vm::read(VMCS_GUEST_ES_LIMIT);
     auto g = vmcs::guest_es_access_rights::granularity::get();
 
     if (vmcs::guest_es_access_rights::unusable::get() != 0)
@@ -1246,7 +1245,7 @@ vmcs_intel_x64::check_guest_es_granularity()
 void
 vmcs_intel_x64::check_guest_fs_granularity()
 {
-    auto fs_limit = vmread(VMCS_GUEST_FS_LIMIT);
+    auto fs_limit = vm::read(VMCS_GUEST_FS_LIMIT);
     auto g = vmcs::guest_fs_access_rights::granularity::get();
 
     if (vmcs::guest_fs_access_rights::unusable::get() != 0)
@@ -1262,7 +1261,7 @@ vmcs_intel_x64::check_guest_fs_granularity()
 void
 vmcs_intel_x64::check_guest_gs_granularity()
 {
-    auto gs_limit = vmread(VMCS_GUEST_GS_LIMIT);
+    auto gs_limit = vm::read(VMCS_GUEST_GS_LIMIT);
     auto g = vmcs::guest_gs_access_rights::granularity::get();
 
     if (vmcs::guest_fs_access_rights::unusable::get() != 0)
@@ -1318,7 +1317,7 @@ vmcs_intel_x64::check_guest_tr_access_rights_reserved_must_be_0()
 void
 vmcs_intel_x64::check_guest_tr_granularity()
 {
-    auto tr_limit = vmread(VMCS_GUEST_TR_LIMIT);
+    auto tr_limit = vm::read(VMCS_GUEST_TR_LIMIT);
     auto g = vmcs::guest_tr_access_rights::granularity::get();
 
     if ((tr_limit & 0x00000FFF) != 0x00000FFF && g != 0)
@@ -1387,7 +1386,7 @@ vmcs_intel_x64::check_guest_ldtr_granularity()
     if (vmcs::guest_ldtr_access_rights::unusable::get() != 0)
         return;
 
-    auto ldtr_limit = vmread(VMCS_GUEST_LDTR_LIMIT);
+    auto ldtr_limit = vm::read(VMCS_GUEST_LDTR_LIMIT);
     auto g = vmcs::guest_ldtr_access_rights::granularity::get();
 
     if ((ldtr_limit & 0x00000FFF) != 0x00000FFF && g != 0)
@@ -1409,7 +1408,7 @@ vmcs_intel_x64::checks_on_guest_descriptor_table_registers()
 void
 vmcs_intel_x64::check_guest_gdtr_base_must_be_canonical()
 {
-    auto gdtr_base = vmread(VMCS_GUEST_GDTR_BASE);
+    auto gdtr_base = vm::read(VMCS_GUEST_GDTR_BASE);
 
     if (!is_address_canonical(gdtr_base))
         throw std::logic_error("gdtr base is non-canonical");
@@ -1418,7 +1417,7 @@ vmcs_intel_x64::check_guest_gdtr_base_must_be_canonical()
 void
 vmcs_intel_x64::check_guest_idtr_base_must_be_canonical()
 {
-    auto idtr_base = vmread(VMCS_GUEST_IDTR_BASE);
+    auto idtr_base = vm::read(VMCS_GUEST_IDTR_BASE);
 
     if (!is_address_canonical(idtr_base))
         throw std::logic_error("idtr base is non-canonical");
@@ -1427,7 +1426,7 @@ vmcs_intel_x64::check_guest_idtr_base_must_be_canonical()
 void
 vmcs_intel_x64::check_guest_gdtr_limit_reserved_bits()
 {
-    auto gdtr_limit = vmread(VMCS_GUEST_GDTR_LIMIT);
+    auto gdtr_limit = vm::read(VMCS_GUEST_GDTR_LIMIT);
 
     if ((gdtr_limit & 0xFFFF0000) != 0)
         throw std::logic_error("gdtr limit bits 31:16 must be 0");
@@ -1436,7 +1435,7 @@ vmcs_intel_x64::check_guest_gdtr_limit_reserved_bits()
 void
 vmcs_intel_x64::check_guest_idtr_limit_reserved_bits()
 {
-    auto idtr_limit = vmread(VMCS_GUEST_IDTR_LIMIT);
+    auto idtr_limit = vm::read(VMCS_GUEST_IDTR_LIMIT);
 
     if ((idtr_limit & 0xFFFF0000) != 0)
         throw std::logic_error("idtr limit bits 31:16 must be 0");
@@ -1460,7 +1459,7 @@ vmcs_intel_x64::check_guest_rip_upper_bits()
     if (is_enabled_ia_32e_mode_guest() && cs_l != 0)
         return;
 
-    auto rip = vmread(VMCS_GUEST_RIP);
+    auto rip = vm::read(VMCS_GUEST_RIP);
 
     if ((rip & 0xFFFFFFFF00000000) != 0)
         throw std::logic_error("rip bits 61:32 must 0 if IA 32e mode is disabled or cs L is disabled");
@@ -1474,7 +1473,7 @@ vmcs_intel_x64::check_guest_rip_valid_addr()
     if (!is_enabled_ia_32e_mode_guest() || cs_l == 0)
         return;
 
-    auto rip = vmread(VMCS_GUEST_RIP);
+    auto rip = vm::read(VMCS_GUEST_RIP);
 
     if (!is_linear_address_valid(rip))
         throw std::logic_error("rip bits must be canonical");
@@ -1504,7 +1503,7 @@ void
 vmcs_intel_x64::check_guest_rflag_interrupt_enable()
 {
     auto interrupt_info_field =
-        vmread(VMCS_VM_ENTRY_INTERRUPTION_INFORMATION_FIELD);
+        vm::read(VMCS_VM_ENTRY_INTERRUPTION_INFORMATION_FIELD);
 
     if ((interrupt_info_field & VM_INTERRUPT_INFORMATION_VALID) == 0)
         return;
@@ -1551,7 +1550,7 @@ vmcs_intel_x64::checks_on_guest_non_register_state()
 void
 vmcs_intel_x64::check_guest_valid_activity_state()
 {
-    auto activity_state = vmread(VMCS_GUEST_ACTIVITY_STATE);
+    auto activity_state = vm::read(VMCS_GUEST_ACTIVITY_STATE);
 
     if (activity_state > 3)
         std::logic_error("activity state must be 0 - 3");
@@ -1560,7 +1559,7 @@ vmcs_intel_x64::check_guest_valid_activity_state()
 void
 vmcs_intel_x64::check_guest_activity_state_not_hlt_when_dpl_not_0()
 {
-    auto activity_state = vmread(VMCS_GUEST_ACTIVITY_STATE);
+    auto activity_state = vm::read(VMCS_GUEST_ACTIVITY_STATE);
 
     if (activity_state != VM_ACTIVITY_STATE_HLT)
         return;
@@ -1572,13 +1571,13 @@ vmcs_intel_x64::check_guest_activity_state_not_hlt_when_dpl_not_0()
 void
 vmcs_intel_x64::check_guest_must_be_active_if_injecting_blocking_state()
 {
-    auto activity_state = vmread(VMCS_GUEST_ACTIVITY_STATE);
+    auto activity_state = vm::read(VMCS_GUEST_ACTIVITY_STATE);
 
     if (activity_state == VM_ACTIVITY_STATE_ACTIVE)
         return;
 
     auto interruptability_state =
-        vmread(VMCS_GUEST_INTERRUPTIBILITY_STATE);
+        vm::read(VMCS_GUEST_INTERRUPTIBILITY_STATE);
 
     if ((interruptability_state & VM_INTERRUPTABILITY_STATE_STI) != 0)
         throw std::logic_error("activity state must be active if "
@@ -1593,12 +1592,12 @@ void
 vmcs_intel_x64::check_guest_hlt_valid_interrupts()
 {
     auto interrupt_info_field =
-        vmread(VMCS_VM_ENTRY_INTERRUPTION_INFORMATION_FIELD);
+        vm::read(VMCS_VM_ENTRY_INTERRUPTION_INFORMATION_FIELD);
 
     if ((interrupt_info_field & VM_INTERRUPT_INFORMATION_VALID) == 0)
         return;
 
-    auto activity_state = vmread(VMCS_GUEST_ACTIVITY_STATE);
+    auto activity_state = vm::read(VMCS_GUEST_ACTIVITY_STATE);
 
     if (activity_state != VM_ACTIVITY_STATE_HLT)
         return;
@@ -1638,12 +1637,12 @@ void
 vmcs_intel_x64::check_guest_shutdown_valid_interrupts()
 {
     auto interrupt_info_field =
-        vmread(VMCS_VM_ENTRY_INTERRUPTION_INFORMATION_FIELD);
+        vm::read(VMCS_VM_ENTRY_INTERRUPTION_INFORMATION_FIELD);
 
     if ((interrupt_info_field & VM_INTERRUPT_INFORMATION_VALID) == 0)
         return;
 
-    auto activity_state = vmread(VMCS_GUEST_ACTIVITY_STATE);
+    auto activity_state = vm::read(VMCS_GUEST_ACTIVITY_STATE);
 
     if (activity_state != VM_ACTIVITY_STATE_SHUTDOWN)
         return;
@@ -1673,12 +1672,12 @@ void
 vmcs_intel_x64::check_guest_sipi_valid_interrupts()
 {
     auto interrupt_info_field =
-        vmread(VMCS_VM_ENTRY_INTERRUPTION_INFORMATION_FIELD);
+        vm::read(VMCS_VM_ENTRY_INTERRUPTION_INFORMATION_FIELD);
 
     if ((interrupt_info_field & VM_INTERRUPT_INFORMATION_VALID) == 0)
         return;
 
-    auto activity_state = vmread(VMCS_GUEST_ACTIVITY_STATE);
+    auto activity_state = vm::read(VMCS_GUEST_ACTIVITY_STATE);
 
     if (activity_state != VM_ACTIVITY_STATE_WAIT_FOR_SIPI)
         return;
@@ -1692,7 +1691,7 @@ vmcs_intel_x64::check_guest_valid_activity_state_and_smm()
     if (!is_enabled_entry_to_smm())
         return;
 
-    auto activity_state = vmread(VMCS_GUEST_ACTIVITY_STATE);
+    auto activity_state = vm::read(VMCS_GUEST_ACTIVITY_STATE);
 
     if (activity_state != VM_ACTIVITY_STATE_WAIT_FOR_SIPI)
         return;
@@ -1704,7 +1703,7 @@ void
 vmcs_intel_x64::check_guest_interruptability_state_reserved()
 {
     auto interruptability_state =
-        vmread(VMCS_GUEST_INTERRUPTIBILITY_STATE);
+        vm::read(VMCS_GUEST_INTERRUPTIBILITY_STATE);
 
     if ((interruptability_state & 0xFFFFFFFFFFFFFFF0) != 0)
         throw std::logic_error("interruptability state reserved bits 31:4 must be 0");
@@ -1714,7 +1713,7 @@ void
 vmcs_intel_x64::check_guest_interruptability_state_sti_mov_ss()
 {
     auto interruptability_state =
-        vmread(VMCS_GUEST_INTERRUPTIBILITY_STATE);
+        vm::read(VMCS_GUEST_INTERRUPTIBILITY_STATE);
 
     auto sti = interruptability_state & VM_INTERRUPTABILITY_STATE_STI;
     auto mov_ss = interruptability_state & VM_INTERRUPTABILITY_STATE_MOV_SS;
@@ -1728,7 +1727,7 @@ void
 vmcs_intel_x64::check_guest_interruptability_state_sti()
 {
     auto interruptability_state =
-        vmread(VMCS_GUEST_INTERRUPTIBILITY_STATE);
+        vm::read(VMCS_GUEST_INTERRUPTIBILITY_STATE);
 
     if (vmcs::guest_rflags::interrupt_enable_flag::get() != 0)
         return;
@@ -1743,7 +1742,7 @@ void
 vmcs_intel_x64::check_guest_interruptability_state_external_interrupt()
 {
     auto interrupt_info_field =
-        vmread(VMCS_VM_ENTRY_INTERRUPTION_INFORMATION_FIELD);
+        vm::read(VMCS_VM_ENTRY_INTERRUPTION_INFORMATION_FIELD);
 
     if ((interrupt_info_field & VM_INTERRUPT_INFORMATION_VALID) == 0)
         return;
@@ -1754,7 +1753,7 @@ vmcs_intel_x64::check_guest_interruptability_state_external_interrupt()
         return;
 
     auto interruptability_state =
-        vmread(VMCS_GUEST_INTERRUPTIBILITY_STATE);
+        vm::read(VMCS_GUEST_INTERRUPTIBILITY_STATE);
 
     if ((interruptability_state & VM_INTERRUPTABILITY_STATE_STI) != 0)
         throw std::logic_error("interruptability state sti must be 0 if "
@@ -1769,7 +1768,7 @@ void
 vmcs_intel_x64::check_guest_interruptability_state_nmi()
 {
     auto interrupt_info_field =
-        vmread(VMCS_VM_ENTRY_INTERRUPTION_INFORMATION_FIELD);
+        vm::read(VMCS_VM_ENTRY_INTERRUPTION_INFORMATION_FIELD);
 
     if ((interrupt_info_field & VM_INTERRUPT_INFORMATION_VALID) == 0)
         return;
@@ -1780,7 +1779,7 @@ vmcs_intel_x64::check_guest_interruptability_state_nmi()
         return;
 
     auto interruptability_state =
-        vmread(VMCS_GUEST_INTERRUPTIBILITY_STATE);
+        vm::read(VMCS_GUEST_INTERRUPTIBILITY_STATE);
 
     if ((interruptability_state & VM_INTERRUPTABILITY_STATE_MOV_SS) != 0)
         throw std::logic_error("activity state must be active if "
@@ -1799,7 +1798,7 @@ vmcs_intel_x64::check_guest_interruptability_entry_to_smm()
         return;
 
     auto interruptability_state =
-        vmread(VMCS_GUEST_INTERRUPTIBILITY_STATE);
+        vm::read(VMCS_GUEST_INTERRUPTIBILITY_STATE);
 
     if ((interruptability_state & VM_INTERRUPTABILITY_STATE_SMI) == 0)
         throw std::logic_error("interruptability state smi must be enabled "
@@ -1810,7 +1809,7 @@ void
 vmcs_intel_x64::check_guest_interruptability_state_sti_and_nmi()
 {
     auto interrupt_info_field =
-        vmread(VMCS_VM_ENTRY_INTERRUPTION_INFORMATION_FIELD);
+        vm::read(VMCS_VM_ENTRY_INTERRUPTION_INFORMATION_FIELD);
 
     if ((interrupt_info_field & VM_INTERRUPT_INFORMATION_VALID) == 0)
         return;
@@ -1821,7 +1820,7 @@ vmcs_intel_x64::check_guest_interruptability_state_sti_and_nmi()
         return;
 
     auto interruptability_state =
-        vmread(VMCS_GUEST_INTERRUPTIBILITY_STATE);
+        vm::read(VMCS_GUEST_INTERRUPTIBILITY_STATE);
 
     if ((interruptability_state & VM_INTERRUPTABILITY_STATE_STI) != 0)
         throw std::logic_error("some processors require sti to be 0 if "
@@ -1835,7 +1834,7 @@ vmcs_intel_x64::check_guest_interruptability_state_virtual_nmi()
         return;
 
     auto interrupt_info_field =
-        vmread(VMCS_VM_ENTRY_INTERRUPTION_INFORMATION_FIELD);
+        vm::read(VMCS_VM_ENTRY_INTERRUPTION_INFORMATION_FIELD);
 
     if ((interrupt_info_field & VM_INTERRUPT_INFORMATION_VALID) == 0)
         return;
@@ -1846,7 +1845,7 @@ vmcs_intel_x64::check_guest_interruptability_state_virtual_nmi()
         return;
 
     auto interruptability_state =
-        vmread(VMCS_GUEST_INTERRUPTIBILITY_STATE);
+        vm::read(VMCS_GUEST_INTERRUPTIBILITY_STATE);
 
     if ((interruptability_state & VM_INTERRUPTABILITY_STATE_NMI) != 0)
         throw std::logic_error("if virtual nmi is enabled, and the interruption "
@@ -1857,7 +1856,7 @@ void
 vmcs_intel_x64::check_guest_pending_debug_exceptions_reserved()
 {
     auto pending_debug_exceptions =
-        vmread(VMCS_GUEST_PENDING_DEBUG_EXCEPTIONS);
+        vm::read(VMCS_GUEST_PENDING_DEBUG_EXCEPTIONS);
 
     if ((pending_debug_exceptions & 0xFFFFFFFFFFFF2FF0) != 0)
         throw std::logic_error("pending debug exception reserved bits must be 0");
@@ -1867,10 +1866,10 @@ void
 vmcs_intel_x64::check_guest_pending_debug_exceptions_dbg_ctl()
 {
     auto interruptability_state =
-        vmread(VMCS_GUEST_INTERRUPTIBILITY_STATE);
+        vm::read(VMCS_GUEST_INTERRUPTIBILITY_STATE);
 
     auto activity_state =
-        vmread(VMCS_GUEST_ACTIVITY_STATE);
+        vm::read(VMCS_GUEST_ACTIVITY_STATE);
 
     auto sti = interruptability_state & VM_INTERRUPTABILITY_STATE_STI;
     auto mov_ss = interruptability_state & VM_INTERRUPTABILITY_STATE_MOV_SS;
@@ -1880,7 +1879,7 @@ vmcs_intel_x64::check_guest_pending_debug_exceptions_dbg_ctl()
         return;
 
     auto pending_debug_exceptions =
-        vmread(VMCS_GUEST_PENDING_DEBUG_EXCEPTIONS);
+        vm::read(VMCS_GUEST_PENDING_DEBUG_EXCEPTIONS);
 
     auto bs = pending_debug_exceptions & PENDING_DEBUG_EXCEPTION_BS;
 
@@ -1899,7 +1898,7 @@ vmcs_intel_x64::check_guest_pending_debug_exceptions_dbg_ctl()
 void
 vmcs_intel_x64::check_guest_vmcs_link_pointer_bits_11_0()
 {
-    auto vmcs_link_pointer = vmread(VMCS_VMCS_LINK_POINTER);
+    auto vmcs_link_pointer = vm::read(VMCS_VMCS_LINK_POINTER);
 
     if (vmcs_link_pointer == 0xFFFFFFFFFFFFFFFF)
         return;
@@ -1911,7 +1910,7 @@ vmcs_intel_x64::check_guest_vmcs_link_pointer_bits_11_0()
 void
 vmcs_intel_x64::check_guest_vmcs_link_pointer_valid_addr()
 {
-    auto vmcs_link_pointer = vmread(VMCS_VMCS_LINK_POINTER);
+    auto vmcs_link_pointer = vm::read(VMCS_VMCS_LINK_POINTER);
 
     if (vmcs_link_pointer == 0xFFFFFFFFFFFFFFFF)
         return;
@@ -1923,7 +1922,7 @@ vmcs_intel_x64::check_guest_vmcs_link_pointer_valid_addr()
 void
 vmcs_intel_x64::check_guest_vmcs_link_pointer_first_word()
 {
-    auto vmcs_link_pointer = vmread(VMCS_VMCS_LINK_POINTER);
+    auto vmcs_link_pointer = vm::read(VMCS_VMCS_LINK_POINTER);
 
     if (vmcs_link_pointer == 0xFFFFFFFFFFFFFFFF)
         return;

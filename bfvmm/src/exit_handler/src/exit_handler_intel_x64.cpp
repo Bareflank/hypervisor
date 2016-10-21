@@ -20,38 +20,40 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #include <debug.h>
-#include <view_as_pointer.h>
 #include <exit_handler/exit_handler_intel_x64.h>
 #include <exit_handler/exit_handler_intel_x64_entry.h>
 #include <exit_handler/exit_handler_intel_x64_support.h>
 
+#include <intrinsics/pm_x64.h>
+#include <intrinsics/cache_x64.h>
+#include <intrinsics/cpuid_x64.h>
+#include <intrinsics/vmx_intel_x64.h>
+
+using namespace x64;
 using namespace intel_x64;
 
 #include <mutex>
 std::mutex g_unimplemented_handler_mutex;
 
-exit_handler_intel_x64::exit_handler_intel_x64(std::shared_ptr<intrinsics_intel_x64> intrinsics) :
-    m_intrinsics(std::move(intrinsics)),
+exit_handler_intel_x64::exit_handler_intel_x64() :
     m_exit_reason(0),
     m_exit_qualification(0),
     m_exit_instruction_length(0),
     m_exit_instruction_information(0)
 {
-    if (!m_intrinsics)
-        m_intrinsics = std::make_shared<intrinsics_intel_x64>();
 }
 
 void
 exit_handler_intel_x64::dispatch()
 {
     m_exit_reason =
-        vmread(VMCS_EXIT_REASON);
+        vm::read(VMCS_EXIT_REASON);
     m_exit_qualification =
-        vmread(VMCS_EXIT_QUALIFICATION);
+        vm::read(VMCS_EXIT_QUALIFICATION);
     m_exit_instruction_length =
-        vmread(VMCS_VM_EXIT_INSTRUCTION_LENGTH);
+        vm::read(VMCS_VM_EXIT_INSTRUCTION_LENGTH);
     m_exit_instruction_information =
-        vmread(VMCS_VM_EXIT_INSTRUCTION_INFORMATION);
+        vm::read(VMCS_VM_EXIT_INSTRUCTION_INFORMATION);
 
     switch (m_exit_reason & 0x0000FFFF)
     {
@@ -341,7 +343,7 @@ exit_handler_intel_x64::halt() noexcept
 
     g_unimplemented_handler_mutex.unlock();
 
-    m_intrinsics->stop();
+    pm::stop();
 }
 
 void
@@ -387,10 +389,15 @@ exit_handler_intel_x64::handle_task_switch()
 void
 exit_handler_intel_x64::handle_cpuid()
 {
-    m_intrinsics->cpuid(&m_state_save->rax,
-                        &m_state_save->rbx,
-                        &m_state_save->rcx,
-                        &m_state_save->rdx);
+    auto ret = cpuid::get(m_state_save->rax,
+                          m_state_save->rbx,
+                          m_state_save->rcx,
+                          m_state_save->rdx);
+
+    m_state_save->rax = std::get<0>(ret);
+    m_state_save->rbx = std::get<1>(ret);
+    m_state_save->rcx = std::get<2>(ret);
+    m_state_save->rdx = std::get<3>(ret);
 
     advance_rip();
 }
@@ -406,7 +413,7 @@ exit_handler_intel_x64::handle_hlt()
 void
 exit_handler_intel_x64::handle_invd()
 {
-    m_intrinsics->wbinvd();
+    cache::wbinvd();
     advance_rip();
 }
 
@@ -491,28 +498,28 @@ exit_handler_intel_x64::handle_rdmsr()
             msr = vmcs::guest_ia32_debugctl::get();
             break;
         case msrs::ia32_pat::addr:
-            msr = vmread(VMCS_GUEST_IA32_PAT);
+            msr = vm::read(VMCS_GUEST_IA32_PAT);
             break;
         case msrs::ia32_efer::addr:
             msr = vmcs::guest_ia32_efer::get();
             break;
         case msrs::ia32_perf_global_ctrl::addr:
-            msr = vmread(VMCS_GUEST_IA32_PERF_GLOBAL_CTRL);
+            msr = vm::read(VMCS_GUEST_IA32_PERF_GLOBAL_CTRL);
             break;
         case msrs::ia32_sysenter_cs::addr:
-            msr = vmread(VMCS_GUEST_IA32_SYSENTER_CS);
+            msr = vm::read(VMCS_GUEST_IA32_SYSENTER_CS);
             break;
         case msrs::ia32_sysenter_esp::addr:
-            msr = vmread(VMCS_GUEST_IA32_SYSENTER_ESP);
+            msr = vm::read(VMCS_GUEST_IA32_SYSENTER_ESP);
             break;
         case msrs::ia32_sysenter_eip::addr:
-            msr = vmread(VMCS_GUEST_IA32_SYSENTER_EIP);
+            msr = vm::read(VMCS_GUEST_IA32_SYSENTER_EIP);
             break;
         case msrs::ia32_fs_base::addr:
-            msr = vmread(VMCS_GUEST_FS_BASE);
+            msr = vm::read(VMCS_GUEST_FS_BASE);
             break;
         case msrs::ia32_gs_base::addr:
-            msr = vmread(VMCS_GUEST_GS_BASE);
+            msr = vm::read(VMCS_GUEST_GS_BASE);
             break;
         default:
             msr = msrs::get(m_state_save->rcx);
@@ -557,28 +564,28 @@ exit_handler_intel_x64::handle_wrmsr()
             vmcs::guest_ia32_debugctl::set(msr);
             break;
         case msrs::ia32_pat::addr:
-            vmwrite(VMCS_GUEST_IA32_PAT, msr);
+            vm::write(VMCS_GUEST_IA32_PAT, msr);
             break;
         case msrs::ia32_efer::addr:
             vmcs::guest_ia32_efer::set(msr);
             break;
         case msrs::ia32_perf_global_ctrl::addr:
-            vmwrite(VMCS_GUEST_IA32_PERF_GLOBAL_CTRL, msr);
+            vm::write(VMCS_GUEST_IA32_PERF_GLOBAL_CTRL, msr);
             break;
         case msrs::ia32_sysenter_cs::addr:
-            vmwrite(VMCS_GUEST_IA32_SYSENTER_CS, msr);
+            vm::write(VMCS_GUEST_IA32_SYSENTER_CS, msr);
             break;
         case msrs::ia32_sysenter_esp::addr:
-            vmwrite(VMCS_GUEST_IA32_SYSENTER_ESP, msr);
+            vm::write(VMCS_GUEST_IA32_SYSENTER_ESP, msr);
             break;
         case msrs::ia32_sysenter_eip::addr:
-            vmwrite(VMCS_GUEST_IA32_SYSENTER_EIP, msr);
+            vm::write(VMCS_GUEST_IA32_SYSENTER_EIP, msr);
             break;
         case msrs::ia32_fs_base::addr:
-            vmwrite(VMCS_GUEST_FS_BASE, msr);
+            vm::write(VMCS_GUEST_FS_BASE, msr);
             break;
         case msrs::ia32_gs_base::addr:
-            vmwrite(VMCS_GUEST_GS_BASE, msr);
+            vm::write(VMCS_GUEST_GS_BASE, msr);
             break;
         default:
             msrs::set(m_state_save->rcx, msr);
@@ -926,33 +933,4 @@ exit_handler_intel_x64::exit_reason_to_str(uint64_t exit_reason)
         default:
             return "unknown";
     };
-}
-
-uint64_t
-exit_handler_intel_x64::vmread(uint64_t field) const
-{
-    uint64_t value = 0;
-
-    if (!m_intrinsics->vmread(field, &value))
-    {
-        bferror << "exit_handler_intel_x64::vmread failed:" << bfendl;
-        bferror << "    - field: " << view_as_pointer(field) << bfendl;
-
-        throw std::runtime_error("vmread failed");
-    }
-
-    return value;
-}
-
-void
-exit_handler_intel_x64::vmwrite(uint64_t field, uint64_t value)
-{
-    if (!m_intrinsics->vmwrite(field, value))
-    {
-        bferror << "exit_handler_intel_x64::vmwrite failed:" << bfendl;
-        bferror << "    - field: " << view_as_pointer(field) << bfendl;
-        bferror << "    - value: " << view_as_pointer(value) << bfendl;
-
-        throw std::runtime_error("vmwrite failed");
-    }
 }

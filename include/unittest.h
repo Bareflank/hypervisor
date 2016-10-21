@@ -28,6 +28,7 @@
 
 #include <gsl/gsl>
 
+#include <memory>
 #include <cstdlib>
 #include <iostream>
 
@@ -39,7 +40,6 @@
 #pragma GCC system_header
 #include <hippomocks.h>
 
-// A simple structure for encapsulating relevant exception expectations
 struct exception_state
 {
     bool caught;
@@ -48,6 +48,15 @@ struct exception_state
     std::string expecting_str;
     std::string what;
 };
+
+inline auto operator"" _ut_ree(const char *str, std::size_t len)
+{ (void)len; return std::make_shared<std::runtime_error>(str); }
+
+inline auto operator"" _ut_lee(const char *str, std::size_t len)
+{ (void)len; return std::make_shared<std::logic_error>(str); }
+
+inline auto operator"" _ut_ffe(const char *str, std::size_t len)
+{ (void)len; return std::make_shared<gsl::fail_fast>(str); }
 
 /// Expect True
 ///
@@ -518,9 +527,11 @@ check_exception_type(struct exception_state &state, const std::exception &caught
         state.what = std::string(caught.what());
     }
     else
+    {
         std::cout << "caught: " << '\n';
-    std::cout << "    - type: " << caught << '\n';
-    std::cout << "    - what: " << caught.what() << '\n';
+        std::cout << "    - type: " << caught << '\n';
+        std::cout << "    - what: " << caught.what() << '\n';
+    }
 }
 
 /// Unit Test
@@ -684,9 +695,9 @@ protected:
             if (state.wrong_exception)
             {
                 this->expect_failed("wrong exception caught", func.data(), line);
-                std::cerr << "    - caught: " << 'n';
-                std::cout << "        - type: " << state.caught_str << '\n';
-                std::cout << "        - what: " << state.what << '\n';
+                std::cerr << "    - caught: " << '\n';
+                std::cerr << "        - type: " << state.caught_str << '\n';
+                std::cerr << "        - what: " << state.what << '\n';
                 std::cerr << "    - expecting: " << state.expecting_str << 'n';
             }
             else

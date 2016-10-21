@@ -45,6 +45,10 @@ extern "C" uint64_t
 __read_rflags(void) noexcept
 { return 0; }
 
+extern "C" uint64_t
+__read_dr7(void) noexcept
+{ return 0; }
+
 extern "C" void
 __read_gdt(gdt_reg_x64_t *gdt_reg) noexcept
 { (void) gdt_reg; }
@@ -107,40 +111,10 @@ vcpu_ut::test_vcpu_intel_x64_invalid_id()
 }
 
 void
-vcpu_ut::test_vcpu_intel_x64_null_params_valid_intrinsics()
-{
-    MockRepository mocks;
-    auto in = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        EXPECT_NO_EXCEPTION(std::make_shared<vcpu_intel_x64>(0, nullptr, in, nullptr, nullptr, nullptr, nullptr, nullptr));
-    });
-}
-
-void
-vcpu_ut::test_vcpu_intel_x64_valid_params_null_intrinsics()
-{
-    MockRepository mocks;
-    auto dr = bfn::mock_shared<debug_ring>(mocks);
-    auto on = bfn::mock_shared<vmxon_intel_x64>(mocks);
-    auto cs = bfn::mock_shared<vmcs_intel_x64>(mocks);
-    auto eh = bfn::mock_shared<exit_handler_intel_x64>(mocks);
-    auto vs = bfn::mock_shared<vmcs_intel_x64_vmm_state>(mocks);
-    auto gs = bfn::mock_shared<vmcs_intel_x64_vmm_state>(mocks);
-
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        EXPECT_NO_EXCEPTION(std::make_shared<vcpu_intel_x64>(0, dr, nullptr, on, cs, eh, vs, gs));
-    });
-}
-
-void
 vcpu_ut::test_vcpu_intel_x64_valid()
 {
     MockRepository mocks;
     auto dr = bfn::mock_shared<debug_ring>(mocks);
-    auto in = bfn::mock_shared<intrinsics_intel_x64>(mocks);
     auto on = bfn::mock_shared<vmxon_intel_x64>(mocks);
     auto cs = bfn::mock_shared<vmcs_intel_x64>(mocks);
     auto eh = bfn::mock_shared<exit_handler_intel_x64>(mocks);
@@ -149,18 +123,15 @@ vcpu_ut::test_vcpu_intel_x64_valid()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_NO_EXCEPTION(std::make_shared<vcpu_intel_x64>(0, dr, in, on, cs, eh, vs, gs));
+        EXPECT_NO_EXCEPTION(std::make_shared<vcpu_intel_x64>(0, dr, on, cs, eh, vs, gs));
     });
 }
 
 void
-vcpu_ut::test_vcpu_intel_x64_init_null_params_valid_intrinsics()
+vcpu_ut::test_vcpu_intel_x64_init_null_params()
 {
     MockRepository mocks;
     auto mm = mocks.Mock<memory_manager>();
-    auto in = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(in.get(), intrinsics_intel_x64::read_dr7).Return(0);
 
     mocks.OnCallFunc(memory_manager::instance).Return(mm);
     mocks.OnCall(mm, memory_manager::virtptr_to_physint).Do(virtptr_to_physint);
@@ -168,13 +139,13 @@ vcpu_ut::test_vcpu_intel_x64_init_null_params_valid_intrinsics()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        auto vc = std::make_shared<vcpu_intel_x64>(0, nullptr, in, nullptr, nullptr, nullptr, nullptr, nullptr);
+        auto vc = std::make_shared<vcpu_intel_x64>(0, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
         vc->init();
     });
 }
 
 void
-vcpu_ut::test_vcpu_intel_x64_init_valid_params_null_intrinsics()
+vcpu_ut::test_vcpu_intel_x64_init_valid_params()
 {
     MockRepository mocks;
     auto mm = mocks.Mock<memory_manager>();
@@ -196,7 +167,7 @@ vcpu_ut::test_vcpu_intel_x64_init_valid_params_null_intrinsics()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        auto vc = std::make_shared<vcpu_intel_x64>(0, dr, nullptr, on, cs, eh, vs, gs);
+        auto vc = std::make_shared<vcpu_intel_x64>(0, dr, on, cs, eh, vs, gs);
         vc->init();
     });
 }
@@ -207,7 +178,6 @@ vcpu_ut::test_vcpu_intel_x64_init_valid()
     MockRepository mocks;
     auto mm = mocks.Mock<memory_manager>();
     auto dr = bfn::mock_shared<debug_ring>(mocks);
-    auto in = bfn::mock_shared<intrinsics_intel_x64>(mocks);
     auto on = bfn::mock_shared<vmxon_intel_x64>(mocks);
     auto cs = bfn::mock_shared<vmcs_intel_x64>(mocks);
     auto eh = bfn::mock_shared<exit_handler_intel_x64>(mocks);
@@ -225,7 +195,7 @@ vcpu_ut::test_vcpu_intel_x64_init_valid()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        auto vc = std::make_shared<vcpu_intel_x64>(0, dr, in, on, cs, eh, vs, gs);
+        auto vc = std::make_shared<vcpu_intel_x64>(0, dr, on, cs, eh, vs, gs);
         vc->init();
     });
 }
@@ -236,7 +206,6 @@ vcpu_ut::test_vcpu_intel_x64_init_vmcs_throws()
     MockRepository mocks;
     auto mm = mocks.Mock<memory_manager>();
     auto dr = bfn::mock_shared<debug_ring>(mocks);
-    auto in = bfn::mock_shared<intrinsics_intel_x64>(mocks);
     auto on = bfn::mock_shared<vmxon_intel_x64>(mocks);
     auto cs = bfn::mock_shared<vmcs_intel_x64>(mocks);
     auto eh = bfn::mock_shared<exit_handler_intel_x64>(mocks);
@@ -254,19 +223,16 @@ vcpu_ut::test_vcpu_intel_x64_init_vmcs_throws()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        auto vc = std::make_shared<vcpu_intel_x64>(0, dr, nullptr, on, cs, eh, vs, gs);
+        auto vc = std::make_shared<vcpu_intel_x64>(0, dr, on, cs, eh, vs, gs);
         EXPECT_EXCEPTION(vc->init(), std::logic_error);
     });
 }
 
 void
-vcpu_ut::test_vcpu_intel_x64_fini_null_params_valid_intrinsics()
+vcpu_ut::test_vcpu_intel_x64_fini_null_params()
 {
     MockRepository mocks;
     auto mm = mocks.Mock<memory_manager>();
-    auto in = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    mocks.OnCall(in.get(), intrinsics_intel_x64::read_dr7).Return(0);
 
     mocks.OnCallFunc(memory_manager::instance).Return(mm);
     mocks.OnCall(mm, memory_manager::virtptr_to_physint).Do(virtptr_to_physint);
@@ -274,14 +240,14 @@ vcpu_ut::test_vcpu_intel_x64_fini_null_params_valid_intrinsics()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        auto vc = std::make_shared<vcpu_intel_x64>(0, nullptr, in, nullptr, nullptr, nullptr, nullptr, nullptr);
+        auto vc = std::make_shared<vcpu_intel_x64>(0, nullptr, nullptr, nullptr, nullptr, nullptr);
         vc->init();
         vc->fini();
     });
 }
 
 void
-vcpu_ut::test_vcpu_intel_x64_fini_valid_params_null_intrinsics()
+vcpu_ut::test_vcpu_intel_x64_fini_valid_params()
 {
     MockRepository mocks;
     auto mm = mocks.Mock<memory_manager>();
@@ -303,7 +269,7 @@ vcpu_ut::test_vcpu_intel_x64_fini_valid_params_null_intrinsics()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        auto vc = std::make_shared<vcpu_intel_x64>(0, dr, nullptr, on, cs, eh, vs, gs);
+        auto vc = std::make_shared<vcpu_intel_x64>(0, dr, on, cs, eh, vs, gs);
         vc->init();
         vc->fini();
     });
@@ -315,7 +281,6 @@ vcpu_ut::test_vcpu_intel_x64_fini_valid()
     MockRepository mocks;
     auto mm = mocks.Mock<memory_manager>();
     auto dr = bfn::mock_shared<debug_ring>(mocks);
-    auto in = bfn::mock_shared<intrinsics_intel_x64>(mocks);
     auto on = bfn::mock_shared<vmxon_intel_x64>(mocks);
     auto cs = bfn::mock_shared<vmcs_intel_x64>(mocks);
     auto eh = bfn::mock_shared<exit_handler_intel_x64>(mocks);
@@ -333,7 +298,7 @@ vcpu_ut::test_vcpu_intel_x64_fini_valid()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        auto vc = std::make_shared<vcpu_intel_x64>(0, dr, in, on, cs, eh, vs, gs);
+        auto vc = std::make_shared<vcpu_intel_x64>(0, dr, on, cs, eh, vs, gs);
         vc->init();
         vc->fini();
     });
@@ -344,7 +309,6 @@ vcpu_ut::test_vcpu_intel_x64_fini_no_init()
 {
     MockRepository mocks;
     auto dr = bfn::mock_shared<debug_ring>(mocks);
-    auto in = bfn::mock_shared<intrinsics_intel_x64>(mocks);
     auto on = bfn::mock_shared<vmxon_intel_x64>(mocks);
     auto cs = bfn::mock_shared<vmcs_intel_x64>(mocks);
     auto eh = bfn::mock_shared<exit_handler_intel_x64>(mocks);
@@ -353,7 +317,7 @@ vcpu_ut::test_vcpu_intel_x64_fini_no_init()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        auto vc = std::make_shared<vcpu_intel_x64>(0, dr, in, on, cs, eh, vs, gs);
+        auto vc = std::make_shared<vcpu_intel_x64>(0, dr, on, cs, eh, vs, gs);
         vc->fini();
     });
 }
@@ -364,7 +328,6 @@ vcpu_ut::test_vcpu_intel_x64_run_launch()
     MockRepository mocks;
     auto mm = mocks.Mock<memory_manager>();
     auto dr = bfn::mock_shared<debug_ring>(mocks);
-    auto in = bfn::mock_shared<intrinsics_intel_x64>(mocks);
     auto on = bfn::mock_shared<vmxon_intel_x64>(mocks);
     auto cs = bfn::mock_shared<vmcs_intel_x64>(mocks);
     auto eh = bfn::mock_shared<exit_handler_intel_x64>(mocks);
@@ -388,7 +351,7 @@ vcpu_ut::test_vcpu_intel_x64_run_launch()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        auto vc = std::make_shared<vcpu_intel_x64>(0x0001000000000000, dr, in, on, cs, eh, vs, gs);
+        auto vc = std::make_shared<vcpu_intel_x64>(0x0001000000000000, dr, on, cs, eh, vs, gs);
         vc->init();
         vc->run();
     });
@@ -400,7 +363,6 @@ vcpu_ut::test_vcpu_intel_x64_run_launch_is_host_vcpu()
     MockRepository mocks;
     auto mm = mocks.Mock<memory_manager>();
     auto dr = bfn::mock_shared<debug_ring>(mocks);
-    auto in = bfn::mock_shared<intrinsics_intel_x64>(mocks);
     auto on = bfn::mock_shared<vmxon_intel_x64>(mocks);
     auto cs = bfn::mock_shared<vmcs_intel_x64>(mocks);
     auto eh = bfn::mock_shared<exit_handler_intel_x64>(mocks);
@@ -424,7 +386,7 @@ vcpu_ut::test_vcpu_intel_x64_run_launch_is_host_vcpu()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        auto vc = std::make_shared<vcpu_intel_x64>(0, dr, in, on, cs, eh, vs, gs);
+        auto vc = std::make_shared<vcpu_intel_x64>(0, dr, on, cs, eh, vs, gs);
         vc->init();
         vc->run();
     });
@@ -436,7 +398,6 @@ vcpu_ut::test_vcpu_intel_x64_run_resume()
     MockRepository mocks;
     auto mm = mocks.Mock<memory_manager>();
     auto dr = bfn::mock_shared<debug_ring>(mocks);
-    auto in = bfn::mock_shared<intrinsics_intel_x64>(mocks);
     auto on = bfn::mock_shared<vmxon_intel_x64>(mocks);
     auto cs = bfn::mock_shared<vmcs_intel_x64>(mocks);
     auto eh = bfn::mock_shared<exit_handler_intel_x64>(mocks);
@@ -460,7 +421,7 @@ vcpu_ut::test_vcpu_intel_x64_run_resume()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        auto vc = std::make_shared<vcpu_intel_x64>(0, dr, in, on, cs, eh, vs, gs);
+        auto vc = std::make_shared<vcpu_intel_x64>(0, dr, on, cs, eh, vs, gs);
         vc->init();
         vc->run();
         vc->run();
@@ -473,7 +434,6 @@ vcpu_ut::test_vcpu_intel_x64_run_no_init()
     MockRepository mocks;
     auto mm = mocks.Mock<memory_manager>();
     auto dr = bfn::mock_shared<debug_ring>(mocks);
-    auto in = bfn::mock_shared<intrinsics_intel_x64>(mocks);
     auto on = bfn::mock_shared<vmxon_intel_x64>(mocks);
     auto cs = bfn::mock_shared<vmcs_intel_x64>(mocks);
     auto eh = bfn::mock_shared<exit_handler_intel_x64>(mocks);
@@ -497,7 +457,7 @@ vcpu_ut::test_vcpu_intel_x64_run_no_init()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        auto vc = std::make_shared<vcpu_intel_x64>(0, dr, in, on, cs, eh, vs, gs);
+        auto vc = std::make_shared<vcpu_intel_x64>(0, dr, on, cs, eh, vs, gs);
         EXPECT_EXCEPTION(vc->run(), std::runtime_error);
     });
 }
@@ -508,7 +468,6 @@ vcpu_ut::test_vcpu_intel_x64_run_vmxon_throws()
     MockRepository mocks;
     auto mm = mocks.Mock<memory_manager>();
     auto dr = bfn::mock_shared<debug_ring>(mocks);
-    auto in = bfn::mock_shared<intrinsics_intel_x64>(mocks);
     auto on = bfn::mock_shared<vmxon_intel_x64>(mocks);
     auto cs = bfn::mock_shared<vmcs_intel_x64>(mocks);
     auto eh = bfn::mock_shared<exit_handler_intel_x64>(mocks);
@@ -532,7 +491,7 @@ vcpu_ut::test_vcpu_intel_x64_run_vmxon_throws()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        auto vc = std::make_shared<vcpu_intel_x64>(0, dr, in, on, cs, eh, vs, gs);
+        auto vc = std::make_shared<vcpu_intel_x64>(0, dr, on, cs, eh, vs, gs);
         vc->init();
         EXPECT_EXCEPTION(vc->run(), std::runtime_error);
     });
@@ -544,7 +503,6 @@ vcpu_ut::test_vcpu_intel_x64_run_vmcs_throws()
     MockRepository mocks;
     auto mm = mocks.Mock<memory_manager>();
     auto dr = bfn::mock_shared<debug_ring>(mocks);
-    auto in = bfn::mock_shared<intrinsics_intel_x64>(mocks);
     auto on = bfn::mock_shared<vmxon_intel_x64>(mocks);
     auto cs = bfn::mock_shared<vmcs_intel_x64>(mocks);
     auto eh = bfn::mock_shared<exit_handler_intel_x64>(mocks);
@@ -568,7 +526,7 @@ vcpu_ut::test_vcpu_intel_x64_run_vmcs_throws()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        auto vc = std::make_shared<vcpu_intel_x64>(0, dr, in, on, cs, eh, vs, gs);
+        auto vc = std::make_shared<vcpu_intel_x64>(0, dr, on, cs, eh, vs, gs);
         vc->init();
         EXPECT_EXCEPTION(vc->run(), std::runtime_error);
     });
@@ -580,7 +538,6 @@ vcpu_ut::test_vcpu_intel_x64_hlt_no_init()
     MockRepository mocks;
     auto mm = mocks.Mock<memory_manager>();
     auto dr = bfn::mock_shared<debug_ring>(mocks);
-    auto in = bfn::mock_shared<intrinsics_intel_x64>(mocks);
     auto on = bfn::mock_shared<vmxon_intel_x64>(mocks);
     auto cs = bfn::mock_shared<vmcs_intel_x64>(mocks);
     auto eh = bfn::mock_shared<exit_handler_intel_x64>(mocks);
@@ -604,7 +561,7 @@ vcpu_ut::test_vcpu_intel_x64_hlt_no_init()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        auto vc = std::make_shared<vcpu_intel_x64>(0x0001000000000000, dr, in, on, cs, eh, vs, gs);
+        auto vc = std::make_shared<vcpu_intel_x64>(0x0001000000000000, dr, on, cs, eh, vs, gs);
         vc->hlt();
     });
 }
@@ -615,7 +572,6 @@ vcpu_ut::test_vcpu_intel_x64_hlt_no_run()
     MockRepository mocks;
     auto mm = mocks.Mock<memory_manager>();
     auto dr = bfn::mock_shared<debug_ring>(mocks);
-    auto in = bfn::mock_shared<intrinsics_intel_x64>(mocks);
     auto on = bfn::mock_shared<vmxon_intel_x64>(mocks);
     auto cs = bfn::mock_shared<vmcs_intel_x64>(mocks);
     auto eh = bfn::mock_shared<exit_handler_intel_x64>(mocks);
@@ -639,7 +595,7 @@ vcpu_ut::test_vcpu_intel_x64_hlt_no_run()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        auto vc = std::make_shared<vcpu_intel_x64>(0x0001000000000000, dr, in, on, cs, eh, vs, gs);
+        auto vc = std::make_shared<vcpu_intel_x64>(0x0001000000000000, dr, on, cs, eh, vs, gs);
         vc->init();
         vc->hlt();
     });
@@ -651,7 +607,6 @@ vcpu_ut::test_vcpu_intel_x64_hlt_valid()
     MockRepository mocks;
     auto mm = mocks.Mock<memory_manager>();
     auto dr = bfn::mock_shared<debug_ring>(mocks);
-    auto in = bfn::mock_shared<intrinsics_intel_x64>(mocks);
     auto on = bfn::mock_shared<vmxon_intel_x64>(mocks);
     auto cs = bfn::mock_shared<vmcs_intel_x64>(mocks);
     auto eh = bfn::mock_shared<exit_handler_intel_x64>(mocks);
@@ -675,7 +630,7 @@ vcpu_ut::test_vcpu_intel_x64_hlt_valid()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        auto vc = std::make_shared<vcpu_intel_x64>(0x0001000000000000, dr, in, on, cs, eh, vs, gs);
+        auto vc = std::make_shared<vcpu_intel_x64>(0x0001000000000000, dr, on, cs, eh, vs, gs);
         vc->init();
         vc->run();
         vc->hlt();
@@ -688,7 +643,6 @@ vcpu_ut::test_vcpu_intel_x64_hlt_valid_is_host_vcpu()
     MockRepository mocks;
     auto mm = mocks.Mock<memory_manager>();
     auto dr = bfn::mock_shared<debug_ring>(mocks);
-    auto in = bfn::mock_shared<intrinsics_intel_x64>(mocks);
     auto on = bfn::mock_shared<vmxon_intel_x64>(mocks);
     auto cs = bfn::mock_shared<vmcs_intel_x64>(mocks);
     auto eh = bfn::mock_shared<exit_handler_intel_x64>(mocks);
@@ -712,7 +666,7 @@ vcpu_ut::test_vcpu_intel_x64_hlt_valid_is_host_vcpu()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        auto vc = std::make_shared<vcpu_intel_x64>(0, dr, in, on, cs, eh, vs, gs);
+        auto vc = std::make_shared<vcpu_intel_x64>(0, dr, on, cs, eh, vs, gs);
         vc->init();
         vc->run();
         vc->hlt();
@@ -725,7 +679,6 @@ vcpu_ut::test_vcpu_intel_x64_hlt_vmxon_throws()
     MockRepository mocks;
     auto mm = mocks.Mock<memory_manager>();
     auto dr = bfn::mock_shared<debug_ring>(mocks);
-    auto in = bfn::mock_shared<intrinsics_intel_x64>(mocks);
     auto on = bfn::mock_shared<vmxon_intel_x64>(mocks);
     auto cs = bfn::mock_shared<vmcs_intel_x64>(mocks);
     auto eh = bfn::mock_shared<exit_handler_intel_x64>(mocks);
@@ -749,7 +702,7 @@ vcpu_ut::test_vcpu_intel_x64_hlt_vmxon_throws()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        auto vc = std::make_shared<vcpu_intel_x64>(0, dr, in, on, cs, eh, vs, gs);
+        auto vc = std::make_shared<vcpu_intel_x64>(0, dr, on, cs, eh, vs, gs);
         vc->init();
         vc->run();
         EXPECT_EXCEPTION(vc->hlt(), std::runtime_error);

@@ -30,10 +30,8 @@
 extern "C" void
 exit_handler(exit_handler_intel_x64 *exit_handler) noexcept
 {
-    guard_exceptions(-1, [&]()
-    {
-        exit_handler->dispatch();
-    });
+    guard_exceptions([&]()
+    { exit_handler->dispatch(); });
 
     exit_handler->halt();
 }

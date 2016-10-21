@@ -132,15 +132,13 @@ vcpu_ut::list()
     this->test_vcpu_is_not_initialized_vm_vcpu();
 
     this->test_vcpu_intel_x64_invalid_id();
-    this->test_vcpu_intel_x64_null_params_valid_intrinsics();
-    this->test_vcpu_intel_x64_valid_params_null_intrinsics();
     this->test_vcpu_intel_x64_valid();
-    this->test_vcpu_intel_x64_init_null_params_valid_intrinsics();
-    this->test_vcpu_intel_x64_init_valid_params_null_intrinsics();
+    this->test_vcpu_intel_x64_init_null_params();
+    this->test_vcpu_intel_x64_init_valid_params();
     this->test_vcpu_intel_x64_init_valid();
     this->test_vcpu_intel_x64_init_vmcs_throws();
-    this->test_vcpu_intel_x64_fini_null_params_valid_intrinsics();
-    this->test_vcpu_intel_x64_fini_valid_params_null_intrinsics();
+    this->test_vcpu_intel_x64_fini_null_params();
+    this->test_vcpu_intel_x64_fini_valid_params();
     this->test_vcpu_intel_x64_fini_valid();
     this->test_vcpu_intel_x64_fini_no_init();
     this->test_vcpu_intel_x64_run_launch();

@@ -19,73 +19,54 @@
 ; License along with this library; if not, write to the Free Software
 ; Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-global __vmxon:function
-global __vmxoff:function
-global __vmcall:function
-global __vmclear:function
-global __vmptrld:function
-global __vmptrst:function
-global __vmwrite:function
-global __vmread:function
-global __vmlaunch:function
-
 section .text
 
-; bool __vmxon(void *vmxon_region)
+global __vmxon:function
 __vmxon:
     vmxon [rdi]
     jbe __vmx_failure
     jmp __vmx_success
 
-; bool __vmxoff(void)
+global __vmxoff:function
 __vmxoff:
     vmxoff
     jbe __vmx_failure
     jmp __vmx_success
 
-; bool __vmcall(uint64_t value)
-__vmcall:
-    mov rax, rdi
-    vmcall
-    jbe __vmx_failure
-    jmp __vmx_success
-
-; bool __vmclear(void *vmcs_region)
+global __vmclear:function
 __vmclear:
     vmclear [rdi]
     jbe __vmx_failure
     jmp __vmx_success
 
-; bool __vmptrld(void *vmcs_region)
+global __vmptrld:function
 __vmptrld:
     vmptrld [rdi]
     jbe __vmx_failure
     jmp __vmx_success
 
-; bool __vmptrst(void *vmcs_region)
+global __vmptrst:function
 __vmptrst:
     vmptrst [rdi]
     jbe __vmx_failure
     jmp __vmx_success
 
-; bool __vmwrite(uint64_t field, uint64_t val)
-__vmwrite:
-    vmwrite rdi, rsi
-    jbe __vmx_failure
-    jmp __vmx_success
-
-; bool __vmread(uint64_t field, uint64_t *val)
+global __vmread:function
 __vmread:
     vmread [rsi], rdi
     jbe __vmx_failure
     jmp __vmx_success
 
-; vmx instruction failed
+global __vmwrite:function
+__vmwrite:
+    vmwrite rdi, rsi
+    jbe __vmx_failure
+    jmp __vmx_success
+
 __vmx_failure:
     mov rax, 0x0
     ret
 
-; vmx instruction succeded
 __vmx_success:
     mov rax, 0x1
     ret
@@ -112,6 +93,7 @@ __vmx_success:
 ; continue execution.
 ;
 
+global __vmlaunch:function
 __vmlaunch:
     call __vmlaunch_trampoline
     ret

@@ -23,7 +23,6 @@
 #define VMXON_INTEL_X64_H
 
 #include <memory>
-#include <intrinsics/intrinsics_intel_x64.h>
 
 // -----------------------------------------------------------------------------
 // Definition
@@ -43,7 +42,7 @@ public:
 
     /// Default Constructor
     ///
-    vmxon_intel_x64(std::shared_ptr<intrinsics_intel_x64> intrinsics = nullptr);
+    vmxon_intel_x64();
 
     /// Destructor
     ///
@@ -84,8 +83,6 @@ protected:
 private:
 
     friend class vmxon_ut;
-
-    std::shared_ptr<intrinsics_intel_x64> m_intrinsics;
 
     bool m_vmxon_enabled;
     uintptr_t m_vmxon_region_phys;

@@ -19,17 +19,19 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <intrinsics/srs_x64.h>
 #include <vmcs/vmcs_intel_x64_host_vm_state.h>
+
+#include <intrinsics/srs_x64.h>
+#include <intrinsics/debug_x64.h>
+#include <intrinsics/rflags_x64.h>
+#include <intrinsics/crs_intel_x64.h>
+#include <intrinsics/msrs_intel_x64.h>
 
 using namespace x64;
 using namespace intel_x64;
 
-vmcs_intel_x64_host_vm_state::vmcs_intel_x64_host_vm_state(const std::shared_ptr<intrinsics_intel_x64> &intrinsics)
+vmcs_intel_x64_host_vm_state::vmcs_intel_x64_host_vm_state()
 {
-    if (!intrinsics)
-        throw std::invalid_argument("intrinsics == nullptr");
-
     m_es = segment_register::es::get();
     m_cs = segment_register::cs::get();
     m_ss = segment_register::ss::get();
@@ -39,9 +41,6 @@ vmcs_intel_x64_host_vm_state::vmcs_intel_x64_host_vm_state(const std::shared_ptr
     m_ldtr = segment_register::ldtr::get();
     m_tr = segment_register::tr::get();
 
-    // REMOVE ME: The bit shift should go into the namespace logic. When you
-    // do this, make sure the VMCS logic also has this as it could be useful
-    // there too
     m_es_index = segment_register::es::index::get();
     m_cs_index = segment_register::cs::index::get();
     m_ss_index = segment_register::ss::index::get();
@@ -54,7 +53,7 @@ vmcs_intel_x64_host_vm_state::vmcs_intel_x64_host_vm_state(const std::shared_ptr
     m_cr0 = cr0::get();
     m_cr3 = cr3::get();
     m_cr4 = cr4::get() | cr4::vmx_enable_bit::mask;
-    m_dr7 = intrinsics->read_dr7();
+    m_dr7 = dr7::get();
 
     m_rflags = rflags::get();
 

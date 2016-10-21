@@ -27,12 +27,19 @@
 #include <vmcs/vmcs_intel_x64_resume.h>
 #include <vmcs/vmcs_intel_x64_promote.h>
 
+#include <intrinsics/rflags_x64.h>
+#include <intrinsics/crs_intel_x64.h>
+#include <intrinsics/vmx_intel_x64.h>
+
 using namespace x64;
 using namespace intel_x64;
 
-extern size_t g_new_throws_bad_alloc;
 extern bool g_vmread_fails;
 extern bool g_vmwrite_fails;
+extern bool g_vmclear_fails;
+extern bool g_vmload_fails;
+extern bool g_vmlaunch_fails;
+extern size_t g_new_throws_bad_alloc;
 
 static void
 vmcs_promote_fail(bool state_save)
@@ -147,7 +154,7 @@ setup_vm_execution_control_fields()
 {
     g_vmcs_fields[VMCS_PIN_BASED_VM_EXECUTION_CONTROLS] = 0xffffFFFFffffFF7F;
     g_vmcs_fields[VMCS_PRIMARY_PROCESSOR_BASED_VM_EXECUTION_CONTROLS] = 0xffffFFFFffffFFFF;
-    g_vmcs_fields[VMCS_SECONDARY_PROCESSOR_BASED_VM_EXECUTION_CONTROLS] = 0xffffFFFFffffFdee;
+    g_vmcs_fields[VMCS_SECONDARY_PROCESSOR_BASED_VM_EXECUTION_CONTROLS] = 0x0000000000000000;
     g_vmcs_fields[VMCS_CR3_TARGET_COUNT] = 3;
     g_vmcs_fields[VMCS_ADDRESS_OF_IO_BITMAP_A] = 0x0000000000000000;
     g_vmcs_fields[VMCS_ADDRESS_OF_IO_BITMAP_B] = 0x0000000000000000;
@@ -195,7 +202,7 @@ setup_msrs()
     g_msrs[msrs::ia32_vmx_basic::addr] = 0x7ffFFFF;
     g_msrs[msrs::ia32_vmx_true_pinbased_ctls::addr] = 0xffffFFFF01010101;
     g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = 0xffffFFFF01010101;
-    g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = 0xffffFdeefffffdee;
+    g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = 0x0000000000000000;
     g_msrs[msrs::ia32_vmx_ept_vpid_cap::addr] = 0x0000000000000000;
     g_msrs[msrs::ia32_vmx_ept_vpid_cap::addr] |= msrs::ia32_vmx_ept_vpid_cap::memory_type_uncacheable_supported::mask;
     g_msrs[msrs::ia32_vmx_ept_vpid_cap::addr] |= msrs::ia32_vmx_ept_vpid_cap::memory_type_write_back_supported::mask;
@@ -302,29 +309,11 @@ setup_vmcs_x64_state_intrinsics(MockRepository &mocks, vmcs_intel_x64_state *sta
 }
 
 static void
-setup_vmcs_launch_failure(MockRepository &mocks, intrinsics_intel_x64 *in)
-{
-    setup_msrs();
-    setup_vmcs_fields();
-
-    Call &vmlaunch = mocks.OnCall(in, intrinsics_intel_x64::vmlaunch).Return(false);
-    mocks.OnCall(in, intrinsics_intel_x64::vmread).After(vmlaunch).Do(__vmread);
-}
-
-static void
-setup_vmcs_intrinsics(MockRepository &mocks, memory_manager *mm, intrinsics_intel_x64 *in)
+setup_vmcs_intrinsics(MockRepository &mocks, memory_manager *mm)
 {
     mocks.OnCallFunc(memory_manager::instance).Return(mm);
     mocks.OnCall(mm, memory_manager::virtptr_to_physint).Do(virtptr_to_physint);
     mocks.OnCall(mm, memory_manager::physint_to_virtptr).Do(physint_to_virtptr);
-
-    mocks.OnCall(in, intrinsics_intel_x64::cpuid_eax).Do(cpuid_eax);
-
-    mocks.OnCall(in, intrinsics_intel_x64::vmclear).Return(true);
-    mocks.OnCall(in, intrinsics_intel_x64::vmptrld).Return(true);
-    mocks.OnCall(in, intrinsics_intel_x64::vmlaunch).Return(true);
-    mocks.OnCall(in, intrinsics_intel_x64::vmwrite).Return(true);
-    mocks.OnCall(in, intrinsics_intel_x64::vmread).Return(true);
 }
 
 void
@@ -332,26 +321,19 @@ vmcs_ut::test_launch_success()
 {
     MockRepository mocks;
     auto mm = mocks.Mock<memory_manager>();
-    auto in = bfn::mock_shared<intrinsics_intel_x64>(mocks);
     auto host_state = bfn::mock_shared<vmcs_intel_x64_state>(mocks);
     auto guest_state = bfn::mock_shared<vmcs_intel_x64_state>(mocks);
 
-    setup_vmcs_intrinsics(mocks, mm, in.get());
+    setup_vmcs_intrinsics(mocks, mm);
     setup_vmcs_x64_state_intrinsics(mocks, host_state.get());
     setup_vmcs_x64_state_intrinsics(mocks, guest_state.get());
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        vmcs_intel_x64 vmcs(in);
+        vmcs_intel_x64 vmcs{};
 
         EXPECT_NO_EXCEPTION(vmcs.launch(host_state, guest_state));
     });
-}
-
-void
-vmcs_ut::test_constructor_null_intrinsics()
-{
-    EXPECT_NO_EXCEPTION(vmcs_intel_x64(nullptr));
 }
 
 void
@@ -359,18 +341,23 @@ vmcs_ut::test_launch_vmlaunch_failure()
 {
     MockRepository mocks;
     auto mm = mocks.Mock<memory_manager>();
-    auto in = bfn::mock_shared<intrinsics_intel_x64>(mocks);
     auto host_state = bfn::mock_shared<vmcs_intel_x64_state>(mocks);
     auto guest_state = bfn::mock_shared<vmcs_intel_x64_state>(mocks);
 
-    setup_vmcs_intrinsics(mocks, mm, in.get());
+    setup_vmcs_intrinsics(mocks, mm);
     setup_vmcs_x64_state_intrinsics(mocks, host_state.get());
     setup_vmcs_x64_state_intrinsics(mocks, guest_state.get());
-    setup_vmcs_launch_failure(mocks, in.get());
+    setup_msrs();
+    setup_vmcs_fields();
+
+    auto ___ = gsl::finally([&]
+    { g_vmlaunch_fails = false; });
+
+    g_vmlaunch_fails = true;
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        vmcs_intel_x64 vmcs(in);
+        vmcs_intel_x64 vmcs{};
 
         EXPECT_EXCEPTION(vmcs.launch(host_state, guest_state), std::runtime_error);
     });
@@ -381,11 +368,10 @@ vmcs_ut::test_launch_create_vmcs_region_failure()
 {
     MockRepository mocks;
     auto mm = mocks.Mock<memory_manager>();
-    auto in = bfn::mock_shared<intrinsics_intel_x64>(mocks);
     auto host_state = bfn::mock_shared<vmcs_intel_x64_state>(mocks);
     auto guest_state = bfn::mock_shared<vmcs_intel_x64_state>(mocks);
 
-    setup_vmcs_intrinsics(mocks, mm, in.get());
+    setup_vmcs_intrinsics(mocks, mm);
     setup_vmcs_x64_state_intrinsics(mocks, host_state.get());
     setup_vmcs_x64_state_intrinsics(mocks, guest_state.get());
 
@@ -396,7 +382,7 @@ vmcs_ut::test_launch_create_vmcs_region_failure()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        vmcs_intel_x64 vmcs(in);
+        vmcs_intel_x64 vmcs{};
 
         EXPECT_EXCEPTION(vmcs.launch(host_state, guest_state), std::logic_error);
     });
@@ -407,15 +393,14 @@ vmcs_ut::test_launch_create_exit_handler_stack_failure()
 {
     MockRepository mocks;
     auto mm = mocks.Mock<memory_manager>();
-    auto in = bfn::mock_shared<intrinsics_intel_x64>(mocks);
     auto host_state = bfn::mock_shared<vmcs_intel_x64_state>(mocks);
     auto guest_state = bfn::mock_shared<vmcs_intel_x64_state>(mocks);
 
-    setup_vmcs_intrinsics(mocks, mm, in.get());
+    setup_vmcs_intrinsics(mocks, mm);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        vmcs_intel_x64 vmcs(in);
+        vmcs_intel_x64 vmcs{};
 
         auto ___ = gsl::finally([&]
         { g_new_throws_bad_alloc = 0; });
@@ -430,17 +415,19 @@ vmcs_ut::test_launch_clear_failure()
 {
     MockRepository mocks;
     auto mm = mocks.Mock<memory_manager>();
-    auto in = bfn::mock_shared<intrinsics_intel_x64>(mocks);
     auto host_state = bfn::mock_shared<vmcs_intel_x64_state>(mocks);
     auto guest_state = bfn::mock_shared<vmcs_intel_x64_state>(mocks);
 
-    setup_vmcs_intrinsics(mocks, mm, in.get());
-    mocks.OnCall(in.get(), intrinsics_intel_x64::vmclear).Return(false);
+    setup_vmcs_intrinsics(mocks, mm);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        vmcs_intel_x64 vmcs(in);
+        vmcs_intel_x64 vmcs{};
 
+        auto ___ = gsl::finally([&]
+        { g_vmclear_fails = false; });
+
+        g_vmclear_fails = true;
         EXPECT_EXCEPTION(vmcs.launch(host_state, guest_state), std::runtime_error);
     });
 }
@@ -450,17 +437,19 @@ vmcs_ut::test_launch_load_failure()
 {
     MockRepository mocks;
     auto mm = mocks.Mock<memory_manager>();
-    auto in = bfn::mock_shared<intrinsics_intel_x64>(mocks);
     auto host_state = bfn::mock_shared<vmcs_intel_x64_state>(mocks);
     auto guest_state = bfn::mock_shared<vmcs_intel_x64_state>(mocks);
 
-    setup_vmcs_intrinsics(mocks, mm, in.get());
-    mocks.OnCall(in.get(), intrinsics_intel_x64::vmptrld).Return(false);
+    setup_vmcs_intrinsics(mocks, mm);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        vmcs_intel_x64 vmcs(in);
+        vmcs_intel_x64 vmcs{};
 
+        auto ___ = gsl::finally([&]
+        { g_vmload_fails = false; });
+
+        g_vmload_fails = true;
         EXPECT_EXCEPTION(vmcs.launch(host_state, guest_state), std::runtime_error);
     });
 }
@@ -469,14 +458,11 @@ void
 vmcs_ut::test_promote_failure()
 {
     MockRepository mocks;
-    auto in = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
     mocks.OnCallFunc(vmcs_promote).Do(vmcs_promote_fail);
-    mocks.OnCall(in.get(), intrinsics_intel_x64::vmread).Return(true);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        vmcs_intel_x64 vmcs(in);
+        vmcs_intel_x64 vmcs{};
 
         EXPECT_EXCEPTION(vmcs.promote(), std::runtime_error);
     });
@@ -486,70 +472,13 @@ void
 vmcs_ut::test_resume_failure()
 {
     MockRepository mocks;
-    auto in = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
     mocks.OnCallFunc(vmcs_resume).Do(vmcs_resume_fail);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        vmcs_intel_x64 vmcs(in);
+        vmcs_intel_x64 vmcs{};
 
         EXPECT_EXCEPTION(vmcs.resume(), std::runtime_error);
-    });
-}
-
-void
-vmcs_ut::test_vmread_failure()
-{
-    MockRepository mocks;
-    auto in = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    g_vmread_fails = true;
-
-    auto ___ = gsl::finally([&]
-    { g_vmread_fails = false; });
-
-    auto e = std::make_shared<std::runtime_error>("");
-    this->expect_exception([&] { vmcs::virtual_processor_identifier::get(); }, e);
-
-    // REMOVEME
-    mocks.OnCall(in.get(), intrinsics_intel_x64::vmread).Return(false);
-
-    // REMOVEME
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        vmcs_intel_x64 vmcs(in);
-        uint64_t field = 0;
-
-        EXPECT_EXCEPTION(vmcs.vmread(field), std::runtime_error);
-    });
-}
-
-void
-vmcs_ut::test_vmwrite_failure()
-{
-    MockRepository mocks;
-    auto in = bfn::mock_shared<intrinsics_intel_x64>(mocks);
-
-    g_vmwrite_fails = true;
-
-    auto ___ = gsl::finally([&]
-    { g_vmwrite_fails = false; });
-
-    auto e = std::make_shared<std::runtime_error>("");
-    this->expect_exception([&] { vmcs::virtual_processor_identifier::set(100UL); }, e);
-
-    // REMOVEME
-    mocks.OnCall(in.get(), intrinsics_intel_x64::vmwrite).Return(false);
-
-    // REMOVEME
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        vmcs_intel_x64 vmcs(in);
-        uint64_t field = 0;
-        uint64_t value = 2;
-
-        EXPECT_EXCEPTION(vmcs.vmwrite(field, value), std::runtime_error);
     });
 }
 

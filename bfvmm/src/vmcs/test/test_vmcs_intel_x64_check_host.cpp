@@ -23,6 +23,7 @@
 #include <string>
 
 #include <intrinsics/srs_x64.h>
+#include <intrinsics/crs_intel_x64.h>
 
 using namespace x64;
 using namespace intel_x64;

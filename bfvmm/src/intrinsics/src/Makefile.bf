@@ -64,9 +64,6 @@ NATIVE_OUTDIR+=%BUILD_REL%/../bin
 # Sources
 ################################################################################
 
-SOURCES+=gdt_x64.cpp
-SOURCES+=idt_x64.cpp
-
 INCLUDE_PATHS+=./
 INCLUDE_PATHS+=%HYPER_ABS%/include/
 INCLUDE_PATHS+=%HYPER_ABS%/bfvmm/include/
@@ -79,8 +76,18 @@ LIBRARY_PATHS+=
 # Environment Specific
 ################################################################################
 
-VMM_SOURCES+=intrinsics_x64.asm
-VMM_SOURCES+=intrinsics_intel_x64.asm
+VMM_SOURCES+=cache_x64.asm
+VMM_SOURCES+=cpuid_x64.asm
+VMM_SOURCES+=crs_intel_x64.asm
+VMM_SOURCES+=debug_x64.asm
+VMM_SOURCES+=gdt_x64.asm
+VMM_SOURCES+=idt_x64.asm
+VMM_SOURCES+=msrs_intel_x64.asm
+VMM_SOURCES+=pm_x64.asm
+VMM_SOURCES+=portio_x64.asm
+VMM_SOURCES+=rflags_x64.asm
+VMM_SOURCES+=srs_x64.asm
+VMM_SOURCES+=vmx_intel_x64.asm
 VMM_INCLUDE_PATHS+=
 VMM_LIBS+=
 VMM_LIBRARY_PATHS+=
@@ -90,8 +97,19 @@ WINDOWS_INCLUDE_PATHS+=
 WINDOWS_LIBS+=
 WINDOWS_LIBRARY_PATHS+=
 
-LINUX_SOURCES+=intrinsics_x64_mock.cpp
-LINUX_SOURCES+=intrinsics_intel_x64_mock.cpp
+LINUX_SOURCES+=cache_x64_mock.cpp
+LINUX_SOURCES+=cpuid_x64_mock.cpp
+LINUX_SOURCES+=crs_intel_x64_mock.cpp
+LINUX_SOURCES+=debug_x64_mock.cpp
+LINUX_SOURCES+=gdt_x64_mock.cpp
+LINUX_SOURCES+=idt_x64_mock.cpp
+LINUX_SOURCES+=msrs_intel_x64_mock.cpp
+LINUX_SOURCES+=pm_x64_mock.cpp
+LINUX_SOURCES+=portio_x64_mock.cpp
+LINUX_SOURCES+=rflags_x64_mock.cpp
+LINUX_SOURCES+=srs_x64_mock.cpp
+LINUX_SOURCES+=vmx_intel_x64_mock.cpp
+LINUX_SOURCES+=thread_context_mock.cpp
 LINUX_INCLUDE_PATHS+=
 LINUX_LIBS+=
 LINUX_LIBRARY_PATHS+=

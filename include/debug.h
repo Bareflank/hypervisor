@@ -27,6 +27,8 @@
 #include <iostream>
 #include <sstream>
 
+#include <view_as_pointer.h>
+
 #define bfcolor_green "\033[1;32m"
 #define bfcolor_red "\033[1;31m"
 
@@ -36,6 +38,15 @@
 #define bfcolor_error "\033[1;31m"
 #define bfcolor_func "\033[1;36m"
 #define bfcolor_line "\033[1;35m"
+
+/// Current Function Macro
+///
+/// Clang Tidy does not like the built in macros that return character pointers
+/// as they claim it breaks the Core Guidelines which is obnoxious, so this
+/// macro redefines how this is done.
+///
+#define __FUNC__ static_cast<const char *>(__PRETTY_FUNCTION__)
+
 
 /// Output To Core
 ///
