@@ -28,8 +28,8 @@
 
 /// Register State
 ///
-/// Defines the state of the registers. WHen the unwinder first starts, it will
-/// get the state of the registers as it's first operation. From that point
+/// Defines the state of the registers. When the unwinder first starts, it will
+/// get the state of the registers as its first operation. From that point
 /// it will locate the FDE associated with the instruction pointer, and unwind
 /// the stack. The process of unwinding the stack is to change the register
 /// state stored here, which at a minimum changes the instruction pointer and
