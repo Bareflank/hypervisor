@@ -438,6 +438,10 @@ private:
     void test_vmcs_vm_entry_exception_error_code();
     void test_vmcs_vm_entry_instruction_length();
 
+    void test_check_vmcs_control_state();
+    void test_checks_on_vm_execution_control_fields();
+    void test_checks_on_vm_exit_control_fields();
+    void test_checks_on_vm_entry_control_fields();
     void test_check_control_pin_based_ctls_reserved_properly_set();
     void test_check_control_proc_based_ctls_reserved_properly_set();
     void test_check_control_proc_based_ctls2_reserved_properly_set();
@@ -470,6 +474,10 @@ private:
     void test_check_control_event_injection_instr_length_checks();
     void test_check_control_entry_msr_load_address();
 
+    void test_check_vmcs_host_state();
+    void test_check_host_control_registers_and_msrs();
+    void test_check_host_segment_and_descriptor_table_registers();
+    void test_check_host_checks_related_to_address_space_size();
     void test_check_host_cr0_for_unsupported_bits();
     void test_check_host_cr4_for_unsupported_bits();
     void test_check_host_cr3_for_unsupported_bits();
@@ -478,20 +486,13 @@ private:
     void test_check_host_verify_load_ia32_perf_global_ctrl();
     void test_check_host_verify_load_ia32_pat();
     void test_check_host_verify_load_ia32_efer();
-    void test_check_host_es_selector_rpl_equal_zero();
-    void test_check_host_cs_selector_rpl_equal_zero();
-    void test_check_host_ss_selector_rpl_equal_zero();
-    void test_check_host_ds_selector_rpl_equal_zero();
-    void test_check_host_fs_selector_rpl_equal_zero();
-    void test_check_host_gs_selector_rpl_equal_zero();
-    void test_check_host_tr_selector_rpl_equal_zero();
-    void test_check_host_es_selector_ti_equal_zero();
-    void test_check_host_cs_selector_ti_equal_zero();
-    void test_check_host_ss_selector_ti_equal_zero();
-    void test_check_host_ds_selector_ti_equal_zero();
-    void test_check_host_fs_selector_ti_equal_zero();
-    void test_check_host_gs_selector_ti_equal_zero();
-    void test_check_host_tr_selector_ti_equal_zero();
+    void test_check_host_es_selector_rpl_ti_equal_zero();
+    void test_check_host_cs_selector_rpl_ti_equal_zero();
+    void test_check_host_ss_selector_rpl_ti_equal_zero();
+    void test_check_host_ds_selector_rpl_ti_equal_zero();
+    void test_check_host_fs_selector_rpl_ti_equal_zero();
+    void test_check_host_gs_selector_rpl_ti_equal_zero();
+    void test_check_host_tr_selector_rpl_ti_equal_zero();
     void test_check_host_cs_not_equal_zero();
     void test_check_host_tr_not_equal_zero();
     void test_check_host_ss_not_equal_zero();
@@ -500,7 +501,6 @@ private:
     void test_check_host_gdtr_canonical_base_address();
     void test_check_host_idtr_canonical_base_address();
     void test_check_host_tr_canonical_base_address();
-    void test_check_host_checks_related_to_address_space_size();
     void test_check_host_if_outside_ia32e_mode();
     void test_check_host_vmcs_host_address_space_size_is_set();
     void test_check_host_host_address_space_disabled();

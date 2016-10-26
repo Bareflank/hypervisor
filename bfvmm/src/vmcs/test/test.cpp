@@ -525,6 +525,10 @@ vmcs_ut::list()
     this->test_vmcs_vm_entry_exception_error_code();
     this->test_vmcs_vm_entry_instruction_length();
 
+    this->test_check_vmcs_control_state();
+    this->test_checks_on_vm_execution_control_fields();
+    this->test_checks_on_vm_exit_control_fields();
+    this->test_checks_on_vm_entry_control_fields();
     this->test_check_control_pin_based_ctls_reserved_properly_set();
     this->test_check_control_proc_based_ctls_reserved_properly_set();
     this->test_check_control_proc_based_ctls2_reserved_properly_set();
@@ -557,6 +561,10 @@ vmcs_ut::list()
     this->test_check_control_event_injection_instr_length_checks();
     this->test_check_control_entry_msr_load_address();
 
+    this->test_check_vmcs_host_state();
+    this->test_check_host_control_registers_and_msrs();
+    this->test_check_host_segment_and_descriptor_table_registers();
+    this->test_check_host_checks_related_to_address_space_size();
     this->test_check_host_cr0_for_unsupported_bits();
     this->test_check_host_cr4_for_unsupported_bits();
     this->test_check_host_cr3_for_unsupported_bits();
@@ -565,20 +573,13 @@ vmcs_ut::list()
     this->test_check_host_verify_load_ia32_perf_global_ctrl();
     this->test_check_host_verify_load_ia32_pat();
     this->test_check_host_verify_load_ia32_efer();
-    this->test_check_host_es_selector_rpl_equal_zero();
-    this->test_check_host_cs_selector_rpl_equal_zero();
-    this->test_check_host_ss_selector_rpl_equal_zero();
-    this->test_check_host_ds_selector_rpl_equal_zero();
-    this->test_check_host_fs_selector_rpl_equal_zero();
-    this->test_check_host_gs_selector_rpl_equal_zero();
-    this->test_check_host_tr_selector_rpl_equal_zero();
-    this->test_check_host_es_selector_ti_equal_zero();
-    this->test_check_host_cs_selector_ti_equal_zero();
-    this->test_check_host_ss_selector_ti_equal_zero();
-    this->test_check_host_ds_selector_ti_equal_zero();
-    this->test_check_host_fs_selector_ti_equal_zero();
-    this->test_check_host_gs_selector_ti_equal_zero();
-    this->test_check_host_tr_selector_ti_equal_zero();
+    this->test_check_host_es_selector_rpl_ti_equal_zero();
+    this->test_check_host_cs_selector_rpl_ti_equal_zero();
+    this->test_check_host_ss_selector_rpl_ti_equal_zero();
+    this->test_check_host_ds_selector_rpl_ti_equal_zero();
+    this->test_check_host_fs_selector_rpl_ti_equal_zero();
+    this->test_check_host_gs_selector_rpl_ti_equal_zero();
+    this->test_check_host_tr_selector_rpl_ti_equal_zero();
     this->test_check_host_cs_not_equal_zero();
     this->test_check_host_tr_not_equal_zero();
     this->test_check_host_ss_not_equal_zero();

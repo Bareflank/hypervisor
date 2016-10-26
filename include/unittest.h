@@ -257,12 +257,14 @@ inline auto operator"" _ut_ffe(const char *str, std::size_t len)
 #define EXPECT_NO_EXCEPTION(a) \
     { \
         bool caught = false; \
+        std::string caught_str = ""; \
         try{ a; } \
         catch(BaseException &be) { throw; } \
-        catch(bfn::general_exception &ge) { caught = true; } \
-        catch(std::exception &e) { caught = true; } \
+        catch(bfn::general_exception &ge) { caught = true; caught_str = ge.what(); } \
+        catch(std::exception &e) { caught = true; caught_str = e.what(); } \
         catch(...) { caught = true; } \
-        EXPECT_FALSE(caught); \
+        std::string err_str = std::string("shouldn't have caught: what == ") + caught_str; \
+        this->expect_false_with_args(caught, err_str, gsl::cstring_span<>(__PRETTY_FUNCTION__), __LINE__); \
     }
 
 /// Expect No Exception
@@ -671,7 +673,7 @@ protected:
             this->expect_failed(e.what(), func, line);
         }
 
-        inc_pass();
+        //inc_pass();
 
         mocks.reset();
 
@@ -824,13 +826,31 @@ protected:
     {
         struct exception_state state = { false, false, "",  "" };
 
-        try { f(); }
-        catch (BaseException &be) { throw; }
-        catch (bfn::general_exception &ge) { state.caught = true; }
-        catch (std::exception &e) { state.caught = true; }
-        catch (...) { state.caught = true; }
+        try
+        {
+            f();
+        }
+        catch (BaseException &be)
+        {
+            throw;
+        }
+        catch (bfn::general_exception &ge)
+        {
+            state.caught = true;
+            state.caught_str = ge.what();
+        }
+        catch (std::exception &e)
+        {
+            state.caught = true;
+            state.caught_str = e.what();
+        }
+        catch (...)
+        {
+            state.caught = true;
+        }
 
-        this->expect_false_with_args(state.caught, "caught", func, line);
+        std::string err_str = std::string("shouldn't have caught: what == ") + state.caught_str;
+        this->expect_false_with_args(state.caught, err_str, func, line);
     }
 
     /// Expect true with args

@@ -5930,7 +5930,7 @@ constexpr const auto VMCS_HOST_RIP                                             =
 
 // VM-Exit Control Fields
 // intel's software developers manual, volume 3, chapter 24.7.1
-#define VM_EXIT_CONTROL_SAVE_DEBUG_CONTROLS                       (1ULL << 2)
+//#define VM_EXIT_CONTROL_SAVE_DEBUG_CONTROLS                       (1ULL << 2)
 #define VM_EXIT_CONTROL_HOST_ADDRESS_SPACE_SIZE                   (1ULL << 9)
 #define VM_EXIT_CONTROL_LOAD_IA32_PERF_GLOBAL_CTRL                (1ULL << 12)
 #define VM_EXIT_CONTROL_ACKNOWLEDGE_INTERRUPT_ON_EXIT             (1ULL << 15)

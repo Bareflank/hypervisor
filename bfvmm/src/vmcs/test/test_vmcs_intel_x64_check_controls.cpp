@@ -26,9 +26,121 @@ using namespace intel_x64;
 static struct control_flow_path path;
 
 static void
+setup_checks_on_vm_execution_control_fields_paths(std::vector<struct control_flow_path> &cfg)
+{
+    path.setup = [&]
+    {
+        g_msrs[msrs::ia32_vmx_true_pinbased_ctls::addr] = 0xffffffff00000000UL;
+        g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = 0xffffffff00000000UL;
+        g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = 0xffffffff00000000UL;
+        vmcs::cr3_target_count::set(3U);
+        disable_proc_ctl(vmcs::primary_processor_based_vm_execution_controls::use_io_bitmaps::mask);
+        disable_proc_ctl(vmcs::primary_processor_based_vm_execution_controls::use_msr_bitmaps::mask);
+        disable_proc_ctl(vmcs::primary_processor_based_vm_execution_controls::use_tpr_shadow::mask);
+        disable_proc_ctl2(VM_EXEC_S_PROC_BASED_VIRTUALIZE_X2APIC_MODE);
+        disable_proc_ctl2(VM_EXEC_S_PROC_BASED_APIC_REGISTER_VIRTUALIZATION);
+        disable_proc_ctl2(VM_EXEC_S_PROC_BASED_VIRTUAL_INTERRUPT_DELIVERY);
+        enable_pin_ctl(vmcs::pin_based_vm_execution_controls::nmi_exiting::mask);
+        enable_pin_ctl(vmcs::pin_based_vm_execution_controls::virtual_nmis::mask);
+        disable_proc_ctl2(VM_EXEC_S_PROC_BASED_VIRTUALIZE_APIC_ACCESSES);
+        disable_pin_ctl(vmcs::pin_based_vm_execution_controls::process_posted_interrupts::mask);
+        disable_proc_ctl2(VM_EXEC_S_PROC_BASED_ENABLE_VPID);
+        disable_proc_ctl2(VM_EXEC_S_PROC_BASED_ENABLE_EPT);
+        disable_proc_ctl2(VM_EXEC_S_PROC_BASED_ENABLE_PML);
+        disable_proc_ctl2(VM_EXEC_S_PROC_BASED_UNRESTRICTED_GUEST);
+        disable_proc_ctl2(VM_EXEC_S_PROC_BASED_ENABLE_VM_FUNCTIONS);
+        disable_proc_ctl2(VM_EXEC_S_PROC_BASED_VMCS_SHADOWING);
+        disable_proc_ctl2(VM_EXEC_S_PROC_BASED_EPT_VIOLATION_VE);
+    };
+    path.throws_exception = false;
+    cfg.push_back(path);
+}
+
+static void
+setup_checks_on_vm_exit_control_fields_paths(std::vector<struct control_flow_path> &cfg)
+{
+    path.setup = [&]
+    {
+        g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] = 0xffffffff00000000UL;
+        enable_pin_ctl(vmcs::pin_based_vm_execution_controls::activate_vmx_preemption_timer::mask);
+        vmcs::vm_exit_msr_store_count::set(0U);
+        vmcs::vm_exit_msr_load_count::set(0U);
+    };
+    path.throws_exception = false;
+    cfg.push_back(path);
+}
+
+static void
+setup_checks_on_vm_entry_control_fields_paths(std::vector<struct control_flow_path> &cfg)
+{
+    path.setup = [&]
+    {
+        g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] = 0xffffffff00000000UL;
+        vmcs::vm_entry_interruption_information_field::valid_bit::clear();
+        vmcs::vm_entry_msr_load_count::set(0U);
+    };
+    path.throws_exception = false;
+    cfg.push_back(path);
+}
+
+void
+setup_check_vmcs_control_state_paths(std::vector<struct control_flow_path> &cfg)
+{
+    std::vector<struct control_flow_path> sub_cfg;
+
+    setup_checks_on_vm_execution_control_fields_paths(sub_cfg);
+    setup_checks_on_vm_exit_control_fields_paths(sub_cfg);
+    setup_checks_on_vm_entry_control_fields_paths(sub_cfg);
+
+    path.setup = [sub_cfg]
+    {
+        for (const auto &sub_path : sub_cfg)
+            sub_path.setup();
+    };
+    path.throws_exception = false;
+    cfg.push_back(path);
+}
+
+void
+vmcs_ut::test_check_vmcs_control_state()
+{
+    std::vector<struct control_flow_path> cfg;
+    setup_check_vmcs_control_state_paths(cfg);
+
+    this->run_vmcs_test(cfg, &vmcs_intel_x64::check_vmcs_control_state);
+}
+
+void
+vmcs_ut::test_checks_on_vm_execution_control_fields()
+{
+    std::vector<struct control_flow_path> cfg;
+    setup_checks_on_vm_execution_control_fields_paths(cfg);
+
+    this->run_vmcs_test(cfg, &vmcs_intel_x64::checks_on_vm_execution_control_fields);
+}
+
+void
+vmcs_ut::test_checks_on_vm_exit_control_fields()
+{
+    std::vector<struct control_flow_path> cfg;
+    setup_checks_on_vm_exit_control_fields_paths(cfg);
+
+    this->run_vmcs_test(cfg, &vmcs_intel_x64::checks_on_vm_exit_control_fields);
+}
+
+void
+vmcs_ut::test_checks_on_vm_entry_control_fields()
+{
+    std::vector<struct control_flow_path> cfg;
+    setup_checks_on_vm_entry_control_fields_paths(cfg);
+
+    this->run_vmcs_test(cfg, &vmcs_intel_x64::checks_on_vm_entry_control_fields);
+}
+
+static void
 setup_check_control_pin_based_ctls_reserved_properly_set_paths(std::vector<struct control_flow_path> &cfg)
 {
-    path.setup = [&] { g_msrs[msrs::ia32_vmx_true_pinbased_ctls::addr] = 0; vmcs::pin_based_vm_execution_controls::set(0UL); };
+    path.setup = [&] { g_msrs[msrs::ia32_vmx_true_pinbased_ctls::addr] = 0xffffffff00000000UL; };
     path.throws_exception = false;
     cfg.push_back(path);
 
@@ -46,7 +158,7 @@ setup_check_control_pin_based_ctls_reserved_properly_set_paths(std::vector<struc
 static void
 setup_check_control_proc_based_ctls_reserved_properly_set_paths(std::vector<struct control_flow_path> &cfg)
 {
-    path.setup = [&] { g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = 0; vmcs::primary_processor_based_vm_execution_controls::set(0UL); };
+    path.setup = [&] { g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = 0xffffffff00000000UL; };
     path.throws_exception = false;
     cfg.push_back(path);
 
@@ -63,7 +175,7 @@ setup_check_control_proc_based_ctls_reserved_properly_set_paths(std::vector<stru
 static void
 setup_check_control_proc_based_ctls2_reserved_properly_set_paths(std::vector<struct control_flow_path> &cfg)
 {
-    path.setup = [&] { g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = 0; g_vmcs_fields[VMCS_SECONDARY_PROCESSOR_BASED_VM_EXECUTION_CONTROLS] = 0; };
+    path.setup = [&] { g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = 0xffffffff00000000UL; };
     path.throws_exception = false;
     cfg.push_back(path);
 
@@ -546,9 +658,8 @@ setup_check_control_vm_exit_ctls_reserved_properly_set_paths(std::vector<struct 
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("invalid vm_exit_controls"));
     cfg.push_back(path);
 
-    path.setup = [&] { vmcs::vm_exit_controls::set(1UL); };
-    path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("invalid vm_exit_controls"));
+    path.setup = [&] { g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] = 0xffffffff00000000UL; };
+    path.throws_exception = false;
     cfg.push_back(path);
 }
 
@@ -631,9 +742,8 @@ setup_check_control_vm_entry_ctls_reserved_properly_set_paths(std::vector<struct
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("invalid vm_entry_controls"));
     cfg.push_back(path);
 
-    path.setup = [&] { vmcs::vm_entry_controls::set(1UL); };
-    path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("invalid vm_entry_controls"));
+    path.setup = [&] { g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] = 0xffffffff00000000; };
+    path.throws_exception = false;
     cfg.push_back(path);
 }
 
