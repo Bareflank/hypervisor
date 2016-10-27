@@ -38,6 +38,8 @@ struct control_flow_path
     bool throws_exception;
 };
 
+struct vm_control;
+
 extern std::map<uint32_t, uint64_t> g_msrs;
 extern std::map<uint64_t, uint64_t> g_vmcs_fields;
 extern uint8_t span[0x81];
@@ -96,6 +98,8 @@ protected:
             });
         }
     }
+
+    void test_vm_control_with_args(const struct vm_control &ctl, gsl::cstring_span<> fut, int line);
 
 private:
 
@@ -372,6 +376,67 @@ private:
     void test_vmcs_guest_tr_access_rights_granularity();
     void test_vmcs_guest_tr_access_rights_reserved();
     void test_vmcs_guest_tr_access_rights_unusable();
+    void test_vmcs_pin_based_vm_execution_controls();
+    void test_vmcs_pin_based_vm_execution_controls_external_interrupt_exiting();
+    void test_vmcs_pin_based_vm_execution_controls_nmi_exiting();
+    void test_vmcs_pin_based_vm_execution_controls_virtual_nmis();
+    void test_vmcs_pin_based_vm_execution_controls_activate_vmx_preemption_timer();
+    void test_vmcs_pin_based_vm_execution_controls_process_posted_interrupts();
+    void test_vmcs_primary_processor_based_vm_execution_controls();
+    void test_vmcs_primary_processor_based_vm_execution_controls_interrupt_window_exiting();
+    void test_vmcs_primary_processor_based_vm_execution_controls_use_tsc_offsetting();
+    void test_vmcs_primary_processor_based_vm_execution_controls_hlt_exiting();
+    void test_vmcs_primary_processor_based_vm_execution_controls_invlpg_exiting();
+    void test_vmcs_primary_processor_based_vm_execution_controls_mwait_exiting();
+    void test_vmcs_primary_processor_based_vm_execution_controls_rdpmc_exiting();
+    void test_vmcs_primary_processor_based_vm_execution_controls_rdtsc_exiting();
+    void test_vmcs_primary_processor_based_vm_execution_controls_cr3_load_exiting();
+    void test_vmcs_primary_processor_based_vm_execution_controls_cr3_store_exiting();
+    void test_vmcs_primary_processor_based_vm_execution_controls_cr8_load_exiting();
+    void test_vmcs_primary_processor_based_vm_execution_controls_cr8_store_exiting();
+    void test_vmcs_primary_processor_based_vm_execution_controls_use_tpr_shadow();
+    void test_vmcs_primary_processor_based_vm_execution_controls_nmi_window_exiting();
+    void test_vmcs_primary_processor_based_vm_execution_controls_mov_dr_exiting();
+    void test_vmcs_primary_processor_based_vm_execution_controls_unconditional_io_exiting();
+    void test_vmcs_primary_processor_based_vm_execution_controls_use_io_bitmaps();
+    void test_vmcs_primary_processor_based_vm_execution_controls_monitor_trap_flag();
+    void test_vmcs_primary_processor_based_vm_execution_controls_use_msr_bitmaps();
+    void test_vmcs_primary_processor_based_vm_execution_controls_monitor_exiting();
+    void test_vmcs_primary_processor_based_vm_execution_controls_pause_exiting();
+    void test_vmcs_primary_processor_based_vm_execution_controls_activate_secondary_controls();
+    void test_vmcs_exception_bitmap();
+    void test_vmcs_page_fault_error_code_mask();
+    void test_vmcs_page_fault_error_code_match();
+    void test_vmcs_cr3_target_count();
+    void test_vmcs_vm_exit_controls();
+    void test_vmcs_vm_exit_controls_save_debug_controls();
+    void test_vmcs_vm_exit_controls_host_address_space_size();
+    void test_vmcs_vm_exit_controls_load_ia32_perf_global_ctrl();
+    void test_vmcs_vm_exit_controls_acknowledge_interrupt_on_exit();
+    void test_vmcs_vm_exit_controls_save_ia32_pat();
+    void test_vmcs_vm_exit_controls_load_ia32_pat();
+    void test_vmcs_vm_exit_controls_save_ia32_efer();
+    void test_vmcs_vm_exit_controls_load_ia32_efer();
+    void test_vmcs_vm_exit_controls_save_vmx_preemption_timer_value();
+    void test_vmcs_vm_exit_msr_store_count();
+    void test_vmcs_vm_exit_msr_load_count();
+    void test_vmcs_vm_entry_controls();
+    void test_vmcs_vm_entry_controls_load_debug_controls();
+    void test_vmcs_vm_entry_controls_ia_32e_mode_guest();
+    void test_vmcs_vm_entry_controls_entry_to_smm();
+    void test_vmcs_vm_entry_controls_deactivate_dual_monitor_treatment();
+    void test_vmcs_vm_entry_controls_load_ia32_perf_global_ctrl();
+    void test_vmcs_vm_entry_controls_load_ia32_pat();
+    void test_vmcs_vm_entry_controls_load_ia32_efer();
+    void test_vmcs_vm_entry_msr_load_count();
+    void test_vmcs_vm_entry_interruption_information_field();
+    void test_vmcs_vm_entry_interruption_information_field_vector();
+    void test_vmcs_vm_entry_interruption_information_field_type();
+    void test_vmcs_vm_entry_interruption_information_field_deliver_error_code_bit();
+    void test_vmcs_vm_entry_interruption_information_field_reserved();
+    void test_vmcs_vm_entry_interruption_information_field_valid_bit();
+    void test_vmcs_vm_entry_exception_error_code();
+    void test_vmcs_vm_entry_instruction_length();
 
     void test_check_control_pin_based_ctls_reserved_properly_set();
     void test_check_control_proc_based_ctls_reserved_properly_set();
@@ -435,6 +500,7 @@ private:
     void test_check_host_gdtr_canonical_base_address();
     void test_check_host_idtr_canonical_base_address();
     void test_check_host_tr_canonical_base_address();
+    void test_check_host_checks_related_to_address_space_size();
     void test_check_host_if_outside_ia32e_mode();
     void test_check_host_vmcs_host_address_space_size_is_set();
     void test_check_host_host_address_space_disabled();

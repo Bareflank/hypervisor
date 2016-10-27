@@ -108,7 +108,7 @@ vmcs_intel_x64::check_host_ia32_sysenter_eip_canonical_address()
 void
 vmcs_intel_x64::check_host_verify_load_ia32_perf_global_ctrl()
 {
-    if (!is_enabled_load_ia32_perf_global_ctrl_on_exit())
+    if (!vmcs::vm_exit_controls::load_ia32_perf_global_ctrl::is_enabled())
         return;
 
     auto vmcs_ia32_perf_global_ctrl =
@@ -121,7 +121,7 @@ vmcs_intel_x64::check_host_verify_load_ia32_perf_global_ctrl()
 void
 vmcs_intel_x64::check_host_verify_load_ia32_pat()
 {
-    if (!is_enabled_load_ia32_pat_on_exit())
+    if (!vmcs::vm_exit_controls::load_ia32_pat::is_enabled())
         return;
 
     auto pat0 = (vm::read(VMCS_HOST_IA32_PAT) & 0x00000000000000FF) >> 0;
@@ -161,7 +161,7 @@ vmcs_intel_x64::check_host_verify_load_ia32_pat()
 void
 vmcs_intel_x64::check_host_verify_load_ia32_efer()
 {
-    if (!is_enabled_load_ia32_efer_on_exit())
+    if (!vmcs::vm_exit_controls::load_ia32_efer::is_enabled())
         return;
 
     if (vmcs::host_ia32_efer::reserved::get() != 0)
@@ -171,10 +171,10 @@ vmcs_intel_x64::check_host_verify_load_ia32_efer()
     auto lma = vmcs::host_ia32_efer::lma::get();
     auto lme = vmcs::host_ia32_efer::lme::get();
 
-    if (!is_enabled_host_address_space_size() && lma != 0)
+    if (!vmcs::vm_exit_controls::host_address_space_size::is_enabled() && lma != 0)
         throw std::logic_error("host addr space is 0, but efer.lma is 1");
 
-    if (is_enabled_host_address_space_size() && lma == 0)
+    if (vmcs::vm_exit_controls::host_address_space_size::is_enabled() && lma == 0)
         throw std::logic_error("host addr space is 1, but efer.lma is 0");
 
     if (vmcs::host_cr0::paging::get() == 0)
@@ -298,7 +298,7 @@ vmcs_intel_x64::check_host_tr_not_equal_zero()
 void
 vmcs_intel_x64::check_host_ss_not_equal_zero()
 {
-    if (is_enabled_host_address_space_size())
+    if (vmcs::vm_exit_controls::host_address_space_size::is_enabled())
         return;
 
     if (vmcs::host_ss_selector::get() == 0)
@@ -365,10 +365,10 @@ vmcs_intel_x64::check_host_if_outside_ia32e_mode()
     if (msrs::ia32_efer::lma::get() != 0)
         return;
 
-    if (is_enabled_ia_32e_mode_guest())
+    if (vmcs::vm_entry_controls::ia_32e_mode_guest::is_enabled())
         throw std::logic_error("ia 32e mode must be 0 if efer.lma == 0");
 
-    if (is_enabled_host_address_space_size())
+    if (vmcs::vm_exit_controls::host_address_space_size::is_enabled())
         throw std::logic_error("host addr space must be 0 if efer.lma == 0");
 }
 
@@ -378,17 +378,17 @@ vmcs_intel_x64::check_host_vmcs_host_address_space_size_is_set()
     if (msrs::ia32_efer::lma::get() == 0)
         return;
 
-    if (!is_enabled_host_address_space_size())
+    if (!vmcs::vm_exit_controls::host_address_space_size::is_enabled())
         throw std::logic_error("host addr space must be 1 if efer.lma == 1");
 }
 
 void
 vmcs_intel_x64::check_host_host_address_space_disabled()
 {
-    if (is_enabled_host_address_space_size())
+    if (vmcs::vm_exit_controls::host_address_space_size::is_enabled())
         return;
 
-    if (is_enabled_ia_32e_mode_guest())
+    if (vmcs::vm_entry_controls::ia_32e_mode_guest::is_enabled())
         throw std::logic_error("ia 32e mode must be disabled if host addr space is disabled");
 
     if (vmcs::host_cr4::pcid_enable_bit::get() != 0)
@@ -403,7 +403,7 @@ vmcs_intel_x64::check_host_host_address_space_disabled()
 void
 vmcs_intel_x64::check_host_host_address_space_enabled()
 {
-    if (!is_enabled_host_address_space_size())
+    if (!vmcs::vm_exit_controls::host_address_space_size::is_enabled())
         return;
 
     if (vmcs::host_cr4::physical_address_extensions::get() == 0)

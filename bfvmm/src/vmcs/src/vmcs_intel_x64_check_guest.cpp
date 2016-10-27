@@ -102,7 +102,7 @@ vmcs_intel_x64::check_guest_cr4_for_unsupported_bits()
 void
 vmcs_intel_x64::check_guest_load_debug_controls_verify_reserved()
 {
-    if (!is_enabled_load_debug_controls_on_entry())
+    if (!vmcs::vm_entry_controls::load_debug_controls::is_enabled())
         return;
 
     if (vmcs::guest_ia32_debugctl::reserved::get() != 0)
@@ -112,7 +112,7 @@ vmcs_intel_x64::check_guest_load_debug_controls_verify_reserved()
 void
 vmcs_intel_x64::check_guest_verify_ia_32e_mode_enabled()
 {
-    if (!is_enabled_ia_32e_mode_guest())
+    if (!vmcs::vm_entry_controls::ia_32e_mode_guest::is_enabled())
         return;
 
     if (vmcs::guest_cr0::paging::get() == 0)
@@ -125,7 +125,7 @@ vmcs_intel_x64::check_guest_verify_ia_32e_mode_enabled()
 void
 vmcs_intel_x64::check_guest_verify_ia_32e_mode_disabled()
 {
-    if (is_enabled_ia_32e_mode_guest())
+    if (vmcs::vm_entry_controls::ia_32e_mode_guest::is_enabled())
         return;
 
     if (vmcs::guest_cr4::pcid_enable_bit::get() != 0)
@@ -142,7 +142,7 @@ vmcs_intel_x64::check_guest_cr3_for_unsupported_bits()
 void
 vmcs_intel_x64::check_guest_load_debug_controls_verify_dr7()
 {
-    if (!is_enabled_load_debug_controls_on_entry())
+    if (!vmcs::vm_entry_controls::load_debug_controls::is_enabled())
         return;
 
     auto dr7 = vm::read(VMCS_GUEST_DR7);
@@ -172,7 +172,7 @@ vmcs_intel_x64::check_guest_ia32_sysenter_eip_canonical_address()
 void
 vmcs_intel_x64::check_guest_verify_load_ia32_perf_global_ctrl()
 {
-    if (!is_enabled_load_ia32_perf_global_ctrl_on_entry())
+    if (!vmcs::vm_entry_controls::load_ia32_perf_global_ctrl::is_enabled())
         return;
 
     auto vmcs_ia32_perf_global_ctrl =
@@ -185,7 +185,7 @@ vmcs_intel_x64::check_guest_verify_load_ia32_perf_global_ctrl()
 void
 vmcs_intel_x64::check_guest_verify_load_ia32_pat()
 {
-    if (!is_enabled_load_ia32_pat_on_entry())
+    if (!vmcs::vm_entry_controls::load_ia32_pat::is_enabled())
         return;
 
     auto pat0 = vm::read(VMCS_GUEST_IA32_PAT) & 0x00000000000000FF >> 0;
@@ -225,7 +225,7 @@ vmcs_intel_x64::check_guest_verify_load_ia32_pat()
 void
 vmcs_intel_x64::check_guest_verify_load_ia32_efer()
 {
-    if (!is_enabled_load_ia32_efer_on_entry())
+    if (!vmcs::vm_entry_controls::load_ia32_efer::is_enabled())
         return;
 
     if (vmcs::guest_ia32_efer::reserved::get() != 0)
@@ -235,10 +235,10 @@ vmcs_intel_x64::check_guest_verify_load_ia32_efer()
     auto lma = vmcs::guest_ia32_efer::lma::get();
     auto lme = vmcs::guest_ia32_efer::lme::get();
 
-    if (!is_enabled_ia_32e_mode_guest() && lma != 0)
+    if (!vmcs::vm_entry_controls::ia_32e_mode_guest::is_enabled() && lma != 0)
         throw std::logic_error("ia 32e mode is 0, but efer.lma is 1");
 
-    if (is_enabled_ia_32e_mode_guest() && lma == 0)
+    if (vmcs::vm_entry_controls::ia_32e_mode_guest::is_enabled() && lma == 0)
         throw std::logic_error("ia 32e mode is 1, but efer.lma is 0");
 
     if (vmcs::guest_cr0::paging::get() == 0)
@@ -1161,7 +1161,7 @@ vmcs_intel_x64::check_guest_fs_access_rights_reserved_must_be_0()
 void
 vmcs_intel_x64::check_guest_gs_access_rights_reserved_must_be_0()
 {
-    if (vmcs::guest_fs_access_rights::unusable::get() != 0)
+    if (vmcs::guest_gs_access_rights::unusable::get() != 0)
         return;
 
     if (vmcs::guest_gs_access_rights::reserved::get() != 0)
@@ -1171,13 +1171,13 @@ vmcs_intel_x64::check_guest_gs_access_rights_reserved_must_be_0()
 void
 vmcs_intel_x64::check_guest_cs_db_must_be_0_if_l_equals_1()
 {
-    if (!is_enabled_ia_32e_mode_guest())
+    if (!vmcs::vm_entry_controls::ia_32e_mode_guest::is_enabled())
         return;
 
-    if (vmcs::guest_gs_access_rights::l::get() == 0)
+    if (vmcs::guest_cs_access_rights::l::get() == 0)
         return;
 
-    if (vmcs::guest_gs_access_rights::db::get() != 0)
+    if (vmcs::guest_cs_access_rights::db::get() != 0)
         throw std::logic_error("d/b for guest cs must be 0 if in ia 32e mode and l == 1");
 }
 
@@ -1264,7 +1264,7 @@ vmcs_intel_x64::check_guest_gs_granularity()
     auto gs_limit = vm::read(VMCS_GUEST_GS_LIMIT);
     auto g = vmcs::guest_gs_access_rights::granularity::get();
 
-    if (vmcs::guest_fs_access_rights::unusable::get() != 0)
+    if (vmcs::guest_gs_access_rights::unusable::get() != 0)
         return;
 
     if ((gs_limit & 0x00000FFF) != 0x00000FFF && g != 0)
@@ -1280,8 +1280,8 @@ vmcs_intel_x64::check_guest_tr_type_must_be_11()
     switch (vmcs::guest_tr_access_rights::type::get())
     {
         case access_rights::type::read_write_accessed:
-            if (is_enabled_ia_32e_mode_guest())
-                throw std::logic_error("tr type canot only be 3 if ia32e mode is disabled");
+            if (vmcs::vm_entry_controls::ia_32e_mode_guest::is_enabled())
+                throw std::logic_error("tr type cannot be 3 if ia_32e_mode_guest is enabled");
 
             return;
 
@@ -1456,7 +1456,7 @@ vmcs_intel_x64::check_guest_rip_upper_bits()
 {
     auto cs_l = vmcs::guest_cs_access_rights::l::get();
 
-    if (is_enabled_ia_32e_mode_guest() && cs_l != 0)
+    if (vmcs::vm_entry_controls::ia_32e_mode_guest::is_enabled() && cs_l != 0)
         return;
 
     auto rip = vm::read(VMCS_GUEST_RIP);
@@ -1470,7 +1470,10 @@ vmcs_intel_x64::check_guest_rip_valid_addr()
 {
     auto cs_l = vmcs::guest_cs_access_rights::l::get();
 
-    if (!is_enabled_ia_32e_mode_guest() || cs_l == 0)
+    if (!vmcs::vm_entry_controls::ia_32e_mode_guest::is_enabled())
+        return;
+
+    if (cs_l == 0)
         return;
 
     auto rip = vm::read(VMCS_GUEST_RIP);
@@ -1492,7 +1495,7 @@ vmcs_intel_x64::check_guest_rflags_reserved_bits()
 void
 vmcs_intel_x64::check_guest_rflags_vm_bit()
 {
-    if (!is_enabled_ia_32e_mode_guest() && vmcs::guest_cr0::protection_enable::get() == 1)
+    if (!vmcs::vm_entry_controls::ia_32e_mode_guest::is_enabled() && vmcs::guest_cr0::protection_enable::get() == 1)
         return;
 
     if (vmcs::guest_rflags::virtual_8086_mode::get() != 0)
@@ -1502,15 +1505,12 @@ vmcs_intel_x64::check_guest_rflags_vm_bit()
 void
 vmcs_intel_x64::check_guest_rflag_interrupt_enable()
 {
-    auto interrupt_info_field =
-        vm::read(VMCS_VM_ENTRY_INTERRUPTION_INFORMATION_FIELD);
+    using namespace vmcs::vm_entry_interruption_information_field;
 
-    if ((interrupt_info_field & VM_INTERRUPT_INFORMATION_VALID) == 0)
+    if (!valid_bit::is_set())
         return;
 
-    auto type = (interrupt_info_field & VM_INTERRUPT_INFORMATION_TYPE) >> 8;
-
-    if (type != VM_INTERRUPTION_TYPE_EXTERNAL)
+    if (type::get() != type::external_interrupt)
         return;
 
     if (vmcs::guest_rflags::interrupt_enable_flag::get() == 0)
@@ -1591,10 +1591,9 @@ vmcs_intel_x64::check_guest_must_be_active_if_injecting_blocking_state()
 void
 vmcs_intel_x64::check_guest_hlt_valid_interrupts()
 {
-    auto interrupt_info_field =
-        vm::read(VMCS_VM_ENTRY_INTERRUPTION_INFORMATION_FIELD);
+    using namespace vmcs::vm_entry_interruption_information_field;
 
-    if ((interrupt_info_field & VM_INTERRUPT_INFORMATION_VALID) == 0)
+    if (!valid_bit::is_set())
         return;
 
     auto activity_state = vm::read(VMCS_GUEST_ACTIVITY_STATE);
@@ -1602,16 +1601,16 @@ vmcs_intel_x64::check_guest_hlt_valid_interrupts()
     if (activity_state != VM_ACTIVITY_STATE_HLT)
         return;
 
-    auto type = (interrupt_info_field & VM_INTERRUPT_INFORMATION_TYPE) >> 8;
-    auto vector = (interrupt_info_field & VM_INTERRUPT_INFORMATION_VECTOR) >> 0;
+    auto type = type::get();
+    auto vector = vector::get();
 
     switch (type)
     {
-        case VM_INTERRUPTION_TYPE_EXTERNAL:
-        case VM_INTERRUPTION_TYPE_NMI:
+        case type::external_interrupt:
+        case type::non_maskable_interrupt:
             return;
 
-        case VM_INTERRUPTION_TYPE_HARDWARE:
+        case type::hardware_exception:
             if (vector == interrupt::debug_exception)
                 return;
 
@@ -1620,7 +1619,7 @@ vmcs_intel_x64::check_guest_hlt_valid_interrupts()
 
             break;
 
-        case VM_INTERRUPTION_TYPE_OTHER:
+        case type::other_event:
             if (vector == MTF_VM_EXIT)
                 return;
 
@@ -1630,16 +1629,15 @@ vmcs_intel_x64::check_guest_hlt_valid_interrupts()
             break;
     }
 
-    throw std::logic_error("invalid interruption combination");
+    throw std::logic_error("invalid interruption combination for guest hlt");
 }
 
 void
 vmcs_intel_x64::check_guest_shutdown_valid_interrupts()
 {
-    auto interrupt_info_field =
-        vm::read(VMCS_VM_ENTRY_INTERRUPTION_INFORMATION_FIELD);
+    using namespace vmcs::vm_entry_interruption_information_field;
 
-    if ((interrupt_info_field & VM_INTERRUPT_INFORMATION_VALID) == 0)
+    if (!valid_bit::is_set())
         return;
 
     auto activity_state = vm::read(VMCS_GUEST_ACTIVITY_STATE);
@@ -1647,15 +1645,15 @@ vmcs_intel_x64::check_guest_shutdown_valid_interrupts()
     if (activity_state != VM_ACTIVITY_STATE_SHUTDOWN)
         return;
 
-    auto type = (interrupt_info_field & VM_INTERRUPT_INFORMATION_TYPE) >> 8;
-    auto vector = (interrupt_info_field & VM_INTERRUPT_INFORMATION_VECTOR) >> 0;
+    auto type = type::get();
+    auto vector = vector::get();
 
     switch (type)
     {
-        case VM_INTERRUPTION_TYPE_NMI:
+        case type::non_maskable_interrupt:
             return;
 
-        case VM_INTERRUPTION_TYPE_HARDWARE:
+        case type::hardware_exception:
             if (vector == interrupt::machine_check)
                 return;
 
@@ -1665,16 +1663,13 @@ vmcs_intel_x64::check_guest_shutdown_valid_interrupts()
             break;
     }
 
-    throw std::logic_error("invalid interruption combination");
+    throw std::logic_error("invalid interruption combination for guest shutdown");
 }
 
 void
 vmcs_intel_x64::check_guest_sipi_valid_interrupts()
 {
-    auto interrupt_info_field =
-        vm::read(VMCS_VM_ENTRY_INTERRUPTION_INFORMATION_FIELD);
-
-    if ((interrupt_info_field & VM_INTERRUPT_INFORMATION_VALID) == 0)
+    if (!vmcs::vm_entry_interruption_information_field::valid_bit::is_set())
         return;
 
     auto activity_state = vm::read(VMCS_GUEST_ACTIVITY_STATE);
@@ -1688,7 +1683,7 @@ vmcs_intel_x64::check_guest_sipi_valid_interrupts()
 void
 vmcs_intel_x64::check_guest_valid_activity_state_and_smm()
 {
-    if (!is_enabled_entry_to_smm())
+    if (!vmcs::vm_entry_controls::entry_to_smm::is_enabled())
         return;
 
     auto activity_state = vm::read(VMCS_GUEST_ACTIVITY_STATE);
@@ -1741,15 +1736,12 @@ vmcs_intel_x64::check_guest_interruptability_state_sti()
 void
 vmcs_intel_x64::check_guest_interruptability_state_external_interrupt()
 {
-    auto interrupt_info_field =
-        vm::read(VMCS_VM_ENTRY_INTERRUPTION_INFORMATION_FIELD);
+    using namespace vmcs::vm_entry_interruption_information_field;
 
-    if ((interrupt_info_field & VM_INTERRUPT_INFORMATION_VALID) == 0)
+    if (!valid_bit::is_set())
         return;
 
-    auto type = (interrupt_info_field & VM_INTERRUPT_INFORMATION_TYPE) >> 8;
-
-    if (type != VM_INTERRUPTION_TYPE_EXTERNAL)
+    if (type::get() != type::external_interrupt)
         return;
 
     auto interruptability_state =
@@ -1767,15 +1759,12 @@ vmcs_intel_x64::check_guest_interruptability_state_external_interrupt()
 void
 vmcs_intel_x64::check_guest_interruptability_state_nmi()
 {
-    auto interrupt_info_field =
-        vm::read(VMCS_VM_ENTRY_INTERRUPTION_INFORMATION_FIELD);
+    using namespace vmcs::vm_entry_interruption_information_field;
 
-    if ((interrupt_info_field & VM_INTERRUPT_INFORMATION_VALID) == 0)
+    if (!valid_bit::is_set())
         return;
 
-    auto type = (interrupt_info_field & VM_INTERRUPT_INFORMATION_TYPE) >> 8;
-
-    if (type != VM_INTERRUPTION_TYPE_NMI)
+    if (type::get() != type::non_maskable_interrupt)
         return;
 
     auto interruptability_state =
@@ -1794,7 +1783,7 @@ vmcs_intel_x64::check_guest_interruptability_not_in_smm()
 void
 vmcs_intel_x64::check_guest_interruptability_entry_to_smm()
 {
-    if (!is_enabled_entry_to_smm())
+    if (!vmcs::vm_entry_controls::entry_to_smm::is_enabled())
         return;
 
     auto interruptability_state =
@@ -1808,15 +1797,12 @@ vmcs_intel_x64::check_guest_interruptability_entry_to_smm()
 void
 vmcs_intel_x64::check_guest_interruptability_state_sti_and_nmi()
 {
-    auto interrupt_info_field =
-        vm::read(VMCS_VM_ENTRY_INTERRUPTION_INFORMATION_FIELD);
+    using namespace vmcs::vm_entry_interruption_information_field;
 
-    if ((interrupt_info_field & VM_INTERRUPT_INFORMATION_VALID) == 0)
+    if (!valid_bit::is_set())
         return;
 
-    auto type = (interrupt_info_field & VM_INTERRUPT_INFORMATION_TYPE) >> 8;
-
-    if (type != VM_INTERRUPTION_TYPE_NMI)
+    if (type::get() != type::non_maskable_interrupt)
         return;
 
     auto interruptability_state =
@@ -1830,18 +1816,15 @@ vmcs_intel_x64::check_guest_interruptability_state_sti_and_nmi()
 void
 vmcs_intel_x64::check_guest_interruptability_state_virtual_nmi()
 {
-    if (!is_enabled_virtual_nmis())
+    using namespace vmcs::vm_entry_interruption_information_field;
+
+    if (!vmcs::pin_based_vm_execution_controls::virtual_nmis::is_enabled())
         return;
 
-    auto interrupt_info_field =
-        vm::read(VMCS_VM_ENTRY_INTERRUPTION_INFORMATION_FIELD);
-
-    if ((interrupt_info_field & VM_INTERRUPT_INFORMATION_VALID) == 0)
+    if (!valid_bit::is_set())
         return;
 
-    auto type = (interrupt_info_field & VM_INTERRUPT_INFORMATION_TYPE) >> 8;
-
-    if (type != VM_INTERRUPTION_TYPE_NMI)
+    if (type::get() != type::non_maskable_interrupt)
         return;
 
     auto interruptability_state =
