@@ -53,7 +53,7 @@ vmcs_intel_x64::check_host_cr0_for_unsupported_bits()
 
     if (0 != ((~cr0 & ia32_vmx_cr0_fixed0) | (cr0 & ~ia32_vmx_cr0_fixed1)))
     {
-        bferror << " failed: check_guest_cr0_for_unsupported_bits" << bfendl;
+        bferror << " failed: check_host_cr0_for_unsupported_bits" << bfendl;
         bferror << "    - ia32_vmx_cr0_fixed0: " << view_as_pointer(ia32_vmx_cr0_fixed0) << bfendl;
         bferror << "    - ia32_vmx_cr0_fixed1: " << view_as_pointer(ia32_vmx_cr0_fixed1) << bfendl;
         bferror << "    - cr0: " << view_as_pointer(cr0) << bfendl;
@@ -71,7 +71,7 @@ vmcs_intel_x64::check_host_cr4_for_unsupported_bits()
 
     if (0 != ((~cr4 & ia32_vmx_cr4_fixed0) | (cr4 & ~ia32_vmx_cr4_fixed1)))
     {
-        bferror << " failed: check_guest_cr4_for_unsupported_bits" << bfendl;
+        bferror << " failed: check_host_cr4_for_unsupported_bits" << bfendl;
         bferror << "    - ia32_vmx_cr4_fixed0: " << view_as_pointer(ia32_vmx_cr4_fixed0) << bfendl;
         bferror << "    - ia32_vmx_cr4_fixed1: " << view_as_pointer(ia32_vmx_cr4_fixed1) << bfendl;
         bferror << "    - cr4: " << view_as_pointer(cr4) << bfendl;

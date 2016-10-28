@@ -41,8 +41,11 @@ extern bool g_vmread_fails;
 extern bool g_vmwrite_fails;
 extern bool g_vmclear_fails;
 extern bool g_vmload_fails;
-extern bool g_vmlaunch_fails;
 extern size_t g_new_throws_bad_alloc;
+
+extern void setup_check_vmcs_control_state_paths(std::vector<struct control_flow_path> &cfg);
+extern void setup_check_vmcs_guest_state_paths(std::vector<struct control_flow_path> &cfg);
+extern void setup_check_vmcs_host_state_paths(std::vector<struct control_flow_path> &cfg);
 
 enum vm_control_type
 {
@@ -77,6 +80,7 @@ struct vm_control
 enum vm_control_type g_ctl_type;
 static struct vm_control_api g_ctl_api = { nullptr, nullptr, nullptr, nullptr, nullptr };
 static struct vm_control g_ctl = { exit_ctl, g_ctl_api, 0UL, "", 0UL, nullptr, nullptr };
+static struct control_flow_path path;
 
 static void
 init_vm_control_api(struct vm_control_api &api, bool (*is_enabled)(), void (*enable)(),
@@ -173,6 +177,24 @@ vmcs_ut::test_vm_control_with_args(const struct vm_control &ctl, gsl::cstring_sp
 }
 
 static void
+setup_check_vmcs_state_paths(std::vector<struct control_flow_path> &cfg)
+{
+    std::vector<struct control_flow_path> sub_cfg;
+
+    setup_check_vmcs_control_state_paths(sub_cfg);
+    setup_check_vmcs_guest_state_paths(sub_cfg);
+    setup_check_vmcs_host_state_paths(sub_cfg);
+
+    path.setup = [sub_cfg]
+    {
+        for (const auto &sub_path : sub_cfg)
+            sub_path.setup();
+    };
+    path.throws_exception = false;
+    cfg.push_back(path);
+}
+
+static void
 vmcs_promote_fail(bool state_save)
 {
     (void) state_save;
@@ -187,176 +209,21 @@ vmcs_resume_fail(state_save_intel_x64 *state_save)
 }
 
 static void
-setup_vmcs_host_control_registers_and_msrs()
+setup_launch_success_msrs()
 {
-    g_vmcs_fields[vmcs::host_cr0::addr] = 0xffffFFFFffffFFFF;
-    g_vmcs_fields[vmcs::host_cr3::addr] = 0x0000000010000000;
-    g_vmcs_fields[vmcs::host_cr4::addr] = 0xffffFFFFffffFFFF;
-    g_vmcs_fields[VMCS_HOST_IA32_SYSENTER_ESP] = 0x0000000010000000;
-    g_vmcs_fields[VMCS_HOST_IA32_SYSENTER_EIP] = 0x0000000010000000;
-    g_vmcs_fields[VMCS_HOST_IA32_PERF_GLOBAL_CTRL] = 0x0;
-    g_vmcs_fields[VMCS_HOST_IA32_PAT] = 0x0;
-    g_vmcs_fields[vmcs::host_ia32_efer::addr] = msrs::ia32_efer::lme::mask | msrs::ia32_efer::lma::mask;
-    g_vmcs_fields[VMCS_HOST_RIP] = 0x0000000010000000;
-}
+    g_msrs[msrs::ia32_vmx_basic::addr] = 0x7FFFFFFUL;
+    g_msrs[msrs::ia32_vmx_true_pinbased_ctls::addr] = 0xffffffff00000000UL;
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = 0xffffffff00000000UL;
+    g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = 0xffffffff00000000UL;
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] = 0xffffffff00000000UL;
+    g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] = 0xffffffff00000000UL;
 
-static void
-setup_vmcs_host_segment_and_descriptor_table_registers()
-{
-    g_vmcs_fields[VMCS_HOST_FS_BASE] = 0x0000000010000000;
-    g_vmcs_fields[VMCS_HOST_GS_BASE] = 0x0000000010000000;
-    g_vmcs_fields[VMCS_HOST_GDTR_BASE] = 0x0000000010000000;
-    g_vmcs_fields[VMCS_HOST_IDTR_BASE] = 0x0000000010000000;
-    g_vmcs_fields[VMCS_HOST_TR_BASE] = 0x0000000010000000;
-}
-
-static void
-setup_vmcs_host_fields()
-{
-    setup_vmcs_host_control_registers_and_msrs();
-    setup_vmcs_host_segment_and_descriptor_table_registers();
-}
-
-static void
-setup_vmcs_guest_control_and_debug_fields()
-{
-    g_vmcs_fields[vmcs::guest_cr0::addr] = 0xffffFFFFffffFFFF;
-    g_vmcs_fields[vmcs::guest_cr3::addr] = 0x0000000000001000;
-    g_vmcs_fields[vmcs::guest_cr4::addr] = 0xffffFFFFfffdFFFF;
-    g_vmcs_fields[VMCS_GUEST_DR7] = 0x00000000ffffFFFF;
-    g_vmcs_fields[VMCS_GUEST_IA32_SYSENTER_ESP] = 0x0000000010000000;
-    g_vmcs_fields[VMCS_GUEST_IA32_SYSENTER_EIP] = 0x0000000010000000;
-    g_vmcs_fields[VMCS_GUEST_IA32_PERF_GLOBAL_CTRL] = 0x0;
-    g_vmcs_fields[VMCS_GUEST_IA32_PAT] = 0x0;
-    g_vmcs_fields[vmcs::guest_ia32_efer::addr] = msrs::ia32_efer::lme::mask | msrs::ia32_efer::lma::mask;
-    g_vmcs_fields[vmcs::guest_ia32_debugctl::addr] = 0x0;
-}
-
-static void
-setup_vmcs_guest_segment_registers()
-{
-    g_vmcs_fields[VMCS_GUEST_CS_LIMIT] = 0xFFFFFFFF;
-    g_vmcs_fields[VMCS_GUEST_SS_LIMIT] = 0xFFFFFFFF;
-    g_vmcs_fields[VMCS_GUEST_DS_LIMIT] = 0xFFFFFFFF;
-    g_vmcs_fields[VMCS_GUEST_ES_LIMIT] = 0xFFFFFFFF;
-    g_vmcs_fields[VMCS_GUEST_FS_LIMIT] = 0xFFFFFFFF;
-    g_vmcs_fields[VMCS_GUEST_GS_LIMIT] = 0xFFFFFFFF;
-    g_vmcs_fields[VMCS_GUEST_TR_LIMIT] = sizeof(tss_x64);
-    g_vmcs_fields[VMCS_GUEST_LDTR_LIMIT] = 0xFFFFFFFF;
-}
-
-static void
-setup_vmcs_guest_descriptor_table_registers()
-{
-    g_vmcs_fields[VMCS_GUEST_GDTR_LIMIT] = 0x00000100;
-    g_vmcs_fields[VMCS_GUEST_IDTR_LIMIT] = 0x00000100;
-    g_vmcs_fields[VMCS_GUEST_GDTR_BASE] = 0x0000000010000000;
-    g_vmcs_fields[VMCS_GUEST_IDTR_BASE] = 0x0000000010000000;
-}
-
-static void
-setup_vmcs_guest_rip_and_rflags()
-{
-    g_vmcs_fields[VMCS_GUEST_RIP] = 0x0000000000ff0000;
-    g_vmcs_fields[vmcs::guest_rflags::addr] = rflags::always_enabled::mask | rflags::interrupt_enable_flag::mask;
-    vmcs::vm_entry_interruption_information_field::set(0x0000000080000B08UL);
-}
-
-static void
-setup_vmcs_guest_non_register_state()
-{
-    g_vmcs_fields[VMCS_GUEST_ACTIVITY_STATE] = 0x0;
-    g_vmcs_fields[VMCS_GUEST_INTERRUPTIBILITY_STATE] = VM_INTERRUPTABILITY_STATE_SMI;
-    g_vmcs_fields[VMCS_VMCS_LINK_POINTER] = 0xffffFFFFffffFFFF;
-}
-
-static void
-setup_vmcs_guest_fields()
-{
-    setup_vmcs_guest_control_and_debug_fields();
-    setup_vmcs_guest_segment_registers();
-    setup_vmcs_guest_descriptor_table_registers();
-    setup_vmcs_guest_rip_and_rflags();
-    setup_vmcs_guest_non_register_state();
-}
-
-void
-setup_vm_execution_control_fields()
-{
-    vmcs::pin_based_vm_execution_controls::set(0xffffFF7FUL);
-    vmcs::primary_processor_based_vm_execution_controls::set(0xffffFFFFUL);
-    g_vmcs_fields[VMCS_SECONDARY_PROCESSOR_BASED_VM_EXECUTION_CONTROLS] = 0xFFFFFCEEUL;
-    vmcs::cr3_target_count::set(3UL);
-    g_vmcs_fields[VMCS_ADDRESS_OF_IO_BITMAP_A] = 0x0000000000000000;
-    g_vmcs_fields[VMCS_ADDRESS_OF_IO_BITMAP_B] = 0x0000000000000000;
-    g_vmcs_fields[VMCS_ADDRESS_OF_MSR_BITMAPS] = 0x0000000000000000;
-    g_vmcs_fields[VMCS_VIRTUAL_APIC_ADDRESS] = 0x0000000000001000;
-    g_vmcs_fields[VMCS_TPR_THRESHOLD] = 0x0000000F00000000;
-    g_vmcs_fields[VMCS_APIC_ACCESS_ADDRESS] = 0x0000000010000000;
-    g_vmcs_fields[vmcs::posted_interrupt_notification_vector::addr] = 0x0000000000000000;
-    g_vmcs_fields[VMCS_POSTED_INTERRUPT_DESCRIPTOR_ADDRESS] = 0x0000000010000000;
-    g_vmcs_fields[vmcs::virtual_processor_identifier::addr] = 0x0000000000000002;
-    g_vmcs_fields[VMCS_EPT_POINTER] = 0x000000000000001e;
-    g_vmcs_fields[VMCS_PML_ADDRESS] = 0x0000000000000000;
-    g_vmcs_fields[VMCS_VM_FUNCTION_CONTROLS] = 0xffffFFFFffffFFFF;
-    g_vmcs_fields[VMCS_EPTP_LIST_ADDRESS] = 0x0000000010000000;
-    g_vmcs_fields[VMCS_VMREAD_BITMAP_ADDRESS] = 0x0000000010000000;
-    g_vmcs_fields[VMCS_VMWRITE_BITMAP_ADDRESS] = 0x0000000010000000;
-    g_vmcs_fields[VMCS_VIRTUALIZATION_EXCEPTION_INFORMATION_ADDRESS] = 0x0000000010000000;
-}
-
-void
-setup_vm_exit_control_fields()
-{
-    vmcs::vm_exit_controls::set(0xFFBFFFFFUL);
-    vmcs::vm_exit_msr_store_count::set(0xff0000UL);
-    g_vmcs_fields[VMCS_VM_EXIT_MSR_STORE_ADDRESS] = 0x1000;
-    vmcs::vm_exit_msr_load_count::set(0xff0000UL);
-    g_vmcs_fields[VMCS_VM_EXIT_MSR_LOAD_ADDRESS] = 0x1000;
-}
-
-void
-setup_vm_entry_control_fields()
-{
-    vmcs::vm_entry_controls::set(0xffffFFFFUL);
-    vmcs::vm_entry_interruption_information_field::set(0x0000000080000B08UL);
-    g_vmcs_fields[vmcs::guest_cr0::addr] = cr0::protection_enable::mask;
-    vmcs::vm_entry_exception_error_code::set(0x0UL);
-    vmcs::vm_entry_msr_load_count::set(0xff0000UL);
-    g_vmcs_fields[VMCS_VM_ENTRY_MSR_LOAD_ADDRESS] = 0x0000000010000000;
-}
-
-void
-setup_msrs()
-{
-    g_msrs[msrs::ia32_vmx_basic::addr] = 0x7ffFFFF;
-    g_msrs[msrs::ia32_vmx_true_pinbased_ctls::addr] = 0xffffFFFF00000000;
-    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = 0xffffFFFF00000000;
-    g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = 0xffffFFFF00000000;
-    g_msrs[msrs::ia32_vmx_ept_vpid_cap::addr] = 0x0000000000000000;
-    g_msrs[msrs::ia32_vmx_ept_vpid_cap::addr] |= msrs::ia32_vmx_ept_vpid_cap::memory_type_uncacheable_supported::mask;
-    g_msrs[msrs::ia32_vmx_ept_vpid_cap::addr] |= msrs::ia32_vmx_ept_vpid_cap::memory_type_write_back_supported::mask;
-    g_msrs[msrs::ia32_vmx_ept_vpid_cap::addr] |= msrs::ia32_vmx_ept_vpid_cap::accessed_dirty_support::mask;
-    g_msrs[msrs::ia32_vmx_vmfunc::addr] = 0xffffFFFFffffFFFF;
-    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] = 0xffffFFFF00000000;
-    g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] = 0xffffFFFF00000000;
-
-    g_msrs[msrs::ia32_vmx_cr0_fixed0::addr] = 0x0;
-    g_msrs[msrs::ia32_vmx_cr0_fixed1::addr] = 0xffffFFFFffffFFFF;
-    g_msrs[msrs::ia32_vmx_cr4_fixed0::addr] = 0x0;
-    g_msrs[msrs::ia32_vmx_cr4_fixed1::addr] = 0xffffFFFFffffFFFF;
+    g_msrs[msrs::ia32_vmx_cr0_fixed0::addr] = 0U;
+    g_msrs[msrs::ia32_vmx_cr0_fixed1::addr] = 0xffffffffffffffffUL;
+    g_msrs[msrs::ia32_vmx_cr4_fixed0::addr] = 0U;
+    g_msrs[msrs::ia32_vmx_cr4_fixed1::addr] = 0xffffffffffffffffUL;
 
     g_msrs[msrs::ia32_efer::addr] = msrs::ia32_efer::lma::mask;
-}
-
-static void
-setup_vmcs_fields()
-{
-    setup_vm_execution_control_fields();
-    setup_vm_exit_control_fields();
-    setup_vm_entry_control_fields();
-    setup_vmcs_guest_fields();
-    setup_vmcs_host_fields();
 }
 
 static void
@@ -457,7 +324,7 @@ vmcs_ut::test_launch_success()
     setup_vmcs_intrinsics(mocks, mm);
     setup_vmcs_x64_state_intrinsics(mocks, host_state.get());
     setup_vmcs_x64_state_intrinsics(mocks, guest_state.get());
-    setup_msrs();
+    setup_launch_success_msrs();
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -478,17 +345,20 @@ vmcs_ut::test_launch_vmlaunch_failure()
     setup_vmcs_intrinsics(mocks, mm);
     setup_vmcs_x64_state_intrinsics(mocks, host_state.get());
     setup_vmcs_x64_state_intrinsics(mocks, guest_state.get());
-    setup_msrs();
-    setup_vmcs_fields();
 
-    auto ___ = gsl::finally([&]
-    { g_vmlaunch_fails = false; });
-
-    g_vmlaunch_fails = true;
+    mocks.OnCallFunc(__vmwrite).Return(true);
+    Call &launch_call = mocks.ExpectCallFunc(__vmlaunch).Return(false);
+    mocks.OnCallFunc(__vmwrite).After(launch_call).Do(__vmwrite);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
         vmcs_intel_x64 vmcs{};
+        std::vector<struct control_flow_path> cfg;
+
+        setup_check_vmcs_state_paths(cfg);
+
+        for (const auto &sub_path : cfg)
+            sub_path.setup();
 
         EXPECT_EXCEPTION(vmcs.launch(host_state, guest_state), std::runtime_error);
     });
