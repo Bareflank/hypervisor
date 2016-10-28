@@ -673,8 +673,6 @@ protected:
             this->expect_failed(e.what(), func, line);
         }
 
-        //inc_pass();
-
         mocks.reset();
 
         // There is an issue with clang-tidy were is basically doesn't see the

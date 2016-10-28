@@ -25,6 +25,7 @@
 #include <memory_manager/memory_manager.h>
 
 using namespace intel_x64;
+using namespace vmcs;
 
 void
 vmcs_intel_x64::check_vmcs_control_state()
@@ -61,12 +62,14 @@ vmcs_intel_x64::checks_on_vm_execution_control_fields()
 
 void
 vmcs_intel_x64::check_control_ctls_reserved_properly_set(uint64_t msr_addr, uint64_t ctls,
-        const std::string &name)
+        const std::string &ctls_name)
 {
-    using namespace intel_x64;
+    using namespace primary_processor_based_vm_execution_controls;
 
     auto allowed0 = (msrs::get(msr_addr) & 0x00000000FFFFFFFFUL);
     auto allowed1 = ((msrs::get(msr_addr) >> 32) & 0x00000000FFFFFFFFUL);
+    auto allowed1_failed = false;
+    ctls &= 0x00000000FFFFFFFFUL;
 
     if ((allowed0 & ctls) != allowed0)
     {
@@ -74,16 +77,21 @@ vmcs_intel_x64::check_control_ctls_reserved_properly_set(uint64_t msr_addr, uint
         bferror << "    - allowed0: " << view_as_pointer(allowed0) << bfendl;
         bferror << "    - bad ctls: " << view_as_pointer(ctls) << bfendl;
 
-        throw std::logic_error(std::string("invalid ") + name);
+        throw std::logic_error(std::string("invalid ") + ctls_name);
     }
 
-    if ((ctls & ~allowed1) != 0UL)
+    allowed1_failed = (ctls & ~allowed1) != 0UL;
+
+    if (msrs::ia32_vmx_procbased_ctls2::addr == msr_addr)
+        allowed1_failed = allowed1_failed && activate_secondary_controls::is_enabled();
+
+    if (allowed1_failed)
     {
         bferror << " failed: check_control_ctls_reserved_properly_set" << bfendl;
         bferror << "    - allowed1: " << view_as_pointer(allowed1) << bfendl;
         bferror << "    - bad ctls: " << view_as_pointer(ctls) << bfendl;
 
-        throw std::logic_error(std::string("invalid ") + name);
+        throw std::logic_error(std::string("invalid ") + ctls_name);
     }
 }
 
@@ -91,8 +99,8 @@ void
 vmcs_intel_x64::check_control_pin_based_ctls_reserved_properly_set()
 {
     auto msr_addr = msrs::ia32_vmx_true_pinbased_ctls::addr;
-    auto ctls = vmcs::pin_based_vm_execution_controls::get();
-    auto name = vmcs::pin_based_vm_execution_controls::name;
+    auto ctls = pin_based_vm_execution_controls::get();
+    auto name = pin_based_vm_execution_controls::name;
 
     this->check_control_ctls_reserved_properly_set(msr_addr, ctls, name);
 }
@@ -101,46 +109,36 @@ void
 vmcs_intel_x64::check_control_proc_based_ctls_reserved_properly_set()
 {
     auto msr_addr = msrs::ia32_vmx_true_procbased_ctls::addr;
-    auto ctls = vmcs::primary_processor_based_vm_execution_controls::get();
-    auto name = vmcs::primary_processor_based_vm_execution_controls::name;
+    auto ctls = primary_processor_based_vm_execution_controls::get();
+    auto name = primary_processor_based_vm_execution_controls::name;
 
     this->check_control_ctls_reserved_properly_set(msr_addr, ctls, name);
 }
 
-// TODO: this will be updated on the next PR
 void
 vmcs_intel_x64::check_control_proc_based_ctls2_reserved_properly_set()
 {
-    auto ia32_vmx_procbased_ctls2_msr = msrs::ia32_vmx_procbased_ctls2::get();
+    if (!secondary_processor_based_vm_execution_controls::exists())
+        throw std::logic_error("the secondary controls field doesn't exist");
 
-    auto allowed_zero = ((ia32_vmx_procbased_ctls2_msr >> 00) & 0x00000000FFFFFFFF);
-    auto allowed_one = ((ia32_vmx_procbased_ctls2_msr >> 32) & 0x00000000FFFFFFFF);
+    auto msr_addr = msrs::ia32_vmx_procbased_ctls2::addr;
+    auto ctls = secondary_processor_based_vm_execution_controls::get();
+    auto name = secondary_processor_based_vm_execution_controls::name;
 
-    auto ctls2 = get_proc2_ctls();
-    auto ctls2_lower = (ctls2 & 0x00000000FFFFFFFF);
-
-    if ((allowed_zero & ctls2_lower) != allowed_zero || (ctls2_lower & ~allowed_one) != 0)
-    {
-        bferror << " failed: check_control_proc_based_ctls2_reserved_properly_set" << bfendl;
-        bferror << "    - allowed_zero: " << view_as_pointer(allowed_zero) << bfendl;
-        bferror << "    - allowed_one: " << view_as_pointer(allowed_one) << bfendl;
-        bferror << "    - ctls2: " << view_as_pointer(ctls2) << bfendl;
-
-        throw std::logic_error("invalid proc based secondary controls");
-    }
+    this->check_control_ctls_reserved_properly_set(msr_addr, ctls, name);
 }
 
 void
 vmcs_intel_x64::check_control_cr3_count_less_then_4()
 {
-    if (vmcs::cr3_target_count::get() > 4)
+    if (cr3_target_count::get() > 4)
         throw std::logic_error("cr3 target count > 4");
 }
 
 void
 vmcs_intel_x64::check_control_io_bitmap_address_bits()
 {
-    if (!vmcs::primary_processor_based_vm_execution_controls::use_io_bitmaps::is_enabled())
+    if (primary_processor_based_vm_execution_controls::use_io_bitmaps::is_disabled())
         return;
 
     auto addr_a = vm::read(VMCS_ADDRESS_OF_IO_BITMAP_A);
@@ -162,7 +160,7 @@ vmcs_intel_x64::check_control_io_bitmap_address_bits()
 void
 vmcs_intel_x64::check_control_msr_bitmap_address_bits()
 {
-    if (!vmcs::primary_processor_based_vm_execution_controls::use_msr_bitmaps::is_enabled())
+    if (primary_processor_based_vm_execution_controls::use_msr_bitmaps::is_disabled())
         return;
 
     auto addr = vm::read(VMCS_ADDRESS_OF_MSR_BITMAPS);
@@ -177,28 +175,33 @@ vmcs_intel_x64::check_control_msr_bitmap_address_bits()
 void
 vmcs_intel_x64::check_control_tpr_shadow_and_virtual_apic()
 {
-    if (vmcs::primary_processor_based_vm_execution_controls::use_tpr_shadow::is_enabled())
+    using namespace primary_processor_based_vm_execution_controls;
+    using namespace secondary_processor_based_vm_execution_controls;
+
+    auto secondary_ctls_enabled = activate_secondary_controls::is_enabled();
+
+    if (use_tpr_shadow::is_enabled())
     {
         auto phys_addr = vm::read(VMCS_VIRTUAL_APIC_ADDRESS);
 
         if (phys_addr == 0)
             throw std::logic_error("virtual apic physical addr is NULL");
 
-        if ((phys_addr & 0x0000000000000FFF) != 0)
+        if ((phys_addr & 0x0000000000000FFFUL) != 0)
             throw std::logic_error("virtual apic addr not 4k aligned");
 
         if (!is_physical_address_valid(phys_addr))
             throw std::logic_error("virtual apic addr too large");
 
-        if (is_enabled_virtual_interrupt_delivery())
+        if (secondary_ctls_enabled && virtual_interrupt_delivery::is_enabled_if_exists())
             throw std::logic_error("tpr_shadow is enabled, but virtual interrupt delivery is enabled");
 
-        auto tpr_threshold = vm::read(VMCS_TPR_THRESHOLD);
+        auto tpr_threshold = tpr_threshold::get();
 
-        if ((tpr_threshold & 0x00000000FFFFFFF0) != 0)
+        if ((tpr_threshold & 0xFFFFFFF0UL) != 0)
             throw std::logic_error("bits 31:4 of the tpr threshold must be 0");
 
-        if (is_enabled_virtualized_apic())
+        if (secondary_ctls_enabled && virtualize_apic_accesses::is_enabled_if_exists())
             throw std::logic_error("tpr_shadow is enabled, but virtual apic is enabled");
 
         auto virt_addr = static_cast<uint8_t *>(g_mm->physint_to_virtptr(phys_addr));
@@ -208,48 +211,55 @@ vmcs_intel_x64::check_control_tpr_shadow_and_virtual_apic()
 
         auto virt_addr_span = gsl::span<uint8_t>(virt_addr, 0x81);
         auto vtpr = virt_addr_span[0x80];
-        auto vtpr_74 = (vtpr & 0xF0) >> 4;
-        auto tpr_threshold_30 = static_cast<uint8_t>(tpr_threshold & 0x000000000000000F);
+        auto vtpr_74 = (vtpr & 0xF0U) >> 4;
+        auto tpr_threshold_30 = static_cast<uint8_t>(tpr_threshold & 0x0000000FUL);
 
         if (tpr_threshold_30 > vtpr_74)
             throw std::logic_error("invalid TPR threshold");
     }
     else
     {
-        if (is_enabled_x2apic_mode())
-            throw std::logic_error("x2apic mode must be disabled if tpr shadow is disabled");
+        if (activate_secondary_controls::is_disabled())
+            return;
 
-        if (is_enabled_apic_register_virtualization())
-            throw std::logic_error("apic register virtualization must be disabled if tpr shadow is disabled");
+        if (virtualize_x2apic_mode::is_enabled_if_exists())
+            throw std::logic_error("virtualize_x2apic_mode must be disabled if tpr shadow is disabled");
 
-        if (is_enabled_virtual_interrupt_delivery())
-            throw std::logic_error("virtual interrupt delivery must be disabled if tpr shadow is disabled");
+        if (apic_register_virtualization::is_enabled_if_exists())
+            throw std::logic_error("apic_register_virtualization must be disabled if tpr shadow is disabled");
+
+        if (virtual_interrupt_delivery::is_enabled_if_exists())
+            throw std::logic_error("virtual_interrupt_delivery must be disabled if tpr shadow is disabled");
     }
 }
 
 void
 vmcs_intel_x64::check_control_nmi_exiting_and_virtual_nmi()
 {
-    using namespace vmcs::pin_based_vm_execution_controls;
+    if (pin_based_vm_execution_controls::nmi_exiting::is_enabled())
+        return;
 
-    if (!nmi_exiting::is_enabled() && virtual_nmis::is_enabled())
+    if (pin_based_vm_execution_controls::virtual_nmis::is_enabled())
         throw std::logic_error("virtual NMI must be 0 if NMI exiting is 0");
 }
 
 void
 vmcs_intel_x64::check_control_virtual_nmi_and_nmi_window()
 {
-    using namespace vmcs::pin_based_vm_execution_controls;
-    using namespace vmcs::primary_processor_based_vm_execution_controls;
+    if (pin_based_vm_execution_controls::virtual_nmis::is_enabled())
+        return;
 
-    if (!virtual_nmis::is_enabled() && nmi_window_exiting::is_enabled())
+    if (primary_processor_based_vm_execution_controls::nmi_window_exiting::is_enabled())
         throw std::logic_error("NMI window exiting must be 0 if virtual NMI is 0");
 }
 
 void
 vmcs_intel_x64::check_control_virtual_apic_address_bits()
 {
-    if (!is_enabled_virtualized_apic())
+    if (primary_processor_based_vm_execution_controls::activate_secondary_controls::is_disabled())
+        return;
+
+    if (secondary_processor_based_vm_execution_controls::virtualize_apic_accesses::is_disabled_if_exists())
         return;
 
     auto phys_addr = vm::read(VMCS_APIC_ACCESS_ADDRESS);
@@ -267,21 +277,26 @@ vmcs_intel_x64::check_control_virtual_apic_address_bits()
 void
 vmcs_intel_x64::check_control_x2apic_mode_and_virtual_apic_access()
 {
-    auto x2apic_mode = is_enabled_x2apic_mode();
-    auto virtualized_apic = is_enabled_virtualized_apic();
+    if (primary_processor_based_vm_execution_controls::activate_secondary_controls::is_disabled())
+        return;
 
-    if (x2apic_mode && virtualized_apic)
+    if (secondary_processor_based_vm_execution_controls::virtualize_x2apic_mode::is_disabled_if_exists())
+        return;
+
+    if (secondary_processor_based_vm_execution_controls::virtualize_apic_accesses::is_enabled_if_exists())
         throw std::logic_error("apic accesses must be 0 if x2 apic mode is 1");
 }
 
 void
 vmcs_intel_x64::check_control_virtual_interrupt_and_external_interrupt()
 {
-    using namespace vmcs::pin_based_vm_execution_controls;
+    if (primary_processor_based_vm_execution_controls::activate_secondary_controls::is_disabled())
+        return;
 
-    auto virtual_interrupt_delivery = is_enabled_virtual_interrupt_delivery();
+    if (secondary_processor_based_vm_execution_controls::virtual_interrupt_delivery::is_disabled_if_exists())
+        return;
 
-    if (virtual_interrupt_delivery && !external_interrupt_exiting::is_enabled())
+    if (pin_based_vm_execution_controls::external_interrupt_exiting::is_disabled())
         throw std::logic_error("external_interrupt_exiting must be 1 "
                                "if virtual_interrupt_delivery is 1");
 }
@@ -289,26 +304,30 @@ vmcs_intel_x64::check_control_virtual_interrupt_and_external_interrupt()
 void
 vmcs_intel_x64::check_control_process_posted_interrupt_checks()
 {
-    if (!vmcs::pin_based_vm_execution_controls::process_posted_interrupts::is_enabled())
+    if (pin_based_vm_execution_controls::process_posted_interrupts::is_disabled())
         return;
 
-    if (!is_enabled_virtual_interrupt_delivery())
+    if (primary_processor_based_vm_execution_controls::activate_secondary_controls::is_disabled())
         throw std::logic_error("virtual interrupt delivery must be 1 "
                                "if posted interrupts is 1");
 
-    if (!vmcs::vm_exit_controls::acknowledge_interrupt_on_exit::is_enabled())
+    if (secondary_processor_based_vm_execution_controls::virtual_interrupt_delivery::is_disabled_if_exists())
+        throw std::logic_error("virtual interrupt delivery must be 1 "
+                               "if posted interrupts is 1");
+
+    if (vm_exit_controls::acknowledge_interrupt_on_exit::is_disabled())
         throw std::logic_error("ack interrupt on exit must be 1 "
                                "if posted interrupts is 1");
 
-    auto vector = vmcs::posted_interrupt_notification_vector::get();
+    auto vector = posted_interrupt_notification_vector::get();
 
-    if ((vector & 0xFFFFFFFFFFFFFF00) != 0)
+    if ((vector & 0x000000000000FF00UL) != 0)
         throw std::logic_error("bits 15:8 of the notification vector must "
                                "be 0 if posted interrupts is 1");
 
     auto addr = vm::read(VMCS_POSTED_INTERRUPT_DESCRIPTOR_ADDRESS);
 
-    if ((addr & 0x000000000000003F) != 0)
+    if ((addr & 0x000000000000003FUL) != 0)
         throw std::logic_error("bits 5:0 of the interrupt descriptor addr "
                                "must be 0 if posted interrupts is 1");
 
@@ -319,10 +338,13 @@ vmcs_intel_x64::check_control_process_posted_interrupt_checks()
 void
 vmcs_intel_x64::check_control_vpid_checks()
 {
-    if (!is_enabled_vpid())
+    if (primary_processor_based_vm_execution_controls::activate_secondary_controls::is_disabled())
         return;
 
-    if (vmcs::virtual_processor_identifier::get() == 0)
+    if (secondary_processor_based_vm_execution_controls::enable_vpid::is_disabled_if_exists())
+        return;
+
+    if (virtual_processor_identifier::get() == 0)
         throw std::logic_error("vpid cannot equal 0");
 }
 
@@ -331,7 +353,10 @@ vmcs_intel_x64::check_control_enable_ept_checks()
 {
     using namespace msrs::ia32_vmx_ept_vpid_cap;
 
-    if (!is_enabled_ept())
+    if (primary_processor_based_vm_execution_controls::activate_secondary_controls::is_disabled())
+        return;
+
+    if (secondary_processor_based_vm_execution_controls::enable_ept::is_disabled_if_exists())
         return;
 
     auto eptp = vm::read(VMCS_EPT_POINTER);
@@ -361,12 +386,15 @@ vmcs_intel_x64::check_control_enable_ept_checks()
 void
 vmcs_intel_x64::check_control_enable_pml_checks()
 {
-    if (!is_enabled_pml())
+    if (primary_processor_based_vm_execution_controls::activate_secondary_controls::is_disabled())
+        return;
+
+    if (secondary_processor_based_vm_execution_controls::enable_pml::is_disabled_if_exists())
         return;
 
     auto pml_addr = vm::read(VMCS_PML_ADDRESS);
 
-    if (!is_enabled_ept())
+    if (secondary_processor_based_vm_execution_controls::enable_ept::is_disabled_if_exists())
         throw std::logic_error("ept must be enabled if pml is enabled");
 
     if (!is_physical_address_valid(pml_addr))
@@ -379,17 +407,23 @@ vmcs_intel_x64::check_control_enable_pml_checks()
 void
 vmcs_intel_x64::check_control_unrestricted_guests()
 {
-    if (!is_enabled_unrestricted_guests())
+    if (primary_processor_based_vm_execution_controls::activate_secondary_controls::is_disabled())
         return;
 
-    if (!is_enabled_ept())
+    if (secondary_processor_based_vm_execution_controls::unrestricted_guest::is_disabled_if_exists())
+        return;
+
+    if (secondary_processor_based_vm_execution_controls::enable_ept::is_disabled_if_exists())
         throw std::logic_error("enable ept must be 1 if unrestricted guest is 1");
 }
 
 void
 vmcs_intel_x64::check_control_enable_vm_functions()
 {
-    if (!is_enabled_vm_functions())
+    if (primary_processor_based_vm_execution_controls::activate_secondary_controls::is_disabled())
+        return;
+
+    if (secondary_processor_based_vm_execution_controls::enable_vm_functions::is_disabled_if_exists())
         return;
 
     auto ia32_vmx_vmfunc_msr = msrs::ia32_vmx_vmfunc::get();
@@ -401,7 +435,7 @@ vmcs_intel_x64::check_control_enable_vm_functions()
     if ((VM_FUNCTION_CONTROL_EPTP_SWITCHING & vmcs_vm_function_controls) == 0)
         return;
 
-    if (!is_enabled_ept())
+    if (secondary_processor_based_vm_execution_controls::enable_ept::is_disabled_if_exists())
         throw std::logic_error("enable ept must be 1 if eptp switching is 1");
 
     auto eptp_list = vm::read(VMCS_EPTP_LIST_ADDRESS);
@@ -416,7 +450,10 @@ vmcs_intel_x64::check_control_enable_vm_functions()
 void
 vmcs_intel_x64::check_control_enable_vmcs_shadowing()
 {
-    if (!is_enabled_vmcs_shadowing())
+    if (primary_processor_based_vm_execution_controls::activate_secondary_controls::is_disabled())
+        return;
+
+    if (secondary_processor_based_vm_execution_controls::vmcs_shadowing::is_disabled_if_exists())
         return;
 
     auto vmcs_vmread_bitmap_address =
@@ -441,7 +478,10 @@ vmcs_intel_x64::check_control_enable_vmcs_shadowing()
 void
 vmcs_intel_x64::check_control_enable_ept_violation_checks()
 {
-    if (!is_enabled_ept_violation_ve())
+    if (primary_processor_based_vm_execution_controls::activate_secondary_controls::is_disabled())
+        return;
+
+    if (secondary_processor_based_vm_execution_controls::ept_violation_ve::is_disabled_if_exists())
         return;
 
     auto vmcs_virt_except_info_address =
@@ -467,8 +507,8 @@ void
 vmcs_intel_x64::check_control_vm_exit_ctls_reserved_properly_set()
 {
     auto msr_addr = msrs::ia32_vmx_true_exit_ctls::addr;
-    auto ctls = vmcs::vm_exit_controls::get();
-    auto name = vmcs::vm_exit_controls::name;
+    auto ctls = vm_exit_controls::get();
+    auto name = vm_exit_controls::name;
 
     this->check_control_ctls_reserved_properly_set(msr_addr, ctls, name);
 }
@@ -476,10 +516,10 @@ vmcs_intel_x64::check_control_vm_exit_ctls_reserved_properly_set()
 void
 vmcs_intel_x64::check_control_activate_and_save_preemption_timer_must_be_0()
 {
-    using namespace vmcs::pin_based_vm_execution_controls;
-    using namespace vmcs::vm_exit_controls;
+    if (pin_based_vm_execution_controls::activate_vmx_preemption_timer::is_enabled())
+        return;
 
-    if (!activate_vmx_preemption_timer::is_enabled() && save_vmx_preemption_timer_value::is_enabled())
+    if (vm_exit_controls::save_vmx_preemption_timer_value::is_enabled())
         throw std::logic_error("save vmx preemption timer must be 0 "
                                "if activate vmx preemption timer is 0");
 }
@@ -487,7 +527,7 @@ vmcs_intel_x64::check_control_activate_and_save_preemption_timer_must_be_0()
 void
 vmcs_intel_x64::check_control_exit_msr_store_address()
 {
-    auto msr_store_count = vmcs::vm_exit_msr_store_count::get();
+    auto msr_store_count = vm_exit_msr_store_count::get();
 
     if (msr_store_count == 0)
         return;
@@ -509,7 +549,7 @@ vmcs_intel_x64::check_control_exit_msr_store_address()
 void
 vmcs_intel_x64::check_control_exit_msr_load_address()
 {
-    auto msr_load_count = vmcs::vm_exit_msr_load_count::get();
+    auto msr_load_count = vm_exit_msr_load_count::get();
 
     if (msr_load_count == 0)
         return;
@@ -544,8 +584,8 @@ void
 vmcs_intel_x64::check_control_vm_entry_ctls_reserved_properly_set()
 {
     auto msr_addr = msrs::ia32_vmx_true_entry_ctls::addr;
-    auto ctls = vmcs::vm_entry_controls::get();
-    auto name = vmcs::vm_entry_controls::name;
+    auto ctls = vm_entry_controls::get();
+    auto name = vm_entry_controls::name;
 
     this->check_control_ctls_reserved_properly_set(msr_addr, ctls, name);
 }
@@ -553,31 +593,31 @@ vmcs_intel_x64::check_control_vm_entry_ctls_reserved_properly_set()
 void
 vmcs_intel_x64::check_control_event_injection_type_vector_checks()
 {
-    using namespace vmcs::vm_entry_interruption_information_field;
+    using namespace vm_entry_interruption_information_field;
     using namespace msrs::ia32_vmx_true_procbased_ctls;
 
-    if (!valid_bit::is_set())
+    if (vm_entry_interruption_information_field::valid_bit::is_disabled())
         return;
 
-    auto vector = vector::get();
-    auto type = type::get();
+    auto vector = vm_entry_interruption_information_field::vector::get();
+    auto type = vm_entry_interruption_information_field::interruption_type::get();
 
-    if (type == type::reserved)
+    if (type == interruption_type::reserved)
         throw std::logic_error("interrupt information field type of 1 is reserved");
 
-    if (!monitor_trap_flag::is_allowed1() && type == type::other_event)
+    if (!monitor_trap_flag::is_allowed1() && type == interruption_type::other_event)
         throw std::logic_error("interrupt information field type of 7 "
                                "is reserved on this hardware");
 
-    if (type == type::non_maskable_interrupt && vector != 2)
+    if (type == interruption_type::non_maskable_interrupt && vector != 2)
         throw std::logic_error("interrupt information field vector must be "
                                "2 if the type field is 2 (NMI)");
 
-    if (type == type::hardware_exception && vector > 31)
+    if (type == interruption_type::hardware_exception && vector > 31)
         throw std::logic_error("interrupt information field vector must be "
                                "at most 31 if the type field is 3 (HE)");
 
-    if (type == type::other_event && vector != 0)
+    if (type == interruption_type::other_event && vector != 0)
         throw std::logic_error("interrupt information field vector must be "
                                "0 if the type field is 7 (other)");
 }
@@ -585,22 +625,24 @@ vmcs_intel_x64::check_control_event_injection_type_vector_checks()
 void
 vmcs_intel_x64::check_control_event_injection_delivery_ec_checks()
 {
-    using namespace vmcs::vm_entry_interruption_information_field;
+    using namespace vm_entry_interruption_information_field;
+    using namespace primary_processor_based_vm_execution_controls;
+    using namespace secondary_processor_based_vm_execution_controls;
 
-    if (!valid_bit::is_set())
+    if (vm_entry_interruption_information_field::valid_bit::is_disabled())
         return;
 
-    auto type = type::get();
-    auto vector = vector::get();
+    auto type = vm_entry_interruption_information_field::interruption_type::get();
+    auto vector = vm_entry_interruption_information_field::vector::get();
 
-    if (is_enabled_unrestricted_guests())
+    if (unrestricted_guest::is_enabled() && activate_secondary_controls::is_enabled())
     {
-        if (vmcs::guest_cr0::protection_enable::get() == 0 && deliver_error_code_bit::is_set())
+        if (guest_cr0::protection_enable::get() == 0 && deliver_error_code_bit::is_enabled())
             throw std::logic_error("unrestricted guest must be 0 or PE must "
                                    "be enabled in cr0 if deliver_error_code_bit is set");
     }
 
-    if (type != type::hardware_exception && deliver_error_code_bit::is_set())
+    if (type != interruption_type::hardware_exception && deliver_error_code_bit::is_enabled())
         throw std::logic_error("interrupt information field type must be "
                                "3 if deliver_error_code_bit is set");
 
@@ -616,39 +658,35 @@ vmcs_intel_x64::check_control_event_injection_delivery_ec_checks()
             break;
 
         default:
-            if (deliver_error_code_bit::is_set())
+            if (deliver_error_code_bit::is_enabled())
                 throw std::logic_error("vector must indicate exception that would normally "
                                        "deliver an error code if deliver_error_code_bit is set");
     }
 
-    if (!deliver_error_code_bit::is_set())
+    if (deliver_error_code_bit::is_disabled())
         throw std::logic_error("deliver_error_code_bit must be 1");
 }
 
 void
 vmcs_intel_x64::check_control_event_injection_reserved_bits_checks()
 {
-    using namespace vmcs::vm_entry_interruption_information_field;
-
-    if (!valid_bit::is_set())
+    if (vm_entry_interruption_information_field::valid_bit::is_disabled())
         return;
 
-    if (reserved::get() != 0)
+    if (vm_entry_interruption_information_field::reserved::get() != 0)
         throw std::logic_error("reserved bits of the interrupt info field must be 0");
 }
 
 void
 vmcs_intel_x64::check_control_event_injection_ec_checks()
 {
-    using namespace vmcs::vm_entry_interruption_information_field;
-
-    if (!valid_bit::is_set())
+    if (vm_entry_interruption_information_field::valid_bit::is_disabled())
         return;
 
-    if (!deliver_error_code_bit::is_set())
+    if (vm_entry_interruption_information_field::deliver_error_code_bit::is_disabled())
         return;
 
-    if ((vmcs::vm_entry_exception_error_code::get() & 0x00000000FFFF8000UL) != 0)
+    if ((vm_entry_exception_error_code::get() & 0x00000000FFFF8000UL) != 0)
         throw std::logic_error("bits 31:15 of the exception error code field must be 0 "
                                "if deliver error code bit is set in the interrupt info field");
 }
@@ -656,19 +694,19 @@ vmcs_intel_x64::check_control_event_injection_ec_checks()
 void
 vmcs_intel_x64::check_control_event_injection_instr_length_checks()
 {
-    using namespace vmcs::vm_entry_interruption_information_field;
+    using namespace vm_entry_interruption_information_field;
 
-    if (!valid_bit::is_set())
+    if (vm_entry_interruption_information_field::valid_bit::is_disabled())
         return;
 
-    auto type = type::get();
-    auto instruction_length = vmcs::vm_entry_instruction_length::get();
+    auto type = vm_entry_interruption_information_field::interruption_type::get();
+    auto instruction_length = vm_entry_instruction_length::get();
 
     switch (type)
     {
-        case type::software_interrupt:
-        case type::privileged_software_exception:
-        case type::software_exception:
+        case interruption_type::software_interrupt:
+        case interruption_type::privileged_software_exception:
+        case interruption_type::software_exception:
             break;
 
         default:
@@ -685,7 +723,7 @@ vmcs_intel_x64::check_control_event_injection_instr_length_checks()
 void
 vmcs_intel_x64::check_control_entry_msr_load_address()
 {
-    auto msr_load_count = vmcs::vm_entry_msr_load_count::get();
+    auto msr_load_count = vm_entry_msr_load_count::get();
 
     if (msr_load_count == 0)
         return;

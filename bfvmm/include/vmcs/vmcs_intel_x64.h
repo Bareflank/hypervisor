@@ -174,8 +174,6 @@ protected:
     virtual void vm_exit_controls();
     virtual void vm_entry_controls();
 
-    virtual void filter_unsupported(uint32_t msr, uint64_t &ctrl);
-
 protected:
 
 #if 0
@@ -206,8 +204,7 @@ protected:
 
 #endif
 
-    // REMOVE ME: These should be removed in favor of the namespace logic
-    virtual uint64_t get_proc2_ctls() const;
+    virtual std::string get_vm_instruction_error();
 
     // REMOVE ME: These should be placed in the x64 namespace instead
     virtual bool is_address_canonical(uint64_t addr);
@@ -217,49 +214,6 @@ protected:
     // REMOVE ME: All is enabled functions should be removed as they are
     // not needed once we have a get() function for each bit
     virtual bool is_enabled_v8086() const;
-
-    virtual bool is_enabled_virtualized_apic() const;
-    virtual bool is_enabled_ept() const;
-    virtual bool is_enabled_descriptor_table_exiting() const;
-    virtual bool is_enabled_rdtscp() const;
-    virtual bool is_enabled_x2apic_mode() const;
-    virtual bool is_enabled_vpid() const;
-    virtual bool is_enabled_wbinvd_exiting() const;
-    virtual bool is_enabled_unrestricted_guests() const;
-    virtual bool is_enabled_apic_register_virtualization() const;
-    virtual bool is_enabled_virtual_interrupt_delivery() const;
-    virtual bool is_enabled_pause_loop_exiting() const;
-    virtual bool is_enabled_rdrand_exiting() const;
-    virtual bool is_enabled_invpcid() const;
-    virtual bool is_enabled_vm_functions() const;
-    virtual bool is_enabled_vmcs_shadowing() const;
-    virtual bool is_enabled_rdseed_exiting() const;
-    virtual bool is_enabled_ept_violation_ve() const;
-    virtual bool is_enabled_xsave_xrestore() const;
-    virtual bool is_enabled_pml() const;
-
-    // REMOVE ME: All is_supported functions should be removed as they are
-    // not needed once the VMCS fields have their own is_supported
-
-    virtual bool is_supported_virtualized_apic() const;
-    virtual bool is_supported_ept() const;
-    virtual bool is_supported_descriptor_table_exiting() const;
-    virtual bool is_supported_rdtscp() const;
-    virtual bool is_supported_x2apic_mode() const;
-    virtual bool is_supported_vpid() const;
-    virtual bool is_supported_wbinvd_exiting() const;
-    virtual bool is_supported_unrestricted_guests() const;
-    virtual bool is_supported_apic_register_virtualization() const;
-    virtual bool is_supported_virtual_interrupt_delivery() const;
-    virtual bool is_supported_pause_loop_exiting() const;
-    virtual bool is_supported_rdrand_exiting() const;
-    virtual bool is_supported_invpcid() const;
-    virtual bool is_supported_vm_functions() const;
-    virtual bool is_supported_vmcs_shadowing() const;
-    virtual bool is_supported_rdseed_exiting() const;
-    virtual bool is_supported_ept_violation_ve() const;
-    virtual bool is_supported_xsave_xrestore() const;
-    virtual bool is_supported_pml() const;
 
     virtual bool is_supported_eptp_switching() const;
     virtual bool is_supported_event_injection_instr_length_of_0() const;
@@ -439,7 +393,7 @@ protected:
     virtual void check_guest_vmcs_link_pointer_in_smm();
 
     virtual void checks_on_vm_execution_control_fields();
-    virtual void check_control_ctls_reserved_properly_set(uint64_t msr_addr, uint64_t ctls, const std::string &name);
+    virtual void check_control_ctls_reserved_properly_set(uint64_t msr_addr, uint64_t ctls, const std::string &ctls_name);
     virtual void check_control_pin_based_ctls_reserved_properly_set();
     virtual void check_control_proc_based_ctls_reserved_properly_set();
     virtual void check_control_proc_based_ctls2_reserved_properly_set();
@@ -502,11 +456,85 @@ private:
 // VMCS Fields
 // -----------------------------------------------------------------------------
 
+inline auto
+get_vmcs_field(uint64_t addr, const std::string &name, bool exists)
+{
+    auto what = std::string("get_vmcs_field failed: ") + name + " field doesn't exist";
+
+    if (!exists)
+        throw std::logic_error(what);
+
+    return intel_x64::vm::read(addr, name);
+}
+
+inline auto
+get_vmcs_field_if_exists(uint64_t addr, const std::string &name, bool verbose, bool exists)
+{
+    if (!exists && verbose)
+        bfwarning << "get_vmcs_field_if_exists failed: " << name << " field doesn't exist" << '\n';
+
+    if (exists)
+        return intel_x64::vm::read(addr, name);
+
+    return 0UL;
+}
+
+template <class T> void
+set_vmcs_field(T val, uint64_t addr, const std::string &name, bool exists)
+{
+    auto what = std::string("set_vmcs_field failed: ") + name + " field doesn't exist";
+
+    if (!exists)
+        throw std::logic_error(what);
+
+    intel_x64::vm::write(addr, val, name);
+}
+
+template <class T> void
+set_vmcs_field_if_exists(T val, uint64_t addr, const std::string &name, bool verbose, bool exists)
+{
+    if (!exists && verbose)
+        bfwarning << "set_vmcs_field_if_exists failed: " << name << " field doesn't exist" << '\n';
+
+    if (exists)
+        intel_x64::vm::write(addr, val, name);
+}
+
+inline auto
+get_vm_control(uint64_t addr, const std::string &name, uint64_t mask, bool exists)
+{
+    auto what = std::string("can't get ") + name + ": corresponding vmcs field doesn't exist";
+
+    if (!exists)
+        throw std::logic_error(what);
+
+    return (intel_x64::vm::read(addr, name) & mask);
+}
+
+inline auto
+get_vm_control_if_exists(uint64_t addr, const std::string &name, uint64_t mask, bool verbose, bool exists)
+{
+    auto what = std::string("getting ") + name + " not allowed: corresponding vmcs field doesn't exist";
+
+    if (!exists && verbose)
+        bfwarning << what << '\n';
+
+    if (exists)
+        return (intel_x64::vm::read(addr, name) & mask);
+
+    return 0UL;
+}
+
 template <class T> void
 set_vm_control(T val, uint64_t msr_addr, uint64_t ctls_addr,
-               const std::string &name, uint64_t mask)
+               const std::string &name, uint64_t mask, bool field_exists)
 {
     using namespace intel_x64;
+
+    auto what = std::string("setting ") + name + " failed: corresponding vmcs field doesn't exist";
+
+    if (!field_exists)
+        throw std::logic_error(what);
 
     bool is_allowed0 = (msrs::get(msr_addr) & mask) == 0;
     bool is_allowed1 = (msrs::get(msr_addr) & (mask << 32)) != 0;
@@ -529,9 +557,16 @@ set_vm_control(T val, uint64_t msr_addr, uint64_t ctls_addr,
 
 template <class T> void
 set_vm_control_if_allowed(T val, uint64_t msr_addr, uint64_t ctls_addr,
-                          const std::string &name, uint64_t mask, bool verbose) noexcept
+                          const std::string &name, uint64_t mask,
+                          bool verbose, bool field_exists) noexcept
 {
     using namespace intel_x64;
+
+    if (!field_exists)
+    {
+        bfwarning << "setting " << name << " failed: corresponding vmcs field doesn't exist" << '\n';
+        return;
+    }
 
     bool is_allowed0 = (msrs::get(msr_addr) & mask) == 0;
     bool is_allowed1 = (msrs::get(msr_addr) & (mask << 32)) != 0;
@@ -1892,14 +1927,20 @@ namespace pin_based_vm_execution_controls
     constexpr const auto name = "pin_based_vm_execution_controls";
     constexpr const auto msr_addr = msrs::ia32_vmx_true_pinbased_ctls::addr;
 
-    inline auto get()
-    { return vm::read(addr, name); }
-
-    template<class T> void set(T val)
-    { vm::write(addr, val, name); }
-
     inline bool exists() noexcept
     { return true; }
+
+    inline auto get()
+    { return get_vmcs_field(addr, name, exists()); }
+
+    inline auto get_if_exists(bool verbose = false) noexcept
+    { return get_vmcs_field_if_exists(addr, name, verbose, exists()); }
+
+    template <class T> void set(T val)
+    { set_vmcs_field(val, addr, name, exists()); }
+
+    template <class T> void set_if_exists(T val, bool verbose = false) noexcept
+    { set_vmcs_field_if_exists(val, addr, name, verbose, exists()); }
 
     namespace external_interrupt_exiting
     {
@@ -1907,27 +1948,29 @@ namespace pin_based_vm_execution_controls
         constexpr const auto from = 0;
         constexpr const auto name = "external_interrupt_exiting";
 
-        inline bool
-        is_enabled()
-        { return (vm::read(addr, name) & mask) != 0; }
+        inline bool is_enabled()
+        { return get_vm_control(addr, name, mask, exists()) != 0U; }
 
-        template <class T> void set(T val)
-        { set_vm_control(val, msr_addr, addr, name, mask); }
+        inline bool is_enabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) != 0U; }
 
-        template <class T> void set_if_allowed(T val, bool verbose) noexcept
-        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+        inline bool is_disabled()
+        { return get_vm_control(addr, name, mask, exists()) == 0U; }
+
+        inline bool is_disabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) == 0U; }
 
         inline void enable()
-        { set(1UL); }
-
-        inline void disable()
-        { set(0UL); }
+        { set_vm_control(1UL, msr_addr, addr, name, mask, exists()); }
 
         inline void enable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(1UL, verbose); }
+        { set_vm_control_if_allowed(1UL, msr_addr, addr, name, mask, verbose, exists()); }
+
+        inline void disable()
+        { set_vm_control(0UL, msr_addr, addr, name, mask, exists()); }
 
         inline void disable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(0UL, verbose); }
+        { set_vm_control_if_allowed(0UL, msr_addr, addr, name, mask, verbose, exists()); }
     }
 
     namespace nmi_exiting
@@ -1936,27 +1979,29 @@ namespace pin_based_vm_execution_controls
         constexpr const auto from = 3;
         constexpr const auto name = "nmi_exiting";
 
-        inline bool
-        is_enabled()
-        { return (vm::read(addr, name) & mask) != 0; }
+        inline bool is_enabled()
+        { return get_vm_control(addr, name, mask, exists()) != 0U; }
 
-        template <class T> void set(T val)
-        { set_vm_control(val, msr_addr, addr, name, mask); }
+        inline bool is_enabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) != 0U; }
 
-        template <class T> void set_if_allowed(T val, bool verbose) noexcept
-        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+        inline bool is_disabled()
+        { return get_vm_control(addr, name, mask, exists()) == 0U; }
+
+        inline bool is_disabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) == 0U; }
 
         inline void enable()
-        { set(1UL); }
-
-        inline void disable()
-        { set(0UL); }
+        { set_vm_control(1UL, msr_addr, addr, name, mask, exists()); }
 
         inline void enable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(1UL, verbose); }
+        { set_vm_control_if_allowed(1UL, msr_addr, addr, name, mask, verbose, exists()); }
+
+        inline void disable()
+        { set_vm_control(0UL, msr_addr, addr, name, mask, exists()); }
 
         inline void disable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(0UL, verbose); }
+        { set_vm_control_if_allowed(0UL, msr_addr, addr, name, mask, verbose, exists()); }
     }
 
     namespace virtual_nmis
@@ -1965,27 +2010,29 @@ namespace pin_based_vm_execution_controls
         constexpr const auto from = 5;
         constexpr const auto name = "virtual_nmis";
 
-        inline bool
-        is_enabled()
-        { return (vm::read(addr, name) & mask) != 0; }
+        inline bool is_enabled()
+        { return get_vm_control(addr, name, mask, exists()) != 0U; }
 
-        template <class T> void set(T val)
-        { set_vm_control(val, msr_addr, addr, name, mask); }
+        inline bool is_enabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) != 0U; }
 
-        template <class T> void set_if_allowed(T val, bool verbose) noexcept
-        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+        inline bool is_disabled()
+        { return get_vm_control(addr, name, mask, exists()) == 0U; }
+
+        inline bool is_disabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) == 0U; }
 
         inline void enable()
-        { set(1UL); }
-
-        inline void disable()
-        { set(0UL); }
+        { set_vm_control(1UL, msr_addr, addr, name, mask, exists()); }
 
         inline void enable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(1UL, verbose); }
+        { set_vm_control_if_allowed(1UL, msr_addr, addr, name, mask, verbose, exists()); }
+
+        inline void disable()
+        { set_vm_control(0UL, msr_addr, addr, name, mask, exists()); }
 
         inline void disable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(0UL, verbose); }
+        { set_vm_control_if_allowed(0UL, msr_addr, addr, name, mask, verbose, exists()); }
     }
 
     namespace activate_vmx_preemption_timer
@@ -1994,27 +2041,29 @@ namespace pin_based_vm_execution_controls
         constexpr const auto from = 6;
         constexpr const auto name = "activate_vmx_preemption_timer";
 
-        inline bool
-        is_enabled()
-        { return (vm::read(addr, name) & mask) != 0; }
+        inline bool is_enabled()
+        { return get_vm_control(addr, name, mask, exists()) != 0U; }
 
-        template <class T> void set(T val)
-        { set_vm_control(val, msr_addr, addr, name, mask); }
+        inline bool is_enabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) != 0U; }
 
-        template <class T> void set_if_allowed(T val, bool verbose) noexcept
-        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+        inline bool is_disabled()
+        { return get_vm_control(addr, name, mask, exists()) == 0U; }
+
+        inline bool is_disabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) == 0U; }
 
         inline void enable()
-        { set(1UL); }
-
-        inline void disable()
-        { set(0UL); }
+        { set_vm_control(1UL, msr_addr, addr, name, mask, exists()); }
 
         inline void enable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(1UL, verbose); }
+        { set_vm_control_if_allowed(1UL, msr_addr, addr, name, mask, verbose, exists()); }
+
+        inline void disable()
+        { set_vm_control(0UL, msr_addr, addr, name, mask, exists()); }
 
         inline void disable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(0UL, verbose); }
+        { set_vm_control_if_allowed(0UL, msr_addr, addr, name, mask, verbose, exists()); }
     }
 
     namespace process_posted_interrupts
@@ -2023,27 +2072,29 @@ namespace pin_based_vm_execution_controls
         constexpr const auto from = 7;
         constexpr const auto name = "process_posted_interrupts";
 
-        inline bool
-        is_enabled()
-        { return (vm::read(addr, name) & mask) != 0; }
+        inline bool is_enabled()
+        { return get_vm_control(addr, name, mask, exists()) != 0U; }
 
-        template <class T> void set(T val)
-        { set_vm_control(val, msr_addr, addr, name, mask); }
+        inline bool is_enabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) != 0U; }
 
-        template <class T> void set_if_allowed(T val, bool verbose) noexcept
-        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+        inline bool is_disabled()
+        { return get_vm_control(addr, name, mask, exists()) == 0U; }
+
+        inline bool is_disabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) == 0U; }
 
         inline void enable()
-        { set(1UL); }
-
-        inline void disable()
-        { set(0UL); }
+        { set_vm_control(1UL, msr_addr, addr, name, mask, exists()); }
 
         inline void enable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(1UL, verbose); }
+        { set_vm_control_if_allowed(1UL, msr_addr, addr, name, mask, verbose, exists()); }
+
+        inline void disable()
+        { set_vm_control(0UL, msr_addr, addr, name, mask, exists()); }
 
         inline void disable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(0UL, verbose); }
+        { set_vm_control_if_allowed(0UL, msr_addr, addr, name, mask, verbose, exists()); }
     }
 }
 
@@ -2053,14 +2104,20 @@ namespace primary_processor_based_vm_execution_controls
     constexpr const auto name = "primary_processor_based_vm_execution_controls";
     constexpr const auto msr_addr = msrs::ia32_vmx_true_procbased_ctls::addr;
 
-    inline auto get()
-    { return vm::read(addr, name); }
-
-    template<class T> void set(T val)
-    { vm::write(addr, val, name); }
-
     inline bool exists() noexcept
     { return true; }
+
+    inline auto get()
+    { return get_vmcs_field(addr, name, exists()); }
+
+    inline auto get_if_exists(bool verbose = false) noexcept
+    { return get_vmcs_field_if_exists(addr, name, verbose, exists()); }
+
+    template <class T> void set(T val)
+    { set_vmcs_field(val, addr, name, exists()); }
+
+    template <class T> void set_if_exists(T val, bool verbose = false) noexcept
+    { set_vmcs_field_if_exists(val, addr, name, verbose, exists()); }
 
     namespace interrupt_window_exiting
     {
@@ -2068,27 +2125,29 @@ namespace primary_processor_based_vm_execution_controls
         constexpr const auto from = 2;
         constexpr const auto name = "interrupt_window_exiting";
 
-        inline bool
-        is_enabled()
-        { return (vm::read(addr, name) & mask) != 0; }
+        inline bool is_enabled()
+        { return get_vm_control(addr, name, mask, exists()) != 0U; }
 
-        template <class T> void set(T val)
-        { set_vm_control(val, msr_addr, addr, name, mask); }
+        inline bool is_enabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) != 0U; }
 
-        template <class T> void set_if_allowed(T val, bool verbose) noexcept
-        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+        inline bool is_disabled()
+        { return get_vm_control(addr, name, mask, exists()) == 0U; }
+
+        inline bool is_disabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) == 0U; }
 
         inline void enable()
-        { set(1UL); }
-
-        inline void disable()
-        { set(0UL); }
+        { set_vm_control(1UL, msr_addr, addr, name, mask, exists()); }
 
         inline void enable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(1UL, verbose); }
+        { set_vm_control_if_allowed(1UL, msr_addr, addr, name, mask, verbose, exists()); }
+
+        inline void disable()
+        { set_vm_control(0UL, msr_addr, addr, name, mask, exists()); }
 
         inline void disable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(0UL, verbose); }
+        { set_vm_control_if_allowed(0UL, msr_addr, addr, name, mask, verbose, exists()); }
     }
 
     namespace use_tsc_offsetting
@@ -2097,27 +2156,29 @@ namespace primary_processor_based_vm_execution_controls
         constexpr const auto from = 3;
         constexpr const auto name = "use_tsc_offsetting";
 
-        inline bool
-        is_enabled()
-        { return (vm::read(addr, name) & mask) != 0; }
+        inline bool is_enabled()
+        { return get_vm_control(addr, name, mask, exists()) != 0U; }
 
-        template <class T> void set(T val)
-        { set_vm_control(val, msr_addr, addr, name, mask); }
+        inline bool is_enabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) != 0U; }
 
-        template <class T> void set_if_allowed(T val, bool verbose) noexcept
-        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+        inline bool is_disabled()
+        { return get_vm_control(addr, name, mask, exists()) == 0U; }
+
+        inline bool is_disabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) == 0U; }
 
         inline void enable()
-        { set(1UL); }
-
-        inline void disable()
-        { set(0UL); }
+        { set_vm_control(1UL, msr_addr, addr, name, mask, exists()); }
 
         inline void enable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(1UL, verbose); }
+        { set_vm_control_if_allowed(1UL, msr_addr, addr, name, mask, verbose, exists()); }
+
+        inline void disable()
+        { set_vm_control(0UL, msr_addr, addr, name, mask, exists()); }
 
         inline void disable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(0UL, verbose); }
+        { set_vm_control_if_allowed(0UL, msr_addr, addr, name, mask, verbose, exists()); }
     }
 
     namespace hlt_exiting
@@ -2126,27 +2187,29 @@ namespace primary_processor_based_vm_execution_controls
         constexpr const auto from = 7;
         constexpr const auto name = "hlt_exiting";
 
-        inline bool
-        is_enabled()
-        { return (vm::read(addr, name) & mask) != 0; }
+        inline bool is_enabled()
+        { return get_vm_control(addr, name, mask, exists()) != 0U; }
 
-        template <class T> void set(T val)
-        { set_vm_control(val, msr_addr, addr, name, mask); }
+        inline bool is_enabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) != 0U; }
 
-        template <class T> void set_if_allowed(T val, bool verbose) noexcept
-        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+        inline bool is_disabled()
+        { return get_vm_control(addr, name, mask, exists()) == 0U; }
+
+        inline bool is_disabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) == 0U; }
 
         inline void enable()
-        { set(1UL); }
-
-        inline void disable()
-        { set(0UL); }
+        { set_vm_control(1UL, msr_addr, addr, name, mask, exists()); }
 
         inline void enable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(1UL, verbose); }
+        { set_vm_control_if_allowed(1UL, msr_addr, addr, name, mask, verbose, exists()); }
+
+        inline void disable()
+        { set_vm_control(0UL, msr_addr, addr, name, mask, exists()); }
 
         inline void disable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(0UL, verbose); }
+        { set_vm_control_if_allowed(0UL, msr_addr, addr, name, mask, verbose, exists()); }
     }
 
     namespace invlpg_exiting
@@ -2155,27 +2218,29 @@ namespace primary_processor_based_vm_execution_controls
         constexpr const auto from = 9;
         constexpr const auto name = "invlpg_exiting";
 
-        inline bool
-        is_enabled()
-        { return (vm::read(addr, name) & mask) != 0; }
+        inline bool is_enabled()
+        { return get_vm_control(addr, name, mask, exists()) != 0U; }
 
-        template <class T> void set(T val)
-        { set_vm_control(val, msr_addr, addr, name, mask); }
+        inline bool is_enabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) != 0U; }
 
-        template <class T> void set_if_allowed(T val, bool verbose) noexcept
-        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+        inline bool is_disabled()
+        { return get_vm_control(addr, name, mask, exists()) == 0U; }
+
+        inline bool is_disabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) == 0U; }
 
         inline void enable()
-        { set(1UL); }
-
-        inline void disable()
-        { set(0UL); }
+        { set_vm_control(1UL, msr_addr, addr, name, mask, exists()); }
 
         inline void enable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(1UL, verbose); }
+        { set_vm_control_if_allowed(1UL, msr_addr, addr, name, mask, verbose, exists()); }
+
+        inline void disable()
+        { set_vm_control(0UL, msr_addr, addr, name, mask, exists()); }
 
         inline void disable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(0UL, verbose); }
+        { set_vm_control_if_allowed(0UL, msr_addr, addr, name, mask, verbose, exists()); }
     }
 
     namespace mwait_exiting
@@ -2184,27 +2249,29 @@ namespace primary_processor_based_vm_execution_controls
         constexpr const auto from = 10;
         constexpr const auto name = "mwait_exiting";
 
-        inline bool
-        is_enabled()
-        { return (vm::read(addr, name) & mask) != 0; }
+        inline bool is_enabled()
+        { return get_vm_control(addr, name, mask, exists()) != 0U; }
 
-        template <class T> void set(T val)
-        { set_vm_control(val, msr_addr, addr, name, mask); }
+        inline bool is_enabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) != 0U; }
 
-        template <class T> void set_if_allowed(T val, bool verbose) noexcept
-        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+        inline bool is_disabled()
+        { return get_vm_control(addr, name, mask, exists()) == 0U; }
+
+        inline bool is_disabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) == 0U; }
 
         inline void enable()
-        { set(1UL); }
-
-        inline void disable()
-        { set(0UL); }
+        { set_vm_control(1UL, msr_addr, addr, name, mask, exists()); }
 
         inline void enable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(1UL, verbose); }
+        { set_vm_control_if_allowed(1UL, msr_addr, addr, name, mask, verbose, exists()); }
+
+        inline void disable()
+        { set_vm_control(0UL, msr_addr, addr, name, mask, exists()); }
 
         inline void disable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(0UL, verbose); }
+        { set_vm_control_if_allowed(0UL, msr_addr, addr, name, mask, verbose, exists()); }
     }
 
     namespace rdpmc_exiting
@@ -2213,27 +2280,29 @@ namespace primary_processor_based_vm_execution_controls
         constexpr const auto from = 11;
         constexpr const auto name = "rdpmc_exiting";
 
-        inline bool
-        is_enabled()
-        { return (vm::read(addr, name) & mask) != 0; }
+        inline bool is_enabled()
+        { return get_vm_control(addr, name, mask, exists()) != 0U; }
 
-        template <class T> void set(T val)
-        { set_vm_control(val, msr_addr, addr, name, mask); }
+        inline bool is_enabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) != 0U; }
 
-        template <class T> void set_if_allowed(T val, bool verbose) noexcept
-        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+        inline bool is_disabled()
+        { return get_vm_control(addr, name, mask, exists()) == 0U; }
+
+        inline bool is_disabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) == 0U; }
 
         inline void enable()
-        { set(1UL); }
-
-        inline void disable()
-        { set(0UL); }
+        { set_vm_control(1UL, msr_addr, addr, name, mask, exists()); }
 
         inline void enable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(1UL, verbose); }
+        { set_vm_control_if_allowed(1UL, msr_addr, addr, name, mask, verbose, exists()); }
+
+        inline void disable()
+        { set_vm_control(0UL, msr_addr, addr, name, mask, exists()); }
 
         inline void disable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(0UL, verbose); }
+        { set_vm_control_if_allowed(0UL, msr_addr, addr, name, mask, verbose, exists()); }
     }
 
     namespace rdtsc_exiting
@@ -2242,27 +2311,29 @@ namespace primary_processor_based_vm_execution_controls
         constexpr const auto from = 12;
         constexpr const auto name = "rdtsc_exiting";
 
-        inline bool
-        is_enabled()
-        { return (vm::read(addr, name) & mask) != 0; }
+        inline bool is_enabled()
+        { return get_vm_control(addr, name, mask, exists()) != 0U; }
 
-        template <class T> void set(T val)
-        { set_vm_control(val, msr_addr, addr, name, mask); }
+        inline bool is_enabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) != 0U; }
 
-        template <class T> void set_if_allowed(T val, bool verbose) noexcept
-        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+        inline bool is_disabled()
+        { return get_vm_control(addr, name, mask, exists()) == 0U; }
+
+        inline bool is_disabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) == 0U; }
 
         inline void enable()
-        { set(1UL); }
-
-        inline void disable()
-        { set(0UL); }
+        { set_vm_control(1UL, msr_addr, addr, name, mask, exists()); }
 
         inline void enable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(1UL, verbose); }
+        { set_vm_control_if_allowed(1UL, msr_addr, addr, name, mask, verbose, exists()); }
+
+        inline void disable()
+        { set_vm_control(0UL, msr_addr, addr, name, mask, exists()); }
 
         inline void disable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(0UL, verbose); }
+        { set_vm_control_if_allowed(0UL, msr_addr, addr, name, mask, verbose, exists()); }
     }
 
     namespace cr3_load_exiting
@@ -2271,27 +2342,29 @@ namespace primary_processor_based_vm_execution_controls
         constexpr const auto from = 15;
         constexpr const auto name = "cr3_load_exiting";
 
-        inline bool
-        is_enabled()
-        { return (vm::read(addr, name) & mask) != 0; }
+        inline bool is_enabled()
+        { return get_vm_control(addr, name, mask, exists()) != 0U; }
 
-        template <class T> void set(T val)
-        { set_vm_control(val, msr_addr, addr, name, mask); }
+        inline bool is_enabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) != 0U; }
 
-        template <class T> void set_if_allowed(T val, bool verbose) noexcept
-        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+        inline bool is_disabled()
+        { return get_vm_control(addr, name, mask, exists()) == 0U; }
+
+        inline bool is_disabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) == 0U; }
 
         inline void enable()
-        { set(1UL); }
-
-        inline void disable()
-        { set(0UL); }
+        { set_vm_control(1UL, msr_addr, addr, name, mask, exists()); }
 
         inline void enable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(1UL, verbose); }
+        { set_vm_control_if_allowed(1UL, msr_addr, addr, name, mask, verbose, exists()); }
+
+        inline void disable()
+        { set_vm_control(0UL, msr_addr, addr, name, mask, exists()); }
 
         inline void disable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(0UL, verbose); }
+        { set_vm_control_if_allowed(0UL, msr_addr, addr, name, mask, verbose, exists()); }
     }
 
     namespace cr3_store_exiting
@@ -2300,27 +2373,29 @@ namespace primary_processor_based_vm_execution_controls
         constexpr const auto from = 16;
         constexpr const auto name = "cr3_store_exiting";
 
-        inline bool
-        is_enabled()
-        { return (vm::read(addr, name) & mask) != 0; }
+        inline bool is_enabled()
+        { return get_vm_control(addr, name, mask, exists()) != 0U; }
 
-        template <class T> void set(T val)
-        { set_vm_control(val, msr_addr, addr, name, mask); }
+        inline bool is_enabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) != 0U; }
 
-        template <class T> void set_if_allowed(T val, bool verbose) noexcept
-        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+        inline bool is_disabled()
+        { return get_vm_control(addr, name, mask, exists()) == 0U; }
+
+        inline bool is_disabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) == 0U; }
 
         inline void enable()
-        { set(1UL); }
-
-        inline void disable()
-        { set(0UL); }
+        { set_vm_control(1UL, msr_addr, addr, name, mask, exists()); }
 
         inline void enable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(1UL, verbose); }
+        { set_vm_control_if_allowed(1UL, msr_addr, addr, name, mask, verbose, exists()); }
+
+        inline void disable()
+        { set_vm_control(0UL, msr_addr, addr, name, mask, exists()); }
 
         inline void disable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(0UL, verbose); }
+        { set_vm_control_if_allowed(0UL, msr_addr, addr, name, mask, verbose, exists()); }
     }
 
     namespace cr8_load_exiting
@@ -2329,27 +2404,29 @@ namespace primary_processor_based_vm_execution_controls
         constexpr const auto from = 19;
         constexpr const auto name = "cr8_load_exiting";
 
-        inline bool
-        is_enabled()
-        { return (vm::read(addr, name) & mask) != 0; }
+        inline bool is_enabled()
+        { return get_vm_control(addr, name, mask, exists()) != 0U; }
 
-        template <class T> void set(T val)
-        { set_vm_control(val, msr_addr, addr, name, mask); }
+        inline bool is_enabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) != 0U; }
 
-        template <class T> void set_if_allowed(T val, bool verbose) noexcept
-        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+        inline bool is_disabled()
+        { return get_vm_control(addr, name, mask, exists()) == 0U; }
+
+        inline bool is_disabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) == 0U; }
 
         inline void enable()
-        { set(1UL); }
-
-        inline void disable()
-        { set(0UL); }
+        { set_vm_control(1UL, msr_addr, addr, name, mask, exists()); }
 
         inline void enable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(1UL, verbose); }
+        { set_vm_control_if_allowed(1UL, msr_addr, addr, name, mask, verbose, exists()); }
+
+        inline void disable()
+        { set_vm_control(0UL, msr_addr, addr, name, mask, exists()); }
 
         inline void disable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(0UL, verbose); }
+        { set_vm_control_if_allowed(0UL, msr_addr, addr, name, mask, verbose, exists()); }
     }
 
     namespace cr8_store_exiting
@@ -2358,27 +2435,29 @@ namespace primary_processor_based_vm_execution_controls
         constexpr const auto from = 20;
         constexpr const auto name = "cr8_store_exiting";
 
-        inline bool
-        is_enabled()
-        { return (vm::read(addr, name) & mask) != 0; }
+        inline bool is_enabled()
+        { return get_vm_control(addr, name, mask, exists()) != 0U; }
 
-        template <class T> void set(T val)
-        { set_vm_control(val, msr_addr, addr, name, mask); }
+        inline bool is_enabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) != 0U; }
 
-        template <class T> void set_if_allowed(T val, bool verbose) noexcept
-        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+        inline bool is_disabled()
+        { return get_vm_control(addr, name, mask, exists()) == 0U; }
+
+        inline bool is_disabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) == 0U; }
 
         inline void enable()
-        { set(1UL); }
-
-        inline void disable()
-        { set(0UL); }
+        { set_vm_control(1UL, msr_addr, addr, name, mask, exists()); }
 
         inline void enable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(1UL, verbose); }
+        { set_vm_control_if_allowed(1UL, msr_addr, addr, name, mask, verbose, exists()); }
+
+        inline void disable()
+        { set_vm_control(0UL, msr_addr, addr, name, mask, exists()); }
 
         inline void disable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(0UL, verbose); }
+        { set_vm_control_if_allowed(0UL, msr_addr, addr, name, mask, verbose, exists()); }
     }
 
     namespace use_tpr_shadow
@@ -2387,27 +2466,29 @@ namespace primary_processor_based_vm_execution_controls
         constexpr const auto from = 21;
         constexpr const auto name = "use_tpr_shadow";
 
-        inline bool
-        is_enabled()
-        { return (vm::read(addr, name) & mask) != 0; }
+        inline bool is_enabled()
+        { return get_vm_control(addr, name, mask, exists()) != 0U; }
 
-        template <class T> void set(T val)
-        { set_vm_control(val, msr_addr, addr, name, mask); }
+        inline bool is_enabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) != 0U; }
 
-        template <class T> void set_if_allowed(T val, bool verbose) noexcept
-        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+        inline bool is_disabled()
+        { return get_vm_control(addr, name, mask, exists()) == 0U; }
+
+        inline bool is_disabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) == 0U; }
 
         inline void enable()
-        { set(1UL); }
-
-        inline void disable()
-        { set(0UL); }
+        { set_vm_control(1UL, msr_addr, addr, name, mask, exists()); }
 
         inline void enable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(1UL, verbose); }
+        { set_vm_control_if_allowed(1UL, msr_addr, addr, name, mask, verbose, exists()); }
+
+        inline void disable()
+        { set_vm_control(0UL, msr_addr, addr, name, mask, exists()); }
 
         inline void disable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(0UL, verbose); }
+        { set_vm_control_if_allowed(0UL, msr_addr, addr, name, mask, verbose, exists()); }
     }
 
     namespace nmi_window_exiting
@@ -2416,27 +2497,29 @@ namespace primary_processor_based_vm_execution_controls
         constexpr const auto from = 22;
         constexpr const auto name = "nmi_window_exiting";
 
-        inline bool
-        is_enabled()
-        { return (vm::read(addr, name) & mask) != 0; }
+        inline bool is_enabled()
+        { return get_vm_control(addr, name, mask, exists()) != 0U; }
 
-        template <class T> void set(T val)
-        { set_vm_control(val, msr_addr, addr, name, mask); }
+        inline bool is_enabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) != 0U; }
 
-        template <class T> void set_if_allowed(T val, bool verbose) noexcept
-        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+        inline bool is_disabled()
+        { return get_vm_control(addr, name, mask, exists()) == 0U; }
+
+        inline bool is_disabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) == 0U; }
 
         inline void enable()
-        { set(1UL); }
-
-        inline void disable()
-        { set(0UL); }
+        { set_vm_control(1UL, msr_addr, addr, name, mask, exists()); }
 
         inline void enable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(1UL, verbose); }
+        { set_vm_control_if_allowed(1UL, msr_addr, addr, name, mask, verbose, exists()); }
+
+        inline void disable()
+        { set_vm_control(0UL, msr_addr, addr, name, mask, exists()); }
 
         inline void disable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(0UL, verbose); }
+        { set_vm_control_if_allowed(0UL, msr_addr, addr, name, mask, verbose, exists()); }
     }
 
     namespace mov_dr_exiting
@@ -2445,27 +2528,29 @@ namespace primary_processor_based_vm_execution_controls
         constexpr const auto from = 23;
         constexpr const auto name = "mov_dr_exiting";
 
-        inline bool
-        is_enabled()
-        { return (vm::read(addr, name) & mask) != 0; }
+        inline bool is_enabled()
+        { return get_vm_control(addr, name, mask, exists()) != 0U; }
 
-        template <class T> void set(T val)
-        { set_vm_control(val, msr_addr, addr, name, mask); }
+        inline bool is_enabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) != 0U; }
 
-        template <class T> void set_if_allowed(T val, bool verbose) noexcept
-        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+        inline bool is_disabled()
+        { return get_vm_control(addr, name, mask, exists()) == 0U; }
+
+        inline bool is_disabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) == 0U; }
 
         inline void enable()
-        { set(1UL); }
-
-        inline void disable()
-        { set(0UL); }
+        { set_vm_control(1UL, msr_addr, addr, name, mask, exists()); }
 
         inline void enable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(1UL, verbose); }
+        { set_vm_control_if_allowed(1UL, msr_addr, addr, name, mask, verbose, exists()); }
+
+        inline void disable()
+        { set_vm_control(0UL, msr_addr, addr, name, mask, exists()); }
 
         inline void disable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(0UL, verbose); }
+        { set_vm_control_if_allowed(0UL, msr_addr, addr, name, mask, verbose, exists()); }
     }
 
     namespace unconditional_io_exiting
@@ -2474,27 +2559,29 @@ namespace primary_processor_based_vm_execution_controls
         constexpr const auto from = 24;
         constexpr const auto name = "unconditional_io_exiting";
 
-        inline bool
-        is_enabled()
-        { return (vm::read(addr, name) & mask) != 0; }
+        inline bool is_enabled()
+        { return get_vm_control(addr, name, mask, exists()) != 0U; }
 
-        template <class T> void set(T val)
-        { set_vm_control(val, msr_addr, addr, name, mask); }
+        inline bool is_enabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) != 0U; }
 
-        template <class T> void set_if_allowed(T val, bool verbose) noexcept
-        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+        inline bool is_disabled()
+        { return get_vm_control(addr, name, mask, exists()) == 0U; }
+
+        inline bool is_disabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) == 0U; }
 
         inline void enable()
-        { set(1UL); }
-
-        inline void disable()
-        { set(0UL); }
+        { set_vm_control(1UL, msr_addr, addr, name, mask, exists()); }
 
         inline void enable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(1UL, verbose); }
+        { set_vm_control_if_allowed(1UL, msr_addr, addr, name, mask, verbose, exists()); }
+
+        inline void disable()
+        { set_vm_control(0UL, msr_addr, addr, name, mask, exists()); }
 
         inline void disable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(0UL, verbose); }
+        { set_vm_control_if_allowed(0UL, msr_addr, addr, name, mask, verbose, exists()); }
     }
 
     namespace use_io_bitmaps
@@ -2503,27 +2590,29 @@ namespace primary_processor_based_vm_execution_controls
         constexpr const auto from = 25;
         constexpr const auto name = "use_io_bitmaps";
 
-        inline bool
-        is_enabled()
-        { return (vm::read(addr, name) & mask) != 0; }
+        inline bool is_enabled()
+        { return get_vm_control(addr, name, mask, exists()) != 0U; }
 
-        template <class T> void set(T val)
-        { set_vm_control(val, msr_addr, addr, name, mask); }
+        inline bool is_enabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) != 0U; }
 
-        template <class T> void set_if_allowed(T val, bool verbose) noexcept
-        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+        inline bool is_disabled()
+        { return get_vm_control(addr, name, mask, exists()) == 0U; }
+
+        inline bool is_disabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) == 0U; }
 
         inline void enable()
-        { set(1UL); }
-
-        inline void disable()
-        { set(0UL); }
+        { set_vm_control(1UL, msr_addr, addr, name, mask, exists()); }
 
         inline void enable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(1UL, verbose); }
+        { set_vm_control_if_allowed(1UL, msr_addr, addr, name, mask, verbose, exists()); }
+
+        inline void disable()
+        { set_vm_control(0UL, msr_addr, addr, name, mask, exists()); }
 
         inline void disable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(0UL, verbose); }
+        { set_vm_control_if_allowed(0UL, msr_addr, addr, name, mask, verbose, exists()); }
     }
 
     namespace monitor_trap_flag
@@ -2534,25 +2623,28 @@ namespace primary_processor_based_vm_execution_controls
 
         inline bool
         is_enabled()
-        { return (vm::read(addr, name) & mask) != 0; }
+        { return get_vm_control(addr, name, mask, exists()) != 0U; }
 
-        template <class T> void set(T val)
-        { set_vm_control(val, msr_addr, addr, name, mask); }
+        inline bool is_enabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) != 0U; }
 
-        template <class T> void set_if_allowed(T val, bool verbose) noexcept
-        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+        inline bool is_disabled()
+        { return get_vm_control(addr, name, mask, exists()) == 0U; }
+
+        inline bool is_disabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) == 0U; }
 
         inline void enable()
-        { set(1UL); }
-
-        inline void disable()
-        { set(0UL); }
+        { set_vm_control(1UL, msr_addr, addr, name, mask, exists()); }
 
         inline void enable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(1UL, verbose); }
+        { set_vm_control_if_allowed(1UL, msr_addr, addr, name, mask, verbose, exists()); }
+
+        inline void disable()
+        { set_vm_control(0UL, msr_addr, addr, name, mask, exists()); }
 
         inline void disable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(0UL, verbose); }
+        { set_vm_control_if_allowed(0UL, msr_addr, addr, name, mask, verbose, exists()); }
     }
 
     namespace use_msr_bitmaps
@@ -2561,27 +2653,30 @@ namespace primary_processor_based_vm_execution_controls
         constexpr const auto from = 28;
         constexpr const auto name = "use_msr_bitmaps";
 
+        inline bool is_enabled()
+        { return get_vm_control(addr, name, mask, exists()) != 0U; }
+
+        inline bool is_enabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) != 0U; }
+
+        inline bool is_disabled()
+        { return get_vm_control(addr, name, mask, exists()) == 0U; }
+
         inline bool
-        is_enabled()
-        { return (vm::read(addr, name) & mask) != 0; }
-
-        template <class T> void set(T val)
-        { set_vm_control(val, msr_addr, addr, name, mask); }
-
-        template <class T> void set_if_allowed(T val, bool verbose) noexcept
-        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+        is_disabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) == 0U; }
 
         inline void enable()
-        { set(1UL); }
-
-        inline void disable()
-        { set(0UL); }
+        { set_vm_control(1UL, msr_addr, addr, name, mask, exists()); }
 
         inline void enable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(1UL, verbose); }
+        { set_vm_control_if_allowed(1UL, msr_addr, addr, name, mask, verbose, exists()); }
+
+        inline void disable()
+        { set_vm_control(0UL, msr_addr, addr, name, mask, exists()); }
 
         inline void disable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(0UL, verbose); }
+        { set_vm_control_if_allowed(0UL, msr_addr, addr, name, mask, verbose, exists()); }
     }
 
     namespace monitor_exiting
@@ -2590,27 +2685,29 @@ namespace primary_processor_based_vm_execution_controls
         constexpr const auto from = 29;
         constexpr const auto name = "monitor_exiting";
 
-        inline bool
-        is_enabled()
-        { return (vm::read(addr, name) & mask) != 0; }
+        inline bool is_enabled()
+        { return get_vm_control(addr, name, mask, exists()) != 0U; }
 
-        template <class T> void set(T val)
-        { set_vm_control(val, msr_addr, addr, name, mask); }
+        inline bool is_enabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) != 0U; }
 
-        template <class T> void set_if_allowed(T val, bool verbose) noexcept
-        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+        inline bool is_disabled()
+        { return get_vm_control(addr, name, mask, exists()) == 0U; }
+
+        inline bool is_disabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) == 0U; }
 
         inline void enable()
-        { set(1UL); }
-
-        inline void disable()
-        { set(0UL); }
+        { set_vm_control(1UL, msr_addr, addr, name, mask, exists()); }
 
         inline void enable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(1UL, verbose); }
+        { set_vm_control_if_allowed(1UL, msr_addr, addr, name, mask, verbose, exists()); }
+
+        inline void disable()
+        { set_vm_control(0UL, msr_addr, addr, name, mask, exists()); }
 
         inline void disable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(0UL, verbose); }
+        { set_vm_control_if_allowed(0UL, msr_addr, addr, name, mask, verbose, exists()); }
     }
 
     namespace pause_exiting
@@ -2619,27 +2716,29 @@ namespace primary_processor_based_vm_execution_controls
         constexpr const auto from = 30;
         constexpr const auto name = "pause_exiting";
 
-        inline bool
-        is_enabled()
-        { return (vm::read(addr, name) & mask) != 0; }
+        inline bool is_enabled()
+        { return get_vm_control(addr, name, mask, exists()) != 0U; }
 
-        template <class T> void set(T val)
-        { set_vm_control(val, msr_addr, addr, name, mask); }
+        inline bool is_enabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) != 0U; }
 
-        template <class T> void set_if_allowed(T val, bool verbose) noexcept
-        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+        inline bool is_disabled()
+        { return get_vm_control(addr, name, mask, exists()) == 0U; }
+
+        inline bool is_disabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) == 0U; }
 
         inline void enable()
-        { set(1UL); }
-
-        inline void disable()
-        { set(0UL); }
+        { set_vm_control(1UL, msr_addr, addr, name, mask, exists()); }
 
         inline void enable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(1UL, verbose); }
+        { set_vm_control_if_allowed(1UL, msr_addr, addr, name, mask, verbose, exists()); }
+
+        inline void disable()
+        { set_vm_control(0UL, msr_addr, addr, name, mask, exists()); }
 
         inline void disable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(0UL, verbose); }
+        { set_vm_control_if_allowed(0UL, msr_addr, addr, name, mask, verbose, exists()); }
     }
 
     namespace activate_secondary_controls
@@ -2648,27 +2747,29 @@ namespace primary_processor_based_vm_execution_controls
         constexpr const auto from = 31;
         constexpr const auto name = "activate_secondary_controls";
 
-        inline bool
-        is_enabled()
-        { return (vm::read(addr, name) & mask) != 0; }
+        inline bool is_enabled()
+        { return get_vm_control(addr, name, mask, exists()) != 0U; }
 
-        template <class T> void set(T val)
-        { set_vm_control(val, msr_addr, addr, name, mask); }
+        inline bool is_enabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) != 0U; }
 
-        template <class T> void set_if_allowed(T val, bool verbose) noexcept
-        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+        inline bool is_disabled()
+        { return get_vm_control(addr, name, mask, exists()) == 0U; }
+
+        inline bool is_disabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) == 0U; }
 
         inline void enable()
-        { set(1UL); }
-
-        inline void disable()
-        { set(0UL); }
+        { set_vm_control(1UL, msr_addr, addr, name, mask, exists()); }
 
         inline void enable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(1UL, verbose); }
+        { set_vm_control_if_allowed(1UL, msr_addr, addr, name, mask, verbose, exists()); }
+
+        inline void disable()
+        { set_vm_control(0UL, msr_addr, addr, name, mask, exists()); }
 
         inline void disable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(0UL, verbose); }
+        { set_vm_control_if_allowed(0UL, msr_addr, addr, name, mask, verbose, exists()); }
     }
 }
 
@@ -2677,14 +2778,20 @@ namespace exception_bitmap
     constexpr const auto addr = 0x0000000000004004UL;
     constexpr const auto name = "execption_bitmap";
 
-    inline auto get()
-    { return vm::read(addr, name); }
-
-    template<class T> void set(T val)
-    { vm::write(addr, val, name); }
-
     inline bool exists() noexcept
     { return true; }
+
+    inline auto get()
+    { return get_vmcs_field(addr, name, exists()); }
+
+    inline auto get_if_exists(bool verbose = false) noexcept
+    { return get_vmcs_field_if_exists(addr, name, verbose, exists()); }
+
+    template <class T> void set(T val)
+    { set_vmcs_field(val, addr, name, exists()); }
+
+    template <class T> void set_if_exists(T val, bool verbose = false) noexcept
+    { set_vmcs_field_if_exists(val, addr, name, verbose, exists()); }
 }
 
 namespace page_fault_error_code_mask
@@ -2692,14 +2799,20 @@ namespace page_fault_error_code_mask
     constexpr const auto addr = 0x0000000000004006UL;
     constexpr const auto name = "page_fault_error_code_mask";
 
-    inline auto get()
-    { return vm::read(addr, name); }
-
-    template<class T> void set(T val)
-    { vm::write(addr, val, name); }
-
     inline bool exists() noexcept
     { return true; }
+
+    inline auto get()
+    { return get_vmcs_field(addr, name, exists()); }
+
+    inline auto get_if_exists(bool verbose = false) noexcept
+    { return get_vmcs_field_if_exists(addr, name, verbose, exists()); }
+
+    template <class T> void set(T val)
+    { set_vmcs_field(val, addr, name, exists()); }
+
+    template <class T> void set_if_exists(T val, bool verbose = false) noexcept
+    { set_vmcs_field_if_exists(val, addr, name, verbose, exists()); }
 }
 
 namespace page_fault_error_code_match
@@ -2707,14 +2820,20 @@ namespace page_fault_error_code_match
     constexpr const auto addr = 0x0000000000004008UL;
     constexpr const auto name = "page_fault_error_code_match";
 
-    inline auto get()
-    { return vm::read(addr, name); }
-
-    template<class T> void set(T val)
-    { vm::write(addr, val, name); }
-
     inline bool exists() noexcept
     { return true; }
+
+    inline auto get()
+    { return get_vmcs_field(addr, name, exists()); }
+
+    inline auto get_if_exists(bool verbose = false) noexcept
+    { return get_vmcs_field_if_exists(addr, name, verbose, exists()); }
+
+    template <class T> void set(T val)
+    { set_vmcs_field(val, addr, name, exists()); }
+
+    template <class T> void set_if_exists(T val, bool verbose = false) noexcept
+    { set_vmcs_field_if_exists(val, addr, name, verbose, exists()); }
 }
 
 namespace cr3_target_count
@@ -2722,14 +2841,20 @@ namespace cr3_target_count
     constexpr const auto addr = 0x000000000000400AUL;
     constexpr const auto name = "cr3_target_count";
 
-    inline auto get()
-    { return vm::read(addr, name); }
-
-    template<class T> void set(T val)
-    { vm::write(addr, val, name); }
-
     inline bool exists() noexcept
     { return true; }
+
+    inline auto get()
+    { return get_vmcs_field(addr, name, exists()); }
+
+    inline auto get_if_exists(bool verbose = false) noexcept
+    { return get_vmcs_field_if_exists(addr, name, verbose, exists()); }
+
+    template <class T> void set(T val)
+    { set_vmcs_field(val, addr, name, exists()); }
+
+    template <class T> void set_if_exists(T val, bool verbose = false) noexcept
+    { set_vmcs_field_if_exists(val, addr, name, verbose, exists()); }
 }
 
 namespace vm_exit_controls
@@ -2738,14 +2863,20 @@ namespace vm_exit_controls
     constexpr const auto name = "vm_exit_controls";
     constexpr const auto msr_addr = msrs::ia32_vmx_true_exit_ctls::addr;
 
-    inline auto get()
-    { return vm::read(addr, name); }
-
-    template<class T> void set(T val)
-    { vm::write(addr, val, name); }
-
     inline bool exists() noexcept
     { return true; }
+
+    inline auto get()
+    { return get_vmcs_field(addr, name, exists()); }
+
+    inline auto get_if_exists(bool verbose = false) noexcept
+    { return get_vmcs_field_if_exists(addr, name, verbose, exists()); }
+
+    template <class T> void set(T val)
+    { set_vmcs_field(val, addr, name, exists()); }
+
+    template <class T> void set_if_exists(T val, bool verbose = false) noexcept
+    { set_vmcs_field_if_exists(val, addr, name, verbose, exists()); }
 
     namespace save_debug_controls
     {
@@ -2753,27 +2884,29 @@ namespace vm_exit_controls
         constexpr const auto from = 2;
         constexpr const auto name = "save_debug_controls";
 
-        inline bool
-        is_enabled()
-        { return (vm::read(addr, name) & mask) != 0; }
+        inline bool is_enabled()
+        { return get_vm_control(addr, name, mask, exists()) != 0U; }
 
-        template <class T> void set(T val)
-        { set_vm_control(val, msr_addr, addr, name, mask); }
+        inline bool is_enabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) != 0U; }
 
-        template <class T> void set_if_allowed(T val, bool verbose) noexcept
-        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+        inline bool is_disabled()
+        { return get_vm_control(addr, name, mask, exists()) == 0U; }
+
+        inline bool is_disabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) == 0U; }
 
         inline void enable()
-        { set(1UL); }
-
-        inline void disable()
-        { set(0UL); }
+        { set_vm_control(1UL, msr_addr, addr, name, mask, exists()); }
 
         inline void enable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(1UL, verbose); }
+        { set_vm_control_if_allowed(1UL, msr_addr, addr, name, mask, verbose, exists()); }
+
+        inline void disable()
+        { set_vm_control(0UL, msr_addr, addr, name, mask, exists()); }
 
         inline void disable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(0UL, verbose); }
+        { set_vm_control_if_allowed(0UL, msr_addr, addr, name, mask, verbose, exists()); }
     }
 
     namespace host_address_space_size
@@ -2782,27 +2915,29 @@ namespace vm_exit_controls
         constexpr const auto from = 9;
         constexpr const auto name = "host_address_space_size";
 
-        inline bool
-        is_enabled()
-        { return (vm::read(addr, name) & mask) != 0; }
+        inline bool is_enabled()
+        { return get_vm_control(addr, name, mask, exists()) != 0U; }
 
-        template <class T> void set(T val)
-        { set_vm_control(val, msr_addr, addr, name, mask); }
+        inline bool is_enabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) != 0U; }
 
-        template <class T> void set_if_allowed(T val, bool verbose) noexcept
-        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+        inline bool is_disabled()
+        { return get_vm_control(addr, name, mask, exists()) == 0U; }
+
+        inline bool is_disabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) == 0U; }
 
         inline void enable()
-        { set(1UL); }
-
-        inline void disable()
-        { set(0UL); }
+        { set_vm_control(1UL, msr_addr, addr, name, mask, exists()); }
 
         inline void enable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(1UL, verbose); }
+        { set_vm_control_if_allowed(1UL, msr_addr, addr, name, mask, verbose, exists()); }
+
+        inline void disable()
+        { set_vm_control(0UL, msr_addr, addr, name, mask, exists()); }
 
         inline void disable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(0UL, verbose); }
+        { set_vm_control_if_allowed(0UL, msr_addr, addr, name, mask, verbose, exists()); }
     }
 
     namespace load_ia32_perf_global_ctrl
@@ -2811,27 +2946,29 @@ namespace vm_exit_controls
         constexpr const auto from = 12;
         constexpr const auto name = "load_ia32_perf_global_ctrl";
 
-        inline bool
-        is_enabled()
-        { return (vm::read(addr, name) & mask) != 0; }
+        inline bool is_enabled()
+        { return get_vm_control(addr, name, mask, exists()) != 0U; }
 
-        template <class T> void set(T val)
-        { set_vm_control(val, msr_addr, addr, name, mask); }
+        inline bool is_enabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) != 0U; }
 
-        template <class T> void set_if_allowed(T val, bool verbose) noexcept
-        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+        inline bool is_disabled()
+        { return get_vm_control(addr, name, mask, exists()) == 0U; }
+
+        inline bool is_disabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) == 0U; }
 
         inline void enable()
-        { set(1UL); }
-
-        inline void disable()
-        { set(0UL); }
+        { set_vm_control(1UL, msr_addr, addr, name, mask, exists()); }
 
         inline void enable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(1UL, verbose); }
+        { set_vm_control_if_allowed(1UL, msr_addr, addr, name, mask, verbose, exists()); }
+
+        inline void disable()
+        { set_vm_control(0UL, msr_addr, addr, name, mask, exists()); }
 
         inline void disable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(0UL, verbose); }
+        { set_vm_control_if_allowed(0UL, msr_addr, addr, name, mask, verbose, exists()); }
     }
 
     namespace acknowledge_interrupt_on_exit
@@ -2840,27 +2977,29 @@ namespace vm_exit_controls
         constexpr const auto from = 15;
         constexpr const auto name = "acknowledge_interrupt_on_exit";
 
-        inline bool
-        is_enabled()
-        { return (vm::read(addr, name) & mask) != 0; }
+        inline bool is_enabled()
+        { return get_vm_control(addr, name, mask, exists()) != 0U; }
 
-        template <class T> void set(T val)
-        { set_vm_control(val, msr_addr, addr, name, mask); }
+        inline bool is_enabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) != 0U; }
 
-        template <class T> void set_if_allowed(T val, bool verbose) noexcept
-        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+        inline bool is_disabled()
+        { return get_vm_control(addr, name, mask, exists()) == 0U; }
+
+        inline bool is_disabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) == 0U; }
 
         inline void enable()
-        { set(1UL); }
-
-        inline void disable()
-        { set(0UL); }
+        { set_vm_control(1UL, msr_addr, addr, name, mask, exists()); }
 
         inline void enable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(1UL, verbose); }
+        { set_vm_control_if_allowed(1UL, msr_addr, addr, name, mask, verbose, exists()); }
+
+        inline void disable()
+        { set_vm_control(0UL, msr_addr, addr, name, mask, exists()); }
 
         inline void disable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(0UL, verbose); }
+        { set_vm_control_if_allowed(0UL, msr_addr, addr, name, mask, verbose, exists()); }
     }
 
     namespace save_ia32_pat
@@ -2869,27 +3008,29 @@ namespace vm_exit_controls
         constexpr const auto from = 18;
         constexpr const auto name = "save_ia32_pat";
 
-        inline bool
-        is_enabled()
-        { return (vm::read(addr, name) & mask) != 0; }
+        inline bool is_enabled()
+        { return get_vm_control(addr, name, mask, exists()) != 0U; }
 
-        template <class T> void set(T val)
-        { set_vm_control(val, msr_addr, addr, name, mask); }
+        inline bool is_enabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) != 0U; }
 
-        template <class T> void set_if_allowed(T val, bool verbose) noexcept
-        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+        inline bool is_disabled()
+        { return get_vm_control(addr, name, mask, exists()) == 0U; }
+
+        inline bool is_disabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) == 0U; }
 
         inline void enable()
-        { set(1UL); }
-
-        inline void disable()
-        { set(0UL); }
+        { set_vm_control(1UL, msr_addr, addr, name, mask, exists()); }
 
         inline void enable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(1UL, verbose); }
+        { set_vm_control_if_allowed(1UL, msr_addr, addr, name, mask, verbose, exists()); }
+
+        inline void disable()
+        { set_vm_control(0UL, msr_addr, addr, name, mask, exists()); }
 
         inline void disable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(0UL, verbose); }
+        { set_vm_control_if_allowed(0UL, msr_addr, addr, name, mask, verbose, exists()); }
     }
 
     namespace load_ia32_pat
@@ -2898,27 +3039,29 @@ namespace vm_exit_controls
         constexpr const auto from = 19;
         constexpr const auto name = "load_ia32_pat";
 
-        inline bool
-        is_enabled()
-        { return (vm::read(addr, name) & mask) != 0; }
+        inline bool is_enabled()
+        { return get_vm_control(addr, name, mask, exists()) != 0U; }
 
-        template <class T> void set(T val)
-        { set_vm_control(val, msr_addr, addr, name, mask); }
+        inline bool is_enabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) != 0U; }
 
-        template <class T> void set_if_allowed(T val, bool verbose) noexcept
-        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+        inline bool is_disabled()
+        { return get_vm_control(addr, name, mask, exists()) == 0U; }
+
+        inline bool is_disabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) == 0U; }
 
         inline void enable()
-        { set(1UL); }
-
-        inline void disable()
-        { set(0UL); }
+        { set_vm_control(1UL, msr_addr, addr, name, mask, exists()); }
 
         inline void enable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(1UL, verbose); }
+        { set_vm_control_if_allowed(1UL, msr_addr, addr, name, mask, verbose, exists()); }
+
+        inline void disable()
+        { set_vm_control(0UL, msr_addr, addr, name, mask, exists()); }
 
         inline void disable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(0UL, verbose); }
+        { set_vm_control_if_allowed(0UL, msr_addr, addr, name, mask, verbose, exists()); }
     }
 
     namespace save_ia32_efer
@@ -2927,27 +3070,29 @@ namespace vm_exit_controls
         constexpr const auto from = 20;
         constexpr const auto name = "save_ia32_efer";
 
-        inline bool
-        is_enabled()
-        { return (vm::read(addr, name) & mask) != 0; }
+        inline bool is_enabled()
+        { return get_vm_control(addr, name, mask, exists()) != 0U; }
 
-        template <class T> void set(T val)
-        { set_vm_control(val, msr_addr, addr, name, mask); }
+        inline bool is_enabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) != 0U; }
 
-        template <class T> void set_if_allowed(T val, bool verbose) noexcept
-        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+        inline bool is_disabled()
+        { return get_vm_control(addr, name, mask, exists()) == 0U; }
+
+        inline bool is_disabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) == 0U; }
 
         inline void enable()
-        { set(1UL); }
-
-        inline void disable()
-        { set(0UL); }
+        { set_vm_control(1UL, msr_addr, addr, name, mask, exists()); }
 
         inline void enable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(1UL, verbose); }
+        { set_vm_control_if_allowed(1UL, msr_addr, addr, name, mask, verbose, exists()); }
+
+        inline void disable()
+        { set_vm_control(0UL, msr_addr, addr, name, mask, exists()); }
 
         inline void disable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(0UL, verbose); }
+        { set_vm_control_if_allowed(0UL, msr_addr, addr, name, mask, verbose, exists()); }
     }
 
     namespace load_ia32_efer
@@ -2956,27 +3101,29 @@ namespace vm_exit_controls
         constexpr const auto from = 21;
         constexpr const auto name = "load_ia32_efer";
 
-        inline bool
-        is_enabled()
-        { return (vm::read(addr, name) & mask) != 0; }
+        inline bool is_enabled()
+        { return get_vm_control(addr, name, mask, exists()) != 0U; }
 
-        template <class T> void set(T val)
-        { set_vm_control(val, msr_addr, addr, name, mask); }
+        inline bool is_enabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) != 0U; }
 
-        template <class T> void set_if_allowed(T val, bool verbose) noexcept
-        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+        inline bool is_disabled()
+        { return get_vm_control(addr, name, mask, exists()) == 0U; }
+
+        inline bool is_disabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) == 0U; }
 
         inline void enable()
-        { set(1UL); }
-
-        inline void disable()
-        { set(0UL); }
+        { set_vm_control(1UL, msr_addr, addr, name, mask, exists()); }
 
         inline void enable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(1UL, verbose); }
+        { set_vm_control_if_allowed(1UL, msr_addr, addr, name, mask, verbose, exists()); }
+
+        inline void disable()
+        { set_vm_control(0UL, msr_addr, addr, name, mask, exists()); }
 
         inline void disable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(0UL, verbose); }
+        { set_vm_control_if_allowed(0UL, msr_addr, addr, name, mask, verbose, exists()); }
     }
 
     namespace save_vmx_preemption_timer_value
@@ -2985,27 +3132,29 @@ namespace vm_exit_controls
         constexpr const auto from = 22;
         constexpr const auto name = "save_vmx_preemption_timer_value";
 
-        inline bool
-        is_enabled()
-        { return (vm::read(addr, name) & mask) != 0; }
+        inline bool is_enabled()
+        { return get_vm_control(addr, name, mask, exists()) != 0U; }
 
-        template <class T> void set(T val)
-        { set_vm_control(val, msr_addr, addr, name, mask); }
+        inline bool is_enabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) != 0U; }
 
-        template <class T> void set_if_allowed(T val, bool verbose) noexcept
-        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+        inline bool is_disabled()
+        { return get_vm_control(addr, name, mask, exists()) == 0U; }
+
+        inline bool is_disabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) == 0U; }
 
         inline void enable()
-        { set(1UL); }
-
-        inline void disable()
-        { set(0UL); }
+        { set_vm_control(1UL, msr_addr, addr, name, mask, exists()); }
 
         inline void enable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(1UL, verbose); }
+        { set_vm_control_if_allowed(1UL, msr_addr, addr, name, mask, verbose, exists()); }
+
+        inline void disable()
+        { set_vm_control(0UL, msr_addr, addr, name, mask, exists()); }
 
         inline void disable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(0UL, verbose); }
+        { set_vm_control_if_allowed(0UL, msr_addr, addr, name, mask, verbose, exists()); }
     }
 }
 
@@ -3014,14 +3163,20 @@ namespace vm_exit_msr_store_count
     constexpr const auto addr = 0x000000000000400EUL;
     constexpr const auto name = "vm_exit_msr_store_count";
 
+    inline bool exists() noexcept
+    { return true; }
+
     inline auto get()
-    { return vm::read(addr, name); }
+    { return get_vmcs_field(addr, name, exists()); }
+
+    inline auto get_if_exists(bool verbose = false) noexcept
+    { return get_vmcs_field_if_exists(addr, name, verbose, exists()); }
 
     template <class T> void set(T val)
-    { vm::write(addr, val, name); }
+    { set_vmcs_field(val, addr, name, exists()); }
 
-    inline bool exists()
-    { return true; }
+    template <class T> void set_if_exists(T val, bool verbose = false) noexcept
+    { set_vmcs_field_if_exists(val, addr, name, verbose, exists()); }
 }
 
 namespace vm_exit_msr_load_count
@@ -3029,14 +3184,20 @@ namespace vm_exit_msr_load_count
     constexpr const auto addr = 0x0000000000004010UL;
     constexpr const auto name = "vm_exit_msr_load_count";
 
+    inline bool exists() noexcept
+    { return true; }
+
     inline auto get()
-    { return vm::read(addr, name); }
+    { return get_vmcs_field(addr, name, exists()); }
+
+    inline auto get_if_exists(bool verbose = false) noexcept
+    { return get_vmcs_field_if_exists(addr, name, verbose, exists()); }
 
     template <class T> void set(T val)
-    { vm::write(addr, val, name); }
+    { set_vmcs_field(val, addr, name, exists()); }
 
-    inline bool exists()
-    { return true; }
+    template <class T> void set_if_exists(T val, bool verbose = false) noexcept
+    { set_vmcs_field_if_exists(val, addr, name, verbose, exists()); }
 }
 
 namespace vm_entry_controls
@@ -3045,14 +3206,20 @@ namespace vm_entry_controls
     constexpr const auto name = "vm_entry_controls";
     constexpr const auto msr_addr = msrs::ia32_vmx_true_entry_ctls::addr;
 
-    inline auto get()
-    { return vm::read(addr, name); }
-
-    template<class T> void set(T val)
-    { vm::write(addr, val, name); }
-
     inline bool exists() noexcept
     { return true; }
+
+    inline auto get()
+    { return get_vmcs_field(addr, name, exists()); }
+
+    inline auto get_if_exists(bool verbose = false) noexcept
+    { return get_vmcs_field_if_exists(addr, name, verbose, exists()); }
+
+    template <class T> void set(T val)
+    { set_vmcs_field(val, addr, name, exists()); }
+
+    template <class T> void set_if_exists(T val, bool verbose = false) noexcept
+    { set_vmcs_field_if_exists(val, addr, name, verbose, exists()); }
 
     namespace load_debug_controls
     {
@@ -3060,27 +3227,29 @@ namespace vm_entry_controls
         constexpr const auto from = 2;
         constexpr const auto name = "load_debug_controls";
 
-        inline bool
-        is_enabled()
-        { return (vm::read(addr, name) & mask) != 0; }
+        inline bool is_enabled()
+        { return get_vm_control(addr, name, mask, exists()) != 0U; }
 
-        template <class T> void set(T val)
-        { set_vm_control(val, msr_addr, addr, name, mask); }
+        inline bool is_enabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) != 0U; }
 
-        template <class T> void set_if_allowed(T val, bool verbose) noexcept
-        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+        inline bool is_disabled()
+        { return get_vm_control(addr, name, mask, exists()) == 0U; }
+
+        inline bool is_disabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) == 0U; }
 
         inline void enable()
-        { set(1UL); }
-
-        inline void disable()
-        { set(0UL); }
+        { set_vm_control(1UL, msr_addr, addr, name, mask, exists()); }
 
         inline void enable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(1UL, verbose); }
+        { set_vm_control_if_allowed(1UL, msr_addr, addr, name, mask, verbose, exists()); }
+
+        inline void disable()
+        { set_vm_control(0UL, msr_addr, addr, name, mask, exists()); }
 
         inline void disable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(0UL, verbose); }
+        { set_vm_control_if_allowed(0UL, msr_addr, addr, name, mask, verbose, exists()); }
     }
 
     namespace ia_32e_mode_guest
@@ -3089,27 +3258,29 @@ namespace vm_entry_controls
         constexpr const auto from = 9;
         constexpr const auto name = "ia_32e_mode_guest";
 
-        inline bool
-        is_enabled()
-        { return (vm::read(addr, name) & mask) != 0; }
+        inline bool is_enabled()
+        { return get_vm_control(addr, name, mask, exists()) != 0U; }
 
-        template <class T> void set(T val)
-        { set_vm_control(val, msr_addr, addr, name, mask); }
+        inline bool is_enabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) != 0U; }
 
-        template <class T> void set_if_allowed(T val, bool verbose) noexcept
-        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+        inline bool is_disabled()
+        { return get_vm_control(addr, name, mask, exists()) == 0U; }
+
+        inline bool is_disabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) == 0U; }
 
         inline void enable()
-        { set(1UL); }
-
-        inline void disable()
-        { set(0UL); }
+        { set_vm_control(1UL, msr_addr, addr, name, mask, exists()); }
 
         inline void enable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(1UL, verbose); }
+        { set_vm_control_if_allowed(1UL, msr_addr, addr, name, mask, verbose, exists()); }
+
+        inline void disable()
+        { set_vm_control(0UL, msr_addr, addr, name, mask, exists()); }
 
         inline void disable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(0UL, verbose); }
+        { set_vm_control_if_allowed(0UL, msr_addr, addr, name, mask, verbose, exists()); }
     }
 
     namespace entry_to_smm
@@ -3118,27 +3289,29 @@ namespace vm_entry_controls
         constexpr const auto from = 10;
         constexpr const auto name = "entry_to_smm";
 
-        inline bool
-        is_enabled()
-        { return (vm::read(addr, name) & mask) != 0; }
+        inline bool is_enabled()
+        { return get_vm_control(addr, name, mask, exists()) != 0U; }
 
-        template <class T> void set(T val)
-        { set_vm_control(val, msr_addr, addr, name, mask); }
+        inline bool is_enabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) != 0U; }
 
-        template <class T> void set_if_allowed(T val, bool verbose) noexcept
-        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+        inline bool is_disabled()
+        { return get_vm_control(addr, name, mask, exists()) == 0U; }
+
+        inline bool is_disabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) == 0U; }
 
         inline void enable()
-        { set(1UL); }
-
-        inline void disable()
-        { set(0UL); }
+        { set_vm_control(1UL, msr_addr, addr, name, mask, exists()); }
 
         inline void enable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(1UL, verbose); }
+        { set_vm_control_if_allowed(1UL, msr_addr, addr, name, mask, verbose, exists()); }
+
+        inline void disable()
+        { set_vm_control(0UL, msr_addr, addr, name, mask, exists()); }
 
         inline void disable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(0UL, verbose); }
+        { set_vm_control_if_allowed(0UL, msr_addr, addr, name, mask, verbose, exists()); }
     }
 
     namespace deactivate_dual_monitor_treatment
@@ -3147,27 +3320,29 @@ namespace vm_entry_controls
         constexpr const auto from = 11;
         constexpr const auto name = "deactivate_dual_monitor_treatment";
 
-        inline bool
-        is_enabled()
-        { return (vm::read(addr, name) & mask) != 0; }
+        inline bool is_enabled()
+        { return get_vm_control(addr, name, mask, exists()) != 0U; }
 
-        template <class T> void set(T val)
-        { set_vm_control(val, msr_addr, addr, name, mask); }
+        inline bool is_enabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) != 0U; }
 
-        template <class T> void set_if_allowed(T val, bool verbose) noexcept
-        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+        inline bool is_disabled()
+        { return get_vm_control(addr, name, mask, exists()) == 0U; }
+
+        inline bool is_disabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) == 0U; }
 
         inline void enable()
-        { set(1UL); }
-
-        inline void disable()
-        { set(0UL); }
+        { set_vm_control(1UL, msr_addr, addr, name, mask, exists()); }
 
         inline void enable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(1UL, verbose); }
+        { set_vm_control_if_allowed(1UL, msr_addr, addr, name, mask, verbose, exists()); }
+
+        inline void disable()
+        { set_vm_control(0UL, msr_addr, addr, name, mask, exists()); }
 
         inline void disable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(0UL, verbose); }
+        { set_vm_control_if_allowed(0UL, msr_addr, addr, name, mask, verbose, exists()); }
     }
 
     namespace load_ia32_perf_global_ctrl
@@ -3176,27 +3351,29 @@ namespace vm_entry_controls
         constexpr const auto from = 13;
         constexpr const auto name = "load_ia32_perf_global_ctrl";
 
-        inline bool
-        is_enabled()
-        { return (vm::read(addr, name) & mask) != 0; }
+        inline bool is_enabled()
+        { return get_vm_control(addr, name, mask, exists()) != 0U; }
 
-        template <class T> void set(T val)
-        { set_vm_control(val, msr_addr, addr, name, mask); }
+        inline bool is_enabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) != 0U; }
 
-        template <class T> void set_if_allowed(T val, bool verbose) noexcept
-        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+        inline bool is_disabled()
+        { return get_vm_control(addr, name, mask, exists()) == 0U; }
+
+        inline bool is_disabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) == 0U; }
 
         inline void enable()
-        { set(1UL); }
-
-        inline void disable()
-        { set(0UL); }
+        { set_vm_control(1UL, msr_addr, addr, name, mask, exists()); }
 
         inline void enable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(1UL, verbose); }
+        { set_vm_control_if_allowed(1UL, msr_addr, addr, name, mask, verbose, exists()); }
+
+        inline void disable()
+        { set_vm_control(0UL, msr_addr, addr, name, mask, exists()); }
 
         inline void disable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(0UL, verbose); }
+        { set_vm_control_if_allowed(0UL, msr_addr, addr, name, mask, verbose, exists()); }
     }
 
     namespace load_ia32_pat
@@ -3205,27 +3382,29 @@ namespace vm_entry_controls
         constexpr const auto from = 14;
         constexpr const auto name = "load_ia32_pat";
 
-        inline bool
-        is_enabled()
-        { return (vm::read(addr, name) & mask) != 0; }
+        inline bool is_enabled()
+        { return get_vm_control(addr, name, mask, exists()) != 0U; }
 
-        template <class T> void set(T val)
-        { set_vm_control(val, msr_addr, addr, name, mask); }
+        inline bool is_enabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) != 0U; }
 
-        template <class T> void set_if_allowed(T val, bool verbose) noexcept
-        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+        inline bool is_disabled()
+        { return get_vm_control(addr, name, mask, exists()) == 0U; }
+
+        inline bool is_disabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) == 0U; }
 
         inline void enable()
-        { set(1UL); }
-
-        inline void disable()
-        { set(0UL); }
+        { set_vm_control(1UL, msr_addr, addr, name, mask, exists()); }
 
         inline void enable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(1UL, verbose); }
+        { set_vm_control_if_allowed(1UL, msr_addr, addr, name, mask, verbose, exists()); }
+
+        inline void disable()
+        { set_vm_control(0UL, msr_addr, addr, name, mask, exists()); }
 
         inline void disable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(0UL, verbose); }
+        { set_vm_control_if_allowed(0UL, msr_addr, addr, name, mask, verbose, exists()); }
     }
 
     namespace load_ia32_efer
@@ -3234,27 +3413,29 @@ namespace vm_entry_controls
         constexpr const auto from = 15;
         constexpr const auto name = "load_ia32_efer";
 
-        inline bool
-        is_enabled()
-        { return (vm::read(addr, name) & mask) != 0; }
+        inline bool is_enabled()
+        { return get_vm_control(addr, name, mask, exists()) != 0U; }
 
-        template <class T> void set(T val)
-        { set_vm_control(val, msr_addr, addr, name, mask); }
+        inline bool is_enabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) != 0U; }
 
-        template <class T> void set_if_allowed(T val, bool verbose) noexcept
-        { set_vm_control_if_allowed(val, msr_addr, addr, name, mask, verbose); }
+        inline bool is_disabled()
+        { return get_vm_control(addr, name, mask, exists()) == 0U; }
+
+        inline bool is_disabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) == 0U; }
 
         inline void enable()
-        { set(1UL); }
-
-        inline void disable()
-        { set(0UL); }
+        { set_vm_control(1UL, msr_addr, addr, name, mask, exists()); }
 
         inline void enable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(1UL, verbose); }
+        { set_vm_control_if_allowed(1UL, msr_addr, addr, name, mask, verbose, exists()); }
+
+        inline void disable()
+        { set_vm_control(0UL, msr_addr, addr, name, mask, exists()); }
 
         inline void disable_if_allowed(bool verbose = false) noexcept
-        { set_if_allowed(0UL, verbose); }
+        { set_vm_control_if_allowed(0UL, msr_addr, addr, name, mask, verbose, exists()); }
     }
 }
 
@@ -3263,14 +3444,20 @@ namespace vm_entry_msr_load_count
     constexpr const auto addr = 0x0000000000004014UL;
     constexpr const auto name = "vm_entry_msr_load_count";
 
+    inline bool exists() noexcept
+    { return true; }
+
     inline auto get()
-    { return vm::read(addr, name); }
+    { return get_vmcs_field(addr, name, exists()); }
+
+    inline auto get_if_exists(bool verbose = false) noexcept
+    { return get_vmcs_field_if_exists(addr, name, verbose, exists()); }
 
     template <class T> void set(T val)
-    { vm::write(addr, val, name); }
+    { set_vmcs_field(val, addr, name, exists()); }
 
-    inline bool exists()
-    { return true; }
+    template <class T> void set_if_exists(T val, bool verbose = false) noexcept
+    { set_vmcs_field_if_exists(val, addr, name, verbose, exists()); }
 }
 
 namespace vm_entry_interruption_information_field
@@ -3278,14 +3465,20 @@ namespace vm_entry_interruption_information_field
     constexpr const auto addr = 0x0000000000004016UL;
     constexpr const auto name = "vm_entry_interruption_information_field";
 
+    inline bool exists() noexcept
+    { return true; }
+
     inline auto get()
-    { return vm::read(addr, name); }
+    { return get_vmcs_field(addr, name, exists()); }
+
+    inline auto get_if_exists(bool verbose = false) noexcept
+    { return get_vmcs_field_if_exists(addr, name, verbose, exists()); }
 
     template <class T> void set(T val)
-    { vm::write(addr, val, name); }
+    { set_vmcs_field(val, addr, name, exists()); }
 
-    inline bool exists()
-    { return true; }
+    template <class T> void set_if_exists(T val, bool verbose = false) noexcept
+    { set_vmcs_field_if_exists(val, addr, name, verbose, exists()); }
 
     namespace vector
     {
@@ -3294,17 +3487,29 @@ namespace vm_entry_interruption_information_field
         constexpr const auto name = "vector";
 
         inline auto get()
-        { return (vm::read(addr, name) & mask); }
+        { return (get_vmcs_field(addr, name, exists()) & mask) >> from; }
+
+        inline auto get_if_exists(bool verbose = false) noexcept
+        { return (get_vmcs_field_if_exists(addr, name, verbose, exists()) & mask) >> from; }
 
         template <class T> void set(T val)
-        { vm::write(addr, ((vm::read(addr, name) & ~mask) | (val & mask)), name); }
+        {
+            auto field = get_vmcs_field(addr, name, exists());
+            set_vmcs_field((field & ~mask) | ((val << from) & mask), addr, name, exists());
+        }
+
+        template <class T> void set_if_exists(T val, bool verbose = false) noexcept
+        {
+            auto field = get_vmcs_field_if_exists(addr, name, verbose, exists());
+            set_vmcs_field_if_exists((field & ~mask) | ((val << from ) & mask), addr, name, verbose, exists());
+        }
     }
 
-    namespace type
+    namespace interruption_type
     {
         constexpr const auto mask = 0x00000700UL;
         constexpr const auto from = 8;
-        constexpr const auto name = "type";
+        constexpr const auto name = "interruption_type";
 
         constexpr const auto external_interrupt = 0UL;
         constexpr const auto reserved = 1UL;
@@ -3316,10 +3521,22 @@ namespace vm_entry_interruption_information_field
         constexpr const auto other_event = 7UL;
 
         inline auto get()
-        { return (vm::read(addr, name) & mask) >> from; }
+        { return (get_vmcs_field(addr, name, exists()) & mask) >> from; }
+
+        inline auto get_if_exists(bool verbose = false) noexcept
+        { return (get_vmcs_field_if_exists(addr, name, verbose, exists()) & mask) >> from; }
 
         template <class T> void set(T val)
-        { vm::write(addr, ((vm::read(addr, name) & ~mask) | ((val << from) & mask)), name); }
+        {
+            auto field = get_vmcs_field(addr, name, exists());
+            set_vmcs_field((field & ~mask) | ((val << from) & mask), addr, name, exists());
+        }
+
+        template <class T> void set_if_exists(T val, bool verbose = false) noexcept
+        {
+            auto field = get_vmcs_field_if_exists(addr, name, verbose, exists());
+            set_vmcs_field_if_exists((field & ~mask) | ((val << from ) & mask), addr, name, verbose, exists());
+        }
     }
 
     namespace deliver_error_code_bit
@@ -3328,14 +3545,38 @@ namespace vm_entry_interruption_information_field
         constexpr const auto from = 11;
         constexpr const auto name = "deliver_error_code_bit";
 
-        inline bool is_set()
-        { return (vm::read(addr, name) & mask) != 0; }
+        inline bool is_enabled()
+        { return (get_vmcs_field(addr, name, exists()) & mask) != 0U; }
 
-        inline void set()
-        { vm::write(addr, (vm::read(addr, name) | mask), name); }
+        inline bool is_enabled_if_exists(bool verbose = false) noexcept
+        { return (get_vmcs_field_if_exists(addr, name, verbose, exists()) & mask) != 0U; }
 
-        inline void clear()
-        { vm::write(addr, (vm::read(addr, name) & ~mask), name); }
+        inline bool is_disabled()
+        { return (get_vmcs_field(addr, name, exists()) & mask) == 0U; }
+
+        inline bool is_disabled_if_exists(bool verbose = false) noexcept
+        { return (get_vmcs_field_if_exists(addr, name, verbose, exists()) & mask) == 0U; }
+
+        inline void enable()
+        { set_vmcs_field((get_vmcs_field(addr, name, exists()) | mask), addr, name, exists()); }
+
+        inline void enable_if_exists(bool verbose = false) noexcept
+        {
+            auto field = get_vmcs_field_if_exists(addr, name, verbose, exists());
+            set_vmcs_field_if_exists((field | mask), addr, name, verbose, exists());
+        }
+
+        inline void disable()
+        {
+            auto field = get_vmcs_field(addr, name, exists());
+            set_vmcs_field((field & ~mask), addr, name, exists());
+        }
+
+        inline void disable_if_exists(bool verbose = false) noexcept
+        {
+            auto field = get_vmcs_field_if_exists(addr, name, verbose, exists());
+            set_vmcs_field_if_exists((field & ~mask), addr, name, verbose, exists());
+        }
     }
 
     namespace reserved
@@ -3345,10 +3586,22 @@ namespace vm_entry_interruption_information_field
         constexpr const auto name = "reserved";
 
         inline auto get()
-        { return (vm::read(addr, name) & mask) >> from; }
+        { return (get_vmcs_field(addr, name, exists()) & mask) >> from; }
+
+        inline auto get_if_exists(bool verbose = false) noexcept
+        { return (get_vmcs_field_if_exists(addr, name, verbose, exists()) & mask) >> from; }
 
         template <class T> void set(T val)
-        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
+        {
+            auto field = get_vmcs_field(addr, name, exists());
+            set_vmcs_field((field & ~mask) | ((val << from) & mask), addr, name, exists());
+        }
+
+        template <class T> void set_if_exists(T val, bool verbose = false) noexcept
+        {
+            auto field = get_vmcs_field_if_exists(addr, name, verbose, exists());
+            set_vmcs_field_if_exists((field & ~mask) | ((val << from ) & mask), addr, name, verbose, exists());
+        }
     }
 
     namespace valid_bit
@@ -3357,14 +3610,41 @@ namespace vm_entry_interruption_information_field
         constexpr const auto from = 31;
         constexpr const auto name = "valid_bit";
 
-        inline bool is_set()
-        { return (vm::read(addr, name) & mask) != 0; }
+        inline bool is_enabled()
+        { return (get_vmcs_field(addr, name, exists()) & mask) != 0U; }
 
-        inline void set()
-        { vm::write(addr, (vm::read(addr, name) | mask), name); }
+        inline bool is_enabled_if_exists(bool verbose = false) noexcept
+        { return (get_vmcs_field_if_exists(addr, name, verbose, exists()) & mask) != 0U; }
 
-        inline void clear()
-        { vm::write(addr, (vm::read(addr, name) & ~mask), name); }
+        inline bool is_disabled()
+        { return (get_vmcs_field(addr, name, exists()) & mask) == 0U; }
+
+        inline bool is_disabled_if_exists(bool verbose = false) noexcept
+        { return (get_vmcs_field_if_exists(addr, name, verbose, exists()) & mask) == 0U; }
+
+        inline void enable()
+        {
+            auto field = get_vmcs_field(addr, name, exists());
+            set_vmcs_field((field| mask), addr, name, exists());
+        }
+
+        inline void enable_if_exists(bool verbose = false) noexcept
+        {
+            auto field = get_vmcs_field_if_exists(addr, name, verbose, exists());
+            set_vmcs_field_if_exists((field | mask), addr, name, verbose, exists());
+        }
+
+        inline void disable()
+        {
+            auto field = get_vmcs_field(addr, name, exists());
+            set_vmcs_field((field & ~mask), addr, name, exists());
+        }
+
+        inline void disable_if_exists(bool verbose = false) noexcept
+        {
+            auto field = get_vmcs_field_if_exists(addr, name, verbose, exists());
+            set_vmcs_field_if_exists((field & ~mask), addr, name, verbose, exists());
+        }
     }
 }
 
@@ -3373,14 +3653,20 @@ namespace vm_entry_exception_error_code
     constexpr const auto addr = 0x0000000000004018UL;
     constexpr const auto name = "vm_entry_exception_error_code";
 
+    inline bool exists() noexcept
+    { return true; }
+
     inline auto get()
-    { return vm::read(addr, name); }
+    { return get_vmcs_field(addr, name, exists()); }
+
+    inline auto get_if_exists(bool verbose = false) noexcept
+    { return get_vmcs_field_if_exists(addr, name, verbose, exists()); }
 
     template <class T> void set(T val)
-    { vm::write(addr, val, name); }
+    { set_vmcs_field(val, addr, name, exists()); }
 
-    inline bool exists()
-    { return true; }
+    template <class T> void set_if_exists(T val, bool verbose = false) noexcept
+    { set_vmcs_field_if_exists(val, addr, name, verbose, exists()); }
 }
 
 namespace vm_entry_instruction_length
@@ -3388,23 +3674,659 @@ namespace vm_entry_instruction_length
     constexpr const auto addr = 0x000000000000401AUL;
     constexpr const auto name = "vm_entry_instruction_length";
 
+    inline bool exists() noexcept
+    { return true; }
+
     inline auto get()
-    { return vm::read(addr, name); }
+    { return get_vmcs_field(addr, name, exists()); }
+
+    inline auto get_if_exists(bool verbose = false) noexcept
+    { return get_vmcs_field_if_exists(addr, name, verbose, exists()); }
 
     template <class T> void set(T val)
-    { vm::write(addr, val, name); }
+    { set_vmcs_field(val, addr, name, exists()); }
 
-    inline bool exists()
-    { return true; }
+    template <class T> void set_if_exists(T val, bool verbose = false) noexcept
+    { set_vmcs_field_if_exists(val, addr, name, verbose, exists()); }
+}
+
+namespace tpr_threshold
+{
+    constexpr const auto addr = 0x000000000000401CUL;
+    constexpr const auto name = "tpr_threshold";
+
+    inline bool exists() noexcept
+    { return msrs::ia32_vmx_true_procbased_ctls::use_tpr_shadow::is_allowed1(); }
+
+    inline auto get()
+    { return get_vmcs_field(addr, name, exists()); }
+
+    inline auto get_if_exists(bool verbose = false) noexcept
+    { return get_vmcs_field_if_exists(addr, name, verbose, exists()); }
+
+    template <class T> void set(T val)
+    { set_vmcs_field(val, addr, name, exists()); }
+
+    template <class T> void set_if_exists(T val, bool verbose = false) noexcept
+    { set_vmcs_field_if_exists(val, addr, name, verbose, exists()); }
+}
+
+namespace secondary_processor_based_vm_execution_controls
+{
+    constexpr const auto addr = 0x000000000000401EUL;
+    constexpr const auto name = "secondary_processor_based_vm_execution_controls";
+    constexpr const auto msr_addr = msrs::ia32_vmx_procbased_ctls2::addr;
+
+    inline bool exists() noexcept
+    { return msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::is_allowed1(); }
+
+    inline auto get()
+    { return get_vmcs_field(addr, name, exists()); }
+
+    inline auto get_if_exists(bool verbose = false) noexcept
+    { return get_vmcs_field_if_exists(addr, name, verbose, exists()); }
+
+    template <class T> void set(T val)
+    { set_vmcs_field(val, addr, name, exists()); }
+
+    template <class T> void set_if_exists(T val, bool verbose = false) noexcept
+    { set_vmcs_field_if_exists(val, addr, name, verbose, exists()); }
+
+    namespace virtualize_apic_accesses
+    {
+        constexpr const auto mask = 0x0000000000000001UL;
+        constexpr const auto from = 0;
+        constexpr const auto name = "virtualize_apic_accesses";
+
+        inline bool is_enabled()
+        { return get_vm_control(addr, name, mask, exists()) != 0U; }
+
+        inline bool is_enabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) != 0U; }
+
+        inline bool is_disabled()
+        { return get_vm_control(addr, name, mask, exists()) == 0U; }
+
+        inline bool is_disabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) == 0U; }
+
+        inline void enable()
+        { set_vm_control(1UL, msr_addr, addr, name, mask, exists()); }
+
+        inline void enable_if_allowed(bool verbose = false) noexcept
+        { set_vm_control_if_allowed(1UL, msr_addr, addr, name, mask, verbose, exists()); }
+
+        inline void disable()
+        { set_vm_control(0UL, msr_addr, addr, name, mask, exists()); }
+
+        inline void disable_if_allowed(bool verbose = false) noexcept
+        { set_vm_control_if_allowed(0UL, msr_addr, addr, name, mask, verbose, exists()); }
+    }
+
+    namespace enable_ept
+    {
+        constexpr const auto mask = 0x0000000000000002UL;
+        constexpr const auto from = 1;
+        constexpr const auto name = "enable_ept";
+
+        inline bool is_enabled()
+        { return get_vm_control(addr, name, mask, exists()) != 0U; }
+
+        inline bool is_enabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) != 0U; }
+
+        inline bool is_disabled()
+        { return get_vm_control(addr, name, mask, exists()) == 0U; }
+
+        inline bool is_disabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) == 0U; }
+
+        inline void enable()
+        { set_vm_control(1UL, msr_addr, addr, name, mask, exists()); }
+
+        inline void enable_if_allowed(bool verbose = false) noexcept
+        { set_vm_control_if_allowed(1UL, msr_addr, addr, name, mask, verbose, exists()); }
+
+        inline void disable()
+        { set_vm_control(0UL, msr_addr, addr, name, mask, exists()); }
+
+        inline void disable_if_allowed(bool verbose = false) noexcept
+        { set_vm_control_if_allowed(0UL, msr_addr, addr, name, mask, verbose, exists()); }
+    }
+
+    namespace descriptor_table_exiting
+    {
+        constexpr const auto mask = 0x0000000000000004UL;
+        constexpr const auto from = 2;
+        constexpr const auto name = "descriptor_table_exiting";
+
+        inline bool is_enabled()
+        { return get_vm_control(addr, name, mask, exists()) != 0U; }
+
+        inline bool is_enabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) != 0U; }
+
+        inline bool is_disabled()
+        { return get_vm_control(addr, name, mask, exists()) == 0U; }
+
+        inline bool is_disabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) == 0U; }
+
+        inline void enable()
+        { set_vm_control(1UL, msr_addr, addr, name, mask, exists()); }
+
+        inline void enable_if_allowed(bool verbose = false) noexcept
+        { set_vm_control_if_allowed(1UL, msr_addr, addr, name, mask, verbose, exists()); }
+
+        inline void disable()
+        { set_vm_control(0UL, msr_addr, addr, name, mask, exists()); }
+
+        inline void disable_if_allowed(bool verbose = false) noexcept
+        { set_vm_control_if_allowed(0UL, msr_addr, addr, name, mask, verbose, exists()); }
+    }
+
+    namespace enable_rdtscp
+    {
+        constexpr const auto mask = 0x0000000000000008UL;
+        constexpr const auto from = 3;
+        constexpr const auto name = "enable_rdtscp";
+
+        inline bool is_enabled()
+        { return get_vm_control(addr, name, mask, exists()) != 0U; }
+
+        inline bool is_enabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) != 0U; }
+
+        inline bool is_disabled()
+        { return get_vm_control(addr, name, mask, exists()) == 0U; }
+
+        inline bool is_disabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) == 0U; }
+
+        inline void enable()
+        { set_vm_control(1UL, msr_addr, addr, name, mask, exists()); }
+
+        inline void enable_if_allowed(bool verbose = false) noexcept
+        { set_vm_control_if_allowed(1UL, msr_addr, addr, name, mask, verbose, exists()); }
+
+        inline void disable()
+        { set_vm_control(0UL, msr_addr, addr, name, mask, exists()); }
+
+        inline void disable_if_allowed(bool verbose = false) noexcept
+        { set_vm_control_if_allowed(0UL, msr_addr, addr, name, mask, verbose, exists()); }
+    }
+
+    namespace virtualize_x2apic_mode
+    {
+        constexpr const auto mask = 0x0000000000000010UL;
+        constexpr const auto from = 4;
+        constexpr const auto name = "virtualize_x2apic_mode";
+
+        inline bool is_enabled()
+        { return get_vm_control(addr, name, mask, exists()) != 0U; }
+
+        inline bool is_enabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) != 0U; }
+
+        inline bool is_disabled()
+        { return get_vm_control(addr, name, mask, exists()) == 0U; }
+
+        inline bool is_disabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) == 0U; }
+
+        inline void enable()
+        { set_vm_control(1UL, msr_addr, addr, name, mask, exists()); }
+
+        inline void enable_if_allowed(bool verbose = false) noexcept
+        { set_vm_control_if_allowed(1UL, msr_addr, addr, name, mask, verbose, exists()); }
+
+        inline void disable()
+        { set_vm_control(0UL, msr_addr, addr, name, mask, exists()); }
+
+        inline void disable_if_allowed(bool verbose = false) noexcept
+        { set_vm_control_if_allowed(0UL, msr_addr, addr, name, mask, verbose, exists()); }
+    }
+
+    namespace enable_vpid
+    {
+        constexpr const auto mask = 0x0000000000000020UL;
+        constexpr const auto from = 5;
+        constexpr const auto name = "enable_vpid";
+
+        inline bool is_enabled()
+        { return get_vm_control(addr, name, mask, exists()) != 0U; }
+
+        inline bool is_enabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) != 0U; }
+
+        inline bool is_disabled()
+        { return get_vm_control(addr, name, mask, exists()) == 0U; }
+
+        inline bool is_disabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) == 0U; }
+
+        inline void enable()
+        { set_vm_control(1UL, msr_addr, addr, name, mask, exists()); }
+
+        inline void enable_if_allowed(bool verbose = false) noexcept
+        { set_vm_control_if_allowed(1UL, msr_addr, addr, name, mask, verbose, exists()); }
+
+        inline void disable()
+        { set_vm_control(0UL, msr_addr, addr, name, mask, exists()); }
+
+        inline void disable_if_allowed(bool verbose = false) noexcept
+        { set_vm_control_if_allowed(0UL, msr_addr, addr, name, mask, verbose, exists()); }
+    }
+
+    namespace wbinvd_exiting
+    {
+        constexpr const auto mask = 0x0000000000000040UL;
+        constexpr const auto from = 6;
+        constexpr const auto name = "wbinvd_exiting";
+
+        inline bool is_enabled()
+        { return get_vm_control(addr, name, mask, exists()) != 0U; }
+
+        inline bool is_enabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) != 0U; }
+
+        inline bool is_disabled()
+        { return get_vm_control(addr, name, mask, exists()) == 0U; }
+
+        inline bool is_disabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) == 0U; }
+
+        inline void enable()
+        { set_vm_control(1UL, msr_addr, addr, name, mask, exists()); }
+
+        inline void enable_if_allowed(bool verbose = false) noexcept
+        { set_vm_control_if_allowed(1UL, msr_addr, addr, name, mask, verbose, exists()); }
+
+        inline void disable()
+        { set_vm_control(0UL, msr_addr, addr, name, mask, exists()); }
+
+        inline void disable_if_allowed(bool verbose = false) noexcept
+        { set_vm_control_if_allowed(0UL, msr_addr, addr, name, mask, verbose, exists()); }
+    }
+
+    namespace unrestricted_guest
+    {
+        constexpr const auto mask = 0x0000000000000080UL;
+        constexpr const auto from = 7;
+        constexpr const auto name = "unrestricted_guest";
+
+        inline bool is_enabled()
+        { return get_vm_control(addr, name, mask, exists()) != 0U; }
+
+        inline bool is_enabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) != 0U; }
+
+        inline bool is_disabled()
+        { return get_vm_control(addr, name, mask, exists()) == 0U; }
+
+        inline bool is_disabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) == 0U; }
+
+        inline void enable()
+        { set_vm_control(1UL, msr_addr, addr, name, mask, exists()); }
+
+        inline void enable_if_allowed(bool verbose = false) noexcept
+        { set_vm_control_if_allowed(1UL, msr_addr, addr, name, mask, verbose, exists()); }
+
+        inline void disable()
+        { set_vm_control(0UL, msr_addr, addr, name, mask, exists()); }
+
+        inline void disable_if_allowed(bool verbose = false) noexcept
+        { set_vm_control_if_allowed(0UL, msr_addr, addr, name, mask, verbose, exists()); }
+    }
+
+    namespace apic_register_virtualization
+    {
+        constexpr const auto mask = 0x0000000000000100UL;
+        constexpr const auto from = 8;
+        constexpr const auto name = "apic_register_virtualization";
+
+        inline bool is_enabled()
+        { return get_vm_control(addr, name, mask, exists()) != 0U; }
+
+        inline bool is_enabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) != 0U; }
+
+        inline bool is_disabled()
+        { return get_vm_control(addr, name, mask, exists()) == 0U; }
+
+        inline bool is_disabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) == 0U; }
+
+        inline void enable()
+        { set_vm_control(1UL, msr_addr, addr, name, mask, exists()); }
+
+        inline void enable_if_allowed(bool verbose = false) noexcept
+        { set_vm_control_if_allowed(1UL, msr_addr, addr, name, mask, verbose, exists()); }
+
+        inline void disable()
+        { set_vm_control(0UL, msr_addr, addr, name, mask, exists()); }
+
+        inline void disable_if_allowed(bool verbose = false) noexcept
+        { set_vm_control_if_allowed(0UL, msr_addr, addr, name, mask, verbose, exists()); }
+    }
+
+    namespace virtual_interrupt_delivery
+    {
+        constexpr const auto mask = 0x0000000000000200UL;
+        constexpr const auto from = 9;
+        constexpr const auto name = "virtual_interrupt_delivery";
+
+        inline bool is_enabled()
+        { return get_vm_control(addr, name, mask, exists()) != 0U; }
+
+        inline bool is_enabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) != 0U; }
+
+        inline bool is_disabled()
+        { return get_vm_control(addr, name, mask, exists()) == 0U; }
+
+        inline bool is_disabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) == 0U; }
+
+        inline void enable()
+        { set_vm_control(1UL, msr_addr, addr, name, mask, exists()); }
+
+        inline void enable_if_allowed(bool verbose = false) noexcept
+        { set_vm_control_if_allowed(1UL, msr_addr, addr, name, mask, verbose, exists()); }
+
+        inline void disable()
+        { set_vm_control(0UL, msr_addr, addr, name, mask, exists()); }
+
+        inline void disable_if_allowed(bool verbose = false) noexcept
+        { set_vm_control_if_allowed(0UL, msr_addr, addr, name, mask, verbose, exists()); }
+    }
+
+    namespace pause_loop_exiting
+    {
+        constexpr const auto mask = 0x0000000000000400UL;
+        constexpr const auto from = 10;
+        constexpr const auto name = "pause_loop_exiting";
+
+        inline bool is_enabled()
+        { return get_vm_control(addr, name, mask, exists()) != 0U; }
+
+        inline bool is_enabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) != 0U; }
+
+        inline bool is_disabled()
+        { return get_vm_control(addr, name, mask, exists()) == 0U; }
+
+        inline bool is_disabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) == 0U; }
+
+        inline void enable()
+        { set_vm_control(1UL, msr_addr, addr, name, mask, exists()); }
+
+        inline void enable_if_allowed(bool verbose = false) noexcept
+        { set_vm_control_if_allowed(1UL, msr_addr, addr, name, mask, verbose, exists()); }
+
+        inline void disable()
+        { set_vm_control(0UL, msr_addr, addr, name, mask, exists()); }
+
+        inline void disable_if_allowed(bool verbose = false) noexcept
+        { set_vm_control_if_allowed(0UL, msr_addr, addr, name, mask, verbose, exists()); }
+    }
+
+    namespace rdrand_exiting
+    {
+        constexpr const auto mask = 0x0000000000000800UL;
+        constexpr const auto from = 11;
+        constexpr const auto name = "rdrand_exiting";
+
+        inline bool is_enabled()
+        { return get_vm_control(addr, name, mask, exists()) != 0U; }
+
+        inline bool is_enabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) != 0U; }
+
+        inline bool is_disabled()
+        { return get_vm_control(addr, name, mask, exists()) == 0U; }
+
+        inline bool is_disabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) == 0U; }
+
+        inline void enable()
+        { set_vm_control(1UL, msr_addr, addr, name, mask, exists()); }
+
+        inline void enable_if_allowed(bool verbose = false) noexcept
+        { set_vm_control_if_allowed(1UL, msr_addr, addr, name, mask, verbose, exists()); }
+
+        inline void disable()
+        { set_vm_control(0UL, msr_addr, addr, name, mask, exists()); }
+
+        inline void disable_if_allowed(bool verbose = false) noexcept
+        { set_vm_control_if_allowed(0UL, msr_addr, addr, name, mask, verbose, exists()); }
+    }
+
+    namespace enable_invpcid
+    {
+        constexpr const auto mask = 0x0000000000001000UL;
+        constexpr const auto from = 12;
+        constexpr const auto name = "enable_invpcid";
+
+        inline bool is_enabled()
+        { return get_vm_control(addr, name, mask, exists()) != 0U; }
+
+        inline bool is_enabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) != 0U; }
+
+        inline bool is_disabled()
+        { return get_vm_control(addr, name, mask, exists()) == 0U; }
+
+        inline bool is_disabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) == 0U; }
+
+        inline void enable()
+        { set_vm_control(1UL, msr_addr, addr, name, mask, exists()); }
+
+        inline void enable_if_allowed(bool verbose = false) noexcept
+        { set_vm_control_if_allowed(1UL, msr_addr, addr, name, mask, verbose, exists()); }
+
+        inline void disable()
+        { set_vm_control(0UL, msr_addr, addr, name, mask, exists()); }
+
+        inline void disable_if_allowed(bool verbose = false) noexcept
+        { set_vm_control_if_allowed(0UL, msr_addr, addr, name, mask, verbose, exists()); }
+    }
+
+    namespace enable_vm_functions
+    {
+        constexpr const auto mask = 0x0000000000002000UL;
+        constexpr const auto from = 13;
+        constexpr const auto name = "enable_vm_functions";
+
+        inline bool is_enabled()
+        { return get_vm_control(addr, name, mask, exists()) != 0U; }
+
+        inline bool is_enabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) != 0U; }
+
+        inline bool is_disabled()
+        { return get_vm_control(addr, name, mask, exists()) == 0U; }
+
+        inline bool is_disabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) == 0U; }
+
+        inline void enable()
+        { set_vm_control(1UL, msr_addr, addr, name, mask, exists()); }
+
+        inline void enable_if_allowed(bool verbose = false) noexcept
+        { set_vm_control_if_allowed(1UL, msr_addr, addr, name, mask, verbose, exists()); }
+
+        inline void disable()
+        { set_vm_control(0UL, msr_addr, addr, name, mask, exists()); }
+
+        inline void disable_if_allowed(bool verbose = false) noexcept
+        { set_vm_control_if_allowed(0UL, msr_addr, addr, name, mask, verbose, exists()); }
+    }
+
+    namespace vmcs_shadowing
+    {
+        constexpr const auto mask = 0x0000000000004000UL;
+        constexpr const auto from = 14;
+        constexpr const auto name = "vmcs_shadowing";
+
+        inline bool is_enabled()
+        { return get_vm_control(addr, name, mask, exists()) != 0U; }
+
+        inline bool is_enabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) != 0U; }
+
+        inline bool is_disabled()
+        { return get_vm_control(addr, name, mask, exists()) == 0U; }
+
+        inline bool is_disabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) == 0U; }
+
+        inline void enable()
+        { set_vm_control(1UL, msr_addr, addr, name, mask, exists()); }
+
+        inline void enable_if_allowed(bool verbose = false) noexcept
+        { set_vm_control_if_allowed(1UL, msr_addr, addr, name, mask, verbose, exists()); }
+
+        inline void disable()
+        { set_vm_control(0UL, msr_addr, addr, name, mask, exists()); }
+
+        inline void disable_if_allowed(bool verbose = false) noexcept
+        { set_vm_control_if_allowed(0UL, msr_addr, addr, name, mask, verbose, exists()); }
+    }
+
+    namespace rdseed_exiting
+    {
+        constexpr const auto mask = 0x0000000000010000UL;
+        constexpr const auto from = 16;
+        constexpr const auto name = "rdseed_exiting";
+
+        inline bool is_enabled()
+        { return get_vm_control(addr, name, mask, exists()) != 0U; }
+
+        inline bool is_enabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) != 0U; }
+
+        inline bool is_disabled()
+        { return get_vm_control(addr, name, mask, exists()) == 0U; }
+
+        inline bool is_disabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) == 0U; }
+
+        inline void enable()
+        { set_vm_control(1UL, msr_addr, addr, name, mask, exists()); }
+
+        inline void enable_if_allowed(bool verbose = false) noexcept
+        { set_vm_control_if_allowed(1UL, msr_addr, addr, name, mask, verbose, exists()); }
+
+        inline void disable()
+        { set_vm_control(0UL, msr_addr, addr, name, mask, exists()); }
+
+        inline void disable_if_allowed(bool verbose = false) noexcept
+        { set_vm_control_if_allowed(0UL, msr_addr, addr, name, mask, verbose, exists()); }
+    }
+
+    namespace enable_pml
+    {
+        constexpr const auto mask = 0x0000000000020000UL;
+        constexpr const auto from = 17;
+        constexpr const auto name = "enable_pml";
+
+        inline bool is_enabled()
+        { return get_vm_control(addr, name, mask, exists()) != 0U; }
+
+        inline bool is_enabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) != 0U; }
+
+        inline bool is_disabled()
+        { return get_vm_control(addr, name, mask, exists()) == 0U; }
+
+        inline bool is_disabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) == 0U; }
+
+        inline void enable()
+        { set_vm_control(1UL, msr_addr, addr, name, mask, exists()); }
+
+        inline void enable_if_allowed(bool verbose = false) noexcept
+        { set_vm_control_if_allowed(1UL, msr_addr, addr, name, mask, verbose, exists()); }
+
+        inline void disable()
+        { set_vm_control(0UL, msr_addr, addr, name, mask, exists()); }
+
+        inline void disable_if_allowed(bool verbose = false) noexcept
+        { set_vm_control_if_allowed(0UL, msr_addr, addr, name, mask, verbose, exists()); }
+    }
+
+    namespace ept_violation_ve
+    {
+        constexpr const auto mask = 0x0000000000040000UL;
+        constexpr const auto from = 18;
+        constexpr const auto name = "ept_violation_ve";
+
+        inline bool is_enabled()
+        { return get_vm_control(addr, name, mask, exists()) != 0U; }
+
+        inline bool is_enabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) != 0U; }
+
+        inline bool is_disabled()
+        { return get_vm_control(addr, name, mask, exists()) == 0U; }
+
+        inline bool is_disabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) == 0U; }
+
+        inline void enable()
+        { set_vm_control(1UL, msr_addr, addr, name, mask, exists()); }
+
+        inline void enable_if_allowed(bool verbose = false) noexcept
+        { set_vm_control_if_allowed(1UL, msr_addr, addr, name, mask, verbose, exists()); }
+
+        inline void disable()
+        { set_vm_control(0UL, msr_addr, addr, name, mask, exists()); }
+
+        inline void disable_if_allowed(bool verbose = false) noexcept
+        { set_vm_control_if_allowed(0UL, msr_addr, addr, name, mask, verbose, exists()); }
+    }
+
+    namespace enable_xsaves_xrstors
+    {
+        constexpr const auto mask = 0x0000000000100000UL;
+        constexpr const auto from = 20 ;
+        constexpr const auto name = "enable_xsaves_xrstors";
+
+        inline bool is_enabled()
+        { return get_vm_control(addr, name, mask, exists()) != 0U; }
+
+        inline bool is_enabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) != 0U; }
+
+        inline bool is_disabled()
+        { return get_vm_control(addr, name, mask, exists()) == 0U; }
+
+        inline bool
+        is_disabled_if_exists(bool verbose = false) noexcept
+        { return get_vm_control_if_exists(addr, name, mask, verbose, exists()) == 0U; }
+
+        inline void enable()
+        { set_vm_control(1UL, msr_addr, addr, name, mask, exists()); }
+
+        inline void enable_if_allowed(bool verbose = false) noexcept
+        { set_vm_control_if_allowed(1UL, msr_addr, addr, name, mask, verbose, exists()); }
+
+        inline void disable()
+        { set_vm_control(0UL, msr_addr, addr, name, mask, exists()); }
+
+        inline void disable_if_allowed(bool verbose = false) noexcept
+        { set_vm_control_if_allowed(0UL, msr_addr, addr, name, mask, verbose, exists()); }
+    }
 }
 
 
 } //vmcs
 } //intel_x64
 
-
-constexpr const auto VMCS_TPR_THRESHOLD                                        = 0x000000000000401CUL;
-constexpr const auto VMCS_SECONDARY_PROCESSOR_BASED_VM_EXECUTION_CONTROLS      = 0x000000000000401EUL;
 constexpr const auto VMCS_PLE_GAP                                              = 0x0000000000004020UL;
 constexpr const auto VMCS_PLE_WINDOW                                           = 0x0000000000004022UL;
 
@@ -5871,83 +6793,6 @@ constexpr const auto VMCS_HOST_RIP                                             =
 //////////////
 
 
-
-// Pin-Based VM-Execution Controls
-// intel's software developers manual, volume 3, chapter 24.6.1.
-#define VM_EXEC_PIN_BASED_EXTERNAL_INTERRUPT_EXITING              (1ULL << 0)
-#define VM_EXEC_PIN_BASED_NMI_EXITING                             (1ULL << 3)
-#define VM_EXEC_PIN_BASED_VIRTUAL_NMIS                            (1ULL << 5)
-#define VM_EXEC_PIN_BASED_ACTIVATE_VMX_PREEMPTION_TIMER           (1ULL << 6)
-#define VM_EXEC_PIN_BASED_PROCESS_POSTED_INTERRUPTS               (1ULL << 7)
-
-// Primary Processor-Based VM-Execution Controls
-// intel's software developers manual, volume 3, chapter 24.6.2
-#define VM_EXEC_P_PROC_BASED_INTERRUPT_WINDOW_EXITING             (1ULL << 2)
-#define VM_EXEC_P_PROC_BASED_USE_TSC_OFFSETTING                   (1ULL << 3)
-#define VM_EXEC_P_PROC_BASED_HLT_EXITING                          (1ULL << 7)
-#define VM_EXEC_P_PROC_BASED_INVLPG_EXITING                       (1ULL << 9)
-#define VM_EXEC_P_PROC_BASED_MWAIT_EXITING                        (1ULL << 10)
-#define VM_EXEC_P_PROC_BASED_RDPMC_EXITING                        (1ULL << 11)
-#define VM_EXEC_P_PROC_BASED_RDTSC_EXITING                        (1ULL << 12)
-#define VM_EXEC_P_PROC_BASED_CR3_LOAD_EXITING                     (1ULL << 15)
-#define VM_EXEC_P_PROC_BASED_CR3_STORE_EXITING                    (1ULL << 16)
-#define VM_EXEC_P_PROC_BASED_CR8_LOAD_EXITING                     (1ULL << 19)
-#define VM_EXEC_P_PROC_BASED_CR8_STORE_EXITING                    (1ULL << 20)
-#define VM_EXEC_P_PROC_BASED_USE_TPR_SHADOW                       (1ULL << 21)
-#define VM_EXEC_P_PROC_BASED_NMI_WINDOW_EXITING                   (1ULL << 22)
-#define VM_EXEC_P_PROC_BASED_MOV_DR_EXITING                       (1ULL << 23)
-#define VM_EXEC_P_PROC_BASED_UNCONDITIONAL_IO_EXITING             (1ULL << 24)
-#define VM_EXEC_P_PROC_BASED_USE_IO_BITMAPS                       (1ULL << 25)
-#define VM_EXEC_P_PROC_BASED_MONITOR_TRAP_FLAG                    (1ULL << 27)
-#define VM_EXEC_P_PROC_BASED_USE_MSR_BITMAPS                      (1ULL << 28)
-#define VM_EXEC_P_PROC_BASED_MONITOR_EXITING                      (1ULL << 29)
-#define VM_EXEC_P_PROC_BASED_PAUSE_EXITING                        (1ULL << 30)
-#define VM_EXEC_P_PROC_BASED_ACTIVATE_SECONDARY_CONTROLS          (1ULL << 31)
-
-// Secondary Processor-Based VM-Execution Controls
-// intel's software developers manual, volume 3, chapter 24.6.2
-#define VM_EXEC_S_PROC_BASED_VIRTUALIZE_APIC_ACCESSES             (1ULL << 0)
-#define VM_EXEC_S_PROC_BASED_ENABLE_EPT                           (1ULL << 1)
-#define VM_EXEC_S_PROC_BASED_DESCRIPTOR_TABLE_EXITING             (1ULL << 2)
-#define VM_EXEC_S_PROC_BASED_ENABLE_RDTSCP                        (1ULL << 3)
-#define VM_EXEC_S_PROC_BASED_VIRTUALIZE_X2APIC_MODE               (1ULL << 4)
-#define VM_EXEC_S_PROC_BASED_ENABLE_VPID                          (1ULL << 5)
-#define VM_EXEC_S_PROC_BASED_WBINVD_EXITING                       (1ULL << 6)
-#define VM_EXEC_S_PROC_BASED_UNRESTRICTED_GUEST                   (1ULL << 7)
-#define VM_EXEC_S_PROC_BASED_APIC_REGISTER_VIRTUALIZATION         (1ULL << 8)
-#define VM_EXEC_S_PROC_BASED_VIRTUAL_INTERRUPT_DELIVERY           (1ULL << 9)
-#define VM_EXEC_S_PROC_BASED_PAUSE_LOOP_EXITING                   (1ULL << 10)
-#define VM_EXEC_S_PROC_BASED_RDRAND_EXITING                       (1ULL << 11)
-#define VM_EXEC_S_PROC_BASED_ENABLE_INVPCID                       (1ULL << 12)
-#define VM_EXEC_S_PROC_BASED_ENABLE_VM_FUNCTIONS                  (1ULL << 13)
-#define VM_EXEC_S_PROC_BASED_VMCS_SHADOWING                       (1ULL << 14)
-#define VM_EXEC_S_PROC_BASED_RDSEED_EXITING                       (1ULL << 16)
-#define VM_EXEC_S_PROC_BASED_ENABLE_PML                           (1ULL << 17)
-#define VM_EXEC_S_PROC_BASED_EPT_VIOLATION_VE                     (1ULL << 18)
-#define VM_EXEC_S_PROC_BASED_ENABLE_XSAVES_XRSTORS                (1ULL << 20)
-
-// VM-Exit Control Fields
-// intel's software developers manual, volume 3, chapter 24.7.1
-//#define VM_EXIT_CONTROL_SAVE_DEBUG_CONTROLS                       (1ULL << 2)
-#define VM_EXIT_CONTROL_HOST_ADDRESS_SPACE_SIZE                   (1ULL << 9)
-#define VM_EXIT_CONTROL_LOAD_IA32_PERF_GLOBAL_CTRL                (1ULL << 12)
-#define VM_EXIT_CONTROL_ACKNOWLEDGE_INTERRUPT_ON_EXIT             (1ULL << 15)
-#define VM_EXIT_CONTROL_SAVE_IA32_PAT                             (1ULL << 18)
-#define VM_EXIT_CONTROL_LOAD_IA32_PAT                             (1ULL << 19)
-#define VM_EXIT_CONTROL_SAVE_IA32_EFER                            (1ULL << 20)
-#define VM_EXIT_CONTROL_LOAD_IA32_EFER                            (1ULL << 21)
-#define VM_EXIT_CONTROL_SAVE_VMX_PREEMPTION_TIMER_VALUE           (1ULL << 22)
-
-// VM-Entry Control Fields
-// intel's software developers manual, volume 3, chapter 24.8.1
-#define VM_ENTRY_CONTROL_LOAD_DEBUG_CONTROLS                      (1ULL << 2)
-#define VM_ENTRY_CONTROL_IA_32E_MODE_GUEST                        (1ULL << 9)
-#define VM_ENTRY_CONTROL_ENTRY_TO_SMM                             (1ULL << 10)
-#define VM_ENTRY_CONTROL_DEACTIVATE_DUAL_MONITOR_TREATMENT        (1ULL << 11)
-#define VM_ENTRY_CONTROL_LOAD_IA32_PERF_GLOBAL_CTRL               (1ULL << 13)
-#define VM_ENTRY_CONTROL_LOAD_IA32_PAT                            (1ULL << 14)
-#define VM_ENTRY_CONTROL_LOAD_IA32_EFER                           (1ULL << 15)
-
 // VM-Function Control Fields
 #define VM_FUNCTION_CONTROL_EPTP_SWITCHING                        (1ULL << 0)
 
@@ -5965,22 +6810,6 @@ constexpr const auto VMCS_HOST_RIP                                             =
 #define VM_INTERRUPTABILITY_STATE_SMI                             (1 << 2)
 #define VM_INTERRUPTABILITY_STATE_NMI                             (1 << 3)
 
-// VM Interrupt Information Fields
-// intel's software developers manual, volume 3, 24.8.3
-#define VM_INTERRUPT_INFORMATION_VECTOR                           (0x000000FF)
-#define VM_INTERRUPT_INFORMATION_TYPE                             (0x00000700)
-#define VM_INTERRUPT_INFORMATION_DELIVERY_ERROR                   (0x00000800)
-#define VM_INTERRUPT_INFORMATION_VALID                            (0x80000000)
-
-// VM Interruption Types
-// intel's software developers manual, volume 3, 24.8.3
-#define VM_INTERRUPTION_TYPE_EXTERNAL                             (0)
-#define VM_INTERRUPTION_TYPE_NMI                                  (2)
-#define VM_INTERRUPTION_TYPE_HARDWARE                             (3)
-#define VM_INTERRUPTION_TYPE_SOFTWARE_INTERRUPT                   (4)
-#define VM_INTERRUPTION_TYPE_PRIVILEGED_SOFTWARE_EXCEPTION        (5)
-#define VM_INTERRUPTION_TYPE_SOFTWARE_EXCEPTION                   (6)
-#define VM_INTERRUPTION_TYPE_OTHER                                (7)
 
 // MTF VM Exit
 // intel's software developers manual, volume 3, 26.5.2

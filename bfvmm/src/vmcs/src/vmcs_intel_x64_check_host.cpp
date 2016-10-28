@@ -108,7 +108,7 @@ vmcs_intel_x64::check_host_ia32_sysenter_eip_canonical_address()
 void
 vmcs_intel_x64::check_host_verify_load_ia32_perf_global_ctrl()
 {
-    if (!vmcs::vm_exit_controls::load_ia32_perf_global_ctrl::is_enabled())
+    if (vmcs::vm_exit_controls::load_ia32_perf_global_ctrl::is_disabled())
         return;
 
     auto vmcs_ia32_perf_global_ctrl =
@@ -121,7 +121,7 @@ vmcs_intel_x64::check_host_verify_load_ia32_perf_global_ctrl()
 void
 vmcs_intel_x64::check_host_verify_load_ia32_pat()
 {
-    if (!vmcs::vm_exit_controls::load_ia32_pat::is_enabled())
+    if (vmcs::vm_exit_controls::load_ia32_pat::is_disabled())
         return;
 
     auto pat0 = (vm::read(VMCS_HOST_IA32_PAT) & 0x00000000000000FF) >> 0;
@@ -161,7 +161,7 @@ vmcs_intel_x64::check_host_verify_load_ia32_pat()
 void
 vmcs_intel_x64::check_host_verify_load_ia32_efer()
 {
-    if (!vmcs::vm_exit_controls::load_ia32_efer::is_enabled())
+    if (vmcs::vm_exit_controls::load_ia32_efer::is_disabled())
         return;
 
     if (vmcs::host_ia32_efer::reserved::get() != 0)
@@ -171,7 +171,7 @@ vmcs_intel_x64::check_host_verify_load_ia32_efer()
     auto lma = vmcs::host_ia32_efer::lma::get();
     auto lme = vmcs::host_ia32_efer::lme::get();
 
-    if (!vmcs::vm_exit_controls::host_address_space_size::is_enabled() && lma != 0)
+    if (vmcs::vm_exit_controls::host_address_space_size::is_disabled() && lma != 0)
         throw std::logic_error("host addr space is 0, but efer.lma is 1");
 
     if (vmcs::vm_exit_controls::host_address_space_size::is_enabled() && lma == 0)
@@ -378,7 +378,7 @@ vmcs_intel_x64::check_host_vmcs_host_address_space_size_is_set()
     if (msrs::ia32_efer::lma::get() == 0)
         return;
 
-    if (!vmcs::vm_exit_controls::host_address_space_size::is_enabled())
+    if (vmcs::vm_exit_controls::host_address_space_size::is_disabled())
         throw std::logic_error("host addr space must be 1 if efer.lma == 1");
 }
 
@@ -403,7 +403,7 @@ vmcs_intel_x64::check_host_host_address_space_disabled()
 void
 vmcs_intel_x64::check_host_host_address_space_enabled()
 {
-    if (!vmcs::vm_exit_controls::host_address_space_size::is_enabled())
+    if (vmcs::vm_exit_controls::host_address_space_size::is_disabled())
         return;
 
     if (vmcs::host_cr4::physical_address_extensions::get() == 0)

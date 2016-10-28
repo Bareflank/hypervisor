@@ -25,13 +25,101 @@
 using namespace x64;
 using namespace intel_x64;
 
-uint64_t
-vmcs_intel_x64::get_proc2_ctls() const
+std::string
+vmcs_intel_x64::get_vm_instruction_error()
 {
-    if (!vmcs::primary_processor_based_vm_execution_controls::activate_secondary_controls::is_enabled())
-        return 0;
+    switch (vm::read(VMCS_VM_INSTRUCTION_ERROR))
+    {
+        case 1:
+            return "VMCALL executed in VMX root operation";
 
-    return vm::read(VMCS_SECONDARY_PROCESSOR_BASED_VM_EXECUTION_CONTROLS);
+        case 2:
+            return "VMCLEAR with invalid physical address";
+
+        case 3:
+            return "VMCLEAR with VMXON pointer";
+
+        case 4:
+            return "VMLAUNCH with non-clear VMCS";
+
+        case 5:
+            return "VMRESUME with non-launched VMCS";
+
+        case 6:
+            return "VMRESUME after VMXOFF (VMXOFF and VMXON between "
+                   "VMLAUNCH and VMRESUME)";
+
+        case 7:
+            return "VM entry with invalid control field(s)";
+
+        case 8:
+            return "VM entry with invalid host-state field(s)";
+
+        case 9:
+            return "VMPTRLD with invalid physical address";
+
+        case 10:
+            return "VMPTRLD with VMXON pointer";
+
+        case 11:
+            return "VMPTRLD with incorrect VMCS revision identifier";
+
+        case 12:
+            return "VMREAD/VMWRITE from/to unsupported VMCS component";
+
+        case 13:
+            return "VMWRITE to read-only VMCS component";
+
+        case 15:
+            return "VMXON executed in VMX root operation";
+
+        case 16:
+            return "VM entry with invalid executive-VMCS pointer";
+
+        case 17:
+            return "VM entry with non-launched executive VMCS";
+
+        case 18:
+            return "VM entry with executive-VMCS pointer not VMXON "
+                   "pointer (when attempting to deactivate the "
+                   "dual-monitor treatment of SMIs and SMM)";
+
+        case 19:
+            return "VMCALL with non-clear VMCS (when attempting to "
+                   "activate the dual-monitor treatment of SMIs and "
+                   "SMM)";
+
+        case 20:
+            return "VMCALL with invalid VM-exit control fields";
+
+        case 22:
+            return "VMCALL with incorrect MSEG revision identifier "
+                   "(when attempting to activate the dual-monitor "
+                   "treatment of SMIs and SMM)";
+
+        case 23:
+            return "VMXOFF under dual-monitor treatment of SMIs and "
+                   "SMM";
+
+        case 24:
+            return "VMCALL with invalid SMM-monitor features (when "
+                   "attempting to activate the dual-monitor treatment "
+                   "of SMIs and SMM)";
+
+        case 25:
+            return "VM entry with invalid VM-execution control fields "
+                   "in executive VMCS (when attempting to return from "
+                   "SMM)";
+
+        case 26:
+            return "VM entry with events blocked by MOV SS.";
+
+        case 28:
+            return "Invalid operand to INVEPT/INVVPID.";
+
+        default:
+            return "Unknown VM instruction error";
+    }
 }
 
 bool
@@ -61,385 +149,6 @@ vmcs_intel_x64::is_enabled_v8086() const
     return vmcs::guest_rflags::virtual_8086_mode::get() == 1;
 }
 
-bool
-vmcs_intel_x64::is_enabled_virtualized_apic() const
-{
-    auto ctls = get_proc2_ctls();
-
-    if ((ctls & VM_EXEC_S_PROC_BASED_VIRTUALIZE_APIC_ACCESSES) == 0)
-        return false;
-
-    if (!is_supported_virtualized_apic())
-        return false;
-
-    return true;
-}
-
-bool
-vmcs_intel_x64::is_enabled_ept() const
-{
-    auto ctls = get_proc2_ctls();
-
-    if ((ctls & VM_EXEC_S_PROC_BASED_ENABLE_EPT) == 0)
-        return false;
-
-    if (!is_supported_ept())
-        return false;
-
-    return true;
-}
-
-bool
-vmcs_intel_x64::is_enabled_descriptor_table_exiting() const
-{
-    auto ctls = get_proc2_ctls();
-
-    if ((ctls & VM_EXEC_S_PROC_BASED_DESCRIPTOR_TABLE_EXITING) == 0)
-        return false;
-
-    if (!is_supported_descriptor_table_exiting())
-        return false;
-
-    return true;
-}
-
-bool
-vmcs_intel_x64::is_enabled_rdtscp() const
-{
-    auto ctls = get_proc2_ctls();
-
-    if ((ctls & VM_EXEC_S_PROC_BASED_ENABLE_RDTSCP) == 0)
-        return false;
-
-    if (!is_supported_rdtscp())
-        return false;
-
-    return true;
-}
-
-bool
-vmcs_intel_x64::is_enabled_x2apic_mode() const
-{
-    auto ctls = get_proc2_ctls();
-
-    if ((ctls & VM_EXEC_S_PROC_BASED_VIRTUALIZE_X2APIC_MODE) == 0)
-        return false;
-
-    if (!is_supported_x2apic_mode())
-        return false;
-
-    return true;
-}
-
-bool
-vmcs_intel_x64::is_enabled_vpid() const
-{
-    auto ctls = get_proc2_ctls();
-
-    if ((ctls & VM_EXEC_S_PROC_BASED_ENABLE_VPID) == 0)
-        return false;
-
-    if (!is_supported_vpid())
-        return false;
-
-    return true;
-}
-
-bool
-vmcs_intel_x64::is_enabled_wbinvd_exiting() const
-{
-    auto ctls = get_proc2_ctls();
-
-    if ((ctls & VM_EXEC_S_PROC_BASED_WBINVD_EXITING) == 0)
-        return false;
-
-    if (!is_supported_wbinvd_exiting())
-        return false;
-
-    return true;
-}
-
-bool
-vmcs_intel_x64::is_enabled_unrestricted_guests() const
-{
-    auto ctls = get_proc2_ctls();
-
-    if ((ctls & VM_EXEC_S_PROC_BASED_UNRESTRICTED_GUEST) == 0)
-        return false;
-
-    if (!is_supported_unrestricted_guests())
-        return false;
-
-    return true;
-}
-
-bool
-vmcs_intel_x64::is_enabled_apic_register_virtualization() const
-{
-    auto ctls = get_proc2_ctls();
-
-    if ((ctls & VM_EXEC_S_PROC_BASED_APIC_REGISTER_VIRTUALIZATION) == 0)
-        return false;
-
-    if (!is_supported_apic_register_virtualization())
-        return false;
-
-    return true;
-}
-
-bool
-vmcs_intel_x64::is_enabled_virtual_interrupt_delivery() const
-{
-    auto ctls = get_proc2_ctls();
-
-    if ((ctls & VM_EXEC_S_PROC_BASED_VIRTUAL_INTERRUPT_DELIVERY) == 0)
-        return false;
-
-    if (!is_supported_virtual_interrupt_delivery())
-        return false;
-
-    return true;
-}
-
-bool
-vmcs_intel_x64::is_enabled_pause_loop_exiting() const
-{
-    auto ctls = get_proc2_ctls();
-
-    if ((ctls & VM_EXEC_S_PROC_BASED_PAUSE_LOOP_EXITING) == 0)
-        return false;
-
-    if (!is_supported_pause_loop_exiting())
-        return false;
-
-    return true;
-}
-
-bool
-vmcs_intel_x64::is_enabled_rdrand_exiting() const
-{
-    auto ctls = get_proc2_ctls();
-
-    if ((ctls & VM_EXEC_S_PROC_BASED_RDRAND_EXITING) == 0)
-        return false;
-
-    if (!is_supported_rdrand_exiting())
-        return false;
-
-    return true;
-}
-
-bool
-vmcs_intel_x64::is_enabled_pml() const
-{
-    auto ctls = get_proc2_ctls();
-
-    if ((ctls & VM_EXEC_S_PROC_BASED_ENABLE_PML) == 0)
-        return false;
-
-    if (!is_supported_pml())
-        return false;
-
-    return true;
-}
-
-bool
-vmcs_intel_x64::is_enabled_invpcid() const
-{
-    auto ctls = get_proc2_ctls();
-
-    if ((ctls & VM_EXEC_S_PROC_BASED_ENABLE_INVPCID) == 0)
-        return false;
-
-    if (!is_supported_invpcid())
-        return false;
-
-    return true;
-}
-
-bool
-vmcs_intel_x64::is_enabled_vm_functions() const
-{
-    auto ctls = get_proc2_ctls();
-
-    if ((ctls & VM_EXEC_S_PROC_BASED_ENABLE_VM_FUNCTIONS) == 0)
-        return false;
-
-    if (!is_supported_vm_functions())
-        return false;
-
-    return true;
-}
-
-bool
-vmcs_intel_x64::is_enabled_vmcs_shadowing() const
-{
-    auto ctls = get_proc2_ctls();
-
-    if ((ctls & VM_EXEC_S_PROC_BASED_VMCS_SHADOWING) == 0)
-        return false;
-
-    if (!is_supported_vmcs_shadowing())
-        return false;
-
-    return true;
-}
-
-bool
-vmcs_intel_x64::is_enabled_rdseed_exiting() const
-{
-    auto ctls = get_proc2_ctls();
-
-    if ((ctls & VM_EXEC_S_PROC_BASED_RDSEED_EXITING) == 0)
-        return false;
-
-    if (!is_supported_rdseed_exiting())
-        return false;
-
-    return true;
-}
-
-bool
-vmcs_intel_x64::is_enabled_ept_violation_ve() const
-{
-    auto ctls = get_proc2_ctls();
-
-    if ((ctls & VM_EXEC_S_PROC_BASED_EPT_VIOLATION_VE) == 0)
-        return false;
-
-    if (!is_supported_ept_violation_ve())
-        return false;
-
-    return true;
-}
-
-bool
-vmcs_intel_x64::is_enabled_xsave_xrestore() const
-{
-    auto ctls = get_proc2_ctls();
-
-    if ((ctls & VM_EXEC_S_PROC_BASED_ENABLE_XSAVES_XRSTORS) == 0)
-        return false;
-
-    if (!is_supported_xsave_xrestore())
-        return false;
-
-    return true;
-}
-
-bool
-vmcs_intel_x64::is_supported_virtualized_apic() const
-{
-    return (msrs::ia32_vmx_procbased_ctls2::get() & (VM_EXEC_S_PROC_BASED_VIRTUALIZE_APIC_ACCESSES << 32)) != 0;
-}
-
-bool
-vmcs_intel_x64::is_supported_ept() const
-{
-    return (msrs::ia32_vmx_procbased_ctls2::get() & (VM_EXEC_S_PROC_BASED_ENABLE_EPT << 32)) != 0;
-}
-
-bool
-vmcs_intel_x64::is_supported_descriptor_table_exiting() const
-{
-    return (msrs::ia32_vmx_procbased_ctls2::get() & (VM_EXEC_S_PROC_BASED_DESCRIPTOR_TABLE_EXITING << 32)) != 0;
-}
-
-bool
-vmcs_intel_x64::is_supported_rdtscp() const
-{
-    return (msrs::ia32_vmx_procbased_ctls2::get() & (VM_EXEC_S_PROC_BASED_ENABLE_RDTSCP << 32)) != 0;
-}
-
-bool
-vmcs_intel_x64::is_supported_x2apic_mode() const
-{
-    return (msrs::ia32_vmx_procbased_ctls2::get() & (VM_EXEC_S_PROC_BASED_VIRTUALIZE_X2APIC_MODE << 32)) != 0;
-}
-
-bool
-vmcs_intel_x64::is_supported_vpid() const
-{
-    return (msrs::ia32_vmx_procbased_ctls2::get() & (VM_EXEC_S_PROC_BASED_ENABLE_VPID << 32)) != 0;
-}
-
-bool
-vmcs_intel_x64::is_supported_wbinvd_exiting() const
-{
-    return (msrs::ia32_vmx_procbased_ctls2::get() & (VM_EXEC_S_PROC_BASED_WBINVD_EXITING << 32)) != 0;
-}
-
-bool
-vmcs_intel_x64::is_supported_unrestricted_guests() const
-{
-    return (msrs::ia32_vmx_procbased_ctls2::get() & (VM_EXEC_S_PROC_BASED_UNRESTRICTED_GUEST << 32)) != 0;
-}
-
-bool
-vmcs_intel_x64::is_supported_apic_register_virtualization() const
-{
-    return (msrs::ia32_vmx_procbased_ctls2::get() & (VM_EXEC_S_PROC_BASED_APIC_REGISTER_VIRTUALIZATION << 32)) != 0;
-}
-
-bool
-vmcs_intel_x64::is_supported_virtual_interrupt_delivery() const
-{
-    return (msrs::ia32_vmx_procbased_ctls2::get() & (VM_EXEC_S_PROC_BASED_VIRTUAL_INTERRUPT_DELIVERY << 32)) != 0;
-}
-
-bool
-vmcs_intel_x64::is_supported_pause_loop_exiting() const
-{
-    return (msrs::ia32_vmx_procbased_ctls2::get() & (VM_EXEC_S_PROC_BASED_PAUSE_LOOP_EXITING << 32)) != 0;
-}
-
-bool
-vmcs_intel_x64::is_supported_rdrand_exiting() const
-{
-    return (msrs::ia32_vmx_procbased_ctls2::get() & (VM_EXEC_S_PROC_BASED_RDRAND_EXITING << 32)) != 0;
-}
-
-bool
-vmcs_intel_x64::is_supported_invpcid() const
-{
-    return (msrs::ia32_vmx_procbased_ctls2::get() & (VM_EXEC_S_PROC_BASED_ENABLE_INVPCID << 32)) != 0;
-}
-
-bool
-vmcs_intel_x64::is_supported_vm_functions() const
-{
-    return (msrs::ia32_vmx_procbased_ctls2::get() & (VM_EXEC_S_PROC_BASED_ENABLE_VM_FUNCTIONS << 32)) != 0;
-}
-
-bool
-vmcs_intel_x64::is_supported_vmcs_shadowing() const
-{
-    return (msrs::ia32_vmx_procbased_ctls2::get() & (VM_EXEC_S_PROC_BASED_VMCS_SHADOWING << 32)) != 0;
-}
-
-bool
-vmcs_intel_x64::is_supported_rdseed_exiting() const
-{
-    return (msrs::ia32_vmx_procbased_ctls2::get() & (VM_EXEC_S_PROC_BASED_RDSEED_EXITING << 32)) != 0;
-}
-
-bool
-vmcs_intel_x64::is_supported_pml() const
-{
-    return (msrs::ia32_vmx_procbased_ctls2::get() & (VM_EXEC_S_PROC_BASED_ENABLE_PML << 32)) != 0;
-}
-
-bool
-vmcs_intel_x64::is_supported_ept_violation_ve() const
-{
-    return (msrs::ia32_vmx_procbased_ctls2::get() & (VM_EXEC_S_PROC_BASED_EPT_VIOLATION_VE << 32)) != 0;
-}
-
-bool
-vmcs_intel_x64::is_supported_xsave_xrestore() const
-{
-    return (msrs::ia32_vmx_procbased_ctls2::get() & (VM_EXEC_S_PROC_BASED_ENABLE_XSAVES_XRSTORS << 32)) != 0;
-}
 
 bool
 vmcs_intel_x64::is_supported_eptp_switching() const
@@ -447,7 +156,7 @@ vmcs_intel_x64::is_supported_eptp_switching() const
     if (!msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::is_allowed1())
         return false;
 
-    if (!this->is_supported_vm_functions())
+    if ((msrs::ia32_vmx_procbased_ctls2::enable_vm_functions::mask << 32) == 0)
         return false;
 
     return ((vm::read(VMCS_VM_FUNCTION_CONTROLS) & VM_FUNCTION_CONTROL_EPTP_SWITCHING) != 0);

@@ -32,6 +32,7 @@
 
 using namespace x64;
 using namespace intel_x64;
+using namespace vmcs;
 
 vmcs_intel_x64::vmcs_intel_x64() : m_vmcs_region_phys(0)
 {
@@ -217,19 +218,19 @@ vmcs_intel_x64::write_32bit_control_state(const std::shared_ptr<vmcs_intel_x64_s
 
     lower = ((ia32_vmx_pinbased_ctls_msr >> 0) & 0x00000000FFFFFFFF);
     upper = ((ia32_vmx_pinbased_ctls_msr >> 32) & 0x00000000FFFFFFFF);
-    vmcs::pin_based_vm_execution_controls::set(lower & upper);
+    pin_based_vm_execution_controls::set(lower & upper);
 
     lower = ((ia32_vmx_procbased_ctls_msr >> 0) & 0x00000000FFFFFFFF);
     upper = ((ia32_vmx_procbased_ctls_msr >> 32) & 0x00000000FFFFFFFF);
-    vmcs::primary_processor_based_vm_execution_controls::set(lower & upper);
+    primary_processor_based_vm_execution_controls::set(lower & upper);
 
     lower = ((ia32_vmx_exit_ctls_msr >> 0) & 0x00000000FFFFFFFF);
     upper = ((ia32_vmx_exit_ctls_msr >> 32) & 0x00000000FFFFFFFF);
-    vmcs::vm_exit_controls::set(lower & upper);
+    vm_exit_controls::set(lower & upper);
 
     lower = ((ia32_vmx_entry_ctls_msr >> 0) & 0x00000000FFFFFFFF);
     upper = ((ia32_vmx_entry_ctls_msr >> 32) & 0x00000000FFFFFFFF);
-    vmcs::vm_entry_controls::set(lower & upper);
+    vm_entry_controls::set(lower & upper);
 
     // unused: VMCS_EXCEPTION_BITMAP
     // unused: VMCS_PAGE_FAULT_ERROR_CODE_MASK
@@ -414,140 +415,86 @@ vmcs_intel_x64::write_natural_host_state(const std::shared_ptr<vmcs_intel_x64_st
 void
 vmcs_intel_x64::pin_based_vm_execution_controls()
 {
-    using namespace vmcs::pin_based_vm_execution_controls;
-
-    // external_interrupt_exiting::enable();
-    // nmi_exiting::enable();
-    // virtual_nmis::enable();
-    // activate_vmx_preemption_timer::enable();
-    // process_posted_interrupts::enable();
+    // pin_based_vm_execution_controls::external_interrupt_exiting::enable();
+    // pin_based_vm_execution_controls::nmi_exiting::enable();
+    // pin_based_vm_execution_controls::virtual_nmis::enable();
+    // pin_based_vm_execution_controls::activate_vmx_preemption_timer::enable();
+    // pin_based_vm_execution_controls::process_posted_interrupts::enable();
 }
 
 void
 vmcs_intel_x64::primary_processor_based_vm_execution_controls()
 {
-    using namespace vmcs::primary_processor_based_vm_execution_controls;
-
-    // interrupt_window_exiting::enable();
-    // use_tsc_offsetting::enable();
-    // hlt_exiting::enable();
-    // invlpg_exiting::enable();
-    // mwait_exiting::enable();
-    // rdpmc_exiting::enable();
-    // rdtsc_exiting::enable();
-    // cr3_load_exiting::enable();
-    // cr3_store_exiting::enable();
-    // cr8_load_exiting::enable();
-    // cr8_store_exiting::enable();
-    // use_tpr_shadow::enable();
-    // nmi_window_exiting::enable();
-    // mov_dr_exiting::enable();
-    // unconditional_io_exiting::enable();
-    // use_io_bitmaps::enable();
-    // monitor_trap_flag::enable();
-    // use_msr_bitmaps::enable();
-    // monitor_exiting::enable();
-    // pause_exiting::enable();
-    activate_secondary_controls::enable();
+    // primary_processor_based_vm_execution_controls::interrupt_window_exiting::enable();
+    // primary_processor_based_vm_execution_controls::use_tsc_offsetting::enable();
+    // primary_processor_based_vm_execution_controls::hlt_exiting::enable();
+    // primary_processor_based_vm_execution_controls::invlpg_exiting::enable();
+    // primary_processor_based_vm_execution_controls::mwait_exiting::enable();
+    // primary_processor_based_vm_execution_controls::rdpmc_exiting::enable();
+    // primary_processor_based_vm_execution_controls::rdtsc_exiting::enable();
+    // primary_processor_based_vm_execution_controls::cr3_load_exiting::enable();
+    // primary_processor_based_vm_execution_controls::cr3_store_exiting::enable();
+    // primary_processor_based_vm_execution_controls::cr8_load_exiting::enable();
+    // primary_processor_based_vm_execution_controls::cr8_store_exiting::enable();
+    // primary_processor_based_vm_execution_controls::use_tpr_shadow::enable();
+    // primary_processor_based_vm_execution_controls::nmi_window_exiting::enable();
+    // primary_processor_based_vm_execution_controls::mov_dr_exiting::enable();
+    // primary_processor_based_vm_execution_controls::unconditional_io_exiting::enable();
+    // primary_processor_based_vm_execution_controls::use_io_bitmaps::enable();
+    // primary_processor_based_vm_execution_controls::monitor_trap_flag::enable();
+    // primary_processor_based_vm_execution_controls::use_msr_bitmaps::enable();
+    // primary_processor_based_vm_execution_controls::monitor_exiting::enable();
+    // primary_processor_based_vm_execution_controls::pause_exiting::enable();
+    primary_processor_based_vm_execution_controls::activate_secondary_controls::enable();
 }
 
 void
 vmcs_intel_x64::secondary_processor_based_vm_execution_controls()
 {
-    auto controls = vm::read(VMCS_SECONDARY_PROCESSOR_BASED_VM_EXECUTION_CONTROLS);
+    bool verbose = true;
 
-    // controls |= VM_EXEC_S_PROC_BASED_VIRTUALIZE_APIC_ACCESSES;
-    // controls |= VM_EXEC_S_PROC_BASED_ENABLE_EPT;
-    // controls |= VM_EXEC_S_PROC_BASED_DESCRIPTOR_TABLE_EXITING;
-    controls |= VM_EXEC_S_PROC_BASED_ENABLE_RDTSCP;
-    // controls |= VM_EXEC_S_PROC_BASED_VIRTUALIZE_X2APIC_MODE;
-    // controls |= VM_EXEC_S_PROC_BASED_ENABLE_VPID;
-    // controls |= VM_EXEC_S_PROC_BASED_WBINVD_EXITING;
-    // controls |= VM_EXEC_S_PROC_BASED_UNRESTRICTED_GUEST;
-    // controls |= VM_EXEC_S_PROC_BASED_APIC_REGISTER_VIRTUALIZATION;
-    // controls |= VM_EXEC_S_PROC_BASED_VIRTUAL_INTERRUPT_DELIVERY;
-    // controls |= VM_EXEC_S_PROC_BASED_PAUSE_LOOP_EXITING;
-    // controls |= VM_EXEC_S_PROC_BASED_RDRAND_EXITING;
-    controls |= VM_EXEC_S_PROC_BASED_ENABLE_INVPCID;
-    // controls |= VM_EXEC_S_PROC_BASED_ENABLE_VM_FUNCTIONS;
-    // controls |= VM_EXEC_S_PROC_BASED_VMCS_SHADOWING;
-    // controls |= VM_EXEC_S_PROC_BASED_RDSEED_EXITING;
-    // controls |= VM_EXEC_S_PROC_BASED_EPT_VIOLATION_VE;
-
-    // @connojd this needs to be re-enabled once these are fixed.
-    // These should all be enabled_if_allowed(), and then RDTSCP, INVPCID,
-    // and SXAVE should all be uncommented, with the rest commented.
-    // I commented out xsave for now so that the hypervisor will still
-    // work on VMWare for now.
-    //
-    // controls |= VM_EXEC_S_PROC_BASED_ENABLE_XSAVES_XRSTORS;
-
-    this->filter_unsupported(msrs::ia32_vmx_procbased_ctls2::addr, controls);
-
-    vm::write(VMCS_SECONDARY_PROCESSOR_BASED_VM_EXECUTION_CONTROLS, controls);
+    // secondary_processor_based_vm_execution_controls::virtualize_apic_accesses::enable_if_allowed(verbose);
+    // secondary_processor_based_vm_execution_controls::enable_ept::enable_if_allowed(verbose);
+    // secondary_processor_based_vm_execution_controls::descriptor_table_exiting::enable_if_allowed(verbose);
+    secondary_processor_based_vm_execution_controls::enable_rdtscp::enable_if_allowed(verbose);
+    // secondary_processor_based_vm_execution_controls::virtualize_x2apic_mode::enable_if_allowed(verbose);
+    // secondary_processor_based_vm_execution_controls::enable_vpid::enable_if_allowed(verbose);
+    // secondary_processor_based_vm_execution_controls::wbinvd_exiting::enable_if_allowed(verbose);
+    // secondary_processor_based_vm_execution_controls::unrestricted_guest::enable_if_allowed(verbose);
+    // secondary_processor_based_vm_execution_controls::apic_register_virtualization::enable_if_allowed(verbose);
+    // secondary_processor_based_vm_execution_controls::virtual_interrupt_delivery::enable_if_allowed(verbose);
+    // secondary_processor_based_vm_execution_controls::pause_loop_exiting::enable_if_allowed(verbose);
+    // secondary_processor_based_vm_execution_controls::rdrand_exiting::enable_if_allowed(verbose);
+    secondary_processor_based_vm_execution_controls::enable_invpcid::enable_if_allowed(verbose);
+    // secondary_processor_based_vm_execution_controls::enable_vm_functions::enable_if_allowed(verbose);
+    // secondary_processor_based_vm_execution_controls::vmcs_shadowing::enable_if_allowed(verbose);
+    // secondary_processor_based_vm_execution_controls::rdseed_exiting::enable_if_allowed(verbose);
+    // secondary_processor_based_vm_execution_controls::ept_violation_ve::enable_if_allowed(verbose);
+    secondary_processor_based_vm_execution_controls::enable_xsaves_xrstors::enable_if_allowed(verbose);
 }
 
 void
 vmcs_intel_x64::vm_exit_controls()
 {
-    using namespace vmcs::vm_exit_controls;
-
-    save_debug_controls::enable();
-    host_address_space_size::enable();
-    load_ia32_perf_global_ctrl::enable();
-    acknowledge_interrupt_on_exit::enable();
-    save_ia32_pat::enable();
-    load_ia32_pat::enable();
-    save_ia32_efer::enable();
-    load_ia32_efer::enable();
-    // save_vmx_preemption_timer_value::enable();
+    vm_exit_controls::save_debug_controls::enable();
+    vm_exit_controls::host_address_space_size::enable();
+    vm_exit_controls::load_ia32_perf_global_ctrl::enable();
+    vm_exit_controls::acknowledge_interrupt_on_exit::enable();
+    vm_exit_controls::save_ia32_pat::enable();
+    vm_exit_controls::load_ia32_pat::enable();
+    vm_exit_controls::save_ia32_efer::enable();
+    vm_exit_controls::load_ia32_efer::enable();
+    // vm_exit_controls::save_vmx_preemption_timer_value::enable();
 }
 
 void
 vmcs_intel_x64::vm_entry_controls()
 {
-    using namespace vmcs::vm_entry_controls;
-
-    load_debug_controls::enable();
-    ia_32e_mode_guest::enable();
-    // entry_to_smm::enable();
-    // deactivate_dual_monitor_treatment::enable();
-    load_ia32_perf_global_ctrl::enable();
-    load_ia32_pat::enable();
-    load_ia32_efer::enable();
-}
-
-void
-vmcs_intel_x64::filter_unsupported(uint32_t msr, uint64_t &ctrl)
-{
-    (void)ctrl;
-    (void)msr;
-    // REMOVE ME: This function should be removed in facvor of
-    // each function being able to detect if they are supported or not.
-
-    // auto allowed = msrs::get(msr);
-    // auto allowed0 = ((allowed >> 00) & 0x00000000FFFFFFFF);
-    // auto allowed1 = ((allowed >> 32) & 0x00000000FFFFFFFF);
-
-    // if ((allowed0 & ctrl) != allowed0)
-    // {
-    //     bfdebug << "vmcs ctrl field mis-configured for msr allowed 0: " << view_as_pointer(msr) << bfendl;
-    //     bfdebug << "    - allowed0: " << view_as_pointer(allowed0) << bfendl;
-    //     bfdebug << "    - old ctrl: " << view_as_pointer(ctrl) << bfendl;
-
-    //     ctrl |= allowed0;
-
-    //     bfdebug << "    - new ctrl: " << view_as_pointer(ctrl) << bfendl;
-    // }
-
-    // if ((ctrl & ~allowed1) != 0)
-    // {
-    //     bfdebug << "vmcs ctrl field mis-configured for msr allowed 1: " << view_as_pointer(msr) << bfendl;
-    //     bfdebug << "    - allowed1: " << view_as_pointer(allowed1) << bfendl;
-    //     bfdebug << "    - old ctrl: " << view_as_pointer(ctrl) << bfendl;
-
-    //     ctrl &= allowed1;
-
-    //     bfdebug << "    - new ctrl: " << view_as_pointer(ctrl) << bfendl;
-    // }
+    vm_entry_controls::load_debug_controls::enable();
+    vm_entry_controls::ia_32e_mode_guest::enable();
+    // vm_entry_controls::entry_to_smm::enable();
+    // vm_entry_controls::deactivate_dual_monitor_treatment::enable();
+    vm_entry_controls::load_ia32_perf_global_ctrl::enable();
+    vm_entry_controls::load_ia32_pat::enable();
+    vm_entry_controls::load_ia32_efer::enable();
 }
