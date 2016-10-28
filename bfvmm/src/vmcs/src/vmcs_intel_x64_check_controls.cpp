@@ -361,9 +361,12 @@ vmcs_intel_x64::check_control_enable_ept_checks()
 void
 vmcs_intel_x64::check_control_enable_pml_checks()
 {
+    if (!is_enabled_pml())
+        return;
+
     auto pml_addr = vm::read(VMCS_PML_ADDRESS);
 
-    if (is_enabled_pml() && !is_enabled_ept())
+    if (!is_enabled_ept())
         throw std::logic_error("ept must be enabled if pml is enabled");
 
     if (!is_physical_address_valid(pml_addr))

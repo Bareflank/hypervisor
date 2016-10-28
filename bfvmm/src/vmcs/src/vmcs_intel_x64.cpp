@@ -92,10 +92,6 @@ vmcs_intel_x64::launch(const std::shared_ptr<vmcs_intel_x64_state> &host_state,
 
     auto ___ = gsl::on_failure([&]
     {
-        bferror << "vmlaunch failed:" << bfendl;
-        bferror << "    - vm_instruction_error: "
-        << this->get_vm_instruction_error() << bfendl;
-
         this->check_vmcs_control_state();
         this->check_vmcs_guest_state();
         this->check_vmcs_host_state();
@@ -420,23 +416,17 @@ vmcs_intel_x64::pin_based_vm_execution_controls()
 {
     using namespace vmcs::pin_based_vm_execution_controls;
 
-    auto controls = get();
-
     // external_interrupt_exiting::enable();
     // nmi_exiting::enable();
     // virtual_nmis::enable();
     // activate_vmx_preemption_timer::enable();
     // process_posted_interrupts::enable();
-
-    set(controls);
 }
 
 void
 vmcs_intel_x64::primary_processor_based_vm_execution_controls()
 {
     using namespace vmcs::primary_processor_based_vm_execution_controls;
-
-    auto controls = get();
 
     // interrupt_window_exiting::enable();
     // use_tsc_offsetting::enable();
@@ -458,9 +448,7 @@ vmcs_intel_x64::primary_processor_based_vm_execution_controls()
     // use_msr_bitmaps::enable();
     // monitor_exiting::enable();
     // pause_exiting::enable();
-    // activate_secondary_controls::enable();
-
-    set(controls);
+    activate_secondary_controls::enable();
 }
 
 void
@@ -485,7 +473,14 @@ vmcs_intel_x64::secondary_processor_based_vm_execution_controls()
     // controls |= VM_EXEC_S_PROC_BASED_VMCS_SHADOWING;
     // controls |= VM_EXEC_S_PROC_BASED_RDSEED_EXITING;
     // controls |= VM_EXEC_S_PROC_BASED_EPT_VIOLATION_VE;
-    controls |= VM_EXEC_S_PROC_BASED_ENABLE_XSAVES_XRSTORS;
+
+    // @connojd this needs to be re-enabled once these are fixed.
+    // These should all be enabled_if_allowed(), and then RDTSCP, INVPCID,
+    // and SXAVE should all be uncommented, with the rest commented.
+    // I commented out xsave for now so that the hypervisor will still
+    // work on VMWare for now.
+    //
+    // controls |= VM_EXEC_S_PROC_BASED_ENABLE_XSAVES_XRSTORS;
 
     this->filter_unsupported(msrs::ia32_vmx_procbased_ctls2::addr, controls);
 
@@ -497,8 +492,6 @@ vmcs_intel_x64::vm_exit_controls()
 {
     using namespace vmcs::vm_exit_controls;
 
-    auto controls = get();
-
     save_debug_controls::enable();
     host_address_space_size::enable();
     load_ia32_perf_global_ctrl::enable();
@@ -508,16 +501,12 @@ vmcs_intel_x64::vm_exit_controls()
     save_ia32_efer::enable();
     load_ia32_efer::enable();
     // save_vmx_preemption_timer_value::enable();
-
-    set(controls);
 }
 
 void
 vmcs_intel_x64::vm_entry_controls()
 {
     using namespace vmcs::vm_entry_controls;
-
-    auto controls = get();
 
     load_debug_controls::enable();
     ia_32e_mode_guest::enable();
@@ -526,8 +515,6 @@ vmcs_intel_x64::vm_entry_controls()
     load_ia32_perf_global_ctrl::enable();
     load_ia32_pat::enable();
     load_ia32_efer::enable();
-
-    set(controls);
 }
 
 void

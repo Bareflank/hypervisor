@@ -514,7 +514,7 @@ setup_check_control_enable_pml_checks_paths(std::vector<struct control_flow_path
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("ept must be enabled if pml is enabled"));
     cfg.push_back(path);
 
-    path.setup = [&] { disable_proc_ctl2(VM_EXEC_S_PROC_BASED_ENABLE_PML); g_vmcs_fields[VMCS_PML_ADDRESS] = 0xff00000000000000; };
+    path.setup = [&] { enable_proc_ctl2(VM_EXEC_S_PROC_BASED_ENABLE_EPT); g_vmcs_fields[VMCS_PML_ADDRESS] = 0xff00000000000000; };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("pml address must be a valid physical address"));
     cfg.push_back(path);

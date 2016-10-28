@@ -206,8 +206,6 @@ protected:
 
 #endif
 
-    virtual std::string get_vm_instruction_error();
-
     // REMOVE ME: These should be removed in favor of the namespace logic
     virtual uint64_t get_proc2_ctls() const;
 
@@ -1928,7 +1926,7 @@ namespace pin_based_vm_execution_controls
         inline void enable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(1UL, verbose); }
 
-        inline void disable_if_allowed(bool verbose = false) noexcept 
+        inline void disable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(0UL, verbose); }
     }
 
@@ -1957,7 +1955,7 @@ namespace pin_based_vm_execution_controls
         inline void enable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(1UL, verbose); }
 
-        inline void disable_if_allowed(bool verbose = false) noexcept 
+        inline void disable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(0UL, verbose); }
     }
 
@@ -1986,7 +1984,7 @@ namespace pin_based_vm_execution_controls
         inline void enable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(1UL, verbose); }
 
-        inline void disable_if_allowed(bool verbose = false) noexcept 
+        inline void disable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(0UL, verbose); }
     }
 
@@ -2015,7 +2013,7 @@ namespace pin_based_vm_execution_controls
         inline void enable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(1UL, verbose); }
 
-        inline void disable_if_allowed(bool verbose = false) noexcept 
+        inline void disable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(0UL, verbose); }
     }
 
@@ -2044,7 +2042,7 @@ namespace pin_based_vm_execution_controls
         inline void enable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(1UL, verbose); }
 
-        inline void disable_if_allowed(bool verbose = false) noexcept 
+        inline void disable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(0UL, verbose); }
     }
 }
@@ -2089,7 +2087,7 @@ namespace primary_processor_based_vm_execution_controls
         inline void enable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(1UL, verbose); }
 
-        inline void disable_if_allowed(bool verbose = false) noexcept 
+        inline void disable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(0UL, verbose); }
     }
 
@@ -2118,7 +2116,7 @@ namespace primary_processor_based_vm_execution_controls
         inline void enable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(1UL, verbose); }
 
-        inline void disable_if_allowed(bool verbose = false) noexcept 
+        inline void disable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(0UL, verbose); }
     }
 
@@ -2147,7 +2145,7 @@ namespace primary_processor_based_vm_execution_controls
         inline void enable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(1UL, verbose); }
 
-        inline void disable_if_allowed(bool verbose = false) noexcept 
+        inline void disable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(0UL, verbose); }
     }
 
@@ -2176,7 +2174,7 @@ namespace primary_processor_based_vm_execution_controls
         inline void enable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(1UL, verbose); }
 
-        inline void disable_if_allowed(bool verbose = false) noexcept 
+        inline void disable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(0UL, verbose); }
     }
 
@@ -2205,7 +2203,7 @@ namespace primary_processor_based_vm_execution_controls
         inline void enable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(1UL, verbose); }
 
-        inline void disable_if_allowed(bool verbose = false) noexcept 
+        inline void disable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(0UL, verbose); }
     }
 
@@ -2234,7 +2232,7 @@ namespace primary_processor_based_vm_execution_controls
         inline void enable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(1UL, verbose); }
 
-        inline void disable_if_allowed(bool verbose = false) noexcept 
+        inline void disable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(0UL, verbose); }
     }
 
@@ -2263,7 +2261,7 @@ namespace primary_processor_based_vm_execution_controls
         inline void enable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(1UL, verbose); }
 
-        inline void disable_if_allowed(bool verbose = false) noexcept 
+        inline void disable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(0UL, verbose); }
     }
 
@@ -2292,7 +2290,7 @@ namespace primary_processor_based_vm_execution_controls
         inline void enable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(1UL, verbose); }
 
-        inline void disable_if_allowed(bool verbose = false) noexcept 
+        inline void disable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(0UL, verbose); }
     }
 
@@ -2321,7 +2319,7 @@ namespace primary_processor_based_vm_execution_controls
         inline void enable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(1UL, verbose); }
 
-        inline void disable_if_allowed(bool verbose = false) noexcept 
+        inline void disable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(0UL, verbose); }
     }
 
@@ -2350,7 +2348,7 @@ namespace primary_processor_based_vm_execution_controls
         inline void enable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(1UL, verbose); }
 
-        inline void disable_if_allowed(bool verbose = false) noexcept 
+        inline void disable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(0UL, verbose); }
     }
 
@@ -2379,7 +2377,7 @@ namespace primary_processor_based_vm_execution_controls
         inline void enable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(1UL, verbose); }
 
-        inline void disable_if_allowed(bool verbose = false) noexcept 
+        inline void disable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(0UL, verbose); }
     }
 
@@ -2408,7 +2406,7 @@ namespace primary_processor_based_vm_execution_controls
         inline void enable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(1UL, verbose); }
 
-        inline void disable_if_allowed(bool verbose = false) noexcept 
+        inline void disable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(0UL, verbose); }
     }
 
@@ -2437,7 +2435,7 @@ namespace primary_processor_based_vm_execution_controls
         inline void enable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(1UL, verbose); }
 
-        inline void disable_if_allowed(bool verbose = false) noexcept 
+        inline void disable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(0UL, verbose); }
     }
 
@@ -2466,7 +2464,7 @@ namespace primary_processor_based_vm_execution_controls
         inline void enable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(1UL, verbose); }
 
-        inline void disable_if_allowed(bool verbose = false) noexcept 
+        inline void disable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(0UL, verbose); }
     }
 
@@ -2495,7 +2493,7 @@ namespace primary_processor_based_vm_execution_controls
         inline void enable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(1UL, verbose); }
 
-        inline void disable_if_allowed(bool verbose = false) noexcept 
+        inline void disable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(0UL, verbose); }
     }
 
@@ -2524,7 +2522,7 @@ namespace primary_processor_based_vm_execution_controls
         inline void enable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(1UL, verbose); }
 
-        inline void disable_if_allowed(bool verbose = false) noexcept 
+        inline void disable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(0UL, verbose); }
     }
 
@@ -2553,7 +2551,7 @@ namespace primary_processor_based_vm_execution_controls
         inline void enable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(1UL, verbose); }
 
-        inline void disable_if_allowed(bool verbose = false) noexcept 
+        inline void disable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(0UL, verbose); }
     }
 
@@ -2582,7 +2580,7 @@ namespace primary_processor_based_vm_execution_controls
         inline void enable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(1UL, verbose); }
 
-        inline void disable_if_allowed(bool verbose = false) noexcept 
+        inline void disable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(0UL, verbose); }
     }
 
@@ -2611,7 +2609,7 @@ namespace primary_processor_based_vm_execution_controls
         inline void enable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(1UL, verbose); }
 
-        inline void disable_if_allowed(bool verbose = false) noexcept 
+        inline void disable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(0UL, verbose); }
     }
 
@@ -2640,7 +2638,7 @@ namespace primary_processor_based_vm_execution_controls
         inline void enable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(1UL, verbose); }
 
-        inline void disable_if_allowed(bool verbose = false) noexcept 
+        inline void disable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(0UL, verbose); }
     }
 
@@ -2669,7 +2667,7 @@ namespace primary_processor_based_vm_execution_controls
         inline void enable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(1UL, verbose); }
 
-        inline void disable_if_allowed(bool verbose = false) noexcept 
+        inline void disable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(0UL, verbose); }
     }
 }
@@ -2774,7 +2772,7 @@ namespace vm_exit_controls
         inline void enable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(1UL, verbose); }
 
-        inline void disable_if_allowed(bool verbose = false) noexcept 
+        inline void disable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(0UL, verbose); }
     }
 
@@ -2803,7 +2801,7 @@ namespace vm_exit_controls
         inline void enable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(1UL, verbose); }
 
-        inline void disable_if_allowed(bool verbose = false) noexcept 
+        inline void disable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(0UL, verbose); }
     }
 
@@ -2832,7 +2830,7 @@ namespace vm_exit_controls
         inline void enable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(1UL, verbose); }
 
-        inline void disable_if_allowed(bool verbose = false) noexcept 
+        inline void disable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(0UL, verbose); }
     }
 
@@ -2861,7 +2859,7 @@ namespace vm_exit_controls
         inline void enable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(1UL, verbose); }
 
-        inline void disable_if_allowed(bool verbose = false) noexcept 
+        inline void disable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(0UL, verbose); }
     }
 
@@ -2890,7 +2888,7 @@ namespace vm_exit_controls
         inline void enable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(1UL, verbose); }
 
-        inline void disable_if_allowed(bool verbose = false) noexcept 
+        inline void disable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(0UL, verbose); }
     }
 
@@ -2919,7 +2917,7 @@ namespace vm_exit_controls
         inline void enable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(1UL, verbose); }
 
-        inline void disable_if_allowed(bool verbose = false) noexcept 
+        inline void disable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(0UL, verbose); }
     }
 
@@ -2948,7 +2946,7 @@ namespace vm_exit_controls
         inline void enable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(1UL, verbose); }
 
-        inline void disable_if_allowed(bool verbose = false) noexcept 
+        inline void disable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(0UL, verbose); }
     }
 
@@ -2977,7 +2975,7 @@ namespace vm_exit_controls
         inline void enable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(1UL, verbose); }
 
-        inline void disable_if_allowed(bool verbose = false) noexcept 
+        inline void disable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(0UL, verbose); }
     }
 
@@ -3006,7 +3004,7 @@ namespace vm_exit_controls
         inline void enable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(1UL, verbose); }
 
-        inline void disable_if_allowed(bool verbose = false) noexcept 
+        inline void disable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(0UL, verbose); }
     }
 }
@@ -3081,7 +3079,7 @@ namespace vm_entry_controls
         inline void enable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(1UL, verbose); }
 
-        inline void disable_if_allowed(bool verbose = false) noexcept 
+        inline void disable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(0UL, verbose); }
     }
 
@@ -3110,7 +3108,7 @@ namespace vm_entry_controls
         inline void enable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(1UL, verbose); }
 
-        inline void disable_if_allowed(bool verbose = false) noexcept 
+        inline void disable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(0UL, verbose); }
     }
 
@@ -3139,7 +3137,7 @@ namespace vm_entry_controls
         inline void enable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(1UL, verbose); }
 
-        inline void disable_if_allowed(bool verbose = false) noexcept 
+        inline void disable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(0UL, verbose); }
     }
 
@@ -3168,7 +3166,7 @@ namespace vm_entry_controls
         inline void enable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(1UL, verbose); }
 
-        inline void disable_if_allowed(bool verbose = false) noexcept 
+        inline void disable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(0UL, verbose); }
     }
 
@@ -3197,7 +3195,7 @@ namespace vm_entry_controls
         inline void enable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(1UL, verbose); }
 
-        inline void disable_if_allowed(bool verbose = false) noexcept 
+        inline void disable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(0UL, verbose); }
     }
 
@@ -3226,7 +3224,7 @@ namespace vm_entry_controls
         inline void enable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(1UL, verbose); }
 
-        inline void disable_if_allowed(bool verbose = false) noexcept 
+        inline void disable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(0UL, verbose); }
     }
 
@@ -3255,7 +3253,7 @@ namespace vm_entry_controls
         inline void enable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(1UL, verbose); }
 
-        inline void disable_if_allowed(bool verbose = false) noexcept 
+        inline void disable_if_allowed(bool verbose = false) noexcept
         { set_if_allowed(0UL, verbose); }
     }
 }
@@ -6009,8 +6007,107 @@ constexpr const auto VMCS_HOST_RIP                                             =
 #define EPTP_PAGE_WALK_LENGTH                              0x0000000000000038
 #define EPTP_ACCESSED_DIRTY_FLAGS_ENABLED                  0x0000000000000040
 
+// REMOVE ME
+//
+// This code needs to be cleaned up so that it's just part of getting this
+// VMCS field. The call to it should be in the dump function in the VMCS
+// code.
+//
+// std::string
+// get_vm_instruction_error()
+// {
+//     switch (vm::read(VMCS_VM_INSTRUCTION_ERROR))
+//     {
+//         case 1:
+//             return "VMCALL executed in VMX root operation";
 
+//         case 2:
+//             return "VMCLEAR with invalid physical address";
 
+//         case 3:
+//             return "VMCLEAR with VMXON pointer";
 
+//         case 4:
+//             return "VMLAUNCH with non-clear VMCS";
+
+//         case 5:
+//             return "VMRESUME with non-launched VMCS";
+
+//         case 6:
+//             return "VMRESUME after VMXOFF (VMXOFF and VMXON between "
+//                    "VMLAUNCH and VMRESUME)";
+
+//         case 7:
+//             return "VM entry with invalid control field(s)";
+
+//         case 8:
+//             return "VM entry with invalid host-state field(s)";
+
+//         case 9:
+//             return "VMPTRLD with invalid physical address";
+
+//         case 10:
+//             return "VMPTRLD with VMXON pointer";
+
+//         case 11:
+//             return "VMPTRLD with incorrect VMCS revision identifier";
+
+//         case 12:
+//             return "VMREAD/VMWRITE from/to unsupported VMCS component";
+
+//         case 13:
+//             return "VMWRITE to read-only VMCS component";
+
+//         case 15:
+//             return "VMXON executed in VMX root operation";
+
+//         case 16:
+//             return "VM entry with invalid executive-VMCS pointer";
+
+//         case 17:
+//             return "VM entry with non-launched executive VMCS";
+
+//         case 18:
+//             return "VM entry with executive-VMCS pointer not VMXON "
+//                    "pointer (when attempting to deactivate the "
+//                    "dual-monitor treatment of SMIs and SMM)";
+
+//         case 19:
+//             return "VMCALL with non-clear VMCS (when attempting to "
+//                    "activate the dual-monitor treatment of SMIs and "
+//                    "SMM)";
+
+//         case 20:
+//             return "VMCALL with invalid VM-exit control fields";
+
+//         case 22:
+//             return "VMCALL with incorrect MSEG revision identifier "
+//                    "(when attempting to activate the dual-monitor "
+//                    "treatment of SMIs and SMM)";
+
+//         case 23:
+//             return "VMXOFF under dual-monitor treatment of SMIs and "
+//                    "SMM";
+
+//         case 24:
+//             return "VMCALL with invalid SMM-monitor features (when "
+//                    "attempting to activate the dual-monitor treatment "
+//                    "of SMIs and SMM)";
+
+//         case 25:
+//             return "VM entry with invalid VM-execution control fields "
+//                    "in executive VMCS (when attempting to return from "
+//                    "SMM)";
+
+//         case 26:
+//             return "VM entry with events blocked by MOV SS.";
+
+//         case 28:
+//             return "Invalid operand to INVEPT/INVVPID.";
+
+//         default:
+//             return "Unknown VM instruction error";
+//     }
+// }
 
 #endif
