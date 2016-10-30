@@ -10,7 +10,7 @@
 /// @section description Description
 ///
 /// The Bareflank Hypervisor is an open source, lightweight hypervisor, lead by
-/// Assured Information Security, Inc. the provides the scaffolding needed to
+/// Assured Information Security, Inc. that provides the scaffolding needed to
 /// rapidly prototype new hypervisors. To ease development, Bareflank
 /// is written in C++, and includes support for exceptions and the C++ Standard
 /// Template Library (STL) via libc++. With the C++ STL, users can leverage
@@ -89,9 +89,9 @@
 /// exit handler, and intrinsics logic.
 ///
 /// To encapsulate the architectural specific logic, each architecture
-/// has it's own vCPU (for Intel this is vcpu_intel_x64) that subclasses a
+/// has its own vCPU (for Intel this is vcpu_intel_x64) that subclasses a
 /// generic vCPU (@ref vcpu) used by the vcpu_manager, and created by the
-/// vcpu_factory. The vcpu_factory is in it's own module, specifically so
+/// vcpu_factory. The vcpu_factory is in its own module, specifically so
 /// that users of Bareflank can replace this module with their own factory.
 ///
 /// The process of extending Bareflank with custom virtualization logic,
