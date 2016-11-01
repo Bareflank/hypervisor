@@ -54,9 +54,11 @@ enable_proc_ctl(uint64_t control)
 void
 enable_proc_ctl2(uint64_t control)
 {
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] |= msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask << 32;
     enable_proc_ctl(vmcs::primary_processor_based_vm_execution_controls::activate_secondary_controls::mask);
-    g_vmcs_fields[VMCS_SECONDARY_PROCESSOR_BASED_VM_EXECUTION_CONTROLS] |= control;
-    g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] |= control << 32;
+
+    auto ctls = vmcs::secondary_processor_based_vm_execution_controls::get();
+    vmcs::secondary_processor_based_vm_execution_controls::set(ctls | control);
 }
 
 void
@@ -76,8 +78,9 @@ disable_proc_ctl(uint64_t control)
 void
 disable_proc_ctl2(uint64_t control)
 {
-    g_vmcs_fields[VMCS_SECONDARY_PROCESSOR_BASED_VM_EXECUTION_CONTROLS] &= ~control;
-    g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] &= ~control;
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] |= msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask << 32;
+    auto ctls = vmcs::secondary_processor_based_vm_execution_controls::get();
+    vmcs::secondary_processor_based_vm_execution_controls::set(ctls & ~control);
 }
 
 void
@@ -198,6 +201,14 @@ vmcs_ut::list()
     this->test_launch_load_failure();
     this->test_promote_failure();
     this->test_resume_failure();
+    this->test_get_vmcs_field();
+    this->test_get_vmcs_field_if_exists();
+    this->test_set_vmcs_field();
+    this->test_set_vmcs_field_if_exists();
+    this->test_get_vm_control();
+    this->test_get_vm_control_if_exists();
+    this->test_set_vm_control();
+    this->test_set_vm_control_if_allowed();
     this->test_vmcs_virtual_processor_identifier();
     this->test_vmcs_posted_interrupt_notification_vector();
     this->test_vmcs_eptp_index();
@@ -524,11 +535,33 @@ vmcs_ut::list()
     this->test_vmcs_vm_entry_interruption_information_field_valid_bit();
     this->test_vmcs_vm_entry_exception_error_code();
     this->test_vmcs_vm_entry_instruction_length();
+    this->test_vmcs_tpr_threshold();
+    this->test_vmcs_secondary_processor_based_vm_execution_controls();
+    this->test_vmcs_secondary_processor_based_vm_execution_controls_virtualize_apic_accesses();
+    this->test_vmcs_secondary_processor_based_vm_execution_controls_enable_ept();
+    this->test_vmcs_secondary_processor_based_vm_execution_controls_descriptor_table_exiting();
+    this->test_vmcs_secondary_processor_based_vm_execution_controls_enable_rdtscp();
+    this->test_vmcs_secondary_processor_based_vm_execution_controls_virtualize_x2apic_mode();
+    this->test_vmcs_secondary_processor_based_vm_execution_controls_enable_vpid();
+    this->test_vmcs_secondary_processor_based_vm_execution_controls_wbinvd_exiting();
+    this->test_vmcs_secondary_processor_based_vm_execution_controls_unrestricted_guest();
+    this->test_vmcs_secondary_processor_based_vm_execution_controls_apic_register_virtualization();
+    this->test_vmcs_secondary_processor_based_vm_execution_controls_virtual_interrupt_delivery();
+    this->test_vmcs_secondary_processor_based_vm_execution_controls_pause_loop_exiting();
+    this->test_vmcs_secondary_processor_based_vm_execution_controls_rdrand_exiting();
+    this->test_vmcs_secondary_processor_based_vm_execution_controls_enable_invpcid();
+    this->test_vmcs_secondary_processor_based_vm_execution_controls_enable_vm_functions();
+    this->test_vmcs_secondary_processor_based_vm_execution_controls_vmcs_shadowing();
+    this->test_vmcs_secondary_processor_based_vm_execution_controls_rdseed_exiting();
+    this->test_vmcs_secondary_processor_based_vm_execution_controls_enable_pml();
+    this->test_vmcs_secondary_processor_based_vm_execution_controls_ept_violation_ve();
+    this->test_vmcs_secondary_processor_based_vm_execution_controls_enable_xsaves_xrstors();
 
     this->test_check_vmcs_control_state();
     this->test_checks_on_vm_execution_control_fields();
     this->test_checks_on_vm_exit_control_fields();
     this->test_checks_on_vm_entry_control_fields();
+    this->test_check_control_ctls_reserved_properly_set();
     this->test_check_control_pin_based_ctls_reserved_properly_set();
     this->test_check_control_proc_based_ctls_reserved_properly_set();
     this->test_check_control_proc_based_ctls2_reserved_properly_set();

@@ -37,20 +37,20 @@ setup_checks_on_vm_execution_control_fields_paths(std::vector<struct control_flo
         disable_proc_ctl(vmcs::primary_processor_based_vm_execution_controls::use_io_bitmaps::mask);
         disable_proc_ctl(vmcs::primary_processor_based_vm_execution_controls::use_msr_bitmaps::mask);
         disable_proc_ctl(vmcs::primary_processor_based_vm_execution_controls::use_tpr_shadow::mask);
-        disable_proc_ctl2(VM_EXEC_S_PROC_BASED_VIRTUALIZE_X2APIC_MODE);
-        disable_proc_ctl2(VM_EXEC_S_PROC_BASED_APIC_REGISTER_VIRTUALIZATION);
-        disable_proc_ctl2(VM_EXEC_S_PROC_BASED_VIRTUAL_INTERRUPT_DELIVERY);
+        disable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::virtualize_x2apic_mode::mask);
+        disable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::apic_register_virtualization::mask);
+        disable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::virtual_interrupt_delivery::mask);
         enable_pin_ctl(vmcs::pin_based_vm_execution_controls::nmi_exiting::mask);
         enable_pin_ctl(vmcs::pin_based_vm_execution_controls::virtual_nmis::mask);
-        disable_proc_ctl2(VM_EXEC_S_PROC_BASED_VIRTUALIZE_APIC_ACCESSES);
+        disable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::virtualize_apic_accesses::mask);
         disable_pin_ctl(vmcs::pin_based_vm_execution_controls::process_posted_interrupts::mask);
-        disable_proc_ctl2(VM_EXEC_S_PROC_BASED_ENABLE_VPID);
-        disable_proc_ctl2(VM_EXEC_S_PROC_BASED_ENABLE_EPT);
-        disable_proc_ctl2(VM_EXEC_S_PROC_BASED_ENABLE_PML);
-        disable_proc_ctl2(VM_EXEC_S_PROC_BASED_UNRESTRICTED_GUEST);
-        disable_proc_ctl2(VM_EXEC_S_PROC_BASED_ENABLE_VM_FUNCTIONS);
-        disable_proc_ctl2(VM_EXEC_S_PROC_BASED_VMCS_SHADOWING);
-        disable_proc_ctl2(VM_EXEC_S_PROC_BASED_EPT_VIOLATION_VE);
+        disable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::enable_vpid::mask);
+        disable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::enable_ept::mask);
+        disable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::enable_pml::mask);
+        disable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::unrestricted_guest::mask);
+        disable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::enable_vm_functions::mask);
+        disable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::vmcs_shadowing::mask);
+        disable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::ept_violation_ve::mask);
     };
     path.throws_exception = false;
     cfg.push_back(path);
@@ -76,7 +76,7 @@ setup_checks_on_vm_entry_control_fields_paths(std::vector<struct control_flow_pa
     path.setup = [&]
     {
         g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] = 0xffffffff00000000UL;
-        vmcs::vm_entry_interruption_information_field::valid_bit::clear();
+        vmcs::vm_entry_interruption_information_field::valid_bit::disable();
         vmcs::vm_entry_msr_load_count::set(0U);
     };
     path.throws_exception = false;
@@ -137,6 +137,30 @@ vmcs_ut::test_checks_on_vm_entry_control_fields()
     this->run_vmcs_test(cfg, &vmcs_intel_x64::checks_on_vm_entry_control_fields);
 }
 
+void
+vmcs_ut::test_check_control_ctls_reserved_properly_set()
+{
+    MockRepository mocks;
+    auto mm = mocks.Mock<memory_manager>();
+
+    mocks.OnCallFunc(memory_manager::instance).Return(mm);
+
+    g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] = 0xffffffff00000000UL;
+    vmcs::vm_entry_controls::set(0x1234UL);
+
+    auto msr_addr = msrs::ia32_vmx_true_entry_ctls::addr;
+    auto ctls = vmcs::vm_entry_controls::get();
+    auto name = vmcs::vm_entry_controls::name;
+
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        vmcs_intel_x64 vmcs{};
+
+        EXPECT_NO_EXCEPTION(vmcs.check_control_ctls_reserved_properly_set(msr_addr, ctls, name));
+    });
+}
+
 static void
 setup_check_control_pin_based_ctls_reserved_properly_set_paths(std::vector<struct control_flow_path> &cfg)
 {
@@ -152,7 +176,6 @@ setup_check_control_pin_based_ctls_reserved_properly_set_paths(std::vector<struc
     path.setup = [&] { vmcs::pin_based_vm_execution_controls::set(1UL); };
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("invalid pin_based_vm_execution_controls"));
     cfg.push_back(path);
-
 }
 
 static void
@@ -175,13 +198,41 @@ setup_check_control_proc_based_ctls_reserved_properly_set_paths(std::vector<stru
 static void
 setup_check_control_proc_based_ctls2_reserved_properly_set_paths(std::vector<struct control_flow_path> &cfg)
 {
-    path.setup = [&] { g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = 0xffffffff00000000UL; };
+    path.setup = [&] { g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = ~(msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask << 32); };
+    path.throws_exception = true;
+    path.exception = std::shared_ptr<std::exception>(new std::logic_error("secondary controls field doesn't exist"));
+    cfg.push_back(path);
+
+    path.setup = [&]
+    {
+        g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask << 32;
+        g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = 0xffffffff00000000UL;
+    };
     path.throws_exception = false;
     cfg.push_back(path);
 
-    path.setup = [&] { g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = 1; g_vmcs_fields[VMCS_SECONDARY_PROCESSOR_BASED_VM_EXECUTION_CONTROLS] = 0; };
+    path.setup = [&] { g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] |= 1; vmcs::secondary_processor_based_vm_execution_controls::set(0UL); };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("invalid proc based secondary controls"));
+    path.exception = std::shared_ptr<std::exception>(new std::logic_error("invalid secondary_processor_based_vm_execution_controls"));
+    cfg.push_back(path);
+
+    path.setup = [&]
+    {
+        using namespace vmcs::secondary_processor_based_vm_execution_controls;
+
+        g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = 0xfffffffe00000000UL;
+        vmcs::primary_processor_based_vm_execution_controls::activate_secondary_controls::disable();
+
+        // we use the _fields_ set() here rather than the controls enable()
+        // so that an exception isn't thrown in the setup function.
+        set(virtualize_apic_accesses::mask);
+    };
+    path.throws_exception = false;
+    cfg.push_back(path);
+
+    path.setup = [&] { vmcs::primary_processor_based_vm_execution_controls::activate_secondary_controls::enable(); };
+    path.throws_exception = true;
+    path.exception = std::shared_ptr<std::exception>(new std::logic_error("invalid secondary_processor_based_vm_execution_controls"));
     cfg.push_back(path);
 }
 
@@ -271,22 +322,31 @@ setup_check_control_tpr_shadow_and_virtual_apic_paths(std::vector<struct control
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("virtual apic addr too large"));
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_VIRTUAL_APIC_ADDRESS] = 0x1000; enable_proc_ctl2(VM_EXEC_S_PROC_BASED_VIRTUAL_INTERRUPT_DELIVERY); };
+    path.setup = [&] { g_vmcs_fields[VMCS_VIRTUAL_APIC_ADDRESS] = 0x1000; enable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::virtual_interrupt_delivery::mask); };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("tpr_shadow is enabled, but virtual interrupt delivery is enabled"));
     cfg.push_back(path);
 
-    path.setup = [&] { disable_proc_ctl2(VM_EXEC_S_PROC_BASED_VIRTUAL_INTERRUPT_DELIVERY); g_vmcs_fields[VMCS_TPR_THRESHOLD] = 0xffffffffffffffff; };
+    path.setup = [&]
+    {
+        disable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::virtual_interrupt_delivery::mask);
+        g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] |= msrs::ia32_vmx_true_procbased_ctls::use_tpr_shadow::mask << 32;
+        vmcs::tpr_threshold::set(0xffffffffffffffffUL);
+    };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("bits 31:4 of the tpr threshold must be 0"));
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_TPR_THRESHOLD] = 0; enable_proc_ctl2(VM_EXEC_S_PROC_BASED_VIRTUALIZE_APIC_ACCESSES); };
+    path.setup = [&]
+    {
+        vmcs::tpr_threshold::set(0UL);
+        enable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::virtualize_apic_accesses::mask);
+    };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("tpr_shadow is enabled, but virtual apic is enabled"));
     cfg.push_back(path);
 
-    path.setup = [&] { disable_proc_ctl2(VM_EXEC_S_PROC_BASED_VIRTUALIZE_APIC_ACCESSES); g_phys_to_virt_return_nullptr = true; };
+    path.setup = [&] { disable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::virtualize_apic_accesses::mask); g_phys_to_virt_return_nullptr = true; };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("virtual apic virtual addr is NULL"));
     cfg.push_back(path);
@@ -295,28 +355,48 @@ setup_check_control_tpr_shadow_and_virtual_apic_paths(std::vector<struct control
     path.throws_exception = false;
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_TPR_THRESHOLD] = 0xf; };
+    path.setup = [&] { vmcs::tpr_threshold::set(0xfUL); };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("invalid TPR threshold"));
     cfg.push_back(path);
 
     // control paths when tpr shadow is disabled
-    path.setup = [&] { disable_proc_ctl(vmcs::primary_processor_based_vm_execution_controls::use_tpr_shadow::mask); enable_proc_ctl2(VM_EXEC_S_PROC_BASED_VIRTUALIZE_X2APIC_MODE); };
-    path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("x2apic mode must be disabled if tpr shadow is disabled"));
+    path.setup = [&]
+    {
+        disable_proc_ctl(vmcs::primary_processor_based_vm_execution_controls::use_tpr_shadow::mask);
+        disable_proc_ctl(vmcs::primary_processor_based_vm_execution_controls::activate_secondary_controls::mask);
+    };
+    path.throws_exception = false;
     cfg.push_back(path);
 
-    path.setup = [&] { disable_proc_ctl2(VM_EXEC_S_PROC_BASED_VIRTUALIZE_X2APIC_MODE); enable_proc_ctl2(VM_EXEC_S_PROC_BASED_APIC_REGISTER_VIRTUALIZATION); };
+    path.setup = [&]
+    {
+        enable_proc_ctl(vmcs::primary_processor_based_vm_execution_controls::activate_secondary_controls::mask);
+        enable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::virtualize_x2apic_mode::mask);
+    };
     path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("apic register virtualization must be disabled if tpr shadow is disabled"));
+    path.exception = std::shared_ptr<std::exception>(new std::logic_error("virtualize_x2apic_mode must be disabled if tpr shadow is disabled"));
     cfg.push_back(path);
 
-    path.setup = [&] { disable_proc_ctl2(VM_EXEC_S_PROC_BASED_APIC_REGISTER_VIRTUALIZATION); enable_proc_ctl2(VM_EXEC_S_PROC_BASED_VIRTUAL_INTERRUPT_DELIVERY); };
+    path.setup = [&]
+    {
+        disable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::virtualize_x2apic_mode::mask);
+        enable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::apic_register_virtualization::mask);
+    };
+    path.throws_exception = true;
+    path.exception = std::shared_ptr<std::exception>(new std::logic_error("apic_register_virtualization must be disabled if tpr shadow is disabled"));
+    cfg.push_back(path);
+
+    path.setup = [&]
+    {
+        disable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::apic_register_virtualization::mask);
+        enable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::virtual_interrupt_delivery::mask);
+    };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("virtual interrupt delivery must be disabled if tpr shadow is disabled"));
     cfg.push_back(path);
 
-    path.setup = [&] { disable_proc_ctl2(VM_EXEC_S_PROC_BASED_VIRTUAL_INTERRUPT_DELIVERY); };
+    path.setup = [&] { disable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::virtual_interrupt_delivery::mask); };
     path.throws_exception = false;
     cfg.push_back(path);
 }
@@ -324,12 +404,20 @@ setup_check_control_tpr_shadow_and_virtual_apic_paths(std::vector<struct control
 static void
 setup_check_control_nmi_exiting_and_virtual_nmi_paths(std::vector<struct control_flow_path> &cfg)
 {
-    path.setup = [&] { disable_pin_ctl(vmcs::pin_based_vm_execution_controls::nmi_exiting::mask); enable_pin_ctl(vmcs::pin_based_vm_execution_controls::virtual_nmis::mask); };
+    path.setup = [&] { enable_pin_ctl(vmcs::pin_based_vm_execution_controls::nmi_exiting::mask); };
+    path.throws_exception = false;
+    cfg.push_back(path);
+
+    path.setup = [&]
+    {
+        disable_pin_ctl(vmcs::pin_based_vm_execution_controls::nmi_exiting::mask);
+        enable_pin_ctl(vmcs::pin_based_vm_execution_controls::virtual_nmis::mask);
+    };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("virtual NMI must be 0 if NMI exiting is 0"));
     cfg.push_back(path);
 
-    path.setup = [&] { enable_pin_ctl(vmcs::pin_based_vm_execution_controls::nmi_exiting::mask); };
+    path.setup = [&] { disable_pin_ctl(vmcs::pin_based_vm_execution_controls::virtual_nmis::mask); };
     path.throws_exception = false;
     cfg.push_back(path);
 }
@@ -337,12 +425,20 @@ setup_check_control_nmi_exiting_and_virtual_nmi_paths(std::vector<struct control
 static void
 setup_check_control_virtual_nmi_and_nmi_window_paths(std::vector<struct control_flow_path> &cfg)
 {
-    path.setup = [&] { disable_pin_ctl(vmcs::pin_based_vm_execution_controls::virtual_nmis::mask); enable_proc_ctl(vmcs::primary_processor_based_vm_execution_controls::nmi_window_exiting::mask); };
-    path.throws_exception = true;
-    path.exception = std::shared_ptr<std::exception>(new std::logic_error("NMI window exitin must be 0 if virtual NMI is 0"));
+    path.setup = [&] { enable_pin_ctl(vmcs::pin_based_vm_execution_controls::virtual_nmis::mask); };
+    path.throws_exception = false;
     cfg.push_back(path);
 
-    path.setup = [&] { enable_pin_ctl(vmcs::pin_based_vm_execution_controls::virtual_nmis::mask); };
+    path.setup = [&]
+    {
+        disable_pin_ctl(vmcs::pin_based_vm_execution_controls::virtual_nmis::mask);
+        enable_proc_ctl(vmcs::primary_processor_based_vm_execution_controls::nmi_window_exiting::mask);
+    };
+    path.throws_exception = true;
+    path.exception = std::shared_ptr<std::exception>(new std::logic_error("NMI window exiting must be 0 if virtual NMI is 0"));
+    cfg.push_back(path);
+
+    path.setup = [&] { disable_proc_ctl(vmcs::primary_processor_based_vm_execution_controls::nmi_window_exiting::mask); };
     path.throws_exception = false;
     cfg.push_back(path);
 }
@@ -350,11 +446,23 @@ setup_check_control_virtual_nmi_and_nmi_window_paths(std::vector<struct control_
 static void
 setup_check_control_virtual_apic_address_bits_paths(std::vector<struct control_flow_path> &cfg)
 {
-    path.setup = [&] { disable_proc_ctl2(VM_EXEC_S_PROC_BASED_VIRTUALIZE_APIC_ACCESSES); };
+    path.setup = [&] { disable_proc_ctl(vmcs::primary_processor_based_vm_execution_controls::activate_secondary_controls::mask); };
     path.throws_exception = false;
     cfg.push_back(path);
 
-    path.setup = [&] { enable_proc_ctl2(VM_EXEC_S_PROC_BASED_VIRTUALIZE_APIC_ACCESSES); g_vmcs_fields[VMCS_APIC_ACCESS_ADDRESS] = 0; };
+    path.setup = [&]
+    {
+        enable_proc_ctl(vmcs::primary_processor_based_vm_execution_controls::activate_secondary_controls::mask);
+        disable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::virtualize_apic_accesses::mask);
+    };
+    path.throws_exception = false;
+    cfg.push_back(path);
+
+    path.setup = [&]
+    {
+        enable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::virtualize_apic_accesses::mask);
+        g_vmcs_fields[VMCS_APIC_ACCESS_ADDRESS] = 0;
+    };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("apic access physical addr is NULL"));
     cfg.push_back(path);
@@ -377,12 +485,28 @@ setup_check_control_virtual_apic_address_bits_paths(std::vector<struct control_f
 static void
 setup_check_control_x2apic_mode_and_virtual_apic_access_paths(std::vector<struct control_flow_path> &cfg)
 {
-    path.setup = [&] { enable_proc_ctl2(VM_EXEC_S_PROC_BASED_VIRTUALIZE_X2APIC_MODE); enable_proc_ctl2(VM_EXEC_S_PROC_BASED_VIRTUALIZE_APIC_ACCESSES); };
+    path.setup = [&] { disable_proc_ctl(vmcs::primary_processor_based_vm_execution_controls::activate_secondary_controls::mask); };
+    path.throws_exception = false;
+    cfg.push_back(path);
+
+    path.setup = [&]
+    {
+        enable_proc_ctl(vmcs::primary_processor_based_vm_execution_controls::activate_secondary_controls::mask);
+        disable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::virtualize_x2apic_mode::mask);
+    };
+    path.throws_exception = false;
+    cfg.push_back(path);
+
+    path.setup = [&]
+    {
+        enable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::virtualize_x2apic_mode::mask);
+        enable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::virtualize_apic_accesses::mask);
+    };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("apic accesses must be 0 if x2 apic mode is 1"));
     cfg.push_back(path);
 
-    path.setup = [&] { disable_proc_ctl2(VM_EXEC_S_PROC_BASED_VIRTUALIZE_X2APIC_MODE); };
+    path.setup = [&] { disable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::virtualize_x2apic_mode::mask); };
     path.throws_exception = false;
     cfg.push_back(path);
 }
@@ -390,12 +514,28 @@ setup_check_control_x2apic_mode_and_virtual_apic_access_paths(std::vector<struct
 static void
 setup_check_control_virtual_interrupt_and_external_interrupt_paths(std::vector<struct control_flow_path> &cfg)
 {
-    path.setup = [&] { enable_proc_ctl2(VM_EXEC_S_PROC_BASED_VIRTUAL_INTERRUPT_DELIVERY); disable_pin_ctl(vmcs::pin_based_vm_execution_controls::external_interrupt_exiting::mask); };
+    path.setup = [&] { disable_proc_ctl(vmcs::primary_processor_based_vm_execution_controls::activate_secondary_controls::mask); };
+    path.throws_exception = false;
+    cfg.push_back(path);
+
+    path.setup = [&]
+    {
+        enable_proc_ctl(vmcs::primary_processor_based_vm_execution_controls::activate_secondary_controls::mask);
+        disable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::virtual_interrupt_delivery::mask);
+    };
+    path.throws_exception = false;
+    cfg.push_back(path);
+
+    path.setup = [&]
+    {
+        enable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::virtual_interrupt_delivery::mask);
+        disable_pin_ctl(vmcs::pin_based_vm_execution_controls::external_interrupt_exiting::mask);
+    };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("external interrupt exiting must be 1 if virtual interrupt delivery is 1"));
     cfg.push_back(path);
 
-    path.setup = [&] { disable_proc_ctl2(VM_EXEC_S_PROC_BASED_VIRTUAL_INTERRUPT_DELIVERY); };
+    path.setup = [&] { enable_pin_ctl(vmcs::pin_based_vm_execution_controls::external_interrupt_exiting::mask); };
     path.throws_exception = false;
     cfg.push_back(path);
 }
@@ -407,22 +547,47 @@ setup_check_control_process_posted_interrupt_checks_paths(std::vector<struct con
     path.throws_exception = false;
     cfg.push_back(path);
 
-    path.setup = [&] { enable_pin_ctl(vmcs::pin_based_vm_execution_controls::process_posted_interrupts::mask); disable_proc_ctl2(VM_EXEC_S_PROC_BASED_VIRTUAL_INTERRUPT_DELIVERY); };
+    path.setup = [&]
+    {
+        enable_pin_ctl(vmcs::pin_based_vm_execution_controls::process_posted_interrupts::mask);
+        disable_proc_ctl(vmcs::primary_processor_based_vm_execution_controls::activate_secondary_controls::mask);
+    };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("virtual interrupt delivery must be 1 if posted interrupts is 1"));
     cfg.push_back(path);
 
-    path.setup = [&] { enable_proc_ctl2(VM_EXEC_S_PROC_BASED_VIRTUAL_INTERRUPT_DELIVERY); disable_exit_ctl(vmcs::vm_exit_controls::acknowledge_interrupt_on_exit::mask); };
+    path.setup = [&]
+    {
+        enable_proc_ctl(vmcs::primary_processor_based_vm_execution_controls::activate_secondary_controls::mask);
+        disable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::virtual_interrupt_delivery::mask);
+    };
+    path.throws_exception = true;
+    path.exception = std::shared_ptr<std::exception>(new std::logic_error("virtual interrupt delivery must be 1 if posted interrupts is 1"));
+    cfg.push_back(path);
+
+    path.setup = [&]
+    {
+        enable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::virtual_interrupt_delivery::mask);
+        disable_exit_ctl(vmcs::vm_exit_controls::acknowledge_interrupt_on_exit::mask);
+    };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("ack interrupt on exit must be 1 if posted interrupts is 1"));
     cfg.push_back(path);
 
-    path.setup = [&] { enable_exit_ctl(vmcs::vm_exit_controls::acknowledge_interrupt_on_exit::mask); g_vmcs_fields[vmcs::posted_interrupt_notification_vector::addr] = 0x100; };
+    path.setup = [&]
+    {
+        enable_exit_ctl(vmcs::vm_exit_controls::acknowledge_interrupt_on_exit::mask);
+        g_vmcs_fields[vmcs::posted_interrupt_notification_vector::addr] = 0x100;
+    };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("bits 15:8 of the notification vector must be 0 if posted interrupts is 1"));
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[vmcs::posted_interrupt_notification_vector::addr] = 0; g_vmcs_fields[VMCS_POSTED_INTERRUPT_DESCRIPTOR_ADDRESS] = 1; };
+    path.setup = [&]
+    {
+        g_vmcs_fields[vmcs::posted_interrupt_notification_vector::addr] = 0;
+        g_vmcs_fields[VMCS_POSTED_INTERRUPT_DESCRIPTOR_ADDRESS] = 1;
+    };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("bits 5:0 of the interrupt descriptor addr must be 0 if posted interrupts is 1"));
     cfg.push_back(path);
@@ -440,11 +605,23 @@ setup_check_control_process_posted_interrupt_checks_paths(std::vector<struct con
 static void
 setup_check_control_vpid_checks_paths(std::vector<struct control_flow_path> &cfg)
 {
-    path.setup = [&] { disable_proc_ctl2(VM_EXEC_S_PROC_BASED_ENABLE_VPID); };
+    path.setup = [&] { disable_proc_ctl(vmcs::primary_processor_based_vm_execution_controls::activate_secondary_controls::mask); };
     path.throws_exception = false;
     cfg.push_back(path);
 
-    path.setup = [&] { enable_proc_ctl2(VM_EXEC_S_PROC_BASED_ENABLE_VPID); g_vmcs_fields[vmcs::virtual_processor_identifier::addr] = 0; };
+    path.setup = [&]
+    {
+        enable_proc_ctl(vmcs::primary_processor_based_vm_execution_controls::activate_secondary_controls::mask);
+        disable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::enable_vpid::mask);
+    };
+    path.throws_exception = false;
+    cfg.push_back(path);
+
+    path.setup = [&]
+    {
+        enable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::enable_vpid::mask);
+        g_vmcs_fields[vmcs::virtual_processor_identifier::addr] = 0;
+    };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("vpid cannot equal 0"));
     cfg.push_back(path);
@@ -457,13 +634,21 @@ setup_check_control_vpid_checks_paths(std::vector<struct control_flow_path> &cfg
 static void
 setup_check_control_enable_ept_checks_paths(std::vector<struct control_flow_path> &cfg)
 {
-    path.setup = [&] { disable_proc_ctl2(VM_EXEC_S_PROC_BASED_ENABLE_EPT); };
+    path.setup = [&] { disable_proc_ctl(vmcs::primary_processor_based_vm_execution_controls::activate_secondary_controls::mask); };
     path.throws_exception = false;
     cfg.push_back(path);
 
     path.setup = [&]
     {
-        enable_proc_ctl2(VM_EXEC_S_PROC_BASED_ENABLE_EPT);
+        enable_proc_ctl(vmcs::primary_processor_based_vm_execution_controls::activate_secondary_controls::mask);
+        disable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::enable_ept::mask);
+    };
+    path.throws_exception = false;
+    cfg.push_back(path);
+
+    path.setup = [&]
+    {
+        enable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::enable_ept::mask);
         g_vmcs_fields[VMCS_EPT_POINTER] = 0;
         g_msrs[msrs::ia32_vmx_ept_vpid_cap::addr] = ~(IA32_VMX_EPT_VPID_CAP_UC | IA32_VMX_EPT_VPID_CAP_WB);
     };
@@ -509,12 +694,32 @@ setup_check_control_enable_ept_checks_paths(std::vector<struct control_flow_path
 static void
 setup_check_control_enable_pml_checks_paths(std::vector<struct control_flow_path> &cfg)
 {
-    path.setup = [&] { enable_proc_ctl2(VM_EXEC_S_PROC_BASED_ENABLE_PML); disable_proc_ctl2(VM_EXEC_S_PROC_BASED_ENABLE_EPT); };
+    path.setup = [&] { disable_proc_ctl(vmcs::primary_processor_based_vm_execution_controls::activate_secondary_controls::mask); };
+    path.throws_exception = false;
+    cfg.push_back(path);
+
+    path.setup = [&]
+    {
+        enable_proc_ctl(vmcs::primary_processor_based_vm_execution_controls::activate_secondary_controls::mask);
+        disable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::enable_pml::mask);
+    };
+    path.throws_exception = false;
+    cfg.push_back(path);
+
+    path.setup = [&]
+    {
+        enable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::enable_pml::mask);
+        disable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::enable_ept::mask);
+    };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("ept must be enabled if pml is enabled"));
     cfg.push_back(path);
 
-    path.setup = [&] { enable_proc_ctl2(VM_EXEC_S_PROC_BASED_ENABLE_EPT); g_vmcs_fields[VMCS_PML_ADDRESS] = 0xff00000000000000; };
+    path.setup = [&]
+    {
+        enable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::enable_ept::mask);
+        g_vmcs_fields[VMCS_PML_ADDRESS] = 0xff00000000000000;
+    };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("pml address must be a valid physical address"));
     cfg.push_back(path);
@@ -532,16 +737,28 @@ setup_check_control_enable_pml_checks_paths(std::vector<struct control_flow_path
 static void
 setup_check_control_unrestricted_guests_paths(std::vector<struct control_flow_path> &cfg)
 {
-    path.setup = [&] { disable_proc_ctl2(VM_EXEC_S_PROC_BASED_UNRESTRICTED_GUEST); };
+    path.setup = [&] { disable_proc_ctl(vmcs::primary_processor_based_vm_execution_controls::activate_secondary_controls::mask); };
     path.throws_exception = false;
     cfg.push_back(path);
 
-    path.setup = [&] { enable_proc_ctl2(VM_EXEC_S_PROC_BASED_UNRESTRICTED_GUEST); disable_proc_ctl2(VM_EXEC_S_PROC_BASED_ENABLE_EPT); };
+    path.setup = [&]
+    {
+        enable_proc_ctl(vmcs::primary_processor_based_vm_execution_controls::activate_secondary_controls::mask);
+        disable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::unrestricted_guest::mask);
+    };
+    path.throws_exception = false;
+    cfg.push_back(path);
+
+    path.setup = [&]
+    {
+        enable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::unrestricted_guest::mask);
+        disable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::enable_ept::mask);
+    };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("enable ept must be 1 if unrestricted guest is 1"));
     cfg.push_back(path);
 
-    path.setup = [&] { enable_proc_ctl2(VM_EXEC_S_PROC_BASED_ENABLE_EPT); };
+    path.setup = [&] { enable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::enable_ept::mask); };
     path.throws_exception = false;
     cfg.push_back(path);
 }
@@ -549,13 +766,21 @@ setup_check_control_unrestricted_guests_paths(std::vector<struct control_flow_pa
 static void
 setup_check_control_enable_vm_functions_paths(std::vector<struct control_flow_path> &cfg)
 {
-    path.setup = [&] { disable_proc_ctl2(VM_EXEC_S_PROC_BASED_ENABLE_VM_FUNCTIONS); };
+    path.setup = [&] { disable_proc_ctl(vmcs::primary_processor_based_vm_execution_controls::activate_secondary_controls::mask); };
     path.throws_exception = false;
     cfg.push_back(path);
 
     path.setup = [&]
     {
-        enable_proc_ctl2(VM_EXEC_S_PROC_BASED_ENABLE_VM_FUNCTIONS);
+        enable_proc_ctl(vmcs::primary_processor_based_vm_execution_controls::activate_secondary_controls::mask);
+        disable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::enable_vm_functions::mask);
+    };
+    path.throws_exception = false;
+    cfg.push_back(path);
+
+    path.setup = [&]
+    {
+        enable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::enable_vm_functions::mask);
         g_vmcs_fields[VMCS_VM_FUNCTION_CONTROLS] = 1;
         g_msrs[msrs::ia32_vmx_vmfunc::addr] = 0;
     };
@@ -571,13 +796,13 @@ setup_check_control_enable_vm_functions_paths(std::vector<struct control_flow_pa
     {
         g_vmcs_fields[VMCS_VM_FUNCTION_CONTROLS] = VM_FUNCTION_CONTROL_EPTP_SWITCHING;
         g_msrs[msrs::ia32_vmx_vmfunc::addr] = VM_FUNCTION_CONTROL_EPTP_SWITCHING;
-        disable_proc_ctl2(VM_EXEC_S_PROC_BASED_ENABLE_EPT);
+        disable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::enable_ept::mask);
     };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("enable ept must be 1 if eptp switching is 1"));
     cfg.push_back(path);
 
-    path.setup = [&] { enable_proc_ctl2(VM_EXEC_S_PROC_BASED_ENABLE_EPT); g_vmcs_fields[VMCS_EPTP_LIST_ADDRESS] = 1; };
+    path.setup = [&] { enable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::enable_ept::mask); g_vmcs_fields[VMCS_EPTP_LIST_ADDRESS] = 1; };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("bits 11:0 must be 0 for eptp list address"));
     cfg.push_back(path);
@@ -595,16 +820,32 @@ setup_check_control_enable_vm_functions_paths(std::vector<struct control_flow_pa
 static void
 setup_check_control_enable_vmcs_shadowing_paths(std::vector<struct control_flow_path> &cfg)
 {
-    path.setup = [&] { disable_proc_ctl2(VM_EXEC_S_PROC_BASED_VMCS_SHADOWING); };
+    path.setup = [&] { disable_proc_ctl(vmcs::primary_processor_based_vm_execution_controls::activate_secondary_controls::mask); };
     path.throws_exception = false;
     cfg.push_back(path);
 
-    path.setup = [&] { enable_proc_ctl2(VM_EXEC_S_PROC_BASED_VMCS_SHADOWING); g_vmcs_fields[VMCS_VMREAD_BITMAP_ADDRESS] = 1; };
+    path.setup = [&]
+    {
+        enable_proc_ctl(vmcs::primary_processor_based_vm_execution_controls::activate_secondary_controls::mask);
+        disable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::vmcs_shadowing::mask);
+    };
+    path.throws_exception = false;
+    cfg.push_back(path);
+
+    path.setup = [&]
+    {
+        enable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::vmcs_shadowing::mask);
+        g_vmcs_fields[VMCS_VMREAD_BITMAP_ADDRESS] = 1;
+    };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("bits 11:0 must be 0 for the vmcs read bitmap address"));
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_VMREAD_BITMAP_ADDRESS] = 0xff00000000000000; g_vmcs_fields[VMCS_VMWRITE_BITMAP_ADDRESS] = 1; };
+    path.setup = [&]
+    {
+        g_vmcs_fields[VMCS_VMREAD_BITMAP_ADDRESS] = 0xff00000000000000;
+        g_vmcs_fields[VMCS_VMWRITE_BITMAP_ADDRESS] = 1;
+    };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("bits 11:0 must be 0 for the vmcs write bitmap address"));
     cfg.push_back(path);
@@ -627,11 +868,23 @@ setup_check_control_enable_vmcs_shadowing_paths(std::vector<struct control_flow_
 static void
 setup_check_control_enable_ept_violation_checks_paths(std::vector<struct control_flow_path> &cfg)
 {
-    path.setup = [&] { disable_proc_ctl2(VM_EXEC_S_PROC_BASED_EPT_VIOLATION_VE); };
+    path.setup = [&] { disable_proc_ctl(vmcs::primary_processor_based_vm_execution_controls::activate_secondary_controls::mask); };
     path.throws_exception = false;
     cfg.push_back(path);
 
-    path.setup = [&] { enable_proc_ctl2(VM_EXEC_S_PROC_BASED_EPT_VIOLATION_VE); g_vmcs_fields[VMCS_VIRTUALIZATION_EXCEPTION_INFORMATION_ADDRESS] = 1; };
+    path.setup = [&]
+    {
+        enable_proc_ctl(vmcs::primary_processor_based_vm_execution_controls::activate_secondary_controls::mask);
+        disable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::ept_violation_ve::mask);
+    };
+    path.throws_exception = false;
+    cfg.push_back(path);
+
+    path.setup = [&]
+    {
+        enable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::ept_violation_ve::mask);
+        g_vmcs_fields[VMCS_VIRTUALIZATION_EXCEPTION_INFORMATION_ADDRESS] = 1;
+    };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("bits 11:0 must be 0 for the vmcs virt except info address"));
     cfg.push_back(path);
@@ -666,12 +919,20 @@ setup_check_control_vm_exit_ctls_reserved_properly_set_paths(std::vector<struct 
 static void
 setup_check_control_activate_and_save_preemption_timer_must_be_0_paths(std::vector<struct control_flow_path> &cfg)
 {
-    path.setup = [&] { disable_pin_ctl(vmcs::pin_based_vm_execution_controls::activate_vmx_preemption_timer::mask); enable_exit_ctl(vmcs::vm_exit_controls::save_vmx_preemption_timer_value::mask); };
+    path.setup = [&] { enable_pin_ctl(vmcs::pin_based_vm_execution_controls::activate_vmx_preemption_timer::mask); };
+    path.throws_exception = false;
+    cfg.push_back(path);
+
+    path.setup = [&]
+    {
+        disable_pin_ctl(vmcs::pin_based_vm_execution_controls::activate_vmx_preemption_timer::mask);
+        enable_exit_ctl(vmcs::vm_exit_controls::save_vmx_preemption_timer_value::mask);
+    };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("save vmx preemption timer must be 0 if activate vmx preemption timer is 0"));
     cfg.push_back(path);
 
-    path.setup = [&] { enable_pin_ctl(vmcs::pin_based_vm_execution_controls::activate_vmx_preemption_timer::mask); };
+    path.setup = [&] { disable_exit_ctl(vmcs::vm_exit_controls::save_vmx_preemption_timer_value::mask); };
     path.throws_exception = false;
     cfg.push_back(path);
 }
@@ -756,33 +1017,33 @@ setup_check_control_event_injection_type_vector_checks_paths(std::vector<struct 
     path.throws_exception = false;
     cfg.push_back(path);
 
-    path.setup = [&] { valid_bit::set(); type::set(type::reserved); };
+    path.setup = [&] { valid_bit::enable(); interruption_type::set(interruption_type::reserved); };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("interrupt information field type of 1 is reserved"));
     cfg.push_back(path);
 
     path.setup = [&]
     {
-        type::set(type::other_event);
+        interruption_type::set(interruption_type::other_event);
         g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = 0;
     };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("interrupt information field type of 7 is reserved on this hardware"));
     cfg.push_back(path);
 
-    path.setup = [&] { type::set(type::non_maskable_interrupt); vector::set(0xFFUL); };
+    path.setup = [&] { interruption_type::set(interruption_type::non_maskable_interrupt); vector::set(0xFFUL); };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("interrupt information field vector must be 2 if the type field is 2 (NMI)"));
     cfg.push_back(path);
 
-    path.setup = [&] { type::set(type::hardware_exception); };
+    path.setup = [&] { interruption_type::set(interruption_type::hardware_exception); };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("interrupt information field vector must be 0->31 if the type field is 3 (HE)"));
     cfg.push_back(path);
 
     path.setup = [&]
     {
-        type::set(type::other_event);
+        interruption_type::set(interruption_type::other_event);
         g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = msrs::ia32_vmx_true_procbased_ctls::monitor_trap_flag::mask << 32;
     };
     path.throws_exception = true;
@@ -799,28 +1060,28 @@ setup_check_control_event_injection_delivery_ec_checks_paths(std::vector<struct 
 {
     using namespace vmcs::vm_entry_interruption_information_field;
 
-    path.setup = [&] { valid_bit::clear(); };
+    path.setup = [&] { valid_bit::disable(); };
     path.throws_exception = false;
     cfg.push_back(path);
 
     path.setup = [&]
     {
-        valid_bit::set();
-        deliver_error_code_bit::set();
+        valid_bit::enable();
+        deliver_error_code_bit::enable();
         g_vmcs_fields[vmcs::guest_cr0::addr] = 0;
-        enable_proc_ctl2(VM_EXEC_S_PROC_BASED_UNRESTRICTED_GUEST);
+        enable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::unrestricted_guest::mask);
     };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("unrestricted guest must be 0 or PE must be enabled in cr0"
                      "if deliver error code bit is set"));
     cfg.push_back(path);
 
-    path.setup = [&] { disable_proc_ctl2(VM_EXEC_S_PROC_BASED_UNRESTRICTED_GUEST); type::set(type::non_maskable_interrupt); };
+    path.setup = [&] { disable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::unrestricted_guest::mask); interruption_type::set(interruption_type::non_maskable_interrupt); };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("interrupt information field type must be 3 if deliver error code bit is set"));
     cfg.push_back(path);
 
-    path.setup = [&] { type::set(type::hardware_exception); };
+    path.setup = [&] { interruption_type::set(interruption_type::hardware_exception); };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("vector must indicate exception that would normally deliver"
                      "an error code if deliver error code bit is set"));
@@ -830,7 +1091,7 @@ setup_check_control_event_injection_delivery_ec_checks_paths(std::vector<struct 
     path.throws_exception = false;
     cfg.push_back(path);
 
-    path.setup = [&] { deliver_error_code_bit::clear(); };
+    path.setup = [&] { deliver_error_code_bit::disable(); };
     path.throws_exception = true;
     path.exception = std::make_shared<std::logic_error>("deliver_error_code_bit must be 1");
     cfg.push_back(path);
@@ -840,11 +1101,12 @@ static void
 setup_check_control_event_injection_reserved_bits_checks_paths(std::vector<struct control_flow_path> &cfg)
 {
     using namespace vmcs::vm_entry_interruption_information_field;
+
     path.setup = [&] { set(0UL); };
     path.throws_exception = false;
     cfg.push_back(path);
 
-    path.setup = [&] { valid_bit::set(); };
+    path.setup = [&] { valid_bit::enable(); };
     path.throws_exception = false;
     cfg.push_back(path);
 
@@ -863,11 +1125,11 @@ setup_check_control_event_injection_ec_checks_paths(std::vector<struct control_f
     path.throws_exception = false;
     cfg.push_back(path);
 
-    path.setup = [&] { valid_bit::set(); };
+    path.setup = [&] { valid_bit::enable(); };
     path.throws_exception = false;
     cfg.push_back(path);
 
-    path.setup = [&] { deliver_error_code_bit::set(); vmcs::vm_entry_exception_error_code::set(0x8000UL); };
+    path.setup = [&] { deliver_error_code_bit::enable(); vmcs::vm_entry_exception_error_code::set(0x8000UL); };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("bits 31:15 of the exception error code field must be 0"
                      " if deliver error code bit is set in the interrupt info field"));
@@ -887,13 +1149,17 @@ setup_check_control_event_injection_instr_length_checks_paths(std::vector<struct
     path.throws_exception = false;
     cfg.push_back(path);
 
-    path.setup = [&] { valid_bit::set(); type::set(type::other_event); };
+    path.setup = [&]
+    {
+        valid_bit::enable();
+        interruption_type::set(interruption_type::other_event);
+    };
     path.throws_exception = false;
     cfg.push_back(path);
 
     path.setup = [&]
     {
-        type::set(type::software_interrupt);
+        interruption_type::set(interruption_type::software_interrupt);
         vmcs::vm_entry_instruction_length::set(0UL);
         g_msrs[msrs::ia32_vmx_misc::addr] = 0;
     };

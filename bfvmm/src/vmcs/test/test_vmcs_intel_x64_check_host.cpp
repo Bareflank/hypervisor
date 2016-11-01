@@ -42,9 +42,9 @@ setup_check_host_control_registers_and_msrs_paths(std::vector<struct control_flo
         vmcs::host_cr3::set(0x1000ULL); // host_cr3 is valid physical address
         g_vmcs_fields[VMCS_HOST_IA32_SYSENTER_ESP] = 0x1000UL; // esp is canonical address
         g_vmcs_fields[VMCS_HOST_IA32_SYSENTER_EIP] = 0x1000UL; // eip is canonical address
-        disable_exit_ctl(VM_EXIT_CONTROL_LOAD_IA32_PERF_GLOBAL_CTRL);
-        disable_exit_ctl(VM_EXIT_CONTROL_LOAD_IA32_PAT);
-        disable_exit_ctl(VM_EXIT_CONTROL_LOAD_IA32_EFER);
+        disable_exit_ctl(vmcs::vm_exit_controls::load_ia32_perf_global_ctrl::mask);
+        disable_exit_ctl(vmcs::vm_exit_controls::load_ia32_pat::mask);
+        disable_exit_ctl(vmcs::vm_exit_controls::load_ia32_efer::mask);
     };
     path.throws_exception = false;
     cfg.push_back(path);
@@ -69,7 +69,7 @@ setup_check_host_segment_and_descriptor_table_registers_paths(std::vector<struct
         host_cs_selector::set(~(cs::ti::mask | cs::rpl::mask)); // cs != 0
         host_tr_selector::set(~(tr::ti::mask | tr::rpl::mask)); // tr != 0
 
-        enable_exit_ctl(VM_EXIT_CONTROL_HOST_ADDRESS_SPACE_SIZE); // VM-exit ctrl host_address_space_size is 1
+        enable_exit_ctl(vmcs::vm_exit_controls::host_address_space_size::mask); // VM-exit ctrl host_address_space_size is 1
         g_vmcs_fields[VMCS_HOST_FS_BASE] = 0x1000UL; // fs base is canonical address
         g_vmcs_fields[VMCS_HOST_GS_BASE] = 0x1000UL; // gs base is canonical address
         g_vmcs_fields[VMCS_HOST_GDTR_BASE] = 0x1000UL; // gdtr base is canonical address
@@ -86,7 +86,7 @@ setup_check_host_checks_related_to_address_space_size_paths(std::vector<struct c
     path.setup = [&]
     {
         g_msrs[msrs::ia32_efer::addr] |= msrs::ia32_efer::lma::mask; // efer.lma == 1
-        enable_exit_ctl(VM_EXIT_CONTROL_HOST_ADDRESS_SPACE_SIZE); // VM-exit ctrl host_address_space_size is 1
+        enable_exit_ctl(vmcs::vm_exit_controls::host_address_space_size::mask); // VM-exit ctrl host_address_space_size is 1
         vmcs::host_cr4::physical_address_extensions::set(1U); // host_cr4::physical_address_extensions == 1
         g_vmcs_fields[VMCS_HOST_RIP] = 0x1000UL; // rip is canonical address
     };

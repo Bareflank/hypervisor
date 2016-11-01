@@ -895,6 +895,12 @@ namespace msrs
         inline auto get() noexcept
         { return __read_msr(addr); }
 
+        inline auto allowed0()
+        { return (__read_msr(addr) & 0x00000000FFFFFFFFUL); }
+
+        inline auto allowed1()
+        { return ((__read_msr(addr) & 0xFFFFFFFF00000000UL) >> 32); }
+
         namespace virtualize_apic_accesses
         {
             constexpr const auto mask = 0x0000000000000001UL;
@@ -903,6 +909,12 @@ namespace msrs
 
             inline auto get() noexcept
             { return (__read_msr(addr) & mask) >> from; }
+
+            inline bool is_allowed0() noexcept
+            { return true; }
+
+            inline bool is_allowed1() noexcept
+            { return (__read_msr(addr) & (mask << 32)) != 0; }
         }
 
         namespace enable_ept
@@ -913,6 +925,12 @@ namespace msrs
 
             inline auto get() noexcept
             { return (__read_msr(addr) & mask) >> from; }
+
+            inline bool is_allowed0() noexcept
+            { return true; }
+
+            inline bool is_allowed1() noexcept
+            { return (__read_msr(addr) & (mask << 32)) != 0; }
         }
 
         namespace descriptor_table_exiting
@@ -923,6 +941,12 @@ namespace msrs
 
             inline auto get() noexcept
             { return (__read_msr(addr) & mask) >> from; }
+
+            inline bool is_allowed0() noexcept
+            { return true; }
+
+            inline bool is_allowed1() noexcept
+            { return (__read_msr(addr) & (mask << 32)) != 0; }
         }
 
         namespace enable_rdtscp
@@ -933,6 +957,12 @@ namespace msrs
 
             inline auto get() noexcept
             { return (__read_msr(addr) & mask) >> from; }
+
+            inline bool is_allowed0() noexcept
+            { return true; }
+
+            inline bool is_allowed1() noexcept
+            { return (__read_msr(addr) & (mask << 32)) != 0; }
         }
 
         namespace virtualize_x2apic_mode
@@ -943,6 +973,12 @@ namespace msrs
 
             inline auto get() noexcept
             { return (__read_msr(addr) & mask) >> from; }
+
+            inline bool is_allowed0() noexcept
+            { return true; }
+
+            inline bool is_allowed1() noexcept
+            { return (__read_msr(addr) & (mask << 32)) != 0; }
         }
 
         namespace enable_vpid
@@ -953,6 +989,12 @@ namespace msrs
 
             inline auto get() noexcept
             { return (__read_msr(addr) & mask) >> from; }
+
+            inline bool is_allowed0() noexcept
+            { return true; }
+
+            inline bool is_allowed1() noexcept
+            { return (__read_msr(addr) & (mask << 32)) != 0; }
         }
 
         namespace wbinvd_exiting
@@ -963,6 +1005,12 @@ namespace msrs
 
             inline auto get() noexcept
             { return (__read_msr(addr) & mask) >> from; }
+
+            inline bool is_allowed0() noexcept
+            { return true; }
+
+            inline bool is_allowed1() noexcept
+            { return (__read_msr(addr) & (mask << 32)) != 0; }
         }
 
         namespace unrestricted_guest
@@ -973,6 +1021,12 @@ namespace msrs
 
             inline auto get() noexcept
             { return (__read_msr(addr) & mask) >> from; }
+
+            inline bool is_allowed0() noexcept
+            { return true; }
+
+            inline bool is_allowed1() noexcept
+            { return (__read_msr(addr) & (mask << 32)) != 0; }
         }
 
         namespace apic_register_virtualization
@@ -983,6 +1037,12 @@ namespace msrs
 
             inline auto get() noexcept
             { return (__read_msr(addr) & mask) >> from; }
+
+            inline bool is_allowed0() noexcept
+            { return true; }
+
+            inline bool is_allowed1() noexcept
+            { return (__read_msr(addr) & (mask << 32)) != 0; }
         }
 
         namespace virtual_interrupt_delivery
@@ -993,6 +1053,12 @@ namespace msrs
 
             inline auto get() noexcept
             { return (__read_msr(addr) & mask) >> from; }
+
+            inline bool is_allowed0() noexcept
+            { return true; }
+
+            inline bool is_allowed1() noexcept
+            { return (__read_msr(addr) & (mask << 32)) != 0; }
         }
 
         namespace pause_loop_exiting
@@ -1003,6 +1069,12 @@ namespace msrs
 
             inline auto get() noexcept
             { return (__read_msr(addr) & mask) >> from; }
+
+            inline bool is_allowed0() noexcept
+            { return true; }
+
+            inline bool is_allowed1() noexcept
+            { return (__read_msr(addr) & (mask << 32)) != 0; }
         }
 
         namespace rdrand_exiting
@@ -1013,6 +1085,12 @@ namespace msrs
 
             inline auto get() noexcept
             { return (__read_msr(addr) & mask) >> from; }
+
+            inline bool is_allowed0() noexcept
+            { return true; }
+
+            inline bool is_allowed1() noexcept
+            { return (__read_msr(addr) & (mask << 32)) != 0; }
         }
 
         namespace enable_invpcid
@@ -1023,6 +1101,12 @@ namespace msrs
 
             inline auto get() noexcept
             { return (__read_msr(addr) & mask) >> from; }
+
+            inline bool is_allowed0() noexcept
+            { return true; }
+
+            inline bool is_allowed1() noexcept
+            { return (__read_msr(addr) & (mask << 32)) != 0; }
         }
 
         namespace enable_vm_functions
@@ -1033,6 +1117,12 @@ namespace msrs
 
             inline auto get() noexcept
             { return (__read_msr(addr) & mask) >> from; }
+
+            inline bool is_allowed0() noexcept
+            { return true; }
+
+            inline bool is_allowed1() noexcept
+            { return (__read_msr(addr) & (mask << 32)) != 0; }
         }
 
         namespace vmcs_shadowing
@@ -1043,6 +1133,12 @@ namespace msrs
 
             inline auto get() noexcept
             { return (__read_msr(addr) & mask) >> from; }
+
+            inline bool is_allowed0() noexcept
+            { return true; }
+
+            inline bool is_allowed1() noexcept
+            { return (__read_msr(addr) & (mask << 32)) != 0; }
         }
 
         namespace rdseed_exiting
@@ -1053,6 +1149,12 @@ namespace msrs
 
             inline auto get() noexcept
             { return (__read_msr(addr) & mask) >> from; }
+
+            inline bool is_allowed0() noexcept
+            { return true; }
+
+            inline bool is_allowed1() noexcept
+            { return (__read_msr(addr) & (mask << 32)) != 0; }
         }
 
         namespace enable_pml
@@ -1063,6 +1165,12 @@ namespace msrs
 
             inline auto get() noexcept
             { return (__read_msr(addr) & mask) >> from; }
+
+            inline bool is_allowed0() noexcept
+            { return true; }
+
+            inline bool is_allowed1() noexcept
+            { return (__read_msr(addr) & (mask << 32)) != 0; }
         }
 
         namespace ept_violation_ve
@@ -1073,6 +1181,12 @@ namespace msrs
 
             inline auto get() noexcept
             { return (__read_msr(addr) & mask) >> from; }
+
+            inline bool is_allowed0() noexcept
+            { return true; }
+
+            inline bool is_allowed1() noexcept
+            { return (__read_msr(addr) & (mask << 32)) != 0; }
         }
 
         namespace enable_xsaves_xrstors
@@ -1083,6 +1197,12 @@ namespace msrs
 
             inline auto get() noexcept
             { return (__read_msr(addr) & mask) >> from; }
+
+            inline bool is_allowed0() noexcept
+            { return true; }
+
+            inline bool is_allowed1() noexcept
+            { return (__read_msr(addr) & (mask << 32)) != 0; }
         }
     }
 

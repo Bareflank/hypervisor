@@ -31,9 +31,6 @@
 #include <intrinsics/crs_intel_x64.h>
 #include <intrinsics/vmx_intel_x64.h>
 
-#define test_vm_control(ctl_under_test) \
-    test_vm_control_with_args(ctl_under_test, gsl::cstring_span<>(__PRETTY_FUNCTION__), __LINE__)
-
 using namespace x64;
 using namespace intel_x64;
 
@@ -47,133 +44,20 @@ extern void setup_check_vmcs_control_state_paths(std::vector<struct control_flow
 extern void setup_check_vmcs_guest_state_paths(std::vector<struct control_flow_path> &cfg);
 extern void setup_check_vmcs_host_state_paths(std::vector<struct control_flow_path> &cfg);
 
-enum vm_control_type
-{
-    pin_execution_ctl,
-    primary_execution_ctl,
-    secondary_execution_ctl,
-    exit_ctl,
-    entry_ctl
-};
-
-struct vm_control_api
-{
-    bool (*is_enabled)();
-    void (*enable)();
-    void (*disable)();
-    void (*enable_if_allowed)(bool);
-    void (*disable_if_allowed)(bool);
-};
-
-struct vm_control
-{
-    enum vm_control_type type;
-    struct vm_control_api api;
-    uint64_t mask;
-    std::string name;
-    unsigned int msr_addr;
-
-    uint64_t (*get_ctls)();
-    void (*set_ctls)(unsigned long);
-};
-
-enum vm_control_type g_ctl_type;
-static struct vm_control_api g_ctl_api = { nullptr, nullptr, nullptr, nullptr, nullptr };
-static struct vm_control g_ctl = { exit_ctl, g_ctl_api, 0UL, "", 0UL, nullptr, nullptr };
 static struct control_flow_path path;
 
 static void
-init_vm_control_api(struct vm_control_api &api, bool (*is_enabled)(), void (*enable)(),
-                    void (*disable)(), void (*enable_if_allowed)(bool), void (*disable_if_allowed)(bool))
+vmcs_promote_fail(bool state_save)
 {
-    api.is_enabled = is_enabled;
-    api.enable = enable;
-    api.disable = disable;
-    api.enable_if_allowed = enable_if_allowed;
-    api.disable_if_allowed = disable_if_allowed;
+    (void) state_save;
+    return;
 }
 
 static void
-init_vm_control(struct vm_control &ctl, enum vm_control_type type,
-                const struct vm_control_api &api, uint64_t mask, const std::string &name)
+vmcs_resume_fail(state_save_intel_x64 *state_save)
 {
-    ctl.type = type;
-    ctl.api = api;
-    ctl.mask = mask;
-    ctl.name = name;
-
-    if (type == pin_execution_ctl)
-    {
-        ctl.msr_addr = msrs::ia32_vmx_true_pinbased_ctls::addr;
-        ctl.get_ctls = &vmcs::pin_based_vm_execution_controls::get;
-        ctl.set_ctls = &vmcs::pin_based_vm_execution_controls::set;
-    }
-
-    if (type == primary_execution_ctl)
-    {
-        ctl.msr_addr = msrs::ia32_vmx_true_procbased_ctls::addr;
-        ctl.get_ctls = &vmcs::primary_processor_based_vm_execution_controls::get;
-        ctl.set_ctls = &vmcs::primary_processor_based_vm_execution_controls::set;
-    }
-
-    //case secondary_execution_ctl:
-    //    ctl.msr_addr = msrs::ia32_vmx_procbased_ctls2::addr;
-    //    ctl.get_ctls = &vmcs::secondary_processor_based_vm_execution_controls::get;
-    //    ctl.set_ctls = &vmcs::secondary_processor_based_vm_execution_controls::set;
-    //    break;
-
-    if (type == exit_ctl)
-    {
-        ctl.msr_addr = msrs::ia32_vmx_true_exit_ctls::addr;
-        ctl.get_ctls = &vmcs::vm_exit_controls::get;
-        ctl.set_ctls = &vmcs::vm_exit_controls::set;
-    }
-
-    if (type == entry_ctl)
-    {
-        ctl.msr_addr = msrs::ia32_vmx_true_entry_ctls::addr;
-        ctl.get_ctls = &vmcs::vm_entry_controls::get;
-        ctl.set_ctls = &vmcs::vm_entry_controls::set;
-    }
-}
-
-void
-vmcs_ut::test_vm_control_with_args(const struct vm_control &ctl, gsl::cstring_span<> fut, int line)
-{
-    std::string allowed0_false = ctl.name + std::string(" is not allowed to be cleared to 0");
-    std::string allowed1_false = ctl.name + std::string(" is not allowed to be set to 1");
-
-    ctl.set_ctls(0UL);
-    g_msrs[ctl.msr_addr] = ~ctl.mask;
-    this->expect_no_exception_with_args([&] { ctl.api.disable(); }, fut, line);
-    this->expect_true_with_args(ctl.get_ctls() == 0UL, ctl.name + std::string("- ctl.get_ctls == 0UL"), fut, line);
-    this->expect_false_with_args(ctl.api.is_enabled(), ctl.name + std::string("::is_enabled()"), fut, line);
-
-    g_msrs[ctl.msr_addr] = ctl.mask;
-    this->expect_exception_with_args([&] { ctl.api.disable(); }, std::make_shared<std::logic_error>(allowed0_false), fut, line);
-
-    g_msrs[ctl.msr_addr] = ctl.mask << 32;
-    this->expect_no_exception_with_args([&] { ctl.api.enable(); }, fut, line);
-    this->expect_true_with_args(ctl.get_ctls() == ctl.mask, ctl.name + std::string("- ctl.get_ctls() == ctl.mask"), fut, line);
-    this->expect_true_with_args(ctl.api.is_enabled(), ctl.name + std::string("::is_enabled()"), fut, line);
-
-    g_msrs[ctl.msr_addr] = ~(ctl.mask << 32);
-    this->expect_exception_with_args([&] { ctl.api.enable(); }, std::make_shared<std::logic_error>(allowed1_false), fut, line);
-
-    ctl.set_ctls(0UL);
-    g_msrs[ctl.msr_addr] = ~ctl.mask;
-    this->expect_no_exception_with_args([&] { ctl.api.disable_if_allowed(true); }, fut, line);
-    this->expect_true_with_args(ctl.get_ctls() == 0UL, ctl.name + std::string("- ctl.get_ctls() == 0UL"), fut, line);
-
-    g_msrs[ctl.msr_addr] = ctl.mask;
-    this->expect_no_exception_with_args([&] { ctl.api.disable_if_allowed(true); }, fut, line);
-
-    g_msrs[ctl.msr_addr] = ctl.mask << 32;
-    this->expect_no_exception_with_args([&] { ctl.api.enable_if_allowed(true); }, fut, line);
-    this->expect_true_with_args(ctl.get_ctls() == ctl.mask, ctl.name + std::string("- ctl.get_ctls() == ctl.mask"), fut, line);
-
-    g_msrs[ctl.msr_addr] = ~(ctl.mask << 32);
-    this->expect_no_exception_with_args([&] { ctl.api.enable_if_allowed(true); }, fut, line);
+    (void) state_save;
+    return;
 }
 
 static void
@@ -194,19 +78,6 @@ setup_check_vmcs_state_paths(std::vector<struct control_flow_path> &cfg)
     cfg.push_back(path);
 }
 
-static void
-vmcs_promote_fail(bool state_save)
-{
-    (void) state_save;
-    return;
-}
-
-static void
-vmcs_resume_fail(state_save_intel_x64 *state_save)
-{
-    (void) state_save;
-    return;
-}
 
 static void
 setup_launch_success_msrs()
@@ -481,6 +352,157 @@ vmcs_ut::test_resume_failure()
 
         EXPECT_EXCEPTION(vmcs.resume(), std::runtime_error);
     });
+}
+
+void
+vmcs_ut::test_get_vmcs_field()
+{
+    std::string name("field");
+    std::string what = std::string("get_vmcs_field_failed: ") + name + " field doesn't exist";
+    auto exists = true;
+
+    this->expect_exception([&] { get_vmcs_field(0U, name, !exists); }, std::make_shared<std::logic_error>(what));
+
+    g_vmcs_fields[0U] = 42U;
+
+    this->expect_true(get_vmcs_field(0U, name, exists) == 42U);
+}
+
+void
+vmcs_ut::test_get_vmcs_field_if_exists()
+{
+    std::string name("field");
+
+    auto exists = true;
+    auto verbose = true;
+    g_vmcs_fields[0U] = 42U;
+
+    this->expect_true(get_vmcs_field_if_exists(0U, name, verbose, !exists) == 0U);
+    this->expect_true(get_vmcs_field_if_exists(0U, name, verbose, exists) == 42U);
+}
+
+void
+vmcs_ut::test_set_vmcs_field()
+{
+    std::string name("field");
+    std::string what = std::string("set_vmcs_field failed: ") + name + "field doesn't exist";
+
+    auto exists = true;
+    g_vmcs_fields[0U] = 0U;
+    this->expect_exception([&] { set_vmcs_field(1U, 0U, name, !exists); },
+                           std::make_shared<std::logic_error>(what));
+    this->expect_true(g_vmcs_fields[0U] == 0U);
+
+    this->expect_no_exception([&] { set_vmcs_field(1U, 0U, name, exists); });
+    this->expect_true(g_vmcs_fields[0U] == 1U);
+}
+
+void
+vmcs_ut::test_set_vmcs_field_if_exists()
+{
+    std::string name("field");
+
+    auto exists = true;
+    auto verbose = true;
+    g_vmcs_fields[0U] = 42U;
+
+    this->expect_no_exception([&] { set_vmcs_field_if_exists(0U, 0U, name, !verbose, !exists); });
+    this->expect_true(g_vmcs_fields[0U] == 42U);
+
+    this->expect_no_exception([&] { set_vmcs_field_if_exists(0U, 0U, name, verbose, !exists); });
+    this->expect_true(g_vmcs_fields[0U] == 42U);
+
+    this->expect_no_exception([&] { set_vmcs_field_if_exists(0U, 0U, name, !verbose, exists); });
+    this->expect_true(g_vmcs_fields[0U] == 0U);
+
+    this->expect_no_exception([&] { set_vmcs_field_if_exists(1U, 0U, name, verbose, exists); });
+    this->expect_true(g_vmcs_fields[0U] == 1U);
+}
+
+void
+vmcs_ut::test_get_vm_control()
+{
+    auto name("control");
+    std::string what = std::string("can't get ") + name + ": corresponding vmcs field doesn't exist";
+
+    auto exists = true;
+    auto mask = 0x0000000000000002UL;
+    g_vmcs_fields[0U] = mask;
+
+    this->expect_exception([&] { get_vm_control(0U, name, mask, !exists); },
+                           std::make_shared<std::logic_error>(what));
+    this->expect_true(get_vm_control(0U, name, mask, exists) == mask);
+}
+
+void
+vmcs_ut::test_get_vm_control_if_exists()
+{
+    auto name("control");
+    auto exists = true;
+    auto verbose = true;
+    auto mask = 0x8UL;
+    g_vmcs_fields[0U] = mask;
+
+    this->expect_true(get_vm_control_if_exists(0U, name, mask, verbose, !exists) == 0UL);
+    this->expect_true(get_vm_control_if_exists(0U, name, mask, verbose, exists) == mask);
+}
+
+void
+vmcs_ut::test_set_vm_control()
+{
+    auto name("control");
+    auto exists = true;
+    auto mask = 0x0000000000000040UL;
+    auto ctls_addr = 0UL;
+    auto msr_addr = 0U;
+
+    this->expect_exception([&] { set_vm_control(1UL, msr_addr, ctls_addr, name, mask, !exists); },
+                           std::make_shared<std::logic_error>(std::string(name) + "'s corresponding vmcs field doesn't exist"));
+
+    g_msrs[msr_addr] = ~mask;
+    this->expect_no_exception([&] { set_vm_control(0UL, msr_addr, ctls_addr, name, mask, exists); });
+    this->expect_true((g_vmcs_fields[ctls_addr] & mask) == 0UL);
+
+    g_msrs[msr_addr] = mask;
+    this->expect_exception([&] { set_vm_control(0UL, msr_addr, ctls_addr, name, mask, exists); },
+                           std::make_shared<std::logic_error>(std::string(name) + " is not allowed to be cleared to 0"));
+
+    g_msrs[msr_addr] = mask << 32;
+    this->expect_no_exception([&] { set_vm_control(1UL, msr_addr, ctls_addr, name, mask, exists); });
+    this->expect_true((g_vmcs_fields[ctls_addr] & mask) != 0UL);
+
+    g_msrs[msr_addr] = ~(mask << 32);
+    this->expect_exception([&] { set_vm_control(1UL, msr_addr, ctls_addr, name, mask, exists); },
+                           std::make_shared<std::logic_error>(std::string(name) + " is not allowed to be set to 1"));
+}
+
+void
+vmcs_ut::test_set_vm_control_if_allowed()
+{
+    auto name("control");
+    auto exists = true;
+    auto verbose = true;
+    auto mask = 0x0000000000000040UL;
+    auto ctls_addr = 0UL;
+    auto msr_addr = 0U;
+
+    this->expect_no_exception([&] { set_vm_control_if_allowed(1UL, msr_addr, ctls_addr, name, mask, verbose, !exists); });
+
+    g_vmcs_fields[ctls_addr] = mask;
+    g_msrs[msr_addr] = ~mask;
+
+    this->expect_no_exception([&] { set_vm_control_if_allowed(0UL, msr_addr, ctls_addr, name, mask, verbose, exists); });
+    this->expect_true((g_vmcs_fields[ctls_addr] & mask) == 0UL);
+
+    g_msrs[msr_addr] = mask;
+    this->expect_no_exception([&] { set_vm_control_if_allowed(0UL, msr_addr, ctls_addr, name, mask, verbose, exists); });
+
+    g_msrs[msr_addr] = mask << 32;
+    this->expect_no_exception([&] { set_vm_control_if_allowed(1UL, msr_addr, ctls_addr, name, mask, verbose, exists); });
+    this->expect_true((g_vmcs_fields[ctls_addr] & mask) != 0UL);
+
+    g_msrs[msr_addr] = ~(mask << 32);
+    this->expect_no_exception([&] { set_vm_control_if_allowed(1UL, msr_addr, ctls_addr, name, mask, verbose, exists); });
 }
 
 void
@@ -2610,9 +2632,13 @@ vmcs_ut::test_vmcs_guest_tr_access_rights_unusable()
 void
 vmcs_ut::test_vmcs_pin_based_vm_execution_controls()
 {
+    this->expect_true(vmcs::pin_based_vm_execution_controls::exists());
+
     vmcs::pin_based_vm_execution_controls::set(1UL);
     this->expect_true(vmcs::pin_based_vm_execution_controls::get() == 1UL);
-    this->expect_true(vmcs::pin_based_vm_execution_controls::exists());
+
+    vmcs::pin_based_vm_execution_controls::set_if_exists(2UL);
+    this->expect_true(vmcs::pin_based_vm_execution_controls::get_if_exists() == 2UL);
 }
 
 void
@@ -2620,11 +2646,19 @@ vmcs_ut::test_vmcs_pin_based_vm_execution_controls_external_interrupt_exiting()
 {
     using namespace vmcs::pin_based_vm_execution_controls::external_interrupt_exiting;
 
-    g_ctl_type = pin_execution_ctl;
-    init_vm_control_api(g_ctl_api, &is_enabled, &enable, &disable, &enable_if_allowed, &disable_if_allowed);
-    init_vm_control(g_ctl, g_ctl_type, g_ctl_api, mask, std::string(name));
+    g_msrs[msrs::ia32_vmx_true_pinbased_ctls::addr] = 0xffffffff00000000UL;
 
-    this->test_vm_control(g_ctl);
+    enable();
+    this->expect_true(is_enabled());
+
+    disable();
+    this->expect_true(is_disabled());
+
+    enable_if_allowed();
+    this->expect_true(is_enabled_if_exists());
+
+    disable_if_allowed();
+    this->expect_true(is_disabled_if_exists());
 }
 
 void
@@ -2632,11 +2666,19 @@ vmcs_ut::test_vmcs_pin_based_vm_execution_controls_nmi_exiting()
 {
     using namespace vmcs::pin_based_vm_execution_controls::nmi_exiting;
 
-    g_ctl_type = pin_execution_ctl;
-    init_vm_control_api(g_ctl_api, &is_enabled, &enable, &disable, &enable_if_allowed, &disable_if_allowed);
-    init_vm_control(g_ctl, g_ctl_type, g_ctl_api, mask, std::string(name));
+    g_msrs[msrs::ia32_vmx_true_pinbased_ctls::addr] = 0xffffffff00000000UL;
 
-    this->test_vm_control(g_ctl);
+    enable();
+    this->expect_true(is_enabled());
+
+    disable();
+    this->expect_true(is_disabled());
+
+    enable_if_allowed();
+    this->expect_true(is_enabled_if_exists());
+
+    disable_if_allowed();
+    this->expect_true(is_disabled_if_exists());
 }
 
 void
@@ -2644,11 +2686,19 @@ vmcs_ut::test_vmcs_pin_based_vm_execution_controls_virtual_nmis()
 {
     using namespace vmcs::pin_based_vm_execution_controls::virtual_nmis;
 
-    g_ctl_type = pin_execution_ctl;
-    init_vm_control_api(g_ctl_api, &is_enabled, &enable, &disable, &enable_if_allowed, &disable_if_allowed);
-    init_vm_control(g_ctl, g_ctl_type, g_ctl_api, mask, std::string(name));
+    g_msrs[msrs::ia32_vmx_true_pinbased_ctls::addr] = 0xffffffff00000000UL;
 
-    this->test_vm_control(g_ctl);
+    enable();
+    this->expect_true(is_enabled());
+
+    disable();
+    this->expect_true(is_disabled());
+
+    enable_if_allowed();
+    this->expect_true(is_enabled_if_exists());
+
+    disable_if_allowed();
+    this->expect_true(is_disabled_if_exists());
 }
 
 void
@@ -2656,11 +2706,19 @@ vmcs_ut::test_vmcs_pin_based_vm_execution_controls_activate_vmx_preemption_timer
 {
     using namespace vmcs::pin_based_vm_execution_controls::activate_vmx_preemption_timer;
 
-    g_ctl_type = pin_execution_ctl;
-    init_vm_control_api(g_ctl_api, &is_enabled, &enable, &disable, &enable_if_allowed, &disable_if_allowed);
-    init_vm_control(g_ctl, g_ctl_type, g_ctl_api, mask, std::string(name));
+    g_msrs[msrs::ia32_vmx_true_pinbased_ctls::addr] = 0xffffffff00000000UL;
 
-    this->test_vm_control(g_ctl);
+    enable();
+    this->expect_true(is_enabled());
+
+    disable();
+    this->expect_true(is_disabled());
+
+    enable_if_allowed();
+    this->expect_true(is_enabled_if_exists());
+
+    disable_if_allowed();
+    this->expect_true(is_disabled_if_exists());
 }
 
 void
@@ -2668,19 +2726,31 @@ vmcs_ut::test_vmcs_pin_based_vm_execution_controls_process_posted_interrupts()
 {
     using namespace vmcs::pin_based_vm_execution_controls::process_posted_interrupts;
 
-    g_ctl_type = pin_execution_ctl;
-    init_vm_control_api(g_ctl_api, &is_enabled, &enable, &disable, &enable_if_allowed, &disable_if_allowed);
-    init_vm_control(g_ctl, g_ctl_type, g_ctl_api, mask, std::string(name));
+    g_msrs[msrs::ia32_vmx_true_pinbased_ctls::addr] = 0xffffffff00000000UL;
 
-    this->test_vm_control(g_ctl);
+    enable();
+    this->expect_true(is_enabled());
+
+    disable();
+    this->expect_true(is_disabled());
+
+    enable_if_allowed();
+    this->expect_true(is_enabled_if_exists());
+
+    disable_if_allowed();
+    this->expect_true(is_disabled_if_exists());
 }
 
 void
 vmcs_ut::test_vmcs_primary_processor_based_vm_execution_controls()
 {
+    this->expect_true(vmcs::primary_processor_based_vm_execution_controls::exists());
+
     vmcs::primary_processor_based_vm_execution_controls::set(1UL);
     this->expect_true(vmcs::primary_processor_based_vm_execution_controls::get() == 1UL);
-    this->expect_true(vmcs::primary_processor_based_vm_execution_controls::exists());
+
+    vmcs::primary_processor_based_vm_execution_controls::set_if_exists(2UL);
+    this->expect_true(vmcs::primary_processor_based_vm_execution_controls::get_if_exists() == 2UL);
 }
 
 void
@@ -2688,11 +2758,19 @@ vmcs_ut::test_vmcs_primary_processor_based_vm_execution_controls_interrupt_windo
 {
     using namespace vmcs::primary_processor_based_vm_execution_controls::interrupt_window_exiting;
 
-    g_ctl_type = primary_execution_ctl;
-    init_vm_control_api(g_ctl_api, &is_enabled, &enable, &disable, &enable_if_allowed, &disable_if_allowed);
-    init_vm_control(g_ctl, g_ctl_type, g_ctl_api, mask, std::string(name));
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = 0xffffffff00000000UL;
 
-    this->test_vm_control(g_ctl);
+    enable();
+    this->expect_true(is_enabled());
+
+    disable();
+    this->expect_true(is_disabled());
+
+    enable_if_allowed();
+    this->expect_true(is_enabled_if_exists());
+
+    disable_if_allowed();
+    this->expect_true(is_disabled_if_exists());
 }
 
 void
@@ -2700,11 +2778,19 @@ vmcs_ut::test_vmcs_primary_processor_based_vm_execution_controls_use_tsc_offsett
 {
     using namespace vmcs::primary_processor_based_vm_execution_controls::use_tsc_offsetting;
 
-    g_ctl_type = primary_execution_ctl;
-    init_vm_control_api(g_ctl_api, &is_enabled, &enable, &disable, &enable_if_allowed, &disable_if_allowed);
-    init_vm_control(g_ctl, g_ctl_type, g_ctl_api, mask, std::string(name));
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = 0xffffffff00000000UL;
 
-    this->test_vm_control(g_ctl);
+    enable();
+    this->expect_true(is_enabled());
+
+    disable();
+    this->expect_true(is_disabled());
+
+    enable_if_allowed();
+    this->expect_true(is_enabled_if_exists());
+
+    disable_if_allowed();
+    this->expect_true(is_disabled_if_exists());
 }
 
 void
@@ -2712,11 +2798,19 @@ vmcs_ut::test_vmcs_primary_processor_based_vm_execution_controls_hlt_exiting()
 {
     using namespace vmcs::primary_processor_based_vm_execution_controls::hlt_exiting;
 
-    g_ctl_type = primary_execution_ctl;
-    init_vm_control_api(g_ctl_api, &is_enabled, &enable, &disable, &enable_if_allowed, &disable_if_allowed);
-    init_vm_control(g_ctl, g_ctl_type, g_ctl_api, mask, std::string(name));
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = 0xffffffff00000000UL;
 
-    this->test_vm_control(g_ctl);
+    enable();
+    this->expect_true(is_enabled());
+
+    disable();
+    this->expect_true(is_disabled());
+
+    enable_if_allowed();
+    this->expect_true(is_enabled_if_exists());
+
+    disable_if_allowed();
+    this->expect_true(is_disabled_if_exists());
 }
 
 void
@@ -2724,11 +2818,19 @@ vmcs_ut::test_vmcs_primary_processor_based_vm_execution_controls_invlpg_exiting(
 {
     using namespace vmcs::primary_processor_based_vm_execution_controls::invlpg_exiting;
 
-    g_ctl_type = primary_execution_ctl;
-    init_vm_control_api(g_ctl_api, &is_enabled, &enable, &disable, &enable_if_allowed, &disable_if_allowed);
-    init_vm_control(g_ctl, g_ctl_type, g_ctl_api, mask, std::string(name));
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = 0xffffffff00000000UL;
 
-    this->test_vm_control(g_ctl);
+    enable();
+    this->expect_true(is_enabled());
+
+    disable();
+    this->expect_true(is_disabled());
+
+    enable_if_allowed();
+    this->expect_true(is_enabled_if_exists());
+
+    disable_if_allowed();
+    this->expect_true(is_disabled_if_exists());
 }
 
 void
@@ -2736,11 +2838,19 @@ vmcs_ut::test_vmcs_primary_processor_based_vm_execution_controls_mwait_exiting()
 {
     using namespace vmcs::primary_processor_based_vm_execution_controls::mwait_exiting;
 
-    g_ctl_type = primary_execution_ctl;
-    init_vm_control_api(g_ctl_api, &is_enabled, &enable, &disable, &enable_if_allowed, &disable_if_allowed);
-    init_vm_control(g_ctl, g_ctl_type, g_ctl_api, mask, std::string(name));
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = 0xffffffff00000000UL;
 
-    this->test_vm_control(g_ctl);
+    enable();
+    this->expect_true(is_enabled());
+
+    disable();
+    this->expect_true(is_disabled());
+
+    enable_if_allowed();
+    this->expect_true(is_enabled_if_exists());
+
+    disable_if_allowed();
+    this->expect_true(is_disabled_if_exists());
 }
 
 void
@@ -2748,11 +2858,19 @@ vmcs_ut::test_vmcs_primary_processor_based_vm_execution_controls_rdpmc_exiting()
 {
     using namespace vmcs::primary_processor_based_vm_execution_controls::rdpmc_exiting;
 
-    g_ctl_type = primary_execution_ctl;
-    init_vm_control_api(g_ctl_api, &is_enabled, &enable, &disable, &enable_if_allowed, &disable_if_allowed);
-    init_vm_control(g_ctl, g_ctl_type, g_ctl_api, mask, std::string(name));
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = 0xffffffff00000000UL;
 
-    this->test_vm_control(g_ctl);
+    enable();
+    this->expect_true(is_enabled());
+
+    disable();
+    this->expect_true(is_disabled());
+
+    enable_if_allowed();
+    this->expect_true(is_enabled_if_exists());
+
+    disable_if_allowed();
+    this->expect_true(is_disabled_if_exists());
 }
 
 void
@@ -2760,11 +2878,19 @@ vmcs_ut::test_vmcs_primary_processor_based_vm_execution_controls_rdtsc_exiting()
 {
     using namespace vmcs::primary_processor_based_vm_execution_controls::rdtsc_exiting;
 
-    g_ctl_type = primary_execution_ctl;
-    init_vm_control_api(g_ctl_api, &is_enabled, &enable, &disable, &enable_if_allowed, &disable_if_allowed);
-    init_vm_control(g_ctl, g_ctl_type, g_ctl_api, mask, std::string(name));
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = 0xffffffff00000000UL;
 
-    this->test_vm_control(g_ctl);
+    enable();
+    this->expect_true(is_enabled());
+
+    disable();
+    this->expect_true(is_disabled());
+
+    enable_if_allowed();
+    this->expect_true(is_enabled_if_exists());
+
+    disable_if_allowed();
+    this->expect_true(is_disabled_if_exists());
 }
 
 void
@@ -2772,11 +2898,19 @@ vmcs_ut::test_vmcs_primary_processor_based_vm_execution_controls_cr3_load_exitin
 {
     using namespace vmcs::primary_processor_based_vm_execution_controls::cr3_load_exiting;
 
-    g_ctl_type = primary_execution_ctl;
-    init_vm_control_api(g_ctl_api, &is_enabled, &enable, &disable, &enable_if_allowed, &disable_if_allowed);
-    init_vm_control(g_ctl, g_ctl_type, g_ctl_api, mask, std::string(name));
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = 0xffffffff00000000UL;
 
-    this->test_vm_control(g_ctl);
+    enable();
+    this->expect_true(is_enabled());
+
+    disable();
+    this->expect_true(is_disabled());
+
+    enable_if_allowed();
+    this->expect_true(is_enabled_if_exists());
+
+    disable_if_allowed();
+    this->expect_true(is_disabled_if_exists());
 }
 
 void
@@ -2784,11 +2918,19 @@ vmcs_ut::test_vmcs_primary_processor_based_vm_execution_controls_cr3_store_exiti
 {
     using namespace vmcs::primary_processor_based_vm_execution_controls::cr3_store_exiting;
 
-    g_ctl_type = primary_execution_ctl;
-    init_vm_control_api(g_ctl_api, &is_enabled, &enable, &disable, &enable_if_allowed, &disable_if_allowed);
-    init_vm_control(g_ctl, g_ctl_type, g_ctl_api, mask, std::string(name));
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = 0xffffffff00000000UL;
 
-    this->test_vm_control(g_ctl);
+    enable();
+    this->expect_true(is_enabled());
+
+    disable();
+    this->expect_true(is_disabled());
+
+    enable_if_allowed();
+    this->expect_true(is_enabled_if_exists());
+
+    disable_if_allowed();
+    this->expect_true(is_disabled_if_exists());
 }
 
 void
@@ -2796,11 +2938,19 @@ vmcs_ut::test_vmcs_primary_processor_based_vm_execution_controls_cr8_load_exitin
 {
     using namespace vmcs::primary_processor_based_vm_execution_controls::cr8_load_exiting;
 
-    g_ctl_type = primary_execution_ctl;
-    init_vm_control_api(g_ctl_api, &is_enabled, &enable, &disable, &enable_if_allowed, &disable_if_allowed);
-    init_vm_control(g_ctl, g_ctl_type, g_ctl_api, mask, std::string(name));
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = 0xffffffff00000000UL;
 
-    this->test_vm_control(g_ctl);
+    enable();
+    this->expect_true(is_enabled());
+
+    disable();
+    this->expect_true(is_disabled());
+
+    enable_if_allowed();
+    this->expect_true(is_enabled_if_exists());
+
+    disable_if_allowed();
+    this->expect_true(is_disabled_if_exists());
 }
 
 void
@@ -2808,11 +2958,19 @@ vmcs_ut::test_vmcs_primary_processor_based_vm_execution_controls_cr8_store_exiti
 {
     using namespace vmcs::primary_processor_based_vm_execution_controls::cr8_store_exiting;
 
-    g_ctl_type = primary_execution_ctl;
-    init_vm_control_api(g_ctl_api, &is_enabled, &enable, &disable, &enable_if_allowed, &disable_if_allowed);
-    init_vm_control(g_ctl, g_ctl_type, g_ctl_api, mask, std::string(name));
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = 0xffffffff00000000UL;
 
-    this->test_vm_control(g_ctl);
+    enable();
+    this->expect_true(is_enabled());
+
+    disable();
+    this->expect_true(is_disabled());
+
+    enable_if_allowed();
+    this->expect_true(is_enabled_if_exists());
+
+    disable_if_allowed();
+    this->expect_true(is_disabled_if_exists());
 }
 
 void
@@ -2820,11 +2978,19 @@ vmcs_ut::test_vmcs_primary_processor_based_vm_execution_controls_use_tpr_shadow(
 {
     using namespace vmcs::primary_processor_based_vm_execution_controls::use_tpr_shadow;
 
-    g_ctl_type = primary_execution_ctl;
-    init_vm_control_api(g_ctl_api, &is_enabled, &enable, &disable, &enable_if_allowed, &disable_if_allowed);
-    init_vm_control(g_ctl, g_ctl_type, g_ctl_api, mask, std::string(name));
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = 0xffffffff00000000UL;
 
-    this->test_vm_control(g_ctl);
+    enable();
+    this->expect_true(is_enabled());
+
+    disable();
+    this->expect_true(is_disabled());
+
+    enable_if_allowed();
+    this->expect_true(is_enabled_if_exists());
+
+    disable_if_allowed();
+    this->expect_true(is_disabled_if_exists());
 }
 
 void
@@ -2832,11 +2998,19 @@ vmcs_ut::test_vmcs_primary_processor_based_vm_execution_controls_nmi_window_exit
 {
     using namespace vmcs::primary_processor_based_vm_execution_controls::nmi_window_exiting;
 
-    g_ctl_type = primary_execution_ctl;
-    init_vm_control_api(g_ctl_api, &is_enabled, &enable, &disable, &enable_if_allowed, &disable_if_allowed);
-    init_vm_control(g_ctl, g_ctl_type, g_ctl_api, mask, std::string(name));
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = 0xffffffff00000000UL;
 
-    this->test_vm_control(g_ctl);
+    enable();
+    this->expect_true(is_enabled());
+
+    disable();
+    this->expect_true(is_disabled());
+
+    enable_if_allowed();
+    this->expect_true(is_enabled_if_exists());
+
+    disable_if_allowed();
+    this->expect_true(is_disabled_if_exists());
 }
 
 void
@@ -2844,11 +3018,19 @@ vmcs_ut::test_vmcs_primary_processor_based_vm_execution_controls_mov_dr_exiting(
 {
     using namespace vmcs::primary_processor_based_vm_execution_controls::mov_dr_exiting;
 
-    g_ctl_type = primary_execution_ctl;
-    init_vm_control_api(g_ctl_api, &is_enabled, &enable, &disable, &enable_if_allowed, &disable_if_allowed);
-    init_vm_control(g_ctl, g_ctl_type, g_ctl_api, mask, std::string(name));
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = 0xffffffff00000000UL;
 
-    this->test_vm_control(g_ctl);
+    enable();
+    this->expect_true(is_enabled());
+
+    disable();
+    this->expect_true(is_disabled());
+
+    enable_if_allowed();
+    this->expect_true(is_enabled_if_exists());
+
+    disable_if_allowed();
+    this->expect_true(is_disabled_if_exists());
 }
 
 void
@@ -2856,11 +3038,19 @@ vmcs_ut::test_vmcs_primary_processor_based_vm_execution_controls_unconditional_i
 {
     using namespace vmcs::primary_processor_based_vm_execution_controls::unconditional_io_exiting;
 
-    g_ctl_type = primary_execution_ctl;
-    init_vm_control_api(g_ctl_api, &is_enabled, &enable, &disable, &enable_if_allowed, &disable_if_allowed);
-    init_vm_control(g_ctl, g_ctl_type, g_ctl_api, mask, std::string(name));
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = 0xffffffff00000000UL;
 
-    this->test_vm_control(g_ctl);
+    enable();
+    this->expect_true(is_enabled());
+
+    disable();
+    this->expect_true(is_disabled());
+
+    enable_if_allowed();
+    this->expect_true(is_enabled_if_exists());
+
+    disable_if_allowed();
+    this->expect_true(is_disabled_if_exists());
 }
 
 void
@@ -2868,11 +3058,19 @@ vmcs_ut::test_vmcs_primary_processor_based_vm_execution_controls_use_io_bitmaps(
 {
     using namespace vmcs::primary_processor_based_vm_execution_controls::use_io_bitmaps;
 
-    g_ctl_type = primary_execution_ctl;
-    init_vm_control_api(g_ctl_api, &is_enabled, &enable, &disable, &enable_if_allowed, &disable_if_allowed);
-    init_vm_control(g_ctl, g_ctl_type, g_ctl_api, mask, std::string(name));
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = 0xffffffff00000000UL;
 
-    this->test_vm_control(g_ctl);
+    enable();
+    this->expect_true(is_enabled());
+
+    disable();
+    this->expect_true(is_disabled());
+
+    enable_if_allowed();
+    this->expect_true(is_enabled_if_exists());
+
+    disable_if_allowed();
+    this->expect_true(is_disabled_if_exists());
 }
 
 void
@@ -2880,11 +3078,19 @@ vmcs_ut::test_vmcs_primary_processor_based_vm_execution_controls_monitor_trap_fl
 {
     using namespace vmcs::primary_processor_based_vm_execution_controls::monitor_trap_flag;
 
-    g_ctl_type = primary_execution_ctl;
-    init_vm_control_api(g_ctl_api, &is_enabled, &enable, &disable, &enable_if_allowed, &disable_if_allowed);
-    init_vm_control(g_ctl, g_ctl_type, g_ctl_api, mask, std::string(name));
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = 0xffffffff00000000UL;
 
-    this->test_vm_control(g_ctl);
+    enable();
+    this->expect_true(is_enabled());
+
+    disable();
+    this->expect_true(is_disabled());
+
+    enable_if_allowed();
+    this->expect_true(is_enabled_if_exists());
+
+    disable_if_allowed();
+    this->expect_true(is_disabled_if_exists());
 }
 
 void
@@ -2892,11 +3098,19 @@ vmcs_ut::test_vmcs_primary_processor_based_vm_execution_controls_use_msr_bitmaps
 {
     using namespace vmcs::primary_processor_based_vm_execution_controls::use_msr_bitmaps;
 
-    g_ctl_type = primary_execution_ctl;
-    init_vm_control_api(g_ctl_api, &is_enabled, &enable, &disable, &enable_if_allowed, &disable_if_allowed);
-    init_vm_control(g_ctl, g_ctl_type, g_ctl_api, mask, std::string(name));
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = 0xffffffff00000000UL;
 
-    this->test_vm_control(g_ctl);
+    enable();
+    this->expect_true(is_enabled());
+
+    disable();
+    this->expect_true(is_disabled());
+
+    enable_if_allowed();
+    this->expect_true(is_enabled_if_exists());
+
+    disable_if_allowed();
+    this->expect_true(is_disabled_if_exists());
 }
 
 void
@@ -2904,11 +3118,19 @@ vmcs_ut::test_vmcs_primary_processor_based_vm_execution_controls_monitor_exiting
 {
     using namespace vmcs::primary_processor_based_vm_execution_controls::monitor_exiting;
 
-    g_ctl_type = primary_execution_ctl;
-    init_vm_control_api(g_ctl_api, &is_enabled, &enable, &disable, &enable_if_allowed, &disable_if_allowed);
-    init_vm_control(g_ctl, g_ctl_type, g_ctl_api, mask, std::string(name));
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = 0xffffffff00000000UL;
 
-    this->test_vm_control(g_ctl);
+    enable();
+    this->expect_true(is_enabled());
+
+    disable();
+    this->expect_true(is_disabled());
+
+    enable_if_allowed();
+    this->expect_true(is_enabled_if_exists());
+
+    disable_if_allowed();
+    this->expect_true(is_disabled_if_exists());
 }
 
 void
@@ -2916,11 +3138,19 @@ vmcs_ut::test_vmcs_primary_processor_based_vm_execution_controls_pause_exiting()
 {
     using namespace vmcs::primary_processor_based_vm_execution_controls::pause_exiting;
 
-    g_ctl_type = primary_execution_ctl;
-    init_vm_control_api(g_ctl_api, &is_enabled, &enable, &disable, &enable_if_allowed, &disable_if_allowed);
-    init_vm_control(g_ctl, g_ctl_type, g_ctl_api, mask, std::string(name));
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = 0xffffffff00000000UL;
 
-    this->test_vm_control(g_ctl);
+    enable();
+    this->expect_true(is_enabled());
+
+    disable();
+    this->expect_true(is_disabled());
+
+    enable_if_allowed();
+    this->expect_true(is_enabled_if_exists());
+
+    disable_if_allowed();
+    this->expect_true(is_disabled_if_exists());
 }
 
 void
@@ -2928,51 +3158,79 @@ vmcs_ut::test_vmcs_primary_processor_based_vm_execution_controls_activate_second
 {
     using namespace vmcs::primary_processor_based_vm_execution_controls::activate_secondary_controls;
 
-    g_ctl_type = primary_execution_ctl;
-    init_vm_control_api(g_ctl_api, &is_enabled, &enable, &disable, &enable_if_allowed, &disable_if_allowed);
-    init_vm_control(g_ctl, g_ctl_type, g_ctl_api, mask, std::string(name));
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = 0xffffffff00000000UL;
 
-    this->test_vm_control(g_ctl);
+    enable();
+    this->expect_true(is_enabled());
+
+    disable();
+    this->expect_true(is_disabled());
+
+    enable_if_allowed();
+    this->expect_true(is_enabled_if_exists());
+
+    disable_if_allowed();
+    this->expect_true(is_disabled_if_exists());
 }
 
 void
 vmcs_ut::test_vmcs_exception_bitmap()
 {
+    this->expect_true(vmcs::exception_bitmap::exists());
+
     vmcs::exception_bitmap::set(1UL);
     this->expect_true(vmcs::exception_bitmap::get() == 1UL);
-    this->expect_true(vmcs::exception_bitmap::exists());
+
+    vmcs::exception_bitmap::set_if_exists(2UL);
+    this->expect_true(vmcs::exception_bitmap::get_if_exists() == 2UL);
 }
 
 void
 vmcs_ut::test_vmcs_page_fault_error_code_mask()
 {
+    this->expect_true(vmcs::page_fault_error_code_mask::exists());
+
     vmcs::page_fault_error_code_mask::set(1UL);
     this->expect_true(vmcs::page_fault_error_code_mask::get() == 1UL);
-    this->expect_true(vmcs::page_fault_error_code_mask::exists());
+
+    vmcs::page_fault_error_code_mask::set_if_exists(2UL);
+    this->expect_true(vmcs::page_fault_error_code_mask::get_if_exists() == 2UL);
 }
 
 void
 vmcs_ut::test_vmcs_page_fault_error_code_match()
 {
+    this->expect_true(vmcs::page_fault_error_code_match::exists());
+
     vmcs::page_fault_error_code_match::set(1UL);
     this->expect_true(vmcs::page_fault_error_code_match::get() == 1UL);
-    this->expect_true(vmcs::page_fault_error_code_match::exists());
+
+    vmcs::page_fault_error_code_match::set_if_exists(2UL);
+    this->expect_true(vmcs::page_fault_error_code_match::get_if_exists() == 2UL);
 }
 
 void
 vmcs_ut::test_vmcs_cr3_target_count()
 {
+    this->expect_true(vmcs::cr3_target_count::exists());
+
     vmcs::cr3_target_count::set(1UL);
     this->expect_true(vmcs::cr3_target_count::get() == 1UL);
-    this->expect_true(vmcs::cr3_target_count::exists());
+
+    vmcs::cr3_target_count::set_if_exists(2UL);
+    this->expect_true(vmcs::cr3_target_count::get_if_exists() == 2UL);
 }
 
 void
 vmcs_ut::test_vmcs_vm_exit_controls()
 {
+    this->expect_true(vmcs::vm_exit_controls::exists());
+
     vmcs::vm_exit_controls::set(1UL);
     this->expect_true(vmcs::vm_exit_controls::get() == 1UL);
-    this->expect_true(vmcs::vm_exit_controls::exists());
+
+    vmcs::vm_exit_controls::set_if_exists(2UL);
+    this->expect_true(vmcs::vm_exit_controls::get_if_exists() == 2UL);
 }
 
 void
@@ -2980,11 +3238,19 @@ vmcs_ut::test_vmcs_vm_exit_controls_save_debug_controls()
 {
     using namespace vmcs::vm_exit_controls::save_debug_controls;
 
-    g_ctl_type = exit_ctl;
-    init_vm_control_api(g_ctl_api, &is_enabled, &enable, &disable, &enable_if_allowed, &disable_if_allowed);
-    init_vm_control(g_ctl, g_ctl_type, g_ctl_api, mask, std::string(name));
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] = 0xffffffff00000000UL;
 
-    this->test_vm_control(g_ctl);
+    enable();
+    this->expect_true(is_enabled());
+
+    disable();
+    this->expect_true(is_disabled());
+
+    enable_if_allowed();
+    this->expect_true(is_enabled_if_exists());
+
+    disable_if_allowed();
+    this->expect_true(is_disabled_if_exists());
 }
 
 void
@@ -2992,11 +3258,19 @@ vmcs_ut::test_vmcs_vm_exit_controls_host_address_space_size()
 {
     using namespace vmcs::vm_exit_controls::host_address_space_size;
 
-    g_ctl_type = exit_ctl;
-    init_vm_control_api(g_ctl_api, &is_enabled, &enable, &disable, &enable_if_allowed, &disable_if_allowed);
-    init_vm_control(g_ctl, g_ctl_type, g_ctl_api, mask, std::string(name));
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] = 0xffffffff00000000UL;
 
-    this->test_vm_control(g_ctl);
+    enable();
+    this->expect_true(is_enabled());
+
+    disable();
+    this->expect_true(is_disabled());
+
+    enable_if_allowed();
+    this->expect_true(is_enabled_if_exists());
+
+    disable_if_allowed();
+    this->expect_true(is_disabled_if_exists());
 }
 
 void
@@ -3004,11 +3278,19 @@ vmcs_ut::test_vmcs_vm_exit_controls_load_ia32_perf_global_ctrl()
 {
     using namespace vmcs::vm_exit_controls::load_ia32_perf_global_ctrl;
 
-    g_ctl_type = exit_ctl;
-    init_vm_control_api(g_ctl_api, &is_enabled, &enable, &disable, &enable_if_allowed, &disable_if_allowed);
-    init_vm_control(g_ctl, g_ctl_type, g_ctl_api, mask, std::string(name));
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] = 0xffffffff00000000UL;
 
-    this->test_vm_control(g_ctl);
+    enable();
+    this->expect_true(is_enabled());
+
+    disable();
+    this->expect_true(is_disabled());
+
+    enable_if_allowed();
+    this->expect_true(is_enabled_if_exists());
+
+    disable_if_allowed();
+    this->expect_true(is_disabled_if_exists());
 }
 
 void
@@ -3016,11 +3298,19 @@ vmcs_ut::test_vmcs_vm_exit_controls_acknowledge_interrupt_on_exit()
 {
     using namespace vmcs::vm_exit_controls::acknowledge_interrupt_on_exit;
 
-    g_ctl_type = exit_ctl;
-    init_vm_control_api(g_ctl_api, &is_enabled, &enable, &disable, &enable_if_allowed, &disable_if_allowed);
-    init_vm_control(g_ctl, g_ctl_type, g_ctl_api, mask, std::string(name));
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] = 0xffffffff00000000UL;
 
-    this->test_vm_control(g_ctl);
+    enable();
+    this->expect_true(is_enabled());
+
+    disable();
+    this->expect_true(is_disabled());
+
+    enable_if_allowed();
+    this->expect_true(is_enabled_if_exists());
+
+    disable_if_allowed();
+    this->expect_true(is_disabled_if_exists());
 }
 
 void
@@ -3028,11 +3318,19 @@ vmcs_ut::test_vmcs_vm_exit_controls_save_ia32_pat()
 {
     using namespace vmcs::vm_exit_controls::save_ia32_pat;
 
-    g_ctl_type = exit_ctl;
-    init_vm_control_api(g_ctl_api, &is_enabled, &enable, &disable, &enable_if_allowed, &disable_if_allowed);
-    init_vm_control(g_ctl, g_ctl_type, g_ctl_api, mask, std::string(name));
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] = 0xffffffff00000000UL;
 
-    this->test_vm_control(g_ctl);
+    enable();
+    this->expect_true(is_enabled());
+
+    disable();
+    this->expect_true(is_disabled());
+
+    enable_if_allowed();
+    this->expect_true(is_enabled_if_exists());
+
+    disable_if_allowed();
+    this->expect_true(is_disabled_if_exists());
 }
 
 void
@@ -3040,11 +3338,19 @@ vmcs_ut::test_vmcs_vm_exit_controls_load_ia32_pat()
 {
     using namespace vmcs::vm_exit_controls::load_ia32_pat;
 
-    g_ctl_type = exit_ctl;
-    init_vm_control_api(g_ctl_api, &is_enabled, &enable, &disable, &enable_if_allowed, &disable_if_allowed);
-    init_vm_control(g_ctl, g_ctl_type, g_ctl_api, mask, std::string(name));
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] = 0xffffffff00000000UL;
 
-    this->test_vm_control(g_ctl);
+    enable();
+    this->expect_true(is_enabled());
+
+    disable();
+    this->expect_true(is_disabled());
+
+    enable_if_allowed();
+    this->expect_true(is_enabled_if_exists());
+
+    disable_if_allowed();
+    this->expect_true(is_disabled_if_exists());
 }
 
 void
@@ -3052,11 +3358,19 @@ vmcs_ut::test_vmcs_vm_exit_controls_save_ia32_efer()
 {
     using namespace vmcs::vm_exit_controls::save_ia32_efer;
 
-    g_ctl_type = exit_ctl;
-    init_vm_control_api(g_ctl_api, &is_enabled, &enable, &disable, &enable_if_allowed, &disable_if_allowed);
-    init_vm_control(g_ctl, g_ctl_type, g_ctl_api, mask, std::string(name));
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] = 0xffffffff00000000UL;
 
-    this->test_vm_control(g_ctl);
+    enable();
+    this->expect_true(is_enabled());
+
+    disable();
+    this->expect_true(is_disabled());
+
+    enable_if_allowed();
+    this->expect_true(is_enabled_if_exists());
+
+    disable_if_allowed();
+    this->expect_true(is_disabled_if_exists());
 }
 
 void
@@ -3064,11 +3378,19 @@ vmcs_ut::test_vmcs_vm_exit_controls_load_ia32_efer()
 {
     using namespace vmcs::vm_exit_controls::load_ia32_efer;
 
-    g_ctl_type = exit_ctl;
-    init_vm_control_api(g_ctl_api, &is_enabled, &enable, &disable, &enable_if_allowed, &disable_if_allowed);
-    init_vm_control(g_ctl, g_ctl_type, g_ctl_api, mask, std::string(name));
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] = 0xffffffff00000000UL;
 
-    this->test_vm_control(g_ctl);
+    enable();
+    this->expect_true(is_enabled());
+
+    disable();
+    this->expect_true(is_disabled());
+
+    enable_if_allowed();
+    this->expect_true(is_enabled_if_exists());
+
+    disable_if_allowed();
+    this->expect_true(is_disabled_if_exists());
 }
 
 void
@@ -3076,35 +3398,55 @@ vmcs_ut::test_vmcs_vm_exit_controls_save_vmx_preemption_timer_value()
 {
     using namespace vmcs::vm_exit_controls::save_vmx_preemption_timer_value;
 
-    g_ctl_type = exit_ctl;
-    init_vm_control_api(g_ctl_api, &is_enabled, &enable, &disable, &enable_if_allowed, &disable_if_allowed);
-    init_vm_control(g_ctl, g_ctl_type, g_ctl_api, mask, std::string(name));
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] = 0xffffffff00000000UL;
 
-    this->test_vm_control(g_ctl);
+    enable();
+    this->expect_true(is_enabled());
+
+    disable();
+    this->expect_true(is_disabled());
+
+    enable_if_allowed();
+    this->expect_true(is_enabled_if_exists());
+
+    disable_if_allowed();
+    this->expect_true(is_disabled_if_exists());
 }
 
 void
 vmcs_ut::test_vmcs_vm_exit_msr_store_count()
 {
+    this->expect_true(vmcs::vm_exit_msr_store_count::exists());
+
     vmcs::vm_exit_msr_store_count::set(1UL);
     this->expect_true(vmcs::vm_exit_msr_store_count::get() == 1UL);
-    this->expect_true(vmcs::vm_exit_msr_store_count::exists());
+
+    vmcs::vm_exit_msr_store_count::set_if_exists(2UL);
+    this->expect_true(vmcs::vm_exit_msr_store_count::get_if_exists() == 2UL);
 }
 
 void
 vmcs_ut::test_vmcs_vm_exit_msr_load_count()
 {
+    this->expect_true(vmcs::vm_exit_msr_load_count::exists());
+
     vmcs::vm_exit_msr_load_count::set(1UL);
     this->expect_true(vmcs::vm_exit_msr_load_count::get() == 1UL);
-    this->expect_true(vmcs::vm_exit_msr_load_count::exists());
+
+    vmcs::vm_exit_msr_load_count::set_if_exists(2UL);
+    this->expect_true(vmcs::vm_exit_msr_load_count::get_if_exists() == 2UL);
 }
 
 void
 vmcs_ut::test_vmcs_vm_entry_controls()
 {
+    this->expect_true(vmcs::vm_entry_controls::exists());
+
     vmcs::vm_entry_controls::set(1UL);
     this->expect_true(vmcs::vm_entry_controls::get() == 1UL);
-    this->expect_true(vmcs::vm_entry_controls::exists());
+
+    vmcs::vm_entry_controls::set_if_exists(2UL);
+    this->expect_true(vmcs::vm_entry_controls::get_if_exists() == 2UL);
 }
 
 void
@@ -3112,11 +3454,19 @@ vmcs_ut::test_vmcs_vm_entry_controls_load_debug_controls()
 {
     using namespace vmcs::vm_entry_controls::load_debug_controls;
 
-    g_ctl_type = entry_ctl;
-    init_vm_control_api(g_ctl_api, &is_enabled, &enable, &disable, &enable_if_allowed, &disable_if_allowed);
-    init_vm_control(g_ctl, g_ctl_type, g_ctl_api, mask, std::string(name));
+    g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] = 0xffffffff00000000UL;
 
-    this->test_vm_control(g_ctl);
+    enable();
+    this->expect_true(is_enabled());
+
+    disable();
+    this->expect_true(is_disabled());
+
+    enable_if_allowed();
+    this->expect_true(is_enabled_if_exists());
+
+    disable_if_allowed();
+    this->expect_true(is_disabled_if_exists());
 }
 
 void
@@ -3124,11 +3474,19 @@ vmcs_ut::test_vmcs_vm_entry_controls_ia_32e_mode_guest()
 {
     using namespace vmcs::vm_entry_controls::ia_32e_mode_guest;
 
-    g_ctl_type = entry_ctl;
-    init_vm_control_api(g_ctl_api, &is_enabled, &enable, &disable, &enable_if_allowed, &disable_if_allowed);
-    init_vm_control(g_ctl, g_ctl_type, g_ctl_api, mask, std::string(name));
+    g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] = 0xffffffff00000000UL;
 
-    this->test_vm_control(g_ctl);
+    enable();
+    this->expect_true(is_enabled());
+
+    disable();
+    this->expect_true(is_disabled());
+
+    enable_if_allowed();
+    this->expect_true(is_enabled_if_exists());
+
+    disable_if_allowed();
+    this->expect_true(is_disabled_if_exists());
 }
 
 void
@@ -3136,11 +3494,19 @@ vmcs_ut::test_vmcs_vm_entry_controls_entry_to_smm()
 {
     using namespace vmcs::vm_entry_controls::entry_to_smm;
 
-    g_ctl_type = entry_ctl;
-    init_vm_control_api(g_ctl_api, &is_enabled, &enable, &disable, &enable_if_allowed, &disable_if_allowed);
-    init_vm_control(g_ctl, g_ctl_type, g_ctl_api, mask, std::string(name));
+    g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] = 0xffffffff00000000UL;
 
-    this->test_vm_control(g_ctl);
+    enable();
+    this->expect_true(is_enabled());
+
+    disable();
+    this->expect_true(is_disabled());
+
+    enable_if_allowed();
+    this->expect_true(is_enabled_if_exists());
+
+    disable_if_allowed();
+    this->expect_true(is_disabled_if_exists());
 }
 
 void
@@ -3148,11 +3514,19 @@ vmcs_ut::test_vmcs_vm_entry_controls_deactivate_dual_monitor_treatment()
 {
     using namespace vmcs::vm_entry_controls::deactivate_dual_monitor_treatment;
 
-    g_ctl_type = entry_ctl;
-    init_vm_control_api(g_ctl_api, &is_enabled, &enable, &disable, &enable_if_allowed, &disable_if_allowed);
-    init_vm_control(g_ctl, g_ctl_type, g_ctl_api, mask, std::string(name));
+    g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] = 0xffffffff00000000UL;
 
-    this->test_vm_control(g_ctl);
+    enable();
+    this->expect_true(is_enabled());
+
+    disable();
+    this->expect_true(is_disabled());
+
+    enable_if_allowed();
+    this->expect_true(is_enabled_if_exists());
+
+    disable_if_allowed();
+    this->expect_true(is_disabled_if_exists());
 }
 
 void
@@ -3160,11 +3534,19 @@ vmcs_ut::test_vmcs_vm_entry_controls_load_ia32_perf_global_ctrl()
 {
     using namespace vmcs::vm_entry_controls::load_ia32_perf_global_ctrl;
 
-    g_ctl_type = entry_ctl;
-    init_vm_control_api(g_ctl_api, &is_enabled, &enable, &disable, &enable_if_allowed, &disable_if_allowed);
-    init_vm_control(g_ctl, g_ctl_type, g_ctl_api, mask, std::string(name));
+    g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] = 0xffffffff00000000UL;
 
-    this->test_vm_control(g_ctl);
+    enable();
+    this->expect_true(is_enabled());
+
+    disable();
+    this->expect_true(is_disabled());
+
+    enable_if_allowed();
+    this->expect_true(is_enabled_if_exists());
+
+    disable_if_allowed();
+    this->expect_true(is_disabled_if_exists());
 }
 
 void
@@ -3172,11 +3554,19 @@ vmcs_ut::test_vmcs_vm_entry_controls_load_ia32_pat()
 {
     using namespace vmcs::vm_entry_controls::load_ia32_pat;
 
-    g_ctl_type = entry_ctl;
-    init_vm_control_api(g_ctl_api, &is_enabled, &enable, &disable, &enable_if_allowed, &disable_if_allowed);
-    init_vm_control(g_ctl, g_ctl_type, g_ctl_api, mask, std::string(name));
+    g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] = 0xffffffff00000000UL;
 
-    this->test_vm_control(g_ctl);
+    enable();
+    this->expect_true(is_enabled());
+
+    disable();
+    this->expect_true(is_disabled());
+
+    enable_if_allowed();
+    this->expect_true(is_enabled_if_exists());
+
+    disable_if_allowed();
+    this->expect_true(is_disabled_if_exists());
 }
 
 void
@@ -3184,101 +3574,609 @@ vmcs_ut::test_vmcs_vm_entry_controls_load_ia32_efer()
 {
     using namespace vmcs::vm_entry_controls::load_ia32_efer;
 
-    g_ctl_type = entry_ctl;
-    init_vm_control_api(g_ctl_api, &is_enabled, &enable, &disable, &enable_if_allowed, &disable_if_allowed);
-    init_vm_control(g_ctl, g_ctl_type, g_ctl_api, mask, std::string(name));
+    g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] = 0xffffffff00000000UL;
 
-    this->test_vm_control(g_ctl);
+    enable();
+    this->expect_true(is_enabled());
+
+    disable();
+    this->expect_true(is_disabled());
+
+    enable_if_allowed();
+    this->expect_true(is_enabled_if_exists());
+
+    disable_if_allowed();
+    this->expect_true(is_disabled_if_exists());
 }
 
 void
 vmcs_ut::test_vmcs_vm_entry_msr_load_count()
 {
+    this->expect_true(vmcs::vm_entry_msr_load_count::exists());
+
     vmcs::vm_entry_msr_load_count::set(1UL);
     this->expect_true(vmcs::vm_entry_msr_load_count::get() == 1UL);
-    this->expect_true(vmcs::vm_entry_msr_load_count::exists());
+
+    vmcs::vm_entry_msr_load_count::set_if_exists(2UL);
+    this->expect_true(vmcs::vm_entry_msr_load_count::get_if_exists() == 2UL);
 }
 
 void
 vmcs_ut::test_vmcs_vm_entry_interruption_information_field()
 {
+    this->expect_true(vmcs::vm_entry_interruption_information_field::exists());
+
     vmcs::vm_entry_interruption_information_field::set(1UL);
     this->expect_true(vmcs::vm_entry_interruption_information_field::get() == 1UL);
-    this->expect_true(vmcs::vm_entry_interruption_information_field::exists());
+
+    vmcs::vm_entry_interruption_information_field::set_if_exists(2UL);
+    this->expect_true(vmcs::vm_entry_interruption_information_field::get_if_exists() == 2UL);
 }
 
 void
 vmcs_ut::test_vmcs_vm_entry_interruption_information_field_vector()
 {
-    vmcs::vm_entry_interruption_information_field::vector::set(0x101UL);
-    this->expect_true(vmcs::vm_entry_interruption_information_field::get() == 0x1UL);
-    this->expect_true(vmcs::vm_entry_interruption_information_field::vector::get() == 0x1UL);
+    using namespace vmcs::vm_entry_interruption_information_field;
+
+    set(0x101UL);
+    this->expect_true(vector::get() == 0x1UL);
+    this->expect_true(get() == 0x101UL);
+
+    set_if_exists(0x222UL);
+    this->expect_true(vector::get_if_exists() == 0x22UL);
+    this->expect_true(get_if_exists() == 0x222UL);
 }
 
 void
 vmcs_ut::test_vmcs_vm_entry_interruption_information_field_type()
 {
-    vmcs::vm_entry_interruption_information_field::set(0x701UL);
-    this->expect_true(vmcs::vm_entry_interruption_information_field::type::get() == vmcs::vm_entry_interruption_information_field::type::other_event);
+    using namespace vmcs::vm_entry_interruption_information_field;
 
-    vmcs::vm_entry_interruption_information_field::type::set(0x301UL);
-    this->expect_true(vmcs::vm_entry_interruption_information_field::type::get() == vmcs::vm_entry_interruption_information_field::type::reserved);
-    this->expect_true(vmcs::vm_entry_interruption_information_field::get() == 0x101UL);
+    set(0xf701UL);
+    interruption_type::set(0x701UL);
+    this->expect_true(interruption_type::get() == interruption_type::reserved);
+    this->expect_true(get() == 0xf101UL);
+
+    interruption_type::set_if_exists(0x303UL);
+    this->expect_true(interruption_type::get_if_exists() == interruption_type::hardware_exception);
+    this->expect_true(get() == 0xf301UL);
 }
 
 void
 vmcs_ut::test_vmcs_vm_entry_interruption_information_field_deliver_error_code_bit()
 {
-    vmcs::vm_entry_interruption_information_field::set(0x701UL);
-    this->expect_false(vmcs::vm_entry_interruption_information_field::deliver_error_code_bit::is_set());
+    using namespace vmcs::vm_entry_interruption_information_field;
 
-    vmcs::vm_entry_interruption_information_field::deliver_error_code_bit::set();
-    this->expect_true(vmcs::vm_entry_interruption_information_field::deliver_error_code_bit::is_set());
-    this->expect_true(vmcs::vm_entry_interruption_information_field::get() == (0x701UL | vmcs::vm_entry_interruption_information_field::deliver_error_code_bit::mask));
+    set(0xffff0000UL);
+    deliver_error_code_bit::enable();
+    this->expect_true(deliver_error_code_bit::is_enabled());
+    this->expect_true(get() == (0xffff0000UL | deliver_error_code_bit::mask));
 
-    vmcs::vm_entry_interruption_information_field::deliver_error_code_bit::clear();
-    this->expect_false(vmcs::vm_entry_interruption_information_field::deliver_error_code_bit::is_set());
-    this->expect_true(vmcs::vm_entry_interruption_information_field::get() == 0x701UL);
+    deliver_error_code_bit::disable();
+    this->expect_true(deliver_error_code_bit::is_disabled());
+    this->expect_true(get() == 0xffff0000UL);
+
+    deliver_error_code_bit::enable_if_exists();
+    this->expect_true(deliver_error_code_bit::is_enabled_if_exists());
+    this->expect_true(get() == (0xffff0000UL | deliver_error_code_bit::mask));
+
+    deliver_error_code_bit::disable_if_exists();
+    this->expect_true(deliver_error_code_bit::is_disabled_if_exists());
+    this->expect_true(get() == 0xffff0000UL);
 }
 
 void
 vmcs_ut::test_vmcs_vm_entry_interruption_information_field_reserved()
 {
-    vmcs::vm_entry_interruption_information_field::set(0x701UL);
-    this->expect_true(vmcs::vm_entry_interruption_information_field::reserved::get() == 0UL);
+    using namespace vmcs::vm_entry_interruption_information_field;
 
-    vmcs::vm_entry_interruption_information_field::reserved::set(0x1UL);
-    this->expect_true(vmcs::vm_entry_interruption_information_field::reserved::get() == 0x1UL);
-    this->expect_true(vmcs::vm_entry_interruption_information_field::get() == 0x1701UL);
+    set(0x701UL);
+    reserved::set(0xbc02UL);
+    this->expect_true(reserved::get() == 0xbc02UL);
+    this->expect_true(get() == 0xbc02701UL);
+
+    reserved::set_if_exists(0x1UL);
+    this->expect_true(reserved::get_if_exists() == 0x1UL);
+    this->expect_true(get() == 0x01701UL);
 }
 
 void
 vmcs_ut::test_vmcs_vm_entry_interruption_information_field_valid_bit()
 {
-    vmcs::vm_entry_interruption_information_field::set(0x701UL);
-    this->expect_false(vmcs::vm_entry_interruption_information_field::valid_bit::is_set());
+    using namespace vmcs::vm_entry_interruption_information_field;
 
-    vmcs::vm_entry_interruption_information_field::valid_bit::set();
-    this->expect_true(vmcs::vm_entry_interruption_information_field::valid_bit::is_set());
-    this->expect_true(vmcs::vm_entry_interruption_information_field::get() == (0x701UL | vmcs::vm_entry_interruption_information_field::valid_bit::mask));
+    set(0x0fff0000UL);
+    valid_bit::enable();
+    this->expect_true(valid_bit::is_enabled());
+    this->expect_true(get() == (0x0fff0000UL | valid_bit::mask));
 
-    vmcs::vm_entry_interruption_information_field::valid_bit::clear();
-    this->expect_false(vmcs::vm_entry_interruption_information_field::valid_bit::is_set());
-    this->expect_true(vmcs::vm_entry_interruption_information_field::get() == 0x701UL);
+    valid_bit::disable();
+    this->expect_true(valid_bit::is_disabled());
+    this->expect_true(get() == 0x0fff0000UL);
+
+    valid_bit::enable_if_exists();
+    this->expect_true(valid_bit::is_enabled_if_exists());
+    this->expect_true(get() == (0x0fff0000UL | valid_bit::mask));
+
+    valid_bit::disable_if_exists();
+    this->expect_true(valid_bit::is_disabled_if_exists());
+    this->expect_true(get() == 0x0fff0000UL);
 }
 
 void
 vmcs_ut::test_vmcs_vm_entry_exception_error_code()
 {
+    this->expect_true(vmcs::vm_entry_exception_error_code::exists());
+
     vmcs::vm_entry_exception_error_code::set(1UL);
     this->expect_true(vmcs::vm_entry_exception_error_code::get() == 1UL);
-    this->expect_true(vmcs::vm_entry_exception_error_code::exists());
+
+    vmcs::vm_entry_exception_error_code::set_if_exists(2UL);
+    this->expect_true(vmcs::vm_entry_exception_error_code::get_if_exists() == 2UL);
 }
 
 void
 vmcs_ut::test_vmcs_vm_entry_instruction_length()
 {
+    this->expect_true(vmcs::vm_entry_instruction_length::exists());
+
     vmcs::vm_entry_instruction_length::set(1UL);
     this->expect_true(vmcs::vm_entry_instruction_length::get() == 1UL);
-    this->expect_true(vmcs::vm_entry_instruction_length::exists());
+
+    vmcs::vm_entry_instruction_length::set_if_exists(2UL);
+    this->expect_true(vmcs::vm_entry_instruction_length::get_if_exists() == 2UL);
+}
+
+void
+vmcs_ut::test_vmcs_tpr_threshold()
+{
+    using namespace msrs::ia32_vmx_true_procbased_ctls;
+
+    g_msrs[addr] = ~(use_tpr_shadow::mask << 32);
+    this->expect_false(vmcs::tpr_threshold::exists());
+
+    g_msrs[addr] = use_tpr_shadow::mask << 32;
+    this->expect_true(vmcs::tpr_threshold::exists());
+
+    vmcs::tpr_threshold::set(0xF03UL);
+    this->expect_true(vmcs::tpr_threshold::get() == 0xF03UL);
+
+    vmcs::tpr_threshold::set_if_exists(0x333UL);
+    this->expect_true(vmcs::tpr_threshold::get_if_exists() == 0x333UL);
+}
+
+void
+vmcs_ut::test_vmcs_secondary_processor_based_vm_execution_controls()
+{
+    using namespace msrs::ia32_vmx_true_procbased_ctls;
+
+    g_msrs[addr] = ~(activate_secondary_controls::mask << 32);
+    this->expect_false(vmcs::secondary_processor_based_vm_execution_controls::exists());
+
+    g_msrs[addr] = activate_secondary_controls::mask << 32;
+    this->expect_true(vmcs::secondary_processor_based_vm_execution_controls::exists());
+
+    vmcs::secondary_processor_based_vm_execution_controls::set(1UL);
+    this->expect_true(vmcs::secondary_processor_based_vm_execution_controls::get() == 1UL);
+
+    vmcs::secondary_processor_based_vm_execution_controls::set_if_exists(2UL);
+    this->expect_true(vmcs::secondary_processor_based_vm_execution_controls::get_if_exists() == 2UL);
+}
+
+void
+vmcs_ut::test_vmcs_secondary_processor_based_vm_execution_controls_virtualize_apic_accesses()
+{
+    using namespace vmcs::secondary_processor_based_vm_execution_controls::virtualize_apic_accesses;
+    using namespace msrs::ia32_vmx_true_procbased_ctls;
+
+    g_msrs[addr] = activate_secondary_controls::mask << 32;
+    g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = 0xffffffff00000000UL;
+
+    enable();
+    this->expect_true(is_enabled());
+
+    disable();
+    this->expect_true(is_disabled());
+
+    enable_if_allowed();
+    this->expect_true(is_enabled_if_exists());
+
+    disable_if_allowed();
+    this->expect_true(is_disabled_if_exists());
+}
+
+void
+vmcs_ut::test_vmcs_secondary_processor_based_vm_execution_controls_enable_ept()
+{
+    using namespace vmcs::secondary_processor_based_vm_execution_controls::enable_ept;
+    using namespace msrs::ia32_vmx_true_procbased_ctls;
+
+    g_msrs[addr] = activate_secondary_controls::mask << 32;
+    g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = 0xffffffff00000000UL;
+
+    enable();
+    this->expect_true(is_enabled());
+
+    disable();
+    this->expect_true(is_disabled());
+
+    enable_if_allowed();
+    this->expect_true(is_enabled_if_exists());
+
+    disable_if_allowed();
+    this->expect_true(is_disabled_if_exists());
+}
+
+void
+vmcs_ut::test_vmcs_secondary_processor_based_vm_execution_controls_descriptor_table_exiting()
+{
+    using namespace vmcs::secondary_processor_based_vm_execution_controls::descriptor_table_exiting;
+    using namespace msrs::ia32_vmx_true_procbased_ctls;
+
+    g_msrs[addr] = activate_secondary_controls::mask << 32;
+    g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = 0xffffffff00000000UL;
+
+    enable();
+    this->expect_true(is_enabled());
+
+    disable();
+    this->expect_true(is_disabled());
+
+    enable_if_allowed();
+    this->expect_true(is_enabled_if_exists());
+
+    disable_if_allowed();
+    this->expect_true(is_disabled_if_exists());
+}
+
+void
+vmcs_ut::test_vmcs_secondary_processor_based_vm_execution_controls_enable_rdtscp()
+{
+    using namespace vmcs::secondary_processor_based_vm_execution_controls::enable_rdtscp;
+    using namespace msrs::ia32_vmx_true_procbased_ctls;
+
+    g_msrs[addr] = activate_secondary_controls::mask << 32;
+    g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = 0xffffffff00000000UL;
+
+    enable();
+    this->expect_true(is_enabled());
+
+    disable();
+    this->expect_true(is_disabled());
+
+    enable_if_allowed();
+    this->expect_true(is_enabled_if_exists());
+
+    disable_if_allowed();
+    this->expect_true(is_disabled_if_exists());
+}
+
+void
+vmcs_ut::test_vmcs_secondary_processor_based_vm_execution_controls_virtualize_x2apic_mode()
+{
+    using namespace vmcs::secondary_processor_based_vm_execution_controls::virtualize_x2apic_mode;
+    using namespace msrs::ia32_vmx_true_procbased_ctls;
+
+    g_msrs[addr] = activate_secondary_controls::mask << 32;
+    g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = 0xffffffff00000000UL;
+
+    enable();
+    this->expect_true(is_enabled());
+
+    disable();
+    this->expect_true(is_disabled());
+
+    enable_if_allowed();
+    this->expect_true(is_enabled_if_exists());
+
+    disable_if_allowed();
+    this->expect_true(is_disabled_if_exists());
+}
+
+void
+vmcs_ut::test_vmcs_secondary_processor_based_vm_execution_controls_enable_vpid()
+{
+    using namespace vmcs::secondary_processor_based_vm_execution_controls::enable_vpid;
+    using namespace msrs::ia32_vmx_true_procbased_ctls;
+
+    g_msrs[addr] = activate_secondary_controls::mask << 32;
+    g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = 0xffffffff00000000UL;
+
+    enable();
+    this->expect_true(is_enabled());
+
+    disable();
+    this->expect_true(is_disabled());
+
+    enable_if_allowed();
+    this->expect_true(is_enabled_if_exists());
+
+    disable_if_allowed();
+    this->expect_true(is_disabled_if_exists());
+}
+
+void
+vmcs_ut::test_vmcs_secondary_processor_based_vm_execution_controls_wbinvd_exiting()
+{
+    using namespace vmcs::secondary_processor_based_vm_execution_controls::wbinvd_exiting;
+    using namespace msrs::ia32_vmx_true_procbased_ctls;
+
+    g_msrs[addr] = activate_secondary_controls::mask << 32;
+    g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = 0xffffffff00000000UL;
+
+    enable();
+    this->expect_true(is_enabled());
+
+    disable();
+    this->expect_true(is_disabled());
+
+    enable_if_allowed();
+    this->expect_true(is_enabled_if_exists());
+
+    disable_if_allowed();
+    this->expect_true(is_disabled_if_exists());
+}
+
+void
+vmcs_ut::test_vmcs_secondary_processor_based_vm_execution_controls_unrestricted_guest()
+{
+    using namespace vmcs::secondary_processor_based_vm_execution_controls::unrestricted_guest;
+    using namespace msrs::ia32_vmx_true_procbased_ctls;
+
+    g_msrs[addr] = activate_secondary_controls::mask << 32;
+    g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = 0xffffffff00000000UL;
+
+    enable();
+    this->expect_true(is_enabled());
+
+    disable();
+    this->expect_true(is_disabled());
+
+    enable_if_allowed();
+    this->expect_true(is_enabled_if_exists());
+
+    disable_if_allowed();
+    this->expect_true(is_disabled_if_exists());
+}
+
+void
+vmcs_ut::test_vmcs_secondary_processor_based_vm_execution_controls_apic_register_virtualization()
+{
+    using namespace vmcs::secondary_processor_based_vm_execution_controls::apic_register_virtualization;
+    using namespace msrs::ia32_vmx_true_procbased_ctls;
+
+    g_msrs[addr] = activate_secondary_controls::mask << 32;
+    g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = 0xffffffff00000000UL;
+
+    enable();
+    this->expect_true(is_enabled());
+
+    disable();
+    this->expect_true(is_disabled());
+
+    enable_if_allowed();
+    this->expect_true(is_enabled_if_exists());
+
+    disable_if_allowed();
+    this->expect_true(is_disabled_if_exists());
+}
+
+void
+vmcs_ut::test_vmcs_secondary_processor_based_vm_execution_controls_virtual_interrupt_delivery()
+{
+    using namespace vmcs::secondary_processor_based_vm_execution_controls::virtual_interrupt_delivery;
+    using namespace msrs::ia32_vmx_true_procbased_ctls;
+
+    g_msrs[addr] = activate_secondary_controls::mask << 32;
+    g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = 0xffffffff00000000UL;
+
+    enable();
+    this->expect_true(is_enabled());
+
+    disable();
+    this->expect_true(is_disabled());
+
+    enable_if_allowed();
+    this->expect_true(is_enabled_if_exists());
+
+    disable_if_allowed();
+    this->expect_true(is_disabled_if_exists());
+}
+
+void
+vmcs_ut::test_vmcs_secondary_processor_based_vm_execution_controls_pause_loop_exiting()
+{
+    using namespace vmcs::secondary_processor_based_vm_execution_controls::pause_loop_exiting;
+    using namespace msrs::ia32_vmx_true_procbased_ctls;
+
+    g_msrs[addr] = activate_secondary_controls::mask << 32;
+    g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = 0xffffffff00000000UL;
+
+    enable();
+    this->expect_true(is_enabled());
+
+    disable();
+    this->expect_true(is_disabled());
+
+    enable_if_allowed();
+    this->expect_true(is_enabled_if_exists());
+
+    disable_if_allowed();
+    this->expect_true(is_disabled_if_exists());
+}
+
+void
+vmcs_ut::test_vmcs_secondary_processor_based_vm_execution_controls_rdrand_exiting()
+{
+    using namespace vmcs::secondary_processor_based_vm_execution_controls::rdrand_exiting;
+    using namespace msrs::ia32_vmx_true_procbased_ctls;
+
+    g_msrs[addr] = activate_secondary_controls::mask << 32;
+    g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = 0xffffffff00000000UL;
+
+    enable();
+    this->expect_true(is_enabled());
+
+    disable();
+    this->expect_true(is_disabled());
+
+    enable_if_allowed();
+    this->expect_true(is_enabled_if_exists());
+
+    disable_if_allowed();
+    this->expect_true(is_disabled_if_exists());
+}
+
+void
+vmcs_ut::test_vmcs_secondary_processor_based_vm_execution_controls_enable_invpcid()
+{
+    using namespace vmcs::secondary_processor_based_vm_execution_controls::enable_invpcid;
+    using namespace msrs::ia32_vmx_true_procbased_ctls;
+
+    g_msrs[addr] = activate_secondary_controls::mask << 32;
+    g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = 0xffffffff00000000UL;
+
+    enable();
+    this->expect_true(is_enabled());
+
+    disable();
+    this->expect_true(is_disabled());
+
+    enable_if_allowed();
+    this->expect_true(is_enabled_if_exists());
+
+    disable_if_allowed();
+    this->expect_true(is_disabled_if_exists());
+}
+
+void
+vmcs_ut::test_vmcs_secondary_processor_based_vm_execution_controls_enable_vm_functions()
+{
+    using namespace vmcs::secondary_processor_based_vm_execution_controls::enable_vm_functions;
+    using namespace msrs::ia32_vmx_true_procbased_ctls;
+
+    g_msrs[addr] = activate_secondary_controls::mask << 32;
+    g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = 0xffffffff00000000UL;
+
+    enable();
+    this->expect_true(is_enabled());
+
+    disable();
+    this->expect_true(is_disabled());
+
+    enable_if_allowed();
+    this->expect_true(is_enabled_if_exists());
+
+    disable_if_allowed();
+    this->expect_true(is_disabled_if_exists());
+}
+
+void
+vmcs_ut::test_vmcs_secondary_processor_based_vm_execution_controls_vmcs_shadowing()
+{
+    using namespace vmcs::secondary_processor_based_vm_execution_controls::vmcs_shadowing;
+    using namespace msrs::ia32_vmx_true_procbased_ctls;
+
+    g_msrs[addr] = activate_secondary_controls::mask << 32;
+    g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = 0xffffffff00000000UL;
+
+    enable();
+    this->expect_true(is_enabled());
+
+    disable();
+    this->expect_true(is_disabled());
+
+    enable_if_allowed();
+    this->expect_true(is_enabled_if_exists());
+
+    disable_if_allowed();
+    this->expect_true(is_disabled_if_exists());
+}
+
+void
+vmcs_ut::test_vmcs_secondary_processor_based_vm_execution_controls_rdseed_exiting()
+{
+    using namespace vmcs::secondary_processor_based_vm_execution_controls::rdseed_exiting;
+    using namespace msrs::ia32_vmx_true_procbased_ctls;
+
+    g_msrs[addr] = activate_secondary_controls::mask << 32;
+    g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = 0xffffffff00000000UL;
+
+    enable();
+    this->expect_true(is_enabled());
+
+    disable();
+    this->expect_true(is_disabled());
+
+    enable_if_allowed();
+    this->expect_true(is_enabled_if_exists());
+
+    disable_if_allowed();
+    this->expect_true(is_disabled_if_exists());
+}
+
+void
+vmcs_ut::test_vmcs_secondary_processor_based_vm_execution_controls_enable_pml()
+{
+    using namespace vmcs::secondary_processor_based_vm_execution_controls::enable_pml;
+    using namespace msrs::ia32_vmx_true_procbased_ctls;
+
+    g_msrs[addr] = activate_secondary_controls::mask << 32;
+    g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = 0xffffffff00000000UL;
+
+    enable();
+    this->expect_true(is_enabled());
+
+    disable();
+    this->expect_true(is_disabled());
+
+    enable_if_allowed();
+    this->expect_true(is_enabled_if_exists());
+
+    disable_if_allowed();
+    this->expect_true(is_disabled_if_exists());
+}
+
+void
+vmcs_ut::test_vmcs_secondary_processor_based_vm_execution_controls_ept_violation_ve()
+{
+    using namespace vmcs::secondary_processor_based_vm_execution_controls::ept_violation_ve;
+    using namespace msrs::ia32_vmx_true_procbased_ctls;
+
+    g_msrs[addr] = activate_secondary_controls::mask << 32;
+    g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = 0xffffffff00000000UL;
+
+    enable();
+    this->expect_true(is_enabled());
+
+    disable();
+    this->expect_true(is_disabled());
+
+    enable_if_allowed();
+    this->expect_true(is_enabled_if_exists());
+
+    disable_if_allowed();
+    this->expect_true(is_disabled_if_exists());
+}
+
+void
+vmcs_ut::test_vmcs_secondary_processor_based_vm_execution_controls_enable_xsaves_xrstors()
+{
+    using namespace vmcs::secondary_processor_based_vm_execution_controls::enable_xsaves_xrstors;
+    using namespace msrs::ia32_vmx_true_procbased_ctls;
+
+    g_msrs[addr] = activate_secondary_controls::mask << 32;
+    g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = 0xffffffff00000000UL;
+
+    enable();
+    this->expect_true(is_enabled());
+
+    disable();
+    this->expect_true(is_disabled());
+
+    enable_if_allowed();
+    this->expect_true(is_enabled_if_exists());
+
+    disable_if_allowed();
+    this->expect_true(is_disabled_if_exists());
 }
