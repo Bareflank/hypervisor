@@ -508,11 +508,16 @@ vmcs_ut::test_set_vm_control_if_allowed()
 void
 vmcs_ut::test_vmcs_virtual_processor_identifier()
 {
-    vmcs::virtual_processor_identifier::set(100UL);
-    g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = msrs::ia32_vmx_procbased_ctls2::enable_vpid::mask;
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask << 32;
+    g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = msrs::ia32_vmx_procbased_ctls2::enable_vpid::mask << 32;
 
-    this->expect_true(vmcs::virtual_processor_identifier::get() == 100UL);
     this->expect_true(vmcs::virtual_processor_identifier::exists());
+
+    vmcs::virtual_processor_identifier::set(100UL);
+    this->expect_true(vmcs::virtual_processor_identifier::get() == 100UL);
+
+    vmcs::virtual_processor_identifier::set_if_exists(100UL);
+    this->expect_true(vmcs::virtual_processor_identifier::get_if_exists() == 100UL);
 
     g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = 0x0;
 
@@ -522,11 +527,15 @@ vmcs_ut::test_vmcs_virtual_processor_identifier()
 void
 vmcs_ut::test_vmcs_posted_interrupt_notification_vector()
 {
-    vmcs::posted_interrupt_notification_vector::set(100UL);
-    g_msrs[msrs::ia32_vmx_true_pinbased_ctls::addr] = msrs::ia32_vmx_true_pinbased_ctls::process_posted_interrupts::mask;
+    g_msrs[msrs::ia32_vmx_true_pinbased_ctls::addr] = msrs::ia32_vmx_true_pinbased_ctls::process_posted_interrupts::mask << 32;
 
-    this->expect_true(vmcs::posted_interrupt_notification_vector::get() == 100UL);
     this->expect_true(vmcs::posted_interrupt_notification_vector::exists());
+
+    vmcs::posted_interrupt_notification_vector::set(100UL);
+    this->expect_true(vmcs::posted_interrupt_notification_vector::get() == 100UL);
+
+    vmcs::posted_interrupt_notification_vector::set_if_exists(100UL);
+    this->expect_true(vmcs::posted_interrupt_notification_vector::get_if_exists() == 100UL);
 
     g_msrs[msrs::ia32_vmx_true_pinbased_ctls::addr] = 0x0;
 
@@ -536,11 +545,16 @@ vmcs_ut::test_vmcs_posted_interrupt_notification_vector()
 void
 vmcs_ut::test_vmcs_eptp_index()
 {
-    vmcs::eptp_index::set(100UL);
-    g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = msrs::ia32_vmx_procbased_ctls2::ept_violation_ve::mask;
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask << 32;
+    g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = msrs::ia32_vmx_procbased_ctls2::ept_violation_ve::mask << 32;
 
-    this->expect_true(vmcs::eptp_index::get() == 100UL);
     this->expect_true(vmcs::eptp_index::exists());
+
+    vmcs::eptp_index::set(100UL);
+    this->expect_true(vmcs::eptp_index::get() == 100UL);
+
+    vmcs::eptp_index::set_if_exists(200UL);
+    this->expect_true(vmcs::eptp_index::get_if_exists() == 200UL);
 
     g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = 0x0;
 

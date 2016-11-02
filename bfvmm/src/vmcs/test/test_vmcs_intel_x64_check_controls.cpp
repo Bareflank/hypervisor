@@ -543,7 +543,11 @@ setup_check_control_virtual_interrupt_and_external_interrupt_paths(std::vector<s
 static void
 setup_check_control_process_posted_interrupt_checks_paths(std::vector<struct control_flow_path> &cfg)
 {
-    path.setup = [&] { disable_pin_ctl(vmcs::pin_based_vm_execution_controls::process_posted_interrupts::mask); };
+    path.setup = [&]
+    {
+        g_msrs[msrs::ia32_vmx_true_pinbased_ctls::addr] = msrs::ia32_vmx_true_pinbased_ctls::process_posted_interrupts::mask << 32;
+        disable_pin_ctl(vmcs::pin_based_vm_execution_controls::process_posted_interrupts::mask);
+    };
     path.throws_exception = false;
     cfg.push_back(path);
 

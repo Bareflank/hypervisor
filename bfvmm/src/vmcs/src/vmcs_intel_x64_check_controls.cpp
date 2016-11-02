@@ -344,7 +344,7 @@ vmcs_intel_x64::check_control_vpid_checks()
     if (secondary_processor_based_vm_execution_controls::enable_vpid::is_disabled_if_exists())
         return;
 
-    if (virtual_processor_identifier::get() == 0)
+    if (virtual_processor_identifier::get_if_exists() == 0)
         throw std::logic_error("vpid cannot equal 0");
 }
 
