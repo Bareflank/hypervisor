@@ -163,7 +163,6 @@ private:
     void test_vm_exit_reason_xsaves();
     void test_vm_exit_reason_xrstors();
     void test_vm_exit_failure_check();
-    void test_vm_exit_reason_to_string();
     void test_halt();
 };
 

@@ -206,8 +206,6 @@ protected:
 
 #endif
 
-    virtual std::string get_vm_instruction_error();
-
     // REMOVE ME: These should be placed in the x64 namespace instead
     virtual bool is_address_canonical(uint64_t addr);
     virtual bool is_linear_address_valid(uint64_t addr);
@@ -1002,19 +1000,6 @@ namespace host_ia32_efer
 }
 
 constexpr const auto VMCS_HOST_IA32_PERF_GLOBAL_CTRL                      = 0x0000000000002C04UL;
-
-// -----------------------------------------------------------------------------
-// 32bit Read-Only Fields
-// -----------------------------------------------------------------------------
-
-constexpr const auto VMCS_VM_INSTRUCTION_ERROR                                 = 0x0000000000004400UL;
-constexpr const auto VMCS_EXIT_REASON                                          = 0x0000000000004402UL;
-constexpr const auto VMCS_VM_EXIT_INTERRUPTION_INFORMATION                     = 0x0000000000004404UL;
-constexpr const auto VMCS_VM_EXIT_INTERRUPTION_ERROR_CODE                      = 0x0000000000004406UL;
-constexpr const auto VMCS_IDT_VECTORING_INFORMATION_FIELD                      = 0x0000000000004408UL;
-constexpr const auto VMCS_IDT_VECTORING_ERROR_CODE                             = 0x000000000000440AUL;
-constexpr const auto VMCS_VM_                           = 0x000000000000440CUL;
-constexpr const auto VMCS_VM_EXIT_INSTRUCTION_INFORMATION                      = 0x000000000000440EUL;
 
 // -----------------------------------------------------------------------------
 // Natural Width Read-Only Fields
@@ -2405,7 +2390,6 @@ constexpr const auto VMCS_HOST_RIP                                             =
 //////////////
 //////////////
 
-
 // VM-Function Control Fields
 #define VM_FUNCTION_CONTROL_EPTP_SWITCHING                        (1ULL << 0)
 
@@ -2448,108 +2432,5 @@ constexpr const auto VMCS_HOST_RIP                                             =
 #define EPTP_MEMORY_TYPE                                   0x0000000000000007
 #define EPTP_PAGE_WALK_LENGTH                              0x0000000000000038
 #define EPTP_ACCESSED_DIRTY_FLAGS_ENABLED                  0x0000000000000040
-
-// REMOVE ME
-//
-// This code needs to be cleaned up so that it's just part of getting this
-// VMCS field. The call to it should be in the dump function in the VMCS
-// code.
-//
-// std::string
-// get_vm_instruction_error()
-// {
-//     switch (vm::read(VMCS_VM_INSTRUCTION_ERROR))
-//     {
-//         case 1:
-//             return "VMCALL executed in VMX root operation";
-
-//         case 2:
-//             return "VMCLEAR with invalid physical address";
-
-//         case 3:
-//             return "VMCLEAR with VMXON pointer";
-
-//         case 4:
-//             return "VMLAUNCH with non-clear VMCS";
-
-//         case 5:
-//             return "VMRESUME with non-launched VMCS";
-
-//         case 6:
-//             return "VMRESUME after VMXOFF (VMXOFF and VMXON between "
-//                    "VMLAUNCH and VMRESUME)";
-
-//         case 7:
-//             return "VM entry with invalid control field(s)";
-
-//         case 8:
-//             return "VM entry with invalid host-state field(s)";
-
-//         case 9:
-//             return "VMPTRLD with invalid physical address";
-
-//         case 10:
-//             return "VMPTRLD with VMXON pointer";
-
-//         case 11:
-//             return "VMPTRLD with incorrect VMCS revision identifier";
-
-//         case 12:
-//             return "VMREAD/VMWRITE from/to unsupported VMCS component";
-
-//         case 13:
-//             return "VMWRITE to read-only VMCS component";
-
-//         case 15:
-//             return "VMXON executed in VMX root operation";
-
-//         case 16:
-//             return "VM entry with invalid executive-VMCS pointer";
-
-//         case 17:
-//             return "VM entry with non-launched executive VMCS";
-
-//         case 18:
-//             return "VM entry with executive-VMCS pointer not VMXON "
-//                    "pointer (when attempting to deactivate the "
-//                    "dual-monitor treatment of SMIs and SMM)";
-
-//         case 19:
-//             return "VMCALL with non-clear VMCS (when attempting to "
-//                    "activate the dual-monitor treatment of SMIs and "
-//                    "SMM)";
-
-//         case 20:
-//             return "VMCALL with invalid VM-exit control fields";
-
-//         case 22:
-//             return "VMCALL with incorrect MSEG revision identifier "
-//                    "(when attempting to activate the dual-monitor "
-//                    "treatment of SMIs and SMM)";
-
-//         case 23:
-//             return "VMXOFF under dual-monitor treatment of SMIs and "
-//                    "SMM";
-
-//         case 24:
-//             return "VMCALL with invalid SMM-monitor features (when "
-//                    "attempting to activate the dual-monitor treatment "
-//                    "of SMIs and SMM)";
-
-//         case 25:
-//             return "VM entry with invalid VM-execution control fields "
-//                    "in executive VMCS (when attempting to return from "
-//                    "SMM)";
-
-//         case 26:
-//             return "VM entry with events blocked by MOV SS.";
-
-//         case 28:
-//             return "Invalid operand to INVEPT/INVVPID.";
-
-//         default:
-//             return "Unknown VM instruction error";
-//     }
-// }
 
 #endif
