@@ -612,14 +612,23 @@ namespace virtual_processor_identifier
     constexpr const auto addr = 0x0000000000000000UL;
     constexpr const auto name = "virtual_processor_identifier";
 
-    inline auto get()
-    { return vm::read(addr, name); }
-
-    template<class T> constexpr void set(T val)
-    { vm::write(addr, val, name); }
-
     inline bool exists() noexcept
-    { return msrs::ia32_vmx_procbased_ctls2::enable_vpid::get() == 1; }
+    {
+        return msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::is_allowed1() &&
+               msrs::ia32_vmx_procbased_ctls2::enable_vpid::is_allowed1();
+    }
+
+    inline auto get()
+    { return get_vmcs_field(addr, name, exists()); }
+
+    inline auto get_if_exists(bool verbose = false) noexcept
+    { return get_vmcs_field_if_exists(addr, name, verbose, exists()); }
+
+    template <class T> void set(T val)
+    { set_vmcs_field(val, addr, name, exists()); }
+
+    template <class T> void set_if_exists(T val, bool verbose = false) noexcept
+    { set_vmcs_field_if_exists(val, addr, name, verbose, exists()); }
 }
 
 namespace posted_interrupt_notification_vector
@@ -627,14 +636,20 @@ namespace posted_interrupt_notification_vector
     constexpr const auto addr = 0x0000000000000002UL;
     constexpr const auto name = "posted_interrupt_notification_vector";
 
-    inline auto get()
-    { return vm::read(addr, name); }
-
-    template<class T> void set(T val)
-    { vm::write(addr, val, name); }
-
     inline bool exists() noexcept
-    { return msrs::ia32_vmx_true_pinbased_ctls::process_posted_interrupts::get() == 1; }
+    { return msrs::ia32_vmx_true_pinbased_ctls::process_posted_interrupts::is_allowed1(); }
+
+    inline auto get()
+    { return get_vmcs_field(addr, name, exists()); }
+
+    inline auto get_if_exists(bool verbose = false) noexcept
+    { return get_vmcs_field_if_exists(addr, name, verbose, exists()); }
+
+    template <class T> void set(T val)
+    { set_vmcs_field(val, addr, name, exists()); }
+
+    template <class T> void set_if_exists(T val, bool verbose = false) noexcept
+    { set_vmcs_field_if_exists(val, addr, name, verbose, exists()); }
 }
 
 namespace eptp_index
@@ -642,14 +657,24 @@ namespace eptp_index
     constexpr const auto addr = 0x0000000000000004UL;
     constexpr const auto name = "eptp_index";
 
-    inline auto get()
-    { return vm::read(addr, name); }
-
-    template<class T> void set(T val)
-    { vm::write(addr, val, name); }
-
     inline bool exists() noexcept
-    { return msrs::ia32_vmx_procbased_ctls2::ept_violation_ve::get() == 1; }
+    {
+        return msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::is_allowed1() &&
+               msrs::ia32_vmx_procbased_ctls2::ept_violation_ve::is_allowed1();
+    }
+
+    inline auto get()
+    { return get_vmcs_field(addr, name, exists()); }
+
+    inline auto get_if_exists(bool verbose = false) noexcept
+    { return get_vmcs_field_if_exists(addr, name, verbose, exists()); }
+
+    template <class T> void set(T val)
+    { set_vmcs_field(val, addr, name, exists()); }
+
+    template <class T> void set_if_exists(T val, bool verbose = false) noexcept
+    { set_vmcs_field_if_exists(val, addr, name, verbose, exists()); }
+
 }
 
 // -----------------------------------------------------------------------------
