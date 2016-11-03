@@ -1079,36 +1079,58 @@ vmcs_ut::test_vmcs_host_es_selector()
 
     this->expect_true(vmcs::host_es_selector::get() == 100UL);
     this->expect_true(vmcs::host_es_selector::exists());
+
+    vmcs::host_es_selector::set_if_exists(200UL);
+
+    this->expect_true(vmcs::host_es_selector::get_if_exists() == 200UL);
 }
 
 void
 vmcs_ut::test_vmcs_host_es_selector_rpl()
 {
-    vmcs::guest_es_selector::rpl::set(1UL);
-    this->expect_true(vmcs::guest_es_selector::rpl::get() == 1UL);
+    vmcs::host_es_selector::rpl::set(1UL);
+    this->expect_true(vmcs::host_es_selector::rpl::get() == 1UL);
 
-    vmcs::guest_es_selector::rpl::set(0UL);
-    this->expect_true(vmcs::guest_es_selector::rpl::get() == 0UL);
+    vmcs::host_es_selector::rpl::set(0UL);
+    this->expect_true(vmcs::host_es_selector::rpl::get() == 0UL);
+
+    vmcs::host_es_selector::rpl::set_if_exists(1UL);
+    this->expect_true(vmcs::host_es_selector::rpl::get_if_exists() == 1UL);
+
+    vmcs::host_es_selector::rpl::set_if_exists(0UL);
+    this->expect_true(vmcs::host_es_selector::rpl::get_if_exists() == 0UL);
 }
 
 void
 vmcs_ut::test_vmcs_host_es_selector_ti()
 {
-    vmcs::guest_es_selector::ti::set(1UL);
-    this->expect_true(vmcs::guest_es_selector::ti::get() == 1UL);
+    vmcs::host_es_selector::ti::set(1UL);
+    this->expect_true(vmcs::host_es_selector::ti::get() == 1UL);
 
-    vmcs::guest_es_selector::ti::set(0UL);
-    this->expect_true(vmcs::guest_es_selector::ti::get() == 0UL);
+    vmcs::host_es_selector::ti::set(0UL);
+    this->expect_true(vmcs::host_es_selector::ti::get() == 0UL);
+
+    vmcs::host_es_selector::ti::set_if_exists(1UL);
+    this->expect_true(vmcs::host_es_selector::ti::get_if_exists() == 1UL);
+
+    vmcs::host_es_selector::ti::set_if_exists(0UL);
+    this->expect_true(vmcs::host_es_selector::ti::get_if_exists() == 0UL);
 }
 
 void
 vmcs_ut::test_vmcs_host_es_selector_index()
 {
-    vmcs::guest_es_selector::index::set(1UL);
-    this->expect_true(vmcs::guest_es_selector::index::get() == 1UL);
+    vmcs::host_es_selector::index::set(1UL);
+    this->expect_true(vmcs::host_es_selector::index::get() == 1UL);
 
-    vmcs::guest_es_selector::index::set(0UL);
-    this->expect_true(vmcs::guest_es_selector::index::get() == 0UL);
+    vmcs::host_es_selector::index::set(0UL);
+    this->expect_true(vmcs::host_es_selector::index::get() == 0UL);
+
+    vmcs::host_es_selector::index::set_if_exists(1UL);
+    this->expect_true(vmcs::host_es_selector::index::get_if_exists() == 1UL);
+
+    vmcs::host_es_selector::index::set_if_exists(0UL);
+    this->expect_true(vmcs::host_es_selector::index::get_if_exists() == 0UL);
 }
 
 void
@@ -1118,36 +1140,58 @@ vmcs_ut::test_vmcs_host_cs_selector()
 
     this->expect_true(vmcs::host_cs_selector::get() == 100UL);
     this->expect_true(vmcs::host_cs_selector::exists());
+
+    vmcs::host_cs_selector::set_if_exists(200UL);
+
+    this->expect_true(vmcs::host_cs_selector::get_if_exists() == 200UL);
 }
 
 void
 vmcs_ut::test_vmcs_host_cs_selector_rpl()
 {
-    vmcs::guest_cs_selector::rpl::set(1UL);
-    this->expect_true(vmcs::guest_cs_selector::rpl::get() == 1UL);
+    vmcs::host_cs_selector::rpl::set(1UL);
+    this->expect_true(vmcs::host_cs_selector::rpl::get() == 1UL);
 
-    vmcs::guest_cs_selector::rpl::set(0UL);
-    this->expect_true(vmcs::guest_cs_selector::rpl::get() == 0UL);
+    vmcs::host_cs_selector::rpl::set(0UL);
+    this->expect_true(vmcs::host_cs_selector::rpl::get() == 0UL);
+
+    vmcs::host_cs_selector::rpl::set_if_exists(1UL);
+    this->expect_true(vmcs::host_cs_selector::rpl::get_if_exists() == 1UL);
+
+    vmcs::host_cs_selector::rpl::set_if_exists(0UL);
+    this->expect_true(vmcs::host_cs_selector::rpl::get_if_exists() == 0UL);
 }
 
 void
 vmcs_ut::test_vmcs_host_cs_selector_ti()
 {
-    vmcs::guest_cs_selector::ti::set(1UL);
-    this->expect_true(vmcs::guest_cs_selector::ti::get() == 1UL);
+    vmcs::host_cs_selector::ti::set(1UL);
+    this->expect_true(vmcs::host_cs_selector::ti::get() == 1UL);
 
-    vmcs::guest_cs_selector::ti::set(0UL);
-    this->expect_true(vmcs::guest_cs_selector::ti::get() == 0UL);
+    vmcs::host_cs_selector::ti::set(0UL);
+    this->expect_true(vmcs::host_cs_selector::ti::get() == 0UL);
+
+    vmcs::host_cs_selector::ti::set_if_exists(1UL);
+    this->expect_true(vmcs::host_cs_selector::ti::get_if_exists() == 1UL);
+
+    vmcs::host_cs_selector::ti::set_if_exists(0UL);
+    this->expect_true(vmcs::host_cs_selector::ti::get_if_exists() == 0UL);
 }
 
 void
 vmcs_ut::test_vmcs_host_cs_selector_index()
 {
-    vmcs::guest_cs_selector::index::set(1UL);
-    this->expect_true(vmcs::guest_cs_selector::index::get() == 1UL);
+    vmcs::host_cs_selector::index::set(1UL);
+    this->expect_true(vmcs::host_cs_selector::index::get() == 1UL);
 
-    vmcs::guest_cs_selector::index::set(0UL);
-    this->expect_true(vmcs::guest_cs_selector::index::get() == 0UL);
+    vmcs::host_cs_selector::index::set(0UL);
+    this->expect_true(vmcs::host_cs_selector::index::get() == 0UL);
+
+    vmcs::host_cs_selector::index::set_if_exists(1UL);
+    this->expect_true(vmcs::host_cs_selector::index::get_if_exists() == 1UL);
+
+    vmcs::host_cs_selector::index::set_if_exists(0UL);
+    this->expect_true(vmcs::host_cs_selector::index::get_if_exists() == 0UL);
 }
 
 void
@@ -1157,36 +1201,58 @@ vmcs_ut::test_vmcs_host_ss_selector()
 
     this->expect_true(vmcs::host_ss_selector::get() == 100UL);
     this->expect_true(vmcs::host_ss_selector::exists());
+
+    vmcs::host_ss_selector::set_if_exists(200UL);
+
+    this->expect_true(vmcs::host_ss_selector::get_if_exists() == 200UL);
 }
 
 void
 vmcs_ut::test_vmcs_host_ss_selector_rpl()
 {
-    vmcs::guest_ss_selector::rpl::set(1UL);
-    this->expect_true(vmcs::guest_ss_selector::rpl::get() == 1UL);
+    vmcs::host_ss_selector::rpl::set(1UL);
+    this->expect_true(vmcs::host_ss_selector::rpl::get() == 1UL);
 
-    vmcs::guest_ss_selector::rpl::set(0UL);
-    this->expect_true(vmcs::guest_ss_selector::rpl::get() == 0UL);
+    vmcs::host_ss_selector::rpl::set(0UL);
+    this->expect_true(vmcs::host_ss_selector::rpl::get() == 0UL);
+
+    vmcs::host_ss_selector::rpl::set_if_exists(1UL);
+    this->expect_true(vmcs::host_ss_selector::rpl::get_if_exists() == 1UL);
+
+    vmcs::host_ss_selector::rpl::set_if_exists(0UL);
+    this->expect_true(vmcs::host_ss_selector::rpl::get_if_exists() == 0UL);
 }
 
 void
 vmcs_ut::test_vmcs_host_ss_selector_ti()
 {
-    vmcs::guest_ss_selector::ti::set(1UL);
-    this->expect_true(vmcs::guest_ss_selector::ti::get() == 1UL);
+    vmcs::host_ss_selector::ti::set(1UL);
+    this->expect_true(vmcs::host_ss_selector::ti::get() == 1UL);
 
-    vmcs::guest_ss_selector::ti::set(0UL);
-    this->expect_true(vmcs::guest_ss_selector::ti::get() == 0UL);
+    vmcs::host_ss_selector::ti::set(0UL);
+    this->expect_true(vmcs::host_ss_selector::ti::get() == 0UL);
+
+    vmcs::host_ss_selector::ti::set_if_exists(1UL);
+    this->expect_true(vmcs::host_ss_selector::ti::get_if_exists() == 1UL);
+
+    vmcs::host_ss_selector::ti::set_if_exists(0UL);
+    this->expect_true(vmcs::host_ss_selector::ti::get_if_exists() == 0UL);
 }
 
 void
 vmcs_ut::test_vmcs_host_ss_selector_index()
 {
-    vmcs::guest_ss_selector::index::set(1UL);
-    this->expect_true(vmcs::guest_ss_selector::index::get() == 1UL);
+    vmcs::host_ss_selector::index::set(1UL);
+    this->expect_true(vmcs::host_ss_selector::index::get() == 1UL);
 
-    vmcs::guest_ss_selector::index::set(0UL);
-    this->expect_true(vmcs::guest_ss_selector::index::get() == 0UL);
+    vmcs::host_ss_selector::index::set(0UL);
+    this->expect_true(vmcs::host_ss_selector::index::get() == 0UL);
+
+    vmcs::host_ss_selector::index::set_if_exists(1UL);
+    this->expect_true(vmcs::host_ss_selector::index::get_if_exists() == 1UL);
+
+    vmcs::host_ss_selector::index::set_if_exists(0UL);
+    this->expect_true(vmcs::host_ss_selector::index::get_if_exists() == 0UL);
 }
 
 void
@@ -1196,36 +1262,58 @@ vmcs_ut::test_vmcs_host_ds_selector()
 
     this->expect_true(vmcs::host_ds_selector::get() == 100UL);
     this->expect_true(vmcs::host_ds_selector::exists());
+
+    vmcs::host_ds_selector::set_if_exists(200UL);
+
+    this->expect_true(vmcs::host_ds_selector::get_if_exists() == 200UL);
 }
 
 void
 vmcs_ut::test_vmcs_host_ds_selector_rpl()
 {
-    vmcs::guest_ds_selector::rpl::set(1UL);
-    this->expect_true(vmcs::guest_ds_selector::rpl::get() == 1UL);
+    vmcs::host_ds_selector::rpl::set(1UL);
+    this->expect_true(vmcs::host_ds_selector::rpl::get() == 1UL);
 
-    vmcs::guest_ds_selector::rpl::set(0UL);
-    this->expect_true(vmcs::guest_ds_selector::rpl::get() == 0UL);
+    vmcs::host_ds_selector::rpl::set(0UL);
+    this->expect_true(vmcs::host_ds_selector::rpl::get() == 0UL);
+
+    vmcs::host_ds_selector::rpl::set_if_exists(1UL);
+    this->expect_true(vmcs::host_ds_selector::rpl::get_if_exists() == 1UL);
+
+    vmcs::host_ds_selector::rpl::set_if_exists(0UL);
+    this->expect_true(vmcs::host_ds_selector::rpl::get_if_exists() == 0UL);
 }
 
 void
 vmcs_ut::test_vmcs_host_ds_selector_ti()
 {
-    vmcs::guest_ds_selector::ti::set(1UL);
-    this->expect_true(vmcs::guest_ds_selector::ti::get() == 1UL);
+    vmcs::host_ds_selector::ti::set(1UL);
+    this->expect_true(vmcs::host_ds_selector::ti::get() == 1UL);
 
-    vmcs::guest_ds_selector::ti::set(0UL);
-    this->expect_true(vmcs::guest_ds_selector::ti::get() == 0UL);
+    vmcs::host_ds_selector::ti::set(0UL);
+    this->expect_true(vmcs::host_ds_selector::ti::get() == 0UL);
+
+    vmcs::host_ds_selector::ti::set_if_exists(1UL);
+    this->expect_true(vmcs::host_ds_selector::ti::get_if_exists() == 1UL);
+
+    vmcs::host_ds_selector::ti::set_if_exists(0UL);
+    this->expect_true(vmcs::host_ds_selector::ti::get_if_exists() == 0UL);
 }
 
 void
 vmcs_ut::test_vmcs_host_ds_selector_index()
 {
-    vmcs::guest_ds_selector::index::set(1UL);
-    this->expect_true(vmcs::guest_ds_selector::index::get() == 1UL);
+    vmcs::host_ds_selector::index::set(1UL);
+    this->expect_true(vmcs::host_ds_selector::index::get() == 1UL);
 
-    vmcs::guest_ds_selector::index::set(0UL);
-    this->expect_true(vmcs::guest_ds_selector::index::get() == 0UL);
+    vmcs::host_ds_selector::index::set(0UL);
+    this->expect_true(vmcs::host_ds_selector::index::get() == 0UL);
+
+    vmcs::host_ds_selector::index::set_if_exists(1UL);
+    this->expect_true(vmcs::host_ds_selector::index::get_if_exists() == 1UL);
+
+    vmcs::host_ds_selector::index::set_if_exists(0UL);
+    this->expect_true(vmcs::host_ds_selector::index::get_if_exists() == 0UL);
 }
 
 void
@@ -1235,36 +1323,58 @@ vmcs_ut::test_vmcs_host_fs_selector()
 
     this->expect_true(vmcs::host_fs_selector::get() == 100UL);
     this->expect_true(vmcs::host_fs_selector::exists());
+
+    vmcs::host_fs_selector::set_if_exists(200UL);
+
+    this->expect_true(vmcs::host_fs_selector::get_if_exists() == 200UL);
 }
 
 void
 vmcs_ut::test_vmcs_host_fs_selector_rpl()
 {
-    vmcs::guest_fs_selector::rpl::set(1UL);
-    this->expect_true(vmcs::guest_fs_selector::rpl::get() == 1UL);
+    vmcs::host_fs_selector::rpl::set(1UL);
+    this->expect_true(vmcs::host_fs_selector::rpl::get() == 1UL);
 
-    vmcs::guest_fs_selector::rpl::set(0UL);
-    this->expect_true(vmcs::guest_fs_selector::rpl::get() == 0UL);
+    vmcs::host_fs_selector::rpl::set(0UL);
+    this->expect_true(vmcs::host_fs_selector::rpl::get() == 0UL);
+
+    vmcs::host_fs_selector::rpl::set_if_exists(1UL);
+    this->expect_true(vmcs::host_fs_selector::rpl::get_if_exists() == 1UL);
+
+    vmcs::host_fs_selector::rpl::set_if_exists(0UL);
+    this->expect_true(vmcs::host_fs_selector::rpl::get_if_exists() == 0UL);
 }
 
 void
 vmcs_ut::test_vmcs_host_fs_selector_ti()
 {
-    vmcs::guest_fs_selector::ti::set(1UL);
-    this->expect_true(vmcs::guest_fs_selector::ti::get() == 1UL);
+    vmcs::host_fs_selector::ti::set(1UL);
+    this->expect_true(vmcs::host_fs_selector::ti::get() == 1UL);
 
-    vmcs::guest_fs_selector::ti::set(0UL);
-    this->expect_true(vmcs::guest_fs_selector::ti::get() == 0UL);
+    vmcs::host_fs_selector::ti::set(0UL);
+    this->expect_true(vmcs::host_fs_selector::ti::get() == 0UL);
+
+    vmcs::host_fs_selector::ti::set_if_exists(1UL);
+    this->expect_true(vmcs::host_fs_selector::ti::get_if_exists() == 1UL);
+
+    vmcs::host_fs_selector::ti::set_if_exists(0UL);
+    this->expect_true(vmcs::host_fs_selector::ti::get_if_exists() == 0UL);
 }
 
 void
 vmcs_ut::test_vmcs_host_fs_selector_index()
 {
-    vmcs::guest_fs_selector::index::set(1UL);
-    this->expect_true(vmcs::guest_fs_selector::index::get() == 1UL);
+    vmcs::host_fs_selector::index::set(1UL);
+    this->expect_true(vmcs::host_fs_selector::index::get() == 1UL);
 
-    vmcs::guest_fs_selector::index::set(0UL);
-    this->expect_true(vmcs::guest_fs_selector::index::get() == 0UL);
+    vmcs::host_fs_selector::index::set(0UL);
+    this->expect_true(vmcs::host_fs_selector::index::get() == 0UL);
+
+    vmcs::host_fs_selector::index::set_if_exists(1UL);
+    this->expect_true(vmcs::host_fs_selector::index::get_if_exists() == 1UL);
+
+    vmcs::host_fs_selector::index::set_if_exists(0UL);
+    this->expect_true(vmcs::host_fs_selector::index::get_if_exists() == 0UL);
 }
 
 void
@@ -1274,36 +1384,58 @@ vmcs_ut::test_vmcs_host_gs_selector()
 
     this->expect_true(vmcs::host_gs_selector::get() == 100UL);
     this->expect_true(vmcs::host_gs_selector::exists());
+
+    vmcs::host_gs_selector::set_if_exists(200UL);
+
+    this->expect_true(vmcs::host_gs_selector::get_if_exists() == 200UL);
 }
 
 void
 vmcs_ut::test_vmcs_host_gs_selector_rpl()
 {
-    vmcs::guest_gs_selector::rpl::set(1UL);
-    this->expect_true(vmcs::guest_gs_selector::rpl::get() == 1UL);
+    vmcs::host_gs_selector::rpl::set(1UL);
+    this->expect_true(vmcs::host_gs_selector::rpl::get() == 1UL);
 
-    vmcs::guest_gs_selector::rpl::set(0UL);
-    this->expect_true(vmcs::guest_gs_selector::rpl::get() == 0UL);
+    vmcs::host_gs_selector::rpl::set(0UL);
+    this->expect_true(vmcs::host_gs_selector::rpl::get() == 0UL);
+
+    vmcs::host_gs_selector::rpl::set_if_exists(1UL);
+    this->expect_true(vmcs::host_gs_selector::rpl::get_if_exists() == 1UL);
+
+    vmcs::host_gs_selector::rpl::set_if_exists(0UL);
+    this->expect_true(vmcs::host_gs_selector::rpl::get_if_exists() == 0UL);
 }
 
 void
 vmcs_ut::test_vmcs_host_gs_selector_ti()
 {
-    vmcs::guest_gs_selector::ti::set(1UL);
-    this->expect_true(vmcs::guest_gs_selector::ti::get() == 1UL);
+    vmcs::host_gs_selector::ti::set(1UL);
+    this->expect_true(vmcs::host_gs_selector::ti::get() == 1UL);
 
-    vmcs::guest_gs_selector::ti::set(0UL);
-    this->expect_true(vmcs::guest_gs_selector::ti::get() == 0UL);
+    vmcs::host_gs_selector::ti::set(0UL);
+    this->expect_true(vmcs::host_gs_selector::ti::get() == 0UL);
+
+    vmcs::host_gs_selector::ti::set_if_exists(1UL);
+    this->expect_true(vmcs::host_gs_selector::ti::get_if_exists() == 1UL);
+
+    vmcs::host_gs_selector::ti::set_if_exists(0UL);
+    this->expect_true(vmcs::host_gs_selector::ti::get_if_exists() == 0UL);
 }
 
 void
 vmcs_ut::test_vmcs_host_gs_selector_index()
 {
-    vmcs::guest_gs_selector::index::set(1UL);
-    this->expect_true(vmcs::guest_gs_selector::index::get() == 1UL);
+    vmcs::host_gs_selector::index::set(1UL);
+    this->expect_true(vmcs::host_gs_selector::index::get() == 1UL);
 
-    vmcs::guest_gs_selector::index::set(0UL);
-    this->expect_true(vmcs::guest_gs_selector::index::get() == 0UL);
+    vmcs::host_gs_selector::index::set(0UL);
+    this->expect_true(vmcs::host_gs_selector::index::get() == 0UL);
+
+    vmcs::host_gs_selector::index::set_if_exists(1UL);
+    this->expect_true(vmcs::host_gs_selector::index::get_if_exists() == 1UL);
+
+    vmcs::host_gs_selector::index::set_if_exists(0UL);
+    this->expect_true(vmcs::host_gs_selector::index::get_if_exists() == 0UL);
 }
 
 void
@@ -1313,36 +1445,58 @@ vmcs_ut::test_vmcs_host_tr_selector()
 
     this->expect_true(vmcs::host_tr_selector::get() == 100UL);
     this->expect_true(vmcs::host_tr_selector::exists());
+
+    vmcs::host_tr_selector::set_if_exists(200UL);
+
+    this->expect_true(vmcs::host_tr_selector::get_if_exists() == 200UL);
 }
 
 void
 vmcs_ut::test_vmcs_host_tr_selector_rpl()
 {
-    vmcs::guest_tr_selector::rpl::set(1UL);
-    this->expect_true(vmcs::guest_tr_selector::rpl::get() == 1UL);
+    vmcs::host_tr_selector::rpl::set(1UL);
+    this->expect_true(vmcs::host_tr_selector::rpl::get() == 1UL);
 
-    vmcs::guest_tr_selector::rpl::set(0UL);
-    this->expect_true(vmcs::guest_tr_selector::rpl::get() == 0UL);
+    vmcs::host_tr_selector::rpl::set(0UL);
+    this->expect_true(vmcs::host_tr_selector::rpl::get() == 0UL);
+
+    vmcs::host_tr_selector::rpl::set_if_exists(1UL);
+    this->expect_true(vmcs::host_tr_selector::rpl::get_if_exists() == 1UL);
+
+    vmcs::host_tr_selector::rpl::set_if_exists(0UL);
+    this->expect_true(vmcs::host_tr_selector::rpl::get_if_exists() == 0UL);
 }
 
 void
 vmcs_ut::test_vmcs_host_tr_selector_ti()
 {
-    vmcs::guest_tr_selector::ti::set(1UL);
-    this->expect_true(vmcs::guest_tr_selector::ti::get() == 1UL);
+    vmcs::host_tr_selector::ti::set(1UL);
+    this->expect_true(vmcs::host_tr_selector::ti::get() == 1UL);
 
-    vmcs::guest_tr_selector::ti::set(0UL);
-    this->expect_true(vmcs::guest_tr_selector::ti::get() == 0UL);
+    vmcs::host_tr_selector::ti::set(0UL);
+    this->expect_true(vmcs::host_tr_selector::ti::get() == 0UL);
+
+    vmcs::host_tr_selector::ti::set_if_exists(1UL);
+    this->expect_true(vmcs::host_tr_selector::ti::get_if_exists() == 1UL);
+
+    vmcs::host_tr_selector::ti::set_if_exists(0UL);
+    this->expect_true(vmcs::host_tr_selector::ti::get_if_exists() == 0UL);
 }
 
 void
 vmcs_ut::test_vmcs_host_tr_selector_index()
 {
-    vmcs::guest_tr_selector::index::set(1UL);
-    this->expect_true(vmcs::guest_tr_selector::index::get() == 1UL);
+    vmcs::host_tr_selector::index::set(1UL);
+    this->expect_true(vmcs::host_tr_selector::index::get() == 1UL);
 
-    vmcs::guest_tr_selector::index::set(0UL);
-    this->expect_true(vmcs::guest_tr_selector::index::get() == 0UL);
+    vmcs::host_tr_selector::index::set(0UL);
+    this->expect_true(vmcs::host_tr_selector::index::get() == 0UL);
+
+    vmcs::host_tr_selector::index::set_if_exists(1UL);
+    this->expect_true(vmcs::host_tr_selector::index::get_if_exists() == 1UL);
+
+    vmcs::host_tr_selector::index::set_if_exists(0UL);
+    this->expect_true(vmcs::host_tr_selector::index::get_if_exists() == 0UL);
 }
 
 void
