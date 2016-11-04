@@ -510,35 +510,38 @@ vmcs_ut::test_vmcs_virtual_processor_identifier()
 {
     g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask << 32;
     g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = msrs::ia32_vmx_procbased_ctls2::enable_vpid::mask << 32;
-
     this->expect_true(vmcs::virtual_processor_identifier::exists());
 
     vmcs::virtual_processor_identifier::set(100UL);
     this->expect_true(vmcs::virtual_processor_identifier::get() == 100UL);
 
-    vmcs::virtual_processor_identifier::set_if_exists(100UL);
-    this->expect_true(vmcs::virtual_processor_identifier::get_if_exists() == 100UL);
+    vmcs::virtual_processor_identifier::set_if_exists(200UL);
+    this->expect_true(vmcs::virtual_processor_identifier::get_if_exists() == 200UL);
 
     g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = 0x0;
-
     this->expect_false(vmcs::virtual_processor_identifier::exists());
+    this->expect_exception([&] { vmcs::virtual_processor_identifier::set(1UL); }, ""_ut_lee);
+    this->expect_exception([&] { vmcs::virtual_processor_identifier::get(); }, ""_ut_lee);
+    this->expect_no_exception([&] { vmcs::virtual_processor_identifier::set_if_exists(1UL); });
+    this->expect_no_exception([&] { vmcs::virtual_processor_identifier::get_if_exists(); });
+
+    g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = msrs::ia32_vmx_procbased_ctls2::enable_vpid::mask << 32;
+    this->expect_true(vmcs::virtual_processor_identifier::get() == 200UL);
 }
 
 void
 vmcs_ut::test_vmcs_posted_interrupt_notification_vector()
 {
     g_msrs[msrs::ia32_vmx_true_pinbased_ctls::addr] = msrs::ia32_vmx_true_pinbased_ctls::process_posted_interrupts::mask << 32;
-
     this->expect_true(vmcs::posted_interrupt_notification_vector::exists());
 
     vmcs::posted_interrupt_notification_vector::set(100UL);
     this->expect_true(vmcs::posted_interrupt_notification_vector::get() == 100UL);
 
-    vmcs::posted_interrupt_notification_vector::set_if_exists(100UL);
-    this->expect_true(vmcs::posted_interrupt_notification_vector::get_if_exists() == 100UL);
+    vmcs::posted_interrupt_notification_vector::set_if_exists(200UL);
+    this->expect_true(vmcs::posted_interrupt_notification_vector::get_if_exists() == 200UL);
 
     g_msrs[msrs::ia32_vmx_true_pinbased_ctls::addr] = 0x0;
-
     this->expect_false(vmcs::posted_interrupt_notification_vector::exists());
 }
 
@@ -547,7 +550,6 @@ vmcs_ut::test_vmcs_eptp_index()
 {
     g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask << 32;
     g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = msrs::ia32_vmx_procbased_ctls2::ept_violation_ve::mask << 32;
-
     this->expect_true(vmcs::eptp_index::exists());
 
     vmcs::eptp_index::set(100UL);
@@ -557,17 +559,25 @@ vmcs_ut::test_vmcs_eptp_index()
     this->expect_true(vmcs::eptp_index::get_if_exists() == 200UL);
 
     g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = 0x0;
-
     this->expect_false(vmcs::eptp_index::exists());
+    this->expect_exception([&] { vmcs::eptp_index::set(1UL); }, ""_ut_lee);
+    this->expect_exception([&] { vmcs::eptp_index::get(); }, ""_ut_lee);
+    this->expect_no_exception([&] { vmcs::eptp_index::set_if_exists(1UL); });
+    this->expect_no_exception([&] { vmcs::eptp_index::get_if_exists(); });
+
+    g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = msrs::ia32_vmx_procbased_ctls2::ept_violation_ve::mask << 32;
+    this->expect_true(vmcs::eptp_index::get() == 200UL);
 }
 
 void
 vmcs_ut::test_vmcs_guest_es_selector()
 {
     vmcs::guest_es_selector::set(100UL);
-
     this->expect_true(vmcs::guest_es_selector::get() == 100UL);
     this->expect_true(vmcs::guest_es_selector::exists());
+
+    vmcs::guest_es_selector::set_if_exists(200UL);
+    this->expect_true(vmcs::guest_es_selector::get_if_exists() == 200UL);
 }
 
 void
@@ -578,6 +588,12 @@ vmcs_ut::test_vmcs_guest_es_selector_rpl()
 
     vmcs::guest_es_selector::rpl::set(0UL);
     this->expect_true(vmcs::guest_es_selector::rpl::get() == 0UL);
+
+    vmcs::guest_es_selector::rpl::set_if_exists(1UL);
+    this->expect_true(vmcs::guest_es_selector::rpl::get_if_exists() == 1UL);
+
+    vmcs::guest_es_selector::rpl::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_es_selector::rpl::get_if_exists() == 0UL);
 }
 
 void
@@ -588,6 +604,12 @@ vmcs_ut::test_vmcs_guest_es_selector_ti()
 
     vmcs::guest_es_selector::ti::set(0UL);
     this->expect_true(vmcs::guest_es_selector::ti::get() == 0UL);
+
+    vmcs::guest_es_selector::ti::set_if_exists(1UL);
+    this->expect_true(vmcs::guest_es_selector::ti::get_if_exists() == 1UL);
+
+    vmcs::guest_es_selector::ti::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_es_selector::ti::get_if_exists() == 0UL);
 }
 
 void
@@ -598,6 +620,12 @@ vmcs_ut::test_vmcs_guest_es_selector_index()
 
     vmcs::guest_es_selector::index::set(0UL);
     this->expect_true(vmcs::guest_es_selector::index::get() == 0UL);
+
+    vmcs::guest_es_selector::index::set_if_exists(1UL);
+    this->expect_true(vmcs::guest_es_selector::index::get_if_exists() == 1UL);
+
+    vmcs::guest_es_selector::index::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_es_selector::index::get_if_exists() == 0UL);
 }
 
 void
@@ -607,6 +635,9 @@ vmcs_ut::test_vmcs_guest_cs_selector()
 
     this->expect_true(vmcs::guest_cs_selector::get() == 100UL);
     this->expect_true(vmcs::guest_cs_selector::exists());
+
+    vmcs::guest_cs_selector::set_if_exists(200UL);
+    this->expect_true(vmcs::guest_cs_selector::get_if_exists() == 200UL);
 }
 
 void
@@ -617,6 +648,12 @@ vmcs_ut::test_vmcs_guest_cs_selector_rpl()
 
     vmcs::guest_cs_selector::rpl::set(0UL);
     this->expect_true(vmcs::guest_cs_selector::rpl::get() == 0UL);
+
+    vmcs::guest_cs_selector::rpl::set_if_exists(1UL);
+    this->expect_true(vmcs::guest_cs_selector::rpl::get_if_exists() == 1UL);
+
+    vmcs::guest_cs_selector::rpl::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_cs_selector::rpl::get_if_exists() == 0UL);
 }
 
 void
@@ -627,6 +664,12 @@ vmcs_ut::test_vmcs_guest_cs_selector_ti()
 
     vmcs::guest_cs_selector::ti::set(0UL);
     this->expect_true(vmcs::guest_cs_selector::ti::get() == 0UL);
+
+    vmcs::guest_cs_selector::ti::set_if_exists(1UL);
+    this->expect_true(vmcs::guest_cs_selector::ti::get_if_exists() == 1UL);
+
+    vmcs::guest_cs_selector::ti::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_cs_selector::ti::get_if_exists() == 0UL);
 }
 
 void
@@ -637,6 +680,12 @@ vmcs_ut::test_vmcs_guest_cs_selector_index()
 
     vmcs::guest_cs_selector::index::set(0UL);
     this->expect_true(vmcs::guest_cs_selector::index::get() == 0UL);
+
+    vmcs::guest_cs_selector::index::set_if_exists(1UL);
+    this->expect_true(vmcs::guest_cs_selector::index::get_if_exists() == 1UL);
+
+    vmcs::guest_cs_selector::index::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_cs_selector::index::get_if_exists() == 0UL);
 }
 
 void
@@ -646,6 +695,9 @@ vmcs_ut::test_vmcs_guest_ss_selector()
 
     this->expect_true(vmcs::guest_ss_selector::get() == 100UL);
     this->expect_true(vmcs::guest_ss_selector::exists());
+
+    vmcs::guest_ss_selector::set_if_exists(200UL);
+    this->expect_true(vmcs::guest_ss_selector::get_if_exists() == 200UL);
 }
 
 void
@@ -656,6 +708,12 @@ vmcs_ut::test_vmcs_guest_ss_selector_rpl()
 
     vmcs::guest_ss_selector::rpl::set(0UL);
     this->expect_true(vmcs::guest_ss_selector::rpl::get() == 0UL);
+
+    vmcs::guest_ss_selector::rpl::set_if_exists(1UL);
+    this->expect_true(vmcs::guest_ss_selector::rpl::get_if_exists() == 1UL);
+
+    vmcs::guest_ss_selector::rpl::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_ss_selector::rpl::get_if_exists() == 0UL);
 }
 
 void
@@ -666,6 +724,12 @@ vmcs_ut::test_vmcs_guest_ss_selector_ti()
 
     vmcs::guest_ss_selector::ti::set(0UL);
     this->expect_true(vmcs::guest_ss_selector::ti::get() == 0UL);
+
+    vmcs::guest_ss_selector::ti::set_if_exists(1UL);
+    this->expect_true(vmcs::guest_ss_selector::ti::get_if_exists() == 1UL);
+
+    vmcs::guest_ss_selector::ti::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_ss_selector::ti::get_if_exists() == 0UL);
 }
 
 void
@@ -676,6 +740,12 @@ vmcs_ut::test_vmcs_guest_ss_selector_index()
 
     vmcs::guest_ss_selector::index::set(0UL);
     this->expect_true(vmcs::guest_ss_selector::index::get() == 0UL);
+
+    vmcs::guest_ss_selector::index::set_if_exists(1UL);
+    this->expect_true(vmcs::guest_ss_selector::index::get_if_exists() == 1UL);
+
+    vmcs::guest_ss_selector::index::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_ss_selector::index::get_if_exists() == 0UL);
 }
 
 void
@@ -685,6 +755,9 @@ vmcs_ut::test_vmcs_guest_ds_selector()
 
     this->expect_true(vmcs::guest_ds_selector::get() == 100UL);
     this->expect_true(vmcs::guest_ds_selector::exists());
+
+    vmcs::guest_ds_selector::set_if_exists(200UL);
+    this->expect_true(vmcs::guest_ds_selector::get_if_exists() == 200UL);
 }
 
 void
@@ -695,6 +768,12 @@ vmcs_ut::test_vmcs_guest_ds_selector_rpl()
 
     vmcs::guest_ds_selector::rpl::set(0UL);
     this->expect_true(vmcs::guest_ds_selector::rpl::get() == 0UL);
+
+    vmcs::guest_ds_selector::rpl::set_if_exists(1UL);
+    this->expect_true(vmcs::guest_ds_selector::rpl::get_if_exists() == 1UL);
+
+    vmcs::guest_ds_selector::rpl::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_ds_selector::rpl::get_if_exists() == 0UL);
 }
 
 void
@@ -705,6 +784,12 @@ vmcs_ut::test_vmcs_guest_ds_selector_ti()
 
     vmcs::guest_ds_selector::ti::set(0UL);
     this->expect_true(vmcs::guest_ds_selector::ti::get() == 0UL);
+
+    vmcs::guest_ds_selector::ti::set_if_exists(1UL);
+    this->expect_true(vmcs::guest_ds_selector::ti::get_if_exists() == 1UL);
+
+    vmcs::guest_ds_selector::ti::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_ds_selector::ti::get_if_exists() == 0UL);
 }
 
 void
@@ -715,6 +800,12 @@ vmcs_ut::test_vmcs_guest_ds_selector_index()
 
     vmcs::guest_ds_selector::index::set(0UL);
     this->expect_true(vmcs::guest_ds_selector::index::get() == 0UL);
+
+    vmcs::guest_ds_selector::index::set_if_exists(1UL);
+    this->expect_true(vmcs::guest_ds_selector::index::get_if_exists() == 1UL);
+
+    vmcs::guest_ds_selector::index::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_ds_selector::index::get_if_exists() == 0UL);
 }
 
 void
@@ -724,6 +815,9 @@ vmcs_ut::test_vmcs_guest_fs_selector()
 
     this->expect_true(vmcs::guest_fs_selector::get() == 100UL);
     this->expect_true(vmcs::guest_fs_selector::exists());
+
+    vmcs::guest_fs_selector::set_if_exists(200UL);
+    this->expect_true(vmcs::guest_fs_selector::get_if_exists() == 200UL);
 }
 
 void
@@ -734,6 +828,12 @@ vmcs_ut::test_vmcs_guest_fs_selector_rpl()
 
     vmcs::guest_fs_selector::rpl::set(0UL);
     this->expect_true(vmcs::guest_fs_selector::rpl::get() == 0UL);
+
+    vmcs::guest_fs_selector::rpl::set_if_exists(1UL);
+    this->expect_true(vmcs::guest_fs_selector::rpl::get_if_exists() == 1UL);
+
+    vmcs::guest_fs_selector::rpl::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_fs_selector::rpl::get_if_exists() == 0UL);
 }
 
 void
@@ -744,6 +844,12 @@ vmcs_ut::test_vmcs_guest_fs_selector_ti()
 
     vmcs::guest_fs_selector::ti::set(0UL);
     this->expect_true(vmcs::guest_fs_selector::ti::get() == 0UL);
+
+    vmcs::guest_fs_selector::ti::set_if_exists(1UL);
+    this->expect_true(vmcs::guest_fs_selector::ti::get_if_exists() == 1UL);
+
+    vmcs::guest_fs_selector::ti::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_fs_selector::ti::get_if_exists() == 0UL);
 }
 
 void
@@ -754,6 +860,12 @@ vmcs_ut::test_vmcs_guest_fs_selector_index()
 
     vmcs::guest_fs_selector::index::set(0UL);
     this->expect_true(vmcs::guest_fs_selector::index::get() == 0UL);
+
+    vmcs::guest_fs_selector::index::set_if_exists(1UL);
+    this->expect_true(vmcs::guest_fs_selector::index::get_if_exists() == 1UL);
+
+    vmcs::guest_fs_selector::index::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_fs_selector::index::get_if_exists() == 0UL);
 }
 
 void
@@ -763,6 +875,9 @@ vmcs_ut::test_vmcs_guest_gs_selector()
 
     this->expect_true(vmcs::guest_gs_selector::get() == 100UL);
     this->expect_true(vmcs::guest_gs_selector::exists());
+
+    vmcs::guest_gs_selector::set_if_exists(200UL);
+    this->expect_true(vmcs::guest_gs_selector::get_if_exists() == 200UL);
 }
 
 void
@@ -773,6 +888,12 @@ vmcs_ut::test_vmcs_guest_gs_selector_rpl()
 
     vmcs::guest_gs_selector::rpl::set(0UL);
     this->expect_true(vmcs::guest_gs_selector::rpl::get() == 0UL);
+
+    vmcs::guest_gs_selector::rpl::set_if_exists(1UL);
+    this->expect_true(vmcs::guest_gs_selector::rpl::get_if_exists() == 1UL);
+
+    vmcs::guest_gs_selector::rpl::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_gs_selector::rpl::get_if_exists() == 0UL);
 }
 
 void
@@ -783,6 +904,12 @@ vmcs_ut::test_vmcs_guest_gs_selector_ti()
 
     vmcs::guest_gs_selector::ti::set(0UL);
     this->expect_true(vmcs::guest_gs_selector::ti::get() == 0UL);
+
+    vmcs::guest_gs_selector::ti::set_if_exists(1UL);
+    this->expect_true(vmcs::guest_gs_selector::ti::get_if_exists() == 1UL);
+
+    vmcs::guest_gs_selector::ti::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_gs_selector::ti::get_if_exists() == 0UL);
 }
 
 void
@@ -793,6 +920,12 @@ vmcs_ut::test_vmcs_guest_gs_selector_index()
 
     vmcs::guest_gs_selector::index::set(0UL);
     this->expect_true(vmcs::guest_gs_selector::index::get() == 0UL);
+
+    vmcs::guest_gs_selector::index::set_if_exists(1UL);
+    this->expect_true(vmcs::guest_gs_selector::index::get_if_exists() == 1UL);
+
+    vmcs::guest_gs_selector::index::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_gs_selector::index::get_if_exists() == 0UL);
 }
 
 void
@@ -802,6 +935,9 @@ vmcs_ut::test_vmcs_guest_ldtr_selector()
 
     this->expect_true(vmcs::guest_ldtr_selector::get() == 100UL);
     this->expect_true(vmcs::guest_ldtr_selector::exists());
+
+    vmcs::guest_ldtr_selector::set_if_exists(200UL);
+    this->expect_true(vmcs::guest_ldtr_selector::get_if_exists() == 200UL);
 }
 
 void
@@ -812,6 +948,12 @@ vmcs_ut::test_vmcs_guest_ldtr_selector_rpl()
 
     vmcs::guest_ldtr_selector::rpl::set(0UL);
     this->expect_true(vmcs::guest_ldtr_selector::rpl::get() == 0UL);
+
+    vmcs::guest_ldtr_selector::rpl::set_if_exists(1UL);
+    this->expect_true(vmcs::guest_ldtr_selector::rpl::get_if_exists() == 1UL);
+
+    vmcs::guest_ldtr_selector::rpl::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_ldtr_selector::rpl::get_if_exists() == 0UL);
 }
 
 void
@@ -822,6 +964,12 @@ vmcs_ut::test_vmcs_guest_ldtr_selector_ti()
 
     vmcs::guest_ldtr_selector::ti::set(0UL);
     this->expect_true(vmcs::guest_ldtr_selector::ti::get() == 0UL);
+
+    vmcs::guest_ldtr_selector::ti::set_if_exists(1UL);
+    this->expect_true(vmcs::guest_ldtr_selector::ti::get_if_exists() == 1UL);
+
+    vmcs::guest_ldtr_selector::ti::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_ldtr_selector::ti::get_if_exists() == 0UL);
 }
 
 void
@@ -832,6 +980,12 @@ vmcs_ut::test_vmcs_guest_ldtr_selector_index()
 
     vmcs::guest_ldtr_selector::index::set(0UL);
     this->expect_true(vmcs::guest_ldtr_selector::index::get() == 0UL);
+
+    vmcs::guest_ldtr_selector::index::set_if_exists(1UL);
+    this->expect_true(vmcs::guest_ldtr_selector::index::get_if_exists() == 1UL);
+
+    vmcs::guest_ldtr_selector::index::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_ldtr_selector::index::get_if_exists() == 0UL);
 }
 
 void
@@ -841,6 +995,9 @@ vmcs_ut::test_vmcs_guest_tr_selector()
 
     this->expect_true(vmcs::guest_tr_selector::get() == 100UL);
     this->expect_true(vmcs::guest_tr_selector::exists());
+
+    vmcs::guest_tr_selector::set_if_exists(200UL);
+    this->expect_true(vmcs::guest_tr_selector::get_if_exists() == 200UL);
 }
 
 void
@@ -851,6 +1008,12 @@ vmcs_ut::test_vmcs_guest_tr_selector_rpl()
 
     vmcs::guest_tr_selector::rpl::set(0UL);
     this->expect_true(vmcs::guest_tr_selector::rpl::get() == 0UL);
+
+    vmcs::guest_tr_selector::rpl::set_if_exists(1UL);
+    this->expect_true(vmcs::guest_tr_selector::rpl::get_if_exists() == 1UL);
+
+    vmcs::guest_tr_selector::rpl::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_tr_selector::rpl::get_if_exists() == 0UL);
 }
 
 void
@@ -861,6 +1024,12 @@ vmcs_ut::test_vmcs_guest_tr_selector_ti()
 
     vmcs::guest_tr_selector::ti::set(0UL);
     this->expect_true(vmcs::guest_tr_selector::ti::get() == 0UL);
+
+    vmcs::guest_tr_selector::ti::set_if_exists(1UL);
+    this->expect_true(vmcs::guest_tr_selector::ti::get_if_exists() == 1UL);
+
+    vmcs::guest_tr_selector::ti::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_tr_selector::ti::get_if_exists() == 0UL);
 }
 
 void
@@ -871,20 +1040,36 @@ vmcs_ut::test_vmcs_guest_tr_selector_index()
 
     vmcs::guest_tr_selector::index::set(0UL);
     this->expect_true(vmcs::guest_tr_selector::index::get() == 0UL);
+
+    vmcs::guest_tr_selector::index::set_if_exists(1UL);
+    this->expect_true(vmcs::guest_tr_selector::index::get_if_exists() == 1UL);
+
+    vmcs::guest_tr_selector::index::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_tr_selector::index::get_if_exists() == 0UL);
 }
 
 void
 vmcs_ut::test_vmcs_guest_interrupt_status()
 {
-    vmcs::guest_interrupt_status::set(100UL);
-    g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = msrs::ia32_vmx_procbased_ctls2::virtual_interrupt_delivery::mask;
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask << 32;
+    g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = msrs::ia32_vmx_procbased_ctls2::virtual_interrupt_delivery::mask << 32;
 
-    this->expect_true(vmcs::guest_interrupt_status::get() == 100UL);
     this->expect_true(vmcs::guest_interrupt_status::exists());
 
-    g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = 0x0;
+    vmcs::guest_interrupt_status::set(100UL);
+    this->expect_true(vmcs::guest_interrupt_status::get() == 100UL);
 
+    vmcs::guest_interrupt_status::set_if_exists(200UL);
+    this->expect_true(vmcs::guest_interrupt_status::get_if_exists() == 200UL);
+
+    g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = 0x0;
     this->expect_false(vmcs::guest_interrupt_status::exists());
+    this->expect_exception([&] { vmcs::guest_interrupt_status::set(1UL); }, ""_ut_lee);
+    this->expect_exception([&] { vmcs::guest_interrupt_status::get(); }, ""_ut_lee);
+    this->expect_no_exception([&] { vmcs::guest_interrupt_status::set_if_exists(1UL); });
+    this->expect_no_exception([&] { vmcs::guest_interrupt_status::get_if_exists(); });
+    g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = msrs::ia32_vmx_procbased_ctls2::virtual_interrupt_delivery::mask << 32;
+    this->expect_true(vmcs::guest_interrupt_status::get() == 200UL);
 }
 
 void
