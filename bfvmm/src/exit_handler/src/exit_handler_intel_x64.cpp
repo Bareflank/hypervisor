@@ -531,7 +531,7 @@ exit_handler_intel_x64::handle_rdmsr()
         // reading the following undefined MSRs, which causes the system to
         // freeze since attempting to read these MSRs in the exit handler
         // will cause a GP which is not being caught. The result is, the core
-        // that runs RDMSR on these freezes, the the other cores receive an
+        // that runs RDMSR on these freezes, the other cores receive an
         // INIT signal to reset, and the system dies.
         //
 

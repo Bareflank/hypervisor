@@ -32,7 +32,7 @@
 /// Exit Handler
 ///
 /// This class is responsible for detecting why a guest exited (i.e. stopped
-/// it's execution), and dispatches the appropriated handler to emulate the
+/// its execution), and dispatches the appropriated handler to emulate the
 /// instruction that could not execute. Note that this class could be executed
 /// a lot, so performance is key here.
 ///
