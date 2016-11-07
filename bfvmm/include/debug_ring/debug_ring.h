@@ -58,7 +58,7 @@ public:
     ///
     /// @throws invalid_debug_ring thrown if the debug_ring that was
     ///     constructed is invalid (likely due to an invalid vcpuid)
-    /// @throws range_error thown if the string that is provided is too large
+    /// @throws range_error thrown if the string that is provided is too large
     ///
     virtual void write(const std::string &str) noexcept;
 

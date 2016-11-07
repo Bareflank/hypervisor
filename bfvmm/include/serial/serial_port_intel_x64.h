@@ -85,7 +85,7 @@
 /// All of the serial devices start off with the same default settings (minus
 /// the port). There are no checks on the port # (in case a custom port number
 /// is needed), and there are no checks to ensure that only one port is used
-/// as a time. If custom port settings are required, once the serial port is
+/// at a time. If custom port settings are required, once the serial port is
 /// created, the custom settings can be setup by using the set_xxx functions.
 /// The user should ensure that the settings worked by checking the result.
 ///
