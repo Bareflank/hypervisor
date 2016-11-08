@@ -6395,6 +6395,44 @@ namespace guest_cr0
         template<class T> void set(T val)
         { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
+
+    inline void dump() noexcept
+    {
+        bfdebug << "guest cr0 enabled flags:" << bfendl;
+
+        if (protection_enable::get() == 1)
+            bfdebug << "    - protection_enable" << bfendl;
+
+        if (monitor_coprocessor::get() == 1)
+            bfdebug << "    - monitor_coprocessor" << bfendl;
+
+        if (emulation::get() == 1)
+            bfdebug << "    - emulation" << bfendl;
+
+        if (task_switched::get() == 1)
+            bfdebug << "    - task_switched" << bfendl;
+
+        if (extension_type::get() == 1)
+            bfdebug << "    - extension_type" << bfendl;
+
+        if (numeric_error::get() == 1)
+            bfdebug << "    - numeric_error" << bfendl;
+
+        if (write_protect::get() == 1)
+            bfdebug << "    - write_protect" << bfendl;
+
+        if (alignment_mask::get() == 1)
+            bfdebug << "    - alignment_mask" << bfendl;
+
+        if (not_write_through::get() == 1)
+            bfdebug << "    - not_write_through" << bfendl;
+
+        if (cache_disable::get() == 1)
+            bfdebug << "    - cache_disable" << bfendl;
+
+        if (paging::get() == 1)
+            bfdebug << "    - paging" << bfendl;
+    }
 }
 
 namespace guest_cr3
@@ -6671,6 +6709,71 @@ namespace guest_cr4
 
         template<class T> void set(T val)
         { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+
+    inline void dump() noexcept
+    {
+        bfdebug << "guest cr4 enabled flags:" << bfendl;
+
+        if (v8086_mode_extensions::get() == 1)
+            bfdebug << "    - v8086_mode_extensions" << bfendl;
+
+        if (protected_mode_virtual_interrupts::get() == 1)
+            bfdebug << "    - protected_mode_virtual_interrupts" << bfendl;
+
+        if (time_stamp_disable::get() == 1)
+            bfdebug << "    - time_stamp_disable" << bfendl;
+
+        if (debugging_extensions::get() == 1)
+            bfdebug << "    - debugging_extensions" << bfendl;
+
+        if (page_size_extensions::get() == 1)
+            bfdebug << "    - page_size_extensions" << bfendl;
+
+        if (physical_address_extensions::get() == 1)
+            bfdebug << "    - physical_address_extensions" << bfendl;
+
+        if (machine_check_enable::get() == 1)
+            bfdebug << "    - machine_check_enable" << bfendl;
+
+        if (page_global_enable::get() == 1)
+            bfdebug << "    - page_global_enable" << bfendl;
+
+        if (performance_monitor_counter_enable::get() == 1)
+            bfdebug << "    - performance_monitor_counter_enable" << bfendl;
+
+        if (osfxsr::get() == 1)
+            bfdebug << "    - osfxsr" << bfendl;
+
+        if (osxmmexcpt::get() == 1)
+            bfdebug << "    - osxmmexcpt" << bfendl;
+
+        if (vmx_enable_bit::get() == 1)
+            bfdebug << "    - vmx_enable_bit" << bfendl;
+
+        if (smx_enable_bit::get() == 1)
+            bfdebug << "    - smx_enable_bit" << bfendl;
+
+        if (smx_enable_bit::get() == 1)
+            bfdebug << "    - smx_enable_bit" << bfendl;
+
+        if (fsgsbase_enable_bit::get() == 1)
+            bfdebug << "    - fsgsbase_enable_bit" << bfendl;
+
+        if (pcid_enable_bit::get() == 1)
+            bfdebug << "    - pcid_enable_bit" << bfendl;
+
+        if (osxsave::get() == 1)
+            bfdebug << "    - osxsave" << bfendl;
+
+        if (smep_enable_bit::get() == 1)
+            bfdebug << "    - smep_enable_bit" << bfendl;
+
+        if (smap_enable_bit::get() == 1)
+            bfdebug << "    - smap_enable_bit" << bfendl;
+
+        if (protection_key_enable_bit::get() == 1)
+            bfdebug << "    - protection_key_enable_bit" << bfendl;
     }
 }
 
@@ -7150,6 +7253,44 @@ namespace host_cr0
         template<class T> void set(T val)
         { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
     }
+
+    inline void dump() noexcept
+    {
+        bfdebug << "host cr0 enabled flags:" << bfendl;
+
+        if (protection_enable::get() == 1)
+            bfdebug << "    - protection_enable" << bfendl;
+
+        if (monitor_coprocessor::get() == 1)
+            bfdebug << "    - monitor_coprocessor" << bfendl;
+
+        if (emulation::get() == 1)
+            bfdebug << "    - emulation" << bfendl;
+
+        if (task_switched::get() == 1)
+            bfdebug << "    - task_switched" << bfendl;
+
+        if (extension_type::get() == 1)
+            bfdebug << "    - extension_type" << bfendl;
+
+        if (numeric_error::get() == 1)
+            bfdebug << "    - numeric_error" << bfendl;
+
+        if (write_protect::get() == 1)
+            bfdebug << "    - write_protect" << bfendl;
+
+        if (alignment_mask::get() == 1)
+            bfdebug << "    - alignment_mask" << bfendl;
+
+        if (not_write_through::get() == 1)
+            bfdebug << "    - not_write_through" << bfendl;
+
+        if (cache_disable::get() == 1)
+            bfdebug << "    - cache_disable" << bfendl;
+
+        if (paging::get() == 1)
+            bfdebug << "    - paging" << bfendl;
+    }
 }
 
 namespace host_cr3
@@ -7426,6 +7567,71 @@ namespace host_cr4
 
         template<class T> void set(T val)
         { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
+    }
+
+    inline void dump() noexcept
+    {
+        bfdebug << "cr4 enabled flags:" << bfendl;
+
+        if (v8086_mode_extensions::get() == 1)
+            bfdebug << "    - v8086_mode_extensions" << bfendl;
+
+        if (protected_mode_virtual_interrupts::get() == 1)
+            bfdebug << "    - protected_mode_virtual_interrupts" << bfendl;
+
+        if (time_stamp_disable::get() == 1)
+            bfdebug << "    - time_stamp_disable" << bfendl;
+
+        if (debugging_extensions::get() == 1)
+            bfdebug << "    - debugging_extensions" << bfendl;
+
+        if (page_size_extensions::get() == 1)
+            bfdebug << "    - page_size_extensions" << bfendl;
+
+        if (physical_address_extensions::get() == 1)
+            bfdebug << "    - physical_address_extensions" << bfendl;
+
+        if (machine_check_enable::get() == 1)
+            bfdebug << "    - machine_check_enable" << bfendl;
+
+        if (page_global_enable::get() == 1)
+            bfdebug << "    - page_global_enable" << bfendl;
+
+        if (performance_monitor_counter_enable::get() == 1)
+            bfdebug << "    - performance_monitor_counter_enable" << bfendl;
+
+        if (osfxsr::get() == 1)
+            bfdebug << "    - osfxsr" << bfendl;
+
+        if (osxmmexcpt::get() == 1)
+            bfdebug << "    - osxmmexcpt" << bfendl;
+
+        if (vmx_enable_bit::get() == 1)
+            bfdebug << "    - vmx_enable_bit" << bfendl;
+
+        if (smx_enable_bit::get() == 1)
+            bfdebug << "    - smx_enable_bit" << bfendl;
+
+        if (smx_enable_bit::get() == 1)
+            bfdebug << "    - smx_enable_bit" << bfendl;
+
+        if (fsgsbase_enable_bit::get() == 1)
+            bfdebug << "    - fsgsbase_enable_bit" << bfendl;
+
+        if (pcid_enable_bit::get() == 1)
+            bfdebug << "    - pcid_enable_bit" << bfendl;
+
+        if (osxsave::get() == 1)
+            bfdebug << "    - osxsave" << bfendl;
+
+        if (smep_enable_bit::get() == 1)
+            bfdebug << "    - smep_enable_bit" << bfendl;
+
+        if (smap_enable_bit::get() == 1)
+            bfdebug << "    - smap_enable_bit" << bfendl;
+
+        if (protection_key_enable_bit::get() == 1)
+            bfdebug << "    - protection_key_enable_bit" << bfendl;
     }
 }
 

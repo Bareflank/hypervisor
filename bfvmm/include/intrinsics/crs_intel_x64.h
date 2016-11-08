@@ -22,6 +22,9 @@
 #ifndef CRS_INTEL_X64_H
 #define CRS_INTEL_X64_H
 
+#include <debug.h>
+#include <bitmanip.h>
+
 extern "C" uint64_t __read_cr0(void) noexcept;
 extern "C" void __write_cr0(uint64_t val) noexcept;
 
@@ -40,8 +43,8 @@ namespace cr0
     inline auto get() noexcept
     { return __read_cr0(); }
 
-    template<class T> void set(T val) noexcept
-    { __write_cr0(val); }
+    template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
+    void set(T val) noexcept { __write_cr0(val); }
 
     namespace protection_enable
     {
@@ -50,10 +53,10 @@ namespace cr0
         constexpr const auto name = "protection_enable";
 
         inline auto get() noexcept
-        { return (__read_cr0() & mask) >> from; }
+        { return get_bit(__read_cr0(), from) != 0; }
 
-        template<class T> void set(T val) noexcept
-        { __write_cr0((__read_cr0() & ~mask) | ((val << from) & mask)); }
+        inline void set(bool val) noexcept
+        { __write_cr0(val ? set_bit(__read_cr0(), from) : clear_bit(__read_cr0(), from)); }
     }
 
     namespace monitor_coprocessor
@@ -63,10 +66,10 @@ namespace cr0
         constexpr const auto name = "monitor_coprocessor";
 
         inline auto get() noexcept
-        { return (__read_cr0() & mask) >> from; }
+        { return get_bit(__read_cr0(), from) != 0; }
 
-        template<class T> void set(T val) noexcept
-        { __write_cr0((__read_cr0() & ~mask) | ((val << from) & mask)); }
+        inline void set(bool val) noexcept
+        { __write_cr0(val ? set_bit(__read_cr0(), from) : clear_bit(__read_cr0(), from)); }
     }
 
     namespace emulation
@@ -76,10 +79,10 @@ namespace cr0
         constexpr const auto name = "emulation";
 
         inline auto get() noexcept
-        { return (__read_cr0() & mask) >> from; }
+        { return get_bit(__read_cr0(), from) != 0; }
 
-        template<class T> void set(T val) noexcept
-        { __write_cr0((__read_cr0() & ~mask) | ((val << from) & mask)); }
+        inline void set(bool val) noexcept
+        { __write_cr0(val ? set_bit(__read_cr0(), from) : clear_bit(__read_cr0(), from)); }
     }
 
     namespace task_switched
@@ -89,10 +92,10 @@ namespace cr0
         constexpr const auto name = "task_switched";
 
         inline auto get() noexcept
-        { return (__read_cr0() & mask) >> from; }
+        { return get_bit(__read_cr0(), from) != 0; }
 
-        template<class T> void set(T val) noexcept
-        { __write_cr0((__read_cr0() & ~mask) | ((val << from) & mask)); }
+        inline void set(bool val) noexcept
+        { __write_cr0(val ? set_bit(__read_cr0(), from) : clear_bit(__read_cr0(), from)); }
     }
 
     namespace extension_type
@@ -102,10 +105,10 @@ namespace cr0
         constexpr const auto name = "extension_type";
 
         inline auto get() noexcept
-        { return (__read_cr0() & mask) >> from; }
+        { return get_bit(__read_cr0(), from) != 0; }
 
-        template<class T> void set(T val) noexcept
-        { __write_cr0((__read_cr0() & ~mask) | ((val << from) & mask)); }
+        inline void set(bool val) noexcept
+        { __write_cr0(val ? set_bit(__read_cr0(), from) : clear_bit(__read_cr0(), from)); }
     }
 
     namespace numeric_error
@@ -115,10 +118,10 @@ namespace cr0
         constexpr const auto name = "numeric_error";
 
         inline auto get() noexcept
-        { return (__read_cr0() & mask) >> from; }
+        { return get_bit(__read_cr0(), from) != 0; }
 
-        template<class T> void set(T val) noexcept
-        { __write_cr0((__read_cr0() & ~mask) | ((val << from) & mask)); }
+        inline void set(bool val) noexcept
+        { __write_cr0(val ? set_bit(__read_cr0(), from) : clear_bit(__read_cr0(), from)); }
     }
 
     namespace write_protect
@@ -128,10 +131,10 @@ namespace cr0
         constexpr const auto name = "write_protect";
 
         inline auto get() noexcept
-        { return (__read_cr0() & mask) >> from; }
+        { return get_bit(__read_cr0(), from) != 0; }
 
-        template<class T> void set(T val) noexcept
-        { __write_cr0((__read_cr0() & ~mask) | ((val << from) & mask)); }
+        inline void set(bool val) noexcept
+        { __write_cr0(val ? set_bit(__read_cr0(), from) : clear_bit(__read_cr0(), from)); }
     }
 
     namespace alignment_mask
@@ -141,10 +144,10 @@ namespace cr0
         constexpr const auto name = "alignment_mask";
 
         inline auto get() noexcept
-        { return (__read_cr0() & mask) >> from; }
+        { return get_bit(__read_cr0(), from) != 0; }
 
-        template<class T> void set(T val) noexcept
-        { __write_cr0((__read_cr0() & ~mask) | ((val << from) & mask)); }
+        inline void set(bool val) noexcept
+        { __write_cr0(val ? set_bit(__read_cr0(), from) : clear_bit(__read_cr0(), from)); }
     }
 
     namespace not_write_through
@@ -154,10 +157,10 @@ namespace cr0
         constexpr const auto name = "not_write_through";
 
         inline auto get() noexcept
-        { return (__read_cr0() & mask) >> from; }
+        { return get_bit(__read_cr0(), from) != 0; }
 
-        template<class T> void set(T val) noexcept
-        { __write_cr0((__read_cr0() & ~mask) | ((val << from) & mask)); }
+        inline void set(bool val) noexcept
+        { __write_cr0(val ? set_bit(__read_cr0(), from) : clear_bit(__read_cr0(), from)); }
     }
 
     namespace cache_disable
@@ -167,10 +170,10 @@ namespace cr0
         constexpr const auto name = "cache_disable";
 
         inline auto get() noexcept
-        { return (__read_cr0() & mask) >> from; }
+        { return get_bit(__read_cr0(), from) != 0; }
 
-        template<class T> void set(T val) noexcept
-        { __write_cr0((__read_cr0() & ~mask) | ((val << from) & mask)); }
+        inline void set(bool val) noexcept
+        { __write_cr0(val ? set_bit(__read_cr0(), from) : clear_bit(__read_cr0(), from)); }
     }
 
     namespace paging
@@ -180,10 +183,48 @@ namespace cr0
         constexpr const auto name = "paging";
 
         inline auto get() noexcept
-        { return (__read_cr0() & mask) >> from; }
+        { return get_bit(__read_cr0(), from) != 0; }
 
-        template<class T> void set(T val) noexcept
-        { __write_cr0((__read_cr0() & ~mask) | ((val << from) & mask)); }
+        inline void set(bool val) noexcept
+        { __write_cr0(val ? set_bit(__read_cr0(), from) : clear_bit(__read_cr0(), from)); }
+    }
+
+    inline void dump() noexcept
+    {
+        bfdebug << "cr0 enabled flags:" << bfendl;
+
+        if (protection_enable::get())
+            bfdebug << "    - protection_enable" << bfendl;
+
+        if (monitor_coprocessor::get())
+            bfdebug << "    - monitor_coprocessor" << bfendl;
+
+        if (emulation::get())
+            bfdebug << "    - emulation" << bfendl;
+
+        if (task_switched::get())
+            bfdebug << "    - task_switched" << bfendl;
+
+        if (extension_type::get())
+            bfdebug << "    - extension_type" << bfendl;
+
+        if (numeric_error::get())
+            bfdebug << "    - numeric_error" << bfendl;
+
+        if (write_protect::get())
+            bfdebug << "    - write_protect" << bfendl;
+
+        if (alignment_mask::get())
+            bfdebug << "    - alignment_mask" << bfendl;
+
+        if (not_write_through::get())
+            bfdebug << "    - not_write_through" << bfendl;
+
+        if (cache_disable::get())
+            bfdebug << "    - cache_disable" << bfendl;
+
+        if (paging::get())
+            bfdebug << "    - paging" << bfendl;
     }
 }
 
@@ -192,8 +233,8 @@ namespace cr3
     inline auto get() noexcept
     { return __read_cr3(); }
 
-    template<class T> void set(T val) noexcept
-    { __write_cr3(val); }
+    template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
+    void set(T val) noexcept { __write_cr3(val); }
 }
 
 namespace cr4
@@ -201,8 +242,8 @@ namespace cr4
     inline auto get() noexcept
     { return __read_cr4(); }
 
-    template<class T> void set(T val) noexcept
-    { __write_cr4(val); }
+    template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
+    void set(T val) noexcept { __write_cr4(val); }
 
     namespace v8086_mode_extensions
     {
@@ -211,10 +252,10 @@ namespace cr4
         constexpr const auto name = "v8086_mode_extensions";
 
         inline auto get() noexcept
-        { return (__read_cr4() & mask) >> from; }
+        { return get_bit(__read_cr4(), from) != 0; }
 
-        template<class T> void set(T val) noexcept
-        { __write_cr4((__read_cr4() & ~mask) | ((val << from) & mask)); }
+        inline void set(bool val) noexcept
+        { __write_cr4(val ? set_bit(__read_cr4(), from) : clear_bit(__read_cr4(), from)); }
     }
 
     namespace protected_mode_virtual_interrupts
@@ -224,10 +265,10 @@ namespace cr4
         constexpr const auto name = "protected_mode_virtual_interrupts";
 
         inline auto get() noexcept
-        { return (__read_cr4() & mask) >> from; }
+        { return get_bit(__read_cr4(), from) != 0; }
 
-        template<class T> void set(T val) noexcept
-        { __write_cr4((__read_cr4() & ~mask) | ((val << from) & mask)); }
+        inline void set(bool val) noexcept
+        { __write_cr4(val ? set_bit(__read_cr4(), from) : clear_bit(__read_cr4(), from)); }
     }
 
     namespace time_stamp_disable
@@ -237,10 +278,10 @@ namespace cr4
         constexpr const auto name = "time_stamp_disable";
 
         inline auto get() noexcept
-        { return (__read_cr4() & mask) >> from; }
+        { return get_bit(__read_cr4(), from) != 0; }
 
-        template<class T> void set(T val) noexcept
-        { __write_cr4((__read_cr4() & ~mask) | ((val << from) & mask)); }
+        inline void set(bool val) noexcept
+        { __write_cr4(val ? set_bit(__read_cr4(), from) : clear_bit(__read_cr4(), from)); }
     }
 
     namespace debugging_extensions
@@ -250,10 +291,10 @@ namespace cr4
         constexpr const auto name = "debugging_extensions";
 
         inline auto get() noexcept
-        { return (__read_cr4() & mask) >> from; }
+        { return get_bit(__read_cr4(), from) != 0; }
 
-        template<class T> void set(T val) noexcept
-        { __write_cr4((__read_cr4() & ~mask) | ((val << from) & mask)); }
+        inline void set(bool val) noexcept
+        { __write_cr4(val ? set_bit(__read_cr4(), from) : clear_bit(__read_cr4(), from)); }
     }
 
     namespace page_size_extensions
@@ -263,10 +304,10 @@ namespace cr4
         constexpr const auto name = "page_size_extensions";
 
         inline auto get() noexcept
-        { return (__read_cr4() & mask) >> from; }
+        { return get_bit(__read_cr4(), from) != 0; }
 
-        template<class T> void set(T val) noexcept
-        { __write_cr4((__read_cr4() & ~mask) | ((val << from) & mask)); }
+        inline void set(bool val) noexcept
+        { __write_cr4(val ? set_bit(__read_cr4(), from) : clear_bit(__read_cr4(), from)); }
     }
 
     namespace physical_address_extensions
@@ -276,10 +317,10 @@ namespace cr4
         constexpr const auto name = "physical_address_extensions";
 
         inline auto get() noexcept
-        { return (__read_cr4() & mask) >> from; }
+        { return get_bit(__read_cr4(), from) != 0; }
 
-        template<class T> void set(T val) noexcept
-        { __write_cr4((__read_cr4() & ~mask) | ((val << from) & mask)); }
+        inline void set(bool val) noexcept
+        { __write_cr4(val ? set_bit(__read_cr4(), from) : clear_bit(__read_cr4(), from)); }
     }
 
     namespace machine_check_enable
@@ -289,10 +330,10 @@ namespace cr4
         constexpr const auto name = "machine_check_enable";
 
         inline auto get() noexcept
-        { return (__read_cr4() & mask) >> from; }
+        { return get_bit(__read_cr4(), from) != 0; }
 
-        template<class T> void set(T val) noexcept
-        { __write_cr4((__read_cr4() & ~mask) | ((val << from) & mask)); }
+        inline void set(bool val) noexcept
+        { __write_cr4(val ? set_bit(__read_cr4(), from) : clear_bit(__read_cr4(), from)); }
     }
 
     namespace page_global_enable
@@ -302,10 +343,10 @@ namespace cr4
         constexpr const auto name = "page_global_enable";
 
         inline auto get() noexcept
-        { return (__read_cr4() & mask) >> from; }
+        { return get_bit(__read_cr4(), from) != 0; }
 
-        template<class T> void set(T val) noexcept
-        { __write_cr4((__read_cr4() & ~mask) | ((val << from) & mask)); }
+        inline void set(bool val) noexcept
+        { __write_cr4(val ? set_bit(__read_cr4(), from) : clear_bit(__read_cr4(), from)); }
     }
 
     namespace performance_monitor_counter_enable
@@ -315,10 +356,10 @@ namespace cr4
         constexpr const auto name = "performance_monitor_counter_enable";
 
         inline auto get() noexcept
-        { return (__read_cr4() & mask) >> from; }
+        { return get_bit(__read_cr4(), from) != 0; }
 
-        template<class T> void set(T val) noexcept
-        { __write_cr4((__read_cr4() & ~mask) | ((val << from) & mask)); }
+        inline void set(bool val) noexcept
+        { __write_cr4(val ? set_bit(__read_cr4(), from) : clear_bit(__read_cr4(), from)); }
     }
 
     namespace osfxsr
@@ -328,10 +369,10 @@ namespace cr4
         constexpr const auto name = "osfxsr";
 
         inline auto get() noexcept
-        { return (__read_cr4() & mask) >> from; }
+        { return get_bit(__read_cr4(), from) != 0; }
 
-        template<class T> void set(T val) noexcept
-        { __write_cr4((__read_cr4() & ~mask) | ((val << from) & mask)); }
+        inline void set(bool val) noexcept
+        { __write_cr4(val ? set_bit(__read_cr4(), from) : clear_bit(__read_cr4(), from)); }
     }
 
     namespace osxmmexcpt
@@ -341,10 +382,10 @@ namespace cr4
         constexpr const auto name = "osxmmexcpt";
 
         inline auto get() noexcept
-        { return (__read_cr4() & mask) >> from; }
+        { return get_bit(__read_cr4(), from) != 0; }
 
-        template<class T> void set(T val) noexcept
-        { __write_cr4((__read_cr4() & ~mask) | ((val << from) & mask)); }
+        inline void set(bool val) noexcept
+        { __write_cr4(val ? set_bit(__read_cr4(), from) : clear_bit(__read_cr4(), from)); }
     }
 
     namespace vmx_enable_bit
@@ -354,10 +395,10 @@ namespace cr4
         constexpr const auto name = "vmx_enable_bit";
 
         inline auto get() noexcept
-        { return (__read_cr4() & mask) >> from; }
+        { return get_bit(__read_cr4(), from) != 0; }
 
-        template<class T> void set(T val) noexcept
-        { __write_cr4((__read_cr4() & ~mask) | ((val << from) & mask)); }
+        inline void set(bool val) noexcept
+        { __write_cr4(val ? set_bit(__read_cr4(), from) : clear_bit(__read_cr4(), from)); }
     }
 
     namespace smx_enable_bit
@@ -367,10 +408,10 @@ namespace cr4
         constexpr const auto name = "smx_enable_bit";
 
         inline auto get() noexcept
-        { return (__read_cr4() & mask) >> from; }
+        { return get_bit(__read_cr4(), from) != 0; }
 
-        template<class T> void set(T val) noexcept
-        { __write_cr4((__read_cr4() & ~mask) | ((val << from) & mask)); }
+        inline void set(bool val) noexcept
+        { __write_cr4(val ? set_bit(__read_cr4(), from) : clear_bit(__read_cr4(), from)); }
     }
 
     namespace fsgsbase_enable_bit
@@ -380,10 +421,10 @@ namespace cr4
         constexpr const auto name = "fsgsbase_enable_bit";
 
         inline auto get() noexcept
-        { return (__read_cr4() & mask) >> from; }
+        { return get_bit(__read_cr4(), from) != 0; }
 
-        template<class T> void set(T val) noexcept
-        { __write_cr4((__read_cr4() & ~mask) | ((val << from) & mask)); }
+        inline void set(bool val) noexcept
+        { __write_cr4(val ? set_bit(__read_cr4(), from) : clear_bit(__read_cr4(), from)); }
     }
 
     namespace pcid_enable_bit
@@ -393,10 +434,10 @@ namespace cr4
         constexpr const auto name = "pcid_enable_bit";
 
         inline auto get() noexcept
-        { return (__read_cr4() & mask) >> from; }
+        { return get_bit(__read_cr4(), from) != 0; }
 
-        template<class T> void set(T val) noexcept
-        { __write_cr4((__read_cr4() & ~mask) | ((val << from) & mask)); }
+        inline void set(bool val) noexcept
+        { __write_cr4(val ? set_bit(__read_cr4(), from) : clear_bit(__read_cr4(), from)); }
     }
 
     namespace osxsave
@@ -406,10 +447,10 @@ namespace cr4
         constexpr const auto name = "osxsave";
 
         inline auto get() noexcept
-        { return (__read_cr4() & mask) >> from; }
+        { return get_bit(__read_cr4(), from) != 0; }
 
-        template<class T> void set(T val) noexcept
-        { __write_cr4((__read_cr4() & ~mask) | ((val << from) & mask)); }
+        inline void set(bool val) noexcept
+        { __write_cr4(val ? set_bit(__read_cr4(), from) : clear_bit(__read_cr4(), from)); }
     }
 
     namespace smep_enable_bit
@@ -419,10 +460,10 @@ namespace cr4
         constexpr const auto name = "smep_enable_bit";
 
         inline auto get() noexcept
-        { return (__read_cr4() & mask) >> from; }
+        { return get_bit(__read_cr4(), from) != 0; }
 
-        template<class T> void set(T val) noexcept
-        { __write_cr4((__read_cr4() & ~mask) | ((val << from) & mask)); }
+        inline void set(bool val) noexcept
+        { __write_cr4(val ? set_bit(__read_cr4(), from) : clear_bit(__read_cr4(), from)); }
     }
 
     namespace smap_enable_bit
@@ -432,10 +473,10 @@ namespace cr4
         constexpr const auto name = "smap_enable_bit";
 
         inline auto get() noexcept
-        { return (__read_cr4() & mask) >> from; }
+        { return get_bit(__read_cr4(), from) != 0; }
 
-        template<class T> void set(T val) noexcept
-        { __write_cr4((__read_cr4() & ~mask) | ((val << from) & mask)); }
+        inline void set(bool val) noexcept
+        { __write_cr4(val ? set_bit(__read_cr4(), from) : clear_bit(__read_cr4(), from)); }
     }
 
     namespace protection_key_enable_bit
@@ -445,10 +486,75 @@ namespace cr4
         constexpr const auto name = "protection_key_enable_bit";
 
         inline auto get() noexcept
-        { return (__read_cr4() & mask) >> from; }
+        { return get_bit(__read_cr4(), from) != 0; }
 
-        template<class T> void set(T val) noexcept
-        { __write_cr4((__read_cr4() & ~mask) | ((val << from) & mask)); }
+        inline void set(bool val) noexcept
+        { __write_cr4(val ? set_bit(__read_cr4(), from) : clear_bit(__read_cr4(), from)); }
+    }
+
+    inline void dump() noexcept
+    {
+        bfdebug << "cr4 enabled flags:" << bfendl;
+
+        if (v8086_mode_extensions::get())
+            bfdebug << "    - v8086_mode_extensions" << bfendl;
+
+        if (protected_mode_virtual_interrupts::get())
+            bfdebug << "    - protected_mode_virtual_interrupts" << bfendl;
+
+        if (time_stamp_disable::get())
+            bfdebug << "    - time_stamp_disable" << bfendl;
+
+        if (debugging_extensions::get())
+            bfdebug << "    - debugging_extensions" << bfendl;
+
+        if (page_size_extensions::get())
+            bfdebug << "    - page_size_extensions" << bfendl;
+
+        if (physical_address_extensions::get())
+            bfdebug << "    - physical_address_extensions" << bfendl;
+
+        if (machine_check_enable::get())
+            bfdebug << "    - machine_check_enable" << bfendl;
+
+        if (page_global_enable::get())
+            bfdebug << "    - page_global_enable" << bfendl;
+
+        if (performance_monitor_counter_enable::get())
+            bfdebug << "    - performance_monitor_counter_enable" << bfendl;
+
+        if (osfxsr::get())
+            bfdebug << "    - osfxsr" << bfendl;
+
+        if (osxmmexcpt::get())
+            bfdebug << "    - osxmmexcpt" << bfendl;
+
+        if (vmx_enable_bit::get())
+            bfdebug << "    - vmx_enable_bit" << bfendl;
+
+        if (smx_enable_bit::get())
+            bfdebug << "    - smx_enable_bit" << bfendl;
+
+        if (smx_enable_bit::get())
+            bfdebug << "    - smx_enable_bit" << bfendl;
+
+        if (fsgsbase_enable_bit::get())
+            bfdebug << "    - fsgsbase_enable_bit" << bfendl;
+
+        if (pcid_enable_bit::get())
+            bfdebug << "    - pcid_enable_bit" << bfendl;
+
+        if (osxsave::get())
+            bfdebug << "    - osxsave" << bfendl;
+
+        if (smep_enable_bit::get())
+            bfdebug << "    - smep_enable_bit" << bfendl;
+
+        if (smap_enable_bit::get())
+            bfdebug << "    - smap_enable_bit" << bfendl;
+
+        if (protection_key_enable_bit::get())
+            bfdebug << "    - protection_key_enable_bit" << bfendl;
     }
 }
 }

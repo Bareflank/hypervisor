@@ -1716,8 +1716,10 @@ vmcs_ut::test_vmcs_guest_rflags_always_enabled()
 void
 vmcs_ut::test_vmcs_guest_cr0()
 {
-    vmcs::guest_cr0::set(100UL);
-    this->expect_true(vmcs::guest_cr0::get() == 100UL);
+    vmcs::guest_cr0::set(0xFFFFFFFFU);
+    this->expect_true(vmcs::guest_cr0::get() == 0xFFFFFFFFU);
+
+    vmcs::guest_cr0::dump();
 }
 
 void
@@ -1807,8 +1809,10 @@ vmcs_ut::test_vmcs_guest_cr3()
 void
 vmcs_ut::test_vmcs_guest_cr4()
 {
-    vmcs::guest_cr4::set(100UL);
-    this->expect_true(vmcs::guest_cr4::get() == 100UL);
+    vmcs::guest_cr4::set(0xFFFFFFFFU);
+    this->expect_true(vmcs::guest_cr4::get() == 0xFFFFFFFFU);
+
+    vmcs::guest_cr4::dump();
 }
 
 void
@@ -1947,8 +1951,10 @@ vmcs_ut::test_vmcs_guest_cr4_protection_key_enable_bit()
 void
 vmcs_ut::test_vmcs_host_cr0()
 {
-    vmcs::host_cr0::set(100UL);
-    this->expect_true(vmcs::host_cr0::get() == 100UL);
+    vmcs::host_cr0::set(0xFFFFFFFFU);
+    this->expect_true(vmcs::host_cr0::get() == 0xFFFFFFFFU);
+
+    vmcs::host_cr0::dump();
 }
 
 void
@@ -2038,8 +2044,10 @@ vmcs_ut::test_vmcs_host_cr3()
 void
 vmcs_ut::test_vmcs_host_cr4()
 {
-    vmcs::host_cr4::set(100UL);
-    this->expect_true(vmcs::host_cr4::get() == 100UL);
+    vmcs::host_cr4::set(0xFFFFFFFFU);
+    this->expect_true(vmcs::host_cr4::get() == 0xFFFFFFFFU);
+
+    vmcs::host_cr4::dump();
 }
 
 void

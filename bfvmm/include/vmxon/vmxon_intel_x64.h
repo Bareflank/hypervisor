@@ -73,12 +73,8 @@ protected:
 
     virtual void create_vmxon_region();
     virtual void release_vmxon_region() noexcept;
-    virtual void enable_vmx_operation() noexcept;
-    virtual void disable_vmx_operation() noexcept;
     virtual void execute_vmxon();
     virtual void execute_vmxoff();
-
-    virtual bool is_vmx_operation_enabled();
 
 private:
 
