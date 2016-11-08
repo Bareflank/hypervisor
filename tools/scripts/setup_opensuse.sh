@@ -43,6 +43,11 @@ if [[ ! -d "bfelf_loader" ]]; then
     exit 1
 fi
 
+if ! grep -q 'avx' /proc/cpuinfo; then
+    echo "Hardware unsupported. AVX is required"
+    exit 1
+fi
+
 # ------------------------------------------------------------------------------
 # Help
 # ------------------------------------------------------------------------------
