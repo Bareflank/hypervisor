@@ -1482,14 +1482,20 @@ namespace host_es_selector
     constexpr const auto addr = 0x0000000000000C00UL;
     constexpr const auto name = "host_es_selector";
 
-    inline auto get()
-    { return vm::read(addr, name); }
-
-    template<class T> void set(T val)
-    { vm::write(addr, val, name); }
-
     inline bool exists() noexcept
     { return true; }
+
+    inline auto get()
+    { return get_vmcs_field(addr, name, exists()); }
+
+    inline auto get_if_exists(bool verbose = false) noexcept
+    { return get_vmcs_field_if_exists(addr, name, verbose, exists()); }
+
+    template <class T> void set(T val)
+    { set_vmcs_field(val, addr, name, exists()); }
+
+    template <class T> void set_if_exists(T val, bool verbose = false) noexcept
+    { set_vmcs_field_if_exists(val, addr, name, verbose, exists()); }
 
     namespace rpl
     {
@@ -1498,10 +1504,22 @@ namespace host_es_selector
         constexpr const auto name = "rpl";
 
         inline auto get()
-        { return (vm::read(addr, name) & mask) >> from; }
+        { return (get_vmcs_field(addr, name, exists()) & mask) >> from; }
+
+        inline auto get_if_exists(bool verbose = false) noexcept
+        { return (get_vmcs_field_if_exists(addr, name, verbose, exists()) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
+        {
+            auto field = get_vmcs_field(addr, name, exists());
+            set_vmcs_field((field & ~mask) | ((val << from) & mask), addr, name, exists());
+        }
+
+        template<class T> void set_if_exists(T val, bool verbose = false) noexcept
+        {
+            auto field = get_vmcs_field_if_exists(addr, name, verbose, exists());
+            set_vmcs_field_if_exists((field & ~mask) | ((val << from) & mask), addr, name, verbose, exists());
+        }
     }
 
     namespace ti
@@ -1511,10 +1529,22 @@ namespace host_es_selector
         constexpr const auto name = "ti";
 
         inline auto get()
-        { return (vm::read(addr, name) & mask) >> from; }
+        { return (get_vmcs_field(addr, name, exists()) & mask) >> from; }
+
+        inline auto get_if_exists(bool verbose = false) noexcept
+        { return (get_vmcs_field_if_exists(addr, name, verbose, exists()) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
+        {
+            auto field = get_vmcs_field(addr, name, exists());
+            set_vmcs_field((field & ~mask) | ((val << from) & mask), addr, name, exists());
+        }
+
+        template<class T> void set_if_exists(T val, bool verbose = false) noexcept
+        {
+            auto field = get_vmcs_field_if_exists(addr, name, verbose, exists());
+            set_vmcs_field_if_exists((field & ~mask) | ((val << from) & mask), addr, name, verbose, exists());
+        }
     }
 
     namespace index
@@ -1524,10 +1554,22 @@ namespace host_es_selector
         constexpr const auto name = "index";
 
         inline auto get()
-        { return (vm::read(addr, name) & mask) >> from; }
+        { return (get_vmcs_field(addr, name, exists()) & mask) >> from; }
+
+        inline auto get_if_exists(bool verbose = false) noexcept
+        { return (get_vmcs_field_if_exists(addr, name, verbose, exists()) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
+        {
+            auto field = get_vmcs_field(addr, name, exists());
+            set_vmcs_field((field & ~mask) | ((val << from) & mask), addr, name, exists());
+        }
+
+        template<class T> void set_if_exists(T val, bool verbose = false) noexcept
+        {
+            auto field = get_vmcs_field_if_exists(addr, name, verbose, exists());
+            set_vmcs_field_if_exists((field & ~mask) | ((val << from) & mask), addr, name, verbose, exists());
+        }
     }
 }
 
@@ -1536,14 +1578,20 @@ namespace host_cs_selector
     constexpr const auto addr = 0x0000000000000C02UL;
     constexpr const auto name = "host_cs_selector";
 
-    inline auto get()
-    { return vm::read(addr, name); }
-
-    template<class T> void set(T val)
-    { vm::write(addr, val, name); }
-
     inline bool exists() noexcept
     { return true; }
+
+    inline auto get()
+    { return get_vmcs_field(addr, name, exists()); }
+
+    inline auto get_if_exists(bool verbose = false) noexcept
+    { return get_vmcs_field_if_exists(addr, name, verbose, exists()); }
+
+    template <class T> void set(T val)
+    { set_vmcs_field(val, addr, name, exists()); }
+
+    template <class T> void set_if_exists(T val, bool verbose = false) noexcept
+    { set_vmcs_field_if_exists(val, addr, name, verbose, exists()); }
 
     namespace rpl
     {
@@ -1552,10 +1600,22 @@ namespace host_cs_selector
         constexpr const auto name = "rpl";
 
         inline auto get()
-        { return (vm::read(addr, name) & mask) >> from; }
+        { return (get_vmcs_field(addr, name, exists()) & mask) >> from; }
+
+        inline auto get_if_exists(bool verbose = false) noexcept
+        { return (get_vmcs_field_if_exists(addr, name, verbose, exists()) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
+        {
+            auto field = get_vmcs_field(addr, name, exists());
+            set_vmcs_field((field & ~mask) | ((val << from) & mask), addr, name, exists());
+        }
+
+        template<class T> void set_if_exists(T val, bool verbose = false) noexcept
+        {
+            auto field = get_vmcs_field_if_exists(addr, name, verbose, exists());
+            set_vmcs_field_if_exists((field & ~mask) | ((val << from) & mask), addr, name, verbose, exists());
+        }
     }
 
     namespace ti
@@ -1565,10 +1625,22 @@ namespace host_cs_selector
         constexpr const auto name = "ti";
 
         inline auto get()
-        { return (vm::read(addr, name) & mask) >> from; }
+        { return (get_vmcs_field(addr, name, exists()) & mask) >> from; }
+
+        inline auto get_if_exists(bool verbose = false) noexcept
+        { return (get_vmcs_field_if_exists(addr, name, verbose, exists()) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
+        {
+            auto field = get_vmcs_field(addr, name, exists());
+            set_vmcs_field((field & ~mask) | ((val << from) & mask), addr, name, exists());
+        }
+
+        template<class T> void set_if_exists(T val, bool verbose = false) noexcept
+        {
+            auto field = get_vmcs_field_if_exists(addr, name, verbose, exists());
+            set_vmcs_field_if_exists((field & ~mask) | ((val << from) & mask), addr, name, verbose, exists());
+        }
     }
 
     namespace index
@@ -1578,10 +1650,22 @@ namespace host_cs_selector
         constexpr const auto name = "index";
 
         inline auto get()
-        { return (vm::read(addr, name) & mask) >> from; }
+        { return (get_vmcs_field(addr, name, exists()) & mask) >> from; }
+
+        inline auto get_if_exists(bool verbose = false) noexcept
+        { return (get_vmcs_field_if_exists(addr, name, verbose, exists()) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
+        {
+            auto field = get_vmcs_field(addr, name, exists());
+            set_vmcs_field((field & ~mask) | ((val << from) & mask), addr, name, exists());
+        }
+
+        template<class T> void set_if_exists(T val, bool verbose = false) noexcept
+        {
+            auto field = get_vmcs_field_if_exists(addr, name, verbose, exists());
+            set_vmcs_field_if_exists((field & ~mask) | ((val << from) & mask), addr, name, verbose, exists());
+        }
     }
 }
 
@@ -1590,14 +1674,20 @@ namespace host_ss_selector
     constexpr const auto addr = 0x0000000000000C04UL;
     constexpr const auto name = "host_ss_selector";
 
-    inline auto get()
-    { return vm::read(addr, name); }
-
-    template<class T> void set(T val)
-    { vm::write(addr, val, name); }
-
     inline bool exists() noexcept
     { return true; }
+
+    inline auto get()
+    { return get_vmcs_field(addr, name, exists()); }
+
+    inline auto get_if_exists(bool verbose = false) noexcept
+    { return get_vmcs_field_if_exists(addr, name, verbose, exists()); }
+
+    template <class T> void set(T val)
+    { set_vmcs_field(val, addr, name, exists()); }
+
+    template <class T> void set_if_exists(T val, bool verbose = false) noexcept
+    { set_vmcs_field_if_exists(val, addr, name, verbose, exists()); }
 
     namespace rpl
     {
@@ -1606,10 +1696,22 @@ namespace host_ss_selector
         constexpr const auto name = "rpl";
 
         inline auto get()
-        { return (vm::read(addr, name) & mask) >> from; }
+        { return (get_vmcs_field(addr, name, exists()) & mask) >> from; }
+
+        inline auto get_if_exists(bool verbose = false) noexcept
+        { return (get_vmcs_field_if_exists(addr, name, verbose, exists()) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
+        {
+            auto field = get_vmcs_field(addr, name, exists());
+            set_vmcs_field((field & ~mask) | ((val << from) & mask), addr, name, exists());
+        }
+
+        template<class T> void set_if_exists(T val, bool verbose = false) noexcept
+        {
+            auto field = get_vmcs_field_if_exists(addr, name, verbose, exists());
+            set_vmcs_field_if_exists((field & ~mask) | ((val << from) & mask), addr, name, verbose, exists());
+        }
     }
 
     namespace ti
@@ -1619,10 +1721,22 @@ namespace host_ss_selector
         constexpr const auto name = "ti";
 
         inline auto get()
-        { return (vm::read(addr, name) & mask) >> from; }
+        { return (get_vmcs_field(addr, name, exists()) & mask) >> from; }
+
+        inline auto get_if_exists(bool verbose = false) noexcept
+        { return (get_vmcs_field_if_exists(addr, name, verbose, exists()) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
+        {
+            auto field = get_vmcs_field(addr, name, exists());
+            set_vmcs_field((field & ~mask) | ((val << from) & mask), addr, name, exists());
+        }
+
+        template<class T> void set_if_exists(T val, bool verbose = false) noexcept
+        {
+            auto field = get_vmcs_field_if_exists(addr, name, verbose, exists());
+            set_vmcs_field_if_exists((field & ~mask) | ((val << from) & mask), addr, name, verbose, exists());
+        }
     }
 
     namespace index
@@ -1632,10 +1746,22 @@ namespace host_ss_selector
         constexpr const auto name = "index";
 
         inline auto get()
-        { return (vm::read(addr, name) & mask) >> from; }
+        { return (get_vmcs_field(addr, name, exists()) & mask) >> from; }
+
+        inline auto get_if_exists(bool verbose = false) noexcept
+        { return (get_vmcs_field_if_exists(addr, name, verbose, exists()) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
+        {
+            auto field = get_vmcs_field(addr, name, exists());
+            set_vmcs_field((field & ~mask) | ((val << from) & mask), addr, name, exists());
+        }
+
+        template<class T> void set_if_exists(T val, bool verbose = false) noexcept
+        {
+            auto field = get_vmcs_field_if_exists(addr, name, verbose, exists());
+            set_vmcs_field_if_exists((field & ~mask) | ((val << from) & mask), addr, name, verbose, exists());
+        }
     }
 }
 
@@ -1644,14 +1770,20 @@ namespace host_ds_selector
     constexpr const auto addr = 0x0000000000000C06UL;
     constexpr const auto name = "host_ds_selector";
 
-    inline auto get()
-    { return vm::read(addr, name); }
-
-    template<class T> void set(T val)
-    { vm::write(addr, val, name); }
-
     inline bool exists() noexcept
     { return true; }
+
+    inline auto get()
+    { return get_vmcs_field(addr, name, exists()); }
+
+    inline auto get_if_exists(bool verbose = false) noexcept
+    { return get_vmcs_field_if_exists(addr, name, verbose, exists()); }
+
+    template <class T> void set(T val)
+    { set_vmcs_field(val, addr, name, exists()); }
+
+    template <class T> void set_if_exists(T val, bool verbose = false) noexcept
+    { set_vmcs_field_if_exists(val, addr, name, verbose, exists()); }
 
     namespace rpl
     {
@@ -1660,10 +1792,22 @@ namespace host_ds_selector
         constexpr const auto name = "rpl";
 
         inline auto get()
-        { return (vm::read(addr, name) & mask) >> from; }
+        { return (get_vmcs_field(addr, name, exists()) & mask) >> from; }
+
+        inline auto get_if_exists(bool verbose = false) noexcept
+        { return (get_vmcs_field_if_exists(addr, name, verbose, exists()) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
+        {
+            auto field = get_vmcs_field(addr, name, exists());
+            set_vmcs_field((field & ~mask) | ((val << from) & mask), addr, name, exists());
+        }
+
+        template<class T> void set_if_exists(T val, bool verbose = false) noexcept
+        {
+            auto field = get_vmcs_field_if_exists(addr, name, verbose, exists());
+            set_vmcs_field_if_exists((field & ~mask) | ((val << from) & mask), addr, name, verbose, exists());
+        }
     }
 
     namespace ti
@@ -1673,10 +1817,22 @@ namespace host_ds_selector
         constexpr const auto name = "ti";
 
         inline auto get()
-        { return (vm::read(addr, name) & mask) >> from; }
+        { return (get_vmcs_field(addr, name, exists()) & mask) >> from; }
+
+        inline auto get_if_exists(bool verbose = false) noexcept
+        { return (get_vmcs_field_if_exists(addr, name, verbose, exists()) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
+        {
+            auto field = get_vmcs_field(addr, name, exists());
+            set_vmcs_field((field & ~mask) | ((val << from) & mask), addr, name, exists());
+        }
+
+        template<class T> void set_if_exists(T val, bool verbose = false) noexcept
+        {
+            auto field = get_vmcs_field_if_exists(addr, name, verbose, exists());
+            set_vmcs_field_if_exists((field & ~mask) | ((val << from) & mask), addr, name, verbose, exists());
+        }
     }
 
     namespace index
@@ -1686,10 +1842,22 @@ namespace host_ds_selector
         constexpr const auto name = "index";
 
         inline auto get()
-        { return (vm::read(addr, name) & mask) >> from; }
+        { return (get_vmcs_field(addr, name, exists()) & mask) >> from; }
+
+        inline auto get_if_exists(bool verbose = false) noexcept
+        { return (get_vmcs_field_if_exists(addr, name, verbose, exists()) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
+        {
+            auto field = get_vmcs_field(addr, name, exists());
+            set_vmcs_field((field & ~mask) | ((val << from) & mask), addr, name, exists());
+        }
+
+        template<class T> void set_if_exists(T val, bool verbose = false) noexcept
+        {
+            auto field = get_vmcs_field_if_exists(addr, name, verbose, exists());
+            set_vmcs_field_if_exists((field & ~mask) | ((val << from) & mask), addr, name, verbose, exists());
+        }
     }
 }
 
@@ -1698,14 +1866,20 @@ namespace host_fs_selector
     constexpr const auto addr = 0x0000000000000C08UL;
     constexpr const auto name = "host_fs_selector";
 
-    inline auto get()
-    { return vm::read(addr, name); }
-
-    template<class T> void set(T val)
-    { vm::write(addr, val, name); }
-
     inline bool exists() noexcept
     { return true; }
+
+    inline auto get()
+    { return get_vmcs_field(addr, name, exists()); }
+
+    inline auto get_if_exists(bool verbose = false) noexcept
+    { return get_vmcs_field_if_exists(addr, name, verbose, exists()); }
+
+    template <class T> void set(T val)
+    { set_vmcs_field(val, addr, name, exists()); }
+
+    template <class T> void set_if_exists(T val, bool verbose = false) noexcept
+    { set_vmcs_field_if_exists(val, addr, name, verbose, exists()); }
 
     namespace rpl
     {
@@ -1714,10 +1888,22 @@ namespace host_fs_selector
         constexpr const auto name = "rpl";
 
         inline auto get()
-        { return (vm::read(addr, name) & mask) >> from; }
+        { return (get_vmcs_field(addr, name, exists()) & mask) >> from; }
+
+        inline auto get_if_exists(bool verbose = false) noexcept
+        { return (get_vmcs_field_if_exists(addr, name, verbose, exists()) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
+        {
+            auto field = get_vmcs_field(addr, name, exists());
+            set_vmcs_field((field & ~mask) | ((val << from) & mask), addr, name, exists());
+        }
+
+        template<class T> void set_if_exists(T val, bool verbose = false) noexcept
+        {
+            auto field = get_vmcs_field_if_exists(addr, name, verbose, exists());
+            set_vmcs_field_if_exists((field & ~mask) | ((val << from) & mask), addr, name, verbose, exists());
+        }
     }
 
     namespace ti
@@ -1727,10 +1913,22 @@ namespace host_fs_selector
         constexpr const auto name = "ti";
 
         inline auto get()
-        { return (vm::read(addr, name) & mask) >> from; }
+        { return (get_vmcs_field(addr, name, exists()) & mask) >> from; }
+
+        inline auto get_if_exists(bool verbose = false) noexcept
+        { return (get_vmcs_field_if_exists(addr, name, verbose, exists()) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
+        {
+            auto field = get_vmcs_field(addr, name, exists());
+            set_vmcs_field((field & ~mask) | ((val << from) & mask), addr, name, exists());
+        }
+
+        template<class T> void set_if_exists(T val, bool verbose = false) noexcept
+        {
+            auto field = get_vmcs_field_if_exists(addr, name, verbose, exists());
+            set_vmcs_field_if_exists((field & ~mask) | ((val << from) & mask), addr, name, verbose, exists());
+        }
     }
 
     namespace index
@@ -1740,10 +1938,22 @@ namespace host_fs_selector
         constexpr const auto name = "index";
 
         inline auto get()
-        { return (vm::read(addr, name) & mask) >> from; }
+        { return (get_vmcs_field(addr, name, exists()) & mask) >> from; }
+
+        inline auto get_if_exists(bool verbose = false) noexcept
+        { return (get_vmcs_field_if_exists(addr, name, verbose, exists()) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
+        {
+            auto field = get_vmcs_field(addr, name, exists());
+            set_vmcs_field((field & ~mask) | ((val << from) & mask), addr, name, exists());
+        }
+
+        template<class T> void set_if_exists(T val, bool verbose = false) noexcept
+        {
+            auto field = get_vmcs_field_if_exists(addr, name, verbose, exists());
+            set_vmcs_field_if_exists((field & ~mask) | ((val << from) & mask), addr, name, verbose, exists());
+        }
     }
 }
 
@@ -1752,14 +1962,20 @@ namespace host_gs_selector
     constexpr const auto addr = 0x0000000000000C0AUL;
     constexpr const auto name = "host_gs_selector";
 
-    inline auto get()
-    { return vm::read(addr, name); }
-
-    template<class T> void set(T val)
-    { vm::write(addr, val, name); }
-
     inline bool exists() noexcept
     { return true; }
+
+    inline auto get()
+    { return get_vmcs_field(addr, name, exists()); }
+
+    inline auto get_if_exists(bool verbose = false) noexcept
+    { return get_vmcs_field_if_exists(addr, name, verbose, exists()); }
+
+    template <class T> void set(T val)
+    { set_vmcs_field(val, addr, name, exists()); }
+
+    template <class T> void set_if_exists(T val, bool verbose = false) noexcept
+    { set_vmcs_field_if_exists(val, addr, name, verbose, exists()); }
 
     namespace rpl
     {
@@ -1768,10 +1984,22 @@ namespace host_gs_selector
         constexpr const auto name = "rpl";
 
         inline auto get()
-        { return (vm::read(addr, name) & mask) >> from; }
+        { return (get_vmcs_field(addr, name, exists()) & mask) >> from; }
+
+        inline auto get_if_exists(bool verbose = false) noexcept
+        { return (get_vmcs_field_if_exists(addr, name, verbose, exists()) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
+        {
+            auto field = get_vmcs_field(addr, name, exists());
+            set_vmcs_field((field & ~mask) | ((val << from) & mask), addr, name, exists());
+        }
+
+        template<class T> void set_if_exists(T val, bool verbose = false) noexcept
+        {
+            auto field = get_vmcs_field_if_exists(addr, name, verbose, exists());
+            set_vmcs_field_if_exists((field & ~mask) | ((val << from) & mask), addr, name, verbose, exists());
+        }
     }
 
     namespace ti
@@ -1781,10 +2009,22 @@ namespace host_gs_selector
         constexpr const auto name = "ti";
 
         inline auto get()
-        { return (vm::read(addr, name) & mask) >> from; }
+        { return (get_vmcs_field(addr, name, exists()) & mask) >> from; }
+
+        inline auto get_if_exists(bool verbose = false) noexcept
+        { return (get_vmcs_field_if_exists(addr, name, verbose, exists()) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
+        {
+            auto field = get_vmcs_field(addr, name, exists());
+            set_vmcs_field((field & ~mask) | ((val << from) & mask), addr, name, exists());
+        }
+
+        template<class T> void set_if_exists(T val, bool verbose = false) noexcept
+        {
+            auto field = get_vmcs_field_if_exists(addr, name, verbose, exists());
+            set_vmcs_field_if_exists((field & ~mask) | ((val << from) & mask), addr, name, verbose, exists());
+        }
     }
 
     namespace index
@@ -1794,10 +2034,22 @@ namespace host_gs_selector
         constexpr const auto name = "index";
 
         inline auto get()
-        { return (vm::read(addr, name) & mask) >> from; }
+        { return (get_vmcs_field(addr, name, exists()) & mask) >> from; }
+
+        inline auto get_if_exists(bool verbose = false) noexcept
+        { return (get_vmcs_field_if_exists(addr, name, verbose, exists()) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
+        {
+            auto field = get_vmcs_field(addr, name, exists());
+            set_vmcs_field((field & ~mask) | ((val << from) & mask), addr, name, exists());
+        }
+
+        template<class T> void set_if_exists(T val, bool verbose = false) noexcept
+        {
+            auto field = get_vmcs_field_if_exists(addr, name, verbose, exists());
+            set_vmcs_field_if_exists((field & ~mask) | ((val << from) & mask), addr, name, verbose, exists());
+        }
     }
 }
 
@@ -1806,14 +2058,20 @@ namespace host_tr_selector
     constexpr const auto addr = 0x0000000000000C0CUL;
     constexpr const auto name = "host_tr_selector";
 
-    inline auto get()
-    { return vm::read(addr, name); }
-
-    template<class T> void set(T val)
-    { vm::write(addr, val, name); }
-
     inline bool exists() noexcept
     { return true; }
+
+    inline auto get()
+    { return get_vmcs_field(addr, name, exists()); }
+
+    inline auto get_if_exists(bool verbose = false) noexcept
+    { return get_vmcs_field_if_exists(addr, name, verbose, exists()); }
+
+    template <class T> void set(T val)
+    { set_vmcs_field(val, addr, name, exists()); }
+
+    template <class T> void set_if_exists(T val, bool verbose = false) noexcept
+    { set_vmcs_field_if_exists(val, addr, name, verbose, exists()); }
 
     namespace rpl
     {
@@ -1822,10 +2080,22 @@ namespace host_tr_selector
         constexpr const auto name = "rpl";
 
         inline auto get()
-        { return (vm::read(addr, name) & mask) >> from; }
+        { return (get_vmcs_field(addr, name, exists()) & mask) >> from; }
+
+        inline auto get_if_exists(bool verbose = false) noexcept
+        { return (get_vmcs_field_if_exists(addr, name, verbose, exists()) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
+        {
+            auto field = get_vmcs_field(addr, name, exists());
+            set_vmcs_field((field & ~mask) | ((val << from) & mask), addr, name, exists());
+        }
+
+        template<class T> void set_if_exists(T val, bool verbose = false) noexcept
+        {
+            auto field = get_vmcs_field_if_exists(addr, name, verbose, exists());
+            set_vmcs_field_if_exists((field & ~mask) | ((val << from) & mask), addr, name, verbose, exists());
+        }
     }
 
     namespace ti
@@ -1835,10 +2105,22 @@ namespace host_tr_selector
         constexpr const auto name = "ti";
 
         inline auto get()
-        { return (vm::read(addr, name) & mask) >> from; }
+        { return (get_vmcs_field(addr, name, exists()) & mask) >> from; }
+
+        inline auto get_if_exists(bool verbose = false) noexcept
+        { return (get_vmcs_field_if_exists(addr, name, verbose, exists()) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
+        {
+            auto field = get_vmcs_field(addr, name, exists());
+            set_vmcs_field((field & ~mask) | ((val << from) & mask), addr, name, exists());
+        }
+
+        template<class T> void set_if_exists(T val, bool verbose = false) noexcept
+        {
+            auto field = get_vmcs_field_if_exists(addr, name, verbose, exists());
+            set_vmcs_field_if_exists((field & ~mask) | ((val << from) & mask), addr, name, verbose, exists());
+        }
     }
 
     namespace index
@@ -1848,10 +2130,22 @@ namespace host_tr_selector
         constexpr const auto name = "index";
 
         inline auto get()
-        { return (vm::read(addr, name) & mask) >> from; }
+        { return (get_vmcs_field(addr, name, exists()) & mask) >> from; }
+
+        inline auto get_if_exists(bool verbose = false) noexcept
+        { return (get_vmcs_field_if_exists(addr, name, verbose, exists()) & mask) >> from; }
 
         template<class T> void set(T val)
-        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
+        {
+            auto field = get_vmcs_field(addr, name, exists());
+            set_vmcs_field((field & ~mask) | ((val << from) & mask), addr, name, exists());
+        }
+
+        template<class T> void set_if_exists(T val, bool verbose = false) noexcept
+        {
+            auto field = get_vmcs_field_if_exists(addr, name, verbose, exists());
+            set_vmcs_field_if_exists((field & ~mask) | ((val << from) & mask), addr, name, verbose, exists());
+        }
     }
 }
 
