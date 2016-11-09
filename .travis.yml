@@ -30,6 +30,15 @@ matrix:
       - if [[ -n $(./tools/astyle/run.sh | grep Formatted) ]]; then echo "You must run astyle before submitting a pull request"; exit -1; fi
 
   #
+  # Doxygen
+  #
+  - os: linux
+    env:
+      - TEST="Doxygen"
+    script:
+      - if [[ -n $(./tools/doxygen/linux/run.sh | grep warning) ]]; then echo "You must fix doxygen before submitting a pull request"; exit -1; fi
+
+  #
   # Git Check
   #
   - os: linux
