@@ -44,7 +44,7 @@
 #
 # - misc-noexcept-move-constructor: Like the above, this is known to be
 #   buggy which is a shame because it's useful. Basically, if a move
-#   constructor is set to "= default" which check fires even if noexcept is
+#   constructor is set to "= default" this check fires even if noexcept is
 #   provided (at least with 3.8)
 #
 # - reinterpret-cast: There are legit cases where we need reinterpret_cast.
@@ -148,7 +148,7 @@ pushd bfvmm > /dev/null
 header $PWD
 run_clang_tidy "clan*,-clang-analyzer-alpha.deadcode.UnreachableCode"
 run_clang_tidy "cert*,-clang-analyzer*,-cert-err60-cpp"
-run_clang_tidy "misc*,-clang-analyzer*"
+run_clang_tidy "misc*,-clang-analyzer*,-misc-noexcept-move-constructor"
 run_clang_tidy "perf*,-clang-analyzer*"
 run_clang_tidy "cppc*,-clang-analyzer*,-cppcoreguidelines-pro-type-reinterpret-cast"
 run_clang_tidy "read*,-clang-analyzer*,-readability-braces-around-statements"
@@ -231,3 +231,5 @@ popd > /dev/null
 if [[ ! $BUILD_ABS == $HYPER_ABS ]]; then
     rm -Rf $HYPER_ABS/compile_commands.json
 fi
+
+rm -Rf $OUTPUT

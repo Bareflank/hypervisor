@@ -45,6 +45,7 @@ int64_t g_num_files = 0;
 char *files[MAX_NUM_MODULES] = {0};
 uint64_t files_size[MAX_NUM_MODULES] = { 0 };
 
+uint64_t g_cpuid = 0;
 uint64_t g_vcpuid = 0;
 
 /* -------------------------------------------------------------------------- */
@@ -296,7 +297,27 @@ ioctl_vmm_status(int64_t *status)
         return BF_IOCTL_FAILURE;
     }
 
-    DEBUG("IOCTL_VMM_STATUS: succeeded\n");
+    return BF_IOCTL_SUCCESS;
+}
+
+static long
+ioctl_set_cpuid(uint64_t *cpuid)
+{
+    int64_t ret;
+
+    if (cpuid == 0)
+    {
+        ALERT("IOCTL_SET_CPUID: failed with cpuid == NULL\n");
+        return BF_IOCTL_FAILURE;
+    }
+
+    ret = copy_from_user(&g_cpuid, cpuid, sizeof(uint64_t));
+    if (ret != 0)
+    {
+        ALERT("IOCTL_SET_CPUID: failed to copy memory from userspace\n");
+        return BF_IOCTL_FAILURE;
+    }
+
     return BF_IOCTL_SUCCESS;
 }
 
@@ -307,7 +328,7 @@ ioctl_set_vcpuid(uint64_t *vcpuid)
 
     if (vcpuid == 0)
     {
-        ALERT("IOCTL_SET_VCPUID: failed with len == NULL\n");
+        ALERT("IOCTL_SET_VCPUID: failed with vcpuid == NULL\n");
         return BF_IOCTL_FAILURE;
     }
 
@@ -318,7 +339,22 @@ ioctl_set_vcpuid(uint64_t *vcpuid)
         return BF_IOCTL_FAILURE;
     }
 
-    DEBUG("IOCTL_SET_VCPUID: succeeded\n");
+    return BF_IOCTL_SUCCESS;
+}
+
+static long
+ioctl_vmcall(struct vmcall_registers_t *regs)
+{
+    int64_t ret;
+
+    ret = common_vmcall(regs, g_cpuid);
+    if (ret != 0)
+    {
+        ALERT("IOCTL_VMCALL: common_vmcall failed: %p - %s\n", \
+              (void *)ret, ec_to_str(ret));
+        return BF_IOCTL_FAILURE;
+    }
+
     return BF_IOCTL_SUCCESS;
 }
 
@@ -355,8 +391,14 @@ dev_unlocked_ioctl(struct file *file,
         case IOCTL_VMM_STATUS:
             return ioctl_vmm_status((int64_t *)arg);
 
+        case IOCTL_SET_CPUID:
+            return ioctl_set_cpuid((uint64_t *)arg);
+
         case IOCTL_SET_VCPUID:
             return ioctl_set_vcpuid((uint64_t *)arg);
+
+        case IOCTL_VMCALL:
+            return ioctl_vmcall((struct vmcall_registers_t *)arg);
 
         default:
             return -EINVAL;

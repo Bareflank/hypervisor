@@ -38,10 +38,10 @@ bool g_virt_to_phys_return_nullptr = false;
 bool g_phys_to_virt_return_nullptr = false;
 
 void
-setup_mock(MockRepository &mocks, memory_manager *mm)
+setup_mock(MockRepository &mocks, memory_manager_x64 *mm)
 {
-    mocks.OnCallFunc(memory_manager::instance).Return(mm);
-    mocks.OnCall(mm, memory_manager::physint_to_virtptr).Do(physint_to_virtptr);
+    mocks.OnCallFunc(memory_manager_x64::instance).Return(mm);
+    mocks.OnCall(mm, memory_manager_x64::physint_to_virtptr).Do(physint_to_virtptr);
 }
 
 void
@@ -158,7 +158,7 @@ virtptr_to_physint(void *ptr)
     (void) ptr;
 
     if (g_virt_to_phys_return_nullptr)
-        return 0;
+        throw gsl::fail_fast("");
 
     return 0x0000000ABCDEF0000;
 }

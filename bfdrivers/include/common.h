@@ -26,6 +26,7 @@
 #include <types.h>
 #include <error_codes.h>
 #include <bfelf_loader.h>
+#include <vmcall_interface.h>
 #include <debug_ring_interface.h>
 
 #ifdef __cplusplus
@@ -183,6 +184,18 @@ common_stop_vmm(void);
  */
 int64_t
 common_dump_vmm(struct debug_ring_resources_t **drr, uint64_t vcpuid);
+
+/**
+ * VMCall
+ *
+ * This performs a vmcall on the requested CPU.
+ *
+ * @param regs the vmcall registers used in the vmcall
+ * @param cpuid indicates which cpu to vmcall
+ * @return BF_SUCCESS on success, negative error code on failure
+ */
+int64_t
+common_vmcall(struct vmcall_registers_t *regs, uint64_t cpuid);
 
 #ifdef __cplusplus
 }

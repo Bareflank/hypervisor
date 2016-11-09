@@ -23,6 +23,7 @@
 #define EXIT_HANDLER_INTEL_X64_H
 
 #include <memory>
+#include <vmcall_interface.h>
 #include <vmcs/vmcs_intel_x64.h>
 
 // -----------------------------------------------------------------------------
@@ -49,12 +50,15 @@ public:
 
     /// Default Constructor
     ///
-    /// @param intrinsics the intriniscs class to be used by this class
-    /// @throws invalid argument if the intrinsics class is null.
+    /// @expects none
+    /// @ensures none
     ///
     exit_handler_intel_x64();
 
     /// Destructor
+    ///
+    /// @expects none
+    /// @ensures none
     ///
     virtual ~exit_handler_intel_x64() = default;
 
@@ -63,12 +67,18 @@ public:
     /// Called when a VM exit needs to be handled. This function will decode
     /// the exit reason, and dispatch the correct handler.
     ///
+    /// @expects none
+    /// @ensures none
+    ///
     virtual void dispatch();
 
     /// Halt
     ///
     /// Called when the exit handler needs to halt the CPU. This would mainly
     /// be due to an error.
+    ///
+    /// @expects none
+    /// @ensures none
     ///
     virtual void halt() noexcept;
 
@@ -135,16 +145,23 @@ protected:
     virtual void handle_xsaves();
     virtual void handle_xrstors();
 
-    virtual void advance_rip();
-    virtual void unimplemented_handler();
+    virtual void advance_rip() noexcept;
+    virtual void unimplemented_handler() noexcept;
 
     virtual std::string exit_reason_to_str(uint64_t exit_reason);
+
+    virtual void handle_vmcall_versions(vmcall_registers_t &regs);
+    virtual void handle_vmcall_registers(vmcall_registers_t &regs);
+    virtual void handle_vmcall_data(vmcall_registers_t &regs);
+    virtual void handle_vmcall_event(vmcall_registers_t &regs);
+    virtual void handle_vmcall_unittest(vmcall_registers_t &regs);
 
 protected:
 
     friend class vcpu_ut;
     friend class vcpu_intel_x64;
     friend class exit_handler_intel_x64_ut;
+    friend exit_handler_intel_x64 setup_ehlr(const std::shared_ptr<vmcs_intel_x64> &vmcs);
 
     uint64_t m_exit_reason;
     uint64_t m_exit_qualification;

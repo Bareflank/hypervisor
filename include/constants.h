@@ -23,6 +23,40 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
+#include <types.h>
+
+#if defined(__GNUC__) || defined(__clang__)
+#if __has_include("user_constants.h")
+#include "user_constants.h"
+#endif
+#endif
+
+/*
+ * Hypervisor Version
+ *
+ * Uses http://semver.org
+ */
+#define BAREFLANK_VERSION_MAJOR 1ULL
+#define BAREFLANK_VERSION_MINOR 1ULL
+#define BAREFLANK_VERSION_PATCH 0ULL
+
+/*
+ * User Version
+ *
+ * Uses http://semver.org
+ */
+#ifndef USER_VERSION_MAJOR
+#define USER_VERSION_MAJOR 0ULL
+#endif
+
+#ifndef USER_VERSION_MINOR
+#define USER_VERSION_MINOR 0ULL
+#endif
+
+#ifndef USER_VERSION_PATCH
+#define USER_VERSION_PATCH 0ULL
+#endif
+
 /*
  * Cache Line Shift
  *
@@ -87,10 +121,10 @@
  * anything that uses a std::container uses this heap so it does need to
  * have some size to it. Pages do not come from this pool.
  *
- * Note: defined in bytes
+ * Note: defined in bytes (defaults to 8MB)
  */
 #ifndef MAX_HEAP_POOL
-#define MAX_HEAP_POOL (256ULL * MAX_PAGE_SIZE * MAX_CACHE_LINE_SIZE)
+#define MAX_HEAP_POOL (256ULL * MAX_PAGE_SIZE * sizeof(uintptr_t))
 #endif
 
 /*
@@ -99,10 +133,34 @@
  * This defines the internal memory that the hypervisor allocates to use
  * for allocating pages.
  *
- * Note: defined in bytes (defaults to 8MB)
+ * Note: defined in bytes (defaults to 1MB)
  */
 #ifndef MAX_PAGE_POOL
 #define MAX_PAGE_POOL (256ULL * MAX_PAGE_SIZE)
+#endif
+
+/*
+ * Max Memory Map Pool
+ *
+ * This defines the virtual memory that the hypervisor will use for mapping
+ * memory
+ *
+ * Note: defined in bytes (defaults to 8MB)
+ */
+#ifndef MAX_MEM_MAP_POOL
+#define MAX_MEM_MAP_POOL (256ULL * MAX_PAGE_SIZE  * sizeof(uintptr_t))
+#endif
+
+/*
+ * Memory Map Pool Start
+ *
+ * This defines the starting location of the virtual memory that is used
+ * for memory mapping.
+ *
+ * Note: defined in bytes (defaults to 2MB)
+ */
+#ifndef MEM_MAP_POOL_START
+#define MEM_MAP_POOL_START 0x200000ULL
 #endif
 
 /*
@@ -191,6 +249,24 @@
  */
 #ifndef STACK_RESERVED
 #define STACK_RESERVED (0x20)
+#endif
+
+/**
+ * VMCall In Buffer Size (MAX)
+ *
+ * Note: Defined in bytes
+ */
+#ifndef VMCALL_IN_BUFFER_SIZE
+#define VMCALL_IN_BUFFER_SIZE (32 * MAX_PAGE_SIZE)
+#endif
+
+/**
+ * VMCall Out Buffer Size (MAX)
+ *
+ * Note: Defined in bytes
+ */
+#ifndef VMCALL_OUT_BUFFER_SIZE
+#define VMCALL_OUT_BUFFER_SIZE (32 * MAX_PAGE_SIZE)
 #endif
 
 #endif

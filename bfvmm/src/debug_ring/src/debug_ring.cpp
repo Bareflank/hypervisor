@@ -28,7 +28,7 @@
 // Global
 // -----------------------------------------------------------------------------
 
-std::map<uint64_t, std::shared_ptr<debug_ring_resources_t> > g_drrs;
+std::map<uint64_t, std::shared_ptr<debug_ring_resources_t>> g_drrs;
 
 extern "C" int64_t
 get_drr(uint64_t vcpuid, struct debug_ring_resources_t **drr) noexcept

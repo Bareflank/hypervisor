@@ -19,40 +19,22 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <test.h>
-#include <split.h>
+#ifndef TLB_X64_H
+#define TLB_X64_H
 
-void
-bfm_ut::test_split_empty_string()
+extern "C" void __invlpg(const void *virt) noexcept;
+
+// *INDENT-OFF*
+
+namespace x64
 {
-    auto fields = split(std::string(), ' ');
-
-    EXPECT_TRUE(fields.empty());
+namespace tlb
+{
+    template<class T> void invlpg(T val) noexcept
+    { __invlpg(val); }
+}
 }
 
-void
-bfm_ut::test_split_with_non_existing_delimiter()
-{
-    auto str = "the cow is blue for this is true";
-    auto fields = split(str, 'z');
+// *INDENT-ON*
 
-    ASSERT_TRUE(fields.size() == 1);
-    EXPECT_TRUE(fields[0] == str);
-}
-
-void
-bfm_ut::test_split_with_delimiter()
-{
-    auto str = "the cow is blue for this is true";
-    auto fields = split(str, ' ');
-
-    ASSERT_TRUE(fields.size() == 8);
-    EXPECT_TRUE(fields[0] == "the");
-    EXPECT_TRUE(fields[1] == "cow");
-    EXPECT_TRUE(fields[2] == "is");
-    EXPECT_TRUE(fields[3] == "blue");
-    EXPECT_TRUE(fields[4] == "for");
-    EXPECT_TRUE(fields[5] == "this");
-    EXPECT_TRUE(fields[6] == "is");
-    EXPECT_TRUE(fields[7] == "true");
-}
+#endif

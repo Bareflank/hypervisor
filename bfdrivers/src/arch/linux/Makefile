@@ -4,6 +4,7 @@ ifneq ($(KERNELRELEASE),)
 	obj-m := $(TARGET_MODULE).o
 
 	$(TARGET_MODULE)-objs += entry.o
+	$(TARGET_MODULE)-objs += vmcall.o
 	$(TARGET_MODULE)-objs += platform.o
 	$(TARGET_MODULE)-objs += ../../common.o
 	$(TARGET_MODULE)-objs += ../../../../bfelf_loader/src/bfelf_loader.o
@@ -35,3 +36,6 @@ unload:
 	-rmmod ./$(TARGET_MODULE).ko
 
 endif
+
+$(KBUILD_EXTMOD)/vmcall.o: vmcall.asm
+	nasm -f elf64 -o $@ $^

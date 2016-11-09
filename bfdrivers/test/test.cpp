@@ -190,6 +190,11 @@ driver_entry_ut::list()
     this->test_common_dump_get_drr_missing();
     this->test_common_dump_get_drr_failure();
 
+    this->test_common_vmcall_invalid_args();
+    this->test_common_vmcall_set_affinity_failure();
+    this->test_common_vmcall_success();
+    this->test_common_vmcall_success_event();
+
     this->test_helper_common_vmm_status();
     this->test_helper_get_file_invalid_index();
     this->test_helper_get_file_success();

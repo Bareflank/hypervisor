@@ -23,7 +23,7 @@
 
 #include <debug.h>
 #include <vmxon/vmxon_intel_x64.h>
-#include <memory_manager/memory_manager.h>
+#include <memory_manager/memory_manager_x64.h>
 
 #include <intrinsics/x64.h>
 #include <intrinsics/cpuid_x64.h>
@@ -158,9 +158,6 @@ vmxon_intel_x64::create_vmxon_region()
 
     m_vmxon_region = std::make_unique<uint32_t[]>(1024);
     m_vmxon_region_phys = g_mm->virtptr_to_physint(m_vmxon_region.get());
-
-    if (m_vmxon_region_phys == 0)
-        throw std::logic_error("m_vmxon_region_phys == nullptr");
 
     gsl::span<uint32_t> id{m_vmxon_region.get(), 1024};
     id[0] = gsl::narrow<uint32_t>(msrs::ia32_vmx_basic::revision_id::get());

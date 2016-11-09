@@ -26,13 +26,11 @@
 // -----------------------------------------------------------------------------
 
 int
-bf_ioctl_open()
-{
-    return 0;
-}
+__attribute__((weak)) bf_ioctl_open()
+{ return 0; }
 
 int64_t
-bf_send_ioctl(int fd, unsigned long request)
+__attribute__((weak)) bf_send_ioctl(int fd, unsigned long request)
 {
     (void) fd;
     (void) request;
@@ -41,7 +39,7 @@ bf_send_ioctl(int fd, unsigned long request)
 }
 
 int64_t
-bf_read_ioctl(int fd, unsigned long request, void *data)
+__attribute__((weak)) bf_read_ioctl(int fd, unsigned long request, void *data)
 {
     (void) fd;
     (void) request;
@@ -51,7 +49,7 @@ bf_read_ioctl(int fd, unsigned long request, void *data)
 }
 
 int64_t
-bf_write_ioctl(int fd, unsigned long request, const void *data)
+__attribute__((weak)) bf_write_ioctl(int fd, unsigned long request, const void *data)
 {
     (void) fd;
     (void) request;
@@ -64,50 +62,41 @@ bf_write_ioctl(int fd, unsigned long request, const void *data)
 // Unit Test Seems
 // -----------------------------------------------------------------------------
 
-ioctl::ioctl() noexcept
-{
-}
+ioctl::ioctl()
+{ }
 
 void
 ioctl::open()
-{
-}
+{ }
 
 void
-ioctl::call_ioctl_add_module(const std::string &str)
-{
-    (void) str;
-}
+ioctl::call_ioctl_add_module(const binary_data &module_data)
+{ (void) module_data; }
 
 void
 ioctl::call_ioctl_load_vmm()
-{
-}
+{ }
 
 void
 ioctl::call_ioctl_unload_vmm()
-{
-}
+{ }
 
 void
 ioctl::call_ioctl_start_vmm()
-{
-}
+{ }
 
 void
 ioctl::call_ioctl_stop_vmm()
-{
-}
+{ }
 
 void
-ioctl::call_ioctl_dump_vmm(debug_ring_resources_t *drr, uint64_t vcpuid)
-{
-    (void) drr;
-    (void) vcpuid;
-}
+ioctl::call_ioctl_dump_vmm(gsl::not_null<drr_pointer> drr, vcpuid_type vcpuid)
+{ (void) drr; (void) vcpuid; }
 
 void
-ioctl::call_ioctl_vmm_status(int64_t *status)
-{
-    (void) status;
-}
+ioctl::call_ioctl_vmm_status(gsl::not_null<status_pointer> status)
+{ (void) status; }
+
+void
+ioctl::call_ioctl_vmcall(gsl::not_null<registers_pointer> regs, cpuid_type cpuid)
+{ (void) regs; (void) cpuid; }

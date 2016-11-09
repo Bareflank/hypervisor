@@ -325,7 +325,7 @@ if [ ! -z "$VERBOSE" ]; then
 fi
 
 if [[ $MODE == "compile" ]]; then
-    $COMPILER $SYSROOT_INC_PATH ${ARGS[*]}
+    $COMPILER ${ARGS[*]} $SYSROOT_INC_PATH
 fi
 
 if [[ $MODE == "link" ]]; then

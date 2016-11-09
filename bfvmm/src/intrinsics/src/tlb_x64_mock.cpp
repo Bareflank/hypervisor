@@ -19,26 +19,14 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <split.h>
+#include <gsl/gsl>
+#include <debug.h>
 
-std::vector<std::string>
-split(const std::string &str, const char delimiter)
+extern "C" void
+__attribute__((weak)) __invlpg(const void *virt) noexcept
 {
-    std::vector<std::string> result;
+    (void) virt;
 
-    if (str.empty())
-        return result;
-
-    result.reserve(str.size() / 2U);
-
-    std::istringstream ss(str);
-    std::string field;
-
-    while (not ss.eof())
-    {
-        std::getline(ss, field, delimiter);
-        result.push_back(field);
-    }
-
-    return result;
+    std::cerr << __FUNC__ << " called" << '\n';
+    abort();
 }

@@ -19,23 +19,12 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#ifndef SPLIT_H
-#define SPLIT_H
-
-#include <vector>
+#include <test.h>
 #include <string>
-#include <sstream>
 
-/// Split String
-///
-/// C++ does not provide a split string function for std::string. The
-/// following function provides a split function given a single character
-/// delimiter.
-///
-/// @param str the string to split
-/// @param delimiter the character that separates the str into tokens
-/// @return str, broken up into a vector or strings, delimited by the
-///         provided delimiter
-std::vector<std::string> split(const std::string &str, const char delimiter);
-
-#endif
+void
+misc_ut::test_string_literal()
+{
+    this->expect_true("" == ""_s);
+    this->expect_true("hello world" == "hello world"_s);
+}

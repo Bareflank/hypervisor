@@ -20,8 +20,7 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #include <vmcs/vmcs_intel_x64_vmm_state.h>
-#include <memory_manager/memory_manager.h>
-#include <memory_manager/page_table_x64.h>
+#include <memory_manager/root_page_table_x64.h>
 
 #include <intrinsics/crs_intel_x64.h>
 #include <intrinsics/msrs_intel_x64.h>
@@ -29,15 +28,10 @@
 using namespace x64;
 using namespace intel_x64;
 
-std::shared_ptr<page_table_x64> m_pml4;
-
-vmcs_intel_x64_vmm_state::vmcs_intel_x64_vmm_state(const std::shared_ptr<state_save_intel_x64> &state_save) :
-    m_gdt(7),
-    m_idt(256)
+vmcs_intel_x64_vmm_state::vmcs_intel_x64_vmm_state() :
+    m_gdt{7},
+    m_idt{256}
 {
-    if (!state_save)
-        throw std::invalid_argument("state_save == nullptr");
-
     m_gdt.set_access_rights(0, 0);
     m_gdt.set_access_rights(1, access_rights::ring0_cs_descriptor);
     m_gdt.set_access_rights(2, access_rights::ring0_ss_descriptor);
@@ -71,39 +65,13 @@ vmcs_intel_x64_vmm_state::vmcs_intel_x64_vmm_state(const std::shared_ptr<state_s
     m_gs = gsl::narrow_cast<uint16_t>(m_gs_index << 3);
     m_tr = gsl::narrow_cast<uint16_t>(m_tr_index << 3);
 
-    // TODO: We need to guard the additions to the page tables here. Just
-    // in case more than one core attempts to change these at the same time.
-
-    if (!m_pml4)
-    {
-        m_pml4 = std::make_shared<page_table_x64>();
-
-        for (const auto &md : g_mm->virt_to_phys_map())
-        {
-            auto entry = m_pml4->add_page(md.second.virt);
-
-            entry->set_phys_addr(md.second.phys);
-            entry->set_present(true);
-
-            if ((md.second.type & MEMORY_TYPE_W) != 0)
-                entry->set_rw(true);
-            else
-                entry->set_rw(false);
-
-            if ((md.second.type & MEMORY_TYPE_E) != 0)
-                entry->set_nx(false);
-            else
-                entry->set_nx(true);
-        }
-    }
-
     m_cr0 = 0;
     m_cr0 |= cr0::protection_enable::mask;
     m_cr0 |= cr0::monitor_coprocessor::mask;
     m_cr0 |= cr0::numeric_error::mask;
     m_cr0 |= cr0::paging::mask;
 
-    m_cr3 = m_pml4->phys_addr();
+    m_cr3 = g_pt->phys_addr();
 
     m_cr4 = 0;
     m_cr4 |= cr4::physical_address_extensions::mask;
@@ -116,8 +84,4 @@ vmcs_intel_x64_vmm_state::vmcs_intel_x64_vmm_state(const std::shared_ptr<state_s
     m_ia32_efer_msr |= msrs::ia32_efer::lme::mask;
     m_ia32_efer_msr |= msrs::ia32_efer::lma::mask;
     m_ia32_efer_msr |= msrs::ia32_efer::nxe::mask;
-
-    m_ia32_pat_msr = 0;
-    m_ia32_fs_base_msr = 0;
-    m_ia32_gs_base_msr = reinterpret_cast<uintptr_t>(state_save.get());
 }

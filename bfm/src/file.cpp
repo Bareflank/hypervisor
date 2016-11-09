@@ -19,21 +19,63 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+#include <gsl/gsl>
+
+#include <fstream>
+
 #include <file.h>
 #include <exception.h>
 
-std::string
-file::read(const std::string &filename) const
+file::text_data
+file::read_text(const filename_type &filename) const
 {
-    std::fstream fstream;
+    expects(!filename.empty());
 
-    fstream.open(filename, std::ios_base::in);
-    if (!fstream.good())
-        throw invalid_file(filename);
+    if (auto && handle = std::fstream(filename, std::ios_base::in))
+        return text_data(std::istreambuf_iterator<char>(handle),
+                         std::istreambuf_iterator<char>());
 
-    auto contents = std::string(std::istreambuf_iterator<char>(fstream),
-                                std::istreambuf_iterator<char>());
+    throw invalid_file(filename);
+}
 
-    fstream.close();
-    return contents;
+file::binary_data
+file::read_binary(const filename_type &filename) const
+{
+    expects(!filename.empty());
+
+    if (auto && handle = std::fstream(filename, std::ios_base::in | std::ios_base::binary))
+        return binary_data(std::istreambuf_iterator<char>(handle),
+                           std::istreambuf_iterator<char>());
+
+    throw invalid_file(filename);
+}
+
+void
+file::write_text(const filename_type &filename, const text_data &data) const
+{
+    expects(!filename.empty());
+    expects(!data.empty());
+
+    if (auto && handle = std::fstream(filename, std::ios_base::out | std::ios_base::binary))
+    {
+        std::copy(data.begin(), data.end(), std::ostreambuf_iterator<char>(handle));
+        return;
+    }
+
+    throw invalid_file(filename);
+}
+
+void
+file::write_binary(const filename_type &filename, const binary_data &data) const
+{
+    expects(!filename.empty());
+    expects(!data.empty());
+
+    if (auto && handle = std::fstream(filename, std::ios_base::out | std::ios_base::binary))
+    {
+        std::copy(data.begin(), data.end(), std::ostreambuf_iterator<char>(handle));
+        return;
+    }
+
+    throw invalid_file(filename);
 }

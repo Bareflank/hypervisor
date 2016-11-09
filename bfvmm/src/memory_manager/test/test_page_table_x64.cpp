@@ -22,151 +22,121 @@
 #include <gsl/gsl>
 
 #include <test.h>
-#include <stdlib.h>
 #include <memory_manager/page_table_x64.h>
-#include <memory_manager/memory_manager.h>
+#include <memory_manager/memory_manager_x64.h>
 
 bool virt_to_phys_return_nullptr = false;
+constexpr page_table_x64::integer_pointer virt = 0x0000123456780000UL;
 
-static uintptr_t
-virtptr_to_physint(void *ptr)
+static auto
+setup_mm(MockRepository &mocks)
 {
-    (void) ptr;
+    auto mm = mocks.Mock<memory_manager_x64>();
+    mocks.OnCallFunc(memory_manager_x64::instance).Return(mm);
+    mocks.OnCall(mm, memory_manager_x64::virtptr_to_physint).Return(0x0000000ABCDEF0000);
 
-    if (virt_to_phys_return_nullptr)
-        return 0;
-
-    return 0x0000000ABCDEF0000;
+    return mm;
 }
 
 void
 memory_manager_ut::test_page_table_x64_no_entry()
 {
     MockRepository mocks;
-    auto mm = mocks.Mock<memory_manager>();
-    mocks.OnCallFunc(memory_manager::instance).Return(mm);
-    mocks.OnCall(mm, memory_manager::virtptr_to_physint).Do(virtptr_to_physint);
-
+    setup_mm(mocks);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        auto pt = std::make_shared<page_table_x64>();
+        auto &&pt = std::make_shared<page_table_x64>();
 
-        EXPECT_TRUE(pt->phys_addr() != 0);
-        EXPECT_TRUE(pt->present());
-        EXPECT_TRUE(pt->rw());
-        EXPECT_TRUE(pt->us());
-        EXPECT_FALSE(pt->pwt());
-        EXPECT_FALSE(pt->pcd());
-        EXPECT_FALSE(pt->accessed());
-        EXPECT_FALSE(pt->dirty());
-        EXPECT_FALSE(pt->pat());
-        EXPECT_FALSE(pt->global());
-        EXPECT_FALSE(pt->nx());
+        this->expect_true(pt->phys_addr() != 0);
+        this->expect_true(pt->present());
+        this->expect_true(pt->rw());
+        this->expect_true(pt->us());
+        this->expect_false(pt->pwt());
+        this->expect_false(pt->pcd());
+        this->expect_false(pt->accessed());
+        this->expect_false(pt->dirty());
+        this->expect_false(pt->pat());
+        this->expect_false(pt->pat());
+        this->expect_false(pt->global());
+        this->expect_false(pt->nx());
     });
 }
 
 void
 memory_manager_ut::test_page_table_x64_with_entry()
 {
-    uintptr_t entry = 0;
-
     MockRepository mocks;
-    auto mm = mocks.Mock<memory_manager>();
-    mocks.OnCallFunc(memory_manager::instance).Return(mm);
-    mocks.OnCall(mm, memory_manager::virtptr_to_physint).Do(virtptr_to_physint);
-
+    setup_mm(mocks);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        auto pt = std::make_shared<page_table_x64>(&entry);
+        page_table_x64::integer_pointer entry = 0;
+        auto &&pt = std::make_shared<page_table_x64>(&entry);
 
-        EXPECT_TRUE(pt->phys_addr() != 0);
-        EXPECT_TRUE(pt->present());
-        EXPECT_TRUE(pt->rw());
-        EXPECT_TRUE(pt->us());
-        EXPECT_FALSE(pt->pwt());
-        EXPECT_FALSE(pt->pcd());
-        EXPECT_FALSE(pt->accessed());
-        EXPECT_FALSE(pt->dirty());
-        EXPECT_FALSE(pt->pat());
-        EXPECT_FALSE(pt->global());
-        EXPECT_FALSE(pt->nx());
+        this->expect_true(pt->phys_addr() != 0);
+        this->expect_true(pt->present());
+        this->expect_true(pt->rw());
+        this->expect_true(pt->us());
+        this->expect_false(pt->pwt());
+        this->expect_false(pt->pcd());
+        this->expect_false(pt->accessed());
+        this->expect_false(pt->dirty());
+        this->expect_false(pt->pat());
+        this->expect_false(pt->global());
+        this->expect_false(pt->nx());
     });
 }
 
 void
-memory_manager_ut::test_page_table_x64_add_page_success()
+memory_manager_ut::test_page_table_x64_add_remove_page_success()
 {
     MockRepository mocks;
-    auto mm = mocks.Mock<memory_manager>();
-    mocks.OnCallFunc(memory_manager::instance).Return(mm);
-    mocks.OnCall(mm, memory_manager::virtptr_to_physint).Do(virtptr_to_physint);
-
+    setup_mm(mocks);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        auto virt = 0x0000123456780000ULL;
-        auto pml4 = std::make_shared<page_table_x64>();
+        auto &&pml4 = std::make_shared<page_table_x64>();
 
-        pml4->add_page(virt);
+        pml4->add_page_x64(virt);
+        this->expect_true(pml4->global_size() == 4);
+
+        pml4->add_page_x64(virt + 0x1000);
+        this->expect_true(pml4->global_size() == 5);
+
+        pml4->add_page_x64(virt + 0x1000000);
+        this->expect_true(pml4->global_size() == 7);
+
+        pml4->remove_page_x64(virt);
+        this->expect_true(pml4->global_size() == 6);
+
+        pml4->remove_page_x64(virt + 0x1000);
+        this->expect_true(pml4->global_size() == 4);
+
+        pml4->remove_page_x64(virt + 0x1000000);
+        this->expect_true(pml4->global_size() == 0);
     });
 }
 
 void
-memory_manager_ut::test_page_table_x64_add_two_pages_no_added_mem_success()
+memory_manager_ut::test_page_table_x64_add_remove_many_pages_success()
 {
     MockRepository mocks;
-    auto mm = mocks.Mock<memory_manager>();
-    mocks.OnCallFunc(memory_manager::instance).Return(mm);
-    mocks.OnCall(mm, memory_manager::virtptr_to_physint).Do(virtptr_to_physint);
-
+    setup_mm(mocks);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        auto virt = 0x0000123456780000ULL;
-        auto pml4 = std::make_shared<page_table_x64>();
+        auto &&pml4 = std::make_shared<page_table_x64>();
 
-        pml4->add_page(virt);
-        pml4->add_page(virt + 0x1000);
-    });
-}
+        for (auto i = 0U; i < 512; i++)
+            pml4->add_page_x64(virt + (i * 0x1000U));
 
-void
-memory_manager_ut::test_page_table_x64_add_two_pages_with_added_mem_success()
-{
-    MockRepository mocks;
-    auto mm = mocks.Mock<memory_manager>();
-    mocks.OnCallFunc(memory_manager::instance).Return(mm);
-    mocks.OnCall(mm, memory_manager::virtptr_to_physint).Do(virtptr_to_physint);
+        this->expect_true(pml4->global_size() == 516);
 
+        for (auto i = 0U; i < 512; i++)
+            pml4->remove_page_x64(virt + (i * 0x1000U));
 
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        auto virt = 0x0000123456780000ULL;
-        auto pml4 = std::make_shared<page_table_x64>();
-
-        pml4->add_page(virt);
-        pml4->add_page(virt + 0x1000000);
-    });
-}
-
-void
-memory_manager_ut::test_page_table_x64_add_many_pages_success()
-{
-    MockRepository mocks;
-    auto mm = mocks.Mock<memory_manager>();
-    mocks.OnCallFunc(memory_manager::instance).Return(mm);
-    mocks.OnCall(mm, memory_manager::virtptr_to_physint).Do(virtptr_to_physint);
-
-
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        auto virt = 0x0000123456780000ULL;
-        auto pml4 = std::make_shared<page_table_x64>();
-
-        for (auto i = 0U; i < 4096; i++)
-            pml4->add_page(virt + (i * 0x1000U));
+        this->expect_true(pml4->global_size() == 0);
     });
 }
 
@@ -174,57 +144,47 @@ void
 memory_manager_ut::test_page_table_x64_add_page_twice_failure()
 {
     MockRepository mocks;
-    auto mm = mocks.Mock<memory_manager>();
-    mocks.OnCallFunc(memory_manager::instance).Return(mm);
-    mocks.OnCall(mm, memory_manager::virtptr_to_physint).Do(virtptr_to_physint);
-
+    setup_mm(mocks);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        auto virt = 0x0000123456780000ULL;
-        auto pml4 = std::make_shared<page_table_x64>();
+        auto &&pml4 = std::make_shared<page_table_x64>();
 
-        pml4->add_page(virt);
-        EXPECT_EXCEPTION(pml4->add_page(virt), std::logic_error);
+        pml4->add_page_x64(virt);
+        this->expect_exception([&]{ pml4->add_page_x64(virt); }, ""_ut_ree);
     });
 }
 
 void
-memory_manager_ut::test_page_table_x64_table_phys_addr_success()
+memory_manager_ut::test_page_table_x64_remove_page_twice_failure()
 {
     MockRepository mocks;
-    auto mm = mocks.Mock<memory_manager>();
-    mocks.OnCallFunc(memory_manager::instance).Return(mm);
-    mocks.OnCall(mm, memory_manager::virtptr_to_physint).Do(virtptr_to_physint);
-
+    setup_mm(mocks);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        auto pt = std::make_shared<page_table_x64>();
+        auto &&pml4 = std::make_shared<page_table_x64>();
 
-        EXPECT_TRUE(pt->phys_addr() != 0);
+        pml4->add_page_x64(virt);
+        pml4->add_page_x64(virt + 0x1000);
+
+        pml4->remove_page_x64(virt);
+        this->expect_exception([&]{ pml4->remove_page_x64(virt); }, ""_ut_ree);
+        pml4->remove_page_x64(virt + 0x1000);
+
+        this->expect_true(pml4->global_size() == 0);
     });
 }
 
 void
-memory_manager_ut::test_page_table_x64_table_phys_addr_failure()
+memory_manager_ut::test_page_table_x64_remove_page_unknown_failure()
 {
     MockRepository mocks;
-    auto mm = mocks.Mock<memory_manager>();
-    mocks.OnCallFunc(memory_manager::instance).Return(mm);
-    mocks.OnCall(mm, memory_manager::virtptr_to_physint).Do(virtptr_to_physint);
-
-    auto ___ = gsl::finally([&]
-    {
-        virt_to_phys_return_nullptr = false;
-    });
-
-    virt_to_phys_return_nullptr = true;
+    setup_mm(mocks);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        auto pt = std::make_shared<page_table_x64>();
-
-        EXPECT_TRUE(pt->phys_addr() == 0);
+        auto &&pml4 = std::make_shared<page_table_x64>();
+        this->expect_exception([&]{ pml4->remove_page_x64(virt); }, ""_ut_ree);
     });
 }

@@ -23,7 +23,8 @@
 #include <stdlib.h>
 #include <vcpu/vcpu_intel_x64.h>
 #include <debug_ring/debug_ring.h>
-#include <memory_manager/memory_manager.h>
+#include <memory_manager/memory_manager_x64.h>
+#include <memory_manager/root_page_table_x64.h>
 
 extern "C" uint64_t
 __read_msr(uint32_t addr) noexcept
@@ -89,19 +90,24 @@ extern "C" uint16_t
 __read_tr(void) noexcept
 { return 0; }
 
-static uintptr_t
-virtptr_to_physint(void *ptr)
+static auto
+setup_mm(MockRepository &mocks)
 {
-    (void) ptr;
+    auto mm = mocks.Mock<memory_manager_x64>();
+    mocks.OnCallFunc(memory_manager_x64::instance).Return(mm);
+    mocks.OnCall(mm, memory_manager_x64::virtptr_to_physint).Return(0x0000000ABCDEF0000);
 
-    return 0x0000000ABCDEF0000;
+    return mm;
 }
 
-static const std::map<uintptr_t, memory_descriptor> &
-virt_to_phys_map() noexcept
+static auto
+setup_pt(MockRepository &mocks)
 {
-    static std::map<uintptr_t, memory_descriptor> m_virt_to_phys_map;
-    return m_virt_to_phys_map;
+    auto pt = mocks.Mock<root_page_table_x64>();
+    mocks.OnCallFunc(root_page_table_x64::instance).Return(pt);
+    mocks.OnCall(pt, root_page_table_x64::phys_addr).Return(0x0000000ABCDEF0000);
+
+    return pt;
 }
 
 void
@@ -131,11 +137,8 @@ void
 vcpu_ut::test_vcpu_intel_x64_init_null_params()
 {
     MockRepository mocks;
-    auto mm = mocks.Mock<memory_manager>();
-
-    mocks.OnCallFunc(memory_manager::instance).Return(mm);
-    mocks.OnCall(mm, memory_manager::virtptr_to_physint).Do(virtptr_to_physint);
-    mocks.OnCall(mm, memory_manager::virt_to_phys_map).Do(virt_to_phys_map);
+    setup_mm(mocks);
+    setup_pt(mocks);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -148,7 +151,9 @@ void
 vcpu_ut::test_vcpu_intel_x64_init_valid_params()
 {
     MockRepository mocks;
-    auto mm = mocks.Mock<memory_manager>();
+    setup_mm(mocks);
+    setup_pt(mocks);
+
     auto dr = bfn::mock_shared<debug_ring>(mocks);
     auto on = bfn::mock_shared<vmxon_intel_x64>(mocks);
     auto cs = bfn::mock_shared<vmcs_intel_x64>(mocks);
@@ -160,10 +165,6 @@ vcpu_ut::test_vcpu_intel_x64_init_valid_params()
 
     mocks.OnCall(eh.get(), exit_handler_intel_x64::set_vmcs);
     mocks.OnCall(eh.get(), exit_handler_intel_x64::set_state_save);
-
-    mocks.OnCallFunc(memory_manager::instance).Return(mm);
-    mocks.OnCall(mm, memory_manager::virtptr_to_physint).Do(virtptr_to_physint);
-    mocks.OnCall(mm, memory_manager::virt_to_phys_map).Do(virt_to_phys_map);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -176,7 +177,9 @@ void
 vcpu_ut::test_vcpu_intel_x64_init_valid()
 {
     MockRepository mocks;
-    auto mm = mocks.Mock<memory_manager>();
+    setup_mm(mocks);
+    setup_pt(mocks);
+
     auto dr = bfn::mock_shared<debug_ring>(mocks);
     auto on = bfn::mock_shared<vmxon_intel_x64>(mocks);
     auto cs = bfn::mock_shared<vmcs_intel_x64>(mocks);
@@ -189,10 +192,6 @@ vcpu_ut::test_vcpu_intel_x64_init_valid()
     mocks.OnCall(eh.get(), exit_handler_intel_x64::set_vmcs);
     mocks.OnCall(eh.get(), exit_handler_intel_x64::set_state_save);
 
-    mocks.OnCallFunc(memory_manager::instance).Return(mm);
-    mocks.OnCall(mm, memory_manager::virtptr_to_physint).Do(virtptr_to_physint);
-    mocks.OnCall(mm, memory_manager::virt_to_phys_map).Do(virt_to_phys_map);
-
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
         auto vc = std::make_shared<vcpu_intel_x64>(0, dr, on, cs, eh, vs, gs);
@@ -204,7 +203,9 @@ void
 vcpu_ut::test_vcpu_intel_x64_init_vmcs_throws()
 {
     MockRepository mocks;
-    auto mm = mocks.Mock<memory_manager>();
+    setup_mm(mocks);
+    setup_pt(mocks);
+
     auto dr = bfn::mock_shared<debug_ring>(mocks);
     auto on = bfn::mock_shared<vmxon_intel_x64>(mocks);
     auto cs = bfn::mock_shared<vmcs_intel_x64>(mocks);
@@ -217,10 +218,6 @@ vcpu_ut::test_vcpu_intel_x64_init_vmcs_throws()
     mocks.OnCall(eh.get(), exit_handler_intel_x64::set_vmcs);
     mocks.OnCall(eh.get(), exit_handler_intel_x64::set_state_save);
 
-    mocks.OnCallFunc(memory_manager::instance).Return(mm);
-    mocks.OnCall(mm, memory_manager::virtptr_to_physint).Do(virtptr_to_physint);
-    mocks.OnCall(mm, memory_manager::virt_to_phys_map).Do(virt_to_phys_map);
-
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
         auto vc = std::make_shared<vcpu_intel_x64>(0, dr, on, cs, eh, vs, gs);
@@ -232,11 +229,8 @@ void
 vcpu_ut::test_vcpu_intel_x64_fini_null_params()
 {
     MockRepository mocks;
-    auto mm = mocks.Mock<memory_manager>();
-
-    mocks.OnCallFunc(memory_manager::instance).Return(mm);
-    mocks.OnCall(mm, memory_manager::virtptr_to_physint).Do(virtptr_to_physint);
-    mocks.OnCall(mm, memory_manager::virt_to_phys_map).Do(virt_to_phys_map);
+    setup_mm(mocks);
+    setup_pt(mocks);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -250,7 +244,9 @@ void
 vcpu_ut::test_vcpu_intel_x64_fini_valid_params()
 {
     MockRepository mocks;
-    auto mm = mocks.Mock<memory_manager>();
+    setup_mm(mocks);
+    setup_pt(mocks);
+
     auto dr = bfn::mock_shared<debug_ring>(mocks);
     auto on = bfn::mock_shared<vmxon_intel_x64>(mocks);
     auto cs = bfn::mock_shared<vmcs_intel_x64>(mocks);
@@ -262,10 +258,6 @@ vcpu_ut::test_vcpu_intel_x64_fini_valid_params()
 
     mocks.OnCall(eh.get(), exit_handler_intel_x64::set_vmcs);
     mocks.OnCall(eh.get(), exit_handler_intel_x64::set_state_save);
-
-    mocks.OnCallFunc(memory_manager::instance).Return(mm);
-    mocks.OnCall(mm, memory_manager::virtptr_to_physint).Do(virtptr_to_physint);
-    mocks.OnCall(mm, memory_manager::virt_to_phys_map).Do(virt_to_phys_map);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -279,7 +271,9 @@ void
 vcpu_ut::test_vcpu_intel_x64_fini_valid()
 {
     MockRepository mocks;
-    auto mm = mocks.Mock<memory_manager>();
+    setup_mm(mocks);
+    setup_pt(mocks);
+
     auto dr = bfn::mock_shared<debug_ring>(mocks);
     auto on = bfn::mock_shared<vmxon_intel_x64>(mocks);
     auto cs = bfn::mock_shared<vmcs_intel_x64>(mocks);
@@ -291,10 +285,6 @@ vcpu_ut::test_vcpu_intel_x64_fini_valid()
 
     mocks.OnCall(eh.get(), exit_handler_intel_x64::set_vmcs);
     mocks.OnCall(eh.get(), exit_handler_intel_x64::set_state_save);
-
-    mocks.OnCallFunc(memory_manager::instance).Return(mm);
-    mocks.OnCall(mm, memory_manager::virtptr_to_physint).Do(virtptr_to_physint);
-    mocks.OnCall(mm, memory_manager::virt_to_phys_map).Do(virt_to_phys_map);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -308,6 +298,9 @@ void
 vcpu_ut::test_vcpu_intel_x64_fini_no_init()
 {
     MockRepository mocks;
+    setup_mm(mocks);
+    setup_pt(mocks);
+
     auto dr = bfn::mock_shared<debug_ring>(mocks);
     auto on = bfn::mock_shared<vmxon_intel_x64>(mocks);
     auto cs = bfn::mock_shared<vmcs_intel_x64>(mocks);
@@ -326,7 +319,9 @@ void
 vcpu_ut::test_vcpu_intel_x64_run_launch()
 {
     MockRepository mocks;
-    auto mm = mocks.Mock<memory_manager>();
+    setup_mm(mocks);
+    setup_pt(mocks);
+
     auto dr = bfn::mock_shared<debug_ring>(mocks);
     auto on = bfn::mock_shared<vmxon_intel_x64>(mocks);
     auto cs = bfn::mock_shared<vmcs_intel_x64>(mocks);
@@ -344,10 +339,6 @@ vcpu_ut::test_vcpu_intel_x64_run_launch()
 
     mocks.OnCall(eh.get(), exit_handler_intel_x64::set_vmcs);
     mocks.OnCall(eh.get(), exit_handler_intel_x64::set_state_save);
-
-    mocks.OnCallFunc(memory_manager::instance).Return(mm);
-    mocks.OnCall(mm, memory_manager::virtptr_to_physint).Do(virtptr_to_physint);
-    mocks.OnCall(mm, memory_manager::virt_to_phys_map).Do(virt_to_phys_map);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -361,7 +352,9 @@ void
 vcpu_ut::test_vcpu_intel_x64_run_launch_is_host_vcpu()
 {
     MockRepository mocks;
-    auto mm = mocks.Mock<memory_manager>();
+    setup_mm(mocks);
+    setup_pt(mocks);
+
     auto dr = bfn::mock_shared<debug_ring>(mocks);
     auto on = bfn::mock_shared<vmxon_intel_x64>(mocks);
     auto cs = bfn::mock_shared<vmcs_intel_x64>(mocks);
@@ -379,10 +372,6 @@ vcpu_ut::test_vcpu_intel_x64_run_launch_is_host_vcpu()
 
     mocks.OnCall(eh.get(), exit_handler_intel_x64::set_vmcs);
     mocks.OnCall(eh.get(), exit_handler_intel_x64::set_state_save);
-
-    mocks.OnCallFunc(memory_manager::instance).Return(mm);
-    mocks.OnCall(mm, memory_manager::virtptr_to_physint).Do(virtptr_to_physint);
-    mocks.OnCall(mm, memory_manager::virt_to_phys_map).Do(virt_to_phys_map);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -396,7 +385,9 @@ void
 vcpu_ut::test_vcpu_intel_x64_run_resume()
 {
     MockRepository mocks;
-    auto mm = mocks.Mock<memory_manager>();
+    setup_mm(mocks);
+    setup_pt(mocks);
+
     auto dr = bfn::mock_shared<debug_ring>(mocks);
     auto on = bfn::mock_shared<vmxon_intel_x64>(mocks);
     auto cs = bfn::mock_shared<vmcs_intel_x64>(mocks);
@@ -414,10 +405,6 @@ vcpu_ut::test_vcpu_intel_x64_run_resume()
 
     mocks.OnCall(eh.get(), exit_handler_intel_x64::set_vmcs);
     mocks.OnCall(eh.get(), exit_handler_intel_x64::set_state_save);
-
-    mocks.OnCallFunc(memory_manager::instance).Return(mm);
-    mocks.OnCall(mm, memory_manager::virtptr_to_physint).Do(virtptr_to_physint);
-    mocks.OnCall(mm, memory_manager::virt_to_phys_map).Do(virt_to_phys_map);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -432,7 +419,9 @@ void
 vcpu_ut::test_vcpu_intel_x64_run_no_init()
 {
     MockRepository mocks;
-    auto mm = mocks.Mock<memory_manager>();
+    setup_mm(mocks);
+    setup_pt(mocks);
+
     auto dr = bfn::mock_shared<debug_ring>(mocks);
     auto on = bfn::mock_shared<vmxon_intel_x64>(mocks);
     auto cs = bfn::mock_shared<vmcs_intel_x64>(mocks);
@@ -451,10 +440,6 @@ vcpu_ut::test_vcpu_intel_x64_run_no_init()
     mocks.OnCall(eh.get(), exit_handler_intel_x64::set_vmcs);
     mocks.OnCall(eh.get(), exit_handler_intel_x64::set_state_save);
 
-    mocks.OnCallFunc(memory_manager::instance).Return(mm);
-    mocks.OnCall(mm, memory_manager::virtptr_to_physint).Do(virtptr_to_physint);
-    mocks.OnCall(mm, memory_manager::virt_to_phys_map).Do(virt_to_phys_map);
-
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
         auto vc = std::make_shared<vcpu_intel_x64>(0, dr, on, cs, eh, vs, gs);
@@ -466,7 +451,9 @@ void
 vcpu_ut::test_vcpu_intel_x64_run_vmxon_throws()
 {
     MockRepository mocks;
-    auto mm = mocks.Mock<memory_manager>();
+    setup_mm(mocks);
+    setup_pt(mocks);
+
     auto dr = bfn::mock_shared<debug_ring>(mocks);
     auto on = bfn::mock_shared<vmxon_intel_x64>(mocks);
     auto cs = bfn::mock_shared<vmcs_intel_x64>(mocks);
@@ -485,10 +472,6 @@ vcpu_ut::test_vcpu_intel_x64_run_vmxon_throws()
     mocks.OnCall(eh.get(), exit_handler_intel_x64::set_vmcs);
     mocks.OnCall(eh.get(), exit_handler_intel_x64::set_state_save);
 
-    mocks.OnCallFunc(memory_manager::instance).Return(mm);
-    mocks.OnCall(mm, memory_manager::virtptr_to_physint).Do(virtptr_to_physint);
-    mocks.OnCall(mm, memory_manager::virt_to_phys_map).Do(virt_to_phys_map);
-
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
         auto vc = std::make_shared<vcpu_intel_x64>(0, dr, on, cs, eh, vs, gs);
@@ -501,7 +484,9 @@ void
 vcpu_ut::test_vcpu_intel_x64_run_vmcs_throws()
 {
     MockRepository mocks;
-    auto mm = mocks.Mock<memory_manager>();
+    setup_mm(mocks);
+    setup_pt(mocks);
+
     auto dr = bfn::mock_shared<debug_ring>(mocks);
     auto on = bfn::mock_shared<vmxon_intel_x64>(mocks);
     auto cs = bfn::mock_shared<vmcs_intel_x64>(mocks);
@@ -520,10 +505,6 @@ vcpu_ut::test_vcpu_intel_x64_run_vmcs_throws()
     mocks.OnCall(eh.get(), exit_handler_intel_x64::set_vmcs);
     mocks.OnCall(eh.get(), exit_handler_intel_x64::set_state_save);
 
-    mocks.OnCallFunc(memory_manager::instance).Return(mm);
-    mocks.OnCall(mm, memory_manager::virtptr_to_physint).Do(virtptr_to_physint);
-    mocks.OnCall(mm, memory_manager::virt_to_phys_map).Do(virt_to_phys_map);
-
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
         auto vc = std::make_shared<vcpu_intel_x64>(0, dr, on, cs, eh, vs, gs);
@@ -536,7 +517,9 @@ void
 vcpu_ut::test_vcpu_intel_x64_hlt_no_init()
 {
     MockRepository mocks;
-    auto mm = mocks.Mock<memory_manager>();
+    setup_mm(mocks);
+    setup_pt(mocks);
+
     auto dr = bfn::mock_shared<debug_ring>(mocks);
     auto on = bfn::mock_shared<vmxon_intel_x64>(mocks);
     auto cs = bfn::mock_shared<vmcs_intel_x64>(mocks);
@@ -554,10 +537,6 @@ vcpu_ut::test_vcpu_intel_x64_hlt_no_init()
 
     mocks.OnCall(eh.get(), exit_handler_intel_x64::set_vmcs);
     mocks.OnCall(eh.get(), exit_handler_intel_x64::set_state_save);
-
-    mocks.OnCallFunc(memory_manager::instance).Return(mm);
-    mocks.OnCall(mm, memory_manager::virtptr_to_physint).Do(virtptr_to_physint);
-    mocks.OnCall(mm, memory_manager::virt_to_phys_map).Do(virt_to_phys_map);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -570,7 +549,9 @@ void
 vcpu_ut::test_vcpu_intel_x64_hlt_no_run()
 {
     MockRepository mocks;
-    auto mm = mocks.Mock<memory_manager>();
+    setup_mm(mocks);
+    setup_pt(mocks);
+
     auto dr = bfn::mock_shared<debug_ring>(mocks);
     auto on = bfn::mock_shared<vmxon_intel_x64>(mocks);
     auto cs = bfn::mock_shared<vmcs_intel_x64>(mocks);
@@ -588,10 +569,6 @@ vcpu_ut::test_vcpu_intel_x64_hlt_no_run()
 
     mocks.OnCall(eh.get(), exit_handler_intel_x64::set_vmcs);
     mocks.OnCall(eh.get(), exit_handler_intel_x64::set_state_save);
-
-    mocks.OnCallFunc(memory_manager::instance).Return(mm);
-    mocks.OnCall(mm, memory_manager::virtptr_to_physint).Do(virtptr_to_physint);
-    mocks.OnCall(mm, memory_manager::virt_to_phys_map).Do(virt_to_phys_map);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -605,7 +582,9 @@ void
 vcpu_ut::test_vcpu_intel_x64_hlt_valid()
 {
     MockRepository mocks;
-    auto mm = mocks.Mock<memory_manager>();
+    setup_mm(mocks);
+    setup_pt(mocks);
+
     auto dr = bfn::mock_shared<debug_ring>(mocks);
     auto on = bfn::mock_shared<vmxon_intel_x64>(mocks);
     auto cs = bfn::mock_shared<vmcs_intel_x64>(mocks);
@@ -623,10 +602,6 @@ vcpu_ut::test_vcpu_intel_x64_hlt_valid()
 
     mocks.OnCall(eh.get(), exit_handler_intel_x64::set_vmcs);
     mocks.OnCall(eh.get(), exit_handler_intel_x64::set_state_save);
-
-    mocks.OnCallFunc(memory_manager::instance).Return(mm);
-    mocks.OnCall(mm, memory_manager::virtptr_to_physint).Do(virtptr_to_physint);
-    mocks.OnCall(mm, memory_manager::virt_to_phys_map).Do(virt_to_phys_map);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -641,7 +616,9 @@ void
 vcpu_ut::test_vcpu_intel_x64_hlt_valid_is_host_vcpu()
 {
     MockRepository mocks;
-    auto mm = mocks.Mock<memory_manager>();
+    setup_mm(mocks);
+    setup_pt(mocks);
+
     auto dr = bfn::mock_shared<debug_ring>(mocks);
     auto on = bfn::mock_shared<vmxon_intel_x64>(mocks);
     auto cs = bfn::mock_shared<vmcs_intel_x64>(mocks);
@@ -660,10 +637,6 @@ vcpu_ut::test_vcpu_intel_x64_hlt_valid_is_host_vcpu()
     mocks.OnCall(eh.get(), exit_handler_intel_x64::set_vmcs);
     mocks.OnCall(eh.get(), exit_handler_intel_x64::set_state_save);
 
-    mocks.OnCallFunc(memory_manager::instance).Return(mm);
-    mocks.OnCall(mm, memory_manager::virtptr_to_physint).Do(virtptr_to_physint);
-    mocks.OnCall(mm, memory_manager::virt_to_phys_map).Do(virt_to_phys_map);
-
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
         auto vc = std::make_shared<vcpu_intel_x64>(0, dr, on, cs, eh, vs, gs);
@@ -677,7 +650,9 @@ void
 vcpu_ut::test_vcpu_intel_x64_hlt_vmxon_throws()
 {
     MockRepository mocks;
-    auto mm = mocks.Mock<memory_manager>();
+    setup_mm(mocks);
+    setup_pt(mocks);
+
     auto dr = bfn::mock_shared<debug_ring>(mocks);
     auto on = bfn::mock_shared<vmxon_intel_x64>(mocks);
     auto cs = bfn::mock_shared<vmcs_intel_x64>(mocks);
@@ -695,10 +670,6 @@ vcpu_ut::test_vcpu_intel_x64_hlt_vmxon_throws()
 
     mocks.OnCall(eh.get(), exit_handler_intel_x64::set_vmcs);
     mocks.OnCall(eh.get(), exit_handler_intel_x64::set_state_save);
-
-    mocks.OnCallFunc(memory_manager::instance).Return(mm);
-    mocks.OnCall(mm, memory_manager::virtptr_to_physint).Do(virtptr_to_physint);
-    mocks.OnCall(mm, memory_manager::virt_to_phys_map).Do(virt_to_phys_map);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {

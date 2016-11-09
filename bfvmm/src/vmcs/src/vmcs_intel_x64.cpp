@@ -27,7 +27,7 @@
 #include <vmcs/vmcs_intel_x64.h>
 #include <vmcs/vmcs_intel_x64_resume.h>
 #include <vmcs/vmcs_intel_x64_promote.h>
-#include <memory_manager/memory_manager.h>
+#include <memory_manager/memory_manager_x64.h>
 #include <exit_handler/exit_handler_intel_x64_support.h>
 
 using namespace x64;
@@ -137,9 +137,6 @@ vmcs_intel_x64::create_vmcs_region()
 
     m_vmcs_region = std::make_unique<uint32_t[]>(1024);
     m_vmcs_region_phys = g_mm->virtptr_to_physint(m_vmcs_region.get());
-
-    if (m_vmcs_region_phys == 0)
-        throw std::logic_error("m_vmcs_region_phys == nullptr");
 
     gsl::span<uint32_t> id{m_vmcs_region.get(), 1024};
     id[0] = gsl::narrow<uint32_t>(msrs::ia32_vmx_basic::revision_id::get());
@@ -399,7 +396,7 @@ vmcs_intel_x64::write_natural_host_state(const std::shared_ptr<vmcs_intel_x64_st
     vmcs::host_cr4::set(state->cr4());
 
     vm::write(VMCS_HOST_FS_BASE, state->ia32_fs_base_msr());
-    vm::write(VMCS_HOST_GS_BASE, state->ia32_gs_base_msr());
+    vm::write(VMCS_HOST_GS_BASE, reinterpret_cast<uintptr_t>(m_state_save.get()));
     vm::write(VMCS_HOST_TR_BASE, state->tr_base());
 
     vm::write(VMCS_HOST_GDTR_BASE, state->gdt_base());

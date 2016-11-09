@@ -36,9 +36,9 @@ extern "C" {
 /**
  * Memory Types
  */
-#define MEMORY_TYPE_R 0x1
-#define MEMORY_TYPE_W 0x2
-#define MEMORY_TYPE_E 0x4
+#define MEMORY_TYPE_R 0x1U
+#define MEMORY_TYPE_W 0x2U
+#define MEMORY_TYPE_E 0x4U
 
 /**
  * Memory Descriptor
@@ -60,7 +60,7 @@ struct memory_descriptor
 {
     uint64_t phys;
     uint64_t virt;
-    uint8_t type;
+    uint64_t type;
 };
 
 /**

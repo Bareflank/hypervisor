@@ -32,25 +32,25 @@
 // -----------------------------------------------------------------------------
 
 int
-bf_ioctl_open()
+__attribute__((weak)) bf_ioctl_open()
 {
     return open("/dev/bareflank", O_RDWR);
 }
 
 int64_t
-bf_send_ioctl(int fd, unsigned long request)
+__attribute__((weak)) bf_send_ioctl(int fd, unsigned long request)
 {
     return ioctl(fd, request);
 }
 
 int64_t
-bf_read_ioctl(int fd, unsigned long request, void *data)
+__attribute__((weak)) bf_read_ioctl(int fd, unsigned long request, void *data)
 {
     return ioctl(fd, request, data);
 }
 
 int64_t
-bf_write_ioctl(int fd, unsigned long request, const void *data)
+__attribute__((weak)) bf_write_ioctl(int fd, unsigned long request, const void *data)
 {
     return ioctl(fd, request, data);
 }
@@ -78,21 +78,17 @@ ioctl_private::open()
 }
 
 void
-ioctl_private::call_ioctl_add_module_length(uint64_t len)
+ioctl_private::call_ioctl_add_module_length(module_len_type len)
 {
-    if (len <= 0)
-        throw std::invalid_argument("len <= 0");
+    expects(len > 0);
 
     if (bf_write_ioctl(fd, IOCTL_ADD_MODULE_LENGTH, &len) < 0)
         throw ioctl_failed(IOCTL_ADD_MODULE_LENGTH);
 }
 
 void
-ioctl_private::call_ioctl_add_module(const char *data)
+ioctl_private::call_ioctl_add_module(gsl::not_null<module_data_type> data)
 {
-    if (data == nullptr)
-        throw std::invalid_argument("data == NULL");
-
     if (bf_write_ioctl(fd, IOCTL_ADD_MODULE, data) < 0)
         throw ioctl_failed(IOCTL_ADD_MODULE);
 }
@@ -126,11 +122,8 @@ ioctl_private::call_ioctl_stop_vmm()
 }
 
 void
-ioctl_private::call_ioctl_dump_vmm(debug_ring_resources_t *drr, uint64_t vcpuid)
+ioctl_private::call_ioctl_dump_vmm(gsl::not_null<drr_pointer> drr, vcpuid_type vcpuid)
 {
-    if (drr == nullptr)
-        throw std::invalid_argument("drr == NULL");
-
     if (bf_write_ioctl(fd, IOCTL_SET_VCPUID, &vcpuid) < 0)
         throw ioctl_failed(IOCTL_SET_VCPUID);
 
@@ -139,11 +132,18 @@ ioctl_private::call_ioctl_dump_vmm(debug_ring_resources_t *drr, uint64_t vcpuid)
 }
 
 void
-ioctl_private::call_ioctl_vmm_status(int64_t *status)
+ioctl_private::call_ioctl_vmm_status(gsl::not_null<status_pointer> status)
 {
-    if (status == nullptr)
-        throw std::invalid_argument("status == NULL");
-
     if (bf_read_ioctl(fd, IOCTL_VMM_STATUS, status) < 0)
         throw ioctl_failed(IOCTL_VMM_STATUS);
+}
+
+void
+ioctl_private::call_ioctl_vmcall(gsl::not_null<registers_pointer> regs, cpuid_type cpuid)
+{
+    if (bf_write_ioctl(fd, IOCTL_SET_CPUID, &cpuid) < 0)
+        throw ioctl_failed(IOCTL_SET_CPUID);
+
+    if (bf_write_ioctl(fd, IOCTL_VMCALL, regs) < 0)
+        throw ioctl_failed(IOCTL_VMCALL);
 }

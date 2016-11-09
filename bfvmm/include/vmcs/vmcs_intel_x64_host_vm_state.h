@@ -23,6 +23,8 @@
 #define VMCS_INTEL_X64_HOST_VM_STATE_H
 
 #include <memory>
+
+#include <debug.h>
 #include <vmcs/vmcs_intel_x64_state.h>
 
 #include <intrinsics/gdt_x64.h>
@@ -109,77 +111,77 @@ public:
 
         bfdebug << bfendl;
         bfdebug << "segment selectors:" << bfendl;
-        PRINT_STATE(m_es);
-        PRINT_STATE(m_cs);
-        PRINT_STATE(m_ss);
-        PRINT_STATE(m_ds);
-        PRINT_STATE(m_fs);
-        PRINT_STATE(m_gs);
-        PRINT_STATE(m_ldtr);
-        PRINT_STATE(m_tr);
+        bfdebug << std::setw(35) << view_as_pointer(m_es) << bfendl;
+        bfdebug << std::setw(35) << view_as_pointer(m_cs) << bfendl;
+        bfdebug << std::setw(35) << view_as_pointer(m_ss) << bfendl;
+        bfdebug << std::setw(35) << view_as_pointer(m_ds) << bfendl;
+        bfdebug << std::setw(35) << view_as_pointer(m_fs) << bfendl;
+        bfdebug << std::setw(35) << view_as_pointer(m_gs) << bfendl;
+        bfdebug << std::setw(35) << view_as_pointer(m_ldtr) << bfendl;
+        bfdebug << std::setw(35) << view_as_pointer(m_tr) << bfendl;
 
         bfdebug << bfendl;
         bfdebug << "segment base:" << bfendl;
-        PRINT_STATE(es_base());
-        PRINT_STATE(cs_base());
-        PRINT_STATE(ss_base());
-        PRINT_STATE(ds_base());
-        PRINT_STATE(fs_base());
-        PRINT_STATE(gs_base());
-        PRINT_STATE(ldtr_base());
-        PRINT_STATE(tr_base());
+        bfdebug << std::setw(35) << view_as_pointer(es_base()) << bfendl;
+        bfdebug << std::setw(35) << view_as_pointer(cs_base()) << bfendl;
+        bfdebug << std::setw(35) << view_as_pointer(ss_base()) << bfendl;
+        bfdebug << std::setw(35) << view_as_pointer(ds_base()) << bfendl;
+        bfdebug << std::setw(35) << view_as_pointer(fs_base()) << bfendl;
+        bfdebug << std::setw(35) << view_as_pointer(gs_base()) << bfendl;
+        bfdebug << std::setw(35) << view_as_pointer(ldtr_base()) << bfendl;
+        bfdebug << std::setw(35) << view_as_pointer(tr_base()) << bfendl;
 
         bfdebug << bfendl;
         bfdebug << "segment limit:" << bfendl;
-        PRINT_STATE(es_limit());
-        PRINT_STATE(cs_limit());
-        PRINT_STATE(ss_limit());
-        PRINT_STATE(ds_limit());
-        PRINT_STATE(fs_limit());
-        PRINT_STATE(gs_limit());
-        PRINT_STATE(ldtr_limit());
-        PRINT_STATE(tr_limit());
+        bfdebug << std::setw(35) << view_as_pointer(es_limit()) << bfendl;
+        bfdebug << std::setw(35) << view_as_pointer(cs_limit()) << bfendl;
+        bfdebug << std::setw(35) << view_as_pointer(ss_limit()) << bfendl;
+        bfdebug << std::setw(35) << view_as_pointer(ds_limit()) << bfendl;
+        bfdebug << std::setw(35) << view_as_pointer(fs_limit()) << bfendl;
+        bfdebug << std::setw(35) << view_as_pointer(gs_limit()) << bfendl;
+        bfdebug << std::setw(35) << view_as_pointer(ldtr_limit()) << bfendl;
+        bfdebug << std::setw(35) << view_as_pointer(tr_limit()) << bfendl;
 
         bfdebug << bfendl;
         bfdebug << "segment acess rights:" << bfendl;
-        PRINT_STATE(es_access_rights());
-        PRINT_STATE(cs_access_rights());
-        PRINT_STATE(ss_access_rights());
-        PRINT_STATE(ds_access_rights());
-        PRINT_STATE(fs_access_rights());
-        PRINT_STATE(gs_access_rights());
-        PRINT_STATE(ldtr_access_rights());
-        PRINT_STATE(tr_access_rights());
+        bfdebug << std::setw(35) << view_as_pointer(es_access_rights()) << bfendl;
+        bfdebug << std::setw(35) << view_as_pointer(cs_access_rights()) << bfendl;
+        bfdebug << std::setw(35) << view_as_pointer(ss_access_rights()) << bfendl;
+        bfdebug << std::setw(35) << view_as_pointer(ds_access_rights()) << bfendl;
+        bfdebug << std::setw(35) << view_as_pointer(fs_access_rights()) << bfendl;
+        bfdebug << std::setw(35) << view_as_pointer(gs_access_rights()) << bfendl;
+        bfdebug << std::setw(35) << view_as_pointer(ldtr_access_rights()) << bfendl;
+        bfdebug << std::setw(35) << view_as_pointer(tr_access_rights()) << bfendl;
 
         bfdebug << bfendl;
         bfdebug << "registers:" << bfendl;
-        PRINT_STATE(m_cr0);
-        PRINT_STATE(m_cr3);
-        PRINT_STATE(m_cr4);
-        PRINT_STATE(m_dr7);
+        bfdebug << std::setw(35) << view_as_pointer(m_cr0) << bfendl;
+        bfdebug << std::setw(35) << view_as_pointer(m_cr3) << bfendl;
+        bfdebug << std::setw(35) << view_as_pointer(m_cr4) << bfendl;
+        bfdebug << std::setw(35) << view_as_pointer(m_dr7) << bfendl;
 
         bfdebug << bfendl;
         bfdebug << "flags:" << bfendl;
-        PRINT_STATE(m_rflags);
+        bfdebug << std::setw(35) << view_as_pointer(m_rflags) << bfendl;
 
         bfdebug << bfendl;
         bfdebug << "gdt/idt:" << bfendl;
-        PRINT_STATE(m_gdt.base());
-        PRINT_STATE(m_gdt.limit());
-        PRINT_STATE(m_idt.base());
-        PRINT_STATE(m_idt.limit());
+        bfdebug << std::setw(35) << view_as_pointer(m_gdt.base()) << bfendl;
+        bfdebug << std::setw(35) << view_as_pointer(m_gdt.limit()) << bfendl;
+        bfdebug << std::setw(35) << view_as_pointer(m_idt.base()) << bfendl;
+        bfdebug << std::setw(35) << view_as_pointer(m_idt.limit()) << bfendl;
 
         bfdebug << bfendl;
         bfdebug << "model specific registers:" << bfendl;
-        PRINT_STATE(m_ia32_debugctl_msr);
-        PRINT_STATE(m_ia32_pat_msr);
-        PRINT_STATE(m_ia32_efer_msr);
-        PRINT_STATE(m_ia32_perf_global_ctrl_msr);
-        PRINT_STATE(m_ia32_sysenter_cs_msr);
-        PRINT_STATE(m_ia32_sysenter_esp_msr);
-        PRINT_STATE(m_ia32_sysenter_eip_msr);
-        PRINT_STATE(m_ia32_fs_base_msr);
-        PRINT_STATE(m_ia32_gs_base_msr);
+        bfdebug << std::setw(35) << view_as_pointer(m_ia32_debugctl_msr) << bfendl;
+        bfdebug << std::setw(35) << view_as_pointer(m_ia32_pat_msr) << bfendl;
+        bfdebug << std::setw(35) << view_as_pointer(m_ia32_efer_msr) << bfendl;
+        bfdebug << std::setw(35) << view_as_pointer(m_ia32_perf_global_ctrl_msr) << bfendl;
+        bfdebug << std::setw(35) << view_as_pointer(m_ia32_sysenter_cs_msr) << bfendl;
+        bfdebug << std::setw(35) << view_as_pointer(m_ia32_sysenter_esp_msr) << bfendl;
+        bfdebug << std::setw(35) << view_as_pointer(m_ia32_sysenter_eip_msr) << bfendl;
+        bfdebug << std::setw(35) << view_as_pointer(m_ia32_fs_base_msr) << bfendl;
+        bfdebug << std::setw(35) << view_as_pointer(m_ia32_gs_base_msr) << bfendl;
 
         bfdebug << bfendl;
     }

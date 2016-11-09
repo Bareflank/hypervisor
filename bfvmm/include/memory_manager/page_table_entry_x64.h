@@ -22,34 +22,51 @@
 #ifndef PAGE_TABLE_ENTRY_X64_H
 #define PAGE_TABLE_ENTRY_X64_H
 
-#include <stdint.h>
-
-// -----------------------------------------------------------------------------
-// Macros
-// -----------------------------------------------------------------------------
-
-#define PT_SIZE 512
-#define PTE_SIZE sizeof(uintptr_t)
-#define BITS_PER_INDEX 9
-#define INDEX_MASK 0x1FFULL
-#define PML4_INDEX 39
-#define PT_INDEX 12
-#define PTE_PHYS_ADDR_MASK 0x000FFFFFFFFFF000ULL
-
-#define PTE_FLAGS_P (0x1ULL << 0)
-#define PTE_FLAGS_RW (0x1ULL << 1)
-#define PTE_FLAGS_US (0x1ULL << 2)
-#define PTE_FLAGS_PWT (0x1ULL << 3)
-#define PTE_FLAGS_PCD (0x1ULL << 4)
-#define PTE_FLAGS_A (0x1ULL << 5)
-#define PTE_FLAGS_D (0x1ULL << 6)
-#define PTE_FLAGS_PAT (0x1ULL << 7)
-#define PTE_FLAGS_G (0x1ULL << 8)
-#define PTE_FLAGS_NX (0x1ULL << 63)
-
-#define PT_BYTES (PT_SIZE * PTE_SIZE)
-
 #include <gsl/gsl>
+
+// -----------------------------------------------------------------------------
+// Constants
+// -----------------------------------------------------------------------------
+
+// *INDENT-OFF*
+
+namespace x64
+{
+namespace page_table
+{
+    constexpr const auto num_entries = 512UL;
+    constexpr const auto num_bytes = num_entries * sizeof(uintptr_t);
+
+    template<class T, class F> auto index(const T virt, const F from)
+    { return (virt & ((0x1FFULL) << from)) >> from; }
+
+    namespace pml4
+    {
+        constexpr const auto size = 9U;
+        constexpr const auto from = 39U;
+    }
+
+    namespace pdpt
+    {
+        constexpr const auto size = 9U;
+        constexpr const auto from = 30U;
+    }
+
+    namespace pd
+    {
+        constexpr const auto size = 9U;
+        constexpr const auto from = 21U;
+    }
+
+    namespace pt
+    {
+        constexpr const auto size = 9U;
+        constexpr const auto from = 12U;
+    }
+}
+}
+
+// *INDENT-ON*
 
 // -----------------------------------------------------------------------------
 // Definition
@@ -59,17 +76,29 @@ class page_table_entry_x64
 {
 public:
 
+    using pointer = uintptr_t *;
+    using integer_pointer = uintptr_t;
+
     /// Default Constructor
     ///
-    /// @param entry the entry that this page table entry encapsulates.
+    /// @expects pte != nullptr
+    /// @ensures none
     ///
-    page_table_entry_x64(gsl::not_null<uintptr_t *> pte) noexcept;
+    /// @param pte the pte that this page table entry encapsulates.
+    ///
+    page_table_entry_x64(const gsl::not_null<pointer> &pte) noexcept;
 
     /// Destructor
+    ///
+    /// @expects none
+    /// @ensures none
     ///
     virtual ~page_table_entry_x64() = default;
 
     /// Present
+    ///
+    /// @expects none
+    /// @ensures none
     ///
     /// @return true if this entry is present, false otherwise
     ///
@@ -77,11 +106,17 @@ public:
 
     /// Set Present
     ///
+    /// @expects none
+    /// @ensures none
+    ///
     /// @param enabled true if the entry is present, false otherwise
     ///
     void set_present(bool enabled) noexcept;
 
     /// Read / Write
+    ///
+    /// @expects none
+    /// @ensures none
     ///
     /// @return true if this entry is read/write, false otherwise
     ///
@@ -89,17 +124,26 @@ public:
 
     /// Set Read / Write
     ///
+    /// @expects none
+    /// @ensures none
+    ///
     /// @param enabled true if the entry is read / write, false otherwise
     ///
     void set_rw(bool enabled) noexcept;
 
     /// User / Supervisor
     ///
+    /// @expects none
+    /// @ensures none
+    ///
     /// @return true if this entry is visible to userspace, false otherwise
     ///
     bool us() const noexcept;
 
     /// Set User / Supervisor
+    ///
+    /// @expects none
+    /// @ensures none
     ///
     /// @param enabled true if the entry is visible to userspace, false
     ///     otherwise
@@ -108,11 +152,17 @@ public:
 
     /// Write-Through
     ///
+    /// @expects none
+    /// @ensures none
+    ///
     /// @return true if this entry is write-through, false otherwise
     ///
     bool pwt() const noexcept;
 
     /// Set Write-Through
+    ///
+    /// @expects none
+    /// @ensures none
     ///
     /// @param enabled true if the entry is write-through, false otherwise
     ///
@@ -120,11 +170,17 @@ public:
 
     /// Cache Disable
     ///
+    /// @expects none
+    /// @ensures none
+    ///
     /// @return true if this entry's cache is disabled, false otherwise
     ///
     bool pcd() const noexcept;
 
     /// Set Cache Disable
+    ///
+    /// @expects none
+    /// @ensures none
     ///
     /// @param enabled true if the entry's cache is disabled, false
     ///     otherwise
@@ -133,11 +189,17 @@ public:
 
     /// Accessed
     ///
+    /// @expects none
+    /// @ensures none
+    ///
     /// @return true if this entry has been accessed, false otherwise
     ///
     bool accessed() const noexcept;
 
     /// Set Accessed
+    ///
+    /// @expects none
+    /// @ensures none
     ///
     /// @param enabled true if the entry has been accessed, false
     ///     otherwise
@@ -146,23 +208,54 @@ public:
 
     /// Dirty
     ///
+    /// @expects none
+    /// @ensures none
+    ///
     /// @return true if this entry is dirty, false otherwise
     ///
     bool dirty() const noexcept;
 
     /// Set Dirty
     ///
+    /// @expects none
+    /// @ensures none
+    ///
     /// @param enabled true if the entry is dirty, false otherwise
     ///
     void set_dirty(bool enabled) noexcept;
 
+    /// Page Size
+    ///
+    /// @expects none
+    /// @ensures none
+    ///
+    /// @return true if this entry is a page, false otherwise
+    ///
+    bool ps() const noexcept;
+
+    /// Set Page Size
+    ///
+    /// @expects none
+    /// @ensures none
+    ///
+    /// @param enabled true if the entry is a page, false
+    ///     otherwise
+    ///
+    void set_ps(bool enabled) noexcept;
+
     /// PAT
+    ///
+    /// @expects none
+    /// @ensures none
     ///
     /// @return true if this entry uses the PAT, false otherwise
     ///
     bool pat() const noexcept;
 
     /// Set PAT
+    ///
+    /// @expects none
+    /// @ensures none
     ///
     /// @param enabled true if the entry uses the PAT, false
     ///     otherwise
@@ -171,11 +264,17 @@ public:
 
     /// Global
     ///
+    /// @expects none
+    /// @ensures none
+    ///
     /// @return true if this entry is global, false otherwise
     ///
     bool global() const noexcept;
 
     /// Set Global
+    ///
+    /// @expects none
+    /// @ensures none
     ///
     /// @param enabled true if the entry is global, false otherwise
     ///
@@ -183,17 +282,26 @@ public:
 
     /// Physical Address
     ///
+    /// @expects none
+    /// @ensures none
+    ///
     /// @return the physical address of the entry
     ///
-    uintptr_t phys_addr() const noexcept;
+    integer_pointer phys_addr() const noexcept;
 
     /// Set Physical Address
     ///
+    /// @expects none
+    /// @ensures none
+    ///
     /// @param addr the physical address of the entry
     ///
-    void set_phys_addr(uintptr_t addr) noexcept;
+    void set_phys_addr(integer_pointer addr) noexcept;
 
     /// NX
+    ///
+    /// @expects none
+    /// @ensures none
     ///
     /// @return true if this entry is not executable, false otherwise
     ///
@@ -201,13 +309,24 @@ public:
 
     /// Set NX
     ///
+    /// @expects none
+    /// @ensures none
+    ///
     /// @param enabled true if the entry is not executable, false otherwise
     ///
     void set_nx(bool enabled) noexcept;
 
 private:
 
-    gsl::not_null<uintptr_t *> m_pte;
+    pointer m_pte;
+
+public:
+
+    page_table_entry_x64(page_table_entry_x64 &&) noexcept = default;
+    page_table_entry_x64 &operator=(page_table_entry_x64 &&) noexcept = default;
+
+    page_table_entry_x64(const page_table_entry_x64 &) = delete;
+    page_table_entry_x64 &operator=(const page_table_entry_x64 &) = delete;
 };
 
 #endif

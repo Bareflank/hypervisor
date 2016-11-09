@@ -98,42 +98,28 @@ public:
     ///
     virtual void write(uint64_t vcpuid, const std::string &str) noexcept;
 
-public:
-
-    /// Disable the copy consturctor
-    ///
-    vcpu_manager(const vcpu_manager &) = delete;
-
-    /// Disable the copy operator
-    ///
-    vcpu_manager &operator=(const vcpu_manager &) = delete;
-
 private:
 
-    /// Default Constructor
-    ///
     vcpu_manager() noexcept;
-
-    /// Get vCPU
     std::shared_ptr<vcpu> get_vcpu(uint64_t vcpuid) const noexcept;
-
-private:
-
-    std::map<uint64_t, std::shared_ptr<vcpu> > m_vcpus;
 
 private:
 
     friend class vcpu_ut;
 
-    /// The vCPU factory is a seem that provides better access for unit
-    /// testing, which allows us to create misbehaving vcpus
-    ///
+    std::map<uint64_t, std::shared_ptr<vcpu>> m_vcpus;
+
+private:
+
     std::shared_ptr<vcpu_factory> m_vcpu_factory;
 
-    /// Set vCPU Factory
-    ///
     void set_factory(const std::shared_ptr<vcpu_factory> &factory)
     { m_vcpu_factory = factory; }
+
+public:
+
+    vcpu_manager(const vcpu_manager &) = delete;
+    vcpu_manager &operator=(const vcpu_manager &) = delete;
 };
 
 /// vCPU Manager Macro

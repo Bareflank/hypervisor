@@ -29,6 +29,7 @@
 #include <stdexcept>
 #include <type_traits>
 #include <utility>
+#include <memory>
 
 #ifdef _MSC_VER
 
@@ -414,6 +415,12 @@ public:
     {
     }
 
+    template<class ArrayElementType = std::add_pointer<element_type>>
+    constexpr span(const std::unique_ptr<ArrayElementType>& ptr, index_type count) : storage_(ptr.get(), count) {}
+
+    constexpr span(const std::unique_ptr<ElementType>& ptr) : storage_(ptr.get(), ptr.get() ? 1 : 0) {}
+    constexpr span(const std::shared_ptr<ElementType>& ptr) : storage_(ptr.get(), ptr.get() ? 1 : 0) {}
+
     // NB: the SFINAE here uses .data() as a incomplete/imperfect proxy for the requirement
     // on Container to be a contiguous sequence container.
     template <class Container,
@@ -539,6 +546,19 @@ public:
     ////////////////////////////////////////////////////////////////////////////
     /// BAREFLANK - proposed API changes to support Bareflank
     ////////////////////////////////////////////////////////////////////////////
+
+    // We added this for sanity, and consistency. Instead of using [], which
+    // not allowed in the STL anymore, we use .at to be consistent with the STL,
+    // and we provide an implementation that accepts both signed and unsigned
+    // indexes to prevent from having to maintain separate signed / unsigned
+    // index types in the same code.
+    template<class I, class = typename std::enable_if<std::is_integral<I>::value>::type>
+    constexpr reference at(I idx) const
+    {
+        auto _idx = narrow_cast<index_type>(idx);
+        Expects(_idx >= 0 && _idx < storage_.size());
+        return data()[_idx];
+    }
 
     // There isn't a fast way of doing a reverse lookup. It is possible to
     // use std::find_if by looping though each element, and comparing the
@@ -676,6 +696,39 @@ as_writeable_bytes(span<ElementType, Extent> s) noexcept
 {
     return {reinterpret_cast<byte*>(s.data()), s.size_bytes()};
 }
+
+//
+// make_span() - Utility functions for creating spans
+//
+template <class ElementType>
+span<ElementType>
+make_span(ElementType *ptr, typename span<ElementType>::index_type &&count)
+{ return span<ElementType>(ptr, std::forward<typename span<ElementType>::index_type>(count)); }
+
+template <class ElementType>
+span<ElementType>
+make_span(ElementType *firstElem, ElementType *lastElem)
+{ return span<ElementType>(firstElem, lastElem); }
+
+template <class ElementType, size_t N>
+span<ElementType>
+make_span(ElementType (&arr)[N])
+{ return span<ElementType>(arr); }
+
+template <class Container>
+span<typename Container::value_type>
+make_span(Container &cont)
+{ return span<typename Container::value_type>(cont); }
+
+template <class Container>
+span<const typename Container::value_type>
+make_span(const Container &cont)
+{ return span<const typename Container::value_type>(cont); }
+
+template <class Ptr>
+span<typename Ptr::element_type>
+make_span(Ptr &ptr, typename span<typename Ptr::element_type>::index_type &&count)
+{ return span<typename Ptr::element_type>(ptr, count); }
 
 } // namespace gsl
 

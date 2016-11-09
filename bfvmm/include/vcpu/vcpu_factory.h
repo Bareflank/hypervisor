@@ -23,7 +23,7 @@
 #define VCPU_FACTORY_H
 
 #include <memory>
-#include <vcpu/vcpu_intel_x64.h>
+#include <vcpu/vcpu.h>
 
 /// vCPU Factory
 ///

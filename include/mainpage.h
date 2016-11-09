@@ -69,7 +69,7 @@
 /// is as simple as adding / replacing the existing modules with new
 /// functionality. For example, suppose you want to prototype a new memory
 /// management algorithm for your hypervisor. Doing so is as simple as
-/// replacing the memory_manager module with your own.
+/// replacing the memory_manager_x64 module with your own.
 ///
 /// In most cases, your likely to be more interested in modifying the
 /// virtualization extension logic. Currently Bareflank supports Intel, but
@@ -81,7 +81,7 @@
 /// - Virtualization Extension Logic
 ///
 /// The support logic enables the VMM environment. For example, libc++
-/// provides std::cout for debugging which uses the memory_manager to
+/// provides std::cout for debugging which uses the memory_manager_x64 to
 /// allocate memory, and the serial_port_intel_x64 / debug_ring to output
 /// the resulting text to. The virtualization extension logic is responsible
 /// for setting up, and enabling virtualization. This logic is specific to
@@ -184,7 +184,7 @@
 /// %BUILD_ABS%/makefiles/bfvmm/src/entry/bin/cross/libentry.so
 /// %BUILD_ABS%/makefiles/bfvmm/src/exit_handler/bin/cross/libexit_handler.so
 /// %BUILD_ABS%/makefiles/bfvmm/src/intrinsics/bin/cross/libintrinsics.so
-/// %BUILD_ABS%/makefiles/bfvmm/src/memory_manager/bin/cross/libmemory_manager.so
+/// %BUILD_ABS%/makefiles/bfvmm/src/memory_manager_x64/bin/cross/libmemory_manager_x64.so
 /// %BUILD_ABS%/makefiles/bfvmm/src/misc/bin/cross/libmisc.so
 /// %BUILD_ABS%/makefiles/bfvmm/src/serial/bin/cross/libserial.so
 /// %BUILD_ABS%/makefiles/bfvmm/src/vcpu/bin/cross/libvcpu.so
@@ -222,12 +222,10 @@
 /// @ref vcpu <br>
 /// @ref vcpu_factory <br>
 /// @ref vcpu_manager <br>
-/// @ref memory_manager <br>
+/// @ref memory_manager_x64 <br>
 ///
 /// @subsection Intel x86_64 Specific
 ///
-/// @ref intrinsics_x64 <br>
-/// @ref intrinsics_intel_x64 <br>
 /// @ref vmxon_intel_x64 <br>
 /// @ref exit_handler_intel_x64 <br>
 /// @ref vmcs_intel_x64 <br>

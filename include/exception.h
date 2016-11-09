@@ -130,6 +130,66 @@ private:
 #define unknown_command(a) bfn::unknown_command_error(a)
 
 // -----------------------------------------------------------------------------
+// Unknown VMCall Type Error
+// -----------------------------------------------------------------------------
+
+class unknown_vmcall_type_error : public bfn::general_exception
+{
+public:
+    unknown_vmcall_type_error(std::string mesg) :
+        m_mesg(std::move(mesg))
+    {}
+
+    std::ostream &print(std::ostream &os) const override
+    { return os << "unknown vmcall type: `" << m_mesg << "`"; }
+
+private:
+    std::string m_mesg;
+};
+
+#define unknown_vmcall_type(a) bfn::unknown_vmcall_type_error(a)
+
+// -----------------------------------------------------------------------------
+// Unknown VMCall String Type Error
+// -----------------------------------------------------------------------------
+
+class unknown_vmcall_string_type_error : public bfn::general_exception
+{
+public:
+    unknown_vmcall_string_type_error(std::string mesg) :
+        m_mesg(std::move(mesg))
+    {}
+
+    std::ostream &print(std::ostream &os) const override
+    { return os << "unknown string type: `" << m_mesg << "`"; }
+
+private:
+    std::string m_mesg;
+};
+
+#define unknown_vmcall_string_type(a) bfn::unknown_vmcall_string_type_error(a)
+
+// -----------------------------------------------------------------------------
+// Unknown VMCall String Type Error
+// -----------------------------------------------------------------------------
+
+class unknown_vmcall_data_type_error : public bfn::general_exception
+{
+public:
+    unknown_vmcall_data_type_error(std::string mesg) :
+        m_mesg(std::move(mesg))
+    {}
+
+    std::ostream &print(std::ostream &os) const override
+    { return os << "unknown data type: `" << m_mesg << "`"; }
+
+private:
+    std::string m_mesg;
+};
+
+#define unknown_vmcall_data_type(a) bfn::unknown_vmcall_data_type_error(a)
+
+// -----------------------------------------------------------------------------
 // Missing Argument Error
 // -----------------------------------------------------------------------------
 

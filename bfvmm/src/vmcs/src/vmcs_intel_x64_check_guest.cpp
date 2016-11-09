@@ -20,7 +20,7 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #include <vmcs/vmcs_intel_x64.h>
-#include <memory_manager/memory_manager.h>
+#include <memory_manager/memory_manager_x64.h>
 
 using namespace x64;
 using namespace intel_x64;

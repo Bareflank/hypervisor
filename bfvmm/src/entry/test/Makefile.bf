@@ -62,9 +62,9 @@ LIBS+=vcpu_factory
 LIBS+=vmxon
 LIBS+=vmcs
 LIBS+=debug_ring
-LIBS+=memory_manager
 LIBS+=exit_handler
 LIBS+=intrinsics
+LIBS+=memory_manager
 
 LIBRARY_PATHS+=%BUILD_REL%/../bin/native/
 LIBRARY_PATHS+=%BUILD_REL%/../../vcpu/bin/native

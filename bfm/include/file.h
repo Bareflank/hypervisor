@@ -23,7 +23,7 @@
 #define FILE_H
 
 #include <string>
-#include <fstream>
+#include <vector>
 
 /// File
 ///
@@ -31,31 +31,80 @@
 /// class wraps calls to ifstream and fstream to simplify their interface
 /// as well as provide an implementation for the rest of the Bareflank
 /// Manager, such that testing is easier.
+///
 class file
 {
 public:
 
+    using text_data = std::string;
+    using binary_data = std::vector<char>;
+    using filename_type = std::string;
+
     /// File Constructor
     ///
+    /// @expects none
+    /// @ensures none
+    ///
     /// Creates a file class that can be used to working with files.
+    ///
     file() noexcept = default;
 
     /// File Destructor
+    ///
+    /// @expects none
+    /// @ensures none
     ///
     virtual ~file() = default;
 
     /// Read
     ///
-    /// Reads the entire contents of a file, and returns the result in
-    /// a c++ standard string.
+    /// Reads the entire contents of a file, in text form
     ///
-    /// @param filename the filename to read.
+    /// @expects filename.empty() == false
+    /// @ensures none
+    ///
+    /// @param filename name of the file to read.
     /// @return the contents of filename
     ///
-    /// @throws invalid_filename_error thrown if the filename does not exist
-    ///     or is not readable
+    virtual text_data read_text(const filename_type &filename) const;
+
+    /// Read
     ///
-    virtual std::string read(const std::string &filename) const;
+    /// Reads the entire contents of a file, in binary form
+    ///
+    /// @expects filename.empty() == false
+    /// @ensures none
+    ///
+    /// @param filename name of the file to read.
+    /// @return the contents of filename
+    ///
+    virtual binary_data read_binary(const filename_type &filename) const;
+
+    /// Write
+    ///
+    /// Writes text data to the file provided
+    ///
+    /// @expects filename.empty() == false
+    /// @expects data.empty() == false
+    /// @ensures none
+    ///
+    /// @param filename name of the file to write to.
+    /// @param data data to write
+    ///
+    virtual void write_text(const filename_type &filename, const text_data &data) const;
+
+    /// Write
+    ///
+    /// Writes binary data to the file provided
+    ///
+    /// @expects filename.empty() == false
+    /// @expects data.empty() == false
+    /// @ensures none
+    ///
+    /// @param filename name of the file to write to.
+    /// @param data data to write
+    ///
+    virtual void write_binary(const filename_type &filename, const binary_data &data) const;
 };
 
 #endif

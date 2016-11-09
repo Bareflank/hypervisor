@@ -22,7 +22,6 @@
 #include <test.h>
 #include <entry/entry.h>
 #include <vcpu/vcpu_manager.h>
-#include <memory_manager/memory_manager.h>
 
 #include <memory.h>
 #include <eh_frame_list.h>

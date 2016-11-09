@@ -22,10 +22,17 @@
 #ifndef X64_H
 #define X64_H
 
+#include <constants.h>
+
 // *INDENT-OFF*
 
 namespace x64
 {
+    constexpr const auto page_size                               = 0x1000UL;
+    constexpr const auto page_shift                              = 12UL;
+    constexpr const auto cache_line_size                         = 64UL;
+    constexpr const auto cache_line_shift                        = 6UL;
+
 namespace memory_type
 {
     constexpr const auto uncacheable                             = 0x00000000U;
