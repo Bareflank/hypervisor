@@ -68,14 +68,18 @@ vmcs_intel_x64_vmm_state::vmcs_intel_x64_vmm_state() :
     m_cr0 = 0;
     m_cr0 |= cr0::protection_enable::mask;
     m_cr0 |= cr0::monitor_coprocessor::mask;
+    m_cr0 |= cr0::extension_type::mask;
     m_cr0 |= cr0::numeric_error::mask;
+    m_cr0 |= cr0::write_protect::mask;
     m_cr0 |= cr0::paging::mask;
 
     m_cr3 = g_pt->phys_addr();
 
     m_cr4 = 0;
     m_cr4 |= cr4::physical_address_extensions::mask;
+    m_cr4 |= cr4::page_global_enable::mask;
     m_cr4 |= cr4::vmx_enable_bit::mask;
+    m_cr4 |= cr4::osfxsr::mask;
     m_cr4 |= cr4::osxsave::mask;
 
     m_rflags = 0;
