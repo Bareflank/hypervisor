@@ -9,23 +9,18 @@ https://help.github.com/articles/using-pull-requests
 
 This project provides multiple methods for asking other community members questions about the project. All questions are welcome, but prior to asking a question, please ensure that existing documentation and / or previous Q&As have not already answered your question prior to submission. 
 
-**Bug Tracking:** <br>
+**Bug Tracking / RFCs / Feature Requests / Questions:** <br>
 https://github.com/Bareflank/hypervisor/issues
 
-**Mailing List:** <br>
-https://groups.google.com/forum/#!forum/bareflank
-
-**IRC:** <br>
-server: chat.freenode.net (freenode) <br>
-port: 6667 <br>
-channel: #bareflank
+**IRC / Gitter:** <br>
+https://gitter.im/Bareflank-hypervisor/Lobby
 
 ## Feature Requests
 
-Feature requests are always welcome as they help to drive the creation of future roadmaps by the community. Please submit all feature requests to the mailing list or GitHub bug tracker with “Feature Request:” prepended to the message’s title. Doing so provides a means for community members to filter and comment on the feature requests, ask questions, and provide input. 
+Feature requests are always welcome as they help to drive the creation of future roadmaps by the community. Please submit all feature requests to the GitHub Bug Tracker with “Feature Request:” prepended to the message’s title. Doing so provides a means for community members to filter and comment on the feature requests, ask questions, and provide input. 
 
-**Mailing List:** <br>
-https://groups.google.com/forum/#!forum/bareflank
+**Feature Requests:** <br>
+https://github.com/Bareflank/hypervisor/issues
 
 If a feature request already exists, please use the existing feature request message, and add a “+1” comment to show your desire for the feature. Features requests with higher community support are more likely to be added to the roadmap. 
 
@@ -50,18 +45,16 @@ When submitting an issue, please include the following documentation:
 
 Prior to submitting changes to the project, a Request for Comments (RFC) is highly advised. An RFC provides the community with an opportunity to provide feedback prior to submission. The submitter should view the RFC as a chance to gain community support early, reducing the likelihood of push back during submission.
 
-All RFCs should be submitted to the project’s mailing list or GitHub bug tracker with “RFC:” prepended to the message’s title. Doing so provides a means for community members to filter and comment on the RFC, ask questions, and provide input.
+All RFCs should be submitted to the project’s GitHub Bug Tracker with “RFC:” prepended to the message’s title. Doing so provides a means for community members to filter and comment on the RFC, ask questions, and provide input.
 
-**Mailing List:** <br>
-https://groups.google.com/forum/#!forum/bareflank
+**RFCs:** <br>
+https://github.com/Bareflank/hypervisor/issues
 
 Although an RFC can take on any format, please ensure that an RFC includes the following:
 
 - Title
 - TL;DR (summary)
 - Detailed description
-- Impact on project
-- Risks
 - Proposed API changes (if applicable)
 - Proposed documentation changes (if applicable)
 - Proposed testing changes (if applicable)
@@ -89,6 +82,8 @@ make clean
 DYNAMIC_ANALYSIS_ENABLED=true make
 make test
 ```
+
+All whitespace should be removed as well. Use "git diff --check" to ensure the PR does not contain added whitespace. Doxygen is also used by this project. Prior to submitting a PR, please run "make doxygen" and "make doxygen_clean" to ensure there are no errors with respect to the documentation. 
 
 Prior to submitting a PR, please rebase your git history to a single commit. To do this:
 
