@@ -20,6 +20,7 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #include <vmcs/vmcs_intel_x64.h>
+#include <vmcs/vmcs_intel_x64_16bit_host_state_fields.h>
 
 using namespace intel_x64;
 
@@ -214,7 +215,7 @@ vmcs_intel_x64::check_host_segment_and_descriptor_table_registers()
 void
 vmcs_intel_x64::check_host_es_selector_rpl_ti_equal_zero()
 {
-    if (vmcs::host_es_selector::ti::get() != 0)
+    if (vmcs::host_es_selector::ti::get())
         throw std::logic_error("host es ti flag must be 0");
 
     if (vmcs::host_es_selector::rpl::get() != 0)
@@ -224,7 +225,7 @@ vmcs_intel_x64::check_host_es_selector_rpl_ti_equal_zero()
 void
 vmcs_intel_x64::check_host_cs_selector_rpl_ti_equal_zero()
 {
-    if (vmcs::host_cs_selector::ti::get() != 0)
+    if (vmcs::host_cs_selector::ti::get())
         throw std::logic_error("host cs ti flag must be 0");
 
     if (vmcs::host_cs_selector::rpl::get() != 0)
@@ -234,7 +235,7 @@ vmcs_intel_x64::check_host_cs_selector_rpl_ti_equal_zero()
 void
 vmcs_intel_x64::check_host_ss_selector_rpl_ti_equal_zero()
 {
-    if (vmcs::host_ss_selector::ti::get() != 0)
+    if (vmcs::host_ss_selector::ti::get())
         throw std::logic_error("host ss ti flag must be 0");
 
     if (vmcs::host_ss_selector::rpl::get() != 0)
@@ -244,7 +245,7 @@ vmcs_intel_x64::check_host_ss_selector_rpl_ti_equal_zero()
 void
 vmcs_intel_x64::check_host_ds_selector_rpl_ti_equal_zero()
 {
-    if (vmcs::host_ds_selector::ti::get() != 0)
+    if (vmcs::host_ds_selector::ti::get())
         throw std::logic_error("host ds ti flag must be 0");
 
     if (vmcs::host_ds_selector::rpl::get() != 0)
@@ -254,7 +255,7 @@ vmcs_intel_x64::check_host_ds_selector_rpl_ti_equal_zero()
 void
 vmcs_intel_x64::check_host_fs_selector_rpl_ti_equal_zero()
 {
-    if (vmcs::host_fs_selector::ti::get() != 0)
+    if (vmcs::host_fs_selector::ti::get())
         throw std::logic_error("host fs ti flag must be 0");
 
     if (vmcs::host_fs_selector::rpl::get() != 0)
@@ -264,7 +265,7 @@ vmcs_intel_x64::check_host_fs_selector_rpl_ti_equal_zero()
 void
 vmcs_intel_x64::check_host_gs_selector_rpl_ti_equal_zero()
 {
-    if (vmcs::host_gs_selector::ti::get() != 0)
+    if (vmcs::host_gs_selector::ti::get())
         throw std::logic_error("host gs ti flag must be 0");
 
     if (vmcs::host_gs_selector::rpl::get() != 0)
@@ -274,7 +275,7 @@ vmcs_intel_x64::check_host_gs_selector_rpl_ti_equal_zero()
 void
 vmcs_intel_x64::check_host_tr_selector_rpl_ti_equal_zero()
 {
-    if (vmcs::host_tr_selector::ti::get() != 0)
+    if (vmcs::host_tr_selector::ti::get())
         throw std::logic_error("host tr ti flag must be 0");
 
     if (vmcs::host_tr_selector::rpl::get() != 0)
