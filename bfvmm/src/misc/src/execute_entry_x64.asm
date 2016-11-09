@@ -61,7 +61,7 @@ execute_entry:
     and rsp, 0xFFFFFFFFFFFFFFE0
 
     sub rsp, 0x20
-    vmovdqa [rsp], xmm0
+    vmovdqa [rsp], ymm0
     sub rsp, 0x20
     vmovdqa [rsp], ymm1
     sub rsp, 0x20
