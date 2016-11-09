@@ -20,6 +20,7 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #include <vmcs/vmcs_intel_x64.h>
+#include <vmcs/vmcs_intel_x64_16bit_guest_state_fields.h>
 #include <memory_manager/memory_manager_x64.h>
 
 using namespace x64;
@@ -339,7 +340,7 @@ vmcs_intel_x64::checks_on_guest_segment_registers()
 void
 vmcs_intel_x64::check_guest_tr_ti_bit_equals_0()
 {
-    if (guest_tr_selector::ti::get() != 0)
+    if (guest_tr_selector::ti::get())
         throw std::logic_error("guest tr's ti flag must be zero");
 }
 
@@ -349,7 +350,7 @@ vmcs_intel_x64::check_guest_ldtr_ti_bit_equals_0()
     if (guest_ldtr_access_rights::unusable::get() != 0)
         return;
 
-    if (guest_ldtr_selector::ti::get() != 0)
+    if (guest_ldtr_selector::ti::get())
         throw std::logic_error("guest ldtr's ti flag must be zero");
 }
 
