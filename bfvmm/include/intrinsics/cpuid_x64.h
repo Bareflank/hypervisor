@@ -22,6 +22,9 @@
 #ifndef CPUID_X64_H
 #define CPUID_X64_H
 
+#include <debug.h>
+#include <bitmanip.h>
+
 extern "C" uint32_t __cpuid_eax(uint32_t val) noexcept;
 extern "C" uint32_t __cpuid_ebx(uint32_t val) noexcept;
 extern "C" uint32_t __cpuid_ecx(uint32_t val) noexcept;
@@ -34,7 +37,12 @@ namespace x64
 {
 namespace cpuid
 {
-    template<class T> auto get(T eax, T ebx, T ecx, T edx) noexcept
+    template<class T1, class T2, class T3, class T4,
+             class = typename std::enable_if<std::is_integral<T1>::value>::type,
+             class = typename std::enable_if<std::is_integral<T2>::value>::type,
+             class = typename std::enable_if<std::is_integral<T3>::value>::type,
+             class = typename std::enable_if<std::is_integral<T4>::value>::type>
+    auto get(T1 eax, T2 ebx, T3 ecx, T4 edx) noexcept
     {
         __cpuid(&eax, &ebx, &ecx, &edx);
         return std::make_tuple(eax, ebx, ecx, edx);
@@ -42,26 +50,26 @@ namespace cpuid
 
     namespace eax
     {
-        template<class T> auto get(T eax) noexcept
-        { return __cpuid_eax(gsl::narrow_cast<uint32_t>(eax)); }
+        template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
+        auto get(T eax) noexcept { return __cpuid_eax(gsl::narrow_cast<uint32_t>(eax)); }
     }
 
     namespace ebx
     {
-        template<class T> auto get(T ebx) noexcept
-        { return __cpuid_ebx(gsl::narrow_cast<uint32_t>(ebx)); }
+        template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
+        auto get(T ebx) noexcept { return __cpuid_ebx(gsl::narrow_cast<uint32_t>(ebx)); }
     }
 
     namespace ecx
     {
-        template<class T> auto get(T ecx) noexcept
-        { return __cpuid_ecx(gsl::narrow_cast<uint32_t>(ecx)); }
+        template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
+        auto get(T ecx) noexcept { return __cpuid_ecx(gsl::narrow_cast<uint32_t>(ecx)); }
     }
 
     namespace edx
     {
-        template<class T> auto get(T edx) noexcept
-        { return __cpuid_edx(gsl::narrow_cast<uint32_t>(edx)); }
+        template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
+        auto get(T edx) noexcept { return __cpuid_edx(gsl::narrow_cast<uint32_t>(edx)); }
     }
 
     namespace addr_size
@@ -76,7 +84,7 @@ namespace cpuid
             constexpr const auto name = "phys";
 
             inline auto get() noexcept
-            { return (__cpuid_eax(addr) & mask) >> from; }
+            { return get_bits(__cpuid_eax(addr), mask) >> from; }
         }
 
         namespace linear
@@ -86,7 +94,7 @@ namespace cpuid
             constexpr const auto name = "linear";
 
             inline auto get() noexcept
-            { return (__cpuid_eax(addr) & mask) >> from; }
+            { return get_bits(__cpuid_eax(addr), mask) >> from; }
         }
     }
 
@@ -104,7 +112,7 @@ namespace cpuid
                 constexpr const auto name = "sse3";
 
                 inline auto get() noexcept
-                { return (__cpuid_ecx(addr) & mask) >> from; }
+                { return get_bit(__cpuid_ecx(addr), from) != 0; }
             }
 
             namespace pclmulqdq
@@ -114,7 +122,7 @@ namespace cpuid
                 constexpr const auto name = "pclmulqdq";
 
                 inline auto get() noexcept
-                { return (__cpuid_ecx(addr) & mask) >> from; }
+                { return get_bit(__cpuid_ecx(addr), from) != 0; }
             }
 
             namespace dtes64
@@ -124,7 +132,7 @@ namespace cpuid
                 constexpr const auto name = "dtes64";
 
                 inline auto get() noexcept
-                { return (__cpuid_ecx(addr) & mask) >> from; }
+                { return get_bit(__cpuid_ecx(addr), from) != 0; }
             }
 
             namespace monitor
@@ -134,7 +142,7 @@ namespace cpuid
                 constexpr const auto name = "monitor";
 
                 inline auto get() noexcept
-                { return (__cpuid_ecx(addr) & mask) >> from; }
+                { return get_bit(__cpuid_ecx(addr), from) != 0; }
             }
 
             namespace ds_cpl
@@ -144,7 +152,7 @@ namespace cpuid
                 constexpr const auto name = "ds_cpl";
 
                 inline auto get() noexcept
-                { return (__cpuid_ecx(addr) & mask) >> from; }
+                { return get_bit(__cpuid_ecx(addr), from) != 0; }
             }
 
             namespace vmx
@@ -154,7 +162,7 @@ namespace cpuid
                 constexpr const auto name = "vmx";
 
                 inline auto get() noexcept
-                { return (__cpuid_ecx(addr) & mask) >> from; }
+                { return get_bit(__cpuid_ecx(addr), from) != 0; }
             }
 
             namespace smx
@@ -164,7 +172,7 @@ namespace cpuid
                 constexpr const auto name = "smx";
 
                 inline auto get() noexcept
-                { return (__cpuid_ecx(addr) & mask) >> from; }
+                { return get_bit(__cpuid_ecx(addr), from) != 0; }
             }
 
             namespace eist
@@ -174,7 +182,7 @@ namespace cpuid
                 constexpr const auto name = "eist";
 
                 inline auto get() noexcept
-                { return (__cpuid_ecx(addr) & mask) >> from; }
+                { return get_bit(__cpuid_ecx(addr), from) != 0; }
             }
 
             namespace tm2
@@ -184,7 +192,7 @@ namespace cpuid
                 constexpr const auto name = "tm2";
 
                 inline auto get() noexcept
-                { return (__cpuid_ecx(addr) & mask) >> from; }
+                { return get_bit(__cpuid_ecx(addr), from) != 0; }
             }
 
             namespace ssse3
@@ -194,7 +202,7 @@ namespace cpuid
                 constexpr const auto name = "ssse3";
 
                 inline auto get() noexcept
-                { return (__cpuid_ecx(addr) & mask) >> from; }
+                { return get_bit(__cpuid_ecx(addr), from) != 0; }
             }
 
             namespace cnxt_id
@@ -204,7 +212,7 @@ namespace cpuid
                 constexpr const auto name = "cnxt_id";
 
                 inline auto get() noexcept
-                { return (__cpuid_ecx(addr) & mask) >> from; }
+                { return get_bit(__cpuid_ecx(addr), from) != 0; }
             }
 
             namespace sdbg
@@ -214,7 +222,7 @@ namespace cpuid
                 constexpr const auto name = "sdbg";
 
                 inline auto get() noexcept
-                { return (__cpuid_ecx(addr) & mask) >> from; }
+                { return get_bit(__cpuid_ecx(addr), from) != 0; }
             }
 
             namespace fma
@@ -224,7 +232,7 @@ namespace cpuid
                 constexpr const auto name = "fma";
 
                 inline auto get() noexcept
-                { return (__cpuid_ecx(addr) & mask) >> from; }
+                { return get_bit(__cpuid_ecx(addr), from) != 0; }
             }
 
             namespace cmpxchg16b
@@ -234,7 +242,7 @@ namespace cpuid
                 constexpr const auto name = "cmpxchg16b";
 
                 inline auto get() noexcept
-                { return (__cpuid_ecx(addr) & mask) >> from; }
+                { return get_bit(__cpuid_ecx(addr), from) != 0; }
             }
 
             namespace xtpr_update_control
@@ -244,7 +252,7 @@ namespace cpuid
                 constexpr const auto name = "xtpr_update_control";
 
                 inline auto get() noexcept
-                { return (__cpuid_ecx(addr) & mask) >> from; }
+                { return get_bit(__cpuid_ecx(addr), from) != 0; }
             }
 
             namespace pdcm
@@ -254,7 +262,7 @@ namespace cpuid
                 constexpr const auto name = "pdcm";
 
                 inline auto get() noexcept
-                { return (__cpuid_ecx(addr) & mask) >> from; }
+                { return get_bit(__cpuid_ecx(addr), from) != 0; }
             }
 
             namespace pcid
@@ -264,7 +272,7 @@ namespace cpuid
                 constexpr const auto name = "pcid";
 
                 inline auto get() noexcept
-                { return (__cpuid_ecx(addr) & mask) >> from; }
+                { return get_bit(__cpuid_ecx(addr), from) != 0; }
             }
 
             namespace dca
@@ -274,7 +282,7 @@ namespace cpuid
                 constexpr const auto name = "dca";
 
                 inline auto get() noexcept
-                { return (__cpuid_ecx(addr) & mask) >> from; }
+                { return get_bit(__cpuid_ecx(addr), from) != 0; }
             }
 
             namespace sse41
@@ -284,7 +292,7 @@ namespace cpuid
                 constexpr const auto name = "sse41";
 
                 inline auto get() noexcept
-                { return (__cpuid_ecx(addr) & mask) >> from; }
+                { return get_bit(__cpuid_ecx(addr), from) != 0; }
             }
 
             namespace sse42
@@ -294,7 +302,7 @@ namespace cpuid
                 constexpr const auto name = "sse42";
 
                 inline auto get() noexcept
-                { return (__cpuid_ecx(addr) & mask) >> from; }
+                { return get_bit(__cpuid_ecx(addr), from) != 0; }
             }
 
             namespace x2apic
@@ -304,7 +312,7 @@ namespace cpuid
                 constexpr const auto name = "x2apic";
 
                 inline auto get() noexcept
-                { return (__cpuid_ecx(addr) & mask) >> from; }
+                { return get_bit(__cpuid_ecx(addr), from) != 0; }
             }
 
             namespace movbe
@@ -314,7 +322,7 @@ namespace cpuid
                 constexpr const auto name = "movbe";
 
                 inline auto get() noexcept
-                { return (__cpuid_ecx(addr) & mask) >> from; }
+                { return get_bit(__cpuid_ecx(addr), from) != 0; }
             }
 
             namespace popcnt
@@ -324,7 +332,7 @@ namespace cpuid
                 constexpr const auto name = "popcnt";
 
                 inline auto get() noexcept
-                { return (__cpuid_ecx(addr) & mask) >> from; }
+                { return get_bit(__cpuid_ecx(addr), from) != 0; }
             }
 
             namespace tsc_deadline
@@ -334,7 +342,7 @@ namespace cpuid
                 constexpr const auto name = "tsc_deadline";
 
                 inline auto get() noexcept
-                { return (__cpuid_ecx(addr) & mask) >> from; }
+                { return get_bit(__cpuid_ecx(addr), from) != 0; }
             }
 
             namespace aesni
@@ -344,7 +352,7 @@ namespace cpuid
                 constexpr const auto name = "aesni";
 
                 inline auto get() noexcept
-                { return (__cpuid_ecx(addr) & mask) >> from; }
+                { return get_bit(__cpuid_ecx(addr), from) != 0; }
             }
 
             namespace xsave
@@ -354,7 +362,7 @@ namespace cpuid
                 constexpr const auto name = "xsave";
 
                 inline auto get() noexcept
-                { return (__cpuid_ecx(addr) & mask) >> from; }
+                { return get_bit(__cpuid_ecx(addr), from) != 0; }
             }
 
             namespace osxsave
@@ -364,7 +372,7 @@ namespace cpuid
                 constexpr const auto name = "osxsave";
 
                 inline auto get() noexcept
-                { return (__cpuid_ecx(addr) & mask) >> from; }
+                { return get_bit(__cpuid_ecx(addr), from) != 0; }
             }
 
             namespace avx
@@ -374,7 +382,7 @@ namespace cpuid
                 constexpr const auto name = "avx";
 
                 inline auto get() noexcept
-                { return (__cpuid_ecx(addr) & mask) >> from; }
+                { return get_bit(__cpuid_ecx(addr), from) != 0; }
             }
 
             namespace f16c
@@ -384,7 +392,7 @@ namespace cpuid
                 constexpr const auto name = "f16c";
 
                 inline auto get() noexcept
-                { return (__cpuid_ecx(addr) & mask) >> from; }
+                { return get_bit(__cpuid_ecx(addr), from) != 0; }
             }
 
             namespace rdrand
@@ -394,7 +402,102 @@ namespace cpuid
                 constexpr const auto name = "rdrand";
 
                 inline auto get() noexcept
-                { return (__cpuid_ecx(addr) & mask) >> from; }
+                { return get_bit(__cpuid_ecx(addr), from) != 0; }
+            }
+
+            inline void dump() noexcept
+            {
+                bfdebug << "cpuid::feature_information::ecx enabled flags:" << bfendl;
+
+                if (sse3::get())
+                    bfdebug << "    - sse3" << bfendl;
+
+                if (pclmulqdq::get())
+                    bfdebug << "    - pclmulqdq" << bfendl;
+
+                if (dtes64::get())
+                    bfdebug << "    - dtes64" << bfendl;
+
+                if (monitor::get())
+                    bfdebug << "    - monitor" << bfendl;
+
+                if (ds_cpl::get())
+                    bfdebug << "    - ds_cpl" << bfendl;
+
+                if (vmx::get())
+                    bfdebug << "    - vmx" << bfendl;
+
+                if (smx::get())
+                    bfdebug << "    - smx" << bfendl;
+
+                if (eist::get())
+                    bfdebug << "    - eist" << bfendl;
+
+                if (tm2::get())
+                    bfdebug << "    - tm2" << bfendl;
+
+                if (ssse3::get())
+                    bfdebug << "    - ssse3" << bfendl;
+
+                if (cnxt_id::get())
+                    bfdebug << "    - cnxt_id" << bfendl;
+
+                if (sdbg::get())
+                    bfdebug << "    - sdbg" << bfendl;
+
+                if (fma::get())
+                    bfdebug << "    - fma" << bfendl;
+
+                if (cmpxchg16b::get())
+                    bfdebug << "    - cmpxchg16b" << bfendl;
+
+                if (xtpr_update_control::get())
+                    bfdebug << "    - xtpr_update_control" << bfendl;
+
+                if (pdcm::get())
+                    bfdebug << "    - pdcm" << bfendl;
+
+                if (pcid::get())
+                    bfdebug << "    - pcid" << bfendl;
+
+                if (dca::get())
+                    bfdebug << "    - dca" << bfendl;
+
+                if (sse41::get())
+                    bfdebug << "    - sse41" << bfendl;
+
+                if (sse42::get())
+                    bfdebug << "    - sse42" << bfendl;
+
+                if (x2apic::get())
+                    bfdebug << "    - x2apic" << bfendl;
+
+                if (movbe::get())
+                    bfdebug << "    - movbe" << bfendl;
+
+                if (popcnt::get())
+                    bfdebug << "    - popcnt" << bfendl;
+
+                if (tsc_deadline::get())
+                    bfdebug << "    - tsc_deadline" << bfendl;
+
+                if (aesni::get())
+                    bfdebug << "    - aesni" << bfendl;
+
+                if (xsave::get())
+                    bfdebug << "    - xsave" << bfendl;
+
+                if (osxsave::get())
+                    bfdebug << "    - osxsave" << bfendl;
+
+                if (avx::get())
+                    bfdebug << "    - avx" << bfendl;
+
+                if (f16c::get())
+                    bfdebug << "    - f16c" << bfendl;
+
+                if (rdrand::get())
+                    bfdebug << "    - rdrand" << bfendl;
             }
         }
     }

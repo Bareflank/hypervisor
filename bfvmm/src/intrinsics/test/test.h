@@ -394,6 +394,7 @@ private:
     void test_cpuid_x64_cpuid_feature_information_ecx_avx();
     void test_cpuid_x64_cpuid_feature_information_ecx_f16c();
     void test_cpuid_x64_cpuid_feature_information_ecx_rdrand();
+    void test_cpuid_x64_cpuid_feature_information_ecx_dump();
 
     void test_pm_x64_halt();
     void test_pm_x64_stop();
