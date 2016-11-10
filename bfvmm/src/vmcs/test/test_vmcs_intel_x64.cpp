@@ -28,6 +28,7 @@
 #include <vmcs/vmcs_intel_x64_promote.h>
 #include <vmcs/vmcs_intel_x64_16bit_control_fields.h>
 #include <vmcs/vmcs_intel_x64_16bit_host_state_fields.h>
+#include <vmcs/vmcs_intel_x64_16bit_guest_state_fields.h>
 
 #include <intrinsics/rflags_x64.h>
 #include <intrinsics/crs_intel_x64.h>
@@ -600,17 +601,17 @@ vmcs_ut::test_vmcs_guest_es_selector_rpl()
 void
 vmcs_ut::test_vmcs_guest_es_selector_ti()
 {
-    vmcs::guest_es_selector::ti::set(1UL);
-    this->expect_true(vmcs::guest_es_selector::ti::get() == 1UL);
+    vmcs::guest_es_selector::ti::set(true);
+    this->expect_true(vmcs::guest_es_selector::ti::get());
 
-    vmcs::guest_es_selector::ti::set(0UL);
-    this->expect_true(vmcs::guest_es_selector::ti::get() == 0UL);
+    vmcs::guest_es_selector::ti::set(false);
+    this->expect_false(vmcs::guest_es_selector::ti::get());
 
-    vmcs::guest_es_selector::ti::set_if_exists(1UL);
-    this->expect_true(vmcs::guest_es_selector::ti::get_if_exists() == 1UL);
+    vmcs::guest_es_selector::ti::set_if_exists(true);
+    this->expect_true(vmcs::guest_es_selector::ti::get_if_exists());
 
-    vmcs::guest_es_selector::ti::set_if_exists(0UL);
-    this->expect_true(vmcs::guest_es_selector::ti::get_if_exists() == 0UL);
+    vmcs::guest_es_selector::ti::set_if_exists(false);
+    this->expect_false(vmcs::guest_es_selector::ti::get_if_exists());
 }
 
 void
@@ -660,17 +661,17 @@ vmcs_ut::test_vmcs_guest_cs_selector_rpl()
 void
 vmcs_ut::test_vmcs_guest_cs_selector_ti()
 {
-    vmcs::guest_cs_selector::ti::set(1UL);
-    this->expect_true(vmcs::guest_cs_selector::ti::get() == 1UL);
+    vmcs::guest_cs_selector::ti::set(true);
+    this->expect_true(vmcs::guest_cs_selector::ti::get());
 
-    vmcs::guest_cs_selector::ti::set(0UL);
-    this->expect_true(vmcs::guest_cs_selector::ti::get() == 0UL);
+    vmcs::guest_cs_selector::ti::set(false);
+    this->expect_false(vmcs::guest_cs_selector::ti::get());
 
-    vmcs::guest_cs_selector::ti::set_if_exists(1UL);
-    this->expect_true(vmcs::guest_cs_selector::ti::get_if_exists() == 1UL);
+    vmcs::guest_cs_selector::ti::set_if_exists(true);
+    this->expect_true(vmcs::guest_cs_selector::ti::get_if_exists());
 
-    vmcs::guest_cs_selector::ti::set_if_exists(0UL);
-    this->expect_true(vmcs::guest_cs_selector::ti::get_if_exists() == 0UL);
+    vmcs::guest_cs_selector::ti::set_if_exists(false);
+    this->expect_false(vmcs::guest_cs_selector::ti::get_if_exists());
 }
 
 void
@@ -720,17 +721,17 @@ vmcs_ut::test_vmcs_guest_ss_selector_rpl()
 void
 vmcs_ut::test_vmcs_guest_ss_selector_ti()
 {
-    vmcs::guest_ss_selector::ti::set(1UL);
-    this->expect_true(vmcs::guest_ss_selector::ti::get() == 1UL);
+    vmcs::guest_ss_selector::ti::set(true);
+    this->expect_true(vmcs::guest_ss_selector::ti::get());
 
-    vmcs::guest_ss_selector::ti::set(0UL);
-    this->expect_true(vmcs::guest_ss_selector::ti::get() == 0UL);
+    vmcs::guest_ss_selector::ti::set(false);
+    this->expect_false(vmcs::guest_ss_selector::ti::get());
 
-    vmcs::guest_ss_selector::ti::set_if_exists(1UL);
-    this->expect_true(vmcs::guest_ss_selector::ti::get_if_exists() == 1UL);
+    vmcs::guest_ss_selector::ti::set_if_exists(true);
+    this->expect_true(vmcs::guest_ss_selector::ti::get_if_exists());
 
-    vmcs::guest_ss_selector::ti::set_if_exists(0UL);
-    this->expect_true(vmcs::guest_ss_selector::ti::get_if_exists() == 0UL);
+    vmcs::guest_ss_selector::ti::set_if_exists(false);
+    this->expect_false(vmcs::guest_ss_selector::ti::get_if_exists());
 }
 
 void
@@ -780,17 +781,17 @@ vmcs_ut::test_vmcs_guest_ds_selector_rpl()
 void
 vmcs_ut::test_vmcs_guest_ds_selector_ti()
 {
-    vmcs::guest_ds_selector::ti::set(1UL);
-    this->expect_true(vmcs::guest_ds_selector::ti::get() == 1UL);
+    vmcs::guest_ds_selector::ti::set(true);
+    this->expect_true(vmcs::guest_ds_selector::ti::get());
 
-    vmcs::guest_ds_selector::ti::set(0UL);
-    this->expect_true(vmcs::guest_ds_selector::ti::get() == 0UL);
+    vmcs::guest_ds_selector::ti::set(false);
+    this->expect_false(vmcs::guest_ds_selector::ti::get());
 
-    vmcs::guest_ds_selector::ti::set_if_exists(1UL);
-    this->expect_true(vmcs::guest_ds_selector::ti::get_if_exists() == 1UL);
+    vmcs::guest_ds_selector::ti::set_if_exists(true);
+    this->expect_true(vmcs::guest_ds_selector::ti::get_if_exists());
 
-    vmcs::guest_ds_selector::ti::set_if_exists(0UL);
-    this->expect_true(vmcs::guest_ds_selector::ti::get_if_exists() == 0UL);
+    vmcs::guest_ds_selector::ti::set_if_exists(false);
+    this->expect_false(vmcs::guest_ds_selector::ti::get_if_exists());
 }
 
 void
@@ -840,17 +841,17 @@ vmcs_ut::test_vmcs_guest_fs_selector_rpl()
 void
 vmcs_ut::test_vmcs_guest_fs_selector_ti()
 {
-    vmcs::guest_fs_selector::ti::set(1UL);
-    this->expect_true(vmcs::guest_fs_selector::ti::get() == 1UL);
+    vmcs::guest_fs_selector::ti::set(true);
+    this->expect_true(vmcs::guest_fs_selector::ti::get());
 
-    vmcs::guest_fs_selector::ti::set(0UL);
-    this->expect_true(vmcs::guest_fs_selector::ti::get() == 0UL);
+    vmcs::guest_fs_selector::ti::set(false);
+    this->expect_false(vmcs::guest_fs_selector::ti::get());
 
-    vmcs::guest_fs_selector::ti::set_if_exists(1UL);
-    this->expect_true(vmcs::guest_fs_selector::ti::get_if_exists() == 1UL);
+    vmcs::guest_fs_selector::ti::set_if_exists(true);
+    this->expect_true(vmcs::guest_fs_selector::ti::get_if_exists());
 
-    vmcs::guest_fs_selector::ti::set_if_exists(0UL);
-    this->expect_true(vmcs::guest_fs_selector::ti::get_if_exists() == 0UL);
+    vmcs::guest_fs_selector::ti::set_if_exists(false);
+    this->expect_false(vmcs::guest_fs_selector::ti::get_if_exists());
 }
 
 void
@@ -900,17 +901,17 @@ vmcs_ut::test_vmcs_guest_gs_selector_rpl()
 void
 vmcs_ut::test_vmcs_guest_gs_selector_ti()
 {
-    vmcs::guest_gs_selector::ti::set(1UL);
-    this->expect_true(vmcs::guest_gs_selector::ti::get() == 1UL);
+    vmcs::guest_gs_selector::ti::set(true);
+    this->expect_true(vmcs::guest_gs_selector::ti::get());
 
-    vmcs::guest_gs_selector::ti::set(0UL);
-    this->expect_true(vmcs::guest_gs_selector::ti::get() == 0UL);
+    vmcs::guest_gs_selector::ti::set(false);
+    this->expect_false(vmcs::guest_gs_selector::ti::get());
 
-    vmcs::guest_gs_selector::ti::set_if_exists(1UL);
-    this->expect_true(vmcs::guest_gs_selector::ti::get_if_exists() == 1UL);
+    vmcs::guest_gs_selector::ti::set_if_exists(true);
+    this->expect_true(vmcs::guest_gs_selector::ti::get_if_exists());
 
-    vmcs::guest_gs_selector::ti::set_if_exists(0UL);
-    this->expect_true(vmcs::guest_gs_selector::ti::get_if_exists() == 0UL);
+    vmcs::guest_gs_selector::ti::set_if_exists(false);
+    this->expect_false(vmcs::guest_gs_selector::ti::get_if_exists());
 }
 
 void
@@ -960,17 +961,17 @@ vmcs_ut::test_vmcs_guest_ldtr_selector_rpl()
 void
 vmcs_ut::test_vmcs_guest_ldtr_selector_ti()
 {
-    vmcs::guest_ldtr_selector::ti::set(1UL);
-    this->expect_true(vmcs::guest_ldtr_selector::ti::get() == 1UL);
+    vmcs::guest_ldtr_selector::ti::set(true);
+    this->expect_true(vmcs::guest_ldtr_selector::ti::get());
 
-    vmcs::guest_ldtr_selector::ti::set(0UL);
-    this->expect_true(vmcs::guest_ldtr_selector::ti::get() == 0UL);
+    vmcs::guest_ldtr_selector::ti::set(false);
+    this->expect_false(vmcs::guest_ldtr_selector::ti::get());
 
-    vmcs::guest_ldtr_selector::ti::set_if_exists(1UL);
-    this->expect_true(vmcs::guest_ldtr_selector::ti::get_if_exists() == 1UL);
+    vmcs::guest_ldtr_selector::ti::set_if_exists(true);
+    this->expect_true(vmcs::guest_ldtr_selector::ti::get_if_exists());
 
-    vmcs::guest_ldtr_selector::ti::set_if_exists(0UL);
-    this->expect_true(vmcs::guest_ldtr_selector::ti::get_if_exists() == 0UL);
+    vmcs::guest_ldtr_selector::ti::set_if_exists(false);
+    this->expect_false(vmcs::guest_ldtr_selector::ti::get_if_exists());
 }
 
 void
@@ -1020,17 +1021,17 @@ vmcs_ut::test_vmcs_guest_tr_selector_rpl()
 void
 vmcs_ut::test_vmcs_guest_tr_selector_ti()
 {
-    vmcs::guest_tr_selector::ti::set(1UL);
-    this->expect_true(vmcs::guest_tr_selector::ti::get() == 1UL);
+    vmcs::guest_tr_selector::ti::set(true);
+    this->expect_true(vmcs::guest_tr_selector::ti::get());
 
-    vmcs::guest_tr_selector::ti::set(0UL);
-    this->expect_true(vmcs::guest_tr_selector::ti::get() == 0UL);
+    vmcs::guest_tr_selector::ti::set(false);
+    this->expect_false(vmcs::guest_tr_selector::ti::get());
 
-    vmcs::guest_tr_selector::ti::set_if_exists(1UL);
-    this->expect_true(vmcs::guest_tr_selector::ti::get_if_exists() == 1UL);
+    vmcs::guest_tr_selector::ti::set_if_exists(true);
+    this->expect_true(vmcs::guest_tr_selector::ti::get_if_exists());
 
-    vmcs::guest_tr_selector::ti::set_if_exists(0UL);
-    this->expect_true(vmcs::guest_tr_selector::ti::get_if_exists() == 0UL);
+    vmcs::guest_tr_selector::ti::set_if_exists(false);
+    this->expect_false(vmcs::guest_tr_selector::ti::get_if_exists());
 }
 
 void
