@@ -44,7 +44,7 @@ vmxon_intel_x64::vmxon_intel_x64() :
 void
 vmxon_intel_x64::start()
 {
-    if (this->is_vmx_operation_enabled())
+    if (cr4::vmx_enable_bit::get())
         throw std::logic_error("vmxon already enabled");
 
     this->check_cpuid_vmx_supported();
@@ -58,12 +58,12 @@ vmxon_intel_x64::start()
     auto ___ = gsl::on_failure([&]
     { this->release_vmxon_region(); });
 
-    this->enable_vmx_operation();
+    cr4::vmx_enable_bit::set(true);
 
     auto ___ = gsl::on_failure([&]
-    { this->disable_vmx_operation(); });
+    { cr4::vmx_enable_bit::set(false); });
 
-    if (!this->is_vmx_operation_enabled())
+    if (!cr4::vmx_enable_bit::get())
         throw std::logic_error("failed to enable VMXON");
 
     this->check_ia32_vmx_cr4_fixed_msr();
@@ -74,9 +74,9 @@ void
 vmxon_intel_x64::stop()
 {
     this->execute_vmxoff();
-    this->disable_vmx_operation();
+    cr4::vmx_enable_bit::set(false);
 
-    if (this->is_vmx_operation_enabled())
+    if (cr4::vmx_enable_bit::get())
         throw std::logic_error("failed to disable VMXON");
 
     this->release_vmxon_region();
@@ -139,18 +139,6 @@ vmxon_intel_x64::check_v8086_disabled()
 }
 
 void
-vmxon_intel_x64::enable_vmx_operation() noexcept
-{
-    cr4::vmx_enable_bit::set(1U);
-}
-
-void
-vmxon_intel_x64::disable_vmx_operation() noexcept
-{
-    cr4::vmx_enable_bit::set(0U);
-}
-
-void
 vmxon_intel_x64::create_vmxon_region()
 {
     auto ___ = gsl::on_failure([&]
@@ -195,10 +183,4 @@ vmxon_intel_x64::execute_vmxoff()
     }
 
     vmx::off();
-}
-
-bool
-vmxon_intel_x64::is_vmx_operation_enabled()
-{
-    return cr4::vmx_enable_bit::get() != 0;
 }
