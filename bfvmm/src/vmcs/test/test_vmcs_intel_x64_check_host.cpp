@@ -22,6 +22,8 @@
 #include <test.h>
 #include <string>
 
+#include <vmcs/vmcs_intel_x64_16bit_host_state_fields.h>
+
 #include <intrinsics/srs_x64.h>
 #include <intrinsics/crs_intel_x64.h>
 
@@ -58,13 +60,13 @@ setup_check_host_segment_and_descriptor_table_registers_paths(std::vector<struct
 
     path.setup = [&]
     {
-        host_es_selector::ti::set(0U); host_es_selector::rpl::set(0U); // es.ti == 0 && es.rpl == 0
-        host_cs_selector::ti::set(0U); host_cs_selector::rpl::set(0U); // cs.ti == 0 && cs.rpl == 0
-        host_ss_selector::ti::set(0U); host_ss_selector::rpl::set(0U); // ss.ti == 0 && ss.rpl == 0
-        host_ds_selector::ti::set(0U); host_ds_selector::rpl::set(0U); // ds.ti == 0 && ds.rpl == 0
-        host_fs_selector::ti::set(0U); host_fs_selector::rpl::set(0U); // fs.ti == 0 && fs.rpl == 0
-        host_gs_selector::ti::set(0U); host_gs_selector::rpl::set(0U); // gs.ti == 0 && gs.rpl == 0
-        host_tr_selector::ti::set(0U); host_tr_selector::rpl::set(0U); // tr.ti == 0 && tr.rpl == 0
+        host_es_selector::ti::set(false); host_es_selector::rpl::set(0U); // es.ti == 0 && es.rpl == 0
+        host_cs_selector::ti::set(false); host_cs_selector::rpl::set(0U); // cs.ti == 0 && cs.rpl == 0
+        host_ss_selector::ti::set(false); host_ss_selector::rpl::set(0U); // ss.ti == 0 && ss.rpl == 0
+        host_ds_selector::ti::set(false); host_ds_selector::rpl::set(0U); // ds.ti == 0 && ds.rpl == 0
+        host_fs_selector::ti::set(false); host_fs_selector::rpl::set(0U); // fs.ti == 0 && fs.rpl == 0
+        host_gs_selector::ti::set(false); host_gs_selector::rpl::set(0U); // gs.ti == 0 && gs.rpl == 0
+        host_tr_selector::ti::set(false); host_tr_selector::rpl::set(0U); // tr.ti == 0 && tr.rpl == 0
 
         host_cs_selector::set(~(cs::ti::mask | cs::rpl::mask)); // cs != 0
         host_tr_selector::set(~(tr::ti::mask | tr::rpl::mask)); // tr != 0
