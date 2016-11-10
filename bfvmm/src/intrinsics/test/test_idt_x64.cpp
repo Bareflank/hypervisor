@@ -24,7 +24,7 @@
 #include <test.h>
 #include <intrinsics/idt_x64.h>
 
-std::vector<uint64_t> g_idt =
+std::vector<idt_x64::interrupt_descriptor_type> g_idt =
 {
     0xFFFFFFFFFFFFFFFF,
     0xFFFFFFFFFFFFFFFF,
@@ -55,7 +55,6 @@ void
 intrinsics_ut::test_idt_reg_base_set_get()
 {
     x64::idt::base::set(g_idt.data());
-
     this->expect_true(x64::idt::base::get() == g_idt.data());
 }
 
@@ -63,7 +62,6 @@ void
 intrinsics_ut::test_idt_reg_limit_set_get()
 {
     x64::idt::limit::set((4 << 3) - 1);
-
     this->expect_true(x64::idt::limit::get() == (4 << 3) - 1);
 }
 
@@ -76,31 +74,28 @@ intrinsics_ut::test_idt_constructor_no_size()
 void
 intrinsics_ut::test_idt_constructor_zero_size()
 {
-    idt_x64 idt{0};
-    EXPECT_TRUE(idt.base() == 0);
-    EXPECT_TRUE(idt.limit() == 0);
+    this->expect_exception([&] { idt_x64{0}; }, ""_ut_ffe);
 }
 
 void
 intrinsics_ut::test_idt_constructor_size()
 {
     idt_x64 idt{4};
-    EXPECT_TRUE(idt.base() != 0);
-    EXPECT_TRUE(idt.limit() == (4 * sizeof(uint64_t)) - 1);
+
+    this->expect_true(idt.base() != 0);
+    this->expect_true(idt.limit() == (4 * sizeof(idt_x64::interrupt_descriptor_type)) - 1);
 }
 
 void
 intrinsics_ut::test_idt_base()
 {
     idt_x64 idt;
-
-    EXPECT_TRUE(idt.base() == reinterpret_cast<uint64_t>(g_idt.data()));
+    this->expect_true(idt.base() == reinterpret_cast<idt_x64::integer_pointer>(g_idt.data()));
 }
 
 void
 intrinsics_ut::test_idt_limit()
 {
     idt_x64 idt;
-
-    EXPECT_TRUE(idt.limit() == (4 * sizeof(uint64_t)) - 1);
+    this->expect_true(idt.limit() == (4 * sizeof(idt_x64::interrupt_descriptor_type)) - 1);
 }

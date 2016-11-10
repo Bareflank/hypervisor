@@ -36,12 +36,20 @@
 
 struct idt_reg_x64_t
 {
-    uint16_t limit;
-    uint64_t *base;
+    using limit_type = uint16_t;
+    using base_type = uint64_t *;
+
+    limit_type limit;
+    base_type base;
 
     idt_reg_x64_t() noexcept :
         limit(0),
         base(nullptr)
+    {}
+
+    idt_reg_x64_t(base_type b, limit_type l) noexcept :
+        limit(l),
+        base(b)
     {}
 };
 
@@ -55,7 +63,7 @@ extern "C" void __read_idt(idt_reg_x64_t *idt_reg) noexcept;
 extern "C" void __write_idt(idt_reg_x64_t *idt_reg) noexcept;
 
 // -----------------------------------------------------------------------------
-// GDT Functions
+// IDT Functions
 // -----------------------------------------------------------------------------
 
 // *INDENT-OFF*
@@ -66,19 +74,15 @@ namespace idt
 {
     inline auto get() noexcept
     {
-        idt_reg_x64_t reg;
+        auto &&reg = idt_reg_x64_t{};
         __read_idt(&reg);
 
         return reg;
     }
 
-    template<class B, class L> void set(B base, L limit) noexcept
+    inline void set(idt_reg_x64_t::base_type base, idt_reg_x64_t::limit_type limit) noexcept
     {
-        idt_reg_x64_t reg;
-
-        reg.base = base;
-        reg.limit = gsl::narrow_cast<uint16_t>(limit);
-
+        auto &&reg = idt_reg_x64_t{base, limit};
         __write_idt(&reg);
     }
 
@@ -86,18 +90,18 @@ namespace idt
     {
         inline auto get() noexcept
         {
-            idt_reg_x64_t reg;
+            auto &&reg = idt_reg_x64_t{};
             __read_idt(&reg);
 
             return reg.base;
         }
 
-        template<class T> void set(T val) noexcept
+        inline void set(idt_reg_x64_t::base_type base) noexcept
         {
-            idt_reg_x64_t reg;
+            auto &&reg = idt_reg_x64_t{};
             __read_idt(&reg);
 
-            reg.base = val;
+            reg.base = base;
             __write_idt(&reg);
         }
     }
@@ -106,24 +110,23 @@ namespace idt
     {
         inline auto get() noexcept
         {
-            idt_reg_x64_t reg;
+            auto &&reg = idt_reg_x64_t{};
             __read_idt(&reg);
 
             return reg.limit;
         }
 
-        template<class T> void set(T val) noexcept
+        inline void set(idt_reg_x64_t::limit_type limit) noexcept
         {
-            idt_reg_x64_t reg;
+            auto &&reg = idt_reg_x64_t{};
             __read_idt(&reg);
 
-            reg.limit = gsl::narrow_cast<uint16_t>(val);
+            reg.limit = limit;
             __write_idt(&reg);
         }
     }
 }
 }
-
 // *INDENT-ON*
 
 // -----------------------------------------------------------------------------
@@ -142,17 +145,24 @@ namespace idt
 /// For more information on the IDT, please see Volume 3, section 6.10
 /// of the Intel Manual. For 64bit, see section 6.14.
 ///
-/// Note: For now, the IDT is global, and blank as we have interrupts
-///       disabled. At some point when we decide to add support for
-///       interrupts we will need to implement this class completely.
+/// @note For now, the IDT is global, and blank as we have interrupts
+///     disabled. At some point when we decide to add support for
+///     interrupts we will need to implement this class completely.
 ///
 class idt_x64
 {
 public:
 
+    using size_type = uint16_t;
+    using integer_pointer = uintptr_t;
+    using interrupt_descriptor_type = uint64_t;
+
     /// Constructor
     ///
     /// Wraps around the IDT that is currently stored in the hardware.
+    ///
+    /// @expects none
+    /// @ensures none
     ///
     idt_x64()
     {
@@ -165,32 +175,43 @@ public:
     /// Creates a new IDT, with size defining the number of descriptors
     /// in the IDT.
     ///
+    /// @expects size != 0
+    /// @ensures none
+    ///
     /// @param size number of entries in the IDT
     ///
-    idt_x64(uint16_t size) :
+    idt_x64(size_type size) :
         m_idt(size)
     {
-        if (size == 0)
-            return;
+        expects(size != 0);
 
         m_idt_reg.base = m_idt.data();
-        m_idt_reg.limit = gsl::narrow<uint16_t>((size << 3) - 1);
+        m_idt_reg.limit = gsl::narrow<size_type>((size << 3) - 1);
     }
 
     /// Destructor
     ///
+    /// @expects none
+    /// @ensures none
+    ///
     ~idt_x64() = default;
 
-    /// GDT Base Address
+    /// IDT Base Address
     ///
-    /// @return returns the base address of the GDT itself.
+    /// @expects none
+    /// @ensures none
+    ///
+    /// @return returns the base address of the IDT itself.
     ///
     auto base() const
-    { return reinterpret_cast<uint64_t>(m_idt_reg.base); }
+    { return reinterpret_cast<integer_pointer>(m_idt_reg.base); }
 
-    /// GDT Limit
+    /// IDT Limit
     ///
-    /// @return returns the size of the GDT itself in bytes
+    /// @expects none
+    /// @ensures none
+    ///
+    /// @return returns the size of the IDT itself in bytes
     ///
     auto limit() const
     { return m_idt_reg.limit; }
@@ -200,7 +221,7 @@ private:
     friend class intrinsics_ut;
 
     idt_reg_x64_t m_idt_reg;
-    std::vector<uint64_t> m_idt;
+    std::vector<interrupt_descriptor_type> m_idt;
 };
 
 #endif

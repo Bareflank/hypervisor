@@ -32,21 +32,18 @@ vmcs_intel_x64_vmm_state::vmcs_intel_x64_vmm_state() :
     m_gdt{7},
     m_idt{256}
 {
-    m_gdt.set_access_rights(0, 0);
     m_gdt.set_access_rights(1, access_rights::ring0_cs_descriptor);
     m_gdt.set_access_rights(2, access_rights::ring0_ss_descriptor);
     m_gdt.set_access_rights(3, access_rights::ring0_fs_descriptor);
     m_gdt.set_access_rights(4, access_rights::ring0_gs_descriptor);
     m_gdt.set_access_rights(5, access_rights::ring0_tr_descriptor);
 
-    m_gdt.set_base(0, 0);
     m_gdt.set_base(1, 0);
     m_gdt.set_base(2, 0);
     m_gdt.set_base(3, 0);
     m_gdt.set_base(4, 0);
     m_gdt.set_base(5, reinterpret_cast<uint64_t>(&m_tss));
 
-    m_gdt.set_limit(0, 0);
     m_gdt.set_limit(1, 0xFFFFFFFF);
     m_gdt.set_limit(2, 0xFFFFFFFF);
     m_gdt.set_limit(3, 0xFFFFFFFF);

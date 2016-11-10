@@ -36,12 +36,20 @@
 
 struct gdt_reg_x64_t
 {
-    uint16_t limit;
-    uint64_t *base;
+    using limit_type = uint16_t;
+    using base_type = uint64_t *;
+
+    limit_type limit;
+    base_type base;
 
     gdt_reg_x64_t() noexcept :
         limit(0),
         base(nullptr)
+    {}
+
+    gdt_reg_x64_t(base_type b, limit_type l) noexcept :
+        limit(l),
+        base(b)
     {}
 };
 
@@ -66,19 +74,15 @@ namespace gdt
 {
     inline auto get() noexcept
     {
-        gdt_reg_x64_t reg;
+        auto &&reg = gdt_reg_x64_t{};
         __read_gdt(&reg);
 
         return reg;
     }
 
-    template<class B, class L> void set(B base, L limit) noexcept
+    inline void set(gdt_reg_x64_t::base_type base, gdt_reg_x64_t::limit_type limit) noexcept
     {
-        gdt_reg_x64_t reg;
-
-        reg.base = base;
-        reg.limit = gsl::narrow_cast<uint16_t>(limit);
-
+        auto &&reg = gdt_reg_x64_t{base, limit};
         __write_gdt(&reg);
     }
 
@@ -86,18 +90,18 @@ namespace gdt
     {
         inline auto get() noexcept
         {
-            gdt_reg_x64_t reg;
+            auto &&reg = gdt_reg_x64_t{};
             __read_gdt(&reg);
 
             return reg.base;
         }
 
-        template<class T> void set(T val) noexcept
+        inline void set(gdt_reg_x64_t::base_type base) noexcept
         {
-            gdt_reg_x64_t reg;
+            auto &&reg = gdt_reg_x64_t{};
             __read_gdt(&reg);
 
-            reg.base = val;
+            reg.base = base;
             __write_gdt(&reg);
         }
     }
@@ -106,18 +110,18 @@ namespace gdt
     {
         inline auto get() noexcept
         {
-            gdt_reg_x64_t reg;
+            auto &&reg = gdt_reg_x64_t{};
             __read_gdt(&reg);
 
             return reg.limit;
         }
 
-        template<class T> void set(T val) noexcept
+        inline void set(gdt_reg_x64_t::limit_type limit) noexcept
         {
-            gdt_reg_x64_t reg;
+            auto &&reg = gdt_reg_x64_t{};
             __read_gdt(&reg);
 
-            reg.limit = gsl::narrow_cast<uint16_t>(val);
+            reg.limit = limit;
             __write_gdt(&reg);
         }
     }
@@ -185,9 +189,20 @@ class gdt_x64
 {
 public:
 
+    using size_type = uint16_t;
+    using index_type = uint16_t;
+    using integer_pointer = uintptr_t;
+    using base_type = uint64_t;
+    using limit_type = uint32_t;
+    using access_rights_type = uint32_t;
+    using segment_descriptor_type = uint64_t;
+
     /// Constructor
     ///
     /// Creates a GDT based on the GDT currently in hardware.
+    ///
+    /// @expects none
+    /// @ensures none
     ///
     /// @note This copies the current GDT. Therefore, the set functions do not
     ///     modify the GDT that is in hardware, but instead modify the copy.
@@ -208,34 +223,45 @@ public:
     /// Creates a new GDT, with size defining the number of descriptors
     /// in the GDT.
     ///
+    /// @expects size != 0;
+    /// @ensures none
+    ///
     /// @param size number of entries in the GDT
     ///
-    gdt_x64(uint16_t size) :
+    gdt_x64(size_type size) :
         m_gdt(size)
     {
-        if (size == 0)
-            return;
+        expects(size != 0);
 
         m_gdt_reg.base = m_gdt.data();
-        m_gdt_reg.limit = gsl::narrow<uint16_t>(size << 3);
+        m_gdt_reg.limit = gsl::narrow<size_type>(size << 3);
     }
 
     /// Destructor
+    ///
+    /// @expects none
+    /// @ensures none
     ///
     ~gdt_x64() noexcept = default;
 
     /// GDT Base Address
     ///
+    /// @expects none
+    /// @ensures none
+    ///
     /// @return returns the base address of the GDT itself.
     ///
-    auto base() const
-    { return reinterpret_cast<uint64_t>(m_gdt_reg.base); }
+    integer_pointer base() const
+    { return reinterpret_cast<integer_pointer>(m_gdt_reg.base); }
 
     /// GDT Limit
     ///
+    /// @expects none
+    /// @ensures none
+    ///
     /// @return returns the size of the GDT itself in bytes
     ///
-    auto limit() const
+    size_type limit() const
     { return m_gdt_reg.limit; }
 
     /// Set Descriptor Base Address
@@ -249,33 +275,32 @@ public:
     /// invalid_argument exception. Also, since the access rights determine
     /// the descriptor type, make sure you set them first.
     ///
+    /// @expects index != 0
+    /// @expects index < m_gdt.size()
+    /// @expects index < m_gdt.size() + 1 (if system descriptor)
+    /// @ensures none
+    ///
     /// @param index the index of the GDT descriptor
     /// @param addr the base address. For code/data descriptor this needs to
     ///     be 0, and for a TSS this is a 64bit virtual address.
     ///
-    void set_base(uint16_t index, uint64_t addr)
+    void set_base(index_type index, base_type base)
     {
-        if (index == 0)
-            return;
+        segment_descriptor_type sd1 = 0;
+        segment_descriptor_type sd2 = 0;
 
-        uint64_t sd1 = 0;
-        uint64_t sd2 = 0;
-
-        if (index >= m_gdt.size())
-            throw std::invalid_argument("index out of range");
+        expects(index != 0);
+        expects(index < m_gdt.size());
 
         sd1 = m_gdt.at(index);
-        if (index + 1U < m_gdt.size()) sd2 = m_gdt.at(index + 1U);
-
         sd1 = (sd1 & 0x00FFFF000000FFFF);
-        sd2 = (sd2 & 0xFFFFFFFF00000000);
 
-        // The segment base description can be found in the intel's software
+        // The segment base description can be found in the Intel's software
         // developer's manual, volume 3, chapter 3.4.5 as well as volume 3,
         // chapter 24.4.1.
         //
         // Note that in 64bit mode, system descriptors are 16 bytes long
-        // instread of the traditional 8 bytes. A system descriptor has the
+        // instead of the traditional 8 bytes. A system descriptor has the
         // system flag set to 0. Most of the time, this is going to be the
         // TSS descriptor. Even though Intel Tasks don't exist in 64 bit mode,
         // the TSS descriptor is still used, and thus, TR must still be loaded.
@@ -289,15 +314,17 @@ public:
         // ------------------------------------------------------------------
         //
 
-        uint64_t base_15_00 = ((addr & 0x000000000000FFFF) << 16);
-        uint64_t base_23_16 = ((addr & 0x0000000000FF0000) << 16);
-        uint64_t base_31_24 = ((addr & 0x00000000FF000000) << 32);
-        uint64_t base_63_32 = ((addr & 0xFFFFFFFF00000000) >> 32);
+        segment_descriptor_type base_15_00 = ((base & 0x000000000000FFFF) << 16);
+        segment_descriptor_type base_23_16 = ((base & 0x0000000000FF0000) << 16);
+        segment_descriptor_type base_31_24 = ((base & 0x00000000FF000000) << 32);
+        segment_descriptor_type base_63_32 = ((base & 0xFFFFFFFF00000000) >> 32);
 
         if ((sd1 & 0x100000000000) == 0)
         {
-            if (index + 1U >= m_gdt.size())
-                throw std::invalid_argument("index does not point to a valid TSS");
+            expects(index + 1U < m_gdt.size());
+
+            sd2 = m_gdt.at(index + 1U);
+            sd2 = (sd2 & 0xFFFFFFFF00000000);
 
             m_gdt.at(index + 0U) = sd1 | base_31_24 | base_23_16 | base_15_00;
             m_gdt.at(index + 1U) = sd2 | base_63_32;
@@ -319,29 +346,28 @@ public:
     /// invalid_argument exception. Also, since the access rights determine
     /// the descriptor type, make sure you set them first.
     ///
+    /// @expects index != 0
+    /// @expects index < m_gdt.size()
+    /// @expects index < m_gdt.size() + 1 (if system descriptor)
+    /// @ensures none
+    ///
     /// @param index the index of the GDT descriptor
     /// @return the base address
     ///
-    uint64_t base(uint16_t index) const
+    base_type base(index_type index) const
     {
-        if (index == 0)
-            return 0;
+        segment_descriptor_type sd1 = 0;
+        segment_descriptor_type sd2 = 0;
 
-        uint64_t sd1 = 0;
-        uint64_t sd2 = 0;
+        expects(index != 0);
+        expects(index < m_gdt.size());
 
-        if (index >= m_gdt.size())
-            throw std::invalid_argument("index out of range");
-
-        sd1 = m_gdt.at(index);
-        if (index + 1U < m_gdt.size()) sd2 = m_gdt.at(index + 1U);
-
-        // The segment base description can be found in the intel's software
+        // The segment base description can be found in the Intel's software
         // developer's manual, volume 3, chapter 3.4.5 as well as volume 3,
         // chapter 24.4.1.
         //
         // Note that in 64bit mode, system descriptors are 16 bytes long
-        // instread of the traditional 8 bytes. A system descriptor has the
+        // instead of the traditional 8 bytes. A system descriptor has the
         // system flag set to 0. Most of the time, this is going to be the
         // TSS descriptor. Even though Intel Tasks don't exist in 64 bit mode,
         // the TSS descriptor is still used, and thus, TR must still be loaded.
@@ -355,15 +381,17 @@ public:
         // ------------------------------------------------------------------
         //
 
-        uint64_t base_15_00 = ((sd1 & 0x00000000FFFF0000) >> 16);
-        uint64_t base_23_16 = ((sd1 & 0x000000FF00000000) >> 16);
-        uint64_t base_31_24 = ((sd1 & 0xFF00000000000000) >> 32);
-        uint64_t base_63_32 = ((sd2 & 0x00000000FFFFFFFF) << 32);
+        sd1 = m_gdt.at(index);
+        base_type base_15_00 = ((sd1 & 0x00000000FFFF0000) >> 16);
+        base_type base_23_16 = ((sd1 & 0x000000FF00000000) >> 16);
+        base_type base_31_24 = ((sd1 & 0xFF00000000000000) >> 32);
 
         if ((sd1 & 0x100000000000) == 0)
         {
-            if (index + 1U >= m_gdt.size())
-                throw std::invalid_argument("index does not point to a valid TSS");
+            expects(index + 1U < m_gdt.size());
+
+            sd2 = m_gdt.at(index + 1U);
+            base_type base_63_32 = ((sd2 & 0x00000000FFFFFFFF) << 32);
 
             return base_63_32 | base_31_24 | base_23_16 | base_15_00;
         }
@@ -378,20 +406,21 @@ public:
     /// the TSS, the limit should be the size in bytes of the TSS, and
     /// any other data you wish to store.
     ///
+    /// @expects index != 0
+    /// @expects index < m_gdt.size()
+    /// @ensures none
+    ///
     /// @param index the index of the GDT descriptor
     /// @param limit the descriptors limit
     ///
-    void set_limit(uint16_t index, uint32_t limit)
+    void set_limit(index_type index, limit_type limit)
     {
-        if (index == 0)
-            return;
+        expects(index != 0);
+        expects(index < m_gdt.size());
 
-        if (index >= m_gdt.size())
-            throw std::invalid_argument("index out of range");
+        segment_descriptor_type sd1 = (m_gdt.at(index) & 0xFFF0FFFFFFFF0000);
 
-        uint64_t sd1 = (m_gdt.at(index) & 0xFFF0FFFFFFFF0000);
-
-        // The segment limit description can be found in the intel's software
+        // The segment limit description can be found in the Intel's software
         // developer's manual, volume 3, chapter 3.4.5 as well as volume 3,
         // chapter 24.4.1.
         //
@@ -404,8 +433,8 @@ public:
         if ((sd1 & 0x80000000000000) != 0)
             limit = (limit >> 12);
 
-        uint64_t limit_15_00 = ((static_cast<uint64_t>(limit) & 0x000000000000FFFF) << 0);
-        uint64_t limit_19_16 = ((static_cast<uint64_t>(limit) & 0x00000000000F0000) << 32);
+        segment_descriptor_type limit_15_00 = ((static_cast<segment_descriptor_type>(limit) & 0x000000000000FFFF) << 0);
+        segment_descriptor_type limit_19_16 = ((static_cast<segment_descriptor_type>(limit) & 0x00000000000F0000) << 32);
 
         m_gdt.at(index) = sd1 | limit_19_16 | limit_15_00;
     }
@@ -414,20 +443,21 @@ public:
     ///
     /// Gets the descriptors limit.
     ///
+    /// @expects index != 0
+    /// @expects index < m_gdt.size()
+    /// @ensures none
+    ///
     /// @param index the index of the GDT descriptor
     /// @return the descriptors limit
     ///
-    uint32_t limit(uint16_t index) const
+    limit_type limit(index_type index) const
     {
-        if (index == 0)
-            return 0;
+        expects(index != 0);
+        expects(index < m_gdt.size());
 
-        if (index >= m_gdt.size())
-            throw std::invalid_argument("index out of range");
+        segment_descriptor_type sd1 = m_gdt.at(index);
 
-        uint64_t sd1 = m_gdt.at(index);
-
-        // The segment limit description can be found in the intel's software
+        // The segment limit description can be found in the Intel's software
         // developer's manual, volume 3, chapter 3.4.5 as well as volume 3,
         // chapter 24.4.1.
         //
@@ -439,14 +469,14 @@ public:
 
         if ((sd1 & 0x80000000000000) != 0)
         {
-            uint32_t limit_15_00 = static_cast<uint32_t>((sd1 & 0x000000000000FFFF) >> 0);
-            uint32_t limit_19_16 = static_cast<uint32_t>((sd1 & 0x000F000000000000) >> 32);
+            limit_type limit_15_00 = gsl::narrow_cast<limit_type>((sd1 & 0x000000000000FFFF) >> 0);
+            limit_type limit_19_16 = gsl::narrow_cast<limit_type>((sd1 & 0x000F000000000000) >> 32);
 
             return ((limit_19_16 | limit_15_00) << 12) | 0x0000000000000FFF;
         }
 
-        uint32_t limit_15_00 = static_cast<uint32_t>((sd1 & 0x000000000000FFFF) >> 0);
-        uint32_t limit_19_16 = static_cast<uint32_t>((sd1 & 0x000F000000000000) >> 32);
+        limit_type limit_15_00 = gsl::narrow_cast<limit_type>((sd1 & 0x000000000000FFFF) >> 0);
+        limit_type limit_19_16 = gsl::narrow_cast<limit_type>((sd1 & 0x000F000000000000) >> 32);
 
         return limit_19_16 | limit_15_00;
     }
@@ -463,20 +493,21 @@ public:
     /// the descriptor is a TSS descriptor, if SS is used the segment is a
     /// stack segment, and all others are data segments. For a complete
     /// list of what each bit does (based on what segment register is
-    /// loading this descriptor), please see the intel manual.
+    /// loading this descriptor), please see the Intel manual.
+    ///
+    /// @expects index != 0
+    /// @expects index < m_gdt.size()
+    /// @ensures none
     ///
     /// @param index the index of the GDT descriptor
     /// @param access_rights the access rights for this descriptor
     ///
-    void set_access_rights(uint16_t index, uint32_t access_rights)
+    void set_access_rights(index_type index, access_rights_type access_rights)
     {
-        if (index == 0)
-            return;
+        expects(index != 0);
+        expects(index < m_gdt.size());
 
-        if (index >= m_gdt.size())
-            throw std::invalid_argument("index out of range");
-
-        uint64_t sd1 = (m_gdt.at(index) & 0xFF0F00FFFFFFFFFF);
+        segment_descriptor_type sd1 = (m_gdt.at(index) & 0xFF0F00FFFFFFFFFF);
 
         // The segment access description can be found in the intel's software
         // developer's manual, volume 3, chapter 3.4.5 as well as volume 3,
@@ -489,8 +520,8 @@ public:
         // ------------------------------------------------------------------
         //
 
-        uint64_t access_rights_07_00 = ((static_cast<uint64_t>(access_rights) & 0x00000000000000FF) << 40);
-        uint64_t access_rights_15_12 = ((static_cast<uint64_t>(access_rights) & 0x000000000000F000) << 40);
+        segment_descriptor_type access_rights_07_00 = ((static_cast<segment_descriptor_type>(access_rights) & 0x00000000000000FF) << 40);
+        segment_descriptor_type access_rights_15_12 = ((static_cast<segment_descriptor_type>(access_rights) & 0x000000000000F000) << 40);
 
         m_gdt.at(index) = sd1 | access_rights_15_12 | access_rights_07_00;
     }
@@ -499,25 +530,21 @@ public:
     ///
     /// Gets the access rights for the descriptor
     ///
+    /// @expects index != 0
+    /// @expects index < m_gdt.size()
+    /// @ensures none
+    ///
     /// @param index the index of the GDT descriptor
     /// @return the descriptors access rights
     ///
-    uint32_t access_rights(uint16_t index) const
+    access_rights_type access_rights(index_type index) const
     {
-        // Note that unlike the other functions, when the selector is for the
-        // null segment, we need to return the following. This tells the system
-        // that this is a unusable segment.
-        //
+        expects(index != 0);
+        expects(index < m_gdt.size());
 
-        if (index == 0)
-            return 0x10000;
+        segment_descriptor_type sd1 = m_gdt.at(index);
 
-        if (index >= m_gdt.size())
-            throw std::invalid_argument("index out of range");
-
-        uint64_t sd1 = m_gdt.at(index);
-
-        // The segment access description can be found in the intel's software
+        // The segment access description can be found in the Intel's software
         // developer's manual, volume 3, chapter 3.4.5 as well as volume 3,
         // chapter 24.4.1.
         //
@@ -528,8 +555,8 @@ public:
         // ------------------------------------------------------------------
         //
 
-        uint32_t access_rights_07_00 = static_cast<uint32_t>((sd1 & 0x0000FF0000000000) >> 40);
-        uint32_t access_rights_15_12 = static_cast<uint32_t>((sd1 & 0x00F0000000000000) >> 40);
+        access_rights_type access_rights_07_00 = static_cast<access_rights_type>((sd1 & 0x0000FF0000000000) >> 40);
+        access_rights_type access_rights_15_12 = static_cast<access_rights_type>((sd1 & 0x00F0000000000000) >> 40);
 
         return access_rights_15_12 | access_rights_07_00;
     }
@@ -539,7 +566,7 @@ private:
     friend class intrinsics_ut;
 
     gdt_reg_x64_t m_gdt_reg;
-    std::vector<uint64_t> m_gdt;
+    std::vector<segment_descriptor_type> m_gdt;
 };
 
 #endif
