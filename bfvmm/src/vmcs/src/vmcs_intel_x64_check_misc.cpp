@@ -165,7 +165,7 @@ vmcs_intel_x64::is_supported_eptp_switching() const
 bool
 vmcs_intel_x64::is_supported_event_injection_instr_length_of_0() const
 {
-    return msrs::ia32_vmx_misc::injection_with_instruction_length_of_zero::get() != 0;
+    return msrs::ia32_vmx_misc::injection_with_instruction_length_of_zero::get();
 }
 
 bool

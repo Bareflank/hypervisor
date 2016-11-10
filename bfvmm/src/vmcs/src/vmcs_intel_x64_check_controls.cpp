@@ -362,10 +362,10 @@ vmcs_intel_x64::check_control_enable_ept_checks()
 
     auto eptp = vm::read(VMCS_EPT_POINTER);
 
-    if ((eptp & EPTP_MEMORY_TYPE) == 0 && memory_type_uncacheable_supported::get() == 0)
+    if ((eptp & EPTP_MEMORY_TYPE) == 0 && !memory_type_uncacheable_supported::get())
         throw std::logic_error("hardware does not support ept memory type: uncachable");
 
-    if ((eptp & EPTP_MEMORY_TYPE) == 6 && memory_type_write_back_supported::get() == 0)
+    if ((eptp & EPTP_MEMORY_TYPE) == 6 && !memory_type_write_back_supported::get())
         throw std::logic_error("hardware does not support ept memory type: write-back");
 
     if ((eptp & EPTP_MEMORY_TYPE) != 0 && (eptp & EPTP_MEMORY_TYPE) != 6)
@@ -374,7 +374,7 @@ vmcs_intel_x64::check_control_enable_ept_checks()
     if ((eptp & EPTP_PAGE_WALK_LENGTH) >> 3 != 3)
         throw std::logic_error("the ept walk-through length must be 1 less than 4, i.e. 3");
 
-    if ((eptp & EPTP_ACCESSED_DIRTY_FLAGS_ENABLED) != 0 && accessed_dirty_support::get() == 0)
+    if ((eptp & EPTP_ACCESSED_DIRTY_FLAGS_ENABLED) != 0 && !accessed_dirty_support::get())
         throw std::logic_error("hardware does not support dirty / accessed flags for ept");
 
     if ((eptp & 0x0000000000000F80) != 0)
