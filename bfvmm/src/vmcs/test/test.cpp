@@ -495,6 +495,7 @@ vmcs_ut::list()
     this->test_vmcs_guest_smbase();
     this->test_vmcs_guest_ia32_sysenter_cs();
     this->test_vmcs_vmx_preemption_timer_value();
+    this->test_vmcs_host_ia32_sysenter_cs();
     this->test_vmcs_pin_based_vm_execution_controls();
     this->test_vmcs_pin_based_vm_execution_controls_external_interrupt_exiting();
     this->test_vmcs_pin_based_vm_execution_controls_nmi_exiting();

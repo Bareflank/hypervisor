@@ -31,6 +31,7 @@
 #include <vmcs/vmcs_intel_x64_16bit_host_state_fields.h>
 #include <vmcs/vmcs_intel_x64_16bit_guest_state_fields.h>
 #include <vmcs/vmcs_intel_x64_32bit_guest_state_fields.h>
+#include <vmcs/vmcs_intel_x64_32bit_host_state_field.h>
 #include <memory_manager/memory_manager_x64.h>
 #include <exit_handler/exit_handler_intel_x64_support.h>
 
@@ -379,7 +380,7 @@ vmcs_intel_x64::write_64bit_host_state(const std::shared_ptr<vmcs_intel_x64_stat
 void
 vmcs_intel_x64::write_32bit_host_state(const std::shared_ptr<vmcs_intel_x64_state> &state)
 {
-    vm::write(VMCS_HOST_IA32_SYSENTER_CS, state->ia32_sysenter_cs_msr());
+    vmcs::host_ia32_sysenter_cs::set(state->ia32_sysenter_cs_msr());
 }
 
 void

@@ -1038,12 +1038,6 @@ constexpr const auto VMCS_VM_EXIT_INSTRUCTION_LENGTH                           =
 constexpr const auto VMCS_VM_EXIT_INSTRUCTION_INFORMATION                      = 0x000000000000440EUL;
 
 // -----------------------------------------------------------------------------
-// 32bit Host State Fields
-// -----------------------------------------------------------------------------
-
-constexpr const auto VMCS_HOST_IA32_SYSENTER_CS                                = 0x0000000000004C00UL;
-
-// -----------------------------------------------------------------------------
 // Natural Width Control Fields
 // -----------------------------------------------------------------------------
 

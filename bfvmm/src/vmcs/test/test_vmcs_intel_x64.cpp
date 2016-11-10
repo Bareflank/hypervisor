@@ -30,6 +30,7 @@
 #include <vmcs/vmcs_intel_x64_16bit_host_state_fields.h>
 #include <vmcs/vmcs_intel_x64_16bit_guest_state_fields.h>
 #include <vmcs/vmcs_intel_x64_32bit_guest_state_fields.h>
+#include <vmcs/vmcs_intel_x64_32bit_host_state_field.h>
 
 #include <intrinsics/rflags_x64.h>
 #include <intrinsics/crs_intel_x64.h>
@@ -3515,6 +3516,18 @@ vmcs_ut::test_vmcs_vmx_preemption_timer_value()
 
     vmcs::vmx_preemption_timer_value::set_if_exists(2UL);
     this->expect_true(vmcs::vmx_preemption_timer_value::get_if_exists() == 2UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_ia32_sysenter_cs()
+{
+    this->expect_true(vmcs::host_ia32_sysenter_cs::exists());
+
+    vmcs::host_ia32_sysenter_cs::set(42U);
+    this->expect_true(vmcs::host_ia32_sysenter_cs::get() == 42U);
+
+    vmcs::host_ia32_sysenter_cs::set_if_exists(0x1000U);
+    this->expect_true(vmcs::host_ia32_sysenter_cs::get_if_exists() == 0x1000U);
 }
 
 void
