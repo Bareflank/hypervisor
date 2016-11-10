@@ -22,6 +22,7 @@
 #include <gsl/gsl>
 #include <view_as_pointer.h>
 #include <vmcs/vmcs_intel_x64.h>
+#include <vmcs/vmcs_intel_x64_32bit_control_fields.h>
 #include <memory_manager/memory_manager_x64.h>
 #include <vmcs/vmcs_intel_x64_16bit_control_fields.h>
 

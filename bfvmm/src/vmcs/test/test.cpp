@@ -556,6 +556,8 @@ vmcs_ut::list()
     this->test_vmcs_secondary_processor_based_vm_execution_controls_enable_pml();
     this->test_vmcs_secondary_processor_based_vm_execution_controls_ept_violation_ve();
     this->test_vmcs_secondary_processor_based_vm_execution_controls_enable_xsaves_xrstors();
+    this->test_vmcs_ple_gap();
+    this->test_vmcs_ple_window();
 
     this->test_check_vmcs_control_state();
     this->test_checks_on_vm_execution_control_fields();

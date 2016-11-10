@@ -4543,3 +4543,57 @@ vmcs_ut::test_vmcs_secondary_processor_based_vm_execution_controls_enable_xsaves
     disable_if_allowed();
     this->expect_true(is_disabled_if_exists());
 }
+
+void
+vmcs_ut::test_vmcs_ple_gap()
+{
+    using namespace msrs::ia32_vmx_true_procbased_ctls;
+
+    g_msrs[addr] = activate_secondary_controls::mask << 32;
+    g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = msrs::ia32_vmx_procbased_ctls2::pause_loop_exiting::mask << 32;
+
+    this->expect_true(vmcs::ple_gap::exists());
+
+    vmcs::ple_gap::set(0x11UL);
+    this->expect_true(vmcs::ple_gap::get() == 0x11UL);
+
+    vmcs::ple_gap::set_if_exists(0xFFFUL);
+    this->expect_true(vmcs::ple_gap::get_if_exists() == 0xFFFUL);
+
+    g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = 0;
+    this->expect_false(vmcs::ple_gap::exists());
+    this->expect_exception([&] { vmcs::ple_gap::set(0x3U); }, ""_ut_lee);
+    this->expect_exception([&] { vmcs::ple_gap::get(); }, ""_ut_lee);
+    this->expect_no_exception([&] { vmcs::ple_gap::set_if_exists(0x3U); });
+    this->expect_no_exception([&] { vmcs::ple_gap::get_if_exists(); });
+
+    g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = msrs::ia32_vmx_procbased_ctls2::pause_loop_exiting::mask << 32;
+    this->expect_true(vmcs::ple_gap::get() == 0xFFFUL);
+}
+
+void
+vmcs_ut::test_vmcs_ple_window()
+{
+    using namespace msrs::ia32_vmx_true_procbased_ctls;
+
+    g_msrs[addr] = activate_secondary_controls::mask << 32;
+    g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = msrs::ia32_vmx_procbased_ctls2::pause_loop_exiting::mask << 32;
+
+    this->expect_true(vmcs::ple_window::exists());
+
+    vmcs::ple_window::set(0x11UL);
+    this->expect_true(vmcs::ple_window::get() == 0x11UL);
+
+    vmcs::ple_window::set_if_exists(0xFFFUL);
+    this->expect_true(vmcs::ple_window::get_if_exists() == 0xFFFUL);
+
+    g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = 0;
+    this->expect_false(vmcs::ple_window::exists());
+    this->expect_exception([&] { vmcs::ple_window::set(0x3U); }, ""_ut_lee);
+    this->expect_exception([&] { vmcs::ple_window::get(); }, ""_ut_lee);
+    this->expect_no_exception([&] { vmcs::ple_window::set_if_exists(0x3U); });
+    this->expect_no_exception([&] { vmcs::ple_window::get_if_exists(); });
+
+    g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = msrs::ia32_vmx_procbased_ctls2::pause_loop_exiting::mask << 32;
+    this->expect_true(vmcs::ple_window::get() == 0xFFFUL);
+}
