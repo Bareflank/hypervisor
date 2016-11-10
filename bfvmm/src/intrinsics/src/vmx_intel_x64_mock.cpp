@@ -27,14 +27,14 @@ __attribute__((weak)) __vmxon(void *ptr)
 {
     (void) ptr;
 
-    bferror << static_cast<const char *>(__PRETTY_FUNCTION__) << " called" << bfendl;
+    std::cerr << __FUNC__ << " called" << '\n';
     abort();
 }
 
 extern "C" bool
 __attribute__((weak)) __vmxoff(void) noexcept
 {
-    bferror << static_cast<const char *>(__PRETTY_FUNCTION__) << " called" << bfendl;
+    std::cerr << __FUNC__ << " called" << '\n';
     abort();
 }
 
@@ -43,7 +43,7 @@ __attribute__((weak)) __vmclear(void *ptr) noexcept
 {
     (void) ptr;
 
-    bferror << static_cast<const char *>(__PRETTY_FUNCTION__) << " called" << bfendl;
+    std::cerr << __FUNC__ << " called" << '\n';
     abort();
 }
 
@@ -52,7 +52,7 @@ __attribute__((weak)) __vmptrld(void *ptr) noexcept
 {
     (void) ptr;
 
-    bferror << static_cast<const char *>(__PRETTY_FUNCTION__) << " called" << bfendl;
+    std::cerr << __FUNC__ << " called" << '\n';
     abort();
 }
 
@@ -61,16 +61,16 @@ __attribute__((weak)) __vmptrst(void *ptr) noexcept
 {
     (void) ptr;
 
-    bferror << static_cast<const char *>(__PRETTY_FUNCTION__) << " called" << bfendl;
+    std::cerr << __FUNC__ << " called" << '\n';
     abort();
 }
 
 extern "C" bool
 __attribute__((weak)) __vmwrite(uint64_t field, uint64_t value) noexcept
 {
-    bferror << static_cast<const char *>(__PRETTY_FUNCTION__) << " called with: " << bfendl;
-    bferror << "    - field: " << view_as_pointer(field) << '\n';
-    bferror << "    - value: " << view_as_pointer(value) << '\n';
+    std::cerr << __FUNC__ << " called with: " << '\n';
+    std::cerr << "    - field: " << view_as_pointer(field) << '\n';
+    std::cerr << "    - value: " << view_as_pointer(value) << '\n';
     abort();
 }
 
@@ -79,14 +79,14 @@ __attribute__((weak)) __vmread(uint64_t field, uint64_t *value) noexcept
 {
     (void) value;
 
-    bferror << static_cast<const char *>(__PRETTY_FUNCTION__) << " called with: " << bfendl;
-    bferror << "    - field: " << view_as_pointer(field) << '\n';
+    std::cerr << __FUNC__ << " called with: " << '\n';
+    std::cerr << "    - field: " << view_as_pointer(field) << '\n';
     abort();
 }
 
 extern "C" bool
 __attribute__((weak)) __vmlaunch(void) noexcept
 {
-    bferror << static_cast<const char *>(__PRETTY_FUNCTION__) << " called" << bfendl;
+    std::cerr << __FUNC__ << " called" << '\n';
     abort();
 }
