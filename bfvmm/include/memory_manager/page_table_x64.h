@@ -78,7 +78,7 @@ public:
     /// @ensures none
     ///
     /// @param virt_addr the virtual address to the page to add
-    /// @return the resulting pte. Note that this pte is blank, and it's
+    /// @return the resulting pte. Note that this pte is blank, and its
     ///     properties (like present) should be set by the caller
     ///
     std::shared_ptr<page_table_entry_x64> add_page_x64(integer_pointer virt_addr);
