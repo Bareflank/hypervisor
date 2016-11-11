@@ -395,6 +395,7 @@ intrinsics_ut::list()
     this->test_cpuid_x64_cpuid_feature_information_ecx_avx();
     this->test_cpuid_x64_cpuid_feature_information_ecx_f16c();
     this->test_cpuid_x64_cpuid_feature_information_ecx_rdrand();
+    this->test_cpuid_x64_cpuid_feature_information_ecx_dump();
 
     this->test_pm_x64_halt();
     this->test_pm_x64_stop();

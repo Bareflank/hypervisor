@@ -85,7 +85,7 @@ vmxon_intel_x64::stop()
 void
 vmxon_intel_x64::check_cpuid_vmx_supported()
 {
-    if (cpuid::feature_information::ecx::vmx::get() == 0)
+    if (!cpuid::feature_information::ecx::vmx::get())
         throw std::logic_error("VMX extensions not supported");
 }
 
