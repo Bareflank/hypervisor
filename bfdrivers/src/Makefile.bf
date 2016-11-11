@@ -26,6 +26,7 @@
 TARGET_NAME:=driver_entry
 TARGET_TYPE:=lib
 TARGET_COMPILER:=native
+PRODUCTION=no
 
 ################################################################################
 # Compiler Flags

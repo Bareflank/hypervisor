@@ -26,6 +26,7 @@
 TARGET_NAME:=test
 TARGET_TYPE:=bin
 TARGET_COMPILER:=native
+PRODUCTION=no
 
 ################################################################################
 # Compiler Flags
