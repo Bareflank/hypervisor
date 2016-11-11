@@ -4844,37 +4844,27 @@ namespace guest_cr0
         bfdebug << "guest cr0 enabled flags:" << bfendl;
 
         if (protection_enable::get() == 1)
-            bfdebug << "    - protection_enable" << bfendl;
-
+            bfdebug << "    - " << protection_enable::name << bfendl;
         if (monitor_coprocessor::get() == 1)
-            bfdebug << "    - monitor_coprocessor" << bfendl;
-
+            bfdebug << "    - " << monitor_coprocessor::name << bfendl;
         if (emulation::get() == 1)
-            bfdebug << "    - emulation" << bfendl;
-
+            bfdebug << "    - " << emulation::name << bfendl;
         if (task_switched::get() == 1)
-            bfdebug << "    - task_switched" << bfendl;
-
+            bfdebug << "    - " << task_switched::name << bfendl;
         if (extension_type::get() == 1)
-            bfdebug << "    - extension_type" << bfendl;
-
+            bfdebug << "    - " << extension_type::name << bfendl;
         if (numeric_error::get() == 1)
-            bfdebug << "    - numeric_error" << bfendl;
-
+            bfdebug << "    - " << numeric_error::name << bfendl;
         if (write_protect::get() == 1)
-            bfdebug << "    - write_protect" << bfendl;
-
+            bfdebug << "    - " << write_protect::name << bfendl;
         if (alignment_mask::get() == 1)
-            bfdebug << "    - alignment_mask" << bfendl;
-
+            bfdebug << "    - " << alignment_mask::name << bfendl;
         if (not_write_through::get() == 1)
-            bfdebug << "    - not_write_through" << bfendl;
-
+            bfdebug << "    - " << not_write_through::name << bfendl;
         if (cache_disable::get() == 1)
-            bfdebug << "    - cache_disable" << bfendl;
-
+            bfdebug << "    - " << cache_disable::name << bfendl;
         if (paging::get() == 1)
-            bfdebug << "    - paging" << bfendl;
+            bfdebug << "    - " << paging::name << bfendl;
     }
 }
 
@@ -5159,64 +5149,45 @@ namespace guest_cr4
         bfdebug << "guest cr4 enabled flags:" << bfendl;
 
         if (v8086_mode_extensions::get() == 1)
-            bfdebug << "    - v8086_mode_extensions" << bfendl;
-
+            bfdebug << "    - " << v8086_mode_extensions::name << bfendl;
         if (protected_mode_virtual_interrupts::get() == 1)
-            bfdebug << "    - protected_mode_virtual_interrupts" << bfendl;
-
+            bfdebug << "    - " << protected_mode_virtual_interrupts::name << bfendl;
         if (time_stamp_disable::get() == 1)
-            bfdebug << "    - time_stamp_disable" << bfendl;
-
+            bfdebug << "    - " << time_stamp_disable::name << bfendl;
         if (debugging_extensions::get() == 1)
-            bfdebug << "    - debugging_extensions" << bfendl;
-
+            bfdebug << "    - " << debugging_extensions::name << bfendl;
         if (page_size_extensions::get() == 1)
-            bfdebug << "    - page_size_extensions" << bfendl;
-
+            bfdebug << "    - " << page_size_extensions::name << bfendl;
         if (physical_address_extensions::get() == 1)
-            bfdebug << "    - physical_address_extensions" << bfendl;
-
+            bfdebug << "    - " << physical_address_extensions::name << bfendl;
         if (machine_check_enable::get() == 1)
-            bfdebug << "    - machine_check_enable" << bfendl;
-
+            bfdebug << "    - " << machine_check_enable::name << bfendl;
         if (page_global_enable::get() == 1)
-            bfdebug << "    - page_global_enable" << bfendl;
-
+            bfdebug << "    - " << page_global_enable::name << bfendl;
         if (performance_monitor_counter_enable::get() == 1)
-            bfdebug << "    - performance_monitor_counter_enable" << bfendl;
-
+            bfdebug << "    - " << performance_monitor_counter_enable::name << bfendl;
         if (osfxsr::get() == 1)
-            bfdebug << "    - osfxsr" << bfendl;
-
+            bfdebug << "    - " << osfxsr::name << bfendl;
         if (osxmmexcpt::get() == 1)
-            bfdebug << "    - osxmmexcpt" << bfendl;
-
+            bfdebug << "    - " << osxmmexcpt::name << bfendl;
         if (vmx_enable_bit::get() == 1)
-            bfdebug << "    - vmx_enable_bit" << bfendl;
-
+            bfdebug << "    - " << vmx_enable_bit::name << bfendl;
         if (smx_enable_bit::get() == 1)
-            bfdebug << "    - smx_enable_bit" << bfendl;
-
+            bfdebug << "    - " << smx_enable_bit::name << bfendl;
         if (smx_enable_bit::get() == 1)
-            bfdebug << "    - smx_enable_bit" << bfendl;
-
+            bfdebug << "    - " << smx_enable_bit::name << bfendl;
         if (fsgsbase_enable_bit::get() == 1)
-            bfdebug << "    - fsgsbase_enable_bit" << bfendl;
-
+            bfdebug << "    - " << fsgsbase_enable_bit::name << bfendl;
         if (pcid_enable_bit::get() == 1)
-            bfdebug << "    - pcid_enable_bit" << bfendl;
-
+            bfdebug << "    - " << pcid_enable_bit::name << bfendl;
         if (osxsave::get() == 1)
-            bfdebug << "    - osxsave" << bfendl;
-
+            bfdebug << "    - " << osxsave::name << bfendl;
         if (smep_enable_bit::get() == 1)
-            bfdebug << "    - smep_enable_bit" << bfendl;
-
+            bfdebug << "    - " << smep_enable_bit::name << bfendl;
         if (smap_enable_bit::get() == 1)
-            bfdebug << "    - smap_enable_bit" << bfendl;
-
+            bfdebug << "    - " << smap_enable_bit::name << bfendl;
         if (protection_key_enable_bit::get() == 1)
-            bfdebug << "    - protection_key_enable_bit" << bfendl;
+            bfdebug << "    - " << protection_key_enable_bit::name << bfendl;
     }
 }
 
@@ -5702,37 +5673,27 @@ namespace host_cr0
         bfdebug << "host cr0 enabled flags:" << bfendl;
 
         if (protection_enable::get() == 1)
-            bfdebug << "    - protection_enable" << bfendl;
-
+            bfdebug << "    - " << protection_enable::name << bfendl;
         if (monitor_coprocessor::get() == 1)
-            bfdebug << "    - monitor_coprocessor" << bfendl;
-
+            bfdebug << "    - " << monitor_coprocessor::name << bfendl;
         if (emulation::get() == 1)
-            bfdebug << "    - emulation" << bfendl;
-
+            bfdebug << "    - " << emulation::name << bfendl;
         if (task_switched::get() == 1)
-            bfdebug << "    - task_switched" << bfendl;
-
+            bfdebug << "    - " << task_switched::name << bfendl;
         if (extension_type::get() == 1)
-            bfdebug << "    - extension_type" << bfendl;
-
+            bfdebug << "    - " << extension_type::name << bfendl;
         if (numeric_error::get() == 1)
-            bfdebug << "    - numeric_error" << bfendl;
-
+            bfdebug << "    - " << numeric_error::name << bfendl;
         if (write_protect::get() == 1)
-            bfdebug << "    - write_protect" << bfendl;
-
+            bfdebug << "    - " << write_protect::name << bfendl;
         if (alignment_mask::get() == 1)
-            bfdebug << "    - alignment_mask" << bfendl;
-
+            bfdebug << "    - " << alignment_mask::name << bfendl;
         if (not_write_through::get() == 1)
-            bfdebug << "    - not_write_through" << bfendl;
-
+            bfdebug << "    - " << not_write_through::name << bfendl;
         if (cache_disable::get() == 1)
-            bfdebug << "    - cache_disable" << bfendl;
-
+            bfdebug << "    - " << cache_disable::name << bfendl;
         if (paging::get() == 1)
-            bfdebug << "    - paging" << bfendl;
+            bfdebug << "    - " << paging::name << bfendl;
     }
 }
 
@@ -6014,67 +5975,48 @@ namespace host_cr4
 
     inline void dump() noexcept
     {
-        bfdebug << "cr4 enabled flags:" << bfendl;
+        bfdebug << "host cr4 enabled flags:" << bfendl;
 
         if (v8086_mode_extensions::get() == 1)
-            bfdebug << "    - v8086_mode_extensions" << bfendl;
-
+            bfdebug << "    - " << v8086_mode_extensions::name << bfendl;
         if (protected_mode_virtual_interrupts::get() == 1)
-            bfdebug << "    - protected_mode_virtual_interrupts" << bfendl;
-
+            bfdebug << "    - " << protected_mode_virtual_interrupts::name << bfendl;
         if (time_stamp_disable::get() == 1)
-            bfdebug << "    - time_stamp_disable" << bfendl;
-
+            bfdebug << "    - " << time_stamp_disable::name << bfendl;
         if (debugging_extensions::get() == 1)
-            bfdebug << "    - debugging_extensions" << bfendl;
-
+            bfdebug << "    - " << debugging_extensions::name << bfendl;
         if (page_size_extensions::get() == 1)
-            bfdebug << "    - page_size_extensions" << bfendl;
-
+            bfdebug << "    - " << page_size_extensions::name << bfendl;
         if (physical_address_extensions::get() == 1)
-            bfdebug << "    - physical_address_extensions" << bfendl;
-
+            bfdebug << "    - " << physical_address_extensions::name << bfendl;
         if (machine_check_enable::get() == 1)
-            bfdebug << "    - machine_check_enable" << bfendl;
-
+            bfdebug << "    - " << machine_check_enable::name << bfendl;
         if (page_global_enable::get() == 1)
-            bfdebug << "    - page_global_enable" << bfendl;
-
+            bfdebug << "    - " << page_global_enable::name << bfendl;
         if (performance_monitor_counter_enable::get() == 1)
-            bfdebug << "    - performance_monitor_counter_enable" << bfendl;
-
+            bfdebug << "    - " << performance_monitor_counter_enable::name << bfendl;
         if (osfxsr::get() == 1)
-            bfdebug << "    - osfxsr" << bfendl;
-
+            bfdebug << "    - " << osfxsr::name << bfendl;
         if (osxmmexcpt::get() == 1)
-            bfdebug << "    - osxmmexcpt" << bfendl;
-
+            bfdebug << "    - " << osxmmexcpt::name << bfendl;
         if (vmx_enable_bit::get() == 1)
-            bfdebug << "    - vmx_enable_bit" << bfendl;
-
+            bfdebug << "    - " << vmx_enable_bit::name << bfendl;
         if (smx_enable_bit::get() == 1)
-            bfdebug << "    - smx_enable_bit" << bfendl;
-
+            bfdebug << "    - " << smx_enable_bit::name << bfendl;
         if (smx_enable_bit::get() == 1)
-            bfdebug << "    - smx_enable_bit" << bfendl;
-
+            bfdebug << "    - " << smx_enable_bit::name << bfendl;
         if (fsgsbase_enable_bit::get() == 1)
-            bfdebug << "    - fsgsbase_enable_bit" << bfendl;
-
+            bfdebug << "    - " << fsgsbase_enable_bit::name << bfendl;
         if (pcid_enable_bit::get() == 1)
-            bfdebug << "    - pcid_enable_bit" << bfendl;
-
+            bfdebug << "    - " << pcid_enable_bit::name << bfendl;
         if (osxsave::get() == 1)
-            bfdebug << "    - osxsave" << bfendl;
-
+            bfdebug << "    - " << osxsave::name << bfendl;
         if (smep_enable_bit::get() == 1)
-            bfdebug << "    - smep_enable_bit" << bfendl;
-
+            bfdebug << "    - " << smep_enable_bit::name << bfendl;
         if (smap_enable_bit::get() == 1)
-            bfdebug << "    - smap_enable_bit" << bfendl;
-
+            bfdebug << "    - " << smap_enable_bit::name << bfendl;
         if (protection_key_enable_bit::get() == 1)
-            bfdebug << "    - protection_key_enable_bit" << bfendl;
+            bfdebug << "    - " << protection_key_enable_bit::name << bfendl;
     }
 }
 
