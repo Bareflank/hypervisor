@@ -44,64 +44,114 @@ public:
     vmcs_intel_x64_host_vm_state();
     ~vmcs_intel_x64_host_vm_state() override = default;
 
-    uint16_t es() const override { return m_es; }
-    uint16_t cs() const override { return m_cs; }
-    uint16_t ss() const override { return m_ss; }
-    uint16_t ds() const override { return m_ds; }
-    uint16_t fs() const override { return m_fs; }
-    uint16_t gs() const override { return m_gs; }
-    uint16_t ldtr() const override { return m_ldtr; }
-    uint16_t tr() const override { return m_tr; }
+    uint16_t es() const override
+    { return m_es; }
+    uint16_t cs() const override
+    { return m_cs; }
+    uint16_t ss() const override
+    { return m_ss; }
+    uint16_t ds() const override
+    { return m_ds; }
+    uint16_t fs() const override
+    { return m_fs; }
+    uint16_t gs() const override
+    { return m_gs; }
+    uint16_t ldtr() const override
+    { return m_ldtr; }
+    uint16_t tr() const override
+    { return m_tr; }
 
-    uint64_t cr0() const override { return m_cr0; }
-    uint64_t cr3() const override { return m_cr3; }
-    uint64_t cr4() const override { return m_cr4; }
-    uint64_t dr7() const override { return m_dr7; }
+    uint64_t cr0() const override
+    { return m_cr0; }
+    uint64_t cr3() const override
+    { return m_cr3; }
+    uint64_t cr4() const override
+    { return m_cr4; }
+    uint64_t dr7() const override
+    { return m_dr7; }
 
-    uint64_t rflags() const override { return m_rflags; }
+    uint64_t rflags() const override
+    { return m_rflags; }
 
-    uint64_t gdt_base() const override { return m_gdt.base(); }
-    uint64_t idt_base() const override { return m_idt.base(); }
+    uint64_t gdt_base() const override
+    { return m_gdt.base(); }
+    uint64_t idt_base() const override
+    { return m_idt.base(); }
 
-    uint16_t gdt_limit() const override { return m_gdt.limit(); }
-    uint16_t idt_limit() const override { return m_idt.limit(); }
+    uint16_t gdt_limit() const override
+    { return m_gdt.limit(); }
+    uint16_t idt_limit() const override
+    { return m_idt.limit(); }
 
-    uint32_t es_limit() const override { return m_gdt.limit(m_es_index); }
-    uint32_t cs_limit() const override { return m_gdt.limit(m_cs_index); }
-    uint32_t ss_limit() const override { return m_gdt.limit(m_ss_index); }
-    uint32_t ds_limit() const override { return m_gdt.limit(m_ds_index); }
-    uint32_t fs_limit() const override { return m_gdt.limit(m_fs_index); }
-    uint32_t gs_limit() const override { return m_gdt.limit(m_gs_index); }
-    uint32_t ldtr_limit() const override { return m_gdt.limit(m_ldtr_index); }
-    uint32_t tr_limit() const override { return m_gdt.limit(m_tr_index); }
+    uint32_t es_limit() const override
+    { return m_es_index != 0 ? m_gdt.limit(m_es_index) : 0; }
+    uint32_t cs_limit() const override
+    { return m_cs_index != 0 ? m_gdt.limit(m_cs_index) : 0; }
+    uint32_t ss_limit() const override
+    { return m_ss_index != 0 ? m_gdt.limit(m_ss_index) : 0; }
+    uint32_t ds_limit() const override
+    { return m_ds_index != 0 ? m_gdt.limit(m_ds_index) : 0; }
+    uint32_t fs_limit() const override
+    { return m_fs_index != 0 ? m_gdt.limit(m_fs_index) : 0; }
+    uint32_t gs_limit() const override
+    { return m_gs_index != 0 ? m_gdt.limit(m_gs_index) : 0; }
+    uint32_t ldtr_limit() const override
+    { return m_ldtr_index != 0 ? m_gdt.limit(m_ldtr_index) : 0; }
+    uint32_t tr_limit() const override
+    { return m_tr_index != 0 ? m_gdt.limit(m_tr_index) : 0; }
 
-    uint32_t es_access_rights() const override { return m_gdt.access_rights(m_es_index); }
-    uint32_t cs_access_rights() const override { return m_gdt.access_rights(m_cs_index); }
-    uint32_t ss_access_rights() const override { return m_gdt.access_rights(m_ss_index); }
-    uint32_t ds_access_rights() const override { return m_gdt.access_rights(m_ds_index); }
-    uint32_t fs_access_rights() const override { return m_gdt.access_rights(m_fs_index); }
-    uint32_t gs_access_rights() const override { return m_gdt.access_rights(m_gs_index); }
-    uint32_t ldtr_access_rights() const override { return m_gdt.access_rights(m_ldtr_index); }
-    uint32_t tr_access_rights() const override { return m_gdt.access_rights(m_tr_index); }
+    uint32_t es_access_rights() const override
+    { return m_es_index != 0 ? m_gdt.access_rights(m_es_index) : x64::access_rights::unusable; }
+    uint32_t cs_access_rights() const override
+    { return m_cs_index != 0 ? m_gdt.access_rights(m_cs_index) : x64::access_rights::unusable; }
+    uint32_t ss_access_rights() const override
+    { return m_ss_index != 0 ? m_gdt.access_rights(m_ss_index) : x64::access_rights::unusable; }
+    uint32_t ds_access_rights() const override
+    { return m_ds_index != 0 ? m_gdt.access_rights(m_ds_index) : x64::access_rights::unusable; }
+    uint32_t fs_access_rights() const override
+    { return m_fs_index != 0 ? m_gdt.access_rights(m_fs_index) : x64::access_rights::unusable; }
+    uint32_t gs_access_rights() const override
+    { return m_gs_index != 0 ? m_gdt.access_rights(m_gs_index) : x64::access_rights::unusable; }
+    uint32_t ldtr_access_rights() const override
+    { return m_ldtr_index != 0 ? m_gdt.access_rights(m_ldtr_index) : x64::access_rights::unusable; }
+    uint32_t tr_access_rights() const override
+    { return m_tr_index != 0 ? m_gdt.access_rights(m_tr_index) : x64::access_rights::unusable; }
 
-    uint64_t es_base() const override { return m_gdt.base(m_es_index); }
-    uint64_t cs_base() const override { return m_gdt.base(m_cs_index); }
-    uint64_t ss_base() const override { return m_gdt.base(m_ss_index); }
-    uint64_t ds_base() const override { return m_gdt.base(m_ds_index); }
-    uint64_t fs_base() const override { return m_gdt.base(m_fs_index); }
-    uint64_t gs_base() const override { return m_gdt.base(m_gs_index); }
-    uint64_t ldtr_base() const override { return m_gdt.base(m_ldtr_index); }
-    uint64_t tr_base() const override { return m_gdt.base(m_tr_index); }
+    uint64_t es_base() const override
+    { return m_es_index != 0 ? m_gdt.base(m_es_index) : 0; }
+    uint64_t cs_base() const override
+    { return m_cs_index != 0 ? m_gdt.base(m_cs_index) : 0; }
+    uint64_t ss_base() const override
+    { return m_ss_index != 0 ? m_gdt.base(m_ss_index) : 0; }
+    uint64_t ds_base() const override
+    { return m_ds_index != 0 ? m_gdt.base(m_ds_index) : 0; }
+    uint64_t fs_base() const override
+    { return m_fs_index != 0 ? m_gdt.base(m_fs_index) : 0; }
+    uint64_t gs_base() const override
+    { return m_gs_index != 0 ? m_gdt.base(m_gs_index) : 0; }
+    uint64_t ldtr_base() const override
+    { return m_ldtr_index != 0 ? m_gdt.base(m_ldtr_index) : 0; }
+    uint64_t tr_base() const override
+    { return m_tr_index != 0 ? m_gdt.base(m_tr_index) : 0; }
 
-    uint64_t ia32_debugctl_msr() const override { return m_ia32_debugctl_msr; }
-    uint64_t ia32_pat_msr() const override { return m_ia32_pat_msr; }
-    uint64_t ia32_efer_msr() const override { return m_ia32_efer_msr; }
-    uint64_t ia32_perf_global_ctrl_msr() const override { return m_ia32_perf_global_ctrl_msr; }
-    uint64_t ia32_sysenter_cs_msr() const override { return m_ia32_sysenter_cs_msr; }
-    uint64_t ia32_sysenter_esp_msr() const override { return m_ia32_sysenter_esp_msr; }
-    uint64_t ia32_sysenter_eip_msr() const override { return m_ia32_sysenter_eip_msr; }
-    uint64_t ia32_fs_base_msr() const override { return m_ia32_fs_base_msr; }
-    uint64_t ia32_gs_base_msr() const override { return m_ia32_gs_base_msr; }
+    uint64_t ia32_debugctl_msr() const override
+    { return m_ia32_debugctl_msr; }
+    uint64_t ia32_pat_msr() const override
+    { return m_ia32_pat_msr; }
+    uint64_t ia32_efer_msr() const override
+    { return m_ia32_efer_msr; }
+    uint64_t ia32_perf_global_ctrl_msr() const override
+    { return m_ia32_perf_global_ctrl_msr; }
+    uint64_t ia32_sysenter_cs_msr() const override
+    { return m_ia32_sysenter_cs_msr; }
+    uint64_t ia32_sysenter_esp_msr() const override
+    { return m_ia32_sysenter_esp_msr; }
+    uint64_t ia32_sysenter_eip_msr() const override
+    { return m_ia32_sysenter_eip_msr; }
+    uint64_t ia32_fs_base_msr() const override
+    { return m_ia32_fs_base_msr; }
+    uint64_t ia32_gs_base_msr() const override
+    { return m_ia32_gs_base_msr; }
 
     void dump() const override
     {
