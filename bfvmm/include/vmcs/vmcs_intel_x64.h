@@ -74,7 +74,7 @@ public:
     ///
     /// Launches the VMCS. Note that this will create a new guest VM when
     /// it is complete. If this function is run more than once, it will clear
-    /// the VMCS and it's state, starting the VM over again. For this reason
+    /// the VMCS and its state, starting the VM over again. For this reason
     /// it should only be called once, unless you intend to clear the VM.
     ///
     /// @throws invalid_vmcs thrown if the VMCS was created without
@@ -87,10 +87,10 @@ public:
     ///
     /// Resumes the VMCS. Note that this should only be called after a launch,
     /// otherwise the system will crash. This function should be called
-    /// whenever the eixt handler needs to execute a VM. Note that there are
+    /// whenever the exit handler needs to execute a VM. Note that there are
     /// two different times that this might happen: when the exit handler is
     /// done emulating an instruction and needs to return back to the VM,
-    /// or it is time to schedule a different VM to execute (that has
+    /// or it's time to schedule a different VM to execute (that has
     /// obviously already been launched)
     ///
     /// @note if you are going to resume a VMCS, you must make sure that
@@ -115,7 +115,7 @@ public:
     /// by the guest.
     ///
     /// @note this function is mainly implemented in raw assembly. The reason
-    ///       for this is, GCC was optimizing errors in it's implementation
+    ///       for this is, GCC was optimizing errors in its implementation
     ///       when "-O3" was enabled. The order of each instruction is very
     ///       important
     ///
