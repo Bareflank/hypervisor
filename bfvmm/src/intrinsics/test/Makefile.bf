@@ -61,6 +61,7 @@ SOURCES+=test_rflags_x64.cpp
 SOURCES+=test_crs_intel_x64.cpp
 SOURCES+=test_srs_x64.cpp
 SOURCES+=test_portio_x64.cpp
+SOURCES+=test_tlb_x64.cpp
 SOURCES+=test_vmx_intel_x64.cpp
 
 INCLUDE_PATHS+=./
