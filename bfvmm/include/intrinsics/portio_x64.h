@@ -36,17 +36,25 @@ namespace x64
 {
 namespace portio
 {
-    template<class P> auto inb(P port) noexcept
-    { return __inb(gsl::narrow_cast<uint16_t>(port)); }
+    using port_addr_type = uint16_t;
+    using port_8bit_type = uint8_t;
+    using port_16bit_type = uint16_t;
 
-    template<class P> auto inw(P port) noexcept
-    { return __inw(gsl::narrow_cast<uint16_t>(port)); }
+    template<class P, class = typename std::enable_if<std::is_integral<P>::value>::type>
+    auto inb(P port) noexcept { return __inb(gsl::narrow_cast<port_addr_type>(port)); }
 
-    template<class P, class T> void outb(P port, T val) noexcept
-    { __outb(gsl::narrow_cast<uint16_t>(port), gsl::narrow_cast<uint8_t>(val)); }
+    template<class P, class = typename std::enable_if<std::is_integral<P>::value>::type>
+    auto inw(P port) noexcept { return __inw(gsl::narrow_cast<port_addr_type>(port)); }
 
-    template<class P, class T> void outw(P port, T val) noexcept
-    { __outw(gsl::narrow_cast<uint16_t>(port), gsl::narrow_cast<uint16_t>(val)); }
+    template<class P, class T,
+             class = typename std::enable_if<std::is_integral<P>::value>::type,
+             class = typename std::enable_if<std::is_integral<T>::value>::type>
+    void outb(P port, T val) noexcept { __outb(gsl::narrow_cast<port_addr_type>(port), gsl::narrow_cast<port_8bit_type>(val)); }
+
+    template<class P, class T,
+             class = typename std::enable_if<std::is_integral<P>::value>::type,
+             class = typename std::enable_if<std::is_integral<T>::value>::type>
+    void outw(P port, T val) noexcept { __outw(gsl::narrow_cast<port_addr_type>(port), gsl::narrow_cast<port_16bit_type>(val)); }
 }
 }
 
