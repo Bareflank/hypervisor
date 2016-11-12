@@ -32,6 +32,8 @@
 #include <vmcs/vmcs_intel_x64_32bit_guest_state_fields.h>
 #include <vmcs/vmcs_intel_x64_32bit_host_state_field.h>
 
+#include <vmcs/vmcs_intel_x64_natural_width_control_fields.h>
+
 #include <intrinsics/rflags_x64.h>
 #include <intrinsics/crs_intel_x64.h>
 #include <intrinsics/vmx_intel_x64.h>
@@ -3528,6 +3530,102 @@ vmcs_ut::test_vmcs_host_ia32_sysenter_cs()
 
     vmcs::host_ia32_sysenter_cs::set_if_exists(0x1000U);
     this->expect_true(vmcs::host_ia32_sysenter_cs::get_if_exists() == 0x1000U);
+}
+
+void
+vmcs_ut::test_vmcs_cr0_guest_host_mask()
+{
+    this->expect_true(vmcs::cr0_guest_host_mask::exists());
+
+    vmcs::cr0_guest_host_mask::set(1UL);
+    this->expect_true(vmcs::cr0_guest_host_mask::get() == 1UL);
+
+    vmcs::cr0_guest_host_mask::set_if_exists(2UL);
+    this->expect_true(vmcs::cr0_guest_host_mask::get_if_exists() == 2UL);
+}
+
+void
+vmcs_ut::test_vmcs_cr4_guest_host_mask()
+{
+    this->expect_true(vmcs::cr4_guest_host_mask::exists());
+
+    vmcs::cr4_guest_host_mask::set(1UL);
+    this->expect_true(vmcs::cr4_guest_host_mask::get() == 1UL);
+
+    vmcs::cr4_guest_host_mask::set_if_exists(2UL);
+    this->expect_true(vmcs::cr4_guest_host_mask::get_if_exists() == 2UL);
+}
+
+void
+vmcs_ut::test_vmcs_cr0_read_shadow()
+{
+    this->expect_true(vmcs::cr0_read_shadow::exists());
+
+    vmcs::cr0_read_shadow::set(1UL);
+    this->expect_true(vmcs::cr0_read_shadow::get() == 1UL);
+
+    vmcs::cr0_read_shadow::set_if_exists(2UL);
+    this->expect_true(vmcs::cr0_read_shadow::get_if_exists() == 2UL);
+}
+
+void
+vmcs_ut::test_vmcs_cr4_read_shadow()
+{
+    this->expect_true(vmcs::cr4_read_shadow::exists());
+
+    vmcs::cr4_read_shadow::set(1UL);
+    this->expect_true(vmcs::cr4_read_shadow::get() == 1UL);
+
+    vmcs::cr4_read_shadow::set_if_exists(2UL);
+    this->expect_true(vmcs::cr4_read_shadow::get_if_exists() == 2UL);
+}
+
+void
+vmcs_ut::test_vmcs_cr3_target_value_0()
+{
+    this->expect_true(vmcs::cr3_target_value_0::exists());
+
+    vmcs::cr3_target_value_0::set(1UL);
+    this->expect_true(vmcs::cr3_target_value_0::get() == 1UL);
+
+    vmcs::cr3_target_value_0::set_if_exists(2UL);
+    this->expect_true(vmcs::cr3_target_value_0::get_if_exists() == 2UL);
+}
+
+void
+vmcs_ut::test_vmcs_cr3_target_value_1()
+{
+    this->expect_true(vmcs::cr3_target_value_1::exists());
+
+    vmcs::cr3_target_value_1::set(1UL);
+    this->expect_true(vmcs::cr3_target_value_1::get() == 1UL);
+
+    vmcs::cr3_target_value_1::set_if_exists(2UL);
+    this->expect_true(vmcs::cr3_target_value_1::get_if_exists() == 2UL);
+}
+
+void
+vmcs_ut::test_vmcs_cr3_target_value_2()
+{
+    this->expect_true(vmcs::cr3_target_value_2::exists());
+
+    vmcs::cr3_target_value_2::set(1UL);
+    this->expect_true(vmcs::cr3_target_value_2::get() == 1UL);
+
+    vmcs::cr3_target_value_2::set_if_exists(2UL);
+    this->expect_true(vmcs::cr3_target_value_2::get_if_exists() == 2UL);
+}
+
+void
+vmcs_ut::test_vmcs_cr3_target_value_3()
+{
+    this->expect_true(vmcs::cr3_target_value_3::exists());
+
+    vmcs::cr3_target_value_3::set(1UL);
+    this->expect_true(vmcs::cr3_target_value_3::get() == 1UL);
+
+    vmcs::cr3_target_value_3::set_if_exists(2UL);
+    this->expect_true(vmcs::cr3_target_value_3::get_if_exists() == 2UL);
 }
 
 void

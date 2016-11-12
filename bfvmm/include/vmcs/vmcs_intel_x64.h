@@ -1038,19 +1038,6 @@ constexpr const auto VMCS_VM_EXIT_INSTRUCTION_LENGTH                           =
 constexpr const auto VMCS_VM_EXIT_INSTRUCTION_INFORMATION                      = 0x000000000000440EUL;
 
 // -----------------------------------------------------------------------------
-// Natural Width Control Fields
-// -----------------------------------------------------------------------------
-
-constexpr const auto VMCS_CR0_GUEST_HOST_MASK                                  = 0x0000000000006000UL;
-constexpr const auto VMCS_CR4_GUEST_HOST_MASK                                  = 0x0000000000006002UL;
-constexpr const auto VMCS_CR0_READ_SHADOW                                      = 0x0000000000006004UL;
-constexpr const auto VMCS_CR4_READ_SHADOW                                      = 0x0000000000006006UL;
-constexpr const auto VMCS_CR3_TARGET_VALUE_0                                   = 0x0000000000006008UL;
-constexpr const auto VMCS_CR3_TARGET_VALUE_1                                   = 0x000000000000600AUL;
-constexpr const auto VMCS_CR3_TARGET_VALUE_2                                   = 0x000000000000600CUL;
-constexpr const auto VMCS_CR3_TARGET_VALUE_31                                  = 0x000000000000600EUL;
-
-// -----------------------------------------------------------------------------
 // Natural Width Read-Only Fields
 // -----------------------------------------------------------------------------
 

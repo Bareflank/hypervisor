@@ -407,6 +407,14 @@ private:
     void test_vmcs_guest_ia32_sysenter_cs();
     void test_vmcs_vmx_preemption_timer_value();
     void test_vmcs_host_ia32_sysenter_cs();
+    void test_vmcs_cr0_guest_host_mask();
+    void test_vmcs_cr4_guest_host_mask();
+    void test_vmcs_cr0_read_shadow();
+    void test_vmcs_cr4_read_shadow();
+    void test_vmcs_cr3_target_value_0();
+    void test_vmcs_cr3_target_value_1();
+    void test_vmcs_cr3_target_value_2();
+    void test_vmcs_cr3_target_value_3();
     void test_vmcs_pin_based_vm_execution_controls();
     void test_vmcs_pin_based_vm_execution_controls_external_interrupt_exiting();
     void test_vmcs_pin_based_vm_execution_controls_nmi_exiting();
