@@ -34,6 +34,7 @@
 #include <vmcs/vmcs_intel_x64_natural_width_guest_state_fields.h>
 
 #include <vmcs/vmcs_intel_x64_natural_width_control_fields.h>
+#include <vmcs/vmcs_intel_x64_natural_width_read_only_data_fields.h>
 
 #include <intrinsics/rflags_x64.h>
 #include <intrinsics/crs_intel_x64.h>
@@ -8648,4 +8649,907 @@ vmcs_ut::test_vmcs_vm_exit_instruction_information_vmwrite_reg2()
 
     g_vmcs_fields[addr] = vmwrite::reg2::rsp << vmwrite::reg2::from;
     this->expect_true(vmwrite::reg2::get_if_exists() == vmwrite::reg2::rsp);
+}
+
+void
+vmcs_ut::test_vmcs_exit_qualification()
+{
+    this->expect_true(vmcs::exit_qualification::exists());
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 1UL;
+    this->expect_true(vmcs::exit_qualification::get() == 1UL);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0UL;
+    this->expect_true(vmcs::exit_qualification::get_if_exists() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_exit_qualification_debug_exception()
+{
+    this->expect_true(vmcs::exit_qualification::debug_exception::get_name() == "debug_exception"_s);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 1UL;
+    this->expect_true(vmcs::exit_qualification::debug_exception::get() == 1UL);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0UL;
+    this->expect_true(vmcs::exit_qualification::debug_exception::get_if_exists() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_exit_qualification_debug_exception_b0()
+{
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 1UL;
+    this->expect_true(vmcs::exit_qualification::debug_exception::b0::is_enabled());
+    this->expect_false(vmcs::exit_qualification::debug_exception::b0::is_disabled());
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0UL;
+    this->expect_false(vmcs::exit_qualification::debug_exception::b0::is_enabled_if_exists());
+    this->expect_true(vmcs::exit_qualification::debug_exception::b0::is_disabled_if_exists());
+}
+
+void
+vmcs_ut::test_vmcs_exit_qualification_debug_exception_b1()
+{
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 2UL;
+    this->expect_true(vmcs::exit_qualification::debug_exception::b1::is_enabled());
+    this->expect_false(vmcs::exit_qualification::debug_exception::b1::is_disabled());
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0UL;
+    this->expect_false(vmcs::exit_qualification::debug_exception::b1::is_enabled_if_exists());
+    this->expect_true(vmcs::exit_qualification::debug_exception::b1::is_disabled_if_exists());
+}
+
+void
+vmcs_ut::test_vmcs_exit_qualification_debug_exception_b2()
+{
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 4UL;
+    this->expect_true(vmcs::exit_qualification::debug_exception::b2::is_enabled());
+    this->expect_false(vmcs::exit_qualification::debug_exception::b2::is_disabled());
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0UL;
+    this->expect_false(vmcs::exit_qualification::debug_exception::b2::is_enabled_if_exists());
+    this->expect_true(vmcs::exit_qualification::debug_exception::b2::is_disabled_if_exists());
+}
+
+void
+vmcs_ut::test_vmcs_exit_qualification_debug_exception_b3()
+{
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 8UL;
+    this->expect_true(vmcs::exit_qualification::debug_exception::b3::is_enabled());
+    this->expect_false(vmcs::exit_qualification::debug_exception::b3::is_disabled());
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0UL;
+    this->expect_false(vmcs::exit_qualification::debug_exception::b3::is_enabled_if_exists());
+    this->expect_true(vmcs::exit_qualification::debug_exception::b3::is_disabled_if_exists());
+}
+
+void
+vmcs_ut::test_vmcs_exit_qualification_debug_exception_reserved()
+{
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x600UL;
+    this->expect_true(vmcs::exit_qualification::debug_exception::reserved::get() == 0x600U);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x602UL;
+    this->expect_true(vmcs::exit_qualification::debug_exception::reserved::get_if_exists() == 0x600U);
+}
+
+void
+vmcs_ut::test_vmcs_exit_qualification_debug_exception_bd()
+{
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x2000UL;
+    this->expect_true(vmcs::exit_qualification::debug_exception::bd::is_enabled());
+    this->expect_false(vmcs::exit_qualification::debug_exception::bd::is_disabled());
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0UL;
+    this->expect_false(vmcs::exit_qualification::debug_exception::bd::is_enabled_if_exists());
+    this->expect_true(vmcs::exit_qualification::debug_exception::bd::is_disabled_if_exists());
+}
+
+void
+vmcs_ut::test_vmcs_exit_qualification_debug_exception_bs()
+{
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x4000UL;
+    this->expect_true(vmcs::exit_qualification::debug_exception::bs::is_enabled());
+    this->expect_false(vmcs::exit_qualification::debug_exception::bs::is_disabled());
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0UL;
+    this->expect_false(vmcs::exit_qualification::debug_exception::bs::is_enabled_if_exists());
+    this->expect_true(vmcs::exit_qualification::debug_exception::bs::is_disabled_if_exists());
+}
+
+void
+vmcs_ut::test_vmcs_exit_qualification_page_fault_exception()
+{
+    this->expect_true(vmcs::exit_qualification::page_fault_exception::get_name() == "page_fault_exception"_s);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x4000UL;
+    this->expect_true(vmcs::exit_qualification::page_fault_exception::address() == 0x4000UL);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x10000000UL;
+    this->expect_true(vmcs::exit_qualification::page_fault_exception::address_if_exists() == 0x10000000UL);
+}
+
+void
+vmcs_ut::test_vmcs_exit_qualification_sipi()
+{
+    this->expect_true(vmcs::exit_qualification::sipi::get_name() == "sipi"_s);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x34UL;
+    this->expect_true(vmcs::exit_qualification::sipi::get() == 0x34UL);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL;
+    this->expect_true(vmcs::exit_qualification::sipi::get_if_exists() == 0x0UL);
+}
+
+void
+vmcs_ut::test_vmcs_exit_qualification_sipi_vector()
+{
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0xF34UL;
+    this->expect_true(vmcs::exit_qualification::sipi::vector::get() == 0x34UL);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x3010UL;
+    this->expect_true(vmcs::exit_qualification::sipi::vector::get_if_exists() == 0x10UL);
+}
+
+void
+vmcs_ut::test_vmcs_exit_qualification_task_switch()
+{
+    this->expect_true(vmcs::exit_qualification::task_switch::get_name() == "task_switch"_s);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL;
+    this->expect_true(vmcs::exit_qualification::task_switch::get() == 0x1UL);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL;
+    this->expect_true(vmcs::exit_qualification::task_switch::get_if_exists() == 0x0UL);
+}
+
+void
+vmcs_ut::test_vmcs_exit_qualification_task_switch_tss_selector()
+{
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0xF0003456UL;
+    this->expect_true(vmcs::exit_qualification::task_switch::tss_selector::get() == 0x3456UL);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL;
+    this->expect_true(vmcs::exit_qualification::task_switch::tss_selector::get_if_exists() == 0x0UL);
+}
+
+void
+vmcs_ut::test_vmcs_exit_qualification_task_switch_reserved()
+{
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0xFFF0000UL;
+    this->expect_true(vmcs::exit_qualification::task_switch::reserved::get() == 0xFFF0000UL);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL;
+    this->expect_true(vmcs::exit_qualification::task_switch::reserved::get_if_exists() == 0x0UL);
+}
+
+void
+vmcs_ut::test_vmcs_exit_qualification_task_switch_source_of_task_switch_init()
+{
+    using namespace vmcs::exit_qualification::task_switch::source_of_task_switch_init;
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL;
+    this->expect_true(get() == call_instruction);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x40000000UL;
+    this->expect_true(get() == iret_instruction);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x80000000UL;
+    this->expect_true(get_if_exists() == jmp_instruction);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0xC0000000UL;
+    this->expect_true(get_if_exists() == task_gate_in_idt);
+}
+
+void
+vmcs_ut::test_vmcs_exit_qualification_invept()
+{
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL;
+    this->expect_true(vmcs::exit_qualification::invept::get() == 0x1UL);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x2UL;
+    this->expect_true(vmcs::exit_qualification::invept::get_if_exists() == 0x2UL);
+}
+
+void
+vmcs_ut::test_vmcs_exit_qualification_invpcid()
+{
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL;
+    this->expect_true(vmcs::exit_qualification::invpcid::get() == 0x1UL);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x2UL;
+    this->expect_true(vmcs::exit_qualification::invpcid::get_if_exists() == 0x2UL);
+}
+
+void
+vmcs_ut::test_vmcs_exit_qualification_invvpid()
+{
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL;
+    this->expect_true(vmcs::exit_qualification::invvpid::get() == 0x1UL);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x2UL;
+    this->expect_true(vmcs::exit_qualification::invvpid::get_if_exists() == 0x2UL);
+}
+
+void
+vmcs_ut::test_vmcs_exit_qualification_lgdt()
+{
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL;
+    this->expect_true(vmcs::exit_qualification::lgdt::get() == 0x1UL);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x2UL;
+    this->expect_true(vmcs::exit_qualification::lgdt::get_if_exists() == 0x2UL);
+}
+
+void
+vmcs_ut::test_vmcs_exit_qualification_lidt()
+{
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL;
+    this->expect_true(vmcs::exit_qualification::lidt::get() == 0x1UL);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x2UL;
+    this->expect_true(vmcs::exit_qualification::lidt::get_if_exists() == 0x2UL);
+}
+
+void
+vmcs_ut::test_vmcs_exit_qualification_lldt()
+{
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL;
+    this->expect_true(vmcs::exit_qualification::lldt::get() == 0x1UL);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x2UL;
+    this->expect_true(vmcs::exit_qualification::lldt::get_if_exists() == 0x2UL);
+}
+
+void
+vmcs_ut::test_vmcs_exit_qualification_ltr()
+{
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL;
+    this->expect_true(vmcs::exit_qualification::ltr::get() == 0x1UL);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x2UL;
+    this->expect_true(vmcs::exit_qualification::ltr::get_if_exists() == 0x2UL);
+}
+
+void
+vmcs_ut::test_vmcs_exit_qualification_sgdt()
+{
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL;
+    this->expect_true(vmcs::exit_qualification::sgdt::get() == 0x1UL);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x2UL;
+    this->expect_true(vmcs::exit_qualification::sgdt::get_if_exists() == 0x2UL);
+}
+
+void
+vmcs_ut::test_vmcs_exit_qualification_sidt()
+{
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL;
+    this->expect_true(vmcs::exit_qualification::sidt::get() == 0x1UL);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x2UL;
+    this->expect_true(vmcs::exit_qualification::sidt::get_if_exists() == 0x2UL);
+}
+
+void
+vmcs_ut::test_vmcs_exit_qualification_sldt()
+{
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL;
+    this->expect_true(vmcs::exit_qualification::sldt::get() == 0x1UL);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x2UL;
+    this->expect_true(vmcs::exit_qualification::sldt::get_if_exists() == 0x2UL);
+}
+
+void
+vmcs_ut::test_vmcs_exit_qualification_str()
+{
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL;
+    this->expect_true(vmcs::exit_qualification::str::get() == 0x1UL);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x2UL;
+    this->expect_true(vmcs::exit_qualification::str::get_if_exists() == 0x2UL);
+}
+
+void
+vmcs_ut::test_vmcs_exit_qualification_vmclear()
+{
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL;
+    this->expect_true(vmcs::exit_qualification::vmclear::get() == 0x1UL);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x2UL;
+    this->expect_true(vmcs::exit_qualification::vmclear::get_if_exists() == 0x2UL);
+}
+
+void
+vmcs_ut::test_vmcs_exit_qualification_vmptrld()
+{
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL;
+    this->expect_true(vmcs::exit_qualification::vmptrld::get() == 0x1UL);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x2UL;
+    this->expect_true(vmcs::exit_qualification::vmptrld::get_if_exists() == 0x2UL);
+}
+
+void
+vmcs_ut::test_vmcs_exit_qualification_vmread()
+{
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL;
+    this->expect_true(vmcs::exit_qualification::vmread::get() == 0x1UL);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x2UL;
+    this->expect_true(vmcs::exit_qualification::vmread::get_if_exists() == 0x2UL);
+}
+
+void
+vmcs_ut::test_vmcs_exit_qualification_vmwrite()
+{
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL;
+    this->expect_true(vmcs::exit_qualification::vmwrite::get() == 0x1UL);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x2UL;
+    this->expect_true(vmcs::exit_qualification::vmwrite::get_if_exists() == 0x2UL);
+}
+
+void
+vmcs_ut::test_vmcs_exit_qualification_vmxon()
+{
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL;
+    this->expect_true(vmcs::exit_qualification::vmxon::get() == 0x1UL);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x2UL;
+    this->expect_true(vmcs::exit_qualification::vmxon::get_if_exists() == 0x2UL);
+}
+
+void
+vmcs_ut::test_vmcs_exit_qualification_xrstors()
+{
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL;
+    this->expect_true(vmcs::exit_qualification::xrstors::get() == 0x1UL);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x2UL;
+    this->expect_true(vmcs::exit_qualification::xrstors::get_if_exists() == 0x2UL);
+}
+
+void
+vmcs_ut::test_vmcs_exit_qualification_xsaves()
+{
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL;
+    this->expect_true(vmcs::exit_qualification::xsaves::get() == 0x1UL);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x2UL;
+    this->expect_true(vmcs::exit_qualification::xsaves::get_if_exists() == 0x2UL);
+}
+
+void
+vmcs_ut::test_vmcs_exit_qualification_control_register_access()
+{
+    this->expect_true(vmcs::exit_qualification::control_register_access::get_name() == "control_register_access"_s);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x34UL;
+    this->expect_true(vmcs::exit_qualification::control_register_access::get() == 0x34UL);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL;
+    this->expect_true(vmcs::exit_qualification::control_register_access::get_if_exists() == 0x0UL);
+}
+
+void
+vmcs_ut::test_vmcs_exit_qualification_control_register_access_control_register_number()
+{
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x42UL;
+    this->expect_true(vmcs::exit_qualification::control_register_access::control_register_number::get() == 0x2UL);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL;
+    this->expect_true(vmcs::exit_qualification::control_register_access::control_register_number::get_if_exists() == 0x0UL);
+}
+
+void
+vmcs_ut::test_vmcs_exit_qualification_control_register_access_access_type()
+{
+    using namespace vmcs::exit_qualification::control_register_access::access_type;
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x00UL;
+    this->expect_true(get() == mov_to_cr);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x10UL;
+    this->expect_true(get() == mov_from_cr);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x20UL;
+    this->expect_true(get_if_exists() == clts);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x30UL;
+    this->expect_true(get_if_exists() == lmsw);
+}
+
+void
+vmcs_ut::test_vmcs_exit_qualification_control_register_access_lmsw_operand_type()
+{
+    using namespace vmcs::exit_qualification::control_register_access::lmsw_operand_type;
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x00UL;
+    this->expect_true(get() == reg);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x40UL;
+    this->expect_true(get_if_exists() == mem);
+}
+
+void
+vmcs_ut::test_vmcs_exit_qualification_control_register_access_reserved()
+{
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x3080UL;
+    this->expect_true(vmcs::exit_qualification::control_register_access::reserved::get() == 0x3080UL);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL;
+    this->expect_true(vmcs::exit_qualification::control_register_access::reserved::get_if_exists() == 0x0UL);
+}
+
+void
+vmcs_ut::test_vmcs_exit_qualification_control_register_access_general_purpose_register()
+{
+    using namespace vmcs::exit_qualification::control_register_access::general_purpose_register;
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x100UL;
+    this->expect_true(get() == rcx);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0xA00UL;
+    this->expect_true(get_if_exists() == r10);
+}
+
+void
+vmcs_ut::test_vmcs_exit_qualification_control_register_access_source_data()
+{
+    using namespace vmcs::exit_qualification::control_register_access::source_data;
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x30000UL;
+    this->expect_true(get() == 3UL);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x60000UL;
+    this->expect_true(get_if_exists() == 6UL);
+}
+
+void
+vmcs_ut::test_vmcs_exit_qualification_mov_dr()
+{
+    this->expect_true(vmcs::exit_qualification::mov_dr::get_name() == "mov_dr"_s);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x34UL;
+    this->expect_true(vmcs::exit_qualification::mov_dr::get() == 0x34UL);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL;
+    this->expect_true(vmcs::exit_qualification::mov_dr::get_if_exists() == 0x0UL);
+}
+
+void
+vmcs_ut::test_vmcs_exit_qualification_mov_dr_debug_register_number()
+{
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x42UL;
+    this->expect_true(vmcs::exit_qualification::mov_dr::debug_register_number::get() == 0x2UL);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL;
+    this->expect_true(vmcs::exit_qualification::mov_dr::debug_register_number::get_if_exists() == 0x0UL);
+}
+
+void
+vmcs_ut::test_vmcs_exit_qualification_mov_dr_reserved()
+{
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x88UL;
+    this->expect_true(vmcs::exit_qualification::mov_dr::reserved::get() == 0x88UL);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL;
+    this->expect_true(vmcs::exit_qualification::mov_dr::reserved::get_if_exists() == 0x0UL);
+}
+
+void
+vmcs_ut::test_vmcs_exit_qualification_mov_dr_direction_of_access()
+{
+    using namespace vmcs::exit_qualification::mov_dr::direction_of_access;
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x00UL;
+    this->expect_true(get() == to_dr);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x10UL;
+    this->expect_true(get_if_exists() == from_dr);
+}
+
+void
+vmcs_ut::test_vmcs_exit_qualification_mov_dr_general_purpose_register()
+{
+    using namespace vmcs::exit_qualification::mov_dr::general_purpose_register;
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x200UL;
+    this->expect_true(get() == rdx);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0xB00UL;
+    this->expect_true(get_if_exists() == r11);
+}
+
+void
+vmcs_ut::test_vmcs_exit_qualification_io_instruction()
+{
+    this->expect_true(vmcs::exit_qualification::io_instruction::get_name() == "io_instruction"_s);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x34UL;
+    this->expect_true(vmcs::exit_qualification::io_instruction::get() == 0x34UL);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL;
+    this->expect_true(vmcs::exit_qualification::io_instruction::get_if_exists() == 0x0UL);
+}
+
+void
+vmcs_ut::test_vmcs_exit_qualification_io_instruction_size_of_access()
+{
+    using namespace vmcs::exit_qualification::io_instruction;
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL;
+    this->expect_true(size_of_access::get() == size_of_access::one_byte);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL;
+    this->expect_true(size_of_access::get() == size_of_access::two_byte);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x3UL;
+    this->expect_true(size_of_access::get_if_exists() == size_of_access::four_byte);
+}
+
+void
+vmcs_ut::test_vmcs_exit_qualification_io_instruction_direction_of_access()
+{
+    using namespace vmcs::exit_qualification::io_instruction;
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL;
+    this->expect_true(direction_of_access::get() == direction_of_access::out);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL << direction_of_access::from;
+    this->expect_true(direction_of_access::get_if_exists() == direction_of_access::in);
+}
+
+void
+vmcs_ut::test_vmcs_exit_qualification_io_instruction_string_instruction()
+{
+    using namespace vmcs::exit_qualification::io_instruction;
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL;
+    this->expect_true(string_instruction::get() == string_instruction::not_string);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL << string_instruction::from;
+    this->expect_true(string_instruction::get_if_exists() == string_instruction::string);
+}
+
+void
+vmcs_ut::test_vmcs_exit_qualification_io_instruction_rep_prefixed()
+{
+    using namespace vmcs::exit_qualification::io_instruction;
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL;
+    this->expect_true(rep_prefixed::get() == rep_prefixed::not_rep);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL << rep_prefixed::from;
+    this->expect_true(rep_prefixed::get_if_exists() == rep_prefixed::rep);
+}
+
+void
+vmcs_ut::test_vmcs_exit_qualification_io_instruction_operand_encoding()
+{
+    using namespace vmcs::exit_qualification::io_instruction;
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL;
+    this->expect_true(operand_encoding::get() == operand_encoding::dx);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL << operand_encoding::from;
+    this->expect_true(operand_encoding::get_if_exists() == operand_encoding::immediate);
+}
+
+void
+vmcs_ut::test_vmcs_exit_qualification_io_instruction_reserved()
+{
+    using namespace vmcs::exit_qualification::io_instruction;
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL;
+    this->expect_true(reserved::get() == 0x0UL);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0xF80UL;
+    this->expect_true(reserved::get_if_exists() == 0xF80UL);
+}
+
+void
+vmcs_ut::test_vmcs_exit_qualification_io_instruction_port_number()
+{
+    using namespace vmcs::exit_qualification::io_instruction;
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL;
+    this->expect_true(port_number::get() == 0x0UL);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL << port_number::from;
+    this->expect_true(port_number::get_if_exists() == 0x1UL);
+}
+
+void
+vmcs_ut::test_vmcs_exit_qualification_mwait()
+{
+    using namespace vmcs::exit_qualification::mwait;
+
+    this->expect_true(get_name() == "mwait"_s);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0U;
+    this->expect_true(get() == 0U);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 1U;
+    this->expect_true(get_if_exists() == 1U);
+}
+
+void
+vmcs_ut::test_vmcs_exit_qualification_linear_apic_access()
+{
+    using namespace vmcs::exit_qualification::linear_apic_access;
+
+    this->expect_true(get_name() == "linear_apic_access"_s);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL;
+    this->expect_true(get() == 0x1UL);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL;
+    this->expect_true(get_if_exists() == 0x0UL);
+}
+
+void
+vmcs_ut::test_vmcs_exit_qualification_linear_apic_access_offset()
+{
+    using namespace vmcs::exit_qualification::linear_apic_access;
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL;
+    this->expect_true(offset::get() == 0x1UL);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL;
+    this->expect_true(offset::get_if_exists() == 0x0UL);
+}
+
+void
+vmcs_ut::test_vmcs_exit_qualification_linear_apic_access_access_type()
+{
+    using namespace vmcs::exit_qualification::linear_apic_access::access_type;
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL;
+    this->expect_true(get() == read_during_instruction_execution);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL << from;
+    this->expect_true(get_if_exists() == write_during_instruction_execution);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x2UL << from;
+    this->expect_true(get() == instruction_fetch);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x3UL << from;
+    this->expect_true(get_if_exists() == event_delivery);
+}
+
+void
+vmcs_ut::test_vmcs_exit_qualification_linear_apic_access_reserved()
+{
+    using namespace vmcs::exit_qualification::linear_apic_access::reserved;
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL;
+    this->expect_true(get() == 0U);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0xF0000UL;
+    this->expect_true(get_if_exists() == 0xF0000U);
+}
+
+void
+vmcs_ut::test_vmcs_exit_qualification_guest_physical_apic_access()
+{
+    using namespace vmcs::exit_qualification::guest_physical_apic_access;
+
+    this->expect_true(get_name() == "guest_physical_apic_access"_s);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL;
+    this->expect_true(get() == 0x1UL);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL;
+    this->expect_true(get_if_exists() == 0x0UL);
+}
+
+void
+vmcs_ut::test_vmcs_exit_qualification_guest_physical_apic_access_access_type()
+{
+    using namespace vmcs::exit_qualification::guest_physical_apic_access::access_type;
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0xAUL << from;
+    this->expect_true(get_if_exists() == event_delivery);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0xFUL << from;
+    this->expect_true(get() == instruction_fetch_or_execution);
+}
+
+void
+vmcs_ut::test_vmcs_exit_qualification_guest_physical_apic_access_reserved()
+{
+    using namespace vmcs::exit_qualification::guest_physical_apic_access::reserved;
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL;
+    this->expect_true(get() == 0U);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0xF0000UL;
+    this->expect_true(get_if_exists() == 0xF0000U);
+}
+
+void
+vmcs_ut::test_vmcs_exit_qualification_ept_violation()
+{
+    this->expect_true(vmcs::exit_qualification::ept_violation::get_name() == "ept_violation"_s);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL;
+    this->expect_true(vmcs::exit_qualification::ept_violation::get() == 1UL);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL;
+    this->expect_true(vmcs::exit_qualification::ept_violation::get_if_exists() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_exit_qualification_ept_violation_data_read()
+{
+    using namespace vmcs::exit_qualification::ept_violation;
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL;
+    this->expect_true(data_read::is_enabled());
+    this->expect_true(data_read::is_enabled_if_exists());
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL;
+    this->expect_true(data_read::is_disabled());
+    this->expect_true(data_read::is_disabled_if_exists());
+}
+
+void
+vmcs_ut::test_vmcs_exit_qualification_ept_violation_data_write()
+{
+    using namespace vmcs::exit_qualification::ept_violation;
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL << data_write::from;
+    this->expect_true(data_write::is_enabled());
+    this->expect_true(data_write::is_enabled_if_exists());
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL << data_write::from;
+    this->expect_true(data_write::is_disabled());
+    this->expect_true(data_write::is_disabled_if_exists());
+}
+
+void
+vmcs_ut::test_vmcs_exit_qualification_ept_violation_instruction_fetch()
+{
+    using namespace vmcs::exit_qualification::ept_violation;
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL << instruction_fetch::from;
+    this->expect_true(instruction_fetch::is_enabled());
+    this->expect_true(instruction_fetch::is_enabled_if_exists());
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL << instruction_fetch::from;
+    this->expect_true(instruction_fetch::is_disabled());
+    this->expect_true(instruction_fetch::is_disabled_if_exists());
+}
+
+void
+vmcs_ut::test_vmcs_exit_qualification_ept_violation_readable()
+{
+    using namespace vmcs::exit_qualification::ept_violation;
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL << readable::from;
+    this->expect_true(readable::is_enabled());
+    this->expect_true(readable::is_enabled_if_exists());
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL << readable::from;
+    this->expect_true(readable::is_disabled());
+    this->expect_true(readable::is_disabled_if_exists());
+}
+
+void
+vmcs_ut::test_vmcs_exit_qualification_ept_violation_writeable()
+{
+    using namespace vmcs::exit_qualification::ept_violation;
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL << writeable::from;
+    this->expect_true(writeable::is_enabled());
+    this->expect_true(writeable::is_enabled_if_exists());
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL << writeable::from;
+    this->expect_true(writeable::is_disabled());
+    this->expect_true(writeable::is_disabled_if_exists());
+}
+
+void
+vmcs_ut::test_vmcs_exit_qualification_ept_violation_executable()
+{
+    using namespace vmcs::exit_qualification::ept_violation;
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL << executable::from;
+    this->expect_true(executable::is_enabled());
+    this->expect_true(executable::is_enabled_if_exists());
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL << executable::from;
+    this->expect_true(executable::is_disabled());
+    this->expect_true(executable::is_disabled_if_exists());
+}
+
+void
+vmcs_ut::test_vmcs_exit_qualification_ept_violation_reserved()
+{
+    using namespace vmcs::exit_qualification::ept_violation;
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x40UL;
+    this->expect_true(reserved::get() == 0x40UL);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL;
+    this->expect_true(reserved::get_if_exists() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_exit_qualification_ept_violation_valid_guest_linear_address()
+{
+    using namespace vmcs::exit_qualification::ept_violation;
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL << valid_guest_linear_address::from;
+    this->expect_true(valid_guest_linear_address::is_enabled());
+    this->expect_true(valid_guest_linear_address::is_enabled_if_exists());
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL << valid_guest_linear_address::from;
+    this->expect_true(valid_guest_linear_address::is_disabled());
+    this->expect_true(valid_guest_linear_address::is_disabled_if_exists());
+}
+
+void
+vmcs_ut::test_vmcs_exit_qualification_ept_violation_nmi_unblocking_due_to_iret()
+{
+    using namespace vmcs::exit_qualification::ept_violation;
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL << nmi_unblocking_due_to_iret::from;
+    this->expect_true(nmi_unblocking_due_to_iret::is_enabled());
+    this->expect_true(nmi_unblocking_due_to_iret::is_enabled_if_exists());
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL << nmi_unblocking_due_to_iret::from;
+    this->expect_true(nmi_unblocking_due_to_iret::is_disabled());
+    this->expect_true(nmi_unblocking_due_to_iret::is_disabled_if_exists());
+}
+
+void
+vmcs_ut::test_vmcs_exit_qualification_eoi_virtualization()
+{
+    this->expect_true(vmcs::exit_qualification::eoi_virtualization::get_name() == "eoi_virtualization"_s);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL;
+    this->expect_true(vmcs::exit_qualification::eoi_virtualization::get() == 1UL);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL;
+    this->expect_true(vmcs::exit_qualification::eoi_virtualization::get_if_exists() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_exit_qualification_eoi_virtualization_vector()
+{
+    using namespace vmcs::exit_qualification::eoi_virtualization::vector;
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL;
+    this->expect_true(get() == 1UL);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL;
+    this->expect_true(get_if_exists() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_exit_qualification_apic_write()
+{
+    this->expect_true(vmcs::exit_qualification::apic_write::get_name() == "apic_write"_s);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL;
+    this->expect_true(vmcs::exit_qualification::apic_write::get() == 1UL);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL;
+    this->expect_true(vmcs::exit_qualification::apic_write::get_if_exists() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_exit_qualification_apic_write_offset()
+{
+    using namespace vmcs::exit_qualification::apic_write::offset;
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL;
+    this->expect_true(get() == 1UL);
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL;
+    this->expect_true(get_if_exists() == 0UL);
 }

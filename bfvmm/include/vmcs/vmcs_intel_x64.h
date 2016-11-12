@@ -1001,7 +1001,6 @@ constexpr const auto VMCS_HOST_IA32_PERF_GLOBAL_CTRL                      = 0x00
 // Natural Width Read-Only Fields
 // -----------------------------------------------------------------------------
 
-constexpr const auto VMCS_EXIT_QUALIFICATION                                   = 0x0000000000006400UL;
 constexpr const auto VMCS_IO_RCX                                               = 0x0000000000006402UL;
 constexpr const auto VMCS_IO_RSI                                               = 0x0000000000006404UL;
 constexpr const auto VMCS_IO_RDI                                               = 0x0000000000006406UL;

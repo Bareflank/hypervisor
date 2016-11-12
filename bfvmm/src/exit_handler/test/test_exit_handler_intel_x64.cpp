@@ -29,7 +29,7 @@
 
 #include <intrinsics/msrs_intel_x64.h>
 #include <vmcs/vmcs_intel_x64_natural_width_guest_state_fields.h>
-
+#include <vmcs/vmcs_intel_x64_natural_width_read_only_data_fields.h>
 #include <vmcs/vmcs_intel_x64_32bit_read_only_data_fields.h>
 
 using namespace x64;
@@ -55,7 +55,7 @@ __vmread(uint64_t field, uint64_t *val) noexcept
         case vmcs::exit_reason::addr:
             *val = g_exit_reason;
             break;
-        case VMCS_EXIT_QUALIFICATION:
+        case vmcs::exit_qualification::addr:
             *val = g_exit_qualification;
             break;
         case vmcs::vm_exit_instruction_length::addr:

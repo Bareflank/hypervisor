@@ -40,6 +40,7 @@
 #include <vmcs/vmcs_intel_x64_32bit_guest_state_fields.h>
 #include <vmcs/vmcs_intel_x64_32bit_read_only_data_fields.h>
 #include <vmcs/vmcs_intel_x64_natural_width_guest_state_fields.h>
+#include <vmcs/vmcs_intel_x64_natural_width_read_only_data_fields.h>
 
 using namespace x64;
 using namespace intel_x64;
@@ -47,17 +48,13 @@ using namespace intel_x64;
 #include <mutex>
 std::mutex g_unimplemented_handler_mutex;
 
-exit_handler_intel_x64::exit_handler_intel_x64() :
-    m_exit_qualification(0)
+exit_handler_intel_x64::exit_handler_intel_x64()
 {
 }
 
 void
 exit_handler_intel_x64::dispatch()
 {
-    m_exit_qualification =
-        vm::read(VMCS_EXIT_QUALIFICATION);
-
     switch (vmcs::exit_reason::basic_exit_reason::get())
     {
         case vmcs::exit_reason::basic_exit_reason::exception_or_non_maskable_interrupt:
@@ -809,7 +806,7 @@ exit_handler_intel_x64::unimplemented_handler() noexcept
     bferror << "- exit reason string: "
             << vmcs::exit_reason::basic_exit_reason::description() << bfendl;
     bferror << "- exit qualification: "
-            << view_as_pointer(m_exit_qualification) << bfendl;
+            << view_as_pointer(vmcs::exit_qualification::get()) << bfendl;
     bferror << "- instruction length: "
             << view_as_pointer(vmcs::vm_exit_instruction_length::get()) << bfendl;
     bferror << "- instruction information: "
