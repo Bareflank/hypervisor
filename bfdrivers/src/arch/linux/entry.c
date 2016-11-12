@@ -346,14 +346,24 @@ static long
 ioctl_vmcall(struct vmcall_registers_t *regs)
 {
     int64_t ret;
+    struct vmcall_registers_t r;
 
-    ret = common_vmcall(regs, g_cpuid);
+    ret = copy_from_user(&r, regs, sizeof(r));
+    if (ret != 0)
+    {
+        ALERT("IOCTL_VMCALL: failed to copy memory from userspace\n");
+        return BF_IOCTL_FAILURE;
+    }
+
+    ret = common_vmcall(&r, g_cpuid);
     if (ret != 0)
     {
         ALERT("IOCTL_VMCALL: common_vmcall failed: %p - %s\n", \
               (void *)ret, ec_to_str(ret));
         return BF_IOCTL_FAILURE;
     }
+
+    ret = copy_to_user(regs, &r, sizeof(*regs));
 
     return BF_IOCTL_SUCCESS;
 }
