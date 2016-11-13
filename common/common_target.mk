@@ -78,7 +78,17 @@ CROSS_OUTDIR:=$(CROSS_OUTDIR)/cross
 # Exectuables
 ################################################################################
 
-ifeq ($(USE_LLVM_CLANG)$(shell uname -o),true Cygwin)
+ifeq ($(shell uname -o), Cygwin)
+    NATIVE_USE_LLVM_CLANG=false
+else
+	ifeq ($(USE_LLVM_CLANG), true)
+		NATIVE_USE_LLVM_CLANG=true
+	else
+		NATIVE_USE_LLVM_CLANG=false
+	endif
+endif
+
+ifeq ($(NATIVE_USE_LLVM_CLANG), true)
 	NATIVE_CC:=clang
 	NATIVE_CXX:=clang++
 	NATIVE_ASM:=nasm
@@ -227,8 +237,8 @@ CROSS_CXXFLAGS+=-DGSL_THROW_ON_CONTRACT_VIOLATION
 CROSS_CXXFLAGS+=$(CONFIGURED_CROSS_CXXFLAGS)
 
 ifeq ($(PRODUCTION),yes)
-	NATIVE_CXXFLAGS+=-O3 -DGSL_UNENFORCED_ON_CONTRACT_VIOLATION -D_FORTIFY_SOURCE=2
-	CROSS_CXXFLAGS+=-O3 -DGSL_UNENFORCED_ON_CONTRACT_VIOLATION -D_FORTIFY_SOURCE=2
+	NATIVE_CXXFLAGS+=-O3 -D_FORTIFY_SOURCE=2
+	CROSS_CXXFLAGS+=-O3 -D_FORTIFY_SOURCE=2
 endif
 
 ifeq ($(COVERALLS), true)

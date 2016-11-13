@@ -28,6 +28,7 @@ NO_ADDRESS_SANATIZE:=true
 TARGET_NAME:=bfelf_loader
 TARGET_TYPE:=lib
 TARGET_COMPILER:=native
+PRODUCTION=no
 
 ################################################################################
 # Compiler Flags
