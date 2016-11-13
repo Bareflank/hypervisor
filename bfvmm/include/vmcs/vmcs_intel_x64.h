@@ -850,7 +850,7 @@ namespace guest_ia32_efer
     { vm::write(addr, val, name); }
 
     inline bool exists() noexcept
-    { return msrs::ia32_vmx_true_entry_ctls::load_ia32_efer::get() == 1; }
+    { return msrs::ia32_vmx_true_entry_ctls::load_ia32_efer::get(); }
 
     namespace sce
     {
@@ -950,7 +950,7 @@ namespace host_ia32_efer
     { vm::write(addr, val, name); }
 
     inline bool exists() noexcept
-    { return msrs::ia32_vmx_true_exit_ctls::load_ia32_efer::get() == 1; }
+    { return msrs::ia32_vmx_true_exit_ctls::load_ia32_efer::get(); }
 
     namespace sce
     {
