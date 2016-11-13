@@ -25,6 +25,7 @@
 #include <vmcs/vmcs_intel_x64_32bit_control_fields.h>
 #include <memory_manager/memory_manager_x64.h>
 #include <vmcs/vmcs_intel_x64_16bit_control_fields.h>
+#include <vmcs/vmcs_intel_x64_natural_width_guest_state_fields.h>
 
 using namespace intel_x64;
 using namespace vmcs;
@@ -639,7 +640,7 @@ vmcs_intel_x64::check_control_event_injection_delivery_ec_checks()
 
     if (unrestricted_guest::is_enabled() && activate_secondary_controls::is_enabled())
     {
-        if (guest_cr0::protection_enable::get() == 0 && deliver_error_code_bit::is_enabled())
+        if (guest_cr0::protection_enable::is_disabled() && deliver_error_code_bit::is_enabled())
             throw std::logic_error("unrestricted guest must be 0 or PE must "
                                    "be enabled in cr0 if deliver_error_code_bit is set");
     }
