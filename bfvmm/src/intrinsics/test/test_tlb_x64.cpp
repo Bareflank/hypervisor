@@ -19,22 +19,17 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#ifndef TLB_X64_H
-#define TLB_X64_H
+#include <test.h>
+#include <intrinsics/tlb_x64.h>
 
-extern "C" void __invlpg(const void *virt) noexcept;
+using namespace x64;
 
-// *INDENT-OFF*
+extern "C" void
+__invlpg(const void *virt) noexcept
+{ (void) virt; }
 
-namespace x64
+void
+intrinsics_ut::test_tlb_x64_invlpg()
 {
-namespace tlb
-{
-    template<class T, class = typename std::enable_if<std::is_pointer<T>::value>::type>
-    void invlpg(T val) noexcept { __invlpg(val); }
+    this->expect_no_exception([&] { tlb::invlpg(this); });
 }
-}
-
-// *INDENT-ON*
-
-#endif

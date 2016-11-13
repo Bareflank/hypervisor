@@ -403,6 +403,8 @@ intrinsics_ut::list()
     this->test_cache_x64_invd();
     this->test_cache_x64_wbinvd();
 
+    this->test_tlb_x64_invlpg();
+
     this->test_debug_x64_dr7();
 
     return true;
