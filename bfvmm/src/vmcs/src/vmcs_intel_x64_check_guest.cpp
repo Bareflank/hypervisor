@@ -22,6 +22,7 @@
 #include <vmcs/vmcs_intel_x64.h>
 #include <vmcs/vmcs_intel_x64_16bit_guest_state_fields.h>
 #include <memory_manager/memory_manager_x64.h>
+#include <vmcs/vmcs_intel_x64_32bit_guest_state_fields.h>
 
 using namespace x64;
 using namespace intel_x64;
@@ -538,7 +539,7 @@ vmcs_intel_x64::check_guest_cs_limit()
     if (!is_enabled_v8086())
         return;
 
-    auto cs_limit = vm::read(VMCS_GUEST_CS_LIMIT);
+    auto cs_limit = vmcs::guest_cs_limit::get();
 
     if (cs_limit != 0x000000000000FFFF)
         throw std::logic_error("if virtual 8086 mode is enabled, cs limit must be 0xFFFF");
@@ -550,7 +551,7 @@ vmcs_intel_x64::check_guest_ss_limit()
     if (!is_enabled_v8086())
         return;
 
-    auto ss_limit = vm::read(VMCS_GUEST_SS_LIMIT);
+    auto ss_limit = vmcs::guest_ss_limit::get();
 
     if (ss_limit != 0x000000000000FFFF)
         throw std::logic_error("if virtual 8086 mode is enabled, ss limit must be 0xFFFF");
@@ -562,7 +563,7 @@ vmcs_intel_x64::check_guest_ds_limit()
     if (!is_enabled_v8086())
         return;
 
-    auto ds_limit = vm::read(VMCS_GUEST_DS_LIMIT);
+    auto ds_limit = vmcs::guest_ds_limit::get();
 
     if (ds_limit != 0x000000000000FFFF)
         throw std::logic_error("if virtual 8086 mode is enabled, ds limit must be 0xFFFF");
@@ -574,7 +575,7 @@ vmcs_intel_x64::check_guest_es_limit()
     if (!is_enabled_v8086())
         return;
 
-    auto es_limit = vm::read(VMCS_GUEST_ES_LIMIT);
+    auto es_limit = vmcs::guest_es_limit::get();
 
     if (es_limit != 0x000000000000FFFF)
         throw std::logic_error("if virtual 8086 mode is enabled, es limit must be 0xFFFF");
@@ -586,7 +587,7 @@ vmcs_intel_x64::check_guest_gs_limit()
     if (!is_enabled_v8086())
         return;
 
-    auto gs_limit = vm::read(VMCS_GUEST_GS_LIMIT);
+    auto gs_limit = vmcs::guest_gs_limit::get();
 
     if (gs_limit != 0x000000000000FFFF)
         throw std::logic_error("if virtual 8086 mode is enabled, gs limit must be 0xFFFF");
@@ -598,7 +599,7 @@ vmcs_intel_x64::check_guest_fs_limit()
     if (!is_enabled_v8086())
         return;
 
-    auto fs_limit = vm::read(VMCS_GUEST_FS_LIMIT);
+    auto fs_limit = vmcs::guest_fs_limit::get();
 
     if (fs_limit != 0x000000000000FFFF)
         throw std::logic_error("if virtual 8086 mode is enabled, fs limit must be 0xFFFF");
@@ -1210,7 +1211,7 @@ vmcs_intel_x64::check_guest_cs_db_must_be_0_if_l_equals_1()
 void
 vmcs_intel_x64::check_guest_cs_granularity()
 {
-    auto cs_limit = vm::read(VMCS_GUEST_CS_LIMIT);
+    auto cs_limit = vmcs::guest_cs_limit::get();
     auto g = guest_cs_access_rights::granularity::get();
 
     if ((cs_limit & 0x00000FFF) != 0x00000FFF && g != 0)
@@ -1223,7 +1224,7 @@ vmcs_intel_x64::check_guest_cs_granularity()
 void
 vmcs_intel_x64::check_guest_ss_granularity()
 {
-    auto ss_limit = vm::read(VMCS_GUEST_SS_LIMIT);
+    auto ss_limit = vmcs::guest_ss_limit::get();
     auto g = guest_ss_access_rights::granularity::get();
 
     if (guest_ss_access_rights::unusable::get() != 0)
@@ -1239,7 +1240,7 @@ vmcs_intel_x64::check_guest_ss_granularity()
 void
 vmcs_intel_x64::check_guest_ds_granularity()
 {
-    auto ds_limit = vm::read(VMCS_GUEST_DS_LIMIT);
+    auto ds_limit = vmcs::guest_ds_limit::get();
     auto g = guest_ds_access_rights::granularity::get();
 
     if (guest_ds_access_rights::unusable::get() != 0)
@@ -1255,7 +1256,7 @@ vmcs_intel_x64::check_guest_ds_granularity()
 void
 vmcs_intel_x64::check_guest_es_granularity()
 {
-    auto es_limit = vm::read(VMCS_GUEST_ES_LIMIT);
+    auto es_limit = vmcs::guest_es_limit::get();
     auto g = guest_es_access_rights::granularity::get();
 
     if (guest_es_access_rights::unusable::get() != 0)
@@ -1271,7 +1272,7 @@ vmcs_intel_x64::check_guest_es_granularity()
 void
 vmcs_intel_x64::check_guest_fs_granularity()
 {
-    auto fs_limit = vm::read(VMCS_GUEST_FS_LIMIT);
+    auto fs_limit = vmcs::guest_fs_limit::get();
     auto g = guest_fs_access_rights::granularity::get();
 
     if (guest_fs_access_rights::unusable::get() != 0)
@@ -1287,7 +1288,7 @@ vmcs_intel_x64::check_guest_fs_granularity()
 void
 vmcs_intel_x64::check_guest_gs_granularity()
 {
-    auto gs_limit = vm::read(VMCS_GUEST_GS_LIMIT);
+    auto gs_limit = vmcs::guest_gs_limit::get();
     auto g = guest_gs_access_rights::granularity::get();
 
     if (guest_gs_access_rights::unusable::get() != 0)
@@ -1343,7 +1344,7 @@ vmcs_intel_x64::check_guest_tr_access_rights_reserved_must_be_0()
 void
 vmcs_intel_x64::check_guest_tr_granularity()
 {
-    auto tr_limit = vm::read(VMCS_GUEST_TR_LIMIT);
+    auto tr_limit = vmcs::guest_tr_limit::get();
     auto g = guest_tr_access_rights::granularity::get();
 
     if ((tr_limit & 0x00000FFF) != 0x00000FFF && g != 0)
@@ -1412,7 +1413,7 @@ vmcs_intel_x64::check_guest_ldtr_granularity()
     if (guest_ldtr_access_rights::unusable::get() != 0)
         return;
 
-    auto ldtr_limit = vm::read(VMCS_GUEST_LDTR_LIMIT);
+    auto ldtr_limit = vmcs::guest_ldtr_limit::get();
     auto g = guest_ldtr_access_rights::granularity::get();
 
     if ((ldtr_limit & 0x00000FFF) != 0x00000FFF && g != 0)
@@ -1452,7 +1453,7 @@ vmcs_intel_x64::check_guest_idtr_base_must_be_canonical()
 void
 vmcs_intel_x64::check_guest_gdtr_limit_reserved_bits()
 {
-    auto gdtr_limit = vm::read(VMCS_GUEST_GDTR_LIMIT);
+    auto gdtr_limit = vmcs::guest_gdtr_limit::get();
 
     if ((gdtr_limit & 0xFFFF0000) != 0)
         throw std::logic_error("gdtr limit bits 31:16 must be 0");
@@ -1461,7 +1462,7 @@ vmcs_intel_x64::check_guest_gdtr_limit_reserved_bits()
 void
 vmcs_intel_x64::check_guest_idtr_limit_reserved_bits()
 {
-    auto idtr_limit = vm::read(VMCS_GUEST_IDTR_LIMIT);
+    auto idtr_limit = vmcs::guest_idtr_limit::get();
 
     if ((idtr_limit & 0xFFFF0000) != 0)
         throw std::logic_error("idtr limit bits 31:16 must be 0");
@@ -1555,15 +1556,15 @@ vmcs_intel_x64::checks_on_guest_non_register_state()
     check_guest_shutdown_valid_interrupts();
     check_guest_sipi_valid_interrupts();
     check_guest_valid_activity_state_and_smm();
-    check_guest_interruptability_state_reserved();
-    check_guest_interruptability_state_sti_mov_ss();
-    check_guest_interruptability_state_sti();
-    check_guest_interruptability_state_external_interrupt();
-    check_guest_interruptability_state_nmi();
-    check_guest_interruptability_not_in_smm();
-    check_guest_interruptability_entry_to_smm();
-    check_guest_interruptability_state_sti_and_nmi();
-    check_guest_interruptability_state_virtual_nmi();
+    check_guest_interruptibility_state_reserved();
+    check_guest_interruptibility_state_sti_mov_ss();
+    check_guest_interruptibility_state_sti();
+    check_guest_interruptibility_state_external_interrupt();
+    check_guest_interruptibility_state_nmi();
+    check_guest_interruptibility_not_in_smm();
+    check_guest_interruptibility_entry_to_smm();
+    check_guest_interruptibility_state_sti_and_nmi();
+    check_guest_interruptibility_state_virtual_nmi();
     check_guest_pending_debug_exceptions_reserved();
     check_guest_pending_debug_exceptions_dbg_ctl();
     check_guest_vmcs_link_pointer_bits_11_0();
@@ -1576,42 +1577,33 @@ vmcs_intel_x64::checks_on_guest_non_register_state()
 void
 vmcs_intel_x64::check_guest_valid_activity_state()
 {
-    auto activity_state = vm::read(VMCS_GUEST_ACTIVITY_STATE);
-
-    if (activity_state > 3)
-        std::logic_error("activity state must be 0 - 3");
+    if (vmcs::guest_activity_state::get() > 3)
+        throw std::logic_error("activity state must be 0 - 3");
 }
 
 void
 vmcs_intel_x64::check_guest_activity_state_not_hlt_when_dpl_not_0()
 {
-    auto activity_state = vm::read(VMCS_GUEST_ACTIVITY_STATE);
-
-    if (activity_state != VM_ACTIVITY_STATE_HLT)
+    if (vmcs::guest_activity_state::get() != vmcs::guest_activity_state::hlt)
         return;
 
     if (guest_ss_access_rights::dpl::get() != 0)
-        std::logic_error("ss.dpl must be 0 if activity state is HLT");
+        throw std::logic_error("ss.dpl must be 0 if activity state is HLT");
 }
 
 void
 vmcs_intel_x64::check_guest_must_be_active_if_injecting_blocking_state()
 {
-    auto activity_state = vm::read(VMCS_GUEST_ACTIVITY_STATE);
-
-    if (activity_state == VM_ACTIVITY_STATE_ACTIVE)
+    if (vmcs::guest_activity_state::get() == vmcs::guest_activity_state::active)
         return;
 
-    auto interruptability_state =
-        vm::read(VMCS_GUEST_INTERRUPTIBILITY_STATE);
-
-    if ((interruptability_state & VM_INTERRUPTABILITY_STATE_STI) != 0)
+    if (vmcs::guest_interruptibility_state::blocking_by_sti::get() != 0U)
         throw std::logic_error("activity state must be active if "
-                               "interruptability state is sti");
+                               "interruptibility state is sti");
 
-    if ((interruptability_state & VM_INTERRUPTABILITY_STATE_MOV_SS) != 0)
+    if (vmcs::guest_interruptibility_state::blocking_by_mov_ss::get() != 0U)
         throw std::logic_error("activity state must be active if "
-                               "interruptability state is mov-ss");
+                               "interruptibility state is mov-ss");
 }
 
 void
@@ -1622,9 +1614,7 @@ vmcs_intel_x64::check_guest_hlt_valid_interrupts()
     if (valid_bit::is_disabled())
         return;
 
-    auto activity_state = vm::read(VMCS_GUEST_ACTIVITY_STATE);
-
-    if (activity_state != VM_ACTIVITY_STATE_HLT)
+    if (vmcs::guest_activity_state::get() != vmcs::guest_activity_state::hlt)
         return;
 
     auto type = interruption_type::get();
@@ -1666,9 +1656,7 @@ vmcs_intel_x64::check_guest_shutdown_valid_interrupts()
     if (valid_bit::is_disabled())
         return;
 
-    auto activity_state = vm::read(VMCS_GUEST_ACTIVITY_STATE);
-
-    if (activity_state != VM_ACTIVITY_STATE_SHUTDOWN)
+    if (vmcs::guest_activity_state::get() != vmcs::guest_activity_state::shutdown)
         return;
 
     auto type = interruption_type::get();
@@ -1698,9 +1686,7 @@ vmcs_intel_x64::check_guest_sipi_valid_interrupts()
     if (vm_entry_interruption_information_field::valid_bit::is_disabled())
         return;
 
-    auto activity_state = vm::read(VMCS_GUEST_ACTIVITY_STATE);
-
-    if (activity_state != VM_ACTIVITY_STATE_WAIT_FOR_SIPI)
+    if (vmcs::guest_activity_state::get() != vmcs::guest_activity_state::wait_for_sipi)
         return;
 
     throw std::logic_error("invalid interruption combination");
@@ -1712,55 +1698,42 @@ vmcs_intel_x64::check_guest_valid_activity_state_and_smm()
     if (vm_entry_controls::entry_to_smm::is_disabled())
         return;
 
-    auto activity_state = vm::read(VMCS_GUEST_ACTIVITY_STATE);
-
-    if (activity_state != VM_ACTIVITY_STATE_WAIT_FOR_SIPI)
+    if (vmcs::guest_activity_state::get() != vmcs::guest_activity_state::wait_for_sipi)
         return;
 
     throw std::logic_error("activity state must not equal wait for sipi if entry to smm is enabled");
 }
 
 void
-vmcs_intel_x64::check_guest_interruptability_state_reserved()
+vmcs_intel_x64::check_guest_interruptibility_state_reserved()
 {
-    auto interruptability_state =
-        vm::read(VMCS_GUEST_INTERRUPTIBILITY_STATE);
-
-    if ((interruptability_state & 0xFFFFFFFFFFFFFFF0) != 0)
-        throw std::logic_error("interruptability state reserved bits 31:4 must be 0");
+    if (vmcs::guest_interruptibility_state::reserved::get() != 0)
+        throw std::logic_error("interruptibility state reserved bits 31:5 must be 0");
 }
 
 void
-vmcs_intel_x64::check_guest_interruptability_state_sti_mov_ss()
+vmcs_intel_x64::check_guest_interruptibility_state_sti_mov_ss()
 {
-    auto interruptability_state =
-        vm::read(VMCS_GUEST_INTERRUPTIBILITY_STATE);
+    auto sti = vmcs::guest_interruptibility_state::blocking_by_sti::get();
+    auto mov_ss = vmcs::guest_interruptibility_state::blocking_by_mov_ss::get();
 
-    auto sti = interruptability_state & VM_INTERRUPTABILITY_STATE_STI;
-    auto mov_ss = interruptability_state & VM_INTERRUPTABILITY_STATE_MOV_SS;
-
-    if (sti == 1 && mov_ss == 1)
-        throw std::logic_error("interruptability state sti and mov ss cannot both be 1");
+    if (sti != 0U && mov_ss != 0U)
+        throw std::logic_error("interruptibility state sti and mov ss cannot both be 1");
 
 }
 
 void
-vmcs_intel_x64::check_guest_interruptability_state_sti()
+vmcs_intel_x64::check_guest_interruptibility_state_sti()
 {
-    auto interruptability_state =
-        vm::read(VMCS_GUEST_INTERRUPTIBILITY_STATE);
-
-    if (guest_rflags::interrupt_enable_flag::get() != 0)
+    if (guest_rflags::interrupt_enable_flag::get() != 0U)
         return;
 
-    auto sti = interruptability_state & VM_INTERRUPTABILITY_STATE_STI;
-
-    if (sti != 0)
-        throw std::logic_error("interruptability state sti must be 0 if rflags interrupt enabled is 0");
+    if (vmcs::guest_interruptibility_state::blocking_by_sti::get() != 0U)
+        throw std::logic_error("interruptibility state sti must be 0 if rflags interrupt enabled is 0");
 }
 
 void
-vmcs_intel_x64::check_guest_interruptability_state_external_interrupt()
+vmcs_intel_x64::check_guest_interruptibility_state_external_interrupt()
 {
     using namespace vm_entry_interruption_information_field;
 
@@ -1770,20 +1743,17 @@ vmcs_intel_x64::check_guest_interruptability_state_external_interrupt()
     if (interruption_type::get() != interruption_type::external_interrupt)
         return;
 
-    auto interruptability_state =
-        vm::read(VMCS_GUEST_INTERRUPTIBILITY_STATE);
-
-    if ((interruptability_state & VM_INTERRUPTABILITY_STATE_STI) != 0)
-        throw std::logic_error("interruptability state sti must be 0 if "
+    if (vmcs::guest_interruptibility_state::blocking_by_sti::get() != 0U)
+        throw std::logic_error("interruptibility state sti must be 0 if "
                                "interrupt type is external and valid");
 
-    if ((interruptability_state & VM_INTERRUPTABILITY_STATE_MOV_SS) != 0)
+    if (vmcs::guest_interruptibility_state::blocking_by_mov_ss::get() != 0U)
         throw std::logic_error("activity state must be active if "
-                               "interruptability state is mov-ss");
+                               "interruptibility state is mov-ss");
 }
 
 void
-vmcs_intel_x64::check_guest_interruptability_state_nmi()
+vmcs_intel_x64::check_guest_interruptibility_state_nmi()
 {
     using namespace vm_entry_interruption_information_field;
 
@@ -1793,35 +1763,29 @@ vmcs_intel_x64::check_guest_interruptability_state_nmi()
     if (interruption_type::get() != interruption_type::non_maskable_interrupt)
         return;
 
-    auto interruptability_state =
-        vm::read(VMCS_GUEST_INTERRUPTIBILITY_STATE);
-
-    if ((interruptability_state & VM_INTERRUPTABILITY_STATE_MOV_SS) != 0)
-        throw std::logic_error("activity state must be active if "
-                               "interruptability state is mov-ss");
+    if (vmcs::guest_interruptibility_state::blocking_by_mov_ss::get() != 0U)
+        throw std::logic_error("vali interrupt type must not be nmi if "
+                               "interruptibility state is mov-ss");
 }
 
 void
-vmcs_intel_x64::check_guest_interruptability_not_in_smm()
+vmcs_intel_x64::check_guest_interruptibility_not_in_smm()
 {
 }
 
 void
-vmcs_intel_x64::check_guest_interruptability_entry_to_smm()
+vmcs_intel_x64::check_guest_interruptibility_entry_to_smm()
 {
     if (vm_entry_controls::entry_to_smm::is_disabled())
         return;
 
-    auto interruptability_state =
-        vm::read(VMCS_GUEST_INTERRUPTIBILITY_STATE);
-
-    if ((interruptability_state & VM_INTERRUPTABILITY_STATE_SMI) == 0)
-        throw std::logic_error("interruptability state smi must be enabled "
+    if (vmcs::guest_interruptibility_state::blocking_by_smi::get() == 0U)
+        throw std::logic_error("interruptibility state smi must be enabled "
                                "if entry to smm is enabled");
 }
 
 void
-vmcs_intel_x64::check_guest_interruptability_state_sti_and_nmi()
+vmcs_intel_x64::check_guest_interruptibility_state_sti_and_nmi()
 {
     using namespace vm_entry_interruption_information_field;
 
@@ -1831,16 +1795,13 @@ vmcs_intel_x64::check_guest_interruptability_state_sti_and_nmi()
     if (interruption_type::get() != interruption_type::non_maskable_interrupt)
         return;
 
-    auto interruptability_state =
-        vm::read(VMCS_GUEST_INTERRUPTIBILITY_STATE);
-
-    if ((interruptability_state & VM_INTERRUPTABILITY_STATE_STI) != 0)
+    if (vmcs::guest_interruptibility_state::blocking_by_sti::get() != 0U)
         throw std::logic_error("some processors require sti to be 0 if "
                                "the interruption type is nmi");
 }
 
 void
-vmcs_intel_x64::check_guest_interruptability_state_virtual_nmi()
+vmcs_intel_x64::check_guest_interruptibility_state_virtual_nmi()
 {
     using namespace vm_entry_interruption_information_field;
 
@@ -1853,10 +1814,7 @@ vmcs_intel_x64::check_guest_interruptability_state_virtual_nmi()
     if (interruption_type::get() != interruption_type::non_maskable_interrupt)
         return;
 
-    auto interruptability_state =
-        vm::read(VMCS_GUEST_INTERRUPTIBILITY_STATE);
-
-    if ((interruptability_state & VM_INTERRUPTABILITY_STATE_NMI) != 0)
+    if (vmcs::guest_interruptibility_state::blocking_by_nmi::get() != 0)
         throw std::logic_error("if virtual nmi is enabled, and the interruption "
                                "type is NMI, blocking by nmi must be disabled");
 }
@@ -1874,17 +1832,11 @@ vmcs_intel_x64::check_guest_pending_debug_exceptions_reserved()
 void
 vmcs_intel_x64::check_guest_pending_debug_exceptions_dbg_ctl()
 {
-    auto interruptability_state =
-        vm::read(VMCS_GUEST_INTERRUPTIBILITY_STATE);
+    auto sti = vmcs::guest_interruptibility_state::blocking_by_sti::get();
+    auto mov_ss = vmcs::guest_interruptibility_state::blocking_by_mov_ss::get();
+    auto activity_state = vmcs::guest_activity_state::get();
 
-    auto activity_state =
-        vm::read(VMCS_GUEST_ACTIVITY_STATE);
-
-    auto sti = interruptability_state & VM_INTERRUPTABILITY_STATE_STI;
-    auto mov_ss = interruptability_state & VM_INTERRUPTABILITY_STATE_MOV_SS;
-    auto hlt = activity_state & VM_ACTIVITY_STATE_HLT;
-
-    if (sti == 0 && mov_ss == 0 && hlt == 0)
+    if (sti == 0 && mov_ss == 0 && activity_state != vmcs::guest_activity_state::hlt)
         return;
 
     auto pending_debug_exceptions =

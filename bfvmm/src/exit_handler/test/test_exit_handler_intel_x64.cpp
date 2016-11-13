@@ -21,6 +21,7 @@
 
 #include <test.h>
 #include <vmcs/vmcs_intel_x64.h>
+#include <vmcs/vmcs_intel_x64_32bit_guest_state_fields.h>
 #include <exit_handler/exit_handler_intel_x64.h>
 #include <exit_handler/exit_handler_intel_x64_support.h>
 #include <memory_manager/memory_manager_x64.h>
@@ -1604,7 +1605,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_rdmsr_cs()
     {
         this->expect_no_exception([&]{ ehlr.dispatch(); });
 
-        this->expect_true(g_field == VMCS_GUEST_IA32_SYSENTER_CS);
+        this->expect_true(g_field == vmcs::guest_ia32_sysenter_cs::addr);
         this->expect_true(ehlr.m_state_save->rax == 0x4);
         this->expect_true(ehlr.m_state_save->rdx == 0x5);
         this->expect_true(ehlr.m_state_save->rip == g_rip);
@@ -1834,7 +1835,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_wrmsr_cs()
     {
         this->expect_no_exception([&]{ ehlr.dispatch(); });
 
-        this->expect_true(g_field == VMCS_GUEST_IA32_SYSENTER_CS);
+        this->expect_true(g_field == vmcs::guest_ia32_sysenter_cs::addr);
         this->expect_true(g_value == 0x0000000500000004);
         this->expect_true(ehlr.m_state_save->rip == g_rip);
     });

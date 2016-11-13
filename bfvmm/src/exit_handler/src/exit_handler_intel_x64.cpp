@@ -37,6 +37,8 @@
 #include <intrinsics/cpuid_x64.h>
 #include <intrinsics/vmx_intel_x64.h>
 
+#include <vmcs/vmcs_intel_x64_32bit_guest_state_fields.h>
+
 using namespace x64;
 using namespace intel_x64;
 
@@ -598,7 +600,7 @@ exit_handler_intel_x64::handle_rdmsr()
             msr = vm::read(VMCS_GUEST_IA32_PERF_GLOBAL_CTRL);
             break;
         case msrs::ia32_sysenter_cs::addr:
-            msr = vm::read(VMCS_GUEST_IA32_SYSENTER_CS);
+            msr = vmcs::guest_ia32_sysenter_cs::get();
             break;
         case msrs::ia32_sysenter_esp::addr:
             msr = vm::read(VMCS_GUEST_IA32_SYSENTER_ESP);
@@ -664,7 +666,7 @@ exit_handler_intel_x64::handle_wrmsr()
             vm::write(VMCS_GUEST_IA32_PERF_GLOBAL_CTRL, msr);
             break;
         case msrs::ia32_sysenter_cs::addr:
-            vm::write(VMCS_GUEST_IA32_SYSENTER_CS, msr);
+            vmcs::guest_ia32_sysenter_cs::set(msr);
             break;
         case msrs::ia32_sysenter_esp::addr:
             vm::write(VMCS_GUEST_IA32_SYSENTER_ESP, msr);
