@@ -290,7 +290,6 @@ public:
         segment_descriptor_type sd2 = 0;
 
         expects(index != 0);
-        expects(index < m_gdt.size());
 
         sd1 = m_gdt.at(index);
         sd1 = (sd1 & 0x00FFFF000000FFFF);
@@ -321,8 +320,6 @@ public:
 
         if ((sd1 & 0x100000000000) == 0)
         {
-            expects(index + 1U < m_gdt.size());
-
             sd2 = m_gdt.at(index + 1U);
             sd2 = (sd2 & 0xFFFFFFFF00000000);
 
@@ -360,7 +357,6 @@ public:
         segment_descriptor_type sd2 = 0;
 
         expects(index != 0);
-        expects(index < m_gdt.size());
 
         // The segment base description can be found in the Intel's software
         // developer's manual, volume 3, chapter 3.4.5 as well as volume 3,
@@ -388,8 +384,6 @@ public:
 
         if ((sd1 & 0x100000000000) == 0)
         {
-            expects(index + 1U < m_gdt.size());
-
             sd2 = m_gdt.at(index + 1U);
             base_type base_63_32 = ((sd2 & 0x00000000FFFFFFFF) << 32);
 
@@ -416,8 +410,6 @@ public:
     void set_limit(index_type index, limit_type limit)
     {
         expects(index != 0);
-        expects(index < m_gdt.size());
-
         segment_descriptor_type sd1 = (m_gdt.at(index) & 0xFFF0FFFFFFFF0000);
 
         // The segment limit description can be found in the Intel's software
@@ -453,8 +445,6 @@ public:
     limit_type limit(index_type index) const
     {
         expects(index != 0);
-        expects(index < m_gdt.size());
-
         segment_descriptor_type sd1 = m_gdt.at(index);
 
         // The segment limit description can be found in the Intel's software
@@ -505,8 +495,6 @@ public:
     void set_access_rights(index_type index, access_rights_type access_rights)
     {
         expects(index != 0);
-        expects(index < m_gdt.size());
-
         segment_descriptor_type sd1 = (m_gdt.at(index) & 0xFF0F00FFFFFFFFFF);
 
         // The segment access description can be found in the intel's software
@@ -540,8 +528,6 @@ public:
     access_rights_type access_rights(index_type index) const
     {
         expects(index != 0);
-        expects(index < m_gdt.size());
-
         segment_descriptor_type sd1 = m_gdt.at(index);
 
         // The segment access description can be found in the Intel's software
