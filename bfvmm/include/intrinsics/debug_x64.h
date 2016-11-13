@@ -34,8 +34,8 @@ namespace dr7
     inline auto get() noexcept
     { return __read_dr7(); }
 
-    template<class T> void set(T val) noexcept
-    { __write_dr7(val); }
+    template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
+    void set(T val) noexcept { __write_dr7(val); }
 }
 }
 
