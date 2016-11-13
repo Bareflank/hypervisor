@@ -348,7 +348,13 @@ ioctl_vmcall(struct vmcall_registers_t *regs)
     int64_t ret;
     struct vmcall_registers_t r;
 
-    ret = copy_from_user(&r, regs, sizeof(r));
+    if (regs == 0)
+    {
+        ALERT("IOCTL_VMCALL: regs == NULL\n");
+        return BF_IOCTL_FAILURE;
+    }
+
+    ret = copy_from_user(&r, regs, sizeof(struct vmcall_registers_t));
     if (ret != 0)
     {
         ALERT("IOCTL_VMCALL: failed to copy memory from userspace\n");
@@ -363,7 +369,12 @@ ioctl_vmcall(struct vmcall_registers_t *regs)
         return BF_IOCTL_FAILURE;
     }
 
-    ret = copy_to_user(regs, &r, sizeof(*regs));
+    ret = copy_to_user(regs, &r, sizeof(struct vmcall_registers_t));
+    if (ret != 0)
+    {
+        ALERT("IOCTL_VMCALL: failed to copy memory to userspace\n");
+        return BF_IOCTL_FAILURE;
+    }
 
     return BF_IOCTL_SUCCESS;
 }
