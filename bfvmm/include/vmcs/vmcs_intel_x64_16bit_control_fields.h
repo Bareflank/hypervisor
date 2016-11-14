@@ -58,8 +58,7 @@ namespace virtual_processor_identifier
     { return get_vmcs_field_if_exists(addr, name, verbose, exists()); }
 
     template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
-    void set(T val)
-    { set_vmcs_field(val, addr, name, exists()); }
+    void set(T val) { set_vmcs_field(val, addr, name, exists()); }
 
     template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
     void set_if_exists(T val, bool verbose = false) noexcept
@@ -81,8 +80,7 @@ namespace posted_interrupt_notification_vector
     { return get_vmcs_field_if_exists(addr, name, verbose, exists()); }
 
     template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
-    void set(T val)
-    { set_vmcs_field(val, addr, name, exists()); }
+    void set(T val) { set_vmcs_field(val, addr, name, exists()); }
 
     template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
     void set_if_exists(T val, bool verbose = false) noexcept
@@ -107,8 +105,7 @@ namespace eptp_index
     { return get_vmcs_field_if_exists(addr, name, verbose, exists()); }
 
     template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
-    void set(T val)
-    { set_vmcs_field(val, addr, name, exists()); }
+    void set(T val) { set_vmcs_field(val, addr, name, exists()); }
 
     template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
     void set_if_exists(T val, bool verbose = false) noexcept

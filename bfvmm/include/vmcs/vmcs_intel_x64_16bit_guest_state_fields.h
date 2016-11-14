@@ -55,8 +55,7 @@ namespace guest_es_selector
     { return get_vmcs_field_if_exists(addr, name, verbose, exists()); }
 
     template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
-    void set(T val)
-    { set_vmcs_field(val, addr, name, exists()); }
+    void set(T val) { set_vmcs_field(val, addr, name, exists()); }
 
     template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
     void set_if_exists(T val, bool verbose = false) noexcept
@@ -157,8 +156,7 @@ namespace guest_cs_selector
     { return get_vmcs_field_if_exists(addr, name, verbose, exists()); }
 
     template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
-    void set(T val)
-    { set_vmcs_field(val, addr, name, exists()); }
+    void set(T val) { set_vmcs_field(val, addr, name, exists()); }
 
     template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
     void set_if_exists(T val, bool verbose = false) noexcept
@@ -259,8 +257,7 @@ namespace guest_ss_selector
     { return get_vmcs_field_if_exists(addr, name, verbose, exists()); }
 
     template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
-    void set(T val)
-    { set_vmcs_field(val, addr, name, exists()); }
+    void set(T val) { set_vmcs_field(val, addr, name, exists()); }
 
     template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
     void set_if_exists(T val, bool verbose = false) noexcept
@@ -361,8 +358,7 @@ namespace guest_ds_selector
     { return get_vmcs_field_if_exists(addr, name, verbose, exists()); }
 
     template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
-    void set(T val)
-    { set_vmcs_field(val, addr, name, exists()); }
+    void set(T val) { set_vmcs_field(val, addr, name, exists()); }
 
     template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
     void set_if_exists(T val, bool verbose = false) noexcept
@@ -463,8 +459,7 @@ namespace guest_fs_selector
     { return get_vmcs_field_if_exists(addr, name, verbose, exists()); }
 
     template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
-    void set(T val)
-    { set_vmcs_field(val, addr, name, exists()); }
+    void set(T val) { set_vmcs_field(val, addr, name, exists()); }
 
     template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
     void set_if_exists(T val, bool verbose = false) noexcept
@@ -565,8 +560,7 @@ namespace guest_gs_selector
     { return get_vmcs_field_if_exists(addr, name, verbose, exists()); }
 
     template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
-    void set(T val)
-    { set_vmcs_field(val, addr, name, exists()); }
+    void set(T val) { set_vmcs_field(val, addr, name, exists()); }
 
     template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
     void set_if_exists(T val, bool verbose = false) noexcept
@@ -667,8 +661,7 @@ namespace guest_ldtr_selector
     { return get_vmcs_field_if_exists(addr, name, verbose, exists()); }
 
     template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
-    void set(T val)
-    { set_vmcs_field(val, addr, name, exists()); }
+    void set(T val) { set_vmcs_field(val, addr, name, exists()); }
 
     template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
     void set_if_exists(T val, bool verbose = false) noexcept
@@ -769,8 +762,7 @@ namespace guest_tr_selector
     { return get_vmcs_field_if_exists(addr, name, verbose, exists()); }
 
     template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
-    void set(T val)
-    { set_vmcs_field(val, addr, name, exists()); }
+    void set(T val) { set_vmcs_field(val, addr, name, exists()); }
 
     template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
     void set_if_exists(T val, bool verbose = false) noexcept
@@ -874,8 +866,7 @@ namespace guest_interrupt_status
     { return get_vmcs_field_if_exists(addr, name, verbose, exists()); }
 
     template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
-    void set(T val)
-    { set_vmcs_field(val, addr, name, exists()); }
+    void set(T val) { set_vmcs_field(val, addr, name, exists()); }
 
     template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
     void set_if_exists(T val, bool verbose = false) noexcept

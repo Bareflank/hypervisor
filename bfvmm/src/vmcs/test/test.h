@@ -27,6 +27,7 @@
 #include <functional>
 #include <memory>
 #include <vmcs/vmcs_intel_x64.h>
+#include <vmcs/vmcs_intel_x64_32bit_control_fields.h>
 #include <memory_manager/memory_manager_x64.h>
 
 #define run_vmcs_test(cfg, ...) run_vmcs_test_with_args(gsl::cstring_span<>(__PRETTY_FUNCTION__), __LINE__, cfg, __VA_ARGS__)
@@ -466,6 +467,8 @@ private:
     void test_vmcs_secondary_processor_based_vm_execution_controls_enable_pml();
     void test_vmcs_secondary_processor_based_vm_execution_controls_ept_violation_ve();
     void test_vmcs_secondary_processor_based_vm_execution_controls_enable_xsaves_xrstors();
+    void test_vmcs_ple_gap();
+    void test_vmcs_ple_window();
 
     void test_check_vmcs_control_state();
     void test_checks_on_vm_execution_control_fields();

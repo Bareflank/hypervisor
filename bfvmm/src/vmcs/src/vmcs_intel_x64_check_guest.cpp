@@ -21,6 +21,7 @@
 
 #include <vmcs/vmcs_intel_x64.h>
 #include <vmcs/vmcs_intel_x64_16bit_guest_state_fields.h>
+#include <vmcs/vmcs_intel_x64_32bit_control_fields.h>
 #include <memory_manager/memory_manager_x64.h>
 
 using namespace x64;

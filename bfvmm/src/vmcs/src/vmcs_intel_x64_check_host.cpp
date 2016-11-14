@@ -21,6 +21,7 @@
 
 #include <vmcs/vmcs_intel_x64.h>
 #include <vmcs/vmcs_intel_x64_16bit_host_state_fields.h>
+#include <vmcs/vmcs_intel_x64_32bit_control_fields.h>
 
 using namespace intel_x64;
 
