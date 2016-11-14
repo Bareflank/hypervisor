@@ -55,6 +55,10 @@ namespace vmx
 
 namespace vm
 {
+    using field_type = uint64_t;
+    using value_type = uint64_t;
+    using name_type = const std::string;
+
     inline void clear(gsl::not_null<void *> ptr)
     {
         if (!__vmclear(ptr))
@@ -73,9 +77,9 @@ namespace vm
             throw std::runtime_error("vm::reset failed");
     }
 
-    inline auto read(uint64_t field, const std::string &name = {})
+    inline auto read(field_type field, name_type &name = {})
     {
-        uint64_t value;
+        value_type value;
 
         if (!__vmread(field, &value))
         {
@@ -88,7 +92,7 @@ namespace vm
         return value;
     }
 
-    inline void write(uint64_t field, uint64_t value, const std::string &name = {})
+    inline void write(field_type field, value_type value, name_type &name = {})
     {
         if (!__vmwrite(field, value))
         {
