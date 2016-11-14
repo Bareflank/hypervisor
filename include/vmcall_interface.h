@@ -175,7 +175,7 @@ enum vmcall_opcode
      * VMM extensions to decide if an event can actually fail.
      *
      * In:
-     * r0 = VMCALL_VERSIONS
+     * r0 = VMCALL_EVENT
      * r1 = VMCALL_MAGIC_NUMBER
      * r2 = index
      *

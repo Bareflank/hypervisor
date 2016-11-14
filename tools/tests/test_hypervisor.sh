@@ -26,6 +26,7 @@
 
 CB='\033[1;35m'
 CC='\033[1;36m'
+CG='\033[1;32m'
 CE='\033[0m'
 
 # ------------------------------------------------------------------------------
@@ -45,6 +46,7 @@ stress_test() {
     make quick
     make clean
     make
+    make test
     make stop
     make driver_unload > /dev/null 2>&1
 }
@@ -154,3 +156,11 @@ vmcall_unittest
 vmcall_string_unformatted
 vmcall_string_json
 vmcall_data_unformatted
+
+# ------------------------------------------------------------------------------
+# Done
+# ------------------------------------------------------------------------------
+
+echo -e ""
+echo -e "$CC""completed:$CG Success$CE"
+echo -e ""
