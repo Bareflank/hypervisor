@@ -161,6 +161,7 @@ private:
     void test_ioctl_driver_process_vmcall_vmm_loaded();
     void test_ioctl_driver_process_vmcall_vmm_corrupt();
     void test_ioctl_driver_process_vmcall_vmm_unknown();
+    void test_ioctl_driver_process_vmcall_unknown_vmcall();
     void test_ioctl_driver_process_vmcall_versions_ioctl_failed();
     void test_ioctl_driver_process_vmcall_versions_ioctl_return_failed();
     void test_ioctl_driver_process_vmcall_versions_protocol_version();

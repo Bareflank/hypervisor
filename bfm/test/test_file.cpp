@@ -74,5 +74,6 @@ bfm_ut::test_file_read_write_success()
     this->expect_no_exception([&] { f.write_binary(filename, binary_data); });
     this->expect_true(f.read_binary(filename) == file::binary_data(binary_data));
 
-    std::remove(filename.c_str());
+    auto &&ret = std::remove(filename.c_str());
+    (void) ret;
 }

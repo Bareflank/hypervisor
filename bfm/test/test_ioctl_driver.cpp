@@ -994,6 +994,28 @@ bfm_ut::test_ioctl_driver_process_vmcall_vmm_unknown()
 }
 
 void
+bfm_ut::test_ioctl_driver_process_vmcall_unknown_vmcall()
+{
+    MockRepository mocks;
+
+    auto &&fil = setup_file(mocks);
+    auto &&ctl = setup_ioctl(mocks, VMM_RUNNING);
+    auto &&clp = setup_command_line_parser(mocks, command_line_parser::command_type::vmcall);
+
+    mocks.OnCall(clp, command_line_parser::registers).Return(ioctl::registers_type
+    {
+        0xBAD,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    });
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        auto &&driver = ioctl_driver(fil, ctl, clp);
+        this->expect_exception([&]{ driver.process(); }, ""_ut_lee);
+    });
+}
+
+void
 bfm_ut::test_ioctl_driver_process_vmcall_versions_ioctl_failed()
 {
     MockRepository mocks;

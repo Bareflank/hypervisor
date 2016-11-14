@@ -165,9 +165,9 @@ bfelf_loader_ut::test_private_relocate_invalid_relocation()
     bfelf_sym symtab[1] = {};
 
     auto file = "hello";
-    auto exec = new char[1];
+    auto exec = std::make_unique<char[]>(1);
 
-    ef.exec = exec;
+    ef.exec = exec.get();
     ef.file = file;
     ef.strtab = &strtab;
     ef.symtab = static_cast<bfelf_sym *>(symtab);
@@ -183,8 +183,6 @@ bfelf_loader_ut::test_private_relocate_invalid_relocation()
     gsl::at(symtab, 0).st_value = 0x1;
 
     EXPECT_TRUE(private_relocate_symbol(&loader, &ef, &rela) == BFELF_ERROR_UNSUPPORTED_RELA);
-
-    delete[] exec;
 }
 
 void
