@@ -110,14 +110,14 @@ void
 intrinsics_ut::test_gdt_set_base_invalid_index()
 {
     gdt_x64 gdt;
-    this->expect_exception([&] { gdt.set_base(1000, 0x10); }, ""_ut_ffe);
+    this->expect_exception([&] { gdt.set_base(1000, 0x10); }, ""_ut_ore);
 }
 
 void
 intrinsics_ut::test_gdt_set_base_tss_at_end_of_gdt()
 {
     gdt_x64 gdt;
-    this->expect_exception([&] { gdt.set_base(3, 0x10); }, ""_ut_ffe);
+    this->expect_exception([&] { gdt.set_base(3, 0x10); }, ""_ut_ore);
 }
 
 void
@@ -150,14 +150,14 @@ void
 intrinsics_ut::test_gdt_base_invalid_index()
 {
     gdt_x64 gdt;
-    this->expect_exception([&] { gdt.base(1000); }, ""_ut_ffe);
+    this->expect_exception([&] { gdt.base(1000); }, ""_ut_ore);
 }
 
 void
 intrinsics_ut::test_gdt_base_tss_at_end_of_gdt()
 {
     gdt_x64 gdt;
-    this->expect_exception([&] { gdt.base(3); }, ""_ut_ffe);
+    this->expect_exception([&] { gdt.base(3); }, ""_ut_ore);
 }
 
 void
@@ -190,7 +190,7 @@ void
 intrinsics_ut::test_gdt_set_limit_invalid_index()
 {
     gdt_x64 gdt;
-    this->expect_exception([&] { gdt.set_limit(1000, 0x10); }, ""_ut_ffe);
+    this->expect_exception([&] { gdt.set_limit(1000, 0x10); }, ""_ut_ore);
 }
 
 void
@@ -213,7 +213,7 @@ void
 intrinsics_ut::test_gdt_limit_invalid_index()
 {
     gdt_x64 gdt;
-    this->expect_exception([&] { gdt.limit(1000); }, ""_ut_ffe);
+    this->expect_exception([&] { gdt.limit(1000); }, ""_ut_ore);
 }
 
 void
@@ -245,7 +245,7 @@ void
 intrinsics_ut::test_gdt_set_access_rights_invalid_index()
 {
     gdt_x64 gdt;
-    this->expect_exception([&] { gdt.set_access_rights(1000, 0x10); }, ""_ut_ffe);
+    this->expect_exception([&] { gdt.set_access_rights(1000, 0x10); }, ""_ut_ore);
 }
 
 void
@@ -268,7 +268,7 @@ void
 intrinsics_ut::test_gdt_access_rights_invalid_index()
 {
     gdt_x64 gdt;
-    this->expect_exception([&] { gdt.access_rights(1000); }, ""_ut_ffe);
+    this->expect_exception([&] { gdt.access_rights(1000); }, ""_ut_ore);
 }
 
 void
