@@ -23,19 +23,9 @@
 #include <stdint.h>
 #include <error_codes.h>
 
-int g_misc = 0;
-
-class test
-{
-public:
-    test() noexcept
-    { g_misc = 10; }
-
-    virtual ~test()
-    { g_misc = 20; }
-};
-
-test g_test;
+int64_t
+return_success()
+{ return SUCCESS; }
 
 void *
 operator new(size_t size)
@@ -69,12 +59,6 @@ sym_that_returns_success(int64_t val)
 }
 
 extern "C" int64_t
-get_misc(void)
-{
-    return g_misc;
-}
-
-extern "C" int64_t
 register_eh_frame(void *addr, uint64_t size)
 {
     (void) addr;
@@ -99,5 +83,19 @@ extern "C" int
 atexit(void (*function)(void))
 {
     (void) function;
+    return 0;
+}
+
+extern "C" int64_t
+local_init(struct section_info_t *info)
+{
+    (void) info;
+    return 0;
+}
+
+extern "C" int64_t
+local_fini(struct section_info_t *info)
+{
+    (void) info;
     return 0;
 }

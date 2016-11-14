@@ -58,10 +58,10 @@ endif
 # Subdirs
 ################################################################################
 
-PARENT_SUBDIRS += bfcrt
-PARENT_SUBDIRS += bfunwind
 PARENT_SUBDIRS += bfc
 PARENT_SUBDIRS += bfcxx
+PARENT_SUBDIRS += bfcrt
+PARENT_SUBDIRS += bfunwind
 PARENT_SUBDIRS += bfdrivers
 PARENT_SUBDIRS += bfelf_loader
 PARENT_SUBDIRS += bfm

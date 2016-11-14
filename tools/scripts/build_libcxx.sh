@@ -40,8 +40,6 @@ mkdir -p $BUILD_ABS/build_libcxx
 
 pushd $BUILD_ABS/build_libcxx
 
-export BAREFLANK_WRAPPER_IS_LIBCXX="true"
-
 if [[ $PRODUCTION == "yes" ]]; then
     BUILD_TYPE=Release
 else

@@ -21,11 +21,13 @@
 
 #include <debug_ring_interface.h>
 
+int64_t return_success();
+
 extern "C" int64_t
 get_drr(uint64_t vcpuid, struct debug_ring_resources_t **drr)
 {
     (void) vcpuid;
     (void) drr;
 
-    return GET_DRR_SUCCESS;
+    return return_success();
 }

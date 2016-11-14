@@ -39,8 +39,6 @@ extern "C"
     int64_t add_md_to_memory_manager(struct module_t *module);
     uint64_t get_elf_file_size(struct module_t *module);
     int64_t load_elf_file(struct module_t *module);
-
-    typedef int64_t (*get_misc_t)();
 }
 
 // -----------------------------------------------------------------------------
@@ -166,21 +164,6 @@ driver_entry_ut::test_helper_execute_symbol_sym_success()
     EXPECT_TRUE(common_add_module(m_dummy_misc.get(), m_dummy_misc_length) == BF_SUCCESS);
     EXPECT_TRUE(common_load_vmm() == BF_SUCCESS);
     EXPECT_TRUE(execute_symbol("sym_that_returns_success", 0, 0, 0) == 0);
-    EXPECT_TRUE(common_fini() == BF_SUCCESS);
-}
-
-void
-driver_entry_ut::test_helper_constructors_success()
-{
-    get_misc_t get_misc;
-
-    EXPECT_TRUE(common_add_module(m_dummy_start_vmm_success.get(), m_dummy_start_vmm_success_length) == BF_SUCCESS);
-    EXPECT_TRUE(common_add_module(m_dummy_stop_vmm_success.get(), m_dummy_stop_vmm_success_length) == BF_SUCCESS);
-    EXPECT_TRUE(common_add_module(m_dummy_add_md_success.get(), m_dummy_add_md_success_length) == BF_SUCCESS);
-    EXPECT_TRUE(common_add_module(m_dummy_misc.get(), m_dummy_misc_length) == BF_SUCCESS);
-    EXPECT_TRUE(common_load_vmm() == BF_SUCCESS);
-    ASSERT_TRUE(resolve_symbol("get_misc", reinterpret_cast<void **>(&get_misc)) == BF_SUCCESS);
-    EXPECT_TRUE(get_misc() == 10);
     EXPECT_TRUE(common_fini() == BF_SUCCESS);
 }
 

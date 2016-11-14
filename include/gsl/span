@@ -702,8 +702,8 @@ as_writeable_bytes(span<ElementType, Extent> s) noexcept
 //
 template <class ElementType>
 span<ElementType>
-make_span(ElementType *ptr, typename span<ElementType>::index_type &&count)
-{ return span<ElementType>(ptr, std::forward<typename span<ElementType>::index_type>(count)); }
+make_span(ElementType *ptr, typename span<ElementType>::index_type count)
+{ return span<ElementType>(ptr, count); }
 
 template <class ElementType>
 span<ElementType>

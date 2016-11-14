@@ -76,7 +76,8 @@ static void dtor_func()
 extern "C" int __attribute__((weak))
 foo(int arg)
 {
-    return g_derived.foo(arg);
+    derived d;
+    return d.foo(arg);
 }
 
 void *
@@ -120,6 +121,27 @@ atexit(void (*function)(void))
 {
     (void) function;
     return 0;
+}
+
+extern "C" int64_t
+local_init(struct section_info_t *info)
+{
+    (void) info;
+    return 0;
+}
+
+extern "C" int64_t
+local_fini(struct section_info_t *info)
+{
+    (void) info;
+    return 0;
+}
+
+uintptr_t __stack_chk_guard = 0x595e9fbd94fda766;
+
+extern "C" void
+__stack_chk_fail(void) noexcept
+{
 }
 
 void func30() {}

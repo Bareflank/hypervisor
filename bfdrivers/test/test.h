@@ -124,8 +124,6 @@ private:
     void test_helper_execute_symbol_missing_symbol();
     void test_helper_execute_symbol_sym_failed();
     void test_helper_execute_symbol_sym_success();
-    void test_helper_constructors_success();
-    void test_helper_destructors_success();
     void test_helper_add_md_to_memory_manager_null_module();
     void test_helper_get_elf_file_size_null_module();
     void test_helper_get_elf_file_size_get_segment_fails();
