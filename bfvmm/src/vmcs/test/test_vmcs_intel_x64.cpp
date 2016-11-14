@@ -29,6 +29,7 @@
 #include <vmcs/vmcs_intel_x64_16bit_control_fields.h>
 #include <vmcs/vmcs_intel_x64_16bit_host_state_fields.h>
 #include <vmcs/vmcs_intel_x64_16bit_guest_state_fields.h>
+#include <vmcs/vmcs_intel_x64_32bit_guest_state_fields.h>
 
 #include <intrinsics/rflags_x64.h>
 #include <intrinsics/crs_intel_x64.h>
@@ -2369,11 +2370,135 @@ vmcs_ut::test_vmcs_host_ia32_efer_reserved()
 }
 
 void
+vmcs_ut::test_vmcs_guest_es_limit()
+{
+    this->expect_true(vmcs::guest_es_limit::exists());
+
+    vmcs::guest_es_limit::set(1UL);
+    this->expect_true(vmcs::guest_es_limit::get() == 1UL);
+
+    vmcs::guest_es_limit::set_if_exists(1UL);
+    this->expect_true(vmcs::guest_es_limit::get_if_exists() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_cs_limit()
+{
+    this->expect_true(vmcs::guest_cs_limit::exists());
+
+    vmcs::guest_cs_limit::set(1UL);
+    this->expect_true(vmcs::guest_cs_limit::get() == 1UL);
+
+    vmcs::guest_cs_limit::set_if_exists(1UL);
+    this->expect_true(vmcs::guest_cs_limit::get_if_exists() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_ss_limit()
+{
+    this->expect_true(vmcs::guest_ss_limit::exists());
+
+    vmcs::guest_ss_limit::set(1UL);
+    this->expect_true(vmcs::guest_ss_limit::get() == 1UL);
+
+    vmcs::guest_ss_limit::set_if_exists(1UL);
+    this->expect_true(vmcs::guest_ss_limit::get_if_exists() == 1UL);
+}
+
+
+void
+vmcs_ut::test_vmcs_guest_ds_limit()
+{
+    this->expect_true(vmcs::guest_ds_limit::exists());
+
+    vmcs::guest_ds_limit::set(1UL);
+    this->expect_true(vmcs::guest_ds_limit::get() == 1UL);
+
+    vmcs::guest_ds_limit::set_if_exists(1UL);
+    this->expect_true(vmcs::guest_ds_limit::get_if_exists() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_fs_limit()
+{
+    this->expect_true(vmcs::guest_fs_limit::exists());
+
+    vmcs::guest_fs_limit::set(1UL);
+    this->expect_true(vmcs::guest_fs_limit::get() == 1UL);
+
+    vmcs::guest_fs_limit::set_if_exists(1UL);
+    this->expect_true(vmcs::guest_fs_limit::get_if_exists() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_gs_limit()
+{
+    this->expect_true(vmcs::guest_gs_limit::exists());
+
+    vmcs::guest_gs_limit::set(1UL);
+    this->expect_true(vmcs::guest_gs_limit::get() == 1UL);
+
+    vmcs::guest_gs_limit::set_if_exists(1UL);
+    this->expect_true(vmcs::guest_gs_limit::get_if_exists() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_ldtr_limit()
+{
+    this->expect_true(vmcs::guest_ldtr_limit::exists());
+
+    vmcs::guest_ldtr_limit::set(1UL);
+    this->expect_true(vmcs::guest_ldtr_limit::get() == 1UL);
+
+    vmcs::guest_ldtr_limit::set_if_exists(1UL);
+    this->expect_true(vmcs::guest_ldtr_limit::get_if_exists() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_tr_limit()
+{
+    this->expect_true(vmcs::guest_tr_limit::exists());
+
+    vmcs::guest_tr_limit::set(1UL);
+    this->expect_true(vmcs::guest_tr_limit::get() == 1UL);
+
+    vmcs::guest_tr_limit::set_if_exists(1UL);
+    this->expect_true(vmcs::guest_tr_limit::get_if_exists() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_gdtr_limit()
+{
+    this->expect_true(vmcs::guest_gdtr_limit::exists());
+
+    vmcs::guest_gdtr_limit::set(1UL);
+    this->expect_true(vmcs::guest_gdtr_limit::get() == 1UL);
+
+    vmcs::guest_gdtr_limit::set_if_exists(1UL);
+    this->expect_true(vmcs::guest_gdtr_limit::get_if_exists() == 1UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_idtr_limit()
+{
+    this->expect_true(vmcs::guest_idtr_limit::exists());
+
+    vmcs::guest_idtr_limit::set(1UL);
+    this->expect_true(vmcs::guest_idtr_limit::get() == 1UL);
+
+    vmcs::guest_idtr_limit::set_if_exists(1UL);
+    this->expect_true(vmcs::guest_idtr_limit::get_if_exists() == 1UL);
+}
+
+void
 vmcs_ut::test_vmcs_guest_es_access_rights()
 {
     vmcs::guest_es_access_rights::set(100UL);
     this->expect_true(vmcs::guest_es_access_rights::exists());
     this->expect_true(vmcs::guest_es_access_rights::get() == 100UL);
+
+    vmcs::guest_es_access_rights::set_if_exists(2UL);
+    this->expect_true(vmcs::guest_es_access_rights::get_if_exists() == 2UL);
 }
 
 void
@@ -2381,6 +2506,9 @@ vmcs_ut::test_vmcs_guest_es_access_rights_type()
 {
     vmcs::guest_es_access_rights::type::set(1UL);
     this->expect_true(vmcs::guest_es_access_rights::type::get() == 1UL);
+
+    vmcs::guest_es_access_rights::type::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_es_access_rights::type::get_if_exists() == 0UL);
 }
 
 void
@@ -2388,6 +2516,9 @@ vmcs_ut::test_vmcs_guest_es_access_rights_s()
 {
     vmcs::guest_es_access_rights::s::set(1UL);
     this->expect_true(vmcs::guest_es_access_rights::s::get() == 1UL);
+
+    vmcs::guest_es_access_rights::s::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_es_access_rights::s::get_if_exists() == 0UL);
 }
 
 void
@@ -2395,6 +2526,9 @@ vmcs_ut::test_vmcs_guest_es_access_rights_dpl()
 {
     vmcs::guest_es_access_rights::dpl::set(1UL);
     this->expect_true(vmcs::guest_es_access_rights::dpl::get() == 1UL);
+
+    vmcs::guest_es_access_rights::dpl::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_es_access_rights::dpl::get_if_exists() == 0UL);
 }
 
 void
@@ -2402,6 +2536,9 @@ vmcs_ut::test_vmcs_guest_es_access_rights_present()
 {
     vmcs::guest_es_access_rights::present::set(1UL);
     this->expect_true(vmcs::guest_es_access_rights::present::get() == 1UL);
+
+    vmcs::guest_es_access_rights::present::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_es_access_rights::present::get_if_exists() == 0UL);
 }
 
 void
@@ -2409,6 +2546,9 @@ vmcs_ut::test_vmcs_guest_es_access_rights_avl()
 {
     vmcs::guest_es_access_rights::avl::set(1UL);
     this->expect_true(vmcs::guest_es_access_rights::avl::get() == 1UL);
+
+    vmcs::guest_es_access_rights::avl::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_es_access_rights::avl::get_if_exists() == 0UL);
 }
 
 void
@@ -2416,6 +2556,9 @@ vmcs_ut::test_vmcs_guest_es_access_rights_l()
 {
     vmcs::guest_es_access_rights::l::set(1UL);
     this->expect_true(vmcs::guest_es_access_rights::l::get() == 1UL);
+
+    vmcs::guest_es_access_rights::l::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_es_access_rights::l::get_if_exists() == 0UL);
 }
 
 void
@@ -2423,6 +2566,9 @@ vmcs_ut::test_vmcs_guest_es_access_rights_db()
 {
     vmcs::guest_es_access_rights::db::set(1UL);
     this->expect_true(vmcs::guest_es_access_rights::db::get() == 1UL);
+
+    vmcs::guest_es_access_rights::db::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_es_access_rights::db::get_if_exists() == 0UL);
 }
 
 void
@@ -2430,6 +2576,9 @@ vmcs_ut::test_vmcs_guest_es_access_rights_granularity()
 {
     vmcs::guest_es_access_rights::granularity::set(1UL);
     this->expect_true(vmcs::guest_es_access_rights::granularity::get() == 1UL);
+
+    vmcs::guest_es_access_rights::granularity::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_es_access_rights::granularity::get_if_exists() == 0UL);
 }
 
 void
@@ -2437,6 +2586,9 @@ vmcs_ut::test_vmcs_guest_es_access_rights_reserved()
 {
     vmcs::guest_es_access_rights::reserved::set(0x10000U);
     this->expect_true(vmcs::guest_es_access_rights::reserved::get() == 0x10000U);
+
+    vmcs::guest_es_access_rights::reserved::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_es_access_rights::reserved::get_if_exists() == 0UL);
 }
 
 void
@@ -2444,6 +2596,9 @@ vmcs_ut::test_vmcs_guest_es_access_rights_unusable()
 {
     vmcs::guest_es_access_rights::unusable::set(1UL);
     this->expect_true(vmcs::guest_es_access_rights::unusable::get() == 1UL);
+
+    vmcs::guest_es_access_rights::unusable::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_es_access_rights::unusable::get_if_exists() == 0UL);
 }
 
 void
@@ -2452,6 +2607,9 @@ vmcs_ut::test_vmcs_guest_cs_access_rights()
     vmcs::guest_cs_access_rights::set(100UL);
     this->expect_true(vmcs::guest_cs_access_rights::exists());
     this->expect_true(vmcs::guest_cs_access_rights::get() == 100UL);
+
+    vmcs::guest_cs_access_rights::set_if_exists(2UL);
+    this->expect_true(vmcs::guest_cs_access_rights::get_if_exists() == 2UL);
 }
 
 void
@@ -2459,6 +2617,9 @@ vmcs_ut::test_vmcs_guest_cs_access_rights_type()
 {
     vmcs::guest_cs_access_rights::type::set(1UL);
     this->expect_true(vmcs::guest_cs_access_rights::type::get() == 1UL);
+
+    vmcs::guest_cs_access_rights::type::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_cs_access_rights::type::get_if_exists() == 0UL);
 }
 
 void
@@ -2466,6 +2627,9 @@ vmcs_ut::test_vmcs_guest_cs_access_rights_s()
 {
     vmcs::guest_cs_access_rights::s::set(1UL);
     this->expect_true(vmcs::guest_cs_access_rights::s::get() == 1UL);
+
+    vmcs::guest_cs_access_rights::s::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_cs_access_rights::s::get_if_exists() == 0UL);
 }
 
 void
@@ -2473,6 +2637,9 @@ vmcs_ut::test_vmcs_guest_cs_access_rights_dpl()
 {
     vmcs::guest_cs_access_rights::dpl::set(1UL);
     this->expect_true(vmcs::guest_cs_access_rights::dpl::get() == 1UL);
+
+    vmcs::guest_cs_access_rights::dpl::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_cs_access_rights::dpl::get_if_exists() == 0UL);
 }
 
 void
@@ -2480,6 +2647,9 @@ vmcs_ut::test_vmcs_guest_cs_access_rights_present()
 {
     vmcs::guest_cs_access_rights::present::set(1UL);
     this->expect_true(vmcs::guest_cs_access_rights::present::get() == 1UL);
+
+    vmcs::guest_cs_access_rights::present::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_cs_access_rights::present::get_if_exists() == 0UL);
 }
 
 void
@@ -2487,6 +2657,9 @@ vmcs_ut::test_vmcs_guest_cs_access_rights_avl()
 {
     vmcs::guest_cs_access_rights::avl::set(1UL);
     this->expect_true(vmcs::guest_cs_access_rights::avl::get() == 1UL);
+
+    vmcs::guest_cs_access_rights::avl::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_cs_access_rights::avl::get_if_exists() == 0UL);
 }
 
 void
@@ -2494,6 +2667,9 @@ vmcs_ut::test_vmcs_guest_cs_access_rights_l()
 {
     vmcs::guest_cs_access_rights::l::set(1UL);
     this->expect_true(vmcs::guest_cs_access_rights::l::get() == 1UL);
+
+    vmcs::guest_cs_access_rights::l::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_cs_access_rights::l::get_if_exists() == 0UL);
 }
 
 void
@@ -2501,6 +2677,9 @@ vmcs_ut::test_vmcs_guest_cs_access_rights_db()
 {
     vmcs::guest_cs_access_rights::db::set(1UL);
     this->expect_true(vmcs::guest_cs_access_rights::db::get() == 1UL);
+
+    vmcs::guest_cs_access_rights::db::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_cs_access_rights::db::get_if_exists() == 0UL);
 }
 
 void
@@ -2508,6 +2687,9 @@ vmcs_ut::test_vmcs_guest_cs_access_rights_granularity()
 {
     vmcs::guest_cs_access_rights::granularity::set(1UL);
     this->expect_true(vmcs::guest_cs_access_rights::granularity::get() == 1UL);
+
+    vmcs::guest_cs_access_rights::granularity::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_cs_access_rights::granularity::get_if_exists() == 0UL);
 }
 
 void
@@ -2515,6 +2697,9 @@ vmcs_ut::test_vmcs_guest_cs_access_rights_reserved()
 {
     vmcs::guest_cs_access_rights::reserved::set(0x10000U);
     this->expect_true(vmcs::guest_cs_access_rights::reserved::get() == 0x10000U);
+
+    vmcs::guest_cs_access_rights::reserved::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_cs_access_rights::reserved::get_if_exists() == 0UL);
 }
 
 void
@@ -2522,6 +2707,9 @@ vmcs_ut::test_vmcs_guest_cs_access_rights_unusable()
 {
     vmcs::guest_cs_access_rights::unusable::set(1UL);
     this->expect_true(vmcs::guest_cs_access_rights::unusable::get() == 1UL);
+
+    vmcs::guest_cs_access_rights::unusable::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_cs_access_rights::unusable::get_if_exists() == 0UL);
 }
 
 void
@@ -2530,6 +2718,9 @@ vmcs_ut::test_vmcs_guest_ss_access_rights()
     vmcs::guest_ss_access_rights::set(100UL);
     this->expect_true(vmcs::guest_ss_access_rights::exists());
     this->expect_true(vmcs::guest_ss_access_rights::get() == 100UL);
+
+    vmcs::guest_ss_access_rights::set_if_exists(2UL);
+    this->expect_true(vmcs::guest_ss_access_rights::get_if_exists() == 2UL);
 }
 
 void
@@ -2537,6 +2728,9 @@ vmcs_ut::test_vmcs_guest_ss_access_rights_type()
 {
     vmcs::guest_ss_access_rights::type::set(1UL);
     this->expect_true(vmcs::guest_ss_access_rights::type::get() == 1UL);
+
+    vmcs::guest_ss_access_rights::type::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_ss_access_rights::type::get_if_exists() == 0UL);
 }
 
 void
@@ -2544,6 +2738,9 @@ vmcs_ut::test_vmcs_guest_ss_access_rights_s()
 {
     vmcs::guest_ss_access_rights::s::set(1UL);
     this->expect_true(vmcs::guest_ss_access_rights::s::get() == 1UL);
+
+    vmcs::guest_ss_access_rights::s::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_ss_access_rights::s::get_if_exists() == 0UL);
 }
 
 void
@@ -2551,6 +2748,9 @@ vmcs_ut::test_vmcs_guest_ss_access_rights_dpl()
 {
     vmcs::guest_ss_access_rights::dpl::set(1UL);
     this->expect_true(vmcs::guest_ss_access_rights::dpl::get() == 1UL);
+
+    vmcs::guest_ss_access_rights::dpl::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_ss_access_rights::dpl::get_if_exists() == 0UL);
 }
 
 void
@@ -2558,6 +2758,9 @@ vmcs_ut::test_vmcs_guest_ss_access_rights_present()
 {
     vmcs::guest_ss_access_rights::present::set(1UL);
     this->expect_true(vmcs::guest_ss_access_rights::present::get() == 1UL);
+
+    vmcs::guest_ss_access_rights::present::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_ss_access_rights::present::get_if_exists() == 0UL);
 }
 
 void
@@ -2565,6 +2768,9 @@ vmcs_ut::test_vmcs_guest_ss_access_rights_avl()
 {
     vmcs::guest_ss_access_rights::avl::set(1UL);
     this->expect_true(vmcs::guest_ss_access_rights::avl::get() == 1UL);
+
+    vmcs::guest_ss_access_rights::avl::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_ss_access_rights::avl::get_if_exists() == 0UL);
 }
 
 void
@@ -2572,6 +2778,9 @@ vmcs_ut::test_vmcs_guest_ss_access_rights_l()
 {
     vmcs::guest_ss_access_rights::l::set(1UL);
     this->expect_true(vmcs::guest_ss_access_rights::l::get() == 1UL);
+
+    vmcs::guest_ss_access_rights::l::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_ss_access_rights::l::get_if_exists() == 0UL);
 }
 
 void
@@ -2579,6 +2788,9 @@ vmcs_ut::test_vmcs_guest_ss_access_rights_db()
 {
     vmcs::guest_ss_access_rights::db::set(1UL);
     this->expect_true(vmcs::guest_ss_access_rights::db::get() == 1UL);
+
+    vmcs::guest_ss_access_rights::db::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_ss_access_rights::db::get_if_exists() == 0UL);
 }
 
 void
@@ -2586,6 +2798,9 @@ vmcs_ut::test_vmcs_guest_ss_access_rights_granularity()
 {
     vmcs::guest_ss_access_rights::granularity::set(1UL);
     this->expect_true(vmcs::guest_ss_access_rights::granularity::get() == 1UL);
+
+    vmcs::guest_ss_access_rights::granularity::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_ss_access_rights::granularity::get_if_exists() == 0UL);
 }
 
 void
@@ -2593,6 +2808,9 @@ vmcs_ut::test_vmcs_guest_ss_access_rights_reserved()
 {
     vmcs::guest_ss_access_rights::reserved::set(0x10000U);
     this->expect_true(vmcs::guest_ss_access_rights::reserved::get() == 0x10000U);
+
+    vmcs::guest_ss_access_rights::reserved::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_ss_access_rights::reserved::get_if_exists() == 0UL);
 }
 
 void
@@ -2600,6 +2818,9 @@ vmcs_ut::test_vmcs_guest_ss_access_rights_unusable()
 {
     vmcs::guest_ss_access_rights::unusable::set(1UL);
     this->expect_true(vmcs::guest_ss_access_rights::unusable::get() == 1UL);
+
+    vmcs::guest_ss_access_rights::unusable::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_ss_access_rights::unusable::get_if_exists() == 0UL);
 }
 
 void
@@ -2608,6 +2829,9 @@ vmcs_ut::test_vmcs_guest_ds_access_rights()
     vmcs::guest_ds_access_rights::set(100UL);
     this->expect_true(vmcs::guest_ds_access_rights::exists());
     this->expect_true(vmcs::guest_ds_access_rights::get() == 100UL);
+
+    vmcs::guest_ds_access_rights::set_if_exists(2UL);
+    this->expect_true(vmcs::guest_ds_access_rights::get_if_exists() == 2UL);
 }
 
 void
@@ -2615,6 +2839,9 @@ vmcs_ut::test_vmcs_guest_ds_access_rights_type()
 {
     vmcs::guest_ds_access_rights::type::set(1UL);
     this->expect_true(vmcs::guest_ds_access_rights::type::get() == 1UL);
+
+    vmcs::guest_ds_access_rights::type::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_ds_access_rights::type::get_if_exists() == 0UL);
 }
 
 void
@@ -2622,6 +2849,9 @@ vmcs_ut::test_vmcs_guest_ds_access_rights_s()
 {
     vmcs::guest_ds_access_rights::s::set(1UL);
     this->expect_true(vmcs::guest_ds_access_rights::s::get() == 1UL);
+
+    vmcs::guest_ds_access_rights::s::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_ds_access_rights::s::get_if_exists() == 0UL);
 }
 
 void
@@ -2629,6 +2859,9 @@ vmcs_ut::test_vmcs_guest_ds_access_rights_dpl()
 {
     vmcs::guest_ds_access_rights::dpl::set(1UL);
     this->expect_true(vmcs::guest_ds_access_rights::dpl::get() == 1UL);
+
+    vmcs::guest_ds_access_rights::dpl::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_ds_access_rights::dpl::get_if_exists() == 0UL);
 }
 
 void
@@ -2636,6 +2869,9 @@ vmcs_ut::test_vmcs_guest_ds_access_rights_present()
 {
     vmcs::guest_ds_access_rights::present::set(1UL);
     this->expect_true(vmcs::guest_ds_access_rights::present::get() == 1UL);
+
+    vmcs::guest_ds_access_rights::present::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_ds_access_rights::present::get_if_exists() == 0UL);
 }
 
 void
@@ -2643,6 +2879,9 @@ vmcs_ut::test_vmcs_guest_ds_access_rights_avl()
 {
     vmcs::guest_ds_access_rights::avl::set(1UL);
     this->expect_true(vmcs::guest_ds_access_rights::avl::get() == 1UL);
+
+    vmcs::guest_ds_access_rights::avl::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_ds_access_rights::avl::get_if_exists() == 0UL);
 }
 
 void
@@ -2650,6 +2889,9 @@ vmcs_ut::test_vmcs_guest_ds_access_rights_l()
 {
     vmcs::guest_ds_access_rights::l::set(1UL);
     this->expect_true(vmcs::guest_ds_access_rights::l::get() == 1UL);
+
+    vmcs::guest_ds_access_rights::l::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_ds_access_rights::l::get_if_exists() == 0UL);
 }
 
 void
@@ -2657,6 +2899,9 @@ vmcs_ut::test_vmcs_guest_ds_access_rights_db()
 {
     vmcs::guest_ds_access_rights::db::set(1UL);
     this->expect_true(vmcs::guest_ds_access_rights::db::get() == 1UL);
+
+    vmcs::guest_ds_access_rights::db::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_ds_access_rights::db::get_if_exists() == 0UL);
 }
 
 void
@@ -2664,6 +2909,9 @@ vmcs_ut::test_vmcs_guest_ds_access_rights_granularity()
 {
     vmcs::guest_ds_access_rights::granularity::set(1UL);
     this->expect_true(vmcs::guest_ds_access_rights::granularity::get() == 1UL);
+
+    vmcs::guest_ds_access_rights::granularity::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_ds_access_rights::granularity::get_if_exists() == 0UL);
 }
 
 void
@@ -2671,6 +2919,9 @@ vmcs_ut::test_vmcs_guest_ds_access_rights_reserved()
 {
     vmcs::guest_ds_access_rights::reserved::set(0x10000U);
     this->expect_true(vmcs::guest_ds_access_rights::reserved::get() == 0x10000U);
+
+    vmcs::guest_ds_access_rights::reserved::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_ds_access_rights::reserved::get_if_exists() == 0UL);
 }
 
 void
@@ -2678,6 +2929,9 @@ vmcs_ut::test_vmcs_guest_ds_access_rights_unusable()
 {
     vmcs::guest_ds_access_rights::unusable::set(1UL);
     this->expect_true(vmcs::guest_ds_access_rights::unusable::get() == 1UL);
+
+    vmcs::guest_ds_access_rights::unusable::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_ds_access_rights::unusable::get_if_exists() == 0UL);
 }
 
 void
@@ -2686,6 +2940,9 @@ vmcs_ut::test_vmcs_guest_fs_access_rights()
     vmcs::guest_fs_access_rights::set(100UL);
     this->expect_true(vmcs::guest_fs_access_rights::exists());
     this->expect_true(vmcs::guest_fs_access_rights::get() == 100UL);
+
+    vmcs::guest_fs_access_rights::set_if_exists(2UL);
+    this->expect_true(vmcs::guest_fs_access_rights::get_if_exists() == 2UL);
 }
 
 void
@@ -2693,6 +2950,9 @@ vmcs_ut::test_vmcs_guest_fs_access_rights_type()
 {
     vmcs::guest_fs_access_rights::type::set(1UL);
     this->expect_true(vmcs::guest_fs_access_rights::type::get() == 1UL);
+
+    vmcs::guest_fs_access_rights::type::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_fs_access_rights::type::get_if_exists() == 0UL);
 }
 
 void
@@ -2700,6 +2960,9 @@ vmcs_ut::test_vmcs_guest_fs_access_rights_s()
 {
     vmcs::guest_fs_access_rights::s::set(1UL);
     this->expect_true(vmcs::guest_fs_access_rights::s::get() == 1UL);
+
+    vmcs::guest_fs_access_rights::s::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_fs_access_rights::s::get_if_exists() == 0UL);
 }
 
 void
@@ -2707,6 +2970,9 @@ vmcs_ut::test_vmcs_guest_fs_access_rights_dpl()
 {
     vmcs::guest_fs_access_rights::dpl::set(1UL);
     this->expect_true(vmcs::guest_fs_access_rights::dpl::get() == 1UL);
+
+    vmcs::guest_fs_access_rights::dpl::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_fs_access_rights::dpl::get_if_exists() == 0UL);
 }
 
 void
@@ -2714,6 +2980,9 @@ vmcs_ut::test_vmcs_guest_fs_access_rights_present()
 {
     vmcs::guest_fs_access_rights::present::set(1UL);
     this->expect_true(vmcs::guest_fs_access_rights::present::get() == 1UL);
+
+    vmcs::guest_fs_access_rights::present::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_fs_access_rights::present::get_if_exists() == 0UL);
 }
 
 void
@@ -2721,6 +2990,9 @@ vmcs_ut::test_vmcs_guest_fs_access_rights_avl()
 {
     vmcs::guest_fs_access_rights::avl::set(1UL);
     this->expect_true(vmcs::guest_fs_access_rights::avl::get() == 1UL);
+
+    vmcs::guest_fs_access_rights::avl::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_fs_access_rights::avl::get_if_exists() == 0UL);
 }
 
 void
@@ -2728,6 +3000,9 @@ vmcs_ut::test_vmcs_guest_fs_access_rights_l()
 {
     vmcs::guest_fs_access_rights::l::set(1UL);
     this->expect_true(vmcs::guest_fs_access_rights::l::get() == 1UL);
+
+    vmcs::guest_fs_access_rights::l::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_fs_access_rights::l::get_if_exists() == 0UL);
 }
 
 void
@@ -2735,6 +3010,9 @@ vmcs_ut::test_vmcs_guest_fs_access_rights_db()
 {
     vmcs::guest_fs_access_rights::db::set(1UL);
     this->expect_true(vmcs::guest_fs_access_rights::db::get() == 1UL);
+
+    vmcs::guest_fs_access_rights::db::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_fs_access_rights::db::get_if_exists() == 0UL);
 }
 
 void
@@ -2742,6 +3020,9 @@ vmcs_ut::test_vmcs_guest_fs_access_rights_granularity()
 {
     vmcs::guest_fs_access_rights::granularity::set(1UL);
     this->expect_true(vmcs::guest_fs_access_rights::granularity::get() == 1UL);
+
+    vmcs::guest_fs_access_rights::granularity::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_fs_access_rights::granularity::get_if_exists() == 0UL);
 }
 
 void
@@ -2749,6 +3030,9 @@ vmcs_ut::test_vmcs_guest_fs_access_rights_reserved()
 {
     vmcs::guest_fs_access_rights::reserved::set(0x10000U);
     this->expect_true(vmcs::guest_fs_access_rights::reserved::get() == 0x10000U);
+
+    vmcs::guest_fs_access_rights::reserved::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_fs_access_rights::reserved::get_if_exists() == 0UL);
 }
 
 void
@@ -2756,6 +3040,9 @@ vmcs_ut::test_vmcs_guest_fs_access_rights_unusable()
 {
     vmcs::guest_fs_access_rights::unusable::set(1UL);
     this->expect_true(vmcs::guest_fs_access_rights::unusable::get() == 1UL);
+
+    vmcs::guest_fs_access_rights::unusable::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_fs_access_rights::unusable::get_if_exists() == 0UL);
 }
 
 void
@@ -2764,6 +3051,9 @@ vmcs_ut::test_vmcs_guest_gs_access_rights()
     vmcs::guest_gs_access_rights::set(100UL);
     this->expect_true(vmcs::guest_gs_access_rights::exists());
     this->expect_true(vmcs::guest_gs_access_rights::get() == 100UL);
+
+    vmcs::guest_gs_access_rights::set_if_exists(2UL);
+    this->expect_true(vmcs::guest_gs_access_rights::get_if_exists() == 2UL);
 }
 
 void
@@ -2771,6 +3061,9 @@ vmcs_ut::test_vmcs_guest_gs_access_rights_type()
 {
     vmcs::guest_gs_access_rights::type::set(1UL);
     this->expect_true(vmcs::guest_gs_access_rights::type::get() == 1UL);
+
+    vmcs::guest_gs_access_rights::type::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_gs_access_rights::type::get_if_exists() == 0UL);
 }
 
 void
@@ -2778,6 +3071,9 @@ vmcs_ut::test_vmcs_guest_gs_access_rights_s()
 {
     vmcs::guest_gs_access_rights::s::set(1UL);
     this->expect_true(vmcs::guest_gs_access_rights::s::get() == 1UL);
+
+    vmcs::guest_gs_access_rights::s::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_gs_access_rights::s::get_if_exists() == 0UL);
 }
 
 void
@@ -2785,6 +3081,9 @@ vmcs_ut::test_vmcs_guest_gs_access_rights_dpl()
 {
     vmcs::guest_gs_access_rights::dpl::set(1UL);
     this->expect_true(vmcs::guest_gs_access_rights::dpl::get() == 1UL);
+
+    vmcs::guest_gs_access_rights::dpl::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_gs_access_rights::dpl::get_if_exists() == 0UL);
 }
 
 void
@@ -2792,6 +3091,9 @@ vmcs_ut::test_vmcs_guest_gs_access_rights_present()
 {
     vmcs::guest_gs_access_rights::present::set(1UL);
     this->expect_true(vmcs::guest_gs_access_rights::present::get() == 1UL);
+
+    vmcs::guest_gs_access_rights::present::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_gs_access_rights::present::get_if_exists() == 0UL);
 }
 
 void
@@ -2799,6 +3101,9 @@ vmcs_ut::test_vmcs_guest_gs_access_rights_avl()
 {
     vmcs::guest_gs_access_rights::avl::set(1UL);
     this->expect_true(vmcs::guest_gs_access_rights::avl::get() == 1UL);
+
+    vmcs::guest_gs_access_rights::avl::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_gs_access_rights::avl::get_if_exists() == 0UL);
 }
 
 void
@@ -2806,6 +3111,9 @@ vmcs_ut::test_vmcs_guest_gs_access_rights_l()
 {
     vmcs::guest_gs_access_rights::l::set(1UL);
     this->expect_true(vmcs::guest_gs_access_rights::l::get() == 1UL);
+
+    vmcs::guest_gs_access_rights::l::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_gs_access_rights::l::get_if_exists() == 0UL);
 }
 
 void
@@ -2813,6 +3121,9 @@ vmcs_ut::test_vmcs_guest_gs_access_rights_db()
 {
     vmcs::guest_gs_access_rights::db::set(1UL);
     this->expect_true(vmcs::guest_gs_access_rights::db::get() == 1UL);
+
+    vmcs::guest_gs_access_rights::db::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_gs_access_rights::db::get_if_exists() == 0UL);
 }
 
 void
@@ -2820,6 +3131,9 @@ vmcs_ut::test_vmcs_guest_gs_access_rights_granularity()
 {
     vmcs::guest_gs_access_rights::granularity::set(1UL);
     this->expect_true(vmcs::guest_gs_access_rights::granularity::get() == 1UL);
+
+    vmcs::guest_gs_access_rights::granularity::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_gs_access_rights::granularity::get_if_exists() == 0UL);
 }
 
 void
@@ -2827,6 +3141,9 @@ vmcs_ut::test_vmcs_guest_gs_access_rights_reserved()
 {
     vmcs::guest_gs_access_rights::reserved::set(0x10000U);
     this->expect_true(vmcs::guest_gs_access_rights::reserved::get() == 0x10000U);
+
+    vmcs::guest_gs_access_rights::reserved::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_gs_access_rights::reserved::get_if_exists() == 0UL);
 }
 
 void
@@ -2834,6 +3151,9 @@ vmcs_ut::test_vmcs_guest_gs_access_rights_unusable()
 {
     vmcs::guest_gs_access_rights::unusable::set(1UL);
     this->expect_true(vmcs::guest_gs_access_rights::unusable::get() == 1UL);
+
+    vmcs::guest_gs_access_rights::unusable::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_gs_access_rights::unusable::get_if_exists() == 0UL);
 }
 
 void
@@ -2842,6 +3162,9 @@ vmcs_ut::test_vmcs_guest_ldtr_access_rights()
     vmcs::guest_ldtr_access_rights::set(100UL);
     this->expect_true(vmcs::guest_ldtr_access_rights::exists());
     this->expect_true(vmcs::guest_ldtr_access_rights::get() == 100UL);
+
+    vmcs::guest_ldtr_access_rights::set_if_exists(2UL);
+    this->expect_true(vmcs::guest_ldtr_access_rights::get_if_exists() == 2UL);
 }
 
 void
@@ -2849,6 +3172,9 @@ vmcs_ut::test_vmcs_guest_ldtr_access_rights_type()
 {
     vmcs::guest_ldtr_access_rights::type::set(1UL);
     this->expect_true(vmcs::guest_ldtr_access_rights::type::get() == 1UL);
+
+    vmcs::guest_ldtr_access_rights::type::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_ldtr_access_rights::type::get_if_exists() == 0UL);
 }
 
 void
@@ -2856,6 +3182,9 @@ vmcs_ut::test_vmcs_guest_ldtr_access_rights_s()
 {
     vmcs::guest_ldtr_access_rights::s::set(1UL);
     this->expect_true(vmcs::guest_ldtr_access_rights::s::get() == 1UL);
+
+    vmcs::guest_ldtr_access_rights::s::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_ldtr_access_rights::s::get_if_exists() == 0UL);
 }
 
 void
@@ -2863,6 +3192,9 @@ vmcs_ut::test_vmcs_guest_ldtr_access_rights_dpl()
 {
     vmcs::guest_ldtr_access_rights::dpl::set(1UL);
     this->expect_true(vmcs::guest_ldtr_access_rights::dpl::get() == 1UL);
+
+    vmcs::guest_ldtr_access_rights::dpl::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_ldtr_access_rights::dpl::get_if_exists() == 0UL);
 }
 
 void
@@ -2870,6 +3202,9 @@ vmcs_ut::test_vmcs_guest_ldtr_access_rights_present()
 {
     vmcs::guest_ldtr_access_rights::present::set(1UL);
     this->expect_true(vmcs::guest_ldtr_access_rights::present::get() == 1UL);
+
+    vmcs::guest_ldtr_access_rights::present::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_ldtr_access_rights::present::get_if_exists() == 0UL);
 }
 
 void
@@ -2877,6 +3212,9 @@ vmcs_ut::test_vmcs_guest_ldtr_access_rights_avl()
 {
     vmcs::guest_ldtr_access_rights::avl::set(1UL);
     this->expect_true(vmcs::guest_ldtr_access_rights::avl::get() == 1UL);
+
+    vmcs::guest_ldtr_access_rights::avl::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_ldtr_access_rights::avl::get_if_exists() == 0UL);
 }
 
 void
@@ -2884,6 +3222,9 @@ vmcs_ut::test_vmcs_guest_ldtr_access_rights_l()
 {
     vmcs::guest_ldtr_access_rights::l::set(1UL);
     this->expect_true(vmcs::guest_ldtr_access_rights::l::get() == 1UL);
+
+    vmcs::guest_ldtr_access_rights::l::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_ldtr_access_rights::l::get_if_exists() == 0UL);
 }
 
 void
@@ -2891,6 +3232,9 @@ vmcs_ut::test_vmcs_guest_ldtr_access_rights_db()
 {
     vmcs::guest_ldtr_access_rights::db::set(1UL);
     this->expect_true(vmcs::guest_ldtr_access_rights::db::get() == 1UL);
+
+    vmcs::guest_ldtr_access_rights::db::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_ldtr_access_rights::db::get_if_exists() == 0UL);
 }
 
 void
@@ -2898,6 +3242,9 @@ vmcs_ut::test_vmcs_guest_ldtr_access_rights_granularity()
 {
     vmcs::guest_ldtr_access_rights::granularity::set(1UL);
     this->expect_true(vmcs::guest_ldtr_access_rights::granularity::get() == 1UL);
+
+    vmcs::guest_ldtr_access_rights::granularity::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_ldtr_access_rights::granularity::get_if_exists() == 0UL);
 }
 
 void
@@ -2905,6 +3252,9 @@ vmcs_ut::test_vmcs_guest_ldtr_access_rights_reserved()
 {
     vmcs::guest_ldtr_access_rights::reserved::set(0x10000U);
     this->expect_true(vmcs::guest_ldtr_access_rights::reserved::get() == 0x10000U);
+
+    vmcs::guest_ldtr_access_rights::reserved::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_ldtr_access_rights::reserved::get_if_exists() == 0UL);
 }
 
 void
@@ -2912,6 +3262,9 @@ vmcs_ut::test_vmcs_guest_ldtr_access_rights_unusable()
 {
     vmcs::guest_ldtr_access_rights::unusable::set(1UL);
     this->expect_true(vmcs::guest_ldtr_access_rights::unusable::get() == 1UL);
+
+    vmcs::guest_ldtr_access_rights::unusable::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_ldtr_access_rights::unusable::get_if_exists() == 0UL);
 }
 
 void
@@ -2920,6 +3273,9 @@ vmcs_ut::test_vmcs_guest_tr_access_rights()
     vmcs::guest_tr_access_rights::set(100UL);
     this->expect_true(vmcs::guest_tr_access_rights::exists());
     this->expect_true(vmcs::guest_tr_access_rights::get() == 100UL);
+
+    vmcs::guest_tr_access_rights::set_if_exists(2UL);
+    this->expect_true(vmcs::guest_tr_access_rights::get_if_exists() == 2UL);
 }
 
 void
@@ -2927,6 +3283,9 @@ vmcs_ut::test_vmcs_guest_tr_access_rights_type()
 {
     vmcs::guest_tr_access_rights::type::set(1UL);
     this->expect_true(vmcs::guest_tr_access_rights::type::get() == 1UL);
+
+    vmcs::guest_tr_access_rights::type::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_tr_access_rights::type::get_if_exists() == 0UL);
 }
 
 void
@@ -2934,6 +3293,9 @@ vmcs_ut::test_vmcs_guest_tr_access_rights_s()
 {
     vmcs::guest_tr_access_rights::s::set(1UL);
     this->expect_true(vmcs::guest_tr_access_rights::s::get() == 1UL);
+
+    vmcs::guest_tr_access_rights::s::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_tr_access_rights::s::get_if_exists() == 0UL);
 }
 
 void
@@ -2941,6 +3303,9 @@ vmcs_ut::test_vmcs_guest_tr_access_rights_dpl()
 {
     vmcs::guest_tr_access_rights::dpl::set(1UL);
     this->expect_true(vmcs::guest_tr_access_rights::dpl::get() == 1UL);
+
+    vmcs::guest_tr_access_rights::dpl::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_tr_access_rights::dpl::get_if_exists() == 0UL);
 }
 
 void
@@ -2948,6 +3313,9 @@ vmcs_ut::test_vmcs_guest_tr_access_rights_present()
 {
     vmcs::guest_tr_access_rights::present::set(1UL);
     this->expect_true(vmcs::guest_tr_access_rights::present::get() == 1UL);
+
+    vmcs::guest_tr_access_rights::present::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_tr_access_rights::present::get_if_exists() == 0UL);
 }
 
 void
@@ -2955,6 +3323,9 @@ vmcs_ut::test_vmcs_guest_tr_access_rights_avl()
 {
     vmcs::guest_tr_access_rights::avl::set(1UL);
     this->expect_true(vmcs::guest_tr_access_rights::avl::get() == 1UL);
+
+    vmcs::guest_tr_access_rights::avl::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_tr_access_rights::avl::get_if_exists() == 0UL);
 }
 
 void
@@ -2962,6 +3333,9 @@ vmcs_ut::test_vmcs_guest_tr_access_rights_l()
 {
     vmcs::guest_tr_access_rights::l::set(1UL);
     this->expect_true(vmcs::guest_tr_access_rights::l::get() == 1UL);
+
+    vmcs::guest_tr_access_rights::l::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_tr_access_rights::l::get_if_exists() == 0UL);
 }
 
 void
@@ -2969,6 +3343,9 @@ vmcs_ut::test_vmcs_guest_tr_access_rights_db()
 {
     vmcs::guest_tr_access_rights::db::set(1UL);
     this->expect_true(vmcs::guest_tr_access_rights::db::get() == 1UL);
+
+    vmcs::guest_tr_access_rights::db::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_tr_access_rights::db::get_if_exists() == 0UL);
 }
 
 void
@@ -2976,6 +3353,9 @@ vmcs_ut::test_vmcs_guest_tr_access_rights_granularity()
 {
     vmcs::guest_tr_access_rights::granularity::set(1UL);
     this->expect_true(vmcs::guest_tr_access_rights::granularity::get() == 1UL);
+
+    vmcs::guest_tr_access_rights::granularity::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_tr_access_rights::granularity::get_if_exists() == 0UL);
 }
 
 void
@@ -2983,6 +3363,9 @@ vmcs_ut::test_vmcs_guest_tr_access_rights_reserved()
 {
     vmcs::guest_tr_access_rights::reserved::set(0x10000U);
     this->expect_true(vmcs::guest_tr_access_rights::reserved::get() == 0x10000U);
+
+    vmcs::guest_tr_access_rights::reserved::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_tr_access_rights::reserved::get_if_exists() == 0UL);
 }
 
 void
@@ -2990,6 +3373,148 @@ vmcs_ut::test_vmcs_guest_tr_access_rights_unusable()
 {
     vmcs::guest_tr_access_rights::unusable::set(1UL);
     this->expect_true(vmcs::guest_tr_access_rights::unusable::get() == 1UL);
+
+    vmcs::guest_tr_access_rights::unusable::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_tr_access_rights::unusable::get_if_exists() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_interruptibility_state()
+{
+    this->expect_true(vmcs::guest_interruptibility_state::exists());
+
+    vmcs::guest_interruptibility_state::set(1UL);
+    this->expect_true(vmcs::guest_interruptibility_state::get() == 1UL);
+
+    vmcs::guest_interruptibility_state::set_if_exists(2UL);
+    this->expect_true(vmcs::guest_interruptibility_state::get_if_exists() == 2UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_interruptibility_state_blocking_by_sti()
+{
+    using namespace vmcs::guest_interruptibility_state;
+
+    blocking_by_sti::set(1UL);
+    this->expect_true(blocking_by_sti::get() == 1UL);
+
+    blocking_by_sti::set_if_exists(0UL);
+    this->expect_true(blocking_by_sti::get_if_exists() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_interruptibility_state_blocking_by_mov_ss()
+{
+    using namespace vmcs::guest_interruptibility_state;
+
+    blocking_by_mov_ss::set(1UL);
+    this->expect_true(blocking_by_mov_ss::get() == 1UL);
+
+    blocking_by_mov_ss::set_if_exists(0UL);
+    this->expect_true(blocking_by_mov_ss::get_if_exists() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_interruptibility_state_blocking_by_smi()
+{
+    using namespace vmcs::guest_interruptibility_state;
+
+    blocking_by_smi::set(1UL);
+    this->expect_true(blocking_by_smi::get() == 1UL);
+
+    blocking_by_smi::set_if_exists(0UL);
+    this->expect_true(blocking_by_smi::get_if_exists() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_interruptibility_state_blocking_by_nmi()
+{
+    using namespace vmcs::guest_interruptibility_state;
+
+    blocking_by_nmi::set(1UL);
+    this->expect_true(blocking_by_nmi::get() == 1UL);
+
+    blocking_by_nmi::set_if_exists(0UL);
+    this->expect_true(blocking_by_nmi::get_if_exists() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_interruptibility_state_enclave_interruption()
+{
+    using namespace vmcs::guest_interruptibility_state;
+
+    enclave_interruption::set(1UL);
+    this->expect_true(enclave_interruption::get() == 1UL);
+
+    enclave_interruption::set_if_exists(0UL);
+    this->expect_true(enclave_interruption::get_if_exists() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_interruptibility_state_reserved()
+{
+    using namespace vmcs::guest_interruptibility_state;
+
+    reserved::set(1UL);
+    this->expect_true(reserved::get() == 1UL);
+
+    reserved::set_if_exists(0UL);
+    this->expect_true(reserved::get_if_exists() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_activity_state()
+{
+    this->expect_true(vmcs::guest_activity_state::exists());
+
+    vmcs::guest_activity_state::set(vmcs::guest_activity_state::active);
+    this->expect_true(vmcs::guest_activity_state::get() == 0U);
+
+    vmcs::guest_activity_state::set(vmcs::guest_activity_state::hlt);
+    this->expect_true(vmcs::guest_activity_state::get() == 1U);
+
+    vmcs::guest_activity_state::set_if_exists(vmcs::guest_activity_state::shutdown);
+    this->expect_true(vmcs::guest_activity_state::get_if_exists() == 2U);
+
+    vmcs::guest_activity_state::set_if_exists(vmcs::guest_activity_state::wait_for_sipi);
+    this->expect_true(vmcs::guest_activity_state::get_if_exists() == 3U);
+}
+
+void
+vmcs_ut::test_vmcs_guest_smbase()
+{
+    this->expect_true(vmcs::guest_smbase::exists());
+
+    vmcs::guest_smbase::set(1UL);
+    this->expect_true(vmcs::guest_smbase::get() == 1UL);
+
+    vmcs::guest_smbase::set_if_exists(2UL);
+    this->expect_true(vmcs::guest_smbase::get_if_exists() == 2UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_ia32_sysenter_cs()
+{
+    this->expect_true(vmcs::guest_ia32_sysenter_cs::exists());
+
+    vmcs::guest_ia32_sysenter_cs::set(1UL);
+    this->expect_true(vmcs::guest_ia32_sysenter_cs::get() == 1UL);
+
+    vmcs::guest_ia32_sysenter_cs::set_if_exists(2UL);
+    this->expect_true(vmcs::guest_ia32_sysenter_cs::get_if_exists() == 2UL);
+}
+
+void
+vmcs_ut::test_vmcs_vmx_preemption_timer_value()
+{
+    g_msrs[msrs::ia32_vmx_true_pinbased_ctls::addr] = msrs::ia32_vmx_true_pinbased_ctls::activate_vmx_preemption_timer::mask << 32;
+    this->expect_true(vmcs::vmx_preemption_timer_value::exists());
+
+    vmcs::vmx_preemption_timer_value::set(1UL);
+    this->expect_true(vmcs::vmx_preemption_timer_value::get() == 1UL);
+
+    vmcs::vmx_preemption_timer_value::set_if_exists(2UL);
+    this->expect_true(vmcs::vmx_preemption_timer_value::get_if_exists() == 2UL);
 }
 
 void

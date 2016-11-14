@@ -30,6 +30,7 @@
 #include <vmcs/vmcs_intel_x64_promote.h>
 #include <vmcs/vmcs_intel_x64_16bit_host_state_fields.h>
 #include <vmcs/vmcs_intel_x64_16bit_guest_state_fields.h>
+#include <vmcs/vmcs_intel_x64_32bit_guest_state_fields.h>
 #include <memory_manager/memory_manager_x64.h>
 #include <exit_handler/exit_handler_intel_x64_support.h>
 
@@ -296,17 +297,17 @@ vmcs_intel_x64::write_64bit_guest_state(const std::shared_ptr<vmcs_intel_x64_sta
 void
 vmcs_intel_x64::write_32bit_guest_state(const std::shared_ptr<vmcs_intel_x64_state> &state)
 {
-    vm::write(VMCS_GUEST_ES_LIMIT, state->es_limit());
-    vm::write(VMCS_GUEST_CS_LIMIT, state->cs_limit());
-    vm::write(VMCS_GUEST_SS_LIMIT, state->ss_limit());
-    vm::write(VMCS_GUEST_DS_LIMIT, state->ds_limit());
-    vm::write(VMCS_GUEST_FS_LIMIT, state->fs_limit());
-    vm::write(VMCS_GUEST_GS_LIMIT, state->gs_limit());
-    vm::write(VMCS_GUEST_LDTR_LIMIT, state->ldtr_limit());
-    vm::write(VMCS_GUEST_TR_LIMIT, state->tr_limit());
+    vmcs::guest_es_limit::set(state->es_limit());
+    vmcs::guest_cs_limit::set(state->cs_limit());
+    vmcs::guest_ss_limit::set(state->ss_limit());
+    vmcs::guest_ds_limit::set(state->ds_limit());
+    vmcs::guest_fs_limit::set(state->fs_limit());
+    vmcs::guest_gs_limit::set(state->gs_limit());
+    vmcs::guest_ldtr_limit::set(state->ldtr_limit());
+    vmcs::guest_tr_limit::set(state->tr_limit());
 
-    vm::write(VMCS_GUEST_GDTR_LIMIT, state->gdt_limit());
-    vm::write(VMCS_GUEST_IDTR_LIMIT, state->idt_limit());
+    vmcs::guest_gdtr_limit::set(state->gdt_limit());
+    vmcs::guest_idtr_limit::set(state->idt_limit());
 
     vmcs::guest_es_access_rights::set(state->es_access_rights());
     vmcs::guest_cs_access_rights::set(state->cs_access_rights());
@@ -317,7 +318,7 @@ vmcs_intel_x64::write_32bit_guest_state(const std::shared_ptr<vmcs_intel_x64_sta
     vmcs::guest_ldtr_access_rights::set(state->ldtr_access_rights());
     vmcs::guest_tr_access_rights::set(state->tr_access_rights());
 
-    vm::write(VMCS_GUEST_IA32_SYSENTER_CS, state->ia32_sysenter_cs_msr());
+    vmcs::guest_ia32_sysenter_cs::set(state->ia32_sysenter_cs_msr());
 
     // unused: VMCS_GUEST_INTERRUPTIBILITY_STATE
     // unused: VMCS_GUEST_ACTIVITY_STATE
