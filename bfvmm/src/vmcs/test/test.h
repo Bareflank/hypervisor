@@ -406,6 +406,7 @@ private:
     void test_vmcs_guest_smbase();
     void test_vmcs_guest_ia32_sysenter_cs();
     void test_vmcs_vmx_preemption_timer_value();
+    void test_vmcs_host_ia32_sysenter_cs();
     void test_vmcs_pin_based_vm_execution_controls();
     void test_vmcs_pin_based_vm_execution_controls_external_interrupt_exiting();
     void test_vmcs_pin_based_vm_execution_controls_nmi_exiting();
