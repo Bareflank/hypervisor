@@ -81,7 +81,7 @@ public:
     /// @return the resulting pte. Note that this pte is blank, and its
     ///     properties (like present) should be set by the caller
     ///
-    std::shared_ptr<page_table_entry_x64> add_page_x64(integer_pointer virt_addr);
+    gsl::not_null<page_table_entry_x64 *> add_page_x64(integer_pointer virt_addr);
 
     /// Remove Page
     ///
@@ -100,10 +100,10 @@ public:
 
 private:
 
-    template<class T> std::shared_ptr<T> add_pte(pointer p);
-    template<class T> std::shared_ptr<T> remove_pte();
+    template<class T> std::unique_ptr<T> add_pte(pointer p);
+    template<class T> std::unique_ptr<T> remove_pte();
 
-    std::shared_ptr<page_table_entry_x64> add_page_x64(integer_pointer virt_addr, integer_pointer bits);
+    gsl::not_null<page_table_entry_x64 *> add_page_x64(integer_pointer virt_addr, integer_pointer bits);
     void remove_page_x64(integer_pointer virt_addr, integer_pointer bits);
 
     auto empty() const noexcept
@@ -116,7 +116,7 @@ private:
 
     size_type m_size;
     integer_pointer m_cr3_shadow;
-    std::vector<std::shared_ptr<page_table_entry_x64>> m_ptes;
+    std::vector<std::unique_ptr<page_table_entry_x64>> m_ptes;
 
 public:
 

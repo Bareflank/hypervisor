@@ -113,7 +113,7 @@ setup_pt(MockRepository &mocks)
 void
 vcpu_ut::test_vcpu_intel_x64_invalid_id()
 {
-    EXPECT_EXCEPTION(std::make_shared<vcpu_intel_x64>(VCPUID_RESERVED), std::invalid_argument);
+    EXPECT_EXCEPTION(std::make_unique<vcpu_intel_x64>(VCPUID_RESERVED), std::invalid_argument);
 }
 
 void
@@ -129,7 +129,7 @@ vcpu_ut::test_vcpu_intel_x64_valid()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_NO_EXCEPTION(std::make_shared<vcpu_intel_x64>(0, dr, on, cs, eh, vs, gs));
+        EXPECT_NO_EXCEPTION(std::make_unique<vcpu_intel_x64>(0, dr, on, cs, eh, vs, gs));
     });
 }
 
@@ -142,7 +142,7 @@ vcpu_ut::test_vcpu_intel_x64_init_null_params()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        auto vc = std::make_shared<vcpu_intel_x64>(0, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
+        auto vc = std::make_unique<vcpu_intel_x64>(0, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
         vc->init();
     });
 }
@@ -168,7 +168,7 @@ vcpu_ut::test_vcpu_intel_x64_init_valid_params()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        auto vc = std::make_shared<vcpu_intel_x64>(0, dr, on, cs, eh, vs, gs);
+        auto vc = std::make_unique<vcpu_intel_x64>(0, dr, on, cs, eh, vs, gs);
         vc->init();
     });
 }
@@ -194,7 +194,7 @@ vcpu_ut::test_vcpu_intel_x64_init_valid()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        auto vc = std::make_shared<vcpu_intel_x64>(0, dr, on, cs, eh, vs, gs);
+        auto vc = std::make_unique<vcpu_intel_x64>(0, dr, on, cs, eh, vs, gs);
         vc->init();
     });
 }
@@ -220,7 +220,7 @@ vcpu_ut::test_vcpu_intel_x64_init_vmcs_throws()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        auto vc = std::make_shared<vcpu_intel_x64>(0, dr, on, cs, eh, vs, gs);
+        auto vc = std::make_unique<vcpu_intel_x64>(0, dr, on, cs, eh, vs, gs);
         EXPECT_EXCEPTION(vc->init(), std::logic_error);
     });
 }
@@ -234,7 +234,7 @@ vcpu_ut::test_vcpu_intel_x64_fini_null_params()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        auto vc = std::make_shared<vcpu_intel_x64>(0, nullptr, nullptr, nullptr, nullptr, nullptr);
+        auto vc = std::make_unique<vcpu_intel_x64>(0, nullptr, nullptr, nullptr, nullptr, nullptr);
         vc->init();
         vc->fini();
     });
@@ -261,7 +261,7 @@ vcpu_ut::test_vcpu_intel_x64_fini_valid_params()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        auto vc = std::make_shared<vcpu_intel_x64>(0, dr, on, cs, eh, vs, gs);
+        auto vc = std::make_unique<vcpu_intel_x64>(0, dr, on, cs, eh, vs, gs);
         vc->init();
         vc->fini();
     });
@@ -288,7 +288,7 @@ vcpu_ut::test_vcpu_intel_x64_fini_valid()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        auto vc = std::make_shared<vcpu_intel_x64>(0, dr, on, cs, eh, vs, gs);
+        auto vc = std::make_unique<vcpu_intel_x64>(0, dr, on, cs, eh, vs, gs);
         vc->init();
         vc->fini();
     });
@@ -310,7 +310,7 @@ vcpu_ut::test_vcpu_intel_x64_fini_no_init()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        auto vc = std::make_shared<vcpu_intel_x64>(0, dr, on, cs, eh, vs, gs);
+        auto vc = std::make_unique<vcpu_intel_x64>(0, dr, on, cs, eh, vs, gs);
         vc->fini();
     });
 }
@@ -342,7 +342,7 @@ vcpu_ut::test_vcpu_intel_x64_run_launch()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        auto vc = std::make_shared<vcpu_intel_x64>(0x0001000000000000, dr, on, cs, eh, vs, gs);
+        auto vc = std::make_unique<vcpu_intel_x64>(0x0001000000000000, dr, on, cs, eh, vs, gs);
         vc->init();
         vc->run();
     });
@@ -375,7 +375,7 @@ vcpu_ut::test_vcpu_intel_x64_run_launch_is_host_vcpu()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        auto vc = std::make_shared<vcpu_intel_x64>(0, dr, on, cs, eh, vs, gs);
+        auto vc = std::make_unique<vcpu_intel_x64>(0, dr, on, cs, eh, vs, gs);
         vc->init();
         vc->run();
     });
@@ -408,7 +408,7 @@ vcpu_ut::test_vcpu_intel_x64_run_resume()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        auto vc = std::make_shared<vcpu_intel_x64>(0, dr, on, cs, eh, vs, gs);
+        auto vc = std::make_unique<vcpu_intel_x64>(0, dr, on, cs, eh, vs, gs);
         vc->init();
         vc->run();
         vc->run();
@@ -442,7 +442,7 @@ vcpu_ut::test_vcpu_intel_x64_run_no_init()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        auto vc = std::make_shared<vcpu_intel_x64>(0, dr, on, cs, eh, vs, gs);
+        auto vc = std::make_unique<vcpu_intel_x64>(0, dr, on, cs, eh, vs, gs);
         EXPECT_EXCEPTION(vc->run(), std::runtime_error);
     });
 }
@@ -474,7 +474,7 @@ vcpu_ut::test_vcpu_intel_x64_run_vmxon_throws()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        auto vc = std::make_shared<vcpu_intel_x64>(0, dr, on, cs, eh, vs, gs);
+        auto vc = std::make_unique<vcpu_intel_x64>(0, dr, on, cs, eh, vs, gs);
         vc->init();
         EXPECT_EXCEPTION(vc->run(), std::runtime_error);
     });
@@ -507,7 +507,7 @@ vcpu_ut::test_vcpu_intel_x64_run_vmcs_throws()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        auto vc = std::make_shared<vcpu_intel_x64>(0, dr, on, cs, eh, vs, gs);
+        auto vc = std::make_unique<vcpu_intel_x64>(0, dr, on, cs, eh, vs, gs);
         vc->init();
         EXPECT_EXCEPTION(vc->run(), std::runtime_error);
     });
@@ -540,7 +540,7 @@ vcpu_ut::test_vcpu_intel_x64_hlt_no_init()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        auto vc = std::make_shared<vcpu_intel_x64>(0x0001000000000000, dr, on, cs, eh, vs, gs);
+        auto vc = std::make_unique<vcpu_intel_x64>(0x0001000000000000, dr, on, cs, eh, vs, gs);
         vc->hlt();
     });
 }
@@ -572,7 +572,7 @@ vcpu_ut::test_vcpu_intel_x64_hlt_no_run()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        auto vc = std::make_shared<vcpu_intel_x64>(0x0001000000000000, dr, on, cs, eh, vs, gs);
+        auto vc = std::make_unique<vcpu_intel_x64>(0x0001000000000000, dr, on, cs, eh, vs, gs);
         vc->init();
         vc->hlt();
     });
@@ -605,7 +605,7 @@ vcpu_ut::test_vcpu_intel_x64_hlt_valid()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        auto vc = std::make_shared<vcpu_intel_x64>(0x0001000000000000, dr, on, cs, eh, vs, gs);
+        auto vc = std::make_unique<vcpu_intel_x64>(0x0001000000000000, dr, on, cs, eh, vs, gs);
         vc->init();
         vc->run();
         vc->hlt();
@@ -639,7 +639,7 @@ vcpu_ut::test_vcpu_intel_x64_hlt_valid_is_host_vcpu()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        auto vc = std::make_shared<vcpu_intel_x64>(0, dr, on, cs, eh, vs, gs);
+        auto vc = std::make_unique<vcpu_intel_x64>(0, dr, on, cs, eh, vs, gs);
         vc->init();
         vc->run();
         vc->hlt();
@@ -673,7 +673,7 @@ vcpu_ut::test_vcpu_intel_x64_hlt_vmxon_throws()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        auto vc = std::make_shared<vcpu_intel_x64>(0, dr, on, cs, eh, vs, gs);
+        auto vc = std::make_unique<vcpu_intel_x64>(0, dr, on, cs, eh, vs, gs);
         vc->init();
         vc->run();
         EXPECT_EXCEPTION(vc->hlt(), std::runtime_error);

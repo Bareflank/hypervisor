@@ -45,7 +45,7 @@ public:
 
     /// Debug Ring Destructor
     ///
-    virtual ~debug_ring() noexcept = default;
+    virtual ~debug_ring() noexcept;
 
     /// Write to Debug Ring
     ///
@@ -64,7 +64,8 @@ public:
 
 private:
 
-    std::shared_ptr<debug_ring_resources_t> m_drr;
+    uint64_t m_vcpuid;
+    std::unique_ptr<debug_ring_resources_t> m_drr;
 };
 
 /// Get Debug Ring Resource

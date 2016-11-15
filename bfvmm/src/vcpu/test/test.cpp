@@ -20,12 +20,14 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #include <test.h>
+#include <new_delete.h>
+
 #include <vcpu/vcpu.h>
 #include <vcpu/vcpu_factory.h>
 #include <vcpu/vcpu_manager.h>
 
-bool make_vcpu_throws;
-std::shared_ptr<vcpu> g_vcpu;
+bool make_vcpu_throws = false;
+vcpu *g_vcpu = nullptr;
 
 class vcpu_factory_ut : public vcpu_factory
 {
@@ -34,7 +36,7 @@ public:
     vcpu_factory_ut() noexcept = default;
     ~vcpu_factory_ut() override = default;
 
-    std::shared_ptr<vcpu> make_vcpu(uint64_t id, void *attr) override
+    std::unique_ptr<vcpu> make_vcpu(uint64_t id, void *attr) override
     {
         (void) id;
         (void) attr;
@@ -42,7 +44,7 @@ public:
         if (make_vcpu_throws)
             throw std::runtime_error("error");
 
-        return g_vcpu;
+        return std::unique_ptr<vcpu>(g_vcpu);
     }
 };
 
@@ -54,39 +56,11 @@ bool
 vcpu_ut::init()
 {
     g_vcm->set_factory(nullptr);
-    EXPECT_EXCEPTION(g_vcm->create_vcpu(0), std::runtime_error);
+    this->expect_exception([&] { g_vcm->create_vcpu(0); }, ""_ut_ree);
 
-    make_vcpu_throws = false;
-    g_vcm->set_factory(std::make_shared<vcpu_factory_ut>());
+    g_vcm->set_factory(std::make_unique<vcpu_factory_ut>());
 
     return true;
-}
-
-void *
-operator new(std::size_t size)
-{
-    if ((size & (MAX_PAGE_SIZE - 1)) == 0)
-    {
-        void *ptr = nullptr;
-        auto ignored_ret = posix_memalign(&ptr, MAX_PAGE_SIZE, size);
-        (void) ignored_ret;
-        return ptr;
-    }
-
-    return malloc(size);
-}
-
-void
-operator delete(void *ptr, std::size_t size) throw()
-{
-    (void) size;
-    free(ptr);
-}
-
-void
-operator delete(void *ptr) throw()
-{
-    free(ptr);
 }
 
 bool

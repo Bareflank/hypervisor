@@ -22,10 +22,9 @@
 #include <vcpu/vcpu_factory.h>
 #include <vcpu/vcpu_intel_x64.h>
 
-std::shared_ptr<vcpu>
+std::unique_ptr<vcpu>
 vcpu_factory::make_vcpu(uint64_t vcpuid, void *attr)
 {
     (void) attr;
-
-    return std::make_shared<vcpu_intel_x64>(vcpuid);
+    return std::make_unique<vcpu_intel_x64>(vcpuid);
 }

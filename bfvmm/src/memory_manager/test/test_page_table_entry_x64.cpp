@@ -30,7 +30,7 @@ void
 memory_manager_ut::test_page_table_entry_x64_present()
 {
     pte_type entry = 0;
-    auto &&pte = std::make_shared<page_table_entry_x64>(&entry);
+    auto &&pte = std::make_unique<page_table_entry_x64>(&entry);
 
     pte->set_present(true);
     this->expect_true(pte->present());
@@ -46,7 +46,7 @@ void
 memory_manager_ut::test_page_table_entry_x64_rw()
 {
     pte_type entry = 0;
-    auto &&pte = std::make_shared<page_table_entry_x64>(&entry);
+    auto &&pte = std::make_unique<page_table_entry_x64>(&entry);
 
     pte->set_rw(true);
     this->expect_true(pte->rw());
@@ -62,7 +62,7 @@ void
 memory_manager_ut::test_page_table_entry_x64_us()
 {
     pte_type entry = 0;
-    auto &&pte = std::make_shared<page_table_entry_x64>(&entry);
+    auto &&pte = std::make_unique<page_table_entry_x64>(&entry);
 
     pte->set_us(true);
     this->expect_true(pte->us());
@@ -78,7 +78,7 @@ void
 memory_manager_ut::test_page_table_entry_x64_pwt()
 {
     pte_type entry = 0;
-    auto &&pte = std::make_shared<page_table_entry_x64>(&entry);
+    auto &&pte = std::make_unique<page_table_entry_x64>(&entry);
 
     pte->set_pwt(true);
     this->expect_true(pte->pwt());
@@ -94,7 +94,7 @@ void
 memory_manager_ut::test_page_table_entry_x64_pcd()
 {
     pte_type entry = 0;
-    auto &&pte = std::make_shared<page_table_entry_x64>(&entry);
+    auto &&pte = std::make_unique<page_table_entry_x64>(&entry);
 
     pte->set_pcd(true);
     this->expect_true(pte->pcd());
@@ -110,7 +110,7 @@ void
 memory_manager_ut::test_page_table_entry_x64_accessed()
 {
     pte_type entry = 0;
-    auto &&pte = std::make_shared<page_table_entry_x64>(&entry);
+    auto &&pte = std::make_unique<page_table_entry_x64>(&entry);
 
     pte->set_accessed(true);
     this->expect_true(pte->accessed());
@@ -126,7 +126,7 @@ void
 memory_manager_ut::test_page_table_entry_x64_dirty()
 {
     pte_type entry = 0;
-    auto &&pte = std::make_shared<page_table_entry_x64>(&entry);
+    auto &&pte = std::make_unique<page_table_entry_x64>(&entry);
 
     pte->set_dirty(true);
     this->expect_true(pte->dirty());
@@ -142,7 +142,7 @@ void
 memory_manager_ut::test_page_table_entry_x64_pat()
 {
     pte_type entry = 0;
-    auto &&pte = std::make_shared<page_table_entry_x64>(&entry);
+    auto &&pte = std::make_unique<page_table_entry_x64>(&entry);
 
     pte->set_pat(true);
     this->expect_true(pte->pat());
@@ -158,7 +158,7 @@ void
 memory_manager_ut::test_page_table_entry_x64_ps()
 {
     pte_type entry = 0;
-    auto &&pte = std::make_shared<page_table_entry_x64>(&entry);
+    auto &&pte = std::make_unique<page_table_entry_x64>(&entry);
 
     pte->set_ps(true);
     this->expect_true(pte->ps());
@@ -174,7 +174,7 @@ void
 memory_manager_ut::test_page_table_entry_x64_global()
 {
     pte_type entry = 0;
-    auto &&pte = std::make_shared<page_table_entry_x64>(&entry);
+    auto &&pte = std::make_unique<page_table_entry_x64>(&entry);
 
     pte->set_global(true);
     this->expect_true(pte->global());
@@ -190,7 +190,7 @@ void
 memory_manager_ut::test_page_table_entry_x64_nx()
 {
     pte_type entry = 0;
-    auto &&pte = std::make_shared<page_table_entry_x64>(&entry);
+    auto &&pte = std::make_unique<page_table_entry_x64>(&entry);
 
     pte->set_nx(true);
     this->expect_true(pte->nx());
@@ -206,7 +206,7 @@ void
 memory_manager_ut::test_page_table_entry_x64_phys_addr()
 {
     pte_type entry = 0;
-    auto &&pte = std::make_shared<page_table_entry_x64>(&entry);
+    auto &&pte = std::make_unique<page_table_entry_x64>(&entry);
 
     pte->set_present(true);
     pte->set_nx(true);
