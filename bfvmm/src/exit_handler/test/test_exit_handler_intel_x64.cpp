@@ -29,6 +29,8 @@
 
 #include <intrinsics/msrs_intel_x64.h>
 
+#include <vmcs/vmcs_intel_x64_32bit_read_only_data_fields.h>
+
 using namespace x64;
 using namespace intel_x64;
 
@@ -54,7 +56,7 @@ __vmread(uint64_t field, uint64_t *val) noexcept
         case VMCS_EXIT_QUALIFICATION:
             *val = g_exit_qualification;
             break;
-        case VMCS_VM_EXIT_INSTRUCTION_LENGTH:
+        case vmcs::vm_exit_instruction_length::addr:
             *val = g_exit_instruction_length;
             break;
         case VMCS_VM_EXIT_INSTRUCTION_INFORMATION:

@@ -205,8 +205,6 @@ vmcs_ut::list()
     this->test_get_vmcs_field_if_exists();
     this->test_set_vmcs_field();
     this->test_set_vmcs_field_if_exists();
-    this->test_get_vm_control();
-    this->test_get_vm_control_if_exists();
     this->test_set_vm_control();
     this->test_set_vm_control_if_allowed();
     this->test_vmcs_virtual_processor_identifier();

@@ -455,142 +455,121 @@ private:
 };
 
 inline auto
-get_vmcs_field(uint64_t addr, const std::string &name, bool exists)
+get_vmcs_field(uint64_t addr, const char *name, bool exists)
 {
-    auto what = std::string("get_vmcs_field failed: ") + name + " field doesn't exist";
-
     if (!exists)
-        throw std::logic_error(what);
+        throw std::logic_error("get_vmcs_field failed: "_s + name + " field doesn't exist");
 
     return intel_x64::vm::read(addr, name);
 }
 
 inline auto
-get_vmcs_field_if_exists(uint64_t addr, const std::string &name, bool verbose, bool exists)
+get_vmcs_field_if_exists(uint64_t addr, const char *name, bool verbose, bool exists)
 {
-    if (!exists && verbose)
-        bfwarning << "get_vmcs_field_if_exists failed: " << name << " field doesn't exist" << '\n';
-
     if (exists)
         return intel_x64::vm::read(addr, name);
+
+    if (!exists && verbose)
+        bfwarning << "get_vmcs_field_if_exists failed: " << name << " field doesn't exist" << '\n';
 
     return 0UL;
 }
 
 template <class T> void
-set_vmcs_field(T val, uint64_t addr, const std::string &name, bool exists)
+set_vmcs_field(T val, uint64_t addr, const char *name, bool exists)
 {
-    auto what = std::string("set_vmcs_field failed: ") + name + " field doesn't exist";
-
     if (!exists)
-        throw std::logic_error(what);
+        throw std::logic_error("set_vmcs_field failed: "_s + name + " field doesn't exist");
 
     intel_x64::vm::write(addr, val, name);
 }
 
 template <class T> void
-set_vmcs_field_if_exists(T val, uint64_t addr, const std::string &name, bool verbose, bool exists)
+set_vmcs_field_if_exists(T val, uint64_t addr, const char *name, bool verbose, bool exists)
 {
-    if (!exists && verbose)
-        bfwarning << "set_vmcs_field_if_exists failed: " << name << " field doesn't exist" << '\n';
-
     if (exists)
         intel_x64::vm::write(addr, val, name);
-}
-
-inline auto
-get_vm_control(uint64_t addr, const std::string &name, uint64_t mask, bool exists)
-{
-    auto what = std::string("can't get ") + name + ": corresponding vmcs field doesn't exist";
-
-    if (!exists)
-        throw std::logic_error(what);
-
-    return (intel_x64::vm::read(addr, name) & mask);
-}
-
-inline auto
-get_vm_control_if_exists(uint64_t addr, const std::string &name, uint64_t mask, bool verbose, bool exists)
-{
-    auto what = std::string("getting ") + name + " not allowed: corresponding vmcs field doesn't exist";
 
     if (!exists && verbose)
-        bfwarning << what << '\n';
-
-    if (exists)
-        return (intel_x64::vm::read(addr, name) & mask);
-
-    return 0UL;
+        bfwarning << "set_vmcs_field failed: " << name << " field doesn't exist" << '\n';
 }
 
-template <class T> void
-set_vm_control(T val, uint64_t msr_addr, uint64_t ctls_addr,
-               const std::string &name, uint64_t mask, bool field_exists)
+inline void
+set_vm_control(bool val, uint64_t msr_addr, uint64_t ctls_addr,
+               const char *name, uint64_t mask, bool field_exists)
 {
-    using namespace intel_x64;
-
-    auto what = std::string("setting ") + name + " failed: corresponding vmcs field doesn't exist";
-
     if (!field_exists)
-        throw std::logic_error(what);
+        throw std::logic_error("set_vm_control failed: "_s + name + " control doesn't exist");
 
-    bool is_allowed0 = (msrs::get(msr_addr) & mask) == 0;
-    bool is_allowed1 = (msrs::get(msr_addr) & (mask << 32)) != 0;
-
-    if (val == 0)
+    if (!val)
     {
-        if (!is_allowed0)
-            throw std::logic_error(std::string(name) + " is not allowed to be cleared to 0");
+        auto is_allowed0 = (intel_x64::msrs::get(msr_addr) & mask) == 0;
 
-        vm::write(ctls_addr, (vm::read(ctls_addr, name) & ~mask), name);
+        if (!is_allowed0)
+        {
+            throw std::logic_error("set_vm_control failed: "_s + name
+                                   + " control is not allowed to be cleared to 0");
+        }
+
+        intel_x64::vm::write(ctls_addr, (intel_x64::vm::read(ctls_addr, name) & ~mask), name);
     }
     else
     {
-        if (!is_allowed1)
-            throw std::logic_error(std::string(name) + " is not allowed to be set to 1");
+        auto is_allowed1 = (intel_x64::msrs::get(msr_addr) & (mask << 32)) != 0;
 
-        vm::write(ctls_addr, (vm::read(ctls_addr, name) | mask), name);
+        if (!is_allowed1)
+        {
+            throw std::logic_error("set_vm_control failed: "_s + name
+                                   + " control is not allowed to be set to 1");
+        }
+
+        intel_x64::vm::write(ctls_addr, (intel_x64::vm::read(ctls_addr, name) | mask), name);
     }
 }
 
-template <class T> void
-set_vm_control_if_allowed(T val, uint64_t msr_addr, uint64_t ctls_addr,
-                          const std::string &name, uint64_t mask,
+inline void
+set_vm_control_if_allowed(bool val, uint64_t msr_addr, uint64_t ctls_addr,
+                          const char *name, uint64_t mask,
                           bool verbose, bool field_exists) noexcept
 {
-    using namespace intel_x64;
-
     if (!field_exists)
     {
-        bfwarning << "setting " << name << " failed: corresponding vmcs field doesn't exist" << '\n';
+        bfwarning << "set_vm_control_if_allowed failed: " << name << " control doesn't exist" << '\n';
         return;
     }
 
-    bool is_allowed0 = (msrs::get(msr_addr) & mask) == 0;
-    bool is_allowed1 = (msrs::get(msr_addr) & (mask << 32)) != 0;
-
-    if (val == 0)
+    if (!val)
     {
+        auto is_allowed0 = (intel_x64::msrs::get(msr_addr) & mask) == 0;
+
         if (is_allowed0)
         {
-            vm::write(ctls_addr, (vm::read(ctls_addr, name) & ~mask), name);
+            intel_x64::vm::write(ctls_addr, (intel_x64::vm::read(ctls_addr, name) & ~mask), name);
         }
         else
         {
             if (verbose)
-                bfwarning << std::string(name) + " is not allowed to be cleared to 0" << bfendl;
+            {
+                bfwarning << "set_vm_control_if_allowed failed: " << name
+                          << "control is not allowed to be cleared to 0" << '\n';
+            }
         }
     }
     else
     {
+        auto is_allowed1 = (intel_x64::msrs::get(msr_addr) & (mask << 32)) != 0;
+
         if (is_allowed1)
         {
-            vm::write(ctls_addr, (vm::read(ctls_addr, name) | mask), name);
+            intel_x64::vm::write(ctls_addr, (intel_x64::vm::read(ctls_addr, name) | mask), name);
         }
         else
         {
             if (verbose)
-                bfwarning << std::string(name) + " is not allowed to be set to 1" << bfendl;
+            {
+                bfwarning << "set_vm_control_if_allowed failed: " << name
+                          << "control is not allowed to be set to 1" << '\n';
+            }
         }
     }
 }
@@ -1034,7 +1013,7 @@ constexpr const auto VMCS_VM_EXIT_INTERRUPTION_INFORMATION                     =
 constexpr const auto VMCS_VM_EXIT_INTERRUPTION_ERROR_CODE                      = 0x0000000000004406UL;
 constexpr const auto VMCS_IDT_VECTORING_INFORMATION_FIELD                      = 0x0000000000004408UL;
 constexpr const auto VMCS_IDT_VECTORING_ERROR_CODE                             = 0x000000000000440AUL;
-constexpr const auto VMCS_VM_EXIT_INSTRUCTION_LENGTH                           = 0x000000000000440CUL;
+constexpr const auto VMCS_VM_                           = 0x000000000000440CUL;
 constexpr const auto VMCS_VM_EXIT_INSTRUCTION_INFORMATION                      = 0x000000000000440EUL;
 
 // -----------------------------------------------------------------------------

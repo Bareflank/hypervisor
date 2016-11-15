@@ -38,6 +38,7 @@
 #include <intrinsics/vmx_intel_x64.h>
 
 #include <vmcs/vmcs_intel_x64_32bit_guest_state_fields.h>
+#include <vmcs/vmcs_intel_x64_32bit_read_only_data_fields.h>
 
 using namespace x64;
 using namespace intel_x64;
@@ -61,7 +62,7 @@ exit_handler_intel_x64::dispatch()
     m_exit_qualification =
         vm::read(VMCS_EXIT_QUALIFICATION);
     m_exit_instruction_length =
-        vm::read(VMCS_VM_EXIT_INSTRUCTION_LENGTH);
+        vmcs::vm_exit_instruction_length::get();
     m_exit_instruction_information =
         vm::read(VMCS_VM_EXIT_INSTRUCTION_INFORMATION);
 

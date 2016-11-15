@@ -57,7 +57,7 @@ namespace vm
 {
     using field_type = uint64_t;
     using value_type = uint64_t;
-    using name_type = const std::string;
+    using name_type = const char *;
 
     inline void clear(gsl::not_null<void *> ptr)
     {
@@ -77,7 +77,7 @@ namespace vm
             throw std::runtime_error("vm::reset failed");
     }
 
-    inline auto read(field_type field, name_type &name = {})
+    inline auto read(field_type field, name_type name = "")
     {
         value_type value;
 
@@ -92,7 +92,7 @@ namespace vm
         return value;
     }
 
-    inline void write(field_type field, value_type value, name_type &name = {})
+    inline void write(field_type field, value_type value, name_type name = "")
     {
         if (!__vmwrite(field, value))
         {
