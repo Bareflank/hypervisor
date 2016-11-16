@@ -23,6 +23,7 @@
 #include <string>
 
 #include <vmcs/vmcs_intel_x64_16bit_host_state_fields.h>
+#include <vmcs/vmcs_intel_x64_natural_width_host_state_fields.h>
 
 #include <intrinsics/srs_x64.h>
 #include <intrinsics/crs_intel_x64.h>
@@ -42,8 +43,8 @@ setup_check_host_control_registers_and_msrs_paths(std::vector<struct control_flo
         g_msrs[msrs::ia32_vmx_cr4_fixed0::addr] = 0ULL;                  // either 0 or 1
         g_msrs[msrs::ia32_vmx_cr4_fixed1::addr] = 0xFFFFFFFFFFFFFFFFULL; //
         vmcs::host_cr3::set(0x1000ULL); // host_cr3 is valid physical address
-        g_vmcs_fields[VMCS_HOST_IA32_SYSENTER_ESP] = 0x1000UL; // esp is canonical address
-        g_vmcs_fields[VMCS_HOST_IA32_SYSENTER_EIP] = 0x1000UL; // eip is canonical address
+        vmcs::host_ia32_sysenter_esp::set(0x1000UL); // esp is canonical address
+        vmcs::host_ia32_sysenter_eip::set(0x1000UL); // eip is canonical address
         disable_exit_ctl(vmcs::vm_exit_controls::load_ia32_perf_global_ctrl::mask);
         disable_exit_ctl(vmcs::vm_exit_controls::load_ia32_pat::mask);
         disable_exit_ctl(vmcs::vm_exit_controls::load_ia32_efer::mask);
@@ -72,11 +73,11 @@ setup_check_host_segment_and_descriptor_table_registers_paths(std::vector<struct
         host_tr_selector::set(~(tr::ti::mask | tr::rpl::mask)); // tr != 0
 
         enable_exit_ctl(vmcs::vm_exit_controls::host_address_space_size::mask); // VM-exit ctrl host_address_space_size is 1
-        g_vmcs_fields[VMCS_HOST_FS_BASE] = 0x1000UL; // fs base is canonical address
-        g_vmcs_fields[VMCS_HOST_GS_BASE] = 0x1000UL; // gs base is canonical address
-        g_vmcs_fields[VMCS_HOST_GDTR_BASE] = 0x1000UL; // gdtr base is canonical address
-        g_vmcs_fields[VMCS_HOST_IDTR_BASE] = 0x1000UL; // idtr base is canonical address
-        g_vmcs_fields[VMCS_HOST_TR_BASE] = 0x1000UL; // tr base is canonical address
+        vmcs::host_fs_base::set(0x1000UL); // fs base is canonical address
+        vmcs::host_gs_base::set(0x1000UL); // gs base is canonical address
+        vmcs::host_gdtr_base::set(0x1000UL); // gdtr base is canonical address
+        vmcs::host_idtr_base::set(0x1000UL); // idtr base is canonical address
+        vmcs::host_tr_base::set(0x1000UL); // tr base is canonical address
     };
     path.throws_exception = false;
     cfg.push_back(path);
@@ -89,8 +90,8 @@ setup_check_host_checks_related_to_address_space_size_paths(std::vector<struct c
     {
         g_msrs[msrs::ia32_efer::addr] |= msrs::ia32_efer::lma::mask; // efer.lma == 1
         enable_exit_ctl(vmcs::vm_exit_controls::host_address_space_size::mask); // VM-exit ctrl host_address_space_size is 1
-        vmcs::host_cr4::physical_address_extensions::set(1U); // host_cr4::physical_address_extensions == 1
-        g_vmcs_fields[VMCS_HOST_RIP] = 0x1000UL; // rip is canonical address
+        vmcs::host_cr4::physical_address_extensions::enable(); // host_cr4::physical_address_extensions == 1
+        vmcs::host_rip::set(0x1000UL); // rip is canonical address
     };
     path.throws_exception = false;
     cfg.push_back(path);
@@ -156,11 +157,11 @@ setup_check_host_cr3_for_unsupported_bits_paths(std::vector<struct control_flow_
 static void
 setup_check_host_ia32_sysenter_esp_canonical_address_paths(std::vector<struct control_flow_path> &cfg)
 {
-    path.setup = [&] { g_vmcs_fields[VMCS_HOST_IA32_SYSENTER_ESP] = 0; };
+    path.setup = [&] { vmcs::host_ia32_sysenter_esp::set(0U); };
     path.throws_exception = false;
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_HOST_IA32_SYSENTER_ESP] = 0x800000000000; };
+    path.setup = [&] { vmcs::host_ia32_sysenter_esp::set(0x800000000000U); };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("host sysenter esp must be canonical"));
     cfg.push_back(path);
@@ -169,11 +170,11 @@ setup_check_host_ia32_sysenter_esp_canonical_address_paths(std::vector<struct co
 static void
 setup_check_host_ia32_sysenter_eip_canonical_address_paths(std::vector<struct control_flow_path> &cfg)
 {
-    path.setup = [&] { g_vmcs_fields[VMCS_HOST_IA32_SYSENTER_EIP] = 0; };
+    path.setup = [&] {  vmcs::host_ia32_sysenter_eip::set(0U); };
     path.throws_exception = false;
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_HOST_IA32_SYSENTER_EIP] = 0x800000000000; };
+    path.setup = [&] {  vmcs::host_ia32_sysenter_eip::set(0x800000000000U); };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("host sysenter eip must be canonical"));
     cfg.push_back(path);
@@ -462,11 +463,11 @@ setup_check_host_ss_not_equal_zero_paths(std::vector<struct control_flow_path> &
 static void
 setup_check_host_fs_canonical_base_address_paths(std::vector<struct control_flow_path> &cfg)
 {
-    path.setup = [&] { g_vmcs_fields[VMCS_HOST_FS_BASE] = 1; };
+    path.setup = [&] { vmcs::host_fs_base::set(1U); };
     path.throws_exception = false;
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_HOST_FS_BASE] = 0x800000000000; };
+    path.setup = [&] { vmcs::host_fs_base::set(0x800000000000U); };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("host fs base must be canonical"));
     cfg.push_back(path);
@@ -475,11 +476,11 @@ setup_check_host_fs_canonical_base_address_paths(std::vector<struct control_flow
 static void
 setup_check_host_gs_canonical_base_address_paths(std::vector<struct control_flow_path> &cfg)
 {
-    path.setup = [&] { g_vmcs_fields[VMCS_HOST_GS_BASE] = 1; };
+    path.setup = [&] {  vmcs::host_gs_base::set(1U); };
     path.throws_exception = false;
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_HOST_GS_BASE] = 0x800000000000; };
+    path.setup = [&] {  vmcs::host_gs_base::set(0x800000000000U); };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("host gs base must be canonical"));
     cfg.push_back(path);
@@ -488,11 +489,11 @@ setup_check_host_gs_canonical_base_address_paths(std::vector<struct control_flow
 static void
 setup_check_host_gdtr_canonical_base_address_paths(std::vector<struct control_flow_path> &cfg)
 {
-    path.setup = [&] { g_vmcs_fields[VMCS_HOST_GDTR_BASE] = 1; };
+    path.setup = [&] { vmcs::host_gdtr_base::set(1U); };
     path.throws_exception = false;
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_HOST_GDTR_BASE] = 0x800000000000; };
+    path.setup = [&] { vmcs::host_gdtr_base::set(0x800000000000U); };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("host gdtr base must be canonical"));
     cfg.push_back(path);
@@ -501,11 +502,11 @@ setup_check_host_gdtr_canonical_base_address_paths(std::vector<struct control_fl
 static void
 setup_check_host_idtr_canonical_base_address_paths(std::vector<struct control_flow_path> &cfg)
 {
-    path.setup = [&] { g_vmcs_fields[VMCS_HOST_IDTR_BASE] = 1; };
+    path.setup = [&] { vmcs::host_idtr_base::set(1U); };
     path.throws_exception = false;
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_HOST_IDTR_BASE] = 0x800000000000; };
+    path.setup = [&] { vmcs::host_idtr_base::set(0x800000000000U); };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("host idtr base must be canonical"));
     cfg.push_back(path);
@@ -514,11 +515,11 @@ setup_check_host_idtr_canonical_base_address_paths(std::vector<struct control_fl
 static void
 setup_check_host_tr_canonical_base_address_paths(std::vector<struct control_flow_path> &cfg)
 {
-    path.setup = [&] { g_vmcs_fields[VMCS_HOST_TR_BASE] = 1; };
+    path.setup = [&] { vmcs::host_tr_base::set(1U); };
     path.throws_exception = false;
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_HOST_TR_BASE] = 0x800000000000; };
+    path.setup = [&] { vmcs::host_tr_base::set(0x800000000000U); };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("host tr base must be canonical"));
     cfg.push_back(path);
@@ -580,12 +581,12 @@ setup_check_host_host_address_space_disabled_paths(std::vector<struct control_fl
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("cr4 pcide must be disabled if host addr space is disabled"));
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[vmcs::host_cr4::addr] = 0; g_vmcs_fields[VMCS_HOST_RIP] = 0xf000000000; };
+    path.setup = [&] { g_vmcs_fields[vmcs::host_cr4::addr] = 0; vmcs::host_rip::set(0xf000000000U); };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("rip bits 63:32 must be 0 if host addr space is disabled"));
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_HOST_RIP] = 0; };
+    path.setup = [&] { vmcs::host_rip::set(0U); };
     path.throws_exception = false;
     cfg.push_back(path);
 }
@@ -602,12 +603,12 @@ setup_check_host_host_address_space_enabled_paths(std::vector<struct control_flo
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("cr4 pae must be enabled if host addr space is enabled"));
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[vmcs::host_cr4::addr] = cr4::physical_address_extensions::mask; g_vmcs_fields[VMCS_HOST_RIP] = 0x800000000000; };
+    path.setup = [&] { g_vmcs_fields[vmcs::host_cr4::addr] = cr4::physical_address_extensions::mask; vmcs::host_rip::set(0x800000000000U); };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("host rip must be canonical"));
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_HOST_RIP] = 0; };
+    path.setup = [&] { vmcs::host_rip::set(0U); };
     path.throws_exception = false;
     cfg.push_back(path);
 }

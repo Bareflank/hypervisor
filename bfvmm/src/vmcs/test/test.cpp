@@ -386,6 +386,15 @@ vmcs_ut::list()
     this->test_vmcs_host_cr4_smep_enable_bit();
     this->test_vmcs_host_cr4_smap_enable_bit();
     this->test_vmcs_host_cr4_protection_key_enable_bit();
+    this->test_vmcs_host_fs_base();
+    this->test_vmcs_host_gs_base();
+    this->test_vmcs_host_tr_base();
+    this->test_vmcs_host_gdtr_base();
+    this->test_vmcs_host_idtr_base();
+    this->test_vmcs_host_ia32_sysenter_esp();
+    this->test_vmcs_host_ia32_sysenter_eip();
+    this->test_vmcs_host_rsp();
+    this->test_vmcs_host_rip();
     this->test_vmcs_guest_ia32_debugctl();
     this->test_vmcs_guest_ia32_debugctl_lbr();
     this->test_vmcs_guest_ia32_debugctl_btf();

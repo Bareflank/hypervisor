@@ -35,6 +35,7 @@
 #include <vmcs/vmcs_intel_x64_natural_width_guest_state_fields.h>
 #include <memory_manager/memory_manager_x64.h>
 #include <exit_handler/exit_handler_intel_x64_support.h>
+#include <vmcs/vmcs_intel_x64_natural_width_host_state_fields.h>
 
 using namespace x64;
 using namespace intel_x64;
@@ -110,7 +111,7 @@ vmcs_intel_x64::launch(const std::shared_ptr<vmcs_intel_x64_state> &host_state,
 void
 vmcs_intel_x64::promote()
 {
-    vmcs_promote(vm::read(VMCS_HOST_GS_BASE));
+    vmcs_promote(vmcs::host_gs_base::get());
 
     throw std::runtime_error("vmcs promote failed");
 }
@@ -401,18 +402,18 @@ vmcs_intel_x64::write_natural_host_state(const std::shared_ptr<vmcs_intel_x64_st
     vmcs::host_cr3::set(state->cr3());
     vmcs::host_cr4::set(state->cr4());
 
-    vm::write(VMCS_HOST_FS_BASE, state->ia32_fs_base_msr());
-    vm::write(VMCS_HOST_GS_BASE, reinterpret_cast<uintptr_t>(m_state_save.get()));
-    vm::write(VMCS_HOST_TR_BASE, state->tr_base());
+    vmcs::host_fs_base::set(state->ia32_fs_base_msr());
+    vmcs::host_gs_base::set(reinterpret_cast<uintptr_t>(m_state_save.get()));
+    vmcs::host_tr_base::set(state->tr_base());
 
-    vm::write(VMCS_HOST_GDTR_BASE, state->gdt_base());
-    vm::write(VMCS_HOST_IDTR_BASE, state->idt_base());
+    vmcs::host_gdtr_base::set(state->gdt_base());
+    vmcs::host_idtr_base::set(state->idt_base());
 
-    vm::write(VMCS_HOST_IA32_SYSENTER_ESP, state->ia32_sysenter_esp_msr());
-    vm::write(VMCS_HOST_IA32_SYSENTER_EIP, state->ia32_sysenter_eip_msr());
+    vmcs::host_ia32_sysenter_esp::set(state->ia32_sysenter_esp_msr());
+    vmcs::host_ia32_sysenter_eip::set(state->ia32_sysenter_eip_msr());
 
-    vm::write(VMCS_HOST_RSP, reinterpret_cast<uintptr_t>(exit_handler_stack));
-    vm::write(VMCS_HOST_RIP, reinterpret_cast<uintptr_t>(exit_handler_entry));
+    vmcs::host_rsp::set(reinterpret_cast<uintptr_t>(exit_handler_stack));
+    vmcs::host_rip::set(reinterpret_cast<uintptr_t>(exit_handler_entry));
 }
 
 void

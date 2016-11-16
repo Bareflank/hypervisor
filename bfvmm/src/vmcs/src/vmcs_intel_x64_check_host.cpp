@@ -22,6 +22,7 @@
 #include <vmcs/vmcs_intel_x64.h>
 #include <vmcs/vmcs_intel_x64_16bit_host_state_fields.h>
 #include <vmcs/vmcs_intel_x64_32bit_control_fields.h>
+#include <vmcs/vmcs_intel_x64_natural_width_host_state_fields.h>
 
 using namespace intel_x64;
 
@@ -92,18 +93,14 @@ vmcs_intel_x64::check_host_cr3_for_unsupported_bits()
 void
 vmcs_intel_x64::check_host_ia32_sysenter_esp_canonical_address()
 {
-    auto esp = vm::read(VMCS_HOST_IA32_SYSENTER_ESP);
-
-    if (!is_address_canonical(esp))
+    if (!is_address_canonical(vmcs::host_ia32_sysenter_esp::get()))
         throw std::logic_error("host sysenter esp must be canonical");
 }
 
 void
 vmcs_intel_x64::check_host_ia32_sysenter_eip_canonical_address()
 {
-    auto eip = vm::read(VMCS_HOST_IA32_SYSENTER_EIP);
-
-    if (!is_address_canonical(eip))
+    if (!is_address_canonical(vmcs::host_ia32_sysenter_eip::get()))
         throw std::logic_error("host sysenter eip must be canonical");
 }
 
@@ -179,7 +176,7 @@ vmcs_intel_x64::check_host_verify_load_ia32_efer()
     if (vmcs::vm_exit_controls::host_address_space_size::is_enabled() && lma == 0)
         throw std::logic_error("host addr space is 1, but efer.lma is 0");
 
-    if (vmcs::host_cr0::paging::get() == 0)
+    if (vmcs::host_cr0::paging::is_disabled())
         return;
 
     if (lme == 0 && lma != 0)
@@ -310,45 +307,35 @@ vmcs_intel_x64::check_host_ss_not_equal_zero()
 void
 vmcs_intel_x64::check_host_fs_canonical_base_address()
 {
-    auto fs_base = vm::read(VMCS_HOST_FS_BASE);
-
-    if (!is_address_canonical(fs_base))
+    if (!is_address_canonical(vmcs::host_fs_base::get()))
         throw std::logic_error("host fs base must be canonical");
 }
 
 void
 vmcs_intel_x64::check_host_gs_canonical_base_address()
 {
-    auto gs_base = vm::read(VMCS_HOST_GS_BASE);
-
-    if (!is_address_canonical(gs_base))
+    if (!is_address_canonical(vmcs::host_gs_base::get()))
         throw std::logic_error("host gs base must be canonical");
 }
 
 void
 vmcs_intel_x64::check_host_gdtr_canonical_base_address()
 {
-    auto gdtr_base = vm::read(VMCS_HOST_GDTR_BASE);
-
-    if (!is_address_canonical(gdtr_base))
+    if (!is_address_canonical(vmcs::host_gdtr_base::get()))
         throw std::logic_error("host gdtr base must be canonical");
 }
 
 void
 vmcs_intel_x64::check_host_idtr_canonical_base_address()
 {
-    auto idtr_base = vm::read(VMCS_HOST_IDTR_BASE);
-
-    if (!is_address_canonical(idtr_base))
+    if (!is_address_canonical(vmcs::host_idtr_base::get()))
         throw std::logic_error("host idtr base must be canonical");
 }
 
 void
 vmcs_intel_x64::check_host_tr_canonical_base_address()
 {
-    auto tr_base = vm::read(VMCS_HOST_TR_BASE);
-
-    if (!is_address_canonical(tr_base))
+    if (!is_address_canonical(vmcs::host_tr_base::get()))
         throw std::logic_error("host tr base must be canonical");
 }
 
@@ -393,12 +380,10 @@ vmcs_intel_x64::check_host_host_address_space_disabled()
     if (vmcs::vm_entry_controls::ia_32e_mode_guest::is_enabled())
         throw std::logic_error("ia 32e mode must be disabled if host addr space is disabled");
 
-    if (vmcs::host_cr4::pcid_enable_bit::get() != 0)
+    if (vmcs::host_cr4::pcid_enable_bit::is_enabled())
         throw std::logic_error("cr4 pcide must be disabled if host addr space is disabled");
 
-    auto rip = vm::read(VMCS_HOST_RIP);
-
-    if ((rip & 0xFFFFFFFF00000000) != 0)
+    if ((vmcs::host_rip::get() & 0xFFFFFFFF00000000) != 0)
         throw std::logic_error("rip bits 63:32 must be 0 if host addr space is disabled");
 }
 
@@ -408,11 +393,9 @@ vmcs_intel_x64::check_host_host_address_space_enabled()
     if (vmcs::vm_exit_controls::host_address_space_size::is_disabled())
         return;
 
-    if (vmcs::host_cr4::physical_address_extensions::get() == 0)
+    if (vmcs::host_cr4::physical_address_extensions::is_disabled())
         throw std::logic_error("cr4 pae must be enabled if host addr space is enabled");
 
-    auto rip = vm::read(VMCS_HOST_RIP);
-
-    if (!is_address_canonical(rip))
+    if (!is_address_canonical(vmcs::host_rip::get()))
         throw std::logic_error("host rip must be canonical");
 }
