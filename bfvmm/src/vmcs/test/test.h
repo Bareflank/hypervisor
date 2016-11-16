@@ -116,8 +116,6 @@ private:
     void test_get_vmcs_field_if_exists();
     void test_set_vmcs_field();
     void test_set_vmcs_field_if_exists();
-    void test_get_vm_control();
-    void test_get_vm_control_if_exists();
     void test_set_vm_control();
     void test_set_vm_control_if_allowed();
     void test_vmcs_virtual_processor_identifier();

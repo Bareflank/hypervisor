@@ -363,21 +363,20 @@ vmcs_ut::test_resume_failure()
 void
 vmcs_ut::test_get_vmcs_field()
 {
-    std::string name("field");
-    std::string what = std::string("get_vmcs_field_failed: ") + name + " field doesn't exist";
+    constexpr const auto name = "field";
     auto exists = true;
 
-    this->expect_exception([&] { get_vmcs_field(0U, name, !exists); }, std::make_shared<std::logic_error>(what));
+    this->expect_exception([&] { get_vmcs_field(0U, name, !exists); },
+                           std::make_shared<std::logic_error>("field doesn't exist"));
 
     g_vmcs_fields[0U] = 42U;
-
     this->expect_true(get_vmcs_field(0U, name, exists) == 42U);
 }
 
 void
 vmcs_ut::test_get_vmcs_field_if_exists()
 {
-    std::string name("field");
+    constexpr const auto name = "field";
 
     auto exists = true;
     auto verbose = true;
@@ -390,13 +389,12 @@ vmcs_ut::test_get_vmcs_field_if_exists()
 void
 vmcs_ut::test_set_vmcs_field()
 {
-    std::string name("field");
-    std::string what = std::string("set_vmcs_field failed: ") + name + "field doesn't exist";
-
+    constexpr const auto name("field");
     auto exists = true;
     g_vmcs_fields[0U] = 0U;
+
     this->expect_exception([&] { set_vmcs_field(1U, 0U, name, !exists); },
-                           std::make_shared<std::logic_error>(what));
+                           std::make_shared<std::logic_error>("doesn't exist"));
     this->expect_true(g_vmcs_fields[0U] == 0U);
 
     this->expect_no_exception([&] { set_vmcs_field(1U, 0U, name, exists); });
@@ -406,8 +404,7 @@ vmcs_ut::test_set_vmcs_field()
 void
 vmcs_ut::test_set_vmcs_field_if_exists()
 {
-    std::string name("field");
-
+    constexpr const auto name("field");
     auto exists = true;
     auto verbose = true;
     g_vmcs_fields[0U] = 42U;
@@ -426,44 +423,16 @@ vmcs_ut::test_set_vmcs_field_if_exists()
 }
 
 void
-vmcs_ut::test_get_vm_control()
-{
-    auto name("control");
-    std::string what = std::string("can't get ") + name + ": corresponding vmcs field doesn't exist";
-
-    auto exists = true;
-    auto mask = 0x0000000000000002UL;
-    g_vmcs_fields[0U] = mask;
-
-    this->expect_exception([&] { get_vm_control(0U, name, mask, !exists); },
-                           std::make_shared<std::logic_error>(what));
-    this->expect_true(get_vm_control(0U, name, mask, exists) == mask);
-}
-
-void
-vmcs_ut::test_get_vm_control_if_exists()
-{
-    auto name("control");
-    auto exists = true;
-    auto verbose = true;
-    auto mask = 0x8UL;
-    g_vmcs_fields[0U] = mask;
-
-    this->expect_true(get_vm_control_if_exists(0U, name, mask, verbose, !exists) == 0UL);
-    this->expect_true(get_vm_control_if_exists(0U, name, mask, verbose, exists) == mask);
-}
-
-void
 vmcs_ut::test_set_vm_control()
 {
-    auto name("control");
+    constexpr const auto name = "control";
     auto exists = true;
     auto mask = 0x0000000000000040UL;
     auto ctls_addr = 0UL;
     auto msr_addr = 0U;
 
     this->expect_exception([&] { set_vm_control(1UL, msr_addr, ctls_addr, name, mask, !exists); },
-                           std::make_shared<std::logic_error>(std::string(name) + "'s corresponding vmcs field doesn't exist"));
+                           std::make_shared<std::logic_error>("vmcs field doesn't exist"));
 
     g_msrs[msr_addr] = ~mask;
     this->expect_no_exception([&] { set_vm_control(0UL, msr_addr, ctls_addr, name, mask, exists); });
@@ -471,7 +440,7 @@ vmcs_ut::test_set_vm_control()
 
     g_msrs[msr_addr] = mask;
     this->expect_exception([&] { set_vm_control(0UL, msr_addr, ctls_addr, name, mask, exists); },
-                           std::make_shared<std::logic_error>(std::string(name) + " is not allowed to be cleared to 0"));
+                           std::make_shared<std::logic_error>("control is not allowed to be cleared to 0"));
 
     g_msrs[msr_addr] = mask << 32;
     this->expect_no_exception([&] { set_vm_control(1UL, msr_addr, ctls_addr, name, mask, exists); });
@@ -479,13 +448,13 @@ vmcs_ut::test_set_vm_control()
 
     g_msrs[msr_addr] = ~(mask << 32);
     this->expect_exception([&] { set_vm_control(1UL, msr_addr, ctls_addr, name, mask, exists); },
-                           std::make_shared<std::logic_error>(std::string(name) + " is not allowed to be set to 1"));
+                           std::make_shared<std::logic_error>("control is not allowed to be set to 1"));
 }
 
 void
 vmcs_ut::test_set_vm_control_if_allowed()
 {
-    auto name("control");
+    constexpr const auto name = "control";
     auto exists = true;
     auto verbose = true;
     auto mask = 0x0000000000000040UL;
