@@ -32,6 +32,7 @@
 #include <vmcs/vmcs_intel_x64_16bit_guest_state_fields.h>
 #include <vmcs/vmcs_intel_x64_32bit_guest_state_fields.h>
 #include <vmcs/vmcs_intel_x64_32bit_host_state_field.h>
+#include <vmcs/vmcs_intel_x64_natural_width_guest_state_fields.h>
 #include <memory_manager/memory_manager_x64.h>
 #include <exit_handler/exit_handler_intel_x64_support.h>
 
@@ -334,23 +335,23 @@ vmcs_intel_x64::write_natural_guest_state(const std::shared_ptr<vmcs_intel_x64_s
     vmcs::guest_cr3::set(state->cr3());
     vmcs::guest_cr4::set(state->cr4());
 
-    vm::write(VMCS_GUEST_ES_BASE, state->es_base());
-    vm::write(VMCS_GUEST_CS_BASE, state->cs_base());
-    vm::write(VMCS_GUEST_SS_BASE, state->ss_base());
-    vm::write(VMCS_GUEST_DS_BASE, state->ds_base());
-    vm::write(VMCS_GUEST_FS_BASE, state->ia32_fs_base_msr());
-    vm::write(VMCS_GUEST_GS_BASE, state->ia32_gs_base_msr());
-    vm::write(VMCS_GUEST_LDTR_BASE, state->ldtr_base());
-    vm::write(VMCS_GUEST_TR_BASE, state->tr_base());
+    vmcs::guest_es_base::set(state->es_base());
+    vmcs::guest_cs_base::set(state->cs_base());
+    vmcs::guest_ss_base::set(state->ss_base());
+    vmcs::guest_ds_base::set(state->ds_base());
+    vmcs::guest_fs_base::set(state->ia32_fs_base_msr());
+    vmcs::guest_gs_base::set(state->ia32_gs_base_msr());
+    vmcs::guest_ldtr_base::set(state->ldtr_base());
+    vmcs::guest_tr_base::set(state->tr_base());
 
-    vm::write(VMCS_GUEST_GDTR_BASE, state->gdt_base());
-    vm::write(VMCS_GUEST_IDTR_BASE, state->idt_base());
+    vmcs::guest_gdtr_base::set(state->gdt_base());
+    vmcs::guest_idtr_base::set(state->idt_base());
 
-    vm::write(VMCS_GUEST_DR7, state->dr7());
+    vmcs::guest_dr7::set(state->dr7());
     vmcs::guest_rflags::set(state->rflags());
 
-    vm::write(VMCS_GUEST_IA32_SYSENTER_ESP, state->ia32_sysenter_esp_msr());
-    vm::write(VMCS_GUEST_IA32_SYSENTER_EIP, state->ia32_sysenter_eip_msr());
+    vmcs::guest_ia32_sysenter_esp::set(state->ia32_sysenter_esp_msr());
+    vmcs::guest_ia32_sysenter_eip::set(state->ia32_sysenter_eip_msr());
 
     // unused: VMCS_GUEST_RSP, see m_intrinsics->vmlaunch()
     // unused: VMCS_GUEST_RIP, see m_intrinsics->vmlaunch()

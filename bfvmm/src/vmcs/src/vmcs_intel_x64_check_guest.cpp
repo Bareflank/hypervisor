@@ -25,6 +25,8 @@
 #include <memory_manager/memory_manager_x64.h>
 #include <vmcs/vmcs_intel_x64_32bit_guest_state_fields.h>
 
+#include <vmcs/vmcs_intel_x64_natural_width_guest_state_fields.h>
+
 using namespace x64;
 using namespace intel_x64;
 using namespace vmcs;
@@ -78,10 +80,10 @@ vmcs_intel_x64::check_guest_cr0_for_unsupported_bits()
 void
 vmcs_intel_x64::check_guest_cr0_verify_paging_enabled()
 {
-    if (guest_cr0::paging::get() == 0)
+    if (guest_cr0::paging::is_disabled())
         return;
 
-    if (guest_cr0::protection_enable::get() == 0)
+    if (guest_cr0::protection_enable::is_disabled())
         throw std::logic_error("PE must be enabled in cr0 if PG is enabled");
 }
 
@@ -119,10 +121,10 @@ vmcs_intel_x64::check_guest_verify_ia_32e_mode_enabled()
     if (vm_entry_controls::ia_32e_mode_guest::is_disabled())
         return;
 
-    if (guest_cr0::paging::get() == 0)
+    if (guest_cr0::paging::is_disabled())
         throw std::logic_error("paging must be enabled if ia 32e guest mode is enabled");
 
-    if (guest_cr4::physical_address_extensions::get() == 0)
+    if (guest_cr4::physical_address_extensions::is_disabled())
         throw std::logic_error("pae must be enabled if ia 32e guest mode is enabled");
 }
 
@@ -132,7 +134,7 @@ vmcs_intel_x64::check_guest_verify_ia_32e_mode_disabled()
     if (vm_entry_controls::ia_32e_mode_guest::is_enabled())
         return;
 
-    if (guest_cr4::pcid_enable_bit::get() != 0)
+    if (guest_cr4::pcid_enable_bit::is_enabled())
         throw std::logic_error("pcide in cr4 must be disabled if ia 32e guest mode is disabled");
 }
 
@@ -149,7 +151,7 @@ vmcs_intel_x64::check_guest_load_debug_controls_verify_dr7()
     if (vm_entry_controls::load_debug_controls::is_disabled())
         return;
 
-    auto dr7 = vm::read(VMCS_GUEST_DR7);
+    auto dr7 = vmcs::guest_dr7::get();
 
     if ((dr7 & 0xFFFFFFFF00000000) != 0)
         throw std::logic_error("bits 63:32 of dr7 must be 0 if load debug controls is 1");
@@ -158,18 +160,14 @@ vmcs_intel_x64::check_guest_load_debug_controls_verify_dr7()
 void
 vmcs_intel_x64::check_guest_ia32_sysenter_esp_canonical_address()
 {
-    auto esp = vm::read(VMCS_GUEST_IA32_SYSENTER_ESP);
-
-    if (!is_address_canonical(esp))
+    if (!is_address_canonical(vmcs::guest_ia32_sysenter_esp::get()))
         throw std::logic_error("guest sysenter esp must be canonical");
 }
 
 void
 vmcs_intel_x64::check_guest_ia32_sysenter_eip_canonical_address()
 {
-    auto eip = vm::read(VMCS_GUEST_IA32_SYSENTER_EIP);
-
-    if (!is_address_canonical(eip))
+    if (!is_address_canonical(vmcs::guest_ia32_sysenter_eip::get()))
         throw std::logic_error("guest sysenter eip must be canonical");
 }
 
@@ -245,7 +243,7 @@ vmcs_intel_x64::check_guest_verify_load_ia32_efer()
     if (vm_entry_controls::ia_32e_mode_guest::is_enabled() && lma == 0)
         throw std::logic_error("ia 32e mode is 1, but efer.lma is 0");
 
-    if (guest_cr0::paging::get() == 0)
+    if (guest_cr0::paging::is_disabled())
         return;
 
     if (lme == 0 && lma != 0)
@@ -362,7 +360,7 @@ vmcs_intel_x64::check_guest_ss_and_cs_rpl_are_the_same()
     using namespace primary_processor_based_vm_execution_controls;
     using namespace secondary_processor_based_vm_execution_controls;
 
-    if (is_enabled_v8086())
+    if (vmcs::guest_rflags::virtual_8086_mode::is_enabled())
         return;
 
     if (unrestricted_guest::is_enabled_if_exists() && activate_secondary_controls::is_enabled())
@@ -375,169 +373,147 @@ vmcs_intel_x64::check_guest_ss_and_cs_rpl_are_the_same()
 void
 vmcs_intel_x64::check_guest_cs_base_is_shifted()
 {
-    if (!is_enabled_v8086())
+    if (vmcs::guest_rflags::virtual_8086_mode::is_disabled())
         return;
 
     auto cs = guest_cs_selector::get();
-    auto cs_base = vm::read(VMCS_GUEST_CS_BASE);
 
-    if ((cs << 4) != cs_base)
+    if ((cs << 4) != vmcs::guest_cs_base::get())
         throw std::logic_error("if virtual 8086 mode is enabled, cs base must be cs shifted 4 bits");
 }
 
 void
 vmcs_intel_x64::check_guest_ss_base_is_shifted()
 {
-    if (!is_enabled_v8086())
+    if (vmcs::guest_rflags::virtual_8086_mode::is_disabled())
         return;
 
     auto ss = guest_ss_selector::get();
-    auto ss_base = vm::read(VMCS_GUEST_SS_BASE);
 
-    if ((ss << 4) != ss_base)
+    if ((ss << 4) != vmcs::guest_ss_base::get())
         throw std::logic_error("if virtual 8086 mode is enabled, ss base must be ss shifted 4 bits");
 }
 
 void
 vmcs_intel_x64::check_guest_ds_base_is_shifted()
 {
-    if (!is_enabled_v8086())
+    if (vmcs::guest_rflags::virtual_8086_mode::is_disabled())
         return;
 
     auto ds = guest_ds_selector::get();
-    auto ds_base = vm::read(VMCS_GUEST_DS_BASE);
 
-    if ((ds << 4) != ds_base)
+    if ((ds << 4) != vmcs::guest_ds_base::get())
         throw std::logic_error("if virtual 8086 mode is enabled, ds base must be ds shifted 4 bits");
 }
 
 void
 vmcs_intel_x64::check_guest_es_base_is_shifted()
 {
-    if (!is_enabled_v8086())
+    if (vmcs::guest_rflags::virtual_8086_mode::is_disabled())
         return;
 
     auto es = guest_es_selector::get();
-    auto es_base = vm::read(VMCS_GUEST_ES_BASE);
 
-    if ((es << 4) != es_base)
+    if ((es << 4) != vmcs::guest_es_base::get())
         throw std::logic_error("if virtual 8086 mode is enabled, es base must be es shifted 4 bits");
 }
 
 void
 vmcs_intel_x64::check_guest_fs_base_is_shifted()
 {
-    if (!is_enabled_v8086())
+    if (vmcs::guest_rflags::virtual_8086_mode::is_disabled())
         return;
 
     auto fs = guest_fs_selector::get();
-    auto fs_base = vm::read(VMCS_GUEST_FS_BASE);
 
-    if ((fs << 4) != fs_base)
+    if ((fs << 4) != vmcs::guest_fs_base::get())
         throw std::logic_error("if virtual 8086 mode is enabled, fs base must be fs shifted 4 bits");
 }
 
 void
 vmcs_intel_x64::check_guest_gs_base_is_shifted()
 {
-    if (!is_enabled_v8086())
+    if (vmcs::guest_rflags::virtual_8086_mode::is_disabled())
         return;
 
     auto gs = guest_gs_selector::get();
-    auto gs_base = vm::read(VMCS_GUEST_GS_BASE);
 
-    if ((gs << 4) != gs_base)
+    if ((gs << 4) != vmcs::guest_gs_base::get())
         throw std::logic_error("if virtual 8086 mode is enabled, gs base must be gs shift 4 bits");
 }
 
 void
 vmcs_intel_x64::check_guest_tr_base_is_canonical()
 {
-    auto tr_base = vm::read(VMCS_GUEST_TR_BASE);
-
-    if (!is_address_canonical(tr_base))
+    if (!is_address_canonical(vmcs::guest_tr_base::get()))
         throw std::logic_error("guest tr base non-canonical");
 }
 
 void
 vmcs_intel_x64::check_guest_fs_base_is_canonical()
 {
-    auto fs_base = vm::read(VMCS_GUEST_FS_BASE);
-
-    if (!is_address_canonical(fs_base))
+    if (!is_address_canonical(vmcs::guest_fs_base::get()))
         throw std::logic_error("guest fs base non-canonical");
 }
 
 void
 vmcs_intel_x64::check_guest_gs_base_is_canonical()
 {
-    auto gs_base = vm::read(VMCS_GUEST_GS_BASE);
-
-    if (!is_address_canonical(gs_base))
+    if (!is_address_canonical(vmcs::guest_gs_base::get()))
         throw std::logic_error("guest gs base non-canonical");
 }
 
 void
 vmcs_intel_x64::check_guest_ldtr_base_is_canonical()
 {
-    auto ldtr_base = vm::read(VMCS_GUEST_LDTR_BASE);
-
     if (guest_ldtr_access_rights::unusable::get() != 0)
         return;
 
-    if (!is_address_canonical(ldtr_base))
+    if (!is_address_canonical(vmcs::guest_ldtr_base::get()))
         throw std::logic_error("guest ldtr base non-canonical");
 }
 
 void
 vmcs_intel_x64::check_guest_cs_base_upper_dword_0()
 {
-    auto cs_base = vm::read(VMCS_GUEST_CS_BASE);
-
-    if ((cs_base & 0xFFFFFFFF00000000) != 0)
+    if ((vmcs::guest_cs_base::get() & 0xFFFFFFFF00000000) != 0)
         throw std::logic_error("guest cs base bits 63:32 must be 0");
 }
 
 void
 vmcs_intel_x64::check_guest_ss_base_upper_dword_0()
 {
-    auto ss_base = vm::read(VMCS_GUEST_SS_BASE);
-
     if (guest_ds_access_rights::unusable::get() != 0)
         return;
 
-    if ((ss_base & 0xFFFFFFFF00000000) != 0)
+    if ((vmcs::guest_ss_base::get() & 0xFFFFFFFF00000000) != 0)
         throw std::logic_error("guest ss base bits 63:32 must be 0");
 }
 
 void
 vmcs_intel_x64::check_guest_ds_base_upper_dword_0()
 {
-    auto ds_base = vm::read(VMCS_GUEST_DS_BASE);
-
     if (guest_ds_access_rights::unusable::get() != 0)
         return;
 
-    if ((ds_base & 0xFFFFFFFF00000000) != 0)
+    if ((vmcs::guest_ds_base::get() & 0xFFFFFFFF00000000) != 0)
         throw std::logic_error("guest ds base bits 63:32 must be 0");
 }
 
 void
 vmcs_intel_x64::check_guest_es_base_upper_dword_0()
 {
-    auto es_base = vm::read(VMCS_GUEST_ES_BASE);
-
     if (guest_es_access_rights::unusable::get() != 0)
         return;
 
-    if ((es_base & 0xFFFFFFFF00000000) != 0)
+    if ((vmcs::guest_es_base::get() & 0xFFFFFFFF00000000) != 0)
         throw std::logic_error("guest es base bits 63:32 must be 0");
 }
 
 void
 vmcs_intel_x64::check_guest_cs_limit()
 {
-    if (!is_enabled_v8086())
+    if (vmcs::guest_rflags::virtual_8086_mode::is_disabled())
         return;
 
     auto cs_limit = vmcs::guest_cs_limit::get();
@@ -549,7 +525,7 @@ vmcs_intel_x64::check_guest_cs_limit()
 void
 vmcs_intel_x64::check_guest_ss_limit()
 {
-    if (!is_enabled_v8086())
+    if (vmcs::guest_rflags::virtual_8086_mode::is_disabled())
         return;
 
     auto ss_limit = vmcs::guest_ss_limit::get();
@@ -561,7 +537,7 @@ vmcs_intel_x64::check_guest_ss_limit()
 void
 vmcs_intel_x64::check_guest_ds_limit()
 {
-    if (!is_enabled_v8086())
+    if (vmcs::guest_rflags::virtual_8086_mode::is_disabled())
         return;
 
     auto ds_limit = vmcs::guest_ds_limit::get();
@@ -573,7 +549,7 @@ vmcs_intel_x64::check_guest_ds_limit()
 void
 vmcs_intel_x64::check_guest_es_limit()
 {
-    if (!is_enabled_v8086())
+    if (vmcs::guest_rflags::virtual_8086_mode::is_disabled())
         return;
 
     auto es_limit = vmcs::guest_es_limit::get();
@@ -585,7 +561,7 @@ vmcs_intel_x64::check_guest_es_limit()
 void
 vmcs_intel_x64::check_guest_gs_limit()
 {
-    if (!is_enabled_v8086())
+    if (vmcs::guest_rflags::virtual_8086_mode::is_disabled())
         return;
 
     auto gs_limit = vmcs::guest_gs_limit::get();
@@ -597,7 +573,7 @@ vmcs_intel_x64::check_guest_gs_limit()
 void
 vmcs_intel_x64::check_guest_fs_limit()
 {
-    if (!is_enabled_v8086())
+    if (vmcs::guest_rflags::virtual_8086_mode::is_disabled())
         return;
 
     auto fs_limit = vmcs::guest_fs_limit::get();
@@ -609,7 +585,7 @@ vmcs_intel_x64::check_guest_fs_limit()
 void
 vmcs_intel_x64::check_guest_v8086_cs_access_rights()
 {
-    if (!is_enabled_v8086())
+    if (vmcs::guest_rflags::virtual_8086_mode::is_disabled())
         return;
 
     if (guest_cs_access_rights::get() != 0x00000000000000F3)
@@ -619,7 +595,7 @@ vmcs_intel_x64::check_guest_v8086_cs_access_rights()
 void
 vmcs_intel_x64::check_guest_v8086_ss_access_rights()
 {
-    if (!is_enabled_v8086())
+    if (vmcs::guest_rflags::virtual_8086_mode::is_disabled())
         return;
 
     if (guest_ss_access_rights::get() != 0x00000000000000F3)
@@ -629,7 +605,7 @@ vmcs_intel_x64::check_guest_v8086_ss_access_rights()
 void
 vmcs_intel_x64::check_guest_v8086_ds_access_rights()
 {
-    if (!is_enabled_v8086())
+    if (vmcs::guest_rflags::virtual_8086_mode::is_disabled())
         return;
 
     if (guest_ds_access_rights::get() != 0x00000000000000F3)
@@ -639,7 +615,7 @@ vmcs_intel_x64::check_guest_v8086_ds_access_rights()
 void
 vmcs_intel_x64::check_guest_v8086_es_access_rights()
 {
-    if (!is_enabled_v8086())
+    if (vmcs::guest_rflags::virtual_8086_mode::is_disabled())
         return;
 
     if (guest_es_access_rights::get() != 0x00000000000000F3)
@@ -649,7 +625,7 @@ vmcs_intel_x64::check_guest_v8086_es_access_rights()
 void
 vmcs_intel_x64::check_guest_v8086_fs_access_rights()
 {
-    if (!is_enabled_v8086())
+    if (vmcs::guest_rflags::virtual_8086_mode::is_disabled())
         return;
 
     if (guest_fs_access_rights::get() != 0x00000000000000F3)
@@ -659,7 +635,7 @@ vmcs_intel_x64::check_guest_v8086_fs_access_rights()
 void
 vmcs_intel_x64::check_guest_v8086_gs_access_rights()
 {
-    if (!is_enabled_v8086())
+    if (vmcs::guest_rflags::virtual_8086_mode::is_disabled())
         return;
 
     if (guest_gs_access_rights::get() != 0x00000000000000F3)
@@ -938,7 +914,7 @@ vmcs_intel_x64::check_guest_ss_dpl_must_equal_zero()
             break;
 
         default:
-            if (guest_cr0::protection_enable::get() != 0)
+            if (guest_cr0::protection_enable::is_enabled())
                 return;
     }
 
@@ -1436,18 +1412,14 @@ vmcs_intel_x64::checks_on_guest_descriptor_table_registers()
 void
 vmcs_intel_x64::check_guest_gdtr_base_must_be_canonical()
 {
-    auto gdtr_base = vm::read(VMCS_GUEST_GDTR_BASE);
-
-    if (!is_address_canonical(gdtr_base))
+    if (!is_address_canonical(vmcs::guest_gdtr_base::get()))
         throw std::logic_error("gdtr base is non-canonical");
 }
 
 void
 vmcs_intel_x64::check_guest_idtr_base_must_be_canonical()
 {
-    auto idtr_base = vm::read(VMCS_GUEST_IDTR_BASE);
-
-    if (!is_address_canonical(idtr_base))
+    if (!is_address_canonical(vmcs::guest_idtr_base::get()))
         throw std::logic_error("idtr base is non-canonical");
 }
 
@@ -1487,9 +1459,7 @@ vmcs_intel_x64::check_guest_rip_upper_bits()
     if (vm_entry_controls::ia_32e_mode_guest::is_enabled() && cs_l != 0)
         return;
 
-    auto rip = vm::read(VMCS_GUEST_RIP);
-
-    if ((rip & 0xFFFFFFFF00000000) != 0)
+    if ((vmcs::guest_rip::get() & 0xFFFFFFFF00000000) != 0)
         throw std::logic_error("rip bits 61:32 must 0 if IA 32e mode is disabled or cs L is disabled");
 }
 
@@ -1504,9 +1474,7 @@ vmcs_intel_x64::check_guest_rip_valid_addr()
     if (cs_l == 0)
         return;
 
-    auto rip = vm::read(VMCS_GUEST_RIP);
-
-    if (!is_linear_address_valid(rip))
+    if (!is_linear_address_valid(vmcs::guest_rip::get()))
         throw std::logic_error("rip bits must be canonical");
 }
 
@@ -1523,10 +1491,10 @@ vmcs_intel_x64::check_guest_rflags_reserved_bits()
 void
 vmcs_intel_x64::check_guest_rflags_vm_bit()
 {
-    if (vm_entry_controls::ia_32e_mode_guest::is_disabled() && guest_cr0::protection_enable::get() == 1)
+    if (vm_entry_controls::ia_32e_mode_guest::is_disabled() && guest_cr0::protection_enable::is_enabled())
         return;
 
-    if (guest_rflags::virtual_8086_mode::get() != 0)
+    if (guest_rflags::virtual_8086_mode::is_enabled())
         throw std::logic_error("rflags VM must be 0 if ia 32e mode is 1 or PE is 0");
 }
 
@@ -1541,7 +1509,7 @@ vmcs_intel_x64::check_guest_rflag_interrupt_enable()
     if (interruption_type::get() != interruption_type::external_interrupt)
         return;
 
-    if (guest_rflags::interrupt_enable_flag::get() == 0)
+    if (guest_rflags::interrupt_enable_flag::is_disabled())
         throw std::logic_error("rflags IF must be 1 if the valid bit is 1 and interrupt type is external");
 }
 
@@ -1726,7 +1694,7 @@ vmcs_intel_x64::check_guest_interruptibility_state_sti_mov_ss()
 void
 vmcs_intel_x64::check_guest_interruptibility_state_sti()
 {
-    if (guest_rflags::interrupt_enable_flag::get() != 0U)
+    if (guest_rflags::interrupt_enable_flag::is_enabled())
         return;
 
     if (vmcs::guest_interruptibility_state::blocking_by_sti::get() != 0U)
@@ -1823,10 +1791,7 @@ vmcs_intel_x64::check_guest_interruptibility_state_virtual_nmi()
 void
 vmcs_intel_x64::check_guest_pending_debug_exceptions_reserved()
 {
-    auto pending_debug_exceptions =
-        vm::read(VMCS_GUEST_PENDING_DEBUG_EXCEPTIONS);
-
-    if ((pending_debug_exceptions & 0xFFFFFFFFFFFF2FF0) != 0)
+    if (vmcs::guest_pending_debug_exceptions::reserved::get() != 0)
         throw std::logic_error("pending debug exception reserved bits must be 0");
 }
 
@@ -1840,19 +1805,15 @@ vmcs_intel_x64::check_guest_pending_debug_exceptions_dbg_ctl()
     if (sti == 0 && mov_ss == 0 && activity_state != vmcs::guest_activity_state::hlt)
         return;
 
-    auto pending_debug_exceptions =
-        vm::read(VMCS_GUEST_PENDING_DEBUG_EXCEPTIONS);
+    auto bs = vmcs::guest_pending_debug_exceptions::bs::is_enabled();
+    auto tf = vmcs::guest_rflags::trap_flag::is_enabled();
+    auto btf = vmcs::guest_ia32_debugctl::btf::get();
 
-    auto bs = pending_debug_exceptions & PENDING_DEBUG_EXCEPTION_BS;
-
-    auto tf = guest_rflags::trap_flag::get();
-    auto btf = guest_ia32_debugctl::btf::get();
-
-    if (bs == 0 && tf != 0 && btf == 0)
+    if (!bs && tf && btf == 0)
         throw std::logic_error("pending debug exception bs must be 1 if "
                                "rflags tf is 1 and debugctl btf is 0");
 
-    if (bs == 1 && tf == 0 && btf == 1)
+    if (bs && !tf && btf == 1)
         throw std::logic_error("pending debug exception bs must be 0 if "
                                "rflags tf is 0 and debugctl btf is 1");
 }

@@ -39,6 +39,7 @@
 
 #include <vmcs/vmcs_intel_x64_32bit_guest_state_fields.h>
 #include <vmcs/vmcs_intel_x64_32bit_read_only_data_fields.h>
+#include <vmcs/vmcs_intel_x64_natural_width_guest_state_fields.h>
 
 using namespace x64;
 using namespace intel_x64;
@@ -595,16 +596,16 @@ exit_handler_intel_x64::handle_rdmsr()
             msr = vmcs::guest_ia32_sysenter_cs::get();
             break;
         case msrs::ia32_sysenter_esp::addr:
-            msr = vm::read(VMCS_GUEST_IA32_SYSENTER_ESP);
+            msr = vmcs::guest_ia32_sysenter_esp::get();
             break;
         case msrs::ia32_sysenter_eip::addr:
-            msr = vm::read(VMCS_GUEST_IA32_SYSENTER_EIP);
+            msr = vmcs::guest_ia32_sysenter_eip::get();
             break;
         case msrs::ia32_fs_base::addr:
-            msr = vm::read(VMCS_GUEST_FS_BASE);
+            msr = vmcs::guest_fs_base::get();
             break;
         case msrs::ia32_gs_base::addr:
-            msr = vm::read(VMCS_GUEST_GS_BASE);
+            msr = vmcs::guest_gs_base::get();
             break;
         default:
             msr = msrs::get(m_state_save->rcx);
@@ -661,16 +662,16 @@ exit_handler_intel_x64::handle_wrmsr()
             vmcs::guest_ia32_sysenter_cs::set(msr);
             break;
         case msrs::ia32_sysenter_esp::addr:
-            vm::write(VMCS_GUEST_IA32_SYSENTER_ESP, msr);
+            vmcs::guest_ia32_sysenter_esp::set(msr);
             break;
         case msrs::ia32_sysenter_eip::addr:
-            vm::write(VMCS_GUEST_IA32_SYSENTER_EIP, msr);
+            vmcs::guest_ia32_sysenter_eip::set(msr);
             break;
         case msrs::ia32_fs_base::addr:
-            vm::write(VMCS_GUEST_FS_BASE, msr);
+            vmcs::guest_fs_base::set(msr);
             break;
         case msrs::ia32_gs_base::addr:
-            vm::write(VMCS_GUEST_GS_BASE, msr);
+            vmcs::guest_gs_base::set(msr);
             break;
         default:
             msrs::set(m_state_save->rcx, msr);

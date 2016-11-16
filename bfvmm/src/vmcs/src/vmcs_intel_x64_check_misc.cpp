@@ -22,6 +22,8 @@
 #include <vmcs/vmcs_intel_x64.h>
 #include <intrinsics/cpuid_x64.h>
 
+#include <vmcs/vmcs_intel_x64_natural_width_guest_state_fields.h>
+
 using namespace x64;
 using namespace intel_x64;
 
@@ -45,13 +47,6 @@ vmcs_intel_x64::is_physical_address_valid(uint64_t addr)
 
     return ((addr & mask) == 0);
 }
-
-bool
-vmcs_intel_x64::is_enabled_v8086() const
-{
-    return vmcs::guest_rflags::virtual_8086_mode::get() == 1;
-}
-
 
 bool
 vmcs_intel_x64::is_supported_eptp_switching() const

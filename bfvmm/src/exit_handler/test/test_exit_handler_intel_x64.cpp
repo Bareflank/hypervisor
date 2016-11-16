@@ -28,6 +28,7 @@
 #include <memory_manager/root_page_table_x64.h>
 
 #include <intrinsics/msrs_intel_x64.h>
+#include <vmcs/vmcs_intel_x64_natural_width_guest_state_fields.h>
 
 #include <vmcs/vmcs_intel_x64_32bit_read_only_data_fields.h>
 
@@ -1629,7 +1630,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_rdmsr_esp()
     {
         this->expect_no_exception([&]{ ehlr.dispatch(); });
 
-        this->expect_true(g_field == VMCS_GUEST_IA32_SYSENTER_ESP);
+        this->expect_true(g_field == vmcs::guest_ia32_sysenter_esp::addr);
         this->expect_true(ehlr.m_state_save->rax == 0x5);
         this->expect_true(ehlr.m_state_save->rdx == 0x6);
         this->expect_true(ehlr.m_state_save->rip == g_rip);
@@ -1650,7 +1651,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_rdmsr_eip()
     {
         this->expect_no_exception([&]{ ehlr.dispatch(); });
 
-        this->expect_true(g_field == VMCS_GUEST_IA32_SYSENTER_EIP);
+        this->expect_true(g_field == vmcs::guest_ia32_sysenter_eip::addr);
         this->expect_true(ehlr.m_state_save->rax == 0x6);
         this->expect_true(ehlr.m_state_save->rdx == 0x7);
         this->expect_true(ehlr.m_state_save->rip == g_rip);
@@ -1671,7 +1672,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_rdmsr_fs_base()
     {
         this->expect_no_exception([&]{ ehlr.dispatch(); });
 
-        this->expect_true(g_field == VMCS_GUEST_FS_BASE);
+        this->expect_true(g_field == vmcs::guest_fs_base::addr);
         this->expect_true(ehlr.m_state_save->rax == 0x7);
         this->expect_true(ehlr.m_state_save->rdx == 0x8);
         this->expect_true(ehlr.m_state_save->rip == g_rip);
@@ -1692,7 +1693,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_rdmsr_gs_base()
     {
         this->expect_no_exception([&]{ ehlr.dispatch(); });
 
-        this->expect_true(g_field == VMCS_GUEST_GS_BASE);
+        this->expect_true(g_field == vmcs::guest_gs_base::addr);
         this->expect_true(ehlr.m_state_save->rax == 0x8);
         this->expect_true(ehlr.m_state_save->rdx == 0x9);
         this->expect_true(ehlr.m_state_save->rip == g_rip);
@@ -1859,7 +1860,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_wrmsr_esp()
     {
         this->expect_no_exception([&]{ ehlr.dispatch(); });
 
-        this->expect_true(g_field == VMCS_GUEST_IA32_SYSENTER_ESP);
+        this->expect_true(g_field == vmcs::guest_ia32_sysenter_esp::addr);
         this->expect_true(g_value == 0x0000000600000005);
         this->expect_true(ehlr.m_state_save->rip == g_rip);
     });
@@ -1880,7 +1881,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_wrmsr_eip()
     {
         this->expect_no_exception([&]{ ehlr.dispatch(); });
 
-        this->expect_true(g_field == VMCS_GUEST_IA32_SYSENTER_EIP);
+        this->expect_true(g_field == vmcs::guest_ia32_sysenter_eip::addr);
         this->expect_true(g_value == 0x0000000700000006);
         this->expect_true(ehlr.m_state_save->rip == g_rip);
     });
@@ -1901,7 +1902,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_wrmsr_fs_base()
     {
         this->expect_no_exception([&]{ ehlr.dispatch(); });
 
-        this->expect_true(g_field == VMCS_GUEST_FS_BASE);
+        this->expect_true(g_field == vmcs::guest_fs_base::addr);
         this->expect_true(g_value == 0x0000000800000007);
         this->expect_true(ehlr.m_state_save->rip == g_rip);
     });
@@ -1922,7 +1923,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_wrmsr_gs_base()
     {
         this->expect_no_exception([&]{ ehlr.dispatch(); });
 
-        this->expect_true(g_field == VMCS_GUEST_GS_BASE);
+        this->expect_true(g_field == vmcs::guest_gs_base::addr);
         this->expect_true(g_value == 0x0000000900000008);
         this->expect_true(ehlr.m_state_save->rip == g_rip);
     });

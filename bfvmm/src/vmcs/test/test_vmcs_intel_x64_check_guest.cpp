@@ -20,6 +20,7 @@
 // License along with this library; if not, write to the Free Software
 
 #include <test.h>
+#include <vmcs/vmcs_intel_x64_natural_width_guest_state_fields.h>
 
 using namespace intel_x64;
 
@@ -36,9 +37,9 @@ setup_checks_on_guest_control_registers_debug_registers_and_msrs_paths(std::vect
         g_msrs[msrs::ia32_vmx_cr4_fixed1::addr] = 0xFFFFFFFFFFFFFFFFULL;
         disable_entry_ctl(vmcs::vm_entry_controls::load_debug_controls::mask);
         disable_entry_ctl(vmcs::vm_entry_controls::ia_32e_mode_guest::mask);
-        vmcs::guest_cr4::pcid_enable_bit::set(0U);
-        g_vmcs_fields[VMCS_GUEST_IA32_SYSENTER_ESP] = 0x1000UL;
-        g_vmcs_fields[VMCS_GUEST_IA32_SYSENTER_EIP] = 0x1000UL;
+        vmcs::guest_cr4::pcid_enable_bit::disable();
+        vmcs::guest_ia32_sysenter_esp::set(0x1000UL);
+        vmcs::guest_ia32_sysenter_eip::set(0x1000UL);
         disable_entry_ctl(vmcs::vm_entry_controls::load_ia32_perf_global_ctrl::mask);
         disable_entry_ctl(vmcs::vm_entry_controls::load_ia32_pat::mask);
         disable_entry_ctl(vmcs::vm_entry_controls::load_ia32_efer::mask);
