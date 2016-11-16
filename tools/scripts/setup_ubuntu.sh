@@ -176,6 +176,9 @@ done
 # ------------------------------------------------------------------------------
 
 case $(lsb_release -sr) in
+16.10)
+    ;;&
+    
 16.04)
     install_apt_tools
     add_docker_repositories
