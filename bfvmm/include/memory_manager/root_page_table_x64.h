@@ -22,6 +22,8 @@
 #ifndef ROOT_PAGE_TABLE_X64_H
 #define ROOT_PAGE_TABLE_X64_H
 
+#include <gsl/gsl>
+
 #include <memory.h>
 #include <memory_manager/page_table_x64.h>
 
@@ -110,7 +112,7 @@ private:
 
     root_page_table_x64() noexcept;
 
-    std::shared_ptr<page_table_entry_x64> add_page(integer_pointer virt);
+    gsl::not_null<page_table_entry_x64 *> add_page(integer_pointer virt);
     void remove_page(integer_pointer virt);
 
     void map_page(integer_pointer virt, integer_pointer phys, attr_type attr);

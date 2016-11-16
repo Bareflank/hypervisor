@@ -45,28 +45,14 @@ vcpu_manager::instance() noexcept
 void
 vcpu_manager::create_vcpu(uint64_t vcpuid, void *attr)
 {
-    if (!m_vcpu_factory)
-        throw std::runtime_error("invalid vcpu factory");
-
-    if (auto vcpu = m_vcpu_factory->make_vcpu(vcpuid, attr))
+    auto ___ = gsl::on_failure([&]
     {
-        {
-            std::lock_guard<std::mutex> guard(g_vcpu_manager_mutex);
-            m_vcpus[vcpuid] = vcpu;
-        }
+        std::lock_guard<std::mutex> guard(g_vcpu_manager_mutex);
+        m_vcpus.erase(vcpuid);
+    });
 
-        auto ___ = gsl::on_failure([&]
-        {
-            std::lock_guard<std::mutex> guard(g_vcpu_manager_mutex);
-            m_vcpus.erase(vcpuid);
-        });
-
+    if (auto && vcpu = add_vcpu(vcpuid, attr))
         vcpu->init(attr);
-    }
-    else
-    {
-        throw std::runtime_error("make_vcpu returned a nullptr vcpu");
-    }
 }
 
 void
@@ -78,14 +64,14 @@ vcpu_manager::delete_vcpu(uint64_t vcpuid, void *attr)
         m_vcpus.erase(vcpuid);
     });
 
-    if (auto vcpu = get_vcpu(vcpuid))
+    if (auto && vcpu = get_vcpu(vcpuid))
         vcpu->fini(attr);
 }
 
 void
 vcpu_manager::run_vcpu(uint64_t vcpuid, void *attr)
 {
-    if (auto vcpu = get_vcpu(vcpuid))
+    if (auto && vcpu = get_vcpu(vcpuid))
     {
         if (!vcpu->is_running())
             vcpu->run(attr);
@@ -107,7 +93,7 @@ vcpu_manager::run_vcpu(uint64_t vcpuid, void *attr)
 void
 vcpu_manager::hlt_vcpu(uint64_t vcpuid, void *attr)
 {
-    if (auto vcpu = get_vcpu(vcpuid))
+    if (auto && vcpu = get_vcpu(vcpuid))
     {
         if (vcpu->is_running())
             vcpu->hlt(attr);
@@ -125,22 +111,35 @@ vcpu_manager::hlt_vcpu(uint64_t vcpuid, void *attr)
 void
 vcpu_manager::write(uint64_t vcpuid, const std::string &str) noexcept
 {
-    if (auto vcpu = get_vcpu(vcpuid))
+    if (auto && vcpu = get_vcpu(vcpuid))
         vcpu->write(str);
 }
 
 vcpu_manager::vcpu_manager() noexcept :
-    m_vcpu_factory(std::make_shared<vcpu_factory>())
+    m_vcpu_factory(std::make_unique<vcpu_factory>())
 { }
 
-std::shared_ptr<vcpu>
-vcpu_manager::get_vcpu(uint64_t vcpuid) const noexcept
+std::unique_ptr<vcpu> &
+vcpu_manager::add_vcpu(uint64_t vcpuid, void *attr)
+{
+    if (!m_vcpu_factory)
+        throw std::runtime_error("invalid vcpu factory");
+
+    if (auto && vcpu = get_vcpu(vcpuid))
+        return vcpu;
+
+    if (auto && vcpu = m_vcpu_factory->make_vcpu(vcpuid, attr))
+    {
+        std::lock_guard<std::mutex> guard(g_vcpu_manager_mutex);
+        return m_vcpus[vcpuid] = std::move(vcpu);
+    }
+
+    throw std::runtime_error("make_vcpu returned a nullptr vcpu");
+}
+
+std::unique_ptr<vcpu> &
+vcpu_manager::get_vcpu(uint64_t vcpuid)
 {
     std::lock_guard<std::mutex> guard(g_vcpu_manager_mutex);
-    auto iter = m_vcpus.find(vcpuid);
-
-    if (iter == m_vcpus.end())
-        return nullptr;
-
-    return iter->second;
+    return m_vcpus[vcpuid];
 }

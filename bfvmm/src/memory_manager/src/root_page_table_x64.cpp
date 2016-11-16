@@ -19,8 +19,6 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <gsl/gsl>
-
 #include <guard_exceptions.h>
 #include <memory_manager/memory_manager_x64.h>
 #include <memory_manager/root_page_table_x64.h>
@@ -88,7 +86,7 @@ root_page_table_x64::root_page_table_x64() noexcept :
     }
 }
 
-std::shared_ptr<page_table_entry_x64>
+gsl::not_null<page_table_entry_x64 *>
 root_page_table_x64::add_page(integer_pointer virt)
 {
     std::lock_guard<std::mutex> guard(g_map_mutex);
@@ -109,36 +107,35 @@ root_page_table_x64::map_page(integer_pointer virt, integer_pointer phys, attr_t
     expects(phys != 0);
     expects(attr != 0);
 
-    if (auto entry = add_page(virt))
+    auto entry = add_page(virt);
+
+    auto ___ = gsl::on_failure([&]
+    { this->remove_page(virt); });
+
+    entry->set_phys_addr(phys);
+    entry->set_present(true);
+
+    switch (attr)
     {
-        auto ___ = gsl::on_failure([&]
-        { this->remove_page(virt); });
-
-        entry->set_phys_addr(phys);
-        entry->set_present(true);
-
-        switch (attr)
+        case MEMORY_TYPE_R | MEMORY_TYPE_W:
         {
-            case MEMORY_TYPE_R | MEMORY_TYPE_W:
-            {
-                entry->set_rw(true);
-                entry->set_nx(true);
-                break;
-            }
-
-            case MEMORY_TYPE_R | MEMORY_TYPE_E:
-            {
-                entry->set_rw(false);
-                entry->set_nx(false);
-                break;
-            }
-
-            default:
-                throw std::logic_error("unsupported memory attribute");
+            entry->set_rw(true);
+            entry->set_nx(true);
+            break;
         }
 
-        g_mm->add_md(virt, phys, attr);
+        case MEMORY_TYPE_R | MEMORY_TYPE_E:
+        {
+            entry->set_rw(false);
+            entry->set_nx(false);
+            break;
+        }
+
+        default:
+            throw std::logic_error("unsupported memory attribute");
     }
+
+    g_mm->add_md(virt, phys, attr);
 }
 
 void

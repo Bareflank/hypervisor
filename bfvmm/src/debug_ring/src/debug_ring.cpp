@@ -19,16 +19,23 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+#include <gsl/gsl>
+
 #include <map>
 #include <debug_ring/debug_ring.h>
 
-#include <gsl/gsl>
+// -----------------------------------------------------------------------------
+// Mutex
+// -----------------------------------------------------------------------------
+
+#include <mutex>
+std::mutex g_debug_mutex;
 
 // -----------------------------------------------------------------------------
 // Global
 // -----------------------------------------------------------------------------
 
-std::map<uint64_t, std::shared_ptr<debug_ring_resources_t>> g_drrs;
+std::map<uint64_t, debug_ring_resources_t *> g_drrs;
 
 extern "C" int64_t
 get_drr(uint64_t vcpuid, struct debug_ring_resources_t **drr) noexcept
@@ -36,14 +43,13 @@ get_drr(uint64_t vcpuid, struct debug_ring_resources_t **drr) noexcept
     if (drr == nullptr)
         return GET_DRR_FAILURE;
 
-    auto iter = g_drrs.find(vcpuid);
+    if (auto found_drr = g_drrs[vcpuid])
+    {
+        *drr = found_drr;
+        return GET_DRR_SUCCESS;
+    }
 
-    if (iter == g_drrs.end())
-        return GET_DRR_FAILURE;
-
-    *drr = iter->second.get();
-
-    return GET_DRR_SUCCESS;
+    return GET_DRR_FAILURE;
 }
 
 // -----------------------------------------------------------------------------
@@ -54,19 +60,25 @@ debug_ring::debug_ring(uint64_t vcpuid) noexcept
 {
     try
     {
-        m_drr = std::make_shared<debug_ring_resources_t>();
+        m_vcpuid = vcpuid;
+        m_drr = std::make_unique<debug_ring_resources_t>();
 
         m_drr->epos = 0;
         m_drr->spos = 0;
         m_drr->tag1 = 0xDB60DB60DB60DB60;
         m_drr->tag2 = 0x06BD06BD06BD06BD;
 
-        g_drrs[vcpuid] = m_drr;
+        std::lock_guard<std::mutex> guard(g_debug_mutex);
+        g_drrs[vcpuid] = m_drr.get();
     }
     catch (...)
-    {
-        m_drr = nullptr;
-    }
+    { }
+}
+
+debug_ring::~debug_ring() noexcept
+{
+    std::lock_guard<std::mutex> guard(g_debug_mutex);
+    g_drrs.erase(m_vcpuid);
 }
 
 void

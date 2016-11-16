@@ -26,13 +26,13 @@
 void
 vcpu_ut::test_vcpu_invalid_id()
 {
-    EXPECT_EXCEPTION(std::make_shared<vcpu>(VCPUID_RESERVED, nullptr), std::invalid_argument);
+    EXPECT_EXCEPTION(std::make_unique<vcpu>(VCPUID_RESERVED, nullptr), std::invalid_argument);
 }
 
 void
 vcpu_ut::test_vcpu_null_debug_ring()
 {
-    EXPECT_NO_EXCEPTION(std::make_shared<vcpu>(0, nullptr));
+    EXPECT_NO_EXCEPTION(std::make_unique<vcpu>(0, nullptr));
 }
 
 void
@@ -40,7 +40,7 @@ vcpu_ut::test_vcpu_valid()
 {
     auto dr = std::shared_ptr<debug_ring>(nullptr);
 
-    EXPECT_NO_EXCEPTION(std::make_shared<vcpu>(0, dr));
+    EXPECT_NO_EXCEPTION(std::make_unique<vcpu>(0, dr));
 }
 
 void
@@ -48,7 +48,7 @@ vcpu_ut::test_vcpu_write_empty_string()
 {
     char rb[DEBUG_RING_SIZE];
     debug_ring_resources_t *drr = nullptr;
-    auto vc = std::make_shared<vcpu>(0);
+    auto vc = std::make_unique<vcpu>(0);
 
     vc->write("");
     get_drr(0, &drr);
@@ -61,7 +61,7 @@ vcpu_ut::test_vcpu_write_hello_world()
 {
     char rb[DEBUG_RING_SIZE];
     debug_ring_resources_t *drr = nullptr;
-    auto vc = std::make_shared<vcpu>(0);
+    auto vc = std::make_unique<vcpu>(0);
 
     vc->write("hello world");
     get_drr(0, &drr);
@@ -72,7 +72,7 @@ vcpu_ut::test_vcpu_write_hello_world()
 void
 vcpu_ut::test_vcpu_init_null_attr()
 {
-    auto vc = std::make_shared<vcpu>(0);
+    auto vc = std::make_unique<vcpu>(0);
 
     EXPECT_FALSE(vc->is_initialized());
     vc->init(nullptr);
@@ -83,7 +83,7 @@ void
 vcpu_ut::test_vcpu_init_valid_attr()
 {
     int i = 0;
-    auto vc = std::make_shared<vcpu>(0);
+    auto vc = std::make_unique<vcpu>(0);
 
     EXPECT_FALSE(vc->is_initialized());
     vc->init(&i);
@@ -93,7 +93,7 @@ vcpu_ut::test_vcpu_init_valid_attr()
 void
 vcpu_ut::test_vcpu_fini_null_attr()
 {
-    auto vc = std::make_shared<vcpu>(0);
+    auto vc = std::make_unique<vcpu>(0);
 
     vc->init();
 
@@ -106,7 +106,7 @@ void
 vcpu_ut::test_vcpu_fini_valid_attr()
 {
     int i = 0;
-    auto vc = std::make_shared<vcpu>(0);
+    auto vc = std::make_unique<vcpu>(0);
 
     vc->init();
 
@@ -118,7 +118,7 @@ vcpu_ut::test_vcpu_fini_valid_attr()
 void
 vcpu_ut::test_vcpu_fini_without_init_without_run()
 {
-    auto vc = std::make_shared<vcpu>(0);
+    auto vc = std::make_unique<vcpu>(0);
 
     EXPECT_FALSE(vc->is_running());
     EXPECT_FALSE(vc->is_initialized());
@@ -130,7 +130,7 @@ vcpu_ut::test_vcpu_fini_without_init_without_run()
 void
 vcpu_ut::test_vcpu_fini_with_init_without_run()
 {
-    auto vc = std::make_shared<vcpu>(0);
+    auto vc = std::make_unique<vcpu>(0);
 
     vc->init();
 
@@ -144,7 +144,7 @@ vcpu_ut::test_vcpu_fini_with_init_without_run()
 void
 vcpu_ut::test_vcpu_fini_without_init_with_run()
 {
-    auto vc = std::make_shared<vcpu>(0);
+    auto vc = std::make_unique<vcpu>(0);
 
     vc->run();
 
@@ -158,7 +158,7 @@ vcpu_ut::test_vcpu_fini_without_init_with_run()
 void
 vcpu_ut::test_vcpu_fini_with_init_with_run()
 {
-    auto vc = std::make_shared<vcpu>(0);
+    auto vc = std::make_unique<vcpu>(0);
 
     vc->init();
     vc->run();
@@ -173,7 +173,7 @@ vcpu_ut::test_vcpu_fini_with_init_with_run()
 void
 vcpu_ut::test_vcpu_run_null_attr()
 {
-    auto vc = std::make_shared<vcpu>(0);
+    auto vc = std::make_unique<vcpu>(0);
 
     EXPECT_FALSE(vc->is_running());
     vc->run(nullptr);
@@ -184,7 +184,7 @@ void
 vcpu_ut::test_vcpu_run_valid_attr()
 {
     int i = 0;
-    auto vc = std::make_shared<vcpu>(0);
+    auto vc = std::make_unique<vcpu>(0);
 
     EXPECT_FALSE(vc->is_running());
     vc->run(&i);
@@ -194,7 +194,7 @@ vcpu_ut::test_vcpu_run_valid_attr()
 void
 vcpu_ut::test_vcpu_run_without_init()
 {
-    auto vc = std::make_shared<vcpu>(0);
+    auto vc = std::make_unique<vcpu>(0);
 
     EXPECT_FALSE(vc->is_running());
     vc->run();
@@ -204,7 +204,7 @@ vcpu_ut::test_vcpu_run_without_init()
 void
 vcpu_ut::test_vcpu_run_with_init()
 {
-    auto vc = std::make_shared<vcpu>(0);
+    auto vc = std::make_unique<vcpu>(0);
 
     vc->init();
 
@@ -216,7 +216,7 @@ vcpu_ut::test_vcpu_run_with_init()
 void
 vcpu_ut::test_vcpu_hlt_null_attr()
 {
-    auto vc = std::make_shared<vcpu>(0);
+    auto vc = std::make_unique<vcpu>(0);
 
     EXPECT_FALSE(vc->is_running());
     vc->hlt(nullptr);
@@ -227,7 +227,7 @@ void
 vcpu_ut::test_vcpu_hlt_valid_attr()
 {
     int i = 0;
-    auto vc = std::make_shared<vcpu>(0);
+    auto vc = std::make_unique<vcpu>(0);
 
     EXPECT_FALSE(vc->is_running());
     vc->hlt(&i);
@@ -237,7 +237,7 @@ vcpu_ut::test_vcpu_hlt_valid_attr()
 void
 vcpu_ut::test_vcpu_hlt_without_run()
 {
-    auto vc = std::make_shared<vcpu>(0);
+    auto vc = std::make_unique<vcpu>(0);
 
     EXPECT_FALSE(vc->is_running());
     vc->hlt();
@@ -247,7 +247,7 @@ vcpu_ut::test_vcpu_hlt_without_run()
 void
 vcpu_ut::test_vcpu_hlt_with_run()
 {
-    auto vc = std::make_shared<vcpu>(0);
+    auto vc = std::make_unique<vcpu>(0);
 
     vc->run();
 
@@ -259,7 +259,7 @@ vcpu_ut::test_vcpu_hlt_with_run()
 void
 vcpu_ut::test_vcpu_id()
 {
-    auto vc = std::make_shared<vcpu>(1);
+    auto vc = std::make_unique<vcpu>(1);
 
     EXPECT_TRUE(vc->id() == 1);
 }
@@ -267,7 +267,7 @@ vcpu_ut::test_vcpu_id()
 void
 vcpu_ut::test_vcpu_is_bootstrap_vcpu()
 {
-    auto vc = std::make_shared<vcpu>(0);
+    auto vc = std::make_unique<vcpu>(0);
 
     EXPECT_TRUE(vc->is_bootstrap_vcpu());
 }
@@ -275,7 +275,7 @@ vcpu_ut::test_vcpu_is_bootstrap_vcpu()
 void
 vcpu_ut::test_vcpu_is_not_bootstrap_vcpu()
 {
-    auto vc = std::make_shared<vcpu>(1);
+    auto vc = std::make_unique<vcpu>(1);
 
     EXPECT_FALSE(vc->is_bootstrap_vcpu());
 }
@@ -283,7 +283,7 @@ vcpu_ut::test_vcpu_is_not_bootstrap_vcpu()
 void
 vcpu_ut::test_vcpu_is_host_vm_vcpu()
 {
-    auto vc = std::make_shared<vcpu>(1);
+    auto vc = std::make_unique<vcpu>(1);
 
     EXPECT_TRUE(vc->is_host_vm_vcpu());
 }
@@ -291,7 +291,7 @@ vcpu_ut::test_vcpu_is_host_vm_vcpu()
 void
 vcpu_ut::test_vcpu_is_not_host_vm_vcpu()
 {
-    auto vc = std::make_shared<vcpu>(0x0000000100000000);
+    auto vc = std::make_unique<vcpu>(0x0000000100000000);
 
     EXPECT_FALSE(vc->is_host_vm_vcpu());
 }
@@ -299,7 +299,7 @@ vcpu_ut::test_vcpu_is_not_host_vm_vcpu()
 void
 vcpu_ut::test_vcpu_is_guest_vm_vcpu()
 {
-    auto vc = std::make_shared<vcpu>(0x0000000100000000);
+    auto vc = std::make_unique<vcpu>(0x0000000100000000);
 
     EXPECT_TRUE(vc->is_guest_vm_vcpu());
 }
@@ -307,7 +307,7 @@ vcpu_ut::test_vcpu_is_guest_vm_vcpu()
 void
 vcpu_ut::test_vcpu_is_not_guest_vm_vcpu()
 {
-    auto vc = std::make_shared<vcpu>(1);
+    auto vc = std::make_unique<vcpu>(1);
 
     EXPECT_FALSE(vc->is_guest_vm_vcpu());
 }
@@ -315,7 +315,7 @@ vcpu_ut::test_vcpu_is_not_guest_vm_vcpu()
 void
 vcpu_ut::test_vcpu_is_running_vm_vcpu()
 {
-    auto vc = std::make_shared<vcpu>(0);
+    auto vc = std::make_unique<vcpu>(0);
 
     vc->run();
     EXPECT_TRUE(vc->is_running());
@@ -324,7 +324,7 @@ vcpu_ut::test_vcpu_is_running_vm_vcpu()
 void
 vcpu_ut::test_vcpu_is_not_running_vm_vcpu()
 {
-    auto vc = std::make_shared<vcpu>(0);
+    auto vc = std::make_unique<vcpu>(0);
 
     EXPECT_FALSE(vc->is_running());
 }
@@ -332,7 +332,7 @@ vcpu_ut::test_vcpu_is_not_running_vm_vcpu()
 void
 vcpu_ut::test_vcpu_is_initialized_vm_vcpu()
 {
-    auto vc = std::make_shared<vcpu>(0);
+    auto vc = std::make_unique<vcpu>(0);
 
     vc->init();
     EXPECT_TRUE(vc->is_initialized());
@@ -341,7 +341,7 @@ vcpu_ut::test_vcpu_is_initialized_vm_vcpu()
 void
 vcpu_ut::test_vcpu_is_not_initialized_vm_vcpu()
 {
-    auto vc = std::make_shared<vcpu>(0);
+    auto vc = std::make_unique<vcpu>(0);
 
     EXPECT_FALSE(vc->is_initialized());
 }

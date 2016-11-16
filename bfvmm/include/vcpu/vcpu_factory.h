@@ -60,7 +60,7 @@ public:
     /// @param attr attributes used to determine which type of vcpu to create
     /// @return returns a pointer to a newly created vCPU.
     ///
-    virtual std::shared_ptr<vcpu> make_vcpu(uint64_t vcpuid, void *attr = nullptr);
+    virtual std::unique_ptr<vcpu> make_vcpu(uint64_t vcpuid, void *attr = nullptr);
 };
 
 #endif

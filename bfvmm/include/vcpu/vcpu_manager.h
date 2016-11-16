@@ -101,20 +101,21 @@ public:
 private:
 
     vcpu_manager() noexcept;
-    std::shared_ptr<vcpu> get_vcpu(uint64_t vcpuid) const noexcept;
+    std::unique_ptr<vcpu> &add_vcpu(uint64_t vcpuid, void *attr);
+    std::unique_ptr<vcpu> &get_vcpu(uint64_t vcpuid);
 
 private:
 
     friend class vcpu_ut;
 
-    std::map<uint64_t, std::shared_ptr<vcpu>> m_vcpus;
+    std::map<uint64_t, std::unique_ptr<vcpu>> m_vcpus;
 
 private:
 
-    std::shared_ptr<vcpu_factory> m_vcpu_factory;
+    std::unique_ptr<vcpu_factory> m_vcpu_factory;
 
-    void set_factory(const std::shared_ptr<vcpu_factory> &factory)
-    { m_vcpu_factory = factory; }
+    void set_factory(std::unique_ptr<vcpu_factory> factory)
+    { m_vcpu_factory = std::move(factory); }
 
 public:
 

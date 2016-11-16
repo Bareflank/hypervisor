@@ -515,12 +515,31 @@ namespace bfn
 ///
 /// @code
 /// MockRepository mocks;
-/// auto in = bfn::mock_shared<intrinsics_intel_x64>(mocks);
+/// auto f = bfn::mock_shared<foo>(mocks);
 /// @endcode
 ///
 template<class T> auto
 mock_shared(MockRepository &mocks)
 { return std::shared_ptr<T>(mocks.Mock<T>(), no_delete<T>); }
+
+/// Mock No Delete
+///
+/// If the destructor of the class is called, this function prevents a
+/// crash by registering a call to the destructor to do nothing.
+///
+/// @code
+/// MockRepository mocks;
+/// auto f = bfn::mock_no_delete<foo>(mocks);
+/// @endcode
+///
+template<class T> auto
+mock_no_delete(MockRepository &mocks)
+{
+    auto &&ptr = mocks.Mock<T>();
+    mocks.OnCallDestructor(ptr);
+
+    return ptr;
+}
 
 }
 

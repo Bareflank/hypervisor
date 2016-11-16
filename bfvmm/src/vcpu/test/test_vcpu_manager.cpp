@@ -24,16 +24,16 @@
 #include <vcpu/vcpu_manager.h>
 
 extern bool make_vcpu_throws;
-extern std::shared_ptr<vcpu> g_vcpu;
+extern vcpu *g_vcpu;
 
 void
 vcpu_ut::test_vcpu_manager_create_valid()
 {
     MockRepository mocks;
-    g_vcpu = bfn::mock_shared<vcpu>(mocks);
+    g_vcpu = bfn::mock_no_delete<vcpu>(mocks);
 
-    mocks.OnCall(g_vcpu.get(), vcpu::init);
-    mocks.OnCall(g_vcpu.get(), vcpu::fini);
+    mocks.OnCall(g_vcpu, vcpu::init);
+    mocks.OnCall(g_vcpu, vcpu::fini);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -48,10 +48,10 @@ void
 vcpu_ut::test_vcpu_manager_create_valid_twice_overwrites()
 {
     MockRepository mocks;
-    g_vcpu = bfn::mock_shared<vcpu>(mocks);
+    g_vcpu = bfn::mock_no_delete<vcpu>(mocks);
 
-    mocks.OnCall(g_vcpu.get(), vcpu::init);
-    mocks.OnCall(g_vcpu.get(), vcpu::fini);
+    mocks.OnCall(g_vcpu, vcpu::init);
+    mocks.OnCall(g_vcpu, vcpu::fini);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -81,10 +81,10 @@ void
 vcpu_ut::test_vcpu_manager_create_init_throws()
 {
     MockRepository mocks;
-    g_vcpu = bfn::mock_shared<vcpu>(mocks);
+    g_vcpu = bfn::mock_no_delete<vcpu>(mocks);
 
-    mocks.OnCall(g_vcpu.get(), vcpu::init).Throw(std::runtime_error("error"));
-    mocks.OnCall(g_vcpu.get(), vcpu::fini);
+    mocks.OnCall(g_vcpu, vcpu::init).Throw(std::runtime_error("error"));
+    mocks.OnCall(g_vcpu, vcpu::fini);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -99,10 +99,10 @@ void
 vcpu_ut::test_vcpu_manager_delete_valid()
 {
     MockRepository mocks;
-    g_vcpu = bfn::mock_shared<vcpu>(mocks);
+    g_vcpu = bfn::mock_no_delete<vcpu>(mocks);
 
-    mocks.OnCall(g_vcpu.get(), vcpu::init);
-    mocks.OnCall(g_vcpu.get(), vcpu::fini);
+    mocks.OnCall(g_vcpu, vcpu::init);
+    mocks.OnCall(g_vcpu, vcpu::fini);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -117,10 +117,10 @@ void
 vcpu_ut::test_vcpu_manager_delete_valid_twice()
 {
     MockRepository mocks;
-    g_vcpu = bfn::mock_shared<vcpu>(mocks);
+    g_vcpu = bfn::mock_no_delete<vcpu>(mocks);
 
-    mocks.OnCall(g_vcpu.get(), vcpu::init);
-    mocks.OnCall(g_vcpu.get(), vcpu::fini);
+    mocks.OnCall(g_vcpu, vcpu::init);
+    mocks.OnCall(g_vcpu, vcpu::fini);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -136,10 +136,10 @@ void
 vcpu_ut::test_vcpu_manager_delete_no_create()
 {
     MockRepository mocks;
-    g_vcpu = bfn::mock_shared<vcpu>(mocks);
+    g_vcpu = bfn::mock_no_delete<vcpu>(mocks);
 
-    mocks.OnCall(g_vcpu.get(), vcpu::init);
-    mocks.OnCall(g_vcpu.get(), vcpu::fini);
+    mocks.OnCall(g_vcpu, vcpu::init);
+    mocks.OnCall(g_vcpu, vcpu::fini);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -153,10 +153,10 @@ void
 vcpu_ut::test_vcpu_manager_delete_fini_throws()
 {
     MockRepository mocks;
-    g_vcpu = bfn::mock_shared<vcpu>(mocks);
+    g_vcpu = bfn::mock_no_delete<vcpu>(mocks);
 
-    mocks.OnCall(g_vcpu.get(), vcpu::init);
-    mocks.OnCall(g_vcpu.get(), vcpu::fini).Throw(std::runtime_error("error"));
+    mocks.OnCall(g_vcpu, vcpu::init);
+    mocks.OnCall(g_vcpu, vcpu::fini).Throw(std::runtime_error("error"));
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -171,14 +171,14 @@ void
 vcpu_ut::test_vcpu_manager_run_valid()
 {
     MockRepository mocks;
-    g_vcpu = bfn::mock_shared<vcpu>(mocks);
+    g_vcpu = bfn::mock_no_delete<vcpu>(mocks);
 
-    mocks.OnCall(g_vcpu.get(), vcpu::init);
-    mocks.OnCall(g_vcpu.get(), vcpu::fini);
-    mocks.OnCall(g_vcpu.get(), vcpu::run);
-    mocks.OnCall(g_vcpu.get(), vcpu::hlt);
-    mocks.OnCall(g_vcpu.get(), vcpu::is_running).Return(false);
-    mocks.OnCall(g_vcpu.get(), vcpu::is_guest_vm_vcpu).Return(false);
+    mocks.OnCall(g_vcpu, vcpu::init);
+    mocks.OnCall(g_vcpu, vcpu::fini);
+    mocks.OnCall(g_vcpu, vcpu::run);
+    mocks.OnCall(g_vcpu, vcpu::hlt);
+    mocks.OnCall(g_vcpu, vcpu::is_running).Return(false);
+    mocks.OnCall(g_vcpu, vcpu::is_guest_vm_vcpu).Return(false);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -194,14 +194,14 @@ void
 vcpu_ut::test_vcpu_manager_run_valid_twice()
 {
     MockRepository mocks;
-    g_vcpu = bfn::mock_shared<vcpu>(mocks);
+    g_vcpu = bfn::mock_no_delete<vcpu>(mocks);
 
-    mocks.OnCall(g_vcpu.get(), vcpu::init);
-    mocks.OnCall(g_vcpu.get(), vcpu::fini);
-    mocks.OnCall(g_vcpu.get(), vcpu::run);
-    mocks.OnCall(g_vcpu.get(), vcpu::hlt);
-    mocks.OnCall(g_vcpu.get(), vcpu::is_running).Return(false);
-    mocks.OnCall(g_vcpu.get(), vcpu::is_guest_vm_vcpu).Return(false);
+    mocks.OnCall(g_vcpu, vcpu::init);
+    mocks.OnCall(g_vcpu, vcpu::fini);
+    mocks.OnCall(g_vcpu, vcpu::run);
+    mocks.OnCall(g_vcpu, vcpu::hlt);
+    mocks.OnCall(g_vcpu, vcpu::is_running).Return(false);
+    mocks.OnCall(g_vcpu, vcpu::is_guest_vm_vcpu).Return(false);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -218,14 +218,14 @@ void
 vcpu_ut::test_vcpu_manager_run_run_throws()
 {
     MockRepository mocks;
-    g_vcpu = bfn::mock_shared<vcpu>(mocks);
+    g_vcpu = bfn::mock_no_delete<vcpu>(mocks);
 
-    mocks.OnCall(g_vcpu.get(), vcpu::init);
-    mocks.OnCall(g_vcpu.get(), vcpu::fini);
-    mocks.OnCall(g_vcpu.get(), vcpu::run).Throw(std::runtime_error("error"));
-    mocks.OnCall(g_vcpu.get(), vcpu::hlt);
-    mocks.OnCall(g_vcpu.get(), vcpu::is_running).Return(false);
-    mocks.OnCall(g_vcpu.get(), vcpu::is_guest_vm_vcpu).Return(false);
+    mocks.OnCall(g_vcpu, vcpu::init);
+    mocks.OnCall(g_vcpu, vcpu::fini);
+    mocks.OnCall(g_vcpu, vcpu::run).Throw(std::runtime_error("error"));
+    mocks.OnCall(g_vcpu, vcpu::hlt);
+    mocks.OnCall(g_vcpu, vcpu::is_running).Return(false);
+    mocks.OnCall(g_vcpu, vcpu::is_guest_vm_vcpu).Return(false);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -241,14 +241,14 @@ void
 vcpu_ut::test_vcpu_manager_run_hlt_throws()
 {
     MockRepository mocks;
-    g_vcpu = bfn::mock_shared<vcpu>(mocks);
+    g_vcpu = bfn::mock_no_delete<vcpu>(mocks);
 
-    mocks.OnCall(g_vcpu.get(), vcpu::init);
-    mocks.OnCall(g_vcpu.get(), vcpu::fini);
-    mocks.OnCall(g_vcpu.get(), vcpu::run).Throw(std::runtime_error("error"));
-    mocks.OnCall(g_vcpu.get(), vcpu::hlt).Throw(std::logic_error("error"));
-    mocks.OnCall(g_vcpu.get(), vcpu::is_running).Return(false);
-    mocks.OnCall(g_vcpu.get(), vcpu::is_guest_vm_vcpu).Return(false);
+    mocks.OnCall(g_vcpu, vcpu::init);
+    mocks.OnCall(g_vcpu, vcpu::fini);
+    mocks.OnCall(g_vcpu, vcpu::run).Throw(std::runtime_error("error"));
+    mocks.OnCall(g_vcpu, vcpu::hlt).Throw(std::logic_error("error"));
+    mocks.OnCall(g_vcpu, vcpu::is_running).Return(false);
+    mocks.OnCall(g_vcpu, vcpu::is_guest_vm_vcpu).Return(false);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -264,14 +264,14 @@ void
 vcpu_ut::test_vcpu_manager_run_is_guest_vm_vcpu_throws()
 {
     MockRepository mocks;
-    g_vcpu = bfn::mock_shared<vcpu>(mocks);
+    g_vcpu = bfn::mock_no_delete<vcpu>(mocks);
 
-    mocks.OnCall(g_vcpu.get(), vcpu::init);
-    mocks.OnCall(g_vcpu.get(), vcpu::fini);
-    mocks.OnCall(g_vcpu.get(), vcpu::run);
-    mocks.OnCall(g_vcpu.get(), vcpu::hlt);
-    mocks.OnCall(g_vcpu.get(), vcpu::is_running).Return(false);
-    mocks.OnCall(g_vcpu.get(), vcpu::is_guest_vm_vcpu).Throw(std::runtime_error("error"));
+    mocks.OnCall(g_vcpu, vcpu::init);
+    mocks.OnCall(g_vcpu, vcpu::fini);
+    mocks.OnCall(g_vcpu, vcpu::run);
+    mocks.OnCall(g_vcpu, vcpu::hlt);
+    mocks.OnCall(g_vcpu, vcpu::is_running).Return(false);
+    mocks.OnCall(g_vcpu, vcpu::is_guest_vm_vcpu).Throw(std::runtime_error("error"));
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -287,14 +287,14 @@ void
 vcpu_ut::test_vcpu_manager_run_no_create()
 {
     MockRepository mocks;
-    g_vcpu = bfn::mock_shared<vcpu>(mocks);
+    g_vcpu = bfn::mock_no_delete<vcpu>(mocks);
 
-    mocks.OnCall(g_vcpu.get(), vcpu::init);
-    mocks.OnCall(g_vcpu.get(), vcpu::fini);
-    mocks.OnCall(g_vcpu.get(), vcpu::run);
-    mocks.OnCall(g_vcpu.get(), vcpu::hlt);
-    mocks.OnCall(g_vcpu.get(), vcpu::is_running).Return(false);
-    mocks.OnCall(g_vcpu.get(), vcpu::is_guest_vm_vcpu).Return(false);
+    mocks.OnCall(g_vcpu, vcpu::init);
+    mocks.OnCall(g_vcpu, vcpu::fini);
+    mocks.OnCall(g_vcpu, vcpu::run);
+    mocks.OnCall(g_vcpu, vcpu::hlt);
+    mocks.OnCall(g_vcpu, vcpu::is_running).Return(false);
+    mocks.OnCall(g_vcpu, vcpu::is_guest_vm_vcpu).Return(false);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -308,14 +308,14 @@ void
 vcpu_ut::test_vcpu_manager_run_is_running()
 {
     MockRepository mocks;
-    g_vcpu = bfn::mock_shared<vcpu>(mocks);
+    g_vcpu = bfn::mock_no_delete<vcpu>(mocks);
 
-    mocks.OnCall(g_vcpu.get(), vcpu::init);
-    mocks.OnCall(g_vcpu.get(), vcpu::fini);
-    mocks.OnCall(g_vcpu.get(), vcpu::run);
-    mocks.OnCall(g_vcpu.get(), vcpu::hlt);
-    mocks.OnCall(g_vcpu.get(), vcpu::is_running).Return(true);
-    mocks.OnCall(g_vcpu.get(), vcpu::is_guest_vm_vcpu).Return(false);
+    mocks.OnCall(g_vcpu, vcpu::init);
+    mocks.OnCall(g_vcpu, vcpu::fini);
+    mocks.OnCall(g_vcpu, vcpu::run);
+    mocks.OnCall(g_vcpu, vcpu::hlt);
+    mocks.OnCall(g_vcpu, vcpu::is_running).Return(true);
+    mocks.OnCall(g_vcpu, vcpu::is_guest_vm_vcpu).Return(false);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -331,14 +331,14 @@ void
 vcpu_ut::test_vcpu_manager_run_is_guest_vm()
 {
     MockRepository mocks;
-    g_vcpu = bfn::mock_shared<vcpu>(mocks);
+    g_vcpu = bfn::mock_no_delete<vcpu>(mocks);
 
-    mocks.OnCall(g_vcpu.get(), vcpu::init);
-    mocks.OnCall(g_vcpu.get(), vcpu::fini);
-    mocks.OnCall(g_vcpu.get(), vcpu::run);
-    mocks.OnCall(g_vcpu.get(), vcpu::hlt);
-    mocks.OnCall(g_vcpu.get(), vcpu::is_running).Return(false);
-    mocks.OnCall(g_vcpu.get(), vcpu::is_guest_vm_vcpu).Return(true);
+    mocks.OnCall(g_vcpu, vcpu::init);
+    mocks.OnCall(g_vcpu, vcpu::fini);
+    mocks.OnCall(g_vcpu, vcpu::run);
+    mocks.OnCall(g_vcpu, vcpu::hlt);
+    mocks.OnCall(g_vcpu, vcpu::is_running).Return(false);
+    mocks.OnCall(g_vcpu, vcpu::is_guest_vm_vcpu).Return(true);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -354,21 +354,21 @@ void
 vcpu_ut::test_vcpu_manager_hlt_valid()
 {
     MockRepository mocks;
-    g_vcpu = bfn::mock_shared<vcpu>(mocks);
+    g_vcpu = bfn::mock_no_delete<vcpu>(mocks);
 
-    mocks.OnCall(g_vcpu.get(), vcpu::init);
-    mocks.OnCall(g_vcpu.get(), vcpu::fini);
-    mocks.OnCall(g_vcpu.get(), vcpu::run);
-    mocks.OnCall(g_vcpu.get(), vcpu::hlt);
-    mocks.OnCall(g_vcpu.get(), vcpu::is_running).Return(false);
-    mocks.OnCall(g_vcpu.get(), vcpu::is_guest_vm_vcpu).Return(false);
+    mocks.OnCall(g_vcpu, vcpu::init);
+    mocks.OnCall(g_vcpu, vcpu::fini);
+    mocks.OnCall(g_vcpu, vcpu::run);
+    mocks.OnCall(g_vcpu, vcpu::hlt);
+    mocks.OnCall(g_vcpu, vcpu::is_running).Return(false);
+    mocks.OnCall(g_vcpu, vcpu::is_guest_vm_vcpu).Return(false);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
         g_vcm->create_vcpu(0);
         g_vcm->run_vcpu(0);
 
-        mocks.OnCall(g_vcpu.get(), vcpu::is_running).Return(true);
+        mocks.OnCall(g_vcpu, vcpu::is_running).Return(true);
 
         EXPECT_NO_EXCEPTION(g_vcm->hlt_vcpu(0));
         g_vcm->delete_vcpu(0);
@@ -381,21 +381,21 @@ void
 vcpu_ut::test_vcpu_manager_hlt_valid_twice()
 {
     MockRepository mocks;
-    g_vcpu = bfn::mock_shared<vcpu>(mocks);
+    g_vcpu = bfn::mock_no_delete<vcpu>(mocks);
 
-    mocks.OnCall(g_vcpu.get(), vcpu::init);
-    mocks.OnCall(g_vcpu.get(), vcpu::fini);
-    mocks.OnCall(g_vcpu.get(), vcpu::run);
-    mocks.OnCall(g_vcpu.get(), vcpu::hlt);
-    mocks.OnCall(g_vcpu.get(), vcpu::is_running).Return(false);
-    mocks.OnCall(g_vcpu.get(), vcpu::is_guest_vm_vcpu).Return(false);
+    mocks.OnCall(g_vcpu, vcpu::init);
+    mocks.OnCall(g_vcpu, vcpu::fini);
+    mocks.OnCall(g_vcpu, vcpu::run);
+    mocks.OnCall(g_vcpu, vcpu::hlt);
+    mocks.OnCall(g_vcpu, vcpu::is_running).Return(false);
+    mocks.OnCall(g_vcpu, vcpu::is_guest_vm_vcpu).Return(false);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
         g_vcm->create_vcpu(0);
         g_vcm->run_vcpu(0);
 
-        mocks.OnCall(g_vcpu.get(), vcpu::is_running).Return(true);
+        mocks.OnCall(g_vcpu, vcpu::is_running).Return(true);
 
         EXPECT_NO_EXCEPTION(g_vcm->hlt_vcpu(0));
         EXPECT_NO_EXCEPTION(g_vcm->hlt_vcpu(0));
@@ -409,21 +409,21 @@ void
 vcpu_ut::test_vcpu_manager_hlt_hlt_throws()
 {
     MockRepository mocks;
-    g_vcpu = bfn::mock_shared<vcpu>(mocks);
+    g_vcpu = bfn::mock_no_delete<vcpu>(mocks);
 
-    mocks.OnCall(g_vcpu.get(), vcpu::init);
-    mocks.OnCall(g_vcpu.get(), vcpu::fini);
-    mocks.OnCall(g_vcpu.get(), vcpu::run);
-    mocks.OnCall(g_vcpu.get(), vcpu::hlt).Throw(std::runtime_error("error"));
-    mocks.OnCall(g_vcpu.get(), vcpu::is_running).Return(false);
-    mocks.OnCall(g_vcpu.get(), vcpu::is_guest_vm_vcpu).Return(false);
+    mocks.OnCall(g_vcpu, vcpu::init);
+    mocks.OnCall(g_vcpu, vcpu::fini);
+    mocks.OnCall(g_vcpu, vcpu::run);
+    mocks.OnCall(g_vcpu, vcpu::hlt).Throw(std::runtime_error("error"));
+    mocks.OnCall(g_vcpu, vcpu::is_running).Return(false);
+    mocks.OnCall(g_vcpu, vcpu::is_guest_vm_vcpu).Return(false);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
         g_vcm->create_vcpu(0);
         g_vcm->run_vcpu(0);
 
-        mocks.OnCall(g_vcpu.get(), vcpu::is_running).Return(true);
+        mocks.OnCall(g_vcpu, vcpu::is_running).Return(true);
 
         EXPECT_EXCEPTION(g_vcm->hlt_vcpu(0), std::runtime_error);
         g_vcm->delete_vcpu(0);
@@ -436,22 +436,22 @@ void
 vcpu_ut::test_vcpu_manager_hlt_is_guest_vm_vcpu_throws()
 {
     MockRepository mocks;
-    g_vcpu = bfn::mock_shared<vcpu>(mocks);
+    g_vcpu = bfn::mock_no_delete<vcpu>(mocks);
 
-    mocks.OnCall(g_vcpu.get(), vcpu::init);
-    mocks.OnCall(g_vcpu.get(), vcpu::fini);
-    mocks.OnCall(g_vcpu.get(), vcpu::run);
-    mocks.OnCall(g_vcpu.get(), vcpu::hlt);
-    mocks.OnCall(g_vcpu.get(), vcpu::is_running).Return(false);
-    mocks.OnCall(g_vcpu.get(), vcpu::is_guest_vm_vcpu).Return(false);
+    mocks.OnCall(g_vcpu, vcpu::init);
+    mocks.OnCall(g_vcpu, vcpu::fini);
+    mocks.OnCall(g_vcpu, vcpu::run);
+    mocks.OnCall(g_vcpu, vcpu::hlt);
+    mocks.OnCall(g_vcpu, vcpu::is_running).Return(false);
+    mocks.OnCall(g_vcpu, vcpu::is_guest_vm_vcpu).Return(false);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
         g_vcm->create_vcpu(0);
         g_vcm->run_vcpu(0);
 
-        mocks.OnCall(g_vcpu.get(), vcpu::is_running).Return(true);
-        mocks.OnCall(g_vcpu.get(), vcpu::is_guest_vm_vcpu).Throw(std::runtime_error("error"));
+        mocks.OnCall(g_vcpu, vcpu::is_running).Return(true);
+        mocks.OnCall(g_vcpu, vcpu::is_guest_vm_vcpu).Throw(std::runtime_error("error"));
 
         EXPECT_EXCEPTION(g_vcm->hlt_vcpu(0), std::runtime_error);
         g_vcm->delete_vcpu(0);
@@ -464,14 +464,14 @@ void
 vcpu_ut::test_vcpu_manager_hlt_no_create()
 {
     MockRepository mocks;
-    g_vcpu = bfn::mock_shared<vcpu>(mocks);
+    g_vcpu = bfn::mock_no_delete<vcpu>(mocks);
 
-    mocks.OnCall(g_vcpu.get(), vcpu::init);
-    mocks.OnCall(g_vcpu.get(), vcpu::fini);
-    mocks.OnCall(g_vcpu.get(), vcpu::run);
-    mocks.OnCall(g_vcpu.get(), vcpu::hlt);
-    mocks.OnCall(g_vcpu.get(), vcpu::is_running).Return(true);
-    mocks.OnCall(g_vcpu.get(), vcpu::is_guest_vm_vcpu).Return(false);
+    mocks.OnCall(g_vcpu, vcpu::init);
+    mocks.OnCall(g_vcpu, vcpu::fini);
+    mocks.OnCall(g_vcpu, vcpu::run);
+    mocks.OnCall(g_vcpu, vcpu::hlt);
+    mocks.OnCall(g_vcpu, vcpu::is_running).Return(true);
+    mocks.OnCall(g_vcpu, vcpu::is_guest_vm_vcpu).Return(false);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -485,14 +485,14 @@ void
 vcpu_ut::test_vcpu_manager_hlt_is_running()
 {
     MockRepository mocks;
-    g_vcpu = bfn::mock_shared<vcpu>(mocks);
+    g_vcpu = bfn::mock_no_delete<vcpu>(mocks);
 
-    mocks.OnCall(g_vcpu.get(), vcpu::init);
-    mocks.OnCall(g_vcpu.get(), vcpu::fini);
-    mocks.OnCall(g_vcpu.get(), vcpu::run);
-    mocks.OnCall(g_vcpu.get(), vcpu::hlt);
-    mocks.OnCall(g_vcpu.get(), vcpu::is_running).Return(false);
-    mocks.OnCall(g_vcpu.get(), vcpu::is_guest_vm_vcpu).Return(false);
+    mocks.OnCall(g_vcpu, vcpu::init);
+    mocks.OnCall(g_vcpu, vcpu::fini);
+    mocks.OnCall(g_vcpu, vcpu::run);
+    mocks.OnCall(g_vcpu, vcpu::hlt);
+    mocks.OnCall(g_vcpu, vcpu::is_running).Return(false);
+    mocks.OnCall(g_vcpu, vcpu::is_guest_vm_vcpu).Return(false);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -509,21 +509,21 @@ void
 vcpu_ut::test_vcpu_manager_hlt_is_guest_vm()
 {
     MockRepository mocks;
-    g_vcpu = bfn::mock_shared<vcpu>(mocks);
+    g_vcpu = bfn::mock_no_delete<vcpu>(mocks);
 
-    mocks.OnCall(g_vcpu.get(), vcpu::init);
-    mocks.OnCall(g_vcpu.get(), vcpu::fini);
-    mocks.OnCall(g_vcpu.get(), vcpu::run);
-    mocks.OnCall(g_vcpu.get(), vcpu::hlt);
-    mocks.OnCall(g_vcpu.get(), vcpu::is_running).Return(false);
-    mocks.OnCall(g_vcpu.get(), vcpu::is_guest_vm_vcpu).Return(true);
+    mocks.OnCall(g_vcpu, vcpu::init);
+    mocks.OnCall(g_vcpu, vcpu::fini);
+    mocks.OnCall(g_vcpu, vcpu::run);
+    mocks.OnCall(g_vcpu, vcpu::hlt);
+    mocks.OnCall(g_vcpu, vcpu::is_running).Return(false);
+    mocks.OnCall(g_vcpu, vcpu::is_guest_vm_vcpu).Return(true);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
         g_vcm->create_vcpu(0);
         g_vcm->run_vcpu(0);
 
-        mocks.OnCall(g_vcpu.get(), vcpu::is_running).Return(true);
+        mocks.OnCall(g_vcpu, vcpu::is_running).Return(true);
 
         EXPECT_NO_EXCEPTION(g_vcm->hlt_vcpu(0));
         g_vcm->delete_vcpu(0);
@@ -536,11 +536,11 @@ void
 vcpu_ut::test_vcpu_manager_write_null()
 {
     MockRepository mocks;
-    g_vcpu = bfn::mock_shared<vcpu>(mocks);
+    g_vcpu = bfn::mock_no_delete<vcpu>(mocks);
 
-    mocks.OnCall(g_vcpu.get(), vcpu::init);
-    mocks.OnCall(g_vcpu.get(), vcpu::fini);
-    mocks.ExpectCall(g_vcpu.get(), vcpu::write).With(""_s);
+    mocks.OnCall(g_vcpu, vcpu::init);
+    mocks.OnCall(g_vcpu, vcpu::fini);
+    mocks.ExpectCall(g_vcpu, vcpu::write).With(""_s);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -556,11 +556,11 @@ void
 vcpu_ut::test_vcpu_manager_write_hello()
 {
     MockRepository mocks;
-    g_vcpu = bfn::mock_shared<vcpu>(mocks);
+    g_vcpu = bfn::mock_no_delete<vcpu>(mocks);
 
-    mocks.OnCall(g_vcpu.get(), vcpu::init);
-    mocks.OnCall(g_vcpu.get(), vcpu::fini);
-    mocks.ExpectCall(g_vcpu.get(), vcpu::write).With("hello"_s);
+    mocks.OnCall(g_vcpu, vcpu::init);
+    mocks.OnCall(g_vcpu, vcpu::fini);
+    mocks.ExpectCall(g_vcpu, vcpu::write).With("hello"_s);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -576,11 +576,11 @@ void
 vcpu_ut::test_vcpu_manager_write_no_create()
 {
     MockRepository mocks;
-    g_vcpu = bfn::mock_shared<vcpu>(mocks);
+    g_vcpu = bfn::mock_no_delete<vcpu>(mocks);
 
-    mocks.OnCall(g_vcpu.get(), vcpu::init);
-    mocks.OnCall(g_vcpu.get(), vcpu::fini);
-    mocks.NeverCall(g_vcpu.get(), vcpu::write);
+    mocks.OnCall(g_vcpu, vcpu::init);
+    mocks.OnCall(g_vcpu, vcpu::fini);
+    mocks.NeverCall(g_vcpu, vcpu::write);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
