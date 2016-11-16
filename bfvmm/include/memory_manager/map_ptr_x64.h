@@ -224,9 +224,14 @@ auto make_unique_map_x64(typename unique_map_ptr_x64<T>::integer_pointer virt,
     auto &&vmap = g_mm->alloc_map(page_size);
 
 #ifdef MAP_PTR_TESTING
+
+    (void) cr3;
+    (void) attr;
+
     expects(virt != 0xDEADBEEF);
     return unique_map_ptr_x64<T> {reinterpret_cast<typename unique_map_ptr_x64<T>::integer_pointer>(vmap), size};
-#endif
+
+#else
 
     try
     {
@@ -240,6 +245,8 @@ auto make_unique_map_x64(typename unique_map_ptr_x64<T>::integer_pointer virt,
     }
 
     return unique_map_ptr_x64<T>();
+
+#endif
 }
 
 /// Unique Map

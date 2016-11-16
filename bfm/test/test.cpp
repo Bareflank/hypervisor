@@ -162,6 +162,7 @@ bfm_ut::list()
     this->test_ioctl_driver_process_vmcall_vmm_loaded();
     this->test_ioctl_driver_process_vmcall_vmm_corrupt();
     this->test_ioctl_driver_process_vmcall_vmm_unknown();
+    this->test_ioctl_driver_process_vmcall_unknown_vmcall();
     this->test_ioctl_driver_process_vmcall_versions_ioctl_failed();
     this->test_ioctl_driver_process_vmcall_versions_ioctl_return_failed();
     this->test_ioctl_driver_process_vmcall_versions_protocol_version();

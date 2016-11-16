@@ -205,7 +205,7 @@ ioctl_driver::vmcall()
             this->vmcall_unittest(regs);
             break;
 
-            break;
+        default:
             throw std::logic_error("unknown vmcall opcode");
     }
 }
