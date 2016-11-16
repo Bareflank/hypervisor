@@ -24,8 +24,8 @@
 # Checks
 # ------------------------------------------------------------------------------
 
-case $(lsb_release -si) in
-Ubuntu)
+case $( grep ^ID= /etc/os-release | cut -d'=' -f 2 ) in
+ubuntu)
     ;;
 *)
     echo "This script can only be used with: Ubuntu"
@@ -62,27 +62,6 @@ option_help() {
 # Functions
 # ------------------------------------------------------------------------------
 
-install_apt_tools() {
-    sudo apt-get update
-    sudo apt-get install --yes software-properties-common
-    sudo apt-get install --yes python-software-properties
-    sudo apt-get install --yes apt-transport-https
-    sudo apt-get install --yes ca-certificates
-}
-
-add_cmake_repositories() {
-    sudo add-apt-repository ppa:george-edison55/cmake-3.x -y
-}
-
-add_gcc_repositories() {
-    sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
-}
-
-add_docker_repositories() {
-    sudo apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
-    sudo add-apt-repository "deb https://apt.dockerproject.org/repo ubuntu-$(lsb_release -s -c) main"
-}
-
 install_common_packages() {
     sudo apt-get update
     sudo apt-get install --yes build-essential
@@ -95,7 +74,76 @@ install_common_packages() {
     sudo apt-get install --yes nasm
     sudo apt-get install --yes texinfo
     sudo apt-get install --yes cmake
+}
+
+install_clang_1610() {
+    sudo apt-get update
+    sudo apt-get install --yes clang-3.8
+    sudo apt-get install --yes clang++-3.8
+    sudo apt-get install --yes clang-tidy-3.8
+    sudo ln -s /usr/bin/clang-3.8 /usr/bin/clang
+    sudo ln -s /usr/bin/clang++-3.8 /usr/bin/clang++
+    sudo ln -s /usr/bin/clang-tidy-3.8 /usr/bin/clang-tidy
+}
+
+install_clang_1604() {
+    wget http://llvm.org/releases/3.8.1/clang+llvm-3.8.1-x86_64-linux-gnu-ubuntu-16.04.tar.xz
+    tar xf clang*
+    sudo cp -R clang*/* /usr/local/
+    rm -Rf clang*
+}
+
+install_clang_1404() {
+    wget http://llvm.org/releases/3.8.1/clang+llvm-3.8.1-x86_64-linux-gnu-ubuntu-14.04.tar.xz
+    tar xf clang*
+    sudo cp -R clang*/* /usr/local/
+    rm -Rf clang*
+}
+
+install_docker_1610() {
+    sudo apt-get update
+    sudo apt-get install --yes docker.io
+}
+
+install_docker_1604() {
+    sudo apt-get install --yes apt-transport-https
+    sudo apt-get install --yes ca-certificates
+
+    sudo apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
+    sudo add-apt-repository "deb https://apt.dockerproject.org/repo ubuntu-xenial main"
+
+    sudo apt-get update
     sudo DEBIAN_FRONTEND=noninteractive apt-get install --yes -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" docker-engine
+}
+
+install_docker_1404() {
+    sudo apt-get install --yes apt-transport-https
+    sudo apt-get install --yes ca-certificates
+
+    sudo apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
+    sudo add-apt-repository "deb https://apt.dockerproject.org/repo ubuntu-trusty main"
+
+    sudo apt-get update
+    sudo DEBIAN_FRONTEND=noninteractive apt-get install --yes -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" docker-engine
+}
+
+prepare_docker() {
+    sudo usermod -a -G docker $USER
+    sudo service docker restart
+}
+
+install_apt_tools() {
+    sudo apt-get update
+    sudo apt-get install --yes software-properties-common
+    sudo apt-get install --yes python-software-properties
+}
+
+add_cmake_repositories() {
+    sudo add-apt-repository ppa:george-edison55/cmake-3.x -y
+}
+
+add_gcc_repositories() {
+    sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
 }
 
 install_g++-6() {
@@ -109,27 +157,8 @@ install_g++-6() {
     sudo ln -s /usr/bin/g++-6 /usr/bin/g++
 }
 
-install_clang_1404() {
-    wget http://llvm.org/releases/3.8.1/clang+llvm-3.8.1-x86_64-linux-gnu-ubuntu-14.04.tar.xz
-    tar xf clang*
-    sudo cp -R clang*/* /usr/local/
-    rm -Rf clang*
-}
-
-install_clang_1604() {
-    wget http://llvm.org/releases/3.8.1/clang+llvm-3.8.1-x86_64-linux-gnu-ubuntu-16.04.tar.xz
-    tar xf clang*
-    sudo cp -R clang*/* /usr/local/
-    rm -Rf clang*
-}
-
-install_clang() {
-    sudo apt-get install --yes clang
-}
-
-prepare_docker() {
-    sudo usermod -a -G docker $USER
-    sudo service docker restart
+fix_linux_kernel() {
+    sudo cp /lib/modules/$(uname -r)/build/include/linux/compiler-gcc5.h /lib/modules/$(uname -r)/build/include/linux/compiler-gcc6.h || true
 }
 
 # ------------------------------------------------------------------------------
@@ -175,15 +204,18 @@ done
 # Setup System
 # ------------------------------------------------------------------------------
 
-case $(lsb_release -sr) in
+case $( grep ^VERSION_ID= /etc/os-release | cut -d'=' -f 2 | tr -d '"' ) in
 16.10)
-    ;&
-    
+    install_common_packages
+    install_clang_1610
+    install_docker_1610
+    prepare_docker
+    ;;
+
 16.04)
-    install_apt_tools
-    add_docker_repositories
     install_common_packages
     install_clang_1604
+    install_docker_1604
     prepare_docker
     ;;
 
@@ -191,11 +223,12 @@ case $(lsb_release -sr) in
     install_apt_tools
     add_cmake_repositories
     add_gcc_repositories
-    add_docker_repositories
     install_common_packages
     install_g++-6
     install_clang_1404
+    install_docker_1404
     prepare_docker
+    fix_linux_kernel
     ;;
 
 *)
