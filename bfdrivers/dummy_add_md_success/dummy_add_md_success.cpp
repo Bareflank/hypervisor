@@ -21,10 +21,11 @@
 
 #include <memory.h>
 
+int64_t return_success();
+
 extern "C" int64_t
 add_md(struct memory_descriptor *md)
 {
     (void) md;
-
-    return MEMORY_MANAGER_SUCCESS;
+    return return_success();
 }

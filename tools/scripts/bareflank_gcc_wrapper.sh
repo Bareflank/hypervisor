@@ -270,43 +270,14 @@ done
 # Sysroot Libraries
 # ------------------------------------------------------------------------------
 
-# By default, bareflank does not support the use of libc or libc++ as static
-# libraries. Instead, libc is only used to create libc++, and libc++ must
-# be loaded at runtime, and thus does not need to be known during linking. The
-# only thing the hypervisor code should need from the sysroot is the includes.
-
-if [[ $BAREFLANK_WRAPPER_IS_LIBCXX == "true" ]]; then
-    SYSROOT_LIBS+="-lbfunwind_static -lc -lbfc "
-    SYSROOT_LIBS+="-u __cxa_throw_bad_array_new_length "
-fi
-
-SYSROOT_LIB_PATH="-L$BUILD_ABS/makefiles/bfcrt/bin/cross/ -L$BUILD_ABS/makefiles/bfunwind/bin/cross/ -L$BUILD_ABS/sysroot/x86_64-elf/lib/ "
+SYSROOT_LIBS="-lc -lbfc"
+SYSROOT_LIB_PATH="-L$BUILD_ABS/sysroot/x86_64-elf/lib/ "
 
 # ------------------------------------------------------------------------------
 # Sysroot Includes
 # ------------------------------------------------------------------------------
 
 SYSROOT_INC_PATH="-isystem $HOME/compilers/$compiler/x86_64-elf/include/ -isystem $BUILD_ABS/sysroot/x86_64-elf/include/ -isystem $BUILD_ABS/sysroot/x86_64-elf/include/c++/v1/ "
-
-# REMOVE ME ***
-# This is a dirty hack that makes sure the newlib header is there. This should
-# go away once we have our own libc
-# Note that there is another bug where running make more than once will cause
-# the libcrt and libunwind to get compiled twice. This is because the includes
-# change once installed. This will also get fixed once we have our own newlib
-if [[ -f "$BUILD_ABS/sysroot/x86_64-elf/include/newlib.h" ]]; then
-    SYSROOT_INC_PATH="-include $BUILD_ABS/sysroot/x86_64-elf/include/newlib.h $SYSROOT_INC_PATH"
-fi
-
-# ------------------------------------------------------------------------------
-# Libgcc
-# ------------------------------------------------------------------------------
-
-if [[ ! `pwd` == *"bfcrt"* && ! `pwd` == *"bfunwind"* ]]; then
-    if [[ $MODE == "link" ]] && [[ $TYPE == "shared" ]]; then
-        BAREFLANK_LIBS="-u local_init -u local_fini -lbfcrt_static "
-    fi
-fi
 
 # ------------------------------------------------------------------------------
 # Execute

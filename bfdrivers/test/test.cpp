@@ -208,7 +208,6 @@ driver_entry_ut::list()
     this->test_helper_execute_symbol_missing_symbol();
     this->test_helper_execute_symbol_sym_failed();
     this->test_helper_execute_symbol_sym_success();
-    this->test_helper_constructors_success();
     this->test_helper_add_md_to_memory_manager_null_module();
     this->test_helper_get_elf_file_size_null_module();
     this->test_helper_get_elf_file_size_get_segment_fails();

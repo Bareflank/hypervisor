@@ -21,10 +21,11 @@
 
 #include <entry.h>
 
+int64_t return_success();
+
 extern "C" int64_t
 start_vmm(uint64_t arg)
 {
     (void) arg;
-
-    return ENTRY_SUCCESS;
+    return return_success();
 }

@@ -24,7 +24,6 @@
 int base::foo(int arg) noexcept
 {
     (void) arg;
-
     return 0;
 }
 

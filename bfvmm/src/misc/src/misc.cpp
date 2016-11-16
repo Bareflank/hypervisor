@@ -243,7 +243,7 @@ extern "C" int64_t
 register_eh_frame(void *addr, uint64_t size) noexcept
 {
     if (addr == nullptr || size == 0)
-        return REGISTER_EH_FRAME_FAILURE;
+        return REGISTER_EH_FRAME_SUCCESS;
 
     if (g_eh_frame_list_num >= MAX_NUM_MODULES)
         return REGISTER_EH_FRAME_FAILURE;

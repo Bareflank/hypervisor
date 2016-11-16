@@ -642,11 +642,11 @@ $(CROSS_OBJDIR):
 $(CROSS_OUTDIR):
 	@$(MD) $(CROSS_OUTDIR)
 
-$(CROSS_OBJDIR)/%.o: %.c $(CROSS_OBJDIR)/%.d
+$(CROSS_OBJDIR)/%.o: %.c | $(CROSS_OBJDIR)/%.d
 	$(CROSS_CC) $(realpath $<) -o $@ -c $(CROSS_CCFLAGS) $(CROSS_DEPFLAGS)
 	$(CROSS_POSTCOMPILE)
 
-$(CROSS_OBJDIR)/%.o: %.cpp $(CROSS_OBJDIR)/%.d
+$(CROSS_OBJDIR)/%.o: %.cpp | $(CROSS_OBJDIR)/%.d
 	$(CROSS_CXX) $(realpath $<) -o $@ -c $(CROSS_CXXFLAGS) $(CROSS_DEPFLAGS)
 	$(CROSS_POSTCOMPILE)
 
@@ -703,11 +703,11 @@ $(NATIVE_OBJDIR):
 $(NATIVE_OUTDIR):
 	@$(MD) $(NATIVE_OUTDIR)
 
-$(NATIVE_OBJDIR)/%.o: %.c $(NATIVE_OBJDIR)/%.d
+$(NATIVE_OBJDIR)/%.o: %.c | $(NATIVE_OBJDIR)/%.d
 	$(NATIVE_CC) $(realpath $<) -o $@ -c $(NATIVE_CCFLAGS) $(NATIVE_DEPFLAGS)
 	$(NATIVE_POSTCOMPILE)
 
-$(NATIVE_OBJDIR)/%.o: %.cpp $(NATIVE_OBJDIR)/%.d
+$(NATIVE_OBJDIR)/%.o: %.cpp | $(NATIVE_OBJDIR)/%.d
 	$(NATIVE_CXX) $(realpath $<) -o $@ -c $(NATIVE_CXXFLAGS) $(NATIVE_DEPFLAGS)
 	$(NATIVE_POSTCOMPILE)
 
