@@ -163,7 +163,6 @@ exit_handler_intel_x64_ut::list()
     this->test_vm_exit_reason_xsaves();
     this->test_vm_exit_reason_xrstors();
     this->test_vm_exit_failure_check();
-    this->test_vm_exit_reason_to_string();
     this->test_halt();
 
     return true;
