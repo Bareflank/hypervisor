@@ -35,6 +35,7 @@
 
 #include <vmcs/vmcs_intel_x64_natural_width_control_fields.h>
 #include <vmcs/vmcs_intel_x64_natural_width_read_only_data_fields.h>
+#include <vmcs/vmcs_intel_x64_natural_width_host_state_fields.h>
 
 #include <intrinsics/rflags_x64.h>
 #include <intrinsics/crs_intel_x64.h>
@@ -2789,6 +2790,11 @@ vmcs_ut::test_vmcs_guest_rip()
 void
 vmcs_ut::test_vmcs_host_cr0()
 {
+    this->expect_true(vmcs::host_cr0::exists());
+
+    vmcs::host_cr0::set_if_exists(0x2U);
+    this->expect_true(vmcs::host_cr0::get_if_exists() == 0x2U);
+
     vmcs::host_cr0::set(0xFFFFFFFFU);
     this->expect_true(vmcs::host_cr0::get() == 0xFFFFFFFFU);
 
@@ -2798,90 +2804,199 @@ vmcs_ut::test_vmcs_host_cr0()
 void
 vmcs_ut::test_vmcs_host_cr0_protection_enable()
 {
-    vmcs::host_cr0::protection_enable::set(1UL);
-    this->expect_true(vmcs::host_cr0::protection_enable::get() == 1UL);
+    vmcs::host_cr0::protection_enable::enable();
+    this->expect_true(vmcs::host_cr0::protection_enable::is_enabled());
+
+    vmcs::host_cr0::protection_enable::disable();
+    this->expect_true(vmcs::host_cr0::protection_enable::is_disabled());
+
+    vmcs::host_cr0::protection_enable::enable_if_exists();
+    this->expect_true(vmcs::host_cr0::protection_enable::is_enabled_if_exists());
+
+    vmcs::host_cr0::protection_enable::disable_if_exists();
+    this->expect_true(vmcs::host_cr0::protection_enable::is_disabled_if_exists());
 }
 
 void
 vmcs_ut::test_vmcs_host_cr0_monitor_coprocessor()
 {
-    vmcs::host_cr0::monitor_coprocessor::set(1UL);
-    this->expect_true(vmcs::host_cr0::monitor_coprocessor::get() == 1UL);
+    vmcs::host_cr0::monitor_coprocessor::enable();
+    this->expect_true(vmcs::host_cr0::monitor_coprocessor::is_enabled());
+
+    vmcs::host_cr0::monitor_coprocessor::disable();
+    this->expect_true(vmcs::host_cr0::monitor_coprocessor::is_disabled());
+
+    vmcs::host_cr0::monitor_coprocessor::enable_if_exists();
+    this->expect_true(vmcs::host_cr0::monitor_coprocessor::is_enabled_if_exists());
+
+    vmcs::host_cr0::monitor_coprocessor::disable_if_exists();
+    this->expect_true(vmcs::host_cr0::monitor_coprocessor::is_disabled_if_exists());
 }
 
 void
 vmcs_ut::test_vmcs_host_cr0_emulation()
 {
-    vmcs::host_cr0::emulation::set(1UL);
-    this->expect_true(vmcs::host_cr0::emulation::get() == 1UL);
+    vmcs::host_cr0::emulation::enable();
+    this->expect_true(vmcs::host_cr0::emulation::is_enabled());
+
+    vmcs::host_cr0::emulation::disable();
+    this->expect_true(vmcs::host_cr0::emulation::is_disabled());
+
+    vmcs::host_cr0::emulation::enable_if_exists();
+    this->expect_true(vmcs::host_cr0::emulation::is_enabled_if_exists());
+
+    vmcs::host_cr0::emulation::disable_if_exists();
+    this->expect_true(vmcs::host_cr0::emulation::is_disabled_if_exists());
 }
 
 void
 vmcs_ut::test_vmcs_host_cr0_task_switched()
 {
-    vmcs::host_cr0::task_switched::set(1UL);
-    this->expect_true(vmcs::host_cr0::task_switched::get() == 1UL);
+    vmcs::host_cr0::task_switched::enable();
+    this->expect_true(vmcs::host_cr0::task_switched::is_enabled());
+
+    vmcs::host_cr0::task_switched::disable();
+    this->expect_true(vmcs::host_cr0::task_switched::is_disabled());
+
+    vmcs::host_cr0::task_switched::enable_if_exists();
+    this->expect_true(vmcs::host_cr0::task_switched::is_enabled_if_exists());
+
+    vmcs::host_cr0::task_switched::disable_if_exists();
+    this->expect_true(vmcs::host_cr0::task_switched::is_disabled_if_exists());
 }
 
 void
 vmcs_ut::test_vmcs_host_cr0_extension_type()
 {
-    vmcs::host_cr0::extension_type::set(1UL);
-    this->expect_true(vmcs::host_cr0::extension_type::get() == 1UL);
+    vmcs::host_cr0::extension_type::enable();
+    this->expect_true(vmcs::host_cr0::extension_type::is_enabled());
+
+    vmcs::host_cr0::extension_type::disable();
+    this->expect_true(vmcs::host_cr0::extension_type::is_disabled());
+
+    vmcs::host_cr0::extension_type::enable_if_exists();
+    this->expect_true(vmcs::host_cr0::extension_type::is_enabled_if_exists());
+
+    vmcs::host_cr0::extension_type::disable_if_exists();
+    this->expect_true(vmcs::host_cr0::extension_type::is_disabled_if_exists());
 }
 
 void
 vmcs_ut::test_vmcs_host_cr0_numeric_error()
 {
-    vmcs::host_cr0::numeric_error::set(1UL);
-    this->expect_true(vmcs::host_cr0::numeric_error::get() == 1UL);
+    vmcs::host_cr0::numeric_error::enable();
+    this->expect_true(vmcs::host_cr0::numeric_error::is_enabled());
+
+    vmcs::host_cr0::numeric_error::disable();
+    this->expect_true(vmcs::host_cr0::numeric_error::is_disabled());
+
+    vmcs::host_cr0::numeric_error::enable_if_exists();
+    this->expect_true(vmcs::host_cr0::numeric_error::is_enabled_if_exists());
+
+    vmcs::host_cr0::numeric_error::disable_if_exists();
+    this->expect_true(vmcs::host_cr0::numeric_error::is_disabled_if_exists());
 }
 
 void
 vmcs_ut::test_vmcs_host_cr0_write_protect()
 {
-    vmcs::host_cr0::write_protect::set(1UL);
-    this->expect_true(vmcs::host_cr0::write_protect::get() == 1UL);
+    vmcs::host_cr0::write_protect::enable();
+    this->expect_true(vmcs::host_cr0::write_protect::is_enabled());
+
+    vmcs::host_cr0::write_protect::disable();
+    this->expect_true(vmcs::host_cr0::write_protect::is_disabled());
+
+    vmcs::host_cr0::write_protect::enable_if_exists();
+    this->expect_true(vmcs::host_cr0::write_protect::is_enabled_if_exists());
+
+    vmcs::host_cr0::write_protect::disable_if_exists();
+    this->expect_true(vmcs::host_cr0::write_protect::is_disabled_if_exists());
 }
 
 void
 vmcs_ut::test_vmcs_host_cr0_alignment_mask()
 {
-    vmcs::host_cr0::alignment_mask::set(1UL);
-    this->expect_true(vmcs::host_cr0::alignment_mask::get() == 1UL);
+    vmcs::host_cr0::alignment_mask::enable();
+    this->expect_true(vmcs::host_cr0::alignment_mask::is_enabled());
+
+    vmcs::host_cr0::alignment_mask::disable();
+    this->expect_true(vmcs::host_cr0::alignment_mask::is_disabled());
+
+    vmcs::host_cr0::alignment_mask::enable_if_exists();
+    this->expect_true(vmcs::host_cr0::alignment_mask::is_enabled_if_exists());
+
+    vmcs::host_cr0::alignment_mask::disable_if_exists();
+    this->expect_true(vmcs::host_cr0::alignment_mask::is_disabled_if_exists());
 }
 
 void
 vmcs_ut::test_vmcs_host_cr0_not_write_through()
 {
-    vmcs::host_cr0::not_write_through::set(1UL);
-    this->expect_true(vmcs::host_cr0::not_write_through::get() == 1UL);
+    vmcs::host_cr0::not_write_through::enable();
+    this->expect_true(vmcs::host_cr0::not_write_through::is_enabled());
+
+    vmcs::host_cr0::not_write_through::disable();
+    this->expect_true(vmcs::host_cr0::not_write_through::is_disabled());
+
+    vmcs::host_cr0::not_write_through::enable_if_exists();
+    this->expect_true(vmcs::host_cr0::not_write_through::is_enabled_if_exists());
+
+    vmcs::host_cr0::not_write_through::disable_if_exists();
+    this->expect_true(vmcs::host_cr0::not_write_through::is_disabled_if_exists());
 }
 
 void
 vmcs_ut::test_vmcs_host_cr0_cache_disable()
 {
-    vmcs::host_cr0::cache_disable::set(1UL);
-    this->expect_true(vmcs::host_cr0::cache_disable::get() == 1UL);
+    vmcs::host_cr0::cache_disable::enable();
+    this->expect_true(vmcs::host_cr0::cache_disable::is_enabled());
+
+    vmcs::host_cr0::cache_disable::disable();
+    this->expect_true(vmcs::host_cr0::cache_disable::is_disabled());
+
+    vmcs::host_cr0::cache_disable::enable_if_exists();
+    this->expect_true(vmcs::host_cr0::cache_disable::is_enabled_if_exists());
+
+    vmcs::host_cr0::cache_disable::disable_if_exists();
+    this->expect_true(vmcs::host_cr0::cache_disable::is_disabled_if_exists());
 }
 
 void
 vmcs_ut::test_vmcs_host_cr0_paging()
 {
-    vmcs::host_cr0::paging::set(1UL);
-    this->expect_true(vmcs::host_cr0::paging::get() == 1UL);
+    vmcs::host_cr0::paging::enable();
+    this->expect_true(vmcs::host_cr0::paging::is_enabled());
+
+    vmcs::host_cr0::paging::disable();
+    this->expect_true(vmcs::host_cr0::paging::is_disabled());
+
+    vmcs::host_cr0::paging::enable_if_exists();
+    this->expect_true(vmcs::host_cr0::paging::is_enabled_if_exists());
+
+    vmcs::host_cr0::paging::disable_if_exists();
+    this->expect_true(vmcs::host_cr0::paging::is_disabled_if_exists());
 }
 
 void
 vmcs_ut::test_vmcs_host_cr3()
 {
-    vmcs::host_cr3::set(100UL);
-    this->expect_true(vmcs::host_cr3::get() == 100UL);
+    this->expect_true(vmcs::host_cr3::exists());
+
+    vmcs::host_cr3::set_if_exists(0x2U);
+    this->expect_true(vmcs::host_cr3::get_if_exists() == 0x2U);
+
+    vmcs::host_cr3::set(0xFFFFFFFFU);
+    this->expect_true(vmcs::host_cr3::get() == 0xFFFFFFFFU);
 }
 
 void
 vmcs_ut::test_vmcs_host_cr4()
 {
+    this->expect_true(vmcs::host_cr4::exists());
+
+    vmcs::host_cr4::set_if_exists(0x2U);
+    this->expect_true(vmcs::host_cr4::get_if_exists() == 0x2U);
+
     vmcs::host_cr4::set(0xFFFFFFFFU);
     this->expect_true(vmcs::host_cr4::get() == 0xFFFFFFFFU);
 
@@ -2891,134 +3006,413 @@ vmcs_ut::test_vmcs_host_cr4()
 void
 vmcs_ut::test_vmcs_host_cr4_v8086_mode_extensions()
 {
-    vmcs::host_cr4::v8086_mode_extensions::set(1UL);
-    this->expect_true(vmcs::host_cr4::v8086_mode_extensions::get() == 1UL);
+    vmcs::host_cr4::v8086_mode_extensions::enable();
+    this->expect_true(vmcs::host_cr4::v8086_mode_extensions::is_enabled());
+
+    vmcs::host_cr4::v8086_mode_extensions::disable();
+    this->expect_true(vmcs::host_cr4::v8086_mode_extensions::is_disabled());
+
+    vmcs::host_cr4::v8086_mode_extensions::enable_if_exists();
+    this->expect_true(vmcs::host_cr4::v8086_mode_extensions::is_enabled_if_exists());
+
+    vmcs::host_cr4::v8086_mode_extensions::disable_if_exists();
+    this->expect_true(vmcs::host_cr4::v8086_mode_extensions::is_disabled_if_exists());
 }
 
 void
 vmcs_ut::test_vmcs_host_cr4_protected_mode_virtual_interrupts()
 {
-    vmcs::host_cr4::protected_mode_virtual_interrupts::set(1UL);
-    this->expect_true(vmcs::host_cr4::protected_mode_virtual_interrupts::get() == 1UL);
+    vmcs::host_cr4::protected_mode_virtual_interrupts::enable();
+    this->expect_true(vmcs::host_cr4::protected_mode_virtual_interrupts::is_enabled());
+
+    vmcs::host_cr4::protected_mode_virtual_interrupts::disable();
+    this->expect_true(vmcs::host_cr4::protected_mode_virtual_interrupts::is_disabled());
+
+    vmcs::host_cr4::protected_mode_virtual_interrupts::enable_if_exists();
+    this->expect_true(vmcs::host_cr4::protected_mode_virtual_interrupts::is_enabled_if_exists());
+
+    vmcs::host_cr4::protected_mode_virtual_interrupts::disable_if_exists();
+    this->expect_true(vmcs::host_cr4::protected_mode_virtual_interrupts::is_disabled_if_exists());
 }
 
 void
 vmcs_ut::test_vmcs_host_cr4_time_stamp_disable()
 {
-    vmcs::host_cr4::time_stamp_disable::set(1UL);
-    this->expect_true(vmcs::host_cr4::time_stamp_disable::get() == 1UL);
+    vmcs::host_cr4::time_stamp_disable::enable();
+    this->expect_true(vmcs::host_cr4::time_stamp_disable::is_enabled());
+
+    vmcs::host_cr4::time_stamp_disable::disable();
+    this->expect_true(vmcs::host_cr4::time_stamp_disable::is_disabled());
+
+    vmcs::host_cr4::time_stamp_disable::enable_if_exists();
+    this->expect_true(vmcs::host_cr4::time_stamp_disable::is_enabled_if_exists());
+
+    vmcs::host_cr4::time_stamp_disable::disable_if_exists();
+    this->expect_true(vmcs::host_cr4::time_stamp_disable::is_disabled_if_exists());
 }
 
 void
 vmcs_ut::test_vmcs_host_cr4_debugging_extensions()
 {
-    vmcs::host_cr4::debugging_extensions::set(1UL);
-    this->expect_true(vmcs::host_cr4::debugging_extensions::get() == 1UL);
+    vmcs::host_cr4::debugging_extensions::enable();
+    this->expect_true(vmcs::host_cr4::debugging_extensions::is_enabled());
+
+    vmcs::host_cr4::debugging_extensions::disable();
+    this->expect_true(vmcs::host_cr4::debugging_extensions::is_disabled());
+
+    vmcs::host_cr4::debugging_extensions::enable_if_exists();
+    this->expect_true(vmcs::host_cr4::debugging_extensions::is_enabled_if_exists());
+
+    vmcs::host_cr4::debugging_extensions::disable_if_exists();
+    this->expect_true(vmcs::host_cr4::debugging_extensions::is_disabled_if_exists());
 }
 
 void
 vmcs_ut::test_vmcs_host_cr4_page_size_extensions()
 {
-    vmcs::host_cr4::page_size_extensions::set(1UL);
-    this->expect_true(vmcs::host_cr4::page_size_extensions::get() == 1UL);
+    vmcs::host_cr4::page_size_extensions::enable();
+    this->expect_true(vmcs::host_cr4::page_size_extensions::is_enabled());
+
+    vmcs::host_cr4::page_size_extensions::disable();
+    this->expect_true(vmcs::host_cr4::page_size_extensions::is_disabled());
+
+    vmcs::host_cr4::page_size_extensions::enable_if_exists();
+    this->expect_true(vmcs::host_cr4::page_size_extensions::is_enabled_if_exists());
+
+    vmcs::host_cr4::page_size_extensions::disable_if_exists();
+    this->expect_true(vmcs::host_cr4::page_size_extensions::is_disabled_if_exists());
 }
 
 void
 vmcs_ut::test_vmcs_host_cr4_physical_address_extensions()
 {
-    vmcs::host_cr4::physical_address_extensions::set(1UL);
-    this->expect_true(vmcs::host_cr4::physical_address_extensions::get() == 1UL);
+    vmcs::host_cr4::physical_address_extensions::enable();
+    this->expect_true(vmcs::host_cr4::physical_address_extensions::is_enabled());
+
+    vmcs::host_cr4::physical_address_extensions::disable();
+    this->expect_true(vmcs::host_cr4::physical_address_extensions::is_disabled());
+
+    vmcs::host_cr4::physical_address_extensions::enable_if_exists();
+    this->expect_true(vmcs::host_cr4::physical_address_extensions::is_enabled_if_exists());
+
+    vmcs::host_cr4::physical_address_extensions::disable_if_exists();
+    this->expect_true(vmcs::host_cr4::physical_address_extensions::is_disabled_if_exists());
 }
 
 void
 vmcs_ut::test_vmcs_host_cr4_machine_check_enable()
 {
-    vmcs::host_cr4::machine_check_enable::set(1UL);
-    this->expect_true(vmcs::host_cr4::machine_check_enable::get() == 1UL);
+    vmcs::host_cr4::machine_check_enable::enable();
+    this->expect_true(vmcs::host_cr4::machine_check_enable::is_enabled());
+
+    vmcs::host_cr4::machine_check_enable::disable();
+    this->expect_true(vmcs::host_cr4::machine_check_enable::is_disabled());
+
+    vmcs::host_cr4::machine_check_enable::enable_if_exists();
+    this->expect_true(vmcs::host_cr4::machine_check_enable::is_enabled_if_exists());
+
+    vmcs::host_cr4::machine_check_enable::disable_if_exists();
+    this->expect_true(vmcs::host_cr4::machine_check_enable::is_disabled_if_exists());
 }
 
 void
 vmcs_ut::test_vmcs_host_cr4_page_global_enable()
 {
-    vmcs::host_cr4::page_global_enable::set(1UL);
-    this->expect_true(vmcs::host_cr4::page_global_enable::get() == 1UL);
+    vmcs::host_cr4::page_global_enable::enable();
+    this->expect_true(vmcs::host_cr4::page_global_enable::is_enabled());
+
+    vmcs::host_cr4::page_global_enable::disable();
+    this->expect_true(vmcs::host_cr4::page_global_enable::is_disabled());
+
+    vmcs::host_cr4::page_global_enable::enable_if_exists();
+    this->expect_true(vmcs::host_cr4::page_global_enable::is_enabled_if_exists());
+
+    vmcs::host_cr4::page_global_enable::disable_if_exists();
+    this->expect_true(vmcs::host_cr4::page_global_enable::is_disabled_if_exists());
 }
 
 void
 vmcs_ut::test_vmcs_host_cr4_performance_monitor_counter_enable()
 {
-    vmcs::host_cr4::performance_monitor_counter_enable::set(1UL);
-    this->expect_true(vmcs::host_cr4::performance_monitor_counter_enable::get() == 1UL);
+    vmcs::host_cr4::performance_monitor_counter_enable::enable();
+    this->expect_true(vmcs::host_cr4::performance_monitor_counter_enable::is_enabled());
+
+    vmcs::host_cr4::performance_monitor_counter_enable::disable();
+    this->expect_true(vmcs::host_cr4::performance_monitor_counter_enable::is_disabled());
+
+    vmcs::host_cr4::performance_monitor_counter_enable::enable_if_exists();
+    this->expect_true(vmcs::host_cr4::performance_monitor_counter_enable::is_enabled_if_exists());
+
+    vmcs::host_cr4::performance_monitor_counter_enable::disable_if_exists();
+    this->expect_true(vmcs::host_cr4::performance_monitor_counter_enable::is_disabled_if_exists());
 }
 
 void
 vmcs_ut::test_vmcs_host_cr4_osfxsr()
 {
-    vmcs::host_cr4::osfxsr::set(1UL);
-    this->expect_true(vmcs::host_cr4::osfxsr::get() == 1UL);
+    vmcs::host_cr4::osfxsr::enable();
+    this->expect_true(vmcs::host_cr4::osfxsr::is_enabled());
+
+    vmcs::host_cr4::osfxsr::disable();
+    this->expect_true(vmcs::host_cr4::osfxsr::is_disabled());
+
+    vmcs::host_cr4::osfxsr::enable_if_exists();
+    this->expect_true(vmcs::host_cr4::osfxsr::is_enabled_if_exists());
+
+    vmcs::host_cr4::osfxsr::disable_if_exists();
+    this->expect_true(vmcs::host_cr4::osfxsr::is_disabled_if_exists());
 }
 
 void
 vmcs_ut::test_vmcs_host_cr4_osxmmexcpt()
 {
-    vmcs::host_cr4::osxmmexcpt::set(1UL);
-    this->expect_true(vmcs::host_cr4::osxmmexcpt::get() == 1UL);
+    vmcs::host_cr4::osxmmexcpt::enable();
+    this->expect_true(vmcs::host_cr4::osxmmexcpt::is_enabled());
+
+    vmcs::host_cr4::osxmmexcpt::disable();
+    this->expect_true(vmcs::host_cr4::osxmmexcpt::is_disabled());
+
+    vmcs::host_cr4::osxmmexcpt::enable_if_exists();
+    this->expect_true(vmcs::host_cr4::osxmmexcpt::is_enabled_if_exists());
+
+    vmcs::host_cr4::osxmmexcpt::disable_if_exists();
+    this->expect_true(vmcs::host_cr4::osxmmexcpt::is_disabled_if_exists());
 }
 
 void
 vmcs_ut::test_vmcs_host_cr4_vmx_enable_bit()
 {
-    vmcs::host_cr4::vmx_enable_bit::set(1UL);
-    this->expect_true(vmcs::host_cr4::vmx_enable_bit::get() == 1UL);
+    vmcs::host_cr4::vmx_enable_bit::enable();
+    this->expect_true(vmcs::host_cr4::vmx_enable_bit::is_enabled());
+
+    vmcs::host_cr4::vmx_enable_bit::disable();
+    this->expect_true(vmcs::host_cr4::vmx_enable_bit::is_disabled());
+
+    vmcs::host_cr4::vmx_enable_bit::enable_if_exists();
+    this->expect_true(vmcs::host_cr4::vmx_enable_bit::is_enabled_if_exists());
+
+    vmcs::host_cr4::vmx_enable_bit::disable_if_exists();
+    this->expect_true(vmcs::host_cr4::vmx_enable_bit::is_disabled_if_exists());
 }
 
 void
 vmcs_ut::test_vmcs_host_cr4_smx_enable_bit()
 {
-    vmcs::host_cr4::smx_enable_bit::set(1UL);
-    this->expect_true(vmcs::host_cr4::smx_enable_bit::get() == 1UL);
+    vmcs::host_cr4::smx_enable_bit::enable();
+    this->expect_true(vmcs::host_cr4::smx_enable_bit::is_enabled());
+
+    vmcs::host_cr4::smx_enable_bit::disable();
+    this->expect_true(vmcs::host_cr4::smx_enable_bit::is_disabled());
+
+    vmcs::host_cr4::smx_enable_bit::enable_if_exists();
+    this->expect_true(vmcs::host_cr4::smx_enable_bit::is_enabled_if_exists());
+
+    vmcs::host_cr4::smx_enable_bit::disable_if_exists();
+    this->expect_true(vmcs::host_cr4::smx_enable_bit::is_disabled_if_exists());
 }
 
 void
 vmcs_ut::test_vmcs_host_cr4_fsgsbase_enable_bit()
 {
-    vmcs::host_cr4::fsgsbase_enable_bit::set(1UL);
-    this->expect_true(vmcs::host_cr4::fsgsbase_enable_bit::get() == 1UL);
+    vmcs::host_cr4::fsgsbase_enable_bit::enable();
+    this->expect_true(vmcs::host_cr4::fsgsbase_enable_bit::is_enabled());
+
+    vmcs::host_cr4::fsgsbase_enable_bit::disable();
+    this->expect_true(vmcs::host_cr4::fsgsbase_enable_bit::is_disabled());
+
+    vmcs::host_cr4::fsgsbase_enable_bit::enable_if_exists();
+    this->expect_true(vmcs::host_cr4::fsgsbase_enable_bit::is_enabled_if_exists());
+
+    vmcs::host_cr4::fsgsbase_enable_bit::disable_if_exists();
+    this->expect_true(vmcs::host_cr4::fsgsbase_enable_bit::is_disabled_if_exists());
 }
 
 void
 vmcs_ut::test_vmcs_host_cr4_pcid_enable_bit()
 {
-    vmcs::host_cr4::pcid_enable_bit::set(1UL);
-    this->expect_true(vmcs::host_cr4::pcid_enable_bit::get() == 1UL);
+    vmcs::host_cr4::pcid_enable_bit::enable();
+    this->expect_true(vmcs::host_cr4::pcid_enable_bit::is_enabled());
+
+    vmcs::host_cr4::pcid_enable_bit::disable();
+    this->expect_true(vmcs::host_cr4::pcid_enable_bit::is_disabled());
+
+    vmcs::host_cr4::pcid_enable_bit::enable_if_exists();
+    this->expect_true(vmcs::host_cr4::pcid_enable_bit::is_enabled_if_exists());
+
+    vmcs::host_cr4::pcid_enable_bit::disable_if_exists();
+    this->expect_true(vmcs::host_cr4::pcid_enable_bit::is_disabled_if_exists());
 }
 
 void
 vmcs_ut::test_vmcs_host_cr4_osxsave()
 {
-    vmcs::host_cr4::osxsave::set(1UL);
-    this->expect_true(vmcs::host_cr4::osxsave::get() == 1UL);
+    vmcs::host_cr4::osxsave::enable();
+    this->expect_true(vmcs::host_cr4::osxsave::is_enabled());
+
+    vmcs::host_cr4::osxsave::disable();
+    this->expect_true(vmcs::host_cr4::osxsave::is_disabled());
+
+    vmcs::host_cr4::osxsave::enable_if_exists();
+    this->expect_true(vmcs::host_cr4::osxsave::is_enabled_if_exists());
+
+    vmcs::host_cr4::osxsave::disable_if_exists();
+    this->expect_true(vmcs::host_cr4::osxsave::is_disabled_if_exists());
 }
 
 void
 vmcs_ut::test_vmcs_host_cr4_smep_enable_bit()
 {
-    vmcs::host_cr4::smep_enable_bit::set(1UL);
-    this->expect_true(vmcs::host_cr4::smep_enable_bit::get() == 1UL);
+    vmcs::host_cr4::smep_enable_bit::enable();
+    this->expect_true(vmcs::host_cr4::smep_enable_bit::is_enabled());
+
+    vmcs::host_cr4::smep_enable_bit::disable();
+    this->expect_true(vmcs::host_cr4::smep_enable_bit::is_disabled());
+
+    vmcs::host_cr4::smep_enable_bit::enable_if_exists();
+    this->expect_true(vmcs::host_cr4::smep_enable_bit::is_enabled_if_exists());
+
+    vmcs::host_cr4::smep_enable_bit::disable_if_exists();
+    this->expect_true(vmcs::host_cr4::smep_enable_bit::is_disabled_if_exists());
 }
 
 void
 vmcs_ut::test_vmcs_host_cr4_smap_enable_bit()
 {
-    vmcs::host_cr4::smap_enable_bit::set(1UL);
-    this->expect_true(vmcs::host_cr4::smap_enable_bit::get() == 1UL);
+    vmcs::host_cr4::smap_enable_bit::enable();
+    this->expect_true(vmcs::host_cr4::smap_enable_bit::is_enabled());
+
+    vmcs::host_cr4::smap_enable_bit::disable();
+    this->expect_true(vmcs::host_cr4::smap_enable_bit::is_disabled());
+
+    vmcs::host_cr4::smap_enable_bit::enable_if_exists();
+    this->expect_true(vmcs::host_cr4::smap_enable_bit::is_enabled_if_exists());
+
+    vmcs::host_cr4::smap_enable_bit::disable_if_exists();
+    this->expect_true(vmcs::host_cr4::smap_enable_bit::is_disabled_if_exists());
 }
 
 void
 vmcs_ut::test_vmcs_host_cr4_protection_key_enable_bit()
 {
-    vmcs::host_cr4::protection_key_enable_bit::set(1UL);
-    this->expect_true(vmcs::host_cr4::protection_key_enable_bit::get() == 1UL);
+    vmcs::host_cr4::protection_key_enable_bit::enable();
+    this->expect_true(vmcs::host_cr4::protection_key_enable_bit::is_enabled());
+
+    vmcs::host_cr4::protection_key_enable_bit::disable();
+    this->expect_true(vmcs::host_cr4::protection_key_enable_bit::is_disabled());
+
+    vmcs::host_cr4::protection_key_enable_bit::enable_if_exists();
+    this->expect_true(vmcs::host_cr4::protection_key_enable_bit::is_enabled_if_exists());
+
+    vmcs::host_cr4::protection_key_enable_bit::disable_if_exists();
+    this->expect_true(vmcs::host_cr4::protection_key_enable_bit::is_disabled_if_exists());
+}
+
+void
+vmcs_ut::test_vmcs_host_fs_base()
+{
+    this->expect_true(vmcs::host_fs_base::exists());
+
+    vmcs::host_fs_base::set(1UL);
+    this->expect_true(vmcs::host_fs_base::get() == 1UL);
+
+    vmcs::host_fs_base::set_if_exists(0UL);
+    this->expect_true(vmcs::host_fs_base::get_if_exists() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_gs_base()
+{
+    this->expect_true(vmcs::host_gs_base::exists());
+
+    vmcs::host_gs_base::set(1UL);
+    this->expect_true(vmcs::host_gs_base::get() == 1UL);
+
+    vmcs::host_gs_base::set_if_exists(0UL);
+    this->expect_true(vmcs::host_gs_base::get_if_exists() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_tr_base()
+{
+    this->expect_true(vmcs::host_tr_base::exists());
+
+    vmcs::host_tr_base::set(1UL);
+    this->expect_true(vmcs::host_tr_base::get() == 1UL);
+
+    vmcs::host_tr_base::set_if_exists(0UL);
+    this->expect_true(vmcs::host_tr_base::get_if_exists() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_gdtr_base()
+{
+    this->expect_true(vmcs::host_gdtr_base::exists());
+
+    vmcs::host_gdtr_base::set(1UL);
+    this->expect_true(vmcs::host_gdtr_base::get() == 1UL);
+
+    vmcs::host_gdtr_base::set_if_exists(0UL);
+    this->expect_true(vmcs::host_gdtr_base::get_if_exists() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_idtr_base()
+{
+    this->expect_true(vmcs::host_idtr_base::exists());
+
+    vmcs::host_idtr_base::set(1UL);
+    this->expect_true(vmcs::host_idtr_base::get() == 1UL);
+
+    vmcs::host_idtr_base::set_if_exists(0UL);
+    this->expect_true(vmcs::host_idtr_base::get_if_exists() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_ia32_sysenter_esp()
+{
+    this->expect_true(vmcs::host_ia32_sysenter_esp::exists());
+
+    vmcs::host_ia32_sysenter_esp::set(1UL);
+    this->expect_true(vmcs::host_ia32_sysenter_esp::get() == 1UL);
+
+    vmcs::host_ia32_sysenter_esp::set_if_exists(0UL);
+    this->expect_true(vmcs::host_ia32_sysenter_esp::get_if_exists() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_ia32_sysenter_eip()
+{
+    this->expect_true(vmcs::host_ia32_sysenter_eip::exists());
+
+    vmcs::host_ia32_sysenter_eip::set(1UL);
+    this->expect_true(vmcs::host_ia32_sysenter_eip::get() == 1UL);
+
+    vmcs::host_ia32_sysenter_eip::set_if_exists(0UL);
+    this->expect_true(vmcs::host_ia32_sysenter_eip::get_if_exists() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_rsp()
+{
+    this->expect_true(vmcs::host_rsp::exists());
+
+    vmcs::host_rsp::set(1UL);
+    this->expect_true(vmcs::host_rsp::get() == 1UL);
+
+    vmcs::host_rsp::set_if_exists(0UL);
+    this->expect_true(vmcs::host_rsp::get_if_exists() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_rip()
+{
+    this->expect_true(vmcs::host_rip::exists());
+
+    vmcs::host_rip::set(1UL);
+    this->expect_true(vmcs::host_rip::get() == 1UL);
+
+    vmcs::host_rip::set_if_exists(0UL);
+    this->expect_true(vmcs::host_rip::get_if_exists() == 0UL);
 }
 
 void

@@ -298,6 +298,15 @@ private:
     void test_vmcs_host_cr4_smep_enable_bit();
     void test_vmcs_host_cr4_smap_enable_bit();
     void test_vmcs_host_cr4_protection_key_enable_bit();
+    void test_vmcs_host_fs_base();
+    void test_vmcs_host_gs_base();
+    void test_vmcs_host_tr_base();
+    void test_vmcs_host_gdtr_base();
+    void test_vmcs_host_idtr_base();
+    void test_vmcs_host_ia32_sysenter_esp();
+    void test_vmcs_host_ia32_sysenter_eip();
+    void test_vmcs_host_rsp();
+    void test_vmcs_host_rip();
     void test_vmcs_guest_ia32_debugctl();
     void test_vmcs_guest_ia32_debugctl_lbr();
     void test_vmcs_guest_ia32_debugctl_btf();
