@@ -236,6 +236,7 @@ private:
     void test_ia32_vmx_true_entry_ctls_load_ia32_pat();
     void test_ia32_vmx_true_entry_ctls_load_ia32_efer();
     void test_ia32_vmx_vmfunc();
+    void test_ia32_vmx_vmfunc_eptp_switching();
     void test_ia32_efer();
     void test_ia32_efer_sce();
     void test_ia32_efer_lme();

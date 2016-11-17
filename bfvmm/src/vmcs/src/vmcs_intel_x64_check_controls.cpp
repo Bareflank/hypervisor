@@ -26,6 +26,7 @@
 #include <memory_manager/memory_manager_x64.h>
 #include <vmcs/vmcs_intel_x64_16bit_control_fields.h>
 #include <vmcs/vmcs_intel_x64_natural_width_guest_state_fields.h>
+#include <vmcs/vmcs_intel_x64_64bit_control_fields.h>
 
 using namespace intel_x64;
 using namespace vmcs;
@@ -144,8 +145,8 @@ vmcs_intel_x64::check_control_io_bitmap_address_bits()
     if (primary_processor_based_vm_execution_controls::use_io_bitmaps::is_disabled())
         return;
 
-    auto addr_a = vm::read(VMCS_ADDRESS_OF_IO_BITMAP_A);
-    auto addr_b = vm::read(VMCS_ADDRESS_OF_IO_BITMAP_B);
+    auto addr_a = vmcs::address_of_io_bitmap_a::get();
+    auto addr_b = vmcs::address_of_io_bitmap_b::get();
 
     if ((addr_a & 0x0000000000000FFF) != 0)
         throw std::logic_error("io bitmap a addr not page aligned");
@@ -166,7 +167,7 @@ vmcs_intel_x64::check_control_msr_bitmap_address_bits()
     if (primary_processor_based_vm_execution_controls::use_msr_bitmaps::is_disabled())
         return;
 
-    auto addr = vm::read(VMCS_ADDRESS_OF_MSR_BITMAPS);
+    auto addr = vmcs::address_of_msr_bitmaps::get();
 
     if ((addr & 0x0000000000000FFF) != 0)
         throw std::logic_error("msr bitmap addr not page aligned");
@@ -185,7 +186,7 @@ vmcs_intel_x64::check_control_tpr_shadow_and_virtual_apic()
 
     if (use_tpr_shadow::is_enabled())
     {
-        auto phys_addr = vm::read(VMCS_VIRTUAL_APIC_ADDRESS);
+        auto phys_addr = vmcs::virtual_apic_address::get();
 
         if (phys_addr == 0)
             throw std::logic_error("virtual apic physical addr is NULL");
@@ -265,7 +266,7 @@ vmcs_intel_x64::check_control_virtual_apic_address_bits()
     if (secondary_processor_based_vm_execution_controls::virtualize_apic_accesses::is_disabled_if_exists())
         return;
 
-    auto phys_addr = vm::read(VMCS_APIC_ACCESS_ADDRESS);
+    auto phys_addr = vmcs::apic_access_address::get_if_exists();
 
     if (phys_addr == 0)
         throw std::logic_error("apic access physical addr is NULL");
@@ -328,7 +329,7 @@ vmcs_intel_x64::check_control_process_posted_interrupt_checks()
         throw std::logic_error("bits 15:8 of the notification vector must "
                                "be 0 if posted interrupts is 1");
 
-    auto addr = vm::read(VMCS_POSTED_INTERRUPT_DESCRIPTOR_ADDRESS);
+    auto addr = vmcs::posted_interrupt_descriptor_address::get();
 
     if ((addr & 0x000000000000003FUL) != 0)
         throw std::logic_error("bits 5:0 of the interrupt descriptor addr "
@@ -355,6 +356,7 @@ void
 vmcs_intel_x64::check_control_enable_ept_checks()
 {
     using namespace msrs::ia32_vmx_ept_vpid_cap;
+    using namespace vmcs::ept_pointer;
 
     if (primary_processor_based_vm_execution_controls::activate_secondary_controls::is_disabled())
         return;
@@ -362,28 +364,25 @@ vmcs_intel_x64::check_control_enable_ept_checks()
     if (secondary_processor_based_vm_execution_controls::enable_ept::is_disabled_if_exists())
         return;
 
-    auto eptp = vm::read(VMCS_EPT_POINTER);
+    auto mem_type = vmcs::ept_pointer::memory_type::get_if_exists();
 
-    if ((eptp & EPTP_MEMORY_TYPE) == 0 && !memory_type_uncacheable_supported::get())
+    if (mem_type == memory_type::uncacheable && !memory_type_uncacheable_supported::get())
         throw std::logic_error("hardware does not support ept memory type: uncachable");
 
-    if ((eptp & EPTP_MEMORY_TYPE) == 6 && !memory_type_write_back_supported::get())
+    if (mem_type == memory_type::write_back && !memory_type_write_back_supported::get())
         throw std::logic_error("hardware does not support ept memory type: write-back");
 
-    if ((eptp & EPTP_MEMORY_TYPE) != 0 && (eptp & EPTP_MEMORY_TYPE) != 6)
+    if (mem_type != memory_type::uncacheable && mem_type != memory_type::write_back)
         throw std::logic_error("unknown eptp memory type");
 
-    if ((eptp & EPTP_PAGE_WALK_LENGTH) >> 3 != 3)
+    if (page_walk_length_minus_one::get_if_exists() != 3)
         throw std::logic_error("the ept walk-through length must be 1 less than 4, i.e. 3");
 
-    if ((eptp & EPTP_ACCESSED_DIRTY_FLAGS_ENABLED) != 0 && !accessed_dirty_support::get())
+    if (accessed_and_dirty_flags::is_enabled_if_exists() && !accessed_dirty_support::get())
         throw std::logic_error("hardware does not support dirty / accessed flags for ept");
 
-    if ((eptp & 0x0000000000000F80) != 0)
+    if (ept_pointer::reserved::get_if_exists() != 0)
         throw std::logic_error("bits 11:7 and 63:48 of the eptp must be 0");
-
-    if (!is_physical_address_valid(eptp))
-        throw std::logic_error("eptp must be a valid physical address");
 }
 
 void
@@ -395,7 +394,7 @@ vmcs_intel_x64::check_control_enable_pml_checks()
     if (secondary_processor_based_vm_execution_controls::enable_pml::is_disabled_if_exists())
         return;
 
-    auto pml_addr = vm::read(VMCS_PML_ADDRESS);
+    auto pml_addr = vmcs::pml_address::get_if_exists();
 
     if (secondary_processor_based_vm_execution_controls::enable_ept::is_disabled_if_exists())
         throw std::logic_error("ept must be enabled if pml is enabled");
@@ -429,21 +428,21 @@ vmcs_intel_x64::check_control_enable_vm_functions()
     if (secondary_processor_based_vm_execution_controls::enable_vm_functions::is_disabled_if_exists())
         return;
 
-    auto ia32_vmx_vmfunc_msr = msrs::ia32_vmx_vmfunc::get();
-    auto vmcs_vm_function_controls = vm::read(VMCS_VM_FUNCTION_CONTROLS);
+    if (!vmcs::vm_function_controls::exists())
+        return;
 
-    if ((~ia32_vmx_vmfunc_msr & vmcs_vm_function_controls) != 0)
+    if ((~msrs::ia32_vmx_vmfunc::get() & vmcs::vm_function_controls::get()) != 0)
         throw std::logic_error("unsupported vm function control bit set");
 
-    if ((VM_FUNCTION_CONTROL_EPTP_SWITCHING & vmcs_vm_function_controls) == 0)
+    if (vmcs::vm_function_controls::eptp_switching::is_disabled())
         return;
 
     if (secondary_processor_based_vm_execution_controls::enable_ept::is_disabled_if_exists())
         throw std::logic_error("enable ept must be 1 if eptp switching is 1");
 
-    auto eptp_list = vm::read(VMCS_EPTP_LIST_ADDRESS);
+    auto eptp_list = vmcs::eptp_list_address::get_if_exists();
 
-    if ((eptp_list & 0x0000000000000FFF) != 0)
+    if ((eptp_list & 0x0000000000000FFFU) != 0)
         throw std::logic_error("bits 11:0 must be 0 for eptp list address");
 
     if (!is_physical_address_valid(eptp_list))
@@ -459,11 +458,8 @@ vmcs_intel_x64::check_control_enable_vmcs_shadowing()
     if (secondary_processor_based_vm_execution_controls::vmcs_shadowing::is_disabled_if_exists())
         return;
 
-    auto vmcs_vmread_bitmap_address =
-        vm::read(VMCS_VMREAD_BITMAP_ADDRESS);
-
-    auto vmcs_vmwrite_bitmap_address =
-        vm::read(VMCS_VMWRITE_BITMAP_ADDRESS);
+    auto vmcs_vmread_bitmap_address = vmread_bitmap_address::get_if_exists();
+    auto vmcs_vmwrite_bitmap_address = vmwrite_bitmap_address::get_if_exists();
 
     if ((vmcs_vmread_bitmap_address & 0x0000000000000FFF) != 0)
         throw std::logic_error("bits 11:0 must be 0 for the vmcs read bitmap address");
@@ -488,7 +484,7 @@ vmcs_intel_x64::check_control_enable_ept_violation_checks()
         return;
 
     auto vmcs_virt_except_info_address =
-        vm::read(VMCS_VIRTUALIZATION_EXCEPTION_INFORMATION_ADDRESS);
+        virtualization_exception_information_address::get_if_exists();
 
     if ((vmcs_virt_except_info_address & 0x0000000000000FFF) != 0)
         throw std::logic_error("bits 11:0 must be 0 for the vmcs virt except info address");
@@ -535,7 +531,7 @@ vmcs_intel_x64::check_control_exit_msr_store_address()
     if (msr_store_count == 0)
         return;
 
-    auto msr_store_addr = vm::read(VMCS_VM_EXIT_MSR_STORE_ADDRESS);
+    auto msr_store_addr = vmcs::vm_exit_msr_store_address::get();
 
     if ((msr_store_addr & 0x000000000000000F) != 0)
         throw std::logic_error("bits 3:0 must be 0 for the exit msr store address");
@@ -557,7 +553,7 @@ vmcs_intel_x64::check_control_exit_msr_load_address()
     if (msr_load_count == 0)
         return;
 
-    auto msr_load_addr = vm::read(VMCS_VM_EXIT_MSR_LOAD_ADDRESS);
+    auto msr_load_addr = vmcs::vm_exit_msr_load_address::get();
 
     if ((msr_load_addr & 0x000000000000000F) != 0)
         throw std::logic_error("bits 3:0 must be 0 for the exit msr load address");
@@ -731,7 +727,7 @@ vmcs_intel_x64::check_control_entry_msr_load_address()
     if (msr_load_count == 0)
         return;
 
-    auto msr_load_addr = vm::read(VMCS_VM_ENTRY_MSR_LOAD_ADDRESS);
+    auto msr_load_addr = vmcs::vm_entry_msr_load_address::get();
 
     if ((msr_load_addr & 0x000000000000000F) != 0)
         throw std::logic_error("bits 3:0 must be 0 for the entry msr load address");

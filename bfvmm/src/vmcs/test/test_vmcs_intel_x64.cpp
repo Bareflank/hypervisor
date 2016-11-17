@@ -37,6 +37,8 @@
 #include <vmcs/vmcs_intel_x64_natural_width_read_only_data_fields.h>
 #include <vmcs/vmcs_intel_x64_natural_width_host_state_fields.h>
 
+#include <vmcs/vmcs_intel_x64_64bit_control_fields.h>
+
 #include <intrinsics/rflags_x64.h>
 #include <intrinsics/crs_intel_x64.h>
 #include <intrinsics/vmx_intel_x64.h>
@@ -598,6 +600,48 @@ vmcs_ut::test_set_vm_control_if_allowed()
 }
 
 void
+vmcs_ut::test_set_vm_function_control()
+{
+    constexpr const auto name = "control";
+    auto exists = true;
+    auto mask = 0x0000000000000040UL;
+    auto ctls_addr = 0UL;
+    auto msr_addr = 0U;
+
+    this->expect_exception([&] { set_vm_function_control(true, msr_addr, ctls_addr, name, mask, !exists); },
+                           std::make_shared<std::logic_error>("vm_functions controls doesn't exist"));
+
+    this->expect_no_exception([&] { set_vm_function_control(false, msr_addr, ctls_addr, name, mask, exists); });
+
+    g_msrs[msr_addr] = mask;
+    this->expect_no_exception([&] { set_vm_function_control(true, msr_addr, ctls_addr, name, mask, exists); });
+
+    g_msrs[msr_addr] = ~mask;
+    this->expect_exception([&] { set_vm_function_control(true, msr_addr, ctls_addr, name, mask, exists); },
+                           std::make_shared<std::logic_error>("control is not allowed to be set to 1"));
+}
+
+void
+vmcs_ut::test_set_vm_function_control_if_allowed()
+{
+    constexpr const auto name = "control";
+    auto exists = true;
+    auto verbose = true;
+    auto mask = 0x0000000000000040UL;
+    auto ctls_addr = 0UL;
+    auto msr_addr = 0U;
+
+    this->expect_no_exception([&] { set_vm_function_control_if_allowed(true, msr_addr, ctls_addr, name, mask, verbose, !exists); });
+    this->expect_no_exception([&] { set_vm_function_control_if_allowed(false, msr_addr, ctls_addr, name, mask, verbose, exists); });
+
+    g_msrs[msr_addr] = mask;
+    this->expect_no_exception([&] { set_vm_function_control_if_allowed(true, msr_addr, ctls_addr, name, mask, verbose, exists); });
+
+    g_msrs[msr_addr] = ~mask;
+    this->expect_no_exception([&] { set_vm_function_control_if_allowed(true, msr_addr, ctls_addr, name, mask, verbose, exists); });
+}
+
+void
 vmcs_ut::test_vmcs_vm_instruction_error_description()
 {
     using namespace vmcs::vm_instruction_error;
@@ -622,7 +666,7 @@ vmcs_ut::test_vmcs_vm_instruction_error_description_if_exists()
 }
 
 void
-vmcs_ut::test_vmcs_basic_error_reason_description()
+vmcs_ut::test_vmcs_exit_reason_basic_exit_reason_description()
 {
     using namespace vmcs::exit_reason;
 
@@ -633,7 +677,7 @@ vmcs_ut::test_vmcs_basic_error_reason_description()
 }
 
 void
-vmcs_ut::test_vmcs_basic_error_reason_description_if_exists()
+vmcs_ut::test_vmcs_exit_reason_basic_exit_reason_description_if_exists()
 {
     using namespace vmcs::exit_reason;
 
@@ -1208,6 +1252,7 @@ vmcs_ut::test_vmcs_guest_interrupt_status()
     this->expect_exception([&] { vmcs::guest_interrupt_status::get(); }, ""_ut_lee);
     this->expect_no_exception([&] { vmcs::guest_interrupt_status::set_if_exists(1UL); });
     this->expect_no_exception([&] { vmcs::guest_interrupt_status::get_if_exists(); });
+
     g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = msrs::ia32_vmx_procbased_ctls2::virtual_interrupt_delivery::mask << 32;
     this->expect_true(vmcs::guest_interrupt_status::get() == 200UL);
 }
@@ -1637,6 +1682,547 @@ vmcs_ut::test_vmcs_host_tr_selector_index()
 
     vmcs::host_tr_selector::index::set_if_exists(0UL);
     this->expect_true(vmcs::host_tr_selector::index::get_if_exists() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_address_of_io_bitmap_a()
+{
+    this->expect_true(vmcs::address_of_io_bitmap_a::exists());
+
+    vmcs::address_of_io_bitmap_a::set(1UL);
+    this->expect_true(vmcs::address_of_io_bitmap_a::get() == 1UL);
+
+    vmcs::address_of_io_bitmap_a::set_if_exists(0UL);
+    this->expect_true(vmcs::address_of_io_bitmap_a::get_if_exists() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_address_of_io_bitmap_b()
+{
+    this->expect_true(vmcs::address_of_io_bitmap_b::exists());
+
+    vmcs::address_of_io_bitmap_b::set(1UL);
+    this->expect_true(vmcs::address_of_io_bitmap_b::get() == 1UL);
+
+    vmcs::address_of_io_bitmap_b::set_if_exists(0UL);
+    this->expect_true(vmcs::address_of_io_bitmap_b::get_if_exists() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_address_of_msr_bitmaps()
+{
+    proc_ctl_allow1(msrs::ia32_vmx_true_procbased_ctls::use_msr_bitmaps::mask);
+    this->expect_true(vmcs::address_of_msr_bitmaps::exists());
+
+    vmcs::address_of_msr_bitmaps::set(1UL);
+    this->expect_true(vmcs::address_of_msr_bitmaps::get() == 1UL);
+
+    vmcs::address_of_msr_bitmaps::set_if_exists(0UL);
+    this->expect_true(vmcs::address_of_msr_bitmaps::get_if_exists() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_vm_exit_msr_store_address()
+{
+    this->expect_true(vmcs::vm_exit_msr_store_address::exists());
+
+    vmcs::vm_exit_msr_store_address::set(1UL);
+    this->expect_true(vmcs::vm_exit_msr_store_address::get() == 1UL);
+
+    vmcs::vm_exit_msr_store_address::set_if_exists(0UL);
+    this->expect_true(vmcs::vm_exit_msr_store_address::get_if_exists() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_vm_exit_msr_load_address()
+{
+    this->expect_true(vmcs::vm_exit_msr_load_address::exists());
+
+    vmcs::vm_exit_msr_load_address::set(1UL);
+    this->expect_true(vmcs::vm_exit_msr_load_address::get() == 1UL);
+
+    vmcs::vm_exit_msr_load_address::set_if_exists(0UL);
+    this->expect_true(vmcs::vm_exit_msr_load_address::get_if_exists() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_vm_entry_msr_load_address()
+{
+    this->expect_true(vmcs::vm_entry_msr_load_address::exists());
+
+    vmcs::vm_entry_msr_load_address::set(1UL);
+    this->expect_true(vmcs::vm_entry_msr_load_address::get() == 1UL);
+
+    vmcs::vm_entry_msr_load_address::set_if_exists(0UL);
+    this->expect_true(vmcs::vm_entry_msr_load_address::get_if_exists() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_executive_vmcs_pointer()
+{
+    this->expect_true(vmcs::executive_vmcs_pointer::exists());
+
+    vmcs::executive_vmcs_pointer::set(1UL);
+    this->expect_true(vmcs::executive_vmcs_pointer::get() == 1UL);
+
+    vmcs::executive_vmcs_pointer::set_if_exists(0UL);
+    this->expect_true(vmcs::executive_vmcs_pointer::get_if_exists() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_pml_address()
+{
+    proc_ctl_allow1(msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask);
+    proc_ctl2_allow1(msrs::ia32_vmx_procbased_ctls2::enable_pml::mask);
+    this->expect_true(vmcs::pml_address::exists());
+
+    vmcs::pml_address::set(1UL);
+    this->expect_true(vmcs::pml_address::get() == 1UL);
+
+    vmcs::pml_address::set_if_exists(0UL);
+    this->expect_true(vmcs::pml_address::get_if_exists() == 0UL);
+
+    proc_ctl2_disallow1(msrs::ia32_vmx_procbased_ctls2::enable_pml::mask);
+    this->expect_false(vmcs::pml_address::exists());
+
+    this->expect_exception([&] { vmcs::pml_address::set(42U); }, ""_ut_lee);
+    this->expect_exception([&] { vmcs::pml_address::get(); }, ""_ut_lee);
+
+    this->expect_no_exception([&] { vmcs::pml_address::set_if_exists(42U); });
+    this->expect_no_exception([&] { vmcs::pml_address::get_if_exists(); });
+    this->expect_true(g_vmcs_fields[vmcs::pml_address::addr] == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_tsc_offset()
+{
+    this->expect_true(vmcs::tsc_offset::exists());
+
+    vmcs::tsc_offset::set(1UL);
+    this->expect_true(vmcs::tsc_offset::get() == 1UL);
+
+    vmcs::tsc_offset::set_if_exists(0UL);
+    this->expect_true(vmcs::tsc_offset::get_if_exists() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_virtual_apic_address()
+{
+    proc_ctl_allow1(msrs::ia32_vmx_true_procbased_ctls::use_tpr_shadow::mask);
+    this->expect_true(vmcs::virtual_apic_address::exists());
+
+    vmcs::virtual_apic_address::set(1UL);
+    this->expect_true(vmcs::virtual_apic_address::get() == 1UL);
+
+    vmcs::virtual_apic_address::set_if_exists(0UL);
+    this->expect_true(vmcs::virtual_apic_address::get_if_exists() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_apic_access_address()
+{
+    proc_ctl_allow1(msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask);
+    proc_ctl2_allow1(msrs::ia32_vmx_procbased_ctls2::virtualize_apic_accesses::mask);
+    this->expect_true(vmcs::apic_access_address::exists());
+
+    vmcs::apic_access_address::set(1UL);
+    this->expect_true(vmcs::apic_access_address::get() == 1UL);
+
+    vmcs::apic_access_address::set_if_exists(0UL);
+    this->expect_true(vmcs::apic_access_address::get_if_exists() == 0UL);
+
+    proc_ctl2_disallow1(msrs::ia32_vmx_procbased_ctls2::virtualize_apic_accesses::mask);
+    this->expect_false(vmcs::apic_access_address::exists());
+
+    this->expect_exception([&] { vmcs::apic_access_address::set(42U); }, ""_ut_lee);
+    this->expect_exception([&] { vmcs::apic_access_address::get(); }, ""_ut_lee);
+
+    this->expect_no_exception([&] { vmcs::apic_access_address::set_if_exists(42U); });
+    this->expect_no_exception([&] { vmcs::apic_access_address::get_if_exists(); });
+    this->expect_true(g_vmcs_fields[vmcs::apic_access_address::addr] == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_posted_interrupt_descriptor_address()
+{
+    pin_ctl_allow1(msrs::ia32_vmx_true_pinbased_ctls::process_posted_interrupts::mask);
+    this->expect_true(vmcs::posted_interrupt_descriptor_address::exists());
+
+    vmcs::posted_interrupt_descriptor_address::set(1UL);
+    this->expect_true(vmcs::posted_interrupt_descriptor_address::get() == 1UL);
+
+    vmcs::posted_interrupt_descriptor_address::set_if_exists(0UL);
+    this->expect_true(vmcs::posted_interrupt_descriptor_address::get_if_exists() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_vm_function_controls()
+{
+    proc_ctl_allow1(msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask);
+    proc_ctl2_allow1(msrs::ia32_vmx_procbased_ctls2::enable_vm_functions::mask);
+    this->expect_true(vmcs::vm_function_controls::exists());
+
+    vmcs::vm_function_controls::set(1UL);
+    this->expect_true(vmcs::vm_function_controls::get() == 1UL);
+
+    vmcs::vm_function_controls::set_if_exists(0UL);
+    this->expect_true(vmcs::vm_function_controls::get_if_exists() == 0UL);
+
+    proc_ctl2_disallow1(msrs::ia32_vmx_procbased_ctls2::enable_vm_functions::mask);
+    this->expect_false(vmcs::vm_function_controls::exists());
+
+    this->expect_exception([&] { vmcs::vm_function_controls::set(42U); }, ""_ut_lee);
+    this->expect_exception([&] { vmcs::vm_function_controls::get(); }, ""_ut_lee);
+
+    this->expect_no_exception([&] { vmcs::vm_function_controls::set_if_exists(42U); });
+    this->expect_no_exception([&] { vmcs::vm_function_controls::get_if_exists(); });
+    this->expect_true(g_vmcs_fields[vmcs::vm_function_controls::addr] == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_vm_function_controls_eptp_switching()
+{
+    proc_ctl_allow1(msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask);
+    proc_ctl2_allow1(msrs::ia32_vmx_procbased_ctls2::enable_vm_functions::mask);
+    vmfunc_ctl_allow1(msrs::ia32_vmx_vmfunc::eptp_switching::mask);
+
+    vmcs::vm_function_controls::eptp_switching::enable();
+    this->expect_true(vmcs::vm_function_controls::eptp_switching::is_enabled());
+
+    vmcs::vm_function_controls::eptp_switching::disable();
+    this->expect_true(vmcs::vm_function_controls::eptp_switching::is_disabled());
+
+    vmcs::vm_function_controls::eptp_switching::enable_if_allowed();
+    this->expect_true(vmcs::vm_function_controls::eptp_switching::is_enabled_if_exists());
+
+    vmcs::vm_function_controls::eptp_switching::disable_if_allowed();
+    this->expect_true(vmcs::vm_function_controls::eptp_switching::is_disabled_if_exists());
+}
+
+void
+vmcs_ut::test_vmcs_vm_function_controls_reserved()
+{
+    proc_ctl_allow1(msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask);
+    proc_ctl2_allow1(msrs::ia32_vmx_procbased_ctls2::enable_vm_functions::mask);
+
+    vmcs::vm_function_controls::reserved::set(0xEU);
+    this->expect_true(vmcs::vm_function_controls::reserved::get() == 0xEU);
+
+    vmcs::vm_function_controls::reserved::set_if_exists(0x0U);
+    this->expect_true(vmcs::vm_function_controls::reserved::get_if_exists() == 0x0U);
+}
+
+void
+vmcs_ut::test_vmcs_ept_pointer()
+{
+    proc_ctl_allow1(msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask);
+    proc_ctl2_allow1(msrs::ia32_vmx_procbased_ctls2::enable_ept::mask);
+    this->expect_true(vmcs::ept_pointer::exists());
+
+    vmcs::ept_pointer::set(1UL);
+    this->expect_true(vmcs::ept_pointer::get() == 1UL);
+
+    vmcs::ept_pointer::set_if_exists(0UL);
+    this->expect_true(vmcs::ept_pointer::get_if_exists() == 0UL);
+
+    proc_ctl2_disallow1(msrs::ia32_vmx_procbased_ctls2::enable_ept::mask);
+    this->expect_false(vmcs::ept_pointer::exists());
+
+    this->expect_exception([&] { vmcs::ept_pointer::set(42U); }, ""_ut_lee);
+    this->expect_exception([&] { vmcs::ept_pointer::get(); }, ""_ut_lee);
+
+    this->expect_no_exception([&] { vmcs::ept_pointer::set_if_exists(42U); });
+    this->expect_no_exception([&] { vmcs::ept_pointer::get_if_exists(); });
+    this->expect_true(g_vmcs_fields[vmcs::ept_pointer::addr] == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_ept_pointer_memory_type()
+{
+    proc_ctl_allow1(msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask);
+    proc_ctl2_allow1(msrs::ia32_vmx_procbased_ctls2::enable_ept::mask);
+
+    vmcs::ept_pointer::memory_type::set(0UL);
+    this->expect_true(vmcs::ept_pointer::memory_type::get() == vmcs::ept_pointer::memory_type::uncacheable);
+
+    vmcs::ept_pointer::memory_type::set_if_exists(6UL);
+    this->expect_true(vmcs::ept_pointer::memory_type::get_if_exists() == vmcs::ept_pointer::memory_type::write_back);
+
+    proc_ctl2_disallow1(msrs::ia32_vmx_procbased_ctls2::enable_ept::mask);
+    this->expect_exception([&] { vmcs::ept_pointer::memory_type::set(42U); }, ""_ut_lee);
+    this->expect_exception([&] { vmcs::ept_pointer::memory_type::get(); }, ""_ut_lee);
+
+    this->expect_no_exception([&] { vmcs::ept_pointer::memory_type::set_if_exists(42U); });
+    this->expect_no_exception([&] { vmcs::ept_pointer::memory_type::get_if_exists(); });
+}
+
+void
+vmcs_ut::test_vmcs_ept_pointer_page_walk_length_minus_one()
+{
+    proc_ctl_allow1(msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask);
+    proc_ctl2_allow1(msrs::ia32_vmx_procbased_ctls2::enable_ept::mask);
+
+    vmcs::ept_pointer::page_walk_length_minus_one::set(2UL);
+    this->expect_true(vmcs::ept_pointer::page_walk_length_minus_one::get() == 2UL);
+
+    vmcs::ept_pointer::page_walk_length_minus_one::set_if_exists(1UL);
+    this->expect_true(vmcs::ept_pointer::page_walk_length_minus_one::get_if_exists() == 1UL);
+
+    proc_ctl2_disallow1(msrs::ia32_vmx_procbased_ctls2::enable_ept::mask);
+    this->expect_exception([&] { vmcs::ept_pointer::page_walk_length_minus_one::set(42U); }, ""_ut_lee);
+    this->expect_exception([&] { vmcs::ept_pointer::page_walk_length_minus_one::get(); }, ""_ut_lee);
+
+    this->expect_no_exception([&] { vmcs::ept_pointer::page_walk_length_minus_one::set_if_exists(42U); });
+    this->expect_no_exception([&] { vmcs::ept_pointer::page_walk_length_minus_one::get_if_exists(); });
+}
+
+void
+vmcs_ut::test_vmcs_ept_pointer_accessed_and_dirty_flags()
+{
+    proc_ctl_allow1(msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask);
+    proc_ctl2_allow1(msrs::ia32_vmx_procbased_ctls2::enable_ept::mask);
+
+    vmcs::ept_pointer::accessed_and_dirty_flags::enable();
+    this->expect_true(vmcs::ept_pointer::accessed_and_dirty_flags::is_enabled());
+
+    vmcs::ept_pointer::accessed_and_dirty_flags::disable();
+    this->expect_true(vmcs::ept_pointer::accessed_and_dirty_flags::is_disabled());
+
+    vmcs::ept_pointer::accessed_and_dirty_flags::enable_if_exists();
+    this->expect_true(vmcs::ept_pointer::accessed_and_dirty_flags::is_enabled_if_exists());
+
+    vmcs::ept_pointer::accessed_and_dirty_flags::disable_if_exists();
+    this->expect_true(vmcs::ept_pointer::accessed_and_dirty_flags::is_disabled_if_exists());
+}
+
+void
+vmcs_ut::test_vmcs_ept_pointer_reserved()
+{
+    proc_ctl_allow1(msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask);
+    proc_ctl2_allow1(msrs::ia32_vmx_procbased_ctls2::enable_ept::mask);
+
+    vmcs::ept_pointer::reserved::set(0x80U);
+    this->expect_true(vmcs::ept_pointer::reserved::get() == 0x80U);
+
+    vmcs::ept_pointer::reserved::set_if_exists(0x0U);
+    this->expect_true(vmcs::ept_pointer::reserved::get_if_exists() == 0x0U);
+}
+
+void
+vmcs_ut::test_vmcs_eoi_exit_bitmap_0()
+{
+    proc_ctl_allow1(msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask);
+    proc_ctl2_allow1(msrs::ia32_vmx_procbased_ctls2::virtual_interrupt_delivery::mask);
+    this->expect_true(vmcs::eoi_exit_bitmap_0::exists());
+
+    vmcs::eoi_exit_bitmap_0::set(1UL);
+    this->expect_true(vmcs::eoi_exit_bitmap_0::get() == 1UL);
+
+    vmcs::eoi_exit_bitmap_0::set_if_exists(0UL);
+    this->expect_true(vmcs::eoi_exit_bitmap_0::get_if_exists() == 0UL);
+
+    proc_ctl2_disallow1(msrs::ia32_vmx_procbased_ctls2::virtual_interrupt_delivery::mask);
+    this->expect_false(vmcs::eoi_exit_bitmap_0::exists());
+
+    this->expect_exception([&] { vmcs::eoi_exit_bitmap_0::set(42U); }, ""_ut_lee);
+    this->expect_exception([&] { vmcs::eoi_exit_bitmap_0::get(); }, ""_ut_lee);
+
+    this->expect_no_exception([&] { vmcs::eoi_exit_bitmap_0::set_if_exists(42U); });
+    this->expect_no_exception([&] { vmcs::eoi_exit_bitmap_0::get_if_exists(); });
+    this->expect_true(g_vmcs_fields[vmcs::eoi_exit_bitmap_0::addr] == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_eoi_exit_bitmap_1()
+{
+    proc_ctl_allow1(msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask);
+    proc_ctl2_allow1(msrs::ia32_vmx_procbased_ctls2::virtual_interrupt_delivery::mask);
+    this->expect_true(vmcs::eoi_exit_bitmap_1::exists());
+
+    vmcs::eoi_exit_bitmap_1::set(1UL);
+    this->expect_true(vmcs::eoi_exit_bitmap_1::get() == 1UL);
+
+    vmcs::eoi_exit_bitmap_1::set_if_exists(0UL);
+    this->expect_true(vmcs::eoi_exit_bitmap_1::get_if_exists() == 0UL);
+
+    proc_ctl2_disallow1(msrs::ia32_vmx_procbased_ctls2::virtual_interrupt_delivery::mask);
+    this->expect_false(vmcs::eoi_exit_bitmap_1::exists());
+
+    this->expect_exception([&] { vmcs::eoi_exit_bitmap_1::set(42U); }, ""_ut_lee);
+    this->expect_exception([&] { vmcs::eoi_exit_bitmap_1::get(); }, ""_ut_lee);
+
+    this->expect_no_exception([&] { vmcs::eoi_exit_bitmap_1::set_if_exists(42U); });
+    this->expect_no_exception([&] { vmcs::eoi_exit_bitmap_1::get_if_exists(); });
+    this->expect_true(g_vmcs_fields[vmcs::eoi_exit_bitmap_1::addr] == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_eoi_exit_bitmap_2()
+{
+    proc_ctl_allow1(msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask);
+    proc_ctl2_allow1(msrs::ia32_vmx_procbased_ctls2::virtual_interrupt_delivery::mask);
+    this->expect_true(vmcs::eoi_exit_bitmap_2::exists());
+
+    vmcs::eoi_exit_bitmap_2::set(1UL);
+    this->expect_true(vmcs::eoi_exit_bitmap_2::get() == 1UL);
+
+    vmcs::eoi_exit_bitmap_2::set_if_exists(0UL);
+    this->expect_true(vmcs::eoi_exit_bitmap_2::get_if_exists() == 0UL);
+
+    proc_ctl2_disallow1(msrs::ia32_vmx_procbased_ctls2::virtual_interrupt_delivery::mask);
+    this->expect_false(vmcs::eoi_exit_bitmap_2::exists());
+
+    this->expect_exception([&] { vmcs::eoi_exit_bitmap_2::set(42U); }, ""_ut_lee);
+    this->expect_exception([&] { vmcs::eoi_exit_bitmap_2::get(); }, ""_ut_lee);
+
+    this->expect_no_exception([&] { vmcs::eoi_exit_bitmap_2::set_if_exists(42U); });
+    this->expect_no_exception([&] { vmcs::eoi_exit_bitmap_2::get_if_exists(); });
+    this->expect_true(g_vmcs_fields[vmcs::eoi_exit_bitmap_2::addr] == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_eoi_exit_bitmap_3()
+{
+    proc_ctl_allow1(msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask);
+    proc_ctl2_allow1(msrs::ia32_vmx_procbased_ctls2::virtual_interrupt_delivery::mask);
+    this->expect_true(vmcs::eoi_exit_bitmap_3::exists());
+
+    vmcs::eoi_exit_bitmap_3::set(1UL);
+    this->expect_true(vmcs::eoi_exit_bitmap_3::get() == 1UL);
+
+    vmcs::eoi_exit_bitmap_3::set_if_exists(0UL);
+    this->expect_true(vmcs::eoi_exit_bitmap_3::get_if_exists() == 0UL);
+
+    proc_ctl2_disallow1(msrs::ia32_vmx_procbased_ctls2::virtual_interrupt_delivery::mask);
+    this->expect_false(vmcs::eoi_exit_bitmap_3::exists());
+
+    this->expect_exception([&] { vmcs::eoi_exit_bitmap_3::set(42U); }, ""_ut_lee);
+    this->expect_exception([&] { vmcs::eoi_exit_bitmap_3::get(); }, ""_ut_lee);
+
+    this->expect_no_exception([&] { vmcs::eoi_exit_bitmap_3::set_if_exists(42U); });
+    this->expect_no_exception([&] { vmcs::eoi_exit_bitmap_3::get_if_exists(); });
+    this->expect_true(g_vmcs_fields[vmcs::eoi_exit_bitmap_3::addr] == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_eptp_list_address()
+{
+    proc_ctl_allow1(msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask);
+    proc_ctl2_allow1(msrs::ia32_vmx_procbased_ctls2::enable_vm_functions::mask);
+    vmfunc_ctl_allow1(msrs::ia32_vmx_vmfunc::eptp_switching::mask);
+    this->expect_true(vmcs::eptp_list_address::exists());
+
+    vmcs::eptp_list_address::set(1UL);
+    this->expect_true(vmcs::eptp_list_address::get() == 1UL);
+
+    vmcs::eptp_list_address::set_if_exists(0UL);
+    this->expect_true(vmcs::eptp_list_address::get_if_exists() == 0UL);
+
+    proc_ctl2_disallow1(msrs::ia32_vmx_procbased_ctls2::enable_vm_functions::mask);
+    this->expect_false(vmcs::eptp_list_address::exists());
+
+    this->expect_exception([&] { vmcs::eptp_list_address::set(42U); }, ""_ut_lee);
+    this->expect_exception([&] { vmcs::eptp_list_address::get(); }, ""_ut_lee);
+
+    this->expect_no_exception([&] { vmcs::eptp_list_address::set_if_exists(42U); });
+    this->expect_no_exception([&] { vmcs::eptp_list_address::get_if_exists(); });
+    this->expect_true(g_vmcs_fields[vmcs::eptp_list_address::addr] == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_vmread_bitmap_address()
+{
+    proc_ctl_allow1(msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask);
+    proc_ctl2_allow1(msrs::ia32_vmx_procbased_ctls2::vmcs_shadowing::mask);
+    this->expect_true(vmcs::vmread_bitmap_address::exists());
+
+    vmcs::vmread_bitmap_address::set(1UL);
+    this->expect_true(vmcs::vmread_bitmap_address::get() == 1UL);
+
+    vmcs::vmread_bitmap_address::set_if_exists(0UL);
+    this->expect_true(vmcs::vmread_bitmap_address::get_if_exists() == 0UL);
+
+    proc_ctl2_disallow1(msrs::ia32_vmx_procbased_ctls2::vmcs_shadowing::mask);
+    this->expect_false(vmcs::vmread_bitmap_address::exists());
+
+    this->expect_exception([&] { vmcs::vmread_bitmap_address::set(42U); }, ""_ut_lee);
+    this->expect_exception([&] { vmcs::vmread_bitmap_address::get(); }, ""_ut_lee);
+
+    this->expect_no_exception([&] { vmcs::vmread_bitmap_address::set_if_exists(42U); });
+    this->expect_no_exception([&] { vmcs::vmread_bitmap_address::get_if_exists(); });
+    this->expect_true(g_vmcs_fields[vmcs::vmread_bitmap_address::addr] == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_vmwrite_bitmap_address()
+{
+    proc_ctl_allow1(msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask);
+    proc_ctl2_allow1(msrs::ia32_vmx_procbased_ctls2::vmcs_shadowing::mask);
+    this->expect_true(vmcs::vmwrite_bitmap_address::exists());
+
+    vmcs::vmwrite_bitmap_address::set(1UL);
+    this->expect_true(vmcs::vmwrite_bitmap_address::get() == 1UL);
+
+    vmcs::vmwrite_bitmap_address::set_if_exists(0UL);
+    this->expect_true(vmcs::vmwrite_bitmap_address::get_if_exists() == 0UL);
+
+    proc_ctl2_disallow1(msrs::ia32_vmx_procbased_ctls2::vmcs_shadowing::mask);
+    this->expect_false(vmcs::vmwrite_bitmap_address::exists());
+
+    this->expect_exception([&] { vmcs::vmwrite_bitmap_address::set(42U); }, ""_ut_lee);
+    this->expect_exception([&] { vmcs::vmwrite_bitmap_address::get(); }, ""_ut_lee);
+
+    this->expect_no_exception([&] { vmcs::vmwrite_bitmap_address::set_if_exists(42U); });
+    this->expect_no_exception([&] { vmcs::vmwrite_bitmap_address::get_if_exists(); });
+    this->expect_true(g_vmcs_fields[vmcs::vmwrite_bitmap_address::addr] == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_virtualization_exception_information_address()
+{
+    proc_ctl_allow1(msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask);
+    proc_ctl2_allow1(msrs::ia32_vmx_procbased_ctls2::ept_violation_ve::mask);
+    this->expect_true(vmcs::virtualization_exception_information_address::exists());
+
+    vmcs::virtualization_exception_information_address::set(1UL);
+    this->expect_true(vmcs::virtualization_exception_information_address::get() == 1UL);
+
+    vmcs::virtualization_exception_information_address::set_if_exists(0UL);
+    this->expect_true(vmcs::virtualization_exception_information_address::get_if_exists() == 0UL);
+
+    proc_ctl2_disallow1(msrs::ia32_vmx_procbased_ctls2::ept_violation_ve::mask);
+    this->expect_false(vmcs::virtualization_exception_information_address::exists());
+
+    this->expect_exception([&] { vmcs::virtualization_exception_information_address::set(42U); }, ""_ut_lee);
+    this->expect_exception([&] { vmcs::virtualization_exception_information_address::get(); }, ""_ut_lee);
+
+    this->expect_no_exception([&] { vmcs::virtualization_exception_information_address::set_if_exists(42U); });
+    this->expect_no_exception([&] { vmcs::virtualization_exception_information_address::get_if_exists(); });
+    this->expect_true(g_vmcs_fields[vmcs::virtualization_exception_information_address::addr] == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_xss_exiting_bitmap()
+{
+    proc_ctl_allow1(msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask);
+    proc_ctl2_allow1(msrs::ia32_vmx_procbased_ctls2::enable_xsaves_xrstors::mask);
+    this->expect_true(vmcs::xss_exiting_bitmap::exists());
+
+    vmcs::xss_exiting_bitmap::set(1UL);
+    this->expect_true(vmcs::xss_exiting_bitmap::get() == 1UL);
+
+    vmcs::xss_exiting_bitmap::set_if_exists(0UL);
+    this->expect_true(vmcs::xss_exiting_bitmap::get_if_exists() == 0UL);
+
+    proc_ctl2_disallow1(msrs::ia32_vmx_procbased_ctls2::enable_xsaves_xrstors::mask);
+    this->expect_false(vmcs::xss_exiting_bitmap::exists());
+
+    this->expect_exception([&] { vmcs::xss_exiting_bitmap::set(42U); }, ""_ut_lee);
+    this->expect_exception([&] { vmcs::xss_exiting_bitmap::get(); }, ""_ut_lee);
+
+    this->expect_no_exception([&] { vmcs::xss_exiting_bitmap::set_if_exists(42U); });
+    this->expect_no_exception([&] { vmcs::xss_exiting_bitmap::get_if_exists(); });
+    this->expect_true(g_vmcs_fields[vmcs::xss_exiting_bitmap::addr] == 0UL);
 }
 
 void

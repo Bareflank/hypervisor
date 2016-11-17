@@ -211,7 +211,6 @@ protected:
     virtual bool is_linear_address_valid(uint64_t addr);
     virtual bool is_physical_address_valid(uint64_t addr);
 
-    virtual bool is_supported_eptp_switching() const;
     virtual bool is_supported_event_injection_instr_length_of_0() const;
 
     // REMOVE ME: These should be placed in their own check class and
@@ -567,34 +566,6 @@ set_vm_control_if_allowed(bool val, uint64_t msr_addr, uint64_t ctls_addr,
         }
     }
 }
-
-// -----------------------------------------------------------------------------
-// 64bit Control Fields
-// -----------------------------------------------------------------------------
-
-constexpr const auto VMCS_ADDRESS_OF_IO_BITMAP_A                          = 0x0000000000002000UL;
-constexpr const auto VMCS_ADDRESS_OF_IO_BITMAP_B                          = 0x0000000000002002UL;
-constexpr const auto VMCS_ADDRESS_OF_MSR_BITMAPS                          = 0x0000000000002004UL;
-constexpr const auto VMCS_VM_EXIT_MSR_STORE_ADDRESS                       = 0x0000000000002006UL;
-constexpr const auto VMCS_VM_EXIT_MSR_LOAD_ADDRESS                        = 0x0000000000002008UL;
-constexpr const auto VMCS_VM_ENTRY_MSR_LOAD_ADDRESS                       = 0x000000000000200AUL;
-constexpr const auto VMCS_EXECUTIVE_VMCS_POINTER                          = 0x000000000000200CUL;
-constexpr const auto VMCS_PML_ADDRESS                                     = 0x000000000000200EUL;
-constexpr const auto VMCS_TSC_OFFSET                                      = 0x0000000000002010UL;
-constexpr const auto VMCS_VIRTUAL_APIC_ADDRESS                            = 0x0000000000002012UL;
-constexpr const auto VMCS_APIC_ACCESS_ADDRESS                             = 0x0000000000002014UL;
-constexpr const auto VMCS_POSTED_INTERRUPT_DESCRIPTOR_ADDRESS             = 0x0000000000002016UL;
-constexpr const auto VMCS_VM_FUNCTION_CONTROLS                            = 0x0000000000002018UL;
-constexpr const auto VMCS_EPT_POINTER                                     = 0x000000000000201AUL;
-constexpr const auto VMCS_EOI_EXIT_BITMAP_0                               = 0x000000000000201CUL;
-constexpr const auto VMCS_EOI_EXIT_BITMAP_1                               = 0x000000000000201EUL;
-constexpr const auto VMCS_EOI_EXIT_BITMAP_2                               = 0x0000000000002020UL;
-constexpr const auto VMCS_EOI_EXIT_BITMAP_3                               = 0x0000000000002022UL;
-constexpr const auto VMCS_EPTP_LIST_ADDRESS                               = 0x0000000000002024UL;
-constexpr const auto VMCS_VMREAD_BITMAP_ADDRESS                           = 0x0000000000002026UL;
-constexpr const auto VMCS_VMWRITE_BITMAP_ADDRESS                          = 0x0000000000002028UL;
-constexpr const auto VMCS_VIRTUALIZATION_EXCEPTION_INFORMATION_ADDRESS    = 0x000000000000202AUL;
-constexpr const auto VMCS_XSS_EXITING_BITMAP                              = 0x000000000000202CUL;
 
 // -----------------------------------------------------------------------------
 // 64bit Read-Only Data Fields

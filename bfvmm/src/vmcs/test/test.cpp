@@ -118,6 +118,95 @@ enable_entry_ctl(uint64_t control)
     vmcs::vm_entry_controls::set(ctls | control);
 }
 
+
+void
+proc_ctl_allow1(uint64_t mask)
+{ g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] |= mask << 32; }
+
+//void
+//proc_ctl_allow0(uint64_t mask)
+//{ g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] &= ~mask; }
+//
+//void
+//proc_ctl_disallow1(uint64_t mask)
+//{ g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] &= ~(mask << 32); }
+//
+//void
+//proc_ctl_disallow0(uint64_t mask)
+//{ g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] |= mask; }
+
+void
+proc_ctl2_allow1(uint64_t mask)
+{ g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] |= mask << 32; }
+
+//void
+//proc_ctl2_allow0(uint64_t mask)
+//{ g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] &= ~mask; }
+
+void
+proc_ctl2_disallow1(uint64_t mask)
+{ g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] &= ~(mask << 32); }
+
+//void
+//proc_ctl2_disallow0(uint64_t mask)
+//{ g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] |= mask; }
+
+void
+pin_ctl_allow1(uint64_t mask)
+{ g_msrs[msrs::ia32_vmx_true_pinbased_ctls::addr] |= mask << 32; }
+
+//void
+//pin_ctl_allow0(uint64_t mask)
+//{ g_msrs[msrs::ia32_vmx_true_pinbased_ctls::addr] &= ~mask; }
+//
+//void
+//pin_ctl_disallow1(uint64_t mask)
+//{ g_msrs[msrs::ia32_vmx_true_pinbased_ctls::addr] &= ~(mask << 32); }
+//
+//void
+//pin_ctl_disallow0(uint64_t mask)
+//{ g_msrs[msrs::ia32_vmx_true_pinbased_ctls::addr] |= mask; }
+//
+//void
+//exit_ctl_allow1(uint64_t mask)
+//{ g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] |= mask << 32; }
+//
+//void
+//exit_ctl_allow0(uint64_t mask)
+//{ g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] &= ~mask; }
+//
+//void
+//exit_ctl_disallow1(uint64_t mask)
+//{ g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] &= ~(mask << 32); }
+//
+//void
+//exit_ctl_disallow0(uint64_t mask)
+//{ g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] |= mask; }
+//
+//void
+//entry_ctl_allow1(uint64_t mask)
+//{ g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] |= mask << 32; }
+//
+//void
+//entry_ctl_allow0(uint64_t mask)
+//{ g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] &= ~mask; }
+//
+//void
+//entry_ctl_disallow1(uint64_t mask)
+//{ g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] &= ~(mask << 32); }
+//
+//void
+//entry_ctl_disallow0(uint64_t mask)
+//{ g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] |= mask; }
+
+void
+vmfunc_ctl_allow1(uint64_t mask)
+{ g_msrs[msrs::ia32_vmx_vmfunc::addr] |= mask; }
+
+//void
+//vmfunc_ctl_disallow1(uint64_t mask)
+//{ g_msrs[msrs::ia32_vmx_vmfunc::addr] &= ~mask; }
+
 extern "C" uint64_t
 __read_msr(uint32_t addr) noexcept
 { return g_msrs[addr]; }
@@ -190,8 +279,8 @@ vmcs_ut::fini()
     return true;
 }
 
-bool
-vmcs_ut::list()
+void
+vmcs_ut::list_vmcs_intel_x64_cpp()
 {
     this->test_launch_success();
     this->test_launch_vmlaunch_failure();
@@ -201,19 +290,32 @@ vmcs_ut::list()
     this->test_launch_load_failure();
     this->test_promote_failure();
     this->test_resume_failure();
+}
+
+void
+vmcs_ut::list_vmcs_intel_x64_h()
+{
     this->test_get_vmcs_field();
     this->test_get_vmcs_field_if_exists();
     this->test_set_vmcs_field();
     this->test_set_vmcs_field_if_exists();
     this->test_set_vm_control();
     this->test_set_vm_control_if_allowed();
-    this->test_vmcs_vm_instruction_error_description();
-    this->test_vmcs_vm_instruction_error_description_if_exists();
-    this->test_vmcs_basic_error_reason_description();
-    this->test_vmcs_basic_error_reason_description_if_exists();
+    this->test_set_vm_function_control();
+    this->test_set_vm_function_control_if_allowed();
+}
+
+void
+vmcs_ut::list_16bit_control_fields()
+{
     this->test_vmcs_virtual_processor_identifier();
     this->test_vmcs_posted_interrupt_notification_vector();
     this->test_vmcs_eptp_index();
+}
+
+void
+vmcs_ut::list_16bit_guest_state_fields()
+{
     this->test_vmcs_guest_es_selector();
     this->test_vmcs_guest_es_selector_rpl();
     this->test_vmcs_guest_es_selector_ti();
@@ -247,6 +349,11 @@ vmcs_ut::list()
     this->test_vmcs_guest_tr_selector_ti();
     this->test_vmcs_guest_tr_selector_index();
     this->test_vmcs_guest_interrupt_status();
+}
+
+void
+vmcs_ut::list_16bit_host_state_fields()
+{
     this->test_vmcs_host_es_selector();
     this->test_vmcs_host_es_selector_rpl();
     this->test_vmcs_host_es_selector_ti();
@@ -275,126 +382,50 @@ vmcs_ut::list()
     this->test_vmcs_host_tr_selector_rpl();
     this->test_vmcs_host_tr_selector_ti();
     this->test_vmcs_host_tr_selector_index();
-    this->test_vmcs_guest_rflags();
-    this->test_vmcs_guest_rflags_carry_flag();
-    this->test_vmcs_guest_rflags_parity_flag();
-    this->test_vmcs_guest_rflags_auxiliary_carry_flag();
-    this->test_vmcs_guest_rflags_zero_flag();
-    this->test_vmcs_guest_rflags_sign_flag();
-    this->test_vmcs_guest_rflags_trap_flag();
-    this->test_vmcs_guest_rflags_interrupt_enable_flag();
-    this->test_vmcs_guest_rflags_direction_flag();
-    this->test_vmcs_guest_rflags_overflow_flag();
-    this->test_vmcs_guest_rflags_privilege_level();
-    this->test_vmcs_guest_rflags_nested_task();
-    this->test_vmcs_guest_rflags_resume_flag();
-    this->test_vmcs_guest_rflags_virtual_8086_mode();
-    this->test_vmcs_guest_rflags_alignment_check_access_control();
-    this->test_vmcs_guest_rflags_virtual_interupt_flag();
-    this->test_vmcs_guest_rflags_virtual_interupt_pending();
-    this->test_vmcs_guest_rflags_id_flag();
-    this->test_vmcs_guest_rflags_reserved();
-    this->test_vmcs_guest_rflags_always_disabled();
-    this->test_vmcs_guest_rflags_always_enabled();
-    this->test_vmcs_guest_cr0();
-    this->test_vmcs_guest_cr0_protection_enable();
-    this->test_vmcs_guest_cr0_monitor_coprocessor();
-    this->test_vmcs_guest_cr0_emulation();
-    this->test_vmcs_guest_cr0_task_switched();
-    this->test_vmcs_guest_cr0_extension_type();
-    this->test_vmcs_guest_cr0_numeric_error();
-    this->test_vmcs_guest_cr0_write_protect();
-    this->test_vmcs_guest_cr0_alignment_mask();
-    this->test_vmcs_guest_cr0_not_write_through();
-    this->test_vmcs_guest_cr0_cache_disable();
-    this->test_vmcs_guest_cr0_paging();
-    this->test_vmcs_guest_cr3();
-    this->test_vmcs_guest_cr4();
-    this->test_vmcs_guest_cr4_v8086_mode_extensions();
-    this->test_vmcs_guest_cr4_protected_mode_virtual_interrupts();
-    this->test_vmcs_guest_cr4_time_stamp_disable();
-    this->test_vmcs_guest_cr4_debugging_extensions();
-    this->test_vmcs_guest_cr4_page_size_extensions();
-    this->test_vmcs_guest_cr4_physical_address_extensions();
-    this->test_vmcs_guest_cr4_machine_check_enable();
-    this->test_vmcs_guest_cr4_page_global_enable();
-    this->test_vmcs_guest_cr4_performance_monitor_counter_enable();
-    this->test_vmcs_guest_cr4_osfxsr();
-    this->test_vmcs_guest_cr4_osxmmexcpt();
-    this->test_vmcs_guest_cr4_vmx_enable_bit();
-    this->test_vmcs_guest_cr4_smx_enable_bit();
-    this->test_vmcs_guest_cr4_fsgsbase_enable_bit();
-    this->test_vmcs_guest_cr4_pcid_enable_bit();
-    this->test_vmcs_guest_cr4_osxsave();
-    this->test_vmcs_guest_cr4_smep_enable_bit();
-    this->test_vmcs_guest_cr4_smap_enable_bit();
-    this->test_vmcs_guest_cr4_protection_key_enable_bit();
-    this->test_vmcs_guest_es_base();
-    this->test_vmcs_guest_cs_base();
-    this->test_vmcs_guest_ss_base();
-    this->test_vmcs_guest_ds_base();
-    this->test_vmcs_guest_fs_base();
-    this->test_vmcs_guest_gs_base();
-    this->test_vmcs_guest_ldtr_base();
-    this->test_vmcs_guest_tr_base();
-    this->test_vmcs_guest_gdtr_base();
-    this->test_vmcs_guest_idtr_base();
-    this->test_vmcs_guest_dr7();
-    this->test_vmcs_guest_rsp();
-    this->test_vmcs_guest_rip();
-    this->test_vmcs_guest_pending_debug_exceptions();
-    this->test_vmcs_guest_pending_debug_exceptions_b0();
-    this->test_vmcs_guest_pending_debug_exceptions_b1();
-    this->test_vmcs_guest_pending_debug_exceptions_b2();
-    this->test_vmcs_guest_pending_debug_exceptions_b3();
-    this->test_vmcs_guest_pending_debug_exceptions_reserved();
-    this->test_vmcs_guest_pending_debug_exceptions_enabled_breakpoint();
-    this->test_vmcs_guest_pending_debug_exceptions_bs();
-    this->test_vmcs_guest_pending_debug_exceptions_rtm();
-    this->test_vmcs_guest_ia32_sysenter_esp();
-    this->test_vmcs_guest_ia32_sysenter_eip();
-    this->test_vmcs_host_cr0();
-    this->test_vmcs_host_cr0_protection_enable();
-    this->test_vmcs_host_cr0_monitor_coprocessor();
-    this->test_vmcs_host_cr0_emulation();
-    this->test_vmcs_host_cr0_task_switched();
-    this->test_vmcs_host_cr0_extension_type();
-    this->test_vmcs_host_cr0_numeric_error();
-    this->test_vmcs_host_cr0_write_protect();
-    this->test_vmcs_host_cr0_alignment_mask();
-    this->test_vmcs_host_cr0_not_write_through();
-    this->test_vmcs_host_cr0_cache_disable();
-    this->test_vmcs_host_cr0_paging();
-    this->test_vmcs_host_cr3();
-    this->test_vmcs_host_cr4();
-    this->test_vmcs_host_cr4_v8086_mode_extensions();
-    this->test_vmcs_host_cr4_protected_mode_virtual_interrupts();
-    this->test_vmcs_host_cr4_time_stamp_disable();
-    this->test_vmcs_host_cr4_debugging_extensions();
-    this->test_vmcs_host_cr4_page_size_extensions();
-    this->test_vmcs_host_cr4_physical_address_extensions();
-    this->test_vmcs_host_cr4_machine_check_enable();
-    this->test_vmcs_host_cr4_page_global_enable();
-    this->test_vmcs_host_cr4_performance_monitor_counter_enable();
-    this->test_vmcs_host_cr4_osfxsr();
-    this->test_vmcs_host_cr4_osxmmexcpt();
-    this->test_vmcs_host_cr4_vmx_enable_bit();
-    this->test_vmcs_host_cr4_smx_enable_bit();
-    this->test_vmcs_host_cr4_fsgsbase_enable_bit();
-    this->test_vmcs_host_cr4_pcid_enable_bit();
-    this->test_vmcs_host_cr4_osxsave();
-    this->test_vmcs_host_cr4_smep_enable_bit();
-    this->test_vmcs_host_cr4_smap_enable_bit();
-    this->test_vmcs_host_cr4_protection_key_enable_bit();
-    this->test_vmcs_host_fs_base();
-    this->test_vmcs_host_gs_base();
-    this->test_vmcs_host_tr_base();
-    this->test_vmcs_host_gdtr_base();
-    this->test_vmcs_host_idtr_base();
-    this->test_vmcs_host_ia32_sysenter_esp();
-    this->test_vmcs_host_ia32_sysenter_eip();
-    this->test_vmcs_host_rsp();
-    this->test_vmcs_host_rip();
+}
+
+void
+vmcs_ut::list_64bit_control_fields()
+{
+    this->test_vmcs_address_of_io_bitmap_a();
+    this->test_vmcs_address_of_io_bitmap_b();
+    this->test_vmcs_address_of_msr_bitmaps();
+    this->test_vmcs_vm_exit_msr_store_address();
+    this->test_vmcs_vm_exit_msr_load_address();
+    this->test_vmcs_vm_entry_msr_load_address();
+    this->test_vmcs_executive_vmcs_pointer();
+    this->test_vmcs_pml_address();
+    this->test_vmcs_tsc_offset();
+    this->test_vmcs_virtual_apic_address();
+    this->test_vmcs_apic_access_address();
+    this->test_vmcs_posted_interrupt_descriptor_address();
+    this->test_vmcs_vm_function_controls();
+    this->test_vmcs_vm_function_controls_eptp_switching();
+    this->test_vmcs_vm_function_controls_reserved();
+    this->test_vmcs_ept_pointer();
+    this->test_vmcs_ept_pointer_memory_type();
+    this->test_vmcs_ept_pointer_page_walk_length_minus_one();
+    this->test_vmcs_ept_pointer_accessed_and_dirty_flags();
+    this->test_vmcs_ept_pointer_reserved();
+    this->test_vmcs_eoi_exit_bitmap_0();
+    this->test_vmcs_eoi_exit_bitmap_1();
+    this->test_vmcs_eoi_exit_bitmap_2();
+    this->test_vmcs_eoi_exit_bitmap_3();
+    this->test_vmcs_eptp_list_address();
+    this->test_vmcs_vmread_bitmap_address();
+    this->test_vmcs_vmwrite_bitmap_address();
+    this->test_vmcs_virtualization_exception_information_address();
+    this->test_vmcs_xss_exiting_bitmap();
+}
+
+void
+vmcs_ut::list_64bit_read_only_data_field()
+{
+}
+
+void
+vmcs_ut::list_64bit_guest_state_fields()
+{
     this->test_vmcs_guest_ia32_debugctl();
     this->test_vmcs_guest_ia32_debugctl_lbr();
     this->test_vmcs_guest_ia32_debugctl_btf();
@@ -415,130 +446,22 @@ vmcs_ut::list()
     this->test_vmcs_guest_ia32_efer_lma();
     this->test_vmcs_guest_ia32_efer_nxe();
     this->test_vmcs_guest_ia32_efer_reserved();
+}
+
+void
+vmcs_ut::list_64bit_host_state_fields()
+{
     this->test_vmcs_host_ia32_efer();
     this->test_vmcs_host_ia32_efer_sce();
     this->test_vmcs_host_ia32_efer_lme();
     this->test_vmcs_host_ia32_efer_lma();
     this->test_vmcs_host_ia32_efer_nxe();
     this->test_vmcs_host_ia32_efer_reserved();
-    this->test_vmcs_guest_es_limit();
-    this->test_vmcs_guest_cs_limit();
-    this->test_vmcs_guest_ss_limit();
-    this->test_vmcs_guest_ds_limit();
-    this->test_vmcs_guest_fs_limit();
-    this->test_vmcs_guest_gs_limit();
-    this->test_vmcs_guest_ldtr_limit();
-    this->test_vmcs_guest_tr_limit();
-    this->test_vmcs_guest_gdtr_limit();
-    this->test_vmcs_guest_idtr_limit();
-    this->test_vmcs_guest_es_access_rights();
-    this->test_vmcs_guest_es_access_rights_type();
-    this->test_vmcs_guest_es_access_rights_s();
-    this->test_vmcs_guest_es_access_rights_dpl();
-    this->test_vmcs_guest_es_access_rights_present();
-    this->test_vmcs_guest_es_access_rights_avl();
-    this->test_vmcs_guest_es_access_rights_l();
-    this->test_vmcs_guest_es_access_rights_db();
-    this->test_vmcs_guest_es_access_rights_granularity();
-    this->test_vmcs_guest_es_access_rights_reserved();
-    this->test_vmcs_guest_es_access_rights_unusable();
-    this->test_vmcs_guest_cs_access_rights();
-    this->test_vmcs_guest_cs_access_rights_type();
-    this->test_vmcs_guest_cs_access_rights_s();
-    this->test_vmcs_guest_cs_access_rights_dpl();
-    this->test_vmcs_guest_cs_access_rights_present();
-    this->test_vmcs_guest_cs_access_rights_avl();
-    this->test_vmcs_guest_cs_access_rights_l();
-    this->test_vmcs_guest_cs_access_rights_db();
-    this->test_vmcs_guest_cs_access_rights_granularity();
-    this->test_vmcs_guest_cs_access_rights_reserved();
-    this->test_vmcs_guest_cs_access_rights_unusable();
-    this->test_vmcs_guest_ss_access_rights();
-    this->test_vmcs_guest_ss_access_rights_type();
-    this->test_vmcs_guest_ss_access_rights_s();
-    this->test_vmcs_guest_ss_access_rights_dpl();
-    this->test_vmcs_guest_ss_access_rights_present();
-    this->test_vmcs_guest_ss_access_rights_avl();
-    this->test_vmcs_guest_ss_access_rights_l();
-    this->test_vmcs_guest_ss_access_rights_db();
-    this->test_vmcs_guest_ss_access_rights_granularity();
-    this->test_vmcs_guest_ss_access_rights_reserved();
-    this->test_vmcs_guest_ss_access_rights_unusable();
-    this->test_vmcs_guest_ds_access_rights();
-    this->test_vmcs_guest_ds_access_rights_type();
-    this->test_vmcs_guest_ds_access_rights_s();
-    this->test_vmcs_guest_ds_access_rights_dpl();
-    this->test_vmcs_guest_ds_access_rights_present();
-    this->test_vmcs_guest_ds_access_rights_avl();
-    this->test_vmcs_guest_ds_access_rights_l();
-    this->test_vmcs_guest_ds_access_rights_db();
-    this->test_vmcs_guest_ds_access_rights_granularity();
-    this->test_vmcs_guest_ds_access_rights_reserved();
-    this->test_vmcs_guest_ds_access_rights_unusable();
-    this->test_vmcs_guest_fs_access_rights();
-    this->test_vmcs_guest_fs_access_rights_type();
-    this->test_vmcs_guest_fs_access_rights_s();
-    this->test_vmcs_guest_fs_access_rights_dpl();
-    this->test_vmcs_guest_fs_access_rights_present();
-    this->test_vmcs_guest_fs_access_rights_avl();
-    this->test_vmcs_guest_fs_access_rights_l();
-    this->test_vmcs_guest_fs_access_rights_db();
-    this->test_vmcs_guest_fs_access_rights_granularity();
-    this->test_vmcs_guest_fs_access_rights_reserved();
-    this->test_vmcs_guest_fs_access_rights_unusable();
-    this->test_vmcs_guest_gs_access_rights();
-    this->test_vmcs_guest_gs_access_rights_type();
-    this->test_vmcs_guest_gs_access_rights_s();
-    this->test_vmcs_guest_gs_access_rights_dpl();
-    this->test_vmcs_guest_gs_access_rights_present();
-    this->test_vmcs_guest_gs_access_rights_avl();
-    this->test_vmcs_guest_gs_access_rights_l();
-    this->test_vmcs_guest_gs_access_rights_db();
-    this->test_vmcs_guest_gs_access_rights_granularity();
-    this->test_vmcs_guest_gs_access_rights_reserved();
-    this->test_vmcs_guest_gs_access_rights_unusable();
-    this->test_vmcs_guest_ldtr_access_rights();
-    this->test_vmcs_guest_ldtr_access_rights_type();
-    this->test_vmcs_guest_ldtr_access_rights_s();
-    this->test_vmcs_guest_ldtr_access_rights_dpl();
-    this->test_vmcs_guest_ldtr_access_rights_present();
-    this->test_vmcs_guest_ldtr_access_rights_avl();
-    this->test_vmcs_guest_ldtr_access_rights_l();
-    this->test_vmcs_guest_ldtr_access_rights_db();
-    this->test_vmcs_guest_ldtr_access_rights_granularity();
-    this->test_vmcs_guest_ldtr_access_rights_reserved();
-    this->test_vmcs_guest_ldtr_access_rights_unusable();
-    this->test_vmcs_guest_tr_access_rights();
-    this->test_vmcs_guest_tr_access_rights_type();
-    this->test_vmcs_guest_tr_access_rights_s();
-    this->test_vmcs_guest_tr_access_rights_dpl();
-    this->test_vmcs_guest_tr_access_rights_present();
-    this->test_vmcs_guest_tr_access_rights_avl();
-    this->test_vmcs_guest_tr_access_rights_l();
-    this->test_vmcs_guest_tr_access_rights_db();
-    this->test_vmcs_guest_tr_access_rights_granularity();
-    this->test_vmcs_guest_tr_access_rights_reserved();
-    this->test_vmcs_guest_tr_access_rights_unusable();
-    this->test_vmcs_guest_interruptibility_state();
-    this->test_vmcs_guest_interruptibility_state_blocking_by_sti();
-    this->test_vmcs_guest_interruptibility_state_blocking_by_mov_ss();
-    this->test_vmcs_guest_interruptibility_state_blocking_by_smi();
-    this->test_vmcs_guest_interruptibility_state_blocking_by_nmi();
-    this->test_vmcs_guest_interruptibility_state_enclave_interruption();
-    this->test_vmcs_guest_interruptibility_state_reserved();
-    this->test_vmcs_guest_activity_state();
-    this->test_vmcs_guest_smbase();
-    this->test_vmcs_guest_ia32_sysenter_cs();
-    this->test_vmcs_vmx_preemption_timer_value();
-    this->test_vmcs_host_ia32_sysenter_cs();
-    this->test_vmcs_cr0_guest_host_mask();
-    this->test_vmcs_cr4_guest_host_mask();
-    this->test_vmcs_cr0_read_shadow();
-    this->test_vmcs_cr4_read_shadow();
-    this->test_vmcs_cr3_target_value_0();
-    this->test_vmcs_cr3_target_value_1();
-    this->test_vmcs_cr3_target_value_2();
-    this->test_vmcs_cr3_target_value_3();
+}
+
+void
+vmcs_ut::list_32bit_control_fields()
+{
     this->test_vmcs_pin_based_vm_execution_controls();
     this->test_vmcs_pin_based_vm_execution_controls_external_interrupt_exiting();
     this->test_vmcs_pin_based_vm_execution_controls_nmi_exiting();
@@ -623,9 +546,19 @@ vmcs_ut::list()
     this->test_vmcs_secondary_processor_based_vm_execution_controls_enable_xsaves_xrstors();
     this->test_vmcs_ple_gap();
     this->test_vmcs_ple_window();
+}
+
+
+void
+vmcs_ut::list_32bit_read_only_data_fields()
+{
     this->test_vmcs_vm_instruction_error();
+    this->test_vmcs_vm_instruction_error_description();
+    this->test_vmcs_vm_instruction_error_description_if_exists();
     this->test_vmcs_exit_reason();
     this->test_vmcs_exit_reason_basic_exit_reason();
+    this->test_vmcs_exit_reason_basic_exit_reason_description();
+    this->test_vmcs_exit_reason_basic_exit_reason_description_if_exists();
     this->test_vmcs_exit_reason_reserved();
     this->test_vmcs_exit_reason_vm_exit_incident_to_enclave_mode();
     this->test_vmcs_exit_reason_pending_mtf_vm_exit();
@@ -841,6 +774,144 @@ vmcs_ut::list()
     this->test_vmcs_vm_exit_instruction_information_vmwrite_base_reg();
     this->test_vmcs_vm_exit_instruction_information_vmwrite_base_reg_invalid();
     this->test_vmcs_vm_exit_instruction_information_vmwrite_reg2();
+}
+
+void
+vmcs_ut::list_32bit_guest_state_fields()
+{
+    this->test_vmcs_guest_es_limit();
+    this->test_vmcs_guest_cs_limit();
+    this->test_vmcs_guest_ss_limit();
+    this->test_vmcs_guest_ds_limit();
+    this->test_vmcs_guest_fs_limit();
+    this->test_vmcs_guest_gs_limit();
+    this->test_vmcs_guest_ldtr_limit();
+    this->test_vmcs_guest_tr_limit();
+    this->test_vmcs_guest_gdtr_limit();
+    this->test_vmcs_guest_idtr_limit();
+    this->test_vmcs_guest_es_access_rights();
+    this->test_vmcs_guest_es_access_rights_type();
+    this->test_vmcs_guest_es_access_rights_s();
+    this->test_vmcs_guest_es_access_rights_dpl();
+    this->test_vmcs_guest_es_access_rights_present();
+    this->test_vmcs_guest_es_access_rights_avl();
+    this->test_vmcs_guest_es_access_rights_l();
+    this->test_vmcs_guest_es_access_rights_db();
+    this->test_vmcs_guest_es_access_rights_granularity();
+    this->test_vmcs_guest_es_access_rights_reserved();
+    this->test_vmcs_guest_es_access_rights_unusable();
+    this->test_vmcs_guest_cs_access_rights();
+    this->test_vmcs_guest_cs_access_rights_type();
+    this->test_vmcs_guest_cs_access_rights_s();
+    this->test_vmcs_guest_cs_access_rights_dpl();
+    this->test_vmcs_guest_cs_access_rights_present();
+    this->test_vmcs_guest_cs_access_rights_avl();
+    this->test_vmcs_guest_cs_access_rights_l();
+    this->test_vmcs_guest_cs_access_rights_db();
+    this->test_vmcs_guest_cs_access_rights_granularity();
+    this->test_vmcs_guest_cs_access_rights_reserved();
+    this->test_vmcs_guest_cs_access_rights_unusable();
+    this->test_vmcs_guest_ss_access_rights();
+    this->test_vmcs_guest_ss_access_rights_type();
+    this->test_vmcs_guest_ss_access_rights_s();
+    this->test_vmcs_guest_ss_access_rights_dpl();
+    this->test_vmcs_guest_ss_access_rights_present();
+    this->test_vmcs_guest_ss_access_rights_avl();
+    this->test_vmcs_guest_ss_access_rights_l();
+    this->test_vmcs_guest_ss_access_rights_db();
+    this->test_vmcs_guest_ss_access_rights_granularity();
+    this->test_vmcs_guest_ss_access_rights_reserved();
+    this->test_vmcs_guest_ss_access_rights_unusable();
+    this->test_vmcs_guest_ds_access_rights();
+    this->test_vmcs_guest_ds_access_rights_type();
+    this->test_vmcs_guest_ds_access_rights_s();
+    this->test_vmcs_guest_ds_access_rights_dpl();
+    this->test_vmcs_guest_ds_access_rights_present();
+    this->test_vmcs_guest_ds_access_rights_avl();
+    this->test_vmcs_guest_ds_access_rights_l();
+    this->test_vmcs_guest_ds_access_rights_db();
+    this->test_vmcs_guest_ds_access_rights_granularity();
+    this->test_vmcs_guest_ds_access_rights_reserved();
+    this->test_vmcs_guest_ds_access_rights_unusable();
+    this->test_vmcs_guest_fs_access_rights();
+    this->test_vmcs_guest_fs_access_rights_type();
+    this->test_vmcs_guest_fs_access_rights_s();
+    this->test_vmcs_guest_fs_access_rights_dpl();
+    this->test_vmcs_guest_fs_access_rights_present();
+    this->test_vmcs_guest_fs_access_rights_avl();
+    this->test_vmcs_guest_fs_access_rights_l();
+    this->test_vmcs_guest_fs_access_rights_db();
+    this->test_vmcs_guest_fs_access_rights_granularity();
+    this->test_vmcs_guest_fs_access_rights_reserved();
+    this->test_vmcs_guest_fs_access_rights_unusable();
+    this->test_vmcs_guest_gs_access_rights();
+    this->test_vmcs_guest_gs_access_rights_type();
+    this->test_vmcs_guest_gs_access_rights_s();
+    this->test_vmcs_guest_gs_access_rights_dpl();
+    this->test_vmcs_guest_gs_access_rights_present();
+    this->test_vmcs_guest_gs_access_rights_avl();
+    this->test_vmcs_guest_gs_access_rights_l();
+    this->test_vmcs_guest_gs_access_rights_db();
+    this->test_vmcs_guest_gs_access_rights_granularity();
+    this->test_vmcs_guest_gs_access_rights_reserved();
+    this->test_vmcs_guest_gs_access_rights_unusable();
+    this->test_vmcs_guest_ldtr_access_rights();
+    this->test_vmcs_guest_ldtr_access_rights_type();
+    this->test_vmcs_guest_ldtr_access_rights_s();
+    this->test_vmcs_guest_ldtr_access_rights_dpl();
+    this->test_vmcs_guest_ldtr_access_rights_present();
+    this->test_vmcs_guest_ldtr_access_rights_avl();
+    this->test_vmcs_guest_ldtr_access_rights_l();
+    this->test_vmcs_guest_ldtr_access_rights_db();
+    this->test_vmcs_guest_ldtr_access_rights_granularity();
+    this->test_vmcs_guest_ldtr_access_rights_reserved();
+    this->test_vmcs_guest_ldtr_access_rights_unusable();
+    this->test_vmcs_guest_tr_access_rights();
+    this->test_vmcs_guest_tr_access_rights_type();
+    this->test_vmcs_guest_tr_access_rights_s();
+    this->test_vmcs_guest_tr_access_rights_dpl();
+    this->test_vmcs_guest_tr_access_rights_present();
+    this->test_vmcs_guest_tr_access_rights_avl();
+    this->test_vmcs_guest_tr_access_rights_l();
+    this->test_vmcs_guest_tr_access_rights_db();
+    this->test_vmcs_guest_tr_access_rights_granularity();
+    this->test_vmcs_guest_tr_access_rights_reserved();
+    this->test_vmcs_guest_tr_access_rights_unusable();
+    this->test_vmcs_guest_interruptibility_state();
+    this->test_vmcs_guest_interruptibility_state_blocking_by_sti();
+    this->test_vmcs_guest_interruptibility_state_blocking_by_mov_ss();
+    this->test_vmcs_guest_interruptibility_state_blocking_by_smi();
+    this->test_vmcs_guest_interruptibility_state_blocking_by_nmi();
+    this->test_vmcs_guest_interruptibility_state_enclave_interruption();
+    this->test_vmcs_guest_interruptibility_state_reserved();
+    this->test_vmcs_guest_activity_state();
+    this->test_vmcs_guest_smbase();
+    this->test_vmcs_guest_ia32_sysenter_cs();
+    this->test_vmcs_vmx_preemption_timer_value();
+}
+
+void
+vmcs_ut::list_32bit_host_state_field()
+{
+    this->test_vmcs_host_ia32_sysenter_cs();
+}
+
+void
+vmcs_ut::list_natural_width_control_fields()
+{
+    this->test_vmcs_cr0_guest_host_mask();
+    this->test_vmcs_cr4_guest_host_mask();
+    this->test_vmcs_cr0_read_shadow();
+    this->test_vmcs_cr4_read_shadow();
+    this->test_vmcs_cr3_target_value_0();
+    this->test_vmcs_cr3_target_value_1();
+    this->test_vmcs_cr3_target_value_2();
+    this->test_vmcs_cr3_target_value_3();
+}
+
+void
+vmcs_ut::list_natural_width_read_only_data_fields()
+{
     this->test_vmcs_exit_qualification();
     this->test_vmcs_exit_qualification_debug_exception();
     this->test_vmcs_exit_qualification_debug_exception_b0();
@@ -922,6 +993,158 @@ vmcs_ut::list()
     this->test_vmcs_io_rdi();
     this->test_vmcs_io_rip();
     this->test_vmcs_guest_linear_address();
+}
+
+void
+vmcs_ut::list_natural_width_guest_state_fields()
+{
+    this->test_vmcs_guest_cr0();
+    this->test_vmcs_guest_cr0_protection_enable();
+    this->test_vmcs_guest_cr0_monitor_coprocessor();
+    this->test_vmcs_guest_cr0_emulation();
+    this->test_vmcs_guest_cr0_task_switched();
+    this->test_vmcs_guest_cr0_extension_type();
+    this->test_vmcs_guest_cr0_numeric_error();
+    this->test_vmcs_guest_cr0_write_protect();
+    this->test_vmcs_guest_cr0_alignment_mask();
+    this->test_vmcs_guest_cr0_not_write_through();
+    this->test_vmcs_guest_cr0_cache_disable();
+    this->test_vmcs_guest_cr0_paging();
+    this->test_vmcs_guest_cr3();
+    this->test_vmcs_guest_cr4();
+    this->test_vmcs_guest_cr4_v8086_mode_extensions();
+    this->test_vmcs_guest_cr4_protected_mode_virtual_interrupts();
+    this->test_vmcs_guest_cr4_time_stamp_disable();
+    this->test_vmcs_guest_cr4_debugging_extensions();
+    this->test_vmcs_guest_cr4_page_size_extensions();
+    this->test_vmcs_guest_cr4_physical_address_extensions();
+    this->test_vmcs_guest_cr4_machine_check_enable();
+    this->test_vmcs_guest_cr4_page_global_enable();
+    this->test_vmcs_guest_cr4_performance_monitor_counter_enable();
+    this->test_vmcs_guest_cr4_osfxsr();
+    this->test_vmcs_guest_cr4_osxmmexcpt();
+    this->test_vmcs_guest_cr4_vmx_enable_bit();
+    this->test_vmcs_guest_cr4_smx_enable_bit();
+    this->test_vmcs_guest_cr4_fsgsbase_enable_bit();
+    this->test_vmcs_guest_cr4_pcid_enable_bit();
+    this->test_vmcs_guest_cr4_osxsave();
+    this->test_vmcs_guest_cr4_smep_enable_bit();
+    this->test_vmcs_guest_cr4_smap_enable_bit();
+    this->test_vmcs_guest_cr4_protection_key_enable_bit();
+    this->test_vmcs_guest_es_base();
+    this->test_vmcs_guest_cs_base();
+    this->test_vmcs_guest_ss_base();
+    this->test_vmcs_guest_ds_base();
+    this->test_vmcs_guest_fs_base();
+    this->test_vmcs_guest_gs_base();
+    this->test_vmcs_guest_ldtr_base();
+    this->test_vmcs_guest_tr_base();
+    this->test_vmcs_guest_gdtr_base();
+    this->test_vmcs_guest_idtr_base();
+    this->test_vmcs_guest_dr7();
+    this->test_vmcs_guest_rsp();
+    this->test_vmcs_guest_rip();
+    this->test_vmcs_guest_rflags();
+    this->test_vmcs_guest_rflags_carry_flag();
+    this->test_vmcs_guest_rflags_parity_flag();
+    this->test_vmcs_guest_rflags_auxiliary_carry_flag();
+    this->test_vmcs_guest_rflags_zero_flag();
+    this->test_vmcs_guest_rflags_sign_flag();
+    this->test_vmcs_guest_rflags_trap_flag();
+    this->test_vmcs_guest_rflags_interrupt_enable_flag();
+    this->test_vmcs_guest_rflags_direction_flag();
+    this->test_vmcs_guest_rflags_overflow_flag();
+    this->test_vmcs_guest_rflags_privilege_level();
+    this->test_vmcs_guest_rflags_nested_task();
+    this->test_vmcs_guest_rflags_resume_flag();
+    this->test_vmcs_guest_rflags_virtual_8086_mode();
+    this->test_vmcs_guest_rflags_alignment_check_access_control();
+    this->test_vmcs_guest_rflags_virtual_interupt_flag();
+    this->test_vmcs_guest_rflags_virtual_interupt_pending();
+    this->test_vmcs_guest_rflags_id_flag();
+    this->test_vmcs_guest_rflags_reserved();
+    this->test_vmcs_guest_rflags_always_disabled();
+    this->test_vmcs_guest_rflags_always_enabled();
+    this->test_vmcs_guest_pending_debug_exceptions();
+    this->test_vmcs_guest_pending_debug_exceptions_b0();
+    this->test_vmcs_guest_pending_debug_exceptions_b1();
+    this->test_vmcs_guest_pending_debug_exceptions_b2();
+    this->test_vmcs_guest_pending_debug_exceptions_b3();
+    this->test_vmcs_guest_pending_debug_exceptions_reserved();
+    this->test_vmcs_guest_pending_debug_exceptions_enabled_breakpoint();
+    this->test_vmcs_guest_pending_debug_exceptions_bs();
+    this->test_vmcs_guest_pending_debug_exceptions_rtm();
+    this->test_vmcs_guest_ia32_sysenter_esp();
+    this->test_vmcs_guest_ia32_sysenter_eip();
+}
+
+void
+vmcs_ut::list_natural_width_host_state_fields()
+{
+    this->test_vmcs_host_cr0();
+    this->test_vmcs_host_cr0_protection_enable();
+    this->test_vmcs_host_cr0_monitor_coprocessor();
+    this->test_vmcs_host_cr0_emulation();
+    this->test_vmcs_host_cr0_task_switched();
+    this->test_vmcs_host_cr0_extension_type();
+    this->test_vmcs_host_cr0_numeric_error();
+    this->test_vmcs_host_cr0_write_protect();
+    this->test_vmcs_host_cr0_alignment_mask();
+    this->test_vmcs_host_cr0_not_write_through();
+    this->test_vmcs_host_cr0_cache_disable();
+    this->test_vmcs_host_cr0_paging();
+    this->test_vmcs_host_cr3();
+    this->test_vmcs_host_cr4();
+    this->test_vmcs_host_cr4_v8086_mode_extensions();
+    this->test_vmcs_host_cr4_protected_mode_virtual_interrupts();
+    this->test_vmcs_host_cr4_time_stamp_disable();
+    this->test_vmcs_host_cr4_debugging_extensions();
+    this->test_vmcs_host_cr4_page_size_extensions();
+    this->test_vmcs_host_cr4_physical_address_extensions();
+    this->test_vmcs_host_cr4_machine_check_enable();
+    this->test_vmcs_host_cr4_page_global_enable();
+    this->test_vmcs_host_cr4_performance_monitor_counter_enable();
+    this->test_vmcs_host_cr4_osfxsr();
+    this->test_vmcs_host_cr4_osxmmexcpt();
+    this->test_vmcs_host_cr4_vmx_enable_bit();
+    this->test_vmcs_host_cr4_smx_enable_bit();
+    this->test_vmcs_host_cr4_fsgsbase_enable_bit();
+    this->test_vmcs_host_cr4_pcid_enable_bit();
+    this->test_vmcs_host_cr4_osxsave();
+    this->test_vmcs_host_cr4_smep_enable_bit();
+    this->test_vmcs_host_cr4_smap_enable_bit();
+    this->test_vmcs_host_cr4_protection_key_enable_bit();
+    this->test_vmcs_host_fs_base();
+    this->test_vmcs_host_gs_base();
+    this->test_vmcs_host_tr_base();
+    this->test_vmcs_host_gdtr_base();
+    this->test_vmcs_host_idtr_base();
+    this->test_vmcs_host_ia32_sysenter_esp();
+    this->test_vmcs_host_ia32_sysenter_eip();
+    this->test_vmcs_host_rsp();
+    this->test_vmcs_host_rip();
+}
+
+bool
+vmcs_ut::list()
+{
+    this->list_vmcs_intel_x64_cpp();
+    this->list_vmcs_intel_x64_h();
+    this->list_16bit_control_fields();
+    this->list_16bit_guest_state_fields();
+    this->list_16bit_host_state_fields();
+    this->list_64bit_control_fields();
+    this->list_64bit_read_only_data_field();
+    this->list_64bit_guest_state_fields();
+    this->list_64bit_host_state_fields();
+    this->list_32bit_control_fields();
+    this->list_32bit_read_only_data_fields();
+    this->list_32bit_guest_state_fields();
+    this->list_32bit_host_state_field();
+    this->list_natural_width_control_fields();
+    this->list_natural_width_read_only_data_fields();
+    this->list_natural_width_guest_state_fields();
+    this->list_natural_width_host_state_fields();
 
     this->test_check_vmcs_control_state();
     this->test_checks_on_vm_execution_control_fields();

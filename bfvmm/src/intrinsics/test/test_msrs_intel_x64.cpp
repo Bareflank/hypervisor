@@ -2340,6 +2340,16 @@ intrinsics_ut::test_ia32_vmx_vmfunc()
 }
 
 void
+intrinsics_ut::test_ia32_vmx_vmfunc_eptp_switching()
+{
+    g_msrs[msrs::ia32_vmx_vmfunc::addr] = 0xFFFFFFFFFFFFFFFFUL;
+    this->expect_true(msrs::ia32_vmx_vmfunc::eptp_switching::is_allowed1());
+
+    g_msrs[msrs::ia32_vmx_vmfunc::addr] = 0xFFFFFFFFFFFFFFFEUL;
+    this->expect_false(msrs::ia32_vmx_vmfunc::eptp_switching::is_allowed1());
+}
+
+void
 intrinsics_ut::test_ia32_efer()
 {
     msrs::ia32_efer::set(0xFFFFFFFFFFFFFFFFUL);

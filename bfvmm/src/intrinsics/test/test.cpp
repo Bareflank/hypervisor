@@ -237,6 +237,7 @@ intrinsics_ut::list()
     this->test_ia32_vmx_true_entry_ctls_load_ia32_pat();
     this->test_ia32_vmx_true_entry_ctls_load_ia32_efer();
     this->test_ia32_vmx_vmfunc();
+    this->test_ia32_vmx_vmfunc_eptp_switching();
     this->test_ia32_efer();
     this->test_ia32_efer_sce();
     this->test_ia32_efer_lme();
