@@ -26,7 +26,6 @@
 #include <vmcs/vmcs_intel_x64.h>
 #include <intrinsics/msrs_intel_x64.h>
 
-
 /// Intel x86_64 VMCS 16-Bit Guest-State Fields
 ///
 /// The following provides the interface for the 16-bit guest-state VMCS
@@ -35,6 +34,7 @@
 ///
 
 // *INDENT-OFF*
+
 namespace intel_x64
 {
 namespace vmcs
