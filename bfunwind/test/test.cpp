@@ -24,8 +24,42 @@
 #include <eh_frame_list.h>
 #include <view_as_pointer.h>
 
+#include <link.h>
 #include <fstream>
 #include <sys/mman.h>
+
+// -----------------------------------------------------------------------------
+// A.out Load Address
+// -----------------------------------------------------------------------------
+
+// The following code is needed to locate the load address of this application.
+// If PIE is being used, the application will be relocated somewhere in memory
+// and we need to use this relocation to identify were the eh_frame section
+// is actually located
+
+uintptr_t g_a_out_offset = 0;
+
+static int
+callback(struct dl_phdr_info *info, size_t size, void *data)
+{
+    (void) size;
+    (void) data;
+    static auto once = false;
+
+    if (once) return 0;
+    once = true;
+
+    for (int i = 0; i < info->dlpi_phnum; i++)
+    {
+        if (info->dlpi_phdr[i].p_type == PT_LOAD)
+        {
+            g_a_out_offset = info->dlpi_addr;
+            break;
+        }
+    }
+
+    return 0;
+}
 
 // -----------------------------------------------------------------------------
 // Exception Handler Framework
@@ -37,7 +71,7 @@ eh_frame_t g_eh_frame_list[MAX_NUM_MODULES] = {{nullptr, 0}};
 extern "C" struct eh_frame_t *
 get_eh_frame_list() noexcept
 {
-    g_eh_frame_list[0].addr = g_info.eh_frame_addr;
+    g_eh_frame_list[0].addr = reinterpret_cast<void *>(reinterpret_cast<uintptr_t>(g_info.eh_frame_addr) + g_a_out_offset);
     g_eh_frame_list[0].size = g_info.eh_frame_size;
 
     return static_cast<struct eh_frame_t *>(g_eh_frame_list);
@@ -56,6 +90,8 @@ bfunwind_ut::bfunwind_ut() :
 
 bool bfunwind_ut::init()
 {
+    dl_iterate_phdr(callback, nullptr);
+
     std::ifstream self_ifs(c_self_filename, std::ifstream::ate);
     m_self_length = static_cast<uint64_t>(self_ifs.tellg());
     m_self = std::make_unique<char[]>(m_self_length);
