@@ -26,7 +26,6 @@
 #include <vmcs/vmcs_intel_x64.h>
 #include <intrinsics/msrs_intel_x64.h>
 
-
 /// Intel x86_64 VMCS 32-Bit Control Fields
 ///
 /// The following provides the interface for the 32-bit VMCS control
@@ -2514,8 +2513,8 @@ namespace ple_window
     { set_vmcs_field_if_exists(val, addr, name, verbose, exists()); }
 }
 
-} //vmcs
-} //intel_x64
+}
+}
 
 // *INDENT-ON*
 
