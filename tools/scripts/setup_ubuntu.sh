@@ -50,11 +50,11 @@ option_help() {
     echo -e "Usage: setup_ubuntu.sh [OPTION]"
     echo -e "Sets up the system to compile / use Bareflank"
     echo -e ""
-    echo -e "       -h, --help                       show this help menu"
-    echo -e "       -l, --local_compilers            setup local cross compilers"
-    echo -e "       -n, --no-configure               skip the configure step"
-    echo -e "       -g, --compiler <dirname>         directory of cross compiler"
-    echo -e "       -o, --out_of_tree <dirname>      setup out of tree build"
+    echo -e "       --help                       show this help menu"
+    echo -e "       --local_compilers            setup local cross compilers"
+    echo -e "       --no-configure               skip the configure step"
+    echo -e "       --compiler <dirname>         directory of cross compiler"
+    echo -e "       --out_of_tree <dirname>      setup out of tree build"
     echo -e ""
 }
 
@@ -167,12 +167,12 @@ fix_linux_kernel() {
 
 while [[ $# -ne 0 ]]; do
 
-    if [[ $1 == "-h" ]] || [[ $1 == "--help" ]]; then
+    if [[ $1 == "--help" ]]; then
         option_help
         exit 0
     fi
 
-    if [[ $1 == "-l" ]] || [[ $1 == "--local_compilers" ]]; then
+    if [[ $1 == "--local_compilers" ]]; then
         local="true"
     fi
 
@@ -185,11 +185,11 @@ while [[ $# -ne 0 ]]; do
         use_llvm_clang="--use_llvm_clang"
     fi
 
-    if [[ $1 == "-n" ]] || [[ $1 == "--no-configure" ]]; then
+    if [[ $1 == "--no-configure" ]]; then
         noconfigure="true"
     fi
 
-    if [[ $1 == "-o" ]] || [[ $1 == "--out_of_tree" ]]; then
+    if [[ $1 == "--out_of_tree" ]]; then
         shift
         out_of_tree="true"
         build_dir=$1
