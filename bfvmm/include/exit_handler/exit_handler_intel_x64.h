@@ -179,6 +179,23 @@ protected:
 
 private:
 
+#ifdef INCLUDE_LIBCXX_UNITTESTS
+
+    void unittest_1001_containers_array() const;
+    void unittest_1002_containers_vector() const;
+    void unittest_1003_containers_deque() const;
+    void unittest_1004_containers_forward_list() const;
+    void unittest_1005_containers_list() const;
+    void unittest_1006_containers_stack() const;
+    void unittest_1007_containers_queue() const;
+    void unittest_1008_containers_priority_queue() const;
+    void unittest_1009_containers_set() const;
+    void unittest_100A_containers_map() const;
+
+#endif
+
+private:
+
     virtual void set_vmcs(const std::shared_ptr<vmcs_intel_x64> &vmcs)
     { m_vmcs = vmcs; }
 
