@@ -26,7 +26,6 @@
 #include <vmcs/vmcs_intel_x64_state.h>
 #include <intrinsics/msrs_intel_x64.h>
 
-
 /// Intel x86_64 VMCS 16-Bit Control Fields
 ///
 /// This provides the namespace for 16-bit control fields of the VMCS.
