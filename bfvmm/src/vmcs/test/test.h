@@ -819,6 +819,11 @@ private:
     void test_vmcs_exit_qualification_eoi_virtualization_vector();
     void test_vmcs_exit_qualification_apic_write();
     void test_vmcs_exit_qualification_apic_write_offset();
+    void test_vmcs_io_rcx();
+    void test_vmcs_io_rsi();
+    void test_vmcs_io_rdi();
+    void test_vmcs_io_rip();
+    void test_vmcs_guest_linear_address();
 
     void test_check_vmcs_control_state();
     void test_checks_on_vm_execution_control_fields();

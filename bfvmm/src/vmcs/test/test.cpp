@@ -908,6 +908,11 @@ vmcs_ut::list()
     this->test_vmcs_exit_qualification_eoi_virtualization_vector();
     this->test_vmcs_exit_qualification_apic_write();
     this->test_vmcs_exit_qualification_apic_write_offset();
+    this->test_vmcs_io_rcx();
+    this->test_vmcs_io_rsi();
+    this->test_vmcs_io_rdi();
+    this->test_vmcs_io_rip();
+    this->test_vmcs_guest_linear_address();
 
     this->test_check_vmcs_control_state();
     this->test_checks_on_vm_execution_control_fields();

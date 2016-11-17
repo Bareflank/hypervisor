@@ -1234,8 +1234,81 @@ namespace exit_qualification
             { return get_bits(get_vmcs_field_if_exists(addr, name, verbose, exists()), mask) >> from; }
         }
     }
+}
 
-    // namespace for page-modification log-full event???
+namespace io_rcx
+{
+    constexpr const auto addr = 0x0000000000006402UL;
+    constexpr const auto name = "io_rcx";
+
+    inline auto exists()
+    { return true; }
+
+    inline auto get()
+    { return get_vmcs_field(addr, name, exists()); }
+
+    inline auto get_if_exists(bool verbose = false) noexcept
+    { return get_vmcs_field_if_exists(addr, name, verbose, exists()); }
+}
+
+namespace io_rsi
+{
+    constexpr const auto addr = 0x0000000000006404UL;
+    constexpr const auto name = "io_rsi";
+
+    inline auto exists()
+    { return true; }
+
+    inline auto get()
+    { return get_vmcs_field(addr, name, exists()); }
+
+    inline auto get_if_exists(bool verbose = false) noexcept
+    { return get_vmcs_field_if_exists(addr, name, verbose, exists()); }
+}
+
+namespace io_rdi
+{
+    constexpr const auto addr = 0x0000000000006406UL;
+    constexpr const auto name = "io_rdi";
+
+    inline auto exists()
+    { return true; }
+
+    inline auto get()
+    { return get_vmcs_field(addr, name, exists()); }
+
+    inline auto get_if_exists(bool verbose = false) noexcept
+    { return get_vmcs_field_if_exists(addr, name, verbose, exists()); }
+}
+
+namespace io_rip
+{
+    constexpr const auto addr = 0x0000000000006408UL;
+    constexpr const auto name = "io_rip";
+
+    inline auto exists()
+    { return true; }
+
+    inline auto get()
+    { return get_vmcs_field(addr, name, exists()); }
+
+    inline auto get_if_exists(bool verbose = false) noexcept
+    { return get_vmcs_field_if_exists(addr, name, verbose, exists()); }
+}
+
+namespace guest_linear_address
+{
+    constexpr const auto addr = 0x000000000000640AUL;
+    constexpr const auto name = "guest_linear_address";
+
+    inline auto exists()
+    { return true; }
+
+    inline auto get()
+    { return get_vmcs_field(addr, name, exists()); }
+
+    inline auto get_if_exists(bool verbose = false) noexcept
+    { return get_vmcs_field_if_exists(addr, name, verbose, exists()); }
 }
 
 }
