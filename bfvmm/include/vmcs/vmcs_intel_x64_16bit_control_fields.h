@@ -34,6 +34,7 @@
 ///
 
 // *INDENT-OFF*
+
 namespace intel_x64
 {
 namespace vmcs
