@@ -23,8 +23,11 @@
 #define EXIT_HANDLER_INTEL_X64_H
 
 #include <memory>
+
+#include <json.h>
 #include <vmcall_interface.h>
 #include <vmcs/vmcs_intel_x64.h>
+#include <memory_manager/map_ptr_x64.h>
 
 // -----------------------------------------------------------------------------
 // Exit Handler
@@ -53,7 +56,7 @@ public:
     /// @expects none
     /// @ensures none
     ///
-    exit_handler_intel_x64();
+    exit_handler_intel_x64() = default;
 
     /// Destructor
     ///
@@ -153,6 +156,16 @@ protected:
     virtual void handle_vmcall_data(vmcall_registers_t &regs);
     virtual void handle_vmcall_event(vmcall_registers_t &regs);
     virtual void handle_vmcall_unittest(vmcall_registers_t &regs);
+
+    virtual void handle_vmcall_data_string_unformatted(vmcall_registers_t &regs, const std::string &str,
+            const bfn::unique_map_ptr_x64<char> &omap);
+
+    virtual void handle_vmcall_data_string_json(vmcall_registers_t &regs, const json &str,
+            const bfn::unique_map_ptr_x64<char> &omap);
+
+    virtual void handle_vmcall_data_binary_unformatted(vmcall_registers_t &regs,
+            const bfn::unique_map_ptr_x64<char> &imap,
+            const bfn::unique_map_ptr_x64<char> &omap);
 
 protected:
 
