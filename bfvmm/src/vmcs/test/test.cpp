@@ -426,6 +426,7 @@ vmcs_ut::list_64bit_read_only_data_field()
 void
 vmcs_ut::list_64bit_guest_state_fields()
 {
+    this->test_vmcs_vmcs_link_pointer();
     this->test_vmcs_guest_ia32_debugctl();
     this->test_vmcs_guest_ia32_debugctl_lbr();
     this->test_vmcs_guest_ia32_debugctl_btf();
@@ -440,12 +441,43 @@ vmcs_ut::list_64bit_guest_state_fields()
     this->test_vmcs_guest_ia32_debugctl_freeze_while_smm();
     this->test_vmcs_guest_ia32_debugctl_rtm_debug();
     this->test_vmcs_guest_ia32_debugctl_reserved();
+    this->test_vmcs_guest_ia32_pat();
+    this->test_vmcs_guest_ia32_pat_pa0();
+    this->test_vmcs_guest_ia32_pat_pa0_memory_type();
+    this->test_vmcs_guest_ia32_pat_pa0_reserved();
+    this->test_vmcs_guest_ia32_pat_pa1();
+    this->test_vmcs_guest_ia32_pat_pa1_memory_type();
+    this->test_vmcs_guest_ia32_pat_pa1_reserved();
+    this->test_vmcs_guest_ia32_pat_pa2();
+    this->test_vmcs_guest_ia32_pat_pa2_memory_type();
+    this->test_vmcs_guest_ia32_pat_pa2_reserved();
+    this->test_vmcs_guest_ia32_pat_pa3();
+    this->test_vmcs_guest_ia32_pat_pa3_memory_type();
+    this->test_vmcs_guest_ia32_pat_pa3_reserved();
+    this->test_vmcs_guest_ia32_pat_pa4();
+    this->test_vmcs_guest_ia32_pat_pa4_memory_type();
+    this->test_vmcs_guest_ia32_pat_pa4_reserved();
+    this->test_vmcs_guest_ia32_pat_pa5();
+    this->test_vmcs_guest_ia32_pat_pa5_memory_type();
+    this->test_vmcs_guest_ia32_pat_pa5_reserved();
+    this->test_vmcs_guest_ia32_pat_pa6();
+    this->test_vmcs_guest_ia32_pat_pa6_memory_type();
+    this->test_vmcs_guest_ia32_pat_pa6_reserved();
+    this->test_vmcs_guest_ia32_pat_pa7();
+    this->test_vmcs_guest_ia32_pat_pa7_memory_type();
+    this->test_vmcs_guest_ia32_pat_pa7_reserved();
     this->test_vmcs_guest_ia32_efer();
     this->test_vmcs_guest_ia32_efer_sce();
     this->test_vmcs_guest_ia32_efer_lme();
     this->test_vmcs_guest_ia32_efer_lma();
     this->test_vmcs_guest_ia32_efer_nxe();
     this->test_vmcs_guest_ia32_efer_reserved();
+    this->test_vmcs_guest_ia32_perf_global_ctrl();
+    this->test_vmcs_guest_ia32_perf_global_ctrl_reserved();
+    this->test_vmcs_guest_pdpte0();
+    this->test_vmcs_guest_pdpte1();
+    this->test_vmcs_guest_pdpte2();
+    this->test_vmcs_guest_pdpte3();
 }
 
 void

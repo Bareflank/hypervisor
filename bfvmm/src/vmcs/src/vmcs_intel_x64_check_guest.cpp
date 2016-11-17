@@ -26,6 +26,7 @@
 #include <vmcs/vmcs_intel_x64_32bit_guest_state_fields.h>
 
 #include <vmcs/vmcs_intel_x64_natural_width_guest_state_fields.h>
+#include <vmcs/vmcs_intel_x64_64bit_guest_state_fields.h>
 
 using namespace x64;
 using namespace intel_x64;
@@ -111,7 +112,7 @@ vmcs_intel_x64::check_guest_load_debug_controls_verify_reserved()
     if (vm_entry_controls::load_debug_controls::is_disabled())
         return;
 
-    if (guest_ia32_debugctl::reserved::get() != 0)
+    if (vmcs::guest_ia32_debugctl::reserved::get() != 0)
         throw std::logic_error("debug ctrl msr reserved bits must be 0");
 }
 
@@ -177,10 +178,7 @@ vmcs_intel_x64::check_guest_verify_load_ia32_perf_global_ctrl()
     if (vm_entry_controls::load_ia32_perf_global_ctrl::is_disabled())
         return;
 
-    auto vmcs_ia32_perf_global_ctrl =
-        vm::read(VMCS_GUEST_IA32_PERF_GLOBAL_CTRL);
-
-    if ((vmcs_ia32_perf_global_ctrl & 0xFFFFFFF8FFFFFFFC) != 0)
+    if (vmcs::guest_ia32_perf_global_ctrl::reserved::get() != 0)
         throw std::logic_error("perf global ctrl msr reserved bits must be 0");
 }
 
@@ -190,37 +188,28 @@ vmcs_intel_x64::check_guest_verify_load_ia32_pat()
     if (vm_entry_controls::load_ia32_pat::is_disabled())
         return;
 
-    auto pat0 = vm::read(VMCS_GUEST_IA32_PAT) & 0x00000000000000FF >> 0;
-    auto pat1 = vm::read(VMCS_GUEST_IA32_PAT) & 0x000000000000FF00 >> 8;
-    auto pat2 = vm::read(VMCS_GUEST_IA32_PAT) & 0x0000000000FF0000 >> 16;
-    auto pat3 = vm::read(VMCS_GUEST_IA32_PAT) & 0x00000000FF000000 >> 24;
-    auto pat4 = vm::read(VMCS_GUEST_IA32_PAT) & 0x000000FF00000000 >> 32;
-    auto pat5 = vm::read(VMCS_GUEST_IA32_PAT) & 0x0000FF0000000000 >> 40;
-    auto pat6 = vm::read(VMCS_GUEST_IA32_PAT) & 0x00FF000000000000 >> 48;
-    auto pat7 = vm::read(VMCS_GUEST_IA32_PAT) & 0xFF00000000000000 >> 56;
-
-    if (!check_pat(pat0))
+    if (!check_pat(guest_ia32_pat::pa0::memory_type::get()))
         throw std::logic_error("pat0 has an invalid memory type");
 
-    if (!check_pat(pat1))
+    if (!check_pat(guest_ia32_pat::pa1::memory_type::get()))
         throw std::logic_error("pat1 has an invalid memory type");
 
-    if (!check_pat(pat2))
+    if (!check_pat(guest_ia32_pat::pa2::memory_type::get()))
         throw std::logic_error("pat2 has an invalid memory type");
 
-    if (!check_pat(pat3))
+    if (!check_pat(guest_ia32_pat::pa3::memory_type::get()))
         throw std::logic_error("pat3 has an invalid memory type");
 
-    if (!check_pat(pat4))
+    if (!check_pat(guest_ia32_pat::pa4::memory_type::get()))
         throw std::logic_error("pat4 has an invalid memory type");
 
-    if (!check_pat(pat5))
+    if (!check_pat(guest_ia32_pat::pa5::memory_type::get()))
         throw std::logic_error("pat5 has an invalid memory type");
 
-    if (!check_pat(pat6))
+    if (!check_pat(guest_ia32_pat::pa6::memory_type::get()))
         throw std::logic_error("pat6 has an invalid memory type");
 
-    if (!check_pat(pat7))
+    if (!check_pat(guest_ia32_pat::pa7::memory_type::get()))
         throw std::logic_error("pat7 has an invalid memory type");
 }
 
@@ -234,22 +223,22 @@ vmcs_intel_x64::check_guest_verify_load_ia32_efer()
         throw std::logic_error("ia32 efer msr reserved buts must be 0 if "
                                "load ia32 efer entry is enabled");
 
-    auto lma = guest_ia32_efer::lma::get();
-    auto lme = guest_ia32_efer::lme::get();
+    auto lma = guest_ia32_efer::lma::is_enabled();
+    auto lme = guest_ia32_efer::lme::is_enabled();
 
-    if (vm_entry_controls::ia_32e_mode_guest::is_disabled() && lma != 0)
+    if (vm_entry_controls::ia_32e_mode_guest::is_disabled() && lma)
         throw std::logic_error("ia 32e mode is 0, but efer.lma is 1");
 
-    if (vm_entry_controls::ia_32e_mode_guest::is_enabled() && lma == 0)
+    if (vm_entry_controls::ia_32e_mode_guest::is_enabled() && !lma)
         throw std::logic_error("ia 32e mode is 1, but efer.lma is 0");
 
     if (guest_cr0::paging::is_disabled())
         return;
 
-    if (lme == 0 && lma != 0)
+    if (!lme && lma)
         throw std::logic_error("efer.lme is 0, but efer.lma is 1");
 
-    if (lme != 0 && lma == 0)
+    if (lme && !lma)
         throw std::logic_error("efer.lme is 1, but efer.lma is 0");
 }
 
@@ -1807,13 +1796,13 @@ vmcs_intel_x64::check_guest_pending_debug_exceptions_dbg_ctl()
 
     auto bs = vmcs::guest_pending_debug_exceptions::bs::is_enabled();
     auto tf = vmcs::guest_rflags::trap_flag::is_enabled();
-    auto btf = vmcs::guest_ia32_debugctl::btf::get();
+    auto btf = vmcs::guest_ia32_debugctl::btf::is_enabled();
 
-    if (!bs && tf && btf == 0)
+    if (!bs && tf && !btf)
         throw std::logic_error("pending debug exception bs must be 1 if "
                                "rflags tf is 1 and debugctl btf is 0");
 
-    if (bs && !tf && btf == 1)
+    if (bs && !tf && btf)
         throw std::logic_error("pending debug exception bs must be 0 if "
                                "rflags tf is 0 and debugctl btf is 1");
 }
@@ -1821,7 +1810,7 @@ vmcs_intel_x64::check_guest_pending_debug_exceptions_dbg_ctl()
 void
 vmcs_intel_x64::check_guest_vmcs_link_pointer_bits_11_0()
 {
-    auto vmcs_link_pointer = vm::read(VMCS_VMCS_LINK_POINTER);
+    auto vmcs_link_pointer = vmcs::vmcs_link_pointer::get();
 
     if (vmcs_link_pointer == 0xFFFFFFFFFFFFFFFF)
         return;
@@ -1833,7 +1822,7 @@ vmcs_intel_x64::check_guest_vmcs_link_pointer_bits_11_0()
 void
 vmcs_intel_x64::check_guest_vmcs_link_pointer_valid_addr()
 {
-    auto vmcs_link_pointer = vm::read(VMCS_VMCS_LINK_POINTER);
+    auto vmcs_link_pointer = vmcs::vmcs_link_pointer::get();
 
     if (vmcs_link_pointer == 0xFFFFFFFFFFFFFFFF)
         return;
@@ -1845,7 +1834,7 @@ vmcs_intel_x64::check_guest_vmcs_link_pointer_valid_addr()
 void
 vmcs_intel_x64::check_guest_vmcs_link_pointer_first_word()
 {
-    auto vmcs_link_pointer = vm::read(VMCS_VMCS_LINK_POINTER);
+    auto vmcs_link_pointer = vmcs::vmcs_link_pointer::get();
 
     if (vmcs_link_pointer == 0xFFFFFFFFFFFFFFFF)
         return;

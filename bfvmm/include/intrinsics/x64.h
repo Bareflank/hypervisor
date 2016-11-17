@@ -35,8 +35,12 @@ namespace x64
 
 namespace memory_type
 {
-    constexpr const auto uncacheable                             = 0x00000000U;
-    constexpr const auto write_back                              = 0x00000006U;
+    constexpr const auto uncacheable                             = 0x00000000ULL;
+    constexpr const auto write_combining                         = 0x00000001ULL;
+    constexpr const auto write_through                           = 0x00000004ULL;
+    constexpr const auto write_protected                         = 0x00000005ULL;
+    constexpr const auto write_back                              = 0x00000006ULL;
+    constexpr const auto uncached                                = 0x00000007ULL;
 }
 
 namespace access_rights

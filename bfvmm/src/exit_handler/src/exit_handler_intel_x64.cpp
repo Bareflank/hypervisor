@@ -41,6 +41,7 @@
 #include <vmcs/vmcs_intel_x64_32bit_read_only_data_fields.h>
 #include <vmcs/vmcs_intel_x64_natural_width_guest_state_fields.h>
 #include <vmcs/vmcs_intel_x64_natural_width_read_only_data_fields.h>
+#include <vmcs/vmcs_intel_x64_64bit_guest_state_fields.h>
 
 using namespace x64;
 using namespace intel_x64;
@@ -581,13 +582,13 @@ exit_handler_intel_x64::handle_rdmsr()
             msr = vmcs::guest_ia32_debugctl::get();
             break;
         case msrs::ia32_pat::addr:
-            msr = vm::read(VMCS_GUEST_IA32_PAT);
+            msr = vmcs::guest_ia32_pat::get();
             break;
         case msrs::ia32_efer::addr:
             msr = vmcs::guest_ia32_efer::get();
             break;
         case msrs::ia32_perf_global_ctrl::addr:
-            msr = vm::read(VMCS_GUEST_IA32_PERF_GLOBAL_CTRL);
+            msr = vmcs::guest_ia32_perf_global_ctrl::get();
             break;
         case msrs::ia32_sysenter_cs::addr:
             msr = vmcs::guest_ia32_sysenter_cs::get();
@@ -647,13 +648,13 @@ exit_handler_intel_x64::handle_wrmsr()
             vmcs::guest_ia32_debugctl::set(msr);
             break;
         case msrs::ia32_pat::addr:
-            vm::write(VMCS_GUEST_IA32_PAT, msr);
+            vmcs::guest_ia32_pat::set(msr);
             break;
         case msrs::ia32_efer::addr:
             vmcs::guest_ia32_efer::set(msr);
             break;
         case msrs::ia32_perf_global_ctrl::addr:
-            vm::write(VMCS_GUEST_IA32_PERF_GLOBAL_CTRL, msr);
+            vmcs::guest_ia32_perf_global_ctrl::set(msr);
             break;
         case msrs::ia32_sysenter_cs::addr:
             vmcs::guest_ia32_sysenter_cs::set(msr);

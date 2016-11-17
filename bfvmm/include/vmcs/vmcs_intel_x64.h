@@ -568,312 +568,7 @@ set_vm_control_if_allowed(bool val, uint64_t msr_addr, uint64_t ctls_addr,
 }
 
 // -----------------------------------------------------------------------------
-// 64bit Read-Only Data Fields
-// -----------------------------------------------------------------------------
-
-constexpr const auto VMCS_GUEST_PHYSICAL_ADDRESS                          = 0x0000000000002400UL;
-
-// -----------------------------------------------------------------------------
 // 64bit Guest State Fields
-// -----------------------------------------------------------------------------
-
-constexpr const auto VMCS_VMCS_LINK_POINTER                               = 0x0000000000002800UL;
-
-// *INDENT-OFF*
-
-namespace intel_x64
-{
-namespace vmcs
-{
-
-using field_type = uint64_t;
-using value_type = uint64_t;
-
-namespace guest_ia32_debugctl
-{
-    constexpr const auto addr = 0x0000000000002802UL;
-    constexpr const auto name = "guest_ia32_debugctl";
-
-    inline auto get()
-    { return vm::read(addr, name); }
-
-    template<class T> void set(T val)
-    { vm::write(addr, val, name); }
-
-    inline bool exists() noexcept
-    { return true; }
-
-    namespace lbr
-    {
-        constexpr const auto mask = 0x0000000000000001UL;
-        constexpr const auto from = 0;
-        constexpr const auto name = "lbr";
-
-        inline auto get()
-        { return (vm::read(addr, name) & mask) >> from; }
-
-        template<class T> void set(T val)
-        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
-    }
-
-    namespace btf
-    {
-        constexpr const auto mask = 0x0000000000000002UL;
-        constexpr const auto from = 1;
-        constexpr const auto name = "btf";
-
-        inline auto get()
-        { return (vm::read(addr, name) & mask) >> from; }
-
-        template<class T> void set(T val)
-        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
-    }
-
-    namespace tr
-    {
-        constexpr const auto mask = 0x0000000000000040UL;
-        constexpr const auto from = 6;
-        constexpr const auto name = "tr";
-
-        inline auto get()
-        { return (vm::read(addr, name) & mask) >> from; }
-
-        template<class T> void set(T val)
-        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
-    }
-
-    namespace bts
-    {
-        constexpr const auto mask = 0x0000000000000080UL;
-        constexpr const auto from = 7;
-        constexpr const auto name = "bts";
-
-        inline auto get()
-        { return (vm::read(addr, name) & mask) >> from; }
-
-        template<class T> void set(T val)
-        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
-    }
-
-    namespace btint
-    {
-        constexpr const auto mask = 0x0000000000000100UL;
-        constexpr const auto from = 8;
-        constexpr const auto name = "btint";
-
-        inline auto get()
-        { return (vm::read(addr, name) & mask) >> from; }
-
-        template<class T> void set(T val)
-        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
-    }
-
-    namespace bt_off_os
-    {
-        constexpr const auto mask = 0x0000000000000200UL;
-        constexpr const auto from = 9;
-        constexpr const auto name = "bt_off_os";
-
-        inline auto get()
-        { return (vm::read(addr, name) & mask) >> from; }
-
-        template<class T> void set(T val)
-        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
-    }
-
-    namespace bt_off_user
-    {
-        constexpr const auto mask = 0x0000000000000400UL;
-        constexpr const auto from = 10;
-        constexpr const auto name = "bt_off_user";
-
-        inline auto get()
-        { return (vm::read(addr, name) & mask) >> from; }
-
-        template<class T> void set(T val)
-        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
-    }
-
-    namespace freeze_lbrs_on_pmi
-    {
-        constexpr const auto mask = 0x0000000000000800UL;
-        constexpr const auto from = 11;
-        constexpr const auto name = "freeze_lbrs_on_pmi";
-
-        inline auto get()
-        { return (vm::read(addr, name) & mask) >> from; }
-
-        template<class T> void set(T val)
-        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
-    }
-
-    namespace freeze_perfmon_on_pmi
-    {
-        constexpr const auto mask = 0x0000000000001000UL;
-        constexpr const auto from = 12;
-        constexpr const auto name = "freeze_perfmon_on_pmi";
-
-        inline auto get()
-        { return (vm::read(addr, name) & mask) >> from; }
-
-        template<class T> void set(T val)
-        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
-    }
-
-    namespace enable_uncore_pmi
-    {
-        constexpr const auto mask = 0x0000000000002000UL;
-        constexpr const auto from = 13;
-        constexpr const auto name = "enable_uncore_pmi";
-
-        inline auto get()
-        { return (vm::read(addr, name) & mask) >> from; }
-
-        template<class T> void set(T val)
-        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
-    }
-
-    namespace freeze_while_smm
-    {
-        constexpr const auto mask = 0x0000000000004000UL;
-        constexpr const auto from = 14;
-        constexpr const auto name = "freeze_while_smm";
-
-        inline auto get()
-        { return (vm::read(addr, name) & mask) >> from; }
-
-        template<class T> void set(T val)
-        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
-    }
-
-    namespace rtm_debug
-    {
-        constexpr const auto mask = 0x0000000000008000UL;
-        constexpr const auto from = 15;
-        constexpr const auto name = "rtm_debug";
-
-        inline auto get()
-        { return (vm::read(addr, name) & mask) >> from; }
-
-        template<class T> void set(T val)
-        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
-    }
-
-    namespace reserved
-    {
-        constexpr const auto mask = 0xFFFFFFFFFFFF003CUL;
-        constexpr const auto from = 0;
-        constexpr const auto name = "reserved";
-
-        inline auto get()
-        { return (vm::read(addr, name) & mask) >> from; }
-
-        template<class T> void set(T val)
-        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
-    }
-}
-
-}
-}
-
-constexpr const auto VMCS_GUEST_IA32_PAT                                  = 0x0000000000002804UL;
-
-namespace intel_x64
-{
-namespace vmcs
-{
-
-namespace guest_ia32_efer
-{
-    constexpr const auto addr = 0x0000000000002806UL;
-    constexpr const auto name = "guest_ia32_efer";
-
-    inline auto get()
-    { return vm::read(addr, name); }
-
-    template<class T> void set(T val)
-    { vm::write(addr, val, name); }
-
-    inline bool exists() noexcept
-    { return msrs::ia32_vmx_true_entry_ctls::load_ia32_efer::get(); }
-
-    namespace sce
-    {
-        constexpr const auto mask = 0x0000000000000001UL;
-        constexpr const auto from = 0;
-        constexpr const auto name = "sce";
-
-        inline auto get()
-        { return (vm::read(addr, name) & mask) >> from; }
-
-        template<class T> void set(T val)
-        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
-    }
-
-    namespace lme
-    {
-        constexpr const auto mask = 0x0000000000000100UL;
-        constexpr const auto from = 8;
-        constexpr const auto name = "lme";
-
-        inline auto get()
-        { return (vm::read(addr, name) & mask) >> from; }
-
-        template<class T> void set(T val)
-        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
-    }
-
-    namespace lma
-    {
-        constexpr const auto mask = 0x0000000000000400UL;
-        constexpr const auto from = 10;
-        constexpr const auto name = "lma";
-
-        inline auto get()
-        { return (vm::read(addr, name) & mask) >> from; }
-
-        template<class T> void set(T val)
-        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
-    }
-
-    namespace nxe
-    {
-        constexpr const auto mask = 0x0000000000000800UL;
-        constexpr const auto from = 11;
-        constexpr const auto name = "nxe";
-
-        inline auto get()
-        { return (vm::read(addr, name) & mask) >> from; }
-
-        template<class T> void set(T val)
-        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
-    }
-
-    namespace reserved
-    {
-        constexpr const auto mask = 0xFFFFFFFFFFFFF2FEUL;
-        constexpr const auto from = 0;
-        constexpr const auto name = "reserved";
-
-        inline auto get()
-        { return (vm::read(addr, name) & mask) >> from; }
-
-        template<class T> void set(T val)
-        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
-    }
-}
-
-}
-}
-
-constexpr const auto VMCS_GUEST_IA32_PERF_GLOBAL_CTRL                     = 0x0000000000002808UL;
-constexpr const auto VMCS_GUEST_PDPTE0                                    = 0x000000000000280AUL;
-constexpr const auto VMCS_GUEST_PDPTE1                                    = 0x000000000000280CUL;
-constexpr const auto VMCS_GUEST_PDPTE2                                    = 0x000000000000280EUL;
-constexpr const auto VMCS_GUEST_PDPTE3                                    = 0x0000000000002810UL;
-
-// -----------------------------------------------------------------------------
-// 64bit Host State Fields
 // -----------------------------------------------------------------------------
 
 constexpr const auto VMCS_HOST_IA32_PAT                                   = 0x0000000000002C00UL;
@@ -883,84 +578,87 @@ namespace intel_x64
 namespace vmcs
 {
 
+using field_type = uint64_t;
+using value_type = uint64_t;
+
 namespace host_ia32_efer
 {
-    constexpr const auto addr = 0x0000000000002C02UL;
-    constexpr const auto name = "host_ia32_efer";
+constexpr const auto addr = 0x0000000000002C02UL;
+constexpr const auto name = "host_ia32_efer";
 
-    inline auto get()
-    { return vm::read(addr, name); }
+inline auto get()
+{ return vm::read(addr, name); }
 
-    template<class T> void set(T val)
-    { vm::write(addr, val, name); }
+template<class T> void set(T val)
+{ vm::write(addr, val, name); }
 
-    inline bool exists() noexcept
-    { return msrs::ia32_vmx_true_exit_ctls::load_ia32_efer::get(); }
+inline bool exists() noexcept
+{ return msrs::ia32_vmx_true_exit_ctls::load_ia32_efer::get(); }
 
-    namespace sce
-    {
-        constexpr const auto mask = 0x0000000000000001UL;
-        constexpr const auto from = 0;
-        constexpr const auto name = "sce";
+namespace sce
+{
+constexpr const auto mask = 0x0000000000000001UL;
+constexpr const auto from = 0;
+constexpr const auto name = "sce";
 
-        inline auto get()
-        { return (vm::read(addr, name) & mask) >> from; }
+inline auto get()
+{ return (vm::read(addr, name) & mask) >> from; }
 
-        template<class T> void set(T val)
-        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
-    }
+template<class T> void set(T val)
+{ vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
+}
 
-    namespace lme
-    {
-        constexpr const auto mask = 0x0000000000000100UL;
-        constexpr const auto from = 8;
-        constexpr const auto name = "lme";
+namespace lme
+{
+constexpr const auto mask = 0x0000000000000100UL;
+constexpr const auto from = 8;
+constexpr const auto name = "lme";
 
-        inline auto get()
-        { return (vm::read(addr, name) & mask) >> from; }
+inline auto get()
+{ return (vm::read(addr, name) & mask) >> from; }
 
-        template<class T> void set(T val)
-        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
-    }
+template<class T> void set(T val)
+{ vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
+}
 
-    namespace lma
-    {
-        constexpr const auto mask = 0x0000000000000400UL;
-        constexpr const auto from = 10;
-        constexpr const auto name = "lma";
+namespace lma
+{
+constexpr const auto mask = 0x0000000000000400UL;
+constexpr const auto from = 10;
+constexpr const auto name = "lma";
 
-        inline auto get()
-        { return (vm::read(addr, name) & mask) >> from; }
+inline auto get()
+{ return (vm::read(addr, name) & mask) >> from; }
 
-        template<class T> void set(T val)
-        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
-    }
+template<class T> void set(T val)
+{ vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
+}
 
-    namespace nxe
-    {
-        constexpr const auto mask = 0x0000000000000800UL;
-        constexpr const auto from = 11;
-        constexpr const auto name = "nxe";
+namespace nxe
+{
+constexpr const auto mask = 0x0000000000000800UL;
+constexpr const auto from = 11;
+constexpr const auto name = "nxe";
 
-        inline auto get()
-        { return (vm::read(addr, name) & mask) >> from; }
+inline auto get()
+{ return (vm::read(addr, name) & mask) >> from; }
 
-        template<class T> void set(T val)
-        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
-    }
+template<class T> void set(T val)
+{ vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
+}
 
-    namespace reserved
-    {
-        constexpr const auto mask = 0xFFFFFFFFFFFFF2FEUL;
-        constexpr const auto from = 0;
-        constexpr const auto name = "reserved";
+namespace reserved
+{
+constexpr const auto mask = 0xFFFFFFFFFFFFF2FEUL;
+constexpr const auto from = 0;
+constexpr const auto name = "reserved";
 
-        inline auto get()
-        { return (vm::read(addr, name) & mask) >> from; }
+inline auto get()
+{ return (vm::read(addr, name) & mask) >> from; }
 
-        template<class T> void set(T val)
-        { vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
-    }
+template<class T> void set(T val)
+{ vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
+}
 }
 
 }

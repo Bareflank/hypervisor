@@ -36,6 +36,7 @@
 #include <memory_manager/memory_manager_x64.h>
 #include <exit_handler/exit_handler_intel_x64_support.h>
 #include <vmcs/vmcs_intel_x64_natural_width_host_state_fields.h>
+#include <vmcs/vmcs_intel_x64_64bit_guest_state_fields.h>
 
 using namespace x64;
 using namespace intel_x64;
@@ -285,11 +286,11 @@ vmcs_intel_x64::write_16bit_guest_state(const std::shared_ptr<vmcs_intel_x64_sta
 void
 vmcs_intel_x64::write_64bit_guest_state(const std::shared_ptr<vmcs_intel_x64_state> &state)
 {
-    vm::write(VMCS_VMCS_LINK_POINTER, 0xFFFFFFFFFFFFFFFF);
+    vmcs::vmcs_link_pointer::set(0xFFFFFFFFFFFFFFFF);
     vmcs::guest_ia32_debugctl::set(state->ia32_debugctl_msr());
-    vm::write(VMCS_GUEST_IA32_PAT, state->ia32_pat_msr());
+    vmcs::guest_ia32_pat::set(state->ia32_pat_msr());
     vmcs::guest_ia32_efer::set(state->ia32_efer_msr());
-    vm::write(VMCS_GUEST_IA32_PERF_GLOBAL_CTRL, state->ia32_perf_global_ctrl_msr());
+    vmcs::guest_ia32_perf_global_ctrl::set(state->ia32_perf_global_ctrl_msr());
 
     // unused: VMCS_GUEST_PDPTE0
     // unused: VMCS_GUEST_PDPTE1
