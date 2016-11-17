@@ -161,8 +161,6 @@ protected:
     friend class exit_handler_intel_x64_ut;
     friend exit_handler_intel_x64 setup_ehlr(const std::shared_ptr<vmcs_intel_x64> &vmcs);
 
-    uint64_t m_exit_qualification;
-
     std::shared_ptr<vmcs_intel_x64> m_vmcs;
     std::shared_ptr<state_save_intel_x64> m_state_save;
 
