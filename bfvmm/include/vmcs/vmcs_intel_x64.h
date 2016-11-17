@@ -998,16 +998,6 @@ namespace host_ia32_efer
 constexpr const auto VMCS_HOST_IA32_PERF_GLOBAL_CTRL                      = 0x0000000000002C04UL;
 
 // -----------------------------------------------------------------------------
-// Natural Width Read-Only Fields
-// -----------------------------------------------------------------------------
-
-constexpr const auto VMCS_IO_RCX                                               = 0x0000000000006402UL;
-constexpr const auto VMCS_IO_RSI                                               = 0x0000000000006404UL;
-constexpr const auto VMCS_IO_RDI                                               = 0x0000000000006406UL;
-constexpr const auto VMCS_IO_RIP                                               = 0x0000000000006408UL;
-constexpr const auto VMCS_GUEST_LINEAR_ADDRESS                                 = 0x000000000000640AUL;
-
-// -----------------------------------------------------------------------------
 // Natural Width Host State Fields
 // -----------------------------------------------------------------------------
 

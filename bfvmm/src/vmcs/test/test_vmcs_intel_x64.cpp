@@ -9553,3 +9553,53 @@ vmcs_ut::test_vmcs_exit_qualification_apic_write_offset()
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL;
     this->expect_true(get_if_exists() == 0UL);
 }
+
+void
+vmcs_ut::test_vmcs_io_rcx()
+{
+    g_vmcs_fields[vmcs::io_rcx::addr] = 1U;
+    this->expect_true(vmcs::io_rcx::get() == 1U);
+
+    g_vmcs_fields[vmcs::io_rcx::addr] = 0U;
+    this->expect_true(vmcs::io_rcx::get_if_exists() == 0U);
+}
+
+void
+vmcs_ut::test_vmcs_io_rsi()
+{
+    g_vmcs_fields[vmcs::io_rsi::addr] = 1U;
+    this->expect_true(vmcs::io_rsi::get() == 1U);
+
+    g_vmcs_fields[vmcs::io_rsi::addr] = 0U;
+    this->expect_true(vmcs::io_rsi::get_if_exists() == 0U);
+}
+
+void
+vmcs_ut::test_vmcs_io_rdi()
+{
+    g_vmcs_fields[vmcs::io_rdi::addr] = 1U;
+    this->expect_true(vmcs::io_rdi::get() == 1U);
+
+    g_vmcs_fields[vmcs::io_rdi::addr] = 0U;
+    this->expect_true(vmcs::io_rdi::get_if_exists() == 0U);
+}
+
+void
+vmcs_ut::test_vmcs_io_rip()
+{
+    g_vmcs_fields[vmcs::io_rip::addr] = 1U;
+    this->expect_true(vmcs::io_rip::get() == 1U);
+
+    g_vmcs_fields[vmcs::io_rip::addr] = 0U;
+    this->expect_true(vmcs::io_rip::get_if_exists() == 0U);
+}
+
+void
+vmcs_ut::test_vmcs_guest_linear_address()
+{
+    g_vmcs_fields[vmcs::guest_linear_address::addr] = 1U;
+    this->expect_true(vmcs::guest_linear_address::get() == 1U);
+
+    g_vmcs_fields[vmcs::guest_linear_address::addr] = 0U;
+    this->expect_true(vmcs::guest_linear_address::get_if_exists() == 0U);
+}
