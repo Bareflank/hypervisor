@@ -37,6 +37,7 @@
 #include <exit_handler/exit_handler_intel_x64_support.h>
 #include <vmcs/vmcs_intel_x64_natural_width_host_state_fields.h>
 #include <vmcs/vmcs_intel_x64_64bit_guest_state_fields.h>
+#include <vmcs/vmcs_intel_x64_64bit_host_state_fields.h>
 
 using namespace x64;
 using namespace intel_x64;
@@ -375,9 +376,9 @@ vmcs_intel_x64::write_16bit_host_state(const std::shared_ptr<vmcs_intel_x64_stat
 void
 vmcs_intel_x64::write_64bit_host_state(const std::shared_ptr<vmcs_intel_x64_state> &state)
 {
-    vm::write(VMCS_HOST_IA32_PAT, state->ia32_pat_msr());
+    vmcs::host_ia32_pat::set(state->ia32_pat_msr());
     vmcs::host_ia32_efer::set(state->ia32_efer_msr());
-    vm::write(VMCS_HOST_IA32_PERF_GLOBAL_CTRL, state->ia32_perf_global_ctrl_msr());
+    vmcs::host_ia32_perf_global_ctrl::set(state->ia32_perf_global_ctrl_msr());
 }
 
 void

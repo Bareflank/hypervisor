@@ -24,6 +24,7 @@
 
 #include <vmcs/vmcs_intel_x64_16bit_host_state_fields.h>
 #include <vmcs/vmcs_intel_x64_natural_width_host_state_fields.h>
+#include <vmcs/vmcs_intel_x64_64bit_host_state_fields.h>
 
 #include <intrinsics/srs_x64.h>
 #include <intrinsics/crs_intel_x64.h>
@@ -183,16 +184,24 @@ setup_check_host_ia32_sysenter_eip_canonical_address_paths(std::vector<struct co
 static void
 setup_check_host_verify_load_ia32_perf_global_ctrl_paths(std::vector<struct control_flow_path> &cfg)
 {
-    path.setup = [&] { disable_exit_ctl(vmcs::vm_exit_controls::load_ia32_perf_global_ctrl::mask); };
+    path.setup = [&]
+    {
+        exit_ctl_allow1(msrs::ia32_vmx_true_exit_ctls::load_ia32_perf_global_ctrl::mask);
+        disable_exit_ctl(vmcs::vm_exit_controls::load_ia32_perf_global_ctrl::mask);
+    };
     path.throws_exception = false;
     cfg.push_back(path);
 
-    path.setup = [&] { enable_exit_ctl(vmcs::vm_exit_controls::load_ia32_perf_global_ctrl::mask); g_vmcs_fields[VMCS_HOST_IA32_PERF_GLOBAL_CTRL] = 0xc; };
+    path.setup = [&]
+    {
+        enable_exit_ctl(vmcs::vm_exit_controls::load_ia32_perf_global_ctrl::mask);
+        vmcs::host_ia32_perf_global_ctrl::set(0xcU);
+    };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("perf global ctrl msr reserved bits must be 0"));
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_HOST_IA32_PERF_GLOBAL_CTRL] = 0; };
+    path.setup = [&] { vmcs::host_ia32_perf_global_ctrl::set(0x0U); };
     path.throws_exception = false;
     cfg.push_back(path);
 }
@@ -200,51 +209,59 @@ setup_check_host_verify_load_ia32_perf_global_ctrl_paths(std::vector<struct cont
 static void
 setup_check_host_verify_load_ia32_pat_paths(std::vector<struct control_flow_path> &cfg)
 {
-    path.setup = [&] { disable_exit_ctl(vmcs::vm_exit_controls::load_ia32_pat::mask); };
+    path.setup = [&]
+    {
+        exit_ctl_allow1(msrs::ia32_vmx_true_exit_ctls::load_ia32_pat::mask);
+        disable_exit_ctl(vmcs::vm_exit_controls::load_ia32_pat::mask);
+    };
     path.throws_exception = false;
     cfg.push_back(path);
 
-    path.setup = [&] { enable_exit_ctl(vmcs::vm_exit_controls::load_ia32_pat::mask); g_vmcs_fields[VMCS_HOST_IA32_PAT] = 2ULL; };
+    path.setup = [&]
+    {
+        enable_exit_ctl(vmcs::vm_exit_controls::load_ia32_pat::mask);
+        vmcs::host_ia32_pat::set(2ULL);
+    };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("pat0 has an invalid memory type"));
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_HOST_IA32_PAT] = 2ULL << 8; };
+    path.setup = [&] { vmcs::host_ia32_pat::set(2ULL << 8); };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("pat1 has an invalid memory type"));
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_HOST_IA32_PAT] = 2ULL << 16; };
+    path.setup = [&] { vmcs::host_ia32_pat::set(2ULL << 16); };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("pat2 has an invalid memory type"));
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_HOST_IA32_PAT] = 2ULL << 24; };
+    path.setup = [&] { vmcs::host_ia32_pat::set(2ULL << 24); };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("pat3 has an invalid memory type"));
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_HOST_IA32_PAT] = 2ULL << 32; };
+    path.setup = [&] { vmcs::host_ia32_pat::set(2ULL << 32); };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("pat4 has an invalid memory type"));
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_HOST_IA32_PAT] = 2ULL << 40; };
+    path.setup = [&] { vmcs::host_ia32_pat::set(2ULL << 40); };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("pat5 has an invalid memory type"));
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_HOST_IA32_PAT] = 2ULL << 48; };
+    path.setup = [&] { vmcs::host_ia32_pat::set(2ULL << 48); };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("pat6 has an invalid memory type"));
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_HOST_IA32_PAT] = 2ULL << 56; };
+    path.setup = [&] { vmcs::host_ia32_pat::set(2ULL << 56); };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("pat7 has an invalid memory type"));
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[VMCS_HOST_IA32_PAT] = 0; };
+    path.setup = [&] { vmcs::host_ia32_pat::set(0U); };
     path.throws_exception = false;
     cfg.push_back(path);
 }
@@ -252,7 +269,11 @@ setup_check_host_verify_load_ia32_pat_paths(std::vector<struct control_flow_path
 static void
 setup_check_host_verify_load_ia32_efer_paths(std::vector<struct control_flow_path> &cfg)
 {
-    path.setup = [&] { disable_exit_ctl(vmcs::vm_exit_controls::load_ia32_efer::mask); };
+    path.setup = [&]
+    {
+        exit_ctl_allow1(msrs::ia32_vmx_true_exit_ctls::load_ia32_pat::mask);
+        disable_exit_ctl(vmcs::vm_exit_controls::load_ia32_efer::mask);
+    };
     path.throws_exception = false;
     cfg.push_back(path);
 

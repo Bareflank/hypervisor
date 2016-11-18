@@ -4,6 +4,7 @@
 // Copyright (C) 2015 Assured Information Security, Inc.
 // Author: Rian Quinn        <quinnr@ainfosec.com>
 // Author: Brendan Kerrigan  <kerriganb@ainfosec.com>
+// Author: Connor Davis      <davisc@ainfosec.com>
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -567,11 +568,6 @@ set_vm_control_if_allowed(bool val, uint64_t msr_addr, uint64_t ctls_addr,
     }
 }
 
-// -----------------------------------------------------------------------------
-// 64bit Guest State Fields
-// -----------------------------------------------------------------------------
-
-constexpr const auto VMCS_HOST_IA32_PAT                                   = 0x0000000000002C00UL;
 
 namespace intel_x64
 {
@@ -581,122 +577,8 @@ namespace vmcs
 using field_type = uint64_t;
 using value_type = uint64_t;
 
-namespace host_ia32_efer
-{
-constexpr const auto addr = 0x0000000000002C02UL;
-constexpr const auto name = "host_ia32_efer";
-
-inline auto get()
-{ return vm::read(addr, name); }
-
-template<class T> void set(T val)
-{ vm::write(addr, val, name); }
-
-inline bool exists() noexcept
-{ return msrs::ia32_vmx_true_exit_ctls::load_ia32_efer::get(); }
-
-namespace sce
-{
-constexpr const auto mask = 0x0000000000000001UL;
-constexpr const auto from = 0;
-constexpr const auto name = "sce";
-
-inline auto get()
-{ return (vm::read(addr, name) & mask) >> from; }
-
-template<class T> void set(T val)
-{ vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
-}
-
-namespace lme
-{
-constexpr const auto mask = 0x0000000000000100UL;
-constexpr const auto from = 8;
-constexpr const auto name = "lme";
-
-inline auto get()
-{ return (vm::read(addr, name) & mask) >> from; }
-
-template<class T> void set(T val)
-{ vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
-}
-
-namespace lma
-{
-constexpr const auto mask = 0x0000000000000400UL;
-constexpr const auto from = 10;
-constexpr const auto name = "lma";
-
-inline auto get()
-{ return (vm::read(addr, name) & mask) >> from; }
-
-template<class T> void set(T val)
-{ vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
-}
-
-namespace nxe
-{
-constexpr const auto mask = 0x0000000000000800UL;
-constexpr const auto from = 11;
-constexpr const auto name = "nxe";
-
-inline auto get()
-{ return (vm::read(addr, name) & mask) >> from; }
-
-template<class T> void set(T val)
-{ vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
-}
-
-namespace reserved
-{
-constexpr const auto mask = 0xFFFFFFFFFFFFF2FEUL;
-constexpr const auto from = 0;
-constexpr const auto name = "reserved";
-
-inline auto get()
-{ return (vm::read(addr, name) & mask) >> from; }
-
-template<class T> void set(T val)
-{ vm::write(addr, (vm::read(addr, name) & ~mask) | ((val << from) & mask), name); }
 }
 }
-
-}
-}
-
-constexpr const auto VMCS_HOST_IA32_PERF_GLOBAL_CTRL                      = 0x0000000000002C04UL;
-
-// -----------------------------------------------------------------------------
-// Natural Width Host State Fields
-// -----------------------------------------------------------------------------
-
-// *INDENT-ON*
-
-
-
-
-
-
-
-//////////////
-//////////////
-///
-///
-/// REMOVE ME
-///
-///
-//////////////
-//////////////
-
-// VM-Function Control Fields
-#define VM_FUNCTION_CONTROL_EPTP_SWITCHING                        (1ULL << 0)
-
-// VM Activity State
-// intel's software developers manual, volume 3, 24.4.2
-#define VM_ACTIVITY_STATE_ACTIVE                                  (0)
-#define VM_ACTIVITY_STATE_HLT                                     (1)
-#define VM_ACTIVITY_STATE_SHUTDOWN                                (2)
-#define VM_ACTIVITY_STATE_WAIT_FOR_SIPI                           (3)
 
 // VM Interrupability State
 // intel's software developers manual, volume 3, 24.4.2

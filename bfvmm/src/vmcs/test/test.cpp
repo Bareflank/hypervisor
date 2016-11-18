@@ -166,11 +166,11 @@ pin_ctl_allow1(uint64_t mask)
 //void
 //pin_ctl_disallow0(uint64_t mask)
 //{ g_msrs[msrs::ia32_vmx_true_pinbased_ctls::addr] |= mask; }
-//
-//void
-//exit_ctl_allow1(uint64_t mask)
-//{ g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] |= mask << 32; }
-//
+
+void
+exit_ctl_allow1(uint64_t mask)
+{ g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] |= mask << 32; }
+
 //void
 //exit_ctl_allow0(uint64_t mask)
 //{ g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] &= ~mask; }
@@ -484,12 +484,39 @@ vmcs_ut::list_64bit_guest_state_fields()
 void
 vmcs_ut::list_64bit_host_state_fields()
 {
+    this->test_vmcs_host_ia32_pat();
+    this->test_vmcs_host_ia32_pat_pa0();
+    this->test_vmcs_host_ia32_pat_pa0_memory_type();
+    this->test_vmcs_host_ia32_pat_pa0_reserved();
+    this->test_vmcs_host_ia32_pat_pa1();
+    this->test_vmcs_host_ia32_pat_pa1_memory_type();
+    this->test_vmcs_host_ia32_pat_pa1_reserved();
+    this->test_vmcs_host_ia32_pat_pa2();
+    this->test_vmcs_host_ia32_pat_pa2_memory_type();
+    this->test_vmcs_host_ia32_pat_pa2_reserved();
+    this->test_vmcs_host_ia32_pat_pa3();
+    this->test_vmcs_host_ia32_pat_pa3_memory_type();
+    this->test_vmcs_host_ia32_pat_pa3_reserved();
+    this->test_vmcs_host_ia32_pat_pa4();
+    this->test_vmcs_host_ia32_pat_pa4_memory_type();
+    this->test_vmcs_host_ia32_pat_pa4_reserved();
+    this->test_vmcs_host_ia32_pat_pa5();
+    this->test_vmcs_host_ia32_pat_pa5_memory_type();
+    this->test_vmcs_host_ia32_pat_pa5_reserved();
+    this->test_vmcs_host_ia32_pat_pa6();
+    this->test_vmcs_host_ia32_pat_pa6_memory_type();
+    this->test_vmcs_host_ia32_pat_pa6_reserved();
+    this->test_vmcs_host_ia32_pat_pa7();
+    this->test_vmcs_host_ia32_pat_pa7_memory_type();
+    this->test_vmcs_host_ia32_pat_pa7_reserved();
     this->test_vmcs_host_ia32_efer();
     this->test_vmcs_host_ia32_efer_sce();
     this->test_vmcs_host_ia32_efer_lme();
     this->test_vmcs_host_ia32_efer_lma();
     this->test_vmcs_host_ia32_efer_nxe();
     this->test_vmcs_host_ia32_efer_reserved();
+    this->test_vmcs_host_ia32_perf_global_ctrl();
+    this->test_vmcs_host_ia32_perf_global_ctrl_reserved();
 }
 
 void
