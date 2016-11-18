@@ -2746,6 +2746,16 @@ namespace msrs
 
         inline auto get() noexcept
         { return __read_msr(addr); }
+
+        namespace eptp_switching
+        {
+            constexpr const auto mask = 0x0000000000000001UL;
+            constexpr const auto from = 0;
+            constexpr const auto name = "eptp_switching";
+
+            inline auto is_allowed1()
+            { return is_bit_set(__read_msr(addr), from); }
+        }
     }
 
     namespace ia32_efer

@@ -49,18 +49,6 @@ vmcs_intel_x64::is_physical_address_valid(uint64_t addr)
 }
 
 bool
-vmcs_intel_x64::is_supported_eptp_switching() const
-{
-    if (!msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::is_allowed1())
-        return false;
-
-    if ((msrs::ia32_vmx_procbased_ctls2::enable_vm_functions::mask << 32) == 0)
-        return false;
-
-    return ((vm::read(VMCS_VM_FUNCTION_CONTROLS) & VM_FUNCTION_CONTROL_EPTP_SWITCHING) != 0);
-}
-
-bool
 vmcs_intel_x64::is_supported_event_injection_instr_length_of_0() const
 {
     return msrs::ia32_vmx_misc::injection_with_instruction_length_of_zero::get();

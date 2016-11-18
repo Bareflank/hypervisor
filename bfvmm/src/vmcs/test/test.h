@@ -62,6 +62,34 @@ void disable_entry_ctl(uint64_t control);
 uintptr_t virtptr_to_physint(void *ptr);
 void *physint_to_virtptr(uintptr_t phys);
 
+void proc_ctl_allow1(uint64_t mask);
+void proc_ctl_allow0(uint64_t mask);
+void proc_ctl_disallow1(uint64_t mask);
+void proc_ctl_disallow0(uint64_t mask);
+
+void proc_ctl2_allow1(uint64_t mask);
+void proc_ctl2_allow0(uint64_t mask);
+void proc_ctl2_disallow1(uint64_t mask);
+void proc_ctl2_disallow0(uint64_t mask);
+
+void pin_ctl_allow1(uint64_t mask);
+void pin_ctl_allow0(uint64_t mask);
+void pin_ctl_disallow1(uint64_t mask);
+void pin_ctl_disallow0(uint64_t mask);
+
+void exit_ctl_allow1(uint64_t mask);
+void exit_ctl_allow0(uint64_t mask);
+void exit_ctl_disallow1(uint64_t mask);
+void exit_ctl_disallow0(uint64_t mask);
+
+void entry_ctl_allow1(uint64_t mask);
+void entry_ctl_allow0(uint64_t mask);
+void entry_ctl_disallow1(uint64_t mask);
+void entry_ctl_disallow0(uint64_t mask);
+
+void vmfunc_ctl_allow1(uint64_t mask);
+void vmfunc_ctl_disallow1(uint64_t mask);
+
 class vmcs_ut : public unittest
 {
 public:
@@ -105,6 +133,24 @@ protected:
 
 private:
 
+    void list_vmcs_intel_x64_cpp();
+    void list_vmcs_intel_x64_h();
+    void list_16bit_control_fields();
+    void list_16bit_guest_state_fields();
+    void list_16bit_host_state_fields();
+    void list_64bit_control_fields();
+    void list_64bit_read_only_data_field();
+    void list_64bit_guest_state_fields();
+    void list_64bit_host_state_fields();
+    void list_32bit_control_fields();
+    void list_32bit_read_only_data_fields();
+    void list_32bit_guest_state_fields();
+    void list_32bit_host_state_field();
+    void list_natural_width_control_fields();
+    void list_natural_width_read_only_data_fields();
+    void list_natural_width_guest_state_fields();
+    void list_natural_width_host_state_fields();
+
     void test_launch_success();
     void test_launch_vmlaunch_failure();
     void test_launch_create_vmcs_region_failure();
@@ -119,10 +165,10 @@ private:
     void test_set_vmcs_field_if_exists();
     void test_set_vm_control();
     void test_set_vm_control_if_allowed();
+    void test_set_vm_function_control();
+    void test_set_vm_function_control_if_allowed();
     void test_vmcs_vm_instruction_error_description();
     void test_vmcs_vm_instruction_error_description_if_exists();
-    void test_vmcs_basic_error_reason_description();
-    void test_vmcs_basic_error_reason_description_if_exists();
     void test_vmcs_virtual_processor_identifier();
     void test_vmcs_posted_interrupt_notification_vector();
     void test_vmcs_eptp_index();
@@ -187,6 +233,35 @@ private:
     void test_vmcs_host_tr_selector_rpl();
     void test_vmcs_host_tr_selector_ti();
     void test_vmcs_host_tr_selector_index();
+    void test_vmcs_address_of_io_bitmap_a();
+    void test_vmcs_address_of_io_bitmap_b();
+    void test_vmcs_address_of_msr_bitmaps();
+    void test_vmcs_vm_exit_msr_store_address();
+    void test_vmcs_vm_exit_msr_load_address();
+    void test_vmcs_vm_entry_msr_load_address();
+    void test_vmcs_executive_vmcs_pointer();
+    void test_vmcs_pml_address();
+    void test_vmcs_tsc_offset();
+    void test_vmcs_virtual_apic_address();
+    void test_vmcs_apic_access_address();
+    void test_vmcs_posted_interrupt_descriptor_address();
+    void test_vmcs_vm_function_controls();
+    void test_vmcs_vm_function_controls_eptp_switching();
+    void test_vmcs_vm_function_controls_reserved();
+    void test_vmcs_ept_pointer();
+    void test_vmcs_ept_pointer_memory_type();
+    void test_vmcs_ept_pointer_page_walk_length_minus_one();
+    void test_vmcs_ept_pointer_accessed_and_dirty_flags();
+    void test_vmcs_ept_pointer_reserved();
+    void test_vmcs_eoi_exit_bitmap_0();
+    void test_vmcs_eoi_exit_bitmap_1();
+    void test_vmcs_eoi_exit_bitmap_2();
+    void test_vmcs_eoi_exit_bitmap_3();
+    void test_vmcs_eptp_list_address();
+    void test_vmcs_vmread_bitmap_address();
+    void test_vmcs_vmwrite_bitmap_address();
+    void test_vmcs_virtualization_exception_information_address();
+    void test_vmcs_xss_exiting_bitmap();
     void test_vmcs_guest_rflags();
     void test_vmcs_guest_rflags_carry_flag();
     void test_vmcs_guest_rflags_parity_flag();
@@ -538,6 +613,8 @@ private:
     void test_vmcs_vm_instruction_error();
     void test_vmcs_exit_reason();
     void test_vmcs_exit_reason_basic_exit_reason();
+    void test_vmcs_exit_reason_basic_exit_reason_description();
+    void test_vmcs_exit_reason_basic_exit_reason_description_if_exists();
     void test_vmcs_exit_reason_reserved();
     void test_vmcs_exit_reason_vm_exit_incident_to_enclave_mode();
     void test_vmcs_exit_reason_pending_mtf_vm_exit();
