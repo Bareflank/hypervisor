@@ -24,7 +24,6 @@
 
 #include <vmcs/vmcs_intel_x64.h>
 
-
 /// Intel x86_64 VMCS 32-Bit Host-State Field
 ///
 /// The following provides the interface to the 32-bit vmcs host state field
@@ -32,6 +31,7 @@
 ///
 
 // *INDENT-OFF*
+
 namespace intel_x64
 {
 namespace vmcs
@@ -61,6 +61,7 @@ namespace host_ia32_sysenter_cs
 
 }
 }
+
 // *INDENT-ON*
 
 #endif
