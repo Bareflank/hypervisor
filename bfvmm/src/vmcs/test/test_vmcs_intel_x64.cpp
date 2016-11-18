@@ -40,6 +40,7 @@
 
 #include <vmcs/vmcs_intel_x64_64bit_guest_state_fields.h>
 #include <vmcs/vmcs_intel_x64_64bit_control_fields.h>
+#include <vmcs/vmcs_intel_x64_64bit_host_state_fields.h>
 
 #include <intrinsics/rflags_x64.h>
 #include <intrinsics/crs_intel_x64.h>
@@ -2227,27 +2228,6 @@ vmcs_ut::test_vmcs_xss_exiting_bitmap()
     this->expect_true(g_vmcs_fields[vmcs::xss_exiting_bitmap::addr] == 0UL);
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 void
 vmcs_ut::test_vmcs_vmcs_link_pointer()
 {
@@ -3076,6 +3056,534 @@ vmcs_ut::test_vmcs_guest_physical_address()
     this->expect_false(vmcs::guest_physical_address::exists());
     this->expect_exception([&] { vmcs::guest_physical_address::get(); }, ""_ut_lee);
     this->expect_no_exception([&] { vmcs::guest_physical_address::get_if_exists(); });
+}
+
+void
+vmcs_ut::test_vmcs_host_ia32_pat()
+{
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] |= msrs::ia32_vmx_true_exit_ctls::load_ia32_pat::mask << 32;
+    this->expect_true(vmcs::host_ia32_pat::exists());
+
+    vmcs::host_ia32_pat::set(1UL);
+    this->expect_true(vmcs::host_ia32_pat::get() == 1UL);
+
+    vmcs::host_ia32_pat::set_if_exists(0UL);
+    this->expect_true(vmcs::host_ia32_pat::get_if_exists() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_ia32_pat_pa0()
+{
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] |= msrs::ia32_vmx_true_exit_ctls::load_ia32_pat::mask << 32;
+
+    vmcs::host_ia32_pat::pa0::set(1UL);
+    this->expect_true(vmcs::host_ia32_pat::pa0::get() == 1UL);
+
+    vmcs::host_ia32_pat::pa0::set_if_exists(0UL);
+    this->expect_true(vmcs::host_ia32_pat::pa0::get_if_exists() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_ia32_pat_pa0_memory_type()
+{
+    using namespace vmcs::host_ia32_pat;
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] |= msrs::ia32_vmx_true_exit_ctls::load_ia32_pat::mask << 32;
+
+    pa0::memory_type::set(x64::memory_type::uncacheable);
+    this->expect_true(pa0::memory_type::get() == x64::memory_type::uncacheable);
+
+    pa0::memory_type::set(x64::memory_type::write_combining);
+    this->expect_true(pa0::memory_type::get() == x64::memory_type::write_combining);
+
+    pa0::memory_type::set(x64::memory_type::write_through);
+    this->expect_true(pa0::memory_type::get() == x64::memory_type::write_through);
+
+    pa0::memory_type::set_if_exists(x64::memory_type::write_protected);
+    this->expect_true(pa0::memory_type::get_if_exists() == x64::memory_type::write_protected);
+
+    pa0::memory_type::set_if_exists(x64::memory_type::write_back);
+    this->expect_true(pa0::memory_type::get_if_exists() == x64::memory_type::write_back);
+
+    pa0::memory_type::set_if_exists(x64::memory_type::uncached);
+    this->expect_true(pa0::memory_type::get_if_exists() == x64::memory_type::uncached);
+}
+
+void
+vmcs_ut::test_vmcs_host_ia32_pat_pa0_reserved()
+{
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] |= msrs::ia32_vmx_true_exit_ctls::load_ia32_pat::mask << 32;
+
+    vmcs::host_ia32_pat::pa0::reserved::set(1UL);
+    this->expect_true(vmcs::host_ia32_pat::pa0::reserved::get() == 1UL);
+
+    vmcs::host_ia32_pat::pa0::reserved::set_if_exists(0UL);
+    this->expect_true(vmcs::host_ia32_pat::pa0::reserved::get_if_exists() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_ia32_pat_pa1()
+{
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] |= msrs::ia32_vmx_true_exit_ctls::load_ia32_pat::mask << 32;
+
+    vmcs::host_ia32_pat::pa1::set(1UL);
+    this->expect_true(vmcs::host_ia32_pat::pa1::get() == 1UL);
+
+    vmcs::host_ia32_pat::pa1::set_if_exists(0UL);
+    this->expect_true(vmcs::host_ia32_pat::pa1::get_if_exists() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_ia32_pat_pa1_memory_type()
+{
+    using namespace vmcs::host_ia32_pat;
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] |= msrs::ia32_vmx_true_exit_ctls::load_ia32_pat::mask << 32;
+
+    pa1::memory_type::set(x64::memory_type::uncacheable);
+    this->expect_true(pa1::memory_type::get() == x64::memory_type::uncacheable);
+
+    pa1::memory_type::set(x64::memory_type::write_combining);
+    this->expect_true(pa1::memory_type::get() == x64::memory_type::write_combining);
+
+    pa1::memory_type::set(x64::memory_type::write_through);
+    this->expect_true(pa1::memory_type::get() == x64::memory_type::write_through);
+
+    pa1::memory_type::set_if_exists(x64::memory_type::write_protected);
+    this->expect_true(pa1::memory_type::get_if_exists() == x64::memory_type::write_protected);
+
+    pa1::memory_type::set_if_exists(x64::memory_type::write_back);
+    this->expect_true(pa1::memory_type::get_if_exists() == x64::memory_type::write_back);
+
+    pa1::memory_type::set_if_exists(x64::memory_type::uncached);
+    this->expect_true(pa1::memory_type::get_if_exists() == x64::memory_type::uncached);
+}
+
+void
+vmcs_ut::test_vmcs_host_ia32_pat_pa1_reserved()
+{
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] |= msrs::ia32_vmx_true_exit_ctls::load_ia32_pat::mask << 32;
+
+    vmcs::host_ia32_pat::pa1::reserved::set(1UL);
+    this->expect_true(vmcs::host_ia32_pat::pa1::reserved::get() == 1UL);
+
+    vmcs::host_ia32_pat::pa1::reserved::set_if_exists(0UL);
+    this->expect_true(vmcs::host_ia32_pat::pa1::reserved::get_if_exists() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_ia32_pat_pa2()
+{
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] |= msrs::ia32_vmx_true_exit_ctls::load_ia32_pat::mask << 32;
+
+    vmcs::host_ia32_pat::pa2::set(1UL);
+    this->expect_true(vmcs::host_ia32_pat::pa2::get() == 1UL);
+
+    vmcs::host_ia32_pat::pa2::set_if_exists(0UL);
+    this->expect_true(vmcs::host_ia32_pat::pa2::get_if_exists() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_ia32_pat_pa2_memory_type()
+{
+    using namespace vmcs::host_ia32_pat;
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] |= msrs::ia32_vmx_true_exit_ctls::load_ia32_pat::mask << 32;
+
+    pa2::memory_type::set(x64::memory_type::uncacheable);
+    this->expect_true(pa2::memory_type::get() == x64::memory_type::uncacheable);
+
+    pa2::memory_type::set(x64::memory_type::write_combining);
+    this->expect_true(pa2::memory_type::get() == x64::memory_type::write_combining);
+
+    pa2::memory_type::set(x64::memory_type::write_through);
+    this->expect_true(pa2::memory_type::get() == x64::memory_type::write_through);
+
+    pa2::memory_type::set_if_exists(x64::memory_type::write_protected);
+    this->expect_true(pa2::memory_type::get_if_exists() == x64::memory_type::write_protected);
+
+    pa2::memory_type::set_if_exists(x64::memory_type::write_back);
+    this->expect_true(pa2::memory_type::get_if_exists() == x64::memory_type::write_back);
+
+    pa2::memory_type::set_if_exists(x64::memory_type::uncached);
+    this->expect_true(pa2::memory_type::get_if_exists() == x64::memory_type::uncached);
+}
+
+void
+vmcs_ut::test_vmcs_host_ia32_pat_pa2_reserved()
+{
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] |= msrs::ia32_vmx_true_exit_ctls::load_ia32_pat::mask << 32;
+
+    vmcs::host_ia32_pat::pa2::reserved::set(1UL);
+    this->expect_true(vmcs::host_ia32_pat::pa2::reserved::get() == 1UL);
+
+    vmcs::host_ia32_pat::pa2::reserved::set_if_exists(0UL);
+    this->expect_true(vmcs::host_ia32_pat::pa2::reserved::get_if_exists() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_ia32_pat_pa3()
+{
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] |= msrs::ia32_vmx_true_exit_ctls::load_ia32_pat::mask << 32;
+
+    vmcs::host_ia32_pat::pa3::set(1UL);
+    this->expect_true(vmcs::host_ia32_pat::pa3::get() == 1UL);
+
+    vmcs::host_ia32_pat::pa3::set_if_exists(0UL);
+    this->expect_true(vmcs::host_ia32_pat::pa3::get_if_exists() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_ia32_pat_pa3_memory_type()
+{
+    using namespace vmcs::host_ia32_pat;
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] |= msrs::ia32_vmx_true_exit_ctls::load_ia32_pat::mask << 32;
+
+    pa3::memory_type::set(x64::memory_type::uncacheable);
+    this->expect_true(pa3::memory_type::get() == x64::memory_type::uncacheable);
+
+    pa3::memory_type::set(x64::memory_type::write_combining);
+    this->expect_true(pa3::memory_type::get() == x64::memory_type::write_combining);
+
+    pa3::memory_type::set(x64::memory_type::write_through);
+    this->expect_true(pa3::memory_type::get() == x64::memory_type::write_through);
+
+    pa3::memory_type::set_if_exists(x64::memory_type::write_protected);
+    this->expect_true(pa3::memory_type::get_if_exists() == x64::memory_type::write_protected);
+
+    pa3::memory_type::set_if_exists(x64::memory_type::write_back);
+    this->expect_true(pa3::memory_type::get_if_exists() == x64::memory_type::write_back);
+
+    pa3::memory_type::set_if_exists(x64::memory_type::uncached);
+    this->expect_true(pa3::memory_type::get_if_exists() == x64::memory_type::uncached);
+}
+
+void
+vmcs_ut::test_vmcs_host_ia32_pat_pa3_reserved()
+{
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] |= msrs::ia32_vmx_true_exit_ctls::load_ia32_pat::mask << 32;
+
+    vmcs::host_ia32_pat::pa3::reserved::set(1UL);
+    this->expect_true(vmcs::host_ia32_pat::pa3::reserved::get() == 1UL);
+
+    vmcs::host_ia32_pat::pa3::reserved::set_if_exists(0UL);
+    this->expect_true(vmcs::host_ia32_pat::pa3::reserved::get_if_exists() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_ia32_pat_pa4()
+{
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] |= msrs::ia32_vmx_true_exit_ctls::load_ia32_pat::mask << 32;
+
+    vmcs::host_ia32_pat::pa4::set(1UL);
+    this->expect_true(vmcs::host_ia32_pat::pa4::get() == 1UL);
+
+    vmcs::host_ia32_pat::pa4::set_if_exists(0UL);
+    this->expect_true(vmcs::host_ia32_pat::pa4::get_if_exists() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_ia32_pat_pa4_memory_type()
+{
+    using namespace vmcs::host_ia32_pat;
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] |= msrs::ia32_vmx_true_exit_ctls::load_ia32_pat::mask << 32;
+
+    pa4::memory_type::set(x64::memory_type::uncacheable);
+    this->expect_true(pa4::memory_type::get() == x64::memory_type::uncacheable);
+
+    pa4::memory_type::set(x64::memory_type::write_combining);
+    this->expect_true(pa4::memory_type::get() == x64::memory_type::write_combining);
+
+    pa4::memory_type::set(x64::memory_type::write_through);
+    this->expect_true(pa4::memory_type::get() == x64::memory_type::write_through);
+
+    pa4::memory_type::set_if_exists(x64::memory_type::write_protected);
+    this->expect_true(pa4::memory_type::get_if_exists() == x64::memory_type::write_protected);
+
+    pa4::memory_type::set_if_exists(x64::memory_type::write_back);
+    this->expect_true(pa4::memory_type::get_if_exists() == x64::memory_type::write_back);
+
+    pa4::memory_type::set_if_exists(x64::memory_type::uncached);
+    this->expect_true(pa4::memory_type::get_if_exists() == x64::memory_type::uncached);
+}
+
+void
+vmcs_ut::test_vmcs_host_ia32_pat_pa4_reserved()
+{
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] |= msrs::ia32_vmx_true_exit_ctls::load_ia32_pat::mask << 32;
+
+    vmcs::host_ia32_pat::pa4::reserved::set(1UL);
+    this->expect_true(vmcs::host_ia32_pat::pa4::reserved::get() == 1UL);
+
+    vmcs::host_ia32_pat::pa4::reserved::set_if_exists(0UL);
+    this->expect_true(vmcs::host_ia32_pat::pa4::reserved::get_if_exists() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_ia32_pat_pa5()
+{
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] |= msrs::ia32_vmx_true_exit_ctls::load_ia32_pat::mask << 32;
+
+    vmcs::host_ia32_pat::pa5::set(1UL);
+    this->expect_true(vmcs::host_ia32_pat::pa5::get() == 1UL);
+
+    vmcs::host_ia32_pat::pa5::set_if_exists(0UL);
+    this->expect_true(vmcs::host_ia32_pat::pa5::get_if_exists() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_ia32_pat_pa5_memory_type()
+{
+    using namespace vmcs::host_ia32_pat;
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] |= msrs::ia32_vmx_true_exit_ctls::load_ia32_pat::mask << 32;
+
+    pa5::memory_type::set(x64::memory_type::uncacheable);
+    this->expect_true(pa5::memory_type::get() == x64::memory_type::uncacheable);
+
+    pa5::memory_type::set(x64::memory_type::write_combining);
+    this->expect_true(pa5::memory_type::get() == x64::memory_type::write_combining);
+
+    pa5::memory_type::set(x64::memory_type::write_through);
+    this->expect_true(pa5::memory_type::get() == x64::memory_type::write_through);
+
+    pa5::memory_type::set_if_exists(x64::memory_type::write_protected);
+    this->expect_true(pa5::memory_type::get_if_exists() == x64::memory_type::write_protected);
+
+    pa5::memory_type::set_if_exists(x64::memory_type::write_back);
+    this->expect_true(pa5::memory_type::get_if_exists() == x64::memory_type::write_back);
+
+    pa5::memory_type::set_if_exists(x64::memory_type::uncached);
+    this->expect_true(pa5::memory_type::get_if_exists() == x64::memory_type::uncached);
+}
+
+void
+vmcs_ut::test_vmcs_host_ia32_pat_pa5_reserved()
+{
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] |= msrs::ia32_vmx_true_exit_ctls::load_ia32_pat::mask << 32;
+
+    vmcs::host_ia32_pat::pa5::reserved::set(1UL);
+    this->expect_true(vmcs::host_ia32_pat::pa5::reserved::get() == 1UL);
+
+    vmcs::host_ia32_pat::pa5::reserved::set_if_exists(0UL);
+    this->expect_true(vmcs::host_ia32_pat::pa5::reserved::get_if_exists() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_ia32_pat_pa6()
+{
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] |= msrs::ia32_vmx_true_exit_ctls::load_ia32_pat::mask << 32;
+
+    vmcs::host_ia32_pat::pa6::set(1UL);
+    this->expect_true(vmcs::host_ia32_pat::pa6::get() == 1UL);
+
+    vmcs::host_ia32_pat::pa6::set_if_exists(0UL);
+    this->expect_true(vmcs::host_ia32_pat::pa6::get_if_exists() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_ia32_pat_pa6_memory_type()
+{
+    using namespace vmcs::host_ia32_pat;
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] |= msrs::ia32_vmx_true_exit_ctls::load_ia32_pat::mask << 32;
+
+    pa6::memory_type::set(x64::memory_type::uncacheable);
+    this->expect_true(pa6::memory_type::get() == x64::memory_type::uncacheable);
+
+    pa6::memory_type::set(x64::memory_type::write_combining);
+    this->expect_true(pa6::memory_type::get() == x64::memory_type::write_combining);
+
+    pa6::memory_type::set(x64::memory_type::write_through);
+    this->expect_true(pa6::memory_type::get() == x64::memory_type::write_through);
+
+    pa6::memory_type::set_if_exists(x64::memory_type::write_protected);
+    this->expect_true(pa6::memory_type::get_if_exists() == x64::memory_type::write_protected);
+
+    pa6::memory_type::set_if_exists(x64::memory_type::write_back);
+    this->expect_true(pa6::memory_type::get_if_exists() == x64::memory_type::write_back);
+
+    pa6::memory_type::set_if_exists(x64::memory_type::uncached);
+    this->expect_true(pa6::memory_type::get_if_exists() == x64::memory_type::uncached);
+}
+
+void
+vmcs_ut::test_vmcs_host_ia32_pat_pa6_reserved()
+{
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] |= msrs::ia32_vmx_true_exit_ctls::load_ia32_pat::mask << 32;
+
+    vmcs::host_ia32_pat::pa6::reserved::set(1UL);
+    this->expect_true(vmcs::host_ia32_pat::pa6::reserved::get() == 1UL);
+
+    vmcs::host_ia32_pat::pa6::reserved::set_if_exists(0UL);
+    this->expect_true(vmcs::host_ia32_pat::pa6::reserved::get_if_exists() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_ia32_pat_pa7()
+{
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] |= msrs::ia32_vmx_true_exit_ctls::load_ia32_pat::mask << 32;
+
+    vmcs::host_ia32_pat::pa7::set(1UL);
+    this->expect_true(vmcs::host_ia32_pat::pa7::get() == 1UL);
+
+    vmcs::host_ia32_pat::pa7::set_if_exists(0UL);
+    this->expect_true(vmcs::host_ia32_pat::pa7::get_if_exists() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_ia32_pat_pa7_memory_type()
+{
+    using namespace vmcs::host_ia32_pat;
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] |= msrs::ia32_vmx_true_exit_ctls::load_ia32_pat::mask << 32;
+
+    pa7::memory_type::set(x64::memory_type::uncacheable);
+    this->expect_true(pa7::memory_type::get() == x64::memory_type::uncacheable);
+
+    pa7::memory_type::set(x64::memory_type::write_combining);
+    this->expect_true(pa7::memory_type::get() == x64::memory_type::write_combining);
+
+    pa7::memory_type::set(x64::memory_type::write_through);
+    this->expect_true(pa7::memory_type::get() == x64::memory_type::write_through);
+
+    pa7::memory_type::set_if_exists(x64::memory_type::write_protected);
+    this->expect_true(pa7::memory_type::get_if_exists() == x64::memory_type::write_protected);
+
+    pa7::memory_type::set_if_exists(x64::memory_type::write_back);
+    this->expect_true(pa7::memory_type::get_if_exists() == x64::memory_type::write_back);
+
+    pa7::memory_type::set_if_exists(x64::memory_type::uncached);
+    this->expect_true(pa7::memory_type::get_if_exists() == x64::memory_type::uncached);
+}
+
+void
+vmcs_ut::test_vmcs_host_ia32_pat_pa7_reserved()
+{
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] |= msrs::ia32_vmx_true_exit_ctls::load_ia32_pat::mask << 32;
+
+    vmcs::host_ia32_pat::pa7::reserved::set(1UL);
+    this->expect_true(vmcs::host_ia32_pat::pa7::reserved::get() == 1UL);
+
+    vmcs::host_ia32_pat::pa7::reserved::set_if_exists(0UL);
+    this->expect_true(vmcs::host_ia32_pat::pa7::reserved::get_if_exists() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_ia32_efer()
+{
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] |= msrs::ia32_vmx_true_exit_ctls::load_ia32_efer::mask << 32;
+    this->expect_true(vmcs::host_ia32_efer::exists());
+
+    vmcs::host_ia32_efer::set(1UL);
+    this->expect_true(vmcs::host_ia32_efer::get() == 1UL);
+
+    vmcs::host_ia32_efer::set_if_exists(0UL);
+    this->expect_true(vmcs::host_ia32_efer::get_if_exists() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_ia32_efer_sce()
+{
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] |= msrs::ia32_vmx_true_exit_ctls::load_ia32_efer::mask << 32;
+
+    vmcs::host_ia32_efer::sce::enable();
+    this->expect_true(vmcs::host_ia32_efer::sce::is_enabled());
+
+    vmcs::host_ia32_efer::sce::disable();
+    this->expect_true(vmcs::host_ia32_efer::sce::is_disabled());
+
+    vmcs::host_ia32_efer::sce::enable_if_exists();
+    this->expect_true(vmcs::host_ia32_efer::sce::is_enabled_if_exists());
+
+    vmcs::host_ia32_efer::sce::disable_if_exists();
+    this->expect_true(vmcs::host_ia32_efer::sce::is_disabled_if_exists());
+}
+
+void
+vmcs_ut::test_vmcs_host_ia32_efer_lme()
+{
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] |= msrs::ia32_vmx_true_exit_ctls::load_ia32_efer::mask << 32;
+
+    vmcs::host_ia32_efer::lme::enable();
+    this->expect_true(vmcs::host_ia32_efer::lme::is_enabled());
+
+    vmcs::host_ia32_efer::lme::disable();
+    this->expect_true(vmcs::host_ia32_efer::lme::is_disabled());
+
+    vmcs::host_ia32_efer::lme::enable_if_exists();
+    this->expect_true(vmcs::host_ia32_efer::lme::is_enabled_if_exists());
+
+    vmcs::host_ia32_efer::lme::disable_if_exists();
+    this->expect_true(vmcs::host_ia32_efer::lme::is_disabled_if_exists());
+}
+
+void
+vmcs_ut::test_vmcs_host_ia32_efer_lma()
+{
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] |= msrs::ia32_vmx_true_exit_ctls::load_ia32_efer::mask << 32;
+
+    vmcs::host_ia32_efer::lma::enable();
+    this->expect_true(vmcs::host_ia32_efer::lma::is_enabled());
+
+    vmcs::host_ia32_efer::lma::disable();
+    this->expect_true(vmcs::host_ia32_efer::lma::is_disabled());
+
+    vmcs::host_ia32_efer::lma::enable_if_exists();
+    this->expect_true(vmcs::host_ia32_efer::lma::is_enabled_if_exists());
+
+    vmcs::host_ia32_efer::lma::disable_if_exists();
+    this->expect_true(vmcs::host_ia32_efer::lma::is_disabled_if_exists());
+}
+
+void
+vmcs_ut::test_vmcs_host_ia32_efer_nxe()
+{
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] |= msrs::ia32_vmx_true_exit_ctls::load_ia32_efer::mask << 32;
+
+    vmcs::host_ia32_efer::nxe::enable();
+    this->expect_true(vmcs::host_ia32_efer::nxe::is_enabled());
+
+    vmcs::host_ia32_efer::nxe::disable();
+    this->expect_true(vmcs::host_ia32_efer::nxe::is_disabled());
+
+    vmcs::host_ia32_efer::nxe::enable_if_exists();
+    this->expect_true(vmcs::host_ia32_efer::nxe::is_enabled_if_exists());
+
+    vmcs::host_ia32_efer::nxe::disable_if_exists();
+    this->expect_true(vmcs::host_ia32_efer::nxe::is_disabled_if_exists());
+}
+
+void
+vmcs_ut::test_vmcs_host_ia32_efer_reserved()
+{
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] |= msrs::ia32_vmx_true_exit_ctls::load_ia32_efer::mask << 32;
+
+    vmcs::host_ia32_efer::reserved::set(0xEU);
+    this->expect_true(vmcs::host_ia32_efer::reserved::get() == 0xEU);
+
+    vmcs::host_ia32_efer::reserved::set_if_exists(0x0U);
+    this->expect_true(vmcs::host_ia32_efer::reserved::get_if_exists() == 0x0U);
+}
+
+void
+vmcs_ut::test_vmcs_host_ia32_perf_global_ctrl()
+{
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] |= msrs::ia32_vmx_true_exit_ctls::load_ia32_perf_global_ctrl::mask << 32;
+    this->expect_true(vmcs::host_ia32_perf_global_ctrl::exists());
+
+    vmcs::host_ia32_perf_global_ctrl::set(1UL);
+    this->expect_true(vmcs::host_ia32_perf_global_ctrl::get() == 1UL);
+
+    vmcs::host_ia32_perf_global_ctrl::set_if_exists(0UL);
+    this->expect_true(vmcs::host_ia32_perf_global_ctrl::get_if_exists() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_host_ia32_perf_global_ctrl_reserved()
+{
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] |= msrs::ia32_vmx_true_exit_ctls::load_ia32_perf_global_ctrl::mask << 32;
+    this->expect_true(vmcs::host_ia32_perf_global_ctrl::exists());
+
+    vmcs::host_ia32_perf_global_ctrl::reserved::set(0xCUL);
+    this->expect_true(vmcs::host_ia32_perf_global_ctrl::reserved::get() == 0xCUL);
+
+    vmcs::host_ia32_perf_global_ctrl::reserved::set_if_exists(0UL);
+    this->expect_true(vmcs::host_ia32_perf_global_ctrl::reserved::get_if_exists() == 0UL);
 }
 
 void
@@ -4852,48 +5360,6 @@ vmcs_ut::test_vmcs_host_rip()
 
     vmcs::host_rip::set_if_exists(0UL);
     this->expect_true(vmcs::host_rip::get_if_exists() == 0UL);
-}
-
-void
-vmcs_ut::test_vmcs_host_ia32_efer()
-{
-    vmcs::host_ia32_efer::set(100UL);
-    this->expect_true(vmcs::host_ia32_efer::get() == 100UL);
-}
-
-void
-vmcs_ut::test_vmcs_host_ia32_efer_sce()
-{
-    vmcs::host_ia32_efer::sce::set(1UL);
-    this->expect_true(vmcs::host_ia32_efer::sce::get() == 1UL);
-}
-
-void
-vmcs_ut::test_vmcs_host_ia32_efer_lme()
-{
-    vmcs::host_ia32_efer::lme::set(1UL);
-    this->expect_true(vmcs::host_ia32_efer::lme::get() == 1UL);
-}
-
-void
-vmcs_ut::test_vmcs_host_ia32_efer_lma()
-{
-    vmcs::host_ia32_efer::lma::set(1UL);
-    this->expect_true(vmcs::host_ia32_efer::lma::get() == 1UL);
-}
-
-void
-vmcs_ut::test_vmcs_host_ia32_efer_nxe()
-{
-    vmcs::host_ia32_efer::nxe::set(1UL);
-    this->expect_true(vmcs::host_ia32_efer::nxe::get() == 1UL);
-}
-
-void
-vmcs_ut::test_vmcs_host_ia32_efer_reserved()
-{
-    vmcs::host_ia32_efer::reserved::set(0x10000UL);
-    this->expect_true(vmcs::host_ia32_efer::reserved::get() == 0x10000UL);
 }
 
 void

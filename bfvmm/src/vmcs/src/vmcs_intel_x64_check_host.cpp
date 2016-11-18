@@ -23,6 +23,7 @@
 #include <vmcs/vmcs_intel_x64_16bit_host_state_fields.h>
 #include <vmcs/vmcs_intel_x64_32bit_control_fields.h>
 #include <vmcs/vmcs_intel_x64_natural_width_host_state_fields.h>
+#include <vmcs/vmcs_intel_x64_64bit_host_state_fields.h>
 
 using namespace intel_x64;
 
@@ -110,11 +111,8 @@ vmcs_intel_x64::check_host_verify_load_ia32_perf_global_ctrl()
     if (vmcs::vm_exit_controls::load_ia32_perf_global_ctrl::is_disabled())
         return;
 
-    auto vmcs_ia32_perf_global_ctrl =
-        vm::read(VMCS_HOST_IA32_PERF_GLOBAL_CTRL);
-
-    if ((vmcs_ia32_perf_global_ctrl & 0xFFFFFFF8FFFFFFFC) != 0)
-        throw std::logic_error("perf global ctrl msr reserved bits must be 0");
+    if (vmcs::host_ia32_perf_global_ctrl::reserved::get() != 0)
+        throw std::logic_error("host perf global ctrl msr reserved bits must be 0");
 }
 
 void
@@ -123,37 +121,28 @@ vmcs_intel_x64::check_host_verify_load_ia32_pat()
     if (vmcs::vm_exit_controls::load_ia32_pat::is_disabled())
         return;
 
-    auto pat0 = (vm::read(VMCS_HOST_IA32_PAT) & 0x00000000000000FF) >> 0;
-    auto pat1 = (vm::read(VMCS_HOST_IA32_PAT) & 0x000000000000FF00) >> 8;
-    auto pat2 = (vm::read(VMCS_HOST_IA32_PAT) & 0x0000000000FF0000) >> 16;
-    auto pat3 = (vm::read(VMCS_HOST_IA32_PAT) & 0x00000000FF000000) >> 24;
-    auto pat4 = (vm::read(VMCS_HOST_IA32_PAT) & 0x000000FF00000000) >> 32;
-    auto pat5 = (vm::read(VMCS_HOST_IA32_PAT) & 0x0000FF0000000000) >> 40;
-    auto pat6 = (vm::read(VMCS_HOST_IA32_PAT) & 0x00FF000000000000) >> 48;
-    auto pat7 = (vm::read(VMCS_HOST_IA32_PAT) & 0xFF00000000000000) >> 56;
-
-    if (!check_pat(pat0))
+    if (!check_pat(vmcs::host_ia32_pat::pa0::memory_type::get()))
         throw std::logic_error("pat0 has an invalid memory type");
 
-    if (!check_pat(pat1))
+    if (!check_pat(vmcs::host_ia32_pat::pa1::memory_type::get()))
         throw std::logic_error("pat1 has an invalid memory type");
 
-    if (!check_pat(pat2))
+    if (!check_pat(vmcs::host_ia32_pat::pa2::memory_type::get()))
         throw std::logic_error("pat2 has an invalid memory type");
 
-    if (!check_pat(pat3))
+    if (!check_pat(vmcs::host_ia32_pat::pa3::memory_type::get()))
         throw std::logic_error("pat3 has an invalid memory type");
 
-    if (!check_pat(pat4))
+    if (!check_pat(vmcs::host_ia32_pat::pa4::memory_type::get()))
         throw std::logic_error("pat4 has an invalid memory type");
 
-    if (!check_pat(pat5))
+    if (!check_pat(vmcs::host_ia32_pat::pa5::memory_type::get()))
         throw std::logic_error("pat5 has an invalid memory type");
 
-    if (!check_pat(pat6))
+    if (!check_pat(vmcs::host_ia32_pat::pa6::memory_type::get()))
         throw std::logic_error("pat6 has an invalid memory type");
 
-    if (!check_pat(pat7))
+    if (!check_pat(vmcs::host_ia32_pat::pa7::memory_type::get()))
         throw std::logic_error("pat7 has an invalid memory type");
 }
 
@@ -167,22 +156,22 @@ vmcs_intel_x64::check_host_verify_load_ia32_efer()
         throw std::logic_error("ia32 efer msr reserved buts must be 0 if "
                                "load ia32 efer entry is enabled");
 
-    auto lma = vmcs::host_ia32_efer::lma::get();
-    auto lme = vmcs::host_ia32_efer::lme::get();
+    auto lma = vmcs::host_ia32_efer::lma::is_enabled();
+    auto lme = vmcs::host_ia32_efer::lme::is_enabled();
 
-    if (vmcs::vm_exit_controls::host_address_space_size::is_disabled() && lma != 0)
+    if (vmcs::vm_exit_controls::host_address_space_size::is_disabled() && lma)
         throw std::logic_error("host addr space is 0, but efer.lma is 1");
 
-    if (vmcs::vm_exit_controls::host_address_space_size::is_enabled() && lma == 0)
+    if (vmcs::vm_exit_controls::host_address_space_size::is_enabled() && !lma)
         throw std::logic_error("host addr space is 1, but efer.lma is 0");
 
     if (vmcs::host_cr0::paging::is_disabled())
         return;
 
-    if (lme == 0 && lma != 0)
+    if (!lme && lma)
         throw std::logic_error("efer.lme is 0, but efer.lma is 1");
 
-    if (lme != 0 && lma == 0)
+    if (lme && !lma)
         throw std::logic_error("efer.lme is 1, but efer.lma is 0");
 }
 
