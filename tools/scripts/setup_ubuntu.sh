@@ -20,43 +20,21 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+source $(dirname $0)/setup_common.sh
+
 # ------------------------------------------------------------------------------
 # Checks
 # ------------------------------------------------------------------------------
 
-case $( grep ^ID= /etc/os-release | cut -d'=' -f 2 ) in
-ubuntu)
-    ;;
-*)
-    echo "This script can only be used with: Ubuntu"
-    exit 1
-esac
-
-if [[ ! -d "bfelf_loader" ]]; then
-    echo "This script must be run from bareflank root directory"
-    exit 1
-fi
-
-if ! grep -q 'avx' /proc/cpuinfo; then
-    echo "Hardware unsupported. AVX is required"
-    exit 1
-fi
+check_distro ubuntu
+check_folder
+check_hardware
 
 # ------------------------------------------------------------------------------
-# Help
+# Parse Arguments
 # ------------------------------------------------------------------------------
 
-option_help() {
-    echo -e "Usage: setup_ubuntu.sh [OPTION]"
-    echo -e "Sets up the system to compile / use Bareflank"
-    echo -e ""
-    echo -e "       --help                       show this help menu"
-    echo -e "       --local_compilers            setup local cross compilers"
-    echo -e "       --no-configure               skip the configure step"
-    echo -e "       --compiler <dirname>         directory of cross compiler"
-    echo -e "       --out_of_tree <dirname>      setup out of tree build"
-    echo -e ""
-}
+parse_arguments $@
 
 # ------------------------------------------------------------------------------
 # Functions
@@ -146,59 +124,15 @@ add_gcc_repositories() {
     sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
 }
 
-install_g++-6() {
+install_g++-5() {
     sudo apt-get update
-    sudo apt-get install --yes gcc-snapshot
-    sudo apt-get install --yes gcc-6
-    sudo apt-get install --yes g++-6
+    sudo apt-get install --yes gcc-5
+    sudo apt-get install --yes g++-5
     sudo rm /usr/bin/gcc
     sudo rm /usr/bin/g++
-    sudo ln -s /usr/bin/gcc-6 /usr/bin/gcc
-    sudo ln -s /usr/bin/g++-6 /usr/bin/g++
+    sudo ln -s /usr/bin/gcc-5 /usr/bin/gcc
+    sudo ln -s /usr/bin/g++-5 /usr/bin/g++
 }
-
-fix_linux_kernel() {
-    sudo cp /lib/modules/$(uname -r)/build/include/linux/compiler-gcc5.h /lib/modules/$(uname -r)/build/include/linux/compiler-gcc6.h || true
-}
-
-# ------------------------------------------------------------------------------
-# Arguments
-# ------------------------------------------------------------------------------
-
-while [[ $# -ne 0 ]]; do
-
-    if [[ $1 == "--help" ]]; then
-        option_help
-        exit 0
-    fi
-
-    if [[ $1 == "--local_compilers" ]]; then
-        local="true"
-    fi
-
-    if [[ $1 == "--compiler" ]]; then
-        shift
-        compiler="--compiler $1"
-    fi
-
-    if [[ $1 == "--use_llvm_clang" ]]; then
-        use_llvm_clang="--use_llvm_clang"
-    fi
-
-    if [[ $1 == "--no-configure" ]]; then
-        noconfigure="true"
-    fi
-
-    if [[ $1 == "--out_of_tree" ]]; then
-        shift
-        out_of_tree="true"
-        build_dir=$1
-        hypervisor_dir=$PWD
-    fi
-
-    shift
-
-done
 
 # ------------------------------------------------------------------------------
 # Setup System
@@ -224,11 +158,10 @@ case $( grep ^VERSION_ID= /etc/os-release | cut -d'=' -f 2 | tr -d '"' ) in
     add_cmake_repositories
     add_gcc_repositories
     install_common_packages
-    install_g++-6
+    install_g++-5
     install_clang_1404
     install_docker_1404
     prepare_docker
-    fix_linux_kernel
     ;;
 
 *)
@@ -241,34 +174,4 @@ esac
 # Setup Build Environment
 # ------------------------------------------------------------------------------
 
-if [[ ! $noconfigure == "true" ]]; then
-    if [[ $out_of_tree == "true" ]]; then
-        mkdir -p $build_dir
-        pushd $build_dir
-        $hypervisor_dir/configure
-        popd
-    else
-        ./configure $compiler $use_llvm_clang
-    fi
-fi
-
-if [[ $local == "true" ]]; then
-    CROSS_COMPILER=gcc_520 ./tools/scripts/create_cross_compiler.sh
-fi
-
-# ------------------------------------------------------------------------------
-# Done
-# ------------------------------------------------------------------------------
-
-echo ""
-
-echo "WARNING: If you are using ssh, or are logged into a GUI you "
-echo "         might need to exit and log back in to compile!!!"
-echo ""
-
-if [[ $out_of_tree == "true" ]]; then
-    echo "To build, run:"
-    echo "    cd $build_dir"
-    echo "    make -j<# cores>"
-    echo ""
-fi
+setup_build_environment
