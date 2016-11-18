@@ -31,6 +31,7 @@
 #include <vmcs/vmcs_intel_x64_natural_width_guest_state_fields.h>
 #include <vmcs/vmcs_intel_x64_natural_width_read_only_data_fields.h>
 #include <vmcs/vmcs_intel_x64_32bit_read_only_data_fields.h>
+#include <vmcs/vmcs_intel_x64_64bit_guest_state_fields.h>
 
 using namespace x64;
 using namespace intel_x64;
@@ -1545,12 +1546,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_rdmsr_pat()
 
     g_value = 0x0000000300000002;
     ehlr.m_state_save->rcx = msrs::ia32_pat::addr;
+    g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] = msrs::ia32_vmx_true_entry_ctls::load_ia32_pat::mask << 32;
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
         this->expect_no_exception([&]{ ehlr.dispatch(); });
 
-        this->expect_true(g_field == VMCS_GUEST_IA32_PAT);
+        this->expect_true(g_field == vmcs::guest_ia32_pat::addr);
         this->expect_true(ehlr.m_state_save->rax == 0x2);
         this->expect_true(ehlr.m_state_save->rdx == 0x3);
         this->expect_true(ehlr.m_state_save->rip == g_rip);
@@ -1566,6 +1568,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_rdmsr_efer()
 
     g_value = 0x0000000400000003;
     ehlr.m_state_save->rcx = msrs::ia32_efer::addr;
+    g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] = msrs::ia32_vmx_true_entry_ctls::load_ia32_efer::mask << 32;
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -1587,12 +1590,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_rdmsr_perf()
 
     g_value = 0x0000000400000003;
     ehlr.m_state_save->rcx = msrs::ia32_perf_global_ctrl::addr;
+    g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] = msrs::ia32_vmx_true_entry_ctls::load_ia32_perf_global_ctrl::mask << 32;
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
         this->expect_no_exception([&]{ ehlr.dispatch(); });
 
-        this->expect_true(g_field == VMCS_GUEST_IA32_PERF_GLOBAL_CTRL);
+        this->expect_true(g_field == vmcs::guest_ia32_perf_global_ctrl::addr);
         this->expect_true(ehlr.m_state_save->rax == 0x3);
         this->expect_true(ehlr.m_state_save->rdx == 0x4);
         this->expect_true(ehlr.m_state_save->rip == g_rip);
@@ -1775,12 +1779,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_wrmsr_pat()
     ehlr.m_state_save->rcx = msrs::ia32_pat::addr;
     ehlr.m_state_save->rax = 0x2;
     ehlr.m_state_save->rdx = 0x3;
+    g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] = msrs::ia32_vmx_true_entry_ctls::load_ia32_pat::mask << 32;
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
         this->expect_no_exception([&]{ ehlr.dispatch(); });
 
-        this->expect_true(g_field == VMCS_GUEST_IA32_PAT);
+        this->expect_true(g_field == vmcs::guest_ia32_pat::addr);
         this->expect_true(g_value == 0x0000000300000002);
         this->expect_true(ehlr.m_state_save->rip == g_rip);
     });
@@ -1796,6 +1801,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_wrmsr_efer()
     ehlr.m_state_save->rcx = msrs::ia32_efer::addr;
     ehlr.m_state_save->rax = 0x3;
     ehlr.m_state_save->rdx = 0x4;
+    g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] = msrs::ia32_vmx_true_entry_ctls::load_ia32_efer::mask << 32;
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -1817,12 +1823,13 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_wrmsr_perf()
     ehlr.m_state_save->rcx = msrs::ia32_perf_global_ctrl::addr;
     ehlr.m_state_save->rax = 0x3;
     ehlr.m_state_save->rdx = 0x4;
+    g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] = msrs::ia32_vmx_true_entry_ctls::load_ia32_perf_global_ctrl::mask << 32;
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
         this->expect_no_exception([&]{ ehlr.dispatch(); });
 
-        this->expect_true(g_field == VMCS_GUEST_IA32_PERF_GLOBAL_CTRL);
+        this->expect_true(g_field == vmcs::guest_ia32_perf_global_ctrl::addr);
         this->expect_true(g_value == 0x0000000400000003);
         this->expect_true(ehlr.m_state_save->rip == g_rip);
     });
