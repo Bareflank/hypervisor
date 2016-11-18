@@ -27,6 +27,7 @@
 #include <vmcs/vmcs_intel_x64.h>
 
 // *INDENT-OFF*
+
 namespace intel_x64
 {
 namespace vmcs
