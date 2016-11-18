@@ -22,20 +22,21 @@
 #include <serial/serial_port_intel_x64.h>
 
 using namespace x64;
+using namespace serial_intel_x64;
 
-serial_port_intel_x64::serial_port_intel_x64(uint16_t port) noexcept :
+serial_port_intel_x64::serial_port_intel_x64(serial_port_intel_x64::port_type port) noexcept :
     m_port(port)
 {
-    uint8_t bits = 0;
+    serial_port_intel_x64::value_type bits = 0;
 
     this->disable_dlab();
 
-    bits |= FIFO_CONTROL_ENABLE_FIFOS;
-    bits |= FIFO_CONTROL_CLEAR_RECIEVE_FIFO;
-    bits |= FIFO_CONTROL_CLEAR_TRANSMIT_FIFO;
+    bits |= fifo_control_enable_fifos;
+    bits |= fifo_control_clear_recieve_fifo;
+    bits |= fifo_control_clear_transmit_fifo;
 
-    portio::outb(m_port + INTERRUPT_EN_REG, 0x00);
-    portio::outb(m_port + FIFO_CONTROL_REG, bits);
+    portio::outb(m_port + interrupt_en_reg, 0x00);
+    portio::outb(m_port + fifo_control_reg, bits);
 
     this->set_baud_rate(DEFAULT_BAUD_RATE);
     this->set_data_bits(DEFAULT_DATA_BITS);
@@ -58,8 +59,8 @@ serial_port_intel_x64::set_baud_rate(baud_rate_t rate) noexcept
 
     this->enable_dlab();
 
-    portio::outb(m_port + BAUD_RATE_LO_REG, lsb);
-    portio::outb(m_port + BAUD_RATE_HI_REG, msb);
+    portio::outb(m_port + baud_rate_lo_reg, lsb);
+    portio::outb(m_port + baud_rate_hi_reg, msb);
 
     this->disable_dlab();
 }
@@ -69,8 +70,8 @@ serial_port_intel_x64::baud_rate() const noexcept
 {
     this->enable_dlab();
 
-    auto lsb = portio::inb(m_port + BAUD_RATE_LO_REG);
-    auto msb = portio::inb(m_port + BAUD_RATE_HI_REG);
+    auto lsb = portio::inb(m_port + baud_rate_lo_reg);
+    auto msb = portio::inb(m_port + baud_rate_hi_reg);
 
     this->disable_dlab();
 
@@ -118,20 +119,20 @@ serial_port_intel_x64::baud_rate() const noexcept
 void
 serial_port_intel_x64::set_data_bits(data_bits_t bits) noexcept
 {
-    auto reg = portio::inb(m_port + LINE_CONTROL_REG);
+    auto reg = portio::inb(m_port + line_control_reg);
 
-    reg = reg & gsl::narrow_cast<decltype(reg)>(~LINE_CONTROL_DATA_MASK);
-    reg = reg | gsl::narrow_cast<decltype(reg)>(bits & LINE_CONTROL_DATA_MASK);
+    reg = reg & gsl::narrow_cast<decltype(reg)>(~line_control_data_mask);
+    reg = reg | gsl::narrow_cast<decltype(reg)>(bits & line_control_data_mask);
 
-    portio::outb(m_port + LINE_CONTROL_REG, reg);
+    portio::outb(m_port + line_control_reg, reg);
 }
 
 serial_port_intel_x64::data_bits_t
 serial_port_intel_x64::data_bits() const noexcept
 {
-    auto reg = portio::inb(m_port + LINE_CONTROL_REG);
+    auto reg = portio::inb(m_port + line_control_reg);
 
-    switch (reg & LINE_CONTROL_DATA_MASK)
+    switch (reg & line_control_data_mask)
     {
         case char_length_5:
             return char_length_5;
@@ -147,20 +148,20 @@ serial_port_intel_x64::data_bits() const noexcept
 void
 serial_port_intel_x64::set_stop_bits(stop_bits_t bits) noexcept
 {
-    auto reg = portio::inb(m_port + LINE_CONTROL_REG);
+    auto reg = portio::inb(m_port + line_control_reg);
 
-    reg = reg & gsl::narrow_cast<decltype(reg)>(~LINE_CONTROL_STOP_MASK);
-    reg = reg | gsl::narrow_cast<decltype(reg)>(bits & LINE_CONTROL_STOP_MASK);
+    reg = reg & gsl::narrow_cast<decltype(reg)>(~line_control_stop_mask);
+    reg = reg | gsl::narrow_cast<decltype(reg)>(bits & line_control_stop_mask);
 
-    portio::outb(m_port + LINE_CONTROL_REG, reg);
+    portio::outb(m_port + line_control_reg, reg);
 }
 
 serial_port_intel_x64::stop_bits_t
 serial_port_intel_x64::stop_bits() const noexcept
 {
-    auto reg = portio::inb(m_port + LINE_CONTROL_REG);
+    auto reg = portio::inb(m_port + line_control_reg);
 
-    switch (reg & LINE_CONTROL_STOP_MASK)
+    switch (reg & line_control_stop_mask)
     {
         case stop_bits_1:
             return stop_bits_1;
@@ -172,20 +173,20 @@ serial_port_intel_x64::stop_bits() const noexcept
 void
 serial_port_intel_x64::set_parity_bits(parity_bits_t bits) noexcept
 {
-    auto reg = portio::inb(m_port + LINE_CONTROL_REG);
+    auto reg = portio::inb(m_port + line_control_reg);
 
-    reg = reg & gsl::narrow_cast<decltype(reg)>(~LINE_CONTROL_PARITY_MASK);
-    reg = reg | gsl::narrow_cast<decltype(reg)>(bits & LINE_CONTROL_PARITY_MASK);
+    reg = reg & gsl::narrow_cast<decltype(reg)>(~line_control_parity_mask);
+    reg = reg | gsl::narrow_cast<decltype(reg)>(bits & line_control_parity_mask);
 
-    portio::outb(m_port + LINE_CONTROL_REG, reg);
+    portio::outb(m_port + line_control_reg, reg);
 }
 
 serial_port_intel_x64::parity_bits_t
 serial_port_intel_x64::parity_bits() const noexcept
 {
-    auto reg = portio::inb(m_port + LINE_CONTROL_REG);
+    auto reg = portio::inb(m_port + line_control_reg);
 
-    switch (reg & LINE_CONTROL_PARITY_MASK)
+    switch (reg & line_control_parity_mask)
     {
         case parity_odd:
             return parity_odd;
@@ -203,8 +204,7 @@ serial_port_intel_x64::parity_bits() const noexcept
 void
 serial_port_intel_x64::write(char c) noexcept
 {
-    while (!line_status_empty_transmitter());
-
+    while (!get_line_status_empty_transmitter());
     portio::outb(m_port, c);
 }
 
@@ -218,21 +218,21 @@ serial_port_intel_x64::write(const std::string &str) noexcept
 void
 serial_port_intel_x64::enable_dlab() const noexcept
 {
-    auto reg = portio::inb(m_port + LINE_CONTROL_REG);
-    reg = reg | gsl::narrow_cast<decltype(reg)>(DLAB);
-    portio::outb(m_port + LINE_CONTROL_REG, reg);
+    auto reg = portio::inb(m_port + line_control_reg);
+    reg = reg | gsl::narrow_cast<decltype(reg)>(dlab);
+    portio::outb(m_port + line_control_reg, reg);
 }
 
 void
 serial_port_intel_x64::disable_dlab() const noexcept
 {
-    auto reg = portio::inb(m_port + LINE_CONTROL_REG);
-    reg = reg & gsl::narrow_cast<decltype(reg)>(~DLAB);
-    portio::outb(m_port + LINE_CONTROL_REG, reg);
+    auto reg = portio::inb(m_port + line_control_reg);
+    reg = reg & gsl::narrow_cast<decltype(reg)>(~(dlab));
+    portio::outb(m_port + line_control_reg, reg);
 }
 
 bool
-serial_port_intel_x64::line_status_empty_transmitter() const noexcept
+serial_port_intel_x64::get_line_status_empty_transmitter() const noexcept
 {
-    return (portio::inb(m_port + LINE_STATUS_REG) & LINE_STATUS_EMPTY_TRANSMITTER) != 0;
+    return (portio::inb(m_port + line_status_reg) & line_status_empty_transmitter) != 0;
 }

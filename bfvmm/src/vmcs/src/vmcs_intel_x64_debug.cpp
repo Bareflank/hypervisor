@@ -25,13 +25,6 @@
 
 #if 0
 
-#define PRINT_FIELD(a,b) \
-    bfdebug << #b << ": "; \
-    if ((a) == true) \
-        bfinfo << view_as_pointer(vmread(b)) << bfendl; \
-    else \
-        bfinfo << "unsupported" << bfendl;
-
 void
 vmcs_intel_x64::dump_vmcs()
 {
@@ -418,10 +411,6 @@ vmcs_intel_x64::print_execution_controls()
     print_vm_exit_control_fields();
     print_vm_entry_control_fields();
 }
-
-#define PRINT_CONTROL(a) \
-    if ((controls & (a)) != 0) \
-        bfdebug << #a << bfendl;
 
 void
 vmcs_intel_x64::print_pin_based_vm_execution_controls()

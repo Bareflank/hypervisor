@@ -26,7 +26,7 @@
 void
 vcpu_ut::test_vcpu_invalid_id()
 {
-    EXPECT_EXCEPTION(std::make_unique<vcpu>(VCPUID_RESERVED, nullptr), std::invalid_argument);
+    EXPECT_EXCEPTION(std::make_unique<vcpu>(vcpuid::reserved, nullptr), std::invalid_argument);
 }
 
 void

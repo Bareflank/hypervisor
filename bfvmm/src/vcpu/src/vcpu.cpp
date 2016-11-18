@@ -28,7 +28,7 @@ vcpu::vcpu(uint64_t id, std::shared_ptr<debug_ring> dr) :
     m_is_running(false),
     m_is_initialized(false)
 {
-    if ((id & VCPUID_RESERVED) != 0)
+    if ((id & vcpuid::reserved) != 0)
         throw std::invalid_argument("invalid vcpuid");
 
     if (!m_debug_ring) m_debug_ring = std::make_shared<debug_ring>(id);

@@ -269,4 +269,49 @@
 #define VMCALL_OUT_BUFFER_SIZE (32 * MAX_PAGE_SIZE)
 #endif
 
+/**
+ * Default Serial COM Port
+ *
+ * Note: See bfvmm/serial/serial_port_intel_x64.h
+ */
+#ifndef DEFAULT_COM_PORT
+#define DEFAULT_COM_PORT com1_port
+#endif
+
+/**
+ * Default Serial Baud Rate
+ *
+ * Note: See bfvmm/serial/serial_port_intel_x64.h
+ */
+#ifndef DEFAULT_BAUD_RATE
+#define DEFAULT_BAUD_RATE baud_rate_115200
+#endif
+
+/**
+ * Default Serial Data Bits
+ *
+ * Note: See bfvmm/serial/serial_port_intel_x64.h
+ */
+#ifndef DEFAULT_DATA_BITS
+#define DEFAULT_DATA_BITS char_length_8
+#endif
+
+/**
+ * Default Serial Stop Bits
+ *
+ * Note: See bfvmm/serial/serial_port_intel_x64.h
+ */
+#ifndef DEFAULT_STOP_BITS
+#define DEFAULT_STOP_BITS stop_bits_1
+#endif
+
+/**
+ * Default Serial Parity Bits
+ *
+ * Note: See bfvmm/serial/serial_port_intel_x64.h
+ */
+#ifndef DEFAULT_PARITY_BITS
+#define DEFAULT_PARITY_BITS parity_none
+#endif
+
 #endif
