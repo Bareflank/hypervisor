@@ -94,8 +94,17 @@ vmcall_unittest() {
     echo -e "$CC""testing:$CB vmcall_unittest$CE"
     make driver_load > /dev/null 2>&1
     make quick
-    ARGS="unittest 1" make vmcall
-    ARGS="unittest 2" make vmcall
+    echo -e ""
+    ARGS="unittest 0x1001" make vmcall
+    ARGS="unittest 0x1002" make vmcall
+    ARGS="unittest 0x1003" make vmcall
+    ARGS="unittest 0x1004" make vmcall
+    ARGS="unittest 0x1005" make vmcall
+    ARGS="unittest 0x1006" make vmcall
+    ARGS="unittest 0x1007" make vmcall
+    ARGS="unittest 0x1008" make vmcall
+    ARGS="unittest 0x1009" make vmcall
+    ARGS="unittest 0x100A" make vmcall
     make driver_unload > /dev/null 2>&1
 }
 

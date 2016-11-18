@@ -359,7 +359,7 @@ void
 ioctl_driver::vmcall_unittest(registers_type &regs)
 {
     vmcall_send_regs(regs);
-    std::cout << "success" << std::endl;
+    std::cout << "\033[1;36m" << std::hex << "0x" << regs.r02 << std::dec << ":\033[1;32m passed\033[0m\n";
 }
 
 ioctl_driver::status_type

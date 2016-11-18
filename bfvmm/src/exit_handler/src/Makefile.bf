@@ -27,9 +27,13 @@ TARGET_NAME:=exit_handler
 TARGET_TYPE:=lib
 
 ifeq ($(shell uname -s), Linux)
-    TARGET_COMPILER:=both
+	TARGET_COMPILER:=both
 else
-    TARGET_COMPILER:=cross
+	TARGET_COMPILER:=cross
+endif
+
+ifeq ($(INCLUDE_LIBCXX_UNITTESTS), yes)
+	NATIVE_DEFINES+=INCLUDE_LIBCXX_UNITTESTS
 endif
 
 ################################################################################
@@ -67,7 +71,7 @@ NATIVE_OUTDIR+=%BUILD_REL%/../bin
 SOURCES+=exit_handler_intel_x64.cpp
 SOURCES+=exit_handler_intel_x64_entry.cpp
 SOURCES+=exit_handler_intel_x64_support.asm
-
+SOURCES+=exit_handler_intel_x64_unittests.cpp
 
 INCLUDE_PATHS+=./
 INCLUDE_PATHS+=%HYPER_ABS%/include/

@@ -917,13 +917,6 @@ exit_handler_intel_x64::handle_vmcall_event(vmcall_registers_t &regs)
 }
 
 void
-exit_handler_intel_x64::handle_vmcall_unittest(vmcall_registers_t &regs)
-{
-    bfdebug << "vmcall unittest:" << bfendl;
-    bfdebug << "r02: " << view_as_pointer(regs.r02) << bfendl;
-}
-
-void
 exit_handler_intel_x64::handle_vmcall_data_string_unformatted(vmcall_registers_t &regs, const std::string &str,
         const bfn::unique_map_ptr_x64<char> &omap)
 {
