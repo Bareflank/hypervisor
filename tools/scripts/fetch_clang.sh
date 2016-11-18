@@ -24,10 +24,34 @@ pushd /tmp/bareflank/
 
 rm -Rf source_llvm
 
+if [[ -z "$CUSTOM_LLVM_BRANCH" ]]; then
+    llvm_branch=$LLVM_RELEASE
+else
+    llvm_branch=$CUSTOM_LLVM_BRANCH
+fi
+
+if [[ -z "$CUSTOM_LLVM_URL" ]]; then
+    llvm_url="http://llvm.org/git/llvm"
+else
+    llvm_url=$CUSTOM_LLVM_URL
+fi
+
+if [[ -z "$CUSTOM_CLANG_BRANCH" ]]; then
+    clang_branch=$CLANG_RELEASE
+else
+    clang_branch=$CUSTOM_CLANG_BRANCH
+fi
+
+if [[ -z "$CUSTOM_CLANG_URL" ]]; then
+    clang_url="http://llvm.org/git/clang.git"
+else
+    clang_url=$CUSTOM_CLANG_URL
+fi
+
 n=0
 until [ $n -ge 5 ]
 do
-    git clone --depth 1 -b $LLVM_RELEASE http://llvm.org/git/llvm source_llvm && break
+    git clone --depth 1 -b $llvm_branch $llvm_url source_llvm && break
     n=$[$n+1]
     sleep 15
 done
@@ -37,7 +61,7 @@ cd source_llvm/tools
 n=0
 until [ $n -ge 5 ]
 do
-    git clone --depth 1 -b $LLVM_RELEASE http://llvm.org/git/clang.git && break
+    git clone --depth 1 -b $clang_branch $clang_url && break
     n=$[$n+1]
     sleep 15
 done
