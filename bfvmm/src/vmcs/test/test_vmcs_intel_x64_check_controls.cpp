@@ -689,7 +689,8 @@ setup_check_control_enable_ept_checks_paths(std::vector<struct control_flow_path
     {
         enable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::enable_ept::mask);
         vmcs::ept_pointer::memory_type::set(vmcs::ept_pointer::memory_type::uncacheable);
-        g_msrs[msrs::ia32_vmx_ept_vpid_cap::addr] = ~(IA32_VMX_EPT_VPID_CAP_UC | IA32_VMX_EPT_VPID_CAP_WB);
+        g_msrs[msrs::ia32_vmx_ept_vpid_cap::addr] = ~(msrs::ia32_vmx_ept_vpid_cap::memory_type_uncacheable_supported::mask |
+        msrs::ia32_vmx_ept_vpid_cap::memory_type_write_back_supported::mask);
     };
     path.throws_exception = true;
     path.exception = std::shared_ptr<std::exception>(new std::logic_error("hardware does not support ept memory type: uncachable"));
@@ -707,7 +708,7 @@ setup_check_control_enable_ept_checks_paths(std::vector<struct control_flow_path
 
     path.setup = [&]
     {
-        g_msrs[msrs::ia32_vmx_ept_vpid_cap::addr] = IA32_VMX_EPT_VPID_CAP_WB;
+        g_msrs[msrs::ia32_vmx_ept_vpid_cap::addr] = msrs::ia32_vmx_ept_vpid_cap::memory_type_write_back_supported::mask;
         vmcs::ept_pointer::memory_type::set(vmcs::ept_pointer::memory_type::write_back);
         vmcs::ept_pointer::page_walk_length_minus_one::set(0U);
     };

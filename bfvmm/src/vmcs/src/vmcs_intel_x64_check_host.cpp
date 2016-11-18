@@ -87,21 +87,21 @@ vmcs_intel_x64::check_host_cr4_for_unsupported_bits()
 void
 vmcs_intel_x64::check_host_cr3_for_unsupported_bits()
 {
-    if (!is_physical_address_valid(vmcs::host_cr3::get()))
+    if (!x64::is_physical_address_valid(vmcs::host_cr3::get()))
         throw std::logic_error("host cr3 too large");
 }
 
 void
 vmcs_intel_x64::check_host_ia32_sysenter_esp_canonical_address()
 {
-    if (!is_address_canonical(vmcs::host_ia32_sysenter_esp::get()))
+    if (!x64::is_address_canonical(vmcs::host_ia32_sysenter_esp::get()))
         throw std::logic_error("host sysenter esp must be canonical");
 }
 
 void
 vmcs_intel_x64::check_host_ia32_sysenter_eip_canonical_address()
 {
-    if (!is_address_canonical(vmcs::host_ia32_sysenter_eip::get()))
+    if (!x64::is_address_canonical(vmcs::host_ia32_sysenter_eip::get()))
         throw std::logic_error("host sysenter eip must be canonical");
 }
 
@@ -296,35 +296,35 @@ vmcs_intel_x64::check_host_ss_not_equal_zero()
 void
 vmcs_intel_x64::check_host_fs_canonical_base_address()
 {
-    if (!is_address_canonical(vmcs::host_fs_base::get()))
+    if (!x64::is_address_canonical(vmcs::host_fs_base::get()))
         throw std::logic_error("host fs base must be canonical");
 }
 
 void
 vmcs_intel_x64::check_host_gs_canonical_base_address()
 {
-    if (!is_address_canonical(vmcs::host_gs_base::get()))
+    if (!x64::is_address_canonical(vmcs::host_gs_base::get()))
         throw std::logic_error("host gs base must be canonical");
 }
 
 void
 vmcs_intel_x64::check_host_gdtr_canonical_base_address()
 {
-    if (!is_address_canonical(vmcs::host_gdtr_base::get()))
+    if (!x64::is_address_canonical(vmcs::host_gdtr_base::get()))
         throw std::logic_error("host gdtr base must be canonical");
 }
 
 void
 vmcs_intel_x64::check_host_idtr_canonical_base_address()
 {
-    if (!is_address_canonical(vmcs::host_idtr_base::get()))
+    if (!x64::is_address_canonical(vmcs::host_idtr_base::get()))
         throw std::logic_error("host idtr base must be canonical");
 }
 
 void
 vmcs_intel_x64::check_host_tr_canonical_base_address()
 {
-    if (!is_address_canonical(vmcs::host_tr_base::get()))
+    if (!x64::is_address_canonical(vmcs::host_tr_base::get()))
         throw std::logic_error("host tr base must be canonical");
 }
 
@@ -385,6 +385,6 @@ vmcs_intel_x64::check_host_host_address_space_enabled()
     if (vmcs::host_cr4::physical_address_extensions::is_disabled())
         throw std::logic_error("cr4 pae must be enabled if host addr space is enabled");
 
-    if (!is_address_canonical(vmcs::host_rip::get()))
+    if (!x64::is_address_canonical(vmcs::host_rip::get()))
         throw std::logic_error("host rip must be canonical");
 }

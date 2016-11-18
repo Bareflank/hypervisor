@@ -1594,7 +1594,7 @@ vmcs_intel_x64::check_guest_hlt_valid_interrupts()
             break;
 
         case interruption_type::other_event:
-            if (vector == MTF_VM_EXIT)
+            if (vector == interrupt::divide_error)
                 return;
 
             break;

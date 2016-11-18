@@ -34,9 +34,12 @@
 /// Developer's manual.
 ///
 
-inline void
-set_vm_function_control(bool val, uint64_t msr_addr, uint64_t ctls_addr,
-                        const char *name, uint64_t mask, bool field_exists)
+template<class MA, class CA, class M,
+         class = typename std::enable_if<std::is_integral<MA>::value>::type,
+         class = typename std::enable_if<std::is_integral<CA>::value>::type,
+         class = typename std::enable_if<std::is_integral<M>::value>::type>
+auto set_vm_function_control(bool val, MA msr_addr, CA ctls_addr,
+                             const char *name, M mask, bool field_exists)
 {
     if (!field_exists)
     {
@@ -61,10 +64,13 @@ set_vm_function_control(bool val, uint64_t msr_addr, uint64_t ctls_addr,
     }
 }
 
-inline void
-set_vm_function_control_if_allowed(bool val, uint64_t msr_addr, uint64_t ctls_addr,
-                                   const char *name, uint64_t mask,
-                                   bool verbose, bool field_exists) noexcept
+template<class MA, class CA, class M,
+         class = typename std::enable_if<std::is_integral<MA>::value>::type,
+         class = typename std::enable_if<std::is_integral<CA>::value>::type,
+         class = typename std::enable_if<std::is_integral<M>::value>::type>
+auto set_vm_function_control_if_allowed(bool val, MA msr_addr, CA ctls_addr,
+                                        const char *name, M mask,
+                                        bool verbose, bool field_exists) noexcept
 {
     if (!field_exists)
     {
