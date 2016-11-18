@@ -421,6 +421,7 @@ vmcs_ut::list_64bit_control_fields()
 void
 vmcs_ut::list_64bit_read_only_data_field()
 {
+    this->test_vmcs_guest_physical_address();
 }
 
 void

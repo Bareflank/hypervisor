@@ -36,6 +36,7 @@
 #include <vmcs/vmcs_intel_x64_natural_width_control_fields.h>
 #include <vmcs/vmcs_intel_x64_natural_width_read_only_data_fields.h>
 #include <vmcs/vmcs_intel_x64_natural_width_host_state_fields.h>
+#include <vmcs/vmcs_intel_x64_64bit_read_only_data_field.h>
 
 #include <vmcs/vmcs_intel_x64_64bit_control_fields.h>
 
@@ -2223,6 +2224,25 @@ vmcs_ut::test_vmcs_xss_exiting_bitmap()
     this->expect_no_exception([&] { vmcs::xss_exiting_bitmap::set_if_exists(42U); });
     this->expect_no_exception([&] { vmcs::xss_exiting_bitmap::get_if_exists(); });
     this->expect_true(g_vmcs_fields[vmcs::xss_exiting_bitmap::addr] == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_physical_address()
+{
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask << 32;
+    g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = msrs::ia32_vmx_procbased_ctls2::enable_ept::mask << 32;
+    this->expect_true(vmcs::guest_physical_address::exists());
+
+    g_vmcs_fields[vmcs::guest_physical_address::addr] = 0x1U;
+    this->expect_true(vmcs::guest_physical_address::get() == 0x1U);
+
+    g_vmcs_fields[vmcs::guest_physical_address::addr] = 0x2U;
+    this->expect_true(vmcs::guest_physical_address::get_if_exists() == 0x2U);
+
+    g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = ~(msrs::ia32_vmx_procbased_ctls2::enable_ept::mask << 32);
+    this->expect_false(vmcs::guest_physical_address::exists());
+    this->expect_exception([&] { vmcs::guest_physical_address::get(); }, ""_ut_lee);
+    this->expect_no_exception([&] { vmcs::guest_physical_address::get_if_exists(); });
 }
 
 void

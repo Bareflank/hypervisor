@@ -262,6 +262,7 @@ private:
     void test_vmcs_vmwrite_bitmap_address();
     void test_vmcs_virtualization_exception_information_address();
     void test_vmcs_xss_exiting_bitmap();
+    void test_vmcs_guest_physical_address();
     void test_vmcs_guest_rflags();
     void test_vmcs_guest_rflags_carry_flag();
     void test_vmcs_guest_rflags_parity_flag();
