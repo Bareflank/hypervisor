@@ -33,6 +33,7 @@
 #include <intrinsics/msrs_intel_x64.h>
 
 // *INDENT-OFF*
+
 namespace intel_x64
 {
 namespace vmcs
@@ -1473,7 +1474,6 @@ namespace guest_fs_access_rights
             auto field = get_vmcs_field_if_exists(addr, name, verbose, exists());
             set_vmcs_field_if_exists((field & ~mask) | ((val << from) & mask), addr, name, verbose, exists());
         }
-
     }
 
     namespace s
@@ -2877,4 +2877,5 @@ namespace vmx_preemption_timer_value
 }
 
 // *INDENT-ON*
+
 #endif
