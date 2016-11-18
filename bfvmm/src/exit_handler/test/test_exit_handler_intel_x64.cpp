@@ -629,14 +629,18 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_vmcall_data_unknown()
     MockRepository mocks;
     auto &&vmcs = setup_vmcs_handled(mocks, exit_reason::basic_exit_reason::vmcall);
     auto &&ehlr = setup_ehlr(vmcs);
+    setup_mm(mocks);
+    setup_pt(mocks);
 
     ehlr.m_state_save->rax = VMCALL_DATA;                        // r00
     ehlr.m_state_save->rdx = VMCALL_MAGIC_NUMBER;                // r01
-    ehlr.m_state_save->rsi = 0x0000BEEF;                         // r04
+    ehlr.m_state_save->rsi = 0x0000BEEF;     // r04
     ehlr.m_state_save->r08 = 0x1234U;                            // r05
     ehlr.m_state_save->r09 = g_msg.size();                       // r06
     ehlr.m_state_save->r11 = 0x1234U;                            // r08
     ehlr.m_state_save->r12 = g_msg.size();                       // r09
+
+    __builtin_memcpy(g_map.get(), g_msg.data(), g_msg.size());
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
