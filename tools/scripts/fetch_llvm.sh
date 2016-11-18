@@ -24,10 +24,22 @@
 
 pushd $BUILD_ABS
 
+if [[ -z "$CUSTOM_LLVM_BRANCH" ]]; then
+    branch=$LLVM_RELEASE
+else
+    branch=$CUSTOM_LLVM_BRANCH
+fi
+
+if [[ -z "$CUSTOM_LLVM_URL" ]]; then
+    url="http://llvm.org/git/llvm"
+else
+    url=$CUSTOM_LLVM_URL
+fi
+
 n=0
 until [ $n -ge 5 ]
 do
-    git clone --depth 1 -b $LLVM_RELEASE http://llvm.org/git/llvm source_llvm && break
+    git clone --depth 1 -b $branch $url source_llvm && break
     n=$[$n+1]
     sleep 15
 done
