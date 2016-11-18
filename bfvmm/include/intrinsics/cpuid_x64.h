@@ -501,6 +501,68 @@ namespace cpuid
             }
         }
     }
+
+    namespace extended_feature_flags
+    {
+        constexpr const auto addr = 0x00000007UL;
+        constexpr const auto name = "extended_feature_flags";
+
+        namespace subleaf0
+        {
+            namespace ebx
+            {
+                namespace sgx
+                {
+                    constexpr const auto mask = 0x00000004UL;
+                    constexpr const auto from = 2;
+                    constexpr const auto name = "sgx";
+
+                    inline auto get() noexcept
+                    {
+                        uint32_t eax = addr;
+                        uint32_t ebx = 0U;
+                        uint32_t ecx = 0U;
+                        uint32_t edx = 0U;
+
+                        __cpuid(&eax, &ebx, &ecx, &edx);
+
+                        return (ebx & mask) != 0;
+                    }
+                }
+
+                namespace rtm
+                {
+                    constexpr const auto mask = 0x00000800UL;
+                    constexpr const auto from = 11;
+                    constexpr const auto name = "rtm";
+
+                    inline auto get() noexcept
+                    {
+                        uint32_t eax = addr;
+                        uint32_t ebx = 0U;
+                        uint32_t ecx = 0U;
+                        uint32_t edx = 0U;
+
+                        __cpuid(&eax, &ebx, &ecx, &edx);
+
+                        return (ebx & mask) != 0;
+                    }
+                }
+
+                inline void dump() noexcept
+                {
+                    bfdebug << "cpuid::extended_feature_flags::subleaf0::ebx enabled flags:" << bfendl;
+
+                    if (sgx::get())
+                        bfdebug << "    - sgx" << bfendl;
+
+                    if (rtm::get())
+                        bfdebug << "    - rtm" << bfendl;
+                }
+            }
+        }
+    }
+
 }
 }
 

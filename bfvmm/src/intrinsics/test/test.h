@@ -24,6 +24,8 @@
 
 #include <unittest.h>
 
+extern std::map<uint32_t, uint32_t> g_eax_cpuid;
+
 class intrinsics_ut : public unittest
 {
 public:
@@ -227,6 +229,7 @@ private:
     void test_ia32_vmx_true_exit_ctls_save_ia32_efer();
     void test_ia32_vmx_true_exit_ctls_load_ia32_efer();
     void test_ia32_vmx_true_exit_ctls_save_vmx_preemption_timer_value();
+    void test_ia32_vmx_true_exit_ctls_clear_ia32_bndcfgs();
     void test_ia32_vmx_true_entry_ctls();
     void test_ia32_vmx_true_entry_ctls_load_debug_controls();
     void test_ia32_vmx_true_entry_ctls_ia_32e_mode_guest();
@@ -235,6 +238,7 @@ private:
     void test_ia32_vmx_true_entry_ctls_load_ia32_perf_global_ctrl();
     void test_ia32_vmx_true_entry_ctls_load_ia32_pat();
     void test_ia32_vmx_true_entry_ctls_load_ia32_efer();
+    void test_ia32_vmx_true_entry_ctls_load_ia32_bndcfgs();
     void test_ia32_vmx_vmfunc();
     void test_ia32_vmx_vmfunc_eptp_switching();
     void test_ia32_efer();
@@ -396,6 +400,9 @@ private:
     void test_cpuid_x64_cpuid_feature_information_ecx_f16c();
     void test_cpuid_x64_cpuid_feature_information_ecx_rdrand();
     void test_cpuid_x64_cpuid_feature_information_ecx_dump();
+    void test_cpuid_x64_cpuid_extended_feature_flags_subleaf0_ebx_sgx();
+    void test_cpuid_x64_cpuid_extended_feature_flags_subleaf0_ebx_rtm();
+    void test_cpuid_x64_cpuid_extended_feature_flags_subleaf0_ebx_dump();
 
     void test_pm_x64_halt();
     void test_pm_x64_stop();
@@ -406,6 +413,9 @@ private:
     void test_tlb_x64_invlpg();
 
     void test_debug_x64_dr7();
+
+    void test_pdpte_x64_reserved_mask();
+    void test_pdpte_x64_page_directory_addr_mask();
 };
 
 #endif

@@ -26,6 +26,7 @@
 #include <thread_context.h>
 #include <vmcs/vmcs_intel_x64.h>
 #include <vmcs/vmcs_intel_x64_debug.h>
+#include <vmcs/vmcs_intel_x64_check.h>
 #include <vmcs/vmcs_intel_x64_32bit_control_fields.h>
 #include <vmcs/vmcs_intel_x64_resume.h>
 #include <vmcs/vmcs_intel_x64_promote.h>
@@ -94,11 +95,7 @@ vmcs_intel_x64::launch(const std::shared_ptr<vmcs_intel_x64_state> &host_state,
     });
 
     auto ___ = gsl::on_failure([&]
-    {
-        this->check_vmcs_control_state();
-        this->check_vmcs_guest_state();
-        this->check_vmcs_host_state();
-    });
+    { vmcs::check::all(); });
 
     vm::launch();
 }

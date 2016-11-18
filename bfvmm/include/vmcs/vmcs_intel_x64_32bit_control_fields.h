@@ -1280,6 +1280,37 @@ namespace vm_exit_controls
         inline void disable_if_allowed(bool verbose = false) noexcept
         { set_vm_control_if_allowed(false, msr_addr, addr, name, mask, verbose, exists()); }
     }
+
+    namespace clear_ia32_bndcfgs
+    {
+        constexpr const auto mask = 0x0000000000800000UL;
+        constexpr const auto from = 23;
+        constexpr const auto name = "clear_ia32_bndcfgs";
+
+        inline auto is_enabled()
+        { return is_bit_set(get_vmcs_field(addr, name, exists()), from); }
+
+        inline auto is_enabled_if_exists(bool verbose = false) noexcept
+        { return is_bit_set(get_vmcs_field_if_exists(addr, name, verbose, exists()), from); }
+
+        inline auto is_disabled()
+        { return is_bit_cleared(get_vmcs_field(addr, name, exists()), from); }
+
+        inline auto is_disabled_if_exists(bool verbose = false) noexcept
+        { return is_bit_cleared(get_vmcs_field_if_exists(addr, name, verbose, exists()), from); }
+
+        inline void enable()
+        { set_vm_control(true, msr_addr, addr, name, mask, exists()); }
+
+        inline void enable_if_allowed(bool verbose = false) noexcept
+        { set_vm_control_if_allowed(true, msr_addr, addr, name, mask, verbose, exists()); }
+
+        inline void disable()
+        { set_vm_control(false, msr_addr, addr, name, mask, exists()); }
+
+        inline void disable_if_allowed(bool verbose = false) noexcept
+        { set_vm_control_if_allowed(false, msr_addr, addr, name, mask, verbose, exists()); }
+    }
 }
 
 namespace vm_exit_msr_store_count
@@ -1539,6 +1570,37 @@ namespace vm_entry_controls
         constexpr const auto mask = 0x0000000000008000UL;
         constexpr const auto from = 15;
         constexpr const auto name = "load_ia32_efer";
+
+        inline auto is_enabled()
+        { return is_bit_set(get_vmcs_field(addr, name, exists()), from); }
+
+        inline auto is_enabled_if_exists(bool verbose = false) noexcept
+        { return is_bit_set(get_vmcs_field_if_exists(addr, name, verbose, exists()), from); }
+
+        inline auto is_disabled()
+        { return is_bit_cleared(get_vmcs_field(addr, name, exists()), from); }
+
+        inline auto is_disabled_if_exists(bool verbose = false) noexcept
+        { return is_bit_cleared(get_vmcs_field_if_exists(addr, name, verbose, exists()), from); }
+
+        inline void enable()
+        { set_vm_control(true, msr_addr, addr, name, mask, exists()); }
+
+        inline void enable_if_allowed(bool verbose = false) noexcept
+        { set_vm_control_if_allowed(true, msr_addr, addr, name, mask, verbose, exists()); }
+
+        inline void disable()
+        { set_vm_control(false, msr_addr, addr, name, mask, exists()); }
+
+        inline void disable_if_allowed(bool verbose = false) noexcept
+        { set_vm_control_if_allowed(false, msr_addr, addr, name, mask, verbose, exists()); }
+    }
+
+    namespace load_ia32_bndcfgs
+    {
+        constexpr const auto mask = 0x0000000000010000UL;
+        constexpr const auto from = 16;
+        constexpr const auto name = "load_ia32_bndcfgs";
 
         inline auto is_enabled()
         { return is_bit_set(get_vmcs_field(addr, name, exists()), from); }

@@ -2164,6 +2164,26 @@ intrinsics_ut::test_ia32_vmx_true_exit_ctls_save_vmx_preemption_timer_value()
 }
 
 void
+intrinsics_ut::test_ia32_vmx_true_exit_ctls_clear_ia32_bndcfgs()
+{
+    auto mask = msrs::ia32_vmx_true_exit_ctls::clear_ia32_bndcfgs::mask;
+
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] = mask;
+    this->expect_true(msrs::ia32_vmx_true_exit_ctls::clear_ia32_bndcfgs::get());
+
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] = ~mask;
+    this->expect_false(msrs::ia32_vmx_true_exit_ctls::clear_ia32_bndcfgs::get());
+
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] = mask | (mask << 32);
+    this->expect_false(msrs::ia32_vmx_true_exit_ctls::clear_ia32_bndcfgs::is_allowed0());
+    this->expect_true(msrs::ia32_vmx_true_exit_ctls::clear_ia32_bndcfgs::is_allowed1());
+
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] = ~mask & ~(mask << 32);
+    this->expect_true(msrs::ia32_vmx_true_exit_ctls::clear_ia32_bndcfgs::is_allowed0());
+    this->expect_false(msrs::ia32_vmx_true_exit_ctls::clear_ia32_bndcfgs::is_allowed1());
+}
+
+void
 intrinsics_ut::test_ia32_vmx_true_entry_ctls()
 {
     g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] = 0x00000000FFFFFFFFUL;
@@ -2327,6 +2347,26 @@ intrinsics_ut::test_ia32_vmx_true_entry_ctls_load_ia32_efer()
     g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] = ~mask & ~(mask << 32);
     this->expect_true(msrs::ia32_vmx_true_entry_ctls::load_ia32_efer::is_allowed0());
     this->expect_false(msrs::ia32_vmx_true_entry_ctls::load_ia32_efer::is_allowed1());
+}
+
+void
+intrinsics_ut::test_ia32_vmx_true_entry_ctls_load_ia32_bndcfgs()
+{
+    auto mask = msrs::ia32_vmx_true_entry_ctls::load_ia32_bndcfgs::mask;
+
+    g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] = mask;
+    this->expect_true(msrs::ia32_vmx_true_entry_ctls::load_ia32_bndcfgs::get());
+
+    g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] = ~mask;
+    this->expect_false(msrs::ia32_vmx_true_entry_ctls::load_ia32_bndcfgs::get());
+
+    g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] = mask | (mask << 32);
+    this->expect_false(msrs::ia32_vmx_true_entry_ctls::load_ia32_bndcfgs::is_allowed0());
+    this->expect_true(msrs::ia32_vmx_true_entry_ctls::load_ia32_bndcfgs::is_allowed1());
+
+    g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] = ~mask & ~(mask << 32);
+    this->expect_true(msrs::ia32_vmx_true_entry_ctls::load_ia32_bndcfgs::is_allowed0());
+    this->expect_false(msrs::ia32_vmx_true_entry_ctls::load_ia32_bndcfgs::is_allowed1());
 }
 
 void

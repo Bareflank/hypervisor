@@ -21,6 +21,7 @@
 
 #include <test.h>
 #include <vmcs/vmcs_intel_x64.h>
+#include <vmcs/vmcs_intel_x64_check.h>
 #include <vmcs/vmcs_intel_x64_32bit_guest_state_fields.h>
 #include <exit_handler/exit_handler_intel_x64.h>
 #include <exit_handler/exit_handler_intel_x64_support.h>
@@ -47,6 +48,10 @@ vmcs::value_type g_exit_instruction_information = 0;
 static std::map<msrs::field_type, msrs::value_type> g_msrs;
 
 uint64_t g_rip = 0;
+
+static void vmcs_check_all()
+{
+}
 
 extern "C" bool
 __vmread(uint64_t field, uint64_t *val) noexcept
@@ -2317,9 +2322,7 @@ exit_handler_intel_x64_ut::test_vm_exit_failure_check()
     auto &&vmcs = setup_vmcs_unhandled(mocks, exit_reason::basic_exit_reason::xrstors | 0x80000000);
     auto &&ehlr = setup_ehlr(vmcs);
 
-    mocks.OnCall(vmcs.get(), vmcs_intel_x64::check_vmcs_control_state);
-    mocks.OnCall(vmcs.get(), vmcs_intel_x64::check_vmcs_guest_state);
-    mocks.OnCall(vmcs.get(), vmcs_intel_x64::check_vmcs_host_state);
+    mocks.OnCallFunc(vmcs::check::all).Do(vmcs_check_all);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {

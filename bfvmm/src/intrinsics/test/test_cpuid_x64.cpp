@@ -24,16 +24,26 @@
 
 using namespace x64;
 
-static std::map<uint32_t, uint32_t> g_eax_cpuid;
-static std::map<uint32_t, uint32_t> g_ebx_cpuid;
-static std::map<uint32_t, uint32_t> g_ecx_cpuid;
-static std::map<uint32_t, uint32_t> g_edx_cpuid;
+std::map<uint32_t, uint32_t> g_eax_cpuid;
+std::map<uint32_t, uint32_t> g_ebx_cpuid;
+std::map<uint32_t, uint32_t> g_ecx_cpuid;
+std::map<uint32_t, uint32_t> g_edx_cpuid;
 
 extern "C" uint32_t __cpuid_eax(uint32_t val) noexcept;
 extern "C" uint32_t __cpuid_ebx(uint32_t val) noexcept;
 extern "C" uint32_t __cpuid_ecx(uint32_t val) noexcept;
 extern "C" uint32_t __cpuid_edx(uint32_t val) noexcept;
 extern "C" void __cpuid(void *eax, void *ebx, void *ecx, void *edx) noexcept;
+
+struct cpuid_regs
+{
+    uint32_t eax;
+    uint32_t ebx;
+    uint32_t ecx;
+    uint32_t edx;
+};
+
+struct cpuid_regs g_regs;
 
 extern "C" uint32_t
 __cpuid_eax(uint32_t val) noexcept
@@ -53,17 +63,22 @@ __cpuid_edx(uint32_t val) noexcept
 
 extern "C" void
 __cpuid(void *eax, void *ebx, void *ecx, void *edx) noexcept
-{ (void) eax; (void) ebx; (void) ecx; (void) edx; }
+{
+    *static_cast<uint32_t *>(eax) = g_regs.eax;
+    *static_cast<uint32_t *>(ebx) = g_regs.ebx;
+    *static_cast<uint32_t *>(ecx) = g_regs.ecx;
+    *static_cast<uint32_t *>(edx) = g_regs.edx;
+}
 
 void
 intrinsics_ut::test_cpuid_x64_cpuid()
 {
-    auto eax = 1U;
-    auto ebx = 2U;
-    auto ecx = 3U;
-    auto edx = 4U;
+    g_regs.eax = 1U;
+    g_regs.ebx = 2U;
+    g_regs.ecx = 3U;
+    g_regs.edx = 4U;
 
-    auto ret = cpuid::get(eax, ebx, ecx, edx);
+    auto ret = cpuid::get(g_regs.eax, g_regs.ebx, g_regs.ecx, g_regs.edx);
 
     this->expect_true(std::get<0>(ret) == 1U);
     this->expect_true(std::get<1>(ret) == 2U);
@@ -422,4 +437,32 @@ intrinsics_ut::test_cpuid_x64_cpuid_feature_information_ecx_dump()
 {
     g_ecx_cpuid[cpuid::feature_information::addr] = 0xFFFFFFFFU;
     cpuid::feature_information::ecx::dump();
+}
+
+void
+intrinsics_ut::test_cpuid_x64_cpuid_extended_feature_flags_subleaf0_ebx_sgx()
+{
+
+    g_regs.ebx = 0x1U << 2;
+    this->expect_true(cpuid::extended_feature_flags::subleaf0::ebx::sgx::get());
+
+    g_regs.ebx = ~(0x1U << 2);
+    this->expect_false(cpuid::extended_feature_flags::subleaf0::ebx::sgx::get());
+}
+
+void
+intrinsics_ut::test_cpuid_x64_cpuid_extended_feature_flags_subleaf0_ebx_rtm()
+{
+    g_regs.ebx = 0x1U << 11;
+    this->expect_true(cpuid::extended_feature_flags::subleaf0::ebx::rtm::get());
+
+    g_regs.ebx = ~(0x1U << 11);
+    this->expect_false(cpuid::extended_feature_flags::subleaf0::ebx::rtm::get());
+}
+
+void
+intrinsics_ut::test_cpuid_x64_cpuid_extended_feature_flags_subleaf0_ebx_dump()
+{
+    g_regs.ebx = 0xFFFFFFFFU;
+    cpuid::extended_feature_flags::subleaf0::ebx::dump();
 }

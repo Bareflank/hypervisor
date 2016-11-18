@@ -54,6 +54,7 @@ SOURCES+=test_debug_x64.cpp
 SOURCES+=test_cache_x64.cpp
 SOURCES+=test_pm_x64.cpp
 SOURCES+=test_cpuid_x64.cpp
+SOURCES+=test_pdpte_x64.cpp
 SOURCES+=test_gdt_x64.cpp
 SOURCES+=test_idt_x64.cpp
 SOURCES+=test_msrs_intel_x64.cpp

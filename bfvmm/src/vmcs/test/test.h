@@ -28,10 +28,14 @@
 #include <memory>
 #include <vmcs/vmcs_intel_x64.h>
 #include <vmcs/vmcs_intel_x64_32bit_control_fields.h>
-#include <memory_manager/memory_manager_x64.h>
 #include <vmcs/vmcs_intel_x64_32bit_read_only_data_fields.h>
+#include <memory_manager/memory_manager_x64.h>
 
-#define run_vmcs_test(cfg, ...) run_vmcs_test_with_args(gsl::cstring_span<>(__PRETTY_FUNCTION__), __LINE__, cfg, __VA_ARGS__)
+#include <intrinsics/msrs_intel_x64.h>
+
+#define test_vmcs_check(cfg, ...) test_vmcs_check_with_args(gsl::cstring_span<>(__PRETTY_FUNCTION__), __LINE__, cfg, __VA_ARGS__)
+
+using namespace intel_x64;
 
 struct control_flow_path
 {
@@ -42,53 +46,52 @@ struct control_flow_path
 
 struct vm_control;
 
-extern std::map<uint32_t, uint64_t> g_msrs;
-extern std::map<uint64_t, uint64_t> g_vmcs_fields;
-extern uint8_t span[0x81];
+struct cpuid_regs
+{
+    uint32_t eax;
+    uint32_t ebx;
+    uint32_t ecx;
+    uint32_t edx;
+};
+
+
+extern std::map<msrs::field_type, msrs::value_type> g_msrs;
+extern std::map<vmcs::field_type, vmcs::value_type> g_vmcs_fields;
+extern std::map<uint32_t, uint32_t> g_eax_cpuid;
 extern bool g_virt_to_phys_return_nullptr;
 extern bool g_phys_to_virt_return_nullptr;
+extern uint64_t g_test_addr;
+extern uint64_t g_virt_apic_addr;
+extern uint64_t g_vmcs_link_addr;
+extern uint64_t g_pdpt_addr;
+extern struct cpuid_regs g_cpuid_regs;
+
+extern uint8_t g_virt_apic_mem[0x81];
+extern uint32_t g_vmcs_link_mem[1];
+extern uint64_t g_pdpt_mem[4];
 
 void setup_mock(MockRepository &mocks, memory_manager_x64 *mm);
-void enable_proc_ctl(uint64_t control);
-void enable_proc_ctl2(uint64_t control);
-void enable_pin_ctl(uint64_t control);
-void enable_exit_ctl(uint64_t control);
-void enable_entry_ctl(uint64_t control);
-void disable_proc_ctl(uint64_t control);
-void disable_proc_ctl2(uint64_t control);
-void disable_pin_ctl(uint64_t control);
-void disable_exit_ctl(uint64_t control);
-void disable_entry_ctl(uint64_t control);
 uintptr_t virtptr_to_physint(void *ptr);
 void *physint_to_virtptr(uintptr_t phys);
 
 void proc_ctl_allow1(uint64_t mask);
 void proc_ctl_allow0(uint64_t mask);
 void proc_ctl_disallow1(uint64_t mask);
-void proc_ctl_disallow0(uint64_t mask);
 
 void proc_ctl2_allow1(uint64_t mask);
 void proc_ctl2_allow0(uint64_t mask);
 void proc_ctl2_disallow1(uint64_t mask);
-void proc_ctl2_disallow0(uint64_t mask);
 
 void pin_ctl_allow1(uint64_t mask);
 void pin_ctl_allow0(uint64_t mask);
-void pin_ctl_disallow1(uint64_t mask);
-void pin_ctl_disallow0(uint64_t mask);
 
 void exit_ctl_allow1(uint64_t mask);
 void exit_ctl_allow0(uint64_t mask);
-void exit_ctl_disallow1(uint64_t mask);
-void exit_ctl_disallow0(uint64_t mask);
 
 void entry_ctl_allow1(uint64_t mask);
 void entry_ctl_allow0(uint64_t mask);
-void entry_ctl_disallow1(uint64_t mask);
-void entry_ctl_disallow0(uint64_t mask);
 
 void vmfunc_ctl_allow1(uint64_t mask);
-void vmfunc_ctl_disallow1(uint64_t mask);
 
 class vmcs_ut : public unittest
 {
@@ -103,10 +106,10 @@ protected:
     bool fini() override;
     bool list() override;
 
-    template <typename R, typename ...Args> void
-    run_vmcs_test_with_args(gsl::cstring_span<> fut, int line,
-                            const std::vector<struct control_flow_path> &cfg,
-                            R(vmcs_intel_x64::*mf)(Args...), Args &&... args)
+    template<class L, class C,
+             class = typename std::enable_if<std::is_integral<L>::value>::type>
+    void test_vmcs_check_with_args(gsl::cstring_span<> fut, L line,
+                                   const std::vector<struct control_flow_path> &cfg, C chk)
     {
         for (int i = 0; static_cast<size_t>(i) < cfg.size(); i++)
         {
@@ -120,18 +123,13 @@ protected:
 
             RUN_UNITTEST_WITH_MOCKS(mocks, [&]
             {
-                vmcs_intel_x64 vmcs{};
-                auto func = std::bind(std::forward<decltype(mf)>(mf), &vmcs, std::forward<Args>(args)...);
-
                 if (path.throws_exception)
-                    this->expect_exception_with_args(func, path.exception, fut, line, i);
+                    this->expect_exception_with_args(std::forward<decltype(chk)>(chk), path.exception, fut, line, i);
                 else
-                    this->expect_no_exception_with_args(func, fut, line, i);
+                    this->expect_no_exception_with_args(std::forward<decltype(chk)>(chk), fut, line, i);
             });
         }
     }
-
-    void test_vm_control_with_args(const struct vm_control &ctl, gsl::cstring_span<> fut, int line);
 
 private:
 
@@ -152,6 +150,10 @@ private:
     void list_natural_width_read_only_data_fields();
     void list_natural_width_guest_state_fields();
     void list_natural_width_host_state_fields();
+
+    void list_checks_on_vmx_controls();
+    void list_checks_on_host_state();
+    void list_checks_on_guest_state();
 
     void test_launch_success();
     void test_launch_vmlaunch_failure();
@@ -578,6 +580,7 @@ private:
     void test_vmcs_vm_exit_controls_save_ia32_efer();
     void test_vmcs_vm_exit_controls_load_ia32_efer();
     void test_vmcs_vm_exit_controls_save_vmx_preemption_timer_value();
+    void test_vmcs_vm_exit_controls_clear_ia32_bndcfgs();
     void test_vmcs_vm_exit_msr_store_count();
     void test_vmcs_vm_exit_msr_load_count();
     void test_vmcs_vm_entry_controls();
@@ -588,6 +591,7 @@ private:
     void test_vmcs_vm_entry_controls_load_ia32_perf_global_ctrl();
     void test_vmcs_vm_entry_controls_load_ia32_pat();
     void test_vmcs_vm_entry_controls_load_ia32_efer();
+    void test_vmcs_vm_entry_controls_load_ia32_bndcfgs();
     void test_vmcs_vm_entry_msr_load_count();
     void test_vmcs_vm_entry_interruption_information_field();
     void test_vmcs_vm_entry_interruption_information_field_vector();
@@ -969,15 +973,37 @@ private:
     void test_vmcs_guest_ia32_perf_global_ctrl();
     void test_vmcs_guest_ia32_perf_global_ctrl_reserved();
     void test_vmcs_guest_pdpte0();
+    void test_vmcs_guest_pdpte0_present();
+    void test_vmcs_guest_pdpte0_reserved();
+    void test_vmcs_guest_pdpte0_pwt();
+    void test_vmcs_guest_pdpte0_pcd();
+    void test_vmcs_guest_pdpte0_page_directory_addr();
     void test_vmcs_guest_pdpte1();
+    void test_vmcs_guest_pdpte1_present();
+    void test_vmcs_guest_pdpte1_reserved();
+    void test_vmcs_guest_pdpte1_pwt();
+    void test_vmcs_guest_pdpte1_pcd();
+    void test_vmcs_guest_pdpte1_page_directory_addr();
     void test_vmcs_guest_pdpte2();
+    void test_vmcs_guest_pdpte2_present();
+    void test_vmcs_guest_pdpte2_reserved();
+    void test_vmcs_guest_pdpte2_pwt();
+    void test_vmcs_guest_pdpte2_pcd();
+    void test_vmcs_guest_pdpte2_page_directory_addr();
     void test_vmcs_guest_pdpte3();
+    void test_vmcs_guest_pdpte3_present();
+    void test_vmcs_guest_pdpte3_reserved();
+    void test_vmcs_guest_pdpte3_pwt();
+    void test_vmcs_guest_pdpte3_pcd();
+    void test_vmcs_guest_pdpte3_page_directory_addr();
+    void test_vmcs_guest_ia32_bndcfgs();
+    void test_vmcs_guest_ia32_bndcfgs_en();
+    void test_vmcs_guest_ia32_bndcfgs_bndpreserve();
+    void test_vmcs_guest_ia32_bndcfgs_reserved();
+    void test_vmcs_guest_ia32_bndcfgs_base_addr_of_bnd_directory();
 
-    void test_check_vmcs_control_state();
-    void test_checks_on_vm_execution_control_fields();
-    void test_checks_on_vm_exit_control_fields();
-    void test_checks_on_vm_entry_control_fields();
-    void test_check_control_ctls_reserved_properly_set();
+    void test_check_control_vmx_controls_all();
+    void test_check_control_vm_execution_control_fields_all();
     void test_check_control_pin_based_ctls_reserved_properly_set();
     void test_check_control_proc_based_ctls_reserved_properly_set();
     void test_check_control_proc_based_ctls2_reserved_properly_set();
@@ -993,15 +1019,19 @@ private:
     void test_check_control_process_posted_interrupt_checks();
     void test_check_control_vpid_checks();
     void test_check_control_enable_ept_checks();
-    void test_check_control_enable_pml_checks();
     void test_check_control_unrestricted_guests();
     void test_check_control_enable_vm_functions();
     void test_check_control_enable_vmcs_shadowing();
     void test_check_control_enable_ept_violation_checks();
+    void test_check_control_enable_pml_checks();
+
+    void test_check_control_vm_exit_control_fields_all();
     void test_check_control_vm_exit_ctls_reserved_properly_set();
     void test_check_control_activate_and_save_preemption_timer_must_be_0();
     void test_check_control_exit_msr_store_address();
     void test_check_control_exit_msr_load_address();
+
+    void test_check_control_vm_entry_control_fields_all();
     void test_check_control_vm_entry_ctls_reserved_properly_set();
     void test_check_control_event_injection_type_vector_checks();
     void test_check_control_event_injection_delivery_ec_checks();
@@ -1010,10 +1040,8 @@ private:
     void test_check_control_event_injection_instr_length_checks();
     void test_check_control_entry_msr_load_address();
 
-    void test_check_vmcs_host_state();
-    void test_check_host_control_registers_and_msrs();
-    void test_check_host_segment_and_descriptor_table_registers();
-    void test_check_host_checks_related_to_address_space_size();
+    void test_check_host_state_all();
+    void test_check_host_control_registers_and_msrs_all();
     void test_check_host_cr0_for_unsupported_bits();
     void test_check_host_cr4_for_unsupported_bits();
     void test_check_host_cr3_for_unsupported_bits();
@@ -1022,6 +1050,8 @@ private:
     void test_check_host_verify_load_ia32_perf_global_ctrl();
     void test_check_host_verify_load_ia32_pat();
     void test_check_host_verify_load_ia32_efer();
+
+    void test_check_host_segment_and_descriptor_table_registers_all();
     void test_check_host_es_selector_rpl_ti_equal_zero();
     void test_check_host_cs_selector_rpl_ti_equal_zero();
     void test_check_host_ss_selector_rpl_ti_equal_zero();
@@ -1037,10 +1067,163 @@ private:
     void test_check_host_gdtr_canonical_base_address();
     void test_check_host_idtr_canonical_base_address();
     void test_check_host_tr_canonical_base_address();
+
+    void test_check_host_address_space_size_all();
     void test_check_host_if_outside_ia32e_mode();
-    void test_check_host_vmcs_host_address_space_size_is_set();
-    void test_check_host_host_address_space_disabled();
-    void test_check_host_host_address_space_enabled();
+    void test_check_host_address_space_size_exit_ctl_is_set();
+    void test_check_host_address_space_disabled();
+    void test_check_host_address_space_enabled();
+
+    void test_check_guest_state_all();
+    void test_check_guest_control_registers_debug_registers_and_msrs_all();
+    void test_check_guest_cr0_for_unsupported_bits();
+    void test_check_guest_cr0_verify_paging_enabled();
+    void test_check_guest_cr4_for_unsupported_bits();
+    void test_check_guest_load_debug_controls_verify_reserved();
+    void test_check_guest_verify_ia_32e_mode_enabled();
+    void test_check_guest_verify_ia_32e_mode_disabled();
+    void test_check_guest_cr3_for_unsupported_bits();
+    void test_check_guest_load_debug_controls_verify_dr7();
+    void test_check_guest_ia32_sysenter_esp_canonical_address();
+    void test_check_guest_ia32_sysenter_eip_canonical_address();
+    void test_check_guest_verify_load_ia32_perf_global_ctrl();
+    void test_check_guest_verify_load_ia32_pat();
+    void test_check_guest_verify_load_ia32_efer();
+    void test_check_guest_verify_load_ia32_bndcfgs();
+
+    void test_check_guest_segment_registers_all();
+    void test_check_guest_tr_ti_bit_equals_0();
+    void test_check_guest_ldtr_ti_bit_equals_0();
+    void test_check_guest_ss_and_cs_rpl_are_the_same();
+    void test_check_guest_cs_base_is_shifted();
+    void test_check_guest_ss_base_is_shifted();
+    void test_check_guest_ds_base_is_shifted();
+    void test_check_guest_es_base_is_shifted();
+    void test_check_guest_fs_base_is_shifted();
+    void test_check_guest_gs_base_is_shifted();
+    void test_check_guest_tr_base_is_canonical();
+    void test_check_guest_fs_base_is_canonical();
+    void test_check_guest_gs_base_is_canonical();
+    void test_check_guest_ldtr_base_is_canonical();
+    void test_check_guest_cs_base_upper_dword_0();
+    void test_check_guest_ss_base_upper_dword_0();
+    void test_check_guest_ds_base_upper_dword_0();
+    void test_check_guest_es_base_upper_dword_0();
+    void test_check_guest_cs_limit();
+    void test_check_guest_ss_limit();
+    void test_check_guest_ds_limit();
+    void test_check_guest_es_limit();
+    void test_check_guest_gs_limit();
+    void test_check_guest_fs_limit();
+    void test_check_guest_v8086_cs_access_rights();
+    void test_check_guest_v8086_ss_access_rights();
+    void test_check_guest_v8086_ds_access_rights();
+    void test_check_guest_v8086_es_access_rights();
+    void test_check_guest_v8086_fs_access_rights();
+    void test_check_guest_v8086_gs_access_rights();
+    void test_check_guest_cs_access_rights_type();
+    void test_check_guest_ss_access_rights_type();
+    void test_check_guest_ds_access_rights_type();
+    void test_check_guest_es_access_rights_type();
+    void test_check_guest_fs_access_rights_type();
+    void test_check_guest_gs_access_rights_type();
+    void test_check_guest_cs_is_not_a_system_descriptor();
+    void test_check_guest_ss_is_not_a_system_descriptor();
+    void test_check_guest_ds_is_not_a_system_descriptor();
+    void test_check_guest_es_is_not_a_system_descriptor();
+    void test_check_guest_fs_is_not_a_system_descriptor();
+    void test_check_guest_gs_is_not_a_system_descriptor();
+    void test_check_guest_cs_type_not_equal_3();
+    void test_check_guest_cs_dpl_adheres_to_ss_dpl();
+    void test_check_guest_ss_dpl_must_equal_rpl();
+    void test_check_guest_ss_dpl_must_equal_zero();
+    void test_check_guest_ds_dpl();
+    void test_check_guest_es_dpl();
+    void test_check_guest_fs_dpl();
+    void test_check_guest_gs_dpl();
+    void test_check_guest_cs_must_be_present();
+    void test_check_guest_ss_must_be_present_if_usable();
+    void test_check_guest_ds_must_be_present_if_usable();
+    void test_check_guest_es_must_be_present_if_usable();
+    void test_check_guest_fs_must_be_present_if_usable();
+    void test_check_guest_gs_must_be_present_if_usable();
+    void test_check_guest_cs_access_rights_reserved_must_be_0();
+    void test_check_guest_ss_access_rights_reserved_must_be_0();
+    void test_check_guest_ds_access_rights_reserved_must_be_0();
+    void test_check_guest_es_access_rights_reserved_must_be_0();
+    void test_check_guest_fs_access_rights_reserved_must_be_0();
+    void test_check_guest_gs_access_rights_reserved_must_be_0();
+    void test_check_guest_cs_db_must_be_0_if_l_equals_1();
+    void test_check_guest_cs_granularity();
+    void test_check_guest_ss_granularity();
+    void test_check_guest_ds_granularity();
+    void test_check_guest_es_granularity();
+    void test_check_guest_fs_granularity();
+    void test_check_guest_gs_granularity();
+    void test_check_guest_cs_access_rights_remaining_reserved_bit_0();
+    void test_check_guest_ss_access_rights_remaining_reserved_bit_0();
+    void test_check_guest_ds_access_rights_remaining_reserved_bit_0();
+    void test_check_guest_es_access_rights_remaining_reserved_bit_0();
+    void test_check_guest_fs_access_rights_remaining_reserved_bit_0();
+    void test_check_guest_gs_access_rights_remaining_reserved_bit_0();
+    void test_check_guest_tr_type_must_be_11();
+    void test_check_guest_tr_must_be_a_system_descriptor();
+    void test_check_guest_tr_must_be_present();
+    void test_check_guest_tr_access_rights_reserved_must_be_0();
+    void test_check_guest_tr_granularity();
+    void test_check_guest_tr_must_be_usable();
+    void test_check_guest_tr_access_rights_remaining_reserved_bit_0();
+    void test_check_guest_ldtr_type_must_be_2();
+    void test_check_guest_ldtr_must_be_a_system_descriptor();
+    void test_check_guest_ldtr_must_be_present();
+    void test_check_guest_ldtr_access_rights_reserved_must_be_0();
+    void test_check_guest_ldtr_granularity();
+    void test_check_guest_ldtr_access_rights_remaining_reserved_bit_0();
+
+    void test_check_guest_descriptor_table_registers_all();
+    void test_check_guest_gdtr_base_must_be_canonical();
+    void test_check_guest_idtr_base_must_be_canonical();
+    void test_check_guest_gdtr_limit_reserved_bits();
+    void test_check_guest_idtr_limit_reserved_bits();
+
+    void test_check_guest_rip_and_rflags_all();
+    void test_check_guest_rip_upper_bits();
+    void test_check_guest_rip_valid_addr();
+    void test_check_guest_rflags_reserved_bits();
+    void test_check_guest_rflags_vm_bit();
+    void test_check_guest_rflag_interrupt_enable();
+
+    void test_check_guest_non_register_state_all();
+    void test_check_guest_valid_activity_state();
+    void test_check_guest_activity_state_not_hlt_when_dpl_not_0();
+    void test_check_guest_must_be_active_if_injecting_blocking_state();
+    void test_check_guest_hlt_valid_interrupts();
+    void test_check_guest_shutdown_valid_interrupts();
+    void test_check_guest_sipi_valid_interrupts();
+    void test_check_guest_valid_activity_state_and_smm();
+    void test_check_guest_interruptibility_state_reserved();
+    void test_check_guest_interruptibility_state_sti_mov_ss();
+    void test_check_guest_interruptibility_state_sti();
+    void test_check_guest_interruptibility_state_external_interrupt();
+    void test_check_guest_interruptibility_state_nmi();
+    void test_check_guest_interruptibility_not_in_smm();
+    void test_check_guest_interruptibility_entry_to_smm();
+    void test_check_guest_interruptibility_state_sti_and_nmi();
+    void test_check_guest_interruptibility_state_virtual_nmi();
+    void test_check_guest_interruptibility_state_enclave_interrupt();
+    void test_check_guest_pending_debug_exceptions_reserved();
+    void test_check_guest_pending_debug_exceptions_dbg_ctl();
+    void test_check_guest_pending_debug_exceptions_rtm();
+    void test_check_guest_vmcs_link_pointer_bits_11_0();
+    void test_check_guest_vmcs_link_pointer_valid_addr();
+    void test_check_guest_vmcs_link_pointer_first_word();
+
+    void test_check_guest_pdptes_all();
+    void test_check_guest_valid_pdpte_with_ept_disabled();
+    void test_check_guest_valid_pdpte_with_ept_enabled();
+
+    void test_check_control_reserved_properly_set();
+    void test_check_memory_type_reserved();
 
     void test_debug_dump();
     void test_debug_dump_16bit_control_fields();
