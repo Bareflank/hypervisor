@@ -28,33 +28,6 @@ using namespace x64;
 using namespace intel_x64;
 
 bool
-vmcs_intel_x64::is_address_canonical(uint64_t addr)
-{
-    return ((addr <= 0x00007FFFFFFFFFFF) || (addr >= 0xFFFF800000000000));
-}
-
-bool
-vmcs_intel_x64::is_linear_address_valid(uint64_t addr)
-{
-    return is_address_canonical(addr);
-}
-
-bool
-vmcs_intel_x64::is_physical_address_valid(uint64_t addr)
-{
-    auto bits = cpuid::addr_size::phys::get();
-    auto mask = (0xFFFFFFFFFFFFFFFFULL >> bits) << bits;
-
-    return ((addr & mask) == 0);
-}
-
-bool
-vmcs_intel_x64::is_supported_event_injection_instr_length_of_0() const
-{
-    return msrs::ia32_vmx_misc::injection_with_instruction_length_of_zero::get();
-}
-
-bool
 vmcs_intel_x64::check_pat(uint64_t pat)
 {
     switch (pat)

@@ -4,6 +4,7 @@
 // Copyright (C) 2015 Assured Information Security, Inc.
 // Author: Rian Quinn        <quinnr@ainfosec.com>
 // Author: Brendan Kerrigan  <kerriganb@ainfosec.com>
+// Author: Connor Davis      <davisc@ainfosec.com>
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -22,7 +23,11 @@
 #ifndef X64_H
 #define X64_H
 
+#include <gsl/gsl>
 #include <constants.h>
+#include <type_traits>
+
+#include <intrinsics/cpuid_x64.h>
 
 // *INDENT-OFF*
 
@@ -109,6 +114,24 @@ namespace interrupt
     constexpr const auto simd_floating_point_exception                   = 19U;
     constexpr const auto virtualization_exception                        = 20U;
 }
+
+template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
+auto is_address_canonical(T addr)
+{ return ((addr <= 0x00007FFFFFFFFFFFUL) || (addr >= 0xFFFF800000000000UL)); }
+
+template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
+auto is_linear_address_valid(T addr)
+{ return is_address_canonical(addr); }
+
+template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
+auto is_physical_address_valid(T addr)
+{
+    auto bits = cpuid::addr_size::phys::get();
+    auto mask = (0xFFFFFFFFFFFFFFFFULL >> bits) << bits;
+
+    return ((addr & mask) == 0);
+}
+
 }
 
 // *INDENT-ON*

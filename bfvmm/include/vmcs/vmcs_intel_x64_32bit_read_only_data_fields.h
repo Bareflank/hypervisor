@@ -47,7 +47,8 @@ namespace vm_instruction_error
     inline auto get_if_exists(bool verbose = false) noexcept
     { return get_vmcs_field_if_exists(addr, name, verbose, exists()); }
 
-    inline auto __vm_instruction_error_description(uint64_t error)
+    template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
+    auto __vm_instruction_error_description(T error)
     {
         switch (error)
         {
@@ -136,8 +137,8 @@ namespace vm_instruction_error
         }
     }
 
-    inline auto
-    vm_instruction_error_description(uint64_t error, bool exists)
+    template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
+    auto vm_instruction_error_description(T error, bool exists)
     {
         if (!exists)
             throw std::logic_error("vm_instruction_error() failed: vm_instruction_error field doesn't exist");
@@ -145,8 +146,8 @@ namespace vm_instruction_error
         return __vm_instruction_error_description(error);
     }
 
-    inline auto
-    vm_instruction_error_description_if_exists(uint64_t error, bool verbose, bool exists)
+    template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
+    auto vm_instruction_error_description_if_exists(T error, bool verbose, bool exists)
     {
         if (!exists && verbose)
             bfwarning << "vm_instruction_error() failed: vm_instruction_error field doesn't exist" << '\n';
@@ -254,8 +255,8 @@ namespace exit_reason
         inline auto get_if_exists(bool verbose = false) noexcept
         { return get_bits(get_vmcs_field_if_exists(addr, name, verbose, exists()), mask) >> from; }
 
-        inline auto
-        __basic_exit_reason_description(uint64_t reason)
+        template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
+        auto __basic_exit_reason_description(T reason)
         {
             switch (reason)
             {
@@ -444,8 +445,8 @@ namespace exit_reason
             };
         }
 
-        inline auto
-        basic_exit_reason_description(uint64_t reason, bool exists)
+        template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
+        auto basic_exit_reason_description(T reason, bool exists)
         {
             if (!exists)
                 throw std::logic_error("basic_exit_reason_description failed: exit_reason field doesn't exist");
@@ -453,8 +454,8 @@ namespace exit_reason
             return __basic_exit_reason_description(reason);
         }
 
-        inline auto
-        basic_exit_reason_description_if_exists(uint64_t reason, bool verbose, bool exists)
+        template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
+        auto basic_exit_reason_description_if_exists(T reason, bool verbose, bool exists)
         {
             if (!exists && verbose)
                 bfwarning << "basic_exit_reason_description_if_exists failed: exit_reason field doesn't exist" << '\n';

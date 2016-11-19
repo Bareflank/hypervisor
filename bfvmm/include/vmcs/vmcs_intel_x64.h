@@ -23,8 +23,6 @@
 #ifndef VMCS_INTEL_X64_H
 #define VMCS_INTEL_X64_H
 
-#include <memory>
-#include <bitmanip.h>
 #include <type_traits>
 #include <vmcs/vmcs_intel_x64_state.h>
 #include <exit_handler/state_save_intel_x64.h>
@@ -206,13 +204,6 @@ protected:
     virtual void print_vm_entry_control_fields();
 
 #endif
-
-    // REMOVE ME: These should be placed in the x64 namespace instead
-    virtual bool is_address_canonical(uint64_t addr);
-    virtual bool is_linear_address_valid(uint64_t addr);
-    virtual bool is_physical_address_valid(uint64_t addr);
-
-    virtual bool is_supported_event_injection_instr_length_of_0() const;
 
     // REMOVE ME: These should be placed in their own check class and
     // created on error instead of being in the VMCS itself which increases
@@ -448,8 +439,8 @@ private:
     { m_state_save = state_save; }
 };
 
-inline auto
-get_vmcs_field(uint64_t addr, const char *name, bool exists)
+template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
+auto get_vmcs_field(T addr, const char *name, bool exists)
 {
     if (!exists)
         throw std::logic_error("get_vmcs_field failed: "_s + name + " field doesn't exist");
@@ -457,8 +448,8 @@ get_vmcs_field(uint64_t addr, const char *name, bool exists)
     return intel_x64::vm::read(addr, name);
 }
 
-inline auto
-get_vmcs_field_if_exists(uint64_t addr, const char *name, bool verbose, bool exists)
+template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
+auto get_vmcs_field_if_exists(T addr, const char *name, bool verbose, bool exists)
 {
     if (exists)
         return intel_x64::vm::read(addr, name);
@@ -469,8 +460,10 @@ get_vmcs_field_if_exists(uint64_t addr, const char *name, bool verbose, bool exi
     return 0UL;
 }
 
-template <class T> void
-set_vmcs_field(T val, uint64_t addr, const char *name, bool exists)
+template <class V, class A,
+          class = typename std::enable_if<std::is_integral<V>::value>::type,
+          class = typename std::enable_if<std::is_integral<A>::value>::type>
+auto set_vmcs_field(V val, A addr, const char *name, bool exists)
 {
     if (!exists)
         throw std::logic_error("set_vmcs_field failed: "_s + name + " field doesn't exist");
@@ -478,8 +471,10 @@ set_vmcs_field(T val, uint64_t addr, const char *name, bool exists)
     intel_x64::vm::write(addr, val, name);
 }
 
-template <class T> void
-set_vmcs_field_if_exists(T val, uint64_t addr, const char *name, bool verbose, bool exists)
+template <class V, class A,
+          class = typename std::enable_if<std::is_integral<V>::value>::type,
+          class = typename std::enable_if<std::is_integral<A>::value>::type>
+auto set_vmcs_field_if_exists(V val, A addr, const char *name, bool verbose, bool exists) noexcept
 {
     if (exists)
         intel_x64::vm::write(addr, val, name);
@@ -488,9 +483,12 @@ set_vmcs_field_if_exists(T val, uint64_t addr, const char *name, bool verbose, b
         bfwarning << "set_vmcs_field failed: " << name << " field doesn't exist" << '\n';
 }
 
-inline void
-set_vm_control(bool val, uint64_t msr_addr, uint64_t ctls_addr,
-               const char *name, uint64_t mask, bool field_exists)
+template <class MA, class CA, class M,
+          class = typename std::enable_if<std::is_integral<MA>::value>::type,
+          class = typename std::enable_if<std::is_integral<CA>::value>::type,
+          class = typename std::enable_if<std::is_integral<M>::value>::type>
+auto set_vm_control(bool val, MA msr_addr, CA ctls_addr,
+                    const char *name, M mask, bool field_exists)
 {
     if (!field_exists)
         throw std::logic_error("set_vm_control failed: "_s + name + " control doesn't exist");
@@ -521,10 +519,12 @@ set_vm_control(bool val, uint64_t msr_addr, uint64_t ctls_addr,
     }
 }
 
-inline void
-set_vm_control_if_allowed(bool val, uint64_t msr_addr, uint64_t ctls_addr,
-                          const char *name, uint64_t mask,
-                          bool verbose, bool field_exists) noexcept
+template <class MA, class CA, class M,
+          class = typename std::enable_if<std::is_integral<MA>::value>::type,
+          class = typename std::enable_if<std::is_integral<CA>::value>::type,
+          class = typename std::enable_if<std::is_integral<M>::value>::type>
+auto set_vm_control_if_allowed(bool val, MA msr_addr, CA ctls_addr, const char *name,
+                               M mask, bool verbose, bool field_exists) noexcept
 {
     if (!field_exists)
     {
@@ -568,7 +568,6 @@ set_vm_control_if_allowed(bool val, uint64_t msr_addr, uint64_t ctls_addr,
     }
 }
 
-
 namespace intel_x64
 {
 namespace vmcs
@@ -579,38 +578,5 @@ using value_type = uint64_t;
 
 }
 }
-
-// VM Interrupability State
-// intel's software developers manual, volume 3, 24.4.2
-#define VM_INTERRUPTABILITY_STATE_STI                             (1 << 0)
-#define VM_INTERRUPTABILITY_STATE_MOV_SS                          (1 << 1)
-#define VM_INTERRUPTABILITY_STATE_SMI                             (1 << 2)
-#define VM_INTERRUPTABILITY_STATE_NMI                             (1 << 3)
-
-
-// MTF VM Exit
-// intel's software developers manual, volume 3, 26.5.2
-#define MTF_VM_EXIT                                               (0)
-
-// Pending Debug Exceptions
-// intel's software developers manual, volume 3, 24.4.2
-#define PENDING_DEBUG_EXCEPTION_B0                                (1 << 0)
-#define PENDING_DEBUG_EXCEPTION_B1                                (1 << 1)
-#define PENDING_DEBUG_EXCEPTION_B2                                (1 << 2)
-#define PENDING_DEBUG_EXCEPTION_B3                                (1 << 3)
-#define PENDING_DEBUG_EXCEPTION_ENABLED_BREAKPOINT                (1 << 12)
-#define PENDING_DEBUG_EXCEPTION_BS                                (1 << 14)
-
-// VPID and EPT Capabilities
-// intel's software developer's manual, volume 3, appendix A.10
-#define IA32_VMX_EPT_VPID_CAP_UC                                  (1ULL << 8)
-#define IA32_VMX_EPT_VPID_CAP_WB                                  (1ULL << 14)
-#define IA32_VMX_EPT_VPID_CAP_AD                                  (1ULL << 21)
-
-// EPTP Format
-// intel's software developer's manual, volume 3, appendix 24.6.11
-#define EPTP_MEMORY_TYPE                                   0x0000000000000007
-#define EPTP_PAGE_WALK_LENGTH                              0x0000000000000038
-#define EPTP_ACCESSED_DIRTY_FLAGS_ENABLED                  0x0000000000000040
 
 #endif
