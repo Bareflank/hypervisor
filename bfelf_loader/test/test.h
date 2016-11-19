@@ -161,6 +161,7 @@ private:
     void test_bfelf_loader_get_info_check_section_name_failure_fini_array();
     void test_bfelf_loader_get_info_get_section_name_failure_eh_frame();
     void test_bfelf_loader_get_info_check_section_name_failure_eh_frame();
+    void test_bfelf_loader_get_info_all();
 
     void test_private_bfelf_error();
     void test_private_invalid_symbol_index();

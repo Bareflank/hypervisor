@@ -78,31 +78,13 @@ CROSS_OUTDIR:=$(CROSS_OUTDIR)/cross
 # Exectuables
 ################################################################################
 
-ifeq ($(shell uname -o), Cygwin)
-    NATIVE_USE_LLVM_CLANG=false
-else
-	ifeq ($(USE_LLVM_CLANG), true)
-		NATIVE_USE_LLVM_CLANG=true
-	else
-		NATIVE_USE_LLVM_CLANG=false
-	endif
-endif
+NATIVE_CC:=$(CC)
+NATIVE_CXX:=$(CXX)
+NATIVE_ASM:=nasm
+NATIVE_LD:=$(CXX)
+NATIVE_AR:=$(AR)
 
-ifeq ($(NATIVE_USE_LLVM_CLANG), true)
-	NATIVE_CC:=clang
-	NATIVE_CXX:=clang++
-	NATIVE_ASM:=nasm
-	NATIVE_LD:=clang++
-	NATIVE_AR:=ar
-else
-	NATIVE_CC:=gcc
-	NATIVE_CXX:=g++
-	NATIVE_ASM:=nasm
-	NATIVE_LD:=g++
-	NATIVE_AR:=ar
-endif
-
-ifeq ($(USE_LLVM_CLANG), true)
+ifeq ($(findstring clang,$(COMPILER)),clang)
 	CROSS_CC:=$(BUILD_ABS)/build_scripts/x86_64-bareflank-clang
 	CROSS_CXX:=$(BUILD_ABS)/build_scripts/x86_64-bareflank-clang++
 	CROSS_ASM:=$(BUILD_ABS)/build_scripts/x86_64-bareflank-nasm
@@ -159,11 +141,6 @@ CROSS_CCFLAGS+=-Wcast-align
 CROSS_CCFLAGS+=-Wconversion
 CROSS_CCFLAGS+=-Wsign-conversion
 CROSS_CCFLAGS+=$(CONFIGURED_CROSS_CCFLAGS)
-
-ifeq ($(PRODUCTION),yes)
-	NATIVE_CCFLAGS+=-O3 -D_FORTIFY_SOURCE=2
-	CROSS_CCFLAGS+=-O3 -D_FORTIFY_SOURCE=2
-endif
 
 ifeq ($(COVERALLS), true)
 	NATIVE_CCFLAGS+=-fprofile-arcs -ftest-coverage
@@ -236,11 +213,6 @@ CROSS_CXXFLAGS+=-Wsign-conversion
 CROSS_CXXFLAGS+=-DGSL_THROW_ON_CONTRACT_VIOLATION
 CROSS_CXXFLAGS+=$(CONFIGURED_CROSS_CXXFLAGS)
 
-ifeq ($(PRODUCTION),yes)
-	NATIVE_CXXFLAGS+=-O3 -D_FORTIFY_SOURCE=2
-	CROSS_CXXFLAGS+=-O3 -D_FORTIFY_SOURCE=2
-endif
-
 ifeq ($(COVERALLS), true)
 	NATIVE_CXXFLAGS+=-fprofile-arcs -ftest-coverage
 endif
@@ -274,7 +246,7 @@ CROSS_ASMFLAGS+=-f elf64
 # Default AR Flags
 ################################################################################
 
-NATIVE_ARFLAGS+=-rcs
+NATIVE_ARFLAGS+=rcs
 
 CROSS_ARFLAGS+=rcs
 

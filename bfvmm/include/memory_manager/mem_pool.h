@@ -52,6 +52,10 @@ constexpr const auto mem_pool_free_index = 0xFFFFFFFFFFFFFFFFUL;
 // Definition
 // -----------------------------------------------------------------------------
 
+///
+/// *INDENT-OFF*
+///
+
 /// Memory Pool
 ///
 /// The VMM has to manage a lot of memory. This includes:
@@ -94,10 +98,9 @@ public:
     /// @ensures none
     ///
     /// @param addr the starting address of the memory pool
-    ///
-mem_pool(integer_pointer addr) noexcept_testing :
-    m_addr(addr),
-           m_size(total_size >> block_shift)
+    mem_pool(integer_pointer addr) noexcept_testing :
+        m_addr(addr),
+        m_size(total_size >> block_shift)
     {
         if (addr == 0)
             static_construction_error();
@@ -308,5 +311,9 @@ public:
     mem_pool(mem_pool &&) noexcept = delete;
     mem_pool &operator=(mem_pool &&) noexcept = delete;
 };
+
+///
+/// *INDENT-ON*
+///
 
 #endif

@@ -89,10 +89,6 @@ parse_arguments() {
             compiler="--compiler $1"
             ;;
 
-        "--use_llvm_clang")
-            use_llvm_clang="--use_llvm_clang"
-            ;;
-
         "--no-configure")
             noconfigure="true"
             ;;
@@ -120,12 +116,12 @@ parse_arguments() {
 setup_build_environment() {
     if [[ ! $noconfigure == "true" ]]; then
         pushd $build_dir
-        $hypervisor_dir/configure $compiler $use_llvm_clang
+        $hypervisor_dir/configure $compiler
         popd
     fi
 
     if [[ $local == "true" ]]; then
-        CROSS_COMPILER=gcc_520 ./tools/scripts/create_cross_compiler.sh
+        CROSS_COMPILER=clang_38 ./tools/scripts/create_cross_compiler.sh
     fi
 
     echo ""

@@ -18,7 +18,7 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-# GCC 5.2.0 Cross Compiler Dockerfile
+# Cross Compiler Dockerfile
 #
 # This dockerfile creates a GCC cross compiler for "x86_64-elf" that can be
 # used to compile source code on the host system. Note that this cross
@@ -38,7 +38,7 @@
 # To create this docker image:
 #
 # - cd <hypervisor repo>
-# - docker build -t bareflank/gcc_540 -f tools/dockerfiles/dockerfile_gcc_540 .
+# - docker build -t bareflank/clang_38 -f tools/dockerfiles/dockerfile_clang_38 .
 
 FROM ubuntu:16.04
 
@@ -58,6 +58,7 @@ RUN apt-get install -y wget
 RUN apt-get install -y texinfo
 RUN apt-get install -y git
 RUN apt-get install -y cmake
+RUN apt-get install -y python
 
 # ------------------------------------------------------------------------------
 # Files
@@ -68,15 +69,15 @@ RUN mkdir -p /tools/scripts/
 COPY ./tools/scripts/create_cross_compiler.sh /tools/scripts/create_cross_compiler.sh
 
 COPY ./tools/scripts/fetch_binutils.sh /tools/scripts/fetch_binutils.sh
-COPY ./tools/scripts/fetch_gcc.sh /tools/scripts/fetch_gcc.sh
+COPY ./tools/scripts/fetch_clang.sh /tools/scripts/fetch_clang.sh
 COPY ./tools/scripts/fetch_nasm.sh /tools/scripts/fetch_nasm.sh
 
 COPY ./tools/scripts/build_binutils.sh /tools/scripts/build_binutils.sh
-COPY ./tools/scripts/build_gcc.sh /tools/scripts/build_gcc.sh
+COPY ./tools/scripts/build_clang.sh /tools/scripts/build_clang.sh
 COPY ./tools/scripts/build_nasm.sh /tools/scripts/build_nasm.sh
 
 # ------------------------------------------------------------------------------
 # Script
 # ------------------------------------------------------------------------------
 
-RUN CROSS_COMPILER=gcc_540 ./tools/scripts/create_cross_compiler.sh
+RUN CROSS_COMPILER=clang_38 ./tools/scripts/create_cross_compiler.sh

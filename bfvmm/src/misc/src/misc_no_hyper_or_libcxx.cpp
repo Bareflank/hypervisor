@@ -19,63 +19,71 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <stdint.h>
-#include <string.h>
-#include <stdlib.h>
+#include <crt.h>
 
-#include <vcpu/vcpu_manager.h>
-#include <serial/serial_port_intel_x64.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <memory.h>
+
+extern "C" int64_t
+start_vmm(uint64_t arg) noexcept
+{ (void) arg; return 0; }
+
+extern "C" int64_t
+stop_vmm(uint64_t arg) noexcept
+{ (void) arg; return 0; }
 
 extern "C" int
 write(int file, const void *buffer, size_t count)
 {
-    if (buffer == nullptr || count == 0)
-        return 0;
-
-    if (file != 1 && file != 2)
-        return 0;
-
-    try
-    {
-        std::string str(static_cast<const char *>(buffer), count);
-        if (str.length() >= 26 && str.compare(0, 8, "$vcpuid=") == 0)
-        {
-            str.erase(0, 8);
-
-            auto vcpuid_str = str.substr(0, 18);
-            auto vcpuid_num = std::stoull(vcpuid_str, 0, 16);
-
-            str.erase(0, 18);
-
-            g_vcm->write(vcpuid_num, str);
-            return static_cast<int>(count);
-        }
-        else
-        {
-            g_vcm->write(0, str);
-            serial_port_intel_x64::instance()->write(str);
-            return static_cast<int>(count);
-        }
-    }
-    catch (...) { }
+    (void) file;
+    (void) buffer;
+    (void) count;
 
     return 0;
 }
 
-extern "C" int
-fstat(int file, struct stat *sbuf)
-{
-    (void) file;
-    (void) sbuf;
+extern "C" void
+__cxa_end_catch(void)
+{ }
 
-    errno = -ENOSYS;
-    return -1;
+extern "C" void
+__cxa_begin_catch(void)
+{ }
+
+extern "C" void
+__gxx_personality_v0(void)
+{ }
+
+namespace std
+{
+void terminate()
+{ }
 }
+
+extern "C" int64_t
+add_md(memory_descriptor *md) noexcept
+{ (void) md; return 0; }
 
 extern "C" void
 __stack_chk_fail(void) noexcept
+{ }
+
+extern "C" void *
+memset(void *block, int c, size_t size)
 {
-    auto msg = "__stack_chk_fail: buffer overflow detected!!!\n";
-    write(1, msg, strlen(msg));
-    abort();
+    auto dstp = static_cast<unsigned char *>(block);
+
+    for (auto i = 0UL; i < size; i++)
+        dstp[i] = static_cast<unsigned char>(c);
+
+    return block;
 }
+
+extern "C" int64_t
+local_init(struct section_info_t *info)
+{ (void) info; return CRT_SUCCESS; }
+
+extern "C" int64_t
+local_fini(struct section_info_t *info)
+{ (void) info; return CRT_SUCCESS; }

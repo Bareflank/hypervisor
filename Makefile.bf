@@ -185,4 +185,3 @@ doxygen_clean:
 tidy:
 	@cd %HYPER_ABS%; \
 	%BUILD_ABS%/build_scripts/verify_source.sh
-

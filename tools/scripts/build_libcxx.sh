@@ -46,6 +46,14 @@ else
     BUILD_TYPE=Debug
 fi
 
+if [[ $compiler == *"clang"* ]]; then
+    cc="$BUILD_ABS/build_scripts/x86_64-bareflank-clang"
+    cxx="$BUILD_ABS/build_scripts/x86_64-bareflank-clang++"
+else
+    cc="$BUILD_ABS/build_scripts/x86_64-bareflank-gcc"
+    cxx="$BUILD_ABS/build_scripts/x86_64-bareflank-g++"
+fi
+
 cmake $BUILD_ABS/source_libcxx/ \
     -DCMAKE_SYSTEM_NAME=Linux \
     -DLLVM_PATH=$BUILD_ABS/source_llvm \
@@ -53,8 +61,8 @@ cmake $BUILD_ABS/source_libcxx/ \
     -DLIBCXX_CXX_ABI_INCLUDE_PATHS=$BUILD_ABS/source_libcxxabi/include \
     -DCMAKE_INSTALL_PREFIX=$BUILD_ABS/sysroot/x86_64-elf/ \
     -DLIBCXX_SYSROOT=$BUILD_ABS/sysroot/x86_64-elf/ \
-    -DCMAKE_C_COMPILER=$BUILD_ABS/build_scripts/x86_64-bareflank-gcc \
-    -DCMAKE_CXX_COMPILER=$BUILD_ABS/build_scripts/x86_64-bareflank-g++ \
+    -DCMAKE_C_COMPILER=$cc \
+    -DCMAKE_CXX_COMPILER=$cxx \
     -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
     -DLIBCXX_HAS_PTHREAD_API=ON \
     -DLIBCXX_ENABLE_EXPERIMENTAL_LIBRARY=OFF

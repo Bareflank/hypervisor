@@ -175,6 +175,7 @@ bool bfelf_loader_ut::list()
     this->test_bfelf_loader_get_info_check_section_name_failure_fini_array();
     this->test_bfelf_loader_get_info_get_section_name_failure_eh_frame();
     this->test_bfelf_loader_get_info_check_section_name_failure_eh_frame();
+    this->test_bfelf_loader_get_info_all();
 
     this->test_private_bfelf_error();
     this->test_private_invalid_symbol_index();

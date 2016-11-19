@@ -23,41 +23,53 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include <vcpu/vcpu_manager.h>
+#include <debug_ring/debug_ring.h>
 #include <serial/serial_port_intel_x64.h>
+
+debug_ring *dr = nullptr;
 
 extern "C" int
 write(int file, const void *buffer, size_t count)
 {
-    if (buffer == nullptr || count == 0)
-        return 0;
+    (void) file;
 
-    if (file != 1 && file != 2)
+    if (buffer == nullptr || count == 0)
         return 0;
 
     try
     {
-        std::string str(static_cast<const char *>(buffer), count);
-        if (str.length() >= 26 && str.compare(0, 8, "$vcpuid=") == 0)
-        {
-            str.erase(0, 8);
+        auto str = std::string(static_cast<const char *>(buffer), count);
 
-            auto vcpuid_str = str.substr(0, 18);
-            auto vcpuid_num = std::stoull(vcpuid_str, 0, 16);
+        if (dr == nullptr)
+            dr = new debug_ring(0);
 
-            str.erase(0, 18);
-
-            g_vcm->write(vcpuid_num, str);
-            return static_cast<int>(count);
-        }
-        else
-        {
-            g_vcm->write(0, str);
-            serial_port_intel_x64::instance()->write(str);
-            return static_cast<int>(count);
-        }
+        dr->write(str);
+        serial_port_intel_x64::instance()->write(str);
+        return static_cast<int>(count);
     }
     catch (...) { }
+
+    return 0;
+}
+
+extern "C" int64_t
+start_vmm(uint64_t arg) noexcept
+{
+    (void) arg;
+
+    auto msg = "start_vmm\n";
+    write(1, msg, strlen(msg));
+
+    return 0;
+}
+
+extern "C" int64_t
+stop_vmm(uint64_t arg) noexcept
+{
+    (void) arg;
+
+    auto msg = "stop_vmm\n";
+    write(1, msg, strlen(msg));
 
     return 0;
 }

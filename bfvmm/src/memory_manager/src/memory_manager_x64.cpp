@@ -296,9 +296,11 @@ add_md(struct memory_descriptor *md) noexcept
     {
         expects(md);
 
-        g_mm->add_md(reinterpret_cast<memory_manager_x64::integer_pointer>(md->virt),
-        reinterpret_cast<memory_manager_x64::integer_pointer>(md->phys),
-        reinterpret_cast<memory_manager_x64::attr_type>(md->type));
+        auto &&virt = reinterpret_cast<memory_manager_x64::integer_pointer>(md->virt);
+        auto &&phys = reinterpret_cast<memory_manager_x64::integer_pointer>(md->phys);
+        auto &&type = reinterpret_cast<memory_manager_x64::attr_type>(md->type);
+
+        g_mm->add_md(virt, phys, type);
     });
 }
 
@@ -306,15 +308,11 @@ add_md(struct memory_descriptor *md) noexcept
 
 extern "C" void *
 _malloc_r(struct _reent *, size_t size)
-{
-    return g_mm->alloc(size);
-}
+{ return g_mm->alloc(size); }
 
 extern "C" void
 _free_r(struct _reent *, void *ptr)
-{
-    g_mm->free(ptr);
-}
+{ g_mm->free(ptr); }
 
 extern "C" void *
 _calloc_r(struct _reent *, size_t nmemb, size_t size)

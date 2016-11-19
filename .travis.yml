@@ -45,7 +45,7 @@ matrix:
     env:
       - TEST="Git Check"
     script:
-      - if [[ -n $(git diff --check HEAD^) ]]; then echo "You must remove whitespace before submitting a pull request"; exit -1; fi
+      - if [[ -n $(git diff --check HEAD^ -- . ':!tools/patches/') ]]; then echo "You must remove whitespace before submitting a pull request"; exit -1; fi
 
   #
   # Coveralls
@@ -124,66 +124,6 @@ matrix:
       - echo "Done"
 
   #
-  # GCC 5.1.0
-  #
-  - os: linux
-    env:
-      - TEST="GCC 5.1.0"
-    services:
-      - docker
-    install:
-      - travis_wait 40 ./tools/scripts/setup_ubuntu.sh --compiler gcc_510
-      - cat env.sh
-    script:
-      - make
-      - make test
-
-  #
-  # GCC 5.2.0
-  #
-  - os: linux
-    env:
-      - TEST="GCC 5.2.0"
-    services:
-      - docker
-    install:
-      - travis_wait 40 ./tools/scripts/setup_ubuntu.sh --compiler gcc_520
-      - cat env.sh
-    script:
-      - make
-      - make test
-
-  #
-  # GCC 5.3.0
-  #
-  - os: linux
-    env:
-      - TEST="GCC 5.3.0"
-    services:
-      - docker
-    install:
-      - travis_wait 40 ./tools/scripts/setup_ubuntu.sh --compiler gcc_530
-      - cat env.sh
-    script:
-      - make
-      - make test
-
-  #
-  # GCC 5.4.0
-  #
-  - os: linux
-    env:
-      - TEST="GCC 5.4.0"
-    services:
-      - docker
-    install:
-      - travis_wait 40 ./tools/scripts/setup_ubuntu.sh --compiler gcc_540
-      - cat env.sh
-    script:
-      - make
-      - make test
-
-  #
   # GCC 6.1.0
   #
   - os: linux
@@ -222,7 +162,7 @@ matrix:
     services:
       - docker
     install:
-      - travis_wait 40 ./tools/scripts/setup_ubuntu.sh --compiler gcc_520 --use_llvm_clang
+      - travis_wait 40 ./tools/scripts/setup_ubuntu.sh --compiler clang_38
       - cat env.sh
     script:
       - make
@@ -237,7 +177,7 @@ matrix:
     services:
       - docker
     install:
-      - travis_wait 40 ./tools/scripts/setup_ubuntu.sh --compiler gcc_620 --use_llvm_clang
+      - travis_wait 40 ./tools/scripts/setup_ubuntu.sh --compiler clang_39
       - cat env.sh
     script:
       - make

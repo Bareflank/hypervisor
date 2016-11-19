@@ -54,6 +54,9 @@ CROSS_OUTDIR+=%BUILD_REL%/../bin
 ################################################################################
 
 SOURCES+=misc.cpp
+SOURCES+=misc_all.cpp
+#SOURCES+=misc_no_hyper.cpp
+#SOURCES+=misc_no_hyper_or_libcxx.cpp
 SOURCES+=execute_entry_x64.asm
 
 INCLUDE_PATHS+=./

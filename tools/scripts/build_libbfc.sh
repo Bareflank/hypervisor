@@ -31,16 +31,24 @@ mkdir -p $BUILD_ABS/build_libbfc
 
 pushd $BUILD_ABS/build_libbfc
 
-export NEWLIB_DEFINES="-D_HAVE_LONG_DOUBLE -D_LDBL_EQ_DBL -D_POSIX_TIMERS -U__STRICT_ANSI__ -DMALLOC_PROVIDED"
-export LIBBFC_DEFINES="-DSYM_PROVIDED__WRITE -DSYM_PROVIDED__MALLOC -DSYM_PROVIDED__FREE -DSYM_PROVIDED__CALLOC -DSYM_PROVIDED__FSTAT -DSYM_PROVIDED__REALLOC -DLOOKUP_TLS_DATA" 2> /dev/null
-export CFLAGS="-fpic -ffreestanding -mno-red-zone $NEWLIB_DEFINES"
-
 cp -Rf $BUILD_ABS/source_libbfc/sysctl.h $BUILD_ABS/sysroot/x86_64-elf/include/sys/
 cp -Rf $BUILD_ABS/source_libbfc/pthread.h $BUILD_ABS/sysroot/x86_64-elf/include/
 
-$BUILD_ABS/build_scripts/x86_64-bareflank-gcc $LIBBFC_DEFINES $CFLAGS -c $BUILD_ABS/source_libbfc/*.c
-$BUILD_ABS/build_scripts/x86_64-bareflank-g++ -std=c++14 $LIBBFC_DEFINES $CFLAGS -c $BUILD_ABS/source_libbfc/*.cpp
-$BUILD_ABS/build_scripts/x86_64-bareflank-ar rcs libbfc.a *.o
-mv libbfc.a $BUILD_ABS/sysroot/x86_64-elf/lib/
+flags="-DSYM_PROVIDED__WRITE -DSYM_PROVIDED__MALLOC -DSYM_PROVIDED__FREE -DSYM_PROVIDED__CALLOC -DSYM_PROVIDED__FSTAT -DSYM_PROVIDED__REALLOC -DLOOKUP_TLS_DATA"
+
+if [[ $compiler == *"clang"* ]]; then
+    cc="$BUILD_ABS/build_scripts/x86_64-bareflank-clang $flags"
+    cxx="$BUILD_ABS/build_scripts/x86_64-bareflank-clang++ $flags"
+    ar="$BUILD_ABS/build_scripts/x86_64-bareflank-ar"
+else
+    cc="$BUILD_ABS/build_scripts/x86_64-bareflank-gcc $flags"
+    cxx="$BUILD_ABS/build_scripts/x86_64-bareflank-g++ $flags"
+    ar="$BUILD_ABS/build_scripts/x86_64-bareflank-ar"
+fi
+
+$cc $CFLAGS -c $BUILD_ABS/source_libbfc/*.c
+$cxx $CXXFLAGS -c $BUILD_ABS/source_libbfc/*.cpp
+$BUILD_ABS/build_scripts/x86_64-bareflank-clang -shared *.o -o libbfc.so
+mv libbfc.so $BUILD_ABS/sysroot/x86_64-elf/lib/
 
 popd
