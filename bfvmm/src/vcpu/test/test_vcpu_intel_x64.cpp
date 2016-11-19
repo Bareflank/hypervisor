@@ -113,7 +113,7 @@ setup_pt(MockRepository &mocks)
 void
 vcpu_ut::test_vcpu_intel_x64_invalid_id()
 {
-    EXPECT_EXCEPTION(std::make_unique<vcpu_intel_x64>(VCPUID_RESERVED), std::invalid_argument);
+    EXPECT_EXCEPTION(std::make_unique<vcpu_intel_x64>(vcpuid::reserved), std::invalid_argument);
 }
 
 void

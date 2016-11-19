@@ -26,8 +26,11 @@
 #include <memory>
 #include <debug_ring/debug_ring.h>
 
-#define VCPUID_RESERVED 0x8000000000000000
-#define VCPUID_GUEST_MASK 0xFFFFFFFF00000000
+namespace vcpuid
+{
+constexpr const auto reserved = 0x8000000000000000UL;
+constexpr const auto guest_mask = 0xFFFFFFFF00000000UL;
+}
 
 /// Virtual CPU
 ///
@@ -218,14 +221,14 @@ public:
     /// @return true if this vCPU belongs to the host VM, false otherwise
     ///
     virtual bool is_host_vm_vcpu()
-    { return (m_id & (VCPUID_GUEST_MASK & ~VCPUID_RESERVED)) == 0; }
+    { return (m_id & (vcpuid::guest_mask & ~vcpuid::reserved)) == 0; }
 
     /// Is Guest VM vCPU
     ///
     /// @return true if this vCPU belongs to a guest VM, false otherwise
     ///
     virtual bool is_guest_vm_vcpu()
-    { return (m_id & (VCPUID_GUEST_MASK & ~VCPUID_RESERVED)) != 0; }
+    { return (m_id & (vcpuid::guest_mask & ~vcpuid::reserved)) != 0; }
 
     /// Write to Debug Ring
     ///

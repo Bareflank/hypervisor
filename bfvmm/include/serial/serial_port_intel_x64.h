@@ -25,59 +25,43 @@
 #include <string>
 #include <memory>
 
+#include <constants.h>
 #include <intrinsics/portio_x64.h>
 
-#define COM1_PORT 0x3F8U
-#define COM2_PORT 0x2F8U
-#define COM3_PORT 0x3E8U
-#define COM4_PORT 0x2E8U
+namespace serial_intel_x64
+{
+constexpr const x64::portio::port_addr_type com1_port = 0x3F8U;
+constexpr const x64::portio::port_addr_type com2_port = 0x2F8U;
+constexpr const x64::portio::port_addr_type com3_port = 0x3E8U;
+constexpr const x64::portio::port_addr_type com4_port = 0x2E8U;
 
-#ifndef DEFAULT_COM_PORT
-#define DEFAULT_COM_PORT COM1_PORT
-#endif
+constexpr const x64::portio::port_8bit_type dlab = 1U << 7;
 
-#ifndef DEFAULT_BAUD_RATE
-#define DEFAULT_BAUD_RATE baud_rate_115200
-#endif
+constexpr const x64::portio::port_addr_type baud_rate_lo_reg = 0U;
+constexpr const x64::portio::port_addr_type baud_rate_hi_reg = 1U;
+constexpr const x64::portio::port_addr_type interrupt_en_reg = 1U;
+constexpr const x64::portio::port_addr_type fifo_control_reg = 2U;
+constexpr const x64::portio::port_addr_type line_control_reg = 3U;
+constexpr const x64::portio::port_addr_type line_status_reg = 5U;
 
-#ifndef DEFAULT_DATA_BITS
-#define DEFAULT_DATA_BITS char_length_8
-#endif
+constexpr const x64::portio::port_8bit_type fifo_control_enable_fifos = 1U << 0;
+constexpr const x64::portio::port_8bit_type fifo_control_clear_recieve_fifo = 1U << 1;
+constexpr const x64::portio::port_8bit_type fifo_control_clear_transmit_fifo = 1U << 2;
+constexpr const x64::portio::port_8bit_type fifo_control_dma_mode_select = 1U << 3;
 
-#ifndef DEFAULT_STOP_BITS
-#define DEFAULT_STOP_BITS stop_bits_1
-#endif
+constexpr const x64::portio::port_8bit_type line_status_data_ready = 1U << 0;
+constexpr const x64::portio::port_8bit_type line_status_overrun_error = 1U << 1;
+constexpr const x64::portio::port_8bit_type line_status_parity_error = 1U << 2;
+constexpr const x64::portio::port_8bit_type line_status_framing_error = 1U << 3;
+constexpr const x64::portio::port_8bit_type line_status_break_interrupt = 1U << 4;
+constexpr const x64::portio::port_8bit_type line_status_empty_transmitter = 1U << 5;
+constexpr const x64::portio::port_8bit_type line_status_empty_data = 1U << 6;
+constexpr const x64::portio::port_8bit_type line_status_recieved_fifo_error = 1U << 7;
 
-#ifndef DEFAULT_PARITY_BITS
-#define DEFAULT_PARITY_BITS parity_none
-#endif
-
-#define DLAB                                                          (1U << 7)
-
-#define BAUD_RATE_LO_REG                                              (0U)
-#define BAUD_RATE_HI_REG                                              (1U)
-#define INTERRUPT_EN_REG                                              (1U)
-#define FIFO_CONTROL_REG                                              (2U)
-#define LINE_CONTROL_REG                                              (3U)
-#define LINE_STATUS_REG                                               (5U)
-
-#define FIFO_CONTROL_ENABLE_FIFOS                                     (1U << 0)
-#define FIFO_CONTROL_CLEAR_RECIEVE_FIFO                               (1U << 1)
-#define FIFO_CONTROL_CLEAR_TRANSMIT_FIFO                              (1U << 2)
-#define FIFO_CONTROL_DMA_MODE_SELECT                                  (1U << 3)
-
-#define LINE_STATUS_DATA_READY                                        (1U << 0)
-#define LINE_STATUS_OVERRUN_ERROR                                     (1U << 1)
-#define LINE_STATUS_PARITY_ERROR                                      (1U << 2)
-#define LINE_STATUS_FRAMING_ERROR                                     (1U << 3)
-#define LINE_STATUS_BREAK_INTERRUPT                                   (1U << 4)
-#define LINE_STATUS_EMPTY_TRANSMITTER                                 (1U << 5)
-#define LINE_STATUS_EMPTY_DATA                                        (1U << 6)
-#define LINE_STATUS_RECIEVED_FIFO_ERROR                               (1U << 7)
-
-#define LINE_CONTROL_DATA_MASK                                        (0x03)
-#define LINE_CONTROL_STOP_MASK                                        (0x04)
-#define LINE_CONTROL_PARITY_MASK                                      (0x38)
+constexpr const x64::portio::port_8bit_type line_control_data_mask = 0x03;
+constexpr const x64::portio::port_8bit_type line_control_stop_mask = 0x04;
+constexpr const x64::portio::port_8bit_type line_control_parity_mask = 0x38;
+}
 
 /// Serial Port (Intel x64)
 ///
@@ -95,6 +79,9 @@
 class serial_port_intel_x64
 {
 public:
+
+    using port_type = x64::portio::port_addr_type;
+    using value_type = x64::portio::port_8bit_type;
 
     enum baud_rate_t
     {
@@ -145,15 +132,24 @@ public:
 
     /// Default Constructor
     ///
-    serial_port_intel_x64(uint16_t port = DEFAULT_COM_PORT) noexcept;
+    /// @expects none
+    /// @ensures none
+    ///
+    serial_port_intel_x64(port_type port = serial_intel_x64::DEFAULT_COM_PORT) noexcept;
 
     /// Destructor
+    ///
+    /// @expects none
+    /// @ensures none
     ///
     ~serial_port_intel_x64() = default;
 
     /// Get Instance
     ///
     /// Get an instance to the class.
+    ///
+    /// @expects none
+    /// @ensures ret != nullptr
     ///
     static serial_port_intel_x64 *instance() noexcept;
 
@@ -163,6 +159,9 @@ public:
     /// rate paramter is actually the divisor that is used, and a custom one
     /// can be used if desired. If 0 is provided, the default baud rate is
     /// used instead.
+    ///
+    /// @expects none
+    /// @ensures none
     ///
     /// @param rate desired baud rate
     ///
@@ -174,6 +173,9 @@ public:
     /// set to a baud rate that this code does not recognize, unknown is
     /// returned.
     ///
+    /// @expects none
+    /// @ensures none
+    ///
     /// @return the baud rate
     ///
     baud_rate_t baud_rate() const noexcept;
@@ -183,11 +185,17 @@ public:
     /// Sets the size of the data that is transmitted. For more information
     /// on the this field, please see http://wiki.osdev.org/Serial_Ports.
     ///
+    /// @expects none
+    /// @ensures none
+    ///
     /// @param bits the desired data bits
     ///
     void set_data_bits(data_bits_t bits) noexcept;
 
     /// Data Bits
+    ///
+    /// @expects none
+    /// @ensures none
     ///
     /// @return the serial device's data bits
     ///
@@ -198,11 +206,17 @@ public:
     /// Sets the stop bits used for transmission. For more information
     /// on the this field, please see http://wiki.osdev.org/Serial_Ports.
     ///
+    /// @expects none
+    /// @ensures none
+    ///
     /// @param bits the desired stop bits
     ///
     void set_stop_bits(stop_bits_t bits) noexcept;
 
     /// Stop Bits
+    ///
+    /// @expects none
+    /// @ensures none
     ///
     /// @return the serial device's stop bits
     ///
@@ -213,11 +227,17 @@ public:
     /// Sets the parity bits used for transmission. For more information
     /// on the this field, please see http://wiki.osdev.org/Serial_Ports.
     ///
+    /// @expects none
+    /// @ensures none
+    ///
     /// @param bits the desired parity bits
     ///
     void set_parity_bits(parity_bits_t bits) noexcept;
 
     /// Parity Bits
+    ///
+    /// @expects none
+    /// @ensures none
     ///
     /// @return the serial device's parity bits
     ///
@@ -225,14 +245,20 @@ public:
 
     // Port
     //
+    /// @expects none
+    /// @ensures none
+    ///
     /// @return the serial device's port
     ///
-    uint16_t port() const noexcept
+    port_type port() const noexcept
     { return m_port; }
 
     /// Write Character
     ///
     /// Writes a character to the serial device.
+    ///
+    /// @expects none
+    /// @ensures none
     ///
     /// @param c character to write
     ///
@@ -242,30 +268,30 @@ public:
     ///
     /// Writes a string to the serial device.
     ///
+    /// @expects none
+    /// @ensures none
+    ///
     /// @param str string to write
     ///
     void write(const std::string &str) noexcept;
-
-public:
-
-    /// Disable the copy consturctor
-    ///
-    serial_port_intel_x64(const serial_port_intel_x64 &) = delete;
-
-    /// Disable the copy operator
-    ///
-    serial_port_intel_x64 &operator=(const serial_port_intel_x64 &) = delete;
 
 private:
 
     void enable_dlab() const noexcept;
     void disable_dlab() const noexcept;
 
-    bool line_status_empty_transmitter() const noexcept;
+    bool get_line_status_empty_transmitter() const noexcept;
 
 private:
 
-    uint16_t m_port;
+    port_type m_port;
+
+public:
+
+    serial_port_intel_x64(serial_port_intel_x64 &&) noexcept = default;
+    serial_port_intel_x64 &operator=(serial_port_intel_x64 &&) noexcept = default;
+    serial_port_intel_x64(const serial_port_intel_x64 &) = delete;
+    serial_port_intel_x64 &operator=(const serial_port_intel_x64 &) = delete;
 };
 
 #endif
