@@ -22,8 +22,7 @@
 #ifndef GUARD_EXCEPTIONS_H
 #define GUARD_EXCEPTIONS_H
 
-#include <debug.h>
-#include <exception.h>
+#include <iostream>
 #include <error_codes.h>
 
 template<class T, class E> E
@@ -35,32 +34,24 @@ guard_exceptions(E error_code, T func)
 
         return SUCCESS;
     }
-    catch (bfn::general_exception &ge)
-    {
-        bfinfo << bfendl;
-        bferror << "----------------------------------------" << bfendl;
-        bferror << "- General Exception Caught             -" << bfendl;
-        bferror << "----------------------------------------" << bfendl;
-        bferror << ge << bfendl;
-    }
     catch (std::bad_alloc &e)
     {
         return BF_BAD_ALLOC;
     }
     catch (std::exception &e)
     {
-        bfinfo << bfendl;
-        bferror << "----------------------------------------" << bfendl;
-        bferror << "- Standard Exception Caught            -" << bfendl;
-        bferror << "----------------------------------------" << bfendl;
-        bferror << e.what() << bfendl;
+        std::cout << '\n';
+        std::cerr << "----------------------------------------" << '\n';
+        std::cerr << "- Standard Exception Caught            -" << '\n';
+        std::cerr << "----------------------------------------" << '\n';
+        std::cerr << e.what() << '\n';
     }
     catch (...)
     {
-        bfinfo << bfendl;
-        bferror << "----------------------------------------" << bfendl;
-        bferror << "- Unknown Exception Caught             -" << bfendl;
-        bferror << "----------------------------------------" << bfendl;
+        std::cout << '\n';
+        std::cerr << "----------------------------------------" << '\n';
+        std::cerr << "- Unknown Exception Caught             -" << '\n';
+        std::cerr << "----------------------------------------" << '\n';
     }
 
     return error_code;

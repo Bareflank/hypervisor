@@ -39,13 +39,23 @@ vcpu_intel_x64::vcpu_intel_x64(uint64_t id,
 {
 }
 
+// REMOVE ME
+namespace bfn
+{
+template<class T, class... Args>
+std::shared_ptr<T> make_shared(Args &&... args)
+{
+    return std::shared_ptr<T>(new T{std::forward<Args>(args)...});
+}
+}
+
 void
 vcpu_intel_x64::init(void *attr)
 {
     auto ___ = gsl::on_failure([&]
     { this->fini(); });
 
-    if (!m_state_save) m_state_save = gsl::make_shared<state_save_intel_x64>();
+    if (!m_state_save) m_state_save = bfn::make_shared<state_save_intel_x64>();
     if (!m_vmxon) m_vmxon = std::make_shared<vmxon_intel_x64>();
     if (!m_vmcs) m_vmcs = std::make_shared<vmcs_intel_x64>();
     if (!m_exit_handler) m_exit_handler = std::make_shared<exit_handler_intel_x64>();

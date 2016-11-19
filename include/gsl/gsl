@@ -19,18 +19,13 @@
 #ifndef GSL_GSL_H
 #define GSL_GSL_H
 
-////////////////////////////////////////////////////////////////////////////////
-/// BAREFLANK - proposed API changes to support Bareflank
-////////////////////////////////////////////////////////////////////////////////
-
-// The GSL does not like clang-tidy when other checks are being performed
-// so we disable them here.
-
+// ----------------------------------------------------------------------------
+// bareflank: start
+// ----------------------------------------------------------------------------
 #pragma GCC system_header
-
-////////////////////////////////////////////////////////////////////////////////
-/// BAREFLANK - proposed API changes to support Bareflank
-////////////////////////////////////////////////////////////////////////////////
+// ----------------------------------------------------------------------------
+// bareflank: end
+// ----------------------------------------------------------------------------
 
 #include "gsl_assert"  // Ensures/Expects
 #include "gsl_util"    // finally()/narrow()/narrow_cast()...
@@ -42,13 +37,13 @@
 
 // No MSVC does constexpr fully yet
 #pragma push_macro("constexpr")
-#define constexpr
+#define constexpr /*constexpr*/
 
 // MSVC 2013 workarounds
 #if _MSC_VER <= 1800
 // noexcept is not understood
 #pragma push_macro("noexcept")
-#define noexcept
+#define noexcept /*noexcept*/
 
 // turn off some misguided warnings
 #pragma warning(push)
@@ -66,20 +61,6 @@ namespace gsl
 //
 using std::unique_ptr;
 using std::shared_ptr;
-
-////////////////////////////////////////////////////////////////////////////////
-/// BAREFLANK - proposed API changes to support Bareflank
-////////////////////////////////////////////////////////////////////////////////
-
-template<class T, class... Args>
-shared_ptr<T> make_shared(Args&&... args)
-{
-    return std::shared_ptr<T>(new T{std::forward<Args>(args)...});
-}
-
-////////////////////////////////////////////////////////////////////////////////
-/// BAREFLANK - proposed API changes to support Bareflank
-////////////////////////////////////////////////////////////////////////////////
 
 template <class T>
 using owner = T;

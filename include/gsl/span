@@ -45,7 +45,7 @@
 
 // No MSVC does constexpr fully yet
 #pragma push_macro("constexpr")
-#define constexpr
+#define constexpr /*constexpr*/
 
 // VS 2013 workarounds
 #if _MSC_VER <= 1800
@@ -57,7 +57,7 @@
 // noexcept is not understood
 #ifndef GSL_THROW_ON_CONTRACT_VIOLATION
 #pragma push_macro("noexcept")
-#define noexcept /* nothing */
+#define noexcept /*noexcept*/
 #endif
 
 #pragma push_macro("alignof")
@@ -78,7 +78,7 @@
 #pragma push_macro("noexcept")
 #endif
 
-#define noexcept /* nothing */
+#define noexcept /*noexcept*/
 
 #endif // GSL_THROW_ON_CONTRACT_VIOLATION
 
@@ -124,23 +124,6 @@ namespace details
     {
     };
 
-    template <class From, class To>
-    struct is_allowed_pointer_conversion
-        : public std::integral_constant<bool, std::is_pointer<From>::value &&
-                                                  std::is_pointer<To>::value &&
-                                                  std::is_convertible<From, To>::value>
-    {
-    };
-
-    template <class From, class To>
-    struct is_allowed_integral_conversion
-        : public std::integral_constant<
-              bool, std::is_integral<From>::value && std::is_integral<To>::value &&
-                        sizeof(From) == sizeof(To) && alignof(From) == alignof(To) &&
-                        std::is_convertible<From, To>::value>
-    {
-    };
-
     template <std::ptrdiff_t From, std::ptrdiff_t To>
     struct is_allowed_extent_conversion
         : public std::integral_constant<bool, From == To || From == gsl::dynamic_extent ||
@@ -150,20 +133,7 @@ namespace details
 
     template <class From, class To>
     struct is_allowed_element_type_conversion
-        : public std::integral_constant<bool, std::is_same<From, std::remove_cv_t<To>>::value ||
-                                                  is_allowed_pointer_conversion<From, To>::value ||
-                                                  is_allowed_integral_conversion<From, To>::value>
-    {
-    };
-
-    template <class From>
-    struct is_allowed_element_type_conversion<From, byte>
-        : public std::integral_constant<bool, !std::is_const<From>::value>
-    {
-    };
-
-    template <class From>
-    struct is_allowed_element_type_conversion<From, const byte> : public std::true_type
+        : public std::integral_constant<bool, std::is_convertible<From (*)[], To (*)[]>::value>
     {
     };
 
@@ -194,6 +164,8 @@ namespace details
         {
         }
 
+        constexpr span_iterator<Span, IsConst>& operator=(const span_iterator<Span, IsConst>&) noexcept = default;
+
         constexpr reference operator*() const
         {
             Expects(span_);
@@ -206,7 +178,7 @@ namespace details
             return &((*span_)[index_]);
         }
 
-        constexpr span_iterator& operator++() noexcept
+        constexpr span_iterator& operator++()
         {
             Expects(span_ && index_ >= 0 && index_ < span_->length());
             ++index_;
@@ -220,7 +192,7 @@ namespace details
             return ret;
         }
 
-        constexpr span_iterator& operator--() noexcept
+        constexpr span_iterator& operator--()
         {
             Expects(span_ && index_ > 0 && index_ <= span_->length());
             --index_;
@@ -240,7 +212,7 @@ namespace details
             return ret += n;
         }
 
-        constexpr span_iterator& operator+=(difference_type n) noexcept
+        constexpr span_iterator& operator+=(difference_type n)
         {
             Expects(span_ && (index_ + n) >= 0 && (index_ + n) <= span_->length());
             index_ += n;
@@ -255,7 +227,7 @@ namespace details
 
         constexpr span_iterator& operator-=(difference_type n) noexcept { return *this += -n; }
 
-        constexpr difference_type operator-(const span_iterator& rhs) const noexcept
+        constexpr difference_type operator-(const span_iterator& rhs) const
         {
             Expects(span_ == rhs.span_);
             return index_ - rhs.index_;
@@ -275,7 +247,7 @@ namespace details
             return !(lhs == rhs);
         }
 
-        constexpr friend bool operator<(const span_iterator& lhs, const span_iterator& rhs) noexcept
+        constexpr friend bool operator<(const span_iterator& lhs, const span_iterator& rhs)
         {
             Expects(lhs.span_ == rhs.span_);
             return lhs.index_ < rhs.index_;
@@ -336,7 +308,7 @@ namespace details
         constexpr extent_type() noexcept {}
 
         template <index_type Other>
-        constexpr extent_type(extent_type<Other> ext) noexcept
+        constexpr extent_type(extent_type<Other> ext)
         {
             static_assert(Other == Ext || Other == dynamic_extent,
                           "Mismatch between fixed-size extent and size of initializing data.");
@@ -429,7 +401,7 @@ public:
                   std::is_convertible<typename Container::pointer, pointer>::value &&
                   std::is_convertible<typename Container::pointer,
                                       decltype(std::declval<Container>().data())>::value>>
-    constexpr span(Container& cont) : span(cont.data(), cont.size())
+    constexpr span(Container& cont) : span(cont.data(), narrow<index_type>(cont.size()))
     {
     }
 
@@ -439,7 +411,7 @@ public:
                   std::is_convertible<typename Container::pointer, pointer>::value &&
                   std::is_convertible<typename Container::pointer,
                                       decltype(std::declval<Container>().data())>::value>>
-    constexpr span(const Container& cont) : span(cont.data(), cont.size())
+    constexpr span(const Container& cont) : span(cont.data(), narrow<index_type>(cont.size()))
     {
     }
 
@@ -456,8 +428,7 @@ public:
             details::is_allowed_extent_conversion<OtherExtent, Extent>::value &&
             details::is_allowed_element_type_conversion<OtherElementType, element_type>::value>>
     constexpr span(const span<OtherElementType, OtherExtent>& other)
-        : storage_(reinterpret_cast<pointer>(other.data()),
-                   details::extent_type<OtherExtent>(other.size()))
+        : storage_(other.data(), details::extent_type<OtherExtent>(other.size()))
     {
     }
 
@@ -467,8 +438,7 @@ public:
             details::is_allowed_extent_conversion<OtherExtent, Extent>::value &&
             details::is_allowed_element_type_conversion<OtherElementType, element_type>::value>>
     constexpr span(span<OtherElementType, OtherExtent>&& other)
-        : storage_(reinterpret_cast<pointer>(other.data()),
-                   details::extent_type<OtherExtent>(other.size()))
+        : storage_(other.data(), details::extent_type<OtherExtent>(other.size()))
     {
     }
 
@@ -531,7 +501,7 @@ public:
     constexpr index_type length() const noexcept { return size(); }
     constexpr index_type size() const noexcept { return storage_.size(); }
     constexpr index_type length_bytes() const noexcept { return size_bytes(); }
-    constexpr index_type size_bytes() const noexcept { return size() * sizeof(element_type); }
+    constexpr index_type size_bytes() const noexcept { return size() * narrow_cast<index_type>(sizeof(element_type)); }
     constexpr bool empty() const noexcept { return size() == 0; }
 
     // [span.elem], span element access
@@ -540,45 +510,17 @@ public:
         Expects(idx >= 0 && idx < storage_.size());
         return data()[idx];
     }
+
+// ----------------------------------------------------------------------------
+// bareflank: start
+// ----------------------------------------------------------------------------
+    template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
+    constexpr reference at(T idx) const { return this->operator[](narrow_cast<index_type>(idx)); }
+// ----------------------------------------------------------------------------
+// bareflank: end
+// ----------------------------------------------------------------------------
     constexpr reference operator()(index_type idx) const { return this->operator[](idx); }
     constexpr pointer data() const noexcept { return storage_.data(); }
-
-    ////////////////////////////////////////////////////////////////////////////
-    /// BAREFLANK - proposed API changes to support Bareflank
-    ////////////////////////////////////////////////////////////////////////////
-
-    // We added this for sanity, and consistency. Instead of using [], which
-    // not allowed in the STL anymore, we use .at to be consistent with the STL,
-    // and we provide an implementation that accepts both signed and unsigned
-    // indexes to prevent from having to maintain separate signed / unsigned
-    // index types in the same code.
-    template<class I, class = typename std::enable_if<std::is_integral<I>::value>::type>
-    constexpr reference at(I idx) const
-    {
-        auto _idx = narrow_cast<index_type>(idx);
-        Expects(_idx >= 0 && _idx < storage_.size());
-        return data()[_idx];
-    }
-
-    // There isn't a fast way of doing a reverse lookup. It is possible to
-    // use std::find_if by looping though each element, and comparing the
-    // reference of each element to the pointer, but this is linear in time.
-    // The following is a simple patch to perform the reverse lookup.
-
-    constexpr bool contains(pointer ptr) const
-    {
-        return ptr >= data() && ptr < data() + size();
-    }
-
-    constexpr index_type index_from_ptr(pointer ptr) const
-    {
-        Expects(ptr >= data() && ptr < data() + size());
-        return ptr - data();
-    }
-
-    ////////////////////////////////////////////////////////////////////////////
-    /// BAREFLANK - proposed API changes to support Bareflank
-    ////////////////////////////////////////////////////////////////////////////
 
     // [span.iter], span iterator support
     iterator begin() const noexcept { return {this, 0}; }
@@ -702,12 +644,12 @@ as_writeable_bytes(span<ElementType, Extent> s) noexcept
 //
 template <class ElementType>
 span<ElementType>
-make_span(ElementType *ptr, typename span<ElementType>::index_type count)
+make_span(ElementType* ptr, typename span<ElementType>::index_type count)
 { return span<ElementType>(ptr, count); }
 
 template <class ElementType>
 span<ElementType>
-make_span(ElementType *firstElem, ElementType *lastElem)
+make_span(ElementType* firstElem, ElementType* lastElem)
 { return span<ElementType>(firstElem, lastElem); }
 
 template <class ElementType, size_t N>
@@ -727,8 +669,22 @@ make_span(const Container &cont)
 
 template <class Ptr>
 span<typename Ptr::element_type>
-make_span(Ptr &ptr, typename span<typename Ptr::element_type>::index_type &&count)
-{ return span<typename Ptr::element_type>(ptr, count); }
+make_span(Ptr& cont, std::ptrdiff_t count)
+{ return span<typename Ptr::element_type>(cont, count); }
+
+template <class Ptr>
+span<typename Ptr::element_type>
+make_span(Ptr& cont)
+{ return span<typename Ptr::element_type>(cont); }
+
+
+// Specialization of gsl::at for span
+template <class ElementType, std::ptrdiff_t Extent>
+constexpr ElementType& at(const span<ElementType, Extent>& s, std::ptrdiff_t index)
+{
+    // No bounds checking here because it is done in span::operator[] called below
+    return s[index];
+}
 
 } // namespace gsl
 

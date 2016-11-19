@@ -37,7 +37,7 @@ else
 fi
 
 if [[ -z "$CUSTOM_CLANG_BRANCH" ]]; then
-    clang_branch=$CLANG_RELEASE
+    clang_branch=$LLVM_RELEASE
 else
     clang_branch=$CUSTOM_CLANG_BRANCH
 fi

@@ -261,7 +261,7 @@ memory_manager_x64::remove_md(integer_pointer virt) noexcept
 }
 
 memory_manager_x64::memory_descriptor_list
-memory_manager_x64::descriptors() const noexcept
+memory_manager_x64::descriptors() const
 {
     memory_descriptor_list list;
     std::lock_guard<std::mutex> guard(g_add_md_mutex);

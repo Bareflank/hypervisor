@@ -28,7 +28,9 @@
 
 void
 exit_handler_intel_x64::handle_vmcall_unittest(vmcall_registers_t &regs)
-{ (void) regs; }
+{
+    (void) regs;
+}
 
 #else
 
