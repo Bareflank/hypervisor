@@ -29,6 +29,8 @@ CC='\033[1;36m'
 CG='\033[1;32m'
 CE='\033[0m'
 
+export INCLUDE_LIBCXX_UNITTESTS=yes
+
 # ------------------------------------------------------------------------------
 # Tests
 # ------------------------------------------------------------------------------
@@ -105,6 +107,9 @@ vmcall_unittest() {
     ARGS="unittest 0x1008" make vmcall
     ARGS="unittest 0x1009" make vmcall
     ARGS="unittest 0x100A" make vmcall
+    ARGS="unittest 0x1100" make vmcall
+    ARGS="unittest 0x1101" make vmcall
+    echo -e ""
     make driver_unload > /dev/null 2>&1
 }
 
@@ -137,13 +142,13 @@ vmcall_data_unformatted() {
     echo -e "$CC""testing:$CB vmcall_data_unformatted$CE"
     make driver_load > /dev/null 2>&1
     make quick
-    sudo rm -Rf /tmp/test_indata.txt
-    sudo rm -Rf /tmp/test_outdata.txt
+    rm -Rf /tmp/test_indata.txt
+    rm -Rf /tmp/test_outdata.txt
     echo "hello world" > /tmp/test_indata.txt
     ARGS="data unformatted /tmp/test_indata.txt /tmp/test_outdata.txt" make vmcall
     if cmp -s "/tmp/test_indata.txt" "/tmp/test_outdata.txt"; then
-        sudo rm -Rf /tmp/test_indata.txt
-        sudo rm -Rf /tmp/test_outdata.txt
+        rm -Rf /tmp/test_indata.txt
+        rm -Rf /tmp/test_outdata.txt
     else
         echo "ERROR: binary files do not match"
         exit 1

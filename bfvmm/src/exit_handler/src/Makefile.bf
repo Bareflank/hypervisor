@@ -33,6 +33,7 @@ else
 endif
 
 ifeq ($(INCLUDE_LIBCXX_UNITTESTS), yes)
+    CROSS_DEFINES+=INCLUDE_LIBCXX_UNITTESTS
 	NATIVE_DEFINES+=INCLUDE_LIBCXX_UNITTESTS
 endif
 
@@ -72,6 +73,8 @@ SOURCES+=exit_handler_intel_x64.cpp
 SOURCES+=exit_handler_intel_x64_entry.cpp
 SOURCES+=exit_handler_intel_x64_support.asm
 SOURCES+=exit_handler_intel_x64_unittests.cpp
+SOURCES+=exit_handler_intel_x64_unittests_containers.cpp
+SOURCES+=exit_handler_intel_x64_unittests_io.cpp
 
 INCLUDE_PATHS+=./
 INCLUDE_PATHS+=%HYPER_ABS%/include/

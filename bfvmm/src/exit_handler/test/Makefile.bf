@@ -27,6 +27,11 @@ TARGET_NAME:=test
 TARGET_TYPE:=bin
 TARGET_COMPILER:=native
 
+ifeq ($(INCLUDE_LIBCXX_UNITTESTS), yes)
+    CROSS_DEFINES+=INCLUDE_LIBCXX_UNITTESTS
+	NATIVE_DEFINES+=INCLUDE_LIBCXX_UNITTESTS
+endif
+
 ################################################################################
 # Compiler Flags
 ################################################################################

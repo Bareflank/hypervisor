@@ -370,12 +370,21 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_vmcall_unittest()
     ehlr.m_state_save->rax = VMCALL_UNITTEST;
     ehlr.m_state_save->rdx = VMCALL_MAGIC_NUMBER;
 
+#ifdef INCLUDE_LIBCXX_UNITTESTS
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        this->expect_no_exception([&]{ ehlr.dispatch(); });
+        this->expect_true(ehlr.m_state_save->rip == g_rip);
+        this->expect_true(ec_sign(ehlr.m_state_save->rdx) == BF_VMCALL_FAILURE);
+    });
+#else
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
         this->expect_no_exception([&]{ ehlr.dispatch(); });
         this->expect_true(ehlr.m_state_save->rip == g_rip);
         this->expect_true(ec_sign(ehlr.m_state_save->rdx) == BF_VMCALL_SUCCESS);
     });
+#endif
 }
 
 void

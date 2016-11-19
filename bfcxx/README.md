@@ -15,7 +15,7 @@ Bareflank leverages [libc++](http://libcxx.llvm.org) to provide support for the 
 - [std::map](http://www.cplusplus.com/reference/map/map/)
 
 ## [Input/Output](http://www.cplusplus.com/reference/iolibrary/)
-\<complete once unit tests are done\>
+- [std::cout](http://www.cplusplus.com/reference/iostream/cout/)
 
 ## [Multi-threading](http://www.cplusplus.com/reference/multithreading/)
 \<complete once unit tests are done\>
