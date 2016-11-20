@@ -113,7 +113,7 @@ setup_pt(MockRepository &mocks)
 void
 vcpu_ut::test_vcpu_intel_x64_invalid_id()
 {
-    EXPECT_EXCEPTION(std::make_unique<vcpu_intel_x64>(vcpuid::reserved), std::invalid_argument);
+    this->expect_exception([&] { std::make_unique<vcpu_intel_x64>(vcpuid::reserved); }, ""_ut_iae);
 }
 
 void
@@ -129,7 +129,7 @@ vcpu_ut::test_vcpu_intel_x64_valid()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_NO_EXCEPTION(std::make_unique<vcpu_intel_x64>(0, dr, on, cs, eh, vs, gs));
+        this->expect_no_exception([&] { std::make_shared<vcpu_intel_x64>(0, dr, on, cs, eh, vs, gs); });
     });
 }
 
@@ -221,7 +221,7 @@ vcpu_ut::test_vcpu_intel_x64_init_vmcs_throws()
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
         auto vc = std::make_unique<vcpu_intel_x64>(0, dr, on, cs, eh, vs, gs);
-        EXPECT_EXCEPTION(vc->init(), std::logic_error);
+        this->expect_exception([&] { vc->init(); }, ""_ut_lee);
     });
 }
 
@@ -443,7 +443,7 @@ vcpu_ut::test_vcpu_intel_x64_run_no_init()
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
         auto vc = std::make_unique<vcpu_intel_x64>(0, dr, on, cs, eh, vs, gs);
-        EXPECT_EXCEPTION(vc->run(), std::runtime_error);
+        this->expect_exception([&] { vc->run(); }, ""_ut_ree);
     });
 }
 
@@ -476,7 +476,7 @@ vcpu_ut::test_vcpu_intel_x64_run_vmxon_throws()
     {
         auto vc = std::make_unique<vcpu_intel_x64>(0, dr, on, cs, eh, vs, gs);
         vc->init();
-        EXPECT_EXCEPTION(vc->run(), std::runtime_error);
+        this->expect_exception([&] { vc->run(); }, ""_ut_ree);
     });
 }
 
@@ -509,7 +509,7 @@ vcpu_ut::test_vcpu_intel_x64_run_vmcs_throws()
     {
         auto vc = std::make_unique<vcpu_intel_x64>(0, dr, on, cs, eh, vs, gs);
         vc->init();
-        EXPECT_EXCEPTION(vc->run(), std::runtime_error);
+        this->expect_exception([&] { vc->run(); }, ""_ut_ree);
     });
 }
 
@@ -676,6 +676,6 @@ vcpu_ut::test_vcpu_intel_x64_hlt_vmxon_throws()
         auto vc = std::make_unique<vcpu_intel_x64>(0, dr, on, cs, eh, vs, gs);
         vc->init();
         vc->run();
-        EXPECT_EXCEPTION(vc->hlt(), std::runtime_error);
+        this->expect_exception([&] { vc->hlt(); }, ""_ut_ree);
     });
 }

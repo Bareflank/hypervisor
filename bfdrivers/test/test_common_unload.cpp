@@ -41,34 +41,34 @@ extern "C"
 void
 driver_entry_ut::test_common_unload_unload_when_already_unloaded()
 {
-    EXPECT_TRUE(common_unload_vmm() == BF_SUCCESS);
+    this->expect_true(common_unload_vmm() == BF_SUCCESS);
 }
 
 void
 driver_entry_ut::test_common_unload_unload_when_running()
 {
-    EXPECT_TRUE(common_add_module(m_dummy_start_vmm_success.get(), m_dummy_start_vmm_success_length) == BF_SUCCESS);
-    EXPECT_TRUE(common_add_module(m_dummy_stop_vmm_success.get(), m_dummy_stop_vmm_success_length) == BF_SUCCESS);
-    EXPECT_TRUE(common_add_module(m_dummy_add_md_success.get(), m_dummy_add_md_success_length) == BF_SUCCESS);
-    EXPECT_TRUE(common_add_module(m_dummy_misc.get(), m_dummy_misc_length) == BF_SUCCESS);
-    EXPECT_TRUE(common_load_vmm() == BF_SUCCESS);
-    EXPECT_TRUE(common_start_vmm() == BF_SUCCESS);
-    EXPECT_TRUE(common_unload_vmm() == BF_ERROR_VMM_INVALID_STATE);
-    EXPECT_TRUE(common_fini() == BF_SUCCESS);
+    this->expect_true(common_add_module(m_dummy_start_vmm_success.get(), m_dummy_start_vmm_success_length) == BF_SUCCESS);
+    this->expect_true(common_add_module(m_dummy_stop_vmm_success.get(), m_dummy_stop_vmm_success_length) == BF_SUCCESS);
+    this->expect_true(common_add_module(m_dummy_add_md_success.get(), m_dummy_add_md_success_length) == BF_SUCCESS);
+    this->expect_true(common_add_module(m_dummy_misc.get(), m_dummy_misc_length) == BF_SUCCESS);
+    this->expect_true(common_load_vmm() == BF_SUCCESS);
+    this->expect_true(common_start_vmm() == BF_SUCCESS);
+    this->expect_true(common_unload_vmm() == BF_ERROR_VMM_INVALID_STATE);
+    this->expect_true(common_fini() == BF_SUCCESS);
 }
 
 void
 driver_entry_ut::test_common_unload_unload_when_corrupt()
 {
-    EXPECT_TRUE(common_add_module(m_dummy_start_vmm_success.get(), m_dummy_start_vmm_success_length) == BF_SUCCESS);
-    EXPECT_TRUE(common_add_module(m_dummy_stop_vmm_failure.get(), m_dummy_stop_vmm_failure_length) == BF_SUCCESS);
-    EXPECT_TRUE(common_add_module(m_dummy_add_md_success.get(), m_dummy_add_md_success_length) == BF_SUCCESS);
-    EXPECT_TRUE(common_add_module(m_dummy_misc.get(), m_dummy_misc_length) == BF_SUCCESS);
-    EXPECT_TRUE(common_load_vmm() == BF_SUCCESS);
-    EXPECT_TRUE(common_start_vmm() == BF_SUCCESS);
-    EXPECT_TRUE(common_fini() == BF_ERROR_VMM_CORRUPTED);
-    EXPECT_TRUE(common_vmm_status() == VMM_CORRUPT);
-    EXPECT_TRUE(common_unload_vmm() == BF_ERROR_VMM_CORRUPTED);
+    this->expect_true(common_add_module(m_dummy_start_vmm_success.get(), m_dummy_start_vmm_success_length) == BF_SUCCESS);
+    this->expect_true(common_add_module(m_dummy_stop_vmm_failure.get(), m_dummy_stop_vmm_failure_length) == BF_SUCCESS);
+    this->expect_true(common_add_module(m_dummy_add_md_success.get(), m_dummy_add_md_success_length) == BF_SUCCESS);
+    this->expect_true(common_add_module(m_dummy_misc.get(), m_dummy_misc_length) == BF_SUCCESS);
+    this->expect_true(common_load_vmm() == BF_SUCCESS);
+    this->expect_true(common_start_vmm() == BF_SUCCESS);
+    this->expect_true(common_fini() == BF_ERROR_VMM_CORRUPTED);
+    this->expect_true(common_vmm_status() == VMM_CORRUPT);
+    this->expect_true(common_unload_vmm() == BF_ERROR_VMM_CORRUPTED);
 
     common_reset();
 }
@@ -76,11 +76,11 @@ driver_entry_ut::test_common_unload_unload_when_corrupt()
 void
 driver_entry_ut::test_common_unload_loader_get_info_failed()
 {
-    EXPECT_TRUE(common_add_module(m_dummy_start_vmm_success.get(), m_dummy_start_vmm_success_length) == BF_SUCCESS);
-    EXPECT_TRUE(common_add_module(m_dummy_stop_vmm_failure.get(), m_dummy_stop_vmm_failure_length) == BF_SUCCESS);
-    EXPECT_TRUE(common_add_module(m_dummy_add_md_success.get(), m_dummy_add_md_success_length) == BF_SUCCESS);
-    EXPECT_TRUE(common_add_module(m_dummy_misc.get(), m_dummy_misc_length) == BF_SUCCESS);
-    EXPECT_TRUE(common_load_vmm() == BF_SUCCESS);
+    this->expect_true(common_add_module(m_dummy_start_vmm_success.get(), m_dummy_start_vmm_success_length) == BF_SUCCESS);
+    this->expect_true(common_add_module(m_dummy_stop_vmm_failure.get(), m_dummy_stop_vmm_failure_length) == BF_SUCCESS);
+    this->expect_true(common_add_module(m_dummy_add_md_success.get(), m_dummy_add_md_success_length) == BF_SUCCESS);
+    this->expect_true(common_add_module(m_dummy_misc.get(), m_dummy_misc_length) == BF_SUCCESS);
+    this->expect_true(common_load_vmm() == BF_SUCCESS);
 
     {
         MockRepository mocks;
@@ -88,7 +88,7 @@ driver_entry_ut::test_common_unload_loader_get_info_failed()
 
         RUN_UNITTEST_WITH_MOCKS(mocks, [&]
         {
-            EXPECT_TRUE(common_unload_vmm() == -1);
+            this->expect_true(common_unload_vmm() == -1);
         });
     }
 
@@ -98,11 +98,11 @@ driver_entry_ut::test_common_unload_loader_get_info_failed()
 void
 driver_entry_ut::test_common_unload_execute_symbol_failed()
 {
-    EXPECT_TRUE(common_add_module(m_dummy_start_vmm_success.get(), m_dummy_start_vmm_success_length) == BF_SUCCESS);
-    EXPECT_TRUE(common_add_module(m_dummy_stop_vmm_failure.get(), m_dummy_stop_vmm_failure_length) == BF_SUCCESS);
-    EXPECT_TRUE(common_add_module(m_dummy_add_md_success.get(), m_dummy_add_md_success_length) == BF_SUCCESS);
-    EXPECT_TRUE(common_add_module(m_dummy_misc.get(), m_dummy_misc_length) == BF_SUCCESS);
-    EXPECT_TRUE(common_load_vmm() == BF_SUCCESS);
+    this->expect_true(common_add_module(m_dummy_start_vmm_success.get(), m_dummy_start_vmm_success_length) == BF_SUCCESS);
+    this->expect_true(common_add_module(m_dummy_stop_vmm_failure.get(), m_dummy_stop_vmm_failure_length) == BF_SUCCESS);
+    this->expect_true(common_add_module(m_dummy_add_md_success.get(), m_dummy_add_md_success_length) == BF_SUCCESS);
+    this->expect_true(common_add_module(m_dummy_misc.get(), m_dummy_misc_length) == BF_SUCCESS);
+    this->expect_true(common_load_vmm() == BF_SUCCESS);
 
     {
         MockRepository mocks;
@@ -110,7 +110,7 @@ driver_entry_ut::test_common_unload_execute_symbol_failed()
 
         RUN_UNITTEST_WITH_MOCKS(mocks, [&]
         {
-            EXPECT_TRUE(common_unload_vmm() == -1);
+            this->expect_true(common_unload_vmm() == -1);
         });
     }
 

@@ -40,7 +40,7 @@ entry_ut::test_start_vmm_success()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_NO_EXCEPTION(start_vmm(0));
+        this->expect_no_exception([&] { start_vmm(0); });
     });
 }
 
@@ -58,7 +58,7 @@ entry_ut::test_start_vmm_throws_general_exception()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_NO_EXCEPTION(start_vmm(0));
+        this->expect_no_exception([&] { start_vmm(0); });
     });
 }
 
@@ -76,7 +76,7 @@ entry_ut::test_start_vmm_throws_standard_exception()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_NO_EXCEPTION(start_vmm(0));
+        this->expect_no_exception([&] { start_vmm(0); });
     });
 }
 
@@ -94,7 +94,7 @@ entry_ut::test_start_vmm_throws_bad_alloc()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_NO_EXCEPTION(start_vmm(0));
+        this->expect_no_exception([&] { start_vmm(0); });
     });
 }
 
@@ -112,7 +112,7 @@ entry_ut::test_start_vmm_throws_any_exception()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_NO_EXCEPTION(start_vmm(0));
+        this->expect_no_exception([&] { start_vmm(0); });
     });
 }
 
@@ -130,7 +130,7 @@ entry_ut::test_stop_vmm_success()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_NO_EXCEPTION(stop_vmm(0));
+        this->expect_no_exception([&] { stop_vmm(0); });
     });
 }
 
@@ -148,7 +148,7 @@ entry_ut::test_stop_vmm_throws_general_exception()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_NO_EXCEPTION(stop_vmm(0));
+        this->expect_no_exception([&] { stop_vmm(0); });
     });
 }
 
@@ -166,7 +166,7 @@ entry_ut::test_stop_vmm_throws_standard_exception()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_NO_EXCEPTION(stop_vmm(0));
+        this->expect_no_exception([&] { stop_vmm(0); });
     });
 }
 
@@ -184,7 +184,7 @@ entry_ut::test_stop_vmm_throws_bad_alloc()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_NO_EXCEPTION(stop_vmm(0));
+        this->expect_no_exception([&] { stop_vmm(0); });
     });
 }
 
@@ -202,6 +202,6 @@ entry_ut::test_stop_vmm_throws_any_exception()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_NO_EXCEPTION(stop_vmm(0));
+        this->expect_no_exception([&] { stop_vmm(0); });
     });
 }

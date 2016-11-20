@@ -25,5 +25,5 @@
 void
 driver_entry_ut::test_common_init()
 {
-    EXPECT_TRUE(common_init() == BF_SUCCESS);
+    this->expect_true(common_init() == BF_SUCCESS);
 }

@@ -51,7 +51,7 @@ bfelf_loader_ut::test_bfelf_loader_get_info_invalid_loader()
     section_info_t info;
 
     auto ret = bfelf_loader_get_info(nullptr, &ef, &info);
-    EXPECT_TRUE(ret == BFELF_ERROR_INVALID_ARG);
+    this->expect_true(ret == BFELF_ERROR_INVALID_ARG);
 }
 
 void
@@ -63,7 +63,7 @@ bfelf_loader_ut::test_bfelf_loader_get_info_invalid_elf_file()
     memset(&loader, 0, sizeof(loader));
 
     auto ret = bfelf_loader_get_info(&loader, nullptr, &info);
-    EXPECT_TRUE(ret == BFELF_ERROR_INVALID_ARG);
+    this->expect_true(ret == BFELF_ERROR_INVALID_ARG);
 }
 
 void
@@ -75,7 +75,7 @@ bfelf_loader_ut::test_bfelf_loader_get_info_invalid_info()
     memset(&loader, 0, sizeof(loader));
 
     auto ret = bfelf_loader_get_info(&loader, &ef, nullptr);
-    EXPECT_TRUE(ret == BFELF_ERROR_INVALID_ARG);
+    this->expect_true(ret == BFELF_ERROR_INVALID_ARG);
 }
 
 void
@@ -88,7 +88,7 @@ bfelf_loader_ut::test_bfelf_loader_get_info_no_relocation()
     memset(&loader, 0, sizeof(loader));
 
     auto ret = bfelf_loader_get_info(&loader, &ef, &info);
-    EXPECT_TRUE(ret == BFELF_ERROR_OUT_OF_ORDER);
+    this->expect_true(ret == BFELF_ERROR_OUT_OF_ORDER);
 }
 
 void
@@ -117,21 +117,21 @@ bfelf_loader_ut::test_bfelf_loader_get_info_expected_misc_resources()
     ASSERT_TRUE(ret == BFELF_SUCCESS);
 
     ret = bfelf_loader_relocate(&loader);
-    EXPECT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     section_info_t info;
 
     ret = bfelf_loader_get_info(&loader, &dummy_misc_ef, &info);
     ASSERT_TRUE(ret == BFELF_SUCCESS);
 
-    EXPECT_TRUE(info.ctors_addr != nullptr || info.init_array_addr != nullptr);
-    EXPECT_TRUE(info.ctors_size != 0 || info.init_array_size != 0);
+    this->expect_true(info.ctors_addr != nullptr || info.init_array_addr != nullptr);
+    this->expect_true(info.ctors_size != 0 || info.init_array_size != 0);
 
-    EXPECT_TRUE(info.dtors_addr != nullptr || info.init_array_addr != nullptr);
-    EXPECT_TRUE(info.dtors_size != 0 || info.init_array_size != 0);
+    this->expect_true(info.dtors_addr != nullptr || info.init_array_addr != nullptr);
+    this->expect_true(info.dtors_size != 0 || info.init_array_size != 0);
 
-    EXPECT_TRUE(info.eh_frame_addr != nullptr);
-    EXPECT_TRUE(info.eh_frame_size != 0);
+    this->expect_true(info.eh_frame_addr != nullptr);
+    this->expect_true(info.eh_frame_size != 0);
 }
 
 void
@@ -160,7 +160,7 @@ bfelf_loader_ut::test_bfelf_loader_get_info_expected_code_resources()
     ASSERT_TRUE(ret == BFELF_SUCCESS);
 
     ret = bfelf_loader_relocate(&loader);
-    EXPECT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     section_info_t info;
     memset(&info, 0, sizeof(info));
@@ -168,14 +168,14 @@ bfelf_loader_ut::test_bfelf_loader_get_info_expected_code_resources()
     ret = bfelf_loader_get_info(&loader, &dummy_code_ef, &info);
     ASSERT_TRUE(ret == BFELF_SUCCESS);
 
-    EXPECT_TRUE(info.ctors_addr == nullptr);
-    EXPECT_TRUE(info.ctors_size == 0);
+    this->expect_true(info.ctors_addr == nullptr);
+    this->expect_true(info.ctors_size == 0);
 
-    EXPECT_TRUE(info.dtors_addr == nullptr);
-    EXPECT_TRUE(info.dtors_size == 0);
+    this->expect_true(info.dtors_addr == nullptr);
+    this->expect_true(info.dtors_size == 0);
 
-    EXPECT_TRUE(info.eh_frame_addr != nullptr);
-    EXPECT_TRUE(info.eh_frame_size != 0);
+    this->expect_true(info.eh_frame_addr != nullptr);
+    this->expect_true(info.eh_frame_size != 0);
 }
 
 void
@@ -204,7 +204,7 @@ bfelf_loader_ut::test_bfelf_loader_get_info_get_section_name_failure_ctors()
     ASSERT_TRUE(ret == BFELF_SUCCESS);
 
     ret = bfelf_loader_relocate(&loader);
-    EXPECT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     section_info_t info;
     memset(&info, 0, sizeof(info));
@@ -245,7 +245,7 @@ bfelf_loader_ut::test_bfelf_loader_get_info_check_section_name_failure_ctors()
     ASSERT_TRUE(ret == BFELF_SUCCESS);
 
     ret = bfelf_loader_relocate(&loader);
-    EXPECT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     section_info_t info;
     memset(&info, 0, sizeof(info));
@@ -291,7 +291,7 @@ bfelf_loader_ut::test_bfelf_loader_get_info_get_section_name_failure_dtors()
     ASSERT_TRUE(ret == BFELF_SUCCESS);
 
     ret = bfelf_loader_relocate(&loader);
-    EXPECT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     section_info_t info;
     memset(&info, 0, sizeof(info));
@@ -337,7 +337,7 @@ bfelf_loader_ut::test_bfelf_loader_get_info_check_section_name_failure_dtors()
     ASSERT_TRUE(ret == BFELF_SUCCESS);
 
     ret = bfelf_loader_relocate(&loader);
-    EXPECT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     section_info_t info;
     memset(&info, 0, sizeof(info));
@@ -388,7 +388,7 @@ bfelf_loader_ut::test_bfelf_loader_get_info_get_section_name_failure_init_array(
     ASSERT_TRUE(ret == BFELF_SUCCESS);
 
     ret = bfelf_loader_relocate(&loader);
-    EXPECT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     section_info_t info;
     memset(&info, 0, sizeof(info));
@@ -439,7 +439,7 @@ bfelf_loader_ut::test_bfelf_loader_get_info_check_section_name_failure_init_arra
     ASSERT_TRUE(ret == BFELF_SUCCESS);
 
     ret = bfelf_loader_relocate(&loader);
-    EXPECT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     section_info_t info;
     memset(&info, 0, sizeof(info));
@@ -495,7 +495,7 @@ bfelf_loader_ut::test_bfelf_loader_get_info_get_section_name_failure_fini_array(
     ASSERT_TRUE(ret == BFELF_SUCCESS);
 
     ret = bfelf_loader_relocate(&loader);
-    EXPECT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     section_info_t info;
     memset(&info, 0, sizeof(info));
@@ -551,7 +551,7 @@ bfelf_loader_ut::test_bfelf_loader_get_info_check_section_name_failure_fini_arra
     ASSERT_TRUE(ret == BFELF_SUCCESS);
 
     ret = bfelf_loader_relocate(&loader);
-    EXPECT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     section_info_t info;
     memset(&info, 0, sizeof(info));
@@ -612,7 +612,7 @@ bfelf_loader_ut::test_bfelf_loader_get_info_get_section_name_failure_eh_frame()
     ASSERT_TRUE(ret == BFELF_SUCCESS);
 
     ret = bfelf_loader_relocate(&loader);
-    EXPECT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     section_info_t info;
     memset(&info, 0, sizeof(info));
@@ -673,7 +673,7 @@ bfelf_loader_ut::test_bfelf_loader_get_info_check_section_name_failure_eh_frame(
     ASSERT_TRUE(ret == BFELF_SUCCESS);
 
     ret = bfelf_loader_relocate(&loader);
-    EXPECT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     section_info_t info;
     memset(&info, 0, sizeof(info));

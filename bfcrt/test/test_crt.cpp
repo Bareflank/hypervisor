@@ -47,7 +47,7 @@ func2()
 void
 crt_ut::test_coveralls()
 {
-    EXPECT_TRUE(register_eh_frame(nullptr, 0) == REGISTER_EH_FRAME_SUCCESS);
+    this->expect_true(register_eh_frame(nullptr, 0) == REGISTER_EH_FRAME_SUCCESS);
     func1();
     func2();
 }
@@ -60,7 +60,7 @@ crt_ut::test_local_init_invalid_arg()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_TRUE(local_init(nullptr) == CRT_FAILURE)
+        this->expect_true(local_init(nullptr) == CRT_FAILURE);
     });
 }
 
@@ -84,7 +84,7 @@ crt_ut::test_local_init_invalid_addr()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_TRUE(local_init(&info) == CRT_SUCCESS);
+        this->expect_true(local_init(&info) == CRT_SUCCESS);
     });
 }
 
@@ -110,7 +110,7 @@ crt_ut::test_local_init_invalid_size()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_TRUE(local_init(&info) == CRT_SUCCESS);
+        this->expect_true(local_init(&info) == CRT_SUCCESS);
     });
 }
 
@@ -136,7 +136,7 @@ crt_ut::test_local_init_register_eh_frame_failure()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_TRUE(local_init(&info) == REGISTER_EH_FRAME_FAILURE);
+        this->expect_true(local_init(&info) == REGISTER_EH_FRAME_FAILURE);
     });
 }
 
@@ -166,7 +166,7 @@ crt_ut::test_local_init_valid_stop_at_size()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_TRUE(local_init(&info) == CRT_SUCCESS);
+        this->expect_true(local_init(&info) == CRT_SUCCESS);
     });
 }
 
@@ -196,7 +196,7 @@ crt_ut::test_local_init_valid_stop_at_null()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_TRUE(local_init(&info) == CRT_SUCCESS);
+        this->expect_true(local_init(&info) == CRT_SUCCESS);
     });
 }
 
@@ -222,14 +222,14 @@ crt_ut::test_local_init_catch_exception()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_TRUE(local_init(&info) == CRT_FAILURE);
+        this->expect_true(local_init(&info) == CRT_FAILURE);
     });
 }
 
 void
 crt_ut::test_local_fini_invalid_arg()
 {
-    EXPECT_TRUE(local_fini(nullptr) == CRT_FAILURE);
+    this->expect_true(local_fini(nullptr) == CRT_FAILURE);
 }
 
 void
@@ -248,7 +248,7 @@ crt_ut::test_local_fini_invalid_addr()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_TRUE(local_fini(&info) == CRT_SUCCESS);
+        this->expect_true(local_fini(&info) == CRT_SUCCESS);
     });
 }
 
@@ -270,7 +270,7 @@ crt_ut::test_local_fini_invalid_size()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_TRUE(local_fini(&info) == CRT_SUCCESS);
+        this->expect_true(local_fini(&info) == CRT_SUCCESS);
     });
 }
 
@@ -296,7 +296,7 @@ crt_ut::test_local_fini_valid_stop_at_size()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_TRUE(local_fini(&info) == CRT_SUCCESS);
+        this->expect_true(local_fini(&info) == CRT_SUCCESS);
     });
 }
 
@@ -322,7 +322,7 @@ crt_ut::test_local_fini_valid_stop_at_null()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_TRUE(local_fini(&info) == CRT_SUCCESS);
+        this->expect_true(local_fini(&info) == CRT_SUCCESS);
     });
 }
 
@@ -348,6 +348,6 @@ crt_ut::test_local_fini_catch_exception()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        EXPECT_TRUE(local_fini(&info) == CRT_FAILURE);
+        this->expect_true(local_fini(&info) == CRT_FAILURE);
     });
 }
