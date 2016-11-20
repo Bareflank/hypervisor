@@ -126,11 +126,11 @@ proc_ctl_allow1(uint64_t mask)
 //void
 //proc_ctl_allow0(uint64_t mask)
 //{ g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] &= ~mask; }
-//
-//void
-//proc_ctl_disallow1(uint64_t mask)
-//{ g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] &= ~(mask << 32); }
-//
+
+void
+proc_ctl_disallow1(uint64_t mask)
+{ g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] &= ~(mask << 32); }
+
 //void
 //proc_ctl_disallow0(uint64_t mask)
 //{ g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] |= mask; }
@@ -1275,6 +1275,31 @@ vmcs_ut::list()
     this->test_check_host_vmcs_host_address_space_size_is_set();
     this->test_check_host_host_address_space_disabled();
     this->test_check_host_host_address_space_enabled();
+
+    this->test_debug_dump();
+    this->test_debug_dump_16bit_control_fields();
+    this->test_debug_dump_16bit_guest_state_fields();
+    this->test_debug_dump_16bit_host_state_fields();
+    this->test_debug_dump_64bit_control_fields();
+    this->test_debug_dump_64bit_read_only_data_field();
+    this->test_debug_dump_64bit_guest_state_fields();
+    this->test_debug_dump_64bit_host_state_fields();
+    this->test_debug_dump_32bit_control_fields();
+    this->test_debug_dump_32bit_read_only_data_fields();
+    this->test_debug_dump_32bit_guest_state_fields();
+    this->test_debug_dump_32bit_host_state_field();
+    this->test_debug_dump_natural_width_control_fields();
+    this->test_debug_dump_natural_width_read_only_data_fields();
+    this->test_debug_dump_natural_width_guest_state_fields();
+    this->test_debug_dump_natural_width_host_state_fields();
+    this->test_debug_dump_vmx_controls();
+    this->test_debug_dump_pin_based_vm_execution_controls();
+    this->test_debug_dump_primary_processor_based_vm_execution_controls();
+    this->test_debug_dump_secondary_processor_based_vm_execution_controls();
+    this->test_debug_dump_vm_exit_control_fields();
+    this->test_debug_dump_vm_entry_control_fields();
+    this->test_debug_dump_vmcs_field();
+    this->test_debug_dump_vm_control();
 
     return true;
 }
