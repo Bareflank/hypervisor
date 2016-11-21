@@ -19,6 +19,9 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+#undef GSL_THROW_ON_CONTRACT_VIOLATION
+#define GSL_TERMINATE_ON_CONTRACT_VIOLATION
+
 #include <gsl/gsl>
 #include <debug.h>
 

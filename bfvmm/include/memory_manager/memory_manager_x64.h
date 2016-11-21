@@ -337,7 +337,7 @@ public:
     ///
     /// @return memory descriptor list
     ///
-    virtual memory_descriptor_list descriptors() const noexcept;
+    virtual memory_descriptor_list descriptors() const;
 
 private:
 
