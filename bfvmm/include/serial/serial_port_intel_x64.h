@@ -243,8 +243,8 @@ public:
     ///
     parity_bits_t parity_bits() const noexcept;
 
-    // Port
-    //
+    /// Port
+    ///
     /// @expects none
     /// @ensures none
     ///
