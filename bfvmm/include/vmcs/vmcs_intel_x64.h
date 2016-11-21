@@ -177,34 +177,6 @@ protected:
 
 protected:
 
-#if 0
-
-    virtual void dump_vmcs();
-    virtual void dump_vmcs_16bit_control_state();
-    virtual void dump_vmcs_16bit_guest_state();
-    virtual void dump_vmcs_16bit_host_state();
-    virtual void dump_vmcs_64bit_control_state();
-    virtual void dump_vmcs_64bit_readonly_state();
-    virtual void dump_vmcs_64bit_guest_state();
-    virtual void dump_vmcs_64bit_host_state();
-    virtual void dump_vmcs_32bit_control_state();
-    virtual void dump_vmcs_32bit_readonly_state();
-    virtual void dump_vmcs_32bit_guest_state();
-    virtual void dump_vmcs_32bit_host_state();
-    virtual void dump_vmcs_natural_control_state();
-    virtual void dump_vmcs_natural_readonly_state();
-    virtual void dump_vmcs_natural_guest_state();
-    virtual void dump_vmcs_natural_host_state();
-
-    virtual void print_execution_controls();
-    virtual void print_pin_based_vm_execution_controls();
-    virtual void print_primary_processor_based_vm_execution_controls();
-    virtual void print_secondary_processor_based_vm_execution_controls();
-    virtual void print_vm_exit_control_fields();
-    virtual void print_vm_entry_control_fields();
-
-#endif
-
     // REMOVE ME: These should be placed in their own check class and
     // created on error instead of being in the VMCS itself which increases
     // the size of the vTable.
@@ -455,7 +427,7 @@ auto get_vmcs_field_if_exists(T addr, const char *name, bool verbose, bool exist
         return intel_x64::vm::read(addr, name);
 
     if (!exists && verbose)
-        bfwarning << "get_vmcs_field_if_exists failed: " << name << " field doesn't exist" << '\n';
+        bfwarning << "get_vmcs_field_if_exists failed: " << name << " field doesn't exist" << bfendl;
 
     return 0UL;
 }
@@ -480,7 +452,7 @@ auto set_vmcs_field_if_exists(V val, A addr, const char *name, bool verbose, boo
         intel_x64::vm::write(addr, val, name);
 
     if (!exists && verbose)
-        bfwarning << "set_vmcs_field failed: " << name << " field doesn't exist" << '\n';
+        bfwarning << "set_vmcs_field failed: " << name << " field doesn't exist" << bfendl;
 }
 
 template <class MA, class CA, class M,
@@ -528,7 +500,7 @@ auto set_vm_control_if_allowed(bool val, MA msr_addr, CA ctls_addr, const char *
 {
     if (!field_exists)
     {
-        bfwarning << "set_vm_control_if_allowed failed: " << name << " control doesn't exist" << '\n';
+        bfwarning << "set_vm_control_if_allowed failed: " << name << " control doesn't exist" << bfendl;
         return;
     }
 
@@ -545,7 +517,7 @@ auto set_vm_control_if_allowed(bool val, MA msr_addr, CA ctls_addr, const char *
             if (verbose)
             {
                 bfwarning << "set_vm_control_if_allowed failed: " << name
-                          << "control is not allowed to be cleared to 0" << '\n';
+                          << "control is not allowed to be cleared to 0" << bfendl;
             }
         }
     }
@@ -562,7 +534,7 @@ auto set_vm_control_if_allowed(bool val, MA msr_addr, CA ctls_addr, const char *
             if (verbose)
             {
                 bfwarning << "set_vm_control_if_allowed failed: " << name
-                          << "control is not allowed to be set to 1" << '\n';
+                          << "control is not allowed to be set to 1" << bfendl;
             }
         }
     }
