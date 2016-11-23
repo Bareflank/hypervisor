@@ -25,7 +25,14 @@
 # ------------------------------------------------------------------------------
 
 check_distro() {
-    case $( grep ^ID= /etc/os-release | cut -d'=' -f 2 ) in
+
+    if [[ -f /etc/os-release ]]; then
+        distro=`grep ^ID= /etc/os-release | cut -d'=' -f 2`
+    else
+        distro=`uname -o`
+    fi
+
+    case $distro in
     $1)
         ;;
     *)
@@ -57,10 +64,10 @@ option_help() {
     echo -e "Sets up the system to compile / use Bareflank"
     echo -e ""
     echo -e "       --help                       show this help menu"
-    echo -e "       --local_compilers            setup local cross compilers"
+    echo -e "       --local-compilers            setup local cross compilers"
     echo -e "       --no-configure               skip the configure step"
     echo -e "       --compiler <dirname>         directory of cross compiler"
-    echo -e "       --out_of_tree <dirname>      setup out of tree build"
+    echo -e "       --out-of-tree <dirname>      setup out of tree build"
     echo -e ""
 }
 
@@ -80,8 +87,12 @@ parse_arguments() {
             exit 0
             ;;
 
-        "--local_compilers")
+        "--local-compilers")
             local="true"
+            ;;
+
+        "--no-configure")
+            noconfigure="true"
             ;;
 
         "--compiler")
@@ -89,11 +100,7 @@ parse_arguments() {
             compiler="--compiler $1"
             ;;
 
-        "--no-configure")
-            noconfigure="true"
-            ;;
-
-        "--out_of_tree")
+        "--out-of-tree")
             shift
             build_dir=$1
             mkdir -p $build_dir

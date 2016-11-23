@@ -7,12 +7,14 @@ environment:
         CYG_MIRROR: http://cygwin.mirror.constant.com
         CYG_CACHE: C:\cygwin64\var\cache\setup
         CYG_BASH: C:\cygwin64\bin\bash
+        CYG_EWDK: C:\cygdrive\c\ewdk
 
 #
 # Cache Cygwin files to speed up build
 #
 cache:
     - '%CYG_CACHE%'
+    - '%CYG_EWDK%'
 
 #
 # Do a shallow clone of the repo to speed up build
@@ -33,11 +35,9 @@ install:
 #
 build_script:
     - 'echo Building...'
-    - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER; ./tools/scripts/setup_cygwin.sh -d --no_ewdk --no-configure"'
-    - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER; ./configure --compiler clang_38"'
-    - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER; make -j2"'
-    - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER; ./configure --compiler clang_39"'
-    - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER; make -j2"'
+    - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER; APPVEYOR=true ./tools/scripts/setup_cygwin.sh"'
+    - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER; APPVEYOR=true make -j2"'
+    - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER; APPVEYOR=true make driver_build"'
 
 #
 # Only build the master branch

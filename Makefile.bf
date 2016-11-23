@@ -58,18 +58,21 @@ endif
 # Subdirs
 ################################################################################
 
-PARENT_SUBDIRS += bfc
-PARENT_SUBDIRS += bfcxx
-PARENT_SUBDIRS += bfcrt
-PARENT_SUBDIRS += bfunwind
-PARENT_SUBDIRS += bfdrivers
-PARENT_SUBDIRS += bfelf_loader
+ifneq ($(APPVEYOR), true)
+	PARENT_SUBDIRS += bfc
+	PARENT_SUBDIRS += bfcxx
+	PARENT_SUBDIRS += bfcrt
+	PARENT_SUBDIRS += bfunwind
+	PARENT_SUBDIRS += bfdrivers
+	PARENT_SUBDIRS += bfelf_loader
+	PARENT_SUBDIRS += bfvmm
+	PARENT_SUBDIRS += $(wildcard %HYPER_ABS%/src_*/)
+	PARENT_SUBDIRS += $(wildcard %HYPER_ABS%/hypervisor_*/)
+	PARENT_SUBDIRS += $(wildcard %BUILD_ABS%/makefiles/src_*/)
+	PARENT_SUBDIRS += $(wildcard %BUILD_ABS%/makefiles/hypervisor_*/)
+endif
+
 PARENT_SUBDIRS += bfm
-PARENT_SUBDIRS += bfvmm
-PARENT_SUBDIRS += $(wildcard %HYPER_ABS%/src_*/)
-PARENT_SUBDIRS += $(wildcard %HYPER_ABS%/hypervisor_*/)
-PARENT_SUBDIRS += $(wildcard %BUILD_ABS%/makefiles/src_*/)
-PARENT_SUBDIRS += $(wildcard %BUILD_ABS%/makefiles/hypervisor_*/)
 
 ################################################################################
 # Common
@@ -81,10 +84,13 @@ include %HYPER_ABS%/common/common_subdir.mk
 # Custom Targets
 ################################################################################
 
+.PHONY: linux_build
 .PHONY: linux_load
 .PHONY: linux_unload
+.PHONY: windows_build
 .PHONY: windows_load
 .PHONY: windows_unload
+.PHONY: driver_build
 .PHONY: driver_load
 .PHONY: driver_unload
 .PHONY: load
@@ -101,6 +107,7 @@ include %HYPER_ABS%/common/common_subdir.mk
 .PHONY: doxygen
 .PHONY: doxygen_clean
 .PHONY: test
+.PHONY: tidy
 
 ifeq ($(shell uname -s), Linux)
     SUDO:=sudo
@@ -108,20 +115,32 @@ else
     SUDO:=
 endif
 
+windows_build: force
+	@%BUILD_ABS%/build_scripts/build_driver.sh
+
 windows_load: force
 	@%BUILD_ABS%/build_scripts/build_driver.sh
+	@%BUILD_ABS%/build_scripts/load_driver.sh
 
 windows_unload: force
 	@%BUILD_ABS%/build_scripts/clean_driver.sh
 
+linux_build: force
+	@%BUILD_ABS%/build_scripts/build_driver.sh
+
 linux_load: force
 	@%BUILD_ABS%/build_scripts/build_driver.sh
+	@%BUILD_ABS%/build_scripts/load_driver.sh
 
 linux_unload: force
 	@%BUILD_ABS%/build_scripts/clean_driver.sh
 
+driver_build:
+	@%BUILD_ABS%/build_scripts/build_driver.sh
+
 driver_load:
 	@%BUILD_ABS%/build_scripts/build_driver.sh
+	@%BUILD_ABS%/build_scripts/load_driver.sh
 
 driver_unload: force
 	@%BUILD_ABS%/build_scripts/clean_driver.sh

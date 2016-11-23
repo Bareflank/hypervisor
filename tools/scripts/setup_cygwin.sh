@@ -20,43 +20,21 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+source $(dirname $0)/setup_common.sh
+
 # ------------------------------------------------------------------------------
 # Checks
 # ------------------------------------------------------------------------------
 
-case $(uname -o) in
-Cygwin)
-    ;;
-*)
-    echo "This script can only be used with: Cygwin"
-    exit 1
-esac
-
-if [[ ! -d "bfelf_loader" ]]; then
-    echo "This script must be run from bareflank root directory"
-    exit 1
-fi
-
-if ! grep -q 'avx' /proc/cpuinfo; then
-    echo "Hardware unsupported. AVX is required"
-    exit 1
-fi
+check_distro Cygwin
+check_folder
+check_hardware
 
 # ------------------------------------------------------------------------------
-# Help
+# Parse Arguments
 # ------------------------------------------------------------------------------
 
-option_help() {
-    echo -e "Usage: setup_cygwin.sh [OPTION]"
-    echo -e "Sets up the system to compile / use Bareflank"
-    echo -e ""
-    echo -e "       -h, --help                       show this help menu"
-    echo -e "       -l, --local_compilers            setup local cross compilers"
-    echo -e "       -n, --no-configure               skip the configure step"
-    echo -e "       -g, --compiler <dirname>         directory of cross compiler"
-    echo -e "       -o, --out_of_tree <dirname>      setup out of tree build"
-    echo -e ""
-}
+parse_arguments $@
 
 # ------------------------------------------------------------------------------
 # Functions
@@ -80,76 +58,15 @@ install_cmake() {
 
 setup_ewdk() {
     if [[ ! -d /cygdrive/c/ewdk ]]; then
+        echo "Fetching EWDK. Please wait..."
         wget -nv -O /tmp/ewdk.zip "https://go.microsoft.com/fwlink/p/?LinkID=699461"
+        echo "Installing EWDK. Please wait..."
         unzip -qq /tmp/ewdk.zip -d /cygdrive/c/ewdk/
         chown -R $USER:SYSTEM /cygdrive/c/ewdk
         icacls.exe `cygpath -w /cygdrive/c/ewdk` /reset /T /Q
         rm -Rf /tmp/ewdk.zip
     fi
 }
-
-setup_cross_compilers() {
-    if [[ ! -f $HOME/bareflank_windows_cross_compilers.tar.gz ]]; then
-        wget -nv -O $HOME/bareflank_windows_cross_compilers.tar.gz "http://138.68.60.235/bareflank_windows_cross_compilers.tar.gz"
-    fi
-    if [[ ! -d $HOME/compilers ]]; then
-        pushd $HOME
-        tar xf bareflank_windows_cross_compilers.tar.gz compilers
-        popd
-    fi
-}
-
-# ------------------------------------------------------------------------------
-# Arguments
-# ------------------------------------------------------------------------------
-
-while [[ $# -ne 0 ]]; do
-
-    if [[ $1 == "-h" ]] || [[ $1 == "--help" ]]; then
-        option_help
-        exit 0
-    fi
-
-    if [[ $1 == "-l" ]] || [[ $1 == "--local_compilers" ]]; then
-        local_compilers="true"
-    fi
-
-    if [[ $1 == "-d" ]] || [[ $1 == "--download_compilers" ]]; then
-        download_compilers="true"
-    fi
-
-    if [[ $1 == "--compiler" ]]; then
-        shift
-        compiler="--compiler $1"
-    fi
-
-    if [[ $1 == "--no_ewdk" ]]; then
-        no_ewdk="true"
-    fi
-
-    if [[ $1 == "--use_llvm_clang" ]]; then
-        use_llvm_clang="--use_llvm_clang"
-    fi
-
-    if [[ $1 == "-n" ]] || [[ $1 == "--no-configure" ]]; then
-        noconfigure="true"
-    fi
-
-    if [[ $1 == "-o" ]] || [[ $1 == "--out_of_tree" ]]; then
-        shift
-        out_of_tree="true"
-        build_dir=$1
-        hypervisor_dir=$PWD
-    fi
-
-    shift
-
-done
-
-if [[ ! $download_compilers == "true" ]]; then
-    echo "Docker currently not supported. Use -d to download local compilers"
-    exit 1
-fi
 
 # ------------------------------------------------------------------------------
 # Setup System
@@ -158,14 +75,14 @@ fi
 case $(uname -r) in
 2.6.*)
     install_common_packages
-    install_cmake
-    if [[ ! $no_ewdk == "true" ]]; then setup_ewdk; fi
+    if [[ ! $APPVEYOR == "true" ]]; then install_cmake; fi
+    setup_ewdk
     ;;
 
 2.5.*)
     install_common_packages
-    install_cmake
-    if [[ ! $no_ewdk == "true" ]]; then setup_ewdk; fi
+    if [[ ! $APPVEYOR == "true" ]]; then install_cmake; fi
+    setup_ewdk
     ;;
 
 *)
@@ -178,42 +95,4 @@ esac
 # Setup Build Environment
 # ------------------------------------------------------------------------------
 
-if [[ $local_compilers == "true" ]]; then
-    echo "Setting up local compilers"
-    CROSS_COMPILER=clang_38 ./tools/scripts/create_cross_compiler.sh
-fi
-
-if [[ $download_compilers == "true" ]]; then
-    echo "Downloading local compilers"
-    setup_cross_compilers
-fi
-
-if [[ ! $noconfigure == "true" ]]; then
-    if [[ $out_of_tree == "true" ]]; then
-        mkdir -p $build_dir
-        pushd $build_dir
-        $hypervisor_dir/configure
-        popd
-    else
-        ./configure $compiler $use_llvm_clang
-    fi
-fi
-
-# ------------------------------------------------------------------------------
-# Done
-# ------------------------------------------------------------------------------
-
-echo ""
-
-echo "WARNING: If you are going to use this machine for testing, you must "
-echo "         turn test signing on yourself:"
-echo ""
-echo "bcdedit.exe /set testsigning ON"
-echo ""
-
-if [[ $out_of_tree == "true" ]]; then
-    echo "To build, run:"
-    echo "    cd $build_dir"
-    echo "    make -j<# cores>"
-    echo ""
-fi
+setup_build_environment
