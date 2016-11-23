@@ -26,7 +26,6 @@
 #include <intrinsics/x64.h>
 #include <vmcs/vmcs_intel_x64_32bit_control_fields.h>
 
-
 /// Intel x86_64 VMCS Check
 ///
 /// This namespace implements the checks found in sections 26.1 through
@@ -265,7 +264,6 @@ void guest_pdptes_all();
 void guest_valid_pdpte_with_ept_disabled();
 void guest_valid_pdpte_with_ept_enabled();
 
-// check helpers
 template<class MA, class C,
          class = typename std::enable_if<std::is_integral<MA>::value>::type,
          class = typename std::enable_if<std::is_integral<C>::value>::type>
@@ -325,4 +323,5 @@ auto memory_type_reserved(T memory_type)
 }
 
 // *INDENT-ON*
+
 #endif
