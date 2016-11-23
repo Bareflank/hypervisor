@@ -18,7 +18,7 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-# GCC 5.2.0 Cross Compiler Dockerfile
+# Cross Compiler Dockerfile
 #
 # This dockerfile creates a GCC cross compiler for "x86_64-elf" that can be
 # used to compile source code on the host system. Note that this cross

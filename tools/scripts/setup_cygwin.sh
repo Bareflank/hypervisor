@@ -180,7 +180,7 @@ esac
 
 if [[ $local_compilers == "true" ]]; then
     echo "Setting up local compilers"
-    CROSS_COMPILER=gcc_520 ./tools/scripts/create_cross_compiler.sh
+    CROSS_COMPILER=clang_38 ./tools/scripts/create_cross_compiler.sh
 fi
 
 if [[ $download_compilers == "true" ]]; then

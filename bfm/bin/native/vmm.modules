@@ -3,6 +3,8 @@
     [
         "%BUILD_ABS%/sysroot/x86_64-elf/lib/libc++.so.1.0",
         "%BUILD_ABS%/sysroot/x86_64-elf/lib/libc++abi.so.1.0",
+        "%BUILD_ABS%/sysroot/x86_64-elf/lib/libc.so",
+        "%BUILD_ABS%/sysroot/x86_64-elf/lib/libbfc.so",
         "%BUILD_ABS%/makefiles/bfcrt/bin/cross/libbfcrt.so",
         "%BUILD_ABS%/makefiles/bfunwind/bin/cross/libbfunwind.so",
         "%BUILD_ABS%/makefiles/bfvmm/src/debug_ring/bin/cross/libdebug_ring.so",

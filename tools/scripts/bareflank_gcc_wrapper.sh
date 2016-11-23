@@ -51,7 +51,7 @@ DOCKER_ARGS="$DOCKER_ARGS -v $HYPER_ABS:$HYPER_ABS -v $BUILD_ABS:$BUILD_ABS -u $
 # Local / Docker Compiler
 # ------------------------------------------------------------------------------
 
-if [[ -f "$HOME/compilers/$compiler/bin/x86_64-elf-gcc" ]]; then
+if [[ -d "$HOME/compilers/$compiler" ]]; then
     LOCAL_COMPILER="true"
     export PATH="$HOME/compilers/$compiler/bin/:$PATH"
 fi
@@ -72,17 +72,9 @@ fi
 
 if [[ $0 == *"clang" ]]; then
     if [[ $LOCAL_COMPILER == "true" ]]; then
-        COMPILER="$HOME/compilers/$compiler/bin/clang --target=x86_64-elf -D__need_size_t -D__need_ptrdiff_t"
+        COMPILER="$HOME/compilers/$compiler/bin/clang --target=x86_64-elf -Qunused-arguments"
     else
-        COMPILER="docker run $DOCKER_ARGS /tmp/compilers/$compiler/bin/clang --target=x86_64-elf -D__need_size_t -D__need_ptrdiff_t"
-    fi
-fi
-
-if [[ $0 == *"clang" ]]; then
-    if [[ $LOCAL_COMPILER == "true" ]]; then
-        COMPILER="$HOME/compilers/$compiler/bin/clang --target=x86_64-elf -D__need_size_t -D__need_ptrdiff_t"
-    else
-        COMPILER="docker run $DOCKER_ARGS /tmp/compilers/$compiler/bin/clang --target=x86_64-elf -D__need_size_t -D__need_ptrdiff_t"
+        COMPILER="docker run $DOCKER_ARGS /tmp/compilers/$compiler/bin/clang --target=x86_64-elf -Qunused-arguments"
     fi
 fi
 
@@ -96,17 +88,9 @@ fi
 
 if [[ $0 == *"clang++" ]]; then
     if [[ $LOCAL_COMPILER == "true" ]]; then
-        COMPILER="$HOME/compilers/$compiler/bin/clang++ --target=x86_64-elf -D__need_size_t -D__need_ptrdiff_t"
+        COMPILER="$HOME/compilers/$compiler/bin/clang++ --target=x86_64-elf -Qunused-arguments"
     else
-        COMPILER="docker run $DOCKER_ARGS /tmp/compilers/$compiler/bin/clang++ --target=x86_64-elf -D__need_size_t -D__need_ptrdiff_t"
-    fi
-fi
-
-if [[ $0 == *"clang++" ]]; then
-    if [[ $LOCAL_COMPILER == "true" ]]; then
-        COMPILER="$HOME/compilers/$compiler/bin/clang++ --target=x86_64-elf -D__need_size_t -D__need_ptrdiff_t"
-    else
-        COMPILER="docker run $DOCKER_ARGS /tmp/compilers/$compiler/bin/clang++ --target=x86_64-elf -D__need_size_t -D__need_ptrdiff_t"
+        COMPILER="docker run $DOCKER_ARGS /tmp/compilers/$compiler/bin/clang++ --target=x86_64-elf -Qunused-arguments"
     fi
 fi
 
@@ -143,169 +127,195 @@ if [[ $0 == *"docker" ]]; then
     exit 0
 fi
 
+if [[ $LOCAL_COMPILER == "true" ]]; then
+    LINKER="$HOME/compilers/$compiler/bin/x86_64-elf-ld"
+else
+    LINKER="docker run $DOCKER_ARGS /tmp/compilers/$compiler/bin/x86_64-elf-ld"
+fi
+
 if [[ $COMPILER == "unsupported" ]]; then
-    echo "You cannot use the wrapper directly. Instead, use a symlink that ends in gcc or g++"
+    echo "You cannot use the wrapper directly. Instead, one of the provided symlinks"
     exit 1
 fi
 
 # ------------------------------------------------------------------------------
-# Mode
+# Mode Flags
 # ------------------------------------------------------------------------------
-
-MODE="link"
-TYPE="binary"
 
 for ARG in "$@"
 do
     if [[ $ARG == "-c" ]]; then
-        MODE="compile"
+        COMPILE_ONLY="yes"
+        continue;
     fi
-
-    if [[ $ARG == "-shared" ]]; then
-        TYPE="shared"
-    fi
-done
-
-# ------------------------------------------------------------------------------
-# Unsupported
-# ------------------------------------------------------------------------------
-
-UNSUPPORTED=false
-
-for ARG in "$@"
-do
-    if [[ $MODE == "link" ]]; then
-        if [[ $ARG == *".c" ]]; then
-            UNSUPPORTED=true
-        fi
-        if [[ $ARG == *".cpp" ]]; then
-            UNSUPPORTED=true
-        fi
-    fi
-done
-
-if [[ $UNSUPPORTED == "true" ]]; then
-    echo "Compiling and linking at the same time is not supported. Use -c"
-    exit 1
-fi
-
-# ------------------------------------------------------------------------------
-# Convert Arguments
-# ------------------------------------------------------------------------------
-
-i=0
-CONVERTED_ARGS[$i]=
-
-for ARG in "$@"
-do
-
-    if [[ $MODE == "link" ]]; then
-
-        # We need to convert the GCC syntax for passing LD flags to LD so that
-        # LD is getting the correct settings.
-        if [[ $ARG == "-Wl,"* ]]; then
-            ARG=${ARG/-Wl,/}
-            ARG=${ARG/,/ }
-        fi
-
-        # GCC's syntax is different than LD's for this option.
-        if [[ $ARG == "-rdynamic" ]]; then
-            ARG="-export-dynamic"
-        fi
-
-    fi
-
-    CONVERTED_ARGS[$i]=$ARG
-    i=$((i + 1))
-
 done
 
 # ------------------------------------------------------------------------------
 # Filter Arguments
 # ------------------------------------------------------------------------------
 
-i=0
-ARGS[$i]=
+COMMON_ARGS_INDEX=0
+COMPILE_ARGS_INDEX=0
+LINK_ARGS_INDEX=0
+SOURCE_ARGS_INDEX=0
+OBJECT_FILE_ARGS_INDEX=0
 
-for ARG in "${CONVERTED_ARGS[@]}"
+COMMON_ARGS[$COMMON_ARGS_INDEX]=
+COMPILE_ARGS[$COMPILE_ARGS_INDEX]=
+LINK_ARGS[$LINK_ARGS_INDEX]=
+SOURCE_ARGS[$SOURCE_ARGS_INDEX]=
+OBJECT_FILE_ARGS[$OBJECT_FILE_ARGS_INDEX]=
+
+for ARG in "$@"
 do
-
-    # This basically just gets rid of some warnings while configuring
-    # libc++ and the libc++abi. Since we know we are using these, we can
-    # ignore this which gets rid of the warnings.
-    if [[ $ARG == "-stdlib=libc++" ]]; then continue; fi
-
-    if [[ $MODE == "link" ]]; then
-
-        # These flags are all specific to GCC and are not used by LD. CMake
-        # will send these to GCC, and GCC filters them similar to what we
-        # do here.
-        if [[ $ARG == "-m"* ]]; then continue; fi
-        if [[ $ARG == "-f"* ]]; then continue; fi
-        if [[ $ARG == "-W"* ]]; then continue; fi
-        if [[ $ARG == "-D"* ]]; then continue; fi
-        if [[ $ARG == "-U"* ]]; then continue; fi
-
-        # For some reason, Libc++abi turns this on for a shared library, and
-        # we really don't want it as we provide the symbols as needed. In
-        # general if this is enabled, we should disable it.
-        if [[ $ARG == "-z defs" ]]; then
-            echo "WARNING: -z defs disabled by bareflank-gcc-wrapper"
-            continue;
-        fi
-
-        # These are not used by LD, and actually cause LD to do some pretty
-        # terrible things. For example, nodefaults tells LD to use "-n" which
-        # changes the permissions from RE/RW -> RWE which is really bad.
-        if [[ $ARG == "-std"* ]]; then continue; fi
-        if [[ $ARG == "-nodefaultlibs" ]]; then continue; fi
+    # Ignored Flags
+    if [[ $ARG == "-stdlib=libc++" ]]; then
+        continue;
     fi
 
-    ARGS[$i]=$ARG
-    i=$((i + 1))
+    if [[ $ARG == "-z defs" ]]; then
+        continue;
+    fi
+
+    # Compile Only Flags
+    if [[ $ARG == "-m"* ]]; then
+        COMPILE_ARGS[$COMPILE_ARGS_INDEX]=$ARG;
+        COMPILE_ARGS_INDEX=$((COMPILE_ARGS_INDEX + 1));
+        continue;
+    fi
+
+    if [[ $ARG == "-f"* ]]; then
+        COMPILE_ARGS[$COMPILE_ARGS_INDEX]=$ARG;
+        COMPILE_ARGS_INDEX=$((COMPILE_ARGS_INDEX + 1));
+        continue;
+    fi
+
+    if [[ $ARG == "-W"* ]]; then
+        COMPILE_ARGS[$COMPILE_ARGS_INDEX]=$ARG;
+        COMPILE_ARGS_INDEX=$((COMPILE_ARGS_INDEX + 1));
+        continue;
+    fi
+
+    if [[ $ARG == "-D"* ]]; then
+
+        if [[ $ARG == "-DPACKAGE"* ]]; then
+            continue
+        fi
+
+        COMPILE_ARGS[$COMPILE_ARGS_INDEX]=$ARG;
+        COMPILE_ARGS_INDEX=$((COMPILE_ARGS_INDEX + 1));
+        continue;
+    fi
+
+    if [[ $ARG == "-U"* ]]; then
+        COMPILE_ARGS[$COMPILE_ARGS_INDEX]=$ARG;
+        COMPILE_ARGS_INDEX=$((COMPILE_ARGS_INDEX + 1));
+        continue;
+    fi
+
+    if [[ $ARG == "-std"* ]]; then
+        COMPILE_ARGS[$COMPILE_ARGS_INDEX]=$ARG;
+        COMPILE_ARGS_INDEX=$((COMPILE_ARGS_INDEX + 1));
+        continue;
+    fi
+
+    if [[ $ARG == "-nodefaultlibs" ]]; then
+        COMPILE_ARGS[$COMPILE_ARGS_INDEX]=$ARG;
+        COMPILE_ARGS_INDEX=$((COMPILE_ARGS_INDEX + 1));
+        continue;
+    fi
+
+    # Link Only Flags
+    if [[ $ARG == "-Wl,"* ]]; then
+        ARG=${ARG/-Wl,/}
+        ARG=${ARG/,/ }
+        LINK_ARGS[$LINK_ARGS_INDEX]=$ARG;
+        LINK_ARGS_INDEX=$((LINK_ARGS_INDEX + 1));
+        continue;
+    fi
+
+    if [[ $ARG == "-rdynamic" ]]; then
+        LINK_ARGS[$LINK_ARGS_INDEX]="-export-dynamic"
+        LINK_ARGS_INDEX=$((LINK_ARGS_INDEX + 1));
+        continue;
+    fi
+
+    # Source Files
+    if [[ $ARG == *".c" ]]; then
+        SOURCE_ARGS[$SOURCE_ARGS_INDEX]=$ARG;
+        SOURCE_ARGS_INDEX=$((SOURCE_ARGS_INDEX + 1));
+        continue;
+    fi
+
+    if [[ $ARG == *".cpp" ]]; then
+        SOURCE_ARGS[$SOURCE_ARGS_INDEX]=$ARG;
+        SOURCE_ARGS_INDEX=$((SOURCE_ARGS_INDEX + 1));
+        continue;
+    fi
+
+    if [[ $ARG == *".cxx" ]]; then
+        SOURCE_ARGS[$SOURCE_ARGS_INDEX]=$ARG;
+        SOURCE_ARGS_INDEX=$((SOURCE_ARGS_INDEX + 1));
+        continue;
+    fi
+
+    if [[ $ARG == *".S" ]]; then
+        SOURCE_ARGS[$SOURCE_ARGS_INDEX]=$ARG;
+        SOURCE_ARGS_INDEX=$((SOURCE_ARGS_INDEX + 1));
+        continue;
+    fi
+
+    # Object Files
+    if [[ $ARG == *".o" ]] && [[ ! $COMPILE_ONLY == "yes" ]]; then
+        OBJECT_FILE_ARGS[$OBJECT_FILE_ARGS_INDEX]=$ARG;
+        OBJECT_FILE_ARGS_INDEX=$((OBJECT_FILE_ARGS_INDEX + 1));
+        continue;
+    fi
+
+    # Common Flags
+    COMMON_ARGS[$COMMON_ARGS_INDEX]=$ARG;
+    COMMON_ARGS_INDEX=$((COMMON_ARGS_INDEX + 1));
 
 done
 
 # ------------------------------------------------------------------------------
-# Sysroot Libraries
+# System Root Includes
 # ------------------------------------------------------------------------------
 
-SYSROOT_LIBS="-lc -lbfc"
-SYSROOT_LIB_PATH="-L$BUILD_ABS/sysroot/x86_64-elf/lib/ "
+SYSROOT_INC_PATH=""
 
-# ------------------------------------------------------------------------------
-# Sysroot Includes
-# ------------------------------------------------------------------------------
+if [[ -d "$HOME/compilers/$compiler/lib/clang/3.*/include/" ]]; then
+    SYSROOT_INC_PATH="$SYSROOT_INC_PATH -isystem $HOME/compilers/$compiler/lib/clang/3.*/include/"
+fi
 
-SYSROOT_INC_PATH="-isystem $HOME/compilers/$compiler/x86_64-elf/include/ -isystem $BUILD_ABS/sysroot/x86_64-elf/include/ -isystem $BUILD_ABS/sysroot/x86_64-elf/include/c++/v1/ "
+if [[ -d "$HOME/compilers/$compiler/x86_64-elf/include/" ]]; then
+    SYSROOT_INC_PATH="$SYSROOT_INC_PATH -isystem $HOME/compilers/$compiler/x86_64-elf/include/"
+fi
+
+if [[ -d "$BUILD_ABS/sysroot/x86_64-elf/include/" ]]; then
+    SYSROOT_INC_PATH="$SYSROOT_INC_PATH -isystem $BUILD_ABS/sysroot/x86_64-elf/include/"
+fi
+
+if [[ -d "$BUILD_ABS/sysroot/x86_64-elf/include/c++/v1/" ]]; then
+    SYSROOT_INC_PATH="$SYSROOT_INC_PATH -isystem $BUILD_ABS/sysroot/x86_64-elf/include/c++/v1/"
+fi
 
 # ------------------------------------------------------------------------------
 # Execute
 # ------------------------------------------------------------------------------
 
-if [ ! -z "$VERBOSE" ]; then
-    echo "ARGS: ${ARGS[*]}"
-    echo "MODE: $MODE"
-    echo "COMPILER: $COMPILER"
-    echo "FILTERED ARGS: ${ARGS[*]}"
-    echo "SYSROOT_LIBS: $SYSROOT_LIBS"
-    echo "SYSROOT_LIB_PATH: $SYSROOT_LIB_PATH"
-    echo "SYSROOT_INC_PATH: $SYSROOT_INC_PATH"
-    echo "BAREFLANK_LIBS: $BAREFLANK_LIBS"
-    echo ""
-fi
+if [[ -n "$SOURCE_ARGS" ]]; then
 
-if [[ $MODE == "compile" ]]; then
-    $COMPILER ${ARGS[*]} $SYSROOT_INC_PATH
-fi
-
-if [[ $MODE == "link" ]]; then
-
-    if [[ $LOCAL_COMPILER == "true" ]]; then
-        LINKER="$HOME/compilers/$compiler/bin/x86_64-elf-ld"
-    else
-        LINKER="docker run $DOCKER_ARGS /tmp/compilers/$compiler/bin/x86_64-elf-ld"
+    if [[ ! $COMPILE_ONLY == "yes" ]]; then
+        COMPILE_ARGS[$COMPILE_ARGS_INDEX]="-c";
+        COMPILE_ARGS_INDEX=$((COMPILE_ARGS_INDEX + 1));
     fi
 
-    $LINKER ${ARGS[*]} $SYSROOT_LIB_PATH $SYSROOT_LIBS $BAREFLANK_LIBS -z max-page-size=4096 -z common-page-size=4096 -z relro -z now
+    $COMPILER $SYSROOT_INC_PATH ${COMPILE_ARGS[*]} ${COMMON_ARGS[*]} ${SOURCE_ARGS[*]}
 fi
+
+if [[ $COMPILE_ONLY == "yes" ]]; then
+    exit 0
+fi
+
+$LINKER ${OBJECT_FILE_ARGS[*]} ${LINK_ARGS[*]} ${COMMON_ARGS[*]} -z max-page-size=4096 -z common-page-size=4096 -z relro -z now

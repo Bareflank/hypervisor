@@ -44,7 +44,7 @@ endif
 
 ifeq ($(PRODUCTION),yes)
     NATIVE_CCFLAGS+=-O3 -D_FORTIFY_SOURCE=2
-    NATIVE_CXXFLAGS+=-O3 -DGSL_UNENFORCED_ON_CONTRACT_VIOLATION -D_FORTIFY_SOURCE=2
+    NATIVE_CXXFLAGS+=-O3 -D_FORTIFY_SOURCE=2
 endif
 
 ################################################################################

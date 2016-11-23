@@ -35,6 +35,7 @@ CE='\033[0m'
 # ------------------------------------------------------------------------------
 
 COMMON_FLAGS=""
+COMMON_FLAGS="$COMMON_FLAGS -g"
 COMMON_FLAGS="$COMMON_FLAGS -fpic"
 COMMON_FLAGS="$COMMON_FLAGS -fexceptions"
 COMMON_FLAGS="$COMMON_FLAGS -fstack-protector-strong"
@@ -66,12 +67,21 @@ CROSS_CCFLAGS="$CROSS_CCFLAGS -std=c99"
 CROSS_CXXFLAGS="$CROSS_COMMON_FLAGS"
 CROSS_CXXFLAGS="$CROSS_CXXFLAGS -std=c++14"
 CROSS_CXXFLAGS="$CROSS_CXXFLAGS -fno-use-cxa-atexit"
+#CROSS_CXXFLAGS="$CROSS_CXXFLAGS -fno-threadsafe-statics"
 
 NATIVE_CCFLAGS="$COMMON_FLAGS"
 NATIVE_CCFLAGS="$NATIVE_CCFLAGS -std=c99"
 
 NATIVE_CXXFLAGS="$COMMON_FLAGS"
 NATIVE_CXXFLAGS="$NATIVE_CXXFLAGS -std=c++14"
+
+if [[ $PRODUCTION == yes ]]; then
+    CROSS_CCFLAGS="$CROSS_CCFLAGS -O3"
+    CROSS_CCFLAGS="$CROSS_CCFLAGS -D_FORTIFY_SOURCE=2"
+
+    CROSS_CXXFLAGS="$CROSS_CXXFLAGS -O3"
+    CROSS_CXXFLAGS="$CROSS_CXXFLAGS -D_FORTIFY_SOURCE=2"
+fi
 
 # ------------------------------------------------------------------------------
 # Environment
@@ -144,7 +154,6 @@ check_env() {
         echo "export LLVM_RELEASE=\"release_39\"" >> $BUILD_ABS/env.sh
         echo "export module_file=\"$module_file\"" >> $BUILD_ABS/env.sh
         echo "export compiler=\"$compiler\"" >> $BUILD_ABS/env.sh
-        echo "export USE_LLVM_CLANG=\"$USE_LLVM_CLANG\"" >> $BUILD_ABS/env.sh
         echo "export CFLAGS=\"$CROSS_CCFLAGS\"" >> $BUILD_ABS/env.sh
         echo "export CXXFLAGS=\"$CROSS_CXXFLAGS\"" >> $BUILD_ABS/env.sh
         printf "export extensions=\"" >> $BUILD_ABS/env.sh
@@ -193,7 +202,6 @@ option_help() {
     echo -e "       -m, --module_file <filename>     module_file to use"
     echo -e "       -e, --extension <dirname>        directory of extension"
     echo -e "           --compiler <dirname>         directory of cross compiler"
-    echo -e "           --use_llvm_clang             use LLVM / Clang where possible"
     echo -e ""
 }
 
@@ -285,7 +293,7 @@ option_run() {
             BUILD_REL=$BUILD_ABS
         fi
         if [[ -z "$compiler" ]]; then
-            compiler=gcc_520
+            compiler=clang_38
         fi
         IFS=';' read -ra extensions <<< "$extensions"
     fi
@@ -431,7 +439,7 @@ copy_makefile() {
     echo -e "BUILD_ABS:=$BUILD_ABS" >> $1/Makefile.tmp
     echo -e "HYPER_REL:=$2" >> $1/Makefile.tmp
     echo -e "BUILD_REL:=$1" >> $1/Makefile.tmp
-    echo -e "USE_LLVM_CLANG:=$USE_LLVM_CLANG" >> $1/Makefile.tmp
+    echo -e "COMPILER:=$compiler" >> $1/Makefile.tmp
     echo -e "CONFIGURED_CROSS_CCFLAGS:=$CROSS_CCFLAGS" >> $1/Makefile.tmp
     echo -e "CONFIGURED_CROSS_CXXFLAGS:=$CROSS_CXXFLAGS" >> $1/Makefile.tmp
     echo -e "CONFIGURED_NATIVE_CCFLAGS:=$NATIVE_CCFLAGS" >> $1/Makefile.tmp
@@ -675,7 +683,7 @@ create_root_makefile() {
 # Filter Arguments
 # ------------------------------------------------------------------------------
 
-compiler="gcc_520"
+compiler="clang_38"
 
 i=0
 extensions[$i]=
@@ -718,10 +726,6 @@ while [[ $# -ne 0 ]]; do
         this_is_make="true"
     fi
 
-    if [[ $1 == "--use_llvm_clang" ]]; then
-        USE_LLVM_CLANG="true"
-    fi
-
     if [[ $1 == "-m" ]] || [[ $1 == "--module_file" ]]; then
         shift
 
@@ -753,10 +757,5 @@ while [[ $# -ne 0 ]]; do
     shift
 
 done
-
-if [[ $USE_LLVM_CLANG == "true" ]] && [[ $compiler != "gcc_520" ]] && [[ $compiler != "gcc_620" ]]; then
-    echo "ERROR: Clang is only supported with GCC 5.2 and GCC 6.2"
-    exit 1
-fi
 
 option_run
