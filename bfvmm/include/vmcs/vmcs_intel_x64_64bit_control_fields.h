@@ -26,7 +26,6 @@
 #include <vmcs/vmcs_intel_x64.h>
 #include <intrinsics/msrs_intel_x64.h>
 
-
 /// Intel x86_64 VMCS 64-Bit Control Fields
 ///
 /// The following provides the interface for the 64-bit VMCS control
@@ -835,8 +834,8 @@ namespace xss_exiting_bitmap
     { set_vmcs_field_if_exists(val, addr, name, verbose, exists()); }
 }
 
-} //vmcs
-} //intel_x64
+}
+}
 
 // *INDENT-ON*
 
