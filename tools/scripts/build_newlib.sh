@@ -50,8 +50,8 @@ else
 fi
 
 echo "Building newlib. Please wait..."
-../source_newlib/configure --target=x86_64-elf --disable-libgloss AR_FOR_TARGET="$ar" CC_FOR_TARGET="$cc" CXX_FOR_TARGET="$cxx" CFLAGS_FOR_TARGET="$CFLAGS" CXXFLAGS_FOR_TARGET="$CXXFLAGS" --prefix=$BUILD_ABS/sysroot/ 
-make -j2 
+../source_newlib/configure --target=x86_64-elf --disable-libgloss AR_FOR_TARGET="$ar" CC_FOR_TARGET="$cc" CXX_FOR_TARGET="$cxx" CFLAGS_FOR_TARGET="$CFLAGS" CXXFLAGS_FOR_TARGET="$CXXFLAGS" --prefix=$BUILD_ABS/sysroot/ 1>/dev/null 2>/dev/null
+make -j2 1>/dev/null 2>/dev/null
 make -j2 install 1>/dev/null 2>/dev/null
 
 $BUILD_ABS/build_scripts/x86_64-bareflank-clang -shared `find $BUILD_ABS/build_newlib/x86_64-elf/newlib/libc -name "*.o" | xargs echo` -o libc.so

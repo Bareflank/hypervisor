@@ -23,6 +23,14 @@
 #define VMCS_INTEL_X64_STATE_H
 
 #include <intrinsics/x64.h>
+#include <intrinsics/gdt_x64.h>
+#include <intrinsics/idt_x64.h>
+#include <intrinsics/tss_x64.h>
+#include <intrinsics/srs_x64.h>
+#include <intrinsics/debug_x64.h>
+#include <intrinsics/rflags_x64.h>
+#include <intrinsics/crs_intel_x64.h>
+#include <intrinsics/msrs_intel_x64.h>
 
 /// VMCS State
 ///
@@ -52,122 +60,222 @@ public:
     vmcs_intel_x64_state() = default;
     virtual ~vmcs_intel_x64_state() = default;
 
-    virtual uint16_t es() const { return 0; }
-    virtual uint16_t cs() const { return 0; }
-    virtual uint16_t ss() const { return 0; }
-    virtual uint16_t ds() const { return 0; }
-    virtual uint16_t fs() const { return 0; }
-    virtual uint16_t gs() const { return 0; }
-    virtual uint16_t ldtr() const { return 0; }
-    virtual uint16_t tr() const { return 0; }
+    virtual x64::segment_register::type es() const
+    { return 0; }
+    virtual x64::segment_register::type cs() const
+    { return 0; }
+    virtual x64::segment_register::type ss() const
+    { return 0; }
+    virtual x64::segment_register::type ds() const
+    { return 0; }
+    virtual x64::segment_register::type fs() const
+    { return 0; }
+    virtual x64::segment_register::type gs() const
+    { return 0; }
+    virtual x64::segment_register::type ldtr() const
+    { return 0; }
+    virtual x64::segment_register::type tr() const
+    { return 0; }
 
-    virtual void set_es(uint16_t val) { (void) val; }
-    virtual void set_cs(uint16_t val) { (void) val; }
-    virtual void set_ss(uint16_t val) { (void) val; }
-    virtual void set_ds(uint16_t val) { (void) val; }
-    virtual void set_fs(uint16_t val) { (void) val; }
-    virtual void set_gs(uint16_t val) { (void) val; }
-    virtual void set_ldtr(uint16_t val) { (void) val; }
-    virtual void set_tr(uint16_t val) { (void) val; }
+    virtual void set_es(x64::segment_register::type val)
+    { (void) val; }
+    virtual void set_cs(x64::segment_register::type val)
+    { (void) val; }
+    virtual void set_ss(x64::segment_register::type val)
+    { (void) val; }
+    virtual void set_ds(x64::segment_register::type val)
+    { (void) val; }
+    virtual void set_fs(x64::segment_register::type val)
+    { (void) val; }
+    virtual void set_gs(x64::segment_register::type val)
+    { (void) val; }
+    virtual void set_ldtr(x64::segment_register::type val)
+    { (void) val; }
+    virtual void set_tr(x64::segment_register::type val)
+    { (void) val; }
 
-    virtual uint64_t cr0() const { return 0; }
-    virtual uint64_t cr3() const { return 0; }
-    virtual uint64_t cr4() const { return 0; }
-    virtual uint64_t dr7() const { return 0; }
+    virtual intel_x64::cr0::value_type cr0() const
+    { return 0; }
+    virtual intel_x64::cr3::value_type cr3() const
+    { return 0; }
+    virtual intel_x64::cr4::value_type cr4() const
+    { return 0; }
+    virtual x64::dr7::value_type dr7() const
+    { return 0; }
 
-    virtual void set_cr0(uint64_t val) { (void) val; }
-    virtual void set_cr3(uint64_t val) { (void) val; }
-    virtual void set_cr4(uint64_t val) { (void) val; }
-    virtual void set_dr7(uint64_t val) { (void) val; }
+    virtual void set_cr0(intel_x64::cr0::value_type val)
+    { (void) val; }
+    virtual void set_cr3(intel_x64::cr3::value_type val)
+    { (void) val; }
+    virtual void set_cr4(intel_x64::cr4::value_type val)
+    { (void) val; }
+    virtual void set_dr7(x64::dr7::value_type val)
+    { (void) val; }
 
-    virtual uint64_t rflags() const { return 0; }
-    virtual void set_rflags(uint64_t val) { (void) val; }
+    virtual x64::rflags::value_type rflags() const
+    { return 0; }
+    virtual void set_rflags(x64::rflags::value_type val)
+    { (void) val; }
 
-    virtual uint64_t gdt_base() const { return 0; }
-    virtual uint64_t idt_base() const { return 0; }
+    virtual gdt_x64::integer_pointer gdt_base() const
+    { return 0; }
+    virtual idt_x64::integer_pointer idt_base() const
+    { return 0; }
 
-    virtual void set_gdt_base(uint64_t val) { (void) val; }
-    virtual void set_idt_base(uint64_t val) { (void) val; }
+    virtual void set_gdt_base(gdt_x64::integer_pointer val)
+    { (void) val; }
+    virtual void set_idt_base(idt_x64::integer_pointer val)
+    { (void) val; }
 
-    virtual uint16_t gdt_limit() const { return 0; }
-    virtual uint16_t idt_limit() const { return 0; }
+    virtual gdt_x64::size_type gdt_limit() const
+    { return 0; }
+    virtual idt_x64::size_type idt_limit() const
+    { return 0; }
 
-    virtual void set_gdt_limit(uint16_t val) { (void) val; }
-    virtual void set_idt_limit(uint16_t val) { (void) val; }
+    virtual void set_gdt_limit(gdt_x64::size_type val)
+    { (void) val; }
+    virtual void set_idt_limit(idt_x64::size_type val)
+    { (void) val; }
 
-    virtual uint32_t es_limit() const { return 0; }
-    virtual uint32_t cs_limit() const { return 0; }
-    virtual uint32_t ss_limit() const { return 0; }
-    virtual uint32_t ds_limit() const { return 0; }
-    virtual uint32_t fs_limit() const { return 0; }
-    virtual uint32_t gs_limit() const { return 0; }
-    virtual uint32_t ldtr_limit() const { return 0; }
-    virtual uint32_t tr_limit() const { return 0; }
+    virtual gdt_x64::limit_type es_limit() const
+    { return 0; }
+    virtual gdt_x64::limit_type cs_limit() const
+    { return 0; }
+    virtual gdt_x64::limit_type ss_limit() const
+    { return 0; }
+    virtual gdt_x64::limit_type ds_limit() const
+    { return 0; }
+    virtual gdt_x64::limit_type fs_limit() const
+    { return 0; }
+    virtual gdt_x64::limit_type gs_limit() const
+    { return 0; }
+    virtual gdt_x64::limit_type ldtr_limit() const
+    { return 0; }
+    virtual gdt_x64::limit_type tr_limit() const
+    { return 0; }
 
-    virtual void set_es_limit(uint32_t val) { (void) val; }
-    virtual void set_cs_limit(uint32_t val) { (void) val; }
-    virtual void set_ss_limit(uint32_t val) { (void) val; }
-    virtual void set_ds_limit(uint32_t val) { (void) val; }
-    virtual void set_fs_limit(uint32_t val) { (void) val; }
-    virtual void set_gs_limit(uint32_t val) { (void) val; }
-    virtual void set_ldtr_limit(uint32_t val) { (void) val; }
-    virtual void set_tr_limit(uint32_t val) { (void) val; }
+    virtual void set_es_limit(gdt_x64::limit_type val)
+    { (void) val; }
+    virtual void set_cs_limit(gdt_x64::limit_type val)
+    { (void) val; }
+    virtual void set_ss_limit(gdt_x64::limit_type val)
+    { (void) val; }
+    virtual void set_ds_limit(gdt_x64::limit_type val)
+    { (void) val; }
+    virtual void set_fs_limit(gdt_x64::limit_type val)
+    { (void) val; }
+    virtual void set_gs_limit(gdt_x64::limit_type val)
+    { (void) val; }
+    virtual void set_ldtr_limit(gdt_x64::limit_type val)
+    { (void) val; }
+    virtual void set_tr_limit(gdt_x64::limit_type val)
+    { (void) val; }
 
-    virtual uint32_t es_access_rights() const { return x64::access_rights::unusable; }
-    virtual uint32_t cs_access_rights() const { return x64::access_rights::unusable; }
-    virtual uint32_t ss_access_rights() const { return x64::access_rights::unusable; }
-    virtual uint32_t ds_access_rights() const { return x64::access_rights::unusable; }
-    virtual uint32_t fs_access_rights() const { return x64::access_rights::unusable; }
-    virtual uint32_t gs_access_rights() const { return x64::access_rights::unusable; }
-    virtual uint32_t ldtr_access_rights() const { return x64::access_rights::unusable; }
-    virtual uint32_t tr_access_rights() const { return x64::access_rights::unusable; }
+    virtual gdt_x64::access_rights_type es_access_rights() const
+    { return x64::access_rights::unusable; }
+    virtual gdt_x64::access_rights_type cs_access_rights() const
+    { return x64::access_rights::unusable; }
+    virtual gdt_x64::access_rights_type ss_access_rights() const
+    { return x64::access_rights::unusable; }
+    virtual gdt_x64::access_rights_type ds_access_rights() const
+    { return x64::access_rights::unusable; }
+    virtual gdt_x64::access_rights_type fs_access_rights() const
+    { return x64::access_rights::unusable; }
+    virtual gdt_x64::access_rights_type gs_access_rights() const
+    { return x64::access_rights::unusable; }
+    virtual gdt_x64::access_rights_type ldtr_access_rights() const
+    { return x64::access_rights::unusable; }
+    virtual gdt_x64::access_rights_type tr_access_rights() const
+    { return x64::access_rights::unusable; }
 
-    virtual void set_es_access_rights(uint32_t val) { (void) val; }
-    virtual void set_cs_access_rights(uint32_t val) { (void) val; }
-    virtual void set_ss_access_rights(uint32_t val) { (void) val; }
-    virtual void set_ds_access_rights(uint32_t val) { (void) val; }
-    virtual void set_fs_access_rights(uint32_t val) { (void) val; }
-    virtual void set_gs_access_rights(uint32_t val) { (void) val; }
-    virtual void set_ldtr_access_rights(uint32_t val) { (void) val; }
-    virtual void set_tr_access_rights(uint32_t val) { (void) val; }
+    virtual void set_es_access_rights(gdt_x64::access_rights_type val)
+    { (void) val; }
+    virtual void set_cs_access_rights(gdt_x64::access_rights_type val)
+    { (void) val; }
+    virtual void set_ss_access_rights(gdt_x64::access_rights_type val)
+    { (void) val; }
+    virtual void set_ds_access_rights(gdt_x64::access_rights_type val)
+    { (void) val; }
+    virtual void set_fs_access_rights(gdt_x64::access_rights_type val)
+    { (void) val; }
+    virtual void set_gs_access_rights(gdt_x64::access_rights_type val)
+    { (void) val; }
+    virtual void set_ldtr_access_rights(gdt_x64::access_rights_type val)
+    { (void) val; }
+    virtual void set_tr_access_rights(gdt_x64::access_rights_type val)
+    { (void) val; }
 
-    virtual uint64_t es_base() const { return 0; }
-    virtual uint64_t cs_base() const { return 0; }
-    virtual uint64_t ss_base() const { return 0; }
-    virtual uint64_t ds_base() const { return 0; }
-    virtual uint64_t fs_base() const { return 0; }
-    virtual uint64_t gs_base() const { return 0; }
-    virtual uint64_t ldtr_base() const { return 0; }
-    virtual uint64_t tr_base() const { return 0; }
+    virtual gdt_x64::base_type es_base() const
+    { return 0; }
+    virtual gdt_x64::base_type cs_base() const
+    { return 0; }
+    virtual gdt_x64::base_type ss_base() const
+    { return 0; }
+    virtual gdt_x64::base_type ds_base() const
+    { return 0; }
+    virtual gdt_x64::base_type fs_base() const
+    { return 0; }
+    virtual gdt_x64::base_type gs_base() const
+    { return 0; }
+    virtual gdt_x64::base_type ldtr_base() const
+    { return 0; }
+    virtual gdt_x64::base_type tr_base() const
+    { return 0; }
 
-    virtual void set_es_base(uint64_t val) { (void) val; }
-    virtual void set_cs_base(uint64_t val) { (void) val; }
-    virtual void set_ss_base(uint64_t val) { (void) val; }
-    virtual void set_ds_base(uint64_t val) { (void) val; }
-    virtual void set_fs_base(uint64_t val) { (void) val; }
-    virtual void set_gs_base(uint64_t val) { (void) val; }
-    virtual void set_ldtr_base(uint64_t val) { (void) val; }
-    virtual void set_tr_base(uint64_t val) { (void) val; }
+    virtual void set_es_base(gdt_x64::base_type val)
+    { (void) val; }
+    virtual void set_cs_base(gdt_x64::base_type val)
+    { (void) val; }
+    virtual void set_ss_base(gdt_x64::base_type val)
+    { (void) val; }
+    virtual void set_ds_base(gdt_x64::base_type val)
+    { (void) val; }
+    virtual void set_fs_base(gdt_x64::base_type val)
+    { (void) val; }
+    virtual void set_gs_base(gdt_x64::base_type val)
+    { (void) val; }
+    virtual void set_ldtr_base(gdt_x64::base_type val)
+    { (void) val; }
+    virtual void set_tr_base(gdt_x64::base_type val)
+    { (void) val; }
 
-    virtual uint64_t ia32_debugctl_msr() const { return 0; }
-    virtual uint64_t ia32_pat_msr() const { return 0; }
-    virtual uint64_t ia32_efer_msr() const { return 0; }
-    virtual uint64_t ia32_perf_global_ctrl_msr() const { return 0; }
-    virtual uint64_t ia32_sysenter_cs_msr() const { return 0; }
-    virtual uint64_t ia32_sysenter_esp_msr() const { return 0; }
-    virtual uint64_t ia32_sysenter_eip_msr() const { return 0; }
-    virtual uint64_t ia32_fs_base_msr() const { return 0; }
-    virtual uint64_t ia32_gs_base_msr() const { return 0; }
+    virtual intel_x64::msrs::value_type ia32_debugctl_msr() const
+    { return 0; }
+    virtual intel_x64::msrs::value_type ia32_pat_msr() const
+    { return 0; }
+    virtual intel_x64::msrs::value_type ia32_efer_msr() const
+    { return 0; }
+    virtual intel_x64::msrs::value_type ia32_perf_global_ctrl_msr() const
+    { return 0; }
+    virtual intel_x64::msrs::value_type ia32_sysenter_cs_msr() const
+    { return 0; }
+    virtual intel_x64::msrs::value_type ia32_sysenter_esp_msr() const
+    { return 0; }
+    virtual intel_x64::msrs::value_type ia32_sysenter_eip_msr() const
+    { return 0; }
+    virtual intel_x64::msrs::value_type ia32_fs_base_msr() const
+    { return 0; }
+    virtual intel_x64::msrs::value_type ia32_gs_base_msr() const
+    { return 0; }
 
-    virtual void set_ia32_debugctl_msr(uint64_t val) { (void) val; }
-    virtual void set_ia32_pat_msr(uint64_t val) { (void) val; }
-    virtual void set_ia32_efer_msr(uint64_t val) { (void) val; }
-    virtual void set_ia32_perf_global_ctrl_msr(uint64_t val) { (void) val; }
-    virtual void set_ia32_sysenter_cs_msr(uint64_t val) { (void) val; }
-    virtual void set_ia32_sysenter_esp_msr(uint64_t val) { (void) val; }
-    virtual void set_ia32_sysenter_eip_msr(uint64_t val) { (void) val; }
-    virtual void set_ia32_fs_base_msr(uint64_t val) { (void) val; }
-    virtual void set_ia32_gs_base_msr(uint64_t val) { (void) val; }
+    virtual void set_ia32_debugctl_msr(intel_x64::msrs::value_type val)
+    { (void) val; }
+    virtual void set_ia32_pat_msr(intel_x64::msrs::value_type val)
+    { (void) val; }
+    virtual void set_ia32_efer_msr(intel_x64::msrs::value_type val)
+    { (void) val; }
+    virtual void set_ia32_perf_global_ctrl_msr(intel_x64::msrs::value_type val)
+    { (void) val; }
+    virtual void set_ia32_sysenter_cs_msr(intel_x64::msrs::value_type val)
+    { (void) val; }
+    virtual void set_ia32_sysenter_esp_msr(intel_x64::msrs::value_type val)
+    { (void) val; }
+    virtual void set_ia32_sysenter_eip_msr(intel_x64::msrs::value_type val)
+    { (void) val; }
+    virtual void set_ia32_fs_base_msr(intel_x64::msrs::value_type val)
+    { (void) val; }
+    virtual void set_ia32_gs_base_msr(intel_x64::msrs::value_type val)
+    { (void) val; }
 
     virtual void dump() const {}
 };

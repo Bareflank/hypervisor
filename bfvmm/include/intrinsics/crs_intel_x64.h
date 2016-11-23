@@ -40,6 +40,8 @@ namespace intel_x64
 {
 namespace cr0
 {
+    using value_type = uint64_t;
+
     inline auto get() noexcept
     { return __read_cr0(); }
 
@@ -220,6 +222,8 @@ namespace cr0
 
 namespace cr3
 {
+    using value_type = uint64_t;
+
     inline auto get() noexcept
     { return __read_cr3(); }
 
@@ -229,6 +233,8 @@ namespace cr3
 
 namespace cr4
 {
+    using value_type = uint64_t;
+
     inline auto get() noexcept
     { return __read_cr4(); }
 
@@ -533,4 +539,3 @@ namespace cr4
 // *INDENT-ON*
 
 #endif
-

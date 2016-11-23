@@ -28,9 +28,9 @@
 
 /// Intel x86_64 VMCS 16-Bit Control Fields
 ///
-/// This provides the namespace for 16-bit control fields of the VMCS.
-/// See Appendix B.1.1, Vol. 3 of the Intel Software Developer's Manual
-/// for details.
+/// The following provides the interface for the 16-bit control VMCS
+/// fields as defined in Appendix B.1.1, Vol. 3 of the Intel Software Developer's
+/// Manual.
 ///
 
 // *INDENT-OFF*

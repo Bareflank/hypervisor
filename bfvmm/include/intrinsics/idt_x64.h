@@ -28,6 +28,8 @@
 #include <algorithm>
 #include <exception>
 
+#include <guard_exceptions.h>
+
 // -----------------------------------------------------------------------------
 // Interrupt Descriptor Table Register
 // -----------------------------------------------------------------------------
@@ -164,10 +166,13 @@ public:
     /// @expects none
     /// @ensures none
     ///
-    idt_x64()
+    idt_x64() noexcept
     {
-        m_idt_reg.base = x64::idt::base::get();
-        m_idt_reg.limit = x64::idt::limit::get();
+        guard_exceptions([&]
+        {
+            m_idt_reg.base = x64::idt::base::get();
+            m_idt_reg.limit = x64::idt::limit::get();
+        });
     }
 
     /// Constructor
@@ -180,13 +185,14 @@ public:
     ///
     /// @param size number of entries in the IDT
     ///
-    idt_x64(size_type size) :
+    idt_x64(size_type size) noexcept :
         m_idt(size)
     {
-        expects(size != 0);
-
-        m_idt_reg.base = m_idt.data();
-        m_idt_reg.limit = gsl::narrow<size_type>((size << 3) - 1);
+        guard_exceptions([&]
+        {
+            m_idt_reg.base = m_idt.data();
+            m_idt_reg.limit = gsl::narrow_cast<size_type>((size << 3) - 1);
+        });
     }
 
     /// Destructor

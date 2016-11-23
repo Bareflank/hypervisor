@@ -74,7 +74,7 @@ intrinsics_ut::test_idt_constructor_no_size()
 void
 intrinsics_ut::test_idt_constructor_zero_size()
 {
-    this->expect_exception([&] { idt_x64{0}; }, ""_ut_ffe);
+    this->expect_no_exception([&] { idt_x64{0}; });
 }
 
 void

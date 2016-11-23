@@ -26,11 +26,11 @@
 #include <vmcs/vmcs_intel_x64.h>
 #include <intrinsics/msrs_intel_x64.h>
 
-/// Intel x86_64 VMCS 64-Bit Control Fields
+/// Intel x86_64 VMCS 64-bit Control Fields
 ///
-/// The following provides the interface for the 64-bit VMCS control
-/// fields as defined in Appendix B.2.1, Vol. 3 of the Intel Software
-/// Developer's manual.
+/// The following provides the interface for the 64-bit control VMCS
+/// fields as defined in Appendix B.2.1, Vol. 3 of the Intel Software Developer's
+/// Manual.
 ///
 
 template<class MA, class CA, class M,

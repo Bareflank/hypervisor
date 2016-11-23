@@ -21,37 +21,37 @@
 
 #include <gsl/gsl>
 
-#include <debug.h>
 #include <constants.h>
 #include <thread_context.h>
+#include <memory_manager/memory_manager_x64.h>
+#include <exit_handler/exit_handler_intel_x64_support.h>
+
 #include <vmcs/vmcs_intel_x64.h>
 #include <vmcs/vmcs_intel_x64_debug.h>
 #include <vmcs/vmcs_intel_x64_check.h>
-#include <vmcs/vmcs_intel_x64_32bit_control_fields.h>
 #include <vmcs/vmcs_intel_x64_resume.h>
 #include <vmcs/vmcs_intel_x64_promote.h>
 #include <vmcs/vmcs_intel_x64_16bit_host_state_fields.h>
 #include <vmcs/vmcs_intel_x64_16bit_guest_state_fields.h>
+#include <vmcs/vmcs_intel_x64_32bit_control_fields.h>
 #include <vmcs/vmcs_intel_x64_32bit_guest_state_fields.h>
 #include <vmcs/vmcs_intel_x64_32bit_host_state_field.h>
-#include <vmcs/vmcs_intel_x64_natural_width_guest_state_fields.h>
-#include <memory_manager/memory_manager_x64.h>
-#include <exit_handler/exit_handler_intel_x64_support.h>
-#include <vmcs/vmcs_intel_x64_natural_width_host_state_fields.h>
 #include <vmcs/vmcs_intel_x64_64bit_guest_state_fields.h>
 #include <vmcs/vmcs_intel_x64_64bit_host_state_fields.h>
+#include <vmcs/vmcs_intel_x64_natural_width_guest_state_fields.h>
+#include <vmcs/vmcs_intel_x64_natural_width_host_state_fields.h>
 
 using namespace x64;
 using namespace intel_x64;
 using namespace vmcs;
 
-vmcs_intel_x64::vmcs_intel_x64() : m_vmcs_region_phys(0)
-{
-}
+vmcs_intel_x64::vmcs_intel_x64() :
+    m_vmcs_region_phys(0)
+{ }
 
 void
-vmcs_intel_x64::launch(const std::shared_ptr<vmcs_intel_x64_state> &host_state,
-                       const std::shared_ptr<vmcs_intel_x64_state> &guest_state)
+vmcs_intel_x64::launch(gsl::not_null<vmcs_intel_x64_state *> host_state,
+                       gsl::not_null<vmcs_intel_x64_state *> guest_state)
 {
     this->create_vmcs_region();
 
@@ -65,31 +65,12 @@ vmcs_intel_x64::launch(const std::shared_ptr<vmcs_intel_x64_state> &host_state,
 
     this->clear();
     this->load();
-
-    this->write_16bit_guest_state(guest_state);
-    this->write_64bit_guest_state(guest_state);
-    this->write_32bit_guest_state(guest_state);
-    this->write_natural_guest_state(guest_state);
-
-    this->write_16bit_control_state(host_state);
-    this->write_64bit_control_state(host_state);
-    this->write_32bit_control_state(host_state);
-    this->write_natural_control_state(host_state);
-
-    this->write_16bit_host_state(host_state);
-    this->write_64bit_host_state(host_state);
-    this->write_32bit_host_state(host_state);
-    this->write_natural_host_state(host_state);
-
-    this->pin_based_vm_execution_controls();
-    this->primary_processor_based_vm_execution_controls();
-    this->secondary_processor_based_vm_execution_controls();
-    this->vm_exit_controls();
-    this->vm_entry_controls();
+    this->write_fields(host_state, guest_state);
 
     auto ___ = gsl::on_failure([&]
     {
         vmcs::debug::dump();
+
         host_state->dump();
         guest_state->dump();
     });
@@ -104,29 +85,23 @@ void
 vmcs_intel_x64::promote()
 {
     vmcs_promote(vmcs::host_gs_base::get());
-
     throw std::runtime_error("vmcs promote failed");
 }
 
 void
 vmcs_intel_x64::resume()
 {
-    vmcs_resume(m_state_save.get());
-
+    vmcs_resume(m_state_save);
     throw std::runtime_error("vmcs resume failed");
 }
 
 void
 vmcs_intel_x64::load()
-{
-    vm::load(&m_vmcs_region_phys);
-}
+{ vm::load(&m_vmcs_region_phys); }
 
 void
 vmcs_intel_x64::clear()
-{
-    vm::clear(&m_vmcs_region_phys);
-}
+{ vm::clear(&m_vmcs_region_phys); }
 
 void
 vmcs_intel_x64::create_vmcs_region()
@@ -150,18 +125,40 @@ vmcs_intel_x64::release_vmcs_region() noexcept
 
 void
 vmcs_intel_x64::create_exit_handler_stack()
-{
-    m_exit_handler_stack = std::make_unique<char[]>(STACK_SIZE * 2);
-}
+{ m_exit_handler_stack = std::make_unique<char[]>(STACK_SIZE * 2); }
 
 void
 vmcs_intel_x64::release_exit_handler_stack() noexcept
+{ m_exit_handler_stack.reset(); }
+
+void
+vmcs_intel_x64::write_fields(gsl::not_null<vmcs_intel_x64_state *> host_state,
+                             gsl::not_null<vmcs_intel_x64_state *> guest_state)
 {
-    m_exit_handler_stack.reset();
+    this->write_16bit_guest_state(guest_state);
+    this->write_64bit_guest_state(guest_state);
+    this->write_32bit_guest_state(guest_state);
+    this->write_natural_guest_state(guest_state);
+
+    this->write_16bit_control_state(host_state);
+    this->write_64bit_control_state(host_state);
+    this->write_32bit_control_state(host_state);
+    this->write_natural_control_state(host_state);
+
+    this->write_16bit_host_state(host_state);
+    this->write_64bit_host_state(host_state);
+    this->write_32bit_host_state(host_state);
+    this->write_natural_host_state(host_state);
+
+    this->pin_based_vm_execution_controls();
+    this->primary_processor_based_vm_execution_controls();
+    this->secondary_processor_based_vm_execution_controls();
+    this->vm_exit_controls();
+    this->vm_entry_controls();
 }
 
 void
-vmcs_intel_x64::write_16bit_control_state(const std::shared_ptr<vmcs_intel_x64_state> &state)
+vmcs_intel_x64::write_16bit_control_state(gsl::not_null<vmcs_intel_x64_state *> state)
 {
     (void) state;
 
@@ -171,7 +168,7 @@ vmcs_intel_x64::write_16bit_control_state(const std::shared_ptr<vmcs_intel_x64_s
 }
 
 void
-vmcs_intel_x64::write_64bit_control_state(const std::shared_ptr<vmcs_intel_x64_state> &state)
+vmcs_intel_x64::write_64bit_control_state(gsl::not_null<vmcs_intel_x64_state *> state)
 {
     (void) state;
 
@@ -200,12 +197,12 @@ vmcs_intel_x64::write_64bit_control_state(const std::shared_ptr<vmcs_intel_x64_s
 }
 
 void
-vmcs_intel_x64::write_32bit_control_state(const std::shared_ptr<vmcs_intel_x64_state> &state)
+vmcs_intel_x64::write_32bit_control_state(gsl::not_null<vmcs_intel_x64_state *> state)
 {
     (void) state;
 
-    uint64_t lower;
-    uint64_t upper;
+    msrs::value_type lower;
+    msrs::value_type upper;
 
     auto ia32_vmx_pinbased_ctls_msr = msrs::ia32_vmx_true_pinbased_ctls::get();
     auto ia32_vmx_procbased_ctls_msr = msrs::ia32_vmx_true_procbased_ctls::get();
@@ -245,7 +242,7 @@ vmcs_intel_x64::write_32bit_control_state(const std::shared_ptr<vmcs_intel_x64_s
 }
 
 void
-vmcs_intel_x64::write_natural_control_state(const std::shared_ptr<vmcs_intel_x64_state> &state)
+vmcs_intel_x64::write_natural_control_state(gsl::not_null<vmcs_intel_x64_state *> state)
 {
     (void) state;
 
@@ -260,7 +257,7 @@ vmcs_intel_x64::write_natural_control_state(const std::shared_ptr<vmcs_intel_x64
 }
 
 void
-vmcs_intel_x64::write_16bit_guest_state(const std::shared_ptr<vmcs_intel_x64_state> &state)
+vmcs_intel_x64::write_16bit_guest_state(gsl::not_null<vmcs_intel_x64_state *> state)
 {
     vmcs::guest_es_selector::set(state->es());
     vmcs::guest_cs_selector::set(state->cs());
@@ -275,7 +272,7 @@ vmcs_intel_x64::write_16bit_guest_state(const std::shared_ptr<vmcs_intel_x64_sta
 }
 
 void
-vmcs_intel_x64::write_64bit_guest_state(const std::shared_ptr<vmcs_intel_x64_state> &state)
+vmcs_intel_x64::write_64bit_guest_state(gsl::not_null<vmcs_intel_x64_state *> state)
 {
     vmcs::vmcs_link_pointer::set(0xFFFFFFFFFFFFFFFF);
     vmcs::guest_ia32_debugctl::set(state->ia32_debugctl_msr());
@@ -290,7 +287,7 @@ vmcs_intel_x64::write_64bit_guest_state(const std::shared_ptr<vmcs_intel_x64_sta
 }
 
 void
-vmcs_intel_x64::write_32bit_guest_state(const std::shared_ptr<vmcs_intel_x64_state> &state)
+vmcs_intel_x64::write_32bit_guest_state(gsl::not_null<vmcs_intel_x64_state *> state)
 {
     vmcs::guest_es_limit::set(state->es_limit());
     vmcs::guest_cs_limit::set(state->cs_limit());
@@ -322,7 +319,7 @@ vmcs_intel_x64::write_32bit_guest_state(const std::shared_ptr<vmcs_intel_x64_sta
 }
 
 void
-vmcs_intel_x64::write_natural_guest_state(const std::shared_ptr<vmcs_intel_x64_state> &state)
+vmcs_intel_x64::write_natural_guest_state(gsl::not_null<vmcs_intel_x64_state *> state)
 {
     vmcs::guest_cr0::set(state->cr0());
     vmcs::guest_cr3::set(state->cr3());
@@ -352,7 +349,7 @@ vmcs_intel_x64::write_natural_guest_state(const std::shared_ptr<vmcs_intel_x64_s
 }
 
 void
-vmcs_intel_x64::write_16bit_host_state(const std::shared_ptr<vmcs_intel_x64_state> &state)
+vmcs_intel_x64::write_16bit_host_state(gsl::not_null<vmcs_intel_x64_state *> state)
 {
     vmcs::host_es_selector::set(state->es());
     vmcs::host_cs_selector::set(state->cs());
@@ -364,7 +361,7 @@ vmcs_intel_x64::write_16bit_host_state(const std::shared_ptr<vmcs_intel_x64_stat
 }
 
 void
-vmcs_intel_x64::write_64bit_host_state(const std::shared_ptr<vmcs_intel_x64_state> &state)
+vmcs_intel_x64::write_64bit_host_state(gsl::not_null<vmcs_intel_x64_state *> state)
 {
     vmcs::host_ia32_pat::set(state->ia32_pat_msr());
     vmcs::host_ia32_efer::set(state->ia32_efer_msr());
@@ -372,13 +369,13 @@ vmcs_intel_x64::write_64bit_host_state(const std::shared_ptr<vmcs_intel_x64_stat
 }
 
 void
-vmcs_intel_x64::write_32bit_host_state(const std::shared_ptr<vmcs_intel_x64_state> &state)
+vmcs_intel_x64::write_32bit_host_state(gsl::not_null<vmcs_intel_x64_state *> state)
 {
     vmcs::host_ia32_sysenter_cs::set(state->ia32_sysenter_cs_msr());
 }
 
 void
-vmcs_intel_x64::write_natural_host_state(const std::shared_ptr<vmcs_intel_x64_state> &state)
+vmcs_intel_x64::write_natural_host_state(gsl::not_null<vmcs_intel_x64_state *> state)
 {
     auto exit_handler_stack = reinterpret_cast<uintptr_t>(m_exit_handler_stack.get());
 
@@ -395,7 +392,7 @@ vmcs_intel_x64::write_natural_host_state(const std::shared_ptr<vmcs_intel_x64_st
     vmcs::host_cr4::set(state->cr4());
 
     vmcs::host_fs_base::set(state->ia32_fs_base_msr());
-    vmcs::host_gs_base::set(reinterpret_cast<uintptr_t>(m_state_save.get()));
+    vmcs::host_gs_base::set(reinterpret_cast<uintptr_t>(m_state_save));
     vmcs::host_tr_base::set(state->tr_base());
 
     vmcs::host_gdtr_base::set(state->gdt_base());

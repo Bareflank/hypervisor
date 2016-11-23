@@ -27,7 +27,7 @@
 
 /// Intel x86_64 VMCS Natural-Width Host-State Fields
 ///
-/// The following provides the interface for the natural-widht host-state VMCS
+/// The following provides the interface for the natural-width host-state VMCS
 /// fields as defined in Appendix B.4.4, Vol. 3 of the Intel Software Developer's
 /// Manual.
 ///

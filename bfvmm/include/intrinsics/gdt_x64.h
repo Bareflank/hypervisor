@@ -28,6 +28,8 @@
 #include <algorithm>
 #include <exception>
 
+#include <guard_exceptions.h>
+
 // -----------------------------------------------------------------------------
 // Global Descriptor Table Register
 // -----------------------------------------------------------------------------
@@ -210,12 +212,15 @@ public:
     ///     GDT using an alternate constructor, and set the hardware to use
     ///     that GDT instead.
     ///
-    gdt_x64()
+    gdt_x64() noexcept
     {
-        m_gdt_reg.base = x64::gdt::base::get();
-        m_gdt_reg.limit = x64::gdt::limit::get();
+        guard_exceptions([&]
+        {
+            m_gdt_reg.base = x64::gdt::base::get();
+            m_gdt_reg.limit = x64::gdt::limit::get();
 
-        std::copy_n(m_gdt_reg.base, m_gdt_reg.limit >> 3, std::back_inserter(m_gdt));
+            std::copy_n(m_gdt_reg.base, m_gdt_reg.limit >> 3, std::back_inserter(m_gdt));
+        });
     }
 
     /// Constructor
@@ -223,18 +228,19 @@ public:
     /// Creates a new GDT, with size defining the number of descriptors
     /// in the GDT.
     ///
-    /// @expects size != 0;
+    /// @ensures none
     /// @ensures none
     ///
     /// @param size number of entries in the GDT
     ///
-    gdt_x64(size_type size) :
+    gdt_x64(size_type size) noexcept :
         m_gdt(size)
     {
-        expects(size != 0);
-
-        m_gdt_reg.base = m_gdt.data();
-        m_gdt_reg.limit = gsl::narrow<size_type>(size << 3);
+        guard_exceptions([&]
+        {
+            m_gdt_reg.base = m_gdt.data();
+            m_gdt_reg.limit = gsl::narrow_cast<size_type>(size << 3);
+        });
     }
 
     /// Destructor

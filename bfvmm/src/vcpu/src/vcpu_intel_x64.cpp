@@ -67,7 +67,7 @@ vcpu_intel_x64::init(void *attr)
     m_state_save->vmcs_ptr = reinterpret_cast<uintptr_t>(m_vmcs.get());
     m_state_save->exit_handler_ptr = reinterpret_cast<uintptr_t>(m_exit_handler.get());
 
-    m_vmcs->set_state_save(m_state_save);
+    m_vmcs->set_state_save(m_state_save.get());
 
     m_exit_handler->set_vmcs(m_vmcs);
     m_exit_handler->set_state_save(m_state_save);
@@ -101,7 +101,7 @@ vcpu_intel_x64::run(void *attr)
                 m_vmxon->stop();
         });
 
-        m_vmcs->launch(m_vmm_state, m_guest_state);
+        m_vmcs->launch(m_vmm_state.get(), m_guest_state.get());
     }
     else
     {

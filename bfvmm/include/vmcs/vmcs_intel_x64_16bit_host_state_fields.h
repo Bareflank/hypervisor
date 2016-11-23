@@ -27,7 +27,7 @@
 
 /// Intel x86_64 VMCS 16-Bit Host-State Fields
 ///
-/// The following provides the interface for the 16-bit guest-state VMCS
+/// The following provides the interface for the 16-bit host-state VMCS
 /// fields as defined in Appendix B.1.3, Vol. 3 of the Intel Software Developer's
 /// Manual.
 ///

@@ -28,7 +28,7 @@
 
 /// Intel x86_64 VMCS Natural-Width Control Fields
 ///
-/// The following provides the interface for the natural-width vmcs control
+/// The following provides the interface for the natural-width control VMCS
 /// fields as defined in Appendix B.4.1, Vol. 3 of the Intel Software Developer's
 /// Manual.
 ///

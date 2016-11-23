@@ -36,6 +36,8 @@ namespace x64
 {
 namespace rflags
 {
+    using value_type = uint64_t;
+
     inline auto get() noexcept
     { return __read_rflags(); }
 

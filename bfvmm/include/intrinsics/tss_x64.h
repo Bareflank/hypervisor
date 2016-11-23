@@ -56,7 +56,7 @@ struct tss_x64
     uint16_t reserved6;
     uint16_t iomap;
 
-    tss_x64() :
+    tss_x64() noexcept :
         reserved1(0),
         rsp0_lower(0),
         rsp0_upper(0),
