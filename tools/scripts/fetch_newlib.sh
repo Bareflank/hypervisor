@@ -24,6 +24,8 @@
 
 pushd $BUILD_ABS
 
+echo "Fetching newlib. Please wait..."
+
 n=0
 until [ $n -ge 5 ]
 do
