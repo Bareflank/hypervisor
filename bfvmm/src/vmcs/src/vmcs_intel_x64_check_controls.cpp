@@ -4,6 +4,7 @@
 // Copyright (C) 2015 Assured Information Security, Inc.
 // Author: Rian Quinn        <quinnr@ainfosec.com>
 // Author: Brendan Kerrigan  <kerriganb@ainfosec.com>
+// Author: Connor Davis      <davisc@ainfosec.com>
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -22,125 +23,92 @@
 #include <gsl/gsl>
 #include <view_as_pointer.h>
 #include <vmcs/vmcs_intel_x64.h>
-#include <vmcs/vmcs_intel_x64_32bit_control_fields.h>
-#include <memory_manager/memory_manager_x64.h>
+#include <vmcs/vmcs_intel_x64_check.h>
 #include <vmcs/vmcs_intel_x64_16bit_control_fields.h>
-#include <vmcs/vmcs_intel_x64_natural_width_guest_state_fields.h>
+#include <vmcs/vmcs_intel_x64_32bit_control_fields.h>
 #include <vmcs/vmcs_intel_x64_64bit_control_fields.h>
+#include <vmcs/vmcs_intel_x64_natural_width_guest_state_fields.h>
+
+#include <memory_manager/memory_manager_x64.h>
 
 using namespace intel_x64;
 using namespace vmcs;
 
 void
-vmcs_intel_x64::check_vmcs_control_state()
+check::control_vmx_controls_all()
 {
-    checks_on_vm_execution_control_fields();
-    checks_on_vm_exit_control_fields();
-    checks_on_vm_entry_control_fields();
+    check::control_vm_execution_control_fields_all();
+    check::control_vm_exit_control_fields_all();
+    check::control_vm_entry_control_fields_all();
 }
 
 void
-vmcs_intel_x64::checks_on_vm_execution_control_fields()
+check::control_vm_execution_control_fields_all()
 {
-    check_control_pin_based_ctls_reserved_properly_set();
-    check_control_proc_based_ctls_reserved_properly_set();
-    check_control_proc_based_ctls2_reserved_properly_set();
-    check_control_cr3_count_less_then_4();
-    check_control_io_bitmap_address_bits();
-    check_control_msr_bitmap_address_bits();
-    check_control_tpr_shadow_and_virtual_apic();
-    check_control_nmi_exiting_and_virtual_nmi();
-    check_control_virtual_nmi_and_nmi_window();
-    check_control_virtual_apic_address_bits();
-    check_control_x2apic_mode_and_virtual_apic_access();
-    check_control_virtual_interrupt_and_external_interrupt();
-    check_control_process_posted_interrupt_checks();
-    check_control_vpid_checks();
-    check_control_enable_ept_checks();
-    check_control_enable_pml_checks();
-    check_control_unrestricted_guests();
-    check_control_enable_vm_functions();
-    check_control_enable_vmcs_shadowing();
-    check_control_enable_ept_violation_checks();
+    check::control_pin_based_ctls_reserved_properly_set();
+    check::control_proc_based_ctls_reserved_properly_set();
+    check::control_proc_based_ctls2_reserved_properly_set();
+    check::control_cr3_count_less_then_4();
+    check::control_io_bitmap_address_bits();
+    check::control_msr_bitmap_address_bits();
+    check::control_tpr_shadow_and_virtual_apic();
+    check::control_nmi_exiting_and_virtual_nmi();
+    check::control_virtual_nmi_and_nmi_window();
+    check::control_virtual_apic_address_bits();
+    check::control_x2apic_mode_and_virtual_apic_access();
+    check::control_virtual_interrupt_and_external_interrupt();
+    check::control_process_posted_interrupt_checks();
+    check::control_vpid_checks();
+    check::control_enable_ept_checks();
+    check::control_enable_pml_checks();
+    check::control_unrestricted_guests();
+    check::control_enable_vm_functions();
+    check::control_enable_vmcs_shadowing();
+    check::control_enable_ept_violation_checks();
 }
 
 void
-vmcs_intel_x64::check_control_ctls_reserved_properly_set(uint64_t msr_addr, uint64_t ctls,
-        const std::string &ctls_name)
-{
-    using namespace primary_processor_based_vm_execution_controls;
-
-    auto allowed0 = (msrs::get(msr_addr) & 0x00000000FFFFFFFFUL);
-    auto allowed1 = ((msrs::get(msr_addr) >> 32) & 0x00000000FFFFFFFFUL);
-    auto allowed1_failed = false;
-    ctls &= 0x00000000FFFFFFFFUL;
-
-    if ((allowed0 & ctls) != allowed0)
-    {
-        bferror << " failed: check_control_ctls_reserved_properly_set" << bfendl;
-        bferror << "    - allowed0: " << view_as_pointer(allowed0) << bfendl;
-        bferror << "    - bad ctls: " << view_as_pointer(ctls) << bfendl;
-
-        throw std::logic_error(std::string("invalid ") + ctls_name);
-    }
-
-    allowed1_failed = (ctls & ~allowed1) != 0UL;
-
-    if (msrs::ia32_vmx_procbased_ctls2::addr == msr_addr)
-        allowed1_failed = allowed1_failed && activate_secondary_controls::is_enabled();
-
-    if (allowed1_failed)
-    {
-        bferror << " failed: check_control_ctls_reserved_properly_set" << bfendl;
-        bferror << "    - allowed1: " << view_as_pointer(allowed1) << bfendl;
-        bferror << "    - bad ctls: " << view_as_pointer(ctls) << bfendl;
-
-        throw std::logic_error(std::string("invalid ") + ctls_name);
-    }
-}
-
-void
-vmcs_intel_x64::check_control_pin_based_ctls_reserved_properly_set()
+check::control_pin_based_ctls_reserved_properly_set()
 {
     auto msr_addr = msrs::ia32_vmx_true_pinbased_ctls::addr;
-    auto ctls = pin_based_vm_execution_controls::get();
-    auto name = pin_based_vm_execution_controls::name;
+    auto ctls = vmcs::pin_based_vm_execution_controls::get();
+    auto name = vmcs::pin_based_vm_execution_controls::name;
 
-    this->check_control_ctls_reserved_properly_set(msr_addr, ctls, name);
+    check::control_reserved_properly_set(msr_addr, ctls, name);
 }
 
 void
-vmcs_intel_x64::check_control_proc_based_ctls_reserved_properly_set()
+check::control_proc_based_ctls_reserved_properly_set()
 {
     auto msr_addr = msrs::ia32_vmx_true_procbased_ctls::addr;
-    auto ctls = primary_processor_based_vm_execution_controls::get();
-    auto name = primary_processor_based_vm_execution_controls::name;
+    auto ctls = vmcs::primary_processor_based_vm_execution_controls::get();
+    auto name = vmcs::primary_processor_based_vm_execution_controls::name;
 
-    this->check_control_ctls_reserved_properly_set(msr_addr, ctls, name);
+    check::control_reserved_properly_set(msr_addr, ctls, name);
 }
 
 void
-vmcs_intel_x64::check_control_proc_based_ctls2_reserved_properly_set()
+check::control_proc_based_ctls2_reserved_properly_set()
 {
-    if (!secondary_processor_based_vm_execution_controls::exists())
+    if (!vmcs::secondary_processor_based_vm_execution_controls::exists())
         throw std::logic_error("the secondary controls field doesn't exist");
 
     auto msr_addr = msrs::ia32_vmx_procbased_ctls2::addr;
-    auto ctls = secondary_processor_based_vm_execution_controls::get();
-    auto name = secondary_processor_based_vm_execution_controls::name;
+    auto ctls = vmcs::secondary_processor_based_vm_execution_controls::get();
+    auto name = vmcs::secondary_processor_based_vm_execution_controls::name;
 
-    this->check_control_ctls_reserved_properly_set(msr_addr, ctls, name);
+    check::control_reserved_properly_set(msr_addr, ctls, name);
 }
 
 void
-vmcs_intel_x64::check_control_cr3_count_less_then_4()
+check::control_cr3_count_less_then_4()
 {
-    if (cr3_target_count::get() > 4)
+    if (vmcs::cr3_target_count::get() > 4)
         throw std::logic_error("cr3 target count > 4");
 }
 
 void
-vmcs_intel_x64::check_control_io_bitmap_address_bits()
+check::control_io_bitmap_address_bits()
 {
     if (primary_processor_based_vm_execution_controls::use_io_bitmaps::is_disabled())
         return;
@@ -162,7 +130,7 @@ vmcs_intel_x64::check_control_io_bitmap_address_bits()
 }
 
 void
-vmcs_intel_x64::check_control_msr_bitmap_address_bits()
+check::control_msr_bitmap_address_bits()
 {
     if (primary_processor_based_vm_execution_controls::use_msr_bitmaps::is_disabled())
         return;
@@ -177,7 +145,7 @@ vmcs_intel_x64::check_control_msr_bitmap_address_bits()
 }
 
 void
-vmcs_intel_x64::check_control_tpr_shadow_and_virtual_apic()
+check::control_tpr_shadow_and_virtual_apic()
 {
     using namespace primary_processor_based_vm_execution_controls;
     using namespace secondary_processor_based_vm_execution_controls;
@@ -238,7 +206,7 @@ vmcs_intel_x64::check_control_tpr_shadow_and_virtual_apic()
 }
 
 void
-vmcs_intel_x64::check_control_nmi_exiting_and_virtual_nmi()
+check::control_nmi_exiting_and_virtual_nmi()
 {
     if (pin_based_vm_execution_controls::nmi_exiting::is_enabled())
         return;
@@ -248,7 +216,7 @@ vmcs_intel_x64::check_control_nmi_exiting_and_virtual_nmi()
 }
 
 void
-vmcs_intel_x64::check_control_virtual_nmi_and_nmi_window()
+check::control_virtual_nmi_and_nmi_window()
 {
     if (pin_based_vm_execution_controls::virtual_nmis::is_enabled())
         return;
@@ -258,7 +226,7 @@ vmcs_intel_x64::check_control_virtual_nmi_and_nmi_window()
 }
 
 void
-vmcs_intel_x64::check_control_virtual_apic_address_bits()
+check::control_virtual_apic_address_bits()
 {
     if (primary_processor_based_vm_execution_controls::activate_secondary_controls::is_disabled())
         return;
@@ -279,7 +247,7 @@ vmcs_intel_x64::check_control_virtual_apic_address_bits()
 }
 
 void
-vmcs_intel_x64::check_control_x2apic_mode_and_virtual_apic_access()
+check::control_x2apic_mode_and_virtual_apic_access()
 {
     if (primary_processor_based_vm_execution_controls::activate_secondary_controls::is_disabled())
         return;
@@ -292,7 +260,7 @@ vmcs_intel_x64::check_control_x2apic_mode_and_virtual_apic_access()
 }
 
 void
-vmcs_intel_x64::check_control_virtual_interrupt_and_external_interrupt()
+check::control_virtual_interrupt_and_external_interrupt()
 {
     if (primary_processor_based_vm_execution_controls::activate_secondary_controls::is_disabled())
         return;
@@ -306,7 +274,7 @@ vmcs_intel_x64::check_control_virtual_interrupt_and_external_interrupt()
 }
 
 void
-vmcs_intel_x64::check_control_process_posted_interrupt_checks()
+check::control_process_posted_interrupt_checks()
 {
     if (pin_based_vm_execution_controls::process_posted_interrupts::is_disabled())
         return;
@@ -340,7 +308,7 @@ vmcs_intel_x64::check_control_process_posted_interrupt_checks()
 }
 
 void
-vmcs_intel_x64::check_control_vpid_checks()
+check::control_vpid_checks()
 {
     if (primary_processor_based_vm_execution_controls::activate_secondary_controls::is_disabled())
         return;
@@ -353,7 +321,7 @@ vmcs_intel_x64::check_control_vpid_checks()
 }
 
 void
-vmcs_intel_x64::check_control_enable_ept_checks()
+check::control_enable_ept_checks()
 {
     using namespace msrs::ia32_vmx_ept_vpid_cap;
     using namespace vmcs::ept_pointer;
@@ -386,7 +354,7 @@ vmcs_intel_x64::check_control_enable_ept_checks()
 }
 
 void
-vmcs_intel_x64::check_control_enable_pml_checks()
+check::control_enable_pml_checks()
 {
     if (primary_processor_based_vm_execution_controls::activate_secondary_controls::is_disabled())
         return;
@@ -407,7 +375,7 @@ vmcs_intel_x64::check_control_enable_pml_checks()
 }
 
 void
-vmcs_intel_x64::check_control_unrestricted_guests()
+check::control_unrestricted_guests()
 {
     if (primary_processor_based_vm_execution_controls::activate_secondary_controls::is_disabled())
         return;
@@ -420,7 +388,7 @@ vmcs_intel_x64::check_control_unrestricted_guests()
 }
 
 void
-vmcs_intel_x64::check_control_enable_vm_functions()
+check::control_enable_vm_functions()
 {
     if (primary_processor_based_vm_execution_controls::activate_secondary_controls::is_disabled())
         return;
@@ -450,7 +418,7 @@ vmcs_intel_x64::check_control_enable_vm_functions()
 }
 
 void
-vmcs_intel_x64::check_control_enable_vmcs_shadowing()
+check::control_enable_vmcs_shadowing()
 {
     if (primary_processor_based_vm_execution_controls::activate_secondary_controls::is_disabled())
         return;
@@ -475,7 +443,7 @@ vmcs_intel_x64::check_control_enable_vmcs_shadowing()
 }
 
 void
-vmcs_intel_x64::check_control_enable_ept_violation_checks()
+check::control_enable_ept_violation_checks()
 {
     if (primary_processor_based_vm_execution_controls::activate_secondary_controls::is_disabled())
         return;
@@ -494,26 +462,26 @@ vmcs_intel_x64::check_control_enable_ept_violation_checks()
 }
 
 void
-vmcs_intel_x64::checks_on_vm_exit_control_fields()
+check::control_vm_exit_control_fields_all()
 {
-    check_control_vm_exit_ctls_reserved_properly_set();
-    check_control_activate_and_save_preemption_timer_must_be_0();
-    check_control_exit_msr_store_address();
-    check_control_exit_msr_load_address();
+    check::control_vm_exit_ctls_reserved_properly_set();
+    check::control_activate_and_save_preemption_timer_must_be_0();
+    check::control_exit_msr_store_address();
+    check::control_exit_msr_load_address();
 }
 
 void
-vmcs_intel_x64::check_control_vm_exit_ctls_reserved_properly_set()
+check::control_vm_exit_ctls_reserved_properly_set()
 {
     auto msr_addr = msrs::ia32_vmx_true_exit_ctls::addr;
-    auto ctls = vm_exit_controls::get();
-    auto name = vm_exit_controls::name;
+    auto ctls = vmcs::vm_exit_controls::get();
+    auto name = vmcs::vm_exit_controls::name;
 
-    this->check_control_ctls_reserved_properly_set(msr_addr, ctls, name);
+    check::control_reserved_properly_set(msr_addr, ctls, name);
 }
 
 void
-vmcs_intel_x64::check_control_activate_and_save_preemption_timer_must_be_0()
+check::control_activate_and_save_preemption_timer_must_be_0()
 {
     if (pin_based_vm_execution_controls::activate_vmx_preemption_timer::is_enabled())
         return;
@@ -524,7 +492,7 @@ vmcs_intel_x64::check_control_activate_and_save_preemption_timer_must_be_0()
 }
 
 void
-vmcs_intel_x64::check_control_exit_msr_store_address()
+check::control_exit_msr_store_address()
 {
     auto msr_store_count = vm_exit_msr_store_count::get();
 
@@ -546,7 +514,7 @@ vmcs_intel_x64::check_control_exit_msr_store_address()
 }
 
 void
-vmcs_intel_x64::check_control_exit_msr_load_address()
+check::control_exit_msr_load_address()
 {
     auto msr_load_count = vm_exit_msr_load_count::get();
 
@@ -568,29 +536,29 @@ vmcs_intel_x64::check_control_exit_msr_load_address()
 }
 
 void
-vmcs_intel_x64::checks_on_vm_entry_control_fields()
+check::control_vm_entry_control_fields_all()
 {
-    check_control_vm_entry_ctls_reserved_properly_set();
-    check_control_event_injection_type_vector_checks();
-    check_control_event_injection_delivery_ec_checks();
-    check_control_event_injection_reserved_bits_checks();
-    check_control_event_injection_ec_checks();
-    check_control_event_injection_instr_length_checks();
-    check_control_entry_msr_load_address();
+    check::control_vm_entry_ctls_reserved_properly_set();
+    check::control_event_injection_type_vector_checks();
+    check::control_event_injection_delivery_ec_checks();
+    check::control_event_injection_reserved_bits_checks();
+    check::control_event_injection_ec_checks();
+    check::control_event_injection_instr_length_checks();
+    check::control_entry_msr_load_address();
 }
 
 void
-vmcs_intel_x64::check_control_vm_entry_ctls_reserved_properly_set()
+check::control_vm_entry_ctls_reserved_properly_set()
 {
     auto msr_addr = msrs::ia32_vmx_true_entry_ctls::addr;
     auto ctls = vm_entry_controls::get();
     auto name = vm_entry_controls::name;
 
-    this->check_control_ctls_reserved_properly_set(msr_addr, ctls, name);
+    check::control_reserved_properly_set(msr_addr, ctls, name);
 }
 
 void
-vmcs_intel_x64::check_control_event_injection_type_vector_checks()
+check::control_event_injection_type_vector_checks()
 {
     using namespace vm_entry_interruption_information_field;
     using namespace msrs::ia32_vmx_true_procbased_ctls;
@@ -622,7 +590,7 @@ vmcs_intel_x64::check_control_event_injection_type_vector_checks()
 }
 
 void
-vmcs_intel_x64::check_control_event_injection_delivery_ec_checks()
+check::control_event_injection_delivery_ec_checks()
 {
     using namespace vm_entry_interruption_information_field;
     using namespace primary_processor_based_vm_execution_controls;
@@ -667,7 +635,7 @@ vmcs_intel_x64::check_control_event_injection_delivery_ec_checks()
 }
 
 void
-vmcs_intel_x64::check_control_event_injection_reserved_bits_checks()
+check::control_event_injection_reserved_bits_checks()
 {
     if (vm_entry_interruption_information_field::valid_bit::is_disabled())
         return;
@@ -677,7 +645,7 @@ vmcs_intel_x64::check_control_event_injection_reserved_bits_checks()
 }
 
 void
-vmcs_intel_x64::check_control_event_injection_ec_checks()
+check::control_event_injection_ec_checks()
 {
     if (vm_entry_interruption_information_field::valid_bit::is_disabled())
         return;
@@ -691,7 +659,7 @@ vmcs_intel_x64::check_control_event_injection_ec_checks()
 }
 
 void
-vmcs_intel_x64::check_control_event_injection_instr_length_checks()
+check::control_event_injection_instr_length_checks()
 {
     using namespace vm_entry_interruption_information_field;
 
@@ -720,7 +688,7 @@ vmcs_intel_x64::check_control_event_injection_instr_length_checks()
 }
 
 void
-vmcs_intel_x64::check_control_entry_msr_load_address()
+check::control_entry_msr_load_address()
 {
     auto msr_load_count = vm_entry_msr_load_count::get();
 

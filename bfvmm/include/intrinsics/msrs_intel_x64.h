@@ -2487,6 +2487,22 @@ namespace msrs
             { return (__read_msr(addr) & (mask << 32)) != 0; }
         }
 
+        namespace clear_ia32_bndcfgs
+        {
+            constexpr const auto mask = 0x0000000000800000UL;
+            constexpr const auto from = 23;
+            constexpr const auto name = "clear_ia32_bndcfgs";
+
+            inline auto get() noexcept
+            { return get_bit(__read_msr(addr), from) != 0; }
+
+            inline auto is_allowed0() noexcept
+            { return (__read_msr(addr) & mask) == 0; }
+
+            inline auto is_allowed1() noexcept
+            { return (__read_msr(addr) & (mask << 32)) != 0; }
+        }
+
         inline void dump() noexcept
         {
             bfdebug << "msrs::ia32_vmx_true_exit_ctls enabled flags:" << bfendl;
@@ -2509,6 +2525,8 @@ namespace msrs
                 bfdebug << "    - " << load_ia32_efer::name << bfendl;
             if (save_vmx_preemption_timer_value::get())
                 bfdebug << "    - " << save_vmx_preemption_timer_value::name << bfendl;
+            if (clear_ia32_bndcfgs::get())
+                bfdebug << "    - " << clear_ia32_bndcfgs::name << bfendl;
 
             bfdebug << bfendl;
             bfdebug << "msrs::ia32_vmx_true_exit_ctls allowed0 fields:" << bfendl;
@@ -2531,6 +2549,8 @@ namespace msrs
                 bfdebug << "    - " << load_ia32_efer::name << bfendl;
             if (save_vmx_preemption_timer_value::is_allowed0())
                 bfdebug << "    - " << save_vmx_preemption_timer_value::name << bfendl;
+            if (clear_ia32_bndcfgs::is_allowed0())
+                bfdebug << "    - " << clear_ia32_bndcfgs::name << bfendl;
 
             bfdebug << bfendl;
             bfdebug << "msrs::ia32_vmx_true_exit_ctls allowed1 fields:" << bfendl;
@@ -2553,6 +2573,8 @@ namespace msrs
                 bfdebug << "    - " << load_ia32_efer::name << bfendl;
             if (save_vmx_preemption_timer_value::is_allowed1())
                 bfdebug << "    - " << save_vmx_preemption_timer_value::name << bfendl;
+            if (clear_ia32_bndcfgs::is_allowed1())
+                bfdebug << "    - " << clear_ia32_bndcfgs::name << bfendl;
         }
     }
 
@@ -2682,6 +2704,22 @@ namespace msrs
             { return (__read_msr(addr) & (mask << 32)) != 0; }
         }
 
+        namespace load_ia32_bndcfgs
+        {
+            constexpr const auto mask = 0x0000000000010000UL;
+            constexpr const auto from = 16;
+            constexpr const auto name = "load_ia32_bndcfgs";
+
+            inline auto get() noexcept
+            { return get_bit(__read_msr(addr), from) != 0; }
+
+            inline auto is_allowed0() noexcept
+            { return (__read_msr(addr) & mask) == 0; }
+
+            inline auto is_allowed1() noexcept
+            { return (__read_msr(addr) & (mask << 32)) != 0; }
+        }
+
         inline void dump() noexcept
         {
             bfdebug << "msrs::ia32_vmx_true_entry_ctls enabled flags:" << bfendl;
@@ -2700,6 +2738,8 @@ namespace msrs
                 bfdebug << "    - " << load_ia32_pat::name << bfendl;
             if (load_ia32_efer::get())
                 bfdebug << "    - " << load_ia32_efer::name << bfendl;
+            if (load_ia32_bndcfgs::get())
+                bfdebug << "    - " << load_ia32_bndcfgs::name << bfendl;
 
             bfdebug << bfendl;
             bfdebug << "msrs::ia32_vmx_true_entry_ctls allowed0 fields:" << bfendl;
@@ -2718,6 +2758,8 @@ namespace msrs
                 bfdebug << "    - " << load_ia32_pat::name << bfendl;
             if (load_ia32_efer::is_allowed0())
                 bfdebug << "    - " << load_ia32_efer::name << bfendl;
+            if (load_ia32_bndcfgs::is_allowed0())
+                bfdebug << "    - " << load_ia32_bndcfgs::name << bfendl;
 
             bfdebug << bfendl;
             bfdebug << "msrs::ia32_vmx_true_entry_ctls allowed1 fields:" << bfendl;
@@ -2736,6 +2778,8 @@ namespace msrs
                 bfdebug << "    - " << load_ia32_pat::name << bfendl;
             if (load_ia32_efer::is_allowed1())
                 bfdebug << "    - " << load_ia32_efer::name << bfendl;
+            if (load_ia32_bndcfgs::is_allowed1())
+                bfdebug << "    - " << load_ia32_bndcfgs::name << bfendl;
         }
     }
 

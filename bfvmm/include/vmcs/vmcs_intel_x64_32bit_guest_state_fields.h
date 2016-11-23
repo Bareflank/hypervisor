@@ -499,7 +499,7 @@ namespace guest_es_access_rights
 
     namespace reserved
     {
-        constexpr const auto mask = 0xFFFFFFFFFFFF0F00UL;
+        constexpr const auto mask = 0xFFFFFFFFFFFE0F00UL;
         constexpr const auto from = 0;
         constexpr const auto name = "reserved";
 
@@ -791,7 +791,7 @@ namespace guest_cs_access_rights
 
     namespace reserved
     {
-        constexpr const auto mask = 0xFFFFFFFFFFFF0F00UL;
+        constexpr const auto mask = 0xFFFFFFFFFFFE0F00UL;
         constexpr const auto from = 0;
         constexpr const auto name = "reserved";
 
@@ -1083,7 +1083,7 @@ namespace guest_ss_access_rights
 
     namespace reserved
     {
-        constexpr const auto mask = 0xFFFFFFFFFFFF0F00UL;
+        constexpr const auto mask = 0xFFFFFFFFFFFE0F00UL;
         constexpr const auto from = 0;
         constexpr const auto name = "reserved";
 
@@ -1375,7 +1375,7 @@ namespace guest_ds_access_rights
 
     namespace reserved
     {
-        constexpr const auto mask = 0xFFFFFFFFFFFF0F00UL;
+        constexpr const auto mask = 0xFFFFFFFFFFFE0F00UL;
         constexpr const auto from = 0;
         constexpr const auto name = "reserved";
 
@@ -1667,7 +1667,7 @@ namespace guest_fs_access_rights
 
     namespace reserved
     {
-        constexpr const auto mask = 0xFFFFFFFFFFFF0F00UL;
+        constexpr const auto mask = 0xFFFFFFFFFFFE0F00UL;
         constexpr const auto from = 0;
         constexpr const auto name = "reserved";
 
@@ -1959,7 +1959,7 @@ namespace guest_gs_access_rights
 
     namespace reserved
     {
-        constexpr const auto mask = 0xFFFFFFFFFFFF0F00UL;
+        constexpr const auto mask = 0xFFFFFFFFFFFE0F00UL;
         constexpr const auto from = 0;
         constexpr const auto name = "reserved";
 
@@ -2251,7 +2251,7 @@ namespace guest_ldtr_access_rights
 
     namespace reserved
     {
-        constexpr const auto mask = 0xFFFFFFFFFFFF0F00UL;
+        constexpr const auto mask = 0xFFFFFFFFFFFE0F00UL;
         constexpr const auto from = 0;
         constexpr const auto name = "reserved";
 
@@ -2543,7 +2543,7 @@ namespace guest_tr_access_rights
 
     namespace reserved
     {
-        constexpr const auto mask = 0xFFFFFFFFFFFF0F00UL;
+        constexpr const auto mask = 0xFFFFFFFFFFFE0F00UL;
         constexpr const auto from = 0;
         constexpr const auto name = "reserved";
 

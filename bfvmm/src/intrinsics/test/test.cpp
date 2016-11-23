@@ -228,6 +228,7 @@ intrinsics_ut::list()
     this->test_ia32_vmx_true_exit_ctls_save_ia32_efer();
     this->test_ia32_vmx_true_exit_ctls_load_ia32_efer();
     this->test_ia32_vmx_true_exit_ctls_save_vmx_preemption_timer_value();
+    this->test_ia32_vmx_true_exit_ctls_clear_ia32_bndcfgs();
     this->test_ia32_vmx_true_entry_ctls();
     this->test_ia32_vmx_true_entry_ctls_load_debug_controls();
     this->test_ia32_vmx_true_entry_ctls_ia_32e_mode_guest();
@@ -236,6 +237,7 @@ intrinsics_ut::list()
     this->test_ia32_vmx_true_entry_ctls_load_ia32_perf_global_ctrl();
     this->test_ia32_vmx_true_entry_ctls_load_ia32_pat();
     this->test_ia32_vmx_true_entry_ctls_load_ia32_efer();
+    this->test_ia32_vmx_true_entry_ctls_load_ia32_bndcfgs();
     this->test_ia32_vmx_vmfunc();
     this->test_ia32_vmx_vmfunc_eptp_switching();
     this->test_ia32_efer();
@@ -397,6 +399,9 @@ intrinsics_ut::list()
     this->test_cpuid_x64_cpuid_feature_information_ecx_f16c();
     this->test_cpuid_x64_cpuid_feature_information_ecx_rdrand();
     this->test_cpuid_x64_cpuid_feature_information_ecx_dump();
+    this->test_cpuid_x64_cpuid_extended_feature_flags_subleaf0_ebx_sgx();
+    this->test_cpuid_x64_cpuid_extended_feature_flags_subleaf0_ebx_rtm();
+    this->test_cpuid_x64_cpuid_extended_feature_flags_subleaf0_ebx_dump();
 
     this->test_pm_x64_halt();
     this->test_pm_x64_stop();
@@ -407,6 +412,9 @@ intrinsics_ut::list()
     this->test_tlb_x64_invlpg();
 
     this->test_debug_x64_dr7();
+
+    this->test_pdpte_x64_reserved_mask();
+    this->test_pdpte_x64_page_directory_addr_mask();
 
     return true;
 }

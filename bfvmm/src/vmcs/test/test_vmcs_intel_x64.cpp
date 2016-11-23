@@ -45,9 +45,11 @@
 #include <intrinsics/rflags_x64.h>
 #include <intrinsics/crs_intel_x64.h>
 #include <intrinsics/vmx_intel_x64.h>
+#include <intrinsics/msrs_intel_x64.h>
 
 using namespace x64;
 using namespace intel_x64;
+using namespace msrs;
 
 extern bool g_vmread_fails;
 extern bool g_vmwrite_fails;
@@ -55,9 +57,9 @@ extern bool g_vmclear_fails;
 extern bool g_vmload_fails;
 extern size_t g_new_throws_bad_alloc;
 
-extern void setup_check_vmcs_control_state_paths(std::vector<struct control_flow_path> &cfg);
-extern void setup_check_vmcs_guest_state_paths(std::vector<struct control_flow_path> &cfg);
-extern void setup_check_vmcs_host_state_paths(std::vector<struct control_flow_path> &cfg);
+extern void setup_check_control_vmx_controls_all_paths(std::vector<struct control_flow_path> &cfg);
+extern void setup_check_host_state_all_paths(std::vector<struct control_flow_path> &cfg);
+extern void setup_check_guest_state_all_paths(std::vector<struct control_flow_path> &cfg);
 
 static struct control_flow_path path;
 
@@ -190,13 +192,13 @@ vmcs_resume_fail(state_save_intel_x64 *state_save)
 }
 
 static void
-setup_check_vmcs_state_paths(std::vector<struct control_flow_path> &cfg)
+setup_check_all_paths(std::vector<struct control_flow_path> &cfg)
 {
     std::vector<struct control_flow_path> sub_cfg;
 
-    setup_check_vmcs_control_state_paths(sub_cfg);
-    setup_check_vmcs_guest_state_paths(sub_cfg);
-    setup_check_vmcs_host_state_paths(sub_cfg);
+    setup_check_control_vmx_controls_all_paths(sub_cfg);
+    setup_check_host_state_all_paths(sub_cfg);
+    setup_check_guest_state_all_paths(sub_cfg);
 
     path.setup = [sub_cfg]
     {
@@ -206,7 +208,6 @@ setup_check_vmcs_state_paths(std::vector<struct control_flow_path> &cfg)
     path.throws_exception = false;
     cfg.push_back(path);
 }
-
 
 static void
 setup_launch_success_msrs()
@@ -355,7 +356,7 @@ vmcs_ut::test_launch_vmlaunch_failure()
         vmcs_intel_x64 vmcs{};
         std::vector<struct control_flow_path> cfg;
 
-        setup_check_vmcs_state_paths(cfg);
+        setup_check_all_paths(cfg);
 
         for (const auto &sub_path : cfg)
             sub_path.setup();
@@ -2980,6 +2981,7 @@ vmcs_ut::test_vmcs_guest_pdpte0()
 {
     g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] |= msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask << 32;
     g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] |= msrs::ia32_vmx_procbased_ctls2::enable_ept::mask << 32;
+
     this->expect_true(vmcs::guest_pdpte0::exists());
 
     vmcs::guest_pdpte0::set(1UL);
@@ -2990,10 +2992,95 @@ vmcs_ut::test_vmcs_guest_pdpte0()
 }
 
 void
+vmcs_ut::test_vmcs_guest_pdpte0_present()
+{
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] |= msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask << 32;
+    g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] |= msrs::ia32_vmx_procbased_ctls2::enable_ept::mask << 32;
+
+    vmcs::guest_pdpte0::present::enable();
+    this->expect_true(vmcs::guest_pdpte0::present::is_enabled());
+
+    vmcs::guest_pdpte0::present::disable();
+    this->expect_true(vmcs::guest_pdpte0::present::is_disabled());
+
+    vmcs::guest_pdpte0::present::enable_if_exists();
+    this->expect_true(vmcs::guest_pdpte0::present::is_enabled_if_exists());
+
+    vmcs::guest_pdpte0::present::disable_if_exists();
+    this->expect_true(vmcs::guest_pdpte0::present::is_disabled_if_exists());
+}
+
+void
+vmcs_ut::test_vmcs_guest_pdpte0_reserved()
+{
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] |= msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask << 32;
+    g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] |= msrs::ia32_vmx_procbased_ctls2::enable_ept::mask << 32;
+
+    vmcs::guest_pdpte0::reserved::set(6U);
+    this->expect_true(vmcs::guest_pdpte0::reserved::get() == 6U);
+
+    vmcs::guest_pdpte0::reserved::set_if_exists(0x8000000000000000U);
+    this->expect_true(vmcs::guest_pdpte0::reserved::get_if_exists() == 0x8000000000000000U);
+}
+
+void
+vmcs_ut::test_vmcs_guest_pdpte0_pwt()
+{
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] |= msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask << 32;
+    g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] |= msrs::ia32_vmx_procbased_ctls2::enable_ept::mask << 32;
+
+    vmcs::guest_pdpte0::pwt::enable();
+    this->expect_true(vmcs::guest_pdpte0::pwt::is_enabled());
+
+    vmcs::guest_pdpte0::pwt::disable();
+    this->expect_true(vmcs::guest_pdpte0::pwt::is_disabled());
+
+    vmcs::guest_pdpte0::pwt::enable_if_exists();
+    this->expect_true(vmcs::guest_pdpte0::pwt::is_enabled_if_exists());
+
+    vmcs::guest_pdpte0::pwt::disable_if_exists();
+    this->expect_true(vmcs::guest_pdpte0::pwt::is_disabled_if_exists());
+}
+
+void
+vmcs_ut::test_vmcs_guest_pdpte0_pcd()
+{
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] |= msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask << 32;
+    g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] |= msrs::ia32_vmx_procbased_ctls2::enable_ept::mask << 32;
+
+    vmcs::guest_pdpte0::pcd::enable();
+    this->expect_true(vmcs::guest_pdpte0::pcd::is_enabled());
+
+    vmcs::guest_pdpte0::pcd::disable();
+    this->expect_true(vmcs::guest_pdpte0::pcd::is_disabled());
+
+    vmcs::guest_pdpte0::pcd::enable_if_exists();
+    this->expect_true(vmcs::guest_pdpte0::pcd::is_enabled_if_exists());
+
+    vmcs::guest_pdpte0::pcd::disable_if_exists();
+    this->expect_true(vmcs::guest_pdpte0::pcd::is_disabled_if_exists());
+}
+
+void
+vmcs_ut::test_vmcs_guest_pdpte0_page_directory_addr()
+{
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] |= msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask << 32;
+    g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] |= msrs::ia32_vmx_procbased_ctls2::enable_ept::mask << 32;
+    g_eax_cpuid[x64::cpuid::addr_size::addr] = 48U;
+
+    vmcs::guest_pdpte0::page_directory_addr::set(0x100000000U);
+    this->expect_true(vmcs::guest_pdpte0::page_directory_addr::get() == 0x100000000UL);
+
+    vmcs::guest_pdpte0::page_directory_addr::set_if_exists(0x0U);
+    this->expect_true(vmcs::guest_pdpte0::page_directory_addr::get_if_exists() == 0x0U);
+}
+
+void
 vmcs_ut::test_vmcs_guest_pdpte1()
 {
     g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] |= msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask << 32;
     g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] |= msrs::ia32_vmx_procbased_ctls2::enable_ept::mask << 32;
+
     this->expect_true(vmcs::guest_pdpte1::exists());
 
     vmcs::guest_pdpte1::set(1UL);
@@ -3004,10 +3091,95 @@ vmcs_ut::test_vmcs_guest_pdpte1()
 }
 
 void
+vmcs_ut::test_vmcs_guest_pdpte1_present()
+{
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] |= msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask << 32;
+    g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] |= msrs::ia32_vmx_procbased_ctls2::enable_ept::mask << 32;
+
+    vmcs::guest_pdpte1::present::enable();
+    this->expect_true(vmcs::guest_pdpte1::present::is_enabled());
+
+    vmcs::guest_pdpte1::present::disable();
+    this->expect_true(vmcs::guest_pdpte1::present::is_disabled());
+
+    vmcs::guest_pdpte1::present::enable_if_exists();
+    this->expect_true(vmcs::guest_pdpte1::present::is_enabled_if_exists());
+
+    vmcs::guest_pdpte1::present::disable_if_exists();
+    this->expect_true(vmcs::guest_pdpte1::present::is_disabled_if_exists());
+}
+
+void
+vmcs_ut::test_vmcs_guest_pdpte1_reserved()
+{
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] |= msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask << 32;
+    g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] |= msrs::ia32_vmx_procbased_ctls2::enable_ept::mask << 32;
+
+    vmcs::guest_pdpte1::reserved::set(6U);
+    this->expect_true(vmcs::guest_pdpte1::reserved::get() == 6U);
+
+    vmcs::guest_pdpte1::reserved::set_if_exists(0x8000000000000000U);
+    this->expect_true(vmcs::guest_pdpte1::reserved::get_if_exists() == 0x8000000000000000U);
+}
+
+void
+vmcs_ut::test_vmcs_guest_pdpte1_pwt()
+{
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] |= msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask << 32;
+    g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] |= msrs::ia32_vmx_procbased_ctls2::enable_ept::mask << 32;
+
+    vmcs::guest_pdpte1::pwt::enable();
+    this->expect_true(vmcs::guest_pdpte1::pwt::is_enabled());
+
+    vmcs::guest_pdpte1::pwt::disable();
+    this->expect_true(vmcs::guest_pdpte1::pwt::is_disabled());
+
+    vmcs::guest_pdpte1::pwt::enable_if_exists();
+    this->expect_true(vmcs::guest_pdpte1::pwt::is_enabled_if_exists());
+
+    vmcs::guest_pdpte1::pwt::disable_if_exists();
+    this->expect_true(vmcs::guest_pdpte1::pwt::is_disabled_if_exists());
+}
+
+void
+vmcs_ut::test_vmcs_guest_pdpte1_pcd()
+{
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] |= msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask << 32;
+    g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] |= msrs::ia32_vmx_procbased_ctls2::enable_ept::mask << 32;
+
+    vmcs::guest_pdpte1::pcd::enable();
+    this->expect_true(vmcs::guest_pdpte1::pcd::is_enabled());
+
+    vmcs::guest_pdpte1::pcd::disable();
+    this->expect_true(vmcs::guest_pdpte1::pcd::is_disabled());
+
+    vmcs::guest_pdpte1::pcd::enable_if_exists();
+    this->expect_true(vmcs::guest_pdpte1::pcd::is_enabled_if_exists());
+
+    vmcs::guest_pdpte1::pcd::disable_if_exists();
+    this->expect_true(vmcs::guest_pdpte1::pcd::is_disabled_if_exists());
+}
+
+void
+vmcs_ut::test_vmcs_guest_pdpte1_page_directory_addr()
+{
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] |= msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask << 32;
+    g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] |= msrs::ia32_vmx_procbased_ctls2::enable_ept::mask << 32;
+    g_eax_cpuid[x64::cpuid::addr_size::addr] = 48U;
+
+    vmcs::guest_pdpte1::page_directory_addr::set(0x100000000U);
+    this->expect_true(vmcs::guest_pdpte1::page_directory_addr::get() == 0x100000000UL);
+
+    vmcs::guest_pdpte1::page_directory_addr::set_if_exists(0x0U);
+    this->expect_true(vmcs::guest_pdpte1::page_directory_addr::get_if_exists() == 0x0U);
+}
+
+void
 vmcs_ut::test_vmcs_guest_pdpte2()
 {
     g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] |= msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask << 32;
     g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] |= msrs::ia32_vmx_procbased_ctls2::enable_ept::mask << 32;
+
     this->expect_true(vmcs::guest_pdpte2::exists());
 
     vmcs::guest_pdpte2::set(1UL);
@@ -3018,10 +3190,95 @@ vmcs_ut::test_vmcs_guest_pdpte2()
 }
 
 void
+vmcs_ut::test_vmcs_guest_pdpte2_present()
+{
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] |= msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask << 32;
+    g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] |= msrs::ia32_vmx_procbased_ctls2::enable_ept::mask << 32;
+
+    vmcs::guest_pdpte2::present::enable();
+    this->expect_true(vmcs::guest_pdpte2::present::is_enabled());
+
+    vmcs::guest_pdpte2::present::disable();
+    this->expect_true(vmcs::guest_pdpte2::present::is_disabled());
+
+    vmcs::guest_pdpte2::present::enable_if_exists();
+    this->expect_true(vmcs::guest_pdpte2::present::is_enabled_if_exists());
+
+    vmcs::guest_pdpte2::present::disable_if_exists();
+    this->expect_true(vmcs::guest_pdpte2::present::is_disabled_if_exists());
+}
+
+void
+vmcs_ut::test_vmcs_guest_pdpte2_reserved()
+{
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] |= msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask << 32;
+    g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] |= msrs::ia32_vmx_procbased_ctls2::enable_ept::mask << 32;
+
+    vmcs::guest_pdpte2::reserved::set(6U);
+    this->expect_true(vmcs::guest_pdpte2::reserved::get() == 6U);
+
+    vmcs::guest_pdpte2::reserved::set_if_exists(0x8000000000000000U);
+    this->expect_true(vmcs::guest_pdpte2::reserved::get_if_exists() == 0x8000000000000000U);
+}
+
+void
+vmcs_ut::test_vmcs_guest_pdpte2_pwt()
+{
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] |= msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask << 32;
+    g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] |= msrs::ia32_vmx_procbased_ctls2::enable_ept::mask << 32;
+
+    vmcs::guest_pdpte2::pwt::enable();
+    this->expect_true(vmcs::guest_pdpte2::pwt::is_enabled());
+
+    vmcs::guest_pdpte2::pwt::disable();
+    this->expect_true(vmcs::guest_pdpte2::pwt::is_disabled());
+
+    vmcs::guest_pdpte2::pwt::enable_if_exists();
+    this->expect_true(vmcs::guest_pdpte2::pwt::is_enabled_if_exists());
+
+    vmcs::guest_pdpte2::pwt::disable_if_exists();
+    this->expect_true(vmcs::guest_pdpte2::pwt::is_disabled_if_exists());
+}
+
+void
+vmcs_ut::test_vmcs_guest_pdpte2_pcd()
+{
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] |= msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask << 32;
+    g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] |= msrs::ia32_vmx_procbased_ctls2::enable_ept::mask << 32;
+
+    vmcs::guest_pdpte2::pcd::enable();
+    this->expect_true(vmcs::guest_pdpte2::pcd::is_enabled());
+
+    vmcs::guest_pdpte2::pcd::disable();
+    this->expect_true(vmcs::guest_pdpte2::pcd::is_disabled());
+
+    vmcs::guest_pdpte2::pcd::enable_if_exists();
+    this->expect_true(vmcs::guest_pdpte2::pcd::is_enabled_if_exists());
+
+    vmcs::guest_pdpte2::pcd::disable_if_exists();
+    this->expect_true(vmcs::guest_pdpte2::pcd::is_disabled_if_exists());
+}
+
+void
+vmcs_ut::test_vmcs_guest_pdpte2_page_directory_addr()
+{
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] |= msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask << 32;
+    g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] |= msrs::ia32_vmx_procbased_ctls2::enable_ept::mask << 32;
+    g_eax_cpuid[x64::cpuid::addr_size::addr] = 48U;
+
+    vmcs::guest_pdpte2::page_directory_addr::set(0x100000000U);
+    this->expect_true(vmcs::guest_pdpte2::page_directory_addr::get() == 0x100000000UL);
+
+    vmcs::guest_pdpte2::page_directory_addr::set_if_exists(0x0U);
+    this->expect_true(vmcs::guest_pdpte2::page_directory_addr::get_if_exists() == 0x0U);
+}
+
+void
 vmcs_ut::test_vmcs_guest_pdpte3()
 {
     g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] |= msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask << 32;
     g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] |= msrs::ia32_vmx_procbased_ctls2::enable_ept::mask << 32;
+
     this->expect_true(vmcs::guest_pdpte3::exists());
 
     vmcs::guest_pdpte3::set(1UL);
@@ -3029,6 +3286,167 @@ vmcs_ut::test_vmcs_guest_pdpte3()
 
     vmcs::guest_pdpte3::set_if_exists(0UL);
     this->expect_true(vmcs::guest_pdpte3::get_if_exists() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_pdpte3_present()
+{
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] |= msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask << 32;
+    g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] |= msrs::ia32_vmx_procbased_ctls2::enable_ept::mask << 32;
+
+    vmcs::guest_pdpte3::present::enable();
+    this->expect_true(vmcs::guest_pdpte3::present::is_enabled());
+
+    vmcs::guest_pdpte3::present::disable();
+    this->expect_true(vmcs::guest_pdpte3::present::is_disabled());
+
+    vmcs::guest_pdpte3::present::enable_if_exists();
+    this->expect_true(vmcs::guest_pdpte3::present::is_enabled_if_exists());
+
+    vmcs::guest_pdpte3::present::disable_if_exists();
+    this->expect_true(vmcs::guest_pdpte3::present::is_disabled_if_exists());
+}
+
+void
+vmcs_ut::test_vmcs_guest_pdpte3_reserved()
+{
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] |= msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask << 32;
+    g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] |= msrs::ia32_vmx_procbased_ctls2::enable_ept::mask << 32;
+
+    vmcs::guest_pdpte3::reserved::set(6U);
+    this->expect_true(vmcs::guest_pdpte3::reserved::get() == 6U);
+
+    vmcs::guest_pdpte3::reserved::set_if_exists(0x8000000000000000U);
+    this->expect_true(vmcs::guest_pdpte3::reserved::get_if_exists() == 0x8000000000000000U);
+}
+
+void
+vmcs_ut::test_vmcs_guest_pdpte3_pwt()
+{
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] |= msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask << 32;
+    g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] |= msrs::ia32_vmx_procbased_ctls2::enable_ept::mask << 32;
+
+    vmcs::guest_pdpte3::pwt::enable();
+    this->expect_true(vmcs::guest_pdpte3::pwt::is_enabled());
+
+    vmcs::guest_pdpte3::pwt::disable();
+    this->expect_true(vmcs::guest_pdpte3::pwt::is_disabled());
+
+    vmcs::guest_pdpte3::pwt::enable_if_exists();
+    this->expect_true(vmcs::guest_pdpte3::pwt::is_enabled_if_exists());
+
+    vmcs::guest_pdpte3::pwt::disable_if_exists();
+    this->expect_true(vmcs::guest_pdpte3::pwt::is_disabled_if_exists());
+}
+
+void
+vmcs_ut::test_vmcs_guest_pdpte3_pcd()
+{
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] |= msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask << 32;
+    g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] |= msrs::ia32_vmx_procbased_ctls2::enable_ept::mask << 32;
+
+    vmcs::guest_pdpte3::pcd::enable();
+    this->expect_true(vmcs::guest_pdpte3::pcd::is_enabled());
+
+    vmcs::guest_pdpte3::pcd::disable();
+    this->expect_true(vmcs::guest_pdpte3::pcd::is_disabled());
+
+    vmcs::guest_pdpte3::pcd::enable_if_exists();
+    this->expect_true(vmcs::guest_pdpte3::pcd::is_enabled_if_exists());
+
+    vmcs::guest_pdpte3::pcd::disable_if_exists();
+    this->expect_true(vmcs::guest_pdpte3::pcd::is_disabled_if_exists());
+}
+
+void
+vmcs_ut::test_vmcs_guest_pdpte3_page_directory_addr()
+{
+    g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] |= msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask << 32;
+    g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] |= msrs::ia32_vmx_procbased_ctls2::enable_ept::mask << 32;
+    g_eax_cpuid[x64::cpuid::addr_size::addr] = 48U;
+
+    vmcs::guest_pdpte3::page_directory_addr::set(0x100000000U);
+    this->expect_true(vmcs::guest_pdpte3::page_directory_addr::get() == 0x100000000UL);
+
+    vmcs::guest_pdpte3::page_directory_addr::set_if_exists(0x0U);
+    this->expect_true(vmcs::guest_pdpte3::page_directory_addr::get_if_exists() == 0x0U);
+}
+
+void
+vmcs_ut::test_vmcs_guest_ia32_bndcfgs()
+{
+    g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] |= ia32_vmx_true_entry_ctls::load_ia32_bndcfgs::mask << 32;
+    this->expect_true(vmcs::guest_ia32_bndcfgs::exists());
+
+    g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] &= ~(ia32_vmx_true_entry_ctls::load_ia32_bndcfgs::mask << 32);
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] |= ia32_vmx_true_exit_ctls::clear_ia32_bndcfgs::mask << 32;
+    this->expect_true(vmcs::guest_ia32_bndcfgs::exists());
+
+    vmcs::guest_ia32_bndcfgs::set(1UL);
+    this->expect_true(vmcs::guest_ia32_bndcfgs::get() == 1UL);
+
+    vmcs::guest_ia32_bndcfgs::set_if_exists(0UL);
+    this->expect_true(vmcs::guest_ia32_bndcfgs::get_if_exists() == 0UL);
+}
+
+void
+vmcs_ut::test_vmcs_guest_ia32_bndcfgs_en()
+{
+    g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] |= ia32_vmx_true_entry_ctls::load_ia32_bndcfgs::mask << 32;
+
+    vmcs::guest_ia32_bndcfgs::en::enable();
+    this->expect_true(vmcs::guest_ia32_bndcfgs::en::is_enabled());
+
+    vmcs::guest_ia32_bndcfgs::en::disable();
+    this->expect_true(vmcs::guest_ia32_bndcfgs::en::is_disabled());
+
+    vmcs::guest_ia32_bndcfgs::en::enable_if_exists();
+    this->expect_true(vmcs::guest_ia32_bndcfgs::en::is_enabled_if_exists());
+
+    vmcs::guest_ia32_bndcfgs::en::disable_if_exists();
+    this->expect_true(vmcs::guest_ia32_bndcfgs::en::is_disabled_if_exists());
+}
+
+void
+vmcs_ut::test_vmcs_guest_ia32_bndcfgs_bndpreserve()
+{
+    g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] |= ia32_vmx_true_entry_ctls::load_ia32_bndcfgs::mask << 32;
+
+    vmcs::guest_ia32_bndcfgs::bndpreserve::enable();
+    this->expect_true(vmcs::guest_ia32_bndcfgs::bndpreserve::is_enabled());
+
+    vmcs::guest_ia32_bndcfgs::bndpreserve::disable();
+    this->expect_true(vmcs::guest_ia32_bndcfgs::bndpreserve::is_disabled());
+
+    vmcs::guest_ia32_bndcfgs::bndpreserve::enable_if_exists();
+    this->expect_true(vmcs::guest_ia32_bndcfgs::bndpreserve::is_enabled_if_exists());
+
+    vmcs::guest_ia32_bndcfgs::bndpreserve::disable_if_exists();
+    this->expect_true(vmcs::guest_ia32_bndcfgs::bndpreserve::is_disabled_if_exists());
+}
+
+void
+vmcs_ut::test_vmcs_guest_ia32_bndcfgs_reserved()
+{
+    g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] |= ia32_vmx_true_entry_ctls::load_ia32_bndcfgs::mask << 32;
+
+    vmcs::guest_ia32_bndcfgs::reserved::set(0xCUL);
+    this->expect_true(vmcs::guest_ia32_bndcfgs::reserved::get() == 0xCUL);
+
+    vmcs::guest_ia32_bndcfgs::reserved::set_if_exists(0U);
+    this->expect_true(vmcs::guest_ia32_bndcfgs::reserved::get_if_exists() == 0U);
+}
+
+void
+vmcs_ut::test_vmcs_guest_ia32_bndcfgs_base_addr_of_bnd_directory()
+{
+    g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] |= ia32_vmx_true_entry_ctls::load_ia32_bndcfgs::mask << 32;
+
+    vmcs::guest_ia32_bndcfgs::base_addr_of_bnd_directory::set(0x100000UL);
+    this->expect_true(vmcs::guest_ia32_bndcfgs::base_addr_of_bnd_directory::get() == 0x100000UL);
+
+    vmcs::guest_ia32_bndcfgs::base_addr_of_bnd_directory::set_if_exists(0U);
+    this->expect_true(vmcs::guest_ia32_bndcfgs::base_addr_of_bnd_directory::get_if_exists() == 0U);
 }
 
 void
@@ -5569,8 +5987,8 @@ vmcs_ut::test_vmcs_guest_es_access_rights_granularity()
 void
 vmcs_ut::test_vmcs_guest_es_access_rights_reserved()
 {
-    vmcs::guest_es_access_rights::reserved::set(0x10000U);
-    this->expect_true(vmcs::guest_es_access_rights::reserved::get() == 0x10000U);
+    vmcs::guest_es_access_rights::reserved::set(0x10F00U);
+    this->expect_true(vmcs::guest_es_access_rights::reserved::get() == 0x00F00U);
 
     vmcs::guest_es_access_rights::reserved::set_if_exists(0UL);
     this->expect_true(vmcs::guest_es_access_rights::reserved::get_if_exists() == 0UL);
@@ -5680,8 +6098,8 @@ vmcs_ut::test_vmcs_guest_cs_access_rights_granularity()
 void
 vmcs_ut::test_vmcs_guest_cs_access_rights_reserved()
 {
-    vmcs::guest_cs_access_rights::reserved::set(0x10000U);
-    this->expect_true(vmcs::guest_cs_access_rights::reserved::get() == 0x10000U);
+    vmcs::guest_cs_access_rights::reserved::set(0x10F00U);
+    this->expect_true(vmcs::guest_cs_access_rights::reserved::get() == 0x00F00U);
 
     vmcs::guest_cs_access_rights::reserved::set_if_exists(0UL);
     this->expect_true(vmcs::guest_cs_access_rights::reserved::get_if_exists() == 0UL);
@@ -5791,8 +6209,8 @@ vmcs_ut::test_vmcs_guest_ss_access_rights_granularity()
 void
 vmcs_ut::test_vmcs_guest_ss_access_rights_reserved()
 {
-    vmcs::guest_ss_access_rights::reserved::set(0x10000U);
-    this->expect_true(vmcs::guest_ss_access_rights::reserved::get() == 0x10000U);
+    vmcs::guest_ss_access_rights::reserved::set(0x10F00U);
+    this->expect_true(vmcs::guest_ss_access_rights::reserved::get() == 0x00F00U);
 
     vmcs::guest_ss_access_rights::reserved::set_if_exists(0UL);
     this->expect_true(vmcs::guest_ss_access_rights::reserved::get_if_exists() == 0UL);
@@ -5902,8 +6320,8 @@ vmcs_ut::test_vmcs_guest_ds_access_rights_granularity()
 void
 vmcs_ut::test_vmcs_guest_ds_access_rights_reserved()
 {
-    vmcs::guest_ds_access_rights::reserved::set(0x10000U);
-    this->expect_true(vmcs::guest_ds_access_rights::reserved::get() == 0x10000U);
+    vmcs::guest_ds_access_rights::reserved::set(0x10F00U);
+    this->expect_true(vmcs::guest_ds_access_rights::reserved::get() == 0x00F00U);
 
     vmcs::guest_ds_access_rights::reserved::set_if_exists(0UL);
     this->expect_true(vmcs::guest_ds_access_rights::reserved::get_if_exists() == 0UL);
@@ -6013,8 +6431,8 @@ vmcs_ut::test_vmcs_guest_fs_access_rights_granularity()
 void
 vmcs_ut::test_vmcs_guest_fs_access_rights_reserved()
 {
-    vmcs::guest_fs_access_rights::reserved::set(0x10000U);
-    this->expect_true(vmcs::guest_fs_access_rights::reserved::get() == 0x10000U);
+    vmcs::guest_fs_access_rights::reserved::set(0x10F00U);
+    this->expect_true(vmcs::guest_fs_access_rights::reserved::get() == 0x00F00U);
 
     vmcs::guest_fs_access_rights::reserved::set_if_exists(0UL);
     this->expect_true(vmcs::guest_fs_access_rights::reserved::get_if_exists() == 0UL);
@@ -6124,8 +6542,8 @@ vmcs_ut::test_vmcs_guest_gs_access_rights_granularity()
 void
 vmcs_ut::test_vmcs_guest_gs_access_rights_reserved()
 {
-    vmcs::guest_gs_access_rights::reserved::set(0x10000U);
-    this->expect_true(vmcs::guest_gs_access_rights::reserved::get() == 0x10000U);
+    vmcs::guest_gs_access_rights::reserved::set(0x10F00U);
+    this->expect_true(vmcs::guest_gs_access_rights::reserved::get() == 0x00F00U);
 
     vmcs::guest_gs_access_rights::reserved::set_if_exists(0UL);
     this->expect_true(vmcs::guest_gs_access_rights::reserved::get_if_exists() == 0UL);
@@ -6235,8 +6653,8 @@ vmcs_ut::test_vmcs_guest_ldtr_access_rights_granularity()
 void
 vmcs_ut::test_vmcs_guest_ldtr_access_rights_reserved()
 {
-    vmcs::guest_ldtr_access_rights::reserved::set(0x10000U);
-    this->expect_true(vmcs::guest_ldtr_access_rights::reserved::get() == 0x10000U);
+    vmcs::guest_ldtr_access_rights::reserved::set(0x10F00U);
+    this->expect_true(vmcs::guest_ldtr_access_rights::reserved::get() == 0x00F00U);
 
     vmcs::guest_ldtr_access_rights::reserved::set_if_exists(0UL);
     this->expect_true(vmcs::guest_ldtr_access_rights::reserved::get_if_exists() == 0UL);
@@ -6346,8 +6764,8 @@ vmcs_ut::test_vmcs_guest_tr_access_rights_granularity()
 void
 vmcs_ut::test_vmcs_guest_tr_access_rights_reserved()
 {
-    vmcs::guest_tr_access_rights::reserved::set(0x10000U);
-    this->expect_true(vmcs::guest_tr_access_rights::reserved::get() == 0x10000U);
+    vmcs::guest_tr_access_rights::reserved::set(0x10F00U);
+    this->expect_true(vmcs::guest_tr_access_rights::reserved::get() == 0x00F00U);
 
     vmcs::guest_tr_access_rights::reserved::set_if_exists(0UL);
     this->expect_true(vmcs::guest_tr_access_rights::reserved::get_if_exists() == 0UL);
@@ -7395,6 +7813,26 @@ vmcs_ut::test_vmcs_vm_exit_controls_save_vmx_preemption_timer_value()
 }
 
 void
+vmcs_ut::test_vmcs_vm_exit_controls_clear_ia32_bndcfgs()
+{
+    using namespace vmcs::vm_exit_controls::clear_ia32_bndcfgs;
+
+    g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] = 0xffffffff00000000UL;
+
+    enable();
+    this->expect_true(is_enabled());
+
+    disable();
+    this->expect_true(is_disabled());
+
+    enable_if_allowed();
+    this->expect_true(is_enabled_if_exists());
+
+    disable_if_allowed();
+    this->expect_true(is_disabled_if_exists());
+}
+
+void
 vmcs_ut::test_vmcs_vm_exit_msr_store_count()
 {
     this->expect_true(vmcs::vm_exit_msr_store_count::exists());
@@ -7554,6 +7992,26 @@ void
 vmcs_ut::test_vmcs_vm_entry_controls_load_ia32_efer()
 {
     using namespace vmcs::vm_entry_controls::load_ia32_efer;
+
+    g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] = 0xffffffff00000000UL;
+
+    enable();
+    this->expect_true(is_enabled());
+
+    disable();
+    this->expect_true(is_disabled());
+
+    enable_if_allowed();
+    this->expect_true(is_enabled_if_exists());
+
+    disable_if_allowed();
+    this->expect_true(is_disabled_if_exists());
+}
+
+void
+vmcs_ut::test_vmcs_vm_entry_controls_load_ia32_bndcfgs()
+{
+    using namespace vmcs::vm_entry_controls::load_ia32_bndcfgs;
 
     g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] = 0xffffffff00000000UL;
 

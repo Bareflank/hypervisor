@@ -22,79 +22,85 @@
 #include <test.h>
 #include <memory_manager/memory_manager_x64.h>
 #include <vmcs/vmcs_intel_x64_16bit_control_fields.h>
-#include <vmcs/vmcs_intel_x64_natural_width_guest_state_fields.h>
 #include <vmcs/vmcs_intel_x64_64bit_control_fields.h>
+#include <vmcs/vmcs_intel_x64_natural_width_guest_state_fields.h>
+#include <vmcs/vmcs_intel_x64_check.h>
+#include <intrinsics/msrs_intel_x64.h>
 
 using namespace intel_x64;
+using namespace msrs;
+using namespace vmcs;
+using namespace check;
 
 static struct control_flow_path path;
 
 static void
-setup_checks_on_vm_execution_control_fields_paths(std::vector<struct control_flow_path> &cfg)
+setup_check_control_vm_execution_control_fields_all_paths(std::vector<struct control_flow_path> &cfg)
 {
     path.setup = [&]
     {
-        g_msrs[msrs::ia32_vmx_true_pinbased_ctls::addr] = 0xffffffff00000000UL;
-        g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = 0xffffffff00000000UL;
-        g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = 0xffffffff00000000UL;
-        vmcs::cr3_target_count::set(3U);
-        disable_proc_ctl(vmcs::primary_processor_based_vm_execution_controls::use_io_bitmaps::mask);
-        disable_proc_ctl(vmcs::primary_processor_based_vm_execution_controls::use_msr_bitmaps::mask);
-        disable_proc_ctl(vmcs::primary_processor_based_vm_execution_controls::use_tpr_shadow::mask);
-        disable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::virtualize_x2apic_mode::mask);
-        disable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::apic_register_virtualization::mask);
-        disable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::virtual_interrupt_delivery::mask);
-        enable_pin_ctl(vmcs::pin_based_vm_execution_controls::nmi_exiting::mask);
-        enable_pin_ctl(vmcs::pin_based_vm_execution_controls::virtual_nmis::mask);
-        disable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::virtualize_apic_accesses::mask);
-        disable_pin_ctl(vmcs::pin_based_vm_execution_controls::process_posted_interrupts::mask);
-        disable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::enable_vpid::mask);
-        disable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::enable_ept::mask);
-        disable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::enable_pml::mask);
-        disable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::unrestricted_guest::mask);
-        disable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::enable_vm_functions::mask);
-        disable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::vmcs_shadowing::mask);
-        disable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::ept_violation_ve::mask);
+        g_msrs[ia32_vmx_true_pinbased_ctls::addr] = 0xffffffff00000000UL;
+        g_msrs[ia32_vmx_true_procbased_ctls::addr] = 0xffffffff00000000UL;
+        g_msrs[ia32_vmx_procbased_ctls2::addr] = 0xffffffff00000000UL;
+        cr3_target_count::set(3U);
+        primary_processor_based_vm_execution_controls::use_io_bitmaps::disable();
+        primary_processor_based_vm_execution_controls::use_msr_bitmaps::disable();
+        primary_processor_based_vm_execution_controls::use_tpr_shadow::disable();
+        secondary_processor_based_vm_execution_controls::virtualize_x2apic_mode::disable();
+        secondary_processor_based_vm_execution_controls::apic_register_virtualization::disable();
+        secondary_processor_based_vm_execution_controls::virtual_interrupt_delivery::disable();
+        pin_based_vm_execution_controls::nmi_exiting::enable();
+        pin_based_vm_execution_controls::virtual_nmis::enable();
+        secondary_processor_based_vm_execution_controls::virtualize_apic_accesses::disable();
+        pin_based_vm_execution_controls::process_posted_interrupts::disable();
+        secondary_processor_based_vm_execution_controls::enable_vpid::disable();
+        secondary_processor_based_vm_execution_controls::enable_ept::disable();
+        secondary_processor_based_vm_execution_controls::enable_pml::disable();
+        secondary_processor_based_vm_execution_controls::unrestricted_guest::disable();
+        secondary_processor_based_vm_execution_controls::enable_vm_functions::disable();
+        secondary_processor_based_vm_execution_controls::vmcs_shadowing::disable();
+        secondary_processor_based_vm_execution_controls::ept_violation_ve::disable();
     };
     path.throws_exception = false;
     cfg.push_back(path);
 }
 
 static void
-setup_checks_on_vm_exit_control_fields_paths(std::vector<struct control_flow_path> &cfg)
+setup_check_control_vm_exit_control_fields_all_paths(std::vector<struct control_flow_path> &cfg)
 {
     path.setup = [&]
     {
-        g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] = 0xffffffff00000000UL;
-        enable_pin_ctl(vmcs::pin_based_vm_execution_controls::activate_vmx_preemption_timer::mask);
-        vmcs::vm_exit_msr_store_count::set(0U);
-        vmcs::vm_exit_msr_load_count::set(0U);
+        g_msrs[ia32_vmx_true_exit_ctls::addr] = 0xffffffff00000000UL;
+        pin_ctl_allow1(ia32_vmx_true_pinbased_ctls::activate_vmx_preemption_timer::mask);
+        pin_based_vm_execution_controls::activate_vmx_preemption_timer::enable();
+        vm_exit_msr_store_count::set(0U);
+        vm_exit_msr_load_count::set(0U);
     };
     path.throws_exception = false;
     cfg.push_back(path);
 }
 
 static void
-setup_checks_on_vm_entry_control_fields_paths(std::vector<struct control_flow_path> &cfg)
+setup_check_control_vm_entry_control_fields_all_paths(std::vector<struct control_flow_path> &cfg)
 {
     path.setup = [&]
     {
-        g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] = 0xffffffff00000000UL;
-        vmcs::vm_entry_interruption_information_field::valid_bit::disable();
-        vmcs::vm_entry_msr_load_count::set(0U);
+        g_msrs[ia32_vmx_true_entry_ctls::addr] = 0xffffffff00000000UL;
+        vm_entry_interruption_information_field::valid_bit::disable();
+        vm_entry_msr_load_count::set(0U);
     };
     path.throws_exception = false;
     cfg.push_back(path);
 }
 
 void
-setup_check_vmcs_control_state_paths(std::vector<struct control_flow_path> &cfg)
+setup_check_control_vmx_controls_all_paths(std::vector<struct control_flow_path> &cfg)
 {
     std::vector<struct control_flow_path> sub_cfg;
 
-    setup_checks_on_vm_execution_control_fields_paths(sub_cfg);
-    setup_checks_on_vm_exit_control_fields_paths(sub_cfg);
-    setup_checks_on_vm_entry_control_fields_paths(sub_cfg);
+    setup_check_control_vm_execution_control_fields_all_paths(sub_cfg);
+    setup_check_control_vm_exit_control_fields_all_paths(sub_cfg);
+    setup_check_control_vm_entry_control_fields_all_paths(sub_cfg);
 
     path.setup = [sub_cfg]
     {
@@ -105,78 +111,20 @@ setup_check_vmcs_control_state_paths(std::vector<struct control_flow_path> &cfg)
     cfg.push_back(path);
 }
 
-void
-vmcs_ut::test_check_vmcs_control_state()
-{
-    std::vector<struct control_flow_path> cfg;
-    setup_check_vmcs_control_state_paths(cfg);
-
-    this->run_vmcs_test(cfg, &vmcs_intel_x64::check_vmcs_control_state);
-}
-
-void
-vmcs_ut::test_checks_on_vm_execution_control_fields()
-{
-    std::vector<struct control_flow_path> cfg;
-    setup_checks_on_vm_execution_control_fields_paths(cfg);
-
-    this->run_vmcs_test(cfg, &vmcs_intel_x64::checks_on_vm_execution_control_fields);
-}
-
-void
-vmcs_ut::test_checks_on_vm_exit_control_fields()
-{
-    std::vector<struct control_flow_path> cfg;
-    setup_checks_on_vm_exit_control_fields_paths(cfg);
-
-    this->run_vmcs_test(cfg, &vmcs_intel_x64::checks_on_vm_exit_control_fields);
-}
-
-void
-vmcs_ut::test_checks_on_vm_entry_control_fields()
-{
-    std::vector<struct control_flow_path> cfg;
-    setup_checks_on_vm_entry_control_fields_paths(cfg);
-
-    this->run_vmcs_test(cfg, &vmcs_intel_x64::checks_on_vm_entry_control_fields);
-}
-
-void
-vmcs_ut::test_check_control_ctls_reserved_properly_set()
-{
-    MockRepository mocks;
-    auto mm = mocks.Mock<memory_manager_x64>();
-
-    mocks.OnCallFunc(memory_manager_x64::instance).Return(mm);
-
-    g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] = 0xffffffff00000000UL;
-    vmcs::vm_entry_controls::set(0x1234UL);
-
-    auto msr_addr = msrs::ia32_vmx_true_entry_ctls::addr;
-    auto ctls = vmcs::vm_entry_controls::get();
-    auto name = vmcs::vm_entry_controls::name;
-
-
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        vmcs_intel_x64 vmcs{};
-        this->expect_no_exception([&]{ vmcs.check_control_ctls_reserved_properly_set(msr_addr, ctls, name); });
-    });
-}
-
 static void
 setup_check_control_pin_based_ctls_reserved_properly_set_paths(std::vector<struct control_flow_path> &cfg)
 {
-    path.setup = [&] { g_msrs[msrs::ia32_vmx_true_pinbased_ctls::addr] = 0xffffffff00000000UL; };
+    path.setup = [&] { g_msrs[ia32_vmx_true_pinbased_ctls::addr] = 0xffffffff00000000UL; };
     path.throws_exception = false;
     cfg.push_back(path);
 
-    path.setup = [&] { g_msrs[msrs::ia32_vmx_true_pinbased_ctls::addr] = 1; };
+    path.setup = [&] { g_msrs[ia32_vmx_true_pinbased_ctls::addr] = 1; };
     path.throws_exception = true;
     path.exception = ""_ut_lee;
     cfg.push_back(path);
 
-    path.setup = [&] { vmcs::pin_based_vm_execution_controls::set(1UL); };
+    path.setup = [&] { pin_based_vm_execution_controls::set(1UL); };
+    path.throws_exception = true;
     path.exception = ""_ut_lee;
     cfg.push_back(path);
 }
@@ -184,16 +132,17 @@ setup_check_control_pin_based_ctls_reserved_properly_set_paths(std::vector<struc
 static void
 setup_check_control_proc_based_ctls_reserved_properly_set_paths(std::vector<struct control_flow_path> &cfg)
 {
-    path.setup = [&] { g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = 0xffffffff00000000UL; };
+    path.setup = [&] { g_msrs[ia32_vmx_true_procbased_ctls::addr] = 0xffffffff00000000UL; };
     path.throws_exception = false;
     cfg.push_back(path);
 
-    path.setup = [&] { g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = 1; };
+    path.setup = [&] { g_msrs[ia32_vmx_true_procbased_ctls::addr] = 1; };
     path.throws_exception = true;
     path.exception = ""_ut_lee;
     cfg.push_back(path);
 
-    path.setup = [&] { vmcs::primary_processor_based_vm_execution_controls::set(1UL); };
+    path.setup = [&] { primary_processor_based_vm_execution_controls::set(1UL); };
+    path.throws_exception = true;
     path.exception = ""_ut_lee;
     cfg.push_back(path);
 }
@@ -201,30 +150,34 @@ setup_check_control_proc_based_ctls_reserved_properly_set_paths(std::vector<stru
 static void
 setup_check_control_proc_based_ctls2_reserved_properly_set_paths(std::vector<struct control_flow_path> &cfg)
 {
-    path.setup = [&] { g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = ~(msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask << 32); };
+    path.setup = [&] { proc_ctl_disallow1(ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask); };
     path.throws_exception = true;
     path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&]
     {
-        g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask << 32;
-        g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = 0xffffffff00000000UL;
+        proc_ctl_allow1(ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask);
+        g_msrs[ia32_vmx_procbased_ctls2::addr] = 0xffffffff00000000UL;
     };
     path.throws_exception = false;
     cfg.push_back(path);
 
-    path.setup = [&] { g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] |= 1; vmcs::secondary_processor_based_vm_execution_controls::set(0UL); };
+    path.setup = [&]
+    {
+        g_msrs[ia32_vmx_procbased_ctls2::addr] |= 1;
+        secondary_processor_based_vm_execution_controls::set(0UL);
+    };
     path.throws_exception = true;
     path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&]
     {
-        using namespace vmcs::secondary_processor_based_vm_execution_controls;
+        using namespace secondary_processor_based_vm_execution_controls;
 
-        g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = 0xfffffffe00000000UL;
-        vmcs::primary_processor_based_vm_execution_controls::activate_secondary_controls::disable();
+        g_msrs[ia32_vmx_procbased_ctls2::addr] = 0xfffffffe00000000UL;
+        primary_processor_based_vm_execution_controls::activate_secondary_controls::disable();
 
         // we use the _fields_ set() here rather than the controls enable()
         // so that an exception isn't thrown in the setup function.
@@ -233,7 +186,7 @@ setup_check_control_proc_based_ctls2_reserved_properly_set_paths(std::vector<str
     path.throws_exception = false;
     cfg.push_back(path);
 
-    path.setup = [&] { vmcs::primary_processor_based_vm_execution_controls::activate_secondary_controls::enable(); };
+    path.setup = [&] { primary_processor_based_vm_execution_controls::activate_secondary_controls::enable(); };
     path.throws_exception = true;
     path.exception = ""_ut_lee;
     cfg.push_back(path);
@@ -242,11 +195,11 @@ setup_check_control_proc_based_ctls2_reserved_properly_set_paths(std::vector<str
 static void
 setup_check_control_cr3_count_less_than_4_paths(std::vector<struct control_flow_path> &cfg)
 {
-    path.setup = [&] { vmcs::cr3_target_count::set(3UL); };
+    path.setup = [&] { cr3_target_count::set(3UL); };
     path.throws_exception = false;
     cfg.push_back(path);
 
-    path.setup = [&] { vmcs::cr3_target_count::set(5UL); };
+    path.setup = [&] { cr3_target_count::set(5UL); };
     path.throws_exception = true;
     path.exception = ""_ut_lee;
     cfg.push_back(path);
@@ -255,31 +208,45 @@ setup_check_control_cr3_count_less_than_4_paths(std::vector<struct control_flow_
 static void
 setup_check_control_io_bitmap_address_bits_paths(std::vector<struct control_flow_path> &cfg)
 {
-    path.setup = [&] { disable_proc_ctl(vmcs::primary_processor_based_vm_execution_controls::use_io_bitmaps::mask); };
+    path.setup = [&]
+    {
+        proc_ctl_allow0(ia32_vmx_true_procbased_ctls::use_io_bitmaps::mask);
+        primary_processor_based_vm_execution_controls::use_io_bitmaps::disable();
+        g_eax_cpuid[x64::cpuid::addr_size::addr] = 48U;
+    };
     path.throws_exception = false;
     cfg.push_back(path);
 
-    path.setup = [&] { enable_proc_ctl(vmcs::primary_processor_based_vm_execution_controls::use_io_bitmaps::mask); vmcs::address_of_io_bitmap_a::set(0x1U); };
+    path.setup = [&]
+    {
+        proc_ctl_allow1(ia32_vmx_true_procbased_ctls::use_io_bitmaps::mask);
+        primary_processor_based_vm_execution_controls::use_io_bitmaps::enable();
+        address_of_io_bitmap_a::set(0x1U);
+    };
     path.throws_exception = true;
     path.exception = ""_ut_lee;
     cfg.push_back(path);
 
-    path.setup = [&] { vmcs::address_of_io_bitmap_a::set(0xff00000000000000U); vmcs::address_of_io_bitmap_b::set(0x1U); };
+    path.setup = [&]
+    {
+        address_of_io_bitmap_a::set(0xff00000000000000U);
+        address_of_io_bitmap_b::set(0x1U);
+    };
     path.throws_exception = true;
     path.exception = ""_ut_lee;
     cfg.push_back(path);
 
-    path.setup = [&] { vmcs::address_of_io_bitmap_b::set(0xff00000000000000U); };
+    path.setup = [&] { address_of_io_bitmap_b::set(0xff00000000000000U); };
     path.throws_exception = true;
     path.exception = ""_ut_lee;
     cfg.push_back(path);
 
-    path.setup = [&] { vmcs::address_of_io_bitmap_a::set(0x1000U); };
+    path.setup = [&] { address_of_io_bitmap_a::set(0x1000U); };
     path.throws_exception = true;
     path.exception = ""_ut_lee;
     cfg.push_back(path);
 
-    path.setup = [&] { vmcs::address_of_io_bitmap_b::set(0x1000U); };
+    path.setup = [&] { address_of_io_bitmap_b::set(0x1000U); };
     path.throws_exception = false;
     cfg.push_back(path);
 }
@@ -289,28 +256,28 @@ setup_check_control_msr_bitmap_address_bits_paths(std::vector<struct control_flo
 {
     path.setup = [&]
     {
-        g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] &= ~msrs::ia32_vmx_true_procbased_ctls::use_msr_bitmaps::mask;
-        disable_proc_ctl(vmcs::primary_processor_based_vm_execution_controls::use_msr_bitmaps::mask);
+        proc_ctl_allow0(ia32_vmx_true_procbased_ctls::use_msr_bitmaps::mask);
+        primary_processor_based_vm_execution_controls::use_msr_bitmaps::disable();
     };
     path.throws_exception = false;
     cfg.push_back(path);
 
     path.setup = [&]
     {
-        g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] |= msrs::ia32_vmx_true_procbased_ctls::use_msr_bitmaps::mask << 32;
-        enable_proc_ctl(vmcs::primary_processor_based_vm_execution_controls::use_msr_bitmaps::mask);
-        vmcs::address_of_msr_bitmaps::set(0x1U);
+        proc_ctl_allow1(ia32_vmx_true_procbased_ctls::use_msr_bitmaps::mask);
+        primary_processor_based_vm_execution_controls::use_msr_bitmaps::enable();
+        address_of_msr_bitmaps::set(0x1U);
     };
     path.throws_exception = true;
     path.exception = ""_ut_lee;
     cfg.push_back(path);
 
-    path.setup = [&] { vmcs::address_of_msr_bitmaps::set(0xff00000000000000U); };
+    path.setup = [&] { address_of_msr_bitmaps::set(0xff00000000000000U); };
     path.throws_exception = true;
     path.exception = ""_ut_lee;
     cfg.push_back(path);
 
-    path.setup = [&] { vmcs::address_of_msr_bitmaps::set(0x1000U); };
+    path.setup = [&] { address_of_msr_bitmaps::set(0x1000U); };
     path.throws_exception = false;
     cfg.push_back(path);
 }
@@ -319,41 +286,36 @@ setup_check_control_msr_bitmap_address_bits_paths(std::vector<struct control_flo
 static void
 setup_check_control_tpr_shadow_and_virtual_apic_paths(std::vector<struct control_flow_path> &cfg)
 {
+    using namespace primary_processor_based_vm_execution_controls;
+    using namespace secondary_processor_based_vm_execution_controls;
+
     // control paths when tpr shadow is enabled
     path.setup = [&]
     {
-        proc_ctl_allow1(vmcs::primary_processor_based_vm_execution_controls::use_tpr_shadow::mask);
-        enable_proc_ctl(vmcs::primary_processor_based_vm_execution_controls::use_tpr_shadow::mask);
-        vmcs::virtual_apic_address::set(0U);
+        proc_ctl_allow1(use_tpr_shadow::mask);
+        use_tpr_shadow::enable();
+        virtual_apic_address::set(0U);
     };
     path.throws_exception = true;
     path.exception = ""_ut_lee;
     cfg.push_back(path);
 
-    path.setup = [&] { vmcs::virtual_apic_address::set(1U); };
+    path.setup = [&] { virtual_apic_address::set(1U); };
     path.throws_exception = true;
     path.exception = ""_ut_lee;
     cfg.push_back(path);
 
-    path.setup = [&] { vmcs::virtual_apic_address::set(0xff00000000000000U); };
+    path.setup = [&] { virtual_apic_address::set(0xff00000000000000U); };
     path.throws_exception = true;
     path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&]
     {
-        vmcs::virtual_apic_address::set(0x1000U);
-        enable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::virtual_interrupt_delivery::mask);
-    };
-    path.throws_exception = true;
-    path.exception = ""_ut_lee;
-    cfg.push_back(path);
-
-    path.setup = [&]
-    {
-        disable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::virtual_interrupt_delivery::mask);
-        g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] |= msrs::ia32_vmx_true_procbased_ctls::use_tpr_shadow::mask << 32;
-        vmcs::tpr_threshold::set(0xffffffffffffffffUL);
+        proc_ctl_allow1(activate_secondary_controls::mask);
+        proc_ctl2_allow1(virtual_interrupt_delivery::mask);
+        virtual_apic_address::set(0x1000U);
+        virtual_interrupt_delivery::enable();
     };
     path.throws_exception = true;
     path.exception = ""_ut_lee;
@@ -361,8 +323,9 @@ setup_check_control_tpr_shadow_and_virtual_apic_paths(std::vector<struct control
 
     path.setup = [&]
     {
-        vmcs::tpr_threshold::set(0UL);
-        enable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::virtualize_apic_accesses::mask);
+        proc_ctl2_allow0(virtual_interrupt_delivery::mask);
+        virtual_interrupt_delivery::disable();
+        tpr_threshold::set(0xffffffffffffffffUL);
     };
     path.throws_exception = true;
     path.exception = ""_ut_lee;
@@ -370,18 +333,34 @@ setup_check_control_tpr_shadow_and_virtual_apic_paths(std::vector<struct control
 
     path.setup = [&]
     {
-        disable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::virtualize_apic_accesses::mask);
+        proc_ctl_allow1(activate_secondary_controls::mask);
+        proc_ctl2_allow1(virtualize_apic_accesses::mask);
+        tpr_threshold::set(0UL);
+        virtualize_apic_accesses::enable();
+    };
+    path.throws_exception = true;
+    path.exception = ""_ut_lee;
+    cfg.push_back(path);
+
+    path.setup = [&]
+    {
+        proc_ctl2_allow0(virtualize_apic_accesses::mask);
+        virtualize_apic_accesses::disable();
         g_phys_to_virt_return_nullptr = true;
     };
     path.throws_exception = true;
     path.exception = ""_ut_lee;
     cfg.push_back(path);
 
-    path.setup = [&] { g_phys_to_virt_return_nullptr = false; };
+    path.setup = [&]
+    {
+        g_phys_to_virt_return_nullptr = false;
+        g_test_addr = g_virt_apic_addr;
+    };
     path.throws_exception = false;
     cfg.push_back(path);
 
-    path.setup = [&] { vmcs::tpr_threshold::set(0xfUL); };
+    path.setup = [&] { tpr_threshold::set(0xfUL); };
     path.throws_exception = true;
     path.exception = ""_ut_lee;
     cfg.push_back(path);
@@ -389,16 +368,20 @@ setup_check_control_tpr_shadow_and_virtual_apic_paths(std::vector<struct control
     // control paths when tpr shadow is disabled
     path.setup = [&]
     {
-        disable_proc_ctl(vmcs::primary_processor_based_vm_execution_controls::use_tpr_shadow::mask);
-        disable_proc_ctl(vmcs::primary_processor_based_vm_execution_controls::activate_secondary_controls::mask);
+        proc_ctl_allow0(activate_secondary_controls::mask);
+        proc_ctl_allow0(use_tpr_shadow::mask);
+        activate_secondary_controls::disable();
+        use_tpr_shadow::disable();
     };
     path.throws_exception = false;
     cfg.push_back(path);
 
     path.setup = [&]
     {
-        enable_proc_ctl(vmcs::primary_processor_based_vm_execution_controls::activate_secondary_controls::mask);
-        enable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::virtualize_x2apic_mode::mask);
+        proc_ctl_allow1(activate_secondary_controls::mask);
+        proc_ctl2_allow1(virtualize_x2apic_mode::mask);
+        activate_secondary_controls::enable();
+        virtualize_x2apic_mode::enable();
     };
     path.throws_exception = true;
     path.exception = ""_ut_lee;
@@ -406,8 +389,11 @@ setup_check_control_tpr_shadow_and_virtual_apic_paths(std::vector<struct control
 
     path.setup = [&]
     {
-        disable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::virtualize_x2apic_mode::mask);
-        enable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::apic_register_virtualization::mask);
+        proc_ctl_allow1(activate_secondary_controls::mask);
+        proc_ctl2_allow0(virtualize_x2apic_mode::mask);
+        proc_ctl2_allow1(apic_register_virtualization::mask);
+        virtualize_x2apic_mode::disable();
+        apic_register_virtualization::enable();
     };
     path.throws_exception = true;
     path.exception = ""_ut_lee;
@@ -415,14 +401,21 @@ setup_check_control_tpr_shadow_and_virtual_apic_paths(std::vector<struct control
 
     path.setup = [&]
     {
-        disable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::apic_register_virtualization::mask);
-        enable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::virtual_interrupt_delivery::mask);
+        proc_ctl_allow1(activate_secondary_controls::mask);
+        proc_ctl2_allow0(apic_register_virtualization::mask);
+        proc_ctl2_allow1(virtual_interrupt_delivery::mask);
+        apic_register_virtualization::disable();
+        virtual_interrupt_delivery::enable();
     };
     path.throws_exception = true;
     path.exception = ""_ut_lee;
     cfg.push_back(path);
 
-    path.setup = [&] { disable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::virtual_interrupt_delivery::mask); };
+    path.setup = [&]
+    {
+        proc_ctl2_allow0(virtual_interrupt_delivery::mask);
+        virtual_interrupt_delivery::disable();
+    };
     path.throws_exception = false;
     cfg.push_back(path);
 }
@@ -430,20 +423,30 @@ setup_check_control_tpr_shadow_and_virtual_apic_paths(std::vector<struct control
 static void
 setup_check_control_nmi_exiting_and_virtual_nmi_paths(std::vector<struct control_flow_path> &cfg)
 {
-    path.setup = [&] { enable_pin_ctl(vmcs::pin_based_vm_execution_controls::nmi_exiting::mask); };
+    path.setup = [&]
+    {
+        pin_ctl_allow1(ia32_vmx_true_pinbased_ctls::nmi_exiting::mask);
+        pin_based_vm_execution_controls::nmi_exiting::enable();
+    };
     path.throws_exception = false;
     cfg.push_back(path);
 
     path.setup = [&]
     {
-        disable_pin_ctl(vmcs::pin_based_vm_execution_controls::nmi_exiting::mask);
-        enable_pin_ctl(vmcs::pin_based_vm_execution_controls::virtual_nmis::mask);
+        pin_ctl_allow0(ia32_vmx_true_pinbased_ctls::nmi_exiting::mask);
+        pin_ctl_allow1(ia32_vmx_true_pinbased_ctls::virtual_nmis::mask);
+        pin_based_vm_execution_controls::nmi_exiting::disable();
+        pin_based_vm_execution_controls::virtual_nmis::enable();
     };
     path.throws_exception = true;
     path.exception = ""_ut_lee;
     cfg.push_back(path);
 
-    path.setup = [&] { disable_pin_ctl(vmcs::pin_based_vm_execution_controls::virtual_nmis::mask); };
+    path.setup = [&]
+    {
+        pin_ctl_allow0(ia32_vmx_true_pinbased_ctls::virtual_nmis::mask);
+        pin_based_vm_execution_controls::virtual_nmis::disable();
+    };
     path.throws_exception = false;
     cfg.push_back(path);
 }
@@ -451,20 +454,30 @@ setup_check_control_nmi_exiting_and_virtual_nmi_paths(std::vector<struct control
 static void
 setup_check_control_virtual_nmi_and_nmi_window_paths(std::vector<struct control_flow_path> &cfg)
 {
-    path.setup = [&] { enable_pin_ctl(vmcs::pin_based_vm_execution_controls::virtual_nmis::mask); };
+    path.setup = [&]
+    {
+        pin_ctl_allow1(ia32_vmx_true_pinbased_ctls::virtual_nmis::mask);
+        pin_based_vm_execution_controls::virtual_nmis::enable();
+    };
     path.throws_exception = false;
     cfg.push_back(path);
 
     path.setup = [&]
     {
-        disable_pin_ctl(vmcs::pin_based_vm_execution_controls::virtual_nmis::mask);
-        enable_proc_ctl(vmcs::primary_processor_based_vm_execution_controls::nmi_window_exiting::mask);
+        pin_ctl_allow1(ia32_vmx_true_pinbased_ctls::virtual_nmis::mask);
+        proc_ctl_allow1(ia32_vmx_true_procbased_ctls::nmi_window_exiting::mask);
+        pin_based_vm_execution_controls::virtual_nmis::disable();
+        primary_processor_based_vm_execution_controls::nmi_window_exiting::enable();
     };
     path.throws_exception = true;
     path.exception = ""_ut_lee;
     cfg.push_back(path);
 
-    path.setup = [&] { disable_proc_ctl(vmcs::primary_processor_based_vm_execution_controls::nmi_window_exiting::mask); };
+    path.setup = [&]
+    {
+        proc_ctl_allow0(ia32_vmx_true_procbased_ctls::nmi_window_exiting::mask);
+        primary_processor_based_vm_execution_controls::nmi_window_exiting::disable();
+    };
     path.throws_exception = false;
     cfg.push_back(path);
 }
@@ -472,40 +485,45 @@ setup_check_control_virtual_nmi_and_nmi_window_paths(std::vector<struct control_
 static void
 setup_check_control_virtual_apic_address_bits_paths(std::vector<struct control_flow_path> &cfg)
 {
-    path.setup = [&] { disable_proc_ctl(vmcs::primary_processor_based_vm_execution_controls::activate_secondary_controls::mask); };
-    path.throws_exception = false;
-    cfg.push_back(path);
-
     path.setup = [&]
     {
-        enable_proc_ctl(vmcs::primary_processor_based_vm_execution_controls::activate_secondary_controls::mask);
-        disable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::virtualize_apic_accesses::mask);
+        proc_ctl_allow0(ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask);
+        primary_processor_based_vm_execution_controls::activate_secondary_controls::disable();
     };
     path.throws_exception = false;
     cfg.push_back(path);
 
     path.setup = [&]
     {
-        proc_ctl_allow1(vmcs::primary_processor_based_vm_execution_controls::activate_secondary_controls::mask);
-        proc_ctl2_allow1(vmcs::secondary_processor_based_vm_execution_controls::virtualize_apic_accesses::mask);
-        enable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::virtualize_apic_accesses::mask);
-        vmcs::apic_access_address::set(0U);
+        proc_ctl_allow1(ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask);
+        primary_processor_based_vm_execution_controls::activate_secondary_controls::enable();
+        secondary_processor_based_vm_execution_controls::virtualize_apic_accesses::disable();
+    };
+    path.throws_exception = false;
+    cfg.push_back(path);
+
+    path.setup = [&]
+    {
+        proc_ctl_allow1(primary_processor_based_vm_execution_controls::activate_secondary_controls::mask);
+        proc_ctl2_allow1(secondary_processor_based_vm_execution_controls::virtualize_apic_accesses::mask);
+        secondary_processor_based_vm_execution_controls::virtualize_apic_accesses::enable();
+        apic_access_address::set(0U);
     };
     path.throws_exception = true;
     path.exception = ""_ut_lee;
     cfg.push_back(path);
 
-    path.setup = [&] { vmcs::apic_access_address::set(1U); };
+    path.setup = [&] { apic_access_address::set(1U); };
     path.throws_exception = true;
     path.exception = ""_ut_lee;
     cfg.push_back(path);
 
-    path.setup = [&] { vmcs::apic_access_address::set(0xff00000000000000U); };
+    path.setup = [&] { apic_access_address::set(0xff00000000000000U); };
     path.throws_exception = true;
     path.exception = ""_ut_lee;
     cfg.push_back(path);
 
-    path.setup = [&] { vmcs::apic_access_address::set(0x1000U); };
+    path.setup = [&] { apic_access_address::set(0x1000U); };
     path.throws_exception = false;
     cfg.push_back(path);
 }
@@ -513,28 +531,42 @@ setup_check_control_virtual_apic_address_bits_paths(std::vector<struct control_f
 static void
 setup_check_control_x2apic_mode_and_virtual_apic_access_paths(std::vector<struct control_flow_path> &cfg)
 {
-    path.setup = [&] { disable_proc_ctl(vmcs::primary_processor_based_vm_execution_controls::activate_secondary_controls::mask); };
-    path.throws_exception = false;
-    cfg.push_back(path);
-
     path.setup = [&]
     {
-        enable_proc_ctl(vmcs::primary_processor_based_vm_execution_controls::activate_secondary_controls::mask);
-        disable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::virtualize_x2apic_mode::mask);
+        proc_ctl_allow0(ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask);
+        primary_processor_based_vm_execution_controls::activate_secondary_controls::disable();
     };
     path.throws_exception = false;
     cfg.push_back(path);
 
     path.setup = [&]
     {
-        enable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::virtualize_x2apic_mode::mask);
-        enable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::virtualize_apic_accesses::mask);
+        proc_ctl_allow1(ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask);
+        proc_ctl2_allow0(ia32_vmx_procbased_ctls2::virtualize_x2apic_mode::mask);
+        primary_processor_based_vm_execution_controls::activate_secondary_controls::enable();
+        secondary_processor_based_vm_execution_controls::virtualize_x2apic_mode::disable();
+    };
+    path.throws_exception = false;
+    cfg.push_back(path);
+
+    path.setup = [&]
+    {
+        proc_ctl_allow1(ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask);
+        proc_ctl2_allow1(ia32_vmx_procbased_ctls2::virtualize_x2apic_mode::mask);
+        proc_ctl2_allow1(ia32_vmx_procbased_ctls2::virtualize_apic_accesses::mask);
+        secondary_processor_based_vm_execution_controls::virtualize_x2apic_mode::enable();
+        secondary_processor_based_vm_execution_controls::virtualize_apic_accesses::enable();
     };
     path.throws_exception = true;
     path.exception = ""_ut_lee;
     cfg.push_back(path);
 
-    path.setup = [&] { disable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::virtualize_x2apic_mode::mask); };
+    path.setup = [&]
+    {
+        proc_ctl_allow1(ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask);
+        proc_ctl2_allow0(ia32_vmx_procbased_ctls2::virtualize_x2apic_mode::mask);
+        secondary_processor_based_vm_execution_controls::virtualize_x2apic_mode::disable();
+    };
     path.throws_exception = false;
     cfg.push_back(path);
 }
@@ -542,28 +574,41 @@ setup_check_control_x2apic_mode_and_virtual_apic_access_paths(std::vector<struct
 static void
 setup_check_control_virtual_interrupt_and_external_interrupt_paths(std::vector<struct control_flow_path> &cfg)
 {
-    path.setup = [&] { disable_proc_ctl(vmcs::primary_processor_based_vm_execution_controls::activate_secondary_controls::mask); };
-    path.throws_exception = false;
-    cfg.push_back(path);
-
     path.setup = [&]
     {
-        enable_proc_ctl(vmcs::primary_processor_based_vm_execution_controls::activate_secondary_controls::mask);
-        disable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::virtual_interrupt_delivery::mask);
+        proc_ctl_allow0(ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask);
+        primary_processor_based_vm_execution_controls::activate_secondary_controls::disable();
     };
     path.throws_exception = false;
     cfg.push_back(path);
 
     path.setup = [&]
     {
-        enable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::virtual_interrupt_delivery::mask);
-        disable_pin_ctl(vmcs::pin_based_vm_execution_controls::external_interrupt_exiting::mask);
+        proc_ctl_allow1(ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask);
+        proc_ctl2_allow0(ia32_vmx_procbased_ctls2::virtual_interrupt_delivery::mask);
+        primary_processor_based_vm_execution_controls::activate_secondary_controls::enable();
+        secondary_processor_based_vm_execution_controls::virtual_interrupt_delivery::disable();
+    };
+    path.throws_exception = false;
+    cfg.push_back(path);
+
+    path.setup = [&]
+    {
+        pin_ctl_allow0(ia32_vmx_true_pinbased_ctls::external_interrupt_exiting::mask);
+        proc_ctl_allow1(ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask);
+        proc_ctl2_allow1(ia32_vmx_procbased_ctls2::virtual_interrupt_delivery::mask);
+        secondary_processor_based_vm_execution_controls::virtual_interrupt_delivery::enable();
+        pin_based_vm_execution_controls::external_interrupt_exiting::disable();
     };
     path.throws_exception = true;
     path.exception = ""_ut_lee;
     cfg.push_back(path);
 
-    path.setup = [&] { enable_pin_ctl(vmcs::pin_based_vm_execution_controls::external_interrupt_exiting::mask); };
+    path.setup = [&]
+    {
+        pin_ctl_allow1(ia32_vmx_true_pinbased_ctls::external_interrupt_exiting::mask);
+        pin_based_vm_execution_controls::external_interrupt_exiting::enable();
+    };
     path.throws_exception = false;
     cfg.push_back(path);
 }
@@ -573,16 +618,18 @@ setup_check_control_process_posted_interrupt_checks_paths(std::vector<struct con
 {
     path.setup = [&]
     {
-        g_msrs[msrs::ia32_vmx_true_pinbased_ctls::addr] = msrs::ia32_vmx_true_pinbased_ctls::process_posted_interrupts::mask << 32;
-        disable_pin_ctl(vmcs::pin_based_vm_execution_controls::process_posted_interrupts::mask);
+        pin_ctl_allow0(ia32_vmx_true_pinbased_ctls::process_posted_interrupts::mask);
+        pin_based_vm_execution_controls::process_posted_interrupts::disable();
     };
     path.throws_exception = false;
     cfg.push_back(path);
 
     path.setup = [&]
     {
-        enable_pin_ctl(vmcs::pin_based_vm_execution_controls::process_posted_interrupts::mask);
-        disable_proc_ctl(vmcs::primary_processor_based_vm_execution_controls::activate_secondary_controls::mask);
+        proc_ctl_allow0(ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask);
+        pin_ctl_allow1(ia32_vmx_true_pinbased_ctls::process_posted_interrupts::mask);
+        pin_based_vm_execution_controls::process_posted_interrupts::enable();
+        primary_processor_based_vm_execution_controls::activate_secondary_controls::disable();
     };
     path.throws_exception = true;
     path.exception = ""_ut_lee;
@@ -590,8 +637,10 @@ setup_check_control_process_posted_interrupt_checks_paths(std::vector<struct con
 
     path.setup = [&]
     {
-        enable_proc_ctl(vmcs::primary_processor_based_vm_execution_controls::activate_secondary_controls::mask);
-        disable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::virtual_interrupt_delivery::mask);
+        proc_ctl_allow1(ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask);
+        proc_ctl2_allow0(ia32_vmx_procbased_ctls2::virtual_interrupt_delivery::mask);
+        primary_processor_based_vm_execution_controls::activate_secondary_controls::enable();
+        secondary_processor_based_vm_execution_controls::virtual_interrupt_delivery::disable();
     };
     path.throws_exception = true;
     path.exception = ""_ut_lee;
@@ -599,8 +648,11 @@ setup_check_control_process_posted_interrupt_checks_paths(std::vector<struct con
 
     path.setup = [&]
     {
-        enable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::virtual_interrupt_delivery::mask);
-        disable_exit_ctl(vmcs::vm_exit_controls::acknowledge_interrupt_on_exit::mask);
+        proc_ctl_allow1(ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask);
+        proc_ctl2_allow1(ia32_vmx_procbased_ctls2::virtual_interrupt_delivery::mask);
+        exit_ctl_allow0(ia32_vmx_true_exit_ctls::acknowledge_interrupt_on_exit::mask);
+        secondary_processor_based_vm_execution_controls::virtual_interrupt_delivery::enable();
+        vm_exit_controls::acknowledge_interrupt_on_exit::disable();
     };
     path.throws_exception = true;
     path.exception = ""_ut_lee;
@@ -608,8 +660,9 @@ setup_check_control_process_posted_interrupt_checks_paths(std::vector<struct con
 
     path.setup = [&]
     {
-        enable_exit_ctl(vmcs::vm_exit_controls::acknowledge_interrupt_on_exit::mask);
-        g_vmcs_fields[vmcs::posted_interrupt_notification_vector::addr] = 0x100;
+        exit_ctl_allow1(ia32_vmx_true_exit_ctls::acknowledge_interrupt_on_exit::mask);
+        vm_exit_controls::acknowledge_interrupt_on_exit::enable();
+        posted_interrupt_notification_vector::set(0x100UL);
     };
     path.throws_exception = true;
     path.exception = ""_ut_lee;
@@ -617,19 +670,19 @@ setup_check_control_process_posted_interrupt_checks_paths(std::vector<struct con
 
     path.setup = [&]
     {
-        g_vmcs_fields[vmcs::posted_interrupt_notification_vector::addr] = 0;
-        vmcs::posted_interrupt_descriptor_address::set(1U);
+        posted_interrupt_notification_vector::set(0U);
+        posted_interrupt_descriptor_address::set(1U);
     };
     path.throws_exception = true;
     path.exception = ""_ut_lee;
     cfg.push_back(path);
 
-    path.setup = [&] { vmcs::posted_interrupt_descriptor_address::set(0xff00000000000000U); };
+    path.setup = [&] { posted_interrupt_descriptor_address::set(0xff00000000000000U); };
     path.throws_exception = true;
     path.exception = ""_ut_lee;
     cfg.push_back(path);
 
-    path.setup = [&] { vmcs::posted_interrupt_descriptor_address::set(0x1000U); };
+    path.setup = [&] { posted_interrupt_descriptor_address::set(0x1000U); };
     path.throws_exception = false;
     cfg.push_back(path);
 }
@@ -637,28 +690,36 @@ setup_check_control_process_posted_interrupt_checks_paths(std::vector<struct con
 static void
 setup_check_control_vpid_checks_paths(std::vector<struct control_flow_path> &cfg)
 {
-    path.setup = [&] { disable_proc_ctl(vmcs::primary_processor_based_vm_execution_controls::activate_secondary_controls::mask); };
-    path.throws_exception = false;
-    cfg.push_back(path);
-
     path.setup = [&]
     {
-        enable_proc_ctl(vmcs::primary_processor_based_vm_execution_controls::activate_secondary_controls::mask);
-        disable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::enable_vpid::mask);
+        proc_ctl_allow0(ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask);
+        primary_processor_based_vm_execution_controls::activate_secondary_controls::disable();
     };
     path.throws_exception = false;
     cfg.push_back(path);
 
     path.setup = [&]
     {
-        enable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::enable_vpid::mask);
-        g_vmcs_fields[vmcs::virtual_processor_identifier::addr] = 0;
+        proc_ctl_allow1(ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask);
+        proc_ctl2_allow0(ia32_vmx_procbased_ctls2::enable_vpid::mask);
+        primary_processor_based_vm_execution_controls::activate_secondary_controls::enable();
+        secondary_processor_based_vm_execution_controls::enable_vpid::disable();
+    };
+    path.throws_exception = false;
+    cfg.push_back(path);
+
+    path.setup = [&]
+    {
+        proc_ctl_allow1(ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask);
+        proc_ctl2_allow1(ia32_vmx_procbased_ctls2::enable_vpid::mask);
+        secondary_processor_based_vm_execution_controls::enable_vpid::enable();
+        virtual_processor_identifier::set(0U);
     };
     path.throws_exception = true;
     path.exception = ""_ut_lee;
     cfg.push_back(path);
 
-    path.setup = [&] { g_vmcs_fields[vmcs::virtual_processor_identifier::addr] = 1; };
+    path.setup = [&] { virtual_processor_identifier::set(1U); };
     path.throws_exception = false;
     cfg.push_back(path);
 }
@@ -668,57 +729,50 @@ setup_check_control_enable_ept_checks_paths(std::vector<struct control_flow_path
 {
     path.setup = [&]
     {
-        proc_ctl_allow1(vmcs::primary_processor_based_vm_execution_controls::activate_secondary_controls::mask);
-        proc_ctl2_allow1(vmcs::secondary_processor_based_vm_execution_controls::enable_ept::mask);
-        disable_proc_ctl(vmcs::primary_processor_based_vm_execution_controls::activate_secondary_controls::mask);
-
+        proc_ctl_allow0(primary_processor_based_vm_execution_controls::activate_secondary_controls::mask);
+        primary_processor_based_vm_execution_controls::activate_secondary_controls::disable();
     };
     path.throws_exception = false;
     cfg.push_back(path);
 
     path.setup = [&]
     {
-        enable_proc_ctl(vmcs::primary_processor_based_vm_execution_controls::activate_secondary_controls::mask);
-        disable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::enable_ept::mask);
+        proc_ctl_allow1(primary_processor_based_vm_execution_controls::activate_secondary_controls::mask);
+        proc_ctl2_allow0(secondary_processor_based_vm_execution_controls::enable_ept::mask);
+        primary_processor_based_vm_execution_controls::activate_secondary_controls::enable();
+        secondary_processor_based_vm_execution_controls::enable_ept::disable();
     };
     path.throws_exception = false;
     cfg.push_back(path);
 
     path.setup = [&]
     {
-        enable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::enable_ept::mask);
-        vmcs::ept_pointer::memory_type::set(vmcs::ept_pointer::memory_type::uncacheable);
-        g_msrs[msrs::ia32_vmx_ept_vpid_cap::addr] = ~(msrs::ia32_vmx_ept_vpid_cap::memory_type_uncacheable_supported::mask |
-        msrs::ia32_vmx_ept_vpid_cap::memory_type_write_back_supported::mask);
+        proc_ctl_allow1(primary_processor_based_vm_execution_controls::activate_secondary_controls::mask);
+        proc_ctl2_allow1(secondary_processor_based_vm_execution_controls::enable_ept::mask);
+        secondary_processor_based_vm_execution_controls::enable_ept::enable();
+        ept_pointer::memory_type::set(vmcs::ept_pointer::memory_type::uncacheable);
+        g_msrs[ia32_vmx_ept_vpid_cap::addr] = ~(ia32_vmx_ept_vpid_cap::memory_type_uncacheable_supported::mask |
+        ia32_vmx_ept_vpid_cap::memory_type_write_back_supported::mask);
     };
     path.throws_exception = true;
     path.exception = ""_ut_lee;
     cfg.push_back(path);
 
-    path.setup = [&] { vmcs::ept_pointer::memory_type::set(vmcs::ept_pointer::memory_type::write_back); };
+    path.setup = [&] { ept_pointer::memory_type::set(vmcs::ept_pointer::memory_type::write_back); };
     path.throws_exception = true;
     path.exception = ""_ut_lee;
     cfg.push_back(path);
 
-    path.setup = [&] { vmcs::ept_pointer::memory_type::set(3U); };
+    path.setup = [&] { ept_pointer::memory_type::set(3U); };
     path.throws_exception = true;
     path.exception = ""_ut_lee;
     cfg.push_back(path);
 
     path.setup = [&]
     {
-        g_msrs[msrs::ia32_vmx_ept_vpid_cap::addr] = msrs::ia32_vmx_ept_vpid_cap::memory_type_write_back_supported::mask;
-        vmcs::ept_pointer::memory_type::set(vmcs::ept_pointer::memory_type::write_back);
-        vmcs::ept_pointer::page_walk_length_minus_one::set(0U);
-    };
-    path.throws_exception = true;
-    path.exception = ""_ut_lee;
-    cfg.push_back(path);
-
-    path.setup = [&]
-    {
-        vmcs::ept_pointer::page_walk_length_minus_one::set(3U);
-        vmcs::ept_pointer::accessed_and_dirty_flags::enable();
+        g_msrs[ia32_vmx_ept_vpid_cap::addr] = ia32_vmx_ept_vpid_cap::memory_type_write_back_supported::mask;
+        ept_pointer::memory_type::set(vmcs::ept_pointer::memory_type::write_back);
+        ept_pointer::page_walk_length_minus_one::set(0U);
     };
     path.throws_exception = true;
     path.exception = ""_ut_lee;
@@ -726,8 +780,17 @@ setup_check_control_enable_ept_checks_paths(std::vector<struct control_flow_path
 
     path.setup = [&]
     {
-        vmcs::ept_pointer::accessed_and_dirty_flags::disable();
-        vmcs::ept_pointer::reserved::set(0xFF0U);
+        ept_pointer::page_walk_length_minus_one::set(3U);
+        ept_pointer::accessed_and_dirty_flags::enable();
+    };
+    path.throws_exception = true;
+    path.exception = ""_ut_lee;
+    cfg.push_back(path);
+
+    path.setup = [&]
+    {
+        ept_pointer::accessed_and_dirty_flags::disable();
+        ept_pointer::reserved::set(0xFF0U);
     };
     path.throws_exception = true;
     path.exception = ""_ut_lee;
@@ -737,22 +800,31 @@ setup_check_control_enable_ept_checks_paths(std::vector<struct control_flow_path
 static void
 setup_check_control_enable_pml_checks_paths(std::vector<struct control_flow_path> &cfg)
 {
-    path.setup = [&] { disable_proc_ctl(vmcs::primary_processor_based_vm_execution_controls::activate_secondary_controls::mask); };
-    path.throws_exception = false;
-    cfg.push_back(path);
-
     path.setup = [&]
     {
-        enable_proc_ctl(vmcs::primary_processor_based_vm_execution_controls::activate_secondary_controls::mask);
-        disable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::enable_pml::mask);
+        proc_ctl_allow0(ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask);
+        primary_processor_based_vm_execution_controls::activate_secondary_controls::disable();
     };
     path.throws_exception = false;
     cfg.push_back(path);
 
     path.setup = [&]
     {
-        enable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::enable_pml::mask);
-        disable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::enable_ept::mask);
+        proc_ctl_allow1(ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask);
+        proc_ctl2_allow0(ia32_vmx_procbased_ctls2::enable_pml::mask);
+        primary_processor_based_vm_execution_controls::activate_secondary_controls::enable();
+        secondary_processor_based_vm_execution_controls::enable_pml::disable();
+    };
+    path.throws_exception = false;
+    cfg.push_back(path);
+
+    path.setup = [&]
+    {
+        proc_ctl_allow1(ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask);
+        proc_ctl2_allow1(ia32_vmx_procbased_ctls2::enable_pml::mask);
+        proc_ctl2_allow0(ia32_vmx_procbased_ctls2::enable_ept::mask);
+        secondary_processor_based_vm_execution_controls::enable_pml::enable();
+        secondary_processor_based_vm_execution_controls::enable_ept::disable();
     };
     path.throws_exception = true;
     path.exception = ""_ut_lee;
@@ -760,19 +832,21 @@ setup_check_control_enable_pml_checks_paths(std::vector<struct control_flow_path
 
     path.setup = [&]
     {
-        enable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::enable_ept::mask);
-        vmcs::pml_address::set(0xff00000000000000U);
+        proc_ctl_allow1(ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask);
+        proc_ctl2_allow1(ia32_vmx_procbased_ctls2::enable_ept::mask);
+        secondary_processor_based_vm_execution_controls::enable_ept::enable();
+        pml_address::set(0xff00000000000000U);
     };
     path.throws_exception = true;
     path.exception = ""_ut_lee;
     cfg.push_back(path);
 
-    path.setup = [&] { vmcs::pml_address::set(1U); };
+    path.setup = [&] { pml_address::set(1U); };
     path.throws_exception = true;
     path.exception = ""_ut_lee;
     cfg.push_back(path);
 
-    path.setup = [&] { vmcs::pml_address::set(0x1000U); };
+    path.setup = [&] { pml_address::set(0x1000U); };
     path.throws_exception = false;
     cfg.push_back(path);
 }
@@ -780,28 +854,42 @@ setup_check_control_enable_pml_checks_paths(std::vector<struct control_flow_path
 static void
 setup_check_control_unrestricted_guests_paths(std::vector<struct control_flow_path> &cfg)
 {
-    path.setup = [&] { disable_proc_ctl(vmcs::primary_processor_based_vm_execution_controls::activate_secondary_controls::mask); };
-    path.throws_exception = false;
-    cfg.push_back(path);
-
     path.setup = [&]
     {
-        enable_proc_ctl(vmcs::primary_processor_based_vm_execution_controls::activate_secondary_controls::mask);
-        disable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::unrestricted_guest::mask);
+        proc_ctl2_allow0(ia32_vmx_procbased_ctls2::virtual_interrupt_delivery::mask);
+        primary_processor_based_vm_execution_controls::activate_secondary_controls::disable();
     };
     path.throws_exception = false;
     cfg.push_back(path);
 
     path.setup = [&]
     {
-        enable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::unrestricted_guest::mask);
-        disable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::enable_ept::mask);
+        proc_ctl_allow1(ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask);
+        proc_ctl2_allow0(ia32_vmx_procbased_ctls2::unrestricted_guest::mask);
+        primary_processor_based_vm_execution_controls::activate_secondary_controls::enable();
+        secondary_processor_based_vm_execution_controls::unrestricted_guest::disable();
+    };
+    path.throws_exception = false;
+    cfg.push_back(path);
+
+    path.setup = [&]
+    {
+        proc_ctl_allow1(ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask);
+        proc_ctl2_allow1(ia32_vmx_procbased_ctls2::unrestricted_guest::mask);
+        proc_ctl2_allow0(ia32_vmx_procbased_ctls2::enable_ept::mask);
+        secondary_processor_based_vm_execution_controls::unrestricted_guest::enable();
+        secondary_processor_based_vm_execution_controls::enable_ept::disable();
     };
     path.throws_exception = true;
     path.exception = ""_ut_lee;
     cfg.push_back(path);
 
-    path.setup = [&] { enable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::enable_ept::mask); };
+    path.setup = [&]
+    {
+        proc_ctl_allow1(ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask);
+        proc_ctl2_allow1(ia32_vmx_procbased_ctls2::enable_ept::mask);
+        secondary_processor_based_vm_execution_controls::enable_ept::enable();
+    };
     path.throws_exception = false;
     cfg.push_back(path);
 }
@@ -809,47 +897,58 @@ setup_check_control_unrestricted_guests_paths(std::vector<struct control_flow_pa
 static void
 setup_check_control_enable_vm_functions_paths(std::vector<struct control_flow_path> &cfg)
 {
-    path.setup = [&] { disable_proc_ctl(vmcs::primary_processor_based_vm_execution_controls::activate_secondary_controls::mask); };
-    path.throws_exception = false;
-    cfg.push_back(path);
+    using namespace vmcs::secondary_processor_based_vm_execution_controls;
 
     path.setup = [&]
     {
-        enable_proc_ctl(vmcs::primary_processor_based_vm_execution_controls::activate_secondary_controls::mask);
-        disable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::enable_vm_functions::mask);
+        proc_ctl_allow0(ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask);
+        primary_processor_based_vm_execution_controls::activate_secondary_controls::disable();
     };
     path.throws_exception = false;
     cfg.push_back(path);
 
     path.setup = [&]
     {
-        enable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::enable_vm_functions::mask);
-        g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] &= ~(vmcs::secondary_processor_based_vm_execution_controls::enable_vm_functions::mask << 32);
+        proc_ctl_allow1(ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask);
+        proc_ctl2_allow0(ia32_vmx_procbased_ctls2::enable_vm_functions::mask);
+        primary_processor_based_vm_execution_controls::activate_secondary_controls::enable();
+        enable_vm_functions::disable();
     };
     path.throws_exception = false;
     cfg.push_back(path);
 
     path.setup = [&]
     {
-        g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] |= vmcs::secondary_processor_based_vm_execution_controls::enable_vm_functions::mask << 32;
-        vmcs::vm_function_controls::set(1U);
-        g_msrs[msrs::ia32_vmx_vmfunc::addr] = 0;
+        proc_ctl_allow1(ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask);
+        proc_ctl2_disallow1(enable_vm_functions::mask);
+        g_vmcs_fields[addr] |= enable_vm_functions::mask;
     };
-    path.throws_exception = true;
-    path.exception = ""_ut_lee;
-    cfg.push_back(path);
-
-    path.setup = [&] { vmcs::vm_function_controls::set(0U); };
     path.throws_exception = false;
     cfg.push_back(path);
 
     path.setup = [&]
     {
-        g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] |= vmcs::primary_processor_based_vm_execution_controls::activate_secondary_controls::mask << 32;
-        g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] |= vmcs::secondary_processor_based_vm_execution_controls::enable_vm_functions::mask << 32;
-        g_msrs[msrs::ia32_vmx_vmfunc::addr] |= vmcs::vm_function_controls::eptp_switching::mask;
-        vmcs::vm_function_controls::eptp_switching::enable_if_allowed();
-        disable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::enable_ept::mask);
+        proc_ctl_allow1(ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask);
+        proc_ctl2_allow1(enable_vm_functions::mask);
+        vm_function_controls::set(1U);
+        g_msrs[ia32_vmx_vmfunc::addr] = 0;
+    };
+    path.throws_exception = true;
+    path.exception = ""_ut_lee;
+    cfg.push_back(path);
+
+    path.setup = [&] { vm_function_controls::set(0U); };
+    path.throws_exception = false;
+    cfg.push_back(path);
+
+    path.setup = [&]
+    {
+        proc_ctl_allow1(ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask);
+        proc_ctl2_allow1(ia32_vmx_procbased_ctls2::enable_vm_functions::mask);
+        proc_ctl2_allow0(ia32_vmx_procbased_ctls2::enable_ept::mask);
+        vmfunc_ctl_allow1(ia32_vmx_vmfunc::eptp_switching::mask);
+        vm_function_controls::eptp_switching::enable();
+        enable_ept::disable();
     };
     path.throws_exception = true;
     path.exception = ""_ut_lee;
@@ -857,19 +956,20 @@ setup_check_control_enable_vm_functions_paths(std::vector<struct control_flow_pa
 
     path.setup = [&]
     {
-        enable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::enable_ept::mask);
-        vmcs::eptp_list_address::set_if_exists(1U);
+        proc_ctl2_allow1(ia32_vmx_procbased_ctls2::enable_ept::mask);
+        enable_ept::enable();
+        eptp_list_address::set_if_exists(1U);
     };
     path.throws_exception = true;
     path.exception = ""_ut_lee;
     cfg.push_back(path);
 
-    path.setup = [&] { vmcs::eptp_list_address::set(0xff00000000000000U); };
+    path.setup = [&] { eptp_list_address::set(0xff00000000000000U); };
     path.throws_exception = true;
     path.exception = ""_ut_lee;
     cfg.push_back(path);
 
-    path.setup = [&] { vmcs::eptp_list_address::set(0x1000U); };
+    path.setup = [&] { eptp_list_address::set(0x1000U); };
     path.throws_exception = false;
     cfg.push_back(path);
 }
@@ -877,22 +977,29 @@ setup_check_control_enable_vm_functions_paths(std::vector<struct control_flow_pa
 static void
 setup_check_control_enable_vmcs_shadowing_paths(std::vector<struct control_flow_path> &cfg)
 {
-    path.setup = [&] { disable_proc_ctl(vmcs::primary_processor_based_vm_execution_controls::activate_secondary_controls::mask); };
-    path.throws_exception = false;
-    cfg.push_back(path);
-
     path.setup = [&]
     {
-        enable_proc_ctl(vmcs::primary_processor_based_vm_execution_controls::activate_secondary_controls::mask);
-        disable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::vmcs_shadowing::mask);
+        proc_ctl_allow0(ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask);
+        primary_processor_based_vm_execution_controls::activate_secondary_controls::disable();
     };
     path.throws_exception = false;
     cfg.push_back(path);
 
     path.setup = [&]
     {
-        enable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::vmcs_shadowing::mask);
-        vmcs::vmread_bitmap_address::set(1U);
+        proc_ctl_allow1(ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask);
+        proc_ctl2_allow0(ia32_vmx_procbased_ctls2::vmcs_shadowing::mask);
+        primary_processor_based_vm_execution_controls::activate_secondary_controls::enable();
+        secondary_processor_based_vm_execution_controls::vmcs_shadowing::disable();
+    };
+    path.throws_exception = false;
+    cfg.push_back(path);
+
+    path.setup = [&]
+    {
+        proc_ctl2_allow1(ia32_vmx_procbased_ctls2::vmcs_shadowing::mask);
+        secondary_processor_based_vm_execution_controls::vmcs_shadowing::enable();
+        vmread_bitmap_address::set(1U);
     };
     path.throws_exception = true;
     path.exception = ""_ut_lee;
@@ -900,24 +1007,24 @@ setup_check_control_enable_vmcs_shadowing_paths(std::vector<struct control_flow_
 
     path.setup = [&]
     {
-        vmcs::vmread_bitmap_address::set(0xff00000000000000U);
-        vmcs::vmwrite_bitmap_address::set(1U);
+        vmread_bitmap_address::set(0xff00000000000000U);
+        vmwrite_bitmap_address::set(1U);
     };
     path.throws_exception = true;
     path.exception = ""_ut_lee;
     cfg.push_back(path);
 
-    path.setup = [&] { vmcs::vmwrite_bitmap_address::set(0xff00000000000000U); };
+    path.setup = [&] { vmwrite_bitmap_address::set(0xff00000000000000U); };
     path.throws_exception = true;
     path.exception = ""_ut_lee;
     cfg.push_back(path);
 
-    path.setup = [&] { vmcs::vmread_bitmap_address::set(0x1000U); };
+    path.setup = [&] { vmread_bitmap_address::set(0x1000U); };
     path.throws_exception = true;
     path.exception = ""_ut_lee;
     cfg.push_back(path);
 
-    path.setup = [&] { vmcs::vmwrite_bitmap_address::set(0x1000U); };
+    path.setup = [&] { vmwrite_bitmap_address::set(0x1000U); };
     path.throws_exception = false;
     cfg.push_back(path);
 }
@@ -925,33 +1032,41 @@ setup_check_control_enable_vmcs_shadowing_paths(std::vector<struct control_flow_
 static void
 setup_check_control_enable_ept_violation_checks_paths(std::vector<struct control_flow_path> &cfg)
 {
-    path.setup = [&] { disable_proc_ctl(vmcs::primary_processor_based_vm_execution_controls::activate_secondary_controls::mask); };
-    path.throws_exception = false;
-    cfg.push_back(path);
-
     path.setup = [&]
     {
-        enable_proc_ctl(vmcs::primary_processor_based_vm_execution_controls::activate_secondary_controls::mask);
-        disable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::ept_violation_ve::mask);
+        proc_ctl_allow0(ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask);
+        primary_processor_based_vm_execution_controls::activate_secondary_controls::disable();
     };
     path.throws_exception = false;
     cfg.push_back(path);
 
     path.setup = [&]
     {
-        enable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::ept_violation_ve::mask);
-        vmcs::virtualization_exception_information_address::set(1U);
+        proc_ctl_allow1(ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask);
+        proc_ctl2_allow0(ia32_vmx_procbased_ctls2::ept_violation_ve::mask);
+        primary_processor_based_vm_execution_controls::activate_secondary_controls::enable();
+        secondary_processor_based_vm_execution_controls::ept_violation_ve::disable();
+    };
+    path.throws_exception = false;
+    cfg.push_back(path);
+
+    path.setup = [&]
+    {
+        proc_ctl_allow1(ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask);
+        proc_ctl2_allow1(ia32_vmx_procbased_ctls2::virtual_interrupt_delivery::mask);
+        secondary_processor_based_vm_execution_controls::ept_violation_ve::enable();
+        virtualization_exception_information_address::set(1U);
     };
     path.throws_exception = true;
     path.exception = ""_ut_lee;
     cfg.push_back(path);
 
-    path.setup = [&] { vmcs::virtualization_exception_information_address::set(0xff00000000000000U); };
+    path.setup = [&] { virtualization_exception_information_address::set(0xff00000000000000U); };
     path.throws_exception = true;
     path.exception = ""_ut_lee;
     cfg.push_back(path);
 
-    path.setup = [&] { vmcs::virtualization_exception_information_address::set(0x1000U); };
+    path.setup = [&] { virtualization_exception_information_address::set(0x1000U); };
     path.throws_exception = false;
     cfg.push_back(path);
 }
@@ -959,16 +1074,20 @@ setup_check_control_enable_ept_violation_checks_paths(std::vector<struct control
 static void
 setup_check_control_vm_exit_ctls_reserved_properly_set_paths(std::vector<struct control_flow_path> &cfg)
 {
-    path.setup = [&] { g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] = 0; vmcs::vm_exit_controls::set(0UL); };
+    path.setup = [&]
+    {
+        g_msrs[ia32_vmx_true_exit_ctls::addr] = 0;
+        vm_exit_controls::set(0UL);
+    };
     path.throws_exception = false;
     cfg.push_back(path);
 
-    path.setup = [&] { g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] = 1; };
+    path.setup = [&] { g_msrs[ia32_vmx_true_exit_ctls::addr] = 1; };
     path.throws_exception = true;
     path.exception = ""_ut_lee;
     cfg.push_back(path);
 
-    path.setup = [&] { g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] = 0xffffffff00000000UL; };
+    path.setup = [&] { g_msrs[ia32_vmx_true_exit_ctls::addr] = 0xffffffff00000000UL; };
     path.throws_exception = false;
     cfg.push_back(path);
 }
@@ -976,20 +1095,30 @@ setup_check_control_vm_exit_ctls_reserved_properly_set_paths(std::vector<struct 
 static void
 setup_check_control_activate_and_save_preemption_timer_must_be_0_paths(std::vector<struct control_flow_path> &cfg)
 {
-    path.setup = [&] { enable_pin_ctl(vmcs::pin_based_vm_execution_controls::activate_vmx_preemption_timer::mask); };
+    path.setup = [&]
+    {
+        pin_ctl_allow1(ia32_vmx_true_pinbased_ctls::activate_vmx_preemption_timer::mask);
+        pin_based_vm_execution_controls::activate_vmx_preemption_timer::enable();
+    };
     path.throws_exception = false;
     cfg.push_back(path);
 
     path.setup = [&]
     {
-        disable_pin_ctl(vmcs::pin_based_vm_execution_controls::activate_vmx_preemption_timer::mask);
-        enable_exit_ctl(vmcs::vm_exit_controls::save_vmx_preemption_timer_value::mask);
+        pin_ctl_allow0(ia32_vmx_true_pinbased_ctls::activate_vmx_preemption_timer::mask);
+        exit_ctl_allow1(ia32_vmx_true_exit_ctls::save_vmx_preemption_timer_value::mask);
+        pin_based_vm_execution_controls::activate_vmx_preemption_timer::disable();
+        vm_exit_controls::save_vmx_preemption_timer_value::enable();
     };
     path.throws_exception = true;
     path.exception = ""_ut_lee;
     cfg.push_back(path);
 
-    path.setup = [&] { disable_exit_ctl(vmcs::vm_exit_controls::save_vmx_preemption_timer_value::mask); };
+    path.setup = [&]
+    {
+        exit_ctl_allow0(ia32_vmx_true_exit_ctls::save_vmx_preemption_timer_value::mask);
+        vm_exit_controls::save_vmx_preemption_timer_value::disable();
+    };
     path.throws_exception = false;
     cfg.push_back(path);
 }
@@ -997,26 +1126,42 @@ setup_check_control_activate_and_save_preemption_timer_must_be_0_paths(std::vect
 static void
 setup_check_control_exit_msr_store_address_paths(std::vector<struct control_flow_path> &cfg)
 {
-    path.setup = [&] { vmcs::vm_exit_msr_store_count::set(0UL); };
+    path.setup = [&] { vm_exit_msr_store_count::set(0UL); };
     path.throws_exception = false;
     cfg.push_back(path);
 
-    path.setup = [&] { vmcs::vm_exit_msr_store_count::set(16UL); vmcs::vm_exit_msr_store_address::set(0xfU); };
+    path.setup = [&]
+    {
+        vm_exit_msr_store_count::set(16UL);
+        vm_exit_msr_store_address::set(0xfU);
+    };
     path.throws_exception = true;
     path.exception = ""_ut_lee;
     cfg.push_back(path);
 
-    path.setup = [&] { vmcs::vm_exit_msr_store_address::set(0xff00000000000000U); };
+    path.setup = [&]
+    {
+        g_eax_cpuid[x64::cpuid::addr_size::addr] = 48U;
+        vm_exit_msr_store_address::set(0xff00000000000000U);
+    };
     path.throws_exception = true;
     path.exception = ""_ut_lee;
     cfg.push_back(path);
 
-    path.setup = [&] { vmcs::vm_exit_msr_store_address::set(0xfffffff0U); };
+    path.setup = [&]
+    {
+        g_eax_cpuid[x64::cpuid::addr_size::addr] = 48U;
+        vm_exit_msr_store_address::set(0xfffffffffff0U);
+    };
     path.throws_exception = true;
     path.exception = ""_ut_lee;
     cfg.push_back(path);
 
-    path.setup = [&] { vmcs::vm_exit_msr_store_address::set(0x10U); };
+    path.setup = [&]
+    {
+        g_eax_cpuid[x64::cpuid::addr_size::addr] = 48U;
+        vm_exit_msr_store_address::set(0x10U);
+    };
     path.throws_exception = false;
     cfg.push_back(path);
 }
@@ -1024,26 +1169,42 @@ setup_check_control_exit_msr_store_address_paths(std::vector<struct control_flow
 static void
 setup_check_control_exit_msr_load_address_paths(std::vector<struct control_flow_path> &cfg)
 {
-    path.setup = [&] { vmcs::vm_exit_msr_load_count::set(0UL); };
+    path.setup = [&] { vm_exit_msr_load_count::set(0UL); };
     path.throws_exception = false;
     cfg.push_back(path);
 
-    path.setup = [&] { vmcs::vm_exit_msr_load_count::set(16UL); vmcs::vm_exit_msr_load_address::set(0xfU); };
+    path.setup = [&]
+    {
+        vm_exit_msr_load_count::set(16UL);
+        vmcs::vm_exit_msr_load_address::set(0xfU);
+    };
     path.throws_exception = true;
     path.exception = ""_ut_lee;
     cfg.push_back(path);
 
-    path.setup = [&] { vmcs::vm_exit_msr_load_address::set(0xff00000000000000U); };
+    path.setup = [&]
+    {
+        g_eax_cpuid[x64::cpuid::addr_size::addr] = 48U;
+        vm_exit_msr_load_address::set(0xff00000000000000U);
+    };
     path.throws_exception = true;
     path.exception = ""_ut_lee;
     cfg.push_back(path);
 
-    path.setup = [&] { vmcs::vm_exit_msr_load_address::set(0xfffffff0U); };
+    path.setup = [&]
+    {
+        g_eax_cpuid[x64::cpuid::addr_size::addr] = 48U;
+        vm_exit_msr_load_address::set(0xfffffffffff0U);
+    };
     path.throws_exception = true;
     path.exception = ""_ut_lee;
     cfg.push_back(path);
 
-    path.setup = [&] { vmcs::vm_exit_msr_load_address::set(0x10U); };
+    path.setup = [&]
+    {
+        g_eax_cpuid[x64::cpuid::addr_size::addr] = 48U;
+        vm_exit_msr_load_address::set(0x10U);
+    };
     path.throws_exception = false;
     cfg.push_back(path);
 }
@@ -1051,16 +1212,20 @@ setup_check_control_exit_msr_load_address_paths(std::vector<struct control_flow_
 static void
 setup_check_control_vm_entry_ctls_reserved_properly_set_paths(std::vector<struct control_flow_path> &cfg)
 {
-    path.setup = [&] { g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] = 0; vmcs::vm_entry_controls::set(0UL); };
+    path.setup = [&]
+    {
+        g_msrs[ia32_vmx_true_entry_ctls::addr] = 0;
+        vm_entry_controls::set(0UL);
+    };
     path.throws_exception = false;
     cfg.push_back(path);
 
-    path.setup = [&] { g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] = 1; };
+    path.setup = [&] { g_msrs[ia32_vmx_true_entry_ctls::addr] = 1; };
     path.throws_exception = true;
     path.exception = ""_ut_lee;
     cfg.push_back(path);
 
-    path.setup = [&] { g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] = 0xffffffff00000000; };
+    path.setup = [&] { g_msrs[ia32_vmx_true_entry_ctls::addr] = 0xffffffff00000000; };
     path.throws_exception = false;
     cfg.push_back(path);
 }
@@ -1068,13 +1233,17 @@ setup_check_control_vm_entry_ctls_reserved_properly_set_paths(std::vector<struct
 static void
 setup_check_control_event_injection_type_vector_checks_paths(std::vector<struct control_flow_path> &cfg)
 {
-    using namespace vmcs::vm_entry_interruption_information_field;
+    using namespace vm_entry_interruption_information_field;
 
     path.setup = [&] { set(0UL); };
     path.throws_exception = false;
     cfg.push_back(path);
 
-    path.setup = [&] { valid_bit::enable(); interruption_type::set(interruption_type::reserved); };
+    path.setup = [&]
+    {
+        valid_bit::enable();
+        interruption_type::set(interruption_type::reserved);
+    };
     path.throws_exception = true;
     path.exception = ""_ut_lee;
     cfg.push_back(path);
@@ -1082,13 +1251,17 @@ setup_check_control_event_injection_type_vector_checks_paths(std::vector<struct 
     path.setup = [&]
     {
         interruption_type::set(interruption_type::other_event);
-        g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = 0;
+        g_msrs[ia32_vmx_true_procbased_ctls::addr] = 0;
     };
     path.throws_exception = true;
     path.exception = ""_ut_lee;
     cfg.push_back(path);
 
-    path.setup = [&] { interruption_type::set(interruption_type::non_maskable_interrupt); vector::set(0xFFUL); };
+    path.setup = [&]
+    {
+        interruption_type::set(interruption_type::non_maskable_interrupt);
+        vector::set(0xFFUL);
+    };
     path.throws_exception = true;
     path.exception = ""_ut_lee;
     cfg.push_back(path);
@@ -1101,7 +1274,7 @@ setup_check_control_event_injection_type_vector_checks_paths(std::vector<struct 
     path.setup = [&]
     {
         interruption_type::set(interruption_type::other_event);
-        g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = msrs::ia32_vmx_true_procbased_ctls::monitor_trap_flag::mask << 32;
+        proc_ctl_allow1(ia32_vmx_true_procbased_ctls::monitor_trap_flag::mask);
     };
     path.throws_exception = true;
     path.exception = ""_ut_lee;
@@ -1115,7 +1288,7 @@ setup_check_control_event_injection_type_vector_checks_paths(std::vector<struct 
 static void
 setup_check_control_event_injection_delivery_ec_checks_paths(std::vector<struct control_flow_path> &cfg)
 {
-    using namespace vmcs::vm_entry_interruption_information_field;
+    using namespace vm_entry_interruption_information_field;
 
     path.setup = [&] { valid_bit::disable(); };
     path.throws_exception = false;
@@ -1123,16 +1296,24 @@ setup_check_control_event_injection_delivery_ec_checks_paths(std::vector<struct 
 
     path.setup = [&]
     {
+        proc_ctl_allow1(ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask);
+        proc_ctl2_allow1(ia32_vmx_procbased_ctls2::unrestricted_guest::mask);
         valid_bit::enable();
         deliver_error_code_bit::enable();
-        g_vmcs_fields[vmcs::guest_cr0::addr] = 0;
-        enable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::unrestricted_guest::mask);
+        guest_cr0::set(0U);
+        secondary_processor_based_vm_execution_controls::unrestricted_guest::enable();
     };
     path.throws_exception = true;
     path.exception = ""_ut_lee;
     cfg.push_back(path);
 
-    path.setup = [&] { disable_proc_ctl2(vmcs::secondary_processor_based_vm_execution_controls::unrestricted_guest::mask); interruption_type::set(interruption_type::non_maskable_interrupt); };
+    path.setup = [&]
+    {
+        proc_ctl_allow1(ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask);
+        proc_ctl2_allow0(ia32_vmx_procbased_ctls2::unrestricted_guest::mask);
+        secondary_processor_based_vm_execution_controls::unrestricted_guest::disable();
+        interruption_type::set(interruption_type::non_maskable_interrupt);
+    };
     path.throws_exception = true;
     path.exception = ""_ut_lee;
     cfg.push_back(path);
@@ -1155,7 +1336,7 @@ setup_check_control_event_injection_delivery_ec_checks_paths(std::vector<struct 
 static void
 setup_check_control_event_injection_reserved_bits_checks_paths(std::vector<struct control_flow_path> &cfg)
 {
-    using namespace vmcs::vm_entry_interruption_information_field;
+    using namespace vm_entry_interruption_information_field;
 
     path.setup = [&] { set(0UL); };
     path.throws_exception = false;
@@ -1174,7 +1355,7 @@ setup_check_control_event_injection_reserved_bits_checks_paths(std::vector<struc
 static void
 setup_check_control_event_injection_ec_checks_paths(std::vector<struct control_flow_path> &cfg)
 {
-    using namespace vmcs::vm_entry_interruption_information_field;
+    using namespace vm_entry_interruption_information_field;
 
     path.setup = [&] { set(0UL); };
     path.throws_exception = false;
@@ -1184,12 +1365,16 @@ setup_check_control_event_injection_ec_checks_paths(std::vector<struct control_f
     path.throws_exception = false;
     cfg.push_back(path);
 
-    path.setup = [&] { deliver_error_code_bit::enable(); vmcs::vm_entry_exception_error_code::set(0x8000UL); };
+    path.setup = [&]
+    {
+        deliver_error_code_bit::enable();
+        vm_entry_exception_error_code::set(0x8000UL);
+    };
     path.throws_exception = true;
     path.exception = ""_ut_lee;
     cfg.push_back(path);
 
-    path.setup = [&] { vmcs::vm_entry_exception_error_code::set(0UL); };
+    path.setup = [&] { vm_entry_exception_error_code::set(0UL); };
     path.throws_exception = false;
     cfg.push_back(path);
 }
@@ -1197,7 +1382,7 @@ setup_check_control_event_injection_ec_checks_paths(std::vector<struct control_f
 static void
 setup_check_control_event_injection_instr_length_checks_paths(std::vector<struct control_flow_path> &cfg)
 {
-    using namespace vmcs::vm_entry_interruption_information_field;
+    using namespace vm_entry_interruption_information_field;
 
     path.setup = [&] { set(0UL); };
     path.throws_exception = false;
@@ -1214,19 +1399,19 @@ setup_check_control_event_injection_instr_length_checks_paths(std::vector<struct
     path.setup = [&]
     {
         interruption_type::set(interruption_type::software_interrupt);
-        vmcs::vm_entry_instruction_length::set(0UL);
-        g_msrs[msrs::ia32_vmx_misc::addr] = 0;
+        vm_entry_instruction_length::set(0UL);
+        g_msrs[ia32_vmx_misc::addr] = 0;
     };
     path.throws_exception = true;
     path.exception = ""_ut_lee;
     cfg.push_back(path);
 
-    path.setup = [&] { vmcs::vm_entry_instruction_length::set(16UL); };
+    path.setup = [&] { vm_entry_instruction_length::set(16UL); };
     path.throws_exception = true;
     path.exception = ""_ut_lee;
     cfg.push_back(path);
 
-    path.setup = [&] { vmcs::vm_entry_instruction_length::set(1UL); };
+    path.setup = [&] { vm_entry_instruction_length::set(1UL); };
     path.throws_exception = false;
     cfg.push_back(path);
 }
@@ -1234,28 +1419,80 @@ setup_check_control_event_injection_instr_length_checks_paths(std::vector<struct
 static void
 setup_check_control_entry_msr_load_address_paths(std::vector<struct control_flow_path> &cfg)
 {
-    path.setup = [&] { vmcs::vm_entry_msr_load_count::set(0UL); };
+    path.setup = [&] { vm_entry_msr_load_count::set(0UL); };
     path.throws_exception = false;
     cfg.push_back(path);
 
-    path.setup = [&] { vmcs::vm_entry_msr_load_count::set(16UL); vmcs::vm_entry_msr_load_address::set(0xfU); };
+    path.setup = [&]
+    {
+        vm_entry_msr_load_count::set(16UL);
+        vm_entry_msr_load_address::set(0xfU);
+    };
     path.throws_exception = true;
     path.exception = ""_ut_lee;
     cfg.push_back(path);
 
-    path.setup = [&] { vmcs::vm_entry_msr_load_address::set(0xff00000000000000U); };
+    path.setup = [&]
+    {
+        g_eax_cpuid[x64::cpuid::addr_size::addr] = 48U;
+        vm_entry_msr_load_address::set(0xff00000000000000U);
+    };
     path.throws_exception = true;
     path.exception = ""_ut_lee;
     cfg.push_back(path);
 
-    path.setup = [&] { vmcs::vm_entry_msr_load_address::set(0xfffffff0U); };
+    path.setup = [&]
+    {
+        g_eax_cpuid[x64::cpuid::addr_size::addr] = 48U;
+        vm_entry_msr_load_address::set(0xfffffffffff0U);
+    };
     path.throws_exception = true;
     path.exception = ""_ut_lee;
     cfg.push_back(path);
 
-    path.setup = [&] { vmcs::vm_entry_msr_load_address::set(0x10U); };
+    path.setup = [&]
+    {
+        g_eax_cpuid[x64::cpuid::addr_size::addr] = 48U;
+        vm_entry_msr_load_address::set(0x10U);
+    };
     path.throws_exception = false;
     cfg.push_back(path);
+}
+
+void
+vmcs_ut::test_check_control_vmx_controls_all()
+{
+    std::vector<struct control_flow_path> cfg;
+    setup_check_control_vmx_controls_all_paths(cfg);
+
+    test_vmcs_check(cfg, check::control_vmx_controls_all);
+}
+
+void
+vmcs_ut::test_check_control_vm_execution_control_fields_all()
+{
+    std::vector<struct control_flow_path> cfg;
+    setup_check_control_vm_execution_control_fields_all_paths(cfg);
+
+    test_vmcs_check(cfg, check::control_vm_execution_control_fields_all);
+}
+
+void
+vmcs_ut::test_check_control_vm_exit_control_fields_all()
+{
+    std::vector<struct control_flow_path> cfg;
+    setup_check_control_vm_exit_control_fields_all_paths(cfg);
+
+    test_vmcs_check(cfg, check::control_vm_exit_control_fields_all);
+}
+
+void
+vmcs_ut::test_check_control_vm_entry_control_fields_all()
+{
+    std::vector<struct control_flow_path> cfg;
+    setup_check_control_vm_entry_control_fields_all_paths(cfg);
+
+    test_vmcs_check(cfg, check::control_vm_entry_control_fields_all);
 }
 
 void
@@ -1264,7 +1501,7 @@ vmcs_ut::test_check_control_pin_based_ctls_reserved_properly_set()
     std::vector<struct control_flow_path> cfg;
     setup_check_control_pin_based_ctls_reserved_properly_set_paths(cfg);
 
-    this->run_vmcs_test(cfg, &vmcs_intel_x64::check_control_pin_based_ctls_reserved_properly_set);
+    test_vmcs_check(cfg, check::control_pin_based_ctls_reserved_properly_set);
 }
 
 void
@@ -1273,7 +1510,7 @@ vmcs_ut::test_check_control_proc_based_ctls_reserved_properly_set()
     std::vector<struct control_flow_path> cfg;
     setup_check_control_proc_based_ctls_reserved_properly_set_paths(cfg);
 
-    this->run_vmcs_test(cfg, &vmcs_intel_x64::check_control_proc_based_ctls_reserved_properly_set);
+    test_vmcs_check(cfg, check::control_proc_based_ctls_reserved_properly_set);
 }
 
 void
@@ -1282,7 +1519,7 @@ vmcs_ut::test_check_control_proc_based_ctls2_reserved_properly_set()
     std::vector<struct control_flow_path> cfg;
     setup_check_control_proc_based_ctls2_reserved_properly_set_paths(cfg);
 
-    this->run_vmcs_test(cfg, &vmcs_intel_x64::check_control_proc_based_ctls2_reserved_properly_set);
+    test_vmcs_check(cfg, check::control_proc_based_ctls2_reserved_properly_set);
 }
 
 void
@@ -1291,7 +1528,7 @@ vmcs_ut::test_check_control_cr3_count_less_than_4()
     std::vector<struct control_flow_path> cfg;
     setup_check_control_cr3_count_less_than_4_paths(cfg);
 
-    this->run_vmcs_test(cfg, &vmcs_intel_x64::check_control_cr3_count_less_then_4);
+    test_vmcs_check(cfg, check::control_cr3_count_less_then_4);
 }
 
 void
@@ -1300,7 +1537,7 @@ vmcs_ut::test_check_control_io_bitmap_address_bits()
     std::vector<struct control_flow_path> cfg;
     setup_check_control_io_bitmap_address_bits_paths(cfg);
 
-    this->run_vmcs_test(cfg, &vmcs_intel_x64::check_control_io_bitmap_address_bits);
+    test_vmcs_check(cfg, check::control_io_bitmap_address_bits);
 }
 
 void
@@ -1309,7 +1546,7 @@ vmcs_ut::test_check_control_msr_bitmap_address_bits()
     std::vector<struct control_flow_path> cfg;
     setup_check_control_msr_bitmap_address_bits_paths(cfg);
 
-    this->run_vmcs_test(cfg, &vmcs_intel_x64::check_control_msr_bitmap_address_bits);
+    test_vmcs_check(cfg, check::control_msr_bitmap_address_bits);
 }
 
 void
@@ -1318,7 +1555,7 @@ vmcs_ut::test_check_control_tpr_shadow_and_virtual_apic()
     std::vector<struct control_flow_path> cfg;
     setup_check_control_tpr_shadow_and_virtual_apic_paths(cfg);
 
-    this->run_vmcs_test(cfg, &vmcs_intel_x64::check_control_tpr_shadow_and_virtual_apic);
+    test_vmcs_check(cfg, check::control_tpr_shadow_and_virtual_apic);
 }
 
 void
@@ -1327,7 +1564,7 @@ vmcs_ut::test_check_control_nmi_exiting_and_virtual_nmi()
     std::vector<struct control_flow_path> cfg;
     setup_check_control_nmi_exiting_and_virtual_nmi_paths(cfg);
 
-    this->run_vmcs_test(cfg, &vmcs_intel_x64::check_control_nmi_exiting_and_virtual_nmi);
+    test_vmcs_check(cfg, check::control_nmi_exiting_and_virtual_nmi);
 }
 
 void
@@ -1336,7 +1573,7 @@ vmcs_ut::test_check_control_virtual_nmi_and_nmi_window()
     std::vector<struct control_flow_path> cfg;
     setup_check_control_virtual_nmi_and_nmi_window_paths(cfg);
 
-    this->run_vmcs_test(cfg, &vmcs_intel_x64::check_control_virtual_nmi_and_nmi_window);
+    test_vmcs_check(cfg, check::control_virtual_nmi_and_nmi_window);
 }
 
 void
@@ -1345,7 +1582,7 @@ vmcs_ut::test_check_control_virtual_apic_address_bits()
     std::vector<struct control_flow_path> cfg;
     setup_check_control_virtual_apic_address_bits_paths(cfg);
 
-    this->run_vmcs_test(cfg, &vmcs_intel_x64::check_control_virtual_apic_address_bits);
+    test_vmcs_check(cfg, check::control_virtual_apic_address_bits);
 }
 
 void
@@ -1354,7 +1591,7 @@ vmcs_ut::test_check_control_x2apic_mode_and_virtual_apic_access()
     std::vector<struct control_flow_path> cfg;
     setup_check_control_x2apic_mode_and_virtual_apic_access_paths(cfg);
 
-    this->run_vmcs_test(cfg, &vmcs_intel_x64::check_control_x2apic_mode_and_virtual_apic_access);
+    test_vmcs_check(cfg, check::control_x2apic_mode_and_virtual_apic_access);
 }
 
 void
@@ -1363,7 +1600,7 @@ vmcs_ut::test_check_control_virtual_interrupt_and_external_interrupt()
     std::vector<struct control_flow_path> cfg;
     setup_check_control_virtual_interrupt_and_external_interrupt_paths(cfg);
 
-    this->run_vmcs_test(cfg, &vmcs_intel_x64::check_control_virtual_interrupt_and_external_interrupt);
+    test_vmcs_check(cfg, check::control_virtual_interrupt_and_external_interrupt);
 }
 
 void
@@ -1372,7 +1609,7 @@ vmcs_ut::test_check_control_process_posted_interrupt_checks()
     std::vector<struct control_flow_path> cfg;
     setup_check_control_process_posted_interrupt_checks_paths(cfg);
 
-    this->run_vmcs_test(cfg, &vmcs_intel_x64::check_control_process_posted_interrupt_checks);
+    test_vmcs_check(cfg, check::control_process_posted_interrupt_checks);
 }
 
 void
@@ -1381,7 +1618,7 @@ vmcs_ut::test_check_control_vpid_checks()
     std::vector<struct control_flow_path> cfg;
     setup_check_control_vpid_checks_paths(cfg);
 
-    this->run_vmcs_test(cfg, &vmcs_intel_x64::check_control_vpid_checks);
+    test_vmcs_check(cfg, check::control_vpid_checks);
 }
 
 void
@@ -1390,7 +1627,7 @@ vmcs_ut::test_check_control_enable_ept_checks()
     std::vector<struct control_flow_path> cfg;
     setup_check_control_enable_ept_checks_paths(cfg);
 
-    this->run_vmcs_test(cfg, &vmcs_intel_x64::check_control_enable_ept_checks);
+    test_vmcs_check(cfg, check::control_enable_ept_checks);
 }
 
 void
@@ -1399,7 +1636,7 @@ vmcs_ut::test_check_control_enable_pml_checks()
     std::vector<struct control_flow_path> cfg;
     setup_check_control_enable_pml_checks_paths(cfg);
 
-    this->run_vmcs_test(cfg, &vmcs_intel_x64::check_control_enable_pml_checks);
+    test_vmcs_check(cfg, check::control_enable_pml_checks);
 }
 
 void
@@ -1408,7 +1645,7 @@ vmcs_ut::test_check_control_unrestricted_guests()
     std::vector<struct control_flow_path> cfg;
     setup_check_control_unrestricted_guests_paths(cfg);
 
-    this->run_vmcs_test(cfg, &vmcs_intel_x64::check_control_unrestricted_guests);
+    test_vmcs_check(cfg, check::control_unrestricted_guests);
 }
 
 void
@@ -1417,7 +1654,7 @@ vmcs_ut::test_check_control_enable_vm_functions()
     std::vector<struct control_flow_path> cfg;
     setup_check_control_enable_vm_functions_paths(cfg);
 
-    this->run_vmcs_test(cfg, &vmcs_intel_x64::check_control_enable_vm_functions);
+    test_vmcs_check(cfg, check::control_enable_vm_functions);
 }
 
 void
@@ -1426,7 +1663,7 @@ vmcs_ut::test_check_control_enable_vmcs_shadowing()
     std::vector<struct control_flow_path> cfg;
     setup_check_control_enable_vmcs_shadowing_paths(cfg);
 
-    this->run_vmcs_test(cfg, &vmcs_intel_x64::check_control_enable_vmcs_shadowing);
+    test_vmcs_check(cfg, check::control_enable_vmcs_shadowing);
 }
 
 void
@@ -1435,7 +1672,7 @@ vmcs_ut::test_check_control_enable_ept_violation_checks()
     std::vector<struct control_flow_path> cfg;
     setup_check_control_enable_ept_violation_checks_paths(cfg);
 
-    this->run_vmcs_test(cfg, &vmcs_intel_x64::check_control_enable_ept_violation_checks);
+    test_vmcs_check(cfg, check::control_enable_ept_violation_checks);
 }
 
 void
@@ -1444,7 +1681,7 @@ vmcs_ut::test_check_control_vm_exit_ctls_reserved_properly_set()
     std::vector<struct control_flow_path> cfg;
     setup_check_control_vm_exit_ctls_reserved_properly_set_paths(cfg);
 
-    this->run_vmcs_test(cfg, &vmcs_intel_x64::check_control_vm_exit_ctls_reserved_properly_set);
+    test_vmcs_check(cfg, check::control_vm_exit_ctls_reserved_properly_set);
 }
 
 void
@@ -1453,7 +1690,7 @@ vmcs_ut::test_check_control_activate_and_save_preemption_timer_must_be_0()
     std::vector<struct control_flow_path> cfg;
     setup_check_control_activate_and_save_preemption_timer_must_be_0_paths(cfg);
 
-    this->run_vmcs_test(cfg, &vmcs_intel_x64::check_control_activate_and_save_preemption_timer_must_be_0);
+    test_vmcs_check(cfg, check::control_activate_and_save_preemption_timer_must_be_0);
 }
 
 void
@@ -1462,7 +1699,7 @@ vmcs_ut::test_check_control_exit_msr_store_address()
     std::vector<struct control_flow_path> cfg;
     setup_check_control_exit_msr_store_address_paths(cfg);
 
-    this->run_vmcs_test(cfg, &vmcs_intel_x64::check_control_exit_msr_store_address);
+    test_vmcs_check(cfg, check::control_exit_msr_store_address);
 }
 
 void
@@ -1471,7 +1708,7 @@ vmcs_ut::test_check_control_exit_msr_load_address()
     std::vector<struct control_flow_path> cfg;
     setup_check_control_exit_msr_load_address_paths(cfg);
 
-    this->run_vmcs_test(cfg, &vmcs_intel_x64::check_control_exit_msr_load_address);
+    test_vmcs_check(cfg, check::control_exit_msr_load_address);
 }
 
 void
@@ -1480,7 +1717,7 @@ vmcs_ut::test_check_control_vm_entry_ctls_reserved_properly_set()
     std::vector<struct control_flow_path> cfg;
     setup_check_control_vm_entry_ctls_reserved_properly_set_paths(cfg);
 
-    this->run_vmcs_test(cfg, &vmcs_intel_x64::check_control_vm_entry_ctls_reserved_properly_set);
+    test_vmcs_check(cfg, check::control_vm_entry_ctls_reserved_properly_set);
 }
 
 void
@@ -1489,7 +1726,7 @@ vmcs_ut::test_check_control_event_injection_type_vector_checks()
     std::vector<struct control_flow_path> cfg;
     setup_check_control_event_injection_type_vector_checks_paths(cfg);
 
-    this->run_vmcs_test(cfg, &vmcs_intel_x64::check_control_event_injection_type_vector_checks);
+    test_vmcs_check(cfg, check::control_event_injection_type_vector_checks);
 }
 
 void
@@ -1498,7 +1735,7 @@ vmcs_ut::test_check_control_event_injection_delivery_ec_checks()
     std::vector<struct control_flow_path> cfg;
     setup_check_control_event_injection_delivery_ec_checks_paths(cfg);
 
-    this->run_vmcs_test(cfg, &vmcs_intel_x64::check_control_event_injection_delivery_ec_checks);
+    test_vmcs_check(cfg, check::control_event_injection_delivery_ec_checks);
 }
 
 void
@@ -1507,7 +1744,7 @@ vmcs_ut::test_check_control_event_injection_reserved_bits_checks()
     std::vector<struct control_flow_path> cfg;
     setup_check_control_event_injection_reserved_bits_checks_paths(cfg);
 
-    this->run_vmcs_test(cfg, &vmcs_intel_x64::check_control_event_injection_reserved_bits_checks);
+    test_vmcs_check(cfg, check::control_event_injection_reserved_bits_checks);
 }
 
 void
@@ -1516,7 +1753,7 @@ vmcs_ut::test_check_control_event_injection_ec_checks()
     std::vector<struct control_flow_path> cfg;
     setup_check_control_event_injection_ec_checks_paths(cfg);
 
-    this->run_vmcs_test(cfg, &vmcs_intel_x64::check_control_event_injection_ec_checks);
+    test_vmcs_check(cfg, check::control_event_injection_ec_checks);
 }
 
 void
@@ -1525,7 +1762,7 @@ vmcs_ut::test_check_control_event_injection_instr_length_checks()
     std::vector<struct control_flow_path> cfg;
     setup_check_control_event_injection_instr_length_checks_paths(cfg);
 
-    this->run_vmcs_test(cfg, &vmcs_intel_x64::check_control_event_injection_instr_length_checks);
+    test_vmcs_check(cfg, check::control_event_injection_instr_length_checks);
 }
 
 void
@@ -1534,5 +1771,25 @@ vmcs_ut::test_check_control_entry_msr_load_address()
     std::vector<struct control_flow_path> cfg;
     setup_check_control_entry_msr_load_address_paths(cfg);
 
-    this->run_vmcs_test(cfg, &vmcs_intel_x64::check_control_entry_msr_load_address);
+    test_vmcs_check(cfg, check::control_entry_msr_load_address);
+}
+
+void
+vmcs_ut::test_check_control_reserved_properly_set()
+{
+    g_msrs[ia32_vmx_true_entry_ctls::addr] = 0xffffffff00000000UL;
+    vm_entry_controls::set(0x1234UL);
+
+    auto msr_addr = ia32_vmx_true_entry_ctls::addr;
+    auto ctls = vm_entry_controls::get();
+    auto name = vm_entry_controls::name;
+
+    this->expect_no_exception([&] { control_reserved_properly_set(msr_addr, ctls, name); });
+}
+
+void
+vmcs_ut::test_check_memory_type_reserved()
+{
+    this->expect_false(memory_type_reserved(x64::memory_type::write_through));
+    this->expect_true(memory_type_reserved(8U));
 }

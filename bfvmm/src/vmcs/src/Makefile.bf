@@ -65,6 +65,7 @@ NATIVE_OUTDIR+=%BUILD_REL%/../bin
 ################################################################################
 
 SOURCES+=vmcs_intel_x64.cpp
+SOURCES+=vmcs_intel_x64_check_all.cpp
 SOURCES+=vmcs_intel_x64_check_controls.cpp
 SOURCES+=vmcs_intel_x64_check_guest.cpp
 SOURCES+=vmcs_intel_x64_check_host.cpp

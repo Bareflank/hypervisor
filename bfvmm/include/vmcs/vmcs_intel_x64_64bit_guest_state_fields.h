@@ -28,6 +28,7 @@
 #include <vmcs/vmcs_intel_x64.h>
 
 #include <intrinsics/msrs_intel_x64.h>
+#include <intrinsics/cpuid_x64.h>
 
 // *INDENT-OFF*
 namespace intel_x64
@@ -1590,6 +1591,201 @@ namespace guest_pdpte0
     template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
     void set_if_exists(T val, bool verbose = false) noexcept
     { set_vmcs_field_if_exists(val, addr, name, verbose, exists()); }
+
+    namespace present
+    {
+        constexpr const auto mask = 0x0000000000000001UL;
+        constexpr const auto from = 0;
+        constexpr const auto name = "present";
+
+        inline auto is_enabled()
+        { return is_bit_set(get_vmcs_field(addr, name, exists()), from); }
+
+        inline auto is_enabled_if_exists(bool verbose = false) noexcept
+        { return is_bit_set(get_vmcs_field_if_exists(addr, name, verbose, exists()), from); }
+
+        inline auto is_disabled()
+        { return is_bit_cleared(get_vmcs_field(addr, name, exists()), from); }
+
+        inline auto is_disabled_if_exists(bool verbose = false) noexcept
+        { return is_bit_cleared(get_vmcs_field_if_exists(addr, name, verbose, exists()), from); }
+
+        inline void enable()
+        {
+            auto&& field = get_vmcs_field(addr, name, exists());
+            set_vmcs_field(set_bit(field, from), addr, name, exists());
+        }
+
+        inline void enable_if_exists(bool verbose = false) noexcept
+        {
+            auto&& field = get_vmcs_field_if_exists(addr, name, verbose, exists());
+            set_vmcs_field_if_exists(set_bit(field, from), addr, name, verbose, exists());
+        }
+
+        inline void disable()
+        {
+            auto&& field = get_vmcs_field(addr, name, exists());
+            set_vmcs_field(clear_bit(field, from), addr, name, exists());
+        }
+
+        inline void disable_if_exists(bool verbose = false) noexcept
+        {
+            auto&& field = get_vmcs_field_if_exists(addr, name, verbose, exists());
+            set_vmcs_field_if_exists(clear_bit(field, from), addr, name, verbose, exists());
+        }
+    }
+
+    namespace reserved
+    {
+        constexpr const auto from = 0;
+        constexpr const auto name = "reserved";
+
+        inline auto mask() noexcept
+        {
+            auto phys_len = x64::cpuid::addr_size::phys::get();
+            auto upper = 0xFFFFFFFFFFFFFFFFULL << phys_len;
+            return (upper | 0x1E6ULL);
+        }
+
+        inline auto get()
+        { return get_bits(get_vmcs_field(addr, name, exists()), mask()) >> from; }
+
+        inline auto get_if_exists(bool verbose = false) noexcept
+        { return get_bits(get_vmcs_field_if_exists(addr, name, verbose, exists()), mask()) >> from; }
+
+        template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
+        void set(T val)
+        {
+            auto&& field = get_vmcs_field(addr, name, exists());
+            set_vmcs_field(set_bits(field, mask(), (val << from)), addr, name, exists());
+        }
+
+        template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
+        void set_if_exists(T val, bool verbose = false) noexcept
+        {
+            auto&& field = get_vmcs_field_if_exists(addr, name, verbose, exists());
+            set_vmcs_field_if_exists(set_bits(field, mask(), (val << from)), addr, name, verbose, exists());
+        }
+    }
+
+    namespace pwt
+    {
+        constexpr const auto mask = 0x0000000000000008UL;
+        constexpr const auto from = 3;
+        constexpr const auto name = "pwt";
+
+        inline auto is_enabled()
+        { return is_bit_set(get_vmcs_field(addr, name, exists()), from); }
+
+        inline auto is_enabled_if_exists(bool verbose = false) noexcept
+        { return is_bit_set(get_vmcs_field_if_exists(addr, name, verbose, exists()), from); }
+
+        inline auto is_disabled()
+        { return is_bit_cleared(get_vmcs_field(addr, name, exists()), from); }
+
+        inline auto is_disabled_if_exists(bool verbose = false) noexcept
+        { return is_bit_cleared(get_vmcs_field_if_exists(addr, name, verbose, exists()), from); }
+
+        inline void enable()
+        {
+            auto&& field = get_vmcs_field(addr, name, exists());
+            set_vmcs_field(set_bit(field, from), addr, name, exists());
+        }
+
+        inline void enable_if_exists(bool verbose = false) noexcept
+        {
+            auto&& field = get_vmcs_field_if_exists(addr, name, verbose, exists());
+            set_vmcs_field_if_exists(set_bit(field, from), addr, name, verbose, exists());
+        }
+
+        inline void disable()
+        {
+            auto&& field = get_vmcs_field(addr, name, exists());
+            set_vmcs_field(clear_bit(field, from), addr, name, exists());
+        }
+
+        inline void disable_if_exists(bool verbose = false) noexcept
+        {
+            auto&& field = get_vmcs_field_if_exists(addr, name, verbose, exists());
+            set_vmcs_field_if_exists(clear_bit(field, from), addr, name, verbose, exists());
+        }
+    }
+
+    namespace pcd
+    {
+        constexpr const auto mask = 0x0000000000000010UL;
+        constexpr const auto from = 4;
+        constexpr const auto name = "pcd";
+
+        inline auto is_enabled()
+        { return is_bit_set(get_vmcs_field(addr, name, exists()), from); }
+
+        inline auto is_enabled_if_exists(bool verbose = false) noexcept
+        { return is_bit_set(get_vmcs_field_if_exists(addr, name, verbose, exists()), from); }
+
+        inline auto is_disabled()
+        { return is_bit_cleared(get_vmcs_field(addr, name, exists()), from); }
+
+        inline auto is_disabled_if_exists(bool verbose = false) noexcept
+        { return is_bit_cleared(get_vmcs_field_if_exists(addr, name, verbose, exists()), from); }
+
+        inline void enable()
+        {
+            auto&& field = get_vmcs_field(addr, name, exists());
+            set_vmcs_field(set_bit(field, from), addr, name, exists());
+        }
+
+        inline void enable_if_exists(bool verbose = false) noexcept
+        {
+            auto&& field = get_vmcs_field_if_exists(addr, name, verbose, exists());
+            set_vmcs_field_if_exists(set_bit(field, from), addr, name, verbose, exists());
+        }
+
+        inline void disable()
+        {
+            auto&& field = get_vmcs_field(addr, name, exists());
+            set_vmcs_field(clear_bit(field, from), addr, name, exists());
+        }
+
+        inline void disable_if_exists(bool verbose = false) noexcept
+        {
+            auto&& field = get_vmcs_field_if_exists(addr, name, verbose, exists());
+            set_vmcs_field_if_exists(clear_bit(field, from), addr, name, verbose, exists());
+        }
+    }
+
+    namespace page_directory_addr
+    {
+        constexpr const auto from = 12;
+        constexpr const auto name = "page_directory_addr";
+
+        inline auto mask() noexcept
+        {
+            auto phys_len = x64::cpuid::addr_size::phys::get();
+            auto upper = 0xFFFFFFFFFFFFFFFFULL << from;
+            return (~(0xFFFFFFFFFFFFFFFFULL << phys_len) & upper);
+        }
+
+        inline auto get()
+        { return get_bits(get_vmcs_field(addr, name, exists()), mask()) >> from; }
+
+        inline auto get_if_exists(bool verbose = false) noexcept
+        { return get_bits(get_vmcs_field_if_exists(addr, name, verbose, exists()), mask()) >> from; }
+
+        template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
+        void set(T val)
+        {
+            auto&& field = get_vmcs_field(addr, name, exists());
+            set_vmcs_field(set_bits(field, mask(), (val << from)), addr, name, exists());
+        }
+
+        template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
+        void set_if_exists(T val, bool verbose = false) noexcept
+        {
+            auto&& field = get_vmcs_field_if_exists(addr, name, verbose, exists());
+            set_vmcs_field_if_exists(set_bits(field, mask(), (val << from)), addr, name, verbose, exists());
+        }
+    }
 }
 
 namespace guest_pdpte1
@@ -1615,6 +1811,201 @@ namespace guest_pdpte1
     template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
     void set_if_exists(T val, bool verbose = false) noexcept
     { set_vmcs_field_if_exists(val, addr, name, verbose, exists()); }
+
+    namespace present
+    {
+        constexpr const auto mask = 0x0000000000000001UL;
+        constexpr const auto from = 0;
+        constexpr const auto name = "present";
+
+        inline auto is_enabled()
+        { return is_bit_set(get_vmcs_field(addr, name, exists()), from); }
+
+        inline auto is_enabled_if_exists(bool verbose = false) noexcept
+        { return is_bit_set(get_vmcs_field_if_exists(addr, name, verbose, exists()), from); }
+
+        inline auto is_disabled()
+        { return is_bit_cleared(get_vmcs_field(addr, name, exists()), from); }
+
+        inline auto is_disabled_if_exists(bool verbose = false) noexcept
+        { return is_bit_cleared(get_vmcs_field_if_exists(addr, name, verbose, exists()), from); }
+
+        inline void enable()
+        {
+            auto&& field = get_vmcs_field(addr, name, exists());
+            set_vmcs_field(set_bit(field, from), addr, name, exists());
+        }
+
+        inline void enable_if_exists(bool verbose = false) noexcept
+        {
+            auto&& field = get_vmcs_field_if_exists(addr, name, verbose, exists());
+            set_vmcs_field_if_exists(set_bit(field, from), addr, name, verbose, exists());
+        }
+
+        inline void disable()
+        {
+            auto&& field = get_vmcs_field(addr, name, exists());
+            set_vmcs_field(clear_bit(field, from), addr, name, exists());
+        }
+
+        inline void disable_if_exists(bool verbose = false) noexcept
+        {
+            auto&& field = get_vmcs_field_if_exists(addr, name, verbose, exists());
+            set_vmcs_field_if_exists(clear_bit(field, from), addr, name, verbose, exists());
+        }
+    }
+
+    namespace reserved
+    {
+        constexpr const auto from = 0;
+        constexpr const auto name = "reserved";
+
+        inline auto mask() noexcept
+        {
+            auto phys_len = x64::cpuid::addr_size::phys::get();
+            auto upper = 0xFFFFFFFFFFFFFFFFULL << phys_len;
+            return (upper | 0x1E6ULL);
+        }
+
+        inline auto get()
+        { return get_bits(get_vmcs_field(addr, name, exists()), mask()) >> from; }
+
+        inline auto get_if_exists(bool verbose = false) noexcept
+        { return get_bits(get_vmcs_field_if_exists(addr, name, verbose, exists()), mask()) >> from; }
+
+        template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
+        void set(T val)
+        {
+            auto&& field = get_vmcs_field(addr, name, exists());
+            set_vmcs_field(set_bits(field, mask(), (val << from)), addr, name, exists());
+        }
+
+        template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
+        void set_if_exists(T val, bool verbose = false) noexcept
+        {
+            auto&& field = get_vmcs_field_if_exists(addr, name, verbose, exists());
+            set_vmcs_field_if_exists(set_bits(field, mask(), (val << from)), addr, name, verbose, exists());
+        }
+    }
+
+    namespace pwt
+    {
+        constexpr const auto mask = 0x0000000000000008UL;
+        constexpr const auto from = 3;
+        constexpr const auto name = "pwt";
+
+        inline auto is_enabled()
+        { return is_bit_set(get_vmcs_field(addr, name, exists()), from); }
+
+        inline auto is_enabled_if_exists(bool verbose = false) noexcept
+        { return is_bit_set(get_vmcs_field_if_exists(addr, name, verbose, exists()), from); }
+
+        inline auto is_disabled()
+        { return is_bit_cleared(get_vmcs_field(addr, name, exists()), from); }
+
+        inline auto is_disabled_if_exists(bool verbose = false) noexcept
+        { return is_bit_cleared(get_vmcs_field_if_exists(addr, name, verbose, exists()), from); }
+
+        inline void enable()
+        {
+            auto&& field = get_vmcs_field(addr, name, exists());
+            set_vmcs_field(set_bit(field, from), addr, name, exists());
+        }
+
+        inline void enable_if_exists(bool verbose = false) noexcept
+        {
+            auto&& field = get_vmcs_field_if_exists(addr, name, verbose, exists());
+            set_vmcs_field_if_exists(set_bit(field, from), addr, name, verbose, exists());
+        }
+
+        inline void disable()
+        {
+            auto&& field = get_vmcs_field(addr, name, exists());
+            set_vmcs_field(clear_bit(field, from), addr, name, exists());
+        }
+
+        inline void disable_if_exists(bool verbose = false) noexcept
+        {
+            auto&& field = get_vmcs_field_if_exists(addr, name, verbose, exists());
+            set_vmcs_field_if_exists(clear_bit(field, from), addr, name, verbose, exists());
+        }
+    }
+
+    namespace pcd
+    {
+        constexpr const auto mask = 0x0000000000000010UL;
+        constexpr const auto from = 4;
+        constexpr const auto name = "pcd";
+
+        inline auto is_enabled()
+        { return is_bit_set(get_vmcs_field(addr, name, exists()), from); }
+
+        inline auto is_enabled_if_exists(bool verbose = false) noexcept
+        { return is_bit_set(get_vmcs_field_if_exists(addr, name, verbose, exists()), from); }
+
+        inline auto is_disabled()
+        { return is_bit_cleared(get_vmcs_field(addr, name, exists()), from); }
+
+        inline auto is_disabled_if_exists(bool verbose = false) noexcept
+        { return is_bit_cleared(get_vmcs_field_if_exists(addr, name, verbose, exists()), from); }
+
+        inline void enable()
+        {
+            auto&& field = get_vmcs_field(addr, name, exists());
+            set_vmcs_field(set_bit(field, from), addr, name, exists());
+        }
+
+        inline void enable_if_exists(bool verbose = false) noexcept
+        {
+            auto&& field = get_vmcs_field_if_exists(addr, name, verbose, exists());
+            set_vmcs_field_if_exists(set_bit(field, from), addr, name, verbose, exists());
+        }
+
+        inline void disable()
+        {
+            auto&& field = get_vmcs_field(addr, name, exists());
+            set_vmcs_field(clear_bit(field, from), addr, name, exists());
+        }
+
+        inline void disable_if_exists(bool verbose = false) noexcept
+        {
+            auto&& field = get_vmcs_field_if_exists(addr, name, verbose, exists());
+            set_vmcs_field_if_exists(clear_bit(field, from), addr, name, verbose, exists());
+        }
+    }
+
+    namespace page_directory_addr
+    {
+        constexpr const auto from = 12;
+        constexpr const auto name = "page_directory_addr";
+
+        inline auto mask() noexcept
+        {
+            auto phys_len = x64::cpuid::addr_size::phys::get();
+            auto upper = 0xFFFFFFFFFFFFFFFFULL << from;
+            return (~(0xFFFFFFFFFFFFFFFFULL << phys_len) & upper);
+        }
+
+        inline auto get()
+        { return get_bits(get_vmcs_field(addr, name, exists()), mask()) >> from; }
+
+        inline auto get_if_exists(bool verbose = false) noexcept
+        { return get_bits(get_vmcs_field_if_exists(addr, name, verbose, exists()), mask()) >> from; }
+
+        template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
+        void set(T val)
+        {
+            auto&& field = get_vmcs_field(addr, name, exists());
+            set_vmcs_field(set_bits(field, mask(), (val << from)), addr, name, exists());
+        }
+
+        template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
+        void set_if_exists(T val, bool verbose = false) noexcept
+        {
+            auto&& field = get_vmcs_field_if_exists(addr, name, verbose, exists());
+            set_vmcs_field_if_exists(set_bits(field, mask(), (val << from)), addr, name, verbose, exists());
+        }
+    }
 }
 
 namespace guest_pdpte2
@@ -1640,6 +2031,201 @@ namespace guest_pdpte2
     template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
     void set_if_exists(T val, bool verbose = false) noexcept
     { set_vmcs_field_if_exists(val, addr, name, verbose, exists()); }
+
+    namespace present
+    {
+        constexpr const auto mask = 0x0000000000000001UL;
+        constexpr const auto from = 0;
+        constexpr const auto name = "present";
+
+        inline auto is_enabled()
+        { return is_bit_set(get_vmcs_field(addr, name, exists()), from); }
+
+        inline auto is_enabled_if_exists(bool verbose = false) noexcept
+        { return is_bit_set(get_vmcs_field_if_exists(addr, name, verbose, exists()), from); }
+
+        inline auto is_disabled()
+        { return is_bit_cleared(get_vmcs_field(addr, name, exists()), from); }
+
+        inline auto is_disabled_if_exists(bool verbose = false) noexcept
+        { return is_bit_cleared(get_vmcs_field_if_exists(addr, name, verbose, exists()), from); }
+
+        inline void enable()
+        {
+            auto&& field = get_vmcs_field(addr, name, exists());
+            set_vmcs_field(set_bit(field, from), addr, name, exists());
+        }
+
+        inline void enable_if_exists(bool verbose = false) noexcept
+        {
+            auto&& field = get_vmcs_field_if_exists(addr, name, verbose, exists());
+            set_vmcs_field_if_exists(set_bit(field, from), addr, name, verbose, exists());
+        }
+
+        inline void disable()
+        {
+            auto&& field = get_vmcs_field(addr, name, exists());
+            set_vmcs_field(clear_bit(field, from), addr, name, exists());
+        }
+
+        inline void disable_if_exists(bool verbose = false) noexcept
+        {
+            auto&& field = get_vmcs_field_if_exists(addr, name, verbose, exists());
+            set_vmcs_field_if_exists(clear_bit(field, from), addr, name, verbose, exists());
+        }
+    }
+
+    namespace reserved
+    {
+        constexpr const auto from = 0;
+        constexpr const auto name = "reserved";
+
+        inline auto mask() noexcept
+        {
+            auto phys_len = x64::cpuid::addr_size::phys::get();
+            auto upper = 0xFFFFFFFFFFFFFFFFULL << phys_len;
+            return (upper | 0x1E6ULL);
+        }
+
+        inline auto get()
+        { return get_bits(get_vmcs_field(addr, name, exists()), mask()) >> from; }
+
+        inline auto get_if_exists(bool verbose = false) noexcept
+        { return get_bits(get_vmcs_field_if_exists(addr, name, verbose, exists()), mask()) >> from; }
+
+        template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
+        void set(T val)
+        {
+            auto&& field = get_vmcs_field(addr, name, exists());
+            set_vmcs_field(set_bits(field, mask(), (val << from)), addr, name, exists());
+        }
+
+        template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
+        void set_if_exists(T val, bool verbose = false) noexcept
+        {
+            auto&& field = get_vmcs_field_if_exists(addr, name, verbose, exists());
+            set_vmcs_field_if_exists(set_bits(field, mask(), (val << from)), addr, name, verbose, exists());
+        }
+    }
+
+    namespace pwt
+    {
+        constexpr const auto mask = 0x0000000000000008UL;
+        constexpr const auto from = 3;
+        constexpr const auto name = "pwt";
+
+        inline auto is_enabled()
+        { return is_bit_set(get_vmcs_field(addr, name, exists()), from); }
+
+        inline auto is_enabled_if_exists(bool verbose = false) noexcept
+        { return is_bit_set(get_vmcs_field_if_exists(addr, name, verbose, exists()), from); }
+
+        inline auto is_disabled()
+        { return is_bit_cleared(get_vmcs_field(addr, name, exists()), from); }
+
+        inline auto is_disabled_if_exists(bool verbose = false) noexcept
+        { return is_bit_cleared(get_vmcs_field_if_exists(addr, name, verbose, exists()), from); }
+
+        inline void enable()
+        {
+            auto&& field = get_vmcs_field(addr, name, exists());
+            set_vmcs_field(set_bit(field, from), addr, name, exists());
+        }
+
+        inline void enable_if_exists(bool verbose = false) noexcept
+        {
+            auto&& field = get_vmcs_field_if_exists(addr, name, verbose, exists());
+            set_vmcs_field_if_exists(set_bit(field, from), addr, name, verbose, exists());
+        }
+
+        inline void disable()
+        {
+            auto&& field = get_vmcs_field(addr, name, exists());
+            set_vmcs_field(clear_bit(field, from), addr, name, exists());
+        }
+
+        inline void disable_if_exists(bool verbose = false) noexcept
+        {
+            auto&& field = get_vmcs_field_if_exists(addr, name, verbose, exists());
+            set_vmcs_field_if_exists(clear_bit(field, from), addr, name, verbose, exists());
+        }
+    }
+
+    namespace pcd
+    {
+        constexpr const auto mask = 0x0000000000000010UL;
+        constexpr const auto from = 4;
+        constexpr const auto name = "pcd";
+
+        inline auto is_enabled()
+        { return is_bit_set(get_vmcs_field(addr, name, exists()), from); }
+
+        inline auto is_enabled_if_exists(bool verbose = false) noexcept
+        { return is_bit_set(get_vmcs_field_if_exists(addr, name, verbose, exists()), from); }
+
+        inline auto is_disabled()
+        { return is_bit_cleared(get_vmcs_field(addr, name, exists()), from); }
+
+        inline auto is_disabled_if_exists(bool verbose = false) noexcept
+        { return is_bit_cleared(get_vmcs_field_if_exists(addr, name, verbose, exists()), from); }
+
+        inline void enable()
+        {
+            auto&& field = get_vmcs_field(addr, name, exists());
+            set_vmcs_field(set_bit(field, from), addr, name, exists());
+        }
+
+        inline void enable_if_exists(bool verbose = false) noexcept
+        {
+            auto&& field = get_vmcs_field_if_exists(addr, name, verbose, exists());
+            set_vmcs_field_if_exists(set_bit(field, from), addr, name, verbose, exists());
+        }
+
+        inline void disable()
+        {
+            auto&& field = get_vmcs_field(addr, name, exists());
+            set_vmcs_field(clear_bit(field, from), addr, name, exists());
+        }
+
+        inline void disable_if_exists(bool verbose = false) noexcept
+        {
+            auto&& field = get_vmcs_field_if_exists(addr, name, verbose, exists());
+            set_vmcs_field_if_exists(clear_bit(field, from), addr, name, verbose, exists());
+        }
+    }
+
+    namespace page_directory_addr
+    {
+        constexpr const auto from = 12;
+        constexpr const auto name = "page_directory_addr";
+
+        inline auto mask() noexcept
+        {
+            auto phys_len = x64::cpuid::addr_size::phys::get();
+            auto upper = 0xFFFFFFFFFFFFFFFFULL << from;
+            return (~(0xFFFFFFFFFFFFFFFFULL << phys_len) & upper);
+        }
+
+        inline auto get()
+        { return get_bits(get_vmcs_field(addr, name, exists()), mask()) >> from; }
+
+        inline auto get_if_exists(bool verbose = false) noexcept
+        { return get_bits(get_vmcs_field_if_exists(addr, name, verbose, exists()), mask()) >> from; }
+
+        template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
+        void set(T val)
+        {
+            auto&& field = get_vmcs_field(addr, name, exists());
+            set_vmcs_field(set_bits(field, mask(), (val << from)), addr, name, exists());
+        }
+
+        template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
+        void set_if_exists(T val, bool verbose = false) noexcept
+        {
+            auto&& field = get_vmcs_field_if_exists(addr, name, verbose, exists());
+            set_vmcs_field_if_exists(set_bits(field, mask(), (val << from)), addr, name, verbose, exists());
+        }
+    }
 }
 
 namespace guest_pdpte3
@@ -1665,6 +2251,366 @@ namespace guest_pdpte3
     template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
     void set_if_exists(T val, bool verbose = false) noexcept
     { set_vmcs_field_if_exists(val, addr, name, verbose, exists()); }
+
+    namespace present
+    {
+        constexpr const auto mask = 0x0000000000000001UL;
+        constexpr const auto from = 0;
+        constexpr const auto name = "present";
+
+        inline auto is_enabled()
+        { return is_bit_set(get_vmcs_field(addr, name, exists()), from); }
+
+        inline auto is_enabled_if_exists(bool verbose = false) noexcept
+        { return is_bit_set(get_vmcs_field_if_exists(addr, name, verbose, exists()), from); }
+
+        inline auto is_disabled()
+        { return is_bit_cleared(get_vmcs_field(addr, name, exists()), from); }
+
+        inline auto is_disabled_if_exists(bool verbose = false) noexcept
+        { return is_bit_cleared(get_vmcs_field_if_exists(addr, name, verbose, exists()), from); }
+
+        inline void enable()
+        {
+            auto&& field = get_vmcs_field(addr, name, exists());
+            set_vmcs_field(set_bit(field, from), addr, name, exists());
+        }
+
+        inline void enable_if_exists(bool verbose = false) noexcept
+        {
+            auto&& field = get_vmcs_field_if_exists(addr, name, verbose, exists());
+            set_vmcs_field_if_exists(set_bit(field, from), addr, name, verbose, exists());
+        }
+
+        inline void disable()
+        {
+            auto&& field = get_vmcs_field(addr, name, exists());
+            set_vmcs_field(clear_bit(field, from), addr, name, exists());
+        }
+
+        inline void disable_if_exists(bool verbose = false) noexcept
+        {
+            auto&& field = get_vmcs_field_if_exists(addr, name, verbose, exists());
+            set_vmcs_field_if_exists(clear_bit(field, from), addr, name, verbose, exists());
+        }
+    }
+
+    namespace reserved
+    {
+        constexpr const auto from = 0;
+        constexpr const auto name = "reserved";
+
+        inline auto mask() noexcept
+        {
+            auto phys_len = x64::cpuid::addr_size::phys::get();
+            auto upper = 0xFFFFFFFFFFFFFFFFULL << phys_len;
+            return (upper | 0x1E6ULL);
+        }
+
+        inline auto get()
+        { return get_bits(get_vmcs_field(addr, name, exists()), mask()) >> from; }
+
+        inline auto get_if_exists(bool verbose = false) noexcept
+        { return get_bits(get_vmcs_field_if_exists(addr, name, verbose, exists()), mask()) >> from; }
+
+        template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
+        void set(T val)
+        {
+            auto&& field = get_vmcs_field(addr, name, exists());
+            set_vmcs_field(set_bits(field, mask(), (val << from)), addr, name, exists());
+        }
+
+        template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
+        void set_if_exists(T val, bool verbose = false) noexcept
+        {
+            auto&& field = get_vmcs_field_if_exists(addr, name, verbose, exists());
+            set_vmcs_field_if_exists(set_bits(field, mask(), (val << from)), addr, name, verbose, exists());
+        }
+    }
+
+    namespace pwt
+    {
+        constexpr const auto mask = 0x0000000000000008UL;
+        constexpr const auto from = 3;
+        constexpr const auto name = "pwt";
+
+        inline auto is_enabled()
+        { return is_bit_set(get_vmcs_field(addr, name, exists()), from); }
+
+        inline auto is_enabled_if_exists(bool verbose = false) noexcept
+        { return is_bit_set(get_vmcs_field_if_exists(addr, name, verbose, exists()), from); }
+
+        inline auto is_disabled()
+        { return is_bit_cleared(get_vmcs_field(addr, name, exists()), from); }
+
+        inline auto is_disabled_if_exists(bool verbose = false) noexcept
+        { return is_bit_cleared(get_vmcs_field_if_exists(addr, name, verbose, exists()), from); }
+
+        inline void enable()
+        {
+            auto&& field = get_vmcs_field(addr, name, exists());
+            set_vmcs_field(set_bit(field, from), addr, name, exists());
+        }
+
+        inline void enable_if_exists(bool verbose = false) noexcept
+        {
+            auto&& field = get_vmcs_field_if_exists(addr, name, verbose, exists());
+            set_vmcs_field_if_exists(set_bit(field, from), addr, name, verbose, exists());
+        }
+
+        inline void disable()
+        {
+            auto&& field = get_vmcs_field(addr, name, exists());
+            set_vmcs_field(clear_bit(field, from), addr, name, exists());
+        }
+
+        inline void disable_if_exists(bool verbose = false) noexcept
+        {
+            auto&& field = get_vmcs_field_if_exists(addr, name, verbose, exists());
+            set_vmcs_field_if_exists(clear_bit(field, from), addr, name, verbose, exists());
+        }
+    }
+
+    namespace pcd
+    {
+        constexpr const auto mask = 0x0000000000000010UL;
+        constexpr const auto from = 4;
+        constexpr const auto name = "pcd";
+
+        inline auto is_enabled()
+        { return is_bit_set(get_vmcs_field(addr, name, exists()), from); }
+
+        inline auto is_enabled_if_exists(bool verbose = false) noexcept
+        { return is_bit_set(get_vmcs_field_if_exists(addr, name, verbose, exists()), from); }
+
+        inline auto is_disabled()
+        { return is_bit_cleared(get_vmcs_field(addr, name, exists()), from); }
+
+        inline auto is_disabled_if_exists(bool verbose = false) noexcept
+        { return is_bit_cleared(get_vmcs_field_if_exists(addr, name, verbose, exists()), from); }
+
+        inline void enable()
+        {
+            auto&& field = get_vmcs_field(addr, name, exists());
+            set_vmcs_field(set_bit(field, from), addr, name, exists());
+        }
+
+        inline void enable_if_exists(bool verbose = false) noexcept
+        {
+            auto&& field = get_vmcs_field_if_exists(addr, name, verbose, exists());
+            set_vmcs_field_if_exists(set_bit(field, from), addr, name, verbose, exists());
+        }
+
+        inline void disable()
+        {
+            auto&& field = get_vmcs_field(addr, name, exists());
+            set_vmcs_field(clear_bit(field, from), addr, name, exists());
+        }
+
+        inline void disable_if_exists(bool verbose = false) noexcept
+        {
+            auto&& field = get_vmcs_field_if_exists(addr, name, verbose, exists());
+            set_vmcs_field_if_exists(clear_bit(field, from), addr, name, verbose, exists());
+        }
+    }
+
+    namespace page_directory_addr
+    {
+        constexpr const auto from = 12;
+        constexpr const auto name = "page_directory_addr";
+
+        inline auto mask() noexcept
+        {
+            auto phys_len = x64::cpuid::addr_size::phys::get();
+            auto upper = 0xFFFFFFFFFFFFFFFFULL << from;
+            return (~(0xFFFFFFFFFFFFFFFFULL << phys_len) & upper);
+        }
+
+        inline auto get()
+        { return get_bits(get_vmcs_field(addr, name, exists()), mask()) >> from; }
+
+        inline auto get_if_exists(bool verbose = false) noexcept
+        { return get_bits(get_vmcs_field_if_exists(addr, name, verbose, exists()), mask()) >> from; }
+
+        template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
+        void set(T val)
+        {
+            auto&& field = get_vmcs_field(addr, name, exists());
+            set_vmcs_field(set_bits(field, mask(), (val << from)), addr, name, exists());
+        }
+
+        template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
+        void set_if_exists(T val, bool verbose = false) noexcept
+        {
+            auto&& field = get_vmcs_field_if_exists(addr, name, verbose, exists());
+            set_vmcs_field_if_exists(set_bits(field, mask(), (val << from)), addr, name, verbose, exists());
+        }
+    }
+}
+
+namespace guest_ia32_bndcfgs
+{
+    constexpr const auto addr = 0x0000000000002812UL;
+    constexpr const auto name = "guest_ia32_bndcfgs";
+
+    inline auto exists() noexcept
+    {
+        return msrs::ia32_vmx_true_entry_ctls::load_ia32_bndcfgs::is_allowed1() ||
+               msrs::ia32_vmx_true_exit_ctls::clear_ia32_bndcfgs::is_allowed1();
+    }
+
+    inline auto get()
+    { return get_vmcs_field(addr, name, exists()); }
+
+    inline auto get_if_exists(bool verbose = false) noexcept
+    { return get_vmcs_field_if_exists(addr, name, verbose, exists()); }
+
+    template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
+    void set(T val) { set_vmcs_field(val, addr, name, exists()); }
+
+    template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
+    void set_if_exists(T val, bool verbose = false) noexcept
+    { set_vmcs_field_if_exists(val, addr, name, verbose, exists()); }
+
+    namespace en
+    {
+        constexpr const auto mask = 0x0000000000000001UL;
+        constexpr const auto from = 0;
+        constexpr const auto name = "en";
+
+        inline auto is_enabled()
+        { return is_bit_set(get_vmcs_field(addr, name, exists()), from); }
+
+        inline auto is_enabled_if_exists(bool verbose = false) noexcept
+        { return is_bit_set(get_vmcs_field_if_exists(addr, name, verbose, exists()), from); }
+
+        inline auto is_disabled()
+        { return is_bit_cleared(get_vmcs_field(addr, name, exists()), from); }
+
+        inline auto is_disabled_if_exists(bool verbose = false) noexcept
+        { return is_bit_cleared(get_vmcs_field_if_exists(addr, name, verbose, exists()), from); }
+
+        inline void enable()
+        {
+            auto&& field = get_vmcs_field(addr, name, exists());
+            set_vmcs_field(set_bit(field, from), addr, name, exists());
+        }
+
+        inline void enable_if_exists(bool verbose = false) noexcept
+        {
+            auto&& field = get_vmcs_field_if_exists(addr, name, verbose, exists());
+            set_vmcs_field_if_exists(set_bit(field, from), addr, name, verbose, exists());
+        }
+
+        inline void disable()
+        {
+            auto&& field = get_vmcs_field(addr, name, exists());
+            set_vmcs_field(clear_bit(field, from), addr, name, exists());
+        }
+
+        inline void disable_if_exists(bool verbose = false) noexcept
+        {
+            auto&& field = get_vmcs_field_if_exists(addr, name, verbose, exists());
+            set_vmcs_field_if_exists(clear_bit(field, from), addr, name, verbose, exists());
+        }
+    }
+
+    namespace bndpreserve
+    {
+        constexpr const auto mask = 0x0000000000000002UL;
+        constexpr const auto from = 1;
+        constexpr const auto name = "bndpreserve";
+
+        inline auto is_enabled()
+        { return is_bit_set(get_vmcs_field(addr, name, exists()), from); }
+
+        inline auto is_enabled_if_exists(bool verbose = false) noexcept
+        { return is_bit_set(get_vmcs_field_if_exists(addr, name, verbose, exists()), from); }
+
+        inline auto is_disabled()
+        { return is_bit_cleared(get_vmcs_field(addr, name, exists()), from); }
+
+        inline auto is_disabled_if_exists(bool verbose = false) noexcept
+        { return is_bit_cleared(get_vmcs_field_if_exists(addr, name, verbose, exists()), from); }
+
+        inline void enable()
+        {
+            auto&& field = get_vmcs_field(addr, name, exists());
+            set_vmcs_field(set_bit(field, from), addr, name, exists());
+        }
+
+        inline void enable_if_exists(bool verbose = false) noexcept
+        {
+            auto&& field = get_vmcs_field_if_exists(addr, name, verbose, exists());
+            set_vmcs_field_if_exists(set_bit(field, from), addr, name, verbose, exists());
+        }
+
+        inline void disable()
+        {
+            auto&& field = get_vmcs_field(addr, name, exists());
+            set_vmcs_field(clear_bit(field, from), addr, name, exists());
+        }
+
+        inline void disable_if_exists(bool verbose = false) noexcept
+        {
+            auto&& field = get_vmcs_field_if_exists(addr, name, verbose, exists());
+            set_vmcs_field_if_exists(clear_bit(field, from), addr, name, verbose, exists());
+        }
+    }
+
+    namespace reserved
+    {
+        constexpr const auto mask = 0x0000000000000FFCUL;
+        constexpr const auto from = 0;
+        constexpr const auto name = "reserved";
+
+        inline auto get()
+        { return get_bits(get_vmcs_field(addr, name, exists()), mask) >> from; }
+
+        inline auto get_if_exists(bool verbose = false) noexcept
+        { return get_bits(get_vmcs_field_if_exists(addr, name, verbose, exists()), mask) >> from; }
+
+        template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
+        void set(T val)
+        {
+            auto&& field = get_vmcs_field(addr, name, exists());
+            set_vmcs_field(set_bits(field, mask, (val << from)), addr, name, exists());
+        }
+
+        template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
+        void set_if_exists(T val, bool verbose = false) noexcept
+        {
+            auto&& field = get_vmcs_field_if_exists(addr, name, verbose, exists());
+            set_vmcs_field_if_exists(set_bits(field, mask, (val << from)), addr, name, verbose, exists());
+        }
+    }
+
+    namespace base_addr_of_bnd_directory
+    {
+        constexpr const auto mask = 0xFFFFFFFFFFFFF000UL;
+        constexpr const auto from = 12;
+        constexpr const auto name = "base_addr_of_bnd_directory";
+
+        inline auto get()
+        { return get_bits(get_vmcs_field(addr, name, exists()), mask) >> from; }
+
+        inline auto get_if_exists(bool verbose = false) noexcept
+        { return get_bits(get_vmcs_field_if_exists(addr, name, verbose, exists()), mask) >> from; }
+
+        template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
+        void set(T val)
+        {
+            auto&& field = get_vmcs_field(addr, name, exists());
+            set_vmcs_field(set_bits(field, mask, (val << from)), addr, name, exists());
+        }
+
+        template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
+        void set_if_exists(T val, bool verbose = false) noexcept
+        {
+            auto&& field = get_vmcs_field_if_exists(addr, name, verbose, exists());
+            set_vmcs_field_if_exists(set_bits(field, mask, (val << from)), addr, name, verbose, exists());
+        }
+    }
 }
 
 }

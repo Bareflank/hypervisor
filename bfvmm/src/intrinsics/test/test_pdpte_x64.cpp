@@ -4,6 +4,7 @@
 // Copyright (C) 2015 Assured Information Security, Inc.
 // Author: Rian Quinn        <quinnr@ainfosec.com>
 // Author: Brendan Kerrigan  <kerriganb@ainfosec.com>
+// Author: Connor Davis      <davisc@ainfosec.com>
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -19,28 +20,22 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <vmcs/vmcs_intel_x64.h>
+#include <test.h>
 #include <intrinsics/cpuid_x64.h>
-
-#include <vmcs/vmcs_intel_x64_natural_width_guest_state_fields.h>
+#include <intrinsics/pdpte_x64.h>
 
 using namespace x64;
-using namespace intel_x64;
 
-bool
-vmcs_intel_x64::check_pat(uint64_t pat)
+void
+intrinsics_ut::test_pdpte_x64_reserved_mask()
 {
-    switch (pat)
-    {
-        case 0:
-        case 1:
-        case 4:
-        case 5:
-        case 6:
-        case 7:
-            return true;
+    g_eax_cpuid[cpuid::addr_size::addr] = 48U;
+    this->expect_true(pdpte::reserved::mask() == 0xFFFF0000000001E6ULL);
+}
 
-        default:
-            return false;
-    }
+void
+intrinsics_ut::test_pdpte_x64_page_directory_addr_mask()
+{
+    g_eax_cpuid[cpuid::addr_size::addr] = 48;
+    this->expect_true(pdpte::page_directory_addr::mask() == 0x0000FFFFFFFFF000ULL);
 }
