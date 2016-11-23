@@ -139,7 +139,6 @@ namespace host_ia32_pat
                 set_vmcs_field_if_exists(set_bits(field, mask, (val << from)), addr, name, verbose, exists());
             }
         }
-
     }
 
     namespace pa1
