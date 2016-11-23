@@ -31,7 +31,6 @@
 #include <intrinsics/vmx_intel_x64.h>
 #include <intrinsics/msrs_intel_x64.h>
 
-
 /// Intel x86_64 VMCS Natural-Width Guest-State Fields
 ///
 /// The following provides the interface to the natural-width vmcs
