@@ -24,10 +24,11 @@
 
 #include <vmcs/vmcs_intel_x64.h>
 
-/// Intel x86_64 VMCS 32-Bit Host-State Field
+/// Intel x86_64 VMCS 32-bit Host-State Data Fields
 ///
-/// The following provides the interface to the 32-bit vmcs host state field
-/// define in Appendix B.3.4, Vol. 3 of the Intel Software Developer's manual.
+/// The following provides the interface for the 32-bit host-state VMCS
+/// fields as defined in Appendix B.3.4, Vol. 3 of the Intel Software Developer's
+/// Manual.
 ///
 
 // *INDENT-OFF*

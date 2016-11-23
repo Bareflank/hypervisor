@@ -23,13 +23,9 @@
 #ifndef VMCS_INTEL_X64_H
 #define VMCS_INTEL_X64_H
 
-#include <type_traits>
 #include <vmcs/vmcs_intel_x64_state.h>
+#include <vmcs/vmcs_intel_x64_helpers.h>
 #include <exit_handler/state_save_intel_x64.h>
-
-#include <intrinsics/vmx_intel_x64.h>
-#include <intrinsics/msrs_intel_x64.h>
-
 
 /// Intel x86_64 VMCS
 ///
@@ -43,9 +39,12 @@
 /// an error should occur, it contains the logic needed to help identify the
 /// issue, including a complete implementation of chapter 26 in the Intel
 /// manual, that describes all of the checks the CPU will perform prior to
-/// a VM launch.
+/// a VM launch. We also provide a considerable amount of pre-defined
+/// constants for working with the VMCS fields. Please see the VMCS headers
+/// for more details. Pro tip: auto-complete works great with the VMCS
+/// namespace logic.
 ///
-/// To use this class, subclass vmcs_intel_x64, and overload the protected
+/// To use this class, subclass vmcs_intel_x64, and overload the virtual
 /// functions for setting up the guest / host state to provide the desired
 /// functionality. Don't forget to call the base class function when complete
 /// unless you intend to provide the same functionality. For an example of
@@ -53,20 +52,21 @@
 ///
 /// <a href="https://github.com/Bareflank/hypervisor_example_vpid">Bareflank Hypervisor VPID Example</a>
 ///
-/// @note This VMCS does not support SMM / Dual Monitor Mode, and the missing
-/// logic will have to be provided by the user if such support is needed.
-///
-/// This class is managed by vcpu_intel_x64
-///
 class vmcs_intel_x64
 {
 public:
 
     /// Default Constructor
     ///
+    /// @expects none
+    /// @ensures none
+    ///
     vmcs_intel_x64();
 
     /// Destructor
+    ///
+    /// @expects none
+    /// @ensures none
     ///
     virtual ~vmcs_intel_x64() = default;
 
@@ -77,11 +77,12 @@ public:
     /// the VMCS and its state, starting the VM over again. For this reason
     /// it should only be called once, unless you intend to clear the VM.
     ///
-    /// @throws invalid_vmcs thrown if the VMCS was created without
-    ///     intrinsics
+    /// @expects host_state != nullptr
+    /// @expects guest_state != nullptr
+    /// @ensures none
     ///
-    virtual void launch(const std::shared_ptr<vmcs_intel_x64_state> &host_state,
-                        const std::shared_ptr<vmcs_intel_x64_state> &guest_state);
+    virtual void launch(gsl::not_null<vmcs_intel_x64_state *> host_state,
+                        gsl::not_null<vmcs_intel_x64_state *> guest_state);
 
     /// Resume
     ///
@@ -100,8 +101,8 @@ public:
     ///       VMX for the currently loaded VMCS which is slow, and it's likely
     ///       this function will get executed a lot.
     ///
-    /// @note this function is implemented mainly in assembly as we need to
-    ///       restore the register state very carefully.
+    /// @expects none
+    /// @ensures none
     ///
     virtual void resume();
 
@@ -119,6 +120,9 @@ public:
     ///       when "-O3" was enabled. The order of each instruction is very
     ///       important
     ///
+    /// @expects none
+    /// @ensures none
+    ///
     virtual void promote();
 
     /// Load
@@ -134,6 +138,9 @@ public:
     /// must be executed. Once gain, the CPU needs to know which VMCS to use,
     /// and thus a load is needed.
     ///
+    /// @expects none
+    /// @ensures none
+    ///
     virtual void load();
 
     /// Clear
@@ -144,36 +151,42 @@ public:
     /// valid bit in the VMCS, rendering future reads / writes to this VMCS
     /// invalid.
     ///
+    /// @expects none
+    /// @ensures none
+    ///
     virtual void clear();
 
 protected:
 
-    virtual void create_vmcs_region();
-    virtual void release_vmcs_region() noexcept;
+    virtual void write_fields(gsl::not_null<vmcs_intel_x64_state *> host_state,
+                              gsl::not_null<vmcs_intel_x64_state *> guest_state);
 
-    virtual void create_exit_handler_stack();
-    virtual void release_exit_handler_stack() noexcept;
+    void create_vmcs_region();
+    void release_vmcs_region() noexcept;
 
-    virtual void write_16bit_control_state(const std::shared_ptr<vmcs_intel_x64_state> &state);
-    virtual void write_64bit_control_state(const std::shared_ptr<vmcs_intel_x64_state> &state);
-    virtual void write_32bit_control_state(const std::shared_ptr<vmcs_intel_x64_state> &state);
-    virtual void write_natural_control_state(const std::shared_ptr<vmcs_intel_x64_state> &state);
+    void create_exit_handler_stack();
+    void release_exit_handler_stack() noexcept;
 
-    virtual void write_16bit_guest_state(const std::shared_ptr<vmcs_intel_x64_state> &state);
-    virtual void write_64bit_guest_state(const std::shared_ptr<vmcs_intel_x64_state> &state);
-    virtual void write_32bit_guest_state(const std::shared_ptr<vmcs_intel_x64_state> &state);
-    virtual void write_natural_guest_state(const std::shared_ptr<vmcs_intel_x64_state> &state);
+    void write_16bit_control_state(gsl::not_null<vmcs_intel_x64_state *> state);
+    void write_64bit_control_state(gsl::not_null<vmcs_intel_x64_state *> state);
+    void write_32bit_control_state(gsl::not_null<vmcs_intel_x64_state *> state);
+    void write_natural_control_state(gsl::not_null<vmcs_intel_x64_state *> state);
 
-    virtual void write_16bit_host_state(const std::shared_ptr<vmcs_intel_x64_state> &state);
-    virtual void write_64bit_host_state(const std::shared_ptr<vmcs_intel_x64_state> &state);
-    virtual void write_32bit_host_state(const std::shared_ptr<vmcs_intel_x64_state> &state);
-    virtual void write_natural_host_state(const std::shared_ptr<vmcs_intel_x64_state> &state);
+    void write_16bit_guest_state(gsl::not_null<vmcs_intel_x64_state *> state);
+    void write_64bit_guest_state(gsl::not_null<vmcs_intel_x64_state *> state);
+    void write_32bit_guest_state(gsl::not_null<vmcs_intel_x64_state *> state);
+    void write_natural_guest_state(gsl::not_null<vmcs_intel_x64_state *> state);
 
-    virtual void pin_based_vm_execution_controls();
-    virtual void primary_processor_based_vm_execution_controls();
-    virtual void secondary_processor_based_vm_execution_controls();
-    virtual void vm_exit_controls();
-    virtual void vm_entry_controls();
+    void write_16bit_host_state(gsl::not_null<vmcs_intel_x64_state *> state);
+    void write_64bit_host_state(gsl::not_null<vmcs_intel_x64_state *> state);
+    void write_32bit_host_state(gsl::not_null<vmcs_intel_x64_state *> state);
+    void write_natural_host_state(gsl::not_null<vmcs_intel_x64_state *> state);
+
+    void pin_based_vm_execution_controls();
+    void primary_processor_based_vm_execution_controls();
+    void secondary_processor_based_vm_execution_controls();
+    void vm_exit_controls();
+    void vm_entry_controls();
 
 protected:
 
@@ -187,152 +200,13 @@ protected:
     std::unique_ptr<uint32_t[]> m_vmcs_region;
 
     std::unique_ptr<char[]> m_exit_handler_stack;
-    std::shared_ptr<state_save_intel_x64> m_state_save;
 
 private:
 
-    virtual void set_state_save(const std::shared_ptr<state_save_intel_x64> &state_save)
+    state_save_intel_x64 *m_state_save;
+
+    virtual void set_state_save(gsl::not_null<state_save_intel_x64 *> state_save)
     { m_state_save = state_save; }
 };
-
-template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
-auto get_vmcs_field(T addr, const char *name, bool exists)
-{
-    if (!exists)
-        throw std::logic_error("get_vmcs_field failed: "_s + name + " field doesn't exist");
-
-    return intel_x64::vm::read(addr, name);
-}
-
-template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
-auto get_vmcs_field_if_exists(T addr, const char *name, bool verbose, bool exists)
-{
-    if (exists)
-        return intel_x64::vm::read(addr, name);
-
-    if (!exists && verbose)
-        bfwarning << "get_vmcs_field_if_exists failed: " << name << " field doesn't exist" << bfendl;
-
-    return 0UL;
-}
-
-template <class V, class A,
-          class = typename std::enable_if<std::is_integral<V>::value>::type,
-          class = typename std::enable_if<std::is_integral<A>::value>::type>
-auto set_vmcs_field(V val, A addr, const char *name, bool exists)
-{
-    if (!exists)
-        throw std::logic_error("set_vmcs_field failed: "_s + name + " field doesn't exist");
-
-    intel_x64::vm::write(addr, val, name);
-}
-
-template <class V, class A,
-          class = typename std::enable_if<std::is_integral<V>::value>::type,
-          class = typename std::enable_if<std::is_integral<A>::value>::type>
-auto set_vmcs_field_if_exists(V val, A addr, const char *name, bool verbose, bool exists) noexcept
-{
-    if (exists)
-        intel_x64::vm::write(addr, val, name);
-
-    if (!exists && verbose)
-        bfwarning << "set_vmcs_field failed: " << name << " field doesn't exist" << bfendl;
-}
-
-template <class MA, class CA, class M,
-          class = typename std::enable_if<std::is_integral<MA>::value>::type,
-          class = typename std::enable_if<std::is_integral<CA>::value>::type,
-          class = typename std::enable_if<std::is_integral<M>::value>::type>
-auto set_vm_control(bool val, MA msr_addr, CA ctls_addr,
-                    const char *name, M mask, bool field_exists)
-{
-    if (!field_exists)
-        throw std::logic_error("set_vm_control failed: "_s + name + " control doesn't exist");
-
-    if (!val)
-    {
-        auto is_allowed0 = (intel_x64::msrs::get(msr_addr) & mask) == 0;
-
-        if (!is_allowed0)
-        {
-            throw std::logic_error("set_vm_control failed: "_s + name
-                                   + " control is not allowed to be cleared to 0");
-        }
-
-        intel_x64::vm::write(ctls_addr, (intel_x64::vm::read(ctls_addr, name) & ~mask), name);
-    }
-    else
-    {
-        auto is_allowed1 = (intel_x64::msrs::get(msr_addr) & (mask << 32)) != 0;
-
-        if (!is_allowed1)
-        {
-            throw std::logic_error("set_vm_control failed: "_s + name
-                                   + " control is not allowed to be set to 1");
-        }
-
-        intel_x64::vm::write(ctls_addr, (intel_x64::vm::read(ctls_addr, name) | mask), name);
-    }
-}
-
-template <class MA, class CA, class M,
-          class = typename std::enable_if<std::is_integral<MA>::value>::type,
-          class = typename std::enable_if<std::is_integral<CA>::value>::type,
-          class = typename std::enable_if<std::is_integral<M>::value>::type>
-auto set_vm_control_if_allowed(bool val, MA msr_addr, CA ctls_addr, const char *name,
-                               M mask, bool verbose, bool field_exists) noexcept
-{
-    if (!field_exists)
-    {
-        bfwarning << "set_vm_control_if_allowed failed: " << name << " control doesn't exist" << bfendl;
-        return;
-    }
-
-    if (!val)
-    {
-        auto is_allowed0 = (intel_x64::msrs::get(msr_addr) & mask) == 0;
-
-        if (is_allowed0)
-        {
-            intel_x64::vm::write(ctls_addr, (intel_x64::vm::read(ctls_addr, name) & ~mask), name);
-        }
-        else
-        {
-            if (verbose)
-            {
-                bfwarning << "set_vm_control_if_allowed failed: " << name
-                          << "control is not allowed to be cleared to 0" << bfendl;
-            }
-        }
-    }
-    else
-    {
-        auto is_allowed1 = (intel_x64::msrs::get(msr_addr) & (mask << 32)) != 0;
-
-        if (is_allowed1)
-        {
-            intel_x64::vm::write(ctls_addr, (intel_x64::vm::read(ctls_addr, name) | mask), name);
-        }
-        else
-        {
-            if (verbose)
-            {
-                bfwarning << "set_vm_control_if_allowed failed: " << name
-                          << "control is not allowed to be set to 1" << bfendl;
-            }
-        }
-    }
-}
-
-namespace intel_x64
-{
-namespace vmcs
-{
-
-using field_type = uint64_t;
-using value_type = uint64_t;
-
-}
-}
 
 #endif

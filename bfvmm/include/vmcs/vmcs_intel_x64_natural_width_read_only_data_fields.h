@@ -27,8 +27,8 @@
 
 /// Intel x86_64 VMCS Natural-Width Read-Only Data Fields
 ///
-/// The following provides the interface for the natural-width read-only VMCS
-/// data fields as defined in Appendix B.4.2, Vol. 3 of the Intel Software Developer's
+/// The following provides the interface for the natural-width read-only data VMCS
+/// fields as defined in Appendix B.4.2, Vol. 3 of the Intel Software Developer's
 /// Manual.
 ///
 

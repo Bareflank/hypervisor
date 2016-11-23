@@ -30,6 +30,13 @@
 #include <intrinsics/msrs_intel_x64.h>
 #include <intrinsics/cpuid_x64.h>
 
+/// Intel x86_64 VMCS 64-bit Guest-State Fields
+///
+/// The following provides the interface for the 64-bit guest-state VMCS
+/// fields as defined in Appendix B.2.3, Vol. 3 of the Intel Software Developer's
+/// Manual.
+///
+
 // *INDENT-OFF*
 
 namespace intel_x64

@@ -23,7 +23,8 @@
 #include <gsl/gsl>
 
 #include <test.h>
-#include <intrinsics/tss_x64.h>
+
+#include <vmcs/vmcs_intel_x64_helpers.h>
 #include <vmcs/vmcs_intel_x64_resume.h>
 #include <vmcs/vmcs_intel_x64_promote.h>
 #include <vmcs/vmcs_intel_x64_16bit_control_fields.h>
@@ -32,16 +33,15 @@
 #include <vmcs/vmcs_intel_x64_32bit_guest_state_fields.h>
 #include <vmcs/vmcs_intel_x64_32bit_host_state_field.h>
 #include <vmcs/vmcs_intel_x64_natural_width_guest_state_fields.h>
-
 #include <vmcs/vmcs_intel_x64_natural_width_control_fields.h>
 #include <vmcs/vmcs_intel_x64_natural_width_read_only_data_fields.h>
 #include <vmcs/vmcs_intel_x64_natural_width_host_state_fields.h>
 #include <vmcs/vmcs_intel_x64_64bit_read_only_data_field.h>
-
 #include <vmcs/vmcs_intel_x64_64bit_guest_state_fields.h>
 #include <vmcs/vmcs_intel_x64_64bit_control_fields.h>
 #include <vmcs/vmcs_intel_x64_64bit_host_state_fields.h>
 
+#include <intrinsics/tss_x64.h>
 #include <intrinsics/rflags_x64.h>
 #include <intrinsics/crs_intel_x64.h>
 #include <intrinsics/vmx_intel_x64.h>
@@ -50,6 +50,7 @@
 using namespace x64;
 using namespace intel_x64;
 using namespace msrs;
+using namespace vmcs;
 
 extern bool g_vmread_fails;
 extern bool g_vmwrite_fails;
@@ -319,12 +320,12 @@ vmcs_ut::test_launch_success()
 {
     MockRepository mocks;
     auto mm = mocks.Mock<memory_manager_x64>();
-    auto host_state = bfn::mock_shared<vmcs_intel_x64_state>(mocks);
-    auto guest_state = bfn::mock_shared<vmcs_intel_x64_state>(mocks);
+    auto host_state = mocks.Mock<vmcs_intel_x64_state>();
+    auto guest_state = mocks.Mock<vmcs_intel_x64_state>();
 
     setup_vmcs_intrinsics(mocks, mm);
-    setup_vmcs_x64_state_intrinsics(mocks, host_state.get());
-    setup_vmcs_x64_state_intrinsics(mocks, guest_state.get());
+    setup_vmcs_x64_state_intrinsics(mocks, host_state);
+    setup_vmcs_x64_state_intrinsics(mocks, guest_state);
     setup_launch_success_msrs();
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -340,12 +341,12 @@ vmcs_ut::test_launch_vmlaunch_failure()
 {
     MockRepository mocks;
     auto mm = mocks.Mock<memory_manager_x64>();
-    auto host_state = bfn::mock_shared<vmcs_intel_x64_state>(mocks);
-    auto guest_state = bfn::mock_shared<vmcs_intel_x64_state>(mocks);
+    auto host_state = mocks.Mock<vmcs_intel_x64_state>();
+    auto guest_state = mocks.Mock<vmcs_intel_x64_state>();
 
     setup_vmcs_intrinsics(mocks, mm);
-    setup_vmcs_x64_state_intrinsics(mocks, host_state.get());
-    setup_vmcs_x64_state_intrinsics(mocks, guest_state.get());
+    setup_vmcs_x64_state_intrinsics(mocks, host_state);
+    setup_vmcs_x64_state_intrinsics(mocks, guest_state);
 
     mocks.OnCallFunc(__vmwrite).Return(true);
     Call &launch_call = mocks.ExpectCallFunc(__vmlaunch).Return(false);
@@ -370,12 +371,12 @@ vmcs_ut::test_launch_create_vmcs_region_failure()
 {
     MockRepository mocks;
     auto mm = mocks.Mock<memory_manager_x64>();
-    auto host_state = bfn::mock_shared<vmcs_intel_x64_state>(mocks);
-    auto guest_state = bfn::mock_shared<vmcs_intel_x64_state>(mocks);
+    auto host_state = mocks.Mock<vmcs_intel_x64_state>();
+    auto guest_state = mocks.Mock<vmcs_intel_x64_state>();
 
     setup_vmcs_intrinsics(mocks, mm);
-    setup_vmcs_x64_state_intrinsics(mocks, host_state.get());
-    setup_vmcs_x64_state_intrinsics(mocks, guest_state.get());
+    setup_vmcs_x64_state_intrinsics(mocks, host_state);
+    setup_vmcs_x64_state_intrinsics(mocks, guest_state);
 
     auto ___ = gsl::finally([&]
     { g_virt_to_phys_return_nullptr = false; });
@@ -394,8 +395,8 @@ vmcs_ut::test_launch_create_exit_handler_stack_failure()
 {
     MockRepository mocks;
     auto mm = mocks.Mock<memory_manager_x64>();
-    auto host_state = bfn::mock_shared<vmcs_intel_x64_state>(mocks);
-    auto guest_state = bfn::mock_shared<vmcs_intel_x64_state>(mocks);
+    auto host_state = mocks.Mock<vmcs_intel_x64_state>();
+    auto guest_state = mocks.Mock<vmcs_intel_x64_state>();
 
     setup_vmcs_intrinsics(mocks, mm);
 
@@ -417,8 +418,8 @@ vmcs_ut::test_launch_clear_failure()
 {
     MockRepository mocks;
     auto mm = mocks.Mock<memory_manager_x64>();
-    auto host_state = bfn::mock_shared<vmcs_intel_x64_state>(mocks);
-    auto guest_state = bfn::mock_shared<vmcs_intel_x64_state>(mocks);
+    auto host_state = mocks.Mock<vmcs_intel_x64_state>();
+    auto guest_state = mocks.Mock<vmcs_intel_x64_state>();
 
     setup_vmcs_intrinsics(mocks, mm);
 
@@ -439,8 +440,8 @@ vmcs_ut::test_launch_load_failure()
 {
     MockRepository mocks;
     auto mm = mocks.Mock<memory_manager_x64>();
-    auto host_state = bfn::mock_shared<vmcs_intel_x64_state>(mocks);
-    auto guest_state = bfn::mock_shared<vmcs_intel_x64_state>(mocks);
+    auto host_state = mocks.Mock<vmcs_intel_x64_state>();
+    auto guest_state = mocks.Mock<vmcs_intel_x64_state>();
 
     setup_vmcs_intrinsics(mocks, mm);
 

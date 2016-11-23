@@ -274,6 +274,7 @@ auto control_reserved_properly_set(MA msr_addr, C ctls, const char *ctls_name)
     auto allowed0 = (msrs::get(msr_addr) & 0x00000000FFFFFFFFUL);
     auto allowed1 = ((msrs::get(msr_addr) >> 32) & 0x00000000FFFFFFFFUL);
     auto allowed1_failed = false;
+
     ctls &= 0x00000000FFFFFFFFUL;
 
     if ((allowed0 & ctls) != allowed0)

@@ -27,6 +27,13 @@
 #include <vmcs/vmcs_intel_x64.h>
 #include <intrinsics/msrs_intel_x64.h>
 
+/// Intel x86_64 VMCS 64-bit Read-Only Data Fields
+///
+/// The following provides the interface for the 64-bit read-only data VMCS
+/// fields as defined in Appendix B.2.2, Vol. 3 of the Intel Software Developer's
+/// Manual.
+///
+
 // *INDENT-OFF*
 
 namespace intel_x64

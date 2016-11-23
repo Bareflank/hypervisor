@@ -31,6 +31,8 @@ namespace x64
 {
 namespace dr7
 {
+    using value_type = uint64_t;
+
     inline auto get() noexcept
     { return __read_dr7(); }
 

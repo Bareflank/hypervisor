@@ -33,9 +33,9 @@
 
 /// Intel x86_64 VMCS Natural-Width Guest-State Fields
 ///
-/// The following provides the interface to the natural-width vmcs
-/// guest state fields as defined in Appendix B.4.3 of the Intel
-/// Software Developer's Manual.
+/// The following provides the interface for the natural-width guest-state VMCS
+/// fields as defined in Appendix B.4.2, Vol. 3 of the Intel Software Developer's
+/// Manual.
 ///
 
 // *INDENT-OFF*
