@@ -34,7 +34,7 @@ install:
 build_script:
     - 'echo Building...'
     - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER; ./tools/scripts/setup_cygwin.sh -d --no_ewdk --no-configure"'
-    - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER; ./configure --compiler gcc_620"'
+    - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER; ./configure --compiler clang_38"'
     - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER; make -j2"'
     - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER; ./configure --compiler clang_39"'
     - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER; make -j2"'
