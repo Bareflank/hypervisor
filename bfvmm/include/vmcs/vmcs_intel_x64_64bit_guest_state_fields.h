@@ -31,6 +31,7 @@
 #include <intrinsics/cpuid_x64.h>
 
 // *INDENT-OFF*
+
 namespace intel_x64
 {
 namespace vmcs
@@ -2617,4 +2618,5 @@ namespace guest_ia32_bndcfgs
 }
 
 // *INDENT-ON*
+
 #endif
