@@ -87,85 +87,36 @@ public:
 
 protected:
 
-    virtual void handle_exception_or_non_maskable_interrupt();
-    virtual void handle_external_interrupt();
-    virtual void handle_triple_fault();
-    virtual void handle_init_signal();
-    virtual void handle_sipi();
-    virtual void handle_smi();
-    virtual void handle_other_smi();
-    virtual void handle_interrupt_window();
-    virtual void handle_nmi_window();
-    virtual void handle_task_switch();
-    virtual void handle_cpuid();
-    virtual void handle_getsec();
-    virtual void handle_hlt();
-    virtual void handle_invd();
-    virtual void handle_invlpg();
-    virtual void handle_rdpmc();
-    virtual void handle_rdtsc();
-    virtual void handle_rsm();
-    virtual void handle_vmcall();
-    virtual void handle_vmclear();
-    virtual void handle_vmlaunch();
-    virtual void handle_vmptrld();
-    virtual void handle_vmptrst();
-    virtual void handle_vmread();
-    virtual void handle_vmresume();
-    virtual void handle_vmwrite();
-    virtual void handle_vmxoff();
-    virtual void handle_vmxon();
-    virtual void handle_control_register_accesses();
-    virtual void handle_mov_dr();
-    virtual void handle_io_instruction();
-    virtual void handle_rdmsr();
-    virtual void handle_wrmsr();
-    virtual void handle_vm_entry_failure_invalid_guest_state();
-    virtual void handle_vm_entry_failure_msr_loading();
-    virtual void handle_mwait();
-    virtual void handle_monitor_trap_flag();
-    virtual void handle_monitor();
-    virtual void handle_pause();
-    virtual void handle_vm_entry_failure_machine_check_event();
-    virtual void handle_tpr_below_threshold();
-    virtual void handle_apic_access();
-    virtual void handle_virtualized_eoi();
-    virtual void handle_access_to_gdtr_or_idtr();
-    virtual void handle_access_to_ldtr_or_tr();
-    virtual void handle_ept_violation();
-    virtual void handle_ept_misconfiguration();
-    virtual void handle_invept();
-    virtual void handle_rdtscp();
-    virtual void handle_vmx_preemption_timer_expired();
-    virtual void handle_invvpid();
-    virtual void handle_wbinvd();
-    virtual void handle_xsetbv();
-    virtual void handle_apic_write();
-    virtual void handle_rdrand();
-    virtual void handle_invpcid();
-    virtual void handle_vmfunc();
-    virtual void handle_rdseed();
-    virtual void handle_xsaves();
-    virtual void handle_xrstors();
+    virtual void handle_exit(intel_x64::vmcs::value_type reason);
 
-    virtual void advance_rip() noexcept;
-    virtual void unimplemented_handler() noexcept;
+    void handle_cpuid();
+    void handle_invd();
+    void handle_vmcall();
+    void handle_vmxoff();
+    void handle_rdmsr();
+    void handle_wrmsr();
 
-    virtual void handle_vmcall_versions(vmcall_registers_t &regs);
-    virtual void handle_vmcall_registers(vmcall_registers_t &regs);
-    virtual void handle_vmcall_data(vmcall_registers_t &regs);
-    virtual void handle_vmcall_event(vmcall_registers_t &regs);
-    virtual void handle_vmcall_unittest(vmcall_registers_t &regs);
+    void advance_rip() noexcept;
+    void unimplemented_handler() noexcept;
 
-    virtual void handle_vmcall_data_string_unformatted(vmcall_registers_t &regs, const std::string &str,
-            const bfn::unique_map_ptr_x64<char> &omap);
+    void handle_vmcall_versions(vmcall_registers_t &regs);
+    void handle_vmcall_registers(vmcall_registers_t &regs);
+    void handle_vmcall_data(vmcall_registers_t &regs);
+    void handle_vmcall_event(vmcall_registers_t &regs);
+    void handle_vmcall_unittest(vmcall_registers_t &regs);
 
-    virtual void handle_vmcall_data_string_json(vmcall_registers_t &regs, const json &str,
-            const bfn::unique_map_ptr_x64<char> &omap);
+    void handle_vmcall_data_string_unformatted(
+        vmcall_registers_t &regs, const std::string &str,
+        const bfn::unique_map_ptr_x64<char> &omap);
 
-    virtual void handle_vmcall_data_binary_unformatted(vmcall_registers_t &regs,
-            const bfn::unique_map_ptr_x64<char> &imap,
-            const bfn::unique_map_ptr_x64<char> &omap);
+    void handle_vmcall_data_string_json(
+        vmcall_registers_t &regs, const json &str,
+        const bfn::unique_map_ptr_x64<char> &omap);
+
+    void handle_vmcall_data_binary_unformatted(
+        vmcall_registers_t &regs,
+        const bfn::unique_map_ptr_x64<char> &imap,
+        const bfn::unique_map_ptr_x64<char> &omap);
 
 protected:
 

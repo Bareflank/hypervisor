@@ -28,14 +28,14 @@ void
 exit_handler_intel_x64_ut::test_entry_valid()
 {
     MockRepository mocks;
-    auto &&eh = bfn::mock_shared<exit_handler_intel_x64>(mocks);
+    auto &&eh = mocks.Mock<exit_handler_intel_x64>();
 
-    mocks.OnCall(eh.get(), exit_handler_intel_x64::halt);
-    mocks.OnCall(eh.get(), exit_handler_intel_x64::dispatch);
+    mocks.OnCall(eh, exit_handler_intel_x64::halt);
+    mocks.OnCall(eh, exit_handler_intel_x64::dispatch);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        this->expect_no_exception([&]{ exit_handler(eh.get()); });
+        this->expect_no_exception([&]{ exit_handler(eh); });
     });
 }
 
@@ -43,14 +43,14 @@ void
 exit_handler_intel_x64_ut::test_entry_throws_general_exception()
 {
     MockRepository mocks;
-    auto &&eh = bfn::mock_shared<exit_handler_intel_x64>(mocks);
+    auto &&eh = mocks.Mock<exit_handler_intel_x64>();
 
-    mocks.ExpectCall(eh.get(), exit_handler_intel_x64::halt);
-    mocks.OnCall(eh.get(), exit_handler_intel_x64::dispatch).Throw(bfn::general_exception());
+    mocks.ExpectCall(eh, exit_handler_intel_x64::halt);
+    mocks.OnCall(eh, exit_handler_intel_x64::dispatch).Throw(bfn::general_exception());
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        this->expect_no_exception([&]{ exit_handler(eh.get()); });
+        this->expect_no_exception([&]{ exit_handler(eh); });
     });
 }
 
@@ -58,14 +58,14 @@ void
 exit_handler_intel_x64_ut::test_entry_throws_standard_exception()
 {
     MockRepository mocks;
-    auto &&eh = bfn::mock_shared<exit_handler_intel_x64>(mocks);
+    auto &&eh = mocks.Mock<exit_handler_intel_x64>();
 
-    mocks.ExpectCall(eh.get(), exit_handler_intel_x64::halt);
-    mocks.OnCall(eh.get(), exit_handler_intel_x64::dispatch).Throw(std::exception());
+    mocks.ExpectCall(eh, exit_handler_intel_x64::halt);
+    mocks.OnCall(eh, exit_handler_intel_x64::dispatch).Throw(std::exception());
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        this->expect_no_exception([&]{ exit_handler(eh.get()); });
+        this->expect_no_exception([&]{ exit_handler(eh); });
     });
 }
 
@@ -73,13 +73,13 @@ void
 exit_handler_intel_x64_ut::test_entry_throws_any_exception()
 {
     MockRepository mocks;
-    auto &&eh = bfn::mock_shared<exit_handler_intel_x64>(mocks);
+    auto &&eh = mocks.Mock<exit_handler_intel_x64>();
 
-    mocks.ExpectCall(eh.get(), exit_handler_intel_x64::halt);
-    mocks.OnCall(eh.get(), exit_handler_intel_x64::dispatch).Throw(10);
+    mocks.ExpectCall(eh, exit_handler_intel_x64::halt);
+    mocks.OnCall(eh, exit_handler_intel_x64::dispatch).Throw(10);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        this->expect_no_exception([&]{ exit_handler(eh.get()); });
+        this->expect_no_exception([&]{ exit_handler(eh); });
     });
 }
