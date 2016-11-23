@@ -44,7 +44,7 @@ lot of time to complete, so please be patient.
 cd ~/
 mkdir build
 cd ~/hypervisor
-./tools/scripts/setup_cygwin.sh -l -o ../build/
+./tools/scripts/setup_cygwin.sh --local-compilers --out-of-tree ../build/
 ```
 
 Once you have a cross compiler setup, you need to build the main source code.
@@ -125,7 +125,7 @@ cd ~/
 git clone https://github.com/Bareflank/hypervisor.git
 cd ~/hypervisor
 
-./tools/scripts/setup_ubuntu.sh --no-configure
+./tools/scripts/setup_cygwin.sh --local-compilers --no-configure
 
 cd ~/
 mkdir build

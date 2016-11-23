@@ -30,10 +30,6 @@ CYGWIN_NT-6.3)
     HYPER_ABS_PATH=`cygpath -w $HYPER_ABS`
     BUILD_ABS_PATH=`cygpath -w $BUILD_ABS`
     cmd.exe /c $SCRIPT_PATH $HYPER_ABS_PATH $BUILD_ABS_PATH WindowsV6.3
-    /cygdrive/c/ewdk/Program\ Files/Windows\ Kits/10/bin/x64/certmgr /add `cygpath -w $BUILD_ABS/outdir/bareflank.cer` /s /r localMachine root
-    /cygdrive/c/ewdk/Program\ Files/Windows\ Kits/10/bin/x64/certmgr /add `cygpath -w $BUILD_ABS/outdir/bareflank.cer` /s /r localMachine trustedpublisher
-    /cygdrive/c/ewdk/Program\ Files/Windows\ Kits/10/Tools/x64/devcon remove "ROOT\bareflank"
-    /cygdrive/c/ewdk/Program\ Files/Windows\ Kits/10/Tools/x64/devcon install `cygpath -w $BUILD_ABS/outdir/bareflank/bareflank.inf` "ROOT\bareflank"
     ;;
 
 CYGWIN_NT-10.0)
@@ -43,18 +39,12 @@ CYGWIN_NT-10.0)
     HYPER_ABS_PATH=`cygpath -w $HYPER_ABS`
     BUILD_ABS_PATH=`cygpath -w $BUILD_ABS`
     cmd.exe /c $SCRIPT_PATH $HYPER_ABS_PATH $BUILD_ABS_PATH Windows10
-    /cygdrive/c/ewdk/Program\ Files/Windows\ Kits/10/bin/x64/certmgr /add `cygpath -w $BUILD_ABS/outdir/bareflank.cer` /s /r localMachine root
-    /cygdrive/c/ewdk/Program\ Files/Windows\ Kits/10/bin/x64/certmgr /add `cygpath -w $BUILD_ABS/outdir/bareflank.cer` /s /r localMachine trustedpublisher
-    /cygdrive/c/ewdk/Program\ Files/Windows\ Kits/10/Tools/x64/devcon remove "ROOT\bareflank"
-    /cygdrive/c/ewdk/Program\ Files/Windows\ Kits/10/Tools/x64/devcon install `cygpath -w $BUILD_ABS/outdir/bareflank/bareflank.inf` "ROOT\bareflank"
     ;;
 
 Linux)
     cd $HYPER_ABS/bfdrivers/src/arch/linux
-    sudo make unload
     make clean
     make
-    sudo make load
     ;;
 *)
     echo "OS not supported"
