@@ -287,7 +287,7 @@ public:
     /// @ensures none
     ///
     /// @param index the index of the GDT descriptor
-    /// @param addr the base address. For code/data descriptor this needs to
+    /// @param base the base address. For code/data descriptor this needs to
     ///     be 0, and for a TSS this is a 64bit virtual address.
     ///
     void set_base(index_type index, base_type base)

@@ -344,15 +344,12 @@ check_exception_type(struct exception_state &state, const std::exception &caught
 /// @ref expect_false <br>
 /// @ref expect_exception <br>
 /// @ref expect_no_exception <br>
-/// @ref ASSERT_TRUE <br>
-/// @ref ASSERT_FALSE <br>
-/// @ref ASSERT_EXCEPTION <br>
-/// @ref ASSERT_NO_EXCEPTION <br>
 ///
-/// And when a shared_ptr must be created that is being mocked by Hippomocks,
+/// And when a shared_ptr/unique_ptr must be created that is being mocked by Hippomocks,
 /// be sure to use:
 ///
 /// @ref bfn::mock_shared <br>
+/// @ref bfn::mock_unique <br>
 ///
 class unittest
 {
