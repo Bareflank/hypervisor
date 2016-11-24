@@ -21,48 +21,21 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+source $(dirname $0)/setup_common.sh
+
 # ------------------------------------------------------------------------------
 # Checks
 # ------------------------------------------------------------------------------
 
-if [[ ! -f /etc/os-release ]]; then
-   echo "This script requires /etc/os-release (systemd)"
-   exit 1
-fi
-
-case $( grep ^ID= /etc/os-release | cut -d'=' -f 2 ) in
-opensuse)
-    ;;
-*)
-    echo "This script can only be used with: openSUSE"
-    exit 1
-esac
-
-if [[ ! -d "bfelf_loader" ]]; then
-    echo "This script must be run from bareflank root directory"
-    exit 1
-fi
-
-if ! grep -q 'avx' /proc/cpuinfo; then
-    echo "Hardware unsupported. AVX is required"
-    exit 1
-fi
+check_distro opensuse
+check_folder
+check_hardware
 
 # ------------------------------------------------------------------------------
-# Help
+# Parse Arguments
 # ------------------------------------------------------------------------------
 
-option_help() {
-    echo -e "Usage: setup-opensuse.sh [OPTION]"
-    echo -e "Sets up the system to compile / use Bareflank"
-    echo -e ""
-    echo -e "       -h, --help                       show this help menu"
-    echo -e "       -l, --local_compilers            setup local cross compilers"
-    echo -e "       -n, --no-configure               skip the configure step"
-    echo -e "       -g, --compiler <dirname>         directory of cross compiler"
-    echo -e "       -o, --out_of_tree <dirname>      setup out of tree build"
-    echo -e ""
-}
+parse_arguments $@
 
 # ------------------------------------------------------------------------------
 # Functions
@@ -70,12 +43,14 @@ option_help() {
 
 install_common_packages() {
     sudo zypper install -y gcc-c++
+    sudo zypper install -y gcc5
+    sudo zypper install -y gcc5-c++
     sudo zypper install -y gmp-devel
     sudo zypper install -y mpc-devel
     sudo zypper install -y mpfr-devel
     sudo zypper install -y isl-devel
 
-    sudo zypper addrepo http://download.opensuse.org/repositories/devel:/languages:/python/openSUSE_Tumbleweed python
+    sudo zypper install -y python
     sudo zypper install -y cmake
 
     sudo zypper install -y nasm
@@ -85,8 +60,12 @@ install_common_packages() {
     sudo zypper install -y kernel-devel
     sudo zypper update -y kernel-default
 
-    sudo zypper addrepo http://download.opensuse.org/repositories/Virtualization:/containers/openSUSE_Tumbleweed docker
     sudo zypper install -y docker
+
+    sudo rm /usr/bin/gcc
+    sudo rm /usr/bin/g++
+    sudo ln -s /usr/bin/gcc-5 /usr/bin/gcc
+    sudo ln -s /usr/bin/g++-5 /usr/bin/g++
 }
 
 prepare_docker() {
@@ -96,50 +75,11 @@ prepare_docker() {
 }
 
 # ------------------------------------------------------------------------------
-# Arguments
-# ------------------------------------------------------------------------------
-
-while [[ $# -ne 0 ]]; do
-
-    if [[ $1 == "-h" ]] || [[ $1 == "--help" ]]; then
-        option_help
-        exit 0
-    fi
-
-    if [[ $1 == "-l" ]] || [[ $1 == "--local_compilers" ]]; then
-        local="true"
-    fi
-
-    if [[ $1 == "--compiler" ]]; then
-        shift
-        compiler="--compiler $1"
-    fi
-
-    if [[ $1 == "--use_llvm_clang" ]]; then
-        use_llvm_clang="--use_llvm_clang"
-    fi
-
-    if [[ $1 == "-n" ]] || [[ $1 == "--no-configure" ]]; then
-        noconfigure="true"
-    fi
-
-    if [[ $1 == "-o" ]] || [[ $1 == "--out_of_tree" ]]; then
-        shift
-        out_of_tree="true"
-        build_dir=$1
-        hypervisor_dir=$PWD
-    fi
-
-    shift
-
-done
-
-# ------------------------------------------------------------------------------
 # Setup System
 # ------------------------------------------------------------------------------
 
-case $( grep ^VERSION= /etc/os-release | cut -d'=' -f 2 | tr -d '"' ) in
-Tumbleweed)
+case $( grep ^VERSION_ID= /etc/os-release | cut -d'=' -f 2 | tr -d '"' ) in
+42.2)
     install_common_packages
     prepare_docker
     ;;
@@ -154,33 +94,4 @@ esac
 # Setup Build Environment
 # ------------------------------------------------------------------------------
 
-if [[ ! $noconfigure == "true" ]]; then
-    if [[ $out_of_tree == "true" ]]; then
-        mkdir -p $build_dir
-        pushd $build_dir
-        $hypervisor_dir/configure.sh
-        popd
-    else
-        ./configure.sh $compiler $use_llvm_clang
-    fi
-fi
-
-if [[ $local == "true" ]]; then
-    CROSS_COMPILER=clang_38 ./tools/scripts/create-cross-compiler.sh
-fi
-
-# ------------------------------------------------------------------------------
-# Done
-# ------------------------------------------------------------------------------
-
-echo ""
-
-echo "WARNING: A reboot is required to build!!!"
-echo ""
-
-if [[ $out_of_tree == "true" ]]; then
-    echo "To build, run:"
-    echo "    cd $build_dir"
-    echo "    make -j<# cores>"
-    echo ""
-fi
+setup_build_environment
