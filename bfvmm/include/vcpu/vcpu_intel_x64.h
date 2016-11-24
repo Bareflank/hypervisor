@@ -22,6 +22,8 @@
 #ifndef VCPU_INTEL_X64_H
 #define VCPU_INTEL_X64_H
 
+#include <vcpuid.h>
+#include <user_data.h>
 #include <vcpu/vcpu.h>
 #include <vmxon/vmxon_intel_x64.h>
 #include <vmcs/vmcs_intel_x64.h>
@@ -55,6 +57,9 @@ public:
     /// will be constructed in its place, providing a means to select which
     /// internal components to override.
     ///
+    /// @expects none
+    /// @ensures none
+    ///
     /// @param id the id of the vcpu
     /// @param debug_ring the debug ring the vcpu should use. If you
     ///     provide nullptr, a default debug ring will be created.
@@ -69,52 +74,64 @@ public:
     /// @param guest_state the guest state the vcpu should use. If you
     ///     provide nullptr, a default guest state will be created.
     ///
-    vcpu_intel_x64(uint64_t id,
-                   std::shared_ptr<debug_ring> debug_ring = nullptr,
-                   std::shared_ptr<vmxon_intel_x64> vmxon = nullptr,
-                   std::shared_ptr<vmcs_intel_x64> vmcs = nullptr,
-                   std::shared_ptr<exit_handler_intel_x64> exit_handler = nullptr,
-                   std::shared_ptr<vmcs_intel_x64_vmm_state> vmm_state = nullptr,
-                   std::shared_ptr<vmcs_intel_x64_vmm_state> guest_state = nullptr);
+    vcpu_intel_x64(vcpuid::type id,
+                   std::unique_ptr<debug_ring> debug_ring = nullptr,
+                   std::unique_ptr<vmxon_intel_x64> vmxon = nullptr,
+                   std::unique_ptr<vmcs_intel_x64> vmcs = nullptr,
+                   std::unique_ptr<exit_handler_intel_x64> exit_handler = nullptr,
+                   std::unique_ptr<vmcs_intel_x64_vmm_state> vmm_state = nullptr,
+                   std::unique_ptr<vmcs_intel_x64_vmm_state> guest_state = nullptr);
 
     /// Destructor
     ///
-    ~vcpu_intel_x64() override = default;
+    ~vcpu_intel_x64() final = default;
 
     /// Init vCPU
     ///
+    /// @expects none
+    /// @ensures none
+    ///
     /// @see vcpu::init
     ///
-    void init(void *attr = nullptr) override;
+    void init(user_data *data = nullptr) override;
 
     /// Fini vCPU
     ///
+    /// @expects none
+    /// @ensures none
+    ///
     /// @see vcpu::fini
     ///
-    void fini(void *attr = nullptr) override;
+    void fini(user_data *data = nullptr) override;
 
     /// Run vCPU
     ///
+    /// @expects this->is_initialized() == true
+    /// @ensures none
+    ///
     /// @see vcpu::run
     ///
-    void run(void *attr = nullptr) override;
+    void run(user_data *data = nullptr) override;
 
     /// Halt vCPU
     ///
+    /// @expects none
+    /// @ensures none
+    ///
     /// @see vcpu::hlt
     ///
-    void hlt(void *attr = nullptr) override;
+    void hlt(user_data *data = nullptr) override;
 
 private:
 
     bool m_vmcs_launched;
 
-    std::shared_ptr<vmxon_intel_x64> m_vmxon;
-    std::shared_ptr<vmcs_intel_x64> m_vmcs;
-    std::shared_ptr<exit_handler_intel_x64> m_exit_handler;
-    std::shared_ptr<state_save_intel_x64> m_state_save;
-    std::shared_ptr<vmcs_intel_x64_state> m_vmm_state;
-    std::shared_ptr<vmcs_intel_x64_state> m_guest_state;
+    std::unique_ptr<vmxon_intel_x64> m_vmxon;
+    std::unique_ptr<vmcs_intel_x64> m_vmcs;
+    std::unique_ptr<exit_handler_intel_x64> m_exit_handler;
+    std::unique_ptr<state_save_intel_x64> m_state_save;
+    std::unique_ptr<vmcs_intel_x64_state> m_vmm_state;
+    std::unique_ptr<vmcs_intel_x64_state> m_guest_state;
 };
 
 #endif

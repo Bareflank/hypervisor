@@ -24,8 +24,6 @@
 
 #include <unittest.h>
 
-extern std::map<uint32_t, uint32_t> g_eax_cpuid;
-
 class intrinsics_ut : public unittest
 {
 public:

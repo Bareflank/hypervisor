@@ -47,7 +47,6 @@
 ///
 #define __FUNC__ static_cast<const char *>(__PRETTY_FUNCTION__)
 
-
 /// Output To Core
 ///
 /// All std::cout and std::cerr are sent to a specific debug_ring
@@ -57,10 +56,10 @@
 /// @param vcpuid the vcpu to send the output to
 /// @param func a lambda function containing the output to redirect
 ///
-template<class T>
-void output_to_vcpu(uint64_t vcpuid, T func)
+template<class V, class T>
+void output_to_vcpu(V vcpuid, T func)
 {
-    std::cout << "$vcpuid=" << std::setw(18) << reinterpret_cast<void *>(vcpuid);
+    std::cout << "$vcpuid=" << std::setw(18) << view_as_pointer(vcpuid);
     func();
 }
 

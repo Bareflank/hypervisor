@@ -24,8 +24,8 @@
 
 using namespace intel_x64;
 
-uint64_t g_region = 0;
-std::map<uint64_t, uint64_t> g_vmcs;
+uintptr_t g_region = 0;
+std::map<vm::field_type, vm::value_type> g_vmcs;
 
 bool g_vmxon_fails = false;
 bool g_vmxoff_fails = false;

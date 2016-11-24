@@ -68,12 +68,7 @@ vmcs_intel_x64::launch(gsl::not_null<vmcs_intel_x64_state *> host_state,
     this->write_fields(host_state, guest_state);
 
     auto ___ = gsl::on_failure([&]
-    {
-        vmcs::debug::dump();
-
-        host_state->dump();
-        guest_state->dump();
-    });
+    { vmcs::debug::dump(); });
 
     auto ___ = gsl::on_failure([&]
     { vmcs::check::all(); });

@@ -80,22 +80,20 @@ bfelf_loader_ut::test_bfelf_file_resolve_no_such_symbol()
     bfelf_file_t dummy_code_ef;
 
     ret = bfelf_file_init(m_dummy_misc.get(), m_dummy_misc_length, &dummy_misc_ef);
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
     ret = bfelf_file_init(m_dummy_code.get(), m_dummy_code_length, &dummy_code_ef);
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     m_dummy_misc_exec = load_elf_file(&dummy_misc_ef);
-    ASSERT_TRUE(m_dummy_misc_exec);
     m_dummy_code_exec = load_elf_file(&dummy_code_ef);
-    ASSERT_TRUE(m_dummy_code_exec);
 
     bfelf_loader_t loader;
     memset(&loader, 0, sizeof(loader));
 
     ret = bfelf_loader_add(&loader, &dummy_misc_ef, m_dummy_misc_exec.get());
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
     ret = bfelf_loader_add(&loader, &dummy_code_ef, m_dummy_code_exec.get());
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     ret = bfelf_loader_relocate(&loader);
     this->expect_true(ret == BFELF_SUCCESS);
@@ -115,22 +113,20 @@ bfelf_loader_ut::test_bfelf_file_resolve_zero_length_symbol()
     bfelf_file_t dummy_code_ef;
 
     ret = bfelf_file_init(m_dummy_misc.get(), m_dummy_misc_length, &dummy_misc_ef);
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
     ret = bfelf_file_init(m_dummy_code.get(), m_dummy_code_length, &dummy_code_ef);
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     m_dummy_misc_exec = load_elf_file(&dummy_misc_ef);
-    ASSERT_TRUE(m_dummy_misc_exec);
     m_dummy_code_exec = load_elf_file(&dummy_code_ef);
-    ASSERT_TRUE(m_dummy_code_exec);
 
     bfelf_loader_t loader;
     memset(&loader, 0, sizeof(loader));
 
     ret = bfelf_loader_add(&loader, &dummy_misc_ef, m_dummy_misc_exec.get());
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
     ret = bfelf_loader_add(&loader, &dummy_code_ef, m_dummy_code_exec.get());
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     ret = bfelf_loader_relocate(&loader);
     this->expect_true(ret == BFELF_SUCCESS);
@@ -150,22 +146,20 @@ bfelf_loader_ut::test_bfelf_file_resolve_invalid_symbol_length()
     bfelf_file_t dummy_code_ef;
 
     ret = bfelf_file_init(m_dummy_misc.get(), m_dummy_misc_length, &dummy_misc_ef);
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
     ret = bfelf_file_init(m_dummy_code.get(), m_dummy_code_length, &dummy_code_ef);
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     m_dummy_misc_exec = load_elf_file(&dummy_misc_ef);
-    ASSERT_TRUE(m_dummy_misc_exec);
     m_dummy_code_exec = load_elf_file(&dummy_code_ef);
-    ASSERT_TRUE(m_dummy_code_exec);
 
     bfelf_loader_t loader;
     memset(&loader, 0, sizeof(loader));
 
     ret = bfelf_loader_add(&loader, &dummy_misc_ef, m_dummy_misc_exec.get());
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
     ret = bfelf_loader_add(&loader, &dummy_code_ef, m_dummy_code_exec.get());
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     ret = bfelf_loader_relocate(&loader);
     this->expect_true(ret == BFELF_SUCCESS);
@@ -185,22 +179,20 @@ bfelf_loader_ut::test_bfelf_file_resolve_symbol_length_too_large()
     bfelf_file_t dummy_code_ef;
 
     ret = bfelf_file_init(m_dummy_misc.get(), m_dummy_misc_length, &dummy_misc_ef);
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
     ret = bfelf_file_init(m_dummy_code.get(), m_dummy_code_length, &dummy_code_ef);
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     m_dummy_misc_exec = load_elf_file(&dummy_misc_ef);
-    ASSERT_TRUE(m_dummy_misc_exec);
     m_dummy_code_exec = load_elf_file(&dummy_code_ef);
-    ASSERT_TRUE(m_dummy_code_exec);
 
     bfelf_loader_t loader;
     memset(&loader, 0, sizeof(loader));
 
     ret = bfelf_loader_add(&loader, &dummy_misc_ef, m_dummy_misc_exec.get());
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
     ret = bfelf_loader_add(&loader, &dummy_code_ef, m_dummy_code_exec.get());
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     ret = bfelf_loader_relocate(&loader);
     this->expect_true(ret == BFELF_SUCCESS);
@@ -220,22 +212,20 @@ bfelf_loader_ut::test_bfelf_file_resolve_symbol_success()
     bfelf_file_t dummy_code_ef;
 
     ret = bfelf_file_init(m_dummy_misc.get(), m_dummy_misc_length, &dummy_misc_ef);
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
     ret = bfelf_file_init(m_dummy_code.get(), m_dummy_code_length, &dummy_code_ef);
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     m_dummy_misc_exec = load_elf_file(&dummy_misc_ef);
-    ASSERT_TRUE(m_dummy_misc_exec);
     m_dummy_code_exec = load_elf_file(&dummy_code_ef);
-    ASSERT_TRUE(m_dummy_code_exec);
 
     bfelf_loader_t loader;
     memset(&loader, 0, sizeof(loader));
 
     ret = bfelf_loader_add(&loader, &dummy_misc_ef, m_dummy_misc_exec.get());
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
     ret = bfelf_loader_add(&loader, &dummy_code_ef, m_dummy_code_exec.get());
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     ret = bfelf_loader_relocate(&loader);
     this->expect_true(ret == BFELF_SUCCESS);
@@ -255,25 +245,23 @@ bfelf_loader_ut::test_bfelf_file_resolve_no_such_symbol_no_hash()
     bfelf_file_t dummy_code_ef;
 
     ret = bfelf_file_init(m_dummy_misc.get(), m_dummy_misc_length, &dummy_misc_ef);
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
     ret = bfelf_file_init(m_dummy_code.get(), m_dummy_code_length, &dummy_code_ef);
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     dummy_misc_ef.hashtab = nullptr;
     dummy_code_ef.hashtab = nullptr;
 
     m_dummy_misc_exec = load_elf_file(&dummy_misc_ef);
-    ASSERT_TRUE(m_dummy_misc_exec);
     m_dummy_code_exec = load_elf_file(&dummy_code_ef);
-    ASSERT_TRUE(m_dummy_code_exec);
 
     bfelf_loader_t loader;
     memset(&loader, 0, sizeof(loader));
 
     ret = bfelf_loader_add(&loader, &dummy_misc_ef, m_dummy_misc_exec.get());
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
     ret = bfelf_loader_add(&loader, &dummy_code_ef, m_dummy_code_exec.get());
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     ret = bfelf_loader_relocate(&loader);
     this->expect_true(ret == BFELF_SUCCESS);
@@ -293,25 +281,23 @@ bfelf_loader_ut::test_bfelf_file_resolve_zero_length_symbol_no_hash()
     bfelf_file_t dummy_code_ef;
 
     ret = bfelf_file_init(m_dummy_misc.get(), m_dummy_misc_length, &dummy_misc_ef);
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
     ret = bfelf_file_init(m_dummy_code.get(), m_dummy_code_length, &dummy_code_ef);
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     dummy_misc_ef.hashtab = nullptr;
     dummy_code_ef.hashtab = nullptr;
 
     m_dummy_misc_exec = load_elf_file(&dummy_misc_ef);
-    ASSERT_TRUE(m_dummy_misc_exec);
     m_dummy_code_exec = load_elf_file(&dummy_code_ef);
-    ASSERT_TRUE(m_dummy_code_exec);
 
     bfelf_loader_t loader;
     memset(&loader, 0, sizeof(loader));
 
     ret = bfelf_loader_add(&loader, &dummy_misc_ef, m_dummy_misc_exec.get());
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
     ret = bfelf_loader_add(&loader, &dummy_code_ef, m_dummy_code_exec.get());
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     ret = bfelf_loader_relocate(&loader);
     this->expect_true(ret == BFELF_SUCCESS);
@@ -331,25 +317,23 @@ bfelf_loader_ut::test_bfelf_file_resolve_invalid_symbol_length_no_hash()
     bfelf_file_t dummy_code_ef;
 
     ret = bfelf_file_init(m_dummy_misc.get(), m_dummy_misc_length, &dummy_misc_ef);
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
     ret = bfelf_file_init(m_dummy_code.get(), m_dummy_code_length, &dummy_code_ef);
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     dummy_misc_ef.hashtab = nullptr;
     dummy_code_ef.hashtab = nullptr;
 
     m_dummy_misc_exec = load_elf_file(&dummy_misc_ef);
-    ASSERT_TRUE(m_dummy_misc_exec);
     m_dummy_code_exec = load_elf_file(&dummy_code_ef);
-    ASSERT_TRUE(m_dummy_code_exec);
 
     bfelf_loader_t loader;
     memset(&loader, 0, sizeof(loader));
 
     ret = bfelf_loader_add(&loader, &dummy_misc_ef, m_dummy_misc_exec.get());
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
     ret = bfelf_loader_add(&loader, &dummy_code_ef, m_dummy_code_exec.get());
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     ret = bfelf_loader_relocate(&loader);
     this->expect_true(ret == BFELF_SUCCESS);
@@ -369,25 +353,23 @@ bfelf_loader_ut::test_bfelf_file_resolve_symbol_length_too_large_no_hash()
     bfelf_file_t dummy_code_ef;
 
     ret = bfelf_file_init(m_dummy_misc.get(), m_dummy_misc_length, &dummy_misc_ef);
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
     ret = bfelf_file_init(m_dummy_code.get(), m_dummy_code_length, &dummy_code_ef);
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     dummy_misc_ef.hashtab = nullptr;
     dummy_code_ef.hashtab = nullptr;
 
     m_dummy_misc_exec = load_elf_file(&dummy_misc_ef);
-    ASSERT_TRUE(m_dummy_misc_exec);
     m_dummy_code_exec = load_elf_file(&dummy_code_ef);
-    ASSERT_TRUE(m_dummy_code_exec);
 
     bfelf_loader_t loader;
     memset(&loader, 0, sizeof(loader));
 
     ret = bfelf_loader_add(&loader, &dummy_misc_ef, m_dummy_misc_exec.get());
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
     ret = bfelf_loader_add(&loader, &dummy_code_ef, m_dummy_code_exec.get());
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     ret = bfelf_loader_relocate(&loader);
     this->expect_true(ret == BFELF_SUCCESS);
@@ -407,25 +389,23 @@ bfelf_loader_ut::test_bfelf_file_resolve_symbol_success_no_hash()
     bfelf_file_t dummy_code_ef;
 
     ret = bfelf_file_init(m_dummy_misc.get(), m_dummy_misc_length, &dummy_misc_ef);
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
     ret = bfelf_file_init(m_dummy_code.get(), m_dummy_code_length, &dummy_code_ef);
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     dummy_misc_ef.hashtab = nullptr;
     dummy_code_ef.hashtab = nullptr;
 
     m_dummy_misc_exec = load_elf_file(&dummy_misc_ef);
-    ASSERT_TRUE(m_dummy_misc_exec);
     m_dummy_code_exec = load_elf_file(&dummy_code_ef);
-    ASSERT_TRUE(m_dummy_code_exec);
 
     bfelf_loader_t loader;
     memset(&loader, 0, sizeof(loader));
 
     ret = bfelf_loader_add(&loader, &dummy_misc_ef, m_dummy_misc_exec.get());
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
     ret = bfelf_loader_add(&loader, &dummy_code_ef, m_dummy_code_exec.get());
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     ret = bfelf_loader_relocate(&loader);
     this->expect_true(ret == BFELF_SUCCESS);

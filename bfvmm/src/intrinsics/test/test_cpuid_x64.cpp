@@ -24,10 +24,10 @@
 
 using namespace x64;
 
-std::map<uint32_t, uint32_t> g_eax_cpuid;
-std::map<uint32_t, uint32_t> g_ebx_cpuid;
-std::map<uint32_t, uint32_t> g_ecx_cpuid;
-std::map<uint32_t, uint32_t> g_edx_cpuid;
+std::map<cpuid::field_type, cpuid::value_type> g_eax_cpuid;
+std::map<cpuid::field_type, cpuid::value_type> g_ebx_cpuid;
+std::map<cpuid::field_type, cpuid::value_type> g_ecx_cpuid;
+std::map<cpuid::field_type, cpuid::value_type> g_edx_cpuid;
 
 extern "C" uint32_t __cpuid_eax(uint32_t val) noexcept;
 extern "C" uint32_t __cpuid_ebx(uint32_t val) noexcept;
@@ -37,10 +37,10 @@ extern "C" void __cpuid(void *eax, void *ebx, void *ecx, void *edx) noexcept;
 
 struct cpuid_regs
 {
-    uint32_t eax;
-    uint32_t ebx;
-    uint32_t ecx;
-    uint32_t edx;
+    cpuid::value_type eax;
+    cpuid::value_type ebx;
+    cpuid::value_type ecx;
+    cpuid::value_type edx;
 };
 
 struct cpuid_regs g_regs;
@@ -64,10 +64,10 @@ __cpuid_edx(uint32_t val) noexcept
 extern "C" void
 __cpuid(void *eax, void *ebx, void *ecx, void *edx) noexcept
 {
-    *static_cast<uint32_t *>(eax) = g_regs.eax;
-    *static_cast<uint32_t *>(ebx) = g_regs.ebx;
-    *static_cast<uint32_t *>(ecx) = g_regs.ecx;
-    *static_cast<uint32_t *>(edx) = g_regs.edx;
+    *static_cast<cpuid::value_type *>(eax) = g_regs.eax;
+    *static_cast<cpuid::value_type *>(ebx) = g_regs.ebx;
+    *static_cast<cpuid::value_type *>(ecx) = g_regs.ecx;
+    *static_cast<cpuid::value_type *>(edx) = g_regs.edx;
 }
 
 void

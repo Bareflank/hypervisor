@@ -19,57 +19,20 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <exception.h>
-#include <vcpu/vcpu.h>
+#ifndef USER_DATA_H
+#define USER_DATA_H
 
-vcpu::vcpu(vcpuid::type id, std::unique_ptr<debug_ring> dr) :
-    m_id(id),
-    m_debug_ring(std::move(dr)),
-    m_is_running(false),
-    m_is_initialized(false)
+/// User Data
+///
+/// This defines the base class used for passing around user data.
+/// This is mainly used so that dynamic_cast can be used if desired
+/// for casting user data.
+///
+class user_data
 {
-    if ((id & vcpuid::reserved) != 0)
-        throw std::invalid_argument("invalid vcpuid");
+public:
+    user_data() = default;
+    virtual ~user_data() = default;
+};
 
-    if (!m_debug_ring)
-        m_debug_ring = std::make_unique<debug_ring>(id);
-}
-
-void
-vcpu::init(user_data *data)
-{
-    (void) data;
-
-    m_is_initialized = true;
-}
-
-void
-vcpu::fini(user_data *data)
-{
-    (void) data;
-
-    if (m_is_running)
-        this->hlt();
-
-    m_is_initialized = false;
-}
-
-void
-vcpu::run(user_data *data)
-{
-    (void) data;
-
-    m_is_running = true;
-}
-
-void
-vcpu::hlt(user_data *data)
-{
-    (void) data;
-
-    m_is_running = false;
-}
-
-void
-vcpu::write(const std::string &str) noexcept
-{ m_debug_ring->write(str); }
+#endif

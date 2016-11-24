@@ -39,7 +39,7 @@ CYGWIN_NT-10.0)
 
 Linux)
     cd $HYPER_ABS/bfdrivers/src/arch/linux
-    sudo make unload
+    sudo make unload 1> /dev/null 2> /dev/null
     sudo make load
     ;;
 *)

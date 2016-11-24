@@ -22,14 +22,14 @@
 #include <gsl/gsl>
 #include <vcpu/vcpu_intel_x64.h>
 
-vcpu_intel_x64::vcpu_intel_x64(uint64_t id,
-                               std::shared_ptr<debug_ring> debug_ring,
-                               std::shared_ptr<vmxon_intel_x64> vmxon,
-                               std::shared_ptr<vmcs_intel_x64> vmcs,
-                               std::shared_ptr<exit_handler_intel_x64> exit_handler,
-                               std::shared_ptr<vmcs_intel_x64_vmm_state> vmm_state,
-                               std::shared_ptr<vmcs_intel_x64_vmm_state> guest_state) :
-    vcpu(id, debug_ring),
+vcpu_intel_x64::vcpu_intel_x64(vcpuid::type id,
+                               std::unique_ptr<debug_ring> debug_ring,
+                               std::unique_ptr<vmxon_intel_x64> vmxon,
+                               std::unique_ptr<vmcs_intel_x64> vmcs,
+                               std::unique_ptr<exit_handler_intel_x64> exit_handler,
+                               std::unique_ptr<vmcs_intel_x64_vmm_state> vmm_state,
+                               std::unique_ptr<vmcs_intel_x64_vmm_state> guest_state) :
+    vcpu(id, std::move(debug_ring)),
     m_vmcs_launched(false),
     m_vmxon(std::move(vmxon)),
     m_vmcs(std::move(vmcs)),
@@ -39,28 +39,29 @@ vcpu_intel_x64::vcpu_intel_x64(uint64_t id,
 {
 }
 
-// REMOVE ME
-namespace bfn
-{
-template<class T, class... Args>
-std::shared_ptr<T> make_shared(Args &&... args)
-{
-    return std::shared_ptr<T>(new T{std::forward<Args>(args)...});
-}
-}
-
 void
-vcpu_intel_x64::init(void *attr)
+vcpu_intel_x64::init(user_data *data)
 {
     auto ___ = gsl::on_failure([&]
     { this->fini(); });
 
-    if (!m_state_save) m_state_save = bfn::make_shared<state_save_intel_x64>();
-    if (!m_vmxon) m_vmxon = std::make_shared<vmxon_intel_x64>();
-    if (!m_vmcs) m_vmcs = std::make_shared<vmcs_intel_x64>();
-    if (!m_exit_handler) m_exit_handler = std::make_shared<exit_handler_intel_x64>();
-    if (!m_vmm_state) m_vmm_state = std::make_shared<vmcs_intel_x64_vmm_state>();
-    if (!m_guest_state) m_guest_state = std::make_shared<vmcs_intel_x64_host_vm_state>();
+    if (!m_state_save)
+        m_state_save = std::make_unique<state_save_intel_x64>();
+
+    if (!m_vmxon)
+        m_vmxon = std::make_unique<vmxon_intel_x64>();
+
+    if (!m_vmcs)
+        m_vmcs = std::make_unique<vmcs_intel_x64>();
+
+    if (!m_exit_handler)
+        m_exit_handler = std::make_unique<exit_handler_intel_x64>();
+
+    if (!m_vmm_state)
+        m_vmm_state = std::make_unique<vmcs_intel_x64_vmm_state>();
+
+    if (!m_guest_state)
+        m_guest_state = std::make_unique<vmcs_intel_x64_host_vm_state>();
 
     m_state_save->vcpuid = this->id();
     m_state_save->vmxon_ptr = reinterpret_cast<uintptr_t>(m_vmxon.get());
@@ -69,23 +70,20 @@ vcpu_intel_x64::init(void *attr)
 
     m_vmcs->set_state_save(m_state_save.get());
 
-    m_exit_handler->set_vmcs(m_vmcs);
-    m_exit_handler->set_state_save(m_state_save);
+    m_exit_handler->set_vmcs(m_vmcs.get());
+    m_exit_handler->set_state_save(m_state_save.get());
 
-    vcpu::init(attr);
+    vcpu::init(data);
 }
 
 void
-vcpu_intel_x64::fini(void *attr)
-{
-    vcpu::fini(attr);
-}
+vcpu_intel_x64::fini(user_data *data)
+{ vcpu::fini(data); }
 
 void
-vcpu_intel_x64::run(void *attr)
+vcpu_intel_x64::run(user_data *data)
 {
-    if (!this->is_initialized())
-        throw std::runtime_error("attempting to run a vcpu that has not been initialized");
+    expects(this->is_initialized());
 
     if (!m_vmcs_launched)
     {
@@ -109,11 +107,11 @@ vcpu_intel_x64::run(void *attr)
         m_vmcs->resume();
     }
 
-    vcpu::run(attr);
+    vcpu::run(data);
 }
 
 void
-vcpu_intel_x64::hlt(void *attr)
+vcpu_intel_x64::hlt(user_data *data)
 {
     if (!this->is_initialized())
         return;
@@ -127,5 +125,5 @@ vcpu_intel_x64::hlt(void *attr)
             m_vmxon->stop();
     }
 
-    vcpu::hlt(attr);
+    vcpu::hlt(data);
 }

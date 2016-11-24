@@ -24,6 +24,9 @@
 
 #include <map>
 #include <memory>
+
+#include <vcpuid.h>
+#include <user_data.h>
 #include <vcpu/vcpu_factory.h>
 
 /// vCPU Manager
@@ -39,9 +42,15 @@ public:
 
     /// Destructor
     ///
+    /// @expects none
+    /// @ensures none
+    ///
     virtual ~vcpu_manager() = default;
 
     /// Get Singleton Instance
+    ///
+    /// @expects none
+    /// @ensures ret != nullptr
     ///
     /// Get an instance to the singleton class.
     ///
@@ -52,63 +61,74 @@ public:
     /// Creates the vCPU. Note that the vCPU is actually created by the
     /// vCPU factory's make_vcpu function.
     ///
-    /// @param vcpuid the vcpu to initialize
-    /// @param attr attributes to be passed to the vcpu about what
-    ///     type of vcpu this is
+    /// @expects none
+    /// @ensures none
     ///
-    virtual void create_vcpu(uint64_t vcpuid, void *attr = nullptr);
+    /// @param vcpuid the vcpu to initialize
+    /// @param data user data that can be passed around as needed
+    ///     by extensions of Bareflank
+    ///
+    virtual void create_vcpu(vcpuid::type vcpuid, user_data *data = nullptr);
 
     /// Delete vCPU
     ///
     /// Deletes the vCPU.
     ///
     /// @param vcpuid the vcpu to stop
-    /// @param attr attributes to be passed to the vcpu about what
-    ///     type of vcpu this is
+    /// @param data user data that can be passed around as needed
+    ///     by extensions of Bareflank
     ///
-    virtual void delete_vcpu(uint64_t vcpuid, void *attr = nullptr);
+    virtual void delete_vcpu(vcpuid::type vcpuid, user_data *data = nullptr);
 
     /// Run vCPU
     ///
     /// Executes the vCPU.
     ///
-    /// @param vcpuid the vcpu to execute
-    /// @param attr attributes to be passed to the vcpu about what
-    ///     type of vcpu this is
-    /// @throws invalid_argument_error thrown when the vcpuid is invalid
+    /// @expects vcpu exists
+    /// @ensures none
     ///
-    virtual void run_vcpu(uint64_t vcpuid, void *attr = nullptr);
+    /// @param vcpuid the vcpu to execute
+    /// @param data user data that can be passed around as needed
+    ///     by extensions of Bareflank
+    ///
+    virtual void run_vcpu(vcpuid::type vcpuid, user_data *data = nullptr);
 
     /// Halt vCPU
     ///
     /// Halts the vCPU.
     ///
-    /// @param vcpuid the vcpu to halt
-    /// @param attr attributes to be passed to the vcpu about what
-    ///     type of vcpu this is
+    /// @expects none
+    /// @ensures none
     ///
-    virtual void hlt_vcpu(uint64_t vcpuid, void *attr = nullptr);
+    /// @param vcpuid the vcpu to halt
+    /// @param data user data that can be passed around as needed
+    ///     by extensions of Bareflank
+    ///
+    virtual void hlt_vcpu(vcpuid::type vcpuid, user_data *data = nullptr);
 
     /// Write to Log
     ///
     /// Write's a string the vCPU's debug ring.
     ///
+    /// @expects none
+    /// @ensures none
+    ///
     /// @param vcpuid the vCPU to write to
     /// @param str the string to write
     ///
-    virtual void write(uint64_t vcpuid, const std::string &str) noexcept;
+    virtual void write(vcpuid::type vcpuid, const std::string &str) noexcept;
 
 private:
 
     vcpu_manager() noexcept;
-    std::unique_ptr<vcpu> &add_vcpu(uint64_t vcpuid, void *attr);
-    std::unique_ptr<vcpu> &get_vcpu(uint64_t vcpuid);
+    std::unique_ptr<vcpu> &add_vcpu(vcpuid::type vcpuid, user_data *data);
+    std::unique_ptr<vcpu> &get_vcpu(vcpuid::type vcpuid);
 
 private:
 
     friend class vcpu_ut;
 
-    std::map<uint64_t, std::unique_ptr<vcpu>> m_vcpus;
+    std::map<vcpuid::type, std::unique_ptr<vcpu>> m_vcpus;
 
 private:
 
@@ -128,6 +148,9 @@ public:
 /// The following macro can be used to quickly call the vcpu manager as
 /// this class will likely be called by a lot of code. This call is guaranteed
 /// to not be NULL
+///
+/// @expects none
+/// @ensures ret != nullptr
 ///
 #define g_vcm vcpu_manager::instance()
 

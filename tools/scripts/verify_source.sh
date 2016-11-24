@@ -101,7 +101,9 @@ OUTPUT=$PWD/verify_source_results.txt
 # Make sure we can run this script
 #
 if [[ ! -f "$BUILD_ABS/compile_commands.json" ]]; then
-    echo "ERROR: database is missing. Did you run 'STATIC_ANALYSIS_ENABLED=true bear make'?"
+    echo "ERROR: database is missing. Did you run?"
+    echo "    - STATIC_ANALYSIS_ENABLED=true bear make"
+    echo "    - sudo ln -s /usr/bin/clang-tidy-3.8 /usr/bin/clang-tidy"
     exit 1
 fi
 

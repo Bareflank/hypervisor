@@ -36,10 +36,10 @@ public:
     vcpu_factory_ut() noexcept = default;
     ~vcpu_factory_ut() override = default;
 
-    std::unique_ptr<vcpu> make_vcpu(uint64_t id, void *attr) override
+    std::unique_ptr<vcpu> make_vcpu(vcpuid::type id, user_data *data) override
     {
         (void) id;
-        (void) attr;
+        (void) data;
 
         if (make_vcpu_throws)
             throw std::runtime_error("error");

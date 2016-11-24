@@ -48,8 +48,7 @@ namespace pdpte
         inline auto mask() noexcept
         {
             auto phys_len = cpuid::addr_size::phys::get();
-            auto upper = 0xFFFFFFFFFFFFFFFFULL << phys_len;
-            return (upper | 0x1E6ULL);
+            return ((0xFFFFFFFFFFFFFFFFULL << phys_len) | 0x1E6ULL);
         }
     }
 
@@ -75,8 +74,7 @@ namespace pdpte
         inline auto mask() noexcept
         {
             auto phys_len = cpuid::addr_size::phys::get();
-            auto upper = 0xFFFFFFFFFFFFFFFFULL << from;
-            return (~(0xFFFFFFFFFFFFFFFFULL << phys_len) & upper);
+            return (~(0xFFFFFFFFFFFFFFFFULL << phys_len) & (0xFFFFFFFFFFFFFFFFULL << from));
         }
     }
 }

@@ -43,7 +43,7 @@ vcpu_manager::instance() noexcept
 }
 
 void
-vcpu_manager::create_vcpu(uint64_t vcpuid, void *attr)
+vcpu_manager::create_vcpu(vcpuid::type vcpuid, user_data *data)
 {
     auto ___ = gsl::on_failure([&]
     {
@@ -51,12 +51,12 @@ vcpu_manager::create_vcpu(uint64_t vcpuid, void *attr)
         m_vcpus.erase(vcpuid);
     });
 
-    if (auto && vcpu = add_vcpu(vcpuid, attr))
-        vcpu->init(attr);
+    if (auto && vcpu = add_vcpu(vcpuid, data))
+        vcpu->init(data);
 }
 
 void
-vcpu_manager::delete_vcpu(uint64_t vcpuid, void *attr)
+vcpu_manager::delete_vcpu(vcpuid::type vcpuid, user_data *data)
 {
     auto ___ = gsl::finally([&]
     {
@@ -65,16 +65,16 @@ vcpu_manager::delete_vcpu(uint64_t vcpuid, void *attr)
     });
 
     if (auto && vcpu = get_vcpu(vcpuid))
-        vcpu->fini(attr);
+        vcpu->fini(data);
 }
 
 void
-vcpu_manager::run_vcpu(uint64_t vcpuid, void *attr)
+vcpu_manager::run_vcpu(vcpuid::type vcpuid, user_data *data)
 {
     if (auto && vcpu = get_vcpu(vcpuid))
     {
         if (!vcpu->is_running())
-            vcpu->run(attr);
+            vcpu->run(data);
         else
             throw std::logic_error("vcpu is already running");
 
@@ -91,12 +91,12 @@ vcpu_manager::run_vcpu(uint64_t vcpuid, void *attr)
 }
 
 void
-vcpu_manager::hlt_vcpu(uint64_t vcpuid, void *attr)
+vcpu_manager::hlt_vcpu(vcpuid::type vcpuid, user_data *data)
 {
     if (auto && vcpu = get_vcpu(vcpuid))
     {
         if (vcpu->is_running())
-            vcpu->hlt(attr);
+            vcpu->hlt(data);
         else
             return;
 
@@ -109,7 +109,7 @@ vcpu_manager::hlt_vcpu(uint64_t vcpuid, void *attr)
 }
 
 void
-vcpu_manager::write(uint64_t vcpuid, const std::string &str) noexcept
+vcpu_manager::write(vcpuid::type vcpuid, const std::string &str) noexcept
 {
     if (auto && vcpu = get_vcpu(vcpuid))
         vcpu->write(str);
@@ -120,7 +120,7 @@ vcpu_manager::vcpu_manager() noexcept :
 { }
 
 std::unique_ptr<vcpu> &
-vcpu_manager::add_vcpu(uint64_t vcpuid, void *attr)
+vcpu_manager::add_vcpu(vcpuid::type vcpuid, user_data *data)
 {
     if (!m_vcpu_factory)
         throw std::runtime_error("invalid vcpu factory");
@@ -128,7 +128,7 @@ vcpu_manager::add_vcpu(uint64_t vcpuid, void *attr)
     if (auto && vcpu = get_vcpu(vcpuid))
         return vcpu;
 
-    if (auto && vcpu = m_vcpu_factory->make_vcpu(vcpuid, attr))
+    if (auto && vcpu = m_vcpu_factory->make_vcpu(vcpuid, data))
     {
         std::lock_guard<std::mutex> guard(g_vcpu_manager_mutex);
         return m_vcpus[vcpuid] = std::move(vcpu);
@@ -138,7 +138,7 @@ vcpu_manager::add_vcpu(uint64_t vcpuid, void *attr)
 }
 
 std::unique_ptr<vcpu> &
-vcpu_manager::get_vcpu(uint64_t vcpuid)
+vcpu_manager::get_vcpu(vcpuid::type vcpuid)
 {
     std::lock_guard<std::mutex> guard(g_vcpu_manager_mutex);
     return m_vcpus[vcpuid];

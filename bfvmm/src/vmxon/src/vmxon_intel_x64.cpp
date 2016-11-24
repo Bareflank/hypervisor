@@ -38,8 +38,7 @@ using namespace intel_x64;
 vmxon_intel_x64::vmxon_intel_x64() :
     m_vmxon_enabled(false),
     m_vmxon_region_phys(0)
-{
-}
+{ }
 
 void
 vmxon_intel_x64::start()

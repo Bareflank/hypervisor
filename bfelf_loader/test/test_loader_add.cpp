@@ -28,7 +28,7 @@ bfelf_loader_ut::test_bfelf_loader_add_invalid_loader()
     bfelf_file_t dummy_misc_ef;
 
     ret = bfelf_file_init(m_dummy_misc.get(), m_dummy_misc_length, &dummy_misc_ef);
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     ret = bfelf_loader_add(nullptr, &dummy_misc_ef, m_dummy_misc_exec.get());
     this->expect_true(ret == BFELF_ERROR_INVALID_ARG);
@@ -51,7 +51,7 @@ bfelf_loader_ut::test_bfelf_loader_add_too_many_files()
     bfelf_file_t dummy_misc_ef;
 
     ret = bfelf_file_init(m_dummy_misc.get(), m_dummy_misc_length, &dummy_misc_ef);
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     bfelf_loader_t loader;
     memset(&loader, 0, sizeof(loader));

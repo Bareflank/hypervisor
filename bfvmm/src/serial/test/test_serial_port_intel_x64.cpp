@@ -40,7 +40,7 @@ __outb(uint16_t port, uint8_t val) noexcept
 void
 serial_ut::test_serial_null_intrinsics()
 {
-    this->expect_no_exception([&] { std::make_shared<serial_port_intel_x64>(); });
+    this->expect_no_exception([&] { std::make_unique<serial_port_intel_x64>(); });
 }
 
 void

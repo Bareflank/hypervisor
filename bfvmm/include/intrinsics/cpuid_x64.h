@@ -37,6 +37,9 @@ namespace x64
 {
 namespace cpuid
 {
+    using field_type = uint32_t;
+    using value_type = uint32_t;
+
     template<class T1, class T2, class T3, class T4,
              class = typename std::enable_if<std::is_integral<T1>::value>::type,
              class = typename std::enable_if<std::is_integral<T2>::value>::type,
@@ -519,10 +522,10 @@ namespace cpuid
 
                     inline auto get() noexcept
                     {
-                        uint32_t eax = addr;
-                        uint32_t ebx = 0U;
-                        uint32_t ecx = 0U;
-                        uint32_t edx = 0U;
+                        value_type eax = addr;
+                        value_type ebx = 0U;
+                        value_type ecx = 0U;
+                        value_type edx = 0U;
 
                         __cpuid(&eax, &ebx, &ecx, &edx);
 
@@ -538,10 +541,10 @@ namespace cpuid
 
                     inline auto get() noexcept
                     {
-                        uint32_t eax = addr;
-                        uint32_t ebx = 0U;
-                        uint32_t ecx = 0U;
-                        uint32_t edx = 0U;
+                        value_type eax = addr;
+                        value_type ebx = 0U;
+                        value_type ecx = 0U;
+                        value_type edx = 0U;
 
                         __cpuid(&eax, &ebx, &ecx, &edx);
 

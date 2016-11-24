@@ -24,7 +24,7 @@
 
 using namespace x64;
 
-uint64_t g_rflags = 0;
+rflags::value_type g_rflags = 0;
 
 extern "C" uint64_t
 __read_rflags(void) noexcept

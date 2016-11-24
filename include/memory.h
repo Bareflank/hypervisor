@@ -66,6 +66,9 @@ struct memory_descriptor
 /**
  * Add Memory Descriptor
  *
+ * @expects md != nullptr
+ * @ensures none
+ *
  * This is used by the driver entry to add an MD to VMM. The driver entry
  * will need to collect memory descriptors for every page of memory that the
  * VMM is using so that the memory manager can provide mappings as needed.

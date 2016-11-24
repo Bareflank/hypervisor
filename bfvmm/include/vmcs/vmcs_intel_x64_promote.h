@@ -31,6 +31,6 @@
 ///
 /// @note this function does not return
 ///
-extern "C" void vmcs_promote(uint64_t state_save);
+extern "C" void vmcs_promote(uintptr_t state_save);
 
 #endif

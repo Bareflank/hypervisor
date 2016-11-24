@@ -55,15 +55,15 @@ struct cpuid_regs
 };
 
 
-extern std::map<msrs::field_type, msrs::value_type> g_msrs;
-extern std::map<vmcs::field_type, vmcs::value_type> g_vmcs_fields;
+extern std::map<uint32_t, uint64_t> g_msrs;
+extern std::map<uint64_t, uint64_t> g_vmcs_fields;
 extern std::map<uint32_t, uint32_t> g_eax_cpuid;
 extern bool g_virt_to_phys_return_nullptr;
 extern bool g_phys_to_virt_return_nullptr;
-extern uint64_t g_test_addr;
-extern uint64_t g_virt_apic_addr;
-extern uint64_t g_vmcs_link_addr;
-extern uint64_t g_pdpt_addr;
+extern uintptr_t g_test_addr;
+extern uintptr_t g_virt_apic_addr;
+extern uintptr_t g_vmcs_link_addr;
+extern uintptr_t g_pdpt_addr;
 extern struct cpuid_regs g_cpuid_regs;
 
 extern uint8_t g_virt_apic_mem[0x81];
