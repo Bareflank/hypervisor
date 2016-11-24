@@ -266,9 +266,6 @@ memory_manager_x64::descriptors() const
     memory_descriptor_list list;
     std::lock_guard<std::mutex> guard(g_add_md_mutex);
 
-    expects(m_phys_to_virt_map.size() == m_virt_to_phys_map.size());
-    expects(m_virt_to_attr_map.size() == m_virt_to_phys_map.size());
-
     for (const auto &p : m_virt_to_phys_map)
     {
         auto virt = p.first;

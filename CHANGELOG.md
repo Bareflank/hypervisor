@@ -20,7 +20,7 @@
 - The VMM now uses it's own CR4 instead of the CR4 provided by the Host OS.
 - The VMM now uses it's own RFLAGS instead of the RFLAGS provided by the Host OS.
 - The VMM now uses it's own EFER MSR instead of the EFER MSR provided by the Host OS.
-- New vCPU APIs that provide that ability to pass around a "void *" for extension
+- New vCPU APIs that provide that ability to pass around a "user_data *" for extension
   support
 - Support for "-O3" optimizations
 - Support for SSE/AVX code in the VMM
@@ -34,6 +34,12 @@
 - AppVeyor support
 - Clang Tidy 3.8 support
 - Clang / LLVM 3.8 and 3.9 support
+- libc / libcxx / libcxxabi / bfcrt / bfunwind all loaded as shared libraries
+- VMCS unit tests
+- Intrinsics / VMCS namespace logic that provides useful functions / definitions
+  found in the Intel manual
+- Libcxx unit tests
+- VMCall support
 
 ### Changed
 - The VMCS state classes are now shared by pointer (i.e. shared_ptr)
@@ -64,6 +70,7 @@
   use the subclasses instead, or inherit manually
 - The vCPU dispatch, halt and promote functions have been removed as they
   were specific to Intel.
+- GCC 5.x support for cross compilation (native still supported)
 
 ## [1.0.0] - 2016-27-04
 ### Added

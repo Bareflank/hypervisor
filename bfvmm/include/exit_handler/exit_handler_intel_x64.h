@@ -128,7 +128,6 @@ protected:
 private:
 
 #ifdef INCLUDE_LIBCXX_UNITTESTS
-
     void unittest_1001_containers_array() const;
     void unittest_1002_containers_vector() const;
     void unittest_1003_containers_deque() const;
@@ -140,6 +139,8 @@ private:
     void unittest_1009_containers_set() const;
     void unittest_100A_containers_map() const;
 
+    void unittest_1100_io_cout() const;
+    void unittest_1101_io_manipulators() const;
 #endif
 
 private:
