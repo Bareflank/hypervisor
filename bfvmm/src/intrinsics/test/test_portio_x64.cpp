@@ -24,11 +24,11 @@
 
 using namespace x64;
 
-std::map<uint16_t, uint16_t> g_ports;
+std::map<portio::port_addr_type, portio::port_16bit_type> g_ports;
 
 extern "C" uint8_t
 __inb(uint16_t port) noexcept
-{ return gsl::narrow_cast<uint8_t>(g_ports[port]); }
+{ return gsl::narrow_cast<portio::port_8bit_type>(g_ports[port]); }
 
 extern "C" uint16_t
 __inw(uint16_t port) noexcept

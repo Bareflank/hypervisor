@@ -24,13 +24,10 @@
 
 #include <string>
 #include <memory>
-#include <debug_ring/debug_ring.h>
 
-namespace vcpuid
-{
-constexpr const auto reserved = 0x8000000000000000UL;
-constexpr const auto guest_mask = 0xFFFFFFFF00000000UL;
-}
+#include <vcpuid.h>
+#include <user_data.h>
+#include <debug_ring/debug_ring.h>
 
 /// Virtual CPU
 ///
@@ -106,17 +103,19 @@ public:
     /// will be constructed in its place, providing a means to select which
     /// internal components to override.
     ///
+    /// @expects none
+    /// @ensures none
+    ///
     /// @param id the id of the vcpu
     /// @param dr the debug ring the vcpu should use. If you provide nullptr,
     ///     a default debug ring will be created.
-    /// @throws invalid_argument_error if the id is invalid
     ///
-    vcpu(uint64_t id, std::shared_ptr<debug_ring> dr = nullptr);
+    vcpu(vcpuid::type id, std::unique_ptr<debug_ring> dr = nullptr);
 
     /// Destructor
     ///
-    /// Note that the destructor is not used. Avoid placing logic in the
-    /// destructor of any subclasses.
+    /// @expects none
+    /// @ensures none
     ///
     virtual ~vcpu() = default;
 
@@ -129,10 +128,13 @@ public:
     ///
     /// @note: subclasses must call this function if it's overridden
     ///
-    /// @param attr attributes to be passed to the vcpu about what
-    ///     type of vcpu this is
+    /// @expects none
+    /// @ensures none
     ///
-    virtual void init(void *attr = nullptr);
+    /// @param data user data that can be passed around as needed
+    ///     by extensions of Bareflank
+    ///
+    virtual void init(user_data *data = nullptr);
 
     /// Fini vCPU
     ///
@@ -143,10 +145,13 @@ public:
     ///
     /// @note: subclasses must call this function if it's overridden
     ///
-    /// @param attr attributes to be passed to the vcpu about what
-    ///     type of vcpu this is
+    /// @expects none
+    /// @ensures none
     ///
-    virtual void fini(void *attr = nullptr);
+    /// @param data user data that can be passed around as needed
+    ///     by extensions of Bareflank
+    ///
+    virtual void fini(user_data *data = nullptr);
 
     /// Run
     ///
@@ -160,10 +165,13 @@ public:
     ///
     /// @note: subclasses must call this function if it's overridden
     ///
-    /// @param attr attributes to be passed to the vcpu about what
-    ///     type of vcpu this is
+    /// @expects none
+    /// @ensures none
     ///
-    virtual void run(void *attr = nullptr);
+    /// @param data user data that can be passed around as needed
+    ///     by extensions of Bareflank
+    ///
+    virtual void run(user_data *data = nullptr);
 
     /// Halt
     ///
@@ -183,19 +191,28 @@ public:
     ///
     /// @note: subclasses must call this function if it's overridden
     ///
-    /// @param attr attributes to be passed to the vcpu about what
-    ///     type of vcpu this is
+    /// @expects none
+    /// @ensures none
     ///
-    virtual void hlt(void *attr = nullptr);
+    /// @param data user data that can be passed around as needed
+    ///     by extensions of Bareflank
+    ///
+    virtual void hlt(user_data *data = nullptr);
 
     /// vCPU Id
     ///
+    /// @expects none
+    /// @ensures none
+    ///
     /// @return the vCPU's id
     ///
-    virtual uint64_t id() const
+    virtual vcpuid::type id() const
     { return m_id; }
 
     /// Is Running
+    ///
+    /// @expects none
+    /// @ensures none
     ///
     /// @return true if the vCPU is running, false otherwise.
     ///
@@ -204,12 +221,18 @@ public:
 
     /// Is Initialized
     ///
+    /// @expects none
+    /// @ensures none
+    ///
     /// @return true if the vCPU is initialized, false otherwise.
     ///
     virtual bool is_initialized()
     { return m_is_initialized; }
 
     /// Is Bootstrap vCPU
+    ///
+    /// @expects none
+    /// @ensures none
     ///
     /// @return true if this vCPU is the bootstrap vCPU, false otherwise
     ///
@@ -218,12 +241,18 @@ public:
 
     /// Is Host VM vCPU
     ///
+    /// @expects none
+    /// @ensures none
+    ///
     /// @return true if this vCPU belongs to the host VM, false otherwise
     ///
     virtual bool is_host_vm_vcpu()
     { return (m_id & (vcpuid::guest_mask & ~vcpuid::reserved)) == 0; }
 
     /// Is Guest VM vCPU
+    ///
+    /// @expects none
+    /// @ensures none
     ///
     /// @return true if this vCPU belongs to a guest VM, false otherwise
     ///
@@ -246,6 +275,9 @@ public:
     /// which vCPU the debug ring belongs to. From there, one must simply
     /// manually parse the ring.
     ///
+    /// @expects none
+    /// @ensures none
+    ///
     /// @param str the string to write to the debug ring. If the ring is
     ///     bigger than DEBUG_RING_SIZE, the write is ignored.
     ///
@@ -253,8 +285,8 @@ public:
 
 private:
 
-    uint64_t m_id;
-    std::shared_ptr<debug_ring> m_debug_ring;
+    vcpuid::type m_id;
+    std::unique_ptr<debug_ring> m_debug_ring;
 
     bool m_is_running;
     bool m_is_initialized;

@@ -64,44 +64,30 @@ custom_new(std::size_t size)
 
 static void
 custom_delete(void *ptr)
-{
-    free(ptr);
-}
+{ free(ptr); }
 
 void *
 operator new[](std::size_t size)
-{
-    return custom_new(size);
-}
+{ return custom_new(size); }
 
 void *
 operator new(std::size_t size)
-{
-    return custom_new(size);
-}
+{ return custom_new(size); }
 
 void
 operator delete(void *ptr, std::size_t /* size */) throw()
-{
-    custom_delete(ptr);
-}
+{ custom_delete(ptr); }
 
 void
 operator delete(void *ptr) throw()
-{
-    custom_delete(ptr);
-}
+{ custom_delete(ptr); }
 
 void
 operator delete[](void *ptr) throw()
-{
-    custom_delete(ptr);
-}
+{ custom_delete(ptr); }
 
 void
 operator delete[](void *ptr, std::size_t /* size */) throw()
-{
-    custom_delete(ptr);
-}
+{ custom_delete(ptr); }
 
 #endif

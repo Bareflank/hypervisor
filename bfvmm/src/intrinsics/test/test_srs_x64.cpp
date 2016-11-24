@@ -24,14 +24,14 @@
 
 using namespace x64;
 
-uint16_t g_es = 0;
-uint16_t g_cs = 0;
-uint16_t g_ss = 0;
-uint16_t g_ds = 0;
-uint16_t g_fs = 0;
-uint16_t g_gs = 0;
-uint16_t g_ldtr = 0;
-uint16_t g_tr = 0;
+segment_register::type g_es = 0;
+segment_register::type g_cs = 0;
+segment_register::type g_ss = 0;
+segment_register::type g_ds = 0;
+segment_register::type g_fs = 0;
+segment_register::type g_gs = 0;
+segment_register::type g_ldtr = 0;
+segment_register::type g_tr = 0;
 
 extern "C" uint16_t
 __read_es(void) noexcept

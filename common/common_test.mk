@@ -49,7 +49,7 @@ Makefile: $(HYPER_REL)/Makefile.bf
 run_tests: force
 	@echo -e $(CS)"--------------------------------------------------------------------------------"$(CE)
 	@LD_LIBRARY_PATH=$(LIBRARY_PATH) ./test > output.txt 2>&1 || (cat output.txt; exit 1)
-	@cat output.txt | grep "totals:"
+	@cat output.txt | grep --text "totals:"
 	@rm output.txt
 	@echo -e $(CS)"--------------------------------------------------------------------------------"$(CE)
 

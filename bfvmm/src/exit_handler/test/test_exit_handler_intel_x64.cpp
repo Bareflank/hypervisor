@@ -47,7 +47,7 @@ vmcs::value_type g_exit_instruction_information = 0;
 
 static std::map<msrs::field_type, msrs::value_type> g_msrs;
 
-uint64_t g_rip = 0;
+uintptr_t g_rip = 0;
 
 static void vmcs_check_all()
 {
@@ -108,16 +108,18 @@ extern "C" void
 __cpuid(void *eax, void *ebx, void *ecx, void *edx) noexcept
 { (void) eax; (void) ebx; (void) ecx; (void) edx; }
 
+state_save_intel_x64 g_state_save{};
+
 auto
 setup_vmcs_unhandled(MockRepository &mocks, vmcs::value_type reason)
 {
-    auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
+    auto vmcs = mocks.Mock<vmcs_intel_x64>();
 
-    mocks.NeverCall(vmcs.get(), vmcs_intel_x64::launch);
-    mocks.NeverCall(vmcs.get(), vmcs_intel_x64::promote);
-    mocks.NeverCall(vmcs.get(), vmcs_intel_x64::load);
-    mocks.NeverCall(vmcs.get(), vmcs_intel_x64::clear);
-    mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
+    mocks.NeverCall(vmcs, vmcs_intel_x64::launch);
+    mocks.NeverCall(vmcs, vmcs_intel_x64::promote);
+    mocks.NeverCall(vmcs, vmcs_intel_x64::load);
+    mocks.NeverCall(vmcs, vmcs_intel_x64::clear);
+    mocks.ExpectCall(vmcs, vmcs_intel_x64::resume);
 
     g_exit_reason = reason;
     return vmcs;
@@ -126,13 +128,13 @@ setup_vmcs_unhandled(MockRepository &mocks, vmcs::value_type reason)
 auto
 setup_vmcs_handled(MockRepository &mocks, vmcs::value_type reason)
 {
-    auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
+    auto vmcs = mocks.Mock<vmcs_intel_x64>();
 
-    mocks.OnCall(vmcs.get(), vmcs_intel_x64::launch);
-    mocks.OnCall(vmcs.get(), vmcs_intel_x64::promote);
-    mocks.OnCall(vmcs.get(), vmcs_intel_x64::load);
-    mocks.OnCall(vmcs.get(), vmcs_intel_x64::clear);
-    mocks.ExpectCall(vmcs.get(), vmcs_intel_x64::resume);
+    mocks.OnCall(vmcs, vmcs_intel_x64::launch);
+    mocks.OnCall(vmcs, vmcs_intel_x64::promote);
+    mocks.OnCall(vmcs, vmcs_intel_x64::load);
+    mocks.OnCall(vmcs, vmcs_intel_x64::clear);
+    mocks.ExpectCall(vmcs, vmcs_intel_x64::resume);
 
     g_exit_reason = reason;
     return vmcs;
@@ -141,24 +143,24 @@ setup_vmcs_handled(MockRepository &mocks, vmcs::value_type reason)
 auto
 setup_vmcs_halt(MockRepository &mocks, vmcs::value_type reason)
 {
-    auto vmcs = bfn::mock_shared<vmcs_intel_x64>(mocks);
+    auto vmcs = mocks.Mock<vmcs_intel_x64>();
 
-    mocks.NeverCall(vmcs.get(), vmcs_intel_x64::launch);
-    mocks.NeverCall(vmcs.get(), vmcs_intel_x64::promote);
-    mocks.NeverCall(vmcs.get(), vmcs_intel_x64::load);
-    mocks.NeverCall(vmcs.get(), vmcs_intel_x64::clear);
-    mocks.NeverCall(vmcs.get(), vmcs_intel_x64::resume);
+    mocks.NeverCall(vmcs, vmcs_intel_x64::launch);
+    mocks.NeverCall(vmcs, vmcs_intel_x64::promote);
+    mocks.NeverCall(vmcs, vmcs_intel_x64::load);
+    mocks.NeverCall(vmcs, vmcs_intel_x64::clear);
+    mocks.NeverCall(vmcs, vmcs_intel_x64::resume);
 
     g_exit_reason = reason;
     return vmcs;
 }
 
 exit_handler_intel_x64
-setup_ehlr(const std::shared_ptr<vmcs_intel_x64> &vmcs)
+setup_ehlr(gsl::not_null<vmcs_intel_x64 *> vmcs)
 {
     auto ehlr = exit_handler_intel_x64{};
     ehlr.set_vmcs(vmcs);
-    ehlr.set_state_save(std::make_shared<state_save_intel_x64>());
+    ehlr.set_state_save(&g_state_save);
 
     g_rip = ehlr.m_state_save->rip + g_exit_instruction_length;
     return ehlr;

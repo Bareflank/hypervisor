@@ -194,130 +194,6 @@ auto make_uintptr(const T ptr)
 ///
 #define expect_no_exception(f) expect_no_exception_with_args(f, __PRETTY_FUNCTION__, __LINE__)
 
-/// Assert True
-///
-/// This macro verifies a unit test to be true. If the unit test is not
-/// true, the unit test reports a failue and stops.
-///
-/// @code
-///
-/// ASSERT_TRUE(1 == 0) // unit test fails
-/// ASSERT_TRUE(1 == 1) // unit test is not executed, but would have passed
-///
-/// @endcode
-///
-#define ASSERT_TRUE(condition) \
-    if((condition)) { this->inc_pass(); } \
-    else { this->assert_failed(#condition, static_cast<const char *>(__PRETTY_FUNCTION__), __LINE__); }
-
-/// Assert False
-///
-/// This macro verifies a unit test to be false. If the unit test is not
-/// false, the unit test reports a failue and stops.
-///
-/// @code
-///
-/// ASSERT_FALSE(1 == 1) // unit test fails
-/// ASSERT_FALSE(1 == 0) // unit test is not executed, but would have passed
-///
-/// @endcode
-///
-#define ASSERT_FALSE(condition) \
-    if(!(condition)) { this->inc_pass(); } \
-    else { this->assert_failed(#condition, static_cast<const char *>(__PRETTY_FUNCTION__), __LINE__); }
-
-/// Assert Exception
-///
-/// This macro verifies a unit test throws an exception. If the unit
-/// test does not throw an exception, the unit test reports a failue and stops.
-///
-/// @code
-///
-/// ASSERT_EXCEPTION(blah.do_something(), std::exception) // unit test fails if throw()
-///
-/// @endcode
-///
-
-#define ASSERT_EXCEPTION(a, b) \
-    { \
-        bool caught = false; \
-        bool wrong_exception = false; \
-        std::string caught_type; \
-        std::string expecting_type; \
-        try{ a; } \
-        catch(BaseException &be) \
-        { \
-            throw; \
-        } \
-        catch(bfn::general_exception &ge) \
-        { \
-            caught = true; \
-            if (strcmp(typeid(ge).name(), typeid(b).name()) != 0) \
-            { \
-                wrong_exception = true; \
-                caught_type = typeid(ge).name(); \
-                expecting_type = typeid(b).name(); \
-            } \
-            else \
-                std::cout << "caught: " << ge << '\n'; \
-        } \
-        catch(std::exception &e) \
-        { \
-            caught = true; \
-            if (strcmp(typeid(e).name(), typeid(b).name()) != 0) \
-            { \
-                wrong_exception = true; \
-                caught_type = typeid(e).name(); \
-                expecting_type = typeid(b).name(); \
-            } \
-            else \
-                std::cout << "caught: " << e << '\n'; \
-        } \
-        catch(...) \
-        { \
-            caught = true; \
-            wrong_exception = true; \
-            std::cerr << "unknown exception caught" << '\n'; \
-        } \
-        if(!caught) \
-        { \
-            this->assert_failed("no exception was caught", static_cast<const char *>(__PRETTY_FUNCTION__), __LINE__); \
-        } \
-        else \
-        { \
-            if (wrong_exception) \
-            { \
-                this->assert_failed("wrong exception caught", static_cast<const char *>(__PRETTY_FUNCTION__), __LINE__); \
-                std::cerr << "    - caught: " << caught_type << '\n'; \
-                std::cerr << "    - expecting: " << expecting_type << '\n'; \
-            } \
-            else \
-                this->inc_pass(); \
-        } \
-    }
-
-/// Assert No Exception
-///
-/// This macro verifies a unit test does not throw an exception. If the unit
-/// test throws an exception, the unit test reports a failue and stops.
-///
-/// @code
-///
-/// ASSERT_NO_EXCEPTION(blah.do_something()) // unit test fails if throw()
-///
-/// @endcode
-///
-#define ASSERT_NO_EXCEPTION(a) \
-    { \
-        bool caught = false; \
-        try{ a; } \
-        catch(BaseException &be) { throw; } \
-        catch(bfn::general_exception &ge) { caught = true; } \
-        catch(std::exception &e) { caught = true; } \
-        catch(...) { caught = true; } \
-        ASSERT_FALSE(caught); \
-    }
-
 /// Run Unittests with Mocks
 ///
 /// When using mocks, it's possible that hippomocks could throw an
@@ -379,19 +255,6 @@ no_delete(T *)
 namespace bfn
 {
 
-/// Mock Shared
-///
-/// Use this function to create a mocked version of a shared pointer.
-///
-/// @code
-/// MockRepository mocks;
-/// auto f = bfn::mock_shared<foo>(mocks);
-/// @endcode
-///
-template<class T> auto
-mock_shared(MockRepository &mocks)
-{ return std::shared_ptr<T>(mocks.Mock<T>(), no_delete<T>); }
-
 /// Mock No Delete
 ///
 /// If the destructor of the class is called, this function prevents a
@@ -410,6 +273,32 @@ mock_no_delete(MockRepository &mocks)
 
     return ptr;
 }
+
+/// Mock Shared
+///
+/// Use this function to create a mocked version of a shared pointer.
+///
+/// @code
+/// MockRepository mocks;
+/// auto f = bfn::mock_shared<foo>(mocks);
+/// @endcode
+///
+template<class T> auto
+mock_shared(MockRepository &mocks)
+{ return std::shared_ptr<T>(mocks.Mock<T>(), no_delete<T>); }
+
+/// Mock Unique
+///
+/// Use this function to create a mocked version of a unique pointer.
+///
+/// @code
+/// MockRepository mocks;
+/// auto f = bfn::mock_unique<foo>(mocks);
+/// @endcode
+///
+template<class T> auto
+mock_unique(MockRepository &mocks)
+{ return std::unique_ptr<T>(mock_no_delete<T>(mocks)); }
 
 }
 
@@ -830,7 +719,6 @@ protected:
     // -------------------------------------------------------------------------
     // Private Interface
     // -------------------------------------------------------------------------
-
 
 private:
 

@@ -33,6 +33,9 @@
 /// completing. To start the VMM, this function calls the vcpu_manager's
 /// start function, which begins the processing of starting the vmm.
 ///
+/// @expects none
+/// @ensures none
+///
 /// @param arg unused (likely will contain the cpu's core # in the future)
 /// @return ENTRY_SUCCESS on success, ENTRY_ERROR_UNKNOWN otherwise.
 ///
@@ -45,6 +48,9 @@ extern "C" int64_t start_vmm(uint64_t arg) noexcept;
 /// function, a new stack is provided, and all exceptions are caught prior to
 /// completing. To stop the VMM, this function calls the vcpu_manager's
 /// stop function, which begins the processing of stopping the vmm.
+///
+/// @expects none
+/// @ensures none
 ///
 /// @param arg unused (likely will contain the cpu's core # in the future)
 /// @return ENTRY_SUCCESS on success, ENTRY_ERROR_UNKNOWN otherwise.

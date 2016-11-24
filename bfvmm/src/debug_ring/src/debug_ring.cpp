@@ -35,7 +35,7 @@ std::mutex g_debug_mutex;
 // Global
 // -----------------------------------------------------------------------------
 
-std::map<uint64_t, debug_ring_resources_t *> g_drrs;
+std::map<vcpuid::type, debug_ring_resources_t *> g_drrs;
 
 extern "C" int64_t
 get_drr(uint64_t vcpuid, struct debug_ring_resources_t **drr) noexcept
@@ -56,7 +56,7 @@ get_drr(uint64_t vcpuid, struct debug_ring_resources_t **drr) noexcept
 // Debug Ring Implementation
 // -----------------------------------------------------------------------------
 
-debug_ring::debug_ring(uint64_t vcpuid) noexcept
+debug_ring::debug_ring(vcpuid::type vcpuid) noexcept
 {
     try
     {
@@ -92,11 +92,9 @@ debug_ring::write(const std::string &str) noexcept
         //       optimized memcpy that used both rep string instructions and
         //       SIMD instructions
 
-        if (!m_drr)
-            throw std::invalid_argument("m_drr == nullptr");
-
-        if (str.length() == 0 || str.length() >= DEBUG_RING_SIZE)
-            throw std::invalid_argument("invalid string length");
+        expects(m_drr);
+        expects(str.length() > 0);
+        expects(str.length() < DEBUG_RING_SIZE);
 
         // The length that we were given is equivalent to strlen, which does not
         // include the '\0', so we add one to the length to account for that.

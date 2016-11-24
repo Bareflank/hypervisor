@@ -49,6 +49,9 @@ struct eh_frame_t
 /**
  * Get EH Framework List
  *
+ * @expects none
+ * @ensures ret != nullptr
+ *
  * Returns a list of ".eh_frame" sections, containing their start address,
  * and size. This is used by the unwind library to find stack frames. The
  * list should have one .eh_frame section for each module that is loaded.
@@ -63,6 +66,10 @@ struct eh_frame_t *get_eh_frame_list() noexcept;
  * Registers an ".eh_frame" section, containing it's start address,
  * and size. This will add the eh_frame section to a global list that can
  * be retreived using get_eh_frame_list
+ *
+ * @expects addr != nullptr
+ * @expects size != 0
+ * @ensures none
  *
  * @param addr the address of the eh_frame section
  * @param size the size of the eh_frame section

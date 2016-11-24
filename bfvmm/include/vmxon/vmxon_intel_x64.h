@@ -42,9 +42,15 @@ public:
 
     /// Default Constructor
     ///
+    /// @expects none
+    /// @ensures none
+    ///
     vmxon_intel_x64();
 
     /// Destructor
+    ///
+    /// @expects none
+    /// @ensures none
     ///
     virtual ~vmxon_intel_x64() = default;
 
@@ -54,27 +60,33 @@ public:
     /// compatibility tests will be run to ensure that the VMXON can in fact
     /// be used. If an error occurs, an exception will be thrown
     ///
+    /// @expects none
+    /// @ensures none
+    ///
     virtual void start();
 
     /// Stop VMXON
     ///
     /// Stops the VMXON.
     ///
+    /// @expects none
+    /// @ensures none
+    ///
     virtual void stop();
 
 protected:
 
-    virtual void check_cpuid_vmx_supported();
-    virtual void check_vmx_capabilities_msr();
-    virtual void check_ia32_vmx_cr0_fixed_msr();
-    virtual void check_ia32_vmx_cr4_fixed_msr();
-    virtual void check_ia32_feature_control_msr();
-    virtual void check_v8086_disabled();
+    void check_cpuid_vmx_supported();
+    void check_vmx_capabilities_msr();
+    void check_ia32_vmx_cr0_fixed_msr();
+    void check_ia32_vmx_cr4_fixed_msr();
+    void check_ia32_feature_control_msr();
+    void check_v8086_disabled();
 
-    virtual void create_vmxon_region();
-    virtual void release_vmxon_region() noexcept;
-    virtual void execute_vmxon();
-    virtual void execute_vmxoff();
+    void create_vmxon_region();
+    void release_vmxon_region() noexcept;
+    void execute_vmxon();
+    void execute_vmxoff();
 
 private:
 

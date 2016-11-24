@@ -26,6 +26,8 @@
 
 using namespace x64;
 
+extern std::map<cpuid::field_type, cpuid::value_type> g_eax_cpuid;
+
 void
 intrinsics_ut::test_pdpte_x64_reserved_mask()
 {
@@ -36,6 +38,6 @@ intrinsics_ut::test_pdpte_x64_reserved_mask()
 void
 intrinsics_ut::test_pdpte_x64_page_directory_addr_mask()
 {
-    g_eax_cpuid[cpuid::addr_size::addr] = 48;
+    g_eax_cpuid[cpuid::addr_size::addr] = 48U;
     this->expect_true(pdpte::page_directory_addr::mask() == 0x0000FFFFFFFFF000ULL);
 }

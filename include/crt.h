@@ -42,6 +42,9 @@ struct section_info_t;
  * module has this function as it is statically linked with each module as
  * it is compiled by the gcc wrapper
  *
+ * @expects info != nullptr
+ * @ensures none
+ *
  * @param info a pointer to the section info structure that is used by the
  *     init funcion.
  */
@@ -54,6 +57,9 @@ typedef int64_t (*local_init_t)(struct section_info_t *info);
  * uses on Linux. This is called by the driver entry as each module. Each
  * module has this function as it is statically linked with each module as
  * it is compiled by the gcc wrapper
+ *
+ * @expects info != nullptr
+ * @ensures none
  *
  * @param info a pointer to the section info structure that is used by the
  *     fini funcion.
@@ -68,6 +74,9 @@ typedef int64_t (*local_fini_t)(struct section_info_t *info);
  * module has this function as it is statically linked with each module as
  * it is compiled by the gcc wrapper
  *
+ * @expects info != nullptr
+ * @ensures none
+ *
  * @param info a pointer to the section info structure that is used by the
  *     init funcion.
  */
@@ -80,6 +89,9 @@ int64_t local_init(struct section_info_t *info);
  * uses on Linux. This is called by the driver entry as each module. Each
  * module has this function as it is statically linked with each module as
  * it is compiled by the gcc wrapper
+ *
+ * @expects info != nullptr
+ * @ensures none
  *
  * @param info a pointer to the section info structure that is used by the
  *     fini funcion.

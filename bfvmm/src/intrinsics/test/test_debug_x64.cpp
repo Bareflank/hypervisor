@@ -24,7 +24,7 @@
 
 using namespace x64;
 
-uint64_t g_dr7 = 0;
+dr7::value_type g_dr7 = 0;
 
 extern "C" uint64_t
 __read_dr7(void) noexcept

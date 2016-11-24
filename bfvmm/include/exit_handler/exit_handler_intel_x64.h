@@ -123,10 +123,7 @@ protected:
     friend class vcpu_ut;
     friend class vcpu_intel_x64;
     friend class exit_handler_intel_x64_ut;
-    friend exit_handler_intel_x64 setup_ehlr(const std::shared_ptr<vmcs_intel_x64> &vmcs);
-
-    std::shared_ptr<vmcs_intel_x64> m_vmcs;
-    std::shared_ptr<state_save_intel_x64> m_state_save;
+    friend exit_handler_intel_x64 setup_ehlr(gsl::not_null<vmcs_intel_x64 *> vmcs);
 
 private:
 
@@ -147,10 +144,13 @@ private:
 
 private:
 
-    virtual void set_vmcs(const std::shared_ptr<vmcs_intel_x64> &vmcs)
+    vmcs_intel_x64 *m_vmcs;
+    state_save_intel_x64 *m_state_save;
+
+    virtual void set_vmcs(gsl::not_null<vmcs_intel_x64 *> vmcs)
     { m_vmcs = vmcs; }
 
-    virtual void set_state_save(const std::shared_ptr<state_save_intel_x64> &state_save)
+    virtual void set_state_save(gsl::not_null<state_save_intel_x64 *> state_save)
     { m_state_save = state_save; }
 };
 

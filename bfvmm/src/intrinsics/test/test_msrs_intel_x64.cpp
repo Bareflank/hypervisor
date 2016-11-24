@@ -24,7 +24,7 @@
 
 using namespace intel_x64;
 
-std::map<uint32_t, uint64_t> g_msrs;
+std::map<msrs::field_type, msrs::value_type> g_msrs;
 
 extern "C" uint64_t
 __read_msr(uint32_t addr) noexcept

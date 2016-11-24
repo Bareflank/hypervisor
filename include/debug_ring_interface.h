@@ -38,6 +38,9 @@ extern "C" {
 /**
  * Get Debug Ring Resource Typedef
  *
+ * @expects none
+ * @ensures none
+ *
  * This is used by the driver entry to as the function signature for
  * getting it's internal debug ring
  */
@@ -105,6 +108,9 @@ struct debug_ring_resources_t
  * Reads strings that have been written to the debug ring. Although you can
  * provide any buffer size you want, it's advised to provide a buffer that
  * is the same size as the buffer that was originally allocated.
+ *
+ * @expects none
+ * @ensures none
  *
  * @param drr the debug_ring_resource that was used to create the
  *        debug ring

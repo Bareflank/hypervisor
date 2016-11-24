@@ -41,6 +41,7 @@
 #include <vmcs/vmcs_intel_x64_natural_width_read_only_data_fields.h>
 #include <vmcs/vmcs_intel_x64_64bit_guest_state_fields.h>
 #include <vmcs/vmcs_intel_x64_check.h>
+#include <vmcs/vmcs_intel_x64_debug.h>
 
 using namespace x64;
 using namespace intel_x64;
@@ -402,6 +403,9 @@ exit_handler_intel_x64::unimplemented_handler() noexcept
 
         guard_exceptions([&]
         { vmcs::check::all(); });
+
+        guard_exceptions([&]
+        { vmcs::debug::dump(); });
     }
 
     g_unimplemented_handler_mutex.unlock();

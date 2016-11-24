@@ -127,56 +127,56 @@ public:
 
         bfdebug << bfendl;
         bfdebug << "segment selectors:" << bfendl;
-        bfdebug << std::setw(35) << view_as_pointer(m_cs) << bfendl;
-        bfdebug << std::setw(35) << view_as_pointer(m_ss) << bfendl;
-        bfdebug << std::setw(35) << view_as_pointer(m_fs) << bfendl;
-        bfdebug << std::setw(35) << view_as_pointer(m_gs) << bfendl;
-        bfdebug << std::setw(35) << view_as_pointer(m_tr) << bfendl;
+        bfdebug << "    - m_cs: " << view_as_pointer(m_cs) << bfendl;
+        bfdebug << "    - m_ss: " << view_as_pointer(m_ss) << bfendl;
+        bfdebug << "    - m_fs: " << view_as_pointer(m_fs) << bfendl;
+        bfdebug << "    - m_gs: " << view_as_pointer(m_gs) << bfendl;
+        bfdebug << "    - m_tr: " << view_as_pointer(m_tr) << bfendl;
 
         bfdebug << bfendl;
         bfdebug << "segment base:" << bfendl;
-        bfdebug << std::setw(35) << view_as_pointer(cs_base()) << bfendl;
-        bfdebug << std::setw(35) << view_as_pointer(ss_base()) << bfendl;
-        bfdebug << std::setw(35) << view_as_pointer(fs_base()) << bfendl;
-        bfdebug << std::setw(35) << view_as_pointer(gs_base()) << bfendl;
-        bfdebug << std::setw(35) << view_as_pointer(tr_base()) << bfendl;
+        bfdebug << "    - cs_base(): " << view_as_pointer(cs_base()) << bfendl;
+        bfdebug << "    - ss_base(): " << view_as_pointer(ss_base()) << bfendl;
+        bfdebug << "    - fs_base(): " << view_as_pointer(fs_base()) << bfendl;
+        bfdebug << "    - gs_base(): " << view_as_pointer(gs_base()) << bfendl;
+        bfdebug << "    - tr_base(): " << view_as_pointer(tr_base()) << bfendl;
 
         bfdebug << bfendl;
         bfdebug << "segment limit:" << bfendl;
-        bfdebug << std::setw(35) << view_as_pointer(cs_limit()) << bfendl;
-        bfdebug << std::setw(35) << view_as_pointer(ss_limit()) << bfendl;
-        bfdebug << std::setw(35) << view_as_pointer(fs_limit()) << bfendl;
-        bfdebug << std::setw(35) << view_as_pointer(gs_limit()) << bfendl;
-        bfdebug << std::setw(35) << view_as_pointer(tr_limit()) << bfendl;
+        bfdebug << "    - cs_limit(): " << view_as_pointer(cs_limit()) << bfendl;
+        bfdebug << "    - ss_limit(): " << view_as_pointer(ss_limit()) << bfendl;
+        bfdebug << "    - fs_limit(): " << view_as_pointer(fs_limit()) << bfendl;
+        bfdebug << "    - gs_limit(): " << view_as_pointer(gs_limit()) << bfendl;
+        bfdebug << "    - tr_limit(): " << view_as_pointer(tr_limit()) << bfendl;
 
         bfdebug << bfendl;
         bfdebug << "segment acess rights:" << bfendl;
-        bfdebug << std::setw(35) << view_as_pointer(cs_access_rights()) << bfendl;
-        bfdebug << std::setw(35) << view_as_pointer(ss_access_rights()) << bfendl;
-        bfdebug << std::setw(35) << view_as_pointer(fs_access_rights()) << bfendl;
-        bfdebug << std::setw(35) << view_as_pointer(gs_access_rights()) << bfendl;
-        bfdebug << std::setw(35) << view_as_pointer(tr_access_rights()) << bfendl;
+        bfdebug << "    - cs_access_rights(): " << view_as_pointer(cs_access_rights()) << bfendl;
+        bfdebug << "    - ss_access_rights(): " << view_as_pointer(ss_access_rights()) << bfendl;
+        bfdebug << "    - fs_access_rights(): " << view_as_pointer(fs_access_rights()) << bfendl;
+        bfdebug << "    - gs_access_rights(): " << view_as_pointer(gs_access_rights()) << bfendl;
+        bfdebug << "    - tr_access_rights(): " << view_as_pointer(tr_access_rights()) << bfendl;
 
         bfdebug << bfendl;
         bfdebug << "registers:" << bfendl;
-        bfdebug << std::setw(35) << view_as_pointer(m_cr0) << bfendl;
-        bfdebug << std::setw(35) << view_as_pointer(m_cr3) << bfendl;
-        bfdebug << std::setw(35) << view_as_pointer(m_cr4) << bfendl;
+        bfdebug << "    - m_cr0: " << view_as_pointer(m_cr0) << bfendl;
+        bfdebug << "    - m_cr3: " << view_as_pointer(m_cr3) << bfendl;
+        bfdebug << "    - m_cr4: " << view_as_pointer(m_cr4) << bfendl;
 
         bfdebug << bfendl;
         bfdebug << "flags:" << bfendl;
-        bfdebug << std::setw(35) << view_as_pointer(m_rflags) << bfendl;
+        bfdebug << "    - m_rflags: " << view_as_pointer(m_rflags) << bfendl;
 
         bfdebug << bfendl;
         bfdebug << "gdt/idt:" << bfendl;
-        bfdebug << std::setw(35) << view_as_pointer(g_gdt.base()) << bfendl;
-        bfdebug << std::setw(35) << view_as_pointer(g_gdt.limit()) << bfendl;
-        bfdebug << std::setw(35) << view_as_pointer(g_idt.base()) << bfendl;
-        bfdebug << std::setw(35) << view_as_pointer(g_idt.limit()) << bfendl;
+        bfdebug << "    - g_gdt.base(): " << view_as_pointer(g_gdt.base()) << bfendl;
+        bfdebug << "    - g_gdt.limit(): " << view_as_pointer(g_gdt.limit()) << bfendl;
+        bfdebug << "    - g_idt.base(): " << view_as_pointer(g_idt.base()) << bfendl;
+        bfdebug << "    - g_idt.limit(): " << view_as_pointer(g_idt.limit()) << bfendl;
 
         bfdebug << bfendl;
         bfdebug << "model specific registers:" << bfendl;
-        bfdebug << std::setw(35) << view_as_pointer(m_ia32_efer_msr) << bfendl;
+        bfdebug << "    - m_ia32_efer_msr: " << view_as_pointer(m_ia32_efer_msr) << bfendl;
 
         bfdebug << bfendl;
     }

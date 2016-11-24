@@ -19,57 +19,21 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <exception.h>
-#include <vcpu/vcpu.h>
+#ifndef VCPUID_H
+#define VCPUID_H
 
-vcpu::vcpu(vcpuid::type id, std::unique_ptr<debug_ring> dr) :
-    m_id(id),
-    m_debug_ring(std::move(dr)),
-    m_is_running(false),
-    m_is_initialized(false)
+#include <stdint.h>
+
+// *INDENT-OFF*
+
+namespace vcpuid
 {
-    if ((id & vcpuid::reserved) != 0)
-        throw std::invalid_argument("invalid vcpuid");
+    using type = uint64_t;
 
-    if (!m_debug_ring)
-        m_debug_ring = std::make_unique<debug_ring>(id);
+    constexpr const auto reserved = 0x8000000000000000UL;
+    constexpr const auto guest_mask = 0xFFFFFFFF00000000UL;
 }
 
-void
-vcpu::init(user_data *data)
-{
-    (void) data;
+// *INDENT-ON*
 
-    m_is_initialized = true;
-}
-
-void
-vcpu::fini(user_data *data)
-{
-    (void) data;
-
-    if (m_is_running)
-        this->hlt();
-
-    m_is_initialized = false;
-}
-
-void
-vcpu::run(user_data *data)
-{
-    (void) data;
-
-    m_is_running = true;
-}
-
-void
-vcpu::hlt(user_data *data)
-{
-    (void) data;
-
-    m_is_running = false;
-}
-
-void
-vcpu::write(const std::string &str) noexcept
-{ m_debug_ring->write(str); }
+#endif

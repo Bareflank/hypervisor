@@ -25,7 +25,7 @@
 #include <string>
 #include <memory>
 
-#include <stdint.h>
+#include <vcpuid.h>
 #include <debug_ring_interface.h>
 
 /// Debug Ring
@@ -41,9 +41,15 @@ public:
 
     /// Default Constructor
     ///
-    debug_ring(uint64_t vcpuid) noexcept;
+    /// @expects none
+    /// @ensures none
+    ///
+    debug_ring(vcpuid::type vcpuid) noexcept;
 
     /// Debug Ring Destructor
+    ///
+    /// @expects none
+    /// @ensures none
     ///
     virtual ~debug_ring() noexcept;
 
@@ -54,23 +60,26 @@ public:
     /// ring is full, the write will keep removing existing strings in the
     /// buffer until enough space is made, to add the string.
     ///
-    /// @param str the string to write to the debug ring
+    /// @expects none
+    /// @ensures none
     ///
-    /// @throws invalid_debug_ring thrown if the debug_ring that was
-    ///     constructed is invalid (likely due to an invalid vcpuid)
-    /// @throws range_error thrown if the string that is provided is too large
+    /// @param str the string to write to the debug ring
     ///
     virtual void write(const std::string &str) noexcept;
 
 private:
 
-    uint64_t m_vcpuid;
+    vcpuid::type m_vcpuid;
     std::unique_ptr<debug_ring_resources_t> m_drr;
 };
 
 /// Get Debug Ring Resource
 ///
 /// Returns a pointer to a debug_ring_resources_t for a given CPU.
+///
+/// @expects drr != nullptr
+/// @expects vcpuid == vcpu that exists
+/// @ensures none
 ///
 /// @param vcpuid defines which debug ring to return
 /// @param drr the resulting debug ring

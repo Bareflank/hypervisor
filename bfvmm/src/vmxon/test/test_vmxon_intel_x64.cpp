@@ -26,6 +26,7 @@
 #include <memory_manager/memory_manager_x64.h>
 
 #include <intrinsics/cpuid_x64.h>
+#include <intrinsics/rflags_x64.h>
 #include <intrinsics/vmx_intel_x64.h>
 #include <intrinsics/crs_intel_x64.h>
 #include <intrinsics/msrs_intel_x64.h>
@@ -33,11 +34,11 @@
 using namespace x64;
 using namespace intel_x64;
 
-static uint64_t g_cr0 = 0;
-static uint64_t g_cr4 = 0;
-static uint64_t g_rflags = 0;
-static std::map<uint32_t, uint64_t> g_msrs;
-static std::map<uint32_t, uint32_t> g_cpuid;
+static cr0::value_type g_cr0 = 0;
+static cr4::value_type g_cr4 = 0;
+static rflags::value_type g_rflags = 0;
+static std::map<msrs::field_type, msrs::value_type> g_msrs;
+static std::map<cpuid::field_type, cpuid::value_type> g_cpuid;
 
 bool g_vmxon_fails = false;
 bool g_vmxoff_fails = false;
@@ -115,7 +116,7 @@ void
 vmxon_ut::test_start_success()
 {
     MockRepository mocks;
-    auto mm = mocks.Mock<memory_manager_x64>();
+    auto &&mm = mocks.Mock<memory_manager_x64>();
 
     setup_intrinsics(mocks, mm);
 
@@ -130,7 +131,7 @@ void
 vmxon_ut::test_start_start_twice()
 {
     MockRepository mocks;
-    auto mm = mocks.Mock<memory_manager_x64>();
+    auto &&mm = mocks.Mock<memory_manager_x64>();
 
     setup_intrinsics(mocks, mm);
 
@@ -148,7 +149,7 @@ void
 vmxon_ut::test_start_execute_vmxon_already_on_failure()
 {
     MockRepository mocks;
-    auto mm = mocks.Mock<memory_manager_x64>();
+    auto &&mm = mocks.Mock<memory_manager_x64>();
 
     setup_intrinsics(mocks, mm);
 
@@ -165,7 +166,7 @@ void
 vmxon_ut::test_start_execute_vmxon_failure()
 {
     MockRepository mocks;
-    auto mm = mocks.Mock<memory_manager_x64>();
+    auto &&mm = mocks.Mock<memory_manager_x64>();
 
     setup_intrinsics(mocks, mm);
 
@@ -185,7 +186,7 @@ void
 vmxon_ut::test_start_check_ia32_vmx_cr4_fixed0_msr_failure()
 {
     MockRepository mocks;
-    auto mm = mocks.Mock<memory_manager_x64>();
+    auto &&mm = mocks.Mock<memory_manager_x64>();
 
     setup_intrinsics(mocks, mm);
 
@@ -202,7 +203,7 @@ void
 vmxon_ut::test_start_check_ia32_vmx_cr4_fixed1_msr_failure()
 {
     MockRepository mocks;
-    auto mm = mocks.Mock<memory_manager_x64>();
+    auto &&mm = mocks.Mock<memory_manager_x64>();
 
     setup_intrinsics(mocks, mm);
 
@@ -220,7 +221,7 @@ void
 vmxon_ut::test_start_enable_vmx_operation_failure()
 {
     MockRepository mocks;
-    auto mm = mocks.Mock<memory_manager_x64>();
+    auto &&mm = mocks.Mock<memory_manager_x64>();
 
     setup_intrinsics(mocks, mm);
 
@@ -240,7 +241,7 @@ void
 vmxon_ut::test_start_v8086_disabled_failure()
 {
     MockRepository mocks;
-    auto mm = mocks.Mock<memory_manager_x64>();
+    auto &&mm = mocks.Mock<memory_manager_x64>();
 
     setup_intrinsics(mocks, mm);
 
@@ -260,7 +261,7 @@ void
 vmxon_ut::test_start_check_ia32_feature_control_msr()
 {
     MockRepository mocks;
-    auto mm = mocks.Mock<memory_manager_x64>();
+    auto &&mm = mocks.Mock<memory_manager_x64>();
 
     setup_intrinsics(mocks, mm);
 
@@ -277,7 +278,7 @@ void
 vmxon_ut::test_start_check_ia32_vmx_cr0_fixed0_msr()
 {
     MockRepository mocks;
-    auto mm = mocks.Mock<memory_manager_x64>();
+    auto &&mm = mocks.Mock<memory_manager_x64>();
 
     setup_intrinsics(mocks, mm);
 
@@ -294,7 +295,7 @@ void
 vmxon_ut::test_start_check_ia32_vmx_cr0_fixed1_msr()
 {
     MockRepository mocks;
-    auto mm = mocks.Mock<memory_manager_x64>();
+    auto &&mm = mocks.Mock<memory_manager_x64>();
 
     setup_intrinsics(mocks, mm);
 
@@ -312,7 +313,7 @@ void
 vmxon_ut::test_start_check_vmx_capabilities_msr_memtype_failure()
 {
     MockRepository mocks;
-    auto mm = mocks.Mock<memory_manager_x64>();
+    auto &&mm = mocks.Mock<memory_manager_x64>();
 
     setup_intrinsics(mocks, mm);
 
@@ -329,7 +330,7 @@ void
 vmxon_ut::test_start_check_vmx_capabilities_msr_addr_width_failure()
 {
     MockRepository mocks;
-    auto mm = mocks.Mock<memory_manager_x64>();
+    auto &&mm = mocks.Mock<memory_manager_x64>();
 
     setup_intrinsics(mocks, mm);
 
@@ -346,7 +347,7 @@ void
 vmxon_ut::test_start_check_vmx_capabilities_true_based_controls_failure()
 {
     MockRepository mocks;
-    auto mm = mocks.Mock<memory_manager_x64>();
+    auto &&mm = mocks.Mock<memory_manager_x64>();
 
     setup_intrinsics(mocks, mm);
 
@@ -363,7 +364,7 @@ void
 vmxon_ut::test_start_check_cpuid_vmx_supported_failure()
 {
     MockRepository mocks;
-    auto mm = mocks.Mock<memory_manager_x64>();
+    auto &&mm = mocks.Mock<memory_manager_x64>();
 
     setup_intrinsics(mocks, mm);
 
@@ -380,7 +381,7 @@ void
 vmxon_ut::test_start_virt_to_phys_failure()
 {
     MockRepository mocks;
-    auto mm = mocks.Mock<memory_manager_x64>();
+    auto &&mm = mocks.Mock<memory_manager_x64>();
 
     setup_intrinsics(mocks, mm);
 
@@ -400,7 +401,7 @@ void
 vmxon_ut::test_stop_success()
 {
     MockRepository mocks;
-    auto mm = mocks.Mock<memory_manager_x64>();
+    auto &&mm = mocks.Mock<memory_manager_x64>();
 
     setup_intrinsics(mocks, mm);
 
@@ -417,7 +418,7 @@ void
 vmxon_ut::test_stop_stop_twice()
 {
     MockRepository mocks;
-    auto mm = mocks.Mock<memory_manager_x64>();
+    auto &&mm = mocks.Mock<memory_manager_x64>();
 
     setup_intrinsics(mocks, mm);
 
@@ -435,7 +436,7 @@ void
 vmxon_ut::test_stop_vmxoff_check_failure()
 {
     MockRepository mocks;
-    auto mm = mocks.Mock<memory_manager_x64>();
+    auto &&mm = mocks.Mock<memory_manager_x64>();
 
     setup_intrinsics(mocks, mm);
 
@@ -457,7 +458,7 @@ void
 vmxon_ut::test_stop_vmxoff_failure()
 {
     MockRepository mocks;
-    auto mm = mocks.Mock<memory_manager_x64>();
+    auto &&mm = mocks.Mock<memory_manager_x64>();
 
     setup_intrinsics(mocks, mm);
 

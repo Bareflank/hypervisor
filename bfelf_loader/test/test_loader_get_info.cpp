@@ -99,22 +99,20 @@ bfelf_loader_ut::test_bfelf_loader_get_info_expected_misc_resources()
     bfelf_file_t dummy_code_ef;
 
     ret = bfelf_file_init(m_dummy_misc.get(), m_dummy_misc_length, &dummy_misc_ef);
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
     ret = bfelf_file_init(m_dummy_code.get(), m_dummy_code_length, &dummy_code_ef);
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     m_dummy_misc_exec = load_elf_file(&dummy_misc_ef);
-    ASSERT_TRUE(m_dummy_misc_exec);
     m_dummy_code_exec = load_elf_file(&dummy_code_ef);
-    ASSERT_TRUE(m_dummy_code_exec);
 
     bfelf_loader_t loader;
     memset(&loader, 0, sizeof(loader));
 
     ret = bfelf_loader_add(&loader, &dummy_misc_ef, m_dummy_misc_exec.get());
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
     ret = bfelf_loader_add(&loader, &dummy_code_ef, m_dummy_code_exec.get());
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     ret = bfelf_loader_relocate(&loader);
     this->expect_true(ret == BFELF_SUCCESS);
@@ -122,7 +120,7 @@ bfelf_loader_ut::test_bfelf_loader_get_info_expected_misc_resources()
     section_info_t info;
 
     ret = bfelf_loader_get_info(&loader, &dummy_misc_ef, &info);
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     this->expect_true(info.ctors_addr != nullptr || info.init_array_addr != nullptr);
     this->expect_true(info.ctors_size != 0 || info.init_array_size != 0);
@@ -142,22 +140,20 @@ bfelf_loader_ut::test_bfelf_loader_get_info_expected_code_resources()
     bfelf_file_t dummy_code_ef;
 
     ret = bfelf_file_init(m_dummy_misc.get(), m_dummy_misc_length, &dummy_misc_ef);
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
     ret = bfelf_file_init(m_dummy_code.get(), m_dummy_code_length, &dummy_code_ef);
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     m_dummy_misc_exec = load_elf_file(&dummy_misc_ef);
-    ASSERT_TRUE(m_dummy_misc_exec);
     m_dummy_code_exec = load_elf_file(&dummy_code_ef);
-    ASSERT_TRUE(m_dummy_code_exec);
 
     bfelf_loader_t loader;
     memset(&loader, 0, sizeof(loader));
 
     ret = bfelf_loader_add(&loader, &dummy_misc_ef, m_dummy_misc_exec.get());
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
     ret = bfelf_loader_add(&loader, &dummy_code_ef, m_dummy_code_exec.get());
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     ret = bfelf_loader_relocate(&loader);
     this->expect_true(ret == BFELF_SUCCESS);
@@ -166,7 +162,7 @@ bfelf_loader_ut::test_bfelf_loader_get_info_expected_code_resources()
     memset(&info, 0, sizeof(info));
 
     ret = bfelf_loader_get_info(&loader, &dummy_code_ef, &info);
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     this->expect_true(info.ctors_addr == nullptr);
     this->expect_true(info.ctors_size == 0);
@@ -186,22 +182,20 @@ bfelf_loader_ut::test_bfelf_loader_get_info_get_section_name_failure_ctors()
     bfelf_file_t dummy_code_ef;
 
     ret = bfelf_file_init(m_dummy_misc.get(), m_dummy_misc_length, &dummy_misc_ef);
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
     ret = bfelf_file_init(m_dummy_code.get(), m_dummy_code_length, &dummy_code_ef);
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     m_dummy_misc_exec = load_elf_file(&dummy_misc_ef);
-    ASSERT_TRUE(m_dummy_misc_exec);
     m_dummy_code_exec = load_elf_file(&dummy_code_ef);
-    ASSERT_TRUE(m_dummy_code_exec);
 
     bfelf_loader_t loader;
     memset(&loader, 0, sizeof(loader));
 
     ret = bfelf_loader_add(&loader, &dummy_misc_ef, m_dummy_misc_exec.get());
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
     ret = bfelf_loader_add(&loader, &dummy_code_ef, m_dummy_code_exec.get());
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     ret = bfelf_loader_relocate(&loader);
     this->expect_true(ret == BFELF_SUCCESS);
@@ -215,7 +209,7 @@ bfelf_loader_ut::test_bfelf_loader_get_info_get_section_name_failure_ctors()
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
         ret = bfelf_loader_get_info(&loader, &dummy_code_ef, &info);
-        ASSERT_TRUE(ret == -1);
+        this->expect_true(ret == -1);
     });
 }
 
@@ -227,22 +221,20 @@ bfelf_loader_ut::test_bfelf_loader_get_info_check_section_name_failure_ctors()
     bfelf_file_t dummy_code_ef;
 
     ret = bfelf_file_init(m_dummy_misc.get(), m_dummy_misc_length, &dummy_misc_ef);
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
     ret = bfelf_file_init(m_dummy_code.get(), m_dummy_code_length, &dummy_code_ef);
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     m_dummy_misc_exec = load_elf_file(&dummy_misc_ef);
-    ASSERT_TRUE(m_dummy_misc_exec);
     m_dummy_code_exec = load_elf_file(&dummy_code_ef);
-    ASSERT_TRUE(m_dummy_code_exec);
 
     bfelf_loader_t loader;
     memset(&loader, 0, sizeof(loader));
 
     ret = bfelf_loader_add(&loader, &dummy_misc_ef, m_dummy_misc_exec.get());
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
     ret = bfelf_loader_add(&loader, &dummy_code_ef, m_dummy_code_exec.get());
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     ret = bfelf_loader_relocate(&loader);
     this->expect_true(ret == BFELF_SUCCESS);
@@ -261,7 +253,7 @@ bfelf_loader_ut::test_bfelf_loader_get_info_check_section_name_failure_ctors()
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
         ret = bfelf_loader_get_info(&loader, &dummy_code_ef, &info);
-        ASSERT_TRUE(ret == -1);
+        this->expect_true(ret == -1);
     });
 }
 
@@ -273,22 +265,20 @@ bfelf_loader_ut::test_bfelf_loader_get_info_get_section_name_failure_dtors()
     bfelf_file_t dummy_code_ef;
 
     ret = bfelf_file_init(m_dummy_misc.get(), m_dummy_misc_length, &dummy_misc_ef);
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
     ret = bfelf_file_init(m_dummy_code.get(), m_dummy_code_length, &dummy_code_ef);
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     m_dummy_misc_exec = load_elf_file(&dummy_misc_ef);
-    ASSERT_TRUE(m_dummy_misc_exec);
     m_dummy_code_exec = load_elf_file(&dummy_code_ef);
-    ASSERT_TRUE(m_dummy_code_exec);
 
     bfelf_loader_t loader;
     memset(&loader, 0, sizeof(loader));
 
     ret = bfelf_loader_add(&loader, &dummy_misc_ef, m_dummy_misc_exec.get());
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
     ret = bfelf_loader_add(&loader, &dummy_code_ef, m_dummy_code_exec.get());
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     ret = bfelf_loader_relocate(&loader);
     this->expect_true(ret == BFELF_SUCCESS);
@@ -307,7 +297,7 @@ bfelf_loader_ut::test_bfelf_loader_get_info_get_section_name_failure_dtors()
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
         ret = bfelf_loader_get_info(&loader, &dummy_code_ef, &info);
-        ASSERT_TRUE(ret == -1);
+        this->expect_true(ret == -1);
     });
 }
 
@@ -319,22 +309,20 @@ bfelf_loader_ut::test_bfelf_loader_get_info_check_section_name_failure_dtors()
     bfelf_file_t dummy_code_ef;
 
     ret = bfelf_file_init(m_dummy_misc.get(), m_dummy_misc_length, &dummy_misc_ef);
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
     ret = bfelf_file_init(m_dummy_code.get(), m_dummy_code_length, &dummy_code_ef);
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     m_dummy_misc_exec = load_elf_file(&dummy_misc_ef);
-    ASSERT_TRUE(m_dummy_misc_exec);
     m_dummy_code_exec = load_elf_file(&dummy_code_ef);
-    ASSERT_TRUE(m_dummy_code_exec);
 
     bfelf_loader_t loader;
     memset(&loader, 0, sizeof(loader));
 
     ret = bfelf_loader_add(&loader, &dummy_misc_ef, m_dummy_misc_exec.get());
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
     ret = bfelf_loader_add(&loader, &dummy_code_ef, m_dummy_code_exec.get());
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     ret = bfelf_loader_relocate(&loader);
     this->expect_true(ret == BFELF_SUCCESS);
@@ -358,7 +346,7 @@ bfelf_loader_ut::test_bfelf_loader_get_info_check_section_name_failure_dtors()
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
         ret = bfelf_loader_get_info(&loader, &dummy_code_ef, &info);
-        ASSERT_TRUE(ret == -1);
+        this->expect_true(ret == -1);
     });
 }
 
@@ -370,22 +358,20 @@ bfelf_loader_ut::test_bfelf_loader_get_info_get_section_name_failure_init_array(
     bfelf_file_t dummy_code_ef;
 
     ret = bfelf_file_init(m_dummy_misc.get(), m_dummy_misc_length, &dummy_misc_ef);
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
     ret = bfelf_file_init(m_dummy_code.get(), m_dummy_code_length, &dummy_code_ef);
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     m_dummy_misc_exec = load_elf_file(&dummy_misc_ef);
-    ASSERT_TRUE(m_dummy_misc_exec);
     m_dummy_code_exec = load_elf_file(&dummy_code_ef);
-    ASSERT_TRUE(m_dummy_code_exec);
 
     bfelf_loader_t loader;
     memset(&loader, 0, sizeof(loader));
 
     ret = bfelf_loader_add(&loader, &dummy_misc_ef, m_dummy_misc_exec.get());
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
     ret = bfelf_loader_add(&loader, &dummy_code_ef, m_dummy_code_exec.get());
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     ret = bfelf_loader_relocate(&loader);
     this->expect_true(ret == BFELF_SUCCESS);
@@ -409,7 +395,7 @@ bfelf_loader_ut::test_bfelf_loader_get_info_get_section_name_failure_init_array(
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
         ret = bfelf_loader_get_info(&loader, &dummy_code_ef, &info);
-        ASSERT_TRUE(ret == -1);
+        this->expect_true(ret == -1);
     });
 }
 
@@ -421,22 +407,20 @@ bfelf_loader_ut::test_bfelf_loader_get_info_check_section_name_failure_init_arra
     bfelf_file_t dummy_code_ef;
 
     ret = bfelf_file_init(m_dummy_misc.get(), m_dummy_misc_length, &dummy_misc_ef);
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
     ret = bfelf_file_init(m_dummy_code.get(), m_dummy_code_length, &dummy_code_ef);
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     m_dummy_misc_exec = load_elf_file(&dummy_misc_ef);
-    ASSERT_TRUE(m_dummy_misc_exec);
     m_dummy_code_exec = load_elf_file(&dummy_code_ef);
-    ASSERT_TRUE(m_dummy_code_exec);
 
     bfelf_loader_t loader;
     memset(&loader, 0, sizeof(loader));
 
     ret = bfelf_loader_add(&loader, &dummy_misc_ef, m_dummy_misc_exec.get());
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
     ret = bfelf_loader_add(&loader, &dummy_code_ef, m_dummy_code_exec.get());
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     ret = bfelf_loader_relocate(&loader);
     this->expect_true(ret == BFELF_SUCCESS);
@@ -465,7 +449,7 @@ bfelf_loader_ut::test_bfelf_loader_get_info_check_section_name_failure_init_arra
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
         ret = bfelf_loader_get_info(&loader, &dummy_code_ef, &info);
-        ASSERT_TRUE(ret == -1);
+        this->expect_true(ret == -1);
     });
 }
 
@@ -477,22 +461,20 @@ bfelf_loader_ut::test_bfelf_loader_get_info_get_section_name_failure_fini_array(
     bfelf_file_t dummy_code_ef;
 
     ret = bfelf_file_init(m_dummy_misc.get(), m_dummy_misc_length, &dummy_misc_ef);
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
     ret = bfelf_file_init(m_dummy_code.get(), m_dummy_code_length, &dummy_code_ef);
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     m_dummy_misc_exec = load_elf_file(&dummy_misc_ef);
-    ASSERT_TRUE(m_dummy_misc_exec);
     m_dummy_code_exec = load_elf_file(&dummy_code_ef);
-    ASSERT_TRUE(m_dummy_code_exec);
 
     bfelf_loader_t loader;
     memset(&loader, 0, sizeof(loader));
 
     ret = bfelf_loader_add(&loader, &dummy_misc_ef, m_dummy_misc_exec.get());
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
     ret = bfelf_loader_add(&loader, &dummy_code_ef, m_dummy_code_exec.get());
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     ret = bfelf_loader_relocate(&loader);
     this->expect_true(ret == BFELF_SUCCESS);
@@ -521,7 +503,7 @@ bfelf_loader_ut::test_bfelf_loader_get_info_get_section_name_failure_fini_array(
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
         ret = bfelf_loader_get_info(&loader, &dummy_code_ef, &info);
-        ASSERT_TRUE(ret == -1);
+        this->expect_true(ret == -1);
     });
 }
 
@@ -533,22 +515,20 @@ bfelf_loader_ut::test_bfelf_loader_get_info_check_section_name_failure_fini_arra
     bfelf_file_t dummy_code_ef;
 
     ret = bfelf_file_init(m_dummy_misc.get(), m_dummy_misc_length, &dummy_misc_ef);
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
     ret = bfelf_file_init(m_dummy_code.get(), m_dummy_code_length, &dummy_code_ef);
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     m_dummy_misc_exec = load_elf_file(&dummy_misc_ef);
-    ASSERT_TRUE(m_dummy_misc_exec);
     m_dummy_code_exec = load_elf_file(&dummy_code_ef);
-    ASSERT_TRUE(m_dummy_code_exec);
 
     bfelf_loader_t loader;
     memset(&loader, 0, sizeof(loader));
 
     ret = bfelf_loader_add(&loader, &dummy_misc_ef, m_dummy_misc_exec.get());
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
     ret = bfelf_loader_add(&loader, &dummy_code_ef, m_dummy_code_exec.get());
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     ret = bfelf_loader_relocate(&loader);
     this->expect_true(ret == BFELF_SUCCESS);
@@ -582,7 +562,7 @@ bfelf_loader_ut::test_bfelf_loader_get_info_check_section_name_failure_fini_arra
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
         ret = bfelf_loader_get_info(&loader, &dummy_code_ef, &info);
-        ASSERT_TRUE(ret == -1);
+        this->expect_true(ret == -1);
     });
 }
 
@@ -594,22 +574,20 @@ bfelf_loader_ut::test_bfelf_loader_get_info_get_section_name_failure_eh_frame()
     bfelf_file_t dummy_code_ef;
 
     ret = bfelf_file_init(m_dummy_misc.get(), m_dummy_misc_length, &dummy_misc_ef);
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
     ret = bfelf_file_init(m_dummy_code.get(), m_dummy_code_length, &dummy_code_ef);
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     m_dummy_misc_exec = load_elf_file(&dummy_misc_ef);
-    ASSERT_TRUE(m_dummy_misc_exec);
     m_dummy_code_exec = load_elf_file(&dummy_code_ef);
-    ASSERT_TRUE(m_dummy_code_exec);
 
     bfelf_loader_t loader;
     memset(&loader, 0, sizeof(loader));
 
     ret = bfelf_loader_add(&loader, &dummy_misc_ef, m_dummy_misc_exec.get());
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
     ret = bfelf_loader_add(&loader, &dummy_code_ef, m_dummy_code_exec.get());
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     ret = bfelf_loader_relocate(&loader);
     this->expect_true(ret == BFELF_SUCCESS);
@@ -643,7 +621,7 @@ bfelf_loader_ut::test_bfelf_loader_get_info_get_section_name_failure_eh_frame()
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
         ret = bfelf_loader_get_info(&loader, &dummy_code_ef, &info);
-        ASSERT_TRUE(ret == -1);
+        this->expect_true(ret == -1);
     });
 }
 
@@ -655,22 +633,20 @@ bfelf_loader_ut::test_bfelf_loader_get_info_check_section_name_failure_eh_frame(
     bfelf_file_t dummy_code_ef;
 
     ret = bfelf_file_init(m_dummy_misc.get(), m_dummy_misc_length, &dummy_misc_ef);
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
     ret = bfelf_file_init(m_dummy_code.get(), m_dummy_code_length, &dummy_code_ef);
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     m_dummy_misc_exec = load_elf_file(&dummy_misc_ef);
-    ASSERT_TRUE(m_dummy_misc_exec);
     m_dummy_code_exec = load_elf_file(&dummy_code_ef);
-    ASSERT_TRUE(m_dummy_code_exec);
 
     bfelf_loader_t loader;
     memset(&loader, 0, sizeof(loader));
 
     ret = bfelf_loader_add(&loader, &dummy_misc_ef, m_dummy_misc_exec.get());
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
     ret = bfelf_loader_add(&loader, &dummy_code_ef, m_dummy_code_exec.get());
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     ret = bfelf_loader_relocate(&loader);
     this->expect_true(ret == BFELF_SUCCESS);
@@ -709,7 +685,7 @@ bfelf_loader_ut::test_bfelf_loader_get_info_check_section_name_failure_eh_frame(
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
         ret = bfelf_loader_get_info(&loader, &dummy_code_ef, &info);
-        ASSERT_TRUE(ret == -1);
+        this->expect_true(ret == -1);
     });
 }
 
@@ -721,22 +697,20 @@ bfelf_loader_ut::test_bfelf_loader_get_info_all()
     bfelf_file_t dummy_code_ef;
 
     ret = bfelf_file_init(m_dummy_misc.get(), m_dummy_misc_length, &dummy_misc_ef);
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
     ret = bfelf_file_init(m_dummy_code.get(), m_dummy_code_length, &dummy_code_ef);
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     m_dummy_misc_exec = load_elf_file(&dummy_misc_ef);
-    ASSERT_TRUE(m_dummy_misc_exec);
     m_dummy_code_exec = load_elf_file(&dummy_code_ef);
-    ASSERT_TRUE(m_dummy_code_exec);
 
     bfelf_loader_t loader;
     memset(&loader, 0, sizeof(loader));
 
     ret = bfelf_loader_add(&loader, &dummy_misc_ef, m_dummy_misc_exec.get());
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
     ret = bfelf_loader_add(&loader, &dummy_code_ef, m_dummy_code_exec.get());
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     ret = bfelf_loader_relocate(&loader);
     this->expect_true(ret == BFELF_SUCCESS);
@@ -779,6 +753,6 @@ bfelf_loader_ut::test_bfelf_loader_get_info_all()
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
         ret = bfelf_loader_get_info(&loader, &dummy_code_ef, &info);
-        ASSERT_TRUE(ret == BFELF_SUCCESS);
+        this->expect_true(ret == BFELF_SUCCESS);
     });
 }

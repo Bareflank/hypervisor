@@ -24,9 +24,9 @@
 
 using namespace intel_x64;
 
-uint64_t g_cr0 = 0;
-uint64_t g_cr3 = 0;
-uint64_t g_cr4 = 0;
+cr0::value_type g_cr0 = 0;
+cr3::value_type g_cr3 = 0;
+cr4::value_type g_cr4 = 0;
 
 extern "C" uint64_t
 __read_cr0(void) noexcept

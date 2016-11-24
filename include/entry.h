@@ -41,6 +41,10 @@ extern "C" {
  * and they have different parameter types. As a result, this function has
  * to be written generically to support all of them
  *
+ * @expects stack != 0
+ * @expects func != nullptr
+ * @ensures none
+ *
  * @param stack the stack to use when executing the entry point
  * @param func the entry point to call
  * @param arg1 the first argument to the entry point

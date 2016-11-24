@@ -45,7 +45,7 @@ vmcs_intel_x64_vmm_state::vmcs_intel_x64_vmm_state()
         g_gdt.set_base(2, 0);
         g_gdt.set_base(3, 0);
         g_gdt.set_base(4, 0);
-        g_gdt.set_base(5, reinterpret_cast<uint64_t>(&g_tss));
+        g_gdt.set_base(5, reinterpret_cast<gdt_x64::base_type>(&g_tss));
 
         g_gdt.set_limit(1, 0xFFFFFFFF);
         g_gdt.set_limit(2, 0xFFFFFFFF);
@@ -62,11 +62,11 @@ vmcs_intel_x64_vmm_state::vmcs_intel_x64_vmm_state()
     m_gs_index = 4;
     m_tr_index = 5;
 
-    m_cs = gsl::narrow_cast<uint16_t>(m_cs_index << 3);
-    m_ss = gsl::narrow_cast<uint16_t>(m_ss_index << 3);
-    m_fs = gsl::narrow_cast<uint16_t>(m_fs_index << 3);
-    m_gs = gsl::narrow_cast<uint16_t>(m_gs_index << 3);
-    m_tr = gsl::narrow_cast<uint16_t>(m_tr_index << 3);
+    m_cs = gsl::narrow_cast<segment_register::type>(m_cs_index << 3);
+    m_ss = gsl::narrow_cast<segment_register::type>(m_ss_index << 3);
+    m_fs = gsl::narrow_cast<segment_register::type>(m_fs_index << 3);
+    m_gs = gsl::narrow_cast<segment_register::type>(m_gs_index << 3);
+    m_tr = gsl::narrow_cast<segment_register::type>(m_tr_index << 3);
 
     m_cr0 = 0;
     m_cr0 |= cr0::protection_enable::mask;

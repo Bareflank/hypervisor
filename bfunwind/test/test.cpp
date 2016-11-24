@@ -102,7 +102,7 @@ bool bfunwind_ut::init()
     bfelf_file_t self_ef;
 
     ret = bfelf_file_init(m_self.get(), static_cast<uint64_t>(m_self_length), &self_ef);
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     bfelf_loader_t loader;
     memset(&loader, 0, sizeof(loader));
@@ -110,7 +110,7 @@ bool bfunwind_ut::init()
     loader.relocated = 1;
 
     ret = bfelf_loader_get_info(&loader, &self_ef, &g_info);
-    ASSERT_TRUE(ret == BFELF_SUCCESS);
+    this->expect_true(ret == BFELF_SUCCESS);
 
     return true;
 }

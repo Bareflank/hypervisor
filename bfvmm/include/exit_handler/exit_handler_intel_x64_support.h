@@ -32,6 +32,9 @@
 /// to the "C" portion of the code to continue execution, and begin the
 /// process of handling the VM exit.
 ///
+/// @expects none
+/// @ensures none
+///
 extern "C" void exit_handler_entry(void);
 
 #endif
