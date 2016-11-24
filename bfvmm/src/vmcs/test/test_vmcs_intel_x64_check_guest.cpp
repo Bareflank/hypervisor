@@ -3588,7 +3588,7 @@ setup_check_guest_pending_debug_exceptions_rtm_paths(std::vector<struct control_
     path.setup = [&]
     {
         guest_pending_debug_exceptions::rtm::enable();
-        guest_pending_debug_exceptions::reserved::set(0xFU);
+        guest_pending_debug_exceptions::reserved::set(0xF0U);
     };
     path.throws_exception = true;
     path.exception = ""_ut_lee;
@@ -3596,7 +3596,7 @@ setup_check_guest_pending_debug_exceptions_rtm_paths(std::vector<struct control_
 
     path.setup = [&]
     {
-        guest_pending_debug_exceptions::reserved::set(0x0U);
+        guest_pending_debug_exceptions::reserved::set(0x00U);
         guest_pending_debug_exceptions::b0::disable();
         guest_pending_debug_exceptions::b1::disable();
         guest_pending_debug_exceptions::b2::disable();

@@ -63,7 +63,7 @@ matrix:
       - COVERALLS=true make
       - make test
     after_success:
-      - coveralls --build-root makefiles -e build_libbfc -e build_libcxx -e build_libcxxabi -e build_newlib -e source_libbfc -e source_libcxx -e source_libcxxabi -e source_llvm -e source_newlib -e sysroot -e bfdrivers/src/arch -e bfm/src/arch -e include/hippomocks.h -e include/json.h -e include/unittest.h -e include/new_delete.h -e include/gsl -e include/exception.h -e bfunwind -e bfvmm/src/intrinsics -e bfvmm/src/vcpu_factory/src/vcpu_factory.cpp -e bfvmm/src/vmcs/src/vmcs_intel_x64_check_guest.cpp -e bfvmm/src/vmcs/src/vmcs_intel_x64_check_misc.cpp -e bfvmm/src/vmcs/src/vmcs_intel_x64_debug.cpp -e  bfvmm/src/vmcs/src/vmcs_intel_x64_host_vm_state.cpp -e bfvmm/src/vmcs/src/vmcs_intel_x64_promote.asm -e bfvmm/src/vmcs/src/vmcs_intel_x64_resume.asm -e bfvmm/src/vmcs/src/vmcs_intel_x64_vmm_state.cpp -e bfvmm/include/vmcs/vmcs_intel_x64_host_vm_state.h -e bfvmm/include/vmcs/vmcs_intel_x64_promote.h -e bfvmm/include/vmcs/vmcs_intel_x64_resume.h -e bfvmm/include/vmcs/vmcs_intel_x64_state.h -e bfvmm/include/vmcs/vmcs_intel_x64_vmm_state.h --gcov-options '\-lp'
+      - coveralls --build-root makefiles -e build_libbfc -e build_libcxx -e build_libcxxabi -e build_newlib -e source_libbfc -e source_libcxx -e source_libcxxabi -e source_llvm -e source_newlib -e sysroot -e bfdrivers/src/arch -e bfm/src/arch -e include/hippomocks.h -e include/json.h -e include/unittest.h -e include/new_delete.h -e include/gsl -e include/exception.h -e bfunwind -e bfvmm/src/intrinsics -e bfvmm/src/vcpu_factory/src/vcpu_factory.cpp --gcov-options '\-lp'
 
   #
   # Clang Tidy

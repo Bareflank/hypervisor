@@ -55,6 +55,9 @@ SOURCES+=test_vmcs_intel_x64_debug.cpp
 SOURCES+=test_vmcs_intel_x64_check_controls.cpp
 SOURCES+=test_vmcs_intel_x64_check_host.cpp
 SOURCES+=test_vmcs_intel_x64_check_guest.cpp
+SOURCES+=test_vmcs_intel_x64_state.cpp
+SOURCES+=test_vmcs_intel_x64_vmm_state.cpp
+SOURCES+=test_vmcs_intel_x64_host_vm_state.cpp
 
 INCLUDE_PATHS+=./
 INCLUDE_PATHS+=%HYPER_ABS%/include/
