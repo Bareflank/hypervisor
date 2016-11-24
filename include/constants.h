@@ -25,10 +25,14 @@
 
 #include <types.h>
 
+#ifdef CROSS_COMPILED
+
 #if defined(__GNUC__) || defined(__clang__)
 #if __has_include("user_constants.h")
 #include "user_constants.h"
 #endif
+#endif
+
 #endif
 
 /*
