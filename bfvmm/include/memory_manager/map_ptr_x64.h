@@ -244,8 +244,6 @@ auto make_unique_map_x64(typename unique_map_ptr_x64<T>::integer_pointer virt,
         throw;
     }
 
-    return unique_map_ptr_x64<T>();
-
 #endif
 }
 
