@@ -87,7 +87,7 @@ testing)
     ;;
 
 *)
-    echo "This version of Ubuntu is not supported"
+    echo "This version of Debian is not supported"
     exit 1
 
 esac

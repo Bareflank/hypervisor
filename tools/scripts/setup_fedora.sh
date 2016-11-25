@@ -79,8 +79,13 @@ case $( grep ^VERSION_ID= /etc/os-release | cut -d'=' -f 2 | tr -d '"' ) in
     prepare_docker
     ;;
 
+23)
+    install_common_packages
+    prepare_docker
+    ;;
+
 *)
-    echo "This version of Ubuntu is not supported"
+    echo "This version of Fedora is not supported"
     exit 1
 
 esac
@@ -90,3 +95,7 @@ esac
 # ------------------------------------------------------------------------------
 
 setup_build_environment
+
+echo ""
+echo "WARNING: Please reboot before attempting to compile / use Bareflank!!!"
+echo ""
