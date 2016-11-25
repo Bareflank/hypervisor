@@ -61,14 +61,16 @@ and the
 including support for the [Guideline Support Library](https://github.com/Microsoft/GSL).
 
 Currently we have support for the following 64bit host operating systems on Intel _SandyBridge_ and above hardware:
-- Ubuntu 16.04, 14.04
+- Ubuntu 16.10, 16.04, 14.04
 - Debian Stretch
-- Fedora 23
+- Fedora 25, 24, 23
+- OpenSUSE Leap 42.2
 - Windows 10
 - Windows 8.1
 
 In the future, we would also like to support:
 - macOS
+- BSD
 - UEFI
 - ARM (64bit)
 
@@ -124,7 +126,7 @@ Bareflank Hypervisor
 
 CppCon 2016: Making C++ and the STL Work in the Linux / Windows Kernels <br>
 
-[![CppCon 2016](http://img.youtube.com/vi/uQSQy-7lveQ/0.jpg)](https://www.youtube.com/watch?v=uQSQy-7lveQ)
+[![CppCon 2016](http://img.youtube.com/vi/uQSQy-7lveQ/mq1.jpg)](https://www.youtube.com/watch?v=uQSQy-7lveQ)
 
 ## Compilation Instructions
 
@@ -231,41 +233,7 @@ functionality, we have provided a couple of examples:
 
 ## Roadmap
 
-### Version 1.0
-
-Released: April 27, 2016 <br>
-[[link](https://github.com/Bareflank/hypervisor/releases/tag/v1.0.0)]
-
-* ~~ELF Loader~~
-* ~~Userspace Managment Application (bfm)~~
-* ~~Unwinder~~
-* ~~Initial C++ Environment~~
-* ~~Linux Driver Entry~~
-* ~~Basic VMM~~
-* ~~Testing (Ubuntu, Debian, Fedora, CentOS)~~
-
-### Version 1.1
-
-Target: September 2016
-
-* ~~Multi-Core Support~~
-* ~~Windows Support~~
-* ~~Isolated VMM~~
-
-### Version 1.2
-
-Target: Janurary 2017
-
-* UEFI Support (i.e. type 1)
-* Basic Guest Support
-* Updated C++ Environment
-
-### Version 1.3
-
-Target: June 2017
-
-* 64bit ARM Support
-* Intel Nested Virtualization Support
+The project roadmap can be located [here](https://github.com/Bareflank/hypervisor/projects)
 
 ## License
 
