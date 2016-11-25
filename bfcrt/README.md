@@ -51,27 +51,11 @@ To make all of this work, Bareflank's wrapper script acts like
 GCC and Clang. When "-c" is provided, the code is compiled, and when
 no "-c" is provided, the code is linked.
 
-The build system compiles this C runtime library as both a
-static library and a dynamic library (the dynamic version is not used), and
-places the library in the "sysroot". When each shared library is compiled, the
-gcc wrapper script adds the static C runtime library during linking, which
-means that every cross compiled shared library has the following two functions
-added:
-- [local_init](https://github.com/Bareflank/hypervisor/blob/master/bfcrt/src/crt.cpp#L26)
-- [local_fini](https://github.com/Bareflank/hypervisor/blob/master/bfcrt/src/crt.cpp#L44)
-
-Here is an example of the "entry" module for the VMM that has these symbols
-added by the wrapper script:
-
-<img src="https://raw.githubusercontent.com/Bareflank/hypervisor/master/doc/images/local_symbols.png" width="500">
-
-As you can see, these symbols are marked as global, meaning they have relocation
-entries, and their addresses can be looked up using the ELF loader. The
-bareflank drivers (also referred to as the driver entry points, located in
-the bfdrivers folder), is responsible for loading each cross compiled module
+The Bareflank drivers (also referred to as the driver entry points, located in
+the bfdrivers folder), are responsible for loading each cross compiled module
 from the bfvmm folder into memory using the ELF loader. Once everything is
-loaded / relocated, the driver then locates the local_init function for each
-module and executes it.
+loaded / relocated, the driver then locates the local_init function and executes 
+it for each shared librariy.
 
 [common.c](https://raw.githubusercontent.com/Bareflank/hypervisor/master/bfdrivers/src/common.c)
 
