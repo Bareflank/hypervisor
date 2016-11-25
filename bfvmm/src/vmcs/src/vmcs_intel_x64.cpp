@@ -46,7 +46,8 @@ using namespace intel_x64;
 using namespace vmcs;
 
 vmcs_intel_x64::vmcs_intel_x64() :
-    m_vmcs_region_phys(0)
+    m_vmcs_region_phys(0),
+    m_state_save(nullptr)
 { }
 
 void

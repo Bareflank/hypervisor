@@ -49,6 +49,11 @@ using namespace intel_x64;
 #include <mutex>
 std::mutex g_unimplemented_handler_mutex;
 
+exit_handler_intel_x64::exit_handler_intel_x64() :
+    m_vmcs(nullptr),
+    m_state_save(nullptr)
+{ }
+
 void
 exit_handler_intel_x64::dispatch()
 { handle_exit(vmcs::exit_reason::basic_exit_reason::get()); }

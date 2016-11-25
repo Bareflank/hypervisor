@@ -56,7 +56,7 @@ public:
     /// @expects none
     /// @ensures none
     ///
-    exit_handler_intel_x64() = default;
+    exit_handler_intel_x64();
 
     /// Destructor
     ///
