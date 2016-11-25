@@ -22,7 +22,7 @@ Currently the VMM is Intel specific. It's designed specifically to be able to be
 
 The VMM has its own memory pool which is static. Future versions will likely work to make the management of this memory pool easier but it's likely to remain a statically compiled resource for the foreseeable future. If you end up with an std::bad_alloc error, you will need to modify the amount of memory that is provided to the VMM in the constants.h file.
 
-Bareflank has no support for libc functions. Some libc symbols are available as they are needed by libc++ but don't rely on them as they could be added / removed over time as they are only there to support libc++ and nothing else. We also do not support anything in libc++ that relies on floating point functions. Furthermore, some STL functionality makes no sense in the kernel, like std::fstream, which we obviously do not support. Our goal is to use the STL to ease development of things that the kernel would normally use, not to provide generic support for the STL. The use of the STL in the kernel is already pretty controversial, lets not push it.
+We do not support anything in libc/libc++ that relies on floating point functions. Furthermore, some STL functionality makes no sense in the kernel, like std::fstream, which we obviously do not support. Our goal is to use the STL to ease development of things that the kernel would normally use, not to provide generic support for the STL. The use of the STL in the kernel is already pretty controversial, lets not push it.
 
 ## Notes
 
