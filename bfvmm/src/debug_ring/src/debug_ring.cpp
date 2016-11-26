@@ -75,12 +75,6 @@ debug_ring::debug_ring(vcpuid::type vcpuid) noexcept
     { }
 }
 
-debug_ring::~debug_ring() noexcept
-{
-    std::lock_guard<std::mutex> guard(g_debug_mutex);
-    g_drrs.erase(m_vcpuid);
-}
-
 void
 debug_ring::write(const std::string &str) noexcept
 {
