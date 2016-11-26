@@ -143,6 +143,76 @@ run_clang_tidy() {
     rm -Rf $OUTPUT
 }
 
+shopt -s extglob
+
+#
+# extensions
+#
+if ls src_*/ 1> /dev/null 2>&1; then
+    for d in src_*/ ; do
+        pushd $d > /dev/null
+        header $PWD
+        run_clang_tidy "clan*,-clang-analyzer-alpha.deadcode.UnreachableCode"
+        run_clang_tidy "cert*,-clang-analyzer*,-cert-err60-cpp"
+        run_clang_tidy "misc*,-clang-analyzer*,-misc-noexcept-move-constructor"
+        run_clang_tidy "perf*,-clang-analyzer*"
+        run_clang_tidy "cppc*,-clang-analyzer*,-cppcoreguidelines-pro-type-reinterpret-cast"
+        run_clang_tidy "read*,-clang-analyzer*,-readability-braces-around-statements"
+        run_clang_tidy "mode*,-clang-analyzer*"
+        popd > /dev/null
+    done
+fi
+
+#
+# extensions
+#
+if ls hypervisor_*/ 1> /dev/null 2>&1; then
+    for d in hypervisor_*/ ; do
+        pushd $d > /dev/null
+        header $PWD
+        run_clang_tidy "clan*,-clang-analyzer-alpha.deadcode.UnreachableCode"
+        run_clang_tidy "cert*,-clang-analyzer*,-cert-err60-cpp"
+        run_clang_tidy "misc*,-clang-analyzer*,-misc-noexcept-move-constructor"
+        run_clang_tidy "perf*,-clang-analyzer*"
+        run_clang_tidy "cppc*,-clang-analyzer*,-cppcoreguidelines-pro-type-reinterpret-cast"
+        run_clang_tidy "read*,-clang-analyzer*,-readability-braces-around-statements"
+        run_clang_tidy "mode*,-clang-analyzer*"
+        popd > /dev/null
+    done
+fi
+
+#
+# hyperkernel
+#
+if [[ -d hyperkernel ]]; then
+    pushd hyperkernel > /dev/null
+    header $PWD
+    run_clang_tidy "clan*,-clang-analyzer-alpha.deadcode.UnreachableCode"
+    run_clang_tidy "cert*,-clang-analyzer*,-cert-err60-cpp"
+    run_clang_tidy "misc*,-clang-analyzer*,-misc-noexcept-move-constructor"
+    run_clang_tidy "perf*,-clang-analyzer*"
+    run_clang_tidy "cppc*,-clang-analyzer*,-cppcoreguidelines-pro-type-reinterpret-cast"
+    run_clang_tidy "read*,-clang-analyzer*,-readability-braces-around-statements"
+    run_clang_tidy "mode*,-clang-analyzer*"
+    popd > /dev/null
+fi
+
+#
+# extended_apis
+#
+if [[ -d extended_apis ]]; then
+    pushd extended_apis > /dev/null
+    header $PWD
+    run_clang_tidy "clan*,-clang-analyzer-alpha.deadcode.UnreachableCode"
+    run_clang_tidy "cert*,-clang-analyzer*,-cert-err60-cpp"
+    run_clang_tidy "misc*,-clang-analyzer*,-misc-noexcept-move-constructor"
+    run_clang_tidy "perf*,-clang-analyzer*"
+    run_clang_tidy "cppc*,-clang-analyzer*,-cppcoreguidelines-pro-type-reinterpret-cast"
+    run_clang_tidy "read*,-clang-analyzer*,-readability-braces-around-statements"
+    run_clang_tidy "mode*,-clang-analyzer*"
+    popd > /dev/null
+fi
+
 #
 # bfvmm
 #

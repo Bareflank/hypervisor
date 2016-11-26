@@ -235,15 +235,12 @@
 /// @subsection Unit Testing
 ///
 /// @ref unittest <br>
+/// @ref bfn::mock_unique <br>
 /// @ref bfn::mock_shared <br>
 /// @ref expect_true <br>
 /// @ref expect_false <br>
 /// @ref expect_exception <br>
 /// @ref expect_no_exception <br>
-/// @ref ASSERT_TRUE <br>
-/// @ref ASSERT_FALSE <br>
-/// @ref ASSERT_EXCEPTION <br>
-/// @ref ASSERT_NO_EXCEPTION <br>
 /// @ref RUN_UNITTEST_WITH_MOCKS <br>
 /// @ref RUN_ALL_TESTS <br>
 ///
