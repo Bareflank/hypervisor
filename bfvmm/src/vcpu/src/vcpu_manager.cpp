@@ -111,7 +111,7 @@ vcpu_manager::hlt_vcpu(vcpuid::type vcpuid, user_data *data)
 void
 vcpu_manager::write(vcpuid::type vcpuid, const std::string &str) noexcept
 {
-    if (auto && vcpu = get_vcpu(vcpuid))
+    if (auto && vcpu = m_vcpus[vcpuid])
         vcpu->write(str);
 }
 
