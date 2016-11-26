@@ -51,7 +51,7 @@ public:
     /// @expects none
     /// @ensures none
     ///
-    virtual ~debug_ring() noexcept;
+    virtual ~debug_ring() noexcept = default;
 
     /// Write to Debug Ring
     ///

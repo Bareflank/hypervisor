@@ -509,12 +509,7 @@ exit_handler_intel_x64::handle_vmcall_data_string_unformatted(
     const bfn::unique_map_ptr_x64<char> &omap)
 {
     bfdebug << "received in vmm: " << str << bfendl;
-
-    __builtin_memset(omap.get(), 0, regs.r09);
-    __builtin_memcpy(omap.get(), str.data(), str.length());
-
-    regs.r07 = VMCALL_DATA_STRING_UNFORMATTED;
-    regs.r09 = regs.r06;
+    reply_with_string(regs, str, omap);
 }
 
 void
@@ -522,15 +517,8 @@ exit_handler_intel_x64::handle_vmcall_data_string_json(
     vmcall_registers_t &regs, const json &str,
     const bfn::unique_map_ptr_x64<char> &omap)
 {
-    auto dump = str.dump();
-
-    bfdebug << "received in vmm: " << dump << bfendl;
-
-    __builtin_memset(omap.get(), 0, regs.r09);
-    __builtin_memcpy(omap.get(), dump.data(), dump.length());
-
-    regs.r07 = VMCALL_DATA_STRING_JSON;
-    regs.r09 = regs.r06;
+    bfdebug << "received in vmm: " << str << bfendl;
+    reply_with_json(regs, str, omap);
 }
 
 void
@@ -550,4 +538,30 @@ exit_handler_intel_x64::handle_vmcall_data_binary_unformatted(
     bfdebug << "    - in_size: " << regs.r06 << bfendl;
     bfdebug << "    - out_addr: " << view_as_pointer(regs.r08) << bfendl;
     bfdebug << "    - out_size: " << regs.r09 << bfendl;
+}
+
+void exit_handler_intel_x64::reply_with_string(
+    vmcall_registers_t &regs, const std::string &str,
+    const bfn::unique_map_ptr_x64<char> &omap)
+{
+    auto &&len = str.length();
+
+    __builtin_memcpy(omap.get(), str.data(), len);
+
+    regs.r07 = VMCALL_DATA_STRING_UNFORMATTED;
+    regs.r09 = len;
+}
+
+void
+exit_handler_intel_x64::reply_with_json(
+    vmcall_registers_t &regs, const json &str,
+    const bfn::unique_map_ptr_x64<char> &omap)
+{
+    auto &&dmp = str.dump();
+    auto &&len = dmp.length();
+
+    __builtin_memcpy(omap.get(), dmp.data(), len);
+
+    regs.r07 = VMCALL_DATA_STRING_JSON;
+    regs.r09 = len;
 }

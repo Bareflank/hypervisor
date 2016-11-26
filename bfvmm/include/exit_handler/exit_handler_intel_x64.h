@@ -105,15 +105,15 @@ protected:
     void handle_vmcall_event(vmcall_registers_t &regs);
     void handle_vmcall_unittest(vmcall_registers_t &regs);
 
-    void handle_vmcall_data_string_unformatted(
+    virtual void handle_vmcall_data_string_unformatted(
         vmcall_registers_t &regs, const std::string &str,
         const bfn::unique_map_ptr_x64<char> &omap);
 
-    void handle_vmcall_data_string_json(
+    virtual void handle_vmcall_data_string_json(
         vmcall_registers_t &regs, const json &str,
         const bfn::unique_map_ptr_x64<char> &omap);
 
-    void handle_vmcall_data_binary_unformatted(
+    virtual void handle_vmcall_data_binary_unformatted(
         vmcall_registers_t &regs,
         const bfn::unique_map_ptr_x64<char> &imap,
         const bfn::unique_map_ptr_x64<char> &omap);
@@ -124,6 +124,12 @@ protected:
     friend class vcpu_intel_x64;
     friend class exit_handler_intel_x64_ut;
     friend exit_handler_intel_x64 setup_ehlr(gsl::not_null<vmcs_intel_x64 *> vmcs);
+
+    void reply_with_string(vmcall_registers_t &regs, const std::string &str,
+                           const bfn::unique_map_ptr_x64<char> &omap);
+
+    void reply_with_json(vmcall_registers_t &regs, const json &str,
+                         const bfn::unique_map_ptr_x64<char> &omap);
 
 private:
 
