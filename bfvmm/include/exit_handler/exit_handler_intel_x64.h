@@ -125,11 +125,13 @@ protected:
     friend class exit_handler_intel_x64_ut;
     friend exit_handler_intel_x64 setup_ehlr(gsl::not_null<vmcs_intel_x64 *> vmcs);
 
-    void reply_with_string(vmcall_registers_t &regs, const std::string &str,
-                           const bfn::unique_map_ptr_x64<char> &omap);
+    void reply_with_string(
+        vmcall_registers_t &regs, const std::string &str,
+        const bfn::unique_map_ptr_x64<char> &omap);
 
-    void reply_with_json(vmcall_registers_t &regs, const json &str,
-                         const bfn::unique_map_ptr_x64<char> &omap);
+    void reply_with_json(
+        vmcall_registers_t &regs, const json &str,
+        const bfn::unique_map_ptr_x64<char> &omap);
 
 private:
 

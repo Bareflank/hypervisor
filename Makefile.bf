@@ -66,6 +66,8 @@ ifneq ($(APPVEYOR), true)
 	PARENT_SUBDIRS += bfdrivers
 	PARENT_SUBDIRS += bfelf_loader
 	PARENT_SUBDIRS += bfvmm
+	PARENT_SUBDIRS += $(wildcard %HYPER_ABS%/extended_apis/)
+	PARENT_SUBDIRS += $(wildcard %HYPER_ABS%/hyperkernel/)
 	PARENT_SUBDIRS += $(wildcard %HYPER_ABS%/src_*/)
 	PARENT_SUBDIRS += $(wildcard %HYPER_ABS%/hypervisor_*/)
 	PARENT_SUBDIRS += $(wildcard %BUILD_ABS%/makefiles/src_*/)
@@ -187,7 +189,7 @@ test: run_tests
 
 astyle:
 	@cd %HYPER_ABS%; \
-	%HYPER_ABS%/tools/astyle/run.sh
+	%HYPER_ABS%/tools/astyle/run.sh %BUILD_ABS%
 
 astyle_clean:
 	@cd %HYPER_ABS%; \

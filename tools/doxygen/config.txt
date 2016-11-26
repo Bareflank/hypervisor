@@ -715,13 +715,13 @@ WARN_NO_PARAMDOC       = YES
 # FILE_VERSION_FILTER)
 # The default value is: $file:$line: $text.
 
-WARN_FORMAT            = "$file:$line: $text"
+WARN_FORMAT            = "FIX: $file:$line: $text"
 
 # The WARN_LOGFILE tag can be used to specify a file to which warning and error
 # messages should be written. If left blank the output is written to standard
 # error (stderr).
 
-WARN_LOGFILE           =
+WARN_LOGFILE           = doxygen_warnings.txt
 
 #---------------------------------------------------------------------------
 # Configuration options related to the input files
@@ -733,7 +733,7 @@ WARN_LOGFILE           =
 # spaces.
 # Note: If this tag is empty the current directory is searched.
 
-INPUT                  = ../bfcrt ../bfdrivers ../bfelf_loader ../bfm ../bfunwind ../bfvmm ../common ../include
+INPUT                  = ../bfcrt ../bfdrivers ../bfelf_loader ../bfm ../bfunwind ../bfvmm ../common ../include ../extended_apis ../hyperkernel
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses
@@ -768,7 +768,7 @@ RECURSIVE              = YES
 # Note that relative paths are relative to the directory from which doxygen is
 # run.
 
-EXCLUDE                = ../include/json.h  ../bfdrivers/src/arch/osx/
+EXCLUDE                = ../include/hippomocks.h ../include/json.h  ../bfdrivers/src/arch/osx/
 
 # The EXCLUDE_SYMLINKS tag can be used to select whether or not files or
 # directories that are symbolic links (a Unix file system feature) are excluded
