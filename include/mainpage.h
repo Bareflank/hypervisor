@@ -107,24 +107,24 @@
 /// class exit_handler_cpuidcount : public exit_handler_intel_x64
 /// {
 /// public:
-/// 
+///
 ///     exit_handler_cpuidcount() :
 ///         m_count(0)
 ///     { }
-/// 
+///
 ///     ~exit_handler_cpuidcount() override
 ///     { bfdebug << "cpuid count = " << m_count << bfendl; }
-/// 
+///
 ///     void handle_exit(intel_x64::vmcs::value_type reason) override
 ///     {
 ///         if (reason == vmcs::exit_reason::basic_exit_reason::cpuid)
 ///             m_count++;
-/// 
+///
 ///         exit_handler_intel_x64::handle_exit(reason);
 ///     }
-/// 
+///
 /// private:
-/// 
+///
 ///     int64_t m_count;
 /// };
 /// @endcode
@@ -152,7 +152,7 @@
 /// vcpu_factory::make_vcpu(vcpuid::type vcpuid, user_data *data)
 /// {
 ///     auto &&my_exit_handler = std::make_unique<exit_handler_cpuidcount>();
-/// 
+///
 ///     (void) data;
 ///     return std::make_unique<vcpu_intel_x64>(
 ///                vcpuid,
@@ -211,7 +211,7 @@
 /// To use in-tree, simply place your code in a folder at Bareflank's root
 /// starting with hypervisor_* or src_* and run make. To perform out-of-tree
 /// compilation, configure your build with "-m" to point to your module file
-/// and "-e" to point to your extensions. 
+/// and "-e" to point to your extensions.
 ///
 /// <a href="https://github.com/Bareflank/hypervisor_example_vpid">Bareflank Hypervisor VPID Example</a>
 /// <br>

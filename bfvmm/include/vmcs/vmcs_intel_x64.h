@@ -190,20 +190,19 @@ protected:
 
 protected:
 
+    uintptr_t m_vmcs_region_phys;
+    std::unique_ptr<uint32_t[]> m_vmcs_region;
+
+    state_save_intel_x64 *m_state_save;
+    std::unique_ptr<char[]> m_exit_handler_stack;
+
+private:
+
     friend class vcpu_ut;
     friend class vmcs_ut;
     friend class vcpu_intel_x64;
     friend class exit_handler_intel_x64;
     friend class exit_handler_intel_x64_ut;
-
-    uintptr_t m_vmcs_region_phys;
-    std::unique_ptr<uint32_t[]> m_vmcs_region;
-
-    std::unique_ptr<char[]> m_exit_handler_stack;
-
-private:
-
-    state_save_intel_x64 *m_state_save;
 
     virtual void set_state_save(gsl::not_null<state_save_intel_x64 *> state_save)
     { m_state_save = state_save; }
