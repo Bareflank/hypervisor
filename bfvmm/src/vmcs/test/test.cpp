@@ -122,6 +122,10 @@ extern "C" uint64_t
 __read_msr(uint32_t addr) noexcept
 { return g_msrs[addr]; }
 
+extern "C" void
+__write_msr(uint32_t addr, uint64_t val) noexcept
+{ g_msrs[addr] = val; }
+
 extern "C" uint32_t
 __cpuid_eax(uint32_t val) noexcept
 { return g_eax_cpuid[val]; }
@@ -1417,6 +1421,71 @@ vmcs_ut::list()
     this->test_debug_dump_vm_entry_control_fields();
     this->test_debug_dump_vmcs_field();
     this->test_debug_dump_vm_control();
+
+    this->test_state();
+    this->test_state_segment_registers();
+    this->test_state_control_registers();
+    this->test_state_debug_registers();
+    this->test_state_rflags();
+    this->test_state_gdt_base();
+    this->test_state_idt_base();
+    this->test_state_gdt_limit();
+    this->test_state_idt_limit();
+    this->test_state_segment_registers_limit();
+    this->test_state_segment_registers_access_rights();
+    this->test_state_segment_register_base();
+    this->test_state_msrs();
+    this->test_state_dump();
+
+    this->test_host_vm_state();
+    this->test_host_vm_state_segment_registers();
+    this->test_host_vm_state_control_registers();
+    this->test_host_vm_state_debug_registers();
+    this->test_host_vm_state_rflags();
+    this->test_host_vm_state_gdt_base();
+    this->test_host_vm_state_idt_base();
+    this->test_host_vm_state_gdt_limit();
+    this->test_host_vm_state_idt_limit();
+    this->test_host_vm_state_es_limit();
+    this->test_host_vm_state_cs_limit();
+    this->test_host_vm_state_ss_limit();
+    this->test_host_vm_state_ds_limit();
+    this->test_host_vm_state_fs_limit();
+    this->test_host_vm_state_gs_limit();
+    this->test_host_vm_state_tr_limit();
+    this->test_host_vm_state_ldtr_limit();
+    this->test_host_vm_state_es_access_rights();
+    this->test_host_vm_state_cs_access_rights();
+    this->test_host_vm_state_ss_access_rights();
+    this->test_host_vm_state_ds_access_rights();
+    this->test_host_vm_state_fs_access_rights();
+    this->test_host_vm_state_gs_access_rights();
+    this->test_host_vm_state_tr_access_rights();
+    this->test_host_vm_state_ldtr_access_rights();
+    this->test_host_vm_state_es_base();
+    this->test_host_vm_state_cs_base();
+    this->test_host_vm_state_ss_base();
+    this->test_host_vm_state_ds_base();
+    this->test_host_vm_state_fs_base();
+    this->test_host_vm_state_gs_base();
+    this->test_host_vm_state_tr_base();
+    this->test_host_vm_state_ldtr_base();
+    this->test_host_vm_state_ia32_msrs();
+    this->test_host_vm_state_dump();
+
+    this->test_vmm_state_gdt_not_setup();
+    this->test_vmm_state_segment_registers();
+    this->test_vmm_state_control_registers();
+    this->test_vmm_state_rflags();
+    this->test_vmm_state_gdt_base();
+    this->test_vmm_state_idt_base();
+    this->test_vmm_state_gdt_limit();
+    this->test_vmm_state_idt_limit();
+    this->test_vmm_state_segment_registers_limit();
+    this->test_vmm_state_segment_registers_access_rights();
+    this->test_vmm_state_segment_registers_base();
+    this->test_vmm_state_ia32_efer_msr();
+    this->test_vmm_state_dump();
 
     return true;
 }

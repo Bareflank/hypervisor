@@ -808,7 +808,7 @@ check::guest_gs_access_rights_type()
     if (vmcs::guest_rflags::virtual_8086_mode::is_enabled())
         return;
 
-    if (guest_fs_access_rights::unusable::get() != 0)
+    if (guest_gs_access_rights::unusable::get() != 0)
         return;
 
     switch (guest_gs_access_rights::type::get())
