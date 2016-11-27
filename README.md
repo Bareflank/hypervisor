@@ -188,6 +188,7 @@ to get status information, use the following:
 ```
 make status
 make dump
+ARGS="versions 1" make vmcall
 ```
 
 to reverse this:
