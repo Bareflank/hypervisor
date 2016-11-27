@@ -35,8 +35,7 @@ cd ~/
 git clone https://github.com/Bareflank/hypervisor.git
 ```
 
-You can build the hypervisor from the repo itself, but it's advised to build
-from a build directory. In addition, on Windows, only a local compiler is
+On Windows, only a local compiler is
 currently supported (i.e. no docker support). The local compiler will take a
 lot of time to complete, so please be patient.
 
@@ -44,7 +43,7 @@ lot of time to complete, so please be patient.
 cd ~/
 mkdir build
 cd ~/hypervisor
-./tools/scripts/setup_cygwin.sh --local-compilers --out-of-tree ../build/
+./tools/scripts/setup_cygwin.sh --local-compilers
 ```
 
 Once you have a cross compiler setup, you need to build the main source code.
@@ -69,10 +68,10 @@ This can be done manually by executing:
 
 ```
 pushd bfm/bin/native
-sudo LD_LIBRARY_PATH=. ./bfm load <module_file>
-sudo LD_LIBRARY_PATH=. ./bfm start
-sudo LD_LIBRARY_PATH=. ./bfm status
-sudo LD_LIBRARY_PATH=. ./bfm dump
+sudo ./bfm load <module_file>
+sudo ./bfm start
+sudo ./bfm status
+sudo ./bfm dump
 popd
 ```
 
@@ -80,8 +79,8 @@ To stop the hypervisor, run the following:
 
 ```
 pushd bfm/bin/native
-sudo LD_LIBRARY_PATH=. ./bfm stop
-sudo LD_LIBRARY_PATH=. ./bfm unload
+sudo ./bfm stop
+sudo ./bfm unload
 popd
 ```
 
@@ -98,6 +97,8 @@ make unload
 
 make quick
 make loop NUM=<xxx>
+ARGS="" make vmcall
+make help
 ```
 
 Bareflank comes with a stock module file called vmm.modules. This file is
@@ -134,7 +135,7 @@ cd ~/build
 ~/hypervisor/configure -m <path to module_file> -e <path to extension>
 
 make
-make unittest
+make test
 
 make driver_load
 make quick
