@@ -1,4 +1,4 @@
-/// @mainpage Bareflank APIs (version 1.0.0)
+/// @mainpage Bareflank APIs (version 1.1.0)
 /// @section pageTOC Content
 ///     -# @ref description
 ///     -# @ref license
@@ -51,8 +51,7 @@
 ///
 /// To execute the unit tests, run:
 /// @code
-/// make
-/// make unittest
+/// make test
 /// @endcode
 ///
 /// Bareflank uses Hippomocks for mocking C/C++ functionality in the unit
@@ -101,40 +100,44 @@
 /// the vmxon_intel_x64, vmcs_intel_x64, intrinsics_intel_x64 logic, etc...
 /// Worst case, you can always outright provide your own modules for this same
 /// logic. Subclassing the code that Bareflank
-/// already provides allows you to leverage the existing scaffolding that
+/// already provides, allows you to leverage the existing scaffolding that
 /// Bareflank has, likely saving you some additional time.
 ///
 /// @code
 /// class exit_handler_cpuidcount : public exit_handler_intel_x64
 /// {
 /// public:
+/// 
 ///     exit_handler_cpuidcount() :
 ///         m_count(0)
 ///     { }
-
-///     virtual ~exit_handler_cpuidcount()
+/// 
+///     ~exit_handler_cpuidcount() override
 ///     { bfdebug << "cpuid count = " << m_count << bfendl; }
-
-///     virtual void handle_cpuid()
+/// 
+///     void handle_exit(intel_x64::vmcs::value_type reason) override
 ///     {
-///         m_count++;
-///         exit_handler_intel_x64::handle_cpuid();
+///         if (reason == vmcs::exit_reason::basic_exit_reason::cpuid)
+///             m_count++;
+/// 
+///         exit_handler_intel_x64::handle_exit(reason);
 ///     }
-
+/// 
 /// private:
+/// 
 ///     int64_t m_count;
 /// };
 /// @endcode
-///
+//
 /// In this example, when the exit handler is first created, a "count"
 /// variable is created with an initial value of 0, and when the exit handler
 /// is destroyed, the exit handler prints out the count variable using
 /// Bareflank's std::cout shortcut "bfdebug" (which also adds some additional
 /// text and color for the developer). When the default exit handler's
-/// dispatch function is called, it will call "handle_cpuid" each time a
-/// CPUID instruction needs to be emulated. In this example, we overload this
-/// function and increment the count variable each time this function is
-/// called. Finally, we call the original handle_cpuid which provides the
+/// dispatch function is called, it will call "handle_exit" each time a
+/// an instruction needs to be emulated. In this example, we overload this
+/// function and increment the count variable each time CPUID is
+/// called. Finally, we call the original handle_exit which provides the
 /// CPUID emulation for us. Note that you could also leave this last part out
 /// and emulate the CPUID instruction yourself.
 ///
@@ -145,15 +148,20 @@
 /// provides a simple means for unit testing).
 ///
 /// @code
-/// std::shared_ptr<vcpu>
-/// vcpu_factory::make_vcpu(uint64_t vcpuid)
+/// std::unique_ptr<vcpu>
+/// vcpu_factory::make_vcpu(vcpuid::type vcpuid, user_data *data)
 /// {
-///     return std::make_shared<vcpu_intel_x64>(vcpuid,
-///                                             nullptr,
-///                                             nullptr,
-///                                             nullptr,
-///                                             std::make_shared<exit_handler_cpuidcount>(),
-///                                             nullptr);
+///     auto &&my_exit_handler = std::make_unique<exit_handler_cpuidcount>();
+/// 
+///     (void) data;
+///     return std::make_unique<vcpu_intel_x64>(
+///                vcpuid,
+///                nullptr,                         // default debug_ring
+///                nullptr,                         // default vmxon
+///                nullptr,                         // default vmcs
+///                std::move(my_exit_handler),
+///                nullptr,                         // default vmm_state
+///                nullptr);                        // default guest_state
 /// }
 /// @endcode
 ///
@@ -175,41 +183,39 @@
 /// module file.
 ///
 /// @code
-/// # Default Modules
-/// #
-/// # Note: The existing vcpu_factory module is commented out as we will be
-/// # providing our own.
-/// %BUILD_ABS%/sysroot/x86_64-elf/lib/libc++.so
-/// %BUILD_ABS%/makefiles/bfvmm/src/debug_ring/bin/cross/libdebug_ring.so
-/// %BUILD_ABS%/makefiles/bfvmm/src/entry/bin/cross/libentry.so
-/// %BUILD_ABS%/makefiles/bfvmm/src/exit_handler/bin/cross/libexit_handler.so
-/// %BUILD_ABS%/makefiles/bfvmm/src/intrinsics/bin/cross/libintrinsics.so
-/// %BUILD_ABS%/makefiles/bfvmm/src/memory_manager_x64/bin/cross/libmemory_manager_x64.so
-/// %BUILD_ABS%/makefiles/bfvmm/src/misc/bin/cross/libmisc.so
-/// %BUILD_ABS%/makefiles/bfvmm/src/serial/bin/cross/libserial.so
-/// %BUILD_ABS%/makefiles/bfvmm/src/vcpu/bin/cross/libvcpu.so
-/// #    %BUILD_ABS%/makefiles/bfvmm/src/vcpu_factory/bin/cross/libvcpu_factory.so
-/// %BUILD_ABS%/makefiles/bfvmm/src/vmcs/bin/cross/libvmcs.so
-/// %BUILD_ABS%/makefiles/bfvmm/src/vmxon/bin/cross/libvmxon.so
-
-/// # Custom Modules
-/// #
-/// # Note: This is where we provide our own vcpu_factory.
-/// %BUILD_ABS%/makefiles/hypervisor_example_cpuidcount/vcpu_factory_cpuidcount/bin/cross/libvcpu_factory_cpuidcount.so
+/// {
+///     "modules" :
+///     [
+///         "%BUILD_ABS%/sysroot/x86_64-elf/lib/libc++.so.1.0",
+///         "%BUILD_ABS%/sysroot/x86_64-elf/lib/libc++abi.so.1.0",
+///         "%BUILD_ABS%/sysroot/x86_64-elf/lib/libc.so",
+///         "%BUILD_ABS%/sysroot/x86_64-elf/lib/libbfc.so",
+///         "%BUILD_ABS%/makefiles/bfcrt/bin/cross/libbfcrt.so",
+///         "%BUILD_ABS%/makefiles/bfunwind/bin/cross/libbfunwind.so",
+///         "%BUILD_ABS%/makefiles/bfvmm/src/debug_ring/bin/cross/libdebug_ring.so",
+///         "%BUILD_ABS%/makefiles/bfvmm/src/entry/bin/cross/libentry.so",
+///         "%BUILD_ABS%/makefiles/bfvmm/src/exit_handler/bin/cross/libexit_handler.so",
+///         "%BUILD_ABS%/makefiles/bfvmm/src/intrinsics/bin/cross/libintrinsics.so",
+///         "%BUILD_ABS%/makefiles/bfvmm/src/memory_manager/bin/cross/libmemory_manager.so",
+///         "%BUILD_ABS%/makefiles/bfvmm/src/misc/bin/cross/libmisc.so",
+///         "%BUILD_ABS%/makefiles/bfvmm/src/serial/bin/cross/libserial.so",
+///         "%BUILD_ABS%/makefiles/bfvmm/src/vcpu/bin/cross/libvcpu.so",
+///         "%BUILD_ABS%/makefiles/hypervisor_example_cpuidcount/vcpu_factory_cpuidcount/bin/cross/libvcpu_factory_cpuidcount.so",
+///         "%BUILD_ABS%/makefiles/bfvmm/src/vmcs/bin/cross/libvmcs.so",
+///         "%BUILD_ABS%/makefiles/bfvmm/src/vmxon/bin/cross/libvmxon.so"
+///     ]
+/// }
 /// @endcode
 ///
 /// Currently, Bareflank supports both in-tree and out-of-tree compilation.
 /// To use in-tree, simply place your code in a folder at Bareflank's root
 /// starting with hypervisor_* or src_* and run make. To perform out-of-tree
-/// compilation, please see one of the examples as this process is fully
-/// documented there. Also, these examples demonstrate how to code, compile
-/// and run an extension.
+/// compilation, configure your build with "-m" to point to your module file
+/// and "-e" to point to your extensions. 
 ///
 /// <a href="https://github.com/Bareflank/hypervisor_example_vpid">Bareflank Hypervisor VPID Example</a>
 /// <br>
 /// <a href="https://github.com/Bareflank/hypervisor_example_cpuidcount">Bareflank Hypervisor CPUID Count Example</a>
-/// <br>
-/// <a href="https://github.com/Bareflank/hypervisor_example_msr_bitmap">Bareflank Hypervisor MSR Bitmaps Example</a>
 ///
 /// @section vmm_reference VMM Reference
 ///
@@ -219,18 +225,35 @@
 ///
 /// @ref start_vmm <br>
 /// @ref stop_vmm <br>
+/// @ref add_md <br>
+/// @ref get_drr <br>
+/// @ref local_init <br>
+/// @ref local_fini <br>
+///
+/// @subsection VCPU Management
+///
 /// @ref vcpu <br>
 /// @ref vcpu_factory <br>
 /// @ref vcpu_manager <br>
+///
+/// @subsection Memory Management
+///
 /// @ref memory_manager_x64 <br>
+/// @ref mem_pool
+/// @ref unique_map_ptr_x64
+/// @ref page_table_entry_x64
+/// @ref page_table_x64
+/// @ref root_page_table_x64
 ///
 /// @subsection Intel x86_64 Specific
 ///
+/// @ref vcpu_intel_x64 <br>
 /// @ref vmxon_intel_x64 <br>
 /// @ref exit_handler_intel_x64 <br>
 /// @ref vmcs_intel_x64 <br>
 /// @ref vmcs_intel_x64_state <br>
-/// @ref vcpu_intel_x64 <br>
+/// @ref vmcs_intel_x64_vmm_state
+/// @ref vmcs_intel_x64_host_vm_state
 ///
 /// @subsection Unit Testing
 ///
@@ -273,10 +296,10 @@
 ///
 /// By default this is set to "COM1_PORT" or "0x3f8". You can set this to
 /// any of the following:
-/// - COM1_PORT
-/// - COM2_PORT
-/// - COM3_PORT
-/// - COM4_PORT
+/// - com1_port
+/// - com2_port
+/// - com3_port
+/// - com4_port
 /// - 0x<port #>
 ///
 /// On some Intel systems with PCI serial devices the port numbers are:
@@ -286,7 +309,7 @@
 /// You can use the above method to define all of the parameters for serial
 /// as well. The default values are listed below, and you can change them
 /// to anything you wish:
-/// - DEFAULT_COM_PORT=COM1_PORT
+/// - DEFAULT_COM_PORT=com1_port
 /// - DEFAULT_BAUD_RATE=baud_rate_115200
 /// - DEFAULT_DATA_BITS=char_length_8
 /// - DEFAULT_STOP_BITS=stop_bits_1
