@@ -1,9 +1,10 @@
 ## Linux Driver Compilation Instructions
 
 Supported Linux distributions are:
-- Ubuntu 14.04, 16.04
+- Ubuntu 16.10, 16.04, 14.04
 - Debian Stretch
-- Fedora 23
+- Fedora 25, 24, 23
+- OpenSUSE Leap 42.2
 
 NOTE: If you would like to use an unsupported platform, so long as you have
 the latest and greatest docker, and GCC5+, it's likely that a build is
@@ -23,7 +24,7 @@ cd ~/hypervisor
 ./tools/scripts/setup_ubuntu.sh
 ```
 
-Once you have a cross compiler setup, you need to build the main source code.
+Next you need to build the main source code.
 This can be done by doing the following:
 
 ```
@@ -40,15 +41,15 @@ make clean
 
 ## Usage Instructions
 
-To use the Bareflank hypervisor, you will use the Bareflank manager (bfm).
+To use the Bareflank hypervisor, you will use the Bareflank Manager (bfm).
 This can be done manually by executing:
 
 ```
 pushd bfm/bin/native
-sudo LD_LIBRARY_PATH=. ./bfm load <module_file>
-sudo LD_LIBRARY_PATH=. ./bfm start
-sudo LD_LIBRARY_PATH=. ./bfm status
-sudo LD_LIBRARY_PATH=. ./bfm dump
+sudo ./bfm load <module_file>
+sudo ./bfm start
+sudo ./bfm status
+sudo ./bfm dump
 popd
 ```
 
@@ -56,8 +57,8 @@ To stop the hypervisor, run the following:
 
 ```
 pushd bfm/bin/native
-sudo LD_LIBRARY_PATH=. ./bfm stop
-sudo LD_LIBRARY_PATH=. ./bfm unload
+sudo ./bfm stop
+sudo ./bfm unload
 popd
 ```
 
@@ -74,6 +75,8 @@ make unload
 
 make quick
 make loop NUM=<xxx>
+ARGS="" make vmcall
+make help
 ```
 
 Bareflank comes with a stock module file called vmm.modules. This file is
@@ -110,7 +113,7 @@ cd ~/build
 ~/hypervisor/configure -m <path to module_file> -e <path to extension>
 
 make
-make unittest
+make test
 
 make driver_load
 make quick
