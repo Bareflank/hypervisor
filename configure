@@ -641,6 +641,11 @@ create_extension_links() {
     if [[ ! -d "$BUILD_ABS/extensions" ]]; then
         mkdir -p $BUILD_ABS/extensions
     fi
+    if [[ -f "$BUILD_ABS/extensions.mk" ]]; then
+        rm -Rf $BUILD_ABS/extensions.mk
+    fi
+
+    touch $BUILD_ABS/extensions.mk
 
     for arg in "${extensions[@]}"
     do
@@ -651,13 +656,13 @@ create_extension_links() {
         local path=`cd "$arg"; pwd`
         local name=`basename $path`
 
-        if [[ ! $name == "hypervisor_"* ]]; then
-            prefix="$prefix"
+        if [[ ! -L "$BUILD_ABS/extensions/$name" ]]; then
+            echo -e "linking extension: $CB$path -> $BUILD_ABS/extensions/$name$CE"
+            ln -s $path $BUILD_ABS/extensions/$name
         fi
 
-        if [[ ! -L "$BUILD_ABS/extensions/$prefix$name" ]]; then
-            echo -e "linking extension: $CB$path -> $BUILD_ABS/extensions/$prefix$name$CE"
-            ln -s $path $BUILD_ABS/extensions/$prefix$name
+        if [[ ! $name == "extended_apis" ]] && [[ ! $name == "hyperkernel" ]] && [[ ! $name == "src_"* ]] && [[ ! $name == "hypervisor_"* ]]; then
+            echo "PARENT_SUBDIRS += $BUILD_ABS/extensions/$name" >> $BUILD_ABS/extensions.mk
         fi
     done
 }
