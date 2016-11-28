@@ -340,6 +340,7 @@ intrinsics_ut::list()
 
     this->test_portio_x64_byte();
     this->test_portio_x64_word();
+    this->test_portio_x64_doubleword();
 
     this->test_vmx_intel_x64_vmxon_nullptr();
     this->test_vmx_intel_x64_vmxon_failure();
