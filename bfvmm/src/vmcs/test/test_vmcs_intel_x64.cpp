@@ -11291,6 +11291,8 @@ vmcs_ut::test_vmcs_exit_qualification_debug_exception_b0()
     g_vmcs_fields[vmcs::exit_qualification::addr] = 1UL;
     this->expect_true(vmcs::exit_qualification::debug_exception::b0::is_enabled());
     this->expect_false(vmcs::exit_qualification::debug_exception::b0::is_disabled());
+    this->expect_true(vmcs::exit_qualification::debug_exception::b0::is_enabled(1UL));
+    this->expect_false(vmcs::exit_qualification::debug_exception::b0::is_disabled(1UL));
 
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0UL;
     this->expect_false(vmcs::exit_qualification::debug_exception::b0::is_enabled_if_exists());
@@ -11303,6 +11305,8 @@ vmcs_ut::test_vmcs_exit_qualification_debug_exception_b1()
     g_vmcs_fields[vmcs::exit_qualification::addr] = 2UL;
     this->expect_true(vmcs::exit_qualification::debug_exception::b1::is_enabled());
     this->expect_false(vmcs::exit_qualification::debug_exception::b1::is_disabled());
+    this->expect_true(vmcs::exit_qualification::debug_exception::b1::is_enabled(2UL));
+    this->expect_false(vmcs::exit_qualification::debug_exception::b1::is_disabled(2UL));
 
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0UL;
     this->expect_false(vmcs::exit_qualification::debug_exception::b1::is_enabled_if_exists());
@@ -11315,6 +11319,8 @@ vmcs_ut::test_vmcs_exit_qualification_debug_exception_b2()
     g_vmcs_fields[vmcs::exit_qualification::addr] = 4UL;
     this->expect_true(vmcs::exit_qualification::debug_exception::b2::is_enabled());
     this->expect_false(vmcs::exit_qualification::debug_exception::b2::is_disabled());
+    this->expect_true(vmcs::exit_qualification::debug_exception::b2::is_enabled(4UL));
+    this->expect_false(vmcs::exit_qualification::debug_exception::b2::is_disabled(4UL));
 
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0UL;
     this->expect_false(vmcs::exit_qualification::debug_exception::b2::is_enabled_if_exists());
@@ -11327,6 +11333,8 @@ vmcs_ut::test_vmcs_exit_qualification_debug_exception_b3()
     g_vmcs_fields[vmcs::exit_qualification::addr] = 8UL;
     this->expect_true(vmcs::exit_qualification::debug_exception::b3::is_enabled());
     this->expect_false(vmcs::exit_qualification::debug_exception::b3::is_disabled());
+    this->expect_true(vmcs::exit_qualification::debug_exception::b3::is_enabled(8UL));
+    this->expect_false(vmcs::exit_qualification::debug_exception::b3::is_disabled(8UL));
 
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0UL;
     this->expect_false(vmcs::exit_qualification::debug_exception::b3::is_enabled_if_exists());
@@ -11338,6 +11346,7 @@ vmcs_ut::test_vmcs_exit_qualification_debug_exception_reserved()
 {
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0x600UL;
     this->expect_true(vmcs::exit_qualification::debug_exception::reserved::get() == 0x600U);
+    this->expect_true(vmcs::exit_qualification::debug_exception::reserved::get(0x600UL) == 0x600U);
 
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0x602UL;
     this->expect_true(vmcs::exit_qualification::debug_exception::reserved::get_if_exists() == 0x600U);
@@ -11349,6 +11358,8 @@ vmcs_ut::test_vmcs_exit_qualification_debug_exception_bd()
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0x2000UL;
     this->expect_true(vmcs::exit_qualification::debug_exception::bd::is_enabled());
     this->expect_false(vmcs::exit_qualification::debug_exception::bd::is_disabled());
+    this->expect_true(vmcs::exit_qualification::debug_exception::bd::is_enabled(0x2000UL));
+    this->expect_false(vmcs::exit_qualification::debug_exception::bd::is_disabled(0x2000UL));
 
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0UL;
     this->expect_false(vmcs::exit_qualification::debug_exception::bd::is_enabled_if_exists());
@@ -11361,6 +11372,8 @@ vmcs_ut::test_vmcs_exit_qualification_debug_exception_bs()
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0x4000UL;
     this->expect_true(vmcs::exit_qualification::debug_exception::bs::is_enabled());
     this->expect_false(vmcs::exit_qualification::debug_exception::bs::is_disabled());
+    this->expect_true(vmcs::exit_qualification::debug_exception::bs::is_enabled(0x4000UL));
+    this->expect_false(vmcs::exit_qualification::debug_exception::bs::is_disabled(0x4000UL));
 
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0UL;
     this->expect_false(vmcs::exit_qualification::debug_exception::bs::is_enabled_if_exists());
@@ -11396,6 +11409,7 @@ vmcs_ut::test_vmcs_exit_qualification_sipi_vector()
 {
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0xF34UL;
     this->expect_true(vmcs::exit_qualification::sipi::vector::get() == 0x34UL);
+    this->expect_true(vmcs::exit_qualification::sipi::vector::get(0xF34UL) == 0x34UL);
 
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0x3010UL;
     this->expect_true(vmcs::exit_qualification::sipi::vector::get_if_exists() == 0x10UL);
@@ -11418,6 +11432,7 @@ vmcs_ut::test_vmcs_exit_qualification_task_switch_tss_selector()
 {
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0xF0003456UL;
     this->expect_true(vmcs::exit_qualification::task_switch::tss_selector::get() == 0x3456UL);
+    this->expect_true(vmcs::exit_qualification::task_switch::tss_selector::get(0xF0003456UL) == 0x3456UL);
 
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL;
     this->expect_true(vmcs::exit_qualification::task_switch::tss_selector::get_if_exists() == 0x0UL);
@@ -11428,6 +11443,7 @@ vmcs_ut::test_vmcs_exit_qualification_task_switch_reserved()
 {
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0xFFF0000UL;
     this->expect_true(vmcs::exit_qualification::task_switch::reserved::get() == 0xFFF0000UL);
+    this->expect_true(vmcs::exit_qualification::task_switch::reserved::get(0xFFF0000UL) == 0xFFF0000UL);
 
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL;
     this->expect_true(vmcs::exit_qualification::task_switch::reserved::get_if_exists() == 0x0UL);
@@ -11436,19 +11452,21 @@ vmcs_ut::test_vmcs_exit_qualification_task_switch_reserved()
 void
 vmcs_ut::test_vmcs_exit_qualification_task_switch_source_of_task_switch_init()
 {
-    using namespace vmcs::exit_qualification::task_switch::source_of_task_switch_init;
+    using namespace vmcs::exit_qualification::task_switch;
 
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL;
-    this->expect_true(get() == call_instruction);
+    this->expect_true(source_of_task_switch_init::get() == source_of_task_switch_init::call_instruction);
+    this->expect_true(source_of_task_switch_init::get(0x0UL) == source_of_task_switch_init::call_instruction);
 
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0x40000000UL;
-    this->expect_true(get() == iret_instruction);
+    this->expect_true(source_of_task_switch_init::get() == source_of_task_switch_init::iret_instruction);
+    this->expect_true(source_of_task_switch_init::get(0x40000000UL) == source_of_task_switch_init::iret_instruction);
 
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0x80000000UL;
-    this->expect_true(get_if_exists() == jmp_instruction);
+    this->expect_true(source_of_task_switch_init::get_if_exists() == source_of_task_switch_init::jmp_instruction);
 
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0xC0000000UL;
-    this->expect_true(get_if_exists() == task_gate_in_idt);
+    this->expect_true(source_of_task_switch_init::get_if_exists() == source_of_task_switch_init::task_gate_in_idt);
 }
 
 void
@@ -11648,6 +11666,7 @@ vmcs_ut::test_vmcs_exit_qualification_control_register_access_control_register_n
 {
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0x42UL;
     this->expect_true(vmcs::exit_qualification::control_register_access::control_register_number::get() == 0x2UL);
+    this->expect_true(vmcs::exit_qualification::control_register_access::control_register_number::get(0x42UL) == 0x2UL);
 
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL;
     this->expect_true(vmcs::exit_qualification::control_register_access::control_register_number::get_if_exists() == 0x0UL);
@@ -11656,31 +11675,34 @@ vmcs_ut::test_vmcs_exit_qualification_control_register_access_control_register_n
 void
 vmcs_ut::test_vmcs_exit_qualification_control_register_access_access_type()
 {
-    using namespace vmcs::exit_qualification::control_register_access::access_type;
+    using namespace vmcs::exit_qualification::control_register_access;
 
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0x00UL;
-    this->expect_true(get() == mov_to_cr);
+    this->expect_true(access_type::get() == access_type::mov_to_cr);
+    this->expect_true(access_type::get(0x00UL) == access_type::mov_to_cr);
 
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0x10UL;
-    this->expect_true(get() == mov_from_cr);
+    this->expect_true(access_type::get() == access_type::mov_from_cr);
+    this->expect_true(access_type::get(0x10UL) == access_type::mov_from_cr);
 
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0x20UL;
-    this->expect_true(get_if_exists() == clts);
+    this->expect_true(access_type::get_if_exists() == access_type::clts);
 
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0x30UL;
-    this->expect_true(get_if_exists() == lmsw);
+    this->expect_true(access_type::get_if_exists() == access_type::lmsw);
 }
 
 void
 vmcs_ut::test_vmcs_exit_qualification_control_register_access_lmsw_operand_type()
 {
-    using namespace vmcs::exit_qualification::control_register_access::lmsw_operand_type;
+    using namespace vmcs::exit_qualification::control_register_access;
 
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0x00UL;
-    this->expect_true(get() == reg);
+    this->expect_true(lmsw_operand_type::get() == lmsw_operand_type::reg);
+    this->expect_true(lmsw_operand_type::get(0x00UL) == lmsw_operand_type::reg);
 
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0x40UL;
-    this->expect_true(get_if_exists() == mem);
+    this->expect_true(lmsw_operand_type::get_if_exists() == lmsw_operand_type::mem);
 }
 
 void
@@ -11688,6 +11710,7 @@ vmcs_ut::test_vmcs_exit_qualification_control_register_access_reserved()
 {
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0x3080UL;
     this->expect_true(vmcs::exit_qualification::control_register_access::reserved::get() == 0x3080UL);
+    this->expect_true(vmcs::exit_qualification::control_register_access::reserved::get(0x3080UL) == 0x3080UL);
 
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL;
     this->expect_true(vmcs::exit_qualification::control_register_access::reserved::get_if_exists() == 0x0UL);
@@ -11696,25 +11719,27 @@ vmcs_ut::test_vmcs_exit_qualification_control_register_access_reserved()
 void
 vmcs_ut::test_vmcs_exit_qualification_control_register_access_general_purpose_register()
 {
-    using namespace vmcs::exit_qualification::control_register_access::general_purpose_register;
+    using namespace vmcs::exit_qualification::control_register_access;
 
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0x100UL;
-    this->expect_true(get() == rcx);
+    this->expect_true(general_purpose_register::get() == general_purpose_register::rcx);
+    this->expect_true(general_purpose_register::get(0x100UL) == general_purpose_register::rcx);
 
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0xA00UL;
-    this->expect_true(get_if_exists() == r10);
+    this->expect_true(general_purpose_register::get_if_exists() == general_purpose_register::r10);
 }
 
 void
 vmcs_ut::test_vmcs_exit_qualification_control_register_access_source_data()
 {
-    using namespace vmcs::exit_qualification::control_register_access::source_data;
+    using namespace vmcs::exit_qualification::control_register_access;
 
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0x30000UL;
-    this->expect_true(get() == 3UL);
+    this->expect_true(source_data::get() == 3UL);
+    this->expect_true(source_data::get(0x30000UL) == 3UL);
 
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0x60000UL;
-    this->expect_true(get_if_exists() == 6UL);
+    this->expect_true(source_data::get_if_exists() == 6UL);
 }
 
 void
@@ -11734,6 +11759,7 @@ vmcs_ut::test_vmcs_exit_qualification_mov_dr_debug_register_number()
 {
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0x42UL;
     this->expect_true(vmcs::exit_qualification::mov_dr::debug_register_number::get() == 0x2UL);
+    this->expect_true(vmcs::exit_qualification::mov_dr::debug_register_number::get(0x42UL) == 0x2UL);
 
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL;
     this->expect_true(vmcs::exit_qualification::mov_dr::debug_register_number::get_if_exists() == 0x0UL);
@@ -11744,6 +11770,7 @@ vmcs_ut::test_vmcs_exit_qualification_mov_dr_reserved()
 {
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0x88UL;
     this->expect_true(vmcs::exit_qualification::mov_dr::reserved::get() == 0x88UL);
+    this->expect_true(vmcs::exit_qualification::mov_dr::reserved::get(0x88UL) == 0x88UL);
 
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL;
     this->expect_true(vmcs::exit_qualification::mov_dr::reserved::get_if_exists() == 0x0UL);
@@ -11752,25 +11779,27 @@ vmcs_ut::test_vmcs_exit_qualification_mov_dr_reserved()
 void
 vmcs_ut::test_vmcs_exit_qualification_mov_dr_direction_of_access()
 {
-    using namespace vmcs::exit_qualification::mov_dr::direction_of_access;
+    using namespace vmcs::exit_qualification::mov_dr;
 
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0x00UL;
-    this->expect_true(get() == to_dr);
+    this->expect_true(direction_of_access::get() == direction_of_access::to_dr);
+    this->expect_true(direction_of_access::get(0x00UL) == direction_of_access::to_dr);
 
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0x10UL;
-    this->expect_true(get_if_exists() == from_dr);
+    this->expect_true(direction_of_access::get_if_exists() == direction_of_access::from_dr);
 }
 
 void
 vmcs_ut::test_vmcs_exit_qualification_mov_dr_general_purpose_register()
 {
-    using namespace vmcs::exit_qualification::mov_dr::general_purpose_register;
+    using namespace vmcs::exit_qualification::mov_dr;
 
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0x200UL;
-    this->expect_true(get() == rdx);
+    this->expect_true(general_purpose_register::get() == general_purpose_register::rdx);
+    this->expect_true(general_purpose_register::get(0x200UL) == general_purpose_register::rdx);
 
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0xB00UL;
-    this->expect_true(get_if_exists() == r11);
+    this->expect_true(general_purpose_register::get_if_exists() == general_purpose_register::r11);
 }
 
 void
@@ -11795,6 +11824,7 @@ vmcs_ut::test_vmcs_exit_qualification_io_instruction_size_of_access()
 
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL;
     this->expect_true(size_of_access::get() == size_of_access::two_byte);
+    this->expect_true(size_of_access::get(0x1UL) == size_of_access::two_byte);
 
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0x3UL;
     this->expect_true(size_of_access::get_if_exists() == size_of_access::four_byte);
@@ -11807,6 +11837,7 @@ vmcs_ut::test_vmcs_exit_qualification_io_instruction_direction_of_access()
 
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL;
     this->expect_true(direction_of_access::get() == direction_of_access::out);
+    this->expect_true(direction_of_access::get(0x0UL) == direction_of_access::out);
 
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL << direction_of_access::from;
     this->expect_true(direction_of_access::get_if_exists() == direction_of_access::in);
@@ -11819,6 +11850,7 @@ vmcs_ut::test_vmcs_exit_qualification_io_instruction_string_instruction()
 
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL;
     this->expect_true(string_instruction::get() == string_instruction::not_string);
+    this->expect_true(string_instruction::get(0x0UL) == string_instruction::not_string);
 
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL << string_instruction::from;
     this->expect_true(string_instruction::get_if_exists() == string_instruction::string);
@@ -11831,6 +11863,7 @@ vmcs_ut::test_vmcs_exit_qualification_io_instruction_rep_prefixed()
 
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL;
     this->expect_true(rep_prefixed::get() == rep_prefixed::not_rep);
+    this->expect_true(rep_prefixed::get(0x0UL) == rep_prefixed::not_rep);
 
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL << rep_prefixed::from;
     this->expect_true(rep_prefixed::get_if_exists() == rep_prefixed::rep);
@@ -11843,6 +11876,7 @@ vmcs_ut::test_vmcs_exit_qualification_io_instruction_operand_encoding()
 
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL;
     this->expect_true(operand_encoding::get() == operand_encoding::dx);
+    this->expect_true(operand_encoding::get(0x0UL) == operand_encoding::dx);
 
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL << operand_encoding::from;
     this->expect_true(operand_encoding::get_if_exists() == operand_encoding::immediate);
@@ -11855,6 +11889,7 @@ vmcs_ut::test_vmcs_exit_qualification_io_instruction_reserved()
 
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL;
     this->expect_true(reserved::get() == 0x0UL);
+    this->expect_true(reserved::get(0x0UL) == 0x0UL);
 
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0xF80UL;
     this->expect_true(reserved::get_if_exists() == 0xF80UL);
@@ -11867,6 +11902,7 @@ vmcs_ut::test_vmcs_exit_qualification_io_instruction_port_number()
 
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL;
     this->expect_true(port_number::get() == 0x0UL);
+    this->expect_true(port_number::get(0x0UL) == 0x0UL);
 
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL << port_number::from;
     this->expect_true(port_number::get_if_exists() == 0x1UL);
@@ -11907,6 +11943,7 @@ vmcs_ut::test_vmcs_exit_qualification_linear_apic_access_offset()
 
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL;
     this->expect_true(offset::get() == 0x1UL);
+    this->expect_true(offset::get(0x1UL) == 0x1UL);
 
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL;
     this->expect_true(offset::get_if_exists() == 0x0UL);
@@ -11915,31 +11952,34 @@ vmcs_ut::test_vmcs_exit_qualification_linear_apic_access_offset()
 void
 vmcs_ut::test_vmcs_exit_qualification_linear_apic_access_access_type()
 {
-    using namespace vmcs::exit_qualification::linear_apic_access::access_type;
+    using namespace vmcs::exit_qualification::linear_apic_access;
 
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL;
-    this->expect_true(get() == read_during_instruction_execution);
+    this->expect_true(access_type::get() == access_type::read_during_instruction_execution);
+    this->expect_true(access_type::get(0x0UL) == access_type::read_during_instruction_execution);
 
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL << from;
-    this->expect_true(get_if_exists() == write_during_instruction_execution);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL << access_type::from;
+    this->expect_true(access_type::get_if_exists() == access_type::write_during_instruction_execution);
 
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x2UL << from;
-    this->expect_true(get() == instruction_fetch);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x2UL << access_type::from;
+    this->expect_true(access_type::get() == access_type::instruction_fetch);
+    this->expect_true(access_type::get(0x2UL << access_type::from) == access_type::instruction_fetch);
 
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x3UL << from;
-    this->expect_true(get_if_exists() == event_delivery);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x3UL << access_type::from;
+    this->expect_true(access_type::get_if_exists() == access_type::event_delivery);
 }
 
 void
 vmcs_ut::test_vmcs_exit_qualification_linear_apic_access_reserved()
 {
-    using namespace vmcs::exit_qualification::linear_apic_access::reserved;
+    using namespace vmcs::exit_qualification::linear_apic_access;
 
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL;
-    this->expect_true(get() == 0U);
+    this->expect_true(reserved::get() == 0U);
+    this->expect_true(reserved::get(0x0UL) == 0U);
 
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0xF0000UL;
-    this->expect_true(get_if_exists() == 0xF0000U);
+    this->expect_true(reserved::get_if_exists() == 0xF0000U);
 }
 
 void
@@ -11959,25 +11999,27 @@ vmcs_ut::test_vmcs_exit_qualification_guest_physical_apic_access()
 void
 vmcs_ut::test_vmcs_exit_qualification_guest_physical_apic_access_access_type()
 {
-    using namespace vmcs::exit_qualification::guest_physical_apic_access::access_type;
+    using namespace vmcs::exit_qualification::guest_physical_apic_access;
 
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0xAUL << from;
-    this->expect_true(get_if_exists() == event_delivery);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0xFUL << access_type::from;
+    this->expect_true(access_type::get() == access_type::instruction_fetch_or_execution);
+    this->expect_true(access_type::get(0xFUL << access_type::from) == access_type::instruction_fetch_or_execution);
 
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0xFUL << from;
-    this->expect_true(get() == instruction_fetch_or_execution);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0xAUL << access_type::from;
+    this->expect_true(access_type::get_if_exists() == access_type::event_delivery);
 }
 
 void
 vmcs_ut::test_vmcs_exit_qualification_guest_physical_apic_access_reserved()
 {
-    using namespace vmcs::exit_qualification::guest_physical_apic_access::reserved;
+    using namespace vmcs::exit_qualification::guest_physical_apic_access;
 
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL;
-    this->expect_true(get() == 0U);
+    this->expect_true(reserved::get() == 0U);
+    this->expect_true(reserved::get(0x0UL) == 0U);
 
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0xF0000UL;
-    this->expect_true(get_if_exists() == 0xF0000U);
+    this->expect_true(reserved::get_if_exists() == 0xF0000U);
 }
 
 void
@@ -11999,10 +12041,12 @@ vmcs_ut::test_vmcs_exit_qualification_ept_violation_data_read()
 
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL;
     this->expect_true(data_read::is_enabled());
+    this->expect_true(data_read::is_enabled(0x1UL));
     this->expect_true(data_read::is_enabled_if_exists());
 
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL;
     this->expect_true(data_read::is_disabled());
+    this->expect_true(data_read::is_disabled(0x0UL));
     this->expect_true(data_read::is_disabled_if_exists());
 }
 
@@ -12013,10 +12057,12 @@ vmcs_ut::test_vmcs_exit_qualification_ept_violation_data_write()
 
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL << data_write::from;
     this->expect_true(data_write::is_enabled());
+    this->expect_true(data_write::is_enabled(0x1UL << data_write::from));
     this->expect_true(data_write::is_enabled_if_exists());
 
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL << data_write::from;
     this->expect_true(data_write::is_disabled());
+    this->expect_true(data_write::is_disabled(0x0UL << data_write::from));
     this->expect_true(data_write::is_disabled_if_exists());
 }
 
@@ -12027,10 +12073,12 @@ vmcs_ut::test_vmcs_exit_qualification_ept_violation_instruction_fetch()
 
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL << instruction_fetch::from;
     this->expect_true(instruction_fetch::is_enabled());
+    this->expect_true(instruction_fetch::is_enabled(0x1UL << instruction_fetch::from));
     this->expect_true(instruction_fetch::is_enabled_if_exists());
 
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL << instruction_fetch::from;
     this->expect_true(instruction_fetch::is_disabled());
+    this->expect_true(instruction_fetch::is_disabled(0x0UL << instruction_fetch::from));
     this->expect_true(instruction_fetch::is_disabled_if_exists());
 }
 
@@ -12041,10 +12089,12 @@ vmcs_ut::test_vmcs_exit_qualification_ept_violation_readable()
 
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL << readable::from;
     this->expect_true(readable::is_enabled());
+    this->expect_true(readable::is_enabled(0x1UL << readable::from));
     this->expect_true(readable::is_enabled_if_exists());
 
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL << readable::from;
     this->expect_true(readable::is_disabled());
+    this->expect_true(readable::is_disabled(0x0UL << readable::from));
     this->expect_true(readable::is_disabled_if_exists());
 }
 
@@ -12055,10 +12105,12 @@ vmcs_ut::test_vmcs_exit_qualification_ept_violation_writeable()
 
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL << writeable::from;
     this->expect_true(writeable::is_enabled());
+    this->expect_true(writeable::is_enabled(0x1UL << writeable::from));
     this->expect_true(writeable::is_enabled_if_exists());
 
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL << writeable::from;
     this->expect_true(writeable::is_disabled());
+    this->expect_true(writeable::is_disabled(0x0UL << writeable::from));
     this->expect_true(writeable::is_disabled_if_exists());
 }
 
@@ -12069,10 +12121,12 @@ vmcs_ut::test_vmcs_exit_qualification_ept_violation_executable()
 
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL << executable::from;
     this->expect_true(executable::is_enabled());
+    this->expect_true(executable::is_enabled(0x1UL << executable::from));
     this->expect_true(executable::is_enabled_if_exists());
 
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL << executable::from;
     this->expect_true(executable::is_disabled());
+    this->expect_true(executable::is_disabled(0x0UL << executable::from));
     this->expect_true(executable::is_disabled_if_exists());
 }
 
@@ -12083,6 +12137,7 @@ vmcs_ut::test_vmcs_exit_qualification_ept_violation_reserved()
 
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0x40UL;
     this->expect_true(reserved::get() == 0x40UL);
+    this->expect_true(reserved::get(0x40UL) == 0x40UL);
 
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL;
     this->expect_true(reserved::get_if_exists() == 0UL);
@@ -12095,10 +12150,12 @@ vmcs_ut::test_vmcs_exit_qualification_ept_violation_valid_guest_linear_address()
 
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL << valid_guest_linear_address::from;
     this->expect_true(valid_guest_linear_address::is_enabled());
+    this->expect_true(valid_guest_linear_address::is_enabled(0x1UL << valid_guest_linear_address::from));
     this->expect_true(valid_guest_linear_address::is_enabled_if_exists());
 
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL << valid_guest_linear_address::from;
     this->expect_true(valid_guest_linear_address::is_disabled());
+    this->expect_true(valid_guest_linear_address::is_disabled(0x0UL << valid_guest_linear_address::from));
     this->expect_true(valid_guest_linear_address::is_disabled_if_exists());
 }
 
@@ -12109,10 +12166,12 @@ vmcs_ut::test_vmcs_exit_qualification_ept_violation_nmi_unblocking_due_to_iret()
 
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL << nmi_unblocking_due_to_iret::from;
     this->expect_true(nmi_unblocking_due_to_iret::is_enabled());
+    this->expect_true(nmi_unblocking_due_to_iret::is_enabled(0x1UL << nmi_unblocking_due_to_iret::from));
     this->expect_true(nmi_unblocking_due_to_iret::is_enabled_if_exists());
 
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL << nmi_unblocking_due_to_iret::from;
     this->expect_true(nmi_unblocking_due_to_iret::is_disabled());
+    this->expect_true(nmi_unblocking_due_to_iret::is_disabled(0x0UL << nmi_unblocking_due_to_iret::from));
     this->expect_true(nmi_unblocking_due_to_iret::is_disabled_if_exists());
 }
 
@@ -12131,13 +12190,14 @@ vmcs_ut::test_vmcs_exit_qualification_eoi_virtualization()
 void
 vmcs_ut::test_vmcs_exit_qualification_eoi_virtualization_vector()
 {
-    using namespace vmcs::exit_qualification::eoi_virtualization::vector;
+    using namespace vmcs::exit_qualification::eoi_virtualization;
 
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL;
-    this->expect_true(get() == 1UL);
+    this->expect_true(vector::get() == 1UL);
+    this->expect_true(vector::get(0x1UL) == 1UL);
 
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL;
-    this->expect_true(get_if_exists() == 0UL);
+    this->expect_true(vector::get_if_exists() == 0UL);
 }
 
 void
@@ -12155,13 +12215,14 @@ vmcs_ut::test_vmcs_exit_qualification_apic_write()
 void
 vmcs_ut::test_vmcs_exit_qualification_apic_write_offset()
 {
-    using namespace vmcs::exit_qualification::apic_write::offset;
+    using namespace vmcs::exit_qualification::apic_write;
 
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL;
-    this->expect_true(get() == 1UL);
+    this->expect_true(offset::get() == 1UL);
+    this->expect_true(offset::get(0x1UL) == 1UL);
 
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL;
-    this->expect_true(get_if_exists() == 0UL);
+    this->expect_true(offset::get_if_exists() == 0UL);
 }
 
 void
