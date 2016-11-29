@@ -339,6 +339,7 @@ private:
 
     void test_portio_x64_byte();
     void test_portio_x64_word();
+    void test_portio_x64_doubleword();
 
     void test_vmx_intel_x64_vmxon_nullptr();
     void test_vmx_intel_x64_vmxon_failure();
