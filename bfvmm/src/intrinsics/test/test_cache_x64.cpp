@@ -32,6 +32,10 @@ extern "C" void
 __wbinvd(void) noexcept
 { }
 
+extern "C" void
+__clflush(void *addr) noexcept
+{ (void) addr; }
+
 void
 intrinsics_ut::test_cache_x64_invd()
 {
@@ -42,4 +46,11 @@ void
 intrinsics_ut::test_cache_x64_wbinvd()
 {
     this->expect_no_exception([&] { cache::wbinvd(); });
+}
+
+void
+intrinsics_ut::test_cache_x64_clflush()
+{
+    this->expect_no_exception([&] { cache::clflush(0x10); });
+    this->expect_no_exception([&] { cache::clflush(this); });
 }

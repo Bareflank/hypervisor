@@ -35,6 +35,7 @@ constexpr const auto valid_map = valid_virt + phys_offset;
 
 std::map<const void *, bool> g_freed;
 std::map<const void *, bool> g_flushed;
+std::map<const void *, bool> g_cache_flushed;
 std::map<memory_manager_x64::integer_pointer, memory_manager_x64::integer_pointer> g_mapped;
 std::map<memory_manager_x64::integer_pointer, bool> g_unmapped;
 
@@ -43,6 +44,10 @@ bfn::unique_map_ptr_x64<int>::attr_type read_write = bfn::unique_map_ptr_x64<int
 extern "C" void
 __invlpg(const void *virt) noexcept
 { g_flushed[virt] = true; }
+
+extern "C" void
+__clflush(void *addr) noexcept
+{ g_cache_flushed[addr] = true; }
 
 auto g_pte_valid_present = true;
 auto g_pte_valid_phys_addr = true;
@@ -603,6 +608,41 @@ memory_manager_ut::test_unique_map_ptr_x64_flush()
         this->expect_true(g_flushed[make_ptr(virt4)]);
         this->expect_true(g_flushed[make_ptr(virt5)]);
         this->expect_true(g_flushed[make_ptr(virt6)]);
+    });
+}
+
+void
+memory_manager_ut::test_unique_map_ptr_x64_cache_flush()
+{
+    MockRepository mocks;
+    setup_mm(mocks);
+    setup_pt(mocks);
+
+    auto &&phys_range_1 = std::make_pair(0x1111000000000010UL, x64::page_size * 2UL);
+    auto &&phys_range_2 = std::make_pair(0x1111000000004000UL, x64::page_size * 2UL);
+    auto &&phys_range_3 = std::make_pair(0x1111000000008000UL, x64::page_size * 2UL);
+    auto &&list = {phys_range_1, phys_range_2, phys_range_3};
+
+    auto &&virt1 = valid_virt + (0 * x64::page_size);
+    auto &&virt2 = valid_virt + (1 * x64::page_size);
+    auto &&virt3 = valid_virt + (2 * x64::page_size);
+    auto &&virt4 = valid_virt + (3 * x64::page_size);
+    auto &&virt5 = valid_virt + (4 * x64::page_size);
+    auto &&virt6 = valid_virt + (5 * x64::page_size);
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        auto &&map = bfn::unique_map_ptr_x64<int>(valid_virt, list, read_write);
+
+        g_cache_flushed.clear();
+        map.cache_flush();
+
+        this->expect_true(g_cache_flushed[make_ptr(virt1)]);
+        this->expect_true(g_cache_flushed[make_ptr(virt2)]);
+        this->expect_true(g_cache_flushed[make_ptr(virt3)]);
+        this->expect_true(g_cache_flushed[make_ptr(virt4)]);
+        this->expect_true(g_cache_flushed[make_ptr(virt5)]);
+        this->expect_true(g_cache_flushed[make_ptr(virt6)]);
     });
 }
 

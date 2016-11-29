@@ -409,6 +409,7 @@ intrinsics_ut::list()
 
     this->test_cache_x64_invd();
     this->test_cache_x64_wbinvd();
+    this->test_cache_x64_clflush();
 
     this->test_tlb_x64_invlpg();
 

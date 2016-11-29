@@ -33,3 +33,8 @@ global __wbinvd:function
 __wbinvd:
     wbinvd
     ret
+
+global __clflush:function
+__clflush:
+    clflush [rdi]
+    ret
