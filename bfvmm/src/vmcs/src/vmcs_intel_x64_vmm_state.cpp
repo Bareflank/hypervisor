@@ -20,6 +20,8 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #include <vmcs/vmcs_intel_x64_vmm_state.h>
+
+#include <memory_manager/pat_x64.h>
 #include <memory_manager/root_page_table_x64.h>
 
 using namespace x64;
@@ -76,7 +78,7 @@ vmcs_intel_x64_vmm_state::vmcs_intel_x64_vmm_state()
     m_cr0 |= cr0::write_protect::mask;
     m_cr0 |= cr0::paging::mask;
 
-    m_cr3 = g_pt->phys_addr();
+    m_cr3 = g_pt->cr3();
 
     m_cr4 = 0;
     m_cr4 |= cr4::physical_address_extensions::mask;
@@ -86,6 +88,8 @@ vmcs_intel_x64_vmm_state::vmcs_intel_x64_vmm_state()
     m_cr4 |= cr4::osxsave::mask;
 
     m_rflags = 0;
+
+    m_ia32_pat_msr = x64::pat::pat_value;
 
     m_ia32_efer_msr = 0;
     m_ia32_efer_msr |= msrs::ia32_efer::lme::mask;

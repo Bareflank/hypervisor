@@ -31,13 +31,15 @@
 
 #include <memory.h>
 #include <guard_exceptions.h>
+#include <memory_manager/pat_x64.h>
+#include <memory_manager/mem_attr_x64.h>
 #include <memory_manager/memory_manager_x64.h>
 #include <memory_manager/root_page_table_x64.h>
 
 #include <intrinsics/x64.h>
 #include <intrinsics/tlb_x64.h>
-
-using namespace x64;
+#include <intrinsics/msrs_x64.h>
+#include <intrinsics/cache_x64.h>
 
 // -----------------------------------------------------------------------------
 // Definition
@@ -69,9 +71,9 @@ class unique_map_ptr_x64;
 ///
 template<class T>
 auto make_unique_map_x64(typename unique_map_ptr_x64<T>::pointer phys,
-                         typename unique_map_ptr_x64<T>::attr_type attr = unique_map_ptr_x64<T>::map_read_write)
+                         x64::memory_attr::attr_type attr = x64::memory_attr::rw_wb)
 {
-    auto &&vmap = g_mm->alloc_map(page_size);
+    auto &&vmap = g_mm->alloc_map(x64::page_size);
 
     try
     {
@@ -106,9 +108,9 @@ auto make_unique_map_x64(typename unique_map_ptr_x64<T>::pointer phys,
 ///
 template<class T>
 auto make_unique_map_x64(typename unique_map_ptr_x64<T>::integer_pointer phys,
-                         typename unique_map_ptr_x64<T>::attr_type attr = unique_map_ptr_x64<T>::map_read_write)
+                         x64::memory_attr::attr_type attr = x64::memory_attr::rw_wb)
 {
-    auto &&vmap = g_mm->alloc_map(page_size);
+    auto &&vmap = g_mm->alloc_map(x64::page_size);
 
     try
     {
@@ -147,7 +149,7 @@ auto make_unique_map_x64(typename unique_map_ptr_x64<T>::integer_pointer phys,
 /// @expects list.empty() == false
 /// @expects list.at(i).first != 0
 /// @expects list.at(i).second != 0
-/// @expects list.at(i).second & (page_size - 1) == 0
+/// @expects list.at(i).second & (x64::page_size - 1) == 0
 /// @expects attr != map_none
 /// @ensures ret.get() != nullptr
 ///
@@ -162,7 +164,7 @@ auto make_unique_map_x64(typename unique_map_ptr_x64<T>::integer_pointer phys,
 ///
 template<class T>
 auto make_unique_map_x64(const std::vector<std::pair<typename unique_map_ptr_x64<T>::integer_pointer, typename unique_map_ptr_x64<T>::size_type>> &list,
-                         typename unique_map_ptr_x64<T>::attr_type attr = unique_map_ptr_x64<T>::map_read_write)
+                         x64::memory_attr::attr_type attr = x64::memory_attr::rw_wb)
 {
     typename unique_map_ptr_x64<T>::size_type size = 0;
 
@@ -205,28 +207,27 @@ auto make_unique_map_x64(const std::vector<std::pair<typename unique_map_ptr_x64
 /// @expects virt != 0
 /// @expects cr3 != 0
 /// @expects size != 0
-/// @expects attr != map_none
 /// @ensures get() != nullptr
 ///
 /// @param virt the virtual address containing the existing mapping
 /// @param cr3 the root page table containing the existing virtual to
 ///     physical memory mappings
 /// @param size the number of bytes to map
-/// @param attr defines how to map the memory. Defaults to map_read_write
+/// @param pat the pat msr associated with the provided cr3
 /// @return resulting unique_map_ptr_x64
 ///
 template<class T>
 auto make_unique_map_x64(typename unique_map_ptr_x64<T>::integer_pointer virt,
                          typename unique_map_ptr_x64<T>::integer_pointer cr3,
                          typename unique_map_ptr_x64<T>::size_type size,
-                         typename unique_map_ptr_x64<T>::attr_type attr = unique_map_ptr_x64<T>::map_read_write)
+                         x64::msrs::value_type pat)
 {
-    auto &&vmap = g_mm->alloc_map(page_size);
+    auto &&vmap = g_mm->alloc_map(x64::page_size);
 
 #ifdef MAP_PTR_TESTING
 
     (void) cr3;
-    (void) attr;
+    (void) pat;
 
     expects(virt != 0xDEADBEEF);
     return unique_map_ptr_x64<T> {reinterpret_cast<typename unique_map_ptr_x64<T>::integer_pointer>(vmap), size};
@@ -236,7 +237,7 @@ auto make_unique_map_x64(typename unique_map_ptr_x64<T>::integer_pointer virt,
     try
     {
         return unique_map_ptr_x64<T>(reinterpret_cast<typename unique_map_ptr_x64<T>::integer_pointer>(vmap),
-                                     virt, cr3, size, attr);
+                                     virt, cr3, size, pat);
     }
     catch (...)
     {
@@ -281,12 +282,6 @@ public:
     using size_type = size_t;
     using element_type = T;
 
-    enum attr_type
-    {
-        map_none = 0,
-        map_read_write = MEMORY_TYPE_R | MEMORY_TYPE_W
-    };
-
     /// Default Map
     ///
     /// This constructor can be used to create a default map that maps to
@@ -330,7 +325,7 @@ public:
     /// @endcode
     ///
     /// @expects vmap != 0
-    /// @expects vmap & (page_size - 1) == 0
+    /// @expects vmap & (x64::page_size - 1) == 0
     /// @expects phys != 0
     /// @expects attr != 0
     /// @ensures get() != nullptr
@@ -339,15 +334,14 @@ public:
     /// @param phys the physical address to map
     /// @param attr defines how to map the memory. Defaults to map_read_write
     ///
-    unique_map_ptr_x64(integer_pointer vmap, integer_pointer phys, attr_type attr) :
+    unique_map_ptr_x64(integer_pointer vmap, integer_pointer phys, x64::memory_attr::attr_type attr) :
         m_virt(0),
-        m_size(page_size)
+        m_size(x64::page_size)
     {
         // [[ensures: get() != nullptr]]
         expects(vmap != 0);
         expects(lower(vmap) == 0);
         expects(phys != 0);
-        expects(attr != map_none);
 
         m_virt |= lower(phys);
         m_virt |= upper(vmap);
@@ -392,11 +386,11 @@ public:
     /// @endcode
     ///
     /// @expects vmap != 0
-    /// @expects vmap & (page_size - 1) == 0
+    /// @expects vmap & (x64::page_size - 1) == 0
     /// @expects list.empty() == false
     /// @expects list.at(i).first != 0
     /// @expects list.at(i).second != 0
-    /// @expects list.at(i).second & (page_size - 1) == 0
+    /// @expects list.at(i).second & (x64::page_size - 1) == 0
     /// @expects attr != 0
     /// @ensures get() != nullptr
     ///
@@ -406,7 +400,7 @@ public:
     ///     virtual address mapping
     /// @param attr defines how to map the memory. Defaults to map_read_write
     ///
-    unique_map_ptr_x64(integer_pointer vmap, const std::vector<std::pair<integer_pointer, size_type>> &list, attr_type attr) :
+    unique_map_ptr_x64(integer_pointer vmap, const std::vector<std::pair<integer_pointer, size_type>> &list, x64::memory_attr::attr_type attr) :
         m_virt(0),
         m_size(0)
     {
@@ -414,7 +408,6 @@ public:
         expects(vmap != 0);
         expects(lower(vmap) == 0);
         expects(!list.empty());
-        expects(attr != map_none);
 
         for (const auto &p : list)
         {
@@ -428,15 +421,15 @@ public:
         m_virt |= lower(list.front().first);
         m_virt |= upper(vmap);
 
-        auto voff = 0UL;
-        auto poff = 0UL;
+        auto &&voff = 0UL;
+        auto &&poff = 0UL;
 
         for (const auto &p : list)
         {
-            auto phys = upper(p.first);
-            auto size = p.second;
+            auto &&phys = upper(p.first);
+            auto &&size = p.second;
 
-            for (poff = 0; poff < size; poff += page_size, voff += page_size)
+            for (poff = 0; poff < size; poff += x64::page_size, voff += x64::page_size)
                 g_pt->map(vmap + voff, phys + poff, attr);
         }
 
@@ -463,10 +456,10 @@ public:
     /// @endcode
     ///
     /// @expects vmap != 0
-    /// @expects vmap & (page_size - 1) == 0
+    /// @expects vmap & (x64::page_size - 1) == 0
     /// @expects virt != 0
     /// @expects cr3 != 0
-    /// @expects cr3 & (page_size - 1) == 0
+    /// @expects cr3 & (x64::page_size - 1) == 0
     /// @expects size != 0
     /// @expects attr != 0
     /// @ensures get() != nullptr
@@ -476,9 +469,9 @@ public:
     /// @param cr3 the root page table containing the existing virtual to
     ///     physical memory mappings
     /// @param size the number of bytes to map
-    /// @param attr defines how to map the memory. Defaults to map_read_write
+    /// @param pat the pat msr associated with the provided cr3
     ///
-    unique_map_ptr_x64(integer_pointer vmap, integer_pointer virt, integer_pointer cr3, size_type size, attr_type attr) :
+    unique_map_ptr_x64(integer_pointer vmap, integer_pointer virt, integer_pointer cr3, size_type size, x64::msrs::value_type pat) :
         m_virt(0),
         m_size(size)
     {
@@ -489,20 +482,26 @@ public:
         expects(cr3 != 0);
         expects(lower(cr3) == 0);
         expects(size != 0);
-        expects(attr != map_none);
 
         m_virt |= lower(virt);
         m_virt |= upper(vmap);
 
         if (lower(virt) != 0)
-            m_size += page_size;
+            m_size += x64::page_size;
 
-        for (auto offset = 0UL; offset < m_size; offset += page_size)
+        for (auto offset = 0UL; offset < m_size; offset += x64::page_size)
         {
-            auto vadr = vmap + offset;
-            auto padr = virt_to_phys_with_cr3(upper(virt) + offset, cr3);
+            auto &&pair = virt_to_pte_with_cr3(upper(virt) + offset, cr3);
+            auto &&gpte = std::get<0>(pair);
+            auto &&from = std::get<1>(pair);
 
-            g_pt->map(vadr, padr, attr);
+            auto &&vadr = vmap + offset;
+            auto &&padr = upper(gpte.phys_addr(), from) | lower(virt + offset, from);
+
+            auto &&perm = x64::memory_attr::rw;
+            auto &&type = x64::msrs::ia32_pat::pa(pat, gpte.pat_index());
+
+            g_pt->map(vadr, upper(padr), x64::memory_attr::mem_type_to_attr(perm, type));
         }
 
         flush();
@@ -768,8 +767,24 @@ public:
     void flush() noexcept
     {
         auto &&vmap = upper(m_virt);
-        for (auto vadr = vmap; vadr < vmap + m_size; vadr += page_size)
-            tlb::invlpg(reinterpret_cast<pointer>(vadr));
+        for (auto vadr = vmap; vadr < vmap + m_size; vadr += x64::page_size)
+            x64::tlb::invlpg(reinterpret_cast<pointer>(vadr));
+    }
+
+    /// Cache Flush
+    ///
+    /// Flushes the Cache associated with the virtual address ranges
+    /// this unique_map_ptr_x64 holds. This is done automatically when
+    /// unmapping memory, but might be needed manually by users
+    ///
+    /// @expects none
+    /// @ensures none
+    ///
+    void cache_flush() noexcept
+    {
+        auto &&vmap = upper(m_virt);
+        for (auto vadr = vmap; vadr < vmap + m_size; vadr += x64::cache_line_size)
+            x64::cache::clflush(reinterpret_cast<pointer>(vadr));
     }
 
 private:
@@ -779,44 +794,47 @@ private:
         if (virt != 0 && size != 0)
         {
             auto &&vmap = upper(virt);
-            for (auto vadr = vmap; vadr < vmap + size; vadr += page_size)
+            for (auto vadr = vmap; vadr < vmap + size; vadr += x64::page_size)
                 g_pt->unmap(vadr);
 
             g_mm->free_map(reinterpret_cast<pointer>(vmap));
         }
     }
 
-    integer_pointer
-    virt_to_phys_with_cr3(integer_pointer virt, integer_pointer phys)
+    std::pair<page_table_entry_x64, decltype(x64::page_table::pml4::from)>
+    virt_to_pte_with_cr3(integer_pointer virt, integer_pointer cr3)
     {
-        auto from = page_table::pml4::from;
+        auto phys = cr3;
+        auto from = x64::page_table::pml4::from;
 
-        for (; from >= page_table::pt::from; from -= page_table::pt::size)
+        auto &&gpte = page_table_entry_x64{};
+
+        for (; from >= x64::page_table::pt::from; from -= x64::page_table::pt::size)
         {
-            auto map = bfn::make_unique_map_x64<memory_manager_x64::integer_pointer>(phys);
-            auto map_view = gsl::make_span(map.get(), x64::page_table::num_entries);
+            auto &&map = bfn::make_unique_map_x64<memory_manager_x64::integer_pointer>(phys);
+            auto &&map_view = gsl::make_span(map.get(), x64::page_table::num_entries);
 
-            auto pte = page_table_entry_x64{&map_view.at(page_table::index(virt, from))};
-            phys = pte.phys_addr();
+            gpte = page_table_entry_x64{&map_view.at(x64::page_table::index(virt, from))};
+            phys = gpte.phys_addr();
 
             expects(phys != 0);
-            expects(pte.present());
+            expects(gpte.present());
 
-            if ((from == page_table::pt::from) || (pte.ps() == true))
+            if ((from <= x64::page_table::pt::from) || (gpte.ps() == true))
                 break;
         }
 
-        return upper(phys, from) | lower(virt, from);
+        return {std::move(gpte), from};
     }
 
     auto lower(integer_pointer ptr) const noexcept
-    { return ptr & (page_size - 1); }
+    { return ptr & (x64::page_size - 1); }
 
     auto lower(integer_pointer ptr, integer_pointer from) const noexcept
     { return ptr & ((0x1UL << from) - 1); }
 
     auto upper(integer_pointer ptr) const noexcept
-    { return ptr & ~(page_size - 1); }
+    { return ptr & ~(x64::page_size - 1); }
 
     auto upper(integer_pointer ptr, integer_pointer from) const noexcept
     { return ptr & ~((0x1UL << from) - 1); }

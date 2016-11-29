@@ -24,15 +24,7 @@
 
 using namespace intel_x64;
 
-std::map<msrs::field_type, msrs::value_type> g_msrs;
-
-extern "C" uint64_t
-__read_msr(uint32_t addr) noexcept
-{ return g_msrs[addr]; }
-
-extern "C" void
-__write_msr(uint32_t addr, uint64_t val) noexcept
-{ g_msrs[addr] = val; }
+extern std::map<msrs::field_type, msrs::value_type> g_msrs;
 
 void
 intrinsics_ut::test_general_msr_access()
@@ -291,98 +283,6 @@ intrinsics_ut::test_ia32_debugctl_reserved()
 {
     msrs::ia32_debugctl::reserved::set(0x100000000UL);
     this->expect_true(msrs::ia32_debugctl::reserved::get() == 0x100000000UL);
-}
-
-void
-intrinsics_ut::test_ia32_pat()
-{
-    msrs::ia32_pat::set(0xFFFFFFFFFFFFFFFFUL);
-    this->expect_true(msrs::ia32_pat::get() == 0xFFFFFFFFFFFFFFFFUL);
-
-    msrs::ia32_pat::dump();
-
-    msrs::ia32_pat::set(0x0U);
-    this->expect_true(msrs::ia32_pat::get() == 0x0U);
-}
-
-void
-intrinsics_ut::test_ia32_pat_pa0()
-{
-    msrs::ia32_pat::pa0::set(6UL);
-    this->expect_true(msrs::ia32_pat::pa0::get() == 6UL);
-
-    msrs::ia32_pat::pa0::set(4UL);
-    this->expect_true(msrs::ia32_pat::pa0::get() == 4UL);
-}
-
-void
-intrinsics_ut::test_ia32_pat_pa1()
-{
-    msrs::ia32_pat::pa1::set(6UL);
-    this->expect_true(msrs::ia32_pat::pa1::get() == 6UL);
-
-    msrs::ia32_pat::pa1::set(4UL);
-    this->expect_true(msrs::ia32_pat::pa1::get() == 4UL);
-}
-
-void
-intrinsics_ut::test_ia32_pat_pa2()
-{
-    msrs::ia32_pat::pa2::set(6UL);
-    this->expect_true(msrs::ia32_pat::pa2::get() == 6UL);
-
-    msrs::ia32_pat::pa2::set(4UL);
-    this->expect_true(msrs::ia32_pat::pa2::get() == 4UL);
-}
-
-void
-intrinsics_ut::test_ia32_pat_pa3()
-{
-    msrs::ia32_pat::pa3::set(6UL);
-    this->expect_true(msrs::ia32_pat::pa3::get() == 6UL);
-
-    msrs::ia32_pat::pa3::set(4UL);
-    this->expect_true(msrs::ia32_pat::pa3::get() == 4UL);
-}
-
-void
-intrinsics_ut::test_ia32_pat_pa4()
-{
-    msrs::ia32_pat::pa4::set(6UL);
-    this->expect_true(msrs::ia32_pat::pa4::get() == 6UL);
-
-    msrs::ia32_pat::pa4::set(4UL);
-    this->expect_true(msrs::ia32_pat::pa4::get() == 4UL);
-}
-
-void
-intrinsics_ut::test_ia32_pat_pa5()
-{
-    msrs::ia32_pat::pa5::set(6UL);
-    this->expect_true(msrs::ia32_pat::pa5::get() == 6UL);
-
-    msrs::ia32_pat::pa5::set(4UL);
-    this->expect_true(msrs::ia32_pat::pa5::get() == 4UL);
-}
-
-void
-intrinsics_ut::test_ia32_pat_pa6()
-{
-    msrs::ia32_pat::pa6::set(6UL);
-    this->expect_true(msrs::ia32_pat::pa6::get() == 6UL);
-
-    msrs::ia32_pat::pa6::set(4UL);
-    this->expect_true(msrs::ia32_pat::pa6::get() == 4UL);
-}
-
-void
-intrinsics_ut::test_ia32_pat_pa7()
-{
-    msrs::ia32_pat::pa7::set(6UL);
-    this->expect_true(msrs::ia32_pat::pa7::get() == 6UL);
-
-    msrs::ia32_pat::pa7::set(4UL);
-    this->expect_true(msrs::ia32_pat::pa7::get() == 4UL);
 }
 
 void

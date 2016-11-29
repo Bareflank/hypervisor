@@ -440,7 +440,7 @@ vmcs_intel_x64::primary_processor_based_vm_execution_controls()
 void
 vmcs_intel_x64::secondary_processor_based_vm_execution_controls()
 {
-    bool verbose = true;
+    bool verbose = SECONDARY_ENABLE_IF_VERBOSE;
 
     // secondary_processor_based_vm_execution_controls::virtualize_apic_accesses::enable_if_allowed(verbose);
     // secondary_processor_based_vm_execution_controls::enable_ept::enable_if_allowed(verbose);

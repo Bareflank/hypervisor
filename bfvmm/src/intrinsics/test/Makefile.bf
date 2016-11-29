@@ -57,6 +57,7 @@ SOURCES+=test_cpuid_x64.cpp
 SOURCES+=test_pdpte_x64.cpp
 SOURCES+=test_gdt_x64.cpp
 SOURCES+=test_idt_x64.cpp
+SOURCES+=test_msrs_x64.cpp
 SOURCES+=test_msrs_intel_x64.cpp
 SOURCES+=test_rflags_x64.cpp
 SOURCES+=test_crs_intel_x64.cpp

@@ -21,6 +21,9 @@
 
 #include <vmcs/vmcs_intel_x64_host_vm_state.h>
 
+#include <intrinsics/msrs_x64.h>
+#include <intrinsics/msrs_intel_x64.h>
+
 using namespace x64;
 using namespace intel_x64;
 
@@ -53,13 +56,13 @@ vmcs_intel_x64_host_vm_state::vmcs_intel_x64_host_vm_state() :
 
     m_rflags = rflags::get();
 
-    m_ia32_debugctl_msr = msrs::ia32_debugctl::get();
-    m_ia32_pat_msr = msrs::ia32_pat::get();
-    m_ia32_efer_msr = msrs::ia32_efer::get();
-    m_ia32_perf_global_ctrl_msr = msrs::ia32_perf_global_ctrl::get();
-    m_ia32_sysenter_cs_msr = msrs::ia32_sysenter_cs::get();
-    m_ia32_sysenter_esp_msr = msrs::ia32_sysenter_esp::get();
-    m_ia32_sysenter_eip_msr = msrs::ia32_sysenter_eip::get();
-    m_ia32_fs_base_msr = msrs::ia32_fs_base::get();
-    m_ia32_gs_base_msr = msrs::ia32_gs_base::get();
+    m_ia32_debugctl_msr = intel_x64::msrs::ia32_debugctl::get();
+    m_ia32_pat_msr = x64::msrs::ia32_pat::get();
+    m_ia32_efer_msr = intel_x64::msrs::ia32_efer::get();
+    m_ia32_perf_global_ctrl_msr = intel_x64::msrs::ia32_perf_global_ctrl::get();
+    m_ia32_sysenter_cs_msr = intel_x64::msrs::ia32_sysenter_cs::get();
+    m_ia32_sysenter_esp_msr = intel_x64::msrs::ia32_sysenter_esp::get();
+    m_ia32_sysenter_eip_msr = intel_x64::msrs::ia32_sysenter_eip::get();
+    m_ia32_fs_base_msr = intel_x64::msrs::ia32_fs_base::get();
+    m_ia32_gs_base_msr = intel_x64::msrs::ia32_gs_base::get();
 }

@@ -20,19 +20,23 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #include <test.h>
+
 #include <vmcs/vmcs_intel_x64.h>
 #include <vmcs/vmcs_intel_x64_check.h>
 #include <vmcs/vmcs_intel_x64_32bit_guest_state_fields.h>
+#include <vmcs/vmcs_intel_x64_64bit_guest_state_fields.h>
+#include <vmcs/vmcs_intel_x64_32bit_read_only_data_fields.h>
+#include <vmcs/vmcs_intel_x64_natural_width_guest_state_fields.h>
+#include <vmcs/vmcs_intel_x64_natural_width_read_only_data_fields.h>
+
 #include <exit_handler/exit_handler_intel_x64.h>
 #include <exit_handler/exit_handler_intel_x64_support.h>
+
 #include <memory_manager/memory_manager_x64.h>
 #include <memory_manager/root_page_table_x64.h>
 
+#include <intrinsics/msrs_x64.h>
 #include <intrinsics/msrs_intel_x64.h>
-#include <vmcs/vmcs_intel_x64_natural_width_guest_state_fields.h>
-#include <vmcs/vmcs_intel_x64_natural_width_read_only_data_fields.h>
-#include <vmcs/vmcs_intel_x64_32bit_read_only_data_fields.h>
-#include <vmcs/vmcs_intel_x64_64bit_guest_state_fields.h>
 
 using namespace x64;
 using namespace intel_x64;
@@ -45,13 +49,12 @@ vmcs::value_type g_exit_qualification = 0;
 vmcs::value_type g_exit_instruction_length = 8;
 vmcs::value_type g_exit_instruction_information = 0;
 
-static std::map<msrs::field_type, msrs::value_type> g_msrs;
+static std::map<intel_x64::msrs::field_type, intel_x64::msrs::value_type> g_msrs;
 
 uintptr_t g_rip = 0;
 
 static void vmcs_check_all()
-{
-}
+{ }
 
 extern "C" bool
 __vmread(uint64_t field, uint64_t *val) noexcept
@@ -121,6 +124,7 @@ setup_vmcs_unhandled(MockRepository &mocks, vmcs::value_type reason)
     mocks.NeverCall(vmcs, vmcs_intel_x64::clear);
     mocks.ExpectCall(vmcs, vmcs_intel_x64::resume);
 
+    g_msrs[intel_x64::msrs::ia32_vmx_true_entry_ctls::addr] = 0xFFFFFFFFFFFFFFFFUL;
     g_exit_reason = reason;
     return vmcs;
 }
@@ -136,6 +140,7 @@ setup_vmcs_handled(MockRepository &mocks, vmcs::value_type reason)
     mocks.OnCall(vmcs, vmcs_intel_x64::clear);
     mocks.ExpectCall(vmcs, vmcs_intel_x64::resume);
 
+    g_msrs[intel_x64::msrs::ia32_vmx_true_entry_ctls::addr] = 0xFFFFFFFFFFFFFFFFUL;
     g_exit_reason = reason;
     return vmcs;
 }
@@ -151,6 +156,7 @@ setup_vmcs_halt(MockRepository &mocks, vmcs::value_type reason)
     mocks.NeverCall(vmcs, vmcs_intel_x64::clear);
     mocks.NeverCall(vmcs, vmcs_intel_x64::resume);
 
+    g_msrs[intel_x64::msrs::ia32_vmx_true_entry_ctls::addr] = 0xFFFFFFFFFFFFFFFFUL;
     g_exit_reason = reason;
     return vmcs;
 }
@@ -1189,7 +1195,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_rdmsr_debug_ctl()
     auto &&ehlr = setup_ehlr(vmcs);
 
     g_value = 0x0000000200000001;
-    ehlr.m_state_save->rcx = msrs::ia32_debugctl::addr;
+    ehlr.m_state_save->rcx = intel_x64::msrs::ia32_debugctl::addr;
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -1210,8 +1216,8 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_rdmsr_pat()
     auto &&ehlr = setup_ehlr(vmcs);
 
     g_value = 0x0000000300000002;
-    ehlr.m_state_save->rcx = msrs::ia32_pat::addr;
-    g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] = msrs::ia32_vmx_true_entry_ctls::load_ia32_pat::mask << 32;
+    ehlr.m_state_save->rcx = x64::msrs::ia32_pat::addr;
+    g_msrs[intel_x64::msrs::ia32_vmx_true_entry_ctls::addr] = intel_x64::msrs::ia32_vmx_true_entry_ctls::load_ia32_pat::mask << 32;
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -1232,8 +1238,8 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_rdmsr_efer()
     auto &&ehlr = setup_ehlr(vmcs);
 
     g_value = 0x0000000400000003;
-    ehlr.m_state_save->rcx = msrs::ia32_efer::addr;
-    g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] = msrs::ia32_vmx_true_entry_ctls::load_ia32_efer::mask << 32;
+    ehlr.m_state_save->rcx = intel_x64::msrs::ia32_efer::addr;
+    g_msrs[intel_x64::msrs::ia32_vmx_true_entry_ctls::addr] = intel_x64::msrs::ia32_vmx_true_entry_ctls::load_ia32_efer::mask << 32;
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -1254,8 +1260,8 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_rdmsr_perf()
     auto &&ehlr = setup_ehlr(vmcs);
 
     g_value = 0x0000000400000003;
-    ehlr.m_state_save->rcx = msrs::ia32_perf_global_ctrl::addr;
-    g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] = msrs::ia32_vmx_true_entry_ctls::load_ia32_perf_global_ctrl::mask << 32;
+    ehlr.m_state_save->rcx = intel_x64::msrs::ia32_perf_global_ctrl::addr;
+    g_msrs[intel_x64::msrs::ia32_vmx_true_entry_ctls::addr] = intel_x64::msrs::ia32_vmx_true_entry_ctls::load_ia32_perf_global_ctrl::mask << 32;
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -1276,7 +1282,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_rdmsr_cs()
     auto &&ehlr = setup_ehlr(vmcs);
 
     g_value = 0x0000000500000004;
-    ehlr.m_state_save->rcx = msrs::ia32_sysenter_cs::addr;
+    ehlr.m_state_save->rcx = intel_x64::msrs::ia32_sysenter_cs::addr;
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -1297,7 +1303,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_rdmsr_esp()
     auto &&ehlr = setup_ehlr(vmcs);
 
     g_value = 0x0000000600000005;
-    ehlr.m_state_save->rcx = msrs::ia32_sysenter_esp::addr;
+    ehlr.m_state_save->rcx = intel_x64::msrs::ia32_sysenter_esp::addr;
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -1318,7 +1324,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_rdmsr_eip()
     auto &&ehlr = setup_ehlr(vmcs);
 
     g_value = 0x0000000700000006;
-    ehlr.m_state_save->rcx = msrs::ia32_sysenter_eip::addr;
+    ehlr.m_state_save->rcx = intel_x64::msrs::ia32_sysenter_eip::addr;
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -1339,7 +1345,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_rdmsr_fs_base()
     auto &&ehlr = setup_ehlr(vmcs);
 
     g_value = 0x0000000800000007;
-    ehlr.m_state_save->rcx = msrs::ia32_fs_base::addr;
+    ehlr.m_state_save->rcx = intel_x64::msrs::ia32_fs_base::addr;
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -1360,7 +1366,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_rdmsr_gs_base()
     auto &&ehlr = setup_ehlr(vmcs);
 
     g_value = 0x0000000900000008;
-    ehlr.m_state_save->rcx = msrs::ia32_gs_base::addr;
+    ehlr.m_state_save->rcx = intel_x64::msrs::ia32_gs_base::addr;
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -1420,7 +1426,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_wrmsr_debug_ctrl()
     auto &&vmcs = setup_vmcs_handled(mocks, exit_reason::basic_exit_reason::wrmsr);
     auto &&ehlr = setup_ehlr(vmcs);
 
-    ehlr.m_state_save->rcx = msrs::ia32_debugctl::addr;
+    ehlr.m_state_save->rcx = intel_x64::msrs::ia32_debugctl::addr;
     ehlr.m_state_save->rax = 0x1;
     ehlr.m_state_save->rdx = 0x2;
 
@@ -1441,10 +1447,10 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_wrmsr_pat()
     auto &&vmcs = setup_vmcs_handled(mocks, exit_reason::basic_exit_reason::wrmsr);
     auto &&ehlr = setup_ehlr(vmcs);
 
-    ehlr.m_state_save->rcx = msrs::ia32_pat::addr;
+    ehlr.m_state_save->rcx = x64::msrs::ia32_pat::addr;
     ehlr.m_state_save->rax = 0x2;
     ehlr.m_state_save->rdx = 0x3;
-    g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] = msrs::ia32_vmx_true_entry_ctls::load_ia32_pat::mask << 32;
+    g_msrs[intel_x64::msrs::ia32_vmx_true_entry_ctls::addr] = intel_x64::msrs::ia32_vmx_true_entry_ctls::load_ia32_pat::mask << 32;
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -1463,10 +1469,10 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_wrmsr_efer()
     auto &&vmcs = setup_vmcs_handled(mocks, exit_reason::basic_exit_reason::wrmsr);
     auto &&ehlr = setup_ehlr(vmcs);
 
-    ehlr.m_state_save->rcx = msrs::ia32_efer::addr;
+    ehlr.m_state_save->rcx = intel_x64::msrs::ia32_efer::addr;
     ehlr.m_state_save->rax = 0x3;
     ehlr.m_state_save->rdx = 0x4;
-    g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] = msrs::ia32_vmx_true_entry_ctls::load_ia32_efer::mask << 32;
+    g_msrs[intel_x64::msrs::ia32_vmx_true_entry_ctls::addr] = intel_x64::msrs::ia32_vmx_true_entry_ctls::load_ia32_efer::mask << 32;
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -1485,10 +1491,10 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_wrmsr_perf()
     auto &&vmcs = setup_vmcs_handled(mocks, exit_reason::basic_exit_reason::wrmsr);
     auto &&ehlr = setup_ehlr(vmcs);
 
-    ehlr.m_state_save->rcx = msrs::ia32_perf_global_ctrl::addr;
+    ehlr.m_state_save->rcx = intel_x64::msrs::ia32_perf_global_ctrl::addr;
     ehlr.m_state_save->rax = 0x3;
     ehlr.m_state_save->rdx = 0x4;
-    g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] = msrs::ia32_vmx_true_entry_ctls::load_ia32_perf_global_ctrl::mask << 32;
+    g_msrs[intel_x64::msrs::ia32_vmx_true_entry_ctls::addr] = intel_x64::msrs::ia32_vmx_true_entry_ctls::load_ia32_perf_global_ctrl::mask << 32;
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -1507,7 +1513,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_wrmsr_cs()
     auto &&vmcs = setup_vmcs_handled(mocks, exit_reason::basic_exit_reason::wrmsr);
     auto &&ehlr = setup_ehlr(vmcs);
 
-    ehlr.m_state_save->rcx = msrs::ia32_sysenter_cs::addr;
+    ehlr.m_state_save->rcx = intel_x64::msrs::ia32_sysenter_cs::addr;
     ehlr.m_state_save->rax = 0x4;
     ehlr.m_state_save->rdx = 0x5;
 
@@ -1528,7 +1534,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_wrmsr_esp()
     auto &&vmcs = setup_vmcs_handled(mocks, exit_reason::basic_exit_reason::wrmsr);
     auto &&ehlr = setup_ehlr(vmcs);
 
-    ehlr.m_state_save->rcx = msrs::ia32_sysenter_esp::addr;
+    ehlr.m_state_save->rcx = intel_x64::msrs::ia32_sysenter_esp::addr;
     ehlr.m_state_save->rax = 0x5;
     ehlr.m_state_save->rdx = 0x6;
 
@@ -1549,7 +1555,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_wrmsr_eip()
     auto &&vmcs = setup_vmcs_handled(mocks, exit_reason::basic_exit_reason::wrmsr);
     auto &&ehlr = setup_ehlr(vmcs);
 
-    ehlr.m_state_save->rcx = msrs::ia32_sysenter_eip::addr;
+    ehlr.m_state_save->rcx = intel_x64::msrs::ia32_sysenter_eip::addr;
     ehlr.m_state_save->rax = 0x6;
     ehlr.m_state_save->rdx = 0x7;
 
@@ -1570,7 +1576,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_wrmsr_fs_base()
     auto &&vmcs = setup_vmcs_handled(mocks, exit_reason::basic_exit_reason::wrmsr);
     auto &&ehlr = setup_ehlr(vmcs);
 
-    ehlr.m_state_save->rcx = msrs::ia32_fs_base::addr;
+    ehlr.m_state_save->rcx = intel_x64::msrs::ia32_fs_base::addr;
     ehlr.m_state_save->rax = 0x7;
     ehlr.m_state_save->rdx = 0x8;
 
@@ -1591,7 +1597,7 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_wrmsr_gs_base()
     auto &&vmcs = setup_vmcs_handled(mocks, exit_reason::basic_exit_reason::wrmsr);
     auto &&ehlr = setup_ehlr(vmcs);
 
-    ehlr.m_state_save->rcx = msrs::ia32_gs_base::addr;
+    ehlr.m_state_save->rcx = intel_x64::msrs::ia32_gs_base::addr;
     ehlr.m_state_save->rax = 0x8;
     ehlr.m_state_save->rdx = 0x9;
 

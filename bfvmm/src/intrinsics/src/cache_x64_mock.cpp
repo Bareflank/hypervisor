@@ -35,3 +35,10 @@ __attribute__((weak)) __wbinvd(void) noexcept
     std::cerr << __FUNC__ << " called" << '\n';
     abort();
 }
+
+extern "C" void
+__attribute__((weak)) __clflush(void *addr) noexcept
+{
+    std::cerr << __FUNC__ << " called with: " << addr << '\n';
+    abort();
+}

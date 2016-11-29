@@ -117,6 +117,7 @@ intrinsics_ut::list()
     this->test_ia32_pat_pa5();
     this->test_ia32_pat_pa6();
     this->test_ia32_pat_pa7();
+    this->test_ia32_pat_pa();
     this->test_ia32_perf_global_ctrl();
     this->test_ia32_perf_global_ctrl_pmc0();
     this->test_ia32_perf_global_ctrl_pmc1();
@@ -409,6 +410,7 @@ intrinsics_ut::list()
 
     this->test_cache_x64_invd();
     this->test_cache_x64_wbinvd();
+    this->test_cache_x64_clflush();
 
     this->test_tlb_x64_invlpg();
 

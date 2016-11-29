@@ -311,7 +311,7 @@ auto memory_type_reserved(T memory_type)
         case x64::memory_type::write_through:
         case x64::memory_type::write_protected:
         case x64::memory_type::write_back:
-        case x64::memory_type::uncached:
+        case x64::memory_type::uncacheable_minus:
             return false;
 
         default:

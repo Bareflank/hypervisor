@@ -4291,19 +4291,21 @@ noexcept(false)
 		}
 	}
 
-	void VerifyAll()
+	int VerifyAll()
 	{
 #ifndef HM_NO_EXCEPTIONS
 		if (latentException)
 			latentException->rethrow();
 #endif
-
+        int count = 0;
 		for (std::list<Call *>::iterator i = expectations.begin(); i != expectations.end(); i++)
 		{
 			if (!(*i)->satisfied) {
 				RAISEEXCEPTION(CallMissingException(this));
 			}
+            count++;
 		}
+        return count;
 	}
 	void VerifyPartial(base_mock *obj)
 	{
@@ -5246,7 +5248,7 @@ TCall<void> &MockRepository::RegisterExpectDestructor(Z2 *mck, RegistrationType 
 						0, funcIndex+1,
 						reinterpret_cast<void (base_mock::*)()>(member), X);
 #endif
-	TCall<void> *call = new TCall<void>(Once, reinterpret_cast<base_mock *>(mck), std::pair<int, int>(0, funcIndex), lineNo, "destructor", fileName);
+	TCall<void> *call = new TCall<void>(Any, reinterpret_cast<base_mock *>(mck), std::pair<int, int>(0, funcIndex), lineNo, "destructor", fileName);
 	addCall( call, expect );
 	return *call;
 }
@@ -6341,4 +6343,3 @@ using HippoMocks::In;
 #undef CFUNC_MOCK_PLATFORMIS64BIT
 
 #endif
-

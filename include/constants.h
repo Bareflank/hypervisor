@@ -318,4 +318,15 @@
 #define DEFAULT_PARITY_BITS parity_none
 #endif
 
+/**
+ * Secondary Enable If Verbosity
+ *
+ * On VMWare, certain secondary controls are not needed
+ * but we throw a warning so that people know there is
+ * an issue. Use this to turn this warning off
+ */
+#ifndef SECONDARY_ENABLE_IF_VERBOSE
+#define SECONDARY_ENABLE_IF_VERBOSE true
+#endif
+
 #endif

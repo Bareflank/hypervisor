@@ -90,6 +90,7 @@ memory_manager_ut::list()
     this->test_page_table_x64_remove_page_twice_failure();
     this->test_page_table_x64_remove_page_unknown_failure();
 
+    this->test_page_table_entry_x64_invalid();
     this->test_page_table_entry_x64_present();
     this->test_page_table_entry_x64_rw();
     this->test_page_table_entry_x64_us();
@@ -102,6 +103,7 @@ memory_manager_ut::list()
     this->test_page_table_entry_x64_global();
     this->test_page_table_entry_x64_nx();
     this->test_page_table_entry_x64_phys_addr();
+    this->test_page_table_entry_x64_pat_index();
 
     this->test_unique_map_ptr_x64_default_constructor();
     this->test_unique_map_ptr_x64_phys_constructor_invalid_args();
@@ -124,16 +126,20 @@ memory_manager_ut::list()
     this->test_unique_map_ptr_x64_reset();
     this->test_unique_map_ptr_x64_swap();
     this->test_unique_map_ptr_x64_flush();
+    this->test_unique_map_ptr_x64_cache_flush();
     this->test_unique_map_ptr_x64_comparison();
     this->test_unique_map_ptr_x64_make_failure();
 
     this->test_root_page_table_x64_init_failure();
     this->test_root_page_table_x64_init_success();
-    this->test_root_page_table_x64_phys_addr();
+    this->test_root_page_table_x64_cr3();
     this->test_root_page_table_x64_map_failure();
     this->test_root_page_table_x64_map_add_md_failure();
     this->test_root_page_table_x64_map_unmap_success();
     this->test_root_page_table_x64_map_unmap_twice_success();
+
+    this->test_pat_x64_mem_attr_to_pat_index();
+    this->test_mem_attr_x64_mem_type_to_attr();
 
     return true;
 }

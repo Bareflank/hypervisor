@@ -19,9 +19,11 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+#include <memory_manager/pat_x64.h>
 #include <memory_manager/page_table_x64.h>
 #include <memory_manager/memory_manager_x64.h>
 
+#include <intrinsics/x64.h>
 using namespace x64;
 
 page_table_x64::page_table_x64(pointer pte) :
@@ -37,6 +39,7 @@ page_table_x64::page_table_x64(pointer pte) :
     this->set_present(true);
     this->set_rw(true);
     this->set_us(true);
+    this->set_pat_index(pat::write_back_index);
 }
 
 page_table_x64::size_type

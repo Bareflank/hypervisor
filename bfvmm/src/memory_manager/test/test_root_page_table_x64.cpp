@@ -20,6 +20,7 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #include <test.h>
+#include <memory_manager/pat_x64.h>
 #include <memory_manager/memory_manager_x64.h>
 #include <memory_manager/root_page_table_x64.h>
 
@@ -32,7 +33,7 @@ setup_mm(MockRepository &mocks)
     {
         memory_descriptor{0x12345000, 0x54321000, MEMORY_TYPE_R | MEMORY_TYPE_W},
         memory_descriptor{0x12346000, 0x54322000, MEMORY_TYPE_R | MEMORY_TYPE_E},
-        memory_descriptor{0xDEADBEEF, 0xDEADBEEF, MEMORY_TYPE_R | MEMORY_TYPE_E}
+        memory_descriptor{0xDEADBEEF, 0xDEADBEEF, 0}
     };
 
     auto mm = mocks.Mock<memory_manager_x64>();
@@ -74,14 +75,14 @@ memory_manager_ut::test_root_page_table_x64_init_success()
 }
 
 void
-memory_manager_ut::test_root_page_table_x64_phys_addr()
+memory_manager_ut::test_root_page_table_x64_cr3()
 {
     MockRepository mocks;
     setup_mm(mocks);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        this->expect_true(g_pt->phys_addr() == 0x0000000ABCDEF0000);
+        this->expect_true(g_pt->cr3() == 0x0000000ABCDEF001F);
     });
 }
 
@@ -93,10 +94,9 @@ memory_manager_ut::test_root_page_table_x64_map_failure()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        this->expect_exception([&] { g_pt->map(0, 0x54323000, MEMORY_TYPE_R | MEMORY_TYPE_W); }, ""_ut_ffe);
-        this->expect_exception([&] { g_pt->map(0x12347000, 0, MEMORY_TYPE_R | MEMORY_TYPE_W); }, ""_ut_ffe);
-        this->expect_exception([&] { g_pt->map(0x12347000, 0x54323000, 0); }, ""_ut_ffe);
-        this->expect_exception([&] { g_pt->map(0x12347000, 0x54323000, MEMORY_TYPE_R); }, ""_ut_lee);
+        this->expect_exception([&] { g_pt->map(0, 0x54323000, x64::memory_attr::rw_wb); }, ""_ut_ffe);
+        this->expect_exception([&] { g_pt->map(0x12347000, 0, x64::memory_attr::rw_wb); }, ""_ut_ffe);
+        this->expect_exception([&] { g_pt->map(0x12347000, 0x54323000, 0); }, ""_ut_lee);
     });
 }
 
@@ -110,7 +110,7 @@ memory_manager_ut::test_root_page_table_x64_map_add_md_failure()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        this->expect_exception([&] { g_pt->map(0x12347000, 0x54323000, MEMORY_TYPE_R | MEMORY_TYPE_W); }, ""_ut_ree);
+        this->expect_exception([&] { g_pt->map(0x12347000, 0x54323000, x64::memory_attr::rw_wb); }, ""_ut_ree);
     });
 }
 
@@ -122,7 +122,10 @@ memory_manager_ut::test_root_page_table_x64_map_unmap_success()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        this->expect_no_exception([&] { g_pt->map(0x12347000, 0x54323000, MEMORY_TYPE_R | MEMORY_TYPE_W); });
+        this->expect_no_exception([&] { g_pt->map(0x12347000, 0x54323000, x64::memory_attr::rw_uc); });
+        this->expect_no_exception([&] { g_pt->unmap(0x12347000); });
+
+        this->expect_no_exception([&] { g_pt->map(0x12347000, 0x54323000, x64::memory_attr::re_uc); });
         this->expect_no_exception([&] { g_pt->unmap(0x12347000); });
     });
 }
@@ -135,7 +138,7 @@ memory_manager_ut::test_root_page_table_x64_map_unmap_twice_success()
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        this->expect_no_exception([&] { g_pt->map(0x12347000, 0x54323000, MEMORY_TYPE_R | MEMORY_TYPE_W); });
+        this->expect_no_exception([&] { g_pt->map(0x12347000, 0x54323000, x64::memory_attr::rw_wb); });
         this->expect_no_exception([&] { g_pt->unmap(0x12347000); });
         this->expect_no_exception([&] { g_pt->unmap(0x12347000); });
     });

@@ -29,6 +29,8 @@
 #include <intrinsics/debug_x64.h>
 #include <intrinsics/crs_intel_x64.h>
 #include <intrinsics/msrs_intel_x64.h>
+
+#include <memory_manager/pat_x64.h>
 #include <memory_manager/root_page_table_x64.h>
 
 using namespace x64;
@@ -47,8 +49,7 @@ setup_vmm_state(MockRepository &mocks)
 {
     auto pt = mocks.Mock<root_page_table_x64>();
     mocks.OnCallFunc(root_page_table_x64::instance).Return(pt);
-    mocks.OnCall(pt, root_page_table_x64::phys_addr).Return(test_cr3);
-
+    mocks.OnCall(pt, root_page_table_x64::cr3).Return(test_cr3);
 
     test_cr0 = cr0::protection_enable::mask;
     test_cr0 |= cr0::monitor_coprocessor::mask;
@@ -304,6 +305,7 @@ vmcs_ut::test_vmm_state_ia32_efer_msr()
         this->expect_no_exception([&]
         {
             vmcs_intel_x64_vmm_state state{};
+            this->expect_true(state.ia32_pat_msr() == pat::pat_value);
             this->expect_true(state.ia32_efer_msr() == test_ia32_efer_msr);
         });
     });

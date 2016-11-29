@@ -116,6 +116,8 @@ public:
     gdt_x64::base_type tr_base() const override
     { return g_gdt.base(m_tr_index); }
 
+    intel_x64::msrs::value_type ia32_pat_msr() const override
+    { return m_ia32_pat_msr; }
     intel_x64::msrs::value_type ia32_efer_msr() const override
     { return m_ia32_efer_msr; }
 
@@ -176,6 +178,7 @@ public:
 
         bfdebug << bfendl;
         bfdebug << "model specific registers:" << bfendl;
+        bfdebug << "    - m_ia32_pat_msr: " << view_as_pointer(m_ia32_pat_msr) << bfendl;
         bfdebug << "    - m_ia32_efer_msr: " << view_as_pointer(m_ia32_efer_msr) << bfendl;
 
         bfdebug << bfendl;
@@ -201,6 +204,7 @@ private:
 
     x64::rflags::value_type m_rflags;
 
+    intel_x64::msrs::value_type m_ia32_pat_msr;
     intel_x64::msrs::value_type m_ia32_efer_msr;
 };
 
