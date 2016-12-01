@@ -24,6 +24,7 @@
 #define VMCS_INTEL_X64_16BIT_NATURAL_WIDTH_READ_ONLY_DATA_FIELDS_H
 
 #include <vmcs/vmcs_intel_x64.h>
+#include <intrinsics/portio_x64.h>
 
 /// Intel x86_64 VMCS Natural-Width Read-Only Data Fields
 ///
@@ -1009,14 +1010,14 @@ namespace exit_qualification
             constexpr const auto name = "port_number";
 
             inline auto get()
-            { return get_bits(get_vmcs_field(addr, name, exists()), mask) >> from; }
+            { return gsl::narrow_cast<x64::portio::port_addr_type>(get_bits(get_vmcs_field(addr, name, exists()), mask) >> from); }
 
             template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
             inline auto get(T t)
-            { return get_bits(t, mask) >> from; }
+            { return gsl::narrow_cast<x64::portio::port_addr_type>(get_bits(t, mask) >> from); }
 
             inline auto get_if_exists(bool verbose = false) noexcept
-            { return get_bits(get_vmcs_field_if_exists(addr, name, verbose, exists()), mask) >> from; }
+            { return gsl::narrow_cast<x64::portio::port_addr_type>(get_bits(get_vmcs_field_if_exists(addr, name, verbose, exists()), mask) >> from); }
         }
     }
 
