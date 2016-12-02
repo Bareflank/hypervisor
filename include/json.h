@@ -2162,6 +2162,11 @@ public:
         return m_type == value_t::number_unsigned;
     }
 
+    constexpr bool is_number() const noexcept
+    {
+        return is_number_integer() || is_number_unsigned();
+    }
+
     /*!
     @brief return whether value is an object
 
