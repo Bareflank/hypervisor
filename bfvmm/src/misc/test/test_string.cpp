@@ -20,11 +20,21 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #include <test.h>
+
 #include <string>
+#include <to_string.h>
 
 void
 misc_ut::test_string_literal()
 {
     this->expect_true("" == ""_s);
     this->expect_true("hello world" == "hello world"_s);
+}
+
+void
+misc_ut::test_string_to_string()
+{
+    this->expect_true(bfn::to_string(10, 8) == "012"_s);
+    this->expect_true(bfn::to_string(10, 10) == "10"_s);
+    this->expect_true(bfn::to_string(10, 16) == "0xA"_s);
 }
