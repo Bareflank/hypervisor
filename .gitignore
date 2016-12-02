@@ -1,4 +1,3 @@
-bfvmm/bin/cross/libc++.so
 .build/
 *.a
 bin/
@@ -9,11 +8,11 @@ bin/
 *.mod.c
 *.order
 *.symvers
-src_*
-hypervisor_example_*
-doc/html/*
-tools/scripts/x86_64-bareflank-g++
-tools/scripts/x86_64-bareflank-gcc
+/src_*/
+/hypervisor_*/
+/extended_apis/
+/hyperkernel/
+/doc/html/*
 /Makefile
 /build_*
 /source_*
