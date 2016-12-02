@@ -43,6 +43,7 @@ private:
     void test_error_codes_unknown();
 
     void test_string_literal();
+    void test_string_to_string();
 
     void test_vector_find();
     void test_vector_cfind();

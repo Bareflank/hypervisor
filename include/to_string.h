@@ -19,55 +19,25 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <test.h>
+#ifndef BFN_TO_STRING
+#define BFN_TO_STRING
 
-misc_ut::misc_ut()
+#include <sstream>
+#include <iomanip>
+
+namespace bfn
 {
+template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
+std::string to_string(T val, int base)
+{
+    std::stringstream stream;
+
+    if (base == 8) stream << "0";
+    if (base == 16) stream << "0x";
+    stream << std::setbase(base) << std::uppercase << val;
+
+    return stream.str();
+}
 }
 
-bool
-misc_ut::init()
-{
-    return true;
-}
-
-bool
-misc_ut::fini()
-{
-    return true;
-}
-
-bool
-misc_ut::list()
-{
-    this->test_error_codes_valid();
-    this->test_error_codes_unknown();
-
-    this->test_string_literal();
-    this->test_string_to_string();
-
-    this->test_vector_find();
-    this->test_vector_cfind();
-    this->test_vector_take();
-    this->test_vector_remove();
-
-    this->test_guard_exceptions_no_return();
-    this->test_guard_exceptions_with_return();
-
-    this->test_bitmanip_set_bit();
-    this->test_bitmanip_clear_bit();
-    this->test_bitmanip_get_bit();
-    this->test_bitmanip_is_bit_set();
-    this->test_bitmanip_is_bit_cleared();
-    this->test_bitmanip_num_bits_set();
-    this->test_bitmanip_get_bits();
-    this->test_bitmanip_set_bits();
-
-    return true;
-}
-
-int
-main(int argc, char *argv[])
-{
-    return RUN_ALL_TESTS(misc_ut);
-}
+#endif
