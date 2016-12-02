@@ -56,6 +56,8 @@ SOURCES+=test_page_table_x64.cpp
 SOURCES+=test_page_table_entry_x64.cpp
 SOURCES+=test_map_ptr_x64.cpp
 SOURCES+=test_root_page_table_x64.cpp
+SOURCES+=test_pat_x64.cpp
+SOURCES+=test_mem_attr_x64.cpp
 HEADERS=
 
 INCLUDE_PATHS+=./

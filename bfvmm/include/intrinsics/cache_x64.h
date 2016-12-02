@@ -24,6 +24,7 @@
 
 extern "C" void __invd(void) noexcept;
 extern "C" void __wbinvd(void) noexcept;
+extern "C" void __clflush(void *addr) noexcept;
 
 // *INDENT-OFF*
 
@@ -31,11 +32,20 @@ namespace x64
 {
 namespace cache
 {
+    using pointer = void *;
+    using integer_pointer = uintptr_t;
+
     inline void invd() noexcept
     { __invd(); }
 
     inline void wbinvd() noexcept
     { __wbinvd(); }
+
+    inline void clflush(integer_pointer addr) noexcept
+    { __clflush(reinterpret_cast<pointer>(addr)); }
+
+    inline void clflush(pointer addr) noexcept
+    { __clflush(addr); }
 }
 }
 

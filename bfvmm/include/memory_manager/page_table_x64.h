@@ -98,6 +98,16 @@ public:
     ///
     void remove_page_x64(integer_pointer virt_addr);
 
+    /// CR3 Shadow
+    ///
+    /// @expects virt_addr != 0;
+    /// @ensures none
+    ///
+    /// @return returns the CR3 shadow
+    ///
+    auto cr3_shadow() const noexcept
+    { return m_cr3_shadow; }
+
 private:
 
     template<class T> std::unique_ptr<T> add_pte(pointer p);

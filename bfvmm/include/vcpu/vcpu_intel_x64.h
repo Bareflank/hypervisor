@@ -79,8 +79,8 @@ public:
                    std::unique_ptr<vmxon_intel_x64> vmxon = nullptr,
                    std::unique_ptr<vmcs_intel_x64> vmcs = nullptr,
                    std::unique_ptr<exit_handler_intel_x64> exit_handler = nullptr,
-                   std::unique_ptr<vmcs_intel_x64_vmm_state> vmm_state = nullptr,
-                   std::unique_ptr<vmcs_intel_x64_vmm_state> guest_state = nullptr);
+                   std::unique_ptr<vmcs_intel_x64_state> vmm_state = nullptr,
+                   std::unique_ptr<vmcs_intel_x64_state> guest_state = nullptr);
 
     /// Destructor
     ///

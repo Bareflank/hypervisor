@@ -27,8 +27,8 @@ vcpu_intel_x64::vcpu_intel_x64(vcpuid::type id,
                                std::unique_ptr<vmxon_intel_x64> vmxon,
                                std::unique_ptr<vmcs_intel_x64> vmcs,
                                std::unique_ptr<exit_handler_intel_x64> exit_handler,
-                               std::unique_ptr<vmcs_intel_x64_vmm_state> vmm_state,
-                               std::unique_ptr<vmcs_intel_x64_vmm_state> guest_state) :
+                               std::unique_ptr<vmcs_intel_x64_state> vmm_state,
+                               std::unique_ptr<vmcs_intel_x64_state> guest_state) :
     vcpu(id, std::move(debug_ring)),
     m_vmcs_launched(false),
     m_vmxon(std::move(vmxon)),

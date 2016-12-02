@@ -116,6 +116,7 @@ private:
     void test_ia32_pat_pa5();
     void test_ia32_pat_pa6();
     void test_ia32_pat_pa7();
+    void test_ia32_pat_pa();
     void test_ia32_perf_global_ctrl();
     void test_ia32_perf_global_ctrl_pmc0();
     void test_ia32_perf_global_ctrl_pmc1();
@@ -408,6 +409,7 @@ private:
 
     void test_cache_x64_invd();
     void test_cache_x64_wbinvd();
+    void test_cache_x64_clflush();
 
     void test_tlb_x64_invlpg();
 

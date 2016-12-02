@@ -28,6 +28,7 @@
 #include <intrinsics/idt_x64.h>
 #include <intrinsics/debug_x64.h>
 #include <intrinsics/crs_intel_x64.h>
+#include <intrinsics/msrs_x64.h>
 #include <intrinsics/msrs_intel_x64.h>
 
 using namespace x64;
@@ -779,15 +780,15 @@ vmcs_ut::test_host_vm_state_ldtr_base()
 void
 vmcs_ut::test_host_vm_state_ia32_msrs()
 {
-    msrs::ia32_debugctl::set(42U);
-    msrs::ia32_pat::set(42U);
-    msrs::ia32_efer::set(42U);
-    msrs::ia32_perf_global_ctrl::set(42U);
-    msrs::ia32_sysenter_cs::set(42U);
-    msrs::ia32_sysenter_esp::set(42U);
-    msrs::ia32_sysenter_eip::set(42U);
-    msrs::ia32_fs_base::set(42U);
-    msrs::ia32_gs_base::set(42U);
+    intel_x64::msrs::ia32_debugctl::set(42U);
+    x64::msrs::ia32_pat::set(42U);
+    intel_x64::msrs::ia32_efer::set(42U);
+    intel_x64::msrs::ia32_perf_global_ctrl::set(42U);
+    intel_x64::msrs::ia32_sysenter_cs::set(42U);
+    intel_x64::msrs::ia32_sysenter_esp::set(42U);
+    intel_x64::msrs::ia32_sysenter_eip::set(42U);
+    intel_x64::msrs::ia32_fs_base::set(42U);
+    intel_x64::msrs::ia32_gs_base::set(42U);
 
     this->expect_no_exception([&]
     {

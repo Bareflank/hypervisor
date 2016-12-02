@@ -24,6 +24,8 @@
 #include <memory_manager/memory_manager_x64.h>
 #include <memory_manager/root_page_table_x64.h>
 
+using namespace x64;
+
 // -----------------------------------------------------------------------------
 // Testing Seem
 // -----------------------------------------------------------------------------
@@ -60,9 +62,9 @@ root_page_table_x64::instance() noexcept
     return &self;
 }
 
-root_page_table_x64::integer_pointer
-root_page_table_x64::phys_addr()
-{ return m_root_pt->phys_addr(); }
+root_page_table_x64::cr3_type
+root_page_table_x64::cr3()
+{ return m_root_pt->cr3_shadow(); }
 
 void
 root_page_table_x64::map(integer_pointer virt, integer_pointer phys, attr_type attr)
@@ -78,11 +80,20 @@ root_page_table_x64::root_page_table_x64() noexcept :
     try
     {
         for (const auto &md : g_mm->descriptors())
-            this->map_page(md.virt, md.phys, md.type);
+        {
+            auto attr = memory_attr::invalid;
+
+            if (md.type == (MEMORY_TYPE_R | MEMORY_TYPE_W))
+                attr = memory_attr::rw_wb;
+            if (md.type == (MEMORY_TYPE_R | MEMORY_TYPE_E))
+                attr = memory_attr::re_wb;
+
+            this->map_page(md.virt, md.phys, attr);
+        }
     }
-    catch (...)
+    catch (std::exception &e)
     {
-        bferror << "failed to construct root page tables" << bfendl;
+        bferror << "failed to construct root page tables: " << e.what() << bfendl;
         root_page_table_terminate();
     }
 }
@@ -106,7 +117,6 @@ root_page_table_x64::map_page(integer_pointer virt, integer_pointer phys, attr_t
 {
     expects(virt != 0);
     expects(phys != 0);
-    expects(attr != 0);
 
     auto entry = add_page(virt);
 
@@ -115,25 +125,32 @@ root_page_table_x64::map_page(integer_pointer virt, integer_pointer phys, attr_t
 
     entry->set_phys_addr(phys);
     entry->set_present(true);
+    entry->set_pat_index(pat::mem_attr_to_pat_index(attr));
 
     switch (attr)
     {
-        case MEMORY_TYPE_R | MEMORY_TYPE_W:
-        {
+        case memory_attr::rw_uc:
+        case memory_attr::rw_wc:
+        case memory_attr::rw_wt:
+        case memory_attr::rw_wp:
+        case memory_attr::rw_wb:
+        case memory_attr::rw_uc_m:
             entry->set_rw(true);
             entry->set_nx(true);
             break;
-        }
 
-        case MEMORY_TYPE_R | MEMORY_TYPE_E:
-        {
+        case memory_attr::re_uc:
+        case memory_attr::re_wc:
+        case memory_attr::re_wt:
+        case memory_attr::re_wp:
+        case memory_attr::re_wb:
+        case memory_attr::re_uc_m:
             entry->set_rw(false);
             entry->set_nx(false);
             break;
-        }
 
         default:
-            throw std::logic_error("unsupported memory attribute");
+            throw std::logic_error("unsupported memory permissions");
     }
 
     g_mm->add_md(virt, phys, attr);

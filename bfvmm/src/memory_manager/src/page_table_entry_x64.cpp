@@ -25,6 +25,12 @@
 #include <intrinsics/x64.h>
 using namespace x64;
 
+page_table_entry_x64::integer_pointer g_invalid_pte = 0;
+
+page_table_entry_x64::page_table_entry_x64() noexcept :
+    m_pte(&g_invalid_pte)
+{ }
+
 page_table_entry_x64::page_table_entry_x64(const gsl::not_null<pointer> &pte) noexcept :
     m_pte(pte.get())
 { }
@@ -124,3 +130,72 @@ page_table_entry_x64::nx() const noexcept
 void
 page_table_entry_x64::set_nx(bool enabled) noexcept
 { *m_pte = enabled ? set_bit(*m_pte, 63) : clear_bit(*m_pte, 63); }
+
+page_table_entry_x64::pat_index_type
+page_table_entry_x64::pat_index() const noexcept
+{
+    pat_index_type index = 0;
+
+    if (this->pwt()) index += 1;
+    if (this->pcd()) index += 2;
+    if (this->pat()) index += 4;
+
+    return index;
+}
+
+void
+page_table_entry_x64::set_pat_index(pat_index_type index)
+{
+    expects(index <= 7);
+
+    switch (index)
+    {
+        case 0:
+            this->set_pwt(false);
+            this->set_pcd(false);
+            this->set_pat(false);
+            break;
+
+        case 1:
+            this->set_pwt(true);
+            this->set_pcd(false);
+            this->set_pat(false);
+            break;
+
+        case 2:
+            this->set_pwt(false);
+            this->set_pcd(true);
+            this->set_pat(false);
+            break;
+
+        case 3:
+            this->set_pwt(true);
+            this->set_pcd(true);
+            this->set_pat(false);
+            break;
+
+        case 4:
+            this->set_pwt(false);
+            this->set_pcd(false);
+            this->set_pat(true);
+            break;
+
+        case 5:
+            this->set_pwt(true);
+            this->set_pcd(false);
+            this->set_pat(true);
+            break;
+
+        case 6:
+            this->set_pwt(false);
+            this->set_pcd(true);
+            this->set_pat(true);
+            break;
+
+        case 7:
+            this->set_pwt(true);
+            this->set_pcd(true);
+            this->set_pat(true);
+            break;
+    };
+}

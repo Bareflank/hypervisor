@@ -25,7 +25,11 @@
 #include <gsl/gsl>
 
 #include <memory.h>
+#include <memory_manager/pat_x64.h>
+#include <memory_manager/mem_attr_x64.h>
 #include <memory_manager/page_table_x64.h>
+
+#include <intrinsics/x64.h>
 
 /// Root Page Tables
 ///
@@ -43,7 +47,8 @@ public:
 
     using pointer = void *;
     using integer_pointer = uintptr_t;
-    using attr_type = decltype(memory_descriptor::type);
+    using cr3_type = uint64_t;
+    using attr_type = x64::memory_attr::attr_type;
 
     /// Default Destructor
     ///
@@ -65,14 +70,15 @@ public:
     ///
     static root_page_table_x64 *instance() noexcept;
 
-    /// Physical Address
+    /// CR3
     ///
     /// @expects none
     /// @ensures none
     ///
-    /// @return returns the physical address of the root page tables.
+    /// @return returns the cr3 value associated with these root
+    ///     page tables
     ///
-    virtual integer_pointer phys_addr();
+    virtual cr3_type cr3();
 
     /// Map Page
     ///
@@ -85,7 +91,7 @@ public:
     ///
     /// @expects virt != 0
     /// @expects phys != 0
-    /// @expects attr != 0
+    /// @expects attr == valid attribute
     /// @ensures none
     ///
     /// @param virt the desired virtual address

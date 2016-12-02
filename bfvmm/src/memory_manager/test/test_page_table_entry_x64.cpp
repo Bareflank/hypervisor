@@ -27,6 +27,12 @@
 using pte_type = page_table_entry_x64::integer_pointer;
 
 void
+memory_manager_ut::test_page_table_entry_x64_invalid()
+{
+    std::make_unique<page_table_entry_x64>();
+}
+
+void
 memory_manager_ut::test_page_table_entry_x64_present()
 {
     pte_type entry = 0;
@@ -225,4 +231,93 @@ memory_manager_ut::test_page_table_entry_x64_phys_addr()
     this->expect_true(pte->present());
     this->expect_true(pte->nx());
     this->expect_true(pte->phys_addr() == 0x0);
+}
+
+void
+memory_manager_ut::test_page_table_entry_x64_pat_index()
+{
+    pte_type entry = 0;
+    auto &&pte = std::make_unique<page_table_entry_x64>(&entry);
+
+    pte->set_pwt(false);
+    pte->set_pcd(false);
+    pte->set_pat(false);
+    this->expect_true(pte->pat_index() == 0);
+
+    pte->set_pwt(true);
+    pte->set_pcd(false);
+    pte->set_pat(false);
+    this->expect_true(pte->pat_index() == 1);
+
+    pte->set_pwt(false);
+    pte->set_pcd(true);
+    pte->set_pat(false);
+    this->expect_true(pte->pat_index() == 2);
+
+    pte->set_pwt(true);
+    pte->set_pcd(true);
+    pte->set_pat(false);
+    this->expect_true(pte->pat_index() == 3);
+
+    pte->set_pwt(false);
+    pte->set_pcd(false);
+    pte->set_pat(true);
+    this->expect_true(pte->pat_index() == 4);
+
+    pte->set_pwt(true);
+    pte->set_pcd(false);
+    pte->set_pat(true);
+    this->expect_true(pte->pat_index() == 5);
+
+    pte->set_pwt(false);
+    pte->set_pcd(true);
+    pte->set_pat(true);
+    this->expect_true(pte->pat_index() == 6);
+
+    pte->set_pwt(true);
+    pte->set_pcd(true);
+    pte->set_pat(true);
+    this->expect_true(pte->pat_index() == 7);
+
+    pte->set_pat_index(0);
+    this->expect_false(pte->pwt());
+    this->expect_false(pte->pcd());
+    this->expect_false(pte->pat());
+
+    pte->set_pat_index(1);
+    this->expect_true(pte->pwt());
+    this->expect_false(pte->pcd());
+    this->expect_false(pte->pat());
+
+    pte->set_pat_index(2);
+    this->expect_false(pte->pwt());
+    this->expect_true(pte->pcd());
+    this->expect_false(pte->pat());
+
+    pte->set_pat_index(3);
+    this->expect_true(pte->pwt());
+    this->expect_true(pte->pcd());
+    this->expect_false(pte->pat());
+
+    pte->set_pat_index(4);
+    this->expect_false(pte->pwt());
+    this->expect_false(pte->pcd());
+    this->expect_true(pte->pat());
+
+    pte->set_pat_index(5);
+    this->expect_true(pte->pwt());
+    this->expect_false(pte->pcd());
+    this->expect_true(pte->pat());
+
+    pte->set_pat_index(6);
+    this->expect_false(pte->pwt());
+    this->expect_true(pte->pcd());
+    this->expect_true(pte->pat());
+
+    pte->set_pat_index(7);
+    this->expect_true(pte->pwt());
+    this->expect_true(pte->pcd());
+    this->expect_true(pte->pat());
+
+    this->expect_exception([&] { pte->set_pat_index(10); }, ""_ut_ffe);
 }

@@ -433,7 +433,7 @@ protected:
         // to get a list of calls that we were expecting that were not called.
         //
         // This will require some mods to HippoMocks to store a list of both
-        // types of problems, and then get that list when an expection
+        // types of problems, and then get that list when an exception
         // occurs.
         //
         // There also seems to be a lot of logic in HippMocks for the
@@ -455,7 +455,7 @@ protected:
 
         try
         {
-            mocks.VerifyAll();
+            m_pass += mocks.VerifyAll();
         }
         catch (std::exception &e)
         {

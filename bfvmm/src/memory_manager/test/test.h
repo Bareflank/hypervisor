@@ -86,6 +86,7 @@ private:
     void test_page_table_x64_remove_page_twice_failure();
     void test_page_table_x64_remove_page_unknown_failure();
 
+    void test_page_table_entry_x64_invalid();
     void test_page_table_entry_x64_present();
     void test_page_table_entry_x64_rw();
     void test_page_table_entry_x64_us();
@@ -98,6 +99,7 @@ private:
     void test_page_table_entry_x64_global();
     void test_page_table_entry_x64_nx();
     void test_page_table_entry_x64_phys_addr();
+    void test_page_table_entry_x64_pat_index();
 
     void test_unique_map_ptr_x64_default_constructor();
     void test_unique_map_ptr_x64_phys_constructor_invalid_args();
@@ -120,16 +122,20 @@ private:
     void test_unique_map_ptr_x64_reset();
     void test_unique_map_ptr_x64_swap();
     void test_unique_map_ptr_x64_flush();
+    void test_unique_map_ptr_x64_cache_flush();
     void test_unique_map_ptr_x64_comparison();
     void test_unique_map_ptr_x64_make_failure();
 
     void test_root_page_table_x64_init_failure();
     void test_root_page_table_x64_init_success();
-    void test_root_page_table_x64_phys_addr();
+    void test_root_page_table_x64_cr3();
     void test_root_page_table_x64_map_failure();
     void test_root_page_table_x64_map_add_md_failure();
     void test_root_page_table_x64_map_unmap_success();
     void test_root_page_table_x64_map_unmap_twice_success();
+
+    void test_pat_x64_mem_attr_to_pat_index();
+    void test_mem_attr_x64_mem_type_to_attr();
 };
 
 #endif

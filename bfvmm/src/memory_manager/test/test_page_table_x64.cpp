@@ -52,14 +52,14 @@ memory_manager_ut::test_page_table_x64_no_entry()
         this->expect_true(pt->present());
         this->expect_true(pt->rw());
         this->expect_true(pt->us());
-        this->expect_false(pt->pwt());
-        this->expect_false(pt->pcd());
+        this->expect_true(pt->pwt());
+        this->expect_true(pt->pcd());
         this->expect_false(pt->accessed());
         this->expect_false(pt->dirty());
         this->expect_false(pt->pat());
-        this->expect_false(pt->pat());
         this->expect_false(pt->global());
         this->expect_false(pt->nx());
+        this->expect_true(pt->cr3_shadow() != 0);
     });
 }
 
@@ -78,13 +78,14 @@ memory_manager_ut::test_page_table_x64_with_entry()
         this->expect_true(pt->present());
         this->expect_true(pt->rw());
         this->expect_true(pt->us());
-        this->expect_false(pt->pwt());
-        this->expect_false(pt->pcd());
+        this->expect_true(pt->pwt());
+        this->expect_true(pt->pcd());
         this->expect_false(pt->accessed());
         this->expect_false(pt->dirty());
         this->expect_false(pt->pat());
         this->expect_false(pt->global());
         this->expect_false(pt->nx());
+        this->expect_true(pt->cr3_shadow() == 0);
     });
 }
 

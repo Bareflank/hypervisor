@@ -2495,8 +2495,8 @@ vmcs_ut::test_vmcs_guest_ia32_pat_pa0_memory_type()
     pa0::memory_type::set_if_exists(x64::memory_type::write_back);
     this->expect_true(pa0::memory_type::get_if_exists() == x64::memory_type::write_back);
 
-    pa0::memory_type::set_if_exists(x64::memory_type::uncached);
-    this->expect_true(pa0::memory_type::get_if_exists() == x64::memory_type::uncached);
+    pa0::memory_type::set_if_exists(x64::memory_type::uncacheable_minus);
+    this->expect_true(pa0::memory_type::get_if_exists() == x64::memory_type::uncacheable_minus);
 }
 
 void
@@ -2544,8 +2544,8 @@ vmcs_ut::test_vmcs_guest_ia32_pat_pa1_memory_type()
     pa1::memory_type::set_if_exists(x64::memory_type::write_back);
     this->expect_true(pa1::memory_type::get_if_exists() == x64::memory_type::write_back);
 
-    pa1::memory_type::set_if_exists(x64::memory_type::uncached);
-    this->expect_true(pa1::memory_type::get_if_exists() == x64::memory_type::uncached);
+    pa1::memory_type::set_if_exists(x64::memory_type::uncacheable_minus);
+    this->expect_true(pa1::memory_type::get_if_exists() == x64::memory_type::uncacheable_minus);
 }
 
 void
@@ -2593,8 +2593,8 @@ vmcs_ut::test_vmcs_guest_ia32_pat_pa2_memory_type()
     pa2::memory_type::set_if_exists(x64::memory_type::write_back);
     this->expect_true(pa2::memory_type::get_if_exists() == x64::memory_type::write_back);
 
-    pa2::memory_type::set_if_exists(x64::memory_type::uncached);
-    this->expect_true(pa2::memory_type::get_if_exists() == x64::memory_type::uncached);
+    pa2::memory_type::set_if_exists(x64::memory_type::uncacheable_minus);
+    this->expect_true(pa2::memory_type::get_if_exists() == x64::memory_type::uncacheable_minus);
 }
 
 void
@@ -2642,8 +2642,8 @@ vmcs_ut::test_vmcs_guest_ia32_pat_pa3_memory_type()
     pa3::memory_type::set_if_exists(x64::memory_type::write_back);
     this->expect_true(pa3::memory_type::get_if_exists() == x64::memory_type::write_back);
 
-    pa3::memory_type::set_if_exists(x64::memory_type::uncached);
-    this->expect_true(pa3::memory_type::get_if_exists() == x64::memory_type::uncached);
+    pa3::memory_type::set_if_exists(x64::memory_type::uncacheable_minus);
+    this->expect_true(pa3::memory_type::get_if_exists() == x64::memory_type::uncacheable_minus);
 }
 
 void
@@ -2691,8 +2691,8 @@ vmcs_ut::test_vmcs_guest_ia32_pat_pa4_memory_type()
     pa4::memory_type::set_if_exists(x64::memory_type::write_back);
     this->expect_true(pa4::memory_type::get_if_exists() == x64::memory_type::write_back);
 
-    pa4::memory_type::set_if_exists(x64::memory_type::uncached);
-    this->expect_true(pa4::memory_type::get_if_exists() == x64::memory_type::uncached);
+    pa4::memory_type::set_if_exists(x64::memory_type::uncacheable_minus);
+    this->expect_true(pa4::memory_type::get_if_exists() == x64::memory_type::uncacheable_minus);
 }
 
 void
@@ -2740,8 +2740,8 @@ vmcs_ut::test_vmcs_guest_ia32_pat_pa5_memory_type()
     pa5::memory_type::set_if_exists(x64::memory_type::write_back);
     this->expect_true(pa5::memory_type::get_if_exists() == x64::memory_type::write_back);
 
-    pa5::memory_type::set_if_exists(x64::memory_type::uncached);
-    this->expect_true(pa5::memory_type::get_if_exists() == x64::memory_type::uncached);
+    pa5::memory_type::set_if_exists(x64::memory_type::uncacheable_minus);
+    this->expect_true(pa5::memory_type::get_if_exists() == x64::memory_type::uncacheable_minus);
 }
 
 void
@@ -2789,8 +2789,8 @@ vmcs_ut::test_vmcs_guest_ia32_pat_pa6_memory_type()
     pa6::memory_type::set_if_exists(x64::memory_type::write_back);
     this->expect_true(pa6::memory_type::get_if_exists() == x64::memory_type::write_back);
 
-    pa6::memory_type::set_if_exists(x64::memory_type::uncached);
-    this->expect_true(pa6::memory_type::get_if_exists() == x64::memory_type::uncached);
+    pa6::memory_type::set_if_exists(x64::memory_type::uncacheable_minus);
+    this->expect_true(pa6::memory_type::get_if_exists() == x64::memory_type::uncacheable_minus);
 }
 
 void
@@ -2838,8 +2838,8 @@ vmcs_ut::test_vmcs_guest_ia32_pat_pa7_memory_type()
     pa7::memory_type::set_if_exists(x64::memory_type::write_back);
     this->expect_true(pa7::memory_type::get_if_exists() == x64::memory_type::write_back);
 
-    pa7::memory_type::set_if_exists(x64::memory_type::uncached);
-    this->expect_true(pa7::memory_type::get_if_exists() == x64::memory_type::uncached);
+    pa7::memory_type::set_if_exists(x64::memory_type::uncacheable_minus);
+    this->expect_true(pa7::memory_type::get_if_exists() == x64::memory_type::uncacheable_minus);
 }
 
 void
@@ -3515,8 +3515,8 @@ vmcs_ut::test_vmcs_host_ia32_pat_pa0_memory_type()
     pa0::memory_type::set_if_exists(x64::memory_type::write_back);
     this->expect_true(pa0::memory_type::get_if_exists() == x64::memory_type::write_back);
 
-    pa0::memory_type::set_if_exists(x64::memory_type::uncached);
-    this->expect_true(pa0::memory_type::get_if_exists() == x64::memory_type::uncached);
+    pa0::memory_type::set_if_exists(x64::memory_type::uncacheable_minus);
+    this->expect_true(pa0::memory_type::get_if_exists() == x64::memory_type::uncacheable_minus);
 }
 
 void
@@ -3564,8 +3564,8 @@ vmcs_ut::test_vmcs_host_ia32_pat_pa1_memory_type()
     pa1::memory_type::set_if_exists(x64::memory_type::write_back);
     this->expect_true(pa1::memory_type::get_if_exists() == x64::memory_type::write_back);
 
-    pa1::memory_type::set_if_exists(x64::memory_type::uncached);
-    this->expect_true(pa1::memory_type::get_if_exists() == x64::memory_type::uncached);
+    pa1::memory_type::set_if_exists(x64::memory_type::uncacheable_minus);
+    this->expect_true(pa1::memory_type::get_if_exists() == x64::memory_type::uncacheable_minus);
 }
 
 void
@@ -3613,8 +3613,8 @@ vmcs_ut::test_vmcs_host_ia32_pat_pa2_memory_type()
     pa2::memory_type::set_if_exists(x64::memory_type::write_back);
     this->expect_true(pa2::memory_type::get_if_exists() == x64::memory_type::write_back);
 
-    pa2::memory_type::set_if_exists(x64::memory_type::uncached);
-    this->expect_true(pa2::memory_type::get_if_exists() == x64::memory_type::uncached);
+    pa2::memory_type::set_if_exists(x64::memory_type::uncacheable_minus);
+    this->expect_true(pa2::memory_type::get_if_exists() == x64::memory_type::uncacheable_minus);
 }
 
 void
@@ -3662,8 +3662,8 @@ vmcs_ut::test_vmcs_host_ia32_pat_pa3_memory_type()
     pa3::memory_type::set_if_exists(x64::memory_type::write_back);
     this->expect_true(pa3::memory_type::get_if_exists() == x64::memory_type::write_back);
 
-    pa3::memory_type::set_if_exists(x64::memory_type::uncached);
-    this->expect_true(pa3::memory_type::get_if_exists() == x64::memory_type::uncached);
+    pa3::memory_type::set_if_exists(x64::memory_type::uncacheable_minus);
+    this->expect_true(pa3::memory_type::get_if_exists() == x64::memory_type::uncacheable_minus);
 }
 
 void
@@ -3711,8 +3711,8 @@ vmcs_ut::test_vmcs_host_ia32_pat_pa4_memory_type()
     pa4::memory_type::set_if_exists(x64::memory_type::write_back);
     this->expect_true(pa4::memory_type::get_if_exists() == x64::memory_type::write_back);
 
-    pa4::memory_type::set_if_exists(x64::memory_type::uncached);
-    this->expect_true(pa4::memory_type::get_if_exists() == x64::memory_type::uncached);
+    pa4::memory_type::set_if_exists(x64::memory_type::uncacheable_minus);
+    this->expect_true(pa4::memory_type::get_if_exists() == x64::memory_type::uncacheable_minus);
 }
 
 void
@@ -3760,8 +3760,8 @@ vmcs_ut::test_vmcs_host_ia32_pat_pa5_memory_type()
     pa5::memory_type::set_if_exists(x64::memory_type::write_back);
     this->expect_true(pa5::memory_type::get_if_exists() == x64::memory_type::write_back);
 
-    pa5::memory_type::set_if_exists(x64::memory_type::uncached);
-    this->expect_true(pa5::memory_type::get_if_exists() == x64::memory_type::uncached);
+    pa5::memory_type::set_if_exists(x64::memory_type::uncacheable_minus);
+    this->expect_true(pa5::memory_type::get_if_exists() == x64::memory_type::uncacheable_minus);
 }
 
 void
@@ -3809,8 +3809,8 @@ vmcs_ut::test_vmcs_host_ia32_pat_pa6_memory_type()
     pa6::memory_type::set_if_exists(x64::memory_type::write_back);
     this->expect_true(pa6::memory_type::get_if_exists() == x64::memory_type::write_back);
 
-    pa6::memory_type::set_if_exists(x64::memory_type::uncached);
-    this->expect_true(pa6::memory_type::get_if_exists() == x64::memory_type::uncached);
+    pa6::memory_type::set_if_exists(x64::memory_type::uncacheable_minus);
+    this->expect_true(pa6::memory_type::get_if_exists() == x64::memory_type::uncacheable_minus);
 }
 
 void
@@ -3858,8 +3858,8 @@ vmcs_ut::test_vmcs_host_ia32_pat_pa7_memory_type()
     pa7::memory_type::set_if_exists(x64::memory_type::write_back);
     this->expect_true(pa7::memory_type::get_if_exists() == x64::memory_type::write_back);
 
-    pa7::memory_type::set_if_exists(x64::memory_type::uncached);
-    this->expect_true(pa7::memory_type::get_if_exists() == x64::memory_type::uncached);
+    pa7::memory_type::set_if_exists(x64::memory_type::uncacheable_minus);
+    this->expect_true(pa7::memory_type::get_if_exists() == x64::memory_type::uncacheable_minus);
 }
 
 void

@@ -253,48 +253,48 @@ exit_handler_intel_x64::handle_vmxoff()
 void
 exit_handler_intel_x64::handle_rdmsr()
 {
-    msrs::value_type msr = 0;
+    intel_x64::msrs::value_type msr = 0;
 
     switch (m_state_save->rcx)
     {
-        case msrs::ia32_debugctl::addr:
+        case intel_x64::msrs::ia32_debugctl::addr:
             msr = vmcs::guest_ia32_debugctl::get();
             break;
 
-        case msrs::ia32_pat::addr:
+        case x64::msrs::ia32_pat::addr:
             msr = vmcs::guest_ia32_pat::get();
             break;
 
-        case msrs::ia32_efer::addr:
+        case intel_x64::msrs::ia32_efer::addr:
             msr = vmcs::guest_ia32_efer::get();
             break;
 
-        case msrs::ia32_perf_global_ctrl::addr:
+        case intel_x64::msrs::ia32_perf_global_ctrl::addr:
             msr = vmcs::guest_ia32_perf_global_ctrl::get();
             break;
 
-        case msrs::ia32_sysenter_cs::addr:
+        case intel_x64::msrs::ia32_sysenter_cs::addr:
             msr = vmcs::guest_ia32_sysenter_cs::get();
             break;
 
-        case msrs::ia32_sysenter_esp::addr:
+        case intel_x64::msrs::ia32_sysenter_esp::addr:
             msr = vmcs::guest_ia32_sysenter_esp::get();
             break;
 
-        case msrs::ia32_sysenter_eip::addr:
+        case intel_x64::msrs::ia32_sysenter_eip::addr:
             msr = vmcs::guest_ia32_sysenter_eip::get();
             break;
 
-        case msrs::ia32_fs_base::addr:
+        case intel_x64::msrs::ia32_fs_base::addr:
             msr = vmcs::guest_fs_base::get();
             break;
 
-        case msrs::ia32_gs_base::addr:
+        case intel_x64::msrs::ia32_gs_base::addr:
             msr = vmcs::guest_gs_base::get();
             break;
 
         default:
-            msr = msrs::get(m_state_save->rcx);
+            msr = intel_x64::msrs::get(m_state_save->rcx);
             break;
 
         // QUIRK:
@@ -325,51 +325,51 @@ exit_handler_intel_x64::handle_rdmsr()
 void
 exit_handler_intel_x64::handle_wrmsr()
 {
-    msrs::value_type msr = 0;
+    intel_x64::msrs::value_type msr = 0;
 
     msr |= ((m_state_save->rax & 0x00000000FFFFFFFF) << 0x00);
     msr |= ((m_state_save->rdx & 0x00000000FFFFFFFF) << 0x20);
 
     switch (m_state_save->rcx)
     {
-        case msrs::ia32_debugctl::addr:
+        case intel_x64::msrs::ia32_debugctl::addr:
             vmcs::guest_ia32_debugctl::set(msr);
             break;
 
-        case msrs::ia32_pat::addr:
+        case x64::msrs::ia32_pat::addr:
             vmcs::guest_ia32_pat::set(msr);
             break;
 
-        case msrs::ia32_efer::addr:
+        case intel_x64::msrs::ia32_efer::addr:
             vmcs::guest_ia32_efer::set(msr);
             break;
 
-        case msrs::ia32_perf_global_ctrl::addr:
+        case intel_x64::msrs::ia32_perf_global_ctrl::addr:
             vmcs::guest_ia32_perf_global_ctrl::set(msr);
             break;
 
-        case msrs::ia32_sysenter_cs::addr:
+        case intel_x64::msrs::ia32_sysenter_cs::addr:
             vmcs::guest_ia32_sysenter_cs::set(msr);
             break;
 
-        case msrs::ia32_sysenter_esp::addr:
+        case intel_x64::msrs::ia32_sysenter_esp::addr:
             vmcs::guest_ia32_sysenter_esp::set(msr);
             break;
 
-        case msrs::ia32_sysenter_eip::addr:
+        case intel_x64::msrs::ia32_sysenter_eip::addr:
             vmcs::guest_ia32_sysenter_eip::set(msr);
             break;
 
-        case msrs::ia32_fs_base::addr:
+        case intel_x64::msrs::ia32_fs_base::addr:
             vmcs::guest_fs_base::set(msr);
             break;
 
-        case msrs::ia32_gs_base::addr:
+        case intel_x64::msrs::ia32_gs_base::addr:
             vmcs::guest_gs_base::set(msr);
             break;
 
         default:
-            msrs::set(m_state_save->rcx, msr);
+            intel_x64::msrs::set(m_state_save->rcx, msr);
             break;
     }
 
@@ -474,8 +474,8 @@ exit_handler_intel_x64::handle_vmcall_data(vmcall_registers_t &regs)
     expects(regs.r06 <= VMCALL_IN_BUFFER_SIZE);
     expects(regs.r09 <= VMCALL_OUT_BUFFER_SIZE);
 
-    auto &&imap = bfn::make_unique_map_x64<char>(regs.r05, vmcs::guest_cr3::get(), regs.r06);
-    auto &&omap = bfn::make_unique_map_x64<char>(regs.r08, vmcs::guest_cr3::get(), regs.r09);
+    auto &&imap = bfn::make_unique_map_x64<char>(regs.r05, vmcs::guest_cr3::get(), regs.r06, vmcs::guest_ia32_pat::get());
+    auto &&omap = bfn::make_unique_map_x64<char>(regs.r08, vmcs::guest_cr3::get(), regs.r09, vmcs::guest_ia32_pat::get());
 
     switch (regs.r04)
     {
