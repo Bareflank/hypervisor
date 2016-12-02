@@ -105,6 +105,10 @@ __wbinvd(void) noexcept
 { }
 
 extern "C" void
+__clflush(void *addr) noexcept
+{ (void) addr; }
+
+extern "C" void
 __cpuid(void *eax, void *ebx, void *ecx, void *edx) noexcept
 { (void) eax; (void) ebx; (void) ecx; (void) edx; }
 

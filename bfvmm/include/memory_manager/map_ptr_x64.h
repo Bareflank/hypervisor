@@ -36,8 +36,7 @@
 
 #include <intrinsics/x64.h>
 #include <intrinsics/tlb_x64.h>
-
-using namespace x64;
+#include <intrinsics/cache_x64.h>
 
 // -----------------------------------------------------------------------------
 // Definition
@@ -71,7 +70,7 @@ template<class T>
 auto make_unique_map_x64(typename unique_map_ptr_x64<T>::pointer phys,
                          typename unique_map_ptr_x64<T>::attr_type attr = unique_map_ptr_x64<T>::map_read_write)
 {
-    auto &&vmap = g_mm->alloc_map(page_size);
+    auto &&vmap = g_mm->alloc_map(x64::page_size);
 
     try
     {
@@ -108,7 +107,7 @@ template<class T>
 auto make_unique_map_x64(typename unique_map_ptr_x64<T>::integer_pointer phys,
                          typename unique_map_ptr_x64<T>::attr_type attr = unique_map_ptr_x64<T>::map_read_write)
 {
-    auto &&vmap = g_mm->alloc_map(page_size);
+    auto &&vmap = g_mm->alloc_map(x64::page_size);
 
     try
     {
@@ -147,7 +146,7 @@ auto make_unique_map_x64(typename unique_map_ptr_x64<T>::integer_pointer phys,
 /// @expects list.empty() == false
 /// @expects list.at(i).first != 0
 /// @expects list.at(i).second != 0
-/// @expects list.at(i).second & (page_size - 1) == 0
+/// @expects list.at(i).second & (x64::page_size - 1) == 0
 /// @expects attr != map_none
 /// @ensures ret.get() != nullptr
 ///
@@ -221,7 +220,7 @@ auto make_unique_map_x64(typename unique_map_ptr_x64<T>::integer_pointer virt,
                          typename unique_map_ptr_x64<T>::size_type size,
                          typename unique_map_ptr_x64<T>::attr_type attr = unique_map_ptr_x64<T>::map_read_write)
 {
-    auto &&vmap = g_mm->alloc_map(page_size);
+    auto &&vmap = g_mm->alloc_map(x64::page_size);
 
 #ifdef MAP_PTR_TESTING
 
@@ -330,7 +329,7 @@ public:
     /// @endcode
     ///
     /// @expects vmap != 0
-    /// @expects vmap & (page_size - 1) == 0
+    /// @expects vmap & (x64::page_size - 1) == 0
     /// @expects phys != 0
     /// @expects attr != 0
     /// @ensures get() != nullptr
@@ -341,7 +340,7 @@ public:
     ///
     unique_map_ptr_x64(integer_pointer vmap, integer_pointer phys, attr_type attr) :
         m_virt(0),
-        m_size(page_size)
+        m_size(x64::page_size)
     {
         // [[ensures: get() != nullptr]]
         expects(vmap != 0);
@@ -392,11 +391,11 @@ public:
     /// @endcode
     ///
     /// @expects vmap != 0
-    /// @expects vmap & (page_size - 1) == 0
+    /// @expects vmap & (x64::page_size - 1) == 0
     /// @expects list.empty() == false
     /// @expects list.at(i).first != 0
     /// @expects list.at(i).second != 0
-    /// @expects list.at(i).second & (page_size - 1) == 0
+    /// @expects list.at(i).second & (x64::page_size - 1) == 0
     /// @expects attr != 0
     /// @ensures get() != nullptr
     ///
@@ -436,7 +435,7 @@ public:
             auto phys = upper(p.first);
             auto size = p.second;
 
-            for (poff = 0; poff < size; poff += page_size, voff += page_size)
+            for (poff = 0; poff < size; poff += x64::page_size, voff += x64::page_size)
                 g_pt->map(vmap + voff, phys + poff, attr);
         }
 
@@ -463,10 +462,10 @@ public:
     /// @endcode
     ///
     /// @expects vmap != 0
-    /// @expects vmap & (page_size - 1) == 0
+    /// @expects vmap & (x64::page_size - 1) == 0
     /// @expects virt != 0
     /// @expects cr3 != 0
-    /// @expects cr3 & (page_size - 1) == 0
+    /// @expects cr3 & (x64::page_size - 1) == 0
     /// @expects size != 0
     /// @expects attr != 0
     /// @ensures get() != nullptr
@@ -495,9 +494,9 @@ public:
         m_virt |= upper(vmap);
 
         if (lower(virt) != 0)
-            m_size += page_size;
+            m_size += x64::page_size;
 
-        for (auto offset = 0UL; offset < m_size; offset += page_size)
+        for (auto offset = 0UL; offset < m_size; offset += x64::page_size)
         {
             auto vadr = vmap + offset;
             auto padr = virt_to_phys_with_cr3(upper(virt) + offset, cr3);
@@ -768,8 +767,24 @@ public:
     void flush() noexcept
     {
         auto &&vmap = upper(m_virt);
-        for (auto vadr = vmap; vadr < vmap + m_size; vadr += page_size)
-            tlb::invlpg(reinterpret_cast<pointer>(vadr));
+        for (auto vadr = vmap; vadr < vmap + m_size; vadr += x64::page_size)
+            x64::tlb::invlpg(reinterpret_cast<pointer>(vadr));
+    }
+
+    /// Cache Flush
+    ///
+    /// Flushes the Cache associated with the virtual address ranges
+    /// this unique_map_ptr_x64 holds. This is done automatically when
+    /// unmapping memory, but might be needed manually by users
+    ///
+    /// @expects none
+    /// @ensures none
+    ///
+    void cache_flush() noexcept
+    {
+        auto &&vmap = upper(m_virt);
+        for (auto vadr = vmap; vadr < vmap + m_size; vadr += x64::cache_line_size)
+            x64::cache::clflush(reinterpret_cast<pointer>(vadr));
     }
 
 private:
@@ -779,7 +794,7 @@ private:
         if (virt != 0 && size != 0)
         {
             auto &&vmap = upper(virt);
-            for (auto vadr = vmap; vadr < vmap + size; vadr += page_size)
+            for (auto vadr = vmap; vadr < vmap + size; vadr += x64::page_size)
                 g_pt->unmap(vadr);
 
             g_mm->free_map(reinterpret_cast<pointer>(vmap));
@@ -789,20 +804,20 @@ private:
     integer_pointer
     virt_to_phys_with_cr3(integer_pointer virt, integer_pointer phys)
     {
-        auto from = page_table::pml4::from;
+        auto from = x64::page_table::pml4::from;
 
-        for (; from >= page_table::pt::from; from -= page_table::pt::size)
+        for (; from >= x64::page_table::pt::from; from -= x64::page_table::pt::size)
         {
             auto map = bfn::make_unique_map_x64<memory_manager_x64::integer_pointer>(phys);
             auto map_view = gsl::make_span(map.get(), x64::page_table::num_entries);
 
-            auto pte = page_table_entry_x64{&map_view.at(page_table::index(virt, from))};
+            auto pte = page_table_entry_x64{&map_view.at(x64::page_table::index(virt, from))};
             phys = pte.phys_addr();
 
             expects(phys != 0);
             expects(pte.present());
 
-            if ((from == page_table::pt::from) || (pte.ps() == true))
+            if ((from == x64::page_table::pt::from) || (pte.ps() == true))
                 break;
         }
 
@@ -810,13 +825,13 @@ private:
     }
 
     auto lower(integer_pointer ptr) const noexcept
-    { return ptr & (page_size - 1); }
+    { return ptr & (x64::page_size - 1); }
 
     auto lower(integer_pointer ptr, integer_pointer from) const noexcept
     { return ptr & ((0x1UL << from) - 1); }
 
     auto upper(integer_pointer ptr) const noexcept
-    { return ptr & ~(page_size - 1); }
+    { return ptr & ~(x64::page_size - 1); }
 
     auto upper(integer_pointer ptr, integer_pointer from) const noexcept
     { return ptr & ~((0x1UL << from) - 1); }

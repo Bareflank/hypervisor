@@ -120,6 +120,7 @@ private:
     void test_unique_map_ptr_x64_reset();
     void test_unique_map_ptr_x64_swap();
     void test_unique_map_ptr_x64_flush();
+    void test_unique_map_ptr_x64_cache_flush();
     void test_unique_map_ptr_x64_comparison();
     void test_unique_map_ptr_x64_make_failure();
 

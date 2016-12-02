@@ -408,6 +408,7 @@ private:
 
     void test_cache_x64_invd();
     void test_cache_x64_wbinvd();
+    void test_cache_x64_clflush();
 
     void test_tlb_x64_invlpg();
 

@@ -124,6 +124,7 @@ memory_manager_ut::list()
     this->test_unique_map_ptr_x64_reset();
     this->test_unique_map_ptr_x64_swap();
     this->test_unique_map_ptr_x64_flush();
+    this->test_unique_map_ptr_x64_cache_flush();
     this->test_unique_map_ptr_x64_comparison();
     this->test_unique_map_ptr_x64_make_failure();
 
