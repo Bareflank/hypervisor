@@ -99,11 +99,11 @@ protected:
     void advance_rip() noexcept;
     void unimplemented_handler() noexcept;
 
-    void handle_vmcall_versions(vmcall_registers_t &regs);
-    void handle_vmcall_registers(vmcall_registers_t &regs);
-    void handle_vmcall_data(vmcall_registers_t &regs);
-    void handle_vmcall_event(vmcall_registers_t &regs);
-    void handle_vmcall_unittest(vmcall_registers_t &regs);
+    virtual void handle_vmcall_versions(vmcall_registers_t &regs);
+    virtual void handle_vmcall_registers(vmcall_registers_t &regs);
+    virtual void handle_vmcall_data(vmcall_registers_t &regs);
+    virtual void handle_vmcall_event(vmcall_registers_t &regs);
+    virtual void handle_vmcall_unittest(vmcall_registers_t &regs);
 
     virtual void handle_vmcall_data_string_unformatted(
         vmcall_registers_t &regs, const std::string &str,
