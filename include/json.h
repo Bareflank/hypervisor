@@ -10059,6 +10059,58 @@ inline nlohmann::json::json_pointer operator "" _json_pointer(const char *s, std
     return nlohmann::json::json_pointer(s);
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// Bareflank Helpers
+///////////////////////////////////////////////////////////////////////////////
+
 using json = nlohmann::json;
+
+template<class T, class J,
+         class = typename std::enable_if<std::is_integral<T>::value>::type>
+auto json_hex_or_dec(const J &obj, std::string field)
+{
+    auto val = obj.value(field + "_hex", obj.at(field));
+
+    if (val.is_string())
+        return gsl::narrow_cast<T>(std::stoull(val.template get<std::string>(), 0, 16));
+
+    if (val.is_number())
+        return gsl::narrow_cast<T>(val.template get<T>());
+
+    throw std::runtime_error("json is neither a hex or dec");
+}
+
+template<class T, class J,
+         class = typename std::enable_if<std::is_integral<T>::value>::type>
+auto json_hex_or_dec_array(const J &obj, std::string field)
+{
+    std::vector<T> result;
+
+    auto array_hex = obj.value(field + "_hex", json(nullptr));
+
+    if (array_hex.is_array())
+    {
+        for (auto val : array_hex)
+            result.push_back(gsl::narrow_cast<T>(std::stoull(val.template get<std::string>(), 0, 16)));
+
+        return result;
+    }
+
+    auto array_dec = obj.at(field);
+
+    if (array_dec.is_array())
+    {
+        for (auto val : array_dec)
+            result.push_back(gsl::narrow_cast<T>(val.template get<T>()));
+
+        return result;
+    }
+
+    throw std::runtime_error("json is neither a hex or dec");
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Bareflank Helpers
+///////////////////////////////////////////////////////////////////////////////
 
 #endif
