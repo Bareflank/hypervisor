@@ -30,11 +30,6 @@
 
 namespace serial_intel_x64
 {
-constexpr const x64::portio::port_addr_type com1_port = 0x3F8U;
-constexpr const x64::portio::port_addr_type com2_port = 0x2F8U;
-constexpr const x64::portio::port_addr_type com3_port = 0x3E8U;
-constexpr const x64::portio::port_addr_type com4_port = 0x2E8U;
-
 constexpr const x64::portio::port_8bit_type dlab = 1U << 7;
 
 constexpr const x64::portio::port_addr_type baud_rate_lo_reg = 0U;
@@ -135,7 +130,7 @@ public:
     /// @expects none
     /// @ensures none
     ///
-    serial_port_intel_x64(port_type port = serial_intel_x64::DEFAULT_COM_PORT) noexcept;
+    serial_port_intel_x64(port_type port = DEFAULT_COM_PORT) noexcept;
 
     /// Destructor
     ///
