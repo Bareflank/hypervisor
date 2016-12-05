@@ -304,7 +304,7 @@ ioctl_driver::vmcall_data_string(registers_type &regs)
             if (regs.r09 >= VMCALL_OUT_BUFFER_SIZE)
                 throw std::out_of_range("return output buffer size out of range");
 
-            std::cout << "received from vmm: " << json::parse(std::string(obuffer.get(), regs.r09)) << '\n';
+            std::cout << "received from vmm: \n" << json::parse(std::string(obuffer.get(), regs.r09)).dump(4) << '\n';
             break;
 
         case VMCALL_DATA_STRING_UNFORMATTED:
