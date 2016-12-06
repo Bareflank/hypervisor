@@ -126,15 +126,14 @@ protected:
         vmcall_registers_t &regs, const json &str,
         const bfn::unique_map_ptr_x64<char> &omap);
 
+public:
+
+    // The following are only marked public for unit testing. Do not use
+    // these APIs directly as they may change at any time, and their direct
+    // use may be unstable. You have been warned.
+
     vmcs_intel_x64 *m_vmcs;
     state_save_intel_x64 *m_state_save;
-
-private:
-
-    friend class vcpu_ut;
-    friend class vcpu_intel_x64;
-    friend class exit_handler_intel_x64_ut;
-    friend exit_handler_intel_x64 setup_ehlr(gsl::not_null<vmcs_intel_x64 *> vmcs);
 
     virtual void set_vmcs(gsl::not_null<vmcs_intel_x64 *> vmcs)
     { m_vmcs = vmcs; }
