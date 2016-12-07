@@ -19,57 +19,27 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <test.h>
+#ifndef TEST_H
+#define TEST_H
 
-misc_ut::misc_ut()
+#include <unittest.h>
+
+class vcpu_factory_ut : public unittest
 {
-}
+public:
 
-bool
-misc_ut::init()
-{
-    return true;
-}
+    vcpu_factory_ut();
+    ~vcpu_factory_ut() override = default;
 
-bool
-misc_ut::fini()
-{
-    return true;
-}
+protected:
 
-bool
-misc_ut::list()
-{
-    this->test_error_codes_valid();
-    this->test_error_codes_unknown();
+    bool init() override;
+    bool fini() override;
+    bool list() override;
 
-    this->test_string_literal();
-    this->test_string_to_string();
+private:
 
-    this->test_vector_find();
-    this->test_vector_cfind();
-    this->test_vector_take();
-    this->test_vector_remove();
+    void test_make_vcpu();
+};
 
-    this->test_guard_exceptions_no_return();
-    this->test_guard_exceptions_with_return();
-
-    this->test_bitmanip_set_bit();
-    this->test_bitmanip_clear_bit();
-    this->test_bitmanip_get_bit();
-    this->test_bitmanip_is_bit_set();
-    this->test_bitmanip_is_bit_cleared();
-    this->test_bitmanip_num_bits_set();
-    this->test_bitmanip_get_bits();
-    this->test_bitmanip_set_bits();
-
-    this->test_exceptions();
-
-    return true;
-}
-
-int
-main(int argc, char *argv[])
-{
-    return RUN_ALL_TESTS(misc_ut);
-}
+#endif

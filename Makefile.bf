@@ -43,6 +43,16 @@ endif
 FILTERED_MODULE_FILE=/tmp/module_file
 
 ################################################################################
+# Sudo
+################################################################################
+
+ifeq ($(shell uname -s), Linux)
+	SUDO:=sudo
+else
+	SUDO:=
+endif
+
+################################################################################
 # CPUID / VCPUID
 ################################################################################
 
@@ -115,12 +125,6 @@ include %HYPER_ABS%/common/common_subdir.mk
 .PHONY: test
 .PHONY: tidy
 
-ifeq ($(shell uname -s), Linux)
-    SUDO:=sudo
-else
-    SUDO:=
-endif
-
 windows_build: force
 	@%BUILD_ABS%/build_scripts/build_driver.sh
 
@@ -152,8 +156,10 @@ driver_unload: force
 	@%BUILD_ABS%/build_scripts/clean_driver.sh
 
 load: force
+	@$(SUDO) rm -Rf $(FILTERED_MODULE_FILE)
 	@%BUILD_ABS%/build_scripts/filter_module_file.sh $(MODULE_FILE) $(FILTERED_MODULE_FILE)
 	@$(SUDO) LD_LIBRARY_PATH=%BUILD_ABS%/makefiles/bfm/bin/native/ %BUILD_ABS%/makefiles/bfm/bin/native/bfm load $(FILTERED_MODULE_FILE)
+	@$(SUDO) rm -Rf $(FILTERED_MODULE_FILE)
 
 unload: force
 	@$(SUDO) LD_LIBRARY_PATH=%BUILD_ABS%/makefiles/bfm/bin/native/ %BUILD_ABS%/makefiles/bfm/bin/native/bfm unload

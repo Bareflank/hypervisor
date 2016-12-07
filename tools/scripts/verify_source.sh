@@ -213,19 +213,33 @@ if [[ -d extended_apis ]]; then
     popd > /dev/null
 fi
 
+verify_bfvmm() {
+    pushd bfvmm/src/$1 > /dev/null
+    header $PWD
+    run_clang_tidy "clan*,-clang-analyzer-alpha.deadcode.UnreachableCode"
+    run_clang_tidy "cert*,-clang-analyzer*,-cert-err60-cpp"
+    run_clang_tidy "misc*,-clang-analyzer*,-misc-noexcept-move-constructor"
+    run_clang_tidy "perf*,-clang-analyzer*"
+    run_clang_tidy "cppc*,-clang-analyzer*,-cppcoreguidelines-pro-type-reinterpret-cast"
+    run_clang_tidy "read*,-clang-analyzer*,-readability-braces-around-statements"
+    run_clang_tidy "mode*,-clang-analyzer*"
+    popd > /dev/null
+}
+
 #
 # bfvmm
 #
-pushd bfvmm > /dev/null
-header $PWD
-run_clang_tidy "clan*,-clang-analyzer-alpha.deadcode.UnreachableCode"
-run_clang_tidy "cert*,-clang-analyzer*,-cert-err60-cpp"
-run_clang_tidy "misc*,-clang-analyzer*,-misc-noexcept-move-constructor"
-run_clang_tidy "perf*,-clang-analyzer*"
-run_clang_tidy "cppc*,-clang-analyzer*,-cppcoreguidelines-pro-type-reinterpret-cast"
-run_clang_tidy "read*,-clang-analyzer*,-readability-braces-around-statements"
-run_clang_tidy "mode*,-clang-analyzer*"
-popd > /dev/null
+verify_bfvmm debug_ring
+verify_bfvmm entry
+verify_bfvmm exit_handler
+verify_bfvmm intrinsics
+verify_bfvmm memory_manager
+verify_bfvmm misc
+verify_bfvmm serial
+verify_bfvmm vcpu
+verify_bfvmm vcpu_factory
+verify_bfvmm vmcs
+verify_bfvmm vmxon
 
 #
 # bfm
