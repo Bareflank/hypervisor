@@ -10069,13 +10069,15 @@ template<class T, class J,
          class = typename std::enable_if<std::is_integral<T>::value>::type>
 auto json_hex_or_dec(const J &obj, std::string field)
 {
-    auto val = obj.value(field + "_hex", obj.at(field));
+    auto val_hex = obj.value(field + "_hex", json(nullptr));
 
-    if (val.is_string())
-        return gsl::narrow_cast<T>(std::stoull(val.template get<std::string>(), 0, 16));
+    if (val_hex.is_string())
+        return gsl::narrow_cast<T>(std::stoull(val_hex.template get<std::string>(), 0, 16));
 
-    if (val.is_number())
-        return gsl::narrow_cast<T>(val.template get<T>());
+    auto val_dec = obj.at(field);
+
+    if (val_dec.is_number())
+        return gsl::narrow_cast<T>(val_dec.template get<T>());
 
     throw std::runtime_error("json is neither a hex or dec");
 }
