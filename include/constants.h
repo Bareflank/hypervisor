@@ -276,10 +276,18 @@
 /**
  * Default Serial COM Port
  *
+ * Possible values include:
+ *    - 0x3F8U  // COM1
+ *    - 0x2F8U  // COM2
+ *    - 0x3E8U  // COM3
+ *    - 0x2E8U  // COM4
+ *    - 0xE000
+ *    - 0xE010
+ *
  * Note: See bfvmm/serial/serial_port_intel_x64.h
  */
 #ifndef DEFAULT_COM_PORT
-#define DEFAULT_COM_PORT com1_port
+#define DEFAULT_COM_PORT 0x3F8U
 #endif
 
 /**
