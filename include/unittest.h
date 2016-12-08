@@ -64,6 +64,9 @@ inline auto operator"" _ut_iae(const char *str, std::size_t len)
 inline auto operator"" _ut_ore(const char *str, std::size_t len)
 { (void)len; return std::make_shared<std::out_of_range>(str); }
 
+inline auto operator"" _ut_dme(const char *str, std::size_t len)
+{ (void)len; return std::make_shared<std::domain_error>(str); }
+
 inline auto operator"" _ut_ffe(const char *str, std::size_t len)
 { (void)len; return std::make_shared<gsl::fail_fast>(str); }
 
@@ -704,7 +707,7 @@ public:
             return;
         }
 
-        std::string reason = std::string(condition_text.data()) + " is true";
+        std::string reason = std::string(condition_text.data());
         this->expect_failed(reason.c_str(), func.data(), line);
     }
 
@@ -735,9 +738,9 @@ private:
         {
             std::cout << '\n';
             std::cout << "totals: ";
-            std::cout << m_pass << " passed, ";
+            std::cout << std::dec << m_pass << " passed, ";
             std::cout << "\033[1;31m";
-            std::cout << m_fail << " failed";
+            std::cout << std::dec << m_fail << " failed";
             std::cout << "\033[0m";
             std::cout << '\n';
 
@@ -747,9 +750,9 @@ private:
         {
             std::cout << "totals: ";
             std::cout << "\033[1;32m";
-            std::cout << m_pass << " passed, ";
+            std::cout << std::dec << m_pass << " passed, ";
             std::cout << "\033[0m";
-            std::cout << m_fail << " failed";
+            std::cout << std::dec << m_fail << " failed";
             std::cout << '\n';
 
             return true;
@@ -813,7 +816,7 @@ public:
     void
     expect_failed(const char *condition, const char *func, int line)
     {
-        std::cout << "\033[1;31mFAILED\033[0m: [" << line << "]: " << func << '\n';
+        std::cout << "\033[1;31mFAILED\033[0m: [" << std::dec << line << "]: " << func << '\n';
         std::cout << "    - reason: " << condition << '\n';
         this->inc_fail();
     }
