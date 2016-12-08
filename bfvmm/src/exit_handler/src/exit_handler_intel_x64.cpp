@@ -480,16 +480,28 @@ exit_handler_intel_x64::handle_vmcall_data(vmcall_registers_t &regs)
     switch (regs.r04)
     {
         case VMCALL_DATA_STRING_UNFORMATTED:
-            handle_vmcall_data_string_unformatted(regs, std::string(imap.get(), regs.r06), omap);
+        {
+            std::string ostr;
+            handle_vmcall_data_string_unformatted(std::string(imap.get(), regs.r06), ostr);
+            reply_with_string(regs, ostr, omap);
             break;
+        }
 
         case VMCALL_DATA_STRING_JSON:
-            handle_vmcall_data_string_json(regs, json::parse(std::string(imap.get(), regs.r06)), omap);
+        {
+            json ojson;
+            handle_vmcall_data_string_json(json::parse(std::string(imap.get(), regs.r06)), ojson);
+            reply_with_json(regs, ojson, omap);
             break;
+        }
 
         case VMCALL_DATA_BINARY_UNFORMATTED:
-            handle_vmcall_data_binary_unformatted(regs, imap, omap);
+        {
+            handle_vmcall_data_binary_unformatted(imap, omap);
+            regs.r07 = VMCALL_DATA_BINARY_UNFORMATTED;
+            regs.r09 = regs.r06;
             break;
+        }
 
         default:
             throw std::runtime_error("unknown vmcall data type");
@@ -505,39 +517,27 @@ exit_handler_intel_x64::handle_vmcall_event(vmcall_registers_t &regs)
 
 void
 exit_handler_intel_x64::handle_vmcall_data_string_unformatted(
-    vmcall_registers_t &regs, const std::string &str,
-    const bfn::unique_map_ptr_x64<char> &omap)
+    const std::string &istr, std::string &ostr)
 {
-    bfdebug << "received in vmm: " << str << bfendl;
-    reply_with_string(regs, str, omap);
+    bfdebug << "received in vmm: " << istr << bfendl;
+    ostr = istr;
 }
 
 void
 exit_handler_intel_x64::handle_vmcall_data_string_json(
-    vmcall_registers_t &regs, const json &str,
-    const bfn::unique_map_ptr_x64<char> &omap)
+    const json &ijson, json &ojson)
 {
-    bfdebug << "received in vmm: " << str << bfendl;
-    reply_with_json(regs, str, omap);
+    bfdebug << "received in vmm: " << ijson << bfendl;
+    ojson = ijson;
 }
 
 void
 exit_handler_intel_x64::handle_vmcall_data_binary_unformatted(
-    vmcall_registers_t &regs,
     const bfn::unique_map_ptr_x64<char> &imap,
     const bfn::unique_map_ptr_x64<char> &omap)
 {
-    __builtin_memset(omap.get(), 0, regs.r09);
-    __builtin_memcpy(omap.get(), imap.get(), regs.r06);
-
-    regs.r07 = VMCALL_DATA_BINARY_UNFORMATTED;
-    regs.r09 = regs.r06;
-
-    bfdebug << "received binary data:" << bfendl;
-    bfdebug << "    - in_addr: " << view_as_pointer(regs.r05) << bfendl;
-    bfdebug << "    - in_size: " << regs.r06 << bfendl;
-    bfdebug << "    - out_addr: " << view_as_pointer(regs.r08) << bfendl;
-    bfdebug << "    - out_size: " << regs.r09 << bfendl;
+    bfdebug << "received binary data" << bfendl;
+    __builtin_memcpy(omap.get(), imap.get(), imap.size());
 }
 
 void exit_handler_intel_x64::reply_with_string(

@@ -21,49 +21,26 @@
 
 #include <test.h>
 
-misc_ut::misc_ut()
+vcpu_factory_ut::vcpu_factory_ut()
 {
 }
 
 bool
-misc_ut::init()
+vcpu_factory_ut::init()
 {
     return true;
 }
 
 bool
-misc_ut::fini()
+vcpu_factory_ut::fini()
 {
     return true;
 }
 
 bool
-misc_ut::list()
+vcpu_factory_ut::list()
 {
-    this->test_error_codes_valid();
-    this->test_error_codes_unknown();
-
-    this->test_string_literal();
-    this->test_string_to_string();
-
-    this->test_vector_find();
-    this->test_vector_cfind();
-    this->test_vector_take();
-    this->test_vector_remove();
-
-    this->test_guard_exceptions_no_return();
-    this->test_guard_exceptions_with_return();
-
-    this->test_bitmanip_set_bit();
-    this->test_bitmanip_clear_bit();
-    this->test_bitmanip_get_bit();
-    this->test_bitmanip_is_bit_set();
-    this->test_bitmanip_is_bit_cleared();
-    this->test_bitmanip_num_bits_set();
-    this->test_bitmanip_get_bits();
-    this->test_bitmanip_set_bits();
-
-    this->test_exceptions();
+    this->test_make_vcpu();
 
     return true;
 }
@@ -71,5 +48,5 @@ misc_ut::list()
 int
 main(int argc, char *argv[])
 {
-    return RUN_ALL_TESTS(misc_ut);
+    return RUN_ALL_TESTS(vcpu_factory_ut);
 }

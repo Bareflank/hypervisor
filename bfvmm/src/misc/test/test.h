@@ -61,6 +61,8 @@ private:
     void test_bitmanip_num_bits_set();
     void test_bitmanip_get_bits();
     void test_bitmanip_set_bits();
+
+    void test_exceptions();
 };
 
 #endif

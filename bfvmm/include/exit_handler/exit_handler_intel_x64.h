@@ -106,15 +106,12 @@ protected:
     virtual void handle_vmcall_unittest(vmcall_registers_t &regs);
 
     virtual void handle_vmcall_data_string_unformatted(
-        vmcall_registers_t &regs, const std::string &str,
-        const bfn::unique_map_ptr_x64<char> &omap);
+        const std::string &istr, std::string &ostr);
 
     virtual void handle_vmcall_data_string_json(
-        vmcall_registers_t &regs, const json &str,
-        const bfn::unique_map_ptr_x64<char> &omap);
+        const json &ijson, json &ojson);
 
     virtual void handle_vmcall_data_binary_unformatted(
-        vmcall_registers_t &regs,
         const bfn::unique_map_ptr_x64<char> &imap,
         const bfn::unique_map_ptr_x64<char> &omap);
 

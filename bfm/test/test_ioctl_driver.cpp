@@ -47,7 +47,7 @@ setup_file(MockRepository &mocks)
     auto fil = mocks.Mock<file>();
 
     mocks.OnCall(fil, file::read_text).Return(""_s);
-    mocks.OnCall(fil, file::read_binary).Return({});
+    mocks.OnCall(fil, file::read_binary).Return(file::binary_data());
     mocks.OnCall(fil, file::write_text);
     mocks.OnCall(fil, file::write_binary);
 
