@@ -154,20 +154,44 @@ done
 # Filter Arguments
 # ------------------------------------------------------------------------------
 
-COMMON_ARGS_INDEX=0
 COMPILE_ARGS_INDEX=0
 LINK_ARGS_INDEX=0
 SOURCE_ARGS_INDEX=0
 OBJECT_FILE_ARGS_INDEX=0
 
-COMMON_ARGS[$COMMON_ARGS_INDEX]=
 COMPILE_ARGS[$COMPILE_ARGS_INDEX]=
 LINK_ARGS[$LINK_ARGS_INDEX]=
 SOURCE_ARGS[$SOURCE_ARGS_INDEX]=
 OBJECT_FILE_ARGS[$OBJECT_FILE_ARGS_INDEX]=
 
-for ARG in "$@"
+# store CLI arguments in an array for direct iteration
+argArray=("$@")
+
+# We store values in two lists, one for compiler options: COMPILER_ARGS
+# and the other for linker options: LINK_ARGS.
+# The algorithm filters known compiler flags from the CLI Args, and sores
+# them in LINK_ARGS. Similarly we filter most linker options from the CLI
+# Args, and store them in COMPILER_ARGS.
+#
+# We loop over the argArray directly, so we can handle positional arguments
+# and not separate a positional argument from its preceding options
+# By only using 2 lists, we are able to preserve the order of CLI Arguments
+#
+# This system is a brittle, and relies completely on the correctness of
+# the conditional checks implemented within this block, as well as the order
+# in which options are filtered. In essence we are reimplementing a
+# functionality built into standard compilers without using the full list
+# of compiler options. If it was desirable to use a compiler with
+# different flags, such as the Intel compiler, this script will need to
+# be refactored to handle the different arguments. As it is, there are
+# likely edge cases where the correctness of this solution will fail.
+# For example any linker arguments prefixed with a '-m' will not be
+# correctly passed to the linker, as we identify them as compiler options.
+for ((i=0; i < ${#argArray[@]}; i++))
 do
+    # get next argument
+    ARG=${argArray[i]};
+
     # Ignored Flags
     if [[ $ARG == "-stdlib=libc++" ]]; then
         continue;
@@ -178,6 +202,23 @@ do
     fi
 
     # Compile Only Flags
+
+    # -mllvm takes a positional argument afterwards
+    if [[ $ARG == "-mllvm" ]]; then
+        COMPILE_ARGS[$COMPILE_ARGS_INDEX]="$ARG ${argArray[i+1]}";
+        COMPILE_ARGS_INDEX=$((COMPILE_ARGS_INDEX + 1));
+        ((i++));
+        continue;
+    fi
+
+    # -Xclang takes a positional argument afterwards
+    if [[ $ARG == "-Xclang" ]]; then
+        COMPILE_ARGS[$COMPILE_ARGS_INDEX]="$ARG ${argArray[i+1]}";
+        COMPILE_ARGS_INDEX=$((COMPILE_ARGS_INDEX + 1));
+        ((i++));
+        continue;
+    fi
+
     if [[ $ARG == "-m"* ]]; then
         COMPILE_ARGS[$COMPILE_ARGS_INDEX]=$ARG;
         COMPILE_ARGS_INDEX=$((COMPILE_ARGS_INDEX + 1));
@@ -185,12 +226,6 @@ do
     fi
 
     if [[ $ARG == "-f"* ]]; then
-        COMPILE_ARGS[$COMPILE_ARGS_INDEX]=$ARG;
-        COMPILE_ARGS_INDEX=$((COMPILE_ARGS_INDEX + 1));
-        continue;
-    fi
-
-    if [[ $ARG == "-W"* ]]; then
         COMPILE_ARGS[$COMPILE_ARGS_INDEX]=$ARG;
         COMPILE_ARGS_INDEX=$((COMPILE_ARGS_INDEX + 1));
         continue;
@@ -226,17 +261,61 @@ do
     fi
 
     # Link Only Flags
-    if [[ $ARG == "-Wl,"* ]]; then
-        ARG=${ARG/-Wl,/}
-        ARG=${ARG/,/ }
-        LINK_ARGS[$LINK_ARGS_INDEX]=$ARG;
-        LINK_ARGS_INDEX=$((LINK_ARGS_INDEX + 1));
+
+    if [[ $ARG == "-Xlinker" ]]; then
+        COMPILE_ARGS[$COMPILE_ARGS_INDEX]="$ARG ${argArray[i+1]}";
+        COMPILE_ARGS_INDEX=$((COMPILE_ARGS_INDEX + 1));
+        ((i++));
         continue;
     fi
+
 
     if [[ $ARG == "-rdynamic" ]]; then
         LINK_ARGS[$LINK_ARGS_INDEX]="-export-dynamic"
         LINK_ARGS_INDEX=$((LINK_ARGS_INDEX + 1));
+        continue;
+    fi
+
+    # -W options must be handled together, in order from strongest to weakest
+    # this compiler option must be handled after other -W arguments are processed
+
+    # This is a specific set of options for passing arguments to the gold linker
+    # for plugin support
+    if [[ $ARG == "-Wl,--plugin-opt"* ]]; then
+        COMPILE_ARGS[$COMPILE_ARGS_INDEX]=$ARG;
+        COMPILE_ARGS_INDEX=$((COMPILE_ARGS_INDEX + 1));
+        ARG=${ARG/-Wl,/}
+        ARG=${ARG/,/ }
+        LINK_ARGS[$LINK_ARGS_INDEX]="--plugin $HOME/compilers/$compiler/lib/LLVMgold.so $ARG";
+        LINK_ARGS_INDEX=$((LINK_ARGS_INDEX + 1));
+        continue;
+    fi
+
+    ## pass arguments directly to the linker through the compiler
+    if [[ $ARG == "-Wl,"* ]]; then
+
+        # store original arg in temp variable for use in COMPILE_ARGS
+        myTemp=$ARG;
+        ARG=${ARG/-Wl,/}
+        ARG=${ARG/,/ }
+
+        # we must be careful not to pass -z defs to libc++abi
+        if [[ $ARG == "-z defs" ]]; then
+            continue;
+        fi
+
+        LINK_ARGS[$LINK_ARGS_INDEX]=$ARG;
+        LINK_ARGS_INDEX=$((LINK_ARGS_INDEX + 1));
+
+        COMPILE_ARGS[$COMPILE_ARGS_INDEX]=$myTemp;
+        COMPILE_ARGS_INDEX=$((COMPILE_ARGS_INDEX + 1));
+        continue;
+    fi
+
+    # add any remaining -W args to COMPILE_ARGS
+    if [[ $ARG == "-W"* ]]; then
+        COMPILE_ARGS[$COMPILE_ARGS_INDEX]=$ARG;
+        COMPILE_ARGS_INDEX=$((COMPILE_ARGS_INDEX + 1));
         continue;
     fi
 
@@ -272,10 +351,13 @@ do
         continue;
     fi
 
-    # Common Flags
-    COMMON_ARGS[$COMMON_ARGS_INDEX]=$ARG;
-    COMMON_ARGS_INDEX=$((COMMON_ARGS_INDEX + 1));
+    # Common Flags, for both linker and compiler are thus far unclassified,
+    # so add them to each list to preserve argument ordering
+    COMPILE_ARGS[$COMPILE_ARGS_INDEX]=$ARG;
+    COMPILE_ARGS_INDEX=$((COMPILE_ARGS_INDEX + 1));
 
+    LINK_ARGS[$LINK_ARGS_INDEX]=$ARG;
+    LINK_ARGS_INDEX=$((LINK_ARGS_INDEX + 1));
 done
 
 # ------------------------------------------------------------------------------
@@ -311,11 +393,11 @@ if [[ -n "$SOURCE_ARGS" ]]; then
         COMPILE_ARGS_INDEX=$((COMPILE_ARGS_INDEX + 1));
     fi
 
-    $COMPILER $SYSROOT_INC_PATH ${COMPILE_ARGS[*]} ${COMMON_ARGS[*]} ${SOURCE_ARGS[*]}
+    $COMPILER $SYSROOT_INC_PATH ${COMPILE_ARGS[*]} ${SOURCE_ARGS[*]}
 fi
 
 if [[ $COMPILE_ONLY == "yes" ]]; then
     exit 0
 fi
 
-$LINKER ${OBJECT_FILE_ARGS[*]} ${LINK_ARGS[*]} ${COMMON_ARGS[*]} -z max-page-size=4096 -z common-page-size=4096 -z relro -z now
+$LINKER  ${OBJECT_FILE_ARGS[*]} ${LINK_ARGS[*]} -z max-page-size=4096 -z common-page-size=4096 -z relro -z now
