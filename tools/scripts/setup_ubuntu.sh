@@ -130,8 +130,10 @@ install_g++-5() {
     sudo apt-get install --yes g++-5
     sudo rm /usr/bin/gcc
     sudo rm /usr/bin/g++
+    sudo rm /usr/bin/gcov
     sudo ln -s /usr/bin/gcc-5 /usr/bin/gcc
     sudo ln -s /usr/bin/g++-5 /usr/bin/g++
+    sudo ln -s /usr/bin/gcov-5 /usr/bin/gcov
 }
 
 # ------------------------------------------------------------------------------
