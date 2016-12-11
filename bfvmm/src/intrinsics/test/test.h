@@ -214,7 +214,7 @@ private:
     void test_ia32_vmx_true_procbased_ctls_unconditional_io_exiting();
     void test_ia32_vmx_true_procbased_ctls_use_io_bitmaps();
     void test_ia32_vmx_true_procbased_ctls_monitor_trap_flag();
-    void test_ia32_vmx_true_procbased_ctls_use_msr_bitmaps();
+    void test_ia32_vmx_true_procbased_ctls_use_msr_bitmap();
     void test_ia32_vmx_true_procbased_ctls_monitor_exiting();
     void test_ia32_vmx_true_procbased_ctls_pause_exiting();
     void test_ia32_vmx_true_procbased_ctls_activate_secondary_controls();

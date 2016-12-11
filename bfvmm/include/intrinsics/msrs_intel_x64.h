@@ -1986,11 +1986,11 @@ namespace msrs
             { return (__read_msr(addr) & (mask << 32)) != 0; }
         }
 
-        namespace use_msr_bitmaps
+        namespace use_msr_bitmap
         {
             constexpr const auto mask = 0x0000000010000000UL;
             constexpr const auto from = 28;
-            constexpr const auto name = "use_msr_bitmaps";
+            constexpr const auto name = "use_msr_bitmap";
 
             inline auto get() noexcept
             { return get_bit(__read_msr(addr), from) != 0; }
@@ -2088,8 +2088,8 @@ namespace msrs
                 bfdebug << "    - " << use_io_bitmaps::name << bfendl;
             if (monitor_trap_flag::get())
                 bfdebug << "    - " << monitor_trap_flag::name << bfendl;
-            if (use_msr_bitmaps::get())
-                bfdebug << "    - " << use_msr_bitmaps::name << bfendl;
+            if (use_msr_bitmap::get())
+                bfdebug << "    - " << use_msr_bitmap::name << bfendl;
             if (monitor_exiting::get())
                 bfdebug << "    - " << monitor_exiting::name << bfendl;
             if (pause_exiting::get())
@@ -2134,8 +2134,8 @@ namespace msrs
                 bfdebug << "    - " << use_io_bitmaps::name << bfendl;
             if (monitor_trap_flag::is_allowed0())
                 bfdebug << "    - " << monitor_trap_flag::name << bfendl;
-            if (use_msr_bitmaps::is_allowed0())
-                bfdebug << "    - " << use_msr_bitmaps::name << bfendl;
+            if (use_msr_bitmap::is_allowed0())
+                bfdebug << "    - " << use_msr_bitmap::name << bfendl;
             if (monitor_exiting::is_allowed0())
                 bfdebug << "    - " << monitor_exiting::name << bfendl;
             if (pause_exiting::is_allowed0())
@@ -2180,8 +2180,8 @@ namespace msrs
                 bfdebug << "    - " << use_io_bitmaps::name << bfendl;
             if (monitor_trap_flag::is_allowed1())
                 bfdebug << "    - " << monitor_trap_flag::name << bfendl;
-            if (use_msr_bitmaps::is_allowed1())
-                bfdebug << "    - " << use_msr_bitmaps::name << bfendl;
+            if (use_msr_bitmap::is_allowed1())
+                bfdebug << "    - " << use_msr_bitmap::name << bfendl;
             if (monitor_exiting::is_allowed1())
                 bfdebug << "    - " << monitor_exiting::name << bfendl;
             if (pause_exiting::is_allowed1())

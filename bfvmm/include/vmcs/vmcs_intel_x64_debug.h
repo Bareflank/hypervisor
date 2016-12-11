@@ -865,8 +865,8 @@ namespace debug
         dump_vm_control(primary_processor_based_vm_execution_controls::monitor_trap_flag::name,
                         primary_processor_based_vm_execution_controls::monitor_trap_flag::is_enabled());
 
-        dump_vm_control(primary_processor_based_vm_execution_controls::use_msr_bitmaps::name,
-                        primary_processor_based_vm_execution_controls::use_msr_bitmaps::is_enabled());
+        dump_vm_control(primary_processor_based_vm_execution_controls::use_msr_bitmap::name,
+                        primary_processor_based_vm_execution_controls::use_msr_bitmap::is_enabled());
 
         dump_vm_control(primary_processor_based_vm_execution_controls::monitor_exiting::name,
                         primary_processor_based_vm_execution_controls::monitor_exiting::is_enabled());

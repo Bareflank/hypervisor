@@ -215,7 +215,7 @@ intrinsics_ut::list()
     this->test_ia32_vmx_true_procbased_ctls_unconditional_io_exiting();
     this->test_ia32_vmx_true_procbased_ctls_use_io_bitmaps();
     this->test_ia32_vmx_true_procbased_ctls_monitor_trap_flag();
-    this->test_ia32_vmx_true_procbased_ctls_use_msr_bitmaps();
+    this->test_ia32_vmx_true_procbased_ctls_use_msr_bitmap();
     this->test_ia32_vmx_true_procbased_ctls_monitor_exiting();
     this->test_ia32_vmx_true_procbased_ctls_pause_exiting();
     this->test_ia32_vmx_true_procbased_ctls_activate_secondary_controls();

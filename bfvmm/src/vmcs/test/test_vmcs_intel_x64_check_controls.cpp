@@ -44,7 +44,7 @@ setup_check_control_vm_execution_control_fields_all_paths(std::vector<struct con
         g_msrs[ia32_vmx_procbased_ctls2::addr] = 0xffffffff00000000UL;
         cr3_target_count::set(3U);
         primary_processor_based_vm_execution_controls::use_io_bitmaps::disable();
-        primary_processor_based_vm_execution_controls::use_msr_bitmaps::disable();
+        primary_processor_based_vm_execution_controls::use_msr_bitmap::disable();
         primary_processor_based_vm_execution_controls::use_tpr_shadow::disable();
         secondary_processor_based_vm_execution_controls::virtualize_x2apic_mode::disable();
         secondary_processor_based_vm_execution_controls::apic_register_virtualization::disable();
@@ -256,16 +256,16 @@ setup_check_control_msr_bitmap_address_bits_paths(std::vector<struct control_flo
 {
     path.setup = [&]
     {
-        proc_ctl_allow0(ia32_vmx_true_procbased_ctls::use_msr_bitmaps::mask);
-        primary_processor_based_vm_execution_controls::use_msr_bitmaps::disable();
+        proc_ctl_allow0(ia32_vmx_true_procbased_ctls::use_msr_bitmap::mask);
+        primary_processor_based_vm_execution_controls::use_msr_bitmap::disable();
     };
     path.throws_exception = false;
     cfg.push_back(path);
 
     path.setup = [&]
     {
-        proc_ctl_allow1(ia32_vmx_true_procbased_ctls::use_msr_bitmaps::mask);
-        primary_processor_based_vm_execution_controls::use_msr_bitmaps::enable();
+        proc_ctl_allow1(ia32_vmx_true_procbased_ctls::use_msr_bitmap::mask);
+        primary_processor_based_vm_execution_controls::use_msr_bitmap::enable();
         address_of_msr_bitmaps::set(0x1U);
     };
     path.throws_exception = true;

@@ -496,7 +496,7 @@ vmcs_ut::list_32bit_control_fields()
     this->test_vmcs_primary_processor_based_vm_execution_controls_nmi_window_exiting();
     this->test_vmcs_primary_processor_based_vm_execution_controls_use_io_bitmaps();
     this->test_vmcs_primary_processor_based_vm_execution_controls_monitor_trap_flag();
-    this->test_vmcs_primary_processor_based_vm_execution_controls_use_msr_bitmaps();
+    this->test_vmcs_primary_processor_based_vm_execution_controls_use_msr_bitmap();
     this->test_vmcs_primary_processor_based_vm_execution_controls_monitor_exiting();
     this->test_vmcs_primary_processor_based_vm_execution_controls_pause_exiting();
     this->test_vmcs_primary_processor_based_vm_execution_controls_activate_secondary_controls();
