@@ -74,7 +74,7 @@ public:
     /// will parse through the different levels making sure the virtual
     /// address provided is valid.
     ///
-    /// @expects virt_addr != 0;
+    /// @expects virt_addr != 0
     /// @ensures none
     ///
     /// @param virt_addr the virtual address to the page to add
@@ -91,7 +91,7 @@ public:
     /// occurs side by side with addresses that are similar (page tables will
     /// be needlessly removed)
     ///
-    /// @expects virt_addr != 0;
+    /// @expects virt_addr != 0
     /// @ensures none
     ///
     /// @param virt_addr the virtual address of the page to remove
@@ -100,7 +100,7 @@ public:
 
     /// CR3 Shadow
     ///
-    /// @expects virt_addr != 0;
+    /// @expects none
     /// @ensures none
     ///
     /// @return returns the CR3 shadow
