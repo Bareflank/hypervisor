@@ -25,7 +25,7 @@
 #include <intrinsics/x64.h>
 using namespace x64;
 
-page_table_entry_x64::integer_pointer g_invalid_pte = 0;
+static page_table_entry_x64::integer_pointer g_invalid_pte = 0;
 
 page_table_entry_x64::page_table_entry_x64() noexcept :
     m_pte(&g_invalid_pte)
