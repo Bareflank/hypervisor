@@ -152,7 +152,7 @@ namespace address_of_msr_bitmaps
     constexpr const auto name = "address_of_msr_bitmaps";
 
     inline bool exists() noexcept
-    { return msrs::ia32_vmx_true_procbased_ctls::use_msr_bitmaps::is_allowed1(); }
+    { return msrs::ia32_vmx_true_procbased_ctls::use_msr_bitmap::is_allowed1(); }
 
     inline auto get()
     { return get_vmcs_field(addr, name, exists()); }

@@ -562,7 +562,7 @@ private:
     void test_vmcs_primary_processor_based_vm_execution_controls_unconditional_io_exiting();
     void test_vmcs_primary_processor_based_vm_execution_controls_use_io_bitmaps();
     void test_vmcs_primary_processor_based_vm_execution_controls_monitor_trap_flag();
-    void test_vmcs_primary_processor_based_vm_execution_controls_use_msr_bitmaps();
+    void test_vmcs_primary_processor_based_vm_execution_controls_use_msr_bitmap();
     void test_vmcs_primary_processor_based_vm_execution_controls_monitor_exiting();
     void test_vmcs_primary_processor_based_vm_execution_controls_pause_exiting();
     void test_vmcs_primary_processor_based_vm_execution_controls_activate_secondary_controls();

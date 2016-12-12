@@ -767,11 +767,11 @@ namespace primary_processor_based_vm_execution_controls
         { set_vm_control_if_allowed(false, msr_addr, addr, name, mask, verbose, exists()); }
     }
 
-    namespace use_msr_bitmaps
+    namespace use_msr_bitmap
     {
         constexpr const auto mask = 0x0000000010000000UL;
         constexpr const auto from = 28;
-        constexpr const auto name = "use_msr_bitmaps";
+        constexpr const auto name = "use_msr_bitmap";
 
         inline auto is_enabled()
         { return is_bit_set(get_vmcs_field(addr, name, exists()), from); }

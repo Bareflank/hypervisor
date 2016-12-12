@@ -1708,7 +1708,7 @@ vmcs_ut::test_vmcs_address_of_io_bitmap_b()
 void
 vmcs_ut::test_vmcs_address_of_msr_bitmaps()
 {
-    proc_ctl_allow1(msrs::ia32_vmx_true_procbased_ctls::use_msr_bitmaps::mask);
+    proc_ctl_allow1(msrs::ia32_vmx_true_procbased_ctls::use_msr_bitmap::mask);
     this->expect_true(vmcs::address_of_msr_bitmaps::exists());
 
     vmcs::address_of_msr_bitmaps::set(1UL);
@@ -7494,9 +7494,9 @@ vmcs_ut::test_vmcs_primary_processor_based_vm_execution_controls_monitor_trap_fl
 }
 
 void
-vmcs_ut::test_vmcs_primary_processor_based_vm_execution_controls_use_msr_bitmaps()
+vmcs_ut::test_vmcs_primary_processor_based_vm_execution_controls_use_msr_bitmap()
 {
-    using namespace vmcs::primary_processor_based_vm_execution_controls::use_msr_bitmaps;
+    using namespace vmcs::primary_processor_based_vm_execution_controls::use_msr_bitmap;
 
     g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = 0xffffffff00000000UL;
 

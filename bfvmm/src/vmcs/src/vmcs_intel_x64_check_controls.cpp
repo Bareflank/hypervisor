@@ -132,7 +132,7 @@ check::control_io_bitmap_address_bits()
 void
 check::control_msr_bitmap_address_bits()
 {
-    if (primary_processor_based_vm_execution_controls::use_msr_bitmaps::is_disabled())
+    if (primary_processor_based_vm_execution_controls::use_msr_bitmap::is_disabled())
         return;
 
     auto addr = vmcs::address_of_msr_bitmaps::get();
