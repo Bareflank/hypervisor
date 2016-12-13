@@ -216,13 +216,13 @@ memory_manager_ut::test_page_table_entry_x64_phys_addr()
 
     pte->set_present(true);
     pte->set_nx(true);
-    pte->set_phys_addr(0x000ABCDEF1234000);
+    pte->set_phys_addr(0x0000ABCDEF123000);
     this->expect_true(pte->present());
     this->expect_true(pte->nx());
-    this->expect_true(pte->phys_addr() == 0x000ABCDEF1234000);
+    this->expect_true(pte->phys_addr() == 0x0000ABCDEF123000);
 
-    pte->set_phys_addr(0x000ABCDEF1234010);
-    this->expect_true(pte->phys_addr() == 0x000ABCDEF1234000);
+    pte->set_phys_addr(0x0000ABCDEF123010);
+    this->expect_true(pte->phys_addr() == 0x0000ABCDEF123000);
     this->expect_false(pte->pcd());
 
     pte->set_present(true);

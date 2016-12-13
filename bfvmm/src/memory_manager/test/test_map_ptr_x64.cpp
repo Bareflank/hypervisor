@@ -29,7 +29,7 @@
 #include <intrinsics/x64.h>
 
 constexpr const auto valid_virt = 0x0000111100000000UL;
-constexpr const auto valid_phys = 0x1111000000000000UL;
+constexpr const auto valid_phys = 0x0000222200000000UL;
 constexpr const auto invalid_virt = 0x0U;
 constexpr const auto invalid_phys = 0x0U;
 constexpr const auto phys_offset = 0x10U;
@@ -320,8 +320,8 @@ memory_manager_ut::test_unique_map_ptr_x64_virt_cr3_constructor_success()
     auto &&virt1 = valid_virt + (0 * x64::page_size);
     auto &&virt2 = valid_virt + (1 * x64::page_size);
 
-    auto &&phys1 = 0x0001000000000000UL;
-    auto &&phys2 = 0x0001000000000000UL;
+    auto &&phys1 = 0x0000222200000000UL;
+    auto &&phys2 = 0x0000222200000000UL;
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -356,8 +356,8 @@ memory_manager_ut::test_unique_map_ptr_x64_virt_cr3_constructor_success_large_pa
     auto &&virt1 = valid_virt + (0 * x64::page_size);
     auto &&virt2 = valid_virt + (1 * x64::page_size);
 
-    auto &&phys1 = 0x0001001100000000UL;
-    auto &&phys2 = 0x0001001100001000UL;
+    auto &&phys1 = 0x0000221100000000UL;
+    auto &&phys2 = 0x0000221100001000UL;
 
     g_pte_large_page = true;
     auto ___ = gsl::finally([&] { g_pte_large_page = false; });

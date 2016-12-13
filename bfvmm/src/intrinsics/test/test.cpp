@@ -181,7 +181,7 @@ intrinsics_ut::list()
     this->test_ia32_vmx_ept_vpid_cap_memory_type_uncacheable_supported();
     this->test_ia32_vmx_ept_vpid_cap_memory_type_write_back_supported();
     this->test_ia32_vmx_ept_vpid_cap_pde_2mb_support();
-    this->test_ia32_vmx_ept_vpid_cap_pdpte_1mb_support();
+    this->test_ia32_vmx_ept_vpid_cap_pdpte_1gb_support();
     this->test_ia32_vmx_ept_vpid_cap_invept_support();
     this->test_ia32_vmx_ept_vpid_cap_accessed_dirty_support();
     this->test_ia32_vmx_ept_vpid_cap_invept_single_context_support();

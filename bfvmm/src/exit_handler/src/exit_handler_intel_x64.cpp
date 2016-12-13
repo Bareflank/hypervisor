@@ -399,6 +399,10 @@ exit_handler_intel_x64::unimplemented_handler() noexcept
             << view_as_pointer(vmcs::vm_exit_instruction_length::get()) << bfendl;
     bferror << "- instruction information: "
             << view_as_pointer(vmcs::vm_exit_instruction_information::get()) << bfendl;
+    bferror << "- guest linear address: "
+            << view_as_pointer(vmcs::guest_linear_address::get()) << bfendl;
+    bferror << "- guest physical address: "
+            << view_as_pointer(vmcs::guest_physical_address::get()) << bfendl;
 
     if (vmcs::exit_reason::vm_entry_failure::is_enabled())
     {

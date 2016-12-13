@@ -117,11 +117,11 @@ page_table_entry_x64::set_global(bool enabled) noexcept
 
 page_table_entry_x64::integer_pointer
 page_table_entry_x64::phys_addr() const noexcept
-{ return get_bits(*m_pte, 0x000FFFFFFFFFF000UL); }
+{ return get_bits(*m_pte, 0x0000FFFFFFFFF000UL); }
 
 void
 page_table_entry_x64::set_phys_addr(integer_pointer addr) noexcept
-{ *m_pte = set_bits(*m_pte, 0x000FFFFFFFFFF000UL, addr); }
+{ *m_pte = set_bits(*m_pte, 0x0000FFFFFFFFF000UL, addr); }
 
 bool
 page_table_entry_x64::nx() const noexcept
