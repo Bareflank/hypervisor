@@ -110,27 +110,19 @@ page_table_x64::add_page_x64(integer_pointer virt_addr, integer_pointer bits)
 void
 page_table_x64::remove_page_x64(integer_pointer virt_addr, integer_pointer bits)
 {
-    auto &&index = page_table::index(virt_addr, bits);
-
-    if (bits > page_table::pt::from)
-    {
-        auto &&iter = bfn::find(m_ptes, index);
-        if (!*iter)
-            throw std::runtime_error("remove_page_x64: invalid virtual address");
-
-        if (auto pte = dynamic_cast<page_table_x64 *>(iter->get()))
-        {
-            pte->remove_page_x64(virt_addr, bits - page_table::pt::size);
-            if (pte->empty())
-                *iter = remove_pte<page_table_entry_x64>();
-
-            return;
-        }
-    }
-
-    auto &&iter = bfn::find(m_ptes, index);
+    auto &&iter = bfn::find(m_ptes, page_table::index(virt_addr, bits));
     if (!*iter)
         throw std::runtime_error("remove_page_x64: invalid virtual address");
 
-    *iter = remove_pte<page_table_entry_x64>();
+    if (auto pte = dynamic_cast<page_table_x64 *>(iter->get()))
+    {
+        pte->remove_page_x64(virt_addr, bits - page_table::pt::size);
+
+        if (pte->empty())
+            *iter = remove_pte<page_table_entry_x64>();
+    }
+    else
+    {
+        *iter = remove_pte<page_table_entry_x64>();
+    }
 }

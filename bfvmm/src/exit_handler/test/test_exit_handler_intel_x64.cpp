@@ -26,6 +26,7 @@
 #include <vmcs/vmcs_intel_x64_32bit_guest_state_fields.h>
 #include <vmcs/vmcs_intel_x64_64bit_guest_state_fields.h>
 #include <vmcs/vmcs_intel_x64_32bit_read_only_data_fields.h>
+#include <vmcs/vmcs_intel_x64_64bit_read_only_data_fields.h>
 #include <vmcs/vmcs_intel_x64_natural_width_guest_state_fields.h>
 #include <vmcs/vmcs_intel_x64_natural_width_read_only_data_fields.h>
 
@@ -72,6 +73,12 @@ __vmread(uint64_t field, uint64_t *val) noexcept
             break;
         case vmcs::vm_exit_instruction_information::addr:
             *val = g_exit_instruction_information;
+            break;
+        case vmcs::guest_linear_address::addr:
+            *val = 0x0;
+            break;
+        case vmcs::guest_physical_address::addr:
+            *val = 0x0;
             break;
         default:
             g_field = field;
@@ -124,7 +131,12 @@ setup_vmcs_unhandled(MockRepository &mocks, vmcs::value_type reason)
     mocks.NeverCall(vmcs, vmcs_intel_x64::clear);
     mocks.ExpectCall(vmcs, vmcs_intel_x64::resume);
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_entry_ctls::addr] = 0xFFFFFFFFFFFFFFFFUL;
+    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = 0xFFFFFFFF00000000UL;
+    g_msrs[intel_x64::msrs::ia32_vmx_true_pinbased_ctls::addr] = 0xFFFFFFFF00000000UL;
+    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = 0xFFFFFFFF00000000UL;
+    g_msrs[intel_x64::msrs::ia32_vmx_true_exit_ctls::addr] = 0xFFFFFFFF00000000UL;
+    g_msrs[intel_x64::msrs::ia32_vmx_true_entry_ctls::addr] = 0xFFFFFFFF00000000UL;
+
     g_exit_reason = reason;
     return vmcs;
 }

@@ -256,6 +256,7 @@ private:
     void test_vmcs_ept_pointer_memory_type();
     void test_vmcs_ept_pointer_page_walk_length_minus_one();
     void test_vmcs_ept_pointer_accessed_and_dirty_flags();
+    void test_vmcs_ept_pointer_phys_addr();
     void test_vmcs_ept_pointer_reserved();
     void test_vmcs_eoi_exit_bitmap_0();
     void test_vmcs_eoi_exit_bitmap_1();

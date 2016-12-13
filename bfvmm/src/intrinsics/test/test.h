@@ -180,7 +180,7 @@ private:
     void test_ia32_vmx_ept_vpid_cap_memory_type_uncacheable_supported();
     void test_ia32_vmx_ept_vpid_cap_memory_type_write_back_supported();
     void test_ia32_vmx_ept_vpid_cap_pde_2mb_support();
-    void test_ia32_vmx_ept_vpid_cap_pdpte_1mb_support();
+    void test_ia32_vmx_ept_vpid_cap_pdpte_1gb_support();
     void test_ia32_vmx_ept_vpid_cap_invept_support();
     void test_ia32_vmx_ept_vpid_cap_accessed_dirty_support();
     void test_ia32_vmx_ept_vpid_cap_invept_single_context_support();

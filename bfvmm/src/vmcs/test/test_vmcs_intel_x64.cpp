@@ -36,7 +36,7 @@
 #include <vmcs/vmcs_intel_x64_natural_width_control_fields.h>
 #include <vmcs/vmcs_intel_x64_natural_width_read_only_data_fields.h>
 #include <vmcs/vmcs_intel_x64_natural_width_host_state_fields.h>
-#include <vmcs/vmcs_intel_x64_64bit_read_only_data_field.h>
+#include <vmcs/vmcs_intel_x64_64bit_read_only_data_fields.h>
 #include <vmcs/vmcs_intel_x64_64bit_guest_state_fields.h>
 #include <vmcs/vmcs_intel_x64_64bit_control_fields.h>
 #include <vmcs/vmcs_intel_x64_64bit_host_state_fields.h>
@@ -1990,6 +1990,19 @@ vmcs_ut::test_vmcs_ept_pointer_accessed_and_dirty_flags()
 
     vmcs::ept_pointer::accessed_and_dirty_flags::disable_if_exists();
     this->expect_true(vmcs::ept_pointer::accessed_and_dirty_flags::is_disabled_if_exists());
+}
+
+void
+vmcs_ut::test_vmcs_ept_pointer_phys_addr()
+{
+    proc_ctl_allow1(msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask);
+    proc_ctl2_allow1(msrs::ia32_vmx_procbased_ctls2::enable_ept::mask);
+
+    vmcs::ept_pointer::phys_addr::set(0x0000ABCDEF123000UL);
+    this->expect_true(vmcs::ept_pointer::phys_addr::get() == 0x0000ABCDEF123000UL);
+
+    vmcs::ept_pointer::phys_addr::set_if_exists(0x0U);
+    this->expect_true(vmcs::ept_pointer::phys_addr::get_if_exists() == 0x0U);
 }
 
 void

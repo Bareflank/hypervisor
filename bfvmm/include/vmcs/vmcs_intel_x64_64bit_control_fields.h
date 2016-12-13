@@ -580,6 +580,33 @@ namespace ept_pointer
         }
     }
 
+    namespace phys_addr
+    {
+        constexpr const auto mask = 0x0000FFFFFFFFF000UL;
+        constexpr const auto from = 0;
+        constexpr const auto name = "phys_addr";
+
+        inline auto get()
+        { return get_bits(get_vmcs_field(addr, name, exists()), mask) >> from; }
+
+        inline auto get_if_exists(bool verbose = false) noexcept
+        { return get_bits(get_vmcs_field_if_exists(addr, name, verbose, exists()), mask) >> from; }
+
+        template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
+        void set(T val)
+        {
+            auto&& field = get_vmcs_field(addr, name, exists());
+            set_vmcs_field(set_bits(field, mask, (val << from)), addr, name, exists());
+        }
+
+        template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
+        void set_if_exists(T val, bool verbose = false) noexcept
+        {
+            auto&& field = get_vmcs_field_if_exists(addr, name, verbose, exists());
+            set_vmcs_field_if_exists(set_bits(field, mask, (val << from)), addr, name, verbose, exists());
+        }
+    }
+
     namespace reserved
     {
         constexpr const auto mask = 0xFFFF000000000F80UL;

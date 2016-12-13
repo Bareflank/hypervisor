@@ -331,6 +331,7 @@ vmcs_ut::list_64bit_control_fields()
     this->test_vmcs_ept_pointer_memory_type();
     this->test_vmcs_ept_pointer_page_walk_length_minus_one();
     this->test_vmcs_ept_pointer_accessed_and_dirty_flags();
+    this->test_vmcs_ept_pointer_phys_addr();
     this->test_vmcs_ept_pointer_reserved();
     this->test_vmcs_eoi_exit_bitmap_0();
     this->test_vmcs_eoi_exit_bitmap_1();

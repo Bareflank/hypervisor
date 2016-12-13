@@ -27,7 +27,7 @@
 #include <vmcs/vmcs_intel_x64_16bit_guest_state_fields.h>
 #include <vmcs/vmcs_intel_x64_16bit_host_state_fields.h>
 #include <vmcs/vmcs_intel_x64_64bit_control_fields.h>
-#include <vmcs/vmcs_intel_x64_64bit_read_only_data_field.h>
+#include <vmcs/vmcs_intel_x64_64bit_read_only_data_fields.h>
 #include <vmcs/vmcs_intel_x64_64bit_guest_state_fields.h>
 #include <vmcs/vmcs_intel_x64_64bit_host_state_fields.h>
 #include <vmcs/vmcs_intel_x64_32bit_control_fields.h>

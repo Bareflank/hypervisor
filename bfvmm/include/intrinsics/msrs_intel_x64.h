@@ -1424,11 +1424,11 @@ namespace msrs
             { return get_bit(__read_msr(addr), from) != 0; }
         }
 
-        namespace pdpte_1mb_support
+        namespace pdpte_1gb_support
         {
             constexpr const auto mask = 0x0000000000020000UL;
             constexpr const auto from = 17;
-            constexpr const auto name = "pdpte_1mb_support";
+            constexpr const auto name = "pdpte_1gb_support";
 
             inline auto get() noexcept
             { return get_bit(__read_msr(addr), from) != 0; }
@@ -1538,8 +1538,8 @@ namespace msrs
                 bfdebug << "    - " << memory_type_write_back_supported::name << bfendl;
             if (pde_2mb_support::get())
                 bfdebug << "    - " << pde_2mb_support::name << bfendl;
-            if (pdpte_1mb_support::get())
-                bfdebug << "    - " << pdpte_1mb_support::name << bfendl;
+            if (pdpte_1gb_support::get())
+                bfdebug << "    - " << pdpte_1gb_support::name << bfendl;
             if (invept_support::get())
                 bfdebug << "    - " << invept_support::name << bfendl;
             if (accessed_dirty_support::get())
