@@ -100,6 +100,7 @@ private:
     void test_page_table_entry_x64_nx();
     void test_page_table_entry_x64_phys_addr();
     void test_page_table_entry_x64_pat_index();
+    void test_page_table_entry_x64_clear();
 
     void test_unique_map_ptr_x64_default_constructor();
     void test_unique_map_ptr_x64_phys_constructor_invalid_args();

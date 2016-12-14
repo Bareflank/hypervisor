@@ -33,6 +33,8 @@ extern "C" bool __vmptrst(void *ptr) noexcept;
 extern "C" bool __vmread(uint64_t field, uint64_t *val) noexcept;
 extern "C" bool __vmwrite(uint64_t field, uint64_t val) noexcept;
 extern "C" bool __vmlaunch(void) noexcept;
+extern "C" void __invept(uint64_t type, void *ptr) noexcept;
+extern "C" void __invvipd(uint64_t type, void *ptr) noexcept;
 
 // *INDENT-OFF*
 
@@ -40,6 +42,10 @@ namespace intel_x64
 {
 namespace vmx
 {
+    using vpid_type = uint64_t;
+    using eptp_type = uint64_t;
+    using integer_pointer = uintptr_t;
+
     inline void on(gsl::not_null<void *> ptr)
     {
         if (!__vmxon(ptr))
@@ -50,6 +56,42 @@ namespace vmx
     {
         if (!__vmxoff())
             throw std::runtime_error("vmx::off failed");
+    }
+
+    inline void invept_single_context(eptp_type eptp)
+    {
+        uint64_t descriptor[2] = { eptp, 0 };
+        __invept(0, static_cast<void *>(descriptor));
+    }
+
+    inline void invept_global()
+    {
+        uint64_t descriptor[2] = { 0, 0 };
+        __invept(1, static_cast<void *>(descriptor));
+    }
+
+    inline void invvipd_individual_address(vpid_type vpid, integer_pointer addr)
+    {
+        uint64_t descriptor[2] = { vpid, addr };
+        __invvipd(0, static_cast<void *>(descriptor));
+    }
+
+    inline void invvipd_single_context(vpid_type vpid)
+    {
+        uint64_t descriptor[2] = { vpid, 0 };
+        __invvipd(1, static_cast<void *>(descriptor));
+    }
+
+    inline void invvipd_all_contexts()
+    {
+        uint64_t descriptor[2] = { 0, 0 };
+        __invvipd(2, static_cast<void *>(descriptor));
+    }
+
+    inline void invvipd_single_context_global(vpid_type vpid)
+    {
+        uint64_t descriptor[2] = { vpid, 0 };
+        __invvipd(3, static_cast<void *>(descriptor));
     }
 }
 

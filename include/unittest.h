@@ -643,7 +643,7 @@ public:
         catch (std::exception &e)
         {
             state.caught = true;
-            state.caught_type = std::string("expected not to catch ") + typeid(e).name();
+            state.caught_type = std::string("expected not to catch ") + typeid(e).name() + ": "_s + e.what();
         }
         catch (...)
         {

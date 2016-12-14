@@ -35,6 +35,7 @@ page_table_x64::page_table_x64(pointer pte) :
     m_pt_owner = std::make_unique<integer_pointer[]>(page_table::num_entries);
     m_pt = gsl::span<integer_pointer>(m_pt_owner, page_table::num_entries);
 
+    this->clear();
     this->set_phys_addr(g_mm->virtptr_to_physint(m_pt_owner.get()));
     this->set_present(true);
     this->set_rw(true);

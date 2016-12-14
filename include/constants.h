@@ -102,7 +102,6 @@
 #define MAX_PAGE_SHIFT (12ULL)
 #endif
 
-
 /*
  * Max Page Size
  *
@@ -137,10 +136,10 @@
  * This defines the internal memory that the hypervisor allocates to use
  * for allocating pages.
  *
- * Note: defined in bytes (defaults to 1MB)
+ * Note: defined in bytes (defaults to 32MB)
  */
 #ifndef MAX_PAGE_POOL
-#define MAX_PAGE_POOL (256ULL * MAX_PAGE_SIZE)
+#define MAX_PAGE_POOL (32 * 256ULL * MAX_PAGE_SIZE)
 #endif
 
 /*

@@ -321,3 +321,13 @@ memory_manager_ut::test_page_table_entry_x64_pat_index()
 
     this->expect_exception([&] { pte->set_pat_index(10); }, ""_ut_ffe);
 }
+
+void
+memory_manager_ut::test_page_table_entry_x64_clear()
+{
+    pte_type entry = 0xFFFFFFFFFFFFFFFF;
+    auto &&pte = std::make_unique<page_table_entry_x64>(&entry);
+
+    pte->clear();
+    this->expect_true(entry == 0);
+}

@@ -342,6 +342,13 @@ public:
     ///
     void set_pat_index(pat_index_type index);
 
+    /// Clear PTE
+    ///
+    /// @expects none
+    /// @ensures none
+    ///
+    void clear() noexcept;
+
 private:
 
     pointer m_pte;

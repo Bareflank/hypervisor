@@ -248,6 +248,89 @@ auto make_unique_map_x64(typename unique_map_ptr_x64<T>::integer_pointer virt,
 #endif
 }
 
+/// Virt to PTE with CR3
+///
+/// Converts a virtual address to a page table entry given the
+/// CR3 to locate the physical address from. Note that this function
+/// has to map / unmap the page table tree as it traverses the tree
+/// to locate the physical address. As a result, this is an expensive
+/// operation and should not be used in time sensitive operations.
+///
+/// @note the provided virtual address should be present prior to running
+///     this function.
+///
+/// @expects virt != 0
+/// @expects cr3 != 0
+/// @ensures none
+///
+/// @param virt virtual address to convert
+/// @param cr3 the CR3 to lookup the physical address from. The virtual address
+///     should originate from this CR3, otherwise the resulting physical address
+///     could be incorrect, or an exception could be thrown.
+/// @return returns a std::pair contains the PTE, and page level the PTE
+///     was located from (in bits)
+///
+std::pair<page_table_entry_x64, decltype(x64::page_table::pml4::from)>
+virt_to_pte_with_cr3(uintptr_t virt, uintptr_t cr3);
+
+/// Virt to Phys with CR3
+///
+/// Converts a virtual address to a physical address given the
+/// CR3 to locate the physical address from. Note that this function
+/// has to map / unmap the page table tree as it traverses the tree
+/// to locate the physical address. As a result, this is an expensive
+/// operation and should not be used in time sensitive operations.
+///
+/// @note the provided virtual address should be present prior to running
+///     this function.
+///
+/// @expects virt != 0
+/// @expects cr3 != 0
+/// @ensures none
+///
+/// @param virt virtual address to convert
+/// @param cr3 the CR3 to lookup the physical address from. The virtual address
+///     should originate from this CR3, otherwise the resulting physical address
+///     could be incorrect, or an exception could be thrown.
+/// @return returns the physical address mapped to the provided virtual address
+///     located in the provided CR3
+///
+uintptr_t virt_to_phys_with_cr3(uintptr_t virt, uintptr_t cr3);
+
+/// Lower
+///
+/// @param ptr the pointer to mask
+/// @return the lower 12 bits of ptr
+///
+inline auto lower(uintptr_t ptr) noexcept
+{ return ptr & (x64::page_size - 1); }
+
+/// Lower
+///
+/// @param ptr the pointer to mask
+/// @param from the number of bits to mask
+/// @return the lower "from" bits of ptr
+///
+inline auto lower(uintptr_t ptr, uintptr_t from) noexcept
+{ return ptr & ((0x1UL << from) - 1); }
+
+/// Upper
+///
+/// @param ptr the pointer to mask
+/// @return the upper 12 bits of ptr
+///
+inline auto upper(uintptr_t ptr) noexcept
+{ return ptr & ~(x64::page_size - 1); }
+
+/// Upper
+///
+/// @param ptr the pointer to mask
+/// @param from the number of bits to mask
+/// @return the upper "from" bits of ptr
+///
+inline auto upper(uintptr_t ptr, uintptr_t from) noexcept
+{ return ptr & ~((0x1UL << from) - 1); }
+
 /// Unique Map
 ///
 /// Like std::unique_ptr, unique_map_ptr_x64 is a smart map that owns and
@@ -801,44 +884,6 @@ private:
         }
     }
 
-    std::pair<page_table_entry_x64, decltype(x64::page_table::pml4::from)>
-    virt_to_pte_with_cr3(integer_pointer virt, integer_pointer cr3)
-    {
-        auto phys = cr3;
-        auto from = x64::page_table::pml4::from;
-
-        auto &&gpte = page_table_entry_x64{};
-
-        for (; from >= x64::page_table::pt::from; from -= x64::page_table::pt::size)
-        {
-            auto &&map = bfn::make_unique_map_x64<memory_manager_x64::integer_pointer>(phys);
-            auto &&map_view = gsl::make_span(map.get(), x64::page_table::num_entries);
-
-            gpte = page_table_entry_x64{&map_view.at(x64::page_table::index(virt, from))};
-            phys = gpte.phys_addr();
-
-            expects(phys != 0);
-            expects(gpte.present());
-
-            if ((from <= x64::page_table::pt::from) || (gpte.ps() == true))
-                break;
-        }
-
-        return {std::move(gpte), from};
-    }
-
-    auto lower(integer_pointer ptr) const noexcept
-    { return ptr & (x64::page_size - 1); }
-
-    auto lower(integer_pointer ptr, integer_pointer from) const noexcept
-    { return ptr & ((0x1UL << from) - 1); }
-
-    auto upper(integer_pointer ptr) const noexcept
-    { return ptr & ~(x64::page_size - 1); }
-
-    auto upper(integer_pointer ptr, integer_pointer from) const noexcept
-    { return ptr & ~((0x1UL << from) - 1); }
-
 private:
 
     integer_pointer m_virt;
@@ -893,6 +938,43 @@ bool operator!=(const unique_map_ptr_x64<T> &x, std::nullptr_t dontcare) noexcep
 template <class T>
 bool operator!=(std::nullptr_t dontcare, const unique_map_ptr_x64<T> &y) noexcept
 { (void) dontcare; return y; }
+
+inline std::pair<page_table_entry_x64, decltype(x64::page_table::pml4::from)>
+virt_to_pte_with_cr3(uintptr_t virt, uintptr_t cr3)
+{
+    expects(virt != 0);
+    expects(cr3 != 0);
+
+    auto phys = cr3;
+    auto from = x64::page_table::pml4::from;
+
+    auto &&gpte = page_table_entry_x64{};
+
+    for (; from >= x64::page_table::pt::from; from -= x64::page_table::pt::size)
+    {
+        auto &&map = bfn::make_unique_map_x64<uintptr_t>(phys);
+        auto &&map_view = gsl::make_span(map.get(), x64::page_table::num_entries);
+
+        gpte = page_table_entry_x64{&map_view.at(x64::page_table::index(virt, from))};
+        phys = gpte.phys_addr();
+
+        expects(phys != 0);
+        expects(gpte.present());
+
+        if ((from <= x64::page_table::pt::from) || (gpte.ps() == true))
+            break;
+    }
+
+    return {std::move(gpte), from};
+}
+
+inline uintptr_t virt_to_phys_with_cr3(uintptr_t virt, uintptr_t cr3)
+{
+    auto &&pair = virt_to_pte_with_cr3(virt, cr3);
+    auto &&gpte = std::get<0>(pair);
+    auto &&from = std::get<1>(pair);
+    return upper(gpte.phys_addr(), from) | lower(virt, from);
+}
 
 }
 
