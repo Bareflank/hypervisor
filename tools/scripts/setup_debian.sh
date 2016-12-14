@@ -78,7 +78,7 @@ prepare_docker() {
 # Setup System
 # ------------------------------------------------------------------------------
 
-case $( grep ^VERSION_ID= /etc/os-release | cut -d'=' -f 2 | tr -d '"' ) in
+case $(lsb_release -sr) in
 testing)
     install_apt_tools
     add_docker_repositories
