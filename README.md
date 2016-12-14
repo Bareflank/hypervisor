@@ -231,6 +231,7 @@ functionality, we have provided a couple of examples:
 
 [Enable VPID](https://github.com/Bareflank/hypervisor_example_vpid) <br>
 [CPUID Count](https://github.com/Bareflank/hypervisor_example_cpuidcount) <br>
+[Extended APIs EPT Hook](https://github.com/Bareflank/extended_apis_example_hook) <br>
 
 ## Roadmap
 
