@@ -35,7 +35,6 @@ driver_entry_ut::test_common_vmcall_invalid_args()
 
     this->expect_true(common_vmcall(nullptr, 0) == BF_ERROR_INVALID_ARG);
     this->expect_true(common_vmcall(&regs, 10) == BF_ERROR_INVALID_ARG);
-    this->expect_true(common_vmcall(&regs, 0xFFFFFFFFFFFFFFFF) == BF_ERROR_INVALID_ARG);
 }
 
 void
@@ -74,6 +73,7 @@ driver_entry_ut::test_common_vmcall_success()
     this->expect_true(common_start_vmm() == BF_SUCCESS);
 
     this->expect_true(common_vmcall(&regs, 0) == BF_SUCCESS);
+    this->expect_true(common_vmcall(&regs, 0xFFFFFFFFFFFFFFFF) == BF_SUCCESS);
 
     this->expect_true(common_stop_vmm() == BF_SUCCESS);
     this->expect_true(common_unload_vmm() == BF_SUCCESS);
@@ -93,6 +93,7 @@ driver_entry_ut::test_common_vmcall_success_event()
     this->expect_true(common_start_vmm() == BF_SUCCESS);
 
     this->expect_true(common_vmcall(&regs, 0) == BF_SUCCESS);
+    this->expect_true(common_vmcall(&regs, 0xFFFFFFFFFFFFFFFF) == BF_SUCCESS);
 
     this->expect_true(common_stop_vmm() == BF_SUCCESS);
     this->expect_true(common_unload_vmm() == BF_SUCCESS);

@@ -161,6 +161,10 @@ if ls src_*/ 1> /dev/null 2>&1; then
         run_clang_tidy "mode*,-clang-analyzer*"
         popd > /dev/null
     done
+
+    if [[ $SRC_EXTENSION == "true" ]]; then
+        exit 0
+    fi
 fi
 
 #
@@ -179,6 +183,10 @@ if ls hypervisor_*/ 1> /dev/null 2>&1; then
         run_clang_tidy "mode*,-clang-analyzer*"
         popd > /dev/null
     done
+
+    if [[ $HYPERVISOR_EXTENSION == "true" ]]; then
+        exit 0
+    fi
 fi
 
 #
@@ -195,6 +203,10 @@ if [[ -d hyperkernel ]]; then
     run_clang_tidy "read*,-clang-analyzer*,-readability-braces-around-statements"
     run_clang_tidy "mode*,-clang-analyzer*"
     popd > /dev/null
+
+    if [[ $HYPERKERNEL_EXTENSION == "true" ]]; then
+        exit 0
+    fi
 fi
 
 #
@@ -211,6 +223,10 @@ if [[ -d extended_apis ]]; then
     run_clang_tidy "read*,-clang-analyzer*,-readability-braces-around-statements"
     run_clang_tidy "mode*,-clang-analyzer*"
     popd > /dev/null
+
+    if [[ $EXTENDED_APIS_EXTENSION == "true" ]]; then
+        exit 0
+    fi
 fi
 
 verify_bfvmm() {

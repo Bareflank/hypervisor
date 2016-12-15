@@ -624,19 +624,23 @@ common_vmcall(struct vmcall_registers_t *regs, uint64_t cpuid)
     if (regs == 0)
         return BF_ERROR_INVALID_ARG;
 
-    if (signed_cpuid < 0 || signed_cpuid >= g_num_cpus_started)
+    if (signed_cpuid >= g_num_cpus_started)
         return BF_ERROR_INVALID_ARG;
 
-    ret = caller_affinity = platform_set_affinity((int64_t)cpuid);
-    if (caller_affinity < 0)
-        return ret;
+    if (signed_cpuid >= 0)
+    {
+        ret = caller_affinity = platform_set_affinity((int64_t)cpuid);
+        if (caller_affinity < 0)
+            return ret;
+    }
 
     if (regs->r00 == VMCALL_EVENT)
         platform_vmcall_event(regs);
     else
         platform_vmcall(regs);
 
-    platform_restore_affinity(caller_affinity);
+    if (signed_cpuid >= 0)
+        platform_restore_affinity(caller_affinity);
 
     return BF_SUCCESS;
 }
