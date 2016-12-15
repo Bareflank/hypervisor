@@ -199,3 +199,7 @@ page_table_entry_x64::set_pat_index(pat_index_type index)
             break;
     };
 }
+
+void
+page_table_entry_x64::clear() noexcept
+{ *m_pte = 0; }

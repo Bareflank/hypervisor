@@ -113,3 +113,13 @@ __vmlaunch_trampoline:
     mov rax, 0x0
 
     jmp rsi
+
+global __invept:function
+__invept:
+    invept rdi, [rsi]
+    ret
+
+global __invvipd:function
+__invvipd:
+    invvpid rdi, [rsi]
+    ret

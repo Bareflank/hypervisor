@@ -73,6 +73,11 @@ ifneq ($(APPVEYOR), true)
 	PARENT_SUBDIRS += bfcxx
 	PARENT_SUBDIRS += bfcrt
 	PARENT_SUBDIRS += bfunwind
+endif
+
+PARENT_SUBDIRS += bfm
+
+ifneq ($(APPVEYOR), true)
 	PARENT_SUBDIRS += bfdrivers
 	PARENT_SUBDIRS += bfelf_loader
 	PARENT_SUBDIRS += bfvmm
@@ -87,8 +92,6 @@ ifneq ($(APPVEYOR), true)
 endif
 
 include extensions.mk
-
-PARENT_SUBDIRS += bfm
 
 ################################################################################
 # Common

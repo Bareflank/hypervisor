@@ -343,6 +343,10 @@ memory_manager_ut::test_unique_map_ptr_x64_virt_cr3_constructor_success()
         this->expect_true(g_unmapped[virt2]);
 
         this->expect_true(g_freed[make_ptr(virt1)]);
+
+        auto &&phys = bfn::virt_to_phys_with_cr3(valid_virt, valid_phys);
+        this->expect_true(phys == 0x0000222200000000UL);
+
     });
 }
 

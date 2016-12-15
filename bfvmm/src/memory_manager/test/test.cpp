@@ -104,6 +104,7 @@ memory_manager_ut::list()
     this->test_page_table_entry_x64_nx();
     this->test_page_table_entry_x64_phys_addr();
     this->test_page_table_entry_x64_pat_index();
+    this->test_page_table_entry_x64_clear();
 
     this->test_unique_map_ptr_x64_default_constructor();
     this->test_unique_map_ptr_x64_phys_constructor_invalid_args();

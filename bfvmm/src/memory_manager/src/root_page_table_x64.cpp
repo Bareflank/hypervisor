@@ -123,6 +123,7 @@ root_page_table_x64::map_page(integer_pointer virt, integer_pointer phys, attr_t
     auto ___ = gsl::on_failure([&]
     { this->remove_page(virt); });
 
+    entry->clear();
     entry->set_phys_addr(phys);
     entry->set_present(true);
     entry->set_pat_index(pat::mem_attr_to_pat_index(attr));
