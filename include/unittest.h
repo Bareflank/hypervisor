@@ -311,15 +311,13 @@ mock_unique(MockRepository &mocks)
 /// from having to look up the string in the source you're testing just to make
 /// the test pass. However, the what() can come in handy when debugging tests
 /// or when tring to prove your test case hits the branch you expect it to.
-//
+///
 static void
 check_exception_type(struct exception_state &state, const std::exception &caught, const std::exception &expected)
 {
     state.caught = true;
     state.caught_type = std::string(typeid(caught).name());
     state.caught_what = caught.what();
-    state.expecting_type = std::string(typeid(expected).name());
-    state.expecting_what = expected.what();
 
     if (typeid(caught) != typeid(expected))
     {
@@ -572,7 +570,10 @@ public:
     expect_exception_with_args(F &&f, std::shared_ptr<const std::exception> expected,
                                gsl::cstring_span<> func, int line, int path_id = -1)
     {
-        struct exception_state state = { false, false, "",  "" };
+        struct exception_state state = {false, false, "",  "", "", ""};
+
+        state.expecting_type = std::string(typeid(*expected).name());
+        state.expecting_what = expected->what();
 
         try { f(); }
         catch (BaseException &be) { throw; }
@@ -583,7 +584,6 @@ public:
             state.wrong_exception = true;
             state.caught = true;
             state.caught_type = "unknown exception";
-            state.expecting_type = std::string(typeid(expected).name());
             std::cerr << "unknown exception caught" << '\n';
         }
 
@@ -631,7 +631,7 @@ public:
     template <typename F> void
     expect_no_exception_with_args(F &&f, gsl::cstring_span<> func, int line, int path_id = -1)
     {
-        struct exception_state state = { false, false, "",  "" };
+        struct exception_state state = {false, false, "",  "", "", ""};
 
         try { f(); }
         catch (BaseException &be) { throw; }
