@@ -33,8 +33,17 @@ driver_entry_ut::test_common_vmcall_invalid_args()
 {
     vmcall_registers_t regs{};
 
+    this->expect_true(common_add_module(m_dummy_start_vmm_success.get(), m_dummy_start_vmm_success_length) == BF_SUCCESS);
+    this->expect_true(common_add_module(m_dummy_stop_vmm_success.get(), m_dummy_stop_vmm_success_length) == BF_SUCCESS);
+    this->expect_true(common_add_module(m_dummy_add_md_success.get(), m_dummy_add_md_success_length) == BF_SUCCESS);
+    this->expect_true(common_add_module(m_dummy_misc.get(), m_dummy_misc_length) == BF_SUCCESS);
+    this->expect_true(common_load_vmm() == BF_SUCCESS);
+    this->expect_true(common_start_vmm() == BF_SUCCESS);
+
     this->expect_true(common_vmcall(nullptr, 0) == BF_ERROR_INVALID_ARG);
     this->expect_true(common_vmcall(&regs, 10) == BF_ERROR_INVALID_ARG);
+
+    this->expect_true(common_fini() == BF_SUCCESS);
 }
 
 void
@@ -56,8 +65,7 @@ driver_entry_ut::test_common_vmcall_set_affinity_failure()
 
     g_set_afinity_fails = 0;
 
-    this->expect_true(common_stop_vmm() == BF_SUCCESS);
-    this->expect_true(common_unload_vmm() == BF_SUCCESS);
+    this->expect_true(common_fini() == BF_SUCCESS);
 }
 
 void
@@ -75,8 +83,7 @@ driver_entry_ut::test_common_vmcall_success()
     this->expect_true(common_vmcall(&regs, 0) == BF_SUCCESS);
     this->expect_true(common_vmcall(&regs, 0xFFFFFFFFFFFFFFFF) == BF_SUCCESS);
 
-    this->expect_true(common_stop_vmm() == BF_SUCCESS);
-    this->expect_true(common_unload_vmm() == BF_SUCCESS);
+    this->expect_true(common_fini() == BF_SUCCESS);
 }
 
 void
@@ -95,6 +102,53 @@ driver_entry_ut::test_common_vmcall_success_event()
     this->expect_true(common_vmcall(&regs, 0) == BF_SUCCESS);
     this->expect_true(common_vmcall(&regs, 0xFFFFFFFFFFFFFFFF) == BF_SUCCESS);
 
-    this->expect_true(common_stop_vmm() == BF_SUCCESS);
-    this->expect_true(common_unload_vmm() == BF_SUCCESS);
+    this->expect_true(common_fini() == BF_SUCCESS);
+}
+
+void
+driver_entry_ut::test_common_vmcall_vmcall_when_unloaded()
+{
+    vmcall_registers_t regs{};
+
+    this->expect_true(common_add_module(m_dummy_start_vmm_success.get(), m_dummy_start_vmm_success_length) == BF_SUCCESS);
+    this->expect_true(common_add_module(m_dummy_stop_vmm_success.get(), m_dummy_stop_vmm_success_length) == BF_SUCCESS);
+    this->expect_true(common_add_module(m_dummy_add_md_success.get(), m_dummy_add_md_success_length) == BF_SUCCESS);
+    this->expect_true(common_add_module(m_dummy_get_drr_success.get(), m_dummy_get_drr_success_length) == BF_SUCCESS);
+    this->expect_true(common_add_module(m_dummy_misc.get(), m_dummy_misc_length) == BF_SUCCESS);
+    this->expect_true(common_vmcall(&regs, 0) == BF_ERROR_VMM_INVALID_STATE);
+    this->expect_true(common_fini() == BF_SUCCESS);
+}
+
+void
+driver_entry_ut::test_common_vmcall_vmcall_when_corrupt()
+{
+    vmcall_registers_t regs{};
+
+    this->expect_true(common_add_module(m_dummy_start_vmm_success.get(), m_dummy_start_vmm_success_length) == BF_SUCCESS);
+    this->expect_true(common_add_module(m_dummy_stop_vmm_failure.get(), m_dummy_stop_vmm_failure_length) == BF_SUCCESS);
+    this->expect_true(common_add_module(m_dummy_add_md_success.get(), m_dummy_add_md_success_length) == BF_SUCCESS);
+    this->expect_true(common_add_module(m_dummy_get_drr_success.get(), m_dummy_get_drr_success_length) == BF_SUCCESS);
+    this->expect_true(common_add_module(m_dummy_misc.get(), m_dummy_misc_length) == BF_SUCCESS);
+    this->expect_true(common_load_vmm() == BF_SUCCESS);
+    this->expect_true(common_start_vmm() == BF_SUCCESS);
+    this->expect_true(common_stop_vmm() == ENTRY_ERROR_VMM_STOP_FAILED);
+    this->expect_true(common_vmcall(&regs, 0) == BF_ERROR_VMM_CORRUPTED);
+    this->expect_true(common_fini() == BF_ERROR_VMM_CORRUPTED);
+
+    common_reset();
+}
+
+void
+driver_entry_ut::test_common_vmcall_vmcall_when_loaded()
+{
+    vmcall_registers_t regs{};
+
+    this->expect_true(common_add_module(m_dummy_start_vmm_success.get(), m_dummy_start_vmm_success_length) == BF_SUCCESS);
+    this->expect_true(common_add_module(m_dummy_stop_vmm_success.get(), m_dummy_stop_vmm_success_length) == BF_SUCCESS);
+    this->expect_true(common_add_module(m_dummy_add_md_success.get(), m_dummy_add_md_success_length) == BF_SUCCESS);
+    this->expect_true(common_add_module(m_dummy_get_drr_success.get(), m_dummy_get_drr_success_length) == BF_SUCCESS);
+    this->expect_true(common_add_module(m_dummy_misc.get(), m_dummy_misc_length) == BF_SUCCESS);
+    this->expect_true(common_load_vmm() == BF_SUCCESS);
+    this->expect_true(common_vmcall(&regs, 0) == BF_ERROR_VMM_INVALID_STATE);
+    this->expect_true(common_fini() == BF_SUCCESS);
 }

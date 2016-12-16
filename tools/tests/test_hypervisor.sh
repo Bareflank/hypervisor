@@ -29,7 +29,13 @@ CC='\033[1;36m'
 CG='\033[1;32m'
 CE='\033[0m'
 
+# ------------------------------------------------------------------------------
+# Environment
+# ------------------------------------------------------------------------------
+
 export INCLUDE_LIBCXX_UNITTESTS=yes
+
+NUM_CORES=`grep -c ^processor /proc/cpuinfo`
 
 # ------------------------------------------------------------------------------
 # Tests
@@ -63,96 +69,117 @@ turn_off_tests() {
 }
 
 vmcall_version() {
-    echo -e "$CC""testing:$CB vmcall_version$CE"
     make driver_load > /dev/null 2>&1
     make quick
-    ARGS="versions 0" make vmcall
-    ARGS="versions 1" make vmcall
-    ARGS="versions 10" make vmcall
-    ARGS="versions 100" make vmcall || true
+    for (( core=0; core<$NUM_CORES; core++ ))
+    do
+        echo -e "$CC""testing:$CB vmcall_version on core #$core$CE"
+        ARGS="--cpuid $core versions 0" make vmcall
+        ARGS="--cpuid $core versions 1" make vmcall
+        ARGS="--cpuid $core versions 10" make vmcall
+        ARGS="--cpuid $core versions 100" make vmcall > /dev/null 2>&1 || true
+    done
     make driver_unload > /dev/null 2>&1
 }
 
 vmcall_registers() {
-    echo -e "$CC""testing:$CB vmcall_registers$CE"
     make driver_load > /dev/null 2>&1
     make quick
-    ARGS="registers 1" make vmcall
-    ARGS="registers 1 2 3 4 5 6 7 8 9 10 11" make vmcall
-    ARGS="registers 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16" make vmcall
+    for (( core=0; core<$NUM_CORES; core++ ))
+    do
+        echo -e "$CC""testing:$CB vmcall_registers on core #$core$CE"
+        ARGS="--cpuid $core registers 1" make vmcall
+        ARGS="--cpuid $core registers 1 2 3 4 5 6 7 8 9 10 11" make vmcall
+        ARGS="--cpuid $core registers 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16" make vmcall
+    done
     make driver_unload > /dev/null 2>&1
 }
 
 vmcall_event() {
-    echo -e "$CC""testing:$CB vmcall_event$CE"
     make driver_load > /dev/null 2>&1
     make quick
-    ARGS="event 1" make vmcall
-    ARGS="event 2" make vmcall
+    for (( core=0; core<$NUM_CORES; core++ ))
+    do
+        echo -e "$CC""testing:$CB vmcall_event on core #$core$CE"
+        ARGS="--cpuid $core event 1" make vmcall
+        ARGS="--cpuid $core event 2" make vmcall
+    done
     make driver_unload > /dev/null 2>&1
 }
 
 vmcall_unittest() {
-    echo -e "$CC""testing:$CB vmcall_unittest$CE"
     make driver_load > /dev/null 2>&1
     make quick
-    echo -e ""
-    ARGS="unittest 0x1001" make vmcall
-    ARGS="unittest 0x1002" make vmcall
-    ARGS="unittest 0x1003" make vmcall
-    ARGS="unittest 0x1004" make vmcall
-    ARGS="unittest 0x1005" make vmcall
-    ARGS="unittest 0x1006" make vmcall
-    ARGS="unittest 0x1007" make vmcall
-    ARGS="unittest 0x1008" make vmcall
-    ARGS="unittest 0x1009" make vmcall
-    ARGS="unittest 0x100A" make vmcall
-    ARGS="unittest 0x1100" make vmcall
-    ARGS="unittest 0x1101" make vmcall
-    echo -e ""
+    for (( core=0; core<$NUM_CORES; core++ ))
+    do
+        echo -e "$CC""testing:$CB vmcall_unittest on core #$core$CE"
+        echo -e ""
+        ARGS="--cpuid $core unittest 0x1001" make vmcall
+        ARGS="--cpuid $core unittest 0x1002" make vmcall
+        ARGS="--cpuid $core unittest 0x1003" make vmcall
+        ARGS="--cpuid $core unittest 0x1004" make vmcall
+        ARGS="--cpuid $core unittest 0x1005" make vmcall
+        ARGS="--cpuid $core unittest 0x1006" make vmcall
+        ARGS="--cpuid $core unittest 0x1007" make vmcall
+        ARGS="--cpuid $core unittest 0x1008" make vmcall
+        ARGS="--cpuid $core unittest 0x1009" make vmcall
+        ARGS="--cpuid $core unittest 0x100A" make vmcall
+        ARGS="--cpuid $core unittest 0x1100" make vmcall
+        ARGS="--cpuid $core unittest 0x1101" make vmcall
+        echo -e ""
+    done
     make driver_unload > /dev/null 2>&1
 }
 
 vmcall_string_unformatted() {
-    echo -e "$CC""testing:$CB vmcall_string_unformatted$CE"
     make driver_load > /dev/null 2>&1
     make quick
-    ARGS="string unformatted 'hello world'" make vmcall
-    ARGS="string unformatted 'hello world'" make vmcall
-    ARGS="string unformatted 'hello world'" make vmcall
-    ARGS="string unformatted 'hello world'" make vmcall
-    ARGS="string unformatted 'hello world'" make vmcall
+    for (( core=0; core<$NUM_CORES; core++ ))
+    do
+        echo -e "$CC""testing:$CB vmcall_string_unformatted on core #$core$CE"
+        ARGS="--cpuid $core string unformatted 'hello world'" make vmcall
+        ARGS="--cpuid $core string unformatted 'hello world'" make vmcall
+        ARGS="--cpuid $core string unformatted 'hello world'" make vmcall
+        ARGS="--cpuid $core string unformatted 'hello world'" make vmcall
+        ARGS="--cpuid $core string unformatted 'hello world'" make vmcall
+    done
     make driver_unload > /dev/null 2>&1
 }
 
 vmcall_string_json() {
-    echo -e "$CC""testing:$CB vmcall_string_json$CE"
     make driver_load > /dev/null 2>&1
     make quick
-    ARGS="string json '{\"msg\":\"hello world\"}'" make vmcall
-    ARGS="string json '{\"msg\":\"hello world\"}'" make vmcall
-    ARGS="string json '{\"msg\":\"hello world\"}'" make vmcall
-    ARGS="string json '{\"msg\":\"hello world\"}'" make vmcall
-    ARGS="string json '{\"msg\":\"hello world\"}'" make vmcall
-    ARGS="string json 'hello world'" make vmcall || true
+    for (( core=0; core<$NUM_CORES; core++ ))
+    do
+        echo -e "$CC""testing:$CB vmcall_string_json on core #$core$CE"
+        ARGS="--cpuid $core string json '{\"msg\":\"hello world\"}'" make vmcall
+        ARGS="--cpuid $core string json '{\"msg\":\"hello world\"}'" make vmcall
+        ARGS="--cpuid $core string json '{\"msg\":\"hello world\"}'" make vmcall
+        ARGS="--cpuid $core string json '{\"msg\":\"hello world\"}'" make vmcall
+        ARGS="--cpuid $core string json '{\"msg\":\"hello world\"}'" make vmcall
+        ARGS="--cpuid $core string json 'hello world'" make vmcall > /dev/null 2>&1 || true
+    done
     make driver_unload > /dev/null 2>&1
 }
 
 vmcall_data_unformatted() {
-    echo -e "$CC""testing:$CB vmcall_data_unformatted$CE"
     make driver_load > /dev/null 2>&1
     make quick
-    rm -Rf /tmp/test_indata.txt
-    rm -Rf /tmp/test_outdata.txt
-    echo "hello world" > /tmp/test_indata.txt
-    ARGS="data unformatted /tmp/test_indata.txt /tmp/test_outdata.txt" make vmcall
-    if cmp -s "/tmp/test_indata.txt" "/tmp/test_outdata.txt"; then
+    for (( core=0; core<$NUM_CORES; core++ ))
+    do
+        echo -e "$CC""testing:$CB vmcall_data_unformatted on core #$core$CE"
         rm -Rf /tmp/test_indata.txt
         rm -Rf /tmp/test_outdata.txt
-    else
-        echo "ERROR: binary files do not match"
-        exit 1
-    fi
+        echo "hello world" > /tmp/test_indata.txt
+        ARGS="--cpuid $core data unformatted /tmp/test_indata.txt /tmp/test_outdata.txt" make vmcall
+        if cmp -s "/tmp/test_indata.txt" "/tmp/test_outdata.txt"; then
+            rm -Rf /tmp/test_indata.txt
+            rm -Rf /tmp/test_outdata.txt
+        else
+            echo "ERROR: binary files do not match"
+            exit 1
+        fi
+    done
     make driver_unload > /dev/null 2>&1
 }
 

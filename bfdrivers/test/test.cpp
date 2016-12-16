@@ -154,6 +154,7 @@ driver_entry_ut::list()
     this->test_common_load_fail_due_to_relocation_error();
     this->test_common_load_fail_due_to_no_modules_added();
     this->test_common_load_add_md_failed();
+    this->test_common_load_add_md_tls_failed();
     this->test_common_load_tls_platform_alloc_failed();
     this->test_common_load_stack_platform_alloc_failed();
     this->test_common_load_loader_add_failed();
@@ -194,6 +195,9 @@ driver_entry_ut::list()
     this->test_common_vmcall_set_affinity_failure();
     this->test_common_vmcall_success();
     this->test_common_vmcall_success_event();
+    this->test_common_vmcall_vmcall_when_unloaded();
+    this->test_common_vmcall_vmcall_when_corrupt();
+    this->test_common_vmcall_vmcall_when_loaded();
 
     this->test_helper_common_vmm_status();
     this->test_helper_get_file_invalid_index();
