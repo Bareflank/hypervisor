@@ -26,7 +26,7 @@
 #include <memory_manager/memory_manager_x64.h>
 
 bool virt_to_phys_return_nullptr = false;
-constexpr page_table_x64::integer_pointer virt = 0x0000123456780000UL;
+constexpr page_table_x64::integer_pointer virt = 0x0000100000000000UL;
 
 static auto
 setup_mm(MockRepository &mocks)
@@ -39,153 +39,314 @@ setup_mm(MockRepository &mocks)
 }
 
 void
-memory_manager_ut::test_page_table_x64_no_entry()
+memory_manager_ut::test_page_table_x64_add_remove_page_success_without_setting()
 {
     MockRepository mocks;
     setup_mm(mocks);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        auto &&pt = std::make_unique<page_table_x64>();
+        auto &&scr3 = 0x0UL;
+        auto &&pml4 = std::make_unique<page_table_x64>(&scr3);
 
-        this->expect_true(pt->phys_addr() != 0);
-        this->expect_true(pt->present());
-        this->expect_true(pt->rw());
-        this->expect_true(pt->us());
-        this->expect_true(pt->pwt());
-        this->expect_true(pt->pcd());
-        this->expect_false(pt->accessed());
-        this->expect_false(pt->dirty());
-        this->expect_false(pt->pat());
-        this->expect_false(pt->global());
-        this->expect_false(pt->nx());
-        this->expect_true(pt->cr3_shadow() != 0);
+        pml4->add_page_4k(virt);
+        this->expect_true(pml4->global_size() == 3);
+        this->expect_true(pml4->global_capacity() == 512 * 3);
+
+        pml4->add_page_4k(virt + 0x1000);
+        this->expect_true(pml4->global_size() == 3);
+        this->expect_true(pml4->global_capacity() == 512 * 3);
+
+        pml4->add_page_4k(virt + 0x10000);
+        this->expect_true(pml4->global_size() == 3);
+        this->expect_true(pml4->global_capacity() == 512 * 3);
+
+        pml4->remove_page(virt);
+        this->expect_true(pml4->global_size() == 0);
+        this->expect_true(pml4->global_capacity() == 512 * 1);
+
+        pml4->remove_page(virt + 0x1000);
+        this->expect_true(pml4->global_size() == 0);
+        this->expect_true(pml4->global_capacity() == 512 * 1);
+
+        pml4->remove_page(virt + 0x10000);
+        this->expect_true(pml4->global_size() == 0);
+        this->expect_true(pml4->global_capacity() == 512 * 1);
     });
 }
 
 void
-memory_manager_ut::test_page_table_x64_with_entry()
+memory_manager_ut::test_page_table_x64_add_remove_page_1g_success()
 {
     MockRepository mocks;
     setup_mm(mocks);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        page_table_x64::integer_pointer entry = 0;
-        auto &&pt = std::make_unique<page_table_x64>(&entry);
+        auto &&scr3 = 0x0UL;
+        auto &&pml4 = std::make_unique<page_table_x64>(&scr3);
 
-        this->expect_true(pt->phys_addr() != 0);
-        this->expect_true(pt->present());
-        this->expect_true(pt->rw());
-        this->expect_true(pt->us());
-        this->expect_true(pt->pwt());
-        this->expect_true(pt->pcd());
-        this->expect_false(pt->accessed());
-        this->expect_false(pt->dirty());
-        this->expect_false(pt->pat());
-        this->expect_false(pt->global());
-        this->expect_false(pt->nx());
-        this->expect_true(pt->cr3_shadow() == 0);
-    });
-}
+        auto &&entry1 = pml4->add_page_1g(virt);
+        entry1.set_present(true);
+        this->expect_true(pml4->global_size() == 2);
+        this->expect_true(pml4->global_capacity() == 512 * 1);
 
-void
-memory_manager_ut::test_page_table_x64_add_remove_page_success()
-{
-    MockRepository mocks;
-    setup_mm(mocks);
+        auto &&entry2 = pml4->add_page_1g(virt + 0x100);
+        entry2.set_present(true);
+        this->expect_true(pml4->global_size() == 2);
+        this->expect_true(pml4->global_capacity() == 512 * 1);
 
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        auto &&pml4 = std::make_unique<page_table_x64>();
+        auto &&entry3 = pml4->add_page_1g(virt + 0x40000000);
+        entry3.set_present(true);
+        this->expect_true(pml4->global_size() == 3);
+        this->expect_true(pml4->global_capacity() == 512 * 1);
 
-        pml4->add_page_x64(virt);
+        auto &&entry4 = pml4->add_page_1g(virt + 0x400000000);
+        entry4.set_present(true);
         this->expect_true(pml4->global_size() == 4);
+        this->expect_true(pml4->global_capacity() == 512 * 1);
 
-        pml4->add_page_x64(virt + 0x1000);
+        pml4->remove_page(virt);
+        this->expect_true(pml4->global_size() == 3);
+        this->expect_true(pml4->global_capacity() == 512 * 1);
+
+        pml4->remove_page(virt + 0x40000000);
+        this->expect_true(pml4->global_size() == 2);
+        this->expect_true(pml4->global_capacity() == 512 * 1);
+
+        pml4->remove_page(virt + 0x400000000);
+        this->expect_true(pml4->global_size() == 0);
+        this->expect_true(pml4->global_capacity() == 512 * 1);
+    });
+}
+
+void
+memory_manager_ut::test_page_table_x64_add_remove_page_2m_success()
+{
+    MockRepository mocks;
+    setup_mm(mocks);
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        auto &&scr3 = 0x0UL;
+        auto &&pml4 = std::make_unique<page_table_x64>(&scr3);
+
+        auto &&entry1 = pml4->add_page_2m(virt);
+        entry1.set_present(true);
+        this->expect_true(pml4->global_size() == 3);
+        this->expect_true(pml4->global_capacity() == 512 * 2);
+
+        auto &&entry2 = pml4->add_page_2m(virt + 0x100);
+        entry2.set_present(true);
+        this->expect_true(pml4->global_size() == 3);
+        this->expect_true(pml4->global_capacity() == 512 * 2);
+
+        auto &&entry3 = pml4->add_page_2m(virt + 0x200000);
+        entry3.set_present(true);
+        this->expect_true(pml4->global_size() == 4);
+        this->expect_true(pml4->global_capacity() == 512 * 2);
+
+        auto &&entry4 = pml4->add_page_2m(virt + 0x2000000);
+        entry4.set_present(true);
         this->expect_true(pml4->global_size() == 5);
+        this->expect_true(pml4->global_capacity() == 512 * 2);
 
-        pml4->add_page_x64(virt + 0x1000000);
-        this->expect_true(pml4->global_size() == 7);
-
-        pml4->remove_page_x64(virt);
-        this->expect_true(pml4->global_size() == 6);
-
-        pml4->remove_page_x64(virt + 0x1000);
+        pml4->remove_page(virt);
         this->expect_true(pml4->global_size() == 4);
+        this->expect_true(pml4->global_capacity() == 512 * 2);
 
-        pml4->remove_page_x64(virt + 0x1000000);
+        pml4->remove_page(virt + 0x200000);
+        this->expect_true(pml4->global_size() == 3);
+        this->expect_true(pml4->global_capacity() == 512 * 2);
+
+        pml4->remove_page(virt + 0x2000000);
+        this->expect_true(pml4->global_size() == 0);
+        this->expect_true(pml4->global_capacity() == 512 * 1);
+    });
+}
+
+void
+memory_manager_ut::test_page_table_x64_add_remove_page_4k_success()
+{
+    MockRepository mocks;
+    setup_mm(mocks);
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        auto &&scr3 = 0x0UL;
+        auto &&pml4 = std::make_unique<page_table_x64>(&scr3);
+
+        auto &&entry1 = pml4->add_page_4k(virt);
+        entry1.set_present(true);
+        this->expect_true(pml4->global_size() == 4);
+        this->expect_true(pml4->global_capacity() == 512 * 3);
+
+        auto &&entry2 = pml4->add_page_4k(virt + 0x100);
+        entry2.set_present(true);
+        this->expect_true(pml4->global_size() == 4);
+        this->expect_true(pml4->global_capacity() == 512 * 3);
+
+        auto &&entry3 = pml4->add_page_4k(virt + 0x1000);
+        entry3.set_present(true);
+        this->expect_true(pml4->global_size() == 5);
+        this->expect_true(pml4->global_capacity() == 512 * 3);
+
+        auto &&entry4 = pml4->add_page_4k(virt + 0x10000);
+        entry4.set_present(true);
+        this->expect_true(pml4->global_size() == 6);
+        this->expect_true(pml4->global_capacity() == 512 * 3);
+
+        pml4->remove_page(virt);
+        this->expect_true(pml4->global_size() == 5);
+        this->expect_true(pml4->global_capacity() == 512 * 3);
+
+        pml4->remove_page(virt + 0x1000);
+        this->expect_true(pml4->global_size() == 4);
+        this->expect_true(pml4->global_capacity() == 512 * 3);
+
+        pml4->remove_page(virt + 0x10000);
+        this->expect_true(pml4->global_size() == 0);
+        this->expect_true(pml4->global_capacity() == 512 * 1);
+    });
+}
+
+void
+memory_manager_ut::test_page_table_x64_add_remove_page_swap_success()
+{
+    MockRepository mocks;
+    setup_mm(mocks);
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        auto &&scr3 = 0x0UL;
+        auto &&pml4 = std::make_unique<page_table_x64>(&scr3);
+
+        auto &&entry1 = pml4->add_page_4k(virt);
+        entry1.set_present(true);
+        this->expect_true(pml4->global_size() == 4);
+        this->expect_true(pml4->global_capacity() == 512 * 3);
+
+        pml4->remove_page(virt);
+        this->expect_true(pml4->global_size() == 0);
+        this->expect_true(pml4->global_capacity() == 512 * 1);
+
+        auto &&entry2 = pml4->add_page_2m(virt);
+        entry2.set_present(true);
+        this->expect_true(pml4->global_size() == 3);
+        this->expect_true(pml4->global_capacity() == 512 * 2);
+
+        pml4->remove_page(virt);
+        this->expect_true(pml4->global_size() == 0);
+        this->expect_true(pml4->global_capacity() == 512 * 1);
+
+        auto &&entry3 = pml4->add_page_4k(virt);
+        entry3.set_present(true);
+        this->expect_true(pml4->global_size() == 4);
+        this->expect_true(pml4->global_capacity() == 512 * 3);
+
+        auto &&entry4 = pml4->add_page_2m(virt);
+        entry4.set_present(true);
+        this->expect_true(pml4->global_size() == 3);
+        this->expect_true(pml4->global_capacity() == 512 * 2);
+
+        auto &&entry5 = pml4->add_page_4k(virt);
+        entry5.set_present(true);
+        this->expect_true(pml4->global_size() == 4);
+        this->expect_true(pml4->global_capacity() == 512 * 3);
+
+        pml4->remove_page(virt);
+        this->expect_true(pml4->global_size() == 0);
+        this->expect_true(pml4->global_capacity() == 512 * 1);
+    });
+}
+
+void
+memory_manager_ut::test_page_table_x64_add_page_twice_success()
+{
+    MockRepository mocks;
+    setup_mm(mocks);
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        auto &&scr3 = 0x0UL;
+        auto &&pml4 = std::make_unique<page_table_x64>(&scr3);
+
+        pml4->add_page_4k(virt);
+        this->expect_no_exception([&]{ pml4->add_page_4k(virt); });
+    });
+}
+
+void
+memory_manager_ut::test_page_table_x64_remove_page_twice_success()
+{
+    MockRepository mocks;
+    setup_mm(mocks);
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        auto &&scr3 = 0x0UL;
+        auto &&pml4 = std::make_unique<page_table_x64>(&scr3);
+
+        pml4->add_page_4k(virt);
+        pml4->add_page_4k(virt + 0x1000);
+
+        pml4->remove_page(virt);
+        this->expect_no_exception([&]{ pml4->remove_page(virt); });
+        pml4->remove_page(virt + 0x1000);
+
         this->expect_true(pml4->global_size() == 0);
     });
 }
 
 void
-memory_manager_ut::test_page_table_x64_add_remove_many_pages_success()
+memory_manager_ut::test_page_table_x64_remove_page_unknown_success()
 {
     MockRepository mocks;
     setup_mm(mocks);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        auto &&pml4 = std::make_unique<page_table_x64>();
+        auto &&scr3 = 0x0UL;
+        auto &&pml4 = std::make_unique<page_table_x64>(&scr3);
+        this->expect_no_exception([&]{ pml4->remove_page(virt); });
+    });
+}
 
-        for (auto i = 0U; i < 512; i++)
-            pml4->add_page_x64(virt + (i * 0x1000U));
+void
+memory_manager_ut::test_page_table_x64_virt_to_pte_invalid()
+{
+    MockRepository mocks;
+    setup_mm(mocks);
 
-        this->expect_true(pml4->global_size() == 516);
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        auto &&scr3 = 0x0UL;
+        auto &&pml4 = std::make_unique<page_table_x64>(&scr3);
 
-        for (auto i = 0U; i < 512; i++)
-            pml4->remove_page_x64(virt + (i * 0x1000U));
+        pml4->add_page_4k(virt);
 
+        this->expect_exception([&]{ pml4->virt_to_pte(virt + 0x40000000); }, ""_ut_lee);
+
+        pml4->remove_page(virt);
         this->expect_true(pml4->global_size() == 0);
     });
 }
 
 void
-memory_manager_ut::test_page_table_x64_add_page_twice_failure()
+memory_manager_ut::test_page_table_x64_virt_to_pte_success()
 {
     MockRepository mocks;
     setup_mm(mocks);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
-        auto &&pml4 = std::make_unique<page_table_x64>();
+        auto &&scr3 = 0x0UL;
+        auto &&pml4 = std::make_unique<page_table_x64>(&scr3);
 
-        pml4->add_page_x64(virt);
-        this->expect_exception([&]{ pml4->add_page_x64(virt); }, ""_ut_ree);
-    });
-}
+        pml4->add_page_4k(virt);
+        this->expect_no_exception([&]{ pml4->virt_to_pte(virt); });
 
-void
-memory_manager_ut::test_page_table_x64_remove_page_twice_failure()
-{
-    MockRepository mocks;
-    setup_mm(mocks);
-
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        auto &&pml4 = std::make_unique<page_table_x64>();
-
-        pml4->add_page_x64(virt);
-        pml4->add_page_x64(virt + 0x1000);
-
-        pml4->remove_page_x64(virt);
-        this->expect_exception([&]{ pml4->remove_page_x64(virt); }, ""_ut_ree);
-        pml4->remove_page_x64(virt + 0x1000);
-
+        pml4->remove_page(virt);
         this->expect_true(pml4->global_size() == 0);
-    });
-}
-
-void
-memory_manager_ut::test_page_table_x64_remove_page_unknown_failure()
-{
-    MockRepository mocks;
-    setup_mm(mocks);
-
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        auto &&pml4 = std::make_unique<page_table_x64>();
-        this->expect_exception([&]{ pml4->remove_page_x64(virt); }, ""_ut_ree);
     });
 }

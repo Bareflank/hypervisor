@@ -64,7 +64,7 @@ root_page_table_x64::instance() noexcept
 
 root_page_table_x64::cr3_type
 root_page_table_x64::cr3()
-{ return m_root_pt->cr3_shadow(); }
+{ return m_cr3; }
 
 void
 root_page_table_x64::map(integer_pointer virt, integer_pointer phys, attr_type attr)
@@ -75,7 +75,7 @@ root_page_table_x64::unmap(integer_pointer virt) noexcept
 { unmap_page(virt); }
 
 root_page_table_x64::root_page_table_x64() noexcept :
-    m_root_pt {std::make_unique<page_table_x64>()}
+    m_root_pt {std::make_unique<page_table_x64>(&m_cr3)}
 {
     try
     {
@@ -98,18 +98,18 @@ root_page_table_x64::root_page_table_x64() noexcept :
     }
 }
 
-gsl::not_null<page_table_entry_x64 *>
+page_table_entry_x64
 root_page_table_x64::add_page(integer_pointer virt)
 {
     std::lock_guard<std::mutex> guard(g_map_mutex);
-    return m_root_pt->add_page_x64(virt);
+    return m_root_pt->add_page_4k(virt);
 }
 
 void
 root_page_table_x64::remove_page(integer_pointer virt)
 {
     std::lock_guard<std::mutex> guard(g_map_mutex);
-    m_root_pt->remove_page_x64(virt);
+    m_root_pt->remove_page(virt);
 }
 
 void
@@ -123,10 +123,10 @@ root_page_table_x64::map_page(integer_pointer virt, integer_pointer phys, attr_t
     auto ___ = gsl::on_failure([&]
     { this->remove_page(virt); });
 
-    entry->clear();
-    entry->set_phys_addr(phys);
-    entry->set_present(true);
-    entry->set_pat_index(pat::mem_attr_to_pat_index(attr));
+    entry.clear();
+    entry.set_phys_addr(phys);
+    entry.set_present(true);
+    entry.set_pat_index(pat::mem_attr_to_pat_index(attr));
 
     switch (attr)
     {
@@ -136,8 +136,8 @@ root_page_table_x64::map_page(integer_pointer virt, integer_pointer phys, attr_t
         case memory_attr::rw_wp:
         case memory_attr::rw_wb:
         case memory_attr::rw_uc_m:
-            entry->set_rw(true);
-            entry->set_nx(true);
+            entry.set_rw(true);
+            entry.set_nx(true);
             break;
 
         case memory_attr::re_uc:
@@ -146,8 +146,8 @@ root_page_table_x64::map_page(integer_pointer virt, integer_pointer phys, attr_t
         case memory_attr::re_wp:
         case memory_attr::re_wb:
         case memory_attr::re_uc_m:
-            entry->set_rw(false);
-            entry->set_nx(false);
+            entry.set_rw(false);
+            entry.set_nx(false);
             break;
 
         default:

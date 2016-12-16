@@ -28,7 +28,7 @@
 #include <memory>
 #include <memory_manager/page_table_entry_x64.h>
 
-class page_table_x64 : public page_table_entry_x64
+class page_table_x64
 {
 public:
 
@@ -47,26 +47,16 @@ public:
     ///
     /// @param pte the parent page table entry that points to this table
     ///
-    page_table_x64(pointer pte = nullptr);
+    page_table_x64(gsl::not_null<pointer> pte);
 
     /// Destructor
     ///
     /// @expects none
     /// @ensures none
     ///
-    ~page_table_x64() override = default;
+    ~page_table_x64() = default;
 
-    /// Global Size
-    ///
-    /// @expects none
-    /// @ensures none
-    ///
-    /// @return returns the number of entries in the entire page table
-    ///     tree. Note that this function is expensive.
-    ///
-    size_type global_size() const noexcept;
-
-    /// Add Page
+    /// Add Page (1g Granularity)
     ///
     /// Adds a page to the page table structure. Note that this is the
     /// public function, and should only be used to add pages to the
@@ -74,14 +64,51 @@ public:
     /// will parse through the different levels making sure the virtual
     /// address provided is valid.
     ///
-    /// @expects virt_addr != 0
+    /// @expects none
     /// @ensures none
     ///
-    /// @param virt_addr the virtual address to the page to add
+    /// @param addr the virtual address to the page to add
     /// @return the resulting pte. Note that this pte is blank, and its
     ///     properties (like present) should be set by the caller
     ///
-    gsl::not_null<page_table_entry_x64 *> add_page_x64(integer_pointer virt_addr);
+    page_table_entry_x64 add_page_1g(integer_pointer addr)
+    { return add_page(addr, x64::page_table::pml4::from, x64::page_table::pdpt::from); }
+
+    /// Add Page (2m Granularity)
+    ///
+    /// Adds a page to the page table structure. Note that this is the
+    /// public function, and should only be used to add pages to the
+    /// PML4 page table. This function will call a private version that
+    /// will parse through the different levels making sure the virtual
+    /// address provided is valid.
+    ///
+    /// @expects none
+    /// @ensures none
+    ///
+    /// @param addr the virtual address to the page to add
+    /// @return the resulting pte. Note that this pte is blank, and its
+    ///     properties (like present) should be set by the caller
+    ///
+    page_table_entry_x64 add_page_2m(integer_pointer addr)
+    { return add_page(addr, x64::page_table::pml4::from, x64::page_table::pd::from); }
+
+    /// Add Page (4k Granularity)
+    ///
+    /// Adds a page to the page table structure. Note that this is the
+    /// public function, and should only be used to add pages to the
+    /// PML4 page table. This function will call a private version that
+    /// will parse through the different levels making sure the virtual
+    /// address provided is valid.
+    ///
+    /// @expects none
+    /// @ensures none
+    ///
+    /// @param addr the virtual address to the page to add
+    /// @return the resulting pte. Note that this pte is blank, and its
+    ///     properties (like present) should be set by the caller
+    ///
+    page_table_entry_x64 add_page_4k(integer_pointer addr)
+    { return add_page(addr, x64::page_table::pml4::from, x64::page_table::pt::from); }
 
     /// Remove Page
     ///
@@ -91,42 +118,43 @@ public:
     /// occurs side by side with addresses that are similar (page tables will
     /// be needlessly removed)
     ///
-    /// @expects virt_addr != 0
+    /// @expects none
     /// @ensures none
     ///
-    /// @param virt_addr the virtual address of the page to remove
+    /// @param addr the virtual address of the page to remove
     ///
-    void remove_page_x64(integer_pointer virt_addr);
+    void remove_page(integer_pointer addr)
+    { remove_page(addr, x64::page_table::pml4::from); }
 
-    /// CR3 Shadow
+    /// Virt to Page Table Entry
+    ///
+    /// Returns the PTE associated with the provided virtual address. If no
+    /// PTE exists for the virtual address provided, an exception is thrown.
     ///
     /// @expects none
     /// @ensures none
     ///
-    /// @return returns the CR3 shadow
+    /// @param addr the virtual address of the pte to locate
     ///
-    auto cr3_shadow() const noexcept
-    { return m_cr3_shadow; }
+    page_table_entry_x64 virt_to_pte(integer_pointer addr)
+    { return virt_to_pte(addr, x64::page_table::pml4::from); }
 
 private:
 
-    template<class T> std::unique_ptr<T> add_pte(pointer p);
-    template<class T> std::unique_ptr<T> remove_pte();
+    page_table_entry_x64 add_page(integer_pointer addr, integer_pointer bits, integer_pointer end);
+    void remove_page(integer_pointer addr, integer_pointer bits);
+    page_table_entry_x64 virt_to_pte(integer_pointer addr, integer_pointer bits);
 
-    gsl::not_null<page_table_entry_x64 *> add_page_x64(integer_pointer virt_addr, integer_pointer bits);
-    void remove_page_x64(integer_pointer virt_addr, integer_pointer bits);
-
-    auto empty() const noexcept
-    { return m_size == 0; }
+    bool empty() const noexcept;
+    size_type global_size() const noexcept;
+    size_type global_capacity() const noexcept;
 
 private:
 
-    gsl::span<integer_pointer> m_pt;
-    std::unique_ptr<integer_pointer[]> m_pt_owner;
+    friend class memory_manager_ut;
 
-    size_type m_size;
-    integer_pointer m_cr3_shadow;
-    std::vector<std::unique_ptr<page_table_entry_x64>> m_ptes;
+    std::unique_ptr<integer_pointer[]> m_pt;
+    std::vector<std::unique_ptr<page_table_x64>> m_pts;
 
 public:
 
