@@ -36,6 +36,8 @@ extern "C"
 {
     int64_t resolve_symbol(const char *name, void **sym);
     int64_t execute_symbol(const char *sym, uint64_t arg1, uint64_t arg2, uint64_t cpuid);
+    int64_t add_raw_md_to_memory_manager(uint64_t virt, uint64_t type);
+    int64_t add_md_to_memory_manager(struct module_t *module);
 }
 
 extern uint64_t g_malloc_fails;
@@ -130,6 +132,28 @@ driver_entry_ut::test_common_load_add_md_failed()
     this->expect_true(common_add_module(m_dummy_add_md_failure.get(), m_dummy_add_md_failure_length) == BF_SUCCESS);
     this->expect_true(common_add_module(m_dummy_misc.get(), m_dummy_misc_length) == BF_SUCCESS);
     this->expect_true(common_load_vmm() == MEMORY_MANAGER_FAILURE);
+    this->expect_true(common_fini() == BF_SUCCESS);
+}
+
+void
+driver_entry_ut::test_common_load_add_md_tls_failed()
+{
+    this->expect_true(common_add_module(m_dummy_start_vmm_success.get(), m_dummy_start_vmm_success_length) == BF_SUCCESS);
+    this->expect_true(common_add_module(m_dummy_stop_vmm_success.get(), m_dummy_stop_vmm_success_length) == BF_SUCCESS);
+    this->expect_true(common_add_module(m_dummy_add_md_success.get(), m_dummy_add_md_success_length) == BF_SUCCESS);
+    this->expect_true(common_add_module(m_dummy_misc.get(), m_dummy_misc_length) == BF_SUCCESS);
+
+    {
+        MockRepository mocks;
+        mocks.OnCallFunc(add_md_to_memory_manager).Return(0);
+        mocks.ExpectCallFunc(add_raw_md_to_memory_manager).Return(-1);
+
+        RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+        {
+            this->expect_true(common_load_vmm() == -1);
+        });
+    }
+
     this->expect_true(common_fini() == BF_SUCCESS);
 }
 
@@ -248,4 +272,3 @@ driver_entry_ut::test_common_load_execute_symbol_failed()
 
     this->expect_true(common_fini() == BF_SUCCESS);
 }
-

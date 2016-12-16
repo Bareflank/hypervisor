@@ -70,6 +70,7 @@ private:
     void test_common_load_fail_due_to_relocation_error();
     void test_common_load_fail_due_to_no_modules_added();
     void test_common_load_add_md_failed();
+    void test_common_load_add_md_tls_failed();
     void test_common_load_tls_platform_alloc_failed();
     void test_common_load_stack_platform_alloc_failed();
     void test_common_load_loader_add_failed();
@@ -110,6 +111,9 @@ private:
     void test_common_vmcall_set_affinity_failure();
     void test_common_vmcall_success();
     void test_common_vmcall_success_event();
+    void test_common_vmcall_vmcall_when_unloaded();
+    void test_common_vmcall_vmcall_when_corrupt();
+    void test_common_vmcall_vmcall_when_loaded();
 
     void test_helper_common_vmm_status();
     void test_helper_get_file_invalid_index();
