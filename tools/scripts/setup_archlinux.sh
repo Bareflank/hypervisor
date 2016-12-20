@@ -42,24 +42,23 @@ parse_arguments $@
 
 install_pacman_tools() {
     sudo pacman -Syu
-    sudo pacman -S --needed ca-certificates
+    sudo pacman -S --needed --noconfirm ca-certificates
 }
 
 install_common_packages() {
     sudo pacman -Syu
-    sudo pacman -S --needed \
-        base-devel \
-        linux-headers \
-        gmp \
-        libmpc \
-        mpfr \
-        flex \
-        bison \
-        nasm \
-        clang \
-        texinfo \
-        cmake \
-        docker
+    sudo pacman -S --needed --noconfirm base-devel
+    sudo pacman -S --needed --noconfirm linux-headers
+    sudo pacman -S --needed --noconfirm gmp
+    sudo pacman -S --needed --noconfirm libmpc
+    sudo pacman -S --needed --noconfirm mpfr
+    sudo pacman -S --needed --noconfirm flex
+    sudo pacman -S --needed --noconfirm bison
+    sudo pacman -S --needed --noconfirm nasm
+    sudo pacman -S --needed --noconfirm clang
+    sudo pacman -S --needed --noconfirm texinfo
+    sudo pacman -S --needed --noconfirm cmake
+    sudo pacman -S --needed --noconfirm docker
 }
 
 prepare_docker() {
