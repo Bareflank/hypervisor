@@ -85,10 +85,11 @@ ifneq ($(APPVEYOR), true)
 	PARENT_SUBDIRS += $(wildcard %HYPER_ABS%/hyperkernel/)
 	PARENT_SUBDIRS += $(wildcard %HYPER_ABS%/src_*/)
 	PARENT_SUBDIRS += $(wildcard %HYPER_ABS%/hypervisor_*/)
-	PARENT_SUBDIRS += $(wildcard %BUILD_ABS%/makefiles/extended_apis/)
-	PARENT_SUBDIRS += $(wildcard %BUILD_ABS%/makefiles/hyperkernel/)
-	PARENT_SUBDIRS += $(wildcard %BUILD_ABS%/makefiles/src_*/)
-	PARENT_SUBDIRS += $(wildcard %BUILD_ABS%/makefiles/hypervisor_*/)
+
+	ifneq (%HYPER_ABS%, %BUILD_ABS%)
+		PARENT_SUBDIRS += $(wildcard %BUILD_ABS%/makefiles/src_*/)
+		PARENT_SUBDIRS += $(wildcard %BUILD_ABS%/makefiles/hypervisor_*/)
+	endif
 endif
 
 include extensions.mk
