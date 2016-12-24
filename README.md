@@ -47,16 +47,16 @@ In addition to Bareflank’s lightweight, modular design, the entire
 hypervisor has been written using test driven development. As such, all
 of Bareflank’s code comes complete with a set of unit tests to validate
 that the provided code works as expected. These tests are validated using
-[Coveralls](https://coveralls.io/github/Bareflank/hypervisor), and 
-[Travis CI](https://travis-ci.org/Bareflank/hypervisor) has been setup to 
-test styling via 
+[Coveralls](https://coveralls.io/github/Bareflank/hypervisor), and
+[Travis CI](https://travis-ci.org/Bareflank/hypervisor) has been setup to
+test styling via
 [Astyle](http://astyle.sourceforge.net), and static / dynamic analysis
 via [Coverity](https://scan.coverity.com/projects/bareflank-hypervisor),
-[Clang Tidy](http://clang.llvm.org/extra/clang-tidy/), and [Google's 
-Sanitizers](https://github.com/google/sanitizers). In addition, we adhere 
-to the 
+[Clang Tidy](http://clang.llvm.org/extra/clang-tidy/), and [Google's
+Sanitizers](https://github.com/google/sanitizers). In addition, we adhere
+to the
 [CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/325),
-and the 
+and the
 [C++ Core Guidelines](https://github.com/isocpp/CppCoreGuidelines/blob/master/CppCoreGuidelines.md)
 including support for the [Guideline Support Library](https://github.com/Microsoft/GSL).
 
@@ -206,12 +206,12 @@ For more detailed instructions please read the following (based on which OS you 
 ## Extended APIs / Hyperkernel
 
 Since Bareflank only provides the bare minimum implementation, we have created
-two other repositories that extend Bareflank to provide additional 
+two other repositories that extend Bareflank to provide additional
 capabilities that you might find useful. The Extended APIs repo provides
 additional APIs around Intel's VT-x / VT-d. Likely most users of Bareflank will
-find these APIs useful. The Hyperkernel leverages the Extended APIs and 
-Bareflank to provide guest support. If your project requires guest support, 
-you might also find this repo useful as well. 
+find these APIs useful. The Hyperkernel leverages the Extended APIs and
+Bareflank to provide guest support. If your project requires guest support,
+you might also find this repo useful as well.
 
 **Extended APIs:**<br>
 https://github.com/Bareflank/extended_apis
