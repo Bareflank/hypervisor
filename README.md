@@ -203,35 +203,35 @@ For more detailed instructions please read the following (based on which OS you 
 
 [Driver Entry Documentation](https://github.com/Bareflank/hypervisor/tree/master/bfdrivers/src/arch)
 
-## Extended APIs
+## Extended APIs / Hyperkernel
 
-Bareflank's main goal is to provide the "bare" minimum hypervisor.
-Since Bareflank supports C++ 11/14, multiple operating systems,
-and a full toolstack, it's not as simple as say
-[SimpleVisor](https://github.com/ionescu007/SimpleVisor), but still
-adheres to the same basic principles of leaving out the complexity
-of a full blown hypervisor in favor of an implementation that is simple to
-read and follow.
+Since Bareflank only provides the bare minimum implementation, we have created
+two other repositories that extend Bareflank to provide additional 
+capabilities that you might find useful. The Extended APIs repo provides
+additional APIs around Intel's VT-x / VT-d. Likely most users of Bareflank will
+find these APIs useful. The Hyperkernel leverages the Extended APIs and 
+Bareflank to provide guest support. If your project requires guest support, 
+you might also find this repo useful as well. 
 
-It is our goal to provide a hypervisor that others can extend to create
-their own hypervisors. The purpose of the
-[Extended APIs](https://github.com/Bareflank/extended_apis) repository,
-is to provide an extended set of APIs to build your hypervisors from
-that simplify common tasks when working with hypervisors.
-For more information about this project, please see:
-
-```
+**Extended APIs:**<br>
 https://github.com/Bareflank/extended_apis
-```
+
+**Hyperkernel:**<br>
+https://github.com/Bareflank/hyperkernel
 
 ## Example Extensions
 
 To provide examples of how you might extend Bareflank to provide your own custom
 functionality, we have provided a couple of examples:
 
-[Enable VPID](https://github.com/Bareflank/hypervisor_example_vpid) <br>
-[CPUID Count](https://github.com/Bareflank/hypervisor_example_cpuidcount) <br>
-[Extended APIs EPT Hook](https://github.com/Bareflank/extended_apis_example_hook) <br>
+**Enable VPID:**<br>
+https://github.com/Bareflank/hypervisor_example_vpid
+
+**CPUID Count:**<br>
+https://github.com/Bareflank/hypervisor_example_cpuidcount
+
+**Extended APIs EPT Hook:**<br>
+https://github.com/Bareflank/extended_apis_example_hook
 
 ## Roadmap
 
