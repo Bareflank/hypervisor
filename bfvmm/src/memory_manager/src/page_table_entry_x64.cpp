@@ -94,12 +94,20 @@ page_table_entry_x64::set_ps(bool enabled) noexcept
 { *m_pte = enabled ? set_bit(*m_pte, 7) : clear_bit(*m_pte, 7); }
 
 bool
-page_table_entry_x64::pat() const noexcept
+page_table_entry_x64::pat_4k() const noexcept
 { return is_bit_set(*m_pte, 7); }
 
 void
-page_table_entry_x64::set_pat(bool enabled) noexcept
+page_table_entry_x64::set_pat_4k(bool enabled) noexcept
 { *m_pte = enabled ? set_bit(*m_pte, 7) : clear_bit(*m_pte, 7); }
+
+bool
+page_table_entry_x64::pat_large() const noexcept
+{ return is_bit_set(*m_pte, 12); }
+
+void
+page_table_entry_x64::set_pat_large(bool enabled) noexcept
+{ *m_pte = enabled ? set_bit(*m_pte, 12) : clear_bit(*m_pte, 12); }
 
 bool
 page_table_entry_x64::global() const noexcept
@@ -126,19 +134,19 @@ page_table_entry_x64::set_nx(bool enabled) noexcept
 { *m_pte = enabled ? set_bit(*m_pte, 63) : clear_bit(*m_pte, 63); }
 
 page_table_entry_x64::pat_index_type
-page_table_entry_x64::pat_index() const noexcept
+page_table_entry_x64::pat_index_4k() const noexcept
 {
     pat_index_type index = 0;
 
     if (this->pwt()) index += 1;
     if (this->pcd()) index += 2;
-    if (this->pat()) index += 4;
+    if (this->pat_4k()) index += 4;
 
     return index;
 }
 
 void
-page_table_entry_x64::set_pat_index(pat_index_type index)
+page_table_entry_x64::set_pat_index_4k(pat_index_type index)
 {
     expects(index <= 7);
 
@@ -147,49 +155,118 @@ page_table_entry_x64::set_pat_index(pat_index_type index)
         case 0:
             this->set_pwt(false);
             this->set_pcd(false);
-            this->set_pat(false);
+            this->set_pat_4k(false);
             break;
 
         case 1:
             this->set_pwt(true);
             this->set_pcd(false);
-            this->set_pat(false);
+            this->set_pat_4k(false);
             break;
 
         case 2:
             this->set_pwt(false);
             this->set_pcd(true);
-            this->set_pat(false);
+            this->set_pat_4k(false);
             break;
 
         case 3:
             this->set_pwt(true);
             this->set_pcd(true);
-            this->set_pat(false);
+            this->set_pat_4k(false);
             break;
 
         case 4:
             this->set_pwt(false);
             this->set_pcd(false);
-            this->set_pat(true);
+            this->set_pat_4k(true);
             break;
 
         case 5:
             this->set_pwt(true);
             this->set_pcd(false);
-            this->set_pat(true);
+            this->set_pat_4k(true);
             break;
 
         case 6:
             this->set_pwt(false);
             this->set_pcd(true);
-            this->set_pat(true);
+            this->set_pat_4k(true);
             break;
 
         case 7:
             this->set_pwt(true);
             this->set_pcd(true);
-            this->set_pat(true);
+            this->set_pat_4k(true);
+            break;
+    };
+}
+
+page_table_entry_x64::pat_index_type
+page_table_entry_x64::pat_index_large() const noexcept
+{
+    pat_index_type index = 0;
+
+    if (this->pwt()) index += 1;
+    if (this->pcd()) index += 2;
+    if (this->pat_large()) index += 4;
+
+    return index;
+}
+
+void
+page_table_entry_x64::set_pat_index_large(pat_index_type index)
+{
+    expects(index <= 7);
+
+    switch (index)
+    {
+        case 0:
+            this->set_pwt(false);
+            this->set_pcd(false);
+            this->set_pat_large(false);
+            break;
+
+        case 1:
+            this->set_pwt(true);
+            this->set_pcd(false);
+            this->set_pat_large(false);
+            break;
+
+        case 2:
+            this->set_pwt(false);
+            this->set_pcd(true);
+            this->set_pat_large(false);
+            break;
+
+        case 3:
+            this->set_pwt(true);
+            this->set_pcd(true);
+            this->set_pat_large(false);
+            break;
+
+        case 4:
+            this->set_pwt(false);
+            this->set_pcd(false);
+            this->set_pat_large(true);
+            break;
+
+        case 5:
+            this->set_pwt(true);
+            this->set_pcd(false);
+            this->set_pat_large(true);
+            break;
+
+        case 6:
+            this->set_pwt(false);
+            this->set_pcd(true);
+            this->set_pat_large(true);
+            break;
+
+        case 7:
+            this->set_pwt(true);
+            this->set_pcd(true);
+            this->set_pat_large(true);
             break;
     };
 }

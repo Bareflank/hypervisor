@@ -217,8 +217,6 @@ memory_manager_x64::add_md(integer_pointer virt, integer_pointer phys, attr_type
         m_virt_to_attr_map.erase(virt);
     });
 
-    expects(virt != 0);
-    expects(phys != 0);
     expects(attr != 0);
     expects(lower(virt) == 0);
     expects(lower(phys) == 0);

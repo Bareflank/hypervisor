@@ -23,8 +23,8 @@
 # Target Information
 ################################################################################
 
-TARGET_NAME:=test
-TARGET_TYPE:=bin
+TARGET_NAME:=bfm_ioctl
+TARGET_TYPE:=lib
 TARGET_COMPILER:=native
 
 ################################################################################
@@ -38,6 +38,15 @@ NATIVE_LDFLAGS+=
 NATIVE_ARFLAGS+=
 NATIVE_DEFINES+=
 
+ifeq ($(OS), windows)
+    NATIVE_DEFINES+=-Wl,--export-all-symbols
+endif
+
+ifeq ($(PRODUCTION),yes)
+    NATIVE_CCFLAGS+=-O3 -D_FORTIFY_SOURCE=2
+    NATIVE_CXXFLAGS+=-O3 -D_FORTIFY_SOURCE=2
+endif
+
 ################################################################################
 # Output
 ################################################################################
@@ -49,36 +58,42 @@ NATIVE_OUTDIR+=%BUILD_REL%/../bin
 # Sources
 ################################################################################
 
-SOURCES+=test.cpp
-SOURCES+=test_error_codes.cpp
-SOURCES+=test_string.cpp
-SOURCES+=test_vector.cpp
-SOURCES+=test_guard_exceptions.cpp
-SOURCES+=test_bitmanip.cpp
-SOURCES+=test_exceptions.cpp
-SOURCES+=test_upper_lower.cpp
+SOURCES+=
 
 INCLUDE_PATHS+=./
+INCLUDE_PATHS+=../include/
 INCLUDE_PATHS+=%HYPER_ABS%/include/
-INCLUDE_PATHS+=%HYPER_ABS%/bfvmm/include/
 
 LIBS+=
 
-LIBRARY_PATHS+=%BUILD_REL%/../bin/native
+LIBRARY_PATHS+=
 
 ################################################################################
 # Environment Specific
 ################################################################################
 
-WINDOWS_SOURCES+=
-WINDOWS_INCLUDE_PATHS+=
-WINDOWS_LIBS+=
+WINDOWS_SOURCES+=arch/windows/ioctl.cpp
+WINDOWS_SOURCES+=arch/windows/ioctl_private.cpp
+WINDOWS_SOURCES+=arch/windows/stack.cpp
+WINDOWS_INCLUDE_PATHS+=arch/windows/
+WINDOWS_LIBS+=setupapi
 WINDOWS_LIBRARY_PATHS+=
+WINDOWS_CCFLAGS+=-fms-extensions
+WINDOWS_CXXFLAGS+=-fms-extensions
+WINDOWS_CXXFLAGS+=-fms-extensions
 
-LINUX_SOURCES+=
-LINUX_INCLUDE_PATHS+=
-LINUX_LIBS+=
-LINUX_LIBRARY_PATHS+=
+ifeq ($(STATIC_ANALYSIS_ENABLED), true)
+    LINUX_SOURCES+=arch/test/ioctl.cpp
+    LINUX_INCLUDE_PATHS+=
+    LINUX_LIBS+=
+    LINUX_LIBRARY_PATHS+=
+else
+    LINUX_SOURCES+=arch/linux/ioctl.cpp
+    LINUX_SOURCES+=arch/linux/ioctl_private.cpp
+    LINUX_INCLUDE_PATHS+=arch/linux/
+    LINUX_LIBS+=
+    LINUX_LIBRARY_PATHS+=
+endif
 
 ################################################################################
 # Common

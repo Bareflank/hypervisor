@@ -57,6 +57,8 @@ class vmcs_intel_x64_state
 {
 public:
 
+    using integer_pointer = uintptr_t;
+
     vmcs_intel_x64_state() = default;
     virtual ~vmcs_intel_x64_state() = default;
 
@@ -276,6 +278,19 @@ public:
     { (void) val; }
     virtual void set_ia32_gs_base_msr(intel_x64::msrs::value_type val)
     { (void) val; }
+
+    virtual integer_pointer rip() const
+    { return 0; }
+    virtual integer_pointer rsp() const
+    { return 0; }
+
+    virtual void set_rip(integer_pointer val) const
+    { (void) val; }
+    virtual void set_rsp(integer_pointer val) const
+    { (void) val; }
+
+    virtual bool is_guest()
+    { return false; }
 
     virtual void dump() const {}
 };

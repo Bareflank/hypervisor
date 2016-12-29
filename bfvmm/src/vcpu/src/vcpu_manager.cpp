@@ -20,8 +20,6 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #include <gsl/gsl>
-
-#include <debug.h>
 #include <vcpu/vcpu_manager.h>
 
 // -----------------------------------------------------------------------------
@@ -72,40 +70,14 @@ void
 vcpu_manager::run_vcpu(vcpuid::type vcpuid, user_data *data)
 {
     if (auto && vcpu = get_vcpu(vcpuid))
-    {
-        if (!vcpu->is_running())
-            vcpu->run(data);
-        else
-            throw std::logic_error("vcpu is already running");
-
-        if (vcpu->is_guest_vm_vcpu())
-            return;
-
-        bfdebug << "success: host os is " << bfcolor_green "now " << bfcolor_end
-                << "in a vm on vcpuid = " << vcpuid << bfendl;
-    }
-    else
-    {
-        throw std::invalid_argument("invalid vcpuid");
-    }
+        vcpu->run(data);
 }
 
 void
 vcpu_manager::hlt_vcpu(vcpuid::type vcpuid, user_data *data)
 {
     if (auto && vcpu = get_vcpu(vcpuid))
-    {
-        if (vcpu->is_running())
-            vcpu->hlt(data);
-        else
-            return;
-
-        if (vcpu->is_guest_vm_vcpu())
-            return;
-
-        bfdebug << "success: host os is " << bfcolor_red "not " << bfcolor_end
-                << "in a vm on vcpuid = " << vcpuid << bfendl;
-    }
+        vcpu->hlt(data);
 }
 
 void

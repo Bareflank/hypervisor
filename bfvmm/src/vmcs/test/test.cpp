@@ -163,7 +163,7 @@ __vmptrld(void *ptr) noexcept
 { (void)ptr; return !g_vmload_fails; }
 
 extern "C" bool
-__vmlaunch(void) noexcept
+__vmlaunch_demote(void) noexcept
 { return !g_vmlaunch_fails; }
 
 uintptr_t
@@ -209,6 +209,7 @@ vmcs_ut::list_vmcs_intel_x64_cpp()
 {
     this->test_launch_success();
     this->test_launch_vmlaunch_failure();
+    this->test_launch_vmlaunch_demote_failure();
     this->test_launch_create_vmcs_region_failure();
     this->test_launch_create_exit_handler_stack_failure();
     this->test_launch_clear_failure();
@@ -1436,6 +1437,8 @@ vmcs_ut::list()
     this->test_state_segment_registers_access_rights();
     this->test_state_segment_register_base();
     this->test_state_msrs();
+    this->test_state_rip_rsp();
+    this->test_state_is_guest();
     this->test_state_dump();
 
     this->test_host_vm_state();

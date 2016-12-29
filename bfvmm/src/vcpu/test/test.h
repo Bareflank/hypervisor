@@ -107,17 +107,11 @@ private:
     void test_vcpu_manager_run_valid_twice();
     void test_vcpu_manager_run_run_throws();
     void test_vcpu_manager_run_hlt_throws();
-    void test_vcpu_manager_run_is_guest_vm_vcpu_throws();
     void test_vcpu_manager_run_no_create();
-    void test_vcpu_manager_run_is_running();
-    void test_vcpu_manager_run_is_guest_vm();
     void test_vcpu_manager_hlt_valid();
     void test_vcpu_manager_hlt_valid_twice();
     void test_vcpu_manager_hlt_hlt_throws();
-    void test_vcpu_manager_hlt_is_guest_vm_vcpu_throws();
     void test_vcpu_manager_hlt_no_create();
-    void test_vcpu_manager_hlt_is_running();
-    void test_vcpu_manager_hlt_is_guest_vm();
     void test_vcpu_manager_write_null();
     void test_vcpu_manager_write_hello();
     void test_vcpu_manager_write_no_create();

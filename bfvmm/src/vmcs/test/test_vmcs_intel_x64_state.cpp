@@ -254,6 +254,30 @@ vmcs_ut::test_state_msrs()
 }
 
 void
+vmcs_ut::test_state_rip_rsp()
+{
+    this->expect_no_exception([&]
+    {
+        vmcs_intel_x64_state state{};
+
+        this->expect_true(state.rip() == 0U);
+        this->expect_true(state.rsp() == 0U);
+        this->expect_no_exception([&]{ state.set_rip(42U); });
+        this->expect_no_exception([&]{ state.set_rsp(42U); });
+    });
+}
+
+void
+vmcs_ut::test_state_is_guest()
+{
+    this->expect_no_exception([&]
+    {
+        vmcs_intel_x64_state state{};
+        this->expect_false(state.is_guest());
+    });
+}
+
+void
 vmcs_ut::test_state_dump()
 {
     this->expect_no_exception([&]

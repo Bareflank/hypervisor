@@ -19,43 +19,19 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <gsl/gsl>
+#include <test.h>
+#include <upper_lower.h>
 
-#include <debug.h>
-#include <entry/entry.h>
-#include <guard_exceptions.h>
-#include <vcpu/vcpu_manager.h>
-
-extern "C" int64_t
-start_vmm(uint64_t arg) noexcept
+void
+misc_ut::test_upper()
 {
-    return guard_exceptions(ENTRY_ERROR_VMM_START_FAILED, [&]()
-    {
-        g_vcm->create_vcpu(arg);
-
-        auto ___ = gsl::on_failure([&]
-        { g_vcm->delete_vcpu(arg); });
-
-        g_vcm->run_vcpu(arg);
-
-        bfdebug << "success: host os is " << bfcolor_green "now " << bfcolor_end
-                << "in a vm on vcpuid = " << arg << bfendl;
-
-        return ENTRY_SUCCESS;
-    });
+    this->expect_true(bfn::upper(0xABCDEF0123456789UL) == 0xABCDEF0123456000UL);
+    this->expect_true(bfn::upper(0xABCDEF0123456789UL, 12) == 0xABCDEF0123456000UL);
 }
 
-extern "C" int64_t
-stop_vmm(uint64_t arg) noexcept
+void
+misc_ut::test_lower()
 {
-    return guard_exceptions(ENTRY_ERROR_VMM_STOP_FAILED, [&]()
-    {
-        g_vcm->hlt_vcpu(arg);
-        g_vcm->delete_vcpu(arg);
-
-        bfdebug << "success: host os is " << bfcolor_red "not " << bfcolor_end
-                << "in a vm on vcpuid = " << arg << bfendl;
-
-        return ENTRY_SUCCESS;
-    });
+    this->expect_true(bfn::lower(0xABCDEF0123456789UL) == 0x0000000000000789UL);
+    this->expect_true(bfn::lower(0xABCDEF0123456789UL, 12) == 0x0000000000000789UL);
 }

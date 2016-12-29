@@ -26,6 +26,8 @@
 
 #include <vector>
 #include <memory>
+
+#include <memory.h>
 #include <memory_manager/page_table_entry_x64.h>
 
 class page_table_x64
@@ -35,6 +37,7 @@ public:
     using pointer = uintptr_t *;
     using integer_pointer = uintptr_t;
     using size_type = std::size_t;
+    using memory_descriptor_list = std::vector<memory_descriptor>;
 
     /// Constructor
     ///
@@ -136,14 +139,30 @@ public:
     ///
     /// @param addr the virtual address of the pte to locate
     ///
-    page_table_entry_x64 virt_to_pte(integer_pointer addr)
+    page_table_entry_x64 virt_to_pte(integer_pointer addr) const
     { return virt_to_pte(addr, x64::page_table::pml4::from); }
+
+    /// Page Table to Memory Descriptor List
+    ///
+    /// This function converts the internal page table tree structure into a
+    /// linear, memory descriptor list. Page table entry information is not
+    /// provide, only the page tables.
+    /// pages.
+    ///
+    /// @expects
+    /// @ensures
+    ///
+    /// @return memory descriptor list
+    ///
+    memory_descriptor_list pt_to_mdl() const
+    { memory_descriptor_list mdl; return pt_to_mdl(mdl); }
 
 private:
 
     page_table_entry_x64 add_page(integer_pointer addr, integer_pointer bits, integer_pointer end);
     void remove_page(integer_pointer addr, integer_pointer bits);
-    page_table_entry_x64 virt_to_pte(integer_pointer addr, integer_pointer bits);
+    page_table_entry_x64 virt_to_pte(integer_pointer addr, integer_pointer bits) const;
+    memory_descriptor_list pt_to_mdl(memory_descriptor_list &mdl) const;
 
     bool empty() const noexcept;
     size_type global_size() const noexcept;

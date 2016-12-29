@@ -699,7 +699,7 @@ check::guest_cs_access_rights_type()
     }
 
     throw std::logic_error("guest cs type must be 9, 11, 13, 15, or "
-                           "3 (if unrestricted guest support is enabled");
+                           "3 (if unrestricted guest support is enabled)");
 }
 
 void

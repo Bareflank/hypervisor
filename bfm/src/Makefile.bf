@@ -72,33 +72,6 @@ LIBS+=
 LIBRARY_PATHS+=
 
 ################################################################################
-# Environment Specific
-################################################################################
-
-WINDOWS_SOURCES+=arch/windows/ioctl.cpp
-WINDOWS_SOURCES+=arch/windows/ioctl_private.cpp
-WINDOWS_SOURCES+=arch/windows/stack.cpp
-WINDOWS_INCLUDE_PATHS+=arch/windows/
-WINDOWS_LIBS+=setupapi
-WINDOWS_LIBRARY_PATHS+=
-WINDOWS_CCFLAGS+=-fms-extensions
-WINDOWS_CXXFLAGS+=-fms-extensions
-WINDOWS_CXXFLAGS+=-fms-extensions
-
-ifeq ($(STATIC_ANALYSIS_ENABLED), true)
-    LINUX_SOURCES+=arch/test/ioctl.cpp
-    LINUX_INCLUDE_PATHS+=
-    LINUX_LIBS+=
-    LINUX_LIBRARY_PATHS+=
-else
-    LINUX_SOURCES+=arch/linux/ioctl.cpp
-    LINUX_SOURCES+=arch/linux/ioctl_private.cpp
-    LINUX_INCLUDE_PATHS+=arch/linux/
-    LINUX_LIBS+=
-    LINUX_LIBRARY_PATHS+=
-endif
-
-################################################################################
 # Common
 ################################################################################
 

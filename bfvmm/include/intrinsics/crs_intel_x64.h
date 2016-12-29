@@ -28,6 +28,9 @@
 extern "C" uint64_t __read_cr0(void) noexcept;
 extern "C" void __write_cr0(uint64_t val) noexcept;
 
+extern "C" uint64_t __read_cr2(void) noexcept;
+extern "C" void __write_cr2(uint64_t val) noexcept;
+
 extern "C" uint64_t __read_cr3(void) noexcept;
 extern "C" void __write_cr3(uint64_t val) noexcept;
 
@@ -218,6 +221,17 @@ namespace cr0
         if (paging::get())
             bfdebug << "    - " << paging::name << bfendl;
     }
+}
+
+namespace cr2
+{
+    using value_type = uint64_t;
+
+    inline auto get() noexcept
+    { return __read_cr2(); }
+
+    template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
+    void set(T val) noexcept { __write_cr2(val); }
 }
 
 namespace cr3

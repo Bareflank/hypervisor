@@ -140,17 +140,11 @@ vcpu_ut::list()
     this->test_vcpu_manager_run_valid_twice();
     this->test_vcpu_manager_run_run_throws();
     this->test_vcpu_manager_run_hlt_throws();
-    this->test_vcpu_manager_run_is_guest_vm_vcpu_throws();
     this->test_vcpu_manager_run_no_create();
-    this->test_vcpu_manager_run_is_running();
-    this->test_vcpu_manager_run_is_guest_vm();
     this->test_vcpu_manager_hlt_valid();
     this->test_vcpu_manager_hlt_valid_twice();
     this->test_vcpu_manager_hlt_hlt_throws();
-    this->test_vcpu_manager_hlt_is_guest_vm_vcpu_throws();
     this->test_vcpu_manager_hlt_no_create();
-    this->test_vcpu_manager_hlt_is_running();
-    this->test_vcpu_manager_hlt_is_guest_vm();
     this->test_vcpu_manager_write_null();
     this->test_vcpu_manager_write_hello();
     this->test_vcpu_manager_write_no_create();

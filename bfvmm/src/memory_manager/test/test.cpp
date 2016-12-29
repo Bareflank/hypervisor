@@ -66,8 +66,6 @@ memory_manager_ut::list()
     this->test_memory_manager_x64_malloc_page();
     this->test_memory_manager_x64_malloc_map();
     this->test_memory_manager_x64_add_md();
-    this->test_memory_manager_x64_add_md_invalid_virt();
-    this->test_memory_manager_x64_add_md_invalid_phys();
     this->test_memory_manager_x64_add_md_invalid_type();
     this->test_memory_manager_x64_add_md_unaligned_physical();
     this->test_memory_manager_x64_add_md_unaligned_virtual();
@@ -92,6 +90,7 @@ memory_manager_ut::list()
     this->test_page_table_x64_remove_page_unknown_success();
     this->test_page_table_x64_virt_to_pte_invalid();
     this->test_page_table_x64_virt_to_pte_success();
+    this->test_page_table_x64_pt_to_mdl_success();
 
     this->test_page_table_entry_x64_present();
     this->test_page_table_entry_x64_rw();
@@ -143,10 +142,18 @@ memory_manager_ut::list()
     this->test_root_page_table_x64_init_failure();
     this->test_root_page_table_x64_init_success();
     this->test_root_page_table_x64_cr3();
-    this->test_root_page_table_x64_map_failure();
-    this->test_root_page_table_x64_map_add_md_failure();
-    this->test_root_page_table_x64_map_unmap_success();
+    this->test_root_page_table_x64_map_1g();
+    this->test_root_page_table_x64_map_2m();
+    this->test_root_page_table_x64_map_4k();
+    this->test_root_page_table_x64_map_invalid();
     this->test_root_page_table_x64_map_unmap_twice_success();
+    this->test_root_page_table_x64_setup_identity_map_1g_invalid();
+    this->test_root_page_table_x64_setup_identity_map_1g_valid();
+    this->test_root_page_table_x64_setup_identity_map_2m_invalid();
+    this->test_root_page_table_x64_setup_identity_map_2m_valid();
+    this->test_root_page_table_x64_setup_identity_map_4k_invalid();
+    this->test_root_page_table_x64_setup_identity_map_4k_valid();
+    this->test_root_page_table_x64_pt_to_mdl();
 
     this->test_pat_x64_mem_attr_to_pat_index();
     this->test_mem_attr_x64_mem_type_to_attr();

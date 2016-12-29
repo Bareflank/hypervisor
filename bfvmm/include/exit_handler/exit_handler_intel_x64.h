@@ -51,6 +51,8 @@ class exit_handler_intel_x64
 {
 public:
 
+    using ret_type = int64_t;
+
     /// Default Constructor
     ///
     /// @expects none
@@ -84,6 +86,23 @@ public:
     /// @ensures none
     ///
     virtual void halt() noexcept;
+
+    /// Complete VMCall
+    ///
+    /// Completes a VMCall given a set of previously setup registers. Note
+    /// that most of the time you should not need to run this function as
+    /// a vmcall will call this for you. If however your VMCall never returns
+    /// and state is lost, you can complete the VMCall at a later time using
+    /// this function. Special care should be taken to ensure the proper
+    /// register values are maintained.
+    ///
+    /// @expects none
+    /// @ensures none
+    ///
+    /// @param ret BF_VMCALL_SUCCESS on success, failure otherwise
+    /// @param regs the register state to return
+    ///
+    virtual void complete_vmcall(ret_type ret, vmcall_registers_t &regs) noexcept;
 
 protected:
 

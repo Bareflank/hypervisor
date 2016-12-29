@@ -65,7 +65,7 @@ matrix:
       - COVERALLS=true make
       - make test
     after_success:
-      - coveralls --build-root makefiles -e build_libbfc -e build_libcxx -e build_libcxxabi -e build_newlib -e source_libbfc -e source_libcxx -e source_libcxxabi -e source_llvm -e source_newlib -e sysroot -e bfdrivers/src/arch -e bfm/src/arch -e bfvmm/src/intrinsics -e include/hippomocks.h -e include/detail -e include/json.h -e include/unittest.h -e include/new_delete.h -e include/gsl -e bfunwind --gcov-options '\-lp'
+      - coveralls --build-root makefiles -e build_libbfc -e build_libcxx -e build_libcxxabi -e build_newlib -e source_libbfc -e source_libcxx -e source_libcxxabi -e source_llvm -e source_newlib -e sysroot -e bfdrivers/src/arch -e bfm/ioctl/arch -e bfvmm/src/intrinsics -e include/hippomocks.h -e include/detail -e include/json.h -e include/unittest.h -e include/new_delete.h -e include/gsl -e bfunwind --gcov-options '\-lp'
 
   #
   # Clang Tidy

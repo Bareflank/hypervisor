@@ -25,6 +25,7 @@
 using namespace intel_x64;
 
 cr0::value_type g_cr0 = 0;
+cr2::value_type g_cr2 = 0;
 cr3::value_type g_cr3 = 0;
 cr4::value_type g_cr4 = 0;
 
@@ -35,6 +36,14 @@ __read_cr0(void) noexcept
 extern "C" void
 __write_cr0(uint64_t val) noexcept
 { g_cr0 = val; }
+
+extern "C" uint64_t
+__read_cr2(void) noexcept
+{ return g_cr2; }
+
+extern "C" void
+__write_cr2(uint64_t val) noexcept
+{ g_cr2 = val; }
 
 extern "C" uint64_t
 __read_cr3(void) noexcept
@@ -194,6 +203,13 @@ intrinsics_ut::test_cr0_intel_x64_paging()
     this->expect_false(cr0::paging::get());
 
     this->expect_true(cr0::get() == 0x0);
+}
+
+void
+intrinsics_ut::test_cr2_intel_x64()
+{
+    cr2::set(0x100U);
+    this->expect_true(cr2::get() == 0x100U);
 }
 
 void

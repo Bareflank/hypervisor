@@ -30,7 +30,9 @@
 #include <type_traits>
 
 #include <memory.h>
+#include <upper_lower.h>
 #include <guard_exceptions.h>
+
 #include <memory_manager/pat_x64.h>
 #include <memory_manager/mem_attr_x64.h>
 #include <memory_manager/memory_manager_x64.h>
@@ -50,40 +52,6 @@ namespace bfn
 
 template <class T>
 class unique_map_ptr_x64;
-
-/// Lower
-///
-/// @param ptr the pointer to mask
-/// @return the lower 12 bits of ptr
-///
-inline auto lower(uintptr_t ptr) noexcept
-{ return ptr & (x64::page_size - 1); }
-
-/// Lower
-///
-/// @param ptr the pointer to mask
-/// @param from the number of bits to mask
-/// @return the lower "from" bits of ptr
-///
-inline auto lower(uintptr_t ptr, uintptr_t from) noexcept
-{ return ptr & ((0x1UL << from) - 1); }
-
-/// Upper
-///
-/// @param ptr the pointer to mask
-/// @return the upper 12 bits of ptr
-///
-inline auto upper(uintptr_t ptr) noexcept
-{ return ptr & ~(x64::page_size - 1); }
-
-/// Upper
-///
-/// @param ptr the pointer to mask
-/// @param from the number of bits to mask
-/// @return the upper "from" bits of ptr
-///
-inline auto upper(uintptr_t ptr, uintptr_t from) noexcept
-{ return ptr & ~((0x1UL << from) - 1); }
 
 /// Make Unique Map (Single Page)
 ///
@@ -407,7 +375,7 @@ public:
         expects(phys != 0);
         expects(lower(phys) == 0);
 
-        g_pt->map(vmap, upper(phys), attr);
+        g_pt->map_4k(vmap, upper(phys), attr);
 
         flush();
     }
@@ -493,7 +461,7 @@ public:
             auto &&size = p.second;
 
             for (poff = 0; poff < size; poff += x64::page_size, voff += x64::page_size)
-                g_pt->map(vmap + voff, phys + poff, attr);
+                g_pt->map_4k(vmap + voff, phys + poff, attr);
         }
 
         flush();
@@ -580,7 +548,7 @@ public:
                 if (pdpt_pte.ps())
                 {
                     phys = pdpt_pte.phys_addr();
-                    pati = pdpt_pte.pat_index();
+                    pati = pdpt_pte.pat_index_large();
                     break;
                 }
 
@@ -595,7 +563,7 @@ public:
                 if (pd_pte.ps())
                 {
                     phys = pd_pte.phys_addr();
-                    pati = pd_pte.pat_index();
+                    pati = pd_pte.pat_index_large();
                     break;
                 }
 
@@ -608,7 +576,7 @@ public:
                 expects(pt_pte.phys_addr() != 0);
 
                 phys = pt_pte.phys_addr();
-                pati = pt_pte.pat_index();
+                pati = pt_pte.pat_index_4k();
                 break;
             }
 
@@ -618,7 +586,7 @@ public:
             auto &&perm = x64::memory_attr::rw;
             auto &&type = x64::msrs::ia32_pat::pa(pat, pati);
 
-            g_pt->map(vadr, upper(padr), x64::memory_attr::mem_type_to_attr(perm, type));
+            g_pt->map_4k(vadr, upper(padr), x64::memory_attr::mem_type_to_attr(perm, type));
         }
 
         flush();
