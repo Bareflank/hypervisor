@@ -361,6 +361,8 @@ private:
     void test_vmx_intel_x64_vmread_vmwrite_succcess();
     void test_vmx_intel_x64_vmlaunch_failure();
     void test_vmx_intel_x64_vmlaunch_success();
+    void test_vmx_intel_x64_vmlaunch_demote_failure();
+    void test_vmx_intel_x64_vmlaunch_demote_success();
     void test_vmx_intel_x64_invept();
     void test_vmx_intel_x64_invvpid();
 

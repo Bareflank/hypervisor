@@ -277,6 +277,8 @@ public:
     virtual void set_ia32_gs_base_msr(intel_x64::msrs::value_type val)
     { (void) val; }
 
+    virtual bool is_guest() { return false; }
+
     virtual void dump() const {}
 };
 

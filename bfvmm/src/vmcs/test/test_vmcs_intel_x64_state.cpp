@@ -254,6 +254,16 @@ vmcs_ut::test_state_msrs()
 }
 
 void
+vmcs_ut::test_state_is_guest()
+{
+    this->expect_no_exception([&]
+    {
+        vmcs_intel_x64_state state{};
+        this->expect_false(state.is_guest());
+    });
+}
+
+void
 vmcs_ut::test_state_dump()
 {
     this->expect_no_exception([&]

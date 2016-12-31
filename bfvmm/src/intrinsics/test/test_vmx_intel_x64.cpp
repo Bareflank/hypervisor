@@ -82,6 +82,10 @@ extern "C" bool
 __vmlaunch(void) noexcept
 { return !g_vmlaunch_fails; }
 
+extern "C" bool
+__vmlaunch_demote(void) noexcept
+{ return !g_vmlaunch_fails; }
+
 extern "C" void
 __invept(uint64_t type, void *ptr) noexcept
 { (void) type; (void) ptr; }
@@ -236,6 +240,22 @@ intrinsics_ut::test_vmx_intel_x64_vmlaunch_failure()
 
     g_vmlaunch_fails = true;
     this->expect_exception([&] { vm::launch(); }, ""_ut_ree);
+}
+
+void
+intrinsics_ut::test_vmx_intel_x64_vmlaunch_demote_success()
+{
+    this->expect_no_exception([&] { vm::launch_demote(); });
+}
+
+void
+intrinsics_ut::test_vmx_intel_x64_vmlaunch_demote_failure()
+{
+    auto ___ = gsl::finally([&]
+    { g_vmlaunch_fails = false; });
+
+    g_vmlaunch_fails = true;
+    this->expect_exception([&] { vm::launch_demote(); }, ""_ut_ree);
 }
 
 void
