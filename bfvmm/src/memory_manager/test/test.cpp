@@ -82,15 +82,17 @@ memory_manager_ut::list()
     this->test_memory_manager_x64_virtint_to_attrint_random_address();
     this->test_memory_manager_x64_virtint_to_attrint_nullptr();
 
-    this->test_page_table_x64_no_entry();
-    this->test_page_table_x64_with_entry();
-    this->test_page_table_x64_add_remove_page_success();
-    this->test_page_table_x64_add_remove_many_pages_success();
-    this->test_page_table_x64_add_page_twice_failure();
-    this->test_page_table_x64_remove_page_twice_failure();
-    this->test_page_table_x64_remove_page_unknown_failure();
+    this->test_page_table_x64_add_remove_page_success_without_setting();
+    this->test_page_table_x64_add_remove_page_1g_success();
+    this->test_page_table_x64_add_remove_page_2m_success();
+    this->test_page_table_x64_add_remove_page_4k_success();
+    this->test_page_table_x64_add_remove_page_swap_success();
+    this->test_page_table_x64_add_page_twice_success();
+    this->test_page_table_x64_remove_page_twice_success();
+    this->test_page_table_x64_remove_page_unknown_success();
+    this->test_page_table_x64_virt_to_pte_invalid();
+    this->test_page_table_x64_virt_to_pte_success();
 
-    this->test_page_table_entry_x64_invalid();
     this->test_page_table_entry_x64_present();
     this->test_page_table_entry_x64_rw();
     this->test_page_table_entry_x64_us();
@@ -115,8 +117,11 @@ memory_manager_ut::list()
     this->test_unique_map_ptr_x64_phys_range_constructor_success();
     this->test_unique_map_ptr_x64_virt_cr3_constructor_invalid_args();
     this->test_unique_map_ptr_x64_virt_cr3_constructor_mm_map_fails();
-    this->test_unique_map_ptr_x64_virt_cr3_constructor_success();
-    this->test_unique_map_ptr_x64_virt_cr3_constructor_success_large_page();
+    this->test_unique_map_ptr_x64_virt_cr3_constructor_success_1g();
+    this->test_unique_map_ptr_x64_virt_cr3_constructor_success_2m();
+    this->test_unique_map_ptr_x64_virt_cr3_constructor_success_4k();
+    this->test_unique_map_ptr_x64_virt_cr3_constructor_success_4k_aligned_addr();
+    this->test_unique_map_ptr_x64_virt_cr3_constructor_success_4k_aligned_size();
     this->test_unique_map_ptr_x64_virt_cr3_constructor_not_present();
     this->test_unique_map_ptr_x64_virt_cr3_constructor_invalid_phys_addr();
     this->test_unique_map_ptr_x64_copy_constructor();
@@ -130,6 +135,10 @@ memory_manager_ut::list()
     this->test_unique_map_ptr_x64_cache_flush();
     this->test_unique_map_ptr_x64_comparison();
     this->test_unique_map_ptr_x64_make_failure();
+    this->test_virt_to_phys_with_cr3_invalid();
+    this->test_virt_to_phys_with_cr3_1g();
+    this->test_virt_to_phys_with_cr3_2m();
+    this->test_virt_to_phys_with_cr3_4k();
 
     this->test_root_page_table_x64_init_failure();
     this->test_root_page_table_x64_init_success();

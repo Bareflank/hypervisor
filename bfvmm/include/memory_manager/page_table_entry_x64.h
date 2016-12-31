@@ -80,28 +80,21 @@ public:
     using integer_pointer = uintptr_t;
     using pat_index_type = uint64_t;
 
-    /// Invalid Constructor
-    ///
-    /// @expects none
-    /// @ensures none
-    ///
-    page_table_entry_x64() noexcept;
-
-    /// Default Constructor
+    /// PTE Constructor
     ///
     /// @expects pte != nullptr
     /// @ensures none
     ///
     /// @param pte the pte that this page table entry encapsulates.
     ///
-    page_table_entry_x64(const gsl::not_null<pointer> &pte) noexcept;
+    page_table_entry_x64(gsl::not_null<pointer> pte) noexcept;
 
     /// Destructor
     ///
     /// @expects none
     /// @ensures none
     ///
-    virtual ~page_table_entry_x64() = default;
+    ~page_table_entry_x64() = default;
 
     /// Present
     ///

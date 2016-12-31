@@ -27,12 +27,6 @@
 using pte_type = page_table_entry_x64::integer_pointer;
 
 void
-memory_manager_ut::test_page_table_entry_x64_invalid()
-{
-    std::make_unique<page_table_entry_x64>();
-}
-
-void
 memory_manager_ut::test_page_table_entry_x64_present()
 {
     pte_type entry = 0;

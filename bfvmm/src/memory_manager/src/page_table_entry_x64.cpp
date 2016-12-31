@@ -25,13 +25,7 @@
 #include <intrinsics/x64.h>
 using namespace x64;
 
-static page_table_entry_x64::integer_pointer g_invalid_pte = 0;
-
-page_table_entry_x64::page_table_entry_x64() noexcept :
-    m_pte(&g_invalid_pte)
-{ }
-
-page_table_entry_x64::page_table_entry_x64(const gsl::not_null<pointer> &pte) noexcept :
+page_table_entry_x64::page_table_entry_x64(gsl::not_null<pointer> pte) noexcept :
     m_pte(pte.get())
 { }
 

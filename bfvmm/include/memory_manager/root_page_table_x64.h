@@ -118,7 +118,7 @@ private:
 
     root_page_table_x64() noexcept;
 
-    gsl::not_null<page_table_entry_x64 *> add_page(integer_pointer virt);
+    page_table_entry_x64 add_page(integer_pointer virt);
     void remove_page(integer_pointer virt);
 
     void map_page(integer_pointer virt, integer_pointer phys, attr_type attr);
@@ -126,6 +126,7 @@ private:
 
 private:
 
+    integer_pointer m_cr3;
     std::unique_ptr<page_table_x64> m_root_pt;
 
 public:
