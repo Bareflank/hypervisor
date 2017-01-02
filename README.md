@@ -96,16 +96,18 @@ a clear method for extending the hypervisor via inheritance, but also to
 provide access to the C++ STL to reduce the time it takes to prototype and
 implement new technologies. For example, suppose you’re writing an
 introspection hypervisor that needs to store the different system calls that
-are being made in a hash table for fast lookups. Doing this in an existing C
-based hypervisor might require you to create your own hash table implementation.
+are being made in a data structure for fast lookups. Doing this in an existing C
+based hypervisor might require you to create your own data structure.
 This same implementation is trivial with the STL's existing data structures.
 With Bareflank's design, you can focus on the goal of your project, and less
 on implementing the foundation needed to support your project.
 
 Bareflank will always maintain the "bare minimum" needed to stand up a
-hypervisor. Future repositories/projects will be created that extend
-the hypervisor to add additional API support for common research tasks (e.g.
-VT-x APIs, LibVMI APIs, and even guest support APIs). Long term, it is our
+hypervisor. Additional repositories like the 
+[Extended APIs](https://github.com/Bareflank/extended_apis) repo and the
+[Hyperkernel](https://github.com/Bareflank/hyperkernel) repo have been created 
+that extend the hypervisor to add additional API support for common research tasks (e.g.
+VT-x / VT-d APIs and guest support APIs). Long term, it is our
 hope that others will leverage Bareflank to create hypervisors
 capable of competing with existing type 1 and type 2 open source hypervisors,
 but Bareflank itself will remain focused on the bare minimum scaffolding.
