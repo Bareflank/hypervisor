@@ -104,7 +104,7 @@ static auto
 setup_pt(MockRepository &mocks)
 {
     auto pt = mocks.Mock<root_page_table_x64>();
-    mocks.OnCallFunc(root_page_table_x64::instance).Return(pt);
+    mocks.OnCallFunc(root_pt).Return(pt);
     mocks.OnCall(pt, root_page_table_x64::cr3).Return(0x000000ABCDEF0000);
 
     return pt;

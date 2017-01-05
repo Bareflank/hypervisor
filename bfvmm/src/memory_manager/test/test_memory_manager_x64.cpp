@@ -96,28 +96,6 @@ memory_manager_ut::test_memory_manager_x64_add_md()
 }
 
 void
-memory_manager_ut::test_memory_manager_x64_add_md_invalid_virt()
-{
-    memory_manager_x64::integer_pointer virt = 0;
-    memory_manager_x64::integer_pointer phys = 0x54321000;
-    memory_manager_x64::attr_type attr = MEMORY_TYPE_R | MEMORY_TYPE_W | MEMORY_TYPE_E;
-
-    this->expect_exception([&] { g_mm->add_md(virt, phys, attr); }, ""_ut_ffe);
-    this->expect_true(g_mm->descriptors().empty());
-}
-
-void
-memory_manager_ut::test_memory_manager_x64_add_md_invalid_phys()
-{
-    memory_manager_x64::integer_pointer virt = 0x12345000;
-    memory_manager_x64::integer_pointer phys = 0;
-    memory_manager_x64::attr_type attr = MEMORY_TYPE_R | MEMORY_TYPE_W | MEMORY_TYPE_E;
-
-    this->expect_exception([&] { g_mm->add_md(virt, phys, attr); }, ""_ut_ffe);
-    this->expect_true(g_mm->descriptors().empty());
-}
-
-void
 memory_manager_ut::test_memory_manager_x64_add_md_invalid_type()
 {
     memory_manager_x64::integer_pointer virt = 0x12345000;

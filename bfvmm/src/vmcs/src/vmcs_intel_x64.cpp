@@ -74,7 +74,10 @@ vmcs_intel_x64::launch(gsl::not_null<vmcs_intel_x64_state *> host_state,
     auto ___ = gsl::on_failure([&]
     { vmcs::check::all(); });
 
-    vm::launch();
+    if (guest_state->is_guest())
+        vm::launch();
+    else
+        vm::launch_demote();
 }
 
 void
@@ -334,6 +337,8 @@ vmcs_intel_x64::write_natural_guest_state(gsl::not_null<vmcs_intel_x64_state *> 
     vmcs::guest_idtr_base::set(state->idt_base());
 
     vmcs::guest_dr7::set(state->dr7());
+    vmcs::guest_rsp::set(state->rsp());
+    vmcs::guest_rip::set(state->rip());
     vmcs::guest_rflags::set(state->rflags());
 
     vmcs::guest_ia32_sysenter_esp::set(state->ia32_sysenter_esp_msr());

@@ -34,6 +34,7 @@ setup_mm(MockRepository &mocks)
     auto mm = mocks.Mock<memory_manager_x64>();
     mocks.OnCallFunc(memory_manager_x64::instance).Return(mm);
     mocks.OnCall(mm, memory_manager_x64::virtptr_to_physint).Return(0x0000000ABCDEF0000);
+    mocks.OnCall(mm, memory_manager_x64::virtint_to_physint).Return(0x0000000ABCDEF0000);
 
     return mm;
 }
@@ -325,7 +326,7 @@ memory_manager_ut::test_page_table_x64_virt_to_pte_invalid()
 
         pml4->add_page_4k(virt);
 
-        this->expect_exception([&]{ pml4->virt_to_pte(virt + 0x40000000); }, ""_ut_lee);
+        this->expect_exception([&]{ pml4->virt_to_pte(virt + 0x40000000); }, ""_ut_ree);
 
         pml4->remove_page(virt);
         this->expect_true(pml4->global_size() == 0);
@@ -347,6 +348,30 @@ memory_manager_ut::test_page_table_x64_virt_to_pte_success()
         this->expect_no_exception([&]{ pml4->virt_to_pte(virt); });
 
         pml4->remove_page(virt);
+        this->expect_true(pml4->global_size() == 0);
+    });
+}
+
+void
+memory_manager_ut::test_page_table_x64_pt_to_mdl_success()
+{
+    MockRepository mocks;
+    setup_mm(mocks);
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        auto &&scr3 = 0x0UL;
+        auto &&pml4 = std::make_unique<page_table_x64>(&scr3);
+
+        this->expect_true(pml4->pt_to_mdl().size() == 1);
+        pml4->add_page_1g(0x1000);
+        this->expect_true(pml4->pt_to_mdl().size() == 2);
+        pml4->add_page_2m(0x1000);
+        this->expect_true(pml4->pt_to_mdl().size() == 3);
+        pml4->add_page_4k(0x1000);
+        this->expect_true(pml4->pt_to_mdl().size() == 4);
+
+        pml4->remove_page(0x1000);
         this->expect_true(pml4->global_size() == 0);
     });
 }

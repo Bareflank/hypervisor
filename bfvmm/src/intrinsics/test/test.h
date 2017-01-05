@@ -283,6 +283,7 @@ private:
     void test_cr0_intel_x64_not_write_through();
     void test_cr0_intel_x64_cache_disable();
     void test_cr0_intel_x64_paging();
+    void test_cr2_intel_x64();
     void test_cr3_intel_x64();
     void test_cr4_intel_x64();
     void test_cr4_intel_x64_v8086_mode_extensions();
@@ -361,6 +362,8 @@ private:
     void test_vmx_intel_x64_vmread_vmwrite_succcess();
     void test_vmx_intel_x64_vmlaunch_failure();
     void test_vmx_intel_x64_vmlaunch_success();
+    void test_vmx_intel_x64_vmlaunch_demote_failure();
+    void test_vmx_intel_x64_vmlaunch_demote_success();
     void test_vmx_intel_x64_invept();
     void test_vmx_intel_x64_invvpid();
 

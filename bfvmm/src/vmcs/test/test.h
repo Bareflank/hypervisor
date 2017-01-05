@@ -157,6 +157,7 @@ private:
 
     void test_launch_success();
     void test_launch_vmlaunch_failure();
+    void test_launch_vmlaunch_demote_failure();
     void test_launch_create_vmcs_region_failure();
     void test_launch_create_exit_handler_stack_failure();
     void test_launch_clear_failure();
@@ -1264,6 +1265,8 @@ private:
     void test_state_segment_registers_access_rights();
     void test_state_segment_register_base();
     void test_state_msrs();
+    void test_state_rip_rsp();
+    void test_state_is_guest();
     void test_state_dump();
 
     void test_host_vm_state();

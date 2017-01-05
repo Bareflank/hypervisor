@@ -33,6 +33,7 @@ extern "C" bool __vmptrst(void *ptr) noexcept;
 extern "C" bool __vmread(uint64_t field, uint64_t *val) noexcept;
 extern "C" bool __vmwrite(uint64_t field, uint64_t val) noexcept;
 extern "C" bool __vmlaunch(void) noexcept;
+extern "C" bool __vmlaunch_demote(void) noexcept;
 extern "C" void __invept(uint64_t type, void *ptr) noexcept;
 extern "C" void __invvipd(uint64_t type, void *ptr) noexcept;
 
@@ -150,6 +151,12 @@ namespace vm
     {
         if (!__vmlaunch())
             throw std::runtime_error("vm::launch failed");
+    }
+
+    inline void launch_demote()
+    {
+        if (!__vmlaunch_demote())
+            throw std::runtime_error("vm::launch_demote failed");
     }
 }
 }

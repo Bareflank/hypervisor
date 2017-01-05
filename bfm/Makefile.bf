@@ -23,6 +23,7 @@
 # Subdirs
 ################################################################################
 
+SUBDIRS += ioctl
 SUBDIRS += src
 SUBDIRS += main
 SUBDIRS += bin

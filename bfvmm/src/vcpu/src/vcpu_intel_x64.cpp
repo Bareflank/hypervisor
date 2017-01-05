@@ -90,6 +90,11 @@ vcpu_intel_x64::run(user_data *data)
         auto ___ = gsl::on_success([&]
         { m_vmcs_launched = true; });
 
+        vcpu::run(data);
+
+        auto ___ = gsl::on_failure([&]
+        { vcpu::hlt(data); });
+
         if (this->is_host_vm_vcpu())
             m_vmxon->start();
 
@@ -106,8 +111,6 @@ vcpu_intel_x64::run(user_data *data)
         m_vmcs->load();
         m_vmcs->resume();
     }
-
-    vcpu::run(data);
 }
 
 void

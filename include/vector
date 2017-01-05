@@ -64,7 +64,7 @@ auto find(std::vector<T> &v, const I index)
 /// @return returns the iterator at pos == index, or throws gsl::fail_fast
 ///
 template<class T, class I, class = typename std::enable_if<std::is_integral<I>::value>::type>
-const auto cfind(std::vector<T> &v, const I index)
+const auto cfind(const std::vector<T> &v, const I index)
 {
     // [[ensures ret: ret != v.end()]]
     expects(index >= 0 && index < v.size())

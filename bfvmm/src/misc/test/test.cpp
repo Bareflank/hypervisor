@@ -65,6 +65,9 @@ misc_ut::list()
 
     this->test_exceptions();
 
+    this->test_upper();
+    this->test_lower();
+
     return true;
 }
 

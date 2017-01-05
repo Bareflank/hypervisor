@@ -284,6 +284,7 @@ intrinsics_ut::list()
     this->test_cr0_intel_x64_not_write_through();
     this->test_cr0_intel_x64_cache_disable();
     this->test_cr0_intel_x64_paging();
+    this->test_cr2_intel_x64();
     this->test_cr3_intel_x64();
     this->test_cr4_intel_x64();
     this->test_cr4_intel_x64_v8086_mode_extensions();
@@ -362,6 +363,8 @@ intrinsics_ut::list()
     this->test_vmx_intel_x64_vmread_vmwrite_succcess();
     this->test_vmx_intel_x64_vmlaunch_failure();
     this->test_vmx_intel_x64_vmlaunch_success();
+    this->test_vmx_intel_x64_vmlaunch_demote_failure();
+    this->test_vmx_intel_x64_vmlaunch_demote_success();
     this->test_vmx_intel_x64_invept();
     this->test_vmx_intel_x64_invvpid();
 

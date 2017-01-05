@@ -111,11 +111,11 @@ private_error(const char *header,
                   BFELF_ERROR_LOADER_FULL);
 
 #define no_such_symbol(a) \
-    private_error("no such symbol: ", a, __func__, __LINE__, \
+    private_error("no such symbol", a, __func__, __LINE__, \
                   BFELF_ERROR_NO_SUCH_SYMBOL);
 
 #define unsupported_rel(a) \
-    private_error("unsupported relocation: ", a, __func__, __LINE__, \
+    private_error("unsupported relocation", a, __func__, __LINE__, \
                   BFELF_ERROR_UNSUPPORTED_RELA);
 
 #define out_of_order(a) \

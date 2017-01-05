@@ -34,6 +34,16 @@ __write_cr0:
     mov cr0, rdi
     ret
 
+global __read_cr2:function
+__read_cr2:
+    mov rax, cr2
+    ret
+
+global __write_cr2:function
+__write_cr2:
+    mov cr2, rdi
+    ret
+
 global __read_cr3:function
 __read_cr3:
     mov rax, cr3

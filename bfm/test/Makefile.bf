@@ -60,6 +60,7 @@ INCLUDE_PATHS+=../include/
 INCLUDE_PATHS+=%HYPER_ABS%/include/
 
 LIBS+=bfm
+LIBS+=bfm_ioctl
 
 LIBRARY_PATHS+=%BUILD_REL%/../bin/native/
 

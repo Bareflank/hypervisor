@@ -38,6 +38,7 @@ namespace memory_attr
 
     constexpr const auto rw               = 0x00000100UL;
     constexpr const auto re               = 0x00000200UL;
+    constexpr const auto pt               = 0x00000300UL;
 
     constexpr const auto rw_uc            = 0x00000100UL;
     constexpr const auto rw_wc            = 0x00000101UL;
@@ -52,6 +53,13 @@ namespace memory_attr
     constexpr const auto re_wp            = 0x00000205UL;
     constexpr const auto re_wb            = 0x00000206UL;
     constexpr const auto re_uc_m          = 0x00000207UL;
+
+    constexpr const auto pt_uc            = 0x00000300UL;
+    constexpr const auto pt_wc            = 0x00000301UL;
+    constexpr const auto pt_wt            = 0x00000304UL;
+    constexpr const auto pt_wp            = 0x00000305UL;
+    constexpr const auto pt_wb            = 0x00000306UL;
+    constexpr const auto pt_uc_m          = 0x00000307UL;
 
     template<class P, class T,
              class = typename std::enable_if<std::is_integral<P>::value>::type,

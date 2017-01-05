@@ -125,9 +125,9 @@ static auto
 setup_pt(MockRepository &mocks)
 {
     auto pt = mocks.Mock<root_page_table_x64>();
-    mocks.OnCallFunc(root_page_table_x64::instance).Return(pt);
+    mocks.OnCallFunc(root_pt).Return(pt);
 
-    mocks.OnCall(pt, root_page_table_x64::map).Do(pt_map);
+    mocks.OnCall(pt, root_page_table_x64::map_4k).Do(pt_map);
     mocks.OnCall(pt, root_page_table_x64::unmap).Do(pt_unmap);
 
     g_flushed.clear();
@@ -160,7 +160,7 @@ memory_manager_ut::test_unique_map_ptr_x64_phys_constructor_mm_map_fails()
     setup_mm(mocks);
     auto &&pt = setup_pt(mocks);
 
-    mocks.OnCall(pt, root_page_table_x64::map).Throw(std::runtime_error("error"));
+    mocks.OnCall(pt, root_page_table_x64::map_4k).Throw(std::runtime_error("error"));
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -222,7 +222,7 @@ memory_manager_ut::test_unique_map_ptr_x64_phys_range_constructor_mm_map_fails()
     setup_mm(mocks);
     auto &&pt = setup_pt(mocks);
 
-    mocks.OnCall(pt, root_page_table_x64::map).Throw(std::runtime_error("error"));
+    mocks.OnCall(pt, root_page_table_x64::map_4k).Throw(std::runtime_error("error"));
 
     auto &&phys_range_1 = std::make_pair(0x1111000000000010UL, x64::page_size * 2UL);
     auto &&phys_range_2 = std::make_pair(0x1111000000004000UL, x64::page_size * 2UL);
@@ -314,7 +314,7 @@ memory_manager_ut::test_unique_map_ptr_x64_virt_cr3_constructor_mm_map_fails()
     setup_mm(mocks);
     auto &&pt = setup_pt(mocks);
 
-    mocks.OnCall(pt, root_page_table_x64::map).Throw(std::runtime_error("error"));
+    mocks.OnCall(pt, root_page_table_x64::map_4k).Throw(std::runtime_error("error"));
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {

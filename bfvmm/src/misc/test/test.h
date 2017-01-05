@@ -63,6 +63,9 @@ private:
     void test_bitmanip_set_bits();
 
     void test_exceptions();
+
+    void test_upper();
+    void test_lower();
 };
 
 #endif
