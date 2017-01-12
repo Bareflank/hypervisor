@@ -20,7 +20,7 @@ bin/
 /env.sh
 /git_working_tree.sh
 /makefiles/
-/sysroot/
+/sysroot_*
 /module_file
 /compile_commands.json
 /verify_source_results.txt

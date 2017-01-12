@@ -55,11 +55,6 @@ private:
     void test_catch_nested_throw_uncaught();
     void test_catch_nested_throw_rethrow();
     void test_catch_throw_with_lots_of_register_mods();
-
-private:
-
-    std::unique_ptr<char[]> m_self;
-    uint64_t m_self_length;
 };
 
 #endif

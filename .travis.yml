@@ -111,49 +111,16 @@ matrix:
     before_install:
       - echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-certificates.crt
     addons:
-      apt:
-        sources: ['ubuntu-toolchain-r-test']
-        packages: ['g++-5', 'nasm']
       coverity_scan:
         project:
           name: "Bareflank/hypervisor"
           description: "Travis CI Build"
         notification_email: rianquinn@gmail.com
-        build_command_prepend: "sudo cp $(which gcc-5) $(which gcc); sudo cp $(which g++-5) $(which g++); ./configure; export STATIC_ANALYSIS_ENABLED=true"
-        build_command: "make"
+        build_command_prepend: "./tools/scripts/setup_ubuntu.sh"
+        build_command: "STATIC_ANALYSIS_ENABLED=true make"
         branch_pattern: coverity_scan
     script:
       - echo "Done"
-
-  #
-  # GCC 6.1.0
-  #
-  - os: linux
-    env:
-      - TEST="GCC 6.1.0"
-    services:
-      - docker
-    install:
-      - travis_wait 40 ./tools/scripts/setup_ubuntu.sh --compiler gcc_610
-      - cat env.sh
-    script:
-      - make
-      - make test
-
-  #
-  # GCC 6.2.0
-  #
-  - os: linux
-    env:
-      - TEST="GCC 6.2.0"
-    services:
-      - docker
-    install:
-      - travis_wait 40 ./tools/scripts/setup_ubuntu.sh --compiler gcc_620
-      - cat env.sh
-    script:
-      - make
-      - make test
 
   #
   # Clang 3.8

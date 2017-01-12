@@ -32,7 +32,7 @@ TARGET_COMPILER:=cross
 ################################################################################
 
 CROSS_CCFLAGS+=
-CROSS_CXXFLAGS+=-fno-rtti -fno-sized-deallocation
+CROSS_CXXFLAGS+=-fno-rtti -fno-sized-deallocation -fno-use-cxa-atexit
 CROSS_ASMFLAGS+=
 CROSS_LDFLAGS+=
 CROSS_ARFLAGS+=
@@ -55,9 +55,9 @@ INCLUDE_PATHS+=./
 INCLUDE_PATHS+=../include/
 INCLUDE_PATHS+=%HYPER_ABS%/include/
 
-LIBS+=
+LIBS+=dummy_code
 
-LIBRARY_PATHS+=
+LIBRARY_PATHS+=%BUILD_REL%/../bin/cross/
 
 ################################################################################
 # Environment Specific

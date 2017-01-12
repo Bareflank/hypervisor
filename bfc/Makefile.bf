@@ -37,14 +37,14 @@ Makefile: $(HYPER_REL)/Makefile.bf
 
 ifneq ($(STATIC_ANALYSIS_ENABLED), true)
 
-all: $(BUILD_ABS)/sysroot/x86_64-elf/lib/libbfc.so
+all: $(BUILD_ABS)/sysroot_vmm/x86_64-elf/lib/libbfc.so
 	@echo > /dev/null
 
-$(BUILD_ABS)/sysroot/x86_64-elf/lib/libc.so:
-	$(BUILD_ABS)/build_scripts/x86_64-bareflank-docker $(BUILD_ABS)/build_scripts/build_newlib.sh
+$(BUILD_ABS)/sysroot_vmm/x86_64-elf/lib/libc.so:
+	$(BUILD_ABS)/build_scripts/x86_64-vmm-docker $(BUILD_ABS)/build_scripts/build_newlib.sh
 
-$(BUILD_ABS)/sysroot/x86_64-elf/lib/libbfc.so: $(BUILD_ABS)/sysroot/x86_64-elf/lib/libc.so
-	$(BUILD_ABS)/build_scripts/x86_64-bareflank-docker $(BUILD_ABS)/build_scripts/build_libbfc.sh
+$(BUILD_ABS)/sysroot_vmm/x86_64-elf/lib/libbfc.so: $(BUILD_ABS)/sysroot_vmm/x86_64-elf/lib/libc.so
+	$(BUILD_ABS)/build_scripts/x86_64-vmm-docker $(BUILD_ABS)/build_scripts/build_libbfc.sh
 
 build_src: all
 build_tests: all
@@ -57,8 +57,8 @@ run_tests:
 clean: clean_src
 
 clean_src:
-	rm $(BUILD_ABS)/sysroot/x86_64-elf/lib/libc.so
-	rm $(BUILD_ABS)/sysroot/x86_64-elf/lib/libbfc.so
+	rm $(BUILD_ABS)/sysroot_vmm/x86_64-elf/lib/libc.so
+	rm $(BUILD_ABS)/sysroot_vmm/x86_64-elf/lib/libbfc.so
 
 clean_tests:
 	@echo > /dev/null

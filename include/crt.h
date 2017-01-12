@@ -106,11 +106,8 @@ int64_t local_fini(struct section_info_t *info);
  */
 struct section_info_t
 {
-    void *ctors_addr;
-    uint64_t ctors_size;
-
-    void *dtors_addr;
-    uint64_t dtors_size;
+    void *init_addr;
+    void *fini_addr;
 
     void *init_array_addr;
     uint64_t init_array_size;

@@ -26,6 +26,10 @@
 #include <vector>
 
 #include <memory.h>
+#include <constants.h>
+
+#include <intrinsics/x64.h>
+#include <memory_manager/mem_pool.h>
 
 /// The memory manager has a couple specific functions:
 /// - alloc / free memory
@@ -341,7 +345,7 @@ public:
 
 private:
 
-    memory_manager_x64() noexcept = default;
+    memory_manager_x64() noexcept;
 
     integer_pointer lower(integer_pointer ptr) const noexcept;
     integer_pointer upper(integer_pointer ptr) const noexcept;
@@ -351,6 +355,10 @@ private:
     std::map<integer_pointer, integer_pointer> m_virt_to_phys_map;
     std::map<integer_pointer, integer_pointer> m_phys_to_virt_map;
     std::map<integer_pointer, attr_type> m_virt_to_attr_map;
+
+    mem_pool<MAX_HEAP_POOL, x64::cache_line_shift> g_heap_pool;
+    mem_pool<MAX_PAGE_POOL, x64::page_shift> g_page_pool;
+    mem_pool<MAX_MEM_MAP_POOL, x64::page_shift> g_mem_map_pool;
 
 public:
 

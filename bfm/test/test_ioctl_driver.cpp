@@ -263,13 +263,7 @@ bfm_ut::test_ioctl_driver_process_load_bad_module_filename()
     mocks.OnCall(fil, file::read_text).Do([](auto) -> auto
     { return "{\"modules\":[\"1\",\"2\",\"3\"]}"_s; });
 
-    mocks.OnCall(fil, file::read_binary).Do([](auto filename) -> auto
-    {
-        if (filename == "2")
-            throw std::runtime_error("error");
-
-        return file::binary_data{'g', 'o', 'o', 'd'};
-    });
+    mocks.OnCall(fil, file::read_binary).Throw(std::runtime_error("error"));
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
@@ -292,19 +286,12 @@ bfm_ut::test_ioctl_driver_process_load_add_module_failed()
     mocks.OnCall(fil, file::read_text).Do([](auto) -> auto
     { return "{\"modules\":[\"1\",\"2\",\"3\"]}"_s; });
 
-    mocks.OnCall(fil, file::read_binary).Do([](auto filename) -> auto
+    mocks.OnCall(fil, file::read_binary).Do([](auto) -> auto
     {
-        if (filename == "2")
-            return file::binary_data{'b', 'a', 'd'};
-
         return file::binary_data{'g', 'o', 'o', 'd'};
     });
 
-    mocks.OnCall(ctl, ioctl::call_ioctl_add_module).Do([](auto data)
-    {
-        if (data == file::binary_data{'b', 'a', 'd'})
-            throw std::runtime_error("error");
-    });
+    mocks.OnCall(ctl, ioctl::call_ioctl_add_module).Throw(std::runtime_error("error"));
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {

@@ -290,6 +290,14 @@ private:
 
     bool m_is_running;
     bool m_is_initialized;
+
+public:
+
+    vcpu(vcpu &&) = default;
+    vcpu &operator=(vcpu &&) = default;
+
+    vcpu(const vcpu &) = delete;
+    vcpu &operator=(const vcpu &) = delete;
 };
 
 #endif

@@ -24,9 +24,13 @@
 #include <eh_frame_list.h>
 #include <view_as_pointer.h>
 
+#include <sys/types.h>
+#include <unistd.h>
+
 #include <link.h>
+#include <string>
 #include <fstream>
-#include <sys/mman.h>
+#include <streambuf>
 
 // -----------------------------------------------------------------------------
 // A.out Load Address
@@ -37,7 +41,8 @@
 // and we need to use this relocation to identify were the eh_frame section
 // is actually located
 
-uintptr_t g_a_out_offset = 0;
+uintptr_t g_offs = 0;
+uintptr_t g_size = 0;
 
 static int
 callback(struct dl_phdr_info *info, size_t size, void *data)
@@ -53,26 +58,24 @@ callback(struct dl_phdr_info *info, size_t size, void *data)
     {
         if (info->dlpi_phdr[i].p_type == PT_LOAD)
         {
-            g_a_out_offset = info->dlpi_addr;
+            g_offs = info->dlpi_addr;
             break;
         }
     }
 
     return 0;
 }
-
 // -----------------------------------------------------------------------------
 // Exception Handler Framework
 // -----------------------------------------------------------------------------
 
-section_info_t g_info;
 eh_frame_t g_eh_frame_list[MAX_NUM_MODULES] = {{nullptr, 0}};
 
 extern "C" struct eh_frame_t *
 get_eh_frame_list() noexcept
 {
-    g_eh_frame_list[0].addr = reinterpret_cast<void *>(reinterpret_cast<uintptr_t>(g_info.eh_frame_addr) + g_a_out_offset);
-    g_eh_frame_list[0].size = g_info.eh_frame_size;
+    g_eh_frame_list[0].addr = reinterpret_cast<void *>(g_offs);
+    g_eh_frame_list[0].size = g_size;
 
     return static_cast<struct eh_frame_t *>(g_eh_frame_list);
 }
@@ -81,37 +84,40 @@ get_eh_frame_list() noexcept
 // Test Implementation
 // -----------------------------------------------------------------------------
 
-const auto c_self_filename = "/proc/self/exe";
+extern void *__eh_frame_start;
+extern void *__eh_frame_end;
 
-bfunwind_ut::bfunwind_ut() :
-    m_self_length(0)
+bfunwind_ut::bfunwind_ut()
 {
+    dl_iterate_phdr(callback, nullptr);
+
+    std::stringstream eh_frame_offs_ss;
+    std::stringstream eh_frame_size_ss;
+
+    eh_frame_offs_ss << "readelf -SW /proc/" << getpid() << "/exe | grep \".eh_frame\" | grep -v \".eh_frame_hdr\" | awk '{print $4}' > offs.txt";
+    eh_frame_size_ss << "readelf -SW /proc/" << getpid() << "/exe | grep \".eh_frame\" | grep -v \".eh_frame_hdr\" | awk '{print $6}' > size.txt";
+
+    system(eh_frame_offs_ss.str().c_str());
+    system(eh_frame_size_ss.str().c_str());
+
+    auto &&offs_file = std::ifstream("offs.txt");
+    auto &&size_file = std::ifstream("size.txt");
+
+    auto &&offs_str = std::string((std::istreambuf_iterator<char>(offs_file)), std::istreambuf_iterator<char>());
+    auto &&size_str = std::string((std::istreambuf_iterator<char>(size_file)), std::istreambuf_iterator<char>());
+
+    std::remove("offs.txt");
+    std::remove("size.txt");
+
+    std::cout << view_as_pointer(std::stoull(offs_str, nullptr, 16)) << '\n';
+    std::cout << view_as_pointer(std::stoull(size_str, nullptr, 16)) << '\n';
+
+    g_offs += std::stoull(offs_str, nullptr, 16);
+    g_size += std::stoull(size_str, nullptr, 16);
 }
 
 bool bfunwind_ut::init()
 {
-    dl_iterate_phdr(callback, nullptr);
-
-    std::ifstream self_ifs(c_self_filename, std::ifstream::ate);
-    m_self_length = static_cast<uint64_t>(self_ifs.tellg());
-    m_self = std::make_unique<char[]>(m_self_length);
-    self_ifs.seekg(0);
-    self_ifs.read(m_self.get(), static_cast<int64_t>(m_self_length));
-
-    auto ret = 0LL;
-    bfelf_file_t self_ef;
-
-    ret = bfelf_file_init(m_self.get(), static_cast<uint64_t>(m_self_length), &self_ef);
-    this->expect_true(ret == BFELF_SUCCESS);
-
-    bfelf_loader_t loader;
-    memset(&loader, 0, sizeof(loader));
-
-    loader.relocated = 1;
-
-    ret = bfelf_loader_get_info(&loader, &self_ef, &g_info);
-    this->expect_true(ret == BFELF_SUCCESS);
-
     return true;
 }
 

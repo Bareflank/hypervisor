@@ -67,6 +67,9 @@ ioctl_driver::process()
     }
 }
 
+#include <random>
+#include <algorithm>
+
 void
 ioctl_driver::load_vmm()
 {
@@ -84,7 +87,14 @@ ioctl_driver::load_vmm()
     auto ___ = gsl::on_failure([&]
     { unload_vmm(); });
 
-    for (const auto &module : modules["modules"])
+    auto &&module_list = modules["modules"];
+
+    std::random_device rd;
+    std::mt19937 g(rd());
+
+    std::shuffle(module_list.begin(), module_list.end(), g);
+
+    for (const auto &module : module_list)
         m_ioctl->call_ioctl_add_module(m_file->read_binary(module));
 
     m_ioctl->call_ioctl_load_vmm();

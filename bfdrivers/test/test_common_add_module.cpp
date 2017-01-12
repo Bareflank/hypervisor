@@ -32,7 +32,6 @@
 
 extern "C"
 {
-    uint64_t get_elf_file_size(struct module_t *module);
     int64_t load_elf_file(struct module_t *module);
 }
 
@@ -112,10 +111,10 @@ driver_entry_ut::test_common_add_module_add_too_many()
 }
 
 void
-driver_entry_ut::test_common_add_module_get_elf_file_size_fails()
+driver_entry_ut::test_common_add_module_file_get_total_size_fails()
 {
     MockRepository mocks;
-    mocks.ExpectCallFunc(get_elf_file_size).Return(0);
+    mocks.ExpectCallFunc(bfelf_file_get_total_size).Return(0);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {

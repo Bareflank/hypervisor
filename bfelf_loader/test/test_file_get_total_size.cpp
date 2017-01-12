@@ -22,32 +22,18 @@
 #include <test.h>
 
 void
-bfelf_loader_ut::test_bfelf_file_num_segments_invalid_ef()
+bfelf_loader_ut::test_bfelf_file_get_total_size_invalid_ef()
 {
-    auto ret = bfelf_file_num_segments(nullptr);
+    auto ret = bfelf_file_get_total_size(nullptr);
     this->expect_true(ret == BFELF_ERROR_INVALID_ARG);
 }
 
 void
-bfelf_loader_ut::test_bfelf_file_num_segments_uninitalized()
-{
-    bfelf_file_t ef;
-    memset(&ef, 0, sizeof(ef));
-
-    auto ret = bfelf_file_num_segments(&ef);
-    this->expect_true(ret == 0);
-}
-
-void
-bfelf_loader_ut::test_bfelf_file_num_segments_success()
+bfelf_loader_ut::test_bfelf_file_get_total_size_success()
 {
     auto ret = 0LL;
-    bfelf_file_t ef;
-    auto test = get_test();
+    bfelf_file_t ef = {};
 
-    ret = bfelf_file_init(reinterpret_cast<char *>(&test), sizeof(test), &ef);
-    this->expect_true(ret == BFELF_SUCCESS);
-
-    ret = bfelf_file_num_segments(&ef);
-    this->expect_true(ret > 0);
+    ret = bfelf_file_get_total_size(&ef);
+    this->expect_true(ret == 0);
 }

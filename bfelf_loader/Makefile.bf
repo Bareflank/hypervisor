@@ -25,8 +25,8 @@
 
 ifeq ($(shell uname -s), Linux)
     ifneq ($(STATIC_ANALYSIS_ENABLED), true)
-        SUBDIRS += dummy_misc
         SUBDIRS += dummy_code
+        SUBDIRS += dummy_misc
     endif
     SUBDIRS += src
     SUBDIRS += bin

@@ -37,7 +37,6 @@ extern "C"
     int64_t resolve_symbol(const char *name, void **sym);
     int64_t execute_symbol(const char *sym, uint64_t arg1, uint64_t arg2, uint64_t cpuid);
     int64_t add_md_to_memory_manager(struct module_t *module);
-    uint64_t get_elf_file_size(struct module_t *module);
     int64_t load_elf_file(struct module_t *module);
 }
 
@@ -174,44 +173,19 @@ driver_entry_ut::test_helper_add_md_to_memory_manager_null_module()
 }
 
 void
-driver_entry_ut::test_helper_get_elf_file_size_null_module()
-{
-    this->expect_true(get_elf_file_size(nullptr) == 0);
-}
-
-void
-driver_entry_ut::test_helper_get_elf_file_size_get_segment_fails()
-{
-    this->expect_true(common_add_module(m_dummy_start_vmm_success.get(), m_dummy_start_vmm_success_length) == BF_SUCCESS);
-
-    {
-        MockRepository mocks;
-        mocks.ExpectCallFunc(bfelf_file_get_segment).Return(-1);
-
-        RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-        {
-            auto module = get_module(0);
-            this->expect_true(get_elf_file_size(module) == 0);
-        });
-    }
-
-    this->expect_true(common_fini() == BF_SUCCESS);
-}
-
-void
 driver_entry_ut::test_helper_load_elf_file_null_module()
 {
     this->expect_true(load_elf_file(nullptr) == BF_ERROR_INVALID_ARG);
 }
 
 void
-driver_entry_ut::test_helper_load_elf_file_get_segment_fails()
+driver_entry_ut::test_helper_load_elf_file_get_load_instr_fails()
 {
     this->expect_true(common_add_module(m_dummy_start_vmm_success.get(), m_dummy_start_vmm_success_length) == BF_SUCCESS);
 
     {
         MockRepository mocks;
-        mocks.ExpectCallFunc(bfelf_file_get_segment).Return(-1);
+        mocks.ExpectCallFunc(bfelf_file_get_load_instr).Return(-1);
 
         RUN_UNITTEST_WITH_MOCKS(mocks, [&]
         {

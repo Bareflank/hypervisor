@@ -116,7 +116,7 @@ verify_default_created() {
     verify_file_exists $1/env.sh $2
     verify_file_exists $1/git_working_tree.sh $2
     verify_file_exists $1/module_file $2
-    verify_file_exists $1/build_scripts/bareflank_gcc_wrapper.sh $2
+    verify_file_exists $1/build_scripts/compiler_wrapper.sh $2
     verify_file_exists $1/build_scripts/build_libbfc.sh $2
     verify_file_exists $1/build_scripts/build_libcxxabi.sh $2
     verify_file_exists $1/build_scripts/build_libcxx.sh $2
@@ -127,10 +127,11 @@ verify_default_created() {
     verify_file_exists $1/build_scripts/fetch_llvm.sh $2
     verify_file_exists $1/build_scripts/fetch_newlib.sh $2
     verify_file_exists $1/build_scripts/x86_64-bareflank-ar $2
-    verify_file_exists $1/build_scripts/x86_64-bareflank-g++ $2
-    verify_file_exists $1/build_scripts/x86_64-bareflank-gcc $2
+    verify_file_exists $1/build_scripts/x86_64-bareflank-clang $2
+    verify_file_exists $1/build_scripts/x86_64-bareflank-clang++ $2
     verify_file_exists $1/build_scripts/x86_64-bareflank-nasm $2
     verify_file_exists $1/build_scripts/x86_64-bareflank-docker $2
+    verify_file_exists $1/build_scripts/x86_64-bareflank-ranlib $2
     verify_directory_exists $1/makefiles $2
 }
 
@@ -140,7 +141,7 @@ verify_default_removed() {
     verify_file_does_not_exist $1/env.sh $2
     verify_file_does_not_exist $1/git_working_tree.sh $2
     verify_file_does_not_exist $1/module_file $2
-    verify_file_does_not_exist $1/build_scripts/bareflank_gcc_wrapper.sh $2
+    verify_file_does_not_exist $1/build_scripts/compiler_wrapper.sh $2
     verify_file_does_not_exist $1/build_scripts/build_libbfc.sh $2
     verify_file_does_not_exist $1/build_scripts/build_libcxxabi.sh $2
     verify_file_does_not_exist $1/build_scripts/build_libcxx.sh $2
@@ -151,10 +152,11 @@ verify_default_removed() {
     verify_file_does_not_exist $1/build_scripts/fetch_llvm.sh $2
     verify_file_does_not_exist $1/build_scripts/fetch_newlib.sh $2
     verify_file_does_not_exist $1/build_scripts/x86_64-bareflank-ar $2
-    verify_file_does_not_exist $1/build_scripts/x86_64-bareflank-g++ $2
-    verify_file_does_not_exist $1/build_scripts/x86_64-bareflank-gcc $2
+    verify_file_does_not_exist $1/build_scripts/x86_64-bareflank-clang $2
+    verify_file_does_not_exist $1/build_scripts/x86_64-bareflank-clang++ $2
     verify_file_does_not_exist $1/build_scripts/x86_64-bareflank-nasm $2
     verify_file_does_not_exist $1/build_scripts/x86_64-bareflank-docker $2
+    verify_file_does_not_exist $1/build_scripts/x86_64-bareflank-ranlib $2
     verify_directory_does_not_exist $1/makefiles $2
 }
 
@@ -649,7 +651,7 @@ test_build_scripts_update_all() {
     $HR/configure -u
     popd
     verify_directory_exists $BR/build_scripts $FUNCNAME
-    verify_file_exists $BR/build_scripts/bareflank_gcc_wrapper.sh $FUNCNAME
+    verify_file_exists $BR/build_scripts/compiler_wrapper.sh $FUNCNAME
     verify_file_exists $BR/build_scripts/build_libbfc.sh $FUNCNAME
     verify_file_exists $BR/build_scripts/build_libcxxabi.sh $FUNCNAME
     verify_file_exists $BR/build_scripts/build_libcxx.sh $FUNCNAME
@@ -660,10 +662,11 @@ test_build_scripts_update_all() {
     verify_file_exists $BR/build_scripts/fetch_llvm.sh $FUNCNAME
     verify_file_exists $BR/build_scripts/fetch_newlib.sh $FUNCNAME
     verify_file_exists $BR/build_scripts/x86_64-bareflank-ar $FUNCNAME
-    verify_file_exists $BR/build_scripts/x86_64-bareflank-g++ $FUNCNAME
-    verify_file_exists $BR/build_scripts/x86_64-bareflank-gcc $FUNCNAME
+    verify_file_exists $BR/build_scripts/x86_64-bareflank-clang $FUNCNAME
+    verify_file_exists $BR/build_scripts/x86_64-bareflank-clang++ $FUNCNAME
     verify_file_exists $BR/build_scripts/x86_64-bareflank-nasm $FUNCNAME
     verify_file_exists $BR/build_scripts/x86_64-bareflank-docker $FUNCNAME
+    verify_file_exists $BR/build_scripts/x86_64-bareflank-ranlib $FUNCNAME
 }
 
 test_build_scripts_update_scripts() {
@@ -673,7 +676,7 @@ test_build_scripts_update_scripts() {
     $HR/configure -s
     popd
     verify_directory_exists $BR/build_scripts $FUNCNAME
-    verify_file_exists $BR/build_scripts/bareflank_gcc_wrapper.sh $FUNCNAME
+    verify_file_exists $BR/build_scripts/compiler_wrapper.sh $FUNCNAME
     verify_file_exists $BR/build_scripts/build_libbfc.sh $FUNCNAME
     verify_file_exists $BR/build_scripts/build_libcxxabi.sh $FUNCNAME
     verify_file_exists $BR/build_scripts/build_libcxx.sh $FUNCNAME
@@ -684,10 +687,11 @@ test_build_scripts_update_scripts() {
     verify_file_exists $BR/build_scripts/fetch_llvm.sh $FUNCNAME
     verify_file_exists $BR/build_scripts/fetch_newlib.sh $FUNCNAME
     verify_file_exists $BR/build_scripts/x86_64-bareflank-ar $FUNCNAME
-    verify_file_exists $BR/build_scripts/x86_64-bareflank-g++ $FUNCNAME
-    verify_file_exists $BR/build_scripts/x86_64-bareflank-gcc $FUNCNAME
+    verify_file_exists $BR/build_scripts/x86_64-bareflank-clang $FUNCNAME
+    verify_file_exists $BR/build_scripts/x86_64-bareflank-clang++ $FUNCNAME
     verify_file_exists $BR/build_scripts/x86_64-bareflank-nasm $FUNCNAME
     verify_file_exists $BR/build_scripts/x86_64-bareflank-docker $FUNCNAME
+    verify_file_exists $BR/build_scripts/x86_64-bareflank-ranlib $FUNCNAME
 }
 
 test_build_scripts_update_makefiles() {
@@ -697,7 +701,7 @@ test_build_scripts_update_makefiles() {
     $HR/configure -r
     popd
     verify_directory_does_not_exist $BR/build_scripts $FUNCNAME
-    verify_file_does_not_exist $BR/build_scripts/bareflank_gcc_wrapper.sh $FUNCNAME
+    verify_file_does_not_exist $BR/build_scripts/compiler_wrapper.sh $FUNCNAME
     verify_file_does_not_exist $BR/build_scripts/build_libbfc.sh $FUNCNAME
     verify_file_does_not_exist $BR/build_scripts/build_libcxxabi.sh $FUNCNAME
     verify_file_does_not_exist $BR/build_scripts/build_libcxx.sh $FUNCNAME
@@ -708,10 +712,11 @@ test_build_scripts_update_makefiles() {
     verify_file_does_not_exist $BR/build_scripts/fetch_llvm.sh $FUNCNAME
     verify_file_does_not_exist $BR/build_scripts/fetch_newlib.sh $FUNCNAME
     verify_file_does_not_exist $BR/build_scripts/x86_64-bareflank-ar $FUNCNAME
-    verify_file_does_not_exist $BR/build_scripts/x86_64-bareflank-g++ $FUNCNAME
-    verify_file_does_not_exist $BR/build_scripts/x86_64-bareflank-gcc $FUNCNAME
+    verify_file_does_not_exist $BR/build_scripts/x86_64-bareflank-clang $FUNCNAME
+    verify_file_does_not_exist $BR/build_scripts/x86_64-bareflank-clang++ $FUNCNAME
     verify_file_does_not_exist $BR/build_scripts/x86_64-bareflank-nasm $FUNCNAME
     verify_file_does_not_exist $BR/build_scripts/x86_64-bareflank-docker $FUNCNAME
+    verify_file_does_not_exist $BR/build_scripts/x86_64-bareflank-ranlib $FUNCNAME
     pushd $BR
     $HR/configure -u
     popd
@@ -724,7 +729,7 @@ test_build_scripts_update_make() {
     make
     popd
     verify_directory_exists $BR/build_scripts $FUNCNAME
-    verify_file_exists $BR/build_scripts/bareflank_gcc_wrapper.sh $FUNCNAME
+    verify_file_exists $BR/build_scripts/compiler_wrapper.sh $FUNCNAME
     verify_file_exists $BR/build_scripts/build_libbfc.sh $FUNCNAME
     verify_file_exists $BR/build_scripts/build_libcxxabi.sh $FUNCNAME
     verify_file_exists $BR/build_scripts/build_libcxx.sh $FUNCNAME
@@ -735,10 +740,11 @@ test_build_scripts_update_make() {
     verify_file_exists $BR/build_scripts/fetch_llvm.sh $FUNCNAME
     verify_file_exists $BR/build_scripts/fetch_newlib.sh $FUNCNAME
     verify_file_exists $BR/build_scripts/x86_64-bareflank-ar $FUNCNAME
-    verify_file_exists $BR/build_scripts/x86_64-bareflank-g++ $FUNCNAME
-    verify_file_exists $BR/build_scripts/x86_64-bareflank-gcc $FUNCNAME
+    verify_file_exists $BR/build_scripts/x86_64-bareflank-clang $FUNCNAME
+    verify_file_exists $BR/build_scripts/x86_64-bareflank-clang++ $FUNCNAME
     verify_file_exists $BR/build_scripts/x86_64-bareflank-nasm $FUNCNAME
     verify_file_exists $BR/build_scripts/x86_64-bareflank-docker $FUNCNAME
+    verify_file_exists $BR/build_scripts/x86_64-bareflank-ranlib $FUNCNAME
 }
 
 test_build_scripts_update_make_subdir() {
@@ -748,7 +754,7 @@ test_build_scripts_update_make_subdir() {
     make
     popd
     verify_directory_does_not_exist $BR/build_scripts $FUNCNAME
-    verify_file_does_not_exist $BR/build_scripts/bareflank_gcc_wrapper.sh $FUNCNAME
+    verify_file_does_not_exist $BR/build_scripts/compiler_wrapper.sh $FUNCNAME
     verify_file_does_not_exist $BR/build_scripts/build_libbfc.sh $FUNCNAME
     verify_file_does_not_exist $BR/build_scripts/build_libcxxabi.sh $FUNCNAME
     verify_file_does_not_exist $BR/build_scripts/build_libcxx.sh $FUNCNAME
@@ -759,10 +765,11 @@ test_build_scripts_update_make_subdir() {
     verify_file_does_not_exist $BR/build_scripts/fetch_llvm.sh $FUNCNAME
     verify_file_does_not_exist $BR/build_scripts/fetch_newlib.sh $FUNCNAME
     verify_file_does_not_exist $BR/build_scripts/x86_64-bareflank-ar $FUNCNAME
-    verify_file_does_not_exist $BR/build_scripts/x86_64-bareflank-g++ $FUNCNAME
-    verify_file_does_not_exist $BR/build_scripts/x86_64-bareflank-gcc $FUNCNAME
+    verify_file_does_not_exist $BR/build_scripts/x86_64-bareflank-clang $FUNCNAME
+    verify_file_does_not_exist $BR/build_scripts/x86_64-bareflank-clang++ $FUNCNAME
     verify_file_does_not_exist $BR/build_scripts/x86_64-bareflank-nasm $FUNCNAME
     verify_file_does_not_exist $BR/build_scripts/x86_64-bareflank-docker $FUNCNAME
+    verify_file_does_not_exist $BR/build_scripts/x86_64-bareflank-ranlib $FUNCNAME
     pushd $BR
     $HR/configure -u
     popd
@@ -1170,7 +1177,7 @@ test_version_change_in_root_update_all() {
     verify_file_is_newer_than $BR/env.sh $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/git_working_tree.sh $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/module_file $BR/timestamp $FUNCNAME
-    verify_file_is_newer_than $BR/build_scripts/bareflank_gcc_wrapper.sh $BR/timestamp $FUNCNAME
+    verify_file_is_newer_than $BR/build_scripts/compiler_wrapper.sh $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/build_scripts/build_libbfc.sh $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/build_scripts/build_libcxxabi.sh $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/build_scripts/build_libcxx.sh $BR/timestamp $FUNCNAME
@@ -1181,10 +1188,11 @@ test_version_change_in_root_update_all() {
     verify_file_is_newer_than $BR/build_scripts/fetch_llvm.sh $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/build_scripts/fetch_newlib.sh $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/build_scripts/x86_64-bareflank-ar $BR/timestamp $FUNCNAME
-    verify_file_is_newer_than $BR/build_scripts/x86_64-bareflank-g++ $BR/timestamp $FUNCNAME
-    verify_file_is_newer_than $BR/build_scripts/x86_64-bareflank-gcc $BR/timestamp $FUNCNAME
+    verify_file_is_newer_than $BR/build_scripts/x86_64-bareflank-clang $BR/timestamp $FUNCNAME
+    verify_file_is_newer_than $BR/build_scripts/x86_64-bareflank-clang++ $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/build_scripts/x86_64-bareflank-nasm $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/build_scripts/x86_64-bareflank-docker $BR/timestamp $FUNCNAME
+    verify_file_is_newer_than $BR/build_scripts/x86_64-bareflank-ranlib $BR/timestamp $FUNCNAME
     popd
 }
 
@@ -1210,7 +1218,7 @@ test_version_change_in_root_update_scripts() {
     verify_file_is_newer_than $BR/env.sh $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/git_working_tree.sh $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/module_file $BR/timestamp $FUNCNAME
-    verify_file_is_newer_than $BR/build_scripts/bareflank_gcc_wrapper.sh $BR/timestamp $FUNCNAME
+    verify_file_is_newer_than $BR/build_scripts/compiler_wrapper.sh $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/build_scripts/build_libbfc.sh $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/build_scripts/build_libcxxabi.sh $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/build_scripts/build_libcxx.sh $BR/timestamp $FUNCNAME
@@ -1221,10 +1229,11 @@ test_version_change_in_root_update_scripts() {
     verify_file_is_newer_than $BR/build_scripts/fetch_llvm.sh $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/build_scripts/fetch_newlib.sh $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/build_scripts/x86_64-bareflank-ar $BR/timestamp $FUNCNAME
-    verify_file_is_newer_than $BR/build_scripts/x86_64-bareflank-g++ $BR/timestamp $FUNCNAME
-    verify_file_is_newer_than $BR/build_scripts/x86_64-bareflank-gcc $BR/timestamp $FUNCNAME
+    verify_file_is_newer_than $BR/build_scripts/x86_64-bareflank-clang $BR/timestamp $FUNCNAME
+    verify_file_is_newer_than $BR/build_scripts/x86_64-bareflank-clang++ $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/build_scripts/x86_64-bareflank-nasm $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/build_scripts/x86_64-bareflank-docker $BR/timestamp $FUNCNAME
+    verify_file_is_newer_than $BR/build_scripts/x86_64-bareflank-ranlib $BR/timestamp $FUNCNAME
     popd
 }
 
@@ -1250,7 +1259,7 @@ test_version_change_in_root_update_makefiles() {
     verify_file_is_newer_than $BR/env.sh $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/git_working_tree.sh $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/module_file $BR/timestamp $FUNCNAME
-    verify_file_is_newer_than $BR/build_scripts/bareflank_gcc_wrapper.sh $BR/timestamp $FUNCNAME
+    verify_file_is_newer_than $BR/build_scripts/compiler_wrapper.sh $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/build_scripts/build_libbfc.sh $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/build_scripts/build_libcxxabi.sh $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/build_scripts/build_libcxx.sh $BR/timestamp $FUNCNAME
@@ -1261,10 +1270,11 @@ test_version_change_in_root_update_makefiles() {
     verify_file_is_newer_than $BR/build_scripts/fetch_llvm.sh $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/build_scripts/fetch_newlib.sh $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/build_scripts/x86_64-bareflank-ar $BR/timestamp $FUNCNAME
-    verify_file_is_newer_than $BR/build_scripts/x86_64-bareflank-g++ $BR/timestamp $FUNCNAME
-    verify_file_is_newer_than $BR/build_scripts/x86_64-bareflank-gcc $BR/timestamp $FUNCNAME
+    verify_file_is_newer_than $BR/build_scripts/x86_64-bareflank-clang $BR/timestamp $FUNCNAME
+    verify_file_is_newer_than $BR/build_scripts/x86_64-bareflank-clang++ $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/build_scripts/x86_64-bareflank-nasm $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/build_scripts/x86_64-bareflank-docker $BR/timestamp $FUNCNAME
+    verify_file_is_newer_than $BR/build_scripts/x86_64-bareflank-ranlib $BR/timestamp $FUNCNAME
     popd
 }
 
@@ -1292,7 +1302,7 @@ test_version_change_in_root_update_make() {
     verify_file_is_newer_than $BR/env.sh $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/git_working_tree.sh $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/module_file $BR/timestamp $FUNCNAME
-    verify_file_is_newer_than $BR/build_scripts/bareflank_gcc_wrapper.sh $BR/timestamp $FUNCNAME
+    verify_file_is_newer_than $BR/build_scripts/compiler_wrapper.sh $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/build_scripts/build_libbfc.sh $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/build_scripts/build_libcxxabi.sh $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/build_scripts/build_libcxx.sh $BR/timestamp $FUNCNAME
@@ -1303,10 +1313,11 @@ test_version_change_in_root_update_make() {
     verify_file_is_newer_than $BR/build_scripts/fetch_llvm.sh $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/build_scripts/fetch_newlib.sh $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/build_scripts/x86_64-bareflank-ar $BR/timestamp $FUNCNAME
-    verify_file_is_newer_than $BR/build_scripts/x86_64-bareflank-g++ $BR/timestamp $FUNCNAME
-    verify_file_is_newer_than $BR/build_scripts/x86_64-bareflank-gcc $BR/timestamp $FUNCNAME
+    verify_file_is_newer_than $BR/build_scripts/x86_64-bareflank-clang $BR/timestamp $FUNCNAME
+    verify_file_is_newer_than $BR/build_scripts/x86_64-bareflank-clang++ $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/build_scripts/x86_64-bareflank-nasm $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/build_scripts/x86_64-bareflank-docker $BR/timestamp $FUNCNAME
+    verify_file_is_newer_than $BR/build_scripts/x86_64-bareflank-ranlib $BR/timestamp $FUNCNAME
     popd
 }
 
@@ -1336,7 +1347,7 @@ test_version_change_in_root_update_make_subdir() {
     verify_file_is_newer_than $BR/env.sh $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/git_working_tree.sh $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/module_file $BR/timestamp $FUNCNAME
-    verify_file_is_newer_than $BR/build_scripts/bareflank_gcc_wrapper.sh $BR/timestamp $FUNCNAME
+    verify_file_is_newer_than $BR/build_scripts/compiler_wrapper.sh $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/build_scripts/build_libbfc.sh $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/build_scripts/build_libcxxabi.sh $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/build_scripts/build_libcxx.sh $BR/timestamp $FUNCNAME
@@ -1347,10 +1358,11 @@ test_version_change_in_root_update_make_subdir() {
     verify_file_is_newer_than $BR/build_scripts/fetch_llvm.sh $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/build_scripts/fetch_newlib.sh $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/build_scripts/x86_64-bareflank-ar $BR/timestamp $FUNCNAME
-    verify_file_is_newer_than $BR/build_scripts/x86_64-bareflank-g++ $BR/timestamp $FUNCNAME
-    verify_file_is_newer_than $BR/build_scripts/x86_64-bareflank-gcc $BR/timestamp $FUNCNAME
+    verify_file_is_newer_than $BR/build_scripts/x86_64-bareflank-clang $BR/timestamp $FUNCNAME
+    verify_file_is_newer_than $BR/build_scripts/x86_64-bareflank-clang++ $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/build_scripts/x86_64-bareflank-nasm $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/build_scripts/x86_64-bareflank-docker $BR/timestamp $FUNCNAME
+    verify_file_is_newer_than $BR/build_scripts/x86_64-bareflank-ranlib $BR/timestamp $FUNCNAME
     popd
 }
 
@@ -1377,7 +1389,7 @@ test_version_change_in_root_update_all_down_version() {
     verify_file_is_newer_than $BR/env.sh $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/git_working_tree.sh $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/module_file $BR/timestamp $FUNCNAME
-    verify_file_is_newer_than $BR/build_scripts/bareflank_gcc_wrapper.sh $BR/timestamp $FUNCNAME
+    verify_file_is_newer_than $BR/build_scripts/compiler_wrapper.sh $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/build_scripts/build_libbfc.sh $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/build_scripts/build_libcxxabi.sh $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/build_scripts/build_libcxx.sh $BR/timestamp $FUNCNAME
@@ -1388,10 +1400,11 @@ test_version_change_in_root_update_all_down_version() {
     verify_file_is_newer_than $BR/build_scripts/fetch_llvm.sh $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/build_scripts/fetch_newlib.sh $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/build_scripts/x86_64-bareflank-ar $BR/timestamp $FUNCNAME
-    verify_file_is_newer_than $BR/build_scripts/x86_64-bareflank-g++ $BR/timestamp $FUNCNAME
-    verify_file_is_newer_than $BR/build_scripts/x86_64-bareflank-gcc $BR/timestamp $FUNCNAME
+    verify_file_is_newer_than $BR/build_scripts/x86_64-bareflank-clang $BR/timestamp $FUNCNAME
+    verify_file_is_newer_than $BR/build_scripts/x86_64-bareflank-clang++ $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/build_scripts/x86_64-bareflank-nasm $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/build_scripts/x86_64-bareflank-docker $BR/timestamp $FUNCNAME
+    verify_file_is_newer_than $BR/build_scripts/x86_64-bareflank-ranlib $BR/timestamp $FUNCNAME
     popd
 }
 

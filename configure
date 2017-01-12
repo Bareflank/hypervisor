@@ -20,7 +20,7 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-version=5
+version=6
 
 # ------------------------------------------------------------------------------
 # Colors
@@ -57,19 +57,12 @@ CROSS_COMMON_FLAGS="$COMMON_FLAGS"
 CROSS_COMMON_FLAGS="$CROSS_COMMON_FLAGS -ffreestanding"
 CROSS_COMMON_FLAGS="$CROSS_COMMON_FLAGS -fstack-protector-strong"
 CROSS_COMMON_FLAGS="$CROSS_COMMON_FLAGS -mno-red-zone"
-CROSS_COMMON_FLAGS="$CROSS_COMMON_FLAGS -D_HAVE_LONG_DOUBLE"
-CROSS_COMMON_FLAGS="$CROSS_COMMON_FLAGS -D_LDBL_EQ_DBL"
-CROSS_COMMON_FLAGS="$CROSS_COMMON_FLAGS -D_POSIX_TIMERS"
-CROSS_COMMON_FLAGS="$CROSS_COMMON_FLAGS -U__STRICT_ANSI__"
-CROSS_COMMON_FLAGS="$CROSS_COMMON_FLAGS -DMALLOC_PROVIDED"
-CROSS_COMMON_FLAGS="$CROSS_COMMON_FLAGS -DCLOCK_MONOTONIC"
 
 CROSS_CCFLAGS="$CROSS_COMMON_FLAGS"
 CROSS_CCFLAGS="$CROSS_CCFLAGS -std=c99"
 
 CROSS_CXXFLAGS="$CROSS_COMMON_FLAGS"
 CROSS_CXXFLAGS="$CROSS_CXXFLAGS -std=c++14"
-CROSS_CXXFLAGS="$CROSS_CXXFLAGS -fno-use-cxa-atexit"
 #CROSS_CXXFLAGS="$CROSS_CXXFLAGS -fno-threadsafe-statics"
 
 NATIVE_CCFLAGS="$COMMON_FLAGS"
@@ -267,9 +260,9 @@ option_distclean() {
         rm -Rf $BUILD_ABS/source_newlib
     fi
 
-    if [[ -d "$BUILD_ABS/sysroot" ]]; then
-        echo -e "removing:$CB sysroot$CE"
-        rm -Rf $BUILD_ABS/sysroot
+    if ls $BUILD_ABS/sysroot_*/ 1> /dev/null 2>&1; then
+        echo -e "removing:$CB sysroots$CE"
+        rm -Rf $BUILD_ABS/sysroot_*
     fi
 
     if [[ -d "$BUILD_ABS/extensions" ]]; then
@@ -577,7 +570,7 @@ copy_script() {
 }
 
 copy_scripts() {
-    copy_script "bareflank_gcc_wrapper.sh"
+    copy_script "compiler_wrapper.sh"
     copy_script "filter_module_file.sh"
     copy_script "build_newlib.sh"
     copy_script "build_libcxx.sh"
@@ -599,39 +592,34 @@ copy_scripts() {
 # ------------------------------------------------------------------------------
 
 create_wrapper_links () {
-    if [[ ! -f "$BUILD_ABS/build_scripts/x86_64-bareflank-gcc" ]]; then
-        echo -e "linking compiler script:$CB x86_64-bareflank-gcc$CE"
-        ln -s $BUILD_ABS/build_scripts/bareflank_gcc_wrapper.sh $BUILD_ABS/build_scripts/x86_64-bareflank-gcc
+    if [[ ! -f "$BUILD_ABS/build_scripts/x86_64-vmm-clang" ]]; then
+        echo -e "linking compiler script:$CB x86_64-vmm-clang$CE"
+        ln -s $BUILD_ABS/build_scripts/compiler_wrapper.sh $BUILD_ABS/build_scripts/x86_64-vmm-clang
     fi
 
-    if [[ ! -f "$BUILD_ABS/build_scripts/x86_64-bareflank-g++" ]]; then
-        echo -e "linking compiler script:$CB x86_64-bareflank-g++$CE"
-        ln -s $BUILD_ABS/build_scripts/bareflank_gcc_wrapper.sh $BUILD_ABS/build_scripts/x86_64-bareflank-g++
+    if [[ ! -f "$BUILD_ABS/build_scripts/x86_64-vmm-clang++" ]]; then
+        echo -e "linking compiler script:$CB x86_64-vmm-clang++$CE"
+        ln -s $BUILD_ABS/build_scripts/compiler_wrapper.sh $BUILD_ABS/build_scripts/x86_64-vmm-clang++
     fi
 
-    if [[ ! -f "$BUILD_ABS/build_scripts/x86_64-bareflank-clang" ]]; then
-        echo -e "linking compiler script:$CB x86_64-bareflank-clang$CE"
-        ln -s $BUILD_ABS/build_scripts/bareflank_gcc_wrapper.sh $BUILD_ABS/build_scripts/x86_64-bareflank-clang
+    if [[ ! -f "$BUILD_ABS/build_scripts/x86_64-vmm-ar" ]]; then
+        echo -e "linking compiler script:$CB x86_64-vmm-ar$CE"
+        ln -s $BUILD_ABS/build_scripts/compiler_wrapper.sh $BUILD_ABS/build_scripts/x86_64-vmm-ar
     fi
 
-    if [[ ! -f "$BUILD_ABS/build_scripts/x86_64-bareflank-clang++" ]]; then
-        echo -e "linking compiler script:$CB x86_64-bareflank-clang++$CE"
-        ln -s $BUILD_ABS/build_scripts/bareflank_gcc_wrapper.sh $BUILD_ABS/build_scripts/x86_64-bareflank-clang++
+    if [[ ! -f "$BUILD_ABS/build_scripts/x86_64-vmm-ranlib" ]]; then
+        echo -e "linking compiler script:$CB x86_64-vmm-ranlib$CE"
+        ln -s $BUILD_ABS/build_scripts/compiler_wrapper.sh $BUILD_ABS/build_scripts/x86_64-vmm-ranlib
     fi
 
-    if [[ ! -f "$BUILD_ABS/build_scripts/x86_64-bareflank-ar" ]]; then
-        echo -e "linking compiler script:$CB x86_64-bareflank-ar$CE"
-        ln -s $BUILD_ABS/build_scripts/bareflank_gcc_wrapper.sh $BUILD_ABS/build_scripts/x86_64-bareflank-ar
+    if [[ ! -f "$BUILD_ABS/build_scripts/x86_64-vmm-nasm" ]]; then
+        echo -e "linking compiler script:$CB x86_64-vmm-nasm$CE"
+        ln -s $BUILD_ABS/build_scripts/compiler_wrapper.sh $BUILD_ABS/build_scripts/x86_64-vmm-nasm
     fi
 
-    if [[ ! -f "$BUILD_ABS/build_scripts/x86_64-bareflank-nasm" ]]; then
-        echo -e "linking compiler script:$CB x86_64-bareflank-nasm$CE"
-        ln -s $BUILD_ABS/build_scripts/bareflank_gcc_wrapper.sh $BUILD_ABS/build_scripts/x86_64-bareflank-nasm
-    fi
-
-    if [[ ! -f "$BUILD_ABS/build_scripts/x86_64-bareflank-docker" ]]; then
-        echo -e "linking compiler script:$CB x86_64-bareflank-docker$CE"
-        ln -s $BUILD_ABS/build_scripts/bareflank_gcc_wrapper.sh $BUILD_ABS/build_scripts/x86_64-bareflank-docker
+    if [[ ! -f "$BUILD_ABS/build_scripts/x86_64-vmm-docker" ]]; then
+        echo -e "linking compiler script:$CB x86_64-vmm-docker$CE"
+        ln -s $BUILD_ABS/build_scripts/compiler_wrapper.sh $BUILD_ABS/build_scripts/x86_64-vmm-docker
     fi
 }
 

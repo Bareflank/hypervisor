@@ -84,7 +84,7 @@ driver_entry_ut::test_common_unload_loader_get_info_failed()
 
     {
         MockRepository mocks;
-        mocks.ExpectCallFunc(bfelf_loader_get_info).Return(-1);
+        mocks.ExpectCallFunc(bfelf_file_get_section_info).Return(-1);
 
         RUN_UNITTEST_WITH_MOCKS(mocks, [&]
         {
@@ -116,4 +116,3 @@ driver_entry_ut::test_common_unload_execute_symbol_failed()
 
     common_reset();
 }
-

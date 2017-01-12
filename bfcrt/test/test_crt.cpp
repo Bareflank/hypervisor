@@ -24,8 +24,8 @@
 #include <crt.h>
 #include <eh_frame_list.h>
 
-typedef void (*ctor_t)();
-typedef void (*dtor_t)();
+typedef void (*init_t)();
+typedef void (*fini_t)();
 
 int64_t
 register_eh_frame(void *addr, uint64_t size) noexcept
@@ -77,7 +77,6 @@ crt_ut::test_local_init_invalid_addr()
     mocks.NeverCallFunc(func2);
     mocks.ExpectCallFunc(register_eh_frame).With(&addr, 100).Return(0);
 
-    info.ctors_size = 16;
     info.init_array_size = 16;
     info.eh_frame_addr = &addr;
     info.eh_frame_size = 100;
@@ -97,13 +96,13 @@ crt_ut::test_local_init_invalid_size()
     memset(&info, 0, sizeof(info));
 
     MockRepository mocks;
-    mocks.NeverCallFunc(func1);
+    mocks.ExpectCallFunc(func1);
     mocks.NeverCallFunc(func2);
     mocks.ExpectCallFunc(register_eh_frame).With(&addr, 100).Return(0);
 
-    ctor_t func_list[2] = {static_cast<ctor_t>(func1), static_cast<ctor_t>(func2)};
+    init_t func_list[2] = {static_cast<init_t>(func1), static_cast<init_t>(func2)};
 
-    info.ctors_addr = static_cast<void *>(func_list);
+    info.init_addr = reinterpret_cast<void *>(func1);
     info.init_array_addr = static_cast<void *>(func_list);
     info.eh_frame_addr = &addr;
     info.eh_frame_size = 100;
@@ -123,14 +122,10 @@ crt_ut::test_local_init_register_eh_frame_failure()
     memset(&info, 0, sizeof(info));
 
     MockRepository mocks;
-    mocks.ExpectCallFunc(func1);
-    mocks.ExpectCallFunc(func2);
+    mocks.NeverCallFunc(func1);
+    mocks.NeverCallFunc(func2);
     mocks.ExpectCallFunc(register_eh_frame).With(&addr, 100).Return(REGISTER_EH_FRAME_FAILURE);
 
-    ctor_t func_list[2] = {static_cast<ctor_t>(func1), static_cast<ctor_t>(func2)};
-
-    info.ctors_size = 16;
-    info.ctors_addr = static_cast<void *>(func_list);
     info.eh_frame_addr = &addr;
     info.eh_frame_size = 100;
 
@@ -150,15 +145,13 @@ crt_ut::test_local_init_valid_stop_at_size()
 
     MockRepository mocks;
     mocks.ExpectCallFunc(func1);
-    mocks.ExpectCallFunc(func2);
     mocks.ExpectCallFunc(func1);
     mocks.ExpectCallFunc(func2);
     mocks.ExpectCallFunc(register_eh_frame).With(&addr, 100).Return(0);
 
-    ctor_t func_list[2] = {static_cast<ctor_t>(func1), static_cast<ctor_t>(func2)};
+    init_t func_list[2] = {static_cast<init_t>(func1), static_cast<init_t>(func2)};
 
-    info.ctors_addr = static_cast<void *>(func_list);
-    info.ctors_size = 16;
+    info.init_addr = reinterpret_cast<void *>(func1);
     info.init_array_addr = static_cast<void *>(func_list);
     info.init_array_size = 16;
     info.eh_frame_addr = &addr;
@@ -180,15 +173,13 @@ crt_ut::test_local_init_valid_stop_at_null()
 
     MockRepository mocks;
     mocks.ExpectCallFunc(func1);
-    mocks.ExpectCallFunc(func2);
     mocks.ExpectCallFunc(func1);
     mocks.ExpectCallFunc(func2);
     mocks.ExpectCallFunc(register_eh_frame).With(&addr, 100).Return(0);
 
-    ctor_t func_list[3] = {static_cast<ctor_t>(func1), static_cast<ctor_t>(func2), nullptr};
+    init_t func_list[3] = {static_cast<init_t>(func1), static_cast<init_t>(func2), nullptr};
 
-    info.ctors_addr = static_cast<void *>(func_list);
-    info.ctors_size = 32;
+    info.init_addr = reinterpret_cast<void *>(func1);
     info.init_array_addr = static_cast<void *>(func_list);
     info.init_array_size = 32;
     info.eh_frame_addr = &addr;
@@ -209,14 +200,10 @@ crt_ut::test_local_init_catch_exception()
     memset(&info, 0, sizeof(info));
 
     MockRepository mocks;
-    mocks.ExpectCallFunc(func1);
-    mocks.ExpectCallFunc(func2).Throw(std::runtime_error("error"));
+    mocks.ExpectCallFunc(func1).Throw(std::runtime_error("error"));
     mocks.OnCallFunc(register_eh_frame).With(&addr, 100).Return(0);
 
-    ctor_t func_list[2] = {static_cast<ctor_t>(func1), static_cast<ctor_t>(func2)};
-
-    info.ctors_addr = static_cast<void *>(func_list);
-    info.ctors_size = 16;
+    info.init_addr = reinterpret_cast<void *>(func1);
     info.eh_frame_addr = &addr;
     info.eh_frame_size = 100;
 
@@ -243,7 +230,6 @@ crt_ut::test_local_fini_invalid_addr()
     mocks.NeverCallFunc(func1);
     mocks.NeverCallFunc(func2);
 
-    info.dtors_size = 16;
     info.fini_array_size = 16;
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -260,12 +246,12 @@ crt_ut::test_local_fini_invalid_size()
     memset(&info, 0, sizeof(info));
 
     MockRepository mocks;
-    mocks.NeverCallFunc(func1);
+    mocks.ExpectCallFunc(func1);
     mocks.NeverCallFunc(func2);
 
-    dtor_t func_list[2] = {static_cast<dtor_t>(func1), static_cast<dtor_t>(func2)};
+    fini_t func_list[2] = {static_cast<fini_t>(func1), static_cast<fini_t>(func2)};
 
-    info.dtors_addr = static_cast<void *>(func_list);
+    info.fini_addr = reinterpret_cast<void *>(func1);
     info.fini_array_addr = static_cast<void *>(func_list);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -285,12 +271,10 @@ crt_ut::test_local_fini_valid_stop_at_size()
     mocks.ExpectCallFunc(func1);
     mocks.ExpectCallFunc(func2);
     mocks.ExpectCallFunc(func1);
-    mocks.ExpectCallFunc(func2);
 
-    dtor_t func_list[2] = {static_cast<dtor_t>(func1), static_cast<dtor_t>(func2)};
+    fini_t func_list[2] = {static_cast<fini_t>(func1), static_cast<fini_t>(func2)};
 
-    info.dtors_addr = static_cast<void *>(func_list);
-    info.dtors_size = 16;
+    info.fini_addr = reinterpret_cast<void *>(func1);
     info.fini_array_addr = static_cast<void *>(func_list);
     info.fini_array_size = 16;
 
@@ -311,12 +295,10 @@ crt_ut::test_local_fini_valid_stop_at_null()
     mocks.ExpectCallFunc(func1);
     mocks.ExpectCallFunc(func2);
     mocks.ExpectCallFunc(func1);
-    mocks.ExpectCallFunc(func2);
 
-    dtor_t func_list[3] = {static_cast<dtor_t>(func1), static_cast<dtor_t>(func2), nullptr};
+    fini_t func_list[3] = {static_cast<fini_t>(func1), static_cast<fini_t>(func2), nullptr};
 
-    info.dtors_addr = static_cast<void *>(func_list);
-    info.dtors_size = 32;
+    info.fini_addr = reinterpret_cast<void *>(func1);
     info.fini_array_addr = static_cast<void *>(func_list);
     info.fini_array_size = 32;
 
@@ -335,14 +317,10 @@ crt_ut::test_local_fini_catch_exception()
     memset(&info, 0, sizeof(info));
 
     MockRepository mocks;
-    mocks.ExpectCallFunc(func1);
-    mocks.ExpectCallFunc(func2).Throw(std::runtime_error("error"));
+    mocks.ExpectCallFunc(func1).Throw(std::runtime_error("error"));
     mocks.OnCallFunc(register_eh_frame).With(&addr, 100).Return(0);
 
-    dtor_t func_list[2] = {static_cast<dtor_t>(func1), static_cast<dtor_t>(func2)};
-
-    info.dtors_addr = static_cast<void *>(func_list);
-    info.dtors_size = 16;
+    info.fini_addr = reinterpret_cast<void *>(func1);
     info.eh_frame_addr = &addr;
     info.eh_frame_size = 100;
 

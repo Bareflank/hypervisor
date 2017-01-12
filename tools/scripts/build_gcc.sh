@@ -34,6 +34,3 @@ make -j2 all-gcc
 make -j2 install-gcc
 
 popd
-
-
-

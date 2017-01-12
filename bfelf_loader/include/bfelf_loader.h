@@ -25,6 +25,7 @@
 
 #include <crt.h>
 #include <types.h>
+#include <constants.h>
 #include <error_codes.h>
 
 #pragma GCC system_header
@@ -39,12 +40,8 @@ extern "C" {
 /* ELF Defines                                                                */
 /******************************************************************************/
 
-#ifndef BFELF_MAX_MODULES
-#define BFELF_MAX_MODULES 25
-#endif
-
-#ifndef BFELF_MAX_RELATAB
-#define BFELF_MAX_RELATAB 8
+#ifndef BFELF_MAX_NEEDED
+#define BFELF_MAX_NEEDED 25
 #endif
 
 #ifndef BFELF_MAX_SEGMENTS
@@ -71,52 +68,31 @@ typedef uint64_t bfelf64_xword;
 typedef int64_t bfelf64_sxword;
 
 /******************************************************************************/
-/* ELF Error Codes                                                            */
-/******************************************************************************/
-
-/**
- * Convert ELF error -> const char *
- *
- * @deprecated This function will be removed in future versions of Bareflank.
- *     Please use ec_to_str instead.
- *
- * @param value error code to convert
- * @return const char * version of error code
- */
-const char *bfelf_error(bfelf64_sword value);
-
-/******************************************************************************/
 /* ELF File                                                                   */
 /******************************************************************************/
 
+struct bfelf_dyn;
 struct bfelf_sym;
-struct bfelf_rel;
+struct bfelf_rela;
 struct bfelf_shdr;
-struct bfelf64_ehdr;
+struct bfelf_phdr;
+struct bfelf_ehdr;
 
 /*
- * String
+ * ELF Load Segment
  *
- * The following defines an ELF string, which is a C style, null terminated
- * string, with it's expected length.
- *
+ * The load instructions that each segment provides is missing some helpful
+ * info. This structure provides the info that is needed, in a cleaned up
+ * format.
  */
-struct e_string_t
+struct bfelf_load_instr
 {
-    const char *buf;
-    bfelf64_xword len;
-};
-
-/*
- * Relocation Table
- *
- * The following is used by this API to store information about a symbol
- * table.
- */
-struct relatab_t
-{
-    bfelf64_xword num;
-    struct bfelf_rela *tab;
+    bfelf64_word perm;
+    bfelf64_off mem_offset;
+    bfelf64_off file_offset;
+    bfelf64_xword memsz;
+    bfelf64_xword filesz;
+    bfelf64_addr virt_addr;
 };
 
 /*
@@ -127,34 +103,66 @@ struct relatab_t
  */
 struct bfelf_file_t
 {
+    uint64_t filesz;
     const char *file;
-    char *exec;
-    uint64_t fsize;
 
-    int64_t num_loadable_segments;
+    char *exec_addr;
+    char *exec_virt;
+
+    bfelf64_off entry;
+
+    bfelf64_xword num_load_instr;
+    struct bfelf_load_instr load_instr[BFELF_MAX_SEGMENTS];
+
+    bfelf64_xword num_loadable_segments;
     struct bfelf_phdr *loadable_segments[BFELF_MAX_SEGMENTS];
 
-    struct bfelf64_ehdr *ehdr;
-    struct bfelf_shdr *shdrtab;
-    struct bfelf_phdr *phdrtab;
+    bfelf64_addr start_addr;
+    bfelf64_xword total_memsz;
 
-    struct bfelf_shdr *dynsym;
-    struct bfelf_shdr *hashtab;
-    struct bfelf_shdr *strtab;
-    struct bfelf_shdr *shstrtab;
+    bfelf64_xword num_needed;
+    bfelf64_xword needed[BFELF_MAX_NEEDED];
+
+    struct bfelf_ehdr *ehdr;
+    struct bfelf_phdr *phdrtab;
+    struct bfelf_shdr *shdrtab;
+
+    bfelf64_addr dynoff;
+
+    char *strtab;
 
     bfelf64_word nbucket;
     bfelf64_word nchain;
     bfelf64_word *bucket;
     bfelf64_word *chain;
+    bfelf64_word *hash;
+
+    bfelf64_xword dynnum;
+    struct bfelf_dyn *dyntab;
 
     bfelf64_xword symnum;
     struct bfelf_sym *symtab;
 
-    bfelf64_word num_rela;
-    struct relatab_t relatab[BFELF_MAX_RELATAB];
+    bfelf64_xword relanum;
+    struct bfelf_rela *relatab;
 
-    bfelf64_word relocated;
+    bfelf64_addr init;
+    bfelf64_addr fini;
+
+    bfelf64_addr init_array;
+    bfelf64_xword init_arraysz;
+
+    bfelf64_addr fini_array;
+    bfelf64_xword fini_arraysz;
+
+    bfelf64_addr eh_frame;
+    bfelf64_xword eh_framesz;
+
+    bfelf64_xword flags_1;
+    bfelf64_xword stack_flags;
+
+    bfelf64_addr relaro_vaddr;
+    bfelf64_xword relaro_memsz;
 };
 
 /**
@@ -166,54 +174,48 @@ struct bfelf_file_t
  *
  * @param file a character buffer containing the contents of the ELF file to
  *     be loaded.
- * @param fsize the size of the character buffer
+ * @param filesz the size of the character buffer
  * @param ef the ELF file structure to initialize.
  * @return BFELF_SUCCESS on success, negative on error
  */
 int64_t bfelf_file_init(const char *file,
-                        uint64_t fsize,
+                        uint64_t filesz,
                         struct bfelf_file_t *ef);
 
 /**
- * Get number of program segments
+ * Get number of load instructions
  *
  * Once an ELF file has been initialized, the next step is to load all of the
  * program segments into memory, relocate them, and then execute the entry
  * point. To assist this operation, this function returns the total number of
- * program segments.
+ * load instructions.
  *
  * @param ef the ELF file
- * @return number of segments on success, negative on error
+ * @return number of load instructions on success, negative on error
  */
-int64_t bfelf_file_num_segments(struct bfelf_file_t *ef);
+int64_t bfelf_file_num_load_instrs(struct bfelf_file_t *ef);
 
 /**
- * Get program segment
+ * Get load instructions
  *
- * Once you know how many program segments there are, you can use this
- * function to get each segment. This ELF library doesn't simplify the
- * program loading part, because how this inforamtion is used, greatly depends
- * on the scenario, and all of the information in the program header is needed
- * depending on how your loading the program.
- *
- * @note The segment has already been sanitized by the ELF library. Doing these
- * checks again would only be wasteful.
+ * Once you know how many load instructions there are, you can use this
+ * function to get each instruction structure.
  *
  * @param ef the ELF file
- * @param index the segment index to get
- * @param phdr where to store the segment's program header
+ * @param index the index of the instructions to get
+ * @param instr where to store the load instructions
  * @return BFELF_SUCCESS on success, negative on error
  */
-int64_t bfelf_file_get_segment(struct bfelf_file_t *ef,
-                               int64_t index,
-                               struct bfelf_phdr **phdr);
+int64_t bfelf_file_get_load_instr(struct bfelf_file_t *ef,
+                                  uint64_t index,
+                                  struct bfelf_load_instr **instr);
 
 /**
  * Resolve Symbol
  *
- * Once an ELF loader has had all of it's ELF files initalized and added,
+ * Once an ELF loader has had all of it's ELF files initialized and added,
  * use the relocate ELF loader to setup the ELF files such that they can
- * be executed. If the ELF file is relocated into memory that is accessable
+ * be executed. If the ELF file is relocated into memory that is accessible
  * via the ELF loader, the resolve symbol function can be used to get the
  * address of a specific symbol so that it can be executed.
  *
@@ -226,8 +228,112 @@ int64_t bfelf_file_get_segment(struct bfelf_file_t *ef,
  * @return BFELF_SUCCESS on success, negative on error
  */
 int64_t bfelf_file_resolve_symbol(struct bfelf_file_t *ef,
-                                  struct e_string_t *name,
+                                  const char *name,
                                   void **addr);
+
+/**
+ * Get Info
+ *
+ * Once an ELF loader has had all of it's ELF files initialized and added,
+ * use the relocate ELF loader to setup the ELF files such that they can
+ * be executed. Once this is done, this function can be used to get the
+ * C runtime information for bootstrapping a binary / module.
+ *
+ * @param ef the ELF file to get the info structure for
+ * @param info the info structure to store the results.
+ * @return BFELF_SUCCESS on success, negative on error
+ */
+int64_t bfelf_file_get_section_info(struct bfelf_file_t *ef,
+                                    struct section_info_t *info);
+
+/**
+ * Get Entry Point
+ *
+ * Returns the entry point of the ELF file.
+ *
+ * @param ef the ELF file to get the info structure for
+ * @param addr the resulting address of the entry point
+ * @return BFELF_SUCCESS on success, negative on error
+ */
+int64_t bfelf_file_get_entry(struct bfelf_file_t *ef,
+                             void **addr);
+
+/**
+ * Get Stack Permissions
+ *
+ * Returns the ELF file's stack permissions.
+ *
+ * @param ef the ELF file to get the info structure for
+ * @param perm the resulting permissions
+ * @return BFELF_SUCCESS on success, negative on error
+ */
+int64_t bfelf_file_get_stack_perm(struct bfelf_file_t *ef,
+                                  bfelf64_xword *perm);
+
+/**
+ * Get Relocation Read-Only Info
+ *
+ * Returns the ELF file's RELRO information for
+ * re-mapping previously writable memory to read-only
+ *
+ * @param ef the ELF file to get the info structure for
+ * @param addr the resulting address
+ * @param size the resulting size
+ * @return BFELF_SUCCESS on success, negative on error
+ */
+int64_t bfelf_file_get_relro(struct bfelf_file_t *ef,
+                             bfelf64_addr *addr,
+                             bfelf64_xword *size);
+
+/**
+ * Get Number of Needed Libraries
+ *
+ * Returns the number of DT_NEEDED entries in the ELF
+ * file
+ *
+ * @param ef the ELF file to get the info structure for
+ * @return number of needed entries on success, negative on error
+ */
+int64_t bfelf_file_get_num_needed(struct bfelf_file_t *ef);
+
+/**
+ * Get Needed Library
+ *
+ * Returns the name of a shared library that is needed by this
+ * ELF file
+ *
+ * @param ef the ELF file to get the info structure for
+ * @param index the shared library name to get
+ * @param needed the resulting needed library
+ * @return number of needed entries on success, negative on error
+ */
+int64_t bfelf_file_get_needed(struct bfelf_file_t *ef,
+                              uint64_t index,
+                              char **needed);
+
+/**
+ * Get Total Memory Size
+ *
+ * Returns the total number of bytes needed in memory for this ELF file
+ * when loading the ELF file
+ *
+ * @param ef the ELF file to get the info structure for
+ * @return number of needed entries on success, negative on error
+ */
+int64_t
+bfelf_file_get_total_size(struct bfelf_file_t *ef);
+
+/**
+ * Get PIC/PIE
+ *
+ * Returns 1 if this ELF file was compiled using PIC / PIE, or
+ * 0 otherwise
+ *
+ * @param ef the ELF file to get the info structure for
+ * @return 1 if compiled with PIC/PIE, 0 otherwise
+ */
+int64_t
+bfelf_file_get_pic_pie(struct bfelf_file_t *ef);
 
 /******************************************************************************/
 /* ELF File Header                                                            */
@@ -358,7 +464,7 @@ int64_t bfelf_file_resolve_symbol(struct bfelf_file_t *ef,
  * The file header is located at the beginning of the file, and is used to
  * locate the other parts of the file.
  */
-struct bfelf64_ehdr
+struct bfelf_ehdr
 {
     unsigned char e_ident[bfei_nident];
     bfelf64_half e_type;
@@ -448,7 +554,100 @@ struct bfelf_shdr
 };
 
 /******************************************************************************/
-/* ELF Dynamic Symbol Table                                                   */
+/* ELF Dynamic Section                                                        */
+/******************************************************************************/
+
+/*
+ * ELF Dynamic Table Entry Tags
+ *
+ * The following is defined in the ELF 64bit file format specification:
+ * http://www.uclibc.org/docs/elf-64-gen.pdf, page 14
+ */
+#define bfdt_null ((bfelf64_xword)0)
+#define bfdt_needed ((bfelf64_xword)1)
+#define bfdt_pltrelsz ((bfelf64_xword)2)
+#define bfdt_pltgot ((bfelf64_xword)3)
+#define bfdt_hash ((bfelf64_xword)4)
+#define bfdt_strtab ((bfelf64_xword)5)
+#define bfdt_symtab ((bfelf64_xword)6)
+#define bfdt_rela ((bfelf64_xword)7)
+#define bfdt_relasz ((bfelf64_xword)8)
+#define bfdt_relaent ((bfelf64_xword)9)
+#define bfdt_strsz ((bfelf64_xword)10)
+#define bfdt_syment ((bfelf64_xword)11)
+#define bfdt_init ((bfelf64_xword)12)
+#define bfdt_fini ((bfelf64_xword)13)
+#define bfdt_soname ((bfelf64_xword)14)
+#define bfdt_rpath ((bfelf64_xword)15)
+#define bfdt_symbolic ((bfelf64_xword)16)
+#define bfdt_rel ((bfelf64_xword)17)
+#define bfdt_relsz ((bfelf64_xword)18)
+#define bfdt_relent ((bfelf64_xword)19)
+#define bfdt_pltrel ((bfelf64_xword)20)
+#define bfdt_debug ((bfelf64_xword)21)
+#define bfdt_textrel ((bfelf64_xword)22)
+#define bfdt_jmprel ((bfelf64_xword)23)
+#define bfdt_bind_now ((bfelf64_xword)24)
+#define bfdt_init_array ((bfelf64_xword)25)
+#define bfdt_fini_array ((bfelf64_xword)26)
+#define bfdt_init_arraysz ((bfelf64_xword)27)
+#define bfdt_fini_arraysz ((bfelf64_xword)28)
+#define bfdt_loos ((bfelf64_xword)0x60000000)
+#define bfdt_relacount ((bfelf64_xword)0x6ffffff9)
+#define bfdt_relcount ((bfelf64_xword)0x6ffffffa)
+#define bfdt_flags_1 ((bfelf64_xword)0x6ffffffb)
+#define bfdt_hios ((bfelf64_xword)0x6FFFFFFF)
+#define bfdt_loproc ((bfelf64_xword)0x70000000)
+#define bfdt_hiproc ((bfelf64_xword)0x7FFFFFFF)
+
+#define bfdf_1_now ((bfelf64_xword)0x00000001)
+#define bfdf_1_global ((bfelf64_xword)0x00000002)
+#define bfdf_1_group ((bfelf64_xword)0x00000004)
+#define bfdf_1_nodelete ((bfelf64_xword)0x00000008)
+#define bfdf_1_loadfltr ((bfelf64_xword)0x00000010)
+#define bfdf_1_initfirst ((bfelf64_xword)0x00000020)
+#define bfdf_1_noopen ((bfelf64_xword)0x00000040)
+#define bfdf_1_origin ((bfelf64_xword)0x00000080)
+#define bfdf_1_direct ((bfelf64_xword)0x00000100)
+#define bfdf_1_trans ((bfelf64_xword)0x00000200)
+#define bfdf_1_interpose ((bfelf64_xword)0x00000400)
+#define bfdf_1_nodeflib ((bfelf64_xword)0x00000800)
+#define bfdf_1_nodump ((bfelf64_xword)0x00001000)
+#define bfdf_1_confalt ((bfelf64_xword)0x00002000)
+#define bfdf_1_endfiltee ((bfelf64_xword)0x00004000)
+#define bfdf_1_dispreldne ((bfelf64_xword)0x00008000)
+#define bfdf_1_disprelpnd ((bfelf64_xword)0x00010000)
+#define bfdf_1_nodirect ((bfelf64_xword)0x00020000)
+#define bfdf_1_ignmuldef ((bfelf64_xword)0x00040000)
+#define bfdf_1_noksyms ((bfelf64_xword)0x00080000)
+#define bfdf_1_nohdr ((bfelf64_xword)0x00100000)
+#define bfdf_1_edited ((bfelf64_xword)0x00200000)
+#define bfdf_1_noreloc ((bfelf64_xword)0x00400000)
+#define bfdf_1_symintpose ((bfelf64_xword)0x00800000)
+#define bfdf_1_globaudit ((bfelf64_xword)0x01000000)
+#define bfdf_1_singleton ((bfelf64_xword)0x02000000)
+#define bfdf_1_pie ((bfelf64_xword) 0x08000000)
+
+/*
+ * ELF Dynamic Table
+ *
+ * The following is defined in the ELF 64bit file format specification:
+ * http://www.uclibc.org/docs/elf-64-gen.pdf, page 14
+ *
+ * NOTE: The spec actually uses a union, but the use of a union goes against
+ * the C++ Core Guidelines, and Windows seems to get really mad. There really
+ * is not need for a union since the type size if the same. For this reason,
+ * we simply use d_val and cast when needed.
+ *
+ */
+struct bfelf_dyn
+{
+    bfelf64_sxword d_tag;
+    bfelf64_xword d_val;
+};
+
+/******************************************************************************/
+/* ELF Symbol Table                                                           */
 /******************************************************************************/
 
 /*
@@ -581,6 +780,9 @@ struct bfelf_rela
 #define bfpt_shlib ((bfelf64_word)5)
 #define bfpt_phdr ((bfelf64_word)6)
 #define bfpt_loos ((bfelf64_word)0x60000000)
+#define bfpt_gnu_eh_frame ((bfelf64_word)0x6474e550)
+#define bfpt_gnu_stack ((bfelf64_word)0x6474e551)
+#define bfpt_gnu_relro ((bfelf64_word)0x6474e552)
 #define bfpt_hios ((bfelf64_word)0x6FFFFFFF)
 #define bfpt_loproc ((bfelf64_word)0x70000000)
 #define bfpt_hiproc ((bfelf64_word)0x7FFFFFFF)
@@ -634,7 +836,7 @@ struct bfelf_loader_t
 {
     bfelf64_word num;
     bfelf64_word relocated;
-    struct bfelf_file_t *efs[BFELF_MAX_MODULES];
+    struct bfelf_file_t *efs[MAX_NUM_MODULES];
 };
 
 /**
@@ -645,17 +847,14 @@ struct bfelf_loader_t
  *
  * @param loader the ELF loader
  * @param ef the ELF file to add
- * @param exec the offset into memory where this ELF file is loaded. This is
- *     used during relocations to move a symbol to where it is actually
- *     located. For most libraries, this should be an actual value, while
- *     for more binaries, this is likely 0. Also note that this value should
- *     be relative to the page tables that will be used when the application
- *     is run.
+ * @param exec_addr the address in memory where this ELF file was loaded.
+ * @param exec_virt the address in memory where this ELF file will be run.
  * @return BFELF_SUCCESS on success, negative on error
  */
 int64_t bfelf_loader_add(struct bfelf_loader_t *loader,
                          struct bfelf_file_t *ef,
-                         char *exec);
+                         char *exec_addr,
+                         char *exec_virt);
 
 /**
  * Relocate ELF Loader
@@ -672,9 +871,9 @@ int64_t bfelf_loader_relocate(struct bfelf_loader_t *loader);
 /**
  * Resolve Symbol
  *
- * Once an ELF loader has had all of it's ELF files initalized and added,
+ * Once an ELF loader has had all of it's ELF files initialized and added,
  * use the relocate ELF loader to setup the ELF files such that they can
- * be executed. If the ELF file is relocated into memory that is accessable
+ * be executed. If the ELF file is relocated into memory that is accessible
  * via the ELF loader, the resolve symbol function can be used to get the
  * address of a specific symbol so that it can be executed.
  *
@@ -684,28 +883,8 @@ int64_t bfelf_loader_relocate(struct bfelf_loader_t *loader);
  * @return BFELF_SUCCESS on success, negative on error
  */
 int64_t bfelf_loader_resolve_symbol(struct bfelf_loader_t *loader,
-                                    struct e_string_t *name,
+                                    const char *name,
                                     void **addr);
-
-/**
- * Get Info
- *
- * Once an ELF loader has had all of it's ELF files initalized and added,
- * use the relocate ELF loader to setup the ELF files such that they can
- * be executed. Once this is done, this function can be used to get the
- * C runtime information for bootstrapping a binary / module. If the info
- * structure is located in memory that is accessible to the loader, the
- * init and fini functions are provided in the inof structure itself for
- * executing the runtime functions.
- *
- * @param loader the ELF loader
- * @param ef the ELF file to get the info structure for
- * @param info the info structore to store the results.
- * @return BFELF_SUCCESS on success, negative on error
- */
-int64_t bfelf_loader_get_info(struct bfelf_loader_t *loader,
-                              struct bfelf_file_t *ef,
-                              struct section_info_t *info);
 
 #ifdef __cplusplus
 }
