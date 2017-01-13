@@ -27,8 +27,19 @@
 
 namespace bfn
 {
+
+/// Get a std::string representation of an interger
+///
+/// @param val
+///   Integer to get a std::string representation of
+///
+/// @param base
+///   The base to format the std::string representation
+///
+/// @note Only bases 8, 16 and 10 are supported
+///
 template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
-std::string to_string(T val, int base)
+std::string to_string(const T val, const int base)
 {
     std::stringstream stream;
 
