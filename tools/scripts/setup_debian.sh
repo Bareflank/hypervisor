@@ -28,7 +28,6 @@ source $(dirname $0)/setup_common.sh
 
 check_distro debian
 check_folder
-check_hardware
 
 # ------------------------------------------------------------------------------
 # Parse Arguments

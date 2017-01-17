@@ -440,14 +440,113 @@ intrinsics_ut::test_cpuid_x64_cpuid_feature_information_ecx_dump()
 }
 
 void
+intrinsics_ut::test_cpuid_x64_cpuid_extended_feature_flags_subleaf0_ebx_fsgsbase()
+{
+    g_regs.ebx = 0x1U << 0;
+    this->expect_true(cpuid::extended_feature_flags::subleaf0::ebx::fsgsbase::get());
+
+    g_regs.ebx = ~(0x1U << 0);
+    this->expect_false(cpuid::extended_feature_flags::subleaf0::ebx::fsgsbase::get());
+}
+
+void
+intrinsics_ut::test_cpuid_x64_cpuid_extended_feature_flags_subleaf0_ebx_ia32_tsc_adjust()
+{
+    g_regs.ebx = 0x1U << 1;
+    this->expect_true(cpuid::extended_feature_flags::subleaf0::ebx::ia32_tsc_adjust::get());
+
+    g_regs.ebx = ~(0x1U << 1);
+    this->expect_false(cpuid::extended_feature_flags::subleaf0::ebx::ia32_tsc_adjust::get());
+}
+
+void
 intrinsics_ut::test_cpuid_x64_cpuid_extended_feature_flags_subleaf0_ebx_sgx()
 {
-
     g_regs.ebx = 0x1U << 2;
     this->expect_true(cpuid::extended_feature_flags::subleaf0::ebx::sgx::get());
 
     g_regs.ebx = ~(0x1U << 2);
     this->expect_false(cpuid::extended_feature_flags::subleaf0::ebx::sgx::get());
+}
+
+void
+intrinsics_ut::test_cpuid_x64_cpuid_extended_feature_flags_subleaf0_ebx_bmi1()
+{
+    g_regs.ebx = 0x1U << 3;
+    this->expect_true(cpuid::extended_feature_flags::subleaf0::ebx::bmi1::get());
+
+    g_regs.ebx = ~(0x1U << 3);
+    this->expect_false(cpuid::extended_feature_flags::subleaf0::ebx::bmi1::get());
+}
+
+void
+intrinsics_ut::test_cpuid_x64_cpuid_extended_feature_flags_subleaf0_ebx_hle()
+{
+    g_regs.ebx = 0x1U << 4;
+    this->expect_true(cpuid::extended_feature_flags::subleaf0::ebx::hle::get());
+
+    g_regs.ebx = ~(0x1U << 4);
+    this->expect_false(cpuid::extended_feature_flags::subleaf0::ebx::hle::get());
+}
+
+void
+intrinsics_ut::test_cpuid_x64_cpuid_extended_feature_flags_subleaf0_ebx_avx2()
+{
+    g_regs.ebx = 0x1U << 5;
+    this->expect_true(cpuid::extended_feature_flags::subleaf0::ebx::avx2::get());
+
+    g_regs.ebx = ~(0x1U << 5);
+    this->expect_false(cpuid::extended_feature_flags::subleaf0::ebx::avx2::get());
+}
+
+void
+intrinsics_ut::test_cpuid_x64_cpuid_extended_feature_flags_subleaf0_ebx_fdp_excptn_only()
+{
+    g_regs.ebx = 0x1U << 6;
+    this->expect_true(cpuid::extended_feature_flags::subleaf0::ebx::fdp_excptn_only::get());
+
+    g_regs.ebx = ~(0x1U << 6);
+    this->expect_false(cpuid::extended_feature_flags::subleaf0::ebx::fdp_excptn_only::get());
+}
+
+void
+intrinsics_ut::test_cpuid_x64_cpuid_extended_feature_flags_subleaf0_ebx_smep()
+{
+    g_regs.ebx = 0x1U << 7;
+    this->expect_true(cpuid::extended_feature_flags::subleaf0::ebx::smep::get());
+
+    g_regs.ebx = ~(0x1U << 7);
+    this->expect_false(cpuid::extended_feature_flags::subleaf0::ebx::smep::get());
+}
+
+void
+intrinsics_ut::test_cpuid_x64_cpuid_extended_feature_flags_subleaf0_ebx_bmi2()
+{
+    g_regs.ebx = 0x1U << 8;
+    this->expect_true(cpuid::extended_feature_flags::subleaf0::ebx::bmi2::get());
+
+    g_regs.ebx = ~(0x1U << 8);
+    this->expect_false(cpuid::extended_feature_flags::subleaf0::ebx::bmi2::get());
+}
+
+void
+intrinsics_ut::test_cpuid_x64_cpuid_extended_feature_flags_subleaf0_ebx_enhanced_rep()
+{
+    g_regs.ebx = 0x1U << 9;
+    this->expect_true(cpuid::extended_feature_flags::subleaf0::ebx::enhanced_rep::get());
+
+    g_regs.ebx = ~(0x1U << 9);
+    this->expect_false(cpuid::extended_feature_flags::subleaf0::ebx::enhanced_rep::get());
+}
+
+void
+intrinsics_ut::test_cpuid_x64_cpuid_extended_feature_flags_subleaf0_ebx_invpcid()
+{
+    g_regs.ebx = 0x1U << 10;
+    this->expect_true(cpuid::extended_feature_flags::subleaf0::ebx::invpcid::get());
+
+    g_regs.ebx = ~(0x1U << 10);
+    this->expect_false(cpuid::extended_feature_flags::subleaf0::ebx::invpcid::get());
 }
 
 void
@@ -458,6 +557,116 @@ intrinsics_ut::test_cpuid_x64_cpuid_extended_feature_flags_subleaf0_ebx_rtm()
 
     g_regs.ebx = ~(0x1U << 11);
     this->expect_false(cpuid::extended_feature_flags::subleaf0::ebx::rtm::get());
+}
+
+void
+intrinsics_ut::test_cpuid_x64_cpuid_extended_feature_flags_subleaf0_ebx_rdt_m()
+{
+    g_regs.ebx = 0x1U << 12;
+    this->expect_true(cpuid::extended_feature_flags::subleaf0::ebx::rdt_m::get());
+
+    g_regs.ebx = ~(0x1U << 12);
+    this->expect_false(cpuid::extended_feature_flags::subleaf0::ebx::rdt_m::get());
+}
+
+void
+intrinsics_ut::test_cpuid_x64_cpuid_extended_feature_flags_subleaf0_ebx_depreciated_fpu_cs_ds()
+{
+    g_regs.ebx = 0x1U << 13;
+    this->expect_true(cpuid::extended_feature_flags::subleaf0::ebx::depreciated_fpu_cs_ds::get());
+
+    g_regs.ebx = ~(0x1U << 13);
+    this->expect_false(cpuid::extended_feature_flags::subleaf0::ebx::depreciated_fpu_cs_ds::get());
+}
+
+void
+intrinsics_ut::test_cpuid_x64_cpuid_extended_feature_flags_subleaf0_ebx_mpx()
+{
+    g_regs.ebx = 0x1U << 14;
+    this->expect_true(cpuid::extended_feature_flags::subleaf0::ebx::mpx::get());
+
+    g_regs.ebx = ~(0x1U << 14);
+    this->expect_false(cpuid::extended_feature_flags::subleaf0::ebx::mpx::get());
+}
+
+void
+intrinsics_ut::test_cpuid_x64_cpuid_extended_feature_flags_subleaf0_ebx_rdt_a()
+{
+    g_regs.ebx = 0x1U << 15;
+    this->expect_true(cpuid::extended_feature_flags::subleaf0::ebx::rdt_a::get());
+
+    g_regs.ebx = ~(0x1U << 15);
+    this->expect_false(cpuid::extended_feature_flags::subleaf0::ebx::rdt_a::get());
+}
+
+void
+intrinsics_ut::test_cpuid_x64_cpuid_extended_feature_flags_subleaf0_ebx_rdseed()
+{
+    g_regs.ebx = 0x1U << 18;
+    this->expect_true(cpuid::extended_feature_flags::subleaf0::ebx::rdseed::get());
+
+    g_regs.ebx = ~(0x1U << 18);
+    this->expect_false(cpuid::extended_feature_flags::subleaf0::ebx::rdseed::get());
+}
+
+void
+intrinsics_ut::test_cpuid_x64_cpuid_extended_feature_flags_subleaf0_ebx_adx()
+{
+    g_regs.ebx = 0x1U << 19;
+    this->expect_true(cpuid::extended_feature_flags::subleaf0::ebx::adx::get());
+
+    g_regs.ebx = ~(0x1U << 19);
+    this->expect_false(cpuid::extended_feature_flags::subleaf0::ebx::adx::get());
+}
+
+void
+intrinsics_ut::test_cpuid_x64_cpuid_extended_feature_flags_subleaf0_ebx_smap()
+{
+    g_regs.ebx = 0x1U << 20;
+    this->expect_true(cpuid::extended_feature_flags::subleaf0::ebx::smap::get());
+
+    g_regs.ebx = ~(0x1U << 20);
+    this->expect_false(cpuid::extended_feature_flags::subleaf0::ebx::smap::get());
+}
+
+void
+intrinsics_ut::test_cpuid_x64_cpuid_extended_feature_flags_subleaf0_ebx_clflushopt()
+{
+    g_regs.ebx = 0x1U << 23;
+    this->expect_true(cpuid::extended_feature_flags::subleaf0::ebx::clflushopt::get());
+
+    g_regs.ebx = ~(0x1U << 23);
+    this->expect_false(cpuid::extended_feature_flags::subleaf0::ebx::clflushopt::get());
+}
+
+void
+intrinsics_ut::test_cpuid_x64_cpuid_extended_feature_flags_subleaf0_ebx_clwb()
+{
+    g_regs.ebx = 0x1U << 24;
+    this->expect_true(cpuid::extended_feature_flags::subleaf0::ebx::clwb::get());
+
+    g_regs.ebx = ~(0x1U << 24);
+    this->expect_false(cpuid::extended_feature_flags::subleaf0::ebx::clwb::get());
+}
+
+void
+intrinsics_ut::test_cpuid_x64_cpuid_extended_feature_flags_subleaf0_ebx_processor_trace()
+{
+    g_regs.ebx = 0x1U << 25;
+    this->expect_true(cpuid::extended_feature_flags::subleaf0::ebx::processor_trace::get());
+
+    g_regs.ebx = ~(0x1U << 25);
+    this->expect_false(cpuid::extended_feature_flags::subleaf0::ebx::processor_trace::get());
+}
+
+void
+intrinsics_ut::test_cpuid_x64_cpuid_extended_feature_flags_subleaf0_ebx_sha()
+{
+    g_regs.ebx = 0x1U << 29;
+    this->expect_true(cpuid::extended_feature_flags::subleaf0::ebx::sha::get());
+
+    g_regs.ebx = ~(0x1U << 29);
+    this->expect_false(cpuid::extended_feature_flags::subleaf0::ebx::sha::get());
 }
 
 void

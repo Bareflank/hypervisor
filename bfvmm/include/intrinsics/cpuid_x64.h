@@ -514,11 +514,201 @@ namespace cpuid
         {
             namespace ebx
             {
+                namespace fsgsbase
+                {
+                    constexpr const auto mask = 0x00000001UL;
+                    constexpr const auto from = 0;
+                    constexpr const auto name = "fsgsbase";
+
+                    inline auto get() noexcept
+                    {
+                        value_type eax = addr;
+                        value_type ebx = 0U;
+                        value_type ecx = 0U;
+                        value_type edx = 0U;
+
+                        __cpuid(&eax, &ebx, &ecx, &edx);
+
+                        return (ebx & mask) != 0;
+                    }
+                }
+
+                namespace ia32_tsc_adjust
+                {
+                    constexpr const auto mask = 0x00000002UL;
+                    constexpr const auto from = 1;
+                    constexpr const auto name = "ia32_tsc_adjust";
+
+                    inline auto get() noexcept
+                    {
+                        value_type eax = addr;
+                        value_type ebx = 0U;
+                        value_type ecx = 0U;
+                        value_type edx = 0U;
+
+                        __cpuid(&eax, &ebx, &ecx, &edx);
+
+                        return (ebx & mask) != 0;
+                    }
+                }
+
                 namespace sgx
                 {
                     constexpr const auto mask = 0x00000004UL;
                     constexpr const auto from = 2;
                     constexpr const auto name = "sgx";
+
+                    inline auto get() noexcept
+                    {
+                        value_type eax = addr;
+                        value_type ebx = 0U;
+                        value_type ecx = 0U;
+                        value_type edx = 0U;
+
+                        __cpuid(&eax, &ebx, &ecx, &edx);
+
+                        return (ebx & mask) != 0;
+                    }
+                }
+
+                namespace bmi1
+                {
+                    constexpr const auto mask = 0x00000008UL;
+                    constexpr const auto from = 3;
+                    constexpr const auto name = "bmi1";
+
+                    inline auto get() noexcept
+                    {
+                        value_type eax = addr;
+                        value_type ebx = 0U;
+                        value_type ecx = 0U;
+                        value_type edx = 0U;
+
+                        __cpuid(&eax, &ebx, &ecx, &edx);
+
+                        return (ebx & mask) != 0;
+                    }
+                }
+
+                namespace hle
+                {
+                    constexpr const auto mask = 0x00000010UL;
+                    constexpr const auto from = 4;
+                    constexpr const auto name = "hle";
+
+                    inline auto get() noexcept
+                    {
+                        value_type eax = addr;
+                        value_type ebx = 0U;
+                        value_type ecx = 0U;
+                        value_type edx = 0U;
+
+                        __cpuid(&eax, &ebx, &ecx, &edx);
+
+                        return (ebx & mask) != 0;
+                    }
+                }
+
+                namespace avx2
+                {
+                    constexpr const auto mask = 0x00000020UL;
+                    constexpr const auto from = 5;
+                    constexpr const auto name = "avx2";
+
+                    inline auto get() noexcept
+                    {
+                        value_type eax = addr;
+                        value_type ebx = 0U;
+                        value_type ecx = 0U;
+                        value_type edx = 0U;
+
+                        __cpuid(&eax, &ebx, &ecx, &edx);
+
+                        return (ebx & mask) != 0;
+                    }
+                }
+
+                namespace fdp_excptn_only
+                {
+                    constexpr const auto mask = 0x00000040UL;
+                    constexpr const auto from = 6;
+                    constexpr const auto name = "fdp_excptn_only";
+
+                    inline auto get() noexcept
+                    {
+                        value_type eax = addr;
+                        value_type ebx = 0U;
+                        value_type ecx = 0U;
+                        value_type edx = 0U;
+
+                        __cpuid(&eax, &ebx, &ecx, &edx);
+
+                        return (ebx & mask) != 0;
+                    }
+                }
+
+                namespace smep
+                {
+                    constexpr const auto mask = 0x00000080UL;
+                    constexpr const auto from = 7;
+                    constexpr const auto name = "smep";
+
+                    inline auto get() noexcept
+                    {
+                        value_type eax = addr;
+                        value_type ebx = 0U;
+                        value_type ecx = 0U;
+                        value_type edx = 0U;
+
+                        __cpuid(&eax, &ebx, &ecx, &edx);
+
+                        return (ebx & mask) != 0;
+                    }
+                }
+
+                namespace bmi2
+                {
+                    constexpr const auto mask = 0x00000100UL;
+                    constexpr const auto from = 8;
+                    constexpr const auto name = "bmi2";
+
+                    inline auto get() noexcept
+                    {
+                        value_type eax = addr;
+                        value_type ebx = 0U;
+                        value_type ecx = 0U;
+                        value_type edx = 0U;
+
+                        __cpuid(&eax, &ebx, &ecx, &edx);
+
+                        return (ebx & mask) != 0;
+                    }
+                }
+
+                namespace enhanced_rep
+                {
+                    constexpr const auto mask = 0x00000200UL;
+                    constexpr const auto from = 9;
+                    constexpr const auto name = "enhanced_rep";
+
+                    inline auto get() noexcept
+                    {
+                        value_type eax = addr;
+                        value_type ebx = 0U;
+                        value_type ecx = 0U;
+                        value_type edx = 0U;
+
+                        __cpuid(&eax, &ebx, &ecx, &edx);
+
+                        return (ebx & mask) != 0;
+                    }
+                }
+
+                namespace invpcid
+                {
+                    constexpr const auto mask = 0x00000400UL;
+                    constexpr const auto from = 10;
+                    constexpr const auto name = "invpcid";
 
                     inline auto get() noexcept
                     {
@@ -552,15 +742,290 @@ namespace cpuid
                     }
                 }
 
+                namespace rdt_m
+                {
+                    constexpr const auto mask = 0x00001000UL;
+                    constexpr const auto from = 12;
+                    constexpr const auto name = "rdt_m";
+
+                    inline auto get() noexcept
+                    {
+                        value_type eax = addr;
+                        value_type ebx = 0U;
+                        value_type ecx = 0U;
+                        value_type edx = 0U;
+
+                        __cpuid(&eax, &ebx, &ecx, &edx);
+
+                        return (ebx & mask) != 0;
+                    }
+                }
+
+                namespace depreciated_fpu_cs_ds
+                {
+                    constexpr const auto mask = 0x00002000UL;
+                    constexpr const auto from = 13;
+                    constexpr const auto name = "depreciated_fpu_cs_ds";
+
+                    inline auto get() noexcept
+                    {
+                        value_type eax = addr;
+                        value_type ebx = 0U;
+                        value_type ecx = 0U;
+                        value_type edx = 0U;
+
+                        __cpuid(&eax, &ebx, &ecx, &edx);
+
+                        return (ebx & mask) != 0;
+                    }
+                }
+
+                namespace mpx
+                {
+                    constexpr const auto mask = 0x00004000UL;
+                    constexpr const auto from = 14;
+                    constexpr const auto name = "mpx";
+
+                    inline auto get() noexcept
+                    {
+                        value_type eax = addr;
+                        value_type ebx = 0U;
+                        value_type ecx = 0U;
+                        value_type edx = 0U;
+
+                        __cpuid(&eax, &ebx, &ecx, &edx);
+
+                        return (ebx & mask) != 0;
+                    }
+                }
+
+                namespace rdt_a
+                {
+                    constexpr const auto mask = 0x00008000UL;
+                    constexpr const auto from = 15;
+                    constexpr const auto name = "rdt_a";
+
+                    inline auto get() noexcept
+                    {
+                        value_type eax = addr;
+                        value_type ebx = 0U;
+                        value_type ecx = 0U;
+                        value_type edx = 0U;
+
+                        __cpuid(&eax, &ebx, &ecx, &edx);
+
+                        return (ebx & mask) != 0;
+                    }
+                }
+
+                namespace rdseed
+                {
+                    constexpr const auto mask = 0x00040000UL;
+                    constexpr const auto from = 18;
+                    constexpr const auto name = "rdseed";
+
+                    inline auto get() noexcept
+                    {
+                        value_type eax = addr;
+                        value_type ebx = 0U;
+                        value_type ecx = 0U;
+                        value_type edx = 0U;
+
+                        __cpuid(&eax, &ebx, &ecx, &edx);
+
+                        return (ebx & mask) != 0;
+                    }
+                }
+
+                namespace adx
+                {
+                    constexpr const auto mask = 0x00080000UL;
+                    constexpr const auto from = 19;
+                    constexpr const auto name = "adx";
+
+                    inline auto get() noexcept
+                    {
+                        value_type eax = addr;
+                        value_type ebx = 0U;
+                        value_type ecx = 0U;
+                        value_type edx = 0U;
+
+                        __cpuid(&eax, &ebx, &ecx, &edx);
+
+                        return (ebx & mask) != 0;
+                    }
+                }
+
+                namespace smap
+                {
+                    constexpr const auto mask = 0x00100000UL;
+                    constexpr const auto from = 20;
+                    constexpr const auto name = "smap";
+
+                    inline auto get() noexcept
+                    {
+                        value_type eax = addr;
+                        value_type ebx = 0U;
+                        value_type ecx = 0U;
+                        value_type edx = 0U;
+
+                        __cpuid(&eax, &ebx, &ecx, &edx);
+
+                        return (ebx & mask) != 0;
+                    }
+                }
+
+                namespace clflushopt
+                {
+                    constexpr const auto mask = 0x00800000UL;
+                    constexpr const auto from = 23;
+                    constexpr const auto name = "clflushopt";
+
+                    inline auto get() noexcept
+                    {
+                        value_type eax = addr;
+                        value_type ebx = 0U;
+                        value_type ecx = 0U;
+                        value_type edx = 0U;
+
+                        __cpuid(&eax, &ebx, &ecx, &edx);
+
+                        return (ebx & mask) != 0;
+                    }
+                }
+
+                namespace clwb
+                {
+                    constexpr const auto mask = 0x01000000UL;
+                    constexpr const auto from = 24;
+                    constexpr const auto name = "clwb";
+
+                    inline auto get() noexcept
+                    {
+                        value_type eax = addr;
+                        value_type ebx = 0U;
+                        value_type ecx = 0U;
+                        value_type edx = 0U;
+
+                        __cpuid(&eax, &ebx, &ecx, &edx);
+
+                        return (ebx & mask) != 0;
+                    }
+                }
+
+                namespace processor_trace
+                {
+                    constexpr const auto mask = 0x02000000UL;
+                    constexpr const auto from = 25;
+                    constexpr const auto name = "processor_trace";
+
+                    inline auto get() noexcept
+                    {
+                        value_type eax = addr;
+                        value_type ebx = 0U;
+                        value_type ecx = 0U;
+                        value_type edx = 0U;
+
+                        __cpuid(&eax, &ebx, &ecx, &edx);
+
+                        return (ebx & mask) != 0;
+                    }
+                }
+
+                namespace sha
+                {
+                    constexpr const auto mask = 0x20000000UL;
+                    constexpr const auto from = 29;
+                    constexpr const auto name = "sha";
+
+                    inline auto get() noexcept
+                    {
+                        value_type eax = addr;
+                        value_type ebx = 0U;
+                        value_type ecx = 0U;
+                        value_type edx = 0U;
+
+                        __cpuid(&eax, &ebx, &ecx, &edx);
+
+                        return (ebx & mask) != 0;
+                    }
+                }
+
                 inline void dump() noexcept
                 {
                     bfdebug << "cpuid::extended_feature_flags::subleaf0::ebx enabled flags:" << bfendl;
 
+                    if (fsgsbase::get())
+                        bfdebug << "    - fsgsbase" << bfendl;
+
+                    if (ia32_tsc_adjust::get())
+                        bfdebug << "    - ia32_tsc_adjust" << bfendl;
+
                     if (sgx::get())
                         bfdebug << "    - sgx" << bfendl;
 
+                    if (bmi1::get())
+                        bfdebug << "    - bmi1" << bfendl;
+
+                    if (hle::get())
+                        bfdebug << "    - hle" << bfendl;
+
+                    if (avx2::get())
+                        bfdebug << "    - avx2" << bfendl;
+
+                    if (fdp_excptn_only::get())
+                        bfdebug << "    - fdp_excptn_only" << bfendl;
+
+                    if (smep::get())
+                        bfdebug << "    - smep" << bfendl;
+
+                    if (bmi2::get())
+                        bfdebug << "    - bmi2" << bfendl;
+
+                    if (enhanced_rep::get())
+                        bfdebug << "    - enhanced_rep" << bfendl;
+
+                    if (invpcid::get())
+                        bfdebug << "    - invpcid" << bfendl;
+
                     if (rtm::get())
                         bfdebug << "    - rtm" << bfendl;
+
+                    if (rtm::get())
+                        bfdebug << "    - rtm" << bfendl;
+
+                    if (rdt_m::get())
+                        bfdebug << "    - rdt_m" << bfendl;
+
+                    if (depreciated_fpu_cs_ds::get())
+                        bfdebug << "    - depreciated_fpu_cs_ds" << bfendl;
+
+                    if (mpx::get())
+                        bfdebug << "    - mpx" << bfendl;
+
+                    if (rdt_a::get())
+                        bfdebug << "    - rdt_a" << bfendl;
+
+                    if (rdseed::get())
+                        bfdebug << "    - rdseed" << bfendl;
+
+                    if (adx::get())
+                        bfdebug << "    - adx" << bfendl;
+
+                    if (smap::get())
+                        bfdebug << "    - smap" << bfendl;
+
+                    if (clflushopt::get())
+                        bfdebug << "    - clflushopt" << bfendl;
+
+                    if (clwb::get())
+                        bfdebug << "    - clwb" << bfendl;
+
+                    if (processor_trace::get())
+                        bfdebug << "    - processor_trace" << bfendl;
+
+                    if (sha::get())
+                        bfdebug << "    - sha" << bfendl;
                 }
             }
         }

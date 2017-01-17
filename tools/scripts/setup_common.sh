@@ -48,13 +48,6 @@ check_folder() {
     fi
 }
 
-check_hardware() {
-    if ! grep -q 'avx' /proc/cpuinfo; then
-        echo "Hardware unsupported. AVX is required"
-        exit 1
-    fi
-}
-
 # ------------------------------------------------------------------------------
 # Help
 # ------------------------------------------------------------------------------

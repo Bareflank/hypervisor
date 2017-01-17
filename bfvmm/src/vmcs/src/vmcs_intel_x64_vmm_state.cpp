@@ -81,11 +81,24 @@ vmcs_intel_x64_vmm_state::vmcs_intel_x64_vmm_state()
     m_cr3 = g_pt->cr3();
 
     m_cr4 = 0;
+    m_cr4 |= cr4::v8086_mode_extensions::mask;
+    m_cr4 |= cr4::protected_mode_virtual_interrupts::mask;
+    m_cr4 |= cr4::time_stamp_disable::mask;
+    m_cr4 |= cr4::debugging_extensions::mask;
+    m_cr4 |= cr4::page_size_extensions::mask;
     m_cr4 |= cr4::physical_address_extensions::mask;
+    m_cr4 |= cr4::machine_check_enable::mask;
     m_cr4 |= cr4::page_global_enable::mask;
-    m_cr4 |= cr4::vmx_enable_bit::mask;
+    m_cr4 |= cr4::performance_monitor_counter_enable::mask;
     m_cr4 |= cr4::osfxsr::mask;
-    m_cr4 |= cr4::osxsave::mask;
+    m_cr4 |= cr4::osxmmexcpt::mask;
+    m_cr4 |= cr4::vmx_enable_bit::mask;
+
+    if (cpuid::extended_feature_flags::subleaf0::ebx::smep::get())
+        m_cr4 |= cr4::smep_enable_bit::mask;
+
+    if (cpuid::extended_feature_flags::subleaf0::ebx::smap::get())
+        m_cr4 |= cr4::smap_enable_bit::mask;
 
     m_rflags = 0;
 

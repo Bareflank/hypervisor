@@ -26,6 +26,10 @@
 #include <memory_manager/memory_manager_x64.h>
 #include <memory_manager/root_page_table_x64.h>
 
+#include <intrinsics/cpuid_x64.h>
+
+using namespace x64;
+
 extern "C" uint64_t
 __read_msr(uint32_t addr) noexcept
 { (void) addr; return 0; }
@@ -89,6 +93,15 @@ __read_ldtr(void) noexcept
 extern "C" uint16_t
 __read_tr(void) noexcept
 { return 0; }
+
+extern "C" void
+__cpuid(void *eax, void *ebx, void *ecx, void *edx) noexcept
+{
+    *static_cast<cpuid::value_type *>(eax) = 0;
+    *static_cast<cpuid::value_type *>(ebx) = 0;
+    *static_cast<cpuid::value_type *>(ecx) = 0;
+    *static_cast<cpuid::value_type *>(edx) = 0;
+}
 
 static auto
 setup_mm(MockRepository &mocks)

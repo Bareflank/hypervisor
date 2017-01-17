@@ -60,6 +60,7 @@ execute_entry:
 
     and rsp, 0xFFFFFFFFFFFFFFE0
 
+%ifdef AVX_SUPPORTED
     sub rsp, 0x20
     vmovdqa [rsp], ymm0
     sub rsp, 0x20
@@ -92,6 +93,24 @@ execute_entry:
     vmovdqa [rsp], ymm14
     sub rsp, 0x20
     vmovdqa [rsp], ymm15
+%else
+    sub rsp, 0x20
+    movdqa [rsp], xmm0
+    sub rsp, 0x20
+    movdqa [rsp], xmm1
+    sub rsp, 0x20
+    movdqa [rsp], xmm2
+    sub rsp, 0x20
+    movdqa [rsp], xmm3
+    sub rsp, 0x20
+    movdqa [rsp], xmm4
+    sub rsp, 0x20
+    movdqa [rsp], xmm5
+    sub rsp, 0x20
+    movdqa [rsp], xmm6
+    sub rsp, 0x20
+    movdqa [rsp], xmm7
+%endif
 
     mov rax, 0xABCDEF1234567890
     push rax
@@ -106,6 +125,7 @@ execute_entry:
     cmp rax, rbx
     jne stack_overflow
 
+%ifdef AVX_SUPPORTED
     vmovdqa [rsp], ymm15
     add rsp, 0x20
     vmovdqa [rsp], ymm14
@@ -138,6 +158,24 @@ execute_entry:
     add rsp, 0x20
     vmovdqa [rsp], ymm0
     add rsp, 0x20
+%else
+    movdqa [rsp], xmm7
+    add rsp, 0x20
+    movdqa [rsp], xmm6
+    add rsp, 0x20
+    movdqa [rsp], xmm5
+    add rsp, 0x20
+    movdqa [rsp], xmm4
+    add rsp, 0x20
+    movdqa [rsp], xmm3
+    add rsp, 0x20
+    movdqa [rsp], xmm2
+    add rsp, 0x20
+    movdqa [rsp], xmm1
+    add rsp, 0x20
+    movdqa [rsp], xmm0
+    add rsp, 0x20
+%endif
 
     mov rax, r11
     leave
