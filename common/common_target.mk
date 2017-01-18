@@ -244,8 +244,12 @@ endif
 ################################################################################
 
 NATIVE_ASMFLAGS+=-f elf64
-
 CROSS_ASMFLAGS+=-f elf64
+
+ifeq ($(AVX_SUPPORTED), true)
+	NATIVE_ASMFLAGS+=-dAVX_SUPPORTED
+	CROSS_ASMFLAGS+=-dAVX_SUPPORTED
+endif
 
 ################################################################################
 # Default AR Flags

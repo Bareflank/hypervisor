@@ -47,8 +47,11 @@ COMMON_FLAGS="$COMMON_FLAGS -mssse3"
 COMMON_FLAGS="$COMMON_FLAGS -msse4.1"
 COMMON_FLAGS="$COMMON_FLAGS -msse4.2"
 COMMON_FLAGS="$COMMON_FLAGS -msse4"
-COMMON_FLAGS="$COMMON_FLAGS -mavx"
-COMMON_FLAGS="$COMMON_FLAGS -maes"
+
+if grep -q 'avx' /proc/cpuinfo; then
+    COMMON_FLAGS="$COMMON_FLAGS -mavx"
+    AVX_SUPPORTED="true"
+fi
 
 CROSS_COMMON_FLAGS="$COMMON_FLAGS"
 CROSS_COMMON_FLAGS="$CROSS_COMMON_FLAGS -ffreestanding"
@@ -156,6 +159,11 @@ check_env() {
         echo "export compiler=\"$compiler\"" >> $BUILD_ABS/env.sh
         echo "export CFLAGS=\"$CROSS_CCFLAGS\"" >> $BUILD_ABS/env.sh
         echo "export CXXFLAGS=\"$CROSS_CXXFLAGS\"" >> $BUILD_ABS/env.sh
+
+        if [[ AVX_SUPPORTED == "true" ]]; then
+            echo "export AVX_SUPPORTED=\"true\"" >> $BUILD_ABS/env.sh
+        fi
+
         printf "export extensions=\"" >> $BUILD_ABS/env.sh
         printf "%s;" "${extensions[@]}" >> $BUILD_ABS/env.sh
         printf "\"\n" >> $BUILD_ABS/env.sh
@@ -444,6 +452,11 @@ copy_makefile() {
     echo -e "CONFIGURED_CROSS_CXXFLAGS:=$CROSS_CXXFLAGS" >> $1/Makefile.tmp
     echo -e "CONFIGURED_NATIVE_CCFLAGS:=$NATIVE_CCFLAGS" >> $1/Makefile.tmp
     echo -e "CONFIGURED_NATIVE_CXXFLAGS:=$NATIVE_CXXFLAGS" >> $1/Makefile.tmp
+
+    if [[ AVX_SUPPORTED == "true" ]]; then
+        echo -e "AVX_SUPPORTED:=true" >> $1/Makefile.tmp
+    fi
+
     echo -e "MAKEFILE_ABS:=\$(dir \$(abspath \$(lastword \$(MAKEFILE_LIST))))" >> $1/Makefile.tmp
     echo -e "ifneq (\$(dir \$(BUILD_REL)/), \$(MAKEFILE_ABS))" >> $1/Makefile.tmp
     echo -e "    \$(error Build system has moved which is not supported!!!)" >> $1/Makefile.tmp

@@ -51,7 +51,8 @@ setup_vmm_state(MockRepository &mocks)
     mocks.OnCallFunc(root_pt).Return(pt);
     mocks.OnCall(pt, root_page_table_x64::cr3).Return(test_cr3);
 
-    test_cr0 = cr0::protection_enable::mask;
+    test_cr0 = 0;
+    test_cr0 |= cr0::protection_enable::mask;
     test_cr0 |= cr0::monitor_coprocessor::mask;
     test_cr0 |= cr0::extension_type::mask;
     test_cr0 |= cr0::numeric_error::mask;
@@ -60,11 +61,21 @@ setup_vmm_state(MockRepository &mocks)
 
     test_cr3 = 0x000000ABCDEF0000;
 
-    test_cr4 = cr4::physical_address_extensions::mask;
+    test_cr4 = 0;
+    test_cr4 |= cr4::v8086_mode_extensions::mask;
+    test_cr4 |= cr4::protected_mode_virtual_interrupts::mask;
+    test_cr4 |= cr4::time_stamp_disable::mask;
+    test_cr4 |= cr4::debugging_extensions::mask;
+    test_cr4 |= cr4::page_size_extensions::mask;
+    test_cr4 |= cr4::physical_address_extensions::mask;
+    test_cr4 |= cr4::machine_check_enable::mask;
     test_cr4 |= cr4::page_global_enable::mask;
-    test_cr4 |= cr4::vmx_enable_bit::mask;
+    test_cr4 |= cr4::performance_monitor_counter_enable::mask;
     test_cr4 |= cr4::osfxsr::mask;
-    test_cr4 |= cr4::osxsave::mask;
+    test_cr4 |= cr4::osxmmexcpt::mask;
+    test_cr4 |= cr4::vmx_enable_bit::mask;
+    test_cr4 |= cr4::smep_enable_bit::mask;
+    test_cr4 |= cr4::smap_enable_bit::mask;
 }
 
 void
@@ -132,6 +143,8 @@ vmcs_ut::test_vmm_state_control_registers()
 {
     MockRepository mocks;
     setup_vmm_state(mocks);
+
+    g_cpuid_regs.ebx = 0x00100080UL;
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {

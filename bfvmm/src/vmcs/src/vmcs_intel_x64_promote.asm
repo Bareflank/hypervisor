@@ -252,6 +252,7 @@ vmcs_promote:
 
     mov rdi, r15
 
+%ifdef AVX_SUPPORTED
     vmovdqa ymm15, [rdi + 0x2A0]
     vmovdqa ymm14, [rdi + 0x280]
     vmovdqa ymm13, [rdi + 0x260]
@@ -268,6 +269,16 @@ vmcs_promote:
     vmovdqa ymm2,  [rdi + 0x100]
     vmovdqa ymm1,  [rdi + 0x0E0]
     vmovdqa ymm0,  [rdi + 0x0C0]
+%else
+    movdqa xmm7,  [rdi + 0x1A0]
+    movdqa xmm6,  [rdi + 0x180]
+    movdqa xmm5,  [rdi + 0x160]
+    movdqa xmm4,  [rdi + 0x140]
+    movdqa xmm3,  [rdi + 0x120]
+    movdqa xmm2,  [rdi + 0x100]
+    movdqa xmm1,  [rdi + 0x0E0]
+    movdqa xmm0,  [rdi + 0x0C0]
+%endif
 
     mov rsp,       [rdi + 0x080]
     mov rax,       [rdi + 0x078]
