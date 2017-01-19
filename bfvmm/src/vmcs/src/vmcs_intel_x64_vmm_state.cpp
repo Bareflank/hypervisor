@@ -91,6 +91,7 @@ vmcs_intel_x64_vmm_state::vmcs_intel_x64_vmm_state()
     m_cr4 |= cr4::page_global_enable::mask;
     m_cr4 |= cr4::performance_monitor_counter_enable::mask;
     m_cr4 |= cr4::osfxsr::mask;
+    m_cr4 |= cr4::osxsave::mask;
     m_cr4 |= cr4::osxmmexcpt::mask;
     m_cr4 |= cr4::vmx_enable_bit::mask;
 

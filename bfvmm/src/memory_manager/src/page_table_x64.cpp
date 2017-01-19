@@ -35,7 +35,6 @@ page_table_x64::page_table_x64(gsl::not_null<pointer> pte)
     entry.set_phys_addr(g_mm->virtptr_to_physint(m_pt.get()));
     entry.set_present(true);
     entry.set_rw(true);
-    entry.set_us(true);
     entry.set_pat_index_4k(pat::write_back_index);
 }
 
