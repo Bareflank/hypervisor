@@ -1,4 +1,4 @@
-//
+// -*- C++ -*-
 // Bareflank Hypervisor
 //
 // Copyright (C) 2015 Assured Information Security, Inc.
@@ -42,13 +42,13 @@ namespace bfn
 /// @param index the iterator to locate
 /// @return returns the iterator at pos == index, or throws gsl::fail_fast
 ///
-template<class T, class I, class = typename std::enable_if<std::is_integral<I>::value>::type>
-auto find(std::vector<T> &v, const I index)
+template<class T, class A, class I, class = typename std::enable_if<std::is_integral<I>::value>::type>
+auto find(std::vector<T,A> &v, const I index)
 {
     // [[ensures ret: ret != v.end()]]
     expects(index >= 0 && index < v.size())
 
-    return v.begin() + gsl::narrow_cast<typename std::vector<T>::difference_type>(index);
+    return v.begin() + gsl::narrow_cast<typename std::vector<T,A>::difference_type>(index);
 }
 
 /// Find (const)
@@ -63,13 +63,13 @@ auto find(std::vector<T> &v, const I index)
 /// @param index the iterator to locate
 /// @return returns the iterator at pos == index, or throws gsl::fail_fast
 ///
-template<class T, class I, class = typename std::enable_if<std::is_integral<I>::value>::type>
-const auto cfind(const std::vector<T> &v, const I index)
+template<class T, class A, class I, class = typename std::enable_if<std::is_integral<I>::value>::type>
+const auto cfind(const std::vector<T,A> &v, const I index)
 {
     // [[ensures ret: ret != v.end()]]
     expects(index >= 0 && index < v.size())
 
-    return v.cbegin() + gsl::narrow_cast<typename std::vector<T>::difference_type>(index);
+    return v.cbegin() + gsl::narrow_cast<typename std::vector<T,A>::difference_type>(index);
 }
 
 /// Remove
@@ -85,8 +85,8 @@ const auto cfind(const std::vector<T> &v, const I index)
 /// @param v std::vector to get iterator from
 /// @param index the iterator to locate
 ///
-template<class T, class I, class = typename std::enable_if<std::is_integral<I>::value>::type>
-void remove(std::vector<T> &v, const I index)
+template<class T, class A, class I, class = typename std::enable_if<std::is_integral<I>::value>::type>
+void remove(std::vector<T,A> &v, const I index)
 {
     v.erase(cfind(v, index));
 }
@@ -105,12 +105,12 @@ void remove(std::vector<T> &v, const I index)
 /// @param index the iterator to locate
 /// @return returns the element that was removed
 ///
-template<class T, class I, class = typename std::enable_if<std::is_integral<I>::value>::type>
-auto take(std::vector<T> &v, const I index)
+template<class T, class A, class I, class = typename std::enable_if<std::is_integral<I>::value>::type>
+auto take(std::vector<T,A> &v, const I index)
 {
     const auto iter = cfind(v, index);
-
     auto val = *iter;
+
     v.erase(iter);
 
     return val;
