@@ -81,7 +81,7 @@ memory_manager_ut::test_root_page_table_x64_cr3()
     setup_mm(mocks);
     auto &&root_cr3 = root_page_table_x64{};
 
-    this->expect_true(root_cr3.cr3() == 0x0000000ABCDEF001F);
+    this->expect_true(root_cr3.cr3() == 0x0000000ABCDEF001B);
 }
 
 void

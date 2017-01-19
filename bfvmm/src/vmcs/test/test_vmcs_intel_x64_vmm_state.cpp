@@ -72,6 +72,7 @@ setup_vmm_state(MockRepository &mocks)
     test_cr4 |= cr4::page_global_enable::mask;
     test_cr4 |= cr4::performance_monitor_counter_enable::mask;
     test_cr4 |= cr4::osfxsr::mask;
+    test_cr4 |= cr4::osxsave::mask;
     test_cr4 |= cr4::osxmmexcpt::mask;
     test_cr4 |= cr4::vmx_enable_bit::mask;
     test_cr4 |= cr4::smep_enable_bit::mask;
