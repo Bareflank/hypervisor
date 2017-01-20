@@ -94,6 +94,10 @@ extern "C" uint16_t
 __read_tr(void) noexcept
 { return 0; }
 
+extern "C" uint32_t
+__cpuid_ecx(uint32_t val) noexcept
+{ (void) val; return 0x04000000U; }
+
 extern "C" void
 __cpuid(void *eax, void *ebx, void *ecx, void *edx) noexcept
 {
