@@ -98,7 +98,7 @@ __attribute__((weak)) __vmlaunch_demote(void) noexcept
     abort();
 }
 
-extern "C" void
+extern "C" bool
 __attribute__((weak)) __invept(uint64_t type, void *ptr) noexcept
 {
     (void) type;
@@ -108,8 +108,8 @@ __attribute__((weak)) __invept(uint64_t type, void *ptr) noexcept
     abort();
 }
 
-extern "C" void
-__attribute__((weak)) __invvipd(uint64_t type, void *ptr) noexcept
+extern "C" bool
+__attribute__((weak)) __invvpid(uint64_t type, void *ptr) noexcept
 {
     (void) type;
     (void) ptr;

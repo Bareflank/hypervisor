@@ -69,14 +69,6 @@ __vmlaunch:
     jbe __vmx_failure
     jmp __vmx_success
 
-__vmx_failure:
-    mov rax, 0x0
-    ret
-
-__vmx_success:
-    mov rax, 0x1
-    ret
-
 ; Since bareflank consists of nothing more than a bunch of shared libraries,
 ; all of the code is position independent, which makes getting the actual
 ; address of a label difficult at compile time since everything is going to be
@@ -121,9 +113,19 @@ __vmlaunch_trampoline:
 global __invept:function
 __invept:
     invept rdi, [rsi]
+    jbe __vmx_failure
+    jmp __vmx_success
+
+global __invvpid:function
+__invvpid:
+    invvpid rdi, [rsi]
+    jbe __vmx_failure
+    jmp __vmx_success
+
+__vmx_failure:
+    mov rax, 0x0
     ret
 
-global __invvipd:function
-__invvipd:
-    invvpid rdi, [rsi]
+__vmx_success:
+    mov rax, 0x1
     ret
