@@ -34,8 +34,8 @@ extern "C" bool __vmread(uint64_t field, uint64_t *val) noexcept;
 extern "C" bool __vmwrite(uint64_t field, uint64_t val) noexcept;
 extern "C" bool __vmlaunch(void) noexcept;
 extern "C" bool __vmlaunch_demote(void) noexcept;
-extern "C" void __invept(uint64_t type, void *ptr) noexcept;
-extern "C" void __invvipd(uint64_t type, void *ptr) noexcept;
+extern "C" bool __invept(uint64_t type, void *ptr) noexcept;
+extern "C" bool __invvpid(uint64_t type, void *ptr) noexcept;
 
 // *INDENT-OFF*
 
@@ -62,37 +62,43 @@ namespace vmx
     inline void invept_single_context(eptp_type eptp)
     {
         uint64_t descriptor[2] = { eptp, 0 };
-        __invept(0, static_cast<void *>(descriptor));
+        if (!__invept(1, static_cast<void *>(descriptor)))
+            throw std::runtime_error("vm::invept_singal_context failed");
     }
 
     inline void invept_global()
     {
         uint64_t descriptor[2] = { 0, 0 };
-        __invept(1, static_cast<void *>(descriptor));
+        if (!__invept(2, static_cast<void *>(descriptor)))
+            throw std::runtime_error("vm::invept_global failed");
     }
 
-    inline void invvipd_individual_address(vpid_type vpid, integer_pointer addr)
+    inline void invvpid_individual_address(vpid_type vpid, integer_pointer addr)
     {
         uint64_t descriptor[2] = { vpid, addr };
-        __invvipd(0, static_cast<void *>(descriptor));
+        if (!__invvpid(0, static_cast<void *>(descriptor)))
+            throw std::runtime_error("vm::invvpid_individual_address failed");
     }
 
-    inline void invvipd_single_context(vpid_type vpid)
+    inline void invvpid_single_context(vpid_type vpid)
     {
         uint64_t descriptor[2] = { vpid, 0 };
-        __invvipd(1, static_cast<void *>(descriptor));
+        if (!__invvpid(1, static_cast<void *>(descriptor)))
+            throw std::runtime_error("vm::invvpid_single_context failed");
     }
 
-    inline void invvipd_all_contexts()
+    inline void invvpid_all_contexts()
     {
         uint64_t descriptor[2] = { 0, 0 };
-        __invvipd(2, static_cast<void *>(descriptor));
+        if (!__invvpid(2, static_cast<void *>(descriptor)))
+            throw std::runtime_error("vm::invvpid_all_contexts failed");
     }
 
-    inline void invvipd_single_context_global(vpid_type vpid)
+    inline void invvpid_single_context_global(vpid_type vpid)
     {
         uint64_t descriptor[2] = { vpid, 0 };
-        __invvipd(3, static_cast<void *>(descriptor));
+        if (!__invvpid(3, static_cast<void *>(descriptor)))
+            throw std::runtime_error("vm::invvpid_single_context_global failed");
     }
 }
 

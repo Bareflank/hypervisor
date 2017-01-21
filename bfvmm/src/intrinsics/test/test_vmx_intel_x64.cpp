@@ -35,6 +35,8 @@ bool g_vmreset_fails = false;
 bool g_vmread_fails = false;
 bool g_vmwrite_fails = false;
 bool g_vmlaunch_fails = false;
+bool g_invept_fails = false;
+bool g_invvpid_fails = false;
 
 extern "C" bool
 __vmxon(void *ptr) noexcept
@@ -86,13 +88,13 @@ extern "C" bool
 __vmlaunch_demote(void) noexcept
 { return !g_vmlaunch_fails; }
 
-extern "C" void
+extern "C" bool
 __invept(uint64_t type, void *ptr) noexcept
-{ (void) type; (void) ptr; }
+{ (void) type; (void) ptr; return !g_invept_fails; }
 
-extern "C" void
-__invvipd(uint64_t type, void *ptr) noexcept
-{ (void) type; (void) ptr; }
+extern "C" bool
+__invvpid(uint64_t type, void *ptr) noexcept
+{ (void) type; (void) ptr; return !g_invvpid_fails; }
 
 void
 intrinsics_ut::test_vmx_intel_x64_vmxon_nullptr()
@@ -269,13 +271,29 @@ intrinsics_ut::test_vmx_intel_x64_invept()
 {
     this->expect_no_exception([&] { vmx::invept_single_context(0); });
     this->expect_no_exception([&] { vmx::invept_global(); });
+
+    auto ___ = gsl::finally([&]
+    { g_invept_fails = false; });
+
+    g_invept_fails = true;
+    this->expect_exception([&] { vmx::invept_single_context(0); }, ""_ut_ree);
+    this->expect_exception([&] { vmx::invept_global(); }, ""_ut_ree);
 }
 
 void
 intrinsics_ut::test_vmx_intel_x64_invvpid()
 {
-    this->expect_no_exception([&] { vmx::invvipd_individual_address(0, 0); });
-    this->expect_no_exception([&] { vmx::invvipd_single_context(0); });
-    this->expect_no_exception([&] { vmx::invvipd_all_contexts(); });
-    this->expect_no_exception([&] { vmx::invvipd_single_context_global(0); });
+    this->expect_no_exception([&] { vmx::invvpid_individual_address(0, 0); });
+    this->expect_no_exception([&] { vmx::invvpid_single_context(0); });
+    this->expect_no_exception([&] { vmx::invvpid_all_contexts(); });
+    this->expect_no_exception([&] { vmx::invvpid_single_context_global(0); });
+
+    auto ___ = gsl::finally([&]
+    { g_invvpid_fails = false; });
+
+    g_invvpid_fails = true;
+    this->expect_exception([&] { vmx::invvpid_individual_address(0, 0); }, ""_ut_ree);
+    this->expect_exception([&] { vmx::invvpid_single_context(0); }, ""_ut_ree);
+    this->expect_exception([&] { vmx::invvpid_all_contexts(); }, ""_ut_ree);
+    this->expect_exception([&] { vmx::invvpid_single_context_global(0); }, ""_ut_ree);
 }
