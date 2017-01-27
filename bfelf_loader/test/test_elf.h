@@ -22,16 +22,24 @@
 #ifndef TEST_ELF
 #define TEST_ELF
 
-#pragma GCC system_header
-
 #include <bfelf_loader.h>
 
-struct test_dynsym
+#pragma pack(push, 1)
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+struct test_phdrtab
 {
-    bfelf_sym syms[2];
+    bfelf_phdr re_segment;
+    bfelf_phdr rw_segment;
+    bfelf_phdr dyn_segment;
+    bfelf_phdr stack_segment;
+    bfelf_phdr relro_segment;
 };
 
-struct test_hashtab
+struct test_hash
 {
     bfelf64_word nbucket;
     bfelf64_word nchain;
@@ -41,19 +49,15 @@ struct test_hashtab
     bfelf64_word hash2;
 };
 
-struct test_strtab
+struct test_dynsym
+{
+    bfelf_sym syms[2];
+};
+
+struct test_dynstr
 {
     const char *func1 = "function1";
     const char *func2 = "function2";
-};
-
-struct test_shstrtab
-{
-    const char *name1 = ".dynsym";
-    const char *name2 = ".hash";
-    const char *name3 = ".strtab";
-    const char *name4 = ".shstrtab";
-    const char *name5 = ".rela.dyn";
 };
 
 struct test_relatab
@@ -61,44 +65,76 @@ struct test_relatab
     struct bfelf_rela relas[2];
 };
 
-struct test_phdrtab
+struct test_eh_frame
 {
-    bfelf_phdr re_segment1;
-    bfelf_phdr re_segment2;
-    bfelf_phdr rw_segment1;
-    bfelf_phdr rw_segment2;
-    bfelf_phdr too_many;
+    const char *reserved[10];
+};
+
+struct test_init_array
+{
+    const char *reserved[10];
+};
+
+struct test_fini_array
+{
+    const char *reserved[10];
+};
+
+struct test_dynamic
+{
+    struct bfelf_dyn needed1;
+    struct bfelf_dyn needed2;
+    struct bfelf_dyn pltgot;
+    struct bfelf_dyn strtab;
+    struct bfelf_dyn symtab;
+    struct bfelf_dyn rela;
+    struct bfelf_dyn relasz;
+    struct bfelf_dyn relaent;
+    struct bfelf_dyn strsz;
+    struct bfelf_dyn init;
+    struct bfelf_dyn fini;
+    struct bfelf_dyn init_array;
+    struct bfelf_dyn fini_array;
+    struct bfelf_dyn init_arraysz;
+    struct bfelf_dyn fini_arraysz;
+    struct bfelf_dyn relacount;
+    struct bfelf_dyn flags_1;
+    struct bfelf_dyn last;
 };
 
 struct test_shdrtab
 {
+    bfelf_shdr hash;         // 1
     bfelf_shdr dynsym;       // 0
-    bfelf_shdr hashtab;      // 1
-    bfelf_shdr strtab;       // 2
-    bfelf_shdr shstrtab;     // 3
-    bfelf_shdr relatab1;     // 4
-    bfelf_shdr relatab2;     // 5
-    bfelf_shdr relatab3;     // 6
-    bfelf_shdr relatab4;     // 7
-    bfelf_shdr relatab5;     // 8
-    bfelf_shdr relatab6;     // 9
-    bfelf_shdr relatab7;     // 10
-    bfelf_shdr relatab8;     // 11
-    bfelf_shdr too_many;     // 12
+    bfelf_shdr dynstr;       // 0
+    bfelf_shdr relatab;      // 4
+    bfelf_shdr eh_frame;     // 4
+    bfelf_shdr init_array;   // 4
+    bfelf_shdr fini_array;   // 4
+    bfelf_shdr dynamic;      // 4
 };
 
 struct bfelf_test
 {
-    bfelf64_ehdr header;
+    bfelf_ehdr header;
     test_phdrtab phdrtab;
 
     test_dynsym dynsym;
-    test_hashtab hashtab;
-    test_strtab strtab;
-    test_shstrtab shstrtab;
+    test_dynstr dynstr;
+    test_hash hash;
     test_relatab relatab;
+    test_eh_frame eh_frame;
+    test_init_array init_array;
+    test_fini_array fini_array;
+    test_dynamic dynamic;
 
     test_shdrtab shdrtab;
 };
+
+#ifdef __cplusplus
+}
+#endif
+
+#pragma pack(pop)
 
 #endif

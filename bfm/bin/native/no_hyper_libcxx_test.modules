@@ -1,6 +1,6 @@
 {
     "modules" :
     [
-        "%BUILD_ABS%/makefiles/bfvmm/src/misc/bin/cross/libmisc.so"
+        "%BUILD_ABS%/makefiles/bfvmm/src/misc/bin/cross/misc"
     ]
 }

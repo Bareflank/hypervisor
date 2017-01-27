@@ -24,7 +24,7 @@
 ################################################################################
 
 TARGET_NAME:=misc
-TARGET_TYPE:=lib
+TARGET_TYPE:=bin
 TARGET_COMPILER:=cross
 
 ################################################################################
@@ -34,7 +34,7 @@ TARGET_COMPILER:=cross
 CROSS_CCFLAGS+=
 CROSS_CXXFLAGS+=
 CROSS_ASMFLAGS+=
-CROSS_LDFLAGS+=
+CROSS_LDFLAGS+=--unresolved-symbols=ignore-all --export-dynamic -pie --no-dynamic-linker
 CROSS_ARFLAGS+=
 CROSS_DEFINES+=
 

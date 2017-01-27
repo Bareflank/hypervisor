@@ -53,22 +53,28 @@ NATIVE_OUTDIR+=%BUILD_REL%/../bin
 ################################################################################
 
 SOURCES+=test.cpp
-SOURCES+=test_file_get_segment.cpp
 SOURCES+=test_file_init.cpp
-SOURCES+=test_file_num_segments.cpp
+SOURCES+=test_file_num_load_instrs.cpp
+SOURCES+=test_file_get_load_instr.cpp
 SOURCES+=test_file_resolve_symbol.cpp
 SOURCES+=test_loader_add.cpp
-SOURCES+=test_loader_get_info.cpp
 SOURCES+=test_loader_relocate.cpp
+SOURCES+=test_file_get_section_info.cpp
 SOURCES+=test_loader_resolve_symbol.cpp
-SOURCES+=test_loader_resolve_symbol.cpp
+SOURCES+=test_file_get_entry.cpp
+SOURCES+=test_file_get_stack_perm.cpp
+SOURCES+=test_file_get_relro.cpp
+SOURCES+=test_file_get_num_needed.cpp
+SOURCES+=test_file_get_needed.cpp
+SOURCES+=test_file_get_total_size.cpp
+SOURCES+=test_file_get_pic_pie.cpp
 SOURCES+=test_private.cpp
 
 INCLUDE_PATHS+=./
 INCLUDE_PATHS+=../include/
 INCLUDE_PATHS+=%HYPER_ABS%/include/
 
-LIBS+=bfelf_loader_static
+LIBS+=bfelf_loader
 
 LIBRARY_PATHS+=%BUILD_REL%/../bin/native/
 

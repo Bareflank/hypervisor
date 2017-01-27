@@ -304,6 +304,9 @@ setup_vmcs_x64_state_intrinsics(MockRepository &mocks, vmcs_intel_x64_state *sta
     mocks.OnCall(state_in, vmcs_intel_x64_state::ia32_fs_base_msr).Return(0);
     mocks.OnCall(state_in, vmcs_intel_x64_state::ia32_gs_base_msr).Return(0);
 
+    mocks.OnCall(state_in, vmcs_intel_x64_state::arg1).Return(0);
+    mocks.OnCall(state_in, vmcs_intel_x64_state::arg2).Return(0);
+
     mocks.OnCall(state_in, vmcs_intel_x64_state::rip).Return(0);
     mocks.OnCall(state_in, vmcs_intel_x64_state::rsp).Return(0);
 

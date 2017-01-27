@@ -31,6 +31,3 @@ make -j2
 make install
 
 popd
-
-
-

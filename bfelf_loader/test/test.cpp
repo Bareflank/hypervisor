@@ -76,369 +76,246 @@ bool bfelf_loader_ut::list()
     this->test_bfelf_file_init_invalid_machine();
     this->test_bfelf_file_init_invalid_version();
     this->test_bfelf_file_init_invalid_flags();
-    this->test_bfelf_file_init_invalid_header_size();
-    this->test_bfelf_file_init_invalid_program_header_size();
-    this->test_bfelf_file_init_invalid_section_header_size();
-    this->test_bfelf_file_init_invalid_program_header_offset();
-    this->test_bfelf_file_init_invalid_section_header_offset();
-    this->test_bfelf_file_init_invalid_program_header_num();
-    this->test_bfelf_file_init_invalid_section_header_num();
-    this->test_bfelf_file_init_invalid_section_header_string_table_index();
-    this->test_bfelf_file_init_invalid_segment_file_size();
-    this->test_bfelf_file_init_invalid_segment_addresses();
-    this->test_bfelf_file_init_invalid_segment_alignment();
-    this->test_bfelf_file_init_invalid_segment_offset();
-    this->test_bfelf_file_init_invalid_section_offset();
-    this->test_bfelf_file_init_invalid_section_size();
-    this->test_bfelf_file_init_invalid_section_name();
-    this->test_bfelf_file_init_invalid_section_link();
-    this->test_bfelf_file_init_invalid_segment_address();
-    this->test_bfelf_file_init_invalid_segment_size();
-    this->test_bfelf_file_init_invalid_entry();
-    this->test_bfelf_file_init_invalid_section_type();
-    this->test_bfelf_file_init_invalid_section_flags();
-    this->test_bfelf_file_init_invalid_section_address_alignment();
-    this->test_bfelf_file_init_invalid_section_entry_size();
-    this->test_bfelf_file_init_missing_dynsym();
-    this->test_bfelf_file_init_too_many_program_segments();
-    this->test_bfelf_file_init_too_many_relocation_tables();
-    this->test_bfelf_file_init_invalid_hash_table_size1();
-    this->test_bfelf_file_init_invalid_hash_table_size2();
-    this->test_bfelf_file_init_invalid_hash_table_size3();
 
-    this->test_bfelf_file_num_segments_invalid_ef();
-    this->test_bfelf_file_num_segments_uninitalized();
-    this->test_bfelf_file_num_segments_success();
+    this->test_bfelf_file_num_load_instrs_invalid_ef();
+    this->test_bfelf_file_num_load_instrs_uninitalized();
+    this->test_bfelf_file_num_load_instrs_success();
 
-    this->test_bfelf_file_get_segment_invalid_ef();
-    this->test_bfelf_file_get_segment_invalid_index();
-    this->test_bfelf_file_get_segment_invalid_phdr();
-    this->test_bfelf_file_get_segment_success();
+    this->test_bfelf_file_get_load_instr_invalid_ef();
+    this->test_bfelf_file_get_load_instr_invalid_index();
+    this->test_bfelf_file_get_load_instr_invalid_instr();
+    this->test_bfelf_file_get_load_instr_success();
 
     this->test_bfelf_file_resolve_symbol_invalid_loader();
     this->test_bfelf_file_resolve_symbol_invalid_name();
     this->test_bfelf_file_resolve_symbol_invalid_addr();
-    this->test_bfelf_file_resolve_symbol_no_relocation();
+    this->test_bfelf_file_resolve_no_such_symbol_no_relocation();
     this->test_bfelf_file_resolve_no_such_symbol();
-    this->test_bfelf_file_resolve_zero_length_symbol();
-    this->test_bfelf_file_resolve_invalid_symbol_length();
-    this->test_bfelf_file_resolve_symbol_length_too_large();
     this->test_bfelf_file_resolve_symbol_success();
     this->test_bfelf_file_resolve_no_such_symbol_no_hash();
-    this->test_bfelf_file_resolve_zero_length_symbol_no_hash();
-    this->test_bfelf_file_resolve_invalid_symbol_length_no_hash();
-    this->test_bfelf_file_resolve_symbol_length_too_large_no_hash();
     this->test_bfelf_file_resolve_symbol_success_no_hash();
 
     this->test_bfelf_loader_add_invalid_loader();
     this->test_bfelf_loader_add_invalid_elf_file();
+    this->test_bfelf_loader_add_invalid_addr();
     this->test_bfelf_loader_add_too_many_files();
-
-    this->test_bfelf_loader_resolve_symbol_invalid_loader();
-    this->test_bfelf_loader_resolve_symbol_invalid_name();
-    this->test_bfelf_loader_resolve_symbol_invalid_addr();
-    this->test_bfelf_loader_resolve_symbol_no_relocation();
-    this->test_bfelf_loader_resolve_symbol_no_files_added();
-    this->test_bfelf_loader_resolve_symbol_uninitialized_files();
-    this->test_bfelf_loader_resolve_no_such_symbol();
-    this->test_bfelf_loader_resolve_zero_length_symbol();
-    this->test_bfelf_loader_resolve_invalid_symbol_length();
-    this->test_bfelf_loader_resolve_symbol_length_too_large();
-    this->test_bfelf_loader_resolve_symbol_success();
-    this->test_bfelf_loader_resolve_no_such_symbol_no_hash();
-    this->test_bfelf_loader_resolve_zero_length_symbol_no_hash();
-    this->test_bfelf_loader_resolve_invalid_symbol_length_no_hash();
-    this->test_bfelf_loader_resolve_symbol_length_too_large_no_hash();
-    this->test_bfelf_loader_resolve_symbol_success_no_hash();
-    this->test_bfelf_loader_resolve_symbol_real_test();
-    this->test_bfelf_file_resolve_symbol_resolve_fail();
-    this->test_bfelf_loader_resolve_symbol_resolve_fail();
+    this->test_bfelf_loader_add_fake();
 
     this->test_bfelf_loader_relocate_invalid_loader();
     this->test_bfelf_loader_relocate_no_files_added();
     this->test_bfelf_loader_relocate_uninitialized_files();
     this->test_bfelf_loader_relocate_twice();
 
-    this->test_bfelf_loader_get_info_invalid_loader();
-    this->test_bfelf_loader_get_info_invalid_elf_file();
-    this->test_bfelf_loader_get_info_invalid_info();
-    this->test_bfelf_loader_get_info_no_relocation();
-    this->test_bfelf_loader_get_info_expected_misc_resources();
-    this->test_bfelf_loader_get_info_expected_code_resources();
-    this->test_bfelf_loader_get_info_get_section_name_failure_ctors();
-    this->test_bfelf_loader_get_info_check_section_name_failure_ctors();
-    this->test_bfelf_loader_get_info_get_section_name_failure_dtors();
-    this->test_bfelf_loader_get_info_check_section_name_failure_dtors();
-    this->test_bfelf_loader_get_info_get_section_name_failure_init_array();
-    this->test_bfelf_loader_get_info_check_section_name_failure_init_array();
-    this->test_bfelf_loader_get_info_get_section_name_failure_fini_array();
-    this->test_bfelf_loader_get_info_check_section_name_failure_fini_array();
-    this->test_bfelf_loader_get_info_get_section_name_failure_eh_frame();
-    this->test_bfelf_loader_get_info_check_section_name_failure_eh_frame();
-    this->test_bfelf_loader_get_info_all();
+    this->test_bfelf_file_get_section_info_invalid_elf_file();
+    this->test_bfelf_file_get_section_info_invalid_info();
+    this->test_bfelf_file_get_section_info_expected_misc_resources();
+    this->test_bfelf_file_get_section_info_expected_code_resources();
+    this->test_bfelf_file_get_section_info_init_fini();
 
-    this->test_private_bfelf_error();
-    this->test_private_invalid_symbol_index();
-    this->test_private_corrupt_symbol_table();
-    this->test_private_relocate_invalid_index();
-    this->test_private_relocate_invalid_name();
-    this->test_private_relocate_invalid_relocation();
-    this->test_private_get_section_invalid_name();
-    this->test_private_symbol_table_sections_invalid_dynsym();
-    this->test_private_symbol_table_sections_invalid_hash();
-    this->test_private_string_table_sections_invalid();
-    this->test_private_get_relocation_tables_invalid_type();
-    this->test_private_get_relocation_tables_invalid_section();
+    this->test_bfelf_loader_resolve_symbol_invalid_loader();
+    this->test_bfelf_loader_resolve_symbol_invalid_name();
+    this->test_bfelf_loader_resolve_symbol_invalid_addr();
+    this->test_bfelf_loader_resolve_symbol_no_files_added();
+    this->test_bfelf_loader_resolve_symbol_uninitialized_files();
+    this->test_bfelf_loader_resolve_no_such_symbol();
+    this->test_bfelf_loader_resolve_symbol_success();
+    this->test_bfelf_loader_resolve_no_such_symbol_no_hash();
+    this->test_bfelf_loader_resolve_symbol_success_no_hash();
+    this->test_bfelf_loader_resolve_symbol_real_test();
+
+    this->test_bfelf_file_get_entry_invalid_ef();
+    this->test_bfelf_file_get_entry_invalid_addr();
+    this->test_bfelf_file_get_entry_success();
+
+    this->test_bfelf_file_get_stack_perm_invalid_ef();
+    this->test_bfelf_file_get_stack_perm_invalid_addr();
+    this->test_bfelf_file_get_stack_perm_success();
+
+    this->test_bfelf_file_get_relro_invalid_ef();
+    this->test_bfelf_file_get_relro_invalid_addr();
+    this->test_bfelf_file_get_relro_invalid_size();
+    this->test_bfelf_file_get_relro_success();
+
+    this->test_bfelf_file_get_num_needed_invalid_ef();
+    this->test_bfelf_file_get_num_needed_success();
+
+    this->test_bfelf_file_get_needed_invalid_ef();
+    this->test_bfelf_file_get_needed_invalid_index();
+    this->test_bfelf_file_get_needed_invalid_size();
+    this->test_bfelf_file_get_needed_success();
+
+    this->test_bfelf_file_get_total_size_invalid_ef();
+    this->test_bfelf_file_get_total_size_success();
+
+    this->test_bfelf_file_get_pic_pie_invalid_ef();
+    this->test_bfelf_file_get_pic_pie_success();
+
     this->test_private_hash();
+    this->test_private_relocate_invalid_relocation();
+    this->test_private_no_loadable_segments();
 
     return true;
 }
 
-void *
+char *
 alloc_exec(size_t size)
 {
-    auto addr = mmap(nullptr, size, PROT_READ | PROT_WRITE | PROT_EXEC,
-                     MAP_PRIVATE | MAP_ANON, -1, 0);
+    auto addr = malloc(size);
 
-    return memset(addr, 0, size);
+    auto &&addr_adjusted = reinterpret_cast<void *>(reinterpret_cast<uintptr_t>(addr) & 0xFFFFFFFFFFFFF000);
+    auto &&size_adjusted = size + (reinterpret_cast<uintptr_t>(addr) & 0xFFF);
+
+    memset(addr, 0, size);
+    mprotect(addr_adjusted, size_adjusted, PROT_READ | PROT_WRITE | PROT_EXEC);
+
+    return reinterpret_cast<char *>(addr);
 }
 
-std::shared_ptr<char>
-bfelf_loader_ut::load_elf_file(bfelf_file_t *ef)
+std::pair<std::unique_ptr<char[]>, uint64_t>
+bfelf_loader_ut::get_elf_exec(bfelf_file_t *ef)
 {
-    bfelf64_xword total = 0;
-    int64_t num_segments = bfelf_file_num_segments(ef);
+    auto &&total = static_cast<size_t>(bfelf_file_get_total_size(ef));
+    auto &&num_segments = bfelf_file_num_load_instrs(ef);
 
-    for (auto i = 0; i < num_segments; i++)
+    auto &&exec = std::unique_ptr<char[]>(alloc_exec(total));
+
+    for (auto i = 0U; i < num_segments; i++)
     {
-        int64_t ret = 0;
-        bfelf_phdr *phdr = nullptr;
+        auto &&ret = 0L;
+        bfelf_load_instr *instr = nullptr;
 
-        ret = bfelf_file_get_segment(ef, i, &phdr);
-        if (ret == BFELF_SUCCESS)
-        {
-            if (total < phdr->p_vaddr + phdr->p_memsz)
-                total = phdr->p_vaddr + phdr->p_memsz;
-        }
+        ret = bfelf_file_get_load_instr(ef, i, &instr);
+        (void) ret;
+
+        auto &&exec_view = gsl::make_span(exec, gsl::narrow_cast<std::ptrdiff_t>(total));
+        auto &&file_view = gsl::make_span(ef->file, gsl::narrow_cast<std::ptrdiff_t>(ef->filesz));
+
+        memcpy(&exec_view.at(instr->mem_offset), &file_view.at(instr->file_offset), instr->filesz);
     }
 
-    auto exec = static_cast<char *>(alloc_exec(total));
-
-    if (exec != nullptr)
-    {
-        memset(exec, 0, total);
-
-        for (auto i = 0U; i < num_segments; i++)
-        {
-            int64_t ret = 0;
-            bfelf_phdr *phdr = nullptr;
-
-            ret = bfelf_file_get_segment(ef, i, &phdr);
-            if (ret == BFELF_SUCCESS)
-            {
-                auto exec_p = exec + phdr->p_vaddr;
-                auto file_p = reinterpret_cast<uintptr_t>(ef->file) + phdr->p_offset;
-
-                memcpy(exec_p, reinterpret_cast<void *>(file_p), phdr->p_filesz);
-            }
-        }
-    }
-
-    return std::shared_ptr<char>(exec, [](void *) {});
+    return {std::move(exec), total};
 }
 
 #define offset(a,b) ( (reinterpret_cast<uintptr_t>(&(a))) - (reinterpret_cast<uintptr_t>(&(b))) )
 
-bfelf_test
-bfelf_loader_ut::get_test() const
+std::pair<std::unique_ptr<char[]>, uint64_t>
+bfelf_loader_ut::get_test()
 {
-    bfelf_test test;
+    auto &&size = sizeof(bfelf_test);
+    auto &&buff = std::make_unique<char[]>(size);
+    auto &&test = reinterpret_cast<bfelf_test *>(buff.get());
 
-    memset(&test, 0, sizeof(test));
+    test->header.e_ident[bfei_mag0] = 0x7F;
+    test->header.e_ident[bfei_mag1] = 'E';
+    test->header.e_ident[bfei_mag2] = 'L';
+    test->header.e_ident[bfei_mag3] = 'F';
+    test->header.e_ident[bfei_class] = bfelfclass64;
+    test->header.e_ident[bfei_data] = bfelfdata2lsb;
+    test->header.e_ident[bfei_version] = bfev_current;
+    test->header.e_ident[bfei_osabi] = bfelfosabi_sysv;
+    test->header.e_ident[bfei_abiversion] = 0;
+    test->header.e_type = bfet_dyn;
+    test->header.e_machine = bfem_x86_64;
+    test->header.e_version = bfev_current;
+    test->header.e_entry = 0x150;
+    test->header.e_phoff = offset(test->phdrtab, *test);
+    test->header.e_shoff = offset(test->shdrtab, *test);
+    test->header.e_flags = 0;
+    test->header.e_ehsize = sizeof(bfelf_ehdr);
+    test->header.e_phentsize = sizeof(bfelf_phdr);
+    test->header.e_phnum = sizeof(test_phdrtab) / sizeof(bfelf_phdr);
+    test->header.e_shentsize = sizeof(bfelf_shdr);
+    test->header.e_shnum = sizeof(test_shdrtab) / sizeof(bfelf_shdr);
+    test->header.e_shstrndx = 3;
 
-    test.header.e_ident[bfei_mag0] = 0x7F;
-    test.header.e_ident[bfei_mag1] = 'E';
-    test.header.e_ident[bfei_mag2] = 'L';
-    test.header.e_ident[bfei_mag3] = 'F';
-    test.header.e_ident[bfei_class] = bfelfclass64;
-    test.header.e_ident[bfei_data] = bfelfdata2lsb;
-    test.header.e_ident[bfei_version] = bfev_current;
-    test.header.e_ident[bfei_osabi] = bfelfosabi_sysv;
-    test.header.e_ident[bfei_abiversion] = 0;
-    test.header.e_type = bfet_dyn;
-    test.header.e_machine = bfem_x86_64;
-    test.header.e_version = bfev_current;
-    test.header.e_entry = 0x150;
-    test.header.e_phoff = offset(test.phdrtab, test);
-    test.header.e_shoff = offset(test.shdrtab, test);
-    test.header.e_flags = 0;
-    test.header.e_ehsize = sizeof(bfelf64_ehdr);
-    test.header.e_phentsize = sizeof(bfelf_phdr);
-    test.header.e_phnum = sizeof(test_phdrtab) / sizeof(bfelf_phdr);
-    test.header.e_shentsize = sizeof(bfelf_shdr);
-    test.header.e_shnum = sizeof(test_shdrtab) / sizeof(bfelf_shdr);
-    test.header.e_shstrndx = 3;
+    test->phdrtab.re_segment.p_type = bfpt_load;
+    test->phdrtab.re_segment.p_flags = bfpf_r | bfpf_x;
+    test->phdrtab.re_segment.p_offset = 0;
+    test->phdrtab.re_segment.p_vaddr = 0;
+    test->phdrtab.re_segment.p_paddr = 0;
+    test->phdrtab.re_segment.p_filesz = 0x500;
+    test->phdrtab.re_segment.p_memsz = 0x500;
+    test->phdrtab.re_segment.p_align = 0x1000;
 
-    test.phdrtab.re_segment1.p_type = bfpt_load;
-    test.phdrtab.re_segment1.p_flags = bfpf_r | bfpf_x;
-    test.phdrtab.re_segment1.p_offset = 0;
-    test.phdrtab.re_segment1.p_vaddr = 0;
-    test.phdrtab.re_segment1.p_paddr = 0;
-    test.phdrtab.re_segment1.p_filesz = 0x500;
-    test.phdrtab.re_segment1.p_memsz = 0x500;
-    test.phdrtab.re_segment1.p_align = 0x1000;
+    test->phdrtab.rw_segment.p_type = bfpt_load;
+    test->phdrtab.rw_segment.p_flags = bfpf_r | bfpf_w;
+    test->phdrtab.rw_segment.p_offset = 0x500;
+    test->phdrtab.rw_segment.p_vaddr = 0x500;
+    test->phdrtab.rw_segment.p_paddr = 0x500;
+    test->phdrtab.rw_segment.p_filesz = 0x500;
+    test->phdrtab.rw_segment.p_memsz = 0x500;
+    test->phdrtab.rw_segment.p_align = 0x1000;
 
-    test.phdrtab.re_segment2.p_type = bfpt_load;
-    test.phdrtab.re_segment2.p_flags = bfpf_r | bfpf_x;
-    test.phdrtab.re_segment2.p_offset = 10;
-    test.phdrtab.re_segment2.p_vaddr = 0x500;
-    test.phdrtab.re_segment2.p_paddr = 0x500;
-    test.phdrtab.re_segment2.p_filesz = 0x500;
-    test.phdrtab.re_segment2.p_memsz = 0x500;
-    test.phdrtab.re_segment2.p_align = 0x1000;
+    test->phdrtab.dyn_segment.p_type = bfpt_dynamic;
+    test->phdrtab.dyn_segment.p_flags = bfpf_r | bfpf_w;
+    test->phdrtab.dyn_segment.p_offset = offset(test->dynamic, *test);
+    test->phdrtab.dyn_segment.p_vaddr = 0x0;
+    test->phdrtab.dyn_segment.p_paddr = 0x0;
+    test->phdrtab.dyn_segment.p_filesz = sizeof(test_dynamic);
+    test->phdrtab.dyn_segment.p_memsz = sizeof(test_dynamic);
+    test->phdrtab.dyn_segment.p_align = 0x1000;
 
-    test.phdrtab.rw_segment1.p_type = bfpt_load;
-    test.phdrtab.rw_segment1.p_flags = bfpf_r | bfpf_w;
-    test.phdrtab.rw_segment1.p_offset = 10;
-    test.phdrtab.rw_segment1.p_vaddr = 0x1000;
-    test.phdrtab.rw_segment1.p_paddr = 0x1000;
-    test.phdrtab.rw_segment1.p_filesz = 0x500;
-    test.phdrtab.rw_segment1.p_memsz = 0x500;
-    test.phdrtab.rw_segment1.p_align = 0x1000;
+    test->phdrtab.stack_segment.p_type = bfpt_gnu_stack;
+    test->phdrtab.stack_segment.p_flags = bfpf_r | bfpf_w;
+    test->phdrtab.stack_segment.p_offset = 0x0;
+    test->phdrtab.stack_segment.p_vaddr = 0x0;
+    test->phdrtab.stack_segment.p_paddr = 0x0;
+    test->phdrtab.stack_segment.p_filesz = 0x0;
+    test->phdrtab.stack_segment.p_memsz = 0x0;
+    test->phdrtab.stack_segment.p_align = 0x0;
 
-    test.phdrtab.rw_segment2.p_type = bfpt_load;
-    test.phdrtab.rw_segment2.p_flags = bfpf_r | bfpf_w;
-    test.phdrtab.rw_segment2.p_offset = 10;
-    test.phdrtab.rw_segment2.p_vaddr = 0x1500;
-    test.phdrtab.rw_segment2.p_paddr = 0x1500;
-    test.phdrtab.rw_segment2.p_filesz = 0x500;
-    test.phdrtab.rw_segment2.p_memsz = 0x500;
-    test.phdrtab.rw_segment2.p_align = 0x1000;
+    test->phdrtab.relro_segment.p_type = bfpt_gnu_relro;
+    test->phdrtab.relro_segment.p_flags = bfpf_r;
+    test->phdrtab.relro_segment.p_offset = 0x0;
+    test->phdrtab.relro_segment.p_vaddr = 0x0;
+    test->phdrtab.relro_segment.p_paddr = 0x0;
+    test->phdrtab.relro_segment.p_filesz = 0x500;
+    test->phdrtab.relro_segment.p_memsz = 0x500;
+    test->phdrtab.relro_segment.p_align = 0x1000;
 
-    test.shdrtab.shstrtab.sh_name = static_cast<bfelf64_word>(offset(test.shstrtab.name4, test.shstrtab));
-    test.shdrtab.shstrtab.sh_type = bfsht_strtab;
-    test.shdrtab.shstrtab.sh_flags = 0;
-    test.shdrtab.shstrtab.sh_addr = 0x250;
-    test.shdrtab.shstrtab.sh_offset = offset(test.shstrtab, test);
-    test.shdrtab.shstrtab.sh_size = sizeof(test_shstrtab);
-    test.shdrtab.shstrtab.sh_link = 0;
-    test.shdrtab.shstrtab.sh_addralign = 1;
-    test.shdrtab.shstrtab.sh_entsize = 0;
+    test->dynamic.needed1.d_tag = bfdt_needed;
+    test->dynamic.needed2.d_tag = bfdt_needed;
+    test->dynamic.pltgot.d_tag = bfdt_pltgot;
+    test->dynamic.strtab.d_tag = bfdt_strtab;
+    test->dynamic.strtab.d_val = offset(test->dynstr, *test);
+    test->dynamic.symtab.d_tag = bfdt_symtab;
+    test->dynamic.symtab.d_val = offset(test->dynsym, *test);
+    test->dynamic.rela.d_tag = bfdt_rela;
+    test->dynamic.rela.d_val = offset(test->relatab, *test);
+    test->dynamic.relasz.d_tag = bfdt_relasz;
+    test->dynamic.relasz.d_val = sizeof(test_relatab);
+    test->dynamic.relaent.d_tag = bfdt_relaent;
+    test->dynamic.relaent.d_val = sizeof(bfelf_rela);
+    test->dynamic.strsz.d_tag = bfdt_strsz;
+    test->dynamic.strsz.d_val = sizeof(test_dynstr);
+    test->dynamic.init.d_tag = bfdt_init;
+    test->dynamic.init.d_val = offset(test->init_array, *test);
+    test->dynamic.fini.d_tag = bfdt_fini;
+    test->dynamic.fini.d_val = offset(test->fini_array, *test);
+    test->dynamic.init_array.d_tag = bfdt_init_array;
+    test->dynamic.init_array.d_val = offset(test->init_array, *test);
+    test->dynamic.fini_array.d_tag = bfdt_fini_array;
+    test->dynamic.fini_array.d_val = offset(test->fini_array, *test);
+    test->dynamic.init_array.d_tag = bfdt_init_arraysz;
+    test->dynamic.init_array.d_val = sizeof(test_init_array);
+    test->dynamic.fini_array.d_tag = bfdt_fini_arraysz;
+    test->dynamic.fini_array.d_val = sizeof(test_fini_array);
+    test->dynamic.relacount.d_tag = bfdt_relacount;
+    test->dynamic.relacount.d_val = 1;
+    test->dynamic.flags_1.d_tag = bfdt_flags_1;
+    test->dynamic.last.d_tag = bfdt_null;
 
-    test.shdrtab.dynsym.sh_name = static_cast<bfelf64_word>(offset(test.shstrtab.name1, test.shstrtab));
-    test.shdrtab.dynsym.sh_type = bfsht_dynsym;
-    test.shdrtab.dynsym.sh_flags = bfshf_a;
-    test.shdrtab.dynsym.sh_addr = 0x250;
-    test.shdrtab.dynsym.sh_offset = offset(test.dynsym, test);
-    test.shdrtab.dynsym.sh_size = sizeof(test_dynsym);
-    test.shdrtab.dynsym.sh_link = 2;
-    test.shdrtab.dynsym.sh_addralign = 8;
-    test.shdrtab.dynsym.sh_entsize = sizeof(bfelf_sym);
+    test->shdrtab.eh_frame.sh_name = 0x0;
+    test->shdrtab.eh_frame.sh_type = bfsht_strtab;
+    test->shdrtab.eh_frame.sh_flags = 0;
+    test->shdrtab.eh_frame.sh_addr = 0x250;
+    test->shdrtab.eh_frame.sh_offset = offset(test->eh_frame, *test);
+    test->shdrtab.eh_frame.sh_size = sizeof(test_eh_frame);
+    test->shdrtab.eh_frame.sh_link = 0;
+    test->shdrtab.eh_frame.sh_addralign = 1;
+    test->shdrtab.eh_frame.sh_entsize = 0;
 
-    test.shdrtab.hashtab.sh_name = static_cast<bfelf64_word>(offset(test.shstrtab.name2, test.shstrtab));
-    test.shdrtab.hashtab.sh_type = bfsht_hash;
-    test.shdrtab.hashtab.sh_flags = bfshf_a;
-    test.shdrtab.hashtab.sh_addr = 0x250;
-    test.shdrtab.hashtab.sh_offset = offset(test.hashtab, test);
-    test.shdrtab.hashtab.sh_size = sizeof(test_hashtab);
-    test.shdrtab.hashtab.sh_link = 0;
-    test.shdrtab.hashtab.sh_addralign = 8;
-    test.shdrtab.hashtab.sh_entsize = 0x4;
-
-    test.shdrtab.strtab.sh_name = static_cast<bfelf64_word>(offset(test.shstrtab.name3, test.shstrtab));
-    test.shdrtab.strtab.sh_type = bfsht_strtab;
-    test.shdrtab.strtab.sh_flags = bfshf_a;
-    test.shdrtab.strtab.sh_addr = 0x250;
-    test.shdrtab.strtab.sh_offset = offset(test.strtab, test);
-    test.shdrtab.strtab.sh_size = sizeof(test_strtab);
-    test.shdrtab.strtab.sh_link = 0;
-    test.shdrtab.strtab.sh_addralign = 1;
-    test.shdrtab.strtab.sh_entsize = 0;
-
-    test.shdrtab.relatab1.sh_name = static_cast<bfelf64_word>(offset(test.shstrtab.name5, test.shstrtab));
-    test.shdrtab.relatab1.sh_type = bfsht_rela;
-    test.shdrtab.relatab1.sh_flags = bfshf_ai;
-    test.shdrtab.relatab1.sh_addr = 0x250;
-    test.shdrtab.relatab1.sh_offset = offset(test.relatab, test);
-    test.shdrtab.relatab1.sh_size = sizeof(test_relatab);
-    test.shdrtab.relatab1.sh_link = 0;
-    test.shdrtab.relatab1.sh_addralign = 8;
-    test.shdrtab.relatab1.sh_entsize = sizeof(bfelf_rela);
-
-    test.shdrtab.relatab2.sh_name = static_cast<bfelf64_word>(offset(test.shstrtab.name5, test.shstrtab));
-    test.shdrtab.relatab2.sh_type = bfsht_rela;
-    test.shdrtab.relatab2.sh_flags = bfshf_ai;
-    test.shdrtab.relatab2.sh_addr = 0x250;
-    test.shdrtab.relatab2.sh_offset = offset(test.relatab, test);
-    test.shdrtab.relatab2.sh_size = sizeof(test_relatab);
-    test.shdrtab.relatab2.sh_link = 0;
-    test.shdrtab.relatab2.sh_addralign = 8;
-    test.shdrtab.relatab2.sh_entsize = sizeof(bfelf_rela);
-
-    test.shdrtab.relatab3.sh_name = static_cast<bfelf64_word>(offset(test.shstrtab.name5, test.shstrtab));
-    test.shdrtab.relatab3.sh_type = bfsht_rela;
-    test.shdrtab.relatab3.sh_flags = bfshf_ai;
-    test.shdrtab.relatab3.sh_addr = 0x250;
-    test.shdrtab.relatab3.sh_offset = offset(test.relatab, test);
-    test.shdrtab.relatab3.sh_size = sizeof(test_relatab);
-    test.shdrtab.relatab3.sh_link = 0;
-    test.shdrtab.relatab3.sh_addralign = 8;
-    test.shdrtab.relatab3.sh_entsize = sizeof(bfelf_rela);
-
-    test.shdrtab.relatab4.sh_name = static_cast<bfelf64_word>(offset(test.shstrtab.name5, test.shstrtab));
-    test.shdrtab.relatab4.sh_type = bfsht_rela;
-    test.shdrtab.relatab4.sh_flags = bfshf_ai;
-    test.shdrtab.relatab4.sh_addr = 0x250;
-    test.shdrtab.relatab4.sh_offset = offset(test.relatab, test);
-    test.shdrtab.relatab4.sh_size = sizeof(test_relatab);
-    test.shdrtab.relatab4.sh_link = 0;
-    test.shdrtab.relatab4.sh_addralign = 8;
-    test.shdrtab.relatab4.sh_entsize = sizeof(bfelf_rela);
-
-    test.shdrtab.relatab5.sh_name = static_cast<bfelf64_word>(offset(test.shstrtab.name5, test.shstrtab));
-    test.shdrtab.relatab5.sh_type = bfsht_rela;
-    test.shdrtab.relatab5.sh_flags = bfshf_ai;
-    test.shdrtab.relatab5.sh_addr = 0x250;
-    test.shdrtab.relatab5.sh_offset = offset(test.relatab, test);
-    test.shdrtab.relatab5.sh_size = sizeof(test_relatab);
-    test.shdrtab.relatab5.sh_link = 0;
-    test.shdrtab.relatab5.sh_addralign = 8;
-    test.shdrtab.relatab5.sh_entsize = sizeof(bfelf_rela);
-
-    test.shdrtab.relatab6.sh_name = static_cast<bfelf64_word>(offset(test.shstrtab.name5, test.shstrtab));
-    test.shdrtab.relatab6.sh_type = bfsht_rela;
-    test.shdrtab.relatab6.sh_flags = bfshf_ai;
-    test.shdrtab.relatab6.sh_addr = 0x250;
-    test.shdrtab.relatab6.sh_offset = offset(test.relatab, test);
-    test.shdrtab.relatab6.sh_size = sizeof(test_relatab);
-    test.shdrtab.relatab6.sh_link = 0;
-    test.shdrtab.relatab6.sh_addralign = 8;
-    test.shdrtab.relatab6.sh_entsize = sizeof(bfelf_rela);
-
-    test.shdrtab.relatab7.sh_name = static_cast<bfelf64_word>(offset(test.shstrtab.name5, test.shstrtab));
-    test.shdrtab.relatab7.sh_type = bfsht_rela;
-    test.shdrtab.relatab7.sh_flags = bfshf_ai;
-    test.shdrtab.relatab7.sh_addr = 0x250;
-    test.shdrtab.relatab7.sh_offset = offset(test.relatab, test);
-    test.shdrtab.relatab7.sh_size = sizeof(test_relatab);
-    test.shdrtab.relatab7.sh_link = 0;
-    test.shdrtab.relatab7.sh_addralign = 8;
-    test.shdrtab.relatab7.sh_entsize = sizeof(bfelf_rela);
-
-    test.shdrtab.relatab8.sh_name = static_cast<bfelf64_word>(offset(test.shstrtab.name5, test.shstrtab));
-    test.shdrtab.relatab8.sh_type = bfsht_rela;
-    test.shdrtab.relatab8.sh_flags = bfshf_ai;
-    test.shdrtab.relatab8.sh_addr = 0x250;
-    test.shdrtab.relatab8.sh_offset = offset(test.relatab, test);
-    test.shdrtab.relatab8.sh_size = sizeof(test_relatab);
-    test.shdrtab.relatab8.sh_link = 0;
-    test.shdrtab.relatab8.sh_addralign = 8;
-    test.shdrtab.relatab8.sh_entsize = sizeof(bfelf_rela);
-
-    test.hashtab.nbucket = 2;
-    test.hashtab.nchain = 2;
-
-    return test;
+    return {std::move(buff), size};
 }
 
 int

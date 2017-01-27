@@ -26,6 +26,7 @@ cp -Rf /tmp/bareflank/src_nasm /tmp/bareflank/build_nasm
 pushd /tmp/bareflank/build_nasm
 
 ./configure --prefix="$PREFIX"
+
 make -j2
 make -j2 install
 

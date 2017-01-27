@@ -27,6 +27,8 @@
 #include <vmcs/vmcs_intel_x64_helpers.h>
 #include <exit_handler/state_save_intel_x64.h>
 
+class vcpu_intel_x64;
+
 /// Intel x86_64 VMCS
 ///
 /// The following provides the basic VMCS implementation as defined by the

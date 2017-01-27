@@ -74,4 +74,10 @@ extern "C" float
 nanf(const char *tagp)
 { return __builtin_nanf(tagp); }
 
+extern "C" void
+_start(void) noexcept
+{ }
+
+void *__dso_handle = 0;
+
 #pragma GCC diagnostic pop

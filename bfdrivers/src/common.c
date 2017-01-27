@@ -87,7 +87,6 @@ int64_t
 resolve_symbol(const char *name, void **sym)
 {
     int64_t ret;
-    struct e_string_t str = {0, 0};
 
     if (name == 0 || sym == 0)
         return BF_ERROR_INVALID_ARG;
@@ -95,10 +94,7 @@ resolve_symbol(const char *name, void **sym)
     if (g_num_modules == 0)
         return BF_ERROR_NO_MODULES_ADDED;
 
-    str.buf = name;
-    str.len = symbol_length(name);
-
-    ret = bfelf_loader_resolve_symbol(&g_loader, &str, sym);
+    ret = bfelf_loader_resolve_symbol(&g_loader, name, sym);
     if (ret != BFELF_SUCCESS)
     {
         ALERT("Failed to find: %s\n", name);
@@ -161,24 +157,24 @@ add_md_to_memory_manager(struct module_t *module)
     if (module == 0)
         return BF_ERROR_INVALID_ARG;
 
-    for (s = 0; s < bfelf_file_num_segments(&module->file); s++)
+    for (s = 0; s < bfelf_file_num_load_instrs(&module->file); s++)
     {
         uint64_t exec_s = 0;
         uint64_t exec_e = 0;
-        struct bfelf_phdr *phdr = 0;
+        struct bfelf_load_instr *instr = 0;
 
-        ret = bfelf_file_get_segment(&module->file, s, &phdr);
+        ret = bfelf_file_get_load_instr(&module->file, s, &instr);
         if (ret != BFELF_SUCCESS)
             return ret;
 
-        exec_s = (uint64_t)module->exec + phdr->p_vaddr;
-        exec_e = (uint64_t)module->exec + phdr->p_vaddr + phdr->p_memsz;
+        exec_s = (uint64_t)module->exec + instr->mem_offset;
+        exec_e = (uint64_t)module->exec + instr->mem_offset + instr->memsz;
         exec_s &= ~(MAX_PAGE_SIZE - 1);
         exec_e &= ~(MAX_PAGE_SIZE - 1);
 
         for (; exec_s <= exec_e; exec_s += MAX_PAGE_SIZE)
         {
-            if ((phdr->p_flags & bfpf_x) != 0)
+            if ((instr->perm & bfpf_x) != 0)
                 ret = add_raw_md_to_memory_manager(exec_s, MEMORY_TYPE_R | MEMORY_TYPE_E);
             else
                 ret = add_raw_md_to_memory_manager(exec_s, MEMORY_TYPE_R | MEMORY_TYPE_W);
@@ -191,34 +187,6 @@ add_md_to_memory_manager(struct module_t *module)
     return BF_SUCCESS;
 }
 
-uint64_t
-get_elf_file_size(struct module_t *module)
-{
-    bfelf64_word s = 0;
-    bfelf64_xword total = 0;
-
-    if (module == 0)
-        return 0;
-
-    for (s = 0; s < bfelf_file_num_segments(&module->file); s++)
-    {
-        int64_t ret = 0;
-        struct bfelf_phdr *phdr = 0;
-
-        ret = bfelf_file_get_segment(&module->file, s, &phdr);
-        if (ret != BFELF_SUCCESS)
-        {
-            ALERT("bfelf_file_get_segment failed: %d\n", (int)ret);
-            return 0;
-        }
-
-        if (total < phdr->p_vaddr + phdr->p_memsz)
-            total = phdr->p_vaddr + phdr->p_memsz;
-    }
-
-    return total;
-}
-
 int64_t
 load_elf_file(struct module_t *module)
 {
@@ -229,22 +197,22 @@ load_elf_file(struct module_t *module)
 
     platform_memset(module->exec, 0, module->size);
 
-    for (s = 0; s < bfelf_file_num_segments(&module->file); s++)
+    for (s = 0; s < bfelf_file_num_load_instrs(&module->file); s++)
     {
         int64_t ret = 0;
-        struct bfelf_phdr *phdr = 0;
+        struct bfelf_load_instr *instr = 0;
 
         const char *src = 0;
         char *dst = 0;
         uint64_t len = 0;
 
-        ret = bfelf_file_get_segment(&module->file, s, &phdr);
+        ret = bfelf_file_get_load_instr(&module->file, s, &instr);
         if (ret != BFELF_SUCCESS)
             return ret;
 
-        dst = module->exec + phdr->p_vaddr;
-        src = module->file.file + phdr->p_offset;
-        len = phdr->p_filesz;
+        dst = module->exec + instr->mem_offset;
+        src = module->file.file + instr->file_offset;
+        len = instr->filesz;
 
         platform_memcpy(dst, src, len);
     }
@@ -364,8 +332,8 @@ common_add_module(const char *file, uint64_t fsize)
     if (ret != BFELF_SUCCESS)
         return ret;
 
-    module->size = get_elf_file_size(module);
-    if (module->size == 0)
+    module->size = (uint64_t)bfelf_file_get_total_size(&module->file);
+    if (module->size <= 0)
         return BF_ERROR_FAILED_TO_ADD_FILE;
 
     module->exec = platform_alloc_rwe(module->size);
@@ -428,7 +396,7 @@ common_load_vmm(void)
 
     for (i = 0; (module = get_module(i)) != 0; i++)
     {
-        ret = bfelf_loader_add(&g_loader, &module->file, module->exec);
+        ret = bfelf_loader_add(&g_loader, &module->file, module->exec, module->exec);
         if (ret != BFELF_SUCCESS)
             goto failure;
     }
@@ -443,9 +411,9 @@ common_load_vmm(void)
 
     for (i = 0; (module = get_module(i)) != 0; i++)
     {
-        struct section_info_t info = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+        struct section_info_t info = {0, 0, 0, 0, 0, 0, 0, 0};
 
-        ret = bfelf_loader_get_info(&g_loader, &module->file, &info);
+        ret = bfelf_file_get_section_info(&module->file, &info);
         if (ret != BF_SUCCESS)
             goto failure;
 
@@ -501,9 +469,9 @@ common_unload_vmm(void)
     {
         for (i = g_num_modules - 1; (module = get_module(i)) != 0; i--)
         {
-            struct section_info_t info = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+            struct section_info_t info = {0, 0, 0, 0, 0, 0, 0, 0};
 
-            ret = bfelf_loader_get_info(&g_loader, &module->file, &info);
+            ret = bfelf_file_get_section_info(&module->file, &info);
             if (ret != BF_SUCCESS)
                 goto corrupted;
 

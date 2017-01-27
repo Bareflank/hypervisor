@@ -31,24 +31,17 @@ mkdir -p $BUILD_ABS/build_libbfc
 
 pushd $BUILD_ABS/build_libbfc
 
-cp -Rf $BUILD_ABS/source_libbfc/sysctl.h $BUILD_ABS/sysroot/x86_64-elf/include/sys/
-cp -Rf $BUILD_ABS/source_libbfc/pthread.h $BUILD_ABS/sysroot/x86_64-elf/include/
+cp -Rf $BUILD_ABS/source_libbfc/sysctl.h $BUILD_ABS/sysroot_$SYSROOT_NAME/x86_64-elf/include/sys/
+cp -Rf $BUILD_ABS/source_libbfc/pthread.h $BUILD_ABS/sysroot_$SYSROOT_NAME/x86_64-elf/include/
 
-flags="-DSYM_PROVIDED__WRITE -DSYM_PROVIDED__MALLOC -DSYM_PROVIDED__FREE -DSYM_PROVIDED__CALLOC -DSYM_PROVIDED__FSTAT -DSYM_PROVIDED__REALLOC -DLOOKUP_TLS_DATA"
+flags="-DLOOKUP_TLS_DATA"
 
-if [[ $compiler == *"clang"* ]]; then
-    cc="$BUILD_ABS/build_scripts/x86_64-bareflank-clang $flags"
-    cxx="$BUILD_ABS/build_scripts/x86_64-bareflank-clang++ $flags"
-    ar="$BUILD_ABS/build_scripts/x86_64-bareflank-ar"
-else
-    cc="$BUILD_ABS/build_scripts/x86_64-bareflank-gcc $flags"
-    cxx="$BUILD_ABS/build_scripts/x86_64-bareflank-g++ $flags"
-    ar="$BUILD_ABS/build_scripts/x86_64-bareflank-ar"
-fi
+cc="$BUILD_ABS/build_scripts/x86_64-$SYSROOT_NAME-clang $flags"
+cxx="$BUILD_ABS/build_scripts/x86_64-$SYSROOT_NAME-clang++ $flags"
 
 $cc $CFLAGS -c $BUILD_ABS/source_libbfc/*.c
 $cxx $CXXFLAGS -c $BUILD_ABS/source_libbfc/*.cpp
-$BUILD_ABS/build_scripts/x86_64-bareflank-clang -shared *.o -o libbfc.so
-mv libbfc.so $BUILD_ABS/sysroot/x86_64-elf/lib/
+$cc -shared *.o -o libbfc.so
+mv libbfc.so $BUILD_ABS/sysroot_$SYSROOT_NAME/x86_64-elf/lib/
 
 popd

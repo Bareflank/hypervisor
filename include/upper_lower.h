@@ -22,6 +22,8 @@
 #ifndef UPPER_LOWER_H
 #define UPPER_LOWER_H
 
+#include <stdint.h>
+
 namespace bfn
 {
 

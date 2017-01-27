@@ -75,7 +75,7 @@ vmcs_intel_x64::launch(gsl::not_null<vmcs_intel_x64_state *> host_state,
     { vmcs::check::all(); });
 
     if (guest_state->is_guest())
-        vm::launch();
+        vm::launch(guest_state->arg1(), guest_state->arg2());
     else
         vm::launch_demote();
 }

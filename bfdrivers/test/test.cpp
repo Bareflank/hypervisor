@@ -143,7 +143,7 @@ driver_entry_ut::list()
     this->test_common_add_module_add_when_already_running();
     this->test_common_add_module_add_when_corrupt();
     this->test_common_add_module_add_too_many();
-    this->test_common_add_module_get_elf_file_size_fails();
+    this->test_common_add_module_file_get_total_size_fails();
     this->test_common_add_module_platform_alloc_fails();
     this->test_common_add_module_load_elf_fails();
 
@@ -213,10 +213,8 @@ driver_entry_ut::list()
     this->test_helper_execute_symbol_sym_failed();
     this->test_helper_execute_symbol_sym_success();
     this->test_helper_add_md_to_memory_manager_null_module();
-    this->test_helper_get_elf_file_size_null_module();
-    this->test_helper_get_elf_file_size_get_segment_fails();
     this->test_helper_load_elf_file_null_module();
-    this->test_helper_load_elf_file_get_segment_fails();
+    this->test_helper_load_elf_file_get_load_instr_fails();
 
     return verify_no_mem_leaks() != 0;
 }

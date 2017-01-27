@@ -74,17 +74,18 @@ public:
     /// @param guest_state the guest state the vcpu should use. If you
     ///     provide nullptr, a default guest state will be created.
     ///
-    vcpu_intel_x64(vcpuid::type id,
-                   std::unique_ptr<debug_ring> debug_ring = nullptr,
-                   std::unique_ptr<vmxon_intel_x64> vmxon = nullptr,
-                   std::unique_ptr<vmcs_intel_x64> vmcs = nullptr,
-                   std::unique_ptr<exit_handler_intel_x64> exit_handler = nullptr,
-                   std::unique_ptr<vmcs_intel_x64_state> vmm_state = nullptr,
-                   std::unique_ptr<vmcs_intel_x64_state> guest_state = nullptr);
+    vcpu_intel_x64(
+        vcpuid::type id,
+        std::unique_ptr<debug_ring> debug_ring = nullptr,
+        std::unique_ptr<vmxon_intel_x64> vmxon = nullptr,
+        std::unique_ptr<vmcs_intel_x64> vmcs = nullptr,
+        std::unique_ptr<exit_handler_intel_x64> exit_handler = nullptr,
+        std::unique_ptr<vmcs_intel_x64_state> vmm_state = nullptr,
+        std::unique_ptr<vmcs_intel_x64_state> guest_state = nullptr);
 
     /// Destructor
     ///
-    ~vcpu_intel_x64() final = default;
+    ~vcpu_intel_x64() override = default;
 
     /// Init vCPU
     ///
@@ -126,12 +127,22 @@ private:
 
     bool m_vmcs_launched;
 
+protected:
+
     std::unique_ptr<vmxon_intel_x64> m_vmxon;
     std::unique_ptr<vmcs_intel_x64> m_vmcs;
     std::unique_ptr<exit_handler_intel_x64> m_exit_handler;
     std::unique_ptr<state_save_intel_x64> m_state_save;
     std::unique_ptr<vmcs_intel_x64_state> m_vmm_state;
     std::unique_ptr<vmcs_intel_x64_state> m_guest_state;
+
+public:
+
+    vcpu_intel_x64(vcpu_intel_x64 &&) = default;
+    vcpu_intel_x64 &operator=(vcpu_intel_x64 &&) = default;
+
+    vcpu_intel_x64(const vcpu_intel_x64 &) = delete;
+    vcpu_intel_x64 &operator=(const vcpu_intel_x64 &) = delete;
 };
 
 #endif

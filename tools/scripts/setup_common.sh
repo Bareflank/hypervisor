@@ -121,8 +121,10 @@ setup_build_environment() {
     fi
 
     if [[ $local == "true" ]]; then
-        CROSS_COMPILER=clang_38 ./tools/scripts/create_cross_compiler.sh
+        CROSS_COMPILER=clang_38 $hypervisor_dir/tools/scripts/create_cross_compiler.sh
     fi
+
+    complete -f $hypervisor_dir/configure
 
     echo ""
     echo "WARNING: If you are using ssh, or are logged into a GUI you "

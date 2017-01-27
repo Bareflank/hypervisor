@@ -28,6 +28,8 @@
 
 struct tss_x64
 {
+    using integer_pointer = uintptr_t;
+
     uint32_t reserved1;
     uint32_t rsp0_lower;
     uint32_t rsp0_upper;

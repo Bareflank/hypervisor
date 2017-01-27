@@ -1441,6 +1441,7 @@ vmcs_ut::list()
     this->test_state_segment_register_base();
     this->test_state_msrs();
     this->test_state_rip_rsp();
+    this->test_state_arg1_arg2();
     this->test_state_is_guest();
     this->test_state_dump();
 

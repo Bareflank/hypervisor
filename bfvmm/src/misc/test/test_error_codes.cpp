@@ -38,7 +38,6 @@ misc_ut::test_error_codes_valid()
     this->expect_true(ec_to_str(BFELF_ERROR_INVALID_ARG) == "BFELF_ERROR_INVALID_ARG"_s);
     this->expect_true(ec_to_str(BFELF_ERROR_INVALID_FILE) == "BFELF_ERROR_INVALID_FILE"_s);
     this->expect_true(ec_to_str(BFELF_ERROR_INVALID_INDEX) == "BFELF_ERROR_INVALID_INDEX"_s);
-    this->expect_true(ec_to_str(BFELF_ERROR_INVALID_STRING) == "BFELF_ERROR_INVALID_STRING"_s);
     this->expect_true(ec_to_str(BFELF_ERROR_INVALID_SIGNATURE) == "BFELF_ERROR_INVALID_SIGNATURE"_s);
     this->expect_true(ec_to_str(BFELF_ERROR_UNSUPPORTED_FILE) == "BFELF_ERROR_UNSUPPORTED_FILE"_s);
     this->expect_true(ec_to_str(BFELF_ERROR_INVALID_SEGMENT) == "BFELF_ERROR_INVALID_SEGMENT"_s);

@@ -22,13 +22,15 @@
 #include <gsl/gsl>
 #include <vcpu/vcpu_intel_x64.h>
 
-vcpu_intel_x64::vcpu_intel_x64(vcpuid::type id,
-                               std::unique_ptr<debug_ring> debug_ring,
-                               std::unique_ptr<vmxon_intel_x64> vmxon,
-                               std::unique_ptr<vmcs_intel_x64> vmcs,
-                               std::unique_ptr<exit_handler_intel_x64> exit_handler,
-                               std::unique_ptr<vmcs_intel_x64_state> vmm_state,
-                               std::unique_ptr<vmcs_intel_x64_state> guest_state) :
+vcpu_intel_x64::vcpu_intel_x64(
+    vcpuid::type id,
+    std::unique_ptr<debug_ring> debug_ring,
+    std::unique_ptr<vmxon_intel_x64> vmxon,
+    std::unique_ptr<vmcs_intel_x64> vmcs,
+    std::unique_ptr<exit_handler_intel_x64> exit_handler,
+    std::unique_ptr<vmcs_intel_x64_state> vmm_state,
+    std::unique_ptr<vmcs_intel_x64_state> guest_state) :
+
     vcpu(id, std::move(debug_ring)),
     m_vmcs_launched(false),
     m_vmxon(std::move(vmxon)),
@@ -36,8 +38,7 @@ vcpu_intel_x64::vcpu_intel_x64(vcpuid::type id,
     m_exit_handler(std::move(exit_handler)),
     m_vmm_state(std::move(vmm_state)),
     m_guest_state(std::move(guest_state))
-{
-}
+{ }
 
 void
 vcpu_intel_x64::init(user_data *data)

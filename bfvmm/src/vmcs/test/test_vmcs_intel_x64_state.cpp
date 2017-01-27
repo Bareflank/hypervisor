@@ -268,6 +268,20 @@ vmcs_ut::test_state_rip_rsp()
 }
 
 void
+vmcs_ut::test_state_arg1_arg2()
+{
+    this->expect_no_exception([&]
+    {
+        vmcs_intel_x64_state state{};
+
+        this->expect_true(state.arg1() == 0U);
+        this->expect_true(state.arg2() == 0U);
+        this->expect_no_exception([&]{ state.set_arg1(42U); });
+        this->expect_no_exception([&]{ state.set_arg2(42U); });
+    });
+}
+
+void
 vmcs_ut::test_state_is_guest()
 {
     this->expect_no_exception([&]

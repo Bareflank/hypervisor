@@ -81,8 +81,8 @@ __vmwrite(uint64_t field, uint64_t val) noexcept
 }
 
 extern "C" bool
-__vmlaunch(void) noexcept
-{ return !g_vmlaunch_fails; }
+__vmlaunch(uint64_t arg1, uint64_t arg2) noexcept
+{ (void)arg1; (void)arg2; return !g_vmlaunch_fails; }
 
 extern "C" bool
 __vmlaunch_demote(void) noexcept
@@ -241,7 +241,7 @@ intrinsics_ut::test_vmx_intel_x64_vmlaunch_failure()
     { g_vmlaunch_fails = false; });
 
     g_vmlaunch_fails = true;
-    this->expect_exception([&] { vm::launch(); }, ""_ut_ree);
+    this->expect_exception([&] { vm::launch(0, 0); }, ""_ut_ree);
 }
 
 void
@@ -263,7 +263,7 @@ intrinsics_ut::test_vmx_intel_x64_vmlaunch_demote_failure()
 void
 intrinsics_ut::test_vmx_intel_x64_vmlaunch_success()
 {
-    this->expect_no_exception([&] { vm::launch(); });
+    this->expect_no_exception([&] { vm::launch(0, 0); });
 }
 
 void

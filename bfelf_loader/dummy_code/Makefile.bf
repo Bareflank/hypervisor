@@ -32,7 +32,7 @@ TARGET_COMPILER:=cross
 ################################################################################
 
 CROSS_CCFLAGS+=
-CROSS_CXXFLAGS+=-fno-rtti -fno-sized-deallocation
+CROSS_CXXFLAGS+=-fno-rtti -fno-sized-deallocation -fno-use-cxa-atexit
 CROSS_ASMFLAGS+=
 CROSS_LDFLAGS+=
 CROSS_ARFLAGS+=

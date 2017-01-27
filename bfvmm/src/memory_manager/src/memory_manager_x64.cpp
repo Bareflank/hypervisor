@@ -38,12 +38,7 @@ using namespace x64;
 /// \cond
 
 uint8_t g_heap_pool_owner[MAX_HEAP_POOL] __attribute__((aligned(page_size))) = {};
-mem_pool<MAX_HEAP_POOL, cache_line_shift> g_heap_pool(reinterpret_cast<uintptr_t>(g_heap_pool_owner));
-
 uint8_t g_page_pool_owner[MAX_PAGE_POOL] __attribute__((aligned(page_size))) = {};
-mem_pool<MAX_PAGE_POOL, page_shift> g_page_pool(reinterpret_cast<uintptr_t>(g_page_pool_owner));
-
-mem_pool<MAX_MEM_MAP_POOL, page_shift> g_mem_map_pool(MEM_MAP_POOL_START);
 
 /// \endcond
 
@@ -275,6 +270,12 @@ memory_manager_x64::descriptors() const
 
     return list;
 }
+
+memory_manager_x64::memory_manager_x64() noexcept :
+    g_heap_pool(reinterpret_cast<uintptr_t>(g_heap_pool_owner)),
+    g_page_pool(reinterpret_cast<uintptr_t>(g_page_pool_owner)),
+    g_mem_map_pool(MEM_MAP_POOL_START)
+{ }
 
 memory_manager_x64::integer_pointer
 memory_manager_x64::lower(integer_pointer ptr) const noexcept

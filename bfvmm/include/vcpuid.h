@@ -31,7 +31,12 @@ namespace vcpuid
     using type = uint64_t;
 
     constexpr const auto reserved = 0x8000000000000000UL;
-    constexpr const auto guest_mask = 0xFFFFFFFF00000000UL;
+
+    constexpr const auto invalid = 0xFFFFFFFFFFFFFFFFUL;
+    constexpr const auto current = 0xFFFFFFFFFFFFFFF0UL;
+
+    constexpr const auto guest_mask = 0xFFFFFFFFFFFF0000UL;
+    constexpr const auto guest_from = 16;
 }
 
 // *INDENT-ON*

@@ -174,7 +174,7 @@
  * value changes.
  */
 #ifndef MAX_NUM_MODULES
-#define MAX_NUM_MODULES (25LL)
+#define MAX_NUM_MODULES (75LL)
 #endif
 
 /**
