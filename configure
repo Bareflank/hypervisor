@@ -35,10 +35,8 @@ CE='\033[0m'
 # ------------------------------------------------------------------------------
 
 COMMON_FLAGS=""
-COMMON_FLAGS="$COMMON_FLAGS -g"
 COMMON_FLAGS="$COMMON_FLAGS -fpic"
 COMMON_FLAGS="$COMMON_FLAGS -fexceptions"
-COMMON_FLAGS="$COMMON_FLAGS -mstackrealign"
 COMMON_FLAGS="$COMMON_FLAGS -mmmx"
 COMMON_FLAGS="$COMMON_FLAGS -msse"
 COMMON_FLAGS="$COMMON_FLAGS -msse2"
@@ -54,9 +52,9 @@ if grep -q 'avx' /proc/cpuinfo; then
 fi
 
 CROSS_COMMON_FLAGS="$COMMON_FLAGS"
-CROSS_COMMON_FLAGS="$CROSS_COMMON_FLAGS -ffreestanding"
-CROSS_COMMON_FLAGS="$CROSS_COMMON_FLAGS -fstack-protector-strong"
 CROSS_COMMON_FLAGS="$CROSS_COMMON_FLAGS -mno-red-zone"
+CROSS_COMMON_FLAGS="$CROSS_COMMON_FLAGS -mstackrealign"
+CROSS_COMMON_FLAGS="$CROSS_COMMON_FLAGS -fstack-protector-strong"
 
 CROSS_CCFLAGS="$CROSS_COMMON_FLAGS"
 CROSS_CCFLAGS="$CROSS_CCFLAGS -std=c99"
@@ -259,6 +257,10 @@ option_distclean() {
         rm -Rf $BUILD_ABS/source_llvm
         rm -Rf $BUILD_ABS/source_newlib
     fi
+
+    rm -f $BUILD_ABS/compile_commands.json
+    rm -f $BUILD_ABS/doc/doxygen_warnings.txt
+    rm -f $BUILD_ABS/extensions.mk
 
     if ls $BUILD_ABS/sysroot_*/ 1> /dev/null 2>&1; then
         echo -e "removing:$CB sysroots$CE"
@@ -592,6 +594,51 @@ copy_scripts() {
 # ------------------------------------------------------------------------------
 
 create_wrapper_links () {
+    if [[ ! -f "$BUILD_ABS/build_scripts/x86_64-vmm-elf-ar" ]]; then
+        echo -e "linking compiler script:$CB x86_64-vmm-elf-ar$CE"
+        ln -s $BUILD_ABS/build_scripts/compiler_wrapper.sh $BUILD_ABS/build_scripts/x86_64-vmm-elf-ar
+    fi
+
+    if [[ ! -f "$BUILD_ABS/build_scripts/x86_64-vmm-elf-as" ]]; then
+        echo -e "linking compiler script:$CB x86_64-vmm-elf-as$CE"
+        ln -s $BUILD_ABS/build_scripts/compiler_wrapper.sh $BUILD_ABS/build_scripts/x86_64-vmm-elf-as
+    fi
+
+    if [[ ! -f "$BUILD_ABS/build_scripts/x86_64-vmm-elf-ld" ]]; then
+        echo -e "linking compiler script:$CB x86_64-vmm-elf-ld$CE"
+        ln -s $BUILD_ABS/build_scripts/compiler_wrapper.sh $BUILD_ABS/build_scripts/x86_64-vmm-elf-ld
+    fi
+
+    if [[ ! -f "$BUILD_ABS/build_scripts/x86_64-vmm-elf-nm" ]]; then
+        echo -e "linking compiler script:$CB x86_64-vmm-elf-nm$CE"
+        ln -s $BUILD_ABS/build_scripts/compiler_wrapper.sh $BUILD_ABS/build_scripts/x86_64-vmm-elf-nm
+    fi
+
+    if [[ ! -f "$BUILD_ABS/build_scripts/x86_64-vmm-elf-objcopy" ]]; then
+        echo -e "linking compiler script:$CB x86_64-vmm-elf-objcopy$CE"
+        ln -s $BUILD_ABS/build_scripts/compiler_wrapper.sh $BUILD_ABS/build_scripts/x86_64-vmm-elf-objcopy
+    fi
+
+    if [[ ! -f "$BUILD_ABS/build_scripts/x86_64-vmm-elf-objdump" ]]; then
+        echo -e "linking compiler script:$CB x86_64-vmm-elf-objdump$CE"
+        ln -s $BUILD_ABS/build_scripts/compiler_wrapper.sh $BUILD_ABS/build_scripts/x86_64-vmm-elf-objdump
+    fi
+
+    if [[ ! -f "$BUILD_ABS/build_scripts/x86_64-vmm-elf-ranlib" ]]; then
+        echo -e "linking compiler script:$CB x86_64-vmm-elf-ranlib$CE"
+        ln -s $BUILD_ABS/build_scripts/compiler_wrapper.sh $BUILD_ABS/build_scripts/x86_64-vmm-elf-ranlib
+    fi
+
+    if [[ ! -f "$BUILD_ABS/build_scripts/x86_64-vmm-elf-readelf" ]]; then
+        echo -e "linking compiler script:$CB x86_64-vmm-elf-readelf$CE"
+        ln -s $BUILD_ABS/build_scripts/compiler_wrapper.sh $BUILD_ABS/build_scripts/x86_64-vmm-elf-readelf
+    fi
+
+    if [[ ! -f "$BUILD_ABS/build_scripts/x86_64-vmm-elf-strip" ]]; then
+        echo -e "linking compiler script:$CB x86_64-vmm-elf-strip$CE"
+        ln -s $BUILD_ABS/build_scripts/compiler_wrapper.sh $BUILD_ABS/build_scripts/x86_64-vmm-elf-strip
+    fi
+
     if [[ ! -f "$BUILD_ABS/build_scripts/x86_64-vmm-clang" ]]; then
         echo -e "linking compiler script:$CB x86_64-vmm-clang$CE"
         ln -s $BUILD_ABS/build_scripts/compiler_wrapper.sh $BUILD_ABS/build_scripts/x86_64-vmm-clang
@@ -600,16 +647,6 @@ create_wrapper_links () {
     if [[ ! -f "$BUILD_ABS/build_scripts/x86_64-vmm-clang++" ]]; then
         echo -e "linking compiler script:$CB x86_64-vmm-clang++$CE"
         ln -s $BUILD_ABS/build_scripts/compiler_wrapper.sh $BUILD_ABS/build_scripts/x86_64-vmm-clang++
-    fi
-
-    if [[ ! -f "$BUILD_ABS/build_scripts/x86_64-vmm-ar" ]]; then
-        echo -e "linking compiler script:$CB x86_64-vmm-ar$CE"
-        ln -s $BUILD_ABS/build_scripts/compiler_wrapper.sh $BUILD_ABS/build_scripts/x86_64-vmm-ar
-    fi
-
-    if [[ ! -f "$BUILD_ABS/build_scripts/x86_64-vmm-ranlib" ]]; then
-        echo -e "linking compiler script:$CB x86_64-vmm-ranlib$CE"
-        ln -s $BUILD_ABS/build_scripts/compiler_wrapper.sh $BUILD_ABS/build_scripts/x86_64-vmm-ranlib
     fi
 
     if [[ ! -f "$BUILD_ABS/build_scripts/x86_64-vmm-nasm" ]]; then

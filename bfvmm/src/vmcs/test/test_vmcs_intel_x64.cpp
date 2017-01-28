@@ -26,6 +26,7 @@
 
 #include <vmcs/vmcs_intel_x64_helpers.h>
 #include <vmcs/vmcs_intel_x64_resume.h>
+#include <vmcs/vmcs_intel_x64_launch.h>
 #include <vmcs/vmcs_intel_x64_promote.h>
 #include <vmcs/vmcs_intel_x64_16bit_control_fields.h>
 #include <vmcs/vmcs_intel_x64_16bit_host_state_fields.h>
@@ -304,12 +305,6 @@ setup_vmcs_x64_state_intrinsics(MockRepository &mocks, vmcs_intel_x64_state *sta
     mocks.OnCall(state_in, vmcs_intel_x64_state::ia32_fs_base_msr).Return(0);
     mocks.OnCall(state_in, vmcs_intel_x64_state::ia32_gs_base_msr).Return(0);
 
-    mocks.OnCall(state_in, vmcs_intel_x64_state::arg1).Return(0);
-    mocks.OnCall(state_in, vmcs_intel_x64_state::arg2).Return(0);
-
-    mocks.OnCall(state_in, vmcs_intel_x64_state::rip).Return(0);
-    mocks.OnCall(state_in, vmcs_intel_x64_state::rsp).Return(0);
-
     mocks.OnCall(state_in, vmcs_intel_x64_state::is_guest).Return(false);
     mocks.OnCall(state_in, vmcs_intel_x64_state::dump);
 }
@@ -355,8 +350,9 @@ vmcs_ut::test_launch_vmlaunch_failure()
     setup_vmcs_x64_state_intrinsics(mocks, host_state);
     setup_vmcs_x64_state_intrinsics(mocks, guest_state);
 
+    mocks.OnCall(guest_state, vmcs_intel_x64_state::is_guest).Return(true);
     mocks.OnCallFunc(__vmwrite).Return(true);
-    Call &launch_call = mocks.ExpectCallFunc(__vmlaunch_demote).Return(false);
+    Call &launch_call = mocks.ExpectCallFunc(vmcs_launch);
     mocks.OnCallFunc(__vmwrite).After(launch_call).Do(__vmwrite);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
@@ -385,9 +381,8 @@ vmcs_ut::test_launch_vmlaunch_demote_failure()
     setup_vmcs_x64_state_intrinsics(mocks, host_state);
     setup_vmcs_x64_state_intrinsics(mocks, guest_state);
 
-    mocks.OnCall(guest_state, vmcs_intel_x64_state::is_guest).Return(true);
     mocks.OnCallFunc(__vmwrite).Return(true);
-    Call &launch_call = mocks.ExpectCallFunc(__vmlaunch).Return(false);
+    Call &launch_call = mocks.ExpectCallFunc(__vmlaunch_demote).Return(false);
     mocks.OnCallFunc(__vmwrite).After(launch_call).Do(__vmwrite);
 
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]

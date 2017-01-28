@@ -31,23 +31,26 @@ if [[ ! -d "$BUILD_ABS/source_newlib" ]]; then
 fi
 
 rm -Rf $BUILD_ABS/build_newlib
-rm -Rf $BUILD_ABS/sysroot_$SYSROOT_NAME/x86_64-elf/lib
-rm -Rf $BUILD_ABS/sysroot_$SYSROOT_NAME/x86_64-elf/include/
 mkdir -p $BUILD_ABS/build_newlib
 
 pushd $BUILD_ABS/build_newlib
 
-cc="$BUILD_ABS/build_scripts/x86_64-$SYSROOT_NAME-clang"
-cxx="$BUILD_ABS/build_scripts/x86_64-$SYSROOT_NAME-clang++"
-ar="$BUILD_ABS/build_scripts/x86_64-$SYSROOT_NAME-ar"
-ranlib="$BUILD_ABS/build_scripts/x86_64-$SYSROOT_NAME-ranlib"
+export PATH=$BUILD_ABS/build_scripts:$PATH
 
 echo "Building newlib. Please wait..."
-../source_newlib/configure --target=x86_64-elf --disable-libgloss RANLIB_FOR_TARGET="$ranlib" AR_FOR_TARGET="$ar" CC_FOR_TARGET="$cc" CXX_FOR_TARGET="$cxx" CFLAGS_FOR_TARGET="$CFLAGS" CXXFLAGS_FOR_TARGET="$CXXFLAGS" --prefix=$BUILD_ABS/sysroot_$SYSROOT_NAME/ 1>/dev/null 2>/dev/null
+../source_newlib/configure --target=x86_64-$SYSROOT_NAME-elf CC_FOR_TARGET=x86_64-$SYSROOT_NAME-clang CXX_FOR_TARGET=x86_64-$SYSROOT_NAME-clang++ CFLAGS_FOR_TARGET="$CFLAGS" CXXFLAGS_FOR_TARGET="$CXXFLAGS" --prefix=$BUILD_ABS/sysroot_$SYSROOT_NAME/ --disable-libgloss --disable-multilib --enable-newlib-multithread --enable-newlib-iconv --disable-newlib-supplied-syscalls 1>/dev/null 2>/dev/null
 make -j2 1>/dev/null 2>/dev/null
 make -j2 install 1>/dev/null 2>/dev/null
 
-$BUILD_ABS/build_scripts/x86_64-$SYSROOT_NAME-clang -shared `find $BUILD_ABS/build_newlib/x86_64-elf/newlib/libc -name "*.o" | xargs echo` -o libc.so
-mv libc.so $BUILD_ABS/sysroot_$SYSROOT_NAME/x86_64-elf/lib/
+#
+# HACK:
+#
+# The following creates a shared library for newlib because it refuses to
+# create a shared library unless the target is Linux. Because of this, we
+# create the shared library ourselves.
+#
+
+x86_64-$SYSROOT_NAME-clang -shared `find $BUILD_ABS/build_newlib/x86_64-$SYSROOT_NAME-elf/newlib/libc -name "*.o" | xargs echo` -o libc.so
+mv libc.so $BUILD_ABS/sysroot_$SYSROOT_NAME/x86_64-$SYSROOT_NAME-elf/lib/
 
 popd

@@ -245,13 +245,16 @@ verify_bfvmm() {
 #
 # bfvmm
 #
+verify_bfvmm crt
 verify_bfvmm debug_ring
 verify_bfvmm entry
 verify_bfvmm exit_handler
 verify_bfvmm intrinsics
 verify_bfvmm memory_manager
 verify_bfvmm misc
+verify_bfvmm pthread
 verify_bfvmm serial
+verify_bfvmm syscall
 verify_bfvmm vcpu
 verify_bfvmm vcpu_factory
 verify_bfvmm vmcs
@@ -275,20 +278,6 @@ popd > /dev/null
 # bfdrivers
 #
 pushd bfdrivers > /dev/null
-header $PWD
-run_clang_tidy "clan*,-clang-analyzer-alpha.deadcode.UnreachableCode"
-run_clang_tidy "cert*,-clang-analyzer*,-cert-err60-cpp"
-run_clang_tidy "misc*,-clang-analyzer*"
-run_clang_tidy "perf*,-clang-analyzer*"
-run_clang_tidy "cppc*,-clang-analyzer*,-cppcoreguidelines-pro-type-reinterpret-cast"
-run_clang_tidy "read*,-clang-analyzer*,-readability-braces-around-statements"
-run_clang_tidy "mode*,-clang-analyzer*"
-popd > /dev/null
-
-#
-# bfcrt
-#
-pushd bfcrt > /dev/null
 header $PWD
 run_clang_tidy "clan*,-clang-analyzer-alpha.deadcode.UnreachableCode"
 run_clang_tidy "cert*,-clang-analyzer*,-cert-err60-cpp"

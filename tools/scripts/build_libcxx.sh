@@ -35,7 +35,7 @@ if [[ ! -d "$BUILD_ABS/source_llvm" ]]; then
 fi
 
 rm -Rf $BUILD_ABS/build_libcxx
-rm -Rf $BUILD_ABS/sysroot_$SYSROOT_NAME/x86_64-elf/include/c++/
+rm -Rf $BUILD_ABS/sysroot_$SYSROOT_NAME/x86_64-$SYSROOT_NAME-elf/include/c++/
 mkdir -p $BUILD_ABS/build_libcxx
 
 pushd $BUILD_ABS/build_libcxx
@@ -46,18 +46,16 @@ else
     BUILD_TYPE=Debug
 fi
 
-cc="$BUILD_ABS/build_scripts/x86_64-$SYSROOT_NAME-clang"
-cxx="$BUILD_ABS/build_scripts/x86_64-$SYSROOT_NAME-clang++"
-
 cmake $BUILD_ABS/source_libcxx/ \
     -DCMAKE_SYSTEM_NAME=Linux \
     -DLLVM_PATH=$BUILD_ABS/source_llvm \
     -DLIBCXX_CXX_ABI=libcxxabi \
     -DLIBCXX_CXX_ABI_INCLUDE_PATHS=$BUILD_ABS/source_libcxxabi/include \
-    -DCMAKE_INSTALL_PREFIX=$BUILD_ABS/sysroot_$SYSROOT_NAME/x86_64-elf/ \
-    -DLIBCXX_SYSROOT=$BUILD_ABS/sysroot_$SYSROOT_NAME/x86_64-elf/ \
-    -DCMAKE_C_COMPILER=$cc \
-    -DCMAKE_CXX_COMPILER=$cxx \
+    -DCMAKE_INSTALL_PREFIX=$BUILD_ABS/sysroot_$SYSROOT_NAME/x86_64-$SYSROOT_NAME-elf/ \
+    -DLIBCXX_SYSROOT=$BUILD_ABS/sysroot_$SYSROOT_NAME/x86_64-$SYSROOT_NAME-elf/ \
+    -DCMAKE_C_COMPILER=$BUILD_ABS/build_scripts/x86_64-$SYSROOT_NAME-clang \
+    -DCMAKE_CXX_COMPILER=$BUILD_ABS/build_scripts/x86_64-$SYSROOT_NAME-clang++ \
+    -DCMAKE_AR=$BUILD_ABS/build_scripts/x86_64-$SYSROOT_NAME-elf-ar \
     -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
     -DLIBCXX_HAS_PTHREAD_API=ON \
     -DLIBCXX_ENABLE_EXPERIMENTAL_LIBRARY=OFF

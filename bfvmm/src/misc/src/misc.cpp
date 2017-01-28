@@ -19,9 +19,7 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <stdint.h>
-#include <string.h>
-#include <stdlib.h>
+#include <unistd.h>
 
 #include <vcpu/vcpu_manager.h>
 #include <serial/serial_port_intel_x64.h>
@@ -60,22 +58,4 @@ write(int file, const void *buffer, size_t count)
     catch (...) { }
 
     return 0;
-}
-
-extern "C" int
-fstat(int file, struct stat *sbuf)
-{
-    (void) file;
-    (void) sbuf;
-
-    errno = -ENOSYS;
-    return -1;
-}
-
-extern "C" void
-__stack_chk_fail(void) noexcept
-{
-    auto msg = "__stack_chk_fail: buffer overflow detected!!!\n";
-    write(1, msg, strlen(msg));
-    abort();
 }

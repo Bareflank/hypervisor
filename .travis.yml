@@ -37,7 +37,7 @@ matrix:
       - TEST="Doxygen"
     script:
       - ./configure
-      - make doxygen
+      - travis_wait 30 make doxygen
       - if cat doc/doxygen_warnings.txt | grep FIX; then echo "You must fix doxygen before submitting a pull request"; exit -1; fi
 
   #

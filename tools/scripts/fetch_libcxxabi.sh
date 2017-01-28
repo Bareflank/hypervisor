@@ -24,27 +24,12 @@
 
 pushd $BUILD_ABS
 
-if [[ -z "$CUSTOM_LIBCXXABI_BRANCH" ]]; then
-    branch=$LLVM_RELEASE
-else
-    branch=$CUSTOM_LIBCXXABI_BRANCH
-fi
-
-if [[ -z "$CUSTOM_LIBCXXABI_URL" ]]; then
-    url="http://llvm.org/git/libcxxabi"
-else
-    url=$CUSTOM_LIBCXXABI_URL
-fi
-
 n=0
 until [ $n -ge 5 ]
 do
-    git clone --depth 1 -b $branch $url source_libcxxabi && break
+    git clone --depth 1 -b libcxxabi-39-v1 https://github.com/Bareflank/libcxxabi.git source_libcxxabi && break
     n=$[$n+1]
     sleep 15
 done
-
-cd source_libcxxabi
-patch -p1 < $HYPER_ABS/tools/patches/libcxxabi.patch
 
 popd

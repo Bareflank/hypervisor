@@ -279,26 +279,6 @@ public:
     virtual void set_ia32_gs_base_msr(intel_x64::msrs::value_type val)
     { (void) val; }
 
-    virtual integer_pointer rip() const
-    { return 0; }
-    virtual integer_pointer rsp() const
-    { return 0; }
-
-    virtual void set_rip(integer_pointer val) const
-    { (void) val; }
-    virtual void set_rsp(integer_pointer val) const
-    { (void) val; }
-
-    virtual integer_pointer arg1() const
-    { return 0; }
-    virtual integer_pointer arg2() const
-    { return 0; }
-
-    virtual void set_arg1(integer_pointer val) const
-    { (void) val; }
-    virtual void set_arg2(integer_pointer val) const
-    { (void) val; }
-
     virtual bool is_guest()
     { return false; }
 

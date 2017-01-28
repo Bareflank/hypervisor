@@ -186,10 +186,9 @@
 /// {
 ///     "modules" :
 ///     [
-///         "%BUILD_ABS%/sysroot_vmm/x86_64-elf/lib/libc++.so.1.0",
-///         "%BUILD_ABS%/sysroot_vmm/x86_64-elf/lib/libc++abi.so.1.0",
-///         "%BUILD_ABS%/sysroot_vmm/x86_64-elf/lib/libc.so",
-///         "%BUILD_ABS%/sysroot_vmm/x86_64-elf/lib/libbfc.so",
+///         "%BUILD_ABS%/sysroot_vmm/x86_64-vmm-elf/lib/libc++.so.1.0",
+///         "%BUILD_ABS%/sysroot_vmm/x86_64-vmm-elf/lib/libc++abi.so.1.0",
+///         "%BUILD_ABS%/sysroot_vmm/x86_64-vmm-elf/lib/libc.so",
 ///         "%BUILD_ABS%/makefiles/bfcrt/bin/cross/libbfcrt.so",
 ///         "%BUILD_ABS%/makefiles/bfunwind/bin/cross/libbfunwind.so",
 ///         "%BUILD_ABS%/makefiles/bfvmm/src/debug_ring/bin/cross/libdebug_ring.so",
@@ -197,12 +196,12 @@
 ///         "%BUILD_ABS%/makefiles/bfvmm/src/exit_handler/bin/cross/libexit_handler.so",
 ///         "%BUILD_ABS%/makefiles/bfvmm/src/intrinsics/bin/cross/libintrinsics.so",
 ///         "%BUILD_ABS%/makefiles/bfvmm/src/memory_manager/bin/cross/libmemory_manager.so",
-///         "%BUILD_ABS%/makefiles/bfvmm/src/misc/bin/cross/libmisc.so",
+///         "%BUILD_ABS%/makefiles/bfvmm/src/misc/bin/cross/misc",
 ///         "%BUILD_ABS%/makefiles/bfvmm/src/serial/bin/cross/libserial.so",
 ///         "%BUILD_ABS%/makefiles/bfvmm/src/vcpu/bin/cross/libvcpu.so",
-///         "%BUILD_ABS%/makefiles/hypervisor_example_cpuidcount/vcpu_factory_cpuidcount/bin/cross/libvcpu_factory_cpuidcount.so",
 ///         "%BUILD_ABS%/makefiles/bfvmm/src/vmcs/bin/cross/libvmcs.so",
 ///         "%BUILD_ABS%/makefiles/bfvmm/src/vmxon/bin/cross/libvmxon.so"
+///         "%BUILD_ABS%/makefiles/hypervisor_example_cpuidcount/vcpu_factory_cpuidcount/bin/cross/libvcpu_factory_cpuidcount.so",
 ///     ]
 /// }
 /// @endcode

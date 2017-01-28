@@ -19,57 +19,18 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+#ifndef VMCS_INTEL_X64_LAUNCH_H
+#define VMCS_INTEL_X64_LAUNCH_H
+
 #include <stdint.h>
-#include <string.h>
-#include <stdlib.h>
+#include <exit_handler/state_save_intel_x64.h>
 
-#include <debug_ring/debug_ring.h>
-#include <serial/serial_port_intel_x64.h>
+/// Launch VMCS
+///
+/// Performs a VMLAUNCH, executing the guest described by this VMCS. This
+/// function can be executed by the exit handler when it is done emulating
+/// and instruction, or it can be executed to schedule another guest
+///
+extern "C" void vmcs_launch(state_save_intel_x64 *state_save);
 
-debug_ring *dr = nullptr;
-
-extern "C" int
-write(int file, const void *buffer, size_t count)
-{
-    (void) file;
-
-    if (buffer == nullptr || count == 0)
-        return 0;
-
-    try
-    {
-        auto str = std::string(static_cast<const char *>(buffer), count);
-
-        if (dr == nullptr)
-            dr = new debug_ring(0);
-
-        dr->write(str);
-        serial_port_intel_x64::instance()->write(str);
-        return static_cast<int>(count);
-    }
-    catch (...) { }
-
-    return 0;
-}
-
-extern "C" int64_t
-start_vmm(uint64_t arg) noexcept
-{
-    (void) arg;
-
-    auto msg = "start_vmm\n";
-    write(1, msg, strlen(msg));
-
-    return 0;
-}
-
-extern "C" int64_t
-stop_vmm(uint64_t arg) noexcept
-{
-    (void) arg;
-
-    auto msg = "stop_vmm\n";
-    write(1, msg, strlen(msg));
-
-    return 0;
-}
+#endif

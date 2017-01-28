@@ -49,9 +49,9 @@ struct state_save_intel_x64
     uint64_t vmcs_ptr;              // 0x098
     uint64_t exit_handler_ptr;      // 0x0A0
 
-    uint64_t reserved1;             // 0x0A8
-    uint64_t reserved2;             // 0x0B0
-    uint64_t reserved3;             // 0x0B8
+    uint64_t user1;                 // 0x0A8
+    uint64_t user2;                 // 0x0B0
+    uint64_t user3;                 // 0x0B8
 
     uint64_t ymm00[4];              // 0x0C0
     uint64_t ymm01[4];              // 0x0E0

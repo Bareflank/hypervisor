@@ -1,5 +1,5 @@
 #
-# Bareflank Hypervisor
+# Bareflank Unwind Library
 #
 # Copyright (C) 2015 Assured Information Security, Inc.
 # Author: Rian Quinn        <quinnr@ainfosec.com>
@@ -23,7 +23,7 @@
 # Target Information
 ################################################################################
 
-TARGET_NAME:=vmcs
+TARGET_NAME:=crt
 TARGET_TYPE:=lib
 
 ifeq ($(shell uname -s), Linux)
@@ -64,21 +64,9 @@ NATIVE_OUTDIR+=%BUILD_REL%/../bin
 # Sources
 ################################################################################
 
-SOURCES+=vmcs_intel_x64.cpp
-SOURCES+=vmcs_intel_x64_check_all.cpp
-SOURCES+=vmcs_intel_x64_check_controls.cpp
-SOURCES+=vmcs_intel_x64_check_guest.cpp
-SOURCES+=vmcs_intel_x64_check_host.cpp
-SOURCES+=vmcs_intel_x64_check_misc.cpp
-SOURCES+=vmcs_intel_x64_vmm_state.cpp
-SOURCES+=vmcs_intel_x64_host_vm_state.cpp
-SOURCES+=vmcs_intel_x64_promote.asm
-SOURCES+=vmcs_intel_x64_resume.asm
-SOURCES+=vmcs_intel_x64_launch.asm
+SOURCES+=crt.cpp
 
-INCLUDE_PATHS+=./
 INCLUDE_PATHS+=%HYPER_ABS%/include/
-INCLUDE_PATHS+=%HYPER_ABS%/bfvmm/include/
 
 LIBS+=
 
@@ -90,8 +78,7 @@ LIBRARY_PATHS+=
 
 VMM_SOURCES+=
 VMM_INCLUDE_PATHS+=
-VMM_LIBS+=
-VMM_LIBRARY_PATHS+=
+VMM_INCLUDE_PATHS+=
 
 WINDOWS_SOURCES+=
 WINDOWS_INCLUDE_PATHS+=
