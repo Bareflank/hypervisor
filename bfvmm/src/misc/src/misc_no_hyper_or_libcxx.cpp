@@ -65,10 +65,6 @@ extern "C" int64_t
 add_md(memory_descriptor *md) noexcept
 { (void) md; return 0; }
 
-extern "C" void
-__stack_chk_fail(void) noexcept
-{ }
-
 extern "C" void *
 memset(void *block, int c, size_t size)
 {

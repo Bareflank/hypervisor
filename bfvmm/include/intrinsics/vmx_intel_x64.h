@@ -32,7 +32,6 @@ extern "C" bool __vmptrld(void *ptr) noexcept;
 extern "C" bool __vmptrst(void *ptr) noexcept;
 extern "C" bool __vmread(uint64_t field, uint64_t *val) noexcept;
 extern "C" bool __vmwrite(uint64_t field, uint64_t val) noexcept;
-extern "C" bool __vmlaunch(uint64_t arg1, uint64_t arg2) noexcept;
 extern "C" bool __vmlaunch_demote(void) noexcept;
 extern "C" bool __invept(uint64_t type, void *ptr) noexcept;
 extern "C" bool __invvpid(uint64_t type, void *ptr) noexcept;
@@ -152,12 +151,6 @@ namespace vm
 
             throw std::runtime_error("vm::write failed");
         }
-    }
-
-    inline void launch(integer_pointer arg1, integer_pointer arg2)
-    {
-        if (!__vmlaunch(arg1, arg2))
-            throw std::runtime_error("vm::launch failed");
     }
 
     inline void launch_demote()

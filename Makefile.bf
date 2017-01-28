@@ -71,7 +71,6 @@ endif
 ifneq ($(APPVEYOR), true)
 	PARENT_SUBDIRS += bfc
 	PARENT_SUBDIRS += bfcxx
-	PARENT_SUBDIRS += bfcrt
 	PARENT_SUBDIRS += bfunwind
 endif
 

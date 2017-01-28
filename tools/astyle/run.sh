@@ -46,10 +46,6 @@ if [ ! -f $ASTYLE ]; then
 	popd
 fi
 
-find bfcrt/ -name "*.h" -exec $ASTYLE --options=./tools/astyle/astyle.config {} \;
-find bfcrt/ -name "*.c" -exec $ASTYLE --options=./tools/astyle/astyle.config {} \;
-find bfcrt/ -name "*.cpp" -exec $ASTYLE --options=./tools/astyle/astyle.config {} \;
-
 find bfdrivers/ -name "*.h" -exec $ASTYLE --options=./tools/astyle/astyle.config {} \;
 find bfdrivers/ -name "*.c" -exec $ASTYLE --options=./tools/astyle/astyle.config {} \;
 find bfdrivers/ -name "*.cpp" -exec $ASTYLE --options=./tools/astyle/astyle.config {} \;

@@ -19,15 +19,17 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+#include <errno.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <unistd.h>
+#include <string.h>
+#include <stdlib.h>
 
 #include <constants.h>
 #include <eh_frame_list.h>
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-result"
-
+void *__dso_handle = 0;
 uintptr_t __stack_chk_guard = 0x595e9fbd94fda766;
 
 auto g_eh_frame_list_num = 0ULL;
@@ -35,7 +37,9 @@ eh_frame_t g_eh_frame_list[MAX_NUM_MODULES] = {};
 
 extern "C" struct eh_frame_t *
 get_eh_frame_list() noexcept
-{ return g_eh_frame_list; }
+{
+    return g_eh_frame_list;
+}
 
 extern "C" int64_t
 register_eh_frame(void *addr, uint64_t size) noexcept
@@ -53,31 +57,23 @@ register_eh_frame(void *addr, uint64_t size) noexcept
     return REGISTER_EH_FRAME_SUCCESS;
 }
 
+extern "C" void
+__stack_chk_fail(void) noexcept
+{
+    auto msg = "__stack_chk_fail: buffer overflow detected!!!\n";
+    write(1, msg, strlen(msg));
+    abort();
+}
+
 extern "C" int
 ___xpg_strerror_r(int errnum, char *buf, size_t buflen)
 {
     (void) errnum;
 
-    __builtin_memset(buf, 0, buflen);
+    memset(buf, 0, buflen);
     return 0;
 }
-
-extern "C" int
-__fpclassifyd(double)
-{ return 0; }
-
-extern "C" double
-ldexp(double x, int exp)
-{ return __builtin_ldexp(x, exp); }
-
-extern "C" float
-nanf(const char *tagp)
-{ return __builtin_nanf(tagp); }
 
 extern "C" void
 _start(void) noexcept
 { }
-
-void *__dso_handle = 0;
-
-#pragma GCC diagnostic pop

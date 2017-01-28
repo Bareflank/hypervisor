@@ -29,20 +29,9 @@ echo "Fetching newlib. Please wait..."
 n=0
 until [ $n -ge 5 ]
 do
-    wget -nv ftp://sourceware.org/pub/newlib/newlib-2.3.0.20160226.tar.gz && break
+    git clone --depth 1 -b newlib-2.5.0-v1 https://github.com/Bareflank/newlib.git source_newlib && break
     n=$[$n+1]
     sleep 15
 done
-
-tar xf newlib-*.tar.gz
-mv newlib-*/ source_newlib
-rm newlib-*.tar.gz
-
-pushd source_newlib
-patch -p1 < $HYPER_ABS/tools/patches/newlib.patch
-if [[ $compiler == "clang_39" ]] || [[ $compiler == "gcc_"* ]] ; then
-    patch -p1 < $HYPER_ABS/tools/patches/newlib_memcpy_memset.patch
-fi
-popd
 
 popd

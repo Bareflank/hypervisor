@@ -25,16 +25,16 @@ default rel
 %define VMCS_GUEST_RSP 0x0000681C
 %define VMCS_GUEST_RIP 0x0000681E
 
-global vmcs_resume:function
+global vmcs_launch:function
 
 section .text
 
-; Resume VMCS
+; Launch VMCS
 ;
-; Resumes the execution of an already launched VMCS. Note that this function
-; should not return. If it does, an error has occurred.
+; Launch the execution of a VMCS. Note that this function should not return.
+; If it does, an error has occurred.
 ;
-vmcs_resume:
+vmcs_launch:
 
     push rbx
     push r12
@@ -93,11 +93,7 @@ vmcs_resume:
 
     mov rdi, [rdi + 0x030]
 
-    vmresume
-
-; We should never get this far. If we do, it's because the resume failed. If
-; happens, we return so that we can throw an exception and tell the user that
-; something really bad happened.
+    vmlaunch
 
     pop rbp
     pop r15
@@ -105,5 +101,9 @@ vmcs_resume:
     pop r13
     pop r12
     pop rbx
+
+; We should never get this far. If we do, it's because the launch failed. If
+; happens, we return so that we can throw an exception and tell the user that
+; something really bad happened.
 
     ret

@@ -29,6 +29,7 @@
 #include <vmcs/vmcs_intel_x64.h>
 #include <vmcs/vmcs_intel_x64_debug.h>
 #include <vmcs/vmcs_intel_x64_check.h>
+#include <vmcs/vmcs_intel_x64_launch.h>
 #include <vmcs/vmcs_intel_x64_resume.h>
 #include <vmcs/vmcs_intel_x64_promote.h>
 #include <vmcs/vmcs_intel_x64_16bit_host_state_fields.h>
@@ -75,9 +76,14 @@ vmcs_intel_x64::launch(gsl::not_null<vmcs_intel_x64_state *> host_state,
     { vmcs::check::all(); });
 
     if (guest_state->is_guest())
-        vm::launch(guest_state->arg1(), guest_state->arg2());
+    {
+        vmcs_launch(m_state_save);
+        throw std::runtime_error("vmcs resume failed");
+    }
     else
+    {
         vm::launch_demote();
+    }
 }
 
 void
@@ -337,8 +343,6 @@ vmcs_intel_x64::write_natural_guest_state(gsl::not_null<vmcs_intel_x64_state *> 
     vmcs::guest_idtr_base::set(state->idt_base());
 
     vmcs::guest_dr7::set(state->dr7());
-    vmcs::guest_rsp::set(state->rsp());
-    vmcs::guest_rip::set(state->rip());
     vmcs::guest_rflags::set(state->rflags());
 
     vmcs::guest_ia32_sysenter_esp::set(state->ia32_sysenter_esp_msr());

@@ -23,14 +23,9 @@
 # Target Information
 ################################################################################
 
-TARGET_NAME:=vmcs
-TARGET_TYPE:=lib
-
-ifeq ($(shell uname -s), Linux)
-    TARGET_COMPILER:=both
-else
-    TARGET_COMPILER:=cross
-endif
+TARGET_NAME:=test
+TARGET_TYPE:=bin
+TARGET_COMPILER:=native
 
 ################################################################################
 # Compiler Flags
@@ -43,19 +38,9 @@ NATIVE_LDFLAGS+=
 NATIVE_ARFLAGS+=
 NATIVE_DEFINES+=
 
-CROSS_CCFLAGS+=
-CROSS_CXXFLAGS+=
-CROSS_ASMFLAGS+=
-CROSS_LDFLAGS+=
-CROSS_ARFLAGS+=
-CROSS_DEFINES+=
-
 ################################################################################
 # Output
 ################################################################################
-
-CROSS_OBJDIR+=%BUILD_REL%/.build
-CROSS_OUTDIR+=%BUILD_REL%/../bin
 
 NATIVE_OBJDIR+=%BUILD_REL%/.build
 NATIVE_OUTDIR+=%BUILD_REL%/../bin
@@ -64,34 +49,19 @@ NATIVE_OUTDIR+=%BUILD_REL%/../bin
 # Sources
 ################################################################################
 
-SOURCES+=vmcs_intel_x64.cpp
-SOURCES+=vmcs_intel_x64_check_all.cpp
-SOURCES+=vmcs_intel_x64_check_controls.cpp
-SOURCES+=vmcs_intel_x64_check_guest.cpp
-SOURCES+=vmcs_intel_x64_check_host.cpp
-SOURCES+=vmcs_intel_x64_check_misc.cpp
-SOURCES+=vmcs_intel_x64_vmm_state.cpp
-SOURCES+=vmcs_intel_x64_host_vm_state.cpp
-SOURCES+=vmcs_intel_x64_promote.asm
-SOURCES+=vmcs_intel_x64_resume.asm
-SOURCES+=vmcs_intel_x64_launch.asm
+SOURCES+=test.cpp
+SOURCES+=test_crt.cpp
 
 INCLUDE_PATHS+=./
 INCLUDE_PATHS+=%HYPER_ABS%/include/
-INCLUDE_PATHS+=%HYPER_ABS%/bfvmm/include/
 
-LIBS+=
+LIBS+=crt
 
-LIBRARY_PATHS+=
+LIBRARY_PATHS+=%BUILD_REL%/../bin/native/
 
 ################################################################################
 # Environment Specific
 ################################################################################
-
-VMM_SOURCES+=
-VMM_INCLUDE_PATHS+=
-VMM_LIBS+=
-VMM_LIBRARY_PATHS+=
 
 WINDOWS_SOURCES+=
 WINDOWS_INCLUDE_PATHS+=

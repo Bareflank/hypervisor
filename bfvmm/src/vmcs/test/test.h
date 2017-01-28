@@ -1265,8 +1265,6 @@ private:
     void test_state_segment_registers_access_rights();
     void test_state_segment_register_base();
     void test_state_msrs();
-    void test_state_rip_rsp();
-    void test_state_arg1_arg2();
     void test_state_is_guest();
     void test_state_dump();
 

@@ -41,8 +41,6 @@ section .text
 ;
 exit_handler_entry:
 
-    cli
-
     mov [gs:0x000], rax
     mov [gs:0x008], rbx
     mov [gs:0x010], rcx

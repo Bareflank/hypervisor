@@ -35,12 +35,12 @@ if [[ ! -d "$BUILD_ABS/source_llvm" ]]; then
 fi
 
 rm -Rf $BUILD_ABS/build_libcxxabi
-rm -Rf $BUILD_ABS/sysroot_$SYSROOT_NAME/x86_64-elf/include/c++/
+rm -Rf $BUILD_ABS/sysroot_$SYSROOT_NAME/x86_64-$SYSROOT_NAME-elf/include/c++/
 mkdir -p $BUILD_ABS/build_libcxxabi
 
 pushd $BUILD_ABS/build_libcxxabi
 
-cp -Rf $HYPER_ABS/bfunwind/include/ia64_cxx_abi.h $BUILD_ABS/sysroot_$SYSROOT_NAME/x86_64-elf/include/unwind.h
+cp -Rf $HYPER_ABS/bfunwind/include/ia64_cxx_abi.h $BUILD_ABS/sysroot_$SYSROOT_NAME/x86_64-$SYSROOT_NAME-elf/include/unwind.h
 
 if [[ $PRODUCTION == "yes" ]]; then
     BUILD_TYPE=Release
@@ -48,17 +48,15 @@ else
     BUILD_TYPE=Debug
 fi
 
-cc="$BUILD_ABS/build_scripts/x86_64-$SYSROOT_NAME-clang"
-cxx="$BUILD_ABS/build_scripts/x86_64-$SYSROOT_NAME-clang++"
-
 cmake $BUILD_ABS/source_libcxxabi/ \
     -DCMAKE_SYSTEM_NAME=Linux \
     -DLLVM_PATH=$BUILD_ABS/source_llvm \
     -DLIBCXXABI_LIBCXX_PATH=$BUILD_ABS/source_libcxx/ \
-    -DCMAKE_INSTALL_PREFIX=$BUILD_ABS/sysroot_$SYSROOT_NAME/x86_64-elf/ \
-    -DLIBCXXABI_SYSROOT=$BUILD_ABS/sysroot_$SYSROOT_NAME/x86_64-elf/ \
-    -DCMAKE_C_COMPILER=$cc \
-    -DCMAKE_CXX_COMPILER=$cxx \
+    -DCMAKE_INSTALL_PREFIX=$BUILD_ABS/sysroot_$SYSROOT_NAME/x86_64-$SYSROOT_NAME-elf/ \
+    -DLIBCXXABI_SYSROOT=$BUILD_ABS/sysroot_$SYSROOT_NAME/x86_64-$SYSROOT_NAME-elf/ \
+    -DCMAKE_C_COMPILER=$BUILD_ABS/build_scripts/x86_64-$SYSROOT_NAME-clang \
+    -DCMAKE_CXX_COMPILER=$BUILD_ABS/build_scripts/x86_64-$SYSROOT_NAME-clang++ \
+    -DCMAKE_AR=$BUILD_ABS/build_scripts/x86_64-vmm-elf-ar \
     -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
     -DLIBCXXABI_HAS_PTHREAD_API=ON \
     -DLLVM_ENABLE_LIBCXX=ON

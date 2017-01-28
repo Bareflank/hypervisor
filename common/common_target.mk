@@ -97,7 +97,7 @@ CROSS_CC:=$(BUILD_ABS)/build_scripts/x86_64-$(SYSROOT_NAME)-clang
 CROSS_CXX:=$(BUILD_ABS)/build_scripts/x86_64-$(SYSROOT_NAME)-clang++
 CROSS_ASM:=$(BUILD_ABS)/build_scripts/x86_64-$(SYSROOT_NAME)-nasm
 CROSS_LD:=$(BUILD_ABS)/build_scripts/x86_64-$(SYSROOT_NAME)-clang++
-CROSS_AR:=$(BUILD_ABS)/build_scripts/x86_64-$(SYSROOT_NAME)-ar
+CROSS_AR:=$(BUILD_ABS)/build_scripts/x86_64-$(SYSROOT_NAME)-elf-ar
 
 RM:=rm -rf
 MD:=mkdir -p
@@ -589,6 +589,8 @@ Makefile: $(HYPER_REL)/Makefile.bf
 .PHONY: clean-native
 .PHONY: build_src
 .PHONY: build_tests
+.PHONY: pre_target
+.PHONY: post_target
 
 .DEFAULT_GOAL := all
 
@@ -598,12 +600,18 @@ build_tests: all
 clean_src: clean
 clean_tests: clean
 
-all: cross native
+all: pre_target cross native post_target
 	@echo > /dev/null
 
 clean: clean-cross clean-native
 
 force: ;
+
+pre_target:
+	@$(PRE_COMMAND)
+
+post_target:
+	@$(POST_COMMAND)
 
 ################################################################################
 # Cross Targets

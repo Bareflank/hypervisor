@@ -23,45 +23,48 @@
 # Target Information
 ################################################################################
 
-TARGET_NAME:=test
-TARGET_TYPE:=bin
-TARGET_COMPILER:=native
+TARGET_NAME:=pthread
+TARGET_TYPE:=lib
+TARGET_COMPILER:=cross
 
 ################################################################################
 # Compiler Flags
 ################################################################################
 
-NATIVE_CCFLAGS+=
-NATIVE_CXXFLAGS+=
-NATIVE_ASMFLAGS+=
-NATIVE_LDFLAGS+=
-NATIVE_ARFLAGS+=
-NATIVE_DEFINES+=
+CROSS_CCFLAGS+=
+CROSS_CXXFLAGS+=
+CROSS_ASMFLAGS+=
+CROSS_LDFLAGS+=
+CROSS_ARFLAGS+=
+CROSS_DEFINES+=LOOKUP_TLS_DATA
 
 ################################################################################
 # Output
 ################################################################################
 
-NATIVE_OBJDIR+=%BUILD_REL%/.build
-NATIVE_OUTDIR+=%BUILD_REL%/../bin
+CROSS_OBJDIR+=%BUILD_REL%/.build
+CROSS_OUTDIR+=%BUILD_REL%/../bin
 
 ################################################################################
 # Sources
 ################################################################################
 
-SOURCES+=test.cpp
-SOURCES+=test_crt.cpp
+SOURCES+=pthread.cpp
 
-INCLUDE_PATHS+=./
-INCLUDE_PATHS+=%HYPER_ABS%/include/
+INCLUDE_PATHS+=
 
-LIBS+=bfcrt
+LIBS+=
 
-LIBRARY_PATHS+=%BUILD_REL%/../bin/native/
+LIBRARY_PATHS+=
 
 ################################################################################
 # Environment Specific
 ################################################################################
+
+VMM_SOURCES+=
+VMM_INCLUDE_PATHS+=
+VMM_LIBS+=
+VMM_LIBRARY_PATHS+=
 
 WINDOWS_SOURCES+=
 WINDOWS_INCLUDE_PATHS+=

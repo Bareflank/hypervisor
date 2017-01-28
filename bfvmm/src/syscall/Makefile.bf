@@ -1,4 +1,3 @@
-#!/bin/bash -e
 #
 # Bareflank Hypervisor
 #
@@ -20,28 +19,14 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-%ENV_SOURCE%
+################################################################################
+# Subdirs
+################################################################################
 
-if [[ ! -d "$BUILD_ABS/source_libbfc" ]]; then
-    $BUILD_ABS/build_scripts/fetch_libbfc.sh $BUILD_ABS
-fi
+SUBDIRS += src
 
-rm -Rf $BUILD_ABS/build_libbfc
-mkdir -p $BUILD_ABS/build_libbfc
+################################################################################
+# Common
+################################################################################
 
-pushd $BUILD_ABS/build_libbfc
-
-cp -Rf $BUILD_ABS/source_libbfc/sysctl.h $BUILD_ABS/sysroot_$SYSROOT_NAME/x86_64-elf/include/sys/
-cp -Rf $BUILD_ABS/source_libbfc/pthread.h $BUILD_ABS/sysroot_$SYSROOT_NAME/x86_64-elf/include/
-
-flags="-DLOOKUP_TLS_DATA"
-
-cc="$BUILD_ABS/build_scripts/x86_64-$SYSROOT_NAME-clang $flags"
-cxx="$BUILD_ABS/build_scripts/x86_64-$SYSROOT_NAME-clang++ $flags"
-
-$cc $CFLAGS -c $BUILD_ABS/source_libbfc/*.c
-$cxx $CXXFLAGS -c $BUILD_ABS/source_libbfc/*.cpp
-$cc -shared *.o -o libbfc.so
-mv libbfc.so $BUILD_ABS/sysroot_$SYSROOT_NAME/x86_64-elf/lib/
-
-popd
+include %HYPER_ABS%/common/common_subdir.mk

@@ -1,5 +1,5 @@
 #
-# Bareflank Unwind Library
+# Bareflank Hypervisor
 #
 # Copyright (C) 2015 Assured Information Security, Inc.
 # Author: Rian Quinn        <quinnr@ainfosec.com>
@@ -23,25 +23,13 @@
 # Target Information
 ################################################################################
 
-TARGET_NAME:=bfcrt
+TARGET_NAME:=syscall
 TARGET_TYPE:=lib
-
-ifeq ($(shell uname -s), Linux)
-    TARGET_COMPILER:=both
-else
-    TARGET_COMPILER:=cross
-endif
+TARGET_COMPILER:=cross
 
 ################################################################################
 # Compiler Flags
 ################################################################################
-
-NATIVE_CCFLAGS+=
-NATIVE_CXXFLAGS+=
-NATIVE_ASMFLAGS+=
-NATIVE_LDFLAGS+=
-NATIVE_ARFLAGS+=
-NATIVE_DEFINES+=
 
 CROSS_CCFLAGS+=
 CROSS_CXXFLAGS+=
@@ -57,16 +45,13 @@ CROSS_DEFINES+=
 CROSS_OBJDIR+=%BUILD_REL%/.build
 CROSS_OUTDIR+=%BUILD_REL%/../bin
 
-NATIVE_OBJDIR+=%BUILD_REL%/.build
-NATIVE_OUTDIR+=%BUILD_REL%/../bin
-
 ################################################################################
 # Sources
 ################################################################################
 
-SOURCES+=crt.cpp
+SOURCES+=syscall.cpp
 
-INCLUDE_PATHS+=%HYPER_ABS%/include/
+INCLUDE_PATHS+=
 
 LIBS+=
 
@@ -78,7 +63,8 @@ LIBRARY_PATHS+=
 
 VMM_SOURCES+=
 VMM_INCLUDE_PATHS+=
-VMM_INCLUDE_PATHS+=
+VMM_LIBS+=
+VMM_LIBRARY_PATHS+=
 
 WINDOWS_SOURCES+=
 WINDOWS_INCLUDE_PATHS+=

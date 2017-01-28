@@ -85,16 +85,6 @@ __attribute__((weak)) __vmread(uint64_t field, uint64_t *value) noexcept
 }
 
 extern "C" bool
-__attribute__((weak)) __vmlaunch(uint64_t arg1, uint64_t arg2) noexcept
-{
-    (void) arg1;
-    (void) arg2;
-
-    std::cerr << __FUNC__ << " called" << '\n';
-    abort();
-}
-
-extern "C" bool
 __attribute__((weak)) __vmlaunch_demote(void) noexcept
 {
     std::cerr << __FUNC__ << " called" << '\n';
