@@ -204,9 +204,9 @@ namespace debug
                         address_of_io_bitmap_b::name,
                         address_of_io_bitmap_b::exists());
 
-        dump_vmcs_field(address_of_msr_bitmaps::addr,
-                        address_of_msr_bitmaps::name,
-                        address_of_msr_bitmaps::exists());
+        dump_vmcs_field(address_of_msr_bitmap::addr,
+                        address_of_msr_bitmap::name,
+                        address_of_msr_bitmap::exists());
 
         dump_vmcs_field(vm_exit_msr_store_address::addr,
                         vm_exit_msr_store_address::name,

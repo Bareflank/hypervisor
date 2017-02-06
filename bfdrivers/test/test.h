@@ -90,6 +90,7 @@ private:
     void test_common_start_start_when_start_vmm_missing();
     void test_common_start_start_vmm_failure();
     void test_common_start_set_affinity_failed();
+    void test_common_start_vmcall_failed();
 
     void test_common_stop_stop_when_unloaded();
     void test_common_stop_stop_when_not_running();
@@ -98,6 +99,7 @@ private:
     void test_common_stop_stop_vmm_missing();
     void test_common_stop_stop_vmm_failure();
     void test_common_stop_set_affinity_failed();
+    void test_common_stop_vmcall_failed();
 
     void test_common_dump_invalid_drr();
     void test_common_dump_invalid_vcpuid();

@@ -185,6 +185,38 @@ enum vmcall_opcode
     VMCALL_EVENT = 4,
 
     /*
+     * Start
+     *
+     * This vmcall is used to run "start" code while the hypervisor is running.
+     * This vmcall should not be used by software and can only be used one
+     * by the bfdriver common.c
+     *
+     * In:
+     * r0 = VMCALL_START
+     * r1 = VMCALL_MAGIC_NUMBER
+     *
+     * Out:
+     * r1 = 0 == success, error code otherwise
+     */
+    VMCALL_START = 5,
+
+    /*
+     * Stop
+     *
+     * This vmcall is used to run "stop" code while the hypervisor is running.
+     * This vmcall should not be used by software and can only be used one
+     * by the bfdriver common.c
+     *
+     * In:
+     * r0 = VMCALL_STOP
+     * r1 = VMCALL_MAGIC_NUMBER
+     *
+     * Out:
+     * r1 = 0 == success, error code otherwise
+     */
+    VMCALL_STOP = 6,
+
+    /*
      * Unit Test
      *
      * This vmcall is used to unit test software inside the VMM. For example,

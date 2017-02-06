@@ -443,6 +443,9 @@ intrinsics_ut::list()
     this->test_pdpte_x64_reserved_mask();
     this->test_pdpte_x64_page_directory_addr_mask();
 
+    this->test_rdtsc_x64();
+    this->test_rdtscp_x64();
+
     return true;
 }
 

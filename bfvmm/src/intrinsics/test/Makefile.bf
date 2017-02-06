@@ -59,6 +59,7 @@ SOURCES+=test_gdt_x64.cpp
 SOURCES+=test_idt_x64.cpp
 SOURCES+=test_msrs_x64.cpp
 SOURCES+=test_msrs_intel_x64.cpp
+SOURCES+=test_rdtsc_x64.cpp
 SOURCES+=test_rflags_x64.cpp
 SOURCES+=test_crs_intel_x64.cpp
 SOURCES+=test_srs_x64.cpp

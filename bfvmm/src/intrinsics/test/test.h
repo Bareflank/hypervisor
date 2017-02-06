@@ -441,6 +441,9 @@ private:
 
     void test_pdpte_x64_reserved_mask();
     void test_pdpte_x64_page_directory_addr_mask();
+
+    void test_rdtsc_x64();
+    void test_rdtscp_x64();
 };
 
 #endif

@@ -110,3 +110,28 @@ driver_entry_ut::test_common_start_set_affinity_failed()
 
     this->expect_true(common_fini() == BF_SUCCESS);
 }
+
+void
+driver_entry_ut::test_common_start_vmcall_failed()
+{
+    this->expect_true(common_add_module(m_dummy_start_vmm_success.get(), m_dummy_start_vmm_success_length) == BF_SUCCESS);
+    this->expect_true(common_add_module(m_dummy_stop_vmm_success.get(), m_dummy_stop_vmm_success_length) == BF_SUCCESS);
+    this->expect_true(common_add_module(m_dummy_add_md_success.get(), m_dummy_add_md_success_length) == BF_SUCCESS);
+    this->expect_true(common_add_module(m_dummy_misc.get(), m_dummy_misc_length) == BF_SUCCESS);
+    this->expect_true(common_load_vmm() == BF_SUCCESS);
+
+    {
+        MockRepository mocks;
+        mocks.ExpectCallFunc(platform_vmcall).Do([](auto regs)
+        {
+            regs->r01 = 1;
+        });
+
+        RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+        {
+            this->expect_true(common_start_vmm() == ENTRY_ERROR_VMM_START_FAILED);
+        });
+    }
+
+    this->expect_true(common_fini() == BF_SUCCESS);
+}

@@ -56,6 +56,8 @@ private:
     void test_vm_exit_reason_vmcall_registers();
     void test_vm_exit_reason_vmcall_unittest();
     void test_vm_exit_reason_vmcall_event();
+    void test_vm_exit_reason_vmcall_start();
+    void test_vm_exit_reason_vmcall_stop();
     void test_vm_exit_reason_vmcall_data_unknown();
     void test_vm_exit_reason_vmcall_data_string_unformatted_input_nullptr();
     void test_vm_exit_reason_vmcall_data_string_unformatted_output_nullptr();
