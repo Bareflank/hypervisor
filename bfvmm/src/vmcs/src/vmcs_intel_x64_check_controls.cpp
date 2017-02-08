@@ -135,7 +135,7 @@ check::control_msr_bitmap_address_bits()
     if (primary_processor_based_vm_execution_controls::use_msr_bitmap::is_disabled())
         return;
 
-    auto addr = vmcs::address_of_msr_bitmaps::get();
+    auto addr = vmcs::address_of_msr_bitmap::get();
 
     if ((addr & 0x0000000000000FFF) != 0)
         throw std::logic_error("msr bitmap addr not page aligned");

@@ -499,6 +499,7 @@ common_start_vmm(void)
     int64_t cpuid = 0;
     int64_t ignore_ret = 0;
     int64_t caller_affinity = 0;
+    struct vmcall_registers_t regs;
 
     if (common_vmm_status() == VMM_CORRUPT)
         return BF_ERROR_VMM_CORRUPTED;
@@ -509,8 +510,11 @@ common_start_vmm(void)
     if (common_vmm_status() == VMM_UNLOADED)
         return BF_ERROR_VMM_INVALID_STATE;
 
-    for (cpuid = 0, g_num_cpus_started = 0; cpuid < platform_num_cpus(); cpuid++, g_num_cpus_started++)
+    for (cpuid = 0, g_num_cpus_started = 0; cpuid < platform_num_cpus(); cpuid++)
     {
+        regs.r00 = VMCALL_START;
+        regs.r01 = VMCALL_MAGIC_NUMBER;
+
         ret = caller_affinity = platform_set_affinity(cpuid);
         if (caller_affinity < 0)
             goto failure;
@@ -519,11 +523,17 @@ common_start_vmm(void)
         if (ret != BF_SUCCESS)
             goto failure;
 
+        g_num_cpus_started++;
+
+        platform_vmcall(&regs);
+        if (regs.r01 != 0)
+            return ENTRY_ERROR_VMM_START_FAILED;
+
         platform_start();
         platform_restore_affinity(caller_affinity);
-    }
 
-    g_vmm_status = VMM_RUNNING;
+        g_vmm_status = VMM_RUNNING;
+    }
 
     return BF_SUCCESS;
 
@@ -541,6 +551,7 @@ common_stop_vmm(void)
     int64_t ret = 0;
     int64_t cpuid = 0;
     int64_t caller_affinity = 0;
+    struct vmcall_registers_t regs;
 
     if (common_vmm_status() == VMM_CORRUPT)
         return BF_ERROR_VMM_CORRUPTED;
@@ -553,13 +564,22 @@ common_stop_vmm(void)
 
     for (cpuid = g_num_cpus_started - 1; cpuid >= 0 ; cpuid--)
     {
+        regs.r00 = VMCALL_STOP;
+        regs.r01 = VMCALL_MAGIC_NUMBER;
+
         ret = caller_affinity = platform_set_affinity(cpuid);
         if (caller_affinity < 0)
             goto corrupted;
 
+        platform_vmcall(&regs);
+        if (regs.r01 != 0)
+            return ENTRY_ERROR_VMM_STOP_FAILED;
+
         ret = execute_symbol("stop_vmm", (uint64_t)cpuid, 0, (uint64_t)cpuid);
         if (ret != BFELF_SUCCESS)
             goto corrupted;
+
+        g_num_cpus_started--;
 
         platform_stop();
         platform_restore_affinity(caller_affinity);

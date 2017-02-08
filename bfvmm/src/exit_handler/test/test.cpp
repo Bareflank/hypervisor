@@ -57,6 +57,8 @@ exit_handler_intel_x64_ut::list()
     this->test_vm_exit_reason_vmcall_registers();
     this->test_vm_exit_reason_vmcall_unittest();
     this->test_vm_exit_reason_vmcall_event();
+    this->test_vm_exit_reason_vmcall_start();
+    this->test_vm_exit_reason_vmcall_stop();
     this->test_vm_exit_reason_vmcall_data_unknown();
     this->test_vm_exit_reason_vmcall_data_string_unformatted_input_nullptr();
     this->test_vm_exit_reason_vmcall_data_string_unformatted_output_nullptr();

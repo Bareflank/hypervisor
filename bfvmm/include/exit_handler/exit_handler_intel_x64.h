@@ -124,6 +124,8 @@ protected:
     virtual void handle_vmcall_registers(vmcall_registers_t &regs);
     virtual void handle_vmcall_data(vmcall_registers_t &regs);
     virtual void handle_vmcall_event(vmcall_registers_t &regs);
+    virtual void handle_vmcall_start(vmcall_registers_t &regs);
+    virtual void handle_vmcall_stop(vmcall_registers_t &regs);
     virtual void handle_vmcall_unittest(vmcall_registers_t &regs);
 
     virtual void handle_vmcall_data_string_unformatted(

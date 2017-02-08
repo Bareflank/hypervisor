@@ -45,12 +45,6 @@ else
     fetch_binutils=$CUSTOM_FETCH_BINUTILS
 fi
 
-if [[ -z "$CUSTOM_FETCH_GCC" ]]; then
-    fetch_gcc=./tools/scripts/fetch_gcc.sh
-else
-    fetch_gcc=$CUSTOM_FETCH_GCC
-fi
-
 if [[ -z "$CUSTOM_FETCH_NASM" ]]; then
     fetch_nasm=./tools/scripts/fetch_nasm.sh
 else
@@ -69,12 +63,6 @@ else
     build_binutils=$CUSTOM_BUILD_BINUTILS
 fi
 
-if [[ -z "$CUSTOM_BUILD_GCC" ]]; then
-    build_gcc=./tools/scripts/build_gcc.sh
-else
-    build_gcc=$CUSTOM_BUILD_GCC
-fi
-
 if [[ -z "$CUSTOM_BUILD_NASM" ]]; then
     build_nasm=./tools/scripts/build_nasm.sh
 else
@@ -85,57 +73,6 @@ if [[ -z "$CUSTOM_BUILD_CLANG" ]]; then
     build_clang=./tools/scripts/build_clang.sh
 else
     build_clang=$CUSTOM_BUILD_CLANG
-fi
-
-# ------------------------------------------------------------------------------
-# GCC 6.1
-# ------------------------------------------------------------------------------
-
-if [[ -z "$CROSS_COMPILER" ]] || [[ $CROSS_COMPILER == *"gcc_610"* ]]; then
-
-    export PREFIX="$HOME/compilers/gcc_610/"
-
-    rm -Rf $PREFIX
-    mkdir -p $PREFIX
-
-    export PATH="$PREFIX/bin:$ORIGINAL_PATH"
-    export BINUTILS_URL="http://ftp.gnu.org/gnu/binutils/binutils-2.26.tar.bz2"
-    export GCC_URL="https://ftp.gnu.org/gnu/gcc/gcc-6.1.0/gcc-6.1.0.tar.bz2"
-    export NASM_URL="http://www.nasm.us/pub/nasm/releasebuilds/2.12.01/nasm-2.12.01.tar.bz2"
-
-    eval $fetch_binutils
-    eval $fetch_gcc
-    eval $fetch_nasm
-
-    eval $build_binutils
-    eval $build_gcc
-    eval $build_nasm
-
-fi
-
-# ------------------------------------------------------------------------------
-# GCC 6.2
-# ------------------------------------------------------------------------------
-
-if [[ -z "$CROSS_COMPILER" ]] || [[ $CROSS_COMPILER == *"gcc_620"* ]]; then
-
-    export PREFIX="$HOME/compilers/gcc_620/"
-
-    rm -Rf $PREFIX
-    mkdir -p $PREFIX
-
-    export PATH="$PREFIX/bin:$ORIGINAL_PATH"
-    export BINUTILS_URL="http://ftp.gnu.org/gnu/binutils/binutils-2.27.tar.bz2"
-    export GCC_URL="https://ftp.gnu.org/gnu/gcc/gcc-6.2.0/gcc-6.2.0.tar.bz2"
-    export NASM_URL="http://www.nasm.us/pub/nasm/releasebuilds/2.12.02/nasm-2.12.02.tar.bz2"
-
-    eval $fetch_binutils
-    eval $fetch_gcc
-    eval $fetch_nasm
-
-    eval $build_binutils
-    eval $build_gcc
-    eval $build_nasm
 fi
 
 # ------------------------------------------------------------------------------

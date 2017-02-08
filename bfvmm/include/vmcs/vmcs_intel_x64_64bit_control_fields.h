@@ -146,10 +146,10 @@ namespace address_of_io_bitmap_b
     { set_vmcs_field_if_exists(val, addr, name, verbose, exists()); }
 }
 
-namespace address_of_msr_bitmaps
+namespace address_of_msr_bitmap
 {
     constexpr const auto addr = 0x0000000000002004UL;
-    constexpr const auto name = "address_of_msr_bitmaps";
+    constexpr const auto name = "address_of_msr_bitmap";
 
     inline bool exists() noexcept
     { return msrs::ia32_vmx_true_procbased_ctls::use_msr_bitmap::is_allowed1(); }

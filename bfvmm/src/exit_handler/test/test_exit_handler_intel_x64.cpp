@@ -423,6 +423,42 @@ exit_handler_intel_x64_ut::test_vm_exit_reason_vmcall_event()
     });
 }
 
+void
+exit_handler_intel_x64_ut::test_vm_exit_reason_vmcall_start()
+{
+    MockRepository mocks;
+    auto &&vmcs = setup_vmcs_handled(mocks, exit_reason::basic_exit_reason::vmcall);
+    auto &&ehlr = setup_ehlr(vmcs);
+
+    ehlr.m_state_save->rax = VMCALL_START;
+    ehlr.m_state_save->rdx = VMCALL_MAGIC_NUMBER;
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        this->expect_no_exception([&]{ ehlr.dispatch(); });
+        this->expect_true(ehlr.m_state_save->rip == g_rip);
+        this->expect_true(ec_sign(ehlr.m_state_save->rdx) == BF_VMCALL_SUCCESS);
+    });
+}
+
+void
+exit_handler_intel_x64_ut::test_vm_exit_reason_vmcall_stop()
+{
+    MockRepository mocks;
+    auto &&vmcs = setup_vmcs_handled(mocks, exit_reason::basic_exit_reason::vmcall);
+    auto &&ehlr = setup_ehlr(vmcs);
+
+    ehlr.m_state_save->rax = VMCALL_STOP;
+    ehlr.m_state_save->rdx = VMCALL_MAGIC_NUMBER;
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        this->expect_no_exception([&]{ ehlr.dispatch(); });
+        this->expect_true(ehlr.m_state_save->rip == g_rip);
+        this->expect_true(ec_sign(ehlr.m_state_save->rdx) == BF_VMCALL_SUCCESS);
+    });
+}
+
 auto g_msg = "{\"msg\":\"hello world\"}"_s;
 auto g_map = std::make_unique<char[]>(100);
 

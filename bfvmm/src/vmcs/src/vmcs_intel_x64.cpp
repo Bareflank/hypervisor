@@ -477,7 +477,7 @@ vmcs_intel_x64::vm_exit_controls()
     vm_exit_controls::save_debug_controls::enable();
     vm_exit_controls::host_address_space_size::enable();
     vm_exit_controls::load_ia32_perf_global_ctrl::enable();
-    vm_exit_controls::acknowledge_interrupt_on_exit::enable();
+    // vm_exit_controls::acknowledge_interrupt_on_exit::enable();
     vm_exit_controls::save_ia32_pat::enable();
     vm_exit_controls::load_ia32_pat::enable();
     vm_exit_controls::save_ia32_efer::enable();

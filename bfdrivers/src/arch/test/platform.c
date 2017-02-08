@@ -36,6 +36,7 @@ int alloc_count_rwe = 0;
 
 uint64_t g_malloc_fails = 0;
 uint64_t g_set_afinity_fails = 0;
+uint64_t g_vmcall = 0;
 
 int
 verify_no_mem_leaks(void)
@@ -160,11 +161,11 @@ platform_restore_affinity(int64_t affinity)
 void
 platform_vmcall(struct vmcall_registers_t *regs)
 {
-    (void) regs;
+    regs->r01 = g_vmcall;
 }
 
 void
 platform_vmcall_event(struct vmcall_registers_t *regs)
 {
-    (void) regs;
+    regs->r01 = g_vmcall;
 }

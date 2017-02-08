@@ -318,7 +318,7 @@ vmcs_ut::list_64bit_control_fields()
 {
     this->test_vmcs_address_of_io_bitmap_a();
     this->test_vmcs_address_of_io_bitmap_b();
-    this->test_vmcs_address_of_msr_bitmaps();
+    this->test_vmcs_address_of_msr_bitmap();
     this->test_vmcs_vm_exit_msr_store_address();
     this->test_vmcs_vm_exit_msr_load_address();
     this->test_vmcs_vm_entry_msr_load_address();

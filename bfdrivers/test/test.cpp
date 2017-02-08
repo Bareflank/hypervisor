@@ -174,6 +174,7 @@ driver_entry_ut::list()
     this->test_common_start_start_when_start_vmm_missing();
     this->test_common_start_start_vmm_failure();
     this->test_common_start_set_affinity_failed();
+    this->test_common_start_vmcall_failed();
 
     this->test_common_stop_stop_when_unloaded();
     this->test_common_stop_stop_when_not_running();
@@ -182,6 +183,7 @@ driver_entry_ut::list()
     this->test_common_stop_stop_vmm_missing();
     this->test_common_stop_stop_vmm_failure();
     this->test_common_stop_set_affinity_failed();
+    this->test_common_stop_vmcall_failed();
 
     this->test_common_dump_invalid_drr();
     this->test_common_dump_invalid_vcpuid();

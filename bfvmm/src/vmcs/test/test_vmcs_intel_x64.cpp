@@ -1739,16 +1739,16 @@ vmcs_ut::test_vmcs_address_of_io_bitmap_b()
 }
 
 void
-vmcs_ut::test_vmcs_address_of_msr_bitmaps()
+vmcs_ut::test_vmcs_address_of_msr_bitmap()
 {
     proc_ctl_allow1(msrs::ia32_vmx_true_procbased_ctls::use_msr_bitmap::mask);
-    this->expect_true(vmcs::address_of_msr_bitmaps::exists());
+    this->expect_true(vmcs::address_of_msr_bitmap::exists());
 
-    vmcs::address_of_msr_bitmaps::set(1UL);
-    this->expect_true(vmcs::address_of_msr_bitmaps::get() == 1UL);
+    vmcs::address_of_msr_bitmap::set(1UL);
+    this->expect_true(vmcs::address_of_msr_bitmap::get() == 1UL);
 
-    vmcs::address_of_msr_bitmaps::set_if_exists(0UL);
-    this->expect_true(vmcs::address_of_msr_bitmaps::get_if_exists() == 0UL);
+    vmcs::address_of_msr_bitmap::set_if_exists(0UL);
+    this->expect_true(vmcs::address_of_msr_bitmap::get_if_exists() == 0UL);
 }
 
 void

@@ -208,6 +208,14 @@ exit_handler_intel_x64::handle_vmcall()
                 handle_vmcall_event(regs);
                 break;
 
+            case VMCALL_START:
+                handle_vmcall_start(regs);
+                break;
+
+            case VMCALL_STOP:
+                handle_vmcall_stop(regs);
+                break;
+
             case VMCALL_UNITTEST:
                 handle_vmcall_unittest(regs);
                 break;
@@ -523,6 +531,14 @@ exit_handler_intel_x64::handle_vmcall_event(vmcall_registers_t &regs)
     bfdebug << "vmcall event:" << bfendl;
     bfdebug << "r02: " << view_as_pointer(regs.r02) << bfendl;
 }
+
+void
+exit_handler_intel_x64::handle_vmcall_start(vmcall_registers_t &regs)
+{ (void) regs; }
+
+void
+exit_handler_intel_x64::handle_vmcall_stop(vmcall_registers_t &regs)
+{ (void) regs; }
 
 void
 exit_handler_intel_x64::handle_vmcall_data_string_unformatted(

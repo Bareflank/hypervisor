@@ -266,18 +266,18 @@ setup_check_control_msr_bitmap_address_bits_paths(std::vector<struct control_flo
     {
         proc_ctl_allow1(ia32_vmx_true_procbased_ctls::use_msr_bitmap::mask);
         primary_processor_based_vm_execution_controls::use_msr_bitmap::enable();
-        address_of_msr_bitmaps::set(0x1U);
+        address_of_msr_bitmap::set(0x1U);
     };
     path.throws_exception = true;
     path.exception = ""_ut_lee;
     cfg.push_back(path);
 
-    path.setup = [&] { address_of_msr_bitmaps::set(0xff00000000000000U); };
+    path.setup = [&] { address_of_msr_bitmap::set(0xff00000000000000U); };
     path.throws_exception = true;
     path.exception = ""_ut_lee;
     cfg.push_back(path);
 
-    path.setup = [&] { address_of_msr_bitmaps::set(0x1000U); };
+    path.setup = [&] { address_of_msr_bitmap::set(0x1000U); };
     path.throws_exception = false;
     cfg.push_back(path);
 }
