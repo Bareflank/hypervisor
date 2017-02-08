@@ -274,6 +274,43 @@ auto make_unique_map_x64(typename unique_map_ptr_x64<T>::integer_pointer virt,
 ///
 uintptr_t virt_to_phys_with_cr3(uintptr_t virt, uintptr_t cr3);
 
+/// Map Physically Contiguous / Non-Contiguous Range With CR3
+///
+/// This function can be used to map both physically contiguous, and
+/// physically non-contiguous memory by providing an existing virtually
+/// contiguous memory range address and size, as well as the CR3 value
+/// that defines the existing virtual to physical memory mappings. This
+/// is useful when mapping guest memory into VMM, and caution should be
+/// taken if mapping executable memory.
+///
+/// @note since this function must map in the guest's page tables to
+///     locate each physical address for each page being mapped, this
+///     function is very expensive, and should not be used in time
+///     critical operations.
+///
+/// @note this function should not be used directly, but instead the
+///     unique_map_ptr_x64 version should be used instead. This function can
+///     however be overloaded to provide custom functionality for mapping
+///     guest memory into the VMM.
+///
+/// @expects vmap != 0
+/// @expects vmap & (x64::page_size - 1) == 0
+/// @expects virt != 0
+/// @expects cr3 != 0
+/// @expects cr3 & (x64::page_size - 1) == 0
+/// @expects size != 0
+/// @expects attr != 0
+/// @ensures get() != nullptr
+///
+/// @param vmap the virtual address to map the range to
+/// @param virt the virtual address containing the existing mapping
+/// @param cr3 the root page table containing the existing virtual to
+///     physical memory mappings
+/// @param size the number of bytes to map
+/// @param pat the pat msr associated with the provided cr3
+///
+void map_with_cr3(uintptr_t vmap, uintptr_t virt, uintptr_t cr3, size_t size, x64::msrs::value_type pat);
+
 /// Unique Map
 ///
 /// Like std::unique_ptr, unique_map_ptr_x64 is a smart map that owns and
@@ -508,86 +545,13 @@ public:
         m_unaligned_size(size)
     {
         // [[ensures: get() != nullptr]]
-        expects(vmap != 0);
-        expects(lower(vmap) == 0);
-        expects(virt != 0);
-        expects(cr3 != 0);
-        expects(lower(cr3) == 0);
-        expects(size != 0);
 
         m_virt |= lower(virt);
         m_virt |= upper(vmap);
 
         m_unaligned_size += lower(virt);
 
-        for (auto offset = 0UL; offset < m_unaligned_size; offset += x64::page_size)
-        {
-            integer_pointer from;
-            integer_pointer phys;
-            integer_pointer pati;
-            integer_pointer current_virt = virt + offset;
-
-            while (true)
-            {
-                from = x64::page_table::pml4::from;
-                auto &&pml4_idx = x64::page_table::index(current_virt, from);
-                auto &&pml4_map = bfn::make_unique_map_x64<uintptr_t>(cr3);
-                auto &&pml4_pte = page_table_entry_x64{&pml4_map.get()[pml4_idx]};
-
-                expects(pml4_pte.present());
-                expects(pml4_pte.phys_addr() != 0);
-
-                from = x64::page_table::pdpt::from;
-                auto &&pdpt_idx = x64::page_table::index(current_virt, from);
-                auto &&pdpt_map = bfn::make_unique_map_x64<uintptr_t>(pml4_pte.phys_addr());
-                auto &&pdpt_pte = page_table_entry_x64{&pdpt_map.get()[pdpt_idx]};
-
-                expects(pdpt_pte.present());
-                expects(pdpt_pte.phys_addr() != 0);
-
-                if (pdpt_pte.ps())
-                {
-                    phys = pdpt_pte.phys_addr();
-                    pati = pdpt_pte.pat_index_large();
-                    break;
-                }
-
-                from = x64::page_table::pd::from;
-                auto &&pd_idx = x64::page_table::index(current_virt, from);
-                auto &&pd_map = bfn::make_unique_map_x64<uintptr_t>(pdpt_pte.phys_addr());
-                auto &&pd_pte = page_table_entry_x64{&pd_map.get()[pd_idx]};
-
-                expects(pd_pte.present());
-                expects(pd_pte.phys_addr() != 0);
-
-                if (pd_pte.ps())
-                {
-                    phys = pd_pte.phys_addr();
-                    pati = pd_pte.pat_index_large();
-                    break;
-                }
-
-                from = x64::page_table::pt::from;
-                auto &&pt_idx = x64::page_table::index(current_virt, from);
-                auto &&pt_map = bfn::make_unique_map_x64<uintptr_t>(pd_pte.phys_addr());
-                auto &&pt_pte = page_table_entry_x64{&pt_map.get()[pt_idx]};
-
-                expects(pt_pte.present());
-                expects(pt_pte.phys_addr() != 0);
-
-                phys = pt_pte.phys_addr();
-                pati = pt_pte.pat_index_4k();
-                break;
-            }
-
-            auto &&vadr = vmap + offset;
-            auto &&padr = upper(phys, from) | lower(current_virt, from);
-
-            auto &&perm = x64::memory_attr::rw;
-            auto &&type = x64::msrs::ia32_pat::pa(pat, pati);
-
-            g_pt->map_4k(vadr, upper(padr), x64::memory_attr::mem_type_to_attr(perm, type));
-        }
+        map_with_cr3(vmap, virt, cr3, m_unaligned_size, pat);
 
         flush();
     }
