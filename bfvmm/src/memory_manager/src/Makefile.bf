@@ -64,6 +64,7 @@ NATIVE_OUTDIR+=%BUILD_REL%/../bin
 # Sources
 ################################################################################
 
+SOURCES+=map_ptr_x64.cpp
 SOURCES+=memory_manager_x64.cpp
 SOURCES+=page_table_x64.cpp
 SOURCES+=page_table_entry_x64.cpp
