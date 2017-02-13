@@ -38,8 +38,8 @@ section .text
 ; randomly accessing different leaf functions in CPUID introducing variance.
 ;
 
-global __rdtsc:function
-__rdtsc:
+global __read_tsc:function
+__read_tsc:
 
     push rbx
 
@@ -56,8 +56,8 @@ __rdtsc:
     pop rbx
     ret
 
-global __rdtscp:function
-__rdtscp:
+global __read_tscp:function
+__read_tscp:
 
     push rbx
 

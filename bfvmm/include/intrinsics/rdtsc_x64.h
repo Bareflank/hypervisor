@@ -22,28 +22,28 @@
 #ifndef RDTSC_X64_H
 #define RDTSC_X64_H
 
-extern "C" uint64_t __rdtsc(void) noexcept;
-extern "C" uint64_t __rdtscp(void) noexcept;
+extern "C" uint64_t __read_tsc(void) noexcept;
+extern "C" uint64_t __read_tscp(void) noexcept;
 
 // *INDENT-OFF*
 
 namespace x64
 {
 
-namespace rdtsc
+namespace read_tsc
 {
     using value_type = uint64_t;
 
     inline auto get() noexcept
-    { return __rdtsc(); }
+    { return __read_tsc(); }
 }
 
-namespace rdtscp
+namespace read_tscp
 {
     using value_type = uint64_t;
 
     inline auto get() noexcept
-    { return __rdtscp(); }
+    { return __read_tscp(); }
 }
 
 }

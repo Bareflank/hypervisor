@@ -40,12 +40,12 @@ parse_arguments $@
 # ------------------------------------------------------------------------------
 
 install_common_packages() {
-    setup-x86_64.exe -q --wait -P wget,make,gcc-core,gcc-g++,diffutils,libgmp-devel,libmpfr-devel,libmpc-devel,flex,bison,nasm,texinfo,unzip,git-completion,bash-completion,patch,ncurses,libncurses-devel,clang,libiconv-devel
+    setup-x86_64.exe -q --wait -P make,gcc-core,gcc-g++,diffutils,libgmp-devel,libmpfr-devel,libmpc-devel,flex,bison,nasm,texinfo,unzip,git-completion,bash-completion,patch,ncurses,libncurses-devel,clang,libiconv-devel
 }
 
 install_cmake() {
     rm -Rf cmake-*
-    wget https://cmake.org/files/v3.6/cmake-3.6.2.tar.gz
+    curl -o -L cmake-3.6.2.tar.gz https://cmake.org/files/v3.6/cmake-3.6.2.tar.gz
     tar xf cmake-*
     pushd cmake-*
     ./configure
@@ -58,7 +58,7 @@ install_cmake() {
 setup_ewdk() {
     if [[ ! -d /cygdrive/c/ewdk ]]; then
         echo "Fetching EWDK. Please wait..."
-        wget -nv -O /tmp/ewdk.zip "https://go.microsoft.com/fwlink/p/?LinkID=699461"
+        curl "https://go.microsoft.com/fwlink/p/?LinkID=699461" -L --output /tmp/ewdk.zip
         echo "Installing EWDK. Please wait..."
         unzip -qq /tmp/ewdk.zip -d /cygdrive/c/ewdk/
         chown -R $USER:SYSTEM /cygdrive/c/ewdk
