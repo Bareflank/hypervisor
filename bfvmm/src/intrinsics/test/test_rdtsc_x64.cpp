@@ -24,27 +24,27 @@
 
 using namespace x64;
 
-rdtsc::value_type g_rdtsc = 0;
-rdtscp::value_type g_rdtscp = 0;
+read_tsc::value_type g_read_tsc = 0;
+read_tscp::value_type g_read_tscp = 0;
 
 extern "C" uint64_t
-__rdtsc(void) noexcept
-{ return g_rdtsc; }
+__read_tsc(void) noexcept
+{ return g_read_tsc; }
 
 extern "C" uint64_t
-__rdtscp(void) noexcept
-{ return g_rdtscp; }
+__read_tscp(void) noexcept
+{ return g_read_tscp; }
 
 void
 intrinsics_ut::test_rdtsc_x64()
 {
-    g_rdtsc = 10U;
-    this->expect_true(rdtsc::get() == 10U);
+    g_read_tsc = 10U;
+    this->expect_true(read_tsc::get() == 10U);
 }
 
 void
 intrinsics_ut::test_rdtscp_x64()
 {
-    g_rdtscp = 10U;
-    this->expect_true(rdtscp::get() == 10U);
+    g_read_tscp = 10U;
+    this->expect_true(read_tscp::get() == 10U);
 }

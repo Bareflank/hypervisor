@@ -51,6 +51,7 @@ install_common_packages() {
     sudo apt-get install --yes nasm
     sudo apt-get install --yes texinfo
     sudo apt-get install --yes cmake
+    sudo apt-get install --yes realpath
 }
 
 install_clang_1610() {

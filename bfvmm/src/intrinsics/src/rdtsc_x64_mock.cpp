@@ -23,14 +23,14 @@
 #include <debug.h>
 
 extern "C" uint64_t
-__attribute__((weak)) __rdtsc(void) noexcept
+__attribute__((weak)) __read_tsc(void) noexcept
 {
     std::cerr << __FUNC__ << " called" << '\n';
     abort();
 }
 
 extern "C" uint64_t
-__attribute__((weak)) __rdtscp(void) noexcept
+__attribute__((weak)) __read_tscp(void) noexcept
 {
     std::cerr << __FUNC__ << " called" << '\n';
     abort();

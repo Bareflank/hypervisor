@@ -5,16 +5,7 @@ environment:
     global:
         CYG_ROOT: C:\cygwin64
         CYG_MIRROR: http://cygwin.mirror.constant.com
-        CYG_CACHE: C:\cygwin64\var\cache\setup
         CYG_BASH: C:\cygwin64\bin\bash
-        CYG_EWDK: C:\cygdrive\c\ewdk
-
-#
-# Cache Cygwin files to speed up build
-#
-cache:
-    - '%CYG_CACHE%'
-    - '%CYG_EWDK%'
 
 #
 # Do a shallow clone of the repo to speed up build
