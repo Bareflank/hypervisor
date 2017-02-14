@@ -59,9 +59,9 @@ install_clang_1610() {
     sudo apt-get install --yes clang-3.8
     sudo apt-get install --yes clang++-3.8
     sudo apt-get install --yes clang-tidy-3.8
-    sudo ln -s /usr/bin/clang-3.8 /usr/bin/clang
-    sudo ln -s /usr/bin/clang++-3.8 /usr/bin/clang++
-    sudo ln -s /usr/bin/clang-tidy-3.8 /usr/bin/clang-tidy
+    sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-3.8 100
+    sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-3.8 100
+    sudo update-alternatives --install /usr/bin/clang-tidy clang-tidy /usr/bin/clang-tidy-3.8 100
 }
 
 install_clang_1604() {
@@ -128,12 +128,9 @@ install_g++-5() {
     sudo apt-get update
     sudo apt-get install --yes gcc-5
     sudo apt-get install --yes g++-5
-    sudo rm /usr/bin/gcc
-    sudo rm /usr/bin/g++
-    sudo rm /usr/bin/gcov
-    sudo ln -s /usr/bin/gcc-5 /usr/bin/gcc
-    sudo ln -s /usr/bin/g++-5 /usr/bin/g++
-    sudo ln -s /usr/bin/gcov-5 /usr/bin/gcov
+    sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-5 100
+    sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-5 100
+    sudo update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-5 100
 }
 
 # ------------------------------------------------------------------------------
