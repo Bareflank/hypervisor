@@ -1,3 +1,25 @@
+#!/bin/bash
+#
+# Bareflank Hypervisor
+#
+# Copyright (C) 2015 Assured Information Security, Inc.
+# Author: Rian Quinn        <quinnr@ainfosec.com>
+# Author: Brendan Kerrigan  <kerriganb@ainfosec.com>
+#
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License as published by the Free Software Foundation; either
+# version 2.1 of the License, or (at your option) any later version.
+#
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+# Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public
+# License along with this library; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+
 check_status()
 {
     if [ $? -ne 0 ] ; then
@@ -71,14 +93,10 @@ test_hook()
     sudo ./makefiles/src_extended_apis_example_hook/app/bin/native/hook > /dev/ttyS1 ; check_status
     sudo make stop > /dev/ttyS1 ; check_status
     sudo make driver_unload > /dev/ttyS1 ; check_status
-    echo Hook Done > /dev/ttyS1 
+    echo Hook Done > /dev/ttyS1
 }
 
-cd hypervisor
-git pull > /dev/ttyS1 ; check_status
-sudo ./tools/scripts/setup_ubuntu.sh --compiler clang_38 >/dev/ttyS ; check_status
-
-# Tests
+# Tests assume you are in the ~/hypervisor directory and have run your setup_XXX script 
 test_hypervisor
 test_extended_apis
 test_hyperkernel
