@@ -146,6 +146,7 @@ case $( grep ^VERSION_ID= /etc/os-release | cut -d'=' -f 2 | tr -d '"' ) in
     ;;
 
 16.04)
+    install_apt_tools
     install_common_packages
     install_clang_1604
     install_docker_1604
