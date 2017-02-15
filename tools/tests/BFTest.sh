@@ -23,7 +23,7 @@
 set -e
 report_error()
 {
-    echo "Ubuntu EXIT" > /dev/ttyS1
+    echo "BFTest EXIT" > /dev/ttyS1
 }
 
 test_hypervisor()
