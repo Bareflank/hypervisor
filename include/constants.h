@@ -295,7 +295,7 @@
  * Note: See bfvmm/serial/serial_port_intel_x64.h
  */
 #ifndef DEFAULT_BAUD_RATE
-#define DEFAULT_BAUD_RATE baud_rate_115200
+#define DEFAULT_BAUD_RATE baud_rate_9600
 #endif
 
 /**
