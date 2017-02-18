@@ -258,7 +258,7 @@ vmcs_intel_x64::write_natural_control_state(gsl::not_null<vmcs_intel_x64_state *
     // unused: VMCS_CR3_TARGET_VALUE_0
     // unused: VMCS_CR3_TARGET_VALUE_1
     // unused: VMCS_CR3_TARGET_VALUE_2
-    // unused: VMCS_CR3_TARGET_VALUE_31
+    // unused: VMCS_CR3_TARGET_VALUE_3
 }
 
 void
