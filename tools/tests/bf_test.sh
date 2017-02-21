@@ -75,7 +75,7 @@ test_cpuid()
     sudo make > /dev/ttyS1
     sudo make driver_load > /dev/ttyS1
     sudo make quick > /dev/ttyS1
-    sudo ARGS="string json '{\"get\":\"count\"}'" make vmcall > /dev/ttyS1 ; check_status
+    sudo ARGS="string json '{\"get\":\"count\"}'" make vmcall > /dev/ttyS1
     sudo make stop > /dev/ttyS1
     sudo make driver_unload > /dev/ttyS1
     echo CPUID Done > /dev/ttyS1
