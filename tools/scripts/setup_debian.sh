@@ -85,6 +85,13 @@ testing)
     prepare_docker
     ;;
 
+9.*)
+    install_apt_tools
+    add_docker_repositories
+    install_common_packages
+    prepare_docker
+    ;;
+    
 *)
     echo "This version of Debian is not supported"
     exit 1
