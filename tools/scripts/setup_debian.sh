@@ -91,7 +91,7 @@ testing)
     install_common_packages
     prepare_docker
     ;;
-    
+
 *)
     echo "This version of Debian is not supported"
     exit 1
