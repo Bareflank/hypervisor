@@ -40,14 +40,14 @@ parse_arguments $@
 # ------------------------------------------------------------------------------
 
 install_common_packages() {
-    setup-x86_64.exe -q --wait -P make,gcc-core,gcc-g++,diffutils,libgmp-devel,libmpfr-devel,libmpc-devel,flex,bison,nasm,texinfo,unzip,git-completion,bash-completion,patch,ncurses,libncurses-devel,clang,libiconv-devel
+    setup-x86_64.exe -q --wait -P make,gcc-core,gcc-g++,diffutils,libgmp-devel,libmpfr-devel,libmpc-devel,flex,bison,nasm,texinfo,unzip,git-completion,bash-completion,patch,ncurses,libncurses-devel,clang,libiconv-devel,curl
 }
 
 install_cmake() {
     rm -Rf cmake-*
-    curl -o -L cmake-3.6.2.tar.gz https://cmake.org/files/v3.6/cmake-3.6.2.tar.gz
+    curl -L -o cmake-3.6.2.tar.gz https://cmake.org/files/v3.6/cmake-3.6.2.tar.gz
     tar xf cmake-*
-    pushd cmake-*
+    pushd cmake-3.6.2
     ./configure
     make
     make install
@@ -72,6 +72,12 @@ setup_ewdk() {
 # ------------------------------------------------------------------------------
 
 case $(uname -r) in
+2.7.*)
+    install_common_packages
+    if [[ ! $APPVEYOR == "true" ]]; then install_cmake; fi
+    setup_ewdk
+    ;;
+
 2.6.*)
     install_common_packages
     if [[ ! $APPVEYOR == "true" ]]; then install_cmake; fi
