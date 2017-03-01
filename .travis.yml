@@ -20,34 +20,33 @@ env:
 matrix:
   include:
 
-  #
-  # Astyle
-  #
-  - os: linux
-    env:
-      - TEST="Astyle"
-    script:
-      - if [[ -n $(./tools/astyle/run.sh | grep Formatted) ]]; then echo "You must run astyle before submitting a pull request"; exit -1; fi
+  # #
+  # # Astyle
+  # #
+  # - os: linux
+  #   env:
+  #     - TEST="Astyle"
+  #   script:
+  #     - if [[ -n $(./tools/astyle/run.sh | grep Formatted) ]]; then echo "You must run astyle before submitting a pull request"; exit -1; fi
 
-  #
-  # Doxygen
-  #
-  - os: linux
-    env:
-      - TEST="Doxygen"
-    script:
-      - ./configure
-      - travis_wait 30 make doxygen
-      - if cat doc/doxygen_warnings.txt | grep FIX; then echo "You must fix doxygen before submitting a pull request"; exit -1; fi
+  # #
+  # # Doxygen
+  # #
+  # - os: linux
+  #   env:
+  #     - TEST="Doxygen"
+  #   script:
+  #     - travis_wait 30 ./tools/doxygen/linux/run.sh
+  #     - if cat doc/doxygen_warnings.txt | grep FIX; then echo "You must fix doxygen before submitting a pull request"; exit -1; fi
 
-  #
-  # Git Check
-  #
-  - os: linux
-    env:
-      - TEST="Git Check"
-    script:
-      - if [[ -n $(git diff --check HEAD^ -- . ':!tools/patches/') ]]; then echo "You must remove whitespace before submitting a pull request"; exit -1; fi
+  # #
+  # # Git Check
+  # #
+  # - os: linux
+  #   env:
+  #     - TEST="Git Check"
+  #   script:
+  #     - if [[ -n $(git diff --check HEAD^ -- . ':!tools/patches/') ]]; then echo "You must remove whitespace before submitting a pull request"; exit -1; fi
 
   #
   # Coveralls
@@ -55,9 +54,21 @@ matrix:
   - os: linux
     env:
       - TEST="Coveralls"
+    addons:
+      apt:
+        sources:
+          - ubuntu-toolchain-r-test
+          - llvm-toolchain-trusty-3.8
+        packages:
+          - clang-3.8
+          - gcc-5
+          - g++-5
     before_install:
-      - pip install --user git+git://github.com/eddyxu/cpp-coveralls.git
+      - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-5 100
+      - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-5 100
+      - sudo update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-5 100
     install:
+      - pip install --user git+git://github.com/eddyxu/cpp-coveralls.git
       - travis_wait 40 ./tools/scripts/setup_ubuntu.sh --no-configure
     script:
       - ./configure --compiler clang-3.8 --linker ld.gold
@@ -66,72 +77,72 @@ matrix:
     after_success:
       - coveralls --build-root makefiles -e build_libbfc -e build_libcxx -e build_libcxxabi -e build_newlib -e source_libbfc -e source_libcxx -e source_libcxxabi -e source_llvm -e source_newlib -e sysroot -e bfdrivers/src/arch -e bfm/ioctl/arch -e bfvmm/src/intrinsics -e include/hippomocks.h -e include/detail -e include/json.h -e include/unittest.h -e include/new_delete.h -e include/gsl -e bfunwind --gcov-options '\-lp'
 
-  #
-  # Clang Tidy
-  #
-  - os: linux
-    env:
-      - TEST="Clang Tidy"
-    install:
-      - travis_wait 40 ./tools/scripts/setup_ubuntu.sh
-      - git clone https://github.com/rizsotto/bear.git
-      - pushd bear; cmake .; make; sudo make install; popd
-    script:
-      - STATIC_ANALYSIS_ENABLED=true bear make
-      - make tidy
+  # #
+  # # Clang Tidy
+  # #
+  # - os: linux
+  #   env:
+  #     - TEST="Clang Tidy"
+  #   install:
+  #     - travis_wait 40 ./tools/scripts/setup_ubuntu.sh
+  #     - git clone https://github.com/rizsotto/bear.git
+  #     - pushd bear; cmake .; make; sudo make install; popd
+  #   script:
+  #     - STATIC_ANALYSIS_ENABLED=true bear make
+  #     - make tidy
 
-  #
-  # Google Sanitizers
-  #
-  - os: linux
-    env:
-      - TEST="Google Sanitizers"
-    install:
-      - travis_wait 40 ./tools/scripts/setup_ubuntu.sh
-    script:
-      - DYNAMIC_ANALYSIS_ENABLED=true make
-      - make test
+  # #
+  # # Google Sanitizers
+  # #
+  # - os: linux
+  #   env:
+  #     - TEST="Google Sanitizers"
+  #   install:
+  #     - travis_wait 40 ./tools/scripts/setup_ubuntu.sh
+  #   script:
+  #     - DYNAMIC_ANALYSIS_ENABLED=true make
+  #     - make test
 
-  #
-  # Coverity
-  #
-  - os: linux
-    env:
-      - TEST="Coverity"
-    before_install:
-      - echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-certificates.crt
-    addons:
-      coverity_scan:
-        project:
-          name: "Bareflank/hypervisor"
-          description: "Travis CI Build"
-        notification_email: rianquinn@gmail.com
-        build_command_prepend: "./tools/scripts/setup_ubuntu.sh"
-        build_command: "STATIC_ANALYSIS_ENABLED=true make"
-        branch_pattern: coverity_scan
-    script:
-      - echo "Done"
+  # #
+  # # Coverity
+  # #
+  # - os: linux
+  #   env:
+  #     - TEST="Coverity"
+  #   before_install:
+  #     - echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-certificates.crt
+  #   addons:
+  #     coverity_scan:
+  #       project:
+  #         name: "Bareflank/hypervisor"
+  #         description: "Travis CI Build"
+  #       notification_email: rianquinn@gmail.com
+  #       build_command_prepend: "./tools/scripts/setup_ubuntu.sh"
+  #       build_command: "STATIC_ANALYSIS_ENABLED=true make"
+  #       branch_pattern: coverity_scan
+  #   script:
+  #     - echo "Done"
 
-  #
-  # Clang 3.8
-  #
-  - os: linux
-    env:
-      - TEST="Clang 3.8"
-    install:
-      - travis_wait 40 ./tools/scripts/setup_ubuntu.sh --compiler clang-3.8
-    script:
-      - make
-      - make test
+  # #
+  # # Clang 3.8
+  # #
+  # - os: linux
+  #   env:
+  #     - TEST="Clang 3.8"
+  #   install:
+  #     - travis_wait 40 ./tools/scripts/setup_ubuntu.sh --compiler clang-3.8
+  #   script:
+  #     - make
+  #     - make test
 
-  #
-  # Clang 3.9
-  #
-  - os: linux
-    env:
-      - TEST="Clang 3.9"
-    install:
-      - travis_wait 40 ./tools/scripts/setup_ubuntu.sh --compiler clang-3.9
-    script:
-      - make
-      - make test
+  # #
+  # # Clang 3.9
+  # #
+  # - os: linux
+  #   env:
+  #     - TEST="Clang 3.9"
+  #   install:
+  #     - travis_wait 40 ./tools/scripts/setup_ubuntu.sh --compiler clang-3.9
+  #   script:
+  #     - make
+  #     - make test

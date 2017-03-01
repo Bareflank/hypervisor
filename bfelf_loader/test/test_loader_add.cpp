@@ -81,9 +81,12 @@ bfelf_loader_ut::test_bfelf_loader_add_too_many_files()
 
         ret = bfelf_loader_add(&loader, &dummy_misc_ef, dummy_misc_exec.get(), dummy_misc_exec.get());
 
-        if (i < MAX_NUM_MODULES) {
+        if (i < MAX_NUM_MODULES)
+        {
             this->expect_true(ret == BFELF_SUCCESS);
-        } else {
+        }
+        else
+        {
             this->expect_true(ret == BFELF_ERROR_LOADER_FULL);
         }
     }

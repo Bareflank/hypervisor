@@ -933,17 +933,22 @@ private_hash(const char *name)
 {
     unsigned long h = 0, g;
 
-    while (*name) {
+    while (*name)
+    {
         char c = *name++;
         unsigned char uc = scast(unsigned char, c);
 
-        if (c >= 0) {
+        if (c >= 0)
+        {
             h = (h << 4) + uc;
-        } else {
+        }
+        else
+        {
             h = (h << 4) - uc;
         }
 
-        if ((g = (h & 0xf0000000))) {
+        if ((g = (h & 0xf0000000)))
+        {
             h ^= g >> 24;
         }
 
@@ -961,14 +966,16 @@ private_get_sym_by_hash(struct bfelf_file_t *ef, const char *name, const struct 
     unsigned long x = private_hash(name);
 
     i = ef->bucket[x % ef->nbucket];
-    while (i > STN_UNDEF && i < ef->nchain) {
+    while (i > STN_UNDEF && i < ef->nchain)
+    {
         const char *str = 0;
 
         *sym = &(ef->symtab[i]);
         str = &(ef->strtab[(*sym)->st_name]);
 
         ret = private_strcmp(name, str);
-        if (ret == BFELF_ERROR_MISMATCH) {
+        if (ret == BFELF_ERROR_MISMATCH)
+        {
             i = ef->chain[i];
             continue;
         }
@@ -985,18 +992,21 @@ private_get_sym_by_name(struct bfelf_file_t *ef, const char *name, const struct 
     int64_t ret = 0;
     bfelf64_word i = 0;
 
-    if (ef->hash != 0) {
+    if (ef->hash != 0)
+    {
         return private_get_sym_by_hash(ef, name, sym);
     }
 
-    for (i = 0; i < ef->symnum; i++) {
+    for (i = 0; i < ef->symnum; i++)
+    {
         const char *str = 0;
 
         *sym = &(ef->symtab[i]);
         str = &(ef->strtab[(*sym)->st_name]);
 
         ret = private_strcmp(name, str);
-        if (ret == BFELF_ERROR_MISMATCH) {
+        if (ret == BFELF_ERROR_MISMATCH)
+        {
             continue;
         }
 
@@ -1021,13 +1031,16 @@ private_get_sym_global(
     *sym = 0;
     *ef_found = 0;
 
-    for (i = 0; i < loader->num; i++) {
-        if (loader->efs[i] == ef_ignore) {
+    for (i = 0; i < loader->num; i++)
+    {
+        if (loader->efs[i] == ef_ignore)
+        {
             continue;
         }
 
         ret = private_get_sym_by_name(loader->efs[i], name, &found_sym);
-        if (ret == BFELF_ERROR_NO_SUCH_SYMBOL) {
+        if (ret == BFELF_ERROR_NO_SUCH_SYMBOL)
+        {
             continue;
         }
 
@@ -1037,14 +1050,16 @@ private_get_sym_global(
         *sym = found_sym;
         *ef_found = loader->efs[i];
 
-        if (BFELF_SYM_BIND(found_sym->st_info) == bfstb_weak) {
+        if (BFELF_SYM_BIND(found_sym->st_info) == bfstb_weak)
+        {
             continue;
         }
 
         return BFELF_SUCCESS;
     }
 
-    if (*sym != 0) {
+    if (*sym != 0)
+    {
         return BFELF_SUCCESS;
     }
 
@@ -1069,29 +1084,34 @@ private_relocate_symbol(
     struct bfelf_file_t *found_ef = ef;
     bfelf64_addr *ptr = rcast(bfelf64_addr *, ef->exec_addr + rela->r_offset - ef->start_addr);
 
-    if (BFELF_REL_TYPE(rela->r_info) == BFR_X86_64_RELATIVE) {
+    if (BFELF_REL_TYPE(rela->r_info) == BFR_X86_64_RELATIVE)
+    {
         *ptr = rcast(bfelf64_addr, ef->exec_virt + rela->r_addend);
         return BFELF_SUCCESS;
     }
 
     found_sym = &(ef->symtab[BFELF_REL_SYM(rela->r_info)]);
 
-    if (BFELF_SYM_BIND(found_sym->st_info) == bfstb_weak) {
+    if (BFELF_SYM_BIND(found_sym->st_info) == bfstb_weak)
+    {
         found_ef = 0;
     }
 
-    if (found_sym->st_value == 0 || found_ef == 0) {
+    if (found_sym->st_value == 0 || found_ef == 0)
+    {
         str = &(ef->strtab[found_sym->st_name]);
 
         ret = private_get_sym_global(loader, str, &found_ef, &found_sym);
-        if (ret != BFELF_SUCCESS) {
+        if (ret != BFELF_SUCCESS)
+        {
             return ret;
         }
     }
 
     *ptr = rcast(bfelf64_addr, found_ef->exec_virt + found_sym->st_value);
 
-    switch (BFELF_REL_TYPE(rela->r_info)) {
+    switch (BFELF_REL_TYPE(rela->r_info))
+    {
         case BFR_X86_64_64:
             *ptr += scast(bfelf64_addr, rela->r_addend);
             break;
@@ -1113,20 +1133,24 @@ private_relocate_symbols(struct bfelf_loader_t *loader, struct bfelf_file_t *ef)
     int64_t ret = 0;
     bfelf64_word i = 0;
 
-    for (i = 0; i < ef->relanum_dyn; i++) {
+    for (i = 0; i < ef->relanum_dyn; i++)
+    {
         const struct bfelf_rela *rela = &(ef->relatab_dyn[i]);
 
         ret = private_relocate_symbol(loader, ef, rela);
-        if (ret != BFELF_SUCCESS) {
+        if (ret != BFELF_SUCCESS)
+        {
             return ret;
         }
     }
 
-    for (i = 0; i < ef->relanum_plt; i++) {
+    for (i = 0; i < ef->relanum_plt; i++)
+    {
         const struct bfelf_rela *rela = &(ef->relatab_plt[i]);
 
         ret = private_relocate_symbol(loader, ef, rela);
-        if (ret != BFELF_SUCCESS) {
+        if (ret != BFELF_SUCCESS)
+        {
             return ret;
         }
     }
@@ -1145,19 +1169,23 @@ private_relocate_symbols(struct bfelf_loader_t *loader, struct bfelf_file_t *ef)
 static inline int64_t
 private_check_signature(struct bfelf_file_t *ef)
 {
-    if (ef->ehdr->e_ident[bfei_mag0] != 0x7F) {
+    if (ef->ehdr->e_ident[bfei_mag0] != 0x7F)
+    {
         return bfinvalid_signature("magic #0 has unexpected value");
     }
 
-    if (ef->ehdr->e_ident[bfei_mag1] != 'E') {
+    if (ef->ehdr->e_ident[bfei_mag1] != 'E')
+    {
         return bfinvalid_signature("magic #1 has unexpected value");
     }
 
-    if (ef->ehdr->e_ident[bfei_mag2] != 'L') {
+    if (ef->ehdr->e_ident[bfei_mag2] != 'L')
+    {
         return bfinvalid_signature("magic #2 has unexpected value");
     }
 
-    if (ef->ehdr->e_ident[bfei_mag3] != 'F') {
+    if (ef->ehdr->e_ident[bfei_mag3] != 'F')
+    {
         return bfinvalid_signature("magic #3 has unexpected value");
     }
 
@@ -1167,39 +1195,48 @@ private_check_signature(struct bfelf_file_t *ef)
 static inline int64_t
 private_check_support(struct bfelf_file_t *ef)
 {
-    if (ef->ehdr->e_ident[bfei_class] != bfelfclass64) {
+    if (ef->ehdr->e_ident[bfei_class] != bfelfclass64)
+    {
         return bfunsupported_file("file is not 64bit");
     }
 
-    if (ef->ehdr->e_ident[bfei_data] != bfelfdata2lsb) {
+    if (ef->ehdr->e_ident[bfei_data] != bfelfdata2lsb)
+    {
         return bfunsupported_file("file is not little endian");
     }
 
-    if (ef->ehdr->e_ident[bfei_version] != bfev_current) {
+    if (ef->ehdr->e_ident[bfei_version] != bfev_current)
+    {
         return bfunsupported_file("unsupported version");
     }
 
-    if (ef->ehdr->e_ident[bfei_osabi] != bfelfosabi_sysv) {
+    if (ef->ehdr->e_ident[bfei_osabi] != bfelfosabi_sysv)
+    {
         return bfunsupported_file("file does not use the system v abi");
     }
 
-    if (ef->ehdr->e_ident[bfei_abiversion] != 0) {
+    if (ef->ehdr->e_ident[bfei_abiversion] != 0)
+    {
         return bfunsupported_file("unsupported abi version");
     }
 
-    if (ef->ehdr->e_type != bfet_dyn && ef->ehdr->e_type != bfet_exec) {
+    if (ef->ehdr->e_type != bfet_dyn && ef->ehdr->e_type != bfet_exec)
+    {
         return bfunsupported_file("file must be an executable or shared library");
     }
 
-    if (ef->ehdr->e_machine != bfem_x86_64) {
+    if (ef->ehdr->e_machine != bfem_x86_64)
+    {
         return bfunsupported_file("file must be compiled for x86_64");
     }
 
-    if (ef->ehdr->e_version != bfev_current) {
+    if (ef->ehdr->e_version != bfev_current)
+    {
         return bfunsupported_file("unsupported version");
     }
 
-    if (ef->ehdr->e_flags != 0) {
+    if (ef->ehdr->e_flags != 0)
+    {
         return bfunsupported_file("unsupported flags");
     }
 
@@ -1211,13 +1248,16 @@ private_process_segments(struct bfelf_file_t *ef)
 {
     bfelf64_xword i = 0;
 
-    for (i = 0; i < ef->ehdr->e_phnum; i++) {
+    for (i = 0; i < ef->ehdr->e_phnum; i++)
+    {
         const struct bfelf_phdr *phdr = &(ef->phdrtab[i]);
 
-        switch (phdr->p_type) {
+        switch (phdr->p_type)
+        {
             case bfpt_load:
 
-                if (ef->num_loadable_segments < BFELF_MAX_SEGMENTS) {
+                if (ef->num_loadable_segments < BFELF_MAX_SEGMENTS)
+                {
                     ef->total_memsz = phdr->p_vaddr + phdr->p_memsz;
                     ef->loadable_segments[ef->num_loadable_segments++] = phdr;
                 }
@@ -1240,12 +1280,14 @@ private_process_segments(struct bfelf_file_t *ef)
         }
     }
 
-    if (ef->num_loadable_segments > 0) {
+    if (ef->num_loadable_segments > 0)
+    {
         ef->start_addr = ef->loadable_segments[0]->p_vaddr;
         ef->total_memsz -= ef->start_addr;
     }
 
-    for (i = 0; i < ef->num_loadable_segments; i++) {
+    for (i = 0; i < ef->num_loadable_segments; i++)
+    {
         const struct bfelf_phdr *phdr = ef->loadable_segments[i];
 
         ef->load_instr[i].perm = phdr->p_flags;
@@ -1270,16 +1312,19 @@ private_process_dynamic_section(struct bfelf_file_t *ef)
     ef->num_needed = 0;
     ef->dyntab = rcast(const struct bfelf_dyn *, ef->file + ef->dynoff);
 
-    for (i = 0; i < ef->dynnum; i++) {
+    for (i = 0; i < ef->dynnum; i++)
+    {
         const struct bfelf_dyn *dyn = &(ef->dyntab[i]);
 
-        switch (dyn->d_tag) {
+        switch (dyn->d_tag)
+        {
             case bfdt_null:
                 return;
 
             case bfdt_needed:
 
-                if (ef->num_needed < BFELF_MAX_NEEDED) {
+                if (ef->num_needed < BFELF_MAX_NEEDED)
+                {
                     ef->needed[ef->num_needed++] = dyn->d_val;
                 }
 
@@ -1359,8 +1404,8 @@ private_process_dynamic_section(struct bfelf_file_t *ef)
  * @expects file != nullptr
  * @expects filesz != nullptr
  * @expects ef != nullptr
- * @ensures 
- * 
+ * @ensures
+ *
  * @param file a character buffer containing the contents of the ELF file to
  *     be loaded.
  * @param filesz the size of the character buffer
@@ -1373,19 +1418,23 @@ bfelf_file_init(const char *file, uint64_t filesz, struct bfelf_file_t *ef)
     int64_t ret = 0;
     bfelf64_word i = 0;
 
-    if (!file) {
+    if (!file)
+    {
         return bfinvalid_argument("file == NULL");
     }
 
-    if (!ef) {
+    if (!ef)
+    {
         return bfinvalid_argument("ef == NULL");
     }
 
-    if (filesz == 0 || filesz < sizeof(struct bfelf_ehdr)) {
+    if (filesz == 0 || filesz < sizeof(struct bfelf_ehdr))
+    {
         return bfinvalid_argument("filesz invalid");
     }
 
-    for (i = 0; i < sizeof(struct bfelf_file_t); i++) {
+    for (i = 0; i < sizeof(struct bfelf_file_t); i++)
+    {
         rcast(char *, ef)[i] = 0;
     }
 
@@ -1397,12 +1446,14 @@ bfelf_file_init(const char *file, uint64_t filesz, struct bfelf_file_t *ef)
     ef->shdrtab = rcast(const struct bfelf_shdr *, file + ef->ehdr->e_shoff);
 
     ret = private_check_signature(ef);
-    if (ret != BFELF_SUCCESS) {
+    if (ret != BFELF_SUCCESS)
+    {
         goto failure;
     }
 
     ret = private_check_support(ef);
-    if (ret != BFELF_SUCCESS) {
+    if (ret != BFELF_SUCCESS)
+    {
         goto failure;
     }
 
@@ -1429,23 +1480,27 @@ bfelf_file_init(const char *file, uint64_t filesz, struct bfelf_file_t *ef)
      * sections now because the file will not be available later.
      */
 
-    for (i = 0; i < ef->ehdr->e_shnum; i++) {
+    for (i = 0; i < ef->ehdr->e_shnum; i++)
+    {
         const struct bfelf_shdr *shdr = &(ef->shdrtab[i]);
         const char *name = &ef->shstrtab[shdr->sh_name];
 
-        if (private_strcmp(name, ".eh_frame") == BFELF_SUCCESS) {
+        if (private_strcmp(name, ".eh_frame") == BFELF_SUCCESS)
+        {
             ef->eh_frame = shdr->sh_addr;
             ef->eh_framesz = shdr->sh_size;
             continue;
         }
 
-        if (private_strcmp(name, ".ctors") == BFELF_SUCCESS) {
+        if (private_strcmp(name, ".ctors") == BFELF_SUCCESS)
+        {
             ef->init_array = shdr->sh_addr;
             ef->init_arraysz = shdr->sh_size;
             continue;
         }
 
-        if (private_strcmp(name, ".dtors") == BFELF_SUCCESS) {
+        if (private_strcmp(name, ".dtors") == BFELF_SUCCESS)
+        {
             ef->fini_array = shdr->sh_addr;
             ef->fini_arraysz = shdr->sh_size;
             continue;
@@ -1456,7 +1511,8 @@ bfelf_file_init(const char *file, uint64_t filesz, struct bfelf_file_t *ef)
 
 failure:
 
-    for (i = 0; i < sizeof(struct bfelf_file_t); i++) {
+    for (i = 0; i < sizeof(struct bfelf_file_t); i++)
+    {
         rcast(char *, ef)[i] = 0;
     }
 
@@ -1473,14 +1529,15 @@ failure:
  *
  * @expects ef != nullptr
  * @ensures returns BFELF_SUCCESS if params == valid
- * 
+ *
  * @param ef the ELF file
  * @return number of load instructions on success, negative on error
  */
 static inline int64_t
 bfelf_file_get_num_load_instrs(struct bfelf_file_t *ef)
 {
-    if (!ef) {
+    if (!ef)
+    {
         return bfinvalid_argument("ef == NULL");
     }
 
@@ -1497,7 +1554,7 @@ bfelf_file_get_num_load_instrs(struct bfelf_file_t *ef)
  * @expects index < bfelf_file_get_num_load_instrs()
  * @expects instr != nullptr
  * @ensures returns BFELF_SUCCESS if params == valid
- * 
+ *
  * @param ef the ELF file
  * @param index the index of the instructions to get
  * @param instr where to store the load instructions
@@ -1506,15 +1563,18 @@ bfelf_file_get_num_load_instrs(struct bfelf_file_t *ef)
 static inline int64_t
 bfelf_file_get_load_instr(struct bfelf_file_t *ef, uint64_t index, struct bfelf_load_instr **instr)
 {
-    if (!ef) {
+    if (!ef)
+    {
         return bfinvalid_argument("ef == NULL");
     }
 
-    if (!instr) {
+    if (!instr)
+    {
         return bfinvalid_argument("phdr == NULL");
     }
 
-    if (index >= ef->num_load_instr) {
+    if (index >= ef->num_load_instr)
+    {
         return bfinvalid_index("index >= number of load instructions");
     }
 
@@ -1543,37 +1603,45 @@ bfelf_file_get_section_info(struct bfelf_file_t *ef, struct section_info_t *info
 {
     bfelf64_word i = 0;
 
-    if (!ef) {
+    if (!ef)
+    {
         return bfinvalid_argument("ef == NULL");
     }
 
-    if (!info) {
+    if (!info)
+    {
         return bfinvalid_argument("info == NULL");
     }
 
-    for (i = 0; i < sizeof(struct section_info_t); i++) {
+    for (i = 0; i < sizeof(struct section_info_t); i++)
+    {
         rcast(char *, info)[i] = 0;
     }
 
-    if (ef->init != 0) {
+    if (ef->init != 0)
+    {
         info->init_addr = ef->init + ef->exec_virt;
     }
 
-    if (ef->fini != 0) {
+    if (ef->fini != 0)
+    {
         info->fini_addr = ef->fini + ef->exec_virt;
     }
 
-    if (ef->init_array != 0) {
+    if (ef->init_array != 0)
+    {
         info->init_array_addr = ef->init_array + ef->exec_virt;
         info->init_array_size = ef->init_arraysz;
     }
 
-    if (ef->fini_array != 0) {
+    if (ef->fini_array != 0)
+    {
         info->fini_array_addr = ef->fini_array + ef->exec_virt;
         info->fini_array_size = ef->fini_arraysz;
     }
 
-    if (ef->eh_frame != 0) {
+    if (ef->eh_frame != 0)
+    {
         info->eh_frame_addr = ef->eh_frame + ef->exec_virt;
         info->eh_frame_size = ef->eh_framesz;
     }
@@ -1589,7 +1657,7 @@ bfelf_file_get_section_info(struct bfelf_file_t *ef, struct section_info_t *info
  * @expects ef != nullptr
  * @expects addr != nullptr
  * @ensures returns BFELF_SUCCESS if params == valid
- * 
+ *
  * @param ef the ELF file to get the info structure for
  * @param addr the resulting address of the entry point
  * @return BFELF_SUCCESS on success, negative on error
@@ -1597,11 +1665,13 @@ bfelf_file_get_section_info(struct bfelf_file_t *ef, struct section_info_t *info
 static inline int64_t
 bfelf_file_get_entry(struct bfelf_file_t *ef, void **addr)
 {
-    if (!ef) {
+    if (!ef)
+    {
         return bfinvalid_argument("ef == NULL");
     }
 
-    if (!addr) {
+    if (!addr)
+    {
         return bfinvalid_argument("addr == NULL");
     }
 
@@ -1617,7 +1687,7 @@ bfelf_file_get_entry(struct bfelf_file_t *ef, void **addr)
  * @expects ef != nullptr
  * @expects perm != nullptr
  * @ensures returns BFELF_SUCCESS if params == valid
- * 
+ *
  * @param ef the ELF file to get the info structure for
  * @param perm the resulting permissions
  * @return BFELF_SUCCESS on success, negative on error
@@ -1625,11 +1695,13 @@ bfelf_file_get_entry(struct bfelf_file_t *ef, void **addr)
 static inline int64_t
 bfelf_file_get_stack_perm(struct bfelf_file_t *ef, bfelf64_xword *perm)
 {
-    if (!ef) {
+    if (!ef)
+    {
         return bfinvalid_argument("ef == NULL");
     }
 
-    if (!perm) {
+    if (!perm)
+    {
         return bfinvalid_argument("perm == NULL");
     }
 
@@ -1647,7 +1719,7 @@ bfelf_file_get_stack_perm(struct bfelf_file_t *ef, bfelf64_xword *perm)
  * @expects addr != nullptr
  * @expects size != nullptr
  * @ensures returns BFELF_SUCCESS if params == valid
- * 
+ *
  * @param ef the ELF file to get the info structure for
  * @param addr the resulting address
  * @param size the resulting size
@@ -1656,15 +1728,18 @@ bfelf_file_get_stack_perm(struct bfelf_file_t *ef, bfelf64_xword *perm)
 static inline int64_t
 bfelf_file_get_relro(struct bfelf_file_t *ef, bfelf64_addr *addr, bfelf64_xword *size)
 {
-    if (!ef) {
+    if (!ef)
+    {
         return bfinvalid_argument("ef == NULL");
     }
 
-    if (!addr) {
+    if (!addr)
+    {
         return bfinvalid_argument("addr == NULL");
     }
 
-    if (!size) {
+    if (!size)
+    {
         return bfinvalid_argument("size == NULL");
     }
 
@@ -1681,14 +1756,15 @@ bfelf_file_get_relro(struct bfelf_file_t *ef, bfelf64_addr *addr, bfelf64_xword 
  *
  * @expects ef != nullptr
  * @ensures returns BFELF_SUCCESS if params == valid
- * 
+ *
  * @param ef the ELF file to get the info structure for
  * @return number of needed entries on success, negative on error
  */
 static inline int64_t
 bfelf_file_get_num_needed(struct bfelf_file_t *ef)
 {
-    if (!ef) {
+    if (!ef)
+    {
         return bfinvalid_argument("ef == NULL");
     }
 
@@ -1705,7 +1781,7 @@ bfelf_file_get_num_needed(struct bfelf_file_t *ef)
  * @expects index < bfelf_file_get_num_needed()
  * @expects needed != nullptr
  * @ensures returns BFELF_SUCCESS if params == valid
- * 
+ *
  * @param ef the ELF file to get the info structure for
  * @param index the shared library name to get
  * @param needed the resulting needed library
@@ -1714,15 +1790,18 @@ bfelf_file_get_num_needed(struct bfelf_file_t *ef)
 static inline int64_t
 bfelf_file_get_needed(struct bfelf_file_t *ef, uint64_t index, const char **needed)
 {
-    if (!ef) {
+    if (!ef)
+    {
         return bfinvalid_argument("ef == NULL");
     }
 
-    if (!needed) {
+    if (!needed)
+    {
         return bfinvalid_argument("needed == NULL");
     }
 
-    if (index >= ef->num_needed) {
+    if (index >= ef->num_needed)
+    {
         return bfinvalid_index("index >= number of needed");
     }
 
@@ -1738,14 +1817,15 @@ bfelf_file_get_needed(struct bfelf_file_t *ef, uint64_t index, const char **need
  *
  * @expects ef != nullptr
  * @ensures returns BFELF_SUCCESS if params == valid
- * 
+ *
  * @param ef the ELF file to get the info structure for
  * @return number of needed entries on success, negative on error
  */
 static inline int64_t
 bfelf_file_get_total_size(struct bfelf_file_t *ef)
 {
-    if (!ef) {
+    if (!ef)
+    {
         return bfinvalid_argument("ef == NULL");
     }
 
@@ -1760,14 +1840,15 @@ bfelf_file_get_total_size(struct bfelf_file_t *ef)
  *
  * @expects ef != nullptr
  * @ensures returns BFELF_SUCCESS if params == valid
- * 
+ *
  * @param ef the ELF file to get the info structure for
  * @return 1 if compiled with PIC/PIE, 0 otherwise
  */
 static inline int64_t
 bfelf_file_get_pic_pie(struct bfelf_file_t *ef)
 {
-    if (!ef) {
+    if (!ef)
+    {
         return bfinvalid_argument("ef == NULL");
     }
 
@@ -1788,8 +1869,8 @@ bfelf_file_get_pic_pie(struct bfelf_file_t *ef)
  * @expects ef != nullptr
  * @expects exec_addr != nullptr
  * @expects exec_virt != nullptr
- * @ensures 
- * 
+ * @ensures
+ *
  * @param loader the ELF loader
  * @param ef the ELF file to add
  * @param exec_addr the address in memory where this ELF file was loaded.
@@ -1802,29 +1883,35 @@ bfelf_loader_add(
 {
     bfelf64_addr start;
 
-    if (!loader) {
+    if (!loader)
+    {
         return bfinvalid_argument("loader == NULL");
     }
 
-    if (!ef) {
+    if (!ef)
+    {
         return bfinvalid_argument("ef == NULL");
     }
 
-    if (!exec_addr) {
+    if (!exec_addr)
+    {
         return bfinvalid_argument("exec_addr == NULL");
     }
 
-    if (loader->num >= MAX_NUM_MODULES) {
+    if (loader->num >= MAX_NUM_MODULES)
+    {
         return bfloader_full("increase MAX_NUM_MODULES");
     }
 
-    if (ef->added++ != 0) {
+    if (ef->added++ != 0)
+    {
         return bfinvalid_argument("ef already added");
     }
 
     ef->exec_addr = exec_addr;
 
-    if (ef->start_addr == 0) {
+    if (ef->start_addr == 0)
+    {
         ef->exec_virt = exec_virt;
     }
 
@@ -1861,8 +1948,8 @@ bfelf_loader_add(
  * symbols for execution.
  *
  * @expects loader != nullptr
- * @ensures 
- * 
+ * @ensures
+ *
  * @param loader the ELF loader
  * @return BFELF_SUCCESS on success, negative on error
  */
@@ -1872,17 +1959,21 @@ bfelf_loader_relocate(struct bfelf_loader_t *loader)
     int64_t ret = 0;
     bfelf64_word i = 0;
 
-    if (!loader) {
+    if (!loader)
+    {
         return bfinvalid_argument("loader == NULL");
     }
 
-    if (loader->relocated == 1) {
+    if (loader->relocated == 1)
+    {
         return BFELF_SUCCESS;
     }
 
-    for (i = 0; i < loader->num; i++) {
+    for (i = 0; i < loader->num; i++)
+    {
         ret = private_relocate_symbols(loader, loader->efs[i]);
-        if (ret != BFELF_SUCCESS) {
+        if (ret != BFELF_SUCCESS)
+        {
             return ret;
         }
     }
@@ -1903,8 +1994,8 @@ bfelf_loader_relocate(struct bfelf_loader_t *loader)
  * @expects loader != nullptr
  * @expects loader != name
  * @expects loader != addr
- * @ensures 
- * 
+ * @ensures
+ *
  * @param loader the ELF loader
  * @param name the name of the symbol to resolve
  * @param addr the resulting address if the symbol is successfully resolved
@@ -1918,20 +2009,24 @@ bfelf_loader_resolve_symbol(struct bfelf_loader_t *loader, const char *name, voi
     struct bfelf_file_t *found_ef = 0;
     const struct bfelf_sym *found_sym = 0;
 
-    if (!loader) {
+    if (!loader)
+    {
         return bfinvalid_argument("loader == NULL");
     }
 
-    if (!name) {
+    if (!name)
+    {
         return bfinvalid_argument("name == NULL");
     }
 
-    if (!addr) {
+    if (!addr)
+    {
         return bfinvalid_argument("addr == NULL");
     }
 
     ret = private_get_sym_global(loader, name, &found_ef, &found_sym);
-    if (ret != BFELF_SUCCESS) {
+    if (ret != BFELF_SUCCESS)
+    {
         return ret;
     }
 
