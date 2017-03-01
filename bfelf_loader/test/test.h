@@ -63,23 +63,14 @@ private:
     void test_bfelf_file_init_invalid_version();
     void test_bfelf_file_init_invalid_flags();
 
-    void test_bfelf_file_num_load_instrs_invalid_ef();
-    void test_bfelf_file_num_load_instrs_uninitalized();
-    void test_bfelf_file_num_load_instrs_success();
+    void test_bfelf_file_get_num_load_instrs_invalid_ef();
+    void test_bfelf_file_get_num_load_instrs_uninitalized();
+    void test_bfelf_file_get_num_load_instrs_success();
 
     void test_bfelf_file_get_load_instr_invalid_ef();
     void test_bfelf_file_get_load_instr_invalid_index();
     void test_bfelf_file_get_load_instr_invalid_instr();
     void test_bfelf_file_get_load_instr_success();
-
-    void test_bfelf_file_resolve_symbol_invalid_loader();
-    void test_bfelf_file_resolve_symbol_invalid_name();
-    void test_bfelf_file_resolve_symbol_invalid_addr();
-    void test_bfelf_file_resolve_no_such_symbol_no_relocation();
-    void test_bfelf_file_resolve_no_such_symbol();
-    void test_bfelf_file_resolve_symbol_success();
-    void test_bfelf_file_resolve_no_such_symbol_no_hash();
-    void test_bfelf_file_resolve_symbol_success_no_hash();
 
     void test_bfelf_loader_add_invalid_loader();
     void test_bfelf_loader_add_invalid_elf_file();
@@ -138,7 +129,6 @@ private:
 
     void test_private_hash();
     void test_private_relocate_invalid_relocation();
-    void test_private_no_loadable_segments();
 
 private:
 

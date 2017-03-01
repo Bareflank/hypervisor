@@ -23,25 +23,6 @@
 
 #include <gsl/gsl>
 
-// -----------------------------------------------------------------------------
-// Expose Private Functions
-// -----------------------------------------------------------------------------
-
-extern "C"
-{
-    unsigned long
-    private_hash(const char *name);
-
-    int64_t
-    private_relocate_symbol(struct bfelf_loader_t *loader,
-                            struct bfelf_file_t *ef,
-                            struct bfelf_rela *rela);
-}
-
-// -----------------------------------------------------------------------------
-// Tests
-// -----------------------------------------------------------------------------
-
 void
 bfelf_loader_ut::test_private_hash()
 {
@@ -73,19 +54,4 @@ bfelf_loader_ut::test_private_relocate_invalid_relocation()
     gsl::at(symtab, 0).st_value = 0x1;
 
     this->expect_true(private_relocate_symbol(&loader, &ef, &rela) == BFELF_ERROR_UNSUPPORTED_RELA);
-}
-
-void
-bfelf_loader_ut::test_private_no_loadable_segments()
-{
-    bfelf_file_t ef;
-    auto &&data = get_test();
-    auto &&buff = std::get<0>(data);
-    auto &&size = std::get<1>(data);
-    auto &&test = reinterpret_cast<bfelf_test *>(buff.get());
-
-    test->header.e_phnum = 0;
-
-    auto ret = bfelf_file_init(buff.get(), size, &ef);
-    this->expect_true(ret == BFELF_ERROR_INVALID_FILE);
 }

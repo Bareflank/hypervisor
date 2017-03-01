@@ -77,23 +77,14 @@ bool bfelf_loader_ut::list()
     this->test_bfelf_file_init_invalid_version();
     this->test_bfelf_file_init_invalid_flags();
 
-    this->test_bfelf_file_num_load_instrs_invalid_ef();
-    this->test_bfelf_file_num_load_instrs_uninitalized();
-    this->test_bfelf_file_num_load_instrs_success();
+    this->test_bfelf_file_get_num_load_instrs_invalid_ef();
+    this->test_bfelf_file_get_num_load_instrs_uninitalized();
+    this->test_bfelf_file_get_num_load_instrs_success();
 
     this->test_bfelf_file_get_load_instr_invalid_ef();
     this->test_bfelf_file_get_load_instr_invalid_index();
     this->test_bfelf_file_get_load_instr_invalid_instr();
     this->test_bfelf_file_get_load_instr_success();
-
-    this->test_bfelf_file_resolve_symbol_invalid_loader();
-    this->test_bfelf_file_resolve_symbol_invalid_name();
-    this->test_bfelf_file_resolve_symbol_invalid_addr();
-    this->test_bfelf_file_resolve_no_such_symbol_no_relocation();
-    this->test_bfelf_file_resolve_no_such_symbol();
-    this->test_bfelf_file_resolve_symbol_success();
-    this->test_bfelf_file_resolve_no_such_symbol_no_hash();
-    this->test_bfelf_file_resolve_symbol_success_no_hash();
 
     this->test_bfelf_loader_add_invalid_loader();
     this->test_bfelf_loader_add_invalid_elf_file();
@@ -152,7 +143,6 @@ bool bfelf_loader_ut::list()
 
     this->test_private_hash();
     this->test_private_relocate_invalid_relocation();
-    this->test_private_no_loadable_segments();
 
     return true;
 }
@@ -175,7 +165,7 @@ std::pair<std::unique_ptr<char[]>, uint64_t>
 bfelf_loader_ut::get_elf_exec(bfelf_file_t *ef)
 {
     auto &&total = static_cast<size_t>(bfelf_file_get_total_size(ef));
-    auto &&num_segments = bfelf_file_num_load_instrs(ef);
+    auto &&num_segments = bfelf_file_get_num_load_instrs(ef);
 
     auto &&exec = std::unique_ptr<char[]>(alloc_exec(total));
 
