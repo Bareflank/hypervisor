@@ -1263,9 +1263,6 @@ static inline void
 private_process_dynamic_section(struct bfelf_file_t *ef)
 {
     bfelf64_xword i = 0;
-    bfelf64_xword relaent = 0;
-    bfelf64_xword relasz_dyn = 0;
-    bfelf64_xword relasz_plt = 0;
 
     if (ef->dynnum == 0 || ef->dynoff == 0)
         return;
@@ -1278,7 +1275,7 @@ private_process_dynamic_section(struct bfelf_file_t *ef)
 
         switch (dyn->d_tag) {
             case bfdt_null:
-                goto done;
+                return;
 
             case bfdt_needed:
 
@@ -1289,7 +1286,7 @@ private_process_dynamic_section(struct bfelf_file_t *ef)
                 break;
 
             case bfdt_pltrelsz:
-                relasz_plt = dyn->d_val;
+                ef->relanum_plt = dyn->d_val / sizeof(struct bfelf_rela);
                 break;
 
             case bfdt_hash:
@@ -1309,11 +1306,7 @@ private_process_dynamic_section(struct bfelf_file_t *ef)
                 break;
 
             case bfdt_relasz:
-                relasz_dyn = dyn->d_val;
-                break;
-
-            case bfdt_relaent:
-                relaent = dyn->d_val;
+                ef->relanum_dyn = dyn->d_val / sizeof(struct bfelf_rela);
                 break;
 
             case bfdt_init:
@@ -1351,13 +1344,6 @@ private_process_dynamic_section(struct bfelf_file_t *ef)
             default:
                 break;
         }
-    }
-
-done:
-
-    if (relaent != 0) {
-        ef->relanum_dyn = relasz_dyn / relaent;
-        ef->relanum_plt = relasz_plt / relaent;
     }
 }
 

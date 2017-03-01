@@ -34,7 +34,7 @@ TARGET_COMPILER:=cross
 CROSS_CCFLAGS+=
 CROSS_CXXFLAGS+=
 CROSS_ASMFLAGS+=
-CROSS_LDFLAGS+=--unresolved-symbols=ignore-all --export-dynamic -pie --no-dynamic-linker
+CROSS_LDFLAGS+=--export-dynamic -pie -Wl
 CROSS_ARFLAGS+=
 CROSS_DEFINES+=
 
@@ -63,9 +63,29 @@ INCLUDE_PATHS+=./
 INCLUDE_PATHS+=%HYPER_ABS%/include/
 INCLUDE_PATHS+=%HYPER_ABS%/bfvmm/include/
 
-LIBS+=
+LIBS+=vmcs
+LIBS+=exit_handler
+LIBS+=vcpu
+LIBS+=vcpu_factory
+LIBS+=vmxon
+LIBS+=debug_ring
+LIBS+=intrinsics
+LIBS+=memory_manager
+LIBS+=c
+LIBS+=c++
+LIBS+=c++abi
+LIBS+=serial
 
-LIBRARY_PATHS+=
+LIBRARY_PATHS+=%BUILD_REL%/../bin/native
+LIBRARY_PATHS+=%BUILD_REL%/../../vmcs/bin/native
+LIBRARY_PATHS+=%BUILD_REL%/../../exit_handler/bin/native
+LIBRARY_PATHS+=%BUILD_REL%/../../vcpu/bin/native
+LIBRARY_PATHS+=%BUILD_REL%/../../vcpu_factory/bin/native
+LIBRARY_PATHS+=%BUILD_REL%/../../vmxon/bin/native
+LIBRARY_PATHS+=%BUILD_REL%/../../debug_ring/bin/native
+LIBRARY_PATHS+=%BUILD_REL%/../../intrinsics/bin/native
+LIBRARY_PATHS+=%BUILD_REL%/../../memory_manager/bin/native
+LIBRARY_PATHS+=%BUILD_REL%/../../serial/bin/native
 
 ################################################################################
 # Environment Specific

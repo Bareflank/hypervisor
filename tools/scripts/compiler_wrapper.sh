@@ -29,40 +29,6 @@
 SYSROOT_NAME=`basename $0 | cut -d '-' -f 2`
 
 # ------------------------------------------------------------------------------
-# Docker Setup
-# ------------------------------------------------------------------------------
-
-if [[ -f /.dockerenv ]]; then
-    HOME=/tmp
-fi
-
-DOCKER_UID=`id -u $USER`
-DOCKER_GID=`id -g $USER`
-
-for dir in $BUILD_ABS/extensions/*
-do
-    if [[ ! -d "$dir" ]]; then
-        continue
-    fi
-
-    abs_dir=`cd $dir; pwd -P`
-
-    DOCKER_ARGS="-v $abs_dir:$abs_dir $DOCKER_ARGS"
-
-done
-
-DOCKER_ARGS="$DOCKER_ARGS -e SYSROOT_NAME=$SYSROOT_NAME -v $HYPER_ABS:$HYPER_ABS -v $BUILD_ABS:$BUILD_ABS -u $DOCKER_UID:$DOCKER_GID --rm -i bareflank/$compiler"
-
-# ------------------------------------------------------------------------------
-# Local / Docker Compiler
-# ------------------------------------------------------------------------------
-
-if [[ -d "$HOME/compilers/$compiler" ]]; then
-    LOCAL_COMPILER="true"
-    export PATH="$HOME/compilers/$compiler/bin/:$PATH"
-fi
-
-# ------------------------------------------------------------------------------
 # Compiler
 # ------------------------------------------------------------------------------
 
@@ -71,151 +37,68 @@ COMPILER="unsupported"
 case $0 in
 
 *"ar")
-    if [[ $LOCAL_COMPILER == "true" ]]; then
-        COMPILER="$HOME/compilers/$compiler/bin/x86_64-elf-ar"
-    else
-        COMPILER="docker run $DOCKER_ARGS /tmp/compilers/$compiler/bin/x86_64-elf-ar"
-    fi
-
-    $COMPILER $@
+    ar $@
     exit 0
     ;;
 
 *"as")
-    if [[ $LOCAL_COMPILER == "true" ]]; then
-        COMPILER="$HOME/compilers/$compiler/bin/x86_64-elf-as"
-    else
-        COMPILER="docker run $DOCKER_ARGS /tmp/compilers/$compiler/bin/x86_64-elf-as"
-    fi
-
-    $COMPILER $@
+    as $@
     exit 0
     ;;
 
 *"ld")
-    if [[ $LOCAL_COMPILER == "true" ]]; then
-        COMPILER="$HOME/compilers/$compiler/bin/x86_64-elf-ld"
-    else
-        COMPILER="docker run $DOCKER_ARGS /tmp/compilers/$compiler/bin/x86_64-elf-ld"
-    fi
-
-    $COMPILER $@
-    exit 0
+    echo "ld currently not supported"
+    exit 1
     ;;
 
 *"nm")
-    if [[ $LOCAL_COMPILER == "true" ]]; then
-        COMPILER="$HOME/compilers/$compiler/bin/x86_64-elf-nm"
-    else
-        COMPILER="docker run $DOCKER_ARGS /tmp/compilers/$compiler/bin/x86_64-elf-nm"
-    fi
-
-    $COMPILER $@
+    nm $@
     exit 0
     ;;
 
 *"objcopy")
-    if [[ $LOCAL_COMPILER == "true" ]]; then
-        COMPILER="$HOME/compilers/$compiler/bin/x86_64-elf-objcopy"
-    else
-        COMPILER="docker run $DOCKER_ARGS /tmp/compilers/$compiler/bin/x86_64-elf-objcopy"
-    fi
-
-    $COMPILER $@
+    objcopy $@
     exit 0
     ;;
 
 *"objdump")
-    if [[ $LOCAL_COMPILER == "true" ]]; then
-        COMPILER="$HOME/compilers/$compiler/bin/x86_64-elf-objdump"
-    else
-        COMPILER="docker run $DOCKER_ARGS /tmp/compilers/$compiler/bin/x86_64-elf-objdump"
-    fi
-
-    $COMPILER $@
+    objdump $@
     exit 0
     ;;
 
 *"ranlib")
-    if [[ $LOCAL_COMPILER == "true" ]]; then
-        COMPILER="$HOME/compilers/$compiler/bin/x86_64-elf-ranlib"
-    else
-        COMPILER="docker run $DOCKER_ARGS /tmp/compilers/$compiler/bin/x86_64-elf-ranlib"
-    fi
-
-    $COMPILER $@
+    ranlib $@
     exit 0
     ;;
 
 *"readelf")
-    if [[ $LOCAL_COMPILER == "true" ]]; then
-        COMPILER="$HOME/compilers/$compiler/bin/x86_64-elf-readelf"
-    else
-        COMPILER="docker run $DOCKER_ARGS /tmp/compilers/$compiler/bin/x86_64-elf-readelf"
-    fi
-
-    $COMPILER $@
+    readelf $@
     exit 0
     ;;
 
 *"strip")
-    if [[ $LOCAL_COMPILER == "true" ]]; then
-        COMPILER="$HOME/compilers/$compiler/bin/x86_64-elf-strip"
-    else
-        COMPILER="docker run $DOCKER_ARGS /tmp/compilers/$compiler/bin/x86_64-elf-strip"
-    fi
-
-    $COMPILER $@
+    strip $@
     exit 0
     ;;
 
 *"clang")
     C_COMPILER="true"
-    if [[ $LOCAL_COMPILER == "true" ]]; then
-        COMPILER="$HOME/compilers/$compiler/bin/clang --target=x86_64-elf -Qunused-arguments"
-    else
-        COMPILER="docker run $DOCKER_ARGS /tmp/compilers/$compiler/bin/clang --target=x86_64-elf -Qunused-arguments"
-    fi
+    COMPILER="$compiler --target=x86_64-elf -Qunused-arguments"
     ;;
 
 *"clang++")
     CXX_COMPILER="true"
-    if [[ $LOCAL_COMPILER == "true" ]]; then
-        COMPILER="$HOME/compilers/$compiler/bin/clang++ --target=x86_64-elf -Qunused-arguments"
-    else
-        COMPILER="docker run $DOCKER_ARGS /tmp/compilers/$compiler/bin/clang++ --target=x86_64-elf -Qunused-arguments"
-    fi
+    COMPILER="${compiler/clang/clang++} --target=x86_64-elf -Qunused-arguments"
     ;;
 
 *"nasm")
-    if [[ $LOCAL_COMPILER == "true" ]]; then
-        COMPILER="$HOME/compilers/$compiler/bin/nasm"
-    else
-        COMPILER="docker run $DOCKER_ARGS /tmp/compilers/$compiler/bin/nasm"
-    fi
-
-    $COMPILER $@
-    exit 0
-    ;;
-
-*"docker")
-    if [[ $LOCAL_COMPILER == "true" ]]; then
-        COMPILER="eval SYSROOT_NAME=$SYSROOT_NAME"
-    else
-        COMPILER="docker run $DOCKER_ARGS"
-    fi
-
-    $COMPILER $@
+    nasm $@
     exit 0
     ;;
 
 esac
 
-if [[ $LOCAL_COMPILER == "true" ]]; then
-    LINKER="$HOME/compilers/$compiler/bin/x86_64-elf-ld"
-else
-    LINKER="docker run $DOCKER_ARGS /tmp/compilers/$compiler/bin/x86_64-elf-ld"
-fi
+LINKER=$linker
 
 if [[ $COMPILER == "unsupported" ]]; then
     echo "You cannot use the wrapper directly. Instead, one of the provided symlinks"

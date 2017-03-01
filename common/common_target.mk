@@ -146,10 +146,10 @@ ifeq ($(COVERALLS), true)
 	NATIVE_CCFLAGS+=-fprofile-arcs -ftest-coverage
 endif
 
-ifneq ($(IGNORE_WARNINGS),yes)
-	NATIVE_CCFLAGS+=-Werror
-	CROSS_CCFLAGS+=-Werror
-endif
+# ifneq ($(IGNORE_WARNINGS),yes)
+# 	NATIVE_CCFLAGS+=-Werror
+# 	CROSS_CCFLAGS+=-Werror
+# endif
 
 ifeq ($(TARGET_NATIVE_COMPILED), true)
 	ifeq ($(OS), windows)
@@ -215,10 +215,10 @@ ifeq ($(COVERALLS), true)
 	NATIVE_CXXFLAGS+=-fprofile-arcs -ftest-coverage
 endif
 
-ifneq ($(IGNORE_WARNINGS),yes)
-	NATIVE_CXXFLAGS+=-Werror
-	CROSS_CXXFLAGS+=-Werror
-endif
+# ifneq ($(IGNORE_WARNINGS),yes)
+# 	NATIVE_CXXFLAGS+=-Werror
+# 	CROSS_CXXFLAGS+=-Werror
+# endif
 
 ifeq ($(TARGET_NATIVE_COMPILED), true)
 	ifeq ($(OS), windows)

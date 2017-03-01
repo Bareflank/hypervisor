@@ -55,13 +55,12 @@ matrix:
   - os: linux
     env:
       - TEST="Coveralls"
-    services:
-      - docker
     before_install:
       - pip install --user git+git://github.com/eddyxu/cpp-coveralls.git
     install:
-      - travis_wait 40 ./tools/scripts/setup_ubuntu.sh
+      - travis_wait 40 ./tools/scripts/setup_ubuntu.sh --no-configure
     script:
+      - ./configure --compiler clang-3.8 --linker ld.gold
       - COVERALLS=true make
       - make test
     after_success:
@@ -73,17 +72,10 @@ matrix:
   - os: linux
     env:
       - TEST="Clang Tidy"
-    services:
-      - docker
-    addons:
-      apt:
-        sources: [ 'ubuntu-toolchain-r-test', 'llvm-toolchain-trusty-3.8' ]
-        packages: [ 'clang-3.8', 'clang-tidy-3.8' ]
     install:
       - travis_wait 40 ./tools/scripts/setup_ubuntu.sh
       - git clone https://github.com/rizsotto/bear.git
       - pushd bear; cmake .; make; sudo make install; popd
-      - sudo ln -s /usr/bin/clang-tidy-3.8 /usr/bin/clang-tidy
     script:
       - STATIC_ANALYSIS_ENABLED=true bear make
       - make tidy
@@ -94,8 +86,6 @@ matrix:
   - os: linux
     env:
       - TEST="Google Sanitizers"
-    services:
-      - docker
     install:
       - travis_wait 40 ./tools/scripts/setup_ubuntu.sh
     script:
@@ -128,11 +118,8 @@ matrix:
   - os: linux
     env:
       - TEST="Clang 3.8"
-    services:
-      - docker
     install:
-      - travis_wait 40 ./tools/scripts/setup_ubuntu.sh --compiler clang_38
-      - cat env.sh
+      - travis_wait 40 ./tools/scripts/setup_ubuntu.sh --compiler clang-3.8
     script:
       - make
       - make test
@@ -143,11 +130,8 @@ matrix:
   - os: linux
     env:
       - TEST="Clang 3.9"
-    services:
-      - docker
     install:
-      - travis_wait 40 ./tools/scripts/setup_ubuntu.sh --compiler clang_39
-      - cat env.sh
+      - travis_wait 40 ./tools/scripts/setup_ubuntu.sh --compiler clang-3.9
     script:
       - make
       - make test
