@@ -1,13 +1,13 @@
 ## Linux Driver Compilation Instructions
 
 Supported Linux distributions are:
-- Ubuntu 16.10, 16.04, 14.04
+- Ubuntu 16.10
 - Debian Stretch
 - Fedora 25, 24, 23
 - OpenSUSE Leap 42.2
 
 NOTE: If you would like to use an unsupported platform, so long as you have
-the latest and greatest docker, and GCC5+, it's likely that a build is
+the latest clang and cmake it's likely that a build is
 possible. The above platforms are simply what our developers are testing.
 If you plan to use an unsupported platform, start by modifying a
 setup_\<platform\>.sh to suit your needs. In some cases, all you have to

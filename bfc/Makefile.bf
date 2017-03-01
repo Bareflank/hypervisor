@@ -41,7 +41,7 @@ all: $(BUILD_ABS)/sysroot_vmm/x86_64-vmm-elf/lib/libc.so
 	@echo > /dev/null
 
 $(BUILD_ABS)/sysroot_vmm/x86_64-vmm-elf/lib/libc.so:
-	$(BUILD_ABS)/build_scripts/x86_64-vmm-docker $(BUILD_ABS)/build_scripts/build_newlib.sh
+	SYSROOT_NAME=vmm $(BUILD_ABS)/build_scripts/build_newlib.sh
 
 build_src: all
 build_tests: all
@@ -54,7 +54,10 @@ run_tests:
 clean: clean_src
 
 clean_src:
-	rm $(BUILD_ABS)/sysroot_vmm/x86_64-vmm-elf/lib/libc.so
+	rm -Rf $(BUILD_ABS)/sysroot_vmm/x86_64-vmm-elf/lib/libg.a
+	rm -Rf $(BUILD_ABS)/sysroot_vmm/x86_64-vmm-elf/lib/libm.a
+	rm -Rf $(BUILD_ABS)/sysroot_vmm/x86_64-vmm-elf/lib/libc.a
+	rm -Rf $(BUILD_ABS)/sysroot_vmm/x86_64-vmm-elf/lib/libc.so
 
 clean_tests:
 	@echo > /dev/null

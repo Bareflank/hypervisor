@@ -41,10 +41,10 @@ all: $(BUILD_ABS)/sysroot_vmm/x86_64-vmm-elf/lib/libc++.so
 	@echo > /dev/null
 
 $(BUILD_ABS)/sysroot_vmm/x86_64-vmm-elf/lib/libc++abi.so:
-	$(BUILD_ABS)/build_scripts/x86_64-vmm-docker $(BUILD_ABS)/build_scripts/build_libcxxabi.sh
+	SYSROOT_NAME=vmm $(BUILD_ABS)/build_scripts/build_libcxxabi.sh
 
 $(BUILD_ABS)/sysroot_vmm/x86_64-vmm-elf/lib/libc++.so: $(BUILD_ABS)/sysroot_vmm/x86_64-vmm-elf/lib/libc++abi.so
-	$(BUILD_ABS)/build_scripts/x86_64-vmm-docker $(BUILD_ABS)/build_scripts/build_libcxx.sh
+	SYSROOT_NAME=vmm $(BUILD_ABS)/build_scripts/build_libcxx.sh
 
 build_src: all
 build_tests: all
@@ -57,8 +57,13 @@ run_tests:
 clean: clean_src
 
 clean_src:
-	rm $(BUILD_ABS)/sysroot_vmm/x86_64-vmm-elf/lib/libc++.so
-	rm $(BUILD_ABS)/sysroot_vmm/x86_64-vmm-elf/lib/libc++abi.so
+	rm -Rf $(BUILD_ABS)/sysroot_vmm/x86_64-vmm-elf/lib/libc++.so
+	rm -Rf $(BUILD_ABS)/sysroot_vmm/x86_64-vmm-elf/lib/libc++.so.1
+	rm -Rf $(BUILD_ABS)/sysroot_vmm/x86_64-vmm-elf/lib/libc++.so.1.0
+	rm -Rf $(BUILD_ABS)/sysroot_vmm/x86_64-vmm-elf/lib/libc++abi.a
+	rm -Rf $(BUILD_ABS)/sysroot_vmm/x86_64-vmm-elf/lib/libc++abi.so
+	rm -Rf $(BUILD_ABS)/sysroot_vmm/x86_64-vmm-elf/lib/libc++abi.so.1
+	rm -Rf $(BUILD_ABS)/sysroot_vmm/x86_64-vmm-elf/lib/libc++abi.so.1.0
 
 clean_tests:
 	@echo > /dev/null

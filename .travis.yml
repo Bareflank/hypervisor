@@ -15,6 +15,38 @@ env:
     - secure: "af7WejqMTjeh2jNz/WhtNZRbRqMDvvzUVAZOLulzkWV6U+VFMq4vn/RDM5P9SwyIjDUUwUqhnr9SEOkr33H7XjoSynG2alcnC27R5EshY0K6NvPmoWsECrVFr8M9J7w4NupbAh8a/e6TGeAVi5Pxc3rhn0TicL570JXrBYedkIXALmOT26URDqEpzrarXh5FmQvluvKoSrlLz2GCVw3S6FjRSS5AnGCDpgLvTJRSsAdHHdx+2tNG8iicNaAjn5+4cFoKwX1EfQJvoUMARAOM/qpz1tw04DgGO/Pu7uBhKUU0fCE0Sw2MkG8fmpm+HaCAzFm7OApYbhIYl7H/o4S3NL1vvMVAqg3DLF+/mfxJjW9TSvxiJXqILsA1lC8Ghxz7KKzdbNiKSUX0uUY6gq1MhJ9iySBsUVPeQwKmAbfge67IdY9lLOlYrFQma7JVap+ZwK9mozzW+w/MjHULYspLN6vi8s4zFBoEEga9CRv/jxmctf8eC6NJuFDtu8nPtEhywquzsnX/BY/YZkLGYr8wKXp6WL8vQWzRx5HCSg0suWFS3uPEMhq54IMZzrfP7TeCXF6nNUkOD63t2vllmx6diQi4jEV7zzORT3LaIW2Yirxg6p4mnUQXA8tWgEY1BDAGIzv1pGgu+qEWqHw7sWmjueN4UGAr0iokDP/V3UZIb5w="
 
 #
+# Compilers
+#
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+      - llvm-toolchain-trusty-3.8
+      - llvm-toolchain-trusty-3.9
+    packages:
+      - clang-3.8
+      - clang-3.9
+      - clang-tidy-3.8
+      - clang-tidy-3.9
+      - gcc-5
+      - g++-5
+      - nasm
+
+#
+# Update Build Environment
+#
+before_install:
+  - mkdir $HOME/usr
+  - export PATH="$HOME/usr/bin:$PATH"
+  - wget https://cmake.org/files/v3.7/cmake-3.7.2-Linux-x86_64.sh
+  - chmod +x cmake-3.7.2-Linux-x86_64.sh
+  - ./cmake-3.7.2-Linux-x86_64.sh --prefix=$HOME/usr --exclude-subdir --skip-license
+  - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-5 100
+  - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-5 100
+  - sudo update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-5 100
+  - sudo update-alternatives --install /usr/bin/clang-tidy clang-tidy /usr/bin/clang-tidy-3.8 100
+
+#
 # Build Matrix
 #
 matrix:
@@ -36,8 +68,7 @@ matrix:
     env:
       - TEST="Doxygen"
     script:
-      - ./configure
-      - travis_wait 30 make doxygen
+      - travis_wait 30 ./tools/doxygen/linux/run.sh
       - if cat doc/doxygen_warnings.txt | grep FIX; then echo "You must fix doxygen before submitting a pull request"; exit -1; fi
 
   #
@@ -55,13 +86,10 @@ matrix:
   - os: linux
     env:
       - TEST="Coveralls"
-    services:
-      - docker
-    before_install:
-      - pip install --user git+git://github.com/eddyxu/cpp-coveralls.git
     install:
-      - travis_wait 40 ./tools/scripts/setup_ubuntu.sh
+      - pip install --user git+git://github.com/eddyxu/cpp-coveralls.git
     script:
+      - ./configure --compiler clang-3.8
       - COVERALLS=true make
       - make test
     after_success:
@@ -73,18 +101,11 @@ matrix:
   - os: linux
     env:
       - TEST="Clang Tidy"
-    services:
-      - docker
-    addons:
-      apt:
-        sources: [ 'ubuntu-toolchain-r-test', 'llvm-toolchain-trusty-3.8' ]
-        packages: [ 'clang-3.8', 'clang-tidy-3.8' ]
     install:
-      - travis_wait 40 ./tools/scripts/setup_ubuntu.sh
       - git clone https://github.com/rizsotto/bear.git
       - pushd bear; cmake .; make; sudo make install; popd
-      - sudo ln -s /usr/bin/clang-tidy-3.8 /usr/bin/clang-tidy
     script:
+      - ./configure --compiler clang-3.8
       - STATIC_ANALYSIS_ENABLED=true bear make
       - make tidy
 
@@ -94,11 +115,8 @@ matrix:
   - os: linux
     env:
       - TEST="Google Sanitizers"
-    services:
-      - docker
-    install:
-      - travis_wait 40 ./tools/scripts/setup_ubuntu.sh
     script:
+      - ./configure --compiler clang-3.8
       - DYNAMIC_ANALYSIS_ENABLED=true make
       - make test
 
@@ -116,7 +134,7 @@ matrix:
           name: "Bareflank/hypervisor"
           description: "Travis CI Build"
         notification_email: rianquinn@gmail.com
-        build_command_prepend: "./tools/scripts/setup_ubuntu.sh"
+        build_command_prepend: "./configure --compiler clang-3.8"
         build_command: "STATIC_ANALYSIS_ENABLED=true make"
         branch_pattern: coverity_scan
     script:
@@ -128,12 +146,8 @@ matrix:
   - os: linux
     env:
       - TEST="Clang 3.8"
-    services:
-      - docker
-    install:
-      - travis_wait 40 ./tools/scripts/setup_ubuntu.sh --compiler clang_38
-      - cat env.sh
     script:
+      - ./configure --compiler clang-3.8
       - make
       - make test
 
@@ -143,11 +157,29 @@ matrix:
   - os: linux
     env:
       - TEST="Clang 3.9"
-    services:
-      - docker
-    install:
-      - travis_wait 40 ./tools/scripts/setup_ubuntu.sh --compiler clang_39
-      - cat env.sh
     script:
+      - ./configure --compiler clang-3.9
+      - make
+      - make test
+
+  #
+  # Clang 3.8 (Gold Linker)
+  #
+  - os: linux
+    env:
+      - TEST="Clang 3.8 (Gold Linker)"
+    script:
+      - ./configure --compiler clang-3.8 --linker ld.gold
+      - make
+      - make test
+
+  #
+  # Clang 3.9 (Gold Linker)
+  #
+  - os: linux
+    env:
+      - TEST="Clang 3.9 (Gold Linker)"
+    script:
+      - ./configure --compiler clang-3.9 --linker ld.gold
       - make
       - make test

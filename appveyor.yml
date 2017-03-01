@@ -3,9 +3,9 @@
 #
 environment:
     global:
-        CYG_ROOT: C:\cygwin64
-        CYG_MIRROR: http://cygwin.mirror.constant.com
-        CYG_BASH: C:\cygwin64\bin\bash
+        CYG_ROOT: C:\cygwin_bareflank
+        CYG_MIRROR: http://mirrors.kernel.org/sourceware/cygwin/
+        CYG_BASH: C:\cygwin_bareflank\bin\bash
 
 #
 # Do a shallow clone of the repo to speed up build
@@ -17,18 +17,17 @@ clone_depth: 1
 #
 install:
     - ps: 'Start-FileDownload "https://cygwin.com/setup-x86_64.exe" -FileName "setup-x86_64.exe"'
-    - 'setup-x86_64.exe --quiet-mode --no-shortcuts --only-site --root "%CYG_ROOT%" --site "%CYG_MIRROR%" --local-package-dir "%CYG_CACHE%" --packages git'
+    - 'setup-x86_64.exe --quiet-mode --no-shortcuts --only-site --root "%CYG_ROOT%" --site "%CYG_MIRROR%" --packages git'
     - 'copy setup-x86_64.exe %CYG_ROOT%\bin\'
-    - '%CYG_BASH% -lc "cygcheck -dc cygwin"'
 
 #
 # Build Bareflank
 #
 build_script:
     - 'echo Building...'
-    - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER; APPVEYOR=true ./tools/scripts/setup_cygwin.sh"'
-    - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER; APPVEYOR=true make -j2"'
-    - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER; APPVEYOR=true make driver_build"'
+    - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER; ./tools/scripts/setup_cygwin.sh --compiler clang --linker $HOME/usr/bin/x86_64-elf-ld.exe"'
+    - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER; make -j2"'
+    - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER; make driver_build"'
 
 #
 # Only build the master branch

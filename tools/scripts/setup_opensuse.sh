@@ -59,18 +59,10 @@ install_common_packages() {
     sudo zypper install -y kernel-devel
     sudo zypper update -y kernel-default
 
-    sudo zypper install -y docker
-
     sudo rm /usr/bin/gcc
     sudo rm /usr/bin/g++
     sudo ln -s /usr/bin/gcc-5 /usr/bin/gcc
     sudo ln -s /usr/bin/g++-5 /usr/bin/g++
-}
-
-prepare_docker() {
-    sudo usermod -a -G docker $USER
-    sudo systemctl start docker
-    sudo systemctl enable docker
 }
 
 # ------------------------------------------------------------------------------
@@ -80,7 +72,6 @@ prepare_docker() {
 case $( grep ^VERSION_ID= /etc/os-release | cut -d'=' -f 2 | tr -d '"' ) in
 42.2)
     install_common_packages
-    prepare_docker
     ;;
 
 *)

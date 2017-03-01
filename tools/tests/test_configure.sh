@@ -130,7 +130,6 @@ verify_default_created() {
     verify_file_exists $1/build_scripts/x86_64-bareflank-clang $2
     verify_file_exists $1/build_scripts/x86_64-bareflank-clang++ $2
     verify_file_exists $1/build_scripts/x86_64-bareflank-nasm $2
-    verify_file_exists $1/build_scripts/x86_64-bareflank-docker $2
     verify_file_exists $1/build_scripts/x86_64-bareflank-ranlib $2
     verify_directory_exists $1/makefiles $2
 }
@@ -155,7 +154,6 @@ verify_default_removed() {
     verify_file_does_not_exist $1/build_scripts/x86_64-bareflank-clang $2
     verify_file_does_not_exist $1/build_scripts/x86_64-bareflank-clang++ $2
     verify_file_does_not_exist $1/build_scripts/x86_64-bareflank-nasm $2
-    verify_file_does_not_exist $1/build_scripts/x86_64-bareflank-docker $2
     verify_file_does_not_exist $1/build_scripts/x86_64-bareflank-ranlib $2
     verify_directory_does_not_exist $1/makefiles $2
 }
@@ -665,7 +663,6 @@ test_build_scripts_update_all() {
     verify_file_exists $BR/build_scripts/x86_64-bareflank-clang $FUNCNAME
     verify_file_exists $BR/build_scripts/x86_64-bareflank-clang++ $FUNCNAME
     verify_file_exists $BR/build_scripts/x86_64-bareflank-nasm $FUNCNAME
-    verify_file_exists $BR/build_scripts/x86_64-bareflank-docker $FUNCNAME
     verify_file_exists $BR/build_scripts/x86_64-bareflank-ranlib $FUNCNAME
 }
 
@@ -690,7 +687,6 @@ test_build_scripts_update_scripts() {
     verify_file_exists $BR/build_scripts/x86_64-bareflank-clang $FUNCNAME
     verify_file_exists $BR/build_scripts/x86_64-bareflank-clang++ $FUNCNAME
     verify_file_exists $BR/build_scripts/x86_64-bareflank-nasm $FUNCNAME
-    verify_file_exists $BR/build_scripts/x86_64-bareflank-docker $FUNCNAME
     verify_file_exists $BR/build_scripts/x86_64-bareflank-ranlib $FUNCNAME
 }
 
@@ -715,7 +711,6 @@ test_build_scripts_update_makefiles() {
     verify_file_does_not_exist $BR/build_scripts/x86_64-bareflank-clang $FUNCNAME
     verify_file_does_not_exist $BR/build_scripts/x86_64-bareflank-clang++ $FUNCNAME
     verify_file_does_not_exist $BR/build_scripts/x86_64-bareflank-nasm $FUNCNAME
-    verify_file_does_not_exist $BR/build_scripts/x86_64-bareflank-docker $FUNCNAME
     verify_file_does_not_exist $BR/build_scripts/x86_64-bareflank-ranlib $FUNCNAME
     pushd $BR
     $HR/configure -u
@@ -743,7 +738,6 @@ test_build_scripts_update_make() {
     verify_file_exists $BR/build_scripts/x86_64-bareflank-clang $FUNCNAME
     verify_file_exists $BR/build_scripts/x86_64-bareflank-clang++ $FUNCNAME
     verify_file_exists $BR/build_scripts/x86_64-bareflank-nasm $FUNCNAME
-    verify_file_exists $BR/build_scripts/x86_64-bareflank-docker $FUNCNAME
     verify_file_exists $BR/build_scripts/x86_64-bareflank-ranlib $FUNCNAME
 }
 
@@ -768,7 +762,6 @@ test_build_scripts_update_make_subdir() {
     verify_file_does_not_exist $BR/build_scripts/x86_64-bareflank-clang $FUNCNAME
     verify_file_does_not_exist $BR/build_scripts/x86_64-bareflank-clang++ $FUNCNAME
     verify_file_does_not_exist $BR/build_scripts/x86_64-bareflank-nasm $FUNCNAME
-    verify_file_does_not_exist $BR/build_scripts/x86_64-bareflank-docker $FUNCNAME
     verify_file_does_not_exist $BR/build_scripts/x86_64-bareflank-ranlib $FUNCNAME
     pushd $BR
     $HR/configure -u
@@ -1191,7 +1184,6 @@ test_version_change_in_root_update_all() {
     verify_file_is_newer_than $BR/build_scripts/x86_64-bareflank-clang $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/build_scripts/x86_64-bareflank-clang++ $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/build_scripts/x86_64-bareflank-nasm $BR/timestamp $FUNCNAME
-    verify_file_is_newer_than $BR/build_scripts/x86_64-bareflank-docker $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/build_scripts/x86_64-bareflank-ranlib $BR/timestamp $FUNCNAME
     popd
 }
@@ -1232,7 +1224,6 @@ test_version_change_in_root_update_scripts() {
     verify_file_is_newer_than $BR/build_scripts/x86_64-bareflank-clang $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/build_scripts/x86_64-bareflank-clang++ $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/build_scripts/x86_64-bareflank-nasm $BR/timestamp $FUNCNAME
-    verify_file_is_newer_than $BR/build_scripts/x86_64-bareflank-docker $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/build_scripts/x86_64-bareflank-ranlib $BR/timestamp $FUNCNAME
     popd
 }
@@ -1273,7 +1264,6 @@ test_version_change_in_root_update_makefiles() {
     verify_file_is_newer_than $BR/build_scripts/x86_64-bareflank-clang $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/build_scripts/x86_64-bareflank-clang++ $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/build_scripts/x86_64-bareflank-nasm $BR/timestamp $FUNCNAME
-    verify_file_is_newer_than $BR/build_scripts/x86_64-bareflank-docker $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/build_scripts/x86_64-bareflank-ranlib $BR/timestamp $FUNCNAME
     popd
 }
@@ -1316,7 +1306,6 @@ test_version_change_in_root_update_make() {
     verify_file_is_newer_than $BR/build_scripts/x86_64-bareflank-clang $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/build_scripts/x86_64-bareflank-clang++ $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/build_scripts/x86_64-bareflank-nasm $BR/timestamp $FUNCNAME
-    verify_file_is_newer_than $BR/build_scripts/x86_64-bareflank-docker $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/build_scripts/x86_64-bareflank-ranlib $BR/timestamp $FUNCNAME
     popd
 }
@@ -1361,7 +1350,6 @@ test_version_change_in_root_update_make_subdir() {
     verify_file_is_newer_than $BR/build_scripts/x86_64-bareflank-clang $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/build_scripts/x86_64-bareflank-clang++ $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/build_scripts/x86_64-bareflank-nasm $BR/timestamp $FUNCNAME
-    verify_file_is_newer_than $BR/build_scripts/x86_64-bareflank-docker $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/build_scripts/x86_64-bareflank-ranlib $BR/timestamp $FUNCNAME
     popd
 }
@@ -1403,7 +1391,6 @@ test_version_change_in_root_update_all_down_version() {
     verify_file_is_newer_than $BR/build_scripts/x86_64-bareflank-clang $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/build_scripts/x86_64-bareflank-clang++ $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/build_scripts/x86_64-bareflank-nasm $BR/timestamp $FUNCNAME
-    verify_file_is_newer_than $BR/build_scripts/x86_64-bareflank-docker $BR/timestamp $FUNCNAME
     verify_file_is_newer_than $BR/build_scripts/x86_64-bareflank-ranlib $BR/timestamp $FUNCNAME
     popd
 }

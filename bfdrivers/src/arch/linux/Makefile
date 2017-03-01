@@ -7,7 +7,6 @@ ifneq ($(KERNELRELEASE),)
 	$(TARGET_MODULE)-objs += vmcall.o
 	$(TARGET_MODULE)-objs += platform.o
 	$(TARGET_MODULE)-objs += ../../common.o
-	$(TARGET_MODULE)-objs += ../../../../bfelf_loader/src/bfelf_loader.o
 
 	EXTRA_CFLAGS += -DKERNEL
 	EXTRA_CFLAGS += -DLINUX_KERNEL

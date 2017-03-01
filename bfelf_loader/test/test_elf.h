@@ -56,8 +56,10 @@ struct test_dynsym
 
 struct test_dynstr
 {
-    const char *func1 = "function1";
-    const char *func2 = "function2";
+    char str1[10];
+    char str2[10];
+    char str3[10];
+    char str4[10];
 };
 
 struct test_relatab
@@ -97,21 +99,22 @@ struct test_dynamic
     struct bfelf_dyn fini_array;
     struct bfelf_dyn init_arraysz;
     struct bfelf_dyn fini_arraysz;
-    struct bfelf_dyn relacount;
     struct bfelf_dyn flags_1;
     struct bfelf_dyn last;
 };
 
 struct test_shdrtab
 {
-    bfelf_shdr hash;         // 1
-    bfelf_shdr dynsym;       // 0
-    bfelf_shdr dynstr;       // 0
-    bfelf_shdr relatab;      // 4
-    bfelf_shdr eh_frame;     // 4
-    bfelf_shdr init_array;   // 4
-    bfelf_shdr fini_array;   // 4
-    bfelf_shdr dynamic;      // 4
+    bfelf_shdr hash;
+    bfelf_shdr dynsym;
+    bfelf_shdr dynstr;
+    bfelf_shdr relatab;
+    bfelf_shdr eh_frame;
+    bfelf_shdr init_array;
+    bfelf_shdr fini_array;
+    bfelf_shdr dynamic;
+    bfelf_shdr ctors;
+    bfelf_shdr dtors;
 };
 
 struct bfelf_test

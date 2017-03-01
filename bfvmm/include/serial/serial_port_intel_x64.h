@@ -268,7 +268,11 @@ public:
     ///
     /// @param str string to write
     ///
-    void write(const std::string &str) noexcept;
+    void write(const std::string &str) noexcept
+    {
+        for (auto c : str)
+            write(c);
+    }
 
 private:
 

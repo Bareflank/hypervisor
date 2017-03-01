@@ -177,22 +177,3 @@ driver_entry_ut::test_helper_load_elf_file_null_module()
 {
     this->expect_true(load_elf_file(nullptr) == BF_ERROR_INVALID_ARG);
 }
-
-void
-driver_entry_ut::test_helper_load_elf_file_get_load_instr_fails()
-{
-    this->expect_true(common_add_module(m_dummy_start_vmm_success.get(), m_dummy_start_vmm_success_length) == BF_SUCCESS);
-
-    {
-        MockRepository mocks;
-        mocks.ExpectCallFunc(bfelf_file_get_load_instr).Return(-1);
-
-        RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-        {
-            auto module = get_module(0);
-            this->expect_true(load_elf_file(module) == -1);
-        });
-    }
-
-    this->expect_true(common_fini() == BF_SUCCESS);
-}

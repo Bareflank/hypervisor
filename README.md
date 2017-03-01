@@ -61,7 +61,7 @@ and the
 including support for the [Guideline Support Library](https://github.com/Microsoft/GSL).
 
 Currently we have support for the following 64bit host operating systems on Intel _SandyBridge_ and above hardware:
-- Ubuntu 16.10, 16.04, 14.04
+- Ubuntu 16.10
 - Debian Stretch
 - Fedora 25, 24, 23
 - OpenSUSE Leap 42.2

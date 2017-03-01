@@ -65,25 +65,31 @@ void
 bfelf_loader_ut::test_bfelf_loader_add_too_many_files()
 {
     auto ret = 0LL;
-    bfelf_file_t dummy_misc_ef;
-
-    ret = bfelf_file_init(m_dummy_misc.get(), m_dummy_misc_length, &dummy_misc_ef);
-    this->expect_true(ret == BFELF_SUCCESS);
-
-    auto &&dummy_misc_pair = get_elf_exec(&dummy_misc_ef);
-    m_dummy_misc_exec = std::move(std::get<0>(dummy_misc_pair));
 
     bfelf_loader_t loader;
     memset(&loader, 0, sizeof(loader));
 
-    for (auto i = 0; i < MAX_NUM_MODULES; i++)
+    for (auto i = 0; i < MAX_NUM_MODULES + 1; i++)
     {
-        ret = bfelf_loader_add(&loader, &dummy_misc_ef, m_dummy_misc_exec.get(), m_dummy_misc_exec.get());
-        this->expect_true(ret == BFELF_SUCCESS);
-    }
+        bfelf_file_t dummy_misc_ef;
 
-    ret = bfelf_loader_add(&loader, &dummy_misc_ef, m_dummy_misc_exec.get(), m_dummy_misc_exec.get());
-    this->expect_true(ret == BFELF_ERROR_LOADER_FULL);
+        ret = bfelf_file_init(m_dummy_misc.get(), m_dummy_misc_length, &dummy_misc_ef);
+        this->expect_true(ret == BFELF_SUCCESS);
+
+        auto &&dummy_misc_pair = get_elf_exec(&dummy_misc_ef);
+        auto &&dummy_misc_exec = std::move(std::get<0>(dummy_misc_pair));
+
+        ret = bfelf_loader_add(&loader, &dummy_misc_ef, dummy_misc_exec.get(), dummy_misc_exec.get());
+
+        if (i < MAX_NUM_MODULES)
+        {
+            this->expect_true(ret == BFELF_SUCCESS);
+        }
+        else
+        {
+            this->expect_true(ret == BFELF_ERROR_LOADER_FULL);
+        }
+    }
 }
 
 void
