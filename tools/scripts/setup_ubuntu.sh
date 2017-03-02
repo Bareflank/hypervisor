@@ -67,10 +67,6 @@ case $( grep ^VERSION_ID= /etc/os-release | cut -d'=' -f 2 | tr -d '"' ) in
     install_clang_1610
     ;;
 
-14.04)
-    install_common_packages
-    ;;
-
 *)
     echo "This version of Ubuntu is not supported"
     exit 1
