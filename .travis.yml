@@ -78,6 +78,8 @@ matrix:
       - echo $PATH
       - rm -Rf `which cmake`
       - cmake --version
+      - export PATH="$HOME/usr/bin:$PATH"
+      - cmake --version
       - sudo update-alternatives --install /usr/bin/cmake gcc /usr/bin/gcc-5 100
       - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-5 100
       - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-5 100
