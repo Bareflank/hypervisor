@@ -66,6 +66,7 @@ matrix:
           - clang-3.8
           - gcc-5
           - g++-5
+          - nasm
     install:
       - mkdir $HOME/usr
       - wget https://cmake.org/files/v3.7/cmake-3.7.2-Linux-x86_64.sh
