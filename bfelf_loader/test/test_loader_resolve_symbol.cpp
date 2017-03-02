@@ -291,7 +291,7 @@ bfelf_loader_ut::test_bfelf_loader_resolve_symbol_real_test()
         ret = bfelf_file_get_section_info(&dummy_misc_ef, &info);
         this->expect_true(ret == BFELF_SUCCESS);
 
-        ret = bfelf_file_resolve_symbol(&dummy_misc_ef, "local_init", reinterpret_cast<void **>(&local_init));
+        ret = bfelf_loader_resolve_symbol(&loader, "local_init", reinterpret_cast<void **>(&local_init));
         this->expect_true(ret == BFELF_SUCCESS);
 
         local_init(&info);
@@ -299,7 +299,7 @@ bfelf_loader_ut::test_bfelf_loader_resolve_symbol_real_test()
         ret = bfelf_file_get_section_info(&dummy_code_ef, &info);
         this->expect_true(ret == BFELF_SUCCESS);
 
-        ret = bfelf_file_resolve_symbol(&dummy_misc_ef, "local_init", reinterpret_cast<void **>(&local_init));
+        ret = bfelf_loader_resolve_symbol(&loader, "local_init", reinterpret_cast<void **>(&local_init));
         this->expect_true(ret == BFELF_SUCCESS);
 
         local_init(&info);
@@ -321,7 +321,7 @@ bfelf_loader_ut::test_bfelf_loader_resolve_symbol_real_test()
         ret = bfelf_file_get_section_info(&dummy_misc_ef, &info);
         this->expect_true(ret == BFELF_SUCCESS);
 
-        ret = bfelf_file_resolve_symbol(&dummy_misc_ef, "local_fini", reinterpret_cast<void **>(&local_fini));
+        ret = bfelf_loader_resolve_symbol(&loader, "local_fini", reinterpret_cast<void **>(&local_fini));
         this->expect_true(ret == BFELF_SUCCESS);
 
         local_fini(&info);
@@ -329,7 +329,7 @@ bfelf_loader_ut::test_bfelf_loader_resolve_symbol_real_test()
         ret = bfelf_file_get_section_info(&dummy_code_ef, &info);
         this->expect_true(ret == BFELF_SUCCESS);
 
-        ret = bfelf_file_resolve_symbol(&dummy_misc_ef, "local_fini", reinterpret_cast<void **>(&local_fini));
+        ret = bfelf_loader_resolve_symbol(&loader, "local_fini", reinterpret_cast<void **>(&local_fini));
         this->expect_true(ret == BFELF_SUCCESS);
 
         local_fini(&info);

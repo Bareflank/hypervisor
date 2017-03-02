@@ -17,6 +17,5 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\common.c" />
-    <ClCompile Include="..\..\..\..\bfelf_loader\src\bfelf_loader.c" />
   </ItemGroup>
 </Project>

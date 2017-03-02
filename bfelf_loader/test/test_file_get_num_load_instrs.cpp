@@ -22,23 +22,23 @@
 #include <test.h>
 
 void
-bfelf_loader_ut::test_bfelf_file_num_load_instrs_invalid_ef()
+bfelf_loader_ut::test_bfelf_file_get_num_load_instrs_invalid_ef()
 {
-    auto ret = bfelf_file_num_load_instrs(nullptr);
+    auto ret = bfelf_file_get_num_load_instrs(nullptr);
     this->expect_true(ret == BFELF_ERROR_INVALID_ARG);
 }
 
 void
-bfelf_loader_ut::test_bfelf_file_num_load_instrs_uninitalized()
+bfelf_loader_ut::test_bfelf_file_get_num_load_instrs_uninitalized()
 {
     bfelf_file_t ef = {};
 
-    auto ret = bfelf_file_num_load_instrs(&ef);
+    auto ret = bfelf_file_get_num_load_instrs(&ef);
     this->expect_true(ret == 0);
 }
 
 void
-bfelf_loader_ut::test_bfelf_file_num_load_instrs_success()
+bfelf_loader_ut::test_bfelf_file_get_num_load_instrs_success()
 {
     auto ret = 0LL;
 
@@ -50,6 +50,6 @@ bfelf_loader_ut::test_bfelf_file_num_load_instrs_success()
     ret = bfelf_file_init(buff.get(), size, &ef);
     this->expect_true(ret == BFELF_SUCCESS);
 
-    ret = bfelf_file_num_load_instrs(&ef);
+    ret = bfelf_file_get_num_load_instrs(&ef);
     this->expect_true(ret > 0);
 }

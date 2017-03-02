@@ -111,18 +111,6 @@ driver_entry_ut::test_common_add_module_add_too_many()
 }
 
 void
-driver_entry_ut::test_common_add_module_file_get_total_size_fails()
-{
-    MockRepository mocks;
-    mocks.ExpectCallFunc(bfelf_file_get_total_size).Return(0);
-
-    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-    {
-        this->expect_true(common_add_module(m_dummy_start_vmm_success.get(), m_dummy_start_vmm_success_length) == BF_ERROR_FAILED_TO_ADD_FILE);
-    });
-}
-
-void
 driver_entry_ut::test_common_add_module_platform_alloc_fails()
 {
     MockRepository mocks;

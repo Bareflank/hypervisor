@@ -30,7 +30,6 @@
 #include <linux/reboot.h>
 
 #include <types.h>
-#include <debug.h>
 #include <common.h>
 #include <constants.h>
 #include <driver_entry_interface.h>
@@ -58,7 +57,7 @@ dev_open(struct inode *inode, struct file *file)
     (void) inode;
     (void) file;
 
-    DEBUG("dev_open succeeded\n");
+    ALERT("dev_open succeeded\n");
     return 0;
 }
 
@@ -68,7 +67,7 @@ dev_release(struct inode *inode, struct file *file)
     (void) inode;
     (void) file;
 
-    DEBUG("dev_release succeeded\n");
+    ALERT("dev_release succeeded\n");
     return 0;
 }
 
@@ -124,14 +123,14 @@ ioctl_add_module(char *file)
 
     g_num_files++;
 
-    DEBUG("IOCTL_ADD_MODULE: succeeded\n");
+    ALERT("IOCTL_ADD_MODULE: succeeded\n");
     return BF_IOCTL_SUCCESS;
 
 failed:
 
     vfree(buf);
 
-    DEBUG("IOCTL_ADD_MODULE: failed\n");
+    ALERT("IOCTL_ADD_MODULE: failed\n");
     return BF_IOCTL_FAILURE;
 }
 
@@ -153,7 +152,7 @@ ioctl_add_module_length(uint64_t *len)
         return BF_IOCTL_FAILURE;
     }
 
-    DEBUG("IOCTL_ADD_MODULE_LENGTH: succeeded\n");
+    ALERT("IOCTL_ADD_MODULE_LENGTH: succeeded\n");
     return BF_IOCTL_SUCCESS;
 }
 
@@ -183,7 +182,7 @@ ioctl_unload_vmm(void)
     g_num_files = 0;
 
     if (status == BF_IOCTL_SUCCESS)
-        DEBUG("IOCTL_UNLOAD_VMM: succeeded\n");
+        ALERT("IOCTL_UNLOAD_VMM: succeeded\n");
 
     return status;
 }
@@ -201,7 +200,7 @@ ioctl_load_vmm(void)
         goto failure;
     }
 
-    DEBUG("IOCTL_LOAD_VMM: succeeded\n");
+    ALERT("IOCTL_LOAD_VMM: succeeded\n");
     return BF_IOCTL_SUCCESS;
 
 failure:
@@ -226,7 +225,7 @@ ioctl_stop_vmm(void)
     }
 
     if (status == BF_IOCTL_SUCCESS)
-        DEBUG("IOCTL_STOP_VMM: succeeded\n");
+        ALERT("IOCTL_STOP_VMM: succeeded\n");
 
     return status;
 }
@@ -244,7 +243,7 @@ ioctl_start_vmm(void)
         goto failure;
     }
 
-    DEBUG("IOCTL_START_VMM: succeeded\n");
+    ALERT("IOCTL_START_VMM: succeeded\n");
     return BF_IOCTL_SUCCESS;
 
 failure:
@@ -274,7 +273,7 @@ ioctl_dump_vmm(struct debug_ring_resources_t *user_drr)
         return BF_IOCTL_FAILURE;
     }
 
-    DEBUG("IOCTL_DUMP_VMM: succeeded\n");
+    ALERT("IOCTL_DUMP_VMM: succeeded\n");
     return BF_IOCTL_SUCCESS;
 }
 
@@ -479,7 +478,7 @@ dev_init(void)
         return -EPERM;
     }
 
-    DEBUG("dev_init succeeded\n");
+    ALERT("dev_init succeeded\n");
     return 0;
 }
 
@@ -491,7 +490,7 @@ dev_exit(void)
     misc_deregister(&bareflank_dev);
     unregister_reboot_notifier(&bareflank_notifier_block);
 
-    DEBUG("dev_exit succeeded\n");
+    ALERT("dev_exit succeeded\n");
     return;
 }
 

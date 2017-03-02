@@ -59,7 +59,6 @@ private:
     void test_common_add_module_add_when_already_running();
     void test_common_add_module_add_when_corrupt();
     void test_common_add_module_add_too_many();
-    void test_common_add_module_file_get_total_size_fails();
     void test_common_add_module_platform_alloc_fails();
     void test_common_add_module_load_elf_fails();
 
@@ -75,13 +74,11 @@ private:
     void test_common_load_stack_platform_alloc_failed();
     void test_common_load_loader_add_failed();
     void test_common_load_resolve_symbol_failed();
-    void test_common_load_loader_get_info_failed();
     void test_common_load_execute_symbol_failed();
 
     void test_common_unload_unload_when_already_unloaded();
     void test_common_unload_unload_when_running();
     void test_common_unload_unload_when_corrupt();
-    void test_common_unload_loader_get_info_failed();
     void test_common_unload_execute_symbol_failed();
 
     void test_common_start_start_when_unloaded();
@@ -132,7 +129,6 @@ private:
     void test_helper_execute_symbol_sym_success();
     void test_helper_add_md_to_memory_manager_null_module();
     void test_helper_load_elf_file_null_module();
-    void test_helper_load_elf_file_get_load_instr_fails();
 
 private:
 
