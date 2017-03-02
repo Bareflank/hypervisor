@@ -68,11 +68,11 @@ matrix:
           - g++-5
     install:
       - mkdir $HOME/usr
-      - ls -al $HOME/usr
-      - ls -al $HOME/usr/bin/
       - wget https://cmake.org/files/v3.7/cmake-3.7.2-Linux-x86_64.sh
       - chmod +x cmake-3.7.2-Linux-x86_64.sh
       - ./cmake-3.7.2-Linux-x86_64.sh --prefix=$HOME/usr --exclude-subdir --skip-license
+      - ls -al $HOME/usr
+      - ls -al $HOME/usr/bin/
       - cmake --version
       - sudo update-alternatives --install /usr/bin/cmake gcc /usr/bin/gcc-5 100
       - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-5 100
