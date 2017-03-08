@@ -29,7 +29,9 @@ report_error()
 test_hypervisor()
 {
     sudo make > /dev/ttyS1
-    sudo make test > /dev/ttyS1
+    if [ "$distro" != "Cygwin" ] ; then
+        sudo make test > /dev/ttyS1
+    fi
     sudo ./tools/tests/test_hypervisor.sh > /dev/ttyS1
     echo Hypervisor Done > /dev/ttyS1
 }
@@ -39,7 +41,9 @@ test_extended_apis()
     git clone https://github.com/Bareflank/extended_apis > /dev/ttyS1
     sudo ./configure -m extended_apis/bin/extended_apis.modules > /dev/ttyS1
     sudo make > /dev/ttyS1
-    sudo make test > /dev/ttyS1
+    if [ "$distro" != "Cygwin" ] ; then
+        sudo make test > /dev/ttyS1
+    fi
     sudo ./extended_apis/tests/test_extended_apis.sh > /dev/ttyS1
     echo EAPIs Done > /dev/ttyS1
 }
@@ -49,7 +53,9 @@ test_hyperkernel()
     git clone https://github.com/Bareflank/hyperkernel > /dev/ttyS1
     sudo ./configure -m hyperkernel/bin/hyperkernel.modules > /dev/ttyS1
     sudo make > /dev/ttyS1
-    sudo make test > /dev/ttyS1
+    if [ "$distro" != "Cygwin" ] ; then
+        sudo make test > /dev/ttyS1
+    fi
     sudo ./hyperkernel/tests/test_hyperkernel.sh > /dev/ttyS1
     echo Hyperkernel Done > /dev/ttyS1
 }
@@ -95,6 +101,7 @@ test_hook()
 }
 
 trap report_error EXIT
+distro=$(uname -o)
 # Tests assume you are in the ~/hypervisor directory and have run your setup_XXX script
 test_hypervisor
 test_extended_apis
