@@ -24,6 +24,12 @@ cd ~/hypervisor
 ./tools/scripts/setup_ubuntu.sh
 ```
 
+NOTE: If you are running on a Fedora system, run the following line. Once you are done performing unit tests, make sure to undo this command.
+
+```
+sudo setenforce 0
+```
+
 Next you need to build the main source code.
 This can be done by doing the following:
 
