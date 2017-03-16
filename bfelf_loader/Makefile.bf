@@ -28,7 +28,6 @@ ifeq ($(shell uname -s), Linux)
         SUBDIRS += dummy_code
         SUBDIRS += dummy_misc
     endif
-    SUBDIRS += src
     SUBDIRS += bin
     SUBDIRS += test
 endif

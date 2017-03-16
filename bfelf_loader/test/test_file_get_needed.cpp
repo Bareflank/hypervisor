@@ -24,7 +24,7 @@
 void
 bfelf_loader_ut::test_bfelf_file_get_needed_invalid_ef()
 {
-    char *needed;
+    const char *needed;
     uint64_t index = 0;
 
     auto ret = bfelf_file_get_needed(nullptr, index, &needed);
@@ -34,7 +34,7 @@ bfelf_loader_ut::test_bfelf_file_get_needed_invalid_ef()
 void
 bfelf_loader_ut::test_bfelf_file_get_needed_invalid_index()
 {
-    char *needed;
+    const char *needed;
     uint64_t index = 0;
     bfelf_file_t ef = {};
 
@@ -81,9 +81,9 @@ bfelf_loader_ut::test_bfelf_file_get_needed_success()
     ret = bfelf_loader_relocate(&loader);
     this->expect_true(ret == BFELF_SUCCESS);
 
-    char *needed;
+    const char *needed;
     uint64_t index = 0;
-    \
+
     ret = bfelf_file_get_needed(&dummy_misc_ef, index, &needed);
     this->expect_true(ret == BFELF_SUCCESS);
 }

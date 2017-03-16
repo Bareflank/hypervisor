@@ -46,11 +46,6 @@ install_apt_tools() {
     sudo apt-get install --yes ca-certificates
 }
 
-add_docker_repositories() {
-    sudo apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
-    sudo add-apt-repository "deb https://apt.dockerproject.org/repo debian-$(lsb_release -s -c) main"
-}
-
 install_common_packages() {
     sudo apt-get update
     sudo apt-get install --yes build-essential
@@ -65,12 +60,6 @@ install_common_packages() {
     sudo apt-get install --yes clang
     sudo apt-get install --yes texinfo
     sudo apt-get install --yes cmake
-    sudo DEBIAN_FRONTEND=noninteractive apt-get install --yes -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" docker-engine
-}
-
-prepare_docker() {
-    sudo usermod -a -G docker $USER
-    sudo service docker restart
 }
 
 # ------------------------------------------------------------------------------
@@ -80,16 +69,12 @@ prepare_docker() {
 case $(lsb_release -sr) in
 testing)
     install_apt_tools
-    add_docker_repositories
     install_common_packages
-    prepare_docker
     ;;
 
 9.*)
     install_apt_tools
-    add_docker_repositories
     install_common_packages
-    prepare_docker
     ;;
 
 *)

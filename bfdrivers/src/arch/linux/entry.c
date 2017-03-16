@@ -29,8 +29,8 @@
 #include <linux/notifier.h>
 #include <linux/reboot.h>
 
-#include <types.h>
 #include <debug.h>
+#include <types.h>
 #include <common.h>
 #include <constants.h>
 #include <driver_entry_interface.h>
@@ -131,7 +131,7 @@ failed:
 
     vfree(buf);
 
-    DEBUG("IOCTL_ADD_MODULE: failed\n");
+    ALERT("IOCTL_ADD_MODULE: failed\n");
     return BF_IOCTL_FAILURE;
 }
 

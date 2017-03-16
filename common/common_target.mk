@@ -138,7 +138,6 @@ CROSS_CCFLAGS+=-Wall
 CROSS_CCFLAGS+=-Wextra
 CROSS_CCFLAGS+=-Wpedantic
 CROSS_CCFLAGS+=-Wshadow
-CROSS_CCFLAGS+=-Wcast-align
 CROSS_CCFLAGS+=-Wconversion
 CROSS_CCFLAGS+=-Wsign-conversion
 CROSS_CCFLAGS+=$(CONFIGURED_CROSS_CCFLAGS)
@@ -147,10 +146,10 @@ ifeq ($(COVERALLS), true)
 	NATIVE_CCFLAGS+=-fprofile-arcs -ftest-coverage
 endif
 
-ifneq ($(IGNORE_WARNINGS),yes)
-	NATIVE_CCFLAGS+=-Werror
-	CROSS_CCFLAGS+=-Werror
-endif
+# ifneq ($(IGNORE_WARNINGS),yes)
+# 	NATIVE_CCFLAGS+=-Werror
+# 	CROSS_CCFLAGS+=-Werror
+# endif
 
 ifeq ($(TARGET_NATIVE_COMPILED), true)
 	ifeq ($(OS), windows)
@@ -184,7 +183,6 @@ NATIVE_CXXFLAGS+=-Wctor-dtor-privacy
 NATIVE_CXXFLAGS+=-Wshadow
 NATIVE_CXXFLAGS+=-Wnon-virtual-dtor
 NATIVE_CXXFLAGS+=-Wold-style-cast
-NATIVE_CXXFLAGS+=-Wcast-align
 NATIVE_CXXFLAGS+=-Woverloaded-virtual
 NATIVE_CXXFLAGS+=-Wconversion
 NATIVE_CXXFLAGS+=-Wsign-conversion
@@ -207,7 +205,6 @@ CROSS_CXXFLAGS+=-Wctor-dtor-privacy
 CROSS_CXXFLAGS+=-Wshadow
 CROSS_CXXFLAGS+=-Wnon-virtual-dtor
 CROSS_CXXFLAGS+=-Wold-style-cast
-CROSS_CXXFLAGS+=-Wcast-align
 CROSS_CXXFLAGS+=-Woverloaded-virtual
 CROSS_CXXFLAGS+=-Wconversion
 CROSS_CXXFLAGS+=-Wsign-conversion
@@ -218,10 +215,10 @@ ifeq ($(COVERALLS), true)
 	NATIVE_CXXFLAGS+=-fprofile-arcs -ftest-coverage
 endif
 
-ifneq ($(IGNORE_WARNINGS),yes)
-	NATIVE_CXXFLAGS+=-Werror
-	CROSS_CXXFLAGS+=-Werror
-endif
+# ifneq ($(IGNORE_WARNINGS),yes)
+# 	NATIVE_CXXFLAGS+=-Werror
+# 	CROSS_CXXFLAGS+=-Werror
+# endif
 
 ifeq ($(TARGET_NATIVE_COMPILED), true)
 	ifeq ($(OS), windows)

@@ -22,6 +22,7 @@
 
 source $(dirname $0)/setup_common.sh
 
+
 # ------------------------------------------------------------------------------
 # Checks
 # ------------------------------------------------------------------------------
@@ -40,7 +41,7 @@ parse_arguments $@
 # ------------------------------------------------------------------------------
 
 install_common_packages() {
-    setup-x86_64.exe -q --wait -P make,gcc-core,gcc-g++,diffutils,libgmp-devel,libmpfr-devel,libmpc-devel,flex,bison,nasm,texinfo,unzip,git-completion,bash-completion,patch,ncurses,libncurses-devel,clang,libiconv-devel,curl,wget
+    setup-x86_64.exe -q --wait -P make,gcc-core,gcc-g++,diffutils,libgmp-devel,libmpfr-devel,libmpc-devel,flex,bison,nasm,texinfo,unzip,git-completion,bash-completion,patch,ncurses,libncurses-devel,clang,clang++,libiconv-devel,curl,wget
 }
 
 install_cmake() {
@@ -74,19 +75,19 @@ setup_ewdk() {
 case $(uname -r) in
 2.7.*)
     install_common_packages
-    if [[ ! $APPVEYOR == "true" ]]; then install_cmake; fi
+    install_cmake
     setup_ewdk
     ;;
 
 2.6.*)
     install_common_packages
-    if [[ ! $APPVEYOR == "true" ]]; then install_cmake; fi
+    install_cmake
     setup_ewdk
     ;;
 
 2.5.*)
     install_common_packages
-    if [[ ! $APPVEYOR == "true" ]]; then install_cmake; fi
+    install_cmake
     setup_ewdk
     ;;
 
@@ -95,6 +96,12 @@ case $(uname -r) in
     exit 1
 
 esac
+
+# ------------------------------------------------------------------------------
+# Setup Build Environment
+# ------------------------------------------------------------------------------
+
+./$(dirname $0)/build_binutils.sh
 
 # ------------------------------------------------------------------------------
 # Setup Build Environment

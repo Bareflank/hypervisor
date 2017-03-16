@@ -143,7 +143,6 @@ driver_entry_ut::list()
     this->test_common_add_module_add_when_already_running();
     this->test_common_add_module_add_when_corrupt();
     this->test_common_add_module_add_too_many();
-    this->test_common_add_module_file_get_total_size_fails();
     this->test_common_add_module_platform_alloc_fails();
     this->test_common_add_module_load_elf_fails();
 
@@ -159,13 +158,11 @@ driver_entry_ut::list()
     this->test_common_load_stack_platform_alloc_failed();
     this->test_common_load_loader_add_failed();
     this->test_common_load_resolve_symbol_failed();
-    this->test_common_load_loader_get_info_failed();
     this->test_common_load_execute_symbol_failed();
 
     this->test_common_unload_unload_when_already_unloaded();
     this->test_common_unload_unload_when_running();
     this->test_common_unload_unload_when_corrupt();
-    this->test_common_unload_loader_get_info_failed();
     this->test_common_unload_execute_symbol_failed();
 
     this->test_common_start_start_when_unloaded();
@@ -216,7 +213,6 @@ driver_entry_ut::list()
     this->test_helper_execute_symbol_sym_success();
     this->test_helper_add_md_to_memory_manager_null_module();
     this->test_helper_load_elf_file_null_module();
-    this->test_helper_load_elf_file_get_load_instr_fails();
 
     return verify_no_mem_leaks() != 0;
 }

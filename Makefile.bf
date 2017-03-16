@@ -68,27 +68,21 @@ endif
 # Subdirs
 ################################################################################
 
-ifneq ($(APPVEYOR), true)
-	PARENT_SUBDIRS += bfc
-	PARENT_SUBDIRS += bfcxx
-	PARENT_SUBDIRS += bfunwind
-endif
-
+PARENT_SUBDIRS += bfc
+PARENT_SUBDIRS += bfcxx
+PARENT_SUBDIRS += bfunwind
 PARENT_SUBDIRS += bfm
+PARENT_SUBDIRS += bfdrivers
+PARENT_SUBDIRS += bfelf_loader
+PARENT_SUBDIRS += bfvmm
+PARENT_SUBDIRS += $(wildcard %HYPER_ABS%/extended_apis/)
+PARENT_SUBDIRS += $(wildcard %HYPER_ABS%/hyperkernel/)
+PARENT_SUBDIRS += $(wildcard %HYPER_ABS%/src_*/)
+PARENT_SUBDIRS += $(wildcard %HYPER_ABS%/hypervisor_*/)
 
-ifneq ($(APPVEYOR), true)
-	PARENT_SUBDIRS += bfdrivers
-	PARENT_SUBDIRS += bfelf_loader
-	PARENT_SUBDIRS += bfvmm
-	PARENT_SUBDIRS += $(wildcard %HYPER_ABS%/extended_apis/)
-	PARENT_SUBDIRS += $(wildcard %HYPER_ABS%/hyperkernel/)
-	PARENT_SUBDIRS += $(wildcard %HYPER_ABS%/src_*/)
-	PARENT_SUBDIRS += $(wildcard %HYPER_ABS%/hypervisor_*/)
-
-	ifneq (%HYPER_ABS%, %BUILD_ABS%)
-		PARENT_SUBDIRS += $(wildcard %BUILD_ABS%/makefiles/src_*/)
-		PARENT_SUBDIRS += $(wildcard %BUILD_ABS%/makefiles/hypervisor_*/)
-	endif
+ifneq (%HYPER_ABS%, %BUILD_ABS%)
+	PARENT_SUBDIRS += $(wildcard %BUILD_ABS%/makefiles/src_*/)
+	PARENT_SUBDIRS += $(wildcard %BUILD_ABS%/makefiles/hypervisor_*/)
 endif
 
 include extensions.mk

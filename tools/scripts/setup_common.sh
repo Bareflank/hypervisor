@@ -57,9 +57,9 @@ option_help() {
     echo -e "Sets up the system to compile / use Bareflank"
     echo -e ""
     echo -e "       --help                       show this help menu"
-    echo -e "       --local-compilers            setup local cross compilers"
     echo -e "       --no-configure               skip the configure step"
-    echo -e "       --compiler <dirname>         directory of cross compiler"
+    echo -e "       --compiler <link name>       name of cross compiler"
+    echo -e "       --linker <link name>         name of linker"
     echo -e "       --out-of-tree <dirname>      setup out of tree build"
     echo -e ""
 }
@@ -80,10 +80,6 @@ parse_arguments() {
             exit 0
             ;;
 
-        "--local-compilers")
-            local="true"
-            ;;
-
         "--no-configure")
             noconfigure="true"
             ;;
@@ -91,6 +87,11 @@ parse_arguments() {
         "--compiler")
             shift
             compiler="--compiler $1"
+            ;;
+
+        "--linker")
+            shift
+            linker="--linker $1"
             ;;
 
         "--out-of-tree")
@@ -116,18 +117,7 @@ parse_arguments() {
 setup_build_environment() {
     if [[ ! $noconfigure == "true" ]]; then
         pushd $build_dir
-        $hypervisor_dir/configure $compiler
+        $hypervisor_dir/configure $compiler $linker
         popd
     fi
-
-    if [[ $local == "true" ]]; then
-        CROSS_COMPILER=clang_38 $hypervisor_dir/tools/scripts/create_cross_compiler.sh
-    fi
-
-    complete -f $hypervisor_dir/configure
-
-    echo ""
-    echo "WARNING: If you are using ssh, or are logged into a GUI you "
-    echo "         might need to exit and log back in to compile!!!"
-    echo ""
 }

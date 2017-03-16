@@ -147,6 +147,7 @@ check_env() {
         echo "export HYPER_ABS=\"$HYPER_ABS\"" >> $BUILD_ABS/env.sh
         echo "export LLVM_RELEASE=\"release_39\"" >> $BUILD_ABS/env.sh
         echo "export module_file=\"$module_file\"" >> $BUILD_ABS/env.sh
+        echo "export linker=\"$linker\"" >> $BUILD_ABS/env.sh
         echo "export compiler=\"$compiler\"" >> $BUILD_ABS/env.sh
         echo "export CFLAGS=\"$CROSS_CCFLAGS\"" >> $BUILD_ABS/env.sh
         echo "export CXXFLAGS=\"$CROSS_CXXFLAGS\"" >> $BUILD_ABS/env.sh
@@ -200,7 +201,8 @@ option_help() {
     echo -e "       -r, --update_makefiles           updates makefiles only"
     echo -e "       -m, --module_file <filename>     module_file to use"
     echo -e "       -e, --extension <dirname>        directory of extension"
-    echo -e "           --compiler <dirname>         directory of cross compiler"
+    echo -e "           --compiler <link name>       name of compiler"
+    echo -e "           --linker <link name>         name of linker"
     echo -e ""
 }
 
@@ -296,7 +298,10 @@ option_run() {
             BUILD_REL=$BUILD_ABS
         fi
         if [[ -z "$compiler" ]]; then
-            compiler=clang_38
+            compiler="clang"
+        fi
+        if [[ -z "$linker" ]]; then
+            linker="ld"
         fi
         IFS=';' read -ra extensions <<< "$extensions"
     fi
@@ -443,6 +448,7 @@ copy_makefile() {
     echo -e "HYPER_REL:=$2" >> $1/Makefile.tmp
     echo -e "BUILD_REL:=$1" >> $1/Makefile.tmp
     echo -e "COMPILER:=$compiler" >> $1/Makefile.tmp
+    echo -e "LINKER:=$linker" >> $1/Makefile.tmp
     echo -e "CONFIGURED_CROSS_CCFLAGS:=$CROSS_CCFLAGS" >> $1/Makefile.tmp
     echo -e "CONFIGURED_CROSS_CXXFLAGS:=$CROSS_CXXFLAGS" >> $1/Makefile.tmp
     echo -e "CONFIGURED_NATIVE_CCFLAGS:=$NATIVE_CCFLAGS" >> $1/Makefile.tmp
@@ -653,11 +659,6 @@ create_wrapper_links () {
         echo -e "linking compiler script:$CB x86_64-vmm-nasm$CE"
         ln -s $BUILD_ABS/build_scripts/compiler_wrapper.sh $BUILD_ABS/build_scripts/x86_64-vmm-nasm
     fi
-
-    if [[ ! -f "$BUILD_ABS/build_scripts/x86_64-vmm-docker" ]]; then
-        echo -e "linking compiler script:$CB x86_64-vmm-docker$CE"
-        ln -s $BUILD_ABS/build_scripts/compiler_wrapper.sh $BUILD_ABS/build_scripts/x86_64-vmm-docker
-    fi
 }
 
 # ------------------------------------------------------------------------------
@@ -727,7 +728,8 @@ create_root_makefile() {
 # Filter Arguments
 # ------------------------------------------------------------------------------
 
-compiler="clang_38"
+compiler="clang"
+linker="ld"
 
 i=0
 extensions[$i]=
@@ -784,6 +786,11 @@ while [[ $# -ne 0 ]]; do
     if [[ $1 == "--compiler" ]]; then
         shift
         compiler=$1
+    fi
+
+    if [[ $1 == "--linker" ]]; then
+        shift
+        linker=$1
     fi
 
     if [[ $1 == "-e" || $1 == "--extension" ]]; then

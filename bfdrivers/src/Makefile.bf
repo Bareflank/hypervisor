@@ -53,7 +53,6 @@ NATIVE_OUTDIR+=%BUILD_REL%/../bin
 SOURCES+=common.c
 SOURCES+=arch/test/platform.c
 SOURCES+=%HYPER_ABS%/src/debug_ring_interface.c
-SOURCES+=%HYPER_ABS%/bfelf_loader/src/bfelf_loader.c
 
 INCLUDE_PATHS+=./
 INCLUDE_PATHS+=../include/

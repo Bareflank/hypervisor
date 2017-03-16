@@ -209,13 +209,6 @@ serial_port_intel_x64::write(char c) noexcept
 }
 
 void
-serial_port_intel_x64::write(const std::string &str) noexcept
-{
-    for (auto c : str)
-        write(c);
-}
-
-void
 serial_port_intel_x64::enable_dlab() const noexcept
 {
     auto reg = portio::inb(m_port + line_control_reg);
