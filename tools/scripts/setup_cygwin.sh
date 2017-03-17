@@ -108,3 +108,7 @@ esac
 # ------------------------------------------------------------------------------
 
 setup_build_environment
+
+echo ""
+echo "WARNING: Please turn test signing on before attempting to compile / user Bareflank! 'bcdedit.exe /set testsigning ON' --> <reboot>"
+echo "
