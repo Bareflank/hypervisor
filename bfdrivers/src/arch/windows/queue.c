@@ -20,7 +20,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#include "driver.h"
+#include <debug.h>
+#include <driver.h>
 
 /* -------------------------------------------------------------------------- */
 /* Global                                                                     */
@@ -84,7 +85,7 @@ failed:
 
     platform_free_rwe(buf, len);
 
-    DEBUG("IOCTL_ADD_MODULE: failed\n");
+    ALERT("IOCTL_ADD_MODULE: failed\n");
     return BF_IOCTL_FAILURE;
 }
 

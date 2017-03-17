@@ -20,12 +20,29 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+rm -Rf /tmp/bareflank/
+mkdir -p /tmp/bareflank/
+
+pushd /tmp/bareflank/
+
+rm -Rf binutils-*.tar.gz
+rm -Rf binutils-*/
+rm -Rf src_binutils
+
+wget -nv http://ftp.gnu.org/gnu/binutils/binutils-2.28.tar.gz && break
+
+tar xfv binutils-*.tar.gz
+mv binutils-*/ src_binutils
+rm -Rf binutils-*.tar.gz
+
+popd
+
 rm -Rf /tmp/bareflank/build_binutils
 mkdir -p /tmp/bareflank/build_binutils
 
 pushd /tmp/bareflank/build_binutils
 
-../src_binutils/configure --target=x86_64-elf --prefix="$PREFIX" --disable-nls --disable-werror --with-sysroot
+../src_binutils/configure --target=x86_64-elf --prefix="$HOME/usr/" --disable-nls --disable-werror --with-sysroot
 
 make -j2
 make -j2 install

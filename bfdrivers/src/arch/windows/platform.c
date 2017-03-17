@@ -22,8 +22,8 @@
 
 #include <ntddk.h>
 
-#include <debug.h>
 #include <platform.h>
+#include <bfelf_loader.h>
 
 #define BF_TAG 'BFLK'
 #define BF_NX_TAG 'BFNX'

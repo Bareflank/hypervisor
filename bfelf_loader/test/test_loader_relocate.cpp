@@ -103,3 +103,24 @@ bfelf_loader_ut::test_bfelf_loader_relocate_twice()
     ret = bfelf_loader_relocate(&loader);
     this->expect_true(ret == BFELF_SUCCESS);
 }
+
+void
+bfelf_loader_ut::test_bfelf_loader_relocate_no_symbol()
+{
+    auto ret = 0LL;
+    bfelf_file_t dummy_code_ef;
+
+    ret = bfelf_file_init(m_dummy_code.get(), m_dummy_code_length, &dummy_code_ef);
+    this->expect_true(ret == BFELF_SUCCESS);
+
+    auto &&dummy_code_pair = get_elf_exec(&dummy_code_ef);
+    auto &&dummy_code_exec = std::move(std::get<0>(dummy_code_pair));
+
+    bfelf_loader_t loader = {};
+
+    ret = bfelf_loader_add(&loader, &dummy_code_ef, dummy_code_exec.get(), dummy_code_exec.get());
+    this->expect_true(ret == BFELF_SUCCESS);
+
+    ret = bfelf_loader_relocate(&loader);
+    this->expect_true(ret == BFELF_ERROR_NO_SUCH_SYMBOL);
+}

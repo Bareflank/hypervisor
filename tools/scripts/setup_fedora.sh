@@ -51,16 +51,8 @@ install_common_packages() {
     sudo dnf install -y clang
     sudo dnf install -y texinfo
     sudo dnf install -y libstdc++-static
-    sudo dnf install -y kernel-devel
     sudo dnf install -y kernel-headers
-    sudo dnf update -y kernel
-    curl -fsSL https://get.docker.com/ | sh
-}
-
-prepare_docker() {
-    sudo usermod -a -G docker $USER
-    sudo systemctl start docker
-    sudo systemctl enable docker
+    sudo dnf install -y "kernel-devel-uname-r == $(uname -r)"
 }
 
 # ------------------------------------------------------------------------------
@@ -70,17 +62,14 @@ prepare_docker() {
 case $( grep ^VERSION_ID= /etc/os-release | cut -d'=' -f 2 | tr -d '"' ) in
 25)
     install_common_packages
-    prepare_docker
     ;;
 
 24)
     install_common_packages
-    prepare_docker
     ;;
 
 23)
     install_common_packages
-    prepare_docker
     ;;
 
 *)

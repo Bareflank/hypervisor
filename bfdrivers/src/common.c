@@ -157,7 +157,7 @@ add_md_to_memory_manager(struct module_t *module)
     if (module == 0)
         return BF_ERROR_INVALID_ARG;
 
-    for (s = 0; s < bfelf_file_num_load_instrs(&module->file); s++)
+    for (s = 0; s < bfelf_file_get_num_load_instrs(&module->file); s++)
     {
         uint64_t exec_s = 0;
         uint64_t exec_e = 0;
@@ -197,7 +197,7 @@ load_elf_file(struct module_t *module)
 
     platform_memset(module->exec, 0, module->size);
 
-    for (s = 0; s < bfelf_file_num_load_instrs(&module->file); s++)
+    for (s = 0; s < bfelf_file_get_num_load_instrs(&module->file); s++)
     {
         int64_t ret = 0;
         struct bfelf_load_instr *instr = 0;
@@ -207,8 +207,7 @@ load_elf_file(struct module_t *module)
         uint64_t len = 0;
 
         ret = bfelf_file_get_load_instr(&module->file, s, &instr);
-        if (ret != BFELF_SUCCESS)
-            return ret;
+        (void) ret;
 
         dst = module->exec + instr->mem_offset;
         src = module->file.file + instr->file_offset;
@@ -333,9 +332,6 @@ common_add_module(const char *file, uint64_t fsize)
         return ret;
 
     module->size = (uint64_t)bfelf_file_get_total_size(&module->file);
-    if (module->size <= 0)
-        return BF_ERROR_FAILED_TO_ADD_FILE;
-
     module->exec = platform_alloc_rwe(module->size);
     if (module->exec == 0)
         return BF_ERROR_OUT_OF_MEMORY;
@@ -414,8 +410,7 @@ common_load_vmm(void)
         struct section_info_t info = {0, 0, 0, 0, 0, 0, 0, 0};
 
         ret = bfelf_file_get_section_info(&module->file, &info);
-        if (ret != BF_SUCCESS)
-            goto failure;
+        (void) ret;
 
         ret = execute_symbol("local_init", (uint64_t)&info, 0, 0);
         if (ret != BF_SUCCESS)
@@ -472,8 +467,7 @@ common_unload_vmm(void)
             struct section_info_t info = {0, 0, 0, 0, 0, 0, 0, 0};
 
             ret = bfelf_file_get_section_info(&module->file, &info);
-            if (ret != BF_SUCCESS)
-                goto corrupted;
+            (void) ret;
 
             ret = execute_symbol("local_fini", (uint64_t)&info, 0, 0);
             if (ret != BF_SUCCESS)

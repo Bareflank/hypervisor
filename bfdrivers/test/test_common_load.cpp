@@ -34,6 +34,7 @@
 
 extern "C"
 {
+    struct module_t *get_module(uint64_t index);
     int64_t resolve_symbol(const char *name, void **sym);
     int64_t execute_symbol(const char *sym, uint64_t arg1, uint64_t arg2, uint64_t cpuid);
     int64_t add_raw_md_to_memory_manager(uint64_t virt, uint64_t type);
@@ -197,16 +198,10 @@ driver_entry_ut::test_common_load_loader_add_failed()
     this->expect_true(common_add_module(m_dummy_add_md_success.get(), m_dummy_add_md_success_length) == BF_SUCCESS);
     this->expect_true(common_add_module(m_dummy_misc.get(), m_dummy_misc_length) == BF_SUCCESS);
 
-    {
-        MockRepository mocks;
-        mocks.ExpectCallFunc(bfelf_loader_add).Return(-1);
+    auto module = get_module(0);
+    module->file.added = 1;
 
-        RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-        {
-            this->expect_true(common_load_vmm() == -1);
-        });
-    }
-
+    this->expect_true(common_load_vmm() == BFELF_ERROR_INVALID_ARG);
     this->expect_true(common_fini() == BF_SUCCESS);
 }
 
@@ -221,27 +216,6 @@ driver_entry_ut::test_common_load_resolve_symbol_failed()
     {
         MockRepository mocks;
         mocks.ExpectCallFunc(resolve_symbol).Return(-1);
-
-        RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-        {
-            this->expect_true(common_load_vmm() == -1);
-        });
-    }
-
-    this->expect_true(common_fini() == BF_SUCCESS);
-}
-
-void
-driver_entry_ut::test_common_load_loader_get_info_failed()
-{
-    this->expect_true(common_add_module(m_dummy_start_vmm_success.get(), m_dummy_start_vmm_success_length) == BF_SUCCESS);
-    this->expect_true(common_add_module(m_dummy_stop_vmm_success.get(), m_dummy_stop_vmm_success_length) == BF_SUCCESS);
-    this->expect_true(common_add_module(m_dummy_add_md_success.get(), m_dummy_add_md_success_length) == BF_SUCCESS);
-    this->expect_true(common_add_module(m_dummy_misc.get(), m_dummy_misc_length) == BF_SUCCESS);
-
-    {
-        MockRepository mocks;
-        mocks.ExpectCallFunc(bfelf_file_get_section_info).Return(-1);
 
         RUN_UNITTEST_WITH_MOCKS(mocks, [&]
         {

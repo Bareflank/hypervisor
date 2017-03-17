@@ -77,23 +77,14 @@ bool bfelf_loader_ut::list()
     this->test_bfelf_file_init_invalid_version();
     this->test_bfelf_file_init_invalid_flags();
 
-    this->test_bfelf_file_num_load_instrs_invalid_ef();
-    this->test_bfelf_file_num_load_instrs_uninitalized();
-    this->test_bfelf_file_num_load_instrs_success();
+    this->test_bfelf_file_get_num_load_instrs_invalid_ef();
+    this->test_bfelf_file_get_num_load_instrs_uninitalized();
+    this->test_bfelf_file_get_num_load_instrs_success();
 
     this->test_bfelf_file_get_load_instr_invalid_ef();
     this->test_bfelf_file_get_load_instr_invalid_index();
     this->test_bfelf_file_get_load_instr_invalid_instr();
     this->test_bfelf_file_get_load_instr_success();
-
-    this->test_bfelf_file_resolve_symbol_invalid_loader();
-    this->test_bfelf_file_resolve_symbol_invalid_name();
-    this->test_bfelf_file_resolve_symbol_invalid_addr();
-    this->test_bfelf_file_resolve_no_such_symbol_no_relocation();
-    this->test_bfelf_file_resolve_no_such_symbol();
-    this->test_bfelf_file_resolve_symbol_success();
-    this->test_bfelf_file_resolve_no_such_symbol_no_hash();
-    this->test_bfelf_file_resolve_symbol_success_no_hash();
 
     this->test_bfelf_loader_add_invalid_loader();
     this->test_bfelf_loader_add_invalid_elf_file();
@@ -105,6 +96,7 @@ bool bfelf_loader_ut::list()
     this->test_bfelf_loader_relocate_no_files_added();
     this->test_bfelf_loader_relocate_uninitialized_files();
     this->test_bfelf_loader_relocate_twice();
+    this->test_bfelf_loader_relocate_no_symbol();
 
     this->test_bfelf_file_get_section_info_invalid_elf_file();
     this->test_bfelf_file_get_section_info_invalid_info();
@@ -151,8 +143,9 @@ bool bfelf_loader_ut::list()
     this->test_bfelf_file_get_pic_pie_success();
 
     this->test_private_hash();
-    this->test_private_relocate_invalid_relocation();
-    this->test_private_no_loadable_segments();
+    this->test_private_relocate_invalid_relocation_dyn();
+    this->test_private_relocate_invalid_relocation_plt();
+    this->test_private_process_dynamic_section();
 
     return true;
 }
@@ -175,7 +168,7 @@ std::pair<std::unique_ptr<char[]>, uint64_t>
 bfelf_loader_ut::get_elf_exec(bfelf_file_t *ef)
 {
     auto &&total = static_cast<size_t>(bfelf_file_get_total_size(ef));
-    auto &&num_segments = bfelf_file_num_load_instrs(ef);
+    auto &&num_segments = bfelf_file_get_num_load_instrs(ef);
 
     auto &&exec = std::unique_ptr<char[]>(alloc_exec(total));
 
@@ -226,7 +219,7 @@ bfelf_loader_ut::get_test()
     test->header.e_phnum = sizeof(test_phdrtab) / sizeof(bfelf_phdr);
     test->header.e_shentsize = sizeof(bfelf_shdr);
     test->header.e_shnum = sizeof(test_shdrtab) / sizeof(bfelf_shdr);
-    test->header.e_shstrndx = 3;
+    test->header.e_shstrndx = 2;
 
     test->phdrtab.re_segment.p_type = bfpt_load;
     test->phdrtab.re_segment.p_flags = bfpf_r | bfpf_x;
@@ -300,8 +293,6 @@ bfelf_loader_ut::get_test()
     test->dynamic.init_array.d_val = sizeof(test_init_array);
     test->dynamic.fini_array.d_tag = bfdt_fini_arraysz;
     test->dynamic.fini_array.d_val = sizeof(test_fini_array);
-    test->dynamic.relacount.d_tag = bfdt_relacount;
-    test->dynamic.relacount.d_val = 1;
     test->dynamic.flags_1.d_tag = bfdt_flags_1;
     test->dynamic.last.d_tag = bfdt_null;
 
@@ -314,6 +305,16 @@ bfelf_loader_ut::get_test()
     test->shdrtab.eh_frame.sh_link = 0;
     test->shdrtab.eh_frame.sh_addralign = 1;
     test->shdrtab.eh_frame.sh_entsize = 0;
+
+    test->shdrtab.dynstr.sh_offset = offset(test->dynstr, *test);
+
+    test->shdrtab.eh_frame.sh_name = 10;
+    test->shdrtab.ctors.sh_name = 20;
+    test->shdrtab.dtors.sh_name = 30;
+
+    strncpy(static_cast<char *>(test->dynstr.str2), ".eh_frame", 10);
+    strncpy(static_cast<char *>(test->dynstr.str3), ".ctors", 10);
+    strncpy(static_cast<char *>(test->dynstr.str4), ".dtors", 10);
 
     return {std::move(buff), size};
 }

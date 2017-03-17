@@ -35,15 +35,13 @@ cd ~/
 git clone https://github.com/Bareflank/hypervisor.git
 ```
 
-On Windows, only a local compiler is
-currently supported (i.e. no docker support). The local compiler will take a
-lot of time to complete, so please be patient.
+Next run the cygwin setup script.
 
 ```
 cd ~/
 mkdir build
 cd ~/hypervisor
-./tools/scripts/setup_cygwin.sh --local-compilers
+./tools/scripts/setup_cygwin.sh
 ```
 
 Once you have a cross compiler setup, you need to build the main source code.
@@ -126,7 +124,7 @@ cd ~/
 git clone https://github.com/Bareflank/hypervisor.git
 cd ~/hypervisor
 
-./tools/scripts/setup_cygwin.sh --local-compilers --no-configure
+./tools/scripts/setup_cygwin.sh --no-configure
 
 cd ~/
 mkdir build

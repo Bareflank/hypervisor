@@ -74,7 +74,6 @@
     <FilesToPackage Include="$(TargetPath)" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\..\bfelf_loader\src\bfelf_loader.c" />
     <ClCompile Include="..\..\common.c" />
     <ClCompile Include="device.c" />
     <ClCompile Include="driver.c" />

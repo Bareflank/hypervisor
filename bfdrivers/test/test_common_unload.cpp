@@ -74,28 +74,6 @@ driver_entry_ut::test_common_unload_unload_when_corrupt()
 }
 
 void
-driver_entry_ut::test_common_unload_loader_get_info_failed()
-{
-    this->expect_true(common_add_module(m_dummy_start_vmm_success.get(), m_dummy_start_vmm_success_length) == BF_SUCCESS);
-    this->expect_true(common_add_module(m_dummy_stop_vmm_failure.get(), m_dummy_stop_vmm_failure_length) == BF_SUCCESS);
-    this->expect_true(common_add_module(m_dummy_add_md_success.get(), m_dummy_add_md_success_length) == BF_SUCCESS);
-    this->expect_true(common_add_module(m_dummy_misc.get(), m_dummy_misc_length) == BF_SUCCESS);
-    this->expect_true(common_load_vmm() == BF_SUCCESS);
-
-    {
-        MockRepository mocks;
-        mocks.ExpectCallFunc(bfelf_file_get_section_info).Return(-1);
-
-        RUN_UNITTEST_WITH_MOCKS(mocks, [&]
-        {
-            this->expect_true(common_unload_vmm() == -1);
-        });
-    }
-
-    common_reset();
-}
-
-void
 driver_entry_ut::test_common_unload_execute_symbol_failed()
 {
     this->expect_true(common_add_module(m_dummy_start_vmm_success.get(), m_dummy_start_vmm_success_length) == BF_SUCCESS);

@@ -66,7 +66,6 @@ NATIVE_OUTDIR+=%BUILD_REL%/../bin
 
 SOURCES+=test.cpp
 SOURCES+=test_try_catch.cpp
-SOURCES+=%HYPER_ABS%/bfelf_loader/src/bfelf_loader.c
 
 INCLUDE_PATHS+=./
 INCLUDE_PATHS+=../include/

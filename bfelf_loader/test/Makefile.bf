@@ -54,9 +54,8 @@ NATIVE_OUTDIR+=%BUILD_REL%/../bin
 
 SOURCES+=test.cpp
 SOURCES+=test_file_init.cpp
-SOURCES+=test_file_num_load_instrs.cpp
+SOURCES+=test_file_get_num_load_instrs.cpp
 SOURCES+=test_file_get_load_instr.cpp
-SOURCES+=test_file_resolve_symbol.cpp
 SOURCES+=test_loader_add.cpp
 SOURCES+=test_loader_relocate.cpp
 SOURCES+=test_file_get_section_info.cpp
@@ -74,7 +73,7 @@ INCLUDE_PATHS+=./
 INCLUDE_PATHS+=../include/
 INCLUDE_PATHS+=%HYPER_ABS%/include/
 
-LIBS+=bfelf_loader
+LIBS+=
 
 LIBRARY_PATHS+=%BUILD_REL%/../bin/native/
 

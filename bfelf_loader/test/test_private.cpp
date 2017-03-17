@@ -23,25 +23,6 @@
 
 #include <gsl/gsl>
 
-// -----------------------------------------------------------------------------
-// Expose Private Functions
-// -----------------------------------------------------------------------------
-
-extern "C"
-{
-    unsigned long
-    private_hash(const char *name);
-
-    int64_t
-    private_relocate_symbol(struct bfelf_loader_t *loader,
-                            struct bfelf_file_t *ef,
-                            struct bfelf_rela *rela);
-}
-
-// -----------------------------------------------------------------------------
-// Tests
-// -----------------------------------------------------------------------------
-
 void
 bfelf_loader_ut::test_private_hash()
 {
@@ -50,42 +31,93 @@ bfelf_loader_ut::test_private_hash()
 }
 
 void
-bfelf_loader_ut::test_private_relocate_invalid_relocation()
+bfelf_loader_ut::test_private_relocate_invalid_relocation_dyn()
 {
+    bfelf_file_t ef;
+    auto &&data = get_test();
+    auto &&buff = std::get<0>(data);
+    auto &&size = std::get<1>(data);
+
+    auto ret = bfelf_file_init(buff.get(), size, &ef);
+    this->expect_true(ret == BFELF_SUCCESS);
+
+    bfelf_rela relatab_dyn[1] = {};
     bfelf_loader_t loader = {};
-    bfelf_file_t ef = {};
-    bfelf_rela rela = {};
     bfelf_sym symtab[1] = {};
 
     auto file = "hello";
-    auto exec = std::make_unique<char[]>(1);
+    auto exec = std::make_unique<char[]>(100);
 
     ef.exec_addr = exec.get();
     ef.exec_virt = exec.get();
     ef.file = file;
     ef.symtab = static_cast<bfelf_sym *>(symtab);
     ef.symnum = 1;
+    ef.relatab_dyn = static_cast<bfelf_rela *>(relatab_dyn);
+    ef.relanum_dyn = 1;
+    ef.relanum_plt = 0;
 
-    rela.r_info = 0xFFFFFFFF;
-    rela.r_offset = 0x0;
+    gsl::at(relatab_dyn, 0).r_info = 0xFFFFFFFF;
+    gsl::at(relatab_dyn, 0).r_offset = 0x0;
 
     gsl::at(symtab, 0).st_name = 0xFFFFF;
     gsl::at(symtab, 0).st_value = 0x1;
 
-    this->expect_true(private_relocate_symbol(&loader, &ef, &rela) == BFELF_ERROR_UNSUPPORTED_RELA);
+    this->expect_true(private_relocate_symbols(&loader, &ef) == BFELF_ERROR_UNSUPPORTED_RELA);
 }
 
 void
-bfelf_loader_ut::test_private_no_loadable_segments()
+bfelf_loader_ut::test_private_relocate_invalid_relocation_plt()
 {
     bfelf_file_t ef;
     auto &&data = get_test();
     auto &&buff = std::get<0>(data);
     auto &&size = std::get<1>(data);
-    auto &&test = reinterpret_cast<bfelf_test *>(buff.get());
-
-    test->header.e_phnum = 0;
 
     auto ret = bfelf_file_init(buff.get(), size, &ef);
-    this->expect_true(ret == BFELF_ERROR_INVALID_FILE);
+    this->expect_true(ret == BFELF_SUCCESS);
+
+    bfelf_rela relatab_plt[1] = {};
+    bfelf_loader_t loader = {};
+    bfelf_sym symtab[1] = {};
+
+    auto file = "hello";
+    auto exec = std::make_unique<char[]>(100);
+
+    ef.exec_addr = exec.get();
+    ef.exec_virt = exec.get();
+    ef.file = file;
+    ef.symtab = static_cast<bfelf_sym *>(symtab);
+    ef.symnum = 1;
+    ef.relatab_plt = static_cast<bfelf_rela *>(relatab_plt);
+    ef.relanum_dyn = 0;
+    ef.relanum_plt = 1;
+
+    gsl::at(relatab_plt, 0).r_info = 0xFFFFFFFF;
+    gsl::at(relatab_plt, 0).r_offset = 0x0;
+
+    gsl::at(symtab, 0).st_name = 0xFFFFF;
+    gsl::at(symtab, 0).st_value = 0x1;
+
+    this->expect_true(private_relocate_symbols(&loader, &ef) == BFELF_ERROR_UNSUPPORTED_RELA);
+}
+
+void
+bfelf_loader_ut::test_private_process_dynamic_section()
+{
+    bfelf_file_t ef;
+    auto &&data = get_test();
+    auto &&buff = std::get<0>(data);
+    auto &&size = std::get<1>(data);
+
+    auto ret = bfelf_file_init(buff.get(), size, &ef);
+    this->expect_true(ret == BFELF_SUCCESS);
+
+    private_process_dynamic_section(&ef);
+
+    ef.dynnum = 0;
+    private_process_dynamic_section(&ef);
+
+    ef.dynoff = 0;
+    private_process_dynamic_section(&ef);
 }
