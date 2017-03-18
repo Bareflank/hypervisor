@@ -1,4 +1,4 @@
-<img src="https://raw.githubusercontent.com/Bareflank/hypervisor/master/doc/images/bareflank_logo.jpg" width="501">
+![Bareflank](https://raw.githubusercontent.com/Bareflank/hypervisor/master/doc/images/bareflank_logo.jpg)
 <br>
 <br>
 <br>
