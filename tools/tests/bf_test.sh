@@ -29,7 +29,9 @@ report_error()
 test_hypervisor()
 {
     sudo make > /dev/ttyS1
-    sudo make test > /dev/ttyS1
+    if [ "$distro" != "Cygwin" ] ; then
+        sudo make test > /dev/ttyS1
+    fi
     sudo ./tools/tests/test_hypervisor.sh > /dev/ttyS1
     echo Hypervisor Done > /dev/ttyS1
 }
@@ -39,7 +41,14 @@ test_extended_apis()
     git clone https://github.com/Bareflank/extended_apis > /dev/ttyS1
     sudo ./configure -m extended_apis/bin/extended_apis.modules > /dev/ttyS1
     sudo make > /dev/ttyS1
-    sudo make test > /dev/ttyS1
+    if [ "$distro" != "Cygwin" ] ; then
+        sudo ./configure -m extended_apis/bin/extended_apis.modules > /dev/ttyS1
+        sudo make > /dev/ttyS1
+        sudo make test > /dev/ttyS1
+    else
+        sudo ./configure -m extended_apis/bin/extended_apis.modules --compiler clang --linker $HOME/usr/bin/x86_64-elf-ld.exe > /dev/ttyS1
+        sudo make > /dev/ttyS1
+    fi
     sudo ./extended_apis/tests/test_extended_apis.sh > /dev/ttyS1
     echo EAPIs Done > /dev/ttyS1
 }
@@ -47,9 +56,14 @@ test_extended_apis()
 test_hyperkernel()
 {
     git clone https://github.com/Bareflank/hyperkernel > /dev/ttyS1
-    sudo ./configure -m hyperkernel/bin/hyperkernel.modules > /dev/ttyS1
-    sudo make > /dev/ttyS1
-    sudo make test > /dev/ttyS1
+    if [ "$distro" != "Cygwin" ] ; then
+        sudo ./configure -m hyperkernel/bin/hyperkernel.modules > /dev/ttyS1
+        sudo make > /dev/ttyS1
+        sudo make test > /dev/ttyS1
+    else
+        sudo ./configure -m hyperkernel/bin/hyperkernel.modules --compiler clang --linker $HOME/usr/bin/x86_64-elf-ld.exe > /dev/ttyS1
+        sudo make > /dev/ttyS1
+    fi
     sudo ./hyperkernel/tests/test_hyperkernel.sh > /dev/ttyS1
     echo Hyperkernel Done > /dev/ttyS1
 }
@@ -57,7 +71,11 @@ test_hyperkernel()
 test_vpid()
 {
     git clone https://github.com/Bareflank/hypervisor_example_vpid > /dev/ttyS1
-    sudo ./configure -m hypervisor_example_vpid/bin/vpid.modules -e hypervisor_example_vpid >/dev/ttyS1
+    if [ "$distro" != "Cygwin" ] ; then
+        sudo ./configure -m hypervisor_example_vpid/bin/vpid.modules -e hypervisor_example_vpid >/dev/ttyS1
+    else
+        sudo ./configure -m hypervisor_example_vpid/bin/vpid.modules -e hypervisor_example_vpid --compiler clang --linker $HOME/usr/bin/x86_64-elf-ld.exe > /dev/ttyS1
+    fi
     sudo make > /dev/ttyS1
     sudo make driver_load > /dev/ttyS1
     sudo make quick > /dev/ttyS1
@@ -71,7 +89,11 @@ test_vpid()
 test_cpuid()
 {
     git clone https://github.com/Bareflank/hypervisor_example_cpuidcount > /dev/ttyS1
-    sudo ./configure -m hypervisor_example_cpuidcount/bin/cpuidcount.modules > /dev/ttyS1
+    if [ "$distro" != "Cygwin" ] ; then
+        sudo ./configure -m hypervisor_example_cpuidcount/bin/cpuidcount.modules > /dev/ttyS1
+    else
+        sudo ./configure -m hypervisor_example_cpuidcount/bin/cpuidcount.modules --compiler clang --linker $HOME/usr/bin/x86_64-elf-ld.exe > /dev/ttyS1
+    fi
     sudo make > /dev/ttyS1
     sudo make driver_load > /dev/ttyS1
     sudo make quick > /dev/ttyS1
@@ -84,7 +106,11 @@ test_cpuid()
 test_hook()
 {
     git clone https://github.com/Bareflank/extended_apis_example_hook src_extended_apis_example_hook > /dev/ttyS1
-    sudo ./configure -m src_extended_apis_example_hook/bin/hook.modules > /dev/ttyS1
+    if [ "$distro" != "Cygwin" ] ; then
+        sudo ./configure -m src_extended_apis_example_hook/bin/hook.modules > /dev/ttyS1
+    else
+        sudo ./configure -m src_extended_apis_example_hook/bin/hook.modules --compiler clang --linker $HOME/usr/bin/x86_64-elf-ld.exe > /dev/ttyS1
+    fi
     sudo make >/dev/ttyS1
     sudo make driver_load > /dev/ttyS1
     sudo make quick > /dev/ttyS1
@@ -95,6 +121,7 @@ test_hook()
 }
 
 trap report_error EXIT
+distro=$(uname -o)
 # Tests assume you are in the ~/hypervisor directory and have run your setup_XXX script
 test_hypervisor
 test_extended_apis
