@@ -26,6 +26,8 @@ report_error()
     echo "BFTest EXIT" > /dev/ttyS1
 }
 
+
+
 test_hypervisor()
 {
     sudo make > /dev/ttyS1
@@ -36,11 +38,18 @@ test_hypervisor()
     echo Hypervisor Done > /dev/ttyS1
 }
 
+
+
 test_extended_apis()
 {
-    git clone https://github.com/Bareflank/extended_apis > /dev/ttyS1
-    sudo ./configure -m extended_apis/bin/extended_apis.modules > /dev/ttyS1
-    sudo make > /dev/ttyS1
+    n=0
+    until [ $n -ge 3 ]
+    do
+        git clone https://github.com/Bareflank/extended_apis > /dev/ttyS1 && break
+        n=$[$n+1]
+        sleep 15
+    done
+
     if [ "$distro" != "Cygwin" ] ; then
         sudo ./configure -m extended_apis/bin/extended_apis.modules > /dev/ttyS1
         sudo make > /dev/ttyS1
@@ -53,9 +62,18 @@ test_extended_apis()
     echo EAPIs Done > /dev/ttyS1
 }
 
+
+
 test_hyperkernel()
 {
-    git clone https://github.com/Bareflank/hyperkernel > /dev/ttyS1
+    n=0
+    until [ $n -ge 3 ]
+    do
+        git clone https://github.com/Bareflank/hyperkernel > /dev/ttyS1 && break
+        n=$[$n+1]
+        sleep 15
+    done
+
     if [ "$distro" != "Cygwin" ] ; then
         sudo ./configure -m hyperkernel/bin/hyperkernel.modules > /dev/ttyS1
         sudo make > /dev/ttyS1
@@ -68,9 +86,18 @@ test_hyperkernel()
     echo Hyperkernel Done > /dev/ttyS1
 }
 
+
+
 test_vpid()
 {
-    git clone https://github.com/Bareflank/hypervisor_example_vpid > /dev/ttyS1
+    n=0
+    until [ $n -ge 3 ]
+    do
+        git clone https://github.com/Bareflank/hypervisor_example_vpid > /dev/ttyS1 && break
+        n=$[$n+1]
+        sleep 15
+    done
+
     if [ "$distro" != "Cygwin" ] ; then
         sudo ./configure -m hypervisor_example_vpid/bin/vpid.modules -e hypervisor_example_vpid >/dev/ttyS1
     else
@@ -86,9 +113,18 @@ test_vpid()
     echo VPID Done > /dev/ttyS1
 }
 
+
+
 test_cpuid()
 {
-    git clone https://github.com/Bareflank/hypervisor_example_cpuidcount > /dev/ttyS1
+    n=0
+    until [ $n -ge 3 ]
+    do
+        git clone https://github.com/Bareflank/hypervisor_example_cpuidcount > /dev/ttyS1 && break
+        n=$[$n+1]
+        sleep 15
+    done
+
     if [ "$distro" != "Cygwin" ] ; then
         sudo ./configure -m hypervisor_example_cpuidcount/bin/cpuidcount.modules > /dev/ttyS1
     else
@@ -103,9 +139,18 @@ test_cpuid()
     echo CPUID Done > /dev/ttyS1
 }
 
+
+
 test_hook()
 {
-    git clone https://github.com/Bareflank/extended_apis_example_hook src_extended_apis_example_hook > /dev/ttyS1
+    n=0
+    until [ $n -ge 3 ]
+    do
+        git clone https://github.com/Bareflank/extended_apis_example_hook src_extended_apis_example_hook > /dev/ttyS1 && break
+        n=$[$n+1]
+        sleep 15
+    done
+
     if [ "$distro" != "Cygwin" ] ; then
         sudo ./configure -m src_extended_apis_example_hook/bin/hook.modules > /dev/ttyS1
     else
@@ -119,6 +164,8 @@ test_hook()
     sudo make driver_unload > /dev/ttyS1
     echo Hook Done > /dev/ttyS1
 }
+
+
 
 trap report_error EXIT
 distro=$(uname -o)
