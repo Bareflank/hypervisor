@@ -88,7 +88,7 @@ case $0 in
 
 *"clang++")
     CXX_COMPILER="true"
-    COMPILER="${compiler/clang/clang++} --target=x86_64-elf -Qunused-arguments"
+    COMPILER="${compiler/clang$/clang++} --target=x86_64-elf -Qunused-arguments"
     ;;
 
 *"nasm")
@@ -226,6 +226,10 @@ do
         continue
         ;;
 
+    "--no-dynamic-linker")
+        continue
+        ;;
+
     "-z defs")
         continue
         ;;
@@ -267,7 +271,8 @@ do
         COMPILE_ARGS_INDEX=$((COMPILE_ARGS_INDEX+1))
 
         if [[ $0 == *"clang"* ]]; then
-            LINK_ARGS=("--plugin $HOME/compilers/$compiler/lib/LLVMgold.so" "${LINK_ARGS[@]}");
+            PLUGIN_DIR=${compiler/bin\/clang/lib\/LLVMgold.so}
+            LINK_ARGS=("--plugin $PLUGIN_DIR" "${LINK_ARGS[@]}");
             LINK_ARGS_INDEX=$((LINK_ARGS_INDEX + 1));
         fi
 

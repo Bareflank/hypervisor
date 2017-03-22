@@ -88,8 +88,10 @@ vcpu_intel_x64::run(user_data *data)
 
     if (!m_vmcs_launched)
     {
-        auto ___ = gsl::on_success([&]
-        { m_vmcs_launched = true; });
+        m_vmcs_launched = true;
+
+        auto ___ = gsl::on_failure([&]
+        { m_vmcs_launched = false; });
 
         vcpu::run(data);
 
