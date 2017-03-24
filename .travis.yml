@@ -103,7 +103,7 @@ matrix:
       - TEST="Clang Tidy"
     install:
       - git clone https://github.com/rizsotto/bear.git
-      - pushd bear; cmake .; make; sudo make install; popd
+      - pushd bear; git reset --hard 37b96a184f32b859c8f25ea2dc0d3f07242a9a98; cmake .; make; sudo make install; popd
     script:
       - ./configure --compiler clang-3.8
       - STATIC_ANALYSIS_ENABLED=true bear make
