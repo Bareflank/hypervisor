@@ -54,11 +54,11 @@ test_extended_apis()
         sudo ./configure -m extended_apis/bin/extended_apis.modules > /dev/ttyS1
         sudo make > /dev/ttyS1
         sudo make test > /dev/ttyS1
+        sudo ./extended_apis/tests/test_extended_apis.sh > /dev/ttyS1
     else
         sudo ./configure -m extended_apis/bin/extended_apis.modules --compiler clang --linker $HOME/usr/bin/x86_64-elf-ld.exe > /dev/ttyS1
         sudo make > /dev/ttyS1
     fi
-    sudo ./extended_apis/tests/test_extended_apis.sh > /dev/ttyS1
     echo EAPIs Done > /dev/ttyS1
 }
 
