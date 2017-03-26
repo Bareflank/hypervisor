@@ -23,9 +23,11 @@
 
 #include <intrinsics/msrs_x64.h>
 #include <intrinsics/msrs_intel_x64.h>
+#include <intrinsics/cpuid_x64.h>
 
 using namespace x64;
 using namespace intel_x64;
+using namespace cpuid;
 
 vmcs_intel_x64_host_vm_state::vmcs_intel_x64_host_vm_state() :
     m_gdt{},
@@ -59,7 +61,10 @@ vmcs_intel_x64_host_vm_state::vmcs_intel_x64_host_vm_state() :
     m_ia32_debugctl_msr = intel_x64::msrs::ia32_debugctl::get();
     m_ia32_pat_msr = x64::msrs::ia32_pat::get();
     m_ia32_efer_msr = intel_x64::msrs::ia32_efer::get();
-    m_ia32_perf_global_ctrl_msr = intel_x64::msrs::ia32_perf_global_ctrl::get();
+
+    if (arch_perf_monitoring::eax::version_id::get() >= 2)
+        m_ia32_perf_global_ctrl_msr = intel_x64::msrs::ia32_perf_global_ctrl::get();
+
     m_ia32_sysenter_cs_msr = intel_x64::msrs::ia32_sysenter_cs::get();
     m_ia32_sysenter_esp_msr = intel_x64::msrs::ia32_sysenter_esp::get();
     m_ia32_sysenter_eip_msr = intel_x64::msrs::ia32_sysenter_eip::get();

@@ -428,6 +428,19 @@ intrinsics_ut::list()
     this->test_cpuid_x64_cpuid_extended_feature_flags_subleaf0_ebx_processor_trace();
     this->test_cpuid_x64_cpuid_extended_feature_flags_subleaf0_ebx_sha();
     this->test_cpuid_x64_cpuid_extended_feature_flags_subleaf0_ebx_dump();
+    this->test_cpuid_x64_cpuid_arch_perf_monitoring_eax_version_id();
+    this->test_cpuid_x64_cpuid_arch_perf_monitoring_eax_gppmc_count();
+    this->test_cpuid_x64_cpuid_arch_perf_monitoring_eax_gppmc_bit_width();
+    this->test_cpuid_x64_cpuid_arch_perf_monitoring_eax_ebx_enumeration_length();
+    this->test_cpuid_x64_cpuid_arch_perf_monitoring_ebx_core_cycle_event();
+    this->test_cpuid_x64_cpuid_arch_perf_monitoring_ebx_instr_retired_event();
+    this->test_cpuid_x64_cpuid_arch_perf_monitoring_ebx_reference_cycles_event();
+    this->test_cpuid_x64_cpuid_arch_perf_monitoring_ebx_llc_reference_event();
+    this->test_cpuid_x64_cpuid_arch_perf_monitoring_ebx_llc_misses_event();
+    this->test_cpuid_x64_cpuid_arch_perf_monitoring_ebx_branch_instr_retired_event();
+    this->test_cpuid_x64_cpuid_arch_perf_monitoring_ebx_branch_mispredict_retired_event();
+    this->test_cpuid_x64_cpuid_arch_perf_monitoring_edx_ffpmc_count();
+    this->test_cpuid_x64_cpuid_arch_perf_monitoring_edx_ffpmc_bit_width();
 
     this->test_pm_x64_halt();
     this->test_pm_x64_stop();

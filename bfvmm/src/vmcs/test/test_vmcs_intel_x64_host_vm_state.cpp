@@ -778,8 +778,10 @@ vmcs_ut::test_host_vm_state_ldtr_base()
 }
 
 void
-vmcs_ut::test_host_vm_state_ia32_msrs()
+vmcs_ut::test_host_vm_state_ia32_msrs_with_perf_global_ctrl()
 {
+    g_eax_cpuid[0xA] = 2;
+
     intel_x64::msrs::ia32_debugctl::set(42U);
     x64::msrs::ia32_pat::set(42U);
     intel_x64::msrs::ia32_efer::set(42U);
@@ -798,6 +800,35 @@ vmcs_ut::test_host_vm_state_ia32_msrs()
         this->expect_true(state.ia32_pat_msr() == 42U);
         this->expect_true(state.ia32_efer_msr() == 42U);
         this->expect_true(state.ia32_perf_global_ctrl_msr() == 42U);
+        this->expect_true(state.ia32_sysenter_cs_msr() == 42U);
+        this->expect_true(state.ia32_sysenter_esp_msr() == 42U);
+        this->expect_true(state.ia32_sysenter_eip_msr() == 42U);
+        this->expect_true(state.ia32_fs_base_msr() == 42U);
+        this->expect_true(state.ia32_gs_base_msr() == 42U);
+    });
+}
+
+void
+vmcs_ut::test_host_vm_state_ia32_msrs_without_perf_global_ctrl()
+{
+    g_eax_cpuid[0xA] = 1;
+
+    intel_x64::msrs::ia32_debugctl::set(42U);
+    x64::msrs::ia32_pat::set(42U);
+    intel_x64::msrs::ia32_efer::set(42U);
+    intel_x64::msrs::ia32_sysenter_cs::set(42U);
+    intel_x64::msrs::ia32_sysenter_esp::set(42U);
+    intel_x64::msrs::ia32_sysenter_eip::set(42U);
+    intel_x64::msrs::ia32_fs_base::set(42U);
+    intel_x64::msrs::ia32_gs_base::set(42U);
+
+    this->expect_no_exception([&]
+    {
+        vmcs_intel_x64_host_vm_state state{};
+
+        this->expect_true(state.ia32_debugctl_msr() == 42U);
+        this->expect_true(state.ia32_pat_msr() == 42U);
+        this->expect_true(state.ia32_efer_msr() == 42U);
         this->expect_true(state.ia32_sysenter_cs_msr() == 42U);
         this->expect_true(state.ia32_sysenter_esp_msr() == 42U);
         this->expect_true(state.ia32_sysenter_eip_msr() == 42U);

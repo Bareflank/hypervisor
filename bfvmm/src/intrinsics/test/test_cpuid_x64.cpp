@@ -675,3 +675,115 @@ intrinsics_ut::test_cpuid_x64_cpuid_extended_feature_flags_subleaf0_ebx_dump()
     g_regs.ebx = 0xFFFFFFFFU;
     cpuid::extended_feature_flags::subleaf0::ebx::dump();
 }
+
+void
+intrinsics_ut::test_cpuid_x64_cpuid_arch_perf_monitoring_eax_version_id()
+{
+    g_eax_cpuid[0xA] = 2;
+    this->expect_true(cpuid::arch_perf_monitoring::eax::version_id::get() == 2);
+}
+
+void
+intrinsics_ut::test_cpuid_x64_cpuid_arch_perf_monitoring_eax_gppmc_count()
+{
+    g_eax_cpuid[0xA] = 0xFF02;
+    this->expect_true(cpuid::arch_perf_monitoring::eax::gppmc_count::get() == 0xFF);
+}
+
+void
+intrinsics_ut::test_cpuid_x64_cpuid_arch_perf_monitoring_eax_gppmc_bit_width()
+{
+    g_eax_cpuid[0xA] = 0xFF0002;
+    this->expect_true(cpuid::arch_perf_monitoring::eax::gppmc_bit_width::get() == 0xFF);
+}
+
+void
+intrinsics_ut::test_cpuid_x64_cpuid_arch_perf_monitoring_eax_ebx_enumeration_length()
+{
+    g_eax_cpuid[0xA] = 0xFF000000;
+    this->expect_true(cpuid::arch_perf_monitoring::eax::ebx_enumeration_length::get() == 0xFF);
+}
+
+void
+intrinsics_ut::test_cpuid_x64_cpuid_arch_perf_monitoring_ebx_core_cycle_event()
+{
+    g_ebx_cpuid[0xA] = 0x1U;
+    this->expect_false(cpuid::arch_perf_monitoring::ebx::core_cycle_event::is_available());
+
+    g_ebx_cpuid[0xA] = ~0x1U;
+    this->expect_true(cpuid::arch_perf_monitoring::ebx::core_cycle_event::is_available());
+}
+
+void
+intrinsics_ut::test_cpuid_x64_cpuid_arch_perf_monitoring_ebx_instr_retired_event()
+{
+    g_ebx_cpuid[0xA] = 0x2U;
+    this->expect_false(cpuid::arch_perf_monitoring::ebx::instr_retired_event::is_available());
+
+    g_ebx_cpuid[0xA] = ~0x2U;
+    this->expect_true(cpuid::arch_perf_monitoring::ebx::instr_retired_event::is_available());
+}
+
+void
+intrinsics_ut::test_cpuid_x64_cpuid_arch_perf_monitoring_ebx_reference_cycles_event()
+{
+    g_ebx_cpuid[0xA] = 0x4U;
+    this->expect_false(cpuid::arch_perf_monitoring::ebx::reference_cycles_event::is_available());
+
+    g_ebx_cpuid[0xA] = ~0x4U;
+    this->expect_true(cpuid::arch_perf_monitoring::ebx::reference_cycles_event::is_available());
+}
+
+void
+intrinsics_ut::test_cpuid_x64_cpuid_arch_perf_monitoring_ebx_llc_reference_event()
+{
+    g_ebx_cpuid[0xA] = 0x8U;
+    this->expect_false(cpuid::arch_perf_monitoring::ebx::llc_reference_event::is_available());
+
+    g_ebx_cpuid[0xA] = ~0x8U;
+    this->expect_true(cpuid::arch_perf_monitoring::ebx::llc_reference_event::is_available());
+}
+
+void
+intrinsics_ut::test_cpuid_x64_cpuid_arch_perf_monitoring_ebx_llc_misses_event()
+{
+    g_ebx_cpuid[0xA] = 0x10U;
+    this->expect_false(cpuid::arch_perf_monitoring::ebx::llc_misses_event::is_available());
+
+    g_ebx_cpuid[0xA] = ~0x10U;
+    this->expect_true(cpuid::arch_perf_monitoring::ebx::llc_misses_event::is_available());
+}
+
+void
+intrinsics_ut::test_cpuid_x64_cpuid_arch_perf_monitoring_ebx_branch_instr_retired_event()
+{
+    g_ebx_cpuid[0xA] = 0x20U;
+    this->expect_false(cpuid::arch_perf_monitoring::ebx::branch_instr_retired_event::is_available());
+
+    g_ebx_cpuid[0xA] = ~0x20U;
+    this->expect_true(cpuid::arch_perf_monitoring::ebx::branch_instr_retired_event::is_available());
+}
+
+void
+intrinsics_ut::test_cpuid_x64_cpuid_arch_perf_monitoring_ebx_branch_mispredict_retired_event()
+{
+    g_ebx_cpuid[0xA] = 0x40U;
+    this->expect_false(cpuid::arch_perf_monitoring::ebx::branch_mispredict_retired_event::is_available());
+
+    g_ebx_cpuid[0xA] = ~0x40U;
+    this->expect_true(cpuid::arch_perf_monitoring::ebx::branch_mispredict_retired_event::is_available());
+}
+
+void
+intrinsics_ut::test_cpuid_x64_cpuid_arch_perf_monitoring_edx_ffpmc_count()
+{
+    g_edx_cpuid[0xA] = 2;
+    this->expect_true(cpuid::arch_perf_monitoring::edx::ffpmc_count::get() == 2);
+}
+
+void
+intrinsics_ut::test_cpuid_x64_cpuid_arch_perf_monitoring_edx_ffpmc_bit_width()
+{
+    g_edx_cpuid[0xA] = 0xE2;
+    this->expect_true(cpuid::arch_perf_monitoring::edx::ffpmc_bit_width::get() == 7);
+}

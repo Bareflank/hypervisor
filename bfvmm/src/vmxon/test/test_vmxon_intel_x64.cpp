@@ -66,6 +66,10 @@ extern "C" uint64_t
 __read_msr(uint32_t addr) noexcept
 { return g_msrs[addr]; }
 
+extern "C" void
+__write_msr(uint32_t addr, uint64_t val) noexcept
+{ g_msrs[addr] = val; }
+
 extern "C" uint64_t
 __read_rflags(void) noexcept
 { return g_rflags; }
@@ -258,7 +262,7 @@ vmxon_ut::test_start_v8086_disabled_failure()
 }
 
 void
-vmxon_ut::test_start_check_ia32_feature_control_msr()
+vmxon_ut::test_start_check_ia32_feature_control_msr_lock_bit_clear()
 {
     MockRepository mocks;
     auto &&mm = mocks.Mock<memory_manager_x64>();
@@ -270,7 +274,25 @@ vmxon_ut::test_start_check_ia32_feature_control_msr()
     RUN_UNITTEST_WITH_MOCKS(mocks, [&]
     {
         vmxon_intel_x64 vmxon{};
-        this->expect_exception([&]{ vmxon.start(); }, ""_ut_lee);
+        this->expect_no_exception([&]{ vmxon.start(); });
+    });
+
+}
+
+void
+vmxon_ut::test_start_check_ia32_feature_control_msr_lock_bit_set()
+{
+    MockRepository mocks;
+    auto &&mm = mocks.Mock<memory_manager_x64>();
+
+    setup_intrinsics(mocks, mm);
+
+    g_msrs[msrs::ia32_feature_control::addr] = 1;
+
+    RUN_UNITTEST_WITH_MOCKS(mocks, [&]
+    {
+        vmxon_intel_x64 vmxon{};
+        this->expect_no_exception([&]{ vmxon.start(); });
     });
 }
 
