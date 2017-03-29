@@ -22,6 +22,9 @@
 bits 64
 default rel
 
+%define CPUID_PERF_MONITORING                                     0x0000000A
+%define CPUID_PERF_MONITORING_VERSION_ID                          0x00000002
+
 %define VMCS_GUEST_IA32_DEBUGCTL_FULL                             0x00002802
 %define VMCS_GUEST_IA32_PAT_FULL                                  0x00002804
 %define VMCS_GUEST_IA32_EFER_FULL                                 0x00002806
@@ -81,11 +84,13 @@ extern __write_cr3;
 extern __write_cr4;
 extern __write_dr7;
 
+extern __cpuid_eax
+
 section .text
 
 ; Promote VMCS
 ;
-; Continues execution using the Guest state. Once this function execute,
+; Continues execution using the Guest state. Once this function executes,
 ; the host VMM will stop executing, and the guest will execute at the
 ; instruction that it exited on (likely the vmxoff instruction)
 ;
@@ -216,10 +221,22 @@ vmcs_promote:
     vmread rsi, rsi
     call __write_msr wrt ..plt
 
+    ;
+    ; Check CPUID.0AH:EAX[7:0] for the existence of
+    ; the IA32_PERF_GLOBAL_CTRL_MSR before writing
+    ;
+
+    mov edi, CPUID_PERF_MONITORING
+    call __cpuid_eax wrt ..plt
+    cmp al, CPUID_PERF_MONITORING_VERSION_ID
+    jl .perf_not_supported
+
     mov rdi, IA32_PERF_GLOBAL_CTRL_MSR
     mov rsi, VMCS_GUEST_IA32_PERF_GLOBAL_CTRL_FULL
     vmread rsi, rsi
     call __write_msr wrt ..plt
+
+.perf_not_supported:
 
     mov rdi, IA32_SYSENTER_CS_MSR
     mov rsi, VMCS_GUEST_IA32_SYSENTER_CS

@@ -427,6 +427,19 @@ private:
     void test_cpuid_x64_cpuid_extended_feature_flags_subleaf0_ebx_processor_trace();
     void test_cpuid_x64_cpuid_extended_feature_flags_subleaf0_ebx_sha();
     void test_cpuid_x64_cpuid_extended_feature_flags_subleaf0_ebx_dump();
+    void test_cpuid_x64_cpuid_arch_perf_monitoring_eax_version_id();
+    void test_cpuid_x64_cpuid_arch_perf_monitoring_eax_gppmc_count();
+    void test_cpuid_x64_cpuid_arch_perf_monitoring_eax_gppmc_bit_width();
+    void test_cpuid_x64_cpuid_arch_perf_monitoring_eax_ebx_enumeration_length();
+    void test_cpuid_x64_cpuid_arch_perf_monitoring_ebx_core_cycle_event();
+    void test_cpuid_x64_cpuid_arch_perf_monitoring_ebx_instr_retired_event();
+    void test_cpuid_x64_cpuid_arch_perf_monitoring_ebx_reference_cycles_event();
+    void test_cpuid_x64_cpuid_arch_perf_monitoring_ebx_llc_reference_event();
+    void test_cpuid_x64_cpuid_arch_perf_monitoring_ebx_llc_misses_event();
+    void test_cpuid_x64_cpuid_arch_perf_monitoring_ebx_branch_instr_retired_event();
+    void test_cpuid_x64_cpuid_arch_perf_monitoring_ebx_branch_mispredict_retired_event();
+    void test_cpuid_x64_cpuid_arch_perf_monitoring_edx_ffpmc_count();
+    void test_cpuid_x64_cpuid_arch_perf_monitoring_edx_ffpmc_bit_width();
 
     void test_pm_x64_halt();
     void test_pm_x64_stop();

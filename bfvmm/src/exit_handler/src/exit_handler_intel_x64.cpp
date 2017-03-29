@@ -265,6 +265,7 @@ void
 exit_handler_intel_x64::handle_rdmsr()
 {
     intel_x64::msrs::value_type msr = 0;
+    bool verbose = SECONDARY_ENABLE_IF_VERBOSE;
 
     switch (m_state_save->rcx)
     {
@@ -281,7 +282,7 @@ exit_handler_intel_x64::handle_rdmsr()
             break;
 
         case intel_x64::msrs::ia32_perf_global_ctrl::addr:
-            msr = vmcs::guest_ia32_perf_global_ctrl::get();
+            msr = vmcs::guest_ia32_perf_global_ctrl::get_if_exists(verbose);
             break;
 
         case intel_x64::msrs::ia32_sysenter_cs::addr:
@@ -337,6 +338,7 @@ void
 exit_handler_intel_x64::handle_wrmsr()
 {
     intel_x64::msrs::value_type msr = 0;
+    bool verbose = SECONDARY_ENABLE_IF_VERBOSE;
 
     msr |= ((m_state_save->rax & 0x00000000FFFFFFFF) << 0x00);
     msr |= ((m_state_save->rdx & 0x00000000FFFFFFFF) << 0x20);
@@ -356,7 +358,7 @@ exit_handler_intel_x64::handle_wrmsr()
             break;
 
         case intel_x64::msrs::ia32_perf_global_ctrl::addr:
-            vmcs::guest_ia32_perf_global_ctrl::set(msr);
+            vmcs::guest_ia32_perf_global_ctrl::set_if_exists(msr, verbose);
             break;
 
         case intel_x64::msrs::ia32_sysenter_cs::addr:
