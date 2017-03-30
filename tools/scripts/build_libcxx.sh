@@ -46,6 +46,9 @@ else
     BUILD_TYPE=Debug
 fi
 
+export CFLAGS="$CFLAGS $CROSS_CCFLAGS"
+export CXXFLAGS="$CXXFLAGS $CROSS_CXXFLAGS"
+
 cmake $BUILD_ABS/source_libcxx/ \
     -DCMAKE_SYSTEM_NAME=Linux \
     -DLLVM_PATH=$BUILD_ABS/source_llvm \

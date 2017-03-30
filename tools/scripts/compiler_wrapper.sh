@@ -279,6 +279,14 @@ do
         continue
         ;;
 
+    "-frandom-seed="*)
+        COMPILE_ARGS[$COMPILE_ARGS_INDEX]=$ARG
+        COMPILE_ARGS_INDEX=$((COMPILE_ARGS_INDEX+1))
+        LINK_ARGS[$LINK_ARGS_INDEX]="${ARG/-frandom-seed/--random-seed}"
+        LINK_ARGS_INDEX=$((LINK_ARGS_INDEX+1))
+        continue
+        ;;
+
     "-f"*)
         COMPILE_ARGS[$COMPILE_ARGS_INDEX]=$ARG
         COMPILE_ARGS_INDEX=$((COMPILE_ARGS_INDEX+1))
