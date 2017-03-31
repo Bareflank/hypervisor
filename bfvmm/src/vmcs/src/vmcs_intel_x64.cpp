@@ -283,7 +283,7 @@ vmcs_intel_x64::write_64bit_guest_state(gsl::not_null<vmcs_intel_x64_state *> st
     vmcs::guest_ia32_debugctl::set(state->ia32_debugctl_msr());
     vmcs::guest_ia32_pat::set(state->ia32_pat_msr());
     vmcs::guest_ia32_efer::set(state->ia32_efer_msr());
-    vmcs::guest_ia32_perf_global_ctrl::set(state->ia32_perf_global_ctrl_msr());
+    vmcs::guest_ia32_perf_global_ctrl::set_if_exists(state->ia32_perf_global_ctrl_msr());
 
     // unused: VMCS_GUEST_PDPTE0
     // unused: VMCS_GUEST_PDPTE1
@@ -370,7 +370,7 @@ vmcs_intel_x64::write_64bit_host_state(gsl::not_null<vmcs_intel_x64_state *> sta
 {
     vmcs::host_ia32_pat::set(state->ia32_pat_msr());
     vmcs::host_ia32_efer::set(state->ia32_efer_msr());
-    vmcs::host_ia32_perf_global_ctrl::set(state->ia32_perf_global_ctrl_msr());
+    vmcs::host_ia32_perf_global_ctrl::set_if_exists(state->ia32_perf_global_ctrl_msr());
 }
 
 void
@@ -474,9 +474,12 @@ vmcs_intel_x64::secondary_processor_based_vm_execution_controls()
 void
 vmcs_intel_x64::vm_exit_controls()
 {
+    bool verbose = SECONDARY_ENABLE_IF_VERBOSE;
+
     vm_exit_controls::save_debug_controls::enable();
     vm_exit_controls::host_address_space_size::enable();
-    vm_exit_controls::load_ia32_perf_global_ctrl::enable();
+    vm_exit_controls::load_ia32_perf_global_ctrl::enable_if_allowed(verbose);
+
     // vm_exit_controls::acknowledge_interrupt_on_exit::enable();
     vm_exit_controls::save_ia32_pat::enable();
     vm_exit_controls::load_ia32_pat::enable();
@@ -488,11 +491,14 @@ vmcs_intel_x64::vm_exit_controls()
 void
 vmcs_intel_x64::vm_entry_controls()
 {
+    bool verbose = SECONDARY_ENABLE_IF_VERBOSE;
+
     vm_entry_controls::load_debug_controls::enable();
     vm_entry_controls::ia_32e_mode_guest::enable();
     // vm_entry_controls::entry_to_smm::enable();
     // vm_entry_controls::deactivate_dual_monitor_treatment::enable();
-    vm_entry_controls::load_ia32_perf_global_ctrl::enable();
+    vm_entry_controls::load_ia32_perf_global_ctrl::enable_if_allowed(verbose);
+
     vm_entry_controls::load_ia32_pat::enable();
     vm_entry_controls::load_ia32_efer::enable();
 }

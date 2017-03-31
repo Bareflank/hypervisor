@@ -29,7 +29,7 @@ echo "Fetching newlib. Please wait..."
 n=0
 until [ $n -ge 5 ]
 do
-    git clone --depth 1 -b newlib-2.5.0-v1 https://github.com/Bareflank/newlib.git source_newlib && break
+    git clone --depth 1 -b v1.2 https://github.com/Bareflank/newlib.git source_newlib && break
     n=$[$n+1]
     sleep 15
 done

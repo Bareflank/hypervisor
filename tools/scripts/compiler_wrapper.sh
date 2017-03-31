@@ -279,6 +279,14 @@ do
         continue
         ;;
 
+    "-frandom-seed="*)
+        COMPILE_ARGS[$COMPILE_ARGS_INDEX]=$ARG
+        COMPILE_ARGS_INDEX=$((COMPILE_ARGS_INDEX+1))
+        LINK_ARGS[$LINK_ARGS_INDEX]="${ARG/-frandom-seed/--random-seed}"
+        LINK_ARGS_INDEX=$((LINK_ARGS_INDEX+1))
+        continue
+        ;;
+
     "-f"*)
         COMPILE_ARGS[$COMPILE_ARGS_INDEX]=$ARG
         COMPILE_ARGS_INDEX=$((COMPILE_ARGS_INDEX+1))
@@ -417,7 +425,7 @@ if [[ -n "$SOURCE_ARGS" ]]; then
         done
     fi
 
-    $COMPILER -U__USER_LABEL_PREFIX__ -D__USER_LABEL_PREFIX__="" $NEWLIB_DEFINES $SYSROOT $SYSROOT_INC_PATH ${COMPILE_ARGS[*]} $REQUIRED_COMPILER_ARGS ${SOURCE_ARGS[*]}
+    $COMPILER -U__USER_LABEL_PREFIX__ -D__USER_LABEL_PREFIX__="" -D__ELF__ $NEWLIB_DEFINES $SYSROOT $SYSROOT_INC_PATH ${COMPILE_ARGS[*]} $REQUIRED_COMPILER_ARGS ${SOURCE_ARGS[*]}
 
 else
 

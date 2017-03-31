@@ -23,11 +23,12 @@ addons:
       - ubuntu-toolchain-r-test
       - llvm-toolchain-trusty-3.8
       - llvm-toolchain-trusty-3.9
+      - llvm-toolchain-trusty-4.0
     packages:
       - clang-3.8
       - clang-3.9
+      - clang-4.0
       - clang-tidy-3.8
-      - clang-tidy-3.9
       - gcc-5
       - g++-5
       - nasm
@@ -163,6 +164,17 @@ matrix:
       - make test
 
   #
+  # Clang 4.0
+  #
+  - os: linux
+    env:
+      - TEST="Clang 4.0"
+    script:
+      - ./configure --compiler clang-4.0
+      - make
+      - make test
+
+  #
   # Clang 3.8 (Gold Linker)
   #
   - os: linux
@@ -181,5 +193,16 @@ matrix:
       - TEST="Clang 3.9 (Gold Linker)"
     script:
       - ./configure --compiler clang-3.9 --linker ld.gold
+      - make
+      - make test
+
+  #
+  # Clang 4.0 (Gold Linker)
+  #
+  - os: linux
+    env:
+      - TEST="Clang 4.0 (Gold Linker)"
+    script:
+      - ./configure --compiler clang-4.0 --linker ld.gold
       - make
       - make test

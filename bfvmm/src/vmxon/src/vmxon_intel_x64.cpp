@@ -126,8 +126,11 @@ vmxon_intel_x64::check_ia32_vmx_cr4_fixed_msr()
 void
 vmxon_intel_x64::check_ia32_feature_control_msr()
 {
-    if (!msrs::ia32_feature_control::lock_bit::get())
-        throw std::logic_error("vmx lock bit == 0 is unsupported");
+    if (msrs::ia32_feature_control::lock_bit::get())
+        return;
+
+    msrs::ia32_feature_control::enable_vmx_outside_smx::set(true);
+    msrs::ia32_feature_control::lock_bit::set(true);
 }
 
 void

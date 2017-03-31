@@ -49,7 +49,8 @@ vmxon_ut::list()
     this->test_start_check_ia32_vmx_cr4_fixed1_msr_failure();
     this->test_start_enable_vmx_operation_failure();
     this->test_start_v8086_disabled_failure();
-    this->test_start_check_ia32_feature_control_msr();
+    this->test_start_check_ia32_feature_control_msr_lock_bit_clear();
+    this->test_start_check_ia32_feature_control_msr_lock_bit_set();
     this->test_start_check_ia32_vmx_cr0_fixed0_msr();
     this->test_start_check_ia32_vmx_cr0_fixed1_msr();
     this->test_start_check_vmx_capabilities_msr_memtype_failure();

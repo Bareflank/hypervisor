@@ -1476,7 +1476,8 @@ vmcs_ut::list()
     this->test_host_vm_state_gs_base();
     this->test_host_vm_state_tr_base();
     this->test_host_vm_state_ldtr_base();
-    this->test_host_vm_state_ia32_msrs();
+    this->test_host_vm_state_ia32_msrs_with_perf_global_ctrl();
+    this->test_host_vm_state_ia32_msrs_without_perf_global_ctrl();
     this->test_host_vm_state_dump();
 
     this->test_vmm_state_gdt_not_setup();

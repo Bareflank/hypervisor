@@ -1031,6 +1031,150 @@ namespace cpuid
         }
     }
 
+    namespace arch_perf_monitoring
+    {
+        constexpr const auto addr = 0x0000000AUL;
+        constexpr const auto name = "arch_perf_monitoring";
+
+        namespace eax
+        {
+            namespace version_id
+            {
+                constexpr const auto mask = 0x000000FFUL;
+                constexpr const auto from = 0UL;
+                constexpr const auto name = "version_id";
+
+                inline auto get() noexcept
+                { return get_bits(__cpuid_eax(addr), mask) >> from; }
+            }
+
+            namespace gppmc_count
+            {
+                constexpr const auto mask = 0x0000FF00UL;
+                constexpr const auto from = 8UL;
+                constexpr const auto name = "gppmc_count";
+
+                inline auto get() noexcept
+                { return get_bits(__cpuid_eax(addr), mask) >> from; }
+            }
+
+            namespace gppmc_bit_width
+            {
+                constexpr const auto mask = 0x00FF0000UL;
+                constexpr const auto from = 16UL;
+                constexpr const auto name = "gppmc_bit_width";
+
+                inline auto get() noexcept
+                { return get_bits(__cpuid_eax(addr), mask) >> from; }
+            }
+
+            namespace ebx_enumeration_length
+            {
+                constexpr const auto mask = 0xFF000000UL;
+                constexpr const auto from = 24;
+                constexpr const auto name = "ebx_enumeration_length";
+
+                inline auto get() noexcept
+                { return get_bits(__cpuid_eax(addr), mask) >> from; }
+            }
+        }
+
+        namespace ebx
+        {
+            namespace core_cycle_event
+            {
+                constexpr const auto mask = 0x00000001UL;
+                constexpr const auto from = 0UL;
+                constexpr const auto name = "core_cycle_event";
+
+                inline auto is_available() noexcept
+                { return get_bit(__cpuid_ebx(addr), from) == 0; }
+            }
+
+            namespace instr_retired_event
+            {
+                constexpr const auto mask = 0x00000002UL;
+                constexpr const auto from = 1UL;
+                constexpr const auto name = "instr_retired_event";
+
+                inline auto is_available() noexcept
+                { return get_bit(__cpuid_ebx(addr), from) == 0; }
+            }
+
+            namespace reference_cycles_event
+            {
+                constexpr const auto mask = 0x00000004UL;
+                constexpr const auto from = 2UL;
+                constexpr const auto name = "reference_cycles_event";
+
+                inline auto is_available() noexcept
+                { return get_bit(__cpuid_ebx(addr), from) == 0; }
+            }
+
+            namespace llc_reference_event
+            {
+                constexpr const auto mask = 0x00000008UL;
+                constexpr const auto from = 3UL;
+                constexpr const auto name = "llc_reference_event";
+
+                inline auto is_available() noexcept
+                { return get_bit(__cpuid_ebx(addr), from) == 0; }
+            }
+
+            namespace llc_misses_event
+            {
+                constexpr const auto mask = 0x00000010UL;
+                constexpr const auto from = 4UL;
+                constexpr const auto name = "llc_misses_event";
+
+                inline auto is_available() noexcept
+                { return get_bit(__cpuid_ebx(addr), from) == 0; }
+            }
+
+            namespace branch_instr_retired_event
+            {
+                constexpr const auto mask = 0x00000020UL;
+                constexpr const auto from = 5UL;
+                constexpr const auto name = "branch_instr_retired_event";
+
+                inline auto is_available() noexcept
+                { return get_bit(__cpuid_ebx(addr), from) == 0; }
+            }
+
+            namespace branch_mispredict_retired_event
+            {
+                constexpr const auto mask = 0x00000040UL;
+                constexpr const auto from = 6UL;
+                constexpr const auto name = "branch_mispredict_retired_event";
+
+                inline auto is_available() noexcept
+                { return get_bit(__cpuid_ebx(addr), from) == 0; }
+            }
+        }
+
+        namespace edx
+        {
+            namespace ffpmc_count
+            {
+                constexpr const auto mask = 0x0000001FUL;
+                constexpr const auto from = 0;
+                constexpr const auto name = "ffpmc_count";
+
+                inline auto get() noexcept
+                { return get_bits(__cpuid_edx(addr), mask) >> from; }
+            }
+
+            namespace ffpmc_bit_width
+            {
+                constexpr const auto mask = 0x00001FE0UL;
+                constexpr const auto from = 5;
+                constexpr const auto name = "ffpmc_bit_width";
+
+                inline auto get() noexcept
+                { return get_bits(__cpuid_edx(addr), mask) >> from; }
+            }
+        }
+    }
 }
 }
 
