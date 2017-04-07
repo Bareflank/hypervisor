@@ -44,18 +44,6 @@ install_common_packages() {
     setup-x86_64.exe -q --wait -P make,gcc-core,gcc-g++,diffutils,libgmp-devel,libmpfr-devel,libmpc-devel,flex,bison,nasm,texinfo,unzip,git-completion,bash-completion,patch,ncurses,libncurses-devel,clang,clang++,libiconv-devel,curl,wget
 }
 
-install_cmake() {
-    rm -Rf cmake-*
-    curl -L -o cmake-3.6.2.tar.gz https://cmake.org/files/v3.6/cmake-3.6.2.tar.gz
-    tar xf cmake-*
-    pushd cmake-3.6.2
-    ./configure
-    make
-    make install
-    popd
-    rm -Rf cmake-*
-}
-
 setup_ewdk() {
     if [[ ! -d /cygdrive/c/ewdk ]]; then
         echo "Fetching EWDK. Please wait..."
@@ -73,24 +61,11 @@ setup_ewdk() {
 # ------------------------------------------------------------------------------
 
 case $(uname -r) in
-2.7.*)
+2.*)
     install_common_packages
-    install_cmake
     setup_ewdk
     ;;
-
-2.6.*)
-    install_common_packages
-    install_cmake
-    setup_ewdk
-    ;;
-
-2.5.*)
-    install_common_packages
-    install_cmake
-    setup_ewdk
-    ;;
-
+    
 *)
     echo "This version of Cygwin is not supported"
     exit 1
@@ -98,7 +73,7 @@ case $(uname -r) in
 esac
 
 # ------------------------------------------------------------------------------
-# Setup Build Environment
+# Setup Binutils
 # ------------------------------------------------------------------------------
 
 ./$(dirname $0)/build_binutils.sh
