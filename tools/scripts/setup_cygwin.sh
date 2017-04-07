@@ -65,7 +65,7 @@ case $(uname -r) in
     install_common_packages
     setup_ewdk
     ;;
-    
+
 *)
     echo "This version of Cygwin is not supported"
     exit 1
