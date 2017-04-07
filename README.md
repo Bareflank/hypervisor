@@ -164,7 +164,9 @@ bcdedit.exe /set testsigning ON
 <reboot>
 ```
 
-If you are using Fedora, perform the following step to make SELinux perform in permissive mode. Once you are done testing, it is probably wise to undo this command.
+If your Linux distro has SELinux turned on, and you wish to run the
+unit tests, you must first put SELinux in permissive mode. Once you are 
+done testing, it is probably wise to turn SELinux back on.
 
 ```
 sudo setenforce 0
@@ -172,8 +174,8 @@ sudo setenforce 0
 
 If you are not on a supported platform, you are more than welcome to modify
 an existing setup_\<platform\>.sh script to suite your needs. Its likely
-the hypervisor will work assuming you can get it to compile. Once you have
-the cross compilers you can run:
+the hypervisor will work assuming you can get it to compile. Once the system
+is set up, run the following commands:
 
 ```
 make
