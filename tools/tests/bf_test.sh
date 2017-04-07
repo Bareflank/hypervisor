@@ -169,7 +169,7 @@ test_hook()
 
 trap report_error EXIT
 distro=$(uname -o)
-# Tests assume you are in the ~/hypervisor directory and have run your setup_XXX script
+# Tests assume you are in the hypervisor directory and have run your setup_XXX script
 test_hypervisor
 test_extended_apis
 test_hyperkernel
