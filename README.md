@@ -165,7 +165,7 @@ bcdedit.exe /set testsigning ON
 ```
 
 If your Linux distro has SELinux turned on, and you wish to run the
-unit tests, you must first put SELinux in permissive mode. Once you are 
+unit tests, you must first put SELinux in permissive mode. Once you are
 done testing, it is probably wise to turn SELinux back on.
 
 ```
@@ -265,6 +265,3 @@ https://github.com/ionescu007/SimpleVisor
 
 **HyperPlatform:**  <br>
 https://github.com/tandasat/HyperPlatform
-
-**HyperBone:**  <br>
-https://github.com/DarthTon/HyperBone
