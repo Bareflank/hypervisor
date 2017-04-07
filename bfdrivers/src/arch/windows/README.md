@@ -41,7 +41,7 @@ Next run the cygwin setup script.
 cd ~/
 mkdir build
 cd ~/hypervisor
-./tools/scripts/setup_cygwin.sh
+./tools/scripts/setup_cygwin.sh --compiler clang --linker $HOME/usr/bin/x86_64-elf-ld.exe
 ```
 
 Once you have a cross compiler setup, you need to build the main source code.
@@ -130,7 +130,7 @@ cd ~/
 mkdir build
 cd ~/build
 
-~/hypervisor/configure -m <path to module_file> -e <path to extension>
+~/hypervisor/configure -m <path to module_file> -e <path to extension> --compiler clang --linker $HOME/usr/bin/x86_64-elf-ld.exe
 
 make
 make test

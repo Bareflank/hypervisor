@@ -22,7 +22,6 @@
 
 source $(dirname $0)/setup_common.sh
 
-
 # ------------------------------------------------------------------------------
 # Checks
 # ------------------------------------------------------------------------------
@@ -34,6 +33,8 @@ check_folder
 # Parse Arguments
 # ------------------------------------------------------------------------------
 
+linker="--linker $HOME/usr/bin/x86_64-elf-ld.exe"
+
 parse_arguments $@
 
 # ------------------------------------------------------------------------------
@@ -42,18 +43,6 @@ parse_arguments $@
 
 install_common_packages() {
     setup-x86_64.exe -q --wait -P make,gcc-core,gcc-g++,diffutils,libgmp-devel,libmpfr-devel,libmpc-devel,flex,bison,nasm,texinfo,unzip,git-completion,bash-completion,patch,ncurses,libncurses-devel,clang,clang++,libiconv-devel,curl,wget
-}
-
-install_cmake() {
-    rm -Rf cmake-*
-    curl -L -o cmake-3.6.2.tar.gz https://cmake.org/files/v3.6/cmake-3.6.2.tar.gz
-    tar xf cmake-*
-    pushd cmake-3.6.2
-    ./configure
-    make
-    make install
-    popd
-    rm -Rf cmake-*
 }
 
 setup_ewdk() {
@@ -73,21 +62,8 @@ setup_ewdk() {
 # ------------------------------------------------------------------------------
 
 case $(uname -r) in
-2.7.*)
+2.*)
     install_common_packages
-    install_cmake
-    setup_ewdk
-    ;;
-
-2.6.*)
-    install_common_packages
-    install_cmake
-    setup_ewdk
-    ;;
-
-2.5.*)
-    install_common_packages
-    install_cmake
     setup_ewdk
     ;;
 
@@ -98,7 +74,7 @@ case $(uname -r) in
 esac
 
 # ------------------------------------------------------------------------------
-# Setup Build Environment
+# Setup Binutils
 # ------------------------------------------------------------------------------
 
 ./$(dirname $0)/build_binutils.sh
