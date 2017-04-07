@@ -23,19 +23,19 @@
 set -e
 report_error()
 {
-    echo "BFTest EXIT" > /dev/ttyS1
+    echo "BFTest EXIT"
 }
 
 
 
 test_hypervisor()
 {
-    sudo make > /dev/ttyS1
+    sudo make
     if [ "$distro" != "Cygwin" ] ; then
-        sudo make test > /dev/ttyS1
+        sudo make test
     fi
-    sudo ./tools/tests/test_hypervisor.sh > /dev/ttyS1
-    echo Hypervisor Done > /dev/ttyS1
+    sudo ./tools/tests/test_hypervisor.sh
+    echo Hypervisor Done
 }
 
 
@@ -45,21 +45,21 @@ test_extended_apis()
     n=0
     until [ $n -ge 3 ]
     do
-        git clone https://github.com/Bareflank/extended_apis > /dev/ttyS1 && break
+        git clone https://github.com/Bareflank/extended_apis && break
         n=$[$n+1]
         sleep 15
     done
 
     if [ "$distro" != "Cygwin" ] ; then
-        sudo ./configure -m extended_apis/bin/extended_apis.modules > /dev/ttyS1
-        sudo make > /dev/ttyS1
-        sudo make test > /dev/ttyS1
-        sudo ./extended_apis/tests/test_extended_apis.sh > /dev/ttyS1
+        sudo ./configure -m extended_apis/bin/extended_apis.modules
+        sudo make
+        sudo make test
+        sudo ./extended_apis/tests/test_extended_apis.sh
     else
-        sudo ./configure -m extended_apis/bin/extended_apis.modules --compiler clang --linker $HOME/usr/bin/x86_64-elf-ld.exe > /dev/ttyS1
-        sudo make > /dev/ttyS1
+        sudo ./configure -m extended_apis/bin/extended_apis.modules --compiler clang --linker $HOME/usr/bin/x86_64-elf-ld.exe
+        sudo make
     fi
-    echo EAPIs Done > /dev/ttyS1
+    echo EAPIs Done
 }
 
 
@@ -69,21 +69,21 @@ test_hyperkernel()
     n=0
     until [ $n -ge 3 ]
     do
-        git clone https://github.com/Bareflank/hyperkernel > /dev/ttyS1 && break
+        git clone https://github.com/Bareflank/hyperkernel && break
         n=$[$n+1]
         sleep 15
     done
 
     if [ "$distro" != "Cygwin" ] ; then
-        sudo ./configure -m hyperkernel/bin/hyperkernel.modules > /dev/ttyS1
-        sudo make > /dev/ttyS1
-        sudo make test > /dev/ttyS1
+        sudo ./configure -m hyperkernel/bin/hyperkernel.modules
+        sudo make
+        sudo make test
     else
-        sudo ./configure -m hyperkernel/bin/hyperkernel.modules --compiler clang --linker $HOME/usr/bin/x86_64-elf-ld.exe > /dev/ttyS1
-        sudo make > /dev/ttyS1
+        sudo ./configure -m hyperkernel/bin/hyperkernel.modules --compiler clang --linker $HOME/usr/bin/x86_64-elf-ld.exe
+        sudo make
     fi
-    sudo ./hyperkernel/tests/test_hyperkernel.sh > /dev/ttyS1
-    echo Hyperkernel Done > /dev/ttyS1
+    sudo ./hyperkernel/tests/test_hyperkernel.sh
+    echo Hyperkernel Done
 }
 
 
@@ -93,24 +93,24 @@ test_vpid()
     n=0
     until [ $n -ge 3 ]
     do
-        git clone https://github.com/Bareflank/hypervisor_example_vpid > /dev/ttyS1 && break
+        git clone https://github.com/Bareflank/hypervisor_example_vpid && break
         n=$[$n+1]
         sleep 15
     done
 
     if [ "$distro" != "Cygwin" ] ; then
-        sudo ./configure -m hypervisor_example_vpid/bin/vpid.modules -e hypervisor_example_vpid >/dev/ttyS1
+        sudo ./configure -m hypervisor_example_vpid/bin/vpid.modules -e hypervisor_example_vpid
     else
-        sudo ./configure -m hypervisor_example_vpid/bin/vpid.modules -e hypervisor_example_vpid --compiler clang --linker $HOME/usr/bin/x86_64-elf-ld.exe > /dev/ttyS1
+        sudo ./configure -m hypervisor_example_vpid/bin/vpid.modules -e hypervisor_example_vpid --compiler clang --linker $HOME/usr/bin/x86_64-elf-ld.exe
     fi
-    sudo make > /dev/ttyS1
-    sudo make driver_load > /dev/ttyS1
-    sudo make quick > /dev/ttyS1
-    sudo make status > /dev/ttyS1
-    sudo make dump > /dev/ttyS1
-    sudo make stop > /dev/ttyS1
-    sudo make driver_unload > /dev/ttyS1
-    echo VPID Done > /dev/ttyS1
+    sudo make
+    sudo make driver_load
+    sudo make quick
+    sudo make status
+    sudo make dump
+    sudo make stop
+    sudo make driver_unload
+    echo VPID Done
 }
 
 
@@ -120,23 +120,23 @@ test_cpuid()
     n=0
     until [ $n -ge 3 ]
     do
-        git clone https://github.com/Bareflank/hypervisor_example_cpuidcount > /dev/ttyS1 && break
+        git clone https://github.com/Bareflank/hypervisor_example_cpuidcount && break
         n=$[$n+1]
         sleep 15
     done
 
     if [ "$distro" != "Cygwin" ] ; then
-        sudo ./configure -m hypervisor_example_cpuidcount/bin/cpuidcount.modules > /dev/ttyS1
+        sudo ./configure -m hypervisor_example_cpuidcount/bin/cpuidcount.modules
     else
-        sudo ./configure -m hypervisor_example_cpuidcount/bin/cpuidcount.modules --compiler clang --linker $HOME/usr/bin/x86_64-elf-ld.exe > /dev/ttyS1
+        sudo ./configure -m hypervisor_example_cpuidcount/bin/cpuidcount.modules --compiler clang --linker $HOME/usr/bin/x86_64-elf-ld.exe
     fi
-    sudo make > /dev/ttyS1
-    sudo make driver_load > /dev/ttyS1
-    sudo make quick > /dev/ttyS1
-    sudo ARGS="string json '{\"get\":\"count\"}'" make vmcall > /dev/ttyS1
-    sudo make stop > /dev/ttyS1
-    sudo make driver_unload > /dev/ttyS1
-    echo CPUID Done > /dev/ttyS1
+    sudo make
+    sudo make driver_load
+    sudo make quick
+    sudo ARGS="string json '{\"get\":\"count\"}'" make vmcall
+    sudo make stop
+    sudo make driver_unload
+    echo CPUID Done
 }
 
 
@@ -146,23 +146,23 @@ test_hook()
     n=0
     until [ $n -ge 3 ]
     do
-        git clone https://github.com/Bareflank/extended_apis_example_hook src_extended_apis_example_hook > /dev/ttyS1 && break
+        git clone https://github.com/Bareflank/extended_apis_example_hook src_extended_apis_example_hook && break
         n=$[$n+1]
         sleep 15
     done
 
     if [ "$distro" != "Cygwin" ] ; then
-        sudo ./configure -m src_extended_apis_example_hook/bin/hook.modules > /dev/ttyS1
+        sudo ./configure -m src_extended_apis_example_hook/bin/hook.modules
     else
-        sudo ./configure -m src_extended_apis_example_hook/bin/hook.modules --compiler clang --linker $HOME/usr/bin/x86_64-elf-ld.exe > /dev/ttyS1
+        sudo ./configure -m src_extended_apis_example_hook/bin/hook.modules --compiler clang --linker $HOME/usr/bin/x86_64-elf-ld.exe
     fi
-    sudo make >/dev/ttyS1
-    sudo make driver_load > /dev/ttyS1
-    sudo make quick > /dev/ttyS1
-    sudo ./makefiles/src_extended_apis_example_hook/app/bin/native/hook > /dev/ttyS1
-    sudo make stop > /dev/ttyS1
-    sudo make driver_unload > /dev/ttyS1
-    echo Hook Done > /dev/ttyS1
+    sudo make
+    sudo make driver_load
+    sudo make quick
+    sudo ./makefiles/src_extended_apis_example_hook/app/bin/native/hook
+    sudo make stop
+    sudo make driver_unload
+    echo Hook Done
 }
 
 
@@ -177,5 +177,5 @@ test_vpid
 test_cpuid
 test_hook
 
-echo BFTest SUCCESS > /dev/ttyS1
+echo BFTest SUCCESS
 sleep 60;
