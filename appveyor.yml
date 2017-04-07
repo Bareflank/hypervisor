@@ -25,7 +25,7 @@ install:
 # Build Bareflank
 #
 build_script:
-    - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER; ./tools/scripts/setup_cygwin.sh --compiler clang --linker $HOME/usr/bin/x86_64-elf-ld.exe"'
+    - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER; ./tools/scripts/setup_cygwin.sh"'
     - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER; make -j2"'
     - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER; make driver_build"'
     
