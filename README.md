@@ -63,7 +63,7 @@ including support for the [Guideline Support Library](https://github.com/Microso
 Currently we have support for the following 64bit host operating systems on Intel _SandyBridge_ and above hardware:
 - Ubuntu 16.10
 - Debian Stretch
-- Fedora 25, 24, 23
+- Fedora 25, 24
 - OpenSUSE Leap 42.2
 - Windows 10
 - Windows 8.1
