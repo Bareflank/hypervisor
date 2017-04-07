@@ -10,7 +10,7 @@ bin/
 *.symvers
 /src_*/
 /hypervisor_*/
-/extended_apis/
+/extended_apis*/
 /hyperkernel/
 /doc/html/*
 /Makefile
