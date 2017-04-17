@@ -133,7 +133,10 @@ test_cpuid()
     sudo make
     sudo make driver_load
     sudo make quick
-    sudo ARGS="string json '{\"get\":\"count\"}'" make vmcall
+    if [ "$distro" != "Cygwin" ] ; then
+        sudo ARGS="string json '{\"get\":\"count\"}'" make vmcall
+    else
+        ARGS="string json '{\"get\":\"count\"}'" make vmcall
     sudo make stop
     sudo make driver_unload
     echo CPUID Done
