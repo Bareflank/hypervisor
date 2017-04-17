@@ -137,6 +137,7 @@ test_cpuid()
         sudo ARGS="string json '{\"get\":\"count\"}'" make vmcall
     else
         ARGS="string json '{\"get\":\"count\"}'" make vmcall
+    fi
     sudo make stop
     sudo make driver_unload
     echo CPUID Done
