@@ -150,7 +150,7 @@ is a terminal. Once your setup, you should be able to run the following:
 cd ~/
 git clone https://github.com/bareflank/hypervisor.git
 cd ~/hypervisor
-git checkout -b rc1.1.0
+git checkout -b v1.1.0
 
 ./tools/scripts/setup_<platform>.sh
 ```
@@ -239,6 +239,9 @@ https://github.com/Bareflank/hypervisor_example_vpid
 
 **CPUID Count:**<br>
 https://github.com/Bareflank/hypervisor_example_cpuidcount
+
+**MSR Bitmap:**<br>
+https://github.com/Bareflank/hypervisor_example_msr_bitmap
 
 **Extended APIs EPT Hook:**<br>
 https://github.com/Bareflank/extended_apis_example_hook
