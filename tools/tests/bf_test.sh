@@ -171,6 +171,33 @@ test_hook()
 
 
 
+test_msr()
+{
+    n=0
+    until [ $n -ge 3 ]
+    do
+        git clone https://github.com/Bareflank/hypervisor_example_msr_bitmap.git && break
+        n=$[$n+1]
+        sleep 15
+    done
+
+    if [ "$distro" != "Cygwin" ] ; then
+        sudo ./configure -m hypervisor_example_msr_bitmap/bin/msr_bitmap.modules -e hypervisor_example_msr_bitmap
+    else
+        sudo ./configure -m hypervisor_example_msr_bitmap/bin/msr_bitmap.modules -e hypervisor_example_msr_bitmap --compiler clang --linker $HOME/usr/bin/x86_64-elf-ld.exe
+    fi
+    sudo make
+    sudo make driver_load
+    sudo make quick
+    sudo make status
+    sudo make dump
+    sudo make stop
+    sudo make driver_unload
+    echo MSR Done
+}
+
+
+
 trap report_error EXIT
 distro=$(uname -o)
 # Tests assume you are in the hypervisor directory and have run your setup_XXX script
@@ -180,6 +207,7 @@ test_hyperkernel
 test_vpid
 test_cpuid
 test_hook
+test_msr
 
 echo BFTest SUCCESS
 sleep 60;
