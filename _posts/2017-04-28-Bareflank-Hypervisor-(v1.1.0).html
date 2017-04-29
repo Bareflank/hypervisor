@@ -1,0 +1,25 @@
+The Bareflank Team is proud to announce version v1.1.0, with the following new features:
+
+<h3> New Build System </h3>
+A new build system was developed that supports out-of-tree compilation, better integration with extensions, and support for Docker. With Docker support, you no longer need to compile the cross compilers on Linux based systems. This not only provides a faster method for testing out Bareflank, but also speeds up our Travis CI builds reducing testing time. Local compilers are still recommended if you plan to do heavy development as they are faster.
+
+<h3> Windows / OpenSUSE Support </h3>
+Bareflank now supports Windows 8.1, Windows 10, and OpenSUSE Leap 42.2. Local compilers are required for Windows, and serial output does not work with Windows in VMWare (nested case), but works fine on real hardware. Extensive testing has been done with Windows including running benchmark programs while Bareflank is running as well as CPU-Z.
+
+<h3> VMM Isolation </h3>
+Like [MoRE](https://github.com/ainfosec/MoRE) and [SimpleVisor] (https://github.com/ionescu007/SimpleVisor), Bareflank version 1.0 used the host OS's resources for execution. This included page tables, CR0, CR4, GDT, IDT, etc... Bareflank now has it's own set of resources providing isolation from the host OS like most traditional hypervisors. This provides the ability to map host / guest memory, as well as provides better security.
+
+<h3> MultiCore Support </h3>
+All of the cores are now used by Bareflank instead of just the bootstrap core (as was the case with version 1.0). To support multicore, mutex support was added to the hypervisor. Bareflank does not contain a scheduler, and thus, thread support is not provided, but std::mutex is via a simple spinlock to ensure coherency between cores. There are also a number of APIs to work with each core individually if needed.
+
+<h3> VMCall Support </h3>
+Bareflank now has generic support for VMCalls including version querying, raw register access, mapped memory, JSON commands, simple events and VMM unit testing. the Bareflank Manager (BFM) user space application has also been extended to provide command line access to these VMCalls, and the host OS drivers have also been updated to provide IOCTL support if direct VMCalls are not desired.
+
+<h3> Clang / LLVM Support </h3>
+Bareflank can now cross compile the VMM using Clang / LLVM. In addition, all of the libraries that are used including newlib and libc++ are compiled as shared libraries and linked as such.
+
+<h3> Optimization Support </h3>
+Bareflank now has support for SSE / AVX and "-O3" optimizations in the VMM.
+
+<h3> Testing / GSL Support </h3>
+Bareflank now supports a number of testing tools to ensure the source code works as advertised. This includes Coveralls support for code coverage, Static analysis via Clang Tidy and Coverity and dynamic analysis via Google Sanitizers. These tests are executed on each PR via Travis CI and AppVeyor to ensure the repo remains stable. Finally, Bareflank uses Clang Tidy to ensure C++ Core Guideline compliance, and has support for the Guideline Support Library.
