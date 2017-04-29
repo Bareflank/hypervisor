@@ -239,7 +239,7 @@
 ///
 /// @ref memory_manager_x64 <br>
 /// @ref mem_pool
-/// @ref unique_map_ptr_x64
+/// @ref bfn::unique_map_ptr_x64
 /// @ref page_table_entry_x64
 /// @ref page_table_x64
 /// @ref root_page_table_x64
@@ -268,12 +268,6 @@
 ///
 /// @subsection Debugging
 ///
-/// @ref bfinfo <br>
-/// @ref bfdebug <br>
-/// @ref bfwarning <br>
-/// @ref bferror <br>
-/// @ref bffatal <br>
-/// @ref bfendl <br>
 /// @ref debug_ring <br>
 /// @ref serial_port_intel_x64 <br>
 ///
