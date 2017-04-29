@@ -128,7 +128,7 @@
 ///     int64_t m_count;
 /// };
 /// @endcode
-//
+///
 /// In this example, when the exit handler is first created, a "count"
 /// variable is created with an initial value of 0, and when the exit handler
 /// is destroyed, the exit handler prints out the count variable using
