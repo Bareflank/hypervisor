@@ -1,17 +1,12 @@
 var searchData=
 [
-  ['segment_5faccess_5frights_5fdb',['SEGMENT_ACCESS_RIGHTS_DB',['../intrinsics__x64_8h.html#a49c875cb73b31f1da9bd032f199f2094',1,'intrinsics_x64.h']]],
-  ['segment_5faccess_5frights_5fdpl',['SEGMENT_ACCESS_RIGHTS_DPL',['../intrinsics__x64_8h.html#af86ccd13904d04f7d0ac0e0f202d2157',1,'intrinsics_x64.h']]],
-  ['segment_5faccess_5frights_5fgranularity',['SEGMENT_ACCESS_RIGHTS_GRANULARITY',['../intrinsics__x64_8h.html#a29094b238c6311de7df425bc5e6b5bbf',1,'intrinsics_x64.h']]],
-  ['segment_5faccess_5frights_5fl',['SEGMENT_ACCESS_RIGHTS_L',['../intrinsics__x64_8h.html#a725b4622815e421ea45742e02aee55db',1,'intrinsics_x64.h']]],
-  ['segment_5faccess_5frights_5fpresent',['SEGMENT_ACCESS_RIGHTS_PRESENT',['../intrinsics__x64_8h.html#a78abd3949e003d2120d053d94656875e',1,'intrinsics_x64.h']]],
-  ['segment_5faccess_5frights_5freserved',['SEGMENT_ACCESS_RIGHTS_RESERVED',['../intrinsics__x64_8h.html#acbb6abe5407890136b4e418106e297dd',1,'intrinsics_x64.h']]],
-  ['segment_5faccess_5frights_5fsystem_5fdescriptor',['SEGMENT_ACCESS_RIGHTS_SYSTEM_DESCRIPTOR',['../intrinsics__x64_8h.html#a553e22bec2c8154997adc66678653e82',1,'intrinsics_x64.h']]],
-  ['segment_5faccess_5frights_5ftype',['SEGMENT_ACCESS_RIGHTS_TYPE',['../intrinsics__x64_8h.html#a340c967198d1246d58689772306738ba',1,'intrinsics_x64.h']]],
-  ['selector_5findex',['SELECTOR_INDEX',['../intrinsics__x64_8h.html#a8f71d044ce489d2eca143125015dc3f6',1,'intrinsics_x64.h']]],
-  ['selector_5frpl_5fflag',['SELECTOR_RPL_FLAG',['../intrinsics__x64_8h.html#a7bce3c27072aac62fdfc013d1507d8a0',1,'intrinsics_x64.h']]],
-  ['selector_5fti_5fflag',['SELECTOR_TI_FLAG',['../intrinsics__x64_8h.html#af22650d364caf062be1c81ea26c0a176',1,'intrinsics_x64.h']]],
-  ['selector_5funusable',['SELECTOR_UNUSABLE',['../intrinsics__x64_8h.html#a712ff908ac6105d7650df218d902f09f',1,'intrinsics_x64.h']]],
-  ['stack_5fsize',['STACK_SIZE',['../constants_8h.html#a6423a880df59733d2d9b509c7718d3a9',1,'constants.h']]],
-  ['stn_5fundef',['STN_UNDEF',['../bfelf__loader_8h.html#a4fe371f3c3ea49303d33153103f89c6d',1,'bfelf_loader.h']]]
+  ['unhandled',['UNHANDLED',['../pthread_8cpp.html#aad7b0a0f850f16fabfe522b92595b44a',1,'UNHANDLED():&#160;pthread.cpp'],['../syscall_8cpp.html#aad7b0a0f850f16fabfe522b92595b44a',1,'UNHANDLED():&#160;syscall.cpp']]],
+  ['unknown_5fcommand',['unknown_command',['../exception_8h.html#a11a55bf09ad9cd346b23c29458a1231d',1,'exception.h']]],
+  ['unknown_5fstatus',['unknown_status',['../exception_8h.html#a5630171a0366aeebc260fb9780ef4f04',1,'exception.h']]],
+  ['unknown_5fvmcall_5fdata_5ftype',['unknown_vmcall_data_type',['../exception_8h.html#abf277c79b363407ef63f9c360070efc2',1,'exception.h']]],
+  ['unknown_5fvmcall_5fstring_5ftype',['unknown_vmcall_string_type',['../exception_8h.html#ab046468a33358deefc93e8668ef94a2a',1,'exception.h']]],
+  ['unknown_5fvmcall_5ftype',['unknown_vmcall_type',['../exception_8h.html#a53d476f340f6f4cded509e920b0f1eee',1,'exception.h']]],
+  ['user_5fversion_5fmajor',['USER_VERSION_MAJOR',['../constants_8h.html#aab4a58aa091a93cb3f64401b26df3646',1,'constants.h']]],
+  ['user_5fversion_5fminor',['USER_VERSION_MINOR',['../constants_8h.html#a473617ef9a12ddfd6c72e34a8dca61bb',1,'constants.h']]],
+  ['user_5fversion_5fpatch',['USER_VERSION_PATCH',['../constants_8h.html#a08e60c3d761a4e9cbf67225d9f9b4119',1,'constants.h']]]
 ];

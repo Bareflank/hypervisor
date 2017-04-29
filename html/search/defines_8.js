@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['hardware_5funsupported',['hardware_unsupported',['../exception_8h.html#a9ed9db14a68b8c31d73167f79153eb5c',1,'exception.h']]]
+  ['log',['log',['../log_8h.html#a66726e5f1a55e7253ddd5aeec06f19c3',1,'log.h']]]
 ];

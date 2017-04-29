@@ -1,24 +1,11 @@
 var searchData=
 [
-  ['vcpu',['vcpu',['../classvcpu.html',1,'']]],
-  ['vcpu_5ffactory',['vcpu_factory',['../classvcpu__factory.html',1,'']]],
-  ['vcpu_5fintel_5fx64',['vcpu_intel_x64',['../classvcpu__intel__x64.html',1,'']]],
-  ['vcpu_5fmanager',['vcpu_manager',['../classvcpu__manager.html',1,'']]],
-  ['vcpu_5fut',['vcpu_ut',['../classvcpu__ut.html',1,'']]],
-  ['vmcs_5f2_5finvalid_5ffields_5ferror',['vmcs_2_invalid_fields_error',['../classbfn_1_1vmcs__2__invalid__fields__error.html',1,'bfn']]],
-  ['vmcs_5ffailure_5ferror',['vmcs_failure_error',['../classbfn_1_1vmcs__failure__error.html',1,'bfn']]],
-  ['vmcs_5fintel_5fx64',['vmcs_intel_x64',['../classvmcs__intel__x64.html',1,'']]],
-  ['vmcs_5fintel_5fx64_5fstate',['vmcs_intel_x64_state',['../classvmcs__intel__x64__state.html',1,'']]],
-  ['vmcs_5finvalid_5fctls_5ferror',['vmcs_invalid_ctls_error',['../classbfn_1_1vmcs__invalid__ctls__error.html',1,'bfn']]],
-  ['vmcs_5finvalid_5fctrl_5ferror',['vmcs_invalid_ctrl_error',['../classbfn_1_1vmcs__invalid__ctrl__error.html',1,'bfn']]],
-  ['vmcs_5finvalid_5ffield_5ferror',['vmcs_invalid_field_error',['../classbfn_1_1vmcs__invalid__field__error.html',1,'bfn']]],
-  ['vmcs_5flaunch_5ffailure_5ferror',['vmcs_launch_failure_error',['../classbfn_1_1vmcs__launch__failure__error.html',1,'bfn']]],
-  ['vmcs_5fread_5ffailure_5ferror',['vmcs_read_failure_error',['../classbfn_1_1vmcs__read__failure__error.html',1,'bfn']]],
-  ['vmcs_5fut',['vmcs_ut',['../classvmcs__ut.html',1,'']]],
-  ['vmcs_5fwrite_5ffailure_5ferror',['vmcs_write_failure_error',['../classbfn_1_1vmcs__write__failure__error.html',1,'bfn']]],
-  ['vmxon_5fcapabilities_5ffailure_5ferror',['vmxon_capabilities_failure_error',['../classbfn_1_1vmxon__capabilities__failure__error.html',1,'bfn']]],
-  ['vmxon_5ffailure_5ferror',['vmxon_failure_error',['../classbfn_1_1vmxon__failure__error.html',1,'bfn']]],
-  ['vmxon_5ffixed_5fmsr_5ffailure_5ferror',['vmxon_fixed_msr_failure_error',['../classbfn_1_1vmxon__fixed__msr__failure__error.html',1,'bfn']]],
-  ['vmxon_5fintel_5fx64',['vmxon_intel_x64',['../classvmxon__intel__x64.html',1,'']]],
-  ['vmxon_5fut',['vmxon_ut',['../classvmxon__ut.html',1,'']]]
+  ['unique_5fmap_5fptr_5fx64',['unique_map_ptr_x64',['../classbfn_1_1unique__map__ptr__x64.html',1,'bfn']]],
+  ['unittest',['unittest',['../classunittest.html',1,'']]],
+  ['unknown_5fcommand_5ferror',['unknown_command_error',['../classbfn_1_1unknown__command__error.html',1,'bfn']]],
+  ['unknown_5fstatus_5ferror',['unknown_status_error',['../classbfn_1_1unknown__status__error.html',1,'bfn']]],
+  ['unknown_5fvmcall_5fdata_5ftype_5ferror',['unknown_vmcall_data_type_error',['../classbfn_1_1unknown__vmcall__data__type__error.html',1,'bfn']]],
+  ['unknown_5fvmcall_5fstring_5ftype_5ferror',['unknown_vmcall_string_type_error',['../classbfn_1_1unknown__vmcall__string__type__error.html',1,'bfn']]],
+  ['unknown_5fvmcall_5ftype_5ferror',['unknown_vmcall_type_error',['../classbfn_1_1unknown__vmcall__type__error.html',1,'bfn']]],
+  ['user_5fdata',['user_data',['../classuser__data.html',1,'']]]
 ];

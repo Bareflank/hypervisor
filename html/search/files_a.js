@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['registers_2eh',['registers.h',['../registers_8h.html',1,'']]],
-  ['registers_5fintel_5fx64_2eh',['registers_intel_x64.h',['../registers__intel__x64_8h.html',1,'']]]
+  ['new_5fdelete_2eh',['new_delete.h',['../new__delete_8h.html',1,'']]]
 ];

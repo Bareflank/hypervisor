@@ -1,11 +1,15 @@
 var searchData=
 [
-  ['open',['open',['../classioctl.html#a4fb0b6ef1c96812ff8b91d462032507a',1,'ioctl::open()'],['../classioctl__private.html#af49f5dbb02801b8dbb7bd5d8f5640648',1,'ioctl_private::open()']]],
-  ['operator_20_22_22_5fs',['operator &quot;&quot;_s',['../unittest_8h.html#ae109887cd8260c74dbb3d8a0236ab197',1,'unittest.h']]],
-  ['operator_20bool',['operator bool',['../classcommon__entry.html#a0a26e31712801f8dd9deee973d18faba',1,'common_entry']]],
-  ['operator_20delete',['operator delete',['../bfdrivers_2dummy__misc_2dummy__misc_8cpp.html#a3d97a7e2a0208075b4b37328c96ed390',1,'operator delete(void *ptr):&#160;dummy_misc.cpp'],['../bfelf__loader_2dummy__misc_2dummy__misc_8cpp.html#a3d97a7e2a0208075b4b37328c96ed390',1,'operator delete(void *ptr):&#160;dummy_misc.cpp']]],
-  ['operator_2b_2b',['operator++',['../classcommon__entry.html#af8fe9e7fe42d1ad04f4a396942c4d464',1,'common_entry']]],
-  ['operator_3c_3c',['operator&lt;&lt;',['../test__try__catch_8cpp.html#a1e376d6ed07f8dd2b06f559de33890ee',1,'operator&lt;&lt;(std::ostream &amp;os, const raii &amp;):&#160;test_try_catch.cpp'],['../exception_8h.html#af348b265ac2b23894e34c4c68fd66f6d',1,'operator&lt;&lt;(std::ostream &amp;os, const bfn::general_exception &amp;ge):&#160;exception.h']]],
-  ['operator_3d',['operator=',['../classmemory__manager.html#ab8360b834a32baa9539718774611dc85',1,'memory_manager::operator=()'],['../classserial__port__intel__x64.html#aa601289607d294b8db7bc542bf34e1f5',1,'serial_port_intel_x64::operator=()'],['../classvcpu__manager.html#ac44d435979440200db3c5de75829d8c3',1,'vcpu_manager::operator=()']]],
-  ['out_5fof_5fmemory',['out_of_memory',['../memory__manager_8cpp.html#a08639d8de955d67cdec51bab263a901e',1,'memory_manager.cpp']]]
+  ['name',['name',['../classregister__state.html#ae17de3e173bd943d33a1c602dcfd0f8d',1,'register_state::name()'],['../classregister__state__intel__x64.html#aa4b028930886626f0f06caf74344c6ce',1,'register_state_intel_x64::name()']]],
+  ['nanf',['nanf',['../syscall_8cpp.html#a7fe43d4c86419daea2c133e8c5c1a17d',1,'syscall.cpp']]],
+  ['nanosleep',['nanosleep',['../syscall_8cpp.html#a1b63fa141b202a0b01cfef8421aa48d6',1,'syscall.cpp']]],
+  ['new_5fhandler',['new_handler',['../main_8cpp.html#a772e5bbd5fed7d3d89eb3f6615a01505',1,'main.cpp']]],
+  ['no_5fdelete',['no_delete',['../unittest_8h.html#af52cc2b70a01d3b7455a6cc017b26d87',1,'unittest.h']]],
+  ['noexpectationmatches',['NoExpectationMatches',['../class_reporter.html#ae42ac95d62649c0fed6fd435cb30af3c',1,'Reporter']]],
+  ['non_5fvirtual_5fparse',['non_virtual_parse',['../classcommon__entry.html#a52d8ca9ef1e795bc80cc32a08fe84f1a',1,'common_entry::non_virtual_parse()'],['../classci__entry.html#abe12182e087a33d9bf887a310fae7b0c',1,'ci_entry::non_virtual_parse()'],['../classfd__entry.html#ac0cf156360d8c5275f31991e524ab9b8',1,'fd_entry::non_virtual_parse()']]],
+  ['noresultsetup',['NoResultSetUp',['../class_reporter.html#a2da874f861ad58d291a5612fc5f8dae2',1,'Reporter']]],
+  ['noresultsetupexception',['NoResultSetUpException',['../class_no_result_set_up_exception.html#a1781af56188c8da645d521a07081b1e3',1,'NoResultSetUpException']]],
+  ['notimplementedexception',['NotImplementedException',['../class_not_implemented_exception.html#aa946a529729183def23cf4f47df5545b',1,'NotImplementedException']]],
+  ['num_5fbits_5fset',['num_bits_set',['../bitmanip_8h.html#a769bdd59bfda695eef58ee62a742d2d8',1,'bitmanip.h']]],
+  ['nx',['nx',['../classpage__table__entry__x64.html#a095dd6ac7e523525e228789b6bd492d6',1,'page_table_entry_x64']]]
 ];

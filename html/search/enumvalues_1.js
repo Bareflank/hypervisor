@@ -17,6 +17,5 @@ var searchData=
   ['baud_5frate_5f600',['baud_rate_600',['../classserial__port__intel__x64.html#a3aa830675a16438f9948b9c69eea201dace41ca9d4da04c163a7015cb57e61acb',1,'serial_port_intel_x64']]],
   ['baud_5frate_5f7200',['baud_rate_7200',['../classserial__port__intel__x64.html#a3aa830675a16438f9948b9c69eea201da123e909489d3ce6a27d6a5b49272b9b8',1,'serial_port_intel_x64']]],
   ['baud_5frate_5f75',['baud_rate_75',['../classserial__port__intel__x64.html#a3aa830675a16438f9948b9c69eea201dad14dae42dcf9687d42a4ee6c1aa6a122',1,'serial_port_intel_x64']]],
-  ['baud_5frate_5f9600',['baud_rate_9600',['../classserial__port__intel__x64.html#a3aa830675a16438f9948b9c69eea201daa475320260686f1485cfb3686e0dd734',1,'serial_port_intel_x64']]],
-  ['baud_5frate_5funknown',['baud_rate_unknown',['../classserial__port__intel__x64.html#a3aa830675a16438f9948b9c69eea201da88579f3a73d3198a87184ba4f5302d1e',1,'serial_port_intel_x64']]]
+  ['baud_5frate_5f9600',['baud_rate_9600',['../classserial__port__intel__x64.html#a3aa830675a16438f9948b9c69eea201daa475320260686f1485cfb3686e0dd734',1,'serial_port_intel_x64']]]
 ];

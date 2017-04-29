@@ -1,6 +1,19 @@
 var searchData=
 [
-  ['g_5fmm',['g_mm',['../memory__manager_8h.html#aa3788063b7c037c87d41f75cb4aba9c9',1,'memory_manager.h']]],
-  ['g_5fvcm',['g_vcm',['../vcpu__manager_8h.html#a4a043d36555742d6a1f51390ac22634e',1,'vcpu_manager.h']]],
-  ['guard',['guard',['../entry_8cpp.html#a7db5bff8a5a82a868ae1b3117ede682a',1,'entry.cpp']]]
+  ['info',['INFO',['../debug_8h.html#aedf01192151e10a6620567952711ff69',1,'debug.h']]],
+  ['initguid',['INITGUID',['../driver_8h.html#af11aade3f3741fb554915d10d3f514eb',1,'driver.h']]],
+  ['invalid_5ffile',['invalid_file',['../exception_8h.html#a8cc7db0be4b2466618847cfa9433698b',1,'exception.h']]],
+  ['invalid_5fvmm_5fstate',['invalid_vmm_state',['../exception_8h.html#a5c25da14d8b17dd1b96349f373010379',1,'exception.h']]],
+  ['ioctl_5fadd_5fmodule_5fcmd',['IOCTL_ADD_MODULE_CMD',['../driver__entry__interface_8h.html#a351dd65e382dcf56c9529cb93e6634ff',1,'driver_entry_interface.h']]],
+  ['ioctl_5fadd_5fmodule_5flength_5fcmd',['IOCTL_ADD_MODULE_LENGTH_CMD',['../driver__entry__interface_8h.html#a338f03ffd1d051677a4effde4e20dfa3',1,'driver_entry_interface.h']]],
+  ['ioctl_5fdump_5fvmm_5fcmd',['IOCTL_DUMP_VMM_CMD',['../driver__entry__interface_8h.html#a4b3ca2942b6f3d18809a6c9194e94231',1,'driver_entry_interface.h']]],
+  ['ioctl_5ffailed',['ioctl_failed',['../exception_8h.html#a0514d4004d5cceef72e4b8cc37c5d108',1,'exception.h']]],
+  ['ioctl_5fload_5fvmm_5fcmd',['IOCTL_LOAD_VMM_CMD',['../driver__entry__interface_8h.html#a1eb404eb81e4e39d030084c64d3c9ac1',1,'driver_entry_interface.h']]],
+  ['ioctl_5fset_5fcpuid_5fcmd',['IOCTL_SET_CPUID_CMD',['../driver__entry__interface_8h.html#a81e9933b359fa832a54c31dc7a54f5c9',1,'driver_entry_interface.h']]],
+  ['ioctl_5fset_5fvcpuid_5fcmd',['IOCTL_SET_VCPUID_CMD',['../driver__entry__interface_8h.html#aba8d7e57abd2f4da80a16c1e283752d5',1,'driver_entry_interface.h']]],
+  ['ioctl_5fstart_5fvmm_5fcmd',['IOCTL_START_VMM_CMD',['../driver__entry__interface_8h.html#a3cdc34a98dc831481abc956174f6e8b3',1,'driver_entry_interface.h']]],
+  ['ioctl_5fstop_5fvmm_5fcmd',['IOCTL_STOP_VMM_CMD',['../driver__entry__interface_8h.html#aa55dd301e9714c5fdf715e0fb600d03b',1,'driver_entry_interface.h']]],
+  ['ioctl_5funload_5fvmm_5fcmd',['IOCTL_UNLOAD_VMM_CMD',['../driver__entry__interface_8h.html#a1f14be7ef2db30060524e72fe29bf94d',1,'driver_entry_interface.h']]],
+  ['ioctl_5fvmcall_5fcmd',['IOCTL_VMCALL_CMD',['../driver__entry__interface_8h.html#a4a9c9fd76277472d99048e769e3b9adc',1,'driver_entry_interface.h']]],
+  ['ioctl_5fvmm_5fstatus_5fcmd',['IOCTL_VMM_STATUS_CMD',['../driver__entry__interface_8h.html#a6445232061ddb8687bd54b59b7cf3ccb',1,'driver_entry_interface.h']]]
 ];
