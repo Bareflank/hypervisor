@@ -1,6 +1,6 @@
 # Change Log
 
-## [Unreleased]
+## [1.1.0] - 2017-28-04
 ### Added
 - New GDT class that provides a cleaner abstraction of the GDT
 - New IDT class that provides a cleaner abstraction of the IDT
@@ -33,7 +33,7 @@
 - Coverity support
 - AppVeyor support
 - Clang Tidy 3.8 support
-- Clang / LLVM 3.8 and 3.9 support
+- Clang / LLVM 3.8, 3.9, and 4.0 support
 - libc / libcxx / libcxxabi / bfcrt / bfunwind all loaded as shared libraries
 - VMCS unit tests
 - Intrinsics / VMCS namespace logic that provides useful functions / definitions
