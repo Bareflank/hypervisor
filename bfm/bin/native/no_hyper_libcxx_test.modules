@@ -1,6 +1,0 @@
-{
-    "modules" :
-    [
-        "%BUILD_ABS%/makefiles/bfvmm/src/misc/bin/cross/misc"
-    ]
-}
