@@ -1,3 +1,11 @@
 build/
 doc
 doxygen_warnings.txt
+
+bfdriver/
+bfelf_loader/
+bfm/
+bfprefix/
+bfsdk/
+bfsysroot/
+bfvmm/
