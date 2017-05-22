@@ -35,6 +35,27 @@ set(BFVMM_TAG "master" CACHE STRING "default VMM repository branch")
 set(BFDRIVER_URL "https://github.com/bareflank/bfdriver.git" CACHE STRING "default driver repository URL")
 set(BFDRIVER_TAG "master" CACHE STRING "default driver repository branch")
 
+message("-- BFSDK_URL: ${BFSDK_URL}")
+message("-- BFSDK_TAG: ${BFSDK_TAG}")
+message("-- BFSYSROOT_URL: ${BFSYSROOT_URL}")
+message("-- BFSYSROOT_TAG: ${BFSYSROOT_TAG}")
+message("-- BFELF_LOADER_URL: ${BFELF_LOADER_URL}")
+message("-- BFELF_LOADER_TAG: ${BFELF_LOADER_TAG}")
+message("-- BFM_URL: ${BFM_URL}")
+message("-- BFM_TAG: ${BFM_TAG}")
+message("-- BFVMM_URL: ${BFVMM_URL}")
+message("-- BFVMM_TAG: ${BFVMM_TAG}")
+message("-- BFDRIVER_URL: ${BFDRIVER_URL}")
+message("-- BFDRIVER_TAG: ${BFDRIVER_TAG}")
+
+# ------------------------------------------------------------------------------
+# Update Disconnected
+# ------------------------------------------------------------------------------
+
+if(UPDATE_DISCONNECTED)
+    message("-- Update Disconnected: On")
+endif()
+
 # ------------------------------------------------------------------------------
 # SDK
 # ------------------------------------------------------------------------------
@@ -55,6 +76,7 @@ ExternalProject_Add(
     SOURCE_DIR          ${CMAKE_SOURCE_DIR}/bfsdk
     BINARY_DIR          ${CMAKE_BINARY_DIR}/bfsdk/build
     UPDATE_DISCONNECTED ${UPDATE_DISCONNECTED}
+    BUILD_COMMAND       ""
 )
 
 # ------------------------------------------------------------------------------
@@ -101,6 +123,7 @@ ExternalProject_Add(
     SOURCE_DIR          ${CMAKE_SOURCE_DIR}/bfelf_loader
     BINARY_DIR          ${CMAKE_BINARY_DIR}/bfelf_loader/build
     UPDATE_DISCONNECTED ${UPDATE_DISCONNECTED}
+    BUILD_COMMAND       ""
     DEPENDS             bfsdk
 )
 
@@ -123,6 +146,7 @@ ExternalProject_Add(
     SOURCE_DIR          ${CMAKE_SOURCE_DIR}/bfm
     BINARY_DIR          ${CMAKE_BINARY_DIR}/bfm/build
     UPDATE_DISCONNECTED ${UPDATE_DISCONNECTED}
+    BUILD_COMMAND       ""
     DEPENDS             bfsdk bfelf_loader
 )
 
@@ -146,6 +170,7 @@ ExternalProject_Add(
     SOURCE_DIR          ${CMAKE_SOURCE_DIR}/bfvmm
     BINARY_DIR          ${CMAKE_BINARY_DIR}/bfvmm/build
     UPDATE_DISCONNECTED ${UPDATE_DISCONNECTED}
+    BUILD_COMMAND       ""
     DEPENDS             bfsdk bfsysroot
 )
 
@@ -168,8 +193,9 @@ ExternalProject_Add(
     SOURCE_DIR          ${CMAKE_SOURCE_DIR}/bfdriver
     BINARY_DIR          ${CMAKE_BINARY_DIR}/bfdriver/build
     UPDATE_DISCONNECTED ${UPDATE_DISCONNECTED}
-    DEPENDS             bfsdk bfelf_loader
+    BUILD_COMMAND       ""
     INSTALL_COMMAND     ""
+    DEPENDS             bfsdk bfelf_loader
 )
 
 # ------------------------------------------------------------------------------
@@ -308,7 +334,7 @@ if(ENABLE_UNITTESTING)
 endif()
 
 # ------------------------------------------------------------------------------
-# Distclean
+# Clean
 # ------------------------------------------------------------------------------
 
 add_custom_target(distclean
@@ -321,15 +347,17 @@ add_custom_target(distclean
     COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_SOURCE_DIR}/bfvmm
 )
 
+set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${CMAKE_SOURCE_DIR}/bfprefix)
+
 # ------------------------------------------------------------------------------
 # BFM Shortcuts
 # ------------------------------------------------------------------------------
 
-add_custom_target(quick COMMAND ${SUDO} ../bfprefix/bin/bfm quick)
-add_custom_target(stop COMMAND ${SUDO} ../bfprefix/bin/bfm stop)
-add_custom_target(unload COMMAND ${SUDO} ../bfprefix/bin/bfm unload)
-add_custom_target(dump COMMAND ${SUDO} ../bfprefix/bin/bfm dump)
-add_custom_target(status COMMAND ${SUDO} ../bfprefix/bin/bfm status)
+add_custom_target(quick COMMAND ${SUDO} ${CMAKE_SOURCE_DIR}/bfprefix/bin/bfm quick)
+add_custom_target(stop COMMAND ${SUDO} ${CMAKE_SOURCE_DIR}/bfprefix/bin/bfm stop)
+add_custom_target(unload COMMAND ${SUDO} ${CMAKE_SOURCE_DIR}/bfprefix/bin/bfm unload)
+add_custom_target(dump COMMAND ${SUDO} ${CMAKE_SOURCE_DIR}/bfprefix/bin/bfm dump)
+add_custom_target(status COMMAND ${SUDO} ${CMAKE_SOURCE_DIR}/bfprefix/bin/bfm status)
 
 # ------------------------------------------------------------------------------
 # Driver Shortcuts
@@ -340,14 +368,6 @@ add_custom_target(driver_load COMMAND make driver_load > /dev/null VERBATIM WORK
 add_custom_target(driver_unload COMMAND make driver_unload > /dev/null VERBATIM WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/bfdriver/build)
 add_custom_target(driver_clean COMMAND make driver_clean > /dev/null VERBATIM WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/bfdriver/build)
 add_custom_target(driver_quick DEPENDS driver_load driver_build)
-
-# ------------------------------------------------------------------------------
-# Source Shortcuts
-# ------------------------------------------------------------------------------
-
-add_custom_target(elf COMMAND make install VERBATIM WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/bfelf_loader/build)
-add_custom_target(m COMMAND make install VERBATIM WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/bfm/build)
-add_custom_target(vmm COMMAND make install VERBATIM WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/bfvmm/build)
 
 # ------------------------------------------------------------------------------
 # Test
