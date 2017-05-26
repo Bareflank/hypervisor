@@ -120,7 +120,7 @@ struct debug_ring_resources_t
  * @return the number of bytes read from the debug ring, 0
  *        on error
  */
-extern inline uint64_t
+static inline uint64_t
 debug_ring_read(struct debug_ring_resources_t *drr, char *str, uint64_t len)
 {
     uint64_t i;
