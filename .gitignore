@@ -6,6 +6,9 @@ bfdriver/
 bfelf_loader/
 bfm/
 bfprefix/
+bfprefix_test/
 bfsdk/
 bfsysroot/
 bfvmm/
+
+extended_apis/

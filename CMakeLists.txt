@@ -1,5 +1,5 @@
 # export PATH="$PWD/../bfprefix/bin:$PATH"
-# cmake ..
+# cmake -DENABLE_UNITTESTING=ON -DUPDATE_DISCONNECTED=ON  ..
 
 cmake_minimum_required(VERSION 3.6)
 project(hypervisor C CXX)
@@ -8,6 +8,7 @@ include(ExternalProject)
 find_package(Git REQUIRED)
 
 set(BFPREFIX "${CMAKE_SOURCE_DIR}/bfprefix")
+set(BFPREFIX_TEST "${CMAKE_SOURCE_DIR}/bfprefix_test")
 
 if(NOT UNAME STREQUAL "Cygwin")
     set(SUDO sudo)
@@ -205,7 +206,7 @@ ExternalProject_Add(
 if(ENABLE_UNITTESTING)
 
     list(APPEND TEST_BFSDK_CMAKE_ARGS
-        "-DCMAKE_INSTALL_PREFIX=${BFPREFIX}"
+        "-DCMAKE_INSTALL_PREFIX=${BFPREFIX_TEST}"
         "-DENABLE_UNITTESTING=${ENABLE_UNITTESTING}"
         "-DUPDATE_DISCONNECTED=${UPDATE_DISCONNECTED}"
     )
@@ -217,9 +218,8 @@ if(ENABLE_UNITTESTING)
         CMAKE_ARGS          ${TEST_BFSDK_CMAKE_ARGS}
         TMP_DIR             ${CMAKE_BINARY_DIR}/test_bfsdk/tmp
         STAMP_DIR           ${CMAKE_BINARY_DIR}/test_bfsdk/stamp
-        DOWNLOAD_DIR        ${CMAKE_BINARY_DIR}/test_bfsdk/download
         BINARY_DIR          ${CMAKE_BINARY_DIR}/test_bfsdk/build
-        INSTALL_COMMAND     ""
+        BUILD_COMMAND       ""
         DEPENDS             bfsdk
     )
 
@@ -236,7 +236,7 @@ endif()
 if(ENABLE_UNITTESTING)
 
     list(APPEND TEST_BFELF_LOADER_CMAKE_ARGS
-        "-DCMAKE_INSTALL_PREFIX=${BFPREFIX}"
+        "-DCMAKE_INSTALL_PREFIX=${BFPREFIX_TEST}"
         "-DENABLE_UNITTESTING=${ENABLE_UNITTESTING}"
     )
 
@@ -247,10 +247,9 @@ if(ENABLE_UNITTESTING)
         CMAKE_ARGS          ${TEST_BFELF_LOADER_CMAKE_ARGS}
         TMP_DIR             ${CMAKE_BINARY_DIR}/test_bfelf_loader/tmp
         STAMP_DIR           ${CMAKE_BINARY_DIR}/test_bfelf_loader/stamp
-        DOWNLOAD_DIR        ${CMAKE_BINARY_DIR}/test_bfelf_loader/download
         BINARY_DIR          ${CMAKE_BINARY_DIR}/test_bfelf_loader/build
-        INSTALL_COMMAND     ""
-        DEPENDS             bfelf_loader
+        BUILD_COMMAND       ""
+        DEPENDS             bfelf_loader test_bfsdk
     )
 
 endif()
@@ -262,7 +261,7 @@ endif()
 if(ENABLE_UNITTESTING)
 
     list(APPEND TEST_BFM_CMAKE_ARGS
-        "-DCMAKE_INSTALL_PREFIX=${BFPREFIX}"
+        "-DCMAKE_INSTALL_PREFIX=${BFPREFIX_TEST}"
         "-DENABLE_UNITTESTING=${ENABLE_UNITTESTING}"
     )
 
@@ -273,10 +272,9 @@ if(ENABLE_UNITTESTING)
         CMAKE_ARGS          ${TEST_BFM_CMAKE_ARGS}
         TMP_DIR             ${CMAKE_BINARY_DIR}/test_bfm/tmp
         STAMP_DIR           ${CMAKE_BINARY_DIR}/test_bfm/stamp
-        DOWNLOAD_DIR        ${CMAKE_BINARY_DIR}/test_bfm/download
         BINARY_DIR          ${CMAKE_BINARY_DIR}/test_bfm/build
-        INSTALL_COMMAND     ""
-        DEPENDS             bfm
+        BUILD_COMMAND       ""
+        DEPENDS             bfm test_bfsdk test_bfelf_loader
     )
 
 endif()
@@ -288,7 +286,7 @@ endif()
 if(ENABLE_UNITTESTING)
 
     list(APPEND TEST_BFVMM_CMAKE_ARGS
-        "-DCMAKE_INSTALL_PREFIX=${BFPREFIX}"
+        "-DCMAKE_INSTALL_PREFIX=${BFPREFIX_TEST}"
         "-DENABLE_UNITTESTING=${ENABLE_UNITTESTING}"
     )
 
@@ -299,10 +297,9 @@ if(ENABLE_UNITTESTING)
         CMAKE_ARGS          ${TEST_BFVMM_CMAKE_ARGS}
         TMP_DIR             ${CMAKE_BINARY_DIR}/test_bfvmm/tmp
         STAMP_DIR           ${CMAKE_BINARY_DIR}/test_bfvmm/stamp
-        DOWNLOAD_DIR        ${CMAKE_BINARY_DIR}/test_bfvmm/download
         BINARY_DIR          ${CMAKE_BINARY_DIR}/test_bfvmm/build
-        INSTALL_COMMAND     ""
-        DEPENDS             bfvmm
+        BUILD_COMMAND       ""
+        DEPENDS             bfvmm test_bfsdk
     )
 
 endif()
@@ -314,7 +311,7 @@ endif()
 if(ENABLE_UNITTESTING)
 
     list(APPEND TEST_BFDRIVER_CMAKE_ARGS
-        "-DCMAKE_INSTALL_PREFIX=${BFPREFIX}"
+        "-DCMAKE_INSTALL_PREFIX=${BFPREFIX_TEST}"
         "-DENABLE_UNITTESTING=${ENABLE_UNITTESTING}"
     )
 
@@ -325,10 +322,9 @@ if(ENABLE_UNITTESTING)
         CMAKE_ARGS          ${TEST_BFDRIVER_CMAKE_ARGS}
         TMP_DIR             ${CMAKE_BINARY_DIR}/test_bfdriver/tmp
         STAMP_DIR           ${CMAKE_BINARY_DIR}/test_bfdriver/stamp
-        DOWNLOAD_DIR        ${CMAKE_BINARY_DIR}/test_bfdriver/download
         BINARY_DIR          ${CMAKE_BINARY_DIR}/test_bfdriver/build
         INSTALL_COMMAND     ""
-        DEPENDS             bfdriver
+        DEPENDS             bfdriver test_bfsdk test_bfelf_loader
     )
 
 endif()
@@ -337,7 +333,28 @@ endif()
 # Clean
 # ------------------------------------------------------------------------------
 
-add_custom_target(distclean
+add_custom_target(super-clean
+    COMMENT "running make super-clean for the hypervisor, bfsysroot and bfsdk"
+    COMMAND cmake --build . --target clean
+    COMMAND cmake --build ${CMAKE_BINARY_DIR}/bfdriver/build --target clean
+    COMMAND cmake --build ${CMAKE_BINARY_DIR}/bfelf_loader/build --target clean
+    COMMAND cmake --build ${CMAKE_BINARY_DIR}/bfm/build --target clean
+    COMMAND cmake --build ${CMAKE_BINARY_DIR}/bfsdk/build --target super-clean
+    COMMAND cmake --build ${CMAKE_BINARY_DIR}/bfsysroot/build --target super-clean
+    COMMAND cmake --build ${CMAKE_BINARY_DIR}/bfvmm/build --target clean
+
+    COMMAND cmake -E remove_directory ${BFPREFIX}/bin
+    COMMAND cmake -E remove_directory ${BFPREFIX}/include
+    COMMAND cmake -E remove_directory ${BFPREFIX}/lib
+    COMMAND cmake -E remove_directory ${BFPREFIX}/sysroots
+
+    COMMAND cmake -E remove_directory ${BFPREFIX_TEST}/bin
+    COMMAND cmake -E remove_directory ${BFPREFIX_TEST}/include
+    COMMAND cmake -E remove_directory ${BFPREFIX_TEST}/lib
+    COMMAND cmake -E remove_directory ${BFPREFIX_TEST}/sysroots
+)
+
+add_custom_target(dist-clean
     COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_SOURCE_DIR}/bfdriver
     COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_SOURCE_DIR}/bfelf_loader
     COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_SOURCE_DIR}/bfm
@@ -347,17 +364,15 @@ add_custom_target(distclean
     COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_SOURCE_DIR}/bfvmm
 )
 
-set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${CMAKE_SOURCE_DIR}/bfprefix)
-
 # ------------------------------------------------------------------------------
 # BFM Shortcuts
 # ------------------------------------------------------------------------------
 
-add_custom_target(quick COMMAND ${SUDO} ${CMAKE_SOURCE_DIR}/bfprefix/bin/bfm quick)
-add_custom_target(stop COMMAND ${SUDO} ${CMAKE_SOURCE_DIR}/bfprefix/bin/bfm stop)
-add_custom_target(unload COMMAND ${SUDO} ${CMAKE_SOURCE_DIR}/bfprefix/bin/bfm unload)
-add_custom_target(dump COMMAND ${SUDO} ${CMAKE_SOURCE_DIR}/bfprefix/bin/bfm dump)
-add_custom_target(status COMMAND ${SUDO} ${CMAKE_SOURCE_DIR}/bfprefix/bin/bfm status)
+add_custom_target(quick COMMAND ${SUDO} ${BFPREFIX}/bin/bfm quick)
+add_custom_target(stop COMMAND ${SUDO} ${BFPREFIX}/bin/bfm stop)
+add_custom_target(unload COMMAND ${SUDO} ${BFPREFIX}/bin/bfm unload)
+add_custom_target(dump COMMAND ${SUDO} ${BFPREFIX}/bin/bfm dump)
+add_custom_target(status COMMAND ${SUDO} ${BFPREFIX}/bin/bfm status)
 
 # ------------------------------------------------------------------------------
 # Driver Shortcuts
@@ -380,12 +395,12 @@ if(POLICY CMP0037)
 endif()
 
 add_custom_target(test
-    COMMAND make -C ${CMAKE_BINARY_DIR}/test_bfdriver/build test
-    COMMAND make -C ${CMAKE_BINARY_DIR}/test_bfelf_loader/build test
-    COMMAND make -C ${CMAKE_BINARY_DIR}/test_bfm/build test
-    COMMAND make -C ${CMAKE_BINARY_DIR}/test_bfsdk/build test
-#    COMMAND make -C ${CMAKE_BINARY_DIR}/bfsysroot/build test
-    COMMAND make -C ${CMAKE_BINARY_DIR}/test_bfvmm/build test
+    COMMAND cmake --build ${CMAKE_BINARY_DIR}/test_bfdriver/build --target test
+    COMMAND cmake --build ${CMAKE_BINARY_DIR}/test_bfelf_loader/build --target test
+    COMMAND cmake --build ${CMAKE_BINARY_DIR}/test_bfm/build --target test
+    COMMAND cmake --build ${CMAKE_BINARY_DIR}/test_bfsdk/build --target test
+#    COMMAND cmake --build ${CMAKE_BINARY_DIR}/test_bfsysroot/build --target test
+    COMMAND cmake --build ${CMAKE_BINARY_DIR}/test_bfvmm/build --target test
 )
 
 cmake_policy(POP)
