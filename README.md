@@ -150,7 +150,7 @@ sudo apt-get install git build-essential linux-headers-$(uname -r) nasm clang cm
 setup-x86_64.exe -q -P git,make,gcc-core,gcc-g++,nasm,clang,clang++,cmake,wget
 ```
 
-### Windows (Bash):
+#### Windows (Bash):
 TBD
 
 ## Compilation Instructions
