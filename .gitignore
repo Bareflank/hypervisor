@@ -11,4 +11,17 @@ bfsdk/
 bfsysroot/
 bfvmm/
 
+astyle/
+bfsupport/
+bfunwind/
+binutils/
+catch/
+gsl/
+hippomocks/
+json/
+libcxx/
+libcxxabi/
+llvm/
+newlib/
+
 extended_apis/

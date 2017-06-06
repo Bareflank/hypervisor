@@ -1,5 +1,5 @@
 # export PATH="$PWD/../bfprefix/bin:$PATH"
-# cmake -DENABLE_UNITTESTING=ON -DUPDATE_DISCONNECTED=ON  ..
+# cmake ..
 
 cmake_minimum_required(VERSION 3.6)
 project(hypervisor C CXX)
@@ -50,6 +50,14 @@ message("-- BFDRIVER_URL: ${BFDRIVER_URL}")
 message("-- BFDRIVER_TAG: ${BFDRIVER_TAG}")
 
 # ------------------------------------------------------------------------------
+# Path
+# ------------------------------------------------------------------------------
+
+if(NOT $ENV{PATH} MATCHES "/bfprefix/")
+    message (FATAL_ERROR "bfprefix has not been added to your path")
+endif()
+
+# ------------------------------------------------------------------------------
 # Update Disconnected
 # ------------------------------------------------------------------------------
 
@@ -58,11 +66,33 @@ if(UPDATE_DISCONNECTED)
 endif()
 
 # ------------------------------------------------------------------------------
+# Toolchain File
+# ------------------------------------------------------------------------------
+
+find_program(CLANG_40 clang-4.0)
+find_program(CLANG_39 clang-3.9)
+find_program(CLANG_38 clang-3.8)
+
+if(NOT CLANG_40 STREQUAL "CLANG_40-NOTFOUND")
+    set(VMM_TOOLCHAIN_FILE "${BFPREFIX}/cmake/CMakeToolchain_VMM_40.txt" CACHE STRING "default VMM toolchain file")
+elseif(NOT CLANG_39 STREQUAL "CLANG_39-NOTFOUND")
+    set(VMM_TOOLCHAIN_FILE "${BFPREFIX}/cmake/CMakeToolchain_VMM_39.txt" CACHE STRING "default VMM toolchain file")
+elseif(NOT CLANG_38 STREQUAL "CLANG_38-NOTFOUND")
+    set(VMM_TOOLCHAIN_FILE "${BFPREFIX}/cmake/CMakeToolchain_VMM_38.txt" CACHE STRING "default VMM toolchain file")
+else()
+    set(VMM_TOOLCHAIN_FILE "${BFPREFIX}/cmake/CMakeToolchain_VMM.txt" CACHE STRING "default VMM toolchain file")
+endif()
+
+# ------------------------------------------------------------------------------
 # SDK
 # ------------------------------------------------------------------------------
 
 list(APPEND BFSDK_CMAKE_ARGS
+    "-DBFSOURCE_DIR=${CMAKE_SOURCE_DIR}"
     "-DCMAKE_INSTALL_PREFIX=${BFPREFIX}"
+    "-DENABLE_TIDY=${ENABLE_TIDY}"
+    "-DENABLE_UNITTESTING=${ENABLE_UNITTESTING}"
+    "-DENABLE_COVERAGE_LLVM=${ENABLE_COVERAGE_LLVM}"
     "-DUPDATE_DISCONNECTED=${UPDATE_DISCONNECTED}"
 )
 
@@ -71,6 +101,7 @@ ExternalProject_Add(
     GIT_REPOSITORY      ${BFSDK_URL}
     GIT_TAG             ${BFSDK_TAG}
     CMAKE_ARGS          ${BFSDK_CMAKE_ARGS}
+    PREFIX              ${CMAKE_BINARY_DIR}/bfsdk/prefix
     TMP_DIR             ${CMAKE_BINARY_DIR}/bfsdk/tmp
     STAMP_DIR           ${CMAKE_BINARY_DIR}/bfsdk/stamp
     DOWNLOAD_DIR        ${CMAKE_BINARY_DIR}/bfsdk/download
@@ -80,13 +111,28 @@ ExternalProject_Add(
     BUILD_COMMAND       ""
 )
 
+if(ENABLE_UNITTESTING OR ENABLE_TIDY OR ENABLE_COVERAGE_LLVM)
+
+    ExternalProject_Add_Step(
+        bfsdk
+        test_prefix_install
+        COMMAND             ${CMAKE_COMMAND} -E make_directory ${BFPREFIX_TEST}
+        COMMAND             ${CMAKE_COMMAND} -E create_symlink ${BFPREFIX}/bin ${BFPREFIX_TEST}/bin
+        COMMAND             ${CMAKE_COMMAND} -E create_symlink ${BFPREFIX}/cmake ${BFPREFIX_TEST}/cmake
+        COMMAND             ${CMAKE_COMMAND} -E create_symlink ${BFPREFIX}/include ${BFPREFIX_TEST}/include
+        DEPENDEES           install
+    )
+
+endif()
+
 # ------------------------------------------------------------------------------
 # Sysroot
 # ------------------------------------------------------------------------------
 
 list(APPEND BFSYSROOT_CMAKE_ARGS
+    "-DBFSOURCE_DIR=${CMAKE_SOURCE_DIR}"
     "-DCMAKE_INSTALL_PREFIX=${BFPREFIX}"
-    "-DCMAKE_TOOLCHAIN_FILE=${BFPREFIX}/cmake/CMakeToolchain_VMM_40.txt"
+    "-DCMAKE_TOOLCHAIN_FILE=${VMM_TOOLCHAIN_FILE}"
     "-DDISABLE_WARNINGS=ON"
 )
 
@@ -95,6 +141,7 @@ ExternalProject_Add(
     GIT_REPOSITORY      ${BFSYSROOT_URL}
     GIT_TAG             ${BFSYSROOT_TAG}
     CMAKE_ARGS          ${BFSYSROOT_CMAKE_ARGS}
+    PREFIX              ${CMAKE_BINARY_DIR}/bfsysroot/prefix
     TMP_DIR             ${CMAKE_BINARY_DIR}/bfsysroot/tmp
     STAMP_DIR           ${CMAKE_BINARY_DIR}/bfsysroot/stamp
     DOWNLOAD_DIR        ${CMAKE_BINARY_DIR}/bfsysroot/download
@@ -111,6 +158,9 @@ ExternalProject_Add(
 
 list(APPEND BFELF_LOADER_CMAKE_ARGS
     "-DCMAKE_INSTALL_PREFIX=${BFPREFIX}"
+    "-DENABLE_TIDY=${ENABLE_TIDY}"
+    "-DENABLE_UNITTESTING=${ENABLE_UNITTESTING}"
+    "-DENABLE_COVERAGE_LLVM=${ENABLE_COVERAGE_LLVM}"
 )
 
 ExternalProject_Add(
@@ -118,6 +168,7 @@ ExternalProject_Add(
     GIT_REPOSITORY      ${BFELF_LOADER_URL}
     GIT_TAG             ${BFELF_LOADER_TAG}
     CMAKE_ARGS          ${BFELF_LOADER_CMAKE_ARGS}
+    PREFIX              ${CMAKE_BINARY_DIR}/bfelf_loader/prefix
     TMP_DIR             ${CMAKE_BINARY_DIR}/bfelf_loader/tmp
     STAMP_DIR           ${CMAKE_BINARY_DIR}/bfelf_loader/stamp
     DOWNLOAD_DIR        ${CMAKE_BINARY_DIR}/bfelf_loader/download
@@ -134,6 +185,9 @@ ExternalProject_Add(
 
 list(APPEND BFM_CMAKE_ARGS
     "-DCMAKE_INSTALL_PREFIX=${BFPREFIX}"
+    "-DENABLE_TIDY=${ENABLE_TIDY}"
+    "-DENABLE_UNITTESTING=${ENABLE_UNITTESTING}"
+    "-DENABLE_COVERAGE_LLVM=${ENABLE_COVERAGE_LLVM}"
 )
 
 ExternalProject_Add(
@@ -141,6 +195,7 @@ ExternalProject_Add(
     GIT_REPOSITORY      ${BFM_URL}
     GIT_TAG             ${BFM_TAG}
     CMAKE_ARGS          ${BFM_CMAKE_ARGS}
+    PREFIX              ${CMAKE_BINARY_DIR}/bfm/prefix
     TMP_DIR             ${CMAKE_BINARY_DIR}/bfm/tmp
     STAMP_DIR           ${CMAKE_BINARY_DIR}/bfm/stamp
     DOWNLOAD_DIR        ${CMAKE_BINARY_DIR}/bfm/download
@@ -148,7 +203,7 @@ ExternalProject_Add(
     BINARY_DIR          ${CMAKE_BINARY_DIR}/bfm/build
     UPDATE_DISCONNECTED ${UPDATE_DISCONNECTED}
     BUILD_COMMAND       ""
-    DEPENDS             bfsdk bfelf_loader
+    DEPENDS             bfsdk
 )
 
 # ------------------------------------------------------------------------------
@@ -157,7 +212,7 @@ ExternalProject_Add(
 
 list(APPEND BFVMM_CMAKE_ARGS
     "-DCMAKE_INSTALL_PREFIX=${BFPREFIX}"
-    "-DCMAKE_TOOLCHAIN_FILE=${BFPREFIX}/cmake/CMakeToolchain_VMM_40.txt"
+    "-DCMAKE_TOOLCHAIN_FILE=${VMM_TOOLCHAIN_FILE}"
 )
 
 ExternalProject_Add(
@@ -165,6 +220,7 @@ ExternalProject_Add(
     GIT_REPOSITORY      ${BFVMM_URL}
     GIT_TAG             ${BFVMM_TAG}
     CMAKE_ARGS          ${BFVMM_CMAKE_ARGS}
+    PREFIX              ${CMAKE_BINARY_DIR}/bfvmm/prefix
     TMP_DIR             ${CMAKE_BINARY_DIR}/bfvmm/tmp
     STAMP_DIR           ${CMAKE_BINARY_DIR}/bfvmm/stamp
     DOWNLOAD_DIR        ${CMAKE_BINARY_DIR}/bfvmm/download
@@ -175,12 +231,39 @@ ExternalProject_Add(
     DEPENDS             bfsdk bfsysroot
 )
 
+if(ENABLE_UNITTESTING OR ENABLE_TIDY OR ENABLE_COVERAGE_LLVM)
+
+    list(APPEND TEST_BFVMM_CMAKE_ARGS
+        "-DCMAKE_INSTALL_PREFIX=${BFPREFIX_TEST}"
+        "-DENABLE_TIDY=${ENABLE_TIDY}"
+        "-DENABLE_UNITTESTING=${ENABLE_UNITTESTING}"
+        "-DENABLE_COVERAGE_LLVM=${ENABLE_COVERAGE_LLVM}"
+    )
+
+    ExternalProject_Add(
+        test_bfvmm
+        DOWNLOAD_COMMAND    ""
+        SOURCE_DIR          ${CMAKE_SOURCE_DIR}/bfvmm
+        CMAKE_ARGS          ${TEST_BFVMM_CMAKE_ARGS}
+        PREFIX              ${CMAKE_BINARY_DIR}/test_bfvmm/prefix
+        TMP_DIR             ${CMAKE_BINARY_DIR}/test_bfvmm/tmp
+        STAMP_DIR           ${CMAKE_BINARY_DIR}/test_bfvmm/stamp
+        BINARY_DIR          ${CMAKE_BINARY_DIR}/test_bfvmm/build
+        BUILD_COMMAND       ""
+        DEPENDS             bfvmm
+    )
+
+endif()
+
 # ------------------------------------------------------------------------------
 # Driver
 # ------------------------------------------------------------------------------
 
 list(APPEND BFDRIVER_CMAKE_ARGS
     "-DCMAKE_INSTALL_PREFIX=${BFPREFIX}"
+    "-DENABLE_TIDY=${ENABLE_TIDY}"
+    "-DENABLE_UNITTESTING=${ENABLE_UNITTESTING}"
+    "-DENABLE_COVERAGE_LLVM=${ENABLE_COVERAGE_LLVM}"
 )
 
 ExternalProject_Add(
@@ -188,6 +271,7 @@ ExternalProject_Add(
     GIT_REPOSITORY      ${BFDRIVER_URL}
     GIT_TAG             ${BFDRIVER_TAG}
     CMAKE_ARGS          ${BFDRIVER_CMAKE_ARGS}
+    PREFIX              ${CMAKE_BINARY_DIR}/bfdriver/prefix
     TMP_DIR             ${CMAKE_BINARY_DIR}/bfdriver/tmp
     STAMP_DIR           ${CMAKE_BINARY_DIR}/bfdriver/stamp
     DOWNLOAD_DIR        ${CMAKE_BINARY_DIR}/bfdriver/download
@@ -200,165 +284,39 @@ ExternalProject_Add(
 )
 
 # ------------------------------------------------------------------------------
-# Test SDK
-# ------------------------------------------------------------------------------
-
-if(ENABLE_UNITTESTING)
-
-    list(APPEND TEST_BFSDK_CMAKE_ARGS
-        "-DCMAKE_INSTALL_PREFIX=${BFPREFIX_TEST}"
-        "-DENABLE_UNITTESTING=${ENABLE_UNITTESTING}"
-        "-DUPDATE_DISCONNECTED=${UPDATE_DISCONNECTED}"
-    )
-
-    ExternalProject_Add(
-        test_bfsdk
-        DOWNLOAD_COMMAND    ""
-        SOURCE_DIR          ${CMAKE_SOURCE_DIR}/bfsdk
-        CMAKE_ARGS          ${TEST_BFSDK_CMAKE_ARGS}
-        TMP_DIR             ${CMAKE_BINARY_DIR}/test_bfsdk/tmp
-        STAMP_DIR           ${CMAKE_BINARY_DIR}/test_bfsdk/stamp
-        BINARY_DIR          ${CMAKE_BINARY_DIR}/test_bfsdk/build
-        BUILD_COMMAND       ""
-        DEPENDS             bfsdk
-    )
-
-endif()
-
-# ------------------------------------------------------------------------------
-# Test Sysroot
-# ------------------------------------------------------------------------------
-
-# ------------------------------------------------------------------------------
-# Test ELF Loader
-# ------------------------------------------------------------------------------
-
-if(ENABLE_UNITTESTING)
-
-    list(APPEND TEST_BFELF_LOADER_CMAKE_ARGS
-        "-DCMAKE_INSTALL_PREFIX=${BFPREFIX_TEST}"
-        "-DENABLE_UNITTESTING=${ENABLE_UNITTESTING}"
-    )
-
-    ExternalProject_Add(
-        test_bfelf_loader
-        DOWNLOAD_COMMAND    ""
-        SOURCE_DIR          ${CMAKE_SOURCE_DIR}/bfelf_loader
-        CMAKE_ARGS          ${TEST_BFELF_LOADER_CMAKE_ARGS}
-        TMP_DIR             ${CMAKE_BINARY_DIR}/test_bfelf_loader/tmp
-        STAMP_DIR           ${CMAKE_BINARY_DIR}/test_bfelf_loader/stamp
-        BINARY_DIR          ${CMAKE_BINARY_DIR}/test_bfelf_loader/build
-        BUILD_COMMAND       ""
-        DEPENDS             bfelf_loader test_bfsdk
-    )
-
-endif()
-
-# ------------------------------------------------------------------------------
-# Test BFM
-# ------------------------------------------------------------------------------
-
-if(ENABLE_UNITTESTING)
-
-    list(APPEND TEST_BFM_CMAKE_ARGS
-        "-DCMAKE_INSTALL_PREFIX=${BFPREFIX_TEST}"
-        "-DENABLE_UNITTESTING=${ENABLE_UNITTESTING}"
-    )
-
-    ExternalProject_Add(
-        test_bfm
-        DOWNLOAD_COMMAND    ""
-        SOURCE_DIR          ${CMAKE_SOURCE_DIR}/bfm
-        CMAKE_ARGS          ${TEST_BFM_CMAKE_ARGS}
-        TMP_DIR             ${CMAKE_BINARY_DIR}/test_bfm/tmp
-        STAMP_DIR           ${CMAKE_BINARY_DIR}/test_bfm/stamp
-        BINARY_DIR          ${CMAKE_BINARY_DIR}/test_bfm/build
-        BUILD_COMMAND       ""
-        DEPENDS             bfm test_bfsdk test_bfelf_loader
-    )
-
-endif()
-
-# ------------------------------------------------------------------------------
-# Test VMM
-# ------------------------------------------------------------------------------
-
-if(ENABLE_UNITTESTING)
-
-    list(APPEND TEST_BFVMM_CMAKE_ARGS
-        "-DCMAKE_INSTALL_PREFIX=${BFPREFIX_TEST}"
-        "-DENABLE_UNITTESTING=${ENABLE_UNITTESTING}"
-    )
-
-    ExternalProject_Add(
-        test_bfvmm
-        DOWNLOAD_COMMAND    ""
-        SOURCE_DIR          ${CMAKE_SOURCE_DIR}/bfvmm
-        CMAKE_ARGS          ${TEST_BFVMM_CMAKE_ARGS}
-        TMP_DIR             ${CMAKE_BINARY_DIR}/test_bfvmm/tmp
-        STAMP_DIR           ${CMAKE_BINARY_DIR}/test_bfvmm/stamp
-        BINARY_DIR          ${CMAKE_BINARY_DIR}/test_bfvmm/build
-        BUILD_COMMAND       ""
-        DEPENDS             bfvmm test_bfsdk
-    )
-
-endif()
-
-# ------------------------------------------------------------------------------
-# Test Driver
-# ------------------------------------------------------------------------------
-
-if(ENABLE_UNITTESTING)
-
-    list(APPEND TEST_BFDRIVER_CMAKE_ARGS
-        "-DCMAKE_INSTALL_PREFIX=${BFPREFIX_TEST}"
-        "-DENABLE_UNITTESTING=${ENABLE_UNITTESTING}"
-    )
-
-    ExternalProject_Add(
-        test_bfdriver
-        DOWNLOAD_COMMAND    ""
-        SOURCE_DIR          ${CMAKE_SOURCE_DIR}/bfdriver
-        CMAKE_ARGS          ${TEST_BFDRIVER_CMAKE_ARGS}
-        TMP_DIR             ${CMAKE_BINARY_DIR}/test_bfdriver/tmp
-        STAMP_DIR           ${CMAKE_BINARY_DIR}/test_bfdriver/stamp
-        BINARY_DIR          ${CMAKE_BINARY_DIR}/test_bfdriver/build
-        INSTALL_COMMAND     ""
-        DEPENDS             bfdriver test_bfsdk test_bfelf_loader
-    )
-
-endif()
-
-# ------------------------------------------------------------------------------
 # Clean
 # ------------------------------------------------------------------------------
 
 add_custom_target(super-clean
     COMMENT "running make super-clean for the hypervisor, bfsysroot and bfsdk"
-    COMMAND cmake --build . --target clean
-    COMMAND cmake --build ${CMAKE_BINARY_DIR}/bfdriver/build --target clean
-    COMMAND cmake --build ${CMAKE_BINARY_DIR}/bfelf_loader/build --target clean
-    COMMAND cmake --build ${CMAKE_BINARY_DIR}/bfm/build --target clean
-    COMMAND cmake --build ${CMAKE_BINARY_DIR}/bfsdk/build --target super-clean
-    COMMAND cmake --build ${CMAKE_BINARY_DIR}/bfsysroot/build --target super-clean
-    COMMAND cmake --build ${CMAKE_BINARY_DIR}/bfvmm/build --target clean
+    COMMAND ${CMAKE_COMMAND} --build . --target clean
 
-    COMMAND cmake -E remove_directory ${BFPREFIX}/bin
-    COMMAND cmake -E remove_directory ${BFPREFIX}/include
-    COMMAND cmake -E remove_directory ${BFPREFIX}/lib
-    COMMAND cmake -E remove_directory ${BFPREFIX}/sysroots
+    COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfdriver/build --target clean
+    COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfelf_loader/build --target clean
+    COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfm/build --target clean
+    COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfsdk/build --target super-clean
+    COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfsysroot/build --target super-clean
+    COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfvmm/build --target clean
 
-    COMMAND cmake -E remove_directory ${BFPREFIX_TEST}/bin
-    COMMAND cmake -E remove_directory ${BFPREFIX_TEST}/include
-    COMMAND cmake -E remove_directory ${BFPREFIX_TEST}/lib
-    COMMAND cmake -E remove_directory ${BFPREFIX_TEST}/sysroots
+    COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/test_bfvmm/build --target clean
+
+    COMMAND ${CMAKE_COMMAND} -E remove_directory ${BFPREFIX}/bin
+    COMMAND ${CMAKE_COMMAND} -E remove_directory ${BFPREFIX}/include
+    COMMAND ${CMAKE_COMMAND} -E remove_directory ${BFPREFIX}/lib
+    COMMAND ${CMAKE_COMMAND} -E remove_directory ${BFPREFIX}/sysroots
+
+    COMMAND ${CMAKE_COMMAND} -E remove_directory ${BFPREFIX_TEST}/bin
+    COMMAND ${CMAKE_COMMAND} -E remove_directory ${BFPREFIX_TEST}/include
+    COMMAND ${CMAKE_COMMAND} -E remove_directory ${BFPREFIX_TEST}/lib
 )
 
 add_custom_target(dist-clean
+    COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfsdk/build --target dist-clean
     COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_SOURCE_DIR}/bfdriver
     COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_SOURCE_DIR}/bfelf_loader
     COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_SOURCE_DIR}/bfm
     COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_SOURCE_DIR}/bfprefix
+    COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_SOURCE_DIR}/bfprefix_test
     COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_SOURCE_DIR}/bfsdk
     COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_SOURCE_DIR}/bfsysroot
     COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_SOURCE_DIR}/bfvmm
@@ -395,15 +353,72 @@ if(POLICY CMP0037)
 endif()
 
 add_custom_target(test
-    COMMAND cmake --build ${CMAKE_BINARY_DIR}/test_bfdriver/build --target test
-    COMMAND cmake --build ${CMAKE_BINARY_DIR}/test_bfelf_loader/build --target test
-    COMMAND cmake --build ${CMAKE_BINARY_DIR}/test_bfm/build --target test
-    COMMAND cmake --build ${CMAKE_BINARY_DIR}/test_bfsdk/build --target test
-#    COMMAND cmake --build ${CMAKE_BINARY_DIR}/test_bfsysroot/build --target test
-    COMMAND cmake --build ${CMAKE_BINARY_DIR}/test_bfvmm/build --target test
+    COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfdriver/build --target test
+    COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfelf_loader/build --target test
+    COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfm/build --target test
+    COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfsdk/build --target test
+    COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/test_bfvmm/build --target test
 )
 
 cmake_policy(POP)
+
+# ------------------------------------------------------------------------------
+# Tidy
+# ------------------------------------------------------------------------------
+
+if(ENABLE_TIDY)
+
+    add_custom_target(tidy
+        # COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/test_bfdriver/build --target tidy
+        COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfelf_loader/build --target tidy
+        COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfm/build --target tidy
+        COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfsdk/build --target tidy
+        COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/test_bfvmm/build --target tidy
+    )
+
+    add_custom_target(tidy-all
+        # COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/test_bfdriver/build --target tidy-all
+        COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfelf_loader/build --target tidy-all
+        COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfm/build --target tidy-all
+        COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfsdk/build --target tidy-all
+        COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/test_bfvmm/build --target tidy-all
+    )
+
+endif()
+
+# ------------------------------------------------------------------------------
+# Astyle
+# ------------------------------------------------------------------------------
+
+add_custom_target(format
+    COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfdriver/build --target format
+    COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfelf_loader/build --target format
+    COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfm/build --target format
+    COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfsdk/build --target format
+    COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfsysroot/build --target format
+    COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfvmm/build --target format
+)
+
+add_custom_target(format-all
+    COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfdriver/build --target format-all
+    COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfelf_loader/build --target format-all
+    COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfm/build --target format-all
+    COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfsdk/build --target format-all
+    COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfsysroot/build --target format-all
+    COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfvmm/build --target format-all
+)
+
+# ------------------------------------------------------------------------------
+# Coverage
+# ------------------------------------------------------------------------------
+
+add_custom_target(llvm_coverage
+    COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfdriver/build --target llvm_coverage
+    COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfelf_loader/build --target llvm_coverage
+    COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfm/build --target llvm_coverage
+    COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfsdk/build --target llvm_coverage
+    COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/test_bfvmm/build --target llvm_coverage
+)
 
 # ------------------------------------------------------------------------------
 # Git Report
