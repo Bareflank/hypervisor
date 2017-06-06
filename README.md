@@ -149,23 +149,8 @@ sudo apt-get install git build-essential linux-headers-$(uname -r) nasm clang cm
 setup-x86_64.exe -q -P git,make,gcc-core,gcc-g++,nasm,clang,clang++,cmake,wget
 ```
 
-#### Windows (Visual Studio):
-
-Install the following packages:
-- [Visual Studio SDK 10](https://go.microsoft.com/fwlink/?linkid=838916)
-- [Visual Studio WDK 10](https://go.microsoft.com/fwlink/p/?LinkId=526733)
-- [Visual Studio 2017](https://www.visualstudio.com/thank-you-downloading-visual-studio/?sku=Community&rel=15#)
-  - Check "Desktop development with C++"
-  - Check "C++ CLI / Support"
-  - Check "Standard Library Modules"
-- [CMake v3.8 rc3 or higher](https://cmake.org/files/v3.8/cmake-3.8.0-rc3-win64-x64.msi)
-- [Git for Windows](https://github.com/git-for-windows/git/releases/download/v2.12.2.windows.1/Git-2.12.2-64-bit.exe)
-
-Turn on test signing:
-```
-bcdedit.exe /set testsigning ON
-<reboot>
-```
+### Windows (Bash):
+TBD
 
 ## Compilation Instructions
 
@@ -185,6 +170,7 @@ cd ~/
 git clone -b dev https://github.com/bareflank/hypervisor.git
 mkdir ~/hypervisor/build
 cd ~/hypervisor/build
+export PATH="$PWD/../bfprefix/bin:$PATH"
 cmake ..
 make
 ```
