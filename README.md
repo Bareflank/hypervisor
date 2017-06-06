@@ -60,13 +60,18 @@ and the
 [C++ Core Guidelines](https://github.com/isocpp/CppCoreGuidelines/blob/master/CppCoreGuidelines.md)
 including support for the [Guideline Support Library](https://github.com/Microsoft/GSL).
 
-Currently we have support for the following 64bit host operating systems on Intel _SandyBridge_ and above hardware:
-- Ubuntu 16.10
-- Debian Stretch
-- Fedora 25, 24
-- OpenSUSE Leap 42.2
+Currently we have support for the following 64bit host operating systems on
+Intel _SandyBridge_ and above hardware:
+- Ubuntu 16.10, 17.04
 - Windows 10
 - Windows 8.1
+
+Although not officially supported, Bareflank has also been tested with the
+following Linux distributions:
+- Debian
+- Fedora
+- OpenSUSE
+- Arch Linux
 
 In the future, we would also like to support:
 - macOS
@@ -130,67 +135,88 @@ CppCon 2016: Making C++ and the STL Work in the Linux / Windows Kernels <br>
 
 [![CppCon 2016](http://img.youtube.com/vi/uQSQy-7lveQ/mq1.jpg)](https://www.youtube.com/watch?v=uQSQy-7lveQ)
 
-## Compilation Instructions
+## Dependencies
 
-NOTE: Our master branch is our working, experimental branch and might be
-unstable. If you would like to use Bareflank, we recommend using a tagged
-release which has been more thoroughly tested. Of course if you happen to
-find a bug, please let us know
-[here](https://github.com/Bareflank/hypervisor/issues). These instructions
-might vary from release to release, so if something doesn't work, please
-refer to the instructions provided in the tagged version.
+Although Bareflank can be made to run on most systems, the following are the
+supported platforms and their dependencies:
 
-Before you can compile, the build environment must be present. If you are on
-a supported Windows platform, you must first install cygwin, and run a cygwin
-terminal with admin rights. You must also copy the setup-x86_64.exe to
-"c:\cygwin64\bin". If you are on a supported Linux platform, all you need
-is a terminal. Once your setup, you should be able to run the following:
-
+#### Ubuntu 16.10 (or Higher):
 ```
-cd ~/
-git clone https://github.com/bareflank/hypervisor.git
-cd ~/hypervisor
-git checkout -b v1.1.0
-
-./tools/scripts/setup_<platform>.sh
+sudo apt-get install git build-essential linux-headers-$(uname -r) nasm clang cmake
 ```
 
-If you are on Windows, there is one additional step that must be taken
-to turn on test signing. This step can be skipped if you plan to sign
-the driver with your own signing key.
+#### Windows (Cygwin):
+```
+setup-x86_64.exe -q -P git,make,gcc-core,gcc-g++,nasm,clang,clang++,cmake,wget
+```
 
+#### Windows (Visual Studio):
+
+Install the following packages:
+- [Visual Studio SDK 10](https://go.microsoft.com/fwlink/?linkid=838916)
+- [Visual Studio WDK 10](https://go.microsoft.com/fwlink/p/?LinkId=526733)
+- [Visual Studio 2017](https://www.visualstudio.com/thank-you-downloading-visual-studio/?sku=Community&rel=15#)
+  - Check "Desktop development with C++"
+  - Check "C++ CLI / Support"
+  - Check "Standard Library Modules"
+- [CMake v3.8 rc3 or higher](https://cmake.org/files/v3.8/cmake-3.8.0-rc3-win64-x64.msi)
+- [Git for Windows](https://github.com/git-for-windows/git/releases/download/v2.12.2.windows.1/Git-2.12.2-64-bit.exe)
+
+Turn on test signing:
 ```
 bcdedit.exe /set testsigning ON
 <reboot>
 ```
 
-If your Linux distro has SELinux turned on, and you wish to run the
-unit tests, you must first put SELinux in permissive mode. Once you are
-done testing, it is probably wise to turn SELinux back on.
+## Compilation Instructions
+
+The hypervisor is a collection of several different repos and external
+dependencies. The main repos are as follows:
+- [bfsdk](https://github.com/bareflank/bfsdk.git)
+- [bfsysroot](https://github.com/bareflank/bfsysroot.git)
+- [bfelf_loader](https://github.com/bareflank/bfelf_loader.git)
+- [bfm](https://github.com/bareflank/bfm.git)
+- [bfvmm](https://github.com/bareflank/bfvmm.git)
+- [bfdriver](https://github.com/bareflank/bfdriver.git)
+
+To compile, run the following commands:
 
 ```
-sudo setenforce 0
-```
-
-If you are not on a supported platform, you are more than welcome to modify
-an existing setup_\<platform\>.sh script to suite your needs. Its likely
-the hypervisor will work assuming you can get it to compile. Once the system
-is set up, run the following commands:
-
-```
+cd ~/
+git clone -b dev https://github.com/bareflank/hypervisor.git
+mkdir ~/hypervisor/build
+cd ~/hypervisor/build
+cmake ..
 make
-make test
 ```
 
-To run the hypervisor, you need to first compile, and load one of the driver
-entry points. Bareflank uses the driver entry point to gain kernel level
-access to the system to load the hypervisor. On Windows and Linux, this
-is as simple as:
+If you wish to enable unit testing, run cmake with the following extra flags
+which will enable LLVM code coverage, Clang Tidy static analysis, and
+Catch based unit tests:
 
 ```
-make driver_load
-make load
-make start
+cmake -DENABLE_TIDY=ON -DENABLE_COVERAGE_LLVM=ON ..
+```
+
+You can also direct the build system to use your own forked repos in-place of
+the main repos. To do this, add any of the following CMake variables with
+links to the repo of your choice:
+
+- BFSDK_URL
+- BFSYSROOT_URL
+- BFELF_LOADER_URL
+- BFM_URL
+- BFVMM_URL
+- BFDRIVER_URL
+
+## Usage Instructions
+
+To use the hypervisor, run the following commands:
+
+```
+make driver_build
+make driver_quick
+make quick
 ```
 
 to get status information, use the following:
@@ -198,20 +224,14 @@ to get status information, use the following:
 ```
 make status
 make dump
-ARGS="versions 1" make vmcall
 ```
 
 to reverse this:
 
 ```
-make stop
 make unload
 make driver_unload
 ```
-
-For more detailed instructions please read the following (based on which OS you are using):
-
-[Driver Entry Documentation](https://github.com/Bareflank/hypervisor/tree/master/bfdrivers/src/arch)
 
 ## Extended APIs / Hyperkernel
 
