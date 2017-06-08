@@ -18,23 +18,41 @@ endif()
 # Repos
 # ------------------------------------------------------------------------------
 
-set(BFSDK_URL "https://github.com/bareflank/bfsdk.git" CACHE STRING "default SDK repository URL")
-set(BFSDK_TAG "master" CACHE STRING "default SDK repository branch")
+if(NOT DEFINED BFSDK_PATH)
+    set(BFSDK_URL "https://github.com/bareflank/bfsdk.git" CACHE STRING "default SDK repository URL")
+    set(BFSDK_TAG "master" CACHE STRING "default SDK repository branch")
+    set(BFSDK_PATH "${CMAKE_SOURCE_DIR}/bfsdk" CACHE PATH "bfsdk local path")
+endif()
 
-set(BFSYSROOT_URL "https://github.com/bareflank/bfsysroot.git" CACHE STRING "default sysroot repository URL")
-set(BFSYSROOT_TAG "master" CACHE STRING "default sysroot repository branch")
+if(NOT DEFINED BFSYSROOT_PATH)
+    set(BFSYSROOT_URL "https://github.com/bareflank/bfsysroot.git" CACHE STRING "default sysroot repository URL")
+    set(BFSYSROOT_TAG "master" CACHE STRING "default sysroot repository branch")
+    set(BFSYSROOT_PATH "${CMAKE_SOURCE_DIR}/bfsysroot" CACHE PATH "bfsysroot local path")
+endif()
 
-set(BFELF_LOADER_URL "https://github.com/bareflank/bfelf_loader.git" CACHE STRING "default ELF loader repository URL")
-set(BFELF_LOADER_TAG "master" CACHE STRING "default ELF loader repository branch")
+if(NOT DEFINED BFELF_LOADER_PATH)
+    set(BFELF_LOADER_URL "https://github.com/bareflank/bfelf_loader.git" CACHE STRING "default ELF loader repository URL")
+    set(BFELF_LOADER_TAG "master" CACHE STRING "default ELF loader repository branch")
+    set(BFELF_LOADER_PATH "${CMAKE_SOURCE_DIR}/bfelf_loader" CACHE PATH "bfelf_loader local path")
+endif()
 
-set(BFM_URL "https://github.com/bareflank/bfm.git" CACHE STRING "default BFM repository URL")
-set(BFM_TAG "master" CACHE STRING "default BFM repository branch")
+if(NOT DEFINED BFM_PATH)
+    set(BFM_URL "https://github.com/bareflank/bfm.git" CACHE STRING "default BFM repository URL")
+    set(BFM_TAG "master" CACHE STRING "default BFM repository branch")
+    set(BFM_PATH "${CMAKE_SOURCE_DIR}/bfm" CACHE PATH "bfm local path")
+endif()
 
-set(BFVMM_URL "https://github.com/bareflank/bfvmm.git" CACHE STRING "default VMM repository URL")
-set(BFVMM_TAG "master" CACHE STRING "default VMM repository branch")
+if(NOT DEFINED BFVMM_PATH)
+    set(BFVMM_URL "https://github.com/bareflank/bfvmm.git" CACHE STRING "default VMM repository URL")
+    set(BFVMM_TAG "master" CACHE STRING "default VMM repository branch")
+    set(BFVMM_PATH "${CMAKE_SOURCE_DIR}/bfvmm" CACHE PATH "bfvmm local path")
+endif()
 
-set(BFDRIVER_URL "https://github.com/bareflank/bfdriver.git" CACHE STRING "default driver repository URL")
-set(BFDRIVER_TAG "master" CACHE STRING "default driver repository branch")
+if(NOT DEFINED BFDRIVER_PATH)
+    set(BFDRIVER_URL "https://github.com/bareflank/bfdriver.git" CACHE STRING "default driver repository URL")
+    set(BFDRIVER_TAG "master" CACHE STRING "default driver repository branch")
+    set(BFDRIVER_PATH "${CMAKE_SOURCE_DIR}/bfdriver" CACHE PATH "bfdriver local path")
+endif()
 
 message("-- BFSDK_URL: ${BFSDK_URL}")
 message("-- BFSDK_TAG: ${BFSDK_TAG}")
@@ -105,7 +123,7 @@ ExternalProject_Add(
     TMP_DIR             ${CMAKE_BINARY_DIR}/bfsdk/tmp
     STAMP_DIR           ${CMAKE_BINARY_DIR}/bfsdk/stamp
     DOWNLOAD_DIR        ${CMAKE_BINARY_DIR}/bfsdk/download
-    SOURCE_DIR          ${CMAKE_SOURCE_DIR}/bfsdk
+    SOURCE_DIR          ${BFSDK_PATH}
     BINARY_DIR          ${CMAKE_BINARY_DIR}/bfsdk/build
     UPDATE_DISCONNECTED ${UPDATE_DISCONNECTED}
     BUILD_COMMAND       ""
@@ -145,7 +163,7 @@ ExternalProject_Add(
     TMP_DIR             ${CMAKE_BINARY_DIR}/bfsysroot/tmp
     STAMP_DIR           ${CMAKE_BINARY_DIR}/bfsysroot/stamp
     DOWNLOAD_DIR        ${CMAKE_BINARY_DIR}/bfsysroot/download
-    SOURCE_DIR          ${CMAKE_SOURCE_DIR}/bfsysroot
+    SOURCE_DIR          ${BFSYSROOT_PATH}
     BINARY_DIR          ${CMAKE_BINARY_DIR}/bfsysroot/build
     UPDATE_DISCONNECTED ${UPDATE_DISCONNECTED}
     DEPENDS             bfsdk
@@ -172,7 +190,7 @@ ExternalProject_Add(
     TMP_DIR             ${CMAKE_BINARY_DIR}/bfelf_loader/tmp
     STAMP_DIR           ${CMAKE_BINARY_DIR}/bfelf_loader/stamp
     DOWNLOAD_DIR        ${CMAKE_BINARY_DIR}/bfelf_loader/download
-    SOURCE_DIR          ${CMAKE_SOURCE_DIR}/bfelf_loader
+    SOURCE_DIR          ${BFELF_LOADER_PATH}
     BINARY_DIR          ${CMAKE_BINARY_DIR}/bfelf_loader/build
     UPDATE_DISCONNECTED ${UPDATE_DISCONNECTED}
     BUILD_COMMAND       ""
@@ -199,7 +217,7 @@ ExternalProject_Add(
     TMP_DIR             ${CMAKE_BINARY_DIR}/bfm/tmp
     STAMP_DIR           ${CMAKE_BINARY_DIR}/bfm/stamp
     DOWNLOAD_DIR        ${CMAKE_BINARY_DIR}/bfm/download
-    SOURCE_DIR          ${CMAKE_SOURCE_DIR}/bfm
+    SOURCE_DIR          ${BFM_PATH}
     BINARY_DIR          ${CMAKE_BINARY_DIR}/bfm/build
     UPDATE_DISCONNECTED ${UPDATE_DISCONNECTED}
     BUILD_COMMAND       ""
@@ -224,7 +242,7 @@ ExternalProject_Add(
     TMP_DIR             ${CMAKE_BINARY_DIR}/bfvmm/tmp
     STAMP_DIR           ${CMAKE_BINARY_DIR}/bfvmm/stamp
     DOWNLOAD_DIR        ${CMAKE_BINARY_DIR}/bfvmm/download
-    SOURCE_DIR          ${CMAKE_SOURCE_DIR}/bfvmm
+    SOURCE_DIR          ${BFVMM_PATH}
     BINARY_DIR          ${CMAKE_BINARY_DIR}/bfvmm/build
     UPDATE_DISCONNECTED ${UPDATE_DISCONNECTED}
     BUILD_COMMAND       ""
@@ -275,7 +293,7 @@ ExternalProject_Add(
     TMP_DIR             ${CMAKE_BINARY_DIR}/bfdriver/tmp
     STAMP_DIR           ${CMAKE_BINARY_DIR}/bfdriver/stamp
     DOWNLOAD_DIR        ${CMAKE_BINARY_DIR}/bfdriver/download
-    SOURCE_DIR          ${CMAKE_SOURCE_DIR}/bfdriver
+    SOURCE_DIR          ${BFDRIVER_PATH}
     BINARY_DIR          ${CMAKE_BINARY_DIR}/bfdriver/build
     UPDATE_DISCONNECTED ${UPDATE_DISCONNECTED}
     BUILD_COMMAND       ""
