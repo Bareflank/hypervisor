@@ -53,7 +53,7 @@ message("-- BFDRIVER_TAG: ${BFDRIVER_TAG}")
 # Path
 # ------------------------------------------------------------------------------
 
-if(NOT $ENV{PATH} MATCHES "/bfprefix/")
+if(NOT $ENV{PATH} MATCHES "bfprefix")
     message (FATAL_ERROR "bfprefix has not been added to your path")
 endif()
 
@@ -69,19 +69,51 @@ endif()
 # Toolchain File
 # ------------------------------------------------------------------------------
 
-find_program(CLANG_40 clang-4.0)
-find_program(CLANG_39 clang-3.9)
-find_program(CLANG_38 clang-3.8)
+find_program(NASM_BIN nasm)
 
-if(NOT CLANG_40 STREQUAL "CLANG_40-NOTFOUND")
-    set(VMM_TOOLCHAIN_FILE "${BFPREFIX}/cmake/CMakeToolchain_VMM_40.txt" CACHE STRING "default VMM toolchain file")
-elseif(NOT CLANG_39 STREQUAL "CLANG_39-NOTFOUND")
-    set(VMM_TOOLCHAIN_FILE "${BFPREFIX}/cmake/CMakeToolchain_VMM_39.txt" CACHE STRING "default VMM toolchain file")
-elseif(NOT CLANG_38 STREQUAL "CLANG_38-NOTFOUND")
-    set(VMM_TOOLCHAIN_FILE "${BFPREFIX}/cmake/CMakeToolchain_VMM_38.txt" CACHE STRING "default VMM toolchain file")
-else()
-    set(VMM_TOOLCHAIN_FILE "${BFPREFIX}/cmake/CMakeToolchain_VMM.txt" CACHE STRING "default VMM toolchain file")
+if(NASM_BIN STREQUAL "NASM_BIN-NOTFOUND")
+    message(FATAL_ERROR "Unable to find nasm, or nasm is not installed")
 endif()
+
+find_program(PYTHON_BIN python)
+
+if(PYTHON_BIN STREQUAL "PYTHON_BIN-NOTFOUND")
+    message(FATAL_ERROR "Unable to find python, or python is not installed")
+endif()
+
+find_program(GIT_BIN git)
+
+if(GIT_BIN STREQUAL "GIT_BIN-NOTFOUND")
+    message(FATAL_ERROR "Unable to find git, or git is not installed")
+endif()
+
+find_program(CLANG_BIN_40 clang-4.0)
+find_program(CLANG_BIN_39 clang-3.9)
+find_program(CLANG_BIN_38 clang-3.8)
+find_program(CLANG_BIN clang)
+
+if(NOT CLANG_BIN_40 STREQUAL "CLANG_BIN_40-NOTFOUND")
+    set(CLANG_BIN ${CLANG_BIN_40})
+    set(PREFERRED_VMM_TOOLCHAIN "${BFPREFIX}/cmake/CMakeToolchain_VMM_40.txt")
+elseif(NOT CLANG_BIN_39 STREQUAL "CLANG_BIN_39-NOTFOUND")
+    set(CLANG_BIN ${CLANG_BIN_39})
+    set(PREFERRED_VMM_TOOLCHAIN "${BFPREFIX}/cmake/CMakeToolchain_VMM_39.txt")
+elseif(NOT CLANG_BIN_38 STREQUAL "CLANG_BIN_38-NOTFOUND")
+    set(CLANG_BIN ${CLANG_BIN_38})
+    set(PREFERRED_VMM_TOOLCHAIN "${BFPREFIX}/cmake/CMakeToolchain_VMM_38.txt")
+elseif(NOT CLANG_BIN STREQUAL "CLANG_BIN-NOTFOUND")
+    set(PREFERRED_VMM_TOOLCHAIN "${BFPREFIX}/cmake/CMakeToolchain_VMM.txt")
+else()
+    message(FATAL_ERROR "Unable to find clang, or clang is not installed")
+endif()
+
+message(STATUS "git: ${GIT_BIN}")
+message(STATUS "python: ${PYTHON_BIN}")
+message(STATUS "clang: ${CLANG_BIN}")
+message(STATUS "nasm: ${NASM_BIN}")
+message(STATUS "preferred vmm toolchain: ${PREFERRED_VMM_TOOLCHAIN}")
+
+set(VMM_TOOLCHAIN_FILE ${PREFERRED_VMM_TOOLCHAIN} CACHE STRING "default VMM toolchain file")
 
 # ------------------------------------------------------------------------------
 # SDK
@@ -203,7 +235,7 @@ ExternalProject_Add(
     BINARY_DIR          ${CMAKE_BINARY_DIR}/bfm/build
     UPDATE_DISCONNECTED ${UPDATE_DISCONNECTED}
     BUILD_COMMAND       ""
-    DEPENDS             bfsdk
+    DEPENDS             bfsdk bfelf_loader
 )
 
 # ------------------------------------------------------------------------------

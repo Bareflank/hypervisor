@@ -1,0 +1,106 @@
+#
+# Configuration
+#
+
+language: cpp
+
+dist: trusty
+sudo: required
+
+#
+# Update Build Environment
+#
+before_install:
+
+  #
+  # Update GCC
+  #
+  - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-6 100
+  - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-6 100
+
+  #
+  # Update CMake
+  #
+  - |
+    if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
+      wget https://cmake.org/files/v3.8/cmake-3.8.0-Linux-x86_64.sh
+      chmod +x cmake-*-Linux-x86_64.sh
+      ./cmake-*-Linux-x86_64.sh --exclude-subdir --skip-license
+      export PATH="${TRAVIS_BUILD_DIR}/bin:$PATH"
+      ls ${TRAVIS_BUILD_DIR}
+      ls ${TRAVIS_BUILD_DIR}/bin
+    else
+      if ! brew ls --version cmake &>/dev/null; then brew install cmake; fi
+    fi
+
+#
+# Build Matrix
+#
+matrix:
+  include:
+
+  #
+  # Clang 3.8
+  #
+  - os: linux
+    addons:
+      apt:
+        sources:
+          - ubuntu-toolchain-r-test
+          - llvm-toolchain-trusty-3.8
+        packages:
+          - gcc-6
+          - g++-6
+          - clang-3.8
+          - nasm
+    env:
+      - TEST="Clang 3.8"
+    script:
+      - export PATH="$PWD/../bfprefix/bin:$PATH"
+      - cmake -DENABLE_UNITTESTING=ON ..
+      - make
+      - make test
+
+  #
+  # Clang 3.9
+  #
+  - os: linux
+    addons:
+      apt:
+        sources:
+          - ubuntu-toolchain-r-test
+          - llvm-toolchain-trusty-3.9
+        packages:
+          - gcc-6
+          - g++-6
+          - clang-3.9
+          - nasm
+    env:
+      - TEST="Clang 3.9"
+    script:
+      - export PATH="$PWD/../bfprefix/bin:$PATH"
+      - cmake -DENABLE_UNITTESTING=ON ..
+      - make
+      - make test
+
+  #
+  # Clang 4.0
+  #
+  - os: linux
+    addons:
+      apt:
+        sources:
+          - ubuntu-toolchain-r-test
+          - llvm-toolchain-trusty-4.0
+        packages:
+          - gcc-6
+          - g++-6
+          - clang-4.0
+          - nasm
+    env:
+      - TEST="Clang 4.0"
+    script:
+      - export PATH="$PWD/../bfprefix/bin:$PATH"
+      - cmake -DENABLE_UNITTESTING=ON ..
+      - make
+      - make test
