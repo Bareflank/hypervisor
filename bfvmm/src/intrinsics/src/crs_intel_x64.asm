@@ -63,3 +63,13 @@ global __write_cr4:function
 __write_cr4:
     mov cr4, rdi
     ret
+
+global __read_cr8:function
+__read_cr8:
+    mov rax, cr8
+    ret
+
+global __write_cr8:function
+__write_cr8:
+    mov cr8, rdi
+    ret
