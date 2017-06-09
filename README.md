@@ -159,7 +159,7 @@ The hypervisor is a collection of several different repos and external
 dependencies. The main repos are as follows:
 - [bfsdk](https://github.com/bareflank/bfsdk.git)
 - [bfsysroot](https://github.com/bareflank/bfsysroot.git)
-- [bfelf_loader](https://github.com/bareflank/bfelf_loader.git)
+- [bfelf\_loader](https://github.com/bareflank/bfelf_loader.git)
 - [bfm](https://github.com/bareflank/bfm.git)
 - [bfvmm](https://github.com/bareflank/bfvmm.git)
 - [bfdriver](https://github.com/bareflank/bfdriver.git)
@@ -188,12 +188,22 @@ You can also direct the build system to use your own forked repos in-place of
 the main repos. To do this, add any of the following CMake variables with
 links to the repo of your choice:
 
-- BFSDK_URL
-- BFSYSROOT_URL
-- BFELF_LOADER_URL
-- BFM_URL
-- BFVMM_URL
-- BFDRIVER_URL
+- BFSDK\_URL
+- BFSYSROOT\_URL
+- BFELF\_LOADER\_URL
+- BFM\_URL
+- BFVMM\_URL
+- BFDRIVER\_URL
+
+Alternatively, if you have cloned your own local repositories, you can avoid
+re-cloning by defining the following variables:
+
+- BFSDK\_PATH
+- BFSYSROOT\_PATH
+- BFELF\_LOADER\_PATH
+- BFM\_PATH
+- BFVMM\_PATH
+- BFDRIVER\_PATH
 
 ## Usage Instructions
 
