@@ -77,3 +77,17 @@ __attribute__((weak)) __write_cr4(uint64_t val) noexcept
     std::cerr << __FUNC__ << " called with: " << view_as_pointer(val) << '\n';
     abort();
 }
+
+extern "C" uint64_t
+__attribute__((weak)) __read_cr8(void) noexcept
+{
+    std::cerr << __FUNC__ << " called" << '\n';
+    abort();
+}
+
+extern "C" void
+__attribute__((weak)) __write_cr8(uint64_t val) noexcept
+{
+    std::cerr << __FUNC__ << " called with: " << view_as_pointer(val) << '\n';
+    abort();
+}

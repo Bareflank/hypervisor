@@ -37,6 +37,9 @@ extern "C" void __write_cr3(uint64_t val) noexcept;
 extern "C" uint64_t __read_cr4(void) noexcept;
 extern "C" void __write_cr4(uint64_t val) noexcept;
 
+extern "C" uint64_t __read_cr8(void) noexcept;
+extern "C" void __write_cr8(uint64_t val) noexcept;
+
 // *INDENT-OFF*
 
 namespace intel_x64
@@ -548,6 +551,18 @@ namespace cr4
             bfdebug << "    - " << protection_key_enable_bit::name << bfendl;
     }
 }
+
+namespace cr8
+{
+    using value_type = uint64_t;
+
+    inline auto get() noexcept
+    { return __read_cr8(); }
+
+    template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
+    void set(T val) noexcept { __write_cr8(val); }
+}
+
 }
 
 // *INDENT-ON*

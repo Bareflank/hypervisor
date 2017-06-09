@@ -306,6 +306,7 @@ intrinsics_ut::list()
     this->test_cr4_intel_x64_smep_enable_bit();
     this->test_cr4_intel_x64_smap_enable_bit();
     this->test_cr4_intel_x64_protection_key_enable_bit();
+    this->test_cr8_intel_x64();
 
     this->test_srs_x64_es();
     this->test_srs_x64_es_rpl();

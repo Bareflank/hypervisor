@@ -305,6 +305,7 @@ private:
     void test_cr4_intel_x64_smep_enable_bit();
     void test_cr4_intel_x64_smap_enable_bit();
     void test_cr4_intel_x64_protection_key_enable_bit();
+    void test_cr8_intel_x64();
 
     void test_srs_x64_es();
     void test_srs_x64_es_rpl();
