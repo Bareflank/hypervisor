@@ -195,6 +195,7 @@ ExternalProject_Add(
     SOURCE_DIR          ${BFSDK_PATH}
     BINARY_DIR          ${CMAKE_BINARY_DIR}/bfsdk/build
     UPDATE_DISCONNECTED ${BFSDK_UPDATE_DISCONNECTED}
+    UPDATE_COMMAND      ${CMAKE_COMMAND} -E echo "checking for updates"
     BUILD_COMMAND       ""
 )
 
@@ -235,8 +236,9 @@ ExternalProject_Add(
     SOURCE_DIR          ${BFSYSROOT_PATH}
     BINARY_DIR          ${CMAKE_BINARY_DIR}/bfsysroot/build
     UPDATE_DISCONNECTED ${BFSYSROOT_UPDATE_DISCONNECTED}
-    DEPENDS             bfsdk
+    UPDATE_COMMAND      ${CMAKE_COMMAND} -E echo "checking for updates"
     INSTALL_COMMAND     ""
+    DEPENDS             bfsdk
 )
 
 # ------------------------------------------------------------------------------
@@ -262,6 +264,7 @@ ExternalProject_Add(
     SOURCE_DIR          ${BFELF_LOADER_PATH}
     BINARY_DIR          ${CMAKE_BINARY_DIR}/bfelf_loader/build
     UPDATE_DISCONNECTED ${BFELF_LOADER_UPDATE_DISCONNECTED}
+    UPDATE_COMMAND      ${CMAKE_COMMAND} -E echo "checking for updates"
     BUILD_COMMAND       ""
     DEPENDS             bfsdk
 )
@@ -289,6 +292,7 @@ ExternalProject_Add(
     SOURCE_DIR          ${BFM_PATH}
     BINARY_DIR          ${CMAKE_BINARY_DIR}/bfm/build
     UPDATE_DISCONNECTED ${BFM_UPDATE_DISCONNECTED}
+    UPDATE_COMMAND      ${CMAKE_COMMAND} -E echo "checking for updates"
     BUILD_COMMAND       ""
     DEPENDS             bfsdk bfelf_loader
 )
@@ -314,6 +318,7 @@ ExternalProject_Add(
     SOURCE_DIR          ${BFVMM_PATH}
     BINARY_DIR          ${CMAKE_BINARY_DIR}/bfvmm/build
     UPDATE_DISCONNECTED ${BFVMM_UPDATE_DISCONNECTED}
+    UPDATE_COMMAND      ${CMAKE_COMMAND} -E echo "checking for updates"
     BUILD_COMMAND       ""
     DEPENDS             bfsdk bfsysroot
 )
@@ -337,6 +342,7 @@ if(ENABLE_UNITTESTING)
         DOWNLOAD_DIR        ${CMAKE_BINARY_DIR}/test_bfvmm/download
         SOURCE_DIR          ${BFVMM_PATH}
         BINARY_DIR          ${CMAKE_BINARY_DIR}/test_bfvmm/build
+        UPDATE_COMMAND      ${CMAKE_COMMAND} -E echo "checking for updates"
         BUILD_COMMAND       ""
         DEPENDS             bfvmm
     )
@@ -366,6 +372,7 @@ ExternalProject_Add(
     SOURCE_DIR          ${BFDRIVER_PATH}
     BINARY_DIR          ${CMAKE_BINARY_DIR}/bfdriver/build
     UPDATE_DISCONNECTED ${BFDRIVER_UPDATE_DISCONNECTED}
+    UPDATE_COMMAND      ${CMAKE_COMMAND} -E echo "checking for updates"
     BUILD_COMMAND       ""
     INSTALL_COMMAND     ""
     DEPENDS             bfsdk bfelf_loader
