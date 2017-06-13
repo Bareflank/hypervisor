@@ -147,7 +147,7 @@ sudo apt-get install git build-essential linux-headers-$(uname -r) nasm clang cm
 
 #### Windows (Cygwin):
 ```
-setup-x86_64.exe -q -P git,make,gcc-core,gcc-g++,nasm,clang,clang++,cmake,wget
+setup-x86_64.exe -q -P git,make,gcc-core,gcc-g++,nasm,clang,clang++,cmake
 ```
 
 #### Windows (Bash):
@@ -174,20 +174,21 @@ cd ~/hypervisor/build
 export PATH="$PWD/../bfprefix/bin:$PATH"
 cmake ..
 make
+make driver_build
 ```
 
-If you wish to enable unit testing, run cmake with the following extra flags
-which will enable LLVM code coverage, Clang Tidy static analysis, and
-Catch based unit tests:
+If your making changes to the hypervisor itself, or you wish to speed
+things up, you can disable updates:
+- UPDATE_DISCONNECTED
 
-```
-cmake -DENABLE_TIDY=ON -DENABLE_COVERAGE_LLVM=ON ..
-```
+The following flags can also be added to turn on various developer tools:
+- ENABLE_TIDY
+- ENABLE_UNITTESTING
+- ENABLE_COVERAGE_LLVM
 
 You can also direct the build system to use your own forked repos in-place of
 the main repos. To do this, add any of the following CMake variables with
 links to the repo of your choice:
-
 - BFSDK\_URL
 - BFSYSROOT\_URL
 - BFELF\_LOADER\_URL
@@ -197,7 +198,6 @@ links to the repo of your choice:
 
 Alternatively, if you have cloned your own local repositories, you can avoid
 re-cloning by defining the following variables:
-
 - BFSDK\_PATH
 - BFSYSROOT\_PATH
 - BFELF\_LOADER\_PATH
@@ -210,7 +210,6 @@ re-cloning by defining the following variables:
 To use the hypervisor, run the following commands:
 
 ```
-make driver_build
 make driver_quick
 make quick
 ```
