@@ -18,42 +18,42 @@ endif()
 # Repos
 # ------------------------------------------------------------------------------
 
-if(NOT DEFINED BFSDK_PATH)
+if(NOT BFSDK_PATH)
     set(BFSDK_URL "https://github.com/bareflank/bfsdk.git" CACHE STRING "")
     set(BFSDK_TAG "master" CACHE STRING "")
     set(BFSDK_PATH ${CMAKE_SOURCE_DIR}/bfsdk CACHE PATH "")
     set(BFSDK_UPDATE_DISCONNECTED ${UPDATE_DISCONNECTED})
 endif()
 
-if(NOT DEFINED BFSYSROOT_PATH)
+if(NOT BFSYSROOT_PATH)
     set(BFSYSROOT_URL "https://github.com/bareflank/bfsysroot.git" CACHE STRING "")
     set(BFSYSROOT_TAG "master" CACHE STRING "")
     set(BFSYSROOT_PATH ${CMAKE_SOURCE_DIR}/bfsysroot CACHE PATH "")
     set(BFSYSROOT_UPDATE_DISCONNECTED ${UPDATE_DISCONNECTED})
 endif()
 
-if(NOT DEFINED BFELF_LOADER_PATH)
+if(NOT BFELF_LOADER_PATH)
     set(BFELF_LOADER_URL "https://github.com/bareflank/bfelf_loader.git" CACHE STRING "")
     set(BFELF_LOADER_TAG "master" CACHE STRING "")
     set(BFELF_LOADER_PATH ${CMAKE_SOURCE_DIR}/bfelf_loader CACHE PATH "")
     set(BFELF_LOADER_UPDATE_DISCONNECTED ${UPDATE_DISCONNECTED})
 endif()
 
-if(NOT DEFINED BFM_PATH)
+if(NOT BFM_PATH)
     set(BFM_URL "https://github.com/bareflank/bfm.git" CACHE STRING "")
     set(BFM_TAG "master" CACHE STRING "")
     set(BFM_PATH ${CMAKE_SOURCE_DIR}/bfm CACHE PATH "")
     set(BFM_UPDATE_DISCONNECTED ${UPDATE_DISCONNECTED})
 endif()
 
-if(NOT DEFINED BFVMM_PATH)
+if(NOT BFVMM_PATH)
     set(BFVMM_URL "https://github.com/bareflank/bfvmm.git" CACHE STRING "")
     set(BFVMM_TAG "master" CACHE STRING "")
     set(BFVMM_PATH ${CMAKE_SOURCE_DIR}/bfvmm CACHE PATH "")
     set(BFVMM_UPDATE_DISCONNECTED ${UPDATE_DISCONNECTED})
 endif()
 
-if(NOT DEFINED BFDRIVER_PATH)
+if(NOT BFDRIVER_PATH)
     set(BFDRIVER_URL "https://github.com/bareflank/bfdriver.git" CACHE STRING "")
     set(BFDRIVER_TAG "master" CACHE STRING "")
     set(BFDRIVER_PATH ${CMAKE_SOURCE_DIR}/bfdriver CACHE PATH "")
@@ -94,6 +94,27 @@ message(STATUS "BFDRIVER_PATH: ${BFDRIVER_PATH}")
 if(BFDRIVER_URL OR BFDRIVER_TAG)
     message(STATUS "BFDRIVER_URL: ${BFDRIVER_URL}")
     message(STATUS "BFDRIVER_TAG: ${BFDRIVER_TAG}")
+endif()
+
+# ------------------------------------------------------------------------------
+# Extended APIs Path
+# ------------------------------------------------------------------------------
+
+if(ENABLE_EXTENDED_APIS)
+
+    if(NOT EXTENDED_APIS_PATH)
+        set(EXTENDED_APIS_URL "https://github.com/bareflank/extended_apis.git" CACHE STRING "")
+        set(EXTENDED_APIS_TAG "master" CACHE STRING "")
+        set(EXTENDED_APIS_PATH ${CMAKE_SOURCE_DIR}/extended_apis CACHE PATH "")
+        set(EXTENDED_APIS_UPDATE_DISCONNECTED ${UPDATE_DISCONNECTED})
+    endif()
+
+    message(STATUS "EXTENDED_APIS_PATH: ${EXTENDED_APIS_PATH}")
+    if(EXTENDED_APIS_URL OR EXTENDED_APIS_TAG)
+        message(STATUS "EXTENDED_APIS_URL: ${EXTENDED_APIS_URL}")
+        message(STATUS "EXTENDED_APIS_TAG: ${EXTENDED_APIS_TAG}")
+    endif()
+
 endif()
 
 # ------------------------------------------------------------------------------
@@ -178,8 +199,8 @@ list(APPEND BFSDK_CMAKE_ARGS
     -DBFSOURCE_DIR=${CMAKE_SOURCE_DIR}
     -DCMAKE_INSTALL_PREFIX=${BFPREFIX}
     -DENABLE_TIDY=${ENABLE_TIDY}
+    -DENABLE_COVERAGE=${ENABLE_COVERAGE}
     -DENABLE_UNITTESTING=${ENABLE_UNITTESTING}
-    -DENABLE_COVERAGE_LLVM=${ENABLE_COVERAGE_LLVM}
     -DUPDATE_DISCONNECTED=${UPDATE_DISCONNECTED}
 )
 
@@ -248,8 +269,8 @@ ExternalProject_Add(
 list(APPEND BFELF_LOADER_CMAKE_ARGS
     -DCMAKE_INSTALL_PREFIX=${BFPREFIX}
     -DENABLE_TIDY=${ENABLE_TIDY}
+    -DENABLE_COVERAGE=${ENABLE_COVERAGE}
     -DENABLE_UNITTESTING=${ENABLE_UNITTESTING}
-    -DENABLE_COVERAGE_LLVM=${ENABLE_COVERAGE_LLVM}
 )
 
 ExternalProject_Add(
@@ -276,9 +297,15 @@ ExternalProject_Add(
 list(APPEND BFM_CMAKE_ARGS
     -DCMAKE_INSTALL_PREFIX=${BFPREFIX}
     -DENABLE_TIDY=${ENABLE_TIDY}
+    -DENABLE_COVERAGE=${ENABLE_COVERAGE}
     -DENABLE_UNITTESTING=${ENABLE_UNITTESTING}
-    -DENABLE_COVERAGE_LLVM=${ENABLE_COVERAGE_LLVM}
 )
+
+if(ENABLE_EXTENDED_APIS)
+    list(APPEND BFM_CMAKE_ARGS
+        "-DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS} -DBFM_DEFAULT_VMM=eapis"
+    )
+endif()
 
 ExternalProject_Add(
     bfm
@@ -328,8 +355,8 @@ if(ENABLE_UNITTESTING)
     list(APPEND TEST_BFVMM_CMAKE_ARGS
         -DCMAKE_INSTALL_PREFIX=${BFPREFIX_TEST}
         -DENABLE_TIDY=${ENABLE_TIDY}
+        -DENABLE_COVERAGE=${ENABLE_COVERAGE}
         -DENABLE_UNITTESTING=${ENABLE_UNITTESTING}
-        -DENABLE_COVERAGE_LLVM=${ENABLE_COVERAGE_LLVM}
     )
 
     ExternalProject_Add(
@@ -356,8 +383,8 @@ endif()
 list(APPEND BFDRIVER_CMAKE_ARGS
     -DCMAKE_INSTALL_PREFIX=${BFPREFIX}
     -DENABLE_TIDY=${ENABLE_TIDY}
+    -DENABLE_COVERAGE=${ENABLE_COVERAGE}
     -DENABLE_UNITTESTING=${ENABLE_UNITTESTING}
-    -DENABLE_COVERAGE_LLVM=${ENABLE_COVERAGE_LLVM}
 )
 
 ExternalProject_Add(
@@ -377,6 +404,62 @@ ExternalProject_Add(
     INSTALL_COMMAND     ""
     DEPENDS             bfsdk bfelf_loader
 )
+
+# ------------------------------------------------------------------------------
+# Extended APIs
+# ------------------------------------------------------------------------------
+
+if(ENABLE_EXTENDED_APIS)
+
+    list(APPEND EXTENDED_APIS_CMAKE_ARGS
+        -DCMAKE_INSTALL_PREFIX=${BFPREFIX}
+        -DCMAKE_TOOLCHAIN_FILE=${VMM_TOOLCHAIN_FILE}
+    )
+
+    ExternalProject_Add(
+        extended_apis
+        GIT_REPOSITORY      ${EXTENDED_APIS_URL}
+        GIT_TAG             ${EXTENDED_APIS_TAG}
+        CMAKE_ARGS          ${EXTENDED_APIS_CMAKE_ARGS}
+        PREFIX              ${CMAKE_BINARY_DIR}/extended_apis/prefix
+        TMP_DIR             ${CMAKE_BINARY_DIR}/extended_apis/tmp
+        STAMP_DIR           ${CMAKE_BINARY_DIR}/extended_apis/stamp
+        DOWNLOAD_DIR        ${CMAKE_BINARY_DIR}/extended_apis/download
+        SOURCE_DIR          ${EXTENDED_APIS_PATH}
+        BINARY_DIR          ${CMAKE_BINARY_DIR}/extended_apis/build
+        UPDATE_DISCONNECTED ${EXTENDED_APIS_UPDATE_DISCONNECTED}
+        UPDATE_COMMAND      ${CMAKE_COMMAND} -E echo "checking for updates"
+        BUILD_COMMAND       ""
+        DEPENDS             bfsdk bfvmm
+    )
+
+    if(ENABLE_UNITTESTING)
+
+        list(APPEND TEST_EXTENDED_APIS_CMAKE_ARGS
+            -DCMAKE_INSTALL_PREFIX=${BFPREFIX_TEST}
+            -DENABLE_TIDY=${ENABLE_TIDY}
+            -DENABLE_COVERAGE=${ENABLE_COVERAGE}
+            -DENABLE_UNITTESTING=${ENABLE_UNITTESTING}
+        )
+
+        ExternalProject_Add(
+            test_extended_apis
+            DOWNLOAD_COMMAND    ""
+            CMAKE_ARGS          ${TEST_EXTENDED_APIS_CMAKE_ARGS}
+            PREFIX              ${CMAKE_BINARY_DIR}/test_extended_apis/prefix
+            TMP_DIR             ${CMAKE_BINARY_DIR}/test_extended_apis/tmp
+            STAMP_DIR           ${CMAKE_BINARY_DIR}/test_extended_apis/stamp
+            DOWNLOAD_DIR        ${CMAKE_BINARY_DIR}/test_extended_apis/download
+            SOURCE_DIR          ${EXTENDED_APIS_PATH}
+            BINARY_DIR          ${CMAKE_BINARY_DIR}/test_extended_apis/build
+            UPDATE_COMMAND      ${CMAKE_COMMAND} -E echo "checking for updates"
+            BUILD_COMMAND       ""
+            DEPENDS             extended_apis
+        )
+
+    endif()
+
+endif()
 
 # ------------------------------------------------------------------------------
 # Clean
@@ -469,7 +552,7 @@ cmake_policy(POP)
 if(ENABLE_TIDY)
 
     add_custom_target(tidy
-        COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfdriver/build --target tidy
+        # COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfdriver/build --target tidy
         COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfelf_loader/build --target tidy
         COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfm/build --target tidy
         COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfsdk/build --target tidy
@@ -477,7 +560,7 @@ if(ENABLE_TIDY)
     )
 
     add_custom_target(tidy-all
-        COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfdriver/build --target tidy-all
+        # COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfdriver/build --target tidy-all
         COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfelf_loader/build --target tidy-all
         COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfm/build --target tidy-all
         COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfsdk/build --target tidy-all
@@ -509,26 +592,14 @@ add_custom_target(format-all
 )
 
 # ------------------------------------------------------------------------------
-# Coverage
-# ------------------------------------------------------------------------------
-
-add_custom_target(llvm_coverage
-    COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfdriver/build --target llvm_coverage
-    COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfelf_loader/build --target llvm_coverage
-    COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfm/build --target llvm_coverage
-    COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfsdk/build --target llvm_coverage
-    COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/test_bfvmm/build --target llvm_coverage
-)
-
-# ------------------------------------------------------------------------------
 # Git Report
 # ------------------------------------------------------------------------------
 
 add_custom_target(report)
 
-add_custom_command(TARGET report COMMAND git -C ${CMAKE_SOURCE_DIR}/bfdriver diff --stat COMMENT "Diff: bfdriver")
-add_custom_command(TARGET report COMMAND git -C ${CMAKE_SOURCE_DIR}/bfelf_loader diff --stat COMMENT "Diff: bfelf_loader")
-add_custom_command(TARGET report COMMAND git -C ${CMAKE_SOURCE_DIR}/bfm diff --stat COMMENT "Diff: bfm")
-add_custom_command(TARGET report COMMAND git -C ${CMAKE_SOURCE_DIR}/bfsdk diff --stat COMMENT "Diff: bfsdk")
-add_custom_command(TARGET report COMMAND git -C ${CMAKE_SOURCE_DIR}/bfsysroot diff --stat COMMENT "Diff: bfsysroot")
-add_custom_command(TARGET report COMMAND git -C ${CMAKE_SOURCE_DIR}/bfvmm diff --stat COMMENT "Diff: bfvmm")
+add_custom_command(TARGET report COMMAND git -C ${BFDRIVER_PATH} diff --stat COMMENT "Diff: bfdriver")
+add_custom_command(TARGET report COMMAND git -C ${BFELF_LOADER_PATH} diff --stat COMMENT "Diff: bfelf_loader")
+add_custom_command(TARGET report COMMAND git -C ${BFM_PATH} diff --stat COMMENT "Diff: bfm")
+add_custom_command(TARGET report COMMAND git -C ${BFSDK_PATH} diff --stat COMMENT "Diff: bfsdk")
+add_custom_command(TARGET report COMMAND git -C ${BFSYSROOT_PATH} diff --stat COMMENT "Diff: bfsysroot")
+add_custom_command(TARGET report COMMAND git -C ${BFVMM_PATH} diff --stat COMMENT "Diff: bfvmm")
