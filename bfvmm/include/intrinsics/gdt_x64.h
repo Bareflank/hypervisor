@@ -219,7 +219,7 @@ public:
             m_gdt_reg.base = x64::gdt::base::get();
             m_gdt_reg.limit = x64::gdt::limit::get();
 
-            std::copy_n(m_gdt_reg.base, m_gdt_reg.limit >> 3, std::back_inserter(m_gdt));
+            std::copy_n(m_gdt_reg.base, (m_gdt_reg.limit+1) >> 3, std::back_inserter(m_gdt));
         });
     }
 
