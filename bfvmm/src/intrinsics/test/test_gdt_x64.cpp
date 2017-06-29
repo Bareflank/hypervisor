@@ -45,10 +45,10 @@ __write_gdt(gdt_reg_x64_t *gdt_reg) noexcept
 void
 intrinsics_ut::test_gdt_reg_set_get()
 {
-    x64::gdt::set(g_gdt.data(), 4 << 3);
+    x64::gdt::set(g_gdt.data(), (4 << 3) - 1);
 
     this->expect_true(x64::gdt::get().base == g_gdt.data());
-    this->expect_true(x64::gdt::get().limit == 4 << 3);
+    this->expect_true(x64::gdt::get().limit == (4 << 3) - 1);
 }
 
 void
@@ -61,8 +61,8 @@ intrinsics_ut::test_gdt_reg_base_set_get()
 void
 intrinsics_ut::test_gdt_reg_limit_set_get()
 {
-    x64::gdt::limit::set(4 << 3);
-    this->expect_true(x64::gdt::limit::get() == 4 << 3);
+    x64::gdt::limit::set((4 << 3) - 1);
+    this->expect_true(x64::gdt::limit::get() == (4 << 3) - 1);
 }
 
 void
@@ -82,7 +82,7 @@ intrinsics_ut::test_gdt_constructor_size()
 {
     gdt_x64 gdt{4};
     this->expect_true(gdt.base() != 0);
-    this->expect_true(gdt.limit() == 4 * sizeof(gdt_x64::segment_descriptor_type));
+    this->expect_true(gdt.limit() == (4 * sizeof(gdt_x64::segment_descriptor_type)) - 1);
 }
 
 void
@@ -96,7 +96,7 @@ void
 intrinsics_ut::test_gdt_limit()
 {
     gdt_x64 gdt;
-    this->expect_true(gdt.limit() == 4 * sizeof(gdt_x64::segment_descriptor_type));
+    this->expect_true(gdt.limit() == (4 * sizeof(gdt_x64::segment_descriptor_type)) - 1);
 }
 
 void

@@ -219,7 +219,7 @@ public:
             m_gdt_reg.base = x64::gdt::base::get();
             m_gdt_reg.limit = x64::gdt::limit::get();
 
-            std::copy_n(m_gdt_reg.base, m_gdt_reg.limit >> 3, std::back_inserter(m_gdt));
+            std::copy_n(m_gdt_reg.base, (m_gdt_reg.limit + 1) >> 3, std::back_inserter(m_gdt));
         });
     }
 
@@ -239,7 +239,7 @@ public:
         guard_exceptions([&]
         {
             m_gdt_reg.base = m_gdt.data();
-            m_gdt_reg.limit = gsl::narrow_cast<size_type>(size << 3);
+            m_gdt_reg.limit = gsl::narrow_cast<size_type>((size << 3) - 1);
         });
     }
 
