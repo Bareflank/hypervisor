@@ -283,7 +283,7 @@ enum vmcall_data_type
  * r0 = rax
  * r1 = rdx
  * r2 = rcx
- * r3 = rdx
+ * r3 = rbx
  * r4 = rsi
  * r5 = r8
  * r6 = r9
