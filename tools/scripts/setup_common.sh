@@ -53,7 +53,7 @@ check_folder() {
 # ------------------------------------------------------------------------------
 
 option_help() {
-    echo -e "Usage: setup_ubuntu.sh [OPTION]"
+    echo -e "Usage: setup_common.sh [OPTION]"
     echo -e "Sets up the system to compile / use Bareflank"
     echo -e ""
     echo -e "       --help                       show this help menu"
