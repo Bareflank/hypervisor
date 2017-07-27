@@ -140,8 +140,8 @@ private:
     uint64_t m_dummy_misc_length;
     uint64_t m_dummy_code_length;
 
-    std::shared_ptr<char> m_dummy_misc_exec;
-    std::shared_ptr<char> m_dummy_code_exec;
+    std::unique_ptr<char[]> m_dummy_misc_exec;
+    std::unique_ptr<char[]> m_dummy_code_exec;
 };
 
 #endif
