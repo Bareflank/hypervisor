@@ -59,24 +59,14 @@ install_common_packages() {
 # Setup System
 # ------------------------------------------------------------------------------
 
-case $( grep ^VERSION_ID= /etc/os-release | cut -d'=' -f 2 | tr -d '"' ) in
-25)
-    install_common_packages
-    ;;
+version=$( grep ^VERSION_ID= /etc/os-release | cut -d'=' -f 2 | tr -d '"' )
 
-24)
-    install_common_packages
-    ;;
-
-23)
-    install_common_packages
-    ;;
-
-*)
+if [[ $version -lt 23 ]]; then
     echo "This version of Fedora is not supported"
     exit 1
+fi
 
-esac
+install_common_packages
 
 # ------------------------------------------------------------------------------
 # Setup Build Environment
