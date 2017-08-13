@@ -1,0 +1,44 @@
+os: Visual Studio 2017
+platform: x64
+
+#
+# Custom environment variables
+#
+environment:
+  global:
+    CYG_ROOT: C:\cygwin_bareflank
+    CYG_BASH: C:\cygwin_bareflank\bin\bash
+    CYG_MIRROR: http://mirrors.kernel.org/sourceware/cygwin/
+    CYG_PACKAGES: git,make,gcc-core,gcc-g++,nasm,clang,clang++,cmake,python
+
+test: off
+
+#
+# Setup Cygwin
+#
+install:
+  - ps: 'Start-FileDownload "https://cygwin.com/setup-x86_64.exe" -FileName "setup-x86_64.exe"'
+  - 'setup-x86_64.exe --quiet-mode --no-shortcuts --only-site --root "%CYG_ROOT%" --site "%CYG_MIRROR%" --local-package-dir "%CYG_ROOT%\var\cache\setup" --packages "%CYG_PACKAGES%"'
+
+#
+# Build
+#
+build_script:
+
+  #
+  # Cygwin
+  #
+  - set PATH=%PATH%;%APPVEYOR_BUILD_FOLDER%/build_cygwin/bfprefix/bin
+  - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER; mkdir build_cygwin"'
+  - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER/build_cygwin; cmake -DENABLE_UNITTESTING=ON .."'
+  - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER/build_cygwin; make -j3"'
+  - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER/build_cygwin; make test"'
+
+  #
+  # Visual Studio (MSBuild)
+  #
+  # - mkdir build_msbuild
+  # - cd build_msbuild
+  # - cmake -G "Visual Studio 15 2017 Win64" -DENABLE_UNITTESTING=ON ..
+  # - msbuild bfsdk.sln
+  # - ctest

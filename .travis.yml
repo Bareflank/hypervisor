@@ -10,6 +10,11 @@ dist: trusty
 before_script:
 
   #
+  # Source Environment
+  #
+  - source env.sh
+
+  #
   # Build Folder
   #
   - mkdir build
@@ -44,51 +49,27 @@ matrix:
   include:
 
   #
-  # Clang 3.8
+  # Doxygen
   #
-  - os: linux
-    addons:
-      apt:
-        sources:
-          - ubuntu-toolchain-r-test
-          - llvm-toolchain-trusty-3.8
-        packages:
-          - gcc-6
-          - g++-6
-          - clang-3.8
-          - nasm
-    env:
-      - TEST="Clang 3.8"
-    script:
-      - export PATH="$PWD/../bfprefix/bin:$PATH"
-      - cmake -DENABLE_UNITTESTING=ON ..
-      - make
-      - make test
+  # - os: linux
+  #   addons:
+  #     apt:
+  #       packages:
+  #         - doxygen
+  #   env:
+  #     - TEST="Doxygen"
+  #   script:
+  #     - cd ..
+  #     - doxygen .doxygen.txt
+  #     - |
+  #       if [[ -s doxygen_warnings.txt ]]; then
+  #         echo "You must fix doxygen before submitting a pull request"
+  #         echo ""
+  #         cat doxygen_warnings.txt
+  #         exit -1
+  #       fi
 
-  #
-  # Clang 3.9
-  #
-  - os: linux
-    addons:
-      apt:
-        sources:
-          - ubuntu-toolchain-r-test
-          - llvm-toolchain-trusty-3.9
-        packages:
-          - gcc-6
-          - g++-6
-          - clang-3.9
-          - nasm
-    env:
-      - TEST="Clang 3.9"
-    script:
-      - export PATH="$PWD/../bfprefix/bin:$PATH"
-      - cmake -DENABLE_UNITTESTING=ON ..
-      - make
-      - make test
-
-  #
-  # Clang 4.0
+  # Git Check
   #
   - os: linux
     addons:
@@ -102,9 +83,296 @@ matrix:
           - clang-4.0
           - nasm
     env:
-      - TEST="Clang 4.0"
+      - TEST="Git Check"
     script:
-      - export PATH="$PWD/../bfprefix/bin:$PATH"
+      - |
+        if [[ -n $(git diff --check HEAD^) ]]; then
+          echo "You must remove whitespace before submitting a pull request"
+          echo ""
+          git diff --check HEAD^
+          exit -1
+        fi
+
+  #
+  # Astyle Format
+  #
+  - os: linux
+    addons:
+      apt:
+        sources:
+          - ubuntu-toolchain-r-test
+          - llvm-toolchain-trusty-4.0
+        packages:
+          - gcc-6
+          - g++-6
+          - clang-4.0
+          - nasm
+    env:
+      - TEST="Astyle Format"
+    script:
+      - cmake -DENABLE_ASTYLE=ON ..
+      - make -j3
+      - make format
+      - |
+        if [[ -n $(git diff) ]]; then
+          echo "You must run make format before submitting a pull request"
+          echo ""
+          git diff
+          exit -1
+        fi
+
+  #
+  # Clang Tidy
+  #
+  - os: linux
+    addons:
+      apt:
+        sources:
+          - ubuntu-toolchain-r-test
+          - llvm-toolchain-trusty-4.0
+        packages:
+          - clang-4.0
+          - clang-tidy-4.0
+          - gcc-6
+          - g++-6
+          - nasm
+    env:
+      - TEST="Clang Tidy"
+    script:
+      - cmake -DBUILD_SHARED_LIBS=ON -DENABLE_UNITTESTING=ON -DENABLE_TIDY=ON ..
+      - make -j3
+      - make test
+      - make tidy
+
+  #
+  # Codecov
+  #
+  - os: linux
+    addons:
+      apt:
+        sources:
+          - ubuntu-toolchain-r-test
+          - llvm-toolchain-trusty-4.0
+        packages:
+          - gcc-6
+          - g++-6
+          - clang-4.0
+          - nasm
+    env:
+      - TEST="Codecov"
+    script:
+      - cmake -DENABLE_UNITTESTING=ON -DENABLE_COVERAGE=ON ..
+      - make -j3
+      - make test
+      - cd ..
+      - bash <(curl -s https://codecov.io/bash)
+
+  #
+  # Google Address Sanitizer
+  #
+  - os: linux
+    addons:
+      apt:
+        sources:
+          - ubuntu-toolchain-r-test
+          - llvm-toolchain-trusty-4.0
+        packages:
+          - gcc-6
+          - g++-6
+          - clang-4.0
+          - nasm
+    env:
+      - TEST="Google Address Sanitizer"
+    script:
+      - cmake -DENABLE_UNITTESTING=ON -DENABLE_DYNAMIC_ASAN=ON ..
+      - make -j3
+      - make test
+
+  #
+  # Google Undefined Sanitizer
+  #
+  - os: linux
+    addons:
+      apt:
+        sources:
+          - ubuntu-toolchain-r-test
+          - llvm-toolchain-trusty-4.0
+        packages:
+          - gcc-6
+          - g++-6
+          - clang-4.0
+          - nasm
+    env:
+      - TEST="Google Undefined Sanitizer"
+    script:
+      - cmake -DENABLE_UNITTESTING=ON -DENABLE_DYNAMIC_USAN=ON ..
+      - make -j3
+      - make test
+
+  #
+  # Clang 3.8 (Static Libraries)
+  #
+  - os: linux
+    addons:
+      apt:
+        sources:
+          - ubuntu-toolchain-r-test
+          - llvm-toolchain-trusty-3.8
+        packages:
+          - gcc-6
+          - g++-6
+          - clang-3.8
+          - nasm
+    env:
+      - TEST="Clang 3.8 (Static Libraries)"
+    script:
       - cmake -DENABLE_UNITTESTING=ON ..
-      - make
+      - make -j3
+      - make test
+
+  #
+  # Clang 3.9 (Static Libraries)
+  #
+  - os: linux
+    addons:
+      apt:
+        sources:
+          - ubuntu-toolchain-r-test
+          - llvm-toolchain-trusty-3.9
+        packages:
+          - gcc-6
+          - g++-6
+          - clang-3.9
+          - nasm
+    env:
+      - TEST="Clang 3.9 (Static Libraries)"
+    script:
+      - cmake -DENABLE_UNITTESTING=ON ..
+      - make -j3
+      - make test
+
+  #
+  # Clang 4.0 (Static Libraries)
+  #
+  - os: linux
+    addons:
+      apt:
+        sources:
+          - ubuntu-toolchain-r-test
+          - llvm-toolchain-trusty-4.0
+        packages:
+          - gcc-6
+          - g++-6
+          - clang-4.0
+          - nasm
+    env:
+      - TEST="Clang 4.0 (Static Libraries)"
+    script:
+      - cmake -DENABLE_UNITTESTING=ON ..
+      - make -j3
+      - make test
+
+  #
+  # Clang 3.8 (Shared Libraries)
+  #
+  - os: linux
+    addons:
+      apt:
+        sources:
+          - ubuntu-toolchain-r-test
+          - llvm-toolchain-trusty-3.8
+        packages:
+          - gcc-6
+          - g++-6
+          - clang-3.8
+          - nasm
+    env:
+      - TEST="Clang 3.8 (Shared Libraries)"
+    script:
+      - cmake -DENABLE_UNITTESTING=ON -DBUILD_SHARED_LIBS=ON ..
+      - make -j3
+      - make test
+
+  #
+  # Clang 3.9 (Shared Libraries)
+  #
+  - os: linux
+    addons:
+      apt:
+        sources:
+          - ubuntu-toolchain-r-test
+          - llvm-toolchain-trusty-3.9
+        packages:
+          - gcc-6
+          - g++-6
+          - clang-3.9
+          - nasm
+    env:
+      - TEST="Clang 3.9 (Shared Libraries)"
+    script:
+      - cmake -DENABLE_UNITTESTING=ON -DBUILD_SHARED_LIBS=ON ..
+      - make -j3
+      - make test
+
+  #
+  # Clang 4.0 (Shared Libraries)
+  #
+  - os: linux
+    addons:
+      apt:
+        sources:
+          - ubuntu-toolchain-r-test
+          - llvm-toolchain-trusty-4.0
+        packages:
+          - gcc-6
+          - g++-6
+          - clang-4.0
+          - nasm
+    env:
+      - TEST="Clang 4.0 (Shared Libraries)"
+    script:
+      - cmake -DENABLE_UNITTESTING=ON -DBUILD_SHARED_LIBS=ON ..
+      - make -j3
+      - make test
+
+  #
+  # Clang 4.0 (No Tests)
+  #
+  - os: linux
+    addons:
+      apt:
+        sources:
+          - ubuntu-toolchain-r-test
+          - llvm-toolchain-trusty-4.0
+        packages:
+          - gcc-6
+          - g++-6
+          - clang-4.0
+          - nasm
+    env:
+      - TEST="Clang 4.0  (No Tests)"
+    script:
+      - cmake -DENABLE_UNITTESTING=ON ..
+      - make -j3
+      - make test
+
+  #
+  # Clang 4.0 (No Tests / Shared Libraries)
+  #
+  - os: linux
+    addons:
+      apt:
+        sources:
+          - ubuntu-toolchain-r-test
+          - llvm-toolchain-trusty-4.0
+        packages:
+          - gcc-6
+          - g++-6
+          - clang-4.0
+          - nasm
+    env:
+      - TEST="Clang 4.0 (No Tests / Shared Libraries)"
+    script:
+      - cmake -DENABLE_UNITTESTING=ON -DBUILD_SHARED_LIBS=ON ..
+      - make -j3
       - make test

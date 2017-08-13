@@ -177,33 +177,47 @@ make
 make driver_build
 ```
 
-If your making changes to the hypervisor itself, or you wish to speed
-things up, you can disable updates:
-- UPDATE_DISCONNECTED
+If your making changes to the hypervisor itself, we highly recommend using a
+working directory. This will allow you maintain your own forks of each repo
+and modify / commit as needed. Each repo that is needed must be present in
+your working directory, otherwise CMake will complain.
+- `-DWORKING_PATH=<path to dir>`
 
-The following flags can also be added to turn on various developer tools:
-- ENABLE_TIDY
-- ENABLE_UNITTESTING
-- ENABLE_COVERAGE_LLVM
+Also, if your modifying the hypervisor, we also highly recommend enabling
+dev mode. This will enable the various different tools that are needed to
+pass all of our CI tests.
+- `-DENABLE_DEV_MODE=ON`
+
+One this is enabled, you can run the following commands before submitting a
+PR:
+- `make test`
+- `make format`
+- `make tidy`
 
 You can also direct the build system to use your own forked repos in-place of
 the main repos. To do this, add any of the following CMake variables with
 links to the repo of your choice:
-- BFSDK\_URL
-- BFSYSROOT\_URL
-- BFELF\_LOADER\_URL
-- BFM\_URL
-- BFVMM\_URL
-- BFDRIVER\_URL
+- `-DBFSDK\_URL=<url>`
+- `-DBFSYSROOT\_URL=<url>`
+- `-DBFELF\_LOADER\_URL=<url>`
+- `-DBFM\_URL=<url>`
+- `-DBFVMM\_URL=<url>`
+- `-DBFDRIVER\_URL=<url>`
 
-Alternatively, if you have cloned your own local repositories, you can avoid
-re-cloning by defining the following variables:
-- BFSDK\_PATH
-- BFSYSROOT\_PATH
-- BFELF\_LOADER\_PATH
-- BFM\_PATH
-- BFVMM\_PATH
-- BFDRIVER\_PATH
+Alternatively, if you have cloned your own local repositories without,
+a working directory you can set the following:
+- `BFSDK\_PATH=<path to repo>`
+- `BFSYSROOT\_PATH=<path to repo>`
+- `BFELF\_LOADER\_PATH=<path to repo>`
+- `BFM\_PATH=<path to repo>`
+- `BFVMM\_PATH=<path to repo>`
+- `BFDRIVER\_PATH=<path to repo>`
+
+If you wish to enable the extended APIs, you can do so using the following.
+If you have a working directory, ensure the extended APIs repo is present in
+your working directory first:
+
+- `-DENABLE_EXTENDED_APIS=ON`
 
 ## Usage Instructions
 
@@ -226,6 +240,18 @@ to reverse this:
 ```
 make unload
 make driver_unload
+```
+to clean-up:
+
+```
+make super-clean
+```
+
+to preform a more comprehensive clean:
+
+```
+make dist-clean
+rm -Rf *
 ```
 
 ## Extended APIs / Hyperkernel

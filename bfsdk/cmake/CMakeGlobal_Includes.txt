@@ -1,0 +1,24 @@
+# ------------------------------------------------------------------------------
+# Libraries
+# ------------------------------------------------------------------------------
+
+list(APPEND LIBS
+    ${CMAKE_INSTALL_PREFIX}/lib
+    ${CMAKE_INSTALL_PREFIX}/sdk_lib
+)
+
+link_directories(${LIBS})
+
+# ------------------------------------------------------------------------------
+# Headers
+# ------------------------------------------------------------------------------
+
+list(APPEND INCLUDES
+    .
+    ../include
+    ../../include
+    ../../../include
+)
+
+include_directories(${INCLUDES})
+include_directories(SYSTEM ${CMAKE_INSTALL_PREFIX}/include)
