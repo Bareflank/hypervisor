@@ -33,11 +33,12 @@ WEAK_SYM map_with_cr3(
     size_t size,
     x64::msrs::value_type pat)
 {
+    uintptr_t pml4_addr = upper(cr3);
+
     expects(vmap != 0);
     expects(lower(vmap) == 0);
     expects(virt != 0);
-    expects(cr3 != 0);
-    expects(lower(cr3) == 0);
+    expects(pml4_addr != 0);
     expects(size != 0);
 
     for (auto offset = 0UL; offset < size; offset += x64::page_size) {
@@ -49,7 +50,7 @@ WEAK_SYM map_with_cr3(
         while (true) {
             from = x64::page_table::pml4::from;
             auto &&pml4_idx = x64::page_table::index(current_virt, from);
-            auto &&pml4_map = make_unique_map_x64<uintptr_t>(cr3);
+            auto &&pml4_map = make_unique_map_x64<uintptr_t>(pml4_addr);
             auto &&pml4_pte = page_table_entry_x64{&pml4_map.get()[pml4_idx]};
 
             expects(pml4_pte.present());
