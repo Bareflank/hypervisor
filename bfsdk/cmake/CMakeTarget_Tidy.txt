@@ -1,0 +1,17 @@
+if(ENABLE_TIDY)
+
+    message(STATUS "Static Analysis: Clang Tidy")
+
+    add_custom_target(
+        tidy
+        COMMAND ${CMAKE_INSTALL_PREFIX}/bin/bareflank_clang_tidy.sh diff ${CMAKE_SOURCE_DIR} ${TIDY_EXCLUSIONS}
+        COMMENT "running clang-tidy checks: ${PROJECT_NAME} in ${CMAKE_SOURCE_DIR}"
+    )
+
+    add_custom_target(
+        tidy-all
+        COMMAND ${CMAKE_INSTALL_PREFIX}/bin/bareflank_clang_tidy.sh all ${CMAKE_SOURCE_DIR} ${TIDY_EXCLUSIONS}
+        COMMENT "running clang-tidy checks: ${PROJECT_NAME} in ${CMAKE_SOURCE_DIR}"
+    )
+
+endif()
