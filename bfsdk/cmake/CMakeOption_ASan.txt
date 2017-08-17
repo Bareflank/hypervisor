@@ -1,0 +1,15 @@
+if(ENABLE_DYNAMIC_ASAN)
+
+    message(STATUS "Testing Config: Dynamic Analysis")
+
+    set(SANITIZER_FLAGS "${SANITIZER_FLAGS} -g")
+    set(SANITIZER_FLAGS "${SANITIZER_FLAGS} -O1")
+    set(SANITIZER_FLAGS "${SANITIZER_FLAGS} -fuse-ld=gold")
+    set(SANITIZER_FLAGS "${SANITIZER_FLAGS} -fno-omit-frame-pointer")
+    set(SANITIZER_FLAGS "${SANITIZER_FLAGS} -fsanitize=address")
+    set(SANITIZER_FLAGS "${SANITIZER_FLAGS} -fsanitize=leak")
+
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${SANITIZER_FLAGS}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${SANITIZER_FLAGS}")
+
+endif()
