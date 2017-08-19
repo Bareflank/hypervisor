@@ -22,7 +22,7 @@
 #include <ioctl_private.h>
 
 #include <bfgsl.h>
-#include <bfdriverentryinterface.h>
+#include <bfdriverinterface.h>
 
 #include <SetupAPI.h>
 

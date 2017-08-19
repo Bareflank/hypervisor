@@ -2,7 +2,10 @@
 # Includes
 # ------------------------------------------------------------------------------
 
-include(CTest)
+if(NOT DISABLE_CTEST)
+    include(CTest)
+endif()
+
 include(ExternalProject)
 
 # ------------------------------------------------------------------------------
@@ -62,7 +65,7 @@ if(ENABLE_TIDY)
     set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 endif()
 
-if(ENABLE_UNITTESTING)
+if(NOT DISABLE_CTEST AND ENABLE_UNITTESTING)
     enable_testing(true)
 endif()
 
