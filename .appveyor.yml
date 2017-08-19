@@ -9,7 +9,9 @@ environment:
     CYG_ROOT: C:\cygwin_bareflank
     CYG_BASH: C:\cygwin_bareflank\bin\bash
     CYG_MIRROR: http://mirrors.kernel.org/sourceware/cygwin/
-    CYG_PACKAGES: git,make,gcc-core,gcc-g++,nasm,clang,clang++,cmake,python
+    CYG_PACKAGES: git,make,gcc-core,gcc-g++,nasm,clang,clang++,cmake,python,gettext
+    BFPATH: '%PATH%'
+    PATH: '%PATH%;C:\Program Files\NASM'
 
 test: off
 
@@ -17,8 +19,18 @@ test: off
 # Setup Cygwin
 #
 install:
-  - ps: 'Start-FileDownload "https://cygwin.com/setup-x86_64.exe" -FileName "setup-x86_64.exe"'
-  - 'setup-x86_64.exe --quiet-mode --no-shortcuts --only-site --root "%CYG_ROOT%" --site "%CYG_MIRROR%" --local-package-dir "%CYG_ROOT%\var\cache\setup" --packages "%CYG_PACKAGES%"'
+
+  #
+  # Nasm
+  #
+  - ps: Start-FileDownload "http://www.nasm.us/pub/nasm/releasebuilds/2.13.01/win64/nasm-2.13.01-installer-x64.exe" -FileName "nasm-installer-x64.exe"
+  - nasm-installer-x64.exe /S
+
+  #
+  # Cygwin
+  #
+  - ps: Start-FileDownload "https://cygwin.com/setup-x86_64.exe" -FileName "setup-x86_64.exe"
+  - setup-x86_64.exe --quiet-mode --no-shortcuts --only-site --root "%CYG_ROOT%" --site "%CYG_MIRROR%" --local-package-dir "%CYG_ROOT%\var\cache\setup" --packages "%CYG_PACKAGES%"
 
 #
 # Build
@@ -26,19 +38,20 @@ install:
 build_script:
 
   #
-  # Cygwin
+  # Visual Studio (MSBuild / Shared Libraries)
   #
-  - set PATH=%PATH%;%APPVEYOR_BUILD_FOLDER%/build_cygwin/bfprefix/bin
-  - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER; mkdir build_cygwin"'
-  - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER/build_cygwin; cmake -DENABLE_UNITTESTING=ON .."'
-  - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER/build_cygwin; make -j3"'
-  - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER/build_cygwin; make test"'
+  - mkdir build_msbuild_shared
+  - cd build_msbuild_shared
+  - cmake -G "Visual Studio 15 2017 Win64" -DENABLE_UNITTESTING=ON -DBUILD_SHARED_LIBS=ON ..
+  - msbuild hypervisor.sln
+  - cmake --build . --target test
+  - cd ..
 
   #
-  # Visual Studio (MSBuild)
+  # Cygwin (Shared Libraries)
   #
-  # - mkdir build_msbuild
-  # - cd build_msbuild
-  # - cmake -G "Visual Studio 15 2017 Win64" -DENABLE_UNITTESTING=ON ..
-  # - msbuild bfsdk.sln
-  # - ctest
+  - set PATH=%BFPATH%;%APPVEYOR_BUILD_FOLDER%/build_cygwin_shared/bfprefix/bin
+  - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER; mkdir build_cygwin_shared"'
+  - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER/build_cygwin_shared; cmake -DENABLE_UNITTESTING=ON -DBUILD_SHARED_LIBS=ON .."'
+  - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER/build_cygwin_shared; make -j3"'
+  - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER/build_cygwin_shared; make test"'

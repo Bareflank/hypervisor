@@ -336,7 +336,7 @@ matrix:
       - make test
 
   #
-  # Clang 4.0 (No Tests)
+  # Clang 4.0 (No Tests / Static Libraries)
   #
   - os: linux
     addons:
@@ -350,7 +350,7 @@ matrix:
           - clang-4.0
           - nasm
     env:
-      - TEST="Clang 4.0  (No Tests)"
+      - TEST="Clang 4.0  (No Tests / Static Libraries)"
     script:
       - cmake -DENABLE_UNITTESTING=ON ..
       - make -j3
