@@ -14,5 +14,5 @@ list(APPEND SOURCES
     ${CMAKE_INSTALL_PREFIX}/src/bfvmcall_intel_x64.asm
 )
 
-add_library(bfm_src STATIC ${SOURCES})
+add_library(bfm_src OBJECT ${SOURCES})
 target_compile_definitions(bfm_src PUBLIC STATIC_BFM_SRC)

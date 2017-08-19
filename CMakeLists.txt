@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.6)
 project(hypervisor C CXX)
 
+set(DISABLE_CTEST ON)
 set(DISABLE_OPTIONS ON)
 set(DISABLE_TARGETS ON)
 
