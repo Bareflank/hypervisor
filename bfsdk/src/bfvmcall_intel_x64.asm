@@ -30,7 +30,7 @@ section .text
 ; MS64
 ; ------------------------------------------------------------------------------
 
-global vmcall:function
+global vmcall
 vmcall:
 
     push rbx
@@ -82,7 +82,7 @@ vmcall:
 
     ret
 
-global vmcall_event:function
+global vmcall_event
 vmcall_event:
 
     push rdi

@@ -41,6 +41,11 @@
 #define EXPORT_BFM_SRC
 #endif
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4251)
+#endif
+
 // -----------------------------------------------------------------------------
 // Definitions
 // -----------------------------------------------------------------------------
@@ -123,5 +128,9 @@ private:
     gsl::not_null<ioctl *> m_ioctl;
     gsl::not_null<command_line_parser *> m_clp;
 };
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 #endif

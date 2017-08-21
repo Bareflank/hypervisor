@@ -47,7 +47,7 @@ option(ENABLE_ASTYLE "enable astyle checks" OFF)
 option(ENABLE_UNITTESTING "enable unit testing" OFF)
 option(ENABLE_DEVELOPER_MODE "enable debug mode, astyle and clang tidy" OFF)
 
-if(ENABLE_DEVELOPER_MODE)
+if(ENABLE_DEVELOPER_MODE AND NOT WIN32)
     set(ENABLE_TIDY ON)
     set(ENABLE_ASTYLE ON)
     set(UPDATE_DISCONNECTED ON)
@@ -61,7 +61,7 @@ if(NOT CMAKE_BUILD_TYPE)
     endif()
 endif()
 
-if(ENABLE_TIDY)
+if(ENABLE_TIDY AND NOT WIN32)
     set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 endif()
 
@@ -118,7 +118,10 @@ endif()
 # ------------------------------------------------------------------------------
 
 macro(install_symlink filepath sympath)
-    if(NOT WIN32 STREQUAL "1")
+    if(WIN32)
+        install(CODE "execute_process(COMMAND mklink ${sympath} ${filepath})")
+        install(CODE "message(STATUS \"Created symlink: ${sympath} -> ${filepath}\")")
+    else()
         install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink ${filepath} ${sympath})")
         install(CODE "message(STATUS \"Created symlink: ${sympath} -> ${filepath}\")")
     endif()
@@ -136,52 +139,39 @@ message(STATUS "Install path: ${CMAKE_INSTALL_PREFIX}")
 
 execute_process(COMMAND uname -o OUTPUT_VARIABLE UNAME OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-if(UNAME STREQUAL "Cygwin" OR WIN32 STREQUAL "1")
+if(UNAME STREQUAL "Cygwin" OR WIN32)
     set(OSTYPE "WIN64")
-else()
-    set(OSTYPE "UNIX")
-endif()
-
-message(STATUS "OS Type: ${OSTYPE}")
-
-# ------------------------------------------------------------------------------
-# ABI
-# ------------------------------------------------------------------------------
-
-if(OSTYPE STREQUAL "WIN64")
     set(ABITYPE "MS64")
 else()
+    set(OSTYPE "UNIX")
     set(ABITYPE "SYSV")
 endif()
 
+message(STATUS "OS Type: ${OSTYPE}")
 message(STATUS "ABI Type: ${ABITYPE}")
 
 # ------------------------------------------------------------------------------
 # Nasm Support
 # ------------------------------------------------------------------------------
 
-if(NOT WIN32 STREQUAL "1")
+find_program(NASM_BIN nasm)
 
-    find_program(NASM_BIN nasm)
-
-    if(NASM_BIN STREQUAL "NASM_BIN-NOTFOUND")
-        message(FATAL_ERROR "Unable to find nasm, or nasm is not installed")
-    endif()
-
-    execute_process(COMMAND ${NASM_BIN} -v OUTPUT_VARIABLE NASM_ID OUTPUT_STRIP_TRAILING_WHITESPACE)
-    set(CMAKE_ASM_NASM_COMPILER_ID ${NASM_ID})
-
-    if(CMAKE_TOOLCHAIN_FILE)
-        set(CMAKE_ASM_NASM_OBJECT_FORMAT "elf64")
-    endif()
-
-    enable_language(ASM_NASM)
-
-    set(CMAKE_ASM_NASM_FLAGS "-d ${ABITYPE}")
-    set(CMAKE_ASM_NASM_CREATE_SHARED_LIBRARY TRUE)
-    set(CMAKE_ASM_NASM_CREATE_STATIC_LIBRARY TRUE)
-
+if(NASM_BIN STREQUAL "NASM_BIN-NOTFOUND")
+    message(FATAL_ERROR "Unable to find nasm, or nasm is not installed")
 endif()
+
+execute_process(COMMAND ${NASM_BIN} -v OUTPUT_VARIABLE NASM_ID OUTPUT_STRIP_TRAILING_WHITESPACE)
+set(CMAKE_ASM_NASM_COMPILER_ID ${NASM_ID})
+
+if(CMAKE_TOOLCHAIN_FILE)
+    set(CMAKE_ASM_NASM_OBJECT_FORMAT "elf64")
+endif()
+
+enable_language(ASM_NASM)
+
+set(CMAKE_ASM_NASM_FLAGS "-d ${ABITYPE}")
+set(CMAKE_ASM_NASM_CREATE_SHARED_LIBRARY TRUE)
+set(CMAKE_ASM_NASM_CREATE_STATIC_LIBRARY TRUE)
 
 # ------------------------------------------------------------------------------
 # Target Information
@@ -283,6 +273,6 @@ endif()
 # Sudo
 # ------------------------------------------------------------------------------
 
-if(NOT UNAME STREQUAL "Cygwin")
+if(NOT CYGWIN)
     set(SUDO sudo)
 endif()

@@ -18,16 +18,40 @@ set(BAREFLANK_INSTALL_TEST_PREFIX ${CMAKE_BINARY_DIR}/bfprefix_test)
 # Toolchain File
 # ------------------------------------------------------------------------------
 
+if(NOT WIN32)
+
+    find_program(PYTHON_BIN python)
+
+    if(PYTHON_BIN STREQUAL "PYTHON_BIN-NOTFOUND")
+        message(FATAL_ERROR "Unable to find python, or python is not installed")
+    endif()
+
+    find_program(CLANG_BIN_40 clang-4.0)
+    find_program(CLANG_BIN_39 clang-3.9)
+    find_program(CLANG_BIN_38 clang-3.8)
+    find_program(CLANG_BIN clang)
+
+    if(NOT CLANG_BIN_40 STREQUAL "CLANG_BIN_40-NOTFOUND")
+        set(CLANG_BIN ${CLANG_BIN_40})
+        set(PREFERRED_VMM_TOOLCHAIN ${CMAKE_SOURCE_DIR}/bfsdk/cmake/CMakeToolchain_VMM_40.txt)
+    elseif(NOT CLANG_BIN_39 STREQUAL "CLANG_BIN_39-NOTFOUND")
+        set(CLANG_BIN ${CLANG_BIN_39})
+        set(PREFERRED_VMM_TOOLCHAIN ${CMAKE_SOURCE_DIR}/bfsdk/cmake/CMakeToolchain_VMM_39.txt)
+    elseif(NOT CLANG_BIN_38 STREQUAL "CLANG_BIN_38-NOTFOUND")
+        set(CLANG_BIN ${CLANG_BIN_38})
+        set(PREFERRED_VMM_TOOLCHAIN ${CMAKE_SOURCE_DIR}/bfsdk/cmake/CMakeToolchain_VMM_38.txt)
+    elseif(NOT CLANG_BIN STREQUAL "CLANG_BIN-NOTFOUND")
+        set(PREFERRED_VMM_TOOLCHAIN ${CMAKE_SOURCE_DIR}/bfsdk/cmake/CMakeToolchain_VMM.txt)
+    else()
+        message(FATAL_ERROR "Unable to find clang, or clang is not installed")
+    endif()
+
+endif()
+
 find_program(NASM_BIN nasm)
 
 if(NASM_BIN STREQUAL "NASM_BIN-NOTFOUND")
     message(FATAL_ERROR "Unable to find nasm, or nasm is not installed")
-endif()
-
-find_program(PYTHON_BIN python)
-
-if(PYTHON_BIN STREQUAL "PYTHON_BIN-NOTFOUND")
-    message(FATAL_ERROR "Unable to find python, or python is not installed")
 endif()
 
 find_program(GIT_BIN git)
@@ -36,31 +60,14 @@ if(GIT_BIN STREQUAL "GIT_BIN-NOTFOUND")
     message(FATAL_ERROR "Unable to find git, or git is not installed")
 endif()
 
-find_program(CLANG_BIN_40 clang-4.0)
-find_program(CLANG_BIN_39 clang-3.9)
-find_program(CLANG_BIN_38 clang-3.8)
-find_program(CLANG_BIN clang)
-
-if(NOT CLANG_BIN_40 STREQUAL "CLANG_BIN_40-NOTFOUND")
-    set(CLANG_BIN ${CLANG_BIN_40})
-    set(PREFERRED_VMM_TOOLCHAIN ${CMAKE_SOURCE_DIR}/bfsdk/cmake/CMakeToolchain_VMM_40.txt)
-elseif(NOT CLANG_BIN_39 STREQUAL "CLANG_BIN_39-NOTFOUND")
-    set(CLANG_BIN ${CLANG_BIN_39})
-    set(PREFERRED_VMM_TOOLCHAIN ${CMAKE_SOURCE_DIR}/bfsdk/cmake/CMakeToolchain_VMM_39.txt)
-elseif(NOT CLANG_BIN_38 STREQUAL "CLANG_BIN_38-NOTFOUND")
-    set(CLANG_BIN ${CLANG_BIN_38})
-    set(PREFERRED_VMM_TOOLCHAIN ${CMAKE_SOURCE_DIR}/bfsdk/cmake/CMakeToolchain_VMM_38.txt)
-elseif(NOT CLANG_BIN STREQUAL "CLANG_BIN-NOTFOUND")
-    set(PREFERRED_VMM_TOOLCHAIN ${CMAKE_SOURCE_DIR}/bfsdk/cmake/CMakeToolchain_VMM.txt)
-else()
-    message(FATAL_ERROR "Unable to find clang, or clang is not installed")
-endif()
-
 message(STATUS "Git: ${GIT_BIN}")
-message(STATUS "Python: ${PYTHON_BIN}")
-message(STATUS "Clang: ${CLANG_BIN}")
-message(STATUS "Nasm: ${NASM_BIN}")
-message(STATUS "Preferred VMM Toolchain: ${PREFERRED_VMM_TOOLCHAIN}")
+
+if(NOT WIN32)
+    message(STATUS "Python: ${PYTHON_BIN}")
+    message(STATUS "Clang: ${CLANG_BIN}")
+    message(STATUS "Nasm: ${NASM_BIN}")
+    message(STATUS "Preferred VMM Toolchain: ${PREFERRED_VMM_TOOLCHAIN}")
+endif()
 
 set(VMM_TOOLCHAIN_FILE ${PREFERRED_VMM_TOOLCHAIN} CACHE STRING "")
 
@@ -68,123 +75,143 @@ set(VMM_TOOLCHAIN_FILE ${PREFERRED_VMM_TOOLCHAIN} CACHE STRING "")
 # Download Newlib
 # ------------------------------------------------------------------------------
 
-ExternalProject_Add(
-    newlib
-    GIT_REPOSITORY      https://github.com/Bareflank/newlib.git
-    GIT_TAG             v1.2
-    GIT_SHALLOW         1
-    PREFIX              ${CMAKE_BINARY_DIR}/newlib/prefix
-    TMP_DIR             ${CMAKE_BINARY_DIR}/newlib/tmp
-    STAMP_DIR           ${CMAKE_BINARY_DIR}/newlib/stamp
-    DOWNLOAD_DIR        ${CMAKE_BINARY_DIR}/newlib/download
-    SOURCE_DIR          ${CMAKE_BINARY_DIR}/newlib/src
-    BINARY_DIR          ${CMAKE_BINARY_DIR}/newlib/build
-    CONFIGURE_COMMAND   ""
-    BUILD_COMMAND       ""
-    INSTALL_COMMAND     ""
-    UPDATE_DISCONNECTED ${UPDATE_DISCONNECTED}
-)
+if(NOT WIN32)
+
+    ExternalProject_Add(
+        newlib
+        GIT_REPOSITORY      https://github.com/Bareflank/newlib.git
+        GIT_TAG             v1.2
+        GIT_SHALLOW         1
+        PREFIX              ${CMAKE_BINARY_DIR}/newlib/prefix
+        TMP_DIR             ${CMAKE_BINARY_DIR}/newlib/tmp
+        STAMP_DIR           ${CMAKE_BINARY_DIR}/newlib/stamp
+        DOWNLOAD_DIR        ${CMAKE_BINARY_DIR}/newlib/download
+        SOURCE_DIR          ${CMAKE_BINARY_DIR}/newlib/src
+        BINARY_DIR          ${CMAKE_BINARY_DIR}/newlib/build
+        CONFIGURE_COMMAND   ""
+        BUILD_COMMAND       ""
+        INSTALL_COMMAND     ""
+        UPDATE_DISCONNECTED ${UPDATE_DISCONNECTED}
+    )
+
+endif()
 
 # ------------------------------------------------------------------------------
 # Download LLVM
 # ------------------------------------------------------------------------------
 
-ExternalProject_Add(
-    llvm
-    GIT_REPOSITORY      https://github.com/Bareflank/llvm.git
-    GIT_TAG             v1.2
-    GIT_SHALLOW         1
-    PREFIX              ${CMAKE_BINARY_DIR}/llvm/prefix
-    TMP_DIR             ${CMAKE_BINARY_DIR}/llvm/tmp
-    STAMP_DIR           ${CMAKE_BINARY_DIR}/llvm/stamp
-    DOWNLOAD_DIR        ${CMAKE_BINARY_DIR}/llvm/download
-    SOURCE_DIR          ${CMAKE_BINARY_DIR}/llvm/src
-    BINARY_DIR          ${CMAKE_BINARY_DIR}/llvm/build
-    CONFIGURE_COMMAND   ""
-    BUILD_COMMAND       ""
-    INSTALL_COMMAND     ""
-    UPDATE_DISCONNECTED ${UPDATE_DISCONNECTED}
-)
+if(NOT WIN32)
+
+    ExternalProject_Add(
+        llvm
+        GIT_REPOSITORY      https://github.com/Bareflank/llvm.git
+        GIT_TAG             v1.2
+        GIT_SHALLOW         1
+        PREFIX              ${CMAKE_BINARY_DIR}/llvm/prefix
+        TMP_DIR             ${CMAKE_BINARY_DIR}/llvm/tmp
+        STAMP_DIR           ${CMAKE_BINARY_DIR}/llvm/stamp
+        DOWNLOAD_DIR        ${CMAKE_BINARY_DIR}/llvm/download
+        SOURCE_DIR          ${CMAKE_BINARY_DIR}/llvm/src
+        BINARY_DIR          ${CMAKE_BINARY_DIR}/llvm/build
+        CONFIGURE_COMMAND   ""
+        BUILD_COMMAND       ""
+        INSTALL_COMMAND     ""
+        UPDATE_DISCONNECTED ${UPDATE_DISCONNECTED}
+    )
+
+endif()
 
 # ------------------------------------------------------------------------------
 # Download Libcxx
 # ------------------------------------------------------------------------------
 
-ExternalProject_Add(
-    libcxx
-    GIT_REPOSITORY      https://github.com/Bareflank/libcxx.git
-    GIT_TAG             v1.2
-    GIT_SHALLOW         1
-    PREFIX              ${CMAKE_BINARY_DIR}/libcxx/prefix
-    TMP_DIR             ${CMAKE_BINARY_DIR}/libcxx/tmp
-    STAMP_DIR           ${CMAKE_BINARY_DIR}/libcxx/stamp
-    DOWNLOAD_DIR        ${CMAKE_BINARY_DIR}/libcxx/download
-    SOURCE_DIR          ${CMAKE_BINARY_DIR}/libcxx/src
-    BINARY_DIR          ${CMAKE_BINARY_DIR}/libcxx/build
-    CONFIGURE_COMMAND   ""
-    BUILD_COMMAND       ""
-    INSTALL_COMMAND     ""
-    UPDATE_DISCONNECTED ${UPDATE_DISCONNECTED}
-)
+if(NOT WIN32)
+
+    ExternalProject_Add(
+        libcxx
+        GIT_REPOSITORY      https://github.com/Bareflank/libcxx.git
+        GIT_TAG             v1.2
+        GIT_SHALLOW         1
+        PREFIX              ${CMAKE_BINARY_DIR}/libcxx/prefix
+        TMP_DIR             ${CMAKE_BINARY_DIR}/libcxx/tmp
+        STAMP_DIR           ${CMAKE_BINARY_DIR}/libcxx/stamp
+        DOWNLOAD_DIR        ${CMAKE_BINARY_DIR}/libcxx/download
+        SOURCE_DIR          ${CMAKE_BINARY_DIR}/libcxx/src
+        BINARY_DIR          ${CMAKE_BINARY_DIR}/libcxx/build
+        CONFIGURE_COMMAND   ""
+        BUILD_COMMAND       ""
+        INSTALL_COMMAND     ""
+        UPDATE_DISCONNECTED ${UPDATE_DISCONNECTED}
+    )
+
+endif()
 
 # ------------------------------------------------------------------------------
 # Download Libcxxabi
 # ------------------------------------------------------------------------------
 
-ExternalProject_Add(
-    libcxxabi
-    GIT_REPOSITORY      https://github.com/Bareflank/libcxxabi.git
-    GIT_TAG             v1.2
-    GIT_SHALLOW         1
-    PREFIX              ${CMAKE_BINARY_DIR}/libcxxabi/prefix
-    TMP_DIR             ${CMAKE_BINARY_DIR}/libcxxabi/tmp
-    STAMP_DIR           ${CMAKE_BINARY_DIR}/libcxxabi/stamp
-    DOWNLOAD_DIR        ${CMAKE_BINARY_DIR}/libcxxabi/download
-    SOURCE_DIR          ${CMAKE_BINARY_DIR}/libcxxabi/src
-    BINARY_DIR          ${CMAKE_BINARY_DIR}/libcxxabi/build
-    CONFIGURE_COMMAND   ""
-    BUILD_COMMAND       ""
-    INSTALL_COMMAND     ""
-    UPDATE_DISCONNECTED ${UPDATE_DISCONNECTED}
-)
+if(NOT WIN32)
+
+    ExternalProject_Add(
+        libcxxabi
+        GIT_REPOSITORY      https://github.com/Bareflank/libcxxabi.git
+        GIT_TAG             v1.2
+        GIT_SHALLOW         1
+        PREFIX              ${CMAKE_BINARY_DIR}/libcxxabi/prefix
+        TMP_DIR             ${CMAKE_BINARY_DIR}/libcxxabi/tmp
+        STAMP_DIR           ${CMAKE_BINARY_DIR}/libcxxabi/stamp
+        DOWNLOAD_DIR        ${CMAKE_BINARY_DIR}/libcxxabi/download
+        SOURCE_DIR          ${CMAKE_BINARY_DIR}/libcxxabi/src
+        BINARY_DIR          ${CMAKE_BINARY_DIR}/libcxxabi/build
+        CONFIGURE_COMMAND   ""
+        BUILD_COMMAND       ""
+        INSTALL_COMMAND     ""
+        UPDATE_DISCONNECTED ${UPDATE_DISCONNECTED}
+    )
+
+endif()
 
 # ------------------------------------------------------------------------------
 # Binutils
 # ------------------------------------------------------------------------------
 
-list(APPEND BINUTILS_ARGS
-    --prefix=${CMAKE_BINARY_DIR}/binutils/prefix
-    --target=${BAREFLANK_TARGET}
-    --disable-nls
-    --disable-werror
-    --with-sysroot
-)
+if(NOT WIN32)
 
-ExternalProject_Add(
-    binutils
-    URL                 http://ftp.gnu.org/gnu/binutils/binutils-2.28.tar.gz
-    URL_MD5             d5d270fd0b698ed59ca5ade8e1b5059c
-    PREFIX              ${CMAKE_BINARY_DIR}/binutils/prefix
-    TMP_DIR             ${CMAKE_BINARY_DIR}/binutils/tmp
-    STAMP_DIR           ${CMAKE_BINARY_DIR}/binutils/stamp
-    DOWNLOAD_DIR        ${CMAKE_BINARY_DIR}/binutils/download
-    SOURCE_DIR          ${CMAKE_BINARY_DIR}/binutils/src
-    BINARY_DIR          ${CMAKE_BINARY_DIR}/binutils/build
-    CONFIGURE_COMMAND   ${CMAKE_BINARY_DIR}/binutils/src/configure ${BINUTILS_ARGS}
-    BUILD_COMMAND       make
-    INSTALL_COMMAND     make install
-    LOG_DOWNLOAD        1
-    LOG_CONFIGURE       1
-    LOG_BUILD           1
-    LOG_INSTALL         1
-)
+    list(APPEND BINUTILS_ARGS
+        --prefix=${CMAKE_BINARY_DIR}/binutils/prefix
+        --target=${BAREFLANK_TARGET}
+        --disable-nls
+        --disable-werror
+        --with-sysroot
+    )
 
-ExternalProject_Add_Step(
-    binutils
-    prefix_install
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_BINARY_DIR}/binutils/prefix/bin/ ${BAREFLANK_INSTALL_PREFIX}/bin/
-    DEPENDEES install
-)
+    ExternalProject_Add(
+        binutils
+        URL                 http://ftp.gnu.org/gnu/binutils/binutils-2.28.tar.gz
+        URL_MD5             d5d270fd0b698ed59ca5ade8e1b5059c
+        PREFIX              ${CMAKE_BINARY_DIR}/binutils/prefix
+        TMP_DIR             ${CMAKE_BINARY_DIR}/binutils/tmp
+        STAMP_DIR           ${CMAKE_BINARY_DIR}/binutils/stamp
+        DOWNLOAD_DIR        ${CMAKE_BINARY_DIR}/binutils/download
+        SOURCE_DIR          ${CMAKE_BINARY_DIR}/binutils/src
+        BINARY_DIR          ${CMAKE_BINARY_DIR}/binutils/build
+        CONFIGURE_COMMAND   ${CMAKE_BINARY_DIR}/binutils/src/configure ${BINUTILS_ARGS}
+        BUILD_COMMAND       make
+        INSTALL_COMMAND     make install
+        LOG_DOWNLOAD        1
+        LOG_CONFIGURE       1
+        LOG_BUILD           1
+        LOG_INSTALL         1
+    )
+
+    ExternalProject_Add_Step(
+        binutils
+        prefix_install
+        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_BINARY_DIR}/binutils/prefix/bin/ ${BAREFLANK_INSTALL_PREFIX}/bin/
+        DEPENDEES install
+    )
+
+endif()
 
 # ------------------------------------------------------------------------------
 # SDK
@@ -217,16 +244,36 @@ ExternalProject_Add(
 
 if(ENABLE_UNITTESTING)
 
-    ExternalProject_Add_Step(
-        bfsdk
-        test_prefix_install
-        COMMAND ${CMAKE_COMMAND} -E make_directory ${BAREFLANK_INSTALL_TEST_PREFIX}
-        COMMAND ${CMAKE_COMMAND} -E create_symlink ${BAREFLANK_INSTALL_PREFIX}/bin ${BAREFLANK_INSTALL_TEST_PREFIX}/bin
-        COMMAND ${CMAKE_COMMAND} -E create_symlink ${BAREFLANK_INSTALL_PREFIX}/cmake ${BAREFLANK_INSTALL_TEST_PREFIX}/cmake
-        COMMAND ${CMAKE_COMMAND} -E create_symlink ${BAREFLANK_INSTALL_PREFIX}/include ${BAREFLANK_INSTALL_TEST_PREFIX}/include
-        COMMAND ${CMAKE_COMMAND} -E create_symlink ${BAREFLANK_INSTALL_PREFIX}/lib ${BAREFLANK_INSTALL_TEST_PREFIX}/sdk_lib
-        DEPENDEES install
-    )
+    if(WIN32)
+
+        file(TO_NATIVE_PATH ${BAREFLANK_INSTALL_PREFIX} WINDOWS_INSTALL_PREFIX)
+        file(TO_NATIVE_PATH ${BAREFLANK_INSTALL_TEST_PREFIX} WINDOWS_INSTALL_TEST_PREFIX)
+
+        ExternalProject_Add_Step(
+            bfsdk
+            test_prefix_install
+            COMMAND ${CMAKE_COMMAND} -E make_directory ${BAREFLANK_INSTALL_TEST_PREFIX}
+            COMMAND mklink /d ${WINDOWS_INSTALL_TEST_PREFIX}\\bin ${WINDOWS_INSTALL_PREFIX}\\bin
+            COMMAND mklink /d ${WINDOWS_INSTALL_TEST_PREFIX}\\cmake ${WINDOWS_INSTALL_PREFIX}\\cmake
+            COMMAND mklink /d ${WINDOWS_INSTALL_TEST_PREFIX}\\include ${WINDOWS_INSTALL_PREFIX}\\include
+            COMMAND mklink /d ${WINDOWS_INSTALL_TEST_PREFIX}\\sdk_lib ${WINDOWS_INSTALL_PREFIX}\\lib
+            DEPENDEES install
+        )
+
+    else()
+
+        ExternalProject_Add_Step(
+            bfsdk
+            test_prefix_install
+            COMMAND ${CMAKE_COMMAND} -E make_directory ${BAREFLANK_INSTALL_TEST_PREFIX}
+            COMMAND ${CMAKE_COMMAND} -E create_symlink ${BAREFLANK_INSTALL_PREFIX}/bin ${BAREFLANK_INSTALL_TEST_PREFIX}/bin
+            COMMAND ${CMAKE_COMMAND} -E create_symlink ${BAREFLANK_INSTALL_PREFIX}/cmake ${BAREFLANK_INSTALL_TEST_PREFIX}/cmake
+            COMMAND ${CMAKE_COMMAND} -E create_symlink ${BAREFLANK_INSTALL_PREFIX}/include ${BAREFLANK_INSTALL_TEST_PREFIX}/include
+            COMMAND ${CMAKE_COMMAND} -E create_symlink ${BAREFLANK_INSTALL_PREFIX}/lib ${BAREFLANK_INSTALL_TEST_PREFIX}/sdk_lib
+            DEPENDEES install
+        )
+
+    endif()
 
 endif()
 
@@ -234,34 +281,38 @@ endif()
 # Sysroot
 # ------------------------------------------------------------------------------
 
-list(APPEND BFSYSROOT_CMAKE_ARGS
-    -DBAREFLANK_SOURCE_DIR=${CMAKE_SOURCE_DIR}
-    -DBAREFLANK_BINARY_DIR=${CMAKE_BINARY_DIR}
-    -DCMAKE_INSTALL_PREFIX=${BAREFLANK_INSTALL_PREFIX}
-    -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
-    -DCMAKE_TOOLCHAIN_FILE=${VMM_TOOLCHAIN_FILE}
-    -DENABLE_COVERAGE=${ENABLE_COVERAGE}
-    -DENABLE_DYNAMIC_ASAN=${ENABLE_DYNAMIC_ASAN}
-    -DENABLE_DYNAMIC_USAN=${ENABLE_DYNAMIC_USAN}
-    -DENABLE_TIDY=${ENABLE_TIDY}
-    -DENABLE_ASTYLE=${ENABLE_ASTYLE}
-    -DBUILD_SHARED_LIBS=${BAREFLANK_HOST_SHARED_LIBS}
-    -DBUILD_STATIC_LIBS=${BAREFLANK_HOST_STATIC_LIBS}
-)
+if(NOT WIN32)
 
-ExternalProject_Add(
-    bfsysroot
-    CMAKE_ARGS          ${BFSYSROOT_CMAKE_ARGS}
-    PREFIX              ${CMAKE_BINARY_DIR}/bfsysroot/prefix
-    TMP_DIR             ${CMAKE_BINARY_DIR}/bfsysroot/tmp
-    STAMP_DIR           ${CMAKE_BINARY_DIR}/bfsysroot/stamp
-    DOWNLOAD_DIR        ${CMAKE_BINARY_DIR}/bfsysroot/download
-    SOURCE_DIR          ${CMAKE_SOURCE_DIR}/bfsysroot
-    BINARY_DIR          ${CMAKE_BINARY_DIR}/bfsysroot/build
-    UPDATE_COMMAND      ${CMAKE_COMMAND} -E echo "checking for updates"
-    INSTALL_COMMAND     ""
-    DEPENDS             bfsdk newlib llvm libcxx libcxxabi binutils
-)
+    list(APPEND BFSYSROOT_CMAKE_ARGS
+        -DBAREFLANK_SOURCE_DIR=${CMAKE_SOURCE_DIR}
+        -DBAREFLANK_BINARY_DIR=${CMAKE_BINARY_DIR}
+        -DCMAKE_INSTALL_PREFIX=${BAREFLANK_INSTALL_PREFIX}
+        -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+        -DCMAKE_TOOLCHAIN_FILE=${VMM_TOOLCHAIN_FILE}
+        -DENABLE_COVERAGE=${ENABLE_COVERAGE}
+        -DENABLE_DYNAMIC_ASAN=${ENABLE_DYNAMIC_ASAN}
+        -DENABLE_DYNAMIC_USAN=${ENABLE_DYNAMIC_USAN}
+        -DENABLE_TIDY=${ENABLE_TIDY}
+        -DENABLE_ASTYLE=${ENABLE_ASTYLE}
+        -DBUILD_SHARED_LIBS=${BAREFLANK_HOST_SHARED_LIBS}
+        -DBUILD_STATIC_LIBS=${BAREFLANK_HOST_STATIC_LIBS}
+    )
+
+    ExternalProject_Add(
+        bfsysroot
+        CMAKE_ARGS          ${BFSYSROOT_CMAKE_ARGS}
+        PREFIX              ${CMAKE_BINARY_DIR}/bfsysroot/prefix
+        TMP_DIR             ${CMAKE_BINARY_DIR}/bfsysroot/tmp
+        STAMP_DIR           ${CMAKE_BINARY_DIR}/bfsysroot/stamp
+        DOWNLOAD_DIR        ${CMAKE_BINARY_DIR}/bfsysroot/download
+        SOURCE_DIR          ${CMAKE_SOURCE_DIR}/bfsysroot
+        BINARY_DIR          ${CMAKE_BINARY_DIR}/bfsysroot/build
+        UPDATE_COMMAND      ${CMAKE_COMMAND} -E echo "checking for updates"
+        INSTALL_COMMAND     ""
+        DEPENDS             bfsdk newlib llvm libcxx libcxxabi binutils
+    )
+
+endif()
 
 # if(ENABLE_UNITTESTING)
 
@@ -326,8 +377,12 @@ ExternalProject_Add(
     BINARY_DIR          ${CMAKE_BINARY_DIR}/bfelf_loader/build
     UPDATE_COMMAND      ${CMAKE_COMMAND} -E echo "checking for updates"
     BUILD_COMMAND       ""
-    DEPENDS             bfsdk bfsysroot
+    DEPENDS             bfsdk
 )
+
+if(ENABLE_UNITTESTING AND NOT WIN32)
+    add_dependencies(bfelf_loader bfsysroot)
+endif()
 
 # ------------------------------------------------------------------------------
 # BFM
@@ -370,34 +425,38 @@ ExternalProject_Add(
 # VMM
 # ------------------------------------------------------------------------------
 
-list(APPEND BFVMM_CMAKE_ARGS
-    -DBAREFLANK_SOURCE_DIR=${CMAKE_SOURCE_DIR}
-    -DBAREFLANK_BINARY_DIR=${CMAKE_BINARY_DIR}
-    -DCMAKE_INSTALL_PREFIX=${BAREFLANK_INSTALL_PREFIX}
-    -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
-    -DCMAKE_TOOLCHAIN_FILE=${VMM_TOOLCHAIN_FILE}
-    -DENABLE_COVERAGE=${ENABLE_COVERAGE}
-    -DENABLE_DYNAMIC_ASAN=${ENABLE_DYNAMIC_ASAN}
-    -DENABLE_DYNAMIC_USAN=${ENABLE_DYNAMIC_USAN}
-    -DENABLE_TIDY=${ENABLE_TIDY}
-    -DENABLE_ASTYLE=${ENABLE_ASTYLE}
-    -DBUILD_SHARED_LIBS=${BAREFLANK_HOST_SHARED_LIBS}
-    -DBUILD_STATIC_LIBS=${BAREFLANK_HOST_STATIC_LIBS}
-)
+if(NOT WIN32)
 
-ExternalProject_Add(
-    bfvmm
-    CMAKE_ARGS          ${BFVMM_CMAKE_ARGS}
-    PREFIX              ${CMAKE_BINARY_DIR}/bfvmm/prefix
-    TMP_DIR             ${CMAKE_BINARY_DIR}/bfvmm/tmp
-    STAMP_DIR           ${CMAKE_BINARY_DIR}/bfvmm/stamp
-    DOWNLOAD_DIR        ${CMAKE_BINARY_DIR}/bfvmm/download
-    SOURCE_DIR          ${CMAKE_SOURCE_DIR}/bfvmm
-    BINARY_DIR          ${CMAKE_BINARY_DIR}/bfvmm/build
-    UPDATE_COMMAND      ${CMAKE_COMMAND} -E echo "checking for updates"
-    BUILD_COMMAND       ""
-    DEPENDS             bfsdk bfsysroot
-)
+    list(APPEND BFVMM_CMAKE_ARGS
+        -DBAREFLANK_SOURCE_DIR=${CMAKE_SOURCE_DIR}
+        -DBAREFLANK_BINARY_DIR=${CMAKE_BINARY_DIR}
+        -DCMAKE_INSTALL_PREFIX=${BAREFLANK_INSTALL_PREFIX}
+        -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+        -DCMAKE_TOOLCHAIN_FILE=${VMM_TOOLCHAIN_FILE}
+        -DENABLE_COVERAGE=${ENABLE_COVERAGE}
+        -DENABLE_DYNAMIC_ASAN=${ENABLE_DYNAMIC_ASAN}
+        -DENABLE_DYNAMIC_USAN=${ENABLE_DYNAMIC_USAN}
+        -DENABLE_TIDY=${ENABLE_TIDY}
+        -DENABLE_ASTYLE=${ENABLE_ASTYLE}
+        -DBUILD_SHARED_LIBS=${BAREFLANK_HOST_SHARED_LIBS}
+        -DBUILD_STATIC_LIBS=${BAREFLANK_HOST_STATIC_LIBS}
+    )
+
+    ExternalProject_Add(
+        bfvmm
+        CMAKE_ARGS          ${BFVMM_CMAKE_ARGS}
+        PREFIX              ${CMAKE_BINARY_DIR}/bfvmm/prefix
+        TMP_DIR             ${CMAKE_BINARY_DIR}/bfvmm/tmp
+        STAMP_DIR           ${CMAKE_BINARY_DIR}/bfvmm/stamp
+        DOWNLOAD_DIR        ${CMAKE_BINARY_DIR}/bfvmm/download
+        SOURCE_DIR          ${CMAKE_SOURCE_DIR}/bfvmm
+        BINARY_DIR          ${CMAKE_BINARY_DIR}/bfvmm/build
+        UPDATE_COMMAND      ${CMAKE_COMMAND} -E echo "checking for updates"
+        BUILD_COMMAND       ""
+        DEPENDS             bfsdk bfsysroot
+    )
+
+endif()
 
 if(ENABLE_UNITTESTING)
 
@@ -427,7 +486,7 @@ if(ENABLE_UNITTESTING)
         BINARY_DIR          ${CMAKE_BINARY_DIR}/test_bfvmm/build
         UPDATE_COMMAND      ${CMAKE_COMMAND} -E echo "checking for updates"
         BUILD_COMMAND       ""
-        DEPENDS             bfvmm
+        DEPENDS             bfsdk
     )
 
 endif()
@@ -558,12 +617,11 @@ endif()
 # ------------------------------------------------------------------------------
 
 add_custom_target(distclean
+    COMMAND ${CMAKE_COMMAND} --build . --target clean
     COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfdriver/build --target clean
     COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfelf_loader/build --target clean
     COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfm/build --target clean
     COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfsdk/build --target clean
-    COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfsysroot/build --target distclean
-    COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfvmm/build --target clean
 
     COMMAND ${CMAKE_COMMAND} -E remove_directory ${BAREFLANK_INSTALL_PREFIX}/include
     COMMAND ${CMAKE_COMMAND} -E remove_directory ${BAREFLANK_INSTALL_PREFIX}/lib
@@ -573,6 +631,11 @@ add_custom_target(distclean
     COMMAND ${CMAKE_COMMAND} -E remove_directory ${BAREFLANK_INSTALL_TEST_PREFIX}/lib
     COMMAND ${CMAKE_COMMAND} -E remove_directory ${BAREFLANK_INSTALL_TEST_PREFIX}/sysroots
 )
+
+if(NOT WIN32)
+    add_custom_command(TARGET distclean COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfsysroot/build --target distclean)
+    add_custom_command(TARGET distclean COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfvmm/build --target clean)
+endif()
 
 if(ENABLE_UNITTESTING)
     add_custom_command(TARGET distclean COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/test_bfvmm/build --target clean)
@@ -598,15 +661,15 @@ if(ENABLE_UNITTESTING)
 
     add_custom_target(test
         # COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfdriver/build --target test
-        COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfelf_loader/build --target test
+        COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/bfelf_loader/build ctest
         # COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfm/build --target test
-        COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfsdk/build --target test
+        COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/bfsdk/build ctest
         # COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/test_bfsysroot/build --target test
-        COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/test_bfvmm/build --target test
+        COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/test_bfvmm/build ctest
     )
 
     if(ENABLE_EXTENDED_APIS)
-        add_custom_command(TARGET test COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/test_extended_apis/build --target test)
+        add_custom_command(TARGET test COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/test_extended_apis/build ctest)
     endif()
 
 endif()
@@ -615,7 +678,7 @@ endif()
 # Tidy
 # ------------------------------------------------------------------------------
 
-if(ENABLE_TIDY)
+if(ENABLE_TIDY AND NOT WIN32)
 
     add_custom_target(tidy
         # COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfdriver/build --target tidy
@@ -661,7 +724,7 @@ endif()
 # Astyle
 # ------------------------------------------------------------------------------
 
-if(ENABLE_ASTYLE)
+if(ENABLE_ASTYLE AND NOT WIN32)
 
     add_custom_target(format
         COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfdriver/build --target format

@@ -45,6 +45,11 @@
 #define EXPORT_BFM_IOCTL
 #endif
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4251)
+#endif
+
 // -----------------------------------------------------------------------------
 // Definitions
 // -----------------------------------------------------------------------------
@@ -76,7 +81,7 @@ public:
     using vcpuid_type = uint64_t;
     using status_type = int64_t;
     using status_pointer = status_type *;
-    using registers_type = struct vmcall_registers_t;
+    using registers_type = vmcall_registers_t;
     using registers_pointer = registers_type *;
 
     /// Default Constructor
@@ -176,5 +181,9 @@ private:
 
     std::unique_ptr<ioctl_private_base> m_d;
 };
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 #endif
