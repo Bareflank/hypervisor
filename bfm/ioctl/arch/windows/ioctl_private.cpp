@@ -57,7 +57,7 @@ bf_ioctl_open()
 
     DWORD requiredSize = 0;
 
-    if (SetupDiGetDeviceInterfaceDetail(hDevInfo, &ifInfo, NULL, 0, &requiredSize, NULL) == true) {
+    if (SetupDiGetDeviceInterfaceDetail(hDevInfo, &ifInfo, NULL, 0, &requiredSize, NULL) == TRUE) {
         return INVALID_HANDLE_VALUE;
     }
 
@@ -153,16 +153,18 @@ ioctl_private::open()
     }
 }
 
+#ifdef __GNUC__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wconversion"
 #pragma GCC diagnostic ignored "-Wsign-conversion"
+#endif
 
 void
 ioctl_private::call_ioctl_add_module(gsl::not_null<module_data_type> data, module_len_type len)
 {
     expects(len > 0);
 
-    if (bf_write_ioctl(fd, IOCTL_ADD_MODULE, data, len) == BF_IOCTL_FAILURE) {
+    if (bf_write_ioctl(fd, IOCTL_ADD_MODULE, data, gsl::narrow_cast<DWORD>(len)) == BF_IOCTL_FAILURE) {
         throw std::runtime_error("ioctl failed: IOCTL_ADD_MODULE");
     }
 }
@@ -219,4 +221,6 @@ ioctl_private::call_ioctl_vmm_status(gsl::not_null<status_pointer> status)
     }
 }
 
+#ifdef __GNUC__
 #pragma GCC diagnostic pop
+#endif

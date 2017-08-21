@@ -7,7 +7,7 @@ include(${CMAKE_INSTALL_PREFIX}/cmake/CMakeGlobal_Project.txt)
 # Subdirectories
 # ------------------------------------------------------------------------------
 
-if(ENABLE_UNITTESTING AND BUILD_SHARED_LIBS)
+if(NOT WIN32 AND ENABLE_UNITTESTING AND BUILD_SHARED_LIBS)
     add_subdirectory(tests)
 endif()
 

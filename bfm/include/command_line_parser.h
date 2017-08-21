@@ -56,6 +56,11 @@ enum class command_line_parser_command {
 #define EXPORT_BFM_SRC
 #endif
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4251)
+#endif
+
 // -----------------------------------------------------------------------------
 // Definitions
 // -----------------------------------------------------------------------------
@@ -216,5 +221,9 @@ private:
     filename_type m_ofile;
     arg_type m_string_data;
 };
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 #endif

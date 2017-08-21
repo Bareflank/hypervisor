@@ -8,7 +8,7 @@ include(${CMAKE_INSTALL_PREFIX}/cmake/CMakeGlobal_Includes.txt)
 # Targets
 # ------------------------------------------------------------------------------
 
-if(NOT CYGWIN STREQUAL "1")
+if(NOT CYGWIN AND NOT WIN32)
     list(APPEND SOURCES
         arch/linux/ioctl.cpp
         arch/linux/ioctl_private.cpp
@@ -28,7 +28,7 @@ target_compile_definitions(bfm_ioctl PUBLIC STATIC_BFM_IOCTL)
 add_library(bf_ioctl SHARED ${SOURCES})
 target_compile_definitions(bf_ioctl PUBLIC SHARED_BFM_IOCTL)
 
-if(CYGWIN STREQUAL "1")
+if(CYGWIN OR WIN32)
     target_link_libraries(bf_ioctl setupapi)
 endif()
 

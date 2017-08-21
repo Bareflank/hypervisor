@@ -52,14 +52,14 @@ flush()
 #endif
 
 void
-terminate()
+bfm_terminate()
 {
     std::cerr << "FATAL ERROR: terminate called" << '\n';
     abort();
 }
 
 void
-new_handler()
+bfm_new_handler()
 {
     std::cerr << "FATAL ERROR: out of memory" << '\n';
     std::terminate();
@@ -151,8 +151,8 @@ protected_main(const command_line_parser::arg_list_type &args)
 int
 main(int argc, const char *argv[])
 {
-    std::set_terminate(terminate);
-    std::set_new_handler(new_handler);
+    std::set_terminate(bfm_terminate);
+    std::set_new_handler(bfm_new_handler);
 
     try {
         command_line_parser::arg_list_type args;

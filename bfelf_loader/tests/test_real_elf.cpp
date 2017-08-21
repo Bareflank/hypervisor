@@ -25,7 +25,7 @@
 #include <list>
 #include <vector>
 
-#ifdef WIN32
+#ifdef WIN64
 #include <windows.h>
 #else
 #include <sys/mman.h>
@@ -52,7 +52,7 @@ platform_alloc_rwe(uint64_t len)
     auto addr = aligned_alloc(0x1000, len);
     g_memory[addr] = std::shared_ptr<char>(static_cast<char *>(addr), free);
 
-#ifdef WIN32
+#ifdef WIN64
     DWORD oldProtect;
     VirtualProtect(addr, len, PAGE_EXECUTE_READWRITE, &oldProtect);
 #else

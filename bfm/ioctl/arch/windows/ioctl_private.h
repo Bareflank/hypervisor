@@ -25,7 +25,32 @@
 #include <ioctl.h>
 #include <windows.h>
 
-class ioctl_private : public ioctl_private_base
+// -----------------------------------------------------------------------------
+// Exports
+// -----------------------------------------------------------------------------
+
+#include <bfexports.h>
+
+#ifndef STATIC_BFM_IOCTL
+#ifdef SHARED_BFM_IOCTL
+#define EXPORT_BFM_IOCTL EXPORT_SYM
+#else
+#define EXPORT_BFM_IOCTL IMPORT_SYM
+#endif
+#else
+#define EXPORT_BFM_IOCTL
+#endif
+
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4251)
+#endif
+
+// -----------------------------------------------------------------------------
+// Definitions
+// -----------------------------------------------------------------------------
+
+class EXPORT_BFM_IOCTL ioctl_private : public ioctl_private_base
 {
 public:
 
@@ -52,5 +77,9 @@ public:
 private:
     HANDLE fd;
 };
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 #endif
