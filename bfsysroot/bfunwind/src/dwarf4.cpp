@@ -22,6 +22,21 @@
 #include <misc.h>
 #include <abort.h>
 #include <dwarf4.h>
+#include <bfdwarf.h>
+#include <unistd.h>
+
+// -----------------------------------------------------------------------------
+// Private structs
+// -----------------------------------------------------------------------------
+
+#pragma pack(push, 1)
+struct DebugInfoCUHeader32 {
+    uint32_t unit_length;
+    uint16_t version;
+    uint32_t debug_abbrev_offset;
+    uint8_t address_size;
+};
+#pragma pack(pop)
 
 // -----------------------------------------------------------------------------
 // Helpers
@@ -1476,6 +1491,129 @@ private_decode_cfi(const fd_entry &fde, register_state *state)
     return row;
 }
 
+template <typename T>
+static T* get_ptr(const void *mem, size_t off)
+{
+    return reinterpret_cast<T *>(reinterpret_cast<uintptr_t>(mem) + off);
+}
+
+static int
+private_get_abbrev(void *dbg_abbrev,
+                   uint64_t num,
+                   uint64_t *ptag,
+                   bool *pchildren)
+{
+    auto debug_abbrev = reinterpret_cast<char *>(dbg_abbrev);
+    uint64_t abbrev;
+    uint64_t tag;
+    bool children;
+
+    if (num == 0) {
+        return 0;
+    }
+
+    while (true) {
+        abbrev = dwarf4::decode_uleb128(&debug_abbrev);
+        tag = dwarf4::decode_uleb128(&debug_abbrev);
+        children = *debug_abbrev == DW_CHILDREN_yes ? true : false;
+        debug_abbrev += 1;
+
+        if (abbrev == num) {
+            *ptag = tag;
+            *pchildren = children;
+            return 1;
+        }
+
+        while (true) {
+            uint64_t name;
+            uint64_t form;
+            name = dwarf4::decode_uleb128(&debug_abbrev);
+            form = dwarf4::decode_uleb128(&debug_abbrev);
+
+            if (name == 0 && form == 0) {
+                break;
+            }
+        }
+    }
+
+    return 0;
+}
+
+static int
+private_get_attr(void *dbg_abbrev,
+                 uint64_t abbrev,
+                 uint64_t num,
+                 uint64_t *pname,
+                 uint64_t *pform)
+{
+    auto debug_abbrev = reinterpret_cast<char *>(dbg_abbrev);
+    uint64_t abbrev2;
+    uint64_t tag;
+    bool children;
+
+    if (abbrev == 0) {
+        return 0;
+    }
+
+    while (true) {
+        abbrev2 = dwarf4::decode_uleb128(&debug_abbrev);
+        tag = dwarf4::decode_uleb128(&debug_abbrev);
+        children = *debug_abbrev == DW_CHILDREN_yes ? true : false;
+        debug_abbrev += 1;
+
+        for (uint64_t attribute_num = 0; true; attribute_num++) {
+            uint64_t name;
+            uint64_t form;
+            name = dwarf4::decode_uleb128(&debug_abbrev);
+            form = dwarf4::decode_uleb128(&debug_abbrev);
+
+            if (abbrev2 == abbrev && attribute_num == num) {
+                *pname = name;
+                *pform = form;
+
+                return name == 0 && form == 0 ? 0 : 1;
+            }
+
+            if (name == 0 && form == 0) {
+                break;
+            }
+        }
+    }
+
+    return 0;
+}
+
+static uint64_t
+private_read_addr_length(const void *data,
+                         uint64_t addr_len)
+{
+    uint64_t res;
+
+    switch (addr_len) {
+        case 4:
+            res = *reinterpret_cast<const uint32_t *>(data);
+            break;
+        case 8:
+            res = *reinterpret_cast<const uint64_t *>(data);
+            break;
+        default:
+            res = 0;
+            break;
+    }
+
+    return res;
+}
+
+static size_t
+private_strlen(const char *str)
+{
+    size_t c = 0;
+    while (*str++) {
+        c++;
+    }
+    return c;
+}
+
 // -----------------------------------------------------------------------------
 // DWARF 4 Implementation
 // -----------------------------------------------------------------------------
@@ -1534,6 +1672,28 @@ dwarf4::unwind(const fd_entry &fde, register_state *state)
         return;
     }
 
+    auto modules = get_dwarf_sections();
+    uintptr_t ip = state->get_ip();
+    const char *fn = nullptr;
+
+    for (auto m = 0U; m < MAX_NUM_MODULES; m++) {
+        uintptr_t text = reinterpret_cast<uintptr_t>(modules[m].text_addr);
+        if (ip >= text && ip < text + modules[m].text_size) {
+            fn = find_function_name(modules[m].debug_info_addr,
+                                    modules[m].debug_info_size,
+                                    modules[m].debug_abbrev_addr,
+                                    modules[m].debug_str_addr,
+                                    ip - text);
+            break;
+        }
+    }
+
+    fn = fn ? fn : "???";
+
+    write(2, "unwind: <", 9);
+    write(2, fn, private_strlen(fn));
+    write(2, ">\n", 2);
+
     auto row = private_decode_cfi(fde, state);
     auto cfa = private_decode_cfa(row, state);
 
@@ -1553,3 +1713,200 @@ dwarf4::unwind(const fd_entry &fde, register_state *state)
 #ifndef __clang__
 #pragma GCC diagnostic pop
 #endif
+
+const char *
+dwarf4::find_function_name(void *debug_info,
+                           uint64_t debug_info_len,
+                           void *debug_abbrev,
+                           void *debug_str,
+                           uint64_t addr)
+{
+    uint64_t cur_offset = 0;
+
+    if (!debug_info || !debug_abbrev || !debug_str || debug_info_len == 0) {
+        return nullptr;
+    }
+
+    while (cur_offset < debug_info_len) {
+        auto info = get_ptr<DebugInfoCUHeader32>(debug_info, cur_offset);
+        auto data = get_ptr<char>(info, sizeof(DebugInfoCUHeader32));
+        void *abbrevs = nullptr;
+        uint64_t abbrev;
+        uint64_t stack = 0;
+
+        abbrevs = get_ptr<void>(debug_abbrev, info->debug_abbrev_offset);
+
+        do {
+            uint64_t tag;
+            bool children;
+            uint64_t attr = 0;
+            uint64_t name;
+            uint64_t form;
+
+            abbrev = decode_uleb128(&data);
+
+            if (private_get_abbrev(abbrevs, abbrev, &tag, &children)) {
+                uint64_t pc_low = 0, pc_high = 0;
+                uint64_t pc_high_form = DW_FORM_data8;
+                bool pc_found = false;
+                char *linkage_name = nullptr;
+                char *fn_name = nullptr;
+
+                if (children) {
+                    stack++;
+                }
+
+                while (private_get_attr(abbrevs, abbrev, attr++, &name, &form)) {
+                    uint64_t val;
+                    uint64_t size2;
+
+                    if (name == 0 && form == 0) {
+                        break;
+                    }
+
+                    if (form == DW_FORM_indirect) {
+                        form = decode_uleb128(&data);
+                    }
+
+                    switch (form) {
+                        case DW_FORM_addr:
+                            val  = private_read_addr_length(data, info->address_size);
+                            data += info->address_size;
+                            break;
+                        case DW_FORM_block1:
+                            size2 = *reinterpret_cast<uint8_t *>(data);
+                            data += 1;
+                            data += size2;
+                            break;
+                        case DW_FORM_block2:
+                            size2 = *reinterpret_cast<uint8_t *>(data);
+                            data += 2;
+                            data += size2;
+                            break;
+                        case DW_FORM_block4:
+                            size2 = *reinterpret_cast<uint8_t *>(data);
+                            data += 4;
+                            data += size2;
+                            break;
+                        case DW_FORM_block:
+                            size2 = decode_uleb128(&data);
+                            data += size2;
+                            break;
+                        case DW_FORM_data1:
+                            val = *reinterpret_cast<uint8_t *>(data);
+                            data += 1;
+                            break;
+                        case DW_FORM_data2:
+                            val = *reinterpret_cast<uint16_t *>(data);
+                            data += 2;
+                            break;
+                        case DW_FORM_data4:
+                            val = *reinterpret_cast<uint32_t *>(data);
+                            data += 4;
+                            break;
+                        case DW_FORM_data8:
+                            val = *reinterpret_cast<uint64_t *>(data);
+                            data += 8;
+                            break;
+                        case DW_FORM_sdata:
+                            decode_sleb128(&data);
+                            break;
+                        case DW_FORM_udata:
+                            val = decode_uleb128(&data);
+                            break;
+                        case DW_FORM_exprloc:
+                            size2 = decode_uleb128(&data);
+                            data += size2;
+                            break;
+                        case DW_FORM_flag:
+                            data++;
+                            break;
+                        case DW_FORM_flag_present:
+                            break;
+                        case DW_FORM_sec_offset:
+                            // TODO: make this work for DWARF64 as well
+                            data += 4;
+                            break;
+                        case DW_FORM_ref1:
+                            data += 1;
+                            break;
+                        case DW_FORM_ref2:
+                            data += 2;
+                            break;
+                        case DW_FORM_ref4:
+                            data += 4;
+                            break;
+                        case DW_FORM_ref8:
+                            data += 8;
+                            break;
+                        case DW_FORM_ref_udata:
+                            decode_uleb128(&data);
+                            break;
+                        case DW_FORM_ref_addr:
+                            // TODO: make this work for DWARF64 as well
+                            data += 4;
+                            break;
+                        case DW_FORM_ref_sig8:
+                            data += 8;
+                            break;
+                        case DW_FORM_string:
+                            val = reinterpret_cast<uintptr_t>(data);
+                            data += private_strlen(data) + 1;
+                            break;
+                        case DW_FORM_strp:
+                            // TODO: make this work for DWARF64 as well
+                            val = reinterpret_cast<uintptr_t>(debug_str) +
+                                  *reinterpret_cast<uint32_t *>(data);
+                            data += 4;
+                            break;
+                        default:
+                            return nullptr;
+                            break;
+                    }
+
+                    switch (name) {
+                        case DW_AT_low_pc:
+                            pc_low = val;
+                            pc_found = true;
+                            break;
+                        case DW_AT_high_pc:
+                            pc_high = val;
+                            pc_high_form = form;
+                            pc_found = true;
+                            break;
+                        case DW_AT_linkage_name:
+                            linkage_name = reinterpret_cast<char *>(val);
+                            break;
+                        case DW_AT_name:
+                            fn_name = reinterpret_cast<char *>(val);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+
+                if (pc_found) {
+                    if (pc_high_form != DW_FORM_addr) {
+                        pc_high += pc_low;
+                    }
+
+                    if (addr >= pc_low && addr < pc_high) {
+                        if (fn_name) {
+                            return fn_name;
+                        }
+                        else {
+                            return linkage_name;
+                        }
+                    }
+                }
+            }
+            else {
+                stack--;
+            }
+        } while (stack > 0);
+
+        cur_offset += info->unit_length + 4;
+    }
+
+    return nullptr;
+}

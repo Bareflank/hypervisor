@@ -114,6 +114,8 @@ __bareflank_register_debug_info(const section_info_t *info) noexcept
     elem->debug_str_size = info->debug_str_size;
     elem->debug_ranges_addr = info->debug_ranges_addr;
     elem->debug_ranges_size = info->debug_ranges_size;
+    elem->text_addr = info->text_addr;
+    elem->text_size = info->text_size;
 }
 
 extern "C" int64_t

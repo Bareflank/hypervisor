@@ -338,6 +338,287 @@ enum register_rules {
 #define DW_OP_lo_user               0xE0
 #define DW_OP_hi_user               0xFF
 
+
+// -----------------------------------------------------------------------------
+// Tags (Section 7.5.4)
+// -----------------------------------------------------------------------------
+
+#define DW_TAG_array_type                  0x01
+#define DW_TAG_class_type                  0x02
+#define DW_TAG_entry_point                 0x03
+#define DW_TAG_enumeration_type            0x04
+#define DW_TAG_formal_parameter            0x05
+#define DW_TAG_imported_declaration        0x08
+#define DW_TAG_label                       0x0a
+#define DW_TAG_lexical_block               0x0b
+#define DW_TAG_member                      0x0d
+#define DW_TAG_pointer_type                0x0f
+#define DW_TAG_reference_type              0x10
+#define DW_TAG_compile_unit                0x11
+#define DW_TAG_string_type                 0x12
+#define DW_TAG_structure_type              0x13
+#define DW_TAG_subroutine_type             0x15
+#define DW_TAG_typedef                     0x16
+#define DW_TAG_union_type                  0x17
+#define DW_TAG_unspecified_parameters      0x18
+#define DW_TAG_variant                     0x19
+#define DW_TAG_common_block                0x1a
+#define DW_TAG_common_inclusion            0x1b
+#define DW_TAG_inheritance                 0x1c
+#define DW_TAG_inlined_subroutine          0x1d
+#define DW_TAG_module                      0x1e
+#define DW_TAG_ptr_to_member_type          0x1f
+#define DW_TAG_set_type                    0x20
+#define DW_TAG_subrange_type               0x21
+#define DW_TAG_with_stmt                   0x22
+#define DW_TAG_access_declaration          0x23
+#define DW_TAG_base_type                   0x24
+#define DW_TAG_catch_block                 0x25
+#define DW_TAG_const_type                  0x26
+#define DW_TAG_constant                    0x27
+#define DW_TAG_enumerator                  0x28
+#define DW_TAG_file_type                   0x29
+#define DW_TAG_friend                      0x2a
+#define DW_TAG_namelist                    0x2b
+#define DW_TAG_namelist_item               0x2c
+#define DW_TAG_packed_type                 0x2d
+#define DW_TAG_subprogram                  0x2e
+#define DW_TAG_template_type_parameter     0x2f
+#define DW_TAG_template_value_parameter    0x30
+#define DW_TAG_thrown_type                 0x31
+#define DW_TAG_try_block                   0x32
+#define DW_TAG_variant_part                0x33
+#define DW_TAG_variable                    0x34
+#define DW_TAG_volatile_type               0x35
+#define DW_TAG_dwarf_procedure             0x36
+#define DW_TAG_restrict_type               0x37
+#define DW_TAG_interface_type              0x38
+#define DW_TAG_namespace                   0x39
+#define DW_TAG_imported_module             0x3a
+#define DW_TAG_unspecified_type            0x3b
+#define DW_TAG_partial_unit                0x3c
+#define DW_TAG_imported_unit               0x3d
+/* 0x3e reserved.  */
+#define DW_TAG_condition                   0x3f
+#define DW_TAG_shared_type                 0x40
+#define DW_TAG_type_unit                   0x41
+#define DW_TAG_rvalue_reference_type       0x42
+#define DW_TAG_template_alias              0x43
+
+/* DWARF 5.  */
+#define DW_TAG_atomic_type                 0x47
+
+#define DW_TAG_lo_user                     0x4080
+
+#define DW_TAG_MIPS_loop                   0x4081
+#define DW_TAG_format_label                0x4101
+#define DW_TAG_function_template           0x4102
+#define DW_TAG_class_template              0x4103
+
+#define DW_TAG_GNU_BINCL                   0x4104
+#define DW_TAG_GNU_EINCL                   0x4105
+
+#define DW_TAG_GNU_template_template_param 0x4106
+#define DW_TAG_GNU_template_parameter_pack 0x4107
+#define DW_TAG_GNU_formal_parameter_pack   0x4108
+#define DW_TAG_GNU_call_site               0x4109
+#define DW_TAG_GNU_call_site_parameter     0x410a
+
+#define DW_TAG_hi_user                     0xffff
+
+// -----------------------------------------------------------------------------
+// Children Determination (Section 7.5.4)
+// -----------------------------------------------------------------------------
+
+#define DW_CHILDREN_no  0
+#define DW_CHILDREN_yes 1
+
+// -----------------------------------------------------------------------------
+// Attribute Encodings (Section 7.5.4)
+// -----------------------------------------------------------------------------
+
+#define DW_AT_sibling                          0x01
+#define DW_AT_location                         0x02
+#define DW_AT_name                             0x03
+#define DW_AT_ordering                         0x09
+#define DW_AT_subscr_data                      0x0a
+#define DW_AT_byte_size                        0x0b
+#define DW_AT_bit_offset                       0x0c
+#define DW_AT_bit_size                         0x0d
+#define DW_AT_element_list                     0x0f
+#define DW_AT_stmt_list                        0x10
+#define DW_AT_low_pc                           0x11
+#define DW_AT_high_pc                          0x12
+#define DW_AT_language                         0x13
+#define DW_AT_member                           0x14
+#define DW_AT_discr                            0x15
+#define DW_AT_discr_value                      0x16
+#define DW_AT_visibility                       0x17
+#define DW_AT_import                           0x18
+#define DW_AT_string_length                    0x19
+#define DW_AT_common_reference                 0x1a
+#define DW_AT_comp_dir                         0x1b
+#define DW_AT_const_value                      0x1c
+#define DW_AT_containing_type                  0x1d
+#define DW_AT_default_value                    0x1e
+#define DW_AT_inline                           0x20
+#define DW_AT_is_optional                      0x21
+#define DW_AT_lower_bound                      0x22
+#define DW_AT_producer                         0x25
+#define DW_AT_prototyped                       0x27
+#define DW_AT_return_addr                      0x2a
+#define DW_AT_start_scope                      0x2c
+#define DW_AT_bit_stride                       0x2e
+#define DW_AT_upper_bound                      0x2f
+#define DW_AT_abstract_origin                  0x31
+#define DW_AT_accessibility                    0x32
+#define DW_AT_address_class                    0x33
+#define DW_AT_artificial                       0x34
+#define DW_AT_base_types                       0x35
+#define DW_AT_calling_convention               0x36
+#define DW_AT_count                            0x37
+#define DW_AT_data_member_location             0x38
+#define DW_AT_decl_column                      0x39
+#define DW_AT_decl_file                        0x3a
+#define DW_AT_decl_line                        0x3b
+#define DW_AT_declaration                      0x3c
+#define DW_AT_discr_list                       0x3d
+#define DW_AT_encoding                         0x3e
+#define DW_AT_external                         0x3f
+#define DW_AT_frame_base                       0x40
+#define DW_AT_friend                           0x41
+#define DW_AT_identifier_case                  0x42
+#define DW_AT_macro_info                       0x43
+#define DW_AT_namelist_item                    0x44
+#define DW_AT_priority                         0x45
+#define DW_AT_segment                          0x46
+#define DW_AT_specification                    0x47
+#define DW_AT_static_link                      0x48
+#define DW_AT_type                             0x49
+#define DW_AT_use_location                     0x4a
+#define DW_AT_variable_parameter               0x4b
+#define DW_AT_virtuality                       0x4c
+#define DW_AT_vtable_elem_location             0x4d
+#define DW_AT_allocated                        0x4e
+#define DW_AT_associated                       0x4f
+#define DW_AT_data_location                    0x50
+#define DW_AT_byte_stride                      0x51
+#define DW_AT_entry_pc                         0x52
+#define DW_AT_use_UTF8                         0x53
+#define DW_AT_extension                        0x54
+#define DW_AT_ranges                           0x55
+#define DW_AT_trampoline                       0x56
+#define DW_AT_call_column                      0x57
+#define DW_AT_call_file                        0x58
+#define DW_AT_call_line                        0x59
+#define DW_AT_description                      0x5a
+#define DW_AT_binary_scale                     0x5b
+#define DW_AT_decimal_scale                    0x5c
+#define DW_AT_small                            0x5d
+#define DW_AT_decimal_sign                     0x5e
+#define DW_AT_digit_count                      0x5f
+#define DW_AT_picture_string                   0x60
+#define DW_AT_mutable                          0x61
+#define DW_AT_threads_scaled                   0x62
+#define DW_AT_explicit                         0x63
+#define DW_AT_object_pointer                   0x64
+#define DW_AT_endianity                        0x65
+#define DW_AT_elemental                        0x66
+#define DW_AT_pure                             0x67
+#define DW_AT_recursive                        0x68
+#define DW_AT_signature                        0x69
+#define DW_AT_main_subprogram                  0x6a
+#define DW_AT_data_bit_offset                  0x6b
+#define DW_AT_const_expr                       0x6c
+#define DW_AT_enum_class                       0x6d
+#define DW_AT_linkage_name                     0x6e
+
+/* DWARF5 attribute values.  */
+#define DW_AT_noreturn                         0x87
+
+#define DW_AT_lo_user                          0x2000
+
+#define DW_AT_MIPS_fde                         0x2001
+#define DW_AT_MIPS_loop_begin                  0x2002
+#define DW_AT_MIPS_tail_loop_begin             0x2003
+#define DW_AT_MIPS_epilog_begin                0x2004
+#define DW_AT_MIPS_loop_unroll_factor          0x2005
+#define DW_AT_MIPS_software_pipeline_depth     0x2006
+#define DW_AT_MIPS_linkage_name                0x2007
+#define DW_AT_MIPS_stride                      0x2008
+#define DW_AT_MIPS_abstract_name               0x2009
+#define DW_AT_MIPS_clone_origin                0x200a
+#define DW_AT_MIPS_has_inlines                 0x200b
+#define DW_AT_MIPS_stride_byte                 0x200c
+#define DW_AT_MIPS_stride_elem                 0x200d
+#define DW_AT_MIPS_ptr_dopetype                0x200e
+#define DW_AT_MIPS_allocatable_dopetype        0x200f
+#define DW_AT_MIPS_assumed_shape_dopetype      0x2010
+#define DW_AT_MIPS_assumed_size                0x2011
+
+/* GNU extensions.  */
+#define DW_AT_sf_names                         0x2101
+#define DW_AT_src_info                         0x2102
+#define DW_AT_mac_info                         0x2103
+#define DW_AT_src_coords                       0x2104
+#define DW_AT_body_begin                       0x2105
+#define DW_AT_body_end                         0x2106
+#define DW_AT_GNU_vector                       0x2107
+#define DW_AT_GNU_guarded_by                   0x2108
+#define DW_AT_GNU_pt_guarded_by                0x2109
+#define DW_AT_GNU_guarded                      0x210a
+#define DW_AT_GNU_pt_guarded                   0x210b
+#define DW_AT_GNU_locks_excluded               0x210c
+#define DW_AT_GNU_exclusive_locks_required     0x210d
+#define DW_AT_GNU_shared_locks_required        0x210e
+#define DW_AT_GNU_odr_signature                0x210f
+#define DW_AT_GNU_template_name                0x2110
+#define DW_AT_GNU_call_site_value              0x2111
+#define DW_AT_GNU_call_site_data_value         0x2112
+#define DW_AT_GNU_call_site_target             0x2113
+#define DW_AT_GNU_call_site_target_clobbered   0x2114
+#define DW_AT_GNU_tail_call                    0x2115
+#define DW_AT_GNU_all_tail_call_sites          0x2116
+#define DW_AT_GNU_all_call_sites               0x2117
+#define DW_AT_GNU_all_source_call_sites        0x2118
+#define DW_AT_GNU_macros                       0x2119
+#define DW_AT_GNU_deleted                      0x211a
+
+#define DW_AT_hi_user                          0x3fff
+
+// -----------------------------------------------------------------------------
+// Form Encodings (Section 7.5.4)
+// -----------------------------------------------------------------------------
+
+#define DW_FORM_addr         0x01
+#define DW_FORM_block2       0x03
+#define DW_FORM_block4       0x04
+#define DW_FORM_data2        0x05
+#define DW_FORM_data4        0x06
+#define DW_FORM_data8        0x07
+#define DW_FORM_string       0x08
+#define DW_FORM_block        0x09
+#define DW_FORM_block1       0x0a
+#define DW_FORM_data1        0x0b
+#define DW_FORM_flag         0x0c
+#define DW_FORM_sdata        0x0d
+#define DW_FORM_strp         0x0e
+#define DW_FORM_udata        0x0f
+#define DW_FORM_ref_addr     0x10
+#define DW_FORM_ref1         0x11
+#define DW_FORM_ref2         0x12
+#define DW_FORM_ref4         0x13
+#define DW_FORM_ref8         0x14
+#define DW_FORM_ref_udata    0x15
+#define DW_FORM_indirect     0x16
+#define DW_FORM_sec_offset   0x17
+#define DW_FORM_exprloc      0x18
+#define DW_FORM_flag_present 0x19
+#define DW_FORM_ref_sig8     0x20
+
+#define DW_FORM_GNU_ref_alt  0x1f20
+#define DW_FORM_GNU_strp_alt 0x1f21
+
 // -----------------------------------------------------------------------------
 // DWARF Class
 // -----------------------------------------------------------------------------
@@ -381,6 +662,24 @@ public:
     /// @param state the current state of the registers
     ///
     static void unwind(const fd_entry &fde, register_state *state = nullptr);
+
+    /// Find a function name given an address
+    ///
+    /// Given pointers to relevant .debug_* sections, this function will walk
+    /// through the DIEs in .debug_info, with format information stored in
+    /// .debug_abbrev, and return a string either in .debug_str or .debug_info
+    /// that corresponds to the address given by `addr`.
+    ///
+    /// @param debug_info the address of .debug_info
+    /// @param debug_info_len the size of .debug_info
+    /// @param debug_abbrev the address of .debug_abbrev
+    /// @param debug_str the address of .debug_str
+    /// @param addr the pre-ASLR offset of the instruction address you wish to
+    ///             associate to a function name
+    ///
+    /// @return a nonzero pointer if a name was found and `nullptr` otherwise
+    static const char *find_function_name(
+        void *debug_info, uint64_t debug_info_len, void *debug_abbrev, void *debug_str, uint64_t addr);
 };
 
 #endif
