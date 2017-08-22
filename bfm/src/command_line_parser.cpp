@@ -40,12 +40,17 @@ command_line_parser::parse(const arg_list_type &args)
     arg_type cmd;
     arg_list_type filtered_args;
 
-    auto ___ = gsl::on_failure([&]
-    { reset(); });
+    auto ___ = gsl::on_failure([&] {
+        reset();
+    });
 
     for (auto arg = args.begin(); arg != args.end(); ++arg) {
 
-        if (arg->empty() || arg->find_first_not_of(" \t") == std::string::npos) {
+        if (arg->empty()) {
+            continue;
+        }
+
+        if (arg->find_first_not_of(" \t") == std::string::npos) {
             continue;
         }
 
@@ -145,12 +150,11 @@ command_line_parser::reset() noexcept
 void
 command_line_parser::parse_load(arg_list_type &args)
 {
-    if (args.empty()) {
-        throw std::runtime_error("missing argument");
-    }
-
     m_cmd = command_type::load;
-    m_modules = args[0];
+
+    if (!args.empty()) {
+        m_modules = args[0];
+    }
 }
 
 void

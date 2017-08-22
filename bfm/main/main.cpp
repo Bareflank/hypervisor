@@ -30,13 +30,24 @@
 
 #include <bfgsl.h>
 #include <bffile.h>
+#include <bfaffinity.h>
 
-#if !defined(__CYGWIN__) && !defined(_WIN32)
+#ifndef MAIN
+#define MAIN ut_main
+int ut_main(int argc, const char *argv[]);
+#endif
+
+#ifndef ABORT
+#define ABORT ut_abort
+void ut_abort();
+#endif
+
+#ifndef WIN64
 
 #include <sys/mman.h>
 
 void
-flush()
+bfm_flush()
 {
     mlockall(MCL_CURRENT);
     munlockall();
@@ -45,7 +56,7 @@ flush()
 #else
 
 void
-flush()
+bfm_flush()
 {
 }
 
@@ -55,49 +66,61 @@ void
 bfm_terminate()
 {
     std::cerr << "FATAL ERROR: terminate called" << '\n';
-    abort();
+    ABORT();
 }
 
 void
 bfm_new_handler()
 {
     std::cerr << "FATAL ERROR: out of memory" << '\n';
-    std::terminate();
+    ABORT();
 }
 
 void
-help()
+bfm_help()
 {
-    std::cout << "Usage: bfm [OPTION]... load... binary" << std::endl;
-    std::cout << "  or:  bfm [OPTION]... load... file.modules" << std::endl;
-    std::cout << "  or:  bfm [OPTION]... unload..." << std::endl;
-    std::cout << "  or:  bfm [OPTION]... start..." << std::endl;
-    std::cout << "  or:  bfm [OPTION]... quick..." << std::endl;
-    std::cout << "  or:  bfm [OPTION]... stop..." << std::endl;
-    std::cout << "  or:  bfm [OPTION]... dump..." << std::endl;
-    std::cout << "  or:  bfm [OPTION]... status..." << std::endl;
-    std::cout << "  or:  bfm [OPTION]... vmcall versions index..." << std::endl;
-    std::cout << "  or:  bfm [OPTION]... vmcall registers r2 r3...r15" << std::endl;
-    std::cout << "  or:  bfm [OPTION]... vmcall string type \"\"..." << std::endl;
-    std::cout << "  or:  bfm [OPTION]... vmcall data type ifile ofile..." << std::endl;
-    std::cout << "  or:  bfm [OPTION]... vmcall unittest index..." << std::endl;
-    std::cout << "  or:  bfm [OPTION]... vmcall event index..." << std::endl;
-    std::cout << "Controls or queries the bareflank hypervisor" << std::endl;
+    std::cout << R"(Usage: bfm [OPTION]... load...)" << std::endl;
+    std::cout << R"(  or:  bfm [OPTION]... load... binary)" << std::endl;
+    std::cout << R"(  or:  bfm [OPTION]... load... file.modules)" << std::endl;
+    std::cout << R"(  or:  bfm [OPTION]... unload...)" << std::endl;
+    std::cout << R"(  or:  bfm [OPTION]... start...)" << std::endl;
+    std::cout << R"(  or:  bfm [OPTION]... quick...)" << std::endl;
+    std::cout << R"(  or:  bfm [OPTION]... stop...)" << std::endl;
+    std::cout << R"(  or:  bfm [OPTION]... dump...)" << std::endl;
+    std::cout << R"(  or:  bfm [OPTION]... status...)" << std::endl;
+    std::cout << R"(  or:  bfm [OPTION]... vmcall versions index...)" << std::endl;
+    std::cout << R"(  or:  bfm [OPTION]... vmcall registers r2 r3...r15)" << std::endl;
+    std::cout << R"(  or:  bfm [OPTION]... vmcall string type ""...)" << std::endl;
+    std::cout << R"(  or:  bfm [OPTION]... vmcall data type ifile ofile...)" << std::endl;
+    std::cout << R"(  or:  bfm [OPTION]... vmcall unittest index...)" << std::endl;
+    std::cout << R"(  or:  bfm [OPTION]... vmcall event index...)" << std::endl;
+    std::cout << R"(Controls or queries the bareflank hypervisor)" << std::endl;
     std::cout << std::endl;
-    std::cout << "       -h, --help      show this help menu" << std::endl;
-    std::cout << "           --cpuid     indicate the requested cpuid" << std::endl;
-    std::cout << "           --vcpuid    indicate the requested vcpuid" << std::endl;
+    std::cout << R"(       -h, --help      show this help menu)" << std::endl;
+    std::cout << R"(           --cpuid     indicate the requested cpuid)" << std::endl;
+    std::cout << R"(           --vcpuid    indicate the requested vcpuid)" << std::endl;
     std::cout << std::endl;
-    std::cout << " vmcall string types:" << std::endl;
-    std::cout << "       unformatted     unformatted string" << std::endl;
-    std::cout << "       json            json formatted string" << std::endl;
+    std::cout << R"(  vmcall string types:)" << std::endl;
+    std::cout << R"(       unformatted     unformatted string)" << std::endl;
+    std::cout << R"(       json            json formatted string)" << std::endl;
     std::cout << std::endl;
-    std::cout << " vmcall binary types:" << std::endl;
-    std::cout << "       unformatted     unformatted binary data" << std::endl;
+    std::cout << R"(  vmcall binary types:)" << std::endl;
+    std::cout << R"(       unformatted     unformatted binary data)" << std::endl;
     std::cout << std::endl;
-    std::cout << " vmcall notes:" << std::endl;
-    std::cout << "       - registers are represented in hex" << std::endl;
-    std::cout << "       - data / string uuids equal 0" << std::endl;
+    std::cout << R"(  vmcall notes:)" << std::endl;
+    std::cout << R"(       - registers are represented in hex)" << std::endl;
+    std::cout << R"(       - data / string uuids equal 0)" << std::endl;
+}
+
+int
+bfm_process(
+    gsl::not_null<file *> f, gsl::not_null<ioctl *> ctl,
+    gsl::not_null<command_line_parser *> clp)
+{
+    auto driver = std::make_unique<ioctl_driver>(f, ctl, clp);
+    driver->process();
+
+    return EXIT_SUCCESS;
 }
 
 int
@@ -110,7 +133,7 @@ protected_main(const command_line_parser::arg_list_type &args)
     clp->parse(args);
 
     if (clp->cmd() == command_line_parser_command::help) {
-        help();
+        bfm_help();
         return EXIT_SUCCESS;
     }
 
@@ -127,29 +150,28 @@ protected_main(const command_line_parser::arg_list_type &args)
     // pages being mapped to the hypervisor, which will need to be page
     // aligned. For now, this should work on most system
 
-    flush();
+    bfm_flush();
 
     // -------------------------------------------------------------------------
     // CPU Affinity
 
-    std::cout << "warning: cpu affinity not implemented yet!!!\n";
+    if (set_affinity(clp->cpuid()) != 0) {
+        throw std::runtime_error("failed to set cpu affinity");
+    }
 
     // -------------------------------------------------------------------------
-    // IOCTR Driver
+    // File
 
     auto f = std::make_unique<file>();
-    auto driver = std::make_unique<ioctl_driver>(f.get(), ctl.get(), clp.get());
-
-    driver->process();
 
     // -------------------------------------------------------------------------
-    // Done
+    // Process
 
-    return EXIT_SUCCESS;
+    return bfm_process(f.get(), ctl.get(), clp.get());
 }
 
 int
-main(int argc, const char *argv[])
+MAIN(int argc, const char *argv[])
 {
     std::set_terminate(bfm_terminate);
     std::set_new_handler(bfm_new_handler);
@@ -159,7 +181,7 @@ main(int argc, const char *argv[])
         auto args_span = gsl::make_span(argv, argc);
 
         for (auto i = 1; i < argc; i++) {
-            args.push_back(args_span[i]);
+            args.emplace_back(args_span[i]);
         }
 
         return protected_main(args);

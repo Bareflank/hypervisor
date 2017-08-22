@@ -41,6 +41,7 @@ before_script:
   #
   - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-6 100
   - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-6 100
+  - sudo update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-6 100
 
 #
 # Build Matrix
@@ -161,9 +162,10 @@ matrix:
     env:
       - TEST="Codecov"
     script:
-      - cmake -DENABLE_UNITTESTING=ON -DENABLE_COVERAGE=ON ..
+      - cmake -DBUILD_SHARED_LIBS=ON -DENABLE_UNITTESTING=ON -DENABLE_COVERAGE=ON ..
       - make -j3
       - make test
+      - rm -Rf external
       - cd ..
       - bash <(curl -s https://codecov.io/bash)
 
@@ -184,7 +186,7 @@ matrix:
     env:
       - TEST="Google Address Sanitizer"
     script:
-      - cmake -DENABLE_UNITTESTING=ON -DENABLE_DYNAMIC_ASAN=ON ..
+      - cmake -DBUILD_SHARED_LIBS=ON -DENABLE_UNITTESTING=ON -DENABLE_DYNAMIC_ASAN=ON ..
       - make -j3
       - make test
 
@@ -205,7 +207,7 @@ matrix:
     env:
       - TEST="Google Undefined Sanitizer"
     script:
-      - cmake -DENABLE_UNITTESTING=ON -DENABLE_DYNAMIC_USAN=ON ..
+      - cmake -DBUILD_SHARED_LIBS=ON -DENABLE_UNITTESTING=ON -DENABLE_DYNAMIC_USAN=ON ..
       - make -j3
       - make test
 

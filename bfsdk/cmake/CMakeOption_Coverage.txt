@@ -1,4 +1,4 @@
-if(ENABLE_COVERAGE)
+if(ENABLE_COVERAGE AND NOT WIN32)
 
     message(STATUS "Testing Config: Coverage Tools for GCC")
 
