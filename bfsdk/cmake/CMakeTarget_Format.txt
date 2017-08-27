@@ -1,17 +1,17 @@
-if(ENABLE_ASTYLE)
+if(ENABLE_ASTYLE AND NOT WIN32)
 
     message(STATUS "Code Formatting: Astyle")
 
     add_custom_target(
         format
-        COMMAND ${CMAKE_INSTALL_PREFIX}/bin/bareflank_astyle_format.sh diff ${CMAKE_SOURCE_DIR}
-        COMMENT "Running astyle format: ${PROJECT_NAME}"
+        COMMAND bareflank_astyle_format.sh diff ${CMAKE_SOURCE_DIR}
+        COMMENT "running astyle checks: ${PROJECT_NAME} in ${CMAKE_SOURCE_DIR}"
     )
 
     add_custom_target(
         format-all
-        COMMAND ${CMAKE_INSTALL_PREFIX}/bin/bareflank_astyle_format.sh all ${CMAKE_SOURCE_DIR}
-        COMMENT "Running astyle format: ${PROJECT_NAME}"
+        COMMAND bareflank_astyle_format.sh all ${CMAKE_SOURCE_DIR}
+        COMMENT "running astyle checks: ${PROJECT_NAME} in ${CMAKE_SOURCE_DIR}"
     )
 
 endif()

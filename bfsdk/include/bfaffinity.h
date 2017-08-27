@@ -19,22 +19,43 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#define CATCH_CONFIG_MAIN
-#include <catch/catch.hpp>
+///
+/// @file bfbuffer.h
+///
+///
 
-#include <bfelf_loader.h>
+#ifdef WIN64
 
-TEST_CASE("bfelf_file_get_num_needed: invalid elf file")
+#include <windows.h>
+
+inline int
+set_affinity(uint64_t core)
 {
-    auto ret = bfelf_file_get_num_needed(nullptr);
-    CHECK(ret == BFELF_ERROR_INVALID_ARG);
+    if (SetProcessAffinityMask(GetCurrentProcess(), 1ULL << core) == 0) {
+        return -1;
+    }
+
+    return 0;
 }
 
-TEST_CASE("bfelf_file_get_num_needed: success")
-{
-    auto ret = 0LL;
-    bfelf_file_t ef = {};
+#else
 
-    ret = bfelf_file_get_num_needed(&ef);
-    CHECK(ret == 0);
+#define _GNU_SOURCE
+#include <sched.h>
+
+inline int
+set_affinity(uint64_t core)
+{
+    cpu_set_t  mask;
+
+    CPU_ZERO(&mask);
+    CPU_SET(core, &mask);
+
+    if (sched_setaffinity(0, sizeof(mask), &mask) != 0) {
+        return -1;
+    }
+
+    return 0;
 }
+
+#endif

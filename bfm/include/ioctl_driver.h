@@ -66,6 +66,8 @@ public:
 
     using status_type = ioctl::status_type;
     using registers_type = command_line_parser::registers_type;
+    using filename_type = std::string;
+    using list_type = std::vector<std::string>;
 
     /// Default Constructor
     ///
@@ -100,7 +102,9 @@ public:
     ///
     void process();
 
+#ifndef ENABLE_UNITTESTING
 private:
+#endif
 
     void load_vmm();
     void unload_vmm();
@@ -121,6 +125,10 @@ private:
     void vmcall_unittest(registers_type &regs);
 
     status_type get_status() const;
+
+    list_type library_path();
+    filename_type vmm_filename();
+    list_type vmm_module_list(const filename_type &filename);
 
 private:
 

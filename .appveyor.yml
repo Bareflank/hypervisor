@@ -42,7 +42,7 @@ build_script:
   #
   - mkdir build_msbuild_shared
   - cd build_msbuild_shared
-  - cmake -G "Visual Studio 15 2017 Win64" -DENABLE_UNITTESTING=ON -DBUILD_SHARED_LIBS=ON ..
+  - cmake -G "Visual Studio 15 2017 Win64" -DENABLE_UNITTESTING=ON ..
   - msbuild hypervisor.sln
   - cmake --build . --target test
   - cd ..

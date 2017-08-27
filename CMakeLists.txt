@@ -82,12 +82,12 @@ if(NOT WIN32)
         GIT_REPOSITORY      https://github.com/Bareflank/newlib.git
         GIT_TAG             v1.2
         GIT_SHALLOW         1
-        PREFIX              ${CMAKE_BINARY_DIR}/newlib/prefix
-        TMP_DIR             ${CMAKE_BINARY_DIR}/newlib/tmp
-        STAMP_DIR           ${CMAKE_BINARY_DIR}/newlib/stamp
-        DOWNLOAD_DIR        ${CMAKE_BINARY_DIR}/newlib/download
-        SOURCE_DIR          ${CMAKE_BINARY_DIR}/newlib/src
-        BINARY_DIR          ${CMAKE_BINARY_DIR}/newlib/build
+        PREFIX              ${CMAKE_BINARY_DIR}/external/newlib/prefix
+        TMP_DIR             ${CMAKE_BINARY_DIR}/external/newlib/tmp
+        STAMP_DIR           ${CMAKE_BINARY_DIR}/external/newlib/stamp
+        DOWNLOAD_DIR        ${CMAKE_BINARY_DIR}/external/newlib/download
+        SOURCE_DIR          ${CMAKE_BINARY_DIR}/external/newlib/src
+        BINARY_DIR          ${CMAKE_BINARY_DIR}/external/newlib/build
         CONFIGURE_COMMAND   ""
         BUILD_COMMAND       ""
         INSTALL_COMMAND     ""
@@ -107,12 +107,12 @@ if(NOT WIN32)
         GIT_REPOSITORY      https://github.com/Bareflank/llvm.git
         GIT_TAG             v1.2
         GIT_SHALLOW         1
-        PREFIX              ${CMAKE_BINARY_DIR}/llvm/prefix
-        TMP_DIR             ${CMAKE_BINARY_DIR}/llvm/tmp
-        STAMP_DIR           ${CMAKE_BINARY_DIR}/llvm/stamp
-        DOWNLOAD_DIR        ${CMAKE_BINARY_DIR}/llvm/download
-        SOURCE_DIR          ${CMAKE_BINARY_DIR}/llvm/src
-        BINARY_DIR          ${CMAKE_BINARY_DIR}/llvm/build
+        PREFIX              ${CMAKE_BINARY_DIR}/external/llvm/prefix
+        TMP_DIR             ${CMAKE_BINARY_DIR}/external/llvm/tmp
+        STAMP_DIR           ${CMAKE_BINARY_DIR}/external/llvm/stamp
+        DOWNLOAD_DIR        ${CMAKE_BINARY_DIR}/external/llvm/download
+        SOURCE_DIR          ${CMAKE_BINARY_DIR}/external/llvm/src
+        BINARY_DIR          ${CMAKE_BINARY_DIR}/external/llvm/build
         CONFIGURE_COMMAND   ""
         BUILD_COMMAND       ""
         INSTALL_COMMAND     ""
@@ -132,12 +132,12 @@ if(NOT WIN32)
         GIT_REPOSITORY      https://github.com/Bareflank/libcxx.git
         GIT_TAG             v1.2
         GIT_SHALLOW         1
-        PREFIX              ${CMAKE_BINARY_DIR}/libcxx/prefix
-        TMP_DIR             ${CMAKE_BINARY_DIR}/libcxx/tmp
-        STAMP_DIR           ${CMAKE_BINARY_DIR}/libcxx/stamp
-        DOWNLOAD_DIR        ${CMAKE_BINARY_DIR}/libcxx/download
-        SOURCE_DIR          ${CMAKE_BINARY_DIR}/libcxx/src
-        BINARY_DIR          ${CMAKE_BINARY_DIR}/libcxx/build
+        PREFIX              ${CMAKE_BINARY_DIR}/external/libcxx/prefix
+        TMP_DIR             ${CMAKE_BINARY_DIR}/external/libcxx/tmp
+        STAMP_DIR           ${CMAKE_BINARY_DIR}/external/libcxx/stamp
+        DOWNLOAD_DIR        ${CMAKE_BINARY_DIR}/external/libcxx/download
+        SOURCE_DIR          ${CMAKE_BINARY_DIR}/external/libcxx/src
+        BINARY_DIR          ${CMAKE_BINARY_DIR}/external/libcxx/build
         CONFIGURE_COMMAND   ""
         BUILD_COMMAND       ""
         INSTALL_COMMAND     ""
@@ -157,12 +157,12 @@ if(NOT WIN32)
         GIT_REPOSITORY      https://github.com/Bareflank/libcxxabi.git
         GIT_TAG             v1.2
         GIT_SHALLOW         1
-        PREFIX              ${CMAKE_BINARY_DIR}/libcxxabi/prefix
-        TMP_DIR             ${CMAKE_BINARY_DIR}/libcxxabi/tmp
-        STAMP_DIR           ${CMAKE_BINARY_DIR}/libcxxabi/stamp
-        DOWNLOAD_DIR        ${CMAKE_BINARY_DIR}/libcxxabi/download
-        SOURCE_DIR          ${CMAKE_BINARY_DIR}/libcxxabi/src
-        BINARY_DIR          ${CMAKE_BINARY_DIR}/libcxxabi/build
+        PREFIX              ${CMAKE_BINARY_DIR}/external/libcxxabi/prefix
+        TMP_DIR             ${CMAKE_BINARY_DIR}/external/libcxxabi/tmp
+        STAMP_DIR           ${CMAKE_BINARY_DIR}/external/libcxxabi/stamp
+        DOWNLOAD_DIR        ${CMAKE_BINARY_DIR}/external/libcxxabi/download
+        SOURCE_DIR          ${CMAKE_BINARY_DIR}/external/libcxxabi/src
+        BINARY_DIR          ${CMAKE_BINARY_DIR}/external/libcxxabi/build
         CONFIGURE_COMMAND   ""
         BUILD_COMMAND       ""
         INSTALL_COMMAND     ""
@@ -178,7 +178,7 @@ endif()
 if(NOT WIN32)
 
     list(APPEND BINUTILS_ARGS
-        --prefix=${CMAKE_BINARY_DIR}/binutils/prefix
+        --prefix=${CMAKE_BINARY_DIR}/external/binutils/prefix
         --target=${BAREFLANK_TARGET}
         --disable-nls
         --disable-werror
@@ -189,13 +189,13 @@ if(NOT WIN32)
         binutils
         URL                 http://ftp.gnu.org/gnu/binutils/binutils-2.28.tar.gz
         URL_MD5             d5d270fd0b698ed59ca5ade8e1b5059c
-        PREFIX              ${CMAKE_BINARY_DIR}/binutils/prefix
-        TMP_DIR             ${CMAKE_BINARY_DIR}/binutils/tmp
-        STAMP_DIR           ${CMAKE_BINARY_DIR}/binutils/stamp
-        DOWNLOAD_DIR        ${CMAKE_BINARY_DIR}/binutils/download
-        SOURCE_DIR          ${CMAKE_BINARY_DIR}/binutils/src
-        BINARY_DIR          ${CMAKE_BINARY_DIR}/binutils/build
-        CONFIGURE_COMMAND   ${CMAKE_BINARY_DIR}/binutils/src/configure ${BINUTILS_ARGS}
+        PREFIX              ${CMAKE_BINARY_DIR}/external/binutils/prefix
+        TMP_DIR             ${CMAKE_BINARY_DIR}/external/binutils/tmp
+        STAMP_DIR           ${CMAKE_BINARY_DIR}/external/binutils/stamp
+        DOWNLOAD_DIR        ${CMAKE_BINARY_DIR}/external/binutils/download
+        SOURCE_DIR          ${CMAKE_BINARY_DIR}/external/binutils/src
+        BINARY_DIR          ${CMAKE_BINARY_DIR}/external/binutils/build
+        CONFIGURE_COMMAND   ${CMAKE_BINARY_DIR}/external/binutils/src/configure ${BINUTILS_ARGS}
         BUILD_COMMAND       make
         INSTALL_COMMAND     make install
         LOG_DOWNLOAD        1
@@ -207,7 +207,7 @@ if(NOT WIN32)
     ExternalProject_Add_Step(
         binutils
         prefix_install
-        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_BINARY_DIR}/binutils/prefix/bin/ ${BAREFLANK_INSTALL_PREFIX}/bin/
+        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_BINARY_DIR}/external/binutils/prefix/bin/ ${BAREFLANK_INSTALL_PREFIX}/bin/
         DEPENDEES install
     )
 
@@ -660,11 +660,11 @@ if(ENABLE_UNITTESTING)
     endif()
 
     add_custom_target(test
-        # COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfdriver/build --target test
+        # COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/bfdriver/build ctest
         COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/bfelf_loader/build ctest
-        # COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfm/build --target test
+        COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/bfm/build ctest
         COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/bfsdk/build ctest
-        # COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/test_bfsysroot/build --target test
+        # COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/test_bfsysroot/build ctest
         COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/test_bfvmm/build ctest
     )
 
@@ -682,18 +682,16 @@ if(ENABLE_TIDY AND NOT WIN32)
 
     add_custom_target(tidy
         # COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfdriver/build --target tidy
-        COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfvmm/build --target tidy
-        # COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfm/build --target tidy
+        COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfelf_loader/build --target tidy
+        COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfm/build --target tidy
         COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfsdk/build --target tidy
-        # COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfsysroot/build --target tidy
     )
 
     add_custom_target(tidy-all
         # COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfdriver/build --target tidy-all
         COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfelf_loader/build --target tidy-all
-        # COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfm/build --target tidy-all
+        COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfm/build --target tidy-all
         COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfsdk/build --target tidy-all
-        # COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfsysroot/build --target tidy-all
     )
 
     if(NOT ENABLE_UNITTESTING)
@@ -703,9 +701,9 @@ if(ENABLE_TIDY AND NOT WIN32)
         add_custom_command(TARGET tidy-all COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfsysroot/build --target tidy-all)
     else()
         add_custom_command(TARGET tidy COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/test_bfvmm/build --target tidy)
-        # add_custom_command(TARGET tidy COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/test_bfsysroot/build --target tidy)
+        add_custom_command(TARGET tidy COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfsysroot/build --target tidy)
         add_custom_command(TARGET tidy-all COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/test_bfvmm/build --target tidy-all)
-        # add_custom_command(TARGET tidy-all COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/test_bfsysroot/build --target tidy-all)
+        add_custom_command(TARGET tidy-all COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfsysroot/build --target tidy-all)
     endif()
 
     if(ENABLE_EXTENDED_APIS)
@@ -732,6 +730,7 @@ if(ENABLE_ASTYLE AND NOT WIN32)
         COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfm/build --target format
         COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfsdk/build --target format
         COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfsysroot/build --target format
+        COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfvmm/build --target format
     )
 
     add_custom_target(format-all
@@ -740,19 +739,8 @@ if(ENABLE_ASTYLE AND NOT WIN32)
         COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfm/build --target format-all
         COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfsdk/build --target format-all
         COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfsysroot/build --target format-all
+        COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfvmm/build --target format-all
     )
-
-    if(NOT ENABLE_UNITTESTING)
-        add_custom_command(TARGET format COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfvmm/build --target format)
-        add_custom_command(TARGET format COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfsysroot/build --target format)
-        add_custom_command(TARGET format-all COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfvmm/build --target format-all)
-        add_custom_command(TARGET format-all COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfsysroot/build --target format-all)
-    else()
-        add_custom_command(TARGET format COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/test_bfvmm/build --target format)
-        # add_custom_command(TARGET format COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/test_bfsysroot/build --target format)
-        add_custom_command(TARGET format-all COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/test_bfvmm/build --target format-all)
-        # add_custom_command(TARGET format-all COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/test_bfsysroot/build --target format-all)
-    endif()
 
     if(ENABLE_EXTENDED_APIS)
         if(NOT ENABLE_UNITTESTING)

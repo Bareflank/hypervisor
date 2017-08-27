@@ -53,6 +53,9 @@
 #   each instance were it is used has been reviewed, and determined to be
 #   needed. The remaining instances were removed in place of safer code.
 #
+# - cppcoreguidelines-pro-type-vararg: This needs to be turned off because
+#   we require C apis that use this paradigm.
+#
 # - cert-err58-cpp: This is triggered by catch.hpp which we need
 #
 # - cert-err60-cpp: This is triggered by libc++ with std::runtime_error and
@@ -68,7 +71,7 @@ NUM_CORES=$(grep -c ^processor /proc/cpuinfo)
 
 get_changed_files() {
     pushd $1 > /dev/null
-    files=$(git diff --name-only --diff-filter=ACM HEAD^ $PWD | grep -Ee "\.(cpp|h|c)$" || true)
+    files=$(git diff --relative --name-only --diff-filter=ACM HEAD^ $PWD | grep -Ee "\.(cpp|h|c)$" || true)
     popd > /dev/null
 }
 
@@ -152,6 +155,6 @@ analyze $1 "clan*$3" "static analysis"
 analyze $1 "cert*,-clang-analyzer*,-cert-err58-cpp,-cert-err60-cpp$3" "cert compliance"
 analyze $1 "misc*,-clang-analyzer*,-misc-noexcept-move-constructor$3" "misc checks"
 analyze $1 "perf*,-clang-analyzer*$3" "performance checks"
-analyze $1 "cppc*,-clang-analyzer*,-cppcoreguidelines-pro-type-reinterpret-cast$3" "c++ core guideline compliance"
+analyze $1 "cppc*,-clang-analyzer*,-cppcoreguidelines-pro-type-reinterpret-cast,-cppcoreguidelines-pro-type-vararg$3" "c++ core guideline compliance"
 analyze $1 "read*,-clang-analyzer*$3" "readability checks"
 analyze $1 "mode*,-clang-analyzer*$3" "modernization checks"

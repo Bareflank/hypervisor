@@ -19,38 +19,11 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#define CATCH_CONFIG_MAIN
-#include <catch/catch.hpp>
+#include <bftypes.h>
+#include <bfvmcallinterface.h>
 
-#include <bfelf_loader.h>
-#include <test_fake_elf.h>
-
-TEST_CASE("bfelf_file_get_num_load_instrs: invalid elf file")
+extern "C" void
+vmcall(vmcall_registers_t *regs)
 {
-    auto ret = bfelf_file_get_num_load_instrs(nullptr);
-    CHECK(ret == BFELF_ERROR_INVALID_ARG);
-}
-
-TEST_CASE("bfelf_file_get_num_load_instrs: uninitialized")
-{
-    bfelf_file_t ef = {};
-
-    auto ret = bfelf_file_get_num_load_instrs(&ef);
-    CHECK(ret == 0);
-}
-
-TEST_CASE("bfelf_file_get_num_load_instrs: success")
-{
-    auto ret = 0LL;
-    bfelf_file_t ef = {};
-
-    auto &&data = get_fake_elf();
-    auto &&buff = std::get<0>(data);
-    auto &&size = std::get<1>(data);
-
-    ret = bfelf_file_init(buff.get(), size, &ef);
-    CHECK(ret == BFELF_SUCCESS);
-
-    ret = bfelf_file_get_num_load_instrs(&ef);
-    CHECK(ret > 0);
+    bfignored(regs);
 }

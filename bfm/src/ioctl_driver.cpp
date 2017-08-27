@@ -75,66 +75,11 @@ ioctl_driver::process()
     }
 }
 
-auto
-bf_library_path()
-{
-    std::vector<std::string> paths;
-
-    for (const auto &path : bfn::split(std::getenv("BF_LIBRARY_PATH"), ';')) {
-        paths.push_back(path);
-    }
-
-    paths.push_back(CMAKE_INSTALL_PREFIX "/sysroots/x86_64-vmm-elf/lib");
-    paths.push_back(CMAKE_INSTALL_PREFIX "/sysroots/x86_64-vmm-elf/bin");
-
-    return paths;
-}
-
-std::string
-bf_vmm_path(gsl::not_null<command_line_parser *> clp)
-{
-    auto filename = clp->modules();
-
-    if (!filename.empty()) {
-        return filename;
-    }
-
-    if (auto bf_vmm_path = std::getenv("BF_VMM_PATH")) {
-        return {bf_vmm_path};
-    }
-
-    return CMAKE_INSTALL_PREFIX "/sysroots/x86_64-vmm-elf/bin/" bfstringify(BFM_DEFAULT_VMM);
-}
-
-auto
-bf_vmm_module_list(gsl::not_null<file *> f, const std::string &filename)
-{
-    std::vector<std::string> module_list;
-
-    if (f->extension(filename) == ".modules") {
-        for (const auto &module : json::parse(f->read_text(filename))) {
-            module_list.push_back(module);
-        }
-    }
-    else {
-        bfn::buffer buffer{};
-        bfelf_binary_t binary{};
-
-        module_list = bfelf_read_binary_and_get_needed_list(
-                          f, filename, bf_library_path(), buffer, binary);
-
-        bfn::shuffle(module_list);
-        module_list.push_back(filename);
-    }
-
-    return module_list;
-}
-
 void
 ioctl_driver::load_vmm()
 {
-    auto filename = bf_vmm_path(m_clp);
-    auto module_list = bf_vmm_module_list(m_file, filename);
+    auto filename = vmm_filename();
+    auto module_list = vmm_module_list(filename);
 
     switch (get_status()) {
         case VMM_RUNNING: stop_vmm();
@@ -144,8 +89,9 @@ ioctl_driver::load_vmm()
         default: throw std::runtime_error("unknown status");
     }
 
-    auto ___ = gsl::on_failure([&]
-    { unload_vmm(); });
+    auto ___ = gsl::on_failure([&] {
+        unload_vmm();
+    });
 
     for (const auto &module : module_list) {
         m_ioctl->call_ioctl_add_module(m_file->read_binary(module));
@@ -426,6 +372,61 @@ ioctl_driver::vmcall_unittest(registers_type &regs)
 {
     vmcall_send_regs(regs);
     std::cout << "\033[1;36m" << std::hex << "0x" << regs.r02 << std::dec << ":\033[1;32m passed\033[0m\n";
+}
+
+ioctl_driver::list_type
+ioctl_driver::library_path()
+{
+    list_type paths;
+
+    for (const auto &path : bfn::split(std::getenv("BF_LIBRARY_PATH"), ';')) {
+        paths.emplace_back(path);
+    }
+
+    paths.emplace_back(CMAKE_INSTALL_PREFIX "/sysroots/x86_64-vmm-elf/lib");
+    paths.emplace_back(CMAKE_INSTALL_PREFIX "/sysroots/x86_64-vmm-elf/bin");
+
+    return paths;
+}
+
+ioctl_driver::filename_type
+ioctl_driver::vmm_filename()
+{
+    auto filename = m_clp->modules();
+
+    if (!filename.empty()) {
+        return filename;
+    }
+
+    if (auto vmm_path = std::getenv("BF_VMM_PATH")) {
+        return {vmm_path};
+    }
+
+    return CMAKE_INSTALL_PREFIX "/sysroots/x86_64-vmm-elf/bin/" bfstringify(BFM_DEFAULT_VMM);
+}
+
+ioctl_driver::list_type
+ioctl_driver::vmm_module_list(const filename_type &filename)
+{
+    list_type module_list;
+
+    if (m_file->extension(filename) == ".modules") {
+        for (const auto &module : json::parse(m_file->read_text(filename))) {
+            module_list.push_back(module);
+        }
+    }
+    else {
+        bfn::buffer buffer{};
+        bfelf_binary_t binary{};
+
+        module_list = bfelf_read_binary_and_get_needed_list(
+                          m_file, filename, library_path(), buffer, binary);
+
+        bfn::shuffle(module_list);
+        module_list.push_back(filename);
+    }
+
+    return module_list;
 }
 
 ioctl_driver::status_type

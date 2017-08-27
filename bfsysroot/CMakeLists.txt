@@ -45,9 +45,9 @@ else()
         PREFIX              ${CMAKE_BINARY_DIR}/newlib/prefix
         TMP_DIR             ${CMAKE_BINARY_DIR}/newlib/tmp
         STAMP_DIR           ${CMAKE_BINARY_DIR}/newlib/stamp
-        SOURCE_DIR          ${BAREFLANK_BINARY_DIR}/newlib/src
+        SOURCE_DIR          ${BAREFLANK_BINARY_DIR}/external/newlib/src
         BINARY_DIR          ${CMAKE_BINARY_DIR}/newlib/build
-        CONFIGURE_COMMAND   ${BAREFLANK_BINARY_DIR}/newlib/src/configure "${NEWLIB_ARGS}" CFLAGS_FOR_TARGET=${NEWLIB_CFLAGS}
+        CONFIGURE_COMMAND   ${BAREFLANK_BINARY_DIR}/external/newlib/src/configure "${NEWLIB_ARGS}" CFLAGS_FOR_TARGET=${NEWLIB_CFLAGS}
         BUILD_COMMAND       make
         INSTALL_COMMAND     make install
         LOG_CONFIGURE       1
@@ -118,9 +118,9 @@ if(ENABLE_UNITTESTING)
 else()
 
     list(APPEND LIBCXXABI_CMAKE_ARGS
-        -DLLVM_PATH=${BAREFLANK_BINARY_DIR}/llvm/src
+        -DLLVM_PATH=${BAREFLANK_BINARY_DIR}/external/llvm/src
         -DLLVM_ENABLE_LIBCXX=ON
-        -DLIBCXXABI_LIBCXX_PATH=${BAREFLANK_BINARY_DIR}/libcxx/src
+        -DLIBCXXABI_LIBCXX_PATH=${BAREFLANK_BINARY_DIR}/external/libcxx/src
         -DLIBCXXABI_SYSROOT=${BAREFLANK_SYSROOT_PATH}
         -DLIBCXXABI_HAS_PTHREAD_API=ON
         -DCMAKE_INSTALL_PREFIX=${BAREFLANK_SYSROOT_PATH}
@@ -147,7 +147,7 @@ else()
         PREFIX          ${CMAKE_BINARY_DIR}/libcxxabi/prefix
         TMP_DIR         ${CMAKE_BINARY_DIR}/libcxxabi/tmp
         STAMP_DIR       ${CMAKE_BINARY_DIR}/libcxxabi/stamp
-        SOURCE_DIR      ${BAREFLANK_BINARY_DIR}/libcxxabi/src
+        SOURCE_DIR      ${BAREFLANK_BINARY_DIR}/external/libcxxabi/src
         BINARY_DIR      ${CMAKE_BINARY_DIR}/libcxxabi/build
         DEPENDS         bfunwind
     )
@@ -165,9 +165,9 @@ if(ENABLE_UNITTESTING)
 else()
 
     list(APPEND LIBCXX_CMAKE_ARGS
-        -DLLVM_PATH=${BAREFLANK_BINARY_DIR}/llvm/src
+        -DLLVM_PATH=${BAREFLANK_BINARY_DIR}/external/llvm/src
         -DLIBCXX_CXX_ABI=libcxxabi
-        -DLIBCXX_CXX_ABI_INCLUDE_PATHS=${BAREFLANK_BINARY_DIR}/libcxxabi/src/include/
+        -DLIBCXX_CXX_ABI_INCLUDE_PATHS=${BAREFLANK_BINARY_DIR}/external/libcxxabi/src/include/
         -DLIBCXX_SYSROOT=${BAREFLANK_SYSROOT_PATH}
         -DLIBCXX_HAS_PTHREAD_API=ON
         -DLIBCXX_ENABLE_EXPERIMENTAL_LIBRARY=OFF
@@ -195,7 +195,7 @@ else()
         PREFIX          ${CMAKE_BINARY_DIR}/libcxx/prefix
         TMP_DIR         ${CMAKE_BINARY_DIR}/libcxx/tmp
         STAMP_DIR       ${CMAKE_BINARY_DIR}/libcxx/stamp
-        SOURCE_DIR      ${BAREFLANK_BINARY_DIR}/libcxx/src
+        SOURCE_DIR      ${BAREFLANK_BINARY_DIR}/external/libcxx/src
         BINARY_DIR      ${CMAKE_BINARY_DIR}/libcxx/build
         DEPENDS         bfunwind libcxxabi
     )
