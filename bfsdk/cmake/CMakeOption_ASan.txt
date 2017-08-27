@@ -1,4 +1,4 @@
-if(ENABLE_DYNAMIC_ASAN)
+if(ENABLE_DYNAMIC_ASAN AND NOT WIN32)
 
     message(STATUS "Testing Config: Dynamic Analysis")
 

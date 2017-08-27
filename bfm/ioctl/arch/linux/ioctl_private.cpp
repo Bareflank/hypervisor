@@ -22,6 +22,7 @@
 #include <ioctl_private.h>
 
 #include <bfgsl.h>
+#include <bfexports.h>
 #include <bfdriverinterface.h>
 
 #include <fcntl.h>
@@ -32,26 +33,26 @@
 // Unit Test Seems
 // -----------------------------------------------------------------------------
 
-int
-__attribute__((weak)) bf_ioctl_open()
+EXPORT_SYM int
+bfm_ioctl_open()
 {
     return open("/dev/bareflank", O_RDWR);
 }
 
-int64_t
-__attribute__((weak)) bf_send_ioctl(int fd, unsigned long request)
+EXPORT_SYM int64_t
+bfm_send_ioctl(int fd, unsigned long request)
 {
     return ioctl(fd, request);
 }
 
-int64_t
-__attribute__((weak)) bf_read_ioctl(int fd, unsigned long request, void *data)
+EXPORT_SYM int64_t
+bfm_read_ioctl(int fd, unsigned long request, void *data)
 {
     return ioctl(fd, request, data);
 }
 
-int64_t
-__attribute__((weak)) bf_write_ioctl(int fd, unsigned long request, const void *data)
+EXPORT_SYM int64_t
+bfm_write_ioctl(int fd, unsigned long request, const void *data)
 {
     return ioctl(fd, request, data);
 }
@@ -75,7 +76,7 @@ ioctl_private::~ioctl_private()
 void
 ioctl_private::open()
 {
-    if ((fd = bf_ioctl_open()) < 0) {
+    if ((fd = bfm_ioctl_open()) < 0) {
         throw std::runtime_error("failed to open to bfdriver");
     }
 }
@@ -85,7 +86,7 @@ ioctl_private::call_ioctl_add_module_length(module_len_type len)
 {
     expects(len > 0);
 
-    if (bf_write_ioctl(fd, IOCTL_ADD_MODULE_LENGTH, &len) < 0) {
+    if (bfm_write_ioctl(fd, IOCTL_ADD_MODULE_LENGTH, &len) < 0) {
         throw std::runtime_error("ioctl failed: IOCTL_ADD_MODULE_LENGTH");
     }
 }
@@ -93,7 +94,7 @@ ioctl_private::call_ioctl_add_module_length(module_len_type len)
 void
 ioctl_private::call_ioctl_add_module(gsl::not_null<module_data_type> data)
 {
-    if (bf_write_ioctl(fd, IOCTL_ADD_MODULE, data) < 0) {
+    if (bfm_write_ioctl(fd, IOCTL_ADD_MODULE, data) < 0) {
         throw std::runtime_error("ioctl failed: IOCTL_ADD_MODULE");
     }
 }
@@ -101,7 +102,7 @@ ioctl_private::call_ioctl_add_module(gsl::not_null<module_data_type> data)
 void
 ioctl_private::call_ioctl_load_vmm()
 {
-    if (bf_send_ioctl(fd, IOCTL_LOAD_VMM) < 0) {
+    if (bfm_send_ioctl(fd, IOCTL_LOAD_VMM) < 0) {
         throw std::runtime_error("ioctl failed: IOCTL_LOAD_VMM");
     }
 }
@@ -109,7 +110,7 @@ ioctl_private::call_ioctl_load_vmm()
 void
 ioctl_private::call_ioctl_unload_vmm()
 {
-    if (bf_send_ioctl(fd, IOCTL_UNLOAD_VMM) < 0) {
+    if (bfm_send_ioctl(fd, IOCTL_UNLOAD_VMM) < 0) {
         throw std::runtime_error("ioctl failed: IOCTL_UNLOAD_VMM");
     }
 }
@@ -117,7 +118,7 @@ ioctl_private::call_ioctl_unload_vmm()
 void
 ioctl_private::call_ioctl_start_vmm()
 {
-    if (bf_send_ioctl(fd, IOCTL_START_VMM) < 0) {
+    if (bfm_send_ioctl(fd, IOCTL_START_VMM) < 0) {
         throw std::runtime_error("ioctl failed: IOCTL_START_VMM");
     }
 }
@@ -125,7 +126,7 @@ ioctl_private::call_ioctl_start_vmm()
 void
 ioctl_private::call_ioctl_stop_vmm()
 {
-    if (bf_send_ioctl(fd, IOCTL_STOP_VMM) < 0) {
+    if (bfm_send_ioctl(fd, IOCTL_STOP_VMM) < 0) {
         throw std::runtime_error("ioctl failed: IOCTL_STOP_VMM");
     }
 }
@@ -133,11 +134,11 @@ ioctl_private::call_ioctl_stop_vmm()
 void
 ioctl_private::call_ioctl_dump_vmm(gsl::not_null<drr_pointer> drr, vcpuid_type vcpuid)
 {
-    if (bf_write_ioctl(fd, IOCTL_SET_VCPUID, &vcpuid) < 0) {
+    if (bfm_write_ioctl(fd, IOCTL_SET_VCPUID, &vcpuid) < 0) {
         throw std::runtime_error("ioctl failed: IOCTL_SET_VCPUID");
     }
 
-    if (bf_read_ioctl(fd, IOCTL_DUMP_VMM, drr) < 0) {
+    if (bfm_read_ioctl(fd, IOCTL_DUMP_VMM, drr) < 0) {
         throw std::runtime_error("ioctl failed: IOCTL_DUMP_VMM");
     }
 }
@@ -145,7 +146,7 @@ ioctl_private::call_ioctl_dump_vmm(gsl::not_null<drr_pointer> drr, vcpuid_type v
 void
 ioctl_private::call_ioctl_vmm_status(gsl::not_null<status_pointer> status)
 {
-    if (bf_read_ioctl(fd, IOCTL_VMM_STATUS, status) < 0) {
+    if (bfm_read_ioctl(fd, IOCTL_VMM_STATUS, status) < 0) {
         throw std::runtime_error("ioctl failed: IOCTL_VMM_STATUS");
     }
 }

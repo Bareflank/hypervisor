@@ -22,12 +22,20 @@ else()
     add_executable(bfm main.cpp $<TARGET_OBJECTS:bfm_src> $<TARGET_OBJECTS:bfm_ioctl> bfvmcall_intel_x64.obj)
 endif()
 
-if(CYGWIN OR WIN32)
-    target_link_libraries(bfm setupapi)
-endif()
+add_library(bfm_static STATIC main.cpp $<TARGET_OBJECTS:bfm_src> $<TARGET_OBJECTS:bfm_ioctl>)
 
 target_compile_definitions(bfm PUBLIC STATIC_BFM_SRC)
 target_compile_definitions(bfm PUBLIC STATIC_BFM_IOCTL)
+target_compile_definitions(bfm PUBLIC MAIN=main)
+target_compile_definitions(bfm PUBLIC ABORT=abort)
+
+target_compile_definitions(bfm_static PUBLIC STATIC_BFM_SRC)
+target_compile_definitions(bfm_static PUBLIC STATIC_BFM_IOCTL)
+
+if(CYGWIN OR WIN32)
+    target_link_libraries(bfm setupapi)
+    target_link_libraries(bfm_static setupapi)
+endif()
 
 # ------------------------------------------------------------------------------
 # Install

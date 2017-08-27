@@ -30,6 +30,7 @@ if [[ "$#" -lt 1 ]]; then
 fi
 
 if [[ "$#" == 2 ]]; then
+    echo $2
     cd $2
 fi
 
@@ -39,12 +40,17 @@ if [[ ! "$1" == "all" ]] && [[ ! "$1" == "diff" ]]; then
 fi
 
 if [[ "$1" == "all" ]]; then
-    FILES=$(git ls-files | grep -Ee "\.(cpp|h|c)$" | awk -v dir="$PWD/" '{print dir $0}' || true)
+    files=$(git ls-files | grep -Ee "\.(cpp|h|c)$" || true)
 else
-    FILES=$(git diff --name-only --diff-filter=ACM HEAD | grep -Ee "\.(cpp|h|c)$" | awk -v dir="$PWD/" '{print dir $0}' || true)
+    files=$(git diff --relative --name-only --diff-filter=ACM HEAD^ $PWD | grep -Ee "\.(cpp|h|c)$" || true)
+
+    echo "Files undergoing astyle checks:"
+    for f in $files; do
+        echo "  - $f"
+    done
 fi
 
-if [[ -z "${FILES// }" ]]; then
+if [[ -z "${files// }" ]]; then
     echo -e "\033[1;32m\xe2\x9c\x93 no files to format. astyle passed\033[0m"
     exit 0
 fi
@@ -75,7 +81,7 @@ astyle \
     --close-templates \
     --add-brackets \
     --break-after-logical \
-    $FILES > $OUTPUT
+    $files > $OUTPUT
 
 if [[ -z $(grep -s Formatted $OUTPUT) ]]; then
     echo -e "\033[1;32m\xe2\x9c\x93 astyle passed\033[0m"

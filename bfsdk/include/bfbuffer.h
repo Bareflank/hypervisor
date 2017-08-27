@@ -285,6 +285,18 @@ inline bool
 operator!=(const buffer &lhs, const buffer &rhs) noexcept
 { return !(lhs == rhs); }
 
+/// Default Out Stream Operator
+///
+/// @expects none
+/// @ensures none
+///
+/// @param os the out stream object
+/// @return os
+///
+inline std::ostream &
+operator<<(std::ostream &os, const buffer &)
+{ return os; }
+
 }
 
 #endif

@@ -212,14 +212,14 @@ private:
 
 private:
 
-    command_type m_cmd;
-    filename_type m_modules;
-    cpuid_type m_cpuid;
-    vcpuid_type m_vcpuid;
-    registers_type m_registers;
-    filename_type m_ifile;
-    filename_type m_ofile;
-    arg_type m_string_data;
+    command_type m_cmd{};
+    filename_type m_modules{};
+    cpuid_type m_cpuid{};
+    vcpuid_type m_vcpuid{};
+    registers_type m_registers{};
+    filename_type m_ifile{};
+    filename_type m_ofile{};
+    arg_type m_string_data{};
 };
 
 #ifdef _MSC_VER
