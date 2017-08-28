@@ -42,7 +42,9 @@
 #include <gsl/gsl>
 #else
 
+#ifdef NEED_STD_LITE
 #include <bfstd.h>
+#endif
 
 /// @cond
 
@@ -54,13 +56,17 @@
 #define gsl_unlikely(x) (x)
 #endif
 
+#ifndef GSL_ABORT
+#define GSL_ABORT abort
+#endif
+
 #define expects(cond)                                                                              \
     if (gsl_unlikely(!(cond))) {                                                                   \
-        std::terminate();                                                                          \
+        GSL_ABORT();                                                                               \
     }
 #define ensures(cond)                                                                              \
     if (gsl_unlikely(!(cond))) {                                                                   \
-        std::terminate();                                                                          \
+        GSL_ABORT();                                                                               \
     }
 
 /// @endcond
@@ -159,4 +165,5 @@ at(const T *arr, size_t N, I index)
 }
 
 #endif
+
 #endif

@@ -51,11 +51,7 @@ template<typename T> T static get(char **p)
 class cfi_register
 {
 public:
-    cfi_register() :
-        m_index(0),
-        m_rule(rule_undefined),
-        m_value(0)
-    {}
+    cfi_register() = default;
 
     cfi_register(uint64_t index, register_rules rule, uint64_t value) :
         m_index(index),
@@ -82,9 +78,9 @@ public:
     { m_value = value; }
 
 private:
-    uint64_t m_index;
-    register_rules m_rule;
-    uint64_t m_value;
+    uint64_t m_index{0};
+    register_rules m_rule{rule_undefined};
+    uint64_t m_value{0};
 };
 
 // -----------------------------------------------------------------------------
@@ -101,11 +97,7 @@ public:
     };
 
 public:
-    cfi_cfa() :
-        m_value(0),
-        m_offset(0),
-        m_type(cfa_register)
-    {}
+    cfi_cfa() = default;
 
     uint64_t value() const
     { return m_value; }
@@ -126,9 +118,9 @@ public:
     { m_type = type; }
 
 private:
-    uint64_t m_value;
-    int64_t m_offset;
-    cfi_cfa_type m_type;
+    uint64_t m_value{0};
+    int64_t m_offset{0};
+    cfi_cfa_type m_type{cfa_register};
 };
 
 // -----------------------------------------------------------------------------
@@ -138,8 +130,7 @@ private:
 class cfi_table_row
 {
 public:
-    cfi_table_row() :
-        m_arg_size(0)
+    cfi_table_row()
     {
         for (auto i = 0U; i < MAX_NUM_REGISTERS; i++) {
             m_registers[i].set_index(i);
@@ -196,7 +187,7 @@ public:
 
 private:
     cfi_cfa m_cfa;
-    uint64_t m_arg_size;
+    uint64_t m_arg_size{0};
     cfi_register m_registers[MAX_NUM_REGISTERS];
 };
 
@@ -1227,7 +1218,7 @@ void
 private_parse_instruction(cfi_table_row *row,
                           const ci_entry &cie,
                           char **p,
-                          uint64_t *l1,
+                          const uint64_t *l1,
                           uint64_t *l2,
                           uint64_t pc_begin,
                           register_state *state,
@@ -1459,9 +1450,10 @@ private_parse_instructions(cfi_table_row *row,
 
     auto initialRow = *row;
 
-    while (p < end && l1 >= l2)
-        private_parse_instruction(row, cie, &p, &l1, &l2, pc_begin, state,
-                                  rememberIndex, rememberStack, &initialRow);
+    while (p < end && l1 >= l2) {
+        private_parse_instruction(
+            row, cie, &p, &l1, &l2, pc_begin, state, rememberIndex, rememberStack, &initialRow);
+    }
 }
 
 cfi_table_row

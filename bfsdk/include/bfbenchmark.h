@@ -44,7 +44,7 @@ uint64_t benchmark(T func)
 size_t g_page_allocs = 0;
 size_t g_nonpage_allocs = 0;
 
-static void *
+inline void *
 custom_new(std::size_t size)
 {
     if ((size & 0xFFF) == 0) {
@@ -57,7 +57,7 @@ custom_new(std::size_t size)
     return malloc(size);
 }
 
-static void
+inline void
 custom_delete(void *ptr, std::size_t size)
 {
     bfignored(size);
@@ -78,7 +78,7 @@ operator delete (void *ptr, std::size_t size) throw()
 
 void
 operator delete (void *ptr) throw()
-{ custom_delete(ptr, 0); }
+{ operator delete (ptr, static_cast<std::size_t>(0)); }
 
 void
 operator delete[](void *ptr, std::size_t size) throw()
@@ -86,9 +86,7 @@ operator delete[](void *ptr, std::size_t size) throw()
 
 void
 operator delete[](void *ptr) throw()
-{ custom_delete(ptr, 0); }
-
-#endif
+{ operator delete[](ptr, static_cast<std::size_t>(0)); }
 
 inline void
 print_memory_stats()
@@ -107,3 +105,5 @@ clear_memory_stats()
     g_page_allocs = 0;
     g_nonpage_allocs = 0;
 }
+
+#endif

@@ -70,8 +70,12 @@ OUTPUT=$PWD/.clang_tidy_results.txt
 NUM_CORES=$(grep -c ^processor /proc/cpuinfo)
 
 get_changed_files() {
-    pushd $1 > /dev/null
-    files=$(git diff --relative --name-only --diff-filter=ACM HEAD^ $PWD | grep -Ee "\.(cpp|h|c)$" || true)
+    pushd $2 > /dev/null
+    if [[ "$1" == "all" ]]; then
+        files=$(git ls-files | grep -Ee "\.(cpp|h|c)$" || true)
+    else
+        files=$(git diff --relative --name-only --diff-filter=ACM HEAD^ $PWD | grep -Ee "\.(cpp|h|c)$" || true)
+    fi
     popd > /dev/null
 }
 
@@ -89,33 +93,22 @@ verify_analysis() {
     fi
 }
 
-run_clang_tidy_all() {
-    run-clang-tidy-4.0.py \
-        -clang-tidy-binary clang-tidy-4.0 \
-        -header-filter="*.h" \
-        -j=$NUM_CORES \
-        -checks=$1 > $OUTPUT 2>&1
-}
-
-run_clang_tidy_diff() {
-    run-clang-tidy-4.0.py \
-        -clang-tidy-binary clang-tidy-4.0 \
-        -header-filter="*.h" \
-        -j=$NUM_CORES \
-        -checks=$1 \
-        files $2 > $OUTPUT 2>&1
+run_clang_tidy_script() {
+    if [[ ! $2 == *"pthread.cpp" ]] && [[ ! $2 == *"syscall.cpp" ]]; then
+        run-clang-tidy-4.0.py \
+            -clang-tidy-binary clang-tidy-4.0 \
+            -header-filter="*.h" \
+            -j=$NUM_CORES \
+            -checks=$1 \
+            files $2 > $OUTPUT 2>&1
+    fi
 }
 
 analyze() {
-    if [[ "$1" == "all" ]]; then
-        run_clang_tidy_all $2
-        verify_analysis "$3"
-    else
-        for f in $files; do
-            run_clang_tidy_diff $2 $f
-            verify_analysis "$3: $f"
-        done
-    fi
+    for f in $files; do
+        run_clang_tidy_script $2 $f
+        verify_analysis "$3: $f"
+    done
 }
 
 if [[ "$#" -lt 2 ]]; then
@@ -139,14 +132,7 @@ if [[ ! "$1" == "all" ]] && [[ ! "$1" == "diff" ]]; then
     exit 1
 fi
 
-if [[ "$1" == "diff" ]]; then
-    get_changed_files $2
-
-    echo "Files undergoing static analysis:"
-    for f in $files; do
-        echo "  - $f"
-    done
-fi
+get_changed_files $1 $2
 
 #
 # Perform Checks

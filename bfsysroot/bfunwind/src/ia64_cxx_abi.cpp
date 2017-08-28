@@ -193,9 +193,9 @@ _Unwind_Resume(_Unwind_Exception *exception_object)
 extern "C" EXPORT_SYM void
 _Unwind_DeleteException(_Unwind_Exception *exception_object)
 {
-    if (exception_object->exception_cleanup != nullptr)
-        (*exception_object->exception_cleanup)(_URC_FOREIGN_EXCEPTION_CAUGHT,
-                                               exception_object);
+    if (exception_object->exception_cleanup != nullptr) {
+        (*exception_object->exception_cleanup)(_URC_FOREIGN_EXCEPTION_CAUGHT, exception_object);
+    }
 }
 
 extern "C" EXPORT_SYM uintptr_t
