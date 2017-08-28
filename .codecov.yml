@@ -21,7 +21,7 @@ parsers:
       macro: no
 
 ignore:
-  - "bfm/ioctl/arch/linux/*"
+  - "bfm/ioctl/arch/linux/**"
 
 comment:
   layout: "header, diff, files"
