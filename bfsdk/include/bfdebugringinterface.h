@@ -28,6 +28,7 @@
 #define BFDEBUGRINGINTERFACE_H
 
 #include <bftypes.h>
+#include <bfdebug.h>
 #include <bfconstants.h>
 #include <bferrorcodes.h>
 
@@ -130,31 +131,30 @@ debug_ring_read(struct debug_ring_resources_t *drr, char *str, uint64_t len)
 {
     uint64_t i;
     uint64_t spos;
+    uint64_t count;
     uint64_t content;
 
-    if (drr == 0 || str == 0 || len == 0)
-    { return 0; }
+    if (drr == 0 || str == 0 || len == 0) {
+        return 0;
+    }
+
+    if (drr->spos > drr->epos) {
+        return 0;
+    }
 
     spos = drr->spos % DEBUG_RING_SIZE;
     content = drr->epos - drr->spos;
 
-    for (i = 0; i < content && i < len - 1; i++) {
-        if (spos == DEBUG_RING_SIZE)
-        { spos = 0; }
-
-        if (drr->buf[spos] != '\0')
-        { str[i] = drr->buf[spos]; }
-        else {
-            i--;
-            content--;
+    for (i = 0, count = 0; i < content && i < len - 1; i++) {
+        if (drr->buf[spos] != '\0') {
+            str[count++] = drr->buf[spos];
         }
 
-        spos++;
+        spos = ((spos + 1) % DEBUG_RING_SIZE);
     }
 
     str[i] = '\0';
-
-    return content;
+    return count;
 }
 
 #ifdef __cplusplus

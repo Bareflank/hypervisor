@@ -137,7 +137,7 @@ TEST_CASE("write: fill_dr")
     init_wb(DEBUG_RING_SIZE - 1);
 
     CHECK_NOTHROW(dr.write(static_cast<const char *>(wb)));
-    CHECK(debug_ring_read(drr, static_cast<char *>(rb), DEBUG_RING_SIZE) == DEBUG_RING_SIZE);
+    CHECK(debug_ring_read(drr, static_cast<char *>(rb), DEBUG_RING_SIZE) == DEBUG_RING_SIZE - 1);
     CHECK(rb[DEBUG_RING_SIZE - 1] == '\0');
 }
 

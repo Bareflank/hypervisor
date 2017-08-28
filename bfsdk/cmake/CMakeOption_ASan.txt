@@ -3,7 +3,6 @@ if(ENABLE_DYNAMIC_ASAN AND NOT WIN32)
     message(STATUS "Testing Config: Dynamic Analysis")
 
     set(SANITIZER_FLAGS "${SANITIZER_FLAGS} -g")
-    set(SANITIZER_FLAGS "${SANITIZER_FLAGS} -O1")
     set(SANITIZER_FLAGS "${SANITIZER_FLAGS} -fuse-ld=gold")
     set(SANITIZER_FLAGS "${SANITIZER_FLAGS} -fno-omit-frame-pointer")
     set(SANITIZER_FLAGS "${SANITIZER_FLAGS} -fsanitize=address")

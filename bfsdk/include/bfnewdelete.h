@@ -38,7 +38,7 @@ size_t g_new_throws_bad_alloc = 0;
 #define aligned_alloc _aligned_malloc
 #endif
 
-static void *
+inline void *
 custom_new(std::size_t size)
 {
     if (size == g_new_throws_bad_alloc || size == 0xFFFFFFFFFFFFFFFF) {
@@ -52,9 +52,12 @@ custom_new(std::size_t size)
     return malloc(size);
 }
 
-static void
-custom_delete(void *ptr)
-{ free(ptr); }
+inline void
+custom_delete(void *ptr, std::size_t size)
+{
+    bfignored(size);
+    free(ptr);
+}
 
 void *
 operator new[](std::size_t size)
@@ -65,19 +68,19 @@ operator new (std::size_t size)
 { return custom_new(size); }
 
 void
-operator delete (void *ptr, std::size_t /* size */) throw()
-{ custom_delete(ptr); }
+operator delete (void *ptr, std::size_t size) throw()
+{ custom_delete(ptr, size); }
 
 void
 operator delete (void *ptr) throw()
-{ custom_delete(ptr); }
+{ operator delete (ptr, static_cast<std::size_t>(0)); }
+
+void
+operator delete[](void *ptr, std::size_t size) throw()
+{ custom_delete(ptr, size); }
 
 void
 operator delete[](void *ptr) throw()
-{ custom_delete(ptr); }
-
-void
-operator delete[](void *ptr, std::size_t /* size */) throw()
-{ custom_delete(ptr); }
+{ operator delete[](ptr, static_cast<std::size_t>(0)); }
 
 #endif

@@ -282,7 +282,8 @@ ci_entry::non_virtual_parse(char *addr)
 
     m_augmentation_string = p;
 
-    while (*p++ != 0);
+    while (*p++ != 0)
+    { }
 
     m_code_alignment = dwarf4::decode_uleb128(&p);
     m_data_alignment = dwarf4::decode_sleb128(&p);

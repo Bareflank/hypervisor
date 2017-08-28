@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.6)
 project(bfunwind C CXX)
 
+set(TIDY_EXCLUSIONS ,-cppcoreguidelines-pro*)
 include(${CMAKE_INSTALL_PREFIX}/cmake/CMakeGlobal_Project.txt)
 
 # ------------------------------------------------------------------------------
@@ -8,8 +9,8 @@ include(${CMAKE_INSTALL_PREFIX}/cmake/CMakeGlobal_Project.txt)
 # ------------------------------------------------------------------------------
 
 if(CMAKE_TOOLCHAIN_FILE)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -nostdlib-c")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -nostdlib-c -nostdinc-c++")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DNOSTDLIB_C")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DNOSTDLIB_C -DNOSTDINC_CXX")
 endif()
 
 # ------------------------------------------------------------------------------

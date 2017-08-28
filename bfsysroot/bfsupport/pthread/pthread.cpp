@@ -61,7 +61,7 @@ void *threadSpecificData[MAX_THREAD_SPECIFIC_DATA] = {0};
 extern "C" EXPORT_SYM int
 pthread_cond_broadcast(pthread_cond_t *cond)
 {
-    if (!cond) {
+    if (cond == nullptr) {
         return -EINVAL;
     }
 
@@ -80,11 +80,11 @@ pthread_cond_destroy(pthread_cond_t *)
 extern "C" EXPORT_SYM int
 pthread_cond_init(pthread_cond_t *cond, const pthread_condattr_t *attr)
 {
-    if (attr) {
+    if (attr != nullptr) {
         ARG_UNSUPPORTED("attr");
     }
 
-    if (!cond) {
+    if (cond == nullptr) {
         return -EINVAL;
     }
 
@@ -109,7 +109,7 @@ pthread_cond_timedwait(pthread_cond_t *, pthread_mutex_t *, const struct timespe
 extern "C" EXPORT_SYM int
 pthread_cond_wait(pthread_cond_t *cond, pthread_mutex_t *mutex)
 {
-    if (!cond || !mutex) {
+    if (cond == nullptr || mutex == nullptr) {
         return -EINVAL;
     }
 
@@ -162,11 +162,11 @@ pthread_key_create(pthread_key_t *key, void (*destructor)(void *))
 {
     static int64_t g_keys = 0;
 
-    if (destructor) {
+    if (destructor != nullptr) {
         ARG_UNSUPPORTED("destructor");
     }
 
-    if (!key) {
+    if (key == nullptr) {
         return -EINVAL;
     }
 
@@ -192,11 +192,11 @@ pthread_mutex_destroy(pthread_mutex_t *)
 extern "C" EXPORT_SYM int
 pthread_mutex_init(pthread_mutex_t *mutex, const pthread_mutexattr_t *attr)
 {
-    if (attr) {
+    if (attr != nullptr) {
         ARG_UNSUPPORTED("attr");
     }
 
-    if (!mutex) {
+    if (mutex == nullptr) {
         return -EINVAL;
     }
 
@@ -207,7 +207,7 @@ pthread_mutex_init(pthread_mutex_t *mutex, const pthread_mutexattr_t *attr)
 extern "C" EXPORT_SYM int
 pthread_mutex_lock(pthread_mutex_t *mutex)
 {
-    if (!mutex) {
+    if (mutex == nullptr) {
         return -EINVAL;
     }
 
@@ -226,7 +226,7 @@ pthread_mutex_trylock(pthread_mutex_t *)
 extern "C" EXPORT_SYM int
 pthread_mutex_unlock(pthread_mutex_t *mutex)
 {
-    if (!mutex) {
+    if (mutex == nullptr) {
         return -EINVAL;
     }
 
@@ -259,7 +259,7 @@ pthread_mutexattr_settype(pthread_mutexattr_t *, int)
 extern "C" EXPORT_SYM int
 pthread_once(pthread_once_t *once, void (*init)(void))
 {
-    if (!once || !init) {
+    if (once == nullptr || init == nullptr) {
         return -EINVAL;
     }
 
