@@ -1,0 +1,29 @@
+codecov:
+  notify:
+    require_ci_to_pass: no
+
+coverage:
+  precision: 2
+  round: down
+  range: "100...100"
+
+status:
+  project: yes
+  patch: no
+  changes: no
+
+parsers:
+  gcov:
+    branch_detection:
+      conditional: no
+      loop: no
+      method: no
+      macro: no
+
+ignore:
+  - "bfm/ioctl/arch/linux/*"
+
+comment:
+  layout: "header, diff, files"
+  behavior: default
+  require_changes: no
