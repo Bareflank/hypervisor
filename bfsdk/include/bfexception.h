@@ -57,7 +57,7 @@ guard_exceptions(int64_t error_code, T func)
         return BF_BAD_ALLOC;
     }
     catch (std::exception &e) {
-        bfdebug_transaction(1, [&](std::string * msg) {
+        bfdebug_transaction(0, [&](std::string * msg) {
             bferror_lnbr(0, msg);
             bferror_brk1(0, msg);
             bferror_info(0, typeid(e).name(), msg);
@@ -66,7 +66,7 @@ guard_exceptions(int64_t error_code, T func)
         });
     }
     catch (...) {
-        bfdebug_transaction(1, [&](std::string * msg) {
+        bfdebug_transaction(0, [&](std::string * msg) {
             bferror_lnbr(0, msg);
             bferror_brk1(0, msg);
             bferror_info(0, "unknown exception", msg);

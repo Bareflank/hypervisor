@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.6)
 project(bfsupport C CXX)
 
+set(TIDY_EXCLUSIONS ,-cert-err34-c,-misc-misplaced-widening-cast,-cppcoreguidelines-no-malloc)
 include(${CMAKE_INSTALL_PREFIX}/cmake/CMakeGlobal_Project.txt)
 
 # ------------------------------------------------------------------------------
@@ -8,8 +9,8 @@ include(${CMAKE_INSTALL_PREFIX}/cmake/CMakeGlobal_Project.txt)
 # ------------------------------------------------------------------------------
 
 if(CMAKE_TOOLCHAIN_FILE)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -nostdlib-c")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -nostdlib-c -nostdlib-c++")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DNOSTDLIB_C")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DNOSTDLIB_C -DNOSTDLIB_CXX")
 endif()
 
 # ------------------------------------------------------------------------------

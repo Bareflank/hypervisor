@@ -18,6 +18,7 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #define NEED_GSL_LITE
+#define NEED_STD_LITE
 
 #include <bfgsl.h>
 #include <bfexports.h>
@@ -26,8 +27,8 @@
 #include <bfehframelist.h>
 #include <bfdwarf.h>
 
-typedef void (*init_t)();
-typedef void (*fini_t)();
+using init_t = void (*)();
+using fini_t = void (*)();
 
 int __attribute__((weak))
 main(int argc, const char *argv[])
@@ -54,7 +55,7 @@ extern eh_frame_t __g_eh_frame_list[MAX_NUM_MODULES];
 extern int __g_dwarf_sections_num;
 extern dwarf_sections_t __g_dwarf_sections[MAX_NUM_MODULES];
 
-EXPORT_SYM void *__dso_handle = 0;
+EXPORT_SYM void *__dso_handle = nullptr;
 
 extern "C" void
 __bareflank_init(const section_info_t *info) noexcept
@@ -151,9 +152,7 @@ _start_c(const crt_info_t *info) noexcept
 
     if (info->arg_type == 0 || info->request == BF_REQUEST_FINI) {
         for (auto i = 0; i < info->info_num; i++) {
-            auto sinfo = &gsl::at(info->info, i);
-
-            __bareflank_fini(sinfo);
+            __bareflank_fini(&gsl::at(info->info, i));
         }
     }
 

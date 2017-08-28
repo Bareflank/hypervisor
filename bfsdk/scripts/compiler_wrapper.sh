@@ -70,21 +70,21 @@ do
         i=$((i+1))
         ;;
 
-    "-nostdinc-c")
+    "-DNOSTDINC_C")
         export DISABLE_LIB_C="true"
         export DISABLE_INCLUDE_C="true"
         ;;
 
-    "-nostdinc-c++")
+    "-DNOSTDINC_CXX")
         export DISABLE_LIB_CXX="true"
         export DISABLE_INCLUDE_CXX="true"
         ;;
 
-    "-nostdlib-c")
+    "-DNOSTDLIB_C")
         export DISABLE_LIB_C="true"
         ;;
 
-    "-nostdlib-c++")
+    "-DNOSTDLIB_CXX")
         export DISABLE_LIB_CXX="true"
         ;;
 
@@ -169,19 +169,19 @@ do
 
     case $ARG in
 
-    "-nostdinc-c")
+    "-DNOSTDINC_C")
         continue
         ;;
 
-    "-nostdinc-c++")
+    "-DNOSTDINC_CXX")
         continue
         ;;
 
-    "-nostdlib-c")
+    "-DNOSTDLIB_C")
         continue
         ;;
 
-    "-nostdlib-c++")
+    "-DNOSTDLIB_CXX")
         continue
         ;;
 

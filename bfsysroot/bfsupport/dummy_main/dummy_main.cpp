@@ -45,8 +45,8 @@ main(int argc, char *argv[])
     catch (std::exception &)
     { }
 
-    return g_derived1.foo(gsl::narrow_cast<int>(atoi(argv[0]))) +
-           g_derived2.foo(gsl::narrow_cast<int>(atoi(argv[1])));
+    return g_derived1.foo(gsl::narrow_cast<int>(atoi(gsl::at(argv, static_cast<size_t>(argc), 0)))) +
+           g_derived2.foo(gsl::narrow_cast<int>(atoi(gsl::at(argv, static_cast<size_t>(argc), 1))));
 }
 
 extern "C" int64_t
@@ -90,7 +90,7 @@ _malloc_r(struct _reent *ent, size_t size)
 {
     bfignored(ent);
 
-    auto *addr = &g_memory[g_cursor];
+    auto *addr = &gsl::at(g_memory, g_cursor);
     g_cursor += size;
 
     return addr;

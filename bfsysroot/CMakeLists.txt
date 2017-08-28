@@ -19,7 +19,7 @@ if(ENABLE_UNITTESTING)
 else()
 
     set(NEWLIB_CFLAGS
-        "${CMAKE_C_FLAGS} -nostdinc-c"
+        "${CMAKE_C_FLAGS} -DNOSTDINC_C"
     )
 
     if(CMAKE_BUILD_TYPE STREQUAL "Release")
@@ -130,7 +130,7 @@ else()
         -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
         -DCMAKE_AR=${CMAKE_AR}
         -DCMAKE_C_FLAGS=${CMAKE_C_FLAGS}
-        -DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS} -nostdinc-c++
+        "-DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS} -DNOSTDINC_CXX"
     )
 
     if(BUILD_SHARED_LIBS)
@@ -178,7 +178,7 @@ else()
         -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
         -DCMAKE_AR=${CMAKE_AR}
         -DCMAKE_C_FLAGS=${CMAKE_C_FLAGS}
-        -DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS} -nostdinc-c++
+        "-DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS} -DNOSTDINC_CXX"
     )
 
     if(BUILD_SHARED_LIBS)

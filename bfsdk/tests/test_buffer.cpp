@@ -170,3 +170,9 @@ TEST_CASE("resize")
     CHECK(buffer.size() == 2);
     CHECK(buffer.span()[0] == 'h');
 }
+
+TEST_CASE("ostream")
+{
+    bfn::buffer buffer;
+    CHECK_NOTHROW(std::cout << buffer << '\n');
+}
