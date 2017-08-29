@@ -32,6 +32,8 @@
 derived1 g_derived1;
 derived2 g_derived2;
 
+EXPORT_SYM int global_var = 0;
+
 int
 main(int argc, char *argv[])
 {

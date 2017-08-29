@@ -919,7 +919,8 @@ private_hash(const char *name)
 }
 
 static inline int64_t
-private_get_sym_by_hash(struct bfelf_file_t *ef, const char *name, const struct bfelf_sym **sym)
+private_get_sym_by_hash(
+    struct bfelf_file_t *ef, const char *name, const struct bfelf_sym **sym)
 {
     bfelf64_word i = 0;
     unsigned long x = private_hash(name);
@@ -945,7 +946,8 @@ private_get_sym_by_hash(struct bfelf_file_t *ef, const char *name, const struct 
 }
 
 static inline int64_t
-private_get_sym_by_name(struct bfelf_file_t *ef, const char *name, const struct bfelf_sym **sym)
+private_get_sym_by_name(
+    struct bfelf_file_t *ef, const char *name, const struct bfelf_sym **sym)
 {
     bfelf64_word i = 0;
 
@@ -973,10 +975,8 @@ private_get_sym_by_name(struct bfelf_file_t *ef, const char *name, const struct 
 
 static inline int64_t
 private_get_sym_global(
-    const struct bfelf_loader_t *loader,
-    const char *name,
-    struct bfelf_file_t **ef_found,
-    const struct bfelf_sym **sym)
+    const struct bfelf_loader_t *loader, const char *name,
+    struct bfelf_file_t **ef_found, const struct bfelf_sym **sym)
 {
     int64_t ret = 0;
     bfelf64_word i = 0;
@@ -1472,8 +1472,8 @@ bfelf_file_get_num_load_instrs(const struct bfelf_file_t *ef)
  * @return BFELF_SUCCESS on success, negative on error
  */
 static inline int64_t
-bfelf_file_get_load_instr(const struct bfelf_file_t *ef, uint64_t index,
-                          const struct bfelf_load_instr **instr)
+bfelf_file_get_load_instr(
+    const struct bfelf_file_t *ef, uint64_t index, const struct bfelf_load_instr **instr)
 {
     if (ef == nullptr) {
         return bfinvalid_argument("ef == nullptr");
@@ -1508,7 +1508,8 @@ bfelf_file_get_load_instr(const struct bfelf_file_t *ef, uint64_t index,
  * @return BFELF_SUCCESS on success, negative on error
  */
 static inline int64_t
-bfelf_file_get_section_info(const struct bfelf_file_t *ef, struct section_info_t *info)
+bfelf_file_get_section_info(
+    const struct bfelf_file_t *ef, struct section_info_t *info)
 {
     bfelf64_word i = 0;
 
@@ -1631,7 +1632,8 @@ bfelf_file_get_stack_perm(const struct bfelf_file_t *ef, bfelf64_xword *perm)
  * @return BFELF_SUCCESS on success, negative on error
  */
 static inline int64_t
-bfelf_file_get_relro(const struct bfelf_file_t *ef, bfelf64_addr *addr, bfelf64_xword *size)
+bfelf_file_get_relro(
+    const struct bfelf_file_t *ef, bfelf64_addr *addr, bfelf64_xword *size)
 {
     if (ef == nullptr) {
         return bfinvalid_argument("ef == nullptr");
@@ -1693,7 +1695,8 @@ bfelf_file_get_num_needed(const struct bfelf_file_t *ef)
  * @return number of needed entries on success, negative on error
  */
 static inline int64_t
-bfelf_file_get_needed(const struct bfelf_file_t *ef, uint64_t index, const char **needed)
+bfelf_file_get_needed(
+    const struct bfelf_file_t *ef, uint64_t index, const char **needed)
 {
     if (ef == nullptr) {
         return bfinvalid_argument("ef == nullptr");
@@ -1891,7 +1894,8 @@ bfelf_loader_relocate(struct bfelf_loader_t *loader)
  * @return BFELF_SUCCESS on success, negative on error
  */
 static inline int64_t
-bfelf_loader_resolve_symbol(const struct bfelf_loader_t *loader, const char *name, void **addr)
+bfelf_loader_resolve_symbol(
+    const struct bfelf_loader_t *loader, const char *name, void **addr)
 {
     int64_t ret = 0;
 
@@ -1934,7 +1938,7 @@ struct bfelf_binary_t {
 };
 
 static inline int64_t
-private_load_elf_binary(struct bfelf_binary_t *binary)
+private_load_binary(struct bfelf_binary_t *binary)
 {
     int64_t i = 0;
     int64_t ret = 0;
@@ -2005,19 +2009,15 @@ private_load_elf_binary(struct bfelf_binary_t *binary)
 }
 
 static inline int64_t
-private_load_elf_binaries(
-    struct bfelf_binary_t *binaries,
-    uint64_t num_binaries,
-    struct bfelf_loader_t *loader)
+private_relocate_binaries(
+    struct bfelf_binary_t *binaries, uint64_t num_binaries, struct bfelf_loader_t *loader)
 {
     uint64_t i = 0;
     int64_t ret = 0;
 
     for (i = 0; i < num_binaries; i++) {
         ret = bfelf_loader_add(loader, &binaries[i].ef, binaries[i].exec, binaries[i].exec);
-        if (ret != BFELF_SUCCESS) {
-            return ret;
-        }
+        bfignored(ret);
     }
 
     ret = bfelf_loader_relocate(loader);
@@ -2030,9 +2030,7 @@ private_load_elf_binaries(
 
 static inline int64_t
 private_crt_info(
-    struct bfelf_binary_t *binaries,
-    uint64_t num_binaries,
-    struct crt_info_t *crt_info)
+    struct bfelf_binary_t *binaries, uint64_t num_binaries, struct crt_info_t *crt_info)
 {
     uint64_t i = 0;
 
@@ -2042,9 +2040,7 @@ private_crt_info(
         struct section_info_t section_info = {};
 
         ret = bfelf_file_get_section_info(&binaries[i].ef, &section_info);
-        if (ret != BFELF_SUCCESS) {
-            return ret;
-        }
+        bfignored(ret);
 
         crt_info->info[crt_info->info_num++] = section_info;
     }
@@ -2086,11 +2082,8 @@ private_crt_info(
  */
 static inline int64_t
 bfelf_load(
-    struct bfelf_binary_t *binaries,
-    uint64_t num_binaries,
-    void **entry,
-    struct crt_info_t *crt_info,
-    struct bfelf_loader_t *loader)
+    struct bfelf_binary_t *binaries, uint64_t num_binaries, void **entry,
+    struct crt_info_t *crt_info, struct bfelf_loader_t *loader)
 {
     uint64_t i = 0;
     int64_t ret = 0;
@@ -2116,21 +2109,19 @@ bfelf_load(
     }
 
     for (i = 0; i < num_binaries; i++) {
-        ret = private_load_elf_binary(&binaries[i]);
+        ret = private_load_binary(&binaries[i]);
         if (ret != BF_SUCCESS) {
             return ret;
         }
     }
 
-    ret = private_load_elf_binaries(binaries, num_binaries, loader);
+    ret = private_relocate_binaries(binaries, num_binaries, loader);
     if (ret != BF_SUCCESS) {
         return ret;
     }
 
     ret = private_crt_info(binaries, num_binaries, crt_info);
-    if (ret != BF_SUCCESS) {
-        return ret;
-    }
+    bfignored(ret);
 
     ret = bfelf_file_get_entry(&binaries[num_binaries - 1].ef, entry);
     bfignored(ret);
@@ -2154,10 +2145,7 @@ bfelf_load(
  * @return BFELF_SUCCESS on success, negative on error
  */
 static inline int64_t
-bfelf_set_args(
-    struct crt_info_t *crt_info,
-    int argc,
-    const char **argv)
+bfelf_set_args(struct crt_info_t *crt_info, int argc, const char **argv)
 {
     if (crt_info == nullptr) {
         return bfinvalid_argument("crt_info == nullptr");
@@ -2191,11 +2179,7 @@ bfelf_set_args(
  */
 static inline int64_t
 bfelf_set_integer_args(
-    struct crt_info_t *crt_info,
-    uintptr_t request,
-    uintptr_t arg1,
-    uintptr_t arg2,
-    uintptr_t arg3)
+    struct crt_info_t *crt_info, uintptr_t request, uintptr_t arg1, uintptr_t arg2, uintptr_t arg3)
 {
     if (crt_info == nullptr) {
         return bfinvalid_argument("crt_info == nullptr");
@@ -2229,9 +2213,7 @@ bfelf_set_integer_args(
 
 inline auto
 private_read_binary(
-    gsl::not_null<file *> f,
-    const std::string &filename,
-    bfelf_binary_t &binary)
+    gsl::not_null<file *> f, const std::string &filename, bfelf_binary_t &binary)
 {
     auto buffer = f->read_binary(filename);
 
@@ -2251,9 +2233,7 @@ private_get_needed_list(const bfelf_file_t &ef)
         const char *needed = nullptr;
 
         ret = bfelf_file_get_needed(&ef, static_cast<uint64_t>(i), &needed);
-        if (ret != BFELF_SUCCESS) {
-            throw std::runtime_error("bfelf_file_get_needed failed: " + bfn::to_string(ret, 16));
-        }
+        bfignored(ret);
 
         list.emplace_back(needed);
     }
@@ -2284,11 +2264,8 @@ private_get_needed_list(const bfelf_file_t &ef)
  */
 inline auto
 bfelf_read_binary_and_get_needed_list(
-    gsl::not_null<file *> f,
-    const std::string &filename,
-    const std::vector<std::string> &paths,
-    bfn::buffer &buffer,
-    bfelf_binary_t &binary)
+    gsl::not_null<file *> f, const std::string &filename,
+    const std::vector<std::string> &paths, bfn::buffer &buffer, bfelf_binary_t &binary)
 {
     buffer = private_read_binary(f, filename, binary);
 
@@ -2330,9 +2307,7 @@ public:
      * @param paths a list of paths to locate the ELF binary from
      */
     binaries_info(
-        gsl::not_null<file *> f,
-        const std::string &filename,
-        const std::vector<std::string> &paths)
+        gsl::not_null<file *> f, const std::string &filename, const std::vector<std::string> &paths)
     {
         bfn::buffer data;
         bfelf_binary_t binary = {};
@@ -2362,8 +2337,7 @@ public:
      * @param filenames the list of files to load
      */
     binaries_info(
-        gsl::not_null<file *> f,
-        const std::vector<std::string> &filenames)
+        gsl::not_null<file *> f, const std::vector<std::string> &filenames)
     {
         this->init_binaries(f, filenames);
 
@@ -2467,18 +2441,14 @@ public:
 private:
 
     void
-    push_binary(
-        bfn::buffer &&data,
-        bfelf_binary_t &&binary)
+    push_binary(bfn::buffer &&data, bfelf_binary_t &&binary)
     {
         m_datas.push_back(std::move(data));
         m_binaries.push_back(std::move(binary));
     }
 
     void
-    init_binaries(
-        gsl::not_null<file *> f,
-        const std::vector<std::string> &filenames)
+    init_binaries(gsl::not_null<file *> f, const std::vector<std::string> &filenames)
     {
         expects(!filenames.empty());
 

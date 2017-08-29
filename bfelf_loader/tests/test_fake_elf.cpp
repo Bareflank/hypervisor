@@ -123,10 +123,10 @@ get_fake_elf()
     test->dynamic.init_array.d_val = offset(test->init_array, *test);
     test->dynamic.fini_array.d_tag = bfdt_fini_array;
     test->dynamic.fini_array.d_val = offset(test->fini_array, *test);
-    test->dynamic.init_array.d_tag = bfdt_init_arraysz;
-    test->dynamic.init_array.d_val = sizeof(test_init_array);
-    test->dynamic.fini_array.d_tag = bfdt_fini_arraysz;
-    test->dynamic.fini_array.d_val = sizeof(test_fini_array);
+    test->dynamic.init_arraysz.d_tag = bfdt_init_arraysz;
+    test->dynamic.init_arraysz.d_val = sizeof(test_init_array);
+    test->dynamic.fini_arraysz.d_tag = bfdt_fini_arraysz;
+    test->dynamic.fini_arraysz.d_val = sizeof(test_fini_array);
     test->dynamic.flags_1.d_tag = bfdt_flags_1;
     test->dynamic.last.d_tag = bfdt_null;
 

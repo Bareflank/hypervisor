@@ -53,11 +53,34 @@ TEST_CASE("bfelf_loader_relocate: twice")
     CHECK(ret == BFELF_SUCCESS);
 }
 
+#ifndef WIN64
+
 TEST_CASE("bfelf_loader_relocate: no such symbol")
 {
-    auto filenames = g_filenames;
-    filenames.erase(filenames.begin());
-    filenames.erase(filenames.begin());
+    int64_t ret = 0;
+    binaries_info binaries{&g_file, g_filenames};
 
-    CHECK_THROWS(binaries_info(&g_file, filenames));
+    binaries.ef(0) = {};
+    binaries.loader().relocated = 0;
+
+    ret = bfelf_loader_relocate(&binaries.loader());
+    CHECK(ret == BFELF_ERROR_NO_SUCH_SYMBOL);
 }
+
+TEST_CASE("bfelf_loader_relocate: no such symbol in plt")
+{
+    int64_t ret = 0;
+    binaries_info binaries{&g_file, g_filenames};
+
+    binaries.ef(0) = {};
+    binaries.loader().relocated = 0;
+
+    for (auto i = 0ULL; i < 9; i++) {
+        binaries.ef(i).relanum_dyn = 0;
+    }
+
+    ret = bfelf_loader_relocate(&binaries.loader());
+    CHECK(ret == BFELF_ERROR_NO_SUCH_SYMBOL);
+}
+
+#endif
