@@ -30,7 +30,7 @@ TEST_CASE("bfelf_loader_resolve_symbol: invalid loader")
 {
     func_t func;
 
-    auto ret = bfelf_loader_resolve_symbol(nullptr, "abort", reinterpret_cast<void **>(&func));
+    auto ret = bfelf_loader_resolve_symbol(nullptr, "lib1_foo", reinterpret_cast<void **>(&func));
     CHECK(ret == BFELF_ERROR_INVALID_ARG);
 }
 
@@ -47,7 +47,7 @@ TEST_CASE("bfelf_loader_resolve_symbol: invalid addr")
 {
     bfelf_loader_t loader = {};
 
-    auto ret = bfelf_loader_resolve_symbol(&loader, "abort", nullptr);
+    auto ret = bfelf_loader_resolve_symbol(&loader, "lib1_foo", nullptr);
     CHECK(ret == BFELF_ERROR_INVALID_ARG);
 }
 
@@ -61,7 +61,7 @@ TEST_CASE("bfelf_loader_resolve_symbol: no files added")
 
     func_t func;
 
-    ret = bfelf_loader_resolve_symbol(&loader, "abort", reinterpret_cast<void **>(&func));
+    ret = bfelf_loader_resolve_symbol(&loader, "lib1_foo", reinterpret_cast<void **>(&func));
     CHECK(ret == BFELF_ERROR_NO_SUCH_SYMBOL);
 }
 
@@ -83,7 +83,7 @@ TEST_CASE("bfelf_loader_resolve_symbol: success")
 
     func_t func;
 
-    ret = bfelf_loader_resolve_symbol(&binaries.loader(), "abort", reinterpret_cast<void **>(&func));
+    ret = bfelf_loader_resolve_symbol(&binaries.loader(), "lib1_foo", reinterpret_cast<void **>(&func));
     CHECK(ret == BFELF_SUCCESS);
 }
 
@@ -111,6 +111,6 @@ TEST_CASE("bfelf_loader_resolve_symbol: success no hash")
 
     func_t func;
 
-    ret = bfelf_loader_resolve_symbol(&binaries.loader(), "abort", reinterpret_cast<void **>(&func));
+    ret = bfelf_loader_resolve_symbol(&binaries.loader(), "lib1_foo", reinterpret_cast<void **>(&func));
     CHECK(ret == BFELF_SUCCESS);
 }

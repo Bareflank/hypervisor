@@ -56,8 +56,10 @@ TEST_CASE("bfelf_file_get_section_info: expected misc resources")
     section_info_t info = {};
     auto &dummy_main_ef = binaries.ef();
 
-    dummy_main_ef.init = 10;
-    dummy_main_ef.fini = 10;
+    dummy_main_ef.init = 42;
+    dummy_main_ef.fini = 42;
+    dummy_main_ef.fini_array = 42;
+    dummy_main_ef.fini_arraysz = 42;
 
     auto ret = bfelf_file_get_section_info(&dummy_main_ef, &info);
     CHECK(ret == BFELF_SUCCESS);
@@ -65,8 +67,8 @@ TEST_CASE("bfelf_file_get_section_info: expected misc resources")
     CHECK(info.init_array_addr != nullptr);
     CHECK(info.init_array_size != 0);
 
-    CHECK(info.fini_array_addr == nullptr);
-    CHECK(info.fini_array_size == 0);
+    CHECK(info.fini_array_addr != nullptr);
+    CHECK(info.fini_array_size != 0);
 
     CHECK(info.eh_frame_addr != nullptr);
     CHECK(info.eh_frame_size != 0);

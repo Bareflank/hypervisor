@@ -51,6 +51,8 @@
 
 /* @cond */
 
+extern int global_var;
+
 class EXPORT_DUMMY base
 {
 public:
@@ -74,7 +76,7 @@ public:
     foo(int arg) noexcept override;
 
 private:
-    int m_member;
+    int m_member{1000};
 };
 
 class EXPORT_DUMMY derived2 : public base
@@ -87,7 +89,7 @@ public:
     foo(int arg) noexcept override;
 
 private:
-    int m_member;
+    int m_member{2000};
 };
 
 /* @endcond */

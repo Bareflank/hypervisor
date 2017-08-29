@@ -19,39 +19,22 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+#include <hippomocks.h>
 #include <catch/catch.hpp>
 
-#include <fstream>
+#include <bfgsl.h>
 #include <test_real_elf.h>
 
-TEST_CASE("bfelf_load_binaries: invalid file")
+TEST_CASE("bfelf_set_integer_args: invalid info")
 {
-    // file *f = nullptr;
-    // bfelf_loader_t loader = {};
-
-    // CHECK_THROWS(bfelf_load_binaries(f, g_filenames, &loader));
+    auto ret = bfelf_set_integer_args(nullptr, 0, 0, 0, 0);
+    CHECK(ret == BFELF_ERROR_INVALID_ARG);
 }
 
-// TEST_CASE("bfelf_load_binaries: invalid loader")
-// {
-//     bfelf_loader_t *loader = nullptr;
-//     CHECK_THROWS(bfelf_load_binaries(&g_file, g_filenames, loader));
-// }
+TEST_CASE("bfelf_set_integer_args: success")
+{
+    crt_info_t info = {};
 
-// TEST_CASE("bfelf_load_binaries: no files")
-// {
-//     bfelf_loader_t loader = {};
-//     CHECK_NOTHROW(bfelf_load_binaries(&g_file, {}, &loader));
-// }
-
-// TEST_CASE("bfelf_load_binaries: invalid filename")
-// {
-//     bfelf_loader_t loader = {};
-//     CHECK_THROWS(bfelf_load_binaries(&g_file, {"bad_file_name"_s}, &loader));
-// }
-
-// TEST_CASE("bfelf_load_binaries: success")
-// {
-//     bfelf_loader_t loader = {};
-//     CHECK_NOTHROW(bfelf_load_binaries(&g_file, g_filenames, &loader));
-// }
+    auto ret = bfelf_set_integer_args(&info, 0, 0, 0, 0);
+    CHECK(ret == BF_SUCCESS);
+}

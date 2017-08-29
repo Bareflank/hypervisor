@@ -28,6 +28,7 @@
 #include <bfelf_loader.h>
 
 extern file g_file;
+extern bool out_of_memory;
 extern std::vector<std::string> g_filenames;
 
 #endif

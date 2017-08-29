@@ -19,23 +19,27 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <dummy_libs.h>
+#include <hippomocks.h>
+#include <catch/catch.hpp>
 
-extern "C" int lib1_foo();
+#include <bfgsl.h>
+#include <test_real_elf.h>
 
-derived2::derived2() noexcept
+TEST_CASE("bfelf_set_args: invalid info")
 {
-    global_var += lib1_foo();
+    int argc = 0;
+    const char *argv = nullptr;
+
+    auto ret = bfelf_set_args(nullptr, argc, &argv);
+    CHECK(ret == BFELF_ERROR_INVALID_ARG);
 }
 
-derived2::~derived2()
+TEST_CASE("bfelf_set_args: success")
 {
-    global_var -= lib1_foo();
-    m_member = 0;
-}
+    int argc = 0;
+    crt_info_t info = {};
+    const char *argv = nullptr;
 
-int
-derived2::foo(int arg) noexcept
-{
-    return arg + m_member;
+    auto ret = bfelf_set_args(&info, argc, &argv);
+    CHECK(ret == BF_SUCCESS);
 }
