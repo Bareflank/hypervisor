@@ -44,11 +44,16 @@ std::vector<std::string> g_filenames = {
 };
 
 file g_file;
+bool out_of_memory = false;
 static std::map<void *, std::shared_ptr<char>> g_memory;
 
 void *
 platform_alloc_rwe(uint64_t len)
 {
+    if (out_of_memory) {
+        return nullptr;
+    }
+
     auto addr = aligned_alloc(0x1000, len);
     g_memory[addr] = std::shared_ptr<char>(static_cast<char *>(addr), free);
 

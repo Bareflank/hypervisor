@@ -74,7 +74,7 @@ get_changed_files() {
     if [[ "$1" == "all" ]]; then
         files=$(git ls-files | grep -Ee "\.(cpp|h|c)$" || true)
     else
-        files=$(git diff --relative --name-only --diff-filter=ACM HEAD^ $PWD | grep -Ee "\.(cpp|h|c)$" || true)
+        files=$(git diff --relative --name-only HEAD $PWD | grep -Ee "\.(cpp|h|c)$" || true)
     fi
     popd > /dev/null
 }

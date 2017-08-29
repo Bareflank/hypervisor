@@ -21,6 +21,7 @@
 
 #include <catch/catch.hpp>
 
+#include <list>
 #include <fstream>
 #include <test_real_elf.h>
 #include <test_fake_elf.h>
@@ -52,33 +53,44 @@ TEST_CASE("bfelf_loader_add: invalid addr")
     CHECK(ret == BFELF_ERROR_INVALID_ARG);
 }
 
-// TEST_CASE("bfelf_loader_add: too many files")
-// {
-//     int64_t ret = 0;
-//     bfelf_file_t ef = {};
-//     bfelf_loader_t loader = {};
+TEST_CASE("bfelf_loader_add: add twice")
+{
+    int64_t ret = 0;
+    bfelf_loader_t loader = {};
+    bfelf_file_t dummy_misc_ef = {};
 
-//     auto data = get_fake_elf();
-//     auto &buf = std::get<0>(data);
-//     auto size = std::get<1>(data);
+    ret = bfelf_loader_add(&loader, &dummy_misc_ef, static_cast<char *>(dummy), static_cast<char *>(dummy));
+    CHECK(ret == BF_SUCCESS);
 
-//     for (auto i = 0; i < MAX_NUM_MODULES + 1; i++) {
+    ret = bfelf_loader_add(&loader, &dummy_misc_ef, static_cast<char *>(dummy), static_cast<char *>(dummy));
+    CHECK(ret == BFELF_ERROR_INVALID_ARG);
+}
 
-//         bfelf_file_t dummy_misc_ef = {};
+TEST_CASE("bfelf_loader_add: too many files")
+{
+    int64_t ret = 0;
+    bfelf_loader_t loader = {};
+    std::vector<bfelf_file_t> efs(MAX_NUM_MODULES + 1);
 
-//         ret = bfelf_file_init(buf.get(), size, &ef);
-//         REQUIRE(ret == BFELF_SUCCESS);
+    auto data = get_fake_elf();
+    auto &buf = std::get<0>(data);
+    auto size = std::get<1>(data);
 
-//         ret = bfelf_loader_add(&loader, &ef, dummy, dummy);
+    for (auto i = 0ULL; i < MAX_NUM_MODULES + 1; i++) {
 
-//         if (i < MAX_NUM_MODULES) {
-//             CHECK(ret == BF_SUCCESS);
-//         }
-//         else {
-//             CHECK(ret == BFELF_ERROR_LOADER_FULL);
-//         }
-//     }
-// }
+        ret = bfelf_file_init(buf.get(), size, &gsl::at(efs, i));
+        REQUIRE(ret == BFELF_SUCCESS);
+
+        ret = bfelf_loader_add(&loader, &gsl::at(efs, i), static_cast<char *>(dummy), static_cast<char *>(dummy));
+
+        if (i < MAX_NUM_MODULES) {
+            CHECK(ret == BF_SUCCESS);
+        }
+        else {
+            CHECK(ret == BFELF_ERROR_LOADER_FULL);
+        }
+    }
+}
 
 TEST_CASE("bfelf_loader_add: add fake")
 {

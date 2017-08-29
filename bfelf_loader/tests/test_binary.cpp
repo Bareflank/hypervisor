@@ -20,39 +20,49 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #include <catch/catch.hpp>
+#include <hippomocks.h>
 
 #include <fstream>
 #include <test_real_elf.h>
 
-TEST_CASE("bfelf_binary: invalid file")
+#ifdef _HIPPOMOCKS__ENABLE_CFUNC_MOCKING_SUPPORT
+
+TEST_CASE("bfelf_binary: binary load fails")
 {
-    file *f = nullptr;
-    CHECK_THROWS(bfelf_binary(f, g_filenames.back()));
+    MockRepository mocks;
+    mocks.OnCallFunc(bfelf_load).Return(-1);
+
+    file f;
+    CHECK_THROWS(binaries_info(&f, g_filenames.back(), {BAREFLANK_SYSROOT_PATH + "/lib/"_s}));
 }
 
-TEST_CASE("bfelf_binary: invalid filename")
+TEST_CASE("bfelf_binary: binary success")
 {
-    CHECK_THROWS(bfelf_binary(&g_file, "bad_filename"));
+    file f;
+    CHECK_NOTHROW(binaries_info(&f, g_filenames.back(), {BAREFLANK_SYSROOT_PATH + "/lib/"_s}));
 }
 
-TEST_CASE("bfelf_binary: invalid ELF file")
+TEST_CASE("bfelf_binary: module list load fails")
 {
-    auto &&filename = "test.txt"_s;
-    auto &&text_data = "not an ELF file"_s;
+    MockRepository mocks;
+    mocks.OnCallFunc(bfelf_load).Return(-1);
 
-    REQUIRE_NOTHROW(g_file.write_text(filename, text_data));
-    CHECK_THROWS(bfelf_binary(&g_file, filename));
-
-    REQUIRE(std::remove(filename.c_str()) == 0);
+    file f;
+    CHECK_THROWS(binaries_info(&f, g_filenames));
 }
 
-TEST_CASE("bfelf_binary: success")
+TEST_CASE("bfelf_binary: module list success")
 {
-    auto &&binary = bfelf_binary {&g_file, g_filenames.back()};
-
-    CHECK(binary.filename() == BAREFLANK_SYSROOT_PATH + "/bin/dummy_main"_s);
-    CHECK(binary.filesize() != 0);
-    CHECK(!binary.filedata().empty());
-    CHECK(binary.execdata());
-    CHECK(binary.ef().file != nullptr);
+    file f;
+    CHECK_NOTHROW(binaries_info(&f, g_filenames));
 }
+
+TEST_CASE("bfelf_binary: set args")
+{
+    file f;
+    binaries_info info(&f, g_filenames);
+
+    CHECK_NOTHROW(info.set_args(0, nullptr));
+}
+
+#endif

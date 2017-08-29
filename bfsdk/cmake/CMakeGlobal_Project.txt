@@ -142,6 +142,7 @@ execute_process(COMMAND uname -o OUTPUT_VARIABLE UNAME OUTPUT_STRIP_TRAILING_WHI
 if(UNAME STREQUAL "Cygwin" OR WIN32)
     set(OSTYPE "WIN64")
     set(ABITYPE "MS64")
+    set(WIN64 ON)
 else()
     set(OSTYPE "UNIX")
     set(ABITYPE "SYSV")

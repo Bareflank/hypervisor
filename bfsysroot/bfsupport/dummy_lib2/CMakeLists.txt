@@ -11,6 +11,10 @@ include(${CMAKE_INSTALL_PREFIX}/cmake/CMakeGlobal_Includes.txt)
 add_library(dummy_lib2 SHARED dummy_lib2.cpp)
 target_compile_definitions(dummy_lib2 PRIVATE SHARED_DUMMY)
 
+if(NOT WIN64)
+    set(CMAKE_SHARED_LINKER_FLAGS "--fuse-ld=gold")
+endif()
+
 # ------------------------------------------------------------------------------
 # Install
 # ------------------------------------------------------------------------------
