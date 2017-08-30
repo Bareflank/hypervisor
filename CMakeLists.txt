@@ -529,12 +529,16 @@ ExternalProject_Add(
 # Extended APIs
 # ------------------------------------------------------------------------------
 
-if(ENABLE_EXTENDED_APIS)
+if(ENABLE_EXTENDED_APIS OR EXTENDED_APIS_PATH)
 
     if(NOT EXTENDED_APIS_PATH)
         set(EXTENDED_APIS_URL "https://github.com/bareflank/extended_apis.git" CACHE STRING "")
         set(EXTENDED_APIS_TAG "master" CACHE STRING "")
         set(EXTENDED_APIS_PATH ${CMAKE_BINARY_DIR}/extended_apis/src CACHE PATH "")
+    else()
+        if(NOT EXISTS ${EXTENDED_APIS_PATH})
+            message(FATAL_ERROR "extended apis path does not exist: ${EXTENDED_APIS_PATH}")
+        endif()
     endif()
 
     message(STATUS "EXTENDED_APIS_PATH: ${EXTENDED_APIS_PATH}")

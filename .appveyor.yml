@@ -38,7 +38,7 @@ install:
 build_script:
 
   #
-  # Visual Studio (MSBuild / Shared Libraries)
+  # Visual Studio (MSBuild / Static Libraries)
   #
   - mkdir build_msbuild_shared
   - cd build_msbuild_shared
