@@ -55,7 +55,11 @@ matrix:
   # - os: linux
   #   addons:
   #     apt:
+  #       sources:
+  #         - ubuntu-toolchain-r-test
   #       packages:
+  #         - gcc-6
+  #         - g++-6
   #         - doxygen
   #   env:
   #     - TEST="Doxygen"
@@ -70,6 +74,7 @@ matrix:
   #         exit -1
   #       fi
 
+  #
   # Git Check
   #
   - os: linux
@@ -77,12 +82,9 @@ matrix:
       apt:
         sources:
           - ubuntu-toolchain-r-test
-          - llvm-toolchain-trusty-4.0
         packages:
           - gcc-6
           - g++-6
-          - clang-4.0
-          - nasm
     env:
       - TEST="Git Check"
     script:
