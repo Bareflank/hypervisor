@@ -4,6 +4,8 @@ doxygen_warnings.txt
 .astyle_results.txt
 .clang_tidy_results.txt
 .vscode/
+.DS_Store
+._.DS_Store
 
 bfdriver/src/.common.o.cmd
 bfdriver/src/arch/linux/.bareflank.ko.cmd
