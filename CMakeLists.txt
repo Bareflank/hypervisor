@@ -547,39 +547,43 @@ if(ENABLE_EXTENDED_APIS OR EXTENDED_APIS_PATH)
         message(STATUS "EXTENDED_APIS_TAG: ${EXTENDED_APIS_TAG}")
     endif()
 
-    list(APPEND EXTENDED_APIS_CMAKE_ARGS
-        -DBAREFLANK_SOURCE_DIR=${CMAKE_SOURCE_DIR}
-        -DBAREFLANK_BINARY_DIR=${CMAKE_BINARY_DIR}
-        -DCMAKE_INSTALL_PREFIX=${BAREFLANK_INSTALL_PREFIX}
-        -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
-        -DCMAKE_TOOLCHAIN_FILE=${VMM_TOOLCHAIN_FILE}
-        -DENABLE_COVERAGE=${ENABLE_COVERAGE}
-        -DENABLE_DYNAMIC_ASAN=${ENABLE_DYNAMIC_ASAN}
-        -DENABLE_DYNAMIC_USAN=${ENABLE_DYNAMIC_USAN}
-        -DENABLE_TIDY=${ENABLE_TIDY}
-        -DENABLE_ASTYLE=${ENABLE_ASTYLE}
-        -DENABLE_UNITTESTING=${ENABLE_UNITTESTING}
-        -DBUILD_SHARED_LIBS=${BAREFLANK_HOST_SHARED_LIBS}
-        -DBUILD_STATIC_LIBS=${BAREFLANK_HOST_STATIC_LIBS}
-    )
+    if(NOT WIN32)
 
-    ExternalProject_Add(
-        extended_apis
-        GIT_REPOSITORY      ${EXTENDED_APIS_URL}
-        GIT_TAG             ${EXTENDED_APIS_TAG}
-        GIT_SHALLOW         1
-        CMAKE_ARGS          ${EXTENDED_APIS_CMAKE_ARGS}
-        PREFIX              ${CMAKE_BINARY_DIR}/extended_apis/prefix
-        TMP_DIR             ${CMAKE_BINARY_DIR}/extended_apis/tmp
-        STAMP_DIR           ${CMAKE_BINARY_DIR}/extended_apis/stamp
-        DOWNLOAD_DIR        ${CMAKE_BINARY_DIR}/extended_apis/download
-        SOURCE_DIR          ${EXTENDED_APIS_PATH}
-        BINARY_DIR          ${CMAKE_BINARY_DIR}/extended_apis/build
-        UPDATE_COMMAND      ${CMAKE_COMMAND} -E echo "checking for updates"
-        UPDATE_DISCONNECTED ${UPDATE_DISCONNECTED}
-        BUILD_COMMAND       ""
-        DEPENDS             bfsdk bfvmm
-    )
+        list(APPEND EXTENDED_APIS_CMAKE_ARGS
+            -DBAREFLANK_SOURCE_DIR=${CMAKE_SOURCE_DIR}
+            -DBAREFLANK_BINARY_DIR=${CMAKE_BINARY_DIR}
+            -DCMAKE_INSTALL_PREFIX=${BAREFLANK_INSTALL_PREFIX}
+            -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+            -DCMAKE_TOOLCHAIN_FILE=${VMM_TOOLCHAIN_FILE}
+            -DENABLE_COVERAGE=${ENABLE_COVERAGE}
+            -DENABLE_DYNAMIC_ASAN=${ENABLE_DYNAMIC_ASAN}
+            -DENABLE_DYNAMIC_USAN=${ENABLE_DYNAMIC_USAN}
+            -DENABLE_TIDY=${ENABLE_TIDY}
+            -DENABLE_ASTYLE=${ENABLE_ASTYLE}
+            -DENABLE_UNITTESTING=${ENABLE_UNITTESTING}
+            -DBUILD_SHARED_LIBS=${BAREFLANK_HOST_SHARED_LIBS}
+            -DBUILD_STATIC_LIBS=${BAREFLANK_HOST_STATIC_LIBS}
+        )
+
+        ExternalProject_Add(
+            extended_apis
+            GIT_REPOSITORY      ${EXTENDED_APIS_URL}
+            GIT_TAG             ${EXTENDED_APIS_TAG}
+            GIT_SHALLOW         1
+            CMAKE_ARGS          ${EXTENDED_APIS_CMAKE_ARGS}
+            PREFIX              ${CMAKE_BINARY_DIR}/extended_apis/prefix
+            TMP_DIR             ${CMAKE_BINARY_DIR}/extended_apis/tmp
+            STAMP_DIR           ${CMAKE_BINARY_DIR}/extended_apis/stamp
+            DOWNLOAD_DIR        ${CMAKE_BINARY_DIR}/extended_apis/download
+            SOURCE_DIR          ${EXTENDED_APIS_PATH}
+            BINARY_DIR          ${CMAKE_BINARY_DIR}/extended_apis/build
+            UPDATE_COMMAND      ${CMAKE_COMMAND} -E echo "checking for updates"
+            UPDATE_DISCONNECTED ${UPDATE_DISCONNECTED}
+            BUILD_COMMAND       ""
+            DEPENDS             bfsdk bfvmm
+        )
+
+    endif()
 
     if(ENABLE_UNITTESTING)
 
@@ -609,7 +613,7 @@ if(ENABLE_EXTENDED_APIS OR EXTENDED_APIS_PATH)
             BINARY_DIR          ${CMAKE_BINARY_DIR}/test_extended_apis/build
             UPDATE_COMMAND      ${CMAKE_COMMAND} -E echo "checking for updates"
             BUILD_COMMAND       ""
-            DEPENDS             extended_apis test_bfvmm
+            DEPENDS             test_bfvmm
         )
 
     endif()
