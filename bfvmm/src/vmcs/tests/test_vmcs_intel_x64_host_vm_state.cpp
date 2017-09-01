@@ -22,21 +22,13 @@
 
 #include <catch/catch.hpp>
 #include <hippomocks.h>
-#include <bftypes.h>
 
-#include <vmcs/vmcs_intel_x64_host_vm_state.h>
-
-#include <intrinsics/x86/common_x64.h>
 #include <intrinsics/x86/intel_x64.h>
-
-#include <test/vmcs_utils.h>
+#include <vmcs/vmcs_intel_x64_host_vm_state.h>
 
 #ifdef _HIPPOMOCKS__ENABLE_CFUNC_MOCKING_SUPPORT
 
 using namespace x64;
-
-std::map<uint32_t, uint32_t> g_eax_cpuid;
-std::map<uint32_t, uint64_t> g_msrs;
 
 uint16_t test_es;
 uint16_t test_cs;
@@ -46,16 +38,6 @@ uint16_t test_fs;
 uint16_t test_gs;
 uint16_t test_ldtr;
 uint16_t test_tr;
-
-uint16_t test_es_index;
-uint16_t test_cs_index;
-uint16_t test_ss_index;
-uint16_t test_ds_index;
-uint16_t test_fs_index;
-uint16_t test_gs_index;
-uint16_t test_ldtr_index;
-uint16_t test_tr_index;
-uint16_t test_gdt_index;
 
 uint64_t test_cr0;
 uint64_t test_cr3;
@@ -77,6 +59,133 @@ std::vector<gdt_x64::segment_descriptor_type> test_gdt = {
 
 std::vector<idt_x64::interrupt_descriptor_type> test_idt{512};
 
+std::map<uint32_t, uint64_t> g_msrs;
+std::map<uint32_t, uint32_t> g_eax_cpuid;
+
+static uint16_t
+test_read_es() noexcept
+{ return test_es; }
+
+static uint16_t
+test_read_cs() noexcept
+{ return test_cs; }
+
+static uint16_t
+test_read_ss() noexcept
+{ return test_ss; }
+
+static uint16_t
+test_read_ds() noexcept
+{ return test_ds; }
+
+static uint16_t
+test_read_fs() noexcept
+{ return test_fs; }
+
+static uint16_t
+test_read_gs() noexcept
+{ return test_gs; }
+
+static uint16_t
+test_read_tr() noexcept
+{ return test_tr; }
+
+static uint16_t
+test_read_ldtr() noexcept
+{ return test_ldtr; }
+
+static void
+test_write_es(uint16_t val) noexcept
+{ test_es = val; }
+
+static void
+test_write_cs(uint16_t val) noexcept
+{ test_cs = val; }
+
+static void
+test_write_ss(uint16_t val) noexcept
+{ test_ss = val; }
+
+static void
+test_write_ds(uint16_t val) noexcept
+{ test_ds = val; }
+
+static void
+test_write_fs(uint16_t val) noexcept
+{ test_fs = val; }
+
+static void
+test_write_gs(uint16_t val) noexcept
+{ test_gs = val; }
+
+static void
+test_write_tr(uint16_t val) noexcept
+{ test_tr = val; }
+
+static void
+test_write_ldtr(uint16_t val) noexcept
+{ test_ldtr = val; }
+
+static uint64_t
+test_read_cr0() noexcept
+{ return test_cr0; }
+
+static uint64_t
+test_read_cr3() noexcept
+{ return test_cr3; }
+
+static uint64_t
+test_read_cr4() noexcept
+{ return test_cr4; }
+
+static void
+test_write_cr0(uint64_t val) noexcept
+{ test_cr0 = val; }
+
+static void
+test_write_cr3(uint64_t val) noexcept
+{ test_cr3 = val; }
+
+static void
+test_write_cr4(uint64_t val) noexcept
+{ test_cr4 = val; }
+
+static uint64_t
+test_read_dr7() noexcept
+{ return test_dr7; }
+
+static void
+test_write_dr7(uint64_t val) noexcept
+{ test_dr7 = val; }
+
+static uint64_t
+test_read_rflags() noexcept
+{ return test_rflags; }
+
+static void
+test_write_rflags(uint64_t val) noexcept
+{ test_rflags = val; }
+
+static void
+test_read_gdt(gdt_reg_x64_t *gdt_reg) noexcept
+{ *gdt_reg = test_gdtr; }
+
+static void
+test_read_idt(idt_reg_x64_t *idt_reg) noexcept
+{ *idt_reg = test_idtr; }
+
+static uint64_t
+test_read_msr(uint32_t addr) noexcept
+{ return g_msrs[addr]; }
+
+static void
+test_write_msr(uint32_t addr, uint64_t val) noexcept
+{ g_msrs[addr] = val; }
+
+static uint32_t
+test_cpuid_eax(uint32_t val) noexcept
+{ return g_eax_cpuid[val]; }
+
 void
 setup_gdt()
 {
@@ -94,51 +203,6 @@ setup_idt()
     test_idtr.base = &test_idt.at(0);
     test_idtr.limit = gsl::narrow_cast<idt_reg_x64_t::limit_type>(limit);
 }
-
-static uint16_t test_read_es() noexcept { return test_es; }
-static uint16_t test_read_cs() noexcept { return test_cs; }
-static uint16_t test_read_ss() noexcept { return test_ss; }
-static uint16_t test_read_ds() noexcept { return test_ds; }
-static uint16_t test_read_fs() noexcept { return test_fs; }
-static uint16_t test_read_gs() noexcept { return test_gs; }
-static uint16_t test_read_tr() noexcept { return test_tr; }
-static uint16_t test_read_ldtr() noexcept { return test_ldtr; }
-
-static void test_write_es(uint16_t val) noexcept { test_es = val; }
-static void test_write_cs(uint16_t val) noexcept { test_cs = val; }
-static void test_write_ss(uint16_t val) noexcept { test_ss = val; }
-static void test_write_ds(uint16_t val) noexcept { test_ds = val; }
-static void test_write_fs(uint16_t val) noexcept { test_fs = val; }
-static void test_write_gs(uint16_t val) noexcept { test_gs = val; }
-static void test_write_tr(uint16_t val) noexcept { test_tr = val; }
-static void test_write_ldtr(uint16_t val) noexcept { test_ldtr = val; }
-
-static uint64_t test_read_cr0() noexcept { return test_cr0; }
-static uint64_t test_read_cr3() noexcept { return test_cr3; }
-static uint64_t test_read_cr4() noexcept { return test_cr4; }
-static void test_write_cr0(uint64_t val) noexcept { test_cr0 = val; }
-static void test_write_cr3(uint64_t val) noexcept { test_cr3 = val; }
-static void test_write_cr4(uint64_t val) noexcept { test_cr4 = val; }
-
-static uint64_t test_read_dr7() noexcept { return test_dr7; }
-static void test_write_dr7(uint64_t val) noexcept { test_dr7 = val; }
-
-static uint64_t test_read_rflags() noexcept { return test_rflags; }
-
-static void test_read_gdt(gdt_reg_x64_t *gdt_reg) noexcept
-{ *gdt_reg = test_gdtr; }
-
-static void test_read_idt(idt_reg_x64_t *idt_reg) noexcept
-{ *idt_reg = test_idtr; }
-
-static uint64_t
-test_read_msr(uint32_t addr) noexcept { return g_msrs[addr]; }
-
-static void
-test_write_msr(uint32_t addr, uint64_t val) noexcept { g_msrs[addr] = val; }
-
-static uint32_t
-test_cpuid_eax(uint32_t val) noexcept { return g_eax_cpuid[val]; }
 
 static void
 setup_intrinsics(MockRepository &mocks)
@@ -172,6 +236,7 @@ setup_intrinsics(MockRepository &mocks)
     mocks.OnCallFunc(_write_dr7).Do(test_write_dr7);
 
     mocks.OnCallFunc(_read_rflags).Do(test_read_rflags);
+    mocks.OnCallFunc(_write_rflags).Do(test_write_rflags);
 
     mocks.OnCallFunc(_read_gdt).Do(test_read_gdt);
     mocks.OnCallFunc(_read_idt).Do(test_read_idt);
@@ -190,7 +255,7 @@ TEST_CASE("vmcs: host_vm_state")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    CHECK_NOTHROW([&] { vmcs_intel_x64_host_vm_state state{}; });
+    CHECK_NOTHROW(vmcs_intel_x64_host_vm_state{});
 }
 
 TEST_CASE("vmcs: host_vm_state_segment_registers")
@@ -241,7 +306,6 @@ TEST_CASE("vmcs: host_vm_state_debug_registers")
     setup_intrinsics(mocks);
 
     dr7::set(42U);
-
     vmcs_intel_x64_host_vm_state state{};
 
     CHECK(state.dr7() == 42U);
@@ -252,8 +316,7 @@ TEST_CASE("vmcs: host_vm_state_rflags")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    test_rflags = 42U;
-
+    rflags::set(42U);
     vmcs_intel_x64_host_vm_state state{};
 
     CHECK(state.rflags() == 42U);

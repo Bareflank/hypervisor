@@ -89,10 +89,6 @@ vcpu_manager::vcpu_manager() noexcept :
 std::unique_ptr<vcpu> &
 vcpu_manager::add_vcpu(vcpuid::type vcpuid, user_data *data)
 {
-    if (!m_vcpu_factory) {
-        throw std::runtime_error("invalid vcpu factory");
-    }
-
     if (auto &&vcpu = get_vcpu(vcpuid)) {
         return vcpu;
     }

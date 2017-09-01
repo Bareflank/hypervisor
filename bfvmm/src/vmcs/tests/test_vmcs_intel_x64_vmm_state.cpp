@@ -22,39 +22,39 @@
 
 #include <catch/catch.hpp>
 #include <hippomocks.h>
-#include <bftypes.h>
 
-#include <vmcs/vmcs_intel_x64_vmm_state.h>
-
-#include <intrinsics/x86/common_x64.h>
 #include <intrinsics/x86/intel_x64.h>
+#include <vmcs/vmcs_intel_x64_vmm_state.h>
 
 #include <memory_manager/pat_x64.h>
 #include <memory_manager/root_page_table_x64.h>
-
-#include <test/vmcs_utils.h>
 
 #ifdef _HIPPOMOCKS__ENABLE_CFUNC_MOCKING_SUPPORT
 
 using namespace x64;
 
-static uint64_t test_cr0;
-static uint64_t test_cr3;
-static uint64_t test_cr4;
-static uint64_t test_ia32_efer_msr;
-
-static std::map<uint32_t, uint32_t> g_ecx;
-static std::map<uint32_t, uint32_t> g_ebx;
-
 static uint32_t
 test_cpuid_ecx(uint32_t addr) noexcept
-{ return g_ecx[addr]; }
+{
+    bfignored(addr);
+    return 0xFFFFFFFFU;
+}
 
 static uint32_t
 test_cpuid_subebx(uint32_t addr, uint32_t leaf)
 {
+    bfignored(addr);
     bfignored(leaf);
-    return g_ebx[addr];
+    return 0xFFFFFFFFU;
+}
+
+static void
+setup_mm(MockRepository &mocks)
+{
+    auto pt = mocks.Mock<root_page_table_x64>();
+
+    mocks.OnCallFunc(root_pt).Return(pt);
+    mocks.OnCall(pt, root_page_table_x64::cr3).Return(42U);
 }
 
 static void
@@ -64,49 +64,169 @@ setup_intrinsics(MockRepository &mocks)
     mocks.OnCallFunc(_cpuid_subebx).Do(test_cpuid_subebx);
 }
 
-static void
-setup_vmm_state(MockRepository &mocks)
-{
-    setup_intrinsics(mocks);
-
-    auto pt = mocks.Mock<root_page_table_x64>();
-    mocks.OnCallFunc(root_pt).Return(pt);
-    mocks.OnCall(pt, root_page_table_x64::cr3).Return(test_cr3);
-
-    test_cr0 = 0;
-    test_cr0 |= intel_x64::cr0::protection_enable::mask;
-    test_cr0 |= intel_x64::cr0::monitor_coprocessor::mask;
-    test_cr0 |= intel_x64::cr0::extension_type::mask;
-    test_cr0 |= intel_x64::cr0::numeric_error::mask;
-    test_cr0 |= intel_x64::cr0::write_protect::mask;
-    test_cr0 |= intel_x64::cr0::paging::mask;
-
-    test_cr3 = 0x000000ABCDEF0000;
-
-    test_cr4 = 0;
-    test_cr4 |= intel_x64::cr4::v8086_mode_extensions::mask;
-    test_cr4 |= intel_x64::cr4::protected_mode_virtual_interrupts::mask;
-    test_cr4 |= intel_x64::cr4::time_stamp_disable::mask;
-    test_cr4 |= intel_x64::cr4::debugging_extensions::mask;
-    test_cr4 |= intel_x64::cr4::page_size_extensions::mask;
-    test_cr4 |= intel_x64::cr4::physical_address_extensions::mask;
-    test_cr4 |= intel_x64::cr4::machine_check_enable::mask;
-    test_cr4 |= intel_x64::cr4::page_global_enable::mask;
-    test_cr4 |= intel_x64::cr4::performance_monitor_counter_enable::mask;
-    test_cr4 |= intel_x64::cr4::osfxsr::mask;
-    test_cr4 |= intel_x64::cr4::osxsave::mask;
-    test_cr4 |= intel_x64::cr4::osxmmexcpt::mask;
-    test_cr4 |= intel_x64::cr4::vmx_enable_bit::mask;
-    test_cr4 |= intel_x64::cr4::smep_enable_bit::mask;
-    test_cr4 |= intel_x64::cr4::smap_enable_bit::mask;
-}
-
 TEST_CASE("vmcs: vmm_state")
 {
     MockRepository mocks;
-    setup_vmm_state(mocks);
+    setup_mm(mocks);
+    setup_intrinsics(mocks);
 
     vmcs_intel_x64_vmm_state state{};
+}
+
+TEST_CASE("vmcs: state_segment_registers")
+{
+    MockRepository mocks;
+    setup_mm(mocks);
+    setup_intrinsics(mocks);
+
+    vmcs_intel_x64_vmm_state state{};
+
+    CHECK(state.cs() == 1U << 3);
+    CHECK(state.ss() == 2U << 3);
+    CHECK(state.fs() == 3U << 3);
+    CHECK(state.gs() == 4U << 3);
+    CHECK(state.tr() == 5U << 3);
+}
+
+TEST_CASE("vmcs: state_control_registers")
+{
+    MockRepository mocks;
+    setup_mm(mocks);
+    setup_intrinsics(mocks);
+
+    vmcs_intel_x64_vmm_state state{};
+
+    CHECK(state.cr0() != 0U);
+    CHECK(state.cr3() != 0U);
+    CHECK(state.cr4() != 0U);
+}
+
+TEST_CASE("vmcs: state_debug_registers")
+{
+    MockRepository mocks;
+    setup_mm(mocks);
+    setup_intrinsics(mocks);
+
+    vmcs_intel_x64_vmm_state state{};
+    CHECK(state.dr7() == 0U);
+}
+
+TEST_CASE("vmcs: state_rflags")
+{
+    MockRepository mocks;
+    setup_mm(mocks);
+    setup_intrinsics(mocks);
+
+    vmcs_intel_x64_vmm_state state{};
+    CHECK(state.rflags() == 0U);
+}
+
+TEST_CASE("vmcs: state_gdt_base")
+{
+    MockRepository mocks;
+    setup_mm(mocks);
+    setup_intrinsics(mocks);
+
+    vmcs_intel_x64_vmm_state state{};
+    CHECK(state.gdt_base() != 0U);
+}
+
+TEST_CASE("vmcs: state_idt_base")
+{
+    MockRepository mocks;
+    setup_mm(mocks);
+    setup_intrinsics(mocks);
+
+    vmcs_intel_x64_vmm_state state{};
+    CHECK(state.idt_base() != 0U);
+}
+
+TEST_CASE("vmcs: state_gdt_limit")
+{
+    MockRepository mocks;
+    setup_mm(mocks);
+    setup_intrinsics(mocks);
+
+    vmcs_intel_x64_vmm_state state{};
+
+    CHECK(state.gdt_limit() == 4095U);
+}
+
+TEST_CASE("vmcs: state_idt_limit")
+{
+    MockRepository mocks;
+    setup_mm(mocks);
+    setup_intrinsics(mocks);
+
+    vmcs_intel_x64_vmm_state state{};
+    CHECK(state.idt_limit() == 2047U);
+}
+
+TEST_CASE("vmcs: state_segment_registers_limit")
+{
+    MockRepository mocks;
+    setup_mm(mocks);
+    setup_intrinsics(mocks);
+
+    vmcs_intel_x64_vmm_state state{};
+
+    CHECK(state.cs_limit() == 0xFFFFFFFF);
+    CHECK(state.ss_limit() == 0xFFFFFFFF);
+    CHECK(state.fs_limit() == 0xFFFFFFFF);
+    CHECK(state.gs_limit() == 0xFFFFFFFF);
+    CHECK(state.tr_limit() != 0U);
+}
+
+TEST_CASE("vmcs: state_segment_registers_access_rights")
+{
+    MockRepository mocks;
+    setup_mm(mocks);
+    setup_intrinsics(mocks);
+
+    vmcs_intel_x64_vmm_state state{};
+
+    CHECK(state.cs_access_rights() == access_rights::ring0_cs_descriptor);
+    CHECK(state.ss_access_rights() == access_rights::ring0_ss_descriptor);
+    CHECK(state.fs_access_rights() == access_rights::ring0_fs_descriptor);
+    CHECK(state.gs_access_rights() == access_rights::ring0_gs_descriptor);
+    CHECK(state.tr_access_rights() == access_rights::ring0_tr_descriptor);
+}
+
+TEST_CASE("vmcs: state_segment_register_base")
+{
+    MockRepository mocks;
+    setup_mm(mocks);
+    setup_intrinsics(mocks);
+
+    vmcs_intel_x64_vmm_state state{};
+
+    CHECK(state.cs_base() == 0U);
+    CHECK(state.ss_base() == 0U);
+    CHECK(state.fs_base() == 0U);
+    CHECK(state.gs_base() == 0U);
+    CHECK(state.tr_base() != 0U);
+}
+
+TEST_CASE("vmcs: state_msrs")
+{
+    MockRepository mocks;
+    setup_mm(mocks);
+    setup_intrinsics(mocks);
+
+    vmcs_intel_x64_vmm_state state{};
+
+    CHECK(state.ia32_pat_msr() != 0U);
+    CHECK(state.ia32_efer_msr() != 0U);
+}
+
+TEST_CASE("vmcs: state_dump")
+{
+    MockRepository mocks;
+    setup_mm(mocks);
+    setup_intrinsics(mocks);
+
+    vmcs_intel_x64_vmm_state state{};
+    CHECK_NOTHROW(state.dump());
 }
 
 #endif

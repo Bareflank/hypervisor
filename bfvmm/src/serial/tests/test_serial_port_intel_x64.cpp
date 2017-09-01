@@ -233,7 +233,7 @@ TEST_CASE("serial: set_parity_bits_success_extra_bits")
 }
 
 
-TEST_CASE("serial: write_character")
+TEST_CASE("serial: write character")
 {
     MockRepository mocks;
     mock_serial(mocks);
@@ -245,7 +245,7 @@ TEST_CASE("serial: write_character")
 }
 
 
-TEST_CASE("serial: write_string")
+TEST_CASE("serial: write string")
 {
     MockRepository mocks;
     mock_serial(mocks);
@@ -254,6 +254,17 @@ TEST_CASE("serial: write_string")
 
     auto serial = std::make_unique<serial_port_intel_x64>();
     serial->write("hello world");
+}
+
+TEST_CASE("serial: write char buffer")
+{
+    MockRepository mocks;
+    mock_serial(mocks);
+
+    g_ports[DEFAULT_COM_PORT + serial_intel_x64::line_status_reg] = 0xFF;
+
+    auto serial = std::make_unique<serial_port_intel_x64>();
+    serial->write("hello world", 12);
 }
 
 #endif

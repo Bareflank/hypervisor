@@ -5,6 +5,13 @@
 include(${CMAKE_INSTALL_PREFIX}/cmake/CMakeGlobal_Includes.txt)
 
 # ------------------------------------------------------------------------------
+# Definitions
+# ------------------------------------------------------------------------------
+
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DEXIT_HANDLER_TEST")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DEXIT_HANDLER_TEST")
+
+# ------------------------------------------------------------------------------
 # Targets
 # ------------------------------------------------------------------------------
 
@@ -21,4 +28,5 @@ macro(do_test str)
 endmacro(do_test)
 
 do_test(exit_handler_intel_x64)
+do_test(exit_handler_intel_x64_support_mock)
 do_test(exit_handler_intel_x64_entry)

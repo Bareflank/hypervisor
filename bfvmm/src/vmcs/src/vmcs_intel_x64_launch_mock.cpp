@@ -19,17 +19,11 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <bfgsl.h>
-#include <bfdebug.h>
 #include <bftypes.h>
-
 #include <vmcs/vmcs_intel_x64_launch.h>
 
 extern "C" void
 vmcs_launch(state_save_intel_x64 *state_save) noexcept
 {
     bfignored(state_save);
-
-    std::cerr << __BFFUNC__ << " called" << '\n';
-    abort();
 }
