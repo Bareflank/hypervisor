@@ -59,6 +59,10 @@ extern "C" {
  *      the virtual address of ".debug_ranges" after relocation
  * @var dwarf_sections_t::debug_ranges_size
  *      the size of ".debug_ranges"
+ * @var dwarf_sections_t::text_addr
+ *      the virtual address of ".text" after relocation
+ * @var dwarf_sections_t::text_size
+ *      the size of ".text"
  */
 struct dwarf_sections_t {
     void *debug_info_addr;
@@ -75,6 +79,9 @@ struct dwarf_sections_t {
 
     void *debug_ranges_addr;
     uint64_t debug_ranges_size;
+
+    void *text_addr;
+    uint64_t text_size;
 };
 
 /**

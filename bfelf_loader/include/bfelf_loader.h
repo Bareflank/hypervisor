@@ -273,6 +273,24 @@ struct bfelf_file_t {
     bfelf64_addr eh_frame;
     bfelf64_xword eh_framesz;
 
+    bfelf64_addr debug_info;
+    bfelf64_xword debug_infosz;
+
+    bfelf64_addr debug_abbrev;
+    bfelf64_xword debug_abbrevsz;
+
+    bfelf64_addr debug_line;
+    bfelf64_xword debug_linesz;
+
+    bfelf64_addr debug_str;
+    bfelf64_xword debug_strsz;
+
+    bfelf64_addr debug_ranges;
+    bfelf64_xword debug_rangessz;
+
+    bfelf64_addr text;
+    bfelf64_xword textsz;
+
     bfelf64_xword flags_1;
     bfelf64_xword stack_flags;
 
@@ -1413,6 +1431,42 @@ bfelf_file_init(const char *file, uint64_t filesz, struct bfelf_file_t *ef)
             ef->fini_arraysz = shdr->sh_size;
             continue;
         }
+
+        if (private_strcmp(name, ".debug_info") == BFELF_SUCCESS) {
+            ef->debug_info = shdr->sh_offset;
+            ef->debug_infosz = shdr->sh_size;
+            continue;
+        }
+
+        if (private_strcmp(name, ".debug_abbrev") == BFELF_SUCCESS) {
+            ef->debug_abbrev = shdr->sh_offset;
+            ef->debug_abbrevsz = shdr->sh_size;
+            continue;
+        }
+
+        if (private_strcmp(name, ".debug_line") == BFELF_SUCCESS) {
+            ef->debug_line = shdr->sh_offset;
+            ef->debug_linesz = shdr->sh_size;
+            continue;
+        }
+
+        if (private_strcmp(name, ".debug_str") == BFELF_SUCCESS) {
+            ef->debug_str = shdr->sh_offset;
+            ef->debug_strsz = shdr->sh_size;
+            continue;
+        }
+
+        if (private_strcmp(name, ".debug_ranges") == BFELF_SUCCESS) {
+            ef->debug_ranges = shdr->sh_offset;
+            ef->debug_rangessz = shdr->sh_size;
+            continue;
+        }
+
+        if (private_strcmp(name, ".text") == BFELF_SUCCESS) {
+            ef->text = shdr->sh_addr;
+            ef->textsz = shdr->sh_size;
+            continue;
+        }
     }
 
     /*
@@ -1550,6 +1604,41 @@ bfelf_file_get_section_info(
     if (ef->eh_frame != 0) {
         info->eh_frame_addr = ef->eh_frame + ef->exec_virt;
         info->eh_frame_size = ef->eh_framesz;
+    }
+
+    if (ef->debug_info != 0) {
+        info->debug_info_addr = platform_alloc_rw(ef->debug_infosz);
+        platform_memcpy(info->debug_info_addr, ef->debug_info + (char *)ef->file, ef->debug_infosz);
+        info->debug_info_size = ef->debug_infosz;
+    }
+
+    if (ef->debug_abbrev != 0) {
+        info->debug_abbrev_addr = platform_alloc_rw(ef->debug_abbrevsz);
+        platform_memcpy(info->debug_abbrev_addr, ef->debug_abbrev + (char *)ef->file, ef->debug_abbrevsz);
+        info->debug_abbrev_size = ef->debug_abbrevsz;
+    }
+
+    if (ef->debug_line != 0) {
+        info->debug_line_addr = platform_alloc_rw(ef->debug_linesz);
+        platform_memcpy(info->debug_line_addr, ef->debug_line + (char *)ef->file, ef->debug_linesz);
+        info->debug_line_size = ef->debug_linesz;
+    }
+
+    if (ef->debug_str != 0) {
+        info->debug_str_addr = platform_alloc_rw(ef->debug_strsz);
+        platform_memcpy(info->debug_str_addr, ef->debug_str + (char *)ef->file, ef->debug_strsz);
+        info->debug_str_size = ef->debug_strsz;
+    }
+
+    if (ef->debug_ranges != 0) {
+        info->debug_ranges_addr = platform_alloc_rw(ef->debug_rangessz);
+        platform_memcpy(info->debug_ranges_addr, ef->debug_ranges + (char *)ef->file, ef->debug_rangessz);
+        info->debug_ranges_size = ef->debug_rangessz;
+    }
+
+    if (ef->text != 0) {
+        info->text_addr = ef->text + ef->exec_virt;
+        info->text_size = ef->textsz;
     }
 
     return BFELF_SUCCESS;
