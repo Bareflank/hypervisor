@@ -21,6 +21,8 @@ parsers:
 
 ignore:
   - "bfm/ioctl/arch/linux/**"
+  - "bfvmm/include/memory_manager/**"
+  - "bfvmm/src/memory_manager/**"
 
 comment:
   layout: "header, diff, files"

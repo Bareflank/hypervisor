@@ -7,9 +7,9 @@ include(${CMAKE_INSTALL_PREFIX}/cmake/CMakeGlobal_Project.txt)
 # Subdirectories
 # ------------------------------------------------------------------------------
 
-# if(ENABLE_UNITTESTING)
-#     add_subdirectory(tests)
-# endif()
+if(ENABLE_UNITTESTING)
+    add_subdirectory(tests)
+endif()
 
 # ------------------------------------------------------------------------------
 # Custom Targets
