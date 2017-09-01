@@ -201,6 +201,23 @@ setup_vmcs_halt(MockRepository &mocks, vmcs::value_type reason)
     return vmcs;
 }
 
+auto
+setup_vmcs_promote(MockRepository &mocks, vmcs::value_type reason)
+{
+    auto vmcs = mocks.Mock<vmcs_intel_x64>();
+
+    mocks.NeverCall(vmcs, vmcs_intel_x64::launch);
+    mocks.ExpectCall(vmcs, vmcs_intel_x64::promote);
+    mocks.NeverCall(vmcs, vmcs_intel_x64::load);
+    mocks.NeverCall(vmcs, vmcs_intel_x64::clear);
+    mocks.NeverCall(vmcs, vmcs_intel_x64::resume);
+
+    g_msrs[intel_x64::msrs::ia32_vmx_true_entry_ctls::addr] = 0xFFFFFFFFFFFFFFFFUL;
+    g_exit_reason = reason;
+
+    return vmcs;
+}
+
 exit_handler_intel_x64
 setup_ehlr(gsl::not_null<vmcs_intel_x64 *> vmcs)
 {
@@ -237,6 +254,46 @@ setup_pt(MockRepository &mocks)
     mocks.OnCall(pt, root_page_table_x64::unmap);
 
     return pt;
+}
+
+TEST_CASE("exit_handler: stop")
+{
+    MockRepository mocks;
+    setup_intrinsics(mocks);
+    auto vmcs = setup_vmcs_halt(mocks, 0x0);
+    auto ehlr = setup_ehlr(vmcs);
+
+    CHECK_NOTHROW(ehlr.stop());
+}
+
+TEST_CASE("exit_handler: promote")
+{
+    MockRepository mocks;
+    setup_intrinsics(mocks);
+    auto vmcs = setup_vmcs_promote(mocks, 0x0);
+    auto ehlr = setup_ehlr(vmcs);
+
+    CHECK_NOTHROW(ehlr.promote());
+}
+
+TEST_CASE("exit_handler: resume")
+{
+    MockRepository mocks;
+    setup_intrinsics(mocks);
+    auto vmcs = setup_vmcs_unhandled(mocks, 0x0);
+    auto ehlr = setup_ehlr(vmcs);
+
+    CHECK_NOTHROW(ehlr.resume());
+}
+
+TEST_CASE("exit_handler: advance_and_resume")
+{
+    MockRepository mocks;
+    setup_intrinsics(mocks);
+    auto vmcs = setup_vmcs_unhandled(mocks, 0x0);
+    auto ehlr = setup_ehlr(vmcs);
+
+    CHECK_NOTHROW(ehlr.advance_and_resume());
 }
 
 TEST_CASE("exit_handler: vm_exit_reason_unknown")

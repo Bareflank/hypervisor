@@ -21,5 +21,8 @@ endmacro(do_test)
 
 do_test(vmcs_intel_x64)
 do_test(vmcs_intel_x64_host_vm_state)
+do_test(vmcs_intel_x64_launch_mock)
+do_test(vmcs_intel_x64_promote_mock)
+do_test(vmcs_intel_x64_resume_mock)
 do_test(vmcs_intel_x64_state)
 do_test(vmcs_intel_x64_vmm_state)

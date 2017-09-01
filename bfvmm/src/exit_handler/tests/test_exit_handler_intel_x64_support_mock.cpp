@@ -19,11 +19,10 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <bftypes.h>
-#include <vmcs/vmcs_intel_x64_resume.h>
+#include <catch/catch.hpp>
+#include <exit_handler/exit_handler_intel_x64_support.h>
 
-extern "C" void
-vmcs_resume(state_save_intel_x64 *state_save) noexcept
+TEST_CASE("exit_handler: entry_valid")
 {
-    bfignored(state_save);
+    CHECK_NOTHROW(exit_handler_entry());
 }

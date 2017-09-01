@@ -11,9 +11,6 @@ include(${CMAKE_INSTALL_PREFIX}/cmake/CMakeGlobal_Includes.txt)
 list(APPEND SOURCES
     exit_handler_intel_x64.cpp
     exit_handler_intel_x64_entry.cpp
-    exit_handler_intel_x64_unittests_containers.cpp
-    exit_handler_intel_x64_unittests.cpp
-    exit_handler_intel_x64_unittests_io.cpp
 )
 
 if(CMAKE_TOOLCHAIN_FILE)

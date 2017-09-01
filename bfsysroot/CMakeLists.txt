@@ -241,6 +241,7 @@ ExternalProject_Add(
 if(ENABLE_UNITTESTING)
 
     add_custom_target(distclean
+        COMMAND ${CMAKE_COMMAND} --build . --target clean
         COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfunwind/build --target clean
         COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfsupport/build --target clean
     )
@@ -248,6 +249,7 @@ if(ENABLE_UNITTESTING)
 else()
 
     add_custom_target(distclean
+        COMMAND ${CMAKE_COMMAND} --build . --target clean
         COMMAND make -C ${CMAKE_BINARY_DIR}/newlib/build clean > /dev/null 2>&1
         COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfunwind/build --target clean
         COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/libcxxabi/build --target clean

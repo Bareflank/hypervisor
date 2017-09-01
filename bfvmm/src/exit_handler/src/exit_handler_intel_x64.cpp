@@ -76,12 +76,12 @@ exit_handler_intel_x64::stop() noexcept
 { pm::stop(); }
 
 void
-exit_handler_intel_x64::resume()
-{ m_vmcs->resume(); }
-
-void
 exit_handler_intel_x64::promote()
 { m_vmcs->promote(); }
+
+void
+exit_handler_intel_x64::resume()
+{ m_vmcs->resume(); }
 
 void
 exit_handler_intel_x64::advance_and_resume()
@@ -511,6 +511,15 @@ exit_handler_intel_x64::handle_vmcall_stop(vmcall_registers_t &regs)
 {
     (void) regs;
     bfdebug_info(0, "host os is" bfcolor_red " not " bfcolor_end "in a vm");
+}
+
+void
+exit_handler_intel_x64::handle_vmcall_unittest(vmcall_registers_t &regs)
+{
+    bfdebug_transaction(0, [&](std::string * msg) {
+        bfdebug_info(0, "vmcall unittest", msg);
+        bfdebug_subnhex(0, "r02", regs.r02, msg);
+    });
 }
 
 void

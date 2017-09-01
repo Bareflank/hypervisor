@@ -29,7 +29,7 @@ using namespace x64;
 
 TEST_CASE("vmcs: state")
 {
-    CHECK_NOTHROW([&] { vmcs_intel_x64_state state{}; });
+    CHECK_NOTHROW(vmcs_intel_x64_state{});
 }
 
 TEST_CASE("vmcs: state_segment_registers")

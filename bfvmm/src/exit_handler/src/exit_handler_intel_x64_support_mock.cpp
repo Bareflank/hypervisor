@@ -19,25 +19,9 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <bfgsl.h>
-#include <bfdebug.h>
-
 #include <exit_handler/exit_handler_intel_x64_support.h>
 
-#ifdef EXIT_HANDLER_TEST
-
 extern "C" void
 exit_handler_entry(void) noexcept
 {
 }
-
-#else
-
-extern "C" void
-exit_handler_entry(void) noexcept
-{
-    std::cerr << __BFFUNC__ << " called" << '\n';
-    abort();
-}
-
-#endif

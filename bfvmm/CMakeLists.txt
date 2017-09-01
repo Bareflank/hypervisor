@@ -15,6 +15,13 @@ else()
     set(INSTALL_BIN_DIR ${CMAKE_INSTALL_PREFIX}/bin)
 endif()
 
+if(NOT CMAKE_TOOLCHAIN_FILE)
+    if(NOT CMAKE_TOOLCHAIN_FILE)
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DDEBUG_LEVEL=1")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DDEBUG_LEVEL=1")
+    endif()
+endif()
+
 add_subdirectory(src)
 
 # ------------------------------------------------------------------------------

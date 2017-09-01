@@ -4,6 +4,7 @@
 // Copyright (C) 2015 Assured Information Security, Inc.
 // Author: Rian Quinn        <quinnr@ainfosec.com>
 // Author: Brendan Kerrigan  <kerriganb@ainfosec.com>
+// Author: Connor Davis      <davisc@ainfosec.com>
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -19,32 +20,10 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#ifndef EXIT_HANDLER_INTEL_X64_UNITTESTS_H
-#define EXIT_HANDLER_INTEL_X64_UNITTESTS_H
+#include <catch/catch.hpp>
+#include <vmcs/vmcs_intel_x64_launch.h>
 
-#ifdef INCLUDE_LIBCXX_UNITTESTS
-
-#include <bfdebug.h>
-#include <bfstring.h>
-
-inline void
-expect_true_with_args(bool cond, const char *func, int line)
+TEST_CASE("")
 {
-    if (!cond) {
-        throw std::runtime_error("unittest failed ["_s + std::to_string(line) + "]: "_s + func);
-    }
+    CHECK_NOTHROW(vmcs_launch(nullptr));
 }
-
-inline void
-expect_false_with_args(bool cond, const char *func, int line)
-{
-    if (cond) {
-        throw std::runtime_error("unittest failed ["_s + std::to_string(line) + "]: "_s + func);
-    }
-}
-
-#define expect_true(a) expect_true_with_args(a, __FUNC__, __LINE__);
-#define expect_false(a) expect_false_with_args(a, __FUNC__, __LINE__);
-
-#endif
-#endif

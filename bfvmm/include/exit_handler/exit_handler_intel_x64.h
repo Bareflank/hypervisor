@@ -194,24 +194,6 @@ public:
         gsl::not_null<state_save_intel_x64 *> state_save)
     { m_state_save = state_save; }
 
-private:
-
-#ifdef INCLUDE_LIBCXX_UNITTESTS
-    void unittest_1001_containers_array() const;
-    void unittest_1002_containers_vector() const;
-    void unittest_1003_containers_deque() const;
-    void unittest_1004_containers_forward_list() const;
-    void unittest_1005_containers_list() const;
-    void unittest_1006_containers_stack() const;
-    void unittest_1007_containers_queue() const;
-    void unittest_1008_containers_priority_queue() const;
-    void unittest_1009_containers_set() const;
-    void unittest_100A_containers_map() const;
-
-    void unittest_1100_io_cout() const;
-    void unittest_1101_io_manipulators() const;
-#endif
-
 public:
 
     exit_handler_intel_x64(exit_handler_intel_x64 &&) noexcept = default;

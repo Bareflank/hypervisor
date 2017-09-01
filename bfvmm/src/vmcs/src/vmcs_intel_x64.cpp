@@ -59,11 +59,12 @@ vmcs_intel_x64::launch(gsl::not_null<vmcs_intel_x64_state *> host_state,
     this->write_fields(host_state, guest_state);
 
     auto ___ = gsl::on_failure([&] {
-        vmcs::check::all();
         bfdebug_transaction(0, [&](std::string * msg)
-        {
-            vmcs::debug::dump(0, msg);
-        });
+        { vmcs::debug::dump(0, msg); });
+    });
+
+    auto ___ = gsl::on_failure([&] {
+        vmcs::check::all();
     });
 
     if (guest_state->is_guest()) {
