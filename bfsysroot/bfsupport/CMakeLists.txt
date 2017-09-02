@@ -26,10 +26,10 @@ else()
 endif()
 
 add_subdirectory(crt)
-add_subdirectory(syscall)
-add_subdirectory(pthread)
 
 if(CMAKE_TOOLCHAIN_FILE)
+    add_subdirectory(syscall)
+    add_subdirectory(pthread)
     add_subdirectory(dummy_lib1)
     add_subdirectory(dummy_lib2)
     add_subdirectory(dummy_main)

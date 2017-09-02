@@ -314,38 +314,38 @@ if(NOT WIN32)
 
 endif()
 
-# if(ENABLE_UNITTESTING)
+if(ENABLE_UNITTESTING)
 
-#     list(APPEND TEST_BFSYSROOT_CMAKE_ARGS
-#         -DBAREFLANK_SOURCE_DIR=${CMAKE_SOURCE_DIR}
-#         -DBAREFLANK_BINARY_DIR=${CMAKE_BINARY_DIR}
-#         -DCMAKE_INSTALL_PREFIX=${BAREFLANK_INSTALL_TEST_PREFIX}
-#         -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
-#         -DENABLE_COVERAGE=${ENABLE_COVERAGE}
-#         -DENABLE_DYNAMIC_ASAN=${ENABLE_DYNAMIC_ASAN}
-#         -DENABLE_DYNAMIC_USAN=${ENABLE_DYNAMIC_USAN}
-#         -DENABLE_TIDY=${ENABLE_TIDY}
-#         -DENABLE_ASTYLE=${ENABLE_ASTYLE}
-#         -DENABLE_UNITTESTING=${ENABLE_UNITTESTING}
-#         -DBUILD_SHARED_LIBS=${BAREFLANK_TEST_SHARED_LIBS}
-#         -DBUILD_STATIC_LIBS=${BAREFLANK_TEST_STATIC_LIBS}
-#     )
+    list(APPEND TEST_BFSYSROOT_CMAKE_ARGS
+        -DBAREFLANK_SOURCE_DIR=${CMAKE_SOURCE_DIR}
+        -DBAREFLANK_BINARY_DIR=${CMAKE_BINARY_DIR}
+        -DCMAKE_INSTALL_PREFIX=${BAREFLANK_INSTALL_TEST_PREFIX}
+        -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+        -DENABLE_COVERAGE=${ENABLE_COVERAGE}
+        -DENABLE_DYNAMIC_ASAN=${ENABLE_DYNAMIC_ASAN}
+        -DENABLE_DYNAMIC_USAN=${ENABLE_DYNAMIC_USAN}
+        -DENABLE_TIDY=${ENABLE_TIDY}
+        -DENABLE_ASTYLE=${ENABLE_ASTYLE}
+        -DENABLE_UNITTESTING=${ENABLE_UNITTESTING}
+        -DBUILD_SHARED_LIBS=${BAREFLANK_TEST_SHARED_LIBS}
+        -DBUILD_STATIC_LIBS=${BAREFLANK_TEST_STATIC_LIBS}
+    )
 
-#     ExternalProject_Add(
-#         test_bfsysroot
-#         CMAKE_ARGS          ${TEST_BFSYSROOT_CMAKE_ARGS}
-#         PREFIX              ${CMAKE_BINARY_DIR}/test_bfsysroot/prefix
-#         TMP_DIR             ${CMAKE_BINARY_DIR}/test_bfsysroot/tmp
-#         STAMP_DIR           ${CMAKE_BINARY_DIR}/test_bfsysroot/stamp
-#         DOWNLOAD_DIR        ${CMAKE_BINARY_DIR}/test_bfsysroot/download
-#         SOURCE_DIR          ${CMAKE_SOURCE_DIR}/bfsysroot
-#         BINARY_DIR          ${CMAKE_BINARY_DIR}/test_bfsysroot/build
-#         UPDATE_COMMAND      ${CMAKE_COMMAND} -E echo "checking for updates"
-#         INSTALL_COMMAND     ""
-#         DEPENDS             bfsysroot
-#     )
+    ExternalProject_Add(
+        test_bfsysroot
+        CMAKE_ARGS          ${TEST_BFSYSROOT_CMAKE_ARGS}
+        PREFIX              ${CMAKE_BINARY_DIR}/test_bfsysroot/prefix
+        TMP_DIR             ${CMAKE_BINARY_DIR}/test_bfsysroot/tmp
+        STAMP_DIR           ${CMAKE_BINARY_DIR}/test_bfsysroot/stamp
+        DOWNLOAD_DIR        ${CMAKE_BINARY_DIR}/test_bfsysroot/download
+        SOURCE_DIR          ${CMAKE_SOURCE_DIR}/bfsysroot
+        BINARY_DIR          ${CMAKE_BINARY_DIR}/test_bfsysroot/build
+        UPDATE_COMMAND      ${CMAKE_COMMAND} -E echo "checking for updates"
+        INSTALL_COMMAND     ""
+        DEPENDS             bfsdk
+    )
 
-# endif()
+endif()
 
 # ------------------------------------------------------------------------------
 # ELF Loader
@@ -646,15 +646,20 @@ if(NOT WIN32)
 endif()
 
 if(ENABLE_UNITTESTING)
+    add_custom_command(TARGET distclean COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/test_bfsysroot/build --target distclean)
     add_custom_command(TARGET distclean COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/test_bfvmm/build --target clean)
-    # add_custom_command(TARGET distclean COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/test_bfsysroot/build --target clean)
 endif()
 
 if(ENABLE_EXTENDED_APIS)
-    add_custom_command(TARGET distclean COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/extended_apis/build --target clean)
+
+    if(NOT WIN32)
+        add_custom_command(TARGET distclean COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/extended_apis/build --target clean)
+    endif()
+
     if(ENABLE_UNITTESTING)
         add_custom_command(TARGET distclean COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/test_extended_apis/build --target clean)
     endif()
+
 endif()
 
 # ------------------------------------------------------------------------------
@@ -672,8 +677,8 @@ if(ENABLE_UNITTESTING)
         COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/bfelf_loader/build ctest
         COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/bfm/build ctest
         COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/bfsdk/build ctest
-        # COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/test_bfsysroot/build ctest
         COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/test_bfvmm/build ctest
+        COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/test_bfsysroot/build --target test
     )
 
     if(ENABLE_EXTENDED_APIS)
@@ -705,26 +710,14 @@ if(ENABLE_TIDY AND NOT WIN32)
         add_custom_command(TARGET tidy-all COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfelf_loader/build --target tidy-all)
     endif()
 
-    if(NOT ENABLE_UNITTESTING)
-        add_custom_command(TARGET tidy COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfvmm/build --target tidy)
-        add_custom_command(TARGET tidy COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfsysroot/build --target tidy)
-        add_custom_command(TARGET tidy-all COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfvmm/build --target tidy-all)
-        add_custom_command(TARGET tidy-all COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfsysroot/build --target tidy-all)
-    else()
-        add_custom_command(TARGET tidy COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/test_bfvmm/build --target tidy)
-        add_custom_command(TARGET tidy COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfsysroot/build --target tidy)
-        add_custom_command(TARGET tidy-all COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/test_bfvmm/build --target tidy-all)
-        add_custom_command(TARGET tidy-all COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfsysroot/build --target tidy-all)
-    endif()
+    add_custom_command(TARGET tidy COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfvmm/build --target tidy)
+    add_custom_command(TARGET tidy COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfsysroot/build --target tidy)
+    add_custom_command(TARGET tidy-all COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfvmm/build --target tidy-all)
+    add_custom_command(TARGET tidy-all COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfsysroot/build --target tidy-all)
 
     if(ENABLE_EXTENDED_APIS)
-        if(NOT ENABLE_UNITTESTING)
-            add_custom_command(TARGET tidy COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/extended_apis/build --target tidy)
-            add_custom_command(TARGET tidy-all COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/extended_apis/build --target tidy-all)
-        else()
-            add_custom_command(TARGET tidy COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/test_extended_apis/build --target tidy)
-            add_custom_command(TARGET tidy-all COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/test_extended_apis/build --target tidy-all)
-        endif()
+        add_custom_command(TARGET tidy COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/extended_apis/build --target tidy)
+        add_custom_command(TARGET tidy-all COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/extended_apis/build --target tidy-all)
     endif()
 
 endif()
@@ -754,13 +747,8 @@ if(ENABLE_ASTYLE AND NOT WIN32)
     )
 
     if(ENABLE_EXTENDED_APIS)
-        if(NOT ENABLE_UNITTESTING)
-            add_custom_command(TARGET format COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/extended_apis/build --target format)
-            add_custom_command(TARGET format-all COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/extended_apis/build --target format-all)
-        else()
-            add_custom_command(TARGET format COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/test_extended_apis/build --target format)
-            add_custom_command(TARGET format-all COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/test_extended_apis/build --target format-all)
-        endif()
+        add_custom_command(TARGET format COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/extended_apis/build --target format)
+        add_custom_command(TARGET format-all COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/extended_apis/build --target format-all)
     endif()
 
 endif()
