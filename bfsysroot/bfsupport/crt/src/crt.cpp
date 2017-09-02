@@ -20,6 +20,17 @@
 #define NEED_GSL_LITE
 #define NEED_STD_LITE
 
+#ifdef ENABLE_UNITTESTING
+#define MAIN mock_main
+#else
+#define MAIN main
+#endif
+
+#ifdef ENABLE_UNITTESTING
+#define GSL_ABORT mock_abort
+extern "C" void mock_abort() noexcept(false);
+#endif
+
 #include <bfgsl.h>
 #include <bfexports.h>
 #include <bfsupport.h>
@@ -30,8 +41,8 @@
 using init_t = void (*)();
 using fini_t = void (*)();
 
-int __attribute__((weak))
-main(int argc, const char *argv[])
+extern "C" int WEAK_SYM
+MAIN(int argc, const char *argv[])
 {
     bfignored(argc);
     bfignored(argv);
@@ -39,7 +50,7 @@ main(int argc, const char *argv[])
     return -1;
 }
 
-extern "C" int64_t __attribute__((weak))
+extern "C" int64_t WEAK_SYM
 bfmain(uintptr_t request, uintptr_t arg1, uintptr_t arg2, uintptr_t arg3)
 {
     bfignored(request);
@@ -55,10 +66,12 @@ extern eh_frame_t __g_eh_frame_list[MAX_NUM_MODULES];
 extern int __g_dwarf_sections_num;
 extern dwarf_sections_t __g_dwarf_sections[MAX_NUM_MODULES];
 
+#ifndef ENABLE_UNITTESTING
 EXPORT_SYM void *__dso_handle = nullptr;
+#endif
 
 extern "C" void
-__bareflank_init(const section_info_t *info) noexcept
+__bareflank_init(const section_info_t *info)
 {
     if (info->init_addr != nullptr) {
         reinterpret_cast<init_t>(info->init_addr)();
@@ -75,7 +88,7 @@ __bareflank_init(const section_info_t *info) noexcept
 }
 
 extern "C" void
-__bareflank_fini(const section_info_t *info) noexcept
+__bareflank_fini(const section_info_t *info)
 {
     if (info->fini_array_addr != nullptr) {
         auto n = info->fini_array_size >> 3;
@@ -92,7 +105,7 @@ __bareflank_fini(const section_info_t *info) noexcept
 }
 
 extern "C" void
-__bareflank_register_eh_frame(const section_info_t *info) noexcept
+__bareflank_register_eh_frame(const section_info_t *info)
 {
     auto elem = &gsl::at(__g_eh_frame_list, __g_eh_frame_list_num++);
 
@@ -100,11 +113,13 @@ __bareflank_register_eh_frame(const section_info_t *info) noexcept
     elem->size = info->eh_frame_size;
 }
 
+
+int count = 0;
 extern "C" void
-__bareflank_register_debug_info(const section_info_t *info) noexcept
+__bareflank_register_debug_info(const section_info_t *info)
 {
     auto elem = &gsl::at(__g_dwarf_sections, __g_dwarf_sections_num++);
-
+    printf("count: %d\n", __g_dwarf_sections_num);
     elem->debug_info_addr = info->debug_info_addr;
     elem->debug_info_size = info->debug_info_size;
     elem->debug_abbrev_addr = info->debug_abbrev_addr;
@@ -144,7 +159,7 @@ _start_c(const crt_info_t *info) noexcept
     }
 
     if (info->arg_type == 0) {
-        ret = main(info->argc, info->argv);
+        ret = MAIN(info->argc, info->argv);
     }
     else {
         ret = bfmain(info->request, info->arg1, info->arg2, info->arg3);

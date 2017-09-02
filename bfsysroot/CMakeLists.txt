@@ -79,33 +79,41 @@ endif()
 # Unwind
 # ------------------------------------------------------------------------------
 
-list(APPEND BFUNWIND_CMAKE_ARGS
-    -DBAREFLANK_SOURCE_DIR=${BAREFLANK_SOURCE_DIR}
-    -DBAREFLANK_BINARY_DIR=${BAREFLANK_BINARY_DIR}
-    -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
-    -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
-    -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}
-    -DENABLE_COVERAGE=${ENABLE_COVERAGE}
-    -DENABLE_DYNAMIC_ASAN=${ENABLE_DYNAMIC_ASAN}
-    -DENABLE_DYNAMIC_USAN=${ENABLE_DYNAMIC_USAN}
-    -DENABLE_TIDY=${ENABLE_TIDY}
-    -DENABLE_ASTYLE=${ENABLE_ASTYLE}
-    -DENABLE_UNITTESTING=${ENABLE_UNITTESTING}
-    -DBUILD_SHARED_LIBS=${BUILD_SHARED_LIBS}
-    -DBUILD_STATIC_LIBS=${BUILD_STATIC_LIBS}
-)
+if(ENABLE_UNITTESTING)
 
-ExternalProject_Add(
-    bfunwind
-    CMAKE_ARGS      ${BFUNWIND_CMAKE_ARGS}
-    PREFIX          ${CMAKE_BINARY_DIR}/bfunwind/prefix
-    TMP_DIR         ${CMAKE_BINARY_DIR}/bfunwind/tmp
-    STAMP_DIR       ${CMAKE_BINARY_DIR}/bfunwind/stamp
-    SOURCE_DIR      ${CMAKE_SOURCE_DIR}/bfunwind
-    BINARY_DIR      ${CMAKE_BINARY_DIR}/bfunwind/build
-    UPDATE_COMMAND  ${CMAKE_COMMAND} -E echo "checking for updates"
-    DEPENDS         newlib
-)
+    add_custom_target(bfunwind)
+
+else()
+
+    list(APPEND BFUNWIND_CMAKE_ARGS
+        -DBAREFLANK_SOURCE_DIR=${BAREFLANK_SOURCE_DIR}
+        -DBAREFLANK_BINARY_DIR=${BAREFLANK_BINARY_DIR}
+        -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+        -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+        -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}
+        -DENABLE_COVERAGE=${ENABLE_COVERAGE}
+        -DENABLE_DYNAMIC_ASAN=${ENABLE_DYNAMIC_ASAN}
+        -DENABLE_DYNAMIC_USAN=${ENABLE_DYNAMIC_USAN}
+        -DENABLE_TIDY=${ENABLE_TIDY}
+        -DENABLE_ASTYLE=${ENABLE_ASTYLE}
+        -DENABLE_UNITTESTING=${ENABLE_UNITTESTING}
+        -DBUILD_SHARED_LIBS=${BUILD_SHARED_LIBS}
+        -DBUILD_STATIC_LIBS=${BUILD_STATIC_LIBS}
+    )
+
+    ExternalProject_Add(
+        bfunwind
+        CMAKE_ARGS      ${BFUNWIND_CMAKE_ARGS}
+        PREFIX          ${CMAKE_BINARY_DIR}/bfunwind/prefix
+        TMP_DIR         ${CMAKE_BINARY_DIR}/bfunwind/tmp
+        STAMP_DIR       ${CMAKE_BINARY_DIR}/bfunwind/stamp
+        SOURCE_DIR      ${CMAKE_SOURCE_DIR}/bfunwind
+        BINARY_DIR      ${CMAKE_BINARY_DIR}/bfunwind/build
+        UPDATE_COMMAND  ${CMAKE_COMMAND} -E echo "checking for updates"
+        DEPENDS         newlib
+    )
+
+endif()
 
 # ------------------------------------------------------------------------------
 # Libcxxabi
@@ -270,8 +278,7 @@ if(ENABLE_UNITTESTING)
     endif()
 
     add_custom_target(test
-        COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfunwind/build --target test
-        COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfsupport/build --target test
+        COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/bfsupport/build ctest
     )
 
 endif()
