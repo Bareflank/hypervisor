@@ -376,10 +376,7 @@ dev_init(void)
         return -EPERM;
     }
 
-    if (common_init() != 0) {
-        BFALERT("common_init failed\n");
-        return -EPERM;
-    }
+    common_init();
 
     BFDEBUG("dev_init succeeded\n");
     return 0;

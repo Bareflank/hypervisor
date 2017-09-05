@@ -2307,7 +2307,7 @@ public:
      * @param paths a list of paths to locate the ELF binary from
      */
     binaries_info(
-        gsl::not_null<file *> f, const std::string &filename, const std::vector<std::string> &paths)
+        gsl::not_null<file *> f, const std::string &filename, const std::vector<std::string> &paths, bool load = true)
     {
         bfn::buffer data;
         bfelf_binary_t binary = {};
@@ -2321,7 +2321,9 @@ public:
             this->unload_binaries();
         });
 
-        this->load_binaries();
+        if (load) {
+            this->load_binaries();
+        }
     }
 
     /**
@@ -2337,7 +2339,7 @@ public:
      * @param filenames the list of files to load
      */
     binaries_info(
-        gsl::not_null<file *> f, const std::vector<std::string> &filenames)
+        gsl::not_null<file *> f, const std::vector<std::string> &filenames, bool load = true)
     {
         this->init_binaries(f, filenames);
 
@@ -2345,7 +2347,9 @@ public:
             this->unload_binaries();
         });
 
-        this->load_binaries();
+        if (load) {
+            this->load_binaries();
+        }
     }
 
     /**
@@ -2395,12 +2399,61 @@ public:
      * @expects index is valid
      * @ensures none
      *
-     * @param index the ELF binary to get
+     * @param index of the ELF binary to get
      * @return main binary
      */
     auto &
     ef(index_type index)
     { return m_binaries.at(index).ef; }
+
+    /**
+     * Get A Specific Binary
+     *
+     * @expects none
+     * @ensures none
+     *
+     * @param index of the specific binary to get
+     * @return returns a specific binary
+     */
+    auto &
+    at(index_type index)
+    { return m_binaries.at(index); }
+
+    /**
+     * Get The First Binary
+     *
+     * @expects none
+     * @ensures none
+     *
+     * @return returns the first binary
+     */
+    auto &
+    front()
+    { return m_binaries.front(); }
+
+    /**
+     * Get The Last Binary
+     *
+     * @expects none
+     * @ensures none
+     *
+     * @return returns the last binary
+     */
+    auto &
+    back()
+    { return m_binaries.back(); }
+
+    /**
+     * Get Binaries
+     *
+     * @expects none
+     * @ensures none
+     *
+     * @return returns the Binaries
+     */
+    auto &
+    binaries()
+    { return m_binaries; }
 
     /**
      * Get CRT Info
@@ -2453,11 +2506,8 @@ private:
         expects(!filenames.empty());
 
         for (const auto &filename : filenames) {
-
             bfelf_binary_t binary = {};
-            auto data = private_read_binary(f, filename, binary);
-
-            this->push_binary(std::move(data), std::move(binary));
+            this->push_binary(private_read_binary(f, filename, binary), std::move(binary));
         }
     }
 
@@ -2484,6 +2534,18 @@ private:
 
     std::vector<bfelf_binary_t> m_binaries;
     std::vector<file::binary_data> m_datas;
+
+public:
+
+    /** @cond */
+
+    binaries_info(binaries_info &&) noexcept = default;
+    binaries_info &operator=(binaries_info &&) noexcept = default;
+
+    binaries_info(const binaries_info &) = delete;
+    binaries_info &operator=(const binaries_info &) = delete;
+
+    /** @endcond */
 };
 
 #endif

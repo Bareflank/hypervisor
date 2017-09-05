@@ -19,6 +19,42 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+#ifndef REQUEST_INIT_FAILS
+#define REQUEST_INIT_RETURN ENTRY_SUCCESS
+#else
+#define REQUEST_INIT_RETURN ENTRY_ERROR_UNKNOWN
+#endif
+
+#ifndef REQUEST_FINI_FAILS
+#define REQUEST_FINI_RETURN ENTRY_SUCCESS
+#else
+#define REQUEST_FINI_RETURN ENTRY_ERROR_UNKNOWN
+#endif
+
+#ifndef REQUEST_ADD_MDL_FAILS
+#define REQUEST_ADD_MDL_RETURN ENTRY_SUCCESS
+#else
+#define REQUEST_ADD_MDL_RETURN ENTRY_ERROR_UNKNOWN
+#endif
+
+#ifndef REQUEST_GET_DRR_FAILS
+#define REQUEST_GET_DRR_RETURN ENTRY_SUCCESS
+#else
+#define REQUEST_GET_DRR_RETURN ENTRY_ERROR_UNKNOWN
+#endif
+
+#ifndef REQUEST_VMM_INIT_FAILS
+#define REQUEST_VMM_INIT_RETURN ENTRY_SUCCESS
+#else
+#define REQUEST_VMM_INIT_RETURN ENTRY_ERROR_UNKNOWN
+#endif
+
+#ifndef REQUEST_VMM_FINI_FAILS
+#define REQUEST_VMM_FINI_RETURN ENTRY_SUCCESS
+#else
+#define REQUEST_VMM_FINI_RETURN ENTRY_ERROR_UNKNOWN
+#endif
+
 #include <bfgsl.h>
 #include <bftypes.h>
 #include <bfexports.h>
@@ -54,20 +90,34 @@ main(int argc, char *argv[])
 extern "C" int64_t
 bfmain(uintptr_t request, uintptr_t arg1, uintptr_t arg2, uintptr_t arg3)
 {
+    bfignored(arg1);
+    bfignored(arg2);
     bfignored(arg3);
 
-    if (request < BF_REQUEST_END) {
-        return 0;
+    switch (request) {
+        case BF_REQUEST_INIT:
+            return REQUEST_INIT_RETURN;
+
+        case BF_REQUEST_FINI:
+            return REQUEST_FINI_RETURN;
+
+        case BF_REQUEST_ADD_MDL:
+            return REQUEST_ADD_MDL_RETURN;
+
+        case BF_REQUEST_GET_DRR:
+            return REQUEST_GET_DRR_RETURN;
+
+        case BF_REQUEST_VMM_INIT:
+            return REQUEST_VMM_INIT_RETURN;
+
+        case BF_REQUEST_VMM_FINI:
+            return REQUEST_VMM_FINI_RETURN;
+
+        default:
+            break;
     }
 
-    try {
-        throw std::runtime_error("test exceptions");
-    }
-    catch (std::exception &)
-    { }
-
-    return g_derived1.foo(gsl::narrow_cast<int>(arg1)) +
-           g_derived2.foo(gsl::narrow_cast<int>(arg2));
+    return ENTRY_ERROR_UNKNOWN;
 }
 
 // -----------------------------------------------------------------------------

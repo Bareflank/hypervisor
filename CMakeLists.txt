@@ -216,6 +216,7 @@ endif()
 # ------------------------------------------------------------------------------
 # SDK
 # ------------------------------------------------------------------------------
+
 list(APPEND BFSDK_CMAKE_ARGS
     -DBAREFLANK_SOURCE_DIR=${CMAKE_SOURCE_DIR}
     -DBAREFLANK_BINARY_DIR=${CMAKE_BINARY_DIR}
@@ -506,8 +507,8 @@ list(APPEND BFDRIVER_CMAKE_ARGS
     -DENABLE_TIDY=${ENABLE_TIDY}
     -DENABLE_ASTYLE=${ENABLE_ASTYLE}
     -DENABLE_UNITTESTING=${ENABLE_UNITTESTING}
-    -DBUILD_SHARED_LIBS=${BAREFLANK_TEST_SHARED_LIBS}
-    -DBUILD_STATIC_LIBS=${BAREFLANK_TEST_STATIC_LIBS}
+    -DBUILD_SHARED_LIBS=${BAREFLANK_HOST_SHARED_LIBS}
+    -DBUILD_STATIC_LIBS=${BAREFLANK_HOST_STATIC_LIBS}
 )
 
 ExternalProject_Add(
@@ -520,10 +521,13 @@ ExternalProject_Add(
     SOURCE_DIR          ${CMAKE_SOURCE_DIR}/bfdriver
     BINARY_DIR          ${CMAKE_BINARY_DIR}/bfdriver/build
     UPDATE_COMMAND      ${CMAKE_COMMAND} -E echo "checking for updates"
-    BUILD_COMMAND       ""
     INSTALL_COMMAND     ""
     DEPENDS             bfsdk bfelf_loader
 )
+
+if(ENABLE_UNITTESTING AND NOT WIN32)
+    add_dependencies(bfdriver bfsysroot)
+endif()
 
 # ------------------------------------------------------------------------------
 # Extended APIs
@@ -673,7 +677,7 @@ if(ENABLE_UNITTESTING)
     endif()
 
     add_custom_target(test
-        # COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/bfdriver/build ctest
+        COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/bfdriver/build ctest
         COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/bfelf_loader/build ctest
         COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/bfm/build ctest
         COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/bfsdk/build ctest
@@ -694,13 +698,13 @@ endif()
 if(ENABLE_TIDY AND NOT WIN32)
 
     add_custom_target(tidy
-        # COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfdriver/build --target tidy
+        COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfdriver/build --target tidy
         COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfm/build --target tidy
         COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfsdk/build --target tidy
     )
 
     add_custom_target(tidy-all
-        # COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfdriver/build --target tidy-all
+        COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfdriver/build --target tidy-all
         COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfm/build --target tidy-all
         COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfsdk/build --target tidy-all
     )

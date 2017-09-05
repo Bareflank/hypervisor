@@ -46,10 +46,8 @@ common_vmm_status(void);
  *
  * This function should not be called directly. Instead, use common_unload.
  * This is only exposed publically for unit testing.
- *
- * @return will always return BF_SUCCESS
  */
-int64_t
+void
 common_reset(void);
 
 /**
@@ -58,10 +56,8 @@ common_reset(void);
  * This code should be run as part of the driver entry's init code. This
  * sets up some resources that are needed throughout the lifetime of the
  * driver entry.
- *
- * @return BF_SUCCESS on success, negative error code on failure
  */
-int64_t
+void
 common_init(void);
 
 /**
