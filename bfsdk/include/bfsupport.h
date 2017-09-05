@@ -29,6 +29,7 @@
 
 #include <bftypes.h>
 #include <bfconstants.h>
+#include <bferrorcodes.h>
 
 /**
  * @struct section_info_t

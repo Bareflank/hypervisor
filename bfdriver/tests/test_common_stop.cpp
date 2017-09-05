@@ -19,136 +19,140 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <test.h>
+#include <catch/catch.hpp>
+#include <hippomocks.h>
 
-#include <entry.h>
+#include <bfdriverinterface.h>
+
 #include <common.h>
-#include <platform.h>
+#include <test_support.h>
 
-void
-driver_entry_ut::test_common_stop_stop_when_unloaded()
+#ifdef _HIPPOMOCKS__ENABLE_CFUNC_MOCKING_SUPPORT
+
+TEST_CASE("common_stop_vmm: success")
 {
-    this->expect_true(common_add_module(m_dummy_start_vmm_success.get(), m_dummy_start_vmm_success_length) == BF_SUCCESS);
-    this->expect_true(common_add_module(m_dummy_stop_vmm_success.get(), m_dummy_stop_vmm_success_length) == BF_SUCCESS);
-    this->expect_true(common_add_module(m_dummy_add_md_success.get(), m_dummy_add_md_success_length) == BF_SUCCESS);
-    this->expect_true(common_add_module(m_dummy_misc.get(), m_dummy_misc_length) == BF_SUCCESS);
-    this->expect_true(common_stop_vmm() == BF_ERROR_VMM_INVALID_STATE);
-    this->expect_true(common_fini() == BF_SUCCESS);
-}
+    binaries_info info{&g_file, g_filenames_success, false};
 
-void
-driver_entry_ut::test_common_stop_stop_when_not_running()
-{
-    this->expect_true(common_add_module(m_dummy_start_vmm_success.get(), m_dummy_start_vmm_success_length) == BF_SUCCESS);
-    this->expect_true(common_add_module(m_dummy_stop_vmm_success.get(), m_dummy_stop_vmm_success_length) == BF_SUCCESS);
-    this->expect_true(common_add_module(m_dummy_add_md_success.get(), m_dummy_add_md_success_length) == BF_SUCCESS);
-    this->expect_true(common_add_module(m_dummy_misc.get(), m_dummy_misc_length) == BF_SUCCESS);
-    this->expect_true(common_load_vmm() == BF_SUCCESS);
-    this->expect_true(common_stop_vmm() == BF_SUCCESS);
-    this->expect_true(common_fini() == BF_SUCCESS);
-}
-
-void
-driver_entry_ut::test_common_stop_stop_when_alread_stopped()
-{
-    this->expect_true(common_add_module(m_dummy_start_vmm_success.get(), m_dummy_start_vmm_success_length) == BF_SUCCESS);
-    this->expect_true(common_add_module(m_dummy_stop_vmm_success.get(), m_dummy_stop_vmm_success_length) == BF_SUCCESS);
-    this->expect_true(common_add_module(m_dummy_add_md_success.get(), m_dummy_add_md_success_length) == BF_SUCCESS);
-    this->expect_true(common_add_module(m_dummy_misc.get(), m_dummy_misc_length) == BF_SUCCESS);
-    this->expect_true(common_load_vmm() == BF_SUCCESS);
-    this->expect_true(common_start_vmm() == BF_SUCCESS);
-    this->expect_true(common_stop_vmm() == BF_SUCCESS);
-    this->expect_true(common_stop_vmm() == BF_SUCCESS);
-    this->expect_true(common_fini() == BF_SUCCESS);
-}
-
-void
-driver_entry_ut::test_common_stop_stop_when_corrupt()
-{
-    this->expect_true(common_add_module(m_dummy_start_vmm_success.get(), m_dummy_start_vmm_success_length) == BF_SUCCESS);
-    this->expect_true(common_add_module(m_dummy_stop_vmm_failure.get(), m_dummy_stop_vmm_failure_length) == BF_SUCCESS);
-    this->expect_true(common_add_module(m_dummy_add_md_success.get(), m_dummy_add_md_success_length) == BF_SUCCESS);
-    this->expect_true(common_add_module(m_dummy_misc.get(), m_dummy_misc_length) == BF_SUCCESS);
-    this->expect_true(common_load_vmm() == BF_SUCCESS);
-    this->expect_true(common_start_vmm() == BF_SUCCESS);
-    this->expect_true(common_stop_vmm() == ENTRY_ERROR_VMM_STOP_FAILED);
-    this->expect_true(common_stop_vmm() == BF_ERROR_VMM_CORRUPTED);
-    this->expect_true(common_fini() == BF_ERROR_VMM_CORRUPTED);
-
-    common_reset();
-}
-
-void
-driver_entry_ut::test_common_stop_stop_vmm_missing()
-{
-    this->expect_true(common_add_module(m_dummy_start_vmm_success.get(), m_dummy_start_vmm_success_length) == BF_SUCCESS);
-    this->expect_true(common_add_module(m_dummy_add_md_success.get(), m_dummy_add_md_success_length) == BF_SUCCESS);
-    this->expect_true(common_add_module(m_dummy_misc.get(), m_dummy_misc_length) == BF_SUCCESS);
-    this->expect_true(common_load_vmm() == BF_SUCCESS);
-    this->expect_true(common_start_vmm() == BF_SUCCESS);
-    this->expect_true(common_stop_vmm() == BFELF_ERROR_NO_SUCH_SYMBOL);
-    this->expect_true(common_fini() == BF_ERROR_VMM_CORRUPTED);
-
-    common_reset();
-}
-
-void
-driver_entry_ut::test_common_stop_stop_vmm_failure()
-{
-    this->expect_true(common_add_module(m_dummy_start_vmm_success.get(), m_dummy_start_vmm_success_length) == BF_SUCCESS);
-    this->expect_true(common_add_module(m_dummy_stop_vmm_failure.get(), m_dummy_stop_vmm_failure_length) == BF_SUCCESS);
-    this->expect_true(common_add_module(m_dummy_add_md_success.get(), m_dummy_add_md_success_length) == BF_SUCCESS);
-    this->expect_true(common_add_module(m_dummy_misc.get(), m_dummy_misc_length) == BF_SUCCESS);
-    this->expect_true(common_load_vmm() == BF_SUCCESS);
-    this->expect_true(common_start_vmm() == BF_SUCCESS);
-    this->expect_true(common_stop_vmm() == ENTRY_ERROR_VMM_STOP_FAILED);
-    this->expect_true(common_fini() == BF_ERROR_VMM_CORRUPTED);
-
-    common_reset();
-}
-
-void
-driver_entry_ut::test_common_stop_set_affinity_failed()
-{
-    this->expect_true(common_add_module(m_dummy_start_vmm_success.get(), m_dummy_start_vmm_success_length) == BF_SUCCESS);
-    this->expect_true(common_add_module(m_dummy_stop_vmm_success.get(), m_dummy_stop_vmm_success_length) == BF_SUCCESS);
-    this->expect_true(common_add_module(m_dummy_add_md_success.get(), m_dummy_add_md_success_length) == BF_SUCCESS);
-    this->expect_true(common_add_module(m_dummy_misc.get(), m_dummy_misc_length) == BF_SUCCESS);
-    this->expect_true(common_load_vmm() == BF_SUCCESS);
-    this->expect_true(common_start_vmm() == BF_SUCCESS);
-
-    {
-        MockRepository mocks;
-        mocks.ExpectCallFunc(platform_set_affinity).Return(-1);
-
-        RUN_UNITTEST_WITH_MOCKS(mocks, [&] {
-            this->expect_true(common_stop_vmm() == -1);
-        });
+    for (const auto &binary : info.binaries()) {
+        REQUIRE(common_add_module(binary.file, binary.file_size) == BF_SUCCESS);
     }
 
-    common_reset();
+    CHECK(common_load_vmm() == BF_SUCCESS);
+    CHECK(common_start_vmm() == BF_SUCCESS);
+    CHECK(common_stop_vmm() == BF_SUCCESS);
+    CHECK(common_fini() == BF_SUCCESS);
 }
 
-void
-driver_entry_ut::test_common_stop_vmcall_failed()
+TEST_CASE("common_stop_vmm: unloaded")
 {
-    this->expect_true(common_add_module(m_dummy_start_vmm_success.get(), m_dummy_start_vmm_success_length) == BF_SUCCESS);
-    this->expect_true(common_add_module(m_dummy_stop_vmm_success.get(), m_dummy_stop_vmm_success_length) == BF_SUCCESS);
-    this->expect_true(common_add_module(m_dummy_add_md_success.get(), m_dummy_add_md_success_length) == BF_SUCCESS);
-    this->expect_true(common_add_module(m_dummy_misc.get(), m_dummy_misc_length) == BF_SUCCESS);
-    this->expect_true(common_load_vmm() == BF_SUCCESS);
-    this->expect_true(common_start_vmm() == BF_SUCCESS);
+    binaries_info info{&g_file, g_filenames_success, false};
 
-    {
-        MockRepository mocks;
-        mocks.ExpectCallFunc(platform_vmcall).Do([](auto regs) {
-            regs->r01 = 1;
-        });
-
-        RUN_UNITTEST_WITH_MOCKS(mocks, [&] {
-            this->expect_true(common_stop_vmm() == ENTRY_ERROR_VMM_STOP_FAILED);
-        });
+    for (const auto &binary : info.binaries()) {
+        REQUIRE(common_add_module(binary.file, binary.file_size) == BF_SUCCESS);
     }
 
+    CHECK(common_stop_vmm() == BF_ERROR_VMM_INVALID_STATE);
+    CHECK(common_fini() == BF_SUCCESS);
+}
+
+TEST_CASE("common_stop_vmm: not running")
+{
+    binaries_info info{&g_file, g_filenames_success, false};
+
+    for (const auto &binary : info.binaries()) {
+        REQUIRE(common_add_module(binary.file, binary.file_size) == BF_SUCCESS);
+    }
+
+    CHECK(common_load_vmm() == BF_SUCCESS);
+    CHECK(common_stop_vmm() == BF_SUCCESS);
+    CHECK(common_fini() == BF_SUCCESS);
+}
+
+TEST_CASE("common_stop_vmm: already stopped")
+{
+    binaries_info info{&g_file, g_filenames_success, false};
+
+    for (const auto &binary : info.binaries()) {
+        REQUIRE(common_add_module(binary.file, binary.file_size) == BF_SUCCESS);
+    }
+
+    CHECK(common_load_vmm() == BF_SUCCESS);
+    CHECK(common_start_vmm() == BF_SUCCESS);
+    CHECK(common_stop_vmm() == BF_SUCCESS);
+    CHECK(common_stop_vmm() == BF_SUCCESS);
+    CHECK(common_fini() == BF_SUCCESS);
+}
+
+TEST_CASE("common_stop_vmm: corrupt")
+{
+    binaries_info info{&g_file, g_filenames_vmm_fini_fails, false};
+
+    for (const auto &binary : info.binaries()) {
+        REQUIRE(common_add_module(binary.file, binary.file_size) == BF_SUCCESS);
+    }
+
+    CHECK(common_load_vmm() == BF_SUCCESS);
+    CHECK(common_start_vmm() == BF_SUCCESS);
+    CHECK(common_fini() == BF_ERROR_VMM_CORRUPTED);
+    CHECK(common_stop_vmm() == BF_ERROR_VMM_CORRUPTED);
+
     common_reset();
 }
+
+TEST_CASE("common_start_vmm: stop fails")
+{
+    binaries_info info{&g_file, g_filenames_vmm_fini_fails, false};
+
+    for (const auto &binary : info.binaries()) {
+        REQUIRE(common_add_module(binary.file, binary.file_size) == BF_SUCCESS);
+    }
+
+    CHECK(common_load_vmm() == BF_SUCCESS);
+    CHECK(common_start_vmm() == BF_SUCCESS);
+    CHECK(common_stop_vmm() == ENTRY_ERROR_UNKNOWN);
+    CHECK(common_fini() == BF_ERROR_VMM_CORRUPTED);
+
+    common_reset();
+}
+
+TEST_CASE("common_stop_vmm: set affinity fails")
+{
+    binaries_info info{&g_file, g_filenames_success, false};
+
+    for (const auto &binary : info.binaries()) {
+        REQUIRE(common_add_module(binary.file, binary.file_size) == BF_SUCCESS);
+    }
+
+    CHECK(common_load_vmm() == BF_SUCCESS);
+    CHECK(common_start_vmm() == BF_SUCCESS);
+
+    MockRepository mocks;
+    mocks.OnCallFunc(platform_set_affinity).Return(BF_ERROR_UNKNOWN);
+
+    CHECK(common_stop_vmm() == BF_ERROR_UNKNOWN);
+    CHECK(common_fini() == BF_ERROR_VMM_CORRUPTED);
+
+    common_reset();
+}
+
+TEST_CASE("common_stop_vmm: vmcall fails")
+{
+    binaries_info info{&g_file, g_filenames_success, false};
+
+    for (const auto &binary : info.binaries()) {
+        REQUIRE(common_add_module(binary.file, binary.file_size) == BF_SUCCESS);
+    }
+
+    CHECK(common_load_vmm() == BF_SUCCESS);
+    CHECK(common_start_vmm() == BF_SUCCESS);
+
+    MockRepository mocks;
+    mocks.OnCallFunc(vmcall);
+
+    CHECK(common_stop_vmm() == ENTRY_ERROR_VMM_STOP_FAILED);
+    CHECK(common_fini() == BF_ERROR_VMM_CORRUPTED);
+
+    common_reset();
+}
+
+#endif

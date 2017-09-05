@@ -65,4 +65,76 @@ TEST_CASE("bfelf_binary: set args")
     CHECK_NOTHROW(info.set_args(0, nullptr));
 }
 
+TEST_CASE("bfelf_binary: ef")
+{
+    file f;
+    binaries_info info(&f, g_filenames);
+
+    CHECK_NOTHROW(info.ef());
+}
+
+TEST_CASE("bfelf_binary: ef index")
+{
+    file f;
+    binaries_info info(&f, g_filenames);
+
+    CHECK_NOTHROW(info.ef(0));
+}
+
+TEST_CASE("bfelf_binary: at")
+{
+    file f;
+    binaries_info info(&f, g_filenames);
+
+    CHECK_NOTHROW(info.at(0));
+}
+
+TEST_CASE("bfelf_binary: front")
+{
+    file f;
+    binaries_info info(&f, g_filenames);
+
+    CHECK_NOTHROW(info.front());
+}
+
+TEST_CASE("bfelf_binary: back")
+{
+    file f;
+    binaries_info info(&f, g_filenames);
+
+    CHECK_NOTHROW(info.back());
+}
+
+TEST_CASE("bfelf_binary: binaries")
+{
+    file f;
+    binaries_info info(&f, g_filenames);
+
+    CHECK_NOTHROW(info.binaries());
+}
+
+TEST_CASE("bfelf_binary: info")
+{
+    file f;
+    binaries_info info(&f, g_filenames);
+
+    CHECK_NOTHROW(info.info());
+}
+
+TEST_CASE("bfelf_binary: entry")
+{
+    file f;
+    binaries_info info(&f, g_filenames);
+
+    CHECK_NOTHROW(info.entry());
+}
+
+TEST_CASE("bfelf_binary: loader")
+{
+    file f;
+    binaries_info info(&f, g_filenames);
+
+    CHECK_NOTHROW(info.loader());
+}
+
 #endif
