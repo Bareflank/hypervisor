@@ -19,13 +19,16 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <catch/catch.hpp>
-#include <bfdriverinterface.h>
+#ifndef TEST_SUPPORT_H
+#define TEST_SUPPORT_H
 
-#include <common.h>
-#include <test_support.h>
+extern file g_file;
+extern std::vector<std::string> g_filenames_success;
+extern std::vector<std::string> g_filenames_init_fails;
+extern std::vector<std::string> g_filenames_fini_fails;
+extern std::vector<std::string> g_filenames_add_mdl_fails;
+extern std::vector<std::string> g_filenames_get_drr_fails;
+extern std::vector<std::string> g_filenames_vmm_init_fails;
+extern std::vector<std::string> g_filenames_vmm_fini_fails;
 
-TEST_CASE("run init")
-{
-    common_init();
-}
+#endif

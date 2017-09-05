@@ -113,13 +113,10 @@ __bareflank_register_eh_frame(const section_info_t *info)
     elem->size = info->eh_frame_size;
 }
 
-
-int count = 0;
 extern "C" void
 __bareflank_register_debug_info(const section_info_t *info)
 {
     auto elem = &gsl::at(__g_dwarf_sections, __g_dwarf_sections_num++);
-    printf("count: %d\n", __g_dwarf_sections_num);
     elem->debug_info_addr = info->debug_info_addr;
     elem->debug_info_size = info->debug_info_size;
     elem->debug_abbrev_addr = info->debug_abbrev_addr;
