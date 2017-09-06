@@ -55,14 +55,18 @@
 // Definitions
 // -----------------------------------------------------------------------------
 
+/// Page Table
+///
+/// Defines page table
+///
 class EXPORT_MEMORY_MANAGER page_table_x64
 {
 public:
 
-    using pointer = uintptr_t *;
-    using integer_pointer = uintptr_t;
-    using size_type = std::size_t;
-    using memory_descriptor_list = std::vector<memory_descriptor>;
+    using pointer = uintptr_t *;                                    ///< Pointer type
+    using integer_pointer = uintptr_t;                              ///< Integer pointer type
+    using size_type = std::size_t;                                  ///< Size type
+    using memory_descriptor_list = std::vector<memory_descriptor>;  ///< Memory descriptor list type
 
     /// Constructor
     ///
@@ -163,6 +167,7 @@ public:
     /// @ensures none
     ///
     /// @param addr the virtual address of the pte to locate
+    /// @return the PTE for the provided virtual address
     ///
     page_table_entry_x64 virt_to_pte(integer_pointer addr) const
     { return virt_to_pte(addr, x64::page_table::pml4::from); }
@@ -202,11 +207,15 @@ private:
 
 public:
 
+    /// @cond
+
     page_table_x64(page_table_x64 &&) noexcept = default;
     page_table_x64 &operator=(page_table_x64 &&) noexcept = default;
 
     page_table_x64(const page_table_x64 &) = delete;
     page_table_x64 &operator=(const page_table_x64 &) = delete;
+
+    /// @endcond
 };
 
 #ifdef _MSC_VER

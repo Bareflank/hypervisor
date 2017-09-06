@@ -11502,7 +11502,7 @@ namespace ia32_vmx_procbased_ctls2
         { return (_read_msr(addr) & (mask << 32)) != 0; }
 
         inline void dump(int level, std::string *msg = nullptr)
-        { bfdebug_subbool(level, name, is_enabled(), msg); }
+        { bfdebug_subbool(level, name, is_allowed1(), msg); }
     }
 
     namespace enable_ept
@@ -11530,7 +11530,7 @@ namespace ia32_vmx_procbased_ctls2
         { return (_read_msr(addr) & (mask << 32)) != 0; }
 
         inline void dump(int level, std::string *msg = nullptr)
-        { bfdebug_subbool(level, name, is_enabled(), msg); }
+        { bfdebug_subbool(level, name, is_allowed1(), msg); }
     }
 
     namespace descriptor_table_exiting
@@ -11558,7 +11558,7 @@ namespace ia32_vmx_procbased_ctls2
         { return (_read_msr(addr) & (mask << 32)) != 0; }
 
         inline void dump(int level, std::string *msg = nullptr)
-        { bfdebug_subbool(level, name, is_enabled(), msg); }
+        { bfdebug_subbool(level, name, is_allowed1(), msg); }
     }
 
     namespace enable_rdtscp
@@ -11586,7 +11586,7 @@ namespace ia32_vmx_procbased_ctls2
         { return (_read_msr(addr) & (mask << 32)) != 0; }
 
         inline void dump(int level, std::string *msg = nullptr)
-        { bfdebug_subbool(level, name, is_enabled(), msg); }
+        { bfdebug_subbool(level, name, is_allowed1(), msg); }
     }
 
     namespace virtualize_x2apic_mode
@@ -11614,7 +11614,7 @@ namespace ia32_vmx_procbased_ctls2
         { return (_read_msr(addr) & (mask << 32)) != 0; }
 
         inline void dump(int level, std::string *msg = nullptr)
-        { bfdebug_subbool(level, name, is_enabled(), msg); }
+        { bfdebug_subbool(level, name, is_allowed1(), msg); }
     }
 
     namespace enable_vpid
@@ -11642,7 +11642,7 @@ namespace ia32_vmx_procbased_ctls2
         { return (_read_msr(addr) & (mask << 32)) != 0; }
 
         inline void dump(int level, std::string *msg = nullptr)
-        { bfdebug_subbool(level, name, is_enabled(), msg); }
+        { bfdebug_subbool(level, name, is_allowed1(), msg); }
     }
 
     namespace wbinvd_exiting
@@ -11670,7 +11670,7 @@ namespace ia32_vmx_procbased_ctls2
         { return (_read_msr(addr) & (mask << 32)) != 0; }
 
         inline void dump(int level, std::string *msg = nullptr)
-        { bfdebug_subbool(level, name, is_enabled(), msg); }
+        { bfdebug_subbool(level, name, is_allowed1(), msg); }
     }
 
     namespace unrestricted_guest
@@ -11698,7 +11698,7 @@ namespace ia32_vmx_procbased_ctls2
         { return (_read_msr(addr) & (mask << 32)) != 0; }
 
         inline void dump(int level, std::string *msg = nullptr)
-        { bfdebug_subbool(level, name, is_enabled(), msg); }
+        { bfdebug_subbool(level, name, is_allowed1(), msg); }
     }
 
     namespace apic_register_virtualization
@@ -11726,7 +11726,7 @@ namespace ia32_vmx_procbased_ctls2
         { return (_read_msr(addr) & (mask << 32)) != 0; }
 
         inline void dump(int level, std::string *msg = nullptr)
-        { bfdebug_subbool(level, name, is_enabled(), msg); }
+        { bfdebug_subbool(level, name, is_allowed1(), msg); }
     }
 
     namespace virtual_interrupt_delivery
@@ -11754,7 +11754,7 @@ namespace ia32_vmx_procbased_ctls2
         { return (_read_msr(addr) & (mask << 32)) != 0; }
 
         inline void dump(int level, std::string *msg = nullptr)
-        { bfdebug_subbool(level, name, is_enabled(), msg); }
+        { bfdebug_subbool(level, name, is_allowed1(), msg); }
     }
 
     namespace pause_loop_exiting
@@ -11782,7 +11782,7 @@ namespace ia32_vmx_procbased_ctls2
         { return (_read_msr(addr) & (mask << 32)) != 0; }
 
         inline void dump(int level, std::string *msg = nullptr)
-        { bfdebug_subbool(level, name, is_enabled(), msg); }
+        { bfdebug_subbool(level, name, is_allowed1(), msg); }
     }
 
     namespace rdrand_exiting
@@ -11810,7 +11810,7 @@ namespace ia32_vmx_procbased_ctls2
         { return (_read_msr(addr) & (mask << 32)) != 0; }
 
         inline void dump(int level, std::string *msg = nullptr)
-        { bfdebug_subbool(level, name, is_enabled(), msg); }
+        { bfdebug_subbool(level, name, is_allowed1(), msg); }
     }
 
     namespace enable_invpcid
@@ -11838,7 +11838,7 @@ namespace ia32_vmx_procbased_ctls2
         { return (_read_msr(addr) & (mask << 32)) != 0; }
 
         inline void dump(int level, std::string *msg = nullptr)
-        { bfdebug_subbool(level, name, is_enabled(), msg); }
+        { bfdebug_subbool(level, name, is_allowed1(), msg); }
     }
 
     namespace enable_vm_functions
@@ -11866,7 +11866,7 @@ namespace ia32_vmx_procbased_ctls2
         { return (_read_msr(addr) & (mask << 32)) != 0; }
 
         inline void dump(int level, std::string *msg = nullptr)
-        { bfdebug_subbool(level, name, is_enabled(), msg); }
+        { bfdebug_subbool(level, name, is_allowed1(), msg); }
     }
 
     namespace vmcs_shadowing
@@ -11894,7 +11894,7 @@ namespace ia32_vmx_procbased_ctls2
         { return (_read_msr(addr) & (mask << 32)) != 0; }
 
         inline void dump(int level, std::string *msg = nullptr)
-        { bfdebug_subbool(level, name, is_enabled(), msg); }
+        { bfdebug_subbool(level, name, is_allowed1(), msg); }
     }
 
     namespace enable_encls_exiting
@@ -11922,7 +11922,7 @@ namespace ia32_vmx_procbased_ctls2
         { return (_read_msr(addr) & (mask << 32)) != 0; }
 
         inline void dump(int level, std::string *msg = nullptr)
-        { bfdebug_subbool(level, name, is_enabled(), msg); }
+        { bfdebug_subbool(level, name, is_allowed1(), msg); }
     }
 
     namespace rdseed_exiting
@@ -11950,7 +11950,7 @@ namespace ia32_vmx_procbased_ctls2
         { return (_read_msr(addr) & (mask << 32)) != 0; }
 
         inline void dump(int level, std::string *msg = nullptr)
-        { bfdebug_subbool(level, name, is_enabled(), msg); }
+        { bfdebug_subbool(level, name, is_allowed1(), msg); }
     }
 
     namespace enable_pml
@@ -11978,7 +11978,7 @@ namespace ia32_vmx_procbased_ctls2
         { return (_read_msr(addr) & (mask << 32)) != 0; }
 
         inline void dump(int level, std::string *msg = nullptr)
-        { bfdebug_subbool(level, name, is_enabled(), msg); }
+        { bfdebug_subbool(level, name, is_allowed1(), msg); }
     }
 
     namespace ept_violation_ve
@@ -12006,7 +12006,7 @@ namespace ia32_vmx_procbased_ctls2
         { return (_read_msr(addr) & (mask << 32)) != 0; }
 
         inline void dump(int level, std::string *msg = nullptr)
-        { bfdebug_subbool(level, name, is_enabled(), msg); }
+        { bfdebug_subbool(level, name, is_allowed1(), msg); }
     }
 
     namespace pt_conceal_nonroot_operation
@@ -12034,7 +12034,7 @@ namespace ia32_vmx_procbased_ctls2
         { return (_read_msr(addr) & (mask << 32)) != 0; }
 
         inline void dump(int level, std::string *msg = nullptr)
-        { bfdebug_subbool(level, name, is_enabled(), msg); }
+        { bfdebug_subbool(level, name, is_allowed1(), msg); }
     }
 
     namespace enable_xsaves_xrstors
@@ -12062,7 +12062,7 @@ namespace ia32_vmx_procbased_ctls2
         { return (_read_msr(addr) & (mask << 32)) != 0; }
 
         inline void dump(int level, std::string *msg = nullptr)
-        { bfdebug_subbool(level, name, is_enabled(), msg); }
+        { bfdebug_subbool(level, name, is_allowed1(), msg); }
     }
 
     namespace ept_mode_based_control
@@ -12090,7 +12090,7 @@ namespace ia32_vmx_procbased_ctls2
         { return (_read_msr(addr) & (mask << 32)) != 0; }
 
         inline void dump(int level, std::string *msg = nullptr)
-        { bfdebug_subbool(level, name, is_enabled(), msg); }
+        { bfdebug_subbool(level, name, is_allowed1(), msg); }
     }
 
     namespace use_tsc_scaling
@@ -12118,7 +12118,7 @@ namespace ia32_vmx_procbased_ctls2
         { return (_read_msr(addr) & (mask << 32)) != 0; }
 
         inline void dump(int level, std::string *msg = nullptr)
-        { bfdebug_subbool(level, name, is_enabled(), msg); }
+        { bfdebug_subbool(level, name, is_allowed1(), msg); }
     }
 
     inline void dump(int level, std::string *msg = nullptr)
@@ -12548,7 +12548,7 @@ namespace ia32_vmx_true_pinbased_ctls
         { return (_read_msr(addr) & (mask << 32)) != 0; }
 
         inline void dump(int level, std::string *msg = nullptr)
-        { bfdebug_subbool(level, name, is_enabled(), msg); }
+        { bfdebug_subbool(level, name, is_allowed1(), msg); }
     }
 
     namespace nmi_exiting
@@ -12576,7 +12576,7 @@ namespace ia32_vmx_true_pinbased_ctls
         { return (_read_msr(addr) & (mask << 32)) != 0; }
 
         inline void dump(int level, std::string *msg = nullptr)
-        { bfdebug_subbool(level, name, is_enabled(), msg); }
+        { bfdebug_subbool(level, name, is_allowed1(), msg); }
     }
 
     namespace virtual_nmis
@@ -12604,7 +12604,7 @@ namespace ia32_vmx_true_pinbased_ctls
         { return (_read_msr(addr) & (mask << 32)) != 0; }
 
         inline void dump(int level, std::string *msg = nullptr)
-        { bfdebug_subbool(level, name, is_enabled(), msg); }
+        { bfdebug_subbool(level, name, is_allowed1(), msg); }
     }
 
     namespace activate_vmx_preemption_timer
@@ -12632,7 +12632,7 @@ namespace ia32_vmx_true_pinbased_ctls
         { return (_read_msr(addr) & (mask << 32)) != 0; }
 
         inline void dump(int level, std::string *msg = nullptr)
-        { bfdebug_subbool(level, name, is_enabled(), msg); }
+        { bfdebug_subbool(level, name, is_allowed1(), msg); }
     }
 
     namespace process_posted_interrupts
@@ -12660,7 +12660,7 @@ namespace ia32_vmx_true_pinbased_ctls
         { return (_read_msr(addr) & (mask << 32)) != 0; }
 
         inline void dump(int level, std::string *msg = nullptr)
-        { bfdebug_subbool(level, name, is_enabled(), msg); }
+        { bfdebug_subbool(level, name, is_allowed1(), msg); }
     }
 
     inline void dump(int level, std::string *msg = nullptr)
@@ -12713,7 +12713,7 @@ namespace ia32_vmx_true_procbased_ctls
         { return (_read_msr(addr) & (mask << 32)) != 0; }
 
         inline void dump(int level, std::string *msg = nullptr)
-        { bfdebug_subbool(level, name, is_enabled(), msg); }
+        { bfdebug_subbool(level, name, is_allowed1(), msg); }
     }
 
     namespace use_tsc_offsetting
@@ -12741,7 +12741,7 @@ namespace ia32_vmx_true_procbased_ctls
         { return (_read_msr(addr) & (mask << 32)) != 0; }
 
         inline void dump(int level, std::string *msg = nullptr)
-        { bfdebug_subbool(level, name, is_enabled(), msg); }
+        { bfdebug_subbool(level, name, is_allowed1(), msg); }
     }
 
     namespace hlt_exiting
@@ -12769,7 +12769,7 @@ namespace ia32_vmx_true_procbased_ctls
         { return (_read_msr(addr) & (mask << 32)) != 0; }
 
         inline void dump(int level, std::string *msg = nullptr)
-        { bfdebug_subbool(level, name, is_enabled(), msg); }
+        { bfdebug_subbool(level, name, is_allowed1(), msg); }
     }
 
     namespace invlpg_exiting
@@ -12797,7 +12797,7 @@ namespace ia32_vmx_true_procbased_ctls
         { return (_read_msr(addr) & (mask << 32)) != 0; }
 
         inline void dump(int level, std::string *msg = nullptr)
-        { bfdebug_subbool(level, name, is_enabled(), msg); }
+        { bfdebug_subbool(level, name, is_allowed1(), msg); }
     }
 
     namespace mwait_exiting
@@ -12825,7 +12825,7 @@ namespace ia32_vmx_true_procbased_ctls
         { return (_read_msr(addr) & (mask << 32)) != 0; }
 
         inline void dump(int level, std::string *msg = nullptr)
-        { bfdebug_subbool(level, name, is_enabled(), msg); }
+        { bfdebug_subbool(level, name, is_allowed1(), msg); }
     }
 
     namespace rdpmc_exiting
@@ -12853,7 +12853,7 @@ namespace ia32_vmx_true_procbased_ctls
         { return (_read_msr(addr) & (mask << 32)) != 0; }
 
         inline void dump(int level, std::string *msg = nullptr)
-        { bfdebug_subbool(level, name, is_enabled(), msg); }
+        { bfdebug_subbool(level, name, is_allowed1(), msg); }
     }
 
     namespace rdtsc_exiting
@@ -12881,7 +12881,7 @@ namespace ia32_vmx_true_procbased_ctls
         { return (_read_msr(addr) & (mask << 32)) != 0; }
 
         inline void dump(int level, std::string *msg = nullptr)
-        { bfdebug_subbool(level, name, is_enabled(), msg); }
+        { bfdebug_subbool(level, name, is_allowed1(), msg); }
     }
 
     namespace cr3_load_exiting
@@ -12909,7 +12909,7 @@ namespace ia32_vmx_true_procbased_ctls
         { return (_read_msr(addr) & (mask << 32)) != 0; }
 
         inline void dump(int level, std::string *msg = nullptr)
-        { bfdebug_subbool(level, name, is_enabled(), msg); }
+        { bfdebug_subbool(level, name, is_allowed1(), msg); }
     }
 
     namespace cr3_store_exiting
@@ -12937,7 +12937,7 @@ namespace ia32_vmx_true_procbased_ctls
         { return (_read_msr(addr) & (mask << 32)) != 0; }
 
         inline void dump(int level, std::string *msg = nullptr)
-        { bfdebug_subbool(level, name, is_enabled(), msg); }
+        { bfdebug_subbool(level, name, is_allowed1(), msg); }
     }
 
     namespace cr8_load_exiting
@@ -12965,7 +12965,7 @@ namespace ia32_vmx_true_procbased_ctls
         { return (_read_msr(addr) & (mask << 32)) != 0; }
 
         inline void dump(int level, std::string *msg = nullptr)
-        { bfdebug_subbool(level, name, is_enabled(), msg); }
+        { bfdebug_subbool(level, name, is_allowed1(), msg); }
     }
 
     namespace cr8_store_exiting
@@ -12993,7 +12993,7 @@ namespace ia32_vmx_true_procbased_ctls
         { return (_read_msr(addr) & (mask << 32)) != 0; }
 
         inline void dump(int level, std::string *msg = nullptr)
-        { bfdebug_subbool(level, name, is_enabled(), msg); }
+        { bfdebug_subbool(level, name, is_allowed1(), msg); }
     }
 
     namespace use_tpr_shadow
@@ -13021,7 +13021,7 @@ namespace ia32_vmx_true_procbased_ctls
         { return (_read_msr(addr) & (mask << 32)) != 0; }
 
         inline void dump(int level, std::string *msg = nullptr)
-        { bfdebug_subbool(level, name, is_enabled(), msg); }
+        { bfdebug_subbool(level, name, is_allowed1(), msg); }
     }
 
     namespace nmi_window_exiting
@@ -13049,7 +13049,7 @@ namespace ia32_vmx_true_procbased_ctls
         { return (_read_msr(addr) & (mask << 32)) != 0; }
 
         inline void dump(int level, std::string *msg = nullptr)
-        { bfdebug_subbool(level, name, is_enabled(), msg); }
+        { bfdebug_subbool(level, name, is_allowed1(), msg); }
     }
 
     namespace mov_dr_exiting
@@ -13077,7 +13077,7 @@ namespace ia32_vmx_true_procbased_ctls
         { return (_read_msr(addr) & (mask << 32)) != 0; }
 
         inline void dump(int level, std::string *msg = nullptr)
-        { bfdebug_subbool(level, name, is_enabled(), msg); }
+        { bfdebug_subbool(level, name, is_allowed1(), msg); }
     }
 
     namespace unconditional_io_exiting
@@ -13105,7 +13105,7 @@ namespace ia32_vmx_true_procbased_ctls
         { return (_read_msr(addr) & (mask << 32)) != 0; }
 
         inline void dump(int level, std::string *msg = nullptr)
-        { bfdebug_subbool(level, name, is_enabled(), msg); }
+        { bfdebug_subbool(level, name, is_allowed1(), msg); }
     }
 
     namespace use_io_bitmaps
@@ -13133,7 +13133,7 @@ namespace ia32_vmx_true_procbased_ctls
         { return (_read_msr(addr) & (mask << 32)) != 0; }
 
         inline void dump(int level, std::string *msg = nullptr)
-        { bfdebug_subbool(level, name, is_enabled(), msg); }
+        { bfdebug_subbool(level, name, is_allowed1(), msg); }
     }
 
     namespace monitor_trap_flag
@@ -13161,7 +13161,7 @@ namespace ia32_vmx_true_procbased_ctls
         { return (_read_msr(addr) & (mask << 32)) != 0; }
 
         inline void dump(int level, std::string *msg = nullptr)
-        { bfdebug_subbool(level, name, is_enabled(), msg); }
+        { bfdebug_subbool(level, name, is_allowed1(), msg); }
     }
 
     namespace use_msr_bitmap
@@ -13189,7 +13189,7 @@ namespace ia32_vmx_true_procbased_ctls
         { return (_read_msr(addr) & (mask << 32)) != 0; }
 
         inline void dump(int level, std::string *msg = nullptr)
-        { bfdebug_subbool(level, name, is_enabled(), msg); }
+        { bfdebug_subbool(level, name, is_allowed1(), msg); }
     }
 
     namespace monitor_exiting
@@ -13217,7 +13217,7 @@ namespace ia32_vmx_true_procbased_ctls
         { return (_read_msr(addr) & (mask << 32)) != 0; }
 
         inline void dump(int level, std::string *msg = nullptr)
-        { bfdebug_subbool(level, name, is_enabled(), msg); }
+        { bfdebug_subbool(level, name, is_allowed1(), msg); }
     }
 
     namespace pause_exiting
@@ -13245,7 +13245,7 @@ namespace ia32_vmx_true_procbased_ctls
         { return (_read_msr(addr) & (mask << 32)) != 0; }
 
         inline void dump(int level, std::string *msg = nullptr)
-        { bfdebug_subbool(level, name, is_enabled(), msg); }
+        { bfdebug_subbool(level, name, is_allowed1(), msg); }
     }
 
     namespace activate_secondary_controls
@@ -13273,7 +13273,7 @@ namespace ia32_vmx_true_procbased_ctls
         { return (_read_msr(addr) & (mask << 32)) != 0; }
 
         inline void dump(int level, std::string *msg = nullptr)
-        { bfdebug_subbool(level, name, is_enabled(), msg); }
+        { bfdebug_subbool(level, name, is_allowed1(), msg); }
     }
 
     inline void dump(int level, std::string *msg = nullptr)
@@ -13342,7 +13342,7 @@ namespace ia32_vmx_true_exit_ctls
         { return (_read_msr(addr) & (mask << 32)) != 0; }
 
         inline void dump(int level, std::string *msg = nullptr)
-        { bfdebug_subbool(level, name, is_enabled(), msg); }
+        { bfdebug_subbool(level, name, is_allowed1(), msg); }
     }
 
     namespace host_address_space_size
@@ -13370,7 +13370,7 @@ namespace ia32_vmx_true_exit_ctls
         { return (_read_msr(addr) & (mask << 32)) != 0; }
 
         inline void dump(int level, std::string *msg = nullptr)
-        { bfdebug_subbool(level, name, is_enabled(), msg); }
+        { bfdebug_subbool(level, name, is_allowed1(), msg); }
     }
 
     namespace load_ia32_perf_global_ctrl
@@ -13398,7 +13398,7 @@ namespace ia32_vmx_true_exit_ctls
         { return (_read_msr(addr) & (mask << 32)) != 0; }
 
         inline void dump(int level, std::string *msg = nullptr)
-        { bfdebug_subbool(level, name, is_enabled(), msg); }
+        { bfdebug_subbool(level, name, is_allowed1(), msg); }
     }
 
     namespace acknowledge_interrupt_on_exit
@@ -13426,7 +13426,7 @@ namespace ia32_vmx_true_exit_ctls
         { return (_read_msr(addr) & (mask << 32)) != 0; }
 
         inline void dump(int level, std::string *msg = nullptr)
-        { bfdebug_subbool(level, name, is_enabled(), msg); }
+        { bfdebug_subbool(level, name, is_allowed1(), msg); }
     }
 
     namespace save_ia32_pat
@@ -13454,7 +13454,7 @@ namespace ia32_vmx_true_exit_ctls
         { return (_read_msr(addr) & (mask << 32)) != 0; }
 
         inline void dump(int level, std::string *msg = nullptr)
-        { bfdebug_subbool(level, name, is_enabled(), msg); }
+        { bfdebug_subbool(level, name, is_allowed1(), msg); }
     }
 
     namespace load_ia32_pat
@@ -13482,7 +13482,7 @@ namespace ia32_vmx_true_exit_ctls
         { return (_read_msr(addr) & (mask << 32)) != 0; }
 
         inline void dump(int level, std::string *msg = nullptr)
-        { bfdebug_subbool(level, name, is_enabled(), msg); }
+        { bfdebug_subbool(level, name, is_allowed1(), msg); }
     }
 
     namespace save_ia32_efer
@@ -13510,7 +13510,7 @@ namespace ia32_vmx_true_exit_ctls
         { return (_read_msr(addr) & (mask << 32)) != 0; }
 
         inline void dump(int level, std::string *msg = nullptr)
-        { bfdebug_subbool(level, name, is_enabled(), msg); }
+        { bfdebug_subbool(level, name, is_allowed1(), msg); }
     }
 
     namespace load_ia32_efer
@@ -13538,7 +13538,7 @@ namespace ia32_vmx_true_exit_ctls
         { return (_read_msr(addr) & (mask << 32)) != 0; }
 
         inline void dump(int level, std::string *msg = nullptr)
-        { bfdebug_subbool(level, name, is_enabled(), msg); }
+        { bfdebug_subbool(level, name, is_allowed1(), msg); }
     }
 
     namespace save_vmx_preemption_timer_value
@@ -13566,7 +13566,7 @@ namespace ia32_vmx_true_exit_ctls
         { return (_read_msr(addr) & (mask << 32)) != 0; }
 
         inline void dump(int level, std::string *msg = nullptr)
-        { bfdebug_subbool(level, name, is_enabled(), msg); }
+        { bfdebug_subbool(level, name, is_allowed1(), msg); }
     }
 
     namespace clear_ia32_bndcfgs
@@ -13594,7 +13594,7 @@ namespace ia32_vmx_true_exit_ctls
         { return (_read_msr(addr) & (mask << 32)) != 0; }
 
         inline void dump(int level, std::string *msg = nullptr)
-        { bfdebug_subbool(level, name, is_enabled(), msg); }
+        { bfdebug_subbool(level, name, is_allowed1(), msg); }
     }
 
     inline void dump(int level, std::string *msg = nullptr)
@@ -13652,7 +13652,7 @@ namespace ia32_vmx_true_entry_ctls
         { return (_read_msr(addr) & (mask << 32)) != 0; }
 
         inline void dump(int level, std::string *msg = nullptr)
-        { bfdebug_subbool(level, name, is_enabled(), msg); }
+        { bfdebug_subbool(level, name, is_allowed1(), msg); }
     }
 
     namespace ia_32e_mode_guest
@@ -13680,7 +13680,7 @@ namespace ia32_vmx_true_entry_ctls
         { return (_read_msr(addr) & (mask << 32)) != 0; }
 
         inline void dump(int level, std::string *msg = nullptr)
-        { bfdebug_subbool(level, name, is_enabled(), msg); }
+        { bfdebug_subbool(level, name, is_allowed1(), msg); }
     }
 
     namespace entry_to_smm
@@ -13708,7 +13708,7 @@ namespace ia32_vmx_true_entry_ctls
         { return (_read_msr(addr) & (mask << 32)) != 0; }
 
         inline void dump(int level, std::string *msg = nullptr)
-        { bfdebug_subbool(level, name, is_enabled(), msg); }
+        { bfdebug_subbool(level, name, is_allowed1(), msg); }
     }
 
     namespace deactivate_dual_monitor_treatment
@@ -13736,7 +13736,7 @@ namespace ia32_vmx_true_entry_ctls
         { return (_read_msr(addr) & (mask << 32)) != 0; }
 
         inline void dump(int level, std::string *msg = nullptr)
-        { bfdebug_subbool(level, name, is_enabled(), msg); }
+        { bfdebug_subbool(level, name, is_allowed1(), msg); }
     }
 
     namespace load_ia32_perf_global_ctrl
@@ -13764,7 +13764,7 @@ namespace ia32_vmx_true_entry_ctls
         { return (_read_msr(addr) & (mask << 32)) != 0; }
 
         inline void dump(int level, std::string *msg = nullptr)
-        { bfdebug_subbool(level, name, is_enabled(), msg); }
+        { bfdebug_subbool(level, name, is_allowed1(), msg); }
     }
 
     namespace load_ia32_pat
@@ -13792,7 +13792,7 @@ namespace ia32_vmx_true_entry_ctls
         { return (_read_msr(addr) & (mask << 32)) != 0; }
 
         inline void dump(int level, std::string *msg = nullptr)
-        { bfdebug_subbool(level, name, is_enabled(), msg); }
+        { bfdebug_subbool(level, name, is_allowed1(), msg); }
     }
 
     namespace load_ia32_efer
@@ -13820,7 +13820,7 @@ namespace ia32_vmx_true_entry_ctls
         { return (_read_msr(addr) & (mask << 32)) != 0; }
 
         inline void dump(int level, std::string *msg = nullptr)
-        { bfdebug_subbool(level, name, is_enabled(), msg); }
+        { bfdebug_subbool(level, name, is_allowed1(), msg); }
     }
 
     namespace load_ia32_bndcfgs
@@ -13848,7 +13848,7 @@ namespace ia32_vmx_true_entry_ctls
         { return (_read_msr(addr) & (mask << 32)) != 0; }
 
         inline void dump(int level, std::string *msg = nullptr)
-        { bfdebug_subbool(level, name, is_enabled(), msg); }
+        { bfdebug_subbool(level, name, is_allowed1(), msg); }
     }
 
     inline void dump(int level, std::string *msg = nullptr)

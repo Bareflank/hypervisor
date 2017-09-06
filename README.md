@@ -146,78 +146,58 @@ sudo apt-get install git build-essential linux-headers-$(uname -r) nasm clang cm
 ```
 
 #### Windows (Cygwin):
-```
-setup-x86_64.exe -q -P git,make,gcc-core,gcc-g++,nasm,clang,clang++,cmake
-```
+Visual Studio 2017 doesn't support building drivers, but the WDK 10 doesn't
+compile drivers without Visual Studio 2017 installed, so you must install
+both Visual Studio 2017 and 2015 to get a complete environment.
+- [Visual Studio 2015](https://go.microsoft.com/fwlink/?LinkId=615448&clcid=0x409)
+  - Check "Visual C++"
+- [Visual Studio 2017](https://www.visualstudio.com/thank-you-downloading-visual-studio/?sku=Community&rel=15#)
+  - Check "Desktop development with C++"
+  - Check "C++ CLI / Support"
+- [Visual Studio WDK 10](https://go.microsoft.com/fwlink/p/?LinkId=526733)
+- [Cygwin](https://www.cygwin.com/setup-x86_64.exe)
 
-#### Windows (Bash):
-TBD
+To install Cygwin, simply install using all default settings, and then copy
+setup-x86_64.exe to C:\cygwin64\bin. From there, open a Cygwin terminal and
+run the following:
+
+```
+setup-x86_64.exe -q -P git,make,gcc-core,gcc-g++,nasm,clang,clang++,cmake,python,gettext
+```
 
 ## Compilation Instructions
-
-The hypervisor is a collection of several different repos and external
-dependencies. The main repos are as follows:
-- [bfsdk](https://github.com/bareflank/bfsdk.git)
-- [bfsysroot](https://github.com/bareflank/bfsysroot.git)
-- [bfelf\_loader](https://github.com/bareflank/bfelf_loader.git)
-- [bfm](https://github.com/bareflank/bfm.git)
-- [bfvmm](https://github.com/bareflank/bfvmm.git)
-- [bfdriver](https://github.com/bareflank/bfdriver.git)
 
 To compile, run the following commands:
 
 ```
-cd ~/
 git clone -b dev https://github.com/bareflank/hypervisor.git
-mkdir ~/hypervisor/build
-cd ~/hypervisor/build
-export PATH="$PWD/../bfprefix/bin:$PATH"
+cd hypervisor
+source env.sh
+mkdir build
+cd build
 cmake ..
-make
-make driver_build
+make -j<# cores + 1>
 ```
 
-If your making changes to the hypervisor itself, we highly recommend using a
-working directory. This will allow you maintain your own forks of each repo
-and modify / commit as needed. Each repo that is needed must be present in
-your working directory, otherwise CMake will complain.
-- `-DWORKING_PATH=<path to dir>`
-
 Also, if your modifying the hypervisor, we also highly recommend enabling
-dev mode. This will enable the various different tools that are needed to
-pass all of our CI tests.
-- `-DENABLE_DEV_MODE=ON`
+unit testing and developer mode. This will enable the various different tools
+that are needed to pass all of our CI tests. This also compiles the hypervisor
+in debug mode.
+- `-DENABLE_UNITTESTING=ON`
+- `-DENABLE_DEVELOPER_MODE=ON`
 
-One this is enabled, you can run the following commands before submitting a
+Once this is enabled, you can run the following commands before submitting a
 PR:
 - `make test`
 - `make format`
 - `make tidy`
 
-You can also direct the build system to use your own forked repos in-place of
-the main repos. To do this, add any of the following CMake variables with
-links to the repo of your choice:
-- `-DBFSDK\_URL=<url>`
-- `-DBFSYSROOT\_URL=<url>`
-- `-DBFELF\_LOADER\_URL=<url>`
-- `-DBFM\_URL=<url>`
-- `-DBFVMM\_URL=<url>`
-- `-DBFDRIVER\_URL=<url>`
-
-Alternatively, if you have cloned your own local repositories without,
-a working directory you can set the following:
-- `BFSDK\_PATH=<path to repo>`
-- `BFSYSROOT\_PATH=<path to repo>`
-- `BFELF\_LOADER\_PATH=<path to repo>`
-- `BFM\_PATH=<path to repo>`
-- `BFVMM\_PATH=<path to repo>`
-- `BFDRIVER\_PATH=<path to repo>`
-
 If you wish to enable the extended APIs, you can do so using the following.
-If you have a working directory, ensure the extended APIs repo is present in
-your working directory first:
-
 - `-DENABLE_EXTENDED_APIS=ON`
+
+or you can provide the location of your own extended APIs repo using the
+following:
+- `-DEXTENDED_APIS_PATH=<path>`
 
 ## Usage Instructions
 
@@ -241,17 +221,35 @@ to reverse this:
 make unload
 make driver_unload
 ```
-to clean-up:
+to clean up:
 
 ```
-make super-clean
+make distclean
 ```
 
-to preform a more comprehensive clean:
+## Serial Instructions
+
+On Windows, serial output might not work. If this is the case, disbale the
+default Serial device using the following:
+```
+reg add "HKEY_LOCAL_MACHINE\System\CurrentControlSet\Services\Serial" /f /v "start" /t REG_DWORD /d "4"
+```
+
+## Cygwin SSH Instructions
+
+You might find it useful to setup SSH if you are using Cygwin. The instructions
+for setting up SSH on Cygwin are as follows:
 
 ```
-make dist-clean
-rm -Rf *
+setup-x86_64.exe -q -P getent,cygrunsrv,openssl,openssh
+
+ssh-host-config -y
+<password>
+<password>
+
+net start sshd
+
+netsh advfirewall firewall add rule name='SSH Port' dir=in action=allow protocol=TCP localport=22
 ```
 
 ## Extended APIs / Hyperkernel
@@ -286,10 +284,6 @@ https://github.com/Bareflank/hypervisor_example_msr_bitmap
 
 **Extended APIs EPT Hook:**<br>
 https://github.com/Bareflank/extended_apis_example_hook
-
-## Roadmap
-
-The project roadmap can be located [here](https://github.com/Bareflank/hypervisor/projects)
 
 ## License
 

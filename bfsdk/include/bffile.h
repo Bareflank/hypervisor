@@ -334,11 +334,15 @@ public:
 
 public:
 
-    file(file &&) noexcept = default;               ///< Default move construction
-    file &operator=(file &&) noexcept = default;    ///< Default move operator
+    /// @cond
 
-    file(const file &) = default;                   ///< Default copy construction
-    file &operator=(const file &) = default;        ///< Default copy operator
+    file(file &&) noexcept = default;
+    file &operator=(file &&) noexcept = default;
+
+    file(const file &) = default;
+    file &operator=(const file &) = default;
+
+    /// @endcond
 };
 
 #endif

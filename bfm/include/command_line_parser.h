@@ -77,13 +77,13 @@ class EXPORT_BFM_SRC command_line_parser
 {
 public:
 
-    using registers_type = ioctl::registers_type;
-    using arg_type = std::string;
-    using arg_list_type = std::vector<arg_type>;
-    using filename_type = file::filename_type;
-    using cpuid_type = uint64_t;
-    using vcpuid_type = ioctl::vcpuid_type;
-    using command_type = command_line_parser_command;
+    using registers_type = ioctl::registers_type;           ///< VMCall registers type
+    using arg_type = std::string;                           ///< Arg type
+    using arg_list_type = std::vector<arg_type>;            ///< Arg list type
+    using filename_type = file::filename_type;              ///< Filename type
+    using cpuid_type = uint64_t;                            ///< CPUID type
+    using vcpuid_type = ioctl::vcpuid_type;                 ///< VCPUID type
+    using command_type = command_line_parser_command;       ///< Command type
 
     /// Command Line Parser Constructor
     ///

@@ -73,17 +73,19 @@ class EXPORT_MEMORY_MANAGER root_page_table_x64
 {
 public:
 
-    using pointer = void *;
-    using integer_pointer = uintptr_t;
-    using cr3_type = uint64_t;
-    using attr_type = x64::memory_attr::attr_type;
-    using size_type = size_t;
-    using memory_descriptor_list = page_table_x64::memory_descriptor_list;
+    using pointer = void *;                                                 ///< Pointer type
+    using integer_pointer = uintptr_t;                                      ///< Integer pointer type
+    using cr3_type = uint64_t;                                              ///< CR3 value type
+    using attr_type = x64::memory_attr::attr_type;                          ///< Attribute type
+    using size_type = size_t;                                               ///< Size type
+    using memory_descriptor_list = page_table_x64::memory_descriptor_list;  ///< Memory descriptor list type
 
     /// Default Constructor
     ///
     /// @expects none
     /// @ensures none
+    ///
+    /// @param is_vmm true if this is the root page table for the VMM
     ///
     root_page_table_x64(bool is_vmm = false);
 
@@ -297,11 +299,15 @@ private:
 
 public:
 
+    /// @cond
+
     root_page_table_x64(root_page_table_x64 &&) noexcept = delete;
     root_page_table_x64 &operator=(root_page_table_x64 &&) noexcept = delete;
 
     root_page_table_x64(const root_page_table_x64 &) = delete;
     root_page_table_x64 &operator=(const root_page_table_x64 &) = delete;
+
+    /// @endcond
 };
 
 /// Root Page Table

@@ -95,7 +95,7 @@ public:
     ///
     virtual void stop();
 
-protected:
+private:
 
     void check_cpuid_vmx_supported();
     void check_vmx_capabilities_msr();
@@ -121,11 +121,15 @@ private:
 
 public:
 
+    /// @cond
+
     vmxon_intel_x64(vmxon_intel_x64 &&) noexcept = default;
     vmxon_intel_x64 &operator=(vmxon_intel_x64 &&) noexcept = default;
 
     vmxon_intel_x64(const vmxon_intel_x64 &) = delete;
     vmxon_intel_x64 &operator=(const vmxon_intel_x64 &) = delete;
+
+    /// @endcond
 };
 
 #ifdef _MSC_VER

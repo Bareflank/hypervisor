@@ -220,12 +220,12 @@ exit_handler_intel_x64::handle_vmcall()
 void
 exit_handler_intel_x64::handle_vmxoff()
 {
-    auto virt = vmcs::guest_gdtr_base::get();
-    auto cr3 = vmcs::guest_cr3::get();
-    auto size = x64::gdt::paged_length(vmcs::guest_gdtr_limit::get() + 1U);
-    auto pat = vmcs::guest_ia32_pat::get();
-
-    auto gdt_map = bfn::make_unique_map_x64<char>(virt, cr3, size, pat);
+    auto gdt_map = bfn::make_unique_map_x64<char>(
+                       vmcs::guest_gdtr_base::get(),
+                       vmcs::guest_cr3::get(),
+                       x64::gdt::size(vmcs::guest_gdtr_limit::get() + 1U),
+                       vmcs::guest_ia32_pat::get()
+                   );
 
     this->promote(gdt_map.get());
 }
@@ -372,11 +372,13 @@ exit_handler_intel_x64::unimplemented_handler() noexcept
 
     if (vmcs::exit_reason::vm_entry_failure::is_enabled()) {
 
-        guard_exceptions([&]
-        { vmcs::check::all(); });
+        guard_exceptions([&] {
+            vmcs::check::all();
+        });
 
-        guard_exceptions([&]
-        { vmcs::debug::dump(); });
+        guard_exceptions([&] {
+            vmcs::debug::dump();
+        });
     }
 
     this->halt();
@@ -467,10 +469,8 @@ exit_handler_intel_x64::handle_vmcall_data(vmcall_registers_t &regs)
     expects(regs.r06 <= VMCALL_IN_BUFFER_SIZE);
     expects(regs.r09 <= VMCALL_OUT_BUFFER_SIZE);
 
-    auto &&imap = bfn::make_unique_map_x64<char>(regs.r05, vmcs::guest_cr3::get(), regs.r06,
-                  vmcs::guest_ia32_pat::get());
-    auto &&omap = bfn::make_unique_map_x64<char>(regs.r08, vmcs::guest_cr3::get(), regs.r09,
-                  vmcs::guest_ia32_pat::get());
+    auto imap = bfn::make_unique_map_x64<char>(regs.r05, vmcs::guest_cr3::get(), regs.r06, vmcs::guest_ia32_pat::get());
+    auto omap = bfn::make_unique_map_x64<char>(regs.r08, vmcs::guest_cr3::get(), regs.r09, vmcs::guest_ia32_pat::get());
 
     switch (regs.r04) {
         case VMCALL_DATA_STRING_UNFORMATTED: {

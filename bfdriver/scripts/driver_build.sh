@@ -23,31 +23,47 @@
 # $1 == CMAKE_SOURCE_DIR
 # $2 == CMAKE_INSTALL_PREFIX
 
+msbuild_2015="/cygdrive/c/Program Files (x86)/MSBuild/14.0/bin/msbuild.exe"
+msbuild_2017="/cygdrive/c/Program Files (x86)/Microsoft Visual Studio/2017/Community/MSBuild/15.0/bin/msbuild.exe"
+
+find_msbuild() {
+
+    if [[ -f $msbuild_2015 ]]; then
+        msbuild=$msbuild_2015
+        return
+    fi
+
+    if [[ -f $msbuild_2017 ]]; then
+        msbuild=$msbuild_2017
+        return
+    fi
+
+    >&2 echo "ERROR: failed to find msbuild"
+    exit 1
+}
+
 case $(uname -s) in
-# CYGWIN_NT-6.3)
-#     rm -Rf $BUILD_ABS/outdir
-#     rm -Rf $BUILD_ABS/intdir
-#     SCRIPT_PATH=`cygpath -w $HYPER_ABS/tools/scripts/build_windows.bat`
-#     HYPER_ABS_PATH=`cygpath -w $HYPER_ABS`
-#     BUILD_ABS_PATH=`cygpath -w $BUILD_ABS`
-#     cmd.exe /c $SCRIPT_PATH $HYPER_ABS_PATH $BUILD_ABS_PATH WindowsV6.3
-#     ;;
-
-# CYGWIN_NT-10.0)
-#     rm -Rf $BUILD_ABS/outdir
-#     rm -Rf $BUILD_ABS/intdir
-#     SCRIPT_PATH=`cygpath -w $HYPER_ABS/tools/scripts/build_windows.bat`
-#     HYPER_ABS_PATH=`cygpath -w $HYPER_ABS`
-#     BUILD_ABS_PATH=`cygpath -w $BUILD_ABS`
-#     cmd.exe /c $SCRIPT_PATH $HYPER_ABS_PATH $BUILD_ABS_PATH Windows10
-#     ;;
-
+CYGWIN_NT-6.1*)
+    find_msbuild
+    cd $1/src/arch/windows/
+    >&2 eval "'$msbuild' /m:3 /p:Configuration=Debug /p:Platform=x64 /p:TargetVersion=WindowsV6.1 bareflank.sln"
+    ;;
+CYGWIN_NT-6.3*)
+    find_msbuild
+    cd $1/src/arch/windows/
+    >&2 eval "'$msbuild' /m:3 /p:Configuration=Debug /p:Platform=x64 /p:TargetVersion=WindowsV6.3 bareflank.sln"
+    ;;
+CYGWIN_NT-10.0*)
+    find_msbuild
+    cd $1/src/arch/windows/
+    >&2 eval "'$msbuild' /m:3 /p:Configuration=Debug /p:Platform=x64 /p:TargetVersion=Windows10 bareflank.sln"
+    ;;
 Linux)
     cd $1/src/arch/linux
     make clean
-    make CMAKE_INSTALL_PREFIX=$2
+    make
     ;;
 *)
-    echo "OS not supported"
+    >&2 echo "OS not supported"
     exit 1
 esac

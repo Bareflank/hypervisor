@@ -913,7 +913,7 @@ TEST_CASE("test ioctl driver process vmcall vmm unloaded")
     auto ctl = setup_ioctl(mocks, VMM_UNLOADED);
     auto clp = setup_command_line_parser(mocks, clpc::vmcall);
 
-    mocks.NeverCallFunc(vmcall);
+    mocks.NeverCallFunc(_vmcall);
 
     auto driver = ioctl_driver(fil, ctl, clp);
     CHECK_THROWS(driver.process());
@@ -927,7 +927,7 @@ TEST_CASE("test ioctl driver process vmcall vmm loaded")
     auto ctl = setup_ioctl(mocks, VMM_LOADED);
     auto clp = setup_command_line_parser(mocks, clpc::vmcall);
 
-    mocks.NeverCallFunc(vmcall);
+    mocks.NeverCallFunc(_vmcall);
 
     auto driver = ioctl_driver(fil, ctl, clp);
     CHECK_THROWS(driver.process());
@@ -941,7 +941,7 @@ TEST_CASE("test ioctl driver process vmcall vmm corrupt")
     auto ctl = setup_ioctl(mocks, VMM_CORRUPT);
     auto clp = setup_command_line_parser(mocks, clpc::vmcall);
 
-    mocks.NeverCallFunc(vmcall);
+    mocks.NeverCallFunc(_vmcall);
 
     auto driver = ioctl_driver(fil, ctl, clp);
     CHECK_THROWS(driver.process());
@@ -955,7 +955,7 @@ TEST_CASE("test ioctl driver process vmcall vmm unknown")
     auto ctl = setup_ioctl(mocks, -1);
     auto clp = setup_command_line_parser(mocks, clpc::vmcall);
 
-    mocks.NeverCallFunc(vmcall);
+    mocks.NeverCallFunc(_vmcall);
 
     auto driver = ioctl_driver(fil, ctl, clp);
     CHECK_THROWS(driver.process());
@@ -991,7 +991,7 @@ TEST_CASE("test ioctl driver process vmcall versions ioctl failed")
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     });
 
-    mocks.ExpectCallFunc(vmcall).Throw(std::runtime_error("error"));
+    mocks.ExpectCallFunc(_vmcall).Throw(std::runtime_error("error"));
 
     auto driver = ioctl_driver(fil, ctl, clp);
     CHECK_THROWS(driver.process());
@@ -1010,7 +1010,7 @@ TEST_CASE("test ioctl driver process vmcall versions ioctl return failed")
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     });
 
-    mocks.ExpectCallFunc(vmcall).Do([](ioctl::registers_pointer regs) {
+    mocks.ExpectCallFunc(_vmcall).Do([](ioctl::registers_pointer regs) {
         regs->r01 = 1;
     });
 
@@ -1031,7 +1031,7 @@ TEST_CASE("test ioctl driver process vmcall versions protocol version")
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     });
 
-    mocks.ExpectCallFunc(vmcall).Do([](ioctl::registers_pointer regs) {
+    mocks.ExpectCallFunc(_vmcall).Do([](ioctl::registers_pointer regs) {
         regs->r01 = 0;
         regs->r02 = 0;
         regs->r03 = 1;
@@ -1054,7 +1054,7 @@ TEST_CASE("test ioctl driver process vmcall versions bareflank version")
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     });
 
-    mocks.ExpectCallFunc(vmcall).Do([](ioctl::registers_pointer regs) {
+    mocks.ExpectCallFunc(_vmcall).Do([](ioctl::registers_pointer regs) {
         regs->r01 = 0;
         regs->r02 = 1;
         regs->r03 = 1;
@@ -1079,7 +1079,7 @@ TEST_CASE("test ioctl driver process vmcall versions user version")
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     });
 
-    mocks.ExpectCallFunc(vmcall).Do([](ioctl::registers_pointer regs) {
+    mocks.ExpectCallFunc(_vmcall).Do([](ioctl::registers_pointer regs) {
         regs->r01 = 0;
         regs->r02 = 10;
         regs->r03 = 1;
@@ -1104,7 +1104,7 @@ TEST_CASE("test ioctl driver process vmcall versions unknown")
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     });
 
-    mocks.ExpectCallFunc(vmcall).Do([](ioctl::registers_pointer regs) {
+    mocks.ExpectCallFunc(_vmcall).Do([](ioctl::registers_pointer regs) {
         regs->r01 = 0;
         regs->r02 = 0x8000000000000000;
         regs->r03 = 1;
@@ -1129,7 +1129,7 @@ TEST_CASE("test ioctl driver process vmcall registers ioctl failed")
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     });
 
-    mocks.ExpectCallFunc(vmcall).Throw(std::runtime_error("error"));
+    mocks.ExpectCallFunc(_vmcall).Throw(std::runtime_error("error"));
 
     auto driver = ioctl_driver(fil, ctl, clp);
     CHECK_THROWS(driver.process());
@@ -1148,7 +1148,7 @@ TEST_CASE("test ioctl driver process vmcall registers ioctl return failed")
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     });
 
-    mocks.ExpectCallFunc(vmcall).Do([](ioctl::registers_pointer regs) {
+    mocks.ExpectCallFunc(_vmcall).Do([](ioctl::registers_pointer regs) {
         regs->r01 = 1;
     });
 
@@ -1186,7 +1186,7 @@ TEST_CASE("test ioctl driver process vmcall unittest ioctl failed")
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     });
 
-    mocks.ExpectCallFunc(vmcall).Throw(std::runtime_error("error"));
+    mocks.ExpectCallFunc(_vmcall).Throw(std::runtime_error("error"));
 
     auto driver = ioctl_driver(fil, ctl, clp);
     CHECK_THROWS(driver.process());
@@ -1205,7 +1205,7 @@ TEST_CASE("test ioctl driver process vmcall unittest ioctl return failed")
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     });
 
-    mocks.ExpectCallFunc(vmcall).Do([](ioctl::registers_pointer regs) {
+    mocks.ExpectCallFunc(_vmcall).Do([](ioctl::registers_pointer regs) {
         regs->r01 = 1;
     });
 
@@ -1243,7 +1243,7 @@ TEST_CASE("test ioctl driver process vmcall event ioctl failed")
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     });
 
-    mocks.ExpectCallFunc(vmcall).Throw(std::runtime_error("error"));
+    mocks.ExpectCallFunc(_vmcall).Throw(std::runtime_error("error"));
 
     auto driver = ioctl_driver(fil, ctl, clp);
     CHECK_THROWS(driver.process());
@@ -1262,7 +1262,7 @@ TEST_CASE("test ioctl driver process vmcall event ioctl return failed")
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     });
 
-    mocks.ExpectCallFunc(vmcall).Do([](ioctl::registers_pointer regs) {
+    mocks.ExpectCallFunc(_vmcall).Do([](ioctl::registers_pointer regs) {
         regs->r01 = 1;
     });
 
@@ -1302,7 +1302,7 @@ TEST_CASE("test ioctl driver process vmcall data string unformatted unknown data
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     });
 
-    mocks.NeverCallFunc(vmcall);
+    mocks.NeverCallFunc(_vmcall);
 
     auto driver = ioctl_driver(fil, ctl, clp);
     CHECK_THROWS(driver.process());
@@ -1323,7 +1323,7 @@ TEST_CASE("test ioctl driver process vmcall data string unformatted ioctl failed
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     });
 
-    mocks.ExpectCallFunc(vmcall).Throw(std::runtime_error("error"));
+    mocks.ExpectCallFunc(_vmcall).Throw(std::runtime_error("error"));
 
     auto driver = ioctl_driver(fil, ctl, clp);
     CHECK_THROWS(driver.process());
@@ -1344,7 +1344,7 @@ TEST_CASE("test ioctl driver process vmcall data string unformatted ioctl return
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     });
 
-    mocks.ExpectCallFunc(vmcall).Do([](ioctl::registers_pointer regs) {
+    mocks.ExpectCallFunc(_vmcall).Do([](ioctl::registers_pointer regs) {
         regs->r01 = 1;
     });
 
@@ -1367,7 +1367,7 @@ TEST_CASE("test ioctl driver process vmcall data string unformatted out of range
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     });
 
-    mocks.ExpectCallFunc(vmcall).Do([](ioctl::registers_pointer regs) {
+    mocks.ExpectCallFunc(_vmcall).Do([](ioctl::registers_pointer regs) {
         regs->r07 = VMCALL_DATA_STRING_UNFORMATTED;
         regs->r09 = VMCALL_OUT_BUFFER_SIZE + 1;
     });
@@ -1391,7 +1391,7 @@ TEST_CASE("test ioctl driver process vmcall data string unformatted success no r
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     });
 
-    mocks.ExpectCallFunc(vmcall).Do([](ioctl::registers_pointer regs) {
+    mocks.ExpectCallFunc(_vmcall).Do([](ioctl::registers_pointer regs) {
         regs->r07 = VMCALL_DATA_NONE;
     });
 
@@ -1414,7 +1414,7 @@ TEST_CASE("test ioctl driver process vmcall data string unformatted success unfo
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     });
 
-    mocks.ExpectCallFunc(vmcall).Do([](ioctl::registers_pointer regs) {
+    mocks.ExpectCallFunc(_vmcall).Do([](ioctl::registers_pointer regs) {
         regs->r07 = VMCALL_DATA_STRING_UNFORMATTED;
         regs->r09 = 10;
     });
@@ -1438,7 +1438,7 @@ TEST_CASE("test ioctl driver process vmcall data string json ioctl failed")
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     });
 
-    mocks.ExpectCallFunc(vmcall).Throw(std::runtime_error("error"));
+    mocks.ExpectCallFunc(_vmcall).Throw(std::runtime_error("error"));
 
     auto driver = ioctl_driver(fil, ctl, clp);
     CHECK_THROWS(driver.process());
@@ -1459,7 +1459,7 @@ TEST_CASE("test ioctl driver process vmcall data string json ioctl return failed
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     });
 
-    mocks.ExpectCallFunc(vmcall).Do([](ioctl::registers_pointer regs) {
+    mocks.ExpectCallFunc(_vmcall).Do([](ioctl::registers_pointer regs) {
         regs->r01 = 1;
     });
 
@@ -1482,7 +1482,7 @@ TEST_CASE("test ioctl driver process vmcall data string json out of range")
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     });
 
-    mocks.ExpectCallFunc(vmcall).Do([](ioctl::registers_pointer regs) {
+    mocks.ExpectCallFunc(_vmcall).Do([](ioctl::registers_pointer regs) {
         regs->r07 = VMCALL_DATA_STRING_JSON;
         regs->r09 = VMCALL_OUT_BUFFER_SIZE + 1;
     });
@@ -1506,7 +1506,7 @@ TEST_CASE("test ioctl driver process vmcall data string json success no return")
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     });
 
-    mocks.ExpectCallFunc(vmcall).Do([](ioctl::registers_pointer regs) {
+    mocks.ExpectCallFunc(_vmcall).Do([](ioctl::registers_pointer regs) {
         regs->r07 = VMCALL_DATA_NONE;
     });
 
@@ -1529,7 +1529,7 @@ TEST_CASE("test ioctl driver process vmcall data string json parse failure")
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     });
 
-    mocks.ExpectCallFunc(vmcall).Do([](ioctl::registers_pointer regs) {
+    mocks.ExpectCallFunc(_vmcall).Do([](ioctl::registers_pointer regs) {
         auto output = "hello world"_s;
         memcpy(reinterpret_cast<char *>(regs->r08), output.c_str(), output.size());
 
@@ -1556,7 +1556,7 @@ TEST_CASE("test ioctl driver process vmcall data string json success json")
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     });
 
-    mocks.ExpectCallFunc(vmcall).Do([](ioctl::registers_pointer regs) {
+    mocks.ExpectCallFunc(_vmcall).Do([](ioctl::registers_pointer regs) {
         auto output = R"({"msg":"hello world"})"_s;
         memcpy(reinterpret_cast<char *>(regs->r08), output.c_str(), output.size());
 
@@ -1604,7 +1604,7 @@ TEST_CASE("test ioctl driver process vmcall data binary unformatted ioctl failed
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     });
 
-    mocks.ExpectCallFunc(vmcall).Throw(std::runtime_error("error"));
+    mocks.ExpectCallFunc(_vmcall).Throw(std::runtime_error("error"));
 
     auto driver = ioctl_driver(fil, ctl, clp);
     CHECK_THROWS(driver.process());
@@ -1625,7 +1625,7 @@ TEST_CASE("test ioctl driver process vmcall data binary unformatted ioctl return
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     });
 
-    mocks.ExpectCallFunc(vmcall).Do([](ioctl::registers_pointer regs) {
+    mocks.ExpectCallFunc(_vmcall).Do([](ioctl::registers_pointer regs) {
         regs->r01 = 1;
     });
 
@@ -1648,7 +1648,7 @@ TEST_CASE("test ioctl driver process vmcall data binary unformatted out of range
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     });
 
-    mocks.ExpectCallFunc(vmcall).Do([](ioctl::registers_pointer regs) {
+    mocks.ExpectCallFunc(_vmcall).Do([](ioctl::registers_pointer regs) {
         regs->r07 = VMCALL_DATA_BINARY_UNFORMATTED;
         regs->r09 = VMCALL_OUT_BUFFER_SIZE + 1;
     });
@@ -1672,7 +1672,7 @@ TEST_CASE("test ioctl driver process vmcall data binary unformatted success no r
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     });
 
-    mocks.ExpectCallFunc(vmcall).Do([](ioctl::registers_pointer regs) {
+    mocks.ExpectCallFunc(_vmcall).Do([](ioctl::registers_pointer regs) {
         regs->r07 = VMCALL_DATA_NONE;
     });
 
@@ -1695,7 +1695,7 @@ TEST_CASE("test ioctl driver process vmcall data binary unformatted success unfo
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     });
 
-    mocks.ExpectCallFunc(vmcall).Do([](ioctl::registers_pointer regs) {
+    mocks.ExpectCallFunc(_vmcall).Do([](ioctl::registers_pointer regs) {
         regs->r07 = VMCALL_DATA_BINARY_UNFORMATTED;
         regs->r09 = 10;
     });

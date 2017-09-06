@@ -70,6 +70,8 @@ public:
     /// @expects none
     /// @ensures none
     ///
+    /// @param vcpuid the vcpuid of the debug ring
+    ///
     debug_ring(vcpuid::type vcpuid) noexcept;
 
     /// Debug Ring Destructor
@@ -100,11 +102,15 @@ private:
 
 public:
 
+    /// @cond
+
     debug_ring(debug_ring &&) noexcept = default;
     debug_ring &operator=(debug_ring &&) noexcept = default;
 
     debug_ring(const debug_ring &) = delete;
     debug_ring &operator=(const debug_ring &) = delete;
+
+    /// @endcond
 };
 
 /// Get Debug Ring Resource

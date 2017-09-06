@@ -21,7 +21,7 @@
 
 .code
 
-platform_vmcall PROC
+_vmcall PROC
 
     push rbx
     push rdi
@@ -72,24 +72,6 @@ platform_vmcall PROC
 
     ret
 
-platform_vmcall ENDP
-
-platform_vmcall_event PROC
-
-    push rdi
-    mov rdi, rcx
-
-    mov rax, [rdi + 00h]
-    mov rdx, [rdi + 08h]
-    mov rcx, [rdi + 10h]
-
-    vmcall
-
-    mov [rdi + 08h], rdx
-
-    pop rdi
-    ret
-
-platform_vmcall_event ENDP
+_vmcall ENDP
 
 end

@@ -25,7 +25,8 @@
 
 #include <memory_manager/mem_attr_x64.h>
 
-// *INDENT-OFF*
+/// @cond
+/// *INDENT-OFF*
 
 namespace x64
 {
@@ -82,6 +83,7 @@ namespace pat
 
 }
 
-// *INDENT-ON*
+/// *INDENT-ON*
+/// @endcond
 
 #endif

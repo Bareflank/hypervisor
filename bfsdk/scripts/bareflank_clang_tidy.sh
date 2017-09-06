@@ -28,11 +28,11 @@
 #    be noted that if you only change a header, it is likely that the header
 #    will not be examined as it is not listed in the compilation database
 #
-# 1: To support out of tree builds, this script needs to be run from the
+# 2: To support out of tree builds, this script needs to be run from the
 #    build folder, and you must provide the source directory associated with
 #    the build folder.
 #
-# 2: Additional arguments for the "-checks=" flag for clang tidy. This can
+# 3: Additional arguments for the "-checks=" flag for clang tidy. This can
 #    be used to disable specific checks that do not apply
 #
 

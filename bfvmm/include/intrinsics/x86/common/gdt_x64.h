@@ -26,8 +26,9 @@
 #include <algorithm>
 
 #include <bfgsl.h>
-#include <bfexception.h>
 #include <bftypes.h>
+#include <bfexception.h>
+#include <bfupperlower.h>
 
 #include <intrinsics/x86/common/x64.h>
 
@@ -92,7 +93,7 @@ namespace x64
 {
 namespace gdt
 {
-    using length_type = uint64_t;
+    using size_type = uint64_t;
 
     inline auto get() noexcept
     {
@@ -148,13 +149,14 @@ namespace gdt
         }
     }
 
-    inline auto paged_length(length_type bytes)
+    inline auto size(size_type bytes)
     {
-        auto pages = ((bytes & (x64::page_size - 1)) != 0ULL) ? 1ULL : 0ULL;
-        pages += bytes >> x64::page_shift;
-        return pages * x64::page_size;
-    }
+        if (bfn::lower(bytes) == 0) {
+            return bfn::upper(bytes);
+        }
 
+        return bfn::upper(bytes) + 1U;
+    }
 }
 }
 

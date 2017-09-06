@@ -20,9 +20,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#include <debug.h>
 #include <driver.h>
-#include <driver.tmh>
 
 NTSTATUS
 DriverEntry(
@@ -44,7 +42,7 @@ DriverEntry(
         return status;
     }
 
-    DEBUG("DriverEntry: success\n");
+    BFDEBUG("DriverEntry: success\n");
     return STATUS_SUCCESS;
 }
 
@@ -70,7 +68,7 @@ bareflankEvtDeviceAdd(
         return status;
     }
 
-    DEBUG("bareflankEvtDeviceAdd: success\n");
+    BFDEBUG("bareflankEvtDeviceAdd: success\n");
     return STATUS_SUCCESS;
 }
 
@@ -83,7 +81,7 @@ bareflankEvtDriverContextCleanup(
 
     common_fini();
 
-    DEBUG("bareflankEvtDriverContextCleanup: success\n");
+    BFDEBUG("bareflankEvtDriverContextCleanup: success\n");
 }
 
 NTSTATUS
@@ -95,7 +93,7 @@ bareflankEvtDeviceD0Entry(
     UNREFERENCED_PARAMETER(Device);
     UNREFERENCED_PARAMETER(PreviousState);
 
-    DEBUG("bareflankEvtDeviceD0Entry: success\n");
+    BFDEBUG("bareflankEvtDeviceD0Entry: success\n");
     return STATUS_SUCCESS;
 }
 
@@ -110,6 +108,6 @@ bareflankEvtDeviceD0Exit(
 
     common_fini();
 
-    DEBUG("bareflankEvtDeviceD0Entry: success\n");
+    BFDEBUG("bareflankEvtDeviceD0Entry: success\n");
     return STATUS_SUCCESS;
 }

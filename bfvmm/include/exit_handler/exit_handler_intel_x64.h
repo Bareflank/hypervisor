@@ -74,7 +74,7 @@ class EXPORT_EXIT_HANDLER exit_handler_intel_x64
 {
 public:
 
-    using ret_type = int64_t;
+    using ret_type = int64_t;   ///< VMCall return type
 
     /// Default Constructor
     ///
@@ -122,6 +122,8 @@ public:
 #ifndef ENABLE_UNITTESTING
 protected:
 #endif
+
+    /// @cond
 
     virtual void promote(gsl::not_null<const void *> guest_gdt);
 
@@ -177,11 +179,11 @@ protected:
         vmcall_registers_t &regs, const json &str,
         const bfn::unique_map_ptr_x64<char> &omap);
 
+    /// @endcond
+
 public:
 
-    // The following are only marked public for unit testing. Do not use
-    // these APIs directly as they may change at any time, and their direct
-    // use may be unstable. You have been warned.
+    /// @cond
 
     vmcs_intel_x64 *m_vmcs{nullptr};
     state_save_intel_x64 *m_state_save{nullptr};
@@ -194,13 +196,19 @@ public:
         gsl::not_null<state_save_intel_x64 *> state_save)
     { m_state_save = state_save; }
 
+    /// @endcond
+
 public:
+
+    /// @cond
 
     exit_handler_intel_x64(exit_handler_intel_x64 &&) noexcept = default;
     exit_handler_intel_x64 &operator=(exit_handler_intel_x64 &&) noexcept = default;
 
     exit_handler_intel_x64(const exit_handler_intel_x64 &) = delete;
     exit_handler_intel_x64 &operator=(const exit_handler_intel_x64 &) = delete;
+
+    /// @endcond
 };
 
 #ifdef _MSC_VER

@@ -1,4 +1,4 @@
-os: Visual Studio 2017
+os: Visual Studio 2015
 platform: x64
 
 #
@@ -40,12 +40,11 @@ build_script:
   #
   # Visual Studio (MSBuild / Static Libraries)
   #
-  - mkdir build
-  - cd build
-  - cmake -G "Visual Studio 15 2017 Win64" -DENABLE_UNITTESTING=ON ..
-  - msbuild hypervisor.sln
+  - mkdir build_msbuild
+  - cd build_msbuild
+  - cmake -G "Visual Studio 14 2015 Win64" -DENABLE_UNITTESTING=ON ..
+  - msbuild /m:3 hypervisor.sln
   - cmake --build . --target test
-  - cd ..
 
   #
   # Cygwin (Shared Libraries)

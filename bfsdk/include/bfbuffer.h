@@ -236,11 +236,15 @@ private:
 
 public:
 
-    buffer(buffer &&) noexcept = default;               ///< Default move construction
-    buffer &operator=(buffer &&) noexcept = default;    ///< Default move operator
+    /// @cond
 
-    buffer(const buffer &) = delete;                    ///< Default copy construction
-    buffer &operator=(const buffer &) = delete;         ///< Default copy operator
+    buffer(buffer &&) noexcept = default;
+    buffer &operator=(buffer &&) noexcept = default;
+
+    buffer(const buffer &) = delete;
+    buffer &operator=(const buffer &) = delete;
+
+    /// @endcond
 };
 
 /// Swap
@@ -262,6 +266,7 @@ swap(buffer &lhs, buffer &rhs) noexcept
 ///
 /// @param lhs buffer to compare
 /// @param rhs buffer to compare
+/// @return true if ==, false otherwise
 ///
 inline bool
 operator==(const buffer &lhs, const buffer &rhs) noexcept
@@ -280,6 +285,7 @@ operator==(const buffer &lhs, const buffer &rhs) noexcept
 ///
 /// @param lhs buffer to compare
 /// @param rhs buffer to compare
+/// @return true if !=, false otherwise
 ///
 inline bool
 operator!=(const buffer &lhs, const buffer &rhs) noexcept

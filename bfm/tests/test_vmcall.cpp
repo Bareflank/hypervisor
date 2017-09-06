@@ -23,7 +23,7 @@
 #include <bfvmcallinterface.h>
 
 extern "C" void
-vmcall(vmcall_registers_t *regs)
+_vmcall(vmcall_registers_t *regs)
 {
     bfignored(regs);
 }

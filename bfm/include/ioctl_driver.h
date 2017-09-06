@@ -64,10 +64,10 @@ class EXPORT_BFM_SRC ioctl_driver
 {
 public:
 
-    using status_type = ioctl::status_type;
-    using registers_type = command_line_parser::registers_type;
-    using filename_type = std::string;
-    using list_type = std::vector<std::string>;
+    using status_type = ioctl::status_type;                         ///< Status type
+    using registers_type = command_line_parser::registers_type;     ///< VMCall registers type
+    using filename_type = std::string;                              ///< Filename type
+    using list_type = std::vector<std::string>;                     ///< List type
 
     /// Default Constructor
     ///

@@ -22,8 +22,8 @@
 
 #include <ntddk.h>
 
-#include <platform.h>
-#include <bfelf_loader.h>
+#include <bfdebug.h>
+#include <bfplatform.h>
 
 #define BF_TAG 'BFLK'
 #define BF_NX_TAG 'BFNX'
@@ -31,17 +31,17 @@
 void *
 platform_alloc_rw(uint64_t len)
 {
-    void *addr = NULL;
+    void *addr = nullptr;
 
     if (len == 0) {
-        ALERT("platform_alloc: invalid length\n");
+        BFALERT("platform_alloc: invalid length\n");
         return addr;
     }
 
     addr = ExAllocatePoolWithTag(NonPagedPool, len, BF_TAG);
 
-    if (addr == NULL) {
-        ALERT("platform_alloc_rw: failed to ExAllocatePoolWithTag mem: %lld\n", len);
+    if (addr == nullptr) {
+        BFALERT("platform_alloc_rw: failed to ExAllocatePoolWithTag mem: %lld\n", len);
     }
 
     return addr;
@@ -50,17 +50,17 @@ platform_alloc_rw(uint64_t len)
 void *
 platform_alloc_rwe(uint64_t len)
 {
-    void *addr = NULL;
+    void *addr = nullptr;
 
     if (len == 0) {
-        ALERT("platform_alloc: invalid length\n");
+        BFALERT("platform_alloc: invalid length\n");
         return addr;
     }
 
     addr = ExAllocatePoolWithTag(NonPagedPoolExecute, len, BF_TAG);
 
-    if (addr == NULL) {
-        ALERT("platform_alloc_rw: failed to ExAllocatePoolWithTag mem: %lld\n", len);
+    if (addr == nullptr) {
+        BFALERT("platform_alloc_rw: failed to ExAllocatePoolWithTag mem: %lld\n", len);
     }
 
     return addr;
@@ -70,54 +70,55 @@ void *
 platform_virt_to_phys(void *virt)
 {
     PHYSICAL_ADDRESS addr = MmGetPhysicalAddress(virt);
-
     return (void *)addr.QuadPart;
 }
 
 void
-platform_free_rw(void *addr, uint64_t len)
+platform_free_rw(const void *addr, uint64_t len)
 {
     (void) len;
 
-    if (addr == NULL) {
-        ALERT("platform_free_rw: invalid address %p\n", addr);
+    if (addr == nullptr) {
+        BFALERT("platform_free_rw: invalid address %p\n", addr);
         return;
     }
 
-    ExFreePoolWithTag(addr, BF_TAG);
+    ExFreePoolWithTag((void *)addr, BF_TAG);
 }
 
 void
-platform_free_rwe(void *addr, uint64_t len)
+platform_free_rwe(const void *addr, uint64_t len)
 {
     (void) len;
 
-    if (addr == NULL) {
-        ALERT("platform_free_rw: invalid address %p\n", addr);
+    if (addr == nullptr) {
+        BFALERT("platform_free_rw: invalid address %p\n", addr);
         return;
     }
 
-    ExFreePoolWithTag(addr, BF_TAG);
+    ExFreePoolWithTag((void *)addr, BF_TAG);
 }
 
-void
+void *
 platform_memset(void *ptr, char value, uint64_t num)
 {
-    if (!ptr) {
-        return;
+    if (ptr == nullptr) {
+        return nullptr;
     }
 
     RtlFillMemory(ptr, num, value);
+    return ptr;
 }
 
-void
+void *
 platform_memcpy(void *dst, const void *src, uint64_t num)
 {
-    if (!dst || !src) {
-        return;
+    if (dst == nullptr || src == nullptr) {
+        return nullptr;
     }
 
     RtlCopyMemory(dst, src, num);
+    return dst;
 }
 
 void
@@ -150,4 +151,15 @@ void
 platform_restore_affinity(int64_t affinity)
 {
     KeRevertToUserAffinityThreadEx((KAFFINITY)(affinity));
+}
+
+int64_t
+platform_get_current_cpu_num(void)
+{
+    return KeGetCurrentProcessorNumberEx(nullptr);
+}
+
+void
+platform_restore_preemption(void)
+{
 }

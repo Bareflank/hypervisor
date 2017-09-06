@@ -11,7 +11,8 @@ CatalogFile=bareflank.cat
 DriverVer=
 
 [DestinationDirs]
-DefaultDestDir=12
+DefaultDestDir = 12
+bareflank_Device_CoInstaller_CopyFiles = 11
 
 ; ================= Class section =====================
 
@@ -20,6 +21,7 @@ DefaultDestDir=12
 
 [SourceDisksFiles]
 bareflank.sys  = 1,,
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll=1
 
 ;*****************************************
 ; Install Section
@@ -29,7 +31,7 @@ bareflank.sys  = 1,,
 %ManufacturerName%=Standard,NT$ARCH$
 
 [Standard.NT$ARCH$]
-%bareflank.DeviceDesc%=bareflank_Device, ROOT\bareflank
+%bareflank.DeviceDesc%=bareflank_Device, Root\bareflank
 
 [bareflank_Device.NT]
 CopyFiles=Drivers_Dir
@@ -53,9 +55,6 @@ ServiceBinary  = %12%\bareflank.sys
 ;--- bareflank_Device Coinstaller installation ------
 ;
 
-[DestinationDirs]
-bareflank_Device_CoInstaller_CopyFiles = 11
-
 [bareflank_Device.NT.CoInstallers]
 AddReg=bareflank_Device_CoInstaller_AddReg
 CopyFiles=bareflank_Device_CoInstaller_CopyFiles
@@ -66,9 +65,6 @@ HKR,,CoInstallers32,0x00010000, "WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll,WdfC
 [bareflank_Device_CoInstaller_CopyFiles]
 WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll
 
-[SourceDisksFiles]
-WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll=1
-
 [bareflank_Device.NT.Wdf]
 KmdfService =  bareflank, bareflank_wdfsect
 [bareflank_wdfsect]
@@ -76,7 +72,7 @@ KmdfLibraryVersion = $KMDFVERSION$
 
 [Strings]
 SPSVCINST_ASSOCSERVICE= 0x00000002
-ManufacturerName="Bareflank Hypervisor"
-DiskName = "Bareflank Hypervisor Installation Disk"
-bareflank.DeviceDesc = "Bareflank Hypervisor"
-bareflank.SVCDESC = "Bareflank Hypervisor"
+ManufacturerName="Assured Information Security, Inc."
+DiskName = "Bareflank Installation Disk"
+bareflank.DeviceDesc = "Bareflank Device"
+bareflank.SVCDESC = "Bareflank Service"

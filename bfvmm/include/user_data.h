@@ -32,16 +32,25 @@ class user_data
 {
 public:
 
+    /// Default Constructor
+    ///
     user_data() = default;
+
+    /// Default Destructor
+    ///
     virtual ~user_data() = default;
 
 public:
+
+    /// @cond
 
     user_data(user_data &&) noexcept = delete;
     user_data &operator=(user_data &&) noexcept = delete;
 
     user_data(const user_data &) = delete;
     user_data &operator=(const user_data &) = delete;
+
+    /// @endcond
 };
 
 #endif

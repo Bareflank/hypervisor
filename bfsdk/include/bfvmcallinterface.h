@@ -364,7 +364,7 @@ struct vmcall_registers_t {
  *
  * @param regs register state
  */
-void vmcall(struct vmcall_registers_t *regs);
+void _vmcall(struct vmcall_registers_t *regs);
 
 /**
  * VMCall Event
@@ -375,7 +375,7 @@ void vmcall(struct vmcall_registers_t *regs);
  *
  * @param regs register state
  */
-void vmcall_event(struct vmcall_registers_t *regs);
+void _vmcall_event(struct vmcall_registers_t *regs);
 
 #ifdef __cplusplus
 }
