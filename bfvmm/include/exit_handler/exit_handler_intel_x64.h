@@ -123,7 +123,7 @@ public:
 protected:
 #endif
 
-    virtual void promote();
+    virtual void promote(gsl::not_null<const void *> guest_gdt);
 
     virtual void resume();
     virtual void advance_and_resume();

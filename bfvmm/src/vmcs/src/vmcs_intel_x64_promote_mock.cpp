@@ -23,7 +23,10 @@
 #include <vmcs/vmcs_intel_x64_promote.h>
 
 extern "C" void
-vmcs_promote(uintptr_t state_save) noexcept
+vmcs_promote(
+    state_save_intel_x64 *state_save,
+    const void * guest_gdt) noexcept
 {
     bfignored(state_save);
+    bfignored(guest_gdt);
 }

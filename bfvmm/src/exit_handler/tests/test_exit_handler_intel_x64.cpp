@@ -23,6 +23,8 @@
 #include <hippomocks.h>
 
 #include <vmcs/vmcs_intel_x64.h>
+#include <vmcs/vmcs_intel_x64_promote.h>
+
 #include <intrinsics/x86/common_x64.h>
 #include <intrinsics/x86/intel_x64.h>
 
@@ -44,9 +46,13 @@ vmcs::value_type g_exit_reason = 0;
 vmcs::value_type g_exit_qualification = 0;
 vmcs::value_type g_exit_instruction_length = 8;
 vmcs::value_type g_exit_instruction_information = 0;
+vmcs::value_type g_guest_cr3 = 0;
+vmcs::value_type g_guest_gdtr_limit = 0;
+vmcs::value_type g_guest_gdtr_base = 0;
 
 constexpr static int g_map_size = 100;
-static char g_map[g_map_size];
+alignas(0x1000) static char g_map[g_map_size];
+
 static auto g_msg = std::string(R"%({"msg":"hello world"})%");
 static std::map<intel_x64::msrs::field_type, intel_x64::msrs::value_type> g_msrs;
 static state_save_intel_x64 g_state_save{};
@@ -77,6 +83,15 @@ test_vmread(uint64_t field, uint64_t *val) noexcept
             break;
         case vmcs::guest_physical_address::addr:
             *val = 0x0;
+            break;
+        case vmcs::guest_cr3::addr:
+            *val = g_guest_cr3;
+            break;
+        case vmcs::guest_gdtr_limit::addr:
+            *val = g_guest_gdtr_limit;
+            break;
+        case vmcs::guest_gdtr_base::addr:
+            *val = g_guest_gdtr_base;
             break;
         default:
             g_field = field;
@@ -176,7 +191,10 @@ setup_vmcs_handled(MockRepository &mocks, vmcs::value_type reason)
     mocks.OnCall(vmcs, vmcs_intel_x64::promote);
     mocks.OnCall(vmcs, vmcs_intel_x64::load);
     mocks.OnCall(vmcs, vmcs_intel_x64::clear);
-    mocks.ExpectCall(vmcs, vmcs_intel_x64::resume);
+
+    if (reason != exit_reason::basic_exit_reason::vmxoff) {
+        mocks.ExpectCall(vmcs, vmcs_intel_x64::resume);
+    }
 
     g_msrs[intel_x64::msrs::ia32_vmx_true_entry_ctls::addr] = 0xFFFFFFFFFFFFFFFFUL;
     g_exit_reason = reason;
@@ -236,6 +254,7 @@ setup_mm(MockRepository &mocks, bool map_success = false)
     mocks.OnCallFunc(memory_manager_x64::instance).Return(mm);
     mocks.OnCall(mm, memory_manager_x64::alloc_map).Return(static_cast<char *>(g_map));
     mocks.OnCall(mm, memory_manager_x64::free_map);
+    mocks.OnCallFunc(bfn::virt_to_phys_with_cr3).Return(0x2000);
 
     if (map_success) {
         mocks.OnCallFunc(bfn::map_with_cr3);
@@ -273,7 +292,8 @@ TEST_CASE("exit_handler: promote")
     auto vmcs = setup_vmcs_promote(mocks, 0x0);
     auto ehlr = setup_ehlr(vmcs);
 
-    CHECK_NOTHROW(ehlr.promote());
+    auto addr = reinterpret_cast<const void *>(0x1000);
+    CHECK_NOTHROW(ehlr.promote(addr));
 }
 
 TEST_CASE("exit_handler: resume")
@@ -1222,12 +1242,25 @@ TEST_CASE("exit_handler: vm_exit_reason_vmcall_unittests")
 
 TEST_CASE("exit_handler: vm_exit_reason_vmxoff")
 {
+    bool map_success = true;
+
     MockRepository mocks;
     setup_intrinsics(mocks);
+    setup_mm(mocks, map_success);
+    setup_pt(mocks);
+
+    g_guest_cr3 = 0x1000;
+    g_guest_gdtr_limit = 0x4;
+    g_guest_gdtr_base = 0x432000;
+
     auto vmcs = setup_vmcs_handled(mocks, exit_reason::basic_exit_reason::vmxoff);
     auto ehlr = setup_ehlr(vmcs);
 
-    CHECK_NOTHROW(ehlr.dispatch());
+    CHECK_THROWS(ehlr.dispatch());
+
+    g_guest_cr3 = 0x0;
+    g_guest_gdtr_limit = 0x0;
+    g_guest_gdtr_base = 0x0;
 }
 
 TEST_CASE("exit_handler: vm_exit_reason_rdmsr_debug_ctl")

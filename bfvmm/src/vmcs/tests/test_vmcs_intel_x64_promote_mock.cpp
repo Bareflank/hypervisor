@@ -25,5 +25,5 @@
 
 TEST_CASE("")
 {
-    CHECK_NOTHROW(vmcs_promote(0));
+    CHECK_NOTHROW(vmcs_promote(0, 0));
 }

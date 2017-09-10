@@ -79,6 +79,24 @@ TEST_CASE("idt_reg_limit_set_get")
     CHECK(x64::idt::limit::get() == (4 << 3) - 1);
 }
 
+TEST_CASE("idt_paged_length")
+{
+    MockRepository mocks;
+    setup_intrinsics(mocks);
+
+    auto bytes = 0;
+    CHECK(x64::idt::paged_length::(bytes) == 0U * x64::page_size);
+
+    bytes = 0xfff;
+    CHECK(x64::idt::paged_length::(bytes) == 1U * x64::page_size);
+
+    bytes = 0x1000;
+    CHECK(x64::idt::paged_length::(bytes) == 1U * x64::page_size);
+
+    bytes = 0x4001;
+    CHECK(x64::idt::paged_length::(bytes) == 5U * x64::page_size);
+}
+
 TEST_CASE("idt_constructor_no_size")
 {
     MockRepository mocks;
