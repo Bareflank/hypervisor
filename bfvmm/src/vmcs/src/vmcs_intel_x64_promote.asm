@@ -76,13 +76,12 @@ extern _write_fs
 extern _write_ldtr
 extern _write_tr
 extern _write_msr
-extern _write_msr
 extern _write_gdt
 extern _write_idt
-extern _write_cr0;
-extern _write_cr3;
-extern _write_cr4;
-extern _write_dr7;
+extern _write_cr0
+extern _write_cr3
+extern _write_cr4
+extern _write_dr7
 
 extern _cpuid_eax
 
@@ -101,33 +100,30 @@ section .text
 vmcs_promote:
 
     mov r15, rdi
+    mov r14, rsi
 
     ;
-    ; Restore Control Registers
+    ; Clear TSS Busy
+    ;
+    ; rsi contains the virtual address of the guest's GDT mapped r/w
+    ; in the VMM's address space (see exit_handler_intel_x64::handle_vmxoff)
     ;
 
-    mov rsi, VMCS_GUEST_CR0
-    vmread rdi, rsi
-    call _write_cr0 wrt ..plt
+    mov rdi, rsi
+    mov rsi, VMCS_GUEST_TR_SELECTOR
+    vmread rsi, rsi
 
-    mov rsi, VMCS_GUEST_CR3
-    vmread rdi, rsi
-    call _write_cr3 wrt ..plt
-
-    mov rsi, VMCS_GUEST_CR4
-    vmread rdi, rsi
-    call _write_cr4 wrt ..plt
-
-    mov rsi, VMCS_GUEST_DR7
-    vmread rdi, rsi
-    call _write_dr7 wrt ..plt
+    add rdi, rsi
+    mov rax, 0xFFFFFDFFFFFFFFFF
+    and [rdi], rax
 
     ;
-    ; Restore GDT
+    ; Temporarily load the guest's GDT using the r/w mapping
+    ; so that writes to it (e.g. ltr) don't fault when
+    ; restoring segment registers.
     ;
 
-    mov rsi, VMCS_GUEST_GDTR_BASE
-    vmread rdi, rsi
+    mov rdi, r14
     push rdi
 
     mov rsi, VMCS_GUEST_GDTR_LIMIT
@@ -136,35 +132,6 @@ vmcs_promote:
 
     mov rdi, rsp
     call _write_gdt wrt ..plt
-
-    ;
-    ; Restore IDT
-    ;
-
-    mov rsi, VMCS_GUEST_IDTR_BASE
-    vmread rdi, rsi
-    push rdi
-
-    mov rsi, VMCS_GUEST_IDTR_LIMIT
-    vmread rdi, rsi
-    push di
-
-    mov rdi, rsp
-    call _write_idt wrt ..plt
-
-    ;
-    ; Clear TSS Busy
-    ;
-
-    mov rsi, VMCS_GUEST_GDTR_BASE
-    vmread rdi, rsi
-    mov rsi, VMCS_GUEST_TR_SELECTOR
-    vmread rsi, rsi
-
-    add rdi, rsi
-
-    mov rax, 0xFFFFFDFFFFFFFFFF
-    and [rdi], rax
 
     ;
     ; Restore Selectors
@@ -201,6 +168,56 @@ vmcs_promote:
     mov rsi, VMCS_GUEST_TR_SELECTOR
     vmread rdi, rsi
     call _write_tr wrt ..plt
+
+    ;
+    ; Restore Control Registers
+    ;
+
+    mov rsi, VMCS_GUEST_CR0
+    vmread rdi, rsi
+    call _write_cr0 wrt ..plt
+
+    mov rsi, VMCS_GUEST_CR3
+    vmread rdi, rsi
+    call _write_cr3 wrt ..plt
+
+    mov rsi, VMCS_GUEST_CR4
+    vmread rdi, rsi
+    call _write_cr4 wrt ..plt
+
+    mov rsi, VMCS_GUEST_DR7
+    vmread rdi, rsi
+    call _write_dr7 wrt ..plt
+
+    ;
+    ; Restore the guest's actual GDT
+    ;
+
+    mov rsi, VMCS_GUEST_GDTR_BASE
+    vmread rdi, rsi
+    push rdi
+
+    mov rsi, VMCS_GUEST_GDTR_LIMIT
+    vmread rdi, rsi
+    push di
+
+    mov rdi, rsp
+    call _write_gdt wrt ..plt
+
+    ;
+    ; Restore IDT
+    ;
+
+    mov rsi, VMCS_GUEST_IDTR_BASE
+    vmread rdi, rsi
+    push rdi
+
+    mov rsi, VMCS_GUEST_IDTR_LIMIT
+    vmread rdi, rsi
+    push di
+
+    mov rdi, rsp
+    call _write_idt wrt ..plt
 
     ;
     ; Restore MSRs

@@ -107,9 +107,10 @@ test_cpuid_eax(uint32_t val) noexcept
 { return g_eax_cpuid[val]; }
 
 static void
-vmcs_promote_fail(bool state_save)
+vmcs_promote_fail(bool state_save, gsl::not_null<const void *> addr)
 {
     (void) state_save;
+    (void) addr;
 }
 
 static void
@@ -399,7 +400,7 @@ TEST_CASE("vmcs: promote_failure")
     mocks.OnCallFunc(_vmread).Do(test_vmread);
 
     vmcs_intel_x64 vmcs{};
-    CHECK_THROWS(vmcs.promote());
+    CHECK_THROWS(vmcs.promote(reinterpret_cast<char *>(0x1000UL)));
 }
 
 TEST_CASE("vmcs: resume_failure")

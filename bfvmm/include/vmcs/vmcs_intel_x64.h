@@ -137,10 +137,16 @@ public:
     ///       when "-O3" was enabled. The order of each instruction is very
     ///       important
     ///
-    /// @expects none
+    /// @note guest_gdt is the virtual address of the guest's GDT that
+    ///       has been mapped into the VMM read/write.  It is marked const
+    ///       in order to prevent static analysis from complaining, but
+    ///       the memory will be written by the processor in
+    ///       vmcs_intel_x64_promote.asm
+    ///
+    /// @expects guest_gdt != nullptr
     /// @ensures none
     ///
-    virtual void promote();
+    virtual void promote(gsl::not_null<const void *> guest_gdt);
 
     /// Load
     ///

@@ -23,6 +23,7 @@
 #define VMCS_INTEL_X64_PROMOTE_H
 
 #include <cstdint>
+#include <exit_handler/state_save_intel_x64.h>
 
 /// Promote VMCS
 ///
@@ -31,6 +32,8 @@
 ///
 /// @note this function does not return
 ///
-extern "C" void vmcs_promote(uintptr_t state_save) noexcept;
+extern "C" void
+vmcs_promote(
+    state_save_intel_x64 *state_save, const void * guest_gdt) noexcept;
 
 #endif
