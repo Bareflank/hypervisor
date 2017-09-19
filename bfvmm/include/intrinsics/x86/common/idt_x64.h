@@ -92,6 +92,8 @@ namespace x64
 {
 namespace idt
 {
+    using length_type = uint64_t;
+
     inline auto get() noexcept
     {
         auto reg = idt_reg_x64_t{};
@@ -144,6 +146,13 @@ namespace idt
             reg.limit = limit;
             _write_idt(&reg);
         }
+    }
+
+    inline auto paged_length(length_type bytes)
+    {
+        auto pages = ((bytes & (x64::page_size - 1)) != 0ULL) ? 1ULL : 0ULL;
+        pages += bytes >> x64::page_shift;
+        return pages * x64::page_size;
     }
 }
 }

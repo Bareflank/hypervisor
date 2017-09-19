@@ -83,6 +83,24 @@ TEST_CASE("gdt_reg_limit_set_get")
     CHECK(x64::gdt::limit::get() == 4 << 3);
 }
 
+TEST_CASE("gdt_paged_length")
+{
+    MockRepository mocks;
+    setup_intrinsics(mocks);
+
+    auto bytes = 0x0;
+    CHECK(x64::gdt::paged_length(bytes) == 0U * x64::page_size);
+
+    bytes = 0x2;
+    CHECK(x64::gdt::paged_length(bytes) == 1U * x64::page_size);
+
+    bytes = 0x1000;
+    CHECK(x64::gdt::paged_length(bytes) == 1U * x64::page_size);
+
+    bytes = 0x1001;
+    CHECK(x64::gdt::paged_length(bytes) == 2U * x64::page_size);
+}
+
 TEST_CASE("gdt_constructor_no_size")
 {
     MockRepository mocks;

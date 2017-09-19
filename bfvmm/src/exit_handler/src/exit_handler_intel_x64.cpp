@@ -76,12 +76,12 @@ exit_handler_intel_x64::stop() noexcept
 { pm::stop(); }
 
 void
-exit_handler_intel_x64::promote()
-{ m_vmcs->promote(); }
-
-void
 exit_handler_intel_x64::resume()
 { m_vmcs->resume(); }
+
+void
+exit_handler_intel_x64::promote(gsl::not_null<const void *> guest_gdt)
+{ m_vmcs->promote(guest_gdt); }
 
 void
 exit_handler_intel_x64::advance_and_resume()
@@ -219,7 +219,16 @@ exit_handler_intel_x64::handle_vmcall()
 
 void
 exit_handler_intel_x64::handle_vmxoff()
-{ this->promote(); }
+{
+    auto virt = vmcs::guest_gdtr_base::get();
+    auto cr3 = vmcs::guest_cr3::get();
+    auto size = x64::gdt::paged_length(vmcs::guest_gdtr_limit::get() + 1U);
+    auto pat = vmcs::guest_ia32_pat::get();
+
+    auto gdt_map = bfn::make_unique_map_x64<char>(virt, cr3, size, pat);
+
+    this->promote(gdt_map.get());
+}
 
 void
 exit_handler_intel_x64::handle_rdmsr()

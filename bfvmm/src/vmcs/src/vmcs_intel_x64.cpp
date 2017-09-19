@@ -77,14 +77,9 @@ vmcs_intel_x64::launch(gsl::not_null<vmcs_intel_x64_state *> host_state,
 }
 
 void
-vmcs_intel_x64::promote()
+vmcs_intel_x64::promote(gsl::not_null<const void *> guest_gdt)
 {
-    // TODO:
-    //
-    // Why are we not passing m_state_save? Seems safer then using the
-    // VMCS
-
-    vmcs_promote(vmcs::host_gs_base::get());
+    vmcs_promote(m_state_save, guest_gdt);
     throw std::runtime_error("vmcs promote failed");
 }
 
