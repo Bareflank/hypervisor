@@ -132,10 +132,11 @@ add_raw_md_to_memory_manager(uint64_t virt, uint64_t type)
 int64_t
 add_md_to_memory_manager(struct bfelf_binary_t *module)
 {
-    int64_t ret = 0;
     bfelf64_word s = 0;
 
     for (s = 0; s < bfelf_file_get_num_load_instrs(&module->ef); s++) {
+
+        int64_t ret = 0;
 
         uint64_t exec_s = 0;
         uint64_t exec_e = 0;

@@ -107,13 +107,6 @@ test_cpuid_eax(uint32_t val) noexcept
 { return g_eax_cpuid[val]; }
 
 static void
-vmcs_promote_fail(bool state_save, gsl::not_null<const void *> addr)
-{
-    (void) state_save;
-    (void) addr;
-}
-
-static void
 vmcs_resume_fail(state_save_intel_x64 *state_save)
 {
     (void) state_save;

@@ -89,7 +89,7 @@ TEST_CASE("gdt_paged_length")
     setup_intrinsics(mocks);
 
     auto bytes = 0x0;
-    CHECK(x64::gdt::paged_length(bytes) == 0U * x64::page_size);
+    CHECK(x64::gdt::paged_length(bytes) == 0U);
 
     bytes = 0x2;
     CHECK(x64::gdt::paged_length(bytes) == 1U * x64::page_size);
