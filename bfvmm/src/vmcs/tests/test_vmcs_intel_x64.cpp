@@ -396,8 +396,9 @@ TEST_CASE("vmcs: launch_load_failure")
 TEST_CASE("vmcs: promote_failure")
 {
     MockRepository mocks;
-    mocks.OnCallFunc(vmcs_promote).Do(vmcs_promote_fail);
-    mocks.OnCallFunc(_vmread).Do(test_vmread);
+    auto mm = mocks.Mock<memory_manager_x64>();
+
+    setup_vmcs_intrinsics(mocks, mm);
 
     vmcs_intel_x64 vmcs{};
     CHECK_THROWS(vmcs.promote(reinterpret_cast<char *>(0x1000UL)));

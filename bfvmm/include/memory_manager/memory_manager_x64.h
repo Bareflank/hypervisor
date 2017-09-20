@@ -98,11 +98,11 @@ class EXPORT_MEMORY_MANAGER memory_manager_x64
 {
 public:
 
-    using pointer = void *;
-    using integer_pointer = uintptr_t;
-    using size_type = std::size_t;
-    using attr_type = decltype(memory_descriptor::type);
-    using memory_descriptor_list = std::vector<memory_descriptor>;
+    using pointer = void *;                                         ///< Pointer type
+    using integer_pointer = uintptr_t;                              ///< Integer pointer type
+    using size_type = std::size_t;                                  ///< Size type
+    using attr_type = decltype(memory_descriptor::type);            ///< Attribute type
+    using memory_descriptor_list = std::vector<memory_descriptor>;  ///< Memory descriptor list type
 
     /// Default Destructor
     ///
@@ -117,6 +117,8 @@ public:
     ///
     /// @expects none
     /// @ensures ret != nullptr
+    ///
+    /// @return a singleton instance of memory_manager_x64
     ///
     static memory_manager_x64 *instance() noexcept;
 
@@ -194,6 +196,7 @@ public:
     /// @ensures none
     ///
     /// @param ptr a pointer to memory previously allocated using alloc.
+    /// @return the size of the pointer
     ///
     virtual size_type size(
         pointer ptr) const noexcept;
@@ -208,6 +211,7 @@ public:
     /// @ensures none
     ///
     /// @param ptr a pointer to memory previously allocated using alloc_map.
+    /// @return the size of the pointer
     ///
     virtual size_type size_map(
         pointer ptr) const noexcept;
@@ -405,11 +409,15 @@ private:
 
 public:
 
+    /// @cond
+
     memory_manager_x64(memory_manager_x64 &&) noexcept = delete;
     memory_manager_x64 &operator=(memory_manager_x64 &&) noexcept = delete;
 
     memory_manager_x64(const memory_manager_x64 &) = delete;
     memory_manager_x64 &operator=(const memory_manager_x64 &) = delete;
+
+    /// @endcond
 };
 
 /// Memory Manager Macro

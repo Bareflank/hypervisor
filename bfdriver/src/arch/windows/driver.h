@@ -25,13 +25,14 @@
 #include <ntddk.h>
 #include <wdf.h>
 
-#include <trace.h>
 #include <queue.h>
 #include <device.h>
 
 #include <common.h>
-#include <platform.h>
-#include <driver_entry_interface.h>
+
+#include <bfdebug.h>
+#include <bfplatform.h>
+#include <bfdriverinterface.h>
 
 EXTERN_C_START
 

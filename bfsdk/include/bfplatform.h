@@ -73,7 +73,7 @@ void *platform_alloc_rwe(uint64_t len);
  * @param addr the address of memory allocated using platform_alloc_rw
  * @param len the size of the memory allocated using platform_alloc_rw
  */
-void platform_free_rw(void *addr, uint64_t len);
+void platform_free_rw(const void *addr, uint64_t len);
 
 /**
  * Free Executable Memory
@@ -84,7 +84,7 @@ void platform_free_rw(void *addr, uint64_t len);
  * @param addr the address of memory allocated using platform_alloc_rwe
  * @param len the size of the memory allocated using platform_alloc_rwe
  */
-void platform_free_rwe(void *addr, uint64_t len);
+void platform_free_rwe(const void *addr, uint64_t len);
 
 /**
  * Convert Virtual Address to Physical Address

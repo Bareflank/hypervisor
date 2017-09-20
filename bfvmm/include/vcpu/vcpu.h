@@ -281,11 +281,15 @@ private:
 
 public:
 
+    /// @cond
+
     vcpu(vcpu &&) noexcept = default;
     vcpu &operator=(vcpu &&) noexcept = default;
 
     vcpu(const vcpu &) = delete;
     vcpu &operator=(const vcpu &) = delete;
+
+    /// @endcond
 };
 
 #ifdef _MSC_VER

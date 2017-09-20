@@ -61,7 +61,13 @@
 class EXPORT_BFM_IOCTL ioctl_private_base
 {
 public:
+
+    /// Default Constructor
+    ///
     ioctl_private_base() = default;
+
+    /// Default Destructor
+    ///
     virtual ~ioctl_private_base() = default;
 };
 
@@ -75,14 +81,14 @@ class EXPORT_BFM_IOCTL ioctl
 {
 public:
 
-    using binary_data = file::binary_data;
-    using drr_type = debug_ring_resources_t;
-    using drr_pointer = drr_type *;
-    using vcpuid_type = uint64_t;
-    using status_type = int64_t;
-    using status_pointer = status_type *;
-    using registers_type = vmcall_registers_t;
-    using registers_pointer = registers_type *;
+    using binary_data = file::binary_data;          ///< Binary data type
+    using drr_type = debug_ring_resources_t;        ///< Debug ring resources type
+    using drr_pointer = drr_type *;                 ///< Debug ring resources pointer type
+    using vcpuid_type = uint64_t;                   ///< VCPUID type
+    using status_type = int64_t;                    ///< Status type
+    using status_pointer = status_type *;           ///< Status pointer type
+    using registers_type = vmcall_registers_t;      ///< VMCall registers type
+    using registers_pointer = registers_type *;     ///< VMCall registers pointer type
 
     /// Default Constructor
     ///

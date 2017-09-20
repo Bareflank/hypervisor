@@ -75,6 +75,8 @@ class EXPORT_VMCS vmcs_intel_x64_state
 {
 public:
 
+    /// @cond
+
     using integer_pointer = uintptr_t;
 
     vmcs_intel_x64_state() = default;
@@ -306,13 +308,19 @@ public:
         bfignored(msg);
     }
 
+    /// @endcond
+
 public:
+
+    /// @cond
 
     vmcs_intel_x64_state(vmcs_intel_x64_state &&) noexcept = delete;
     vmcs_intel_x64_state &operator=(vmcs_intel_x64_state &&) noexcept = delete;
 
     vmcs_intel_x64_state(const vmcs_intel_x64_state &) = delete;
     vmcs_intel_x64_state &operator=(const vmcs_intel_x64_state &) = delete;
+
+    /// @endcond
 };
 
 #ifdef _MSC_VER

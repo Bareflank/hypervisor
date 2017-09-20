@@ -34,6 +34,6 @@
 ///
 extern "C" void
 vmcs_promote(
-    state_save_intel_x64 *state_save, const void * guest_gdt) noexcept;
+    state_save_intel_x64 *state_save, const void *guest_gdt) noexcept;
 
 #endif

@@ -45,7 +45,7 @@ std::vector<std::string> g_filenames = {
 
 file g_file;
 bool out_of_memory = false;
-static std::map<void *, std::shared_ptr<char>> g_memory;
+static std::map<const void *, std::shared_ptr<char>> g_memory;
 
 void *
 platform_alloc_rwe(uint64_t len)
@@ -68,7 +68,7 @@ platform_alloc_rwe(uint64_t len)
 }
 
 void
-platform_free_rwe(void *addr, uint64_t len)
+platform_free_rwe(const void *addr, uint64_t len)
 {
     bfignored(len);
     g_memory.erase(addr);

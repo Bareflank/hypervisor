@@ -2037,7 +2037,7 @@ private_crt_info(
     for (i = 0; i < num_binaries; i++) {
 
         int64_t ret = 0;
-        struct section_info_t section_info = {};
+        struct section_info_t section_info;
 
         ret = bfelf_file_get_section_info(&binaries[i].ef, &section_info);
         bfignored(ret);
@@ -2305,6 +2305,7 @@ public:
      * @param f the file object to read the located filename
      * @param filename the name of the ELF binary to load
      * @param paths a list of paths to locate the ELF binary from
+     * @param load if true, loads the binaries
      */
     binaries_info(
         gsl::not_null<file *> f, const std::string &filename, const std::vector<std::string> &paths, bool load = true)
@@ -2337,6 +2338,7 @@ public:
      *
      * @param f the file object to read the located filename
      * @param filenames the list of files to load
+     * @param load if true, loads the binaries
      */
     binaries_info(
         gsl::not_null<file *> f, const std::vector<std::string> &filenames, bool load = true)

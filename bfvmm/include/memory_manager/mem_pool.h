@@ -51,9 +51,7 @@ constexpr const auto mem_pool_free_index = 0xFFFFFFFFFFFFFFFFUL;
 // Definition
 // -----------------------------------------------------------------------------
 
-///
 /// *INDENT-OFF*
-///
 
 /// Memory Pool
 ///
@@ -85,9 +83,9 @@ class mem_pool
 
 public:
 
-    using size_type = size_t;
-    using shift_type = size_t;
-    using integer_pointer = uintptr_t;
+    using size_type = size_t;               ///< Size type
+    using shift_type = size_t;              ///< Shift type
+    using integer_pointer = uintptr_t;      ///< Integer pointer type
 
     /// Constructor
     ///
@@ -197,6 +195,7 @@ public:
     /// @ensures none
     ///
     /// @param addr to lookup
+    /// @return true if the mempool contains addr, false otherwise
     ///
     bool
     contains(integer_pointer addr) const noexcept
@@ -212,6 +211,7 @@ public:
     /// @ensures none
     ///
     /// @param addr to lookup
+    /// @return the size of the addr
     ///
     size_type
     size(integer_pointer addr) const noexcept
@@ -318,15 +318,17 @@ private:
 
 public:
 
+    /// @cond
+
     mem_pool(mem_pool &&) noexcept = delete;
     mem_pool &operator=(mem_pool &&) noexcept = delete;
 
     mem_pool(const mem_pool &) = delete;
     mem_pool &operator=(const mem_pool &) = delete;
+
+    /// @endcond
 };
 
-///
 /// *INDENT-ON*
-///
 
 #endif

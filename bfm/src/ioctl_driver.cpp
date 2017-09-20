@@ -226,7 +226,7 @@ ioctl_driver::vmcall()
 void
 ioctl_driver::vmcall_send_regs(registers_type &regs)
 {
-    ::vmcall(&regs);
+    _vmcall(&regs);
 
     if (regs.r01 != 0) {
         throw std::runtime_error("ioctl failed: IOCTL_VMCALL");

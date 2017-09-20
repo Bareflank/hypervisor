@@ -419,7 +419,7 @@ ExternalProject_Add(
     BINARY_DIR          ${CMAKE_BINARY_DIR}/bfm/build
     UPDATE_COMMAND      ${CMAKE_COMMAND} -E echo "checking for updates"
     BUILD_COMMAND       ""
-    DEPENDS             bfsdk bfelf_loader
+    DEPENDS             bfelf_loader
 )
 
 # ------------------------------------------------------------------------------
@@ -454,7 +454,7 @@ if(NOT WIN32)
         BINARY_DIR          ${CMAKE_BINARY_DIR}/bfvmm/build
         UPDATE_COMMAND      ${CMAKE_COMMAND} -E echo "checking for updates"
         BUILD_COMMAND       ""
-        DEPENDS             bfsdk bfsysroot
+        DEPENDS             bfsysroot
     )
 
 endif()
@@ -522,7 +522,7 @@ ExternalProject_Add(
     BINARY_DIR          ${CMAKE_BINARY_DIR}/bfdriver/build
     UPDATE_COMMAND      ${CMAKE_COMMAND} -E echo "checking for updates"
     INSTALL_COMMAND     ""
-    DEPENDS             bfsdk bfelf_loader
+    DEPENDS             bfelf_loader
 )
 
 if(ENABLE_UNITTESTING AND NOT WIN32)
@@ -584,7 +584,7 @@ if(ENABLE_EXTENDED_APIS OR EXTENDED_APIS_PATH)
             UPDATE_COMMAND      ${CMAKE_COMMAND} -E echo "checking for updates"
             UPDATE_DISCONNECTED ${UPDATE_DISCONNECTED}
             BUILD_COMMAND       ""
-            DEPENDS             bfsdk bfvmm
+            DEPENDS             bfvmm
         )
 
     endif()
@@ -645,6 +645,7 @@ add_custom_target(distclean
 )
 
 if(NOT WIN32)
+    add_custom_command(TARGET distclean COMMAND ${CMAKE_COMMAND} --build . --target driver_clean)
     add_custom_command(TARGET distclean COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfsysroot/build --target distclean)
     add_custom_command(TARGET distclean COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfvmm/build --target clean)
 endif()
@@ -761,18 +762,27 @@ endif()
 # BFM Shortcuts
 # ------------------------------------------------------------------------------
 
-add_custom_target(quick COMMAND ${SUDO} ${BAREFLANK_INSTALL_PREFIX}/bin/bfm quick)
-add_custom_target(stop COMMAND ${SUDO} ${BAREFLANK_INSTALL_PREFIX}/bin/bfm stop)
-add_custom_target(unload COMMAND ${SUDO} ${BAREFLANK_INSTALL_PREFIX}/bin/bfm unload)
-add_custom_target(dump COMMAND ${SUDO} ${BAREFLANK_INSTALL_PREFIX}/bin/bfm dump)
-add_custom_target(status COMMAND ${SUDO} ${BAREFLANK_INSTALL_PREFIX}/bin/bfm status)
+if(NOT WIN32)
+    add_custom_target(quick COMMAND ${SUDO} ${BAREFLANK_INSTALL_PREFIX}/bin/bfm quick)
+    add_custom_target(stop COMMAND ${SUDO} ${BAREFLANK_INSTALL_PREFIX}/bin/bfm stop)
+    add_custom_target(unload COMMAND ${SUDO} ${BAREFLANK_INSTALL_PREFIX}/bin/bfm unload)
+    add_custom_target(dump COMMAND ${SUDO} ${BAREFLANK_INSTALL_PREFIX}/bin/bfm dump)
+    add_custom_target(status COMMAND ${SUDO} ${BAREFLANK_INSTALL_PREFIX}/bin/bfm status)
+endif()
 
 # ------------------------------------------------------------------------------
 # Driver Shortcuts
 # ------------------------------------------------------------------------------
 
-add_custom_target(driver_build COMMAND make driver_build > /dev/null VERBATIM WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/bfdriver/build)
-add_custom_target(driver_load COMMAND make driver_load > /dev/null VERBATIM WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/bfdriver/build)
-add_custom_target(driver_unload COMMAND make driver_unload > /dev/null VERBATIM WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/bfdriver/build)
-add_custom_target(driver_clean COMMAND make driver_clean > /dev/null VERBATIM WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/bfdriver/build)
-add_custom_target(driver_quick DEPENDS driver_load driver_build)
+if(NOT WIN32)
+    add_custom_target(driver_build COMMAND make driver_build > /dev/null VERBATIM WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/bfdriver/build)
+    add_custom_target(driver_load COMMAND make driver_load > /dev/null VERBATIM WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/bfdriver/build)
+    add_custom_target(driver_unload COMMAND make driver_unload > /dev/null VERBATIM WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/bfdriver/build)
+    add_custom_target(driver_clean COMMAND make driver_clean > /dev/null VERBATIM WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/bfdriver/build)
+
+    add_custom_target(driver_quick)
+    add_custom_command(TARGET driver_quick COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target driver_unload)
+    add_custom_command(TARGET driver_quick COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target driver_clean)
+    add_custom_command(TARGET driver_quick COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target driver_build)
+    add_custom_command(TARGET driver_quick COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target driver_load)
+endif()

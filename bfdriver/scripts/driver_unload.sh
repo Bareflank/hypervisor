@@ -21,23 +21,14 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 case $(uname -s) in
-# CYGWIN_NT-6.3)
-#     rm -Rf $BUILD_ABS/outdir
-#     rm -Rf $BUILD_ABS/intdir
-#     /cygdrive/c/ewdk/Program\ Files/Windows\ Kits/10/Tools/x64/devcon remove "ROOT\bareflank"
-#     ;;
-
-# CYGWIN_NT-10.0)
-#     rm -Rf $BUILD_ABS/outdir
-#     rm -Rf $BUILD_ABS/intdir
-#     /cygdrive/c/ewdk/Program\ Files/Windows\ Kits/10/Tools/x64/devcon remove "ROOT\bareflank"
-#     ;;
-
+CYGWIN_NT*)
+    >&2 /cygdrive/c/Program\ Files\ \(x86\)/Windows\ Kits/10/Tools/x64/devcon remove "ROOT\bareflank"
+    ;;
 Linux)
     cd $1/src/arch/linux
     sudo make unload 1> /dev/null 2> /dev/null
     ;;
 *)
-    echo "OS not supported"
+    >&2 echo "OS not supported"
     exit 1
 esac

@@ -26,8 +26,9 @@
 #include <algorithm>
 
 #include <bfgsl.h>
-#include <bfexception.h>
 #include <bftypes.h>
+#include <bfexception.h>
+#include <bfupperlower.h>
 
 #include <intrinsics/x86/common/x64.h>
 
@@ -92,7 +93,7 @@ namespace x64
 {
 namespace idt
 {
-    using length_type = uint64_t;
+    using size_type = uint64_t;
 
     inline auto get() noexcept
     {
@@ -148,11 +149,13 @@ namespace idt
         }
     }
 
-    inline auto paged_length(length_type bytes)
+    inline auto size(size_type bytes)
     {
-        auto pages = ((bytes & (x64::page_size - 1)) != 0ULL) ? 1ULL : 0ULL;
-        pages += bytes >> x64::page_shift;
-        return pages * x64::page_size;
+        if (bfn::lower(bytes) == 0) {
+            return bfn::upper(bytes);
+        }
+
+        return bfn::upper(bytes) + 1U;
     }
 }
 }
@@ -353,7 +356,7 @@ public:
     ///
     bool present(index_type index) const
     {
-        return m_idt.at(index * 2U) & 0x0000800000000000ULL;
+        return (m_idt.at(index * 2U) & 0x0000800000000000ULL) != 0;
     }
 
     /// Set All Fields

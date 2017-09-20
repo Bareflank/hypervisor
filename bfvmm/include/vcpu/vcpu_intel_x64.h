@@ -112,7 +112,8 @@ public:
     /// @expects none
     /// @ensures none
     ///
-    /// @see vcpu::init
+    /// @param data user data that can be passed around as needed
+    ///     by extensions of Bareflank
     ///
     void init(user_data *data = nullptr) override;
 
@@ -121,7 +122,8 @@ public:
     /// @expects none
     /// @ensures none
     ///
-    /// @see vcpu::fini
+    /// @param data user data that can be passed around as needed
+    ///     by extensions of Bareflank
     ///
     void fini(user_data *data = nullptr) override;
 
@@ -130,7 +132,8 @@ public:
     /// @expects this->is_initialized() == true
     /// @ensures none
     ///
-    /// @see vcpu::run
+    /// @param data user data that can be passed around as needed
+    ///     by extensions of Bareflank
     ///
     void run(user_data *data = nullptr) override;
 
@@ -139,7 +142,8 @@ public:
     /// @expects none
     /// @ensures none
     ///
-    /// @see vcpu::hlt
+    /// @param data user data that can be passed around as needed
+    ///     by extensions of Bareflank
     ///
     void hlt(user_data *data = nullptr) override;
 
@@ -149,6 +153,8 @@ private:
 
 protected:
 
+    /// @cond
+
     std::unique_ptr<vmxon_intel_x64> m_vmxon;
     std::unique_ptr<vmcs_intel_x64> m_vmcs;
     std::unique_ptr<exit_handler_intel_x64> m_exit_handler;
@@ -156,13 +162,19 @@ protected:
     std::unique_ptr<vmcs_intel_x64_state> m_vmm_state;
     std::unique_ptr<vmcs_intel_x64_state> m_guest_state;
 
+    /// @endcond
+
 public:
+
+    /// @cond
 
     vcpu_intel_x64(vcpu_intel_x64 &&) noexcept = default;
     vcpu_intel_x64 &operator=(vcpu_intel_x64 &&) noexcept = default;
 
     vcpu_intel_x64(const vcpu_intel_x64 &) = delete;
     vcpu_intel_x64 &operator=(const vcpu_intel_x64 &) = delete;
+
+    /// @endcond
 };
 
 #ifdef _MSC_VER

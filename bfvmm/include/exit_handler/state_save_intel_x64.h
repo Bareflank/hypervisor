@@ -24,6 +24,7 @@
 
 #include <cstdint>
 
+/// @cond
 #pragma pack(push, 1)
 
 struct state_save_intel_x64 {
@@ -75,5 +76,6 @@ struct state_save_intel_x64 {
 };
 
 #pragma pack(pop)
+/// @endcond
 
 #endif

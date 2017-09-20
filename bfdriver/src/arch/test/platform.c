@@ -65,17 +65,17 @@ platform_alloc_rwe(uint64_t len)
 }
 
 void
-platform_free_rw(void *addr, uint64_t len)
+platform_free_rw(const void *addr, uint64_t len)
 {
     bfignored(len);
-    free(addr);
+    free((void *)addr);
 }
 
 void
-platform_free_rwe(void *addr, uint64_t len)
+platform_free_rwe(const void *addr, uint64_t len)
 {
     bfignored(len);
-    free(addr);
+    free((void *)addr);
 }
 
 void *
@@ -122,5 +122,5 @@ platform_restore_preemption(void)
 { }
 
 void
-vmcall(struct vmcall_registers_t *regs)
+_vmcall(struct vmcall_registers_t *regs)
 { regs->r01 = 0; }
