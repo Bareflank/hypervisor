@@ -2,14 +2,12 @@
 <br>
 <br>
 <br>
-[![GitHub version](https://badge.fury.io/gh/bareflank%2Fhypervisor.svg)](https://badge.fury.io/gh/bareflank%2Fhypervisor)
+[![GitHub Version](https://badge.fury.io/gh/bareflank%2Fhypervisor.svg)](https://badge.fury.io/gh/bareflank%2Fhypervisor)
 [![Build Status](https://travis-ci.org/Bareflank/hypervisor.svg?branch=master)](https://travis-ci.org/Bareflank/hypervisor)
-[![Build status](https://ci.appveyor.com/api/projects/status/r82c37nc634tnsv9/branch/master?svg=true)](https://ci.appveyor.com/project/rianquinn/hypervisor-13oyg/branch/master)
+[![Build Status](https://ci.appveyor.com/api/projects/status/r82c37nc634tnsv9/branch/master?svg=true)](https://ci.appveyor.com/project/rianquinn/hypervisor-13oyg/branch/master)
 [![Coverage Status](https://coveralls.io/repos/github/Bareflank/hypervisor/badge.svg?branch=master)](https://coveralls.io/github/Bareflank/hypervisor?branch=master)
-<a href="https://scan.coverity.com/projects/bareflank-hypervisor">
-  <img alt="Coverity Scan Build Status"
-       src="https://scan.coverity.com/projects/9857/badge.svg"/>
-</a>
+[![Codacy Status](https://api.codacy.com/project/badge/Grade/28ec616803cb4800a4b727b70a3b112f)](https://www.codacy.com/app/rianquinn/hypervisor?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Bareflank/hypervisor&amp;utm_campaign=Badge_Grade)
+[![Coverity Scan Status](https://scan.coverity.com/projects/9857/badge.svg)](https://scan.coverity.com/projects/bareflank-hypervisor)
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/325/badge)](https://bestpractices.coreinfrastructure.org/projects/325)
 [![Join the chat at https://gitter.im/Bareflank-hypervisor/Lobby](https://badges.gitter.im/Bareflank-hypervisor/Lobby.svg)](https://gitter.im/Bareflank-hypervisor/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
@@ -51,14 +49,18 @@ that the provided code works as expected. These tests are validated using
 [Travis CI](https://travis-ci.org/Bareflank/hypervisor) has been setup to
 test styling via
 [Astyle](http://astyle.sourceforge.net), and static / dynamic analysis
-via [Coverity](https://scan.coverity.com/projects/bareflank-hypervisor),
-[Clang Tidy](http://clang.llvm.org/extra/clang-tidy/), and [Google's
-Sanitizers](https://github.com/google/sanitizers). In addition, we adhere
+via
+[Coverity Scan](https://scan.coverity.com/projects/bareflank-hypervisor),
+[Clang Tidy](http://clang.llvm.org/extra/clang-tidy/),
+[Codacy](https://www.codacy.com),
+and
+[Google's Sanitizers](https://github.com/google/sanitizers). In addition, we adhere
 to the
 [CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/325),
 and the
 [C++ Core Guidelines](https://github.com/isocpp/CppCoreGuidelines/blob/master/CppCoreGuidelines.md)
-including support for the [Guideline Support Library](https://github.com/Microsoft/GSL).
+including support for the
+[Guideline Support Library](https://github.com/Microsoft/GSL).
 
 Currently we have support for the following 64bit host operating systems on
 Intel _SandyBridge_ and above hardware:
@@ -76,8 +78,9 @@ following Linux distributions:
 In the future, we would also like to support:
 - macOS
 - BSD
-- UEFI
-- ARM (64bit)
+- Windows 7 (currently under development)
+- UEFI (currently under development)
+- ARM64 (currently under development)
 
 ## Motivation
 
@@ -170,15 +173,13 @@ To compile, run the following commands:
 
 ```
 git clone -b dev https://github.com/bareflank/hypervisor.git
-cd hypervisor
-source env.sh
-mkdir build
-cd build
+source $PWD/hypervisor/env.sh $PWD/hypervisor/build
+cd $PWD/hypervisor/build
 cmake ..
 make -j<# cores + 1>
 ```
 
-Also, if your modifying the hypervisor, we also highly recommend enabling
+Also, if your modifying the hypervisor, we highly recommend enabling
 unit testing and developer mode. This will enable the various different tools
 that are needed to pass all of our CI tests. This also compiles the hypervisor
 in debug mode.
@@ -192,11 +193,7 @@ PR:
 - `make tidy`
 
 If you wish to enable the extended APIs, you can do so using the following.
-- `-DENABLE_EXTENDED_APIS=ON`
-
-or you can provide the location of your own extended APIs repo using the
-following:
-- `-DEXTENDED_APIS_PATH=<path>`
+- `-DENABLE_EXTENDED_APIS=ON` and/or `-DEXTENDED_APIS_PATH=<path>`
 
 ## Usage Instructions
 

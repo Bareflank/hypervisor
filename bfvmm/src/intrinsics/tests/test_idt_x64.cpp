@@ -85,7 +85,7 @@ TEST_CASE("idt_paged_length")
     setup_intrinsics(mocks);
 
     auto bytes = 0;
-    CHECK(x64::idt::paged_length::(bytes) == 0U * x64::page_size);
+    CHECK(x64::idt::paged_length::(bytes) == 0U);
 
     bytes = 0xfff;
     CHECK(x64::idt::paged_length::(bytes) == 1U * x64::page_size);

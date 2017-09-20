@@ -42,11 +42,11 @@ TEST_CASE("expects / ensures")
         mocks.ExpectCallFunc(ut_abort);
         mocks.ExpectCallFunc(ut_abort);
 
-        expects(true == true);
-        ensures(true == true);
+        expects(true);
+        ensures(true);
 
-        expects(false == true);
-        ensures(false == true);
+        expects(false);
+        ensures(false);
     }
 
     // Note:

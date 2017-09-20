@@ -254,7 +254,9 @@ extern "C" EXPORT_SYM void
 _exit(int status)
 {
     bfignored(status);
-    while (1);
+
+    while (1)
+    { }
 }
 
 extern "C" EXPORT_SYM int
