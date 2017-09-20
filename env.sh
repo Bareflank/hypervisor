@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/sh -e
 #
 # Bareflank Hypervisor
 #
@@ -20,24 +20,27 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-if [ -z "$BAREFLANK_SOURCED" ]; then
+if [[ ! $PATH == *"bfprefix"* ]]; then
 
-    if [ -z "$BAREFLANK_SOURCE_DIR" ]; then
-        export BAREFLANK_SOURCE_DIR="$PWD"
+    BAREFLANK_SOURCE_DIR="$(cd $(dirname ${BASH_SOURCE[0]}) && pwd)"
+
+    if [[ -z "$1" ]]; then
+        BAREFLANK_BINARY_DIR="$BAREFLANK_SOURCE_DIR/build"
+    else
+        BAREFLANK_BINARY_DIR="$1"
     fi
 
-    if [ -z "$BAREFLANK_BINARY_DIR" ]; then
-        export BAREFLANK_BINARY_DIR="$PWD/build"
+    if [[ ! -d $BAREFLANK_BINARY_DIR ]]; then
+        >&2 echo "$BAREFLANK_BINARY_DIR does not exist, creating it"
+        mkdir -p $BAREFLANK_BINARY_DIR
     fi
 
     export CTEST_OUTPUT_ON_FAILURE=yes
     export PATH="$BAREFLANK_BINARY_DIR/bfprefix/bin:$PATH"
 
-    alias h='cd $BAREFLANK_SOURCE_DIR'
+    alias s='cd $BAREFLANK_SOURCE_DIR'
     alias b='cd $BAREFLANK_BINARY_DIR'
 
-    export BAREFLANK_SOURCED=yes
-
 else
-    echo "ERROR: bareflank already sourced"
+    >&2 echo "bareflank environment already sourced"
 fi

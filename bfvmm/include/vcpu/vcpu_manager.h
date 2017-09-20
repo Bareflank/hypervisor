@@ -75,7 +75,7 @@ public:
     /// @expects none
     /// @ensures ret != nullptr
     ///
-    /// Get an instance to the singleton class.
+    /// @return a singleton instance of vcpu_manager
     ///
     static vcpu_manager *instance() noexcept;
 
@@ -158,11 +158,15 @@ private:
 
 public:
 
+    /// @cond
+
     vcpu_manager(vcpu_manager &&) noexcept = delete;
     vcpu_manager &operator=(vcpu_manager &&) noexcept = delete;
 
     vcpu_manager(const vcpu_manager &) = delete;
     vcpu_manager &operator=(const vcpu_manager &) = delete;
+
+    /// @endcond
 };
 
 /// vCPU Manager Macro

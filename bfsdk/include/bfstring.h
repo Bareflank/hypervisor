@@ -103,7 +103,7 @@ to_string(const T val, const int base)
 /// @expects none
 /// @ensures none
 ///
-/// @param ss the stringstream to split
+/// @param str the string to split
 /// @param delimiter the delimiter to split the string with
 /// @return std::vector<std::string> version of str, split using delimiter
 ///

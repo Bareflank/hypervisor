@@ -25,6 +25,7 @@
 
 #include <intrinsics/x86/common_x64.h>
 
+// @cond
 // *INDENT-OFF*
 
 namespace x64
@@ -100,5 +101,6 @@ namespace memory_attr
 }
 
 // *INDENT-ON*
+// @endcond
 
 #endif

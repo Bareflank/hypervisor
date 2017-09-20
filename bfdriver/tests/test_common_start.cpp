@@ -122,7 +122,7 @@ TEST_CASE("common_start_vmm: vmcall fails")
     }
 
     MockRepository mocks;
-    mocks.OnCallFunc(vmcall);
+    mocks.OnCallFunc(_vmcall);
 
     CHECK(common_load_vmm() == BF_SUCCESS);
     CHECK(common_start_vmm() == ENTRY_ERROR_VMM_START_FAILED);

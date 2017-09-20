@@ -30,8 +30,8 @@ section .text
 ; MS64
 ; ------------------------------------------------------------------------------
 
-global vmcall
-vmcall:
+global _vmcall
+_vmcall:
 
     push rbx
     push rdi
@@ -82,8 +82,8 @@ vmcall:
 
     ret
 
-global vmcall_event
-vmcall_event:
+global _vmcall_event
+_vmcall_event:
 
     push rdi
     mov rdi, rcx
@@ -105,8 +105,8 @@ vmcall_event:
 ; SYSV
 ; ------------------------------------------------------------------------------
 
-global vmcall:function
-vmcall:
+global _vmcall:function
+_vmcall:
 
     push rbx
     push r12
@@ -151,8 +151,8 @@ vmcall:
 
     ret
 
-global vmcall_event:function
-vmcall_event:
+global _vmcall_event:function
+_vmcall_event:
 
     mov rax, [rdi + 0x00]
     mov rdx, [rdi + 0x08]

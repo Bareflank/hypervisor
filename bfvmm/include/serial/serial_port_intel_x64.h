@@ -53,6 +53,8 @@
 // Constants
 // -----------------------------------------------------------------------------
 
+/// @cond
+
 namespace serial_intel_x64
 {
 
@@ -85,6 +87,8 @@ constexpr const x64::portio::port_8bit_type line_control_parity_mask = 0x38;
 
 }
 
+/// @endcond
+
 // -----------------------------------------------------------------------------
 // Definitions
 // -----------------------------------------------------------------------------
@@ -106,8 +110,12 @@ class EXPORT_SERIAL serial_port_intel_x64
 {
 public:
 
-    using port_type = x64::portio::port_addr_type;
-    using value_type = x64::portio::port_8bit_type;
+    using port_type = x64::portio::port_addr_type;          ///< Port type
+    using value_type = x64::portio::port_8bit_type;         ///< Value type
+
+public:
+
+    /// @cond
 
     enum baud_rate_t {
         baud_rate_50 = 0x0900,
@@ -150,12 +158,16 @@ public:
         parity_space = 0x38
     };
 
+    /// @endcond
+
 public:
 
     /// Default Constructor
     ///
     /// @expects none
     /// @ensures none
+    ///
+    /// @param port the serial port to connect to
     ///
     serial_port_intel_x64(port_type port = DEFAULT_COM_PORT) noexcept;
 
@@ -172,6 +184,8 @@ public:
     ///
     /// @expects none
     /// @ensures ret != nullptr
+    ///
+    /// @return a singleton instance of serial_port_intel_x64
     ///
     static serial_port_intel_x64 *instance() noexcept;
 
@@ -322,11 +336,15 @@ private:
 
 public:
 
+    /// @cond
+
     serial_port_intel_x64(serial_port_intel_x64 &&) noexcept = default;
     serial_port_intel_x64 &operator=(serial_port_intel_x64 &&) noexcept = default;
 
     serial_port_intel_x64(const serial_port_intel_x64 &) = delete;
     serial_port_intel_x64 &operator=(const serial_port_intel_x64 &) = delete;
+
+    /// @endcond
 };
 
 #ifdef _MSC_VER

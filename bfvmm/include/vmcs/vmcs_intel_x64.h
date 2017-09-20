@@ -97,6 +97,9 @@ public:
     /// @expects guest_state != nullptr
     /// @ensures none
     ///
+    /// @param host_state the host state for the VMCS
+    /// @param guest_state the guest state for the VMCS
+    ///
     virtual void launch(
         gsl::not_null<vmcs_intel_x64_state *> host_state,
         gsl::not_null<vmcs_intel_x64_state *> guest_state);
@@ -146,6 +149,8 @@ public:
     /// @expects guest_gdt != nullptr
     /// @ensures none
     ///
+    /// @param guest_gdt a pointer to the guest's gdt
+    ///
     virtual void promote(gsl::not_null<const void *> guest_gdt);
 
     /// Load
@@ -181,6 +186,8 @@ public:
 
 protected:
 
+    /// @cond
+
     virtual void write_fields(gsl::not_null<vmcs_intel_x64_state *> host_state,
                               gsl::not_null<vmcs_intel_x64_state *> guest_state);
 
@@ -211,13 +218,21 @@ protected:
     void vm_exit_controls();
     void vm_entry_controls();
 
+    /// @endcond
+
 protected:
+
+    /// @cond
 
     uintptr_t m_vmcs_region_phys{0};
     std::unique_ptr<uint32_t[]> m_vmcs_region;
     std::unique_ptr<gsl::byte[]> m_exit_handler_stack;
 
+    /// @endcond
+
 public:
+
+    /// @cond
 
     void *m_exit_handler_entry{nullptr};
     state_save_intel_x64 *m_state_save{nullptr};
@@ -228,13 +243,19 @@ public:
     virtual void set_exit_handler_entry(void *entry)
     { m_exit_handler_entry = entry; }
 
+    /// @endcond
+
 public:
+
+    /// @cond
 
     vmcs_intel_x64(vmcs_intel_x64 &&) noexcept = default;
     vmcs_intel_x64 &operator=(vmcs_intel_x64 &&) noexcept = default;
 
     vmcs_intel_x64(const vmcs_intel_x64 &) = delete;
     vmcs_intel_x64 &operator=(const vmcs_intel_x64 &) = delete;
+
+    /// @endcond
 };
 
 #ifdef _MSC_VER

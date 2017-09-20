@@ -437,7 +437,7 @@ common_start_vmm(void)
 
         g_num_cpus_started++;
 
-        vmcall(&regs);
+        _vmcall(&regs);
         if (regs.r01 != 0) {
             return ENTRY_ERROR_VMM_START_FAILED;
         }
@@ -487,7 +487,7 @@ common_stop_vmm(void)
             goto corrupted;
         }
 
-        vmcall(&regs);
+        _vmcall(&regs);
         if (regs.r01 != 0) {
             ret = ENTRY_ERROR_VMM_STOP_FAILED;
             goto corrupted;

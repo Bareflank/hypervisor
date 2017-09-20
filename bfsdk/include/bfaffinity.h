@@ -40,7 +40,10 @@ set_affinity(uint64_t core)
 
 #else
 
+#ifndef _GNU_SOURCE
 #define _GNU_SOURCE
+#endif
+
 #include <sched.h>
 
 inline int

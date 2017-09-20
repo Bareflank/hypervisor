@@ -24,8 +24,8 @@ default rel
 
 section .text
 
-global vmcall:function
-vmcall:
+global _vmcall:function
+_vmcall:
 
     push rbx
     push r12

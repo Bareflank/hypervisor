@@ -24,6 +24,15 @@ PROJECT_BRIEF = "lightweight, extendable hypervisor written in C++ with support 
 
 INPUT = bfdriver/include bfelf_loader/include bfm/include bfsdk/include bfvmm/include
 
+# The EXCLUDE tag can be used to specify files and/or directories that should be
+# excluded from the INPUT source files. This way you can easily exclude a
+# subdirectory from a directory tree whose root is specified with the INPUT tag.
+#
+# Note that relative paths are relative to the directory from which doxygen is
+# run.
+
+EXCLUDE = bfvmm/include/intrinsics
+
 #---------------------------------------------------------------------------
 # Shared
 #---------------------------------------------------------------------------
@@ -749,15 +758,6 @@ FILE_PATTERNS          = *.c *.cpp *.h
 # The default value is: NO.
 
 RECURSIVE              = YES
-
-# The EXCLUDE tag can be used to specify files and/or directories that should be
-# excluded from the INPUT source files. This way you can easily exclude a
-# subdirectory from a directory tree whose root is specified with the INPUT tag.
-#
-# Note that relative paths are relative to the directory from which doxygen is
-# run.
-
-EXCLUDE                =
 
 # The EXCLUDE_SYMLINKS tag can be used to select whether or not files or
 # directories that are symbolic links (a Unix file system feature) are excluded

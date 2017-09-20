@@ -23,26 +23,19 @@
 # $1 == CMAKE_SOURCE_DIR
 
 case $(uname -s) in
-# CYGWIN_NT-6.3)
-#     /cygdrive/c/ewdk/Program\ Files/Windows\ Kits/10/bin/x64/certmgr /add `cygpath -w $BUILD_ABS/outdir/bareflank.cer` /s /r localMachine root
-#     /cygdrive/c/ewdk/Program\ Files/Windows\ Kits/10/bin/x64/certmgr /add `cygpath -w $BUILD_ABS/outdir/bareflank.cer` /s /r localMachine trustedpublisher
-#     /cygdrive/c/ewdk/Program\ Files/Windows\ Kits/10/Tools/x64/devcon remove "ROOT\bareflank"
-#     /cygdrive/c/ewdk/Program\ Files/Windows\ Kits/10/Tools/x64/devcon install `cygpath -w $BUILD_ABS/outdir/bareflank/bareflank.inf` "ROOT\bareflank"
-#     ;;
-
-# CYGWIN_NT-10.0)
-#     /cygdrive/c/ewdk/Program\ Files/Windows\ Kits/10/bin/x64/certmgr /add `cygpath -w $BUILD_ABS/outdir/bareflank.cer` /s /r localMachine root
-#     /cygdrive/c/ewdk/Program\ Files/Windows\ Kits/10/bin/x64/certmgr /add `cygpath -w $BUILD_ABS/outdir/bareflank.cer` /s /r localMachine trustedpublisher
-#     /cygdrive/c/ewdk/Program\ Files/Windows\ Kits/10/Tools/x64/devcon remove "ROOT\bareflank"
-#     /cygdrive/c/ewdk/Program\ Files/Windows\ Kits/10/Tools/x64/devcon install `cygpath -w $BUILD_ABS/outdir/bareflank/bareflank.inf` "ROOT\bareflank"
-#     ;;
-
+CYGWIN_NT*)
+    cd $1/src/arch/windows
+    >&2 /cygdrive/c/Program\ Files\ \(x86\)/Windows\ Kits/10/bin/x64/certmgr /add x64/Debug/windows.cer /s /r localMachine root
+    >&2 /cygdrive/c/Program\ Files\ \(x86\)/Windows\ Kits/10/bin/x64/certmgr /add x64/Debug/windows.cer /s /r localMachine trustedpublisher
+    >&2 /cygdrive/c/Program\ Files\ \(x86\)/Windows\ Kits/10/Tools/x64/devcon remove "ROOT\bareflank"
+    >&2 /cygdrive/c/Program\ Files\ \(x86\)/Windows\ Kits/10/Tools/x64/devcon install x64/Debug/windows/windows.inf "ROOT\bareflank"
+    ;;
 Linux)
     cd $1/src/arch/linux
     sudo make unload 1> /dev/null 2> /dev/null
     sudo make load 1> /dev/null 2> /dev/null
     ;;
 *)
-    echo "OS not supported"
+    >&2 echo "OS not supported"
     exit 1
 esac

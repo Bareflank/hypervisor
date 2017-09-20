@@ -49,7 +49,8 @@
 // Constants
 // -----------------------------------------------------------------------------
 
-// *INDENT-OFF*
+/// @cond
+/// *INDENT-OFF*
 
 namespace x64
 {
@@ -92,18 +93,24 @@ namespace page_table
 }
 
 // *INDENT-ON*
+/// @endcond
 
 // -----------------------------------------------------------------------------
 // Definition
 // -----------------------------------------------------------------------------
 
+/// Page Table Entry
+///
+/// Defines an entry in a page table and provides helper functions for setting
+/// each field in the entry
+///
 class EXPORT_MEMORY_MANAGER page_table_entry_x64
 {
 public:
 
-    using pointer = uintptr_t *;
-    using integer_pointer = uintptr_t;
-    using pat_index_type = uint64_t;
+    using pointer = uintptr_t *;                ///< Pointer type
+    using integer_pointer = uintptr_t;          ///< Integer pointer type
+    using pat_index_type = uint64_t;            ///< PAT index type
 
     /// PTE Constructor
     ///
@@ -410,11 +417,15 @@ private:
 
 public:
 
+    /// @cond
+
     page_table_entry_x64(page_table_entry_x64 &&) noexcept = default;
     page_table_entry_x64 &operator=(page_table_entry_x64 &&) noexcept = default;
 
     page_table_entry_x64(const page_table_entry_x64 &) = delete;
     page_table_entry_x64 &operator=(const page_table_entry_x64 &) = delete;
+
+    /// @endcond
 };
 
 #ifdef _MSC_VER

@@ -20,7 +20,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#include <debug.h>
 #include <driver.h>
 
 NTSTATUS
@@ -49,6 +48,6 @@ bareflankCreateDevice(
         return status;
     }
 
-    DEBUG("bareflankCreateDevice: success\n");
+    BFDEBUG("bareflankCreateDevice: success\n");
     return status;
 }

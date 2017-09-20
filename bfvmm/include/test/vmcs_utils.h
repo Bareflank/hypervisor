@@ -22,6 +22,8 @@
 #ifndef TEST_VMCS_UTILS_H
 #define TEST_VMCS_UTILS_H
 
+/// @cond
+
 #include <vector>
 #include <functional>
 #include <memory>
@@ -34,7 +36,6 @@ using namespace msrs;
 
 struct control_flow_path {
     std::function<void()> setup{};
-    //    std::shared_ptr<std::exception> exception;
     bool throws_exception{false};
 };
 
@@ -491,5 +492,7 @@ setup_check_all_paths(std::vector<struct control_flow_path> &cfg)
     path.throws_exception = false;
     cfg.push_back(path);
 }
+
+/// @endcond
 
 #endif

@@ -45,7 +45,7 @@ constexpr const auto objtpool_size = 255U;
 ///
 #include <memory_manager/memory_manager_x64.h>
 
-/// struct __oa_page
+/// @struct __oa_page
 ///
 /// Object Allocator Page
 ///
@@ -246,6 +246,7 @@ public:
     /// @ensures none
     ///
     /// @param other the allocator to move from
+    /// @return this
     ///
     basic_object_allocator &operator=(basic_object_allocator &&other) noexcept
     {
@@ -623,6 +624,8 @@ public:
 template<typename T, std::size_t max_pages = 0>
 class object_allocator
 {
+    static_assert(OBJECT_ALLOCATOR_PAGE_SIZE >= sizeof(T), "T is too large");
+
 public:
 
     using value_type = T;                                               ///< Alloc::value_type
@@ -636,11 +639,14 @@ public:
     using propagate_on_container_swap = std::true_type;                 ///< Swap supported
     using is_always_equal = std::false_type;                            ///< Not always equal
 
+    /// Rebind
+    ///
+    /// @expects none
+    /// @ensures none
+    ///
     template<typename U> struct rebind {
-        using other = object_allocator<U, max_pages>;
+        using other = object_allocator<U, max_pages>;                   ///< Rebind
     };
-
-    static_assert(OBJECT_ALLOCATOR_PAGE_SIZE >= sizeof(T), "T is too large");
 
 public:
 
@@ -678,6 +684,7 @@ public:
     /// @ensures none
     ///
     /// @param other the allocator to move from
+    /// @return this
     ///
     object_allocator &operator=(object_allocator &&other) noexcept
     {
@@ -714,6 +721,7 @@ public:
     /// @ensures none
     ///
     /// @param other not supported
+    /// @return this
     ///
     object_allocator &operator=(const object_allocator &other) noexcept
     { bfignored(other); }
@@ -816,11 +824,15 @@ private:
 
 private:
 
+    /// @cond
+
     template <typename T1, typename T2, std::size_t MP>
     friend bool operator==(const object_allocator<T1, MP> &lhs, const object_allocator<T2, MP> &rhs);
 
     template <typename T1, typename T2, std::size_t MP>
     friend bool operator!=(const object_allocator<T1, MP> &lhs, const object_allocator<T2, MP> &rhs);
+
+    /// @endcond
 };
 
 /// @cond

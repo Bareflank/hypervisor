@@ -147,7 +147,7 @@ TEST_CASE("common_stop_vmm: vmcall fails")
     CHECK(common_start_vmm() == BF_SUCCESS);
 
     MockRepository mocks;
-    mocks.OnCallFunc(vmcall);
+    mocks.OnCallFunc(_vmcall);
 
     CHECK(common_stop_vmm() == ENTRY_ERROR_VMM_STOP_FAILED);
     CHECK(common_fini() == BF_ERROR_VMM_CORRUPTED);

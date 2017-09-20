@@ -353,10 +353,10 @@ class unique_map_ptr_x64
 {
 public:
 
-    using pointer = T*;
-    using integer_pointer = uintptr_t;
-    using size_type = size_t;
-    using element_type = T;
+    using pointer = T*;                         ///< Pointer type
+    using integer_pointer = uintptr_t;          ///< Integer pointer type
+    using size_type = size_t;                   ///< Size type
+    using element_type = T;                     ///< Element type
 
     /// Default Map
     ///
@@ -370,6 +370,7 @@ public:
     /// This constructor can be used to create an invalid map that maps to
     /// nothing
     ///
+    /// @param donotcare don't care
     unique_map_ptr_x64(std::nullptr_t donotcare)
     { (void) donotcare; }
 
@@ -379,6 +380,9 @@ public:
     /// an exist virtual address and size. Note that this should be used
     /// with case as the original map must be released. Otherwise you will
     /// have two owners.
+    ///
+    /// @param virt the virtual address of the map
+    /// @param size the size of the map
     ///
     unique_map_ptr_x64(integer_pointer virt, size_type size) :
         m_virt(virt),
@@ -883,9 +887,15 @@ private:
 
 public:
 
+    /// @cond
+
     unique_map_ptr_x64(const unique_map_ptr_x64 &) = delete;
     unique_map_ptr_x64 &operator=(const unique_map_ptr_x64 &) = delete;
+
+    /// @endcond
 };
+
+/// @cond
 
 template <class T>
 void swap(unique_map_ptr_x64<T> &x, unique_map_ptr_x64<T> &y) noexcept
@@ -931,7 +941,10 @@ template <class T>
 bool operator!=(std::nullptr_t dontcare, const unique_map_ptr_x64<T> &y) noexcept
 { (void) dontcare; return y; }
 
-inline uintptr_t virt_to_phys_with_cr3(uintptr_t virt, uintptr_t cr3)
+/// @endcond
+
+inline uintptr_t
+virt_to_phys_with_cr3(uintptr_t virt, uintptr_t cr3)
 {
     uintptr_t from;
 

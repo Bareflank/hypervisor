@@ -25,3 +25,5 @@ bfdriver/src/arch/linux/modules.order
 bfdriver/src/arch/linux/platform.o
 bfdriver/src/arch/linux/vmcall.o
 bfdriver/src/common.o
+
+bfdriver/src/arch/windows/x64/

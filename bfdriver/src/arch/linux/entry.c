@@ -43,7 +43,7 @@ uint64_t g_vcpuid = 0;
 uint64_t g_module_length = 0;
 
 struct pmodule_t {
-    char *data;
+    const char *data;
     int64_t size;
 };
 
@@ -75,7 +75,7 @@ dev_release(struct inode *inode, struct file *file)
 }
 
 static long
-ioctl_add_module(char *file)
+ioctl_add_module(const char *file)
 {
     char *buf;
     int64_t ret;
@@ -149,8 +149,7 @@ ioctl_unload_vmm(void)
 
     ret = common_unload_vmm();
     if (ret != BF_SUCCESS) {
-        BFALERT("IOCTL_UNLOAD_VMM: common_unload_vmm failed: %p - %s\n", \
-                (void *)ret, ec_to_str(ret));
+        BFALERT("IOCTL_UNLOAD_VMM: common_unload_vmm failed: %p - %s\n", (void *)ret, ec_to_str(ret));
         status = BF_IOCTL_FAILURE;
     }
 
@@ -175,8 +174,7 @@ ioctl_load_vmm(void)
 
     ret = common_load_vmm();
     if (ret != BF_SUCCESS) {
-        BFALERT("IOCTL_LOAD_VMM: common_load_vmm failed: %p - %s\n", \
-                (void *)ret, ec_to_str(ret));
+        BFALERT("IOCTL_LOAD_VMM: common_load_vmm failed: %p - %s\n", (void *)ret, ec_to_str(ret));
         goto failure;
     }
 
@@ -198,8 +196,7 @@ ioctl_stop_vmm(void)
     ret = common_stop_vmm();
 
     if (ret != BF_SUCCESS) {
-        BFALERT("IOCTL_STOP_VMM: common_stop_vmm failed: %p - %s\n", \
-                (void *)ret, ec_to_str(ret));
+        BFALERT("IOCTL_STOP_VMM: common_stop_vmm failed: %p - %s\n", (void *)ret, ec_to_str(ret));
         status = BF_IOCTL_FAILURE;
     }
 
@@ -217,8 +214,7 @@ ioctl_start_vmm(void)
 
     ret = common_start_vmm();
     if (ret != BF_SUCCESS) {
-        BFALERT("IOCTL_START_VMM: common_start_vmm failed: %p - %s\n", \
-                (void *)ret, ec_to_str(ret));
+        BFALERT("IOCTL_START_VMM: common_start_vmm failed: %p - %s\n", (void *)ret, ec_to_str(ret));
         goto failure;
     }
 
@@ -239,8 +235,7 @@ ioctl_dump_vmm(struct debug_ring_resources_t *user_drr)
 
     ret = common_dump_vmm(&drr, g_vcpuid);
     if (ret != BF_SUCCESS) {
-        BFALERT("IOCTL_DUMP_VMM: common_dump_vmm failed: %p - %s\n", \
-                (void *)ret, ec_to_str(ret));
+        BFALERT("IOCTL_DUMP_VMM: common_dump_vmm failed: %p - %s\n", (void *)ret, ec_to_str(ret));
         return BF_IOCTL_FAILURE;
     }
 

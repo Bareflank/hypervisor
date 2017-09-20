@@ -99,11 +99,15 @@ public:
 
 public:
 
+    /// @cond
+
     vcpu_factory(vcpu_factory &&) noexcept = default;
     vcpu_factory &operator=(vcpu_factory &&) noexcept = default;
 
     vcpu_factory(const vcpu_factory &) = delete;
     vcpu_factory &operator=(const vcpu_factory &) = delete;
+
+    /// @endcond
 };
 
 #ifdef _MSC_VER

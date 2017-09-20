@@ -10,14 +10,9 @@ dist: trusty
 before_script:
 
   #
-  # Source Environment
+  # Build Enviornment
   #
-  - source env.sh
-
-  #
-  # Build Folder
-  #
-  - mkdir build
+  - source env.sh $TRAVIS_BUILD_DIR/build
   - cd build
 
   #
@@ -52,27 +47,27 @@ matrix:
   #
   # Doxygen
   #
-  # - os: linux
-  #   addons:
-  #     apt:
-  #       sources:
-  #         - ubuntu-toolchain-r-test
-  #       packages:
-  #         - gcc-6
-  #         - g++-6
-  #         - doxygen
-  #   env:
-  #     - TEST="Doxygen"
-  #   script:
-  #     - cd ..
-  #     - doxygen .doxygen.txt
-  #     - |
-  #       if [[ -s doxygen_warnings.txt ]]; then
-  #         echo "You must fix doxygen before submitting a pull request"
-  #         echo ""
-  #         cat doxygen_warnings.txt
-  #         exit -1
-  #       fi
+  - os: linux
+    addons:
+      apt:
+        sources:
+          - ubuntu-toolchain-r-test
+        packages:
+          - gcc-6
+          - g++-6
+          - doxygen
+    env:
+      - TEST="Doxygen"
+    script:
+      - cd ..
+      - doxygen .doxygen.txt
+      - |
+        if [[ -s doxygen_warnings.txt ]]; then
+          echo "You must fix doxygen before submitting a pull request"
+          echo ""
+          cat doxygen_warnings.txt
+          exit -1
+        fi
 
   #
   # Git Check

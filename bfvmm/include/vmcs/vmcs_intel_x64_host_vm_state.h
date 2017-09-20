@@ -63,6 +63,8 @@ class EXPORT_VMCS vmcs_intel_x64_host_vm_state : public vmcs_intel_x64_state
 {
 public:
 
+    /// @cond
+
     vmcs_intel_x64_host_vm_state();
     ~vmcs_intel_x64_host_vm_state() override = default;
 
@@ -248,7 +250,11 @@ public:
         bfdebug_subnhex(level, "m_ia32_gs_base_msr", m_ia32_gs_base_msr, msg);
     }
 
+    /// @endcond
+
 protected:
+
+    /// @cond
 
     x64::segment_register::value_type m_es{0};
     x64::segment_register::value_type m_cs{0};
@@ -288,13 +294,19 @@ protected:
     intel_x64::msrs::value_type m_ia32_fs_base_msr{0};
     intel_x64::msrs::value_type m_ia32_gs_base_msr{0};
 
+    /// @endcond
+
 public:
+
+    /// @cond
 
     vmcs_intel_x64_host_vm_state(vmcs_intel_x64_host_vm_state &&) noexcept = delete;
     vmcs_intel_x64_host_vm_state &operator=(vmcs_intel_x64_host_vm_state &&) noexcept = delete;
 
     vmcs_intel_x64_host_vm_state(const vmcs_intel_x64_host_vm_state &) = delete;
     vmcs_intel_x64_host_vm_state &operator=(const vmcs_intel_x64_host_vm_state &) = delete;
+
+    /// @endcond
 };
 
 #ifdef _MSC_VER
