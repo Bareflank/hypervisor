@@ -1498,12 +1498,11 @@ dwarf4::decode_sleb128(char **addr)
 uint64_t
 dwarf4::decode_uleb128(char **addr)
 {
-    uint64_t byte = 0;
     uint64_t shift = 0;
     uint64_t result = 0;
 
     while (true) {
-        byte = *(reinterpret_cast<uint8_t *>((*addr)++));
+        uint64_t byte = *(reinterpret_cast<uint8_t *>((*addr)++));
         result |= ((byte & 0x7f) << shift);
         shift += 7;
         if ((byte & 0x80) == 0) {

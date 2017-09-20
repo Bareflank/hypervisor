@@ -292,7 +292,7 @@ ci_entry::non_virtual_parse(char *addr)
     if (m_augmentation_string[0] == 'z') {
         auto len = dwarf4::decode_uleb128(&p);
 
-        for (auto i = 1U; m_augmentation_string[i] != 0 && i <= len; i++) {
+        for (auto i = 1U; i <= len && m_augmentation_string[i] != 0; i++) {
             switch (m_augmentation_string[i]) {
                 case 'L':
                     m_lsda_encoding = *reinterpret_cast<uint8_t *>(p++);

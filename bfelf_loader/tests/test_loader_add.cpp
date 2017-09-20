@@ -68,7 +68,6 @@ TEST_CASE("bfelf_loader_add: add twice")
 
 TEST_CASE("bfelf_loader_add: too many files")
 {
-    int64_t ret = 0;
     bfelf_loader_t loader = {};
     std::vector<bfelf_file_t> efs(MAX_NUM_MODULES + 1);
 
@@ -77,6 +76,8 @@ TEST_CASE("bfelf_loader_add: too many files")
     auto size = std::get<1>(data);
 
     for (auto i = 0ULL; i < MAX_NUM_MODULES + 1; i++) {
+
+        int64_t ret = 0;
 
         ret = bfelf_file_init(buf.get(), size, &gsl::at(efs, i));
         REQUIRE(ret == BFELF_SUCCESS);

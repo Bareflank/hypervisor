@@ -40,7 +40,6 @@ TEST_CASE("bfelf_loader_relocate: no files added")
 
 TEST_CASE("bfelf_loader_relocate: success")
 {
-    int64_t ret = 0;
     binaries_info binaries{&g_file, g_filenames};
 }
 
