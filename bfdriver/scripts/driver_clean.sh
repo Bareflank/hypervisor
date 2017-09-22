@@ -23,7 +23,7 @@
 case $(uname -s) in
 CYGWIN_NT*)
     rm -Rf $1/src/arch/windows/.vs/
-    rm -Rf $1/src/arch/windows/windows.VC.db
+    rm -Rf $1/src/arch/windows/bareflank.VC.db
     rm -Rf $1/src/arch/windows/x64/
     ;;
 Linux)

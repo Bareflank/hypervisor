@@ -67,6 +67,7 @@ Intel _SandyBridge_ and above hardware:
 - Ubuntu 16.10, 17.04
 - Windows 10
 - Windows 8.1
+- Windows 7
 
 Although not officially supported, Bareflank has also been tested with the
 following Linux distributions:
@@ -78,7 +79,6 @@ following Linux distributions:
 In the future, we would also like to support:
 - macOS
 - BSD
-- Windows 7 (currently under development)
 - UEFI (currently under development)
 - ARM64 (currently under development)
 
@@ -150,7 +150,8 @@ sudo apt-get install git build-essential linux-headers-$(uname -r) nasm clang cm
 #### Windows (Cygwin):
 Visual Studio 2017 doesn't support building drivers, but the WDK 10 doesn't
 compile drivers without Visual Studio 2017 installed, so you must install
-both Visual Studio 2017 and 2015 to get a complete environment.
+both Visual Studio 2017 and 2015 to get a complete environment. Also note that
+these packages must be installed in the following order:
 - [Visual Studio 2015](https://go.microsoft.com/fwlink/?LinkId=615448&clcid=0x409)
   - Check "Visual C++"
 - [Visual Studio 2017](https://www.visualstudio.com/thank-you-downloading-visual-studio/?sku=Community&rel=15#)
@@ -164,9 +165,15 @@ setup-x86_64.exe to C:\cygwin64\bin. From there, open a Cygwin terminal and
 run the following:
 
 ```
-setup-x86_64.exe -q -P git,make,gcc-core,gcc-g++,nasm,clang,clang++,cmake,python,gettext
+setup-x86_64.exe -q -P git,make,gcc-core,gcc-g++,nasm,clang,clang++,cmake,python,gettext,bash-completion
 ```
 
+After installing the the above packages you must enable test signing mode.
+This can be done from a command prompt with admin privileges:
+```
+bcdedit.exe /set testsigning ON
+<reboot>
+```
 ## Compilation Instructions
 
 To compile, run the following commands:
@@ -244,7 +251,6 @@ ssh-host-config -y
 <password>
 
 net start sshd
-
 netsh advfirewall firewall add rule name='SSH Port' dir=in action=allow protocol=TCP localport=22
 ```
 
