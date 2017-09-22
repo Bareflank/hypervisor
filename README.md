@@ -157,7 +157,7 @@ these packages must be installed in the following order:
 - [Visual Studio 2017](https://www.visualstudio.com/thank-you-downloading-visual-studio/?sku=Community&rel=15#)
   - Check "Desktop development with C++"
   - Check "C++ CLI / Support"
-- [Visual Studio WDK 10](https://go.microsoft.com/fwlink/p/?LinkId=526733)
+- [Visual Studio WDK 10](https://go.microsoft.com/fwlink/p/?LinkId=845980)
 - [Cygwin](https://www.cygwin.com/setup-x86_64.exe)
 
 To install Cygwin, simply install using all default settings, and then copy
