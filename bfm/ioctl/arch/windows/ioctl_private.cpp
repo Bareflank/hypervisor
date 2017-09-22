@@ -93,7 +93,8 @@ bfm_ioctl_open()
 EXPORT_SYM int64_t
 bfm_send_ioctl(HANDLE fd, DWORD request)
 {
-    if (!DeviceIoControl(fd, request, NULL, 0, NULL, 0, NULL, NULL)) {
+    DWORD bytes = 0;
+    if (!DeviceIoControl(fd, request, NULL, 0, NULL, 0, &bytes, NULL)) {
         return BF_IOCTL_FAILURE;
     }
 
@@ -103,7 +104,8 @@ bfm_send_ioctl(HANDLE fd, DWORD request)
 EXPORT_SYM int64_t
 bfm_read_ioctl(HANDLE fd, DWORD request, void *data, DWORD size)
 {
-    if (!DeviceIoControl(fd, request, NULL, 0, data, size, NULL, NULL)) {
+    DWORD bytes = 0;
+    if (!DeviceIoControl(fd, request, NULL, 0, data, size, &bytes, NULL)) {
         return BF_IOCTL_FAILURE;
     }
 
@@ -113,7 +115,8 @@ bfm_read_ioctl(HANDLE fd, DWORD request, void *data, DWORD size)
 EXPORT_SYM int64_t
 bfm_write_ioctl(HANDLE fd, DWORD request, const void *data, DWORD size)
 {
-    if (!DeviceIoControl(fd, request, const_cast<void *>(data), size, NULL, 0, NULL, NULL)) {
+    DWORD bytes = 0;
+    if (!DeviceIoControl(fd, request, const_cast<void *>(data), size, NULL, 0, &bytes, NULL)) {
         return BF_IOCTL_FAILURE;
     }
 
@@ -123,7 +126,8 @@ bfm_write_ioctl(HANDLE fd, DWORD request, const void *data, DWORD size)
 EXPORT_SYM int64_t
 bfm_read_write_ioctl(HANDLE fd, DWORD request, void *data, DWORD size)
 {
-    if (!DeviceIoControl(fd, request, data, size, data, size, NULL, NULL)) {
+    DWORD bytes = 0;
+    if (!DeviceIoControl(fd, request, data, size, data, size, &bytes, NULL)) {
         return BF_IOCTL_FAILURE;
     }
 
