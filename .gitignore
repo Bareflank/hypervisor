@@ -26,4 +26,6 @@ bfdriver/src/arch/linux/platform.o
 bfdriver/src/arch/linux/vmcall.o
 bfdriver/src/common.o
 
+bfdriver/src/arch/windows/.vs/
+bfdriver/src/arch/windows/bareflank.VC.db
 bfdriver/src/arch/windows/x64/

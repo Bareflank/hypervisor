@@ -46,7 +46,7 @@ case $(uname -s) in
 CYGWIN_NT-6.1*)
     find_msbuild
     cd $1/src/arch/windows/
-    >&2 eval "'$msbuild' /m:3 /p:Configuration=Debug /p:Platform=x64 /p:TargetVersion=WindowsV6.1 bareflank.sln"
+    >&2 eval "'$msbuild' /m:3 /p:Configuration=Debug /p:Platform=x64 /p:TargetVersion=Windows7 bareflank.sln"
     ;;
 CYGWIN_NT-6.3*)
     find_msbuild
