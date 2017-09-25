@@ -59,13 +59,15 @@ TEST_CASE("vmcs_exit_qualification")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    CHECK(vmcs::exit_qualification::exists());
+    using namespace vmcs::exit_qualification;
 
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 1UL;
-    CHECK(vmcs::exit_qualification::get() == 1UL);
+    CHECK(exists());
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 100UL;
+    CHECK(get() == 100UL);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 200UL;
+    CHECK(get_if_exists() == 200UL);
 
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0UL;
-    CHECK(vmcs::exit_qualification::get_if_exists() == 0UL);
+    dump(0);
 }
 
 TEST_CASE("vmcs_exit_qualification_debug_exception")
@@ -73,13 +75,12 @@ TEST_CASE("vmcs_exit_qualification_debug_exception")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    CHECK(vmcs::exit_qualification::debug_exception::get_name() == "debug_exception"_s);
+    using namespace vmcs::exit_qualification;
 
     g_vmcs_fields[vmcs::exit_qualification::addr] = 1UL;
-    CHECK(vmcs::exit_qualification::debug_exception::get() == 1UL);
-
+    CHECK(debug_exception::get() == 1UL);
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0UL;
-    CHECK(vmcs::exit_qualification::debug_exception::get_if_exists() == 0UL);
+    CHECK(debug_exception::get_if_exists() == 0UL);
 }
 
 TEST_CASE("vmcs_exit_qualification_debug_exception_b0")
@@ -87,15 +88,22 @@ TEST_CASE("vmcs_exit_qualification_debug_exception_b0")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 1UL;
-    CHECK(vmcs::exit_qualification::debug_exception::b0::is_enabled());
-    CHECK_FALSE(vmcs::exit_qualification::debug_exception::b0::is_disabled());
-    CHECK(vmcs::exit_qualification::debug_exception::b0::is_enabled(1UL));
-    CHECK_FALSE(vmcs::exit_qualification::debug_exception::b0::is_disabled(1UL));
+    using namespace vmcs::exit_qualification::debug_exception;
 
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0UL;
-    CHECK_FALSE(vmcs::exit_qualification::debug_exception::b0::is_enabled_if_exists());
-    CHECK(vmcs::exit_qualification::debug_exception::b0::is_disabled_if_exists());
+    g_vmcs_fields[vmcs::exit_qualification::addr] = b0::mask;
+    CHECK(b0::is_enabled());
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0U;
+    CHECK(b0::is_disabled());
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = b0::mask;
+    CHECK(b0::is_enabled(b0::mask));
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0U;
+    CHECK(b0::is_disabled(0x0));
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = b0::mask;
+    CHECK(b0::is_enabled_if_exists());
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0U;
+    CHECK(b0::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_exit_qualification_debug_exception_b1")
@@ -103,15 +111,22 @@ TEST_CASE("vmcs_exit_qualification_debug_exception_b1")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 2UL;
-    CHECK(vmcs::exit_qualification::debug_exception::b1::is_enabled());
-    CHECK_FALSE(vmcs::exit_qualification::debug_exception::b1::is_disabled());
-    CHECK(vmcs::exit_qualification::debug_exception::b1::is_enabled(2UL));
-    CHECK_FALSE(vmcs::exit_qualification::debug_exception::b1::is_disabled(2UL));
+    using namespace vmcs::exit_qualification::debug_exception;
 
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0UL;
-    CHECK_FALSE(vmcs::exit_qualification::debug_exception::b1::is_enabled_if_exists());
-    CHECK(vmcs::exit_qualification::debug_exception::b1::is_disabled_if_exists());
+    g_vmcs_fields[vmcs::exit_qualification::addr] = b1::mask;
+    CHECK(b1::is_enabled());
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0U;
+    CHECK(b1::is_disabled());
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = b1::mask;
+    CHECK(b1::is_enabled(b1::mask));
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0U;
+    CHECK(b1::is_disabled(0x0));
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = b1::mask;
+    CHECK(b1::is_enabled_if_exists());
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0U;
+    CHECK(b1::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_exit_qualification_debug_exception_b2")
@@ -119,15 +134,22 @@ TEST_CASE("vmcs_exit_qualification_debug_exception_b2")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 4UL;
-    CHECK(vmcs::exit_qualification::debug_exception::b2::is_enabled());
-    CHECK_FALSE(vmcs::exit_qualification::debug_exception::b2::is_disabled());
-    CHECK(vmcs::exit_qualification::debug_exception::b2::is_enabled(4UL));
-    CHECK_FALSE(vmcs::exit_qualification::debug_exception::b2::is_disabled(4UL));
+    using namespace vmcs::exit_qualification::debug_exception;
 
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0UL;
-    CHECK_FALSE(vmcs::exit_qualification::debug_exception::b2::is_enabled_if_exists());
-    CHECK(vmcs::exit_qualification::debug_exception::b2::is_disabled_if_exists());
+    g_vmcs_fields[vmcs::exit_qualification::addr] = b2::mask;
+    CHECK(b2::is_enabled());
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0U;
+    CHECK(b2::is_disabled());
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = b2::mask;
+    CHECK(b2::is_enabled(b2::mask));
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0U;
+    CHECK(b2::is_disabled(0x0));
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = b2::mask;
+    CHECK(b2::is_enabled_if_exists());
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0U;
+    CHECK(b2::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_exit_qualification_debug_exception_b3")
@@ -135,15 +157,22 @@ TEST_CASE("vmcs_exit_qualification_debug_exception_b3")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 8UL;
-    CHECK(vmcs::exit_qualification::debug_exception::b3::is_enabled());
-    CHECK_FALSE(vmcs::exit_qualification::debug_exception::b3::is_disabled());
-    CHECK(vmcs::exit_qualification::debug_exception::b3::is_enabled(8UL));
-    CHECK_FALSE(vmcs::exit_qualification::debug_exception::b3::is_disabled(8UL));
+    using namespace vmcs::exit_qualification::debug_exception;
 
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0UL;
-    CHECK_FALSE(vmcs::exit_qualification::debug_exception::b3::is_enabled_if_exists());
-    CHECK(vmcs::exit_qualification::debug_exception::b3::is_disabled_if_exists());
+    g_vmcs_fields[vmcs::exit_qualification::addr] = b3::mask;
+    CHECK(b3::is_enabled());
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0U;
+    CHECK(b3::is_disabled());
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = b3::mask;
+    CHECK(b3::is_enabled(b3::mask));
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0U;
+    CHECK(b3::is_disabled(0x0));
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = b3::mask;
+    CHECK(b3::is_enabled_if_exists());
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0U;
+    CHECK(b3::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_exit_qualification_debug_exception_reserved")
@@ -151,12 +180,16 @@ TEST_CASE("vmcs_exit_qualification_debug_exception_reserved")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x600UL;
-    CHECK(vmcs::exit_qualification::debug_exception::reserved::get() == 0x600U);
-    CHECK(vmcs::exit_qualification::debug_exception::reserved::get(0x600UL) == 0x600U);
+    using namespace vmcs::exit_qualification::debug_exception;
 
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x602UL;
-    CHECK(vmcs::exit_qualification::debug_exception::reserved::get_if_exists() == 0x600U);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(reserved::get() == (reserved::mask >> reserved::from));
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(reserved::get(reserved::mask) == (reserved::mask >> reserved::from));
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(reserved::get_if_exists() == (reserved::mask >> reserved::from));
 }
 
 TEST_CASE("vmcs_exit_qualification_debug_exception_bd")
@@ -164,15 +197,22 @@ TEST_CASE("vmcs_exit_qualification_debug_exception_bd")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x2000UL;
-    CHECK(vmcs::exit_qualification::debug_exception::bd::is_enabled());
-    CHECK_FALSE(vmcs::exit_qualification::debug_exception::bd::is_disabled());
-    CHECK(vmcs::exit_qualification::debug_exception::bd::is_enabled(0x2000UL));
-    CHECK_FALSE(vmcs::exit_qualification::debug_exception::bd::is_disabled(0x2000UL));
+    using namespace vmcs::exit_qualification::debug_exception;
 
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0UL;
-    CHECK_FALSE(vmcs::exit_qualification::debug_exception::bd::is_enabled_if_exists());
-    CHECK(vmcs::exit_qualification::debug_exception::bd::is_disabled_if_exists());
+    g_vmcs_fields[vmcs::exit_qualification::addr] = bd::mask;
+    CHECK(bd::is_enabled());
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0U;
+    CHECK(bd::is_disabled());
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = bd::mask;
+    CHECK(bd::is_enabled(bd::mask));
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0U;
+    CHECK(bd::is_disabled(0x0));
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = bd::mask;
+    CHECK(bd::is_enabled_if_exists());
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0U;
+    CHECK(bd::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_exit_qualification_debug_exception_bs")
@@ -180,15 +220,22 @@ TEST_CASE("vmcs_exit_qualification_debug_exception_bs")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x4000UL;
-    CHECK(vmcs::exit_qualification::debug_exception::bs::is_enabled());
-    CHECK_FALSE(vmcs::exit_qualification::debug_exception::bs::is_disabled());
-    CHECK(vmcs::exit_qualification::debug_exception::bs::is_enabled(0x4000UL));
-    CHECK_FALSE(vmcs::exit_qualification::debug_exception::bs::is_disabled(0x4000UL));
+    using namespace vmcs::exit_qualification::debug_exception;
 
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0UL;
-    CHECK_FALSE(vmcs::exit_qualification::debug_exception::bs::is_enabled_if_exists());
-    CHECK(vmcs::exit_qualification::debug_exception::bs::is_disabled_if_exists());
+    g_vmcs_fields[vmcs::exit_qualification::addr] = bs::mask;
+    CHECK(bs::is_enabled());
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0U;
+    CHECK(bs::is_disabled());
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = bs::mask;
+    CHECK(bs::is_enabled(bs::mask));
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0U;
+    CHECK(bs::is_disabled(0x0));
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = bs::mask;
+    CHECK(bs::is_enabled_if_exists());
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0U;
+    CHECK(bs::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_exit_qualification_page_fault_exception")
@@ -196,15 +243,12 @@ TEST_CASE("vmcs_exit_qualification_page_fault_exception")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    CHECK(vmcs::exit_qualification::page_fault_exception::get_name() ==
-          "page_fault_exception"_s);
+    using namespace vmcs::exit_qualification;
 
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x4000UL;
-    CHECK(vmcs::exit_qualification::page_fault_exception::address() == 0x4000UL);
-
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x10000000UL;
-    CHECK(vmcs::exit_qualification::page_fault_exception::address_if_exists() ==
-          0x10000000UL);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 1UL;
+    CHECK(page_fault_exception::get() == 1UL);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0UL;
+    CHECK(page_fault_exception::get_if_exists() == 0UL);
 }
 
 TEST_CASE("vmcs_exit_qualification_sipi")
@@ -212,13 +256,12 @@ TEST_CASE("vmcs_exit_qualification_sipi")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    CHECK(vmcs::exit_qualification::sipi::get_name() == "sipi"_s);
+    using namespace vmcs::exit_qualification;
 
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x34UL;
-    CHECK(vmcs::exit_qualification::sipi::get() == 0x34UL);
-
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL;
-    CHECK(vmcs::exit_qualification::sipi::get_if_exists() == 0x0UL);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 1UL;
+    CHECK(sipi::get() == 1UL);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0UL;
+    CHECK(sipi::get_if_exists() == 0UL);
 }
 
 TEST_CASE("vmcs_exit_qualification_sipi_vector")
@@ -226,12 +269,16 @@ TEST_CASE("vmcs_exit_qualification_sipi_vector")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0xF34UL;
-    CHECK(vmcs::exit_qualification::sipi::vector::get() == 0x34UL);
-    CHECK(vmcs::exit_qualification::sipi::vector::get(0xF34UL) == 0x34UL);
+    using namespace vmcs::exit_qualification::sipi;
 
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x3010UL;
-    CHECK(vmcs::exit_qualification::sipi::vector::get_if_exists() == 0x10UL);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(vector::get() == (vector::mask >> vector::from));
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(vector::get(vector::mask) == (vector::mask >> vector::from));
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(vector::get_if_exists() == (vector::mask >> vector::from));
 }
 
 TEST_CASE("vmcs_exit_qualification_task_switch")
@@ -239,13 +286,12 @@ TEST_CASE("vmcs_exit_qualification_task_switch")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    CHECK(vmcs::exit_qualification::task_switch::get_name() == "task_switch"_s);
+    using namespace vmcs::exit_qualification;
 
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL;
-    CHECK(vmcs::exit_qualification::task_switch::get() == 0x1UL);
-
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL;
-    CHECK(vmcs::exit_qualification::task_switch::get_if_exists() == 0x0UL);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 1UL;
+    CHECK(task_switch::get() == 1UL);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0UL;
+    CHECK(task_switch::get_if_exists() == 0UL);
 }
 
 TEST_CASE("vmcs_exit_qualification_task_switch_tss_selector")
@@ -253,13 +299,16 @@ TEST_CASE("vmcs_exit_qualification_task_switch_tss_selector")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0xF0003456UL;
-    CHECK(vmcs::exit_qualification::task_switch::tss_selector::get() == 0x3456UL);
-    CHECK(vmcs::exit_qualification::task_switch::tss_selector::get(
-              0xF0003456UL) == 0x3456UL);
+    using namespace vmcs::exit_qualification::task_switch;
 
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL;
-    CHECK(vmcs::exit_qualification::task_switch::tss_selector::get_if_exists() == 0x0UL);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(tss_selector::get() == (tss_selector::mask >> tss_selector::from));
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(tss_selector::get(tss_selector::mask) == (tss_selector::mask >> tss_selector::from));
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(tss_selector::get_if_exists() == (tss_selector::mask >> tss_selector::from));
 }
 
 TEST_CASE("vmcs_exit_qualification_task_switch_reserved")
@@ -267,12 +316,16 @@ TEST_CASE("vmcs_exit_qualification_task_switch_reserved")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0xFFF0000UL;
-    CHECK(vmcs::exit_qualification::task_switch::reserved::get() == 0xFFF0000UL);
-    CHECK(vmcs::exit_qualification::task_switch::reserved::get(0xFFF0000UL) == 0xFFF0000UL);
+    using namespace vmcs::exit_qualification::task_switch;
 
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL;
-    CHECK(vmcs::exit_qualification::task_switch::reserved::get_if_exists() == 0x0UL);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(reserved::get() == (reserved::mask >> reserved::from));
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(reserved::get(reserved::mask) == (reserved::mask >> reserved::from));
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(reserved::get_if_exists() == (reserved::mask >> reserved::from));
 }
 
 TEST_CASE("vmcs_exit_qualification_task_switch_source_of_task_switch_init")
@@ -301,6 +354,7 @@ TEST_CASE("vmcs_exit_qualification_task_switch_source_of_task_switch_init")
     g_vmcs_fields[vmcs::exit_qualification::addr] = 0xC0000000UL;
     CHECK(source_of_task_switch_init::get_if_exists() ==
           source_of_task_switch_init::task_gate_in_idt);
+
 }
 
 TEST_CASE("vmcs_exit_qualification_invept")
@@ -308,13 +362,12 @@ TEST_CASE("vmcs_exit_qualification_invept")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    CHECK(vmcs::exit_qualification::invept::get_name() == "invept"_s);
+    using namespace vmcs::exit_qualification;
 
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL;
-    CHECK(vmcs::exit_qualification::invept::get() == 0x1UL);
-
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x2UL;
-    CHECK(vmcs::exit_qualification::invept::get_if_exists() == 0x2UL);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 1UL;
+    CHECK(invept::get() == 1UL);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0UL;
+    CHECK(invept::get_if_exists() == 0UL);
 }
 
 TEST_CASE("vmcs_exit_qualification_invpcid")
@@ -322,13 +375,12 @@ TEST_CASE("vmcs_exit_qualification_invpcid")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    CHECK(vmcs::exit_qualification::invpcid::get_name() == "invpcid"_s);
+    using namespace vmcs::exit_qualification;
 
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL;
-    CHECK(vmcs::exit_qualification::invpcid::get() == 0x1UL);
-
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x2UL;
-    CHECK(vmcs::exit_qualification::invpcid::get_if_exists() == 0x2UL);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 1UL;
+    CHECK(invpcid::get() == 1UL);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0UL;
+    CHECK(invpcid::get_if_exists() == 0UL);
 }
 
 TEST_CASE("vmcs_exit_qualification_invvpid")
@@ -336,13 +388,12 @@ TEST_CASE("vmcs_exit_qualification_invvpid")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    CHECK(vmcs::exit_qualification::invvpid::get_name() == "invvpid"_s);
+    using namespace vmcs::exit_qualification;
 
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL;
-    CHECK(vmcs::exit_qualification::invvpid::get() == 0x1UL);
-
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x2UL;
-    CHECK(vmcs::exit_qualification::invvpid::get_if_exists() == 0x2UL);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 1UL;
+    CHECK(invvpid::get() == 1UL);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0UL;
+    CHECK(invvpid::get_if_exists() == 0UL);
 }
 
 TEST_CASE("vmcs_exit_qualification_lgdt")
@@ -350,13 +401,12 @@ TEST_CASE("vmcs_exit_qualification_lgdt")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    CHECK(vmcs::exit_qualification::lgdt::get_name() == "lgdt"_s);
+    using namespace vmcs::exit_qualification;
 
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL;
-    CHECK(vmcs::exit_qualification::lgdt::get() == 0x1UL);
-
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x2UL;
-    CHECK(vmcs::exit_qualification::lgdt::get_if_exists() == 0x2UL);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 1UL;
+    CHECK(lgdt::get() == 1UL);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0UL;
+    CHECK(lgdt::get_if_exists() == 0UL);
 }
 
 TEST_CASE("vmcs_exit_qualification_lidt")
@@ -364,13 +414,12 @@ TEST_CASE("vmcs_exit_qualification_lidt")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    CHECK(vmcs::exit_qualification::lidt::get_name() == "lidt"_s);
+    using namespace vmcs::exit_qualification;
 
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL;
-    CHECK(vmcs::exit_qualification::lidt::get() == 0x1UL);
-
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x2UL;
-    CHECK(vmcs::exit_qualification::lidt::get_if_exists() == 0x2UL);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 1UL;
+    CHECK(lidt::get() == 1UL);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0UL;
+    CHECK(lidt::get_if_exists() == 0UL);
 }
 
 TEST_CASE("vmcs_exit_qualification_lldt")
@@ -378,13 +427,12 @@ TEST_CASE("vmcs_exit_qualification_lldt")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    CHECK(vmcs::exit_qualification::lldt::get_name() == "lldt"_s);
+    using namespace vmcs::exit_qualification;
 
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL;
-    CHECK(vmcs::exit_qualification::lldt::get() == 0x1UL);
-
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x2UL;
-    CHECK(vmcs::exit_qualification::lldt::get_if_exists() == 0x2UL);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 1UL;
+    CHECK(lldt::get() == 1UL);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0UL;
+    CHECK(lldt::get_if_exists() == 0UL);
 }
 
 TEST_CASE("vmcs_exit_qualification_ltr")
@@ -392,13 +440,12 @@ TEST_CASE("vmcs_exit_qualification_ltr")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    CHECK(vmcs::exit_qualification::ltr::get_name() == "ltr"_s);
+    using namespace vmcs::exit_qualification;
 
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL;
-    CHECK(vmcs::exit_qualification::ltr::get() == 0x1UL);
-
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x2UL;
-    CHECK(vmcs::exit_qualification::ltr::get_if_exists() == 0x2UL);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 1UL;
+    CHECK(ltr::get() == 1UL);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0UL;
+    CHECK(ltr::get_if_exists() == 0UL);
 }
 
 TEST_CASE("vmcs_exit_qualification_sgdt")
@@ -406,13 +453,12 @@ TEST_CASE("vmcs_exit_qualification_sgdt")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    CHECK(vmcs::exit_qualification::sgdt::get_name() == "sgdt"_s);
+    using namespace vmcs::exit_qualification;
 
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL;
-    CHECK(vmcs::exit_qualification::sgdt::get() == 0x1UL);
-
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x2UL;
-    CHECK(vmcs::exit_qualification::sgdt::get_if_exists() == 0x2UL);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 1UL;
+    CHECK(sgdt::get() == 1UL);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0UL;
+    CHECK(sgdt::get_if_exists() == 0UL);
 }
 
 TEST_CASE("vmcs_exit_qualification_sidt")
@@ -420,13 +466,12 @@ TEST_CASE("vmcs_exit_qualification_sidt")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    CHECK(vmcs::exit_qualification::sidt::get_name() == "sidt"_s);
+    using namespace vmcs::exit_qualification;
 
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL;
-    CHECK(vmcs::exit_qualification::sidt::get() == 0x1UL);
-
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x2UL;
-    CHECK(vmcs::exit_qualification::sidt::get_if_exists() == 0x2UL);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 1UL;
+    CHECK(sidt::get() == 1UL);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0UL;
+    CHECK(sidt::get_if_exists() == 0UL);
 }
 
 TEST_CASE("vmcs_exit_qualification_sldt")
@@ -434,13 +479,12 @@ TEST_CASE("vmcs_exit_qualification_sldt")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    CHECK(vmcs::exit_qualification::sldt::get_name() == "sldt"_s);
+    using namespace vmcs::exit_qualification;
 
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL;
-    CHECK(vmcs::exit_qualification::sldt::get() == 0x1UL);
-
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x2UL;
-    CHECK(vmcs::exit_qualification::sldt::get_if_exists() == 0x2UL);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 1UL;
+    CHECK(sldt::get() == 1UL);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0UL;
+    CHECK(sldt::get_if_exists() == 0UL);
 }
 
 TEST_CASE("vmcs_exit_qualification_str")
@@ -448,13 +492,12 @@ TEST_CASE("vmcs_exit_qualification_str")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    CHECK(vmcs::exit_qualification::str::get_name() == "str"_s);
+    using namespace vmcs::exit_qualification;
 
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL;
-    CHECK(vmcs::exit_qualification::str::get() == 0x1UL);
-
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x2UL;
-    CHECK(vmcs::exit_qualification::str::get_if_exists() == 0x2UL);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 1UL;
+    CHECK(str::get() == 1UL);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0UL;
+    CHECK(str::get_if_exists() == 0UL);
 }
 
 TEST_CASE("vmcs_exit_qualification_vmclear")
@@ -462,13 +505,12 @@ TEST_CASE("vmcs_exit_qualification_vmclear")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    CHECK(vmcs::exit_qualification::vmclear::get_name() == "vmclear"_s);
+    using namespace vmcs::exit_qualification;
 
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL;
-    CHECK(vmcs::exit_qualification::vmclear::get() == 0x1UL);
-
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x2UL;
-    CHECK(vmcs::exit_qualification::vmclear::get_if_exists() == 0x2UL);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 1UL;
+    CHECK(vmclear::get() == 1UL);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0UL;
+    CHECK(vmclear::get_if_exists() == 0UL);
 }
 
 TEST_CASE("vmcs_exit_qualification_vmptrld")
@@ -476,13 +518,12 @@ TEST_CASE("vmcs_exit_qualification_vmptrld")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    CHECK(vmcs::exit_qualification::vmptrld::get_name() == "vmptrld"_s);
+    using namespace vmcs::exit_qualification;
 
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL;
-    CHECK(vmcs::exit_qualification::vmptrld::get() == 0x1UL);
-
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x2UL;
-    CHECK(vmcs::exit_qualification::vmptrld::get_if_exists() == 0x2UL);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 1UL;
+    CHECK(vmptrld::get() == 1UL);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0UL;
+    CHECK(vmptrld::get_if_exists() == 0UL);
 }
 
 TEST_CASE("vmcs_exit_qualification_vmptrst")
@@ -490,13 +531,12 @@ TEST_CASE("vmcs_exit_qualification_vmptrst")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    CHECK(vmcs::exit_qualification::vmptrst::get_name() == "vmptrst"_s);
+    using namespace vmcs::exit_qualification;
 
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL;
-    CHECK(vmcs::exit_qualification::vmptrst::get() == 0x1UL);
-
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x2UL;
-    CHECK(vmcs::exit_qualification::vmptrst::get_if_exists() == 0x2UL);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 1UL;
+    CHECK(vmptrst::get() == 1UL);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0UL;
+    CHECK(vmptrst::get_if_exists() == 0UL);
 }
 
 TEST_CASE("vmcs_exit_qualification_vmread")
@@ -504,13 +544,12 @@ TEST_CASE("vmcs_exit_qualification_vmread")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    CHECK(vmcs::exit_qualification::vmread::get_name() == "vmread"_s);
+    using namespace vmcs::exit_qualification;
 
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL;
-    CHECK(vmcs::exit_qualification::vmread::get() == 0x1UL);
-
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x2UL;
-    CHECK(vmcs::exit_qualification::vmread::get_if_exists() == 0x2UL);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 1UL;
+    CHECK(vmread::get() == 1UL);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0UL;
+    CHECK(vmread::get_if_exists() == 0UL);
 }
 
 TEST_CASE("vmcs_exit_qualification_vmwrite")
@@ -518,13 +557,12 @@ TEST_CASE("vmcs_exit_qualification_vmwrite")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    CHECK(vmcs::exit_qualification::vmwrite::get_name() == "vmwrite"_s);
+    using namespace vmcs::exit_qualification;
 
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL;
-    CHECK(vmcs::exit_qualification::vmwrite::get() == 0x1UL);
-
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x2UL;
-    CHECK(vmcs::exit_qualification::vmwrite::get_if_exists() == 0x2UL);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 1UL;
+    CHECK(vmwrite::get() == 1UL);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0UL;
+    CHECK(vmwrite::get_if_exists() == 0UL);
 }
 
 TEST_CASE("vmcs_exit_qualification_vmxon")
@@ -532,13 +570,12 @@ TEST_CASE("vmcs_exit_qualification_vmxon")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    CHECK(vmcs::exit_qualification::vmxon::get_name() == "vmxon"_s);
+    using namespace vmcs::exit_qualification;
 
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL;
-    CHECK(vmcs::exit_qualification::vmxon::get() == 0x1UL);
-
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x2UL;
-    CHECK(vmcs::exit_qualification::vmxon::get_if_exists() == 0x2UL);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 1UL;
+    CHECK(vmxon::get() == 1UL);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0UL;
+    CHECK(vmxon::get_if_exists() == 0UL);
 }
 
 TEST_CASE("vmcs_exit_qualification_xrstors")
@@ -546,13 +583,12 @@ TEST_CASE("vmcs_exit_qualification_xrstors")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    CHECK(vmcs::exit_qualification::xrstors::get_name() == "xrstors"_s);
+    using namespace vmcs::exit_qualification;
 
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL;
-    CHECK(vmcs::exit_qualification::xrstors::get() == 0x1UL);
-
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x2UL;
-    CHECK(vmcs::exit_qualification::xrstors::get_if_exists() == 0x2UL);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 1UL;
+    CHECK(xrstors::get() == 1UL);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0UL;
+    CHECK(xrstors::get_if_exists() == 0UL);
 }
 
 TEST_CASE("vmcs_exit_qualification_xsaves")
@@ -560,13 +596,12 @@ TEST_CASE("vmcs_exit_qualification_xsaves")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    CHECK(vmcs::exit_qualification::xsaves::get_name() == "xsaves"_s);
+    using namespace vmcs::exit_qualification;
 
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL;
-    CHECK(vmcs::exit_qualification::xsaves::get() == 0x1UL);
-
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x2UL;
-    CHECK(vmcs::exit_qualification::xsaves::get_if_exists() == 0x2UL);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 1UL;
+    CHECK(xsaves::get() == 1UL);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0UL;
+    CHECK(xsaves::get_if_exists() == 0UL);
 }
 
 TEST_CASE("vmcs_exit_qualification_control_register_access")
@@ -574,14 +609,12 @@ TEST_CASE("vmcs_exit_qualification_control_register_access")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    CHECK(vmcs::exit_qualification::control_register_access::get_name() ==
-          "control_register_access"_s);
+    using namespace vmcs::exit_qualification;
 
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x34UL;
-    CHECK(vmcs::exit_qualification::control_register_access::get() == 0x34UL);
-
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL;
-    CHECK(vmcs::exit_qualification::control_register_access::get_if_exists() == 0x0UL);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 1UL;
+    CHECK(control_register_access::get() == 1UL);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0UL;
+    CHECK(control_register_access::get_if_exists() == 0UL);
 }
 
 TEST_CASE("vmcs_exit_qualification_control_register_access_control_register_number")
@@ -589,16 +622,16 @@ TEST_CASE("vmcs_exit_qualification_control_register_access_control_register_numb
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x42UL;
-    CHECK(vmcs::exit_qualification::control_register_access::control_register_number::get()
-          == 0x2UL);
-    CHECK(vmcs::exit_qualification::control_register_access::control_register_number::get(
-              0x42UL) == 0x2UL);
+    using namespace vmcs::exit_qualification::control_register_access;
 
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL;
-    CHECK(
-        vmcs::exit_qualification::control_register_access::control_register_number::get_if_exists() ==
-        0x0UL);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(control_register_number::get() == (control_register_number::mask >> control_register_number::from));
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(control_register_number::get(control_register_number::mask) == (control_register_number::mask >> control_register_number::from));
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(control_register_number::get_if_exists() == (control_register_number::mask >> control_register_number::from));
 }
 
 TEST_CASE("vmcs_exit_qualification_control_register_access_access_type")
@@ -643,14 +676,16 @@ TEST_CASE("vmcs_exit_qualification_control_register_access_reserved")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x3080UL;
-    CHECK(vmcs::exit_qualification::control_register_access::reserved::get() == 0x3080UL);
-    CHECK(vmcs::exit_qualification::control_register_access::reserved::get(
-              0x3080UL) == 0x3080UL);
+    using namespace vmcs::exit_qualification::control_register_access;
 
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL;
-    CHECK(vmcs::exit_qualification::control_register_access::reserved::get_if_exists() ==
-          0x0UL);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(reserved::get() == (reserved::mask >> reserved::from));
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(reserved::get(reserved::mask) == (reserved::mask >> reserved::from));
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(reserved::get_if_exists() == (reserved::mask >> reserved::from));
 }
 
 TEST_CASE("vmcs_exit_qualification_control_register_access_general_purpose_register")
@@ -688,13 +723,12 @@ TEST_CASE("vmcs_exit_qualification_mov_dr")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    CHECK(vmcs::exit_qualification::mov_dr::get_name() == "mov_dr"_s);
+    using namespace vmcs::exit_qualification;
 
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x34UL;
-    CHECK(vmcs::exit_qualification::mov_dr::get() == 0x34UL);
-
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL;
-    CHECK(vmcs::exit_qualification::mov_dr::get_if_exists() == 0x0UL);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 1UL;
+    CHECK(mov_dr::get() == 1UL);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0UL;
+    CHECK(mov_dr::get_if_exists() == 0UL);
 }
 
 TEST_CASE("vmcs_exit_qualification_mov_dr_debug_register_number")
@@ -702,13 +736,16 @@ TEST_CASE("vmcs_exit_qualification_mov_dr_debug_register_number")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x42UL;
-    CHECK(vmcs::exit_qualification::mov_dr::debug_register_number::get() == 0x2UL);
-    CHECK(vmcs::exit_qualification::mov_dr::debug_register_number::get(0x42UL) == 0x2UL);
+    using namespace vmcs::exit_qualification::mov_dr;
 
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL;
-    CHECK(vmcs::exit_qualification::mov_dr::debug_register_number::get_if_exists() ==
-          0x0UL);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(debug_register_number::get() == (debug_register_number::mask >> debug_register_number::from));
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(debug_register_number::get(debug_register_number::mask) == (debug_register_number::mask >> debug_register_number::from));
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(debug_register_number::get_if_exists() == (debug_register_number::mask >> debug_register_number::from));
 }
 
 TEST_CASE("vmcs_exit_qualification_mov_dr_reserved")
@@ -716,12 +753,16 @@ TEST_CASE("vmcs_exit_qualification_mov_dr_reserved")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x88UL;
-    CHECK(vmcs::exit_qualification::mov_dr::reserved::get() == 0x88UL);
-    CHECK(vmcs::exit_qualification::mov_dr::reserved::get(0x88UL) == 0x88UL);
+    using namespace vmcs::exit_qualification::mov_dr;
 
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL;
-    CHECK(vmcs::exit_qualification::mov_dr::reserved::get_if_exists() == 0x0UL);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(reserved::get() == (reserved::mask >> reserved::from));
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(reserved::get(reserved::mask) == (reserved::mask >> reserved::from));
+
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(reserved::get_if_exists() == (reserved::mask >> reserved::from));
 }
 
 TEST_CASE("vmcs_exit_qualification_mov_dr_direction_of_access")
@@ -759,13 +800,12 @@ TEST_CASE("vmcs_exit_qualification_io_instruction")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    CHECK(vmcs::exit_qualification::io_instruction::get_name() == "io_instruction"_s);
+    using namespace vmcs::exit_qualification;
 
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x34UL;
-    CHECK(vmcs::exit_qualification::io_instruction::get() == 0x34UL);
-
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL;
-    CHECK(vmcs::exit_qualification::io_instruction::get_if_exists() == 0x0UL);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 1UL;
+    CHECK(io_instruction::get() == 1UL);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0UL;
+    CHECK(io_instruction::get_if_exists() == 0UL);
 }
 
 TEST_CASE("vmcs_exit_qualification_io_instruction_size_of_access")
@@ -808,12 +848,15 @@ TEST_CASE("vmcs_exit_qualification_io_instruction_string_instruction")
 
     using namespace vmcs::exit_qualification::io_instruction;
 
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL;
-    CHECK(string_instruction::get() == string_instruction::not_string);
-    CHECK(string_instruction::get(0x0UL) == string_instruction::not_string);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = string_instruction::mask;
+    CHECK(string_instruction::is_enabled());
+    CHECK(string_instruction::is_enabled(string_instruction::mask));
+    CHECK(string_instruction::is_enabled_if_exists());
 
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL << string_instruction::from;
-    CHECK(string_instruction::get_if_exists() == string_instruction::string);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL;
+    CHECK(string_instruction::is_disabled());
+    CHECK(string_instruction::is_disabled(0x0UL));
+    CHECK(string_instruction::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_exit_qualification_io_instruction_rep_prefixed")
@@ -823,12 +866,15 @@ TEST_CASE("vmcs_exit_qualification_io_instruction_rep_prefixed")
 
     using namespace vmcs::exit_qualification::io_instruction;
 
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL;
-    CHECK(rep_prefixed::get() == rep_prefixed::not_rep);
-    CHECK(rep_prefixed::get(0x0UL) == rep_prefixed::not_rep);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = rep_prefixed::mask;
+    CHECK(rep_prefixed::is_enabled());
+    CHECK(rep_prefixed::is_enabled(rep_prefixed::mask));
+    CHECK(rep_prefixed::is_enabled_if_exists());
 
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL << rep_prefixed::from;
-    CHECK(rep_prefixed::get_if_exists() == rep_prefixed::rep);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL;
+    CHECK(rep_prefixed::is_disabled());
+    CHECK(rep_prefixed::is_disabled(0x0UL));
+    CHECK(rep_prefixed::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_exit_qualification_io_instruction_operand_encoding")
@@ -881,15 +927,12 @@ TEST_CASE("vmcs_exit_qualification_mwait")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    using namespace vmcs::exit_qualification::mwait;
+    using namespace vmcs::exit_qualification;
 
-    CHECK(get_name() == "mwait"_s);
-
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0U;
-    CHECK(get() == 0U);
-
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 1U;
-    CHECK(get_if_exists() == 1U);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 1UL;
+    CHECK(mwait::get() == 1UL);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0UL;
+    CHECK(mwait::get_if_exists() == 0UL);
 }
 
 TEST_CASE("vmcs_exit_qualification_linear_apic_access")
@@ -897,15 +940,12 @@ TEST_CASE("vmcs_exit_qualification_linear_apic_access")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    using namespace vmcs::exit_qualification::linear_apic_access;
+    using namespace vmcs::exit_qualification;
 
-    CHECK(get_name() == "linear_apic_access"_s);
-
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL;
-    CHECK(get() == 0x1UL);
-
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL;
-    CHECK(get_if_exists() == 0x0UL);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 1UL;
+    CHECK(linear_apic_access::get() == 1UL);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0UL;
+    CHECK(linear_apic_access::get_if_exists() == 0UL);
 }
 
 TEST_CASE("vmcs_exit_qualification_linear_apic_access_offset")
@@ -965,15 +1005,12 @@ TEST_CASE("vmcs_exit_qualification_guest_physical_apic_access")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    using namespace vmcs::exit_qualification::guest_physical_apic_access;
+    using namespace vmcs::exit_qualification;
 
-    CHECK(get_name() == "guest_physical_apic_access"_s);
-
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL;
-    CHECK(get() == 0x1UL);
-
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL;
-    CHECK(get_if_exists() == 0x0UL);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 1UL;
+    CHECK(guest_physical_apic_access::get() == 1UL);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0UL;
+    CHECK(guest_physical_apic_access::get_if_exists() == 0UL);
 }
 
 TEST_CASE("vmcs_exit_qualification_guest_physical_apic_access_access_type")
@@ -1012,13 +1049,12 @@ TEST_CASE("vmcs_exit_qualification_ept_violation")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    CHECK(vmcs::exit_qualification::ept_violation::get_name() == "ept_violation"_s);
+    using namespace vmcs::exit_qualification;
 
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL;
-    CHECK(vmcs::exit_qualification::ept_violation::get() == 1UL);
-
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL;
-    CHECK(vmcs::exit_qualification::ept_violation::get_if_exists() == 0UL);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 1UL;
+    CHECK(ept_violation::get() == 1UL);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0UL;
+    CHECK(ept_violation::get_if_exists() == 0UL);
 }
 
 TEST_CASE("vmcs_exit_qualification_ept_violation_data_read")
@@ -1189,14 +1225,12 @@ TEST_CASE("vmcs_exit_qualification_eoi_virtualization")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    CHECK(vmcs::exit_qualification::eoi_virtualization::get_name() ==
-          "eoi_virtualization"_s);
+    using namespace vmcs::exit_qualification;
 
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL;
-    CHECK(vmcs::exit_qualification::eoi_virtualization::get() == 1UL);
-
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL;
-    CHECK(vmcs::exit_qualification::eoi_virtualization::get_if_exists() == 0UL);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 1UL;
+    CHECK(eoi_virtualization::get() == 1UL);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0UL;
+    CHECK(eoi_virtualization::get_if_exists() == 0UL);
 }
 
 TEST_CASE("vmcs_exit_qualification_eoi_virtualization_vector")
@@ -1219,13 +1253,12 @@ TEST_CASE("vmcs_exit_qualification_apic_write")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    CHECK(vmcs::exit_qualification::apic_write::get_name() == "apic_write"_s);
+    using namespace vmcs::exit_qualification;
 
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x1UL;
-    CHECK(vmcs::exit_qualification::apic_write::get() == 1UL);
-
-    g_vmcs_fields[vmcs::exit_qualification::addr] = 0x0UL;
-    CHECK(vmcs::exit_qualification::apic_write::get_if_exists() == 0UL);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 1UL;
+    CHECK(apic_write::get() == 1UL);
+    g_vmcs_fields[vmcs::exit_qualification::addr] = 0UL;
+    CHECK(apic_write::get_if_exists() == 0UL);
 }
 
 TEST_CASE("vmcs_exit_qualification_apic_write_offset")
@@ -1248,11 +1281,15 @@ TEST_CASE("vmcs_io_rcx")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_vmcs_fields[vmcs::io_rcx::addr] = 1U;
-    CHECK(vmcs::io_rcx::get() == 1U);
+    using namespace vmcs::io_rcx;
 
-    g_vmcs_fields[vmcs::io_rcx::addr] = 0U;
-    CHECK(vmcs::io_rcx::get_if_exists() == 0U);
+    CHECK(exists());
+    g_vmcs_fields[addr] = 100UL;
+    CHECK(get() == 100UL);
+    g_vmcs_fields[addr] = 200UL;
+    CHECK(get_if_exists() == 200UL);
+
+    dump(0);
 }
 
 TEST_CASE("vmcs_io_rsi")
@@ -1260,11 +1297,15 @@ TEST_CASE("vmcs_io_rsi")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_vmcs_fields[vmcs::io_rsi::addr] = 1U;
-    CHECK(vmcs::io_rsi::get() == 1U);
+    using namespace vmcs::io_rsi;
 
-    g_vmcs_fields[vmcs::io_rsi::addr] = 0U;
-    CHECK(vmcs::io_rsi::get_if_exists() == 0U);
+    CHECK(exists());
+    g_vmcs_fields[addr] = 100UL;
+    CHECK(get() == 100UL);
+    g_vmcs_fields[addr] = 200UL;
+    CHECK(get_if_exists() == 200UL);
+
+    dump(0);
 }
 
 TEST_CASE("vmcs_io_rdi")
@@ -1272,11 +1313,15 @@ TEST_CASE("vmcs_io_rdi")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_vmcs_fields[vmcs::io_rdi::addr] = 1U;
-    CHECK(vmcs::io_rdi::get() == 1U);
+    using namespace vmcs::io_rdi;
 
-    g_vmcs_fields[vmcs::io_rdi::addr] = 0U;
-    CHECK(vmcs::io_rdi::get_if_exists() == 0U);
+    CHECK(exists());
+    g_vmcs_fields[addr] = 100UL;
+    CHECK(get() == 100UL);
+    g_vmcs_fields[addr] = 200UL;
+    CHECK(get_if_exists() == 200UL);
+
+    dump(0);
 }
 
 TEST_CASE("vmcs_io_rip")
@@ -1284,11 +1329,15 @@ TEST_CASE("vmcs_io_rip")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_vmcs_fields[vmcs::io_rip::addr] = 1U;
-    CHECK(vmcs::io_rip::get() == 1U);
+    using namespace vmcs::io_rip;
 
-    g_vmcs_fields[vmcs::io_rip::addr] = 0U;
-    CHECK(vmcs::io_rip::get_if_exists() == 0U);
+    CHECK(exists());
+    g_vmcs_fields[addr] = 100UL;
+    CHECK(get() == 100UL);
+    g_vmcs_fields[addr] = 200UL;
+    CHECK(get_if_exists() == 200UL);
+
+    dump(0);
 }
 
 TEST_CASE("vmcs_guest_linear_address")
@@ -1296,11 +1345,15 @@ TEST_CASE("vmcs_guest_linear_address")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_vmcs_fields[vmcs::guest_linear_address::addr] = 1U;
-    CHECK(vmcs::guest_linear_address::get() == 1U);
+    using namespace vmcs::guest_linear_address;
 
-    g_vmcs_fields[vmcs::guest_linear_address::addr] = 0U;
-    CHECK(vmcs::guest_linear_address::get_if_exists() == 0U);
+    CHECK(exists());
+    g_vmcs_fields[addr] = 100UL;
+    CHECK(get() == 100UL);
+    g_vmcs_fields[addr] = 200UL;
+    CHECK(get_if_exists() == 200UL);
+
+    dump(0);
 }
 
 #endif

@@ -131,13 +131,13 @@ namespace ia32_apic_base
         { return is_bit_cleared(msr, from); }
 
         inline void enable()
-        { set_bit(_read_msr(addr), from); }
+        { _write_msr(addr, set_bit(_read_msr(addr), from)); }
 
         inline auto enable(value_type msr)
         { return set_bit(msr, from); }
 
         inline void disable()
-        { clear_bit(_read_msr(addr), from); }
+        { _write_msr(addr, clear_bit(_read_msr(addr), from)); }
 
         inline auto disable(value_type msr)
         { return clear_bit(msr, from); }
@@ -165,13 +165,13 @@ namespace ia32_apic_base
         { return is_bit_cleared(msr, from); }
 
         inline void enable()
-        { set_bit(_read_msr(addr), from); }
+        { _write_msr(addr, set_bit(_read_msr(addr), from)); }
 
         inline auto enable(value_type msr)
         { return set_bit(msr, from); }
 
         inline void disable()
-        { clear_bit(_read_msr(addr), from); }
+        { _write_msr(addr, clear_bit(_read_msr(addr), from)); }
 
         inline auto disable(value_type msr)
         { return clear_bit(msr, from); }
@@ -199,13 +199,13 @@ namespace ia32_apic_base
         { return is_bit_cleared(msr, from); }
 
         inline void enable()
-        { set_bit(_read_msr(addr), from); }
+        { _write_msr(addr, set_bit(_read_msr(addr), from)); }
 
         inline auto enable(value_type msr)
         { return set_bit(msr, from); }
 
         inline void disable()
-        { clear_bit(_read_msr(addr), from); }
+        { _write_msr(addr, clear_bit(_read_msr(addr), from)); }
 
         inline auto disable(value_type msr)
         { return clear_bit(msr, from); }
@@ -588,7 +588,7 @@ namespace ia32_mcg_cap
 
     namespace mcg_tes
     {
-        constexpr const auto mask = 0x0000000000000400ULL;
+        constexpr const auto mask = 0x0000000000000800ULL;
         constexpr const auto from = 11ULL;
         constexpr const auto name = "mcg_tes";
 
@@ -735,13 +735,13 @@ namespace ia32_mcg_status
         { return is_bit_cleared(msr, from); }
 
         inline void enable()
-        { set_bit(_read_msr(addr), from); }
+        { _write_msr(addr, set_bit(_read_msr(addr), from)); }
 
         inline auto enable(value_type msr)
         { return set_bit(msr, from); }
 
         inline void disable()
-        { clear_bit(_read_msr(addr), from); }
+        { _write_msr(addr, clear_bit(_read_msr(addr), from)); }
 
         inline auto disable(value_type msr)
         { return clear_bit(msr, from); }
@@ -769,13 +769,13 @@ namespace ia32_mcg_status
         { return is_bit_cleared(msr, from); }
 
         inline void enable()
-        { set_bit(_read_msr(addr), from); }
+        { _write_msr(addr, set_bit(_read_msr(addr), from)); }
 
         inline auto enable(value_type msr)
         { return set_bit(msr, from); }
 
         inline void disable()
-        { clear_bit(_read_msr(addr), from); }
+        { _write_msr(addr, clear_bit(_read_msr(addr), from)); }
 
         inline auto disable(value_type msr)
         { return clear_bit(msr, from); }
@@ -803,13 +803,13 @@ namespace ia32_mcg_status
         { return is_bit_cleared(msr, from); }
 
         inline void enable()
-        { set_bit(_read_msr(addr), from); }
+        { _write_msr(addr, set_bit(_read_msr(addr), from)); }
 
         inline auto enable(value_type msr)
         { return set_bit(msr, from); }
 
         inline void disable()
-        { clear_bit(_read_msr(addr), from); }
+        { _write_msr(addr, clear_bit(_read_msr(addr), from)); }
 
         inline auto disable(value_type msr)
         { return clear_bit(msr, from); }
@@ -837,13 +837,13 @@ namespace ia32_mcg_status
         { return is_bit_cleared(msr, from); }
 
         inline void enable()
-        { set_bit(_read_msr(addr), from); }
+        { _write_msr(addr, set_bit(_read_msr(addr), from)); }
 
         inline auto enable(value_type msr)
         { return set_bit(msr, from); }
 
         inline void disable()
-        { clear_bit(_read_msr(addr), from); }
+        { _write_msr(addr, clear_bit(_read_msr(addr), from)); }
 
         inline auto disable(value_type msr)
         { return clear_bit(msr, from); }

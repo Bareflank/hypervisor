@@ -67,13 +67,15 @@ TEST_CASE("vmcs_cr0_guest_host_mask")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    CHECK(vmcs::cr0_guest_host_mask::exists());
+    using namespace vmcs::cr0_guest_host_mask;
 
-    vmcs::cr0_guest_host_mask::set(1UL);
-    CHECK(vmcs::cr0_guest_host_mask::get() == 1UL);
+    CHECK(exists());
+    set(100UL);
+    CHECK(get() == 100UL);
+    set_if_exists(200UL);
+    CHECK(get_if_exists() == 200UL);
 
-    vmcs::cr0_guest_host_mask::set_if_exists(2UL);
-    CHECK(vmcs::cr0_guest_host_mask::get_if_exists() == 2UL);
+    dump(0);
 }
 
 TEST_CASE("vmcs_cr4_guest_host_mask")
@@ -81,13 +83,15 @@ TEST_CASE("vmcs_cr4_guest_host_mask")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    CHECK(vmcs::cr4_guest_host_mask::exists());
+    using namespace vmcs::cr4_guest_host_mask;
 
-    vmcs::cr4_guest_host_mask::set(1UL);
-    CHECK(vmcs::cr4_guest_host_mask::get() == 1UL);
+    CHECK(exists());
+    set(100UL);
+    CHECK(get() == 100UL);
+    set_if_exists(200UL);
+    CHECK(get_if_exists() == 200UL);
 
-    vmcs::cr4_guest_host_mask::set_if_exists(2UL);
-    CHECK(vmcs::cr4_guest_host_mask::get_if_exists() == 2UL);
+    dump(0);
 }
 
 TEST_CASE("vmcs_cr0_read_shadow")
@@ -95,13 +99,15 @@ TEST_CASE("vmcs_cr0_read_shadow")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    CHECK(vmcs::cr0_read_shadow::exists());
+    using namespace vmcs::cr0_read_shadow;
 
-    vmcs::cr0_read_shadow::set(1UL);
-    CHECK(vmcs::cr0_read_shadow::get() == 1UL);
+    CHECK(exists());
+    set(100UL);
+    CHECK(get() == 100UL);
+    set_if_exists(200UL);
+    CHECK(get_if_exists() == 200UL);
 
-    vmcs::cr0_read_shadow::set_if_exists(2UL);
-    CHECK(vmcs::cr0_read_shadow::get_if_exists() == 2UL);
+    dump(0);
 }
 
 TEST_CASE("vmcs_cr4_read_shadow")
@@ -109,13 +115,15 @@ TEST_CASE("vmcs_cr4_read_shadow")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    CHECK(vmcs::cr4_read_shadow::exists());
+    using namespace vmcs::cr4_read_shadow;
 
-    vmcs::cr4_read_shadow::set(1UL);
-    CHECK(vmcs::cr4_read_shadow::get() == 1UL);
+    CHECK(exists());
+    set(100UL);
+    CHECK(get() == 100UL);
+    set_if_exists(200UL);
+    CHECK(get_if_exists() == 200UL);
 
-    vmcs::cr4_read_shadow::set_if_exists(2UL);
-    CHECK(vmcs::cr4_read_shadow::get_if_exists() == 2UL);
+    dump(0);
 }
 
 TEST_CASE("vmcs_cr3_target_value_0")
@@ -123,13 +131,15 @@ TEST_CASE("vmcs_cr3_target_value_0")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    CHECK(vmcs::cr3_target_value_0::exists());
+    using namespace vmcs::cr3_target_value_0;
 
-    vmcs::cr3_target_value_0::set(1UL);
-    CHECK(vmcs::cr3_target_value_0::get() == 1UL);
+    CHECK(exists());
+    set(100UL);
+    CHECK(get() == 100UL);
+    set_if_exists(200UL);
+    CHECK(get_if_exists() == 200UL);
 
-    vmcs::cr3_target_value_0::set_if_exists(2UL);
-    CHECK(vmcs::cr3_target_value_0::get_if_exists() == 2UL);
+    dump(0);
 }
 
 TEST_CASE("vmcs_cr3_target_value_1")
@@ -137,13 +147,15 @@ TEST_CASE("vmcs_cr3_target_value_1")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    CHECK(vmcs::cr3_target_value_1::exists());
+    using namespace vmcs::cr3_target_value_1;
 
-    vmcs::cr3_target_value_1::set(1UL);
-    CHECK(vmcs::cr3_target_value_1::get() == 1UL);
+    CHECK(exists());
+    set(100UL);
+    CHECK(get() == 100UL);
+    set_if_exists(200UL);
+    CHECK(get_if_exists() == 200UL);
 
-    vmcs::cr3_target_value_1::set_if_exists(2UL);
-    CHECK(vmcs::cr3_target_value_1::get_if_exists() == 2UL);
+    dump(0);
 }
 
 TEST_CASE("vmcs_cr3_target_value_2")
@@ -151,13 +163,15 @@ TEST_CASE("vmcs_cr3_target_value_2")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    CHECK(vmcs::cr3_target_value_2::exists());
+    using namespace vmcs::cr3_target_value_2;
 
-    vmcs::cr3_target_value_2::set(1UL);
-    CHECK(vmcs::cr3_target_value_2::get() == 1UL);
+    CHECK(exists());
+    set(100UL);
+    CHECK(get() == 100UL);
+    set_if_exists(200UL);
+    CHECK(get_if_exists() == 200UL);
 
-    vmcs::cr3_target_value_2::set_if_exists(2UL);
-    CHECK(vmcs::cr3_target_value_2::get_if_exists() == 2UL);
+    dump(0);
 }
 
 TEST_CASE("vmcs_cr3_target_value_3")
@@ -165,13 +179,15 @@ TEST_CASE("vmcs_cr3_target_value_3")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    CHECK(vmcs::cr3_target_value_3::exists());
+    using namespace vmcs::cr3_target_value_3;
 
-    vmcs::cr3_target_value_3::set(1UL);
-    CHECK(vmcs::cr3_target_value_3::get() == 1UL);
+    CHECK(exists());
+    set(100UL);
+    CHECK(get() == 100UL);
+    set_if_exists(200UL);
+    CHECK(get_if_exists() == 200UL);
 
-    vmcs::cr3_target_value_3::set_if_exists(2UL);
-    CHECK(vmcs::cr3_target_value_3::get_if_exists() == 2UL);
+    dump(0);
 }
 
 #endif

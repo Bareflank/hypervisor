@@ -40,6 +40,11 @@ setup_intrinsics(MockRepository &mocks)
     mocks.OnCallFunc(_cpuid_eax).Do(test_cpuid_eax);
 }
 
+TEST_CASE("test name goes here")
+{
+    CHECK(true);
+}
+
 TEST_CASE("pdpte_x64_reserved_mask")
 {
     MockRepository mocks;

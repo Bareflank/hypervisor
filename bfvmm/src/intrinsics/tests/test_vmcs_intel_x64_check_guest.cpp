@@ -69,8 +69,8 @@ test_cpuid_eax(uint32_t val) noexcept
 { return g_eax_cpuid[val]; }
 
 uint32_t
-test_cpuid_ebx(uint32_t val) noexcept
-{ return g_ebx_cpuid[val]; }
+test_cpuid_subebx(uint32_t val, uint32_t sub) noexcept
+{ bfignored(sub); return g_ebx_cpuid[val]; }
 
 uint64_t
 test_read_msr(uint32_t addr) noexcept
@@ -96,7 +96,7 @@ setup_intrinsics(MockRepository &mocks, memory_manager_x64 *mm)
     mocks.OnCallFunc(memory_manager_x64::instance).Return(mm);
     mocks.OnCall(mm, memory_manager_x64::physint_to_virtptr).Do(test_physint_to_virtptr);
     mocks.OnCallFunc(_cpuid_eax).Do(test_cpuid_eax);
-    mocks.OnCallFunc(_cpuid_ebx).Do(test_cpuid_ebx);
+    mocks.OnCallFunc(_cpuid_subebx).Do(test_cpuid_subebx);
     mocks.OnCallFunc(_read_msr).Do(test_read_msr);
     mocks.OnCallFunc(_vmread).Do(test_vmread);
     mocks.OnCallFunc(_vmwrite).Do(test_vmwrite);
@@ -1216,7 +1216,7 @@ setup_check_guest_cs_is_not_a_system_descriptor_paths(std::vector<struct control
     path.throws_exception = true;
     cfg.push_back(path);
 
-    path.setup = [&] { guest_cs_access_rights::s::set(1U); };
+    path.setup = [&] { guest_cs_access_rights::s::set(true); };
     path.throws_exception = false;
     cfg.push_back(path);
 }
@@ -1237,12 +1237,12 @@ setup_check_guest_ss_is_not_a_system_descriptor_paths(std::vector<struct control
 
     path.setup = [&] {
         make_usable(guest_ss_access_rights::addr);
-        guest_ss_access_rights::s::set(0U);
+        guest_ss_access_rights::s::set(false);
     };
     path.throws_exception = true;
     cfg.push_back(path);
 
-    path.setup = [&] { guest_ss_access_rights::s::set(1U); };
+    path.setup = [&] { guest_ss_access_rights::s::set(true); };
     path.throws_exception = false;
     cfg.push_back(path);
 }
@@ -1263,12 +1263,12 @@ setup_check_guest_ds_is_not_a_system_descriptor_paths(std::vector<struct control
 
     path.setup = [&] {
         make_usable(guest_ds_access_rights::addr);
-        guest_ds_access_rights::s::set(0U);
+        guest_ds_access_rights::s::set(false);
     };
     path.throws_exception = true;
     cfg.push_back(path);
 
-    path.setup = [&] { guest_ds_access_rights::s::set(1U); };
+    path.setup = [&] { guest_ds_access_rights::s::set(true); };
     path.throws_exception = false;
     cfg.push_back(path);
 }
@@ -1289,12 +1289,12 @@ setup_check_guest_es_is_not_a_system_descriptor_paths(std::vector<struct control
 
     path.setup = [&] {
         make_usable(guest_es_access_rights::addr);
-        guest_es_access_rights::s::set(0U);
+        guest_es_access_rights::s::set(false);
     };
     path.throws_exception = true;
     cfg.push_back(path);
 
-    path.setup = [&] { guest_es_access_rights::s::set(1U); };
+    path.setup = [&] { guest_es_access_rights::s::set(true); };
     path.throws_exception = false;
     cfg.push_back(path);
 }
@@ -1315,12 +1315,12 @@ setup_check_guest_fs_is_not_a_system_descriptor_paths(std::vector<struct control
 
     path.setup = [&] {
         make_usable(guest_fs_access_rights::addr);
-        guest_fs_access_rights::s::set(0U);
+        guest_fs_access_rights::s::set(false);
     };
     path.throws_exception = true;
     cfg.push_back(path);
 
-    path.setup = [&] { guest_fs_access_rights::s::set(1U); };
+    path.setup = [&] { guest_fs_access_rights::s::set(true); };
     path.throws_exception = false;
     cfg.push_back(path);
 }
@@ -1341,12 +1341,12 @@ setup_check_guest_gs_is_not_a_system_descriptor_paths(std::vector<struct control
 
     path.setup = [&] {
         make_usable(guest_gs_access_rights::addr);
-        guest_gs_access_rights::s::set(0U);
+        guest_gs_access_rights::s::set(false);
     };
     path.throws_exception = true;
     cfg.push_back(path);
 
-    path.setup = [&] { guest_gs_access_rights::s::set(1U); };
+    path.setup = [&] { guest_gs_access_rights::s::set(true); };
     path.throws_exception = false;
     cfg.push_back(path);
 }
@@ -1658,7 +1658,7 @@ setup_check_guest_cs_must_be_present_paths(std::vector<struct control_flow_path>
     path.throws_exception = true;
     cfg.push_back(path);
 
-    path.setup = [&] { guest_cs_access_rights::present::set(1U); };
+    path.setup = [&] { guest_cs_access_rights::present::set(true); };
     path.throws_exception = false;
     cfg.push_back(path);
 }
@@ -1681,7 +1681,7 @@ setup_check_guest_ss_must_be_present_if_usable_paths(std::vector<struct control_
     path.throws_exception = true;
     cfg.push_back(path);
 
-    path.setup = [&] { guest_ss_access_rights::present::set(1U); };
+    path.setup = [&] { guest_ss_access_rights::present::set(true); };
     path.throws_exception = false;
     cfg.push_back(path);
 }
@@ -1704,7 +1704,7 @@ setup_check_guest_ds_must_be_present_if_usable_paths(std::vector<struct control_
     path.throws_exception = true;
     cfg.push_back(path);
 
-    path.setup = [&] { guest_ds_access_rights::present::set(1U); };
+    path.setup = [&] { guest_ds_access_rights::present::set(true); };
     path.throws_exception = false;
     cfg.push_back(path);
 }
@@ -1726,7 +1726,7 @@ setup_check_guest_es_must_be_present_if_usable_paths(std::vector<struct control_
     path.throws_exception = true;
     cfg.push_back(path);
 
-    path.setup = [&] { guest_es_access_rights::present::set(1U); };
+    path.setup = [&] { guest_es_access_rights::present::set(true); };
     path.throws_exception = false;
     cfg.push_back(path);
 }
@@ -1749,7 +1749,7 @@ setup_check_guest_fs_must_be_present_if_usable_paths(std::vector<struct control_
     path.throws_exception = true;
     cfg.push_back(path);
 
-    path.setup = [&] { guest_fs_access_rights::present::set(1U); };
+    path.setup = [&] { guest_fs_access_rights::present::set(true); };
     path.throws_exception = false;
     cfg.push_back(path);
 }
@@ -1771,7 +1771,7 @@ setup_check_guest_gs_must_be_present_if_usable_paths(std::vector<struct control_
     path.throws_exception = true;
     cfg.push_back(path);
 
-    path.setup = [&] { guest_gs_access_rights::present::set(1U); };
+    path.setup = [&] { guest_gs_access_rights::present::set(true); };
     path.throws_exception = false;
     cfg.push_back(path);
 }
@@ -1949,16 +1949,16 @@ setup_check_guest_cs_db_must_be_0_if_l_equals_1_paths(std::vector<struct control
     path.setup = [&] {
         entry_ctl_allow1(ia32_vmx_true_entry_ctls::ia_32e_mode_guest::mask);
         vm_entry_controls::ia_32e_mode_guest::enable();
-        guest_cs_access_rights::l::set(0U);
+        guest_cs_access_rights::l::set(false);
     };
     path.throws_exception = false;
     cfg.push_back(path);
 
-    path.setup = [&] { guest_cs_access_rights::l::set(1U); };
+    path.setup = [&] { guest_cs_access_rights::l::set(true); };
     path.throws_exception = false;
     cfg.push_back(path);
 
-    path.setup = [&] { guest_cs_access_rights::db::set(1U); };
+    path.setup = [&] { guest_cs_access_rights::db::set(true); };
     path.throws_exception = true;
     cfg.push_back(path);
 }
@@ -1973,12 +1973,12 @@ setup_check_guest_cs_granularity_paths(std::vector<struct control_flow_path> &cf
     path.setup = [&] {
         disable_v8086();
         guest_cs_limit::set(0U);
-        guest_cs_access_rights::granularity::set(1U);
+        guest_cs_access_rights::granularity::set(true);
     };
     path.throws_exception = true;
     cfg.push_back(path);
 
-    path.setup = [&] { guest_cs_access_rights::granularity::set(0U); };
+    path.setup = [&] { guest_cs_access_rights::granularity::set(false); };
     path.throws_exception = false;
     cfg.push_back(path);
 
@@ -2004,12 +2004,12 @@ setup_check_guest_ss_granularity_paths(std::vector<struct control_flow_path> &cf
     path.setup = [&] {
         make_usable(guest_ss_access_rights::addr);
         guest_ss_limit::set(0U);
-        guest_ss_access_rights::granularity::set(1UL);
+        guest_ss_access_rights::granularity::set(true);
     };
     path.throws_exception = true;
     cfg.push_back(path);
 
-    path.setup = [&] { guest_ss_access_rights::granularity::set(0U); };
+    path.setup = [&] { guest_ss_access_rights::granularity::set(false); };
     path.throws_exception = false;
     cfg.push_back(path);
 
@@ -2035,12 +2035,12 @@ setup_check_guest_ds_granularity_paths(std::vector<struct control_flow_path> &cf
     path.setup = [&] {
         make_usable(guest_ds_access_rights::addr);
         guest_ds_limit::set(0U);
-        guest_ds_access_rights::granularity::set(1UL);
+        guest_ds_access_rights::granularity::set(true);
     };
     path.throws_exception = true;
     cfg.push_back(path);
 
-    path.setup = [&] { guest_ds_access_rights::granularity::set(0U); };
+    path.setup = [&] { guest_ds_access_rights::granularity::set(false); };
     path.throws_exception = false;
     cfg.push_back(path);
 
@@ -2066,12 +2066,12 @@ setup_check_guest_es_granularity_paths(std::vector<struct control_flow_path> &cf
     path.setup = [&] {
         make_usable(guest_es_access_rights::addr);
         guest_es_limit::set(0U);
-        guest_es_access_rights::granularity::set(1UL);
+        guest_es_access_rights::granularity::set(true);
     };
     path.throws_exception = true;
     cfg.push_back(path);
 
-    path.setup = [&] { guest_es_access_rights::granularity::set(0U); };
+    path.setup = [&] { guest_es_access_rights::granularity::set(false); };
     path.throws_exception = false;
     cfg.push_back(path);
 
@@ -2097,12 +2097,12 @@ setup_check_guest_fs_granularity_paths(std::vector<struct control_flow_path> &cf
     path.setup = [&] {
         make_usable(guest_fs_access_rights::addr);
         guest_fs_limit::set(0U);
-        guest_fs_access_rights::granularity::set(1UL);
+        guest_fs_access_rights::granularity::set(true);
     };
     path.throws_exception = true;
     cfg.push_back(path);
 
-    path.setup = [&] { guest_fs_access_rights::granularity::set(0U); };
+    path.setup = [&] { guest_fs_access_rights::granularity::set(false); };
     path.throws_exception = false;
     cfg.push_back(path);
 
@@ -2128,12 +2128,12 @@ setup_check_guest_gs_granularity_paths(std::vector<struct control_flow_path> &cf
     path.setup = [&] {
         make_usable(guest_gs_access_rights::addr);
         guest_gs_limit::set(0U);
-        guest_gs_access_rights::granularity::set(1UL);
+        guest_gs_access_rights::granularity::set(true);
     };
     path.throws_exception = true;
     cfg.push_back(path);
 
-    path.setup = [&] { guest_gs_access_rights::granularity::set(0U); };
+    path.setup = [&] { guest_gs_access_rights::granularity::set(false); };
     path.throws_exception = false;
     cfg.push_back(path);
 
@@ -2327,7 +2327,7 @@ setup_check_guest_tr_type_must_be_11_paths(std::vector<struct control_flow_path>
 static void
 setup_check_guest_tr_must_be_a_system_descriptor_paths(std::vector<struct control_flow_path> &cfg)
 {
-    path.setup = [&] { guest_tr_access_rights::s::set(1U); };
+    path.setup = [&] { guest_tr_access_rights::s::set(true); };
     path.throws_exception = true;
     cfg.push_back(path);
 
@@ -2343,7 +2343,7 @@ setup_check_guest_tr_must_be_present_paths(std::vector<struct control_flow_path>
     path.throws_exception = true;
     cfg.push_back(path);
 
-    path.setup = [&] { guest_tr_access_rights::present::set(1U); };
+    path.setup = [&] { guest_tr_access_rights::present::set(true); };
     path.throws_exception = false;
     cfg.push_back(path);
 }
@@ -2378,12 +2378,12 @@ setup_check_guest_tr_granularity_paths(std::vector<struct control_flow_path> &cf
     path.setup = [&] {
         make_usable(guest_tr_access_rights::addr);
         guest_tr_limit::set(0U);
-        guest_tr_access_rights::granularity::set(1UL);
+        guest_tr_access_rights::granularity::set(true);
     };
     path.throws_exception = true;
     cfg.push_back(path);
 
-    path.setup = [&] { guest_tr_access_rights::granularity::set(0U); };
+    path.setup = [&] { guest_tr_access_rights::granularity::set(false); };
     path.throws_exception = false;
     cfg.push_back(path);
 
@@ -2445,12 +2445,12 @@ setup_check_guest_ldtr_must_be_a_system_descriptor_paths(std::vector<struct cont
 
     path.setup = [&] {
         make_usable(guest_ldtr_access_rights::addr);
-        guest_ldtr_access_rights::s::set(1U);
+        guest_ldtr_access_rights::s::set(true);
     };
     path.throws_exception = true;
     cfg.push_back(path);
 
-    path.setup = [&] { guest_ldtr_access_rights::s::set(0U); };
+    path.setup = [&] { guest_ldtr_access_rights::s::set(false); };
     path.throws_exception = false;
     cfg.push_back(path);
 }
@@ -2464,12 +2464,12 @@ setup_check_guest_ldtr_must_be_present_paths(std::vector<struct control_flow_pat
 
     path.setup = [&] {
         make_usable(guest_ldtr_access_rights::addr);
-        guest_ldtr_access_rights::present::set(0U);
+        guest_ldtr_access_rights::present::set(false);
     };
     path.throws_exception = true;
     cfg.push_back(path);
 
-    path.setup = [&] { guest_ldtr_access_rights::present::set(1U); };
+    path.setup = [&] { guest_ldtr_access_rights::present::set(true); };
     path.throws_exception = false;
     cfg.push_back(path);
 }
@@ -2511,12 +2511,12 @@ setup_check_guest_ldtr_granularity_paths(std::vector<struct control_flow_path> &
     path.setup = [&] {
         make_usable(guest_ldtr_access_rights::addr);
         guest_ldtr_limit::set(0U);
-        guest_ldtr_access_rights::granularity::set(1UL);
+        guest_ldtr_access_rights::granularity::set(true);
     };
     path.throws_exception = true;
     cfg.push_back(path);
 
-    path.setup = [&] { guest_ldtr_access_rights::granularity::set(0U); };
+    path.setup = [&] { guest_ldtr_access_rights::granularity::set(false); };
     path.throws_exception = false;
     cfg.push_back(path);
 
@@ -2599,7 +2599,7 @@ setup_check_guest_rip_upper_bits_paths(std::vector<struct control_flow_path> &cf
     path.setup = [&] {
         entry_ctl_allow1(ia32_vmx_true_entry_ctls::ia_32e_mode_guest::mask);
         vm_entry_controls::ia_32e_mode_guest::enable();
-        guest_cs_access_rights::l::set(1U);
+        guest_cs_access_rights::l::set(true);
     };
     path.throws_exception = false;
     cfg.push_back(path);
@@ -2630,13 +2630,13 @@ setup_check_guest_rip_valid_addr_paths(std::vector<struct control_flow_path> &cf
     path.setup = [&] {
         entry_ctl_allow1(ia32_vmx_true_entry_ctls::ia_32e_mode_guest::mask);
         vm_entry_controls::ia_32e_mode_guest::enable();
-        guest_cs_access_rights::l::set(0U);
+        guest_cs_access_rights::l::set(false);
     };
     path.throws_exception = false;
     cfg.push_back(path);
 
     path.setup = [&] {
-        guest_cs_access_rights::l::set(1U);
+        guest_cs_access_rights::l::set(true);
         guest_rip::set(0x800000000000U);
     };
     path.throws_exception = true;
@@ -2689,7 +2689,7 @@ setup_check_guest_rflags_vm_bit_paths(std::vector<struct control_flow_path> &cfg
 static void
 setup_check_guest_rflag_interrupt_enable_paths(std::vector<struct control_flow_path> &cfg)
 {
-    using namespace vm_entry_interruption_information_field;
+    using namespace vm_entry_interruption_information;
 
     path.setup = [&] { valid_bit::disable(); };
     path.throws_exception = false;
@@ -2756,14 +2756,14 @@ setup_check_guest_must_be_active_if_injecting_blocking_state_paths(
 
     path.setup = [&] {
         guest_activity_state::set(vmcs::guest_activity_state::hlt);
-        guest_interruptibility_state::blocking_by_sti::set(1U);
+        guest_interruptibility_state::blocking_by_sti::set(true);
     };
     path.throws_exception = true;
     cfg.push_back(path);
 
     path.setup = [&] {
-        guest_interruptibility_state::blocking_by_sti::set(0U);
-        guest_interruptibility_state::blocking_by_mov_ss::set(1U);
+        guest_interruptibility_state::blocking_by_sti::set(false);
+        guest_interruptibility_state::blocking_by_mov_ss::set(true);
     };
     path.throws_exception = true;
     cfg.push_back(path);
@@ -2776,7 +2776,7 @@ setup_check_guest_must_be_active_if_injecting_blocking_state_paths(
 static void
 setup_check_guest_hlt_valid_interrupts_paths(std::vector<struct control_flow_path> &cfg)
 {
-    using namespace vm_entry_interruption_information_field;
+    using namespace vm_entry_interruption_information;
 
     path.setup = [&] { valid_bit::disable(); };
     path.throws_exception = false;
@@ -2830,7 +2830,7 @@ setup_check_guest_hlt_valid_interrupts_paths(std::vector<struct control_flow_pat
 static void
 setup_check_guest_shutdown_valid_interrupts_paths(std::vector<struct control_flow_path> &cfg)
 {
-    using namespace vm_entry_interruption_information_field;
+    using namespace vm_entry_interruption_information;
 
     path.setup = [&] { valid_bit::disable(); };
     path.throws_exception = false;
@@ -2869,7 +2869,7 @@ setup_check_guest_shutdown_valid_interrupts_paths(std::vector<struct control_flo
 static void
 setup_check_guest_sipi_valid_interrupts_paths(std::vector<struct control_flow_path> &cfg)
 {
-    using namespace vm_entry_interruption_information_field;
+    using namespace vm_entry_interruption_information;
 
     path.setup = [&] { valid_bit::disable(); };
     path.throws_exception = false;
@@ -2931,8 +2931,8 @@ setup_check_guest_interruptibility_state_sti_mov_ss_paths(std::vector<struct con
     cfg.push_back(path);
 
     path.setup = [&] {
-        guest_interruptibility_state::blocking_by_sti::set(1U);
-        guest_interruptibility_state::blocking_by_mov_ss::set(1U);
+        guest_interruptibility_state::blocking_by_sti::set(true);
+        guest_interruptibility_state::blocking_by_mov_ss::set(true);
     };
     path.throws_exception = true;
     cfg.push_back(path);
@@ -2947,12 +2947,12 @@ setup_check_guest_interruptibility_state_sti_paths(std::vector<struct control_fl
 
     path.setup = [&] {
         guest_rflags::interrupt_enable_flag::disable();
-        guest_interruptibility_state::blocking_by_sti::set(1U);
+        guest_interruptibility_state::blocking_by_sti::set(true);
     };
     path.throws_exception = true;
     cfg.push_back(path);
 
-    path.setup = [&] { guest_interruptibility_state::blocking_by_sti::set(0U); };
+    path.setup = [&] { guest_interruptibility_state::blocking_by_sti::set(false); };
     path.throws_exception = false;
     cfg.push_back(path);
 }
@@ -2961,7 +2961,7 @@ static void
 setup_check_guest_interruptibility_state_external_interrupt_paths(
     std::vector<struct control_flow_path> &cfg)
 {
-    using namespace vm_entry_interruption_information_field;
+    using namespace vm_entry_interruption_information;
 
     path.setup = [&] { valid_bit::disable(); };
     path.throws_exception = false;
@@ -2976,19 +2976,19 @@ setup_check_guest_interruptibility_state_external_interrupt_paths(
 
     path.setup = [&] {
         interruption_type::set(interruption_type::external_interrupt);
-        guest_interruptibility_state::blocking_by_sti::set(1U);
+        guest_interruptibility_state::blocking_by_sti::set(true);
     };
     path.throws_exception = true;
     cfg.push_back(path);
 
     path.setup = [&] {
-        guest_interruptibility_state::blocking_by_sti::set(0U);
-        guest_interruptibility_state::blocking_by_mov_ss::set(1U);
+        guest_interruptibility_state::blocking_by_sti::set(false);
+        guest_interruptibility_state::blocking_by_mov_ss::set(true);
     };
     path.throws_exception = true;
     cfg.push_back(path);
 
-    path.setup = [&] { guest_interruptibility_state::blocking_by_mov_ss::set(0U); };
+    path.setup = [&] { guest_interruptibility_state::blocking_by_mov_ss::set(false); };
     path.throws_exception = false;
     cfg.push_back(path);
 }
@@ -2996,7 +2996,7 @@ setup_check_guest_interruptibility_state_external_interrupt_paths(
 static void
 setup_check_guest_interruptibility_state_nmi_paths(std::vector<struct control_flow_path> &cfg)
 {
-    using namespace vm_entry_interruption_information_field;
+    using namespace vm_entry_interruption_information;
 
     path.setup = [&] { valid_bit::disable(); };
     path.throws_exception = false;
@@ -3011,12 +3011,12 @@ setup_check_guest_interruptibility_state_nmi_paths(std::vector<struct control_fl
 
     path.setup = [&] {
         interruption_type::set(interruption_type::non_maskable_interrupt);
-        guest_interruptibility_state::blocking_by_mov_ss::set(1U);
+        guest_interruptibility_state::blocking_by_mov_ss::set(true);
     };
     path.throws_exception = true;
     cfg.push_back(path);
 
-    path.setup = [&] { guest_interruptibility_state::blocking_by_mov_ss::set(0U); };
+    path.setup = [&] { guest_interruptibility_state::blocking_by_mov_ss::set(false); };
     path.throws_exception = false;
     cfg.push_back(path);
 }
@@ -3040,12 +3040,12 @@ setup_check_guest_interruptibility_entry_to_smm_paths(std::vector<struct control
     path.setup = [&] {
         entry_ctl_allow1(ia32_vmx_true_entry_ctls::entry_to_smm::mask);
         vm_entry_controls::entry_to_smm::enable();
-        guest_interruptibility_state::blocking_by_smi::set(0U);
+        guest_interruptibility_state::blocking_by_smi::set(false);
     };
     path.throws_exception = true;
     cfg.push_back(path);
 
-    path.setup = [&] { guest_interruptibility_state::blocking_by_smi::set(1U); };
+    path.setup = [&] { guest_interruptibility_state::blocking_by_smi::set(true); };
     path.throws_exception = false;
     cfg.push_back(path);
 }
@@ -3054,7 +3054,7 @@ static void
 setup_check_guest_interruptibility_state_sti_and_nmi_paths(std::vector<struct control_flow_path>
         &cfg)
 {
-    using namespace vm_entry_interruption_information_field;
+    using namespace vm_entry_interruption_information;
 
     path.setup = [&] { valid_bit::disable(); };
     path.throws_exception = false;
@@ -3069,12 +3069,12 @@ setup_check_guest_interruptibility_state_sti_and_nmi_paths(std::vector<struct co
 
     path.setup = [&] {
         interruption_type::set(interruption_type::non_maskable_interrupt);
-        guest_interruptibility_state::blocking_by_sti::set(1U);
+        guest_interruptibility_state::blocking_by_sti::set(true);
     };
     path.throws_exception = true;
     cfg.push_back(path);
 
-    path.setup = [&] { guest_interruptibility_state::blocking_by_sti::set(0U); };
+    path.setup = [&] { guest_interruptibility_state::blocking_by_sti::set(false); };
     path.throws_exception = false;
     cfg.push_back(path);
 }
@@ -3083,7 +3083,7 @@ static void
 setup_check_guest_interruptibility_state_virtual_nmi_paths(std::vector<struct control_flow_path>
         &cfg)
 {
-    using namespace vm_entry_interruption_information_field;
+    using namespace vm_entry_interruption_information;
 
     path.setup = [&] {
         pin_ctl_allow0(ia32_vmx_true_pinbased_ctls::virtual_nmis::mask);
@@ -3109,12 +3109,12 @@ setup_check_guest_interruptibility_state_virtual_nmi_paths(std::vector<struct co
 
     path.setup = [&] {
         interruption_type::set(interruption_type::non_maskable_interrupt);
-        guest_interruptibility_state::blocking_by_nmi::set(1U);
+        guest_interruptibility_state::blocking_by_nmi::set(true);
     };
     path.throws_exception = true;
     cfg.push_back(path);
 
-    path.setup = [&] { guest_interruptibility_state::blocking_by_nmi::set(0U); };
+    path.setup = [&] { guest_interruptibility_state::blocking_by_nmi::set(false); };
     path.throws_exception = false;
     cfg.push_back(path);
 }
@@ -3123,25 +3123,25 @@ static void
 setup_check_guest_interruptibility_state_enclave_interrupt_paths(
     std::vector<struct control_flow_path> &cfg)
 {
-    path.setup = [&] { guest_interruptibility_state::enclave_interruption::set(0U); };
+    path.setup = [&] { guest_interruptibility_state::enclave_interruption::disable(); };
     path.throws_exception = false;
     cfg.push_back(path);
 
     path.setup = [&] {
-        guest_interruptibility_state::enclave_interruption::set(1U);
-        guest_interruptibility_state::blocking_by_mov_ss::set(1U);
+        guest_interruptibility_state::enclave_interruption::enable();
+        guest_interruptibility_state::blocking_by_mov_ss::enable();
     };
     path.throws_exception = true;
     cfg.push_back(path);
 
     path.setup = [&] {
-        guest_interruptibility_state::blocking_by_mov_ss::set(0U);
+        guest_interruptibility_state::blocking_by_mov_ss::disable();
         g_cpuid_regs.ebx = 0U;
     };
     path.throws_exception = true;
     cfg.push_back(path);
 
-    path.setup = [&] { g_ebx_cpuid[x64::cpuid::extended_feature_flags::addr] = x64::cpuid::extended_feature_flags::subleaf0::ebx::sgx::mask; };
+    path.setup = [&] { g_ebx_cpuid[intel_x64::cpuid::extended_feature_flags::addr] = intel_x64::cpuid::extended_feature_flags::subleaf0::ebx::sgx::mask; };
     path.throws_exception = false;
     cfg.push_back(path);
 }
@@ -3170,7 +3170,7 @@ setup_check_guest_pending_debug_exceptions_dbg_ctl_paths(std::vector<struct cont
     cfg.push_back(path);
 
     path.setup = [&] {
-        guest_interruptibility_state::blocking_by_sti::set(1U);
+        guest_interruptibility_state::blocking_by_sti::set(true);
         guest_pending_debug_exceptions::bs::disable();
         guest_rflags::trap_flag::enable();
         guest_ia32_debugctl::btf::disable();
@@ -3224,13 +3224,13 @@ setup_check_guest_pending_debug_exceptions_rtm_paths(std::vector<struct control_
     cfg.push_back(path);
 
     path.setup = [&] {
-        g_ebx_cpuid[x64::cpuid::extended_feature_flags::addr] = x64::cpuid::extended_feature_flags::subleaf0::ebx::rtm::mask;
-        guest_interruptibility_state::blocking_by_mov_ss::set(1U);
+        g_ebx_cpuid[intel_x64::cpuid::extended_feature_flags::addr] = intel_x64::cpuid::extended_feature_flags::subleaf0::ebx::rtm::mask;
+        guest_interruptibility_state::blocking_by_mov_ss::set(true);
     };
     path.throws_exception = true;
     cfg.push_back(path);
 
-    path.setup = [&] { guest_interruptibility_state::blocking_by_mov_ss::set(0U); };
+    path.setup = [&] { guest_interruptibility_state::blocking_by_mov_ss::set(false); };
     path.throws_exception = false;
     cfg.push_back(path);
 }

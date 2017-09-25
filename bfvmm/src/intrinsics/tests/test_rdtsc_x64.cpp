@@ -45,6 +45,11 @@ setup_intrinsics(MockRepository &mocks)
     mocks.OnCallFunc(_read_tscp).Do(test_read_tscp);
 }
 
+TEST_CASE("test name goes here")
+{
+    CHECK(true);
+}
+
 TEST_CASE("_rdtsc_x64")
 {
     MockRepository mocks;

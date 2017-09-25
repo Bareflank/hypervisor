@@ -29,7 +29,6 @@ _read_idt(idt_reg_x64_t *idt_reg) noexcept
 {
     std::cerr << __BFFUNC__ << " called with: " << '\n';
     std::cerr << "    - idt_reg: " << idt_reg << '\n';
-    abort();
 }
 
 extern "C" void
@@ -37,5 +36,4 @@ _write_idt(idt_reg_x64_t *idt_reg) noexcept
 {
     std::cerr << __BFFUNC__ << " called with: " << '\n';
     std::cerr << "    - idt_reg: " << idt_reg << '\n';
-    abort();
 }

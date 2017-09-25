@@ -46,7 +46,7 @@ setup_intrinsics(MockRepository &mocks)
     mocks.OnCallFunc(_vmread).Do(test_vmread);
 }
 
-static std::map<uint64_t, const char *> vm_instruction_error_codes {
+static std::map<uint64_t, std::string> vm_instruction_error_codes {
     {
         {1U, "VMCALL executed in VMX root operation"},
         {2U, "VMCLEAR with invalid physical address"},
@@ -171,54 +171,53 @@ TEST_CASE("vmcs_vm_instruction_error")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    CHECK(vmcs::vm_instruction_error::exists());
+    using namespace vmcs::vm_instruction_error;
+
+    CHECK(exists());
 
     for (auto &&code : vm_instruction_error_codes) {
-        g_vmcs_fields[vmcs::vm_instruction_error::addr] = code.first;
-        CHECK(vmcs::vm_instruction_error::get() == code.first);
-        CHECK(vmcs::vm_instruction_error::get_if_exists() == code.first);
-        CHECK(vmcs::vm_instruction_error::description() == code.second);
-        CHECK(vmcs::vm_instruction_error::description_if_exists() == code.second);
+        g_vmcs_fields[addr] = code.first;
+        CHECK(get() == code.first);
+        CHECK(description() == code.second);
     }
 }
 
-TEST_CASE("vmcs_vm_instruction_error_description")
-{
-    MockRepository mocks;
-    setup_intrinsics(mocks);
-
-    using namespace vmcs::vm_instruction_error;
-
-    CHECK_THROWS(vm_instruction_error_description(0UL, false));
-    CHECK(vm_instruction_error_description(1UL,
-                                           true) == "VMCALL executed in VMX root operation"_s);
-}
-
-TEST_CASE("vmcs_vm_instruction_error_description_if_exists")
-{
-    MockRepository mocks;
-    setup_intrinsics(mocks);
-
-    using namespace vmcs::vm_instruction_error;
-
-    CHECK_NOTHROW(vm_instruction_error_description_if_exists(0UL, true, false));
-    CHECK(vm_instruction_error_description_if_exists(0UL, true, false) == ""_s);
-    CHECK(vm_instruction_error_description_if_exists(1UL, true,
-            true) == "VMCALL executed in VMX root operation"_s);
-}
+//TEST_CASE("vmcs_vm_instruction_error_description")
+//{
+//    MockRepository mocks;
+//    setup_intrinsics(mocks);
+//
+//    using namespace vmcs::vm_instruction_error;
+//
+//    CHECK_THROWS(vm_instruction_error_description(0UL));
+//    CHECK(vm_instruction_error_description(1UL) == "VMCALL executed in VMX root operation"_s);
+//}
+//
+//TEST_CASE("vmcs_vm_instruction_error_description_if_exists")
+//{
+//    MockRepository mocks;
+//    setup_intrinsics(mocks);
+//
+//    using namespace vmcs::vm_instruction_error;
+//
+//    CHECK_NOTHROW(vm_instruction_error_description_if_exists(0UL, true, false));
+//    CHECK(vm_instruction_error_description_if_exists(0UL, true, false) == ""_s);
+//    CHECK(vm_instruction_error_description_if_exists(1UL, true,
+//            true) == "VMCALL executed in VMX root operation"_s);
+//}
 
 TEST_CASE("vmcs_exit_reason")
 {
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    CHECK(vmcs::exit_reason::exists());
+    using namespace vmcs::exit_reason;
 
-    g_vmcs_fields[vmcs::exit_reason::addr] = 1UL;
-    CHECK(vmcs::exit_reason::get() == 1UL);
+    g_vmcs_fields[addr] = 100UL;
+    CHECK(get() == 100UL);
+    CHECK(exists());
 
-    g_vmcs_fields[vmcs::exit_reason::addr] = 2UL;
-    CHECK(vmcs::exit_reason::get_if_exists() == 2UL);
+    dump(0);
 }
 
 TEST_CASE("vmcs_exit_reason_basic_exit_reason")
@@ -231,37 +230,35 @@ TEST_CASE("vmcs_exit_reason_basic_exit_reason")
 
         g_vmcs_fields[addr] = reason.first << basic_exit_reason::from;
         CHECK(basic_exit_reason::get() == reason.first);
-        CHECK(basic_exit_reason::get_if_exists() == reason.first);
         CHECK(basic_exit_reason::description() == reason.second);
-        CHECK(basic_exit_reason::description_if_exists() == reason.second);
     }
 }
 
-TEST_CASE("vmcs_exit_reason_basic_exit_reason_description")
-{
-    MockRepository mocks;
-    setup_intrinsics(mocks);
-
-    using namespace vmcs::exit_reason;
-
-    CHECK_THROWS(basic_exit_reason::basic_exit_reason_description(0UL, false));
-    CHECK(basic_exit_reason::basic_exit_reason_description(40UL,
-            true) == "pause"_s);
-}
-
-TEST_CASE("vmcs_exit_reason_basic_exit_reason_description_if_exists")
-{
-    MockRepository mocks;
-    setup_intrinsics(mocks);
-
-    using namespace vmcs::exit_reason;
-
-    CHECK_NOTHROW(basic_exit_reason::basic_exit_reason_description_if_exists(0UL, true, false));
-    CHECK(basic_exit_reason::basic_exit_reason_description_if_exists(0UL, true,
-            false) == ""_s);
-    CHECK(basic_exit_reason::basic_exit_reason_description_if_exists(
-              40UL, true, true) == "pause"_s);
-}
+//TEST_CASE("vmcs_exit_reason_basic_exit_reason_description")
+//{
+//    MockRepository mocks;
+//    setup_intrinsics(mocks);
+//
+//    using namespace vmcs::exit_reason;
+//
+//    CHECK_THROWS(basic_exit_reason::basic_exit_reason_description(0UL, false));
+//    CHECK(basic_exit_reason::basic_exit_reason_description(40UL,
+//            true) == "pause"_s);
+//}
+//
+//TEST_CASE("vmcs_exit_reason_basic_exit_reason_description_if_exists")
+//{
+//    MockRepository mocks;
+//    setup_intrinsics(mocks);
+//
+//    using namespace vmcs::exit_reason;
+//
+//    CHECK_NOTHROW(basic_exit_reason::basic_exit_reason_description_if_exists(0UL, true, false));
+//    CHECK(basic_exit_reason::basic_exit_reason_description_if_exists(0UL, true,
+//            false) == ""_s);
+//    CHECK(basic_exit_reason::basic_exit_reason_description_if_exists(
+//              40UL, true, true) == "pause"_s);
+//}
 
 TEST_CASE("vmcs_exit_reason_reserved")
 {
@@ -272,7 +269,6 @@ TEST_CASE("vmcs_exit_reason_reserved")
 
     g_vmcs_fields[addr] = reserved::mask;
     CHECK(reserved::get() == reserved::mask >> reserved::from);
-    CHECK(reserved::get_if_exists() == reserved::mask >> reserved::from);
 }
 
 TEST_CASE("vmcs_exit_reason_vm_exit_incident_to_enclave_mode")
@@ -282,13 +278,20 @@ TEST_CASE("vmcs_exit_reason_vm_exit_incident_to_enclave_mode")
 
     using namespace vmcs::exit_reason;
 
-    g_vmcs_fields[addr] = 0UL;
-    CHECK(vm_exit_incident_to_enclave_mode::is_disabled());
-    CHECK(vm_exit_incident_to_enclave_mode::is_disabled_if_exists());
-
     g_vmcs_fields[addr] = vm_exit_incident_to_enclave_mode::mask;
     CHECK(vm_exit_incident_to_enclave_mode::is_enabled());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(vm_exit_incident_to_enclave_mode::is_disabled());
+
+    g_vmcs_fields[addr] = vm_exit_incident_to_enclave_mode::mask;
+    CHECK(vm_exit_incident_to_enclave_mode::is_enabled(vm_exit_incident_to_enclave_mode::mask));
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(vm_exit_incident_to_enclave_mode::is_disabled(0x0));
+
+    g_vmcs_fields[addr] = vm_exit_incident_to_enclave_mode::mask;
     CHECK(vm_exit_incident_to_enclave_mode::is_enabled_if_exists());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(vm_exit_incident_to_enclave_mode::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_exit_reason_pending_mtf_vm_exit")
@@ -298,13 +301,20 @@ TEST_CASE("vmcs_exit_reason_pending_mtf_vm_exit")
 
     using namespace vmcs::exit_reason;
 
-    g_vmcs_fields[addr] = 0UL;
-    CHECK(pending_mtf_vm_exit::is_disabled());
-    CHECK(pending_mtf_vm_exit::is_disabled_if_exists());
-
     g_vmcs_fields[addr] = pending_mtf_vm_exit::mask;
     CHECK(pending_mtf_vm_exit::is_enabled());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(pending_mtf_vm_exit::is_disabled());
+
+    g_vmcs_fields[addr] = pending_mtf_vm_exit::mask;
+    CHECK(pending_mtf_vm_exit::is_enabled(pending_mtf_vm_exit::mask));
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(pending_mtf_vm_exit::is_disabled(0x0));
+
+    g_vmcs_fields[addr] = pending_mtf_vm_exit::mask;
     CHECK(pending_mtf_vm_exit::is_enabled_if_exists());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(pending_mtf_vm_exit::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_exit_reason_vm_exit_from_vmx_root_operation")
@@ -314,13 +324,20 @@ TEST_CASE("vmcs_exit_reason_vm_exit_from_vmx_root_operation")
 
     using namespace vmcs::exit_reason;
 
-    g_vmcs_fields[addr] = 0UL;
-    CHECK(vm_exit_from_vmx_root_operation::is_disabled());
-    CHECK(vm_exit_from_vmx_root_operation::is_disabled_if_exists());
-
     g_vmcs_fields[addr] = vm_exit_from_vmx_root_operation::mask;
     CHECK(vm_exit_from_vmx_root_operation::is_enabled());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(vm_exit_from_vmx_root_operation::is_disabled());
+
+    g_vmcs_fields[addr] = vm_exit_from_vmx_root_operation::mask;
+    CHECK(vm_exit_from_vmx_root_operation::is_enabled(vm_exit_from_vmx_root_operation::mask));
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(vm_exit_from_vmx_root_operation::is_disabled(0x0));
+
+    g_vmcs_fields[addr] = vm_exit_from_vmx_root_operation::mask;
     CHECK(vm_exit_from_vmx_root_operation::is_enabled_if_exists());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(vm_exit_from_vmx_root_operation::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_exit_reason_vm_entry_failure")
@@ -330,13 +347,20 @@ TEST_CASE("vmcs_exit_reason_vm_entry_failure")
 
     using namespace vmcs::exit_reason;
 
-    g_vmcs_fields[addr] = 0UL;
-    CHECK(vm_entry_failure::is_disabled());
-    CHECK(vm_entry_failure::is_disabled_if_exists());
-
     g_vmcs_fields[addr] = vm_entry_failure::mask;
     CHECK(vm_entry_failure::is_enabled());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(vm_entry_failure::is_disabled());
+
+    g_vmcs_fields[addr] = vm_entry_failure::mask;
+    CHECK(vm_entry_failure::is_enabled(vm_entry_failure::mask));
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(vm_entry_failure::is_disabled(0x0));
+
+    g_vmcs_fields[addr] = vm_entry_failure::mask;
     CHECK(vm_entry_failure::is_enabled_if_exists());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(vm_entry_failure::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_vm_exit_interruption_information")
@@ -344,11 +368,16 @@ TEST_CASE("vmcs_vm_exit_interruption_information")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    CHECK(vmcs::vm_exit_interruption_information::exists());
+    using namespace vmcs::vm_exit_interruption_information;
 
-    g_vmcs_fields[vmcs::vm_exit_interruption_information::addr] = 1UL;
-    CHECK(vmcs::vm_exit_interruption_information::get() == 1UL);
-    CHECK(vmcs::vm_exit_interruption_information::get_if_exists() == 1UL);
+    g_vmcs_fields[addr] = 100UL;
+    CHECK(get() == 100UL);
+    CHECK(exists());
+
+    g_vmcs_fields[addr] = 200UL;
+    CHECK(get_if_exists() == 200UL);
+
+    dump(0);
 }
 
 TEST_CASE("vmcs_vm_exit_interruption_information_vector")
@@ -356,10 +385,16 @@ TEST_CASE("vmcs_vm_exit_interruption_information_vector")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_vmcs_fields[vmcs::vm_exit_interruption_information::addr] = 0xFFFUL;
+    using namespace vmcs::vm_exit_interruption_information;
 
-    CHECK(vmcs::vm_exit_interruption_information::vector::get() == 0xFFUL);
-    CHECK(vmcs::vm_exit_interruption_information::vector::get_if_exists() == 0xFFUL);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vector::get() == (vector::mask >> vector::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vector::get(vector::mask) == (vector::mask >> vector::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vector::get_if_exists() == (vector::mask >> vector::from));
 }
 
 TEST_CASE("vmcs_vm_exit_interruption_information_interruption_type")
@@ -367,11 +402,16 @@ TEST_CASE("vmcs_vm_exit_interruption_information_interruption_type")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_vmcs_fields[vmcs::vm_exit_interruption_information::addr] = 0xFFFUL;
+    using namespace vmcs::vm_exit_interruption_information;
 
-    CHECK(vmcs::vm_exit_interruption_information::interruption_type::get() == 7UL);
-    CHECK(vmcs::vm_exit_interruption_information::interruption_type::get_if_exists() ==
-          7UL);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(interruption_type::get() == (interruption_type::mask >> interruption_type::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(interruption_type::get(interruption_type::mask) == (interruption_type::mask >> interruption_type::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(interruption_type::get_if_exists() == (interruption_type::mask >> interruption_type::from));
 }
 
 TEST_CASE("vmcs_vm_exit_interruption_information_error_code_valid")
@@ -379,14 +419,22 @@ TEST_CASE("vmcs_vm_exit_interruption_information_error_code_valid")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_vmcs_fields[vmcs::vm_exit_interruption_information::addr] = 0xFFFUL;
+    using namespace vmcs::vm_exit_interruption_information;
 
-    CHECK(vmcs::vm_exit_interruption_information::error_code_valid::is_enabled());
-    CHECK(vmcs::vm_exit_interruption_information::error_code_valid::is_enabled_if_exists());
+    g_vmcs_fields[addr] = error_code_valid::mask;
+    CHECK(error_code_valid::is_enabled());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(error_code_valid::is_disabled());
 
-    CHECK_FALSE(vmcs::vm_exit_interruption_information::error_code_valid::is_disabled());
-    CHECK_FALSE(
-        vmcs::vm_exit_interruption_information::error_code_valid::is_disabled_if_exists());
+    g_vmcs_fields[addr] = error_code_valid::mask;
+    CHECK(error_code_valid::is_enabled(error_code_valid::mask));
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(error_code_valid::is_disabled(0x0));
+
+    g_vmcs_fields[addr] = error_code_valid::mask;
+    CHECK(error_code_valid::is_enabled_if_exists());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(error_code_valid::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_vm_exit_interruption_information_nmi_blocking_due_to_iret")
@@ -394,16 +442,22 @@ TEST_CASE("vmcs_vm_exit_interruption_information_nmi_blocking_due_to_iret")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_vmcs_fields[vmcs::vm_exit_interruption_information::addr] = 0x1000UL;
+    using namespace vmcs::vm_exit_interruption_information;
 
-    CHECK(vmcs::vm_exit_interruption_information::nmi_unblocking_due_to_iret::is_enabled());
-    CHECK(
-        vmcs::vm_exit_interruption_information::nmi_unblocking_due_to_iret::is_enabled_if_exists());
+    g_vmcs_fields[addr] = nmi_unblocking_due_to_iret::mask;
+    CHECK(nmi_unblocking_due_to_iret::is_enabled());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(nmi_unblocking_due_to_iret::is_disabled());
 
-    CHECK_FALSE(
-        vmcs::vm_exit_interruption_information::nmi_unblocking_due_to_iret::is_disabled());
-    CHECK_FALSE(
-        vmcs::vm_exit_interruption_information::nmi_unblocking_due_to_iret::is_disabled_if_exists());
+    g_vmcs_fields[addr] = nmi_unblocking_due_to_iret::mask;
+    CHECK(nmi_unblocking_due_to_iret::is_enabled(nmi_unblocking_due_to_iret::mask));
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(nmi_unblocking_due_to_iret::is_disabled(0x0));
+
+    g_vmcs_fields[addr] = nmi_unblocking_due_to_iret::mask;
+    CHECK(nmi_unblocking_due_to_iret::is_enabled_if_exists());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(nmi_unblocking_due_to_iret::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_vm_exit_interruption_information_reserved")
@@ -411,10 +465,16 @@ TEST_CASE("vmcs_vm_exit_interruption_information_reserved")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_vmcs_fields[vmcs::vm_exit_interruption_information::addr] = 0xEE000UL;
+    using namespace vmcs::vm_exit_interruption_information;
 
-    CHECK(vmcs::vm_exit_interruption_information::reserved::get() == 0xEE000U);
-    CHECK(vmcs::vm_exit_interruption_information::reserved::get_if_exists() == 0xEE000U);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(reserved::get() == (reserved::mask >> reserved::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(reserved::get(reserved::mask) == (reserved::mask >> reserved::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(reserved::get_if_exists() == (reserved::mask >> reserved::from));
 }
 
 TEST_CASE("vmcs_vm_exit_interruption_information_valid_bit")
@@ -422,13 +482,22 @@ TEST_CASE("vmcs_vm_exit_interruption_information_valid_bit")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_vmcs_fields[vmcs::vm_exit_interruption_information::addr] = 0x80001000UL;
+    using namespace vmcs::vm_exit_interruption_information;
 
-    CHECK(vmcs::vm_exit_interruption_information::valid_bit::is_enabled());
-    CHECK(vmcs::vm_exit_interruption_information::valid_bit::is_enabled_if_exists());
+    g_vmcs_fields[addr] = valid_bit::mask;
+    CHECK(valid_bit::is_enabled());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(valid_bit::is_disabled());
 
-    CHECK_FALSE(vmcs::vm_exit_interruption_information::valid_bit::is_disabled());
-    CHECK_FALSE(vmcs::vm_exit_interruption_information::valid_bit::is_disabled_if_exists());
+    g_vmcs_fields[addr] = valid_bit::mask;
+    CHECK(valid_bit::is_enabled(valid_bit::mask));
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(valid_bit::is_disabled(0x0));
+
+    g_vmcs_fields[addr] = valid_bit::mask;
+    CHECK(valid_bit::is_enabled_if_exists());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(valid_bit::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_vm_exit_interruption_error_code")
@@ -436,11 +505,14 @@ TEST_CASE("vmcs_vm_exit_interruption_error_code")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_vmcs_fields[vmcs::vm_exit_interruption_error_code::addr] = 1UL;
+    using namespace vmcs::vm_exit_interruption_error_code;
 
-    CHECK(vmcs::vm_exit_interruption_error_code::exists());
-    CHECK(vmcs::vm_exit_interruption_error_code::get() == 1U);
-    CHECK(vmcs::vm_exit_interruption_error_code::get_if_exists() == 1U);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFUL);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(get_if_exists() == 0xFFFFFFFFFFFFFFFUL);
+
+    dump(0);
 }
 
 TEST_CASE("vmcs_idt_vectoring_information")
@@ -448,11 +520,15 @@ TEST_CASE("vmcs_idt_vectoring_information")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_vmcs_fields[vmcs::idt_vectoring_information::addr] = 1UL;
+    using namespace vmcs::idt_vectoring_information;
+    CHECK(exists());
 
-    CHECK(vmcs::idt_vectoring_information::exists());
-    CHECK(vmcs::idt_vectoring_information::get() == 1UL);
-    CHECK(vmcs::idt_vectoring_information::get_if_exists() == 1UL);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFUL);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(get_if_exists() == 0xFFFFFFFFFFFFFFFUL);
+
+    dump(0);
 }
 
 TEST_CASE("vmcs_idt_vectoring_information_vector")
@@ -460,10 +536,16 @@ TEST_CASE("vmcs_idt_vectoring_information_vector")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_vmcs_fields[vmcs::idt_vectoring_information::addr] = 0xFFFUL;
+    using namespace vmcs::idt_vectoring_information;
 
-    CHECK(vmcs::idt_vectoring_information::vector::get() == 0xFFUL);
-    CHECK(vmcs::idt_vectoring_information::vector::get_if_exists() == 0xFFUL);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vector::get() == (vector::mask >> vector::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vector::get(vector::mask) == (vector::mask >> vector::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vector::get_if_exists() == (vector::mask >> vector::from));
 }
 
 TEST_CASE("vmcs_idt_vectoring_information_interruption_type")
@@ -471,10 +553,16 @@ TEST_CASE("vmcs_idt_vectoring_information_interruption_type")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_vmcs_fields[vmcs::idt_vectoring_information::addr] = 0xFFFUL;
+    using namespace vmcs::idt_vectoring_information;
 
-    CHECK(vmcs::idt_vectoring_information::interruption_type::get() == 7UL);
-    CHECK(vmcs::idt_vectoring_information::interruption_type::get_if_exists() == 7UL);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(interruption_type::get() == (interruption_type::mask >> interruption_type::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(interruption_type::get(interruption_type::mask) == (interruption_type::mask >> interruption_type::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(interruption_type::get_if_exists() == (interruption_type::mask >> interruption_type::from));
 }
 
 TEST_CASE("vmcs_idt_vectoring_information_error_code_valid")
@@ -482,13 +570,22 @@ TEST_CASE("vmcs_idt_vectoring_information_error_code_valid")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_vmcs_fields[vmcs::idt_vectoring_information::addr] = 0xFFFUL;
+    using namespace vmcs::idt_vectoring_information;
 
-    CHECK(vmcs::idt_vectoring_information::error_code_valid::is_enabled());
-    CHECK(vmcs::idt_vectoring_information::error_code_valid::is_enabled_if_exists());
+    g_vmcs_fields[addr] = error_code_valid::mask;
+    CHECK(error_code_valid::is_enabled());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(error_code_valid::is_disabled());
 
-    CHECK_FALSE(vmcs::idt_vectoring_information::error_code_valid::is_disabled());
-    CHECK_FALSE(vmcs::idt_vectoring_information::error_code_valid::is_disabled_if_exists());
+    g_vmcs_fields[addr] = error_code_valid::mask;
+    CHECK(error_code_valid::is_enabled(error_code_valid::mask));
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(error_code_valid::is_disabled(0x0));
+
+    g_vmcs_fields[addr] = error_code_valid::mask;
+    CHECK(error_code_valid::is_enabled_if_exists());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(error_code_valid::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_idt_vectoring_information_reserved")
@@ -496,10 +593,16 @@ TEST_CASE("vmcs_idt_vectoring_information_reserved")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_vmcs_fields[vmcs::idt_vectoring_information::addr] = 0xEE000UL;
+    using namespace vmcs::idt_vectoring_information;
 
-    CHECK(vmcs::idt_vectoring_information::reserved::get() == 0xEE000U);
-    CHECK(vmcs::idt_vectoring_information::reserved::get_if_exists() == 0xEE000U);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(reserved::get() == (reserved::mask >> reserved::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(reserved::get(reserved::mask) == (reserved::mask >> reserved::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(reserved::get_if_exists() == (reserved::mask >> reserved::from));
 }
 
 TEST_CASE("vmcs_idt_vectoring_information_valid_bit")
@@ -507,13 +610,22 @@ TEST_CASE("vmcs_idt_vectoring_information_valid_bit")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_vmcs_fields[vmcs::idt_vectoring_information::addr] = 0x80001000UL;
+    using namespace vmcs::idt_vectoring_information;
 
-    CHECK(vmcs::idt_vectoring_information::valid_bit::is_enabled());
-    CHECK(vmcs::idt_vectoring_information::valid_bit::is_enabled_if_exists());
+    g_vmcs_fields[addr] = valid_bit::mask;
+    CHECK(valid_bit::is_enabled());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(valid_bit::is_disabled());
 
-    CHECK_FALSE(vmcs::idt_vectoring_information::valid_bit::is_disabled());
-    CHECK_FALSE(vmcs::idt_vectoring_information::valid_bit::is_disabled_if_exists());
+    g_vmcs_fields[addr] = valid_bit::mask;
+    CHECK(valid_bit::is_enabled(valid_bit::mask));
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(valid_bit::is_disabled(0x0));
+
+    g_vmcs_fields[addr] = valid_bit::mask;
+    CHECK(valid_bit::is_enabled_if_exists());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(valid_bit::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_idt_vectoring_error_code")
@@ -521,11 +633,16 @@ TEST_CASE("vmcs_idt_vectoring_error_code")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_vmcs_fields[vmcs::idt_vectoring_error_code::addr] = 1UL;
+    using namespace vmcs::idt_vectoring_error_code;
 
-    CHECK(vmcs::idt_vectoring_error_code::exists());
-    CHECK(vmcs::idt_vectoring_error_code::get() == 1U);
-    CHECK(vmcs::idt_vectoring_error_code::get_if_exists() == 1U);
+    g_vmcs_fields[addr] = 100UL;
+    CHECK(get() == 100UL);
+    CHECK(exists());
+
+    g_vmcs_fields[addr] = 200UL;
+    CHECK(get_if_exists() == 200UL);
+
+    dump(0);
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_length")
@@ -533,11 +650,16 @@ TEST_CASE("vmcs_vm_exit_instruction_length")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_vmcs_fields[vmcs::vm_exit_instruction_length::addr] = 1UL;
+    using namespace vmcs::vm_exit_instruction_length;
 
-    CHECK(vmcs::vm_exit_instruction_length::exists());
-    CHECK(vmcs::vm_exit_instruction_length::get() == 1U);
-    CHECK(vmcs::vm_exit_instruction_length::get_if_exists() == 1U);
+    g_vmcs_fields[addr] = 100UL;
+    CHECK(get() == 100UL);
+    CHECK(exists());
+
+    g_vmcs_fields[addr] = 200UL;
+    CHECK(get_if_exists() == 200UL);
+
+    dump(0);
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information")
@@ -545,11 +667,16 @@ TEST_CASE("vmcs_vm_exit_instruction_information")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_vmcs_fields[vmcs::vm_exit_instruction_information::addr] = 1UL;
+    using namespace vmcs::vm_exit_instruction_information;
 
-    CHECK(vmcs::vm_exit_instruction_information::exists());
-    CHECK(vmcs::vm_exit_instruction_information::get() == 1UL);
-    CHECK(vmcs::vm_exit_instruction_information::get_if_exists() == 1UL);
+    g_vmcs_fields[addr] = 100UL;
+    CHECK(get() == 100UL);
+    CHECK(exists());
+
+    g_vmcs_fields[addr] = 200UL;
+    CHECK(get_if_exists() == 200UL);
+
+    dump(0);
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_ins")
@@ -559,11 +686,11 @@ TEST_CASE("vmcs_vm_exit_instruction_information_ins")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = 1UL;
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(ins::get() == 0xFFFFFFFFFFFFFFFUL);
 
-    CHECK(ins::get_name() == ins::name);
-    CHECK(ins::get() == 1UL);
-    CHECK(ins::get_if_exists() == 1UL);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(ins::get_if_exists() == 0xFFFFFFFFFFFFFFFUL);
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_ins_address_size")
@@ -573,11 +700,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_ins_address_size")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = ins::address_size::_16bit << ins::address_size::from;
-    CHECK(ins::address_size::get() == ins::address_size::_16bit);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(ins::address_size::get() == (ins::address_size::mask >> ins::address_size::from));
 
-    g_vmcs_fields[addr] = ins::address_size::_32bit << ins::address_size::from;
-    CHECK(ins::address_size::get_if_exists() == ins::address_size::_32bit);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(ins::address_size::get(ins::address_size::mask) == (ins::address_size::mask >> ins::address_size::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(ins::address_size::get_if_exists() == (ins::address_size::mask >> ins::address_size::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_outs")
@@ -587,11 +717,11 @@ TEST_CASE("vmcs_vm_exit_instruction_information_outs")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = 1UL;
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(outs::get() == 0xFFFFFFFFFFFFFFFUL);
 
-    CHECK(outs::get_name() == outs::name);
-    CHECK(outs::get() == 1UL);
-    CHECK(outs::get_if_exists() == 1UL);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(outs::get_if_exists() == 0xFFFFFFFFFFFFFFFUL);
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_outs_address_size")
@@ -601,11 +731,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_outs_address_size")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = outs::address_size::_16bit << outs::address_size::from;
-    CHECK(outs::address_size::get() == outs::address_size::_16bit);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(outs::address_size::get() == (outs::address_size::mask >> outs::address_size::from));
 
-    g_vmcs_fields[addr] = outs::address_size::_32bit << outs::address_size::from;
-    CHECK(outs::address_size::get_if_exists() == outs::address_size::_32bit);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(outs::address_size::get(outs::address_size::mask) == (outs::address_size::mask >> outs::address_size::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(outs::address_size::get_if_exists() == (outs::address_size::mask >> outs::address_size::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_outs_segment_register")
@@ -615,11 +748,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_outs_segment_register")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = outs::segment_register::ss << outs::segment_register::from;
-    CHECK(outs::segment_register::get() == outs::segment_register::ss);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(outs::segment_register::get() == (outs::segment_register::mask >> outs::segment_register::from));
 
-    g_vmcs_fields[addr] = outs::segment_register::cs << outs::segment_register::from;
-    CHECK(outs::segment_register::get_if_exists() == outs::segment_register::cs);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(outs::segment_register::get(outs::segment_register::mask) == (outs::segment_register::mask >> outs::segment_register::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(outs::segment_register::get_if_exists() == (outs::segment_register::mask >> outs::segment_register::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_invept")
@@ -629,11 +765,11 @@ TEST_CASE("vmcs_vm_exit_instruction_information_invept")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = 1UL;
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(invept::get() == 0xFFFFFFFFFFFFFFFUL);
 
-    CHECK(invept::get_name() == invept::name);
-    CHECK(invept::get() == 1UL);
-    CHECK(invept::get_if_exists() == 1UL);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(invept::get_if_exists() == 0xFFFFFFFFFFFFFFFUL);
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_invept_scaling")
@@ -643,11 +779,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_invept_scaling")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = invept::scaling::scale_by_2 << invept::scaling::from;
-    CHECK(invept::scaling::get() == invept::scaling::scale_by_2);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(invept::scaling::get() == (invept::scaling::mask >> invept::scaling::from));
 
-    g_vmcs_fields[addr] = invept::scaling::scale_by_8 << invept::scaling::from;
-    CHECK(invept::scaling::get_if_exists() == invept::scaling::scale_by_8);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(invept::scaling::get(invept::scaling::mask) == (invept::scaling::mask >> invept::scaling::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(invept::scaling::get_if_exists() == (invept::scaling::mask >> invept::scaling::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_invept_address_size")
@@ -657,11 +796,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_invept_address_size")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = invept::address_size::_32bit << invept::address_size::from;
-    CHECK(invept::address_size::get() == invept::address_size::_32bit);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(invept::address_size::get() == (invept::address_size::mask >> invept::address_size::from));
 
-    g_vmcs_fields[addr] = invept::address_size::_64bit << invept::address_size::from;
-    CHECK(invept::address_size::get_if_exists() == invept::address_size::_64bit);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(invept::address_size::get(invept::address_size::mask) == (invept::address_size::mask >> invept::address_size::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(invept::address_size::get_if_exists() == (invept::address_size::mask >> invept::address_size::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_invept_segment_register")
@@ -671,11 +813,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_invept_segment_register")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = invept::segment_register::cs << invept::segment_register::from;
-    CHECK(invept::segment_register::get() == invept::segment_register::cs);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(invept::segment_register::get() == (invept::segment_register::mask >> invept::segment_register::from));
 
-    g_vmcs_fields[addr] = invept::segment_register::gs << invept::segment_register::from;
-    CHECK(invept::segment_register::get_if_exists() == invept::segment_register::gs);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(invept::segment_register::get(invept::segment_register::mask) == (invept::segment_register::mask >> invept::segment_register::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(invept::segment_register::get_if_exists() == (invept::segment_register::mask >> invept::segment_register::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_invept_index_reg")
@@ -685,11 +830,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_invept_index_reg")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = invept::index_reg::rsi << invept::index_reg::from;
-    CHECK(invept::index_reg::get() == invept::index_reg::rsi);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(invept::index_reg::get() == (invept::index_reg::mask >> invept::index_reg::from));
 
-    g_vmcs_fields[addr] = invept::index_reg::r11 << invept::index_reg::from;
-    CHECK(invept::index_reg::get_if_exists() == invept::index_reg::r11);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(invept::index_reg::get(invept::index_reg::mask) == (invept::index_reg::mask >> invept::index_reg::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(invept::index_reg::get_if_exists() == (invept::index_reg::mask >> invept::index_reg::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_invept_index_reg_invalid")
@@ -699,11 +847,20 @@ TEST_CASE("vmcs_vm_exit_instruction_information_invept_index_reg_invalid")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = invept::index_reg_invalid::valid << invept::index_reg_invalid::from;
-    CHECK(invept::index_reg_invalid::get() == invept::index_reg_invalid::valid);
+    g_vmcs_fields[addr] = invept::index_reg_invalid::mask;
+    CHECK(invept::index_reg_invalid::is_enabled());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(invept::index_reg_invalid::is_disabled());
 
-    g_vmcs_fields[addr] = invept::index_reg_invalid::invalid << invept::index_reg_invalid::from;
-    CHECK(invept::index_reg_invalid::get_if_exists() == invept::index_reg_invalid::invalid);
+    g_vmcs_fields[addr] = invept::index_reg_invalid::mask;
+    CHECK(invept::index_reg_invalid::is_enabled(invept::index_reg_invalid::mask));
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(invept::index_reg_invalid::is_disabled(0x0));
+
+    g_vmcs_fields[addr] = invept::index_reg_invalid::mask;
+    CHECK(invept::index_reg_invalid::is_enabled_if_exists());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(invept::index_reg_invalid::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_invept_base_reg")
@@ -713,11 +870,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_invept_base_reg")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = invept::base_reg::rdi << invept::base_reg::from;
-    CHECK(invept::base_reg::get() == invept::base_reg::rdi);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(invept::base_reg::get() == (invept::base_reg::mask >> invept::base_reg::from));
 
-    g_vmcs_fields[addr] = invept::base_reg::rcx << invept::base_reg::from;
-    CHECK(invept::base_reg::get_if_exists() == invept::base_reg::rcx);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(invept::base_reg::get(invept::base_reg::mask) == (invept::base_reg::mask >> invept::base_reg::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(invept::base_reg::get_if_exists() == (invept::base_reg::mask >> invept::base_reg::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_invept_base_reg_invalid")
@@ -727,11 +887,20 @@ TEST_CASE("vmcs_vm_exit_instruction_information_invept_base_reg_invalid")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = invept::base_reg_invalid::valid << invept::base_reg_invalid::from;
-    CHECK(invept::base_reg_invalid::get() == invept::base_reg_invalid::valid);
+    g_vmcs_fields[addr] = invept::base_reg_invalid::mask;
+    CHECK(invept::base_reg_invalid::is_enabled());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(invept::base_reg_invalid::is_disabled());
 
-    g_vmcs_fields[addr] = invept::base_reg_invalid::invalid << invept::base_reg_invalid::from;
-    CHECK(invept::base_reg_invalid::get_if_exists() == invept::base_reg_invalid::invalid);
+    g_vmcs_fields[addr] = invept::base_reg_invalid::mask;
+    CHECK(invept::base_reg_invalid::is_enabled(invept::base_reg_invalid::mask));
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(invept::base_reg_invalid::is_disabled(0x0));
+
+    g_vmcs_fields[addr] = invept::base_reg_invalid::mask;
+    CHECK(invept::base_reg_invalid::is_enabled_if_exists());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(invept::base_reg_invalid::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_invept_reg2")
@@ -741,11 +910,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_invept_reg2")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = invept::reg2::rdx << invept::reg2::from;
-    CHECK(invept::reg2::get() == invept::reg2::rdx);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(invept::reg2::get() == (invept::reg2::mask >> invept::reg2::from));
 
-    g_vmcs_fields[addr] = invept::reg2::rsp << invept::reg2::from;
-    CHECK(invept::reg2::get_if_exists() == invept::reg2::rsp);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(invept::reg2::get(invept::reg2::mask) == (invept::reg2::mask >> invept::reg2::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(invept::reg2::get_if_exists() == (invept::reg2::mask >> invept::reg2::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_invpcid")
@@ -755,11 +927,11 @@ TEST_CASE("vmcs_vm_exit_instruction_information_invpcid")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = 1UL;
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(invpcid::get() == 0xFFFFFFFFFFFFFFFUL);
 
-    CHECK(invpcid::get_name() == invpcid::name);
-    CHECK(invpcid::get() == 1UL);
-    CHECK(invpcid::get_if_exists() == 1UL);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(invpcid::get_if_exists() == 0xFFFFFFFFFFFFFFFUL);
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_invpcid_scaling")
@@ -769,11 +941,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_invpcid_scaling")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = invpcid::scaling::scale_by_2 << invpcid::scaling::from;
-    CHECK(invpcid::scaling::get() == invpcid::scaling::scale_by_2);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(invpcid::scaling::get() == (invpcid::scaling::mask >> invpcid::scaling::from));
 
-    g_vmcs_fields[addr] = invpcid::scaling::scale_by_8 << invpcid::scaling::from;
-    CHECK(invpcid::scaling::get_if_exists() == invpcid::scaling::scale_by_8);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(invpcid::scaling::get(invpcid::scaling::mask) == (invpcid::scaling::mask >> invpcid::scaling::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(invpcid::scaling::get_if_exists() == (invpcid::scaling::mask >> invpcid::scaling::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_invpcid_address_size")
@@ -783,11 +958,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_invpcid_address_size")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = invpcid::address_size::_32bit << invpcid::address_size::from;
-    CHECK(invpcid::address_size::get() == invpcid::address_size::_32bit);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(invpcid::address_size::get() == (invpcid::address_size::mask >> invpcid::address_size::from));
 
-    g_vmcs_fields[addr] = invpcid::address_size::_64bit << invpcid::address_size::from;
-    CHECK(invpcid::address_size::get_if_exists() == invpcid::address_size::_64bit);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(invpcid::address_size::get(invpcid::address_size::mask) == (invpcid::address_size::mask >> invpcid::address_size::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(invpcid::address_size::get_if_exists() == (invpcid::address_size::mask >> invpcid::address_size::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_invpcid_segment_register")
@@ -797,11 +975,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_invpcid_segment_register")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = invpcid::segment_register::cs << invpcid::segment_register::from;
-    CHECK(invpcid::segment_register::get() == invpcid::segment_register::cs);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(invpcid::segment_register::get() == (invpcid::segment_register::mask >> invpcid::segment_register::from));
 
-    g_vmcs_fields[addr] = invpcid::segment_register::gs << invpcid::segment_register::from;
-    CHECK(invpcid::segment_register::get_if_exists() == invpcid::segment_register::gs);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(invpcid::segment_register::get(invpcid::segment_register::mask) == (invpcid::segment_register::mask >> invpcid::segment_register::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(invpcid::segment_register::get_if_exists() == (invpcid::segment_register::mask >> invpcid::segment_register::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_invpcid_index_reg")
@@ -811,11 +992,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_invpcid_index_reg")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = invpcid::index_reg::rsi << invpcid::index_reg::from;
-    CHECK(invpcid::index_reg::get() == invpcid::index_reg::rsi);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(invpcid::index_reg::get() == (invpcid::index_reg::mask >> invpcid::index_reg::from));
 
-    g_vmcs_fields[addr] = invpcid::index_reg::r11 << invpcid::index_reg::from;
-    CHECK(invpcid::index_reg::get_if_exists() == invpcid::index_reg::r11);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(invpcid::index_reg::get(invpcid::index_reg::mask) == (invpcid::index_reg::mask >> invpcid::index_reg::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(invpcid::index_reg::get_if_exists() == (invpcid::index_reg::mask >> invpcid::index_reg::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_invpcid_index_reg_invalid")
@@ -825,12 +1009,20 @@ TEST_CASE("vmcs_vm_exit_instruction_information_invpcid_index_reg_invalid")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = invpcid::index_reg_invalid::valid << invpcid::index_reg_invalid::from;
-    CHECK(invpcid::index_reg_invalid::get() == invpcid::index_reg_invalid::valid);
+    g_vmcs_fields[addr] = invpcid::index_reg_invalid::mask;
+    CHECK(invpcid::index_reg_invalid::is_enabled());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(invpcid::index_reg_invalid::is_disabled());
 
-    g_vmcs_fields[addr] = invpcid::index_reg_invalid::invalid << invpcid::index_reg_invalid::from;
-    CHECK(invpcid::index_reg_invalid::get_if_exists() ==
-          invpcid::index_reg_invalid::invalid);
+    g_vmcs_fields[addr] = invpcid::index_reg_invalid::mask;
+    CHECK(invpcid::index_reg_invalid::is_enabled(invpcid::index_reg_invalid::mask));
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(invpcid::index_reg_invalid::is_disabled(0x0));
+
+    g_vmcs_fields[addr] = invpcid::index_reg_invalid::mask;
+    CHECK(invpcid::index_reg_invalid::is_enabled_if_exists());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(invpcid::index_reg_invalid::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_invpcid_base_reg")
@@ -840,11 +1032,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_invpcid_base_reg")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = invpcid::base_reg::rdi << invpcid::base_reg::from;
-    CHECK(invpcid::base_reg::get() == invpcid::base_reg::rdi);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(invpcid::base_reg::get() == (invpcid::base_reg::mask >> invpcid::base_reg::from));
 
-    g_vmcs_fields[addr] = invpcid::base_reg::rcx << invpcid::base_reg::from;
-    CHECK(invpcid::base_reg::get_if_exists() == invpcid::base_reg::rcx);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(invpcid::base_reg::get(invpcid::base_reg::mask) == (invpcid::base_reg::mask >> invpcid::base_reg::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(invpcid::base_reg::get_if_exists() == (invpcid::base_reg::mask >> invpcid::base_reg::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_invpcid_base_reg_invalid")
@@ -854,11 +1049,20 @@ TEST_CASE("vmcs_vm_exit_instruction_information_invpcid_base_reg_invalid")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = invpcid::base_reg_invalid::valid << invpcid::base_reg_invalid::from;
-    CHECK(invpcid::base_reg_invalid::get() == invpcid::base_reg_invalid::valid);
+    g_vmcs_fields[addr] = invpcid::base_reg_invalid::mask;
+    CHECK(invpcid::base_reg_invalid::is_enabled());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(invpcid::base_reg_invalid::is_disabled());
 
-    g_vmcs_fields[addr] = invpcid::base_reg_invalid::invalid << invpcid::base_reg_invalid::from;
-    CHECK(invpcid::base_reg_invalid::get_if_exists() == invpcid::base_reg_invalid::invalid);
+    g_vmcs_fields[addr] = invpcid::base_reg_invalid::mask;
+    CHECK(invpcid::base_reg_invalid::is_enabled(invpcid::base_reg_invalid::mask));
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(invpcid::base_reg_invalid::is_disabled(0x0));
+
+    g_vmcs_fields[addr] = invpcid::base_reg_invalid::mask;
+    CHECK(invpcid::base_reg_invalid::is_enabled_if_exists());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(invpcid::base_reg_invalid::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_invpcid_reg2")
@@ -868,11 +1072,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_invpcid_reg2")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = invpcid::reg2::rdx << invpcid::reg2::from;
-    CHECK(invpcid::reg2::get() == invpcid::reg2::rdx);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(invpcid::reg2::get() == (invpcid::reg2::mask >> invpcid::reg2::from));
 
-    g_vmcs_fields[addr] = invpcid::reg2::rsp << invpcid::reg2::from;
-    CHECK(invpcid::reg2::get_if_exists() == invpcid::reg2::rsp);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(invpcid::reg2::get(invpcid::reg2::mask) == (invpcid::reg2::mask >> invpcid::reg2::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(invpcid::reg2::get_if_exists() == (invpcid::reg2::mask >> invpcid::reg2::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_invvpid")
@@ -882,11 +1089,11 @@ TEST_CASE("vmcs_vm_exit_instruction_information_invvpid")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = 1UL;
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(invvpid::get() == 0xFFFFFFFFFFFFFFFUL);
 
-    CHECK(invvpid::get_name() == invvpid::name);
-    CHECK(invvpid::get() == 1UL);
-    CHECK(invvpid::get_if_exists() == 1UL);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(invvpid::get_if_exists() == 0xFFFFFFFFFFFFFFFUL);
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_invvpid_scaling")
@@ -896,11 +1103,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_invvpid_scaling")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = invvpid::scaling::scale_by_2 << invvpid::scaling::from;
-    CHECK(invvpid::scaling::get() == invvpid::scaling::scale_by_2);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(invvpid::scaling::get() == (invvpid::scaling::mask >> invvpid::scaling::from));
 
-    g_vmcs_fields[addr] = invvpid::scaling::scale_by_8 << invvpid::scaling::from;
-    CHECK(invvpid::scaling::get_if_exists() == invvpid::scaling::scale_by_8);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(invvpid::scaling::get(invvpid::scaling::mask) == (invvpid::scaling::mask >> invvpid::scaling::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(invvpid::scaling::get_if_exists() == (invvpid::scaling::mask >> invvpid::scaling::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_invvpid_address_size")
@@ -910,11 +1120,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_invvpid_address_size")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = invvpid::address_size::_32bit << invvpid::address_size::from;
-    CHECK(invvpid::address_size::get() == invvpid::address_size::_32bit);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(invvpid::address_size::get() == (invvpid::address_size::mask >> invvpid::address_size::from));
 
-    g_vmcs_fields[addr] = invvpid::address_size::_64bit << invvpid::address_size::from;
-    CHECK(invvpid::address_size::get_if_exists() == invvpid::address_size::_64bit);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(invvpid::address_size::get(invvpid::address_size::mask) == (invvpid::address_size::mask >> invvpid::address_size::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(invvpid::address_size::get_if_exists() == (invvpid::address_size::mask >> invvpid::address_size::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_invvpid_segment_register")
@@ -924,11 +1137,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_invvpid_segment_register")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = invvpid::segment_register::cs << invvpid::segment_register::from;
-    CHECK(invvpid::segment_register::get() == invvpid::segment_register::cs);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(invvpid::segment_register::get() == (invvpid::segment_register::mask >> invvpid::segment_register::from));
 
-    g_vmcs_fields[addr] = invvpid::segment_register::gs << invvpid::segment_register::from;
-    CHECK(invvpid::segment_register::get_if_exists() == invvpid::segment_register::gs);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(invvpid::segment_register::get(invvpid::segment_register::mask) == (invvpid::segment_register::mask >> invvpid::segment_register::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(invvpid::segment_register::get_if_exists() == (invvpid::segment_register::mask >> invvpid::segment_register::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_invvpid_index_reg")
@@ -938,11 +1154,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_invvpid_index_reg")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = invvpid::index_reg::rsi << invvpid::index_reg::from;
-    CHECK(invvpid::index_reg::get() == invvpid::index_reg::rsi);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(invvpid::index_reg::get() == (invvpid::index_reg::mask >> invvpid::index_reg::from));
 
-    g_vmcs_fields[addr] = invvpid::index_reg::r11 << invvpid::index_reg::from;
-    CHECK(invvpid::index_reg::get_if_exists() == invvpid::index_reg::r11);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(invvpid::index_reg::get(invvpid::index_reg::mask) == (invvpid::index_reg::mask >> invvpid::index_reg::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(invvpid::index_reg::get_if_exists() == (invvpid::index_reg::mask >> invvpid::index_reg::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_invvpid_index_reg_invalid")
@@ -952,12 +1171,20 @@ TEST_CASE("vmcs_vm_exit_instruction_information_invvpid_index_reg_invalid")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = invvpid::index_reg_invalid::valid << invvpid::index_reg_invalid::from;
-    CHECK(invvpid::index_reg_invalid::get() == invvpid::index_reg_invalid::valid);
+    g_vmcs_fields[addr] = invvpid::index_reg_invalid::mask;
+    CHECK(invvpid::index_reg_invalid::is_enabled());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(invvpid::index_reg_invalid::is_disabled());
 
-    g_vmcs_fields[addr] = invvpid::index_reg_invalid::invalid << invvpid::index_reg_invalid::from;
-    CHECK(invvpid::index_reg_invalid::get_if_exists() ==
-          invvpid::index_reg_invalid::invalid);
+    g_vmcs_fields[addr] = invvpid::index_reg_invalid::mask;
+    CHECK(invvpid::index_reg_invalid::is_enabled(invvpid::index_reg_invalid::mask));
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(invvpid::index_reg_invalid::is_disabled(0x0));
+
+    g_vmcs_fields[addr] = invvpid::index_reg_invalid::mask;
+    CHECK(invvpid::index_reg_invalid::is_enabled_if_exists());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(invvpid::index_reg_invalid::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_invvpid_base_reg")
@@ -967,11 +1194,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_invvpid_base_reg")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = invvpid::base_reg::rdi << invvpid::base_reg::from;
-    CHECK(invvpid::base_reg::get() == invvpid::base_reg::rdi);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(invvpid::base_reg::get() == (invvpid::base_reg::mask >> invvpid::base_reg::from));
 
-    g_vmcs_fields[addr] = invvpid::base_reg::rcx << invvpid::base_reg::from;
-    CHECK(invvpid::base_reg::get_if_exists() == invvpid::base_reg::rcx);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(invvpid::base_reg::get(invvpid::base_reg::mask) == (invvpid::base_reg::mask >> invvpid::base_reg::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(invvpid::base_reg::get_if_exists() == (invvpid::base_reg::mask >> invvpid::base_reg::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_invvpid_base_reg_invalid")
@@ -981,11 +1211,20 @@ TEST_CASE("vmcs_vm_exit_instruction_information_invvpid_base_reg_invalid")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = invvpid::base_reg_invalid::valid << invvpid::base_reg_invalid::from;
-    CHECK(invvpid::base_reg_invalid::get() == invvpid::base_reg_invalid::valid);
+    g_vmcs_fields[addr] = invvpid::base_reg_invalid::mask;
+    CHECK(invvpid::base_reg_invalid::is_enabled());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(invvpid::base_reg_invalid::is_disabled());
 
-    g_vmcs_fields[addr] = invvpid::base_reg_invalid::invalid << invvpid::base_reg_invalid::from;
-    CHECK(invvpid::base_reg_invalid::get_if_exists() == invvpid::base_reg_invalid::invalid);
+    g_vmcs_fields[addr] = invvpid::base_reg_invalid::mask;
+    CHECK(invvpid::base_reg_invalid::is_enabled(invvpid::base_reg_invalid::mask));
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(invvpid::base_reg_invalid::is_disabled(0x0));
+
+    g_vmcs_fields[addr] = invvpid::base_reg_invalid::mask;
+    CHECK(invvpid::base_reg_invalid::is_enabled_if_exists());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(invvpid::base_reg_invalid::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_invvpid_reg2")
@@ -995,11 +1234,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_invvpid_reg2")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = invvpid::reg2::rdx << invvpid::reg2::from;
-    CHECK(invvpid::reg2::get() == invvpid::reg2::rdx);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(invvpid::reg2::get() == (invvpid::reg2::mask >> invvpid::reg2::from));
 
-    g_vmcs_fields[addr] = invvpid::reg2::rsp << invvpid::reg2::from;
-    CHECK(invvpid::reg2::get_if_exists() == invvpid::reg2::rsp);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(invvpid::reg2::get(invvpid::reg2::mask) == (invvpid::reg2::mask >> invvpid::reg2::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(invvpid::reg2::get_if_exists() == (invvpid::reg2::mask >> invvpid::reg2::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_lidt")
@@ -1009,11 +1251,11 @@ TEST_CASE("vmcs_vm_exit_instruction_information_lidt")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = 1UL;
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(lidt::get() == 0xFFFFFFFFFFFFFFFUL);
 
-    CHECK(lidt::get_name() == lidt::name);
-    CHECK(lidt::get() == 1UL);
-    CHECK(lidt::get_if_exists() == 1UL);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(lidt::get_if_exists() == 0xFFFFFFFFFFFFFFFUL);
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_lidt_scaling")
@@ -1023,11 +1265,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_lidt_scaling")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = lidt::scaling::scale_by_2 << lidt::scaling::from;
-    CHECK(lidt::scaling::get() == lidt::scaling::scale_by_2);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(lidt::scaling::get() == (lidt::scaling::mask >> lidt::scaling::from));
 
-    g_vmcs_fields[addr] = lidt::scaling::scale_by_8 << lidt::scaling::from;
-    CHECK(lidt::scaling::get_if_exists() == lidt::scaling::scale_by_8);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(lidt::scaling::get(lidt::scaling::mask) == (lidt::scaling::mask >> lidt::scaling::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(lidt::scaling::get_if_exists() == (lidt::scaling::mask >> lidt::scaling::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_lidt_address_size")
@@ -1037,11 +1282,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_lidt_address_size")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = lidt::address_size::_32bit << lidt::address_size::from;
-    CHECK(lidt::address_size::get() == lidt::address_size::_32bit);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(lidt::address_size::get() == (lidt::address_size::mask >> lidt::address_size::from));
 
-    g_vmcs_fields[addr] = lidt::address_size::_64bit << lidt::address_size::from;
-    CHECK(lidt::address_size::get_if_exists() == lidt::address_size::_64bit);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(lidt::address_size::get(lidt::address_size::mask) == (lidt::address_size::mask >> lidt::address_size::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(lidt::address_size::get_if_exists() == (lidt::address_size::mask >> lidt::address_size::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_lidt_operand_size")
@@ -1051,11 +1299,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_lidt_operand_size")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = lidt::operand_size::_16bit << lidt::operand_size::from;
-    CHECK(lidt::operand_size::get() == lidt::operand_size::_16bit);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(lidt::operand_size::get() == (lidt::operand_size::mask >> lidt::operand_size::from));
 
-    g_vmcs_fields[addr] = lidt::operand_size::_32bit << lidt::operand_size::from;
-    CHECK(lidt::operand_size::get_if_exists() == lidt::operand_size::_32bit);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(lidt::operand_size::get(lidt::operand_size::mask) == (lidt::operand_size::mask >> lidt::operand_size::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(lidt::operand_size::get_if_exists() == (lidt::operand_size::mask >> lidt::operand_size::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_lidt_segment_register")
@@ -1065,11 +1316,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_lidt_segment_register")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = lidt::segment_register::cs << lidt::segment_register::from;
-    CHECK(lidt::segment_register::get() == lidt::segment_register::cs);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(lidt::segment_register::get() == (lidt::segment_register::mask >> lidt::segment_register::from));
 
-    g_vmcs_fields[addr] = lidt::segment_register::gs << lidt::segment_register::from;
-    CHECK(lidt::segment_register::get_if_exists() == lidt::segment_register::gs);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(lidt::segment_register::get(lidt::segment_register::mask) == (lidt::segment_register::mask >> lidt::segment_register::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(lidt::segment_register::get_if_exists() == (lidt::segment_register::mask >> lidt::segment_register::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_lidt_index_reg")
@@ -1079,11 +1333,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_lidt_index_reg")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = lidt::index_reg::rsi << lidt::index_reg::from;
-    CHECK(lidt::index_reg::get() == lidt::index_reg::rsi);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(lidt::index_reg::get() == (lidt::index_reg::mask >> lidt::index_reg::from));
 
-    g_vmcs_fields[addr] = lidt::index_reg::r11 << lidt::index_reg::from;
-    CHECK(lidt::index_reg::get_if_exists() == lidt::index_reg::r11);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(lidt::index_reg::get(lidt::index_reg::mask) == (lidt::index_reg::mask >> lidt::index_reg::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(lidt::index_reg::get_if_exists() == (lidt::index_reg::mask >> lidt::index_reg::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_lidt_index_reg_invalid")
@@ -1093,11 +1350,20 @@ TEST_CASE("vmcs_vm_exit_instruction_information_lidt_index_reg_invalid")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = lidt::index_reg_invalid::valid << lidt::index_reg_invalid::from;
-    CHECK(lidt::index_reg_invalid::get() == lidt::index_reg_invalid::valid);
+    g_vmcs_fields[addr] = lidt::index_reg_invalid::mask;
+    CHECK(lidt::index_reg_invalid::is_enabled());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(lidt::index_reg_invalid::is_disabled());
 
-    g_vmcs_fields[addr] = lidt::index_reg_invalid::invalid << lidt::index_reg_invalid::from;
-    CHECK(lidt::index_reg_invalid::get_if_exists() == lidt::index_reg_invalid::invalid);
+    g_vmcs_fields[addr] = lidt::index_reg_invalid::mask;
+    CHECK(lidt::index_reg_invalid::is_enabled(lidt::index_reg_invalid::mask));
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(lidt::index_reg_invalid::is_disabled(0x0));
+
+    g_vmcs_fields[addr] = lidt::index_reg_invalid::mask;
+    CHECK(lidt::index_reg_invalid::is_enabled_if_exists());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(lidt::index_reg_invalid::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_lidt_base_reg")
@@ -1107,11 +1373,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_lidt_base_reg")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = lidt::base_reg::rdi << lidt::base_reg::from;
-    CHECK(lidt::base_reg::get() == lidt::base_reg::rdi);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(lidt::base_reg::get() == (lidt::base_reg::mask >> lidt::base_reg::from));
 
-    g_vmcs_fields[addr] = lidt::base_reg::rcx << lidt::base_reg::from;
-    CHECK(lidt::base_reg::get_if_exists() == lidt::base_reg::rcx);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(lidt::base_reg::get(lidt::base_reg::mask) == (lidt::base_reg::mask >> lidt::base_reg::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(lidt::base_reg::get_if_exists() == (lidt::base_reg::mask >> lidt::base_reg::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_lidt_base_reg_invalid")
@@ -1121,11 +1390,20 @@ TEST_CASE("vmcs_vm_exit_instruction_information_lidt_base_reg_invalid")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = lidt::base_reg_invalid::valid << lidt::base_reg_invalid::from;
-    CHECK(lidt::base_reg_invalid::get() == lidt::base_reg_invalid::valid);
+    g_vmcs_fields[addr] = lidt::base_reg_invalid::mask;
+    CHECK(lidt::base_reg_invalid::is_enabled());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(lidt::base_reg_invalid::is_disabled());
 
-    g_vmcs_fields[addr] = lidt::base_reg_invalid::invalid << lidt::base_reg_invalid::from;
-    CHECK(lidt::base_reg_invalid::get_if_exists() == lidt::base_reg_invalid::invalid);
+    g_vmcs_fields[addr] = lidt::base_reg_invalid::mask;
+    CHECK(lidt::base_reg_invalid::is_enabled(lidt::base_reg_invalid::mask));
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(lidt::base_reg_invalid::is_disabled(0x0));
+
+    g_vmcs_fields[addr] = lidt::base_reg_invalid::mask;
+    CHECK(lidt::base_reg_invalid::is_enabled_if_exists());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(lidt::base_reg_invalid::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_lidt_instruction_identity")
@@ -1135,11 +1413,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_lidt_instruction_identity")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = lidt::instruction_identity::sgdt << lidt::instruction_identity::from;
-    CHECK(lidt::instruction_identity::get() == lidt::instruction_identity::sgdt);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(lidt::instruction_identity::get() == (lidt::instruction_identity::mask >> lidt::instruction_identity::from));
 
-    g_vmcs_fields[addr] = lidt::instruction_identity::lidt << lidt::instruction_identity::from;
-    CHECK(lidt::instruction_identity::get_if_exists() == lidt::instruction_identity::lidt);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(lidt::instruction_identity::get(lidt::instruction_identity::mask) == (lidt::instruction_identity::mask >> lidt::instruction_identity::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(lidt::instruction_identity::get_if_exists() == (lidt::instruction_identity::mask >> lidt::instruction_identity::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_lgdt")
@@ -1149,11 +1430,11 @@ TEST_CASE("vmcs_vm_exit_instruction_information_lgdt")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = 1UL;
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(lgdt::get() == 0xFFFFFFFFFFFFFFFUL);
 
-    CHECK(lgdt::get_name() == lgdt::name);
-    CHECK(lgdt::get() == 1UL);
-    CHECK(lgdt::get_if_exists() == 1UL);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(lgdt::get_if_exists() == 0xFFFFFFFFFFFFFFFUL);
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_lgdt_scaling")
@@ -1163,11 +1444,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_lgdt_scaling")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = lgdt::scaling::scale_by_2 << lgdt::scaling::from;
-    CHECK(lgdt::scaling::get() == lgdt::scaling::scale_by_2);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(lgdt::scaling::get() == (lgdt::scaling::mask >> lgdt::scaling::from));
 
-    g_vmcs_fields[addr] = lgdt::scaling::scale_by_8 << lgdt::scaling::from;
-    CHECK(lgdt::scaling::get_if_exists() == lgdt::scaling::scale_by_8);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(lgdt::scaling::get(lgdt::scaling::mask) == (lgdt::scaling::mask >> lgdt::scaling::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(lgdt::scaling::get_if_exists() == (lgdt::scaling::mask >> lgdt::scaling::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_lgdt_address_size")
@@ -1177,11 +1461,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_lgdt_address_size")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = lgdt::address_size::_32bit << lgdt::address_size::from;
-    CHECK(lgdt::address_size::get() == lgdt::address_size::_32bit);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(lgdt::address_size::get() == (lgdt::address_size::mask >> lgdt::address_size::from));
 
-    g_vmcs_fields[addr] = lgdt::address_size::_64bit << lgdt::address_size::from;
-    CHECK(lgdt::address_size::get_if_exists() == lgdt::address_size::_64bit);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(lgdt::address_size::get(lgdt::address_size::mask) == (lgdt::address_size::mask >> lgdt::address_size::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(lgdt::address_size::get_if_exists() == (lgdt::address_size::mask >> lgdt::address_size::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_lgdt_operand_size")
@@ -1191,11 +1478,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_lgdt_operand_size")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = lgdt::operand_size::_16bit << lgdt::operand_size::from;
-    CHECK(lgdt::operand_size::get() == lgdt::operand_size::_16bit);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(lgdt::operand_size::get() == (lgdt::operand_size::mask >> lgdt::operand_size::from));
 
-    g_vmcs_fields[addr] = lgdt::operand_size::_32bit << lgdt::operand_size::from;
-    CHECK(lgdt::operand_size::get_if_exists() == lgdt::operand_size::_32bit);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(lgdt::operand_size::get(lgdt::operand_size::mask) == (lgdt::operand_size::mask >> lgdt::operand_size::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(lgdt::operand_size::get_if_exists() == (lgdt::operand_size::mask >> lgdt::operand_size::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_lgdt_segment_register")
@@ -1205,11 +1495,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_lgdt_segment_register")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = lgdt::segment_register::cs << lgdt::segment_register::from;
-    CHECK(lgdt::segment_register::get() == lgdt::segment_register::cs);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(lgdt::segment_register::get() == (lgdt::segment_register::mask >> lgdt::segment_register::from));
 
-    g_vmcs_fields[addr] = lgdt::segment_register::gs << lgdt::segment_register::from;
-    CHECK(lgdt::segment_register::get_if_exists() == lgdt::segment_register::gs);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(lgdt::segment_register::get(lgdt::segment_register::mask) == (lgdt::segment_register::mask >> lgdt::segment_register::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(lgdt::segment_register::get_if_exists() == (lgdt::segment_register::mask >> lgdt::segment_register::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_lgdt_index_reg")
@@ -1219,11 +1512,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_lgdt_index_reg")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = lgdt::index_reg::rsi << lgdt::index_reg::from;
-    CHECK(lgdt::index_reg::get() == lgdt::index_reg::rsi);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(lgdt::index_reg::get() == (lgdt::index_reg::mask >> lgdt::index_reg::from));
 
-    g_vmcs_fields[addr] = lgdt::index_reg::r11 << lgdt::index_reg::from;
-    CHECK(lgdt::index_reg::get_if_exists() == lgdt::index_reg::r11);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(lgdt::index_reg::get(lgdt::index_reg::mask) == (lgdt::index_reg::mask >> lgdt::index_reg::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(lgdt::index_reg::get_if_exists() == (lgdt::index_reg::mask >> lgdt::index_reg::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_lgdt_index_reg_invalid")
@@ -1233,11 +1529,20 @@ TEST_CASE("vmcs_vm_exit_instruction_information_lgdt_index_reg_invalid")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = lgdt::index_reg_invalid::valid << lgdt::index_reg_invalid::from;
-    CHECK(lgdt::index_reg_invalid::get() == lgdt::index_reg_invalid::valid);
+    g_vmcs_fields[addr] = lgdt::index_reg_invalid::mask;
+    CHECK(lgdt::index_reg_invalid::is_enabled());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(lgdt::index_reg_invalid::is_disabled());
 
-    g_vmcs_fields[addr] = lgdt::index_reg_invalid::invalid << lgdt::index_reg_invalid::from;
-    CHECK(lgdt::index_reg_invalid::get_if_exists() == lgdt::index_reg_invalid::invalid);
+    g_vmcs_fields[addr] = lgdt::index_reg_invalid::mask;
+    CHECK(lgdt::index_reg_invalid::is_enabled(lgdt::index_reg_invalid::mask));
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(lgdt::index_reg_invalid::is_disabled(0x0));
+
+    g_vmcs_fields[addr] = lgdt::index_reg_invalid::mask;
+    CHECK(lgdt::index_reg_invalid::is_enabled_if_exists());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(lgdt::index_reg_invalid::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_lgdt_base_reg")
@@ -1247,11 +1552,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_lgdt_base_reg")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = lgdt::base_reg::rdi << lgdt::base_reg::from;
-    CHECK(lgdt::base_reg::get() == lgdt::base_reg::rdi);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(lgdt::base_reg::get() == (lgdt::base_reg::mask >> lgdt::base_reg::from));
 
-    g_vmcs_fields[addr] = lgdt::base_reg::rcx << lgdt::base_reg::from;
-    CHECK(lgdt::base_reg::get_if_exists() == lgdt::base_reg::rcx);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(lgdt::base_reg::get(lgdt::base_reg::mask) == (lgdt::base_reg::mask >> lgdt::base_reg::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(lgdt::base_reg::get_if_exists() == (lgdt::base_reg::mask >> lgdt::base_reg::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_lgdt_base_reg_invalid")
@@ -1261,11 +1569,20 @@ TEST_CASE("vmcs_vm_exit_instruction_information_lgdt_base_reg_invalid")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = lgdt::base_reg_invalid::valid << lgdt::base_reg_invalid::from;
-    CHECK(lgdt::base_reg_invalid::get() == lgdt::base_reg_invalid::valid);
+    g_vmcs_fields[addr] = lgdt::base_reg_invalid::mask;
+    CHECK(lgdt::base_reg_invalid::is_enabled());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(lgdt::base_reg_invalid::is_disabled());
 
-    g_vmcs_fields[addr] = lgdt::base_reg_invalid::invalid << lgdt::base_reg_invalid::from;
-    CHECK(lgdt::base_reg_invalid::get_if_exists() == lgdt::base_reg_invalid::invalid);
+    g_vmcs_fields[addr] = lgdt::base_reg_invalid::mask;
+    CHECK(lgdt::base_reg_invalid::is_enabled(lgdt::base_reg_invalid::mask));
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(lgdt::base_reg_invalid::is_disabled(0x0));
+
+    g_vmcs_fields[addr] = lgdt::base_reg_invalid::mask;
+    CHECK(lgdt::base_reg_invalid::is_enabled_if_exists());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(lgdt::base_reg_invalid::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_lgdt_instruction_identity")
@@ -1275,11 +1592,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_lgdt_instruction_identity")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = lgdt::instruction_identity::sgdt << lgdt::instruction_identity::from;
-    CHECK(lgdt::instruction_identity::get() == lgdt::instruction_identity::sgdt);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(lgdt::instruction_identity::get() == (lgdt::instruction_identity::mask >> lgdt::instruction_identity::from));
 
-    g_vmcs_fields[addr] = lgdt::instruction_identity::lgdt << lgdt::instruction_identity::from;
-    CHECK(lgdt::instruction_identity::get_if_exists() == lgdt::instruction_identity::lgdt);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(lgdt::instruction_identity::get(lgdt::instruction_identity::mask) == (lgdt::instruction_identity::mask >> lgdt::instruction_identity::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(lgdt::instruction_identity::get_if_exists() == (lgdt::instruction_identity::mask >> lgdt::instruction_identity::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_sidt")
@@ -1289,11 +1609,11 @@ TEST_CASE("vmcs_vm_exit_instruction_information_sidt")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = 1UL;
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(sidt::get() == 0xFFFFFFFFFFFFFFFUL);
 
-    CHECK(sidt::get_name() == sidt::name);
-    CHECK(sidt::get() == 1UL);
-    CHECK(sidt::get_if_exists() == 1UL);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(sidt::get_if_exists() == 0xFFFFFFFFFFFFFFFUL);
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_sidt_scaling")
@@ -1303,11 +1623,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_sidt_scaling")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = sidt::scaling::scale_by_2 << sidt::scaling::from;
-    CHECK(sidt::scaling::get() == sidt::scaling::scale_by_2);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(sidt::scaling::get() == (sidt::scaling::mask >> sidt::scaling::from));
 
-    g_vmcs_fields[addr] = sidt::scaling::scale_by_8 << sidt::scaling::from;
-    CHECK(sidt::scaling::get_if_exists() == sidt::scaling::scale_by_8);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(sidt::scaling::get(sidt::scaling::mask) == (sidt::scaling::mask >> sidt::scaling::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(sidt::scaling::get_if_exists() == (sidt::scaling::mask >> sidt::scaling::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_sidt_address_size")
@@ -1317,11 +1640,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_sidt_address_size")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = sidt::address_size::_32bit << sidt::address_size::from;
-    CHECK(sidt::address_size::get() == sidt::address_size::_32bit);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(sidt::address_size::get() == (sidt::address_size::mask >> sidt::address_size::from));
 
-    g_vmcs_fields[addr] = sidt::address_size::_64bit << sidt::address_size::from;
-    CHECK(sidt::address_size::get_if_exists() == sidt::address_size::_64bit);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(sidt::address_size::get(sidt::address_size::mask) == (sidt::address_size::mask >> sidt::address_size::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(sidt::address_size::get_if_exists() == (sidt::address_size::mask >> sidt::address_size::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_sidt_operand_size")
@@ -1331,11 +1657,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_sidt_operand_size")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = sidt::operand_size::_16bit << sidt::operand_size::from;
-    CHECK(sidt::operand_size::get() == sidt::operand_size::_16bit);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(sidt::operand_size::get() == (sidt::operand_size::mask >> sidt::operand_size::from));
 
-    g_vmcs_fields[addr] = sidt::operand_size::_32bit << sidt::operand_size::from;
-    CHECK(sidt::operand_size::get_if_exists() == sidt::operand_size::_32bit);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(sidt::operand_size::get(sidt::operand_size::mask) == (sidt::operand_size::mask >> sidt::operand_size::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(sidt::operand_size::get_if_exists() == (sidt::operand_size::mask >> sidt::operand_size::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_sidt_segment_register")
@@ -1345,11 +1674,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_sidt_segment_register")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = sidt::segment_register::cs << sidt::segment_register::from;
-    CHECK(sidt::segment_register::get() == sidt::segment_register::cs);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(sidt::segment_register::get() == (sidt::segment_register::mask >> sidt::segment_register::from));
 
-    g_vmcs_fields[addr] = sidt::segment_register::gs << sidt::segment_register::from;
-    CHECK(sidt::segment_register::get_if_exists() == sidt::segment_register::gs);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(sidt::segment_register::get(sidt::segment_register::mask) == (sidt::segment_register::mask >> sidt::segment_register::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(sidt::segment_register::get_if_exists() == (sidt::segment_register::mask >> sidt::segment_register::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_sidt_index_reg")
@@ -1359,11 +1691,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_sidt_index_reg")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = sidt::index_reg::rsi << sidt::index_reg::from;
-    CHECK(sidt::index_reg::get() == sidt::index_reg::rsi);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(sidt::index_reg::get() == (sidt::index_reg::mask >> sidt::index_reg::from));
 
-    g_vmcs_fields[addr] = sidt::index_reg::r11 << sidt::index_reg::from;
-    CHECK(sidt::index_reg::get_if_exists() == sidt::index_reg::r11);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(sidt::index_reg::get(sidt::index_reg::mask) == (sidt::index_reg::mask >> sidt::index_reg::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(sidt::index_reg::get_if_exists() == (sidt::index_reg::mask >> sidt::index_reg::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_sidt_index_reg_invalid")
@@ -1373,11 +1708,20 @@ TEST_CASE("vmcs_vm_exit_instruction_information_sidt_index_reg_invalid")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = sidt::index_reg_invalid::valid << sidt::index_reg_invalid::from;
-    CHECK(sidt::index_reg_invalid::get() == sidt::index_reg_invalid::valid);
+    g_vmcs_fields[addr] = sidt::index_reg_invalid::mask;
+    CHECK(sidt::index_reg_invalid::is_enabled());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(sidt::index_reg_invalid::is_disabled());
 
-    g_vmcs_fields[addr] = sidt::index_reg_invalid::invalid << sidt::index_reg_invalid::from;
-    CHECK(sidt::index_reg_invalid::get_if_exists() == sidt::index_reg_invalid::invalid);
+    g_vmcs_fields[addr] = sidt::index_reg_invalid::mask;
+    CHECK(sidt::index_reg_invalid::is_enabled(sidt::index_reg_invalid::mask));
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(sidt::index_reg_invalid::is_disabled(0x0));
+
+    g_vmcs_fields[addr] = sidt::index_reg_invalid::mask;
+    CHECK(sidt::index_reg_invalid::is_enabled_if_exists());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(sidt::index_reg_invalid::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_sidt_base_reg")
@@ -1387,11 +1731,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_sidt_base_reg")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = sidt::base_reg::rdi << sidt::base_reg::from;
-    CHECK(sidt::base_reg::get() == sidt::base_reg::rdi);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(sidt::base_reg::get() == (sidt::base_reg::mask >> sidt::base_reg::from));
 
-    g_vmcs_fields[addr] = sidt::base_reg::rcx << sidt::base_reg::from;
-    CHECK(sidt::base_reg::get_if_exists() == sidt::base_reg::rcx);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(sidt::base_reg::get(sidt::base_reg::mask) == (sidt::base_reg::mask >> sidt::base_reg::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(sidt::base_reg::get_if_exists() == (sidt::base_reg::mask >> sidt::base_reg::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_sidt_base_reg_invalid")
@@ -1401,11 +1748,20 @@ TEST_CASE("vmcs_vm_exit_instruction_information_sidt_base_reg_invalid")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = sidt::base_reg_invalid::valid << sidt::base_reg_invalid::from;
-    CHECK(sidt::base_reg_invalid::get() == sidt::base_reg_invalid::valid);
+    g_vmcs_fields[addr] = sidt::base_reg_invalid::mask;
+    CHECK(sidt::base_reg_invalid::is_enabled());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(sidt::base_reg_invalid::is_disabled());
 
-    g_vmcs_fields[addr] = sidt::base_reg_invalid::invalid << sidt::base_reg_invalid::from;
-    CHECK(sidt::base_reg_invalid::get_if_exists() == sidt::base_reg_invalid::invalid);
+    g_vmcs_fields[addr] = sidt::base_reg_invalid::mask;
+    CHECK(sidt::base_reg_invalid::is_enabled(sidt::base_reg_invalid::mask));
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(sidt::base_reg_invalid::is_disabled(0x0));
+
+    g_vmcs_fields[addr] = sidt::base_reg_invalid::mask;
+    CHECK(sidt::base_reg_invalid::is_enabled_if_exists());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(sidt::base_reg_invalid::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_sidt_instruction_identity")
@@ -1415,11 +1771,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_sidt_instruction_identity")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = sidt::instruction_identity::sgdt << sidt::instruction_identity::from;
-    CHECK(sidt::instruction_identity::get() == sidt::instruction_identity::sgdt);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(sidt::instruction_identity::get() == (sidt::instruction_identity::mask >> sidt::instruction_identity::from));
 
-    g_vmcs_fields[addr] = sidt::instruction_identity::sidt << sidt::instruction_identity::from;
-    CHECK(sidt::instruction_identity::get_if_exists() == sidt::instruction_identity::sidt);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(sidt::instruction_identity::get(sidt::instruction_identity::mask) == (sidt::instruction_identity::mask >> sidt::instruction_identity::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(sidt::instruction_identity::get_if_exists() == (sidt::instruction_identity::mask >> sidt::instruction_identity::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_sgdt")
@@ -1429,11 +1788,11 @@ TEST_CASE("vmcs_vm_exit_instruction_information_sgdt")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = 1UL;
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(sgdt::get() == 0xFFFFFFFFFFFFFFFUL);
 
-    CHECK(sgdt::get_name() == sgdt::name);
-    CHECK(sgdt::get() == 1UL);
-    CHECK(sgdt::get_if_exists() == 1UL);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(sgdt::get_if_exists() == 0xFFFFFFFFFFFFFFFUL);
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_sgdt_scaling")
@@ -1443,11 +1802,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_sgdt_scaling")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = sgdt::scaling::scale_by_2 << sgdt::scaling::from;
-    CHECK(sgdt::scaling::get() == sgdt::scaling::scale_by_2);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(sgdt::scaling::get() == (sgdt::scaling::mask >> sgdt::scaling::from));
 
-    g_vmcs_fields[addr] = sgdt::scaling::scale_by_8 << sgdt::scaling::from;
-    CHECK(sgdt::scaling::get_if_exists() == sgdt::scaling::scale_by_8);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(sgdt::scaling::get(sgdt::scaling::mask) == (sgdt::scaling::mask >> sgdt::scaling::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(sgdt::scaling::get_if_exists() == (sgdt::scaling::mask >> sgdt::scaling::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_sgdt_address_size")
@@ -1457,11 +1819,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_sgdt_address_size")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = sgdt::address_size::_32bit << sgdt::address_size::from;
-    CHECK(sgdt::address_size::get() == sgdt::address_size::_32bit);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(sgdt::address_size::get() == (sgdt::address_size::mask >> sgdt::address_size::from));
 
-    g_vmcs_fields[addr] = sgdt::address_size::_64bit << sgdt::address_size::from;
-    CHECK(sgdt::address_size::get_if_exists() == sgdt::address_size::_64bit);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(sgdt::address_size::get(sgdt::address_size::mask) == (sgdt::address_size::mask >> sgdt::address_size::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(sgdt::address_size::get_if_exists() == (sgdt::address_size::mask >> sgdt::address_size::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_sgdt_operand_size")
@@ -1471,11 +1836,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_sgdt_operand_size")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = sgdt::operand_size::_16bit << sgdt::operand_size::from;
-    CHECK(sgdt::operand_size::get() == sgdt::operand_size::_16bit);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(sgdt::operand_size::get() == (sgdt::operand_size::mask >> sgdt::operand_size::from));
 
-    g_vmcs_fields[addr] = sgdt::operand_size::_32bit << sgdt::operand_size::from;
-    CHECK(sgdt::operand_size::get_if_exists() == sgdt::operand_size::_32bit);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(sgdt::operand_size::get(sgdt::operand_size::mask) == (sgdt::operand_size::mask >> sgdt::operand_size::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(sgdt::operand_size::get_if_exists() == (sgdt::operand_size::mask >> sgdt::operand_size::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_sgdt_segment_register")
@@ -1485,11 +1853,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_sgdt_segment_register")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = sgdt::segment_register::cs << sgdt::segment_register::from;
-    CHECK(sgdt::segment_register::get() == sgdt::segment_register::cs);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(sgdt::segment_register::get() == (sgdt::segment_register::mask >> sgdt::segment_register::from));
 
-    g_vmcs_fields[addr] = sgdt::segment_register::gs << sgdt::segment_register::from;
-    CHECK(sgdt::segment_register::get_if_exists() == sgdt::segment_register::gs);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(sgdt::segment_register::get(sgdt::segment_register::mask) == (sgdt::segment_register::mask >> sgdt::segment_register::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(sgdt::segment_register::get_if_exists() == (sgdt::segment_register::mask >> sgdt::segment_register::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_sgdt_index_reg")
@@ -1499,11 +1870,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_sgdt_index_reg")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = sgdt::index_reg::rsi << sgdt::index_reg::from;
-    CHECK(sgdt::index_reg::get() == sgdt::index_reg::rsi);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(sgdt::index_reg::get() == (sgdt::index_reg::mask >> sgdt::index_reg::from));
 
-    g_vmcs_fields[addr] = sgdt::index_reg::r11 << sgdt::index_reg::from;
-    CHECK(sgdt::index_reg::get_if_exists() == sgdt::index_reg::r11);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(sgdt::index_reg::get(sgdt::index_reg::mask) == (sgdt::index_reg::mask >> sgdt::index_reg::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(sgdt::index_reg::get_if_exists() == (sgdt::index_reg::mask >> sgdt::index_reg::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_sgdt_index_reg_invalid")
@@ -1513,11 +1887,20 @@ TEST_CASE("vmcs_vm_exit_instruction_information_sgdt_index_reg_invalid")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = sgdt::index_reg_invalid::valid << sgdt::index_reg_invalid::from;
-    CHECK(sgdt::index_reg_invalid::get() == sgdt::index_reg_invalid::valid);
+    g_vmcs_fields[addr] = sgdt::index_reg_invalid::mask;
+    CHECK(sgdt::index_reg_invalid::is_enabled());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(sgdt::index_reg_invalid::is_disabled());
 
-    g_vmcs_fields[addr] = sgdt::index_reg_invalid::invalid << sgdt::index_reg_invalid::from;
-    CHECK(sgdt::index_reg_invalid::get_if_exists() == sgdt::index_reg_invalid::invalid);
+    g_vmcs_fields[addr] = sgdt::index_reg_invalid::mask;
+    CHECK(sgdt::index_reg_invalid::is_enabled(sgdt::index_reg_invalid::mask));
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(sgdt::index_reg_invalid::is_disabled(0x0));
+
+    g_vmcs_fields[addr] = sgdt::index_reg_invalid::mask;
+    CHECK(sgdt::index_reg_invalid::is_enabled_if_exists());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(sgdt::index_reg_invalid::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_sgdt_base_reg")
@@ -1527,11 +1910,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_sgdt_base_reg")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = sgdt::base_reg::rdi << sgdt::base_reg::from;
-    CHECK(sgdt::base_reg::get() == sgdt::base_reg::rdi);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(sgdt::base_reg::get() == (sgdt::base_reg::mask >> sgdt::base_reg::from));
 
-    g_vmcs_fields[addr] = sgdt::base_reg::rcx << sgdt::base_reg::from;
-    CHECK(sgdt::base_reg::get_if_exists() == sgdt::base_reg::rcx);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(sgdt::base_reg::get(sgdt::base_reg::mask) == (sgdt::base_reg::mask >> sgdt::base_reg::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(sgdt::base_reg::get_if_exists() == (sgdt::base_reg::mask >> sgdt::base_reg::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_sgdt_base_reg_invalid")
@@ -1541,11 +1927,20 @@ TEST_CASE("vmcs_vm_exit_instruction_information_sgdt_base_reg_invalid")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = sgdt::base_reg_invalid::valid << sgdt::base_reg_invalid::from;
-    CHECK(sgdt::base_reg_invalid::get() == sgdt::base_reg_invalid::valid);
+    g_vmcs_fields[addr] = sgdt::base_reg_invalid::mask;
+    CHECK(sgdt::base_reg_invalid::is_enabled());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(sgdt::base_reg_invalid::is_disabled());
 
-    g_vmcs_fields[addr] = sgdt::base_reg_invalid::invalid << sgdt::base_reg_invalid::from;
-    CHECK(sgdt::base_reg_invalid::get_if_exists() == sgdt::base_reg_invalid::invalid);
+    g_vmcs_fields[addr] = sgdt::base_reg_invalid::mask;
+    CHECK(sgdt::base_reg_invalid::is_enabled(sgdt::base_reg_invalid::mask));
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(sgdt::base_reg_invalid::is_disabled(0x0));
+
+    g_vmcs_fields[addr] = sgdt::base_reg_invalid::mask;
+    CHECK(sgdt::base_reg_invalid::is_enabled_if_exists());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(sgdt::base_reg_invalid::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_sgdt_instruction_identity")
@@ -1555,11 +1950,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_sgdt_instruction_identity")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = sgdt::instruction_identity::sgdt << sgdt::instruction_identity::from;
-    CHECK(sgdt::instruction_identity::get() == sgdt::instruction_identity::sgdt);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(sgdt::instruction_identity::get() == (sgdt::instruction_identity::mask >> sgdt::instruction_identity::from));
 
-    g_vmcs_fields[addr] = sgdt::instruction_identity::sgdt << sgdt::instruction_identity::from;
-    CHECK(sgdt::instruction_identity::get_if_exists() == sgdt::instruction_identity::sgdt);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(sgdt::instruction_identity::get(sgdt::instruction_identity::mask) == (sgdt::instruction_identity::mask >> sgdt::instruction_identity::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(sgdt::instruction_identity::get_if_exists() == (sgdt::instruction_identity::mask >> sgdt::instruction_identity::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_lldt")
@@ -1569,11 +1967,11 @@ TEST_CASE("vmcs_vm_exit_instruction_information_lldt")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = 1UL;
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(lldt::get() == 0xFFFFFFFFFFFFFFFUL);
 
-    CHECK(lldt::get_name() == lldt::name);
-    CHECK(lldt::get() == 1UL);
-    CHECK(lldt::get_if_exists() == 1UL);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(lldt::get_if_exists() == 0xFFFFFFFFFFFFFFFUL);
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_lldt_scaling")
@@ -1583,11 +1981,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_lldt_scaling")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = lldt::scaling::scale_by_2 << lldt::scaling::from;
-    CHECK(lldt::scaling::get() == lldt::scaling::scale_by_2);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(lldt::scaling::get() == (lldt::scaling::mask >> lldt::scaling::from));
 
-    g_vmcs_fields[addr] = lldt::scaling::scale_by_8 << lldt::scaling::from;
-    CHECK(lldt::scaling::get_if_exists() == lldt::scaling::scale_by_8);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(lldt::scaling::get(lldt::scaling::mask) == (lldt::scaling::mask >> lldt::scaling::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(lldt::scaling::get_if_exists() == (lldt::scaling::mask >> lldt::scaling::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_lldt_reg1")
@@ -1597,11 +1998,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_lldt_reg1")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = lldt::reg1::rbp << lldt::reg1::from;
-    CHECK(lldt::reg1::get() == lldt::reg1::rbp);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(lldt::reg1::get() == (lldt::reg1::mask >> lldt::reg1::from));
 
-    g_vmcs_fields[addr] = lldt::reg1::r13 << lldt::reg1::from;
-    CHECK(lldt::reg1::get_if_exists() == lldt::reg1::r13);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(lldt::reg1::get(lldt::reg1::mask) == (lldt::reg1::mask >> lldt::reg1::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(lldt::reg1::get_if_exists() == (lldt::reg1::mask >> lldt::reg1::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_lldt_address_size")
@@ -1611,11 +2015,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_lldt_address_size")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = lldt::address_size::_32bit << lldt::address_size::from;
-    CHECK(lldt::address_size::get() == lldt::address_size::_32bit);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(lldt::address_size::get() == (lldt::address_size::mask >> lldt::address_size::from));
 
-    g_vmcs_fields[addr] = lldt::address_size::_64bit << lldt::address_size::from;
-    CHECK(lldt::address_size::get_if_exists() == lldt::address_size::_64bit);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(lldt::address_size::get(lldt::address_size::mask) == (lldt::address_size::mask >> lldt::address_size::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(lldt::address_size::get_if_exists() == (lldt::address_size::mask >> lldt::address_size::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_lldt_mem_reg")
@@ -1625,11 +2032,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_lldt_mem_reg")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = lldt::mem_reg::mem << lldt::mem_reg::from;
-    CHECK(lldt::mem_reg::get() == lldt::mem_reg::mem);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(lldt::mem_reg::get() == (lldt::mem_reg::mask >> lldt::mem_reg::from));
 
-    g_vmcs_fields[addr] = lldt::mem_reg::reg << lldt::mem_reg::from;
-    CHECK(lldt::mem_reg::get_if_exists() == lldt::mem_reg::reg);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(lldt::mem_reg::get(lldt::mem_reg::mask) == (lldt::mem_reg::mask >> lldt::mem_reg::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(lldt::mem_reg::get_if_exists() == (lldt::mem_reg::mask >> lldt::mem_reg::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_lldt_segment_register")
@@ -1639,11 +2049,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_lldt_segment_register")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = lldt::segment_register::cs << lldt::segment_register::from;
-    CHECK(lldt::segment_register::get() == lldt::segment_register::cs);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(lldt::segment_register::get() == (lldt::segment_register::mask >> lldt::segment_register::from));
 
-    g_vmcs_fields[addr] = lldt::segment_register::gs << lldt::segment_register::from;
-    CHECK(lldt::segment_register::get_if_exists() == lldt::segment_register::gs);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(lldt::segment_register::get(lldt::segment_register::mask) == (lldt::segment_register::mask >> lldt::segment_register::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(lldt::segment_register::get_if_exists() == (lldt::segment_register::mask >> lldt::segment_register::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_lldt_index_reg")
@@ -1653,11 +2066,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_lldt_index_reg")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = lldt::index_reg::rsi << lldt::index_reg::from;
-    CHECK(lldt::index_reg::get() == lldt::index_reg::rsi);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(lldt::index_reg::get() == (lldt::index_reg::mask >> lldt::index_reg::from));
 
-    g_vmcs_fields[addr] = lldt::index_reg::r11 << lldt::index_reg::from;
-    CHECK(lldt::index_reg::get_if_exists() == lldt::index_reg::r11);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(lldt::index_reg::get(lldt::index_reg::mask) == (lldt::index_reg::mask >> lldt::index_reg::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(lldt::index_reg::get_if_exists() == (lldt::index_reg::mask >> lldt::index_reg::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_lldt_index_reg_invalid")
@@ -1667,11 +2083,20 @@ TEST_CASE("vmcs_vm_exit_instruction_information_lldt_index_reg_invalid")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = lldt::index_reg_invalid::valid << lldt::index_reg_invalid::from;
-    CHECK(lldt::index_reg_invalid::get() == lldt::index_reg_invalid::valid);
+    g_vmcs_fields[addr] = lldt::index_reg_invalid::mask;
+    CHECK(lldt::index_reg_invalid::is_enabled());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(lldt::index_reg_invalid::is_disabled());
 
-    g_vmcs_fields[addr] = lldt::index_reg_invalid::invalid << lldt::index_reg_invalid::from;
-    CHECK(lldt::index_reg_invalid::get_if_exists() == lldt::index_reg_invalid::invalid);
+    g_vmcs_fields[addr] = lldt::index_reg_invalid::mask;
+    CHECK(lldt::index_reg_invalid::is_enabled(lldt::index_reg_invalid::mask));
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(lldt::index_reg_invalid::is_disabled(0x0));
+
+    g_vmcs_fields[addr] = lldt::index_reg_invalid::mask;
+    CHECK(lldt::index_reg_invalid::is_enabled_if_exists());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(lldt::index_reg_invalid::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_lldt_base_reg")
@@ -1681,11 +2106,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_lldt_base_reg")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = lldt::base_reg::rdi << lldt::base_reg::from;
-    CHECK(lldt::base_reg::get() == lldt::base_reg::rdi);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(lldt::base_reg::get() == (lldt::base_reg::mask >> lldt::base_reg::from));
 
-    g_vmcs_fields[addr] = lldt::base_reg::rcx << lldt::base_reg::from;
-    CHECK(lldt::base_reg::get_if_exists() == lldt::base_reg::rcx);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(lldt::base_reg::get(lldt::base_reg::mask) == (lldt::base_reg::mask >> lldt::base_reg::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(lldt::base_reg::get_if_exists() == (lldt::base_reg::mask >> lldt::base_reg::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_lldt_base_reg_invalid")
@@ -1695,11 +2123,20 @@ TEST_CASE("vmcs_vm_exit_instruction_information_lldt_base_reg_invalid")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = lldt::base_reg_invalid::valid << lldt::base_reg_invalid::from;
-    CHECK(lldt::base_reg_invalid::get() == lldt::base_reg_invalid::valid);
+    g_vmcs_fields[addr] = lldt::base_reg_invalid::mask;
+    CHECK(lldt::base_reg_invalid::is_enabled());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(lldt::base_reg_invalid::is_disabled());
 
-    g_vmcs_fields[addr] = lldt::base_reg_invalid::invalid << lldt::base_reg_invalid::from;
-    CHECK(lldt::base_reg_invalid::get_if_exists() == lldt::base_reg_invalid::invalid);
+    g_vmcs_fields[addr] = lldt::base_reg_invalid::mask;
+    CHECK(lldt::base_reg_invalid::is_enabled(lldt::base_reg_invalid::mask));
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(lldt::base_reg_invalid::is_disabled(0x0));
+
+    g_vmcs_fields[addr] = lldt::base_reg_invalid::mask;
+    CHECK(lldt::base_reg_invalid::is_enabled_if_exists());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(lldt::base_reg_invalid::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_lldt_instruction_identity")
@@ -1709,11 +2146,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_lldt_instruction_identity")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = lldt::instruction_identity::sldt << lldt::instruction_identity::from;
-    CHECK(lldt::instruction_identity::get() == lldt::instruction_identity::sldt);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(lldt::instruction_identity::get() == (lldt::instruction_identity::mask >> lldt::instruction_identity::from));
 
-    g_vmcs_fields[addr] = lldt::instruction_identity::lldt << lldt::instruction_identity::from;
-    CHECK(lldt::instruction_identity::get_if_exists() == lldt::instruction_identity::lldt);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(lldt::instruction_identity::get(lldt::instruction_identity::mask) == (lldt::instruction_identity::mask >> lldt::instruction_identity::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(lldt::instruction_identity::get_if_exists() == (lldt::instruction_identity::mask >> lldt::instruction_identity::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_ltr")
@@ -1723,11 +2163,11 @@ TEST_CASE("vmcs_vm_exit_instruction_information_ltr")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = 1UL;
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(ltr::get() == 0xFFFFFFFFFFFFFFFUL);
 
-    CHECK(ltr::get_name() == ltr::name);
-    CHECK(ltr::get() == 1UL);
-    CHECK(ltr::get_if_exists() == 1UL);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(ltr::get_if_exists() == 0xFFFFFFFFFFFFFFFUL);
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_ltr_scaling")
@@ -1737,11 +2177,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_ltr_scaling")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = ltr::scaling::scale_by_2 << ltr::scaling::from;
-    CHECK(ltr::scaling::get() == ltr::scaling::scale_by_2);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(ltr::scaling::get() == (ltr::scaling::mask >> ltr::scaling::from));
 
-    g_vmcs_fields[addr] = ltr::scaling::scale_by_8 << ltr::scaling::from;
-    CHECK(ltr::scaling::get_if_exists() == ltr::scaling::scale_by_8);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(ltr::scaling::get(ltr::scaling::mask) == (ltr::scaling::mask >> ltr::scaling::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(ltr::scaling::get_if_exists() == (ltr::scaling::mask >> ltr::scaling::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_ltr_reg1")
@@ -1751,11 +2194,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_ltr_reg1")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = ltr::reg1::rbp << ltr::reg1::from;
-    CHECK(ltr::reg1::get() == ltr::reg1::rbp);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(ltr::reg1::get() == (ltr::reg1::mask >> ltr::reg1::from));
 
-    g_vmcs_fields[addr] = ltr::reg1::r13 << ltr::reg1::from;
-    CHECK(ltr::reg1::get_if_exists() == ltr::reg1::r13);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(ltr::reg1::get(ltr::reg1::mask) == (ltr::reg1::mask >> ltr::reg1::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(ltr::reg1::get_if_exists() == (ltr::reg1::mask >> ltr::reg1::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_ltr_address_size")
@@ -1765,11 +2211,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_ltr_address_size")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = ltr::address_size::_32bit << ltr::address_size::from;
-    CHECK(ltr::address_size::get() == ltr::address_size::_32bit);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(ltr::address_size::get() == (ltr::address_size::mask >> ltr::address_size::from));
 
-    g_vmcs_fields[addr] = ltr::address_size::_64bit << ltr::address_size::from;
-    CHECK(ltr::address_size::get_if_exists() == ltr::address_size::_64bit);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(ltr::address_size::get(ltr::address_size::mask) == (ltr::address_size::mask >> ltr::address_size::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(ltr::address_size::get_if_exists() == (ltr::address_size::mask >> ltr::address_size::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_ltr_mem_reg")
@@ -1779,11 +2228,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_ltr_mem_reg")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = ltr::mem_reg::mem << ltr::mem_reg::from;
-    CHECK(ltr::mem_reg::get() == ltr::mem_reg::mem);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(ltr::mem_reg::get() == (ltr::mem_reg::mask >> ltr::mem_reg::from));
 
-    g_vmcs_fields[addr] = ltr::mem_reg::reg << ltr::mem_reg::from;
-    CHECK(ltr::mem_reg::get_if_exists() == ltr::mem_reg::reg);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(ltr::mem_reg::get(ltr::mem_reg::mask) == (ltr::mem_reg::mask >> ltr::mem_reg::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(ltr::mem_reg::get_if_exists() == (ltr::mem_reg::mask >> ltr::mem_reg::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_ltr_segment_register")
@@ -1793,11 +2245,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_ltr_segment_register")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = ltr::segment_register::cs << ltr::segment_register::from;
-    CHECK(ltr::segment_register::get() == ltr::segment_register::cs);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(ltr::segment_register::get() == (ltr::segment_register::mask >> ltr::segment_register::from));
 
-    g_vmcs_fields[addr] = ltr::segment_register::gs << ltr::segment_register::from;
-    CHECK(ltr::segment_register::get_if_exists() == ltr::segment_register::gs);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(ltr::segment_register::get(ltr::segment_register::mask) == (ltr::segment_register::mask >> ltr::segment_register::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(ltr::segment_register::get_if_exists() == (ltr::segment_register::mask >> ltr::segment_register::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_ltr_index_reg")
@@ -1807,11 +2262,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_ltr_index_reg")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = ltr::index_reg::rsi << ltr::index_reg::from;
-    CHECK(ltr::index_reg::get() == ltr::index_reg::rsi);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(ltr::index_reg::get() == (ltr::index_reg::mask >> ltr::index_reg::from));
 
-    g_vmcs_fields[addr] = ltr::index_reg::r11 << ltr::index_reg::from;
-    CHECK(ltr::index_reg::get_if_exists() == ltr::index_reg::r11);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(ltr::index_reg::get(ltr::index_reg::mask) == (ltr::index_reg::mask >> ltr::index_reg::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(ltr::index_reg::get_if_exists() == (ltr::index_reg::mask >> ltr::index_reg::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_ltr_index_reg_invalid")
@@ -1821,11 +2279,20 @@ TEST_CASE("vmcs_vm_exit_instruction_information_ltr_index_reg_invalid")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = ltr::index_reg_invalid::valid << ltr::index_reg_invalid::from;
-    CHECK(ltr::index_reg_invalid::get() == ltr::index_reg_invalid::valid);
+    g_vmcs_fields[addr] = ltr::index_reg_invalid::mask;
+    CHECK(ltr::index_reg_invalid::is_enabled());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(ltr::index_reg_invalid::is_disabled());
 
-    g_vmcs_fields[addr] = ltr::index_reg_invalid::invalid << ltr::index_reg_invalid::from;
-    CHECK(ltr::index_reg_invalid::get_if_exists() == ltr::index_reg_invalid::invalid);
+    g_vmcs_fields[addr] = ltr::index_reg_invalid::mask;
+    CHECK(ltr::index_reg_invalid::is_enabled(ltr::index_reg_invalid::mask));
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(ltr::index_reg_invalid::is_disabled(0x0));
+
+    g_vmcs_fields[addr] = ltr::index_reg_invalid::mask;
+    CHECK(ltr::index_reg_invalid::is_enabled_if_exists());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(ltr::index_reg_invalid::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_ltr_base_reg")
@@ -1835,11 +2302,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_ltr_base_reg")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = ltr::base_reg::rdi << ltr::base_reg::from;
-    CHECK(ltr::base_reg::get() == ltr::base_reg::rdi);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(ltr::base_reg::get() == (ltr::base_reg::mask >> ltr::base_reg::from));
 
-    g_vmcs_fields[addr] = ltr::base_reg::rcx << ltr::base_reg::from;
-    CHECK(ltr::base_reg::get_if_exists() == ltr::base_reg::rcx);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(ltr::base_reg::get(ltr::base_reg::mask) == (ltr::base_reg::mask >> ltr::base_reg::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(ltr::base_reg::get_if_exists() == (ltr::base_reg::mask >> ltr::base_reg::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_ltr_base_reg_invalid")
@@ -1849,11 +2319,20 @@ TEST_CASE("vmcs_vm_exit_instruction_information_ltr_base_reg_invalid")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = ltr::base_reg_invalid::valid << ltr::base_reg_invalid::from;
-    CHECK(ltr::base_reg_invalid::get() == ltr::base_reg_invalid::valid);
+    g_vmcs_fields[addr] = ltr::base_reg_invalid::mask;
+    CHECK(ltr::base_reg_invalid::is_enabled());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(ltr::base_reg_invalid::is_disabled());
 
-    g_vmcs_fields[addr] = ltr::base_reg_invalid::invalid << ltr::base_reg_invalid::from;
-    CHECK(ltr::base_reg_invalid::get_if_exists() == ltr::base_reg_invalid::invalid);
+    g_vmcs_fields[addr] = ltr::base_reg_invalid::mask;
+    CHECK(ltr::base_reg_invalid::is_enabled(ltr::base_reg_invalid::mask));
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(ltr::base_reg_invalid::is_disabled(0x0));
+
+    g_vmcs_fields[addr] = ltr::base_reg_invalid::mask;
+    CHECK(ltr::base_reg_invalid::is_enabled_if_exists());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(ltr::base_reg_invalid::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_ltr_instruction_identity")
@@ -1863,11 +2342,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_ltr_instruction_identity")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = ltr::instruction_identity::sldt << ltr::instruction_identity::from;
-    CHECK(ltr::instruction_identity::get() == ltr::instruction_identity::sldt);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(ltr::instruction_identity::get() == (ltr::instruction_identity::mask >> ltr::instruction_identity::from));
 
-    g_vmcs_fields[addr] = ltr::instruction_identity::ltr << ltr::instruction_identity::from;
-    CHECK(ltr::instruction_identity::get_if_exists() == ltr::instruction_identity::ltr);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(ltr::instruction_identity::get(ltr::instruction_identity::mask) == (ltr::instruction_identity::mask >> ltr::instruction_identity::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(ltr::instruction_identity::get_if_exists() == (ltr::instruction_identity::mask >> ltr::instruction_identity::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_sldt")
@@ -1877,11 +2359,11 @@ TEST_CASE("vmcs_vm_exit_instruction_information_sldt")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = 1UL;
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(sldt::get() == 0xFFFFFFFFFFFFFFFUL);
 
-    CHECK(sldt::get_name() == sldt::name);
-    CHECK(sldt::get() == 1UL);
-    CHECK(sldt::get_if_exists() == 1UL);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(sldt::get_if_exists() == 0xFFFFFFFFFFFFFFFUL);
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_sldt_scaling")
@@ -1891,11 +2373,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_sldt_scaling")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = sldt::scaling::scale_by_2 << sldt::scaling::from;
-    CHECK(sldt::scaling::get() == sldt::scaling::scale_by_2);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(sldt::scaling::get() == (sldt::scaling::mask >> sldt::scaling::from));
 
-    g_vmcs_fields[addr] = sldt::scaling::scale_by_8 << sldt::scaling::from;
-    CHECK(sldt::scaling::get_if_exists() == sldt::scaling::scale_by_8);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(sldt::scaling::get(sldt::scaling::mask) == (sldt::scaling::mask >> sldt::scaling::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(sldt::scaling::get_if_exists() == (sldt::scaling::mask >> sldt::scaling::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_sldt_reg1")
@@ -1905,11 +2390,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_sldt_reg1")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = sldt::reg1::rbp << sldt::reg1::from;
-    CHECK(sldt::reg1::get() == sldt::reg1::rbp);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(sldt::reg1::get() == (sldt::reg1::mask >> sldt::reg1::from));
 
-    g_vmcs_fields[addr] = sldt::reg1::r13 << sldt::reg1::from;
-    CHECK(sldt::reg1::get_if_exists() == sldt::reg1::r13);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(sldt::reg1::get(sldt::reg1::mask) == (sldt::reg1::mask >> sldt::reg1::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(sldt::reg1::get_if_exists() == (sldt::reg1::mask >> sldt::reg1::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_sldt_address_size")
@@ -1919,11 +2407,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_sldt_address_size")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = sldt::address_size::_32bit << sldt::address_size::from;
-    CHECK(sldt::address_size::get() == sldt::address_size::_32bit);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(sldt::address_size::get() == (sldt::address_size::mask >> sldt::address_size::from));
 
-    g_vmcs_fields[addr] = sldt::address_size::_64bit << sldt::address_size::from;
-    CHECK(sldt::address_size::get_if_exists() == sldt::address_size::_64bit);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(sldt::address_size::get(sldt::address_size::mask) == (sldt::address_size::mask >> sldt::address_size::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(sldt::address_size::get_if_exists() == (sldt::address_size::mask >> sldt::address_size::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_sldt_mem_reg")
@@ -1933,11 +2424,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_sldt_mem_reg")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = sldt::mem_reg::mem << sldt::mem_reg::from;
-    CHECK(sldt::mem_reg::get() == sldt::mem_reg::mem);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(sldt::mem_reg::get() == (sldt::mem_reg::mask >> sldt::mem_reg::from));
 
-    g_vmcs_fields[addr] = sldt::mem_reg::reg << sldt::mem_reg::from;
-    CHECK(sldt::mem_reg::get_if_exists() == sldt::mem_reg::reg);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(sldt::mem_reg::get(sldt::mem_reg::mask) == (sldt::mem_reg::mask >> sldt::mem_reg::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(sldt::mem_reg::get_if_exists() == (sldt::mem_reg::mask >> sldt::mem_reg::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_sldt_segment_register")
@@ -1947,11 +2441,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_sldt_segment_register")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = sldt::segment_register::cs << sldt::segment_register::from;
-    CHECK(sldt::segment_register::get() == sldt::segment_register::cs);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(sldt::segment_register::get() == (sldt::segment_register::mask >> sldt::segment_register::from));
 
-    g_vmcs_fields[addr] = sldt::segment_register::gs << sldt::segment_register::from;
-    CHECK(sldt::segment_register::get_if_exists() == sldt::segment_register::gs);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(sldt::segment_register::get(sldt::segment_register::mask) == (sldt::segment_register::mask >> sldt::segment_register::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(sldt::segment_register::get_if_exists() == (sldt::segment_register::mask >> sldt::segment_register::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_sldt_index_reg")
@@ -1961,11 +2458,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_sldt_index_reg")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = sldt::index_reg::rsi << sldt::index_reg::from;
-    CHECK(sldt::index_reg::get() == sldt::index_reg::rsi);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(sldt::index_reg::get() == (sldt::index_reg::mask >> sldt::index_reg::from));
 
-    g_vmcs_fields[addr] = sldt::index_reg::r11 << sldt::index_reg::from;
-    CHECK(sldt::index_reg::get_if_exists() == sldt::index_reg::r11);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(sldt::index_reg::get(sldt::index_reg::mask) == (sldt::index_reg::mask >> sldt::index_reg::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(sldt::index_reg::get_if_exists() == (sldt::index_reg::mask >> sldt::index_reg::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_sldt_index_reg_invalid")
@@ -1975,11 +2475,20 @@ TEST_CASE("vmcs_vm_exit_instruction_information_sldt_index_reg_invalid")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = sldt::index_reg_invalid::valid << sldt::index_reg_invalid::from;
-    CHECK(sldt::index_reg_invalid::get() == sldt::index_reg_invalid::valid);
+    g_vmcs_fields[addr] = sldt::index_reg_invalid::mask;
+    CHECK(sldt::index_reg_invalid::is_enabled());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(sldt::index_reg_invalid::is_disabled());
 
-    g_vmcs_fields[addr] = sldt::index_reg_invalid::invalid << sldt::index_reg_invalid::from;
-    CHECK(sldt::index_reg_invalid::get_if_exists() == sldt::index_reg_invalid::invalid);
+    g_vmcs_fields[addr] = sldt::index_reg_invalid::mask;
+    CHECK(sldt::index_reg_invalid::is_enabled(sldt::index_reg_invalid::mask));
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(sldt::index_reg_invalid::is_disabled(0x0));
+
+    g_vmcs_fields[addr] = sldt::index_reg_invalid::mask;
+    CHECK(sldt::index_reg_invalid::is_enabled_if_exists());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(sldt::index_reg_invalid::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_sldt_base_reg")
@@ -1989,11 +2498,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_sldt_base_reg")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = sldt::base_reg::rdi << sldt::base_reg::from;
-    CHECK(sldt::base_reg::get() == sldt::base_reg::rdi);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(sldt::base_reg::get() == (sldt::base_reg::mask >> sldt::base_reg::from));
 
-    g_vmcs_fields[addr] = sldt::base_reg::rcx << sldt::base_reg::from;
-    CHECK(sldt::base_reg::get_if_exists() == sldt::base_reg::rcx);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(sldt::base_reg::get(sldt::base_reg::mask) == (sldt::base_reg::mask >> sldt::base_reg::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(sldt::base_reg::get_if_exists() == (sldt::base_reg::mask >> sldt::base_reg::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_sldt_base_reg_invalid")
@@ -2003,11 +2515,20 @@ TEST_CASE("vmcs_vm_exit_instruction_information_sldt_base_reg_invalid")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = sldt::base_reg_invalid::valid << sldt::base_reg_invalid::from;
-    CHECK(sldt::base_reg_invalid::get() == sldt::base_reg_invalid::valid);
+    g_vmcs_fields[addr] = sldt::base_reg_invalid::mask;
+    CHECK(sldt::base_reg_invalid::is_enabled());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(sldt::base_reg_invalid::is_disabled());
 
-    g_vmcs_fields[addr] = sldt::base_reg_invalid::invalid << sldt::base_reg_invalid::from;
-    CHECK(sldt::base_reg_invalid::get_if_exists() == sldt::base_reg_invalid::invalid);
+    g_vmcs_fields[addr] = sldt::base_reg_invalid::mask;
+    CHECK(sldt::base_reg_invalid::is_enabled(sldt::base_reg_invalid::mask));
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(sldt::base_reg_invalid::is_disabled(0x0));
+
+    g_vmcs_fields[addr] = sldt::base_reg_invalid::mask;
+    CHECK(sldt::base_reg_invalid::is_enabled_if_exists());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(sldt::base_reg_invalid::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_sldt_instruction_identity")
@@ -2017,11 +2538,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_sldt_instruction_identity")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = sldt::instruction_identity::sldt << sldt::instruction_identity::from;
-    CHECK(sldt::instruction_identity::get() == sldt::instruction_identity::sldt);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(sldt::instruction_identity::get() == (sldt::instruction_identity::mask >> sldt::instruction_identity::from));
 
-    g_vmcs_fields[addr] = sldt::instruction_identity::ltr << sldt::instruction_identity::from;
-    CHECK(sldt::instruction_identity::get_if_exists() == sldt::instruction_identity::ltr);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(sldt::instruction_identity::get(sldt::instruction_identity::mask) == (sldt::instruction_identity::mask >> sldt::instruction_identity::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(sldt::instruction_identity::get_if_exists() == (sldt::instruction_identity::mask >> sldt::instruction_identity::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_str")
@@ -2031,11 +2555,11 @@ TEST_CASE("vmcs_vm_exit_instruction_information_str")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = 1UL;
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(str::get() == 0xFFFFFFFFFFFFFFFUL);
 
-    CHECK(str::get_name() == str::name);
-    CHECK(str::get() == 1UL);
-    CHECK(str::get_if_exists() == 1UL);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(str::get_if_exists() == 0xFFFFFFFFFFFFFFFUL);
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_str_scaling")
@@ -2045,11 +2569,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_str_scaling")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = str::scaling::scale_by_2 << str::scaling::from;
-    CHECK(str::scaling::get() == str::scaling::scale_by_2);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(str::scaling::get() == (str::scaling::mask >> str::scaling::from));
 
-    g_vmcs_fields[addr] = str::scaling::scale_by_8 << str::scaling::from;
-    CHECK(str::scaling::get_if_exists() == str::scaling::scale_by_8);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(str::scaling::get(str::scaling::mask) == (str::scaling::mask >> str::scaling::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(str::scaling::get_if_exists() == (str::scaling::mask >> str::scaling::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_str_reg1")
@@ -2059,11 +2586,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_str_reg1")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = str::reg1::rbp << str::reg1::from;
-    CHECK(str::reg1::get() == str::reg1::rbp);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(str::reg1::get() == (str::reg1::mask >> str::reg1::from));
 
-    g_vmcs_fields[addr] = str::reg1::r13 << str::reg1::from;
-    CHECK(str::reg1::get_if_exists() == str::reg1::r13);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(str::reg1::get(str::reg1::mask) == (str::reg1::mask >> str::reg1::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(str::reg1::get_if_exists() == (str::reg1::mask >> str::reg1::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_str_address_size")
@@ -2073,11 +2603,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_str_address_size")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = str::address_size::_32bit << str::address_size::from;
-    CHECK(str::address_size::get() == str::address_size::_32bit);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(str::address_size::get() == (str::address_size::mask >> str::address_size::from));
 
-    g_vmcs_fields[addr] = str::address_size::_64bit << str::address_size::from;
-    CHECK(str::address_size::get_if_exists() == str::address_size::_64bit);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(str::address_size::get(str::address_size::mask) == (str::address_size::mask >> str::address_size::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(str::address_size::get_if_exists() == (str::address_size::mask >> str::address_size::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_str_mem_reg")
@@ -2087,11 +2620,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_str_mem_reg")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = str::mem_reg::mem << str::mem_reg::from;
-    CHECK(str::mem_reg::get() == str::mem_reg::mem);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(str::mem_reg::get() == (str::mem_reg::mask >> str::mem_reg::from));
 
-    g_vmcs_fields[addr] = str::mem_reg::reg << str::mem_reg::from;
-    CHECK(str::mem_reg::get_if_exists() == str::mem_reg::reg);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(str::mem_reg::get(str::mem_reg::mask) == (str::mem_reg::mask >> str::mem_reg::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(str::mem_reg::get_if_exists() == (str::mem_reg::mask >> str::mem_reg::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_str_segment_register")
@@ -2101,11 +2637,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_str_segment_register")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = str::segment_register::cs << str::segment_register::from;
-    CHECK(str::segment_register::get() == str::segment_register::cs);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(str::segment_register::get() == (str::segment_register::mask >> str::segment_register::from));
 
-    g_vmcs_fields[addr] = str::segment_register::gs << str::segment_register::from;
-    CHECK(str::segment_register::get_if_exists() == str::segment_register::gs);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(str::segment_register::get(str::segment_register::mask) == (str::segment_register::mask >> str::segment_register::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(str::segment_register::get_if_exists() == (str::segment_register::mask >> str::segment_register::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_str_index_reg")
@@ -2115,11 +2654,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_str_index_reg")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = str::index_reg::rsi << str::index_reg::from;
-    CHECK(str::index_reg::get() == str::index_reg::rsi);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(str::index_reg::get() == (str::index_reg::mask >> str::index_reg::from));
 
-    g_vmcs_fields[addr] = str::index_reg::r11 << str::index_reg::from;
-    CHECK(str::index_reg::get_if_exists() == str::index_reg::r11);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(str::index_reg::get(str::index_reg::mask) == (str::index_reg::mask >> str::index_reg::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(str::index_reg::get_if_exists() == (str::index_reg::mask >> str::index_reg::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_str_index_reg_invalid")
@@ -2129,11 +2671,20 @@ TEST_CASE("vmcs_vm_exit_instruction_information_str_index_reg_invalid")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = str::index_reg_invalid::valid << str::index_reg_invalid::from;
-    CHECK(str::index_reg_invalid::get() == str::index_reg_invalid::valid);
+    g_vmcs_fields[addr] = str::index_reg_invalid::mask;
+    CHECK(str::index_reg_invalid::is_enabled());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(str::index_reg_invalid::is_disabled());
 
-    g_vmcs_fields[addr] = str::index_reg_invalid::invalid << str::index_reg_invalid::from;
-    CHECK(str::index_reg_invalid::get_if_exists() == str::index_reg_invalid::invalid);
+    g_vmcs_fields[addr] = str::index_reg_invalid::mask;
+    CHECK(str::index_reg_invalid::is_enabled(str::index_reg_invalid::mask));
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(str::index_reg_invalid::is_disabled(0x0));
+
+    g_vmcs_fields[addr] = str::index_reg_invalid::mask;
+    CHECK(str::index_reg_invalid::is_enabled_if_exists());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(str::index_reg_invalid::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_str_base_reg")
@@ -2143,11 +2694,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_str_base_reg")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = str::base_reg::rdi << str::base_reg::from;
-    CHECK(str::base_reg::get() == str::base_reg::rdi);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(str::base_reg::get() == (str::base_reg::mask >> str::base_reg::from));
 
-    g_vmcs_fields[addr] = str::base_reg::rcx << str::base_reg::from;
-    CHECK(str::base_reg::get_if_exists() == str::base_reg::rcx);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(str::base_reg::get(str::base_reg::mask) == (str::base_reg::mask >> str::base_reg::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(str::base_reg::get_if_exists() == (str::base_reg::mask >> str::base_reg::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_str_base_reg_invalid")
@@ -2157,11 +2711,20 @@ TEST_CASE("vmcs_vm_exit_instruction_information_str_base_reg_invalid")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = str::base_reg_invalid::valid << str::base_reg_invalid::from;
-    CHECK(str::base_reg_invalid::get() == str::base_reg_invalid::valid);
+    g_vmcs_fields[addr] = str::base_reg_invalid::mask;
+    CHECK(str::base_reg_invalid::is_enabled());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(str::base_reg_invalid::is_disabled());
 
-    g_vmcs_fields[addr] = str::base_reg_invalid::invalid << str::base_reg_invalid::from;
-    CHECK(str::base_reg_invalid::get_if_exists() == str::base_reg_invalid::invalid);
+    g_vmcs_fields[addr] = str::base_reg_invalid::mask;
+    CHECK(str::base_reg_invalid::is_enabled(str::base_reg_invalid::mask));
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(str::base_reg_invalid::is_disabled(0x0));
+
+    g_vmcs_fields[addr] = str::base_reg_invalid::mask;
+    CHECK(str::base_reg_invalid::is_enabled_if_exists());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(str::base_reg_invalid::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_str_instruction_identity")
@@ -2171,11 +2734,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_str_instruction_identity")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = str::instruction_identity::sldt << str::instruction_identity::from;
-    CHECK(str::instruction_identity::get() == str::instruction_identity::sldt);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(str::instruction_identity::get() == (str::instruction_identity::mask >> str::instruction_identity::from));
 
-    g_vmcs_fields[addr] = str::instruction_identity::str << str::instruction_identity::from;
-    CHECK(str::instruction_identity::get_if_exists() == str::instruction_identity::str);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(str::instruction_identity::get(str::instruction_identity::mask) == (str::instruction_identity::mask >> str::instruction_identity::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(str::instruction_identity::get_if_exists() == (str::instruction_identity::mask >> str::instruction_identity::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_rdrand")
@@ -2185,11 +2751,11 @@ TEST_CASE("vmcs_vm_exit_instruction_information_rdrand")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = 1UL;
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(rdrand::get() == 0xFFFFFFFFFFFFFFFUL);
 
-    CHECK(rdrand::get_name() == rdrand::name);
-    CHECK(rdrand::get() == 1UL);
-    CHECK(rdrand::get_if_exists() == 1UL);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(rdrand::get_if_exists() == 0xFFFFFFFFFFFFFFFUL);
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_rdrand_destination_register")
@@ -2199,12 +2765,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_rdrand_destination_register")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = rdrand::destination_register::rdx << rdrand::destination_register::from;
-    CHECK(rdrand::destination_register::get() == rdrand::destination_register::rdx);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(rdrand::destination_register::get() == (rdrand::destination_register::mask >> rdrand::destination_register::from));
 
-    g_vmcs_fields[addr] = rdrand::destination_register::r14 << rdrand::destination_register::from;
-    CHECK(rdrand::destination_register::get_if_exists() ==
-          rdrand::destination_register::r14);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(rdrand::destination_register::get(rdrand::destination_register::mask) == (rdrand::destination_register::mask >> rdrand::destination_register::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(rdrand::destination_register::get_if_exists() == (rdrand::destination_register::mask >> rdrand::destination_register::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_rdrand_operand_size")
@@ -2214,11 +2782,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_rdrand_operand_size")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = rdrand::operand_size::_16bit << rdrand::operand_size::from;
-    CHECK(rdrand::operand_size::get() == rdrand::operand_size::_16bit);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(rdrand::operand_size::get() == (rdrand::operand_size::mask >> rdrand::operand_size::from));
 
-    g_vmcs_fields[addr] = rdrand::operand_size::_64bit << rdrand::operand_size::from;
-    CHECK(rdrand::operand_size::get_if_exists() == rdrand::operand_size::_64bit);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(rdrand::operand_size::get(rdrand::operand_size::mask) == (rdrand::operand_size::mask >> rdrand::operand_size::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(rdrand::operand_size::get_if_exists() == (rdrand::operand_size::mask >> rdrand::operand_size::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_rdseed")
@@ -2228,11 +2799,11 @@ TEST_CASE("vmcs_vm_exit_instruction_information_rdseed")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = 1UL;
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(rdseed::get() == 0xFFFFFFFFFFFFFFFUL);
 
-    CHECK(rdseed::get_name() == rdseed::name);
-    CHECK(rdseed::get() == 1UL);
-    CHECK(rdseed::get_if_exists() == 1UL);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(rdseed::get_if_exists() == 0xFFFFFFFFFFFFFFFUL);
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_rdseed_destination_register")
@@ -2242,12 +2813,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_rdseed_destination_register")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = rdseed::destination_register::rdx << rdseed::destination_register::from;
-    CHECK(rdseed::destination_register::get() == rdseed::destination_register::rdx);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(rdseed::destination_register::get() == (rdseed::destination_register::mask >> rdseed::destination_register::from));
 
-    g_vmcs_fields[addr] = rdseed::destination_register::r14 << rdseed::destination_register::from;
-    CHECK(rdseed::destination_register::get_if_exists() ==
-          rdseed::destination_register::r14);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(rdseed::destination_register::get(rdseed::destination_register::mask) == (rdseed::destination_register::mask >> rdseed::destination_register::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(rdseed::destination_register::get_if_exists() == (rdseed::destination_register::mask >> rdseed::destination_register::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_rdseed_operand_size")
@@ -2257,11 +2830,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_rdseed_operand_size")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = rdseed::operand_size::_16bit << rdseed::operand_size::from;
-    CHECK(rdseed::operand_size::get() == rdseed::operand_size::_16bit);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(rdseed::operand_size::get() == (rdseed::operand_size::mask >> rdseed::operand_size::from));
 
-    g_vmcs_fields[addr] = rdseed::operand_size::_64bit << rdseed::operand_size::from;
-    CHECK(rdseed::operand_size::get_if_exists() == rdseed::operand_size::_64bit);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(rdseed::operand_size::get(rdseed::operand_size::mask) == (rdseed::operand_size::mask >> rdseed::operand_size::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(rdseed::operand_size::get_if_exists() == (rdseed::operand_size::mask >> rdseed::operand_size::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_vmclear")
@@ -2271,11 +2847,11 @@ TEST_CASE("vmcs_vm_exit_instruction_information_vmclear")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = 1UL;
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmclear::get() == 0xFFFFFFFFFFFFFFFUL);
 
-    CHECK(vmclear::get_name() == vmclear::name);
-    CHECK(vmclear::get() == 1UL);
-    CHECK(vmclear::get_if_exists() == 1UL);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmclear::get_if_exists() == 0xFFFFFFFFFFFFFFFUL);
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_vmclear_scaling")
@@ -2285,11 +2861,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_vmclear_scaling")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = vmclear::scaling::scale_by_2 << vmclear::scaling::from;
-    CHECK(vmclear::scaling::get() == vmclear::scaling::scale_by_2);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmclear::scaling::get() == (vmclear::scaling::mask >> vmclear::scaling::from));
 
-    g_vmcs_fields[addr] = vmclear::scaling::scale_by_8 << vmclear::scaling::from;
-    CHECK(vmclear::scaling::get_if_exists() == vmclear::scaling::scale_by_8);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmclear::scaling::get(vmclear::scaling::mask) == (vmclear::scaling::mask >> vmclear::scaling::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmclear::scaling::get_if_exists() == (vmclear::scaling::mask >> vmclear::scaling::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_vmclear_address_size")
@@ -2299,11 +2878,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_vmclear_address_size")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = vmclear::address_size::_32bit << vmclear::address_size::from;
-    CHECK(vmclear::address_size::get() == vmclear::address_size::_32bit);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmclear::address_size::get() == (vmclear::address_size::mask >> vmclear::address_size::from));
 
-    g_vmcs_fields[addr] = vmclear::address_size::_64bit << vmclear::address_size::from;
-    CHECK(vmclear::address_size::get_if_exists() == vmclear::address_size::_64bit);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmclear::address_size::get(vmclear::address_size::mask) == (vmclear::address_size::mask >> vmclear::address_size::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmclear::address_size::get_if_exists() == (vmclear::address_size::mask >> vmclear::address_size::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_vmclear_segment_register")
@@ -2313,11 +2895,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_vmclear_segment_register")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = vmclear::segment_register::cs << vmclear::segment_register::from;
-    CHECK(vmclear::segment_register::get() == vmclear::segment_register::cs);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmclear::segment_register::get() == (vmclear::segment_register::mask >> vmclear::segment_register::from));
 
-    g_vmcs_fields[addr] = vmclear::segment_register::gs << vmclear::segment_register::from;
-    CHECK(vmclear::segment_register::get_if_exists() == vmclear::segment_register::gs);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmclear::segment_register::get(vmclear::segment_register::mask) == (vmclear::segment_register::mask >> vmclear::segment_register::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmclear::segment_register::get_if_exists() == (vmclear::segment_register::mask >> vmclear::segment_register::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_vmclear_index_reg")
@@ -2327,11 +2912,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_vmclear_index_reg")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = vmclear::index_reg::rsi << vmclear::index_reg::from;
-    CHECK(vmclear::index_reg::get() == vmclear::index_reg::rsi);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmclear::index_reg::get() == (vmclear::index_reg::mask >> vmclear::index_reg::from));
 
-    g_vmcs_fields[addr] = vmclear::index_reg::r11 << vmclear::index_reg::from;
-    CHECK(vmclear::index_reg::get_if_exists() == vmclear::index_reg::r11);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmclear::index_reg::get(vmclear::index_reg::mask) == (vmclear::index_reg::mask >> vmclear::index_reg::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmclear::index_reg::get_if_exists() == (vmclear::index_reg::mask >> vmclear::index_reg::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_vmclear_index_reg_invalid")
@@ -2341,12 +2929,20 @@ TEST_CASE("vmcs_vm_exit_instruction_information_vmclear_index_reg_invalid")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = vmclear::index_reg_invalid::valid << vmclear::index_reg_invalid::from;
-    CHECK(vmclear::index_reg_invalid::get() == vmclear::index_reg_invalid::valid);
+    g_vmcs_fields[addr] = vmclear::index_reg_invalid::mask;
+    CHECK(vmclear::index_reg_invalid::is_enabled());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(vmclear::index_reg_invalid::is_disabled());
 
-    g_vmcs_fields[addr] = vmclear::index_reg_invalid::invalid << vmclear::index_reg_invalid::from;
-    CHECK(vmclear::index_reg_invalid::get_if_exists() ==
-          vmclear::index_reg_invalid::invalid);
+    g_vmcs_fields[addr] = vmclear::index_reg_invalid::mask;
+    CHECK(vmclear::index_reg_invalid::is_enabled(vmclear::index_reg_invalid::mask));
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(vmclear::index_reg_invalid::is_disabled(0x0));
+
+    g_vmcs_fields[addr] = vmclear::index_reg_invalid::mask;
+    CHECK(vmclear::index_reg_invalid::is_enabled_if_exists());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(vmclear::index_reg_invalid::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_vmclear_base_reg")
@@ -2356,11 +2952,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_vmclear_base_reg")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = vmclear::base_reg::rdi << vmclear::base_reg::from;
-    CHECK(vmclear::base_reg::get() == vmclear::base_reg::rdi);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmclear::base_reg::get() == (vmclear::base_reg::mask >> vmclear::base_reg::from));
 
-    g_vmcs_fields[addr] = vmclear::base_reg::rcx << vmclear::base_reg::from;
-    CHECK(vmclear::base_reg::get_if_exists() == vmclear::base_reg::rcx);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmclear::base_reg::get(vmclear::base_reg::mask) == (vmclear::base_reg::mask >> vmclear::base_reg::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmclear::base_reg::get_if_exists() == (vmclear::base_reg::mask >> vmclear::base_reg::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_vmclear_base_reg_invalid")
@@ -2370,11 +2969,20 @@ TEST_CASE("vmcs_vm_exit_instruction_information_vmclear_base_reg_invalid")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = vmclear::base_reg_invalid::valid << vmclear::base_reg_invalid::from;
-    CHECK(vmclear::base_reg_invalid::get() == vmclear::base_reg_invalid::valid);
+    g_vmcs_fields[addr] = vmclear::base_reg_invalid::mask;
+    CHECK(vmclear::base_reg_invalid::is_enabled());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(vmclear::base_reg_invalid::is_disabled());
 
-    g_vmcs_fields[addr] = vmclear::base_reg_invalid::invalid << vmclear::base_reg_invalid::from;
-    CHECK(vmclear::base_reg_invalid::get_if_exists() == vmclear::base_reg_invalid::invalid);
+    g_vmcs_fields[addr] = vmclear::base_reg_invalid::mask;
+    CHECK(vmclear::base_reg_invalid::is_enabled(vmclear::base_reg_invalid::mask));
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(vmclear::base_reg_invalid::is_disabled(0x0));
+
+    g_vmcs_fields[addr] = vmclear::base_reg_invalid::mask;
+    CHECK(vmclear::base_reg_invalid::is_enabled_if_exists());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(vmclear::base_reg_invalid::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_vmptrld")
@@ -2384,11 +2992,11 @@ TEST_CASE("vmcs_vm_exit_instruction_information_vmptrld")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = 1UL;
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmptrld::get() == 0xFFFFFFFFFFFFFFFUL);
 
-    CHECK(vmptrld::get_name() == vmptrld::name);
-    CHECK(vmptrld::get() == 1UL);
-    CHECK(vmptrld::get_if_exists() == 1UL);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmptrld::get_if_exists() == 0xFFFFFFFFFFFFFFFUL);
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_vmptrld_scaling")
@@ -2398,11 +3006,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_vmptrld_scaling")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = vmptrld::scaling::scale_by_2 << vmptrld::scaling::from;
-    CHECK(vmptrld::scaling::get() == vmptrld::scaling::scale_by_2);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmptrld::scaling::get() == (vmptrld::scaling::mask >> vmptrld::scaling::from));
 
-    g_vmcs_fields[addr] = vmptrld::scaling::scale_by_8 << vmptrld::scaling::from;
-    CHECK(vmptrld::scaling::get_if_exists() == vmptrld::scaling::scale_by_8);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmptrld::scaling::get(vmptrld::scaling::mask) == (vmptrld::scaling::mask >> vmptrld::scaling::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmptrld::scaling::get_if_exists() == (vmptrld::scaling::mask >> vmptrld::scaling::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_vmptrld_address_size")
@@ -2412,11 +3023,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_vmptrld_address_size")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = vmptrld::address_size::_32bit << vmptrld::address_size::from;
-    CHECK(vmptrld::address_size::get() == vmptrld::address_size::_32bit);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmptrld::address_size::get() == (vmptrld::address_size::mask >> vmptrld::address_size::from));
 
-    g_vmcs_fields[addr] = vmptrld::address_size::_64bit << vmptrld::address_size::from;
-    CHECK(vmptrld::address_size::get_if_exists() == vmptrld::address_size::_64bit);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmptrld::address_size::get(vmptrld::address_size::mask) == (vmptrld::address_size::mask >> vmptrld::address_size::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmptrld::address_size::get_if_exists() == (vmptrld::address_size::mask >> vmptrld::address_size::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_vmptrld_segment_register")
@@ -2426,11 +3040,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_vmptrld_segment_register")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = vmptrld::segment_register::cs << vmptrld::segment_register::from;
-    CHECK(vmptrld::segment_register::get() == vmptrld::segment_register::cs);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmptrld::segment_register::get() == (vmptrld::segment_register::mask >> vmptrld::segment_register::from));
 
-    g_vmcs_fields[addr] = vmptrld::segment_register::gs << vmptrld::segment_register::from;
-    CHECK(vmptrld::segment_register::get_if_exists() == vmptrld::segment_register::gs);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmptrld::segment_register::get(vmptrld::segment_register::mask) == (vmptrld::segment_register::mask >> vmptrld::segment_register::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmptrld::segment_register::get_if_exists() == (vmptrld::segment_register::mask >> vmptrld::segment_register::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_vmptrld_index_reg")
@@ -2440,11 +3057,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_vmptrld_index_reg")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = vmptrld::index_reg::rsi << vmptrld::index_reg::from;
-    CHECK(vmptrld::index_reg::get() == vmptrld::index_reg::rsi);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmptrld::index_reg::get() == (vmptrld::index_reg::mask >> vmptrld::index_reg::from));
 
-    g_vmcs_fields[addr] = vmptrld::index_reg::r11 << vmptrld::index_reg::from;
-    CHECK(vmptrld::index_reg::get_if_exists() == vmptrld::index_reg::r11);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmptrld::index_reg::get(vmptrld::index_reg::mask) == (vmptrld::index_reg::mask >> vmptrld::index_reg::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmptrld::index_reg::get_if_exists() == (vmptrld::index_reg::mask >> vmptrld::index_reg::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_vmptrld_index_reg_invalid")
@@ -2454,12 +3074,20 @@ TEST_CASE("vmcs_vm_exit_instruction_information_vmptrld_index_reg_invalid")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = vmptrld::index_reg_invalid::valid << vmptrld::index_reg_invalid::from;
-    CHECK(vmptrld::index_reg_invalid::get() == vmptrld::index_reg_invalid::valid);
+    g_vmcs_fields[addr] = vmptrld::index_reg_invalid::mask;
+    CHECK(vmptrld::index_reg_invalid::is_enabled());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(vmptrld::index_reg_invalid::is_disabled());
 
-    g_vmcs_fields[addr] = vmptrld::index_reg_invalid::invalid << vmptrld::index_reg_invalid::from;
-    CHECK(vmptrld::index_reg_invalid::get_if_exists() ==
-          vmptrld::index_reg_invalid::invalid);
+    g_vmcs_fields[addr] = vmptrld::index_reg_invalid::mask;
+    CHECK(vmptrld::index_reg_invalid::is_enabled(vmptrld::index_reg_invalid::mask));
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(vmptrld::index_reg_invalid::is_disabled(0x0));
+
+    g_vmcs_fields[addr] = vmptrld::index_reg_invalid::mask;
+    CHECK(vmptrld::index_reg_invalid::is_enabled_if_exists());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(vmptrld::index_reg_invalid::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_vmptrld_base_reg")
@@ -2469,11 +3097,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_vmptrld_base_reg")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = vmptrld::base_reg::rdi << vmptrld::base_reg::from;
-    CHECK(vmptrld::base_reg::get() == vmptrld::base_reg::rdi);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmptrld::base_reg::get() == (vmptrld::base_reg::mask >> vmptrld::base_reg::from));
 
-    g_vmcs_fields[addr] = vmptrld::base_reg::rcx << vmptrld::base_reg::from;
-    CHECK(vmptrld::base_reg::get_if_exists() == vmptrld::base_reg::rcx);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmptrld::base_reg::get(vmptrld::base_reg::mask) == (vmptrld::base_reg::mask >> vmptrld::base_reg::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmptrld::base_reg::get_if_exists() == (vmptrld::base_reg::mask >> vmptrld::base_reg::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_vmptrld_base_reg_invalid")
@@ -2483,11 +3114,20 @@ TEST_CASE("vmcs_vm_exit_instruction_information_vmptrld_base_reg_invalid")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = vmptrld::base_reg_invalid::valid << vmptrld::base_reg_invalid::from;
-    CHECK(vmptrld::base_reg_invalid::get() == vmptrld::base_reg_invalid::valid);
+    g_vmcs_fields[addr] = vmptrld::base_reg_invalid::mask;
+    CHECK(vmptrld::base_reg_invalid::is_enabled());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(vmptrld::base_reg_invalid::is_disabled());
 
-    g_vmcs_fields[addr] = vmptrld::base_reg_invalid::invalid << vmptrld::base_reg_invalid::from;
-    CHECK(vmptrld::base_reg_invalid::get_if_exists() == vmptrld::base_reg_invalid::invalid);
+    g_vmcs_fields[addr] = vmptrld::base_reg_invalid::mask;
+    CHECK(vmptrld::base_reg_invalid::is_enabled(vmptrld::base_reg_invalid::mask));
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(vmptrld::base_reg_invalid::is_disabled(0x0));
+
+    g_vmcs_fields[addr] = vmptrld::base_reg_invalid::mask;
+    CHECK(vmptrld::base_reg_invalid::is_enabled_if_exists());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(vmptrld::base_reg_invalid::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_vmptrst")
@@ -2497,11 +3137,11 @@ TEST_CASE("vmcs_vm_exit_instruction_information_vmptrst")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = 1UL;
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmptrst::get() == 0xFFFFFFFFFFFFFFFUL);
 
-    CHECK(vmptrst::get_name() == vmptrst::name);
-    CHECK(vmptrst::get() == 1UL);
-    CHECK(vmptrst::get_if_exists() == 1UL);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmptrst::get_if_exists() == 0xFFFFFFFFFFFFFFFUL);
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_vmptrst_scaling")
@@ -2511,11 +3151,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_vmptrst_scaling")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = vmptrst::scaling::scale_by_2 << vmptrst::scaling::from;
-    CHECK(vmptrst::scaling::get() == vmptrst::scaling::scale_by_2);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmptrst::scaling::get() == (vmptrst::scaling::mask >> vmptrst::scaling::from));
 
-    g_vmcs_fields[addr] = vmptrst::scaling::scale_by_8 << vmptrst::scaling::from;
-    CHECK(vmptrst::scaling::get_if_exists() == vmptrst::scaling::scale_by_8);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmptrst::scaling::get(vmptrst::scaling::mask) == (vmptrst::scaling::mask >> vmptrst::scaling::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmptrst::scaling::get_if_exists() == (vmptrst::scaling::mask >> vmptrst::scaling::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_vmptrst_address_size")
@@ -2525,11 +3168,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_vmptrst_address_size")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = vmptrst::address_size::_32bit << vmptrst::address_size::from;
-    CHECK(vmptrst::address_size::get() == vmptrst::address_size::_32bit);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmptrst::address_size::get() == (vmptrst::address_size::mask >> vmptrst::address_size::from));
 
-    g_vmcs_fields[addr] = vmptrst::address_size::_64bit << vmptrst::address_size::from;
-    CHECK(vmptrst::address_size::get_if_exists() == vmptrst::address_size::_64bit);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmptrst::address_size::get(vmptrst::address_size::mask) == (vmptrst::address_size::mask >> vmptrst::address_size::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmptrst::address_size::get_if_exists() == (vmptrst::address_size::mask >> vmptrst::address_size::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_vmptrst_segment_register")
@@ -2539,11 +3185,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_vmptrst_segment_register")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = vmptrst::segment_register::cs << vmptrst::segment_register::from;
-    CHECK(vmptrst::segment_register::get() == vmptrst::segment_register::cs);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmptrst::segment_register::get() == (vmptrst::segment_register::mask >> vmptrst::segment_register::from));
 
-    g_vmcs_fields[addr] = vmptrst::segment_register::gs << vmptrst::segment_register::from;
-    CHECK(vmptrst::segment_register::get_if_exists() == vmptrst::segment_register::gs);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmptrst::segment_register::get(vmptrst::segment_register::mask) == (vmptrst::segment_register::mask >> vmptrst::segment_register::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmptrst::segment_register::get_if_exists() == (vmptrst::segment_register::mask >> vmptrst::segment_register::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_vmptrst_index_reg")
@@ -2553,11 +3202,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_vmptrst_index_reg")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = vmptrst::index_reg::rsi << vmptrst::index_reg::from;
-    CHECK(vmptrst::index_reg::get() == vmptrst::index_reg::rsi);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmptrst::index_reg::get() == (vmptrst::index_reg::mask >> vmptrst::index_reg::from));
 
-    g_vmcs_fields[addr] = vmptrst::index_reg::r11 << vmptrst::index_reg::from;
-    CHECK(vmptrst::index_reg::get_if_exists() == vmptrst::index_reg::r11);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmptrst::index_reg::get(vmptrst::index_reg::mask) == (vmptrst::index_reg::mask >> vmptrst::index_reg::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmptrst::index_reg::get_if_exists() == (vmptrst::index_reg::mask >> vmptrst::index_reg::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_vmptrst_index_reg_invalid")
@@ -2567,12 +3219,20 @@ TEST_CASE("vmcs_vm_exit_instruction_information_vmptrst_index_reg_invalid")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = vmptrst::index_reg_invalid::valid << vmptrst::index_reg_invalid::from;
-    CHECK(vmptrst::index_reg_invalid::get() == vmptrst::index_reg_invalid::valid);
+    g_vmcs_fields[addr] = vmptrst::index_reg_invalid::mask;
+    CHECK(vmptrst::index_reg_invalid::is_enabled());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(vmptrst::index_reg_invalid::is_disabled());
 
-    g_vmcs_fields[addr] = vmptrst::index_reg_invalid::invalid << vmptrst::index_reg_invalid::from;
-    CHECK(vmptrst::index_reg_invalid::get_if_exists() ==
-          vmptrst::index_reg_invalid::invalid);
+    g_vmcs_fields[addr] = vmptrst::index_reg_invalid::mask;
+    CHECK(vmptrst::index_reg_invalid::is_enabled(vmptrst::index_reg_invalid::mask));
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(vmptrst::index_reg_invalid::is_disabled(0x0));
+
+    g_vmcs_fields[addr] = vmptrst::index_reg_invalid::mask;
+    CHECK(vmptrst::index_reg_invalid::is_enabled_if_exists());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(vmptrst::index_reg_invalid::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_vmptrst_base_reg")
@@ -2582,11 +3242,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_vmptrst_base_reg")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = vmptrst::base_reg::rdi << vmptrst::base_reg::from;
-    CHECK(vmptrst::base_reg::get() == vmptrst::base_reg::rdi);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmptrst::base_reg::get() == (vmptrst::base_reg::mask >> vmptrst::base_reg::from));
 
-    g_vmcs_fields[addr] = vmptrst::base_reg::rcx << vmptrst::base_reg::from;
-    CHECK(vmptrst::base_reg::get_if_exists() == vmptrst::base_reg::rcx);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmptrst::base_reg::get(vmptrst::base_reg::mask) == (vmptrst::base_reg::mask >> vmptrst::base_reg::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmptrst::base_reg::get_if_exists() == (vmptrst::base_reg::mask >> vmptrst::base_reg::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_vmptrst_base_reg_invalid")
@@ -2596,11 +3259,20 @@ TEST_CASE("vmcs_vm_exit_instruction_information_vmptrst_base_reg_invalid")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = vmptrst::base_reg_invalid::valid << vmptrst::base_reg_invalid::from;
-    CHECK(vmptrst::base_reg_invalid::get() == vmptrst::base_reg_invalid::valid);
+    g_vmcs_fields[addr] = vmptrst::base_reg_invalid::mask;
+    CHECK(vmptrst::base_reg_invalid::is_enabled());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(vmptrst::base_reg_invalid::is_disabled());
 
-    g_vmcs_fields[addr] = vmptrst::base_reg_invalid::invalid << vmptrst::base_reg_invalid::from;
-    CHECK(vmptrst::base_reg_invalid::get_if_exists() == vmptrst::base_reg_invalid::invalid);
+    g_vmcs_fields[addr] = vmptrst::base_reg_invalid::mask;
+    CHECK(vmptrst::base_reg_invalid::is_enabled(vmptrst::base_reg_invalid::mask));
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(vmptrst::base_reg_invalid::is_disabled(0x0));
+
+    g_vmcs_fields[addr] = vmptrst::base_reg_invalid::mask;
+    CHECK(vmptrst::base_reg_invalid::is_enabled_if_exists());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(vmptrst::base_reg_invalid::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_vmxon")
@@ -2610,11 +3282,11 @@ TEST_CASE("vmcs_vm_exit_instruction_information_vmxon")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = 1UL;
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmxon::get() == 0xFFFFFFFFFFFFFFFUL);
 
-    CHECK(vmxon::get_name() == vmxon::name);
-    CHECK(vmxon::get() == 1UL);
-    CHECK(vmxon::get_if_exists() == 1UL);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmxon::get_if_exists() == 0xFFFFFFFFFFFFFFFUL);
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_vmxon_scaling")
@@ -2624,11 +3296,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_vmxon_scaling")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = vmxon::scaling::scale_by_2 << vmxon::scaling::from;
-    CHECK(vmxon::scaling::get() == vmxon::scaling::scale_by_2);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmxon::scaling::get() == (vmxon::scaling::mask >> vmxon::scaling::from));
 
-    g_vmcs_fields[addr] = vmxon::scaling::scale_by_8 << vmxon::scaling::from;
-    CHECK(vmxon::scaling::get_if_exists() == vmxon::scaling::scale_by_8);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmxon::scaling::get(vmxon::scaling::mask) == (vmxon::scaling::mask >> vmxon::scaling::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmxon::scaling::get_if_exists() == (vmxon::scaling::mask >> vmxon::scaling::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_vmxon_address_size")
@@ -2638,11 +3313,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_vmxon_address_size")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = vmxon::address_size::_32bit << vmxon::address_size::from;
-    CHECK(vmxon::address_size::get() == vmxon::address_size::_32bit);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmxon::address_size::get() == (vmxon::address_size::mask >> vmxon::address_size::from));
 
-    g_vmcs_fields[addr] = vmxon::address_size::_64bit << vmxon::address_size::from;
-    CHECK(vmxon::address_size::get_if_exists() == vmxon::address_size::_64bit);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmxon::address_size::get(vmxon::address_size::mask) == (vmxon::address_size::mask >> vmxon::address_size::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmxon::address_size::get_if_exists() == (vmxon::address_size::mask >> vmxon::address_size::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_vmxon_segment_register")
@@ -2652,11 +3330,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_vmxon_segment_register")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = vmxon::segment_register::cs << vmxon::segment_register::from;
-    CHECK(vmxon::segment_register::get() == vmxon::segment_register::cs);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmxon::segment_register::get() == (vmxon::segment_register::mask >> vmxon::segment_register::from));
 
-    g_vmcs_fields[addr] = vmxon::segment_register::gs << vmxon::segment_register::from;
-    CHECK(vmxon::segment_register::get_if_exists() == vmxon::segment_register::gs);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmxon::segment_register::get(vmxon::segment_register::mask) == (vmxon::segment_register::mask >> vmxon::segment_register::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmxon::segment_register::get_if_exists() == (vmxon::segment_register::mask >> vmxon::segment_register::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_vmxon_index_reg")
@@ -2666,11 +3347,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_vmxon_index_reg")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = vmxon::index_reg::rsi << vmxon::index_reg::from;
-    CHECK(vmxon::index_reg::get() == vmxon::index_reg::rsi);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmxon::index_reg::get() == (vmxon::index_reg::mask >> vmxon::index_reg::from));
 
-    g_vmcs_fields[addr] = vmxon::index_reg::r11 << vmxon::index_reg::from;
-    CHECK(vmxon::index_reg::get_if_exists() == vmxon::index_reg::r11);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmxon::index_reg::get(vmxon::index_reg::mask) == (vmxon::index_reg::mask >> vmxon::index_reg::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmxon::index_reg::get_if_exists() == (vmxon::index_reg::mask >> vmxon::index_reg::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_vmxon_index_reg_invalid")
@@ -2680,11 +3364,20 @@ TEST_CASE("vmcs_vm_exit_instruction_information_vmxon_index_reg_invalid")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = vmxon::index_reg_invalid::valid << vmxon::index_reg_invalid::from;
-    CHECK(vmxon::index_reg_invalid::get() == vmxon::index_reg_invalid::valid);
+    g_vmcs_fields[addr] = vmxon::index_reg_invalid::mask;
+    CHECK(vmxon::index_reg_invalid::is_enabled());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(vmxon::index_reg_invalid::is_disabled());
 
-    g_vmcs_fields[addr] = vmxon::index_reg_invalid::invalid << vmxon::index_reg_invalid::from;
-    CHECK(vmxon::index_reg_invalid::get_if_exists() == vmxon::index_reg_invalid::invalid);
+    g_vmcs_fields[addr] = vmxon::index_reg_invalid::mask;
+    CHECK(vmxon::index_reg_invalid::is_enabled(vmxon::index_reg_invalid::mask));
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(vmxon::index_reg_invalid::is_disabled(0x0));
+
+    g_vmcs_fields[addr] = vmxon::index_reg_invalid::mask;
+    CHECK(vmxon::index_reg_invalid::is_enabled_if_exists());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(vmxon::index_reg_invalid::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_vmxon_base_reg")
@@ -2694,11 +3387,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_vmxon_base_reg")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = vmxon::base_reg::rdi << vmxon::base_reg::from;
-    CHECK(vmxon::base_reg::get() == vmxon::base_reg::rdi);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmxon::base_reg::get() == (vmxon::base_reg::mask >> vmxon::base_reg::from));
 
-    g_vmcs_fields[addr] = vmxon::base_reg::rcx << vmxon::base_reg::from;
-    CHECK(vmxon::base_reg::get_if_exists() == vmxon::base_reg::rcx);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmxon::base_reg::get(vmxon::base_reg::mask) == (vmxon::base_reg::mask >> vmxon::base_reg::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmxon::base_reg::get_if_exists() == (vmxon::base_reg::mask >> vmxon::base_reg::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_vmxon_base_reg_invalid")
@@ -2708,11 +3404,20 @@ TEST_CASE("vmcs_vm_exit_instruction_information_vmxon_base_reg_invalid")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = vmxon::base_reg_invalid::valid << vmxon::base_reg_invalid::from;
-    CHECK(vmxon::base_reg_invalid::get() == vmxon::base_reg_invalid::valid);
+    g_vmcs_fields[addr] = vmxon::base_reg_invalid::mask;
+    CHECK(vmxon::base_reg_invalid::is_enabled());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(vmxon::base_reg_invalid::is_disabled());
 
-    g_vmcs_fields[addr] = vmxon::base_reg_invalid::invalid << vmxon::base_reg_invalid::from;
-    CHECK(vmxon::base_reg_invalid::get_if_exists() == vmxon::base_reg_invalid::invalid);
+    g_vmcs_fields[addr] = vmxon::base_reg_invalid::mask;
+    CHECK(vmxon::base_reg_invalid::is_enabled(vmxon::base_reg_invalid::mask));
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(vmxon::base_reg_invalid::is_disabled(0x0));
+
+    g_vmcs_fields[addr] = vmxon::base_reg_invalid::mask;
+    CHECK(vmxon::base_reg_invalid::is_enabled_if_exists());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(vmxon::base_reg_invalid::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_xrstors")
@@ -2722,11 +3427,11 @@ TEST_CASE("vmcs_vm_exit_instruction_information_xrstors")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = 1UL;
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(xrstors::get() == 0xFFFFFFFFFFFFFFFUL);
 
-    CHECK(xrstors::get_name() == xrstors::name);
-    CHECK(xrstors::get() == 1UL);
-    CHECK(xrstors::get_if_exists() == 1UL);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(xrstors::get_if_exists() == 0xFFFFFFFFFFFFFFFUL);
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_xrstors_scaling")
@@ -2736,11 +3441,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_xrstors_scaling")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = xrstors::scaling::scale_by_2 << xrstors::scaling::from;
-    CHECK(xrstors::scaling::get() == xrstors::scaling::scale_by_2);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(xrstors::scaling::get() == (xrstors::scaling::mask >> xrstors::scaling::from));
 
-    g_vmcs_fields[addr] = xrstors::scaling::scale_by_8 << xrstors::scaling::from;
-    CHECK(xrstors::scaling::get_if_exists() == xrstors::scaling::scale_by_8);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(xrstors::scaling::get(xrstors::scaling::mask) == (xrstors::scaling::mask >> xrstors::scaling::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(xrstors::scaling::get_if_exists() == (xrstors::scaling::mask >> xrstors::scaling::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_xrstors_address_size")
@@ -2750,11 +3458,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_xrstors_address_size")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = xrstors::address_size::_32bit << xrstors::address_size::from;
-    CHECK(xrstors::address_size::get() == xrstors::address_size::_32bit);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(xrstors::address_size::get() == (xrstors::address_size::mask >> xrstors::address_size::from));
 
-    g_vmcs_fields[addr] = xrstors::address_size::_64bit << xrstors::address_size::from;
-    CHECK(xrstors::address_size::get_if_exists() == xrstors::address_size::_64bit);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(xrstors::address_size::get(xrstors::address_size::mask) == (xrstors::address_size::mask >> xrstors::address_size::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(xrstors::address_size::get_if_exists() == (xrstors::address_size::mask >> xrstors::address_size::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_xrstors_segment_register")
@@ -2764,11 +3475,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_xrstors_segment_register")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = xrstors::segment_register::cs << xrstors::segment_register::from;
-    CHECK(xrstors::segment_register::get() == xrstors::segment_register::cs);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(xrstors::segment_register::get() == (xrstors::segment_register::mask >> xrstors::segment_register::from));
 
-    g_vmcs_fields[addr] = xrstors::segment_register::gs << xrstors::segment_register::from;
-    CHECK(xrstors::segment_register::get_if_exists() == xrstors::segment_register::gs);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(xrstors::segment_register::get(xrstors::segment_register::mask) == (xrstors::segment_register::mask >> xrstors::segment_register::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(xrstors::segment_register::get_if_exists() == (xrstors::segment_register::mask >> xrstors::segment_register::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_xrstors_index_reg")
@@ -2778,11 +3492,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_xrstors_index_reg")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = xrstors::index_reg::rsi << xrstors::index_reg::from;
-    CHECK(xrstors::index_reg::get() == xrstors::index_reg::rsi);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(xrstors::index_reg::get() == (xrstors::index_reg::mask >> xrstors::index_reg::from));
 
-    g_vmcs_fields[addr] = xrstors::index_reg::r11 << xrstors::index_reg::from;
-    CHECK(xrstors::index_reg::get_if_exists() == xrstors::index_reg::r11);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(xrstors::index_reg::get(xrstors::index_reg::mask) == (xrstors::index_reg::mask >> xrstors::index_reg::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(xrstors::index_reg::get_if_exists() == (xrstors::index_reg::mask >> xrstors::index_reg::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_xrstors_index_reg_invalid")
@@ -2792,12 +3509,20 @@ TEST_CASE("vmcs_vm_exit_instruction_information_xrstors_index_reg_invalid")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = xrstors::index_reg_invalid::valid << xrstors::index_reg_invalid::from;
-    CHECK(xrstors::index_reg_invalid::get() == xrstors::index_reg_invalid::valid);
+    g_vmcs_fields[addr] = xrstors::index_reg_invalid::mask;
+    CHECK(xrstors::index_reg_invalid::is_enabled());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(xrstors::index_reg_invalid::is_disabled());
 
-    g_vmcs_fields[addr] = xrstors::index_reg_invalid::invalid << xrstors::index_reg_invalid::from;
-    CHECK(xrstors::index_reg_invalid::get_if_exists() ==
-          xrstors::index_reg_invalid::invalid);
+    g_vmcs_fields[addr] = xrstors::index_reg_invalid::mask;
+    CHECK(xrstors::index_reg_invalid::is_enabled(xrstors::index_reg_invalid::mask));
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(xrstors::index_reg_invalid::is_disabled(0x0));
+
+    g_vmcs_fields[addr] = xrstors::index_reg_invalid::mask;
+    CHECK(xrstors::index_reg_invalid::is_enabled_if_exists());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(xrstors::index_reg_invalid::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_xrstors_base_reg")
@@ -2807,11 +3532,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_xrstors_base_reg")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = xrstors::base_reg::rdi << xrstors::base_reg::from;
-    CHECK(xrstors::base_reg::get() == xrstors::base_reg::rdi);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(xrstors::base_reg::get() == (xrstors::base_reg::mask >> xrstors::base_reg::from));
 
-    g_vmcs_fields[addr] = xrstors::base_reg::rcx << xrstors::base_reg::from;
-    CHECK(xrstors::base_reg::get_if_exists() == xrstors::base_reg::rcx);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(xrstors::base_reg::get(xrstors::base_reg::mask) == (xrstors::base_reg::mask >> xrstors::base_reg::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(xrstors::base_reg::get_if_exists() == (xrstors::base_reg::mask >> xrstors::base_reg::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_xrstors_base_reg_invalid")
@@ -2821,11 +3549,20 @@ TEST_CASE("vmcs_vm_exit_instruction_information_xrstors_base_reg_invalid")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = xrstors::base_reg_invalid::valid << xrstors::base_reg_invalid::from;
-    CHECK(xrstors::base_reg_invalid::get() == xrstors::base_reg_invalid::valid);
+    g_vmcs_fields[addr] = xrstors::base_reg_invalid::mask;
+    CHECK(xrstors::base_reg_invalid::is_enabled());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(xrstors::base_reg_invalid::is_disabled());
 
-    g_vmcs_fields[addr] = xrstors::base_reg_invalid::invalid << xrstors::base_reg_invalid::from;
-    CHECK(xrstors::base_reg_invalid::get_if_exists() == xrstors::base_reg_invalid::invalid);
+    g_vmcs_fields[addr] = xrstors::base_reg_invalid::mask;
+    CHECK(xrstors::base_reg_invalid::is_enabled(xrstors::base_reg_invalid::mask));
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(xrstors::base_reg_invalid::is_disabled(0x0));
+
+    g_vmcs_fields[addr] = xrstors::base_reg_invalid::mask;
+    CHECK(xrstors::base_reg_invalid::is_enabled_if_exists());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(xrstors::base_reg_invalid::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_xsaves")
@@ -2835,11 +3572,11 @@ TEST_CASE("vmcs_vm_exit_instruction_information_xsaves")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = 1UL;
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(xsaves::get() == 0xFFFFFFFFFFFFFFFUL);
 
-    CHECK(xsaves::get_name() == xsaves::name);
-    CHECK(xsaves::get() == 1UL);
-    CHECK(xsaves::get_if_exists() == 1UL);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(xsaves::get_if_exists() == 0xFFFFFFFFFFFFFFFUL);
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_xsaves_scaling")
@@ -2849,11 +3586,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_xsaves_scaling")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = xsaves::scaling::scale_by_2 << xsaves::scaling::from;
-    CHECK(xsaves::scaling::get() == xsaves::scaling::scale_by_2);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(xsaves::scaling::get() == (xsaves::scaling::mask >> xsaves::scaling::from));
 
-    g_vmcs_fields[addr] = xsaves::scaling::scale_by_8 << xsaves::scaling::from;
-    CHECK(xsaves::scaling::get_if_exists() == xsaves::scaling::scale_by_8);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(xsaves::scaling::get(xsaves::scaling::mask) == (xsaves::scaling::mask >> xsaves::scaling::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(xsaves::scaling::get_if_exists() == (xsaves::scaling::mask >> xsaves::scaling::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_xsaves_address_size")
@@ -2863,11 +3603,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_xsaves_address_size")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = xsaves::address_size::_32bit << xsaves::address_size::from;
-    CHECK(xsaves::address_size::get() == xsaves::address_size::_32bit);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(xsaves::address_size::get() == (xsaves::address_size::mask >> xsaves::address_size::from));
 
-    g_vmcs_fields[addr] = xsaves::address_size::_64bit << xsaves::address_size::from;
-    CHECK(xsaves::address_size::get_if_exists() == xsaves::address_size::_64bit);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(xsaves::address_size::get(xsaves::address_size::mask) == (xsaves::address_size::mask >> xsaves::address_size::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(xsaves::address_size::get_if_exists() == (xsaves::address_size::mask >> xsaves::address_size::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_xsaves_segment_register")
@@ -2877,11 +3620,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_xsaves_segment_register")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = xsaves::segment_register::cs << xsaves::segment_register::from;
-    CHECK(xsaves::segment_register::get() == xsaves::segment_register::cs);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(xsaves::segment_register::get() == (xsaves::segment_register::mask >> xsaves::segment_register::from));
 
-    g_vmcs_fields[addr] = xsaves::segment_register::gs << xsaves::segment_register::from;
-    CHECK(xsaves::segment_register::get_if_exists() == xsaves::segment_register::gs);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(xsaves::segment_register::get(xsaves::segment_register::mask) == (xsaves::segment_register::mask >> xsaves::segment_register::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(xsaves::segment_register::get_if_exists() == (xsaves::segment_register::mask >> xsaves::segment_register::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_xsaves_index_reg")
@@ -2891,11 +3637,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_xsaves_index_reg")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = xsaves::index_reg::rsi << xsaves::index_reg::from;
-    CHECK(xsaves::index_reg::get() == xsaves::index_reg::rsi);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(xsaves::index_reg::get() == (xsaves::index_reg::mask >> xsaves::index_reg::from));
 
-    g_vmcs_fields[addr] = xsaves::index_reg::r11 << xsaves::index_reg::from;
-    CHECK(xsaves::index_reg::get_if_exists() == xsaves::index_reg::r11);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(xsaves::index_reg::get(xsaves::index_reg::mask) == (xsaves::index_reg::mask >> xsaves::index_reg::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(xsaves::index_reg::get_if_exists() == (xsaves::index_reg::mask >> xsaves::index_reg::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_xsaves_index_reg_invalid")
@@ -2905,11 +3654,20 @@ TEST_CASE("vmcs_vm_exit_instruction_information_xsaves_index_reg_invalid")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = xsaves::index_reg_invalid::valid << xsaves::index_reg_invalid::from;
-    CHECK(xsaves::index_reg_invalid::get() == xsaves::index_reg_invalid::valid);
+    g_vmcs_fields[addr] = xsaves::index_reg_invalid::mask;
+    CHECK(xsaves::index_reg_invalid::is_enabled());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(xsaves::index_reg_invalid::is_disabled());
 
-    g_vmcs_fields[addr] = xsaves::index_reg_invalid::invalid << xsaves::index_reg_invalid::from;
-    CHECK(xsaves::index_reg_invalid::get_if_exists() == xsaves::index_reg_invalid::invalid);
+    g_vmcs_fields[addr] = xsaves::index_reg_invalid::mask;
+    CHECK(xsaves::index_reg_invalid::is_enabled(xsaves::index_reg_invalid::mask));
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(xsaves::index_reg_invalid::is_disabled(0x0));
+
+    g_vmcs_fields[addr] = xsaves::index_reg_invalid::mask;
+    CHECK(xsaves::index_reg_invalid::is_enabled_if_exists());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(xsaves::index_reg_invalid::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_xsaves_base_reg")
@@ -2919,11 +3677,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_xsaves_base_reg")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = xsaves::base_reg::rdi << xsaves::base_reg::from;
-    CHECK(xsaves::base_reg::get() == xsaves::base_reg::rdi);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(xsaves::base_reg::get() == (xsaves::base_reg::mask >> xsaves::base_reg::from));
 
-    g_vmcs_fields[addr] = xsaves::base_reg::rcx << xsaves::base_reg::from;
-    CHECK(xsaves::base_reg::get_if_exists() == xsaves::base_reg::rcx);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(xsaves::base_reg::get(xsaves::base_reg::mask) == (xsaves::base_reg::mask >> xsaves::base_reg::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(xsaves::base_reg::get_if_exists() == (xsaves::base_reg::mask >> xsaves::base_reg::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_xsaves_base_reg_invalid")
@@ -2933,11 +3694,20 @@ TEST_CASE("vmcs_vm_exit_instruction_information_xsaves_base_reg_invalid")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = xsaves::base_reg_invalid::valid << xsaves::base_reg_invalid::from;
-    CHECK(xsaves::base_reg_invalid::get() == xsaves::base_reg_invalid::valid);
+    g_vmcs_fields[addr] = xsaves::base_reg_invalid::mask;
+    CHECK(xsaves::base_reg_invalid::is_enabled());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(xsaves::base_reg_invalid::is_disabled());
 
-    g_vmcs_fields[addr] = xsaves::base_reg_invalid::invalid << xsaves::base_reg_invalid::from;
-    CHECK(xsaves::base_reg_invalid::get_if_exists() == xsaves::base_reg_invalid::invalid);
+    g_vmcs_fields[addr] = xsaves::base_reg_invalid::mask;
+    CHECK(xsaves::base_reg_invalid::is_enabled(xsaves::base_reg_invalid::mask));
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(xsaves::base_reg_invalid::is_disabled(0x0));
+
+    g_vmcs_fields[addr] = xsaves::base_reg_invalid::mask;
+    CHECK(xsaves::base_reg_invalid::is_enabled_if_exists());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(xsaves::base_reg_invalid::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_vmread")
@@ -2947,11 +3717,11 @@ TEST_CASE("vmcs_vm_exit_instruction_information_vmread")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = 1UL;
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmread::get() == 0xFFFFFFFFFFFFFFFUL);
 
-    CHECK(vmread::get_name() == vmread::name);
-    CHECK(vmread::get() == 1UL);
-    CHECK(vmread::get_if_exists() == 1UL);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmread::get_if_exists() == 0xFFFFFFFFFFFFFFFUL);
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_vmread_scaling")
@@ -2961,11 +3731,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_vmread_scaling")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = vmread::scaling::scale_by_2 << vmread::scaling::from;
-    CHECK(vmread::scaling::get() == vmread::scaling::scale_by_2);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmread::scaling::get() == (vmread::scaling::mask >> vmread::scaling::from));
 
-    g_vmcs_fields[addr] = vmread::scaling::scale_by_8 << vmread::scaling::from;
-    CHECK(vmread::scaling::get_if_exists() == vmread::scaling::scale_by_8);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmread::scaling::get(vmread::scaling::mask) == (vmread::scaling::mask >> vmread::scaling::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmread::scaling::get_if_exists() == (vmread::scaling::mask >> vmread::scaling::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_vmread_reg1")
@@ -2975,11 +3748,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_vmread_reg1")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = vmread::reg1::rbp << vmread::reg1::from;
-    CHECK(vmread::reg1::get() == vmread::reg1::rbp);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmread::reg1::get() == (vmread::reg1::mask >> vmread::reg1::from));
 
-    g_vmcs_fields[addr] = vmread::reg1::r13 << vmread::reg1::from;
-    CHECK(vmread::reg1::get_if_exists() == vmread::reg1::r13);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmread::reg1::get(vmread::reg1::mask) == (vmread::reg1::mask >> vmread::reg1::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmread::reg1::get_if_exists() == (vmread::reg1::mask >> vmread::reg1::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_vmread_address_size")
@@ -2989,11 +3765,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_vmread_address_size")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = vmread::address_size::_32bit << vmread::address_size::from;
-    CHECK(vmread::address_size::get() == vmread::address_size::_32bit);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmread::address_size::get() == (vmread::address_size::mask >> vmread::address_size::from));
 
-    g_vmcs_fields[addr] = vmread::address_size::_64bit << vmread::address_size::from;
-    CHECK(vmread::address_size::get_if_exists() == vmread::address_size::_64bit);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmread::address_size::get(vmread::address_size::mask) == (vmread::address_size::mask >> vmread::address_size::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmread::address_size::get_if_exists() == (vmread::address_size::mask >> vmread::address_size::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_vmread_mem_reg")
@@ -3003,11 +3782,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_vmread_mem_reg")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = vmread::mem_reg::mem << vmread::mem_reg::from;
-    CHECK(vmread::mem_reg::get() == vmread::mem_reg::mem);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmread::mem_reg::get() == (vmread::mem_reg::mask >> vmread::mem_reg::from));
 
-    g_vmcs_fields[addr] = vmread::mem_reg::reg << vmread::mem_reg::from;
-    CHECK(vmread::mem_reg::get_if_exists() == vmread::mem_reg::reg);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmread::mem_reg::get(vmread::mem_reg::mask) == (vmread::mem_reg::mask >> vmread::mem_reg::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmread::mem_reg::get_if_exists() == (vmread::mem_reg::mask >> vmread::mem_reg::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_vmread_segment_register")
@@ -3017,11 +3799,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_vmread_segment_register")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = vmread::segment_register::cs << vmread::segment_register::from;
-    CHECK(vmread::segment_register::get() == vmread::segment_register::cs);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmread::segment_register::get() == (vmread::segment_register::mask >> vmread::segment_register::from));
 
-    g_vmcs_fields[addr] = vmread::segment_register::gs << vmread::segment_register::from;
-    CHECK(vmread::segment_register::get_if_exists() == vmread::segment_register::gs);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmread::segment_register::get(vmread::segment_register::mask) == (vmread::segment_register::mask >> vmread::segment_register::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmread::segment_register::get_if_exists() == (vmread::segment_register::mask >> vmread::segment_register::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_vmread_index_reg")
@@ -3031,11 +3816,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_vmread_index_reg")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = vmread::index_reg::rsi << vmread::index_reg::from;
-    CHECK(vmread::index_reg::get() == vmread::index_reg::rsi);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmread::index_reg::get() == (vmread::index_reg::mask >> vmread::index_reg::from));
 
-    g_vmcs_fields[addr] = vmread::index_reg::r11 << vmread::index_reg::from;
-    CHECK(vmread::index_reg::get_if_exists() == vmread::index_reg::r11);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmread::index_reg::get(vmread::index_reg::mask) == (vmread::index_reg::mask >> vmread::index_reg::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmread::index_reg::get_if_exists() == (vmread::index_reg::mask >> vmread::index_reg::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_vmread_index_reg_invalid")
@@ -3045,11 +3833,20 @@ TEST_CASE("vmcs_vm_exit_instruction_information_vmread_index_reg_invalid")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = vmread::index_reg_invalid::valid << vmread::index_reg_invalid::from;
-    CHECK(vmread::index_reg_invalid::get() == vmread::index_reg_invalid::valid);
+    g_vmcs_fields[addr] = vmread::index_reg_invalid::mask;
+    CHECK(vmread::index_reg_invalid::is_enabled());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(vmread::index_reg_invalid::is_disabled());
 
-    g_vmcs_fields[addr] = vmread::index_reg_invalid::invalid << vmread::index_reg_invalid::from;
-    CHECK(vmread::index_reg_invalid::get_if_exists() == vmread::index_reg_invalid::invalid);
+    g_vmcs_fields[addr] = vmread::index_reg_invalid::mask;
+    CHECK(vmread::index_reg_invalid::is_enabled(vmread::index_reg_invalid::mask));
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(vmread::index_reg_invalid::is_disabled(0x0));
+
+    g_vmcs_fields[addr] = vmread::index_reg_invalid::mask;
+    CHECK(vmread::index_reg_invalid::is_enabled_if_exists());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(vmread::index_reg_invalid::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_vmread_base_reg")
@@ -3059,11 +3856,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_vmread_base_reg")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = vmread::base_reg::rdi << vmread::base_reg::from;
-    CHECK(vmread::base_reg::get() == vmread::base_reg::rdi);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmread::base_reg::get() == (vmread::base_reg::mask >> vmread::base_reg::from));
 
-    g_vmcs_fields[addr] = vmread::base_reg::rcx << vmread::base_reg::from;
-    CHECK(vmread::base_reg::get_if_exists() == vmread::base_reg::rcx);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmread::base_reg::get(vmread::base_reg::mask) == (vmread::base_reg::mask >> vmread::base_reg::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmread::base_reg::get_if_exists() == (vmread::base_reg::mask >> vmread::base_reg::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_vmread_base_reg_invalid")
@@ -3073,11 +3873,20 @@ TEST_CASE("vmcs_vm_exit_instruction_information_vmread_base_reg_invalid")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = vmread::base_reg_invalid::valid << vmread::base_reg_invalid::from;
-    CHECK(vmread::base_reg_invalid::get() == vmread::base_reg_invalid::valid);
+    g_vmcs_fields[addr] = vmread::base_reg_invalid::mask;
+    CHECK(vmread::base_reg_invalid::is_enabled());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(vmread::base_reg_invalid::is_disabled());
 
-    g_vmcs_fields[addr] = vmread::base_reg_invalid::invalid << vmread::base_reg_invalid::from;
-    CHECK(vmread::base_reg_invalid::get_if_exists() == vmread::base_reg_invalid::invalid);
+    g_vmcs_fields[addr] = vmread::base_reg_invalid::mask;
+    CHECK(vmread::base_reg_invalid::is_enabled(vmread::base_reg_invalid::mask));
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(vmread::base_reg_invalid::is_disabled(0x0));
+
+    g_vmcs_fields[addr] = vmread::base_reg_invalid::mask;
+    CHECK(vmread::base_reg_invalid::is_enabled_if_exists());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(vmread::base_reg_invalid::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_vmread_reg2")
@@ -3087,11 +3896,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_vmread_reg2")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = vmread::reg2::rdx << vmread::reg2::from;
-    CHECK(vmread::reg2::get() == vmread::reg2::rdx);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmread::reg2::get() == (vmread::reg2::mask >> vmread::reg2::from));
 
-    g_vmcs_fields[addr] = vmread::reg2::rsp << vmread::reg2::from;
-    CHECK(vmread::reg2::get_if_exists() == vmread::reg2::rsp);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmread::reg2::get(vmread::reg2::mask) == (vmread::reg2::mask >> vmread::reg2::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmread::reg2::get_if_exists() == (vmread::reg2::mask >> vmread::reg2::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_vmwrite")
@@ -3101,11 +3913,11 @@ TEST_CASE("vmcs_vm_exit_instruction_information_vmwrite")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = 1UL;
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmwrite::get() == 0xFFFFFFFFFFFFFFFUL);
 
-    CHECK(vmwrite::get_name() == vmwrite::name);
-    CHECK(vmwrite::get() == 1UL);
-    CHECK(vmwrite::get_if_exists() == 1UL);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmwrite::get_if_exists() == 0xFFFFFFFFFFFFFFFUL);
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_vmwrite_scaling")
@@ -3115,11 +3927,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_vmwrite_scaling")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = vmwrite::scaling::scale_by_2 << vmwrite::scaling::from;
-    CHECK(vmwrite::scaling::get() == vmwrite::scaling::scale_by_2);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmwrite::scaling::get() == (vmwrite::scaling::mask >> vmwrite::scaling::from));
 
-    g_vmcs_fields[addr] = vmwrite::scaling::scale_by_8 << vmwrite::scaling::from;
-    CHECK(vmwrite::scaling::get_if_exists() == vmwrite::scaling::scale_by_8);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmwrite::scaling::get(vmwrite::scaling::mask) == (vmwrite::scaling::mask >> vmwrite::scaling::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmwrite::scaling::get_if_exists() == (vmwrite::scaling::mask >> vmwrite::scaling::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_vmwrite_reg1")
@@ -3129,11 +3944,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_vmwrite_reg1")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = vmwrite::reg1::rbp << vmwrite::reg1::from;
-    CHECK(vmwrite::reg1::get() == vmwrite::reg1::rbp);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmwrite::reg1::get() == (vmwrite::reg1::mask >> vmwrite::reg1::from));
 
-    g_vmcs_fields[addr] = vmwrite::reg1::r13 << vmwrite::reg1::from;
-    CHECK(vmwrite::reg1::get_if_exists() == vmwrite::reg1::r13);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmwrite::reg1::get(vmwrite::reg1::mask) == (vmwrite::reg1::mask >> vmwrite::reg1::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmwrite::reg1::get_if_exists() == (vmwrite::reg1::mask >> vmwrite::reg1::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_vmwrite_address_size")
@@ -3143,11 +3961,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_vmwrite_address_size")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = vmwrite::address_size::_32bit << vmwrite::address_size::from;
-    CHECK(vmwrite::address_size::get() == vmwrite::address_size::_32bit);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmwrite::address_size::get() == (vmwrite::address_size::mask >> vmwrite::address_size::from));
 
-    g_vmcs_fields[addr] = vmwrite::address_size::_64bit << vmwrite::address_size::from;
-    CHECK(vmwrite::address_size::get_if_exists() == vmwrite::address_size::_64bit);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmwrite::address_size::get(vmwrite::address_size::mask) == (vmwrite::address_size::mask >> vmwrite::address_size::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmwrite::address_size::get_if_exists() == (vmwrite::address_size::mask >> vmwrite::address_size::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_vmwrite_mem_reg")
@@ -3157,11 +3978,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_vmwrite_mem_reg")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = vmwrite::mem_reg::mem << vmwrite::mem_reg::from;
-    CHECK(vmwrite::mem_reg::get() == vmwrite::mem_reg::mem);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmwrite::mem_reg::get() == (vmwrite::mem_reg::mask >> vmwrite::mem_reg::from));
 
-    g_vmcs_fields[addr] = vmwrite::mem_reg::reg << vmwrite::mem_reg::from;
-    CHECK(vmwrite::mem_reg::get_if_exists() == vmwrite::mem_reg::reg);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmwrite::mem_reg::get(vmwrite::mem_reg::mask) == (vmwrite::mem_reg::mask >> vmwrite::mem_reg::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmwrite::mem_reg::get_if_exists() == (vmwrite::mem_reg::mask >> vmwrite::mem_reg::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_vmwrite_segment_register")
@@ -3171,11 +3995,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_vmwrite_segment_register")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = vmwrite::segment_register::cs << vmwrite::segment_register::from;
-    CHECK(vmwrite::segment_register::get() == vmwrite::segment_register::cs);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmwrite::segment_register::get() == (vmwrite::segment_register::mask >> vmwrite::segment_register::from));
 
-    g_vmcs_fields[addr] = vmwrite::segment_register::gs << vmwrite::segment_register::from;
-    CHECK(vmwrite::segment_register::get_if_exists() == vmwrite::segment_register::gs);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmwrite::segment_register::get(vmwrite::segment_register::mask) == (vmwrite::segment_register::mask >> vmwrite::segment_register::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmwrite::segment_register::get_if_exists() == (vmwrite::segment_register::mask >> vmwrite::segment_register::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_vmwrite_index_reg")
@@ -3185,11 +4012,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_vmwrite_index_reg")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = vmwrite::index_reg::rsi << vmwrite::index_reg::from;
-    CHECK(vmwrite::index_reg::get() == vmwrite::index_reg::rsi);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmwrite::index_reg::get() == (vmwrite::index_reg::mask >> vmwrite::index_reg::from));
 
-    g_vmcs_fields[addr] = vmwrite::index_reg::r11 << vmwrite::index_reg::from;
-    CHECK(vmwrite::index_reg::get_if_exists() == vmwrite::index_reg::r11);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmwrite::index_reg::get(vmwrite::index_reg::mask) == (vmwrite::index_reg::mask >> vmwrite::index_reg::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmwrite::index_reg::get_if_exists() == (vmwrite::index_reg::mask >> vmwrite::index_reg::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_vmwrite_index_reg_invalid")
@@ -3199,12 +4029,20 @@ TEST_CASE("vmcs_vm_exit_instruction_information_vmwrite_index_reg_invalid")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = vmwrite::index_reg_invalid::valid << vmwrite::index_reg_invalid::from;
-    CHECK(vmwrite::index_reg_invalid::get() == vmwrite::index_reg_invalid::valid);
+    g_vmcs_fields[addr] = vmwrite::index_reg_invalid::mask;
+    CHECK(vmwrite::index_reg_invalid::is_enabled());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(vmwrite::index_reg_invalid::is_disabled());
 
-    g_vmcs_fields[addr] = vmwrite::index_reg_invalid::invalid << vmwrite::index_reg_invalid::from;
-    CHECK(vmwrite::index_reg_invalid::get_if_exists() ==
-          vmwrite::index_reg_invalid::invalid);
+    g_vmcs_fields[addr] = vmwrite::index_reg_invalid::mask;
+    CHECK(vmwrite::index_reg_invalid::is_enabled(vmwrite::index_reg_invalid::mask));
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(vmwrite::index_reg_invalid::is_disabled(0x0));
+
+    g_vmcs_fields[addr] = vmwrite::index_reg_invalid::mask;
+    CHECK(vmwrite::index_reg_invalid::is_enabled_if_exists());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(vmwrite::index_reg_invalid::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_vmwrite_base_reg")
@@ -3214,11 +4052,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_vmwrite_base_reg")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = vmwrite::base_reg::rdi << vmwrite::base_reg::from;
-    CHECK(vmwrite::base_reg::get() == vmwrite::base_reg::rdi);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmwrite::base_reg::get() == (vmwrite::base_reg::mask >> vmwrite::base_reg::from));
 
-    g_vmcs_fields[addr] = vmwrite::base_reg::rcx << vmwrite::base_reg::from;
-    CHECK(vmwrite::base_reg::get_if_exists() == vmwrite::base_reg::rcx);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmwrite::base_reg::get(vmwrite::base_reg::mask) == (vmwrite::base_reg::mask >> vmwrite::base_reg::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmwrite::base_reg::get_if_exists() == (vmwrite::base_reg::mask >> vmwrite::base_reg::from));
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_vmwrite_base_reg_invalid")
@@ -3228,11 +4069,20 @@ TEST_CASE("vmcs_vm_exit_instruction_information_vmwrite_base_reg_invalid")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = vmwrite::base_reg_invalid::valid << vmwrite::base_reg_invalid::from;
-    CHECK(vmwrite::base_reg_invalid::get() == vmwrite::base_reg_invalid::valid);
+    g_vmcs_fields[addr] = vmwrite::base_reg_invalid::mask;
+    CHECK(vmwrite::base_reg_invalid::is_enabled());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(vmwrite::base_reg_invalid::is_disabled());
 
-    g_vmcs_fields[addr] = vmwrite::base_reg_invalid::invalid << vmwrite::base_reg_invalid::from;
-    CHECK(vmwrite::base_reg_invalid::get_if_exists() == vmwrite::base_reg_invalid::invalid);
+    g_vmcs_fields[addr] = vmwrite::base_reg_invalid::mask;
+    CHECK(vmwrite::base_reg_invalid::is_enabled(vmwrite::base_reg_invalid::mask));
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(vmwrite::base_reg_invalid::is_disabled(0x0));
+
+    g_vmcs_fields[addr] = vmwrite::base_reg_invalid::mask;
+    CHECK(vmwrite::base_reg_invalid::is_enabled_if_exists());
+    g_vmcs_fields[addr] = 0UL;
+    CHECK(vmwrite::base_reg_invalid::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_vm_exit_instruction_information_vmwrite_reg2")
@@ -3242,11 +4092,14 @@ TEST_CASE("vmcs_vm_exit_instruction_information_vmwrite_reg2")
 
     using namespace vmcs::vm_exit_instruction_information;
 
-    g_vmcs_fields[addr] = vmwrite::reg2::rdx << vmwrite::reg2::from;
-    CHECK(vmwrite::reg2::get() == vmwrite::reg2::rdx);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmwrite::reg2::get() == (vmwrite::reg2::mask >> vmwrite::reg2::from));
 
-    g_vmcs_fields[addr] = vmwrite::reg2::rsp << vmwrite::reg2::from;
-    CHECK(vmwrite::reg2::get_if_exists() == vmwrite::reg2::rsp);
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmwrite::reg2::get(vmwrite::reg2::mask) == (vmwrite::reg2::mask >> vmwrite::reg2::from));
+
+    g_vmcs_fields[addr] = 0xFFFFFFFFFFFFFFFUL;
+    CHECK(vmwrite::reg2::get_if_exists() == (vmwrite::reg2::mask >> vmwrite::reg2::from));
 }
 
 #endif

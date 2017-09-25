@@ -47,6 +47,14 @@ setup_intrinsics(MockRepository &mocks)
     mocks.OnCallFunc(_clflush).Do(test_clflush);
 }
 
+TEST_CASE("test name goes here")
+{
+    MockRepository mocks;
+    setup_intrinsics(mocks);
+
+    CHECK(true);
+}
+
 TEST_CASE("cache_x64_invd")
 {
     MockRepository mocks;

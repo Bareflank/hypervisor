@@ -72,13 +72,16 @@ TEST_CASE("vmcs_guest_es_limit")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    CHECK(vmcs::guest_es_limit::exists());
+    using namespace vmcs::guest_es_limit;
 
-    vmcs::guest_es_limit::set(1UL);
-    CHECK(vmcs::guest_es_limit::get() == 1UL);
+    set(100UL);
+    CHECK(get() == 100UL);
+    CHECK(exists());
 
-    vmcs::guest_es_limit::set_if_exists(1UL);
-    CHECK(vmcs::guest_es_limit::get_if_exists() == 1UL);
+    set_if_exists(200UL);
+    CHECK(get_if_exists() == 200UL);
+
+    dump(0);
 }
 
 TEST_CASE("vmcs_guest_cs_limit")
@@ -86,13 +89,16 @@ TEST_CASE("vmcs_guest_cs_limit")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    CHECK(vmcs::guest_cs_limit::exists());
+    using namespace vmcs::guest_cs_limit;
 
-    vmcs::guest_cs_limit::set(1UL);
-    CHECK(vmcs::guest_cs_limit::get() == 1UL);
+    set(100UL);
+    CHECK(get() == 100UL);
+    CHECK(exists());
 
-    vmcs::guest_cs_limit::set_if_exists(1UL);
-    CHECK(vmcs::guest_cs_limit::get_if_exists() == 1UL);
+    set_if_exists(200UL);
+    CHECK(get_if_exists() == 200UL);
+
+    dump(0);
 }
 
 TEST_CASE("vmcs_guest_ss_limit")
@@ -100,28 +106,33 @@ TEST_CASE("vmcs_guest_ss_limit")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    CHECK(vmcs::guest_ss_limit::exists());
+    using namespace vmcs::guest_ss_limit;
 
-    vmcs::guest_ss_limit::set(1UL);
-    CHECK(vmcs::guest_ss_limit::get() == 1UL);
+    set(100UL);
+    CHECK(get() == 100UL);
+    CHECK(exists());
 
-    vmcs::guest_ss_limit::set_if_exists(1UL);
-    CHECK(vmcs::guest_ss_limit::get_if_exists() == 1UL);
+    set_if_exists(200UL);
+    CHECK(get_if_exists() == 200UL);
+
+    dump(0);
 }
-
 
 TEST_CASE("vmcs_guest_ds_limit")
 {
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    CHECK(vmcs::guest_ds_limit::exists());
+    using namespace vmcs::guest_ds_limit;
 
-    vmcs::guest_ds_limit::set(1UL);
-    CHECK(vmcs::guest_ds_limit::get() == 1UL);
+    set(100UL);
+    CHECK(get() == 100UL);
+    CHECK(exists());
 
-    vmcs::guest_ds_limit::set_if_exists(1UL);
-    CHECK(vmcs::guest_ds_limit::get_if_exists() == 1UL);
+    set_if_exists(200UL);
+    CHECK(get_if_exists() == 200UL);
+
+    dump(0);
 }
 
 TEST_CASE("vmcs_guest_fs_limit")
@@ -129,13 +140,16 @@ TEST_CASE("vmcs_guest_fs_limit")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    CHECK(vmcs::guest_fs_limit::exists());
+    using namespace vmcs::guest_fs_limit;
 
-    vmcs::guest_fs_limit::set(1UL);
-    CHECK(vmcs::guest_fs_limit::get() == 1UL);
+    set(100UL);
+    CHECK(get() == 100UL);
+    CHECK(exists());
 
-    vmcs::guest_fs_limit::set_if_exists(1UL);
-    CHECK(vmcs::guest_fs_limit::get_if_exists() == 1UL);
+    set_if_exists(200UL);
+    CHECK(get_if_exists() == 200UL);
+
+    dump(0);
 }
 
 TEST_CASE("vmcs_guest_gs_limit")
@@ -143,13 +157,16 @@ TEST_CASE("vmcs_guest_gs_limit")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    CHECK(vmcs::guest_gs_limit::exists());
+    using namespace vmcs::guest_gs_limit;
 
-    vmcs::guest_gs_limit::set(1UL);
-    CHECK(vmcs::guest_gs_limit::get() == 1UL);
+    set(100UL);
+    CHECK(get() == 100UL);
+    CHECK(exists());
 
-    vmcs::guest_gs_limit::set_if_exists(1UL);
-    CHECK(vmcs::guest_gs_limit::get_if_exists() == 1UL);
+    set_if_exists(200UL);
+    CHECK(get_if_exists() == 200UL);
+
+    dump(0);
 }
 
 TEST_CASE("vmcs_guest_ldtr_limit")
@@ -157,13 +174,16 @@ TEST_CASE("vmcs_guest_ldtr_limit")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    CHECK(vmcs::guest_ldtr_limit::exists());
+    using namespace vmcs::guest_ldtr_limit;
 
-    vmcs::guest_ldtr_limit::set(1UL);
-    CHECK(vmcs::guest_ldtr_limit::get() == 1UL);
+    set(100UL);
+    CHECK(get() == 100UL);
+    CHECK(exists());
 
-    vmcs::guest_ldtr_limit::set_if_exists(1UL);
-    CHECK(vmcs::guest_ldtr_limit::get_if_exists() == 1UL);
+    set_if_exists(200UL);
+    CHECK(get_if_exists() == 200UL);
+
+    dump(0);
 }
 
 TEST_CASE("vmcs_guest_tr_limit")
@@ -171,13 +191,16 @@ TEST_CASE("vmcs_guest_tr_limit")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    CHECK(vmcs::guest_tr_limit::exists());
+    using namespace vmcs::guest_tr_limit;
 
-    vmcs::guest_tr_limit::set(1UL);
-    CHECK(vmcs::guest_tr_limit::get() == 1UL);
+    set(100UL);
+    CHECK(get() == 100UL);
+    CHECK(exists());
 
-    vmcs::guest_tr_limit::set_if_exists(1UL);
-    CHECK(vmcs::guest_tr_limit::get_if_exists() == 1UL);
+    set_if_exists(200UL);
+    CHECK(get_if_exists() == 200UL);
+
+    dump(0);
 }
 
 TEST_CASE("vmcs_guest_gdtr_limit")
@@ -185,13 +208,16 @@ TEST_CASE("vmcs_guest_gdtr_limit")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    CHECK(vmcs::guest_gdtr_limit::exists());
+    using namespace vmcs::guest_gdtr_limit;
 
-    vmcs::guest_gdtr_limit::set(1UL);
-    CHECK(vmcs::guest_gdtr_limit::get() == 1UL);
+    set(100UL);
+    CHECK(get() == 100UL);
+    CHECK(exists());
 
-    vmcs::guest_gdtr_limit::set_if_exists(1UL);
-    CHECK(vmcs::guest_gdtr_limit::get_if_exists() == 1UL);
+    set_if_exists(200UL);
+    CHECK(get_if_exists() == 200UL);
+
+    dump(0);
 }
 
 TEST_CASE("vmcs_guest_idtr_limit")
@@ -199,13 +225,16 @@ TEST_CASE("vmcs_guest_idtr_limit")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    CHECK(vmcs::guest_idtr_limit::exists());
+    using namespace vmcs::guest_idtr_limit;
 
-    vmcs::guest_idtr_limit::set(1UL);
-    CHECK(vmcs::guest_idtr_limit::get() == 1UL);
+    set(100UL);
+    CHECK(get() == 100UL);
+    CHECK(exists());
 
-    vmcs::guest_idtr_limit::set_if_exists(1UL);
-    CHECK(vmcs::guest_idtr_limit::get_if_exists() == 1UL);
+    set_if_exists(200UL);
+    CHECK(get_if_exists() == 200UL);
+
+    dump(0);
 }
 
 TEST_CASE("vmcs_guest_es_access_rights")
@@ -213,12 +242,16 @@ TEST_CASE("vmcs_guest_es_access_rights")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_es_access_rights::set(100UL);
-    CHECK(vmcs::guest_es_access_rights::exists());
-    CHECK(vmcs::guest_es_access_rights::get() == 100UL);
+    using namespace vmcs::guest_es_access_rights;
 
-    vmcs::guest_es_access_rights::set_if_exists(2UL);
-    CHECK(vmcs::guest_es_access_rights::get_if_exists() == 2UL);
+    set(100UL);
+    CHECK(get() == 100UL);
+    CHECK(exists());
+
+    set_if_exists(200UL);
+    CHECK(get_if_exists() == 200UL);
+
+    dump(0);
 }
 
 TEST_CASE("vmcs_guest_es_access_rights_type")
@@ -226,11 +259,16 @@ TEST_CASE("vmcs_guest_es_access_rights_type")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_es_access_rights::type::set(1UL);
-    CHECK(vmcs::guest_es_access_rights::type::get() == 1UL);
+    using namespace vmcs::guest_es_access_rights;
 
-    vmcs::guest_es_access_rights::type::set_if_exists(0UL);
-    CHECK(vmcs::guest_es_access_rights::type::get_if_exists() == 0UL);
+    type::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(type::get() == (type::mask >> type::from));
+
+    type::set(type::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(type::get(type::mask) == (type::mask >> type::from));
+
+    type::set_if_exists(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(type::get_if_exists() == (type::mask >> type::from));
 }
 
 TEST_CASE("vmcs_guest_es_access_rights_s")
@@ -238,11 +276,22 @@ TEST_CASE("vmcs_guest_es_access_rights_s")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_es_access_rights::s::set(1UL);
-    CHECK(vmcs::guest_es_access_rights::s::get() == 1UL);
+    using namespace vmcs::guest_es_access_rights;
 
-    vmcs::guest_es_access_rights::s::set_if_exists(0UL);
-    CHECK(vmcs::guest_es_access_rights::s::get_if_exists() == 0UL);
+    s::set(true);
+    CHECK(s::is_enabled());
+    s::set(false);
+    CHECK(s::is_disabled());
+
+    s::set(s::mask, true);
+    CHECK(s::is_enabled(s::mask));
+    s::set(0x0, false);
+    CHECK(s::is_disabled(0x0));
+
+    s::set_if_exists(true);
+    CHECK(s::is_enabled_if_exists());
+    s::set_if_exists(false);
+    CHECK(s::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_es_access_rights_dpl")
@@ -250,11 +299,16 @@ TEST_CASE("vmcs_guest_es_access_rights_dpl")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_es_access_rights::dpl::set(1UL);
-    CHECK(vmcs::guest_es_access_rights::dpl::get() == 1UL);
+    using namespace vmcs::guest_es_access_rights;
 
-    vmcs::guest_es_access_rights::dpl::set_if_exists(0UL);
-    CHECK(vmcs::guest_es_access_rights::dpl::get_if_exists() == 0UL);
+    dpl::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(dpl::get() == (dpl::mask >> dpl::from));
+
+    dpl::set(dpl::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(dpl::get(dpl::mask) == (dpl::mask >> dpl::from));
+
+    dpl::set_if_exists(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(dpl::get_if_exists() == (dpl::mask >> dpl::from));
 }
 
 TEST_CASE("vmcs_guest_es_access_rights_present")
@@ -262,11 +316,22 @@ TEST_CASE("vmcs_guest_es_access_rights_present")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_es_access_rights::present::set(1UL);
-    CHECK(vmcs::guest_es_access_rights::present::get() == 1UL);
+    using namespace vmcs::guest_es_access_rights;
 
-    vmcs::guest_es_access_rights::present::set_if_exists(0UL);
-    CHECK(vmcs::guest_es_access_rights::present::get_if_exists() == 0UL);
+    present::set(true);
+    CHECK(present::is_enabled());
+    present::set(false);
+    CHECK(present::is_disabled());
+
+    present::set(present::mask, true);
+    CHECK(present::is_enabled(present::mask));
+    present::set(0x0, false);
+    CHECK(present::is_disabled(0x0));
+
+    present::set_if_exists(true);
+    CHECK(present::is_enabled_if_exists());
+    present::set_if_exists(false);
+    CHECK(present::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_es_access_rights_avl")
@@ -274,11 +339,22 @@ TEST_CASE("vmcs_guest_es_access_rights_avl")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_es_access_rights::avl::set(1UL);
-    CHECK(vmcs::guest_es_access_rights::avl::get() == 1UL);
+    using namespace vmcs::guest_es_access_rights;
 
-    vmcs::guest_es_access_rights::avl::set_if_exists(0UL);
-    CHECK(vmcs::guest_es_access_rights::avl::get_if_exists() == 0UL);
+    avl::set(true);
+    CHECK(avl::is_enabled());
+    avl::set(false);
+    CHECK(avl::is_disabled());
+
+    avl::set(avl::mask, true);
+    CHECK(avl::is_enabled(avl::mask));
+    avl::set(0x0, false);
+    CHECK(avl::is_disabled(0x0));
+
+    avl::set_if_exists(true);
+    CHECK(avl::is_enabled_if_exists());
+    avl::set_if_exists(false);
+    CHECK(avl::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_es_access_rights_l")
@@ -286,11 +362,22 @@ TEST_CASE("vmcs_guest_es_access_rights_l")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_es_access_rights::l::set(1UL);
-    CHECK(vmcs::guest_es_access_rights::l::get() == 1UL);
+    using namespace vmcs::guest_es_access_rights;
 
-    vmcs::guest_es_access_rights::l::set_if_exists(0UL);
-    CHECK(vmcs::guest_es_access_rights::l::get_if_exists() == 0UL);
+    l::set(true);
+    CHECK(l::is_enabled());
+    l::set(false);
+    CHECK(l::is_disabled());
+
+    l::set(l::mask, true);
+    CHECK(l::is_enabled(l::mask));
+    l::set(0x0, false);
+    CHECK(l::is_disabled(0x0));
+
+    l::set_if_exists(true);
+    CHECK(l::is_enabled_if_exists());
+    l::set_if_exists(false);
+    CHECK(l::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_es_access_rights_db")
@@ -298,11 +385,22 @@ TEST_CASE("vmcs_guest_es_access_rights_db")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_es_access_rights::db::set(1UL);
-    CHECK(vmcs::guest_es_access_rights::db::get() == 1UL);
+    using namespace vmcs::guest_es_access_rights;
 
-    vmcs::guest_es_access_rights::db::set_if_exists(0UL);
-    CHECK(vmcs::guest_es_access_rights::db::get_if_exists() == 0UL);
+    db::set(true);
+    CHECK(db::is_enabled());
+    db::set(false);
+    CHECK(db::is_disabled());
+
+    db::set(db::mask, true);
+    CHECK(db::is_enabled(db::mask));
+    db::set(0x0, false);
+    CHECK(db::is_disabled(0x0));
+
+    db::set_if_exists(true);
+    CHECK(db::is_enabled_if_exists());
+    db::set_if_exists(false);
+    CHECK(db::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_es_access_rights_granularity")
@@ -310,11 +408,22 @@ TEST_CASE("vmcs_guest_es_access_rights_granularity")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_es_access_rights::granularity::set(1UL);
-    CHECK(vmcs::guest_es_access_rights::granularity::get() == 1UL);
+    using namespace vmcs::guest_es_access_rights;
 
-    vmcs::guest_es_access_rights::granularity::set_if_exists(0UL);
-    CHECK(vmcs::guest_es_access_rights::granularity::get_if_exists() == 0UL);
+    granularity::set(true);
+    CHECK(granularity::is_enabled());
+    granularity::set(false);
+    CHECK(granularity::is_disabled());
+
+    granularity::set(granularity::mask, true);
+    CHECK(granularity::is_enabled(granularity::mask));
+    granularity::set(0x0, false);
+    CHECK(granularity::is_disabled(0x0));
+
+    granularity::set_if_exists(true);
+    CHECK(granularity::is_enabled_if_exists());
+    granularity::set_if_exists(false);
+    CHECK(granularity::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_es_access_rights_reserved")
@@ -322,11 +431,16 @@ TEST_CASE("vmcs_guest_es_access_rights_reserved")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_es_access_rights::reserved::set(0x10F00U);
-    CHECK(vmcs::guest_es_access_rights::reserved::get() == 0x00F00U);
+    using namespace vmcs::guest_es_access_rights;
 
-    vmcs::guest_es_access_rights::reserved::set_if_exists(0UL);
-    CHECK(vmcs::guest_es_access_rights::reserved::get_if_exists() == 0UL);
+    reserved::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(reserved::get() == (reserved::mask >> reserved::from));
+
+    reserved::set(reserved::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(reserved::get(reserved::mask) == (reserved::mask >> reserved::from));
+
+    reserved::set_if_exists(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(reserved::get_if_exists() == (reserved::mask >> reserved::from));
 }
 
 TEST_CASE("vmcs_guest_es_access_rights_unusable")
@@ -334,11 +448,22 @@ TEST_CASE("vmcs_guest_es_access_rights_unusable")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_es_access_rights::unusable::set(1UL);
-    CHECK(vmcs::guest_es_access_rights::unusable::get() == 1UL);
+    using namespace vmcs::guest_es_access_rights;
 
-    vmcs::guest_es_access_rights::unusable::set_if_exists(0UL);
-    CHECK(vmcs::guest_es_access_rights::unusable::get_if_exists() == 0UL);
+    unusable::set(true);
+    CHECK(unusable::is_enabled());
+    unusable::set(false);
+    CHECK(unusable::is_disabled());
+
+    unusable::set(unusable::mask, true);
+    CHECK(unusable::is_enabled(unusable::mask));
+    unusable::set(0x0, false);
+    CHECK(unusable::is_disabled(0x0));
+
+    unusable::set_if_exists(true);
+    CHECK(unusable::is_enabled_if_exists());
+    unusable::set_if_exists(false);
+    CHECK(unusable::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_cs_access_rights")
@@ -346,12 +471,16 @@ TEST_CASE("vmcs_guest_cs_access_rights")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_cs_access_rights::set(100UL);
-    CHECK(vmcs::guest_cs_access_rights::exists());
-    CHECK(vmcs::guest_cs_access_rights::get() == 100UL);
+    using namespace vmcs::guest_cs_access_rights;
 
-    vmcs::guest_cs_access_rights::set_if_exists(2UL);
-    CHECK(vmcs::guest_cs_access_rights::get_if_exists() == 2UL);
+    set(100UL);
+    CHECK(get() == 100UL);
+    CHECK(exists());
+
+    set_if_exists(200UL);
+    CHECK(get_if_exists() == 200UL);
+
+    dump(0);
 }
 
 TEST_CASE("vmcs_guest_cs_access_rights_type")
@@ -359,11 +488,16 @@ TEST_CASE("vmcs_guest_cs_access_rights_type")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_cs_access_rights::type::set(1UL);
-    CHECK(vmcs::guest_cs_access_rights::type::get() == 1UL);
+    using namespace vmcs::guest_cs_access_rights;
 
-    vmcs::guest_cs_access_rights::type::set_if_exists(0UL);
-    CHECK(vmcs::guest_cs_access_rights::type::get_if_exists() == 0UL);
+    type::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(type::get() == (type::mask >> type::from));
+
+    type::set(type::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(type::get(type::mask) == (type::mask >> type::from));
+
+    type::set_if_exists(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(type::get_if_exists() == (type::mask >> type::from));
 }
 
 TEST_CASE("vmcs_guest_cs_access_rights_s")
@@ -371,11 +505,22 @@ TEST_CASE("vmcs_guest_cs_access_rights_s")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_cs_access_rights::s::set(1UL);
-    CHECK(vmcs::guest_cs_access_rights::s::get() == 1UL);
+    using namespace vmcs::guest_cs_access_rights;
 
-    vmcs::guest_cs_access_rights::s::set_if_exists(0UL);
-    CHECK(vmcs::guest_cs_access_rights::s::get_if_exists() == 0UL);
+    s::set(true);
+    CHECK(s::is_enabled());
+    s::set(false);
+    CHECK(s::is_disabled());
+
+    s::set(s::mask, true);
+    CHECK(s::is_enabled(s::mask));
+    s::set(0x0, false);
+    CHECK(s::is_disabled(0x0));
+
+    s::set_if_exists(true);
+    CHECK(s::is_enabled_if_exists());
+    s::set_if_exists(false);
+    CHECK(s::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_cs_access_rights_dpl")
@@ -383,11 +528,16 @@ TEST_CASE("vmcs_guest_cs_access_rights_dpl")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_cs_access_rights::dpl::set(1UL);
-    CHECK(vmcs::guest_cs_access_rights::dpl::get() == 1UL);
+    using namespace vmcs::guest_cs_access_rights;
 
-    vmcs::guest_cs_access_rights::dpl::set_if_exists(0UL);
-    CHECK(vmcs::guest_cs_access_rights::dpl::get_if_exists() == 0UL);
+    dpl::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(dpl::get() == (dpl::mask >> dpl::from));
+
+    dpl::set(dpl::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(dpl::get(dpl::mask) == (dpl::mask >> dpl::from));
+
+    dpl::set_if_exists(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(dpl::get_if_exists() == (dpl::mask >> dpl::from));
 }
 
 TEST_CASE("vmcs_guest_cs_access_rights_present")
@@ -395,11 +545,22 @@ TEST_CASE("vmcs_guest_cs_access_rights_present")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_cs_access_rights::present::set(1UL);
-    CHECK(vmcs::guest_cs_access_rights::present::get() == 1UL);
+    using namespace vmcs::guest_cs_access_rights;
 
-    vmcs::guest_cs_access_rights::present::set_if_exists(0UL);
-    CHECK(vmcs::guest_cs_access_rights::present::get_if_exists() == 0UL);
+    present::set(true);
+    CHECK(present::is_enabled());
+    present::set(false);
+    CHECK(present::is_disabled());
+
+    present::set(present::mask, true);
+    CHECK(present::is_enabled(present::mask));
+    present::set(0x0, false);
+    CHECK(present::is_disabled(0x0));
+
+    present::set_if_exists(true);
+    CHECK(present::is_enabled_if_exists());
+    present::set_if_exists(false);
+    CHECK(present::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_cs_access_rights_avl")
@@ -407,11 +568,22 @@ TEST_CASE("vmcs_guest_cs_access_rights_avl")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_cs_access_rights::avl::set(1UL);
-    CHECK(vmcs::guest_cs_access_rights::avl::get() == 1UL);
+    using namespace vmcs::guest_cs_access_rights;
 
-    vmcs::guest_cs_access_rights::avl::set_if_exists(0UL);
-    CHECK(vmcs::guest_cs_access_rights::avl::get_if_exists() == 0UL);
+    avl::set(true);
+    CHECK(avl::is_enabled());
+    avl::set(false);
+    CHECK(avl::is_disabled());
+
+    avl::set(avl::mask, true);
+    CHECK(avl::is_enabled(avl::mask));
+    avl::set(0x0, false);
+    CHECK(avl::is_disabled(0x0));
+
+    avl::set_if_exists(true);
+    CHECK(avl::is_enabled_if_exists());
+    avl::set_if_exists(false);
+    CHECK(avl::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_cs_access_rights_l")
@@ -419,11 +591,22 @@ TEST_CASE("vmcs_guest_cs_access_rights_l")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_cs_access_rights::l::set(1UL);
-    CHECK(vmcs::guest_cs_access_rights::l::get() == 1UL);
+    using namespace vmcs::guest_cs_access_rights;
 
-    vmcs::guest_cs_access_rights::l::set_if_exists(0UL);
-    CHECK(vmcs::guest_cs_access_rights::l::get_if_exists() == 0UL);
+    l::set(true);
+    CHECK(l::is_enabled());
+    l::set(false);
+    CHECK(l::is_disabled());
+
+    l::set(l::mask, true);
+    CHECK(l::is_enabled(l::mask));
+    l::set(0x0, false);
+    CHECK(l::is_disabled(0x0));
+
+    l::set_if_exists(true);
+    CHECK(l::is_enabled_if_exists());
+    l::set_if_exists(false);
+    CHECK(l::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_cs_access_rights_db")
@@ -431,11 +614,22 @@ TEST_CASE("vmcs_guest_cs_access_rights_db")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_cs_access_rights::db::set(1UL);
-    CHECK(vmcs::guest_cs_access_rights::db::get() == 1UL);
+    using namespace vmcs::guest_cs_access_rights;
 
-    vmcs::guest_cs_access_rights::db::set_if_exists(0UL);
-    CHECK(vmcs::guest_cs_access_rights::db::get_if_exists() == 0UL);
+    db::set(true);
+    CHECK(db::is_enabled());
+    db::set(false);
+    CHECK(db::is_disabled());
+
+    db::set(db::mask, true);
+    CHECK(db::is_enabled(db::mask));
+    db::set(0x0, false);
+    CHECK(db::is_disabled(0x0));
+
+    db::set_if_exists(true);
+    CHECK(db::is_enabled_if_exists());
+    db::set_if_exists(false);
+    CHECK(db::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_cs_access_rights_granularity")
@@ -443,11 +637,22 @@ TEST_CASE("vmcs_guest_cs_access_rights_granularity")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_cs_access_rights::granularity::set(1UL);
-    CHECK(vmcs::guest_cs_access_rights::granularity::get() == 1UL);
+    using namespace vmcs::guest_cs_access_rights;
 
-    vmcs::guest_cs_access_rights::granularity::set_if_exists(0UL);
-    CHECK(vmcs::guest_cs_access_rights::granularity::get_if_exists() == 0UL);
+    granularity::set(true);
+    CHECK(granularity::is_enabled());
+    granularity::set(false);
+    CHECK(granularity::is_disabled());
+
+    granularity::set(granularity::mask, true);
+    CHECK(granularity::is_enabled(granularity::mask));
+    granularity::set(0x0, false);
+    CHECK(granularity::is_disabled(0x0));
+
+    granularity::set_if_exists(true);
+    CHECK(granularity::is_enabled_if_exists());
+    granularity::set_if_exists(false);
+    CHECK(granularity::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_cs_access_rights_reserved")
@@ -455,11 +660,16 @@ TEST_CASE("vmcs_guest_cs_access_rights_reserved")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_cs_access_rights::reserved::set(0x10F00U);
-    CHECK(vmcs::guest_cs_access_rights::reserved::get() == 0x00F00U);
+    using namespace vmcs::guest_cs_access_rights;
 
-    vmcs::guest_cs_access_rights::reserved::set_if_exists(0UL);
-    CHECK(vmcs::guest_cs_access_rights::reserved::get_if_exists() == 0UL);
+    reserved::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(reserved::get() == (reserved::mask >> reserved::from));
+
+    reserved::set(reserved::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(reserved::get(reserved::mask) == (reserved::mask >> reserved::from));
+
+    reserved::set_if_exists(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(reserved::get_if_exists() == (reserved::mask >> reserved::from));
 }
 
 TEST_CASE("vmcs_guest_cs_access_rights_unusable")
@@ -467,11 +677,22 @@ TEST_CASE("vmcs_guest_cs_access_rights_unusable")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_cs_access_rights::unusable::set(1UL);
-    CHECK(vmcs::guest_cs_access_rights::unusable::get() == 1UL);
+    using namespace vmcs::guest_cs_access_rights;
 
-    vmcs::guest_cs_access_rights::unusable::set_if_exists(0UL);
-    CHECK(vmcs::guest_cs_access_rights::unusable::get_if_exists() == 0UL);
+    unusable::set(true);
+    CHECK(unusable::is_enabled());
+    unusable::set(false);
+    CHECK(unusable::is_disabled());
+
+    unusable::set(unusable::mask, true);
+    CHECK(unusable::is_enabled(unusable::mask));
+    unusable::set(0x0, false);
+    CHECK(unusable::is_disabled(0x0));
+
+    unusable::set_if_exists(true);
+    CHECK(unusable::is_enabled_if_exists());
+    unusable::set_if_exists(false);
+    CHECK(unusable::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_ss_access_rights")
@@ -479,12 +700,16 @@ TEST_CASE("vmcs_guest_ss_access_rights")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_ss_access_rights::set(100UL);
-    CHECK(vmcs::guest_ss_access_rights::exists());
-    CHECK(vmcs::guest_ss_access_rights::get() == 100UL);
+    using namespace vmcs::guest_ss_access_rights;
 
-    vmcs::guest_ss_access_rights::set_if_exists(2UL);
-    CHECK(vmcs::guest_ss_access_rights::get_if_exists() == 2UL);
+    set(100UL);
+    CHECK(get() == 100UL);
+    CHECK(exists());
+
+    set_if_exists(200UL);
+    CHECK(get_if_exists() == 200UL);
+
+    dump(0);
 }
 
 TEST_CASE("vmcs_guest_ss_access_rights_type")
@@ -492,11 +717,16 @@ TEST_CASE("vmcs_guest_ss_access_rights_type")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_ss_access_rights::type::set(1UL);
-    CHECK(vmcs::guest_ss_access_rights::type::get() == 1UL);
+    using namespace vmcs::guest_ss_access_rights;
 
-    vmcs::guest_ss_access_rights::type::set_if_exists(0UL);
-    CHECK(vmcs::guest_ss_access_rights::type::get_if_exists() == 0UL);
+    type::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(type::get() == (type::mask >> type::from));
+
+    type::set(type::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(type::get(type::mask) == (type::mask >> type::from));
+
+    type::set_if_exists(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(type::get_if_exists() == (type::mask >> type::from));
 }
 
 TEST_CASE("vmcs_guest_ss_access_rights_s")
@@ -504,11 +734,22 @@ TEST_CASE("vmcs_guest_ss_access_rights_s")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_ss_access_rights::s::set(1UL);
-    CHECK(vmcs::guest_ss_access_rights::s::get() == 1UL);
+    using namespace vmcs::guest_ss_access_rights;
 
-    vmcs::guest_ss_access_rights::s::set_if_exists(0UL);
-    CHECK(vmcs::guest_ss_access_rights::s::get_if_exists() == 0UL);
+    s::set(true);
+    CHECK(s::is_enabled());
+    s::set(false);
+    CHECK(s::is_disabled());
+
+    s::set(s::mask, true);
+    CHECK(s::is_enabled(s::mask));
+    s::set(0x0, false);
+    CHECK(s::is_disabled(0x0));
+
+    s::set_if_exists(true);
+    CHECK(s::is_enabled_if_exists());
+    s::set_if_exists(false);
+    CHECK(s::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_ss_access_rights_dpl")
@@ -516,11 +757,16 @@ TEST_CASE("vmcs_guest_ss_access_rights_dpl")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_ss_access_rights::dpl::set(1UL);
-    CHECK(vmcs::guest_ss_access_rights::dpl::get() == 1UL);
+    using namespace vmcs::guest_ss_access_rights;
 
-    vmcs::guest_ss_access_rights::dpl::set_if_exists(0UL);
-    CHECK(vmcs::guest_ss_access_rights::dpl::get_if_exists() == 0UL);
+    dpl::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(dpl::get() == (dpl::mask >> dpl::from));
+
+    dpl::set(dpl::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(dpl::get(dpl::mask) == (dpl::mask >> dpl::from));
+
+    dpl::set_if_exists(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(dpl::get_if_exists() == (dpl::mask >> dpl::from));
 }
 
 TEST_CASE("vmcs_guest_ss_access_rights_present")
@@ -528,11 +774,22 @@ TEST_CASE("vmcs_guest_ss_access_rights_present")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_ss_access_rights::present::set(1UL);
-    CHECK(vmcs::guest_ss_access_rights::present::get() == 1UL);
+    using namespace vmcs::guest_ss_access_rights;
 
-    vmcs::guest_ss_access_rights::present::set_if_exists(0UL);
-    CHECK(vmcs::guest_ss_access_rights::present::get_if_exists() == 0UL);
+    present::set(true);
+    CHECK(present::is_enabled());
+    present::set(false);
+    CHECK(present::is_disabled());
+
+    present::set(present::mask, true);
+    CHECK(present::is_enabled(present::mask));
+    present::set(0x0, false);
+    CHECK(present::is_disabled(0x0));
+
+    present::set_if_exists(true);
+    CHECK(present::is_enabled_if_exists());
+    present::set_if_exists(false);
+    CHECK(present::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_ss_access_rights_avl")
@@ -540,11 +797,22 @@ TEST_CASE("vmcs_guest_ss_access_rights_avl")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_ss_access_rights::avl::set(1UL);
-    CHECK(vmcs::guest_ss_access_rights::avl::get() == 1UL);
+    using namespace vmcs::guest_ss_access_rights;
 
-    vmcs::guest_ss_access_rights::avl::set_if_exists(0UL);
-    CHECK(vmcs::guest_ss_access_rights::avl::get_if_exists() == 0UL);
+    avl::set(true);
+    CHECK(avl::is_enabled());
+    avl::set(false);
+    CHECK(avl::is_disabled());
+
+    avl::set(avl::mask, true);
+    CHECK(avl::is_enabled(avl::mask));
+    avl::set(0x0, false);
+    CHECK(avl::is_disabled(0x0));
+
+    avl::set_if_exists(true);
+    CHECK(avl::is_enabled_if_exists());
+    avl::set_if_exists(false);
+    CHECK(avl::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_ss_access_rights_l")
@@ -552,11 +820,22 @@ TEST_CASE("vmcs_guest_ss_access_rights_l")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_ss_access_rights::l::set(1UL);
-    CHECK(vmcs::guest_ss_access_rights::l::get() == 1UL);
+    using namespace vmcs::guest_ss_access_rights;
 
-    vmcs::guest_ss_access_rights::l::set_if_exists(0UL);
-    CHECK(vmcs::guest_ss_access_rights::l::get_if_exists() == 0UL);
+    l::set(true);
+    CHECK(l::is_enabled());
+    l::set(false);
+    CHECK(l::is_disabled());
+
+    l::set(l::mask, true);
+    CHECK(l::is_enabled(l::mask));
+    l::set(0x0, false);
+    CHECK(l::is_disabled(0x0));
+
+    l::set_if_exists(true);
+    CHECK(l::is_enabled_if_exists());
+    l::set_if_exists(false);
+    CHECK(l::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_ss_access_rights_db")
@@ -564,11 +843,22 @@ TEST_CASE("vmcs_guest_ss_access_rights_db")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_ss_access_rights::db::set(1UL);
-    CHECK(vmcs::guest_ss_access_rights::db::get() == 1UL);
+    using namespace vmcs::guest_ss_access_rights;
 
-    vmcs::guest_ss_access_rights::db::set_if_exists(0UL);
-    CHECK(vmcs::guest_ss_access_rights::db::get_if_exists() == 0UL);
+    db::set(true);
+    CHECK(db::is_enabled());
+    db::set(false);
+    CHECK(db::is_disabled());
+
+    db::set(db::mask, true);
+    CHECK(db::is_enabled(db::mask));
+    db::set(0x0, false);
+    CHECK(db::is_disabled(0x0));
+
+    db::set_if_exists(true);
+    CHECK(db::is_enabled_if_exists());
+    db::set_if_exists(false);
+    CHECK(db::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_ss_access_rights_granularity")
@@ -576,11 +866,22 @@ TEST_CASE("vmcs_guest_ss_access_rights_granularity")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_ss_access_rights::granularity::set(1UL);
-    CHECK(vmcs::guest_ss_access_rights::granularity::get() == 1UL);
+    using namespace vmcs::guest_ss_access_rights;
 
-    vmcs::guest_ss_access_rights::granularity::set_if_exists(0UL);
-    CHECK(vmcs::guest_ss_access_rights::granularity::get_if_exists() == 0UL);
+    granularity::set(true);
+    CHECK(granularity::is_enabled());
+    granularity::set(false);
+    CHECK(granularity::is_disabled());
+
+    granularity::set(granularity::mask, true);
+    CHECK(granularity::is_enabled(granularity::mask));
+    granularity::set(0x0, false);
+    CHECK(granularity::is_disabled(0x0));
+
+    granularity::set_if_exists(true);
+    CHECK(granularity::is_enabled_if_exists());
+    granularity::set_if_exists(false);
+    CHECK(granularity::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_ss_access_rights_reserved")
@@ -588,11 +889,16 @@ TEST_CASE("vmcs_guest_ss_access_rights_reserved")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_ss_access_rights::reserved::set(0x10F00U);
-    CHECK(vmcs::guest_ss_access_rights::reserved::get() == 0x00F00U);
+    using namespace vmcs::guest_ss_access_rights;
 
-    vmcs::guest_ss_access_rights::reserved::set_if_exists(0UL);
-    CHECK(vmcs::guest_ss_access_rights::reserved::get_if_exists() == 0UL);
+    reserved::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(reserved::get() == (reserved::mask >> reserved::from));
+
+    reserved::set(reserved::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(reserved::get(reserved::mask) == (reserved::mask >> reserved::from));
+
+    reserved::set_if_exists(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(reserved::get_if_exists() == (reserved::mask >> reserved::from));
 }
 
 TEST_CASE("vmcs_guest_ss_access_rights_unusable")
@@ -600,11 +906,22 @@ TEST_CASE("vmcs_guest_ss_access_rights_unusable")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_ss_access_rights::unusable::set(1UL);
-    CHECK(vmcs::guest_ss_access_rights::unusable::get() == 1UL);
+    using namespace vmcs::guest_ss_access_rights;
 
-    vmcs::guest_ss_access_rights::unusable::set_if_exists(0UL);
-    CHECK(vmcs::guest_ss_access_rights::unusable::get_if_exists() == 0UL);
+    unusable::set(true);
+    CHECK(unusable::is_enabled());
+    unusable::set(false);
+    CHECK(unusable::is_disabled());
+
+    unusable::set(unusable::mask, true);
+    CHECK(unusable::is_enabled(unusable::mask));
+    unusable::set(0x0, false);
+    CHECK(unusable::is_disabled(0x0));
+
+    unusable::set_if_exists(true);
+    CHECK(unusable::is_enabled_if_exists());
+    unusable::set_if_exists(false);
+    CHECK(unusable::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_ds_access_rights")
@@ -612,12 +929,16 @@ TEST_CASE("vmcs_guest_ds_access_rights")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_ds_access_rights::set(100UL);
-    CHECK(vmcs::guest_ds_access_rights::exists());
-    CHECK(vmcs::guest_ds_access_rights::get() == 100UL);
+    using namespace vmcs::guest_ds_access_rights;
 
-    vmcs::guest_ds_access_rights::set_if_exists(2UL);
-    CHECK(vmcs::guest_ds_access_rights::get_if_exists() == 2UL);
+    set(100UL);
+    CHECK(get() == 100UL);
+    CHECK(exists());
+
+    set_if_exists(200UL);
+    CHECK(get_if_exists() == 200UL);
+
+    dump(0);
 }
 
 TEST_CASE("vmcs_guest_ds_access_rights_type")
@@ -625,11 +946,16 @@ TEST_CASE("vmcs_guest_ds_access_rights_type")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_ds_access_rights::type::set(1UL);
-    CHECK(vmcs::guest_ds_access_rights::type::get() == 1UL);
+    using namespace vmcs::guest_ds_access_rights;
 
-    vmcs::guest_ds_access_rights::type::set_if_exists(0UL);
-    CHECK(vmcs::guest_ds_access_rights::type::get_if_exists() == 0UL);
+    type::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(type::get() == (type::mask >> type::from));
+
+    type::set(type::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(type::get(type::mask) == (type::mask >> type::from));
+
+    type::set_if_exists(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(type::get_if_exists() == (type::mask >> type::from));
 }
 
 TEST_CASE("vmcs_guest_ds_access_rights_s")
@@ -637,11 +963,22 @@ TEST_CASE("vmcs_guest_ds_access_rights_s")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_ds_access_rights::s::set(1UL);
-    CHECK(vmcs::guest_ds_access_rights::s::get() == 1UL);
+    using namespace vmcs::guest_ds_access_rights;
 
-    vmcs::guest_ds_access_rights::s::set_if_exists(0UL);
-    CHECK(vmcs::guest_ds_access_rights::s::get_if_exists() == 0UL);
+    s::set(true);
+    CHECK(s::is_enabled());
+    s::set(false);
+    CHECK(s::is_disabled());
+
+    s::set(s::mask, true);
+    CHECK(s::is_enabled(s::mask));
+    s::set(0x0, false);
+    CHECK(s::is_disabled(0x0));
+
+    s::set_if_exists(true);
+    CHECK(s::is_enabled_if_exists());
+    s::set_if_exists(false);
+    CHECK(s::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_ds_access_rights_dpl")
@@ -649,11 +986,16 @@ TEST_CASE("vmcs_guest_ds_access_rights_dpl")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_ds_access_rights::dpl::set(1UL);
-    CHECK(vmcs::guest_ds_access_rights::dpl::get() == 1UL);
+    using namespace vmcs::guest_ds_access_rights;
 
-    vmcs::guest_ds_access_rights::dpl::set_if_exists(0UL);
-    CHECK(vmcs::guest_ds_access_rights::dpl::get_if_exists() == 0UL);
+    dpl::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(dpl::get() == (dpl::mask >> dpl::from));
+
+    dpl::set(dpl::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(dpl::get(dpl::mask) == (dpl::mask >> dpl::from));
+
+    dpl::set_if_exists(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(dpl::get_if_exists() == (dpl::mask >> dpl::from));
 }
 
 TEST_CASE("vmcs_guest_ds_access_rights_present")
@@ -661,11 +1003,22 @@ TEST_CASE("vmcs_guest_ds_access_rights_present")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_ds_access_rights::present::set(1UL);
-    CHECK(vmcs::guest_ds_access_rights::present::get() == 1UL);
+    using namespace vmcs::guest_ds_access_rights;
 
-    vmcs::guest_ds_access_rights::present::set_if_exists(0UL);
-    CHECK(vmcs::guest_ds_access_rights::present::get_if_exists() == 0UL);
+    present::set(true);
+    CHECK(present::is_enabled());
+    present::set(false);
+    CHECK(present::is_disabled());
+
+    present::set(present::mask, true);
+    CHECK(present::is_enabled(present::mask));
+    present::set(0x0, false);
+    CHECK(present::is_disabled(0x0));
+
+    present::set_if_exists(true);
+    CHECK(present::is_enabled_if_exists());
+    present::set_if_exists(false);
+    CHECK(present::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_ds_access_rights_avl")
@@ -673,11 +1026,22 @@ TEST_CASE("vmcs_guest_ds_access_rights_avl")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_ds_access_rights::avl::set(1UL);
-    CHECK(vmcs::guest_ds_access_rights::avl::get() == 1UL);
+    using namespace vmcs::guest_ds_access_rights;
 
-    vmcs::guest_ds_access_rights::avl::set_if_exists(0UL);
-    CHECK(vmcs::guest_ds_access_rights::avl::get_if_exists() == 0UL);
+    avl::set(true);
+    CHECK(avl::is_enabled());
+    avl::set(false);
+    CHECK(avl::is_disabled());
+
+    avl::set(avl::mask, true);
+    CHECK(avl::is_enabled(avl::mask));
+    avl::set(0x0, false);
+    CHECK(avl::is_disabled(0x0));
+
+    avl::set_if_exists(true);
+    CHECK(avl::is_enabled_if_exists());
+    avl::set_if_exists(false);
+    CHECK(avl::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_ds_access_rights_l")
@@ -685,11 +1049,22 @@ TEST_CASE("vmcs_guest_ds_access_rights_l")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_ds_access_rights::l::set(1UL);
-    CHECK(vmcs::guest_ds_access_rights::l::get() == 1UL);
+    using namespace vmcs::guest_ds_access_rights;
 
-    vmcs::guest_ds_access_rights::l::set_if_exists(0UL);
-    CHECK(vmcs::guest_ds_access_rights::l::get_if_exists() == 0UL);
+    l::set(true);
+    CHECK(l::is_enabled());
+    l::set(false);
+    CHECK(l::is_disabled());
+
+    l::set(l::mask, true);
+    CHECK(l::is_enabled(l::mask));
+    l::set(0x0, false);
+    CHECK(l::is_disabled(0x0));
+
+    l::set_if_exists(true);
+    CHECK(l::is_enabled_if_exists());
+    l::set_if_exists(false);
+    CHECK(l::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_ds_access_rights_db")
@@ -697,11 +1072,22 @@ TEST_CASE("vmcs_guest_ds_access_rights_db")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_ds_access_rights::db::set(1UL);
-    CHECK(vmcs::guest_ds_access_rights::db::get() == 1UL);
+    using namespace vmcs::guest_ds_access_rights;
 
-    vmcs::guest_ds_access_rights::db::set_if_exists(0UL);
-    CHECK(vmcs::guest_ds_access_rights::db::get_if_exists() == 0UL);
+    db::set(true);
+    CHECK(db::is_enabled());
+    db::set(false);
+    CHECK(db::is_disabled());
+
+    db::set(db::mask, true);
+    CHECK(db::is_enabled(db::mask));
+    db::set(0x0, false);
+    CHECK(db::is_disabled(0x0));
+
+    db::set_if_exists(true);
+    CHECK(db::is_enabled_if_exists());
+    db::set_if_exists(false);
+    CHECK(db::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_ds_access_rights_granularity")
@@ -709,11 +1095,22 @@ TEST_CASE("vmcs_guest_ds_access_rights_granularity")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_ds_access_rights::granularity::set(1UL);
-    CHECK(vmcs::guest_ds_access_rights::granularity::get() == 1UL);
+    using namespace vmcs::guest_ds_access_rights;
 
-    vmcs::guest_ds_access_rights::granularity::set_if_exists(0UL);
-    CHECK(vmcs::guest_ds_access_rights::granularity::get_if_exists() == 0UL);
+    granularity::set(true);
+    CHECK(granularity::is_enabled());
+    granularity::set(false);
+    CHECK(granularity::is_disabled());
+
+    granularity::set(granularity::mask, true);
+    CHECK(granularity::is_enabled(granularity::mask));
+    granularity::set(0x0, false);
+    CHECK(granularity::is_disabled(0x0));
+
+    granularity::set_if_exists(true);
+    CHECK(granularity::is_enabled_if_exists());
+    granularity::set_if_exists(false);
+    CHECK(granularity::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_ds_access_rights_reserved")
@@ -721,11 +1118,16 @@ TEST_CASE("vmcs_guest_ds_access_rights_reserved")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_ds_access_rights::reserved::set(0x10F00U);
-    CHECK(vmcs::guest_ds_access_rights::reserved::get() == 0x00F00U);
+    using namespace vmcs::guest_ds_access_rights;
 
-    vmcs::guest_ds_access_rights::reserved::set_if_exists(0UL);
-    CHECK(vmcs::guest_ds_access_rights::reserved::get_if_exists() == 0UL);
+    reserved::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(reserved::get() == (reserved::mask >> reserved::from));
+
+    reserved::set(reserved::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(reserved::get(reserved::mask) == (reserved::mask >> reserved::from));
+
+    reserved::set_if_exists(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(reserved::get_if_exists() == (reserved::mask >> reserved::from));
 }
 
 TEST_CASE("vmcs_guest_ds_access_rights_unusable")
@@ -733,11 +1135,22 @@ TEST_CASE("vmcs_guest_ds_access_rights_unusable")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_ds_access_rights::unusable::set(1UL);
-    CHECK(vmcs::guest_ds_access_rights::unusable::get() == 1UL);
+    using namespace vmcs::guest_ds_access_rights;
 
-    vmcs::guest_ds_access_rights::unusable::set_if_exists(0UL);
-    CHECK(vmcs::guest_ds_access_rights::unusable::get_if_exists() == 0UL);
+    unusable::set(true);
+    CHECK(unusable::is_enabled());
+    unusable::set(false);
+    CHECK(unusable::is_disabled());
+
+    unusable::set(unusable::mask, true);
+    CHECK(unusable::is_enabled(unusable::mask));
+    unusable::set(0x0, false);
+    CHECK(unusable::is_disabled(0x0));
+
+    unusable::set_if_exists(true);
+    CHECK(unusable::is_enabled_if_exists());
+    unusable::set_if_exists(false);
+    CHECK(unusable::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_fs_access_rights")
@@ -745,12 +1158,16 @@ TEST_CASE("vmcs_guest_fs_access_rights")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_fs_access_rights::set(100UL);
-    CHECK(vmcs::guest_fs_access_rights::exists());
-    CHECK(vmcs::guest_fs_access_rights::get() == 100UL);
+    using namespace vmcs::guest_fs_access_rights;
 
-    vmcs::guest_fs_access_rights::set_if_exists(2UL);
-    CHECK(vmcs::guest_fs_access_rights::get_if_exists() == 2UL);
+    set(100UL);
+    CHECK(get() == 100UL);
+    CHECK(exists());
+
+    set_if_exists(200UL);
+    CHECK(get_if_exists() == 200UL);
+
+    dump(0);
 }
 
 TEST_CASE("vmcs_guest_fs_access_rights_type")
@@ -758,11 +1175,16 @@ TEST_CASE("vmcs_guest_fs_access_rights_type")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_fs_access_rights::type::set(1UL);
-    CHECK(vmcs::guest_fs_access_rights::type::get() == 1UL);
+    using namespace vmcs::guest_fs_access_rights;
 
-    vmcs::guest_fs_access_rights::type::set_if_exists(0UL);
-    CHECK(vmcs::guest_fs_access_rights::type::get_if_exists() == 0UL);
+    type::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(type::get() == (type::mask >> type::from));
+
+    type::set(type::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(type::get(type::mask) == (type::mask >> type::from));
+
+    type::set_if_exists(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(type::get_if_exists() == (type::mask >> type::from));
 }
 
 TEST_CASE("vmcs_guest_fs_access_rights_s")
@@ -770,11 +1192,22 @@ TEST_CASE("vmcs_guest_fs_access_rights_s")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_fs_access_rights::s::set(1UL);
-    CHECK(vmcs::guest_fs_access_rights::s::get() == 1UL);
+    using namespace vmcs::guest_fs_access_rights;
 
-    vmcs::guest_fs_access_rights::s::set_if_exists(0UL);
-    CHECK(vmcs::guest_fs_access_rights::s::get_if_exists() == 0UL);
+    s::set(true);
+    CHECK(s::is_enabled());
+    s::set(false);
+    CHECK(s::is_disabled());
+
+    s::set(s::mask, true);
+    CHECK(s::is_enabled(s::mask));
+    s::set(0x0, false);
+    CHECK(s::is_disabled(0x0));
+
+    s::set_if_exists(true);
+    CHECK(s::is_enabled_if_exists());
+    s::set_if_exists(false);
+    CHECK(s::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_fs_access_rights_dpl")
@@ -782,11 +1215,16 @@ TEST_CASE("vmcs_guest_fs_access_rights_dpl")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_fs_access_rights::dpl::set(1UL);
-    CHECK(vmcs::guest_fs_access_rights::dpl::get() == 1UL);
+    using namespace vmcs::guest_fs_access_rights;
 
-    vmcs::guest_fs_access_rights::dpl::set_if_exists(0UL);
-    CHECK(vmcs::guest_fs_access_rights::dpl::get_if_exists() == 0UL);
+    dpl::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(dpl::get() == (dpl::mask >> dpl::from));
+
+    dpl::set(dpl::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(dpl::get(dpl::mask) == (dpl::mask >> dpl::from));
+
+    dpl::set_if_exists(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(dpl::get_if_exists() == (dpl::mask >> dpl::from));
 }
 
 TEST_CASE("vmcs_guest_fs_access_rights_present")
@@ -794,11 +1232,22 @@ TEST_CASE("vmcs_guest_fs_access_rights_present")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_fs_access_rights::present::set(1UL);
-    CHECK(vmcs::guest_fs_access_rights::present::get() == 1UL);
+    using namespace vmcs::guest_fs_access_rights;
 
-    vmcs::guest_fs_access_rights::present::set_if_exists(0UL);
-    CHECK(vmcs::guest_fs_access_rights::present::get_if_exists() == 0UL);
+    present::set(true);
+    CHECK(present::is_enabled());
+    present::set(false);
+    CHECK(present::is_disabled());
+
+    present::set(present::mask, true);
+    CHECK(present::is_enabled(present::mask));
+    present::set(0x0, false);
+    CHECK(present::is_disabled(0x0));
+
+    present::set_if_exists(true);
+    CHECK(present::is_enabled_if_exists());
+    present::set_if_exists(false);
+    CHECK(present::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_fs_access_rights_avl")
@@ -806,11 +1255,22 @@ TEST_CASE("vmcs_guest_fs_access_rights_avl")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_fs_access_rights::avl::set(1UL);
-    CHECK(vmcs::guest_fs_access_rights::avl::get() == 1UL);
+    using namespace vmcs::guest_fs_access_rights;
 
-    vmcs::guest_fs_access_rights::avl::set_if_exists(0UL);
-    CHECK(vmcs::guest_fs_access_rights::avl::get_if_exists() == 0UL);
+    avl::set(true);
+    CHECK(avl::is_enabled());
+    avl::set(false);
+    CHECK(avl::is_disabled());
+
+    avl::set(avl::mask, true);
+    CHECK(avl::is_enabled(avl::mask));
+    avl::set(0x0, false);
+    CHECK(avl::is_disabled(0x0));
+
+    avl::set_if_exists(true);
+    CHECK(avl::is_enabled_if_exists());
+    avl::set_if_exists(false);
+    CHECK(avl::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_fs_access_rights_l")
@@ -818,11 +1278,22 @@ TEST_CASE("vmcs_guest_fs_access_rights_l")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_fs_access_rights::l::set(1UL);
-    CHECK(vmcs::guest_fs_access_rights::l::get() == 1UL);
+    using namespace vmcs::guest_fs_access_rights;
 
-    vmcs::guest_fs_access_rights::l::set_if_exists(0UL);
-    CHECK(vmcs::guest_fs_access_rights::l::get_if_exists() == 0UL);
+    l::set(true);
+    CHECK(l::is_enabled());
+    l::set(false);
+    CHECK(l::is_disabled());
+
+    l::set(l::mask, true);
+    CHECK(l::is_enabled(l::mask));
+    l::set(0x0, false);
+    CHECK(l::is_disabled(0x0));
+
+    l::set_if_exists(true);
+    CHECK(l::is_enabled_if_exists());
+    l::set_if_exists(false);
+    CHECK(l::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_fs_access_rights_db")
@@ -830,11 +1301,22 @@ TEST_CASE("vmcs_guest_fs_access_rights_db")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_fs_access_rights::db::set(1UL);
-    CHECK(vmcs::guest_fs_access_rights::db::get() == 1UL);
+    using namespace vmcs::guest_fs_access_rights;
 
-    vmcs::guest_fs_access_rights::db::set_if_exists(0UL);
-    CHECK(vmcs::guest_fs_access_rights::db::get_if_exists() == 0UL);
+    db::set(true);
+    CHECK(db::is_enabled());
+    db::set(false);
+    CHECK(db::is_disabled());
+
+    db::set(db::mask, true);
+    CHECK(db::is_enabled(db::mask));
+    db::set(0x0, false);
+    CHECK(db::is_disabled(0x0));
+
+    db::set_if_exists(true);
+    CHECK(db::is_enabled_if_exists());
+    db::set_if_exists(false);
+    CHECK(db::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_fs_access_rights_granularity")
@@ -842,11 +1324,22 @@ TEST_CASE("vmcs_guest_fs_access_rights_granularity")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_fs_access_rights::granularity::set(1UL);
-    CHECK(vmcs::guest_fs_access_rights::granularity::get() == 1UL);
+    using namespace vmcs::guest_fs_access_rights;
 
-    vmcs::guest_fs_access_rights::granularity::set_if_exists(0UL);
-    CHECK(vmcs::guest_fs_access_rights::granularity::get_if_exists() == 0UL);
+    granularity::set(true);
+    CHECK(granularity::is_enabled());
+    granularity::set(false);
+    CHECK(granularity::is_disabled());
+
+    granularity::set(granularity::mask, true);
+    CHECK(granularity::is_enabled(granularity::mask));
+    granularity::set(0x0, false);
+    CHECK(granularity::is_disabled(0x0));
+
+    granularity::set_if_exists(true);
+    CHECK(granularity::is_enabled_if_exists());
+    granularity::set_if_exists(false);
+    CHECK(granularity::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_fs_access_rights_reserved")
@@ -854,11 +1347,16 @@ TEST_CASE("vmcs_guest_fs_access_rights_reserved")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_fs_access_rights::reserved::set(0x10F00U);
-    CHECK(vmcs::guest_fs_access_rights::reserved::get() == 0x00F00U);
+    using namespace vmcs::guest_fs_access_rights;
 
-    vmcs::guest_fs_access_rights::reserved::set_if_exists(0UL);
-    CHECK(vmcs::guest_fs_access_rights::reserved::get_if_exists() == 0UL);
+    reserved::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(reserved::get() == (reserved::mask >> reserved::from));
+
+    reserved::set(reserved::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(reserved::get(reserved::mask) == (reserved::mask >> reserved::from));
+
+    reserved::set_if_exists(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(reserved::get_if_exists() == (reserved::mask >> reserved::from));
 }
 
 TEST_CASE("vmcs_guest_fs_access_rights_unusable")
@@ -866,11 +1364,22 @@ TEST_CASE("vmcs_guest_fs_access_rights_unusable")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_fs_access_rights::unusable::set(1UL);
-    CHECK(vmcs::guest_fs_access_rights::unusable::get() == 1UL);
+    using namespace vmcs::guest_fs_access_rights;
 
-    vmcs::guest_fs_access_rights::unusable::set_if_exists(0UL);
-    CHECK(vmcs::guest_fs_access_rights::unusable::get_if_exists() == 0UL);
+    unusable::set(true);
+    CHECK(unusable::is_enabled());
+    unusable::set(false);
+    CHECK(unusable::is_disabled());
+
+    unusable::set(unusable::mask, true);
+    CHECK(unusable::is_enabled(unusable::mask));
+    unusable::set(0x0, false);
+    CHECK(unusable::is_disabled(0x0));
+
+    unusable::set_if_exists(true);
+    CHECK(unusable::is_enabled_if_exists());
+    unusable::set_if_exists(false);
+    CHECK(unusable::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_gs_access_rights")
@@ -878,12 +1387,16 @@ TEST_CASE("vmcs_guest_gs_access_rights")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_gs_access_rights::set(100UL);
-    CHECK(vmcs::guest_gs_access_rights::exists());
-    CHECK(vmcs::guest_gs_access_rights::get() == 100UL);
+    using namespace vmcs::guest_gs_access_rights;
 
-    vmcs::guest_gs_access_rights::set_if_exists(2UL);
-    CHECK(vmcs::guest_gs_access_rights::get_if_exists() == 2UL);
+    set(100UL);
+    CHECK(get() == 100UL);
+    CHECK(exists());
+
+    set_if_exists(200UL);
+    CHECK(get_if_exists() == 200UL);
+
+    dump(0);
 }
 
 TEST_CASE("vmcs_guest_gs_access_rights_type")
@@ -891,11 +1404,16 @@ TEST_CASE("vmcs_guest_gs_access_rights_type")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_gs_access_rights::type::set(1UL);
-    CHECK(vmcs::guest_gs_access_rights::type::get() == 1UL);
+    using namespace vmcs::guest_gs_access_rights;
 
-    vmcs::guest_gs_access_rights::type::set_if_exists(0UL);
-    CHECK(vmcs::guest_gs_access_rights::type::get_if_exists() == 0UL);
+    type::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(type::get() == (type::mask >> type::from));
+
+    type::set(type::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(type::get(type::mask) == (type::mask >> type::from));
+
+    type::set_if_exists(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(type::get_if_exists() == (type::mask >> type::from));
 }
 
 TEST_CASE("vmcs_guest_gs_access_rights_s")
@@ -903,11 +1421,22 @@ TEST_CASE("vmcs_guest_gs_access_rights_s")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_gs_access_rights::s::set(1UL);
-    CHECK(vmcs::guest_gs_access_rights::s::get() == 1UL);
+    using namespace vmcs::guest_gs_access_rights;
 
-    vmcs::guest_gs_access_rights::s::set_if_exists(0UL);
-    CHECK(vmcs::guest_gs_access_rights::s::get_if_exists() == 0UL);
+    s::set(true);
+    CHECK(s::is_enabled());
+    s::set(false);
+    CHECK(s::is_disabled());
+
+    s::set(s::mask, true);
+    CHECK(s::is_enabled(s::mask));
+    s::set(0x0, false);
+    CHECK(s::is_disabled(0x0));
+
+    s::set_if_exists(true);
+    CHECK(s::is_enabled_if_exists());
+    s::set_if_exists(false);
+    CHECK(s::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_gs_access_rights_dpl")
@@ -915,11 +1444,16 @@ TEST_CASE("vmcs_guest_gs_access_rights_dpl")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_gs_access_rights::dpl::set(1UL);
-    CHECK(vmcs::guest_gs_access_rights::dpl::get() == 1UL);
+    using namespace vmcs::guest_gs_access_rights;
 
-    vmcs::guest_gs_access_rights::dpl::set_if_exists(0UL);
-    CHECK(vmcs::guest_gs_access_rights::dpl::get_if_exists() == 0UL);
+    dpl::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(dpl::get() == (dpl::mask >> dpl::from));
+
+    dpl::set(dpl::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(dpl::get(dpl::mask) == (dpl::mask >> dpl::from));
+
+    dpl::set_if_exists(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(dpl::get_if_exists() == (dpl::mask >> dpl::from));
 }
 
 TEST_CASE("vmcs_guest_gs_access_rights_present")
@@ -927,11 +1461,22 @@ TEST_CASE("vmcs_guest_gs_access_rights_present")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_gs_access_rights::present::set(1UL);
-    CHECK(vmcs::guest_gs_access_rights::present::get() == 1UL);
+    using namespace vmcs::guest_gs_access_rights;
 
-    vmcs::guest_gs_access_rights::present::set_if_exists(0UL);
-    CHECK(vmcs::guest_gs_access_rights::present::get_if_exists() == 0UL);
+    present::set(true);
+    CHECK(present::is_enabled());
+    present::set(false);
+    CHECK(present::is_disabled());
+
+    present::set(present::mask, true);
+    CHECK(present::is_enabled(present::mask));
+    present::set(0x0, false);
+    CHECK(present::is_disabled(0x0));
+
+    present::set_if_exists(true);
+    CHECK(present::is_enabled_if_exists());
+    present::set_if_exists(false);
+    CHECK(present::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_gs_access_rights_avl")
@@ -939,11 +1484,22 @@ TEST_CASE("vmcs_guest_gs_access_rights_avl")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_gs_access_rights::avl::set(1UL);
-    CHECK(vmcs::guest_gs_access_rights::avl::get() == 1UL);
+    using namespace vmcs::guest_gs_access_rights;
 
-    vmcs::guest_gs_access_rights::avl::set_if_exists(0UL);
-    CHECK(vmcs::guest_gs_access_rights::avl::get_if_exists() == 0UL);
+    avl::set(true);
+    CHECK(avl::is_enabled());
+    avl::set(false);
+    CHECK(avl::is_disabled());
+
+    avl::set(avl::mask, true);
+    CHECK(avl::is_enabled(avl::mask));
+    avl::set(0x0, false);
+    CHECK(avl::is_disabled(0x0));
+
+    avl::set_if_exists(true);
+    CHECK(avl::is_enabled_if_exists());
+    avl::set_if_exists(false);
+    CHECK(avl::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_gs_access_rights_l")
@@ -951,11 +1507,22 @@ TEST_CASE("vmcs_guest_gs_access_rights_l")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_gs_access_rights::l::set(1UL);
-    CHECK(vmcs::guest_gs_access_rights::l::get() == 1UL);
+    using namespace vmcs::guest_gs_access_rights;
 
-    vmcs::guest_gs_access_rights::l::set_if_exists(0UL);
-    CHECK(vmcs::guest_gs_access_rights::l::get_if_exists() == 0UL);
+    l::set(true);
+    CHECK(l::is_enabled());
+    l::set(false);
+    CHECK(l::is_disabled());
+
+    l::set(l::mask, true);
+    CHECK(l::is_enabled(l::mask));
+    l::set(0x0, false);
+    CHECK(l::is_disabled(0x0));
+
+    l::set_if_exists(true);
+    CHECK(l::is_enabled_if_exists());
+    l::set_if_exists(false);
+    CHECK(l::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_gs_access_rights_db")
@@ -963,11 +1530,22 @@ TEST_CASE("vmcs_guest_gs_access_rights_db")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_gs_access_rights::db::set(1UL);
-    CHECK(vmcs::guest_gs_access_rights::db::get() == 1UL);
+    using namespace vmcs::guest_gs_access_rights;
 
-    vmcs::guest_gs_access_rights::db::set_if_exists(0UL);
-    CHECK(vmcs::guest_gs_access_rights::db::get_if_exists() == 0UL);
+    db::set(true);
+    CHECK(db::is_enabled());
+    db::set(false);
+    CHECK(db::is_disabled());
+
+    db::set(db::mask, true);
+    CHECK(db::is_enabled(db::mask));
+    db::set(0x0, false);
+    CHECK(db::is_disabled(0x0));
+
+    db::set_if_exists(true);
+    CHECK(db::is_enabled_if_exists());
+    db::set_if_exists(false);
+    CHECK(db::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_gs_access_rights_granularity")
@@ -975,11 +1553,22 @@ TEST_CASE("vmcs_guest_gs_access_rights_granularity")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_gs_access_rights::granularity::set(1UL);
-    CHECK(vmcs::guest_gs_access_rights::granularity::get() == 1UL);
+    using namespace vmcs::guest_gs_access_rights;
 
-    vmcs::guest_gs_access_rights::granularity::set_if_exists(0UL);
-    CHECK(vmcs::guest_gs_access_rights::granularity::get_if_exists() == 0UL);
+    granularity::set(true);
+    CHECK(granularity::is_enabled());
+    granularity::set(false);
+    CHECK(granularity::is_disabled());
+
+    granularity::set(granularity::mask, true);
+    CHECK(granularity::is_enabled(granularity::mask));
+    granularity::set(0x0, false);
+    CHECK(granularity::is_disabled(0x0));
+
+    granularity::set_if_exists(true);
+    CHECK(granularity::is_enabled_if_exists());
+    granularity::set_if_exists(false);
+    CHECK(granularity::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_gs_access_rights_reserved")
@@ -987,11 +1576,16 @@ TEST_CASE("vmcs_guest_gs_access_rights_reserved")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_gs_access_rights::reserved::set(0x10F00U);
-    CHECK(vmcs::guest_gs_access_rights::reserved::get() == 0x00F00U);
+    using namespace vmcs::guest_gs_access_rights;
 
-    vmcs::guest_gs_access_rights::reserved::set_if_exists(0UL);
-    CHECK(vmcs::guest_gs_access_rights::reserved::get_if_exists() == 0UL);
+    reserved::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(reserved::get() == (reserved::mask >> reserved::from));
+
+    reserved::set(reserved::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(reserved::get(reserved::mask) == (reserved::mask >> reserved::from));
+
+    reserved::set_if_exists(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(reserved::get_if_exists() == (reserved::mask >> reserved::from));
 }
 
 TEST_CASE("vmcs_guest_gs_access_rights_unusable")
@@ -999,11 +1593,22 @@ TEST_CASE("vmcs_guest_gs_access_rights_unusable")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_gs_access_rights::unusable::set(1UL);
-    CHECK(vmcs::guest_gs_access_rights::unusable::get() == 1UL);
+    using namespace vmcs::guest_gs_access_rights;
 
-    vmcs::guest_gs_access_rights::unusable::set_if_exists(0UL);
-    CHECK(vmcs::guest_gs_access_rights::unusable::get_if_exists() == 0UL);
+    unusable::set(true);
+    CHECK(unusable::is_enabled());
+    unusable::set(false);
+    CHECK(unusable::is_disabled());
+
+    unusable::set(unusable::mask, true);
+    CHECK(unusable::is_enabled(unusable::mask));
+    unusable::set(0x0, false);
+    CHECK(unusable::is_disabled(0x0));
+
+    unusable::set_if_exists(true);
+    CHECK(unusable::is_enabled_if_exists());
+    unusable::set_if_exists(false);
+    CHECK(unusable::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_ldtr_access_rights")
@@ -1011,12 +1616,16 @@ TEST_CASE("vmcs_guest_ldtr_access_rights")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_ldtr_access_rights::set(100UL);
-    CHECK(vmcs::guest_ldtr_access_rights::exists());
-    CHECK(vmcs::guest_ldtr_access_rights::get() == 100UL);
+    using namespace vmcs::guest_ldtr_access_rights;
 
-    vmcs::guest_ldtr_access_rights::set_if_exists(2UL);
-    CHECK(vmcs::guest_ldtr_access_rights::get_if_exists() == 2UL);
+    set(100UL);
+    CHECK(get() == 100UL);
+    CHECK(exists());
+
+    set_if_exists(200UL);
+    CHECK(get_if_exists() == 200UL);
+
+    dump(0);
 }
 
 TEST_CASE("vmcs_guest_ldtr_access_rights_type")
@@ -1024,11 +1633,16 @@ TEST_CASE("vmcs_guest_ldtr_access_rights_type")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_ldtr_access_rights::type::set(1UL);
-    CHECK(vmcs::guest_ldtr_access_rights::type::get() == 1UL);
+    using namespace vmcs::guest_ldtr_access_rights;
 
-    vmcs::guest_ldtr_access_rights::type::set_if_exists(0UL);
-    CHECK(vmcs::guest_ldtr_access_rights::type::get_if_exists() == 0UL);
+    type::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(type::get() == (type::mask >> type::from));
+
+    type::set(type::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(type::get(type::mask) == (type::mask >> type::from));
+
+    type::set_if_exists(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(type::get_if_exists() == (type::mask >> type::from));
 }
 
 TEST_CASE("vmcs_guest_ldtr_access_rights_s")
@@ -1036,11 +1650,22 @@ TEST_CASE("vmcs_guest_ldtr_access_rights_s")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_ldtr_access_rights::s::set(1UL);
-    CHECK(vmcs::guest_ldtr_access_rights::s::get() == 1UL);
+    using namespace vmcs::guest_ldtr_access_rights;
 
-    vmcs::guest_ldtr_access_rights::s::set_if_exists(0UL);
-    CHECK(vmcs::guest_ldtr_access_rights::s::get_if_exists() == 0UL);
+    s::set(true);
+    CHECK(s::is_enabled());
+    s::set(false);
+    CHECK(s::is_disabled());
+
+    s::set(s::mask, true);
+    CHECK(s::is_enabled(s::mask));
+    s::set(0x0, false);
+    CHECK(s::is_disabled(0x0));
+
+    s::set_if_exists(true);
+    CHECK(s::is_enabled_if_exists());
+    s::set_if_exists(false);
+    CHECK(s::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_ldtr_access_rights_dpl")
@@ -1048,11 +1673,16 @@ TEST_CASE("vmcs_guest_ldtr_access_rights_dpl")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_ldtr_access_rights::dpl::set(1UL);
-    CHECK(vmcs::guest_ldtr_access_rights::dpl::get() == 1UL);
+    using namespace vmcs::guest_ldtr_access_rights;
 
-    vmcs::guest_ldtr_access_rights::dpl::set_if_exists(0UL);
-    CHECK(vmcs::guest_ldtr_access_rights::dpl::get_if_exists() == 0UL);
+    dpl::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(dpl::get() == (dpl::mask >> dpl::from));
+
+    dpl::set(dpl::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(dpl::get(dpl::mask) == (dpl::mask >> dpl::from));
+
+    dpl::set_if_exists(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(dpl::get_if_exists() == (dpl::mask >> dpl::from));
 }
 
 TEST_CASE("vmcs_guest_ldtr_access_rights_present")
@@ -1060,11 +1690,22 @@ TEST_CASE("vmcs_guest_ldtr_access_rights_present")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_ldtr_access_rights::present::set(1UL);
-    CHECK(vmcs::guest_ldtr_access_rights::present::get() == 1UL);
+    using namespace vmcs::guest_ldtr_access_rights;
 
-    vmcs::guest_ldtr_access_rights::present::set_if_exists(0UL);
-    CHECK(vmcs::guest_ldtr_access_rights::present::get_if_exists() == 0UL);
+    present::set(true);
+    CHECK(present::is_enabled());
+    present::set(false);
+    CHECK(present::is_disabled());
+
+    present::set(present::mask, true);
+    CHECK(present::is_enabled(present::mask));
+    present::set(0x0, false);
+    CHECK(present::is_disabled(0x0));
+
+    present::set_if_exists(true);
+    CHECK(present::is_enabled_if_exists());
+    present::set_if_exists(false);
+    CHECK(present::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_ldtr_access_rights_avl")
@@ -1072,11 +1713,22 @@ TEST_CASE("vmcs_guest_ldtr_access_rights_avl")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_ldtr_access_rights::avl::set(1UL);
-    CHECK(vmcs::guest_ldtr_access_rights::avl::get() == 1UL);
+    using namespace vmcs::guest_ldtr_access_rights;
 
-    vmcs::guest_ldtr_access_rights::avl::set_if_exists(0UL);
-    CHECK(vmcs::guest_ldtr_access_rights::avl::get_if_exists() == 0UL);
+    avl::set(true);
+    CHECK(avl::is_enabled());
+    avl::set(false);
+    CHECK(avl::is_disabled());
+
+    avl::set(avl::mask, true);
+    CHECK(avl::is_enabled(avl::mask));
+    avl::set(0x0, false);
+    CHECK(avl::is_disabled(0x0));
+
+    avl::set_if_exists(true);
+    CHECK(avl::is_enabled_if_exists());
+    avl::set_if_exists(false);
+    CHECK(avl::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_ldtr_access_rights_l")
@@ -1084,11 +1736,22 @@ TEST_CASE("vmcs_guest_ldtr_access_rights_l")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_ldtr_access_rights::l::set(1UL);
-    CHECK(vmcs::guest_ldtr_access_rights::l::get() == 1UL);
+    using namespace vmcs::guest_ldtr_access_rights;
 
-    vmcs::guest_ldtr_access_rights::l::set_if_exists(0UL);
-    CHECK(vmcs::guest_ldtr_access_rights::l::get_if_exists() == 0UL);
+    l::set(true);
+    CHECK(l::is_enabled());
+    l::set(false);
+    CHECK(l::is_disabled());
+
+    l::set(l::mask, true);
+    CHECK(l::is_enabled(l::mask));
+    l::set(0x0, false);
+    CHECK(l::is_disabled(0x0));
+
+    l::set_if_exists(true);
+    CHECK(l::is_enabled_if_exists());
+    l::set_if_exists(false);
+    CHECK(l::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_ldtr_access_rights_db")
@@ -1096,11 +1759,22 @@ TEST_CASE("vmcs_guest_ldtr_access_rights_db")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_ldtr_access_rights::db::set(1UL);
-    CHECK(vmcs::guest_ldtr_access_rights::db::get() == 1UL);
+    using namespace vmcs::guest_ldtr_access_rights;
 
-    vmcs::guest_ldtr_access_rights::db::set_if_exists(0UL);
-    CHECK(vmcs::guest_ldtr_access_rights::db::get_if_exists() == 0UL);
+    db::set(true);
+    CHECK(db::is_enabled());
+    db::set(false);
+    CHECK(db::is_disabled());
+
+    db::set(db::mask, true);
+    CHECK(db::is_enabled(db::mask));
+    db::set(0x0, false);
+    CHECK(db::is_disabled(0x0));
+
+    db::set_if_exists(true);
+    CHECK(db::is_enabled_if_exists());
+    db::set_if_exists(false);
+    CHECK(db::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_ldtr_access_rights_granularity")
@@ -1108,11 +1782,22 @@ TEST_CASE("vmcs_guest_ldtr_access_rights_granularity")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_ldtr_access_rights::granularity::set(1UL);
-    CHECK(vmcs::guest_ldtr_access_rights::granularity::get() == 1UL);
+    using namespace vmcs::guest_ldtr_access_rights;
 
-    vmcs::guest_ldtr_access_rights::granularity::set_if_exists(0UL);
-    CHECK(vmcs::guest_ldtr_access_rights::granularity::get_if_exists() == 0UL);
+    granularity::set(true);
+    CHECK(granularity::is_enabled());
+    granularity::set(false);
+    CHECK(granularity::is_disabled());
+
+    granularity::set(granularity::mask, true);
+    CHECK(granularity::is_enabled(granularity::mask));
+    granularity::set(0x0, false);
+    CHECK(granularity::is_disabled(0x0));
+
+    granularity::set_if_exists(true);
+    CHECK(granularity::is_enabled_if_exists());
+    granularity::set_if_exists(false);
+    CHECK(granularity::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_ldtr_access_rights_reserved")
@@ -1120,11 +1805,16 @@ TEST_CASE("vmcs_guest_ldtr_access_rights_reserved")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_ldtr_access_rights::reserved::set(0x10F00UL);
-    CHECK(vmcs::guest_ldtr_access_rights::reserved::get() == 0x00F00UL);
+    using namespace vmcs::guest_ldtr_access_rights;
 
-    vmcs::guest_ldtr_access_rights::reserved::set_if_exists(0UL);
-    CHECK(vmcs::guest_ldtr_access_rights::reserved::get_if_exists() == 0UL);
+    reserved::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(reserved::get() == (reserved::mask >> reserved::from));
+
+    reserved::set(reserved::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(reserved::get(reserved::mask) == (reserved::mask >> reserved::from));
+
+    reserved::set_if_exists(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(reserved::get_if_exists() == (reserved::mask >> reserved::from));
 }
 
 TEST_CASE("vmcs_guest_ldtr_access_rights_unusable")
@@ -1132,11 +1822,22 @@ TEST_CASE("vmcs_guest_ldtr_access_rights_unusable")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_ldtr_access_rights::unusable::set(1UL);
-    CHECK(vmcs::guest_ldtr_access_rights::unusable::get() == 1UL);
+    using namespace vmcs::guest_ldtr_access_rights;
 
-    vmcs::guest_ldtr_access_rights::unusable::set_if_exists(0UL);
-    CHECK(vmcs::guest_ldtr_access_rights::unusable::get_if_exists() == 0UL);
+    unusable::set(true);
+    CHECK(unusable::is_enabled());
+    unusable::set(false);
+    CHECK(unusable::is_disabled());
+
+    unusable::set(unusable::mask, true);
+    CHECK(unusable::is_enabled(unusable::mask));
+    unusable::set(0x0, false);
+    CHECK(unusable::is_disabled(0x0));
+
+    unusable::set_if_exists(true);
+    CHECK(unusable::is_enabled_if_exists());
+    unusable::set_if_exists(false);
+    CHECK(unusable::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_tr_access_rights")
@@ -1144,12 +1845,16 @@ TEST_CASE("vmcs_guest_tr_access_rights")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_tr_access_rights::set(100UL);
-    CHECK(vmcs::guest_tr_access_rights::exists());
-    CHECK(vmcs::guest_tr_access_rights::get() == 100UL);
+    using namespace vmcs::guest_tr_access_rights;
 
-    vmcs::guest_tr_access_rights::set_if_exists(2UL);
-    CHECK(vmcs::guest_tr_access_rights::get_if_exists() == 2UL);
+    set(100UL);
+    CHECK(get() == 100UL);
+    CHECK(exists());
+
+    set_if_exists(200UL);
+    CHECK(get_if_exists() == 200UL);
+
+    dump(0);
 }
 
 TEST_CASE("vmcs_guest_tr_access_rights_type")
@@ -1157,11 +1862,16 @@ TEST_CASE("vmcs_guest_tr_access_rights_type")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_tr_access_rights::type::set(gsl::narrow_cast<uint32_t>(1UL));
-    CHECK(vmcs::guest_tr_access_rights::type::get() == 1UL);
+    using namespace vmcs::guest_tr_access_rights;
 
-    vmcs::guest_tr_access_rights::type::set_if_exists(0UL);
-    CHECK(vmcs::guest_tr_access_rights::type::get_if_exists() == 0UL);
+    type::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(type::get() == (type::mask >> type::from));
+
+    type::set(type::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(type::get(type::mask) == (type::mask >> type::from));
+
+    type::set_if_exists(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(type::get_if_exists() == (type::mask >> type::from));
 }
 
 TEST_CASE("vmcs_guest_tr_access_rights_s")
@@ -1169,11 +1879,22 @@ TEST_CASE("vmcs_guest_tr_access_rights_s")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_tr_access_rights::s::set(1UL);
-    CHECK(vmcs::guest_tr_access_rights::s::get() == 1UL);
+    using namespace vmcs::guest_tr_access_rights;
 
-    vmcs::guest_tr_access_rights::s::set_if_exists(0UL);
-    CHECK(vmcs::guest_tr_access_rights::s::get_if_exists() == 0UL);
+    s::set(true);
+    CHECK(s::is_enabled());
+    s::set(false);
+    CHECK(s::is_disabled());
+
+    s::set(s::mask, true);
+    CHECK(s::is_enabled(s::mask));
+    s::set(0x0, false);
+    CHECK(s::is_disabled(0x0));
+
+    s::set_if_exists(true);
+    CHECK(s::is_enabled_if_exists());
+    s::set_if_exists(false);
+    CHECK(s::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_tr_access_rights_dpl")
@@ -1181,11 +1902,16 @@ TEST_CASE("vmcs_guest_tr_access_rights_dpl")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_tr_access_rights::dpl::set(1UL);
-    CHECK(vmcs::guest_tr_access_rights::dpl::get() == 1UL);
+    using namespace vmcs::guest_tr_access_rights;
 
-    vmcs::guest_tr_access_rights::dpl::set_if_exists(0UL);
-    CHECK(vmcs::guest_tr_access_rights::dpl::get_if_exists() == 0UL);
+    dpl::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(dpl::get() == (dpl::mask >> dpl::from));
+
+    dpl::set(dpl::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(dpl::get(dpl::mask) == (dpl::mask >> dpl::from));
+
+    dpl::set_if_exists(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(dpl::get_if_exists() == (dpl::mask >> dpl::from));
 }
 
 TEST_CASE("vmcs_guest_tr_access_rights_present")
@@ -1193,11 +1919,22 @@ TEST_CASE("vmcs_guest_tr_access_rights_present")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_tr_access_rights::present::set(1UL);
-    CHECK(vmcs::guest_tr_access_rights::present::get() == 1UL);
+    using namespace vmcs::guest_tr_access_rights;
 
-    vmcs::guest_tr_access_rights::present::set_if_exists(0UL);
-    CHECK(vmcs::guest_tr_access_rights::present::get_if_exists() == 0UL);
+    present::set(true);
+    CHECK(present::is_enabled());
+    present::set(false);
+    CHECK(present::is_disabled());
+
+    present::set(present::mask, true);
+    CHECK(present::is_enabled(present::mask));
+    present::set(0x0, false);
+    CHECK(present::is_disabled(0x0));
+
+    present::set_if_exists(true);
+    CHECK(present::is_enabled_if_exists());
+    present::set_if_exists(false);
+    CHECK(present::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_tr_access_rights_avl")
@@ -1205,11 +1942,22 @@ TEST_CASE("vmcs_guest_tr_access_rights_avl")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_tr_access_rights::avl::set(1UL);
-    CHECK(vmcs::guest_tr_access_rights::avl::get() == 1UL);
+    using namespace vmcs::guest_tr_access_rights;
 
-    vmcs::guest_tr_access_rights::avl::set_if_exists(0UL);
-    CHECK(vmcs::guest_tr_access_rights::avl::get_if_exists() == 0UL);
+    avl::set(true);
+    CHECK(avl::is_enabled());
+    avl::set(false);
+    CHECK(avl::is_disabled());
+
+    avl::set(avl::mask, true);
+    CHECK(avl::is_enabled(avl::mask));
+    avl::set(0x0, false);
+    CHECK(avl::is_disabled(0x0));
+
+    avl::set_if_exists(true);
+    CHECK(avl::is_enabled_if_exists());
+    avl::set_if_exists(false);
+    CHECK(avl::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_tr_access_rights_l")
@@ -1217,11 +1965,22 @@ TEST_CASE("vmcs_guest_tr_access_rights_l")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_tr_access_rights::l::set(1UL);
-    CHECK(vmcs::guest_tr_access_rights::l::get() == 1UL);
+    using namespace vmcs::guest_tr_access_rights;
 
-    vmcs::guest_tr_access_rights::l::set_if_exists(0UL);
-    CHECK(vmcs::guest_tr_access_rights::l::get_if_exists() == 0UL);
+    l::set(true);
+    CHECK(l::is_enabled());
+    l::set(false);
+    CHECK(l::is_disabled());
+
+    l::set(l::mask, true);
+    CHECK(l::is_enabled(l::mask));
+    l::set(0x0, false);
+    CHECK(l::is_disabled(0x0));
+
+    l::set_if_exists(true);
+    CHECK(l::is_enabled_if_exists());
+    l::set_if_exists(false);
+    CHECK(l::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_tr_access_rights_db")
@@ -1229,11 +1988,22 @@ TEST_CASE("vmcs_guest_tr_access_rights_db")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_tr_access_rights::db::set(1UL);
-    CHECK(vmcs::guest_tr_access_rights::db::get() == 1UL);
+    using namespace vmcs::guest_tr_access_rights;
 
-    vmcs::guest_tr_access_rights::db::set_if_exists(0UL);
-    CHECK(vmcs::guest_tr_access_rights::db::get_if_exists() == 0UL);
+    db::set(true);
+    CHECK(db::is_enabled());
+    db::set(false);
+    CHECK(db::is_disabled());
+
+    db::set(db::mask, true);
+    CHECK(db::is_enabled(db::mask));
+    db::set(0x0, false);
+    CHECK(db::is_disabled(0x0));
+
+    db::set_if_exists(true);
+    CHECK(db::is_enabled_if_exists());
+    db::set_if_exists(false);
+    CHECK(db::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_tr_access_rights_granularity")
@@ -1241,11 +2011,22 @@ TEST_CASE("vmcs_guest_tr_access_rights_granularity")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_tr_access_rights::granularity::set(1UL);
-    CHECK(vmcs::guest_tr_access_rights::granularity::get() == 1UL);
+    using namespace vmcs::guest_tr_access_rights;
 
-    vmcs::guest_tr_access_rights::granularity::set_if_exists(0UL);
-    CHECK(vmcs::guest_tr_access_rights::granularity::get_if_exists() == 0UL);
+    granularity::set(true);
+    CHECK(granularity::is_enabled());
+    granularity::set(false);
+    CHECK(granularity::is_disabled());
+
+    granularity::set(granularity::mask, true);
+    CHECK(granularity::is_enabled(granularity::mask));
+    granularity::set(0x0, false);
+    CHECK(granularity::is_disabled(0x0));
+
+    granularity::set_if_exists(true);
+    CHECK(granularity::is_enabled_if_exists());
+    granularity::set_if_exists(false);
+    CHECK(granularity::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_tr_access_rights_reserved")
@@ -1253,11 +2034,16 @@ TEST_CASE("vmcs_guest_tr_access_rights_reserved")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_tr_access_rights::reserved::set(0x10F00U);
-    CHECK(vmcs::guest_tr_access_rights::reserved::get() == 0x00F00U);
+    using namespace vmcs::guest_tr_access_rights;
 
-    vmcs::guest_tr_access_rights::reserved::set_if_exists(0UL);
-    CHECK(vmcs::guest_tr_access_rights::reserved::get_if_exists() == 0UL);
+    reserved::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(reserved::get() == (reserved::mask >> reserved::from));
+
+    reserved::set(reserved::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(reserved::get(reserved::mask) == (reserved::mask >> reserved::from));
+
+    reserved::set_if_exists(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(reserved::get_if_exists() == (reserved::mask >> reserved::from));
 }
 
 TEST_CASE("vmcs_guest_tr_access_rights_unusable")
@@ -1265,11 +2051,22 @@ TEST_CASE("vmcs_guest_tr_access_rights_unusable")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_tr_access_rights::unusable::set(1UL);
-    CHECK(vmcs::guest_tr_access_rights::unusable::get() == 1UL);
+    using namespace vmcs::guest_tr_access_rights;
 
-    vmcs::guest_tr_access_rights::unusable::set_if_exists(0UL);
-    CHECK(vmcs::guest_tr_access_rights::unusable::get_if_exists() == 0UL);
+    unusable::set(true);
+    CHECK(unusable::is_enabled());
+    unusable::set(false);
+    CHECK(unusable::is_disabled());
+
+    unusable::set(unusable::mask, true);
+    CHECK(unusable::is_enabled(unusable::mask));
+    unusable::set(0x0, false);
+    CHECK(unusable::is_disabled(0x0));
+
+    unusable::set_if_exists(true);
+    CHECK(unusable::is_enabled_if_exists());
+    unusable::set_if_exists(false);
+    CHECK(unusable::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_interruptibility_state")
@@ -1277,13 +2074,16 @@ TEST_CASE("vmcs_guest_interruptibility_state")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    CHECK(vmcs::guest_interruptibility_state::exists());
+    using namespace vmcs::guest_interruptibility_state;
 
-    vmcs::guest_interruptibility_state::set(1UL);
-    CHECK(vmcs::guest_interruptibility_state::get() == 1UL);
+    set(100UL);
+    CHECK(get() == 100UL);
+    CHECK(exists());
 
-    vmcs::guest_interruptibility_state::set_if_exists(2UL);
-    CHECK(vmcs::guest_interruptibility_state::get_if_exists() == 2UL);
+    set_if_exists(200UL);
+    CHECK(get_if_exists() == 200UL);
+
+    dump(0);
 }
 
 TEST_CASE("vmcs_guest_interruptibility_state_blocking_by_sti")
@@ -1293,11 +2093,20 @@ TEST_CASE("vmcs_guest_interruptibility_state_blocking_by_sti")
 
     using namespace vmcs::guest_interruptibility_state;
 
-    blocking_by_sti::set(1UL);
-    CHECK(blocking_by_sti::get() == 1UL);
+    blocking_by_sti::set(true);
+    CHECK(blocking_by_sti::is_enabled());
+    blocking_by_sti::set(false);
+    CHECK(blocking_by_sti::is_disabled());
 
-    blocking_by_sti::set_if_exists(0UL);
-    CHECK(blocking_by_sti::get_if_exists() == 0UL);
+    blocking_by_sti::set(blocking_by_sti::mask, true);
+    CHECK(blocking_by_sti::is_enabled(blocking_by_sti::mask));
+    blocking_by_sti::set(0x0, false);
+    CHECK(blocking_by_sti::is_disabled(0x0));
+
+    blocking_by_sti::set_if_exists(true);
+    CHECK(blocking_by_sti::is_enabled_if_exists());
+    blocking_by_sti::set_if_exists(false);
+    CHECK(blocking_by_sti::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_interruptibility_state_blocking_by_mov_ss")
@@ -1307,11 +2116,20 @@ TEST_CASE("vmcs_guest_interruptibility_state_blocking_by_mov_ss")
 
     using namespace vmcs::guest_interruptibility_state;
 
-    blocking_by_mov_ss::set(1UL);
-    CHECK(blocking_by_mov_ss::get() == 1UL);
+    blocking_by_mov_ss::set(true);
+    CHECK(blocking_by_mov_ss::is_enabled());
+    blocking_by_mov_ss::set(false);
+    CHECK(blocking_by_mov_ss::is_disabled());
 
-    blocking_by_mov_ss::set_if_exists(0UL);
-    CHECK(blocking_by_mov_ss::get_if_exists() == 0UL);
+    blocking_by_mov_ss::set(blocking_by_mov_ss::mask, true);
+    CHECK(blocking_by_mov_ss::is_enabled(blocking_by_mov_ss::mask));
+    blocking_by_mov_ss::set(0x0, false);
+    CHECK(blocking_by_mov_ss::is_disabled(0x0));
+
+    blocking_by_mov_ss::set_if_exists(true);
+    CHECK(blocking_by_mov_ss::is_enabled_if_exists());
+    blocking_by_mov_ss::set_if_exists(false);
+    CHECK(blocking_by_mov_ss::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_interruptibility_state_blocking_by_smi")
@@ -1321,11 +2139,20 @@ TEST_CASE("vmcs_guest_interruptibility_state_blocking_by_smi")
 
     using namespace vmcs::guest_interruptibility_state;
 
-    blocking_by_smi::set(1UL);
-    CHECK(blocking_by_smi::get() == 1UL);
+    blocking_by_smi::set(true);
+    CHECK(blocking_by_smi::is_enabled());
+    blocking_by_smi::set(false);
+    CHECK(blocking_by_smi::is_disabled());
 
-    blocking_by_smi::set_if_exists(0UL);
-    CHECK(blocking_by_smi::get_if_exists() == 0UL);
+    blocking_by_smi::set(blocking_by_smi::mask, true);
+    CHECK(blocking_by_smi::is_enabled(blocking_by_smi::mask));
+    blocking_by_smi::set(0x0, false);
+    CHECK(blocking_by_smi::is_disabled(0x0));
+
+    blocking_by_smi::set_if_exists(true);
+    CHECK(blocking_by_smi::is_enabled_if_exists());
+    blocking_by_smi::set_if_exists(false);
+    CHECK(blocking_by_smi::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_interruptibility_state_blocking_by_nmi")
@@ -1335,11 +2162,20 @@ TEST_CASE("vmcs_guest_interruptibility_state_blocking_by_nmi")
 
     using namespace vmcs::guest_interruptibility_state;
 
-    blocking_by_nmi::set(1UL);
-    CHECK(blocking_by_nmi::get() == 1UL);
+    blocking_by_nmi::set(true);
+    CHECK(blocking_by_nmi::is_enabled());
+    blocking_by_nmi::set(false);
+    CHECK(blocking_by_nmi::is_disabled());
 
-    blocking_by_nmi::set_if_exists(0UL);
-    CHECK(blocking_by_nmi::get_if_exists() == 0UL);
+    blocking_by_nmi::set(blocking_by_nmi::mask, true);
+    CHECK(blocking_by_nmi::is_enabled(blocking_by_nmi::mask));
+    blocking_by_nmi::set(0x0, false);
+    CHECK(blocking_by_nmi::is_disabled(0x0));
+
+    blocking_by_nmi::set_if_exists(true);
+    CHECK(blocking_by_nmi::is_enabled_if_exists());
+    blocking_by_nmi::set_if_exists(false);
+    CHECK(blocking_by_nmi::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_interruptibility_state_enclave_interruption")
@@ -1349,11 +2185,20 @@ TEST_CASE("vmcs_guest_interruptibility_state_enclave_interruption")
 
     using namespace vmcs::guest_interruptibility_state;
 
-    enclave_interruption::set(1UL);
-    CHECK(enclave_interruption::get() == 1UL);
+    enclave_interruption::set(true);
+    CHECK(enclave_interruption::is_enabled());
+    enclave_interruption::set(false);
+    CHECK(enclave_interruption::is_disabled());
 
-    enclave_interruption::set_if_exists(0UL);
-    CHECK(enclave_interruption::get_if_exists() == 0UL);
+    enclave_interruption::set(enclave_interruption::mask, true);
+    CHECK(enclave_interruption::is_enabled(enclave_interruption::mask));
+    enclave_interruption::set(0x0, false);
+    CHECK(enclave_interruption::is_disabled(0x0));
+
+    enclave_interruption::set_if_exists(true);
+    CHECK(enclave_interruption::is_enabled_if_exists());
+    enclave_interruption::set_if_exists(false);
+    CHECK(enclave_interruption::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_interruptibility_state_reserved")
@@ -1363,11 +2208,14 @@ TEST_CASE("vmcs_guest_interruptibility_state_reserved")
 
     using namespace vmcs::guest_interruptibility_state;
 
-    reserved::set(1UL);
-    CHECK(reserved::get() == 1UL);
+    reserved::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(reserved::get() == (reserved::mask >> reserved::from));
 
-    reserved::set_if_exists(0UL);
-    CHECK(reserved::get_if_exists() == 0UL);
+    reserved::set(reserved::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(reserved::get(reserved::mask) == (reserved::mask >> reserved::from));
+
+    reserved::set_if_exists(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(reserved::get_if_exists() == (reserved::mask >> reserved::from));
 }
 
 TEST_CASE("vmcs_guest_activity_state")
@@ -1375,19 +2223,16 @@ TEST_CASE("vmcs_guest_activity_state")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    CHECK(vmcs::guest_activity_state::exists());
+    using namespace vmcs::guest_activity_state;
 
-    vmcs::guest_activity_state::set(vmcs::guest_activity_state::active);
-    CHECK(vmcs::guest_activity_state::get() == 0U);
+    set(100UL);
+    CHECK(get() == 100UL);
+    CHECK(exists());
 
-    vmcs::guest_activity_state::set(vmcs::guest_activity_state::hlt);
-    CHECK(vmcs::guest_activity_state::get() == 1U);
+    set_if_exists(200UL);
+    CHECK(get_if_exists() == 200UL);
 
-    vmcs::guest_activity_state::set_if_exists(vmcs::guest_activity_state::shutdown);
-    CHECK(vmcs::guest_activity_state::get_if_exists() == 2U);
-
-    vmcs::guest_activity_state::set_if_exists(vmcs::guest_activity_state::wait_for_sipi);
-    CHECK(vmcs::guest_activity_state::get_if_exists() == 3U);
+    dump(0);
 }
 
 TEST_CASE("vmcs_guest_smbase")
@@ -1395,13 +2240,16 @@ TEST_CASE("vmcs_guest_smbase")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    CHECK(vmcs::guest_smbase::exists());
+    using namespace vmcs::guest_smbase;
 
-    vmcs::guest_smbase::set(1UL);
-    CHECK(vmcs::guest_smbase::get() == 1UL);
+    set(100UL);
+    CHECK(get() == 100UL);
+    CHECK(exists());
 
-    vmcs::guest_smbase::set_if_exists(2UL);
-    CHECK(vmcs::guest_smbase::get_if_exists() == 2UL);
+    set_if_exists(200UL);
+    CHECK(get_if_exists() == 200UL);
+
+    dump(0);
 }
 
 TEST_CASE("vmcs_guest_ia32_sysenter_cs")
@@ -1409,13 +2257,16 @@ TEST_CASE("vmcs_guest_ia32_sysenter_cs")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    CHECK(vmcs::guest_ia32_sysenter_cs::exists());
+    using namespace vmcs::guest_ia32_sysenter_cs;
 
-    vmcs::guest_ia32_sysenter_cs::set(1UL);
-    CHECK(vmcs::guest_ia32_sysenter_cs::get() == 1UL);
+    set(100UL);
+    CHECK(get() == 100UL);
+    CHECK(exists());
 
-    vmcs::guest_ia32_sysenter_cs::set_if_exists(2UL);
-    CHECK(vmcs::guest_ia32_sysenter_cs::get_if_exists() == 2UL);
+    set_if_exists(200UL);
+    CHECK(get_if_exists() == 200UL);
+
+    dump(0);
 }
 
 TEST_CASE("vmcs_vmx_preemption_timer_value")
@@ -1425,13 +2276,17 @@ TEST_CASE("vmcs_vmx_preemption_timer_value")
 
     g_msrs[msrs::ia32_vmx_true_pinbased_ctls::addr] =
         msrs::ia32_vmx_true_pinbased_ctls::activate_vmx_preemption_timer::mask << 32;
-    CHECK(vmcs::vmx_preemption_timer_value::exists());
 
-    vmcs::vmx_preemption_timer_value::set(1UL);
-    CHECK(vmcs::vmx_preemption_timer_value::get() == 1UL);
+    using namespace vmcs::vmx_preemption_timer_value;
 
-    vmcs::vmx_preemption_timer_value::set_if_exists(2UL);
-    CHECK(vmcs::vmx_preemption_timer_value::get_if_exists() == 2UL);
+    set(100UL);
+    CHECK(get() == 100UL);
+    CHECK(exists());
+
+    set_if_exists(200UL);
+    CHECK(get_if_exists() == 200UL);
+
+    dump(0);
 }
 
 #endif

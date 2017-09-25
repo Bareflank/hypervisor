@@ -67,15 +67,15 @@ TEST_CASE("vmcs_host_cr0")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    CHECK(vmcs::host_cr0::exists());
+    using namespace vmcs::host_cr0;
 
-    vmcs::host_cr0::set_if_exists(0x2UL);
-    CHECK(vmcs::host_cr0::get_if_exists() == 0x2UL);
+    CHECK(exists());
+    set(100UL);
+    CHECK(get() == 100UL);
+    set_if_exists(200UL);
+    CHECK(get_if_exists() == 200UL);
 
-    vmcs::host_cr0::set(0xFFFFFFFFUL);
-    CHECK(vmcs::host_cr0::get() == 0xFFFFFFFFUL);
-
-    vmcs::host_cr0::dump();
+    dump(0);
 }
 
 TEST_CASE("vmcs_host_cr0_protection_enable")
@@ -83,17 +83,22 @@ TEST_CASE("vmcs_host_cr0_protection_enable")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::host_cr0::protection_enable::enable();
-    CHECK(vmcs::host_cr0::protection_enable::is_enabled());
+    using namespace vmcs::host_cr0;
 
-    vmcs::host_cr0::protection_enable::disable();
-    CHECK(vmcs::host_cr0::protection_enable::is_disabled());
+    protection_enable::set(true);
+    CHECK(protection_enable::is_enabled());
+    protection_enable::set(false);
+    CHECK(protection_enable::is_disabled());
 
-    vmcs::host_cr0::protection_enable::enable_if_exists();
-    CHECK(vmcs::host_cr0::protection_enable::is_enabled_if_exists());
+    protection_enable::set(protection_enable::mask, true);
+    CHECK(protection_enable::is_enabled(protection_enable::mask));
+    protection_enable::set(0x0, false);
+    CHECK(protection_enable::is_disabled(0x0));
 
-    vmcs::host_cr0::protection_enable::disable_if_exists();
-    CHECK(vmcs::host_cr0::protection_enable::is_disabled_if_exists());
+    protection_enable::set_if_exists(true);
+    CHECK(protection_enable::is_enabled_if_exists());
+    protection_enable::set_if_exists(false);
+    CHECK(protection_enable::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_host_cr0_monitor_coprocessor")
@@ -101,17 +106,22 @@ TEST_CASE("vmcs_host_cr0_monitor_coprocessor")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::host_cr0::monitor_coprocessor::enable();
-    CHECK(vmcs::host_cr0::monitor_coprocessor::is_enabled());
+    using namespace vmcs::host_cr0;
 
-    vmcs::host_cr0::monitor_coprocessor::disable();
-    CHECK(vmcs::host_cr0::monitor_coprocessor::is_disabled());
+    monitor_coprocessor::set(true);
+    CHECK(monitor_coprocessor::is_enabled());
+    monitor_coprocessor::set(false);
+    CHECK(monitor_coprocessor::is_disabled());
 
-    vmcs::host_cr0::monitor_coprocessor::enable_if_exists();
-    CHECK(vmcs::host_cr0::monitor_coprocessor::is_enabled_if_exists());
+    monitor_coprocessor::set(monitor_coprocessor::mask, true);
+    CHECK(monitor_coprocessor::is_enabled(monitor_coprocessor::mask));
+    monitor_coprocessor::set(0x0, false);
+    CHECK(monitor_coprocessor::is_disabled(0x0));
 
-    vmcs::host_cr0::monitor_coprocessor::disable_if_exists();
-    CHECK(vmcs::host_cr0::monitor_coprocessor::is_disabled_if_exists());
+    monitor_coprocessor::set_if_exists(true);
+    CHECK(monitor_coprocessor::is_enabled_if_exists());
+    monitor_coprocessor::set_if_exists(false);
+    CHECK(monitor_coprocessor::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_host_cr0_emulation")
@@ -119,17 +129,22 @@ TEST_CASE("vmcs_host_cr0_emulation")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::host_cr0::emulation::enable();
-    CHECK(vmcs::host_cr0::emulation::is_enabled());
+    using namespace vmcs::host_cr0;
 
-    vmcs::host_cr0::emulation::disable();
-    CHECK(vmcs::host_cr0::emulation::is_disabled());
+    emulation::set(true);
+    CHECK(emulation::is_enabled());
+    emulation::set(false);
+    CHECK(emulation::is_disabled());
 
-    vmcs::host_cr0::emulation::enable_if_exists();
-    CHECK(vmcs::host_cr0::emulation::is_enabled_if_exists());
+    emulation::set(emulation::mask, true);
+    CHECK(emulation::is_enabled(emulation::mask));
+    emulation::set(0x0, false);
+    CHECK(emulation::is_disabled(0x0));
 
-    vmcs::host_cr0::emulation::disable_if_exists();
-    CHECK(vmcs::host_cr0::emulation::is_disabled_if_exists());
+    emulation::set_if_exists(true);
+    CHECK(emulation::is_enabled_if_exists());
+    emulation::set_if_exists(false);
+    CHECK(emulation::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_host_cr0_task_switched")
@@ -137,17 +152,22 @@ TEST_CASE("vmcs_host_cr0_task_switched")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::host_cr0::task_switched::enable();
-    CHECK(vmcs::host_cr0::task_switched::is_enabled());
+    using namespace vmcs::host_cr0;
 
-    vmcs::host_cr0::task_switched::disable();
-    CHECK(vmcs::host_cr0::task_switched::is_disabled());
+    task_switched::set(true);
+    CHECK(task_switched::is_enabled());
+    task_switched::set(false);
+    CHECK(task_switched::is_disabled());
 
-    vmcs::host_cr0::task_switched::enable_if_exists();
-    CHECK(vmcs::host_cr0::task_switched::is_enabled_if_exists());
+    task_switched::set(task_switched::mask, true);
+    CHECK(task_switched::is_enabled(task_switched::mask));
+    task_switched::set(0x0, false);
+    CHECK(task_switched::is_disabled(0x0));
 
-    vmcs::host_cr0::task_switched::disable_if_exists();
-    CHECK(vmcs::host_cr0::task_switched::is_disabled_if_exists());
+    task_switched::set_if_exists(true);
+    CHECK(task_switched::is_enabled_if_exists());
+    task_switched::set_if_exists(false);
+    CHECK(task_switched::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_host_cr0_extension_type")
@@ -155,17 +175,22 @@ TEST_CASE("vmcs_host_cr0_extension_type")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::host_cr0::extension_type::enable();
-    CHECK(vmcs::host_cr0::extension_type::is_enabled());
+    using namespace vmcs::host_cr0;
 
-    vmcs::host_cr0::extension_type::disable();
-    CHECK(vmcs::host_cr0::extension_type::is_disabled());
+    extension_type::set(true);
+    CHECK(extension_type::is_enabled());
+    extension_type::set(false);
+    CHECK(extension_type::is_disabled());
 
-    vmcs::host_cr0::extension_type::enable_if_exists();
-    CHECK(vmcs::host_cr0::extension_type::is_enabled_if_exists());
+    extension_type::set(extension_type::mask, true);
+    CHECK(extension_type::is_enabled(extension_type::mask));
+    extension_type::set(0x0, false);
+    CHECK(extension_type::is_disabled(0x0));
 
-    vmcs::host_cr0::extension_type::disable_if_exists();
-    CHECK(vmcs::host_cr0::extension_type::is_disabled_if_exists());
+    extension_type::set_if_exists(true);
+    CHECK(extension_type::is_enabled_if_exists());
+    extension_type::set_if_exists(false);
+    CHECK(extension_type::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_host_cr0_numeric_error")
@@ -173,17 +198,22 @@ TEST_CASE("vmcs_host_cr0_numeric_error")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::host_cr0::numeric_error::enable();
-    CHECK(vmcs::host_cr0::numeric_error::is_enabled());
+    using namespace vmcs::host_cr0;
 
-    vmcs::host_cr0::numeric_error::disable();
-    CHECK(vmcs::host_cr0::numeric_error::is_disabled());
+    numeric_error::set(true);
+    CHECK(numeric_error::is_enabled());
+    numeric_error::set(false);
+    CHECK(numeric_error::is_disabled());
 
-    vmcs::host_cr0::numeric_error::enable_if_exists();
-    CHECK(vmcs::host_cr0::numeric_error::is_enabled_if_exists());
+    numeric_error::set(numeric_error::mask, true);
+    CHECK(numeric_error::is_enabled(numeric_error::mask));
+    numeric_error::set(0x0, false);
+    CHECK(numeric_error::is_disabled(0x0));
 
-    vmcs::host_cr0::numeric_error::disable_if_exists();
-    CHECK(vmcs::host_cr0::numeric_error::is_disabled_if_exists());
+    numeric_error::set_if_exists(true);
+    CHECK(numeric_error::is_enabled_if_exists());
+    numeric_error::set_if_exists(false);
+    CHECK(numeric_error::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_host_cr0_write_protect")
@@ -191,17 +221,22 @@ TEST_CASE("vmcs_host_cr0_write_protect")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::host_cr0::write_protect::enable();
-    CHECK(vmcs::host_cr0::write_protect::is_enabled());
+    using namespace vmcs::host_cr0;
 
-    vmcs::host_cr0::write_protect::disable();
-    CHECK(vmcs::host_cr0::write_protect::is_disabled());
+    write_protect::set(true);
+    CHECK(write_protect::is_enabled());
+    write_protect::set(false);
+    CHECK(write_protect::is_disabled());
 
-    vmcs::host_cr0::write_protect::enable_if_exists();
-    CHECK(vmcs::host_cr0::write_protect::is_enabled_if_exists());
+    write_protect::set(write_protect::mask, true);
+    CHECK(write_protect::is_enabled(write_protect::mask));
+    write_protect::set(0x0, false);
+    CHECK(write_protect::is_disabled(0x0));
 
-    vmcs::host_cr0::write_protect::disable_if_exists();
-    CHECK(vmcs::host_cr0::write_protect::is_disabled_if_exists());
+    write_protect::set_if_exists(true);
+    CHECK(write_protect::is_enabled_if_exists());
+    write_protect::set_if_exists(false);
+    CHECK(write_protect::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_host_cr0_alignment_mask")
@@ -209,17 +244,22 @@ TEST_CASE("vmcs_host_cr0_alignment_mask")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::host_cr0::alignment_mask::enable();
-    CHECK(vmcs::host_cr0::alignment_mask::is_enabled());
+    using namespace vmcs::host_cr0;
 
-    vmcs::host_cr0::alignment_mask::disable();
-    CHECK(vmcs::host_cr0::alignment_mask::is_disabled());
+    alignment_mask::set(true);
+    CHECK(alignment_mask::is_enabled());
+    alignment_mask::set(false);
+    CHECK(alignment_mask::is_disabled());
 
-    vmcs::host_cr0::alignment_mask::enable_if_exists();
-    CHECK(vmcs::host_cr0::alignment_mask::is_enabled_if_exists());
+    alignment_mask::set(alignment_mask::mask, true);
+    CHECK(alignment_mask::is_enabled(alignment_mask::mask));
+    alignment_mask::set(0x0, false);
+    CHECK(alignment_mask::is_disabled(0x0));
 
-    vmcs::host_cr0::alignment_mask::disable_if_exists();
-    CHECK(vmcs::host_cr0::alignment_mask::is_disabled_if_exists());
+    alignment_mask::set_if_exists(true);
+    CHECK(alignment_mask::is_enabled_if_exists());
+    alignment_mask::set_if_exists(false);
+    CHECK(alignment_mask::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_host_cr0_not_write_through")
@@ -227,17 +267,22 @@ TEST_CASE("vmcs_host_cr0_not_write_through")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::host_cr0::not_write_through::enable();
-    CHECK(vmcs::host_cr0::not_write_through::is_enabled());
+    using namespace vmcs::host_cr0;
 
-    vmcs::host_cr0::not_write_through::disable();
-    CHECK(vmcs::host_cr0::not_write_through::is_disabled());
+    not_write_through::set(true);
+    CHECK(not_write_through::is_enabled());
+    not_write_through::set(false);
+    CHECK(not_write_through::is_disabled());
 
-    vmcs::host_cr0::not_write_through::enable_if_exists();
-    CHECK(vmcs::host_cr0::not_write_through::is_enabled_if_exists());
+    not_write_through::set(not_write_through::mask, true);
+    CHECK(not_write_through::is_enabled(not_write_through::mask));
+    not_write_through::set(0x0, false);
+    CHECK(not_write_through::is_disabled(0x0));
 
-    vmcs::host_cr0::not_write_through::disable_if_exists();
-    CHECK(vmcs::host_cr0::not_write_through::is_disabled_if_exists());
+    not_write_through::set_if_exists(true);
+    CHECK(not_write_through::is_enabled_if_exists());
+    not_write_through::set_if_exists(false);
+    CHECK(not_write_through::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_host_cr0_cache_disable")
@@ -245,17 +290,22 @@ TEST_CASE("vmcs_host_cr0_cache_disable")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::host_cr0::cache_disable::enable();
-    CHECK(vmcs::host_cr0::cache_disable::is_enabled());
+    using namespace vmcs::host_cr0;
 
-    vmcs::host_cr0::cache_disable::disable();
-    CHECK(vmcs::host_cr0::cache_disable::is_disabled());
+    cache_disable::set(true);
+    CHECK(cache_disable::is_enabled());
+    cache_disable::set(false);
+    CHECK(cache_disable::is_disabled());
 
-    vmcs::host_cr0::cache_disable::enable_if_exists();
-    CHECK(vmcs::host_cr0::cache_disable::is_enabled_if_exists());
+    cache_disable::set(cache_disable::mask, true);
+    CHECK(cache_disable::is_enabled(cache_disable::mask));
+    cache_disable::set(0x0, false);
+    CHECK(cache_disable::is_disabled(0x0));
 
-    vmcs::host_cr0::cache_disable::disable_if_exists();
-    CHECK(vmcs::host_cr0::cache_disable::is_disabled_if_exists());
+    cache_disable::set_if_exists(true);
+    CHECK(cache_disable::is_enabled_if_exists());
+    cache_disable::set_if_exists(false);
+    CHECK(cache_disable::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_host_cr0_paging")
@@ -263,17 +313,22 @@ TEST_CASE("vmcs_host_cr0_paging")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::host_cr0::paging::enable();
-    CHECK(vmcs::host_cr0::paging::is_enabled());
+    using namespace vmcs::host_cr0;
 
-    vmcs::host_cr0::paging::disable();
-    CHECK(vmcs::host_cr0::paging::is_disabled());
+    paging::set(true);
+    CHECK(paging::is_enabled());
+    paging::set(false);
+    CHECK(paging::is_disabled());
 
-    vmcs::host_cr0::paging::enable_if_exists();
-    CHECK(vmcs::host_cr0::paging::is_enabled_if_exists());
+    paging::set(paging::mask, true);
+    CHECK(paging::is_enabled(paging::mask));
+    paging::set(0x0, false);
+    CHECK(paging::is_disabled(0x0));
 
-    vmcs::host_cr0::paging::disable_if_exists();
-    CHECK(vmcs::host_cr0::paging::is_disabled_if_exists());
+    paging::set_if_exists(true);
+    CHECK(paging::is_enabled_if_exists());
+    paging::set_if_exists(false);
+    CHECK(paging::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_host_cr3")
@@ -281,13 +336,15 @@ TEST_CASE("vmcs_host_cr3")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    CHECK(vmcs::host_cr3::exists());
+    using namespace vmcs::host_cr3;
 
-    vmcs::host_cr3::set_if_exists(0x2UL);
-    CHECK(vmcs::host_cr3::get_if_exists() == 0x2UL);
+    CHECK(exists());
+    set(100UL);
+    CHECK(get() == 100UL);
+    set_if_exists(200UL);
+    CHECK(get_if_exists() == 200UL);
 
-    vmcs::host_cr3::set(0xFFFFFFFFUL);
-    CHECK(vmcs::host_cr3::get() == 0xFFFFFFFFUL);
+    dump(0);
 }
 
 TEST_CASE("vmcs_host_cr4")
@@ -295,15 +352,15 @@ TEST_CASE("vmcs_host_cr4")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    CHECK(vmcs::host_cr4::exists());
+    using namespace vmcs::host_cr4;
 
-    vmcs::host_cr4::set_if_exists(0x2UL);
-    CHECK(vmcs::host_cr4::get_if_exists() == 0x2UL);
+    CHECK(exists());
+    set(100UL);
+    CHECK(get() == 100UL);
+    set_if_exists(200UL);
+    CHECK(get_if_exists() == 200UL);
 
-    vmcs::host_cr4::set(0xFFFFFFFFUL);
-    CHECK(vmcs::host_cr4::get() == 0xFFFFFFFFUL);
-
-    vmcs::host_cr4::dump();
+    dump(0);
 }
 
 TEST_CASE("vmcs_host_cr4_v8086_mode_extensions")
@@ -311,17 +368,22 @@ TEST_CASE("vmcs_host_cr4_v8086_mode_extensions")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::host_cr4::v8086_mode_extensions::enable();
-    CHECK(vmcs::host_cr4::v8086_mode_extensions::is_enabled());
+    using namespace vmcs::host_cr4;
 
-    vmcs::host_cr4::v8086_mode_extensions::disable();
-    CHECK(vmcs::host_cr4::v8086_mode_extensions::is_disabled());
+    v8086_mode_extensions::set(true);
+    CHECK(v8086_mode_extensions::is_enabled());
+    v8086_mode_extensions::set(false);
+    CHECK(v8086_mode_extensions::is_disabled());
 
-    vmcs::host_cr4::v8086_mode_extensions::enable_if_exists();
-    CHECK(vmcs::host_cr4::v8086_mode_extensions::is_enabled_if_exists());
+    v8086_mode_extensions::set(v8086_mode_extensions::mask, true);
+    CHECK(v8086_mode_extensions::is_enabled(v8086_mode_extensions::mask));
+    v8086_mode_extensions::set(0x0, false);
+    CHECK(v8086_mode_extensions::is_disabled(0x0));
 
-    vmcs::host_cr4::v8086_mode_extensions::disable_if_exists();
-    CHECK(vmcs::host_cr4::v8086_mode_extensions::is_disabled_if_exists());
+    v8086_mode_extensions::set_if_exists(true);
+    CHECK(v8086_mode_extensions::is_enabled_if_exists());
+    v8086_mode_extensions::set_if_exists(false);
+    CHECK(v8086_mode_extensions::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_host_cr4_protected_mode_virtual_interrupts")
@@ -329,17 +391,22 @@ TEST_CASE("vmcs_host_cr4_protected_mode_virtual_interrupts")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::host_cr4::protected_mode_virtual_interrupts::enable();
-    CHECK(vmcs::host_cr4::protected_mode_virtual_interrupts::is_enabled());
+    using namespace vmcs::host_cr4;
 
-    vmcs::host_cr4::protected_mode_virtual_interrupts::disable();
-    CHECK(vmcs::host_cr4::protected_mode_virtual_interrupts::is_disabled());
+    protected_mode_virtual_interrupts::set(true);
+    CHECK(protected_mode_virtual_interrupts::is_enabled());
+    protected_mode_virtual_interrupts::set(false);
+    CHECK(protected_mode_virtual_interrupts::is_disabled());
 
-    vmcs::host_cr4::protected_mode_virtual_interrupts::enable_if_exists();
-    CHECK(vmcs::host_cr4::protected_mode_virtual_interrupts::is_enabled_if_exists());
+    protected_mode_virtual_interrupts::set(protected_mode_virtual_interrupts::mask, true);
+    CHECK(protected_mode_virtual_interrupts::is_enabled(protected_mode_virtual_interrupts::mask));
+    protected_mode_virtual_interrupts::set(0x0, false);
+    CHECK(protected_mode_virtual_interrupts::is_disabled(0x0));
 
-    vmcs::host_cr4::protected_mode_virtual_interrupts::disable_if_exists();
-    CHECK(vmcs::host_cr4::protected_mode_virtual_interrupts::is_disabled_if_exists());
+    protected_mode_virtual_interrupts::set_if_exists(true);
+    CHECK(protected_mode_virtual_interrupts::is_enabled_if_exists());
+    protected_mode_virtual_interrupts::set_if_exists(false);
+    CHECK(protected_mode_virtual_interrupts::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_host_cr4_time_stamp_disable")
@@ -347,17 +414,22 @@ TEST_CASE("vmcs_host_cr4_time_stamp_disable")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::host_cr4::time_stamp_disable::enable();
-    CHECK(vmcs::host_cr4::time_stamp_disable::is_enabled());
+    using namespace vmcs::host_cr4;
 
-    vmcs::host_cr4::time_stamp_disable::disable();
-    CHECK(vmcs::host_cr4::time_stamp_disable::is_disabled());
+    time_stamp_disable::set(true);
+    CHECK(time_stamp_disable::is_enabled());
+    time_stamp_disable::set(false);
+    CHECK(time_stamp_disable::is_disabled());
 
-    vmcs::host_cr4::time_stamp_disable::enable_if_exists();
-    CHECK(vmcs::host_cr4::time_stamp_disable::is_enabled_if_exists());
+    time_stamp_disable::set(time_stamp_disable::mask, true);
+    CHECK(time_stamp_disable::is_enabled(time_stamp_disable::mask));
+    time_stamp_disable::set(0x0, false);
+    CHECK(time_stamp_disable::is_disabled(0x0));
 
-    vmcs::host_cr4::time_stamp_disable::disable_if_exists();
-    CHECK(vmcs::host_cr4::time_stamp_disable::is_disabled_if_exists());
+    time_stamp_disable::set_if_exists(true);
+    CHECK(time_stamp_disable::is_enabled_if_exists());
+    time_stamp_disable::set_if_exists(false);
+    CHECK(time_stamp_disable::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_host_cr4_debugging_extensions")
@@ -365,17 +437,22 @@ TEST_CASE("vmcs_host_cr4_debugging_extensions")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::host_cr4::debugging_extensions::enable();
-    CHECK(vmcs::host_cr4::debugging_extensions::is_enabled());
+    using namespace vmcs::host_cr4;
 
-    vmcs::host_cr4::debugging_extensions::disable();
-    CHECK(vmcs::host_cr4::debugging_extensions::is_disabled());
+    debugging_extensions::set(true);
+    CHECK(debugging_extensions::is_enabled());
+    debugging_extensions::set(false);
+    CHECK(debugging_extensions::is_disabled());
 
-    vmcs::host_cr4::debugging_extensions::enable_if_exists();
-    CHECK(vmcs::host_cr4::debugging_extensions::is_enabled_if_exists());
+    debugging_extensions::set(debugging_extensions::mask, true);
+    CHECK(debugging_extensions::is_enabled(debugging_extensions::mask));
+    debugging_extensions::set(0x0, false);
+    CHECK(debugging_extensions::is_disabled(0x0));
 
-    vmcs::host_cr4::debugging_extensions::disable_if_exists();
-    CHECK(vmcs::host_cr4::debugging_extensions::is_disabled_if_exists());
+    debugging_extensions::set_if_exists(true);
+    CHECK(debugging_extensions::is_enabled_if_exists());
+    debugging_extensions::set_if_exists(false);
+    CHECK(debugging_extensions::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_host_cr4_page_size_extensions")
@@ -383,17 +460,22 @@ TEST_CASE("vmcs_host_cr4_page_size_extensions")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::host_cr4::page_size_extensions::enable();
-    CHECK(vmcs::host_cr4::page_size_extensions::is_enabled());
+    using namespace vmcs::host_cr4;
 
-    vmcs::host_cr4::page_size_extensions::disable();
-    CHECK(vmcs::host_cr4::page_size_extensions::is_disabled());
+    page_size_extensions::set(true);
+    CHECK(page_size_extensions::is_enabled());
+    page_size_extensions::set(false);
+    CHECK(page_size_extensions::is_disabled());
 
-    vmcs::host_cr4::page_size_extensions::enable_if_exists();
-    CHECK(vmcs::host_cr4::page_size_extensions::is_enabled_if_exists());
+    page_size_extensions::set(page_size_extensions::mask, true);
+    CHECK(page_size_extensions::is_enabled(page_size_extensions::mask));
+    page_size_extensions::set(0x0, false);
+    CHECK(page_size_extensions::is_disabled(0x0));
 
-    vmcs::host_cr4::page_size_extensions::disable_if_exists();
-    CHECK(vmcs::host_cr4::page_size_extensions::is_disabled_if_exists());
+    page_size_extensions::set_if_exists(true);
+    CHECK(page_size_extensions::is_enabled_if_exists());
+    page_size_extensions::set_if_exists(false);
+    CHECK(page_size_extensions::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_host_cr4_physical_address_extensions")
@@ -401,17 +483,22 @@ TEST_CASE("vmcs_host_cr4_physical_address_extensions")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::host_cr4::physical_address_extensions::enable();
-    CHECK(vmcs::host_cr4::physical_address_extensions::is_enabled());
+    using namespace vmcs::host_cr4;
 
-    vmcs::host_cr4::physical_address_extensions::disable();
-    CHECK(vmcs::host_cr4::physical_address_extensions::is_disabled());
+    physical_address_extensions::set(true);
+    CHECK(physical_address_extensions::is_enabled());
+    physical_address_extensions::set(false);
+    CHECK(physical_address_extensions::is_disabled());
 
-    vmcs::host_cr4::physical_address_extensions::enable_if_exists();
-    CHECK(vmcs::host_cr4::physical_address_extensions::is_enabled_if_exists());
+    physical_address_extensions::set(physical_address_extensions::mask, true);
+    CHECK(physical_address_extensions::is_enabled(physical_address_extensions::mask));
+    physical_address_extensions::set(0x0, false);
+    CHECK(physical_address_extensions::is_disabled(0x0));
 
-    vmcs::host_cr4::physical_address_extensions::disable_if_exists();
-    CHECK(vmcs::host_cr4::physical_address_extensions::is_disabled_if_exists());
+    physical_address_extensions::set_if_exists(true);
+    CHECK(physical_address_extensions::is_enabled_if_exists());
+    physical_address_extensions::set_if_exists(false);
+    CHECK(physical_address_extensions::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_host_cr4_machine_check_enable")
@@ -419,17 +506,22 @@ TEST_CASE("vmcs_host_cr4_machine_check_enable")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::host_cr4::machine_check_enable::enable();
-    CHECK(vmcs::host_cr4::machine_check_enable::is_enabled());
+    using namespace vmcs::host_cr4;
 
-    vmcs::host_cr4::machine_check_enable::disable();
-    CHECK(vmcs::host_cr4::machine_check_enable::is_disabled());
+    machine_check_enable::set(true);
+    CHECK(machine_check_enable::is_enabled());
+    machine_check_enable::set(false);
+    CHECK(machine_check_enable::is_disabled());
 
-    vmcs::host_cr4::machine_check_enable::enable_if_exists();
-    CHECK(vmcs::host_cr4::machine_check_enable::is_enabled_if_exists());
+    machine_check_enable::set(machine_check_enable::mask, true);
+    CHECK(machine_check_enable::is_enabled(machine_check_enable::mask));
+    machine_check_enable::set(0x0, false);
+    CHECK(machine_check_enable::is_disabled(0x0));
 
-    vmcs::host_cr4::machine_check_enable::disable_if_exists();
-    CHECK(vmcs::host_cr4::machine_check_enable::is_disabled_if_exists());
+    machine_check_enable::set_if_exists(true);
+    CHECK(machine_check_enable::is_enabled_if_exists());
+    machine_check_enable::set_if_exists(false);
+    CHECK(machine_check_enable::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_host_cr4_page_global_enable")
@@ -437,17 +529,22 @@ TEST_CASE("vmcs_host_cr4_page_global_enable")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::host_cr4::page_global_enable::enable();
-    CHECK(vmcs::host_cr4::page_global_enable::is_enabled());
+    using namespace vmcs::host_cr4;
 
-    vmcs::host_cr4::page_global_enable::disable();
-    CHECK(vmcs::host_cr4::page_global_enable::is_disabled());
+    page_global_enable::set(true);
+    CHECK(page_global_enable::is_enabled());
+    page_global_enable::set(false);
+    CHECK(page_global_enable::is_disabled());
 
-    vmcs::host_cr4::page_global_enable::enable_if_exists();
-    CHECK(vmcs::host_cr4::page_global_enable::is_enabled_if_exists());
+    page_global_enable::set(page_global_enable::mask, true);
+    CHECK(page_global_enable::is_enabled(page_global_enable::mask));
+    page_global_enable::set(0x0, false);
+    CHECK(page_global_enable::is_disabled(0x0));
 
-    vmcs::host_cr4::page_global_enable::disable_if_exists();
-    CHECK(vmcs::host_cr4::page_global_enable::is_disabled_if_exists());
+    page_global_enable::set_if_exists(true);
+    CHECK(page_global_enable::is_enabled_if_exists());
+    page_global_enable::set_if_exists(false);
+    CHECK(page_global_enable::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_host_cr4_performance_monitor_counter_enable")
@@ -455,17 +552,22 @@ TEST_CASE("vmcs_host_cr4_performance_monitor_counter_enable")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::host_cr4::performance_monitor_counter_enable::enable();
-    CHECK(vmcs::host_cr4::performance_monitor_counter_enable::is_enabled());
+    using namespace vmcs::host_cr4;
 
-    vmcs::host_cr4::performance_monitor_counter_enable::disable();
-    CHECK(vmcs::host_cr4::performance_monitor_counter_enable::is_disabled());
+    performance_monitor_counter_enable::set(true);
+    CHECK(performance_monitor_counter_enable::is_enabled());
+    performance_monitor_counter_enable::set(false);
+    CHECK(performance_monitor_counter_enable::is_disabled());
 
-    vmcs::host_cr4::performance_monitor_counter_enable::enable_if_exists();
-    CHECK(vmcs::host_cr4::performance_monitor_counter_enable::is_enabled_if_exists());
+    performance_monitor_counter_enable::set(performance_monitor_counter_enable::mask, true);
+    CHECK(performance_monitor_counter_enable::is_enabled(performance_monitor_counter_enable::mask));
+    performance_monitor_counter_enable::set(0x0, false);
+    CHECK(performance_monitor_counter_enable::is_disabled(0x0));
 
-    vmcs::host_cr4::performance_monitor_counter_enable::disable_if_exists();
-    CHECK(vmcs::host_cr4::performance_monitor_counter_enable::is_disabled_if_exists());
+    performance_monitor_counter_enable::set_if_exists(true);
+    CHECK(performance_monitor_counter_enable::is_enabled_if_exists());
+    performance_monitor_counter_enable::set_if_exists(false);
+    CHECK(performance_monitor_counter_enable::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_host_cr4_osfxsr")
@@ -473,17 +575,22 @@ TEST_CASE("vmcs_host_cr4_osfxsr")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::host_cr4::osfxsr::enable();
-    CHECK(vmcs::host_cr4::osfxsr::is_enabled());
+    using namespace vmcs::host_cr4;
 
-    vmcs::host_cr4::osfxsr::disable();
-    CHECK(vmcs::host_cr4::osfxsr::is_disabled());
+    osfxsr::set(true);
+    CHECK(osfxsr::is_enabled());
+    osfxsr::set(false);
+    CHECK(osfxsr::is_disabled());
 
-    vmcs::host_cr4::osfxsr::enable_if_exists();
-    CHECK(vmcs::host_cr4::osfxsr::is_enabled_if_exists());
+    osfxsr::set(osfxsr::mask, true);
+    CHECK(osfxsr::is_enabled(osfxsr::mask));
+    osfxsr::set(0x0, false);
+    CHECK(osfxsr::is_disabled(0x0));
 
-    vmcs::host_cr4::osfxsr::disable_if_exists();
-    CHECK(vmcs::host_cr4::osfxsr::is_disabled_if_exists());
+    osfxsr::set_if_exists(true);
+    CHECK(osfxsr::is_enabled_if_exists());
+    osfxsr::set_if_exists(false);
+    CHECK(osfxsr::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_host_cr4_osxmmexcpt")
@@ -491,17 +598,22 @@ TEST_CASE("vmcs_host_cr4_osxmmexcpt")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::host_cr4::osxmmexcpt::enable();
-    CHECK(vmcs::host_cr4::osxmmexcpt::is_enabled());
+    using namespace vmcs::host_cr4;
 
-    vmcs::host_cr4::osxmmexcpt::disable();
-    CHECK(vmcs::host_cr4::osxmmexcpt::is_disabled());
+    osxmmexcpt::set(true);
+    CHECK(osxmmexcpt::is_enabled());
+    osxmmexcpt::set(false);
+    CHECK(osxmmexcpt::is_disabled());
 
-    vmcs::host_cr4::osxmmexcpt::enable_if_exists();
-    CHECK(vmcs::host_cr4::osxmmexcpt::is_enabled_if_exists());
+    osxmmexcpt::set(osxmmexcpt::mask, true);
+    CHECK(osxmmexcpt::is_enabled(osxmmexcpt::mask));
+    osxmmexcpt::set(0x0, false);
+    CHECK(osxmmexcpt::is_disabled(0x0));
 
-    vmcs::host_cr4::osxmmexcpt::disable_if_exists();
-    CHECK(vmcs::host_cr4::osxmmexcpt::is_disabled_if_exists());
+    osxmmexcpt::set_if_exists(true);
+    CHECK(osxmmexcpt::is_enabled_if_exists());
+    osxmmexcpt::set_if_exists(false);
+    CHECK(osxmmexcpt::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_host_cr4_vmx_enable_bit")
@@ -509,17 +621,22 @@ TEST_CASE("vmcs_host_cr4_vmx_enable_bit")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::host_cr4::vmx_enable_bit::enable();
-    CHECK(vmcs::host_cr4::vmx_enable_bit::is_enabled());
+    using namespace vmcs::host_cr4;
 
-    vmcs::host_cr4::vmx_enable_bit::disable();
-    CHECK(vmcs::host_cr4::vmx_enable_bit::is_disabled());
+    vmx_enable_bit::set(true);
+    CHECK(vmx_enable_bit::is_enabled());
+    vmx_enable_bit::set(false);
+    CHECK(vmx_enable_bit::is_disabled());
 
-    vmcs::host_cr4::vmx_enable_bit::enable_if_exists();
-    CHECK(vmcs::host_cr4::vmx_enable_bit::is_enabled_if_exists());
+    vmx_enable_bit::set(vmx_enable_bit::mask, true);
+    CHECK(vmx_enable_bit::is_enabled(vmx_enable_bit::mask));
+    vmx_enable_bit::set(0x0, false);
+    CHECK(vmx_enable_bit::is_disabled(0x0));
 
-    vmcs::host_cr4::vmx_enable_bit::disable_if_exists();
-    CHECK(vmcs::host_cr4::vmx_enable_bit::is_disabled_if_exists());
+    vmx_enable_bit::set_if_exists(true);
+    CHECK(vmx_enable_bit::is_enabled_if_exists());
+    vmx_enable_bit::set_if_exists(false);
+    CHECK(vmx_enable_bit::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_host_cr4_smx_enable_bit")
@@ -527,17 +644,22 @@ TEST_CASE("vmcs_host_cr4_smx_enable_bit")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::host_cr4::smx_enable_bit::enable();
-    CHECK(vmcs::host_cr4::smx_enable_bit::is_enabled());
+    using namespace vmcs::host_cr4;
 
-    vmcs::host_cr4::smx_enable_bit::disable();
-    CHECK(vmcs::host_cr4::smx_enable_bit::is_disabled());
+    smx_enable_bit::set(true);
+    CHECK(smx_enable_bit::is_enabled());
+    smx_enable_bit::set(false);
+    CHECK(smx_enable_bit::is_disabled());
 
-    vmcs::host_cr4::smx_enable_bit::enable_if_exists();
-    CHECK(vmcs::host_cr4::smx_enable_bit::is_enabled_if_exists());
+    smx_enable_bit::set(smx_enable_bit::mask, true);
+    CHECK(smx_enable_bit::is_enabled(smx_enable_bit::mask));
+    smx_enable_bit::set(0x0, false);
+    CHECK(smx_enable_bit::is_disabled(0x0));
 
-    vmcs::host_cr4::smx_enable_bit::disable_if_exists();
-    CHECK(vmcs::host_cr4::smx_enable_bit::is_disabled_if_exists());
+    smx_enable_bit::set_if_exists(true);
+    CHECK(smx_enable_bit::is_enabled_if_exists());
+    smx_enable_bit::set_if_exists(false);
+    CHECK(smx_enable_bit::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_host_cr4_fsgsbase_enable_bit")
@@ -545,17 +667,22 @@ TEST_CASE("vmcs_host_cr4_fsgsbase_enable_bit")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::host_cr4::fsgsbase_enable_bit::enable();
-    CHECK(vmcs::host_cr4::fsgsbase_enable_bit::is_enabled());
+    using namespace vmcs::host_cr4;
 
-    vmcs::host_cr4::fsgsbase_enable_bit::disable();
-    CHECK(vmcs::host_cr4::fsgsbase_enable_bit::is_disabled());
+    fsgsbase_enable_bit::set(true);
+    CHECK(fsgsbase_enable_bit::is_enabled());
+    fsgsbase_enable_bit::set(false);
+    CHECK(fsgsbase_enable_bit::is_disabled());
 
-    vmcs::host_cr4::fsgsbase_enable_bit::enable_if_exists();
-    CHECK(vmcs::host_cr4::fsgsbase_enable_bit::is_enabled_if_exists());
+    fsgsbase_enable_bit::set(fsgsbase_enable_bit::mask, true);
+    CHECK(fsgsbase_enable_bit::is_enabled(fsgsbase_enable_bit::mask));
+    fsgsbase_enable_bit::set(0x0, false);
+    CHECK(fsgsbase_enable_bit::is_disabled(0x0));
 
-    vmcs::host_cr4::fsgsbase_enable_bit::disable_if_exists();
-    CHECK(vmcs::host_cr4::fsgsbase_enable_bit::is_disabled_if_exists());
+    fsgsbase_enable_bit::set_if_exists(true);
+    CHECK(fsgsbase_enable_bit::is_enabled_if_exists());
+    fsgsbase_enable_bit::set_if_exists(false);
+    CHECK(fsgsbase_enable_bit::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_host_cr4_pcid_enable_bit")
@@ -563,17 +690,22 @@ TEST_CASE("vmcs_host_cr4_pcid_enable_bit")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::host_cr4::pcid_enable_bit::enable();
-    CHECK(vmcs::host_cr4::pcid_enable_bit::is_enabled());
+    using namespace vmcs::host_cr4;
 
-    vmcs::host_cr4::pcid_enable_bit::disable();
-    CHECK(vmcs::host_cr4::pcid_enable_bit::is_disabled());
+    pcid_enable_bit::set(true);
+    CHECK(pcid_enable_bit::is_enabled());
+    pcid_enable_bit::set(false);
+    CHECK(pcid_enable_bit::is_disabled());
 
-    vmcs::host_cr4::pcid_enable_bit::enable_if_exists();
-    CHECK(vmcs::host_cr4::pcid_enable_bit::is_enabled_if_exists());
+    pcid_enable_bit::set(pcid_enable_bit::mask, true);
+    CHECK(pcid_enable_bit::is_enabled(pcid_enable_bit::mask));
+    pcid_enable_bit::set(0x0, false);
+    CHECK(pcid_enable_bit::is_disabled(0x0));
 
-    vmcs::host_cr4::pcid_enable_bit::disable_if_exists();
-    CHECK(vmcs::host_cr4::pcid_enable_bit::is_disabled_if_exists());
+    pcid_enable_bit::set_if_exists(true);
+    CHECK(pcid_enable_bit::is_enabled_if_exists());
+    pcid_enable_bit::set_if_exists(false);
+    CHECK(pcid_enable_bit::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_host_cr4_osxsave")
@@ -581,17 +713,22 @@ TEST_CASE("vmcs_host_cr4_osxsave")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::host_cr4::osxsave::enable();
-    CHECK(vmcs::host_cr4::osxsave::is_enabled());
+    using namespace vmcs::host_cr4;
 
-    vmcs::host_cr4::osxsave::disable();
-    CHECK(vmcs::host_cr4::osxsave::is_disabled());
+    osxsave::set(true);
+    CHECK(osxsave::is_enabled());
+    osxsave::set(false);
+    CHECK(osxsave::is_disabled());
 
-    vmcs::host_cr4::osxsave::enable_if_exists();
-    CHECK(vmcs::host_cr4::osxsave::is_enabled_if_exists());
+    osxsave::set(osxsave::mask, true);
+    CHECK(osxsave::is_enabled(osxsave::mask));
+    osxsave::set(0x0, false);
+    CHECK(osxsave::is_disabled(0x0));
 
-    vmcs::host_cr4::osxsave::disable_if_exists();
-    CHECK(vmcs::host_cr4::osxsave::is_disabled_if_exists());
+    osxsave::set_if_exists(true);
+    CHECK(osxsave::is_enabled_if_exists());
+    osxsave::set_if_exists(false);
+    CHECK(osxsave::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_host_cr4_smep_enable_bit")
@@ -599,17 +736,22 @@ TEST_CASE("vmcs_host_cr4_smep_enable_bit")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::host_cr4::smep_enable_bit::enable();
-    CHECK(vmcs::host_cr4::smep_enable_bit::is_enabled());
+    using namespace vmcs::host_cr4;
 
-    vmcs::host_cr4::smep_enable_bit::disable();
-    CHECK(vmcs::host_cr4::smep_enable_bit::is_disabled());
+    smep_enable_bit::set(true);
+    CHECK(smep_enable_bit::is_enabled());
+    smep_enable_bit::set(false);
+    CHECK(smep_enable_bit::is_disabled());
 
-    vmcs::host_cr4::smep_enable_bit::enable_if_exists();
-    CHECK(vmcs::host_cr4::smep_enable_bit::is_enabled_if_exists());
+    smep_enable_bit::set(smep_enable_bit::mask, true);
+    CHECK(smep_enable_bit::is_enabled(smep_enable_bit::mask));
+    smep_enable_bit::set(0x0, false);
+    CHECK(smep_enable_bit::is_disabled(0x0));
 
-    vmcs::host_cr4::smep_enable_bit::disable_if_exists();
-    CHECK(vmcs::host_cr4::smep_enable_bit::is_disabled_if_exists());
+    smep_enable_bit::set_if_exists(true);
+    CHECK(smep_enable_bit::is_enabled_if_exists());
+    smep_enable_bit::set_if_exists(false);
+    CHECK(smep_enable_bit::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_host_cr4_smap_enable_bit")
@@ -617,17 +759,22 @@ TEST_CASE("vmcs_host_cr4_smap_enable_bit")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::host_cr4::smap_enable_bit::enable();
-    CHECK(vmcs::host_cr4::smap_enable_bit::is_enabled());
+    using namespace vmcs::host_cr4;
 
-    vmcs::host_cr4::smap_enable_bit::disable();
-    CHECK(vmcs::host_cr4::smap_enable_bit::is_disabled());
+    smap_enable_bit::set(true);
+    CHECK(smap_enable_bit::is_enabled());
+    smap_enable_bit::set(false);
+    CHECK(smap_enable_bit::is_disabled());
 
-    vmcs::host_cr4::smap_enable_bit::enable_if_exists();
-    CHECK(vmcs::host_cr4::smap_enable_bit::is_enabled_if_exists());
+    smap_enable_bit::set(smap_enable_bit::mask, true);
+    CHECK(smap_enable_bit::is_enabled(smap_enable_bit::mask));
+    smap_enable_bit::set(0x0, false);
+    CHECK(smap_enable_bit::is_disabled(0x0));
 
-    vmcs::host_cr4::smap_enable_bit::disable_if_exists();
-    CHECK(vmcs::host_cr4::smap_enable_bit::is_disabled_if_exists());
+    smap_enable_bit::set_if_exists(true);
+    CHECK(smap_enable_bit::is_enabled_if_exists());
+    smap_enable_bit::set_if_exists(false);
+    CHECK(smap_enable_bit::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_host_cr4_protection_key_enable_bit")
@@ -635,17 +782,22 @@ TEST_CASE("vmcs_host_cr4_protection_key_enable_bit")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::host_cr4::protection_key_enable_bit::enable();
-    CHECK(vmcs::host_cr4::protection_key_enable_bit::is_enabled());
+    using namespace vmcs::host_cr4;
 
-    vmcs::host_cr4::protection_key_enable_bit::disable();
-    CHECK(vmcs::host_cr4::protection_key_enable_bit::is_disabled());
+    protection_key_enable_bit::set(true);
+    CHECK(protection_key_enable_bit::is_enabled());
+    protection_key_enable_bit::set(false);
+    CHECK(protection_key_enable_bit::is_disabled());
 
-    vmcs::host_cr4::protection_key_enable_bit::enable_if_exists();
-    CHECK(vmcs::host_cr4::protection_key_enable_bit::is_enabled_if_exists());
+    protection_key_enable_bit::set(protection_key_enable_bit::mask, true);
+    CHECK(protection_key_enable_bit::is_enabled(protection_key_enable_bit::mask));
+    protection_key_enable_bit::set(0x0, false);
+    CHECK(protection_key_enable_bit::is_disabled(0x0));
 
-    vmcs::host_cr4::protection_key_enable_bit::disable_if_exists();
-    CHECK(vmcs::host_cr4::protection_key_enable_bit::is_disabled_if_exists());
+    protection_key_enable_bit::set_if_exists(true);
+    CHECK(protection_key_enable_bit::is_enabled_if_exists());
+    protection_key_enable_bit::set_if_exists(false);
+    CHECK(protection_key_enable_bit::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_host_fs_base")
@@ -653,13 +805,15 @@ TEST_CASE("vmcs_host_fs_base")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    CHECK(vmcs::host_fs_base::exists());
+    using namespace vmcs::host_fs_base;
 
-    vmcs::host_fs_base::set(1UL);
-    CHECK(vmcs::host_fs_base::get() == 1UL);
+    CHECK(exists());
+    set(100UL);
+    CHECK(get() == 100UL);
+    set_if_exists(200UL);
+    CHECK(get_if_exists() == 200UL);
 
-    vmcs::host_fs_base::set_if_exists(0UL);
-    CHECK(vmcs::host_fs_base::get_if_exists() == 0UL);
+    dump(0);
 }
 
 TEST_CASE("vmcs_host_gs_base")
@@ -667,13 +821,15 @@ TEST_CASE("vmcs_host_gs_base")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    CHECK(vmcs::host_gs_base::exists());
+    using namespace vmcs::host_gs_base;
 
-    vmcs::host_gs_base::set(1UL);
-    CHECK(vmcs::host_gs_base::get() == 1UL);
+    CHECK(exists());
+    set(100UL);
+    CHECK(get() == 100UL);
+    set_if_exists(200UL);
+    CHECK(get_if_exists() == 200UL);
 
-    vmcs::host_gs_base::set_if_exists(0UL);
-    CHECK(vmcs::host_gs_base::get_if_exists() == 0UL);
+    dump(0);
 }
 
 TEST_CASE("vmcs_host_tr_base")
@@ -681,13 +837,15 @@ TEST_CASE("vmcs_host_tr_base")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    CHECK(vmcs::host_tr_base::exists());
+    using namespace vmcs::host_tr_base;
 
-    vmcs::host_tr_base::set(1UL);
-    CHECK(vmcs::host_tr_base::get() == 1UL);
+    CHECK(exists());
+    set(100UL);
+    CHECK(get() == 100UL);
+    set_if_exists(200UL);
+    CHECK(get_if_exists() == 200UL);
 
-    vmcs::host_tr_base::set_if_exists(0UL);
-    CHECK(vmcs::host_tr_base::get_if_exists() == 0UL);
+    dump(0);
 }
 
 TEST_CASE("vmcs_host_gdtr_base")
@@ -695,13 +853,15 @@ TEST_CASE("vmcs_host_gdtr_base")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    CHECK(vmcs::host_gdtr_base::exists());
+    using namespace vmcs::host_gdtr_base;
 
-    vmcs::host_gdtr_base::set(1UL);
-    CHECK(vmcs::host_gdtr_base::get() == 1UL);
+    CHECK(exists());
+    set(100UL);
+    CHECK(get() == 100UL);
+    set_if_exists(200UL);
+    CHECK(get_if_exists() == 200UL);
 
-    vmcs::host_gdtr_base::set_if_exists(0UL);
-    CHECK(vmcs::host_gdtr_base::get_if_exists() == 0UL);
+    dump(0);
 }
 
 TEST_CASE("vmcs_host_idtr_base")
@@ -709,13 +869,15 @@ TEST_CASE("vmcs_host_idtr_base")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    CHECK(vmcs::host_idtr_base::exists());
+    using namespace vmcs::host_idtr_base;
 
-    vmcs::host_idtr_base::set(1UL);
-    CHECK(vmcs::host_idtr_base::get() == 1UL);
+    CHECK(exists());
+    set(100UL);
+    CHECK(get() == 100UL);
+    set_if_exists(200UL);
+    CHECK(get_if_exists() == 200UL);
 
-    vmcs::host_idtr_base::set_if_exists(0UL);
-    CHECK(vmcs::host_idtr_base::get_if_exists() == 0UL);
+    dump(0);
 }
 
 TEST_CASE("vmcs_host_ia32_sysenter_esp")
@@ -723,13 +885,15 @@ TEST_CASE("vmcs_host_ia32_sysenter_esp")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    CHECK(vmcs::host_ia32_sysenter_esp::exists());
+    using namespace vmcs::host_ia32_sysenter_esp;
 
-    vmcs::host_ia32_sysenter_esp::set(1UL);
-    CHECK(vmcs::host_ia32_sysenter_esp::get() == 1UL);
+    CHECK(exists());
+    set(100UL);
+    CHECK(get() == 100UL);
+    set_if_exists(200UL);
+    CHECK(get_if_exists() == 200UL);
 
-    vmcs::host_ia32_sysenter_esp::set_if_exists(0UL);
-    CHECK(vmcs::host_ia32_sysenter_esp::get_if_exists() == 0UL);
+    dump(0);
 }
 
 TEST_CASE("vmcs_host_ia32_sysenter_eip")
@@ -737,13 +901,15 @@ TEST_CASE("vmcs_host_ia32_sysenter_eip")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    CHECK(vmcs::host_ia32_sysenter_eip::exists());
+    using namespace vmcs::host_ia32_sysenter_eip;
 
-    vmcs::host_ia32_sysenter_eip::set(1UL);
-    CHECK(vmcs::host_ia32_sysenter_eip::get() == 1UL);
+    CHECK(exists());
+    set(100UL);
+    CHECK(get() == 100UL);
+    set_if_exists(200UL);
+    CHECK(get_if_exists() == 200UL);
 
-    vmcs::host_ia32_sysenter_eip::set_if_exists(0UL);
-    CHECK(vmcs::host_ia32_sysenter_eip::get_if_exists() == 0UL);
+    dump(0);
 }
 
 TEST_CASE("vmcs_host_rsp")
@@ -751,13 +917,15 @@ TEST_CASE("vmcs_host_rsp")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    CHECK(vmcs::host_rsp::exists());
+    using namespace vmcs::host_rsp;
 
-    vmcs::host_rsp::set(1UL);
-    CHECK(vmcs::host_rsp::get() == 1UL);
+    CHECK(exists());
+    set(100UL);
+    CHECK(get() == 100UL);
+    set_if_exists(200UL);
+    CHECK(get_if_exists() == 200UL);
 
-    vmcs::host_rsp::set_if_exists(0UL);
-    CHECK(vmcs::host_rsp::get_if_exists() == 0UL);
+    dump(0);
 }
 
 TEST_CASE("vmcs_host_rip")
@@ -765,13 +933,15 @@ TEST_CASE("vmcs_host_rip")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    CHECK(vmcs::host_rip::exists());
+    using namespace vmcs::host_rip;
 
-    vmcs::host_rip::set(1UL);
-    CHECK(vmcs::host_rip::get() == 1UL);
+    CHECK(exists());
+    set(100UL);
+    CHECK(get() == 100UL);
+    set_if_exists(200UL);
+    CHECK(get_if_exists() == 200UL);
 
-    vmcs::host_rip::set_if_exists(0UL);
-    CHECK(vmcs::host_rip::get_if_exists() == 0UL);
+    dump(0);
 }
 
 #endif

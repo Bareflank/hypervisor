@@ -37,6 +37,11 @@ setup_intrinsics(MockRepository &mocks)
     mocks.OnCallFunc(_invlpg).Do(test_invlpg);
 }
 
+TEST_CASE("test name goes here")
+{
+    CHECK(true);
+}
+
 TEST_CASE("tlb_x64_invlpg")
 {
     MockRepository mocks;

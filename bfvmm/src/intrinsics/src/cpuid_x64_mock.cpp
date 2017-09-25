@@ -32,28 +32,28 @@ extern "C" uint32_t
 _cpuid_eax(uint32_t val) noexcept
 {
     std::cerr << __BFFUNC__ << " called with: " << view_as_pointer(val) << '\n';
-    abort();
+    return 0;
 }
 
 extern "C" uint32_t
 _cpuid_ebx(uint32_t val) noexcept
 {
     std::cerr << __BFFUNC__ << " called with: " << view_as_pointer(val) << '\n';
-    abort();
+    return 0;
 }
 
 extern "C" uint32_t
 _cpuid_ecx(uint32_t val) noexcept
 {
     std::cerr << __BFFUNC__ << " called with: " << view_as_pointer(val) << '\n';
-    abort();
+    return 0;
 }
 
 extern "C" uint32_t
 _cpuid_edx(uint32_t val) noexcept
 {
     std::cerr << __BFFUNC__ << " called with: " << view_as_pointer(val) << '\n';
-    abort();
+    return 0;
 }
 
 extern "C" uint32_t
@@ -63,7 +63,7 @@ _cpuid_subeax(uint32_t val, uint32_t sub) noexcept
     bfignored(sub);
 
     std::cerr << __BFFUNC__ << " called" << '\n';
-    abort();
+    return 0;
 }
 
 extern "C" uint32_t
@@ -73,7 +73,7 @@ _cpuid_subebx(uint32_t val, uint32_t sub) noexcept
     bfignored(sub);
 
     std::cerr << __BFFUNC__ << " called" << '\n';
-    abort();
+    return 0;
 }
 
 extern "C" uint32_t
@@ -83,7 +83,7 @@ _cpuid_subecx(uint32_t val, uint32_t sub) noexcept
     bfignored(sub);
 
     std::cerr << __BFFUNC__ << " called" << '\n';
-    abort();
+    return 0;
 }
 
 extern "C" uint32_t
@@ -93,7 +93,7 @@ _cpuid_subedx(uint32_t val, uint32_t sub) noexcept
     bfignored(sub);
 
     std::cerr << __BFFUNC__ << " called" << '\n';
-    abort();
+    return 0;
 }
 
 extern "C" void
@@ -105,5 +105,4 @@ _cpuid(void *eax, void *ebx, void *ecx, void *edx) noexcept
     bfignored(edx);
 
     std::cerr << __BFFUNC__ << " called" << '\n';
-    abort();
 }

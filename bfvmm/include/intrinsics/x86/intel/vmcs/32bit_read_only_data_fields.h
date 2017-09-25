@@ -227,7 +227,7 @@ namespace exit_reason
         {
             switch (reason) {
                 case exception_or_non_maskable_interrupt:
-                    return "exception_or_nmi";
+                    return "exception_or_non_maskable_interrupt";
 
                 case external_interrupt:
                     return "external_interrupt";
