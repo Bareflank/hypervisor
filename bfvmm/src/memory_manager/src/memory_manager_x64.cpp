@@ -309,7 +309,7 @@ _calloc_r(struct _reent *ent, size_t nmemb, size_t size)
     bfignored(ent);
 
     if (auto ptr = g_mm->alloc(nmemb * size)) {
-        return __builtin_memset(ptr, 0, nmemb * size);
+        return memset(ptr, 0, nmemb * size);
     }
 
     return nullptr;
@@ -328,7 +328,7 @@ _realloc_r(struct _reent *ent, void *ptr, size_t size)
     }
 
     if (ptr != nullptr) {
-        __builtin_memcpy(new_ptr, ptr, size > old_sze ? old_sze : size);
+        memcpy(new_ptr, ptr, size > old_sze ? old_sze : size);
         g_mm->free(ptr);
     }
 

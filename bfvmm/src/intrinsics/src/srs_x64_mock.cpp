@@ -28,110 +28,102 @@ extern "C" uint16_t
 _read_es(void) noexcept
 {
     std::cerr << __BFFUNC__ << " called" << '\n';
-    abort();
+    return 0;
 }
 
 extern "C" void
 _write_es(uint16_t val) noexcept
 {
     std::cerr << __BFFUNC__ << " called with: " << view_as_pointer(val) << '\n';
-    abort();
 }
 
 extern "C" uint16_t
 _read_cs(void) noexcept
 {
     std::cerr << __BFFUNC__ << " called" << '\n';
-    abort();
+    return 0;
 }
 
 extern "C" void
 _write_cs(uint16_t val) noexcept
 {
     std::cerr << __BFFUNC__ << " called with: " << view_as_pointer(val) << '\n';
-    abort();
 }
 
 extern "C" uint16_t
 _read_ss(void) noexcept
 {
     std::cerr << __BFFUNC__ << " called" << '\n';
-    abort();
+    return 0;
 }
 
 extern "C" void
 _write_ss(uint16_t val) noexcept
 {
     std::cerr << __BFFUNC__ << " called with: " << view_as_pointer(val) << '\n';
-    abort();
 }
 
 extern "C" uint16_t
 _read_ds(void) noexcept
 {
     std::cerr << __BFFUNC__ << " called" << '\n';
-    abort();
+    return 0;
 }
 
 extern "C" void
 _write_ds(uint16_t val) noexcept
 {
     std::cerr << __BFFUNC__ << " called with: " << view_as_pointer(val) << '\n';
-    abort();
 }
 
 extern "C" uint16_t
 _read_fs(void) noexcept
 {
     std::cerr << __BFFUNC__ << " called" << '\n';
-    abort();
+    return 0;
 }
 
 extern "C" void
 _write_fs(uint16_t val) noexcept
 {
     std::cerr << __BFFUNC__ << " called with: " << view_as_pointer(val) << '\n';
-    abort();
 }
 
 extern "C" uint16_t
 _read_gs(void) noexcept
 {
     std::cerr << __BFFUNC__ << " called" << '\n';
-    abort();
+    return 0;
 }
 
 extern "C" void
 _write_gs(uint16_t val) noexcept
 {
     std::cerr << __BFFUNC__ << " called with: " << view_as_pointer(val) << '\n';
-    abort();
 }
 
 extern "C" uint16_t
 _read_ldtr(void) noexcept
 {
     std::cerr << __BFFUNC__ << " called" << '\n';
-    abort();
+    return 0;
 }
 
 extern "C" void
 _write_ldtr(uint16_t val) noexcept
 {
     std::cerr << __BFFUNC__ << " called with: " << view_as_pointer(val) << '\n';
-    abort();
 }
 
 extern "C" uint16_t
 _read_tr(void) noexcept
 {
     std::cerr << __BFFUNC__ << " called" << '\n';
-    abort();
+    return 0;
 }
 
 extern "C" void
 _write_tr(uint16_t val) noexcept
 {
     std::cerr << __BFFUNC__ << " called with: " << view_as_pointer(val) << '\n';
-    abort();
 }

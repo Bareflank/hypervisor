@@ -292,7 +292,7 @@ setup_check_guest_segment_registers_all_paths(std::vector<struct control_flow_pa
         guest_fs_access_rights::set(0xF3UL);
         guest_gs_access_rights::set(0xF3UL);
         guest_tr_access_rights::type::set(gsl::narrow_cast<uint32_t>(x64::access_rights::type::read_execute_accessed));
-        guest_tr_access_rights::s::enable();
+        //guest_tr_access_rights::s::enable();
         guest_tr_access_rights::present::enable();
         guest_tr_limit::set(0x1UL);
         guest_tr_access_rights::granularity::disable();

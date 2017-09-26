@@ -30,14 +30,14 @@ _vmxon(void *ptr) noexcept
     (void) ptr;
 
     std::cerr << __BFFUNC__ << " called" << '\n';
-    abort();
+    return true;
 }
 
 extern "C" bool
 _vmxoff(void) noexcept
 {
     std::cerr << __BFFUNC__ << " called" << '\n';
-    abort();
+    return true;
 }
 
 extern "C" bool
@@ -46,7 +46,7 @@ _vmclear(void *ptr) noexcept
     (void) ptr;
 
     std::cerr << __BFFUNC__ << " called" << '\n';
-    abort();
+    return true;
 }
 
 extern "C" bool
@@ -55,7 +55,7 @@ _vmptrld(void *ptr) noexcept
     (void) ptr;
 
     std::cerr << __BFFUNC__ << " called" << '\n';
-    abort();
+    return true;
 }
 
 extern "C" bool
@@ -64,7 +64,7 @@ _vmptrst(void *ptr) noexcept
     (void) ptr;
 
     std::cerr << __BFFUNC__ << " called" << '\n';
-    abort();
+    return true;
 }
 
 extern "C" bool
@@ -74,7 +74,7 @@ _vmread(uint64_t field, uint64_t *value) noexcept
 
     std::cerr << __BFFUNC__ << " called with: " << '\n';
     std::cerr << "    - field: " << view_as_pointer(field) << '\n';
-    abort();
+    return true;
 }
 
 extern "C" bool
@@ -83,14 +83,14 @@ _vmwrite(uint64_t field, uint64_t value) noexcept
     std::cerr << __BFFUNC__ << " called with: " << '\n';
     std::cerr << "    - field: " << view_as_pointer(field) << '\n';
     std::cerr << "    - value: " << view_as_pointer(value) << '\n';
-    abort();
+    return true;
 }
 
 extern "C" bool
 _vmlaunch_demote(void) noexcept
 {
     std::cerr << __BFFUNC__ << " called" << '\n';
-    abort();
+    return true;
 }
 
 extern "C" bool
@@ -100,7 +100,7 @@ _invept(uint64_t type, void *ptr) noexcept
     (void) ptr;
 
     std::cerr << __BFFUNC__ << " called" << '\n';
-    abort();
+    return true;
 }
 
 extern "C" bool
@@ -110,5 +110,5 @@ _invvpid(uint64_t type, void *ptr) noexcept
     (void) ptr;
 
     std::cerr << __BFFUNC__ << " called" << '\n';
-    abort();
+    return true;
 }

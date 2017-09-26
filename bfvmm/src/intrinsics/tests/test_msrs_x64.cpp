@@ -27,6 +27,11 @@
 
 using namespace x64;
 
+TEST_CASE("test name goes here")
+{
+    CHECK(true);
+}
+
 std::map<msrs::field_type, msrs::value_type> g_msrs;
 
 extern "C" uint64_t
@@ -49,8 +54,11 @@ TEST_CASE("ia32_p5_mc_addr")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000000UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(msrs::ia32_p5_mc_addr::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace msrs::ia32_p5_mc_addr;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_p5_mc_type")
@@ -58,8 +66,11 @@ TEST_CASE("ia32_p5_mc_type")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000001UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(msrs::ia32_p5_mc_type::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace msrs::ia32_p5_mc_type;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_tsc")
@@ -67,8 +78,11 @@ TEST_CASE("ia32_tsc")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000010UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(msrs::ia32_tsc::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace msrs::ia32_tsc;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_apic_base")
@@ -76,8 +90,11 @@ TEST_CASE("ia32_apic_base")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    msrs::ia32_apic_base::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(msrs::ia32_apic_base::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace msrs::ia32_apic_base;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_apic_base_bsp_flag")
@@ -85,11 +102,17 @@ TEST_CASE("ia32_apic_base_bsp_flag")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    msrs::ia32_apic_base::bsp_flag::set(true);
-    CHECK(msrs::ia32_apic_base::bsp_flag::get());
+    using namespace msrs::ia32_apic_base;
 
-    msrs::ia32_apic_base::bsp_flag::set(false);
-    CHECK_FALSE(msrs::ia32_apic_base::bsp_flag::get());
+    bsp_flag::enable();
+    CHECK(bsp_flag::is_enabled());
+    bsp_flag::disable();
+    CHECK(bsp_flag::is_disabled());
+
+    bsp_flag::enable(bsp_flag::mask);
+    CHECK(bsp_flag::is_enabled(bsp_flag::mask));
+    bsp_flag::disable(0x0);
+    CHECK(bsp_flag::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_apic_base_enable_x2apic")
@@ -97,11 +120,17 @@ TEST_CASE("ia32_apic_base_enable_x2apic")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    msrs::ia32_apic_base::enable_x2apic::set(true);
-    CHECK(msrs::ia32_apic_base::enable_x2apic::get());
+    using namespace msrs::ia32_apic_base;
 
-    msrs::ia32_apic_base::enable_x2apic::set(false);
-    CHECK_FALSE(msrs::ia32_apic_base::enable_x2apic::get());
+    enable_x2apic::enable();
+    CHECK(enable_x2apic::is_enabled());
+    enable_x2apic::disable();
+    CHECK(enable_x2apic::is_disabled());
+
+    enable_x2apic::enable(enable_x2apic::mask);
+    CHECK(enable_x2apic::is_enabled(enable_x2apic::mask));
+    enable_x2apic::disable(0x0);
+    CHECK(enable_x2apic::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_apic_base_apic_global_enable")
@@ -109,11 +138,17 @@ TEST_CASE("ia32_apic_base_apic_global_enable")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    msrs::ia32_apic_base::apic_global_enable::set(true);
-    CHECK(msrs::ia32_apic_base::apic_global_enable::get());
+    using namespace msrs::ia32_apic_base;
 
-    msrs::ia32_apic_base::apic_global_enable::set(false);
-    CHECK_FALSE(msrs::ia32_apic_base::apic_global_enable::get());
+    apic_global_enable::enable();
+    CHECK(apic_global_enable::is_enabled());
+    apic_global_enable::disable();
+    CHECK(apic_global_enable::is_disabled());
+
+    apic_global_enable::enable(apic_global_enable::mask);
+    CHECK(apic_global_enable::is_enabled(apic_global_enable::mask));
+    apic_global_enable::disable(0x0);
+    CHECK(apic_global_enable::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_apic_base_apic_base")
@@ -121,8 +156,13 @@ TEST_CASE("ia32_apic_base_apic_base")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    msrs::ia32_apic_base::apic_base::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(msrs::ia32_apic_base::apic_base::get() == 0x000FFFFFFFFFFFFFULL);
+    using namespace msrs::ia32_apic_base;
+
+    apic_base::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(apic_base::get() == (apic_base::mask >> apic_base::from));
+
+    apic_base::set(apic_base::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(apic_base::get(apic_base::mask) == (apic_base::mask >> apic_base::from));
 }
 
 TEST_CASE("ia32_mperf")
@@ -130,8 +170,11 @@ TEST_CASE("ia32_mperf")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    msrs::ia32_mperf::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(msrs::ia32_mperf::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace msrs::ia32_mperf;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mperf_tsc_freq_clock_count")
@@ -139,8 +182,13 @@ TEST_CASE("ia32_mperf_tsc_freq_clock_count")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    msrs::ia32_mperf::tsc_freq_clock_count::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(msrs::ia32_mperf::tsc_freq_clock_count::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace msrs::ia32_mperf;
+
+    tsc_freq_clock_count::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(tsc_freq_clock_count::get() == (tsc_freq_clock_count::mask >> tsc_freq_clock_count::from));
+
+    tsc_freq_clock_count::set(tsc_freq_clock_count::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(tsc_freq_clock_count::get(tsc_freq_clock_count::mask) == (tsc_freq_clock_count::mask >> tsc_freq_clock_count::from));
 }
 
 TEST_CASE("ia32_aperf")
@@ -148,8 +196,11 @@ TEST_CASE("ia32_aperf")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    msrs::ia32_aperf::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(msrs::ia32_aperf::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace msrs::ia32_aperf;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_aperf_actual_freq_clock_count")
@@ -157,8 +208,13 @@ TEST_CASE("ia32_aperf_actual_freq_clock_count")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    msrs::ia32_aperf::actual_freq_clock_count::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(msrs::ia32_aperf::actual_freq_clock_count::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace msrs::ia32_aperf;
+
+    actual_freq_clock_count::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(actual_freq_clock_count::get() == (actual_freq_clock_count::mask >> actual_freq_clock_count::from));
+
+    actual_freq_clock_count::set(actual_freq_clock_count::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(actual_freq_clock_count::get(actual_freq_clock_count::mask) == (actual_freq_clock_count::mask >> actual_freq_clock_count::from));
 }
 
 TEST_CASE("ia32_mtrrcap")
@@ -166,8 +222,11 @@ TEST_CASE("ia32_mtrrcap")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x000000FEUL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(msrs::ia32_mtrrcap::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace msrs::ia32_mtrrcap;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mtrrcap_vcnt")
@@ -175,8 +234,13 @@ TEST_CASE("ia32_mtrrcap_vcnt")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x000000FEUL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(msrs::ia32_mtrrcap::vcnt::get() == 0x00000000000000FFULL);
+    using namespace msrs::ia32_mtrrcap;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(vcnt::get() == (vcnt::mask >> vcnt::from));
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(vcnt::get(vcnt::mask) == (vcnt::mask >> vcnt::from));
 }
 
 TEST_CASE("ia32_mtrrcap_fixed_range_mtrr")
@@ -184,11 +248,17 @@ TEST_CASE("ia32_mtrrcap_fixed_range_mtrr")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x000000FEUL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(msrs::ia32_mtrrcap::fixed_range_mtrr::get());
+    using namespace msrs::ia32_mtrrcap;
 
-    g_msrs[0x000000FEUL] = 0x0000000000000000ULL;
-    CHECK_FALSE(msrs::ia32_mtrrcap::fixed_range_mtrr::get());
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(fixed_range_mtrr::is_enabled());
+    g_msrs[addr] = 0x0;
+    CHECK(fixed_range_mtrr::is_disabled());
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(fixed_range_mtrr::is_enabled(fixed_range_mtrr::mask));
+    g_msrs[addr] = 0x0;
+    CHECK(fixed_range_mtrr::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_mtrrcap_wc")
@@ -196,11 +266,17 @@ TEST_CASE("ia32_mtrrcap_wc")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x000000FEUL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(msrs::ia32_mtrrcap::wc::get());
+    using namespace msrs::ia32_mtrrcap;
 
-    g_msrs[0x000000FEUL] = 0x0000000000000000ULL;
-    CHECK_FALSE(msrs::ia32_mtrrcap::wc::get());
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(wc::is_enabled());
+    g_msrs[addr] = 0x0;
+    CHECK(wc::is_disabled());
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(wc::is_enabled(wc::mask));
+    g_msrs[addr] = 0x0;
+    CHECK(wc::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_mtrrcap_smrr")
@@ -208,11 +284,17 @@ TEST_CASE("ia32_mtrrcap_smrr")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x000000FEUL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(msrs::ia32_mtrrcap::smrr::get());
+    using namespace msrs::ia32_mtrrcap;
 
-    g_msrs[0x000000FEUL] = 0x0000000000000000ULL;
-    CHECK_FALSE(msrs::ia32_mtrrcap::smrr::get());
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(smrr::is_enabled());
+    g_msrs[addr] = 0x0;
+    CHECK(smrr::is_disabled());
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(smrr::is_enabled(smrr::mask));
+    g_msrs[addr] = 0x0;
+    CHECK(smrr::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_sysenter_cs")
@@ -220,8 +302,11 @@ TEST_CASE("ia32_sysenter_cs")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    msrs::ia32_sysenter_cs::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(msrs::ia32_sysenter_cs::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace msrs::ia32_sysenter_cs;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_sysenter_cs_cs_selector")
@@ -229,8 +314,13 @@ TEST_CASE("ia32_sysenter_cs_cs_selector")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    msrs::ia32_sysenter_cs::cs_selector::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(msrs::ia32_sysenter_cs::cs_selector::get() == 0x000000000000FFFFULL);
+    using namespace msrs::ia32_sysenter_cs;
+
+    cs_selector::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(cs_selector::get() == (cs_selector::mask >> cs_selector::from));
+
+    cs_selector::set(cs_selector::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(cs_selector::get(cs_selector::mask) == (cs_selector::mask >> cs_selector::from));
 }
 
 TEST_CASE("ia32_sysenter_esp")
@@ -238,8 +328,11 @@ TEST_CASE("ia32_sysenter_esp")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    msrs::ia32_sysenter_esp::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(msrs::ia32_sysenter_esp::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace msrs::ia32_sysenter_esp;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_sysenter_eip")
@@ -247,8 +340,11 @@ TEST_CASE("ia32_sysenter_eip")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    msrs::ia32_sysenter_eip::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(msrs::ia32_sysenter_eip::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace msrs::ia32_sysenter_eip;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mcg_cap")
@@ -256,8 +352,11 @@ TEST_CASE("ia32_mcg_cap")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000179UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(msrs::ia32_mcg_cap::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace msrs::ia32_mcg_cap;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mcg_cap_count")
@@ -265,8 +364,13 @@ TEST_CASE("ia32_mcg_cap_count")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000179UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(msrs::ia32_mcg_cap::count::get() == 0x00000000000000FFULL);
+    using namespace msrs::ia32_mcg_cap;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(count::get() == (count::mask >> count::from));
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(count::get(count::mask) == (count::mask >> count::from));
 }
 
 TEST_CASE("ia32_mcg_cap_mcg_ctl")
@@ -274,11 +378,17 @@ TEST_CASE("ia32_mcg_cap_mcg_ctl")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000179UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(msrs::ia32_mcg_cap::mcg_ctl::get());
+    using namespace msrs::ia32_mcg_cap;
 
-    g_msrs[0x00000179UL] = 0x0000000000000000ULL;
-    CHECK_FALSE(msrs::ia32_mcg_cap::mcg_ctl::get());
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(mcg_ctl::is_enabled());
+    g_msrs[addr] = 0x0;
+    CHECK(mcg_ctl::is_disabled());
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(mcg_ctl::is_enabled(mcg_ctl::mask));
+    g_msrs[addr] = 0x0;
+    CHECK(mcg_ctl::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_mcg_cap_mcg_ext")
@@ -286,11 +396,17 @@ TEST_CASE("ia32_mcg_cap_mcg_ext")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000179UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(msrs::ia32_mcg_cap::mcg_ext::get());
+    using namespace msrs::ia32_mcg_cap;
 
-    g_msrs[0x00000179UL] = 0x0000000000000000ULL;
-    CHECK_FALSE(msrs::ia32_mcg_cap::mcg_ext::get());
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(mcg_ext::is_enabled());
+    g_msrs[addr] = 0x0;
+    CHECK(mcg_ext::is_disabled());
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(mcg_ext::is_enabled(mcg_ext::mask));
+    g_msrs[addr] = 0x0;
+    CHECK(mcg_ext::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_mcg_cap_mcg_cmci")
@@ -298,11 +414,17 @@ TEST_CASE("ia32_mcg_cap_mcg_cmci")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000179UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(msrs::ia32_mcg_cap::mcg_cmci::get());
+    using namespace msrs::ia32_mcg_cap;
 
-    g_msrs[0x00000179UL] = 0x0000000000000000ULL;
-    CHECK_FALSE(msrs::ia32_mcg_cap::mcg_cmci::get());
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(mcg_cmci::is_enabled());
+    g_msrs[addr] = 0x0;
+    CHECK(mcg_cmci::is_disabled());
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(mcg_cmci::is_enabled(mcg_cmci::mask));
+    g_msrs[addr] = 0x0;
+    CHECK(mcg_cmci::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_mcg_cap_mcg_tes")
@@ -310,11 +432,17 @@ TEST_CASE("ia32_mcg_cap_mcg_tes")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000179UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(msrs::ia32_mcg_cap::mcg_tes::get());
+    using namespace msrs::ia32_mcg_cap;
 
-    g_msrs[0x00000179UL] = 0x0000000000000000ULL;
-    CHECK_FALSE(msrs::ia32_mcg_cap::mcg_tes::get());
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(mcg_tes::is_enabled());
+    g_msrs[addr] = 0x0;
+    CHECK(mcg_tes::is_disabled());
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(mcg_tes::is_enabled(mcg_tes::mask));
+    g_msrs[addr] = 0x0;
+    CHECK(mcg_tes::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_mcg_cap_mcg_ext_cnt")
@@ -322,8 +450,13 @@ TEST_CASE("ia32_mcg_cap_mcg_ext_cnt")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000179UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(msrs::ia32_mcg_cap::mcg_ext_cnt::get() == 0x00000000000000FFULL);
+    using namespace msrs::ia32_mcg_cap;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(mcg_ext_cnt::get() == (mcg_ext_cnt::mask >> mcg_ext_cnt::from));
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(mcg_ext_cnt::get(mcg_ext_cnt::mask) == (mcg_ext_cnt::mask >> mcg_ext_cnt::from));
 }
 
 TEST_CASE("ia32_mcg_cap_mcg_ser")
@@ -331,11 +464,17 @@ TEST_CASE("ia32_mcg_cap_mcg_ser")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000179UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(msrs::ia32_mcg_cap::mcg_ser::get());
+    using namespace msrs::ia32_mcg_cap;
 
-    g_msrs[0x00000179UL] = 0x0000000000000000ULL;
-    CHECK_FALSE(msrs::ia32_mcg_cap::mcg_ser::get());
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(mcg_ser::is_enabled());
+    g_msrs[addr] = 0x0;
+    CHECK(mcg_ser::is_disabled());
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(mcg_ser::is_enabled(mcg_ser::mask));
+    g_msrs[addr] = 0x0;
+    CHECK(mcg_ser::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_mcg_cap_mcg_elog")
@@ -343,11 +482,17 @@ TEST_CASE("ia32_mcg_cap_mcg_elog")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000179UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(msrs::ia32_mcg_cap::mcg_elog::get());
+    using namespace msrs::ia32_mcg_cap;
 
-    g_msrs[0x00000179UL] = 0x0000000000000000ULL;
-    CHECK_FALSE(msrs::ia32_mcg_cap::mcg_elog::get());
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(mcg_elog::is_enabled());
+    g_msrs[addr] = 0x0;
+    CHECK(mcg_elog::is_disabled());
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(mcg_elog::is_enabled(mcg_elog::mask));
+    g_msrs[addr] = 0x0;
+    CHECK(mcg_elog::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_mcg_cap_mcg_lmce")
@@ -355,11 +500,17 @@ TEST_CASE("ia32_mcg_cap_mcg_lmce")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000179UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(msrs::ia32_mcg_cap::mcg_lmce::get());
+    using namespace msrs::ia32_mcg_cap;
 
-    g_msrs[0x00000179UL] = 0x0000000000000000ULL;
-    CHECK_FALSE(msrs::ia32_mcg_cap::mcg_lmce::get());
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(mcg_lmce::is_enabled());
+    g_msrs[addr] = 0x0;
+    CHECK(mcg_lmce::is_disabled());
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(mcg_lmce::is_enabled(mcg_lmce::mask));
+    g_msrs[addr] = 0x0;
+    CHECK(mcg_lmce::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_mcg_status")
@@ -367,8 +518,11 @@ TEST_CASE("ia32_mcg_status")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    msrs::ia32_mcg_status::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(msrs::ia32_mcg_status::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace msrs::ia32_mcg_status;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mcg_status_ripv")
@@ -376,11 +530,17 @@ TEST_CASE("ia32_mcg_status_ripv")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    msrs::ia32_mcg_status::ripv::set(true);
-    CHECK(msrs::ia32_mcg_status::ripv::get());
+    using namespace msrs::ia32_mcg_status;
 
-    msrs::ia32_mcg_status::ripv::set(false);
-    CHECK_FALSE(msrs::ia32_mcg_status::ripv::get());
+    ripv::enable();
+    CHECK(ripv::is_enabled());
+    ripv::disable();
+    CHECK(ripv::is_disabled());
+
+    ripv::enable(ripv::mask);
+    CHECK(ripv::is_enabled(ripv::mask));
+    ripv::disable(0x0);
+    CHECK(ripv::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_mcg_status_eipv")
@@ -388,11 +548,17 @@ TEST_CASE("ia32_mcg_status_eipv")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    msrs::ia32_mcg_status::eipv::set(true);
-    CHECK(msrs::ia32_mcg_status::eipv::get());
+    using namespace msrs::ia32_mcg_status;
 
-    msrs::ia32_mcg_status::eipv::set(false);
-    CHECK_FALSE(msrs::ia32_mcg_status::eipv::get());
+    eipv::enable();
+    CHECK(eipv::is_enabled());
+    eipv::disable();
+    CHECK(eipv::is_disabled());
+
+    eipv::enable(eipv::mask);
+    CHECK(eipv::is_enabled(eipv::mask));
+    eipv::disable(0x0);
+    CHECK(eipv::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_mcg_status_mcip")
@@ -400,11 +566,17 @@ TEST_CASE("ia32_mcg_status_mcip")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    msrs::ia32_mcg_status::mcip::set(true);
-    CHECK(msrs::ia32_mcg_status::mcip::get());
+    using namespace msrs::ia32_mcg_status;
 
-    msrs::ia32_mcg_status::mcip::set(false);
-    CHECK_FALSE(msrs::ia32_mcg_status::mcip::get());
+    mcip::enable();
+    CHECK(mcip::is_enabled());
+    mcip::disable();
+    CHECK(mcip::is_disabled());
+
+    mcip::enable(mcip::mask);
+    CHECK(mcip::is_enabled(mcip::mask));
+    mcip::disable(0x0);
+    CHECK(mcip::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_mcg_status_lmce_s")
@@ -412,11 +584,17 @@ TEST_CASE("ia32_mcg_status_lmce_s")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    msrs::ia32_mcg_status::lmce_s::set(true);
-    CHECK(msrs::ia32_mcg_status::lmce_s::get());
+    using namespace msrs::ia32_mcg_status;
 
-    msrs::ia32_mcg_status::lmce_s::set(false);
-    CHECK_FALSE(msrs::ia32_mcg_status::lmce_s::get());
+    lmce_s::enable();
+    CHECK(lmce_s::is_enabled());
+    lmce_s::disable();
+    CHECK(lmce_s::is_disabled());
+
+    lmce_s::enable(lmce_s::mask);
+    CHECK(lmce_s::is_enabled(lmce_s::mask));
+    lmce_s::disable(0x0);
+    CHECK(lmce_s::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_mcg_ctl")
@@ -424,8 +602,11 @@ TEST_CASE("ia32_mcg_ctl")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    msrs::ia32_mcg_ctl::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(msrs::ia32_mcg_ctl::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace msrs::ia32_mcg_ctl;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_pat")
@@ -433,137 +614,126 @@ TEST_CASE("ia32_pat")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    msrs::ia32_pat::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(msrs::ia32_pat::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace msrs::ia32_pat;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
-TEST_CASE("test_ia32_pat")
+TEST_CASE("ia32_pat_pa0")
 {
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    msrs::ia32_pat::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(msrs::ia32_pat::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace msrs::ia32_pat;
 
-    msrs::ia32_pat::dump();
+    pa0::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(pa0::get() == (pa0::mask >> pa0::from));
 
-    msrs::ia32_pat::set(0x0UL);
-    CHECK(msrs::ia32_pat::get() == 0x0UL);
+    pa0::set(pa0::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(pa0::get(pa0::mask) == (pa0::mask >> pa0::from));
 }
 
-TEST_CASE("test_ia32_pat_pa0")
+TEST_CASE("ia32_pat_pa1")
 {
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    msrs::ia32_pat::pa0::set(6UL);
-    CHECK(msrs::ia32_pat::pa0::get() == 6UL);
-    CHECK(msrs::ia32_pat::pa0::get(0x0000000000000006ULL) == 6UL);
+    using namespace msrs::ia32_pat;
 
-    msrs::ia32_pat::pa0::set(4UL);
-    CHECK(msrs::ia32_pat::pa0::get() == 4UL);
-    CHECK(msrs::ia32_pat::pa0::get(0x0000000000000004ULL) == 4UL);
+    pa1::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(pa1::get() == (pa1::mask >> pa1::from));
+
+    pa1::set(pa1::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(pa1::get(pa1::mask) == (pa1::mask >> pa1::from));
 }
 
-TEST_CASE("test_ia32_pat_pa1")
+TEST_CASE("ia32_pat_pa2")
 {
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    msrs::ia32_pat::pa1::set(6UL);
-    CHECK(msrs::ia32_pat::pa1::get() == 6UL);
-    CHECK(msrs::ia32_pat::pa1::get(0x0000000000000600ULL) == 6UL);
+    using namespace msrs::ia32_pat;
 
-    msrs::ia32_pat::pa1::set(4UL);
-    CHECK(msrs::ia32_pat::pa1::get() == 4UL);
-    CHECK(msrs::ia32_pat::pa1::get(0x0000000000000400ULL) == 4UL);
+    pa2::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(pa2::get() == (pa2::mask >> pa2::from));
+
+    pa2::set(pa2::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(pa2::get(pa2::mask) == (pa2::mask >> pa2::from));
 }
 
-TEST_CASE("test_ia32_pat_pa2")
+TEST_CASE("ia32_pat_pa3")
 {
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    msrs::ia32_pat::pa2::set(6UL);
-    CHECK(msrs::ia32_pat::pa2::get() == 6UL);
-    CHECK(msrs::ia32_pat::pa2::get(0x0000000000060000ULL) == 6UL);
+    using namespace msrs::ia32_pat;
 
-    msrs::ia32_pat::pa2::set(4UL);
-    CHECK(msrs::ia32_pat::pa2::get() == 4UL);
-    CHECK(msrs::ia32_pat::pa2::get(0x0000000000040000ULL) == 4UL);
+    pa3::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(pa3::get() == (pa3::mask >> pa3::from));
+
+    pa3::set(pa3::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(pa3::get(pa3::mask) == (pa3::mask >> pa3::from));
 }
 
-TEST_CASE("test_ia32_pat_pa3")
+TEST_CASE("ia32_pat_pa4")
 {
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    msrs::ia32_pat::pa3::set(6UL);
-    CHECK(msrs::ia32_pat::pa3::get() == 6UL);
-    CHECK(msrs::ia32_pat::pa3::get(0x0000000006000000ULL) == 6UL);
+    using namespace msrs::ia32_pat;
 
-    msrs::ia32_pat::pa3::set(4UL);
-    CHECK(msrs::ia32_pat::pa3::get() == 4UL);
-    CHECK(msrs::ia32_pat::pa3::get(0x0000000004000000ULL) == 4UL);
+    pa4::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(pa4::get() == (pa4::mask >> pa4::from));
+
+    pa4::set(pa4::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(pa4::get(pa4::mask) == (pa4::mask >> pa4::from));
 }
 
-TEST_CASE("test_ia32_pat_pa4")
+TEST_CASE("ia32_pat_pa5")
 {
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    msrs::ia32_pat::pa4::set(6UL);
-    CHECK(msrs::ia32_pat::pa4::get() == 6UL);
-    CHECK(msrs::ia32_pat::pa4::get(0x0000000600000000ULL) == 6UL);
+    using namespace msrs::ia32_pat;
 
-    msrs::ia32_pat::pa4::set(4UL);
-    CHECK(msrs::ia32_pat::pa4::get() == 4UL);
-    CHECK(msrs::ia32_pat::pa4::get(0x0000000400000000ULL) == 4UL);
+    pa5::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(pa5::get() == (pa5::mask >> pa5::from));
+
+    pa5::set(pa5::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(pa5::get(pa5::mask) == (pa5::mask >> pa5::from));
 }
 
-TEST_CASE("test_ia32_pat_pa5")
+TEST_CASE("ia32_pat_pa6")
 {
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    msrs::ia32_pat::pa5::set(6UL);
-    CHECK(msrs::ia32_pat::pa5::get() == 6UL);
-    CHECK(msrs::ia32_pat::pa5::get(0x0000060000000000ULL) == 6UL);
+    using namespace msrs::ia32_pat;
 
-    msrs::ia32_pat::pa5::set(4UL);
-    CHECK(msrs::ia32_pat::pa5::get() == 4UL);
-    CHECK(msrs::ia32_pat::pa5::get(0x0000040000000000ULL) == 4UL);
+    pa6::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(pa6::get() == (pa6::mask >> pa6::from));
+
+    pa6::set(pa6::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(pa6::get(pa6::mask) == (pa6::mask >> pa6::from));
 }
 
-TEST_CASE("test_ia32_pat_pa6")
+TEST_CASE("ia32_pat_pa7")
 {
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    msrs::ia32_pat::pa6::set(6UL);
-    CHECK(msrs::ia32_pat::pa6::get() == 6UL);
-    CHECK(msrs::ia32_pat::pa6::get(0x0006000000000000ULL) == 6UL);
+    using namespace msrs::ia32_pat;
 
-    msrs::ia32_pat::pa6::set(4UL);
-    CHECK(msrs::ia32_pat::pa6::get() == 4UL);
-    CHECK(msrs::ia32_pat::pa6::get(0x0004000000000000ULL) == 4UL);
+    pa7::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(pa7::get() == (pa7::mask >> pa7::from));
+
+    pa7::set(pa7::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(pa7::get(pa7::mask) == (pa7::mask >> pa7::from));
 }
 
-TEST_CASE("test_ia32_pat_pa7")
-{
-    MockRepository mocks;
-    setup_intrinsics(mocks);
-
-    msrs::ia32_pat::pa7::set(6UL);
-    CHECK(msrs::ia32_pat::pa7::get() == 6UL);
-    CHECK(msrs::ia32_pat::pa7::get(0x0600000000000000ULL) == 6UL);
-
-    msrs::ia32_pat::pa7::set(4UL);
-    CHECK(msrs::ia32_pat::pa7::get() == 4UL);
-    CHECK(msrs::ia32_pat::pa7::get(0x0400000000000000ULL) == 4UL);
-}
-
-TEST_CASE("test_ia32_pat_pa")
+TEST_CASE("ia32_pat_pa")
 {
     MockRepository mocks;
     setup_intrinsics(mocks);
@@ -603,8 +773,11 @@ TEST_CASE("ia32_mc0_ctl")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000400UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(msrs::ia32_mc0_ctl::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace msrs::ia32_mc0_ctl;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc0_status")
@@ -612,8 +785,11 @@ TEST_CASE("ia32_mc0_status")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000401UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(msrs::ia32_mc0_status::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace msrs::ia32_mc0_status;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc0_addr")
@@ -621,8 +797,11 @@ TEST_CASE("ia32_mc0_addr")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000402UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(msrs::ia32_mc0_addr::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace msrs::ia32_mc0_addr;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc0_misc")
@@ -630,8 +809,11 @@ TEST_CASE("ia32_mc0_misc")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000403UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(msrs::ia32_mc0_misc::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace msrs::ia32_mc0_misc;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc1_ctl")
@@ -639,8 +821,11 @@ TEST_CASE("ia32_mc1_ctl")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000404UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(msrs::ia32_mc1_ctl::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace msrs::ia32_mc1_ctl;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc1_status")
@@ -648,8 +833,11 @@ TEST_CASE("ia32_mc1_status")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000405UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(msrs::ia32_mc1_status::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace msrs::ia32_mc1_status;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc1_addr")
@@ -657,8 +845,11 @@ TEST_CASE("ia32_mc1_addr")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000406UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(msrs::ia32_mc1_addr::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace msrs::ia32_mc1_addr;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc1_misc")
@@ -666,8 +857,11 @@ TEST_CASE("ia32_mc1_misc")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000407UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(msrs::ia32_mc1_misc::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace msrs::ia32_mc1_misc;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc2_ctl")
@@ -675,8 +869,11 @@ TEST_CASE("ia32_mc2_ctl")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000408UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(msrs::ia32_mc2_ctl::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace msrs::ia32_mc2_ctl;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc2_status")
@@ -684,8 +881,11 @@ TEST_CASE("ia32_mc2_status")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000409UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(msrs::ia32_mc2_status::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace msrs::ia32_mc2_status;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc2_addr")
@@ -693,8 +893,11 @@ TEST_CASE("ia32_mc2_addr")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000040AUL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(msrs::ia32_mc2_addr::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace msrs::ia32_mc2_addr;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc2_misc")
@@ -702,8 +905,11 @@ TEST_CASE("ia32_mc2_misc")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000040BUL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(msrs::ia32_mc2_misc::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace msrs::ia32_mc2_misc;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc3_ctl")
@@ -711,8 +917,11 @@ TEST_CASE("ia32_mc3_ctl")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000040CUL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(msrs::ia32_mc3_ctl::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace msrs::ia32_mc3_ctl;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc3_status")
@@ -720,8 +929,11 @@ TEST_CASE("ia32_mc3_status")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000040DUL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(msrs::ia32_mc3_status::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace msrs::ia32_mc3_status;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc3_addr")
@@ -729,8 +941,11 @@ TEST_CASE("ia32_mc3_addr")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000040EUL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(msrs::ia32_mc3_addr::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace msrs::ia32_mc3_addr;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc3_misc")
@@ -738,8 +953,11 @@ TEST_CASE("ia32_mc3_misc")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000040FUL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(msrs::ia32_mc3_misc::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace msrs::ia32_mc3_misc;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc4_ctl")
@@ -747,8 +965,11 @@ TEST_CASE("ia32_mc4_ctl")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000410UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(msrs::ia32_mc4_ctl::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace msrs::ia32_mc4_ctl;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc4_status")
@@ -756,8 +977,11 @@ TEST_CASE("ia32_mc4_status")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000411UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(msrs::ia32_mc4_status::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace msrs::ia32_mc4_status;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc4_addr")
@@ -765,8 +989,11 @@ TEST_CASE("ia32_mc4_addr")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000412UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(msrs::ia32_mc4_addr::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace msrs::ia32_mc4_addr;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc4_misc")
@@ -774,8 +1001,11 @@ TEST_CASE("ia32_mc4_misc")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000413UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(msrs::ia32_mc4_misc::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace msrs::ia32_mc4_misc;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc5_ctl")
@@ -783,8 +1013,11 @@ TEST_CASE("ia32_mc5_ctl")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000414UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(msrs::ia32_mc5_ctl::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace msrs::ia32_mc5_ctl;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc5_status")
@@ -792,8 +1025,11 @@ TEST_CASE("ia32_mc5_status")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000415UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(msrs::ia32_mc5_status::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace msrs::ia32_mc5_status;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc5_addr")
@@ -801,8 +1037,11 @@ TEST_CASE("ia32_mc5_addr")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000416UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(msrs::ia32_mc5_addr::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace msrs::ia32_mc5_addr;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc5_misc")
@@ -810,8 +1049,11 @@ TEST_CASE("ia32_mc5_misc")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000417UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(msrs::ia32_mc5_misc::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace msrs::ia32_mc5_misc;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_star")
@@ -819,8 +1061,11 @@ TEST_CASE("ia32_star")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    msrs::ia32_star::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(msrs::ia32_star::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace msrs::ia32_star;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_lstar")
@@ -828,8 +1073,11 @@ TEST_CASE("ia32_lstar")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    msrs::ia32_lstar::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(msrs::ia32_lstar::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace msrs::ia32_lstar;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_fmask")
@@ -837,8 +1085,11 @@ TEST_CASE("ia32_fmask")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    msrs::ia32_fmask::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(msrs::ia32_fmask::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace msrs::ia32_fmask;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_kernel_gs_base")
@@ -846,8 +1097,11 @@ TEST_CASE("ia32_kernel_gs_base")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    msrs::ia32_kernel_gs_base::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(msrs::ia32_kernel_gs_base::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace msrs::ia32_kernel_gs_base;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_tsc_aux")
@@ -855,8 +1109,11 @@ TEST_CASE("ia32_tsc_aux")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    msrs::ia32_tsc_aux::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(msrs::ia32_tsc_aux::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace msrs::ia32_tsc_aux;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_tsc_aux_aux")
@@ -864,8 +1121,13 @@ TEST_CASE("ia32_tsc_aux_aux")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    msrs::ia32_tsc_aux::aux::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(msrs::ia32_tsc_aux::aux::get() == 0x00000000FFFFFFFFULL);
+    using namespace msrs::ia32_tsc_aux;
+
+    aux::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(aux::get() == (aux::mask >> aux::from));
+
+    aux::set(aux::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(aux::get(aux::mask) == (aux::mask >> aux::from));
 }
 
 #endif

@@ -72,25 +72,29 @@ TEST_CASE("vmcs_virtual_processor_identifier")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace vmcs::virtual_processor_identifier;
+
     g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] = msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask << 32;
     g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = msrs::ia32_vmx_procbased_ctls2::enable_vpid::mask << 32;
-    CHECK(vmcs::virtual_processor_identifier::exists());
+    CHECK(exists());
 
-    vmcs::virtual_processor_identifier::set(100UL);
-    CHECK(vmcs::virtual_processor_identifier::get() == 100UL);
+    set(100UL);
+    CHECK(get() == 100UL);
 
-    vmcs::virtual_processor_identifier::set_if_exists(200UL);
-    CHECK(vmcs::virtual_processor_identifier::get_if_exists() == 200UL);
+    set_if_exists(200UL);
+    CHECK(get_if_exists() == 200UL);
 
     g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = 0x0;
-    CHECK_FALSE(vmcs::virtual_processor_identifier::exists());
-    CHECK_THROWS(vmcs::virtual_processor_identifier::set(1UL));
-    CHECK_THROWS(vmcs::virtual_processor_identifier::get());
-    CHECK_NOTHROW(vmcs::virtual_processor_identifier::set_if_exists(1UL));
-    CHECK_NOTHROW(vmcs::virtual_processor_identifier::get_if_exists());
+    CHECK_FALSE(exists());
+    CHECK_THROWS(set(1UL));
+    CHECK_THROWS(get());
+    CHECK_NOTHROW(set_if_exists(1UL));
+    CHECK_NOTHROW(get_if_exists());
 
     g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = msrs::ia32_vmx_procbased_ctls2::enable_vpid::mask << 32;
-    CHECK(vmcs::virtual_processor_identifier::get() == 200UL);
+    CHECK(get() == 200UL);
+
+    dump(0);
 }
 
 TEST_CASE("vmcs_posted_interrupt_notification_vector")
@@ -98,18 +102,22 @@ TEST_CASE("vmcs_posted_interrupt_notification_vector")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace vmcs::posted_interrupt_notification_vector;
+
     g_msrs[msrs::ia32_vmx_true_pinbased_ctls::addr] =
         msrs::ia32_vmx_true_pinbased_ctls::process_posted_interrupts::mask << 32;
-    CHECK(vmcs::posted_interrupt_notification_vector::exists());
+    CHECK(exists());
 
-    vmcs::posted_interrupt_notification_vector::set(100UL);
-    CHECK(vmcs::posted_interrupt_notification_vector::get() == 100UL);
+    set(100UL);
+    CHECK(get() == 100UL);
 
-    vmcs::posted_interrupt_notification_vector::set_if_exists(200UL);
-    CHECK(vmcs::posted_interrupt_notification_vector::get_if_exists() == 200UL);
+    set_if_exists(200UL);
+    CHECK(get_if_exists() == 200UL);
 
     g_msrs[msrs::ia32_vmx_true_pinbased_ctls::addr] = 0x0;
-    CHECK_FALSE(vmcs::posted_interrupt_notification_vector::exists());
+    CHECK_FALSE(exists());
+
+    dump(0);
 }
 
 TEST_CASE("vmcs_eptp_index")
@@ -117,28 +125,32 @@ TEST_CASE("vmcs_eptp_index")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace vmcs::eptp_index;
+
     g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] =
         msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask << 32;
     g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] =
         msrs::ia32_vmx_procbased_ctls2::ept_violation_ve::mask << 32;
-    CHECK(vmcs::eptp_index::exists());
+    CHECK(exists());
 
-    vmcs::eptp_index::set(100UL);
-    CHECK(vmcs::eptp_index::get() == 100UL);
+    set(100UL);
+    CHECK(get() == 100UL);
 
-    vmcs::eptp_index::set_if_exists(200UL);
-    CHECK(vmcs::eptp_index::get_if_exists() == 200UL);
+    set_if_exists(200UL);
+    CHECK(get_if_exists() == 200UL);
 
     g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = 0x0;
-    CHECK_FALSE(vmcs::eptp_index::exists());
-    CHECK_THROWS(vmcs::eptp_index::set(1UL));
-    CHECK_THROWS(vmcs::eptp_index::get());
-    CHECK_NOTHROW(vmcs::eptp_index::set_if_exists(1UL));
-    CHECK_NOTHROW(vmcs::eptp_index::get_if_exists());
+    CHECK_FALSE(exists());
+    CHECK_THROWS(set(1UL));
+    CHECK_THROWS(get());
+    CHECK_NOTHROW(set_if_exists(1UL));
+    CHECK_NOTHROW(get_if_exists());
 
     g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] =
         msrs::ia32_vmx_procbased_ctls2::ept_violation_ve::mask << 32;
-    CHECK(vmcs::eptp_index::get() == 200UL);
+    CHECK(get() == 200UL);
+
+    dump(0);
 }
 
 #endif

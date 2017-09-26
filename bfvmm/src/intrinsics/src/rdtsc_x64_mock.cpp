@@ -28,12 +28,12 @@ extern "C" uint64_t
 _read_tsc(void) noexcept
 {
     std::cerr << __BFFUNC__ << " called" << '\n';
-    abort();
+    return 0;
 }
 
 extern "C" uint64_t
 _read_tscp(void) noexcept
 {
     std::cerr << __BFFUNC__ << " called" << '\n';
-    abort();
+    return 0;
 }

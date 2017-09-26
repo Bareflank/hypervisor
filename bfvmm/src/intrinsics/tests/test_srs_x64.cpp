@@ -25,16 +25,21 @@
 
 #ifdef _HIPPOMOCKS__ENABLE_CFUNC_MOCKING_SUPPORT
 
+TEST_CASE("test name goes here")
+{
+    CHECK(true);
+}
+
 using namespace x64;
 
-segment_register::type g_es = 0;
-segment_register::type g_cs = 0;
-segment_register::type g_ss = 0;
-segment_register::type g_ds = 0;
-segment_register::type g_fs = 0;
-segment_register::type g_gs = 0;
-segment_register::type g_ldtr = 0;
-segment_register::type g_tr = 0;
+segment_register::value_type g_es = 0;
+segment_register::value_type g_cs = 0;
+segment_register::value_type g_ss = 0;
+segment_register::value_type g_ds = 0;
+segment_register::value_type g_fs = 0;
+segment_register::value_type g_gs = 0;
+segment_register::value_type g_ldtr = 0;
+segment_register::value_type g_tr = 0;
 
 uint16_t
 test_read_es() noexcept
@@ -126,11 +131,11 @@ TEST_CASE("srs_x64_es")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    segment_register::es::set(0xFFFFU);
-    CHECK(segment_register::es::get() == 0xFFFFU);
+    using namespace segment_register::es;
 
-    segment_register::es::set(0x0U);
-    CHECK(segment_register::es::get() == 0x0U);
+    set(0xFFFFU);
+    CHECK(get() == 0xFFFFU);
+    dump(0);
 }
 
 TEST_CASE("srs_x64_es_rpl")
@@ -138,17 +143,13 @@ TEST_CASE("srs_x64_es_rpl")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    segment_register::es::rpl::set(0x3U);
-    CHECK(segment_register::es::rpl::get() == 0x3U);
+    using namespace segment_register::es;
 
-    segment_register::es::rpl::set(0x2U);
-    CHECK(segment_register::es::rpl::get() == 0x2U);
+    rpl::set(0xFFFFULL);
+    CHECK(rpl::get() == (rpl::mask >> rpl::from));
 
-    segment_register::es::rpl::set(0x1U);
-    CHECK(segment_register::es::rpl::get() == 0x1U);
-
-    segment_register::es::rpl::set(0x0U);
-    CHECK(segment_register::es::rpl::get() == 0x0U);
+    rpl::set(rpl::mask, 0xFFFFULL);
+    CHECK(rpl::get(rpl::mask) == (rpl::mask >> rpl::from));
 }
 
 TEST_CASE("srs_x64_es_ti")
@@ -156,11 +157,17 @@ TEST_CASE("srs_x64_es_ti")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    segment_register::es::ti::set(true);
-    CHECK(segment_register::es::ti::get());
+    using namespace segment_register::es;
 
-    segment_register::es::ti::set(false);
-    CHECK_FALSE(segment_register::es::ti::get());
+    ti::enable();
+    CHECK(ti::is_enabled());
+    ti::disable();
+    CHECK(ti::is_disabled());
+
+    ti::enable(ti::mask);
+    CHECK(ti::is_enabled(ti::mask));
+    ti::disable(0x0);
+    CHECK(ti::is_disabled(0x0));
 }
 
 TEST_CASE("srs_x64_es_index")
@@ -168,17 +175,13 @@ TEST_CASE("srs_x64_es_index")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    segment_register::es::index::set(0x3U);
-    CHECK(segment_register::es::index::get() == 0x3U);
+    using namespace segment_register::es;
 
-    segment_register::es::index::set(0x2U);
-    CHECK(segment_register::es::index::get() == 0x2U);
+    index::set(0xFFFFULL);
+    CHECK(index::get() == (index::mask >> index::from));
 
-    segment_register::es::index::set(0x1U);
-    CHECK(segment_register::es::index::get() == 0x1U);
-
-    segment_register::es::index::set(0x0U);
-    CHECK(segment_register::es::index::get() == 0x0U);
+    index::set(index::mask, 0xFFFFULL);
+    CHECK(index::get(index::mask) == (index::mask >> index::from));
 }
 
 TEST_CASE("srs_x64_cs")
@@ -186,11 +189,11 @@ TEST_CASE("srs_x64_cs")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    segment_register::cs::set(0xFFFFU);
-    CHECK(segment_register::cs::get() == 0xFFFFU);
+    using namespace segment_register::cs;
 
-    segment_register::cs::set(0x0U);
-    CHECK(segment_register::cs::get() == 0x0U);
+    set(0xFFFFU);
+    CHECK(get() == 0xFFFFU);
+    dump(0);
 }
 
 TEST_CASE("srs_x64_cs_rpl")
@@ -198,17 +201,13 @@ TEST_CASE("srs_x64_cs_rpl")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    segment_register::cs::rpl::set(0x3U);
-    CHECK(segment_register::cs::rpl::get() == 0x3U);
+    using namespace segment_register::cs;
 
-    segment_register::cs::rpl::set(0x2U);
-    CHECK(segment_register::cs::rpl::get() == 0x2U);
+    rpl::set(0xFFFFULL);
+    CHECK(rpl::get() == (rpl::mask >> rpl::from));
 
-    segment_register::cs::rpl::set(0x1U);
-    CHECK(segment_register::cs::rpl::get() == 0x1U);
-
-    segment_register::cs::rpl::set(0x0U);
-    CHECK(segment_register::cs::rpl::get() == 0x0U);
+    rpl::set(rpl::mask, 0xFFFFULL);
+    CHECK(rpl::get(rpl::mask) == (rpl::mask >> rpl::from));
 }
 
 TEST_CASE("srs_x64_cs_ti")
@@ -216,11 +215,17 @@ TEST_CASE("srs_x64_cs_ti")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    segment_register::cs::ti::set(true);
-    CHECK(segment_register::cs::ti::get());
+    using namespace segment_register::cs;
 
-    segment_register::cs::ti::set(false);
-    CHECK_FALSE(segment_register::cs::ti::get());
+    ti::enable();
+    CHECK(ti::is_enabled());
+    ti::disable();
+    CHECK(ti::is_disabled());
+
+    ti::enable(ti::mask);
+    CHECK(ti::is_enabled(ti::mask));
+    ti::disable(0x0);
+    CHECK(ti::is_disabled(0x0));
 }
 
 TEST_CASE("srs_x64_cs_index")
@@ -228,17 +233,13 @@ TEST_CASE("srs_x64_cs_index")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    segment_register::cs::index::set(0x3U);
-    CHECK(segment_register::cs::index::get() == 0x3U);
+    using namespace segment_register::cs;
 
-    segment_register::cs::index::set(0x2U);
-    CHECK(segment_register::cs::index::get() == 0x2U);
+    index::set(0xFFFFULL);
+    CHECK(index::get() == (index::mask >> index::from));
 
-    segment_register::cs::index::set(0x1U);
-    CHECK(segment_register::cs::index::get() == 0x1U);
-
-    segment_register::cs::index::set(0x0U);
-    CHECK(segment_register::cs::index::get() == 0x0U);
+    index::set(index::mask, 0xFFFFULL);
+    CHECK(index::get(index::mask) == (index::mask >> index::from));
 }
 
 TEST_CASE("srs_x64_ss")
@@ -246,11 +247,11 @@ TEST_CASE("srs_x64_ss")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    segment_register::ss::set(0xFFFFU);
-    CHECK(segment_register::ss::get() == 0xFFFFU);
+    using namespace segment_register::ss;
 
-    segment_register::ss::set(0x0U);
-    CHECK(segment_register::ss::get() == 0x0U);
+    set(0xFFFFU);
+    CHECK(get() == 0xFFFFU);
+    dump(0);
 }
 
 TEST_CASE("srs_x64_ss_rpl")
@@ -258,17 +259,13 @@ TEST_CASE("srs_x64_ss_rpl")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    segment_register::ss::rpl::set(0x3U);
-    CHECK(segment_register::ss::rpl::get() == 0x3U);
+    using namespace segment_register::ss;
 
-    segment_register::ss::rpl::set(0x2U);
-    CHECK(segment_register::ss::rpl::get() == 0x2U);
+    rpl::set(0xFFFFULL);
+    CHECK(rpl::get() == (rpl::mask >> rpl::from));
 
-    segment_register::ss::rpl::set(0x1U);
-    CHECK(segment_register::ss::rpl::get() == 0x1U);
-
-    segment_register::ss::rpl::set(0x0U);
-    CHECK(segment_register::ss::rpl::get() == 0x0U);
+    rpl::set(rpl::mask, 0xFFFFULL);
+    CHECK(rpl::get(rpl::mask) == (rpl::mask >> rpl::from));
 }
 
 TEST_CASE("srs_x64_ss_ti")
@@ -276,11 +273,17 @@ TEST_CASE("srs_x64_ss_ti")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    segment_register::ss::ti::set(true);
-    CHECK(segment_register::ss::ti::get());
+    using namespace segment_register::ss;
 
-    segment_register::ss::ti::set(false);
-    CHECK_FALSE(segment_register::ss::ti::get());
+    ti::enable();
+    CHECK(ti::is_enabled());
+    ti::disable();
+    CHECK(ti::is_disabled());
+
+    ti::enable(ti::mask);
+    CHECK(ti::is_enabled(ti::mask));
+    ti::disable(0x0);
+    CHECK(ti::is_disabled(0x0));
 }
 
 TEST_CASE("srs_x64_ss_index")
@@ -288,17 +291,13 @@ TEST_CASE("srs_x64_ss_index")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    segment_register::ss::index::set(0x3U);
-    CHECK(segment_register::ss::index::get() == 0x3U);
+    using namespace segment_register::ss;
 
-    segment_register::ss::index::set(0x2U);
-    CHECK(segment_register::ss::index::get() == 0x2U);
+    index::set(0xFFFFULL);
+    CHECK(index::get() == (index::mask >> index::from));
 
-    segment_register::ss::index::set(0x1U);
-    CHECK(segment_register::ss::index::get() == 0x1U);
-
-    segment_register::ss::index::set(0x0U);
-    CHECK(segment_register::ss::index::get() == 0x0U);
+    index::set(index::mask, 0xFFFFULL);
+    CHECK(index::get(index::mask) == (index::mask >> index::from));
 }
 
 TEST_CASE("srs_x64_ds")
@@ -306,11 +305,11 @@ TEST_CASE("srs_x64_ds")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    segment_register::ds::set(0xFFFFU);
-    CHECK(segment_register::ds::get() == 0xFFFFU);
+    using namespace segment_register::ds;
 
-    segment_register::ds::set(0x0U);
-    CHECK(segment_register::ds::get() == 0x0U);
+    set(0xFFFFU);
+    CHECK(get() == 0xFFFFU);
+    dump(0);
 }
 
 TEST_CASE("srs_x64_ds_rpl")
@@ -318,17 +317,13 @@ TEST_CASE("srs_x64_ds_rpl")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    segment_register::ds::rpl::set(0x3U);
-    CHECK(segment_register::ds::rpl::get() == 0x3U);
+    using namespace segment_register::ds;
 
-    segment_register::ds::rpl::set(0x2U);
-    CHECK(segment_register::ds::rpl::get() == 0x2U);
+    rpl::set(0xFFFFULL);
+    CHECK(rpl::get() == (rpl::mask >> rpl::from));
 
-    segment_register::ds::rpl::set(0x1U);
-    CHECK(segment_register::ds::rpl::get() == 0x1U);
-
-    segment_register::ds::rpl::set(0x0U);
-    CHECK(segment_register::ds::rpl::get() == 0x0U);
+    rpl::set(rpl::mask, 0xFFFFULL);
+    CHECK(rpl::get(rpl::mask) == (rpl::mask >> rpl::from));
 }
 
 TEST_CASE("srs_x64_ds_ti")
@@ -336,11 +331,17 @@ TEST_CASE("srs_x64_ds_ti")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    segment_register::ds::ti::set(true);
-    CHECK(segment_register::ds::ti::get());
+    using namespace segment_register::ds;
 
-    segment_register::ds::ti::set(false);
-    CHECK_FALSE(segment_register::ds::ti::get());
+    ti::enable();
+    CHECK(ti::is_enabled());
+    ti::disable();
+    CHECK(ti::is_disabled());
+
+    ti::enable(ti::mask);
+    CHECK(ti::is_enabled(ti::mask));
+    ti::disable(0x0);
+    CHECK(ti::is_disabled(0x0));
 }
 
 TEST_CASE("srs_x64_ds_index")
@@ -348,17 +349,13 @@ TEST_CASE("srs_x64_ds_index")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    segment_register::ds::index::set(0x3U);
-    CHECK(segment_register::ds::index::get() == 0x3U);
+    using namespace segment_register::ds;
 
-    segment_register::ds::index::set(0x2U);
-    CHECK(segment_register::ds::index::get() == 0x2U);
+    index::set(0xFFFFULL);
+    CHECK(index::get() == (index::mask >> index::from));
 
-    segment_register::ds::index::set(0x1U);
-    CHECK(segment_register::ds::index::get() == 0x1U);
-
-    segment_register::ds::index::set(0x0U);
-    CHECK(segment_register::ds::index::get() == 0x0U);
+    index::set(index::mask, 0xFFFFULL);
+    CHECK(index::get(index::mask) == (index::mask >> index::from));
 }
 
 TEST_CASE("srs_x64_fs")
@@ -366,11 +363,11 @@ TEST_CASE("srs_x64_fs")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    segment_register::fs::set(0xFFFFU);
-    CHECK(segment_register::fs::get() == 0xFFFFU);
+    using namespace segment_register::fs;
 
-    segment_register::fs::set(0x0U);
-    CHECK(segment_register::fs::get() == 0x0U);
+    set(0xFFFFU);
+    CHECK(get() == 0xFFFFU);
+    dump(0);
 }
 
 TEST_CASE("srs_x64_fs_rpl")
@@ -378,17 +375,13 @@ TEST_CASE("srs_x64_fs_rpl")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    segment_register::fs::rpl::set(0x3U);
-    CHECK(segment_register::fs::rpl::get() == 0x3U);
+    using namespace segment_register::fs;
 
-    segment_register::fs::rpl::set(0x2U);
-    CHECK(segment_register::fs::rpl::get() == 0x2U);
+    rpl::set(0xFFFFULL);
+    CHECK(rpl::get() == (rpl::mask >> rpl::from));
 
-    segment_register::fs::rpl::set(0x1U);
-    CHECK(segment_register::fs::rpl::get() == 0x1U);
-
-    segment_register::fs::rpl::set(0x0U);
-    CHECK(segment_register::fs::rpl::get() == 0x0U);
+    rpl::set(rpl::mask, 0xFFFFULL);
+    CHECK(rpl::get(rpl::mask) == (rpl::mask >> rpl::from));
 }
 
 TEST_CASE("srs_x64_fs_ti")
@@ -396,11 +389,17 @@ TEST_CASE("srs_x64_fs_ti")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    segment_register::fs::ti::set(true);
-    CHECK(segment_register::fs::ti::get());
+    using namespace segment_register::fs;
 
-    segment_register::fs::ti::set(false);
-    CHECK_FALSE(segment_register::fs::ti::get());
+    ti::enable();
+    CHECK(ti::is_enabled());
+    ti::disable();
+    CHECK(ti::is_disabled());
+
+    ti::enable(ti::mask);
+    CHECK(ti::is_enabled(ti::mask));
+    ti::disable(0x0);
+    CHECK(ti::is_disabled(0x0));
 }
 
 TEST_CASE("srs_x64_fs_index")
@@ -408,17 +407,13 @@ TEST_CASE("srs_x64_fs_index")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    segment_register::fs::index::set(0x3U);
-    CHECK(segment_register::fs::index::get() == 0x3U);
+    using namespace segment_register::fs;
 
-    segment_register::fs::index::set(0x2U);
-    CHECK(segment_register::fs::index::get() == 0x2U);
+    index::set(0xFFFFULL);
+    CHECK(index::get() == (index::mask >> index::from));
 
-    segment_register::fs::index::set(0x1U);
-    CHECK(segment_register::fs::index::get() == 0x1U);
-
-    segment_register::fs::index::set(0x0U);
-    CHECK(segment_register::fs::index::get() == 0x0U);
+    index::set(index::mask, 0xFFFFULL);
+    CHECK(index::get(index::mask) == (index::mask >> index::from));
 }
 
 TEST_CASE("srs_x64_gs")
@@ -426,11 +421,11 @@ TEST_CASE("srs_x64_gs")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    segment_register::gs::set(0xFFFFU);
-    CHECK(segment_register::gs::get() == 0xFFFFU);
+    using namespace segment_register::gs;
 
-    segment_register::gs::set(0x0U);
-    CHECK(segment_register::gs::get() == 0x0U);
+    set(0xFFFFU);
+    CHECK(get() == 0xFFFFU);
+    dump(0);
 }
 
 TEST_CASE("srs_x64_gs_rpl")
@@ -438,17 +433,13 @@ TEST_CASE("srs_x64_gs_rpl")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    segment_register::gs::rpl::set(0x3U);
-    CHECK(segment_register::gs::rpl::get() == 0x3U);
+    using namespace segment_register::gs;
 
-    segment_register::gs::rpl::set(0x2U);
-    CHECK(segment_register::gs::rpl::get() == 0x2U);
+    rpl::set(0xFFFFULL);
+    CHECK(rpl::get() == (rpl::mask >> rpl::from));
 
-    segment_register::gs::rpl::set(0x1U);
-    CHECK(segment_register::gs::rpl::get() == 0x1U);
-
-    segment_register::gs::rpl::set(0x0U);
-    CHECK(segment_register::gs::rpl::get() == 0x0U);
+    rpl::set(rpl::mask, 0xFFFFULL);
+    CHECK(rpl::get(rpl::mask) == (rpl::mask >> rpl::from));
 }
 
 TEST_CASE("srs_x64_gs_ti")
@@ -456,11 +447,17 @@ TEST_CASE("srs_x64_gs_ti")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    segment_register::gs::ti::set(true);
-    CHECK(segment_register::gs::ti::get());
+    using namespace segment_register::gs;
 
-    segment_register::gs::ti::set(false);
-    CHECK_FALSE(segment_register::gs::ti::get());
+    ti::enable();
+    CHECK(ti::is_enabled());
+    ti::disable();
+    CHECK(ti::is_disabled());
+
+    ti::enable(ti::mask);
+    CHECK(ti::is_enabled(ti::mask));
+    ti::disable(0x0);
+    CHECK(ti::is_disabled(0x0));
 }
 
 TEST_CASE("srs_x64_gs_index")
@@ -468,17 +465,13 @@ TEST_CASE("srs_x64_gs_index")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    segment_register::gs::index::set(0x3U);
-    CHECK(segment_register::gs::index::get() == 0x3U);
+    using namespace segment_register::gs;
 
-    segment_register::gs::index::set(0x2U);
-    CHECK(segment_register::gs::index::get() == 0x2U);
+    index::set(0xFFFFULL);
+    CHECK(index::get() == (index::mask >> index::from));
 
-    segment_register::gs::index::set(0x1U);
-    CHECK(segment_register::gs::index::get() == 0x1U);
-
-    segment_register::gs::index::set(0x0U);
-    CHECK(segment_register::gs::index::get() == 0x0U);
+    index::set(index::mask, 0xFFFFULL);
+    CHECK(index::get(index::mask) == (index::mask >> index::from));
 }
 
 TEST_CASE("srs_x64_ldtr")
@@ -486,11 +479,11 @@ TEST_CASE("srs_x64_ldtr")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    segment_register::ldtr::set(0xFFFFU);
-    CHECK(segment_register::ldtr::get() == 0xFFFFU);
+    using namespace segment_register::ldtr;
 
-    segment_register::ldtr::set(0x0U);
-    CHECK(segment_register::ldtr::get() == 0x0U);
+    set(0xFFFFU);
+    CHECK(get() == 0xFFFFU);
+    dump(0);
 }
 
 TEST_CASE("srs_x64_ldtr_rpl")
@@ -498,17 +491,13 @@ TEST_CASE("srs_x64_ldtr_rpl")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    segment_register::ldtr::rpl::set(0x3U);
-    CHECK(segment_register::ldtr::rpl::get() == 0x3U);
+    using namespace segment_register::ldtr;
 
-    segment_register::ldtr::rpl::set(0x2U);
-    CHECK(segment_register::ldtr::rpl::get() == 0x2U);
+    rpl::set(0xFFFFULL);
+    CHECK(rpl::get() == (rpl::mask >> rpl::from));
 
-    segment_register::ldtr::rpl::set(0x1U);
-    CHECK(segment_register::ldtr::rpl::get() == 0x1U);
-
-    segment_register::ldtr::rpl::set(0x0U);
-    CHECK(segment_register::ldtr::rpl::get() == 0x0U);
+    rpl::set(rpl::mask, 0xFFFFULL);
+    CHECK(rpl::get(rpl::mask) == (rpl::mask >> rpl::from));
 }
 
 TEST_CASE("srs_x64_ldtr_ti")
@@ -516,11 +505,17 @@ TEST_CASE("srs_x64_ldtr_ti")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    segment_register::ldtr::ti::set(true);
-    CHECK(segment_register::ldtr::ti::get());
+    using namespace segment_register::ldtr;
 
-    segment_register::ldtr::ti::set(false);
-    CHECK_FALSE(segment_register::ldtr::ti::get());
+    ti::enable();
+    CHECK(ti::is_enabled());
+    ti::disable();
+    CHECK(ti::is_disabled());
+
+    ti::enable(ti::mask);
+    CHECK(ti::is_enabled(ti::mask));
+    ti::disable(0x0);
+    CHECK(ti::is_disabled(0x0));
 }
 
 TEST_CASE("srs_x64_ldtr_index")
@@ -528,17 +523,13 @@ TEST_CASE("srs_x64_ldtr_index")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    segment_register::ldtr::index::set(0x3U);
-    CHECK(segment_register::ldtr::index::get() == 0x3U);
+    using namespace segment_register::ldtr;
 
-    segment_register::ldtr::index::set(0x2U);
-    CHECK(segment_register::ldtr::index::get() == 0x2U);
+    index::set(0xFFFFULL);
+    CHECK(index::get() == (index::mask >> index::from));
 
-    segment_register::ldtr::index::set(0x1U);
-    CHECK(segment_register::ldtr::index::get() == 0x1U);
-
-    segment_register::ldtr::index::set(0x0U);
-    CHECK(segment_register::ldtr::index::get() == 0x0U);
+    index::set(index::mask, 0xFFFFULL);
+    CHECK(index::get(index::mask) == (index::mask >> index::from));
 }
 
 TEST_CASE("srs_x64_tr")
@@ -546,11 +537,11 @@ TEST_CASE("srs_x64_tr")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    segment_register::tr::set(0xFFFFU);
-    CHECK(segment_register::tr::get() == 0xFFFFU);
+    using namespace segment_register::tr;
 
-    segment_register::tr::set(0x0U);
-    CHECK(segment_register::tr::get() == 0x0U);
+    set(0xFFFFU);
+    CHECK(get() == 0xFFFFU);
+    dump(0);
 }
 
 TEST_CASE("srs_x64_tr_rpl")
@@ -558,17 +549,13 @@ TEST_CASE("srs_x64_tr_rpl")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    segment_register::tr::rpl::set(0x3U);
-    CHECK(segment_register::tr::rpl::get() == 0x3U);
+    using namespace segment_register::tr;
 
-    segment_register::tr::rpl::set(0x2U);
-    CHECK(segment_register::tr::rpl::get() == 0x2U);
+    rpl::set(0xFFFFULL);
+    CHECK(rpl::get() == (rpl::mask >> rpl::from));
 
-    segment_register::tr::rpl::set(0x1U);
-    CHECK(segment_register::tr::rpl::get() == 0x1U);
-
-    segment_register::tr::rpl::set(0x0U);
-    CHECK(segment_register::tr::rpl::get() == 0x0U);
+    rpl::set(rpl::mask, 0xFFFFULL);
+    CHECK(rpl::get(rpl::mask) == (rpl::mask >> rpl::from));
 }
 
 TEST_CASE("srs_x64_tr_ti")
@@ -576,11 +563,17 @@ TEST_CASE("srs_x64_tr_ti")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    segment_register::tr::ti::set(true);
-    CHECK(segment_register::tr::ti::get());
+    using namespace segment_register::tr;
 
-    segment_register::tr::ti::set(false);
-    CHECK_FALSE(segment_register::tr::ti::get());
+    ti::enable();
+    CHECK(ti::is_enabled());
+    ti::disable();
+    CHECK(ti::is_disabled());
+
+    ti::enable(ti::mask);
+    CHECK(ti::is_enabled(ti::mask));
+    ti::disable(0x0);
+    CHECK(ti::is_disabled(0x0));
 }
 
 TEST_CASE("srs_x64_tr_index")
@@ -588,17 +581,14 @@ TEST_CASE("srs_x64_tr_index")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    segment_register::tr::index::set(0x3U);
-    CHECK(segment_register::tr::index::get() == 0x3U);
+    using namespace segment_register::tr;
 
-    segment_register::tr::index::set(0x2U);
-    CHECK(segment_register::tr::index::get() == 0x2U);
+    index::set(0xFFFFULL);
+    CHECK(index::get() == (index::mask >> index::from));
 
-    segment_register::tr::index::set(0x1U);
-    CHECK(segment_register::tr::index::get() == 0x1U);
-
-    segment_register::tr::index::set(0x0U);
-    CHECK(segment_register::tr::index::get() == 0x0U);
+    index::set(index::mask, 0xFFFFULL);
+    CHECK(index::get(index::mask) == (index::mask >> index::from));
 }
+
 
 #endif

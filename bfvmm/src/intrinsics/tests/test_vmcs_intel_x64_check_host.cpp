@@ -98,11 +98,16 @@ setup_check_host_cr0_for_unsupported_bits_paths(std::vector<struct control_flow_
     path.setup = [&] {
         host_cr0::set(0U);
         g_msrs[ia32_vmx_cr0_fixed0::addr] = 0;
+        g_msrs[ia32_vmx_cr0_fixed1::addr] = 0;
     };
     path.throws_exception = false;
     cfg.push_back(path);
 
-    path.setup = [&] { g_msrs[ia32_vmx_cr0_fixed0::addr] = 1; };
+    path.setup = [&] {
+        host_cr0::set(0xFFFFFFFFFFFFFFFFULL);
+        g_msrs[ia32_vmx_cr0_fixed0::addr] = 0x00000000FFFFFFFFULL;
+        g_msrs[ia32_vmx_cr0_fixed1::addr] = 0xFFFFFFFF00000000ULL;
+    };
     path.throws_exception = true;
     cfg.push_back(path);
 }
@@ -319,10 +324,7 @@ setup_check_host_verify_load_ia32_efer_paths(std::vector<struct control_flow_pat
     cfg.push_back(path);
 }
 
-
-static void
-setup_check_host_es_selector_rpl_ti_equal_zero_paths(std::vector<struct control_flow_path> &cfg)
-{
+static void setup_check_host_es_selector_rpl_ti_equal_zero_paths(std::vector<struct control_flow_path> &cfg) {
     path.setup = [&] { host_es_selector::set(0U); };
     path.throws_exception = false;
     cfg.push_back(path);

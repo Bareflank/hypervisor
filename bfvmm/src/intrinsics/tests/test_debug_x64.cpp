@@ -27,6 +27,11 @@
 
 using namespace x64;
 
+TEST_CASE("test name goes here")
+{
+    CHECK(true);
+}
+
 dr7::value_type g_dr7 = 0;
 
 uint64_t

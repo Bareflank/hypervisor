@@ -1905,6 +1905,12 @@ namespace serial_num
         inline void dump(int level, std::string *msg = nullptr)
         { bfdebug_nhex(level, name, get(), msg); }
     }
+
+    inline void dump(int level, std::string *msg = nullptr)
+    {
+        ecx::dump(level, msg);
+        edx::dump(level, msg);
+    }
 }
 
 namespace cache_parameters
@@ -4894,6 +4900,13 @@ namespace time_stamp_count
         inline void dump(int level, std::string *msg = nullptr)
         { bfdebug_nhex(level, name, get(), msg); }
     }
+
+    inline void dump(int level, std::string *msg = nullptr)
+    {
+        eax::dump(level, msg);
+        ebx::dump(level, msg);
+        ecx::dump(level, msg);
+    }
 }
 
 namespace processor_freq
@@ -4931,6 +4944,13 @@ namespace processor_freq
 
         inline void dump(int level, std::string *msg = nullptr)
         { bfdebug_nhex(level, name, get(), msg); }
+    }
+
+    inline void dump(int level, std::string *msg = nullptr)
+    {
+        eax::dump(level, msg);
+        ebx::dump(level, msg);
+        ecx::dump(level, msg);
     }
 }
 

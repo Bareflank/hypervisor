@@ -27,6 +27,11 @@
 
 using namespace x64;
 
+TEST_CASE("test name goes here")
+{
+    CHECK(true);
+}
+
 std::map<msrs::field_type, msrs::value_type> g_msrs;
 
 extern "C" uint64_t
@@ -58,8 +63,11 @@ TEST_CASE("ia32_monitor_filter_size")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000006UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_monitor_filter_size::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_monitor_filter_size;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_platform_id")
@@ -67,8 +75,11 @@ TEST_CASE("ia32_platform_id")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000017UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_platform_id::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_platform_id;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_platform_id_platform_id")
@@ -76,8 +87,11 @@ TEST_CASE("ia32_platform_id_platform_id")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000017UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_platform_id::platform_id::get() == 0x0000000000000007ULL);
+    using namespace intel_x64::msrs::ia32_platform_id;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(platform_id::get() == (platform_id::mask >> platform_id::from));
+    CHECK(platform_id::get(platform_id::mask) == (platform_id::mask >> platform_id::from));
 }
 
 TEST_CASE("ia32_feature_control")
@@ -85,8 +99,11 @@ TEST_CASE("ia32_feature_control")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_feature_control::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_feature_control::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_feature_control;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_feature_control_lock_bit")
@@ -94,11 +111,17 @@ TEST_CASE("ia32_feature_control_lock_bit")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_feature_control::lock_bit::set(true);
-    CHECK(intel_x64::msrs::ia32_feature_control::lock_bit::get());
+    using namespace intel_x64::msrs::ia32_feature_control;
 
-    intel_x64::msrs::ia32_feature_control::lock_bit::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_feature_control::lock_bit::get());
+    lock_bit::enable();
+    CHECK(lock_bit::is_enabled());
+    lock_bit::disable();
+    CHECK(lock_bit::is_disabled());
+
+    lock_bit::enable(lock_bit::mask);
+    CHECK(lock_bit::is_enabled(lock_bit::mask));
+    lock_bit::disable(0x0);
+    CHECK(lock_bit::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_feature_control_enable_vmx_inside_smx")
@@ -106,11 +129,17 @@ TEST_CASE("ia32_feature_control_enable_vmx_inside_smx")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_feature_control::enable_vmx_inside_smx::set(true);
-    CHECK(intel_x64::msrs::ia32_feature_control::enable_vmx_inside_smx::get());
+    using namespace intel_x64::msrs::ia32_feature_control;
 
-    intel_x64::msrs::ia32_feature_control::enable_vmx_inside_smx::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_feature_control::enable_vmx_inside_smx::get());
+    enable_vmx_inside_smx::enable();
+    CHECK(enable_vmx_inside_smx::is_enabled());
+    enable_vmx_inside_smx::disable();
+    CHECK(enable_vmx_inside_smx::is_disabled());
+
+    enable_vmx_inside_smx::enable(enable_vmx_inside_smx::mask);
+    CHECK(enable_vmx_inside_smx::is_enabled(enable_vmx_inside_smx::mask));
+    enable_vmx_inside_smx::disable(0x0);
+    CHECK(enable_vmx_inside_smx::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_feature_control_enable_vmx_outside_smx")
@@ -118,11 +147,17 @@ TEST_CASE("ia32_feature_control_enable_vmx_outside_smx")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_feature_control::enable_vmx_outside_smx::set(true);
-    CHECK(intel_x64::msrs::ia32_feature_control::enable_vmx_outside_smx::get());
+    using namespace intel_x64::msrs::ia32_feature_control;
 
-    intel_x64::msrs::ia32_feature_control::enable_vmx_outside_smx::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_feature_control::enable_vmx_outside_smx::get());
+    enable_vmx_outside_smx::enable();
+    CHECK(enable_vmx_outside_smx::is_enabled());
+    enable_vmx_outside_smx::disable();
+    CHECK(enable_vmx_outside_smx::is_disabled());
+
+    enable_vmx_outside_smx::enable(enable_vmx_outside_smx::mask);
+    CHECK(enable_vmx_outside_smx::is_enabled(enable_vmx_outside_smx::mask));
+    enable_vmx_outside_smx::disable(0x0);
+    CHECK(enable_vmx_outside_smx::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_feature_control_senter_local_function_enable")
@@ -130,11 +165,13 @@ TEST_CASE("ia32_feature_control_senter_local_function_enable")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_feature_control::senter_local_function_enable::set(true);
-    CHECK(intel_x64::msrs::ia32_feature_control::senter_local_function_enable::get());
+    using namespace intel_x64::msrs::ia32_feature_control;
 
-    intel_x64::msrs::ia32_feature_control::senter_local_function_enable::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_feature_control::senter_local_function_enable::get());
+    senter_local_function_enable::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(senter_local_function_enable::get() == (senter_local_function_enable::mask >> senter_local_function_enable::from));
+
+    senter_local_function_enable::set(senter_local_function_enable::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(senter_local_function_enable::get(senter_local_function_enable::mask) == (senter_local_function_enable::mask >> senter_local_function_enable::from));
 }
 
 TEST_CASE("ia32_feature_control_senter_global_function_enables")
@@ -142,11 +179,17 @@ TEST_CASE("ia32_feature_control_senter_global_function_enables")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_feature_control::senter_global_function_enables::set(true);
-    CHECK(intel_x64::msrs::ia32_feature_control::senter_global_function_enables::get());
+    using namespace intel_x64::msrs::ia32_feature_control;
 
-    intel_x64::msrs::ia32_feature_control::senter_global_function_enables::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_feature_control::senter_global_function_enables::get());
+    senter_global_function_enables::enable();
+    CHECK(senter_global_function_enables::is_enabled());
+    senter_global_function_enables::disable();
+    CHECK(senter_global_function_enables::is_disabled());
+
+    senter_global_function_enables::enable(senter_global_function_enables::mask);
+    CHECK(senter_global_function_enables::is_enabled(senter_global_function_enables::mask));
+    senter_global_function_enables::disable(0x0);
+    CHECK(senter_global_function_enables::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_feature_control_sgx_launch_control_enable")
@@ -154,11 +197,17 @@ TEST_CASE("ia32_feature_control_sgx_launch_control_enable")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_feature_control::sgx_launch_control_enable::set(true);
-    CHECK(intel_x64::msrs::ia32_feature_control::sgx_launch_control_enable::get());
+    using namespace intel_x64::msrs::ia32_feature_control;
 
-    intel_x64::msrs::ia32_feature_control::sgx_launch_control_enable::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_feature_control::sgx_launch_control_enable::get());
+    sgx_launch_control_enable::enable();
+    CHECK(sgx_launch_control_enable::is_enabled());
+    sgx_launch_control_enable::disable();
+    CHECK(sgx_launch_control_enable::is_disabled());
+
+    sgx_launch_control_enable::enable(sgx_launch_control_enable::mask);
+    CHECK(sgx_launch_control_enable::is_enabled(sgx_launch_control_enable::mask));
+    sgx_launch_control_enable::disable(0x0);
+    CHECK(sgx_launch_control_enable::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_feature_control_sgx_global_enable")
@@ -166,11 +215,17 @@ TEST_CASE("ia32_feature_control_sgx_global_enable")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_feature_control::sgx_global_enable::set(true);
-    CHECK(intel_x64::msrs::ia32_feature_control::sgx_global_enable::get());
+    using namespace intel_x64::msrs::ia32_feature_control;
 
-    intel_x64::msrs::ia32_feature_control::sgx_global_enable::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_feature_control::sgx_global_enable::get());
+    sgx_global_enable::enable();
+    CHECK(sgx_global_enable::is_enabled());
+    sgx_global_enable::disable();
+    CHECK(sgx_global_enable::is_disabled());
+
+    sgx_global_enable::enable(sgx_global_enable::mask);
+    CHECK(sgx_global_enable::is_enabled(sgx_global_enable::mask));
+    sgx_global_enable::disable(0x0);
+    CHECK(sgx_global_enable::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_feature_control_lmce")
@@ -178,11 +233,17 @@ TEST_CASE("ia32_feature_control_lmce")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_feature_control::lmce::set(true);
-    CHECK(intel_x64::msrs::ia32_feature_control::lmce::get());
+    using namespace intel_x64::msrs::ia32_feature_control;
 
-    intel_x64::msrs::ia32_feature_control::lmce::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_feature_control::lmce::get());
+    lmce::enable();
+    CHECK(lmce::is_enabled());
+    lmce::disable();
+    CHECK(lmce::is_disabled());
+
+    lmce::enable(lmce::mask);
+    CHECK(lmce::is_enabled(lmce::mask));
+    lmce::disable(0x0);
+    CHECK(lmce::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_tsc_adjust")
@@ -190,8 +251,11 @@ TEST_CASE("ia32_tsc_adjust")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_tsc_adjust::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_tsc_adjust::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_tsc_adjust;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_tsc_adjust_thread_adjust")
@@ -199,8 +263,13 @@ TEST_CASE("ia32_tsc_adjust_thread_adjust")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_tsc_adjust::thread_adjust::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_tsc_adjust::thread_adjust::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_tsc_adjust;
+
+    thread_adjust::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(thread_adjust::get() == (thread_adjust::mask >> thread_adjust::from));
+
+    thread_adjust::set(thread_adjust::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(thread_adjust::get(thread_adjust::mask) == (thread_adjust::mask >> thread_adjust::from));
 }
 
 TEST_CASE("ia32_bios_updt_trig")
@@ -208,8 +277,10 @@ TEST_CASE("ia32_bios_updt_trig")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_bios_updt_trig::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(g_msrs[0x00000079UL] == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_bios_updt_trig;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(g_msrs[addr] == 0xFFFFFFFFFFFFFFFFULL);
 }
 
 TEST_CASE("ia32_bios_sign_id")
@@ -217,8 +288,11 @@ TEST_CASE("ia32_bios_sign_id")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000008BUL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_bios_sign_id::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_bios_sign_id;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_bios_sign_id_bios_sign_id")
@@ -226,8 +300,13 @@ TEST_CASE("ia32_bios_sign_id_bios_sign_id")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_bios_sign_id::bios_sign_id::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_bios_sign_id::bios_sign_id::get() == 0x00000000FFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_bios_sign_id;
+
+    bios_sign_id::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(bios_sign_id::get() == (bios_sign_id::mask >> bios_sign_id::from));
+
+    bios_sign_id::set(bios_sign_id::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(bios_sign_id::get(bios_sign_id::mask) == (bios_sign_id::mask >> bios_sign_id::from));
 }
 
 TEST_CASE("ia32_sgxlepubkeyhash0")
@@ -235,8 +314,11 @@ TEST_CASE("ia32_sgxlepubkeyhash0")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_sgxlepubkeyhash0::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_sgxlepubkeyhash0::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_sgxlepubkeyhash0;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_sgxlepubkeyhash1")
@@ -244,8 +326,11 @@ TEST_CASE("ia32_sgxlepubkeyhash1")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_sgxlepubkeyhash1::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_sgxlepubkeyhash1::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_sgxlepubkeyhash1;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_sgxlepubkeyhash2")
@@ -253,8 +338,11 @@ TEST_CASE("ia32_sgxlepubkeyhash2")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_sgxlepubkeyhash2::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_sgxlepubkeyhash2::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_sgxlepubkeyhash2;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_sgxlepubkeyhash3")
@@ -262,8 +350,11 @@ TEST_CASE("ia32_sgxlepubkeyhash3")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_sgxlepubkeyhash3::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_sgxlepubkeyhash3::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_sgxlepubkeyhash3;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_smm_monitor_ctl")
@@ -271,8 +362,11 @@ TEST_CASE("ia32_smm_monitor_ctl")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_smm_monitor_ctl::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_smm_monitor_ctl::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_smm_monitor_ctl;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_smm_monitor_ctl_valid")
@@ -280,11 +374,17 @@ TEST_CASE("ia32_smm_monitor_ctl_valid")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_smm_monitor_ctl::valid::set(true);
-    CHECK(intel_x64::msrs::ia32_smm_monitor_ctl::valid::get());
+    using namespace intel_x64::msrs::ia32_smm_monitor_ctl;
 
-    intel_x64::msrs::ia32_smm_monitor_ctl::valid::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_smm_monitor_ctl::valid::get());
+    valid::enable();
+    CHECK(valid::is_enabled());
+    valid::disable();
+    CHECK(valid::is_disabled());
+
+    valid::enable(valid::mask);
+    CHECK(valid::is_enabled(valid::mask));
+    valid::disable(0x0);
+    CHECK(valid::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_smm_monitor_ctl_vmxoff")
@@ -292,11 +392,17 @@ TEST_CASE("ia32_smm_monitor_ctl_vmxoff")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_smm_monitor_ctl::vmxoff::set(true);
-    CHECK(intel_x64::msrs::ia32_smm_monitor_ctl::vmxoff::get());
+    using namespace intel_x64::msrs::ia32_smm_monitor_ctl;
 
-    intel_x64::msrs::ia32_smm_monitor_ctl::vmxoff::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_smm_monitor_ctl::vmxoff::get());
+    vmxoff::enable();
+    CHECK(vmxoff::is_enabled());
+    vmxoff::disable();
+    CHECK(vmxoff::is_disabled());
+
+    vmxoff::enable(vmxoff::mask);
+    CHECK(vmxoff::is_enabled(vmxoff::mask));
+    vmxoff::disable(0x0);
+    CHECK(vmxoff::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_smm_monitor_ctl_mseg_base")
@@ -304,8 +410,13 @@ TEST_CASE("ia32_smm_monitor_ctl_mseg_base")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_smm_monitor_ctl::mseg_base::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_smm_monitor_ctl::mseg_base::get() == 0x00000000000FFFFFULL);
+    using namespace intel_x64::msrs::ia32_smm_monitor_ctl;
+
+    mseg_base::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(mseg_base::get() == (mseg_base::mask >> mseg_base::from));
+
+    mseg_base::set(mseg_base::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(mseg_base::get(mseg_base::mask) == (mseg_base::mask >> mseg_base::from));
 }
 
 TEST_CASE("ia32_smbase")
@@ -313,8 +424,11 @@ TEST_CASE("ia32_smbase")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000009EUL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_smbase::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_smbase;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_pmc0")
@@ -322,8 +436,11 @@ TEST_CASE("ia32_pmc0")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_pmc0::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_pmc0::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_pmc0;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_pmc1")
@@ -331,8 +448,11 @@ TEST_CASE("ia32_pmc1")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_pmc1::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_pmc1::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_pmc1;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_pmc2")
@@ -340,8 +460,11 @@ TEST_CASE("ia32_pmc2")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_pmc2::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_pmc2::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_pmc2;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_pmc3")
@@ -349,8 +472,11 @@ TEST_CASE("ia32_pmc3")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_pmc3::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_pmc3::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_pmc3;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_pmc4")
@@ -358,8 +484,11 @@ TEST_CASE("ia32_pmc4")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_pmc4::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_pmc4::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_pmc4;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_pmc5")
@@ -367,8 +496,11 @@ TEST_CASE("ia32_pmc5")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_pmc5::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_pmc5::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_pmc5;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_pmc6")
@@ -376,8 +508,11 @@ TEST_CASE("ia32_pmc6")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_pmc6::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_pmc6::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_pmc6;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_pmc7")
@@ -385,8 +520,11 @@ TEST_CASE("ia32_pmc7")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_pmc7::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_pmc7::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_pmc7;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_sysenter_cs")
@@ -394,8 +532,11 @@ TEST_CASE("ia32_sysenter_cs")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_sysenter_cs::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_sysenter_cs::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_sysenter_cs;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_sysenter_esp")
@@ -403,8 +544,11 @@ TEST_CASE("ia32_sysenter_esp")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_sysenter_esp::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_sysenter_esp::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_sysenter_esp;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_sysenter_eip")
@@ -412,8 +556,11 @@ TEST_CASE("ia32_sysenter_eip")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_sysenter_eip::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_sysenter_eip::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_sysenter_eip;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_perfevtsel0")
@@ -421,8 +568,11 @@ TEST_CASE("ia32_perfevtsel0")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_perfevtsel0::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_perfevtsel0::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_perfevtsel0;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_perfevtsel0_event_select")
@@ -430,8 +580,13 @@ TEST_CASE("ia32_perfevtsel0_event_select")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_perfevtsel0::event_select::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_perfevtsel0::event_select::get() == 0x00000000000000FFULL);
+    using namespace intel_x64::msrs::ia32_perfevtsel0;
+
+    event_select::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(event_select::get() == (event_select::mask >> event_select::from));
+
+    event_select::set(event_select::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(event_select::get(event_select::mask) == (event_select::mask >> event_select::from));
 }
 
 TEST_CASE("ia32_perfevtsel0_umask")
@@ -439,8 +594,13 @@ TEST_CASE("ia32_perfevtsel0_umask")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_perfevtsel0::umask::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_perfevtsel0::umask::get() == 0x00000000000000FFULL);
+    using namespace intel_x64::msrs::ia32_perfevtsel0;
+
+    umask::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(umask::get() == (umask::mask >> umask::from));
+
+    umask::set(umask::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(umask::get(umask::mask) == (umask::mask >> umask::from));
 }
 
 TEST_CASE("ia32_perfevtsel0_usr")
@@ -448,11 +608,17 @@ TEST_CASE("ia32_perfevtsel0_usr")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_perfevtsel0::usr::set(true);
-    CHECK(intel_x64::msrs::ia32_perfevtsel0::usr::get());
+    using namespace intel_x64::msrs::ia32_perfevtsel0;
 
-    intel_x64::msrs::ia32_perfevtsel0::usr::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_perfevtsel0::usr::get());
+    usr::enable();
+    CHECK(usr::is_enabled());
+    usr::disable();
+    CHECK(usr::is_disabled());
+
+    usr::enable(usr::mask);
+    CHECK(usr::is_enabled(usr::mask));
+    usr::disable(0x0);
+    CHECK(usr::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_perfevtsel0_os")
@@ -460,11 +626,17 @@ TEST_CASE("ia32_perfevtsel0_os")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_perfevtsel0::os::set(true);
-    CHECK(intel_x64::msrs::ia32_perfevtsel0::os::get());
+    using namespace intel_x64::msrs::ia32_perfevtsel0;
 
-    intel_x64::msrs::ia32_perfevtsel0::os::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_perfevtsel0::os::get());
+    os::enable();
+    CHECK(os::is_enabled());
+    os::disable();
+    CHECK(os::is_disabled());
+
+    os::enable(os::mask);
+    CHECK(os::is_enabled(os::mask));
+    os::disable(0x0);
+    CHECK(os::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_perfevtsel0_edge")
@@ -472,11 +644,17 @@ TEST_CASE("ia32_perfevtsel0_edge")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_perfevtsel0::edge::set(true);
-    CHECK(intel_x64::msrs::ia32_perfevtsel0::edge::get());
+    using namespace intel_x64::msrs::ia32_perfevtsel0;
 
-    intel_x64::msrs::ia32_perfevtsel0::edge::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_perfevtsel0::edge::get());
+    edge::enable();
+    CHECK(edge::is_enabled());
+    edge::disable();
+    CHECK(edge::is_disabled());
+
+    edge::enable(edge::mask);
+    CHECK(edge::is_enabled(edge::mask));
+    edge::disable(0x0);
+    CHECK(edge::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_perfevtsel0_pc")
@@ -484,11 +662,17 @@ TEST_CASE("ia32_perfevtsel0_pc")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_perfevtsel0::pc::set(true);
-    CHECK(intel_x64::msrs::ia32_perfevtsel0::pc::get());
+    using namespace intel_x64::msrs::ia32_perfevtsel0;
 
-    intel_x64::msrs::ia32_perfevtsel0::pc::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_perfevtsel0::pc::get());
+    pc::enable();
+    CHECK(pc::is_enabled());
+    pc::disable();
+    CHECK(pc::is_disabled());
+
+    pc::enable(pc::mask);
+    CHECK(pc::is_enabled(pc::mask));
+    pc::disable(0x0);
+    CHECK(pc::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_perfevtsel0_interrupt")
@@ -496,11 +680,17 @@ TEST_CASE("ia32_perfevtsel0_interrupt")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_perfevtsel0::interrupt::set(true);
-    CHECK(intel_x64::msrs::ia32_perfevtsel0::interrupt::get());
+    using namespace intel_x64::msrs;
 
-    intel_x64::msrs::ia32_perfevtsel0::interrupt::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_perfevtsel0::interrupt::get());
+    ia32_perfevtsel0::interrupt::enable();
+    CHECK(ia32_perfevtsel0::interrupt::is_enabled());
+    ia32_perfevtsel0::interrupt::disable();
+    CHECK(ia32_perfevtsel0::interrupt::is_disabled());
+
+    ia32_perfevtsel0::interrupt::enable(ia32_perfevtsel0::interrupt::mask);
+    CHECK(ia32_perfevtsel0::interrupt::is_enabled(ia32_perfevtsel0::interrupt::mask));
+    ia32_perfevtsel0::interrupt::disable(0x0);
+    CHECK(ia32_perfevtsel0::interrupt::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_perfevtsel0_anythread")
@@ -508,11 +698,17 @@ TEST_CASE("ia32_perfevtsel0_anythread")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_perfevtsel0::anythread::set(true);
-    CHECK(intel_x64::msrs::ia32_perfevtsel0::anythread::get());
+    using namespace intel_x64::msrs::ia32_perfevtsel0;
 
-    intel_x64::msrs::ia32_perfevtsel0::anythread::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_perfevtsel0::anythread::get());
+    anythread::enable();
+    CHECK(anythread::is_enabled());
+    anythread::disable();
+    CHECK(anythread::is_disabled());
+
+    anythread::enable(anythread::mask);
+    CHECK(anythread::is_enabled(anythread::mask));
+    anythread::disable(0x0);
+    CHECK(anythread::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_perfevtsel0_en")
@@ -520,11 +716,17 @@ TEST_CASE("ia32_perfevtsel0_en")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_perfevtsel0::en::set(true);
-    CHECK(intel_x64::msrs::ia32_perfevtsel0::en::get());
+    using namespace intel_x64::msrs::ia32_perfevtsel0;
 
-    intel_x64::msrs::ia32_perfevtsel0::en::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_perfevtsel0::en::get());
+    en::enable();
+    CHECK(en::is_enabled());
+    en::disable();
+    CHECK(en::is_disabled());
+
+    en::enable(en::mask);
+    CHECK(en::is_enabled(en::mask));
+    en::disable(0x0);
+    CHECK(en::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_perfevtsel0_inv")
@@ -532,11 +734,17 @@ TEST_CASE("ia32_perfevtsel0_inv")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_perfevtsel0::inv::set(true);
-    CHECK(intel_x64::msrs::ia32_perfevtsel0::inv::get());
+    using namespace intel_x64::msrs::ia32_perfevtsel0;
 
-    intel_x64::msrs::ia32_perfevtsel0::inv::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_perfevtsel0::inv::get());
+    inv::enable();
+    CHECK(inv::is_enabled());
+    inv::disable();
+    CHECK(inv::is_disabled());
+
+    inv::enable(inv::mask);
+    CHECK(inv::is_enabled(inv::mask));
+    inv::disable(0x0);
+    CHECK(inv::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_perfevtsel0_cmask")
@@ -544,8 +752,13 @@ TEST_CASE("ia32_perfevtsel0_cmask")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_perfevtsel0::cmask::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_perfevtsel0::cmask::get() == 0x00000000000000FFULL);
+    using namespace intel_x64::msrs::ia32_perfevtsel0;
+
+    cmask::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(cmask::get() == (cmask::mask >> cmask::from));
+
+    cmask::set(cmask::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(cmask::get(cmask::mask) == (cmask::mask >> cmask::from));
 }
 
 TEST_CASE("ia32_perfevtsel1")
@@ -553,8 +766,11 @@ TEST_CASE("ia32_perfevtsel1")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_perfevtsel1::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_perfevtsel1::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_perfevtsel1;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_perfevtsel2")
@@ -562,8 +778,11 @@ TEST_CASE("ia32_perfevtsel2")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_perfevtsel2::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_perfevtsel2::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_perfevtsel2;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_perfevtsel3")
@@ -571,8 +790,11 @@ TEST_CASE("ia32_perfevtsel3")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_perfevtsel3::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_perfevtsel3::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_perfevtsel3;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_perf_status")
@@ -580,8 +802,11 @@ TEST_CASE("ia32_perf_status")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000198UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_perf_status::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_perf_status;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_perf_status_state_value")
@@ -589,8 +814,11 @@ TEST_CASE("ia32_perf_status_state_value")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000198UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_perf_status::state_value::get() == 0x000000000000FFFFULL);
+    using namespace intel_x64::msrs::ia32_perf_status;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(state_value::get() == (state_value::mask >> state_value::from));
+    CHECK(state_value::get(state_value::mask) == (state_value::mask >> state_value::from));
 }
 
 TEST_CASE("ia32_perf_ctl")
@@ -598,8 +826,11 @@ TEST_CASE("ia32_perf_ctl")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_perf_ctl::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_perf_ctl::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_perf_ctl;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_perf_ctl_state_value")
@@ -607,8 +838,13 @@ TEST_CASE("ia32_perf_ctl_state_value")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_perf_ctl::state_value::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_perf_ctl::state_value::get() == 0x000000000000FFFFULL);
+    using namespace intel_x64::msrs::ia32_perf_ctl;
+
+    state_value::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(state_value::get() == (state_value::mask >> state_value::from));
+
+    state_value::set(state_value::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(state_value::get(state_value::mask) == (state_value::mask >> state_value::from));
 }
 
 TEST_CASE("ia32_perf_ctl_ida_engage")
@@ -616,11 +852,17 @@ TEST_CASE("ia32_perf_ctl_ida_engage")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_perf_ctl::ida_engage::set(true);
-    CHECK(intel_x64::msrs::ia32_perf_ctl::ida_engage::get());
+    using namespace intel_x64::msrs::ia32_perf_ctl;
 
-    intel_x64::msrs::ia32_perf_ctl::ida_engage::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_perf_ctl::ida_engage::get());
+    ida_engage::enable();
+    CHECK(ida_engage::is_enabled());
+    ida_engage::disable();
+    CHECK(ida_engage::is_disabled());
+
+    ida_engage::enable(ida_engage::mask);
+    CHECK(ida_engage::is_enabled(ida_engage::mask));
+    ida_engage::disable(0x0);
+    CHECK(ida_engage::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_clock_modulation")
@@ -628,8 +870,11 @@ TEST_CASE("ia32_clock_modulation")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_clock_modulation::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_clock_modulation::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_clock_modulation;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_clock_modulation_ext_duty_cycle")
@@ -637,11 +882,17 @@ TEST_CASE("ia32_clock_modulation_ext_duty_cycle")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_clock_modulation::ext_duty_cycle::set(true);
-    CHECK(intel_x64::msrs::ia32_clock_modulation::ext_duty_cycle::get());
+    using namespace intel_x64::msrs::ia32_clock_modulation;
 
-    intel_x64::msrs::ia32_clock_modulation::ext_duty_cycle::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_clock_modulation::ext_duty_cycle::get());
+    ext_duty_cycle::enable();
+    CHECK(ext_duty_cycle::is_enabled());
+    ext_duty_cycle::disable();
+    CHECK(ext_duty_cycle::is_disabled());
+
+    ext_duty_cycle::enable(ext_duty_cycle::mask);
+    CHECK(ext_duty_cycle::is_enabled(ext_duty_cycle::mask));
+    ext_duty_cycle::disable(0x0);
+    CHECK(ext_duty_cycle::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_clock_modulation_duty_cycle_values")
@@ -649,8 +900,13 @@ TEST_CASE("ia32_clock_modulation_duty_cycle_values")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_clock_modulation::duty_cycle_values::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_clock_modulation::duty_cycle_values::get() == 0x0000000000000007ULL);
+    using namespace intel_x64::msrs::ia32_clock_modulation;
+
+    duty_cycle_values::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(duty_cycle_values::get() == (duty_cycle_values::mask >> duty_cycle_values::from));
+
+    duty_cycle_values::set(duty_cycle_values::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(duty_cycle_values::get(duty_cycle_values::mask) == (duty_cycle_values::mask >> duty_cycle_values::from));
 }
 
 TEST_CASE("ia32_clock_modulation_enable_modulation")
@@ -658,11 +914,17 @@ TEST_CASE("ia32_clock_modulation_enable_modulation")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_clock_modulation::enable_modulation::set(true);
-    CHECK(intel_x64::msrs::ia32_clock_modulation::enable_modulation::get());
+    using namespace intel_x64::msrs::ia32_clock_modulation;
 
-    intel_x64::msrs::ia32_clock_modulation::enable_modulation::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_clock_modulation::enable_modulation::get());
+    enable_modulation::enable();
+    CHECK(enable_modulation::is_enabled());
+    enable_modulation::disable();
+    CHECK(enable_modulation::is_disabled());
+
+    enable_modulation::enable(enable_modulation::mask);
+    CHECK(enable_modulation::is_enabled(enable_modulation::mask));
+    enable_modulation::disable(0x0);
+    CHECK(enable_modulation::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_therm_interrupt")
@@ -670,8 +932,11 @@ TEST_CASE("ia32_therm_interrupt")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_therm_interrupt::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_therm_interrupt::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_therm_interrupt;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_therm_interrupt_high_temp")
@@ -679,11 +944,17 @@ TEST_CASE("ia32_therm_interrupt_high_temp")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_therm_interrupt::high_temp::set(true);
-    CHECK(intel_x64::msrs::ia32_therm_interrupt::high_temp::get());
+    using namespace intel_x64::msrs::ia32_therm_interrupt;
 
-    intel_x64::msrs::ia32_therm_interrupt::high_temp::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_therm_interrupt::high_temp::get());
+    high_temp::enable();
+    CHECK(high_temp::is_enabled());
+    high_temp::disable();
+    CHECK(high_temp::is_disabled());
+
+    high_temp::enable(high_temp::mask);
+    CHECK(high_temp::is_enabled(high_temp::mask));
+    high_temp::disable(0x0);
+    CHECK(high_temp::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_therm_interrupt_low_temp")
@@ -691,11 +962,17 @@ TEST_CASE("ia32_therm_interrupt_low_temp")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_therm_interrupt::low_temp::set(true);
-    CHECK(intel_x64::msrs::ia32_therm_interrupt::low_temp::get());
+    using namespace intel_x64::msrs::ia32_therm_interrupt;
 
-    intel_x64::msrs::ia32_therm_interrupt::low_temp::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_therm_interrupt::low_temp::get());
+    low_temp::enable();
+    CHECK(low_temp::is_enabled());
+    low_temp::disable();
+    CHECK(low_temp::is_disabled());
+
+    low_temp::enable(low_temp::mask);
+    CHECK(low_temp::is_enabled(low_temp::mask));
+    low_temp::disable(0x0);
+    CHECK(low_temp::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_therm_interrupt_prochot")
@@ -703,11 +980,17 @@ TEST_CASE("ia32_therm_interrupt_prochot")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_therm_interrupt::prochot::set(true);
-    CHECK(intel_x64::msrs::ia32_therm_interrupt::prochot::get());
+    using namespace intel_x64::msrs::ia32_therm_interrupt;
 
-    intel_x64::msrs::ia32_therm_interrupt::prochot::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_therm_interrupt::prochot::get());
+    prochot::enable();
+    CHECK(prochot::is_enabled());
+    prochot::disable();
+    CHECK(prochot::is_disabled());
+
+    prochot::enable(prochot::mask);
+    CHECK(prochot::is_enabled(prochot::mask));
+    prochot::disable(0x0);
+    CHECK(prochot::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_therm_interrupt_forcepr")
@@ -715,11 +998,17 @@ TEST_CASE("ia32_therm_interrupt_forcepr")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_therm_interrupt::forcepr::set(true);
-    CHECK(intel_x64::msrs::ia32_therm_interrupt::forcepr::get());
+    using namespace intel_x64::msrs::ia32_therm_interrupt;
 
-    intel_x64::msrs::ia32_therm_interrupt::forcepr::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_therm_interrupt::forcepr::get());
+    forcepr::enable();
+    CHECK(forcepr::is_enabled());
+    forcepr::disable();
+    CHECK(forcepr::is_disabled());
+
+    forcepr::enable(forcepr::mask);
+    CHECK(forcepr::is_enabled(forcepr::mask));
+    forcepr::disable(0x0);
+    CHECK(forcepr::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_therm_interrupt_crit_temp")
@@ -727,11 +1016,17 @@ TEST_CASE("ia32_therm_interrupt_crit_temp")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_therm_interrupt::crit_temp::set(true);
-    CHECK(intel_x64::msrs::ia32_therm_interrupt::crit_temp::get());
+    using namespace intel_x64::msrs::ia32_therm_interrupt;
 
-    intel_x64::msrs::ia32_therm_interrupt::crit_temp::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_therm_interrupt::crit_temp::get());
+    crit_temp::enable();
+    CHECK(crit_temp::is_enabled());
+    crit_temp::disable();
+    CHECK(crit_temp::is_disabled());
+
+    crit_temp::enable(crit_temp::mask);
+    CHECK(crit_temp::is_enabled(crit_temp::mask));
+    crit_temp::disable(0x0);
+    CHECK(crit_temp::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_therm_interrupt_threshold_1_enable")
@@ -739,11 +1034,17 @@ TEST_CASE("ia32_therm_interrupt_threshold_1_enable")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_therm_interrupt::threshold_1_enable::set(true);
-    CHECK(intel_x64::msrs::ia32_therm_interrupt::threshold_1_enable::get());
+    using namespace intel_x64::msrs::ia32_therm_interrupt;
 
-    intel_x64::msrs::ia32_therm_interrupt::threshold_1_enable::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_therm_interrupt::threshold_1_enable::get());
+    threshold_1_enable::enable();
+    CHECK(threshold_1_enable::is_enabled());
+    threshold_1_enable::disable();
+    CHECK(threshold_1_enable::is_disabled());
+
+    threshold_1_enable::enable(threshold_1_enable::mask);
+    CHECK(threshold_1_enable::is_enabled(threshold_1_enable::mask));
+    threshold_1_enable::disable(0x0);
+    CHECK(threshold_1_enable::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_therm_interrupt_threshold_1_value")
@@ -751,8 +1052,13 @@ TEST_CASE("ia32_therm_interrupt_threshold_1_value")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_therm_interrupt::threshold_1_value::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_therm_interrupt::threshold_1_value::get() == 0x000000000000007FULL);
+    using namespace intel_x64::msrs::ia32_therm_interrupt;
+
+    threshold_1_value::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(threshold_1_value::get() == (threshold_1_value::mask >> threshold_1_value::from));
+
+    threshold_1_value::set(threshold_1_value::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(threshold_1_value::get(threshold_1_value::mask) == (threshold_1_value::mask >> threshold_1_value::from));
 }
 
 TEST_CASE("ia32_therm_interrupt_threshold_2_enable")
@@ -760,11 +1066,17 @@ TEST_CASE("ia32_therm_interrupt_threshold_2_enable")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_therm_interrupt::threshold_2_enable::set(true);
-    CHECK(intel_x64::msrs::ia32_therm_interrupt::threshold_2_enable::get());
+    using namespace intel_x64::msrs::ia32_therm_interrupt;
 
-    intel_x64::msrs::ia32_therm_interrupt::threshold_2_enable::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_therm_interrupt::threshold_2_enable::get());
+    threshold_2_enable::enable();
+    CHECK(threshold_2_enable::is_enabled());
+    threshold_2_enable::disable();
+    CHECK(threshold_2_enable::is_disabled());
+
+    threshold_2_enable::enable(threshold_2_enable::mask);
+    CHECK(threshold_2_enable::is_enabled(threshold_2_enable::mask));
+    threshold_2_enable::disable(0x0);
+    CHECK(threshold_2_enable::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_therm_interrupt_threshold_2_value")
@@ -772,8 +1084,13 @@ TEST_CASE("ia32_therm_interrupt_threshold_2_value")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_therm_interrupt::threshold_2_value::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_therm_interrupt::threshold_2_value::get() == 0x000000000000007FULL);
+    using namespace intel_x64::msrs::ia32_therm_interrupt;
+
+    threshold_2_value::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(threshold_2_value::get() == (threshold_2_value::mask >> threshold_2_value::from));
+
+    threshold_2_value::set(threshold_2_value::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(threshold_2_value::get(threshold_2_value::mask) == (threshold_2_value::mask >> threshold_2_value::from));
 }
 
 TEST_CASE("ia32_therm_interrupt_power_limit")
@@ -781,11 +1098,17 @@ TEST_CASE("ia32_therm_interrupt_power_limit")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_therm_interrupt::power_limit::set(true);
-    CHECK(intel_x64::msrs::ia32_therm_interrupt::power_limit::get());
+    using namespace intel_x64::msrs::ia32_therm_interrupt;
 
-    intel_x64::msrs::ia32_therm_interrupt::power_limit::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_therm_interrupt::power_limit::get());
+    power_limit::enable();
+    CHECK(power_limit::is_enabled());
+    power_limit::disable();
+    CHECK(power_limit::is_disabled());
+
+    power_limit::enable(power_limit::mask);
+    CHECK(power_limit::is_enabled(power_limit::mask));
+    power_limit::disable(0x0);
+    CHECK(power_limit::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_therm_status")
@@ -793,8 +1116,11 @@ TEST_CASE("ia32_therm_status")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000019CUL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_therm_status::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_therm_status;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_therm_status_therm_status")
@@ -802,11 +1128,17 @@ TEST_CASE("ia32_therm_status_therm_status")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000019CUL] = 0x0000000000000001ULL;
-    CHECK(intel_x64::msrs::ia32_therm_status::therm_status::get());
+    using namespace intel_x64::msrs::ia32_therm_status;
 
-    g_msrs[0x0000019CUL] = 0x0000000000000000ULL;
-    CHECK_FALSE(intel_x64::msrs::ia32_therm_status::therm_status::get());
+    g_msrs[addr] = therm_status::mask;
+    CHECK(therm_status::is_enabled());
+    g_msrs[addr] = 0x0;
+    CHECK(therm_status::is_disabled());
+
+    g_msrs[addr] = therm_status::mask;
+    CHECK(therm_status::is_enabled(therm_status::mask));
+    g_msrs[addr] = 0x0;
+    CHECK(therm_status::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_therm_status_thermal_status_log")
@@ -814,11 +1146,17 @@ TEST_CASE("ia32_therm_status_thermal_status_log")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_therm_status::thermal_status_log::set(true);
-    CHECK(intel_x64::msrs::ia32_therm_status::thermal_status_log::get());
+    using namespace intel_x64::msrs::ia32_therm_status;
 
-    intel_x64::msrs::ia32_therm_status::thermal_status_log::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_therm_status::thermal_status_log::get());
+    thermal_status_log::enable();
+    CHECK(thermal_status_log::is_enabled());
+    thermal_status_log::disable();
+    CHECK(thermal_status_log::is_disabled());
+
+    thermal_status_log::enable(thermal_status_log::mask);
+    CHECK(thermal_status_log::is_enabled(thermal_status_log::mask));
+    thermal_status_log::disable(0x0);
+    CHECK(thermal_status_log::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_therm_status_forcepr_event")
@@ -826,11 +1164,17 @@ TEST_CASE("ia32_therm_status_forcepr_event")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000019CUL] = 0x0000000000000004ULL;
-    CHECK(intel_x64::msrs::ia32_therm_status::forcepr_event::get());
+    using namespace intel_x64::msrs::ia32_therm_status;
 
-    g_msrs[0x0000019CUL] = 0x0000000000000000ULL;
-    CHECK_FALSE(intel_x64::msrs::ia32_therm_status::forcepr_event::get());
+    g_msrs[addr] = forcepr_event::mask;
+    CHECK(forcepr_event::is_enabled());
+    g_msrs[addr] = 0x0;
+    CHECK(forcepr_event::is_disabled());
+
+    g_msrs[addr] = forcepr_event::mask;
+    CHECK(forcepr_event::is_enabled(forcepr_event::mask));
+    g_msrs[addr] = 0x0;
+    CHECK(forcepr_event::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_therm_status_forcepr_log")
@@ -838,11 +1182,17 @@ TEST_CASE("ia32_therm_status_forcepr_log")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_therm_status::forcepr_log::set(true);
-    CHECK(intel_x64::msrs::ia32_therm_status::forcepr_log::get());
+    using namespace intel_x64::msrs::ia32_therm_status;
 
-    intel_x64::msrs::ia32_therm_status::forcepr_log::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_therm_status::forcepr_log::get());
+    forcepr_log::enable();
+    CHECK(forcepr_log::is_enabled());
+    forcepr_log::disable();
+    CHECK(forcepr_log::is_disabled());
+
+    forcepr_log::enable(forcepr_log::mask);
+    CHECK(forcepr_log::is_enabled(forcepr_log::mask));
+    forcepr_log::disable(0x0);
+    CHECK(forcepr_log::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_therm_status_crit_temp_status")
@@ -850,11 +1200,17 @@ TEST_CASE("ia32_therm_status_crit_temp_status")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000019CUL] = 0x0000000000000010ULL;
-    CHECK(intel_x64::msrs::ia32_therm_status::crit_temp_status::get());
+    using namespace intel_x64::msrs::ia32_therm_status;
 
-    g_msrs[0x0000019CUL] = 0x0000000000000000ULL;
-    CHECK_FALSE(intel_x64::msrs::ia32_therm_status::crit_temp_status::get());
+    g_msrs[addr] = crit_temp_status::mask;
+    CHECK(crit_temp_status::is_enabled());
+    g_msrs[addr] = 0x0;
+    CHECK(crit_temp_status::is_disabled());
+
+    g_msrs[addr] = crit_temp_status::mask;
+    CHECK(crit_temp_status::is_enabled(crit_temp_status::mask));
+    g_msrs[addr] = 0x0;
+    CHECK(crit_temp_status::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_therm_status_crit_temp_log")
@@ -862,11 +1218,17 @@ TEST_CASE("ia32_therm_status_crit_temp_log")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_therm_status::crit_temp_log::set(true);
-    CHECK(intel_x64::msrs::ia32_therm_status::crit_temp_log::get());
+    using namespace intel_x64::msrs::ia32_therm_status;
 
-    intel_x64::msrs::ia32_therm_status::crit_temp_log::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_therm_status::crit_temp_log::get());
+    crit_temp_log::enable();
+    CHECK(crit_temp_log::is_enabled());
+    crit_temp_log::disable();
+    CHECK(crit_temp_log::is_disabled());
+
+    crit_temp_log::enable(crit_temp_log::mask);
+    CHECK(crit_temp_log::is_enabled(crit_temp_log::mask));
+    crit_temp_log::disable(0x0);
+    CHECK(crit_temp_log::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_therm_status_therm_threshold1_status")
@@ -874,11 +1236,17 @@ TEST_CASE("ia32_therm_status_therm_threshold1_status")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000019CUL] = 0x0000000000000040ULL;
-    CHECK(intel_x64::msrs::ia32_therm_status::therm_threshold1_status::get());
+    using namespace intel_x64::msrs::ia32_therm_status;
 
-    g_msrs[0x0000019CUL] = 0x0000000000000000ULL;
-    CHECK_FALSE(intel_x64::msrs::ia32_therm_status::therm_threshold1_status::get());
+    g_msrs[addr] = therm_threshold1_status::mask;
+    CHECK(therm_threshold1_status::is_enabled());
+    g_msrs[addr] = 0x0;
+    CHECK(therm_threshold1_status::is_disabled());
+
+    g_msrs[addr] = therm_threshold1_status::mask;
+    CHECK(therm_threshold1_status::is_enabled(therm_threshold1_status::mask));
+    g_msrs[addr] = 0x0;
+    CHECK(therm_threshold1_status::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_therm_status_therm_threshold1_log")
@@ -886,11 +1254,17 @@ TEST_CASE("ia32_therm_status_therm_threshold1_log")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_therm_status::therm_threshold1_log::set(true);
-    CHECK(intel_x64::msrs::ia32_therm_status::therm_threshold1_log::get());
+    using namespace intel_x64::msrs::ia32_therm_status;
 
-    intel_x64::msrs::ia32_therm_status::therm_threshold1_log::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_therm_status::therm_threshold1_log::get());
+    therm_threshold1_log::enable();
+    CHECK(therm_threshold1_log::is_enabled());
+    therm_threshold1_log::disable();
+    CHECK(therm_threshold1_log::is_disabled());
+
+    therm_threshold1_log::enable(therm_threshold1_log::mask);
+    CHECK(therm_threshold1_log::is_enabled(therm_threshold1_log::mask));
+    therm_threshold1_log::disable(0x0);
+    CHECK(therm_threshold1_log::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_therm_status_therm_threshold2_status")
@@ -898,11 +1272,17 @@ TEST_CASE("ia32_therm_status_therm_threshold2_status")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000019CUL] = 0x0000000000000100ULL;
-    CHECK(intel_x64::msrs::ia32_therm_status::therm_threshold2_status::get());
+    using namespace intel_x64::msrs::ia32_therm_status;
 
-    g_msrs[0x0000019CUL] = 0x0000000000000000ULL;
-    CHECK_FALSE(intel_x64::msrs::ia32_therm_status::therm_threshold2_status::get());
+    g_msrs[addr] = therm_threshold2_status::mask;
+    CHECK(therm_threshold2_status::is_enabled());
+    g_msrs[addr] = 0x0;
+    CHECK(therm_threshold2_status::is_disabled());
+
+    g_msrs[addr] = therm_threshold2_status::mask;
+    CHECK(therm_threshold2_status::is_enabled(therm_threshold2_status::mask));
+    g_msrs[addr] = 0x0;
+    CHECK(therm_threshold2_status::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_therm_status_therm_threshold2_log")
@@ -910,11 +1290,17 @@ TEST_CASE("ia32_therm_status_therm_threshold2_log")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_therm_status::therm_threshold2_log::set(true);
-    CHECK(intel_x64::msrs::ia32_therm_status::therm_threshold2_log::get());
+    using namespace intel_x64::msrs::ia32_therm_status;
 
-    intel_x64::msrs::ia32_therm_status::therm_threshold2_log::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_therm_status::therm_threshold2_log::get());
+    therm_threshold2_log::enable();
+    CHECK(therm_threshold2_log::is_enabled());
+    therm_threshold2_log::disable();
+    CHECK(therm_threshold2_log::is_disabled());
+
+    therm_threshold2_log::enable(therm_threshold2_log::mask);
+    CHECK(therm_threshold2_log::is_enabled(therm_threshold2_log::mask));
+    therm_threshold2_log::disable(0x0);
+    CHECK(therm_threshold2_log::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_therm_status_power_limit_status")
@@ -922,11 +1308,17 @@ TEST_CASE("ia32_therm_status_power_limit_status")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000019CUL] = 0x0000000000000400ULL;
-    CHECK(intel_x64::msrs::ia32_therm_status::power_limit_status::get());
+    using namespace intel_x64::msrs::ia32_therm_status;
 
-    g_msrs[0x0000019CUL] = 0x0000000000000000ULL;
-    CHECK_FALSE(intel_x64::msrs::ia32_therm_status::power_limit_status::get());
+    g_msrs[addr] = power_limit_status::mask;
+    CHECK(power_limit_status::is_enabled());
+    g_msrs[addr] = 0x0;
+    CHECK(power_limit_status::is_disabled());
+
+    g_msrs[addr] = power_limit_status::mask;
+    CHECK(power_limit_status::is_enabled(power_limit_status::mask));
+    g_msrs[addr] = 0x0;
+    CHECK(power_limit_status::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_therm_status_power_limit_log")
@@ -934,11 +1326,17 @@ TEST_CASE("ia32_therm_status_power_limit_log")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_therm_status::power_limit_log::set(true);
-    CHECK(intel_x64::msrs::ia32_therm_status::power_limit_log::get());
+    using namespace intel_x64::msrs::ia32_therm_status;
 
-    intel_x64::msrs::ia32_therm_status::power_limit_log::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_therm_status::power_limit_log::get());
+    power_limit_log::enable();
+    CHECK(power_limit_log::is_enabled());
+    power_limit_log::disable();
+    CHECK(power_limit_log::is_disabled());
+
+    power_limit_log::enable(power_limit_log::mask);
+    CHECK(power_limit_log::is_enabled(power_limit_log::mask));
+    power_limit_log::disable(0x0);
+    CHECK(power_limit_log::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_therm_status_current_limit_status")
@@ -946,11 +1344,17 @@ TEST_CASE("ia32_therm_status_current_limit_status")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000019CUL] = 0x0000000000001000ULL;
-    CHECK(intel_x64::msrs::ia32_therm_status::current_limit_status::get());
+    using namespace intel_x64::msrs::ia32_therm_status;
 
-    g_msrs[0x0000019CUL] = 0x0000000000000000ULL;
-    CHECK_FALSE(intel_x64::msrs::ia32_therm_status::current_limit_status::get());
+    g_msrs[addr] = current_limit_status::mask;
+    CHECK(current_limit_status::is_enabled());
+    g_msrs[addr] = 0x0;
+    CHECK(current_limit_status::is_disabled());
+
+    g_msrs[addr] = current_limit_status::mask;
+    CHECK(current_limit_status::is_enabled(current_limit_status::mask));
+    g_msrs[addr] = 0x0;
+    CHECK(current_limit_status::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_therm_status_current_limit_log")
@@ -958,11 +1362,17 @@ TEST_CASE("ia32_therm_status_current_limit_log")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_therm_status::current_limit_log::set(true);
-    CHECK(intel_x64::msrs::ia32_therm_status::current_limit_log::get());
+    using namespace intel_x64::msrs::ia32_therm_status;
 
-    intel_x64::msrs::ia32_therm_status::current_limit_log::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_therm_status::current_limit_log::get());
+    current_limit_log::enable();
+    CHECK(current_limit_log::is_enabled());
+    current_limit_log::disable();
+    CHECK(current_limit_log::is_disabled());
+
+    current_limit_log::enable(current_limit_log::mask);
+    CHECK(current_limit_log::is_enabled(current_limit_log::mask));
+    current_limit_log::disable(0x0);
+    CHECK(current_limit_log::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_therm_status_cross_domain_status")
@@ -970,11 +1380,17 @@ TEST_CASE("ia32_therm_status_cross_domain_status")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000019CUL] = 0x0000000000004000ULL;
-    CHECK(intel_x64::msrs::ia32_therm_status::cross_domain_status::get());
+    using namespace intel_x64::msrs::ia32_therm_status;
 
-    g_msrs[0x0000019CUL] = 0x0000000000000000ULL;
-    CHECK_FALSE(intel_x64::msrs::ia32_therm_status::cross_domain_status::get());
+    g_msrs[addr] = cross_domain_status::mask;
+    CHECK(cross_domain_status::is_enabled());
+    g_msrs[addr] = 0x0;
+    CHECK(cross_domain_status::is_disabled());
+
+    g_msrs[addr] = cross_domain_status::mask;
+    CHECK(cross_domain_status::is_enabled(cross_domain_status::mask));
+    g_msrs[addr] = 0x0;
+    CHECK(cross_domain_status::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_therm_status_cross_domain_log")
@@ -982,11 +1398,17 @@ TEST_CASE("ia32_therm_status_cross_domain_log")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_therm_status::cross_domain_log::set(true);
-    CHECK(intel_x64::msrs::ia32_therm_status::cross_domain_log::get());
+    using namespace intel_x64::msrs::ia32_therm_status;
 
-    intel_x64::msrs::ia32_therm_status::cross_domain_log::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_therm_status::cross_domain_log::get());
+    cross_domain_log::enable();
+    CHECK(cross_domain_log::is_enabled());
+    cross_domain_log::disable();
+    CHECK(cross_domain_log::is_disabled());
+
+    cross_domain_log::enable(cross_domain_log::mask);
+    CHECK(cross_domain_log::is_enabled(cross_domain_log::mask));
+    cross_domain_log::disable(0x0);
+    CHECK(cross_domain_log::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_therm_status_digital_readout")
@@ -994,8 +1416,11 @@ TEST_CASE("ia32_therm_status_digital_readout")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000019CUL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_therm_status::digital_readout::get() == 0x000000000000007FULL);
+    using namespace intel_x64::msrs::ia32_therm_status;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(digital_readout::get() == (digital_readout::mask >> digital_readout::from));
+    CHECK(digital_readout::get(digital_readout::mask) == (digital_readout::mask >> digital_readout::from));
 }
 
 TEST_CASE("ia32_therm_status_resolution_celcius")
@@ -1003,8 +1428,11 @@ TEST_CASE("ia32_therm_status_resolution_celcius")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000019CUL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_therm_status::resolution_celcius::get() == 0x000000000000000FULL);
+    using namespace intel_x64::msrs::ia32_therm_status;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(resolution_celcius::get() == (resolution_celcius::mask >> resolution_celcius::from));
+    CHECK(resolution_celcius::get(resolution_celcius::mask) == (resolution_celcius::mask >> resolution_celcius::from));
 }
 
 TEST_CASE("ia32_therm_status_reading_valid")
@@ -1012,11 +1440,17 @@ TEST_CASE("ia32_therm_status_reading_valid")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000019CUL] = 0x0000000080000000ULL;
-    CHECK(intel_x64::msrs::ia32_therm_status::reading_valid::get());
+    using namespace intel_x64::msrs::ia32_therm_status;
 
-    g_msrs[0x0000019CUL] = 0x0000000000000000ULL;
-    CHECK_FALSE(intel_x64::msrs::ia32_therm_status::reading_valid::get());
+    g_msrs[addr] = reading_valid::mask;
+    CHECK(reading_valid::is_enabled());
+    g_msrs[addr] = 0x0;
+    CHECK(reading_valid::is_disabled());
+
+    g_msrs[addr] = reading_valid::mask;
+    CHECK(reading_valid::is_enabled(reading_valid::mask));
+    g_msrs[addr] = 0x0;
+    CHECK(reading_valid::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_misc_enable")
@@ -1024,8 +1458,11 @@ TEST_CASE("ia32_misc_enable")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_misc_enable::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_misc_enable::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_misc_enable;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_misc_enable_fast_strings")
@@ -1033,11 +1470,17 @@ TEST_CASE("ia32_misc_enable_fast_strings")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_misc_enable::fast_strings::set(true);
-    CHECK(intel_x64::msrs::ia32_misc_enable::fast_strings::get());
+    using namespace intel_x64::msrs::ia32_misc_enable;
 
-    intel_x64::msrs::ia32_misc_enable::fast_strings::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_misc_enable::fast_strings::get());
+    fast_strings::enable();
+    CHECK(fast_strings::is_enabled());
+    fast_strings::disable();
+    CHECK(fast_strings::is_disabled());
+
+    fast_strings::enable(fast_strings::mask);
+    CHECK(fast_strings::is_enabled(fast_strings::mask));
+    fast_strings::disable(0x0);
+    CHECK(fast_strings::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_misc_enable_auto_therm_control")
@@ -1045,11 +1488,17 @@ TEST_CASE("ia32_misc_enable_auto_therm_control")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_misc_enable::auto_therm_control::set(true);
-    CHECK(intel_x64::msrs::ia32_misc_enable::auto_therm_control::get());
+    using namespace intel_x64::msrs::ia32_misc_enable;
 
-    intel_x64::msrs::ia32_misc_enable::auto_therm_control::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_misc_enable::auto_therm_control::get());
+    auto_therm_control::enable();
+    CHECK(auto_therm_control::is_enabled());
+    auto_therm_control::disable();
+    CHECK(auto_therm_control::is_disabled());
+
+    auto_therm_control::enable(auto_therm_control::mask);
+    CHECK(auto_therm_control::is_enabled(auto_therm_control::mask));
+    auto_therm_control::disable(0x0);
+    CHECK(auto_therm_control::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_misc_enable_perf_monitor")
@@ -1057,11 +1506,17 @@ TEST_CASE("ia32_misc_enable_perf_monitor")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x000001A0UL] = 0x0000000000000080ULL;
-    CHECK(intel_x64::msrs::ia32_misc_enable::perf_monitor::get());
+    using namespace intel_x64::msrs::ia32_misc_enable;
 
-    g_msrs[0x000001A0UL] = 0x0000000000000000ULL;
-    CHECK_FALSE(intel_x64::msrs::ia32_misc_enable::perf_monitor::get());
+    g_msrs[addr] = perf_monitor::mask;
+    CHECK(perf_monitor::is_enabled());
+    g_msrs[addr] = 0x0;
+    CHECK(perf_monitor::is_disabled());
+
+    g_msrs[addr] = perf_monitor::mask;
+    CHECK(perf_monitor::is_enabled(perf_monitor::mask));
+    g_msrs[addr] = 0x0;
+    CHECK(perf_monitor::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_misc_enable_branch_trace_storage")
@@ -1069,11 +1524,17 @@ TEST_CASE("ia32_misc_enable_branch_trace_storage")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x000001A0UL] = 0x0000000000000800ULL;
-    CHECK(intel_x64::msrs::ia32_misc_enable::branch_trace_storage::get());
+    using namespace intel_x64::msrs::ia32_misc_enable;
 
-    g_msrs[0x000001A0UL] = 0x0000000000000000ULL;
-    CHECK_FALSE(intel_x64::msrs::ia32_misc_enable::branch_trace_storage::get());
+    g_msrs[addr] = branch_trace_storage::mask;
+    CHECK(branch_trace_storage::is_enabled());
+    g_msrs[addr] = 0x0;
+    CHECK(branch_trace_storage::is_disabled());
+
+    g_msrs[addr] = branch_trace_storage::mask;
+    CHECK(branch_trace_storage::is_enabled(branch_trace_storage::mask));
+    g_msrs[addr] = 0x0;
+    CHECK(branch_trace_storage::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_misc_enable_processor_sampling")
@@ -1081,11 +1542,17 @@ TEST_CASE("ia32_misc_enable_processor_sampling")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x000001A0UL] = 0x0000000000001000ULL;
-    CHECK(intel_x64::msrs::ia32_misc_enable::processor_sampling::get());
+    using namespace intel_x64::msrs::ia32_misc_enable;
 
-    g_msrs[0x000001A0UL] = 0x0000000000000000ULL;
-    CHECK_FALSE(intel_x64::msrs::ia32_misc_enable::processor_sampling::get());
+    g_msrs[addr] = processor_sampling::mask;
+    CHECK(processor_sampling::is_enabled());
+    g_msrs[addr] = 0x0;
+    CHECK(processor_sampling::is_disabled());
+
+    g_msrs[addr] = processor_sampling::mask;
+    CHECK(processor_sampling::is_enabled(processor_sampling::mask));
+    g_msrs[addr] = 0x0;
+    CHECK(processor_sampling::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_misc_enable_intel_speedstep")
@@ -1093,11 +1560,17 @@ TEST_CASE("ia32_misc_enable_intel_speedstep")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_misc_enable::intel_speedstep::set(true);
-    CHECK(intel_x64::msrs::ia32_misc_enable::intel_speedstep::get());
+    using namespace intel_x64::msrs::ia32_misc_enable;
 
-    intel_x64::msrs::ia32_misc_enable::intel_speedstep::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_misc_enable::intel_speedstep::get());
+    intel_speedstep::enable();
+    CHECK(intel_speedstep::is_enabled());
+    intel_speedstep::disable();
+    CHECK(intel_speedstep::is_disabled());
+
+    intel_speedstep::enable(intel_speedstep::mask);
+    CHECK(intel_speedstep::is_enabled(intel_speedstep::mask));
+    intel_speedstep::disable(0x0);
+    CHECK(intel_speedstep::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_misc_enable_monitor_fsm")
@@ -1105,11 +1578,17 @@ TEST_CASE("ia32_misc_enable_monitor_fsm")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_misc_enable::monitor_fsm::set(true);
-    CHECK(intel_x64::msrs::ia32_misc_enable::monitor_fsm::get());
+    using namespace intel_x64::msrs::ia32_misc_enable;
 
-    intel_x64::msrs::ia32_misc_enable::monitor_fsm::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_misc_enable::monitor_fsm::get());
+    monitor_fsm::enable();
+    CHECK(monitor_fsm::is_enabled());
+    monitor_fsm::disable();
+    CHECK(monitor_fsm::is_disabled());
+
+    monitor_fsm::enable(monitor_fsm::mask);
+    CHECK(monitor_fsm::is_enabled(monitor_fsm::mask));
+    monitor_fsm::disable(0x0);
+    CHECK(monitor_fsm::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_misc_enable_limit_cpuid_maxval")
@@ -1117,11 +1596,17 @@ TEST_CASE("ia32_misc_enable_limit_cpuid_maxval")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_misc_enable::limit_cpuid_maxval::set(true);
-    CHECK(intel_x64::msrs::ia32_misc_enable::limit_cpuid_maxval::get());
+    using namespace intel_x64::msrs::ia32_misc_enable;
 
-    intel_x64::msrs::ia32_misc_enable::limit_cpuid_maxval::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_misc_enable::limit_cpuid_maxval::get());
+    limit_cpuid_maxval::enable();
+    CHECK(limit_cpuid_maxval::is_enabled());
+    limit_cpuid_maxval::disable();
+    CHECK(limit_cpuid_maxval::is_disabled());
+
+    limit_cpuid_maxval::enable(limit_cpuid_maxval::mask);
+    CHECK(limit_cpuid_maxval::is_enabled(limit_cpuid_maxval::mask));
+    limit_cpuid_maxval::disable(0x0);
+    CHECK(limit_cpuid_maxval::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_misc_enable_xtpr_message")
@@ -1129,11 +1614,17 @@ TEST_CASE("ia32_misc_enable_xtpr_message")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_misc_enable::xtpr_message::set(true);
-    CHECK(intel_x64::msrs::ia32_misc_enable::xtpr_message::get());
+    using namespace intel_x64::msrs::ia32_misc_enable;
 
-    intel_x64::msrs::ia32_misc_enable::xtpr_message::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_misc_enable::xtpr_message::get());
+    xtpr_message::enable();
+    CHECK(xtpr_message::is_enabled());
+    xtpr_message::disable();
+    CHECK(xtpr_message::is_disabled());
+
+    xtpr_message::enable(xtpr_message::mask);
+    CHECK(xtpr_message::is_enabled(xtpr_message::mask));
+    xtpr_message::disable(0x0);
+    CHECK(xtpr_message::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_misc_enable_xd_bit")
@@ -1141,11 +1632,17 @@ TEST_CASE("ia32_misc_enable_xd_bit")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_misc_enable::xd_bit::set(true);
-    CHECK(intel_x64::msrs::ia32_misc_enable::xd_bit::get());
+    using namespace intel_x64::msrs::ia32_misc_enable;
 
-    intel_x64::msrs::ia32_misc_enable::xd_bit::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_misc_enable::xd_bit::get());
+    xd_bit::enable();
+    CHECK(xd_bit::is_enabled());
+    xd_bit::disable();
+    CHECK(xd_bit::is_disabled());
+
+    xd_bit::enable(xd_bit::mask);
+    CHECK(xd_bit::is_enabled(xd_bit::mask));
+    xd_bit::disable(0x0);
+    CHECK(xd_bit::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_energy_perf_bias")
@@ -1153,8 +1650,11 @@ TEST_CASE("ia32_energy_perf_bias")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_energy_perf_bias::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_energy_perf_bias::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_energy_perf_bias;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_energy_perf_bias_power_policy")
@@ -1162,8 +1662,13 @@ TEST_CASE("ia32_energy_perf_bias_power_policy")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_energy_perf_bias::power_policy::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_energy_perf_bias::power_policy::get() == 0x000000000000000FULL);
+    using namespace intel_x64::msrs::ia32_energy_perf_bias;
+
+    power_policy::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(power_policy::get() == (power_policy::mask >> power_policy::from));
+
+    power_policy::set(power_policy::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(power_policy::get(power_policy::mask) == (power_policy::mask >> power_policy::from));
 }
 
 TEST_CASE("ia32_package_therm_status")
@@ -1171,8 +1676,11 @@ TEST_CASE("ia32_package_therm_status")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x000001B1UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_package_therm_status::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_package_therm_status;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_package_therm_status_pkg_therm_status")
@@ -1180,11 +1688,17 @@ TEST_CASE("ia32_package_therm_status_pkg_therm_status")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x000001B1UL] = 0x0000000000000001ULL;
-    CHECK(intel_x64::msrs::ia32_package_therm_status::pkg_therm_status::get());
+    using namespace intel_x64::msrs::ia32_package_therm_status;
 
-    g_msrs[0x000001B1UL] = 0x0000000000000000ULL;
-    CHECK_FALSE(intel_x64::msrs::ia32_package_therm_status::pkg_therm_status::get());
+    g_msrs[addr] = pkg_therm_status::mask;
+    CHECK(pkg_therm_status::is_enabled());
+    g_msrs[addr] = 0x0;
+    CHECK(pkg_therm_status::is_disabled());
+
+    g_msrs[addr] = pkg_therm_status::mask;
+    CHECK(pkg_therm_status::is_enabled(pkg_therm_status::mask));
+    g_msrs[addr] = 0x0;
+    CHECK(pkg_therm_status::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_package_therm_status_pkg_therm_log")
@@ -1192,11 +1706,17 @@ TEST_CASE("ia32_package_therm_status_pkg_therm_log")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_package_therm_status::pkg_therm_log::set(true);
-    CHECK(intel_x64::msrs::ia32_package_therm_status::pkg_therm_log::get());
+    using namespace intel_x64::msrs::ia32_package_therm_status;
 
-    intel_x64::msrs::ia32_package_therm_status::pkg_therm_log::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_package_therm_status::pkg_therm_log::get());
+    pkg_therm_log::enable();
+    CHECK(pkg_therm_log::is_enabled());
+    pkg_therm_log::disable();
+    CHECK(pkg_therm_log::is_disabled());
+
+    pkg_therm_log::enable(pkg_therm_log::mask);
+    CHECK(pkg_therm_log::is_enabled(pkg_therm_log::mask));
+    pkg_therm_log::disable(0x0);
+    CHECK(pkg_therm_log::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_package_therm_status_pkg_prochot_event")
@@ -1204,11 +1724,17 @@ TEST_CASE("ia32_package_therm_status_pkg_prochot_event")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x000001B1UL] = 0x0000000000000004ULL;
-    CHECK(intel_x64::msrs::ia32_package_therm_status::pkg_prochot_event::get());
+    using namespace intel_x64::msrs::ia32_package_therm_status;
 
-    g_msrs[0x000001B1UL] = 0x0000000000000000ULL;
-    CHECK_FALSE(intel_x64::msrs::ia32_package_therm_status::pkg_prochot_event::get());
+    g_msrs[addr] = pkg_prochot_event::mask;
+    CHECK(pkg_prochot_event::is_enabled());
+    g_msrs[addr] = 0x0;
+    CHECK(pkg_prochot_event::is_disabled());
+
+    g_msrs[addr] = pkg_prochot_event::mask;
+    CHECK(pkg_prochot_event::is_enabled(pkg_prochot_event::mask));
+    g_msrs[addr] = 0x0;
+    CHECK(pkg_prochot_event::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_package_therm_status_pkg_prochot_log")
@@ -1216,11 +1742,17 @@ TEST_CASE("ia32_package_therm_status_pkg_prochot_log")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_package_therm_status::pkg_prochot_log::set(true);
-    CHECK(intel_x64::msrs::ia32_package_therm_status::pkg_prochot_log::get());
+    using namespace intel_x64::msrs::ia32_package_therm_status;
 
-    intel_x64::msrs::ia32_package_therm_status::pkg_prochot_log::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_package_therm_status::pkg_prochot_log::get());
+    pkg_prochot_log::enable();
+    CHECK(pkg_prochot_log::is_enabled());
+    pkg_prochot_log::disable();
+    CHECK(pkg_prochot_log::is_disabled());
+
+    pkg_prochot_log::enable(pkg_prochot_log::mask);
+    CHECK(pkg_prochot_log::is_enabled(pkg_prochot_log::mask));
+    pkg_prochot_log::disable(0x0);
+    CHECK(pkg_prochot_log::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_package_therm_status_pkg_crit_temp_status")
@@ -1228,11 +1760,17 @@ TEST_CASE("ia32_package_therm_status_pkg_crit_temp_status")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x000001B1UL] = 0x0000000000000010ULL;
-    CHECK(intel_x64::msrs::ia32_package_therm_status::pkg_crit_temp_status::get());
+    using namespace intel_x64::msrs::ia32_package_therm_status;
 
-    g_msrs[0x000001B1UL] = 0x0000000000000000ULL;
-    CHECK_FALSE(intel_x64::msrs::ia32_package_therm_status::pkg_crit_temp_status::get());
+    g_msrs[addr] = pkg_crit_temp_status::mask;
+    CHECK(pkg_crit_temp_status::is_enabled());
+    g_msrs[addr] = 0x0;
+    CHECK(pkg_crit_temp_status::is_disabled());
+
+    g_msrs[addr] = pkg_crit_temp_status::mask;
+    CHECK(pkg_crit_temp_status::is_enabled(pkg_crit_temp_status::mask));
+    g_msrs[addr] = 0x0;
+    CHECK(pkg_crit_temp_status::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_package_therm_status_pkg_crit_temp_log")
@@ -1240,11 +1778,17 @@ TEST_CASE("ia32_package_therm_status_pkg_crit_temp_log")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_package_therm_status::pkg_crit_temp_log::set(true);
-    CHECK(intel_x64::msrs::ia32_package_therm_status::pkg_crit_temp_log::get());
+    using namespace intel_x64::msrs::ia32_package_therm_status;
 
-    intel_x64::msrs::ia32_package_therm_status::pkg_crit_temp_log::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_package_therm_status::pkg_crit_temp_log::get());
+    pkg_crit_temp_log::enable();
+    CHECK(pkg_crit_temp_log::is_enabled());
+    pkg_crit_temp_log::disable();
+    CHECK(pkg_crit_temp_log::is_disabled());
+
+    pkg_crit_temp_log::enable(pkg_crit_temp_log::mask);
+    CHECK(pkg_crit_temp_log::is_enabled(pkg_crit_temp_log::mask));
+    pkg_crit_temp_log::disable(0x0);
+    CHECK(pkg_crit_temp_log::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_package_therm_status_pkg_therm_thresh1_status")
@@ -1252,11 +1796,17 @@ TEST_CASE("ia32_package_therm_status_pkg_therm_thresh1_status")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x000001B1UL] = 0x0000000000000040ULL;
-    CHECK(intel_x64::msrs::ia32_package_therm_status::pkg_therm_thresh1_status::get());
+    using namespace intel_x64::msrs::ia32_package_therm_status;
 
-    g_msrs[0x000001B1UL] = 0x0000000000000000ULL;
-    CHECK_FALSE(intel_x64::msrs::ia32_package_therm_status::pkg_therm_thresh1_status::get());
+    g_msrs[addr] = pkg_therm_thresh1_status::mask;
+    CHECK(pkg_therm_thresh1_status::is_enabled());
+    g_msrs[addr] = 0x0;
+    CHECK(pkg_therm_thresh1_status::is_disabled());
+
+    g_msrs[addr] = pkg_therm_thresh1_status::mask;
+    CHECK(pkg_therm_thresh1_status::is_enabled(pkg_therm_thresh1_status::mask));
+    g_msrs[addr] = 0x0;
+    CHECK(pkg_therm_thresh1_status::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_package_therm_status_pkg_therm_thresh1_log")
@@ -1264,11 +1814,17 @@ TEST_CASE("ia32_package_therm_status_pkg_therm_thresh1_log")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_package_therm_status::pkg_therm_thresh1_log::set(true);
-    CHECK(intel_x64::msrs::ia32_package_therm_status::pkg_therm_thresh1_log::get());
+    using namespace intel_x64::msrs::ia32_package_therm_status;
 
-    intel_x64::msrs::ia32_package_therm_status::pkg_therm_thresh1_log::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_package_therm_status::pkg_therm_thresh1_log::get());
+    pkg_therm_thresh1_log::enable();
+    CHECK(pkg_therm_thresh1_log::is_enabled());
+    pkg_therm_thresh1_log::disable();
+    CHECK(pkg_therm_thresh1_log::is_disabled());
+
+    pkg_therm_thresh1_log::enable(pkg_therm_thresh1_log::mask);
+    CHECK(pkg_therm_thresh1_log::is_enabled(pkg_therm_thresh1_log::mask));
+    pkg_therm_thresh1_log::disable(0x0);
+    CHECK(pkg_therm_thresh1_log::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_package_therm_status_pkg_therm_thresh2_status")
@@ -1276,11 +1832,17 @@ TEST_CASE("ia32_package_therm_status_pkg_therm_thresh2_status")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x000001B1UL] = 0x0000000000000100ULL;
-    CHECK(intel_x64::msrs::ia32_package_therm_status::pkg_therm_thresh2_status::get());
+    using namespace intel_x64::msrs::ia32_package_therm_status;
 
-    g_msrs[0x000001B1UL] = 0x0000000000000000ULL;
-    CHECK_FALSE(intel_x64::msrs::ia32_package_therm_status::pkg_therm_thresh2_status::get());
+    g_msrs[addr] = pkg_therm_thresh2_status::mask;
+    CHECK(pkg_therm_thresh2_status::is_enabled());
+    g_msrs[addr] = 0x0;
+    CHECK(pkg_therm_thresh2_status::is_disabled());
+
+    g_msrs[addr] = pkg_therm_thresh2_status::mask;
+    CHECK(pkg_therm_thresh2_status::is_enabled(pkg_therm_thresh2_status::mask));
+    g_msrs[addr] = 0x0;
+    CHECK(pkg_therm_thresh2_status::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_package_therm_status_pkg_therm_thresh2_log")
@@ -1288,11 +1850,17 @@ TEST_CASE("ia32_package_therm_status_pkg_therm_thresh2_log")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_package_therm_status::pkg_therm_thresh2_log::set(true);
-    CHECK(intel_x64::msrs::ia32_package_therm_status::pkg_therm_thresh2_log::get());
+    using namespace intel_x64::msrs::ia32_package_therm_status;
 
-    intel_x64::msrs::ia32_package_therm_status::pkg_therm_thresh2_log::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_package_therm_status::pkg_therm_thresh2_log::get());
+    pkg_therm_thresh2_log::enable();
+    CHECK(pkg_therm_thresh2_log::is_enabled());
+    pkg_therm_thresh2_log::disable();
+    CHECK(pkg_therm_thresh2_log::is_disabled());
+
+    pkg_therm_thresh2_log::enable(pkg_therm_thresh2_log::mask);
+    CHECK(pkg_therm_thresh2_log::is_enabled(pkg_therm_thresh2_log::mask));
+    pkg_therm_thresh2_log::disable(0x0);
+    CHECK(pkg_therm_thresh2_log::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_package_therm_status_pkg_power_limit_status")
@@ -1300,11 +1868,17 @@ TEST_CASE("ia32_package_therm_status_pkg_power_limit_status")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x000001B1UL] = 0x0000000000000400ULL;
-    CHECK(intel_x64::msrs::ia32_package_therm_status::pkg_power_limit_status::get());
+    using namespace intel_x64::msrs::ia32_package_therm_status;
 
-    g_msrs[0x000001B1UL] = 0x0000000000000000ULL;
-    CHECK_FALSE(intel_x64::msrs::ia32_package_therm_status::pkg_power_limit_status::get());
+    g_msrs[addr] = pkg_power_limit_status::mask;
+    CHECK(pkg_power_limit_status::is_enabled());
+    g_msrs[addr] = 0x0;
+    CHECK(pkg_power_limit_status::is_disabled());
+
+    g_msrs[addr] = pkg_power_limit_status::mask;
+    CHECK(pkg_power_limit_status::is_enabled(pkg_power_limit_status::mask));
+    g_msrs[addr] = 0x0;
+    CHECK(pkg_power_limit_status::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_package_therm_status_pkg_power_limit_log")
@@ -1312,11 +1886,17 @@ TEST_CASE("ia32_package_therm_status_pkg_power_limit_log")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_package_therm_status::pkg_power_limit_log::set(true);
-    CHECK(intel_x64::msrs::ia32_package_therm_status::pkg_power_limit_log::get());
+    using namespace intel_x64::msrs::ia32_package_therm_status;
 
-    intel_x64::msrs::ia32_package_therm_status::pkg_power_limit_log::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_package_therm_status::pkg_power_limit_log::get());
+    pkg_power_limit_log::enable();
+    CHECK(pkg_power_limit_log::is_enabled());
+    pkg_power_limit_log::disable();
+    CHECK(pkg_power_limit_log::is_disabled());
+
+    pkg_power_limit_log::enable(pkg_power_limit_log::mask);
+    CHECK(pkg_power_limit_log::is_enabled(pkg_power_limit_log::mask));
+    pkg_power_limit_log::disable(0x0);
+    CHECK(pkg_power_limit_log::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_package_therm_status_pkg_digital_readout")
@@ -1324,8 +1904,10 @@ TEST_CASE("ia32_package_therm_status_pkg_digital_readout")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x000001B1UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_package_therm_status::pkg_digital_readout::get() == 0x000000000000007FULL);
+    using namespace intel_x64::msrs::ia32_package_therm_status;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(pkg_digital_readout::get() == (pkg_digital_readout::mask >> pkg_digital_readout::from));
 }
 
 TEST_CASE("ia32_package_therm_interrupt")
@@ -1333,8 +1915,11 @@ TEST_CASE("ia32_package_therm_interrupt")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_package_therm_interrupt::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_package_therm_interrupt::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_package_therm_interrupt;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_package_therm_interrupt_pkg_high_temp")
@@ -1342,11 +1927,17 @@ TEST_CASE("ia32_package_therm_interrupt_pkg_high_temp")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_package_therm_interrupt::pkg_high_temp::set(true);
-    CHECK(intel_x64::msrs::ia32_package_therm_interrupt::pkg_high_temp::get());
+    using namespace intel_x64::msrs::ia32_package_therm_interrupt;
 
-    intel_x64::msrs::ia32_package_therm_interrupt::pkg_high_temp::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_package_therm_interrupt::pkg_high_temp::get());
+    pkg_high_temp::enable();
+    CHECK(pkg_high_temp::is_enabled());
+    pkg_high_temp::disable();
+    CHECK(pkg_high_temp::is_disabled());
+
+    pkg_high_temp::enable(pkg_high_temp::mask);
+    CHECK(pkg_high_temp::is_enabled(pkg_high_temp::mask));
+    pkg_high_temp::disable(0x0);
+    CHECK(pkg_high_temp::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_package_therm_interrupt_pkg_low_temp")
@@ -1354,11 +1945,17 @@ TEST_CASE("ia32_package_therm_interrupt_pkg_low_temp")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_package_therm_interrupt::pkg_low_temp::set(true);
-    CHECK(intel_x64::msrs::ia32_package_therm_interrupt::pkg_low_temp::get());
+    using namespace intel_x64::msrs::ia32_package_therm_interrupt;
 
-    intel_x64::msrs::ia32_package_therm_interrupt::pkg_low_temp::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_package_therm_interrupt::pkg_low_temp::get());
+    pkg_low_temp::enable();
+    CHECK(pkg_low_temp::is_enabled());
+    pkg_low_temp::disable();
+    CHECK(pkg_low_temp::is_disabled());
+
+    pkg_low_temp::enable(pkg_low_temp::mask);
+    CHECK(pkg_low_temp::is_enabled(pkg_low_temp::mask));
+    pkg_low_temp::disable(0x0);
+    CHECK(pkg_low_temp::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_package_therm_interrupt_pkg_prochot")
@@ -1366,11 +1963,17 @@ TEST_CASE("ia32_package_therm_interrupt_pkg_prochot")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_package_therm_interrupt::pkg_prochot::set(true);
-    CHECK(intel_x64::msrs::ia32_package_therm_interrupt::pkg_prochot::get());
+    using namespace intel_x64::msrs::ia32_package_therm_interrupt;
 
-    intel_x64::msrs::ia32_package_therm_interrupt::pkg_prochot::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_package_therm_interrupt::pkg_prochot::get());
+    pkg_prochot::enable();
+    CHECK(pkg_prochot::is_enabled());
+    pkg_prochot::disable();
+    CHECK(pkg_prochot::is_disabled());
+
+    pkg_prochot::enable(pkg_prochot::mask);
+    CHECK(pkg_prochot::is_enabled(pkg_prochot::mask));
+    pkg_prochot::disable(0x0);
+    CHECK(pkg_prochot::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_package_therm_interrupt_pkg_overheat")
@@ -1378,11 +1981,17 @@ TEST_CASE("ia32_package_therm_interrupt_pkg_overheat")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_package_therm_interrupt::pkg_overheat::set(true);
-    CHECK(intel_x64::msrs::ia32_package_therm_interrupt::pkg_overheat::get());
+    using namespace intel_x64::msrs::ia32_package_therm_interrupt;
 
-    intel_x64::msrs::ia32_package_therm_interrupt::pkg_overheat::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_package_therm_interrupt::pkg_overheat::get());
+    pkg_overheat::enable();
+    CHECK(pkg_overheat::is_enabled());
+    pkg_overheat::disable();
+    CHECK(pkg_overheat::is_disabled());
+
+    pkg_overheat::enable(pkg_overheat::mask);
+    CHECK(pkg_overheat::is_enabled(pkg_overheat::mask));
+    pkg_overheat::disable(0x0);
+    CHECK(pkg_overheat::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_package_therm_interrupt_pkg_threshold_1_value")
@@ -1390,11 +1999,13 @@ TEST_CASE("ia32_package_therm_interrupt_pkg_threshold_1_value")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_package_therm_interrupt::pkg_threshold_1_value::set(true);
-    CHECK(intel_x64::msrs::ia32_package_therm_interrupt::pkg_threshold_1_value::get());
+    using namespace intel_x64::msrs::ia32_package_therm_interrupt;
 
-    intel_x64::msrs::ia32_package_therm_interrupt::pkg_threshold_1_value::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_package_therm_interrupt::pkg_threshold_1_value::get());
+    pkg_threshold_1_value::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(pkg_threshold_1_value::get() == (pkg_threshold_1_value::mask >> pkg_threshold_1_value::from));
+
+    pkg_threshold_1_value::set(pkg_threshold_1_value::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(pkg_threshold_1_value::get(pkg_threshold_1_value::mask) == (pkg_threshold_1_value::mask >> pkg_threshold_1_value::from));
 }
 
 TEST_CASE("ia32_package_therm_interrupt_pkg_threshold_1_enable")
@@ -1402,11 +2013,17 @@ TEST_CASE("ia32_package_therm_interrupt_pkg_threshold_1_enable")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_package_therm_interrupt::pkg_threshold_1_enable::set(true);
-    CHECK(intel_x64::msrs::ia32_package_therm_interrupt::pkg_threshold_1_enable::get());
+    using namespace intel_x64::msrs::ia32_package_therm_interrupt;
 
-    intel_x64::msrs::ia32_package_therm_interrupt::pkg_threshold_1_enable::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_package_therm_interrupt::pkg_threshold_1_enable::get());
+    pkg_threshold_1_enable::enable();
+    CHECK(pkg_threshold_1_enable::is_enabled());
+    pkg_threshold_1_enable::disable();
+    CHECK(pkg_threshold_1_enable::is_disabled());
+
+    pkg_threshold_1_enable::enable(pkg_threshold_1_enable::mask);
+    CHECK(pkg_threshold_1_enable::is_enabled(pkg_threshold_1_enable::mask));
+    pkg_threshold_1_enable::disable(0x0);
+    CHECK(pkg_threshold_1_enable::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_package_therm_interrupt_pkg_threshold_2_value")
@@ -1414,11 +2031,13 @@ TEST_CASE("ia32_package_therm_interrupt_pkg_threshold_2_value")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_package_therm_interrupt::pkg_threshold_2_value::set(true);
-    CHECK(intel_x64::msrs::ia32_package_therm_interrupt::pkg_threshold_2_value::get());
+    using namespace intel_x64::msrs::ia32_package_therm_interrupt;
 
-    intel_x64::msrs::ia32_package_therm_interrupt::pkg_threshold_2_value::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_package_therm_interrupt::pkg_threshold_2_value::get());
+    pkg_threshold_2_value::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(pkg_threshold_2_value::get() == (pkg_threshold_2_value::mask >> pkg_threshold_2_value::from));
+
+    pkg_threshold_2_value::set(pkg_threshold_2_value::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(pkg_threshold_2_value::get(pkg_threshold_2_value::mask) == (pkg_threshold_2_value::mask >> pkg_threshold_2_value::from));
 }
 
 TEST_CASE("ia32_package_therm_interrupt_pkg_threshold_2_enable")
@@ -1426,11 +2045,17 @@ TEST_CASE("ia32_package_therm_interrupt_pkg_threshold_2_enable")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_package_therm_interrupt::pkg_threshold_2_enable::set(true);
-    CHECK(intel_x64::msrs::ia32_package_therm_interrupt::pkg_threshold_2_enable::get());
+    using namespace intel_x64::msrs::ia32_package_therm_interrupt;
 
-    intel_x64::msrs::ia32_package_therm_interrupt::pkg_threshold_2_enable::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_package_therm_interrupt::pkg_threshold_2_enable::get());
+    pkg_threshold_2_enable::enable();
+    CHECK(pkg_threshold_2_enable::is_enabled());
+    pkg_threshold_2_enable::disable();
+    CHECK(pkg_threshold_2_enable::is_disabled());
+
+    pkg_threshold_2_enable::enable(pkg_threshold_2_enable::mask);
+    CHECK(pkg_threshold_2_enable::is_enabled(pkg_threshold_2_enable::mask));
+    pkg_threshold_2_enable::disable(0x0);
+    CHECK(pkg_threshold_2_enable::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_package_therm_interrupt_pkg_power_limit")
@@ -1438,11 +2063,17 @@ TEST_CASE("ia32_package_therm_interrupt_pkg_power_limit")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_package_therm_interrupt::pkg_power_limit::set(true);
-    CHECK(intel_x64::msrs::ia32_package_therm_interrupt::pkg_power_limit::get());
+    using namespace intel_x64::msrs::ia32_package_therm_interrupt;
 
-    intel_x64::msrs::ia32_package_therm_interrupt::pkg_power_limit::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_package_therm_interrupt::pkg_power_limit::get());
+    pkg_power_limit::enable();
+    CHECK(pkg_power_limit::is_enabled());
+    pkg_power_limit::disable();
+    CHECK(pkg_power_limit::is_disabled());
+
+    pkg_power_limit::enable(pkg_power_limit::mask);
+    CHECK(pkg_power_limit::is_enabled(pkg_power_limit::mask));
+    pkg_power_limit::disable(0x0);
+    CHECK(pkg_power_limit::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_debugctl")
@@ -1450,10 +2081,11 @@ TEST_CASE("ia32_debugctl")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_debugctl::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_debugctl::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_debugctl;
 
-    intel_x64::msrs::ia32_debugctl::dump();
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_debugctl_lbr")
@@ -1461,11 +2093,17 @@ TEST_CASE("ia32_debugctl_lbr")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_debugctl::lbr::set(true);
-    CHECK(intel_x64::msrs::ia32_debugctl::lbr::get());
+    using namespace intel_x64::msrs::ia32_debugctl;
 
-    intel_x64::msrs::ia32_debugctl::lbr::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_debugctl::lbr::get());
+    lbr::enable();
+    CHECK(lbr::is_enabled());
+    lbr::disable();
+    CHECK(lbr::is_disabled());
+
+    lbr::enable(lbr::mask);
+    CHECK(lbr::is_enabled(lbr::mask));
+    lbr::disable(0x0);
+    CHECK(lbr::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_debugctl_btf")
@@ -1473,11 +2111,17 @@ TEST_CASE("ia32_debugctl_btf")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_debugctl::btf::set(true);
-    CHECK(intel_x64::msrs::ia32_debugctl::btf::get());
+    using namespace intel_x64::msrs::ia32_debugctl;
 
-    intel_x64::msrs::ia32_debugctl::btf::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_debugctl::btf::get());
+    btf::enable();
+    CHECK(btf::is_enabled());
+    btf::disable();
+    CHECK(btf::is_disabled());
+
+    btf::enable(btf::mask);
+    CHECK(btf::is_enabled(btf::mask));
+    btf::disable(0x0);
+    CHECK(btf::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_debugctl_tr")
@@ -1485,11 +2129,17 @@ TEST_CASE("ia32_debugctl_tr")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_debugctl::tr::set(true);
-    CHECK(intel_x64::msrs::ia32_debugctl::tr::get());
+    using namespace intel_x64::msrs::ia32_debugctl;
 
-    intel_x64::msrs::ia32_debugctl::tr::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_debugctl::tr::get());
+    tr::enable();
+    CHECK(tr::is_enabled());
+    tr::disable();
+    CHECK(tr::is_disabled());
+
+    tr::enable(tr::mask);
+    CHECK(tr::is_enabled(tr::mask));
+    tr::disable(0x0);
+    CHECK(tr::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_debugctl_bts")
@@ -1497,11 +2147,17 @@ TEST_CASE("ia32_debugctl_bts")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_debugctl::bts::set(true);
-    CHECK(intel_x64::msrs::ia32_debugctl::bts::get());
+    using namespace intel_x64::msrs::ia32_debugctl;
 
-    intel_x64::msrs::ia32_debugctl::bts::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_debugctl::bts::get());
+    bts::enable();
+    CHECK(bts::is_enabled());
+    bts::disable();
+    CHECK(bts::is_disabled());
+
+    bts::enable(bts::mask);
+    CHECK(bts::is_enabled(bts::mask));
+    bts::disable(0x0);
+    CHECK(bts::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_debugctl_btint")
@@ -1509,11 +2165,17 @@ TEST_CASE("ia32_debugctl_btint")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_debugctl::btint::set(true);
-    CHECK(intel_x64::msrs::ia32_debugctl::btint::get());
+    using namespace intel_x64::msrs::ia32_debugctl;
 
-    intel_x64::msrs::ia32_debugctl::btint::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_debugctl::btint::get());
+    btint::enable();
+    CHECK(btint::is_enabled());
+    btint::disable();
+    CHECK(btint::is_disabled());
+
+    btint::enable(btint::mask);
+    CHECK(btint::is_enabled(btint::mask));
+    btint::disable(0x0);
+    CHECK(btint::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_debugctl_bt_off_os")
@@ -1521,11 +2183,17 @@ TEST_CASE("ia32_debugctl_bt_off_os")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_debugctl::bt_off_os::set(true);
-    CHECK(intel_x64::msrs::ia32_debugctl::bt_off_os::get());
+    using namespace intel_x64::msrs::ia32_debugctl;
 
-    intel_x64::msrs::ia32_debugctl::bt_off_os::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_debugctl::bt_off_os::get());
+    bt_off_os::enable();
+    CHECK(bt_off_os::is_enabled());
+    bt_off_os::disable();
+    CHECK(bt_off_os::is_disabled());
+
+    bt_off_os::enable(bt_off_os::mask);
+    CHECK(bt_off_os::is_enabled(bt_off_os::mask));
+    bt_off_os::disable(0x0);
+    CHECK(bt_off_os::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_debugctl_bt_off_user")
@@ -1533,11 +2201,17 @@ TEST_CASE("ia32_debugctl_bt_off_user")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_debugctl::bt_off_user::set(true);
-    CHECK(intel_x64::msrs::ia32_debugctl::bt_off_user::get());
+    using namespace intel_x64::msrs::ia32_debugctl;
 
-    intel_x64::msrs::ia32_debugctl::bt_off_user::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_debugctl::bt_off_user::get());
+    bt_off_user::enable();
+    CHECK(bt_off_user::is_enabled());
+    bt_off_user::disable();
+    CHECK(bt_off_user::is_disabled());
+
+    bt_off_user::enable(bt_off_user::mask);
+    CHECK(bt_off_user::is_enabled(bt_off_user::mask));
+    bt_off_user::disable(0x0);
+    CHECK(bt_off_user::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_debugctl_freeze_lbrs_on_pmi")
@@ -1545,11 +2219,17 @@ TEST_CASE("ia32_debugctl_freeze_lbrs_on_pmi")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_debugctl::freeze_lbrs_on_pmi::set(true);
-    CHECK(intel_x64::msrs::ia32_debugctl::freeze_lbrs_on_pmi::get());
+    using namespace intel_x64::msrs::ia32_debugctl;
 
-    intel_x64::msrs::ia32_debugctl::freeze_lbrs_on_pmi::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_debugctl::freeze_lbrs_on_pmi::get());
+    freeze_lbrs_on_pmi::enable();
+    CHECK(freeze_lbrs_on_pmi::is_enabled());
+    freeze_lbrs_on_pmi::disable();
+    CHECK(freeze_lbrs_on_pmi::is_disabled());
+
+    freeze_lbrs_on_pmi::enable(freeze_lbrs_on_pmi::mask);
+    CHECK(freeze_lbrs_on_pmi::is_enabled(freeze_lbrs_on_pmi::mask));
+    freeze_lbrs_on_pmi::disable(0x0);
+    CHECK(freeze_lbrs_on_pmi::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_debugctl_freeze_perfmon_on_pmi")
@@ -1557,11 +2237,17 @@ TEST_CASE("ia32_debugctl_freeze_perfmon_on_pmi")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_debugctl::freeze_perfmon_on_pmi::set(true);
-    CHECK(intel_x64::msrs::ia32_debugctl::freeze_perfmon_on_pmi::get());
+    using namespace intel_x64::msrs::ia32_debugctl;
 
-    intel_x64::msrs::ia32_debugctl::freeze_perfmon_on_pmi::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_debugctl::freeze_perfmon_on_pmi::get());
+    freeze_perfmon_on_pmi::enable();
+    CHECK(freeze_perfmon_on_pmi::is_enabled());
+    freeze_perfmon_on_pmi::disable();
+    CHECK(freeze_perfmon_on_pmi::is_disabled());
+
+    freeze_perfmon_on_pmi::enable(freeze_perfmon_on_pmi::mask);
+    CHECK(freeze_perfmon_on_pmi::is_enabled(freeze_perfmon_on_pmi::mask));
+    freeze_perfmon_on_pmi::disable(0x0);
+    CHECK(freeze_perfmon_on_pmi::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_debugctl_enable_uncore_pmi")
@@ -1569,11 +2255,17 @@ TEST_CASE("ia32_debugctl_enable_uncore_pmi")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_debugctl::enable_uncore_pmi::set(true);
-    CHECK(intel_x64::msrs::ia32_debugctl::enable_uncore_pmi::get());
+    using namespace intel_x64::msrs::ia32_debugctl;
 
-    intel_x64::msrs::ia32_debugctl::enable_uncore_pmi::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_debugctl::enable_uncore_pmi::get());
+    enable_uncore_pmi::enable();
+    CHECK(enable_uncore_pmi::is_enabled());
+    enable_uncore_pmi::disable();
+    CHECK(enable_uncore_pmi::is_disabled());
+
+    enable_uncore_pmi::enable(enable_uncore_pmi::mask);
+    CHECK(enable_uncore_pmi::is_enabled(enable_uncore_pmi::mask));
+    enable_uncore_pmi::disable(0x0);
+    CHECK(enable_uncore_pmi::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_debugctl_freeze_while_smm")
@@ -1581,11 +2273,17 @@ TEST_CASE("ia32_debugctl_freeze_while_smm")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_debugctl::freeze_while_smm::set(true);
-    CHECK(intel_x64::msrs::ia32_debugctl::freeze_while_smm::get());
+    using namespace intel_x64::msrs::ia32_debugctl;
 
-    intel_x64::msrs::ia32_debugctl::freeze_while_smm::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_debugctl::freeze_while_smm::get());
+    freeze_while_smm::enable();
+    CHECK(freeze_while_smm::is_enabled());
+    freeze_while_smm::disable();
+    CHECK(freeze_while_smm::is_disabled());
+
+    freeze_while_smm::enable(freeze_while_smm::mask);
+    CHECK(freeze_while_smm::is_enabled(freeze_while_smm::mask));
+    freeze_while_smm::disable(0x0);
+    CHECK(freeze_while_smm::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_debugctl_rtm_debug")
@@ -1593,20 +2291,17 @@ TEST_CASE("ia32_debugctl_rtm_debug")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_debugctl::rtm_debug::set(true);
-    CHECK(intel_x64::msrs::ia32_debugctl::rtm_debug::get());
+    using namespace intel_x64::msrs::ia32_debugctl;
 
-    intel_x64::msrs::ia32_debugctl::rtm_debug::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_debugctl::rtm_debug::get());
-}
+    rtm_debug::enable();
+    CHECK(rtm_debug::is_enabled());
+    rtm_debug::disable();
+    CHECK(rtm_debug::is_disabled());
 
-TEST_CASE("ia32_debugctl_reserved")
-{
-    MockRepository mocks;
-    setup_intrinsics(mocks);
-
-    intel_x64::msrs::ia32_debugctl::reserved::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_debugctl::reserved::get() == 0xFFFFFFFFFFFF003CULL);
+    rtm_debug::enable(rtm_debug::mask);
+    CHECK(rtm_debug::is_enabled(rtm_debug::mask));
+    rtm_debug::disable(0x0);
+    CHECK(rtm_debug::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_smrr_physbase")
@@ -1614,8 +2309,11 @@ TEST_CASE("ia32_smrr_physbase")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_smrr_physbase::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_smrr_physbase::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_smrr_physbase;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_smrr_physbase_type")
@@ -1623,8 +2321,13 @@ TEST_CASE("ia32_smrr_physbase_type")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_smrr_physbase::type::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_smrr_physbase::type::get() == 0x00000000000000FFULL);
+    using namespace intel_x64::msrs::ia32_smrr_physbase;
+
+    type::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(type::get() == (type::mask >> type::from));
+
+    type::set(type::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(type::get(type::mask) == (type::mask >> type::from));
 }
 
 TEST_CASE("ia32_smrr_physbase_physbase")
@@ -1632,8 +2335,13 @@ TEST_CASE("ia32_smrr_physbase_physbase")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_smrr_physbase::physbase::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_smrr_physbase::physbase::get() == 0x00000000000FFFFFULL);
+    using namespace intel_x64::msrs::ia32_smrr_physbase;
+
+    physbase::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(physbase::get() == (physbase::mask >> physbase::from));
+
+    physbase::set(physbase::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(physbase::get(physbase::mask) == (physbase::mask >> physbase::from));
 }
 
 TEST_CASE("ia32_smrr_physmask")
@@ -1641,8 +2349,11 @@ TEST_CASE("ia32_smrr_physmask")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_smrr_physmask::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_smrr_physmask::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_smrr_physmask;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_smrr_physmask_valid")
@@ -1650,11 +2361,17 @@ TEST_CASE("ia32_smrr_physmask_valid")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_smrr_physmask::valid::set(true);
-    CHECK(intel_x64::msrs::ia32_smrr_physmask::valid::get());
+    using namespace intel_x64::msrs::ia32_smrr_physmask;
 
-    intel_x64::msrs::ia32_smrr_physmask::valid::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_smrr_physmask::valid::get());
+    valid::enable();
+    CHECK(valid::is_enabled());
+    valid::disable();
+    CHECK(valid::is_disabled());
+
+    valid::enable(valid::mask);
+    CHECK(valid::is_enabled(valid::mask));
+    valid::disable(0x0);
+    CHECK(valid::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_smrr_physmask_physmask")
@@ -1662,8 +2379,13 @@ TEST_CASE("ia32_smrr_physmask_physmask")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_smrr_physmask::physmask::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_smrr_physmask::physmask::get() == 0x00000000000FFFFFULL);
+    using namespace intel_x64::msrs::ia32_smrr_physmask;
+
+    physmask::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(physmask::get() == (physmask::mask >> physmask::from));
+
+    physmask::set(physmask::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(physmask::get(physmask::mask) == (physmask::mask >> physmask::from));
 }
 
 TEST_CASE("ia32_platform_dca_cap")
@@ -1671,8 +2393,11 @@ TEST_CASE("ia32_platform_dca_cap")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x000001F8UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_platform_dca_cap::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_platform_dca_cap;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_cpu_dca_cap")
@@ -1680,8 +2405,11 @@ TEST_CASE("ia32_cpu_dca_cap")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_cpu_dca_cap::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_cpu_dca_cap::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_cpu_dca_cap;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_dca_0_cap")
@@ -1689,8 +2417,11 @@ TEST_CASE("ia32_dca_0_cap")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_dca_0_cap::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_dca_0_cap::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_dca_0_cap;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_dca_0_cap_dca_active")
@@ -1698,11 +2429,17 @@ TEST_CASE("ia32_dca_0_cap_dca_active")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_dca_0_cap::dca_active::set(true);
-    CHECK(intel_x64::msrs::ia32_dca_0_cap::dca_active::get());
+    using namespace intel_x64::msrs::ia32_dca_0_cap;
 
-    intel_x64::msrs::ia32_dca_0_cap::dca_active::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_dca_0_cap::dca_active::get());
+    dca_active::enable();
+    CHECK(dca_active::is_enabled());
+    dca_active::disable();
+    CHECK(dca_active::is_disabled());
+
+    dca_active::enable(dca_active::mask);
+    CHECK(dca_active::is_enabled(dca_active::mask));
+    dca_active::disable(0x0);
+    CHECK(dca_active::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_dca_0_cap_transaction")
@@ -1710,8 +2447,13 @@ TEST_CASE("ia32_dca_0_cap_transaction")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_dca_0_cap::transaction::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_dca_0_cap::transaction::get() == 0x0000000000000003ULL);
+    using namespace intel_x64::msrs::ia32_dca_0_cap;
+
+    transaction::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(transaction::get() == (transaction::mask >> transaction::from));
+
+    transaction::set(transaction::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(transaction::get(transaction::mask) == (transaction::mask >> transaction::from));
 }
 
 TEST_CASE("ia32_dca_0_cap_dca_type")
@@ -1719,8 +2461,13 @@ TEST_CASE("ia32_dca_0_cap_dca_type")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_dca_0_cap::dca_type::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_dca_0_cap::dca_type::get() == 0x000000000000000FULL);
+    using namespace intel_x64::msrs::ia32_dca_0_cap;
+
+    dca_type::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(dca_type::get() == (dca_type::mask >> dca_type::from));
+
+    dca_type::set(dca_type::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(dca_type::get(dca_type::mask) == (dca_type::mask >> dca_type::from));
 }
 
 TEST_CASE("ia32_dca_0_cap_dca_queue_size")
@@ -1728,8 +2475,13 @@ TEST_CASE("ia32_dca_0_cap_dca_queue_size")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_dca_0_cap::dca_queue_size::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_dca_0_cap::dca_queue_size::get() == 0x000000000000000FULL);
+    using namespace intel_x64::msrs::ia32_dca_0_cap;
+
+    dca_queue_size::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(dca_queue_size::get() == (dca_queue_size::mask >> dca_queue_size::from));
+
+    dca_queue_size::set(dca_queue_size::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(dca_queue_size::get(dca_queue_size::mask) == (dca_queue_size::mask >> dca_queue_size::from));
 }
 
 TEST_CASE("ia32_dca_0_cap_dca_delay")
@@ -1737,8 +2489,13 @@ TEST_CASE("ia32_dca_0_cap_dca_delay")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_dca_0_cap::dca_delay::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_dca_0_cap::dca_delay::get() == 0x000000000000000FULL);
+    using namespace intel_x64::msrs::ia32_dca_0_cap;
+
+    dca_delay::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(dca_delay::get() == (dca_delay::mask >> dca_delay::from));
+
+    dca_delay::set(dca_delay::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(dca_delay::get(dca_delay::mask) == (dca_delay::mask >> dca_delay::from));
 }
 
 TEST_CASE("ia32_dca_0_cap_sw_block")
@@ -1746,11 +2503,17 @@ TEST_CASE("ia32_dca_0_cap_sw_block")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_dca_0_cap::sw_block::set(true);
-    CHECK(intel_x64::msrs::ia32_dca_0_cap::sw_block::get());
+    using namespace intel_x64::msrs::ia32_dca_0_cap;
 
-    intel_x64::msrs::ia32_dca_0_cap::sw_block::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_dca_0_cap::sw_block::get());
+    sw_block::enable();
+    CHECK(sw_block::is_enabled());
+    sw_block::disable();
+    CHECK(sw_block::is_disabled());
+
+    sw_block::enable(sw_block::mask);
+    CHECK(sw_block::is_enabled(sw_block::mask));
+    sw_block::disable(0x0);
+    CHECK(sw_block::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_dca_0_cap_hw_block")
@@ -1758,11 +2521,17 @@ TEST_CASE("ia32_dca_0_cap_hw_block")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_dca_0_cap::hw_block::set(true);
-    CHECK(intel_x64::msrs::ia32_dca_0_cap::hw_block::get());
+    using namespace intel_x64::msrs::ia32_dca_0_cap;
 
-    intel_x64::msrs::ia32_dca_0_cap::hw_block::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_dca_0_cap::hw_block::get());
+    hw_block::enable();
+    CHECK(hw_block::is_enabled());
+    hw_block::disable();
+    CHECK(hw_block::is_disabled());
+
+    hw_block::enable(hw_block::mask);
+    CHECK(hw_block::is_enabled(hw_block::mask));
+    hw_block::disable(0x0);
+    CHECK(hw_block::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_mtrr_physbase0")
@@ -1770,8 +2539,11 @@ TEST_CASE("ia32_mtrr_physbase0")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000200UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mtrr_physbase0::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mtrr_physbase0;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mtrr_physmask0")
@@ -1779,8 +2551,11 @@ TEST_CASE("ia32_mtrr_physmask0")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000201UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mtrr_physmask0::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mtrr_physmask0;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mtrr_physbase1")
@@ -1788,8 +2563,11 @@ TEST_CASE("ia32_mtrr_physbase1")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000202UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mtrr_physbase1::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mtrr_physbase1;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mtrr_physmask1")
@@ -1797,8 +2575,11 @@ TEST_CASE("ia32_mtrr_physmask1")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000203UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mtrr_physmask1::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mtrr_physmask1;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mtrr_physbase2")
@@ -1806,8 +2587,11 @@ TEST_CASE("ia32_mtrr_physbase2")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000204UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mtrr_physbase2::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mtrr_physbase2;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mtrr_physmask2")
@@ -1815,8 +2599,11 @@ TEST_CASE("ia32_mtrr_physmask2")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000205UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mtrr_physmask2::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mtrr_physmask2;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mtrr_physbase3")
@@ -1824,8 +2611,11 @@ TEST_CASE("ia32_mtrr_physbase3")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000206UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mtrr_physbase3::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mtrr_physbase3;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mtrr_physmask3")
@@ -1833,8 +2623,11 @@ TEST_CASE("ia32_mtrr_physmask3")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000207UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mtrr_physmask3::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mtrr_physmask3;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mtrr_physbase4")
@@ -1842,8 +2635,11 @@ TEST_CASE("ia32_mtrr_physbase4")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000208UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mtrr_physbase4::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mtrr_physbase4;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mtrr_physmask4")
@@ -1851,8 +2647,11 @@ TEST_CASE("ia32_mtrr_physmask4")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000209UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mtrr_physmask4::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mtrr_physmask4;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mtrr_physbase5")
@@ -1860,8 +2659,11 @@ TEST_CASE("ia32_mtrr_physbase5")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000020AUL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mtrr_physbase5::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mtrr_physbase5;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mtrr_physmask5")
@@ -1869,8 +2671,11 @@ TEST_CASE("ia32_mtrr_physmask5")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000020BUL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mtrr_physmask5::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mtrr_physmask5;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mtrr_physbase6")
@@ -1878,8 +2683,11 @@ TEST_CASE("ia32_mtrr_physbase6")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000020CUL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mtrr_physbase6::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mtrr_physbase6;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mtrr_physmask6")
@@ -1887,8 +2695,11 @@ TEST_CASE("ia32_mtrr_physmask6")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000020DUL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mtrr_physmask6::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mtrr_physmask6;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mtrr_physbase7")
@@ -1896,8 +2707,11 @@ TEST_CASE("ia32_mtrr_physbase7")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000020EUL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mtrr_physbase7::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mtrr_physbase7;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mtrr_physmask7")
@@ -1905,8 +2719,11 @@ TEST_CASE("ia32_mtrr_physmask7")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000020FUL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mtrr_physmask7::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mtrr_physmask7;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mtrr_physbase8")
@@ -1914,8 +2731,11 @@ TEST_CASE("ia32_mtrr_physbase8")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000210UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mtrr_physbase8::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mtrr_physbase8;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mtrr_physmask8")
@@ -1923,8 +2743,11 @@ TEST_CASE("ia32_mtrr_physmask8")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000211UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mtrr_physmask8::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mtrr_physmask8;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mtrr_physbase9")
@@ -1932,8 +2755,11 @@ TEST_CASE("ia32_mtrr_physbase9")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000212UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mtrr_physbase9::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mtrr_physbase9;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mtrr_physmask9")
@@ -1941,8 +2767,11 @@ TEST_CASE("ia32_mtrr_physmask9")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000213UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mtrr_physmask9::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mtrr_physmask9;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mtrr_fix64k_00000")
@@ -1950,8 +2779,11 @@ TEST_CASE("ia32_mtrr_fix64k_00000")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000250UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mtrr_fix64k_00000::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mtrr_fix64k_00000;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mtrr_fix16k_80000")
@@ -1959,8 +2791,11 @@ TEST_CASE("ia32_mtrr_fix16k_80000")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000258UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mtrr_fix16k_80000::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mtrr_fix16k_80000;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mtrr_fix16k_A0000")
@@ -1968,8 +2803,11 @@ TEST_CASE("ia32_mtrr_fix16k_A0000")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000259UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mtrr_fix16k_A0000::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mtrr_fix16k_A0000;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mtrr_fix4k_C0000")
@@ -1977,8 +2815,11 @@ TEST_CASE("ia32_mtrr_fix4k_C0000")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000268UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mtrr_fix4k_C0000::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mtrr_fix4k_C0000;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mtrr_fix4k_C8000")
@@ -1986,8 +2827,11 @@ TEST_CASE("ia32_mtrr_fix4k_C8000")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000269UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mtrr_fix4k_C8000::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mtrr_fix4k_C8000;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mtrr_fix4k_D0000")
@@ -1995,8 +2839,11 @@ TEST_CASE("ia32_mtrr_fix4k_D0000")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000026AUL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mtrr_fix4k_D0000::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mtrr_fix4k_D0000;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mtrr_fix4k_D8000")
@@ -2004,8 +2851,11 @@ TEST_CASE("ia32_mtrr_fix4k_D8000")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000026BUL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mtrr_fix4k_D8000::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mtrr_fix4k_D8000;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mtrr_fix4k_E0000")
@@ -2013,8 +2863,11 @@ TEST_CASE("ia32_mtrr_fix4k_E0000")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000026CUL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mtrr_fix4k_E0000::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mtrr_fix4k_E0000;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mtrr_fix4k_E8000")
@@ -2022,8 +2875,11 @@ TEST_CASE("ia32_mtrr_fix4k_E8000")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000026DUL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mtrr_fix4k_E8000::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mtrr_fix4k_E8000;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mtrr_fix4k_F0000")
@@ -2031,8 +2887,11 @@ TEST_CASE("ia32_mtrr_fix4k_F0000")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000026EUL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mtrr_fix4k_F0000::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mtrr_fix4k_F0000;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mtrr_fix4k_F8000")
@@ -2040,8 +2899,11 @@ TEST_CASE("ia32_mtrr_fix4k_F8000")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000026FUL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mtrr_fix4k_F8000::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mtrr_fix4k_F8000;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc0_ctl2")
@@ -2049,8 +2911,11 @@ TEST_CASE("ia32_mc0_ctl2")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc0_ctl2::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_mc0_ctl2::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc0_ctl2;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc0_ctl2_error_threshold")
@@ -2058,8 +2923,13 @@ TEST_CASE("ia32_mc0_ctl2_error_threshold")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc0_ctl2::error_threshold::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_mc0_ctl2::error_threshold::get() == 0x0000000000007FFFULL);
+    using namespace intel_x64::msrs::ia32_mc0_ctl2;
+
+    error_threshold::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(error_threshold::get() == (error_threshold::mask >> error_threshold::from));
+
+    error_threshold::set(error_threshold::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(error_threshold::get(error_threshold::mask) == (error_threshold::mask >> error_threshold::from));
 }
 
 TEST_CASE("ia32_mc0_ctl2_cmci_en")
@@ -2067,11 +2937,17 @@ TEST_CASE("ia32_mc0_ctl2_cmci_en")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc0_ctl2::cmci_en::set(true);
-    CHECK(intel_x64::msrs::ia32_mc0_ctl2::cmci_en::get());
+    using namespace intel_x64::msrs::ia32_mc0_ctl2;
 
-    intel_x64::msrs::ia32_mc0_ctl2::cmci_en::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_mc0_ctl2::cmci_en::get());
+    cmci_en::enable();
+    CHECK(cmci_en::is_enabled());
+    cmci_en::disable();
+    CHECK(cmci_en::is_disabled());
+
+    cmci_en::enable(cmci_en::mask);
+    CHECK(cmci_en::is_enabled(cmci_en::mask));
+    cmci_en::disable(0x0);
+    CHECK(cmci_en::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_mc1_ctl2")
@@ -2079,8 +2955,11 @@ TEST_CASE("ia32_mc1_ctl2")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc1_ctl2::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_mc1_ctl2::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc1_ctl2;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc1_ctl2_error_threshold")
@@ -2088,8 +2967,13 @@ TEST_CASE("ia32_mc1_ctl2_error_threshold")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc1_ctl2::error_threshold::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_mc1_ctl2::error_threshold::get() == 0x0000000000007FFFULL);
+    using namespace intel_x64::msrs::ia32_mc1_ctl2;
+
+    error_threshold::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(error_threshold::get() == (error_threshold::mask >> error_threshold::from));
+
+    error_threshold::set(error_threshold::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(error_threshold::get(error_threshold::mask) == (error_threshold::mask >> error_threshold::from));
 }
 
 TEST_CASE("ia32_mc1_ctl2_cmci_en")
@@ -2097,11 +2981,17 @@ TEST_CASE("ia32_mc1_ctl2_cmci_en")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc1_ctl2::cmci_en::set(true);
-    CHECK(intel_x64::msrs::ia32_mc1_ctl2::cmci_en::get());
+    using namespace intel_x64::msrs::ia32_mc1_ctl2;
 
-    intel_x64::msrs::ia32_mc1_ctl2::cmci_en::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_mc1_ctl2::cmci_en::get());
+    cmci_en::enable();
+    CHECK(cmci_en::is_enabled());
+    cmci_en::disable();
+    CHECK(cmci_en::is_disabled());
+
+    cmci_en::enable(cmci_en::mask);
+    CHECK(cmci_en::is_enabled(cmci_en::mask));
+    cmci_en::disable(0x0);
+    CHECK(cmci_en::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_mc2_ctl2")
@@ -2109,8 +2999,11 @@ TEST_CASE("ia32_mc2_ctl2")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc2_ctl2::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_mc2_ctl2::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc2_ctl2;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc2_ctl2_error_threshold")
@@ -2118,8 +3011,13 @@ TEST_CASE("ia32_mc2_ctl2_error_threshold")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc2_ctl2::error_threshold::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_mc2_ctl2::error_threshold::get() == 0x0000000000007FFFULL);
+    using namespace intel_x64::msrs::ia32_mc2_ctl2;
+
+    error_threshold::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(error_threshold::get() == (error_threshold::mask >> error_threshold::from));
+
+    error_threshold::set(error_threshold::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(error_threshold::get(error_threshold::mask) == (error_threshold::mask >> error_threshold::from));
 }
 
 TEST_CASE("ia32_mc2_ctl2_cmci_en")
@@ -2127,11 +3025,17 @@ TEST_CASE("ia32_mc2_ctl2_cmci_en")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc2_ctl2::cmci_en::set(true);
-    CHECK(intel_x64::msrs::ia32_mc2_ctl2::cmci_en::get());
+    using namespace intel_x64::msrs::ia32_mc2_ctl2;
 
-    intel_x64::msrs::ia32_mc2_ctl2::cmci_en::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_mc2_ctl2::cmci_en::get());
+    cmci_en::enable();
+    CHECK(cmci_en::is_enabled());
+    cmci_en::disable();
+    CHECK(cmci_en::is_disabled());
+
+    cmci_en::enable(cmci_en::mask);
+    CHECK(cmci_en::is_enabled(cmci_en::mask));
+    cmci_en::disable(0x0);
+    CHECK(cmci_en::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_mc3_ctl2")
@@ -2139,8 +3043,11 @@ TEST_CASE("ia32_mc3_ctl2")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc3_ctl2::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_mc3_ctl2::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc3_ctl2;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc3_ctl2_error_threshold")
@@ -2148,8 +3055,13 @@ TEST_CASE("ia32_mc3_ctl2_error_threshold")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc3_ctl2::error_threshold::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_mc3_ctl2::error_threshold::get() == 0x0000000000007FFFULL);
+    using namespace intel_x64::msrs::ia32_mc3_ctl2;
+
+    error_threshold::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(error_threshold::get() == (error_threshold::mask >> error_threshold::from));
+
+    error_threshold::set(error_threshold::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(error_threshold::get(error_threshold::mask) == (error_threshold::mask >> error_threshold::from));
 }
 
 TEST_CASE("ia32_mc3_ctl2_cmci_en")
@@ -2157,11 +3069,17 @@ TEST_CASE("ia32_mc3_ctl2_cmci_en")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc3_ctl2::cmci_en::set(true);
-    CHECK(intel_x64::msrs::ia32_mc3_ctl2::cmci_en::get());
+    using namespace intel_x64::msrs::ia32_mc3_ctl2;
 
-    intel_x64::msrs::ia32_mc3_ctl2::cmci_en::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_mc3_ctl2::cmci_en::get());
+    cmci_en::enable();
+    CHECK(cmci_en::is_enabled());
+    cmci_en::disable();
+    CHECK(cmci_en::is_disabled());
+
+    cmci_en::enable(cmci_en::mask);
+    CHECK(cmci_en::is_enabled(cmci_en::mask));
+    cmci_en::disable(0x0);
+    CHECK(cmci_en::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_mc4_ctl2")
@@ -2169,8 +3087,11 @@ TEST_CASE("ia32_mc4_ctl2")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc4_ctl2::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_mc4_ctl2::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc4_ctl2;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc4_ctl2_error_threshold")
@@ -2178,8 +3099,13 @@ TEST_CASE("ia32_mc4_ctl2_error_threshold")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc4_ctl2::error_threshold::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_mc4_ctl2::error_threshold::get() == 0x0000000000007FFFULL);
+    using namespace intel_x64::msrs::ia32_mc4_ctl2;
+
+    error_threshold::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(error_threshold::get() == (error_threshold::mask >> error_threshold::from));
+
+    error_threshold::set(error_threshold::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(error_threshold::get(error_threshold::mask) == (error_threshold::mask >> error_threshold::from));
 }
 
 TEST_CASE("ia32_mc4_ctl2_cmci_en")
@@ -2187,11 +3113,17 @@ TEST_CASE("ia32_mc4_ctl2_cmci_en")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc4_ctl2::cmci_en::set(true);
-    CHECK(intel_x64::msrs::ia32_mc4_ctl2::cmci_en::get());
+    using namespace intel_x64::msrs::ia32_mc4_ctl2;
 
-    intel_x64::msrs::ia32_mc4_ctl2::cmci_en::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_mc4_ctl2::cmci_en::get());
+    cmci_en::enable();
+    CHECK(cmci_en::is_enabled());
+    cmci_en::disable();
+    CHECK(cmci_en::is_disabled());
+
+    cmci_en::enable(cmci_en::mask);
+    CHECK(cmci_en::is_enabled(cmci_en::mask));
+    cmci_en::disable(0x0);
+    CHECK(cmci_en::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_mc5_ctl2")
@@ -2199,8 +3131,11 @@ TEST_CASE("ia32_mc5_ctl2")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc5_ctl2::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_mc5_ctl2::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc5_ctl2;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc5_ctl2_error_threshold")
@@ -2208,8 +3143,13 @@ TEST_CASE("ia32_mc5_ctl2_error_threshold")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc5_ctl2::error_threshold::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_mc5_ctl2::error_threshold::get() == 0x0000000000007FFFULL);
+    using namespace intel_x64::msrs::ia32_mc5_ctl2;
+
+    error_threshold::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(error_threshold::get() == (error_threshold::mask >> error_threshold::from));
+
+    error_threshold::set(error_threshold::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(error_threshold::get(error_threshold::mask) == (error_threshold::mask >> error_threshold::from));
 }
 
 TEST_CASE("ia32_mc5_ctl2_cmci_en")
@@ -2217,11 +3157,17 @@ TEST_CASE("ia32_mc5_ctl2_cmci_en")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc5_ctl2::cmci_en::set(true);
-    CHECK(intel_x64::msrs::ia32_mc5_ctl2::cmci_en::get());
+    using namespace intel_x64::msrs::ia32_mc5_ctl2;
 
-    intel_x64::msrs::ia32_mc5_ctl2::cmci_en::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_mc5_ctl2::cmci_en::get());
+    cmci_en::enable();
+    CHECK(cmci_en::is_enabled());
+    cmci_en::disable();
+    CHECK(cmci_en::is_disabled());
+
+    cmci_en::enable(cmci_en::mask);
+    CHECK(cmci_en::is_enabled(cmci_en::mask));
+    cmci_en::disable(0x0);
+    CHECK(cmci_en::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_mc6_ctl2")
@@ -2229,8 +3175,11 @@ TEST_CASE("ia32_mc6_ctl2")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc6_ctl2::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_mc6_ctl2::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc6_ctl2;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc6_ctl2_error_threshold")
@@ -2238,8 +3187,13 @@ TEST_CASE("ia32_mc6_ctl2_error_threshold")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc6_ctl2::error_threshold::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_mc6_ctl2::error_threshold::get() == 0x0000000000007FFFULL);
+    using namespace intel_x64::msrs::ia32_mc6_ctl2;
+
+    error_threshold::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(error_threshold::get() == (error_threshold::mask >> error_threshold::from));
+
+    error_threshold::set(error_threshold::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(error_threshold::get(error_threshold::mask) == (error_threshold::mask >> error_threshold::from));
 }
 
 TEST_CASE("ia32_mc6_ctl2_cmci_en")
@@ -2247,11 +3201,17 @@ TEST_CASE("ia32_mc6_ctl2_cmci_en")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc6_ctl2::cmci_en::set(true);
-    CHECK(intel_x64::msrs::ia32_mc6_ctl2::cmci_en::get());
+    using namespace intel_x64::msrs::ia32_mc6_ctl2;
 
-    intel_x64::msrs::ia32_mc6_ctl2::cmci_en::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_mc6_ctl2::cmci_en::get());
+    cmci_en::enable();
+    CHECK(cmci_en::is_enabled());
+    cmci_en::disable();
+    CHECK(cmci_en::is_disabled());
+
+    cmci_en::enable(cmci_en::mask);
+    CHECK(cmci_en::is_enabled(cmci_en::mask));
+    cmci_en::disable(0x0);
+    CHECK(cmci_en::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_mc7_ctl2")
@@ -2259,8 +3219,11 @@ TEST_CASE("ia32_mc7_ctl2")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc7_ctl2::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_mc7_ctl2::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc7_ctl2;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc7_ctl2_error_threshold")
@@ -2268,8 +3231,13 @@ TEST_CASE("ia32_mc7_ctl2_error_threshold")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc7_ctl2::error_threshold::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_mc7_ctl2::error_threshold::get() == 0x0000000000007FFFULL);
+    using namespace intel_x64::msrs::ia32_mc7_ctl2;
+
+    error_threshold::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(error_threshold::get() == (error_threshold::mask >> error_threshold::from));
+
+    error_threshold::set(error_threshold::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(error_threshold::get(error_threshold::mask) == (error_threshold::mask >> error_threshold::from));
 }
 
 TEST_CASE("ia32_mc7_ctl2_cmci_en")
@@ -2277,11 +3245,17 @@ TEST_CASE("ia32_mc7_ctl2_cmci_en")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc7_ctl2::cmci_en::set(true);
-    CHECK(intel_x64::msrs::ia32_mc7_ctl2::cmci_en::get());
+    using namespace intel_x64::msrs::ia32_mc7_ctl2;
 
-    intel_x64::msrs::ia32_mc7_ctl2::cmci_en::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_mc7_ctl2::cmci_en::get());
+    cmci_en::enable();
+    CHECK(cmci_en::is_enabled());
+    cmci_en::disable();
+    CHECK(cmci_en::is_disabled());
+
+    cmci_en::enable(cmci_en::mask);
+    CHECK(cmci_en::is_enabled(cmci_en::mask));
+    cmci_en::disable(0x0);
+    CHECK(cmci_en::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_mc8_ctl2")
@@ -2289,8 +3263,11 @@ TEST_CASE("ia32_mc8_ctl2")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc8_ctl2::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_mc8_ctl2::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc8_ctl2;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc8_ctl2_error_threshold")
@@ -2298,8 +3275,13 @@ TEST_CASE("ia32_mc8_ctl2_error_threshold")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc8_ctl2::error_threshold::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_mc8_ctl2::error_threshold::get() == 0x0000000000007FFFULL);
+    using namespace intel_x64::msrs::ia32_mc8_ctl2;
+
+    error_threshold::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(error_threshold::get() == (error_threshold::mask >> error_threshold::from));
+
+    error_threshold::set(error_threshold::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(error_threshold::get(error_threshold::mask) == (error_threshold::mask >> error_threshold::from));
 }
 
 TEST_CASE("ia32_mc8_ctl2_cmci_en")
@@ -2307,11 +3289,17 @@ TEST_CASE("ia32_mc8_ctl2_cmci_en")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc8_ctl2::cmci_en::set(true);
-    CHECK(intel_x64::msrs::ia32_mc8_ctl2::cmci_en::get());
+    using namespace intel_x64::msrs::ia32_mc8_ctl2;
 
-    intel_x64::msrs::ia32_mc8_ctl2::cmci_en::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_mc8_ctl2::cmci_en::get());
+    cmci_en::enable();
+    CHECK(cmci_en::is_enabled());
+    cmci_en::disable();
+    CHECK(cmci_en::is_disabled());
+
+    cmci_en::enable(cmci_en::mask);
+    CHECK(cmci_en::is_enabled(cmci_en::mask));
+    cmci_en::disable(0x0);
+    CHECK(cmci_en::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_mc9_ctl2")
@@ -2319,8 +3307,11 @@ TEST_CASE("ia32_mc9_ctl2")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc9_ctl2::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_mc9_ctl2::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc9_ctl2;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc9_ctl2_error_threshold")
@@ -2328,8 +3319,13 @@ TEST_CASE("ia32_mc9_ctl2_error_threshold")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc9_ctl2::error_threshold::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_mc9_ctl2::error_threshold::get() == 0x0000000000007FFFULL);
+    using namespace intel_x64::msrs::ia32_mc9_ctl2;
+
+    error_threshold::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(error_threshold::get() == (error_threshold::mask >> error_threshold::from));
+
+    error_threshold::set(error_threshold::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(error_threshold::get(error_threshold::mask) == (error_threshold::mask >> error_threshold::from));
 }
 
 TEST_CASE("ia32_mc9_ctl2_cmci_en")
@@ -2337,11 +3333,17 @@ TEST_CASE("ia32_mc9_ctl2_cmci_en")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc9_ctl2::cmci_en::set(true);
-    CHECK(intel_x64::msrs::ia32_mc9_ctl2::cmci_en::get());
+    using namespace intel_x64::msrs::ia32_mc9_ctl2;
 
-    intel_x64::msrs::ia32_mc9_ctl2::cmci_en::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_mc9_ctl2::cmci_en::get());
+    cmci_en::enable();
+    CHECK(cmci_en::is_enabled());
+    cmci_en::disable();
+    CHECK(cmci_en::is_disabled());
+
+    cmci_en::enable(cmci_en::mask);
+    CHECK(cmci_en::is_enabled(cmci_en::mask));
+    cmci_en::disable(0x0);
+    CHECK(cmci_en::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_mc10_ctl2")
@@ -2349,8 +3351,11 @@ TEST_CASE("ia32_mc10_ctl2")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc10_ctl2::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_mc10_ctl2::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc10_ctl2;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc10_ctl2_error_threshold")
@@ -2358,8 +3363,13 @@ TEST_CASE("ia32_mc10_ctl2_error_threshold")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc10_ctl2::error_threshold::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_mc10_ctl2::error_threshold::get() == 0x0000000000007FFFULL);
+    using namespace intel_x64::msrs::ia32_mc10_ctl2;
+
+    error_threshold::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(error_threshold::get() == (error_threshold::mask >> error_threshold::from));
+
+    error_threshold::set(error_threshold::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(error_threshold::get(error_threshold::mask) == (error_threshold::mask >> error_threshold::from));
 }
 
 TEST_CASE("ia32_mc10_ctl2_cmci_en")
@@ -2367,11 +3377,17 @@ TEST_CASE("ia32_mc10_ctl2_cmci_en")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc10_ctl2::cmci_en::set(true);
-    CHECK(intel_x64::msrs::ia32_mc10_ctl2::cmci_en::get());
+    using namespace intel_x64::msrs::ia32_mc10_ctl2;
 
-    intel_x64::msrs::ia32_mc10_ctl2::cmci_en::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_mc10_ctl2::cmci_en::get());
+    cmci_en::enable();
+    CHECK(cmci_en::is_enabled());
+    cmci_en::disable();
+    CHECK(cmci_en::is_disabled());
+
+    cmci_en::enable(cmci_en::mask);
+    CHECK(cmci_en::is_enabled(cmci_en::mask));
+    cmci_en::disable(0x0);
+    CHECK(cmci_en::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_mc11_ctl2")
@@ -2379,8 +3395,11 @@ TEST_CASE("ia32_mc11_ctl2")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc11_ctl2::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_mc11_ctl2::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc11_ctl2;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc11_ctl2_error_threshold")
@@ -2388,8 +3407,13 @@ TEST_CASE("ia32_mc11_ctl2_error_threshold")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc11_ctl2::error_threshold::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_mc11_ctl2::error_threshold::get() == 0x0000000000007FFFULL);
+    using namespace intel_x64::msrs::ia32_mc11_ctl2;
+
+    error_threshold::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(error_threshold::get() == (error_threshold::mask >> error_threshold::from));
+
+    error_threshold::set(error_threshold::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(error_threshold::get(error_threshold::mask) == (error_threshold::mask >> error_threshold::from));
 }
 
 TEST_CASE("ia32_mc11_ctl2_cmci_en")
@@ -2397,11 +3421,17 @@ TEST_CASE("ia32_mc11_ctl2_cmci_en")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc11_ctl2::cmci_en::set(true);
-    CHECK(intel_x64::msrs::ia32_mc11_ctl2::cmci_en::get());
+    using namespace intel_x64::msrs::ia32_mc11_ctl2;
 
-    intel_x64::msrs::ia32_mc11_ctl2::cmci_en::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_mc11_ctl2::cmci_en::get());
+    cmci_en::enable();
+    CHECK(cmci_en::is_enabled());
+    cmci_en::disable();
+    CHECK(cmci_en::is_disabled());
+
+    cmci_en::enable(cmci_en::mask);
+    CHECK(cmci_en::is_enabled(cmci_en::mask));
+    cmci_en::disable(0x0);
+    CHECK(cmci_en::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_mc12_ctl2")
@@ -2409,8 +3439,11 @@ TEST_CASE("ia32_mc12_ctl2")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc12_ctl2::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_mc12_ctl2::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc12_ctl2;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc12_ctl2_error_threshold")
@@ -2418,8 +3451,13 @@ TEST_CASE("ia32_mc12_ctl2_error_threshold")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc12_ctl2::error_threshold::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_mc12_ctl2::error_threshold::get() == 0x0000000000007FFFULL);
+    using namespace intel_x64::msrs::ia32_mc12_ctl2;
+
+    error_threshold::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(error_threshold::get() == (error_threshold::mask >> error_threshold::from));
+
+    error_threshold::set(error_threshold::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(error_threshold::get(error_threshold::mask) == (error_threshold::mask >> error_threshold::from));
 }
 
 TEST_CASE("ia32_mc12_ctl2_cmci_en")
@@ -2427,11 +3465,17 @@ TEST_CASE("ia32_mc12_ctl2_cmci_en")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc12_ctl2::cmci_en::set(true);
-    CHECK(intel_x64::msrs::ia32_mc12_ctl2::cmci_en::get());
+    using namespace intel_x64::msrs::ia32_mc12_ctl2;
 
-    intel_x64::msrs::ia32_mc12_ctl2::cmci_en::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_mc12_ctl2::cmci_en::get());
+    cmci_en::enable();
+    CHECK(cmci_en::is_enabled());
+    cmci_en::disable();
+    CHECK(cmci_en::is_disabled());
+
+    cmci_en::enable(cmci_en::mask);
+    CHECK(cmci_en::is_enabled(cmci_en::mask));
+    cmci_en::disable(0x0);
+    CHECK(cmci_en::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_mc13_ctl2")
@@ -2439,8 +3483,11 @@ TEST_CASE("ia32_mc13_ctl2")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc13_ctl2::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_mc13_ctl2::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc13_ctl2;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc13_ctl2_error_threshold")
@@ -2448,8 +3495,13 @@ TEST_CASE("ia32_mc13_ctl2_error_threshold")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc13_ctl2::error_threshold::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_mc13_ctl2::error_threshold::get() == 0x0000000000007FFFULL);
+    using namespace intel_x64::msrs::ia32_mc13_ctl2;
+
+    error_threshold::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(error_threshold::get() == (error_threshold::mask >> error_threshold::from));
+
+    error_threshold::set(error_threshold::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(error_threshold::get(error_threshold::mask) == (error_threshold::mask >> error_threshold::from));
 }
 
 TEST_CASE("ia32_mc13_ctl2_cmci_en")
@@ -2457,11 +3509,17 @@ TEST_CASE("ia32_mc13_ctl2_cmci_en")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc13_ctl2::cmci_en::set(true);
-    CHECK(intel_x64::msrs::ia32_mc13_ctl2::cmci_en::get());
+    using namespace intel_x64::msrs::ia32_mc13_ctl2;
 
-    intel_x64::msrs::ia32_mc13_ctl2::cmci_en::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_mc13_ctl2::cmci_en::get());
+    cmci_en::enable();
+    CHECK(cmci_en::is_enabled());
+    cmci_en::disable();
+    CHECK(cmci_en::is_disabled());
+
+    cmci_en::enable(cmci_en::mask);
+    CHECK(cmci_en::is_enabled(cmci_en::mask));
+    cmci_en::disable(0x0);
+    CHECK(cmci_en::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_mc14_ctl2")
@@ -2469,8 +3527,11 @@ TEST_CASE("ia32_mc14_ctl2")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc14_ctl2::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_mc14_ctl2::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc14_ctl2;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc14_ctl2_error_threshold")
@@ -2478,8 +3539,13 @@ TEST_CASE("ia32_mc14_ctl2_error_threshold")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc14_ctl2::error_threshold::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_mc14_ctl2::error_threshold::get() == 0x0000000000007FFFULL);
+    using namespace intel_x64::msrs::ia32_mc14_ctl2;
+
+    error_threshold::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(error_threshold::get() == (error_threshold::mask >> error_threshold::from));
+
+    error_threshold::set(error_threshold::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(error_threshold::get(error_threshold::mask) == (error_threshold::mask >> error_threshold::from));
 }
 
 TEST_CASE("ia32_mc14_ctl2_cmci_en")
@@ -2487,11 +3553,17 @@ TEST_CASE("ia32_mc14_ctl2_cmci_en")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc14_ctl2::cmci_en::set(true);
-    CHECK(intel_x64::msrs::ia32_mc14_ctl2::cmci_en::get());
+    using namespace intel_x64::msrs::ia32_mc14_ctl2;
 
-    intel_x64::msrs::ia32_mc14_ctl2::cmci_en::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_mc14_ctl2::cmci_en::get());
+    cmci_en::enable();
+    CHECK(cmci_en::is_enabled());
+    cmci_en::disable();
+    CHECK(cmci_en::is_disabled());
+
+    cmci_en::enable(cmci_en::mask);
+    CHECK(cmci_en::is_enabled(cmci_en::mask));
+    cmci_en::disable(0x0);
+    CHECK(cmci_en::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_mc15_ctl2")
@@ -2499,8 +3571,11 @@ TEST_CASE("ia32_mc15_ctl2")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc15_ctl2::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_mc15_ctl2::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc15_ctl2;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc15_ctl2_error_threshold")
@@ -2508,8 +3583,13 @@ TEST_CASE("ia32_mc15_ctl2_error_threshold")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc15_ctl2::error_threshold::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_mc15_ctl2::error_threshold::get() == 0x0000000000007FFFULL);
+    using namespace intel_x64::msrs::ia32_mc15_ctl2;
+
+    error_threshold::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(error_threshold::get() == (error_threshold::mask >> error_threshold::from));
+
+    error_threshold::set(error_threshold::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(error_threshold::get(error_threshold::mask) == (error_threshold::mask >> error_threshold::from));
 }
 
 TEST_CASE("ia32_mc15_ctl2_cmci_en")
@@ -2517,11 +3597,17 @@ TEST_CASE("ia32_mc15_ctl2_cmci_en")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc15_ctl2::cmci_en::set(true);
-    CHECK(intel_x64::msrs::ia32_mc15_ctl2::cmci_en::get());
+    using namespace intel_x64::msrs::ia32_mc15_ctl2;
 
-    intel_x64::msrs::ia32_mc15_ctl2::cmci_en::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_mc15_ctl2::cmci_en::get());
+    cmci_en::enable();
+    CHECK(cmci_en::is_enabled());
+    cmci_en::disable();
+    CHECK(cmci_en::is_disabled());
+
+    cmci_en::enable(cmci_en::mask);
+    CHECK(cmci_en::is_enabled(cmci_en::mask));
+    cmci_en::disable(0x0);
+    CHECK(cmci_en::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_mc16_ctl2")
@@ -2529,8 +3615,11 @@ TEST_CASE("ia32_mc16_ctl2")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc16_ctl2::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_mc16_ctl2::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc16_ctl2;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc16_ctl2_error_threshold")
@@ -2538,8 +3627,13 @@ TEST_CASE("ia32_mc16_ctl2_error_threshold")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc16_ctl2::error_threshold::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_mc16_ctl2::error_threshold::get() == 0x0000000000007FFFULL);
+    using namespace intel_x64::msrs::ia32_mc16_ctl2;
+
+    error_threshold::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(error_threshold::get() == (error_threshold::mask >> error_threshold::from));
+
+    error_threshold::set(error_threshold::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(error_threshold::get(error_threshold::mask) == (error_threshold::mask >> error_threshold::from));
 }
 
 TEST_CASE("ia32_mc16_ctl2_cmci_en")
@@ -2547,11 +3641,17 @@ TEST_CASE("ia32_mc16_ctl2_cmci_en")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc16_ctl2::cmci_en::set(true);
-    CHECK(intel_x64::msrs::ia32_mc16_ctl2::cmci_en::get());
+    using namespace intel_x64::msrs::ia32_mc16_ctl2;
 
-    intel_x64::msrs::ia32_mc16_ctl2::cmci_en::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_mc16_ctl2::cmci_en::get());
+    cmci_en::enable();
+    CHECK(cmci_en::is_enabled());
+    cmci_en::disable();
+    CHECK(cmci_en::is_disabled());
+
+    cmci_en::enable(cmci_en::mask);
+    CHECK(cmci_en::is_enabled(cmci_en::mask));
+    cmci_en::disable(0x0);
+    CHECK(cmci_en::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_mc17_ctl2")
@@ -2559,8 +3659,11 @@ TEST_CASE("ia32_mc17_ctl2")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc17_ctl2::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_mc17_ctl2::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc17_ctl2;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc17_ctl2_error_threshold")
@@ -2568,8 +3671,13 @@ TEST_CASE("ia32_mc17_ctl2_error_threshold")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc17_ctl2::error_threshold::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_mc17_ctl2::error_threshold::get() == 0x0000000000007FFFULL);
+    using namespace intel_x64::msrs::ia32_mc17_ctl2;
+
+    error_threshold::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(error_threshold::get() == (error_threshold::mask >> error_threshold::from));
+
+    error_threshold::set(error_threshold::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(error_threshold::get(error_threshold::mask) == (error_threshold::mask >> error_threshold::from));
 }
 
 TEST_CASE("ia32_mc17_ctl2_cmci_en")
@@ -2577,11 +3685,17 @@ TEST_CASE("ia32_mc17_ctl2_cmci_en")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc17_ctl2::cmci_en::set(true);
-    CHECK(intel_x64::msrs::ia32_mc17_ctl2::cmci_en::get());
+    using namespace intel_x64::msrs::ia32_mc17_ctl2;
 
-    intel_x64::msrs::ia32_mc17_ctl2::cmci_en::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_mc17_ctl2::cmci_en::get());
+    cmci_en::enable();
+    CHECK(cmci_en::is_enabled());
+    cmci_en::disable();
+    CHECK(cmci_en::is_disabled());
+
+    cmci_en::enable(cmci_en::mask);
+    CHECK(cmci_en::is_enabled(cmci_en::mask));
+    cmci_en::disable(0x0);
+    CHECK(cmci_en::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_mc18_ctl2")
@@ -2589,8 +3703,11 @@ TEST_CASE("ia32_mc18_ctl2")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc18_ctl2::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_mc18_ctl2::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc18_ctl2;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc18_ctl2_error_threshold")
@@ -2598,8 +3715,13 @@ TEST_CASE("ia32_mc18_ctl2_error_threshold")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc18_ctl2::error_threshold::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_mc18_ctl2::error_threshold::get() == 0x0000000000007FFFULL);
+    using namespace intel_x64::msrs::ia32_mc18_ctl2;
+
+    error_threshold::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(error_threshold::get() == (error_threshold::mask >> error_threshold::from));
+
+    error_threshold::set(error_threshold::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(error_threshold::get(error_threshold::mask) == (error_threshold::mask >> error_threshold::from));
 }
 
 TEST_CASE("ia32_mc18_ctl2_cmci_en")
@@ -2607,11 +3729,17 @@ TEST_CASE("ia32_mc18_ctl2_cmci_en")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc18_ctl2::cmci_en::set(true);
-    CHECK(intel_x64::msrs::ia32_mc18_ctl2::cmci_en::get());
+    using namespace intel_x64::msrs::ia32_mc18_ctl2;
 
-    intel_x64::msrs::ia32_mc18_ctl2::cmci_en::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_mc18_ctl2::cmci_en::get());
+    cmci_en::enable();
+    CHECK(cmci_en::is_enabled());
+    cmci_en::disable();
+    CHECK(cmci_en::is_disabled());
+
+    cmci_en::enable(cmci_en::mask);
+    CHECK(cmci_en::is_enabled(cmci_en::mask));
+    cmci_en::disable(0x0);
+    CHECK(cmci_en::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_mc19_ctl2")
@@ -2619,8 +3747,11 @@ TEST_CASE("ia32_mc19_ctl2")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc19_ctl2::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_mc19_ctl2::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc19_ctl2;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc19_ctl2_error_threshold")
@@ -2628,8 +3759,13 @@ TEST_CASE("ia32_mc19_ctl2_error_threshold")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc19_ctl2::error_threshold::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_mc19_ctl2::error_threshold::get() == 0x0000000000007FFFULL);
+    using namespace intel_x64::msrs::ia32_mc19_ctl2;
+
+    error_threshold::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(error_threshold::get() == (error_threshold::mask >> error_threshold::from));
+
+    error_threshold::set(error_threshold::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(error_threshold::get(error_threshold::mask) == (error_threshold::mask >> error_threshold::from));
 }
 
 TEST_CASE("ia32_mc19_ctl2_cmci_en")
@@ -2637,11 +3773,17 @@ TEST_CASE("ia32_mc19_ctl2_cmci_en")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc19_ctl2::cmci_en::set(true);
-    CHECK(intel_x64::msrs::ia32_mc19_ctl2::cmci_en::get());
+    using namespace intel_x64::msrs::ia32_mc19_ctl2;
 
-    intel_x64::msrs::ia32_mc19_ctl2::cmci_en::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_mc19_ctl2::cmci_en::get());
+    cmci_en::enable();
+    CHECK(cmci_en::is_enabled());
+    cmci_en::disable();
+    CHECK(cmci_en::is_disabled());
+
+    cmci_en::enable(cmci_en::mask);
+    CHECK(cmci_en::is_enabled(cmci_en::mask));
+    cmci_en::disable(0x0);
+    CHECK(cmci_en::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_mc20_ctl2")
@@ -2649,8 +3791,11 @@ TEST_CASE("ia32_mc20_ctl2")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc20_ctl2::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_mc20_ctl2::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc20_ctl2;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc20_ctl2_error_threshold")
@@ -2658,8 +3803,13 @@ TEST_CASE("ia32_mc20_ctl2_error_threshold")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc20_ctl2::error_threshold::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_mc20_ctl2::error_threshold::get() == 0x0000000000007FFFULL);
+    using namespace intel_x64::msrs::ia32_mc20_ctl2;
+
+    error_threshold::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(error_threshold::get() == (error_threshold::mask >> error_threshold::from));
+
+    error_threshold::set(error_threshold::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(error_threshold::get(error_threshold::mask) == (error_threshold::mask >> error_threshold::from));
 }
 
 TEST_CASE("ia32_mc20_ctl2_cmci_en")
@@ -2667,11 +3817,17 @@ TEST_CASE("ia32_mc20_ctl2_cmci_en")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc20_ctl2::cmci_en::set(true);
-    CHECK(intel_x64::msrs::ia32_mc20_ctl2::cmci_en::get());
+    using namespace intel_x64::msrs::ia32_mc20_ctl2;
 
-    intel_x64::msrs::ia32_mc20_ctl2::cmci_en::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_mc20_ctl2::cmci_en::get());
+    cmci_en::enable();
+    CHECK(cmci_en::is_enabled());
+    cmci_en::disable();
+    CHECK(cmci_en::is_disabled());
+
+    cmci_en::enable(cmci_en::mask);
+    CHECK(cmci_en::is_enabled(cmci_en::mask));
+    cmci_en::disable(0x0);
+    CHECK(cmci_en::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_mc21_ctl2")
@@ -2679,8 +3835,11 @@ TEST_CASE("ia32_mc21_ctl2")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc21_ctl2::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_mc21_ctl2::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc21_ctl2;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc21_ctl2_error_threshold")
@@ -2688,8 +3847,13 @@ TEST_CASE("ia32_mc21_ctl2_error_threshold")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc21_ctl2::error_threshold::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_mc21_ctl2::error_threshold::get() == 0x0000000000007FFFULL);
+    using namespace intel_x64::msrs::ia32_mc21_ctl2;
+
+    error_threshold::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(error_threshold::get() == (error_threshold::mask >> error_threshold::from));
+
+    error_threshold::set(error_threshold::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(error_threshold::get(error_threshold::mask) == (error_threshold::mask >> error_threshold::from));
 }
 
 TEST_CASE("ia32_mc21_ctl2_cmci_en")
@@ -2697,11 +3861,17 @@ TEST_CASE("ia32_mc21_ctl2_cmci_en")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc21_ctl2::cmci_en::set(true);
-    CHECK(intel_x64::msrs::ia32_mc21_ctl2::cmci_en::get());
+    using namespace intel_x64::msrs::ia32_mc21_ctl2;
 
-    intel_x64::msrs::ia32_mc21_ctl2::cmci_en::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_mc21_ctl2::cmci_en::get());
+    cmci_en::enable();
+    CHECK(cmci_en::is_enabled());
+    cmci_en::disable();
+    CHECK(cmci_en::is_disabled());
+
+    cmci_en::enable(cmci_en::mask);
+    CHECK(cmci_en::is_enabled(cmci_en::mask));
+    cmci_en::disable(0x0);
+    CHECK(cmci_en::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_mc22_ctl2")
@@ -2709,8 +3879,11 @@ TEST_CASE("ia32_mc22_ctl2")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc22_ctl2::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_mc22_ctl2::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc22_ctl2;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc22_ctl2_error_threshold")
@@ -2718,8 +3891,13 @@ TEST_CASE("ia32_mc22_ctl2_error_threshold")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc22_ctl2::error_threshold::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_mc22_ctl2::error_threshold::get() == 0x0000000000007FFFULL);
+    using namespace intel_x64::msrs::ia32_mc22_ctl2;
+
+    error_threshold::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(error_threshold::get() == (error_threshold::mask >> error_threshold::from));
+
+    error_threshold::set(error_threshold::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(error_threshold::get(error_threshold::mask) == (error_threshold::mask >> error_threshold::from));
 }
 
 TEST_CASE("ia32_mc22_ctl2_cmci_en")
@@ -2727,11 +3905,17 @@ TEST_CASE("ia32_mc22_ctl2_cmci_en")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc22_ctl2::cmci_en::set(true);
-    CHECK(intel_x64::msrs::ia32_mc22_ctl2::cmci_en::get());
+    using namespace intel_x64::msrs::ia32_mc22_ctl2;
 
-    intel_x64::msrs::ia32_mc22_ctl2::cmci_en::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_mc22_ctl2::cmci_en::get());
+    cmci_en::enable();
+    CHECK(cmci_en::is_enabled());
+    cmci_en::disable();
+    CHECK(cmci_en::is_disabled());
+
+    cmci_en::enable(cmci_en::mask);
+    CHECK(cmci_en::is_enabled(cmci_en::mask));
+    cmci_en::disable(0x0);
+    CHECK(cmci_en::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_mc23_ctl2")
@@ -2739,8 +3923,11 @@ TEST_CASE("ia32_mc23_ctl2")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc23_ctl2::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_mc23_ctl2::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc23_ctl2;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc23_ctl2_error_threshold")
@@ -2748,8 +3935,13 @@ TEST_CASE("ia32_mc23_ctl2_error_threshold")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc23_ctl2::error_threshold::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_mc23_ctl2::error_threshold::get() == 0x0000000000007FFFULL);
+    using namespace intel_x64::msrs::ia32_mc23_ctl2;
+
+    error_threshold::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(error_threshold::get() == (error_threshold::mask >> error_threshold::from));
+
+    error_threshold::set(error_threshold::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(error_threshold::get(error_threshold::mask) == (error_threshold::mask >> error_threshold::from));
 }
 
 TEST_CASE("ia32_mc23_ctl2_cmci_en")
@@ -2757,11 +3949,17 @@ TEST_CASE("ia32_mc23_ctl2_cmci_en")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc23_ctl2::cmci_en::set(true);
-    CHECK(intel_x64::msrs::ia32_mc23_ctl2::cmci_en::get());
+    using namespace intel_x64::msrs::ia32_mc23_ctl2;
 
-    intel_x64::msrs::ia32_mc23_ctl2::cmci_en::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_mc23_ctl2::cmci_en::get());
+    cmci_en::enable();
+    CHECK(cmci_en::is_enabled());
+    cmci_en::disable();
+    CHECK(cmci_en::is_disabled());
+
+    cmci_en::enable(cmci_en::mask);
+    CHECK(cmci_en::is_enabled(cmci_en::mask));
+    cmci_en::disable(0x0);
+    CHECK(cmci_en::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_mc24_ctl2")
@@ -2769,8 +3967,11 @@ TEST_CASE("ia32_mc24_ctl2")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc24_ctl2::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_mc24_ctl2::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc24_ctl2;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc24_ctl2_error_threshold")
@@ -2778,8 +3979,13 @@ TEST_CASE("ia32_mc24_ctl2_error_threshold")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc24_ctl2::error_threshold::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_mc24_ctl2::error_threshold::get() == 0x0000000000007FFFULL);
+    using namespace intel_x64::msrs::ia32_mc24_ctl2;
+
+    error_threshold::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(error_threshold::get() == (error_threshold::mask >> error_threshold::from));
+
+    error_threshold::set(error_threshold::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(error_threshold::get(error_threshold::mask) == (error_threshold::mask >> error_threshold::from));
 }
 
 TEST_CASE("ia32_mc24_ctl2_cmci_en")
@@ -2787,11 +3993,17 @@ TEST_CASE("ia32_mc24_ctl2_cmci_en")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc24_ctl2::cmci_en::set(true);
-    CHECK(intel_x64::msrs::ia32_mc24_ctl2::cmci_en::get());
+    using namespace intel_x64::msrs::ia32_mc24_ctl2;
 
-    intel_x64::msrs::ia32_mc24_ctl2::cmci_en::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_mc24_ctl2::cmci_en::get());
+    cmci_en::enable();
+    CHECK(cmci_en::is_enabled());
+    cmci_en::disable();
+    CHECK(cmci_en::is_disabled());
+
+    cmci_en::enable(cmci_en::mask);
+    CHECK(cmci_en::is_enabled(cmci_en::mask));
+    cmci_en::disable(0x0);
+    CHECK(cmci_en::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_mc25_ctl2")
@@ -2799,8 +4011,11 @@ TEST_CASE("ia32_mc25_ctl2")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc25_ctl2::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_mc25_ctl2::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc25_ctl2;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc25_ctl2_error_threshold")
@@ -2808,8 +4023,13 @@ TEST_CASE("ia32_mc25_ctl2_error_threshold")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc25_ctl2::error_threshold::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_mc25_ctl2::error_threshold::get() == 0x0000000000007FFFULL);
+    using namespace intel_x64::msrs::ia32_mc25_ctl2;
+
+    error_threshold::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(error_threshold::get() == (error_threshold::mask >> error_threshold::from));
+
+    error_threshold::set(error_threshold::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(error_threshold::get(error_threshold::mask) == (error_threshold::mask >> error_threshold::from));
 }
 
 TEST_CASE("ia32_mc25_ctl2_cmci_en")
@@ -2817,11 +4037,17 @@ TEST_CASE("ia32_mc25_ctl2_cmci_en")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc25_ctl2::cmci_en::set(true);
-    CHECK(intel_x64::msrs::ia32_mc25_ctl2::cmci_en::get());
+    using namespace intel_x64::msrs::ia32_mc25_ctl2;
 
-    intel_x64::msrs::ia32_mc25_ctl2::cmci_en::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_mc25_ctl2::cmci_en::get());
+    cmci_en::enable();
+    CHECK(cmci_en::is_enabled());
+    cmci_en::disable();
+    CHECK(cmci_en::is_disabled());
+
+    cmci_en::enable(cmci_en::mask);
+    CHECK(cmci_en::is_enabled(cmci_en::mask));
+    cmci_en::disable(0x0);
+    CHECK(cmci_en::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_mc26_ctl2")
@@ -2829,8 +4055,11 @@ TEST_CASE("ia32_mc26_ctl2")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc26_ctl2::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_mc26_ctl2::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc26_ctl2;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc26_ctl2_error_threshold")
@@ -2838,8 +4067,13 @@ TEST_CASE("ia32_mc26_ctl2_error_threshold")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc26_ctl2::error_threshold::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_mc26_ctl2::error_threshold::get() == 0x0000000000007FFFULL);
+    using namespace intel_x64::msrs::ia32_mc26_ctl2;
+
+    error_threshold::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(error_threshold::get() == (error_threshold::mask >> error_threshold::from));
+
+    error_threshold::set(error_threshold::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(error_threshold::get(error_threshold::mask) == (error_threshold::mask >> error_threshold::from));
 }
 
 TEST_CASE("ia32_mc26_ctl2_cmci_en")
@@ -2847,11 +4081,17 @@ TEST_CASE("ia32_mc26_ctl2_cmci_en")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc26_ctl2::cmci_en::set(true);
-    CHECK(intel_x64::msrs::ia32_mc26_ctl2::cmci_en::get());
+    using namespace intel_x64::msrs::ia32_mc26_ctl2;
 
-    intel_x64::msrs::ia32_mc26_ctl2::cmci_en::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_mc26_ctl2::cmci_en::get());
+    cmci_en::enable();
+    CHECK(cmci_en::is_enabled());
+    cmci_en::disable();
+    CHECK(cmci_en::is_disabled());
+
+    cmci_en::enable(cmci_en::mask);
+    CHECK(cmci_en::is_enabled(cmci_en::mask));
+    cmci_en::disable(0x0);
+    CHECK(cmci_en::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_mc27_ctl2")
@@ -2859,8 +4099,11 @@ TEST_CASE("ia32_mc27_ctl2")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc27_ctl2::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_mc27_ctl2::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc27_ctl2;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc27_ctl2_error_threshold")
@@ -2868,8 +4111,13 @@ TEST_CASE("ia32_mc27_ctl2_error_threshold")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc27_ctl2::error_threshold::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_mc27_ctl2::error_threshold::get() == 0x0000000000007FFFULL);
+    using namespace intel_x64::msrs::ia32_mc27_ctl2;
+
+    error_threshold::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(error_threshold::get() == (error_threshold::mask >> error_threshold::from));
+
+    error_threshold::set(error_threshold::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(error_threshold::get(error_threshold::mask) == (error_threshold::mask >> error_threshold::from));
 }
 
 TEST_CASE("ia32_mc27_ctl2_cmci_en")
@@ -2877,11 +4125,17 @@ TEST_CASE("ia32_mc27_ctl2_cmci_en")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc27_ctl2::cmci_en::set(true);
-    CHECK(intel_x64::msrs::ia32_mc27_ctl2::cmci_en::get());
+    using namespace intel_x64::msrs::ia32_mc27_ctl2;
 
-    intel_x64::msrs::ia32_mc27_ctl2::cmci_en::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_mc27_ctl2::cmci_en::get());
+    cmci_en::enable();
+    CHECK(cmci_en::is_enabled());
+    cmci_en::disable();
+    CHECK(cmci_en::is_disabled());
+
+    cmci_en::enable(cmci_en::mask);
+    CHECK(cmci_en::is_enabled(cmci_en::mask));
+    cmci_en::disable(0x0);
+    CHECK(cmci_en::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_mc28_ctl2")
@@ -2889,8 +4143,11 @@ TEST_CASE("ia32_mc28_ctl2")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc28_ctl2::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_mc28_ctl2::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc28_ctl2;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc28_ctl2_error_threshold")
@@ -2898,8 +4155,13 @@ TEST_CASE("ia32_mc28_ctl2_error_threshold")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc28_ctl2::error_threshold::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_mc28_ctl2::error_threshold::get() == 0x0000000000007FFFULL);
+    using namespace intel_x64::msrs::ia32_mc28_ctl2;
+
+    error_threshold::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(error_threshold::get() == (error_threshold::mask >> error_threshold::from));
+
+    error_threshold::set(error_threshold::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(error_threshold::get(error_threshold::mask) == (error_threshold::mask >> error_threshold::from));
 }
 
 TEST_CASE("ia32_mc28_ctl2_cmci_en")
@@ -2907,11 +4169,17 @@ TEST_CASE("ia32_mc28_ctl2_cmci_en")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc28_ctl2::cmci_en::set(true);
-    CHECK(intel_x64::msrs::ia32_mc28_ctl2::cmci_en::get());
+    using namespace intel_x64::msrs::ia32_mc28_ctl2;
 
-    intel_x64::msrs::ia32_mc28_ctl2::cmci_en::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_mc28_ctl2::cmci_en::get());
+    cmci_en::enable();
+    CHECK(cmci_en::is_enabled());
+    cmci_en::disable();
+    CHECK(cmci_en::is_disabled());
+
+    cmci_en::enable(cmci_en::mask);
+    CHECK(cmci_en::is_enabled(cmci_en::mask));
+    cmci_en::disable(0x0);
+    CHECK(cmci_en::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_mc29_ctl2")
@@ -2919,8 +4187,11 @@ TEST_CASE("ia32_mc29_ctl2")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc29_ctl2::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_mc29_ctl2::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc29_ctl2;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc29_ctl2_error_threshold")
@@ -2928,8 +4199,13 @@ TEST_CASE("ia32_mc29_ctl2_error_threshold")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc29_ctl2::error_threshold::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_mc29_ctl2::error_threshold::get() == 0x0000000000007FFFULL);
+    using namespace intel_x64::msrs::ia32_mc29_ctl2;
+
+    error_threshold::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(error_threshold::get() == (error_threshold::mask >> error_threshold::from));
+
+    error_threshold::set(error_threshold::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(error_threshold::get(error_threshold::mask) == (error_threshold::mask >> error_threshold::from));
 }
 
 TEST_CASE("ia32_mc29_ctl2_cmci_en")
@@ -2937,11 +4213,17 @@ TEST_CASE("ia32_mc29_ctl2_cmci_en")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc29_ctl2::cmci_en::set(true);
-    CHECK(intel_x64::msrs::ia32_mc29_ctl2::cmci_en::get());
+    using namespace intel_x64::msrs::ia32_mc29_ctl2;
 
-    intel_x64::msrs::ia32_mc29_ctl2::cmci_en::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_mc29_ctl2::cmci_en::get());
+    cmci_en::enable();
+    CHECK(cmci_en::is_enabled());
+    cmci_en::disable();
+    CHECK(cmci_en::is_disabled());
+
+    cmci_en::enable(cmci_en::mask);
+    CHECK(cmci_en::is_enabled(cmci_en::mask));
+    cmci_en::disable(0x0);
+    CHECK(cmci_en::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_mc30_ctl2")
@@ -2949,8 +4231,11 @@ TEST_CASE("ia32_mc30_ctl2")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc30_ctl2::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_mc30_ctl2::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc30_ctl2;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc30_ctl2_error_threshold")
@@ -2958,8 +4243,13 @@ TEST_CASE("ia32_mc30_ctl2_error_threshold")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc30_ctl2::error_threshold::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_mc30_ctl2::error_threshold::get() == 0x0000000000007FFFULL);
+    using namespace intel_x64::msrs::ia32_mc30_ctl2;
+
+    error_threshold::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(error_threshold::get() == (error_threshold::mask >> error_threshold::from));
+
+    error_threshold::set(error_threshold::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(error_threshold::get(error_threshold::mask) == (error_threshold::mask >> error_threshold::from));
 }
 
 TEST_CASE("ia32_mc30_ctl2_cmci_en")
@@ -2967,11 +4257,17 @@ TEST_CASE("ia32_mc30_ctl2_cmci_en")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc30_ctl2::cmci_en::set(true);
-    CHECK(intel_x64::msrs::ia32_mc30_ctl2::cmci_en::get());
+    using namespace intel_x64::msrs::ia32_mc30_ctl2;
 
-    intel_x64::msrs::ia32_mc30_ctl2::cmci_en::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_mc30_ctl2::cmci_en::get());
+    cmci_en::enable();
+    CHECK(cmci_en::is_enabled());
+    cmci_en::disable();
+    CHECK(cmci_en::is_disabled());
+
+    cmci_en::enable(cmci_en::mask);
+    CHECK(cmci_en::is_enabled(cmci_en::mask));
+    cmci_en::disable(0x0);
+    CHECK(cmci_en::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_mc31_ctl2")
@@ -2979,8 +4275,11 @@ TEST_CASE("ia32_mc31_ctl2")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc31_ctl2::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_mc31_ctl2::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc31_ctl2;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc31_ctl2_error_threshold")
@@ -2988,8 +4287,13 @@ TEST_CASE("ia32_mc31_ctl2_error_threshold")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc31_ctl2::error_threshold::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_mc31_ctl2::error_threshold::get() == 0x0000000000007FFFULL);
+    using namespace intel_x64::msrs::ia32_mc31_ctl2;
+
+    error_threshold::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(error_threshold::get() == (error_threshold::mask >> error_threshold::from));
+
+    error_threshold::set(error_threshold::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(error_threshold::get(error_threshold::mask) == (error_threshold::mask >> error_threshold::from));
 }
 
 TEST_CASE("ia32_mc31_ctl2_cmci_en")
@@ -2997,11 +4301,17 @@ TEST_CASE("ia32_mc31_ctl2_cmci_en")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mc31_ctl2::cmci_en::set(true);
-    CHECK(intel_x64::msrs::ia32_mc31_ctl2::cmci_en::get());
+    using namespace intel_x64::msrs::ia32_mc31_ctl2;
 
-    intel_x64::msrs::ia32_mc31_ctl2::cmci_en::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_mc31_ctl2::cmci_en::get());
+    cmci_en::enable();
+    CHECK(cmci_en::is_enabled());
+    cmci_en::disable();
+    CHECK(cmci_en::is_disabled());
+
+    cmci_en::enable(cmci_en::mask);
+    CHECK(cmci_en::is_enabled(cmci_en::mask));
+    cmci_en::disable(0x0);
+    CHECK(cmci_en::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_mtrr_def_type")
@@ -3009,8 +4319,11 @@ TEST_CASE("ia32_mtrr_def_type")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mtrr_def_type::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_mtrr_def_type::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mtrr_def_type;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mtrr_def_type_def_mem_type")
@@ -3018,8 +4331,13 @@ TEST_CASE("ia32_mtrr_def_type_def_mem_type")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mtrr_def_type::def_mem_type::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_mtrr_def_type::def_mem_type::get() == 0x0000000000000007ULL);
+    using namespace intel_x64::msrs::ia32_mtrr_def_type;
+
+    def_mem_type::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(def_mem_type::get() == (def_mem_type::mask >> def_mem_type::from));
+
+    def_mem_type::set(def_mem_type::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(def_mem_type::get(def_mem_type::mask) == (def_mem_type::mask >> def_mem_type::from));
 }
 
 TEST_CASE("ia32_mtrr_def_type_fixed_range_mtrr")
@@ -3027,11 +4345,17 @@ TEST_CASE("ia32_mtrr_def_type_fixed_range_mtrr")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mtrr_def_type::fixed_range_mtrr::set(true);
-    CHECK(intel_x64::msrs::ia32_mtrr_def_type::fixed_range_mtrr::get());
+    using namespace intel_x64::msrs::ia32_mtrr_def_type;
 
-    intel_x64::msrs::ia32_mtrr_def_type::fixed_range_mtrr::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_mtrr_def_type::fixed_range_mtrr::get());
+    fixed_range_mtrr::enable();
+    CHECK(fixed_range_mtrr::is_enabled());
+    fixed_range_mtrr::disable();
+    CHECK(fixed_range_mtrr::is_disabled());
+
+    fixed_range_mtrr::enable(fixed_range_mtrr::mask);
+    CHECK(fixed_range_mtrr::is_enabled(fixed_range_mtrr::mask));
+    fixed_range_mtrr::disable(0x0);
+    CHECK(fixed_range_mtrr::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_mtrr_def_type_mtrr")
@@ -3039,11 +4363,17 @@ TEST_CASE("ia32_mtrr_def_type_mtrr")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mtrr_def_type::mtrr::set(true);
-    CHECK(intel_x64::msrs::ia32_mtrr_def_type::mtrr::get());
+    using namespace intel_x64::msrs::ia32_mtrr_def_type;
 
-    intel_x64::msrs::ia32_mtrr_def_type::mtrr::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_mtrr_def_type::mtrr::get());
+    mtrr::enable();
+    CHECK(mtrr::is_enabled());
+    mtrr::disable();
+    CHECK(mtrr::is_disabled());
+
+    mtrr::enable(mtrr::mask);
+    CHECK(mtrr::is_enabled(mtrr::mask));
+    mtrr::disable(0x0);
+    CHECK(mtrr::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_fixed_ctr0")
@@ -3051,8 +4381,11 @@ TEST_CASE("ia32_fixed_ctr0")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_fixed_ctr0::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_fixed_ctr0::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_fixed_ctr0;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_fixed_ctr1")
@@ -3060,8 +4393,11 @@ TEST_CASE("ia32_fixed_ctr1")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_fixed_ctr1::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_fixed_ctr1::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_fixed_ctr1;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_fixed_ctr2")
@@ -3069,8 +4405,11 @@ TEST_CASE("ia32_fixed_ctr2")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_fixed_ctr2::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_fixed_ctr2::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_fixed_ctr2;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_perf_capabilities")
@@ -3078,8 +4417,11 @@ TEST_CASE("ia32_perf_capabilities")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000345UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_perf_capabilities::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_perf_capabilities;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_perf_capabilities_lbo_format")
@@ -3087,8 +4429,13 @@ TEST_CASE("ia32_perf_capabilities_lbo_format")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000345UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_perf_capabilities::lbo_format::get() == 0x000000000000003FULL);
+    using namespace intel_x64::msrs::ia32_perf_capabilities;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(lbo_format::get() == (lbo_format::mask >> lbo_format::from));
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(lbo_format::get(lbo_format::mask) == (lbo_format::mask >> lbo_format::from));
 }
 
 TEST_CASE("ia32_perf_capabilities_pebs_trap")
@@ -3096,11 +4443,17 @@ TEST_CASE("ia32_perf_capabilities_pebs_trap")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000345UL] = 0x0000000000000040ULL;
-    CHECK(intel_x64::msrs::ia32_perf_capabilities::pebs_trap::get());
+    using namespace intel_x64::msrs::ia32_perf_capabilities;
 
-    g_msrs[0x00000345UL] = 0x0000000000000000ULL;
-    CHECK_FALSE(intel_x64::msrs::ia32_perf_capabilities::pebs_trap::get());
+    g_msrs[addr] = pebs_trap::mask;
+    CHECK(pebs_trap::is_enabled());
+    g_msrs[addr] = 0x0;
+    CHECK(pebs_trap::is_disabled());
+
+    g_msrs[addr] = pebs_trap::mask;
+    CHECK(pebs_trap::is_enabled(pebs_trap::mask));
+    g_msrs[addr] = 0x0;
+    CHECK(pebs_trap::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_perf_capabilities_pebs_savearchregs")
@@ -3108,11 +4461,17 @@ TEST_CASE("ia32_perf_capabilities_pebs_savearchregs")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000345UL] = 0x0000000000000080ULL;
-    CHECK(intel_x64::msrs::ia32_perf_capabilities::pebs_savearchregs::get());
+    using namespace intel_x64::msrs::ia32_perf_capabilities;
 
-    g_msrs[0x00000345UL] = 0x0000000000000000ULL;
-    CHECK_FALSE(intel_x64::msrs::ia32_perf_capabilities::pebs_savearchregs::get());
+    g_msrs[addr] = pebs_savearchregs::mask;
+    CHECK(pebs_savearchregs::is_enabled());
+    g_msrs[addr] = 0x0;
+    CHECK(pebs_savearchregs::is_disabled());
+
+    g_msrs[addr] = pebs_savearchregs::mask;
+    CHECK(pebs_savearchregs::is_enabled(pebs_savearchregs::mask));
+    g_msrs[addr] = 0x0;
+    CHECK(pebs_savearchregs::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_perf_capabilities_pebs_record_format")
@@ -3120,8 +4479,13 @@ TEST_CASE("ia32_perf_capabilities_pebs_record_format")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000345UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_perf_capabilities::pebs_record_format::get() == 0x000000000000000FULL);
+    using namespace intel_x64::msrs::ia32_perf_capabilities;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(pebs_record_format::get() == (pebs_record_format::mask >> pebs_record_format::from));
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(pebs_record_format::get(pebs_record_format::mask) == (pebs_record_format::mask >> pebs_record_format::from));
 }
 
 TEST_CASE("ia32_perf_capabilities_freeze")
@@ -3129,11 +4493,17 @@ TEST_CASE("ia32_perf_capabilities_freeze")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000345UL] = 0x0000000000001000ULL;
-    CHECK(intel_x64::msrs::ia32_perf_capabilities::freeze::get());
+    using namespace intel_x64::msrs::ia32_perf_capabilities;
 
-    g_msrs[0x00000345UL] = 0x0000000000000000ULL;
-    CHECK_FALSE(intel_x64::msrs::ia32_perf_capabilities::freeze::get());
+    g_msrs[addr] = freeze::mask;
+    CHECK(freeze::is_enabled());
+    g_msrs[addr] = 0x0;
+    CHECK(freeze::is_disabled());
+
+    g_msrs[addr] = freeze::mask;
+    CHECK(freeze::is_enabled(freeze::mask));
+    g_msrs[addr] = 0x0;
+    CHECK(freeze::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_perf_capabilities_counter_width")
@@ -3141,11 +4511,17 @@ TEST_CASE("ia32_perf_capabilities_counter_width")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000345UL] = 0x0000000000002000ULL;
-    CHECK(intel_x64::msrs::ia32_perf_capabilities::counter_width::get());
+    using namespace intel_x64::msrs::ia32_perf_capabilities;
 
-    g_msrs[0x00000345UL] = 0x0000000000000000ULL;
-    CHECK_FALSE(intel_x64::msrs::ia32_perf_capabilities::counter_width::get());
+    g_msrs[addr] = counter_width::mask;
+    CHECK(counter_width::is_enabled());
+    g_msrs[addr] = 0x0;
+    CHECK(counter_width::is_disabled());
+
+    g_msrs[addr] = counter_width::mask;
+    CHECK(counter_width::is_enabled(counter_width::mask));
+    g_msrs[addr] = 0x0;
+    CHECK(counter_width::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_fixed_ctr_ctrl")
@@ -3153,8 +4529,11 @@ TEST_CASE("ia32_fixed_ctr_ctrl")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_fixed_ctr_ctrl::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_fixed_ctr_ctrl::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_fixed_ctr_ctrl;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_fixed_ctr_ctrl_en0_os")
@@ -3162,11 +4541,17 @@ TEST_CASE("ia32_fixed_ctr_ctrl_en0_os")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_fixed_ctr_ctrl::en0_os::set(true);
-    CHECK(intel_x64::msrs::ia32_fixed_ctr_ctrl::en0_os::get());
+    using namespace intel_x64::msrs::ia32_fixed_ctr_ctrl;
 
-    intel_x64::msrs::ia32_fixed_ctr_ctrl::en0_os::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_fixed_ctr_ctrl::en0_os::get());
+    en0_os::enable();
+    CHECK(en0_os::is_enabled());
+    en0_os::disable();
+    CHECK(en0_os::is_disabled());
+
+    en0_os::enable(en0_os::mask);
+    CHECK(en0_os::is_enabled(en0_os::mask));
+    en0_os::disable(0x0);
+    CHECK(en0_os::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_fixed_ctr_ctrl_en0_usr")
@@ -3174,11 +4559,17 @@ TEST_CASE("ia32_fixed_ctr_ctrl_en0_usr")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_fixed_ctr_ctrl::en0_usr::set(true);
-    CHECK(intel_x64::msrs::ia32_fixed_ctr_ctrl::en0_usr::get());
+    using namespace intel_x64::msrs::ia32_fixed_ctr_ctrl;
 
-    intel_x64::msrs::ia32_fixed_ctr_ctrl::en0_usr::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_fixed_ctr_ctrl::en0_usr::get());
+    en0_usr::enable();
+    CHECK(en0_usr::is_enabled());
+    en0_usr::disable();
+    CHECK(en0_usr::is_disabled());
+
+    en0_usr::enable(en0_usr::mask);
+    CHECK(en0_usr::is_enabled(en0_usr::mask));
+    en0_usr::disable(0x0);
+    CHECK(en0_usr::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_fixed_ctr_ctrl_en0_anythread")
@@ -3186,11 +4577,17 @@ TEST_CASE("ia32_fixed_ctr_ctrl_en0_anythread")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_fixed_ctr_ctrl::en0_anythread::set(true);
-    CHECK(intel_x64::msrs::ia32_fixed_ctr_ctrl::en0_anythread::get());
+    using namespace intel_x64::msrs::ia32_fixed_ctr_ctrl;
 
-    intel_x64::msrs::ia32_fixed_ctr_ctrl::en0_anythread::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_fixed_ctr_ctrl::en0_anythread::get());
+    en0_anythread::enable();
+    CHECK(en0_anythread::is_enabled());
+    en0_anythread::disable();
+    CHECK(en0_anythread::is_disabled());
+
+    en0_anythread::enable(en0_anythread::mask);
+    CHECK(en0_anythread::is_enabled(en0_anythread::mask));
+    en0_anythread::disable(0x0);
+    CHECK(en0_anythread::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_fixed_ctr_ctrl_en0_pmi")
@@ -3198,11 +4595,17 @@ TEST_CASE("ia32_fixed_ctr_ctrl_en0_pmi")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_fixed_ctr_ctrl::en0_pmi::set(true);
-    CHECK(intel_x64::msrs::ia32_fixed_ctr_ctrl::en0_pmi::get());
+    using namespace intel_x64::msrs::ia32_fixed_ctr_ctrl;
 
-    intel_x64::msrs::ia32_fixed_ctr_ctrl::en0_pmi::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_fixed_ctr_ctrl::en0_pmi::get());
+    en0_pmi::enable();
+    CHECK(en0_pmi::is_enabled());
+    en0_pmi::disable();
+    CHECK(en0_pmi::is_disabled());
+
+    en0_pmi::enable(en0_pmi::mask);
+    CHECK(en0_pmi::is_enabled(en0_pmi::mask));
+    en0_pmi::disable(0x0);
+    CHECK(en0_pmi::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_fixed_ctr_ctrl_en1_os")
@@ -3210,11 +4613,17 @@ TEST_CASE("ia32_fixed_ctr_ctrl_en1_os")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_fixed_ctr_ctrl::en1_os::set(true);
-    CHECK(intel_x64::msrs::ia32_fixed_ctr_ctrl::en1_os::get());
+    using namespace intel_x64::msrs::ia32_fixed_ctr_ctrl;
 
-    intel_x64::msrs::ia32_fixed_ctr_ctrl::en1_os::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_fixed_ctr_ctrl::en1_os::get());
+    en1_os::enable();
+    CHECK(en1_os::is_enabled());
+    en1_os::disable();
+    CHECK(en1_os::is_disabled());
+
+    en1_os::enable(en1_os::mask);
+    CHECK(en1_os::is_enabled(en1_os::mask));
+    en1_os::disable(0x0);
+    CHECK(en1_os::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_fixed_ctr_ctrl_en1_usr")
@@ -3222,11 +4631,17 @@ TEST_CASE("ia32_fixed_ctr_ctrl_en1_usr")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_fixed_ctr_ctrl::en1_usr::set(true);
-    CHECK(intel_x64::msrs::ia32_fixed_ctr_ctrl::en1_usr::get());
+    using namespace intel_x64::msrs::ia32_fixed_ctr_ctrl;
 
-    intel_x64::msrs::ia32_fixed_ctr_ctrl::en1_usr::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_fixed_ctr_ctrl::en1_usr::get());
+    en1_usr::enable();
+    CHECK(en1_usr::is_enabled());
+    en1_usr::disable();
+    CHECK(en1_usr::is_disabled());
+
+    en1_usr::enable(en1_usr::mask);
+    CHECK(en1_usr::is_enabled(en1_usr::mask));
+    en1_usr::disable(0x0);
+    CHECK(en1_usr::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_fixed_ctr_ctrl_en1_anythread")
@@ -3234,11 +4649,17 @@ TEST_CASE("ia32_fixed_ctr_ctrl_en1_anythread")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_fixed_ctr_ctrl::en1_anythread::set(true);
-    CHECK(intel_x64::msrs::ia32_fixed_ctr_ctrl::en1_anythread::get());
+    using namespace intel_x64::msrs::ia32_fixed_ctr_ctrl;
 
-    intel_x64::msrs::ia32_fixed_ctr_ctrl::en1_anythread::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_fixed_ctr_ctrl::en1_anythread::get());
+    en1_anythread::enable();
+    CHECK(en1_anythread::is_enabled());
+    en1_anythread::disable();
+    CHECK(en1_anythread::is_disabled());
+
+    en1_anythread::enable(en1_anythread::mask);
+    CHECK(en1_anythread::is_enabled(en1_anythread::mask));
+    en1_anythread::disable(0x0);
+    CHECK(en1_anythread::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_fixed_ctr_ctrl_en1_pmi")
@@ -3246,11 +4667,17 @@ TEST_CASE("ia32_fixed_ctr_ctrl_en1_pmi")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_fixed_ctr_ctrl::en1_pmi::set(true);
-    CHECK(intel_x64::msrs::ia32_fixed_ctr_ctrl::en1_pmi::get());
+    using namespace intel_x64::msrs::ia32_fixed_ctr_ctrl;
 
-    intel_x64::msrs::ia32_fixed_ctr_ctrl::en1_pmi::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_fixed_ctr_ctrl::en1_pmi::get());
+    en1_pmi::enable();
+    CHECK(en1_pmi::is_enabled());
+    en1_pmi::disable();
+    CHECK(en1_pmi::is_disabled());
+
+    en1_pmi::enable(en1_pmi::mask);
+    CHECK(en1_pmi::is_enabled(en1_pmi::mask));
+    en1_pmi::disable(0x0);
+    CHECK(en1_pmi::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_fixed_ctr_ctrl_en2_os")
@@ -3258,11 +4685,17 @@ TEST_CASE("ia32_fixed_ctr_ctrl_en2_os")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_fixed_ctr_ctrl::en2_os::set(true);
-    CHECK(intel_x64::msrs::ia32_fixed_ctr_ctrl::en2_os::get());
+    using namespace intel_x64::msrs::ia32_fixed_ctr_ctrl;
 
-    intel_x64::msrs::ia32_fixed_ctr_ctrl::en2_os::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_fixed_ctr_ctrl::en2_os::get());
+    en2_os::enable();
+    CHECK(en2_os::is_enabled());
+    en2_os::disable();
+    CHECK(en2_os::is_disabled());
+
+    en2_os::enable(en2_os::mask);
+    CHECK(en2_os::is_enabled(en2_os::mask));
+    en2_os::disable(0x0);
+    CHECK(en2_os::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_fixed_ctr_ctrl_en2_usr")
@@ -3270,11 +4703,17 @@ TEST_CASE("ia32_fixed_ctr_ctrl_en2_usr")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_fixed_ctr_ctrl::en2_usr::set(true);
-    CHECK(intel_x64::msrs::ia32_fixed_ctr_ctrl::en2_usr::get());
+    using namespace intel_x64::msrs::ia32_fixed_ctr_ctrl;
 
-    intel_x64::msrs::ia32_fixed_ctr_ctrl::en2_usr::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_fixed_ctr_ctrl::en2_usr::get());
+    en2_usr::enable();
+    CHECK(en2_usr::is_enabled());
+    en2_usr::disable();
+    CHECK(en2_usr::is_disabled());
+
+    en2_usr::enable(en2_usr::mask);
+    CHECK(en2_usr::is_enabled(en2_usr::mask));
+    en2_usr::disable(0x0);
+    CHECK(en2_usr::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_fixed_ctr_ctrl_en2_anythread")
@@ -3282,11 +4721,17 @@ TEST_CASE("ia32_fixed_ctr_ctrl_en2_anythread")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_fixed_ctr_ctrl::en2_anythread::set(true);
-    CHECK(intel_x64::msrs::ia32_fixed_ctr_ctrl::en2_anythread::get());
+    using namespace intel_x64::msrs::ia32_fixed_ctr_ctrl;
 
-    intel_x64::msrs::ia32_fixed_ctr_ctrl::en2_anythread::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_fixed_ctr_ctrl::en2_anythread::get());
+    en2_anythread::enable();
+    CHECK(en2_anythread::is_enabled());
+    en2_anythread::disable();
+    CHECK(en2_anythread::is_disabled());
+
+    en2_anythread::enable(en2_anythread::mask);
+    CHECK(en2_anythread::is_enabled(en2_anythread::mask));
+    en2_anythread::disable(0x0);
+    CHECK(en2_anythread::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_fixed_ctr_ctrl_en2_pmi")
@@ -3294,11 +4739,17 @@ TEST_CASE("ia32_fixed_ctr_ctrl_en2_pmi")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_fixed_ctr_ctrl::en2_pmi::set(true);
-    CHECK(intel_x64::msrs::ia32_fixed_ctr_ctrl::en2_pmi::get());
+    using namespace intel_x64::msrs::ia32_fixed_ctr_ctrl;
 
-    intel_x64::msrs::ia32_fixed_ctr_ctrl::en2_pmi::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_fixed_ctr_ctrl::en2_pmi::get());
+    en2_pmi::enable();
+    CHECK(en2_pmi::is_enabled());
+    en2_pmi::disable();
+    CHECK(en2_pmi::is_disabled());
+
+    en2_pmi::enable(en2_pmi::mask);
+    CHECK(en2_pmi::is_enabled(en2_pmi::mask));
+    en2_pmi::disable(0x0);
+    CHECK(en2_pmi::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_perf_global_status")
@@ -3306,8 +4757,11 @@ TEST_CASE("ia32_perf_global_status")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000038EUL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_perf_global_status::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_perf_global_status;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_perf_global_status_ovf_pmc0")
@@ -3315,11 +4769,17 @@ TEST_CASE("ia32_perf_global_status_ovf_pmc0")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_perf_global_status::ovf_pmc0::set(true);
-    CHECK(intel_x64::msrs::ia32_perf_global_status::ovf_pmc0::get());
+    using namespace intel_x64::msrs::ia32_perf_global_status;
 
-    intel_x64::msrs::ia32_perf_global_status::ovf_pmc0::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_perf_global_status::ovf_pmc0::get());
+    ovf_pmc0::enable();
+    CHECK(ovf_pmc0::is_enabled());
+    ovf_pmc0::disable();
+    CHECK(ovf_pmc0::is_disabled());
+
+    ovf_pmc0::enable(ovf_pmc0::mask);
+    CHECK(ovf_pmc0::is_enabled(ovf_pmc0::mask));
+    ovf_pmc0::disable(0x0);
+    CHECK(ovf_pmc0::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_perf_global_status_ovf_pmc1")
@@ -3327,11 +4787,17 @@ TEST_CASE("ia32_perf_global_status_ovf_pmc1")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_perf_global_status::ovf_pmc1::set(true);
-    CHECK(intel_x64::msrs::ia32_perf_global_status::ovf_pmc1::get());
+    using namespace intel_x64::msrs::ia32_perf_global_status;
 
-    intel_x64::msrs::ia32_perf_global_status::ovf_pmc1::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_perf_global_status::ovf_pmc1::get());
+    ovf_pmc1::enable();
+    CHECK(ovf_pmc1::is_enabled());
+    ovf_pmc1::disable();
+    CHECK(ovf_pmc1::is_disabled());
+
+    ovf_pmc1::enable(ovf_pmc1::mask);
+    CHECK(ovf_pmc1::is_enabled(ovf_pmc1::mask));
+    ovf_pmc1::disable(0x0);
+    CHECK(ovf_pmc1::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_perf_global_status_ovf_pmc2")
@@ -3339,11 +4805,17 @@ TEST_CASE("ia32_perf_global_status_ovf_pmc2")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_perf_global_status::ovf_pmc2::set(true);
-    CHECK(intel_x64::msrs::ia32_perf_global_status::ovf_pmc2::get());
+    using namespace intel_x64::msrs::ia32_perf_global_status;
 
-    intel_x64::msrs::ia32_perf_global_status::ovf_pmc2::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_perf_global_status::ovf_pmc2::get());
+    ovf_pmc2::enable();
+    CHECK(ovf_pmc2::is_enabled());
+    ovf_pmc2::disable();
+    CHECK(ovf_pmc2::is_disabled());
+
+    ovf_pmc2::enable(ovf_pmc2::mask);
+    CHECK(ovf_pmc2::is_enabled(ovf_pmc2::mask));
+    ovf_pmc2::disable(0x0);
+    CHECK(ovf_pmc2::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_perf_global_status_ovf_pmc3")
@@ -3351,11 +4823,17 @@ TEST_CASE("ia32_perf_global_status_ovf_pmc3")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_perf_global_status::ovf_pmc3::set(true);
-    CHECK(intel_x64::msrs::ia32_perf_global_status::ovf_pmc3::get());
+    using namespace intel_x64::msrs::ia32_perf_global_status;
 
-    intel_x64::msrs::ia32_perf_global_status::ovf_pmc3::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_perf_global_status::ovf_pmc3::get());
+    ovf_pmc3::enable();
+    CHECK(ovf_pmc3::is_enabled());
+    ovf_pmc3::disable();
+    CHECK(ovf_pmc3::is_disabled());
+
+    ovf_pmc3::enable(ovf_pmc3::mask);
+    CHECK(ovf_pmc3::is_enabled(ovf_pmc3::mask));
+    ovf_pmc3::disable(0x0);
+    CHECK(ovf_pmc3::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_perf_global_status_ovf_fixedctr0")
@@ -3363,11 +4841,17 @@ TEST_CASE("ia32_perf_global_status_ovf_fixedctr0")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_perf_global_status::ovf_fixedctr0::set(true);
-    CHECK(intel_x64::msrs::ia32_perf_global_status::ovf_fixedctr0::get());
+    using namespace intel_x64::msrs::ia32_perf_global_status;
 
-    intel_x64::msrs::ia32_perf_global_status::ovf_fixedctr0::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_perf_global_status::ovf_fixedctr0::get());
+    ovf_fixedctr0::enable();
+    CHECK(ovf_fixedctr0::is_enabled());
+    ovf_fixedctr0::disable();
+    CHECK(ovf_fixedctr0::is_disabled());
+
+    ovf_fixedctr0::enable(ovf_fixedctr0::mask);
+    CHECK(ovf_fixedctr0::is_enabled(ovf_fixedctr0::mask));
+    ovf_fixedctr0::disable(0x0);
+    CHECK(ovf_fixedctr0::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_perf_global_status_ovf_fixedctr1")
@@ -3375,11 +4859,17 @@ TEST_CASE("ia32_perf_global_status_ovf_fixedctr1")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_perf_global_status::ovf_fixedctr1::set(true);
-    CHECK(intel_x64::msrs::ia32_perf_global_status::ovf_fixedctr1::get());
+    using namespace intel_x64::msrs::ia32_perf_global_status;
 
-    intel_x64::msrs::ia32_perf_global_status::ovf_fixedctr1::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_perf_global_status::ovf_fixedctr1::get());
+    ovf_fixedctr1::enable();
+    CHECK(ovf_fixedctr1::is_enabled());
+    ovf_fixedctr1::disable();
+    CHECK(ovf_fixedctr1::is_disabled());
+
+    ovf_fixedctr1::enable(ovf_fixedctr1::mask);
+    CHECK(ovf_fixedctr1::is_enabled(ovf_fixedctr1::mask));
+    ovf_fixedctr1::disable(0x0);
+    CHECK(ovf_fixedctr1::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_perf_global_status_ovf_fixedctr2")
@@ -3387,11 +4877,17 @@ TEST_CASE("ia32_perf_global_status_ovf_fixedctr2")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_perf_global_status::ovf_fixedctr2::set(true);
-    CHECK(intel_x64::msrs::ia32_perf_global_status::ovf_fixedctr2::get());
+    using namespace intel_x64::msrs::ia32_perf_global_status;
 
-    intel_x64::msrs::ia32_perf_global_status::ovf_fixedctr2::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_perf_global_status::ovf_fixedctr2::get());
+    ovf_fixedctr2::enable();
+    CHECK(ovf_fixedctr2::is_enabled());
+    ovf_fixedctr2::disable();
+    CHECK(ovf_fixedctr2::is_disabled());
+
+    ovf_fixedctr2::enable(ovf_fixedctr2::mask);
+    CHECK(ovf_fixedctr2::is_enabled(ovf_fixedctr2::mask));
+    ovf_fixedctr2::disable(0x0);
+    CHECK(ovf_fixedctr2::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_perf_global_status_trace_topa_pmi")
@@ -3399,11 +4895,17 @@ TEST_CASE("ia32_perf_global_status_trace_topa_pmi")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_perf_global_status::trace_topa_pmi::set(true);
-    CHECK(intel_x64::msrs::ia32_perf_global_status::trace_topa_pmi::get());
+    using namespace intel_x64::msrs::ia32_perf_global_status;
 
-    intel_x64::msrs::ia32_perf_global_status::trace_topa_pmi::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_perf_global_status::trace_topa_pmi::get());
+    trace_topa_pmi::enable();
+    CHECK(trace_topa_pmi::is_enabled());
+    trace_topa_pmi::disable();
+    CHECK(trace_topa_pmi::is_disabled());
+
+    trace_topa_pmi::enable(trace_topa_pmi::mask);
+    CHECK(trace_topa_pmi::is_enabled(trace_topa_pmi::mask));
+    trace_topa_pmi::disable(0x0);
+    CHECK(trace_topa_pmi::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_perf_global_status_lbr_frz")
@@ -3411,11 +4913,17 @@ TEST_CASE("ia32_perf_global_status_lbr_frz")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_perf_global_status::lbr_frz::set(true);
-    CHECK(intel_x64::msrs::ia32_perf_global_status::lbr_frz::get());
+    using namespace intel_x64::msrs::ia32_perf_global_status;
 
-    intel_x64::msrs::ia32_perf_global_status::lbr_frz::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_perf_global_status::lbr_frz::get());
+    lbr_frz::enable();
+    CHECK(lbr_frz::is_enabled());
+    lbr_frz::disable();
+    CHECK(lbr_frz::is_disabled());
+
+    lbr_frz::enable(lbr_frz::mask);
+    CHECK(lbr_frz::is_enabled(lbr_frz::mask));
+    lbr_frz::disable(0x0);
+    CHECK(lbr_frz::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_perf_global_status_ctr_frz")
@@ -3423,11 +4931,17 @@ TEST_CASE("ia32_perf_global_status_ctr_frz")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_perf_global_status::ctr_frz::set(true);
-    CHECK(intel_x64::msrs::ia32_perf_global_status::ctr_frz::get());
+    using namespace intel_x64::msrs::ia32_perf_global_status;
 
-    intel_x64::msrs::ia32_perf_global_status::ctr_frz::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_perf_global_status::ctr_frz::get());
+    ctr_frz::enable();
+    CHECK(ctr_frz::is_enabled());
+    ctr_frz::disable();
+    CHECK(ctr_frz::is_disabled());
+
+    ctr_frz::enable(ctr_frz::mask);
+    CHECK(ctr_frz::is_enabled(ctr_frz::mask));
+    ctr_frz::disable(0x0);
+    CHECK(ctr_frz::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_perf_global_status_asci")
@@ -3435,11 +4949,17 @@ TEST_CASE("ia32_perf_global_status_asci")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_perf_global_status::asci::set(true);
-    CHECK(intel_x64::msrs::ia32_perf_global_status::asci::get());
+    using namespace intel_x64::msrs::ia32_perf_global_status;
 
-    intel_x64::msrs::ia32_perf_global_status::asci::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_perf_global_status::asci::get());
+    asci::enable();
+    CHECK(asci::is_enabled());
+    asci::disable();
+    CHECK(asci::is_disabled());
+
+    asci::enable(asci::mask);
+    CHECK(asci::is_enabled(asci::mask));
+    asci::disable(0x0);
+    CHECK(asci::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_perf_global_status_ovf_uncore")
@@ -3447,11 +4967,17 @@ TEST_CASE("ia32_perf_global_status_ovf_uncore")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_perf_global_status::ovf_uncore::set(true);
-    CHECK(intel_x64::msrs::ia32_perf_global_status::ovf_uncore::get());
+    using namespace intel_x64::msrs::ia32_perf_global_status;
 
-    intel_x64::msrs::ia32_perf_global_status::ovf_uncore::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_perf_global_status::ovf_uncore::get());
+    ovf_uncore::enable();
+    CHECK(ovf_uncore::is_enabled());
+    ovf_uncore::disable();
+    CHECK(ovf_uncore::is_disabled());
+
+    ovf_uncore::enable(ovf_uncore::mask);
+    CHECK(ovf_uncore::is_enabled(ovf_uncore::mask));
+    ovf_uncore::disable(0x0);
+    CHECK(ovf_uncore::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_perf_global_status_ovfbuf")
@@ -3459,11 +4985,17 @@ TEST_CASE("ia32_perf_global_status_ovfbuf")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_perf_global_status::ovfbuf::set(true);
-    CHECK(intel_x64::msrs::ia32_perf_global_status::ovfbuf::get());
+    using namespace intel_x64::msrs::ia32_perf_global_status;
 
-    intel_x64::msrs::ia32_perf_global_status::ovfbuf::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_perf_global_status::ovfbuf::get());
+    ovfbuf::enable();
+    CHECK(ovfbuf::is_enabled());
+    ovfbuf::disable();
+    CHECK(ovfbuf::is_disabled());
+
+    ovfbuf::enable(ovfbuf::mask);
+    CHECK(ovfbuf::is_enabled(ovfbuf::mask));
+    ovfbuf::disable(0x0);
+    CHECK(ovfbuf::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_perf_global_status_condchgd")
@@ -3471,11 +5003,17 @@ TEST_CASE("ia32_perf_global_status_condchgd")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_perf_global_status::condchgd::set(true);
-    CHECK(intel_x64::msrs::ia32_perf_global_status::condchgd::get());
+    using namespace intel_x64::msrs::ia32_perf_global_status;
 
-    intel_x64::msrs::ia32_perf_global_status::condchgd::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_perf_global_status::condchgd::get());
+    condchgd::enable();
+    CHECK(condchgd::is_enabled());
+    condchgd::disable();
+    CHECK(condchgd::is_disabled());
+
+    condchgd::enable(condchgd::mask);
+    CHECK(condchgd::is_enabled(condchgd::mask));
+    condchgd::disable(0x0);
+    CHECK(condchgd::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_perf_global_ctrl")
@@ -3483,10 +5021,11 @@ TEST_CASE("ia32_perf_global_ctrl")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_perf_global_ctrl::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_perf_global_ctrl::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_perf_global_ctrl;
 
-    intel_x64::msrs::ia32_perf_global_ctrl::dump();
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_perf_global_ctrl_pmc0")
@@ -3494,11 +5033,17 @@ TEST_CASE("ia32_perf_global_ctrl_pmc0")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_perf_global_ctrl::pmc0::set(true);
-    CHECK(intel_x64::msrs::ia32_perf_global_ctrl::pmc0::get());
+    using namespace intel_x64::msrs::ia32_perf_global_ctrl;
 
-    intel_x64::msrs::ia32_perf_global_ctrl::pmc0::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_perf_global_ctrl::pmc0::get());
+    pmc0::enable();
+    CHECK(pmc0::is_enabled());
+    pmc0::disable();
+    CHECK(pmc0::is_disabled());
+
+    pmc0::enable(pmc0::mask);
+    CHECK(pmc0::is_enabled(pmc0::mask));
+    pmc0::disable(0x0);
+    CHECK(pmc0::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_perf_global_ctrl_pmc1")
@@ -3506,11 +5051,17 @@ TEST_CASE("ia32_perf_global_ctrl_pmc1")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_perf_global_ctrl::pmc1::set(true);
-    CHECK(intel_x64::msrs::ia32_perf_global_ctrl::pmc1::get());
+    using namespace intel_x64::msrs::ia32_perf_global_ctrl;
 
-    intel_x64::msrs::ia32_perf_global_ctrl::pmc1::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_perf_global_ctrl::pmc1::get());
+    pmc1::enable();
+    CHECK(pmc1::is_enabled());
+    pmc1::disable();
+    CHECK(pmc1::is_disabled());
+
+    pmc1::enable(pmc1::mask);
+    CHECK(pmc1::is_enabled(pmc1::mask));
+    pmc1::disable(0x0);
+    CHECK(pmc1::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_perf_global_ctrl_pmc2")
@@ -3518,11 +5069,17 @@ TEST_CASE("ia32_perf_global_ctrl_pmc2")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_perf_global_ctrl::pmc2::set(true);
-    CHECK(intel_x64::msrs::ia32_perf_global_ctrl::pmc2::get());
+    using namespace intel_x64::msrs::ia32_perf_global_ctrl;
 
-    intel_x64::msrs::ia32_perf_global_ctrl::pmc2::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_perf_global_ctrl::pmc2::get());
+    pmc2::enable();
+    CHECK(pmc2::is_enabled());
+    pmc2::disable();
+    CHECK(pmc2::is_disabled());
+
+    pmc2::enable(pmc2::mask);
+    CHECK(pmc2::is_enabled(pmc2::mask));
+    pmc2::disable(0x0);
+    CHECK(pmc2::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_perf_global_ctrl_pmc3")
@@ -3530,11 +5087,17 @@ TEST_CASE("ia32_perf_global_ctrl_pmc3")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_perf_global_ctrl::pmc3::set(true);
-    CHECK(intel_x64::msrs::ia32_perf_global_ctrl::pmc3::get());
+    using namespace intel_x64::msrs::ia32_perf_global_ctrl;
 
-    intel_x64::msrs::ia32_perf_global_ctrl::pmc3::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_perf_global_ctrl::pmc3::get());
+    pmc3::enable();
+    CHECK(pmc3::is_enabled());
+    pmc3::disable();
+    CHECK(pmc3::is_disabled());
+
+    pmc3::enable(pmc3::mask);
+    CHECK(pmc3::is_enabled(pmc3::mask));
+    pmc3::disable(0x0);
+    CHECK(pmc3::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_perf_global_ctrl_pmc4")
@@ -3542,11 +5105,17 @@ TEST_CASE("ia32_perf_global_ctrl_pmc4")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_perf_global_ctrl::pmc4::set(true);
-    CHECK(intel_x64::msrs::ia32_perf_global_ctrl::pmc4::get());
+    using namespace intel_x64::msrs::ia32_perf_global_ctrl;
 
-    intel_x64::msrs::ia32_perf_global_ctrl::pmc4::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_perf_global_ctrl::pmc4::get());
+    pmc4::enable();
+    CHECK(pmc4::is_enabled());
+    pmc4::disable();
+    CHECK(pmc4::is_disabled());
+
+    pmc4::enable(pmc4::mask);
+    CHECK(pmc4::is_enabled(pmc4::mask));
+    pmc4::disable(0x0);
+    CHECK(pmc4::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_perf_global_ctrl_pmc5")
@@ -3554,11 +5123,17 @@ TEST_CASE("ia32_perf_global_ctrl_pmc5")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_perf_global_ctrl::pmc5::set(true);
-    CHECK(intel_x64::msrs::ia32_perf_global_ctrl::pmc5::get());
+    using namespace intel_x64::msrs::ia32_perf_global_ctrl;
 
-    intel_x64::msrs::ia32_perf_global_ctrl::pmc5::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_perf_global_ctrl::pmc5::get());
+    pmc5::enable();
+    CHECK(pmc5::is_enabled());
+    pmc5::disable();
+    CHECK(pmc5::is_disabled());
+
+    pmc5::enable(pmc5::mask);
+    CHECK(pmc5::is_enabled(pmc5::mask));
+    pmc5::disable(0x0);
+    CHECK(pmc5::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_perf_global_ctrl_pmc6")
@@ -3566,11 +5141,17 @@ TEST_CASE("ia32_perf_global_ctrl_pmc6")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_perf_global_ctrl::pmc6::set(true);
-    CHECK(intel_x64::msrs::ia32_perf_global_ctrl::pmc6::get());
+    using namespace intel_x64::msrs::ia32_perf_global_ctrl;
 
-    intel_x64::msrs::ia32_perf_global_ctrl::pmc6::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_perf_global_ctrl::pmc6::get());
+    pmc6::enable();
+    CHECK(pmc6::is_enabled());
+    pmc6::disable();
+    CHECK(pmc6::is_disabled());
+
+    pmc6::enable(pmc6::mask);
+    CHECK(pmc6::is_enabled(pmc6::mask));
+    pmc6::disable(0x0);
+    CHECK(pmc6::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_perf_global_ctrl_pmc7")
@@ -3578,11 +5159,17 @@ TEST_CASE("ia32_perf_global_ctrl_pmc7")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_perf_global_ctrl::pmc7::set(true);
-    CHECK(intel_x64::msrs::ia32_perf_global_ctrl::pmc7::get());
+    using namespace intel_x64::msrs::ia32_perf_global_ctrl;
 
-    intel_x64::msrs::ia32_perf_global_ctrl::pmc7::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_perf_global_ctrl::pmc7::get());
+    pmc7::enable();
+    CHECK(pmc7::is_enabled());
+    pmc7::disable();
+    CHECK(pmc7::is_disabled());
+
+    pmc7::enable(pmc7::mask);
+    CHECK(pmc7::is_enabled(pmc7::mask));
+    pmc7::disable(0x0);
+    CHECK(pmc7::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_perf_global_ctrl_fixed_ctr0")
@@ -3590,11 +5177,17 @@ TEST_CASE("ia32_perf_global_ctrl_fixed_ctr0")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_perf_global_ctrl::fixed_ctr0::set(true);
-    CHECK(intel_x64::msrs::ia32_perf_global_ctrl::fixed_ctr0::get());
+    using namespace intel_x64::msrs::ia32_perf_global_ctrl;
 
-    intel_x64::msrs::ia32_perf_global_ctrl::fixed_ctr0::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_perf_global_ctrl::fixed_ctr0::get());
+    fixed_ctr0::enable();
+    CHECK(fixed_ctr0::is_enabled());
+    fixed_ctr0::disable();
+    CHECK(fixed_ctr0::is_disabled());
+
+    fixed_ctr0::enable(fixed_ctr0::mask);
+    CHECK(fixed_ctr0::is_enabled(fixed_ctr0::mask));
+    fixed_ctr0::disable(0x0);
+    CHECK(fixed_ctr0::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_perf_global_ctrl_fixed_ctr1")
@@ -3602,11 +5195,17 @@ TEST_CASE("ia32_perf_global_ctrl_fixed_ctr1")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_perf_global_ctrl::fixed_ctr1::set(true);
-    CHECK(intel_x64::msrs::ia32_perf_global_ctrl::fixed_ctr1::get());
+    using namespace intel_x64::msrs::ia32_perf_global_ctrl;
 
-    intel_x64::msrs::ia32_perf_global_ctrl::fixed_ctr1::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_perf_global_ctrl::fixed_ctr1::get());
+    fixed_ctr1::enable();
+    CHECK(fixed_ctr1::is_enabled());
+    fixed_ctr1::disable();
+    CHECK(fixed_ctr1::is_disabled());
+
+    fixed_ctr1::enable(fixed_ctr1::mask);
+    CHECK(fixed_ctr1::is_enabled(fixed_ctr1::mask));
+    fixed_ctr1::disable(0x0);
+    CHECK(fixed_ctr1::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_perf_global_ctrl_fixed_ctr2")
@@ -3614,11 +5213,17 @@ TEST_CASE("ia32_perf_global_ctrl_fixed_ctr2")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_perf_global_ctrl::fixed_ctr2::set(true);
-    CHECK(intel_x64::msrs::ia32_perf_global_ctrl::fixed_ctr2::get());
+    using namespace intel_x64::msrs::ia32_perf_global_ctrl;
 
-    intel_x64::msrs::ia32_perf_global_ctrl::fixed_ctr2::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_perf_global_ctrl::fixed_ctr2::get());
+    fixed_ctr2::enable();
+    CHECK(fixed_ctr2::is_enabled());
+    fixed_ctr2::disable();
+    CHECK(fixed_ctr2::is_disabled());
+
+    fixed_ctr2::enable(fixed_ctr2::mask);
+    CHECK(fixed_ctr2::is_enabled(fixed_ctr2::mask));
+    fixed_ctr2::disable(0x0);
+    CHECK(fixed_ctr2::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_perf_global_ovf_ctrl")
@@ -3626,8 +5231,11 @@ TEST_CASE("ia32_perf_global_ovf_ctrl")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_perf_global_ovf_ctrl::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_perf_global_ovf_ctrl::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_perf_global_ovf_ctrl;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_perf_global_ovf_ctrl_clear_ovf_pmc0")
@@ -3635,11 +5243,17 @@ TEST_CASE("ia32_perf_global_ovf_ctrl_clear_ovf_pmc0")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_perf_global_ovf_ctrl::clear_ovf_pmc0::set(true);
-    CHECK(intel_x64::msrs::ia32_perf_global_ovf_ctrl::clear_ovf_pmc0::get());
+    using namespace intel_x64::msrs::ia32_perf_global_ovf_ctrl;
 
-    intel_x64::msrs::ia32_perf_global_ovf_ctrl::clear_ovf_pmc0::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_perf_global_ovf_ctrl::clear_ovf_pmc0::get());
+    clear_ovf_pmc0::enable();
+    CHECK(clear_ovf_pmc0::is_enabled());
+    clear_ovf_pmc0::disable();
+    CHECK(clear_ovf_pmc0::is_disabled());
+
+    clear_ovf_pmc0::enable(clear_ovf_pmc0::mask);
+    CHECK(clear_ovf_pmc0::is_enabled(clear_ovf_pmc0::mask));
+    clear_ovf_pmc0::disable(0x0);
+    CHECK(clear_ovf_pmc0::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_perf_global_ovf_ctrl_clear_ovf_pmc1")
@@ -3647,11 +5261,17 @@ TEST_CASE("ia32_perf_global_ovf_ctrl_clear_ovf_pmc1")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_perf_global_ovf_ctrl::clear_ovf_pmc1::set(true);
-    CHECK(intel_x64::msrs::ia32_perf_global_ovf_ctrl::clear_ovf_pmc1::get());
+    using namespace intel_x64::msrs::ia32_perf_global_ovf_ctrl;
 
-    intel_x64::msrs::ia32_perf_global_ovf_ctrl::clear_ovf_pmc1::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_perf_global_ovf_ctrl::clear_ovf_pmc1::get());
+    clear_ovf_pmc1::enable();
+    CHECK(clear_ovf_pmc1::is_enabled());
+    clear_ovf_pmc1::disable();
+    CHECK(clear_ovf_pmc1::is_disabled());
+
+    clear_ovf_pmc1::enable(clear_ovf_pmc1::mask);
+    CHECK(clear_ovf_pmc1::is_enabled(clear_ovf_pmc1::mask));
+    clear_ovf_pmc1::disable(0x0);
+    CHECK(clear_ovf_pmc1::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_perf_global_ovf_ctrl_clear_ovf_pmc2")
@@ -3659,11 +5279,17 @@ TEST_CASE("ia32_perf_global_ovf_ctrl_clear_ovf_pmc2")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_perf_global_ovf_ctrl::clear_ovf_pmc2::set(true);
-    CHECK(intel_x64::msrs::ia32_perf_global_ovf_ctrl::clear_ovf_pmc2::get());
+    using namespace intel_x64::msrs::ia32_perf_global_ovf_ctrl;
 
-    intel_x64::msrs::ia32_perf_global_ovf_ctrl::clear_ovf_pmc2::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_perf_global_ovf_ctrl::clear_ovf_pmc2::get());
+    clear_ovf_pmc2::enable();
+    CHECK(clear_ovf_pmc2::is_enabled());
+    clear_ovf_pmc2::disable();
+    CHECK(clear_ovf_pmc2::is_disabled());
+
+    clear_ovf_pmc2::enable(clear_ovf_pmc2::mask);
+    CHECK(clear_ovf_pmc2::is_enabled(clear_ovf_pmc2::mask));
+    clear_ovf_pmc2::disable(0x0);
+    CHECK(clear_ovf_pmc2::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_perf_global_ovf_ctrl_clear_ovf_fixed_ctr0")
@@ -3671,11 +5297,17 @@ TEST_CASE("ia32_perf_global_ovf_ctrl_clear_ovf_fixed_ctr0")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_perf_global_ovf_ctrl::clear_ovf_fixed_ctr0::set(true);
-    CHECK(intel_x64::msrs::ia32_perf_global_ovf_ctrl::clear_ovf_fixed_ctr0::get());
+    using namespace intel_x64::msrs::ia32_perf_global_ovf_ctrl;
 
-    intel_x64::msrs::ia32_perf_global_ovf_ctrl::clear_ovf_fixed_ctr0::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_perf_global_ovf_ctrl::clear_ovf_fixed_ctr0::get());
+    clear_ovf_fixed_ctr0::enable();
+    CHECK(clear_ovf_fixed_ctr0::is_enabled());
+    clear_ovf_fixed_ctr0::disable();
+    CHECK(clear_ovf_fixed_ctr0::is_disabled());
+
+    clear_ovf_fixed_ctr0::enable(clear_ovf_fixed_ctr0::mask);
+    CHECK(clear_ovf_fixed_ctr0::is_enabled(clear_ovf_fixed_ctr0::mask));
+    clear_ovf_fixed_ctr0::disable(0x0);
+    CHECK(clear_ovf_fixed_ctr0::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_perf_global_ovf_ctrl_clear_ovf_fixed_ctr1")
@@ -3683,11 +5315,17 @@ TEST_CASE("ia32_perf_global_ovf_ctrl_clear_ovf_fixed_ctr1")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_perf_global_ovf_ctrl::clear_ovf_fixed_ctr1::set(true);
-    CHECK(intel_x64::msrs::ia32_perf_global_ovf_ctrl::clear_ovf_fixed_ctr1::get());
+    using namespace intel_x64::msrs::ia32_perf_global_ovf_ctrl;
 
-    intel_x64::msrs::ia32_perf_global_ovf_ctrl::clear_ovf_fixed_ctr1::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_perf_global_ovf_ctrl::clear_ovf_fixed_ctr1::get());
+    clear_ovf_fixed_ctr1::enable();
+    CHECK(clear_ovf_fixed_ctr1::is_enabled());
+    clear_ovf_fixed_ctr1::disable();
+    CHECK(clear_ovf_fixed_ctr1::is_disabled());
+
+    clear_ovf_fixed_ctr1::enable(clear_ovf_fixed_ctr1::mask);
+    CHECK(clear_ovf_fixed_ctr1::is_enabled(clear_ovf_fixed_ctr1::mask));
+    clear_ovf_fixed_ctr1::disable(0x0);
+    CHECK(clear_ovf_fixed_ctr1::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_perf_global_ovf_ctrl_clear_ovf_fixed_ctr2")
@@ -3695,11 +5333,17 @@ TEST_CASE("ia32_perf_global_ovf_ctrl_clear_ovf_fixed_ctr2")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_perf_global_ovf_ctrl::clear_ovf_fixed_ctr2::set(true);
-    CHECK(intel_x64::msrs::ia32_perf_global_ovf_ctrl::clear_ovf_fixed_ctr2::get());
+    using namespace intel_x64::msrs::ia32_perf_global_ovf_ctrl;
 
-    intel_x64::msrs::ia32_perf_global_ovf_ctrl::clear_ovf_fixed_ctr2::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_perf_global_ovf_ctrl::clear_ovf_fixed_ctr2::get());
+    clear_ovf_fixed_ctr2::enable();
+    CHECK(clear_ovf_fixed_ctr2::is_enabled());
+    clear_ovf_fixed_ctr2::disable();
+    CHECK(clear_ovf_fixed_ctr2::is_disabled());
+
+    clear_ovf_fixed_ctr2::enable(clear_ovf_fixed_ctr2::mask);
+    CHECK(clear_ovf_fixed_ctr2::is_enabled(clear_ovf_fixed_ctr2::mask));
+    clear_ovf_fixed_ctr2::disable(0x0);
+    CHECK(clear_ovf_fixed_ctr2::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_perf_global_ovf_ctrl_clear_trace_topa_pmi")
@@ -3707,11 +5351,17 @@ TEST_CASE("ia32_perf_global_ovf_ctrl_clear_trace_topa_pmi")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_perf_global_ovf_ctrl::clear_trace_topa_pmi::set(true);
-    CHECK(intel_x64::msrs::ia32_perf_global_ovf_ctrl::clear_trace_topa_pmi::get());
+    using namespace intel_x64::msrs::ia32_perf_global_ovf_ctrl;
 
-    intel_x64::msrs::ia32_perf_global_ovf_ctrl::clear_trace_topa_pmi::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_perf_global_ovf_ctrl::clear_trace_topa_pmi::get());
+    clear_trace_topa_pmi::enable();
+    CHECK(clear_trace_topa_pmi::is_enabled());
+    clear_trace_topa_pmi::disable();
+    CHECK(clear_trace_topa_pmi::is_disabled());
+
+    clear_trace_topa_pmi::enable(clear_trace_topa_pmi::mask);
+    CHECK(clear_trace_topa_pmi::is_enabled(clear_trace_topa_pmi::mask));
+    clear_trace_topa_pmi::disable(0x0);
+    CHECK(clear_trace_topa_pmi::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_perf_global_ovf_ctrl_lbr_frz")
@@ -3719,11 +5369,17 @@ TEST_CASE("ia32_perf_global_ovf_ctrl_lbr_frz")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_perf_global_ovf_ctrl::lbr_frz::set(true);
-    CHECK(intel_x64::msrs::ia32_perf_global_ovf_ctrl::lbr_frz::get());
+    using namespace intel_x64::msrs::ia32_perf_global_ovf_ctrl;
 
-    intel_x64::msrs::ia32_perf_global_ovf_ctrl::lbr_frz::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_perf_global_ovf_ctrl::lbr_frz::get());
+    lbr_frz::enable();
+    CHECK(lbr_frz::is_enabled());
+    lbr_frz::disable();
+    CHECK(lbr_frz::is_disabled());
+
+    lbr_frz::enable(lbr_frz::mask);
+    CHECK(lbr_frz::is_enabled(lbr_frz::mask));
+    lbr_frz::disable(0x0);
+    CHECK(lbr_frz::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_perf_global_ovf_ctrl_ctr_frz")
@@ -3731,11 +5387,17 @@ TEST_CASE("ia32_perf_global_ovf_ctrl_ctr_frz")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_perf_global_ovf_ctrl::ctr_frz::set(true);
-    CHECK(intel_x64::msrs::ia32_perf_global_ovf_ctrl::ctr_frz::get());
+    using namespace intel_x64::msrs::ia32_perf_global_ovf_ctrl;
 
-    intel_x64::msrs::ia32_perf_global_ovf_ctrl::ctr_frz::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_perf_global_ovf_ctrl::ctr_frz::get());
+    ctr_frz::enable();
+    CHECK(ctr_frz::is_enabled());
+    ctr_frz::disable();
+    CHECK(ctr_frz::is_disabled());
+
+    ctr_frz::enable(ctr_frz::mask);
+    CHECK(ctr_frz::is_enabled(ctr_frz::mask));
+    ctr_frz::disable(0x0);
+    CHECK(ctr_frz::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_perf_global_ovf_ctrl_clear_ovf_uncore")
@@ -3743,11 +5405,17 @@ TEST_CASE("ia32_perf_global_ovf_ctrl_clear_ovf_uncore")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_perf_global_ovf_ctrl::clear_ovf_uncore::set(true);
-    CHECK(intel_x64::msrs::ia32_perf_global_ovf_ctrl::clear_ovf_uncore::get());
+    using namespace intel_x64::msrs::ia32_perf_global_ovf_ctrl;
 
-    intel_x64::msrs::ia32_perf_global_ovf_ctrl::clear_ovf_uncore::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_perf_global_ovf_ctrl::clear_ovf_uncore::get());
+    clear_ovf_uncore::enable();
+    CHECK(clear_ovf_uncore::is_enabled());
+    clear_ovf_uncore::disable();
+    CHECK(clear_ovf_uncore::is_disabled());
+
+    clear_ovf_uncore::enable(clear_ovf_uncore::mask);
+    CHECK(clear_ovf_uncore::is_enabled(clear_ovf_uncore::mask));
+    clear_ovf_uncore::disable(0x0);
+    CHECK(clear_ovf_uncore::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_perf_global_ovf_ctrl_clear_ovfbuf")
@@ -3755,11 +5423,17 @@ TEST_CASE("ia32_perf_global_ovf_ctrl_clear_ovfbuf")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_perf_global_ovf_ctrl::clear_ovfbuf::set(true);
-    CHECK(intel_x64::msrs::ia32_perf_global_ovf_ctrl::clear_ovfbuf::get());
+    using namespace intel_x64::msrs::ia32_perf_global_ovf_ctrl;
 
-    intel_x64::msrs::ia32_perf_global_ovf_ctrl::clear_ovfbuf::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_perf_global_ovf_ctrl::clear_ovfbuf::get());
+    clear_ovfbuf::enable();
+    CHECK(clear_ovfbuf::is_enabled());
+    clear_ovfbuf::disable();
+    CHECK(clear_ovfbuf::is_disabled());
+
+    clear_ovfbuf::enable(clear_ovfbuf::mask);
+    CHECK(clear_ovfbuf::is_enabled(clear_ovfbuf::mask));
+    clear_ovfbuf::disable(0x0);
+    CHECK(clear_ovfbuf::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_perf_global_ovf_ctrl_clear_condchgd")
@@ -3767,11 +5441,17 @@ TEST_CASE("ia32_perf_global_ovf_ctrl_clear_condchgd")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_perf_global_ovf_ctrl::clear_condchgd::set(true);
-    CHECK(intel_x64::msrs::ia32_perf_global_ovf_ctrl::clear_condchgd::get());
+    using namespace intel_x64::msrs::ia32_perf_global_ovf_ctrl;
 
-    intel_x64::msrs::ia32_perf_global_ovf_ctrl::clear_condchgd::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_perf_global_ovf_ctrl::clear_condchgd::get());
+    clear_condchgd::enable();
+    CHECK(clear_condchgd::is_enabled());
+    clear_condchgd::disable();
+    CHECK(clear_condchgd::is_disabled());
+
+    clear_condchgd::enable(clear_condchgd::mask);
+    CHECK(clear_condchgd::is_enabled(clear_condchgd::mask));
+    clear_condchgd::disable(0x0);
+    CHECK(clear_condchgd::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_perf_global_status_set")
@@ -3779,8 +5459,11 @@ TEST_CASE("ia32_perf_global_status_set")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_perf_global_status_set::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_perf_global_status_set::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_perf_global_status_set;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_perf_global_status_set_ovf_pmc0")
@@ -3788,11 +5471,17 @@ TEST_CASE("ia32_perf_global_status_set_ovf_pmc0")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_perf_global_status_set::ovf_pmc0::set(true);
-    CHECK(intel_x64::msrs::ia32_perf_global_status_set::ovf_pmc0::get());
+    using namespace intel_x64::msrs::ia32_perf_global_status_set;
 
-    intel_x64::msrs::ia32_perf_global_status_set::ovf_pmc0::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_perf_global_status_set::ovf_pmc0::get());
+    ovf_pmc0::enable();
+    CHECK(ovf_pmc0::is_enabled());
+    ovf_pmc0::disable();
+    CHECK(ovf_pmc0::is_disabled());
+
+    ovf_pmc0::enable(ovf_pmc0::mask);
+    CHECK(ovf_pmc0::is_enabled(ovf_pmc0::mask));
+    ovf_pmc0::disable(0x0);
+    CHECK(ovf_pmc0::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_perf_global_status_set_ovf_pmc1")
@@ -3800,11 +5489,17 @@ TEST_CASE("ia32_perf_global_status_set_ovf_pmc1")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_perf_global_status_set::ovf_pmc1::set(true);
-    CHECK(intel_x64::msrs::ia32_perf_global_status_set::ovf_pmc1::get());
+    using namespace intel_x64::msrs::ia32_perf_global_status_set;
 
-    intel_x64::msrs::ia32_perf_global_status_set::ovf_pmc1::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_perf_global_status_set::ovf_pmc1::get());
+    ovf_pmc1::enable();
+    CHECK(ovf_pmc1::is_enabled());
+    ovf_pmc1::disable();
+    CHECK(ovf_pmc1::is_disabled());
+
+    ovf_pmc1::enable(ovf_pmc1::mask);
+    CHECK(ovf_pmc1::is_enabled(ovf_pmc1::mask));
+    ovf_pmc1::disable(0x0);
+    CHECK(ovf_pmc1::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_perf_global_status_set_ovf_pmc2")
@@ -3812,11 +5507,17 @@ TEST_CASE("ia32_perf_global_status_set_ovf_pmc2")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_perf_global_status_set::ovf_pmc2::set(true);
-    CHECK(intel_x64::msrs::ia32_perf_global_status_set::ovf_pmc2::get());
+    using namespace intel_x64::msrs::ia32_perf_global_status_set;
 
-    intel_x64::msrs::ia32_perf_global_status_set::ovf_pmc2::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_perf_global_status_set::ovf_pmc2::get());
+    ovf_pmc2::enable();
+    CHECK(ovf_pmc2::is_enabled());
+    ovf_pmc2::disable();
+    CHECK(ovf_pmc2::is_disabled());
+
+    ovf_pmc2::enable(ovf_pmc2::mask);
+    CHECK(ovf_pmc2::is_enabled(ovf_pmc2::mask));
+    ovf_pmc2::disable(0x0);
+    CHECK(ovf_pmc2::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_perf_global_status_set_ovf_fixed_ctr0")
@@ -3824,11 +5525,17 @@ TEST_CASE("ia32_perf_global_status_set_ovf_fixed_ctr0")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_perf_global_status_set::ovf_fixed_ctr0::set(true);
-    CHECK(intel_x64::msrs::ia32_perf_global_status_set::ovf_fixed_ctr0::get());
+    using namespace intel_x64::msrs::ia32_perf_global_status_set;
 
-    intel_x64::msrs::ia32_perf_global_status_set::ovf_fixed_ctr0::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_perf_global_status_set::ovf_fixed_ctr0::get());
+    ovf_fixed_ctr0::enable();
+    CHECK(ovf_fixed_ctr0::is_enabled());
+    ovf_fixed_ctr0::disable();
+    CHECK(ovf_fixed_ctr0::is_disabled());
+
+    ovf_fixed_ctr0::enable(ovf_fixed_ctr0::mask);
+    CHECK(ovf_fixed_ctr0::is_enabled(ovf_fixed_ctr0::mask));
+    ovf_fixed_ctr0::disable(0x0);
+    CHECK(ovf_fixed_ctr0::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_perf_global_status_set_ovf_fixed_ctr1")
@@ -3836,11 +5543,17 @@ TEST_CASE("ia32_perf_global_status_set_ovf_fixed_ctr1")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_perf_global_status_set::ovf_fixed_ctr1::set(true);
-    CHECK(intel_x64::msrs::ia32_perf_global_status_set::ovf_fixed_ctr1::get());
+    using namespace intel_x64::msrs::ia32_perf_global_status_set;
 
-    intel_x64::msrs::ia32_perf_global_status_set::ovf_fixed_ctr1::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_perf_global_status_set::ovf_fixed_ctr1::get());
+    ovf_fixed_ctr1::enable();
+    CHECK(ovf_fixed_ctr1::is_enabled());
+    ovf_fixed_ctr1::disable();
+    CHECK(ovf_fixed_ctr1::is_disabled());
+
+    ovf_fixed_ctr1::enable(ovf_fixed_ctr1::mask);
+    CHECK(ovf_fixed_ctr1::is_enabled(ovf_fixed_ctr1::mask));
+    ovf_fixed_ctr1::disable(0x0);
+    CHECK(ovf_fixed_ctr1::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_perf_global_status_set_ovf_fixed_ctr2")
@@ -3848,11 +5561,17 @@ TEST_CASE("ia32_perf_global_status_set_ovf_fixed_ctr2")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_perf_global_status_set::ovf_fixed_ctr2::set(true);
-    CHECK(intel_x64::msrs::ia32_perf_global_status_set::ovf_fixed_ctr2::get());
+    using namespace intel_x64::msrs::ia32_perf_global_status_set;
 
-    intel_x64::msrs::ia32_perf_global_status_set::ovf_fixed_ctr2::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_perf_global_status_set::ovf_fixed_ctr2::get());
+    ovf_fixed_ctr2::enable();
+    CHECK(ovf_fixed_ctr2::is_enabled());
+    ovf_fixed_ctr2::disable();
+    CHECK(ovf_fixed_ctr2::is_disabled());
+
+    ovf_fixed_ctr2::enable(ovf_fixed_ctr2::mask);
+    CHECK(ovf_fixed_ctr2::is_enabled(ovf_fixed_ctr2::mask));
+    ovf_fixed_ctr2::disable(0x0);
+    CHECK(ovf_fixed_ctr2::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_perf_global_status_set_trace_topa_pmi")
@@ -3860,11 +5579,17 @@ TEST_CASE("ia32_perf_global_status_set_trace_topa_pmi")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_perf_global_status_set::trace_topa_pmi::set(true);
-    CHECK(intel_x64::msrs::ia32_perf_global_status_set::trace_topa_pmi::get());
+    using namespace intel_x64::msrs::ia32_perf_global_status_set;
 
-    intel_x64::msrs::ia32_perf_global_status_set::trace_topa_pmi::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_perf_global_status_set::trace_topa_pmi::get());
+    trace_topa_pmi::enable();
+    CHECK(trace_topa_pmi::is_enabled());
+    trace_topa_pmi::disable();
+    CHECK(trace_topa_pmi::is_disabled());
+
+    trace_topa_pmi::enable(trace_topa_pmi::mask);
+    CHECK(trace_topa_pmi::is_enabled(trace_topa_pmi::mask));
+    trace_topa_pmi::disable(0x0);
+    CHECK(trace_topa_pmi::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_perf_global_status_set_lbr_frz")
@@ -3872,11 +5597,17 @@ TEST_CASE("ia32_perf_global_status_set_lbr_frz")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_perf_global_status_set::lbr_frz::set(true);
-    CHECK(intel_x64::msrs::ia32_perf_global_status_set::lbr_frz::get());
+    using namespace intel_x64::msrs::ia32_perf_global_status_set;
 
-    intel_x64::msrs::ia32_perf_global_status_set::lbr_frz::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_perf_global_status_set::lbr_frz::get());
+    lbr_frz::enable();
+    CHECK(lbr_frz::is_enabled());
+    lbr_frz::disable();
+    CHECK(lbr_frz::is_disabled());
+
+    lbr_frz::enable(lbr_frz::mask);
+    CHECK(lbr_frz::is_enabled(lbr_frz::mask));
+    lbr_frz::disable(0x0);
+    CHECK(lbr_frz::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_perf_global_status_set_ctr_frz")
@@ -3884,11 +5615,17 @@ TEST_CASE("ia32_perf_global_status_set_ctr_frz")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_perf_global_status_set::ctr_frz::set(true);
-    CHECK(intel_x64::msrs::ia32_perf_global_status_set::ctr_frz::get());
+    using namespace intel_x64::msrs::ia32_perf_global_status_set;
 
-    intel_x64::msrs::ia32_perf_global_status_set::ctr_frz::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_perf_global_status_set::ctr_frz::get());
+    ctr_frz::enable();
+    CHECK(ctr_frz::is_enabled());
+    ctr_frz::disable();
+    CHECK(ctr_frz::is_disabled());
+
+    ctr_frz::enable(ctr_frz::mask);
+    CHECK(ctr_frz::is_enabled(ctr_frz::mask));
+    ctr_frz::disable(0x0);
+    CHECK(ctr_frz::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_perf_global_status_set_ovf_uncore")
@@ -3896,11 +5633,17 @@ TEST_CASE("ia32_perf_global_status_set_ovf_uncore")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_perf_global_status_set::ovf_uncore::set(true);
-    CHECK(intel_x64::msrs::ia32_perf_global_status_set::ovf_uncore::get());
+    using namespace intel_x64::msrs::ia32_perf_global_status_set;
 
-    intel_x64::msrs::ia32_perf_global_status_set::ovf_uncore::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_perf_global_status_set::ovf_uncore::get());
+    ovf_uncore::enable();
+    CHECK(ovf_uncore::is_enabled());
+    ovf_uncore::disable();
+    CHECK(ovf_uncore::is_disabled());
+
+    ovf_uncore::enable(ovf_uncore::mask);
+    CHECK(ovf_uncore::is_enabled(ovf_uncore::mask));
+    ovf_uncore::disable(0x0);
+    CHECK(ovf_uncore::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_perf_global_status_set_ovfbuf")
@@ -3908,11 +5651,17 @@ TEST_CASE("ia32_perf_global_status_set_ovfbuf")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_perf_global_status_set::ovfbuf::set(true);
-    CHECK(intel_x64::msrs::ia32_perf_global_status_set::ovfbuf::get());
+    using namespace intel_x64::msrs::ia32_perf_global_status_set;
 
-    intel_x64::msrs::ia32_perf_global_status_set::ovfbuf::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_perf_global_status_set::ovfbuf::get());
+    ovfbuf::enable();
+    CHECK(ovfbuf::is_enabled());
+    ovfbuf::disable();
+    CHECK(ovfbuf::is_disabled());
+
+    ovfbuf::enable(ovfbuf::mask);
+    CHECK(ovfbuf::is_enabled(ovfbuf::mask));
+    ovfbuf::disable(0x0);
+    CHECK(ovfbuf::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_perf_global_inuse")
@@ -3920,8 +5669,11 @@ TEST_CASE("ia32_perf_global_inuse")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000392UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_perf_global_inuse::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_perf_global_inuse;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_perf_global_inuse_perfevtsel0")
@@ -3929,11 +5681,17 @@ TEST_CASE("ia32_perf_global_inuse_perfevtsel0")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000392UL] = 0x0000000000000001ULL;
-    CHECK(intel_x64::msrs::ia32_perf_global_inuse::perfevtsel0::get());
+    using namespace intel_x64::msrs::ia32_perf_global_inuse;
 
-    g_msrs[0x00000392UL] = 0x0000000000000000ULL;
-    CHECK_FALSE(intel_x64::msrs::ia32_perf_global_inuse::perfevtsel0::get());
+    g_msrs[addr] = perfevtsel0::mask;
+    CHECK(perfevtsel0::is_enabled());
+    g_msrs[addr] = 0x0;
+    CHECK(perfevtsel0::is_disabled());
+
+    g_msrs[addr] = perfevtsel0::mask;
+    CHECK(perfevtsel0::is_enabled(perfevtsel0::mask));
+    g_msrs[addr] = 0x0;
+    CHECK(perfevtsel0::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_perf_global_inuse_perfevtsel1")
@@ -3941,11 +5699,17 @@ TEST_CASE("ia32_perf_global_inuse_perfevtsel1")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000392UL] = 0x0000000000000002ULL;
-    CHECK(intel_x64::msrs::ia32_perf_global_inuse::perfevtsel1::get());
+    using namespace intel_x64::msrs::ia32_perf_global_inuse;
 
-    g_msrs[0x00000392UL] = 0x0000000000000000ULL;
-    CHECK_FALSE(intel_x64::msrs::ia32_perf_global_inuse::perfevtsel1::get());
+    g_msrs[addr] = perfevtsel1::mask;
+    CHECK(perfevtsel1::is_enabled());
+    g_msrs[addr] = 0x0;
+    CHECK(perfevtsel1::is_disabled());
+
+    g_msrs[addr] = perfevtsel1::mask;
+    CHECK(perfevtsel1::is_enabled(perfevtsel1::mask));
+    g_msrs[addr] = 0x0;
+    CHECK(perfevtsel1::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_perf_global_inuse_perfevtsel2")
@@ -3953,11 +5717,17 @@ TEST_CASE("ia32_perf_global_inuse_perfevtsel2")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000392UL] = 0x0000000000000004ULL;
-    CHECK(intel_x64::msrs::ia32_perf_global_inuse::perfevtsel2::get());
+    using namespace intel_x64::msrs::ia32_perf_global_inuse;
 
-    g_msrs[0x00000392UL] = 0x0000000000000000ULL;
-    CHECK_FALSE(intel_x64::msrs::ia32_perf_global_inuse::perfevtsel2::get());
+    g_msrs[addr] = perfevtsel2::mask;
+    CHECK(perfevtsel2::is_enabled());
+    g_msrs[addr] = 0x0;
+    CHECK(perfevtsel2::is_disabled());
+
+    g_msrs[addr] = perfevtsel2::mask;
+    CHECK(perfevtsel2::is_enabled(perfevtsel2::mask));
+    g_msrs[addr] = 0x0;
+    CHECK(perfevtsel2::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_perf_global_inuse_fixed_ctr0")
@@ -3965,11 +5735,17 @@ TEST_CASE("ia32_perf_global_inuse_fixed_ctr0")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000392UL] = 0x0000000100000000ULL;
-    CHECK(intel_x64::msrs::ia32_perf_global_inuse::fixed_ctr0::get());
+    using namespace intel_x64::msrs::ia32_perf_global_inuse;
 
-    g_msrs[0x00000392UL] = 0x0000000000000000ULL;
-    CHECK_FALSE(intel_x64::msrs::ia32_perf_global_inuse::fixed_ctr0::get());
+    g_msrs[addr] = fixed_ctr0::mask;
+    CHECK(fixed_ctr0::is_enabled());
+    g_msrs[addr] = 0x0;
+    CHECK(fixed_ctr0::is_disabled());
+
+    g_msrs[addr] = fixed_ctr0::mask;
+    CHECK(fixed_ctr0::is_enabled(fixed_ctr0::mask));
+    g_msrs[addr] = 0x0;
+    CHECK(fixed_ctr0::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_perf_global_inuse_fixed_ctr1")
@@ -3977,11 +5753,17 @@ TEST_CASE("ia32_perf_global_inuse_fixed_ctr1")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000392UL] = 0x0000000200000000ULL;
-    CHECK(intel_x64::msrs::ia32_perf_global_inuse::fixed_ctr1::get());
+    using namespace intel_x64::msrs::ia32_perf_global_inuse;
 
-    g_msrs[0x00000392UL] = 0x0000000000000000ULL;
-    CHECK_FALSE(intel_x64::msrs::ia32_perf_global_inuse::fixed_ctr1::get());
+    g_msrs[addr] = fixed_ctr1::mask;
+    CHECK(fixed_ctr1::is_enabled());
+    g_msrs[addr] = 0x0;
+    CHECK(fixed_ctr1::is_disabled());
+
+    g_msrs[addr] = fixed_ctr1::mask;
+    CHECK(fixed_ctr1::is_enabled(fixed_ctr1::mask));
+    g_msrs[addr] = 0x0;
+    CHECK(fixed_ctr1::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_perf_global_inuse_fixed_ctr2")
@@ -3989,11 +5771,17 @@ TEST_CASE("ia32_perf_global_inuse_fixed_ctr2")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000392UL] = 0x0000000400000000ULL;
-    CHECK(intel_x64::msrs::ia32_perf_global_inuse::fixed_ctr2::get());
+    using namespace intel_x64::msrs::ia32_perf_global_inuse;
 
-    g_msrs[0x00000392UL] = 0x0000000000000000ULL;
-    CHECK_FALSE(intel_x64::msrs::ia32_perf_global_inuse::fixed_ctr2::get());
+    g_msrs[addr] = fixed_ctr2::mask;
+    CHECK(fixed_ctr2::is_enabled());
+    g_msrs[addr] = 0x0;
+    CHECK(fixed_ctr2::is_disabled());
+
+    g_msrs[addr] = fixed_ctr2::mask;
+    CHECK(fixed_ctr2::is_enabled(fixed_ctr2::mask));
+    g_msrs[addr] = 0x0;
+    CHECK(fixed_ctr2::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_perf_global_inuse_pmi")
@@ -4001,11 +5789,17 @@ TEST_CASE("ia32_perf_global_inuse_pmi")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000392UL] = 0x8000000000000000ULL;
-    CHECK(intel_x64::msrs::ia32_perf_global_inuse::pmi::get());
+    using namespace intel_x64::msrs::ia32_perf_global_inuse;
 
-    g_msrs[0x00000392UL] = 0x0000000000000000ULL;
-    CHECK_FALSE(intel_x64::msrs::ia32_perf_global_inuse::pmi::get());
+    g_msrs[addr] = pmi::mask;
+    CHECK(pmi::is_enabled());
+    g_msrs[addr] = 0x0;
+    CHECK(pmi::is_disabled());
+
+    g_msrs[addr] = pmi::mask;
+    CHECK(pmi::is_enabled(pmi::mask));
+    g_msrs[addr] = 0x0;
+    CHECK(pmi::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_pebs_enable")
@@ -4013,20 +5807,29 @@ TEST_CASE("ia32_pebs_enable")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_pebs_enable::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_pebs_enable::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_pebs_enable;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
-TEST_CASE("ia32_pebs_enable_pebs")
+TEST_CASE("ia32_pebs_pebs")
 {
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_pebs_enable::pebs::set(true);
-    CHECK(intel_x64::msrs::ia32_pebs_enable::pebs::get());
+    using namespace intel_x64::msrs::ia32_pebs_enable;
 
-    intel_x64::msrs::ia32_pebs_enable::pebs::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_pebs_enable::pebs::get());
+    pebs::enable();
+    CHECK(pebs::is_enabled());
+    pebs::disable();
+    CHECK(pebs::is_disabled());
+
+    pebs::enable(pebs::mask);
+    CHECK(pebs::is_enabled(pebs::mask));
+    pebs::disable(0x0);
+    CHECK(pebs::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_mc6_ctl")
@@ -4034,8 +5837,11 @@ TEST_CASE("ia32_mc6_ctl")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000418UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc6_ctl::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc6_ctl;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc6_status")
@@ -4043,8 +5849,11 @@ TEST_CASE("ia32_mc6_status")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000419UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc6_status::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc6_status;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc6_addr")
@@ -4052,8 +5861,11 @@ TEST_CASE("ia32_mc6_addr")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000041AUL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc6_addr::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc6_addr;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc6_misc")
@@ -4061,8 +5873,11 @@ TEST_CASE("ia32_mc6_misc")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000041BUL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc6_misc::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc6_misc;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc7_ctl")
@@ -4070,8 +5885,11 @@ TEST_CASE("ia32_mc7_ctl")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000041CUL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc7_ctl::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc7_ctl;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc7_status")
@@ -4079,8 +5897,11 @@ TEST_CASE("ia32_mc7_status")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000041DUL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc7_status::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc7_status;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc7_addr")
@@ -4088,8 +5909,11 @@ TEST_CASE("ia32_mc7_addr")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000041EUL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc7_addr::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc7_addr;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc7_misc")
@@ -4097,8 +5921,11 @@ TEST_CASE("ia32_mc7_misc")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000041FUL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc7_misc::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc7_misc;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc8_ctl")
@@ -4106,8 +5933,11 @@ TEST_CASE("ia32_mc8_ctl")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000420UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc8_ctl::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc8_ctl;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc8_status")
@@ -4115,8 +5945,11 @@ TEST_CASE("ia32_mc8_status")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000421UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc8_status::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc8_status;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc8_addr")
@@ -4124,8 +5957,11 @@ TEST_CASE("ia32_mc8_addr")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000422UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc8_addr::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc8_addr;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc8_misc")
@@ -4133,8 +5969,11 @@ TEST_CASE("ia32_mc8_misc")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000423UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc8_misc::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc8_misc;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc9_ctl")
@@ -4142,8 +5981,11 @@ TEST_CASE("ia32_mc9_ctl")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000424UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc9_ctl::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc9_ctl;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc9_status")
@@ -4151,8 +5993,11 @@ TEST_CASE("ia32_mc9_status")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000425UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc9_status::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc9_status;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc9_addr")
@@ -4160,8 +6005,11 @@ TEST_CASE("ia32_mc9_addr")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000426UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc9_addr::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc9_addr;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc9_misc")
@@ -4169,8 +6017,11 @@ TEST_CASE("ia32_mc9_misc")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000427UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc9_misc::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc9_misc;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc10_ctl")
@@ -4178,8 +6029,11 @@ TEST_CASE("ia32_mc10_ctl")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000428UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc10_ctl::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc10_ctl;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc10_status")
@@ -4187,8 +6041,11 @@ TEST_CASE("ia32_mc10_status")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000429UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc10_status::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc10_status;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc10_addr")
@@ -4196,8 +6053,11 @@ TEST_CASE("ia32_mc10_addr")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000042AUL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc10_addr::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc10_addr;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc10_misc")
@@ -4205,8 +6065,11 @@ TEST_CASE("ia32_mc10_misc")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000042BUL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc10_misc::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc10_misc;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc11_ctl")
@@ -4214,8 +6077,11 @@ TEST_CASE("ia32_mc11_ctl")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000042CUL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc11_ctl::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc11_ctl;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc11_status")
@@ -4223,8 +6089,11 @@ TEST_CASE("ia32_mc11_status")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000042DUL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc11_status::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc11_status;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc11_addr")
@@ -4232,8 +6101,11 @@ TEST_CASE("ia32_mc11_addr")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000042EUL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc11_addr::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc11_addr;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc11_misc")
@@ -4241,8 +6113,11 @@ TEST_CASE("ia32_mc11_misc")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000042FUL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc11_misc::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc11_misc;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc12_ctl")
@@ -4250,8 +6125,11 @@ TEST_CASE("ia32_mc12_ctl")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000430UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc12_ctl::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc12_ctl;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc12_status")
@@ -4259,8 +6137,11 @@ TEST_CASE("ia32_mc12_status")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000431UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc12_status::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc12_status;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc12_addr")
@@ -4268,8 +6149,11 @@ TEST_CASE("ia32_mc12_addr")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000432UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc12_addr::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc12_addr;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc12_misc")
@@ -4277,8 +6161,11 @@ TEST_CASE("ia32_mc12_misc")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000433UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc12_misc::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc12_misc;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc13_ctl")
@@ -4286,8 +6173,11 @@ TEST_CASE("ia32_mc13_ctl")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000434UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc13_ctl::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc13_ctl;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc13_status")
@@ -4295,8 +6185,11 @@ TEST_CASE("ia32_mc13_status")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000435UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc13_status::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc13_status;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc13_addr")
@@ -4304,8 +6197,11 @@ TEST_CASE("ia32_mc13_addr")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000436UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc13_addr::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc13_addr;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc13_misc")
@@ -4313,8 +6209,11 @@ TEST_CASE("ia32_mc13_misc")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000437UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc13_misc::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc13_misc;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc14_ctl")
@@ -4322,8 +6221,11 @@ TEST_CASE("ia32_mc14_ctl")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000438UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc14_ctl::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc14_ctl;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc14_status")
@@ -4331,8 +6233,11 @@ TEST_CASE("ia32_mc14_status")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000439UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc14_status::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc14_status;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc14_addr")
@@ -4340,8 +6245,11 @@ TEST_CASE("ia32_mc14_addr")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000043AUL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc14_addr::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc14_addr;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc14_misc")
@@ -4349,8 +6257,11 @@ TEST_CASE("ia32_mc14_misc")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000043BUL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc14_misc::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc14_misc;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc15_ctl")
@@ -4358,8 +6269,11 @@ TEST_CASE("ia32_mc15_ctl")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000043CUL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc15_ctl::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc15_ctl;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc15_status")
@@ -4367,8 +6281,11 @@ TEST_CASE("ia32_mc15_status")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000043DUL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc15_status::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc15_status;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc15_addr")
@@ -4376,8 +6293,11 @@ TEST_CASE("ia32_mc15_addr")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000043EUL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc15_addr::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc15_addr;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc15_misc")
@@ -4385,8 +6305,11 @@ TEST_CASE("ia32_mc15_misc")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000043FUL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc15_misc::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc15_misc;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc16_ctl")
@@ -4394,8 +6317,11 @@ TEST_CASE("ia32_mc16_ctl")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000440UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc16_ctl::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc16_ctl;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc16_status")
@@ -4403,8 +6329,11 @@ TEST_CASE("ia32_mc16_status")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000441UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc16_status::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc16_status;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc16_addr")
@@ -4412,8 +6341,11 @@ TEST_CASE("ia32_mc16_addr")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000442UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc16_addr::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc16_addr;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc16_misc")
@@ -4421,8 +6353,11 @@ TEST_CASE("ia32_mc16_misc")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000443UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc16_misc::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc16_misc;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc17_ctl")
@@ -4430,8 +6365,11 @@ TEST_CASE("ia32_mc17_ctl")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000444UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc17_ctl::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc17_ctl;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc17_status")
@@ -4439,8 +6377,11 @@ TEST_CASE("ia32_mc17_status")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000445UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc17_status::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc17_status;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc17_addr")
@@ -4448,8 +6389,11 @@ TEST_CASE("ia32_mc17_addr")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000446UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc17_addr::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc17_addr;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc17_misc")
@@ -4457,8 +6401,11 @@ TEST_CASE("ia32_mc17_misc")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000447UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc17_misc::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc17_misc;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc18_ctl")
@@ -4466,8 +6413,11 @@ TEST_CASE("ia32_mc18_ctl")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000448UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc18_ctl::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc18_ctl;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc18_status")
@@ -4475,8 +6425,11 @@ TEST_CASE("ia32_mc18_status")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000449UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc18_status::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc18_status;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc18_addr")
@@ -4484,8 +6437,11 @@ TEST_CASE("ia32_mc18_addr")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000044AUL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc18_addr::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc18_addr;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc18_misc")
@@ -4493,8 +6449,11 @@ TEST_CASE("ia32_mc18_misc")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000044BUL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc18_misc::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc18_misc;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc19_ctl")
@@ -4502,8 +6461,11 @@ TEST_CASE("ia32_mc19_ctl")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000044CUL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc19_ctl::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc19_ctl;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc19_status")
@@ -4511,8 +6473,11 @@ TEST_CASE("ia32_mc19_status")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000044DUL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc19_status::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc19_status;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc19_addr")
@@ -4520,8 +6485,11 @@ TEST_CASE("ia32_mc19_addr")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000044EUL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc19_addr::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc19_addr;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc19_misc")
@@ -4529,8 +6497,11 @@ TEST_CASE("ia32_mc19_misc")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000044FUL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc19_misc::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc19_misc;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc20_ctl")
@@ -4538,8 +6509,11 @@ TEST_CASE("ia32_mc20_ctl")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000450UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc20_ctl::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc20_ctl;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc20_status")
@@ -4547,8 +6521,11 @@ TEST_CASE("ia32_mc20_status")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000451UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc20_status::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc20_status;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc20_addr")
@@ -4556,8 +6533,11 @@ TEST_CASE("ia32_mc20_addr")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000452UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc20_addr::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc20_addr;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc20_misc")
@@ -4565,8 +6545,11 @@ TEST_CASE("ia32_mc20_misc")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000453UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc20_misc::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc20_misc;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc21_ctl")
@@ -4574,8 +6557,11 @@ TEST_CASE("ia32_mc21_ctl")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000454UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc21_ctl::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc21_ctl;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc21_status")
@@ -4583,8 +6569,11 @@ TEST_CASE("ia32_mc21_status")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000455UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc21_status::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc21_status;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc21_addr")
@@ -4592,8 +6581,11 @@ TEST_CASE("ia32_mc21_addr")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000456UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc21_addr::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc21_addr;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc21_misc")
@@ -4601,8 +6593,11 @@ TEST_CASE("ia32_mc21_misc")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000457UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc21_misc::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc21_misc;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc22_ctl")
@@ -4610,8 +6605,11 @@ TEST_CASE("ia32_mc22_ctl")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000458UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc22_ctl::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc22_ctl;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc22_status")
@@ -4619,8 +6617,11 @@ TEST_CASE("ia32_mc22_status")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000459UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc22_status::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc22_status;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc22_addr")
@@ -4628,8 +6629,11 @@ TEST_CASE("ia32_mc22_addr")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000045AUL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc22_addr::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc22_addr;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc22_misc")
@@ -4637,8 +6641,11 @@ TEST_CASE("ia32_mc22_misc")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000045BUL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc22_misc::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc22_misc;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc23_ctl")
@@ -4646,8 +6653,11 @@ TEST_CASE("ia32_mc23_ctl")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000045CUL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc23_ctl::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc23_ctl;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc23_status")
@@ -4655,8 +6665,11 @@ TEST_CASE("ia32_mc23_status")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000045DUL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc23_status::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc23_status;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc23_addr")
@@ -4664,8 +6677,11 @@ TEST_CASE("ia32_mc23_addr")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000045EUL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc23_addr::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc23_addr;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc23_misc")
@@ -4673,8 +6689,11 @@ TEST_CASE("ia32_mc23_misc")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000045FUL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc23_misc::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc23_misc;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc24_ctl")
@@ -4682,8 +6701,11 @@ TEST_CASE("ia32_mc24_ctl")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000460UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc24_ctl::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc24_ctl;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc24_status")
@@ -4691,8 +6713,11 @@ TEST_CASE("ia32_mc24_status")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000461UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc24_status::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc24_status;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc24_addr")
@@ -4700,8 +6725,11 @@ TEST_CASE("ia32_mc24_addr")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000462UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc24_addr::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc24_addr;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc24_misc")
@@ -4709,8 +6737,11 @@ TEST_CASE("ia32_mc24_misc")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000463UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc24_misc::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc24_misc;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc25_ctl")
@@ -4718,8 +6749,11 @@ TEST_CASE("ia32_mc25_ctl")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000464UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc25_ctl::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc25_ctl;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc25_status")
@@ -4727,8 +6761,11 @@ TEST_CASE("ia32_mc25_status")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000465UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc25_status::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc25_status;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc25_addr")
@@ -4736,8 +6773,11 @@ TEST_CASE("ia32_mc25_addr")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000466UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc25_addr::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc25_addr;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc25_misc")
@@ -4745,8 +6785,11 @@ TEST_CASE("ia32_mc25_misc")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000467UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc25_misc::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc25_misc;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc26_ctl")
@@ -4754,8 +6797,11 @@ TEST_CASE("ia32_mc26_ctl")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000468UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc26_ctl::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc26_ctl;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc26_status")
@@ -4763,8 +6809,11 @@ TEST_CASE("ia32_mc26_status")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000469UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc26_status::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc26_status;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc26_addr")
@@ -4772,8 +6821,11 @@ TEST_CASE("ia32_mc26_addr")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000046AUL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc26_addr::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc26_addr;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc26_misc")
@@ -4781,8 +6833,11 @@ TEST_CASE("ia32_mc26_misc")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000046BUL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc26_misc::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc26_misc;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc27_ctl")
@@ -4790,8 +6845,11 @@ TEST_CASE("ia32_mc27_ctl")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000046CUL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc27_ctl::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc27_ctl;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc27_status")
@@ -4799,8 +6857,11 @@ TEST_CASE("ia32_mc27_status")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000046DUL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc27_status::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc27_status;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc27_addr")
@@ -4808,8 +6869,11 @@ TEST_CASE("ia32_mc27_addr")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000046EUL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc27_addr::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc27_addr;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc27_misc")
@@ -4817,8 +6881,11 @@ TEST_CASE("ia32_mc27_misc")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000046FUL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc27_misc::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc27_misc;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc28_ctl")
@@ -4826,8 +6893,11 @@ TEST_CASE("ia32_mc28_ctl")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000470UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc28_ctl::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc28_ctl;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc28_status")
@@ -4835,8 +6905,11 @@ TEST_CASE("ia32_mc28_status")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000471UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc28_status::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc28_status;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc28_addr")
@@ -4844,8 +6917,11 @@ TEST_CASE("ia32_mc28_addr")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000472UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc28_addr::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc28_addr;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mc28_misc")
@@ -4853,8 +6929,11 @@ TEST_CASE("ia32_mc28_misc")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000473UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_mc28_misc::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mc28_misc;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_vmx_basic")
@@ -4862,10 +6941,11 @@ TEST_CASE("ia32_vmx_basic")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000480UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_vmx_basic::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_vmx_basic;
 
-    intel_x64::msrs::ia32_vmx_basic::dump();
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_vmx_basic_revision_id")
@@ -4873,8 +6953,11 @@ TEST_CASE("ia32_vmx_basic_revision_id")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000480UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_vmx_basic::revision_id::get() == 0x000000007FFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_vmx_basic;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(revision_id::get() == (revision_id::mask >> revision_id::from));
+    CHECK(revision_id::get(revision_id::mask) == (revision_id::mask >> revision_id::from));
 }
 
 TEST_CASE("ia32_vmx_basic_vmxon_vmcs_region_size")
@@ -4882,8 +6965,11 @@ TEST_CASE("ia32_vmx_basic_vmxon_vmcs_region_size")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000480UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_vmx_basic::vmxon_vmcs_region_size::get() == 0x0000000000001FFFULL);
+    using namespace intel_x64::msrs::ia32_vmx_basic;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(vmxon_vmcs_region_size::get() == (vmxon_vmcs_region_size::mask >> vmxon_vmcs_region_size::from));
+    CHECK(vmxon_vmcs_region_size::get(vmxon_vmcs_region_size::mask) == (vmxon_vmcs_region_size::mask >> vmxon_vmcs_region_size::from));
 }
 
 TEST_CASE("ia32_vmx_basic_physical_address_width")
@@ -4891,11 +6977,17 @@ TEST_CASE("ia32_vmx_basic_physical_address_width")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000480UL] = 0x0001000000000000ULL;
-    CHECK(intel_x64::msrs::ia32_vmx_basic::physical_address_width::get());
+    using namespace intel_x64::msrs::ia32_vmx_basic;
 
-    g_msrs[0x00000480UL] = 0x0000000000000000ULL;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_basic::physical_address_width::get());
+    g_msrs[addr] = physical_address_width::mask;
+    CHECK(physical_address_width::is_enabled());
+    g_msrs[addr] = 0x0;
+    CHECK(physical_address_width::is_disabled());
+
+    g_msrs[addr] = physical_address_width::mask;
+    CHECK(physical_address_width::is_enabled(physical_address_width::mask));
+    g_msrs[addr] = 0x0;
+    CHECK(physical_address_width::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_vmx_basic_dual_monitor_mode_support")
@@ -4903,11 +6995,17 @@ TEST_CASE("ia32_vmx_basic_dual_monitor_mode_support")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000480UL] = 0x0002000000000000ULL;
-    CHECK(intel_x64::msrs::ia32_vmx_basic::dual_monitor_mode_support::get());
+    using namespace intel_x64::msrs::ia32_vmx_basic;
 
-    g_msrs[0x00000480UL] = 0x0000000000000000ULL;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_basic::dual_monitor_mode_support::get());
+    g_msrs[addr] = dual_monitor_mode_support::mask;
+    CHECK(dual_monitor_mode_support::is_enabled());
+    g_msrs[addr] = 0x0;
+    CHECK(dual_monitor_mode_support::is_disabled());
+
+    g_msrs[addr] = dual_monitor_mode_support::mask;
+    CHECK(dual_monitor_mode_support::is_enabled(dual_monitor_mode_support::mask));
+    g_msrs[addr] = 0x0;
+    CHECK(dual_monitor_mode_support::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_vmx_basic_memory_type")
@@ -4915,8 +7013,11 @@ TEST_CASE("ia32_vmx_basic_memory_type")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000480UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_vmx_basic::memory_type::get() == 0x000000000000000FULL);
+    using namespace intel_x64::msrs;
+
+    g_msrs[ia32_vmx_basic::addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(ia32_vmx_basic::memory_type::get() == (ia32_vmx_basic::memory_type::mask >> ia32_vmx_basic::memory_type::from));
+    CHECK(ia32_vmx_basic::memory_type::get(ia32_vmx_basic::memory_type::mask) == (ia32_vmx_basic::memory_type::mask >> ia32_vmx_basic::memory_type::from));
 }
 
 TEST_CASE("ia32_vmx_basic_ins_outs_exit_information")
@@ -4924,11 +7025,17 @@ TEST_CASE("ia32_vmx_basic_ins_outs_exit_information")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000480UL] = 0x0040000000000000ULL;
-    CHECK(intel_x64::msrs::ia32_vmx_basic::ins_outs_exit_information::get());
+    using namespace intel_x64::msrs::ia32_vmx_basic;
 
-    g_msrs[0x00000480UL] = 0x0000000000000000ULL;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_basic::ins_outs_exit_information::get());
+    g_msrs[addr] = ins_outs_exit_information::mask;
+    CHECK(ins_outs_exit_information::is_enabled());
+    g_msrs[addr] = 0x0;
+    CHECK(ins_outs_exit_information::is_disabled());
+
+    g_msrs[addr] = ins_outs_exit_information::mask;
+    CHECK(ins_outs_exit_information::is_enabled(ins_outs_exit_information::mask));
+    g_msrs[addr] = 0x0;
+    CHECK(ins_outs_exit_information::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_vmx_basic_true_based_controls")
@@ -4936,11 +7043,17 @@ TEST_CASE("ia32_vmx_basic_true_based_controls")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000480UL] = 0x0080000000000000ULL;
-    CHECK(intel_x64::msrs::ia32_vmx_basic::true_based_controls::get());
+    using namespace intel_x64::msrs::ia32_vmx_basic;
 
-    g_msrs[0x00000480UL] = 0x0000000000000000ULL;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_basic::true_based_controls::get());
+    g_msrs[addr] = true_based_controls::mask;
+    CHECK(true_based_controls::is_enabled());
+    g_msrs[addr] = 0x0;
+    CHECK(true_based_controls::is_disabled());
+
+    g_msrs[addr] = true_based_controls::mask;
+    CHECK(true_based_controls::is_enabled(true_based_controls::mask));
+    g_msrs[addr] = 0x0;
+    CHECK(true_based_controls::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_vmx_pinbased_ctls")
@@ -4948,8 +7061,11 @@ TEST_CASE("ia32_vmx_pinbased_ctls")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000481UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_vmx_pinbased_ctls::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_vmx_pinbased_ctls;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_vmx_pinbased_ctls_allowed_0_settings")
@@ -4957,8 +7073,11 @@ TEST_CASE("ia32_vmx_pinbased_ctls_allowed_0_settings")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000481UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_vmx_pinbased_ctls::allowed_0_settings::get() == 0x00000000FFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_vmx_pinbased_ctls;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(allowed_0_settings::get() == (allowed_0_settings::mask >> allowed_0_settings::from));
+    CHECK(allowed_0_settings::get(allowed_0_settings::mask) == (allowed_0_settings::mask >> allowed_0_settings::from));
 }
 
 TEST_CASE("ia32_vmx_pinbased_ctls_allowed_1_settings")
@@ -4966,8 +7085,11 @@ TEST_CASE("ia32_vmx_pinbased_ctls_allowed_1_settings")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000481UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_vmx_pinbased_ctls::allowed_1_settings::get() == 0x00000000FFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_vmx_pinbased_ctls;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(allowed_1_settings::get() == (allowed_1_settings::mask >> allowed_1_settings::from));
+    CHECK(allowed_1_settings::get(allowed_1_settings::mask) == (allowed_1_settings::mask >> allowed_1_settings::from));
 }
 
 TEST_CASE("ia32_vmx_procbased_ctls")
@@ -4975,8 +7097,11 @@ TEST_CASE("ia32_vmx_procbased_ctls")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000482UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_vmx_procbased_ctls::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_vmx_procbased_ctls;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_vmx_procbased_ctls_allowed_0_settings")
@@ -4984,8 +7109,11 @@ TEST_CASE("ia32_vmx_procbased_ctls_allowed_0_settings")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000482UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_vmx_procbased_ctls::allowed_0_settings::get() == 0x00000000FFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_vmx_procbased_ctls;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(allowed_0_settings::get() == (allowed_0_settings::mask >> allowed_0_settings::from));
+    CHECK(allowed_0_settings::get(allowed_0_settings::mask) == (allowed_0_settings::mask >> allowed_0_settings::from));
 }
 
 TEST_CASE("ia32_vmx_procbased_ctls_allowed_1_settings")
@@ -4993,8 +7121,11 @@ TEST_CASE("ia32_vmx_procbased_ctls_allowed_1_settings")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000482UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_vmx_procbased_ctls::allowed_1_settings::get() == 0x00000000FFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_vmx_procbased_ctls;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(allowed_1_settings::get() == (allowed_1_settings::mask >> allowed_1_settings::from));
+    CHECK(allowed_1_settings::get(allowed_1_settings::mask) == (allowed_1_settings::mask >> allowed_1_settings::from));
 }
 
 TEST_CASE("ia32_vmx_exit_ctls")
@@ -5002,8 +7133,11 @@ TEST_CASE("ia32_vmx_exit_ctls")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000483UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_vmx_exit_ctls::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_vmx_exit_ctls;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_vmx_exit_ctls_allowed_0_settings")
@@ -5011,8 +7145,11 @@ TEST_CASE("ia32_vmx_exit_ctls_allowed_0_settings")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000483UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_vmx_exit_ctls::allowed_0_settings::get() == 0x00000000FFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_vmx_exit_ctls;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(allowed_0_settings::get() == (allowed_0_settings::mask >> allowed_0_settings::from));
+    CHECK(allowed_0_settings::get(allowed_0_settings::mask) == (allowed_0_settings::mask >> allowed_0_settings::from));
 }
 
 TEST_CASE("ia32_vmx_exit_ctls_allowed_1_settings")
@@ -5020,8 +7157,11 @@ TEST_CASE("ia32_vmx_exit_ctls_allowed_1_settings")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000483UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_vmx_exit_ctls::allowed_1_settings::get() == 0x00000000FFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_vmx_exit_ctls;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(allowed_1_settings::get() == (allowed_1_settings::mask >> allowed_1_settings::from));
+    CHECK(allowed_1_settings::get(allowed_1_settings::mask) == (allowed_1_settings::mask >> allowed_1_settings::from));
 }
 
 TEST_CASE("ia32_vmx_entry_ctls")
@@ -5029,8 +7169,11 @@ TEST_CASE("ia32_vmx_entry_ctls")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000484UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_vmx_entry_ctls::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_vmx_entry_ctls;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_vmx_entry_ctls_allowed_0_settings")
@@ -5038,8 +7181,11 @@ TEST_CASE("ia32_vmx_entry_ctls_allowed_0_settings")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000484UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_vmx_entry_ctls::allowed_0_settings::get() == 0x00000000FFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_vmx_entry_ctls;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(allowed_0_settings::get() == (allowed_0_settings::mask >> allowed_0_settings::from));
+    CHECK(allowed_0_settings::get(allowed_0_settings::mask) == (allowed_0_settings::mask >> allowed_0_settings::from));
 }
 
 TEST_CASE("ia32_vmx_entry_ctls_allowed_1_settings")
@@ -5047,8 +7193,11 @@ TEST_CASE("ia32_vmx_entry_ctls_allowed_1_settings")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000484UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_vmx_entry_ctls::allowed_1_settings::get() == 0x00000000FFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_vmx_entry_ctls;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(allowed_1_settings::get() == (allowed_1_settings::mask >> allowed_1_settings::from));
+    CHECK(allowed_1_settings::get(allowed_1_settings::mask) == (allowed_1_settings::mask >> allowed_1_settings::from));
 }
 
 TEST_CASE("ia32_vmx_misc")
@@ -5056,10 +7205,11 @@ TEST_CASE("ia32_vmx_misc")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000485UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_vmx_misc::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_vmx_misc;
 
-    intel_x64::msrs::ia32_vmx_misc::dump();
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_vmx_misc_preemption_timer_decrement")
@@ -5067,8 +7217,11 @@ TEST_CASE("ia32_vmx_misc_preemption_timer_decrement")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000485UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_vmx_misc::preemption_timer_decrement::get() == 0x000000000000001FULL);
+    using namespace intel_x64::msrs::ia32_vmx_misc;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(preemption_timer_decrement::get() == (preemption_timer_decrement::mask >> preemption_timer_decrement::from));
+    CHECK(preemption_timer_decrement::get(preemption_timer_decrement::mask) == (preemption_timer_decrement::mask >> preemption_timer_decrement::from));
 }
 
 TEST_CASE("ia32_vmx_misc_store_efer_lma_on_vm_exit")
@@ -5076,11 +7229,17 @@ TEST_CASE("ia32_vmx_misc_store_efer_lma_on_vm_exit")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000485UL] = 0x0000000000000020ULL;
-    CHECK(intel_x64::msrs::ia32_vmx_misc::store_efer_lma_on_vm_exit::get());
+    using namespace intel_x64::msrs::ia32_vmx_misc;
 
-    g_msrs[0x00000485UL] = 0x0000000000000000ULL;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_misc::store_efer_lma_on_vm_exit::get());
+    g_msrs[addr] = store_efer_lma_on_vm_exit::mask;
+    CHECK(store_efer_lma_on_vm_exit::is_enabled());
+    g_msrs[addr] = 0x0;
+    CHECK(store_efer_lma_on_vm_exit::is_disabled());
+
+    g_msrs[addr] = store_efer_lma_on_vm_exit::mask;
+    CHECK(store_efer_lma_on_vm_exit::is_enabled(store_efer_lma_on_vm_exit::mask));
+    g_msrs[addr] = 0x0;
+    CHECK(store_efer_lma_on_vm_exit::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_vmx_misc_activity_state_hlt_support")
@@ -5088,11 +7247,17 @@ TEST_CASE("ia32_vmx_misc_activity_state_hlt_support")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000485UL] = 0x0000000000000040ULL;
-    CHECK(intel_x64::msrs::ia32_vmx_misc::activity_state_hlt_support::get());
+    using namespace intel_x64::msrs::ia32_vmx_misc;
 
-    g_msrs[0x00000485UL] = 0x0000000000000000ULL;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_misc::activity_state_hlt_support::get());
+    g_msrs[addr] = activity_state_hlt_support::mask;
+    CHECK(activity_state_hlt_support::is_enabled());
+    g_msrs[addr] = 0x0;
+    CHECK(activity_state_hlt_support::is_disabled());
+
+    g_msrs[addr] = activity_state_hlt_support::mask;
+    CHECK(activity_state_hlt_support::is_enabled(activity_state_hlt_support::mask));
+    g_msrs[addr] = 0x0;
+    CHECK(activity_state_hlt_support::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_vmx_misc_activity_state_shutdown_support")
@@ -5100,11 +7265,17 @@ TEST_CASE("ia32_vmx_misc_activity_state_shutdown_support")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000485UL] = 0x0000000000000080ULL;
-    CHECK(intel_x64::msrs::ia32_vmx_misc::activity_state_shutdown_support::get());
+    using namespace intel_x64::msrs::ia32_vmx_misc;
 
-    g_msrs[0x00000485UL] = 0x0000000000000000ULL;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_misc::activity_state_shutdown_support::get());
+    g_msrs[addr] = activity_state_shutdown_support::mask;
+    CHECK(activity_state_shutdown_support::is_enabled());
+    g_msrs[addr] = 0x0;
+    CHECK(activity_state_shutdown_support::is_disabled());
+
+    g_msrs[addr] = activity_state_shutdown_support::mask;
+    CHECK(activity_state_shutdown_support::is_enabled(activity_state_shutdown_support::mask));
+    g_msrs[addr] = 0x0;
+    CHECK(activity_state_shutdown_support::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_vmx_misc_activity_state_wait_for_sipi_support")
@@ -5112,11 +7283,17 @@ TEST_CASE("ia32_vmx_misc_activity_state_wait_for_sipi_support")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000485UL] = 0x0000000000000100ULL;
-    CHECK(intel_x64::msrs::ia32_vmx_misc::activity_state_wait_for_sipi_support::get());
+    using namespace intel_x64::msrs::ia32_vmx_misc;
 
-    g_msrs[0x00000485UL] = 0x0000000000000000ULL;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_misc::activity_state_wait_for_sipi_support::get());
+    g_msrs[addr] = activity_state_wait_for_sipi_support::mask;
+    CHECK(activity_state_wait_for_sipi_support::is_enabled());
+    g_msrs[addr] = 0x0;
+    CHECK(activity_state_wait_for_sipi_support::is_disabled());
+
+    g_msrs[addr] = activity_state_wait_for_sipi_support::mask;
+    CHECK(activity_state_wait_for_sipi_support::is_enabled(activity_state_wait_for_sipi_support::mask));
+    g_msrs[addr] = 0x0;
+    CHECK(activity_state_wait_for_sipi_support::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_vmx_misc_processor_trace_support")
@@ -5124,11 +7301,17 @@ TEST_CASE("ia32_vmx_misc_processor_trace_support")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000485UL] = 0x0000000000004000ULL;
-    CHECK(intel_x64::msrs::ia32_vmx_misc::processor_trace_support::get());
+    using namespace intel_x64::msrs::ia32_vmx_misc;
 
-    g_msrs[0x00000485UL] = 0x0000000000000000ULL;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_misc::processor_trace_support::get());
+    g_msrs[addr] = processor_trace_support::mask;
+    CHECK(processor_trace_support::is_enabled());
+    g_msrs[addr] = 0x0;
+    CHECK(processor_trace_support::is_disabled());
+
+    g_msrs[addr] = processor_trace_support::mask;
+    CHECK(processor_trace_support::is_enabled(processor_trace_support::mask));
+    g_msrs[addr] = 0x0;
+    CHECK(processor_trace_support::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_vmx_misc_rdmsr_in_smm_support")
@@ -5136,11 +7319,17 @@ TEST_CASE("ia32_vmx_misc_rdmsr_in_smm_support")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000485UL] = 0x0000000000008000ULL;
-    CHECK(intel_x64::msrs::ia32_vmx_misc::rdmsr_in_smm_support::get());
+    using namespace intel_x64::msrs::ia32_vmx_misc;
 
-    g_msrs[0x00000485UL] = 0x0000000000000000ULL;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_misc::rdmsr_in_smm_support::get());
+    g_msrs[addr] = rdmsr_in_smm_support::mask;
+    CHECK(rdmsr_in_smm_support::is_enabled());
+    g_msrs[addr] = 0x0;
+    CHECK(rdmsr_in_smm_support::is_disabled());
+
+    g_msrs[addr] = rdmsr_in_smm_support::mask;
+    CHECK(rdmsr_in_smm_support::is_enabled(rdmsr_in_smm_support::mask));
+    g_msrs[addr] = 0x0;
+    CHECK(rdmsr_in_smm_support::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_vmx_misc_cr3_targets")
@@ -5148,8 +7337,11 @@ TEST_CASE("ia32_vmx_misc_cr3_targets")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000485UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_vmx_misc::cr3_targets::get() == 0x00000000000001FFULL);
+    using namespace intel_x64::msrs::ia32_vmx_misc;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(cr3_targets::get() == (cr3_targets::mask >> cr3_targets::from));
+    CHECK(cr3_targets::get(cr3_targets::mask) == (cr3_targets::mask >> cr3_targets::from));
 }
 
 TEST_CASE("ia32_vmx_misc_max_num_msr_load_store_on_exit")
@@ -5157,8 +7349,11 @@ TEST_CASE("ia32_vmx_misc_max_num_msr_load_store_on_exit")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000485UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_vmx_misc::max_num_msr_load_store_on_exit::get() == 0x0000000000000007ULL);
+    using namespace intel_x64::msrs::ia32_vmx_misc;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(max_num_msr_load_store_on_exit::get() == (max_num_msr_load_store_on_exit::mask >> max_num_msr_load_store_on_exit::from));
+    CHECK(max_num_msr_load_store_on_exit::get(max_num_msr_load_store_on_exit::mask) == (max_num_msr_load_store_on_exit::mask >> max_num_msr_load_store_on_exit::from));
 }
 
 TEST_CASE("ia32_vmx_misc_vmxoff_blocked_smi_support")
@@ -5166,11 +7361,17 @@ TEST_CASE("ia32_vmx_misc_vmxoff_blocked_smi_support")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000485UL] = 0x0000000010000000ULL;
-    CHECK(intel_x64::msrs::ia32_vmx_misc::vmxoff_blocked_smi_support::get());
+    using namespace intel_x64::msrs::ia32_vmx_misc;
 
-    g_msrs[0x00000485UL] = 0x0000000000000000ULL;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_misc::vmxoff_blocked_smi_support::get());
+    g_msrs[addr] = vmxoff_blocked_smi_support::mask;
+    CHECK(vmxoff_blocked_smi_support::is_enabled());
+    g_msrs[addr] = 0x0;
+    CHECK(vmxoff_blocked_smi_support::is_disabled());
+
+    g_msrs[addr] = vmxoff_blocked_smi_support::mask;
+    CHECK(vmxoff_blocked_smi_support::is_enabled(vmxoff_blocked_smi_support::mask));
+    g_msrs[addr] = 0x0;
+    CHECK(vmxoff_blocked_smi_support::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_vmx_misc_vmwrite_all_fields_support")
@@ -5178,11 +7379,17 @@ TEST_CASE("ia32_vmx_misc_vmwrite_all_fields_support")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000485UL] = 0x0000000020000000ULL;
-    CHECK(intel_x64::msrs::ia32_vmx_misc::vmwrite_all_fields_support::get());
+    using namespace intel_x64::msrs::ia32_vmx_misc;
 
-    g_msrs[0x00000485UL] = 0x0000000000000000ULL;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_misc::vmwrite_all_fields_support::get());
+    g_msrs[addr] = vmwrite_all_fields_support::mask;
+    CHECK(vmwrite_all_fields_support::is_enabled());
+    g_msrs[addr] = 0x0;
+    CHECK(vmwrite_all_fields_support::is_disabled());
+
+    g_msrs[addr] = vmwrite_all_fields_support::mask;
+    CHECK(vmwrite_all_fields_support::is_enabled(vmwrite_all_fields_support::mask));
+    g_msrs[addr] = 0x0;
+    CHECK(vmwrite_all_fields_support::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_vmx_misc_injection_with_instruction_length_of_zero")
@@ -5190,11 +7397,17 @@ TEST_CASE("ia32_vmx_misc_injection_with_instruction_length_of_zero")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000485UL] = 0x0000000040000000ULL;
-    CHECK(intel_x64::msrs::ia32_vmx_misc::injection_with_instruction_length_of_zero::get());
+    using namespace intel_x64::msrs::ia32_vmx_misc;
 
-    g_msrs[0x00000485UL] = 0x0000000000000000ULL;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_misc::injection_with_instruction_length_of_zero::get());
+    g_msrs[addr] = injection_with_instruction_length_of_zero::mask;
+    CHECK(injection_with_instruction_length_of_zero::is_enabled());
+    g_msrs[addr] = 0x0;
+    CHECK(injection_with_instruction_length_of_zero::is_disabled());
+
+    g_msrs[addr] = injection_with_instruction_length_of_zero::mask;
+    CHECK(injection_with_instruction_length_of_zero::is_enabled(injection_with_instruction_length_of_zero::mask));
+    g_msrs[addr] = 0x0;
+    CHECK(injection_with_instruction_length_of_zero::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_vmx_cr0_fixed0")
@@ -5202,8 +7415,11 @@ TEST_CASE("ia32_vmx_cr0_fixed0")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000486UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_vmx_cr0_fixed0::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_vmx_cr0_fixed0;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_vmx_cr0_fixed1")
@@ -5211,8 +7427,11 @@ TEST_CASE("ia32_vmx_cr0_fixed1")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000487UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_vmx_cr0_fixed1::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_vmx_cr0_fixed1;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_vmx_cr4_fixed0")
@@ -5220,8 +7439,11 @@ TEST_CASE("ia32_vmx_cr4_fixed0")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000488UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_vmx_cr4_fixed0::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_vmx_cr4_fixed0;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_vmx_cr4_fixed1")
@@ -5229,8 +7451,11 @@ TEST_CASE("ia32_vmx_cr4_fixed1")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000489UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_vmx_cr4_fixed1::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_vmx_cr4_fixed1;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_vmx_vmcs_enum")
@@ -5238,8 +7463,11 @@ TEST_CASE("ia32_vmx_vmcs_enum")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000048AUL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_vmx_vmcs_enum::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_vmx_vmcs_enum;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_vmx_vmcs_enum_highest_index")
@@ -5247,8 +7475,11 @@ TEST_CASE("ia32_vmx_vmcs_enum_highest_index")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000048AUL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_vmx_vmcs_enum::highest_index::get() == 0x00000000000001FFULL);
+    using namespace intel_x64::msrs::ia32_vmx_vmcs_enum;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(highest_index::get() == (highest_index::mask >> highest_index::from));
+    CHECK(highest_index::get(highest_index::mask) == (highest_index::mask >> highest_index::from));
 }
 
 TEST_CASE("ia32_vmx_procbased_ctls2")
@@ -5256,27 +7487,29 @@ TEST_CASE("ia32_vmx_procbased_ctls2")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = 0x00000000FFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_vmx_procbased_ctls2::get() == 0x00000000FFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_vmx_procbased_ctls2;
 
-    intel_x64::msrs::ia32_vmx_procbased_ctls2::dump();
+    g_msrs[addr] = 0x00000000FFFFFFFFULL;
+    CHECK(get() == 0x00000000FFFFFFFFULL);
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = 0x0UL;
-    CHECK(intel_x64::msrs::ia32_vmx_procbased_ctls2::get() == 0x0UL);
+    dump(0);
 
-    intel_x64::msrs::ia32_vmx_procbased_ctls2::dump();
+    g_msrs[addr] = 0x0UL;
+    CHECK(get() == 0x0UL);
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = 0x00000000FFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_vmx_procbased_ctls2::allowed0() == 0xFFFFFFFFUL);
-    CHECK(intel_x64::msrs::ia32_vmx_procbased_ctls2::allowed1() == 0x00000000UL);
+    dump(0);
 
-    intel_x64::msrs::ia32_vmx_procbased_ctls2::dump();
+    g_msrs[addr] = 0x00000000FFFFFFFFULL;
+    CHECK(allowed0() == 0xFFFFFFFFUL);
+    CHECK(allowed1() == 0x00000000UL);
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = 0xFFFFFFFF00000000ULL;
-    CHECK(intel_x64::msrs::ia32_vmx_procbased_ctls2::allowed0() == 0x00000000UL);
-    CHECK(intel_x64::msrs::ia32_vmx_procbased_ctls2::allowed1() == 0xFFFFFFFFUL);
+    dump(0);
 
-    intel_x64::msrs::ia32_vmx_procbased_ctls2::dump();
+    g_msrs[addr] = 0xFFFFFFFF00000000ULL;
+    CHECK(allowed0() == 0x00000000UL);
+    CHECK(allowed1() == 0xFFFFFFFFUL);
+
+    dump(0);
 }
 
 TEST_CASE("ia32_vmx_procbased_ctls2_virtualize_apic_accesses")
@@ -5284,21 +7517,26 @@ TEST_CASE("ia32_vmx_procbased_ctls2_virtualize_apic_accesses")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    auto mask = intel_x64::msrs::ia32_vmx_procbased_ctls2::virtualize_apic_accesses::mask;
+    using namespace intel_x64::msrs::ia32_vmx_procbased_ctls2;
+    auto mask = virtualize_apic_accesses::mask;
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = mask;
-    CHECK(intel_x64::msrs::ia32_vmx_procbased_ctls2::virtualize_apic_accesses::get());
+    g_msrs[addr] = mask;
+    CHECK(virtualize_apic_accesses::is_enabled());
+    g_msrs[addr] = ~mask;
+    CHECK(virtualize_apic_accesses::is_disabled());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = ~mask;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_procbased_ctls2::virtualize_apic_accesses::get());
+    g_msrs[addr] = mask;
+    CHECK(virtualize_apic_accesses::is_enabled(virtualize_apic_accesses::mask));
+    g_msrs[addr] = ~mask;
+    CHECK(virtualize_apic_accesses::is_disabled(~virtualize_apic_accesses::mask));
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = mask | (mask << 32);
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_procbased_ctls2::virtualize_apic_accesses::is_allowed0());
-    CHECK(intel_x64::msrs::ia32_vmx_procbased_ctls2::virtualize_apic_accesses::is_allowed1());
+    g_msrs[addr] = mask | (mask << 32);
+    CHECK_FALSE(virtualize_apic_accesses::is_allowed0());
+    CHECK(virtualize_apic_accesses::is_allowed1());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = ~mask & ~(mask << 32);
-    CHECK(intel_x64::msrs::ia32_vmx_procbased_ctls2::virtualize_apic_accesses::is_allowed0());
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_procbased_ctls2::virtualize_apic_accesses::is_allowed1());
+    g_msrs[addr] = ~(mask | (mask << 32));
+    CHECK(virtualize_apic_accesses::is_allowed0());
+    CHECK_FALSE(virtualize_apic_accesses::is_allowed1());
 }
 
 TEST_CASE("ia32_vmx_procbased_ctls2_enable_ept")
@@ -5306,21 +7544,26 @@ TEST_CASE("ia32_vmx_procbased_ctls2_enable_ept")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace intel_x64::msrs::ia32_vmx_procbased_ctls2;
     auto mask = intel_x64::msrs::ia32_vmx_procbased_ctls2::enable_ept::mask;
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = mask;
-    CHECK(intel_x64::msrs::ia32_vmx_procbased_ctls2::enable_ept::get());
+    g_msrs[addr] = mask;
+    CHECK(enable_ept::is_enabled());
+    g_msrs[addr] = ~mask;
+    CHECK(enable_ept::is_disabled());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = ~mask;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_procbased_ctls2::enable_ept::get());
+    g_msrs[addr] = mask;
+    CHECK(enable_ept::is_enabled(enable_ept::mask));
+    g_msrs[addr] = ~mask;
+    CHECK(enable_ept::is_disabled(~enable_ept::mask));
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = mask | (mask << 32);
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_procbased_ctls2::enable_ept::is_allowed0());
-    CHECK(intel_x64::msrs::ia32_vmx_procbased_ctls2::enable_ept::is_allowed1());
+    g_msrs[addr] = mask | (mask << 32);
+    CHECK_FALSE(enable_ept::is_allowed0());
+    CHECK(enable_ept::is_allowed1());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = ~mask & ~(mask << 32);
-    CHECK(intel_x64::msrs::ia32_vmx_procbased_ctls2::enable_ept::is_allowed0());
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_procbased_ctls2::enable_ept::is_allowed1());
+    g_msrs[addr] = ~(mask | (mask << 32));
+    CHECK(enable_ept::is_allowed0());
+    CHECK_FALSE(enable_ept::is_allowed1());
 }
 
 TEST_CASE("ia32_vmx_procbased_ctls2_descriptor_table_exiting")
@@ -5328,21 +7571,26 @@ TEST_CASE("ia32_vmx_procbased_ctls2_descriptor_table_exiting")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace intel_x64::msrs::ia32_vmx_procbased_ctls2;
     auto mask = intel_x64::msrs::ia32_vmx_procbased_ctls2::descriptor_table_exiting::mask;
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = mask;
-    CHECK(intel_x64::msrs::ia32_vmx_procbased_ctls2::descriptor_table_exiting::get());
+    g_msrs[addr] = mask;
+    CHECK(descriptor_table_exiting::is_enabled());
+    g_msrs[addr] = ~mask;
+    CHECK(descriptor_table_exiting::is_disabled());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = ~mask;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_procbased_ctls2::descriptor_table_exiting::get());
+    g_msrs[addr] = mask;
+    CHECK(descriptor_table_exiting::is_enabled(descriptor_table_exiting::mask));
+    g_msrs[addr] = ~mask;
+    CHECK(descriptor_table_exiting::is_disabled(~descriptor_table_exiting::mask));
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = mask | (mask << 32);
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_procbased_ctls2::descriptor_table_exiting::is_allowed0());
-    CHECK(intel_x64::msrs::ia32_vmx_procbased_ctls2::descriptor_table_exiting::is_allowed1());
+    g_msrs[addr] = mask | (mask << 32);
+    CHECK_FALSE(descriptor_table_exiting::is_allowed0());
+    CHECK(descriptor_table_exiting::is_allowed1());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = ~mask & ~(mask << 32);
-    CHECK(intel_x64::msrs::ia32_vmx_procbased_ctls2::descriptor_table_exiting::is_allowed0());
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_procbased_ctls2::descriptor_table_exiting::is_allowed1());
+    g_msrs[addr] = ~(mask | (mask << 32));
+    CHECK(descriptor_table_exiting::is_allowed0());
+    CHECK_FALSE(descriptor_table_exiting::is_allowed1());
 }
 
 TEST_CASE("ia32_vmx_procbased_ctls2_enable_rdtscp")
@@ -5350,21 +7598,26 @@ TEST_CASE("ia32_vmx_procbased_ctls2_enable_rdtscp")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace intel_x64::msrs::ia32_vmx_procbased_ctls2;
     auto mask = intel_x64::msrs::ia32_vmx_procbased_ctls2::enable_rdtscp::mask;
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = mask;
-    CHECK(intel_x64::msrs::ia32_vmx_procbased_ctls2::enable_rdtscp::get());
+    g_msrs[addr] = mask;
+    CHECK(enable_rdtscp::is_enabled());
+    g_msrs[addr] = ~mask;
+    CHECK(enable_rdtscp::is_disabled());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = ~mask;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_procbased_ctls2::enable_rdtscp::get());
+    g_msrs[addr] = mask;
+    CHECK(enable_rdtscp::is_enabled(enable_rdtscp::mask));
+    g_msrs[addr] = ~mask;
+    CHECK(enable_rdtscp::is_disabled(~enable_rdtscp::mask));
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = mask | (mask << 32);
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_procbased_ctls2::enable_rdtscp::is_allowed0());
-    CHECK(intel_x64::msrs::ia32_vmx_procbased_ctls2::enable_rdtscp::is_allowed1());
+    g_msrs[addr] = mask | (mask << 32);
+    CHECK_FALSE(enable_rdtscp::is_allowed0());
+    CHECK(enable_rdtscp::is_allowed1());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = ~mask & ~(mask << 32);
-    CHECK(intel_x64::msrs::ia32_vmx_procbased_ctls2::enable_rdtscp::is_allowed0());
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_procbased_ctls2::enable_rdtscp::is_allowed1());
+    g_msrs[addr] = ~(mask | (mask << 32));
+    CHECK(enable_rdtscp::is_allowed0());
+    CHECK_FALSE(enable_rdtscp::is_allowed1());
 }
 
 TEST_CASE("ia32_vmx_procbased_ctls2_virtualize_x2apic_mode")
@@ -5372,21 +7625,26 @@ TEST_CASE("ia32_vmx_procbased_ctls2_virtualize_x2apic_mode")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace intel_x64::msrs::ia32_vmx_procbased_ctls2;
     auto mask = intel_x64::msrs::ia32_vmx_procbased_ctls2::virtualize_x2apic_mode::mask;
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = mask;
-    CHECK(intel_x64::msrs::ia32_vmx_procbased_ctls2::virtualize_x2apic_mode::get());
+    g_msrs[addr] = mask;
+    CHECK(virtualize_x2apic_mode::is_enabled());
+    g_msrs[addr] = ~mask;
+    CHECK(virtualize_x2apic_mode::is_disabled());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = ~mask;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_procbased_ctls2::virtualize_x2apic_mode::get());
+    g_msrs[addr] = mask;
+    CHECK(virtualize_x2apic_mode::is_enabled(virtualize_x2apic_mode::mask));
+    g_msrs[addr] = ~mask;
+    CHECK(virtualize_x2apic_mode::is_disabled(~virtualize_x2apic_mode::mask));
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = mask | (mask << 32);
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_procbased_ctls2::virtualize_x2apic_mode::is_allowed0());
-    CHECK(intel_x64::msrs::ia32_vmx_procbased_ctls2::virtualize_x2apic_mode::is_allowed1());
+    g_msrs[addr] = mask | (mask << 32);
+    CHECK_FALSE(virtualize_x2apic_mode::is_allowed0());
+    CHECK(virtualize_x2apic_mode::is_allowed1());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = ~mask & ~(mask << 32);
-    CHECK(intel_x64::msrs::ia32_vmx_procbased_ctls2::virtualize_x2apic_mode::is_allowed0());
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_procbased_ctls2::virtualize_x2apic_mode::is_allowed1());
+    g_msrs[addr] = ~(mask | (mask << 32));
+    CHECK(virtualize_x2apic_mode::is_allowed0());
+    CHECK_FALSE(virtualize_x2apic_mode::is_allowed1());
 }
 
 TEST_CASE("ia32_vmx_procbased_ctls2_enable_vpid")
@@ -5394,21 +7652,26 @@ TEST_CASE("ia32_vmx_procbased_ctls2_enable_vpid")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace intel_x64::msrs::ia32_vmx_procbased_ctls2;
     auto mask = intel_x64::msrs::ia32_vmx_procbased_ctls2::enable_vpid::mask;
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = mask;
-    CHECK(intel_x64::msrs::ia32_vmx_procbased_ctls2::enable_vpid::get());
+    g_msrs[addr] = mask;
+    CHECK(enable_vpid::is_enabled());
+    g_msrs[addr] = ~mask;
+    CHECK(enable_vpid::is_disabled());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = ~mask;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_procbased_ctls2::enable_vpid::get());
+    g_msrs[addr] = mask;
+    CHECK(enable_vpid::is_enabled(enable_vpid::mask));
+    g_msrs[addr] = ~mask;
+    CHECK(enable_vpid::is_disabled(~enable_vpid::mask));
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = mask | (mask << 32);
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_procbased_ctls2::enable_vpid::is_allowed0());
-    CHECK(intel_x64::msrs::ia32_vmx_procbased_ctls2::enable_vpid::is_allowed1());
+    g_msrs[addr] = mask | (mask << 32);
+    CHECK_FALSE(enable_vpid::is_allowed0());
+    CHECK(enable_vpid::is_allowed1());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = ~mask & ~(mask << 32);
-    CHECK(intel_x64::msrs::ia32_vmx_procbased_ctls2::enable_vpid::is_allowed0());
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_procbased_ctls2::enable_vpid::is_allowed1());
+    g_msrs[addr] = ~(mask | (mask << 32));
+    CHECK(enable_vpid::is_allowed0());
+    CHECK_FALSE(enable_vpid::is_allowed1());
 }
 
 TEST_CASE("ia32_vmx_procbased_ctls2_wbinvd_exiting")
@@ -5416,21 +7679,26 @@ TEST_CASE("ia32_vmx_procbased_ctls2_wbinvd_exiting")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace intel_x64::msrs::ia32_vmx_procbased_ctls2;
     auto mask = intel_x64::msrs::ia32_vmx_procbased_ctls2::wbinvd_exiting::mask;
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = mask;
-    CHECK(intel_x64::msrs::ia32_vmx_procbased_ctls2::wbinvd_exiting::get());
+    g_msrs[addr] = mask;
+    CHECK(wbinvd_exiting::is_enabled());
+    g_msrs[addr] = ~mask;
+    CHECK(wbinvd_exiting::is_disabled());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = ~mask;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_procbased_ctls2::wbinvd_exiting::get());
+    g_msrs[addr] = mask;
+    CHECK(wbinvd_exiting::is_enabled(wbinvd_exiting::mask));
+    g_msrs[addr] = ~mask;
+    CHECK(wbinvd_exiting::is_disabled(~wbinvd_exiting::mask));
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = mask | (mask << 32);
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_procbased_ctls2::wbinvd_exiting::is_allowed0());
-    CHECK(intel_x64::msrs::ia32_vmx_procbased_ctls2::wbinvd_exiting::is_allowed1());
+    g_msrs[addr] = mask | (mask << 32);
+    CHECK_FALSE(wbinvd_exiting::is_allowed0());
+    CHECK(wbinvd_exiting::is_allowed1());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = ~mask & ~(mask << 32);
-    CHECK(intel_x64::msrs::ia32_vmx_procbased_ctls2::wbinvd_exiting::is_allowed0());
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_procbased_ctls2::wbinvd_exiting::is_allowed1());
+    g_msrs[addr] = ~(mask | (mask << 32));
+    CHECK(wbinvd_exiting::is_allowed0());
+    CHECK_FALSE(wbinvd_exiting::is_allowed1());
 }
 
 TEST_CASE("ia32_vmx_procbased_ctls2_unrestricted_guest")
@@ -5438,21 +7706,26 @@ TEST_CASE("ia32_vmx_procbased_ctls2_unrestricted_guest")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace intel_x64::msrs::ia32_vmx_procbased_ctls2;
     auto mask = intel_x64::msrs::ia32_vmx_procbased_ctls2::unrestricted_guest::mask;
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = mask;
-    CHECK(intel_x64::msrs::ia32_vmx_procbased_ctls2::unrestricted_guest::get());
+    g_msrs[addr] = mask;
+    CHECK(unrestricted_guest::is_enabled());
+    g_msrs[addr] = ~mask;
+    CHECK(unrestricted_guest::is_disabled());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = ~mask;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_procbased_ctls2::unrestricted_guest::get());
+    g_msrs[addr] = mask;
+    CHECK(unrestricted_guest::is_enabled(unrestricted_guest::mask));
+    g_msrs[addr] = ~mask;
+    CHECK(unrestricted_guest::is_disabled(~unrestricted_guest::mask));
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = mask | (mask << 32);
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_procbased_ctls2::unrestricted_guest::is_allowed0());
-    CHECK(intel_x64::msrs::ia32_vmx_procbased_ctls2::unrestricted_guest::is_allowed1());
+    g_msrs[addr] = mask | (mask << 32);
+    CHECK_FALSE(unrestricted_guest::is_allowed0());
+    CHECK(unrestricted_guest::is_allowed1());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = ~mask & ~(mask << 32);
-    CHECK(intel_x64::msrs::ia32_vmx_procbased_ctls2::unrestricted_guest::is_allowed0());
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_procbased_ctls2::unrestricted_guest::is_allowed1());
+    g_msrs[addr] = ~(mask | (mask << 32));
+    CHECK(unrestricted_guest::is_allowed0());
+    CHECK_FALSE(unrestricted_guest::is_allowed1());
 }
 
 TEST_CASE("ia32_vmx_procbased_ctls2_apic_register_virtualization")
@@ -5460,21 +7733,26 @@ TEST_CASE("ia32_vmx_procbased_ctls2_apic_register_virtualization")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace intel_x64::msrs::ia32_vmx_procbased_ctls2;
     auto mask = intel_x64::msrs::ia32_vmx_procbased_ctls2::apic_register_virtualization::mask;
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = mask;
-    CHECK(intel_x64::msrs::ia32_vmx_procbased_ctls2::apic_register_virtualization::get());
+    g_msrs[addr] = mask;
+    CHECK(apic_register_virtualization::is_enabled());
+    g_msrs[addr] = ~mask;
+    CHECK(apic_register_virtualization::is_disabled());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = ~mask;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_procbased_ctls2::apic_register_virtualization::get());
+    g_msrs[addr] = mask;
+    CHECK(apic_register_virtualization::is_enabled(apic_register_virtualization::mask));
+    g_msrs[addr] = ~mask;
+    CHECK(apic_register_virtualization::is_disabled(~apic_register_virtualization::mask));
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = mask | (mask << 32);
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_procbased_ctls2::apic_register_virtualization::is_allowed0());
-    CHECK(intel_x64::msrs::ia32_vmx_procbased_ctls2::apic_register_virtualization::is_allowed1());
+    g_msrs[addr] = mask | (mask << 32);
+    CHECK_FALSE(apic_register_virtualization::is_allowed0());
+    CHECK(apic_register_virtualization::is_allowed1());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = ~mask & ~(mask << 32);
-    CHECK(intel_x64::msrs::ia32_vmx_procbased_ctls2::apic_register_virtualization::is_allowed0());
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_procbased_ctls2::apic_register_virtualization::is_allowed1());
+    g_msrs[addr] = ~(mask | (mask << 32));
+    CHECK(apic_register_virtualization::is_allowed0());
+    CHECK_FALSE(apic_register_virtualization::is_allowed1());
 }
 
 TEST_CASE("ia32_vmx_procbased_ctls2_virtual_interrupt_delivery")
@@ -5482,21 +7760,26 @@ TEST_CASE("ia32_vmx_procbased_ctls2_virtual_interrupt_delivery")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace intel_x64::msrs::ia32_vmx_procbased_ctls2;
     auto mask = intel_x64::msrs::ia32_vmx_procbased_ctls2::virtual_interrupt_delivery::mask;
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = mask;
-    CHECK(intel_x64::msrs::ia32_vmx_procbased_ctls2::virtual_interrupt_delivery::get());
+    g_msrs[addr] = mask;
+    CHECK(virtual_interrupt_delivery::is_enabled());
+    g_msrs[addr] = ~mask;
+    CHECK(virtual_interrupt_delivery::is_disabled());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = ~mask;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_procbased_ctls2::virtual_interrupt_delivery::get());
+    g_msrs[addr] = mask;
+    CHECK(virtual_interrupt_delivery::is_enabled(virtual_interrupt_delivery::mask));
+    g_msrs[addr] = ~mask;
+    CHECK(virtual_interrupt_delivery::is_disabled(~virtual_interrupt_delivery::mask));
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = mask | (mask << 32);
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_procbased_ctls2::virtual_interrupt_delivery::is_allowed0());
-    CHECK(intel_x64::msrs::ia32_vmx_procbased_ctls2::virtual_interrupt_delivery::is_allowed1());
+    g_msrs[addr] = mask | (mask << 32);
+    CHECK_FALSE(virtual_interrupt_delivery::is_allowed0());
+    CHECK(virtual_interrupt_delivery::is_allowed1());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = ~mask & ~(mask << 32);
-    CHECK(intel_x64::msrs::ia32_vmx_procbased_ctls2::virtual_interrupt_delivery::is_allowed0());
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_procbased_ctls2::virtual_interrupt_delivery::is_allowed1());
+    g_msrs[addr] = ~(mask | (mask << 32));
+    CHECK(virtual_interrupt_delivery::is_allowed0());
+    CHECK_FALSE(virtual_interrupt_delivery::is_allowed1());
 }
 
 TEST_CASE("ia32_vmx_procbased_ctls2_pause_loop_exiting")
@@ -5504,21 +7787,26 @@ TEST_CASE("ia32_vmx_procbased_ctls2_pause_loop_exiting")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace intel_x64::msrs::ia32_vmx_procbased_ctls2;
     auto mask = intel_x64::msrs::ia32_vmx_procbased_ctls2::pause_loop_exiting::mask;
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = mask;
-    CHECK(intel_x64::msrs::ia32_vmx_procbased_ctls2::pause_loop_exiting::get());
+    g_msrs[addr] = mask;
+    CHECK(pause_loop_exiting::is_enabled());
+    g_msrs[addr] = ~mask;
+    CHECK(pause_loop_exiting::is_disabled());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = ~mask;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_procbased_ctls2::pause_loop_exiting::get());
+    g_msrs[addr] = mask;
+    CHECK(pause_loop_exiting::is_enabled(pause_loop_exiting::mask));
+    g_msrs[addr] = ~mask;
+    CHECK(pause_loop_exiting::is_disabled(~pause_loop_exiting::mask));
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = mask | (mask << 32);
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_procbased_ctls2::pause_loop_exiting::is_allowed0());
-    CHECK(intel_x64::msrs::ia32_vmx_procbased_ctls2::pause_loop_exiting::is_allowed1());
+    g_msrs[addr] = mask | (mask << 32);
+    CHECK_FALSE(pause_loop_exiting::is_allowed0());
+    CHECK(pause_loop_exiting::is_allowed1());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = ~mask & ~(mask << 32);
-    CHECK(intel_x64::msrs::ia32_vmx_procbased_ctls2::pause_loop_exiting::is_allowed0());
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_procbased_ctls2::pause_loop_exiting::is_allowed1());
+    g_msrs[addr] = ~(mask | (mask << 32));
+    CHECK(pause_loop_exiting::is_allowed0());
+    CHECK_FALSE(pause_loop_exiting::is_allowed1());
 }
 
 TEST_CASE("ia32_vmx_procbased_ctls2_rdrand_exiting")
@@ -5526,21 +7814,26 @@ TEST_CASE("ia32_vmx_procbased_ctls2_rdrand_exiting")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace intel_x64::msrs::ia32_vmx_procbased_ctls2;
     auto mask = intel_x64::msrs::ia32_vmx_procbased_ctls2::rdrand_exiting::mask;
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = mask;
-    CHECK(intel_x64::msrs::ia32_vmx_procbased_ctls2::rdrand_exiting::get());
+    g_msrs[addr] = mask;
+    CHECK(rdrand_exiting::is_enabled());
+    g_msrs[addr] = ~mask;
+    CHECK(rdrand_exiting::is_disabled());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = ~mask;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_procbased_ctls2::rdrand_exiting::get());
+    g_msrs[addr] = mask;
+    CHECK(rdrand_exiting::is_enabled(rdrand_exiting::mask));
+    g_msrs[addr] = ~mask;
+    CHECK(rdrand_exiting::is_disabled(~rdrand_exiting::mask));
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = mask | (mask << 32);
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_procbased_ctls2::rdrand_exiting::is_allowed0());
-    CHECK(intel_x64::msrs::ia32_vmx_procbased_ctls2::rdrand_exiting::is_allowed1());
+    g_msrs[addr] = mask | (mask << 32);
+    CHECK_FALSE(rdrand_exiting::is_allowed0());
+    CHECK(rdrand_exiting::is_allowed1());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = ~mask & ~(mask << 32);
-    CHECK(intel_x64::msrs::ia32_vmx_procbased_ctls2::rdrand_exiting::is_allowed0());
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_procbased_ctls2::rdrand_exiting::is_allowed1());
+    g_msrs[addr] = ~(mask | (mask << 32));
+    CHECK(rdrand_exiting::is_allowed0());
+    CHECK_FALSE(rdrand_exiting::is_allowed1());
 }
 
 TEST_CASE("ia32_vmx_procbased_ctls2_enable_invpcid")
@@ -5548,21 +7841,26 @@ TEST_CASE("ia32_vmx_procbased_ctls2_enable_invpcid")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace intel_x64::msrs::ia32_vmx_procbased_ctls2;
     auto mask = intel_x64::msrs::ia32_vmx_procbased_ctls2::enable_invpcid::mask;
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = mask;
-    CHECK(intel_x64::msrs::ia32_vmx_procbased_ctls2::enable_invpcid::get());
+    g_msrs[addr] = mask;
+    CHECK(enable_invpcid::is_enabled());
+    g_msrs[addr] = ~mask;
+    CHECK(enable_invpcid::is_disabled());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = ~mask;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_procbased_ctls2::enable_invpcid::get());
+    g_msrs[addr] = mask;
+    CHECK(enable_invpcid::is_enabled(enable_invpcid::mask));
+    g_msrs[addr] = ~mask;
+    CHECK(enable_invpcid::is_disabled(~enable_invpcid::mask));
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = mask | (mask << 32);
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_procbased_ctls2::enable_invpcid::is_allowed0());
-    CHECK(intel_x64::msrs::ia32_vmx_procbased_ctls2::enable_invpcid::is_allowed1());
+    g_msrs[addr] = mask | (mask << 32);
+    CHECK_FALSE(enable_invpcid::is_allowed0());
+    CHECK(enable_invpcid::is_allowed1());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = ~mask & ~(mask << 32);
-    CHECK(intel_x64::msrs::ia32_vmx_procbased_ctls2::enable_invpcid::is_allowed0());
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_procbased_ctls2::enable_invpcid::is_allowed1());
+    g_msrs[addr] = ~(mask | (mask << 32));
+    CHECK(enable_invpcid::is_allowed0());
+    CHECK_FALSE(enable_invpcid::is_allowed1());
 }
 
 TEST_CASE("ia32_vmx_procbased_ctls2_enable_vm_functions")
@@ -5570,21 +7868,26 @@ TEST_CASE("ia32_vmx_procbased_ctls2_enable_vm_functions")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace intel_x64::msrs::ia32_vmx_procbased_ctls2;
     auto mask = intel_x64::msrs::ia32_vmx_procbased_ctls2::enable_vm_functions::mask;
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = mask;
-    CHECK(intel_x64::msrs::ia32_vmx_procbased_ctls2::enable_vm_functions::get());
+    g_msrs[addr] = mask;
+    CHECK(enable_vm_functions::is_enabled());
+    g_msrs[addr] = ~mask;
+    CHECK(enable_vm_functions::is_disabled());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = ~mask;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_procbased_ctls2::enable_vm_functions::get());
+    g_msrs[addr] = mask;
+    CHECK(enable_vm_functions::is_enabled(enable_vm_functions::mask));
+    g_msrs[addr] = ~mask;
+    CHECK(enable_vm_functions::is_disabled(~enable_vm_functions::mask));
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = mask | (mask << 32);
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_procbased_ctls2::enable_vm_functions::is_allowed0());
-    CHECK(intel_x64::msrs::ia32_vmx_procbased_ctls2::enable_vm_functions::is_allowed1());
+    g_msrs[addr] = mask | (mask << 32);
+    CHECK_FALSE(enable_vm_functions::is_allowed0());
+    CHECK(enable_vm_functions::is_allowed1());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = ~mask & ~(mask << 32);
-    CHECK(intel_x64::msrs::ia32_vmx_procbased_ctls2::enable_vm_functions::is_allowed0());
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_procbased_ctls2::enable_vm_functions::is_allowed1());
+    g_msrs[addr] = ~(mask | (mask << 32));
+    CHECK(enable_vm_functions::is_allowed0());
+    CHECK_FALSE(enable_vm_functions::is_allowed1());
 }
 
 TEST_CASE("ia32_vmx_procbased_ctls2_vmcs_shadowing")
@@ -5592,21 +7895,26 @@ TEST_CASE("ia32_vmx_procbased_ctls2_vmcs_shadowing")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace intel_x64::msrs::ia32_vmx_procbased_ctls2;
     auto mask = intel_x64::msrs::ia32_vmx_procbased_ctls2::vmcs_shadowing::mask;
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = mask;
-    CHECK(intel_x64::msrs::ia32_vmx_procbased_ctls2::vmcs_shadowing::get());
+    g_msrs[addr] = mask;
+    CHECK(vmcs_shadowing::is_enabled());
+    g_msrs[addr] = ~mask;
+    CHECK(vmcs_shadowing::is_disabled());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = ~mask;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_procbased_ctls2::vmcs_shadowing::get());
+    g_msrs[addr] = mask;
+    CHECK(vmcs_shadowing::is_enabled(vmcs_shadowing::mask));
+    g_msrs[addr] = ~mask;
+    CHECK(vmcs_shadowing::is_disabled(~vmcs_shadowing::mask));
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = mask | (mask << 32);
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_procbased_ctls2::vmcs_shadowing::is_allowed0());
-    CHECK(intel_x64::msrs::ia32_vmx_procbased_ctls2::vmcs_shadowing::is_allowed1());
+    g_msrs[addr] = mask | (mask << 32);
+    CHECK_FALSE(vmcs_shadowing::is_allowed0());
+    CHECK(vmcs_shadowing::is_allowed1());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = ~mask & ~(mask << 32);
-    CHECK(intel_x64::msrs::ia32_vmx_procbased_ctls2::vmcs_shadowing::is_allowed0());
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_procbased_ctls2::vmcs_shadowing::is_allowed1());
+    g_msrs[addr] = ~(mask | (mask << 32));
+    CHECK(vmcs_shadowing::is_allowed0());
+    CHECK_FALSE(vmcs_shadowing::is_allowed1());
 }
 
 TEST_CASE("ia32_vmx_procbased_ctls2_enable_encls_exiting")
@@ -5614,21 +7922,26 @@ TEST_CASE("ia32_vmx_procbased_ctls2_enable_encls_exiting")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace intel_x64::msrs::ia32_vmx_procbased_ctls2;
     auto mask = intel_x64::msrs::ia32_vmx_procbased_ctls2::enable_encls_exiting::mask;
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = mask;
-    CHECK(intel_x64::msrs::ia32_vmx_procbased_ctls2::enable_encls_exiting::get());
+    g_msrs[addr] = mask;
+    CHECK(enable_encls_exiting::is_enabled());
+    g_msrs[addr] = ~mask;
+    CHECK(enable_encls_exiting::is_disabled());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = ~mask;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_procbased_ctls2::enable_encls_exiting::get());
+    g_msrs[addr] = mask;
+    CHECK(enable_encls_exiting::is_enabled(enable_encls_exiting::mask));
+    g_msrs[addr] = ~mask;
+    CHECK(enable_encls_exiting::is_disabled(~enable_encls_exiting::mask));
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = mask | (mask << 32);
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_procbased_ctls2::enable_encls_exiting::is_allowed0());
-    CHECK(intel_x64::msrs::ia32_vmx_procbased_ctls2::enable_encls_exiting::is_allowed1());
+    g_msrs[addr] = mask | (mask << 32);
+    CHECK_FALSE(enable_encls_exiting::is_allowed0());
+    CHECK(enable_encls_exiting::is_allowed1());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = ~mask & ~(mask << 32);
-    CHECK(intel_x64::msrs::ia32_vmx_procbased_ctls2::enable_encls_exiting::is_allowed0());
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_procbased_ctls2::enable_encls_exiting::is_allowed1());
+    g_msrs[addr] = ~(mask | (mask << 32));
+    CHECK(enable_encls_exiting::is_allowed0());
+    CHECK_FALSE(enable_encls_exiting::is_allowed1());
 }
 
 TEST_CASE("ia32_vmx_procbased_ctls2_rdseed_exiting")
@@ -5636,21 +7949,26 @@ TEST_CASE("ia32_vmx_procbased_ctls2_rdseed_exiting")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace intel_x64::msrs::ia32_vmx_procbased_ctls2;
     auto mask = intel_x64::msrs::ia32_vmx_procbased_ctls2::rdseed_exiting::mask;
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = mask;
-    CHECK(intel_x64::msrs::ia32_vmx_procbased_ctls2::rdseed_exiting::get());
+    g_msrs[addr] = mask;
+    CHECK(rdseed_exiting::is_enabled());
+    g_msrs[addr] = ~mask;
+    CHECK(rdseed_exiting::is_disabled());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = ~mask;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_procbased_ctls2::rdseed_exiting::get());
+    g_msrs[addr] = mask;
+    CHECK(rdseed_exiting::is_enabled(rdseed_exiting::mask));
+    g_msrs[addr] = ~mask;
+    CHECK(rdseed_exiting::is_disabled(~rdseed_exiting::mask));
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = mask | (mask << 32);
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_procbased_ctls2::rdseed_exiting::is_allowed0());
-    CHECK(intel_x64::msrs::ia32_vmx_procbased_ctls2::rdseed_exiting::is_allowed1());
+    g_msrs[addr] = mask | (mask << 32);
+    CHECK_FALSE(rdseed_exiting::is_allowed0());
+    CHECK(rdseed_exiting::is_allowed1());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = ~mask & ~(mask << 32);
-    CHECK(intel_x64::msrs::ia32_vmx_procbased_ctls2::rdseed_exiting::is_allowed0());
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_procbased_ctls2::rdseed_exiting::is_allowed1());
+    g_msrs[addr] = ~(mask | (mask << 32));
+    CHECK(rdseed_exiting::is_allowed0());
+    CHECK_FALSE(rdseed_exiting::is_allowed1());
 }
 
 TEST_CASE("ia32_vmx_procbased_ctls2_enable_pml")
@@ -5658,21 +7976,26 @@ TEST_CASE("ia32_vmx_procbased_ctls2_enable_pml")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace intel_x64::msrs::ia32_vmx_procbased_ctls2;
     auto mask = intel_x64::msrs::ia32_vmx_procbased_ctls2::enable_pml::mask;
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = mask;
-    CHECK(intel_x64::msrs::ia32_vmx_procbased_ctls2::enable_pml::get());
+    g_msrs[addr] = mask;
+    CHECK(enable_pml::is_enabled());
+    g_msrs[addr] = ~mask;
+    CHECK(enable_pml::is_disabled());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = ~mask;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_procbased_ctls2::enable_pml::get());
+    g_msrs[addr] = mask;
+    CHECK(enable_pml::is_enabled(enable_pml::mask));
+    g_msrs[addr] = ~mask;
+    CHECK(enable_pml::is_disabled(~enable_pml::mask));
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = mask | (mask << 32);
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_procbased_ctls2::enable_pml::is_allowed0());
-    CHECK(intel_x64::msrs::ia32_vmx_procbased_ctls2::enable_pml::is_allowed1());
+    g_msrs[addr] = mask | (mask << 32);
+    CHECK_FALSE(enable_pml::is_allowed0());
+    CHECK(enable_pml::is_allowed1());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = ~mask & ~(mask << 32);
-    CHECK(intel_x64::msrs::ia32_vmx_procbased_ctls2::enable_pml::is_allowed0());
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_procbased_ctls2::enable_pml::is_allowed1());
+    g_msrs[addr] = ~(mask | (mask << 32));
+    CHECK(enable_pml::is_allowed0());
+    CHECK_FALSE(enable_pml::is_allowed1());
 }
 
 TEST_CASE("ia32_vmx_procbased_ctls2_ept_violation_ve")
@@ -5680,21 +8003,26 @@ TEST_CASE("ia32_vmx_procbased_ctls2_ept_violation_ve")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace intel_x64::msrs::ia32_vmx_procbased_ctls2;
     auto mask = intel_x64::msrs::ia32_vmx_procbased_ctls2::ept_violation_ve::mask;
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = mask;
-    CHECK(intel_x64::msrs::ia32_vmx_procbased_ctls2::ept_violation_ve::get());
+    g_msrs[addr] = mask;
+    CHECK(ept_violation_ve::is_enabled());
+    g_msrs[addr] = ~mask;
+    CHECK(ept_violation_ve::is_disabled());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = ~mask;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_procbased_ctls2::ept_violation_ve::get());
+    g_msrs[addr] = mask;
+    CHECK(ept_violation_ve::is_enabled(ept_violation_ve::mask));
+    g_msrs[addr] = ~mask;
+    CHECK(ept_violation_ve::is_disabled(~ept_violation_ve::mask));
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = mask | (mask << 32);
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_procbased_ctls2::ept_violation_ve::is_allowed0());
-    CHECK(intel_x64::msrs::ia32_vmx_procbased_ctls2::ept_violation_ve::is_allowed1());
+    g_msrs[addr] = mask | (mask << 32);
+    CHECK_FALSE(ept_violation_ve::is_allowed0());
+    CHECK(ept_violation_ve::is_allowed1());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = ~mask & ~(mask << 32);
-    CHECK(intel_x64::msrs::ia32_vmx_procbased_ctls2::ept_violation_ve::is_allowed0());
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_procbased_ctls2::ept_violation_ve::is_allowed1());
+    g_msrs[addr] = ~(mask | (mask << 32));
+    CHECK(ept_violation_ve::is_allowed0());
+    CHECK_FALSE(ept_violation_ve::is_allowed1());
 }
 
 TEST_CASE("ia32_vmx_procbased_ctls2_pt_conceal_nonroot_operation")
@@ -5702,21 +8030,26 @@ TEST_CASE("ia32_vmx_procbased_ctls2_pt_conceal_nonroot_operation")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace intel_x64::msrs::ia32_vmx_procbased_ctls2;
     auto mask = intel_x64::msrs::ia32_vmx_procbased_ctls2::pt_conceal_nonroot_operation::mask;
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = mask;
-    CHECK(intel_x64::msrs::ia32_vmx_procbased_ctls2::pt_conceal_nonroot_operation::get());
+    g_msrs[addr] = mask;
+    CHECK(pt_conceal_nonroot_operation::is_enabled());
+    g_msrs[addr] = ~mask;
+    CHECK(pt_conceal_nonroot_operation::is_disabled());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = ~mask;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_procbased_ctls2::pt_conceal_nonroot_operation::get());
+    g_msrs[addr] = mask;
+    CHECK(pt_conceal_nonroot_operation::is_enabled(pt_conceal_nonroot_operation::mask));
+    g_msrs[addr] = ~mask;
+    CHECK(pt_conceal_nonroot_operation::is_disabled(~pt_conceal_nonroot_operation::mask));
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = mask | (mask << 32);
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_procbased_ctls2::pt_conceal_nonroot_operation::is_allowed0());
-    CHECK(intel_x64::msrs::ia32_vmx_procbased_ctls2::pt_conceal_nonroot_operation::is_allowed1());
+    g_msrs[addr] = mask | (mask << 32);
+    CHECK_FALSE(pt_conceal_nonroot_operation::is_allowed0());
+    CHECK(pt_conceal_nonroot_operation::is_allowed1());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = ~mask & ~(mask << 32);
-    CHECK(intel_x64::msrs::ia32_vmx_procbased_ctls2::pt_conceal_nonroot_operation::is_allowed0());
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_procbased_ctls2::pt_conceal_nonroot_operation::is_allowed1());
+    g_msrs[addr] = ~(mask | (mask << 32));
+    CHECK(pt_conceal_nonroot_operation::is_allowed0());
+    CHECK_FALSE(pt_conceal_nonroot_operation::is_allowed1());
 }
 
 TEST_CASE("ia32_vmx_procbased_ctls2_enable_xsaves_xrstors")
@@ -5724,21 +8057,26 @@ TEST_CASE("ia32_vmx_procbased_ctls2_enable_xsaves_xrstors")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace intel_x64::msrs::ia32_vmx_procbased_ctls2;
     auto mask = intel_x64::msrs::ia32_vmx_procbased_ctls2::enable_xsaves_xrstors::mask;
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = mask;
-    CHECK(intel_x64::msrs::ia32_vmx_procbased_ctls2::enable_xsaves_xrstors::get());
+    g_msrs[addr] = mask;
+    CHECK(enable_xsaves_xrstors::is_enabled());
+    g_msrs[addr] = ~mask;
+    CHECK(enable_xsaves_xrstors::is_disabled());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = ~mask;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_procbased_ctls2::enable_xsaves_xrstors::get());
+    g_msrs[addr] = mask;
+    CHECK(enable_xsaves_xrstors::is_enabled(enable_xsaves_xrstors::mask));
+    g_msrs[addr] = ~mask;
+    CHECK(enable_xsaves_xrstors::is_disabled(~enable_xsaves_xrstors::mask));
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = mask | (mask << 32);
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_procbased_ctls2::enable_xsaves_xrstors::is_allowed0());
-    CHECK(intel_x64::msrs::ia32_vmx_procbased_ctls2::enable_xsaves_xrstors::is_allowed1());
+    g_msrs[addr] = mask | (mask << 32);
+    CHECK_FALSE(enable_xsaves_xrstors::is_allowed0());
+    CHECK(enable_xsaves_xrstors::is_allowed1());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = ~mask & ~(mask << 32);
-    CHECK(intel_x64::msrs::ia32_vmx_procbased_ctls2::enable_xsaves_xrstors::is_allowed0());
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_procbased_ctls2::enable_xsaves_xrstors::is_allowed1());
+    g_msrs[addr] = ~(mask | (mask << 32));
+    CHECK(enable_xsaves_xrstors::is_allowed0());
+    CHECK_FALSE(enable_xsaves_xrstors::is_allowed1());
 }
 
 TEST_CASE("ia32_vmx_procbased_ctls2_ept_mode_based_control")
@@ -5746,21 +8084,26 @@ TEST_CASE("ia32_vmx_procbased_ctls2_ept_mode_based_control")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace intel_x64::msrs::ia32_vmx_procbased_ctls2;
     auto mask = intel_x64::msrs::ia32_vmx_procbased_ctls2::ept_mode_based_control::mask;
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = mask;
-    CHECK(intel_x64::msrs::ia32_vmx_procbased_ctls2::ept_mode_based_control::get());
+    g_msrs[addr] = mask;
+    CHECK(ept_mode_based_control::is_enabled());
+    g_msrs[addr] = ~mask;
+    CHECK(ept_mode_based_control::is_disabled());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = ~mask;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_procbased_ctls2::ept_mode_based_control::get());
+    g_msrs[addr] = mask;
+    CHECK(ept_mode_based_control::is_enabled(ept_mode_based_control::mask));
+    g_msrs[addr] = ~mask;
+    CHECK(ept_mode_based_control::is_disabled(~ept_mode_based_control::mask));
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = mask | (mask << 32);
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_procbased_ctls2::ept_mode_based_control::is_allowed0());
-    CHECK(intel_x64::msrs::ia32_vmx_procbased_ctls2::ept_mode_based_control::is_allowed1());
+    g_msrs[addr] = mask | (mask << 32);
+    CHECK_FALSE(ept_mode_based_control::is_allowed0());
+    CHECK(ept_mode_based_control::is_allowed1());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = ~mask & ~(mask << 32);
-    CHECK(intel_x64::msrs::ia32_vmx_procbased_ctls2::ept_mode_based_control::is_allowed0());
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_procbased_ctls2::ept_mode_based_control::is_allowed1());
+    g_msrs[addr] = ~(mask | (mask << 32));
+    CHECK(ept_mode_based_control::is_allowed0());
+    CHECK_FALSE(ept_mode_based_control::is_allowed1());
 }
 
 TEST_CASE("ia32_vmx_procbased_ctls2_use_tsc_scaling")
@@ -5768,21 +8111,26 @@ TEST_CASE("ia32_vmx_procbased_ctls2_use_tsc_scaling")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace intel_x64::msrs::ia32_vmx_procbased_ctls2;
     auto mask = intel_x64::msrs::ia32_vmx_procbased_ctls2::use_tsc_scaling::mask;
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = mask;
-    CHECK(intel_x64::msrs::ia32_vmx_procbased_ctls2::use_tsc_scaling::get());
+    g_msrs[addr] = mask;
+    CHECK(use_tsc_scaling::is_enabled());
+    g_msrs[addr] = ~mask;
+    CHECK(use_tsc_scaling::is_disabled());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = ~mask;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_procbased_ctls2::use_tsc_scaling::get());
+    g_msrs[addr] = mask;
+    CHECK(use_tsc_scaling::is_enabled(use_tsc_scaling::mask));
+    g_msrs[addr] = ~mask;
+    CHECK(use_tsc_scaling::is_disabled(~use_tsc_scaling::mask));
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = mask | (mask << 32);
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_procbased_ctls2::use_tsc_scaling::is_allowed0());
-    CHECK(intel_x64::msrs::ia32_vmx_procbased_ctls2::use_tsc_scaling::is_allowed1());
+    g_msrs[addr] = mask | (mask << 32);
+    CHECK_FALSE(use_tsc_scaling::is_allowed0());
+    CHECK(use_tsc_scaling::is_allowed1());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = ~mask & ~(mask << 32);
-    CHECK(intel_x64::msrs::ia32_vmx_procbased_ctls2::use_tsc_scaling::is_allowed0());
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_procbased_ctls2::use_tsc_scaling::is_allowed1());
+    g_msrs[addr] = ~(mask | (mask << 32));
+    CHECK(use_tsc_scaling::is_allowed0());
+    CHECK_FALSE(use_tsc_scaling::is_allowed1());
 }
 
 TEST_CASE("ia32_vmx_ept_vpid_cap")
@@ -5790,10 +8138,11 @@ TEST_CASE("ia32_vmx_ept_vpid_cap")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000048CUL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_vmx_ept_vpid_cap::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_vmx_ept_vpid_cap;
 
-    intel_x64::msrs::ia32_vmx_ept_vpid_cap::dump();
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_vmx_ept_vpid_cap_execute_only_translation")
@@ -5801,11 +8150,17 @@ TEST_CASE("ia32_vmx_ept_vpid_cap_execute_only_translation")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000048CUL] = 0x0000000000000001ULL;
-    CHECK(intel_x64::msrs::ia32_vmx_ept_vpid_cap::execute_only_translation::get());
+    using namespace intel_x64::msrs::ia32_vmx_ept_vpid_cap;
 
-    g_msrs[0x0000048CUL] = 0x0000000000000000ULL;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_ept_vpid_cap::execute_only_translation::get());
+    g_msrs[addr] = execute_only_translation::mask;
+    CHECK(execute_only_translation::is_enabled());
+    g_msrs[addr] = 0x0;
+    CHECK(execute_only_translation::is_disabled());
+
+    g_msrs[addr] = execute_only_translation::mask;
+    CHECK(execute_only_translation::is_enabled(execute_only_translation::mask));
+    g_msrs[addr] = 0x0;
+    CHECK(execute_only_translation::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_vmx_ept_vpid_cap_page_walk_length_of_4")
@@ -5813,11 +8168,17 @@ TEST_CASE("ia32_vmx_ept_vpid_cap_page_walk_length_of_4")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000048CUL] = 0x0000000000000040ULL;
-    CHECK(intel_x64::msrs::ia32_vmx_ept_vpid_cap::page_walk_length_of_4::get());
+    using namespace intel_x64::msrs::ia32_vmx_ept_vpid_cap;
 
-    g_msrs[0x0000048CUL] = 0x0000000000000000ULL;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_ept_vpid_cap::page_walk_length_of_4::get());
+    g_msrs[addr] = page_walk_length_of_4::mask;
+    CHECK(page_walk_length_of_4::is_enabled());
+    g_msrs[addr] = 0x0;
+    CHECK(page_walk_length_of_4::is_disabled());
+
+    g_msrs[addr] = page_walk_length_of_4::mask;
+    CHECK(page_walk_length_of_4::is_enabled(page_walk_length_of_4::mask));
+    g_msrs[addr] = 0x0;
+    CHECK(page_walk_length_of_4::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_vmx_ept_vpid_cap_memory_type_uncacheable_supported")
@@ -5825,11 +8186,17 @@ TEST_CASE("ia32_vmx_ept_vpid_cap_memory_type_uncacheable_supported")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000048CUL] = 0x0000000000000100ULL;
-    CHECK(intel_x64::msrs::ia32_vmx_ept_vpid_cap::memory_type_uncacheable_supported::get());
+    using namespace intel_x64::msrs::ia32_vmx_ept_vpid_cap;
 
-    g_msrs[0x0000048CUL] = 0x0000000000000000ULL;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_ept_vpid_cap::memory_type_uncacheable_supported::get());
+    g_msrs[addr] = memory_type_uncacheable_supported::mask;
+    CHECK(memory_type_uncacheable_supported::is_enabled());
+    g_msrs[addr] = 0x0;
+    CHECK(memory_type_uncacheable_supported::is_disabled());
+
+    g_msrs[addr] = memory_type_uncacheable_supported::mask;
+    CHECK(memory_type_uncacheable_supported::is_enabled(memory_type_uncacheable_supported::mask));
+    g_msrs[addr] = 0x0;
+    CHECK(memory_type_uncacheable_supported::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_vmx_ept_vpid_cap_memory_type_write_back_supported")
@@ -5837,11 +8204,17 @@ TEST_CASE("ia32_vmx_ept_vpid_cap_memory_type_write_back_supported")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000048CUL] = 0x0000000000004000ULL;
-    CHECK(intel_x64::msrs::ia32_vmx_ept_vpid_cap::memory_type_write_back_supported::get());
+    using namespace intel_x64::msrs::ia32_vmx_ept_vpid_cap;
 
-    g_msrs[0x0000048CUL] = 0x0000000000000000ULL;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_ept_vpid_cap::memory_type_write_back_supported::get());
+    g_msrs[addr] = memory_type_write_back_supported::mask;
+    CHECK(memory_type_write_back_supported::is_enabled());
+    g_msrs[addr] = 0x0;
+    CHECK(memory_type_write_back_supported::is_disabled());
+
+    g_msrs[addr] = memory_type_write_back_supported::mask;
+    CHECK(memory_type_write_back_supported::is_enabled(memory_type_write_back_supported::mask));
+    g_msrs[addr] = 0x0;
+    CHECK(memory_type_write_back_supported::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_vmx_ept_vpid_cap_pde_2mb_support")
@@ -5849,11 +8222,17 @@ TEST_CASE("ia32_vmx_ept_vpid_cap_pde_2mb_support")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000048CUL] = 0x0000000000010000ULL;
-    CHECK(intel_x64::msrs::ia32_vmx_ept_vpid_cap::pde_2mb_support::get());
+    using namespace intel_x64::msrs::ia32_vmx_ept_vpid_cap;
 
-    g_msrs[0x0000048CUL] = 0x0000000000000000ULL;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_ept_vpid_cap::pde_2mb_support::get());
+    g_msrs[addr] = pde_2mb_support::mask;
+    CHECK(pde_2mb_support::is_enabled());
+    g_msrs[addr] = 0x0;
+    CHECK(pde_2mb_support::is_disabled());
+
+    g_msrs[addr] = pde_2mb_support::mask;
+    CHECK(pde_2mb_support::is_enabled(pde_2mb_support::mask));
+    g_msrs[addr] = 0x0;
+    CHECK(pde_2mb_support::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_vmx_ept_vpid_cap_pdpte_1gb_support")
@@ -5861,11 +8240,17 @@ TEST_CASE("ia32_vmx_ept_vpid_cap_pdpte_1gb_support")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000048CUL] = 0x0000000000020000ULL;
-    CHECK(intel_x64::msrs::ia32_vmx_ept_vpid_cap::pdpte_1gb_support::get());
+    using namespace intel_x64::msrs::ia32_vmx_ept_vpid_cap;
 
-    g_msrs[0x0000048CUL] = 0x0000000000000000ULL;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_ept_vpid_cap::pdpte_1gb_support::get());
+    g_msrs[addr] = pdpte_1gb_support::mask;
+    CHECK(pdpte_1gb_support::is_enabled());
+    g_msrs[addr] = 0x0;
+    CHECK(pdpte_1gb_support::is_disabled());
+
+    g_msrs[addr] = pdpte_1gb_support::mask;
+    CHECK(pdpte_1gb_support::is_enabled(pdpte_1gb_support::mask));
+    g_msrs[addr] = 0x0;
+    CHECK(pdpte_1gb_support::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_vmx_ept_vpid_cap_invept_support")
@@ -5873,11 +8258,17 @@ TEST_CASE("ia32_vmx_ept_vpid_cap_invept_support")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000048CUL] = 0x0000000000100000ULL;
-    CHECK(intel_x64::msrs::ia32_vmx_ept_vpid_cap::invept_support::get());
+    using namespace intel_x64::msrs::ia32_vmx_ept_vpid_cap;
 
-    g_msrs[0x0000048CUL] = 0x0000000000000000ULL;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_ept_vpid_cap::invept_support::get());
+    g_msrs[addr] = invept_support::mask;
+    CHECK(invept_support::is_enabled());
+    g_msrs[addr] = 0x0;
+    CHECK(invept_support::is_disabled());
+
+    g_msrs[addr] = invept_support::mask;
+    CHECK(invept_support::is_enabled(invept_support::mask));
+    g_msrs[addr] = 0x0;
+    CHECK(invept_support::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_vmx_ept_vpid_cap_accessed_dirty_support")
@@ -5885,11 +8276,17 @@ TEST_CASE("ia32_vmx_ept_vpid_cap_accessed_dirty_support")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000048CUL] = 0x0000000000200000ULL;
-    CHECK(intel_x64::msrs::ia32_vmx_ept_vpid_cap::accessed_dirty_support::get());
+    using namespace intel_x64::msrs::ia32_vmx_ept_vpid_cap;
 
-    g_msrs[0x0000048CUL] = 0x0000000000000000ULL;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_ept_vpid_cap::accessed_dirty_support::get());
+    g_msrs[addr] = accessed_dirty_support::mask;
+    CHECK(accessed_dirty_support::is_enabled());
+    g_msrs[addr] = 0x0;
+    CHECK(accessed_dirty_support::is_disabled());
+
+    g_msrs[addr] = accessed_dirty_support::mask;
+    CHECK(accessed_dirty_support::is_enabled(accessed_dirty_support::mask));
+    g_msrs[addr] = 0x0;
+    CHECK(accessed_dirty_support::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_vmx_ept_vpid_cap_invept_single_context_support")
@@ -5897,23 +8294,17 @@ TEST_CASE("ia32_vmx_ept_vpid_cap_invept_single_context_support")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000048CUL] = 0x0000000002000000ULL;
-    CHECK(intel_x64::msrs::ia32_vmx_ept_vpid_cap::invept_single_context_support::get());
+    using namespace intel_x64::msrs::ia32_vmx_ept_vpid_cap;
 
-    g_msrs[0x0000048CUL] = 0x0000000000000000ULL;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_ept_vpid_cap::invept_single_context_support::get());
-}
+    g_msrs[addr] = invept_single_context_support::mask;
+    CHECK(invept_single_context_support::is_enabled());
+    g_msrs[addr] = 0x0;
+    CHECK(invept_single_context_support::is_disabled());
 
-TEST_CASE("ia32_vmx_ept_vpid_cap_invept_all_context_support")
-{
-    MockRepository mocks;
-    setup_intrinsics(mocks);
-
-    g_msrs[0x0000048CUL] = 0x0000000004000000ULL;
-    CHECK(intel_x64::msrs::ia32_vmx_ept_vpid_cap::invept_all_context_support::get());
-
-    g_msrs[0x0000048CUL] = 0x0000000000000000ULL;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_ept_vpid_cap::invept_all_context_support::get());
+    g_msrs[addr] = invept_single_context_support::mask;
+    CHECK(invept_single_context_support::is_enabled(invept_single_context_support::mask));
+    g_msrs[addr] = 0x0;
+    CHECK(invept_single_context_support::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_vmx_ept_vpid_cap_invvpid_support")
@@ -5921,11 +8312,17 @@ TEST_CASE("ia32_vmx_ept_vpid_cap_invvpid_support")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000048CUL] = 0x0000000100000000ULL;
-    CHECK(intel_x64::msrs::ia32_vmx_ept_vpid_cap::invvpid_support::get());
+    using namespace intel_x64::msrs::ia32_vmx_ept_vpid_cap;
 
-    g_msrs[0x0000048CUL] = 0x0000000000000000ULL;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_ept_vpid_cap::invvpid_support::get());
+    g_msrs[addr] = invvpid_support::mask;
+    CHECK(invvpid_support::is_enabled());
+    g_msrs[addr] = 0x0;
+    CHECK(invvpid_support::is_disabled());
+
+    g_msrs[addr] = invvpid_support::mask;
+    CHECK(invvpid_support::is_enabled(invvpid_support::mask));
+    g_msrs[addr] = 0x0;
+    CHECK(invvpid_support::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_vmx_ept_vpid_cap_invvpid_individual_address_support")
@@ -5933,11 +8330,17 @@ TEST_CASE("ia32_vmx_ept_vpid_cap_invvpid_individual_address_support")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000048CUL] = 0x0000010000000000ULL;
-    CHECK(intel_x64::msrs::ia32_vmx_ept_vpid_cap::invvpid_individual_address_support::get());
+    using namespace intel_x64::msrs::ia32_vmx_ept_vpid_cap;
 
-    g_msrs[0x0000048CUL] = 0x0000000000000000ULL;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_ept_vpid_cap::invvpid_individual_address_support::get());
+    g_msrs[addr] = invvpid_individual_address_support::mask;
+    CHECK(invvpid_individual_address_support::is_enabled());
+    g_msrs[addr] = 0x0;
+    CHECK(invvpid_individual_address_support::is_disabled());
+
+    g_msrs[addr] = invvpid_individual_address_support::mask;
+    CHECK(invvpid_individual_address_support::is_enabled(invvpid_individual_address_support::mask));
+    g_msrs[addr] = 0x0;
+    CHECK(invvpid_individual_address_support::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_vmx_ept_vpid_cap_invvpid_single_context_support")
@@ -5945,11 +8348,17 @@ TEST_CASE("ia32_vmx_ept_vpid_cap_invvpid_single_context_support")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000048CUL] = 0x0000020000000000ULL;
-    CHECK(intel_x64::msrs::ia32_vmx_ept_vpid_cap::invvpid_single_context_support::get());
+    using namespace intel_x64::msrs::ia32_vmx_ept_vpid_cap;
 
-    g_msrs[0x0000048CUL] = 0x0000000000000000ULL;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_ept_vpid_cap::invvpid_single_context_support::get());
+    g_msrs[addr] = invvpid_single_context_support::mask;
+    CHECK(invvpid_single_context_support::is_enabled());
+    g_msrs[addr] = 0x0;
+    CHECK(invvpid_single_context_support::is_disabled());
+
+    g_msrs[addr] = invvpid_single_context_support::mask;
+    CHECK(invvpid_single_context_support::is_enabled(invvpid_single_context_support::mask));
+    g_msrs[addr] = 0x0;
+    CHECK(invvpid_single_context_support::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_vmx_ept_vpid_cap_invvpid_all_context_support")
@@ -5957,11 +8366,17 @@ TEST_CASE("ia32_vmx_ept_vpid_cap_invvpid_all_context_support")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000048CUL] = 0x0000040000000000ULL;
-    CHECK(intel_x64::msrs::ia32_vmx_ept_vpid_cap::invvpid_all_context_support::get());
+    using namespace intel_x64::msrs::ia32_vmx_ept_vpid_cap;
 
-    g_msrs[0x0000048CUL] = 0x0000000000000000ULL;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_ept_vpid_cap::invvpid_all_context_support::get());
+    g_msrs[addr] = invvpid_all_context_support::mask;
+    CHECK(invvpid_all_context_support::is_enabled());
+    g_msrs[addr] = 0x0;
+    CHECK(invvpid_all_context_support::is_disabled());
+
+    g_msrs[addr] = invvpid_all_context_support::mask;
+    CHECK(invvpid_all_context_support::is_enabled(invvpid_all_context_support::mask));
+    g_msrs[addr] = 0x0;
+    CHECK(invvpid_all_context_support::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_vmx_ept_vpid_cap_invvpid_single_context_retaining_globals_support")
@@ -5969,11 +8384,17 @@ TEST_CASE("ia32_vmx_ept_vpid_cap_invvpid_single_context_retaining_globals_suppor
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000048CUL] = 0x0000080000000000ULL;
-    CHECK(intel_x64::msrs::ia32_vmx_ept_vpid_cap::invvpid_single_context_retaining_globals_support::get());
+    using namespace intel_x64::msrs::ia32_vmx_ept_vpid_cap;
 
-    g_msrs[0x0000048CUL] = 0x0000000000000000ULL;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_ept_vpid_cap::invvpid_single_context_retaining_globals_support::get());
+    g_msrs[addr] = invvpid_single_context_retaining_globals_support::mask;
+    CHECK(invvpid_single_context_retaining_globals_support::is_enabled());
+    g_msrs[addr] = 0x0;
+    CHECK(invvpid_single_context_retaining_globals_support::is_disabled());
+
+    g_msrs[addr] = invvpid_single_context_retaining_globals_support::mask;
+    CHECK(invvpid_single_context_retaining_globals_support::is_enabled(invvpid_single_context_retaining_globals_support::mask));
+    g_msrs[addr] = 0x0;
+    CHECK(invvpid_single_context_retaining_globals_support::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_vmx_true_pinbased_ctls")
@@ -5981,27 +8402,29 @@ TEST_CASE("ia32_vmx_true_pinbased_ctls")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_pinbased_ctls::addr] = 0x00000000FFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_vmx_true_pinbased_ctls::get() == 0x00000000FFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_vmx_true_pinbased_ctls;
 
-    intel_x64::msrs::ia32_vmx_true_pinbased_ctls::dump();
+    g_msrs[addr] = 0x00000000FFFFFFFFULL;
+    CHECK(get() == 0x00000000FFFFFFFFULL);
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_pinbased_ctls::addr] = 0x0UL;
-    CHECK(intel_x64::msrs::ia32_vmx_true_pinbased_ctls::get() == 0x0UL);
+    dump(0);
 
-    intel_x64::msrs::ia32_vmx_true_pinbased_ctls::dump();
+    g_msrs[addr] = 0x0UL;
+    CHECK(get() == 0x0UL);
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_pinbased_ctls::addr] = 0x00000000FFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_vmx_true_pinbased_ctls::allowed0() == 0xFFFFFFFFUL);
-    CHECK(intel_x64::msrs::ia32_vmx_true_pinbased_ctls::allowed1() == 0x00000000UL);
+    dump(0);
 
-    intel_x64::msrs::ia32_vmx_true_pinbased_ctls::dump();
+    g_msrs[addr] = 0x00000000FFFFFFFFULL;
+    CHECK(allowed0() == 0xFFFFFFFFUL);
+    CHECK(allowed1() == 0x00000000UL);
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_pinbased_ctls::addr] = 0xFFFFFFFF00000000ULL;
-    CHECK(intel_x64::msrs::ia32_vmx_true_pinbased_ctls::allowed0() == 0x00000000UL);
-    CHECK(intel_x64::msrs::ia32_vmx_true_pinbased_ctls::allowed1() == 0xFFFFFFFFUL);
+    dump(0);
 
-    intel_x64::msrs::ia32_vmx_true_pinbased_ctls::dump();
+    g_msrs[addr] = 0xFFFFFFFF00000000ULL;
+    CHECK(allowed0() == 0x00000000UL);
+    CHECK(allowed1() == 0xFFFFFFFFUL);
+
+    dump(0);
 }
 
 TEST_CASE("ia32_vmx_true_pinbased_ctls_external_interrupt_exiting")
@@ -6009,21 +8432,26 @@ TEST_CASE("ia32_vmx_true_pinbased_ctls_external_interrupt_exiting")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    auto mask = intel_x64::msrs::ia32_vmx_true_pinbased_ctls::external_interrupt_exiting::mask;
+    using namespace intel_x64::msrs::ia32_vmx_true_pinbased_ctls;
+    auto mask = external_interrupt_exiting::mask;
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_pinbased_ctls::addr] = mask;
-    CHECK(intel_x64::msrs::ia32_vmx_true_pinbased_ctls::external_interrupt_exiting::get());
+    g_msrs[addr] = mask;
+    CHECK(external_interrupt_exiting::is_enabled());
+    g_msrs[addr] = ~mask;
+    CHECK(external_interrupt_exiting::is_disabled());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_pinbased_ctls::addr] = ~mask;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_pinbased_ctls::external_interrupt_exiting::get());
+    g_msrs[addr] = mask;
+    CHECK(external_interrupt_exiting::is_enabled(external_interrupt_exiting::mask));
+    g_msrs[addr] = ~mask;
+    CHECK(external_interrupt_exiting::is_disabled(~external_interrupt_exiting::mask));
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_pinbased_ctls::addr] = mask | (mask << 32);
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_pinbased_ctls::external_interrupt_exiting::is_allowed0());
-    CHECK(intel_x64::msrs::ia32_vmx_true_pinbased_ctls::external_interrupt_exiting::is_allowed1());
+    g_msrs[addr] = mask | (mask << 32);
+    CHECK_FALSE(external_interrupt_exiting::is_allowed0());
+    CHECK(external_interrupt_exiting::is_allowed1());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_pinbased_ctls::addr] = ~mask & ~(mask << 32);
-    CHECK(intel_x64::msrs::ia32_vmx_true_pinbased_ctls::external_interrupt_exiting::is_allowed0());
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_pinbased_ctls::external_interrupt_exiting::is_allowed1());
+    g_msrs[addr] = ~(mask | (mask << 32));
+    CHECK(external_interrupt_exiting::is_allowed0());
+    CHECK_FALSE(external_interrupt_exiting::is_allowed1());
 }
 
 TEST_CASE("ia32_vmx_true_pinbased_ctls_nmi_exiting")
@@ -6031,21 +8459,26 @@ TEST_CASE("ia32_vmx_true_pinbased_ctls_nmi_exiting")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    auto mask = intel_x64::msrs::ia32_vmx_true_pinbased_ctls::nmi_exiting::mask;
+    using namespace intel_x64::msrs::ia32_vmx_true_pinbased_ctls;
+    auto mask = nmi_exiting::mask;
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_pinbased_ctls::addr] = mask;
-    CHECK(intel_x64::msrs::ia32_vmx_true_pinbased_ctls::nmi_exiting::get());
+    g_msrs[addr] = mask;
+    CHECK(nmi_exiting::is_enabled());
+    g_msrs[addr] = ~mask;
+    CHECK(nmi_exiting::is_disabled());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_pinbased_ctls::addr] = ~mask;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_pinbased_ctls::nmi_exiting::get());
+    g_msrs[addr] = mask;
+    CHECK(nmi_exiting::is_enabled(nmi_exiting::mask));
+    g_msrs[addr] = ~mask;
+    CHECK(nmi_exiting::is_disabled(~nmi_exiting::mask));
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_pinbased_ctls::addr] = mask | (mask << 32);
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_pinbased_ctls::nmi_exiting::is_allowed0());
-    CHECK(intel_x64::msrs::ia32_vmx_true_pinbased_ctls::nmi_exiting::is_allowed1());
+    g_msrs[addr] = mask | (mask << 32);
+    CHECK_FALSE(nmi_exiting::is_allowed0());
+    CHECK(nmi_exiting::is_allowed1());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_pinbased_ctls::addr] = ~mask & ~(mask << 32);
-    CHECK(intel_x64::msrs::ia32_vmx_true_pinbased_ctls::nmi_exiting::is_allowed0());
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_pinbased_ctls::nmi_exiting::is_allowed1());
+    g_msrs[addr] = ~(mask | (mask << 32));
+    CHECK(nmi_exiting::is_allowed0());
+    CHECK_FALSE(nmi_exiting::is_allowed1());
 }
 
 TEST_CASE("ia32_vmx_true_pinbased_ctls_virtual_nmis")
@@ -6053,21 +8486,26 @@ TEST_CASE("ia32_vmx_true_pinbased_ctls_virtual_nmis")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    auto mask = intel_x64::msrs::ia32_vmx_true_pinbased_ctls::virtual_nmis::mask;
+    using namespace intel_x64::msrs::ia32_vmx_true_pinbased_ctls;
+    auto mask = virtual_nmis::mask;
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_pinbased_ctls::addr] = mask;
-    CHECK(intel_x64::msrs::ia32_vmx_true_pinbased_ctls::virtual_nmis::get());
+    g_msrs[addr] = mask;
+    CHECK(virtual_nmis::is_enabled());
+    g_msrs[addr] = ~mask;
+    CHECK(virtual_nmis::is_disabled());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_pinbased_ctls::addr] = ~mask;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_pinbased_ctls::virtual_nmis::get());
+    g_msrs[addr] = mask;
+    CHECK(virtual_nmis::is_enabled(virtual_nmis::mask));
+    g_msrs[addr] = ~mask;
+    CHECK(virtual_nmis::is_disabled(~virtual_nmis::mask));
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_pinbased_ctls::addr] = mask | (mask << 32);
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_pinbased_ctls::virtual_nmis::is_allowed0());
-    CHECK(intel_x64::msrs::ia32_vmx_true_pinbased_ctls::virtual_nmis::is_allowed1());
+    g_msrs[addr] = mask | (mask << 32);
+    CHECK_FALSE(virtual_nmis::is_allowed0());
+    CHECK(virtual_nmis::is_allowed1());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_pinbased_ctls::addr] = ~mask & ~(mask << 32);
-    CHECK(intel_x64::msrs::ia32_vmx_true_pinbased_ctls::virtual_nmis::is_allowed0());
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_pinbased_ctls::virtual_nmis::is_allowed1());
+    g_msrs[addr] = ~(mask | (mask << 32));
+    CHECK(virtual_nmis::is_allowed0());
+    CHECK_FALSE(virtual_nmis::is_allowed1());
 }
 
 TEST_CASE("ia32_vmx_true_pinbased_ctls_activate_vmx_preemption_timer")
@@ -6075,21 +8513,26 @@ TEST_CASE("ia32_vmx_true_pinbased_ctls_activate_vmx_preemption_timer")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    auto mask = intel_x64::msrs::ia32_vmx_true_pinbased_ctls::activate_vmx_preemption_timer::mask;
+    using namespace intel_x64::msrs::ia32_vmx_true_pinbased_ctls;
+    auto mask = activate_vmx_preemption_timer::mask;
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_pinbased_ctls::addr] = mask;
-    CHECK(intel_x64::msrs::ia32_vmx_true_pinbased_ctls::activate_vmx_preemption_timer::get());
+    g_msrs[addr] = mask;
+    CHECK(activate_vmx_preemption_timer::is_enabled());
+    g_msrs[addr] = ~mask;
+    CHECK(activate_vmx_preemption_timer::is_disabled());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_pinbased_ctls::addr] = ~mask;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_pinbased_ctls::activate_vmx_preemption_timer::get());
+    g_msrs[addr] = mask;
+    CHECK(activate_vmx_preemption_timer::is_enabled(activate_vmx_preemption_timer::mask));
+    g_msrs[addr] = ~mask;
+    CHECK(activate_vmx_preemption_timer::is_disabled(~activate_vmx_preemption_timer::mask));
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_pinbased_ctls::addr] = mask | (mask << 32);
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_pinbased_ctls::activate_vmx_preemption_timer::is_allowed0());
-    CHECK(intel_x64::msrs::ia32_vmx_true_pinbased_ctls::activate_vmx_preemption_timer::is_allowed1());
+    g_msrs[addr] = mask | (mask << 32);
+    CHECK_FALSE(activate_vmx_preemption_timer::is_allowed0());
+    CHECK(activate_vmx_preemption_timer::is_allowed1());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_pinbased_ctls::addr] = ~mask & ~(mask << 32);
-    CHECK(intel_x64::msrs::ia32_vmx_true_pinbased_ctls::activate_vmx_preemption_timer::is_allowed0());
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_pinbased_ctls::activate_vmx_preemption_timer::is_allowed1());
+    g_msrs[addr] = ~(mask | (mask << 32));
+    CHECK(activate_vmx_preemption_timer::is_allowed0());
+    CHECK_FALSE(activate_vmx_preemption_timer::is_allowed1());
 }
 
 TEST_CASE("ia32_vmx_true_pinbased_ctls_process_posted_interrupts")
@@ -6097,21 +8540,26 @@ TEST_CASE("ia32_vmx_true_pinbased_ctls_process_posted_interrupts")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    auto mask = intel_x64::msrs::ia32_vmx_true_pinbased_ctls::process_posted_interrupts::mask;
+    using namespace intel_x64::msrs::ia32_vmx_true_pinbased_ctls;
+    auto mask = process_posted_interrupts::mask;
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_pinbased_ctls::addr] = mask;
-    CHECK(intel_x64::msrs::ia32_vmx_true_pinbased_ctls::process_posted_interrupts::get());
+    g_msrs[addr] = mask;
+    CHECK(process_posted_interrupts::is_enabled());
+    g_msrs[addr] = ~mask;
+    CHECK(process_posted_interrupts::is_disabled());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_pinbased_ctls::addr] = ~mask;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_pinbased_ctls::process_posted_interrupts::get());
+    g_msrs[addr] = mask;
+    CHECK(process_posted_interrupts::is_enabled(process_posted_interrupts::mask));
+    g_msrs[addr] = ~mask;
+    CHECK(process_posted_interrupts::is_disabled(~process_posted_interrupts::mask));
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_pinbased_ctls::addr] = mask | (mask << 32);
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_pinbased_ctls::process_posted_interrupts::is_allowed0());
-    CHECK(intel_x64::msrs::ia32_vmx_true_pinbased_ctls::process_posted_interrupts::is_allowed1());
+    g_msrs[addr] = mask | (mask << 32);
+    CHECK_FALSE(process_posted_interrupts::is_allowed0());
+    CHECK(process_posted_interrupts::is_allowed1());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_pinbased_ctls::addr] = ~mask & ~(mask << 32);
-    CHECK(intel_x64::msrs::ia32_vmx_true_pinbased_ctls::process_posted_interrupts::is_allowed0());
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_pinbased_ctls::process_posted_interrupts::is_allowed1());
+    g_msrs[addr] = ~(mask | (mask << 32));
+    CHECK(process_posted_interrupts::is_allowed0());
+    CHECK_FALSE(process_posted_interrupts::is_allowed1());
 }
 
 TEST_CASE("ia32_vmx_true_procbased_ctls")
@@ -6119,27 +8567,29 @@ TEST_CASE("ia32_vmx_true_procbased_ctls")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = 0x00000000FFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_vmx_true_procbased_ctls::get() == 0x00000000FFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_vmx_true_procbased_ctls;
 
-    intel_x64::msrs::ia32_vmx_true_procbased_ctls::dump();
+    g_msrs[addr] = 0x00000000FFFFFFFFULL;
+    CHECK(get() == 0x00000000FFFFFFFFULL);
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = 0x0UL;
-    CHECK(intel_x64::msrs::ia32_vmx_true_procbased_ctls::get() == 0x0UL);
+    dump(0);
 
-    intel_x64::msrs::ia32_vmx_true_procbased_ctls::dump();
+    g_msrs[addr] = 0x0UL;
+    CHECK(get() == 0x0UL);
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = 0x00000000FFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_vmx_true_procbased_ctls::allowed0() == 0xFFFFFFFFUL);
-    CHECK(intel_x64::msrs::ia32_vmx_true_procbased_ctls::allowed1() == 0x00000000UL);
+    dump(0);
 
-    intel_x64::msrs::ia32_vmx_true_procbased_ctls::dump();
+    g_msrs[addr] = 0x00000000FFFFFFFFULL;
+    CHECK(allowed0() == 0xFFFFFFFFUL);
+    CHECK(allowed1() == 0x00000000UL);
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = 0xFFFFFFFF00000000ULL;
-    CHECK(intel_x64::msrs::ia32_vmx_true_procbased_ctls::allowed0() == 0x00000000UL);
-    CHECK(intel_x64::msrs::ia32_vmx_true_procbased_ctls::allowed1() == 0xFFFFFFFFUL);
+    dump(0);
 
-    intel_x64::msrs::ia32_vmx_true_procbased_ctls::dump();
+    g_msrs[addr] = 0xFFFFFFFF00000000ULL;
+    CHECK(allowed0() == 0x00000000UL);
+    CHECK(allowed1() == 0xFFFFFFFFUL);
+
+    dump(0);
 }
 
 TEST_CASE("ia32_vmx_true_procbased_ctls_interrupt_window_exiting")
@@ -6147,21 +8597,26 @@ TEST_CASE("ia32_vmx_true_procbased_ctls_interrupt_window_exiting")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    auto mask = intel_x64::msrs::ia32_vmx_true_procbased_ctls::interrupt_window_exiting::mask;
+    using namespace intel_x64::msrs::ia32_vmx_true_procbased_ctls;
+    auto mask = interrupt_window_exiting::mask;
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = mask;
-    CHECK(intel_x64::msrs::ia32_vmx_true_procbased_ctls::interrupt_window_exiting::get());
+    g_msrs[addr] = mask;
+    CHECK(interrupt_window_exiting::is_enabled());
+    g_msrs[addr] = ~mask;
+    CHECK(interrupt_window_exiting::is_disabled());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = ~mask;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_procbased_ctls::interrupt_window_exiting::get());
+    g_msrs[addr] = mask;
+    CHECK(interrupt_window_exiting::is_enabled(interrupt_window_exiting::mask));
+    g_msrs[addr] = ~mask;
+    CHECK(interrupt_window_exiting::is_disabled(~interrupt_window_exiting::mask));
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = mask | (mask << 32);
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_procbased_ctls::interrupt_window_exiting::is_allowed0());
-    CHECK(intel_x64::msrs::ia32_vmx_true_procbased_ctls::interrupt_window_exiting::is_allowed1());
+    g_msrs[addr] = mask | (mask << 32);
+    CHECK_FALSE(interrupt_window_exiting::is_allowed0());
+    CHECK(interrupt_window_exiting::is_allowed1());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = ~mask & ~(mask << 32);
-    CHECK(intel_x64::msrs::ia32_vmx_true_procbased_ctls::interrupt_window_exiting::is_allowed0());
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_procbased_ctls::interrupt_window_exiting::is_allowed1());
+    g_msrs[addr] = ~(mask | (mask << 32));
+    CHECK(interrupt_window_exiting::is_allowed0());
+    CHECK_FALSE(interrupt_window_exiting::is_allowed1());
 }
 
 TEST_CASE("ia32_vmx_true_procbased_ctls_use_tsc_offsetting")
@@ -6169,21 +8624,26 @@ TEST_CASE("ia32_vmx_true_procbased_ctls_use_tsc_offsetting")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    auto mask = intel_x64::msrs::ia32_vmx_true_procbased_ctls::use_tsc_offsetting::mask;
+    using namespace intel_x64::msrs::ia32_vmx_true_procbased_ctls;
+    auto mask = use_tsc_offsetting::mask;
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = mask;
-    CHECK(intel_x64::msrs::ia32_vmx_true_procbased_ctls::use_tsc_offsetting::get());
+    g_msrs[addr] = mask;
+    CHECK(use_tsc_offsetting::is_enabled());
+    g_msrs[addr] = ~mask;
+    CHECK(use_tsc_offsetting::is_disabled());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = ~mask;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_procbased_ctls::use_tsc_offsetting::get());
+    g_msrs[addr] = mask;
+    CHECK(use_tsc_offsetting::is_enabled(use_tsc_offsetting::mask));
+    g_msrs[addr] = ~mask;
+    CHECK(use_tsc_offsetting::is_disabled(~use_tsc_offsetting::mask));
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = mask | (mask << 32);
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_procbased_ctls::use_tsc_offsetting::is_allowed0());
-    CHECK(intel_x64::msrs::ia32_vmx_true_procbased_ctls::use_tsc_offsetting::is_allowed1());
+    g_msrs[addr] = mask | (mask << 32);
+    CHECK_FALSE(use_tsc_offsetting::is_allowed0());
+    CHECK(use_tsc_offsetting::is_allowed1());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = ~mask & ~(mask << 32);
-    CHECK(intel_x64::msrs::ia32_vmx_true_procbased_ctls::use_tsc_offsetting::is_allowed0());
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_procbased_ctls::use_tsc_offsetting::is_allowed1());
+    g_msrs[addr] = ~(mask | (mask << 32));
+    CHECK(use_tsc_offsetting::is_allowed0());
+    CHECK_FALSE(use_tsc_offsetting::is_allowed1());
 }
 
 TEST_CASE("ia32_vmx_true_procbased_ctls_hlt_exiting")
@@ -6191,21 +8651,26 @@ TEST_CASE("ia32_vmx_true_procbased_ctls_hlt_exiting")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    auto mask = intel_x64::msrs::ia32_vmx_true_procbased_ctls::hlt_exiting::mask;
+    using namespace intel_x64::msrs::ia32_vmx_true_procbased_ctls;
+    auto mask = hlt_exiting::mask;
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = mask;
-    CHECK(intel_x64::msrs::ia32_vmx_true_procbased_ctls::hlt_exiting::get());
+    g_msrs[addr] = mask;
+    CHECK(hlt_exiting::is_enabled());
+    g_msrs[addr] = ~mask;
+    CHECK(hlt_exiting::is_disabled());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = ~mask;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_procbased_ctls::hlt_exiting::get());
+    g_msrs[addr] = mask;
+    CHECK(hlt_exiting::is_enabled(hlt_exiting::mask));
+    g_msrs[addr] = ~mask;
+    CHECK(hlt_exiting::is_disabled(~hlt_exiting::mask));
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = mask | (mask << 32);
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_procbased_ctls::hlt_exiting::is_allowed0());
-    CHECK(intel_x64::msrs::ia32_vmx_true_procbased_ctls::hlt_exiting::is_allowed1());
+    g_msrs[addr] = mask | (mask << 32);
+    CHECK_FALSE(hlt_exiting::is_allowed0());
+    CHECK(hlt_exiting::is_allowed1());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = ~mask & ~(mask << 32);
-    CHECK(intel_x64::msrs::ia32_vmx_true_procbased_ctls::hlt_exiting::is_allowed0());
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_procbased_ctls::hlt_exiting::is_allowed1());
+    g_msrs[addr] = ~(mask | (mask << 32));
+    CHECK(hlt_exiting::is_allowed0());
+    CHECK_FALSE(hlt_exiting::is_allowed1());
 }
 
 TEST_CASE("ia32_vmx_true_procbased_ctls_invlpg_exiting")
@@ -6213,21 +8678,26 @@ TEST_CASE("ia32_vmx_true_procbased_ctls_invlpg_exiting")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    auto mask = intel_x64::msrs::ia32_vmx_true_procbased_ctls::invlpg_exiting::mask;
+    using namespace intel_x64::msrs::ia32_vmx_true_procbased_ctls;
+    auto mask = invlpg_exiting::mask;
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = mask;
-    CHECK(intel_x64::msrs::ia32_vmx_true_procbased_ctls::invlpg_exiting::get());
+    g_msrs[addr] = mask;
+    CHECK(invlpg_exiting::is_enabled());
+    g_msrs[addr] = ~mask;
+    CHECK(invlpg_exiting::is_disabled());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = ~mask;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_procbased_ctls::invlpg_exiting::get());
+    g_msrs[addr] = mask;
+    CHECK(invlpg_exiting::is_enabled(invlpg_exiting::mask));
+    g_msrs[addr] = ~mask;
+    CHECK(invlpg_exiting::is_disabled(~invlpg_exiting::mask));
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = mask | (mask << 32);
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_procbased_ctls::invlpg_exiting::is_allowed0());
-    CHECK(intel_x64::msrs::ia32_vmx_true_procbased_ctls::invlpg_exiting::is_allowed1());
+    g_msrs[addr] = mask | (mask << 32);
+    CHECK_FALSE(invlpg_exiting::is_allowed0());
+    CHECK(invlpg_exiting::is_allowed1());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = ~mask & ~(mask << 32);
-    CHECK(intel_x64::msrs::ia32_vmx_true_procbased_ctls::invlpg_exiting::is_allowed0());
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_procbased_ctls::invlpg_exiting::is_allowed1());
+    g_msrs[addr] = ~(mask | (mask << 32));
+    CHECK(invlpg_exiting::is_allowed0());
+    CHECK_FALSE(invlpg_exiting::is_allowed1());
 }
 
 TEST_CASE("ia32_vmx_true_procbased_ctls_mwait_exiting")
@@ -6235,21 +8705,26 @@ TEST_CASE("ia32_vmx_true_procbased_ctls_mwait_exiting")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    auto mask = intel_x64::msrs::ia32_vmx_true_procbased_ctls::mwait_exiting::mask;
+    using namespace intel_x64::msrs::ia32_vmx_true_procbased_ctls;
+    auto mask = mwait_exiting::mask;
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = mask;
-    CHECK(intel_x64::msrs::ia32_vmx_true_procbased_ctls::mwait_exiting::get());
+    g_msrs[addr] = mask;
+    CHECK(mwait_exiting::is_enabled());
+    g_msrs[addr] = ~mask;
+    CHECK(mwait_exiting::is_disabled());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = ~mask;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_procbased_ctls::mwait_exiting::get());
+    g_msrs[addr] = mask;
+    CHECK(mwait_exiting::is_enabled(mwait_exiting::mask));
+    g_msrs[addr] = ~mask;
+    CHECK(mwait_exiting::is_disabled(~mwait_exiting::mask));
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = mask | (mask << 32);
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_procbased_ctls::mwait_exiting::is_allowed0());
-    CHECK(intel_x64::msrs::ia32_vmx_true_procbased_ctls::mwait_exiting::is_allowed1());
+    g_msrs[addr] = mask | (mask << 32);
+    CHECK_FALSE(mwait_exiting::is_allowed0());
+    CHECK(mwait_exiting::is_allowed1());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = ~mask & ~(mask << 32);
-    CHECK(intel_x64::msrs::ia32_vmx_true_procbased_ctls::mwait_exiting::is_allowed0());
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_procbased_ctls::mwait_exiting::is_allowed1());
+    g_msrs[addr] = ~(mask | (mask << 32));
+    CHECK(mwait_exiting::is_allowed0());
+    CHECK_FALSE(mwait_exiting::is_allowed1());
 }
 
 TEST_CASE("ia32_vmx_true_procbased_ctls_rdpmc_exiting")
@@ -6257,21 +8732,26 @@ TEST_CASE("ia32_vmx_true_procbased_ctls_rdpmc_exiting")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    auto mask = intel_x64::msrs::ia32_vmx_true_procbased_ctls::rdpmc_exiting::mask;
+    using namespace intel_x64::msrs::ia32_vmx_true_procbased_ctls;
+    auto mask = rdpmc_exiting::mask;
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = mask;
-    CHECK(intel_x64::msrs::ia32_vmx_true_procbased_ctls::rdpmc_exiting::get());
+    g_msrs[addr] = mask;
+    CHECK(rdpmc_exiting::is_enabled());
+    g_msrs[addr] = ~mask;
+    CHECK(rdpmc_exiting::is_disabled());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = ~mask;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_procbased_ctls::rdpmc_exiting::get());
+    g_msrs[addr] = mask;
+    CHECK(rdpmc_exiting::is_enabled(rdpmc_exiting::mask));
+    g_msrs[addr] = ~mask;
+    CHECK(rdpmc_exiting::is_disabled(~rdpmc_exiting::mask));
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = mask | (mask << 32);
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_procbased_ctls::rdpmc_exiting::is_allowed0());
-    CHECK(intel_x64::msrs::ia32_vmx_true_procbased_ctls::rdpmc_exiting::is_allowed1());
+    g_msrs[addr] = mask | (mask << 32);
+    CHECK_FALSE(rdpmc_exiting::is_allowed0());
+    CHECK(rdpmc_exiting::is_allowed1());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = ~mask & ~(mask << 32);
-    CHECK(intel_x64::msrs::ia32_vmx_true_procbased_ctls::rdpmc_exiting::is_allowed0());
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_procbased_ctls::rdpmc_exiting::is_allowed1());
+    g_msrs[addr] = ~(mask | (mask << 32));
+    CHECK(rdpmc_exiting::is_allowed0());
+    CHECK_FALSE(rdpmc_exiting::is_allowed1());
 }
 
 TEST_CASE("ia32_vmx_true_procbased_ctls_rdtsc_exiting")
@@ -6279,21 +8759,26 @@ TEST_CASE("ia32_vmx_true_procbased_ctls_rdtsc_exiting")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    auto mask = intel_x64::msrs::ia32_vmx_true_procbased_ctls::rdtsc_exiting::mask;
+    using namespace intel_x64::msrs::ia32_vmx_true_procbased_ctls;
+    auto mask = rdtsc_exiting::mask;
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = mask;
-    CHECK(intel_x64::msrs::ia32_vmx_true_procbased_ctls::rdtsc_exiting::get());
+    g_msrs[addr] = mask;
+    CHECK(rdtsc_exiting::is_enabled());
+    g_msrs[addr] = ~mask;
+    CHECK(rdtsc_exiting::is_disabled());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = ~mask;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_procbased_ctls::rdtsc_exiting::get());
+    g_msrs[addr] = mask;
+    CHECK(rdtsc_exiting::is_enabled(rdtsc_exiting::mask));
+    g_msrs[addr] = ~mask;
+    CHECK(rdtsc_exiting::is_disabled(~rdtsc_exiting::mask));
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = mask | (mask << 32);
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_procbased_ctls::rdtsc_exiting::is_allowed0());
-    CHECK(intel_x64::msrs::ia32_vmx_true_procbased_ctls::rdtsc_exiting::is_allowed1());
+    g_msrs[addr] = mask | (mask << 32);
+    CHECK_FALSE(rdtsc_exiting::is_allowed0());
+    CHECK(rdtsc_exiting::is_allowed1());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = ~mask & ~(mask << 32);
-    CHECK(intel_x64::msrs::ia32_vmx_true_procbased_ctls::rdtsc_exiting::is_allowed0());
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_procbased_ctls::rdtsc_exiting::is_allowed1());
+    g_msrs[addr] = ~(mask | (mask << 32));
+    CHECK(rdtsc_exiting::is_allowed0());
+    CHECK_FALSE(rdtsc_exiting::is_allowed1());
 }
 
 TEST_CASE("ia32_vmx_true_procbased_ctls_cr3_load_exiting")
@@ -6301,21 +8786,26 @@ TEST_CASE("ia32_vmx_true_procbased_ctls_cr3_load_exiting")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    auto mask = intel_x64::msrs::ia32_vmx_true_procbased_ctls::cr3_load_exiting::mask;
+    using namespace intel_x64::msrs::ia32_vmx_true_procbased_ctls;
+    auto mask = cr3_load_exiting::mask;
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = mask;
-    CHECK(intel_x64::msrs::ia32_vmx_true_procbased_ctls::cr3_load_exiting::get());
+    g_msrs[addr] = mask;
+    CHECK(cr3_load_exiting::is_enabled());
+    g_msrs[addr] = ~mask;
+    CHECK(cr3_load_exiting::is_disabled());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = ~mask;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_procbased_ctls::cr3_load_exiting::get());
+    g_msrs[addr] = mask;
+    CHECK(cr3_load_exiting::is_enabled(cr3_load_exiting::mask));
+    g_msrs[addr] = ~mask;
+    CHECK(cr3_load_exiting::is_disabled(~cr3_load_exiting::mask));
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = mask | (mask << 32);
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_procbased_ctls::cr3_load_exiting::is_allowed0());
-    CHECK(intel_x64::msrs::ia32_vmx_true_procbased_ctls::cr3_load_exiting::is_allowed1());
+    g_msrs[addr] = mask | (mask << 32);
+    CHECK_FALSE(cr3_load_exiting::is_allowed0());
+    CHECK(cr3_load_exiting::is_allowed1());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = ~mask & ~(mask << 32);
-    CHECK(intel_x64::msrs::ia32_vmx_true_procbased_ctls::cr3_load_exiting::is_allowed0());
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_procbased_ctls::cr3_load_exiting::is_allowed1());
+    g_msrs[addr] = ~(mask | (mask << 32));
+    CHECK(cr3_load_exiting::is_allowed0());
+    CHECK_FALSE(cr3_load_exiting::is_allowed1());
 }
 
 TEST_CASE("ia32_vmx_true_procbased_ctls_cr3_store_exiting")
@@ -6323,21 +8813,26 @@ TEST_CASE("ia32_vmx_true_procbased_ctls_cr3_store_exiting")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    auto mask = intel_x64::msrs::ia32_vmx_true_procbased_ctls::cr3_store_exiting::mask;
+    using namespace intel_x64::msrs::ia32_vmx_true_procbased_ctls;
+    auto mask = cr3_store_exiting::mask;
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = mask;
-    CHECK(intel_x64::msrs::ia32_vmx_true_procbased_ctls::cr3_store_exiting::get());
+    g_msrs[addr] = mask;
+    CHECK(cr3_store_exiting::is_enabled());
+    g_msrs[addr] = ~mask;
+    CHECK(cr3_store_exiting::is_disabled());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = ~mask;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_procbased_ctls::cr3_store_exiting::get());
+    g_msrs[addr] = mask;
+    CHECK(cr3_store_exiting::is_enabled(cr3_store_exiting::mask));
+    g_msrs[addr] = ~mask;
+    CHECK(cr3_store_exiting::is_disabled(~cr3_store_exiting::mask));
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = mask | (mask << 32);
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_procbased_ctls::cr3_store_exiting::is_allowed0());
-    CHECK(intel_x64::msrs::ia32_vmx_true_procbased_ctls::cr3_store_exiting::is_allowed1());
+    g_msrs[addr] = mask | (mask << 32);
+    CHECK_FALSE(cr3_store_exiting::is_allowed0());
+    CHECK(cr3_store_exiting::is_allowed1());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = ~mask & ~(mask << 32);
-    CHECK(intel_x64::msrs::ia32_vmx_true_procbased_ctls::cr3_store_exiting::is_allowed0());
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_procbased_ctls::cr3_store_exiting::is_allowed1());
+    g_msrs[addr] = ~(mask | (mask << 32));
+    CHECK(cr3_store_exiting::is_allowed0());
+    CHECK_FALSE(cr3_store_exiting::is_allowed1());
 }
 
 TEST_CASE("ia32_vmx_true_procbased_ctls_cr8_load_exiting")
@@ -6345,21 +8840,26 @@ TEST_CASE("ia32_vmx_true_procbased_ctls_cr8_load_exiting")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    auto mask = intel_x64::msrs::ia32_vmx_true_procbased_ctls::cr8_load_exiting::mask;
+    using namespace intel_x64::msrs::ia32_vmx_true_procbased_ctls;
+    auto mask = cr8_load_exiting::mask;
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = mask;
-    CHECK(intel_x64::msrs::ia32_vmx_true_procbased_ctls::cr8_load_exiting::get());
+    g_msrs[addr] = mask;
+    CHECK(cr8_load_exiting::is_enabled());
+    g_msrs[addr] = ~mask;
+    CHECK(cr8_load_exiting::is_disabled());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = ~mask;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_procbased_ctls::cr8_load_exiting::get());
+    g_msrs[addr] = mask;
+    CHECK(cr8_load_exiting::is_enabled(cr8_load_exiting::mask));
+    g_msrs[addr] = ~mask;
+    CHECK(cr8_load_exiting::is_disabled(~cr8_load_exiting::mask));
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = mask | (mask << 32);
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_procbased_ctls::cr8_load_exiting::is_allowed0());
-    CHECK(intel_x64::msrs::ia32_vmx_true_procbased_ctls::cr8_load_exiting::is_allowed1());
+    g_msrs[addr] = mask | (mask << 32);
+    CHECK_FALSE(cr8_load_exiting::is_allowed0());
+    CHECK(cr8_load_exiting::is_allowed1());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = ~mask & ~(mask << 32);
-    CHECK(intel_x64::msrs::ia32_vmx_true_procbased_ctls::cr8_load_exiting::is_allowed0());
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_procbased_ctls::cr8_load_exiting::is_allowed1());
+    g_msrs[addr] = ~(mask | (mask << 32));
+    CHECK(cr8_load_exiting::is_allowed0());
+    CHECK_FALSE(cr8_load_exiting::is_allowed1());
 }
 
 TEST_CASE("ia32_vmx_true_procbased_ctls_cr8_store_exiting")
@@ -6367,21 +8867,26 @@ TEST_CASE("ia32_vmx_true_procbased_ctls_cr8_store_exiting")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    auto mask = intel_x64::msrs::ia32_vmx_true_procbased_ctls::cr8_store_exiting::mask;
+    using namespace intel_x64::msrs::ia32_vmx_true_procbased_ctls;
+    auto mask = cr8_store_exiting::mask;
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = mask;
-    CHECK(intel_x64::msrs::ia32_vmx_true_procbased_ctls::cr8_store_exiting::get());
+    g_msrs[addr] = mask;
+    CHECK(cr8_store_exiting::is_enabled());
+    g_msrs[addr] = ~mask;
+    CHECK(cr8_store_exiting::is_disabled());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = ~mask;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_procbased_ctls::cr8_store_exiting::get());
+    g_msrs[addr] = mask;
+    CHECK(cr8_store_exiting::is_enabled(cr8_store_exiting::mask));
+    g_msrs[addr] = ~mask;
+    CHECK(cr8_store_exiting::is_disabled(~cr8_store_exiting::mask));
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = mask | (mask << 32);
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_procbased_ctls::cr8_store_exiting::is_allowed0());
-    CHECK(intel_x64::msrs::ia32_vmx_true_procbased_ctls::cr8_store_exiting::is_allowed1());
+    g_msrs[addr] = mask | (mask << 32);
+    CHECK_FALSE(cr8_store_exiting::is_allowed0());
+    CHECK(cr8_store_exiting::is_allowed1());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = ~mask & ~(mask << 32);
-    CHECK(intel_x64::msrs::ia32_vmx_true_procbased_ctls::cr8_store_exiting::is_allowed0());
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_procbased_ctls::cr8_store_exiting::is_allowed1());
+    g_msrs[addr] = ~(mask | (mask << 32));
+    CHECK(cr8_store_exiting::is_allowed0());
+    CHECK_FALSE(cr8_store_exiting::is_allowed1());
 }
 
 TEST_CASE("ia32_vmx_true_procbased_ctls_use_tpr_shadow")
@@ -6389,21 +8894,26 @@ TEST_CASE("ia32_vmx_true_procbased_ctls_use_tpr_shadow")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    auto mask = intel_x64::msrs::ia32_vmx_true_procbased_ctls::use_tpr_shadow::mask;
+    using namespace intel_x64::msrs::ia32_vmx_true_procbased_ctls;
+    auto mask = use_tpr_shadow::mask;
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = mask;
-    CHECK(intel_x64::msrs::ia32_vmx_true_procbased_ctls::use_tpr_shadow::get());
+    g_msrs[addr] = mask;
+    CHECK(use_tpr_shadow::is_enabled());
+    g_msrs[addr] = ~mask;
+    CHECK(use_tpr_shadow::is_disabled());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = ~mask;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_procbased_ctls::use_tpr_shadow::get());
+    g_msrs[addr] = mask;
+    CHECK(use_tpr_shadow::is_enabled(use_tpr_shadow::mask));
+    g_msrs[addr] = ~mask;
+    CHECK(use_tpr_shadow::is_disabled(~use_tpr_shadow::mask));
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = mask | (mask << 32);
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_procbased_ctls::use_tpr_shadow::is_allowed0());
-    CHECK(intel_x64::msrs::ia32_vmx_true_procbased_ctls::use_tpr_shadow::is_allowed1());
+    g_msrs[addr] = mask | (mask << 32);
+    CHECK_FALSE(use_tpr_shadow::is_allowed0());
+    CHECK(use_tpr_shadow::is_allowed1());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = ~mask & ~(mask << 32);
-    CHECK(intel_x64::msrs::ia32_vmx_true_procbased_ctls::use_tpr_shadow::is_allowed0());
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_procbased_ctls::use_tpr_shadow::is_allowed1());
+    g_msrs[addr] = ~(mask | (mask << 32));
+    CHECK(use_tpr_shadow::is_allowed0());
+    CHECK_FALSE(use_tpr_shadow::is_allowed1());
 }
 
 TEST_CASE("ia32_vmx_true_procbased_ctls_nmi_window_exiting")
@@ -6411,21 +8921,26 @@ TEST_CASE("ia32_vmx_true_procbased_ctls_nmi_window_exiting")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    auto mask = intel_x64::msrs::ia32_vmx_true_procbased_ctls::nmi_window_exiting::mask;
+    using namespace intel_x64::msrs::ia32_vmx_true_procbased_ctls;
+    auto mask = nmi_window_exiting::mask;
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = mask;
-    CHECK(intel_x64::msrs::ia32_vmx_true_procbased_ctls::nmi_window_exiting::get());
+    g_msrs[addr] = mask;
+    CHECK(nmi_window_exiting::is_enabled());
+    g_msrs[addr] = ~mask;
+    CHECK(nmi_window_exiting::is_disabled());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = ~mask;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_procbased_ctls::nmi_window_exiting::get());
+    g_msrs[addr] = mask;
+    CHECK(nmi_window_exiting::is_enabled(nmi_window_exiting::mask));
+    g_msrs[addr] = ~mask;
+    CHECK(nmi_window_exiting::is_disabled(~nmi_window_exiting::mask));
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = mask | (mask << 32);
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_procbased_ctls::nmi_window_exiting::is_allowed0());
-    CHECK(intel_x64::msrs::ia32_vmx_true_procbased_ctls::nmi_window_exiting::is_allowed1());
+    g_msrs[addr] = mask | (mask << 32);
+    CHECK_FALSE(nmi_window_exiting::is_allowed0());
+    CHECK(nmi_window_exiting::is_allowed1());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = ~mask & ~(mask << 32);
-    CHECK(intel_x64::msrs::ia32_vmx_true_procbased_ctls::nmi_window_exiting::is_allowed0());
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_procbased_ctls::nmi_window_exiting::is_allowed1());
+    g_msrs[addr] = ~(mask | (mask << 32));
+    CHECK(nmi_window_exiting::is_allowed0());
+    CHECK_FALSE(nmi_window_exiting::is_allowed1());
 }
 
 TEST_CASE("ia32_vmx_true_procbased_ctls_mov_dr_exiting")
@@ -6433,21 +8948,26 @@ TEST_CASE("ia32_vmx_true_procbased_ctls_mov_dr_exiting")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    auto mask = intel_x64::msrs::ia32_vmx_true_procbased_ctls::mov_dr_exiting::mask;
+    using namespace intel_x64::msrs::ia32_vmx_true_procbased_ctls;
+    auto mask = mov_dr_exiting::mask;
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = mask;
-    CHECK(intel_x64::msrs::ia32_vmx_true_procbased_ctls::mov_dr_exiting::get());
+    g_msrs[addr] = mask;
+    CHECK(mov_dr_exiting::is_enabled());
+    g_msrs[addr] = ~mask;
+    CHECK(mov_dr_exiting::is_disabled());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = ~mask;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_procbased_ctls::mov_dr_exiting::get());
+    g_msrs[addr] = mask;
+    CHECK(mov_dr_exiting::is_enabled(mov_dr_exiting::mask));
+    g_msrs[addr] = ~mask;
+    CHECK(mov_dr_exiting::is_disabled(~mov_dr_exiting::mask));
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = mask | (mask << 32);
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_procbased_ctls::mov_dr_exiting::is_allowed0());
-    CHECK(intel_x64::msrs::ia32_vmx_true_procbased_ctls::mov_dr_exiting::is_allowed1());
+    g_msrs[addr] = mask | (mask << 32);
+    CHECK_FALSE(mov_dr_exiting::is_allowed0());
+    CHECK(mov_dr_exiting::is_allowed1());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = ~mask & ~(mask << 32);
-    CHECK(intel_x64::msrs::ia32_vmx_true_procbased_ctls::mov_dr_exiting::is_allowed0());
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_procbased_ctls::mov_dr_exiting::is_allowed1());
+    g_msrs[addr] = ~(mask | (mask << 32));
+    CHECK(mov_dr_exiting::is_allowed0());
+    CHECK_FALSE(mov_dr_exiting::is_allowed1());
 }
 
 TEST_CASE("ia32_vmx_true_procbased_ctls_unconditional_io_exiting")
@@ -6455,21 +8975,26 @@ TEST_CASE("ia32_vmx_true_procbased_ctls_unconditional_io_exiting")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    auto mask = intel_x64::msrs::ia32_vmx_true_procbased_ctls::unconditional_io_exiting::mask;
+    using namespace intel_x64::msrs::ia32_vmx_true_procbased_ctls;
+    auto mask = unconditional_io_exiting::mask;
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = mask;
-    CHECK(intel_x64::msrs::ia32_vmx_true_procbased_ctls::unconditional_io_exiting::get());
+    g_msrs[addr] = mask;
+    CHECK(unconditional_io_exiting::is_enabled());
+    g_msrs[addr] = ~mask;
+    CHECK(unconditional_io_exiting::is_disabled());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = ~mask;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_procbased_ctls::unconditional_io_exiting::get());
+    g_msrs[addr] = mask;
+    CHECK(unconditional_io_exiting::is_enabled(unconditional_io_exiting::mask));
+    g_msrs[addr] = ~mask;
+    CHECK(unconditional_io_exiting::is_disabled(~unconditional_io_exiting::mask));
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = mask | (mask << 32);
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_procbased_ctls::unconditional_io_exiting::is_allowed0());
-    CHECK(intel_x64::msrs::ia32_vmx_true_procbased_ctls::unconditional_io_exiting::is_allowed1());
+    g_msrs[addr] = mask | (mask << 32);
+    CHECK_FALSE(unconditional_io_exiting::is_allowed0());
+    CHECK(unconditional_io_exiting::is_allowed1());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = ~mask & ~(mask << 32);
-    CHECK(intel_x64::msrs::ia32_vmx_true_procbased_ctls::unconditional_io_exiting::is_allowed0());
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_procbased_ctls::unconditional_io_exiting::is_allowed1());
+    g_msrs[addr] = ~(mask | (mask << 32));
+    CHECK(unconditional_io_exiting::is_allowed0());
+    CHECK_FALSE(unconditional_io_exiting::is_allowed1());
 }
 
 TEST_CASE("ia32_vmx_true_procbased_ctls_use_io_bitmaps")
@@ -6477,21 +9002,26 @@ TEST_CASE("ia32_vmx_true_procbased_ctls_use_io_bitmaps")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    auto mask = intel_x64::msrs::ia32_vmx_true_procbased_ctls::use_io_bitmaps::mask;
+    using namespace intel_x64::msrs::ia32_vmx_true_procbased_ctls;
+    auto mask = use_io_bitmaps::mask;
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = mask;
-    CHECK(intel_x64::msrs::ia32_vmx_true_procbased_ctls::use_io_bitmaps::get());
+    g_msrs[addr] = mask;
+    CHECK(use_io_bitmaps::is_enabled());
+    g_msrs[addr] = ~mask;
+    CHECK(use_io_bitmaps::is_disabled());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = ~mask;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_procbased_ctls::use_io_bitmaps::get());
+    g_msrs[addr] = mask;
+    CHECK(use_io_bitmaps::is_enabled(use_io_bitmaps::mask));
+    g_msrs[addr] = ~mask;
+    CHECK(use_io_bitmaps::is_disabled(~use_io_bitmaps::mask));
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = mask | (mask << 32);
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_procbased_ctls::use_io_bitmaps::is_allowed0());
-    CHECK(intel_x64::msrs::ia32_vmx_true_procbased_ctls::use_io_bitmaps::is_allowed1());
+    g_msrs[addr] = mask | (mask << 32);
+    CHECK_FALSE(use_io_bitmaps::is_allowed0());
+    CHECK(use_io_bitmaps::is_allowed1());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = ~mask & ~(mask << 32);
-    CHECK(intel_x64::msrs::ia32_vmx_true_procbased_ctls::use_io_bitmaps::is_allowed0());
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_procbased_ctls::use_io_bitmaps::is_allowed1());
+    g_msrs[addr] = ~(mask | (mask << 32));
+    CHECK(use_io_bitmaps::is_allowed0());
+    CHECK_FALSE(use_io_bitmaps::is_allowed1());
 }
 
 TEST_CASE("ia32_vmx_true_procbased_ctls_monitor_trap_flag")
@@ -6499,21 +9029,26 @@ TEST_CASE("ia32_vmx_true_procbased_ctls_monitor_trap_flag")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    auto mask = intel_x64::msrs::ia32_vmx_true_procbased_ctls::monitor_trap_flag::mask;
+    using namespace intel_x64::msrs::ia32_vmx_true_procbased_ctls;
+    auto mask = monitor_trap_flag::mask;
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = mask;
-    CHECK(intel_x64::msrs::ia32_vmx_true_procbased_ctls::monitor_trap_flag::get());
+    g_msrs[addr] = mask;
+    CHECK(monitor_trap_flag::is_enabled());
+    g_msrs[addr] = ~mask;
+    CHECK(monitor_trap_flag::is_disabled());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = ~mask;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_procbased_ctls::monitor_trap_flag::get());
+    g_msrs[addr] = mask;
+    CHECK(monitor_trap_flag::is_enabled(monitor_trap_flag::mask));
+    g_msrs[addr] = ~mask;
+    CHECK(monitor_trap_flag::is_disabled(~monitor_trap_flag::mask));
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = mask | (mask << 32);
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_procbased_ctls::monitor_trap_flag::is_allowed0());
-    CHECK(intel_x64::msrs::ia32_vmx_true_procbased_ctls::monitor_trap_flag::is_allowed1());
+    g_msrs[addr] = mask | (mask << 32);
+    CHECK_FALSE(monitor_trap_flag::is_allowed0());
+    CHECK(monitor_trap_flag::is_allowed1());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = ~mask & ~(mask << 32);
-    CHECK(intel_x64::msrs::ia32_vmx_true_procbased_ctls::monitor_trap_flag::is_allowed0());
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_procbased_ctls::monitor_trap_flag::is_allowed1());
+    g_msrs[addr] = ~(mask | (mask << 32));
+    CHECK(monitor_trap_flag::is_allowed0());
+    CHECK_FALSE(monitor_trap_flag::is_allowed1());
 }
 
 TEST_CASE("ia32_vmx_true_procbased_ctls_use_msr_bitmap")
@@ -6521,21 +9056,26 @@ TEST_CASE("ia32_vmx_true_procbased_ctls_use_msr_bitmap")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    auto mask = intel_x64::msrs::ia32_vmx_true_procbased_ctls::use_msr_bitmap::mask;
+    using namespace intel_x64::msrs::ia32_vmx_true_procbased_ctls;
+    auto mask = use_msr_bitmap::mask;
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = mask;
-    CHECK(intel_x64::msrs::ia32_vmx_true_procbased_ctls::use_msr_bitmap::get());
+    g_msrs[addr] = mask;
+    CHECK(use_msr_bitmap::is_enabled());
+    g_msrs[addr] = ~mask;
+    CHECK(use_msr_bitmap::is_disabled());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = ~mask;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_procbased_ctls::use_msr_bitmap::get());
+    g_msrs[addr] = mask;
+    CHECK(use_msr_bitmap::is_enabled(use_msr_bitmap::mask));
+    g_msrs[addr] = ~mask;
+    CHECK(use_msr_bitmap::is_disabled(~use_msr_bitmap::mask));
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = mask | (mask << 32);
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_procbased_ctls::use_msr_bitmap::is_allowed0());
-    CHECK(intel_x64::msrs::ia32_vmx_true_procbased_ctls::use_msr_bitmap::is_allowed1());
+    g_msrs[addr] = mask | (mask << 32);
+    CHECK_FALSE(use_msr_bitmap::is_allowed0());
+    CHECK(use_msr_bitmap::is_allowed1());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = ~mask & ~(mask << 32);
-    CHECK(intel_x64::msrs::ia32_vmx_true_procbased_ctls::use_msr_bitmap::is_allowed0());
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_procbased_ctls::use_msr_bitmap::is_allowed1());
+    g_msrs[addr] = ~(mask | (mask << 32));
+    CHECK(use_msr_bitmap::is_allowed0());
+    CHECK_FALSE(use_msr_bitmap::is_allowed1());
 }
 
 TEST_CASE("ia32_vmx_true_procbased_ctls_monitor_exiting")
@@ -6543,21 +9083,26 @@ TEST_CASE("ia32_vmx_true_procbased_ctls_monitor_exiting")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    auto mask = intel_x64::msrs::ia32_vmx_true_procbased_ctls::monitor_exiting::mask;
+    using namespace intel_x64::msrs::ia32_vmx_true_procbased_ctls;
+    auto mask = monitor_exiting::mask;
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = mask;
-    CHECK(intel_x64::msrs::ia32_vmx_true_procbased_ctls::monitor_exiting::get());
+    g_msrs[addr] = mask;
+    CHECK(monitor_exiting::is_enabled());
+    g_msrs[addr] = ~mask;
+    CHECK(monitor_exiting::is_disabled());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = ~mask;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_procbased_ctls::monitor_exiting::get());
+    g_msrs[addr] = mask;
+    CHECK(monitor_exiting::is_enabled(monitor_exiting::mask));
+    g_msrs[addr] = ~mask;
+    CHECK(monitor_exiting::is_disabled(~monitor_exiting::mask));
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = mask | (mask << 32);
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_procbased_ctls::monitor_exiting::is_allowed0());
-    CHECK(intel_x64::msrs::ia32_vmx_true_procbased_ctls::monitor_exiting::is_allowed1());
+    g_msrs[addr] = mask | (mask << 32);
+    CHECK_FALSE(monitor_exiting::is_allowed0());
+    CHECK(monitor_exiting::is_allowed1());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = ~mask & ~(mask << 32);
-    CHECK(intel_x64::msrs::ia32_vmx_true_procbased_ctls::monitor_exiting::is_allowed0());
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_procbased_ctls::monitor_exiting::is_allowed1());
+    g_msrs[addr] = ~(mask | (mask << 32));
+    CHECK(monitor_exiting::is_allowed0());
+    CHECK_FALSE(monitor_exiting::is_allowed1());
 }
 
 TEST_CASE("ia32_vmx_true_procbased_ctls_pause_exiting")
@@ -6565,21 +9110,26 @@ TEST_CASE("ia32_vmx_true_procbased_ctls_pause_exiting")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    auto mask = intel_x64::msrs::ia32_vmx_true_procbased_ctls::pause_exiting::mask;
+    using namespace intel_x64::msrs::ia32_vmx_true_procbased_ctls;
+    auto mask = pause_exiting::mask;
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = mask;
-    CHECK(intel_x64::msrs::ia32_vmx_true_procbased_ctls::pause_exiting::get());
+    g_msrs[addr] = mask;
+    CHECK(pause_exiting::is_enabled());
+    g_msrs[addr] = ~mask;
+    CHECK(pause_exiting::is_disabled());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = ~mask;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_procbased_ctls::pause_exiting::get());
+    g_msrs[addr] = mask;
+    CHECK(pause_exiting::is_enabled(pause_exiting::mask));
+    g_msrs[addr] = ~mask;
+    CHECK(pause_exiting::is_disabled(~pause_exiting::mask));
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = mask | (mask << 32);
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_procbased_ctls::pause_exiting::is_allowed0());
-    CHECK(intel_x64::msrs::ia32_vmx_true_procbased_ctls::pause_exiting::is_allowed1());
+    g_msrs[addr] = mask | (mask << 32);
+    CHECK_FALSE(pause_exiting::is_allowed0());
+    CHECK(pause_exiting::is_allowed1());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = ~mask & ~(mask << 32);
-    CHECK(intel_x64::msrs::ia32_vmx_true_procbased_ctls::pause_exiting::is_allowed0());
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_procbased_ctls::pause_exiting::is_allowed1());
+    g_msrs[addr] = ~(mask | (mask << 32));
+    CHECK(pause_exiting::is_allowed0());
+    CHECK_FALSE(pause_exiting::is_allowed1());
 }
 
 TEST_CASE("ia32_vmx_true_procbased_ctls_activate_secondary_controls")
@@ -6587,21 +9137,26 @@ TEST_CASE("ia32_vmx_true_procbased_ctls_activate_secondary_controls")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    auto mask = intel_x64::msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask;
+    using namespace intel_x64::msrs::ia32_vmx_true_procbased_ctls;
+    auto mask = activate_secondary_controls::mask;
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = mask;
-    CHECK(intel_x64::msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::get());
+    g_msrs[addr] = mask;
+    CHECK(activate_secondary_controls::is_enabled());
+    g_msrs[addr] = ~mask;
+    CHECK(activate_secondary_controls::is_disabled());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = ~mask;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::get());
+    g_msrs[addr] = mask;
+    CHECK(activate_secondary_controls::is_enabled(activate_secondary_controls::mask));
+    g_msrs[addr] = ~mask;
+    CHECK(activate_secondary_controls::is_disabled(~activate_secondary_controls::mask));
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = mask | (mask << 32);
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::is_allowed0());
-    CHECK(intel_x64::msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::is_allowed1());
+    g_msrs[addr] = mask | (mask << 32);
+    CHECK_FALSE(activate_secondary_controls::is_allowed0());
+    CHECK(activate_secondary_controls::is_allowed1());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr] = ~mask & ~(mask << 32);
-    CHECK(intel_x64::msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::is_allowed0());
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::is_allowed1());
+    g_msrs[addr] = ~(mask | (mask << 32));
+    CHECK(activate_secondary_controls::is_allowed0());
+    CHECK_FALSE(activate_secondary_controls::is_allowed1());
 }
 
 TEST_CASE("ia32_vmx_true_exit_ctls")
@@ -6609,27 +9164,29 @@ TEST_CASE("ia32_vmx_true_exit_ctls")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_exit_ctls::addr] = 0x00000000FFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_vmx_true_exit_ctls::get() == 0x00000000FFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_vmx_true_exit_ctls;
 
-    intel_x64::msrs::ia32_vmx_true_exit_ctls::dump();
+    g_msrs[addr] = 0x00000000FFFFFFFFULL;
+    CHECK(get() == 0x00000000FFFFFFFFULL);
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_exit_ctls::addr] = 0x0UL;
-    CHECK(intel_x64::msrs::ia32_vmx_true_exit_ctls::get() == 0x0UL);
+    dump(0);
 
-    intel_x64::msrs::ia32_vmx_true_exit_ctls::dump();
+    g_msrs[addr] = 0x0UL;
+    CHECK(get() == 0x0UL);
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_exit_ctls::addr] = 0x00000000FFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_vmx_true_exit_ctls::allowed0() == 0xFFFFFFFFUL);
-    CHECK(intel_x64::msrs::ia32_vmx_true_exit_ctls::allowed1() == 0x00000000UL);
+    dump(0);
 
-    intel_x64::msrs::ia32_vmx_true_exit_ctls::dump();
+    g_msrs[addr] = 0x00000000FFFFFFFFULL;
+    CHECK(allowed0() == 0xFFFFFFFFUL);
+    CHECK(allowed1() == 0x00000000UL);
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_exit_ctls::addr] = 0xFFFFFFFF00000000ULL;
-    CHECK(intel_x64::msrs::ia32_vmx_true_exit_ctls::allowed0() == 0x00000000UL);
-    CHECK(intel_x64::msrs::ia32_vmx_true_exit_ctls::allowed1() == 0xFFFFFFFFUL);
+    dump(0);
 
-    intel_x64::msrs::ia32_vmx_true_exit_ctls::dump();
+    g_msrs[addr] = 0xFFFFFFFF00000000ULL;
+    CHECK(allowed0() == 0x00000000UL);
+    CHECK(allowed1() == 0xFFFFFFFFUL);
+
+    dump(0);
 }
 
 TEST_CASE("ia32_vmx_true_exit_ctls_save_debug_controls")
@@ -6637,21 +9194,26 @@ TEST_CASE("ia32_vmx_true_exit_ctls_save_debug_controls")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    auto mask = intel_x64::msrs::ia32_vmx_true_exit_ctls::save_debug_controls::mask;
+    using namespace intel_x64::msrs::ia32_vmx_true_exit_ctls;
+    auto mask = save_debug_controls::mask;
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_exit_ctls::addr] = mask;
-    CHECK(intel_x64::msrs::ia32_vmx_true_exit_ctls::save_debug_controls::get());
+    g_msrs[addr] = mask;
+    CHECK(save_debug_controls::is_enabled());
+    g_msrs[addr] = ~mask;
+    CHECK(save_debug_controls::is_disabled());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_exit_ctls::addr] = ~mask;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_exit_ctls::save_debug_controls::get());
+    g_msrs[addr] = mask;
+    CHECK(save_debug_controls::is_enabled(save_debug_controls::mask));
+    g_msrs[addr] = ~mask;
+    CHECK(save_debug_controls::is_disabled(~save_debug_controls::mask));
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_exit_ctls::addr] = mask | (mask << 32);
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_exit_ctls::save_debug_controls::is_allowed0());
-    CHECK(intel_x64::msrs::ia32_vmx_true_exit_ctls::save_debug_controls::is_allowed1());
+    g_msrs[addr] = mask | (mask << 32);
+    CHECK_FALSE(save_debug_controls::is_allowed0());
+    CHECK(save_debug_controls::is_allowed1());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_exit_ctls::addr] = ~mask & ~(mask << 32);
-    CHECK(intel_x64::msrs::ia32_vmx_true_exit_ctls::save_debug_controls::is_allowed0());
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_exit_ctls::save_debug_controls::is_allowed1());
+    g_msrs[addr] = ~(mask | (mask << 32));
+    CHECK(save_debug_controls::is_allowed0());
+    CHECK_FALSE(save_debug_controls::is_allowed1());
 }
 
 TEST_CASE("ia32_vmx_true_exit_ctls_host_address_space_size")
@@ -6659,21 +9221,26 @@ TEST_CASE("ia32_vmx_true_exit_ctls_host_address_space_size")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    auto mask = intel_x64::msrs::ia32_vmx_true_exit_ctls::host_address_space_size::mask;
+    using namespace intel_x64::msrs::ia32_vmx_true_exit_ctls;
+    auto mask = host_address_space_size::mask;
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_exit_ctls::addr] = mask;
-    CHECK(intel_x64::msrs::ia32_vmx_true_exit_ctls::host_address_space_size::get());
+    g_msrs[addr] = mask;
+    CHECK(host_address_space_size::is_enabled());
+    g_msrs[addr] = ~mask;
+    CHECK(host_address_space_size::is_disabled());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_exit_ctls::addr] = ~mask;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_exit_ctls::host_address_space_size::get());
+    g_msrs[addr] = mask;
+    CHECK(host_address_space_size::is_enabled(host_address_space_size::mask));
+    g_msrs[addr] = ~mask;
+    CHECK(host_address_space_size::is_disabled(~host_address_space_size::mask));
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_exit_ctls::addr] = mask | (mask << 32);
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_exit_ctls::host_address_space_size::is_allowed0());
-    CHECK(intel_x64::msrs::ia32_vmx_true_exit_ctls::host_address_space_size::is_allowed1());
+    g_msrs[addr] = mask | (mask << 32);
+    CHECK_FALSE(host_address_space_size::is_allowed0());
+    CHECK(host_address_space_size::is_allowed1());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_exit_ctls::addr] = ~mask & ~(mask << 32);
-    CHECK(intel_x64::msrs::ia32_vmx_true_exit_ctls::host_address_space_size::is_allowed0());
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_exit_ctls::host_address_space_size::is_allowed1());
+    g_msrs[addr] = ~(mask | (mask << 32));
+    CHECK(host_address_space_size::is_allowed0());
+    CHECK_FALSE(host_address_space_size::is_allowed1());
 }
 
 TEST_CASE("ia32_vmx_true_exit_ctls_load_ia32_perf_global_ctrl")
@@ -6681,21 +9248,26 @@ TEST_CASE("ia32_vmx_true_exit_ctls_load_ia32_perf_global_ctrl")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    auto mask = intel_x64::msrs::ia32_vmx_true_exit_ctls::load_ia32_perf_global_ctrl::mask;
+    using namespace intel_x64::msrs::ia32_vmx_true_exit_ctls;
+    auto mask = load_ia32_perf_global_ctrl::mask;
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_exit_ctls::addr] = mask;
-    CHECK(intel_x64::msrs::ia32_vmx_true_exit_ctls::load_ia32_perf_global_ctrl::get());
+    g_msrs[addr] = mask;
+    CHECK(load_ia32_perf_global_ctrl::is_enabled());
+    g_msrs[addr] = ~mask;
+    CHECK(load_ia32_perf_global_ctrl::is_disabled());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_exit_ctls::addr] = ~mask;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_exit_ctls::load_ia32_perf_global_ctrl::get());
+    g_msrs[addr] = mask;
+    CHECK(load_ia32_perf_global_ctrl::is_enabled(load_ia32_perf_global_ctrl::mask));
+    g_msrs[addr] = ~mask;
+    CHECK(load_ia32_perf_global_ctrl::is_disabled(~load_ia32_perf_global_ctrl::mask));
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_exit_ctls::addr] = mask | (mask << 32);
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_exit_ctls::load_ia32_perf_global_ctrl::is_allowed0());
-    CHECK(intel_x64::msrs::ia32_vmx_true_exit_ctls::load_ia32_perf_global_ctrl::is_allowed1());
+    g_msrs[addr] = mask | (mask << 32);
+    CHECK_FALSE(load_ia32_perf_global_ctrl::is_allowed0());
+    CHECK(load_ia32_perf_global_ctrl::is_allowed1());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_exit_ctls::addr] = ~mask & ~(mask << 32);
-    CHECK(intel_x64::msrs::ia32_vmx_true_exit_ctls::load_ia32_perf_global_ctrl::is_allowed0());
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_exit_ctls::load_ia32_perf_global_ctrl::is_allowed1());
+    g_msrs[addr] = ~(mask | (mask << 32));
+    CHECK(load_ia32_perf_global_ctrl::is_allowed0());
+    CHECK_FALSE(load_ia32_perf_global_ctrl::is_allowed1());
 }
 
 TEST_CASE("ia32_vmx_true_exit_ctls_acknowledge_interrupt_on_exit")
@@ -6703,21 +9275,26 @@ TEST_CASE("ia32_vmx_true_exit_ctls_acknowledge_interrupt_on_exit")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    auto mask = intel_x64::msrs::ia32_vmx_true_exit_ctls::acknowledge_interrupt_on_exit::mask;
+    using namespace intel_x64::msrs::ia32_vmx_true_exit_ctls;
+    auto mask = acknowledge_interrupt_on_exit::mask;
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_exit_ctls::addr] = mask;
-    CHECK(intel_x64::msrs::ia32_vmx_true_exit_ctls::acknowledge_interrupt_on_exit::get());
+    g_msrs[addr] = mask;
+    CHECK(acknowledge_interrupt_on_exit::is_enabled());
+    g_msrs[addr] = ~mask;
+    CHECK(acknowledge_interrupt_on_exit::is_disabled());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_exit_ctls::addr] = ~mask;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_exit_ctls::acknowledge_interrupt_on_exit::get());
+    g_msrs[addr] = mask;
+    CHECK(acknowledge_interrupt_on_exit::is_enabled(acknowledge_interrupt_on_exit::mask));
+    g_msrs[addr] = ~mask;
+    CHECK(acknowledge_interrupt_on_exit::is_disabled(~acknowledge_interrupt_on_exit::mask));
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_exit_ctls::addr] = mask | (mask << 32);
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_exit_ctls::acknowledge_interrupt_on_exit::is_allowed0());
-    CHECK(intel_x64::msrs::ia32_vmx_true_exit_ctls::acknowledge_interrupt_on_exit::is_allowed1());
+    g_msrs[addr] = mask | (mask << 32);
+    CHECK_FALSE(acknowledge_interrupt_on_exit::is_allowed0());
+    CHECK(acknowledge_interrupt_on_exit::is_allowed1());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_exit_ctls::addr] = ~mask & ~(mask << 32);
-    CHECK(intel_x64::msrs::ia32_vmx_true_exit_ctls::acknowledge_interrupt_on_exit::is_allowed0());
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_exit_ctls::acknowledge_interrupt_on_exit::is_allowed1());
+    g_msrs[addr] = ~(mask | (mask << 32));
+    CHECK(acknowledge_interrupt_on_exit::is_allowed0());
+    CHECK_FALSE(acknowledge_interrupt_on_exit::is_allowed1());
 }
 
 TEST_CASE("ia32_vmx_true_exit_ctls_save_ia32_pat")
@@ -6725,21 +9302,26 @@ TEST_CASE("ia32_vmx_true_exit_ctls_save_ia32_pat")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    auto mask = intel_x64::msrs::ia32_vmx_true_exit_ctls::save_ia32_pat::mask;
+    using namespace intel_x64::msrs::ia32_vmx_true_exit_ctls;
+    auto mask = save_ia32_pat::mask;
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_exit_ctls::addr] = mask;
-    CHECK(intel_x64::msrs::ia32_vmx_true_exit_ctls::save_ia32_pat::get());
+    g_msrs[addr] = mask;
+    CHECK(save_ia32_pat::is_enabled());
+    g_msrs[addr] = ~mask;
+    CHECK(save_ia32_pat::is_disabled());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_exit_ctls::addr] = ~mask;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_exit_ctls::save_ia32_pat::get());
+    g_msrs[addr] = mask;
+    CHECK(save_ia32_pat::is_enabled(save_ia32_pat::mask));
+    g_msrs[addr] = ~mask;
+    CHECK(save_ia32_pat::is_disabled(~save_ia32_pat::mask));
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_exit_ctls::addr] = mask | (mask << 32);
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_exit_ctls::save_ia32_pat::is_allowed0());
-    CHECK(intel_x64::msrs::ia32_vmx_true_exit_ctls::save_ia32_pat::is_allowed1());
+    g_msrs[addr] = mask | (mask << 32);
+    CHECK_FALSE(save_ia32_pat::is_allowed0());
+    CHECK(save_ia32_pat::is_allowed1());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_exit_ctls::addr] = ~mask & ~(mask << 32);
-    CHECK(intel_x64::msrs::ia32_vmx_true_exit_ctls::save_ia32_pat::is_allowed0());
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_exit_ctls::save_ia32_pat::is_allowed1());
+    g_msrs[addr] = ~(mask | (mask << 32));
+    CHECK(save_ia32_pat::is_allowed0());
+    CHECK_FALSE(save_ia32_pat::is_allowed1());
 }
 
 TEST_CASE("ia32_vmx_true_exit_ctls_load_ia32_pat")
@@ -6747,21 +9329,26 @@ TEST_CASE("ia32_vmx_true_exit_ctls_load_ia32_pat")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    auto mask = intel_x64::msrs::ia32_vmx_true_exit_ctls::load_ia32_pat::mask;
+    using namespace intel_x64::msrs::ia32_vmx_true_exit_ctls;
+    auto mask = load_ia32_pat::mask;
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_exit_ctls::addr] = mask;
-    CHECK(intel_x64::msrs::ia32_vmx_true_exit_ctls::load_ia32_pat::get());
+    g_msrs[addr] = mask;
+    CHECK(load_ia32_pat::is_enabled());
+    g_msrs[addr] = ~mask;
+    CHECK(load_ia32_pat::is_disabled());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_exit_ctls::addr] = ~mask;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_exit_ctls::load_ia32_pat::get());
+    g_msrs[addr] = mask;
+    CHECK(load_ia32_pat::is_enabled(load_ia32_pat::mask));
+    g_msrs[addr] = ~mask;
+    CHECK(load_ia32_pat::is_disabled(~load_ia32_pat::mask));
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_exit_ctls::addr] = mask | (mask << 32);
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_exit_ctls::load_ia32_pat::is_allowed0());
-    CHECK(intel_x64::msrs::ia32_vmx_true_exit_ctls::load_ia32_pat::is_allowed1());
+    g_msrs[addr] = mask | (mask << 32);
+    CHECK_FALSE(load_ia32_pat::is_allowed0());
+    CHECK(load_ia32_pat::is_allowed1());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_exit_ctls::addr] = ~mask & ~(mask << 32);
-    CHECK(intel_x64::msrs::ia32_vmx_true_exit_ctls::load_ia32_pat::is_allowed0());
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_exit_ctls::load_ia32_pat::is_allowed1());
+    g_msrs[addr] = ~(mask | (mask << 32));
+    CHECK(load_ia32_pat::is_allowed0());
+    CHECK_FALSE(load_ia32_pat::is_allowed1());
 }
 
 TEST_CASE("ia32_vmx_true_exit_ctls_save_ia32_efer")
@@ -6769,21 +9356,26 @@ TEST_CASE("ia32_vmx_true_exit_ctls_save_ia32_efer")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    auto mask = intel_x64::msrs::ia32_vmx_true_exit_ctls::save_ia32_efer::mask;
+    using namespace intel_x64::msrs::ia32_vmx_true_exit_ctls;
+    auto mask = save_ia32_efer::mask;
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_exit_ctls::addr] = mask;
-    CHECK(intel_x64::msrs::ia32_vmx_true_exit_ctls::save_ia32_efer::get());
+    g_msrs[addr] = mask;
+    CHECK(save_ia32_efer::is_enabled());
+    g_msrs[addr] = ~mask;
+    CHECK(save_ia32_efer::is_disabled());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_exit_ctls::addr] = ~mask;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_exit_ctls::save_ia32_efer::get());
+    g_msrs[addr] = mask;
+    CHECK(save_ia32_efer::is_enabled(save_ia32_efer::mask));
+    g_msrs[addr] = ~mask;
+    CHECK(save_ia32_efer::is_disabled(~save_ia32_efer::mask));
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_exit_ctls::addr] = mask | (mask << 32);
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_exit_ctls::save_ia32_efer::is_allowed0());
-    CHECK(intel_x64::msrs::ia32_vmx_true_exit_ctls::save_ia32_efer::is_allowed1());
+    g_msrs[addr] = mask | (mask << 32);
+    CHECK_FALSE(save_ia32_efer::is_allowed0());
+    CHECK(save_ia32_efer::is_allowed1());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_exit_ctls::addr] = ~mask & ~(mask << 32);
-    CHECK(intel_x64::msrs::ia32_vmx_true_exit_ctls::save_ia32_efer::is_allowed0());
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_exit_ctls::save_ia32_efer::is_allowed1());
+    g_msrs[addr] = ~(mask | (mask << 32));
+    CHECK(save_ia32_efer::is_allowed0());
+    CHECK_FALSE(save_ia32_efer::is_allowed1());
 }
 
 TEST_CASE("ia32_vmx_true_exit_ctls_load_ia32_efer")
@@ -6791,21 +9383,26 @@ TEST_CASE("ia32_vmx_true_exit_ctls_load_ia32_efer")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    auto mask = intel_x64::msrs::ia32_vmx_true_exit_ctls::load_ia32_efer::mask;
+    using namespace intel_x64::msrs::ia32_vmx_true_exit_ctls;
+    auto mask = load_ia32_efer::mask;
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_exit_ctls::addr] = mask;
-    CHECK(intel_x64::msrs::ia32_vmx_true_exit_ctls::load_ia32_efer::get());
+    g_msrs[addr] = mask;
+    CHECK(load_ia32_efer::is_enabled());
+    g_msrs[addr] = ~mask;
+    CHECK(load_ia32_efer::is_disabled());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_exit_ctls::addr] = ~mask;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_exit_ctls::load_ia32_efer::get());
+    g_msrs[addr] = mask;
+    CHECK(load_ia32_efer::is_enabled(load_ia32_efer::mask));
+    g_msrs[addr] = ~mask;
+    CHECK(load_ia32_efer::is_disabled(~load_ia32_efer::mask));
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_exit_ctls::addr] = mask | (mask << 32);
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_exit_ctls::load_ia32_efer::is_allowed0());
-    CHECK(intel_x64::msrs::ia32_vmx_true_exit_ctls::load_ia32_efer::is_allowed1());
+    g_msrs[addr] = mask | (mask << 32);
+    CHECK_FALSE(load_ia32_efer::is_allowed0());
+    CHECK(load_ia32_efer::is_allowed1());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_exit_ctls::addr] = ~mask & ~(mask << 32);
-    CHECK(intel_x64::msrs::ia32_vmx_true_exit_ctls::load_ia32_efer::is_allowed0());
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_exit_ctls::load_ia32_efer::is_allowed1());
+    g_msrs[addr] = ~(mask | (mask << 32));
+    CHECK(load_ia32_efer::is_allowed0());
+    CHECK_FALSE(load_ia32_efer::is_allowed1());
 }
 
 TEST_CASE("ia32_vmx_true_exit_ctls_save_vmx_preemption_timer_value")
@@ -6813,21 +9410,26 @@ TEST_CASE("ia32_vmx_true_exit_ctls_save_vmx_preemption_timer_value")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    auto mask = intel_x64::msrs::ia32_vmx_true_exit_ctls::save_vmx_preemption_timer_value::mask;
+    using namespace intel_x64::msrs::ia32_vmx_true_exit_ctls;
+    auto mask = save_vmx_preemption_timer_value::mask;
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_exit_ctls::addr] = mask;
-    CHECK(intel_x64::msrs::ia32_vmx_true_exit_ctls::save_vmx_preemption_timer_value::get());
+    g_msrs[addr] = mask;
+    CHECK(save_vmx_preemption_timer_value::is_enabled());
+    g_msrs[addr] = ~mask;
+    CHECK(save_vmx_preemption_timer_value::is_disabled());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_exit_ctls::addr] = ~mask;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_exit_ctls::save_vmx_preemption_timer_value::get());
+    g_msrs[addr] = mask;
+    CHECK(save_vmx_preemption_timer_value::is_enabled(save_vmx_preemption_timer_value::mask));
+    g_msrs[addr] = ~mask;
+    CHECK(save_vmx_preemption_timer_value::is_disabled(~save_vmx_preemption_timer_value::mask));
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_exit_ctls::addr] = mask | (mask << 32);
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_exit_ctls::save_vmx_preemption_timer_value::is_allowed0());
-    CHECK(intel_x64::msrs::ia32_vmx_true_exit_ctls::save_vmx_preemption_timer_value::is_allowed1());
+    g_msrs[addr] = mask | (mask << 32);
+    CHECK_FALSE(save_vmx_preemption_timer_value::is_allowed0());
+    CHECK(save_vmx_preemption_timer_value::is_allowed1());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_exit_ctls::addr] = ~mask & ~(mask << 32);
-    CHECK(intel_x64::msrs::ia32_vmx_true_exit_ctls::save_vmx_preemption_timer_value::is_allowed0());
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_exit_ctls::save_vmx_preemption_timer_value::is_allowed1());
+    g_msrs[addr] = ~(mask | (mask << 32));
+    CHECK(save_vmx_preemption_timer_value::is_allowed0());
+    CHECK_FALSE(save_vmx_preemption_timer_value::is_allowed1());
 }
 
 TEST_CASE("ia32_vmx_true_exit_ctls_clear_ia32_bndcfgs")
@@ -6835,21 +9437,26 @@ TEST_CASE("ia32_vmx_true_exit_ctls_clear_ia32_bndcfgs")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    auto mask = intel_x64::msrs::ia32_vmx_true_exit_ctls::clear_ia32_bndcfgs::mask;
+    using namespace intel_x64::msrs::ia32_vmx_true_exit_ctls;
+    auto mask = clear_ia32_bndcfgs::mask;
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_exit_ctls::addr] = mask;
-    CHECK(intel_x64::msrs::ia32_vmx_true_exit_ctls::clear_ia32_bndcfgs::get());
+    g_msrs[addr] = mask;
+    CHECK(clear_ia32_bndcfgs::is_enabled());
+    g_msrs[addr] = ~mask;
+    CHECK(clear_ia32_bndcfgs::is_disabled());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_exit_ctls::addr] = ~mask;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_exit_ctls::clear_ia32_bndcfgs::get());
+    g_msrs[addr] = mask;
+    CHECK(clear_ia32_bndcfgs::is_enabled(clear_ia32_bndcfgs::mask));
+    g_msrs[addr] = ~mask;
+    CHECK(clear_ia32_bndcfgs::is_disabled(~clear_ia32_bndcfgs::mask));
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_exit_ctls::addr] = mask | (mask << 32);
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_exit_ctls::clear_ia32_bndcfgs::is_allowed0());
-    CHECK(intel_x64::msrs::ia32_vmx_true_exit_ctls::clear_ia32_bndcfgs::is_allowed1());
+    g_msrs[addr] = mask | (mask << 32);
+    CHECK_FALSE(clear_ia32_bndcfgs::is_allowed0());
+    CHECK(clear_ia32_bndcfgs::is_allowed1());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_exit_ctls::addr] = ~mask & ~(mask << 32);
-    CHECK(intel_x64::msrs::ia32_vmx_true_exit_ctls::clear_ia32_bndcfgs::is_allowed0());
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_exit_ctls::clear_ia32_bndcfgs::is_allowed1());
+    g_msrs[addr] = ~(mask | (mask << 32));
+    CHECK(clear_ia32_bndcfgs::is_allowed0());
+    CHECK_FALSE(clear_ia32_bndcfgs::is_allowed1());
 }
 
 TEST_CASE("ia32_vmx_true_entry_ctls")
@@ -6857,27 +9464,29 @@ TEST_CASE("ia32_vmx_true_entry_ctls")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_entry_ctls::addr] = 0x00000000FFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_vmx_true_entry_ctls::get() == 0x00000000FFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_vmx_true_entry_ctls;
 
-    intel_x64::msrs::ia32_vmx_true_entry_ctls::dump();
+    g_msrs[addr] = 0x00000000FFFFFFFFULL;
+    CHECK(get() == 0x00000000FFFFFFFFULL);
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_entry_ctls::addr] = 0x0UL;
-    CHECK(intel_x64::msrs::ia32_vmx_true_entry_ctls::get() == 0x0UL);
+    dump(0);
 
-    intel_x64::msrs::ia32_vmx_true_entry_ctls::dump();
+    g_msrs[addr] = 0x0UL;
+    CHECK(get() == 0x0UL);
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_entry_ctls::addr] = 0x00000000FFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_vmx_true_entry_ctls::allowed0() == 0xFFFFFFFFUL);
-    CHECK(intel_x64::msrs::ia32_vmx_true_entry_ctls::allowed1() == 0x00000000UL);
+    dump(0);
 
-    intel_x64::msrs::ia32_vmx_true_entry_ctls::dump();
+    g_msrs[addr] = 0x00000000FFFFFFFFULL;
+    CHECK(allowed0() == 0xFFFFFFFFUL);
+    CHECK(allowed1() == 0x00000000UL);
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_entry_ctls::addr] = 0xFFFFFFFF00000000ULL;
-    CHECK(intel_x64::msrs::ia32_vmx_true_entry_ctls::allowed0() == 0x00000000UL);
-    CHECK(intel_x64::msrs::ia32_vmx_true_entry_ctls::allowed1() == 0xFFFFFFFFUL);
+    dump(0);
 
-    intel_x64::msrs::ia32_vmx_true_entry_ctls::dump();
+    g_msrs[addr] = 0xFFFFFFFF00000000ULL;
+    CHECK(allowed0() == 0x00000000UL);
+    CHECK(allowed1() == 0xFFFFFFFFUL);
+
+    dump(0);
 }
 
 TEST_CASE("ia32_vmx_true_entry_ctls_load_debug_controls")
@@ -6885,21 +9494,26 @@ TEST_CASE("ia32_vmx_true_entry_ctls_load_debug_controls")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    auto mask = intel_x64::msrs::ia32_vmx_true_entry_ctls::load_debug_controls::mask;
+    using namespace intel_x64::msrs::ia32_vmx_true_entry_ctls;
+    auto mask = load_debug_controls::mask;
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_entry_ctls::addr] = mask;
-    CHECK(intel_x64::msrs::ia32_vmx_true_entry_ctls::load_debug_controls::get());
+    g_msrs[addr] = mask;
+    CHECK(load_debug_controls::is_enabled());
+    g_msrs[addr] = ~mask;
+    CHECK(load_debug_controls::is_disabled());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_entry_ctls::addr] = ~mask;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_entry_ctls::load_debug_controls::get());
+    g_msrs[addr] = mask;
+    CHECK(load_debug_controls::is_enabled(load_debug_controls::mask));
+    g_msrs[addr] = ~mask;
+    CHECK(load_debug_controls::is_disabled(~load_debug_controls::mask));
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_entry_ctls::addr] = mask | (mask << 32);
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_entry_ctls::load_debug_controls::is_allowed0());
-    CHECK(intel_x64::msrs::ia32_vmx_true_entry_ctls::load_debug_controls::is_allowed1());
+    g_msrs[addr] = mask | (mask << 32);
+    CHECK_FALSE(load_debug_controls::is_allowed0());
+    CHECK(load_debug_controls::is_allowed1());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_entry_ctls::addr] = ~mask & ~(mask << 32);
-    CHECK(intel_x64::msrs::ia32_vmx_true_entry_ctls::load_debug_controls::is_allowed0());
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_entry_ctls::load_debug_controls::is_allowed1());
+    g_msrs[addr] = ~(mask | (mask << 32));
+    CHECK(load_debug_controls::is_allowed0());
+    CHECK_FALSE(load_debug_controls::is_allowed1());
 }
 
 TEST_CASE("ia32_vmx_true_entry_ctls_ia_32e_mode_guest")
@@ -6907,21 +9521,26 @@ TEST_CASE("ia32_vmx_true_entry_ctls_ia_32e_mode_guest")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    auto mask = intel_x64::msrs::ia32_vmx_true_entry_ctls::ia_32e_mode_guest::mask;
+    using namespace intel_x64::msrs::ia32_vmx_true_entry_ctls;
+    auto mask = ia_32e_mode_guest::mask;
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_entry_ctls::addr] = mask;
-    CHECK(intel_x64::msrs::ia32_vmx_true_entry_ctls::ia_32e_mode_guest::get());
+    g_msrs[addr] = mask;
+    CHECK(ia_32e_mode_guest::is_enabled());
+    g_msrs[addr] = ~mask;
+    CHECK(ia_32e_mode_guest::is_disabled());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_entry_ctls::addr] = ~mask;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_entry_ctls::ia_32e_mode_guest::get());
+    g_msrs[addr] = mask;
+    CHECK(ia_32e_mode_guest::is_enabled(ia_32e_mode_guest::mask));
+    g_msrs[addr] = ~mask;
+    CHECK(ia_32e_mode_guest::is_disabled(~ia_32e_mode_guest::mask));
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_entry_ctls::addr] = mask | (mask << 32);
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_entry_ctls::ia_32e_mode_guest::is_allowed0());
-    CHECK(intel_x64::msrs::ia32_vmx_true_entry_ctls::ia_32e_mode_guest::is_allowed1());
+    g_msrs[addr] = mask | (mask << 32);
+    CHECK_FALSE(ia_32e_mode_guest::is_allowed0());
+    CHECK(ia_32e_mode_guest::is_allowed1());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_entry_ctls::addr] = ~mask & ~(mask << 32);
-    CHECK(intel_x64::msrs::ia32_vmx_true_entry_ctls::ia_32e_mode_guest::is_allowed0());
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_entry_ctls::ia_32e_mode_guest::is_allowed1());
+    g_msrs[addr] = ~(mask | (mask << 32));
+    CHECK(ia_32e_mode_guest::is_allowed0());
+    CHECK_FALSE(ia_32e_mode_guest::is_allowed1());
 }
 
 TEST_CASE("ia32_vmx_true_entry_ctls_entry_to_smm")
@@ -6929,21 +9548,26 @@ TEST_CASE("ia32_vmx_true_entry_ctls_entry_to_smm")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    auto mask = intel_x64::msrs::ia32_vmx_true_entry_ctls::entry_to_smm::mask;
+    using namespace intel_x64::msrs::ia32_vmx_true_entry_ctls;
+    auto mask = entry_to_smm::mask;
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_entry_ctls::addr] = mask;
-    CHECK(intel_x64::msrs::ia32_vmx_true_entry_ctls::entry_to_smm::get());
+    g_msrs[addr] = mask;
+    CHECK(entry_to_smm::is_enabled());
+    g_msrs[addr] = ~mask;
+    CHECK(entry_to_smm::is_disabled());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_entry_ctls::addr] = ~mask;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_entry_ctls::entry_to_smm::get());
+    g_msrs[addr] = mask;
+    CHECK(entry_to_smm::is_enabled(entry_to_smm::mask));
+    g_msrs[addr] = ~mask;
+    CHECK(entry_to_smm::is_disabled(~entry_to_smm::mask));
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_entry_ctls::addr] = mask | (mask << 32);
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_entry_ctls::entry_to_smm::is_allowed0());
-    CHECK(intel_x64::msrs::ia32_vmx_true_entry_ctls::entry_to_smm::is_allowed1());
+    g_msrs[addr] = mask | (mask << 32);
+    CHECK_FALSE(entry_to_smm::is_allowed0());
+    CHECK(entry_to_smm::is_allowed1());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_entry_ctls::addr] = ~mask & ~(mask << 32);
-    CHECK(intel_x64::msrs::ia32_vmx_true_entry_ctls::entry_to_smm::is_allowed0());
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_entry_ctls::entry_to_smm::is_allowed1());
+    g_msrs[addr] = ~(mask | (mask << 32));
+    CHECK(entry_to_smm::is_allowed0());
+    CHECK_FALSE(entry_to_smm::is_allowed1());
 }
 
 TEST_CASE("ia32_vmx_true_entry_ctls_deactivate_dual_monitor_treatment")
@@ -6951,21 +9575,26 @@ TEST_CASE("ia32_vmx_true_entry_ctls_deactivate_dual_monitor_treatment")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    auto mask = intel_x64::msrs::ia32_vmx_true_entry_ctls::deactivate_dual_monitor_treatment::mask;
+    using namespace intel_x64::msrs::ia32_vmx_true_entry_ctls;
+    auto mask = deactivate_dual_monitor_treatment::mask;
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_entry_ctls::addr] = mask;
-    CHECK(intel_x64::msrs::ia32_vmx_true_entry_ctls::deactivate_dual_monitor_treatment::get());
+    g_msrs[addr] = mask;
+    CHECK(deactivate_dual_monitor_treatment::is_enabled());
+    g_msrs[addr] = ~mask;
+    CHECK(deactivate_dual_monitor_treatment::is_disabled());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_entry_ctls::addr] = ~mask;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_entry_ctls::deactivate_dual_monitor_treatment::get());
+    g_msrs[addr] = mask;
+    CHECK(deactivate_dual_monitor_treatment::is_enabled(deactivate_dual_monitor_treatment::mask));
+    g_msrs[addr] = ~mask;
+    CHECK(deactivate_dual_monitor_treatment::is_disabled(~deactivate_dual_monitor_treatment::mask));
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_entry_ctls::addr] = mask | (mask << 32);
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_entry_ctls::deactivate_dual_monitor_treatment::is_allowed0());
-    CHECK(intel_x64::msrs::ia32_vmx_true_entry_ctls::deactivate_dual_monitor_treatment::is_allowed1());
+    g_msrs[addr] = mask | (mask << 32);
+    CHECK_FALSE(deactivate_dual_monitor_treatment::is_allowed0());
+    CHECK(deactivate_dual_monitor_treatment::is_allowed1());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_entry_ctls::addr] = ~mask & ~(mask << 32);
-    CHECK(intel_x64::msrs::ia32_vmx_true_entry_ctls::deactivate_dual_monitor_treatment::is_allowed0());
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_entry_ctls::deactivate_dual_monitor_treatment::is_allowed1());
+    g_msrs[addr] = ~(mask | (mask << 32));
+    CHECK(deactivate_dual_monitor_treatment::is_allowed0());
+    CHECK_FALSE(deactivate_dual_monitor_treatment::is_allowed1());
 }
 
 TEST_CASE("ia32_vmx_true_entry_ctls_load_ia32_perf_global_ctrl")
@@ -6973,21 +9602,26 @@ TEST_CASE("ia32_vmx_true_entry_ctls_load_ia32_perf_global_ctrl")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    auto mask = intel_x64::msrs::ia32_vmx_true_entry_ctls::load_ia32_perf_global_ctrl::mask;
+    using namespace intel_x64::msrs::ia32_vmx_true_entry_ctls;
+    auto mask = load_ia32_perf_global_ctrl::mask;
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_entry_ctls::addr] = mask;
-    CHECK(intel_x64::msrs::ia32_vmx_true_entry_ctls::load_ia32_perf_global_ctrl::get());
+    g_msrs[addr] = mask;
+    CHECK(load_ia32_perf_global_ctrl::is_enabled());
+    g_msrs[addr] = ~mask;
+    CHECK(load_ia32_perf_global_ctrl::is_disabled());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_entry_ctls::addr] = ~mask;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_entry_ctls::load_ia32_perf_global_ctrl::get());
+    g_msrs[addr] = mask;
+    CHECK(load_ia32_perf_global_ctrl::is_enabled(load_ia32_perf_global_ctrl::mask));
+    g_msrs[addr] = ~mask;
+    CHECK(load_ia32_perf_global_ctrl::is_disabled(~load_ia32_perf_global_ctrl::mask));
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_entry_ctls::addr] = mask | (mask << 32);
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_entry_ctls::load_ia32_perf_global_ctrl::is_allowed0());
-    CHECK(intel_x64::msrs::ia32_vmx_true_entry_ctls::load_ia32_perf_global_ctrl::is_allowed1());
+    g_msrs[addr] = mask | (mask << 32);
+    CHECK_FALSE(load_ia32_perf_global_ctrl::is_allowed0());
+    CHECK(load_ia32_perf_global_ctrl::is_allowed1());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_entry_ctls::addr] = ~mask & ~(mask << 32);
-    CHECK(intel_x64::msrs::ia32_vmx_true_entry_ctls::load_ia32_perf_global_ctrl::is_allowed0());
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_entry_ctls::load_ia32_perf_global_ctrl::is_allowed1());
+    g_msrs[addr] = ~(mask | (mask << 32));
+    CHECK(load_ia32_perf_global_ctrl::is_allowed0());
+    CHECK_FALSE(load_ia32_perf_global_ctrl::is_allowed1());
 }
 
 TEST_CASE("ia32_vmx_true_entry_ctls_load_ia32_pat")
@@ -6995,21 +9629,26 @@ TEST_CASE("ia32_vmx_true_entry_ctls_load_ia32_pat")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    auto mask = intel_x64::msrs::ia32_vmx_true_entry_ctls::load_ia32_pat::mask;
+    using namespace intel_x64::msrs::ia32_vmx_true_entry_ctls;
+    auto mask = load_ia32_pat::mask;
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_entry_ctls::addr] = mask;
-    CHECK(intel_x64::msrs::ia32_vmx_true_entry_ctls::load_ia32_pat::get());
+    g_msrs[addr] = mask;
+    CHECK(load_ia32_pat::is_enabled());
+    g_msrs[addr] = ~mask;
+    CHECK(load_ia32_pat::is_disabled());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_entry_ctls::addr] = ~mask;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_entry_ctls::load_ia32_pat::get());
+    g_msrs[addr] = mask;
+    CHECK(load_ia32_pat::is_enabled(load_ia32_pat::mask));
+    g_msrs[addr] = ~mask;
+    CHECK(load_ia32_pat::is_disabled(~load_ia32_pat::mask));
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_entry_ctls::addr] = mask | (mask << 32);
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_entry_ctls::load_ia32_pat::is_allowed0());
-    CHECK(intel_x64::msrs::ia32_vmx_true_entry_ctls::load_ia32_pat::is_allowed1());
+    g_msrs[addr] = mask | (mask << 32);
+    CHECK_FALSE(load_ia32_pat::is_allowed0());
+    CHECK(load_ia32_pat::is_allowed1());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_entry_ctls::addr] = ~mask & ~(mask << 32);
-    CHECK(intel_x64::msrs::ia32_vmx_true_entry_ctls::load_ia32_pat::is_allowed0());
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_entry_ctls::load_ia32_pat::is_allowed1());
+    g_msrs[addr] = ~(mask | (mask << 32));
+    CHECK(load_ia32_pat::is_allowed0());
+    CHECK_FALSE(load_ia32_pat::is_allowed1());
 }
 
 TEST_CASE("ia32_vmx_true_entry_ctls_load_ia32_efer")
@@ -7017,21 +9656,26 @@ TEST_CASE("ia32_vmx_true_entry_ctls_load_ia32_efer")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    auto mask = intel_x64::msrs::ia32_vmx_true_entry_ctls::load_ia32_efer::mask;
+    using namespace intel_x64::msrs::ia32_vmx_true_entry_ctls;
+    auto mask = load_ia32_efer::mask;
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_entry_ctls::addr] = mask;
-    CHECK(intel_x64::msrs::ia32_vmx_true_entry_ctls::load_ia32_efer::get());
+    g_msrs[addr] = mask;
+    CHECK(load_ia32_efer::is_enabled());
+    g_msrs[addr] = ~mask;
+    CHECK(load_ia32_efer::is_disabled());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_entry_ctls::addr] = ~mask;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_entry_ctls::load_ia32_efer::get());
+    g_msrs[addr] = mask;
+    CHECK(load_ia32_efer::is_enabled(load_ia32_efer::mask));
+    g_msrs[addr] = ~mask;
+    CHECK(load_ia32_efer::is_disabled(~load_ia32_efer::mask));
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_entry_ctls::addr] = mask | (mask << 32);
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_entry_ctls::load_ia32_efer::is_allowed0());
-    CHECK(intel_x64::msrs::ia32_vmx_true_entry_ctls::load_ia32_efer::is_allowed1());
+    g_msrs[addr] = mask | (mask << 32);
+    CHECK_FALSE(load_ia32_efer::is_allowed0());
+    CHECK(load_ia32_efer::is_allowed1());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_entry_ctls::addr] = ~mask & ~(mask << 32);
-    CHECK(intel_x64::msrs::ia32_vmx_true_entry_ctls::load_ia32_efer::is_allowed0());
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_entry_ctls::load_ia32_efer::is_allowed1());
+    g_msrs[addr] = ~(mask | (mask << 32));
+    CHECK(load_ia32_efer::is_allowed0());
+    CHECK_FALSE(load_ia32_efer::is_allowed1());
 }
 
 TEST_CASE("ia32_vmx_true_entry_ctls_load_ia32_bndcfgs")
@@ -7039,21 +9683,26 @@ TEST_CASE("ia32_vmx_true_entry_ctls_load_ia32_bndcfgs")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    auto mask = intel_x64::msrs::ia32_vmx_true_entry_ctls::load_ia32_bndcfgs::mask;
+    using namespace intel_x64::msrs::ia32_vmx_true_entry_ctls;
+    auto mask = load_ia32_bndcfgs::mask;
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_entry_ctls::addr] = mask;
-    CHECK(intel_x64::msrs::ia32_vmx_true_entry_ctls::load_ia32_bndcfgs::get());
+    g_msrs[addr] = mask;
+    CHECK(load_ia32_bndcfgs::is_enabled());
+    g_msrs[addr] = ~mask;
+    CHECK(load_ia32_bndcfgs::is_disabled());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_entry_ctls::addr] = ~mask;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_entry_ctls::load_ia32_bndcfgs::get());
+    g_msrs[addr] = mask;
+    CHECK(load_ia32_bndcfgs::is_enabled(load_ia32_bndcfgs::mask));
+    g_msrs[addr] = ~mask;
+    CHECK(load_ia32_bndcfgs::is_disabled(~load_ia32_bndcfgs::mask));
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_entry_ctls::addr] = mask | (mask << 32);
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_entry_ctls::load_ia32_bndcfgs::is_allowed0());
-    CHECK(intel_x64::msrs::ia32_vmx_true_entry_ctls::load_ia32_bndcfgs::is_allowed1());
+    g_msrs[addr] = mask | (mask << 32);
+    CHECK_FALSE(load_ia32_bndcfgs::is_allowed0());
+    CHECK(load_ia32_bndcfgs::is_allowed1());
 
-    g_msrs[intel_x64::msrs::ia32_vmx_true_entry_ctls::addr] = ~mask & ~(mask << 32);
-    CHECK(intel_x64::msrs::ia32_vmx_true_entry_ctls::load_ia32_bndcfgs::is_allowed0());
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_true_entry_ctls::load_ia32_bndcfgs::is_allowed1());
+    g_msrs[addr] = ~(mask | (mask << 32));
+    CHECK(load_ia32_bndcfgs::is_allowed0());
+    CHECK_FALSE(load_ia32_bndcfgs::is_allowed1());
 }
 
 TEST_CASE("ia32_vmx_vmfunc")
@@ -7061,11 +9710,11 @@ TEST_CASE("ia32_vmx_vmfunc")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[intel_x64::msrs::ia32_vmx_vmfunc::addr] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_vmx_vmfunc::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_vmx_vmfunc;
 
-    g_msrs[intel_x64::msrs::ia32_vmx_vmfunc::addr] = 0x0UL;
-    CHECK(intel_x64::msrs::ia32_vmx_vmfunc::get() == 0x0UL);
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_vmx_vmfunc_eptp_switching")
@@ -7073,11 +9722,20 @@ TEST_CASE("ia32_vmx_vmfunc_eptp_switching")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[intel_x64::msrs::ia32_vmx_vmfunc::addr] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_vmx_vmfunc::eptp_switching::is_allowed1());
+    using namespace intel_x64::msrs::ia32_vmx_vmfunc;
+    auto mask = eptp_switching::mask;
 
-    g_msrs[intel_x64::msrs::ia32_vmx_vmfunc::addr] = 0xFFFFFFFFFFFFFFFEULL;
-    CHECK_FALSE(intel_x64::msrs::ia32_vmx_vmfunc::eptp_switching::is_allowed1());
+    g_msrs[addr] = mask;
+    CHECK(eptp_switching::is_enabled());
+
+    g_msrs[addr] = mask;
+    CHECK(eptp_switching::is_enabled(mask));
+
+    g_msrs[addr] = mask | (mask << 32);
+    CHECK(eptp_switching::is_allowed1());
+
+    g_msrs[addr] = ~(mask | (mask << 32));
+    CHECK_FALSE(eptp_switching::is_allowed1());
 }
 
 TEST_CASE("ia32_a_pmc0")
@@ -7085,8 +9743,11 @@ TEST_CASE("ia32_a_pmc0")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_a_pmc0::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_a_pmc0::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_a_pmc0;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_a_pmc1")
@@ -7094,8 +9755,11 @@ TEST_CASE("ia32_a_pmc1")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_a_pmc1::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_a_pmc1::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_a_pmc1;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_a_pmc2")
@@ -7103,8 +9767,11 @@ TEST_CASE("ia32_a_pmc2")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_a_pmc2::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_a_pmc2::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_a_pmc2;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_a_pmc3")
@@ -7112,8 +9779,11 @@ TEST_CASE("ia32_a_pmc3")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_a_pmc3::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_a_pmc3::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_a_pmc3;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_a_pmc4")
@@ -7121,8 +9791,11 @@ TEST_CASE("ia32_a_pmc4")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_a_pmc4::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_a_pmc4::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_a_pmc4;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_a_pmc5")
@@ -7130,8 +9803,11 @@ TEST_CASE("ia32_a_pmc5")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_a_pmc5::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_a_pmc5::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_a_pmc5;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_a_pmc6")
@@ -7139,8 +9815,11 @@ TEST_CASE("ia32_a_pmc6")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_a_pmc6::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_a_pmc6::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_a_pmc6;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_a_pmc7")
@@ -7148,8 +9827,11 @@ TEST_CASE("ia32_a_pmc7")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_a_pmc7::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_a_pmc7::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_a_pmc7;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mcg_ext_ctl")
@@ -7157,8 +9839,11 @@ TEST_CASE("ia32_mcg_ext_ctl")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mcg_ext_ctl::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_mcg_ext_ctl::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_mcg_ext_ctl;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_mcg_ext_ctl_lmce_en")
@@ -7166,11 +9851,17 @@ TEST_CASE("ia32_mcg_ext_ctl_lmce_en")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_mcg_ext_ctl::lmce_en::set(true);
-    CHECK(intel_x64::msrs::ia32_mcg_ext_ctl::lmce_en::get());
+    using namespace intel_x64::msrs::ia32_mcg_ext_ctl;
 
-    intel_x64::msrs::ia32_mcg_ext_ctl::lmce_en::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_mcg_ext_ctl::lmce_en::get());
+    lmce_en::enable();
+    CHECK(lmce_en::is_enabled());
+    lmce_en::disable();
+    CHECK(lmce_en::is_disabled());
+
+    lmce_en::enable(lmce_en::mask);
+    CHECK(lmce_en::is_enabled(lmce_en::mask));
+    lmce_en::disable(0x0);
+    CHECK(lmce_en::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_sgx_svn_sinit")
@@ -7178,8 +9869,11 @@ TEST_CASE("ia32_sgx_svn_sinit")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000500UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_sgx_svn_sinit::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_sgx_svn_sinit;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_sgx_svn_sinit_lock")
@@ -7187,11 +9881,17 @@ TEST_CASE("ia32_sgx_svn_sinit_lock")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000500UL] = 0x0000000000000001ULL;
-    CHECK(intel_x64::msrs::ia32_sgx_svn_sinit::lock::get());
+    using namespace intel_x64::msrs::ia32_sgx_svn_sinit;
 
-    g_msrs[0x00000500UL] = 0x0000000000000000ULL;
-    CHECK_FALSE(intel_x64::msrs::ia32_sgx_svn_sinit::lock::get());
+    g_msrs[addr] = lock::mask;
+    CHECK(lock::is_enabled());
+    g_msrs[addr] = 0x0;
+    CHECK(lock::is_disabled());
+
+    g_msrs[addr] = lock::mask;
+    CHECK(lock::is_enabled(lock::mask));
+    g_msrs[addr] = 0x0;
+    CHECK(lock::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_sgx_svn_sinit_sgx_svn_sinit")
@@ -7199,8 +9899,11 @@ TEST_CASE("ia32_sgx_svn_sinit_sgx_svn_sinit")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000500UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_sgx_svn_sinit::sgx_svn_sinit::get() == 0x00000000000000FFULL);
+    using namespace intel_x64::msrs::ia32_sgx_svn_sinit;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(sgx_svn_sinit::get() == (sgx_svn_sinit::mask >> sgx_svn_sinit::from));
+    CHECK(sgx_svn_sinit::get(sgx_svn_sinit::mask) == (sgx_svn_sinit::mask >> sgx_svn_sinit::from));
 }
 
 TEST_CASE("ia32_rtit_output_base")
@@ -7208,8 +9911,11 @@ TEST_CASE("ia32_rtit_output_base")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_rtit_output_base::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_rtit_output_base::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_rtit_output_base;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_rtit_output_base_base_phys_address")
@@ -7217,8 +9923,13 @@ TEST_CASE("ia32_rtit_output_base_base_phys_address")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_rtit_output_base::base_phys_address::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_rtit_output_base::base_phys_address::get() == 0x00FFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_rtit_output_base;
+
+    base_phys_address::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(base_phys_address::get() == (base_phys_address::mask >> base_phys_address::from));
+
+    base_phys_address::set(base_phys_address::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(base_phys_address::get(base_phys_address::mask) == (base_phys_address::mask >> base_phys_address::from));
 }
 
 TEST_CASE("ia32_rtit_output_mask_ptrs")
@@ -7226,8 +9937,11 @@ TEST_CASE("ia32_rtit_output_mask_ptrs")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_rtit_output_mask_ptrs::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_rtit_output_mask_ptrs::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_rtit_output_mask_ptrs;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_rtit_output_mask_ptrs_mask_table_offset")
@@ -7235,8 +9949,13 @@ TEST_CASE("ia32_rtit_output_mask_ptrs_mask_table_offset")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_rtit_output_mask_ptrs::mask_table_offset::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_rtit_output_mask_ptrs::mask_table_offset::get() == 0x0000000001FFFFFFULL);
+    using namespace intel_x64::msrs::ia32_rtit_output_mask_ptrs;
+
+    mask_table_offset::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(mask_table_offset::get() == (mask_table_offset::mask >> mask_table_offset::from));
+
+    mask_table_offset::set(mask_table_offset::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(mask_table_offset::get(mask_table_offset::mask) == (mask_table_offset::mask >> mask_table_offset::from));
 }
 
 TEST_CASE("ia32_rtit_output_mask_ptrs_output_offset")
@@ -7244,8 +9963,13 @@ TEST_CASE("ia32_rtit_output_mask_ptrs_output_offset")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_rtit_output_mask_ptrs::output_offset::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_rtit_output_mask_ptrs::output_offset::get() == 0x00000000FFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_rtit_output_mask_ptrs;
+
+    output_offset::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(output_offset::get() == (output_offset::mask >> output_offset::from));
+
+    output_offset::set(output_offset::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(output_offset::get(output_offset::mask) == (output_offset::mask >> output_offset::from));
 }
 
 TEST_CASE("ia32_rtit_ctl")
@@ -7253,8 +9977,11 @@ TEST_CASE("ia32_rtit_ctl")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_rtit_ctl::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_rtit_ctl::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_rtit_ctl;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_rtit_ctl_traceen")
@@ -7262,11 +9989,17 @@ TEST_CASE("ia32_rtit_ctl_traceen")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_rtit_ctl::traceen::set(true);
-    CHECK(intel_x64::msrs::ia32_rtit_ctl::traceen::get());
+    using namespace intel_x64::msrs::ia32_rtit_ctl;
 
-    intel_x64::msrs::ia32_rtit_ctl::traceen::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_rtit_ctl::traceen::get());
+    traceen::enable();
+    CHECK(traceen::is_enabled());
+    traceen::disable();
+    CHECK(traceen::is_disabled());
+
+    traceen::enable(traceen::mask);
+    CHECK(traceen::is_enabled(traceen::mask));
+    traceen::disable(0x0);
+    CHECK(traceen::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_rtit_ctl_cycen")
@@ -7274,11 +10007,17 @@ TEST_CASE("ia32_rtit_ctl_cycen")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_rtit_ctl::cycen::set(true);
-    CHECK(intel_x64::msrs::ia32_rtit_ctl::cycen::get());
+    using namespace intel_x64::msrs::ia32_rtit_ctl;
 
-    intel_x64::msrs::ia32_rtit_ctl::cycen::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_rtit_ctl::cycen::get());
+    cycen::enable();
+    CHECK(cycen::is_enabled());
+    cycen::disable();
+    CHECK(cycen::is_disabled());
+
+    cycen::enable(cycen::mask);
+    CHECK(cycen::is_enabled(cycen::mask));
+    cycen::disable(0x0);
+    CHECK(cycen::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_rtit_ctl_os")
@@ -7286,11 +10025,17 @@ TEST_CASE("ia32_rtit_ctl_os")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_rtit_ctl::os::set(true);
-    CHECK(intel_x64::msrs::ia32_rtit_ctl::os::get());
+    using namespace intel_x64::msrs::ia32_rtit_ctl;
 
-    intel_x64::msrs::ia32_rtit_ctl::os::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_rtit_ctl::os::get());
+    os::enable();
+    CHECK(os::is_enabled());
+    os::disable();
+    CHECK(os::is_disabled());
+
+    os::enable(os::mask);
+    CHECK(os::is_enabled(os::mask));
+    os::disable(0x0);
+    CHECK(os::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_rtit_ctl_user")
@@ -7298,11 +10043,17 @@ TEST_CASE("ia32_rtit_ctl_user")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_rtit_ctl::user::set(true);
-    CHECK(intel_x64::msrs::ia32_rtit_ctl::user::get());
+    using namespace intel_x64::msrs::ia32_rtit_ctl;
 
-    intel_x64::msrs::ia32_rtit_ctl::user::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_rtit_ctl::user::get());
+    user::enable();
+    CHECK(user::is_enabled());
+    user::disable();
+    CHECK(user::is_disabled());
+
+    user::enable(user::mask);
+    CHECK(user::is_enabled(user::mask));
+    user::disable(0x0);
+    CHECK(user::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_rtit_ctl_fabricen")
@@ -7310,11 +10061,17 @@ TEST_CASE("ia32_rtit_ctl_fabricen")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_rtit_ctl::fabricen::set(true);
-    CHECK(intel_x64::msrs::ia32_rtit_ctl::fabricen::get());
+    using namespace intel_x64::msrs::ia32_rtit_ctl;
 
-    intel_x64::msrs::ia32_rtit_ctl::fabricen::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_rtit_ctl::fabricen::get());
+    fabricen::enable();
+    CHECK(fabricen::is_enabled());
+    fabricen::disable();
+    CHECK(fabricen::is_disabled());
+
+    fabricen::enable(fabricen::mask);
+    CHECK(fabricen::is_enabled(fabricen::mask));
+    fabricen::disable(0x0);
+    CHECK(fabricen::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_rtit_ctl_cr3_filter")
@@ -7322,11 +10079,17 @@ TEST_CASE("ia32_rtit_ctl_cr3_filter")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_rtit_ctl::cr3_filter::set(true);
-    CHECK(intel_x64::msrs::ia32_rtit_ctl::cr3_filter::get());
+    using namespace intel_x64::msrs::ia32_rtit_ctl;
 
-    intel_x64::msrs::ia32_rtit_ctl::cr3_filter::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_rtit_ctl::cr3_filter::get());
+    cr3_filter::enable();
+    CHECK(cr3_filter::is_enabled());
+    cr3_filter::disable();
+    CHECK(cr3_filter::is_disabled());
+
+    cr3_filter::enable(cr3_filter::mask);
+    CHECK(cr3_filter::is_enabled(cr3_filter::mask));
+    cr3_filter::disable(0x0);
+    CHECK(cr3_filter::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_rtit_ctl_topa")
@@ -7334,11 +10097,17 @@ TEST_CASE("ia32_rtit_ctl_topa")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_rtit_ctl::topa::set(true);
-    CHECK(intel_x64::msrs::ia32_rtit_ctl::topa::get());
+    using namespace intel_x64::msrs::ia32_rtit_ctl;
 
-    intel_x64::msrs::ia32_rtit_ctl::topa::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_rtit_ctl::topa::get());
+    topa::enable();
+    CHECK(topa::is_enabled());
+    topa::disable();
+    CHECK(topa::is_disabled());
+
+    topa::enable(topa::mask);
+    CHECK(topa::is_enabled(topa::mask));
+    topa::disable(0x0);
+    CHECK(topa::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_rtit_ctl_mtcen")
@@ -7346,11 +10115,17 @@ TEST_CASE("ia32_rtit_ctl_mtcen")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_rtit_ctl::mtcen::set(true);
-    CHECK(intel_x64::msrs::ia32_rtit_ctl::mtcen::get());
+    using namespace intel_x64::msrs::ia32_rtit_ctl;
 
-    intel_x64::msrs::ia32_rtit_ctl::mtcen::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_rtit_ctl::mtcen::get());
+    mtcen::enable();
+    CHECK(mtcen::is_enabled());
+    mtcen::disable();
+    CHECK(mtcen::is_disabled());
+
+    mtcen::enable(mtcen::mask);
+    CHECK(mtcen::is_enabled(mtcen::mask));
+    mtcen::disable(0x0);
+    CHECK(mtcen::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_rtit_ctl_tscen")
@@ -7358,11 +10133,17 @@ TEST_CASE("ia32_rtit_ctl_tscen")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_rtit_ctl::tscen::set(true);
-    CHECK(intel_x64::msrs::ia32_rtit_ctl::tscen::get());
+    using namespace intel_x64::msrs::ia32_rtit_ctl;
 
-    intel_x64::msrs::ia32_rtit_ctl::tscen::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_rtit_ctl::tscen::get());
+    tscen::enable();
+    CHECK(tscen::is_enabled());
+    tscen::disable();
+    CHECK(tscen::is_disabled());
+
+    tscen::enable(tscen::mask);
+    CHECK(tscen::is_enabled(tscen::mask));
+    tscen::disable(0x0);
+    CHECK(tscen::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_rtit_ctl_disretc")
@@ -7370,11 +10151,17 @@ TEST_CASE("ia32_rtit_ctl_disretc")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_rtit_ctl::disretc::set(true);
-    CHECK(intel_x64::msrs::ia32_rtit_ctl::disretc::get());
+    using namespace intel_x64::msrs::ia32_rtit_ctl;
 
-    intel_x64::msrs::ia32_rtit_ctl::disretc::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_rtit_ctl::disretc::get());
+    disretc::enable();
+    CHECK(disretc::is_enabled());
+    disretc::disable();
+    CHECK(disretc::is_disabled());
+
+    disretc::enable(disretc::mask);
+    CHECK(disretc::is_enabled(disretc::mask));
+    disretc::disable(0x0);
+    CHECK(disretc::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_rtit_ctl_branchen")
@@ -7382,11 +10169,17 @@ TEST_CASE("ia32_rtit_ctl_branchen")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_rtit_ctl::branchen::set(true);
-    CHECK(intel_x64::msrs::ia32_rtit_ctl::branchen::get());
+    using namespace intel_x64::msrs::ia32_rtit_ctl;
 
-    intel_x64::msrs::ia32_rtit_ctl::branchen::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_rtit_ctl::branchen::get());
+    branchen::enable();
+    CHECK(branchen::is_enabled());
+    branchen::disable();
+    CHECK(branchen::is_disabled());
+
+    branchen::enable(branchen::mask);
+    CHECK(branchen::is_enabled(branchen::mask));
+    branchen::disable(0x0);
+    CHECK(branchen::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_rtit_ctl_mtcfreq")
@@ -7394,8 +10187,13 @@ TEST_CASE("ia32_rtit_ctl_mtcfreq")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_rtit_ctl::mtcfreq::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_rtit_ctl::mtcfreq::get() == 0x000000000000000FULL);
+    using namespace intel_x64::msrs::ia32_rtit_ctl;
+
+    mtcfreq::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(mtcfreq::get() == (mtcfreq::mask >> mtcfreq::from));
+
+    mtcfreq::set(mtcfreq::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(mtcfreq::get(mtcfreq::mask) == (mtcfreq::mask >> mtcfreq::from));
 }
 
 TEST_CASE("ia32_rtit_ctl_cycthresh")
@@ -7403,8 +10201,13 @@ TEST_CASE("ia32_rtit_ctl_cycthresh")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_rtit_ctl::cycthresh::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_rtit_ctl::cycthresh::get() == 0x000000000000000FULL);
+    using namespace intel_x64::msrs::ia32_rtit_ctl;
+
+    cycthresh::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(cycthresh::get() == (cycthresh::mask >> cycthresh::from));
+
+    cycthresh::set(cycthresh::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(cycthresh::get(cycthresh::mask) == (cycthresh::mask >> cycthresh::from));
 }
 
 TEST_CASE("ia32_rtit_ctl_psbfreq")
@@ -7412,8 +10215,13 @@ TEST_CASE("ia32_rtit_ctl_psbfreq")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_rtit_ctl::psbfreq::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_rtit_ctl::psbfreq::get() == 0x000000000000000FULL);
+    using namespace intel_x64::msrs::ia32_rtit_ctl;
+
+    psbfreq::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(psbfreq::get() == (psbfreq::mask >> psbfreq::from));
+
+    psbfreq::set(psbfreq::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(psbfreq::get(psbfreq::mask) == (psbfreq::mask >> psbfreq::from));
 }
 
 TEST_CASE("ia32_rtit_ctl_addr0_cfg")
@@ -7421,8 +10229,13 @@ TEST_CASE("ia32_rtit_ctl_addr0_cfg")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_rtit_ctl::addr0_cfg::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_rtit_ctl::addr0_cfg::get() == 0x000000000000000FULL);
+    using namespace intel_x64::msrs::ia32_rtit_ctl;
+
+    addr0_cfg::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(addr0_cfg::get() == (addr0_cfg::mask >> addr0_cfg::from));
+
+    addr0_cfg::set(addr0_cfg::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(addr0_cfg::get(addr0_cfg::mask) == (addr0_cfg::mask >> addr0_cfg::from));
 }
 
 TEST_CASE("ia32_rtit_ctl_addr1_cfg")
@@ -7430,8 +10243,13 @@ TEST_CASE("ia32_rtit_ctl_addr1_cfg")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_rtit_ctl::addr1_cfg::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_rtit_ctl::addr1_cfg::get() == 0x000000000000000FULL);
+    using namespace intel_x64::msrs::ia32_rtit_ctl;
+
+    addr1_cfg::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(addr1_cfg::get() == (addr1_cfg::mask >> addr1_cfg::from));
+
+    addr1_cfg::set(addr1_cfg::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(addr1_cfg::get(addr1_cfg::mask) == (addr1_cfg::mask >> addr1_cfg::from));
 }
 
 TEST_CASE("ia32_rtit_ctl_addr2_cfg")
@@ -7439,8 +10257,13 @@ TEST_CASE("ia32_rtit_ctl_addr2_cfg")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_rtit_ctl::addr2_cfg::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_rtit_ctl::addr2_cfg::get() == 0x000000000000000FULL);
+    using namespace intel_x64::msrs::ia32_rtit_ctl;
+
+    addr2_cfg::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(addr2_cfg::get() == (addr2_cfg::mask >> addr2_cfg::from));
+
+    addr2_cfg::set(addr2_cfg::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(addr2_cfg::get(addr2_cfg::mask) == (addr2_cfg::mask >> addr2_cfg::from));
 }
 
 TEST_CASE("ia32_rtit_ctl_addr3_cfg")
@@ -7448,8 +10271,13 @@ TEST_CASE("ia32_rtit_ctl_addr3_cfg")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_rtit_ctl::addr3_cfg::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_rtit_ctl::addr3_cfg::get() == 0x000000000000000FULL);
+    using namespace intel_x64::msrs::ia32_rtit_ctl;
+
+    addr3_cfg::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(addr3_cfg::get() == (addr3_cfg::mask >> addr3_cfg::from));
+
+    addr3_cfg::set(addr3_cfg::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(addr3_cfg::get(addr3_cfg::mask) == (addr3_cfg::mask >> addr3_cfg::from));
 }
 
 TEST_CASE("ia32_rtit_status")
@@ -7457,8 +10285,11 @@ TEST_CASE("ia32_rtit_status")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_rtit_status::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_rtit_status::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_rtit_status;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_rtit_status_filteren")
@@ -7466,11 +10297,17 @@ TEST_CASE("ia32_rtit_status_filteren")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000571UL] = 0x0000000000000001ULL;
-    CHECK(intel_x64::msrs::ia32_rtit_status::filteren::get());
+    using namespace intel_x64::msrs::ia32_rtit_status;
 
-    g_msrs[0x00000571UL] = 0x0000000000000000ULL;
-    CHECK_FALSE(intel_x64::msrs::ia32_rtit_status::filteren::get());
+    g_msrs[addr] = filteren::mask;
+    CHECK(filteren::is_enabled());
+    g_msrs[addr] = 0x0;
+    CHECK(filteren::is_disabled());
+
+    g_msrs[addr] = filteren::mask;
+    CHECK(filteren::is_enabled(filteren::mask));
+    g_msrs[addr] = 0x0;
+    CHECK(filteren::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_rtit_status_contexen")
@@ -7478,11 +10315,17 @@ TEST_CASE("ia32_rtit_status_contexen")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000571UL] = 0x0000000000000002ULL;
-    CHECK(intel_x64::msrs::ia32_rtit_status::contexen::get());
+    using namespace intel_x64::msrs::ia32_rtit_status;
 
-    g_msrs[0x00000571UL] = 0x0000000000000000ULL;
-    CHECK_FALSE(intel_x64::msrs::ia32_rtit_status::contexen::get());
+    g_msrs[addr] = contexen::mask;
+    CHECK(contexen::is_enabled());
+    g_msrs[addr] = 0x0;
+    CHECK(contexen::is_disabled());
+
+    g_msrs[addr] = contexen::mask;
+    CHECK(contexen::is_enabled(contexen::mask));
+    g_msrs[addr] = 0x0;
+    CHECK(contexen::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_rtit_status_triggeren")
@@ -7490,11 +10333,17 @@ TEST_CASE("ia32_rtit_status_triggeren")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000571UL] = 0x0000000000000004ULL;
-    CHECK(intel_x64::msrs::ia32_rtit_status::triggeren::get());
+    using namespace intel_x64::msrs::ia32_rtit_status;
 
-    g_msrs[0x00000571UL] = 0x0000000000000000ULL;
-    CHECK_FALSE(intel_x64::msrs::ia32_rtit_status::triggeren::get());
+    g_msrs[addr] = triggeren::mask;
+    CHECK(triggeren::is_enabled());
+    g_msrs[addr] = 0x0;
+    CHECK(triggeren::is_disabled());
+
+    g_msrs[addr] = triggeren::mask;
+    CHECK(triggeren::is_enabled(triggeren::mask));
+    g_msrs[addr] = 0x0;
+    CHECK(triggeren::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_rtit_status_error")
@@ -7502,11 +10351,17 @@ TEST_CASE("ia32_rtit_status_error")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_rtit_status::error::set(true);
-    CHECK(intel_x64::msrs::ia32_rtit_status::error::get());
+    using namespace intel_x64::msrs::ia32_rtit_status;
 
-    intel_x64::msrs::ia32_rtit_status::error::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_rtit_status::error::get());
+    error::enable();
+    CHECK(error::is_enabled());
+    error::disable();
+    CHECK(error::is_disabled());
+
+    error::enable(error::mask);
+    CHECK(error::is_enabled(error::mask));
+    error::disable(0x0);
+    CHECK(error::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_rtit_status_stopped")
@@ -7514,11 +10369,17 @@ TEST_CASE("ia32_rtit_status_stopped")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_rtit_status::stopped::set(true);
-    CHECK(intel_x64::msrs::ia32_rtit_status::stopped::get());
+    using namespace intel_x64::msrs::ia32_rtit_status;
 
-    intel_x64::msrs::ia32_rtit_status::stopped::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_rtit_status::stopped::get());
+    stopped::enable();
+    CHECK(stopped::is_enabled());
+    stopped::disable();
+    CHECK(stopped::is_disabled());
+
+    stopped::enable(stopped::mask);
+    CHECK(stopped::is_enabled(stopped::mask));
+    stopped::disable(0x0);
+    CHECK(stopped::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_rtit_status_packetbytecnt")
@@ -7526,8 +10387,13 @@ TEST_CASE("ia32_rtit_status_packetbytecnt")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_rtit_status::packetbytecnt::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_rtit_status::packetbytecnt::get() == 0x000000000001FFFFULL);
+    using namespace intel_x64::msrs::ia32_rtit_status;
+
+    packetbytecnt::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(packetbytecnt::get() == (packetbytecnt::mask >> packetbytecnt::from));
+
+    packetbytecnt::set(packetbytecnt::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(packetbytecnt::get(packetbytecnt::mask) == (packetbytecnt::mask >> packetbytecnt::from));
 }
 
 TEST_CASE("ia32_rtit_cr3_match")
@@ -7535,8 +10401,11 @@ TEST_CASE("ia32_rtit_cr3_match")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_rtit_cr3_match::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_rtit_cr3_match::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_rtit_cr3_match;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_rtit_cr3_match_cr3")
@@ -7544,8 +10413,14 @@ TEST_CASE("ia32_rtit_cr3_match_cr3")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_rtit_cr3_match::cr3::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_rtit_cr3_match::cr3::get() == 0x07FFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_rtit_cr3_match;
+
+    cr3::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(cr3::get() == (cr3::mask >> cr3::from));
+
+    cr3::set(cr3::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(cr3::get(cr3::mask) == (cr3::mask >> cr3::from));
+
 }
 
 TEST_CASE("ia32_rtit_addr0_a")
@@ -7553,8 +10428,11 @@ TEST_CASE("ia32_rtit_addr0_a")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_rtit_addr0_a::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_rtit_addr0_a::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_rtit_addr0_a;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_rtit_addr0_a_virtual_address")
@@ -7562,8 +10440,13 @@ TEST_CASE("ia32_rtit_addr0_a_virtual_address")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_rtit_addr0_a::virtual_address::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_rtit_addr0_a::virtual_address::get() == 0x0000FFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_rtit_addr0_a;
+
+    virtual_address::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(virtual_address::get() == (virtual_address::mask >> virtual_address::from));
+
+    virtual_address::set(virtual_address::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(virtual_address::get(virtual_address::mask) == (virtual_address::mask >> virtual_address::from));
 }
 
 TEST_CASE("ia32_rtit_addr0_a_signext_va")
@@ -7571,8 +10454,13 @@ TEST_CASE("ia32_rtit_addr0_a_signext_va")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_rtit_addr0_a::signext_va::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_rtit_addr0_a::signext_va::get() == 0x000000000000FFFFULL);
+    using namespace intel_x64::msrs::ia32_rtit_addr0_a;
+
+    signext_va::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(signext_va::get() == (signext_va::mask >> signext_va::from));
+
+    signext_va::set(signext_va::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(signext_va::get(signext_va::mask) == (signext_va::mask >> signext_va::from));
 }
 
 TEST_CASE("ia32_rtit_addr0_b")
@@ -7580,8 +10468,11 @@ TEST_CASE("ia32_rtit_addr0_b")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_rtit_addr0_b::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_rtit_addr0_b::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_rtit_addr0_b;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_rtit_addr0_b_virtual_address")
@@ -7589,8 +10480,13 @@ TEST_CASE("ia32_rtit_addr0_b_virtual_address")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_rtit_addr0_b::virtual_address::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_rtit_addr0_b::virtual_address::get() == 0x0000FFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_rtit_addr0_b;
+
+    virtual_address::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(virtual_address::get() == (virtual_address::mask >> virtual_address::from));
+
+    virtual_address::set(virtual_address::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(virtual_address::get(virtual_address::mask) == (virtual_address::mask >> virtual_address::from));
 }
 
 TEST_CASE("ia32_rtit_addr0_b_signext_va")
@@ -7598,8 +10494,13 @@ TEST_CASE("ia32_rtit_addr0_b_signext_va")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_rtit_addr0_b::signext_va::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_rtit_addr0_b::signext_va::get() == 0x000000000000FFFFULL);
+    using namespace intel_x64::msrs::ia32_rtit_addr0_b;
+
+    signext_va::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(signext_va::get() == (signext_va::mask >> signext_va::from));
+
+    signext_va::set(signext_va::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(signext_va::get(signext_va::mask) == (signext_va::mask >> signext_va::from));
 }
 
 TEST_CASE("ia32_rtit_addr1_a")
@@ -7607,8 +10508,11 @@ TEST_CASE("ia32_rtit_addr1_a")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_rtit_addr1_a::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_rtit_addr1_a::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_rtit_addr1_a;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_rtit_addr1_a_virtual_address")
@@ -7616,8 +10520,13 @@ TEST_CASE("ia32_rtit_addr1_a_virtual_address")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_rtit_addr1_a::virtual_address::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_rtit_addr1_a::virtual_address::get() == 0x0000FFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_rtit_addr1_a;
+
+    virtual_address::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(virtual_address::get() == (virtual_address::mask >> virtual_address::from));
+
+    virtual_address::set(virtual_address::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(virtual_address::get(virtual_address::mask) == (virtual_address::mask >> virtual_address::from));
 }
 
 TEST_CASE("ia32_rtit_addr1_a_signext_va")
@@ -7625,8 +10534,13 @@ TEST_CASE("ia32_rtit_addr1_a_signext_va")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_rtit_addr1_a::signext_va::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_rtit_addr1_a::signext_va::get() == 0x000000000000FFFFULL);
+    using namespace intel_x64::msrs::ia32_rtit_addr1_a;
+
+    signext_va::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(signext_va::get() == (signext_va::mask >> signext_va::from));
+
+    signext_va::set(signext_va::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(signext_va::get(signext_va::mask) == (signext_va::mask >> signext_va::from));
 }
 
 TEST_CASE("ia32_rtit_addr1_b")
@@ -7634,8 +10548,11 @@ TEST_CASE("ia32_rtit_addr1_b")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_rtit_addr1_b::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_rtit_addr1_b::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_rtit_addr1_b;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_rtit_addr1_b_virtual_address")
@@ -7643,8 +10560,13 @@ TEST_CASE("ia32_rtit_addr1_b_virtual_address")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_rtit_addr1_b::virtual_address::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_rtit_addr1_b::virtual_address::get() == 0x0000FFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_rtit_addr1_b;
+
+    virtual_address::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(virtual_address::get() == (virtual_address::mask >> virtual_address::from));
+
+    virtual_address::set(virtual_address::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(virtual_address::get(virtual_address::mask) == (virtual_address::mask >> virtual_address::from));
 }
 
 TEST_CASE("ia32_rtit_addr1_b_signext_va")
@@ -7652,8 +10574,13 @@ TEST_CASE("ia32_rtit_addr1_b_signext_va")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_rtit_addr1_b::signext_va::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_rtit_addr1_b::signext_va::get() == 0x000000000000FFFFULL);
+    using namespace intel_x64::msrs::ia32_rtit_addr1_b;
+
+    signext_va::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(signext_va::get() == (signext_va::mask >> signext_va::from));
+
+    signext_va::set(signext_va::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(signext_va::get(signext_va::mask) == (signext_va::mask >> signext_va::from));
 }
 
 TEST_CASE("ia32_rtit_addr2_a")
@@ -7661,8 +10588,11 @@ TEST_CASE("ia32_rtit_addr2_a")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_rtit_addr2_a::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_rtit_addr2_a::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_rtit_addr2_a;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_rtit_addr2_a_virtual_address")
@@ -7670,8 +10600,13 @@ TEST_CASE("ia32_rtit_addr2_a_virtual_address")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_rtit_addr2_a::virtual_address::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_rtit_addr2_a::virtual_address::get() == 0x0000FFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_rtit_addr2_a;
+
+    virtual_address::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(virtual_address::get() == (virtual_address::mask >> virtual_address::from));
+
+    virtual_address::set(virtual_address::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(virtual_address::get(virtual_address::mask) == (virtual_address::mask >> virtual_address::from));
 }
 
 TEST_CASE("ia32_rtit_addr2_a_signext_va")
@@ -7679,8 +10614,13 @@ TEST_CASE("ia32_rtit_addr2_a_signext_va")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_rtit_addr2_a::signext_va::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_rtit_addr2_a::signext_va::get() == 0x000000000000FFFFULL);
+    using namespace intel_x64::msrs::ia32_rtit_addr2_a;
+
+    signext_va::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(signext_va::get() == (signext_va::mask >> signext_va::from));
+
+    signext_va::set(signext_va::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(signext_va::get(signext_va::mask) == (signext_va::mask >> signext_va::from));
 }
 
 TEST_CASE("ia32_rtit_addr2_b")
@@ -7688,8 +10628,11 @@ TEST_CASE("ia32_rtit_addr2_b")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_rtit_addr2_b::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_rtit_addr2_b::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_rtit_addr2_b;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_rtit_addr2_b_virtual_address")
@@ -7697,8 +10640,13 @@ TEST_CASE("ia32_rtit_addr2_b_virtual_address")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_rtit_addr2_b::virtual_address::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_rtit_addr2_b::virtual_address::get() == 0x0000FFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_rtit_addr2_b;
+
+    virtual_address::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(virtual_address::get() == (virtual_address::mask >> virtual_address::from));
+
+    virtual_address::set(virtual_address::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(virtual_address::get(virtual_address::mask) == (virtual_address::mask >> virtual_address::from));
 }
 
 TEST_CASE("ia32_rtit_addr2_b_signext_va")
@@ -7706,8 +10654,13 @@ TEST_CASE("ia32_rtit_addr2_b_signext_va")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_rtit_addr2_b::signext_va::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_rtit_addr2_b::signext_va::get() == 0x000000000000FFFFULL);
+    using namespace intel_x64::msrs::ia32_rtit_addr2_b;
+
+    signext_va::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(signext_va::get() == (signext_va::mask >> signext_va::from));
+
+    signext_va::set(signext_va::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(signext_va::get(signext_va::mask) == (signext_va::mask >> signext_va::from));
 }
 
 TEST_CASE("ia32_rtit_addr3_a")
@@ -7715,8 +10668,11 @@ TEST_CASE("ia32_rtit_addr3_a")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_rtit_addr3_a::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_rtit_addr3_a::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_rtit_addr3_a;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_rtit_addr3_a_virtual_address")
@@ -7724,8 +10680,13 @@ TEST_CASE("ia32_rtit_addr3_a_virtual_address")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_rtit_addr3_a::virtual_address::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_rtit_addr3_a::virtual_address::get() == 0x0000FFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_rtit_addr3_a;
+
+    virtual_address::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(virtual_address::get() == (virtual_address::mask >> virtual_address::from));
+
+    virtual_address::set(virtual_address::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(virtual_address::get(virtual_address::mask) == (virtual_address::mask >> virtual_address::from));
 }
 
 TEST_CASE("ia32_rtit_addr3_a_signext_va")
@@ -7733,8 +10694,13 @@ TEST_CASE("ia32_rtit_addr3_a_signext_va")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_rtit_addr3_a::signext_va::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_rtit_addr3_a::signext_va::get() == 0x000000000000FFFFULL);
+    using namespace intel_x64::msrs::ia32_rtit_addr3_a;
+
+    signext_va::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(signext_va::get() == (signext_va::mask >> signext_va::from));
+
+    signext_va::set(signext_va::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(signext_va::get(signext_va::mask) == (signext_va::mask >> signext_va::from));
 }
 
 TEST_CASE("ia32_rtit_addr3_b")
@@ -7742,8 +10708,11 @@ TEST_CASE("ia32_rtit_addr3_b")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_rtit_addr3_b::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_rtit_addr3_b::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_rtit_addr3_b;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_rtit_addr3_b_virtual_address")
@@ -7751,8 +10720,13 @@ TEST_CASE("ia32_rtit_addr3_b_virtual_address")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_rtit_addr3_b::virtual_address::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_rtit_addr3_b::virtual_address::get() == 0x0000FFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_rtit_addr3_b;
+
+    virtual_address::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(virtual_address::get() == (virtual_address::mask >> virtual_address::from));
+
+    virtual_address::set(virtual_address::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(virtual_address::get(virtual_address::mask) == (virtual_address::mask >> virtual_address::from));
 }
 
 TEST_CASE("ia32_rtit_addr3_b_signext_va")
@@ -7760,8 +10734,13 @@ TEST_CASE("ia32_rtit_addr3_b_signext_va")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_rtit_addr3_b::signext_va::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_rtit_addr3_b::signext_va::get() == 0x000000000000FFFFULL);
+    using namespace intel_x64::msrs::ia32_rtit_addr3_b;
+
+    signext_va::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(signext_va::get() == (signext_va::mask >> signext_va::from));
+
+    signext_va::set(signext_va::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(signext_va::get(signext_va::mask) == (signext_va::mask >> signext_va::from));
 }
 
 TEST_CASE("ia32_ds_area")
@@ -7769,8 +10748,11 @@ TEST_CASE("ia32_ds_area")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_ds_area::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_ds_area::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_ds_area;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_tsc_deadline")
@@ -7778,8 +10760,11 @@ TEST_CASE("ia32_tsc_deadline")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_tsc_deadline::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_tsc_deadline::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_tsc_deadline;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_pm_enable")
@@ -7787,8 +10772,11 @@ TEST_CASE("ia32_pm_enable")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_pm_enable::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_pm_enable::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_pm_enable;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_pm_enable_hwp")
@@ -7796,11 +10784,17 @@ TEST_CASE("ia32_pm_enable_hwp")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_pm_enable::hwp::set(true);
-    CHECK(intel_x64::msrs::ia32_pm_enable::hwp::get());
+    using namespace intel_x64::msrs::ia32_pm_enable;
 
-    intel_x64::msrs::ia32_pm_enable::hwp::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_pm_enable::hwp::get());
+    hwp::enable();
+    CHECK(hwp::is_enabled());
+    hwp::disable();
+    CHECK(hwp::is_disabled());
+
+    hwp::enable(hwp::mask);
+    CHECK(hwp::is_enabled(hwp::mask));
+    hwp::disable(0x0);
+    CHECK(hwp::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_hwp_capabilities")
@@ -7808,8 +10802,11 @@ TEST_CASE("ia32_hwp_capabilities")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000771UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_hwp_capabilities::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_hwp_capabilities;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_hwp_capabilities_highest_perf")
@@ -7817,8 +10814,11 @@ TEST_CASE("ia32_hwp_capabilities_highest_perf")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000771UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_hwp_capabilities::highest_perf::get() == 0x00000000000000FFULL);
+    using namespace intel_x64::msrs::ia32_hwp_capabilities;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(highest_perf::get() == (highest_perf::mask >> highest_perf::from));
+    CHECK(highest_perf::get(highest_perf::mask) == (highest_perf::mask >> highest_perf::from));
 }
 
 TEST_CASE("ia32_hwp_capabilities_guaranteed_perf")
@@ -7826,8 +10826,11 @@ TEST_CASE("ia32_hwp_capabilities_guaranteed_perf")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000771UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_hwp_capabilities::guaranteed_perf::get() == 0x00000000000000FFULL);
+    using namespace intel_x64::msrs::ia32_hwp_capabilities;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(guaranteed_perf::get() == (guaranteed_perf::mask >> guaranteed_perf::from));
+    CHECK(guaranteed_perf::get(guaranteed_perf::mask) == (guaranteed_perf::mask >> guaranteed_perf::from));
 }
 
 TEST_CASE("ia32_hwp_capabilities_most_efficient_perf")
@@ -7835,8 +10838,11 @@ TEST_CASE("ia32_hwp_capabilities_most_efficient_perf")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000771UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_hwp_capabilities::most_efficient_perf::get() == 0x00000000000000FFULL);
+    using namespace intel_x64::msrs::ia32_hwp_capabilities;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(most_efficient_perf::get() == (most_efficient_perf::mask >> most_efficient_perf::from));
+    CHECK(most_efficient_perf::get(most_efficient_perf::mask) == (most_efficient_perf::mask >> most_efficient_perf::from));
 }
 
 TEST_CASE("ia32_hwp_capabilities_lowest_perf")
@@ -7844,8 +10850,11 @@ TEST_CASE("ia32_hwp_capabilities_lowest_perf")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000771UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_hwp_capabilities::lowest_perf::get() == 0x00000000000000FFULL);
+    using namespace intel_x64::msrs::ia32_hwp_capabilities;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(lowest_perf::get() == (lowest_perf::mask >> lowest_perf::from));
+    CHECK(lowest_perf::get(lowest_perf::mask) == (lowest_perf::mask >> lowest_perf::from));
 }
 
 TEST_CASE("ia32_hwp_request_pkg")
@@ -7853,8 +10862,11 @@ TEST_CASE("ia32_hwp_request_pkg")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_hwp_request_pkg::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_hwp_request_pkg::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_hwp_request_pkg;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_hwp_request_pkg_min_perf")
@@ -7862,8 +10874,13 @@ TEST_CASE("ia32_hwp_request_pkg_min_perf")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_hwp_request_pkg::min_perf::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_hwp_request_pkg::min_perf::get() == 0x00000000000000FFULL);
+    using namespace intel_x64::msrs::ia32_hwp_request_pkg;
+
+    min_perf::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(min_perf::get() == (min_perf::mask >> min_perf::from));
+
+    min_perf::set(min_perf::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(min_perf::get(min_perf::mask) == (min_perf::mask >> min_perf::from));
 }
 
 TEST_CASE("ia32_hwp_request_pkg_max_perf")
@@ -7871,8 +10888,13 @@ TEST_CASE("ia32_hwp_request_pkg_max_perf")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_hwp_request_pkg::max_perf::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_hwp_request_pkg::max_perf::get() == 0x00000000000000FFULL);
+    using namespace intel_x64::msrs::ia32_hwp_request_pkg;
+
+    max_perf::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(max_perf::get() == (max_perf::mask >> max_perf::from));
+
+    max_perf::set(max_perf::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(max_perf::get(max_perf::mask) == (max_perf::mask >> max_perf::from));
 }
 
 TEST_CASE("ia32_hwp_request_pkg_desired_perf")
@@ -7880,8 +10902,13 @@ TEST_CASE("ia32_hwp_request_pkg_desired_perf")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_hwp_request_pkg::desired_perf::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_hwp_request_pkg::desired_perf::get() == 0x00000000000000FFULL);
+    using namespace intel_x64::msrs::ia32_hwp_request_pkg;
+
+    desired_perf::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(desired_perf::get() == (desired_perf::mask >> desired_perf::from));
+
+    desired_perf::set(desired_perf::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(desired_perf::get(desired_perf::mask) == (desired_perf::mask >> desired_perf::from));
 }
 
 TEST_CASE("ia32_hwp_request_pkg_energy_perf_pref")
@@ -7889,8 +10916,13 @@ TEST_CASE("ia32_hwp_request_pkg_energy_perf_pref")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_hwp_request_pkg::energy_perf_pref::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_hwp_request_pkg::energy_perf_pref::get() == 0x00000000000000FFULL);
+    using namespace intel_x64::msrs::ia32_hwp_request_pkg;
+
+    energy_perf_pref::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(energy_perf_pref::get() == (energy_perf_pref::mask >> energy_perf_pref::from));
+
+    energy_perf_pref::set(energy_perf_pref::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(energy_perf_pref::get(energy_perf_pref::mask) == (energy_perf_pref::mask >> energy_perf_pref::from));
 }
 
 TEST_CASE("ia32_hwp_request_pkg_activity_window")
@@ -7898,8 +10930,13 @@ TEST_CASE("ia32_hwp_request_pkg_activity_window")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_hwp_request_pkg::activity_window::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_hwp_request_pkg::activity_window::get() == 0x00000000000003FFULL);
+    using namespace intel_x64::msrs::ia32_hwp_request_pkg;
+
+    activity_window::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(activity_window::get() == (activity_window::mask >> activity_window::from));
+
+    activity_window::set(activity_window::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(activity_window::get(activity_window::mask) == (activity_window::mask >> activity_window::from));
 }
 
 TEST_CASE("ia32_hwp_interrupt")
@@ -7907,8 +10944,11 @@ TEST_CASE("ia32_hwp_interrupt")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_hwp_interrupt::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_hwp_interrupt::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_hwp_interrupt;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_hwp_interrupt_perf_change")
@@ -7916,11 +10956,17 @@ TEST_CASE("ia32_hwp_interrupt_perf_change")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_hwp_interrupt::perf_change::set(true);
-    CHECK(intel_x64::msrs::ia32_hwp_interrupt::perf_change::get());
+    using namespace intel_x64::msrs::ia32_hwp_interrupt;
 
-    intel_x64::msrs::ia32_hwp_interrupt::perf_change::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_hwp_interrupt::perf_change::get());
+    perf_change::enable();
+    CHECK(perf_change::is_enabled());
+    perf_change::disable();
+    CHECK(perf_change::is_disabled());
+
+    perf_change::enable(perf_change::mask);
+    CHECK(perf_change::is_enabled(perf_change::mask));
+    perf_change::disable(0x0);
+    CHECK(perf_change::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_hwp_interrupt_excursion_min")
@@ -7928,11 +10974,17 @@ TEST_CASE("ia32_hwp_interrupt_excursion_min")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_hwp_interrupt::excursion_min::set(true);
-    CHECK(intel_x64::msrs::ia32_hwp_interrupt::excursion_min::get());
+    using namespace intel_x64::msrs::ia32_hwp_interrupt;
 
-    intel_x64::msrs::ia32_hwp_interrupt::excursion_min::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_hwp_interrupt::excursion_min::get());
+    excursion_min::enable();
+    CHECK(excursion_min::is_enabled());
+    excursion_min::disable();
+    CHECK(excursion_min::is_disabled());
+
+    excursion_min::enable(excursion_min::mask);
+    CHECK(excursion_min::is_enabled(excursion_min::mask));
+    excursion_min::disable(0x0);
+    CHECK(excursion_min::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_hwp_request")
@@ -7940,8 +10992,11 @@ TEST_CASE("ia32_hwp_request")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_hwp_request::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_hwp_request::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_hwp_request;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_hwp_request_min_perf")
@@ -7949,8 +11004,13 @@ TEST_CASE("ia32_hwp_request_min_perf")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_hwp_request::min_perf::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_hwp_request::min_perf::get() == 0x00000000000000FFULL);
+    using namespace intel_x64::msrs::ia32_hwp_request;
+
+    min_perf::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(min_perf::get() == (min_perf::mask >> min_perf::from));
+
+    min_perf::set(min_perf::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(min_perf::get(min_perf::mask) == (min_perf::mask >> min_perf::from));
 }
 
 TEST_CASE("ia32_hwp_request_max_perf")
@@ -7958,8 +11018,13 @@ TEST_CASE("ia32_hwp_request_max_perf")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_hwp_request::max_perf::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_hwp_request::max_perf::get() == 0x00000000000000FFULL);
+    using namespace intel_x64::msrs::ia32_hwp_request;
+
+    max_perf::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(max_perf::get() == (max_perf::mask >> max_perf::from));
+
+    max_perf::set(max_perf::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(max_perf::get(max_perf::mask) == (max_perf::mask >> max_perf::from));
 }
 
 TEST_CASE("ia32_hwp_request_desired_perf")
@@ -7967,8 +11032,13 @@ TEST_CASE("ia32_hwp_request_desired_perf")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_hwp_request::desired_perf::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_hwp_request::desired_perf::get() == 0x00000000000000FFULL);
+    using namespace intel_x64::msrs::ia32_hwp_request;
+
+    desired_perf::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(desired_perf::get() == (desired_perf::mask >> desired_perf::from));
+
+    desired_perf::set(desired_perf::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(desired_perf::get(desired_perf::mask) == (desired_perf::mask >> desired_perf::from));
 }
 
 TEST_CASE("ia32_hwp_request_energy_perf_pref")
@@ -7976,8 +11046,13 @@ TEST_CASE("ia32_hwp_request_energy_perf_pref")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_hwp_request::energy_perf_pref::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_hwp_request::energy_perf_pref::get() == 0x00000000000000FFULL);
+    using namespace intel_x64::msrs::ia32_hwp_request;
+
+    energy_perf_pref::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(energy_perf_pref::get() == (energy_perf_pref::mask >> energy_perf_pref::from));
+
+    energy_perf_pref::set(energy_perf_pref::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(energy_perf_pref::get(energy_perf_pref::mask) == (energy_perf_pref::mask >> energy_perf_pref::from));
 }
 
 TEST_CASE("ia32_hwp_request_activity_window")
@@ -7985,8 +11060,13 @@ TEST_CASE("ia32_hwp_request_activity_window")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_hwp_request::activity_window::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_hwp_request::activity_window::get() == 0x00000000000003FFULL);
+    using namespace intel_x64::msrs::ia32_hwp_request;
+
+    activity_window::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(activity_window::get() == (activity_window::mask >> activity_window::from));
+
+    activity_window::set(activity_window::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(activity_window::get(activity_window::mask) == (activity_window::mask >> activity_window::from));
 }
 
 TEST_CASE("ia32_hwp_request_package_control")
@@ -7994,11 +11074,17 @@ TEST_CASE("ia32_hwp_request_package_control")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_hwp_request::package_control::set(true);
-    CHECK(intel_x64::msrs::ia32_hwp_request::package_control::get());
+    using namespace intel_x64::msrs::ia32_hwp_request;
 
-    intel_x64::msrs::ia32_hwp_request::package_control::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_hwp_request::package_control::get());
+    package_control::enable();
+    CHECK(package_control::is_enabled());
+    package_control::disable();
+    CHECK(package_control::is_disabled());
+
+    package_control::enable(package_control::mask);
+    CHECK(package_control::is_enabled(package_control::mask));
+    package_control::disable(0x0);
+    CHECK(package_control::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_hwp_status")
@@ -8006,8 +11092,11 @@ TEST_CASE("ia32_hwp_status")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_hwp_status::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_hwp_status::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_hwp_status;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_hwp_status_perf_change")
@@ -8015,11 +11104,17 @@ TEST_CASE("ia32_hwp_status_perf_change")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_hwp_status::perf_change::set(true);
-    CHECK(intel_x64::msrs::ia32_hwp_status::perf_change::get());
+    using namespace intel_x64::msrs::ia32_hwp_status;
 
-    intel_x64::msrs::ia32_hwp_status::perf_change::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_hwp_status::perf_change::get());
+    perf_change::enable();
+    CHECK(perf_change::is_enabled());
+    perf_change::disable();
+    CHECK(perf_change::is_disabled());
+
+    perf_change::enable(perf_change::mask);
+    CHECK(perf_change::is_enabled(perf_change::mask));
+    perf_change::disable(0x0);
+    CHECK(perf_change::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_hwp_status_excursion_to_min")
@@ -8027,11 +11122,17 @@ TEST_CASE("ia32_hwp_status_excursion_to_min")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_hwp_status::excursion_to_min::set(true);
-    CHECK(intel_x64::msrs::ia32_hwp_status::excursion_to_min::get());
+    using namespace intel_x64::msrs::ia32_hwp_status;
 
-    intel_x64::msrs::ia32_hwp_status::excursion_to_min::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_hwp_status::excursion_to_min::get());
+    excursion_to_min::enable();
+    CHECK(excursion_to_min::is_enabled());
+    excursion_to_min::disable();
+    CHECK(excursion_to_min::is_disabled());
+
+    excursion_to_min::enable(excursion_to_min::mask);
+    CHECK(excursion_to_min::is_enabled(excursion_to_min::mask));
+    excursion_to_min::disable(0x0);
+    CHECK(excursion_to_min::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_x2apic_apicid")
@@ -8039,8 +11140,11 @@ TEST_CASE("ia32_x2apic_apicid")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000802UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_x2apic_apicid::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_x2apic_apicid;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_x2apic_version")
@@ -8048,8 +11152,11 @@ TEST_CASE("ia32_x2apic_version")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000803UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_x2apic_version::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_x2apic_version;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_x2apic_tpr")
@@ -8057,8 +11164,11 @@ TEST_CASE("ia32_x2apic_tpr")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_x2apic_tpr::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_x2apic_tpr::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_x2apic_tpr;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_x2apic_ppr")
@@ -8066,8 +11176,11 @@ TEST_CASE("ia32_x2apic_ppr")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000080AUL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_x2apic_ppr::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_x2apic_ppr;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_x2apic_eoi")
@@ -8075,8 +11188,10 @@ TEST_CASE("ia32_x2apic_eoi")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_x2apic_eoi::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(g_msrs[0x0000080BUL] == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_x2apic_eoi;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(g_msrs[addr] == 0xFFFFFFFFFFFFFFFFULL);
 }
 
 TEST_CASE("ia32_x2apic_ldr")
@@ -8084,8 +11199,11 @@ TEST_CASE("ia32_x2apic_ldr")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000080DUL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_x2apic_ldr::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_x2apic_ldr;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_x2apic_sivr")
@@ -8093,8 +11211,11 @@ TEST_CASE("ia32_x2apic_sivr")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_x2apic_sivr::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_x2apic_sivr::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_x2apic_sivr;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_x2apic_isr0")
@@ -8102,8 +11223,11 @@ TEST_CASE("ia32_x2apic_isr0")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000810UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_x2apic_isr0::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_x2apic_isr0;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_x2apic_isr1")
@@ -8111,8 +11235,11 @@ TEST_CASE("ia32_x2apic_isr1")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000811UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_x2apic_isr1::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_x2apic_isr1;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_x2apic_isr2")
@@ -8120,8 +11247,11 @@ TEST_CASE("ia32_x2apic_isr2")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000812UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_x2apic_isr2::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_x2apic_isr2;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_x2apic_isr3")
@@ -8129,8 +11259,11 @@ TEST_CASE("ia32_x2apic_isr3")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000813UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_x2apic_isr3::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_x2apic_isr3;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_x2apic_isr4")
@@ -8138,8 +11271,11 @@ TEST_CASE("ia32_x2apic_isr4")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000814UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_x2apic_isr4::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_x2apic_isr4;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_x2apic_isr5")
@@ -8147,8 +11283,11 @@ TEST_CASE("ia32_x2apic_isr5")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000815UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_x2apic_isr5::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_x2apic_isr5;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_x2apic_isr6")
@@ -8156,8 +11295,11 @@ TEST_CASE("ia32_x2apic_isr6")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000816UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_x2apic_isr6::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_x2apic_isr6;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_x2apic_isr7")
@@ -8165,8 +11307,11 @@ TEST_CASE("ia32_x2apic_isr7")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000817UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_x2apic_isr7::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_x2apic_isr7;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_x2apic_tmr0")
@@ -8174,8 +11319,11 @@ TEST_CASE("ia32_x2apic_tmr0")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000818UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_x2apic_tmr0::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_x2apic_tmr0;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_x2apic_tmr1")
@@ -8183,8 +11331,11 @@ TEST_CASE("ia32_x2apic_tmr1")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000819UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_x2apic_tmr1::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_x2apic_tmr1;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_x2apic_tmr2")
@@ -8192,8 +11343,11 @@ TEST_CASE("ia32_x2apic_tmr2")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000081AUL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_x2apic_tmr2::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_x2apic_tmr2;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_x2apic_tmr3")
@@ -8201,8 +11355,11 @@ TEST_CASE("ia32_x2apic_tmr3")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000081BUL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_x2apic_tmr3::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_x2apic_tmr3;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_x2apic_tmr4")
@@ -8210,8 +11367,11 @@ TEST_CASE("ia32_x2apic_tmr4")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000081CUL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_x2apic_tmr4::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_x2apic_tmr4;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_x2apic_tmr5")
@@ -8219,8 +11379,11 @@ TEST_CASE("ia32_x2apic_tmr5")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000081DUL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_x2apic_tmr5::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_x2apic_tmr5;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_x2apic_tmr6")
@@ -8228,8 +11391,11 @@ TEST_CASE("ia32_x2apic_tmr6")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000081EUL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_x2apic_tmr6::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_x2apic_tmr6;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_x2apic_tmr7")
@@ -8237,8 +11403,11 @@ TEST_CASE("ia32_x2apic_tmr7")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x0000081FUL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_x2apic_tmr7::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_x2apic_tmr7;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_x2apic_irr0")
@@ -8246,8 +11415,11 @@ TEST_CASE("ia32_x2apic_irr0")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000820UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_x2apic_irr0::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_x2apic_irr0;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_x2apic_irr1")
@@ -8255,8 +11427,11 @@ TEST_CASE("ia32_x2apic_irr1")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000821UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_x2apic_irr1::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_x2apic_irr1;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_x2apic_irr2")
@@ -8264,8 +11439,11 @@ TEST_CASE("ia32_x2apic_irr2")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000822UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_x2apic_irr2::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_x2apic_irr2;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_x2apic_irr3")
@@ -8273,8 +11451,11 @@ TEST_CASE("ia32_x2apic_irr3")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000823UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_x2apic_irr3::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_x2apic_irr3;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_x2apic_irr4")
@@ -8282,8 +11463,11 @@ TEST_CASE("ia32_x2apic_irr4")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000824UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_x2apic_irr4::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_x2apic_irr4;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_x2apic_irr5")
@@ -8291,8 +11475,11 @@ TEST_CASE("ia32_x2apic_irr5")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000825UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_x2apic_irr5::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_x2apic_irr5;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_x2apic_irr6")
@@ -8300,8 +11487,11 @@ TEST_CASE("ia32_x2apic_irr6")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000826UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_x2apic_irr6::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_x2apic_irr6;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_x2apic_irr7")
@@ -8309,8 +11499,11 @@ TEST_CASE("ia32_x2apic_irr7")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000827UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_x2apic_irr7::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_x2apic_irr7;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_x2apic_esr")
@@ -8318,8 +11511,11 @@ TEST_CASE("ia32_x2apic_esr")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_x2apic_esr::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_x2apic_esr::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_x2apic_esr;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_x2apic_lvt_cmci")
@@ -8327,8 +11523,11 @@ TEST_CASE("ia32_x2apic_lvt_cmci")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_x2apic_lvt_cmci::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_x2apic_lvt_cmci::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_x2apic_lvt_cmci;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_x2apic_icr")
@@ -8336,8 +11535,11 @@ TEST_CASE("ia32_x2apic_icr")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_x2apic_icr::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_x2apic_icr::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_x2apic_icr;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_x2apic_lvt_timer")
@@ -8345,8 +11547,11 @@ TEST_CASE("ia32_x2apic_lvt_timer")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_x2apic_lvt_timer::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_x2apic_lvt_timer::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_x2apic_lvt_timer;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_x2apic_lvt_thermal")
@@ -8354,8 +11559,11 @@ TEST_CASE("ia32_x2apic_lvt_thermal")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_x2apic_lvt_thermal::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_x2apic_lvt_thermal::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_x2apic_lvt_thermal;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_x2apic_lvt_pmi")
@@ -8363,8 +11571,11 @@ TEST_CASE("ia32_x2apic_lvt_pmi")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_x2apic_lvt_pmi::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_x2apic_lvt_pmi::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_x2apic_lvt_pmi;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_x2apic_lvt_lint0")
@@ -8372,8 +11583,11 @@ TEST_CASE("ia32_x2apic_lvt_lint0")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_x2apic_lvt_lint0::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_x2apic_lvt_lint0::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_x2apic_lvt_lint0;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_x2apic_lvt_lint1")
@@ -8381,8 +11595,11 @@ TEST_CASE("ia32_x2apic_lvt_lint1")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_x2apic_lvt_lint1::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_x2apic_lvt_lint1::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_x2apic_lvt_lint1;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_x2apic_lvt_error")
@@ -8390,8 +11607,11 @@ TEST_CASE("ia32_x2apic_lvt_error")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_x2apic_lvt_error::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_x2apic_lvt_error::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_x2apic_lvt_error;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_x2apic_init_count")
@@ -8399,8 +11619,11 @@ TEST_CASE("ia32_x2apic_init_count")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_x2apic_init_count::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_x2apic_init_count::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_x2apic_init_count;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_x2apic_cur_count")
@@ -8408,8 +11631,11 @@ TEST_CASE("ia32_x2apic_cur_count")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000839UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_x2apic_cur_count::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_x2apic_cur_count;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_x2apic_div_conf")
@@ -8417,8 +11643,11 @@ TEST_CASE("ia32_x2apic_div_conf")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_x2apic_div_conf::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_x2apic_div_conf::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_x2apic_div_conf;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_x2apic_self_ipi")
@@ -8426,8 +11655,10 @@ TEST_CASE("ia32_x2apic_self_ipi")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_x2apic_self_ipi::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(g_msrs[0x0000083FUL] == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_x2apic_self_ipi;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(g_msrs[addr] == 0xFFFFFFFFFFFFFFFFULL);
 }
 
 TEST_CASE("ia32_debug_interface")
@@ -8435,8 +11666,11 @@ TEST_CASE("ia32_debug_interface")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_debug_interface::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_debug_interface::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_debug_interface;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_debug_interface_enable")
@@ -8444,11 +11678,17 @@ TEST_CASE("ia32_debug_interface_enable")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_debug_interface::enable::set(true);
-    CHECK(intel_x64::msrs::ia32_debug_interface::enable::get());
+    using namespace intel_x64::msrs::ia32_debug_interface;
 
-    intel_x64::msrs::ia32_debug_interface::enable::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_debug_interface::enable::get());
+    enable::enable();
+    CHECK(enable::is_enabled());
+    enable::disable();
+    CHECK(enable::is_disabled());
+
+    enable::enable(enable::mask);
+    CHECK(enable::is_enabled(enable::mask));
+    enable::disable(0x0);
+    CHECK(enable::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_debug_interface_lock")
@@ -8456,11 +11696,17 @@ TEST_CASE("ia32_debug_interface_lock")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_debug_interface::lock::set(true);
-    CHECK(intel_x64::msrs::ia32_debug_interface::lock::get());
+    using namespace intel_x64::msrs::ia32_debug_interface;
 
-    intel_x64::msrs::ia32_debug_interface::lock::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_debug_interface::lock::get());
+    lock::enable();
+    CHECK(lock::is_enabled());
+    lock::disable();
+    CHECK(lock::is_disabled());
+
+    lock::enable(lock::mask);
+    CHECK(lock::is_enabled(lock::mask));
+    lock::disable(0x0);
+    CHECK(lock::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_debug_interface_debug_occurred")
@@ -8468,11 +11714,17 @@ TEST_CASE("ia32_debug_interface_debug_occurred")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_debug_interface::debug_occurred::set(true);
-    CHECK(intel_x64::msrs::ia32_debug_interface::debug_occurred::get());
+    using namespace intel_x64::msrs::ia32_debug_interface;
 
-    intel_x64::msrs::ia32_debug_interface::debug_occurred::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_debug_interface::debug_occurred::get());
+    debug_occurred::enable();
+    CHECK(debug_occurred::is_enabled());
+    debug_occurred::disable();
+    CHECK(debug_occurred::is_disabled());
+
+    debug_occurred::enable(debug_occurred::mask);
+    CHECK(debug_occurred::is_enabled(debug_occurred::mask));
+    debug_occurred::disable(0x0);
+    CHECK(debug_occurred::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_l3_qos_cfg")
@@ -8480,8 +11732,11 @@ TEST_CASE("ia32_l3_qos_cfg")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_l3_qos_cfg::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_l3_qos_cfg::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_l3_qos_cfg;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_l3_qos_cfg_enable")
@@ -8489,11 +11744,17 @@ TEST_CASE("ia32_l3_qos_cfg_enable")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_l3_qos_cfg::enable::set(true);
-    CHECK(intel_x64::msrs::ia32_l3_qos_cfg::enable::get());
+    using namespace intel_x64::msrs::ia32_l3_qos_cfg;
 
-    intel_x64::msrs::ia32_l3_qos_cfg::enable::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_l3_qos_cfg::enable::get());
+    enable::enable();
+    CHECK(enable::is_enabled());
+    enable::disable();
+    CHECK(enable::is_disabled());
+
+    enable::enable(enable::mask);
+    CHECK(enable::is_enabled(enable::mask));
+    enable::disable(0x0);
+    CHECK(enable::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_qm_evtsel")
@@ -8501,8 +11762,11 @@ TEST_CASE("ia32_qm_evtsel")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_qm_evtsel::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_qm_evtsel::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_qm_evtsel;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_qm_evtsel_event_id")
@@ -8510,8 +11774,13 @@ TEST_CASE("ia32_qm_evtsel_event_id")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_qm_evtsel::event_id::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_qm_evtsel::event_id::get() == 0x00000000000000FFULL);
+    using namespace intel_x64::msrs::ia32_qm_evtsel;
+
+    event_id::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(event_id::get() == (event_id::mask >> event_id::from));
+
+    event_id::set(event_id::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(event_id::get(event_id::mask) == (event_id::mask >> event_id::from));
 }
 
 TEST_CASE("ia32_qm_evtsel_resource_monitoring_id")
@@ -8519,8 +11788,13 @@ TEST_CASE("ia32_qm_evtsel_resource_monitoring_id")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_qm_evtsel::resource_monitoring_id::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_qm_evtsel::resource_monitoring_id::get() == 0x00000000FFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_qm_evtsel;
+
+    resource_monitoring_id::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(resource_monitoring_id::get() == (resource_monitoring_id::mask >> resource_monitoring_id::from));
+
+    resource_monitoring_id::set(resource_monitoring_id::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(resource_monitoring_id::get(resource_monitoring_id::mask) == (resource_monitoring_id::mask >> resource_monitoring_id::from));
 }
 
 TEST_CASE("ia32_qm_ctr")
@@ -8528,8 +11802,11 @@ TEST_CASE("ia32_qm_ctr")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000C8EUL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_qm_ctr::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_qm_ctr;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_qm_ctr_resource_monitored_data")
@@ -8537,8 +11814,11 @@ TEST_CASE("ia32_qm_ctr_resource_monitored_data")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000C8EUL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_qm_ctr::resource_monitored_data::get() == 0x3FFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_qm_ctr;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(resource_monitored_data::get() == (resource_monitored_data::mask >> resource_monitored_data::from));
+    CHECK(resource_monitored_data::get(resource_monitored_data::mask) == (resource_monitored_data::mask >> resource_monitored_data::from));
 }
 
 TEST_CASE("ia32_qm_ctr_unavailable")
@@ -8546,11 +11826,17 @@ TEST_CASE("ia32_qm_ctr_unavailable")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000C8EUL] = 0x4000000000000000ULL;
-    CHECK(intel_x64::msrs::ia32_qm_ctr::unavailable::get());
+    using namespace intel_x64::msrs::ia32_qm_ctr;
 
-    g_msrs[0x00000C8EUL] = 0x0000000000000000ULL;
-    CHECK_FALSE(intel_x64::msrs::ia32_qm_ctr::unavailable::get());
+    g_msrs[addr] = unavailable::mask;
+    CHECK(unavailable::is_enabled());
+    g_msrs[addr] = 0x0;
+    CHECK(unavailable::is_disabled());
+
+    g_msrs[addr] = unavailable::mask;
+    CHECK(unavailable::is_enabled(unavailable::mask));
+    g_msrs[addr] = 0x0;
+    CHECK(unavailable::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_qm_ctr_error")
@@ -8558,11 +11844,17 @@ TEST_CASE("ia32_qm_ctr_error")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000C8EUL] = 0x8000000000000000ULL;
-    CHECK(intel_x64::msrs::ia32_qm_ctr::error::get());
+    using namespace intel_x64::msrs::ia32_qm_ctr;
 
-    g_msrs[0x00000C8EUL] = 0x0000000000000000ULL;
-    CHECK_FALSE(intel_x64::msrs::ia32_qm_ctr::error::get());
+    g_msrs[addr] = error::mask;
+    CHECK(error::is_enabled());
+    g_msrs[addr] = 0x0;
+    CHECK(error::is_disabled());
+
+    g_msrs[addr] = error::mask;
+    CHECK(error::is_enabled(error::mask));
+    g_msrs[addr] = 0x0;
+    CHECK(error::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_pqr_assoc")
@@ -8570,8 +11862,11 @@ TEST_CASE("ia32_pqr_assoc")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_pqr_assoc::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_pqr_assoc::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_pqr_assoc;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_pqr_assoc_resource_monitoring_id")
@@ -8579,8 +11874,13 @@ TEST_CASE("ia32_pqr_assoc_resource_monitoring_id")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_pqr_assoc::resource_monitoring_id::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_pqr_assoc::resource_monitoring_id::get() == 0x00000000FFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_pqr_assoc;
+
+    resource_monitoring_id::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(resource_monitoring_id::get() == (resource_monitoring_id::mask >> resource_monitoring_id::from));
+
+    resource_monitoring_id::set(resource_monitoring_id::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(resource_monitoring_id::get(resource_monitoring_id::mask) == (resource_monitoring_id::mask >> resource_monitoring_id::from));
 }
 
 TEST_CASE("ia32_pqr_assoc_cos")
@@ -8588,8 +11888,13 @@ TEST_CASE("ia32_pqr_assoc_cos")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_pqr_assoc::cos::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_pqr_assoc::cos::get() == 0x00000000FFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_pqr_assoc;
+
+    cos::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(cos::get() == (cos::mask >> cos::from));
+
+    cos::set(cos::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(cos::get(cos::mask) == (cos::mask >> cos::from));
 }
 
 TEST_CASE("ia32_bndcfgs")
@@ -8597,8 +11902,11 @@ TEST_CASE("ia32_bndcfgs")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_bndcfgs::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_bndcfgs::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_bndcfgs;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_bndcfgs_en")
@@ -8606,11 +11914,17 @@ TEST_CASE("ia32_bndcfgs_en")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_bndcfgs::en::set(true);
-    CHECK(intel_x64::msrs::ia32_bndcfgs::en::get());
+    using namespace intel_x64::msrs::ia32_bndcfgs;
 
-    intel_x64::msrs::ia32_bndcfgs::en::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_bndcfgs::en::get());
+    en::enable();
+    CHECK(en::is_enabled());
+    en::disable();
+    CHECK(en::is_disabled());
+
+    en::enable(en::mask);
+    CHECK(en::is_enabled(en::mask));
+    en::disable(0x0);
+    CHECK(en::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_bndcfgs_bndpreserve")
@@ -8618,11 +11932,17 @@ TEST_CASE("ia32_bndcfgs_bndpreserve")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_bndcfgs::bndpreserve::set(true);
-    CHECK(intel_x64::msrs::ia32_bndcfgs::bndpreserve::get());
+    using namespace intel_x64::msrs::ia32_bndcfgs;
 
-    intel_x64::msrs::ia32_bndcfgs::bndpreserve::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_bndcfgs::bndpreserve::get());
+    bndpreserve::enable();
+    CHECK(bndpreserve::is_enabled());
+    bndpreserve::disable();
+    CHECK(bndpreserve::is_disabled());
+
+    bndpreserve::enable(bndpreserve::mask);
+    CHECK(bndpreserve::is_enabled(bndpreserve::mask));
+    bndpreserve::disable(0x0);
+    CHECK(bndpreserve::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_bndcfgs_base_address")
@@ -8630,11 +11950,13 @@ TEST_CASE("ia32_bndcfgs_base_address")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_bndcfgs::base_address::set(true);
-    CHECK(intel_x64::msrs::ia32_bndcfgs::base_address::get());
+    using namespace intel_x64::msrs::ia32_bndcfgs;
 
-    intel_x64::msrs::ia32_bndcfgs::base_address::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_bndcfgs::base_address::get());
+    base_address::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(base_address::get() == (base_address::mask >> base_address::from));
+
+    base_address::set(base_address::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(base_address::get(base_address::mask) == (base_address::mask >> base_address::from));
 }
 
 TEST_CASE("ia32_xss")
@@ -8642,8 +11964,11 @@ TEST_CASE("ia32_xss")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_xss::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_xss::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_xss;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_xss_trace_packet")
@@ -8651,11 +11976,17 @@ TEST_CASE("ia32_xss_trace_packet")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_xss::trace_packet::set(true);
-    CHECK(intel_x64::msrs::ia32_xss::trace_packet::get());
+    using namespace intel_x64::msrs::ia32_xss;
 
-    intel_x64::msrs::ia32_xss::trace_packet::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_xss::trace_packet::get());
+    trace_packet::enable();
+    CHECK(trace_packet::is_enabled());
+    trace_packet::disable();
+    CHECK(trace_packet::is_disabled());
+
+    trace_packet::enable(trace_packet::mask);
+    CHECK(trace_packet::is_enabled(trace_packet::mask));
+    trace_packet::disable(0x0);
+    CHECK(trace_packet::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_pkg_hdc_ctl")
@@ -8663,8 +11994,11 @@ TEST_CASE("ia32_pkg_hdc_ctl")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_pkg_hdc_ctl::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_pkg_hdc_ctl::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_pkg_hdc_ctl;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_pkg_hdc_ctl_hdc_pkg_enable")
@@ -8672,11 +12006,17 @@ TEST_CASE("ia32_pkg_hdc_ctl_hdc_pkg_enable")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_pkg_hdc_ctl::hdc_pkg_enable::set(true);
-    CHECK(intel_x64::msrs::ia32_pkg_hdc_ctl::hdc_pkg_enable::get());
+    using namespace intel_x64::msrs::ia32_pkg_hdc_ctl;
 
-    intel_x64::msrs::ia32_pkg_hdc_ctl::hdc_pkg_enable::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_pkg_hdc_ctl::hdc_pkg_enable::get());
+    hdc_pkg_enable::enable();
+    CHECK(hdc_pkg_enable::is_enabled());
+    hdc_pkg_enable::disable();
+    CHECK(hdc_pkg_enable::is_disabled());
+
+    hdc_pkg_enable::enable(hdc_pkg_enable::mask);
+    CHECK(hdc_pkg_enable::is_enabled(hdc_pkg_enable::mask));
+    hdc_pkg_enable::disable(0x0);
+    CHECK(hdc_pkg_enable::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_pm_ctl1")
@@ -8684,8 +12024,11 @@ TEST_CASE("ia32_pm_ctl1")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_pm_ctl1::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_pm_ctl1::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_pm_ctl1;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_pm_ctl1_hdc_allow_block")
@@ -8693,11 +12036,17 @@ TEST_CASE("ia32_pm_ctl1_hdc_allow_block")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_pm_ctl1::hdc_allow_block::set(true);
-    CHECK(intel_x64::msrs::ia32_pm_ctl1::hdc_allow_block::get());
+    using namespace intel_x64::msrs::ia32_pm_ctl1;
 
-    intel_x64::msrs::ia32_pm_ctl1::hdc_allow_block::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_pm_ctl1::hdc_allow_block::get());
+    hdc_allow_block::enable();
+    CHECK(hdc_allow_block::is_enabled());
+    hdc_allow_block::disable();
+    CHECK(hdc_allow_block::is_disabled());
+
+    hdc_allow_block::enable(hdc_allow_block::mask);
+    CHECK(hdc_allow_block::is_enabled(hdc_allow_block::mask));
+    hdc_allow_block::disable(0x0);
+    CHECK(hdc_allow_block::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_thread_stall")
@@ -8705,8 +12054,11 @@ TEST_CASE("ia32_thread_stall")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    g_msrs[0x00000DB2UL] = 0xFFFFFFFFFFFFFFFFULL;
-    CHECK(intel_x64::msrs::ia32_thread_stall::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_thread_stall;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_thread_stall_stall_cycle_cnt")
@@ -8714,8 +12066,13 @@ TEST_CASE("ia32_thread_stall_stall_cycle_cnt")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_thread_stall::stall_cycle_cnt::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_thread_stall::stall_cycle_cnt::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_thread_stall;
+
+    stall_cycle_cnt::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(stall_cycle_cnt::get() == (stall_cycle_cnt::mask >> stall_cycle_cnt::from));
+
+    stall_cycle_cnt::set(stall_cycle_cnt::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(stall_cycle_cnt::get(stall_cycle_cnt::mask) == (stall_cycle_cnt::mask >> stall_cycle_cnt::from));
 }
 
 TEST_CASE("ia32_efer")
@@ -8723,10 +12080,11 @@ TEST_CASE("ia32_efer")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_efer::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_efer::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_efer;
 
-    intel_x64::msrs::ia32_efer::dump();
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_efer_sce")
@@ -8734,11 +12092,17 @@ TEST_CASE("ia32_efer_sce")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_efer::sce::set(true);
-    CHECK(intel_x64::msrs::ia32_efer::sce::get());
+    using namespace intel_x64::msrs::ia32_efer;
 
-    intel_x64::msrs::ia32_efer::sce::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_efer::sce::get());
+    sce::enable();
+    CHECK(sce::is_enabled());
+    sce::disable();
+    CHECK(sce::is_disabled());
+
+    sce::enable(sce::mask);
+    CHECK(sce::is_enabled(sce::mask));
+    sce::disable(0x0);
+    CHECK(sce::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_efer_lme")
@@ -8746,11 +12110,17 @@ TEST_CASE("ia32_efer_lme")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_efer::lme::set(true);
-    CHECK(intel_x64::msrs::ia32_efer::lme::get());
+    using namespace intel_x64::msrs::ia32_efer;
 
-    intel_x64::msrs::ia32_efer::lme::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_efer::lme::get());
+    lme::enable();
+    CHECK(lme::is_enabled());
+    lme::disable();
+    CHECK(lme::is_disabled());
+
+    lme::enable(lme::mask);
+    CHECK(lme::is_enabled(lme::mask));
+    lme::disable(0x0);
+    CHECK(lme::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_efer_lma")
@@ -8758,11 +12128,17 @@ TEST_CASE("ia32_efer_lma")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_efer::lma::set(true);
-    CHECK(intel_x64::msrs::ia32_efer::lma::get());
+    using namespace intel_x64::msrs::ia32_efer;
 
-    intel_x64::msrs::ia32_efer::lma::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_efer::lma::get());
+    lma::enable();
+    CHECK(lma::is_enabled());
+    lma::disable();
+    CHECK(lma::is_disabled());
+
+    lma::enable(lma::mask);
+    CHECK(lma::is_enabled(lma::mask));
+    lma::disable(0x0);
+    CHECK(lma::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_efer_nxe")
@@ -8770,20 +12146,17 @@ TEST_CASE("ia32_efer_nxe")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_efer::nxe::set(true);
-    CHECK(intel_x64::msrs::ia32_efer::nxe::get());
+    using namespace intel_x64::msrs::ia32_efer;
 
-    intel_x64::msrs::ia32_efer::nxe::set(false);
-    CHECK_FALSE(intel_x64::msrs::ia32_efer::nxe::get());
-}
+    nxe::enable();
+    CHECK(nxe::is_enabled());
+    nxe::disable();
+    CHECK(nxe::is_disabled());
 
-TEST_CASE("ia32_efer_reserved")
-{
-    MockRepository mocks;
-    setup_intrinsics(mocks);
-
-    intel_x64::msrs::ia32_efer::reserved::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_efer::reserved::get() == 0xFFFFFFFFFFFFF2FEULL);
+    nxe::enable(nxe::mask);
+    CHECK(nxe::is_enabled(nxe::mask));
+    nxe::disable(0x0);
+    CHECK(nxe::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_fs_base")
@@ -8791,8 +12164,11 @@ TEST_CASE("ia32_fs_base")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_fs_base::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_fs_base::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_fs_base;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 TEST_CASE("ia32_gs_base")
@@ -8800,8 +12176,11 @@ TEST_CASE("ia32_gs_base")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    intel_x64::msrs::ia32_gs_base::set(0xFFFFFFFFFFFFFFFFULL);
-    CHECK(intel_x64::msrs::ia32_gs_base::get() == 0xFFFFFFFFFFFFFFFFULL);
+    using namespace intel_x64::msrs::ia32_gs_base;
+
+    set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
 }
 
 #endif

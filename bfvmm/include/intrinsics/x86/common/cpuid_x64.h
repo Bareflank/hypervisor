@@ -353,6 +353,14 @@ namespace processor_string_3
         inline void dump(int level, std::string *msg = nullptr)
         { bfdebug_nhex(level, name, get(), msg); }
     }
+
+    inline void dump(int level, std::string *msg = nullptr)
+    {
+        eax::dump(level, msg);
+        ebx::dump(level, msg);
+        ecx::dump(level, msg);
+        edx::dump(level, msg);
+    }
 }
 
 }

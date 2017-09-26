@@ -78,13 +78,15 @@ TEST_CASE("vmcs_vmcs_link_pointer")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    CHECK(vmcs::vmcs_link_pointer::exists());
+    using namespace vmcs::vmcs_link_pointer;
 
-    vmcs::vmcs_link_pointer::set(1UL);
-    CHECK(vmcs::vmcs_link_pointer::get() == 1UL);
+    CHECK(exists());
+    set(100UL);
+    CHECK(get() == 100UL);
+    set_if_exists(200UL);
+    CHECK(get_if_exists() == 200UL);
 
-    vmcs::vmcs_link_pointer::set_if_exists(0UL);
-    CHECK(vmcs::vmcs_link_pointer::get_if_exists() == 0UL);
+    dump(0);
 }
 
 TEST_CASE("vmcs_guest_ia32_debugctl")
@@ -92,13 +94,15 @@ TEST_CASE("vmcs_guest_ia32_debugctl")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    CHECK(vmcs::guest_ia32_debugctl::exists());
+    using namespace vmcs::guest_ia32_debugctl;
 
-    vmcs::guest_ia32_debugctl::set(1UL);
-    CHECK(vmcs::guest_ia32_debugctl::get() == 1UL);
+    CHECK(exists());
+    set(100UL);
+    CHECK(get() == 100UL);
+    set_if_exists(200UL);
+    CHECK(get_if_exists() == 200UL);
 
-    vmcs::guest_ia32_debugctl::set_if_exists(0UL);
-    CHECK(vmcs::guest_ia32_debugctl::get_if_exists() == 0UL);
+    dump(0);
 }
 
 TEST_CASE("vmcs_guest_ia32_debugctl_lbr")
@@ -106,17 +110,22 @@ TEST_CASE("vmcs_guest_ia32_debugctl_lbr")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_ia32_debugctl::lbr::enable();
-    CHECK(vmcs::guest_ia32_debugctl::lbr::is_enabled());
+    using namespace vmcs::guest_ia32_debugctl;
 
-    vmcs::guest_ia32_debugctl::lbr::disable();
-    CHECK(vmcs::guest_ia32_debugctl::lbr::is_disabled());
+    lbr::set(true);
+    CHECK(lbr::is_enabled());
+    lbr::set(false);
+    CHECK(lbr::is_disabled());
 
-    vmcs::guest_ia32_debugctl::lbr::enable_if_exists();
-    CHECK(vmcs::guest_ia32_debugctl::lbr::is_enabled_if_exists());
+    lbr::set(lbr::mask, true);
+    CHECK(lbr::is_enabled(lbr::mask));
+    lbr::set(0x0, false);
+    CHECK(lbr::is_disabled(0x0));
 
-    vmcs::guest_ia32_debugctl::lbr::disable_if_exists();
-    CHECK(vmcs::guest_ia32_debugctl::lbr::is_disabled_if_exists());
+    lbr::set_if_exists(true);
+    CHECK(lbr::is_enabled_if_exists());
+    lbr::set_if_exists(false);
+    CHECK(lbr::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_ia32_debugctl_btf")
@@ -124,17 +133,22 @@ TEST_CASE("vmcs_guest_ia32_debugctl_btf")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_ia32_debugctl::btf::enable();
-    CHECK(vmcs::guest_ia32_debugctl::btf::is_enabled());
+    using namespace vmcs::guest_ia32_debugctl;
 
-    vmcs::guest_ia32_debugctl::btf::disable();
-    CHECK(vmcs::guest_ia32_debugctl::btf::is_disabled());
+    btf::set(true);
+    CHECK(btf::is_enabled());
+    btf::set(false);
+    CHECK(btf::is_disabled());
 
-    vmcs::guest_ia32_debugctl::btf::enable_if_exists();
-    CHECK(vmcs::guest_ia32_debugctl::btf::is_enabled_if_exists());
+    btf::set(btf::mask, true);
+    CHECK(btf::is_enabled(btf::mask));
+    btf::set(0x0, false);
+    CHECK(btf::is_disabled(0x0));
 
-    vmcs::guest_ia32_debugctl::btf::disable_if_exists();
-    CHECK(vmcs::guest_ia32_debugctl::btf::is_disabled_if_exists());
+    btf::set_if_exists(true);
+    CHECK(btf::is_enabled_if_exists());
+    btf::set_if_exists(false);
+    CHECK(btf::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_ia32_debugctl_tr")
@@ -142,17 +156,22 @@ TEST_CASE("vmcs_guest_ia32_debugctl_tr")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_ia32_debugctl::tr::enable();
-    CHECK(vmcs::guest_ia32_debugctl::tr::is_enabled());
+    using namespace vmcs::guest_ia32_debugctl;
 
-    vmcs::guest_ia32_debugctl::tr::disable();
-    CHECK(vmcs::guest_ia32_debugctl::tr::is_disabled());
+    tr::set(true);
+    CHECK(tr::is_enabled());
+    tr::set(false);
+    CHECK(tr::is_disabled());
 
-    vmcs::guest_ia32_debugctl::tr::enable_if_exists();
-    CHECK(vmcs::guest_ia32_debugctl::tr::is_enabled_if_exists());
+    tr::set(tr::mask, true);
+    CHECK(tr::is_enabled(tr::mask));
+    tr::set(0x0, false);
+    CHECK(tr::is_disabled(0x0));
 
-    vmcs::guest_ia32_debugctl::tr::disable_if_exists();
-    CHECK(vmcs::guest_ia32_debugctl::tr::is_disabled_if_exists());
+    tr::set_if_exists(true);
+    CHECK(tr::is_enabled_if_exists());
+    tr::set_if_exists(false);
+    CHECK(tr::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_ia32_debugctl_bts")
@@ -160,17 +179,22 @@ TEST_CASE("vmcs_guest_ia32_debugctl_bts")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_ia32_debugctl::bts::enable();
-    CHECK(vmcs::guest_ia32_debugctl::bts::is_enabled());
+    using namespace vmcs::guest_ia32_debugctl;
 
-    vmcs::guest_ia32_debugctl::bts::disable();
-    CHECK(vmcs::guest_ia32_debugctl::bts::is_disabled());
+    bts::set(true);
+    CHECK(bts::is_enabled());
+    bts::set(false);
+    CHECK(bts::is_disabled());
 
-    vmcs::guest_ia32_debugctl::bts::enable_if_exists();
-    CHECK(vmcs::guest_ia32_debugctl::bts::is_enabled_if_exists());
+    bts::set(bts::mask, true);
+    CHECK(bts::is_enabled(bts::mask));
+    bts::set(0x0, false);
+    CHECK(bts::is_disabled(0x0));
 
-    vmcs::guest_ia32_debugctl::bts::disable_if_exists();
-    CHECK(vmcs::guest_ia32_debugctl::bts::is_disabled_if_exists());
+    bts::set_if_exists(true);
+    CHECK(bts::is_enabled_if_exists());
+    bts::set_if_exists(false);
+    CHECK(bts::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_ia32_debugctl_btint")
@@ -178,17 +202,22 @@ TEST_CASE("vmcs_guest_ia32_debugctl_btint")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_ia32_debugctl::btint::enable();
-    CHECK(vmcs::guest_ia32_debugctl::btint::is_enabled());
+    using namespace vmcs::guest_ia32_debugctl;
 
-    vmcs::guest_ia32_debugctl::btint::disable();
-    CHECK(vmcs::guest_ia32_debugctl::btint::is_disabled());
+    btint::set(true);
+    CHECK(btint::is_enabled());
+    btint::set(false);
+    CHECK(btint::is_disabled());
 
-    vmcs::guest_ia32_debugctl::btint::enable_if_exists();
-    CHECK(vmcs::guest_ia32_debugctl::btint::is_enabled_if_exists());
+    btint::set(btint::mask, true);
+    CHECK(btint::is_enabled(btint::mask));
+    btint::set(0x0, false);
+    CHECK(btint::is_disabled(0x0));
 
-    vmcs::guest_ia32_debugctl::btint::disable_if_exists();
-    CHECK(vmcs::guest_ia32_debugctl::btint::is_disabled_if_exists());
+    btint::set_if_exists(true);
+    CHECK(btint::is_enabled_if_exists());
+    btint::set_if_exists(false);
+    CHECK(btint::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_ia32_debugctl_bt_off_os")
@@ -196,17 +225,22 @@ TEST_CASE("vmcs_guest_ia32_debugctl_bt_off_os")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_ia32_debugctl::bt_off_os::enable();
-    CHECK(vmcs::guest_ia32_debugctl::bt_off_os::is_enabled());
+    using namespace vmcs::guest_ia32_debugctl;
 
-    vmcs::guest_ia32_debugctl::bt_off_os::disable();
-    CHECK(vmcs::guest_ia32_debugctl::bt_off_os::is_disabled());
+    bt_off_os::set(true);
+    CHECK(bt_off_os::is_enabled());
+    bt_off_os::set(false);
+    CHECK(bt_off_os::is_disabled());
 
-    vmcs::guest_ia32_debugctl::bt_off_os::enable_if_exists();
-    CHECK(vmcs::guest_ia32_debugctl::bt_off_os::is_enabled_if_exists());
+    bt_off_os::set(bt_off_os::mask, true);
+    CHECK(bt_off_os::is_enabled(bt_off_os::mask));
+    bt_off_os::set(0x0, false);
+    CHECK(bt_off_os::is_disabled(0x0));
 
-    vmcs::guest_ia32_debugctl::bt_off_os::disable_if_exists();
-    CHECK(vmcs::guest_ia32_debugctl::bt_off_os::is_disabled_if_exists());
+    bt_off_os::set_if_exists(true);
+    CHECK(bt_off_os::is_enabled_if_exists());
+    bt_off_os::set_if_exists(false);
+    CHECK(bt_off_os::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_ia32_debugctl_bt_off_user")
@@ -214,17 +248,22 @@ TEST_CASE("vmcs_guest_ia32_debugctl_bt_off_user")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_ia32_debugctl::bt_off_user::enable();
-    CHECK(vmcs::guest_ia32_debugctl::bt_off_user::is_enabled());
+    using namespace vmcs::guest_ia32_debugctl;
 
-    vmcs::guest_ia32_debugctl::bt_off_user::disable();
-    CHECK(vmcs::guest_ia32_debugctl::bt_off_user::is_disabled());
+    bt_off_user::set(true);
+    CHECK(bt_off_user::is_enabled());
+    bt_off_user::set(false);
+    CHECK(bt_off_user::is_disabled());
 
-    vmcs::guest_ia32_debugctl::bt_off_user::enable_if_exists();
-    CHECK(vmcs::guest_ia32_debugctl::bt_off_user::is_enabled_if_exists());
+    bt_off_user::set(bt_off_user::mask, true);
+    CHECK(bt_off_user::is_enabled(bt_off_user::mask));
+    bt_off_user::set(0x0, false);
+    CHECK(bt_off_user::is_disabled(0x0));
 
-    vmcs::guest_ia32_debugctl::bt_off_user::disable_if_exists();
-    CHECK(vmcs::guest_ia32_debugctl::bt_off_user::is_disabled_if_exists());
+    bt_off_user::set_if_exists(true);
+    CHECK(bt_off_user::is_enabled_if_exists());
+    bt_off_user::set_if_exists(false);
+    CHECK(bt_off_user::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_ia32_debugctl_freeze_lbrs_on_pmi")
@@ -232,17 +271,22 @@ TEST_CASE("vmcs_guest_ia32_debugctl_freeze_lbrs_on_pmi")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_ia32_debugctl::freeze_lbrs_on_pmi::enable();
-    CHECK(vmcs::guest_ia32_debugctl::freeze_lbrs_on_pmi::is_enabled());
+    using namespace vmcs::guest_ia32_debugctl;
 
-    vmcs::guest_ia32_debugctl::freeze_lbrs_on_pmi::disable();
-    CHECK(vmcs::guest_ia32_debugctl::freeze_lbrs_on_pmi::is_disabled());
+    freeze_lbrs_on_pmi::set(true);
+    CHECK(freeze_lbrs_on_pmi::is_enabled());
+    freeze_lbrs_on_pmi::set(false);
+    CHECK(freeze_lbrs_on_pmi::is_disabled());
 
-    vmcs::guest_ia32_debugctl::freeze_lbrs_on_pmi::enable_if_exists();
-    CHECK(vmcs::guest_ia32_debugctl::freeze_lbrs_on_pmi::is_enabled_if_exists());
+    freeze_lbrs_on_pmi::set(freeze_lbrs_on_pmi::mask, true);
+    CHECK(freeze_lbrs_on_pmi::is_enabled(freeze_lbrs_on_pmi::mask));
+    freeze_lbrs_on_pmi::set(0x0, false);
+    CHECK(freeze_lbrs_on_pmi::is_disabled(0x0));
 
-    vmcs::guest_ia32_debugctl::freeze_lbrs_on_pmi::disable_if_exists();
-    CHECK(vmcs::guest_ia32_debugctl::freeze_lbrs_on_pmi::is_disabled_if_exists());
+    freeze_lbrs_on_pmi::set_if_exists(true);
+    CHECK(freeze_lbrs_on_pmi::is_enabled_if_exists());
+    freeze_lbrs_on_pmi::set_if_exists(false);
+    CHECK(freeze_lbrs_on_pmi::is_disabled_if_exists());
 }
 
 
@@ -251,17 +295,22 @@ TEST_CASE("vmcs_guest_ia32_debugctl_freeze_perfmon_on_pmi")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_ia32_debugctl::freeze_perfmon_on_pmi::enable();
-    CHECK(vmcs::guest_ia32_debugctl::freeze_perfmon_on_pmi::is_enabled());
+    using namespace vmcs::guest_ia32_debugctl;
 
-    vmcs::guest_ia32_debugctl::freeze_perfmon_on_pmi::disable();
-    CHECK(vmcs::guest_ia32_debugctl::freeze_perfmon_on_pmi::is_disabled());
+    freeze_perfmon_on_pmi::set(true);
+    CHECK(freeze_perfmon_on_pmi::is_enabled());
+    freeze_perfmon_on_pmi::set(false);
+    CHECK(freeze_perfmon_on_pmi::is_disabled());
 
-    vmcs::guest_ia32_debugctl::freeze_perfmon_on_pmi::enable_if_exists();
-    CHECK(vmcs::guest_ia32_debugctl::freeze_perfmon_on_pmi::is_enabled_if_exists());
+    freeze_perfmon_on_pmi::set(freeze_perfmon_on_pmi::mask, true);
+    CHECK(freeze_perfmon_on_pmi::is_enabled(freeze_perfmon_on_pmi::mask));
+    freeze_perfmon_on_pmi::set(0x0, false);
+    CHECK(freeze_perfmon_on_pmi::is_disabled(0x0));
 
-    vmcs::guest_ia32_debugctl::freeze_perfmon_on_pmi::disable_if_exists();
-    CHECK(vmcs::guest_ia32_debugctl::freeze_perfmon_on_pmi::is_disabled_if_exists());
+    freeze_perfmon_on_pmi::set_if_exists(true);
+    CHECK(freeze_perfmon_on_pmi::is_enabled_if_exists());
+    freeze_perfmon_on_pmi::set_if_exists(false);
+    CHECK(freeze_perfmon_on_pmi::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_ia32_debugctl_enable_uncore_pmi")
@@ -269,17 +318,22 @@ TEST_CASE("vmcs_guest_ia32_debugctl_enable_uncore_pmi")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_ia32_debugctl::enable_uncore_pmi::enable();
-    CHECK(vmcs::guest_ia32_debugctl::enable_uncore_pmi::is_enabled());
+    using namespace vmcs::guest_ia32_debugctl;
 
-    vmcs::guest_ia32_debugctl::enable_uncore_pmi::disable();
-    CHECK(vmcs::guest_ia32_debugctl::enable_uncore_pmi::is_disabled());
+    enable_uncore_pmi::set(true);
+    CHECK(enable_uncore_pmi::is_enabled());
+    enable_uncore_pmi::set(false);
+    CHECK(enable_uncore_pmi::is_disabled());
 
-    vmcs::guest_ia32_debugctl::enable_uncore_pmi::enable_if_exists();
-    CHECK(vmcs::guest_ia32_debugctl::enable_uncore_pmi::is_enabled_if_exists());
+    enable_uncore_pmi::set(enable_uncore_pmi::mask, true);
+    CHECK(enable_uncore_pmi::is_enabled(enable_uncore_pmi::mask));
+    enable_uncore_pmi::set(0x0, false);
+    CHECK(enable_uncore_pmi::is_disabled(0x0));
 
-    vmcs::guest_ia32_debugctl::enable_uncore_pmi::disable_if_exists();
-    CHECK(vmcs::guest_ia32_debugctl::enable_uncore_pmi::is_disabled_if_exists());
+    enable_uncore_pmi::set_if_exists(true);
+    CHECK(enable_uncore_pmi::is_enabled_if_exists());
+    enable_uncore_pmi::set_if_exists(false);
+    CHECK(enable_uncore_pmi::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_ia32_debugctl_freeze_while_smm")
@@ -287,17 +341,22 @@ TEST_CASE("vmcs_guest_ia32_debugctl_freeze_while_smm")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_ia32_debugctl::freeze_while_smm::enable();
-    CHECK(vmcs::guest_ia32_debugctl::freeze_while_smm::is_enabled());
+    using namespace vmcs::guest_ia32_debugctl;
 
-    vmcs::guest_ia32_debugctl::freeze_while_smm::disable();
-    CHECK(vmcs::guest_ia32_debugctl::freeze_while_smm::is_disabled());
+    freeze_while_smm::set(true);
+    CHECK(freeze_while_smm::is_enabled());
+    freeze_while_smm::set(false);
+    CHECK(freeze_while_smm::is_disabled());
 
-    vmcs::guest_ia32_debugctl::freeze_while_smm::enable_if_exists();
-    CHECK(vmcs::guest_ia32_debugctl::freeze_while_smm::is_enabled_if_exists());
+    freeze_while_smm::set(freeze_while_smm::mask, true);
+    CHECK(freeze_while_smm::is_enabled(freeze_while_smm::mask));
+    freeze_while_smm::set(0x0, false);
+    CHECK(freeze_while_smm::is_disabled(0x0));
 
-    vmcs::guest_ia32_debugctl::freeze_while_smm::disable_if_exists();
-    CHECK(vmcs::guest_ia32_debugctl::freeze_while_smm::is_disabled_if_exists());
+    freeze_while_smm::set_if_exists(true);
+    CHECK(freeze_while_smm::is_enabled_if_exists());
+    freeze_while_smm::set_if_exists(false);
+    CHECK(freeze_while_smm::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_ia32_debugctl_rtm_debug")
@@ -305,17 +364,22 @@ TEST_CASE("vmcs_guest_ia32_debugctl_rtm_debug")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_ia32_debugctl::rtm_debug::enable();
-    CHECK(vmcs::guest_ia32_debugctl::rtm_debug::is_enabled());
+    using namespace vmcs::guest_ia32_debugctl;
 
-    vmcs::guest_ia32_debugctl::rtm_debug::disable();
-    CHECK(vmcs::guest_ia32_debugctl::rtm_debug::is_disabled());
+    rtm_debug::set(true);
+    CHECK(rtm_debug::is_enabled());
+    rtm_debug::set(false);
+    CHECK(rtm_debug::is_disabled());
 
-    vmcs::guest_ia32_debugctl::rtm_debug::enable_if_exists();
-    CHECK(vmcs::guest_ia32_debugctl::rtm_debug::is_enabled_if_exists());
+    rtm_debug::set(rtm_debug::mask, true);
+    CHECK(rtm_debug::is_enabled(rtm_debug::mask));
+    rtm_debug::set(0x0, false);
+    CHECK(rtm_debug::is_disabled(0x0));
 
-    vmcs::guest_ia32_debugctl::rtm_debug::disable_if_exists();
-    CHECK(vmcs::guest_ia32_debugctl::rtm_debug::is_disabled_if_exists());
+    rtm_debug::set_if_exists(true);
+    CHECK(rtm_debug::is_enabled_if_exists());
+    rtm_debug::set_if_exists(false);
+    CHECK(rtm_debug::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_ia32_debugctl_reserved")
@@ -323,11 +387,16 @@ TEST_CASE("vmcs_guest_ia32_debugctl_reserved")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_ia32_debugctl::reserved::set(0xCU);
-    CHECK(vmcs::guest_ia32_debugctl::reserved::get() == 0xCU);
+    using namespace vmcs::guest_ia32_debugctl;
 
-    vmcs::guest_ia32_debugctl::reserved::set_if_exists(0x0U);
-    CHECK(vmcs::guest_ia32_debugctl::reserved::get_if_exists() == 0x0U);
+    reserved::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(reserved::get() == (reserved::mask >> reserved::from));
+
+    reserved::set(reserved::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(reserved::get(reserved::mask) == (reserved::mask >> reserved::from));
+
+    reserved::set_if_exists(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(reserved::get_if_exists() == (reserved::mask >> reserved::from));
 }
 
 TEST_CASE("vmcs_guest_ia32_pat")
@@ -335,18 +404,18 @@ TEST_CASE("vmcs_guest_ia32_pat")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace vmcs::guest_ia32_pat;
+
     g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] |= msrs::ia32_vmx_true_entry_ctls::load_ia32_pat::mask << 32;
-    CHECK(vmcs::guest_ia32_pat::exists());
-
-    g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] = 0x0UL;
     g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] |= msrs::ia32_vmx_true_exit_ctls::save_ia32_pat::mask << 32;
-    CHECK(vmcs::guest_ia32_pat::exists());
 
-    vmcs::guest_ia32_pat::set(1UL);
-    CHECK(vmcs::guest_ia32_pat::get() == 1UL);
+    CHECK(exists());
+    set(100UL);
+    CHECK(get() == 100UL);
+    set_if_exists(200UL);
+    CHECK(get_if_exists() == 200UL);
 
-    vmcs::guest_ia32_pat::set_if_exists(0UL);
-    CHECK(vmcs::guest_ia32_pat::get_if_exists() == 0UL);
+    dump(0);
 }
 
 TEST_CASE("vmcs_guest_ia32_pat_pa0")
@@ -354,14 +423,19 @@ TEST_CASE("vmcs_guest_ia32_pat_pa0")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace vmcs::guest_ia32_pat;
+
     g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] |= msrs::ia32_vmx_true_entry_ctls::load_ia32_pat::mask
             << 32;
 
-    vmcs::guest_ia32_pat::pa0::set(1UL);
-    CHECK(vmcs::guest_ia32_pat::pa0::get() == 1UL);
+    pa0::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(pa0::get() == (pa0::mask >> pa0::from));
 
-    vmcs::guest_ia32_pat::pa0::set_if_exists(0UL);
-    CHECK(vmcs::guest_ia32_pat::pa0::get_if_exists() == 0UL);
+    pa0::set(pa0::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(pa0::get(pa0::mask) == (pa0::mask >> pa0::from));
+
+    pa0::set_if_exists(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(pa0::get_if_exists() == (pa0::mask >> pa0::from));
 }
 
 TEST_CASE("vmcs_guest_ia32_pat_pa0_memory_type")
@@ -375,21 +449,20 @@ TEST_CASE("vmcs_guest_ia32_pat_pa0_memory_type")
 
     pa0::memory_type::set(x64::memory_type::uncacheable);
     CHECK(pa0::memory_type::get() == x64::memory_type::uncacheable);
-
     pa0::memory_type::set(x64::memory_type::write_combining);
     CHECK(pa0::memory_type::get() == x64::memory_type::write_combining);
-
     pa0::memory_type::set(x64::memory_type::write_through);
     CHECK(pa0::memory_type::get() == x64::memory_type::write_through);
 
     pa0::memory_type::set_if_exists(x64::memory_type::write_protected);
     CHECK(pa0::memory_type::get_if_exists() == x64::memory_type::write_protected);
-
     pa0::memory_type::set_if_exists(x64::memory_type::write_back);
     CHECK(pa0::memory_type::get_if_exists() == x64::memory_type::write_back);
-
     pa0::memory_type::set_if_exists(x64::memory_type::uncacheable_minus);
     CHECK(pa0::memory_type::get_if_exists() == x64::memory_type::uncacheable_minus);
+
+    pa0::memory_type::set(pa0::memory_type::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(pa0::memory_type::get(pa0::memory_type::mask) == (pa0::memory_type::mask >> pa0::memory_type::from));
 }
 
 TEST_CASE("vmcs_guest_ia32_pat_pa0_reserved")
@@ -397,14 +470,19 @@ TEST_CASE("vmcs_guest_ia32_pat_pa0_reserved")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace vmcs::guest_ia32_pat;
+
     g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] |= msrs::ia32_vmx_true_entry_ctls::load_ia32_pat::mask
             << 32;
 
-    vmcs::guest_ia32_pat::pa0::reserved::set(1UL);
-    CHECK(vmcs::guest_ia32_pat::pa0::reserved::get() == 1UL);
+    pa0::reserved::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(pa0::reserved::get() == (pa0::reserved::mask >> pa0::reserved::from));
 
-    vmcs::guest_ia32_pat::pa0::reserved::set_if_exists(0UL);
-    CHECK(vmcs::guest_ia32_pat::pa0::reserved::get_if_exists() == 0UL);
+    pa0::reserved::set(pa0::reserved::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(pa0::reserved::get(pa0::reserved::mask) == (pa0::reserved::mask >> pa0::reserved::from));
+
+    pa0::reserved::set_if_exists(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(pa0::reserved::get_if_exists() == (pa0::reserved::mask >> pa0::reserved::from));
 }
 
 TEST_CASE("vmcs_guest_ia32_pat_pa1")
@@ -412,14 +490,19 @@ TEST_CASE("vmcs_guest_ia32_pat_pa1")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace vmcs::guest_ia32_pat;
+
     g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] |= msrs::ia32_vmx_true_entry_ctls::load_ia32_pat::mask
             << 32;
 
-    vmcs::guest_ia32_pat::pa1::set(1UL);
-    CHECK(vmcs::guest_ia32_pat::pa1::get() == 1UL);
+    pa1::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(pa1::get() == (pa1::mask >> pa1::from));
 
-    vmcs::guest_ia32_pat::pa1::set_if_exists(0UL);
-    CHECK(vmcs::guest_ia32_pat::pa1::get_if_exists() == 0UL);
+    pa1::set(pa1::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(pa1::get(pa1::mask) == (pa1::mask >> pa1::from));
+
+    pa1::set_if_exists(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(pa1::get_if_exists() == (pa1::mask >> pa1::from));
 }
 
 TEST_CASE("vmcs_guest_ia32_pat_pa1_memory_type")
@@ -433,21 +516,20 @@ TEST_CASE("vmcs_guest_ia32_pat_pa1_memory_type")
 
     pa1::memory_type::set(x64::memory_type::uncacheable);
     CHECK(pa1::memory_type::get() == x64::memory_type::uncacheable);
-
     pa1::memory_type::set(x64::memory_type::write_combining);
     CHECK(pa1::memory_type::get() == x64::memory_type::write_combining);
-
     pa1::memory_type::set(x64::memory_type::write_through);
     CHECK(pa1::memory_type::get() == x64::memory_type::write_through);
 
     pa1::memory_type::set_if_exists(x64::memory_type::write_protected);
     CHECK(pa1::memory_type::get_if_exists() == x64::memory_type::write_protected);
-
     pa1::memory_type::set_if_exists(x64::memory_type::write_back);
     CHECK(pa1::memory_type::get_if_exists() == x64::memory_type::write_back);
-
     pa1::memory_type::set_if_exists(x64::memory_type::uncacheable_minus);
     CHECK(pa1::memory_type::get_if_exists() == x64::memory_type::uncacheable_minus);
+
+    pa1::memory_type::set(pa1::memory_type::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(pa1::memory_type::get(pa1::memory_type::mask) == (pa1::memory_type::mask >> pa1::memory_type::from));
 }
 
 TEST_CASE("vmcs_guest_ia32_pat_pa1_reserved")
@@ -455,14 +537,19 @@ TEST_CASE("vmcs_guest_ia32_pat_pa1_reserved")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace vmcs::guest_ia32_pat;
+
     g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] |= msrs::ia32_vmx_true_entry_ctls::load_ia32_pat::mask
             << 32;
 
-    vmcs::guest_ia32_pat::pa1::reserved::set(1UL);
-    CHECK(vmcs::guest_ia32_pat::pa1::reserved::get() == 1UL);
+    pa1::reserved::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(pa1::reserved::get() == (pa1::reserved::mask >> pa1::reserved::from));
 
-    vmcs::guest_ia32_pat::pa1::reserved::set_if_exists(0UL);
-    CHECK(vmcs::guest_ia32_pat::pa1::reserved::get_if_exists() == 0UL);
+    pa1::reserved::set(pa1::reserved::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(pa1::reserved::get(pa1::reserved::mask) == (pa1::reserved::mask >> pa1::reserved::from));
+
+    pa1::reserved::set_if_exists(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(pa1::reserved::get_if_exists() == (pa1::reserved::mask >> pa1::reserved::from));
 }
 
 TEST_CASE("vmcs_guest_ia32_pat_pa2")
@@ -470,14 +557,19 @@ TEST_CASE("vmcs_guest_ia32_pat_pa2")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace vmcs::guest_ia32_pat;
+
     g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] |= msrs::ia32_vmx_true_entry_ctls::load_ia32_pat::mask
             << 32;
 
-    vmcs::guest_ia32_pat::pa2::set(1UL);
-    CHECK(vmcs::guest_ia32_pat::pa2::get() == 1UL);
+    pa2::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(pa2::get() == (pa2::mask >> pa2::from));
 
-    vmcs::guest_ia32_pat::pa2::set_if_exists(0UL);
-    CHECK(vmcs::guest_ia32_pat::pa2::get_if_exists() == 0UL);
+    pa2::set(pa2::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(pa2::get(pa2::mask) == (pa2::mask >> pa2::from));
+
+    pa2::set_if_exists(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(pa2::get_if_exists() == (pa2::mask >> pa2::from));
 }
 
 TEST_CASE("vmcs_guest_ia32_pat_pa2_memory_type")
@@ -491,21 +583,20 @@ TEST_CASE("vmcs_guest_ia32_pat_pa2_memory_type")
 
     pa2::memory_type::set(x64::memory_type::uncacheable);
     CHECK(pa2::memory_type::get() == x64::memory_type::uncacheable);
-
     pa2::memory_type::set(x64::memory_type::write_combining);
     CHECK(pa2::memory_type::get() == x64::memory_type::write_combining);
-
     pa2::memory_type::set(x64::memory_type::write_through);
     CHECK(pa2::memory_type::get() == x64::memory_type::write_through);
 
     pa2::memory_type::set_if_exists(x64::memory_type::write_protected);
     CHECK(pa2::memory_type::get_if_exists() == x64::memory_type::write_protected);
-
     pa2::memory_type::set_if_exists(x64::memory_type::write_back);
     CHECK(pa2::memory_type::get_if_exists() == x64::memory_type::write_back);
-
     pa2::memory_type::set_if_exists(x64::memory_type::uncacheable_minus);
     CHECK(pa2::memory_type::get_if_exists() == x64::memory_type::uncacheable_minus);
+
+    pa2::memory_type::set(pa2::memory_type::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(pa2::memory_type::get(pa2::memory_type::mask) == (pa2::memory_type::mask >> pa2::memory_type::from));
 }
 
 TEST_CASE("vmcs_guest_ia32_pat_pa2_reserved")
@@ -513,14 +604,19 @@ TEST_CASE("vmcs_guest_ia32_pat_pa2_reserved")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace vmcs::guest_ia32_pat;
+
     g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] |= msrs::ia32_vmx_true_entry_ctls::load_ia32_pat::mask
             << 32;
 
-    vmcs::guest_ia32_pat::pa2::reserved::set(1UL);
-    CHECK(vmcs::guest_ia32_pat::pa2::reserved::get() == 1UL);
+    pa2::reserved::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(pa2::reserved::get() == (pa2::reserved::mask >> pa2::reserved::from));
 
-    vmcs::guest_ia32_pat::pa2::reserved::set_if_exists(0UL);
-    CHECK(vmcs::guest_ia32_pat::pa2::reserved::get_if_exists() == 0UL);
+    pa2::reserved::set(pa2::reserved::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(pa2::reserved::get(pa2::reserved::mask) == (pa2::reserved::mask >> pa2::reserved::from));
+
+    pa2::reserved::set_if_exists(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(pa2::reserved::get_if_exists() == (pa2::reserved::mask >> pa2::reserved::from));
 }
 
 TEST_CASE("vmcs_guest_ia32_pat_pa3")
@@ -528,14 +624,19 @@ TEST_CASE("vmcs_guest_ia32_pat_pa3")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace vmcs::guest_ia32_pat;
+
     g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] |= msrs::ia32_vmx_true_entry_ctls::load_ia32_pat::mask
             << 32;
 
-    vmcs::guest_ia32_pat::pa3::set(1UL);
-    CHECK(vmcs::guest_ia32_pat::pa3::get() == 1UL);
+    pa3::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(pa3::get() == (pa3::mask >> pa3::from));
 
-    vmcs::guest_ia32_pat::pa3::set_if_exists(0UL);
-    CHECK(vmcs::guest_ia32_pat::pa3::get_if_exists() == 0UL);
+    pa3::set(pa3::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(pa3::get(pa3::mask) == (pa3::mask >> pa3::from));
+
+    pa3::set_if_exists(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(pa3::get_if_exists() == (pa3::mask >> pa3::from));
 }
 
 TEST_CASE("vmcs_guest_ia32_pat_pa3_memory_type")
@@ -549,21 +650,20 @@ TEST_CASE("vmcs_guest_ia32_pat_pa3_memory_type")
 
     pa3::memory_type::set(x64::memory_type::uncacheable);
     CHECK(pa3::memory_type::get() == x64::memory_type::uncacheable);
-
     pa3::memory_type::set(x64::memory_type::write_combining);
     CHECK(pa3::memory_type::get() == x64::memory_type::write_combining);
-
     pa3::memory_type::set(x64::memory_type::write_through);
     CHECK(pa3::memory_type::get() == x64::memory_type::write_through);
 
     pa3::memory_type::set_if_exists(x64::memory_type::write_protected);
     CHECK(pa3::memory_type::get_if_exists() == x64::memory_type::write_protected);
-
     pa3::memory_type::set_if_exists(x64::memory_type::write_back);
     CHECK(pa3::memory_type::get_if_exists() == x64::memory_type::write_back);
-
     pa3::memory_type::set_if_exists(x64::memory_type::uncacheable_minus);
     CHECK(pa3::memory_type::get_if_exists() == x64::memory_type::uncacheable_minus);
+
+    pa3::memory_type::set(pa3::memory_type::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(pa3::memory_type::get(pa3::memory_type::mask) == (pa3::memory_type::mask >> pa3::memory_type::from));
 }
 
 TEST_CASE("vmcs_guest_ia32_pat_pa3_reserved")
@@ -571,14 +671,19 @@ TEST_CASE("vmcs_guest_ia32_pat_pa3_reserved")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace vmcs::guest_ia32_pat;
+
     g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] |= msrs::ia32_vmx_true_entry_ctls::load_ia32_pat::mask
             << 32;
 
-    vmcs::guest_ia32_pat::pa3::reserved::set(1UL);
-    CHECK(vmcs::guest_ia32_pat::pa3::reserved::get() == 1UL);
+    pa3::reserved::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(pa3::reserved::get() == (pa3::reserved::mask >> pa3::reserved::from));
 
-    vmcs::guest_ia32_pat::pa3::reserved::set_if_exists(0UL);
-    CHECK(vmcs::guest_ia32_pat::pa3::reserved::get_if_exists() == 0UL);
+    pa3::reserved::set(pa3::reserved::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(pa3::reserved::get(pa3::reserved::mask) == (pa3::reserved::mask >> pa3::reserved::from));
+
+    pa3::reserved::set_if_exists(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(pa3::reserved::get_if_exists() == (pa3::reserved::mask >> pa3::reserved::from));
 }
 
 TEST_CASE("vmcs_guest_ia32_pat_pa4")
@@ -586,14 +691,19 @@ TEST_CASE("vmcs_guest_ia32_pat_pa4")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace vmcs::guest_ia32_pat;
+
     g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] |= msrs::ia32_vmx_true_entry_ctls::load_ia32_pat::mask
             << 32;
 
-    vmcs::guest_ia32_pat::pa4::set(1UL);
-    CHECK(vmcs::guest_ia32_pat::pa4::get() == 1UL);
+    pa4::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(pa4::get() == (pa4::mask >> pa4::from));
 
-    vmcs::guest_ia32_pat::pa4::set_if_exists(0UL);
-    CHECK(vmcs::guest_ia32_pat::pa4::get_if_exists() == 0UL);
+    pa4::set(pa4::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(pa4::get(pa4::mask) == (pa4::mask >> pa4::from));
+
+    pa4::set_if_exists(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(pa4::get_if_exists() == (pa4::mask >> pa4::from));
 }
 
 TEST_CASE("vmcs_guest_ia32_pat_pa4_memory_type")
@@ -607,21 +717,20 @@ TEST_CASE("vmcs_guest_ia32_pat_pa4_memory_type")
 
     pa4::memory_type::set(x64::memory_type::uncacheable);
     CHECK(pa4::memory_type::get() == x64::memory_type::uncacheable);
-
     pa4::memory_type::set(x64::memory_type::write_combining);
     CHECK(pa4::memory_type::get() == x64::memory_type::write_combining);
-
     pa4::memory_type::set(x64::memory_type::write_through);
     CHECK(pa4::memory_type::get() == x64::memory_type::write_through);
 
     pa4::memory_type::set_if_exists(x64::memory_type::write_protected);
     CHECK(pa4::memory_type::get_if_exists() == x64::memory_type::write_protected);
-
     pa4::memory_type::set_if_exists(x64::memory_type::write_back);
     CHECK(pa4::memory_type::get_if_exists() == x64::memory_type::write_back);
-
     pa4::memory_type::set_if_exists(x64::memory_type::uncacheable_minus);
     CHECK(pa4::memory_type::get_if_exists() == x64::memory_type::uncacheable_minus);
+
+    pa4::memory_type::set(pa4::memory_type::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(pa4::memory_type::get(pa4::memory_type::mask) == (pa4::memory_type::mask >> pa4::memory_type::from));
 }
 
 TEST_CASE("vmcs_guest_ia32_pat_pa4_reserved")
@@ -629,14 +738,19 @@ TEST_CASE("vmcs_guest_ia32_pat_pa4_reserved")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace vmcs::guest_ia32_pat;
+
     g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] |= msrs::ia32_vmx_true_entry_ctls::load_ia32_pat::mask
             << 32;
 
-    vmcs::guest_ia32_pat::pa4::reserved::set(1UL);
-    CHECK(vmcs::guest_ia32_pat::pa4::reserved::get() == 1UL);
+    pa4::reserved::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(pa4::reserved::get() == (pa4::reserved::mask >> pa4::reserved::from));
 
-    vmcs::guest_ia32_pat::pa4::reserved::set_if_exists(0UL);
-    CHECK(vmcs::guest_ia32_pat::pa4::reserved::get_if_exists() == 0UL);
+    pa4::reserved::set(pa4::reserved::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(pa4::reserved::get(pa4::reserved::mask) == (pa4::reserved::mask >> pa4::reserved::from));
+
+    pa4::reserved::set_if_exists(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(pa4::reserved::get_if_exists() == (pa4::reserved::mask >> pa4::reserved::from));
 }
 
 TEST_CASE("vmcs_guest_ia32_pat_pa5")
@@ -644,14 +758,19 @@ TEST_CASE("vmcs_guest_ia32_pat_pa5")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace vmcs::guest_ia32_pat;
+
     g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] |= msrs::ia32_vmx_true_entry_ctls::load_ia32_pat::mask
             << 32;
 
-    vmcs::guest_ia32_pat::pa5::set(1UL);
-    CHECK(vmcs::guest_ia32_pat::pa5::get() == 1UL);
+    pa5::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(pa5::get() == (pa5::mask >> pa5::from));
 
-    vmcs::guest_ia32_pat::pa5::set_if_exists(0UL);
-    CHECK(vmcs::guest_ia32_pat::pa5::get_if_exists() == 0UL);
+    pa5::set(pa5::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(pa5::get(pa5::mask) == (pa5::mask >> pa5::from));
+
+    pa5::set_if_exists(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(pa5::get_if_exists() == (pa5::mask >> pa5::from));
 }
 
 TEST_CASE("vmcs_guest_ia32_pat_pa5_memory_type")
@@ -665,21 +784,20 @@ TEST_CASE("vmcs_guest_ia32_pat_pa5_memory_type")
 
     pa5::memory_type::set(x64::memory_type::uncacheable);
     CHECK(pa5::memory_type::get() == x64::memory_type::uncacheable);
-
     pa5::memory_type::set(x64::memory_type::write_combining);
     CHECK(pa5::memory_type::get() == x64::memory_type::write_combining);
-
     pa5::memory_type::set(x64::memory_type::write_through);
     CHECK(pa5::memory_type::get() == x64::memory_type::write_through);
 
     pa5::memory_type::set_if_exists(x64::memory_type::write_protected);
     CHECK(pa5::memory_type::get_if_exists() == x64::memory_type::write_protected);
-
     pa5::memory_type::set_if_exists(x64::memory_type::write_back);
     CHECK(pa5::memory_type::get_if_exists() == x64::memory_type::write_back);
-
     pa5::memory_type::set_if_exists(x64::memory_type::uncacheable_minus);
     CHECK(pa5::memory_type::get_if_exists() == x64::memory_type::uncacheable_minus);
+
+    pa5::memory_type::set(pa5::memory_type::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(pa5::memory_type::get(pa5::memory_type::mask) == (pa5::memory_type::mask >> pa5::memory_type::from));
 }
 
 TEST_CASE("vmcs_guest_ia32_pat_pa5_reserved")
@@ -687,14 +805,19 @@ TEST_CASE("vmcs_guest_ia32_pat_pa5_reserved")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace vmcs::guest_ia32_pat;
+
     g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] |= msrs::ia32_vmx_true_entry_ctls::load_ia32_pat::mask
             << 32;
 
-    vmcs::guest_ia32_pat::pa5::reserved::set(1UL);
-    CHECK(vmcs::guest_ia32_pat::pa5::reserved::get() == 1UL);
+    pa5::reserved::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(pa5::reserved::get() == (pa5::reserved::mask >> pa5::reserved::from));
 
-    vmcs::guest_ia32_pat::pa5::reserved::set_if_exists(0UL);
-    CHECK(vmcs::guest_ia32_pat::pa5::reserved::get_if_exists() == 0UL);
+    pa5::reserved::set(pa5::reserved::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(pa5::reserved::get(pa5::reserved::mask) == (pa5::reserved::mask >> pa5::reserved::from));
+
+    pa5::reserved::set_if_exists(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(pa5::reserved::get_if_exists() == (pa5::reserved::mask >> pa5::reserved::from));
 }
 
 TEST_CASE("vmcs_guest_ia32_pat_pa6")
@@ -702,14 +825,19 @@ TEST_CASE("vmcs_guest_ia32_pat_pa6")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace vmcs::guest_ia32_pat;
+
     g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] |= msrs::ia32_vmx_true_entry_ctls::load_ia32_pat::mask
             << 32;
 
-    vmcs::guest_ia32_pat::pa6::set(1UL);
-    CHECK(vmcs::guest_ia32_pat::pa6::get() == 1UL);
+    pa6::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(pa6::get() == (pa6::mask >> pa6::from));
 
-    vmcs::guest_ia32_pat::pa6::set_if_exists(0UL);
-    CHECK(vmcs::guest_ia32_pat::pa6::get_if_exists() == 0UL);
+    pa6::set(pa6::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(pa6::get(pa6::mask) == (pa6::mask >> pa6::from));
+
+    pa6::set_if_exists(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(pa6::get_if_exists() == (pa6::mask >> pa6::from));
 }
 
 TEST_CASE("vmcs_guest_ia32_pat_pa6_memory_type")
@@ -723,21 +851,20 @@ TEST_CASE("vmcs_guest_ia32_pat_pa6_memory_type")
 
     pa6::memory_type::set(x64::memory_type::uncacheable);
     CHECK(pa6::memory_type::get() == x64::memory_type::uncacheable);
-
     pa6::memory_type::set(x64::memory_type::write_combining);
     CHECK(pa6::memory_type::get() == x64::memory_type::write_combining);
-
     pa6::memory_type::set(x64::memory_type::write_through);
     CHECK(pa6::memory_type::get() == x64::memory_type::write_through);
 
     pa6::memory_type::set_if_exists(x64::memory_type::write_protected);
     CHECK(pa6::memory_type::get_if_exists() == x64::memory_type::write_protected);
-
     pa6::memory_type::set_if_exists(x64::memory_type::write_back);
     CHECK(pa6::memory_type::get_if_exists() == x64::memory_type::write_back);
-
     pa6::memory_type::set_if_exists(x64::memory_type::uncacheable_minus);
     CHECK(pa6::memory_type::get_if_exists() == x64::memory_type::uncacheable_minus);
+
+    pa6::memory_type::set(pa6::memory_type::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(pa6::memory_type::get(pa6::memory_type::mask) == (pa6::memory_type::mask >> pa6::memory_type::from));
 }
 
 TEST_CASE("vmcs_guest_ia32_pat_pa6_reserved")
@@ -745,14 +872,19 @@ TEST_CASE("vmcs_guest_ia32_pat_pa6_reserved")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace vmcs::guest_ia32_pat;
+
     g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] |= msrs::ia32_vmx_true_entry_ctls::load_ia32_pat::mask
             << 32;
 
-    vmcs::guest_ia32_pat::pa6::reserved::set(1UL);
-    CHECK(vmcs::guest_ia32_pat::pa6::reserved::get() == 1UL);
+    pa6::reserved::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(pa6::reserved::get() == (pa6::reserved::mask >> pa6::reserved::from));
 
-    vmcs::guest_ia32_pat::pa6::reserved::set_if_exists(0UL);
-    CHECK(vmcs::guest_ia32_pat::pa6::reserved::get_if_exists() == 0UL);
+    pa6::reserved::set(pa6::reserved::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(pa6::reserved::get(pa6::reserved::mask) == (pa6::reserved::mask >> pa6::reserved::from));
+
+    pa6::reserved::set_if_exists(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(pa6::reserved::get_if_exists() == (pa6::reserved::mask >> pa6::reserved::from));
 }
 
 TEST_CASE("vmcs_guest_ia32_pat_pa7")
@@ -760,14 +892,19 @@ TEST_CASE("vmcs_guest_ia32_pat_pa7")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace vmcs::guest_ia32_pat;
+
     g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] |= msrs::ia32_vmx_true_entry_ctls::load_ia32_pat::mask
             << 32;
 
-    vmcs::guest_ia32_pat::pa7::set(1UL);
-    CHECK(vmcs::guest_ia32_pat::pa7::get() == 1UL);
+    pa7::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(pa7::get() == (pa7::mask >> pa7::from));
 
-    vmcs::guest_ia32_pat::pa7::set_if_exists(0UL);
-    CHECK(vmcs::guest_ia32_pat::pa7::get_if_exists() == 0UL);
+    pa7::set(pa7::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(pa7::get(pa7::mask) == (pa7::mask >> pa7::from));
+
+    pa7::set_if_exists(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(pa7::get_if_exists() == (pa7::mask >> pa7::from));
 }
 
 TEST_CASE("vmcs_guest_ia32_pat_pa7_memory_type")
@@ -781,21 +918,20 @@ TEST_CASE("vmcs_guest_ia32_pat_pa7_memory_type")
 
     pa7::memory_type::set(x64::memory_type::uncacheable);
     CHECK(pa7::memory_type::get() == x64::memory_type::uncacheable);
-
     pa7::memory_type::set(x64::memory_type::write_combining);
     CHECK(pa7::memory_type::get() == x64::memory_type::write_combining);
-
     pa7::memory_type::set(x64::memory_type::write_through);
     CHECK(pa7::memory_type::get() == x64::memory_type::write_through);
 
     pa7::memory_type::set_if_exists(x64::memory_type::write_protected);
     CHECK(pa7::memory_type::get_if_exists() == x64::memory_type::write_protected);
-
     pa7::memory_type::set_if_exists(x64::memory_type::write_back);
     CHECK(pa7::memory_type::get_if_exists() == x64::memory_type::write_back);
-
     pa7::memory_type::set_if_exists(x64::memory_type::uncacheable_minus);
     CHECK(pa7::memory_type::get_if_exists() == x64::memory_type::uncacheable_minus);
+
+    pa7::memory_type::set(pa7::memory_type::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(pa7::memory_type::get(pa7::memory_type::mask) == (pa7::memory_type::mask >> pa7::memory_type::from));
 }
 
 TEST_CASE("vmcs_guest_ia32_pat_pa7_reserved")
@@ -803,14 +939,19 @@ TEST_CASE("vmcs_guest_ia32_pat_pa7_reserved")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace vmcs::guest_ia32_pat;
+
     g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] |= msrs::ia32_vmx_true_entry_ctls::load_ia32_pat::mask
             << 32;
 
-    vmcs::guest_ia32_pat::pa7::reserved::set(1UL);
-    CHECK(vmcs::guest_ia32_pat::pa7::reserved::get() == 1UL);
+    pa7::reserved::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(pa7::reserved::get() == (pa7::reserved::mask >> pa7::reserved::from));
 
-    vmcs::guest_ia32_pat::pa7::reserved::set_if_exists(0UL);
-    CHECK(vmcs::guest_ia32_pat::pa7::reserved::get_if_exists() == 0UL);
+    pa7::reserved::set(pa7::reserved::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(pa7::reserved::get(pa7::reserved::mask) == (pa7::reserved::mask >> pa7::reserved::from));
+
+    pa7::reserved::set_if_exists(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(pa7::reserved::get_if_exists() == (pa7::reserved::mask >> pa7::reserved::from));
 }
 
 TEST_CASE("vmcs_guest_ia32_efer")
@@ -818,18 +959,22 @@ TEST_CASE("vmcs_guest_ia32_efer")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+
+    using namespace vmcs::guest_ia32_efer;
+
     g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] |= msrs::ia32_vmx_true_entry_ctls::load_ia32_efer::mask << 32;
-    CHECK(vmcs::guest_ia32_efer::exists());
+    CHECK(exists());
 
     g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] = 0x0UL;
     g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] |= msrs::ia32_vmx_true_exit_ctls::save_ia32_efer::mask << 32;
-    CHECK(vmcs::guest_ia32_efer::exists());
 
-    vmcs::guest_ia32_efer::set(1UL);
-    CHECK(vmcs::guest_ia32_efer::get() == 1UL);
+    CHECK(exists());
+    set(100UL);
+    CHECK(get() == 100UL);
+    set_if_exists(200UL);
+    CHECK(get_if_exists() == 200UL);
 
-    vmcs::guest_ia32_efer::set_if_exists(0UL);
-    CHECK(vmcs::guest_ia32_efer::get_if_exists() == 0UL);
+    dump(0);
 }
 
 TEST_CASE("vmcs_guest_ia32_efer_sce")
@@ -837,20 +982,25 @@ TEST_CASE("vmcs_guest_ia32_efer_sce")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace vmcs::guest_ia32_efer;
+
     g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] |= msrs::ia32_vmx_true_entry_ctls::load_ia32_efer::mask
             << 32;
 
-    vmcs::guest_ia32_efer::sce::enable();
-    CHECK(vmcs::guest_ia32_efer::sce::is_enabled());
+    sce::set(true);
+    CHECK(sce::is_enabled());
+    sce::set(false);
+    CHECK(sce::is_disabled());
 
-    vmcs::guest_ia32_efer::sce::disable();
-    CHECK(vmcs::guest_ia32_efer::sce::is_disabled());
+    sce::set(sce::mask, true);
+    CHECK(sce::is_enabled(sce::mask));
+    sce::set(0x0, false);
+    CHECK(sce::is_disabled(0x0));
 
-    vmcs::guest_ia32_efer::sce::enable_if_exists();
-    CHECK(vmcs::guest_ia32_efer::sce::is_enabled_if_exists());
-
-    vmcs::guest_ia32_efer::sce::disable_if_exists();
-    CHECK(vmcs::guest_ia32_efer::sce::is_disabled_if_exists());
+    sce::set_if_exists(true);
+    CHECK(sce::is_enabled_if_exists());
+    sce::set_if_exists(false);
+    CHECK(sce::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_ia32_efer_lme")
@@ -858,20 +1008,25 @@ TEST_CASE("vmcs_guest_ia32_efer_lme")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace vmcs::guest_ia32_efer;
+
     g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] |= msrs::ia32_vmx_true_entry_ctls::load_ia32_efer::mask
             << 32;
 
-    vmcs::guest_ia32_efer::lme::enable();
-    CHECK(vmcs::guest_ia32_efer::lme::is_enabled());
+    lme::set(true);
+    CHECK(lme::is_enabled());
+    lme::set(false);
+    CHECK(lme::is_disabled());
 
-    vmcs::guest_ia32_efer::lme::disable();
-    CHECK(vmcs::guest_ia32_efer::lme::is_disabled());
+    lme::set(lme::mask, true);
+    CHECK(lme::is_enabled(lme::mask));
+    lme::set(0x0, false);
+    CHECK(lme::is_disabled(0x0));
 
-    vmcs::guest_ia32_efer::lme::enable_if_exists();
-    CHECK(vmcs::guest_ia32_efer::lme::is_enabled_if_exists());
-
-    vmcs::guest_ia32_efer::lme::disable_if_exists();
-    CHECK(vmcs::guest_ia32_efer::lme::is_disabled_if_exists());
+    lme::set_if_exists(true);
+    CHECK(lme::is_enabled_if_exists());
+    lme::set_if_exists(false);
+    CHECK(lme::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_ia32_efer_lma")
@@ -879,20 +1034,25 @@ TEST_CASE("vmcs_guest_ia32_efer_lma")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace vmcs::guest_ia32_efer;
+
     g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] |= msrs::ia32_vmx_true_entry_ctls::load_ia32_efer::mask
             << 32;
 
-    vmcs::guest_ia32_efer::lma::enable();
-    CHECK(vmcs::guest_ia32_efer::lma::is_enabled());
+    lma::set(true);
+    CHECK(lma::is_enabled());
+    lma::set(false);
+    CHECK(lma::is_disabled());
 
-    vmcs::guest_ia32_efer::lma::disable();
-    CHECK(vmcs::guest_ia32_efer::lma::is_disabled());
+    lma::set(lma::mask, true);
+    CHECK(lma::is_enabled(lma::mask));
+    lma::set(0x0, false);
+    CHECK(lma::is_disabled(0x0));
 
-    vmcs::guest_ia32_efer::lma::enable_if_exists();
-    CHECK(vmcs::guest_ia32_efer::lma::is_enabled_if_exists());
-
-    vmcs::guest_ia32_efer::lma::disable_if_exists();
-    CHECK(vmcs::guest_ia32_efer::lma::is_disabled_if_exists());
+    lma::set_if_exists(true);
+    CHECK(lma::is_enabled_if_exists());
+    lma::set_if_exists(false);
+    CHECK(lma::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_ia32_efer_nxe")
@@ -900,20 +1060,25 @@ TEST_CASE("vmcs_guest_ia32_efer_nxe")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace vmcs::guest_ia32_efer;
+
     g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] |= msrs::ia32_vmx_true_entry_ctls::load_ia32_efer::mask
             << 32;
 
-    vmcs::guest_ia32_efer::nxe::enable();
-    CHECK(vmcs::guest_ia32_efer::nxe::is_enabled());
+    nxe::set(true);
+    CHECK(nxe::is_enabled());
+    nxe::set(false);
+    CHECK(nxe::is_disabled());
 
-    vmcs::guest_ia32_efer::nxe::disable();
-    CHECK(vmcs::guest_ia32_efer::nxe::is_disabled());
+    nxe::set(nxe::mask, true);
+    CHECK(nxe::is_enabled(nxe::mask));
+    nxe::set(0x0, false);
+    CHECK(nxe::is_disabled(0x0));
 
-    vmcs::guest_ia32_efer::nxe::enable_if_exists();
-    CHECK(vmcs::guest_ia32_efer::nxe::is_enabled_if_exists());
-
-    vmcs::guest_ia32_efer::nxe::disable_if_exists();
-    CHECK(vmcs::guest_ia32_efer::nxe::is_disabled_if_exists());
+    nxe::set_if_exists(true);
+    CHECK(nxe::is_enabled_if_exists());
+    nxe::set_if_exists(false);
+    CHECK(nxe::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_ia32_efer_reserved")
@@ -921,14 +1086,19 @@ TEST_CASE("vmcs_guest_ia32_efer_reserved")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace vmcs::guest_ia32_efer;
+
     g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] |= msrs::ia32_vmx_true_entry_ctls::load_ia32_efer::mask
             << 32;
 
-    vmcs::guest_ia32_efer::reserved::set(0xEU);
-    CHECK(vmcs::guest_ia32_efer::reserved::get() == 0xEU);
+    reserved::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(reserved::get() == (reserved::mask >> reserved::from));
 
-    vmcs::guest_ia32_efer::reserved::set_if_exists(0x0U);
-    CHECK(vmcs::guest_ia32_efer::reserved::get_if_exists() == 0x0U);
+    reserved::set(reserved::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(reserved::get(reserved::mask) == (reserved::mask >> reserved::from));
+
+    reserved::set_if_exists(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(reserved::get_if_exists() == (reserved::mask >> reserved::from));
 }
 
 TEST_CASE("vmcs_guest_ia32_perf_global_ctrl")
@@ -936,15 +1106,18 @@ TEST_CASE("vmcs_guest_ia32_perf_global_ctrl")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace vmcs::guest_ia32_perf_global_ctrl;
+
     g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] |=
         msrs::ia32_vmx_true_entry_ctls::load_ia32_perf_global_ctrl::mask << 32;
-    CHECK(vmcs::guest_ia32_perf_global_ctrl::exists());
 
-    vmcs::guest_ia32_perf_global_ctrl::set(1UL);
-    CHECK(vmcs::guest_ia32_perf_global_ctrl::get() == 1UL);
+    CHECK(exists());
+    set(100UL);
+    CHECK(get() == 100UL);
+    set_if_exists(200UL);
+    CHECK(get_if_exists() == 200UL);
 
-    vmcs::guest_ia32_perf_global_ctrl::set_if_exists(0UL);
-    CHECK(vmcs::guest_ia32_perf_global_ctrl::get_if_exists() == 0UL);
+    dump(0);
 }
 
 TEST_CASE("vmcs_guest_ia32_perf_global_ctrl_reserved")
@@ -952,15 +1125,19 @@ TEST_CASE("vmcs_guest_ia32_perf_global_ctrl_reserved")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace vmcs::guest_ia32_perf_global_ctrl;
+
     g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] |=
         msrs::ia32_vmx_true_entry_ctls::load_ia32_perf_global_ctrl::mask << 32;
-    CHECK(vmcs::guest_ia32_perf_global_ctrl::exists());
 
-    vmcs::guest_ia32_perf_global_ctrl::reserved::set(0xCUL);
-    CHECK(vmcs::guest_ia32_perf_global_ctrl::reserved::get() == 0xCUL);
+    reserved::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(reserved::get() == (reserved::mask >> reserved::from));
 
-    vmcs::guest_ia32_perf_global_ctrl::reserved::set_if_exists(0UL);
-    CHECK(vmcs::guest_ia32_perf_global_ctrl::reserved::get_if_exists() == 0UL);
+    reserved::set(reserved::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(reserved::get(reserved::mask) == (reserved::mask >> reserved::from));
+
+    reserved::set_if_exists(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(reserved::get_if_exists() == (reserved::mask >> reserved::from));
 }
 
 TEST_CASE("vmcs_guest_pdpte0")
@@ -968,18 +1145,20 @@ TEST_CASE("vmcs_guest_pdpte0")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace vmcs::guest_pdpte0;
+
     g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] |=
         msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask << 32;
     g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] |= msrs::ia32_vmx_procbased_ctls2::enable_ept::mask <<
             32;
 
-    CHECK(vmcs::guest_pdpte0::exists());
+    CHECK(exists());
+    set(100UL);
+    CHECK(get() == 100UL);
+    set_if_exists(200UL);
+    CHECK(get_if_exists() == 200UL);
 
-    vmcs::guest_pdpte0::set(1UL);
-    CHECK(vmcs::guest_pdpte0::get() == 1UL);
-
-    vmcs::guest_pdpte0::set_if_exists(0UL);
-    CHECK(vmcs::guest_pdpte0::get_if_exists() == 0UL);
+    dump(0);
 }
 
 TEST_CASE("vmcs_guest_pdpte0_present")
@@ -987,22 +1166,27 @@ TEST_CASE("vmcs_guest_pdpte0_present")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace vmcs::guest_pdpte0;
+
     g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] |=
         msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask << 32;
     g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] |= msrs::ia32_vmx_procbased_ctls2::enable_ept::mask <<
             32;
 
-    vmcs::guest_pdpte0::present::enable();
-    CHECK(vmcs::guest_pdpte0::present::is_enabled());
+    present::set(true);
+    CHECK(present::is_enabled());
+    present::set(false);
+    CHECK(present::is_disabled());
 
-    vmcs::guest_pdpte0::present::disable();
-    CHECK(vmcs::guest_pdpte0::present::is_disabled());
+    present::set(present::mask, true);
+    CHECK(present::is_enabled(present::mask));
+    present::set(0x0, false);
+    CHECK(present::is_disabled(0x0));
 
-    vmcs::guest_pdpte0::present::enable_if_exists();
-    CHECK(vmcs::guest_pdpte0::present::is_enabled_if_exists());
-
-    vmcs::guest_pdpte0::present::disable_if_exists();
-    CHECK(vmcs::guest_pdpte0::present::is_disabled_if_exists());
+    present::set_if_exists(true);
+    CHECK(present::is_enabled_if_exists());
+    present::set_if_exists(false);
+    CHECK(present::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_pdpte0_reserved")
@@ -1010,16 +1194,21 @@ TEST_CASE("vmcs_guest_pdpte0_reserved")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace vmcs::guest_pdpte0;
+
     g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] |=
         msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask << 32;
     g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] |= msrs::ia32_vmx_procbased_ctls2::enable_ept::mask <<
             32;
 
-    vmcs::guest_pdpte0::reserved::set(6U);
-    CHECK(vmcs::guest_pdpte0::reserved::get() == 6U);
+    reserved::set(6U);
+    CHECK(reserved::get() == 6U);
 
-    vmcs::guest_pdpte0::reserved::set_if_exists(0x8000000000000000U);
-    CHECK(vmcs::guest_pdpte0::reserved::get_if_exists() == 0x8000000000000000U);
+    reserved::set(0x0U, 0x0U);
+    CHECK(reserved::get(0x0U) == 0x0U);
+
+    reserved::set_if_exists(0x8000000000000000U);
+    CHECK(reserved::get_if_exists() == 0x8000000000000000U);
 }
 
 TEST_CASE("vmcs_guest_pdpte0_pwt")
@@ -1027,22 +1216,27 @@ TEST_CASE("vmcs_guest_pdpte0_pwt")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace vmcs::guest_pdpte0;
+
     g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] |=
         msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask << 32;
     g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] |= msrs::ia32_vmx_procbased_ctls2::enable_ept::mask <<
             32;
 
-    vmcs::guest_pdpte0::pwt::enable();
-    CHECK(vmcs::guest_pdpte0::pwt::is_enabled());
+    pwt::set(true);
+    CHECK(pwt::is_enabled());
+    pwt::set(false);
+    CHECK(pwt::is_disabled());
 
-    vmcs::guest_pdpte0::pwt::disable();
-    CHECK(vmcs::guest_pdpte0::pwt::is_disabled());
+    pwt::set(pwt::mask, true);
+    CHECK(pwt::is_enabled(pwt::mask));
+    pwt::set(0x0, false);
+    CHECK(pwt::is_disabled(0x0));
 
-    vmcs::guest_pdpte0::pwt::enable_if_exists();
-    CHECK(vmcs::guest_pdpte0::pwt::is_enabled_if_exists());
-
-    vmcs::guest_pdpte0::pwt::disable_if_exists();
-    CHECK(vmcs::guest_pdpte0::pwt::is_disabled_if_exists());
+    pwt::set_if_exists(true);
+    CHECK(pwt::is_enabled_if_exists());
+    pwt::set_if_exists(false);
+    CHECK(pwt::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_pdpte0_pcd")
@@ -1050,22 +1244,27 @@ TEST_CASE("vmcs_guest_pdpte0_pcd")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace vmcs::guest_pdpte0;
+
     g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] |=
         msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask << 32;
     g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] |= msrs::ia32_vmx_procbased_ctls2::enable_ept::mask <<
             32;
 
-    vmcs::guest_pdpte0::pcd::enable();
-    CHECK(vmcs::guest_pdpte0::pcd::is_enabled());
+    pcd::set(true);
+    CHECK(pcd::is_enabled());
+    pcd::set(false);
+    CHECK(pcd::is_disabled());
 
-    vmcs::guest_pdpte0::pcd::disable();
-    CHECK(vmcs::guest_pdpte0::pcd::is_disabled());
+    pcd::set(pcd::mask, true);
+    CHECK(pcd::is_enabled(pcd::mask));
+    pcd::set(0x0, false);
+    CHECK(pcd::is_disabled(0x0));
 
-    vmcs::guest_pdpte0::pcd::enable_if_exists();
-    CHECK(vmcs::guest_pdpte0::pcd::is_enabled_if_exists());
-
-    vmcs::guest_pdpte0::pcd::disable_if_exists();
-    CHECK(vmcs::guest_pdpte0::pcd::is_disabled_if_exists());
+    pcd::set_if_exists(true);
+    CHECK(pcd::is_enabled_if_exists());
+    pcd::set_if_exists(false);
+    CHECK(pcd::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_pdpte0_page_directory_addr")
@@ -1073,17 +1272,22 @@ TEST_CASE("vmcs_guest_pdpte0_page_directory_addr")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace vmcs::guest_pdpte0;
+
     g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] |=
         msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask << 32;
     g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] |= msrs::ia32_vmx_procbased_ctls2::enable_ept::mask <<
             32;
     g_eax_cpuid[x64::cpuid::addr_size::addr] = 48U;
 
-    vmcs::guest_pdpte0::page_directory_addr::set(0x100000000U);
-    CHECK(vmcs::guest_pdpte0::page_directory_addr::get() == 0x100000000UL);
+    page_directory_addr::set(0x0U);
+    CHECK(page_directory_addr::get() == 0x0U);
 
-    vmcs::guest_pdpte0::page_directory_addr::set_if_exists(0x0U);
-    CHECK(vmcs::guest_pdpte0::page_directory_addr::get_if_exists() == 0x0U);
+    page_directory_addr::set(0x0U, 0x0U);
+    CHECK(page_directory_addr::get(0x0U) == 0x0U);
+
+    page_directory_addr::set_if_exists(0x0U);
+    CHECK(page_directory_addr::get_if_exists() == 0x0U);
 }
 
 TEST_CASE("vmcs_guest_pdpte1")
@@ -1091,18 +1295,20 @@ TEST_CASE("vmcs_guest_pdpte1")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace vmcs::guest_pdpte1;
+
     g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] |=
         msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask << 32;
     g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] |= msrs::ia32_vmx_procbased_ctls2::enable_ept::mask <<
             32;
 
-    CHECK(vmcs::guest_pdpte1::exists());
+    CHECK(exists());
+    set(100UL);
+    CHECK(get() == 100UL);
+    set_if_exists(200UL);
+    CHECK(get_if_exists() == 200UL);
 
-    vmcs::guest_pdpte1::set(1UL);
-    CHECK(vmcs::guest_pdpte1::get() == 1UL);
-
-    vmcs::guest_pdpte1::set_if_exists(0UL);
-    CHECK(vmcs::guest_pdpte1::get_if_exists() == 0UL);
+    dump(0);
 }
 
 TEST_CASE("vmcs_guest_pdpte1_present")
@@ -1110,22 +1316,27 @@ TEST_CASE("vmcs_guest_pdpte1_present")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace vmcs::guest_pdpte1;
+
     g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] |=
         msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask << 32;
     g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] |= msrs::ia32_vmx_procbased_ctls2::enable_ept::mask <<
             32;
 
-    vmcs::guest_pdpte1::present::enable();
-    CHECK(vmcs::guest_pdpte1::present::is_enabled());
+    present::set(true);
+    CHECK(present::is_enabled());
+    present::set(false);
+    CHECK(present::is_disabled());
 
-    vmcs::guest_pdpte1::present::disable();
-    CHECK(vmcs::guest_pdpte1::present::is_disabled());
+    present::set(present::mask, true);
+    CHECK(present::is_enabled(present::mask));
+    present::set(0x0, false);
+    CHECK(present::is_disabled(0x0));
 
-    vmcs::guest_pdpte1::present::enable_if_exists();
-    CHECK(vmcs::guest_pdpte1::present::is_enabled_if_exists());
-
-    vmcs::guest_pdpte1::present::disable_if_exists();
-    CHECK(vmcs::guest_pdpte1::present::is_disabled_if_exists());
+    present::set_if_exists(true);
+    CHECK(present::is_enabled_if_exists());
+    present::set_if_exists(false);
+    CHECK(present::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_pdpte1_reserved")
@@ -1133,16 +1344,21 @@ TEST_CASE("vmcs_guest_pdpte1_reserved")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace vmcs::guest_pdpte1;
+
     g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] |=
         msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask << 32;
     g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] |= msrs::ia32_vmx_procbased_ctls2::enable_ept::mask <<
             32;
 
-    vmcs::guest_pdpte1::reserved::set(6U);
-    CHECK(vmcs::guest_pdpte1::reserved::get() == 6U);
+    reserved::set(6U);
+    CHECK(reserved::get() == 6U);
 
-    vmcs::guest_pdpte1::reserved::set_if_exists(0x8000000000000000U);
-    CHECK(vmcs::guest_pdpte1::reserved::get_if_exists() == 0x8000000000000000U);
+    reserved::set(0x0U, 0x0U);
+    CHECK(reserved::get(0x0U) == 0x0U);
+
+    reserved::set_if_exists(0x8000000000000000U);
+    CHECK(reserved::get_if_exists() == 0x8000000000000000U);
 }
 
 TEST_CASE("vmcs_guest_pdpte1_pwt")
@@ -1150,22 +1366,27 @@ TEST_CASE("vmcs_guest_pdpte1_pwt")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace vmcs::guest_pdpte1;
+
     g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] |=
         msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask << 32;
     g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] |= msrs::ia32_vmx_procbased_ctls2::enable_ept::mask <<
             32;
 
-    vmcs::guest_pdpte1::pwt::enable();
-    CHECK(vmcs::guest_pdpte1::pwt::is_enabled());
+    pwt::set(true);
+    CHECK(pwt::is_enabled());
+    pwt::set(false);
+    CHECK(pwt::is_disabled());
 
-    vmcs::guest_pdpte1::pwt::disable();
-    CHECK(vmcs::guest_pdpte1::pwt::is_disabled());
+    pwt::set(pwt::mask, true);
+    CHECK(pwt::is_enabled(pwt::mask));
+    pwt::set(0x0, false);
+    CHECK(pwt::is_disabled(0x0));
 
-    vmcs::guest_pdpte1::pwt::enable_if_exists();
-    CHECK(vmcs::guest_pdpte1::pwt::is_enabled_if_exists());
-
-    vmcs::guest_pdpte1::pwt::disable_if_exists();
-    CHECK(vmcs::guest_pdpte1::pwt::is_disabled_if_exists());
+    pwt::set_if_exists(true);
+    CHECK(pwt::is_enabled_if_exists());
+    pwt::set_if_exists(false);
+    CHECK(pwt::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_pdpte1_pcd")
@@ -1173,22 +1394,27 @@ TEST_CASE("vmcs_guest_pdpte1_pcd")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace vmcs::guest_pdpte1;
+
     g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] |=
         msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask << 32;
     g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] |= msrs::ia32_vmx_procbased_ctls2::enable_ept::mask <<
             32;
 
-    vmcs::guest_pdpte1::pcd::enable();
-    CHECK(vmcs::guest_pdpte1::pcd::is_enabled());
+    pcd::set(true);
+    CHECK(pcd::is_enabled());
+    pcd::set(false);
+    CHECK(pcd::is_disabled());
 
-    vmcs::guest_pdpte1::pcd::disable();
-    CHECK(vmcs::guest_pdpte1::pcd::is_disabled());
+    pcd::set(pcd::mask, true);
+    CHECK(pcd::is_enabled(pcd::mask));
+    pcd::set(0x0, false);
+    CHECK(pcd::is_disabled(0x0));
 
-    vmcs::guest_pdpte1::pcd::enable_if_exists();
-    CHECK(vmcs::guest_pdpte1::pcd::is_enabled_if_exists());
-
-    vmcs::guest_pdpte1::pcd::disable_if_exists();
-    CHECK(vmcs::guest_pdpte1::pcd::is_disabled_if_exists());
+    pcd::set_if_exists(true);
+    CHECK(pcd::is_enabled_if_exists());
+    pcd::set_if_exists(false);
+    CHECK(pcd::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_pdpte1_page_directory_addr")
@@ -1196,17 +1422,22 @@ TEST_CASE("vmcs_guest_pdpte1_page_directory_addr")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace vmcs::guest_pdpte1;
+
     g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] |=
         msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask << 32;
     g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] |= msrs::ia32_vmx_procbased_ctls2::enable_ept::mask <<
             32;
     g_eax_cpuid[x64::cpuid::addr_size::addr] = 48U;
 
-    vmcs::guest_pdpte1::page_directory_addr::set(0x100000000U);
-    CHECK(vmcs::guest_pdpte1::page_directory_addr::get() == 0x100000000UL);
+    page_directory_addr::set(0x0U);
+    CHECK(page_directory_addr::get() == 0x0U);
 
-    vmcs::guest_pdpte1::page_directory_addr::set_if_exists(0x0U);
-    CHECK(vmcs::guest_pdpte1::page_directory_addr::get_if_exists() == 0x0U);
+    page_directory_addr::set(0x0U, 0x0U);
+    CHECK(page_directory_addr::get(0x0U) == 0x0U);
+
+    page_directory_addr::set_if_exists(0x0U);
+    CHECK(page_directory_addr::get_if_exists() == 0x0U);
 }
 
 TEST_CASE("vmcs_guest_pdpte2")
@@ -1214,18 +1445,20 @@ TEST_CASE("vmcs_guest_pdpte2")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace vmcs::guest_pdpte2;
+
     g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] |=
         msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask << 32;
     g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] |= msrs::ia32_vmx_procbased_ctls2::enable_ept::mask <<
             32;
 
-    CHECK(vmcs::guest_pdpte2::exists());
+    CHECK(exists());
+    set(100UL);
+    CHECK(get() == 100UL);
+    set_if_exists(200UL);
+    CHECK(get_if_exists() == 200UL);
 
-    vmcs::guest_pdpte2::set(1UL);
-    CHECK(vmcs::guest_pdpte2::get() == 1UL);
-
-    vmcs::guest_pdpte2::set_if_exists(0UL);
-    CHECK(vmcs::guest_pdpte2::get_if_exists() == 0UL);
+    dump(0);
 }
 
 TEST_CASE("vmcs_guest_pdpte2_present")
@@ -1233,22 +1466,27 @@ TEST_CASE("vmcs_guest_pdpte2_present")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace vmcs::guest_pdpte2;
+
     g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] |=
         msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask << 32;
     g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] |= msrs::ia32_vmx_procbased_ctls2::enable_ept::mask <<
             32;
 
-    vmcs::guest_pdpte2::present::enable();
-    CHECK(vmcs::guest_pdpte2::present::is_enabled());
+    present::set(true);
+    CHECK(present::is_enabled());
+    present::set(false);
+    CHECK(present::is_disabled());
 
-    vmcs::guest_pdpte2::present::disable();
-    CHECK(vmcs::guest_pdpte2::present::is_disabled());
+    present::set(present::mask, true);
+    CHECK(present::is_enabled(present::mask));
+    present::set(0x0, false);
+    CHECK(present::is_disabled(0x0));
 
-    vmcs::guest_pdpte2::present::enable_if_exists();
-    CHECK(vmcs::guest_pdpte2::present::is_enabled_if_exists());
-
-    vmcs::guest_pdpte2::present::disable_if_exists();
-    CHECK(vmcs::guest_pdpte2::present::is_disabled_if_exists());
+    present::set_if_exists(true);
+    CHECK(present::is_enabled_if_exists());
+    present::set_if_exists(false);
+    CHECK(present::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_pdpte2_reserved")
@@ -1256,16 +1494,21 @@ TEST_CASE("vmcs_guest_pdpte2_reserved")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace vmcs::guest_pdpte2;
+
     g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] |=
         msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask << 32;
     g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] |= msrs::ia32_vmx_procbased_ctls2::enable_ept::mask <<
             32;
 
-    vmcs::guest_pdpte2::reserved::set(6U);
-    CHECK(vmcs::guest_pdpte2::reserved::get() == 6U);
+    reserved::set(6U);
+    CHECK(reserved::get() == 6U);
 
-    vmcs::guest_pdpte2::reserved::set_if_exists(0x8000000000000000U);
-    CHECK(vmcs::guest_pdpte2::reserved::get_if_exists() == 0x8000000000000000U);
+    reserved::set(0x0U, 0x0U);
+    CHECK(reserved::get(0x0U) == 0x0U);
+
+    reserved::set_if_exists(0x8000000000000000U);
+    CHECK(reserved::get_if_exists() == 0x8000000000000000U);
 }
 
 TEST_CASE("vmcs_guest_pdpte2_pwt")
@@ -1273,22 +1516,27 @@ TEST_CASE("vmcs_guest_pdpte2_pwt")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace vmcs::guest_pdpte2;
+
     g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] |=
         msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask << 32;
     g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] |= msrs::ia32_vmx_procbased_ctls2::enable_ept::mask <<
             32;
 
-    vmcs::guest_pdpte2::pwt::enable();
-    CHECK(vmcs::guest_pdpte2::pwt::is_enabled());
+    pwt::set(true);
+    CHECK(pwt::is_enabled());
+    pwt::set(false);
+    CHECK(pwt::is_disabled());
 
-    vmcs::guest_pdpte2::pwt::disable();
-    CHECK(vmcs::guest_pdpte2::pwt::is_disabled());
+    pwt::set(pwt::mask, true);
+    CHECK(pwt::is_enabled(pwt::mask));
+    pwt::set(0x0, false);
+    CHECK(pwt::is_disabled(0x0));
 
-    vmcs::guest_pdpte2::pwt::enable_if_exists();
-    CHECK(vmcs::guest_pdpte2::pwt::is_enabled_if_exists());
-
-    vmcs::guest_pdpte2::pwt::disable_if_exists();
-    CHECK(vmcs::guest_pdpte2::pwt::is_disabled_if_exists());
+    pwt::set_if_exists(true);
+    CHECK(pwt::is_enabled_if_exists());
+    pwt::set_if_exists(false);
+    CHECK(pwt::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_pdpte2_pcd")
@@ -1296,22 +1544,27 @@ TEST_CASE("vmcs_guest_pdpte2_pcd")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace vmcs::guest_pdpte2;
+
     g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] |=
         msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask << 32;
     g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] |= msrs::ia32_vmx_procbased_ctls2::enable_ept::mask <<
             32;
 
-    vmcs::guest_pdpte2::pcd::enable();
-    CHECK(vmcs::guest_pdpte2::pcd::is_enabled());
+    pcd::set(true);
+    CHECK(pcd::is_enabled());
+    pcd::set(false);
+    CHECK(pcd::is_disabled());
 
-    vmcs::guest_pdpte2::pcd::disable();
-    CHECK(vmcs::guest_pdpte2::pcd::is_disabled());
+    pcd::set(pcd::mask, true);
+    CHECK(pcd::is_enabled(pcd::mask));
+    pcd::set(0x0, false);
+    CHECK(pcd::is_disabled(0x0));
 
-    vmcs::guest_pdpte2::pcd::enable_if_exists();
-    CHECK(vmcs::guest_pdpte2::pcd::is_enabled_if_exists());
-
-    vmcs::guest_pdpte2::pcd::disable_if_exists();
-    CHECK(vmcs::guest_pdpte2::pcd::is_disabled_if_exists());
+    pcd::set_if_exists(true);
+    CHECK(pcd::is_enabled_if_exists());
+    pcd::set_if_exists(false);
+    CHECK(pcd::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_pdpte2_page_directory_addr")
@@ -1319,17 +1572,22 @@ TEST_CASE("vmcs_guest_pdpte2_page_directory_addr")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace vmcs::guest_pdpte2;
+
     g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] |=
         msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask << 32;
     g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] |= msrs::ia32_vmx_procbased_ctls2::enable_ept::mask <<
             32;
     g_eax_cpuid[x64::cpuid::addr_size::addr] = 48U;
 
-    vmcs::guest_pdpte2::page_directory_addr::set(0x100000000U);
-    CHECK(vmcs::guest_pdpte2::page_directory_addr::get() == 0x100000000UL);
+    page_directory_addr::set(0x0U);
+    CHECK(page_directory_addr::get() == 0x0U);
 
-    vmcs::guest_pdpte2::page_directory_addr::set_if_exists(0x0U);
-    CHECK(vmcs::guest_pdpte2::page_directory_addr::get_if_exists() == 0x0U);
+    page_directory_addr::set(0x0U, 0x0U);
+    CHECK(page_directory_addr::get(0x0U) == 0x0U);
+
+    page_directory_addr::set_if_exists(0x0U);
+    CHECK(page_directory_addr::get_if_exists() == 0x0U);
 }
 
 TEST_CASE("vmcs_guest_pdpte3")
@@ -1337,18 +1595,20 @@ TEST_CASE("vmcs_guest_pdpte3")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace vmcs::guest_pdpte3;
+
     g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] |=
         msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask << 32;
     g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] |= msrs::ia32_vmx_procbased_ctls2::enable_ept::mask <<
             32;
 
-    CHECK(vmcs::guest_pdpte3::exists());
+    CHECK(exists());
+    set(100UL);
+    CHECK(get() == 100UL);
+    set_if_exists(200UL);
+    CHECK(get_if_exists() == 200UL);
 
-    vmcs::guest_pdpte3::set(1UL);
-    CHECK(vmcs::guest_pdpte3::get() == 1UL);
-
-    vmcs::guest_pdpte3::set_if_exists(0UL);
-    CHECK(vmcs::guest_pdpte3::get_if_exists() == 0UL);
+    dump(0);
 }
 
 TEST_CASE("vmcs_guest_pdpte3_present")
@@ -1356,22 +1616,27 @@ TEST_CASE("vmcs_guest_pdpte3_present")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace vmcs::guest_pdpte3;
+
     g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] |=
         msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask << 32;
     g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] |= msrs::ia32_vmx_procbased_ctls2::enable_ept::mask <<
             32;
 
-    vmcs::guest_pdpte3::present::enable();
-    CHECK(vmcs::guest_pdpte3::present::is_enabled());
+    present::set(true);
+    CHECK(present::is_enabled());
+    present::set(false);
+    CHECK(present::is_disabled());
 
-    vmcs::guest_pdpte3::present::disable();
-    CHECK(vmcs::guest_pdpte3::present::is_disabled());
+    present::set(present::mask, true);
+    CHECK(present::is_enabled(present::mask));
+    present::set(0x0, false);
+    CHECK(present::is_disabled(0x0));
 
-    vmcs::guest_pdpte3::present::enable_if_exists();
-    CHECK(vmcs::guest_pdpte3::present::is_enabled_if_exists());
-
-    vmcs::guest_pdpte3::present::disable_if_exists();
-    CHECK(vmcs::guest_pdpte3::present::is_disabled_if_exists());
+    present::set_if_exists(true);
+    CHECK(present::is_enabled_if_exists());
+    present::set_if_exists(false);
+    CHECK(present::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_pdpte3_reserved")
@@ -1379,16 +1644,21 @@ TEST_CASE("vmcs_guest_pdpte3_reserved")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace vmcs::guest_pdpte3;
+
     g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] |=
         msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask << 32;
     g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] |= msrs::ia32_vmx_procbased_ctls2::enable_ept::mask <<
             32;
 
-    vmcs::guest_pdpte3::reserved::set(6U);
-    CHECK(vmcs::guest_pdpte3::reserved::get() == 6U);
+    reserved::set(6U);
+    CHECK(reserved::get() == 6U);
 
-    vmcs::guest_pdpte3::reserved::set_if_exists(0x8000000000000000U);
-    CHECK(vmcs::guest_pdpte3::reserved::get_if_exists() == 0x8000000000000000U);
+    reserved::set(0x0U, 0x0U);
+    CHECK(reserved::get(0x0U) == 0x0U);
+
+    reserved::set_if_exists(0x8000000000000000U);
+    CHECK(reserved::get_if_exists() == 0x8000000000000000U);
 }
 
 TEST_CASE("vmcs_guest_pdpte3_pwt")
@@ -1396,22 +1666,27 @@ TEST_CASE("vmcs_guest_pdpte3_pwt")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace vmcs::guest_pdpte3;
+
     g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] |=
         msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask << 32;
     g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] |= msrs::ia32_vmx_procbased_ctls2::enable_ept::mask <<
             32;
 
-    vmcs::guest_pdpte3::pwt::enable();
-    CHECK(vmcs::guest_pdpte3::pwt::is_enabled());
+    pwt::set(true);
+    CHECK(pwt::is_enabled());
+    pwt::set(false);
+    CHECK(pwt::is_disabled());
 
-    vmcs::guest_pdpte3::pwt::disable();
-    CHECK(vmcs::guest_pdpte3::pwt::is_disabled());
+    pwt::set(pwt::mask, true);
+    CHECK(pwt::is_enabled(pwt::mask));
+    pwt::set(0x0, false);
+    CHECK(pwt::is_disabled(0x0));
 
-    vmcs::guest_pdpte3::pwt::enable_if_exists();
-    CHECK(vmcs::guest_pdpte3::pwt::is_enabled_if_exists());
-
-    vmcs::guest_pdpte3::pwt::disable_if_exists();
-    CHECK(vmcs::guest_pdpte3::pwt::is_disabled_if_exists());
+    pwt::set_if_exists(true);
+    CHECK(pwt::is_enabled_if_exists());
+    pwt::set_if_exists(false);
+    CHECK(pwt::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_pdpte3_pcd")
@@ -1419,22 +1694,27 @@ TEST_CASE("vmcs_guest_pdpte3_pcd")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace vmcs::guest_pdpte3;
+
     g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] |=
         msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask << 32;
     g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] |= msrs::ia32_vmx_procbased_ctls2::enable_ept::mask <<
             32;
 
-    vmcs::guest_pdpte3::pcd::enable();
-    CHECK(vmcs::guest_pdpte3::pcd::is_enabled());
+    pcd::set(true);
+    CHECK(pcd::is_enabled());
+    pcd::set(false);
+    CHECK(pcd::is_disabled());
 
-    vmcs::guest_pdpte3::pcd::disable();
-    CHECK(vmcs::guest_pdpte3::pcd::is_disabled());
+    pcd::set(pcd::mask, true);
+    CHECK(pcd::is_enabled(pcd::mask));
+    pcd::set(0x0, false);
+    CHECK(pcd::is_disabled(0x0));
 
-    vmcs::guest_pdpte3::pcd::enable_if_exists();
-    CHECK(vmcs::guest_pdpte3::pcd::is_enabled_if_exists());
-
-    vmcs::guest_pdpte3::pcd::disable_if_exists();
-    CHECK(vmcs::guest_pdpte3::pcd::is_disabled_if_exists());
+    pcd::set_if_exists(true);
+    CHECK(pcd::is_enabled_if_exists());
+    pcd::set_if_exists(false);
+    CHECK(pcd::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_pdpte3_page_directory_addr")
@@ -1442,17 +1722,22 @@ TEST_CASE("vmcs_guest_pdpte3_page_directory_addr")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace vmcs::guest_pdpte3;
+
     g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] |=
         msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask << 32;
     g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] |= msrs::ia32_vmx_procbased_ctls2::enable_ept::mask <<
             32;
     g_eax_cpuid[x64::cpuid::addr_size::addr] = 48U;
 
-    vmcs::guest_pdpte3::page_directory_addr::set(0x100000000U);
-    CHECK(vmcs::guest_pdpte3::page_directory_addr::get() == 0x100000000UL);
+    page_directory_addr::set(0x0U);
+    CHECK(page_directory_addr::get() == 0x0U);
 
-    vmcs::guest_pdpte3::page_directory_addr::set_if_exists(0x0U);
-    CHECK(vmcs::guest_pdpte3::page_directory_addr::get_if_exists() == 0x0U);
+    page_directory_addr::set(0x0U, 0x0U);
+    CHECK(page_directory_addr::get(0x0U) == 0x0U);
+
+    page_directory_addr::set_if_exists(0x0U);
+    CHECK(page_directory_addr::get_if_exists() == 0x0U);
 }
 
 TEST_CASE("vmcs_guest_ia32_bndcfgs")
@@ -1460,21 +1745,24 @@ TEST_CASE("vmcs_guest_ia32_bndcfgs")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace vmcs::guest_ia32_bndcfgs;
+
     g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] |= ia32_vmx_true_entry_ctls::load_ia32_bndcfgs::mask <<
             32;
-    CHECK(vmcs::guest_ia32_bndcfgs::exists());
+    CHECK(exists());
 
     g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] &= ~(ia32_vmx_true_entry_ctls::load_ia32_bndcfgs::mask
             << 32);
     g_msrs[msrs::ia32_vmx_true_exit_ctls::addr] |= ia32_vmx_true_exit_ctls::clear_ia32_bndcfgs::mask <<
             32;
-    CHECK(vmcs::guest_ia32_bndcfgs::exists());
+    CHECK(exists());
 
-    vmcs::guest_ia32_bndcfgs::set(1UL);
-    CHECK(vmcs::guest_ia32_bndcfgs::get() == 1UL);
+    set(100UL);
+    CHECK(get() == 100UL);
+    set_if_exists(200UL);
+    CHECK(get_if_exists() == 200UL);
 
-    vmcs::guest_ia32_bndcfgs::set_if_exists(0UL);
-    CHECK(vmcs::guest_ia32_bndcfgs::get_if_exists() == 0UL);
+    dump(0);
 }
 
 TEST_CASE("vmcs_guest_ia32_bndcfgs_en")
@@ -1482,20 +1770,25 @@ TEST_CASE("vmcs_guest_ia32_bndcfgs_en")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace vmcs::guest_ia32_bndcfgs;
+
     g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] |= ia32_vmx_true_entry_ctls::load_ia32_bndcfgs::mask <<
             32;
 
-    vmcs::guest_ia32_bndcfgs::en::enable();
-    CHECK(vmcs::guest_ia32_bndcfgs::en::is_enabled());
+    en::set(true);
+    CHECK(en::is_enabled());
+    en::set(false);
+    CHECK(en::is_disabled());
 
-    vmcs::guest_ia32_bndcfgs::en::disable();
-    CHECK(vmcs::guest_ia32_bndcfgs::en::is_disabled());
+    en::set(en::mask, true);
+    CHECK(en::is_enabled(en::mask));
+    en::set(0x0, false);
+    CHECK(en::is_disabled(0x0));
 
-    vmcs::guest_ia32_bndcfgs::en::enable_if_exists();
-    CHECK(vmcs::guest_ia32_bndcfgs::en::is_enabled_if_exists());
-
-    vmcs::guest_ia32_bndcfgs::en::disable_if_exists();
-    CHECK(vmcs::guest_ia32_bndcfgs::en::is_disabled_if_exists());
+    en::set_if_exists(true);
+    CHECK(en::is_enabled_if_exists());
+    en::set_if_exists(false);
+    CHECK(en::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_ia32_bndcfgs_bndpreserve")
@@ -1503,20 +1796,25 @@ TEST_CASE("vmcs_guest_ia32_bndcfgs_bndpreserve")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace vmcs::guest_ia32_bndcfgs;
+
     g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] |= ia32_vmx_true_entry_ctls::load_ia32_bndcfgs::mask <<
             32;
 
-    vmcs::guest_ia32_bndcfgs::bndpreserve::enable();
-    CHECK(vmcs::guest_ia32_bndcfgs::bndpreserve::is_enabled());
+    bndpreserve::set(true);
+    CHECK(bndpreserve::is_enabled());
+    bndpreserve::set(false);
+    CHECK(bndpreserve::is_disabled());
 
-    vmcs::guest_ia32_bndcfgs::bndpreserve::disable();
-    CHECK(vmcs::guest_ia32_bndcfgs::bndpreserve::is_disabled());
+    bndpreserve::set(bndpreserve::mask, true);
+    CHECK(bndpreserve::is_enabled(bndpreserve::mask));
+    bndpreserve::set(0x0, false);
+    CHECK(bndpreserve::is_disabled(0x0));
 
-    vmcs::guest_ia32_bndcfgs::bndpreserve::enable_if_exists();
-    CHECK(vmcs::guest_ia32_bndcfgs::bndpreserve::is_enabled_if_exists());
-
-    vmcs::guest_ia32_bndcfgs::bndpreserve::disable_if_exists();
-    CHECK(vmcs::guest_ia32_bndcfgs::bndpreserve::is_disabled_if_exists());
+    bndpreserve::set_if_exists(true);
+    CHECK(bndpreserve::is_enabled_if_exists());
+    bndpreserve::set_if_exists(false);
+    CHECK(bndpreserve::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_ia32_bndcfgs_reserved")
@@ -1524,14 +1822,19 @@ TEST_CASE("vmcs_guest_ia32_bndcfgs_reserved")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace vmcs::guest_ia32_bndcfgs;
+
     g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] |= ia32_vmx_true_entry_ctls::load_ia32_bndcfgs::mask <<
             32;
 
-    vmcs::guest_ia32_bndcfgs::reserved::set(0xCUL);
-    CHECK(vmcs::guest_ia32_bndcfgs::reserved::get() == 0xCUL);
+    reserved::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(reserved::get() == (reserved::mask >> reserved::from));
 
-    vmcs::guest_ia32_bndcfgs::reserved::set_if_exists(0U);
-    CHECK(vmcs::guest_ia32_bndcfgs::reserved::get_if_exists() == 0U);
+    reserved::set(reserved::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(reserved::get(reserved::mask) == (reserved::mask >> reserved::from));
+
+    reserved::set_if_exists(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(reserved::get_if_exists() == (reserved::mask >> reserved::from));
 }
 
 TEST_CASE("vmcs_guest_ia32_bndcfgs_base_addr_of_bnd_directory")
@@ -1539,14 +1842,19 @@ TEST_CASE("vmcs_guest_ia32_bndcfgs_base_addr_of_bnd_directory")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace vmcs::guest_ia32_bndcfgs;
+
     g_msrs[msrs::ia32_vmx_true_entry_ctls::addr] |= ia32_vmx_true_entry_ctls::load_ia32_bndcfgs::mask <<
             32;
 
-    vmcs::guest_ia32_bndcfgs::base_addr_of_bnd_directory::set(0x100000UL);
-    CHECK(vmcs::guest_ia32_bndcfgs::base_addr_of_bnd_directory::get() == 0x100000UL);
+    base_addr_of_bnd_directory::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(base_addr_of_bnd_directory::get() == (base_addr_of_bnd_directory::mask >> base_addr_of_bnd_directory::from));
 
-    vmcs::guest_ia32_bndcfgs::base_addr_of_bnd_directory::set_if_exists(0U);
-    CHECK(vmcs::guest_ia32_bndcfgs::base_addr_of_bnd_directory::get_if_exists() == 0U);
+    base_addr_of_bnd_directory::set(base_addr_of_bnd_directory::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(base_addr_of_bnd_directory::get(base_addr_of_bnd_directory::mask) == (base_addr_of_bnd_directory::mask >> base_addr_of_bnd_directory::from));
+
+    base_addr_of_bnd_directory::set_if_exists(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(base_addr_of_bnd_directory::get_if_exists() == (base_addr_of_bnd_directory::mask >> base_addr_of_bnd_directory::from));
 }
 
 #endif

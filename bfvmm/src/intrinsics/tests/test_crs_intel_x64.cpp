@@ -27,6 +27,11 @@
 
 using namespace intel_x64;
 
+TEST_CASE("test name goes here")
+{
+    CHECK(true);
+}
+
 cr0::value_type g_cr0 = 0;
 cr2::value_type g_cr2 = 0;
 cr3::value_type g_cr3 = 0;
@@ -93,13 +98,11 @@ TEST_CASE("cr0_intel_x64")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    cr0::set(0xFFFFFFFFU);
-    CHECK(cr0::get() == 0xFFFFFFFFU);
+    using namespace cr0;
 
-    cr0::dump();
-
-    cr0::set(0x0U);
-    CHECK(cr0::get() == 0x0U);
+    set(0xFFFFFFFFU);
+    CHECK(get() == 0xFFFFFFFFU);
+    dump(0);
 }
 
 TEST_CASE("cr0_intel_x64_protection_enable")
@@ -107,13 +110,17 @@ TEST_CASE("cr0_intel_x64_protection_enable")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    cr0::protection_enable::set(true);
-    CHECK(cr0::protection_enable::get());
+    using namespace cr0;
 
-    cr0::protection_enable::set(false);
-    CHECK_FALSE(cr0::protection_enable::get());
+    protection_enable::enable();
+    CHECK(protection_enable::is_enabled());
+    protection_enable::disable();
+    CHECK(protection_enable::is_disabled());
 
-    CHECK(cr0::get() == 0x0);
+    protection_enable::enable(protection_enable::mask);
+    CHECK(protection_enable::is_enabled(protection_enable::mask));
+    protection_enable::disable(0x0);
+    CHECK(protection_enable::is_disabled(0x0));
 }
 
 TEST_CASE("cr0_intel_x64_monitor_coprocessor")
@@ -121,13 +128,17 @@ TEST_CASE("cr0_intel_x64_monitor_coprocessor")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    cr0::monitor_coprocessor::set(true);
-    CHECK(cr0::monitor_coprocessor::get());
+    using namespace cr0;
 
-    cr0::monitor_coprocessor::set(false);
-    CHECK_FALSE(cr0::monitor_coprocessor::get());
+    monitor_coprocessor::enable();
+    CHECK(monitor_coprocessor::is_enabled());
+    monitor_coprocessor::disable();
+    CHECK(monitor_coprocessor::is_disabled());
 
-    CHECK(cr0::get() == 0x0);
+    monitor_coprocessor::enable(monitor_coprocessor::mask);
+    CHECK(monitor_coprocessor::is_enabled(monitor_coprocessor::mask));
+    monitor_coprocessor::disable(0x0);
+    CHECK(monitor_coprocessor::is_disabled(0x0));
 }
 
 TEST_CASE("cr0_intel_x64_emulation")
@@ -135,13 +146,17 @@ TEST_CASE("cr0_intel_x64_emulation")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    cr0::emulation::set(true);
-    CHECK(cr0::emulation::get());
+    using namespace cr0;
 
-    cr0::emulation::set(false);
-    CHECK_FALSE(cr0::emulation::get());
+    emulation::enable();
+    CHECK(emulation::is_enabled());
+    emulation::disable();
+    CHECK(emulation::is_disabled());
 
-    CHECK(cr0::get() == 0x0);
+    emulation::enable(emulation::mask);
+    CHECK(emulation::is_enabled(emulation::mask));
+    emulation::disable(0x0);
+    CHECK(emulation::is_disabled(0x0));
 }
 
 TEST_CASE("cr0_intel_x64_task_switched")
@@ -149,13 +164,17 @@ TEST_CASE("cr0_intel_x64_task_switched")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    cr0::task_switched::set(true);
-    CHECK(cr0::task_switched::get());
+    using namespace cr0;
 
-    cr0::task_switched::set(false);
-    CHECK_FALSE(cr0::task_switched::get());
+    task_switched::enable();
+    CHECK(task_switched::is_enabled());
+    task_switched::disable();
+    CHECK(task_switched::is_disabled());
 
-    CHECK(cr0::get() == 0x0);
+    task_switched::enable(task_switched::mask);
+    CHECK(task_switched::is_enabled(task_switched::mask));
+    task_switched::disable(0x0);
+    CHECK(task_switched::is_disabled(0x0));
 }
 
 TEST_CASE("cr0_intel_x64_extension_type")
@@ -163,13 +182,17 @@ TEST_CASE("cr0_intel_x64_extension_type")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    cr0::extension_type::set(true);
-    CHECK(cr0::extension_type::get());
+    using namespace cr0;
 
-    cr0::extension_type::set(false);
-    CHECK_FALSE(cr0::extension_type::get());
+    extension_type::enable();
+    CHECK(extension_type::is_enabled());
+    extension_type::disable();
+    CHECK(extension_type::is_disabled());
 
-    CHECK(cr0::get() == 0x0);
+    extension_type::enable(extension_type::mask);
+    CHECK(extension_type::is_enabled(extension_type::mask));
+    extension_type::disable(0x0);
+    CHECK(extension_type::is_disabled(0x0));
 }
 
 TEST_CASE("cr0_intel_x64_numeric_error")
@@ -177,13 +200,17 @@ TEST_CASE("cr0_intel_x64_numeric_error")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    cr0::numeric_error::set(true);
-    CHECK(cr0::numeric_error::get());
+    using namespace cr0;
 
-    cr0::numeric_error::set(false);
-    CHECK_FALSE(cr0::numeric_error::get());
+    numeric_error::enable();
+    CHECK(numeric_error::is_enabled());
+    numeric_error::disable();
+    CHECK(numeric_error::is_disabled());
 
-    CHECK(cr0::get() == 0x0);
+    numeric_error::enable(numeric_error::mask);
+    CHECK(numeric_error::is_enabled(numeric_error::mask));
+    numeric_error::disable(0x0);
+    CHECK(numeric_error::is_disabled(0x0));
 }
 
 TEST_CASE("cr0_intel_x64_write_protect")
@@ -191,13 +218,17 @@ TEST_CASE("cr0_intel_x64_write_protect")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    cr0::write_protect::set(true);
-    CHECK(cr0::write_protect::get());
+    using namespace cr0;
 
-    cr0::write_protect::set(false);
-    CHECK_FALSE(cr0::write_protect::get());
+    write_protect::enable();
+    CHECK(write_protect::is_enabled());
+    write_protect::disable();
+    CHECK(write_protect::is_disabled());
 
-    CHECK(cr0::get() == 0x0);
+    write_protect::enable(write_protect::mask);
+    CHECK(write_protect::is_enabled(write_protect::mask));
+    write_protect::disable(0x0);
+    CHECK(write_protect::is_disabled(0x0));
 }
 
 TEST_CASE("cr0_intel_x64_alignment_mask")
@@ -205,13 +236,17 @@ TEST_CASE("cr0_intel_x64_alignment_mask")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    cr0::alignment_mask::set(true);
-    CHECK(cr0::alignment_mask::get());
+    using namespace cr0;
 
-    cr0::alignment_mask::set(false);
-    CHECK_FALSE(cr0::alignment_mask::get());
+    alignment_mask::enable();
+    CHECK(alignment_mask::is_enabled());
+    alignment_mask::disable();
+    CHECK(alignment_mask::is_disabled());
 
-    CHECK(cr0::get() == 0x0);
+    alignment_mask::enable(alignment_mask::mask);
+    CHECK(alignment_mask::is_enabled(alignment_mask::mask));
+    alignment_mask::disable(0x0);
+    CHECK(alignment_mask::is_disabled(0x0));
 }
 
 TEST_CASE("cr0_intel_x64_not_write_through")
@@ -219,13 +254,17 @@ TEST_CASE("cr0_intel_x64_not_write_through")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    cr0::not_write_through::set(true);
-    CHECK(cr0::not_write_through::get());
+    using namespace cr0;
 
-    cr0::not_write_through::set(false);
-    CHECK_FALSE(cr0::not_write_through::get());
+    not_write_through::enable();
+    CHECK(not_write_through::is_enabled());
+    not_write_through::disable();
+    CHECK(not_write_through::is_disabled());
 
-    CHECK(cr0::get() == 0x0);
+    not_write_through::enable(not_write_through::mask);
+    CHECK(not_write_through::is_enabled(not_write_through::mask));
+    not_write_through::disable(0x0);
+    CHECK(not_write_through::is_disabled(0x0));
 }
 
 TEST_CASE("cr0_intel_x64_cache_disable")
@@ -233,13 +272,17 @@ TEST_CASE("cr0_intel_x64_cache_disable")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    cr0::cache_disable::set(true);
-    CHECK(cr0::cache_disable::get());
+    using namespace cr0;
 
-    cr0::cache_disable::set(false);
-    CHECK_FALSE(cr0::cache_disable::get());
+    cache_disable::enable();
+    CHECK(cache_disable::is_enabled());
+    cache_disable::disable();
+    CHECK(cache_disable::is_disabled());
 
-    CHECK(cr0::get() == 0x0);
+    cache_disable::enable(cache_disable::mask);
+    CHECK(cache_disable::is_enabled(cache_disable::mask));
+    cache_disable::disable(0x0);
+    CHECK(cache_disable::is_disabled(0x0));
 }
 
 TEST_CASE("cr0_intel_x64_paging")
@@ -247,13 +290,17 @@ TEST_CASE("cr0_intel_x64_paging")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    cr0::paging::set(true);
-    CHECK(cr0::paging::get());
+    using namespace cr0;
 
-    cr0::paging::set(false);
-    CHECK_FALSE(cr0::paging::get());
+    paging::enable();
+    CHECK(paging::is_enabled());
+    paging::disable();
+    CHECK(paging::is_disabled());
 
-    CHECK(cr0::get() == 0x0);
+    paging::enable(paging::mask);
+    CHECK(paging::is_enabled(paging::mask));
+    paging::disable(0x0);
+    CHECK(paging::is_disabled(0x0));
 }
 
 TEST_CASE("cr2_intel_x64")
@@ -261,8 +308,11 @@ TEST_CASE("cr2_intel_x64")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    cr2::set(0x100U);
-    CHECK(cr2::get() == 0x100U);
+    using namespace cr2;
+
+    set(0xFFFFFFFFU);
+    CHECK(get() == 0xFFFFFFFFU);
+    dump(0);
 }
 
 TEST_CASE("cr3_intel_x64")
@@ -270,8 +320,11 @@ TEST_CASE("cr3_intel_x64")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    cr3::set(0x100U);
-    CHECK(cr3::get() == 0x100U);
+    using namespace cr3;
+
+    set(0xFFFFFFFFU);
+    CHECK(get() == 0xFFFFFFFFU);
+    dump(0);
 }
 
 TEST_CASE("cr4_intel_x64")
@@ -279,13 +332,11 @@ TEST_CASE("cr4_intel_x64")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    cr4::set(0xFFFFFFFFU);
-    CHECK(cr4::get() == 0xFFFFFFFFU);
+    using namespace cr4;
 
-    cr4::dump();
-
-    cr4::set(0x0U);
-    CHECK(cr4::get() == 0x0U);
+    set(0xFFFFFFFFU);
+    CHECK(get() == 0xFFFFFFFFU);
+    dump(0);
 }
 
 TEST_CASE("cr4_intel_x64_v8086_mode_extensions")
@@ -293,13 +344,17 @@ TEST_CASE("cr4_intel_x64_v8086_mode_extensions")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    cr4::v8086_mode_extensions::set(true);
-    CHECK(cr4::v8086_mode_extensions::get());
+    using namespace cr4;
 
-    cr4::v8086_mode_extensions::set(false);
-    CHECK_FALSE(cr4::v8086_mode_extensions::get());
+    v8086_mode_extensions::enable();
+    CHECK(v8086_mode_extensions::is_enabled());
+    v8086_mode_extensions::disable();
+    CHECK(v8086_mode_extensions::is_disabled());
 
-    CHECK(cr4::get() == 0x0);
+    v8086_mode_extensions::enable(v8086_mode_extensions::mask);
+    CHECK(v8086_mode_extensions::is_enabled(v8086_mode_extensions::mask));
+    v8086_mode_extensions::disable(0x0);
+    CHECK(v8086_mode_extensions::is_disabled(0x0));
 }
 
 TEST_CASE("cr4_intel_x64_protected_mode_virtual_interrupts")
@@ -307,13 +362,17 @@ TEST_CASE("cr4_intel_x64_protected_mode_virtual_interrupts")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    cr4::protected_mode_virtual_interrupts::set(true);
-    CHECK(cr4::protected_mode_virtual_interrupts::get());
+    using namespace cr4;
 
-    cr4::protected_mode_virtual_interrupts::set(false);
-    CHECK_FALSE(cr4::protected_mode_virtual_interrupts::get());
+    protected_mode_virtual_interrupts::enable();
+    CHECK(protected_mode_virtual_interrupts::is_enabled());
+    protected_mode_virtual_interrupts::disable();
+    CHECK(protected_mode_virtual_interrupts::is_disabled());
 
-    CHECK(cr4::get() == 0x0);
+    protected_mode_virtual_interrupts::enable(protected_mode_virtual_interrupts::mask);
+    CHECK(protected_mode_virtual_interrupts::is_enabled(protected_mode_virtual_interrupts::mask));
+    protected_mode_virtual_interrupts::disable(0x0);
+    CHECK(protected_mode_virtual_interrupts::is_disabled(0x0));
 }
 
 TEST_CASE("cr4_intel_x64_time_stamp_disable")
@@ -321,13 +380,17 @@ TEST_CASE("cr4_intel_x64_time_stamp_disable")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    cr4::time_stamp_disable::set(true);
-    CHECK(cr4::time_stamp_disable::get());
+    using namespace cr4;
 
-    cr4::time_stamp_disable::set(false);
-    CHECK_FALSE(cr4::time_stamp_disable::get());
+    time_stamp_disable::enable();
+    CHECK(time_stamp_disable::is_enabled());
+    time_stamp_disable::disable();
+    CHECK(time_stamp_disable::is_disabled());
 
-    CHECK(cr4::get() == 0x0);
+    time_stamp_disable::enable(time_stamp_disable::mask);
+    CHECK(time_stamp_disable::is_enabled(time_stamp_disable::mask));
+    time_stamp_disable::disable(0x0);
+    CHECK(time_stamp_disable::is_disabled(0x0));
 }
 
 TEST_CASE("cr4_intel_x64_debugging_extensions")
@@ -335,13 +398,17 @@ TEST_CASE("cr4_intel_x64_debugging_extensions")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    cr4::debugging_extensions::set(true);
-    CHECK(cr4::debugging_extensions::get());
+    using namespace cr4;
 
-    cr4::debugging_extensions::set(false);
-    CHECK_FALSE(cr4::debugging_extensions::get());
+    debugging_extensions::enable();
+    CHECK(debugging_extensions::is_enabled());
+    debugging_extensions::disable();
+    CHECK(debugging_extensions::is_disabled());
 
-    CHECK(cr4::get() == 0x0);
+    debugging_extensions::enable(debugging_extensions::mask);
+    CHECK(debugging_extensions::is_enabled(debugging_extensions::mask));
+    debugging_extensions::disable(0x0);
+    CHECK(debugging_extensions::is_disabled(0x0));
 }
 
 TEST_CASE("cr4_intel_x64_page_size_extensions")
@@ -349,13 +416,17 @@ TEST_CASE("cr4_intel_x64_page_size_extensions")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    cr4::page_size_extensions::set(true);
-    CHECK(cr4::page_size_extensions::get());
+    using namespace cr4;
 
-    cr4::page_size_extensions::set(false);
-    CHECK_FALSE(cr4::page_size_extensions::get());
+    page_size_extensions::enable();
+    CHECK(page_size_extensions::is_enabled());
+    page_size_extensions::disable();
+    CHECK(page_size_extensions::is_disabled());
 
-    CHECK(cr4::get() == 0x0);
+    page_size_extensions::enable(page_size_extensions::mask);
+    CHECK(page_size_extensions::is_enabled(page_size_extensions::mask));
+    page_size_extensions::disable(0x0);
+    CHECK(page_size_extensions::is_disabled(0x0));
 }
 
 TEST_CASE("cr4_intel_x64_physical_address_extensions")
@@ -363,13 +434,17 @@ TEST_CASE("cr4_intel_x64_physical_address_extensions")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    cr4::physical_address_extensions::set(true);
-    CHECK(cr4::physical_address_extensions::get());
+    using namespace cr4;
 
-    cr4::physical_address_extensions::set(false);
-    CHECK_FALSE(cr4::physical_address_extensions::get());
+    physical_address_extensions::enable();
+    CHECK(physical_address_extensions::is_enabled());
+    physical_address_extensions::disable();
+    CHECK(physical_address_extensions::is_disabled());
 
-    CHECK(cr4::get() == 0x0);
+    physical_address_extensions::enable(physical_address_extensions::mask);
+    CHECK(physical_address_extensions::is_enabled(physical_address_extensions::mask));
+    physical_address_extensions::disable(0x0);
+    CHECK(physical_address_extensions::is_disabled(0x0));
 }
 
 TEST_CASE("cr4_intel_x64_machine_check_enable")
@@ -377,13 +452,17 @@ TEST_CASE("cr4_intel_x64_machine_check_enable")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    cr4::machine_check_enable::set(true);
-    CHECK(cr4::machine_check_enable::get());
+    using namespace cr4;
 
-    cr4::machine_check_enable::set(false);
-    CHECK_FALSE(cr4::machine_check_enable::get());
+    machine_check_enable::enable();
+    CHECK(machine_check_enable::is_enabled());
+    machine_check_enable::disable();
+    CHECK(machine_check_enable::is_disabled());
 
-    CHECK(cr4::get() == 0x0);
+    machine_check_enable::enable(machine_check_enable::mask);
+    CHECK(machine_check_enable::is_enabled(machine_check_enable::mask));
+    machine_check_enable::disable(0x0);
+    CHECK(machine_check_enable::is_disabled(0x0));
 }
 
 TEST_CASE("cr4_intel_x64_page_global_enable")
@@ -391,13 +470,17 @@ TEST_CASE("cr4_intel_x64_page_global_enable")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    cr4::page_global_enable::set(true);
-    CHECK(cr4::page_global_enable::get());
+    using namespace cr4;
 
-    cr4::page_global_enable::set(false);
-    CHECK_FALSE(cr4::page_global_enable::get());
+    page_global_enable::enable();
+    CHECK(page_global_enable::is_enabled());
+    page_global_enable::disable();
+    CHECK(page_global_enable::is_disabled());
 
-    CHECK(cr4::get() == 0x0);
+    page_global_enable::enable(page_global_enable::mask);
+    CHECK(page_global_enable::is_enabled(page_global_enable::mask));
+    page_global_enable::disable(0x0);
+    CHECK(page_global_enable::is_disabled(0x0));
 }
 
 TEST_CASE("cr4_intel_x64_performance_monitor_counter_enable")
@@ -405,13 +488,17 @@ TEST_CASE("cr4_intel_x64_performance_monitor_counter_enable")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    cr4::performance_monitor_counter_enable::set(true);
-    CHECK(cr4::performance_monitor_counter_enable::get());
+    using namespace cr4;
 
-    cr4::performance_monitor_counter_enable::set(false);
-    CHECK_FALSE(cr4::performance_monitor_counter_enable::get());
+    performance_monitor_counter_enable::enable();
+    CHECK(performance_monitor_counter_enable::is_enabled());
+    performance_monitor_counter_enable::disable();
+    CHECK(performance_monitor_counter_enable::is_disabled());
 
-    CHECK(cr4::get() == 0x0);
+    performance_monitor_counter_enable::enable(performance_monitor_counter_enable::mask);
+    CHECK(performance_monitor_counter_enable::is_enabled(performance_monitor_counter_enable::mask));
+    performance_monitor_counter_enable::disable(0x0);
+    CHECK(performance_monitor_counter_enable::is_disabled(0x0));
 }
 
 TEST_CASE("cr4_intel_x64_osfxsr")
@@ -419,13 +506,17 @@ TEST_CASE("cr4_intel_x64_osfxsr")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    cr4::osfxsr::set(true);
-    CHECK(cr4::osfxsr::get());
+    using namespace cr4;
 
-    cr4::osfxsr::set(false);
-    CHECK_FALSE(cr4::osfxsr::get());
+    osfxsr::enable();
+    CHECK(osfxsr::is_enabled());
+    osfxsr::disable();
+    CHECK(osfxsr::is_disabled());
 
-    CHECK(cr4::get() == 0x0);
+    osfxsr::enable(osfxsr::mask);
+    CHECK(osfxsr::is_enabled(osfxsr::mask));
+    osfxsr::disable(0x0);
+    CHECK(osfxsr::is_disabled(0x0));
 }
 
 TEST_CASE("cr4_intel_x64_osxmmexcpt")
@@ -433,13 +524,17 @@ TEST_CASE("cr4_intel_x64_osxmmexcpt")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    cr4::osxmmexcpt::set(true);
-    CHECK(cr4::osxmmexcpt::get());
+    using namespace cr4;
 
-    cr4::osxmmexcpt::set(false);
-    CHECK_FALSE(cr4::osxmmexcpt::get());
+    osxmmexcpt::enable();
+    CHECK(osxmmexcpt::is_enabled());
+    osxmmexcpt::disable();
+    CHECK(osxmmexcpt::is_disabled());
 
-    CHECK(cr4::get() == 0x0);
+    osxmmexcpt::enable(osxmmexcpt::mask);
+    CHECK(osxmmexcpt::is_enabled(osxmmexcpt::mask));
+    osxmmexcpt::disable(0x0);
+    CHECK(osxmmexcpt::is_disabled(0x0));
 }
 
 TEST_CASE("cr4_intel_x64_vmx_enable_bit")
@@ -447,13 +542,17 @@ TEST_CASE("cr4_intel_x64_vmx_enable_bit")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    cr4::vmx_enable_bit::set(true);
-    CHECK(cr4::vmx_enable_bit::get());
+    using namespace cr4;
 
-    cr4::vmx_enable_bit::set(false);
-    CHECK_FALSE(cr4::vmx_enable_bit::get());
+    vmx_enable_bit::enable();
+    CHECK(vmx_enable_bit::is_enabled());
+    vmx_enable_bit::disable();
+    CHECK(vmx_enable_bit::is_disabled());
 
-    CHECK(cr4::get() == 0x0);
+    vmx_enable_bit::enable(vmx_enable_bit::mask);
+    CHECK(vmx_enable_bit::is_enabled(vmx_enable_bit::mask));
+    vmx_enable_bit::disable(0x0);
+    CHECK(vmx_enable_bit::is_disabled(0x0));
 }
 
 TEST_CASE("cr4_intel_x64_smx_enable_bit")
@@ -461,13 +560,17 @@ TEST_CASE("cr4_intel_x64_smx_enable_bit")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    cr4::smx_enable_bit::set(true);
-    CHECK(cr4::smx_enable_bit::get());
+    using namespace cr4;
 
-    cr4::smx_enable_bit::set(false);
-    CHECK_FALSE(cr4::smx_enable_bit::get());
+    smx_enable_bit::enable();
+    CHECK(smx_enable_bit::is_enabled());
+    smx_enable_bit::disable();
+    CHECK(smx_enable_bit::is_disabled());
 
-    CHECK(cr4::get() == 0x0);
+    smx_enable_bit::enable(smx_enable_bit::mask);
+    CHECK(smx_enable_bit::is_enabled(smx_enable_bit::mask));
+    smx_enable_bit::disable(0x0);
+    CHECK(smx_enable_bit::is_disabled(0x0));
 }
 
 TEST_CASE("cr4_intel_x64_fsgsbase_enable_bit")
@@ -475,13 +578,17 @@ TEST_CASE("cr4_intel_x64_fsgsbase_enable_bit")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    cr4::fsgsbase_enable_bit::set(true);
-    CHECK(cr4::fsgsbase_enable_bit::get());
+    using namespace cr4;
 
-    cr4::fsgsbase_enable_bit::set(false);
-    CHECK_FALSE(cr4::fsgsbase_enable_bit::get());
+    fsgsbase_enable_bit::enable();
+    CHECK(fsgsbase_enable_bit::is_enabled());
+    fsgsbase_enable_bit::disable();
+    CHECK(fsgsbase_enable_bit::is_disabled());
 
-    CHECK(cr4::get() == 0x0);
+    fsgsbase_enable_bit::enable(fsgsbase_enable_bit::mask);
+    CHECK(fsgsbase_enable_bit::is_enabled(fsgsbase_enable_bit::mask));
+    fsgsbase_enable_bit::disable(0x0);
+    CHECK(fsgsbase_enable_bit::is_disabled(0x0));
 }
 
 TEST_CASE("cr4_intel_x64_pcid_enable_bit")
@@ -489,13 +596,17 @@ TEST_CASE("cr4_intel_x64_pcid_enable_bit")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    cr4::pcid_enable_bit::set(true);
-    CHECK(cr4::pcid_enable_bit::get());
+    using namespace cr4;
 
-    cr4::pcid_enable_bit::set(false);
-    CHECK_FALSE(cr4::pcid_enable_bit::get());
+    pcid_enable_bit::enable();
+    CHECK(pcid_enable_bit::is_enabled());
+    pcid_enable_bit::disable();
+    CHECK(pcid_enable_bit::is_disabled());
 
-    CHECK(cr4::get() == 0x0);
+    pcid_enable_bit::enable(pcid_enable_bit::mask);
+    CHECK(pcid_enable_bit::is_enabled(pcid_enable_bit::mask));
+    pcid_enable_bit::disable(0x0);
+    CHECK(pcid_enable_bit::is_disabled(0x0));
 }
 
 TEST_CASE("cr4_intel_x64_osxsave")
@@ -503,13 +614,17 @@ TEST_CASE("cr4_intel_x64_osxsave")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    cr4::osxsave::set(true);
-    CHECK(cr4::osxsave::get());
+    using namespace cr4;
 
-    cr4::osxsave::set(false);
-    CHECK_FALSE(cr4::osxsave::get());
+    osxsave::enable();
+    CHECK(osxsave::is_enabled());
+    osxsave::disable();
+    CHECK(osxsave::is_disabled());
 
-    CHECK(cr4::get() == 0x0);
+    osxsave::enable(osxsave::mask);
+    CHECK(osxsave::is_enabled(osxsave::mask));
+    osxsave::disable(0x0);
+    CHECK(osxsave::is_disabled(0x0));
 }
 
 TEST_CASE("cr4_intel_x64_smep_enable_bit")
@@ -517,13 +632,17 @@ TEST_CASE("cr4_intel_x64_smep_enable_bit")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    cr4::smep_enable_bit::set(true);
-    CHECK(cr4::smep_enable_bit::get());
+    using namespace cr4;
 
-    cr4::smep_enable_bit::set(false);
-    CHECK_FALSE(cr4::smep_enable_bit::get());
+    smep_enable_bit::enable();
+    CHECK(smep_enable_bit::is_enabled());
+    smep_enable_bit::disable();
+    CHECK(smep_enable_bit::is_disabled());
 
-    CHECK(cr4::get() == 0x0);
+    smep_enable_bit::enable(smep_enable_bit::mask);
+    CHECK(smep_enable_bit::is_enabled(smep_enable_bit::mask));
+    smep_enable_bit::disable(0x0);
+    CHECK(smep_enable_bit::is_disabled(0x0));
 }
 
 TEST_CASE("cr4_intel_x64_smap_enable_bit")
@@ -531,13 +650,17 @@ TEST_CASE("cr4_intel_x64_smap_enable_bit")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    cr4::smap_enable_bit::set(true);
-    CHECK(cr4::smap_enable_bit::get());
+    using namespace cr4;
 
-    cr4::smap_enable_bit::set(false);
-    CHECK_FALSE(cr4::smap_enable_bit::get());
+    smap_enable_bit::enable();
+    CHECK(smap_enable_bit::is_enabled());
+    smap_enable_bit::disable();
+    CHECK(smap_enable_bit::is_disabled());
 
-    CHECK(cr4::get() == 0x0);
+    smap_enable_bit::enable(smap_enable_bit::mask);
+    CHECK(smap_enable_bit::is_enabled(smap_enable_bit::mask));
+    smap_enable_bit::disable(0x0);
+    CHECK(smap_enable_bit::is_disabled(0x0));
 }
 
 TEST_CASE("cr4_intel_x64_protection_key_enable_bit")
@@ -545,13 +668,17 @@ TEST_CASE("cr4_intel_x64_protection_key_enable_bit")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    cr4::protection_key_enable_bit::set(true);
-    CHECK(cr4::protection_key_enable_bit::get());
+    using namespace cr4;
 
-    cr4::protection_key_enable_bit::set(false);
-    CHECK_FALSE(cr4::protection_key_enable_bit::get());
+    protection_key_enable_bit::enable();
+    CHECK(protection_key_enable_bit::is_enabled());
+    protection_key_enable_bit::disable();
+    CHECK(protection_key_enable_bit::is_disabled());
 
-    CHECK(cr4::get() == 0x0);
+    protection_key_enable_bit::enable(protection_key_enable_bit::mask);
+    CHECK(protection_key_enable_bit::is_enabled(protection_key_enable_bit::mask));
+    protection_key_enable_bit::disable(0x0);
+    CHECK(protection_key_enable_bit::is_disabled(0x0));
 }
 
 TEST_CASE("cr8_intel_x64")
@@ -559,8 +686,11 @@ TEST_CASE("cr8_intel_x64")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    cr8::set(0x100U);
-    CHECK(cr8::get() == 0x100U);
+    using namespace cr8;
+
+    set(0xFFFFFFFFU);
+    CHECK(get() == 0xFFFFFFFFU);
+    dump(0);
 }
 
 #endif

@@ -54,27 +54,27 @@ test_ind(uint16_t port) noexcept
 
 void
 test_insb(uint16_t port, uint64_t m8) noexcept
-{ (void) port; __builtin_memcpy(reinterpret_cast<void *>(m8), static_cast<void *>(g_buf_8bit), 1); }
+{ (void) port; memcpy(reinterpret_cast<void *>(m8), static_cast<void *>(g_buf_8bit), 1); }
 
 void
 test_insw(uint16_t port, uint64_t m16) noexcept
-{ (void) port; __builtin_memcpy(reinterpret_cast<void *>(m16), static_cast<void *>(g_buf_16bit), 2); }
+{ (void) port; memcpy(reinterpret_cast<void *>(m16), static_cast<void *>(g_buf_16bit), 2); }
 
 void
 test_insd(uint16_t port, uint64_t m32) noexcept
-{ (void) port; __builtin_memcpy(reinterpret_cast<void *>(m32), static_cast<void *>(g_buf_32bit), 4); }
+{ (void) port; memcpy(reinterpret_cast<void *>(m32), static_cast<void *>(g_buf_32bit), 4); }
 
 void
 test_insbrep(uint16_t port, uint64_t m8, uint32_t count) noexcept
-{ (void) port; __builtin_memcpy(reinterpret_cast<void *>(m8), static_cast<void *>(g_buf_8bit), static_cast<uint32_t>(count * 1)); }
+{ (void) port; memcpy(reinterpret_cast<void *>(m8), static_cast<void *>(g_buf_8bit), static_cast<uint32_t>(count * 1)); }
 
 void
 test_inswrep(uint16_t port, uint64_t m16, uint32_t count) noexcept
-{ (void) port; __builtin_memcpy(reinterpret_cast<void *>(m16), static_cast<void *>(g_buf_16bit), static_cast<uint32_t>(count * 2)); }
+{ (void) port; memcpy(reinterpret_cast<void *>(m16), static_cast<void *>(g_buf_16bit), static_cast<uint32_t>(count * 2)); }
 
 void
 test_insdrep(uint16_t port, uint64_t m32, uint32_t count) noexcept
-{ (void) port; __builtin_memcpy(reinterpret_cast<void *>(m32), static_cast<void *>(g_buf_32bit), static_cast<uint32_t>(count * 4)); }
+{ (void) port; memcpy(reinterpret_cast<void *>(m32), static_cast<void *>(g_buf_32bit), static_cast<uint32_t>(count * 4)); }
 
 void
 test_outb(uint16_t port, uint8_t val) noexcept
@@ -90,27 +90,27 @@ test_outd(uint16_t port, uint32_t val) noexcept
 
 void
 test_outsb(uint16_t port, uint64_t m8) noexcept
-{ (void) port; __builtin_memcpy(static_cast<void *>(g_buf_8bit), reinterpret_cast<void *>(m8), 1); }
+{ (void) port; memcpy(static_cast<void *>(g_buf_8bit), reinterpret_cast<void *>(m8), 1); }
 
 void
 test_outsw(uint16_t port, uint64_t m16) noexcept
-{ (void) port; __builtin_memcpy(static_cast<void *>(g_buf_16bit), reinterpret_cast<void *>(m16), 2); }
+{ (void) port; memcpy(static_cast<void *>(g_buf_16bit), reinterpret_cast<void *>(m16), 2); }
 
 void
 test_outsd(uint16_t port, uint64_t m32) noexcept
-{ (void) port; __builtin_memcpy(static_cast<void *>(g_buf_32bit), reinterpret_cast<void *>(m32), 4); }
+{ (void) port; memcpy(static_cast<void *>(g_buf_32bit), reinterpret_cast<void *>(m32), 4); }
 
 void
 test_outsbrep(uint16_t port, uint64_t m8, uint32_t count) noexcept
-{ (void) port; __builtin_memcpy(static_cast<void *>(g_buf_8bit), reinterpret_cast<void *>(m8), static_cast<uint32_t>(count * 1)); }
+{ (void) port; memcpy(static_cast<void *>(g_buf_8bit), reinterpret_cast<void *>(m8), static_cast<uint32_t>(count * 1)); }
 
 void
 test_outswrep(uint16_t port, uint64_t m16, uint32_t count) noexcept
-{ (void) port; __builtin_memcpy(static_cast<void *>(g_buf_16bit), reinterpret_cast<void *>(m16), static_cast<uint32_t>(count * 2)); }
+{ (void) port; memcpy(static_cast<void *>(g_buf_16bit), reinterpret_cast<void *>(m16), static_cast<uint32_t>(count * 2)); }
 
 void
 test_outsdrep(uint16_t port, uint64_t m32, uint32_t count) noexcept
-{ (void) port; __builtin_memcpy(static_cast<void *>(g_buf_32bit), reinterpret_cast<void *>(m32), static_cast<uint32_t>(count * 4)); }
+{ (void) port; memcpy(static_cast<void *>(g_buf_32bit), reinterpret_cast<void *>(m32), static_cast<uint32_t>(count * 4)); }
 
 static void
 setup_intrinsics(MockRepository &mocks)

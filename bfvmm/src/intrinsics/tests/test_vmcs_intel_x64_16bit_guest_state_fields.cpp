@@ -72,12 +72,16 @@ TEST_CASE("vmcs_guest_es_selector")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_es_selector::set(100UL);
-    CHECK(vmcs::guest_es_selector::get() == 100UL);
-    CHECK(vmcs::guest_es_selector::exists());
+    using namespace vmcs::guest_es_selector;
 
-    vmcs::guest_es_selector::set_if_exists(200UL);
-    CHECK(vmcs::guest_es_selector::get_if_exists() == 200UL);
+    set(100UL);
+    CHECK(get() == 100UL);
+    CHECK(exists());
+
+    set_if_exists(200UL);
+    CHECK(get_if_exists() == 200UL);
+
+    vmcs::guest_es_selector::dump(0);
 }
 
 TEST_CASE("vmcs_guest_es_selector_rpl")
@@ -85,17 +89,16 @@ TEST_CASE("vmcs_guest_es_selector_rpl")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_es_selector::rpl::set(1UL);
-    CHECK(vmcs::guest_es_selector::rpl::get() == 1UL);
+    using namespace vmcs::guest_es_selector;
 
-    vmcs::guest_es_selector::rpl::set(0UL);
-    CHECK(vmcs::guest_es_selector::rpl::get() == 0UL);
+    rpl::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(rpl::get() == (rpl::mask >> rpl::from));
 
-    vmcs::guest_es_selector::rpl::set_if_exists(1UL);
-    CHECK(vmcs::guest_es_selector::rpl::get_if_exists() == 1UL);
+    rpl::set(rpl::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(rpl::get(rpl::mask) == (rpl::mask >> rpl::from));
 
-    vmcs::guest_es_selector::rpl::set_if_exists(0UL);
-    CHECK(vmcs::guest_es_selector::rpl::get_if_exists() == 0UL);
+    rpl::set_if_exists(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(rpl::get_if_exists() == (rpl::mask >> rpl::from));
 }
 
 TEST_CASE("vmcs_guest_es_selector_ti")
@@ -103,17 +106,22 @@ TEST_CASE("vmcs_guest_es_selector_ti")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_es_selector::ti::set(true);
-    CHECK(vmcs::guest_es_selector::ti::get());
+    using namespace vmcs::guest_es_selector;
 
-    vmcs::guest_es_selector::ti::set(false);
-    CHECK_FALSE(vmcs::guest_es_selector::ti::get());
+    ti::set(true);
+    CHECK(ti::is_enabled());
+    ti::set(false);
+    CHECK(ti::is_disabled());
 
-    vmcs::guest_es_selector::ti::set_if_exists(true);
-    CHECK(vmcs::guest_es_selector::ti::get_if_exists());
+    ti::set(ti::mask, true);
+    CHECK(ti::is_enabled(ti::mask));
+    ti::set(0x0, false);
+    CHECK(ti::is_disabled(0x0));
 
-    vmcs::guest_es_selector::ti::set_if_exists(false);
-    CHECK_FALSE(vmcs::guest_es_selector::ti::get_if_exists());
+    ti::set_if_exists(true);
+    CHECK(ti::is_enabled_if_exists());
+    ti::set_if_exists(false);
+    CHECK(ti::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_es_selector_index")
@@ -121,17 +129,16 @@ TEST_CASE("vmcs_guest_es_selector_index")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_es_selector::index::set(1UL);
-    CHECK(vmcs::guest_es_selector::index::get() == 1UL);
+    using namespace vmcs::guest_es_selector;
 
-    vmcs::guest_es_selector::index::set(0UL);
-    CHECK(vmcs::guest_es_selector::index::get() == 0UL);
+    index::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(index::get() == (index::mask >> index::from));
 
-    vmcs::guest_es_selector::index::set_if_exists(1UL);
-    CHECK(vmcs::guest_es_selector::index::get_if_exists() == 1UL);
+    index::set(index::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(index::get(index::mask) == (index::mask >> index::from));
 
-    vmcs::guest_es_selector::index::set_if_exists(0UL);
-    CHECK(vmcs::guest_es_selector::index::get_if_exists() == 0UL);
+    index::set_if_exists(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(index::get_if_exists() == (index::mask >> index::from));
 }
 
 TEST_CASE("vmcs_guest_cs_selector")
@@ -139,13 +146,16 @@ TEST_CASE("vmcs_guest_cs_selector")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_cs_selector::set(100UL);
+    using namespace vmcs::guest_cs_selector;
 
-    CHECK(vmcs::guest_cs_selector::get() == 100UL);
-    CHECK(vmcs::guest_cs_selector::exists());
+    set(100UL);
+    CHECK(get() == 100UL);
+    CHECK(exists());
 
-    vmcs::guest_cs_selector::set_if_exists(200UL);
-    CHECK(vmcs::guest_cs_selector::get_if_exists() == 200UL);
+    set_if_exists(200UL);
+    CHECK(get_if_exists() == 200UL);
+
+    vmcs::guest_cs_selector::dump(0);
 }
 
 TEST_CASE("vmcs_guest_cs_selector_rpl")
@@ -153,17 +163,16 @@ TEST_CASE("vmcs_guest_cs_selector_rpl")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_cs_selector::rpl::set(1UL);
-    CHECK(vmcs::guest_cs_selector::rpl::get() == 1UL);
+    using namespace vmcs::guest_cs_selector;
 
-    vmcs::guest_cs_selector::rpl::set(0UL);
-    CHECK(vmcs::guest_cs_selector::rpl::get() == 0UL);
+    rpl::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(rpl::get() == (rpl::mask >> rpl::from));
 
-    vmcs::guest_cs_selector::rpl::set_if_exists(1UL);
-    CHECK(vmcs::guest_cs_selector::rpl::get_if_exists() == 1UL);
+    rpl::set(rpl::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(rpl::get(rpl::mask) == (rpl::mask >> rpl::from));
 
-    vmcs::guest_cs_selector::rpl::set_if_exists(0UL);
-    CHECK(vmcs::guest_cs_selector::rpl::get_if_exists() == 0UL);
+    rpl::set_if_exists(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(rpl::get_if_exists() == (rpl::mask >> rpl::from));
 }
 
 TEST_CASE("vmcs_guest_cs_selector_ti")
@@ -171,17 +180,22 @@ TEST_CASE("vmcs_guest_cs_selector_ti")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_cs_selector::ti::set(true);
-    CHECK(vmcs::guest_cs_selector::ti::get());
+    using namespace vmcs::guest_cs_selector;
 
-    vmcs::guest_cs_selector::ti::set(false);
-    CHECK_FALSE(vmcs::guest_cs_selector::ti::get());
+    ti::set(true);
+    CHECK(ti::is_enabled());
+    ti::set(false);
+    CHECK(ti::is_disabled());
 
-    vmcs::guest_cs_selector::ti::set_if_exists(true);
-    CHECK(vmcs::guest_cs_selector::ti::get_if_exists());
+    ti::set(ti::mask, true);
+    CHECK(ti::is_enabled(ti::mask));
+    ti::set(0x0, false);
+    CHECK(ti::is_disabled(0x0));
 
-    vmcs::guest_cs_selector::ti::set_if_exists(false);
-    CHECK_FALSE(vmcs::guest_cs_selector::ti::get_if_exists());
+    ti::set_if_exists(true);
+    CHECK(ti::is_enabled_if_exists());
+    ti::set_if_exists(false);
+    CHECK(ti::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_cs_selector_index")
@@ -189,17 +203,16 @@ TEST_CASE("vmcs_guest_cs_selector_index")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_cs_selector::index::set(1UL);
-    CHECK(vmcs::guest_cs_selector::index::get() == 1UL);
+    using namespace vmcs::guest_cs_selector;
 
-    vmcs::guest_cs_selector::index::set(0UL);
-    CHECK(vmcs::guest_cs_selector::index::get() == 0UL);
+    index::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(index::get() == (index::mask >> index::from));
 
-    vmcs::guest_cs_selector::index::set_if_exists(1UL);
-    CHECK(vmcs::guest_cs_selector::index::get_if_exists() == 1UL);
+    index::set(index::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(index::get(index::mask) == (index::mask >> index::from));
 
-    vmcs::guest_cs_selector::index::set_if_exists(0UL);
-    CHECK(vmcs::guest_cs_selector::index::get_if_exists() == 0UL);
+    index::set_if_exists(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(index::get_if_exists() == (index::mask >> index::from));
 }
 
 TEST_CASE("vmcs_guest_ss_selector")
@@ -207,13 +220,16 @@ TEST_CASE("vmcs_guest_ss_selector")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_ss_selector::set(100UL);
+    using namespace vmcs::guest_ss_selector;
 
-    CHECK(vmcs::guest_ss_selector::get() == 100UL);
-    CHECK(vmcs::guest_ss_selector::exists());
+    set(100UL);
+    CHECK(get() == 100UL);
+    CHECK(exists());
 
-    vmcs::guest_ss_selector::set_if_exists(200UL);
-    CHECK(vmcs::guest_ss_selector::get_if_exists() == 200UL);
+    set_if_exists(200UL);
+    CHECK(get_if_exists() == 200UL);
+
+    vmcs::guest_ss_selector::dump(0);
 }
 
 TEST_CASE("vmcs_guest_ss_selector_rpl")
@@ -221,17 +237,16 @@ TEST_CASE("vmcs_guest_ss_selector_rpl")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_ss_selector::rpl::set(1UL);
-    CHECK(vmcs::guest_ss_selector::rpl::get() == 1UL);
+    using namespace vmcs::guest_ss_selector;
 
-    vmcs::guest_ss_selector::rpl::set(0UL);
-    CHECK(vmcs::guest_ss_selector::rpl::get() == 0UL);
+    rpl::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(rpl::get() == (rpl::mask >> rpl::from));
 
-    vmcs::guest_ss_selector::rpl::set_if_exists(1UL);
-    CHECK(vmcs::guest_ss_selector::rpl::get_if_exists() == 1UL);
+    rpl::set(rpl::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(rpl::get(rpl::mask) == (rpl::mask >> rpl::from));
 
-    vmcs::guest_ss_selector::rpl::set_if_exists(0UL);
-    CHECK(vmcs::guest_ss_selector::rpl::get_if_exists() == 0UL);
+    rpl::set_if_exists(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(rpl::get_if_exists() == (rpl::mask >> rpl::from));
 }
 
 TEST_CASE("vmcs_guest_ss_selector_ti")
@@ -239,17 +254,22 @@ TEST_CASE("vmcs_guest_ss_selector_ti")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_ss_selector::ti::set(true);
-    CHECK(vmcs::guest_ss_selector::ti::get());
+    using namespace vmcs::guest_ss_selector;
 
-    vmcs::guest_ss_selector::ti::set(false);
-    CHECK_FALSE(vmcs::guest_ss_selector::ti::get());
+    ti::set(true);
+    CHECK(ti::is_enabled());
+    ti::set(false);
+    CHECK(ti::is_disabled());
 
-    vmcs::guest_ss_selector::ti::set_if_exists(true);
-    CHECK(vmcs::guest_ss_selector::ti::get_if_exists());
+    ti::set(ti::mask, true);
+    CHECK(ti::is_enabled(ti::mask));
+    ti::set(0x0, false);
+    CHECK(ti::is_disabled(0x0));
 
-    vmcs::guest_ss_selector::ti::set_if_exists(false);
-    CHECK_FALSE(vmcs::guest_ss_selector::ti::get_if_exists());
+    ti::set_if_exists(true);
+    CHECK(ti::is_enabled_if_exists());
+    ti::set_if_exists(false);
+    CHECK(ti::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_ss_selector_index")
@@ -257,17 +277,16 @@ TEST_CASE("vmcs_guest_ss_selector_index")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_ss_selector::index::set(1UL);
-    CHECK(vmcs::guest_ss_selector::index::get() == 1UL);
+    using namespace vmcs::guest_ss_selector;
 
-    vmcs::guest_ss_selector::index::set(0UL);
-    CHECK(vmcs::guest_ss_selector::index::get() == 0UL);
+    index::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(index::get() == (index::mask >> index::from));
 
-    vmcs::guest_ss_selector::index::set_if_exists(1UL);
-    CHECK(vmcs::guest_ss_selector::index::get_if_exists() == 1UL);
+    index::set(index::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(index::get(index::mask) == (index::mask >> index::from));
 
-    vmcs::guest_ss_selector::index::set_if_exists(0UL);
-    CHECK(vmcs::guest_ss_selector::index::get_if_exists() == 0UL);
+    index::set_if_exists(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(index::get_if_exists() == (index::mask >> index::from));
 }
 
 TEST_CASE("vmcs_guest_ds_selector")
@@ -275,13 +294,16 @@ TEST_CASE("vmcs_guest_ds_selector")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_ds_selector::set(100UL);
+    using namespace vmcs::guest_ds_selector;
 
-    CHECK(vmcs::guest_ds_selector::get() == 100UL);
-    CHECK(vmcs::guest_ds_selector::exists());
+    set(100UL);
+    CHECK(get() == 100UL);
+    CHECK(exists());
 
-    vmcs::guest_ds_selector::set_if_exists(200UL);
-    CHECK(vmcs::guest_ds_selector::get_if_exists() == 200UL);
+    set_if_exists(200UL);
+    CHECK(get_if_exists() == 200UL);
+
+    vmcs::guest_ds_selector::dump(0);
 }
 
 TEST_CASE("vmcs_guest_ds_selector_rpl")
@@ -289,17 +311,16 @@ TEST_CASE("vmcs_guest_ds_selector_rpl")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_ds_selector::rpl::set(1UL);
-    CHECK(vmcs::guest_ds_selector::rpl::get() == 1UL);
+    using namespace vmcs::guest_ds_selector;
 
-    vmcs::guest_ds_selector::rpl::set(0UL);
-    CHECK(vmcs::guest_ds_selector::rpl::get() == 0UL);
+    rpl::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(rpl::get() == (rpl::mask >> rpl::from));
 
-    vmcs::guest_ds_selector::rpl::set_if_exists(1UL);
-    CHECK(vmcs::guest_ds_selector::rpl::get_if_exists() == 1UL);
+    rpl::set(rpl::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(rpl::get(rpl::mask) == (rpl::mask >> rpl::from));
 
-    vmcs::guest_ds_selector::rpl::set_if_exists(0UL);
-    CHECK(vmcs::guest_ds_selector::rpl::get_if_exists() == 0UL);
+    rpl::set_if_exists(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(rpl::get_if_exists() == (rpl::mask >> rpl::from));
 }
 
 TEST_CASE("vmcs_guest_ds_selector_ti")
@@ -307,17 +328,22 @@ TEST_CASE("vmcs_guest_ds_selector_ti")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_ds_selector::ti::set(true);
-    CHECK(vmcs::guest_ds_selector::ti::get());
+    using namespace vmcs::guest_ds_selector;
 
-    vmcs::guest_ds_selector::ti::set(false);
-    CHECK_FALSE(vmcs::guest_ds_selector::ti::get());
+    ti::set(true);
+    CHECK(ti::is_enabled());
+    ti::set(false);
+    CHECK(ti::is_disabled());
 
-    vmcs::guest_ds_selector::ti::set_if_exists(true);
-    CHECK(vmcs::guest_ds_selector::ti::get_if_exists());
+    ti::set(ti::mask, true);
+    CHECK(ti::is_enabled(ti::mask));
+    ti::set(0x0, false);
+    CHECK(ti::is_disabled(0x0));
 
-    vmcs::guest_ds_selector::ti::set_if_exists(false);
-    CHECK_FALSE(vmcs::guest_ds_selector::ti::get_if_exists());
+    ti::set_if_exists(true);
+    CHECK(ti::is_enabled_if_exists());
+    ti::set_if_exists(false);
+    CHECK(ti::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_ds_selector_index")
@@ -325,17 +351,16 @@ TEST_CASE("vmcs_guest_ds_selector_index")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_ds_selector::index::set(1UL);
-    CHECK(vmcs::guest_ds_selector::index::get() == 1UL);
+    using namespace vmcs::guest_ds_selector;
 
-    vmcs::guest_ds_selector::index::set(0UL);
-    CHECK(vmcs::guest_ds_selector::index::get() == 0UL);
+    index::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(index::get() == (index::mask >> index::from));
 
-    vmcs::guest_ds_selector::index::set_if_exists(1UL);
-    CHECK(vmcs::guest_ds_selector::index::get_if_exists() == 1UL);
+    index::set(index::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(index::get(index::mask) == (index::mask >> index::from));
 
-    vmcs::guest_ds_selector::index::set_if_exists(0UL);
-    CHECK(vmcs::guest_ds_selector::index::get_if_exists() == 0UL);
+    index::set_if_exists(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(index::get_if_exists() == (index::mask >> index::from));
 }
 
 TEST_CASE("vmcs_guest_fs_selector")
@@ -343,13 +368,16 @@ TEST_CASE("vmcs_guest_fs_selector")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_fs_selector::set(100UL);
+    using namespace vmcs::guest_fs_selector;
 
-    CHECK(vmcs::guest_fs_selector::get() == 100UL);
-    CHECK(vmcs::guest_fs_selector::exists());
+    set(100UL);
+    CHECK(get() == 100UL);
+    CHECK(exists());
 
-    vmcs::guest_fs_selector::set_if_exists(200UL);
-    CHECK(vmcs::guest_fs_selector::get_if_exists() == 200UL);
+    set_if_exists(200UL);
+    CHECK(get_if_exists() == 200UL);
+
+    vmcs::guest_fs_selector::dump(0);
 }
 
 TEST_CASE("vmcs_guest_fs_selector_rpl")
@@ -357,17 +385,16 @@ TEST_CASE("vmcs_guest_fs_selector_rpl")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_fs_selector::rpl::set(1UL);
-    CHECK(vmcs::guest_fs_selector::rpl::get() == 1UL);
+    using namespace vmcs::guest_fs_selector;
 
-    vmcs::guest_fs_selector::rpl::set(0UL);
-    CHECK(vmcs::guest_fs_selector::rpl::get() == 0UL);
+    rpl::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(rpl::get() == (rpl::mask >> rpl::from));
 
-    vmcs::guest_fs_selector::rpl::set_if_exists(1UL);
-    CHECK(vmcs::guest_fs_selector::rpl::get_if_exists() == 1UL);
+    rpl::set(rpl::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(rpl::get(rpl::mask) == (rpl::mask >> rpl::from));
 
-    vmcs::guest_fs_selector::rpl::set_if_exists(0UL);
-    CHECK(vmcs::guest_fs_selector::rpl::get_if_exists() == 0UL);
+    rpl::set_if_exists(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(rpl::get_if_exists() == (rpl::mask >> rpl::from));
 }
 
 TEST_CASE("vmcs_guest_fs_selector_ti")
@@ -375,17 +402,22 @@ TEST_CASE("vmcs_guest_fs_selector_ti")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_fs_selector::ti::set(true);
-    CHECK(vmcs::guest_fs_selector::ti::get());
+    using namespace vmcs::guest_fs_selector;
 
-    vmcs::guest_fs_selector::ti::set(false);
-    CHECK_FALSE(vmcs::guest_fs_selector::ti::get());
+    ti::set(true);
+    CHECK(ti::is_enabled());
+    ti::set(false);
+    CHECK(ti::is_disabled());
 
-    vmcs::guest_fs_selector::ti::set_if_exists(true);
-    CHECK(vmcs::guest_fs_selector::ti::get_if_exists());
+    ti::set(ti::mask, true);
+    CHECK(ti::is_enabled(ti::mask));
+    ti::set(0x0, false);
+    CHECK(ti::is_disabled(0x0));
 
-    vmcs::guest_fs_selector::ti::set_if_exists(false);
-    CHECK_FALSE(vmcs::guest_fs_selector::ti::get_if_exists());
+    ti::set_if_exists(true);
+    CHECK(ti::is_enabled_if_exists());
+    ti::set_if_exists(false);
+    CHECK(ti::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_fs_selector_index")
@@ -393,17 +425,16 @@ TEST_CASE("vmcs_guest_fs_selector_index")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_fs_selector::index::set(1UL);
-    CHECK(vmcs::guest_fs_selector::index::get() == 1UL);
+    using namespace vmcs::guest_fs_selector;
 
-    vmcs::guest_fs_selector::index::set(0UL);
-    CHECK(vmcs::guest_fs_selector::index::get() == 0UL);
+    index::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(index::get() == (index::mask >> index::from));
 
-    vmcs::guest_fs_selector::index::set_if_exists(1UL);
-    CHECK(vmcs::guest_fs_selector::index::get_if_exists() == 1UL);
+    index::set(index::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(index::get(index::mask) == (index::mask >> index::from));
 
-    vmcs::guest_fs_selector::index::set_if_exists(0UL);
-    CHECK(vmcs::guest_fs_selector::index::get_if_exists() == 0UL);
+    index::set_if_exists(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(index::get_if_exists() == (index::mask >> index::from));
 }
 
 TEST_CASE("vmcs_guest_gs_selector")
@@ -411,13 +442,16 @@ TEST_CASE("vmcs_guest_gs_selector")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_gs_selector::set(100UL);
+    using namespace vmcs::guest_gs_selector;
 
-    CHECK(vmcs::guest_gs_selector::get() == 100UL);
-    CHECK(vmcs::guest_gs_selector::exists());
+    set(100UL);
+    CHECK(get() == 100UL);
+    CHECK(exists());
 
-    vmcs::guest_gs_selector::set_if_exists(200UL);
-    CHECK(vmcs::guest_gs_selector::get_if_exists() == 200UL);
+    set_if_exists(200UL);
+    CHECK(get_if_exists() == 200UL);
+
+    vmcs::guest_gs_selector::dump(0);
 }
 
 TEST_CASE("vmcs_guest_gs_selector_rpl")
@@ -425,17 +459,16 @@ TEST_CASE("vmcs_guest_gs_selector_rpl")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_gs_selector::rpl::set(1UL);
-    CHECK(vmcs::guest_gs_selector::rpl::get() == 1UL);
+    using namespace vmcs::guest_gs_selector;
 
-    vmcs::guest_gs_selector::rpl::set(0UL);
-    CHECK(vmcs::guest_gs_selector::rpl::get() == 0UL);
+    rpl::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(rpl::get() == (rpl::mask >> rpl::from));
 
-    vmcs::guest_gs_selector::rpl::set_if_exists(1UL);
-    CHECK(vmcs::guest_gs_selector::rpl::get_if_exists() == 1UL);
+    rpl::set(rpl::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(rpl::get(rpl::mask) == (rpl::mask >> rpl::from));
 
-    vmcs::guest_gs_selector::rpl::set_if_exists(0UL);
-    CHECK(vmcs::guest_gs_selector::rpl::get_if_exists() == 0UL);
+    rpl::set_if_exists(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(rpl::get_if_exists() == (rpl::mask >> rpl::from));
 }
 
 TEST_CASE("vmcs_guest_gs_selector_ti")
@@ -443,17 +476,22 @@ TEST_CASE("vmcs_guest_gs_selector_ti")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_gs_selector::ti::set(true);
-    CHECK(vmcs::guest_gs_selector::ti::get());
+    using namespace vmcs::guest_gs_selector;
 
-    vmcs::guest_gs_selector::ti::set(false);
-    CHECK_FALSE(vmcs::guest_gs_selector::ti::get());
+    ti::set(true);
+    CHECK(ti::is_enabled());
+    ti::set(false);
+    CHECK(ti::is_disabled());
 
-    vmcs::guest_gs_selector::ti::set_if_exists(true);
-    CHECK(vmcs::guest_gs_selector::ti::get_if_exists());
+    ti::set(ti::mask, true);
+    CHECK(ti::is_enabled(ti::mask));
+    ti::set(0x0, false);
+    CHECK(ti::is_disabled(0x0));
 
-    vmcs::guest_gs_selector::ti::set_if_exists(false);
-    CHECK_FALSE(vmcs::guest_gs_selector::ti::get_if_exists());
+    ti::set_if_exists(true);
+    CHECK(ti::is_enabled_if_exists());
+    ti::set_if_exists(false);
+    CHECK(ti::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_gs_selector_index")
@@ -461,17 +499,16 @@ TEST_CASE("vmcs_guest_gs_selector_index")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_gs_selector::index::set(1UL);
-    CHECK(vmcs::guest_gs_selector::index::get() == 1UL);
+    using namespace vmcs::guest_gs_selector;
 
-    vmcs::guest_gs_selector::index::set(0UL);
-    CHECK(vmcs::guest_gs_selector::index::get() == 0UL);
+    index::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(index::get() == (index::mask >> index::from));
 
-    vmcs::guest_gs_selector::index::set_if_exists(1UL);
-    CHECK(vmcs::guest_gs_selector::index::get_if_exists() == 1UL);
+    index::set(index::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(index::get(index::mask) == (index::mask >> index::from));
 
-    vmcs::guest_gs_selector::index::set_if_exists(0UL);
-    CHECK(vmcs::guest_gs_selector::index::get_if_exists() == 0UL);
+    index::set_if_exists(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(index::get_if_exists() == (index::mask >> index::from));
 }
 
 TEST_CASE("vmcs_guest_ldtr_selector")
@@ -479,13 +516,16 @@ TEST_CASE("vmcs_guest_ldtr_selector")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_ldtr_selector::set(100UL);
+    using namespace vmcs::guest_ldtr_selector;
 
-    CHECK(vmcs::guest_ldtr_selector::get() == 100UL);
-    CHECK(vmcs::guest_ldtr_selector::exists());
+    set(100UL);
+    CHECK(get() == 100UL);
+    CHECK(exists());
 
-    vmcs::guest_ldtr_selector::set_if_exists(200UL);
-    CHECK(vmcs::guest_ldtr_selector::get_if_exists() == 200UL);
+    set_if_exists(200UL);
+    CHECK(get_if_exists() == 200UL);
+
+    vmcs::guest_ldtr_selector::dump(0);
 }
 
 TEST_CASE("vmcs_guest_ldtr_selector_rpl")
@@ -493,17 +533,16 @@ TEST_CASE("vmcs_guest_ldtr_selector_rpl")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_ldtr_selector::rpl::set(1UL);
-    CHECK(vmcs::guest_ldtr_selector::rpl::get() == 1UL);
+    using namespace vmcs::guest_ldtr_selector;
 
-    vmcs::guest_ldtr_selector::rpl::set(0UL);
-    CHECK(vmcs::guest_ldtr_selector::rpl::get() == 0UL);
+    rpl::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(rpl::get() == (rpl::mask >> rpl::from));
 
-    vmcs::guest_ldtr_selector::rpl::set_if_exists(1UL);
-    CHECK(vmcs::guest_ldtr_selector::rpl::get_if_exists() == 1UL);
+    rpl::set(rpl::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(rpl::get(rpl::mask) == (rpl::mask >> rpl::from));
 
-    vmcs::guest_ldtr_selector::rpl::set_if_exists(0UL);
-    CHECK(vmcs::guest_ldtr_selector::rpl::get_if_exists() == 0UL);
+    rpl::set_if_exists(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(rpl::get_if_exists() == (rpl::mask >> rpl::from));
 }
 
 TEST_CASE("vmcs_guest_ldtr_selector_ti")
@@ -511,17 +550,22 @@ TEST_CASE("vmcs_guest_ldtr_selector_ti")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_ldtr_selector::ti::set(true);
-    CHECK(vmcs::guest_ldtr_selector::ti::get());
+    using namespace vmcs::guest_ldtr_selector;
 
-    vmcs::guest_ldtr_selector::ti::set(false);
-    CHECK_FALSE(vmcs::guest_ldtr_selector::ti::get());
+    ti::set(true);
+    CHECK(ti::is_enabled());
+    ti::set(false);
+    CHECK(ti::is_disabled());
 
-    vmcs::guest_ldtr_selector::ti::set_if_exists(true);
-    CHECK(vmcs::guest_ldtr_selector::ti::get_if_exists());
+    ti::set(ti::mask, true);
+    CHECK(ti::is_enabled(ti::mask));
+    ti::set(0x0, false);
+    CHECK(ti::is_disabled(0x0));
 
-    vmcs::guest_ldtr_selector::ti::set_if_exists(false);
-    CHECK_FALSE(vmcs::guest_ldtr_selector::ti::get_if_exists());
+    ti::set_if_exists(true);
+    CHECK(ti::is_enabled_if_exists());
+    ti::set_if_exists(false);
+    CHECK(ti::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_ldtr_selector_index")
@@ -529,17 +573,16 @@ TEST_CASE("vmcs_guest_ldtr_selector_index")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_ldtr_selector::index::set(1UL);
-    CHECK(vmcs::guest_ldtr_selector::index::get() == 1UL);
+    using namespace vmcs::guest_ldtr_selector;
 
-    vmcs::guest_ldtr_selector::index::set(0UL);
-    CHECK(vmcs::guest_ldtr_selector::index::get() == 0UL);
+    index::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(index::get() == (index::mask >> index::from));
 
-    vmcs::guest_ldtr_selector::index::set_if_exists(1UL);
-    CHECK(vmcs::guest_ldtr_selector::index::get_if_exists() == 1UL);
+    index::set(index::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(index::get(index::mask) == (index::mask >> index::from));
 
-    vmcs::guest_ldtr_selector::index::set_if_exists(0UL);
-    CHECK(vmcs::guest_ldtr_selector::index::get_if_exists() == 0UL);
+    index::set_if_exists(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(index::get_if_exists() == (index::mask >> index::from));
 }
 
 TEST_CASE("vmcs_guest_tr_selector")
@@ -547,13 +590,16 @@ TEST_CASE("vmcs_guest_tr_selector")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_tr_selector::set(100UL);
+    using namespace vmcs::guest_tr_selector;
 
-    CHECK(vmcs::guest_tr_selector::get() == 100UL);
-    CHECK(vmcs::guest_tr_selector::exists());
+    set(100UL);
+    CHECK(get() == 100UL);
+    CHECK(exists());
 
-    vmcs::guest_tr_selector::set_if_exists(200UL);
-    CHECK(vmcs::guest_tr_selector::get_if_exists() == 200UL);
+    set_if_exists(200UL);
+    CHECK(get_if_exists() == 200UL);
+
+    vmcs::guest_tr_selector::dump(0);
 }
 
 TEST_CASE("vmcs_guest_tr_selector_rpl")
@@ -561,17 +607,16 @@ TEST_CASE("vmcs_guest_tr_selector_rpl")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_tr_selector::rpl::set(1UL);
-    CHECK(vmcs::guest_tr_selector::rpl::get() == 1UL);
+    using namespace vmcs::guest_tr_selector;
 
-    vmcs::guest_tr_selector::rpl::set(0UL);
-    CHECK(vmcs::guest_tr_selector::rpl::get() == 0UL);
+    rpl::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(rpl::get() == (rpl::mask >> rpl::from));
 
-    vmcs::guest_tr_selector::rpl::set_if_exists(1UL);
-    CHECK(vmcs::guest_tr_selector::rpl::get_if_exists() == 1UL);
+    rpl::set(rpl::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(rpl::get(rpl::mask) == (rpl::mask >> rpl::from));
 
-    vmcs::guest_tr_selector::rpl::set_if_exists(0UL);
-    CHECK(vmcs::guest_tr_selector::rpl::get_if_exists() == 0UL);
+    rpl::set_if_exists(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(rpl::get_if_exists() == (rpl::mask >> rpl::from));
 }
 
 TEST_CASE("vmcs_guest_tr_selector_ti")
@@ -579,17 +624,22 @@ TEST_CASE("vmcs_guest_tr_selector_ti")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_tr_selector::ti::set(true);
-    CHECK(vmcs::guest_tr_selector::ti::get());
+    using namespace vmcs::guest_tr_selector;
 
-    vmcs::guest_tr_selector::ti::set(false);
-    CHECK_FALSE(vmcs::guest_tr_selector::ti::get());
+    ti::set(true);
+    CHECK(ti::is_enabled());
+    ti::set(false);
+    CHECK(ti::is_disabled());
 
-    vmcs::guest_tr_selector::ti::set_if_exists(true);
-    CHECK(vmcs::guest_tr_selector::ti::get_if_exists());
+    ti::set(ti::mask, true);
+    CHECK(ti::is_enabled(ti::mask));
+    ti::set(0x0, false);
+    CHECK(ti::is_disabled(0x0));
 
-    vmcs::guest_tr_selector::ti::set_if_exists(false);
-    CHECK_FALSE(vmcs::guest_tr_selector::ti::get_if_exists());
+    ti::set_if_exists(true);
+    CHECK(ti::is_enabled_if_exists());
+    ti::set_if_exists(false);
+    CHECK(ti::is_disabled_if_exists());
 }
 
 TEST_CASE("vmcs_guest_tr_selector_index")
@@ -597,17 +647,16 @@ TEST_CASE("vmcs_guest_tr_selector_index")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    vmcs::guest_tr_selector::index::set(1UL);
-    CHECK(vmcs::guest_tr_selector::index::get() == 1UL);
+    using namespace vmcs::guest_tr_selector;
 
-    vmcs::guest_tr_selector::index::set(0UL);
-    CHECK(vmcs::guest_tr_selector::index::get() == 0UL);
+    index::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(index::get() == (index::mask >> index::from));
 
-    vmcs::guest_tr_selector::index::set_if_exists(1UL);
-    CHECK(vmcs::guest_tr_selector::index::get_if_exists() == 1UL);
+    index::set(index::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(index::get(index::mask) == (index::mask >> index::from));
 
-    vmcs::guest_tr_selector::index::set_if_exists(0UL);
-    CHECK(vmcs::guest_tr_selector::index::get_if_exists() == 0UL);
+    index::set_if_exists(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(index::get_if_exists() == (index::mask >> index::from));
 }
 
 TEST_CASE("vmcs_guest_interrupt_status")
@@ -615,29 +664,31 @@ TEST_CASE("vmcs_guest_interrupt_status")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace vmcs::guest_interrupt_status;
+
     g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] =
         msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask << 32;
     g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] =
         msrs::ia32_vmx_procbased_ctls2::virtual_interrupt_delivery::mask << 32;
 
-    CHECK(vmcs::guest_interrupt_status::exists());
+    CHECK(exists());
 
-    vmcs::guest_interrupt_status::set(100UL);
-    CHECK(vmcs::guest_interrupt_status::get() == 100UL);
+    set(100UL);
+    CHECK(get() == 100UL);
 
-    vmcs::guest_interrupt_status::set_if_exists(200UL);
-    CHECK(vmcs::guest_interrupt_status::get_if_exists() == 200UL);
+    set_if_exists(200UL);
+    CHECK(get_if_exists() == 200UL);
 
     g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = 0x0;
-    CHECK_FALSE(vmcs::guest_interrupt_status::exists());
-    CHECK_THROWS(vmcs::guest_interrupt_status::set(1UL));
-    CHECK_THROWS(vmcs::guest_interrupt_status::get());
-    CHECK_NOTHROW(vmcs::guest_interrupt_status::set_if_exists(1UL));
-    CHECK_NOTHROW(vmcs::guest_interrupt_status::get_if_exists());
+    CHECK_FALSE(exists());
+    CHECK_THROWS(set(1UL));
+    CHECK_THROWS(get());
+    CHECK_NOTHROW(set_if_exists(1UL));
+    CHECK_NOTHROW(get_if_exists());
 
     g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] =
         msrs::ia32_vmx_procbased_ctls2::virtual_interrupt_delivery::mask << 32;
-    CHECK(vmcs::guest_interrupt_status::get() == 200UL);
+    CHECK(get() == 200UL);
 }
 
 TEST_CASE("vmcs_pml_index")
@@ -645,29 +696,31 @@ TEST_CASE("vmcs_pml_index")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace vmcs::pml_index;
+
     g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] =
         msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask << 32;
     g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] =
         msrs::ia32_vmx_procbased_ctls2::enable_pml::mask << 32;
 
-    CHECK(vmcs::pml_index::exists());
+    CHECK(exists());
 
-    vmcs::pml_index::set(100UL);
-    CHECK(vmcs::pml_index::get() == 100UL);
+    set(100UL);
+    CHECK(get() == 100UL);
 
-    vmcs::pml_index::set_if_exists(200UL);
-    CHECK(vmcs::pml_index::get_if_exists() == 200UL);
+    set_if_exists(200UL);
+    CHECK(get_if_exists() == 200UL);
 
     g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = 0x0;
-    CHECK_FALSE(vmcs::pml_index::exists());
-    CHECK_THROWS(vmcs::pml_index::set(1UL));
-    CHECK_THROWS(vmcs::pml_index::get());
-    CHECK_NOTHROW(vmcs::pml_index::set_if_exists(1UL));
-    CHECK_NOTHROW(vmcs::pml_index::get_if_exists());
+    CHECK_FALSE(exists());
+    CHECK_THROWS(set(1UL));
+    CHECK_THROWS(get());
+    CHECK_NOTHROW(set_if_exists(1UL));
+    CHECK_NOTHROW(get_if_exists());
 
     g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] =
         msrs::ia32_vmx_procbased_ctls2::enable_pml::mask << 32;
-    CHECK(vmcs::pml_index::get() == 200UL);
+    CHECK(get() == 200UL);
 }
 
 #endif
