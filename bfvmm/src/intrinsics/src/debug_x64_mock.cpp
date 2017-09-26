@@ -28,12 +28,11 @@ extern "C" uint64_t
 _read_dr7(void) noexcept
 {
     std::cerr << __BFFUNC__ << " called" << '\n';
-    abort();
+    return 0;
 }
 
 extern "C" void
 _write_dr7(uint64_t val) noexcept
 {
     std::cerr << __BFFUNC__ << " called with: " << view_as_pointer(val) << '\n';
-    abort();
 }

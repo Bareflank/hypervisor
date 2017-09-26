@@ -24,6 +24,11 @@
 
 #ifdef _HIPPOMOCKS__ENABLE_CFUNC_MOCKING_SUPPORT
 
+TEST_CASE("test name goes here")
+{
+    CHECK(true);
+}
+
 using namespace intel_x64;
 using namespace msrs;
 using namespace vmcs;
@@ -31,10 +36,6 @@ using namespace debug;
 
 std::map<uint32_t, uint64_t> g_msrs;
 std::map<uint64_t, uint64_t> g_vmcs_fields;
-
-uint64_t
-test_read_msr(uint32_t addr) noexcept
-{ return g_msrs[addr]; }
 
 static bool
 test_vmread(uint64_t field, uint64_t *val) noexcept
@@ -53,7 +54,6 @@ test_vmwrite(uint64_t field, uint64_t val) noexcept
 static void
 setup_intrinsics(MockRepository &mocks)
 {
-    mocks.OnCallFunc(_read_msr).Do(test_read_msr);
     mocks.OnCallFunc(_vmread).Do(test_vmread);
     mocks.OnCallFunc(_vmwrite).Do(test_vmwrite);
 }
@@ -120,103 +120,194 @@ TEST_CASE("set_vmcs_field_if_exists")
     CHECK(g_vmcs_fields[0UL] == 1UL);
 }
 
-TEST_CASE("set_vm_control")
+TEST_CASE("set_vmcs_field_bits")
 {
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    constexpr const auto name = "control";
-    auto mask = 0x0000000000000040ULL;
-    auto ctls_addr = 0ULL;
-    auto msr_addr = 0UL;
+    constexpr const auto name("field");
+    g_vmcs_fields[0UL] = 0UL;
 
-    CHECK_THROWS(set_vm_control(true, msr_addr, ctls_addr, name, mask, false));
+    CHECK_THROWS(set_vmcs_field_bits(0xFFFFFFFFULL, 0ULL, 0x00000080ULL, 3ULL, name, false));
+    CHECK(g_vmcs_fields[0UL] == 0UL);
 
-    g_msrs[gsl::narrow_cast<uint16_t>(msr_addr)] = ~mask;
-    CHECK_NOTHROW(set_vm_control(false, msr_addr, ctls_addr, name, mask, true));
-    CHECK((g_vmcs_fields[ctls_addr] & mask) == 0UL);
-
-    g_msrs[gsl::narrow_cast<uint16_t>(msr_addr)] = mask;
-    CHECK_THROWS(set_vm_control(false, msr_addr, ctls_addr, name, mask, true));
-
-    g_msrs[gsl::narrow_cast<uint16_t>(msr_addr)] = mask << 32;
-    CHECK_NOTHROW(set_vm_control(true, msr_addr, ctls_addr, name, mask, true));
-    CHECK((g_vmcs_fields[ctls_addr] & mask) != 0UL);
-
-    g_msrs[gsl::narrow_cast<uint16_t>(msr_addr)] = ~(mask << 32);
-    CHECK_THROWS(set_vm_control(true, msr_addr, ctls_addr, name, mask, true));
+    CHECK_NOTHROW(set_vmcs_field_bits(0xFFFFFFFFULL, 0ULL, 0x00000008ULL, 3ULL, name, true));
+    CHECK(g_vmcs_fields[0UL] == 8UL);
 }
 
-TEST_CASE("set_vm_control_if_allowed")
+TEST_CASE("set_vmcs_field_bits_if_exists")
 {
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    constexpr const auto name = "control";
-    auto mask = 0x0000000000000040ULL;
-    auto ctls_addr = 0ULL;
-    auto msr_addr = 0UL;
+    constexpr const auto name("field");
+    g_vmcs_fields[0UL] = 0UL;
 
-    CHECK_NOTHROW(set_vm_control_if_allowed(true, msr_addr, ctls_addr, name, mask, true, false));
+    CHECK_NOTHROW(set_vmcs_field_bits_if_exists(0xFFFFFFFFULL, 0ULL,
+                0x00000008ULL, 3ULL, name, false, false));
+    CHECK(g_vmcs_fields[0UL] == 0UL);
 
-    g_vmcs_fields[ctls_addr] = mask;
-    g_msrs[gsl::narrow_cast<uint16_t>(msr_addr)] = ~mask;
+    CHECK_NOTHROW(set_vmcs_field_bits_if_exists(0xFFFFFFFFULL, 0ULL,
+                0x00000008ULL, 3ULL, name, true, false));
+    CHECK(g_vmcs_fields[0UL] == 0UL);
 
-    CHECK_NOTHROW(set_vm_control_if_allowed(false, msr_addr, ctls_addr, name, mask, true, true));
-    CHECK((g_vmcs_fields[ctls_addr] & mask) == 0UL);
+    CHECK_NOTHROW(set_vmcs_field_bits_if_exists(0xFFFFFFFFULL, 0ULL,
+                0x00000008ULL, 3ULL, name, false, true));
+    CHECK(g_vmcs_fields[0UL] == 8UL);
 
-    g_msrs[gsl::narrow_cast<uint16_t>(msr_addr)] = mask;
-    CHECK_NOTHROW(set_vm_control_if_allowed(false, msr_addr, ctls_addr, name, mask, true, true));
+    g_vmcs_fields[0UL] = 0UL;
 
-    g_msrs[gsl::narrow_cast<uint16_t>(msr_addr)] = mask;
-    CHECK_NOTHROW(set_vm_control_if_allowed(true, msr_addr, ctls_addr, name, mask, true, true));
-
-    g_msrs[gsl::narrow_cast<uint16_t>(msr_addr)] = mask << 32;
-    CHECK_NOTHROW(set_vm_control_if_allowed(true, msr_addr, ctls_addr, name, mask, true, true));
-    CHECK((g_vmcs_fields[ctls_addr] & mask) != 0UL);
-
-    g_msrs[gsl::narrow_cast<uint16_t>(msr_addr)] = ~(mask << 32);
-    CHECK_NOTHROW(set_vm_control_if_allowed(true, msr_addr, ctls_addr, name, mask, true, true));
+    CHECK_NOTHROW(set_vmcs_field_bits_if_exists(0xFFFFFFFFULL, 0ULL,
+                0x00000008ULL, 3ULL, name, true, true));
+    CHECK(g_vmcs_fields[0UL] == 8UL);
 }
 
-TEST_CASE("set_vm_function_control")
+TEST_CASE("clear_vmcs_field_bit")
 {
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    constexpr const auto name = "control";
-    auto mask = 0x0000000000000040ULL;
-    auto ctls_addr = 0ULL;
-    auto msr_addr = 0UL;
+    constexpr const auto name("field");
+    g_vmcs_fields[0UL] = 8UL;
 
-    CHECK_THROWS(set_vm_function_control(true, msr_addr, ctls_addr, name, mask, false));
-    CHECK_NOTHROW(set_vm_function_control(false, msr_addr, ctls_addr, name, mask, true));
+    CHECK_THROWS(clear_vmcs_field_bit(0ULL, 3ULL, name, false));
+    CHECK(g_vmcs_fields[0UL] == 8UL);
 
-    g_msrs[gsl::narrow_cast<uint16_t>(msr_addr)] = mask;
-    CHECK_NOTHROW(set_vm_function_control(true, msr_addr, ctls_addr, name, mask, true));
-
-    g_msrs[gsl::narrow_cast<uint16_t>(msr_addr)] = ~mask;
-    CHECK_THROWS(set_vm_function_control(true, msr_addr, ctls_addr, name, mask, true));
+    CHECK_NOTHROW(clear_vmcs_field_bit(0ULL, 3ULL, name, true));
+    CHECK(g_vmcs_fields[0UL] == 0UL);
 }
 
-TEST_CASE("set_vm_function_control_if_allowed")
+TEST_CASE("clear_vmcs_field_bit_if_exists")
+{
+    MockRepository mocks;
+    setup_intrinsics(mocks);
+
+    constexpr const auto name("field");
+    g_vmcs_fields[0UL] = 8UL;
+
+    CHECK_NOTHROW(clear_vmcs_field_bit_if_exists(0ULL, 3ULL, name, false, false));
+    CHECK(g_vmcs_fields[0UL] == 8UL);
+
+    CHECK_NOTHROW(clear_vmcs_field_bit_if_exists(0ULL, 3ULL, name, true, false));
+    CHECK(g_vmcs_fields[0UL] == 8UL);
+
+    CHECK_NOTHROW(clear_vmcs_field_bit_if_exists(0ULL, 3ULL, name, false, true));
+    CHECK(g_vmcs_fields[0UL] == 0UL);
+
+    g_vmcs_fields[0UL] = 8UL;
+
+    CHECK_NOTHROW(clear_vmcs_field_bit_if_exists(0ULL, 3ULL, name, true, true));
+    CHECK(g_vmcs_fields[0UL] == 0UL);
+}
+
+TEST_CASE("enable_vm_control")
 {
     MockRepository mocks;
     setup_intrinsics(mocks);
 
     constexpr const auto name = "control";
-    auto mask = 0x0000000000000040ULL;
-    auto ctls_addr = 0ULL;
-    auto msr_addr = 0UL;
+    g_vmcs_fields[0UL] = 0UL;
 
-    CHECK_NOTHROW(set_vm_function_control_if_allowed(true, msr_addr, ctls_addr, name, mask, true, false));
-    CHECK_NOTHROW(set_vm_function_control_if_allowed(false, msr_addr, ctls_addr, name, mask, true, true));
+    CHECK_THROWS(enable_vm_control(0ULL, 3ULL, false, name, false));
+    CHECK(g_vmcs_fields[0UL] == 0UL);
+    CHECK_THROWS(enable_vm_control(0ULL, 3ULL, true, name, false));
+    CHECK(g_vmcs_fields[0UL] == 0UL);
+    CHECK_THROWS(enable_vm_control(0ULL, 3ULL, false, name, true));
+    CHECK(g_vmcs_fields[0UL] == 0UL);
 
-    g_msrs[gsl::narrow_cast<uint16_t>(msr_addr)] = mask;
-    CHECK_NOTHROW(set_vm_function_control_if_allowed(true, msr_addr, ctls_addr, name, mask, true, true));
+    CHECK_NOTHROW(enable_vm_control(0ULL, 3ULL, true, name, true));
+    CHECK(g_vmcs_fields[0UL] == 8UL);
+}
 
-    g_msrs[gsl::narrow_cast<uint16_t>(msr_addr)] = ~mask;
-    CHECK_NOTHROW(set_vm_function_control_if_allowed(true, msr_addr, ctls_addr, name, mask, true, true));
+TEST_CASE("enable_vm_control_if_allowed")
+{
+    MockRepository mocks;
+    setup_intrinsics(mocks);
+
+    constexpr const auto name = "control";
+    g_vmcs_fields[0UL] = 0UL;
+
+    CHECK_NOTHROW(enable_vm_control_if_allowed(0ULL, 3ULL, false, name, false, false));
+    CHECK(g_vmcs_fields[0UL] == 0UL);
+    CHECK_NOTHROW(enable_vm_control_if_allowed(0ULL, 3ULL, false, name, true, false));
+    CHECK(g_vmcs_fields[0UL] == 0UL);
+
+    CHECK_NOTHROW(enable_vm_control_if_allowed(0ULL, 3ULL, false, name, false, true));
+    CHECK(g_vmcs_fields[0UL] == 0UL);
+    CHECK_NOTHROW(enable_vm_control_if_allowed(0ULL, 3ULL, false, name, true, true));
+    CHECK(g_vmcs_fields[0UL] == 0UL);
+
+    CHECK_NOTHROW(enable_vm_control_if_allowed(0ULL, 3ULL, true, name, false, false));
+    CHECK(g_vmcs_fields[0UL] == 0UL);
+    CHECK_NOTHROW(enable_vm_control_if_allowed(0ULL, 3ULL, true, name, true, false));
+    CHECK(g_vmcs_fields[0UL] == 0UL);
+
+    CHECK_NOTHROW(enable_vm_control_if_allowed(0ULL, 3ULL, true, name, false, true));
+    CHECK(g_vmcs_fields[0UL] == 8UL);
+    CHECK_NOTHROW(enable_vm_control_if_allowed(0ULL, 3ULL, true, name, true, true));
+    CHECK(g_vmcs_fields[0UL] == 8UL);
+}
+
+TEST_CASE("disable_vm_control")
+{
+    MockRepository mocks;
+    setup_intrinsics(mocks);
+
+    constexpr const auto name = "control";
+    g_vmcs_fields[0UL] = 8UL;
+
+    CHECK_THROWS(disable_vm_control(0ULL, 3ULL, false, name, false));
+    CHECK(g_vmcs_fields[0UL] == 8UL);
+    CHECK_THROWS(disable_vm_control(0ULL, 3ULL, false, name, true));
+    CHECK(g_vmcs_fields[0UL] == 8UL);
+    CHECK_THROWS(disable_vm_control(0ULL, 3ULL, true, name, false));
+    CHECK(g_vmcs_fields[0UL] == 8UL);
+
+    CHECK_NOTHROW(disable_vm_control(0ULL, 3ULL, true, name, true));
+    CHECK(g_vmcs_fields[0UL] == 0UL);
+}
+
+TEST_CASE("disable_vm_control_if_allowed")
+{
+    MockRepository mocks;
+    setup_intrinsics(mocks);
+
+    constexpr const auto name = "control";
+    g_vmcs_fields[0UL] = 8UL;
+
+    CHECK_NOTHROW(disable_vm_control_if_allowed(0ULL, 3ULL, false, name, false, false));
+    CHECK(g_vmcs_fields[0UL] == 8UL);
+    CHECK_NOTHROW(disable_vm_control_if_allowed(0ULL, 3ULL, false, name, true, false));
+    CHECK(g_vmcs_fields[0UL] == 8UL);
+
+    CHECK_NOTHROW(disable_vm_control_if_allowed(0ULL, 3ULL, false, name, false, true));
+    CHECK(g_vmcs_fields[0UL] == 8UL);
+    CHECK_NOTHROW(disable_vm_control_if_allowed(0ULL, 3ULL, false, name, true, true));
+    CHECK(g_vmcs_fields[0UL] == 8UL);
+
+    CHECK_NOTHROW(disable_vm_control_if_allowed(0ULL, 3ULL, true, name, false, false));
+    CHECK(g_vmcs_fields[0UL] == 8UL);
+    CHECK_NOTHROW(disable_vm_control_if_allowed(0ULL, 3ULL, true, name, true, false));
+    CHECK(g_vmcs_fields[0UL] == 8UL);
+
+    CHECK_NOTHROW(disable_vm_control_if_allowed(0ULL, 3ULL, true, name, false, true));
+    CHECK(g_vmcs_fields[0UL] == 0UL);
+    CHECK_NOTHROW(disable_vm_control_if_allowed(0ULL, 3ULL, true, name, true, true));
+    CHECK(g_vmcs_fields[0UL] == 0UL);
+}
+
+TEST_CASE("dump_vm_control")
+{
+    MockRepository mocks;
+    setup_intrinsics(mocks);
+
+    constexpr const auto name = "dump";
+    std::string msg = "dump";
+
+    CHECK_NOTHROW(dump_vm_control(0, false, false, false, name, &msg));
+    CHECK_NOTHROW(dump_vm_control(0, false, true, false, name, &msg));
+    CHECK_NOTHROW(dump_vm_control(0, true, false, false, name, &msg));
+    CHECK_NOTHROW(dump_vm_control(0, true, true, false, name, &msg));
 }
 
 TEST_CASE("memory_type_reserved")

@@ -42,6 +42,11 @@ setup_intrinsics(MockRepository &mocks)
     mocks.OnCallFunc(_stop).Do(test_stop);
 }
 
+TEST_CASE("test name goes here")
+{
+    CHECK(true);
+}
+
 TEST_CASE("pm_x64_halt")
 {
     MockRepository mocks;

@@ -67,13 +67,16 @@ TEST_CASE("vmcs_host_ia32_sysenter_cs")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    CHECK(vmcs::host_ia32_sysenter_cs::exists());
+    using namespace vmcs::host_ia32_sysenter_cs;
 
-    vmcs::host_ia32_sysenter_cs::set(42U);
-    CHECK(vmcs::host_ia32_sysenter_cs::get() == 42U);
+    set(100UL);
+    CHECK(get() == 100UL);
+    CHECK(exists());
 
-    vmcs::host_ia32_sysenter_cs::set_if_exists(0x1000U);
-    CHECK(vmcs::host_ia32_sysenter_cs::get_if_exists() == 0x1000U);
+    set_if_exists(200UL);
+    CHECK(get_if_exists() == 200UL);
+
+    dump(0);
 }
 
 #endif

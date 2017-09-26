@@ -64,23 +64,26 @@ TEST_CASE("vmcs_guest_physical_address")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
+    using namespace vmcs::guest_physical_address;
+
     g_msrs[msrs::ia32_vmx_true_procbased_ctls::addr] =
         msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask << 32;
     g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = msrs::ia32_vmx_procbased_ctls2::enable_ept::mask <<
             32;
-    CHECK(vmcs::guest_physical_address::exists());
 
-    g_vmcs_fields[vmcs::guest_physical_address::addr] = 0x1U;
-    CHECK(vmcs::guest_physical_address::get() == 0x1U);
-
-    g_vmcs_fields[vmcs::guest_physical_address::addr] = 0x2U;
-    CHECK(vmcs::guest_physical_address::get_if_exists() == 0x2U);
+    CHECK(exists());
+    g_vmcs_fields[addr] = 100UL;
+    CHECK(get() == 100UL);
+    g_vmcs_fields[addr] = 200UL;
+    CHECK(get_if_exists() == 200UL);
 
     g_msrs[msrs::ia32_vmx_procbased_ctls2::addr] = ~(msrs::ia32_vmx_procbased_ctls2::enable_ept::mask <<
             32);
     CHECK_FALSE(vmcs::guest_physical_address::exists());
     CHECK_THROWS(vmcs::guest_physical_address::get());
     CHECK_NOTHROW(vmcs::guest_physical_address::get_if_exists());
+
+    dump(0);
 }
 
 #endif

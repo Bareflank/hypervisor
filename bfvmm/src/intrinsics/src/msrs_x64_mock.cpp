@@ -29,7 +29,7 @@ _read_msr(uint32_t addr) noexcept
 {
     std::cerr << __BFFUNC__ << " called with: " << '\n';
     std::cerr << "    - msr: " << view_as_pointer(addr) << '\n';
-    abort();
+    return 0;
 }
 
 extern "C" void
@@ -38,5 +38,4 @@ _write_msr(uint32_t addr, uint64_t val) noexcept
     std::cerr << __BFFUNC__ << " called with: " << '\n';
     std::cerr << "    - msr: " << view_as_pointer(addr) << '\n';
     std::cerr << "    - val: " << view_as_pointer(val) << '\n';
-    abort();
 }

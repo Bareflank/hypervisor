@@ -25,6 +25,11 @@
 
 #ifdef _HIPPOMOCKS__ENABLE_CFUNC_MOCKING_SUPPORT
 
+TEST_CASE("test name goes here")
+{
+    CHECK(true);
+}
+
 using namespace intel_x64;
 
 uintptr_t g_region = 0;
@@ -277,7 +282,7 @@ TEST_CASE("vmx_intel_x64_vmread_vmwrite_succcess")
     MockRepository mocks;
     setup_intrinsics(mocks);
 
-    auto val = 10UL;
+    auto val = 10ULL;
 
     CHECK_NOTHROW(vm::write(10U, val));
     CHECK_NOTHROW(val = vm::read(10U));

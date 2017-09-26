@@ -837,6 +837,7 @@ setup_check_control_enable_vm_functions_paths(std::vector<struct control_flow_pa
         proc_ctl2_allow1(ia32_vmx_procbased_ctls2::enable_vm_functions::mask);
         proc_ctl2_allow0(ia32_vmx_procbased_ctls2::enable_ept::mask);
         vmfunc_ctl_allow1(ia32_vmx_vmfunc::eptp_switching::mask);
+        g_msrs[msrs::ia32_vmx_vmfunc::addr] |= (ia32_vmx_vmfunc::eptp_switching::mask << 32);
         vm_function_controls::eptp_switching::enable();
         enable_ept::disable();
     };
@@ -846,16 +847,21 @@ setup_check_control_enable_vm_functions_paths(std::vector<struct control_flow_pa
     path.setup = [&] {
         proc_ctl2_allow1(ia32_vmx_procbased_ctls2::enable_ept::mask);
         enable_ept::enable();
-        eptp_list_address::set_if_exists(1U);
+        secondary_processor_based_vm_execution_controls::enable_ept::enable();
+        eptp_list_address::set_if_exists(0x0000000000000FFFULL);
     };
     path.throws_exception = true;
     cfg.push_back(path);
 
-    path.setup = [&] { eptp_list_address::set(0xff00000000000000U); };
+    path.setup = [&] {
+        eptp_list_address::set_if_exists(0xFFFFFFFFFFFFF000ULL);
+    };
     path.throws_exception = true;
     cfg.push_back(path);
 
-    path.setup = [&] { eptp_list_address::set(0x1000U); };
+    path.setup = [&] {
+        eptp_list_address::set(0x1000U);
+    };
     path.throws_exception = false;
     cfg.push_back(path);
 }
@@ -1088,7 +1094,7 @@ static void
 setup_check_control_event_injection_type_vector_checks_paths(std::vector<struct control_flow_path>
         &cfg)
 {
-    using namespace vm_entry_interruption_information_field;
+    using namespace vm_entry_interruption_information;
 
     path.setup = [&] { set(0UL); };
     path.throws_exception = false;
@@ -1135,7 +1141,7 @@ static void
 setup_check_control_event_injection_delivery_ec_checks_paths(std::vector<struct control_flow_path>
         &cfg)
 {
-    using namespace vm_entry_interruption_information_field;
+    using namespace vm_entry_interruption_information;
 
     path.setup = [&] { valid_bit::disable(); };
     path.throws_exception = false;
@@ -1172,13 +1178,24 @@ setup_check_control_event_injection_delivery_ec_checks_paths(std::vector<struct 
     path.setup = [&] { deliver_error_code_bit::disable(); };
     path.throws_exception = true;
     cfg.push_back(path);
+
+    path.setup = [&] {
+        vector::set(0x18UL);
+        deliver_error_code_bit::enable();
+    };
+    path.throws_exception = true;
+    cfg.push_back(path);
+
+    path.setup = [&] { deliver_error_code_bit::disable(); };
+    path.throws_exception = false;
+    cfg.push_back(path);
 }
 
 static void
 setup_check_control_event_injection_reserved_bits_checks_paths(std::vector<struct control_flow_path>
         &cfg)
 {
-    using namespace vm_entry_interruption_information_field;
+    using namespace vm_entry_interruption_information;
 
     path.setup = [&] { set(0UL); };
     path.throws_exception = false;
@@ -1196,7 +1213,7 @@ setup_check_control_event_injection_reserved_bits_checks_paths(std::vector<struc
 static void
 setup_check_control_event_injection_ec_checks_paths(std::vector<struct control_flow_path> &cfg)
 {
-    using namespace vm_entry_interruption_information_field;
+    using namespace vm_entry_interruption_information;
 
     path.setup = [&] { set(0UL); };
     path.throws_exception = false;
@@ -1222,7 +1239,7 @@ static void
 setup_check_control_event_injection_instr_length_checks_paths(std::vector<struct control_flow_path>
         &cfg)
 {
-    using namespace vm_entry_interruption_information_field;
+    using namespace vm_entry_interruption_information;
 
     path.setup = [&] { set(0UL); };
     path.throws_exception = false;
