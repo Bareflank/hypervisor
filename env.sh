@@ -1,5 +1,3 @@
-#!/bin/sh -e
-#
 # Bareflank Hypervisor
 #
 # Copyright (C) 2015 Assured Information Security, Inc.
@@ -22,7 +20,8 @@
 
 if [[ ! $PATH == *"bfprefix"* ]]; then
 
-    BAREFLANK_SOURCE_DIR="$(cd $(dirname ${BASH_SOURCE[0]}) && pwd)"
+    DIRNAME="$(dirname ${BASH_SOURCE[0]})" || return 1
+    BAREFLANK_SOURCE_DIR="$(cd "$DIRNAME" && pwd)" || return 1
 
     if [[ -z "$1" ]]; then
         BAREFLANK_BINARY_DIR="$BAREFLANK_SOURCE_DIR/build"
@@ -30,16 +29,16 @@ if [[ ! $PATH == *"bfprefix"* ]]; then
         BAREFLANK_BINARY_DIR="$1"
     fi
 
-    if [[ ! -d $BAREFLANK_BINARY_DIR ]]; then
+    if [[ ! -d "$BAREFLANK_BINARY_DIR" ]]; then
         >&2 echo "$BAREFLANK_BINARY_DIR does not exist, creating it"
-        mkdir -p $BAREFLANK_BINARY_DIR
+        mkdir -p "$BAREFLANK_BINARY_DIR" || return 1
     fi
 
     export CTEST_OUTPUT_ON_FAILURE=yes
     export PATH="$BAREFLANK_BINARY_DIR/bfprefix/bin:$PATH"
 
-    alias s='cd $BAREFLANK_SOURCE_DIR'
-    alias b='cd $BAREFLANK_BINARY_DIR'
+    alias s='cd "$BAREFLANK_SOURCE_DIR"'
+    alias b='cd "$BAREFLANK_BINARY_DIR"'
 
 else
     >&2 echo "bareflank environment already sourced"
