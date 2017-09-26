@@ -20,7 +20,7 @@
 
 if [[ ! $PATH == *"bfprefix"* ]]; then
 
-    DIRNAME="$(dirname ${BASH_SOURCE[0]})" || return 1
+    DIRNAME="$(dirname "${BASH_SOURCE[0]}")" || return 1
     BAREFLANK_SOURCE_DIR="$(cd "$DIRNAME" && pwd)" || return 1
 
     if [[ -z "$1" ]]; then
