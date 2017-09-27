@@ -28,7 +28,6 @@ source $(dirname $0)/setup_common.sh
 
 check_distro arch
 check_folder
-check_hardware
 
 # ------------------------------------------------------------------------------
 # Parse Arguments
@@ -58,12 +57,6 @@ install_common_packages() {
     sudo pacman -S --needed --noconfirm clang
     sudo pacman -S --needed --noconfirm texinfo
     sudo pacman -S --needed --noconfirm cmake
-    sudo pacman -S --needed --noconfirm docker
-}
-
-prepare_docker() {
-    sudo usermod -a -G docker $USER
-    sudo systemctl restart docker
 }
 
 # ------------------------------------------------------------------------------
@@ -74,7 +67,6 @@ case $( grep ^ID_LIKE= /etc/os-release | cut -d'=' -f 2 ) in
 archlinux)
     install_pacman_tools
     install_common_packages
-    prepare_docker
     ;;
 
 *)
