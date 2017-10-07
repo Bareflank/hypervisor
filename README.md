@@ -1,7 +1,7 @@
 ![Bareflank](https://raw.githubusercontent.com/Bareflank/hypervisor/master/doc/images/bareflank_logo.jpg)
 <br>
 <br>
-<br>
+
 [![GitHub Version](https://badge.fury.io/gh/bareflank%2Fhypervisor.svg)](https://badge.fury.io/gh/bareflank%2Fhypervisor)
 [![Build Status](https://travis-ci.org/Bareflank/hypervisor.svg?branch=master)](https://travis-ci.org/Bareflank/hypervisor)
 [![Build Status](https://ci.appveyor.com/api/projects/status/r82c37nc634tnsv9/branch/master?svg=true)](https://ci.appveyor.com/project/rianquinn/hypervisor-13oyg/branch/master)
