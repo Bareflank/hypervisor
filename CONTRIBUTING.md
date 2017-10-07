@@ -1,3 +1,6 @@
+## Contributors License Agreement
+To get started, <a href="https://www.clahub.com/agreements/Bareflank/hypervisor">sign the Contributor License Agreement</a>.
+
 ## Forking
 
 Before you can contribute, you must fork the repo that you wish to contribute to. GitHub already has great documentation on how to fork a repo, make a modification, and create a pull request. If you are not familiar with this process, please read the following before continuing:
