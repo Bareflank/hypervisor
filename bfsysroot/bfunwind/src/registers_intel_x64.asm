@@ -1,9 +1,6 @@
 ;
 ; Bareflank Unwind Library
-;
 ; Copyright (C) 2015 Assured Information Security, Inc.
-; Author: Rian Quinn        <quinnr@ainfosec.com>
-; Author: Brendan Kerrigan  <kerriganb@ainfosec.com>
 ;
 ; This library is free software; you can redistribute it and/or
 ; modify it under the terms of the GNU Lesser General Public

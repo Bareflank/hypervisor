@@ -1,9 +1,6 @@
 //
 // Bareflank Hypervisor
-//
 // Copyright (C) 2015 Assured Information Security, Inc.
-// Author: Rian Quinn        <quinnr@ainfosec.com>
-// Author: Brendan Kerrigan  <kerriganb@ainfosec.com>
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -22,10 +19,6 @@
 #include <catch/catch.hpp>
 #include <intrinsics/x86/common_x64.h>
 #include <intrinsics/x86/intel_x64.h>
-//#include <intrinsics/x86/common/cpuid_x64.h>
-//#include <intrinsics/x86/intel/crs_intel_x64.h>
-//#include <intrinsics/x86/common/debug_x64.h>
-//#include <intrinsics/x86/common/gdt_x64.h>
 
 TEST_CASE("cache_mock_invd")
 {
