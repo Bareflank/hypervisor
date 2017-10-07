@@ -246,15 +246,6 @@ https://github.com/Bareflank/hypervisor_example_msr_bitmap
 **Extended APIs EPT Hook:**<br>
 https://github.com/Bareflank/extended_apis_example_hook
 
-## Roadmap
-
-The project roadmap can be located [here](https://github.com/Bareflank/hypervisor/projects)
-
-## License
-
-The Bareflank Hypervisor is licensed under the GNU Lesser General Public License
-v2.1 (LGPL).
-
 ## Related
 
 If you’re interested in Bareflank, you might also be interested in the
