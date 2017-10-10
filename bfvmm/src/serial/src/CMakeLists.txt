@@ -23,7 +23,7 @@ include(${CMAKE_INSTALL_PREFIX}/cmake/CMakeGlobal_Includes.txt)
 # ------------------------------------------------------------------------------
 
 list(APPEND SOURCES
-    serial_port_intel_x64.cpp
+    serial_port_ns16550a.cpp
 )
 
 if(BUILD_SHARED_LIBS)
