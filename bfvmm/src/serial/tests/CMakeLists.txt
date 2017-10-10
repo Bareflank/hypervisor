@@ -32,4 +32,4 @@ macro(do_test str)
     add_test(test_${str} test_${str})
 endmacro(do_test)
 
-do_test(serial_port_intel_x64)
+do_test(serial_port_ns16550a)

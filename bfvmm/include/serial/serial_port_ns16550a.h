@@ -52,7 +52,7 @@
 
 /// @cond
 
-namespace serial_intel_x64
+namespace serial_ns16550a
 {
 
 constexpr const x64::portio::port_8bit_type dlab = 1U << 7;
@@ -103,7 +103,7 @@ constexpr const x64::portio::port_8bit_type line_control_parity_mask = 0x38;
 /// Also note, that by default, a FIFO is used / required, and interrupts are
 /// disabled.
 ///
-class EXPORT_SERIAL serial_port_intel_x64
+class EXPORT_SERIAL serial_port_ns16550a
 {
 public:
 
@@ -166,14 +166,14 @@ public:
     ///
     /// @param port the serial port to connect to
     ///
-    serial_port_intel_x64(port_type port = DEFAULT_COM_PORT) noexcept;
+    serial_port_ns16550a(port_type port = DEFAULT_COM_PORT) noexcept;
 
     /// Destructor
     ///
     /// @expects none
     /// @ensures none
     ///
-    ~serial_port_intel_x64() = default;
+    ~serial_port_ns16550a() = default;
 
     /// Get Instance
     ///
@@ -182,9 +182,9 @@ public:
     /// @expects none
     /// @ensures ret != nullptr
     ///
-    /// @return a singleton instance of serial_port_intel_x64
+    /// @return a singleton instance of serial_port_ns16550a
     ///
-    static serial_port_intel_x64 *instance() noexcept;
+    static serial_port_ns16550a *instance() noexcept;
 
     /// Set Baud Rate
     ///
@@ -335,11 +335,11 @@ public:
 
     /// @cond
 
-    serial_port_intel_x64(serial_port_intel_x64 &&) noexcept = default;
-    serial_port_intel_x64 &operator=(serial_port_intel_x64 &&) noexcept = default;
+    serial_port_ns16550a(serial_port_ns16550a &&) noexcept = default;
+    serial_port_ns16550a &operator=(serial_port_ns16550a &&) noexcept = default;
 
-    serial_port_intel_x64(const serial_port_intel_x64 &) = delete;
-    serial_port_intel_x64 &operator=(const serial_port_intel_x64 &) = delete;
+    serial_port_ns16550a(const serial_port_ns16550a &) = delete;
+    serial_port_ns16550a &operator=(const serial_port_ns16550a &) = delete;
 
     /// @endcond
 };

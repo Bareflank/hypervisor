@@ -20,7 +20,7 @@
 #include <bfexports.h>
 
 #include <debug_ring/debug_ring.h>
-#include <serial/serial_port_intel_x64.h>
+#include <serial/serial_port_ns16550a.h>
 
 #include <mutex>
 std::mutex g_write_mutex;
@@ -43,7 +43,7 @@ write_str(const std::string &str)
         std::lock_guard<std::mutex> guard(g_write_mutex);
 
         g_debug_ring()->write(str);
-        serial_port_intel_x64::instance()->write(str);
+        serial_port_ns16550a::instance()->write(str);
 
         return str.length();
     }

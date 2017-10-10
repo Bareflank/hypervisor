@@ -270,7 +270,7 @@
  *    - 0xE000U
  *    - 0xE010U
  *
- * Note: See bfvmm/serial/serial_port_intel_x64.h
+ * Note: See bfvmm/serial/serial_port_ns16550a.h
  */
 #ifndef DEFAULT_COM_PORT
 #define DEFAULT_COM_PORT 0x3F8U
@@ -279,7 +279,7 @@
 /*
  * Default Serial Baud Rate
  *
- * Note: See bfvmm/serial/serial_port_intel_x64.h
+ * Note: See bfvmm/serial/serial_port_ns16550a.h
  */
 #ifndef DEFAULT_BAUD_RATE
 #define DEFAULT_BAUD_RATE baud_rate_115200
@@ -288,7 +288,7 @@
 /*
  * Default Serial Data Bits
  *
- * Note: See bfvmm/serial/serial_port_intel_x64.h
+ * Note: See bfvmm/serial/serial_port_ns16550a.h
  */
 #ifndef DEFAULT_DATA_BITS
 #define DEFAULT_DATA_BITS char_length_8
@@ -297,7 +297,7 @@
 /*
  * Default Serial Stop Bits
  *
- * Note: See bfvmm/serial/serial_port_intel_x64.h
+ * Note: See bfvmm/serial/serial_port_ns16550a.h
  */
 #ifndef DEFAULT_STOP_BITS
 #define DEFAULT_STOP_BITS stop_bits_1
@@ -306,7 +306,7 @@
 /*
  * Default Serial Parity Bits
  *
- * Note: See bfvmm/serial/serial_port_intel_x64.h
+ * Note: See bfvmm/serial/serial_port_ns16550a.h
  */
 #ifndef DEFAULT_PARITY_BITS
 #define DEFAULT_PARITY_BITS parity_none
