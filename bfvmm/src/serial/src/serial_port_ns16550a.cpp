@@ -17,16 +17,16 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #include <bfgsl.h>
-#include <serial/serial_port_intel_x64.h>
+#include <serial/serial_port_ns16550a.h>
 
 using namespace x64;
 using namespace portio;
-using namespace serial_intel_x64;
+using namespace serial_ns16550a;
 
-serial_port_intel_x64::serial_port_intel_x64(serial_port_intel_x64::port_type port) noexcept :
+serial_port_ns16550a::serial_port_ns16550a(serial_port_ns16550a::port_type port) noexcept :
     m_port(port)
 {
-    serial_port_intel_x64::value_type bits = 0;
+    serial_port_ns16550a::value_type bits = 0;
 
     this->disable_dlab();
 
@@ -43,15 +43,15 @@ serial_port_intel_x64::serial_port_intel_x64(serial_port_intel_x64::port_type po
     this->set_parity_bits(DEFAULT_PARITY_BITS);
 }
 
-serial_port_intel_x64 *
-serial_port_intel_x64::instance() noexcept
+serial_port_ns16550a *
+serial_port_ns16550a::instance() noexcept
 {
-    static serial_port_intel_x64 serial{};
+    static serial_port_ns16550a serial{};
     return &serial;
 }
 
 void
-serial_port_intel_x64::set_baud_rate(baud_rate_t rate) noexcept
+serial_port_ns16550a::set_baud_rate(baud_rate_t rate) noexcept
 {
     auto lsb = (rate & 0x000000FF) >> 0;
     auto msb = (rate & 0x0000FF00) >> 8;
@@ -64,8 +64,8 @@ serial_port_intel_x64::set_baud_rate(baud_rate_t rate) noexcept
     this->disable_dlab();
 }
 
-serial_port_intel_x64::baud_rate_t
-serial_port_intel_x64::baud_rate() const noexcept
+serial_port_ns16550a::baud_rate_t
+serial_port_ns16550a::baud_rate() const noexcept
 {
     this->enable_dlab();
 
@@ -115,7 +115,7 @@ serial_port_intel_x64::baud_rate() const noexcept
 }
 
 void
-serial_port_intel_x64::set_data_bits(data_bits_t bits) noexcept
+serial_port_ns16550a::set_data_bits(data_bits_t bits) noexcept
 {
     auto reg = portio::inb(gsl::narrow_cast<port_addr_type>(m_port + line_control_reg));
 
@@ -125,8 +125,8 @@ serial_port_intel_x64::set_data_bits(data_bits_t bits) noexcept
     portio::outb(gsl::narrow_cast<port_addr_type>(m_port + line_control_reg), reg);
 }
 
-serial_port_intel_x64::data_bits_t
-serial_port_intel_x64::data_bits() const noexcept
+serial_port_ns16550a::data_bits_t
+serial_port_ns16550a::data_bits() const noexcept
 {
     auto reg = portio::inb(gsl::narrow_cast<port_addr_type>(m_port + line_control_reg));
 
@@ -143,7 +143,7 @@ serial_port_intel_x64::data_bits() const noexcept
 }
 
 void
-serial_port_intel_x64::set_stop_bits(stop_bits_t bits) noexcept
+serial_port_ns16550a::set_stop_bits(stop_bits_t bits) noexcept
 {
     auto reg = portio::inb(gsl::narrow_cast<port_addr_type>(m_port + line_control_reg));
 
@@ -153,8 +153,8 @@ serial_port_intel_x64::set_stop_bits(stop_bits_t bits) noexcept
     portio::outb(gsl::narrow_cast<port_addr_type>(m_port + line_control_reg), reg);
 }
 
-serial_port_intel_x64::stop_bits_t
-serial_port_intel_x64::stop_bits() const noexcept
+serial_port_ns16550a::stop_bits_t
+serial_port_ns16550a::stop_bits() const noexcept
 {
     auto reg = portio::inb(gsl::narrow_cast<port_addr_type>(m_port + line_control_reg));
 
@@ -167,7 +167,7 @@ serial_port_intel_x64::stop_bits() const noexcept
 }
 
 void
-serial_port_intel_x64::set_parity_bits(parity_bits_t bits) noexcept
+serial_port_ns16550a::set_parity_bits(parity_bits_t bits) noexcept
 {
     auto reg = portio::inb(gsl::narrow_cast<port_addr_type>(m_port + line_control_reg));
 
@@ -177,8 +177,8 @@ serial_port_intel_x64::set_parity_bits(parity_bits_t bits) noexcept
     portio::outb(gsl::narrow_cast<port_addr_type>(m_port + line_control_reg), reg);
 }
 
-serial_port_intel_x64::parity_bits_t
-serial_port_intel_x64::parity_bits() const noexcept
+serial_port_ns16550a::parity_bits_t
+serial_port_ns16550a::parity_bits() const noexcept
 {
     auto reg = portio::inb(gsl::narrow_cast<port_addr_type>(m_port + line_control_reg));
 
@@ -197,7 +197,7 @@ serial_port_intel_x64::parity_bits() const noexcept
 }
 
 void
-serial_port_intel_x64::write(char c) noexcept
+serial_port_ns16550a::write(char c) noexcept
 {
     while (!get_line_status_empty_transmitter())
     { }
@@ -206,7 +206,7 @@ serial_port_intel_x64::write(char c) noexcept
 }
 
 void
-serial_port_intel_x64::write(const std::string &str) noexcept
+serial_port_ns16550a::write(const std::string &str) noexcept
 {
     for (auto c : str) {
         this->write(c);
@@ -214,7 +214,7 @@ serial_port_intel_x64::write(const std::string &str) noexcept
 }
 
 void
-serial_port_intel_x64::write(const char *str, size_t len) noexcept
+serial_port_ns16550a::write(const char *str, size_t len) noexcept
 {
     gsl::cstring_span<> span(str, gsl::narrow_cast<std::ptrdiff_t>(len));
 
@@ -224,7 +224,7 @@ serial_port_intel_x64::write(const char *str, size_t len) noexcept
 }
 
 void
-serial_port_intel_x64::enable_dlab() const noexcept
+serial_port_ns16550a::enable_dlab() const noexcept
 {
     auto reg = portio::inb(gsl::narrow_cast<port_addr_type>(m_port + line_control_reg));
     reg = reg | gsl::narrow_cast<decltype(reg)>(dlab);
@@ -232,7 +232,7 @@ serial_port_intel_x64::enable_dlab() const noexcept
 }
 
 void
-serial_port_intel_x64::disable_dlab() const noexcept
+serial_port_ns16550a::disable_dlab() const noexcept
 {
     auto reg = portio::inb(gsl::narrow_cast<port_addr_type>(m_port + line_control_reg));
     reg = reg & gsl::narrow_cast<decltype(reg)>(~(dlab));
@@ -240,7 +240,7 @@ serial_port_intel_x64::disable_dlab() const noexcept
 }
 
 bool
-serial_port_intel_x64::get_line_status_empty_transmitter() const noexcept
+serial_port_ns16550a::get_line_status_empty_transmitter() const noexcept
 {
     return (portio::inb(gsl::narrow_cast<port_addr_type>(m_port + line_status_reg)) & line_status_empty_transmitter) != 0;
 }
