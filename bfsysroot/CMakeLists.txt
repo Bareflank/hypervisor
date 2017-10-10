@@ -19,8 +19,6 @@
 cmake_minimum_required(VERSION 3.6)
 project(bfsysroot C CXX)
 
-set(DISABLE_OPTIONS ON)
-set(DISABLE_TARGETS ON)
 set(DISABLE_WARNINGS ON)
 set(DISABLE_VISIBILITY_HIDDEN ON)
 
