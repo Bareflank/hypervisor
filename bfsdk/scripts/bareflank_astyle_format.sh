@@ -19,6 +19,10 @@
 
 OUTPUT=$PWD/.astyle_results.txt
 
+ls_not_deleted() {
+    git ls-files | sort | comm -23 - <( git ls-files -d | sort )
+}
+
 rm -f $OUTPUT
 
 if [[ "$#" -lt 1 ]]; then
@@ -37,7 +41,7 @@ if [[ ! "$1" == "all" ]] && [[ ! "$1" == "diff" ]]; then
 fi
 
 if [[ "$1" == "all" ]]; then
-    files=$(git ls-files | grep -Ee "\.(cpp|h|c)$" || true)
+    files=$(ls_not_deleted | grep -Ee "\.(cpp|h|c)$" || true)
 else
     files=$(git diff --relative --name-only HEAD $PWD | grep -Ee "\.(cpp|h|c)$" || true)
 

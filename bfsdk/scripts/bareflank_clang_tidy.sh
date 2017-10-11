@@ -66,10 +66,14 @@
 OUTPUT=$PWD/.clang_tidy_results.txt
 NUM_CORES=$(grep -c ^processor /proc/cpuinfo)
 
+ls_not_deleted() {
+    git ls-files | sort | comm -23 - <( git ls-files -d | sort )
+}
+
 get_changed_files() {
     pushd $2 > /dev/null
     if [[ "$1" == "all" ]]; then
-        files=$(git ls-files | grep -Ee "\.(cpp|h|c)$" || true)
+        files=$(ls_not_deleted | grep -Ee "\.(cpp|h|c)$" || true)
     else
         files=$(git diff --relative --name-only HEAD $PWD | grep -Ee "\.(cpp|h|c)$" || true)
     fi
