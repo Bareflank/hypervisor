@@ -32,15 +32,17 @@ if(ENABLE_UNITTESTING)
     enable_testing(true)
 endif()
 
-if(ENABLE_TIDY AND NOT WIN32)
-    set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+if(ENABLE_DEPEND_UPDATES)
+    set_property(GLOBAL PROPERTY EP_UPDATE_DISCONNECTED OFF)
+else()
+    set_property(GLOBAL PROPERTY EP_UPDATE_DISCONNECTED ON)
 endif()
 
 # ------------------------------------------------------------------------------
 # OS
 # ------------------------------------------------------------------------------
 
-# TODO: Use CMAKE_SYSTEM_NAME to detect your host OS, and allow for build
+# TODO: Use CMAKE_HOST_SYSTEM_NAME to detect your host OS, and allow for build
 # configuration files to override the target OS
 execute_process(COMMAND uname -o OUTPUT_VARIABLE UNAME OUTPUT_STRIP_TRAILING_WHITESPACE)
 if(UNAME STREQUAL "Cygwin" OR WIN32)
@@ -53,8 +55,9 @@ else()
 endif()
 
 # TODO: All NASM configuration will be moved into x86_64 toolchain files
-# execute_process(COMMAND ${NASM_BIN} -v OUTPUT_VARIABLE NASM_ID OUTPUT_STRIP_TRAILING_WHITESPACE)
-# set(CMAKE_ASM_NASM_COMPILER_ID ${NASM_ID})
+find_program(NASM_BIN nasm)
+execute_process(COMMAND ${NASM_BIN} -v OUTPUT_VARIABLE NASM_ID OUTPUT_STRIP_TRAILING_WHITESPACE)
+set(CMAKE_ASM_NASM_COMPILER_ID ${NASM_ID})
 if(CMAKE_TOOLCHAIN_FILE)
     set(CMAKE_ASM_NASM_OBJECT_FORMAT "elf64")
 endif()

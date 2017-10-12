@@ -23,12 +23,6 @@ include(${CMAKE_SOURCE_DIR}/scripts/cmake/global_vars.cmake)
 include(${CMAKE_SOURCE_DIR}/scripts/cmake/config/default.cmake)
 include(${CMAKE_SOURCE_DIR}/bfsdk/cmake/CMakeGlobal_Project.txt)
 
-if(ENABLE_DEPEND_UPDATES)
-    set(EP_UPDATE_DISCONNECTED OFF)
-else()
-    set(EP_UPDATE_DISCONNECTED ON)
-endif()
-
 set(BAREFLANK_INSTALL_TEST_PREFIX ${CMAKE_BINARY_DIR}/bfprefix_test)
 
 if(EXTENDED_APIS_PATH)
@@ -210,6 +204,8 @@ if(NOT WIN32)
         SOURCE_DIR          ${CMAKE_BINARY_DIR}/external/binutils/src
         BINARY_DIR          ${CMAKE_BINARY_DIR}/external/binutils/build
         CONFIGURE_COMMAND   ${CMAKE_BINARY_DIR}/external/binutils/src/configure ${BINUTILS_ARGS}
+        UPDATE_DISCONNECTED 0
+        UPDATE_COMMAND      ""
         BUILD_COMMAND       make
         INSTALL_COMMAND     make install
         LOG_DOWNLOAD        1
@@ -253,7 +249,8 @@ ExternalProject_Add(
     DOWNLOAD_DIR        ${CMAKE_BINARY_DIR}/bfsdk/download
     SOURCE_DIR          ${CMAKE_SOURCE_DIR}/bfsdk
     BINARY_DIR          ${CMAKE_BINARY_DIR}/bfsdk/build
-    UPDATE_COMMAND      ${CMAKE_COMMAND} -E echo "checking for updates"
+    UPDATE_DISCONNECTED 0
+    UPDATE_COMMAND      ""
     BUILD_COMMAND       ""
 )
 
@@ -322,8 +319,9 @@ if(NOT WIN32)
         DOWNLOAD_DIR        ${CMAKE_BINARY_DIR}/bfsysroot/download
         SOURCE_DIR          ${CMAKE_SOURCE_DIR}/bfsysroot
         BINARY_DIR          ${CMAKE_BINARY_DIR}/bfsysroot/build
-        UPDATE_COMMAND      ${CMAKE_COMMAND} -E echo "checking for updates"
         INSTALL_COMMAND     ""
+        UPDATE_DISCONNECTED 0
+        UPDATE_COMMAND      ""
         DEPENDS             bfsdk newlib llvm libcxx libcxxabi binutils
     )
 
@@ -354,7 +352,6 @@ if(ENABLE_UNITTESTING)
         DOWNLOAD_DIR        ${CMAKE_BINARY_DIR}/test_bfsysroot/download
         SOURCE_DIR          ${CMAKE_SOURCE_DIR}/bfsysroot
         BINARY_DIR          ${CMAKE_BINARY_DIR}/test_bfsysroot/build
-        UPDATE_COMMAND      ${CMAKE_COMMAND} -E echo "checking for updates"
         INSTALL_COMMAND     ""
         DEPENDS             bfsdk
     )
@@ -389,7 +386,8 @@ ExternalProject_Add(
     DOWNLOAD_DIR        ${CMAKE_BINARY_DIR}/bfelf_loader/download
     SOURCE_DIR          ${CMAKE_SOURCE_DIR}/bfelf_loader
     BINARY_DIR          ${CMAKE_BINARY_DIR}/bfelf_loader/build
-    UPDATE_COMMAND      ${CMAKE_COMMAND} -E echo "checking for updates"
+    UPDATE_DISCONNECTED 0
+    UPDATE_COMMAND      ""
     BUILD_COMMAND       ""
     DEPENDS             bfsdk
 )
@@ -430,7 +428,8 @@ ExternalProject_Add(
     DOWNLOAD_DIR        ${CMAKE_BINARY_DIR}/bfm/download
     SOURCE_DIR          ${CMAKE_SOURCE_DIR}/bfm
     BINARY_DIR          ${CMAKE_BINARY_DIR}/bfm/build
-    UPDATE_COMMAND      ${CMAKE_COMMAND} -E echo "checking for updates"
+    UPDATE_DISCONNECTED 0
+    UPDATE_COMMAND      ""
     BUILD_COMMAND       ""
     DEPENDS             bfelf_loader
 )
@@ -465,7 +464,8 @@ if(NOT WIN32)
         DOWNLOAD_DIR        ${CMAKE_BINARY_DIR}/bfvmm/download
         SOURCE_DIR          ${CMAKE_SOURCE_DIR}/bfvmm
         BINARY_DIR          ${CMAKE_BINARY_DIR}/bfvmm/build
-        UPDATE_COMMAND      ${CMAKE_COMMAND} -E echo "checking for updates"
+        UPDATE_DISCONNECTED 0
+        UPDATE_COMMAND      ""
         BUILD_COMMAND       ""
         DEPENDS             bfsysroot
     )
@@ -497,7 +497,8 @@ if(ENABLE_UNITTESTING)
         DOWNLOAD_DIR        ${CMAKE_BINARY_DIR}/test_bfvmm/download
         SOURCE_DIR          ${CMAKE_SOURCE_DIR}/bfvmm
         BINARY_DIR          ${CMAKE_BINARY_DIR}/test_bfvmm/build
-        UPDATE_COMMAND      ${CMAKE_COMMAND} -E echo "checking for updates"
+        UPDATE_DISCONNECTED 0
+        UPDATE_COMMAND      ""
         BUILD_COMMAND       ""
         DEPENDS             bfsdk
     )
@@ -532,7 +533,8 @@ ExternalProject_Add(
     DOWNLOAD_DIR        ${CMAKE_BINARY_DIR}/bfdriver/download
     SOURCE_DIR          ${CMAKE_SOURCE_DIR}/bfdriver
     BINARY_DIR          ${CMAKE_BINARY_DIR}/bfdriver/build
-    UPDATE_COMMAND      ${CMAKE_COMMAND} -E echo "checking for updates"
+    UPDATE_DISCONNECTED 0
+    UPDATE_COMMAND      ""
     INSTALL_COMMAND     ""
     DEPENDS             bfelf_loader
 )
@@ -593,7 +595,8 @@ if(ENABLE_EXTENDED_APIS)
             DOWNLOAD_DIR        ${CMAKE_BINARY_DIR}/extended_apis/download
             SOURCE_DIR          ${EXTENDED_APIS_PATH}
             BINARY_DIR          ${CMAKE_BINARY_DIR}/extended_apis/build
-            UPDATE_COMMAND      ${CMAKE_COMMAND} -E echo "checking for updates"
+            UPDATE_DISCONNECTED 0
+            UPDATE_COMMAND      ""
             BUILD_COMMAND       ""
             DEPENDS             bfvmm
         )
@@ -626,7 +629,8 @@ if(ENABLE_EXTENDED_APIS)
             DOWNLOAD_DIR        ${CMAKE_BINARY_DIR}/test_extended_apis/download
             SOURCE_DIR          ${EXTENDED_APIS_PATH}
             BINARY_DIR          ${CMAKE_BINARY_DIR}/test_extended_apis/build
-            UPDATE_COMMAND      ${CMAKE_COMMAND} -E echo "checking for updates"
+            UPDATE_DISCONNECTED 0
+            UPDATE_COMMAND      ""
             BUILD_COMMAND       ""
             DEPENDS             test_bfvmm
         )
