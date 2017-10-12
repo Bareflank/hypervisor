@@ -286,6 +286,24 @@
 #endif
 
 /*
+ * Default serial baud rate divisor, integer part (for PL011)
+ *
+ * Note: See bfvmm/serial/serial_port_pl011.h
+ */
+#ifndef DEFAULT_BAUD_RATE_INT
+#define DEFAULT_BAUD_RATE_INT 0x4
+#endif
+
+/*
+ * Default serial baud rate divisor, fractional part (for PL011)
+ *
+ * Note: See bfvmm/serial/serial_port_pl011.h
+ */
+#ifndef DEFAULT_BAUD_RATE_FRAC
+#define DEFAULT_BAUD_RATE_FRAC 0x0
+#endif
+
+/*
  * Default Serial Data Bits
  *
  * Note: See bfvmm/serial/serial_port_ns16550a.h
