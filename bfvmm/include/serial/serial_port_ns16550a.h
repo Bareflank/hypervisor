@@ -16,14 +16,14 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#ifndef SERIAL_PORT_INTEL_X64_H
-#define SERIAL_PORT_INTEL_X64_H
+#ifndef SERIAL_PORT_NS16550A_H
+#define SERIAL_PORT_NS16550A_H
 
 #include <string>
 #include <memory>
 
 #include <bfconstants.h>
-#include <intrinsics/x86/common_x64.h>
+#include <intrinsics/common.h>
 
 // -----------------------------------------------------------------------------
 // Exports
@@ -55,32 +55,32 @@
 namespace serial_ns16550a
 {
 
-constexpr const x64::portio::port_8bit_type dlab = 1U << 7;
+constexpr const intrinsics::portio::port_8bit_type dlab = 1U << 7;
 
-constexpr const x64::portio::port_addr_type baud_rate_lo_reg = 0U;
-constexpr const x64::portio::port_addr_type baud_rate_hi_reg = 1U;
-constexpr const x64::portio::port_addr_type interrupt_en_reg = 1U;
-constexpr const x64::portio::port_addr_type fifo_control_reg = 2U;
-constexpr const x64::portio::port_addr_type line_control_reg = 3U;
-constexpr const x64::portio::port_addr_type line_status_reg = 5U;
+constexpr const intrinsics::portio::port_addr_type baud_rate_lo_reg = 0U;
+constexpr const intrinsics::portio::port_addr_type baud_rate_hi_reg = 1U;
+constexpr const intrinsics::portio::port_addr_type interrupt_en_reg = 1U;
+constexpr const intrinsics::portio::port_addr_type fifo_control_reg = 2U;
+constexpr const intrinsics::portio::port_addr_type line_control_reg = 3U;
+constexpr const intrinsics::portio::port_addr_type line_status_reg = 5U;
 
-constexpr const x64::portio::port_8bit_type fifo_control_enable_fifos = 1U << 0;
-constexpr const x64::portio::port_8bit_type fifo_control_clear_recieve_fifo = 1U << 1;
-constexpr const x64::portio::port_8bit_type fifo_control_clear_transmit_fifo = 1U << 2;
-constexpr const x64::portio::port_8bit_type fifo_control_dma_mode_select = 1U << 3;
+constexpr const intrinsics::portio::port_8bit_type fifo_control_enable_fifos = 1U << 0;
+constexpr const intrinsics::portio::port_8bit_type fifo_control_clear_recieve_fifo = 1U << 1;
+constexpr const intrinsics::portio::port_8bit_type fifo_control_clear_transmit_fifo = 1U << 2;
+constexpr const intrinsics::portio::port_8bit_type fifo_control_dma_mode_select = 1U << 3;
 
-constexpr const x64::portio::port_8bit_type line_status_data_ready = 1U << 0;
-constexpr const x64::portio::port_8bit_type line_status_overrun_error = 1U << 1;
-constexpr const x64::portio::port_8bit_type line_status_parity_error = 1U << 2;
-constexpr const x64::portio::port_8bit_type line_status_framing_error = 1U << 3;
-constexpr const x64::portio::port_8bit_type line_status_break_interrupt = 1U << 4;
-constexpr const x64::portio::port_8bit_type line_status_empty_transmitter = 1U << 5;
-constexpr const x64::portio::port_8bit_type line_status_empty_data = 1U << 6;
-constexpr const x64::portio::port_8bit_type line_status_recieved_fifo_error = 1U << 7;
+constexpr const intrinsics::portio::port_8bit_type line_status_data_ready = 1U << 0;
+constexpr const intrinsics::portio::port_8bit_type line_status_overrun_error = 1U << 1;
+constexpr const intrinsics::portio::port_8bit_type line_status_parity_error = 1U << 2;
+constexpr const intrinsics::portio::port_8bit_type line_status_framing_error = 1U << 3;
+constexpr const intrinsics::portio::port_8bit_type line_status_break_interrupt = 1U << 4;
+constexpr const intrinsics::portio::port_8bit_type line_status_empty_transmitter = 1U << 5;
+constexpr const intrinsics::portio::port_8bit_type line_status_empty_data = 1U << 6;
+constexpr const intrinsics::portio::port_8bit_type line_status_recieved_fifo_error = 1U << 7;
 
-constexpr const x64::portio::port_8bit_type line_control_data_mask = 0x03;
-constexpr const x64::portio::port_8bit_type line_control_stop_mask = 0x04;
-constexpr const x64::portio::port_8bit_type line_control_parity_mask = 0x38;
+constexpr const intrinsics::portio::port_8bit_type line_control_data_mask = 0x03;
+constexpr const intrinsics::portio::port_8bit_type line_control_stop_mask = 0x04;
+constexpr const intrinsics::portio::port_8bit_type line_control_parity_mask = 0x38;
 
 }
 
@@ -90,7 +90,7 @@ constexpr const x64::portio::port_8bit_type line_control_parity_mask = 0x38;
 // Definitions
 // -----------------------------------------------------------------------------
 
-/// Serial Port (Intel x64)
+/// Serial Port (NatSemi 16550A and compatible)
 ///
 /// This class implements the serial device for Intel specific archiectures.
 /// All of the serial devices start off with the same default settings (minus
@@ -107,8 +107,8 @@ class EXPORT_SERIAL serial_port_ns16550a
 {
 public:
 
-    using port_type = x64::portio::port_addr_type;          ///< Port type
-    using value_type = x64::portio::port_8bit_type;         ///< Value type
+    using port_type = intrinsics::portio::port_addr_type;          ///< Port type
+    using value_type = intrinsics::portio::port_8bit_type;         ///< Value type
 
 public:
 

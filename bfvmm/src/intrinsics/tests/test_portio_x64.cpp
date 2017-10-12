@@ -23,7 +23,7 @@
 
 #ifdef _HIPPOMOCKS__ENABLE_CFUNC_MOCKING_SUPPORT
 
-using namespace x64;
+using namespace intrinsics;
 
 TEST_CASE("test name goes here")
 {

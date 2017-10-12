@@ -19,7 +19,7 @@
 #include <bfgsl.h>
 #include <serial/serial_port_ns16550a.h>
 
-using namespace x64;
+using namespace intrinsics;
 using namespace portio;
 using namespace serial_ns16550a;
 
