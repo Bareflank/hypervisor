@@ -176,6 +176,7 @@ install(FILES cmake/CMakeToolchain_VMM_38.txt DESTINATION cmake)
 install(FILES cmake/CMakeToolchain_VMM_39.txt DESTINATION cmake)
 install(FILES cmake/CMakeToolchain_VMM_40.txt DESTINATION cmake)
 
+install(FILES include/bfarch.h DESTINATION include)
 install(FILES include/bfaffinity.h DESTINATION include)
 install(FILES include/bfbenchmark.h DESTINATION include)
 install(FILES include/bfbitmanip.h DESTINATION include)
