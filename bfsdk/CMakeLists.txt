@@ -209,6 +209,7 @@ install(FILES include/bfvmcallinterface.h DESTINATION include)
 install(FILES src/bfvmcall_intel_x64.asm DESTINATION src)
 
 install(PROGRAMS scripts/bareflank_astyle_format.sh DESTINATION bin)
+install(PROGRAMS scripts/bareflank_blank_lines.sh DESTINATION bin)
 install(PROGRAMS scripts/bareflank_clang_tidy.sh DESTINATION bin)
 install(PROGRAMS scripts/compiler_wrapper.sh DESTINATION bin)
 

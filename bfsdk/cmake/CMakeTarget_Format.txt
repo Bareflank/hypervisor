@@ -23,13 +23,15 @@ if(ENABLE_ASTYLE AND NOT WIN32)
     add_custom_target(
         format
         COMMAND bareflank_astyle_format.sh diff ${CMAKE_SOURCE_DIR}
-        COMMENT "running astyle checks: ${PROJECT_NAME} in ${CMAKE_SOURCE_DIR}"
+        COMMAND bareflank_blank_lines.sh diff ${CMAKE_SOURCE_DIR}
+        COMMENT "running code style checks: ${PROJECT_NAME} in ${CMAKE_SOURCE_DIR}"
     )
 
     add_custom_target(
         format-all
         COMMAND bareflank_astyle_format.sh all ${CMAKE_SOURCE_DIR}
-        COMMENT "running astyle checks: ${PROJECT_NAME} in ${CMAKE_SOURCE_DIR}"
+        COMMAND bareflank_blank_lines.sh all ${CMAKE_SOURCE_DIR}
+        COMMENT "running code style checks: ${PROJECT_NAME} in ${CMAKE_SOURCE_DIR}"
     )
 
 endif()
