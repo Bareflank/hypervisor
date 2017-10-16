@@ -32,6 +32,10 @@ include(${CMAKE_SOURCE_DIR}/bfsdk/cmake/CMakeGlobal_Project.txt)
 set(BAREFLANK_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/bfprefix)
 set(BAREFLANK_INSTALL_TEST_PREFIX ${CMAKE_BINARY_DIR}/bfprefix_test)
 
+if(EXTENDED_APIS_PATH)
+    set(ENABLE_EXTENDED_APIS ON)
+endif()
+
 # ------------------------------------------------------------------------------
 # Toolchain File
 # ------------------------------------------------------------------------------
@@ -551,7 +555,7 @@ endif()
 # Extended APIs
 # ------------------------------------------------------------------------------
 
-if(ENABLE_EXTENDED_APIS OR EXTENDED_APIS_PATH)
+if(ENABLE_EXTENDED_APIS)
 
     if(NOT EXTENDED_APIS_PATH)
         set(EXTENDED_APIS_URL "https://github.com/bareflank/extended_apis.git" CACHE STRING "")
