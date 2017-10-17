@@ -307,38 +307,38 @@ if(ENABLE_UNITTESTING)
 
 endif()
 
-# ------------------------------------------------------------------------------
-# Tidy
-# ------------------------------------------------------------------------------
-
-if(ENABLE_TIDY)
-
-    add_custom_target(tidy
-        COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfunwind/build --target tidy
-        COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfsupport/build --target tidy
-    )
-
-    add_custom_target(tidy-all
-        COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfunwind/build --target tidy-all
-        COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfsupport/build --target tidy-all
-    )
-
-endif()
-
-# ------------------------------------------------------------------------------
-# Astyle
-# ------------------------------------------------------------------------------
-
-if(ENABLE_ASTYLE)
-
-    add_custom_target(format
-        COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfunwind/build --target format
-        COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfsupport/build --target format
-    )
-
-    add_custom_target(format-all
-        COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfunwind/build --target format-all
-        COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfsupport/build --target format-all
-    )
-
-endif()
+# # ------------------------------------------------------------------------------
+# # Tidy
+# # ------------------------------------------------------------------------------
+#
+# if(ENABLE_TIDY)
+#
+#     add_custom_target(tidy
+#         COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfunwind/build --target tidy
+#         COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfsupport/build --target tidy
+#     )
+#
+#     add_custom_target(tidy-all
+#         COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfunwind/build --target tidy-all
+#         COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfsupport/build --target tidy-all
+#     )
+#
+# endif()
+#
+# # ------------------------------------------------------------------------------
+# # Astyle
+# # ------------------------------------------------------------------------------
+#
+# if(ENABLE_ASTYLE)
+#
+#     add_custom_target(format
+#         COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfunwind/build --target format
+#         COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfsupport/build --target format
+#     )
+#
+#     add_custom_target(format-all
+#         COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfunwind/build --target format-all
+#         COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfsupport/build --target format-all
+#     )
+#
+# endif()

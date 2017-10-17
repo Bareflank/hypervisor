@@ -353,6 +353,8 @@ if(ENABLE_UNITTESTING)
         SOURCE_DIR          ${CMAKE_SOURCE_DIR}/bfsysroot
         BINARY_DIR          ${CMAKE_BINARY_DIR}/test_bfsysroot/build
         INSTALL_COMMAND     ""
+        UPDATE_DISCONNECTED 0
+        UPDATE_COMMAND      ""
         DEPENDS             bfsdk
     )
 
