@@ -16,147 +16,35 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-# ------------------------------------------------------------------------------
-# Includes
-# ------------------------------------------------------------------------------
-
-if(NOT DISABLE_CTEST)
-    include(CTest)
-endif()
-
 include(ExternalProject)
-
-# ------------------------------------------------------------------------------
-# Packages
-# ------------------------------------------------------------------------------
-
-find_package(Git REQUIRED)
-
-# ------------------------------------------------------------------------------
-# Source / Binary Dirs
-# ------------------------------------------------------------------------------
-
-if(BAREFLANK_SOURCE_DIR)
-    message(STATUS "bareflank src dir: ${BAREFLANK_SOURCE_DIR}")
-endif()
-
-if(BAREFLANK_BINARY_DIR)
-    message(STATUS "bareflank bin dir: ${BAREFLANK_BINARY_DIR}")
-endif()
-
-# ------------------------------------------------------------------------------
-# CI Options
-# ------------------------------------------------------------------------------
-
-option(ENABLE_COVERAGE "enable code coverage" OFF)
-option(ENABLE_DYNAMIC_ASAN "enable google address sanitizer" OFF)
-option(ENABLE_DYNAMIC_USAN "enable google undefined sanitizer" OFF)
-
-if(ENABLE_COVERAGE OR ENABLE_DYNAMIC_ASAN OR ENABLE_DYNAMIC_USAN)
-    set(ENABLE_UNITTESTING ON)
-endif()
-
-# ------------------------------------------------------------------------------
-# Developer Mode Options
-# ------------------------------------------------------------------------------
-
-option(ENABLE_TIDY "enable clang tidy" OFF)
-option(ENABLE_ASTYLE "enable astyle checks" OFF)
-option(ENABLE_UNITTESTING "enable unit testing" OFF)
-option(ENABLE_DEVELOPER_MODE "enable debug mode, astyle and clang tidy" OFF)
-
-if(ENABLE_DEVELOPER_MODE AND NOT WIN32)
-    set(ENABLE_TIDY ON)
-    set(ENABLE_ASTYLE ON)
-    set(UPDATE_DISCONNECTED ON)
-endif()
-
-if(NOT CMAKE_BUILD_TYPE)
-    if(ENABLE_UNITTESTING OR ENABLE_DEVELOPER_MODE)
-        set(CMAKE_BUILD_TYPE "Debug")
-    else()
-        set(CMAKE_BUILD_TYPE "Release")
-    endif()
-endif()
-
-if(ENABLE_TIDY AND NOT WIN32)
-    set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-endif()
-
-if(NOT DISABLE_CTEST AND ENABLE_UNITTESTING)
-    enable_testing(true)
-endif()
-
-# ------------------------------------------------------------------------------
-# Library Types
-# ------------------------------------------------------------------------------
-
-option(BUILD_SHARED_LIBS "" OFF)
-option(BUILD_STATIC_LIBS "" ON)
-
-if(ENABLE_UNITTESTING)
-    if(BUILD_SHARED_LIBS)
-        set(BAREFLANK_HOST_SHARED_LIBS ON)
-        set(BAREFLANK_HOST_STATIC_LIBS OFF)
-        set(BAREFLANK_TEST_SHARED_LIBS OFF)
-        set(BAREFLANK_TEST_STATIC_LIBS ON)
-    else()
-        set(BAREFLANK_HOST_SHARED_LIBS OFF)
-        set(BAREFLANK_HOST_STATIC_LIBS ON)
-        set(BAREFLANK_TEST_SHARED_LIBS OFF)
-        set(BAREFLANK_TEST_STATIC_LIBS ON)
-    endif()
-else()
-    if(BUILD_SHARED_LIBS)
-        set(BAREFLANK_HOST_SHARED_LIBS ON)
-        set(BAREFLANK_HOST_STATIC_LIBS OFF)
-        set(BAREFLANK_TEST_SHARED_LIBS OFF)
-        set(BAREFLANK_TEST_STATIC_LIBS OFF)
-    else()
-        set(BAREFLANK_HOST_SHARED_LIBS OFF)
-        set(BAREFLANK_HOST_STATIC_LIBS ON)
-        set(BAREFLANK_TEST_SHARED_LIBS OFF)
-        set(BAREFLANK_TEST_STATIC_LIBS OFF)
-    endif()
-endif()
-
-message(STATUS "Build Shared Libs: ${BUILD_SHARED_LIBS}")
-message(STATUS "Build Static Libs: ${BUILD_STATIC_LIBS}")
-
-# ------------------------------------------------------------------------------
-# Detect 32bit
-# ------------------------------------------------------------------------------
+include(${CMAKE_CURRENT_LIST_DIR}/CMakeOption_Coverage.txt)
+include(${CMAKE_CURRENT_LIST_DIR}/CMakeOption_USan.txt)
+include(${CMAKE_CURRENT_LIST_DIR}/CMakeOption_ASan.txt)
+# include(${CMAKE_CURRENT_LIST_DIR}/CMakeTarget_Tidy.txt)
+# include(${CMAKE_CURRENT_LIST_DIR}/CMakeTarget_Format.txt)
 
 if(NOT CMAKE_CXX_SIZEOF_DATA_PTR STREQUAL "8")
     message(FATAL_ERROR "Only 64bit builds are supported")
 endif()
 
-# ------------------------------------------------------------------------------
-# Install Symlink
-# ------------------------------------------------------------------------------
+if(ENABLE_UNITTESTING)
+    include(CTest)
+    enable_testing(true)
+endif()
 
-macro(install_symlink filepath sympath)
-    if(WIN32)
-        install(CODE "execute_process(COMMAND mklink ${sympath} ${filepath})")
-        install(CODE "message(STATUS \"Created symlink: ${sympath} -> ${filepath}\")")
-    else()
-        install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink ${filepath} ${sympath})")
-        install(CODE "message(STATUS \"Created symlink: ${sympath} -> ${filepath}\")")
-    endif()
-endmacro(install_symlink)
-
-# ------------------------------------------------------------------------------
-# Prefix
-# ------------------------------------------------------------------------------
-
-message(STATUS "Install path: ${CMAKE_INSTALL_PREFIX}")
+if(ENABLE_DEPEND_UPDATES)
+    set_property(GLOBAL PROPERTY EP_UPDATE_DISCONNECTED OFF)
+else()
+    set_property(GLOBAL PROPERTY EP_UPDATE_DISCONNECTED ON)
+endif()
 
 # ------------------------------------------------------------------------------
 # OS
 # ------------------------------------------------------------------------------
 
+# TODO: Use CMAKE_HOST_SYSTEM_NAME to detect your host OS, and allow for build
+# configuration files to override the target OS
 execute_process(COMMAND uname -o OUTPUT_VARIABLE UNAME OUTPUT_STRIP_TRAILING_WHITESPACE)
-
 if(UNAME STREQUAL "Cygwin" OR WIN32)
     set(OSTYPE "WIN64")
     set(ABITYPE "MS64")
@@ -166,35 +54,14 @@ else()
     set(ABITYPE "SYSV")
 endif()
 
-message(STATUS "OS Type: ${OSTYPE}")
-message(STATUS "ABI Type: ${ABITYPE}")
-
-# ------------------------------------------------------------------------------
-# Nasm Support
-# ------------------------------------------------------------------------------
-
+# TODO: All NASM configuration will be moved into x86_64 toolchain files
 find_program(NASM_BIN nasm)
-
-if(NASM_BIN STREQUAL "NASM_BIN-NOTFOUND")
-    if(WIN32)
-        set(NASM_BIN "c:\\Program Files\\NASM\\nasm.exe")
-        if(NOT EXISTS ${NASM_BIN})
-            message(FATAL_ERROR "Unable to find nasm, or nasm is not installed")
-        endif()
-    else()
-        message(FATAL_ERROR "Unable to find nasm, or nasm is not installed")
-    endif()
-endif()
-
 execute_process(COMMAND ${NASM_BIN} -v OUTPUT_VARIABLE NASM_ID OUTPUT_STRIP_TRAILING_WHITESPACE)
 set(CMAKE_ASM_NASM_COMPILER_ID ${NASM_ID})
-
 if(CMAKE_TOOLCHAIN_FILE)
     set(CMAKE_ASM_NASM_OBJECT_FORMAT "elf64")
 endif()
-
 enable_language(ASM_NASM)
-
 set(CMAKE_ASM_NASM_FLAGS "-d ${ABITYPE}")
 set(CMAKE_ASM_NASM_CREATE_SHARED_LIBRARY TRUE)
 set(CMAKE_ASM_NASM_CREATE_STATIC_LIBRARY TRUE)
@@ -202,7 +69,8 @@ set(CMAKE_ASM_NASM_CREATE_STATIC_LIBRARY TRUE)
 # ------------------------------------------------------------------------------
 # Target Information
 # ------------------------------------------------------------------------------
-
+# TODO: All toolchain configurations will be moved to specific toolchain
+# files at ${BF_TOOLCHAIN_DIR}
 if(CMAKE_TOOLCHAIN_FILE)
 
     message(STATUS "Cross Compiling Enabled")
@@ -276,23 +144,6 @@ else()
         message(STATUS "Flags: ${CMAKE_CURRENT_LIST_DIR}/CMakeFlags_Native_GCC.txt")
         include(${CMAKE_CURRENT_LIST_DIR}/CMakeFlags_Native_GCC.txt)
     endif()
-endif()
-
-# ------------------------------------------------------------------------------
-# Custom Targets / Options
-# ------------------------------------------------------------------------------
-
-if(NOT BAREFLANK_TOOLCHAIN_FLAGS)
-    if(NOT DISABLE_OPTIONS)
-        include(${CMAKE_CURRENT_LIST_DIR}/CMakeOption_ASan.txt)
-        include(${CMAKE_CURRENT_LIST_DIR}/CMakeOption_Coverage.txt)
-        include(${CMAKE_CURRENT_LIST_DIR}/CMakeOption_USan.txt)
-    endif()
-endif()
-
-if(NOT DISABLE_TARGETS)
-    include(${CMAKE_CURRENT_LIST_DIR}/CMakeTarget_Tidy.txt)
-    include(${CMAKE_CURRENT_LIST_DIR}/CMakeTarget_Format.txt)
 endif()
 
 # ------------------------------------------------------------------------------

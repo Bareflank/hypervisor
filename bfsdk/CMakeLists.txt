@@ -19,6 +19,7 @@
 cmake_minimum_required(VERSION 3.6)
 project(bfsdk C CXX)
 
+include(${CMAKE_SOURCE_DIR}/../scripts/cmake/macros.cmake)
 include(${CMAKE_SOURCE_DIR}/cmake/CMakeGlobal_Project.txt)
 
 # ------------------------------------------------------------------------------
@@ -41,7 +42,6 @@ ExternalProject_Add(
     DOWNLOAD_DIR        ${CMAKE_BINARY_DIR}/json/download
     SOURCE_DIR          ${CMAKE_BINARY_DIR}/json/src
     BINARY_DIR          ${CMAKE_BINARY_DIR}/json/build
-    UPDATE_DISCONNECTED 1
 )
 
 # ------------------------------------------------------------------------------
@@ -64,7 +64,6 @@ ExternalProject_Add(
     DOWNLOAD_DIR        ${CMAKE_BINARY_DIR}/gsl/download
     SOURCE_DIR          ${CMAKE_BINARY_DIR}/gsl/src
     BINARY_DIR          ${CMAKE_BINARY_DIR}/gsl/build
-    UPDATE_DISCONNECTED 1
 )
 
 # ------------------------------------------------------------------------------
@@ -89,7 +88,6 @@ if(ENABLE_UNITTESTING)
         DOWNLOAD_DIR        ${CMAKE_BINARY_DIR}/catch/download
         SOURCE_DIR          ${CMAKE_BINARY_DIR}/catch/src
         BINARY_DIR          ${CMAKE_BINARY_DIR}/catch/build
-        UPDATE_DISCONNECTED 1
     )
 
 endif()
@@ -116,7 +114,6 @@ if(ENABLE_UNITTESTING)
         DOWNLOAD_DIR        ${CMAKE_BINARY_DIR}/hippomocks/download
         SOURCE_DIR          ${CMAKE_BINARY_DIR}/hippomocks/src
         BINARY_DIR          ${CMAKE_BINARY_DIR}/hippomocks/build
-        UPDATE_DISCONNECTED 1
     )
 
 endif()
@@ -144,7 +141,6 @@ if(ENABLE_ASTYLE)
         DOWNLOAD_DIR        ${CMAKE_BINARY_DIR}/astyle/download
         SOURCE_DIR          ${CMAKE_BINARY_DIR}/astyle/src
         BINARY_DIR          ${CMAKE_BINARY_DIR}/astyle/build
-        UPDATE_DISCONNECTED 1
     )
 
 endif()

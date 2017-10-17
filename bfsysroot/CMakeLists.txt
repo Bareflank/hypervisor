@@ -19,8 +19,6 @@
 cmake_minimum_required(VERSION 3.6)
 project(bfsysroot C CXX)
 
-set(DISABLE_OPTIONS ON)
-set(DISABLE_TARGETS ON)
 set(DISABLE_WARNINGS ON)
 set(DISABLE_VISIBILITY_HIDDEN ON)
 
@@ -66,6 +64,8 @@ else()
         SOURCE_DIR          ${BAREFLANK_BINARY_DIR}/external/newlib/src
         BINARY_DIR          ${CMAKE_BINARY_DIR}/newlib/build
         CONFIGURE_COMMAND   ${BAREFLANK_BINARY_DIR}/external/newlib/src/configure "${NEWLIB_ARGS}" CFLAGS_FOR_TARGET=${NEWLIB_CFLAGS}
+        UPDATE_DISCONNECTED 0
+        UPDATE_COMMAND      ""
         BUILD_COMMAND       make
         INSTALL_COMMAND     make install
         LOG_CONFIGURE       1
@@ -127,7 +127,8 @@ else()
         STAMP_DIR       ${CMAKE_BINARY_DIR}/bfunwind/stamp
         SOURCE_DIR      ${CMAKE_SOURCE_DIR}/bfunwind
         BINARY_DIR      ${CMAKE_BINARY_DIR}/bfunwind/build
-        UPDATE_COMMAND  ${CMAKE_COMMAND} -E echo "checking for updates"
+        UPDATE_DISCONNECTED 0
+        UPDATE_COMMAND      ""
         DEPENDS         newlib
     )
 
@@ -175,6 +176,8 @@ else()
         STAMP_DIR       ${CMAKE_BINARY_DIR}/libcxxabi/stamp
         SOURCE_DIR      ${BAREFLANK_BINARY_DIR}/external/libcxxabi/src
         BINARY_DIR      ${CMAKE_BINARY_DIR}/libcxxabi/build
+        UPDATE_DISCONNECTED 0
+        UPDATE_COMMAND      ""
         DEPENDS         bfunwind
     )
 
@@ -223,6 +226,8 @@ else()
         STAMP_DIR       ${CMAKE_BINARY_DIR}/libcxx/stamp
         SOURCE_DIR      ${BAREFLANK_BINARY_DIR}/external/libcxx/src
         BINARY_DIR      ${CMAKE_BINARY_DIR}/libcxx/build
+        UPDATE_DISCONNECTED 0
+        UPDATE_COMMAND      ""
         DEPENDS         bfunwind libcxxabi
     )
 
@@ -256,7 +261,8 @@ ExternalProject_Add(
     STAMP_DIR       ${CMAKE_BINARY_DIR}/bfsupport/stamp
     SOURCE_DIR      ${CMAKE_SOURCE_DIR}/bfsupport
     BINARY_DIR      ${CMAKE_BINARY_DIR}/bfsupport/build
-    UPDATE_COMMAND  ${CMAKE_COMMAND} -E echo "checking for updates"
+    UPDATE_DISCONNECTED 0
+    UPDATE_COMMAND      ""
     DEPENDS         newlib libcxxabi libcxx
 )
 
@@ -301,38 +307,38 @@ if(ENABLE_UNITTESTING)
 
 endif()
 
-# ------------------------------------------------------------------------------
-# Tidy
-# ------------------------------------------------------------------------------
-
-if(ENABLE_TIDY)
-
-    add_custom_target(tidy
-        COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfunwind/build --target tidy
-        COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfsupport/build --target tidy
-    )
-
-    add_custom_target(tidy-all
-        COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfunwind/build --target tidy-all
-        COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfsupport/build --target tidy-all
-    )
-
-endif()
-
-# ------------------------------------------------------------------------------
-# Astyle
-# ------------------------------------------------------------------------------
-
-if(ENABLE_ASTYLE)
-
-    add_custom_target(format
-        COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfunwind/build --target format
-        COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfsupport/build --target format
-    )
-
-    add_custom_target(format-all
-        COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfunwind/build --target format-all
-        COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfsupport/build --target format-all
-    )
-
-endif()
+# # ------------------------------------------------------------------------------
+# # Tidy
+# # ------------------------------------------------------------------------------
+#
+# if(ENABLE_TIDY)
+#
+#     add_custom_target(tidy
+#         COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfunwind/build --target tidy
+#         COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfsupport/build --target tidy
+#     )
+#
+#     add_custom_target(tidy-all
+#         COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfunwind/build --target tidy-all
+#         COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfsupport/build --target tidy-all
+#     )
+#
+# endif()
+#
+# # ------------------------------------------------------------------------------
+# # Astyle
+# # ------------------------------------------------------------------------------
+#
+# if(ENABLE_ASTYLE)
+#
+#     add_custom_target(format
+#         COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfunwind/build --target format
+#         COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfsupport/build --target format
+#     )
+#
+#     add_custom_target(format-all
+#         COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfunwind/build --target format-all
+#         COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/bfsupport/build --target format-all
+#     )
+#
+# endif()
