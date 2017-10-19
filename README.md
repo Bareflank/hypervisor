@@ -134,9 +134,8 @@ Bareflank Hypervisor
 
 ## Additional Videos
 
-CppCon 2016: Making C++ and the STL Work in the Linux / Windows Kernels <br>
-
-[![CppCon 2016](http://img.youtube.com/vi/uQSQy-7lveQ/mq1.jpg)](https://www.youtube.com/watch?v=uQSQy-7lveQ)
+[![CppCon 2017](https://i.imgur.com/bLnrVon.png)](https://www.youtube.com/watch?v=KdJhQuycD78)
+[![CppCon 2016](https://i.imgur.com/MLoOLmM.png)](https://www.youtube.com/watch?v=uQSQy-7lveQ)
 
 ## Dependencies
 
