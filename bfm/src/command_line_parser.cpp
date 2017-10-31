@@ -239,33 +239,33 @@ command_line_parser::parse_vmcall_registers(arg_list_type &args)
 
     switch (index) {
         case 0xD:
-            m_registers.r15 = std::stoull(args[index--], nullptr, 16);
+            m_registers.r15 = std::stoull(args[index--], nullptr, 16);      // falls through
         case 0xC:
-            m_registers.r14 = std::stoull(args[index--], nullptr, 16);
+            m_registers.r14 = std::stoull(args[index--], nullptr, 16);      // falls through
         case 0xB:
-            m_registers.r13 = std::stoull(args[index--], nullptr, 16);
+            m_registers.r13 = std::stoull(args[index--], nullptr, 16);      // falls through
         case 0xA:
-            m_registers.r12 = std::stoull(args[index--], nullptr, 16);
+            m_registers.r12 = std::stoull(args[index--], nullptr, 16);      // falls through
         case 0x9:
-            m_registers.r11 = std::stoull(args[index--], nullptr, 16);
+            m_registers.r11 = std::stoull(args[index--], nullptr, 16);      // falls through
         case 0x8:
-            m_registers.r10 = std::stoull(args[index--], nullptr, 16);
+            m_registers.r10 = std::stoull(args[index--], nullptr, 16);      // falls through
         case 0x7:
-            m_registers.r09 = std::stoull(args[index--], nullptr, 16);
+            m_registers.r09 = std::stoull(args[index--], nullptr, 16);      // falls through
         case 0x6:
-            m_registers.r08 = std::stoull(args[index--], nullptr, 16);
+            m_registers.r08 = std::stoull(args[index--], nullptr, 16);      // falls through
         case 0x5:
-            m_registers.r07 = std::stoull(args[index--], nullptr, 16);
+            m_registers.r07 = std::stoull(args[index--], nullptr, 16);      // falls through
         case 0x4:
-            m_registers.r06 = std::stoull(args[index--], nullptr, 16);
+            m_registers.r06 = std::stoull(args[index--], nullptr, 16);      // falls through
         case 0x3:
-            m_registers.r05 = std::stoull(args[index--], nullptr, 16);
+            m_registers.r05 = std::stoull(args[index--], nullptr, 16);      // falls through
         case 0x2:
-            m_registers.r04 = std::stoull(args[index--], nullptr, 16);
+            m_registers.r04 = std::stoull(args[index--], nullptr, 16);      // falls through
         case 0x1:
-            m_registers.r03 = std::stoull(args[index--], nullptr, 16);
+            m_registers.r03 = std::stoull(args[index--], nullptr, 16);      // falls through
         case 0x0:
-            m_registers.r02 = std::stoull(args[index--], nullptr, 16);
+            m_registers.r02 = std::stoull(args[index--], nullptr, 16);      // falls through
             break;
 
         default:

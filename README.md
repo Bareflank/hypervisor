@@ -142,9 +142,14 @@ Bareflank Hypervisor
 Although Bareflank can be made to run on most systems, the following are the
 supported platforms and their dependencies:
 
-#### Ubuntu 16.10 (or Higher):
+#### Ubuntu 17.04 (or Higher):
 ```
 sudo apt-get install git build-essential linux-headers-$(uname -r) nasm clang cmake
+```
+
+#### Arch Linux:
+```
+sudo pacman -S git linux-headers nasm clang cmake
 ```
 
 #### Windows (Cygwin):

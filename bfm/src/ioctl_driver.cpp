@@ -79,8 +79,8 @@ ioctl_driver::load_vmm()
     auto module_list = vmm_module_list(filename);
 
     switch (get_status()) {
-        case VMM_RUNNING: stop_vmm();
-        case VMM_LOADED: unload_vmm();
+        case VMM_RUNNING: stop_vmm();       // falls through
+        case VMM_LOADED: unload_vmm();      // falls through
         case VMM_UNLOADED: break;
         case VMM_CORRUPT: throw std::runtime_error("vmm corrupt");
         default: throw std::runtime_error("unknown status");
