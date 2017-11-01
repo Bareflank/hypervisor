@@ -67,7 +67,6 @@ build_script:
   #
   # Cygwin (Shared Libraries)
   #
-  - set PATH=%BFPATH%;%APPVEYOR_BUILD_FOLDER%/build_cygwin/bfprefix/bin
   - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER; mkdir build_cygwin"'
   - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER/build_cygwin; cmake -DENABLE_UNITTESTING=ON -DBUILD_SHARED_LIBS=ON .."'
   - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER/build_cygwin; make -j3"'
