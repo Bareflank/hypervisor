@@ -22,13 +22,13 @@ if(ENABLE_TIDY AND NOT WIN32)
 
     add_custom_target(
         tidy
-        COMMAND bareflank_clang_tidy.sh diff ${CMAKE_SOURCE_DIR} ${TIDY_EXCLUSIONS}
+        COMMAND ${BAREFLANK_SOURCE_DIR}/bfsdk/scripts/bareflank_clang_tidy.sh diff ${CMAKE_SOURCE_DIR} ${TIDY_EXCLUSIONS}
         COMMENT "running clang-tidy checks: ${PROJECT_NAME} in ${CMAKE_SOURCE_DIR}"
     )
 
     add_custom_target(
         tidy-all
-        COMMAND bareflank_clang_tidy.sh all ${CMAKE_SOURCE_DIR} ${TIDY_EXCLUSIONS}
+        COMMAND ${BAREFLANK_SOURCE_DIR}/bfsdk/scripts/bareflank_clang_tidy.sh all ${CMAKE_SOURCE_DIR} ${TIDY_EXCLUSIONS}
         COMMENT "running clang-tidy checks: ${PROJECT_NAME} in ${CMAKE_SOURCE_DIR}"
     )
 

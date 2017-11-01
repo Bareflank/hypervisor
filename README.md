@@ -64,17 +64,12 @@ including support for the
 
 Currently we have support for the following 64bit host operating systems on
 Intel _SandyBridge_ and above hardware:
-- Ubuntu 16.10, 17.04
+- Arch Linux
+- Debian 9.x+
+- Ubuntu 17.04+
 - Windows 10
 - Windows 8.1
 - Windows 7
-
-Although not officially supported, Bareflank has also been tested with the
-following Linux distributions:
-- Debian
-- Fedora
-- OpenSUSE
-- Arch Linux
 
 In the future, we would also like to support:
 - macOS
@@ -134,22 +129,23 @@ Bareflank Hypervisor
 
 ## Additional Videos
 
-[![CppCon 2017](https://i.imgur.com/bLnrVon.png)](https://www.youtube.com/watch?v=KdJhQuycD78)
-[![CppCon 2016](https://i.imgur.com/MLoOLmM.png)](https://www.youtube.com/watch?v=uQSQy-7lveQ)
+CppCon 2016: Making C++ and the STL Work in the Linux / Windows Kernels <br>
+
+[![CppCon 2016](http://img.youtube.com/vi/uQSQy-7lveQ/mq1.jpg)](https://www.youtube.com/watch?v=uQSQy-7lveQ)
 
 ## Dependencies
 
 Although Bareflank can be made to run on most systems, the following are the
 supported platforms and their dependencies:
 
-#### Ubuntu 17.04 (or Higher):
-```
-sudo apt-get install git build-essential linux-headers-$(uname -r) nasm clang cmake
-```
-
 #### Arch Linux:
 ```
 sudo pacman -S git linux-headers nasm clang cmake
+```
+
+#### Ubuntu 17.04 (or Higher):
+```
+sudo apt-get install git build-essential linux-headers-$(uname -r) nasm clang cmake
 ```
 
 #### Windows (Cygwin):
@@ -185,8 +181,7 @@ To compile, run the following commands:
 
 ```
 git clone -b dev https://github.com/bareflank/hypervisor.git
-source $PWD/hypervisor/env.sh $PWD/hypervisor/build
-cd $PWD/hypervisor/build
+mkdir hypervisor/build; cd hypervisor/build
 cmake ..
 make -j<# cores + 1>
 ```
@@ -310,3 +305,4 @@ https://github.com/ionescu007/SimpleVisor
 
 **HyperPlatform:**  <br>
 https://github.com/tandasat/HyperPlatform
+   
