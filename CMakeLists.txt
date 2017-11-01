@@ -41,33 +41,11 @@ endif()
 # ------------------------------------------------------------------------------
 
 if(NOT WIN32)
-
     find_program(PYTHON_BIN python)
 
     if(PYTHON_BIN STREQUAL "PYTHON_BIN-NOTFOUND")
         message(FATAL_ERROR "Unable to find python, or python is not installed")
     endif()
-
-    find_program(CLANG_BIN_40 clang-4.0)
-    find_program(CLANG_BIN_39 clang-3.9)
-    find_program(CLANG_BIN_38 clang-3.8)
-    find_program(CLANG_BIN clang)
-
-    if(NOT CLANG_BIN_40 STREQUAL "CLANG_BIN_40-NOTFOUND")
-        set(CLANG_BIN ${CLANG_BIN_40})
-        set(PREFERRED_VMM_TOOLCHAIN ${CMAKE_SOURCE_DIR}/bfsdk/cmake/CMakeToolchain_VMM_40.txt)
-    elseif(NOT CLANG_BIN_39 STREQUAL "CLANG_BIN_39-NOTFOUND")
-        set(CLANG_BIN ${CLANG_BIN_39})
-        set(PREFERRED_VMM_TOOLCHAIN ${CMAKE_SOURCE_DIR}/bfsdk/cmake/CMakeToolchain_VMM_39.txt)
-    elseif(NOT CLANG_BIN_38 STREQUAL "CLANG_BIN_38-NOTFOUND")
-        set(CLANG_BIN ${CLANG_BIN_38})
-        set(PREFERRED_VMM_TOOLCHAIN ${CMAKE_SOURCE_DIR}/bfsdk/cmake/CMakeToolchain_VMM_38.txt)
-    elseif(NOT CLANG_BIN STREQUAL "CLANG_BIN-NOTFOUND")
-        set(PREFERRED_VMM_TOOLCHAIN ${CMAKE_SOURCE_DIR}/bfsdk/cmake/CMakeToolchain_VMM.txt)
-    else()
-        message(FATAL_ERROR "Unable to find clang, or clang is not installed")
-    endif()
-
 endif()
 
 find_program(NASM_BIN nasm)
@@ -83,11 +61,11 @@ if(GIT_BIN STREQUAL "GIT_BIN-NOTFOUND")
 endif()
 
 message(STATUS "Git: ${GIT_BIN}")
+message(STATUS "Nasm: ${NASM_BIN}")
 
 if(NOT WIN32)
     message(STATUS "Python: ${PYTHON_BIN}")
     message(STATUS "Clang: ${CLANG_BIN}")
-    message(STATUS "Nasm: ${NASM_BIN}")
     message(STATUS "Preferred VMM Toolchain: ${PREFERRED_VMM_TOOLCHAIN}")
 endif()
 
@@ -807,4 +785,48 @@ if(NOT WIN32)
     add_custom_command(TARGET driver_quick COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target driver_clean)
     add_custom_command(TARGET driver_quick COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target driver_build)
     add_custom_command(TARGET driver_quick COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target driver_load)
+endif()
+
+# ------------------------------------------------------------------------------
+# Messages
+# ------------------------------------------------------------------------------
+
+set_property(GLOBAL PROPERTY TARGET_MESSAGES OFF)
+
+add_custom_command(
+        OUTPUT success_message_completed
+        COMMAND touch success_message_completed
+        COMMAND ${CMAKE_COMMAND} -E cmake_echo_color ""
+        COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --magenta --bold "  ___                __ _           _   "
+        COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --magenta --bold " | _ ) __ _ _ _ ___ / _| |__ _ _ _ | |__"
+        COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --magenta --bold " | _ \\/ _` | '_/ -_)  _| / _` | ' \\| / /"
+        COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --magenta --bold " |___/\\__,_|_| \\___|_| |_\\__,_|_||_|_\\_\\"
+        COMMAND ${CMAKE_COMMAND} -E cmake_echo_color ""
+        COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --green --bold --no-newline " Please give us a star on:"
+        COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --white --bold --no-newline " https://github.com/Bareflank/hypervisor"
+        COMMAND ${CMAKE_COMMAND} -E cmake_echo_color ""
+        COMMAND ${CMAKE_COMMAND} -E cmake_echo_color ""
+        COMMAND ${CMAKE_COMMAND} -E cmake_echo_color ""
+        VERBATIM
+)
+
+add_custom_target(complete_once ALL
+    DEPENDS success_message_completed
+)
+
+add_custom_target(complete_always ALL
+    COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --cyan "Compilation was successful!!!"
+)
+
+if(NOT WIN32)
+    add_dependencies(complete_once bfsdk bfsysroot bfelf_loader bfm bfvmm bfdriver)
+    add_dependencies(complete_always bfsdk bfsysroot bfelf_loader bfm bfvmm bfdriver complete_once)
+else()
+    add_dependencies(complete_once bfsdk bfelf_loader bfm bfdriver)
+    add_dependencies(complete_always bfsdk bfelf_loader bfm bfdriver complete_once)
+endif()
+
+if(ENABLE_UNITTESTING)
+    add_dependencies(complete_once test_bfvmm test_bfsysroot)
+    add_dependencies(complete_always test_bfvmm test_bfsysroot)
 endif()

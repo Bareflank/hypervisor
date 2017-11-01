@@ -30,7 +30,7 @@ before_script:
   #
   # Build Enviornment
   #
-  - source env.sh $TRAVIS_BUILD_DIR/build
+  - mkdir build
   - cd build
 
   #

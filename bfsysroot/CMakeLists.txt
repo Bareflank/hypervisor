@@ -56,6 +56,8 @@ else()
         "--enable-newlib-iconv"
         "CC_FOR_TARGET=${CMAKE_C_COMPILER}"
         "CXX_FOR_TARGET=${CMAKE_CXX_COMPILER}"
+        "AR_FOR_TARGET=${CMAKE_AR}"
+        "RANLIB_FOR_TARGET=${CMAKE_RANLIB}"
     )
 
     ExternalProject_Add(
@@ -66,7 +68,7 @@ else()
         SOURCE_DIR          ${BAREFLANK_BINARY_DIR}/external/newlib/src
         BINARY_DIR          ${CMAKE_BINARY_DIR}/newlib/build
         CONFIGURE_COMMAND   ${BAREFLANK_BINARY_DIR}/external/newlib/src/configure "${NEWLIB_ARGS}" CFLAGS_FOR_TARGET=${NEWLIB_CFLAGS}
-        BUILD_COMMAND       make
+        BUILD_COMMAND       make -j1
         INSTALL_COMMAND     make install
         LOG_CONFIGURE       1
         LOG_BUILD           1

@@ -17,6 +17,6 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 set(CMAKE_SYSTEM_NAME Linux)
-set(CMAKE_C_COMPILER x86_64-vmm-clang-3.8)
-set(CMAKE_CXX_COMPILER x86_64-vmm-clang-3.8)
+set(CMAKE_C_COMPILER ${CMAKE_INSTALL_PREFIX}/bin/x86_64-vmm-clang-3.8)
+set(CMAKE_CXX_COMPILER ${CMAKE_INSTALL_PREFIX}/bin/x86_64-vmm-clang-3.8)
 set(BAREFLANK_TOOLCHAIN_FLAGS CMakeFlags_VMM.txt)

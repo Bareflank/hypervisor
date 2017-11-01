@@ -124,6 +124,32 @@ message(STATUS "Build Shared Libs: ${BUILD_SHARED_LIBS}")
 message(STATUS "Build Static Libs: ${BUILD_STATIC_LIBS}")
 
 # ------------------------------------------------------------------------------
+# Toolchain
+# ------------------------------------------------------------------------------
+
+if(NOT WIN32)
+    find_program(CLANG_BIN_40 clang-4.0)
+    find_program(CLANG_BIN_39 clang-3.9)
+    find_program(CLANG_BIN_38 clang-3.8)
+    find_program(CLANG_BIN clang)
+
+    if(NOT CLANG_BIN_40 STREQUAL "CLANG_BIN_40-NOTFOUND")
+        set(CLANG_BIN ${CLANG_BIN_40})
+        set(PREFERRED_VMM_TOOLCHAIN ${CMAKE_SOURCE_DIR}/bfsdk/cmake/CMakeToolchain_VMM_40.txt)
+    elseif(NOT CLANG_BIN_39 STREQUAL "CLANG_BIN_39-NOTFOUND")
+        set(CLANG_BIN ${CLANG_BIN_39})
+        set(PREFERRED_VMM_TOOLCHAIN ${CMAKE_SOURCE_DIR}/bfsdk/cmake/CMakeToolchain_VMM_39.txt)
+    elseif(NOT CLANG_BIN_38 STREQUAL "CLANG_BIN_38-NOTFOUND")
+        set(CLANG_BIN ${CLANG_BIN_38})
+        set(PREFERRED_VMM_TOOLCHAIN ${CMAKE_SOURCE_DIR}/bfsdk/cmake/CMakeToolchain_VMM_38.txt)
+    elseif(NOT CLANG_BIN STREQUAL "CLANG_BIN-NOTFOUND")
+        set(PREFERRED_VMM_TOOLCHAIN ${CMAKE_SOURCE_DIR}/bfsdk/cmake/CMakeToolchain_VMM.txt)
+    else()
+        message(FATAL_ERROR "Unable to find clang, or clang is not installed")
+    endif()
+endif()
+
+# ------------------------------------------------------------------------------
 # Detect 32bit
 # ------------------------------------------------------------------------------
 
