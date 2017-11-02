@@ -65,7 +65,7 @@ extern "C" EXPORT_INTRINSICS void _outsdrep(uint16_t port, uint64_t m32, uint32_
 
 // *INDENT-OFF*
 
-namespace intrinsics
+namespace x64
 {
 namespace portio
 {

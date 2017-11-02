@@ -27,7 +27,7 @@
 
 #ifdef _HIPPOMOCKS__ENABLE_CFUNC_MOCKING_SUPPORT
 
-static std::map<serial_port_ns16550a::port_type, serial_port_ns16550a::value_type> g_ports;
+static std::map<serial_port_ns16550a::port_type, serial_port_ns16550a::value_type_8> g_ports;
 
 static uint8_t
 mock_inb(uint16_t port) noexcept
@@ -64,7 +64,6 @@ TEST_CASE("serial: constructor_null_intrinsics")
     CHECK_NOTHROW(std::make_unique<serial_port_ns16550a>());
 }
 
-
 TEST_CASE("serial: success")
 {
     MockRepository mocks;
@@ -85,7 +84,6 @@ TEST_CASE("serial: success")
     CHECK((g_ports[DEFAULT_COM_PORT + serial_ns16550a::line_control_reg] & serial_ns16550a::line_control_stop_mask) == serial_port_ns16550a::DEFAULT_STOP_BITS);
     CHECK((g_ports[DEFAULT_COM_PORT + serial_ns16550a::line_control_reg] & serial_ns16550a::line_control_parity_mask) == serial_port_ns16550a::DEFAULT_PARITY_BITS);
 }
-
 
 TEST_CASE("serial: set_baud_rate_success")
 {
@@ -132,7 +130,6 @@ TEST_CASE("serial: set_baud_rate_success")
     CHECK(serial->baud_rate() == serial_port_ns16550a::baud_rate_115200);
 }
 
-
 TEST_CASE("serial: set_data_bits_success")
 {
     MockRepository mocks;
@@ -150,7 +147,6 @@ TEST_CASE("serial: set_data_bits_success")
     CHECK(serial->data_bits() == serial_port_ns16550a::char_length_8);
 }
 
-
 TEST_CASE("serial: set_data_bits_success_extra_bits")
 {
     MockRepository mocks;
@@ -166,7 +162,6 @@ TEST_CASE("serial: set_data_bits_success_extra_bits")
     CHECK(serial->parity_bits() == serial_port_ns16550a::DEFAULT_PARITY_BITS);
 }
 
-
 TEST_CASE("serial: set_stop_bits_success")
 {
     MockRepository mocks;
@@ -179,7 +174,6 @@ TEST_CASE("serial: set_stop_bits_success")
     serial->set_stop_bits(serial_port_ns16550a::stop_bits_2);
     CHECK(serial->stop_bits() == serial_port_ns16550a::stop_bits_2);
 }
-
 
 TEST_CASE("serial: set_stop_bits_success_extra_bits")
 {
@@ -195,7 +189,6 @@ TEST_CASE("serial: set_stop_bits_success_extra_bits")
     CHECK(serial->stop_bits() == serial_port_ns16550a::DEFAULT_STOP_BITS);
     CHECK(serial->parity_bits() == serial_port_ns16550a::DEFAULT_PARITY_BITS);
 }
-
 
 TEST_CASE("serial: set_parity_bits_success")
 {
@@ -216,7 +209,6 @@ TEST_CASE("serial: set_parity_bits_success")
     CHECK(serial->parity_bits() == serial_port_ns16550a::parity_space);
 }
 
-
 TEST_CASE("serial: set_parity_bits_success_extra_bits")
 {
     MockRepository mocks;
@@ -232,7 +224,6 @@ TEST_CASE("serial: set_parity_bits_success_extra_bits")
     CHECK(serial->parity_bits() == serial_port_ns16550a::DEFAULT_PARITY_BITS);
 }
 
-
 TEST_CASE("serial: write character")
 {
     MockRepository mocks;
@@ -243,7 +234,6 @@ TEST_CASE("serial: write character")
     auto serial = std::make_unique<serial_port_ns16550a>();
     serial->write('c');
 }
-
 
 TEST_CASE("serial: write string")
 {

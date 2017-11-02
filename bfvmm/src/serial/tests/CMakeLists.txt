@@ -34,3 +34,4 @@ endmacro(do_test)
 
 do_test(serial_port_ns16550a)
 do_test(serial_port_pl011)
+do_test(serial_port_base)
