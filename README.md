@@ -13,20 +13,20 @@
 
 ## Description
 
-The Bareflank Hypervisor is an open source, lightweight hypervisor, lead by
-Assured Information Security, Inc. that provides the scaffolding needed to
+The Bareflank Hypervisor is an open source, lightweight hypervisor, led by
+Assured Information Security, Inc., that provides the scaffolding needed to
 rapidly prototype new hypervisors. To ease development, Bareflank
 is written in C++, and includes support for exceptions and the C++ Standard
 Template Library (STL) via libc++. With the C++ STL, users can leverage
 shared pointers, complex data structures (e.g. hash tables, maps, lists,
 etc…), and several other modern C++ features. Existing open source
-hypervisors that are written in C are difficult to modify, and spend a
+hypervisors that are written in C are difficult to modify, and require a
 considerable amount of time re-writing similar functionality instead of
 focusing on what matters most: hypervisor technologies. Furthermore, users
 can leverage inheritance to extend every part of the hypervisor to provide
 additional functionality above and beyond what is already provided.
 
-To this end, Bareflank's primary goal is to remain simple, and
+To this end, Bareflank's primary goal is to remain simple and
 minimalistic, providing only the scaffolding needed
 to construct more complete/complicated hypervisors including:
 - Bare Metal Hypervisors (also known as type 1, like [Xen](http://www.xenproject.org))
@@ -63,7 +63,7 @@ including support for the
 [Guideline Support Library](https://github.com/Microsoft/GSL).
 
 Currently we have support for the following 64bit host operating systems on
-Intel _SandyBridge_ and above hardware:
+Intel _Sandy Bridge_ and above hardware:
 - Arch Linux
 - Debian 9.x+
 - Ubuntu 17.04+
@@ -83,7 +83,7 @@ Most people think that hypervisors are meant to virtualize servers and
 provide a means to run Windows on a Mac, but there is a whole field
 of research where hypervisors are used without guest virtual
 machines. Since a hypervisor is capable of controlling the host OS
-running underneath it, (so called "ring -1"), hypervisors have been
+running underneath it (so called "ring -1"), hypervisors have been
 used for introspection, reverse engineering, anti-virus, containerization,
 diversity, and even architectural research like the
 [MoRE](https://github.com/ainfosec/MoRE) hypervisor. All of these use
@@ -162,7 +162,7 @@ these packages must be installed in the following order:
 - [Cygwin](https://www.cygwin.com/setup-x86_64.exe)
 
 To install Cygwin, simply install using all default settings, and then copy
-setup-x86_64.exe to C:\cygwin64\bin. From there, open a Cygwin terminal and
+setup-x86\_64.exe to C:\\cygwin64\\bin. From there, open a Cygwin terminal and
 run the following:
 
 ```
