@@ -11203,6 +11203,34 @@ TEST_CASE("ia32_x2apic_ldr")
     dump(0);
 }
 
+TEST_CASE("ia32_x2apic_ldr_logical_id")
+{
+    MockRepository mocks;
+    setup_intrinsics(mocks);
+
+    using namespace intel_x64::msrs::ia32_x2apic_ldr;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(logical_id::get() == (logical_id::mask >> logical_id::from));
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(logical_id::get(logical_id::mask) == (logical_id::mask >> logical_id::from));
+}
+
+TEST_CASE("ia32_x2apic_ldr_cluster_id")
+{
+    MockRepository mocks;
+    setup_intrinsics(mocks);
+
+    using namespace intel_x64::msrs::ia32_x2apic_ldr;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(cluster_id::get() == (cluster_id::mask >> cluster_id::from));
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(cluster_id::get(cluster_id::mask) == (cluster_id::mask >> cluster_id::from));
+}
+
 TEST_CASE("ia32_x2apic_sivr")
 {
     MockRepository mocks;
@@ -11213,6 +11241,74 @@ TEST_CASE("ia32_x2apic_sivr")
     set(0xFFFFFFFFFFFFFFFFULL);
     CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
     dump(0);
+}
+
+TEST_CASE("ia32_x2apic_sivr_vector")
+{
+    MockRepository mocks;
+    setup_intrinsics(mocks);
+
+    using namespace intel_x64::msrs::ia32_x2apic_sivr;
+
+    vector::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(vector::get() == (vector::mask >> vector::from));
+
+    vector::set(vector::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(vector::get(vector::mask) == (vector::mask >> vector::from));
+}
+
+TEST_CASE("ia32_x2apic_sivr_apic_enable_bit")
+{
+    MockRepository mocks;
+    setup_intrinsics(mocks);
+
+    using namespace intel_x64::msrs::ia32_x2apic_sivr;
+
+    apic_enable_bit::enable();
+    CHECK(apic_enable_bit::is_enabled());
+    apic_enable_bit::disable();
+    CHECK(apic_enable_bit::is_disabled());
+
+    apic_enable_bit::enable(apic_enable_bit::mask);
+    CHECK(apic_enable_bit::is_enabled(apic_enable_bit::mask));
+    apic_enable_bit::disable(0x0);
+    CHECK(apic_enable_bit::is_disabled(0x0));
+}
+
+TEST_CASE("ia32_x2apic_sivr_focus_checking")
+{
+    MockRepository mocks;
+    setup_intrinsics(mocks);
+
+    using namespace intel_x64::msrs::ia32_x2apic_sivr;
+
+    focus_checking::enable();
+    CHECK(focus_checking::is_enabled());
+    focus_checking::disable();
+    CHECK(focus_checking::is_disabled());
+
+    focus_checking::enable(0x0);
+    CHECK(focus_checking::is_enabled(0x0));
+    focus_checking::disable(focus_checking::mask);
+    CHECK(focus_checking::is_disabled(focus_checking::mask));
+}
+
+TEST_CASE("ia32_x2apic_sivr_suppress_eoi_broadcast")
+{
+    MockRepository mocks;
+    setup_intrinsics(mocks);
+
+    using namespace intel_x64::msrs::ia32_x2apic_sivr;
+
+    suppress_eoi_broadcast::enable();
+    CHECK(suppress_eoi_broadcast::is_enabled());
+    suppress_eoi_broadcast::disable();
+    CHECK(suppress_eoi_broadcast::is_disabled());
+
+    suppress_eoi_broadcast::enable(suppress_eoi_broadcast::mask);
+    CHECK(suppress_eoi_broadcast::is_enabled(suppress_eoi_broadcast::mask));
+    suppress_eoi_broadcast::disable(0x0);
+    CHECK(suppress_eoi_broadcast::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_x2apic_isr0")
@@ -11527,6 +11623,84 @@ TEST_CASE("ia32_x2apic_lvt_cmci")
     dump(0);
 }
 
+TEST_CASE("ia32_x2apic_lvt_cmci_vector")
+{
+    MockRepository mocks;
+    setup_intrinsics(mocks);
+
+    using namespace intel_x64::msrs::ia32_x2apic_lvt_cmci;
+
+    vector::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(vector::get() == (vector::mask >> vector::from));
+
+    vector::set(vector::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(vector::get(vector::mask) == (vector::mask >> vector::from));
+}
+
+TEST_CASE("ia32_x2apic_lvt_cmci_delivery_mode")
+{
+    MockRepository mocks;
+    setup_intrinsics(mocks);
+
+    using namespace intel_x64::msrs::ia32_x2apic_lvt_cmci;
+
+    delivery_mode::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(delivery_mode::get() == (delivery_mode::mask >> delivery_mode::from));
+
+    delivery_mode::set(delivery_mode::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(delivery_mode::get(delivery_mode::mask) == (delivery_mode::mask >> delivery_mode::from));
+
+    delivery_mode::set(0x0ULL);
+    delivery_mode::dump(0);
+    delivery_mode::set(0x2ULL);
+    delivery_mode::dump(0);
+    delivery_mode::set(0x4ULL);
+    delivery_mode::dump(0);
+    delivery_mode::set(0x5ULL);
+    delivery_mode::dump(0);
+    delivery_mode::set(0x7ULL);
+    delivery_mode::dump(0);
+    delivery_mode::set(0x1ULL);
+    delivery_mode::dump(0);
+}
+
+TEST_CASE("ia32_x2apic_lvt_cmci_delivery_status")
+{
+    MockRepository mocks;
+    setup_intrinsics(mocks);
+
+    using namespace intel_x64::msrs::ia32_x2apic_lvt_cmci;
+
+    delivery_status::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(delivery_status::get() == (delivery_status::mask >> delivery_status::from));
+
+    delivery_status::set(delivery_status::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(delivery_status::get(delivery_status::mask) == (delivery_status::mask >> delivery_status::from));
+
+    delivery_status::set(0x0000000000000000ULL);
+    dump(0);
+    delivery_status::set(0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
+}
+
+TEST_CASE("ia32_x2apic_lvt_cmci_mask_bit")
+{
+    MockRepository mocks;
+    setup_intrinsics(mocks);
+
+    using namespace intel_x64::msrs::ia32_x2apic_lvt_cmci;
+
+    mask_bit::enable();
+    CHECK(mask_bit::is_enabled());
+    mask_bit::disable();
+    CHECK(mask_bit::is_disabled());
+
+    mask_bit::enable(mask_bit::mask);
+    CHECK(mask_bit::is_enabled(mask_bit::mask));
+    mask_bit::disable(0x0);
+    CHECK(mask_bit::is_disabled(0x0));
+}
+
 TEST_CASE("ia32_x2apic_icr")
 {
     MockRepository mocks;
@@ -11537,6 +11711,140 @@ TEST_CASE("ia32_x2apic_icr")
     set(0xFFFFFFFFFFFFFFFFULL);
     CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
     dump(0);
+}
+
+TEST_CASE("ia32_x2apic_icr_vector")
+{
+    MockRepository mocks;
+    setup_intrinsics(mocks);
+
+    using namespace intel_x64::msrs::ia32_x2apic_icr;
+
+    vector::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(vector::get() == (vector::mask >> vector::from));
+
+    vector::set(vector::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(vector::get(vector::mask) == (vector::mask >> vector::from));
+}
+
+TEST_CASE("ia32_x2apic_icr_delivery_mode")
+{
+    MockRepository mocks;
+    setup_intrinsics(mocks);
+
+    using namespace intel_x64::msrs::ia32_x2apic_icr;
+
+    delivery_mode::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(delivery_mode::get() == (delivery_mode::mask >> delivery_mode::from));
+
+    delivery_mode::set(delivery_mode::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(delivery_mode::get(delivery_mode::mask) == (delivery_mode::mask >> delivery_mode::from));
+
+    delivery_mode::set(0x0ULL);
+    delivery_mode::dump(0);
+    delivery_mode::set(0x2ULL);
+    delivery_mode::dump(0);
+    delivery_mode::set(0x4ULL);
+    delivery_mode::dump(0);
+    delivery_mode::set(0x5ULL);
+    delivery_mode::dump(0);
+    delivery_mode::set(0x7ULL);
+    delivery_mode::dump(0);
+    delivery_mode::set(0x1ULL);
+    delivery_mode::dump(0);
+}
+
+TEST_CASE("ia32_x2apic_icr_destination_mode")
+{
+    MockRepository mocks;
+    setup_intrinsics(mocks);
+
+    using namespace intel_x64::msrs::ia32_x2apic_icr;
+
+    destination_mode::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(destination_mode::get() == (destination_mode::mask >> destination_mode::from));
+
+    destination_mode::set(destination_mode::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(destination_mode::get(destination_mode::mask) == (destination_mode::mask >> destination_mode::from));
+
+    destination_mode::set(0x0000000000000000ULL);
+    dump(0);
+    destination_mode::set(0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
+}
+
+TEST_CASE("ia32_x2apic_icr_level")
+{
+    MockRepository mocks;
+    setup_intrinsics(mocks);
+
+    using namespace intel_x64::msrs::ia32_x2apic_icr;
+
+    level::enable();
+    CHECK(level::is_enabled());
+    level::disable();
+    CHECK(level::is_disabled());
+
+    level::enable(level::mask);
+    CHECK(level::is_enabled(level::mask));
+    level::disable(0x0);
+    CHECK(level::is_disabled(0x0));
+}
+
+TEST_CASE("ia32_x2apic_icr_trigger_mode")
+{
+    MockRepository mocks;
+    setup_intrinsics(mocks);
+
+    using namespace intel_x64::msrs::ia32_x2apic_icr;
+
+    trigger_mode::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(trigger_mode::get() == (trigger_mode::mask >> trigger_mode::from));
+
+    trigger_mode::set(trigger_mode::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(trigger_mode::get(trigger_mode::mask) == (trigger_mode::mask >> trigger_mode::from));
+
+    trigger_mode::set(0x0000000000000000ULL);
+    dump(0);
+    trigger_mode::set(0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
+}
+
+TEST_CASE("ia32_x2apic_icr_destination_shorthand")
+{
+    MockRepository mocks;
+    setup_intrinsics(mocks);
+
+    using namespace intel_x64::msrs::ia32_x2apic_icr;
+
+    destination_shorthand::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(destination_shorthand::get() == (destination_shorthand::mask >> destination_shorthand::from));
+
+    destination_shorthand::set(destination_shorthand::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(destination_shorthand::get(destination_shorthand::mask) == (destination_shorthand::mask >> destination_shorthand::from));
+
+    destination_shorthand::set(0x0ULL);
+    destination_shorthand::dump(0);
+    destination_shorthand::set(0x1ULL);
+    destination_shorthand::dump(0);
+    destination_shorthand::set(0x2ULL);
+    destination_shorthand::dump(0);
+    destination_shorthand::set(0x3ULL);
+    destination_shorthand::dump(0);
+}
+
+TEST_CASE("ia32_x2apic_icr_destination_field")
+{
+    MockRepository mocks;
+    setup_intrinsics(mocks);
+
+    using namespace intel_x64::msrs::ia32_x2apic_icr;
+
+    destination_field::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(destination_field::get() == (destination_field::mask >> destination_field::from));
+
+    destination_field::set(destination_field::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(destination_field::get(destination_field::mask) == (destination_field::mask >> destination_field::from));
 }
 
 TEST_CASE("ia32_x2apic_lvt_timer")
@@ -11551,6 +11859,80 @@ TEST_CASE("ia32_x2apic_lvt_timer")
     dump(0);
 }
 
+TEST_CASE("ia32_x2apic_lvt_timer_vector")
+{
+    MockRepository mocks;
+    setup_intrinsics(mocks);
+
+    using namespace intel_x64::msrs::ia32_x2apic_lvt_timer;
+
+    vector::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(vector::get() == (vector::mask >> vector::from));
+
+    vector::set(vector::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(vector::get(vector::mask) == (vector::mask >> vector::from));
+}
+
+TEST_CASE("ia32_x2apic_lvt_timer_delivery_status")
+{
+    MockRepository mocks;
+    setup_intrinsics(mocks);
+
+    using namespace intel_x64::msrs::ia32_x2apic_lvt_timer;
+
+    delivery_status::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(delivery_status::get() == (delivery_status::mask >> delivery_status::from));
+
+    delivery_status::set(delivery_status::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(delivery_status::get(delivery_status::mask) == (delivery_status::mask >> delivery_status::from));
+
+    delivery_status::set(0x0000000000000000ULL);
+    dump(0);
+    delivery_status::set(0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
+}
+
+TEST_CASE("ia32_x2apic_lvt_timer_mask_bit")
+{
+    MockRepository mocks;
+    setup_intrinsics(mocks);
+
+    using namespace intel_x64::msrs::ia32_x2apic_lvt_timer;
+
+    mask_bit::enable();
+    CHECK(mask_bit::is_enabled());
+    mask_bit::disable();
+    CHECK(mask_bit::is_disabled());
+
+    mask_bit::enable(mask_bit::mask);
+    CHECK(mask_bit::is_enabled(mask_bit::mask));
+    mask_bit::disable(0x0);
+    CHECK(mask_bit::is_disabled(0x0));
+}
+
+TEST_CASE("ia32_x2apic_lvt_timer_timer_mode")
+{
+    MockRepository mocks;
+    setup_intrinsics(mocks);
+
+    using namespace intel_x64::msrs::ia32_x2apic_lvt_timer;
+
+    timer_mode::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(timer_mode::get() == (timer_mode::mask >> timer_mode::from));
+
+    timer_mode::set(timer_mode::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(timer_mode::get(timer_mode::mask) == (timer_mode::mask >> timer_mode::from));
+
+    timer_mode::set(0x0ULL);
+    timer_mode::dump(0);
+    timer_mode::set(0x1ULL);
+    timer_mode::dump(0);
+    timer_mode::set(0x2ULL);
+    timer_mode::dump(0);
+    timer_mode::set(0x3ULL);
+    timer_mode::dump(0);
+}
+
 TEST_CASE("ia32_x2apic_lvt_thermal")
 {
     MockRepository mocks;
@@ -11561,6 +11943,84 @@ TEST_CASE("ia32_x2apic_lvt_thermal")
     set(0xFFFFFFFFFFFFFFFFULL);
     CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
     dump(0);
+}
+
+TEST_CASE("ia32_x2apic_lvt_thermal_vector")
+{
+    MockRepository mocks;
+    setup_intrinsics(mocks);
+
+    using namespace intel_x64::msrs::ia32_x2apic_lvt_thermal;
+
+    vector::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(vector::get() == (vector::mask >> vector::from));
+
+    vector::set(vector::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(vector::get(vector::mask) == (vector::mask >> vector::from));
+}
+
+TEST_CASE("ia32_x2apic_lvt_thermal_delivery_mode")
+{
+    MockRepository mocks;
+    setup_intrinsics(mocks);
+
+    using namespace intel_x64::msrs::ia32_x2apic_lvt_thermal;
+
+    delivery_mode::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(delivery_mode::get() == (delivery_mode::mask >> delivery_mode::from));
+
+    delivery_mode::set(delivery_mode::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(delivery_mode::get(delivery_mode::mask) == (delivery_mode::mask >> delivery_mode::from));
+
+    delivery_mode::set(0x0ULL);
+    delivery_mode::dump(0);
+    delivery_mode::set(0x2ULL);
+    delivery_mode::dump(0);
+    delivery_mode::set(0x4ULL);
+    delivery_mode::dump(0);
+    delivery_mode::set(0x5ULL);
+    delivery_mode::dump(0);
+    delivery_mode::set(0x7ULL);
+    delivery_mode::dump(0);
+    delivery_mode::set(0x1ULL);
+    delivery_mode::dump(0);
+}
+
+TEST_CASE("ia32_x2apic_lvt_thermal_delivery_status")
+{
+    MockRepository mocks;
+    setup_intrinsics(mocks);
+
+    using namespace intel_x64::msrs::ia32_x2apic_lvt_thermal;
+
+    delivery_status::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(delivery_status::get() == (delivery_status::mask >> delivery_status::from));
+
+    delivery_status::set(delivery_status::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(delivery_status::get(delivery_status::mask) == (delivery_status::mask >> delivery_status::from));
+
+    delivery_status::set(0x0000000000000000ULL);
+    dump(0);
+    delivery_status::set(0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
+}
+
+TEST_CASE("ia32_x2apic_lvt_thermal_mask_bit")
+{
+    MockRepository mocks;
+    setup_intrinsics(mocks);
+
+    using namespace intel_x64::msrs::ia32_x2apic_lvt_thermal;
+
+    mask_bit::enable();
+    CHECK(mask_bit::is_enabled());
+    mask_bit::disable();
+    CHECK(mask_bit::is_disabled());
+
+    mask_bit::enable(mask_bit::mask);
+    CHECK(mask_bit::is_enabled(mask_bit::mask));
+    mask_bit::disable(0x0);
+    CHECK(mask_bit::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_x2apic_lvt_pmi")
@@ -11575,6 +12035,82 @@ TEST_CASE("ia32_x2apic_lvt_pmi")
     dump(0);
 }
 
+TEST_CASE("ia32_x2apic_lvt_pmi_vector")
+{
+    MockRepository mocks;
+    setup_intrinsics(mocks);
+
+    using namespace intel_x64::msrs::ia32_x2apic_lvt_pmi;
+
+    vector::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(vector::get() == (vector::mask >> vector::from));
+
+    vector::set(vector::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(vector::get(vector::mask) == (vector::mask >> vector::from));
+}
+
+TEST_CASE("ia32_x2apic_lvt_pmi_delivery_mode")
+{
+    MockRepository mocks;
+    setup_intrinsics(mocks);
+
+    using namespace intel_x64::msrs::ia32_x2apic_lvt_pmi;
+
+    delivery_mode::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(delivery_mode::get() == (delivery_mode::mask >> delivery_mode::from));
+
+    delivery_mode::set(delivery_mode::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(delivery_mode::get(delivery_mode::mask) == (delivery_mode::mask >> delivery_mode::from));
+
+    delivery_mode::set(0x0ULL);
+    delivery_mode::dump(0);
+    delivery_mode::set(0x2ULL);
+    delivery_mode::dump(0);
+    delivery_mode::set(0x4ULL);
+    delivery_mode::dump(0);
+    delivery_mode::set(0x5ULL);
+    delivery_mode::dump(0);
+    delivery_mode::set(0x7ULL);
+    delivery_mode::dump(0);
+    delivery_mode::set(0x1ULL);
+    delivery_mode::dump(0);
+}
+
+TEST_CASE("ia32_x2apic_lvt_pmi_delivery_status")
+{
+    MockRepository mocks;
+    setup_intrinsics(mocks);
+
+    using namespace intel_x64::msrs::ia32_x2apic_lvt_pmi;
+
+    delivery_status::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(delivery_status::get() == (delivery_status::mask >> delivery_status::from));
+
+    delivery_status::set(delivery_status::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(delivery_status::get(delivery_status::mask) == (delivery_status::mask >> delivery_status::from));
+
+    delivery_status::set(0x0000000000000000ULL);
+    dump(0);
+}
+
+TEST_CASE("ia32_x2apic_lvt_pmi_mask_bit")
+{
+    MockRepository mocks;
+    setup_intrinsics(mocks);
+
+    using namespace intel_x64::msrs::ia32_x2apic_lvt_pmi;
+
+    mask_bit::enable();
+    CHECK(mask_bit::is_enabled());
+    mask_bit::disable();
+    CHECK(mask_bit::is_disabled());
+
+    mask_bit::enable(mask_bit::mask);
+    CHECK(mask_bit::is_enabled(mask_bit::mask));
+    mask_bit::disable(0x0);
+    CHECK(mask_bit::is_disabled(0x0));
+}
+
 TEST_CASE("ia32_x2apic_lvt_lint0")
 {
     MockRepository mocks;
@@ -11585,6 +12121,136 @@ TEST_CASE("ia32_x2apic_lvt_lint0")
     set(0xFFFFFFFFFFFFFFFFULL);
     CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
     dump(0);
+}
+
+TEST_CASE("ia32_x2apic_lvt_lint0_vector")
+{
+    MockRepository mocks;
+    setup_intrinsics(mocks);
+
+    using namespace intel_x64::msrs::ia32_x2apic_lvt_lint0;
+
+    vector::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(vector::get() == (vector::mask >> vector::from));
+
+    vector::set(vector::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(vector::get(vector::mask) == (vector::mask >> vector::from));
+}
+
+TEST_CASE("ia32_x2apic_lvt_lint0_delivery_mode")
+{
+    MockRepository mocks;
+    setup_intrinsics(mocks);
+
+    using namespace intel_x64::msrs::ia32_x2apic_lvt_lint0;
+
+    delivery_mode::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(delivery_mode::get() == (delivery_mode::mask >> delivery_mode::from));
+
+    delivery_mode::set(delivery_mode::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(delivery_mode::get(delivery_mode::mask) == (delivery_mode::mask >> delivery_mode::from));
+
+    delivery_mode::set(0x0ULL);
+    delivery_mode::dump(0);
+    delivery_mode::set(0x2ULL);
+    delivery_mode::dump(0);
+    delivery_mode::set(0x4ULL);
+    delivery_mode::dump(0);
+    delivery_mode::set(0x5ULL);
+    delivery_mode::dump(0);
+    delivery_mode::set(0x7ULL);
+    delivery_mode::dump(0);
+    delivery_mode::set(0x1ULL);
+    delivery_mode::dump(0);
+}
+
+TEST_CASE("ia32_x2apic_lvt_lint0_delivery_status")
+{
+    MockRepository mocks;
+    setup_intrinsics(mocks);
+
+    using namespace intel_x64::msrs::ia32_x2apic_lvt_lint0;
+
+    delivery_status::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(delivery_status::get() == (delivery_status::mask >> delivery_status::from));
+
+    delivery_status::set(delivery_status::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(delivery_status::get(delivery_status::mask) == (delivery_status::mask >> delivery_status::from));
+
+    delivery_status::set(0x0000000000000000ULL);
+    dump(0);
+    delivery_status::set(0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
+}
+
+TEST_CASE("ia32_x2apic_lvt_lint0_polarity")
+{
+    MockRepository mocks;
+    setup_intrinsics(mocks);
+
+    using namespace intel_x64::msrs::ia32_x2apic_lvt_lint0;
+
+    polarity::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(polarity::get() == (polarity::mask >> polarity::from));
+
+    polarity::set(polarity::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(polarity::get(polarity::mask) == (polarity::mask >> polarity::from));
+
+    polarity::set(0x0000000000000000ULL);
+    dump(0);
+    polarity::set(0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
+}
+
+TEST_CASE("ia32_x2apic_lvt_lint0_remote_irr")
+{
+    MockRepository mocks;
+    setup_intrinsics(mocks);
+
+    using namespace intel_x64::msrs::ia32_x2apic_lvt_lint0;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(remote_irr::get() == (remote_irr::mask >> remote_irr::from));
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(remote_irr::get(remote_irr::mask) == (remote_irr::mask >> remote_irr::from));
+}
+
+TEST_CASE("ia32_x2apic_lvt_lint0_trigger_mode")
+{
+    MockRepository mocks;
+    setup_intrinsics(mocks);
+
+    using namespace intel_x64::msrs::ia32_x2apic_lvt_lint0;
+
+    trigger_mode::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(trigger_mode::get() == (trigger_mode::mask >> trigger_mode::from));
+
+    trigger_mode::set(trigger_mode::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(trigger_mode::get(trigger_mode::mask) == (trigger_mode::mask >> trigger_mode::from));
+
+    trigger_mode::set(0x0000000000000000ULL);
+    dump(0);
+    trigger_mode::set(0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
+}
+
+TEST_CASE("ia32_x2apic_lvt_lint0_mask_bit")
+{
+    MockRepository mocks;
+    setup_intrinsics(mocks);
+
+    using namespace intel_x64::msrs::ia32_x2apic_lvt_lint0;
+
+    mask_bit::enable();
+    CHECK(mask_bit::is_enabled());
+    mask_bit::disable();
+    CHECK(mask_bit::is_disabled());
+
+    mask_bit::enable(mask_bit::mask);
+    CHECK(mask_bit::is_enabled(mask_bit::mask));
+    mask_bit::disable(0x0);
+    CHECK(mask_bit::is_disabled(0x0));
 }
 
 TEST_CASE("ia32_x2apic_lvt_lint1")
@@ -11599,6 +12265,136 @@ TEST_CASE("ia32_x2apic_lvt_lint1")
     dump(0);
 }
 
+TEST_CASE("ia32_x2apic_lvt_lint1_vector")
+{
+    MockRepository mocks;
+    setup_intrinsics(mocks);
+
+    using namespace intel_x64::msrs::ia32_x2apic_lvt_lint1;
+
+    vector::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(vector::get() == (vector::mask >> vector::from));
+
+    vector::set(vector::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(vector::get(vector::mask) == (vector::mask >> vector::from));
+}
+
+TEST_CASE("ia32_x2apic_lvt_lint1_delivery_mode")
+{
+    MockRepository mocks;
+    setup_intrinsics(mocks);
+
+    using namespace intel_x64::msrs::ia32_x2apic_lvt_lint1;
+
+    delivery_mode::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(delivery_mode::get() == (delivery_mode::mask >> delivery_mode::from));
+
+    delivery_mode::set(delivery_mode::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(delivery_mode::get(delivery_mode::mask) == (delivery_mode::mask >> delivery_mode::from));
+
+    delivery_mode::set(0x0ULL);
+    delivery_mode::dump(0);
+    delivery_mode::set(0x2ULL);
+    delivery_mode::dump(0);
+    delivery_mode::set(0x4ULL);
+    delivery_mode::dump(0);
+    delivery_mode::set(0x5ULL);
+    delivery_mode::dump(0);
+    delivery_mode::set(0x7ULL);
+    delivery_mode::dump(0);
+    delivery_mode::set(0x1ULL);
+    delivery_mode::dump(0);
+}
+
+TEST_CASE("ia32_x2apic_lvt_lint1_delivery_status")
+{
+    MockRepository mocks;
+    setup_intrinsics(mocks);
+
+    using namespace intel_x64::msrs::ia32_x2apic_lvt_lint1;
+
+    delivery_status::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(delivery_status::get() == (delivery_status::mask >> delivery_status::from));
+
+    delivery_status::set(delivery_status::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(delivery_status::get(delivery_status::mask) == (delivery_status::mask >> delivery_status::from));
+
+    delivery_status::set(0x0000000000000000ULL);
+    dump(0);
+    delivery_status::set(0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
+}
+
+TEST_CASE("ia32_x2apic_lvt_lint1_polarity")
+{
+    MockRepository mocks;
+    setup_intrinsics(mocks);
+
+    using namespace intel_x64::msrs::ia32_x2apic_lvt_lint1;
+
+    polarity::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(polarity::get() == (polarity::mask >> polarity::from));
+
+    polarity::set(polarity::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(polarity::get(polarity::mask) == (polarity::mask >> polarity::from));
+
+    polarity::set(0x0000000000000000ULL);
+    dump(0);
+    polarity::set(0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
+}
+
+TEST_CASE("ia32_x2apic_lvt_lint1_remote_irr")
+{
+    MockRepository mocks;
+    setup_intrinsics(mocks);
+
+    using namespace intel_x64::msrs::ia32_x2apic_lvt_lint1;
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(remote_irr::get() == (remote_irr::mask >> remote_irr::from));
+
+    g_msrs[addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(remote_irr::get(remote_irr::mask) == (remote_irr::mask >> remote_irr::from));
+}
+
+TEST_CASE("ia32_x2apic_lvt_lint1_trigger_mode")
+{
+    MockRepository mocks;
+    setup_intrinsics(mocks);
+
+    using namespace intel_x64::msrs::ia32_x2apic_lvt_lint1;
+
+    trigger_mode::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(trigger_mode::get() == (trigger_mode::mask >> trigger_mode::from));
+
+    trigger_mode::set(trigger_mode::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(trigger_mode::get(trigger_mode::mask) == (trigger_mode::mask >> trigger_mode::from));
+
+    trigger_mode::set(0x0000000000000000ULL);
+    dump(0);
+    trigger_mode::set(0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
+}
+
+TEST_CASE("ia32_x2apic_lvt_lint1_mask_bit")
+{
+    MockRepository mocks;
+    setup_intrinsics(mocks);
+
+    using namespace intel_x64::msrs::ia32_x2apic_lvt_lint1;
+
+    mask_bit::enable();
+    CHECK(mask_bit::is_enabled());
+    mask_bit::disable();
+    CHECK(mask_bit::is_disabled());
+
+    mask_bit::enable(mask_bit::mask);
+    CHECK(mask_bit::is_enabled(mask_bit::mask));
+    mask_bit::disable(0x0);
+    CHECK(mask_bit::is_disabled(0x0));
+}
+
 TEST_CASE("ia32_x2apic_lvt_error")
 {
     MockRepository mocks;
@@ -11608,6 +12404,39 @@ TEST_CASE("ia32_x2apic_lvt_error")
 
     set(0xFFFFFFFFFFFFFFFFULL);
     CHECK(get() == 0xFFFFFFFFFFFFFFFFULL);
+    dump(0);
+}
+
+TEST_CASE("ia32_x2apic_lvt_error_vector")
+{
+    MockRepository mocks;
+    setup_intrinsics(mocks);
+
+    using namespace intel_x64::msrs::ia32_x2apic_lvt_error;
+
+    vector::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(vector::get() == (vector::mask >> vector::from));
+
+    vector::set(vector::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(vector::get(vector::mask) == (vector::mask >> vector::from));
+}
+
+TEST_CASE("ia32_x2apic_lvt_error_delivery_status")
+{
+    MockRepository mocks;
+    setup_intrinsics(mocks);
+
+    using namespace intel_x64::msrs::ia32_x2apic_lvt_error;
+
+    delivery_status::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(delivery_status::get() == (delivery_status::mask >> delivery_status::from));
+
+    delivery_status::set(delivery_status::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(delivery_status::get(delivery_status::mask) == (delivery_status::mask >> delivery_status::from));
+
+    delivery_status::set(0x0000000000000000ULL);
+    dump(0);
+    delivery_status::set(0xFFFFFFFFFFFFFFFFULL);
     dump(0);
 }
 
@@ -11656,6 +12485,21 @@ TEST_CASE("ia32_x2apic_self_ipi")
 
     set(0xFFFFFFFFFFFFFFFFULL);
     CHECK(g_msrs[addr] == 0xFFFFFFFFFFFFFFFFULL);
+}
+
+TEST_CASE("ia32_x2apic_self_ipi_vector")
+{
+    MockRepository mocks;
+    setup_intrinsics(mocks);
+
+    using namespace intel_x64::msrs::ia32_x2apic_self_ipi;
+
+    set(0x0000000000000000ULL);
+    vector::set(0xFFFFFFFFFFFFFFFFULL);
+    CHECK(g_msrs[addr] == vector::mask);
+
+    vector::set(vector::mask, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(g_msrs[addr] == vector::mask);
 }
 
 TEST_CASE("ia32_debug_interface")
