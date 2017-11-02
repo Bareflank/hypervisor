@@ -43,7 +43,7 @@ fi
 if [[ "$1" == "all" ]]; then
     files=$(ls_not_deleted | grep -Ee "\.(cpp|h|c)$" || true)
 else
-    files=$(git diff --relative --name-only HEAD $PWD | grep -Ee "\.(cpp|h|c)$" || true)
+    files=$(git diff --relative --name-only --diff-filter=d HEAD $PWD | grep -Ee "\.(cpp|h|c)$" || true)
 
     echo "Files undergoing astyle checks:"
     for f in $files; do
