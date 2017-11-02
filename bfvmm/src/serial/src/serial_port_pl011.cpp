@@ -19,8 +19,6 @@
 #include <bfgsl.h>
 #include <serial/serial_port_pl011.h>
 
-using namespace intrinsics;
-using namespace portio;
 using namespace serial_pl011;
 
 serial_port_pl011::serial_port_pl011(serial_port_pl011::port_type port) noexcept :
@@ -55,7 +53,7 @@ serial_port_pl011::set_baud_rate_divisor(uint32_t int_part, uint32_t frac_part) 
     int_part &= 0xFFFF;
     frac_part &= 0x3F;
 
-    value_type lcr_h = offset_ind(uartlcr_h_reg);
+    auto lcr_h = offset_ind(uartlcr_h_reg);
 
     offset_outd(uartibrd_reg, int_part);
     offset_outd(uartfbrd_reg, frac_part);
@@ -155,40 +153,11 @@ serial_port_pl011::write(char c) noexcept
     while (get_status_full_transmitter())
     { }
 
-    offset_outd(uartdr_reg, static_cast<value_type>(c));
-}
-
-void
-serial_port_pl011::write(const std::string &str) noexcept
-{
-    for (auto c : str) {
-        this->write(c);
-    }
-}
-
-void
-serial_port_pl011::write(const char *str, size_t len) noexcept
-{
-    for (size_t i = 0; i < len; ++i) {
-        this->write(str[i]);
-    }
+    offset_outd(uartdr_reg, static_cast<value_type_32>(static_cast<unsigned char>(c)));
 }
 
 bool
 serial_port_pl011::get_status_full_transmitter() const noexcept
 {
     return (offset_ind(uartfr_reg) & uartfr_tx_full) != 0;
-}
-
-serial_port_pl011::value_type
-serial_port_pl011::offset_ind(port_addr_type offset) const noexcept
-{
-    return portio::ind(gsl::narrow_cast<port_addr_type>(m_port + offset));
-}
-
-void
-serial_port_pl011::offset_outd(port_addr_type offset, value_type data) noexcept
-{
-    portio::outd(gsl::narrow_cast<port_addr_type>(m_port + offset),
-                 gsl::narrow_cast<value_type>(data));
 }

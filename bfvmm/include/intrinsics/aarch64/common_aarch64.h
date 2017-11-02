@@ -19,6 +19,4 @@
 #ifndef INTRINSICS_AARCH64_COMMON_AARCH64_H
 #define INTRINSICS_AARCH64_COMMON_AARCH64_H
 
-#include <intrinsics/aarch64/common/portio_aarch64.h>
-
 #endif

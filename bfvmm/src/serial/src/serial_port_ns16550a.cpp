@@ -19,14 +19,12 @@
 #include <bfgsl.h>
 #include <serial/serial_port_ns16550a.h>
 
-using namespace intrinsics;
-using namespace portio;
 using namespace serial_ns16550a;
 
 serial_port_ns16550a::serial_port_ns16550a(serial_port_ns16550a::port_type port) noexcept :
     m_port(port)
 {
-    serial_port_ns16550a::value_type bits = 0;
+    value_type_8 bits = 0;
 
     this->disable_dlab();
 
@@ -34,8 +32,8 @@ serial_port_ns16550a::serial_port_ns16550a(serial_port_ns16550a::port_type port)
     bits |= fifo_control_clear_recieve_fifo;
     bits |= fifo_control_clear_transmit_fifo;
 
-    portio::outb(gsl::narrow_cast<port_addr_type>(m_port + interrupt_en_reg), gsl::narrow_cast<port_8bit_type>(0x00));
-    portio::outb(gsl::narrow_cast<port_addr_type>(m_port + fifo_control_reg), gsl::narrow_cast<port_8bit_type>(bits));
+    offset_outb(interrupt_en_reg, gsl::narrow_cast<value_type_8>(0x00));
+    offset_outb(fifo_control_reg, gsl::narrow_cast<value_type_8>(bits));
 
     this->set_baud_rate(DEFAULT_BAUD_RATE);
     this->set_data_bits(DEFAULT_DATA_BITS);
@@ -58,8 +56,8 @@ serial_port_ns16550a::set_baud_rate(baud_rate_t rate) noexcept
 
     this->enable_dlab();
 
-    portio::outb(gsl::narrow_cast<port_addr_type>(m_port + baud_rate_lo_reg), gsl::narrow_cast<port_8bit_type>(lsb));
-    portio::outb(gsl::narrow_cast<port_addr_type>(m_port + baud_rate_hi_reg), gsl::narrow_cast<port_8bit_type>(msb));
+    offset_outb(baud_rate_lo_reg, gsl::narrow_cast<value_type_8>(lsb));
+    offset_outb(baud_rate_hi_reg, gsl::narrow_cast<value_type_8>(msb));
 
     this->disable_dlab();
 }
@@ -69,8 +67,8 @@ serial_port_ns16550a::baud_rate() const noexcept
 {
     this->enable_dlab();
 
-    auto lsb = portio::inb(gsl::narrow_cast<port_addr_type>(m_port + baud_rate_lo_reg));
-    auto msb = portio::inb(gsl::narrow_cast<port_addr_type>(m_port + baud_rate_hi_reg));
+    auto lsb = offset_inb(baud_rate_lo_reg);
+    auto msb = offset_inb(baud_rate_hi_reg);
 
     this->disable_dlab();
 
@@ -117,18 +115,18 @@ serial_port_ns16550a::baud_rate() const noexcept
 void
 serial_port_ns16550a::set_data_bits(data_bits_t bits) noexcept
 {
-    auto reg = portio::inb(gsl::narrow_cast<port_addr_type>(m_port + line_control_reg));
+    auto reg = offset_inb(line_control_reg);
 
     reg = reg & gsl::narrow_cast<decltype(reg)>(~line_control_data_mask);
     reg = reg | gsl::narrow_cast<decltype(reg)>(bits & line_control_data_mask);
 
-    portio::outb(gsl::narrow_cast<port_addr_type>(m_port + line_control_reg), reg);
+    offset_outb(line_control_reg, reg);
 }
 
 serial_port_ns16550a::data_bits_t
 serial_port_ns16550a::data_bits() const noexcept
 {
-    auto reg = portio::inb(gsl::narrow_cast<port_addr_type>(m_port + line_control_reg));
+    auto reg = offset_inb(line_control_reg);
 
     switch (reg & line_control_data_mask) {
         case char_length_5:
@@ -145,18 +143,18 @@ serial_port_ns16550a::data_bits() const noexcept
 void
 serial_port_ns16550a::set_stop_bits(stop_bits_t bits) noexcept
 {
-    auto reg = portio::inb(gsl::narrow_cast<port_addr_type>(m_port + line_control_reg));
+    auto reg = offset_inb(line_control_reg);
 
     reg = reg & gsl::narrow_cast<decltype(reg)>(~line_control_stop_mask);
     reg = reg | gsl::narrow_cast<decltype(reg)>(bits & line_control_stop_mask);
 
-    portio::outb(gsl::narrow_cast<port_addr_type>(m_port + line_control_reg), reg);
+    offset_outb(line_control_reg, reg);
 }
 
 serial_port_ns16550a::stop_bits_t
 serial_port_ns16550a::stop_bits() const noexcept
 {
-    auto reg = portio::inb(gsl::narrow_cast<port_addr_type>(m_port + line_control_reg));
+    auto reg = offset_inb(line_control_reg);
 
     switch (reg & line_control_stop_mask) {
         case stop_bits_1:
@@ -169,18 +167,18 @@ serial_port_ns16550a::stop_bits() const noexcept
 void
 serial_port_ns16550a::set_parity_bits(parity_bits_t bits) noexcept
 {
-    auto reg = portio::inb(gsl::narrow_cast<port_addr_type>(m_port + line_control_reg));
+    auto reg = offset_inb(line_control_reg);
 
     reg = reg & gsl::narrow_cast<decltype(reg)>(~line_control_parity_mask);
     reg = reg | gsl::narrow_cast<decltype(reg)>(bits & line_control_parity_mask);
 
-    portio::outb(gsl::narrow_cast<port_addr_type>(m_port + line_control_reg), reg);
+    offset_outb(line_control_reg, reg);
 }
 
 serial_port_ns16550a::parity_bits_t
 serial_port_ns16550a::parity_bits() const noexcept
 {
-    auto reg = portio::inb(gsl::narrow_cast<port_addr_type>(m_port + line_control_reg));
+    auto reg = offset_inb(line_control_reg);
 
     switch (reg & line_control_parity_mask) {
         case parity_odd:
@@ -202,45 +200,27 @@ serial_port_ns16550a::write(char c) noexcept
     while (!get_line_status_empty_transmitter())
     { }
 
-    portio::outb(m_port, gsl::narrow_cast<port_8bit_type>(c));
-}
-
-void
-serial_port_ns16550a::write(const std::string &str) noexcept
-{
-    for (auto c : str) {
-        this->write(c);
-    }
-}
-
-void
-serial_port_ns16550a::write(const char *str, size_t len) noexcept
-{
-    gsl::cstring_span<> span(str, gsl::narrow_cast<std::ptrdiff_t>(len));
-
-    for (auto c : span) {
-        this->write(c);
-    }
+    offset_outb(0, gsl::narrow_cast<value_type_8>(c));
 }
 
 void
 serial_port_ns16550a::enable_dlab() const noexcept
 {
-    auto reg = portio::inb(gsl::narrow_cast<port_addr_type>(m_port + line_control_reg));
+    auto reg = offset_inb(line_control_reg);
     reg = reg | gsl::narrow_cast<decltype(reg)>(dlab);
-    portio::outb(gsl::narrow_cast<port_addr_type>(m_port + line_control_reg), reg);
+    offset_outb(line_control_reg, reg);
 }
 
 void
 serial_port_ns16550a::disable_dlab() const noexcept
 {
-    auto reg = portio::inb(gsl::narrow_cast<port_addr_type>(m_port + line_control_reg));
+    auto reg = offset_inb(line_control_reg);
     reg = reg & gsl::narrow_cast<decltype(reg)>(~(dlab));
-    portio::outb(gsl::narrow_cast<port_addr_type>(m_port + line_control_reg), reg);
+    offset_outb(line_control_reg, reg);
 }
 
 bool
 serial_port_ns16550a::get_line_status_empty_transmitter() const noexcept
 {
-    return (portio::inb(gsl::narrow_cast<port_addr_type>(m_port + line_status_reg)) & line_status_empty_transmitter) != 0;
+    return (offset_inb(line_status_reg) & line_status_empty_transmitter) != 0;
 }

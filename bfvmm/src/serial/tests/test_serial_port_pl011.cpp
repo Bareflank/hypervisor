@@ -27,7 +27,7 @@
 
 #ifdef _HIPPOMOCKS__ENABLE_CFUNC_MOCKING_SUPPORT
 
-static std::map<serial_port_pl011::port_type, serial_port_pl011::value_type> g_ports;
+static std::map<serial_port_pl011::port_type, serial_port_pl011::value_type_32> g_ports;
 
 static uint32_t
 mock_ind(uint16_t port) noexcept
