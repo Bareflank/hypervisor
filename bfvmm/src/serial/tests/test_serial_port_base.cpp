@@ -79,6 +79,11 @@ public:
         str += c;
     }
 
+    virtual void set_port(port_type port) noexcept override
+    {
+        (void) port;
+    }
+
     using serial_port_base::write;
     using serial_port_base::offset_inb;
     using serial_port_base::offset_ind;

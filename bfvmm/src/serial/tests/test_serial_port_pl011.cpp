@@ -79,6 +79,20 @@ TEST_CASE("serial: success")
     CHECK((g_ports[DEFAULT_COM_PORT + serial_pl011::uartlcr_h_reg] & serial_pl011::uartlcr_h_parity_mask) == serial_port_pl011::DEFAULT_PARITY_BITS);
 }
 
+TEST_CASE("serial: port and set_port")
+{
+    MockRepository mocks;
+    mock_serial(mocks);
+
+    auto const invport = static_cast<serial_port_pl011::port_type>(~DEFAULT_COM_PORT);
+
+    serial_port_pl011::instance()->set_port(invport);
+    CHECK(serial_port_pl011::instance()->port() == invport);
+
+    serial_port_pl011::instance()->set_port(DEFAULT_COM_PORT);
+    CHECK(serial_port_pl011::instance()->port() == DEFAULT_COM_PORT);
+}
+
 TEST_CASE("serial: set_baud_rate_success")
 {
     MockRepository mocks;
