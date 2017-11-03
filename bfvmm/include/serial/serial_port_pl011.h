@@ -336,6 +336,18 @@ public:
     ///
     parity_bits_t parity_bits() const noexcept;
 
+    /// Set Port
+    ///
+    /// Change the peripheral port/base address at runtime.
+    ///
+    /// @expects none
+    /// @ensures none
+    ///
+    virtual void set_port(port_type port) noexcept override
+    {
+        m_port = port;
+    }
+
     /// Port
     ///
     /// @expects none
