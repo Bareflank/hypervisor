@@ -54,6 +54,12 @@ TEST_CASE("serial: support")
     CHECK_NOTHROW(_outd(0, 0));
 }
 
+TEST_CASE("serial: constructor with specific port")
+{
+    serial_port_pl011 ser(0x1234);
+    CHECK(ser.port() == 0x1234);
+}
+
 TEST_CASE("serial: constructor_null_intrinsics")
 {
     CHECK_NOTHROW(std::make_unique<serial_port_pl011>());

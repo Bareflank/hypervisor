@@ -24,9 +24,15 @@
 #ifndef BFSUPPORT_H
 #define BFSUPPORT_H
 
+#include <bfarch.h>
 #include <bftypes.h>
 #include <bfconstants.h>
 #include <bferrorcodes.h>
+#include <bfexports.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
  * @struct section_info_t
@@ -101,6 +107,24 @@ struct section_info_t {
 };
 
 /**
+ * @struct platform_info_t
+ *
+ * Provides platform-specific information to be passed into the VMM from
+ * bfdriver. Definition of this struct varies based on build target.
+ *
+ * @var platform_info_t::_dummy
+ *      dummy member to avoid an empty struct on platforms not needing platform info
+ */
+struct platform_info_t {
+    int _dummy;
+
+#if defined(BF_AARCH64)
+    /// Address of serial peripheral within kernel space
+    uintptr_t serial_address;
+#endif
+};
+
+/**
  * @struct crt_info_t
  *
  * Provides information for executing an application including section
@@ -130,6 +154,8 @@ struct section_info_t {
  *     (optional) vcpuid the executable is running on
  * @var crt_info_t::program_break
  *     (optional) the executable's program break
+ * @var crt_info_t::platform_info
+ *     platform-specific information from bfdriver
  */
 struct crt_info_t {
 
@@ -149,6 +175,8 @@ struct crt_info_t {
     uintptr_t func;
     uintptr_t vcpuid;
     uintptr_t program_break;
+
+    struct platform_info_t platform_info;
 };
 
 /**
@@ -180,6 +208,21 @@ struct crt_info_t {
 using _start_t = int64_t (*)(char *stack, const struct crt_info_t *);
 #else
 typedef int64_t (*_start_t)(char *stack, const struct crt_info_t *);
+#endif
+
+/**
+ * get_platform_info
+ *
+ * Get a pointer to a populated platform_info_t. The returned struct is not
+ * to be freed by the caller. Returned pointer will never be null.
+ *
+ * @return pointer to populated platform_info_t
+ */
+EXPORT_SYM struct platform_info_t *
+get_platform_info();
+
+#ifdef __cplusplus
+}
 #endif
 
 #endif

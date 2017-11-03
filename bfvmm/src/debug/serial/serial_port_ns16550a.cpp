@@ -17,6 +17,8 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #include <bfgsl.h>
+#include <bfarch.h>
+#include <bfsupport.h>
 #include <debug/serial/serial_port_ns16550a.h>
 
 namespace bfvmm
@@ -24,9 +26,26 @@ namespace bfvmm
 
 using namespace serial_ns16550a;
 
-serial_port_ns16550a::serial_port_ns16550a(serial_port_ns16550a::port_type port) noexcept :
-    m_port(port)
+serial_port_ns16550a::serial_port_ns16550a() noexcept
 {
+#ifdef BF_AARCH64
+    auto platform_info = get_platform_info();
+    auto port = reinterpret_cast<port_type>(platform_info->serial_address);
+    init(port);
+#else
+    init(DEFAULT_COM_PORT);
+#endif
+}
+
+serial_port_ns16550a::serial_port_ns16550a(serial_port_ns16550a::port_type port) noexcept
+{
+    init(port);
+}
+
+void serial_port_ns16550a::init(serial_port_ns16550a::port_type port) noexcept
+{
+    m_port = port;
+
     value_type_8 bits = 0;
 
     this->disable_dlab();
