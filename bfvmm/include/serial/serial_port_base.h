@@ -79,6 +79,17 @@ public:
     /// @return the serial device's port
     virtual port_type port() const noexcept = 0;
 
+    /// Set Port
+    ///
+    /// Change the peripheral port/base address at runtime.
+    ///
+    /// @param port serial peripheral port or base address
+    ///
+    /// @expects none
+    /// @ensures none
+    ///
+    virtual void set_port(port_type port) noexcept = 0;
+
     /// Write Character
     ///
     /// Writes a character to the serial device.

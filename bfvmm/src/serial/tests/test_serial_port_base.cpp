@@ -79,6 +79,11 @@ public:
         str += c;
     }
 
+    virtual void set_port(port_type port) noexcept override
+    {
+        (void) port;
+    }
+
     using serial_port_base::write;
     using serial_port_base::offset_inb;
     using serial_port_base::offset_ind;
@@ -86,7 +91,17 @@ public:
     using serial_port_base::offset_outd;
 };
 
-TEST_CASE("serial_base: outb, inb, outd, ind")
+TEST_CASE("serial_port_base: tester self-test")
+{
+    serial_port_base_tester tester;
+
+    CHECK(tester.port() == DEFAULT_COM_PORT);
+
+    tester.set_port(DEFAULT_COM_PORT + 1);
+    CHECK(tester.port() == DEFAULT_COM_PORT);
+}
+
+TEST_CASE("serial_port_base: outb, inb, outd, ind")
 {
     MockRepository mocks;
     mock_portio(mocks);
@@ -102,7 +117,7 @@ TEST_CASE("serial_base: outb, inb, outd, ind")
     CHECK(tester.offset_ind(2) == 0x55aa55aa);
 }
 
-TEST_CASE("serial_base: write string")
+TEST_CASE("serial_port_base: write string")
 {
     MockRepository mocks;
     mock_portio(mocks);
@@ -113,7 +128,7 @@ TEST_CASE("serial_base: write string")
     CHECK(tester.str == "hello world");
 }
 
-TEST_CASE("serial_base: write char buffer")
+TEST_CASE("serial_port_base: write char buffer")
 {
     MockRepository mocks;
     mock_portio(mocks);
