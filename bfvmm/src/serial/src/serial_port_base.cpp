@@ -43,7 +43,7 @@ serial_port_base::offset_inb(serial_port_base::port_type offset) const noexcept
 #if defined(BF_X64)
     return x64::portio::inb(gsl::narrow_cast<port_type>(port() + offset));
 #elif defined(BF_AARCH64)
-    auto ptr = static_cast<uint8_t volatile *>(port() + offset);
+    auto ptr = reinterpret_cast<uint8_t volatile *>(port() + offset);
     return *ptr;
 #endif
 }
@@ -54,7 +54,7 @@ serial_port_base::offset_ind(serial_port_base::port_type offset) const noexcept
 #if defined(BF_X64)
     return x64::portio::ind(gsl::narrow_cast<port_type>(port() + offset));
 #elif defined(BF_AARCH64)
-    auto ptr = static_cast<uint32_t volatile *>(port() + offset);
+    auto ptr = reinterpret_cast<uint32_t volatile *>(port() + offset);
     return *ptr;
 #endif
 }
@@ -66,7 +66,7 @@ serial_port_base::offset_outb(serial_port_base::port_type offset, serial_port_ba
     x64::portio::outb(gsl::narrow_cast<port_type>(port() + offset),
                       gsl::narrow_cast<value_type_8>(data));
 #elif defined(BF_AARCH64)
-    auto ptr = static_cast<uint8_t volatile *>(port() + offset);
+    auto ptr = reinterpret_cast<uint8_t volatile *>(port() + offset);
     *ptr = data;
 #endif
 }
@@ -78,7 +78,7 @@ serial_port_base::offset_outd(serial_port_base::port_type offset, serial_port_ba
     x64::portio::outd(gsl::narrow_cast<port_type>(port() + offset),
                       gsl::narrow_cast<value_type_32>(data));
 #elif defined(BF_AARCH64)
-    auto ptr = static_cast<uint32_t volatile *>(port() + offset);
+    auto ptr = reinterpret_cast<uint32_t volatile *>(port() + offset);
     *ptr = data;
 #endif
 }
