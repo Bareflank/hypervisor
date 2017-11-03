@@ -20,6 +20,7 @@
 #ifndef BFCONSTANTS_H
 #define BFCONSTANTS_H
 
+#include <bfarch.h>
 #include <bftypes.h>
 
 /*
@@ -262,7 +263,7 @@
 /*
  * Default Serial COM Port
  *
- * Possible values include (but not limited to):
+ * On x64, possible values include (but not limited to):
  *    - 0x03F8U  // COM1
  *    - 0x02F8U  // COM2
  *    - 0x03E8U  // COM3
@@ -270,10 +271,44 @@
  *    - 0xE000U
  *    - 0xE010U
  *
+ * On aarch64, the value is the serial peripheral's physical base address.
+ *
  * Note: See bfvmm/serial/serial_port_ns16550a.h
  */
 #ifndef DEFAULT_COM_PORT
-#define DEFAULT_COM_PORT 0x3F8U
+#if defined(BF_AARCH64)
+#   define DEFAULT_COM_PORT 0x09000000
+#else
+#   define DEFAULT_COM_PORT 0x3F8U
+#   define DEFAULT_COM_DRIVER serial_port_ns16550a
+#endif
+#endif
+
+/*
+ * Serial Port Driver
+ *
+ * Possible values include:
+ *     - serial_port_ns16550a
+ *     - serial_port_pl011
+ *
+ * On x64, this should always be serial_port_ns16550a.
+ */
+#ifndef DEFAULT_COM_DRIVER
+#if defined(BF_AARCH64)
+#   define DEFAULT_COM_DRIVER serial_port_pl011
+#else
+#   define DEFAULT_COM_DRIVER serial_port_ns16550a
+#endif
+#endif
+
+/*
+ * Serial port memory length (aarch64 only)
+ *
+ * This is the length of the memory region occupied by the memory-mapped
+ * serial port.
+ */
+#if !defined(DEFAULT_COM_LENGTH) && defined(BF_AARCH64)
+#define DEFAULT_COM_LENGTH 0x1000
 #endif
 
 /*

@@ -84,6 +84,12 @@ private_setup_tls(void)
 }
 
 int64_t
+private_setup_info(void)
+{
+    return platform_populate_info(&g_info.platform_info);
+}
+
+int64_t
 private_call_vmm(uintptr_t request, uintptr_t arg1, uintptr_t arg2, uintptr_t arg3)
 {
     int64_t ret = 0;
@@ -209,6 +215,8 @@ common_reset(void)
 {
     int64_t i;
 
+    platform_unload_info(&g_info.platform_info);
+
     for (i = 0; i < g_num_modules; i++) {
         if (g_modules[i].exec != 0) {
             platform_free_rwe(g_modules[i].exec, g_modules[i].exec_size);
@@ -327,6 +335,11 @@ common_load_vmm(void)
     }
 
     ret = private_setup_tls();
+    if (ret != BF_SUCCESS) {
+        goto failure;
+    }
+
+    ret = private_setup_info();
     if (ret != BF_SUCCESS) {
         goto failure;
     }

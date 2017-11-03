@@ -36,9 +36,12 @@ extern "C" void mock_abort() noexcept(false);
 #include <bfconstants.h>
 #include <bfehframelist.h>
 #include <bfdwarf.h>
+#include <cstring>
 
 using init_t = void (*)();
 using fini_t = void (*)();
+
+static struct platform_info_t g_platform_info = { false };
 
 extern "C" int WEAK_SYM
 MAIN(int argc, const char *argv[])
@@ -144,6 +147,9 @@ _start_c(const crt_info_t *info) noexcept
     //
 
     if (info->arg_type == 0 || info->request == BF_REQUEST_INIT) {
+        memcpy(&g_platform_info, &(info->platform_info), sizeof(g_platform_info));
+        g_platform_info.initialized = true;
+
         for (auto i = 0; i < info->info_num; i++) {
             auto sinfo = &gsl::at(info->info, i);
 
@@ -167,4 +173,14 @@ _start_c(const crt_info_t *info) noexcept
     }
 
     return ret;
+}
+
+extern "C" EXPORT_SYM struct platform_info_t *
+get_platform_info(void)
+{
+    if (g_platform_info.initialized) {
+        return &g_platform_info;
+    } else {
+        return nullptr;
+    }
 }

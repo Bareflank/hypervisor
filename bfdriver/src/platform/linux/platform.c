@@ -17,6 +17,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
+#include <bfarch.h>
 #include <bftypes.h>
 #include <bfdebug.h>
 #include <bfplatform.h>
@@ -31,6 +32,10 @@
 #include <linux/cpumask.h>
 #include <linux/sched.h>
 #include <linux/kallsyms.h>
+
+#if defined(BF_AARCH64)
+#   include <asm/io.h>
+#endif
 
 #include <asm/tlbflush.h>
 
@@ -195,3 +200,42 @@ platform_restore_preemption(void)
 {
     put_cpu();
 }
+
+#if defined(BF_AARCH64)
+
+int64_t
+platform_populate_info(struct platform_info_t *info)
+{
+    info->serial_address = (uintptr_t) ioremap(DEFAULT_COM_PORT, DEFAULT_COM_LENGTH);
+
+    return BF_SUCCESS;
+}
+
+void
+platform_unload_info(struct platform_info_t *info)
+{
+    if (info->serial_address) {
+        iounmap((void*) info->serial_address);
+        info->serial_address = 0;
+    }
+}
+
+#else
+
+int64_t
+platform_populate_info(struct platform_info_t *info)
+{
+    if (info) {
+        platform_memset(info, 0, sizeof(struct platform_info_t));
+    }
+
+    return BF_SUCCESS;
+}
+
+void
+platform_unload_info(struct platform_info_t *info)
+{
+    (void) info;
+}
+
+#endif

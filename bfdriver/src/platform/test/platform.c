@@ -121,3 +121,19 @@ platform_restore_preemption(void)
 void
 _vmcall(struct vmcall_registers_t *regs)
 { regs->r01 = 0; }
+
+int64_t
+platform_populate_info(struct platform_info_t *info)
+{
+    if (info) {
+        platform_memset(info, 0, sizeof(struct platform_info_t));
+    }
+
+    return BF_SUCCESS;
+}
+
+void
+platform_unload_info(struct platform_info_t *info)
+{
+    (void) info;
+}
