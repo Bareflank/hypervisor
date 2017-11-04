@@ -1,6 +1,6 @@
 //
 // Bareflank Hypervisor
-// Copyright (C) 2015 Assured Information Security, Inc.
+// Copyright (C) 2017 Assured Information Security, Inc.
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -16,15 +16,21 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#ifndef INTRINSICS_X86_INTEL_X64_H
-#define INTRINSICS_X86_INTEL_X64_H
+#include <intrinsics/x86/intel/apic/x2apic.h>
 
-#include <intrinsics/x86/common_x64.h>
-#include <intrinsics/x86/intel/vmx_intel_x64.h>
-#include <intrinsics/x86/intel/msrs_intel_x64.h>
-#include <intrinsics/x86/intel/crs_intel_x64.h>
-#include <intrinsics/x86/intel/vmcs/vmcs_intel_x64.h>
-#include <intrinsics/x86/intel/cpuid_intel_x64.h>
-#include <intrinsics/x86/intel/apic/apic_intel_x64.h>
+using namespace intel_x64;
+using namespace msrs;
 
-#endif
+inline auto
+x2apic::read_id() noexcept
+{
+    return ia32_x2apic_apicid::get();
+}
+
+inline auto
+x2apic::read_version() noexcept
+{
+    return ia32_x2apic_version::get();
+}
+
+// ...

@@ -16,15 +16,11 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#ifndef INTRINSICS_X86_INTEL_X64_H
-#define INTRINSICS_X86_INTEL_X64_H
+#ifndef INTRINSICS_APIC_INTEL_X64_H
+#define INTRINSICS_APIC_INTEL_X64_H
 
-#include <intrinsics/x86/common_x64.h>
-#include <intrinsics/x86/intel/vmx_intel_x64.h>
-#include <intrinsics/x86/intel/msrs_intel_x64.h>
-#include <intrinsics/x86/intel/crs_intel_x64.h>
-#include <intrinsics/x86/intel/vmcs/vmcs_intel_x64.h>
-#include <intrinsics/x86/intel/cpuid_intel_x64.h>
-#include <intrinsics/x86/intel/apic/apic_intel_x64.h>
+#include <intrinsics/x86/intel/apic/lapic.h>
+#include <intrinsics/x86/intel/apic/xapic.h>
+#include <intrinsics/x86/intel/apic/x2apic.h>
 
 #endif
