@@ -58,31 +58,31 @@ struct EXPORT_XAPIC xapic_ctl final : public lapic_ctl
     //
     // Register reads
     //
-    value_type read_id() override noexcept;
-    value_type read_version() override noexcept;
-    value_type read_tpr() override noexcept;
-    value_type read_ldr() override noexcept;
-    value_type read_svr() override noexcept;
-    value_type read_icr() override noexcept;
+    value_type read_id() noexcept override;
+    value_type read_version() noexcept override;
+    value_type read_tpr() noexcept override;
+    value_type read_ldr() noexcept override;
+    value_type read_svr() noexcept override;
+    value_type read_icr() noexcept override;
 
-    value_type read_isr(index idx) override noexcept;
-    value_type read_tmr(index idx) override noexcept;
-    value_type read_irr(index idx) override noexcept;
+    value_type read_isr(index idx) noexcept override;
+    value_type read_tmr(index idx) noexcept override;
+    value_type read_irr(index idx) noexcept override;
 
-    value_type read_lvt(lvt_reg reg) override noexcept;
-    value_type read_count(count_reg reg) override noexcept;
-    value_type read_div_config() override noexcept;
+    value_type read_lvt(lvt_reg reg) noexcept override;
+    value_type read_count(count_reg reg) noexcept override;
+    value_type read_div_config() noexcept override;
 
     //
     // Register writes
     //
-    void write_eoi() override noexcept;
-    void write_tpr(value_type tpr) override noexcept;
-    void write_svr(value_type svr) override noexcept;
-    void write_icr(value_type icr) override noexcept;
-    void write_lvt(lvt_reg reg, value_type val) override noexcept;
-    void write_init_count(value_type count) override noexcept;
-    void write_div_config(value_type config) override noexcept;
+    void write_eoi() noexcept override;
+    void write_tpr(value_type tpr) noexcept override;
+    void write_svr(value_type svr) noexcept override;
+    void write_icr(value_type icr) noexcept override;
+    void write_lvt(lvt_reg reg, value_type val) noexcept override;
+    void write_init_count(value_type count) noexcept override;
+    void write_div_config(value_type config) noexcept override;
 
     //
     // Send a self-ipi
@@ -92,7 +92,7 @@ struct EXPORT_XAPIC xapic_ctl final : public lapic_ctl
     //
     // @param vec - the vector of the self-ipi
     //
-    void write_self_ipi(vector_type vec) override noexcept;
+    void write_self_ipi(vector_type vec) noexcept override;
 
     //
     // Check trigger-mode
@@ -105,7 +105,7 @@ struct EXPORT_XAPIC xapic_ctl final : public lapic_ctl
     // @note to ensure an accurate result, the caller should mask
     // the vector prior to the call
     //
-    bool level_triggered(vector_type vec) override noexcept;
+    bool level_triggered(vector_type vec) noexcept override;
 
     //
     // Check if in-service
@@ -118,7 +118,7 @@ struct EXPORT_XAPIC xapic_ctl final : public lapic_ctl
     // @note to ensure an accurate result, the caller should mask
     // the vector prior to the call
     //
-    bool in_service(vector_type vec) override noexcept;
+    bool in_service(vector_type vec) noexcept override;
 
     //
     // Default operations

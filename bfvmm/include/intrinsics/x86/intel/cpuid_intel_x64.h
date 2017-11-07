@@ -35,6 +35,202 @@ namespace feature_information
 {
     constexpr const auto addr = 0x00000001ULL;
 
+    namespace eax
+    {
+        constexpr const auto name = "feature_information_eax";
+
+        inline auto get() noexcept
+        { return _cpuid_eax(addr); }
+
+        namespace stepping_id
+        {
+            constexpr const auto mask = 0x0000000FULL;
+            constexpr const auto from = 0ULL;
+            constexpr const auto name = "stepping_id";
+
+            inline auto get() noexcept
+            { return get_bits(_cpuid_eax(addr), mask) >> from; }
+
+            inline auto get(value_type msr) noexcept
+            { return get_bits(msr, mask) >> from; }
+
+            inline void dump(int level, std::string *msg = nullptr)
+            { bfdebug_subnhex(level, name, get(), msg); }
+        }
+
+        namespace model
+        {
+            constexpr const auto mask = 0x000000F0ULL;
+            constexpr const auto from = 4ULL;
+            constexpr const auto name = "model";
+
+            inline auto get() noexcept
+            { return get_bits(_cpuid_eax(addr), mask) >> from; }
+
+            inline auto get(value_type msr) noexcept
+            { return get_bits(msr, mask) >> from; }
+
+            inline void dump(int level, std::string *msg = nullptr)
+            { bfdebug_subnhex(level, name, get(), msg); }
+        }
+
+        namespace family_id
+        {
+            constexpr const auto mask = 0x00000F00ULL;
+            constexpr const auto from = 8ULL;
+            constexpr const auto name = "family_id";
+
+            inline auto get() noexcept
+            { return get_bits(_cpuid_eax(addr), mask) >> from; }
+
+            inline auto get(value_type msr) noexcept
+            { return get_bits(msr, mask) >> from; }
+
+            inline void dump(int level, std::string *msg = nullptr)
+            { bfdebug_subnhex(level, name, get(), msg); }
+        }
+
+        namespace processor_type
+        {
+            constexpr const auto mask = 0x00003000ULL;
+            constexpr const auto from = 12ULL;
+            constexpr const auto name = "processor_type";
+
+            inline auto get() noexcept
+            { return get_bits(_cpuid_eax(addr), mask) >> from; }
+
+            inline auto get(value_type msr) noexcept
+            { return get_bits(msr, mask) >> from; }
+
+            inline void dump(int level, std::string *msg = nullptr)
+            { bfdebug_subnhex(level, name, get(), msg); }
+        }
+
+        namespace extended_model_id
+        {
+            constexpr const auto mask = 0x000F0000ULL;
+            constexpr const auto from = 16ULL;
+            constexpr const auto name = "extended_model_id";
+
+            inline auto get() noexcept
+            { return get_bits(_cpuid_eax(addr), mask) >> from; }
+
+            inline auto get(value_type msr) noexcept
+            { return get_bits(msr, mask) >> from; }
+
+            inline void dump(int level, std::string *msg = nullptr)
+            { bfdebug_subnhex(level, name, get(), msg); }
+        }
+
+        namespace extended_family_id
+        {
+            constexpr const auto mask = 0x0FF00000ULL;
+            constexpr const auto from = 20ULL;
+            constexpr const auto name = "extended_family_id";
+
+            inline auto get() noexcept
+            { return get_bits(_cpuid_eax(addr), mask) >> from; }
+
+            inline auto get(value_type msr) noexcept
+            { return get_bits(msr, mask) >> from; }
+
+            inline void dump(int level, std::string *msg = nullptr)
+            { bfdebug_subnhex(level, name, get(), msg); }
+        }
+
+        inline void dump(int level, std::string *msg = nullptr)
+        {
+            bfdebug_nhex(level, name, get(), msg);
+            stepping_id::dump(level, msg);
+            model::dump(level, msg);
+            family_id::dump(level, msg);
+            processor_type::dump(level, msg);
+            extended_model_id::dump(level, msg);
+            extended_family_id::dump(level, msg);
+        }
+    }
+
+    namespace ebx
+    {
+        constexpr const auto name = "feature_information_ebx";
+
+        inline auto get() noexcept
+        { return _cpuid_ebx(addr); }
+
+        namespace brand_index
+        {
+            constexpr const auto mask = 0x000000FFULL;
+            constexpr const auto from = 0ULL;
+            constexpr const auto name = "brand_index";
+
+            inline auto get() noexcept
+            { return get_bits(_cpuid_eax(addr), mask) >> from; }
+
+            inline auto get(value_type msr) noexcept
+            { return get_bits(msr, mask) >> from; }
+
+            inline void dump(int level, std::string *msg = nullptr)
+            { bfdebug_subnhex(level, name, get(), msg); }
+        }
+
+        namespace clflush_line_size
+        {
+            constexpr const auto mask = 0x0000FF00ULL;
+            constexpr const auto from = 8ULL;
+            constexpr const auto name = "clflush_line_size";
+
+            inline auto get() noexcept
+            { return get_bits(_cpuid_eax(addr), mask) >> from; }
+
+            inline auto get(value_type msr) noexcept
+            { return get_bits(msr, mask) >> from; }
+
+            inline void dump(int level, std::string *msg = nullptr)
+            { bfdebug_subnhex(level, name, get(), msg); }
+        }
+
+        namespace max_addressable_ids
+        {
+            constexpr const auto mask = 0x00FF0000ULL;
+            constexpr const auto from = 16ULL;
+            constexpr const auto name = "max_addressable_ids";
+
+            inline auto get() noexcept
+            { return get_bits(_cpuid_eax(addr), mask) >> from; }
+
+            inline auto get(value_type msr) noexcept
+            { return get_bits(msr, mask) >> from; }
+
+            inline void dump(int level, std::string *msg = nullptr)
+            { bfdebug_subnhex(level, name, get(), msg); }
+        }
+
+        namespace initial_apic_id
+        {
+            constexpr const auto mask = 0xFF000000ULL;
+            constexpr const auto from = 24ULL;
+            constexpr const auto name = "initial_apic_id";
+
+            inline auto get() noexcept
+            { return get_bits(_cpuid_eax(addr), mask) >> from; }
+
+            inline auto get(value_type msr) noexcept
+            { return get_bits(msr, mask) >> from; }
+
+            inline void dump(int level, std::string *msg = nullptr)
+            { bfdebug_subnhex(level, name, get(), msg); }
+        }
+
+        inline void dump(int level, std::string *msg = nullptr)
+        {
+            bfdebug_nhex(level, name, get(), msg);
+            brand_index::dump(level, msg);
+            clflush_line_size::dump(level, msg);
+            max_addressable_ids::dump(level, msg);
+            initial_apic_id::dump(level, msg);
+        }
+    }
+
     namespace ecx
     {
         constexpr const auto name = "feature_information_ecx";
@@ -738,10 +934,694 @@ namespace feature_information
         }
     }
 
+    namespace edx
+    {
+        constexpr const auto name = "feature_information_edx";
+
+        inline auto get() noexcept
+        { return _cpuid_edx(addr); }
+
+        namespace fpu
+        {
+            constexpr const auto mask = 0x00000001ULL;
+            constexpr const auto from = 0ULL;
+            constexpr const auto name = "fpu";
+
+            inline auto is_enabled()
+            { return is_bit_set(_cpuid_ecx(addr), from); }
+
+            inline auto is_enabled(value_type msr)
+            { return is_bit_set(msr, from); }
+
+            inline auto is_disabled()
+            { return is_bit_cleared(_cpuid_ecx(addr), from); }
+
+            inline auto is_disabled(value_type msr)
+            { return is_bit_cleared(msr, from); }
+
+            inline void dump(int level, std::string *msg = nullptr)
+            { bfdebug_subbool(level, name, is_enabled(), msg); }
+        }
+
+        namespace vme
+        {
+            constexpr const auto mask = 0x00000002ULL;
+            constexpr const auto from = 1ULL;
+            constexpr const auto name = "vme";
+
+            inline auto is_enabled()
+            { return is_bit_set(_cpuid_ecx(addr), from); }
+
+            inline auto is_enabled(value_type msr)
+            { return is_bit_set(msr, from); }
+
+            inline auto is_disabled()
+            { return is_bit_cleared(_cpuid_ecx(addr), from); }
+
+            inline auto is_disabled(value_type msr)
+            { return is_bit_cleared(msr, from); }
+
+            inline void dump(int level, std::string *msg = nullptr)
+            { bfdebug_subbool(level, name, is_enabled(), msg); }
+        }
+
+        namespace de
+        {
+            constexpr const auto mask = 0x00000004ULL;
+            constexpr const auto from = 2ULL;
+            constexpr const auto name = "de";
+
+            inline auto is_enabled()
+            { return is_bit_set(_cpuid_ecx(addr), from); }
+
+            inline auto is_enabled(value_type msr)
+            { return is_bit_set(msr, from); }
+
+            inline auto is_disabled()
+            { return is_bit_cleared(_cpuid_ecx(addr), from); }
+
+            inline auto is_disabled(value_type msr)
+            { return is_bit_cleared(msr, from); }
+
+            inline void dump(int level, std::string *msg = nullptr)
+            { bfdebug_subbool(level, name, is_enabled(), msg); }
+        }
+
+        namespace pse
+        {
+            constexpr const auto mask = 0x00000008ULL;
+            constexpr const auto from = 3ULL;
+            constexpr const auto name = "pse";
+
+            inline auto is_enabled()
+            { return is_bit_set(_cpuid_ecx(addr), from); }
+
+            inline auto is_enabled(value_type msr)
+            { return is_bit_set(msr, from); }
+
+            inline auto is_disabled()
+            { return is_bit_cleared(_cpuid_ecx(addr), from); }
+
+            inline auto is_disabled(value_type msr)
+            { return is_bit_cleared(msr, from); }
+
+            inline void dump(int level, std::string *msg = nullptr)
+            { bfdebug_subbool(level, name, is_enabled(), msg); }
+        }
+
+        namespace tsc
+        {
+            constexpr const auto mask = 0x00000010ULL;
+            constexpr const auto from = 4ULL;
+            constexpr const auto name = "tsc";
+
+            inline auto is_enabled()
+            { return is_bit_set(_cpuid_ecx(addr), from); }
+
+            inline auto is_enabled(value_type msr)
+            { return is_bit_set(msr, from); }
+
+            inline auto is_disabled()
+            { return is_bit_cleared(_cpuid_ecx(addr), from); }
+
+            inline auto is_disabled(value_type msr)
+            { return is_bit_cleared(msr, from); }
+
+            inline void dump(int level, std::string *msg = nullptr)
+            { bfdebug_subbool(level, name, is_enabled(), msg); }
+        }
+
+        namespace msr
+        {
+            constexpr const auto mask = 0x00000020ULL;
+            constexpr const auto from = 5ULL;
+            constexpr const auto name = "msr";
+
+            inline auto is_enabled()
+            { return is_bit_set(_cpuid_ecx(addr), from); }
+
+            inline auto is_enabled(value_type msr)
+            { return is_bit_set(msr, from); }
+
+            inline auto is_disabled()
+            { return is_bit_cleared(_cpuid_ecx(addr), from); }
+
+            inline auto is_disabled(value_type msr)
+            { return is_bit_cleared(msr, from); }
+
+            inline void dump(int level, std::string *msg = nullptr)
+            { bfdebug_subbool(level, name, is_enabled(), msg); }
+        }
+
+        namespace pae
+        {
+            constexpr const auto mask = 0x00000040ULL;
+            constexpr const auto from = 6ULL;
+            constexpr const auto name = "pae";
+
+            inline auto is_enabled()
+            { return is_bit_set(_cpuid_ecx(addr), from); }
+
+            inline auto is_enabled(value_type msr)
+            { return is_bit_set(msr, from); }
+
+            inline auto is_disabled()
+            { return is_bit_cleared(_cpuid_ecx(addr), from); }
+
+            inline auto is_disabled(value_type msr)
+            { return is_bit_cleared(msr, from); }
+
+            inline void dump(int level, std::string *msg = nullptr)
+            { bfdebug_subbool(level, name, is_enabled(), msg); }
+        }
+
+        namespace mce
+        {
+            constexpr const auto mask = 0x00000080ULL;
+            constexpr const auto from = 7ULL;
+            constexpr const auto name = "mce";
+
+            inline auto is_enabled()
+            { return is_bit_set(_cpuid_ecx(addr), from); }
+
+            inline auto is_enabled(value_type msr)
+            { return is_bit_set(msr, from); }
+
+            inline auto is_disabled()
+            { return is_bit_cleared(_cpuid_ecx(addr), from); }
+
+            inline auto is_disabled(value_type msr)
+            { return is_bit_cleared(msr, from); }
+
+            inline void dump(int level, std::string *msg = nullptr)
+            { bfdebug_subbool(level, name, is_enabled(), msg); }
+        }
+
+        namespace cx8
+        {
+            constexpr const auto mask = 0x00000100ULL;
+            constexpr const auto from = 8ULL;
+            constexpr const auto name = "cx8";
+
+            inline auto is_enabled()
+            { return is_bit_set(_cpuid_ecx(addr), from); }
+
+            inline auto is_enabled(value_type msr)
+            { return is_bit_set(msr, from); }
+
+            inline auto is_disabled()
+            { return is_bit_cleared(_cpuid_ecx(addr), from); }
+
+            inline auto is_disabled(value_type msr)
+            { return is_bit_cleared(msr, from); }
+
+            inline void dump(int level, std::string *msg = nullptr)
+            { bfdebug_subbool(level, name, is_enabled(), msg); }
+        }
+
+        namespace apic
+        {
+            constexpr const auto mask = 0x00000200ULL;
+            constexpr const auto from = 9ULL;
+            constexpr const auto name = "apic";
+
+            inline auto is_enabled()
+            { return is_bit_set(_cpuid_ecx(addr), from); }
+
+            inline auto is_enabled(value_type msr)
+            { return is_bit_set(msr, from); }
+
+            inline auto is_disabled()
+            { return is_bit_cleared(_cpuid_ecx(addr), from); }
+
+            inline auto is_disabled(value_type msr)
+            { return is_bit_cleared(msr, from); }
+
+            inline void dump(int level, std::string *msg = nullptr)
+            { bfdebug_subbool(level, name, is_enabled(), msg); }
+        }
+
+        namespace sep
+        {
+            constexpr const auto mask = 0x00000800ULL;
+            constexpr const auto from = 11ULL;
+            constexpr const auto name = "sep";
+
+            inline auto is_enabled()
+            { return is_bit_set(_cpuid_ecx(addr), from); }
+
+            inline auto is_enabled(value_type msr)
+            { return is_bit_set(msr, from); }
+
+            inline auto is_disabled()
+            { return is_bit_cleared(_cpuid_ecx(addr), from); }
+
+            inline auto is_disabled(value_type msr)
+            { return is_bit_cleared(msr, from); }
+
+            inline void dump(int level, std::string *msg = nullptr)
+            { bfdebug_subbool(level, name, is_enabled(), msg); }
+        }
+
+        namespace mtrr
+        {
+            constexpr const auto mask = 0x00001000ULL;
+            constexpr const auto from = 12ULL;
+            constexpr const auto name = "mtrr";
+
+            inline auto is_enabled()
+            { return is_bit_set(_cpuid_ecx(addr), from); }
+
+            inline auto is_enabled(value_type msr)
+            { return is_bit_set(msr, from); }
+
+            inline auto is_disabled()
+            { return is_bit_cleared(_cpuid_ecx(addr), from); }
+
+            inline auto is_disabled(value_type msr)
+            { return is_bit_cleared(msr, from); }
+
+            inline void dump(int level, std::string *msg = nullptr)
+            { bfdebug_subbool(level, name, is_enabled(), msg); }
+        }
+
+        namespace pge
+        {
+            constexpr const auto mask = 0x00002000ULL;
+            constexpr const auto from = 13ULL;
+            constexpr const auto name = "pge";
+
+            inline auto is_enabled()
+            { return is_bit_set(_cpuid_ecx(addr), from); }
+
+            inline auto is_enabled(value_type msr)
+            { return is_bit_set(msr, from); }
+
+            inline auto is_disabled()
+            { return is_bit_cleared(_cpuid_ecx(addr), from); }
+
+            inline auto is_disabled(value_type msr)
+            { return is_bit_cleared(msr, from); }
+
+            inline void dump(int level, std::string *msg = nullptr)
+            { bfdebug_subbool(level, name, is_enabled(), msg); }
+        }
+
+        namespace mca
+        {
+            constexpr const auto mask = 0x00004000ULL;
+            constexpr const auto from = 14ULL;
+            constexpr const auto name = "mca";
+
+            inline auto is_enabled()
+            { return is_bit_set(_cpuid_ecx(addr), from); }
+
+            inline auto is_enabled(value_type msr)
+            { return is_bit_set(msr, from); }
+
+            inline auto is_disabled()
+            { return is_bit_cleared(_cpuid_ecx(addr), from); }
+
+            inline auto is_disabled(value_type msr)
+            { return is_bit_cleared(msr, from); }
+
+            inline void dump(int level, std::string *msg = nullptr)
+            { bfdebug_subbool(level, name, is_enabled(), msg); }
+        }
+
+        namespace cmov
+        {
+            constexpr const auto mask = 0x00008000ULL;
+            constexpr const auto from = 15ULL;
+            constexpr const auto name = "cmov";
+
+            inline auto is_enabled()
+            { return is_bit_set(_cpuid_ecx(addr), from); }
+
+            inline auto is_enabled(value_type msr)
+            { return is_bit_set(msr, from); }
+
+            inline auto is_disabled()
+            { return is_bit_cleared(_cpuid_ecx(addr), from); }
+
+            inline auto is_disabled(value_type msr)
+            { return is_bit_cleared(msr, from); }
+
+            inline void dump(int level, std::string *msg = nullptr)
+            { bfdebug_subbool(level, name, is_enabled(), msg); }
+        }
+
+        namespace pat
+        {
+            constexpr const auto mask = 0x00010000ULL;
+            constexpr const auto from = 16ULL;
+            constexpr const auto name = "pat";
+
+            inline auto is_enabled()
+            { return is_bit_set(_cpuid_ecx(addr), from); }
+
+            inline auto is_enabled(value_type msr)
+            { return is_bit_set(msr, from); }
+
+            inline auto is_disabled()
+            { return is_bit_cleared(_cpuid_ecx(addr), from); }
+
+            inline auto is_disabled(value_type msr)
+            { return is_bit_cleared(msr, from); }
+
+            inline void dump(int level, std::string *msg = nullptr)
+            { bfdebug_subbool(level, name, is_enabled(), msg); }
+        }
+
+        namespace pse_36
+        {
+            constexpr const auto mask = 0x00020000ULL;
+            constexpr const auto from = 17ULL;
+            constexpr const auto name = "pse_36";
+
+            inline auto is_enabled()
+            { return is_bit_set(_cpuid_ecx(addr), from); }
+
+            inline auto is_enabled(value_type msr)
+            { return is_bit_set(msr, from); }
+
+            inline auto is_disabled()
+            { return is_bit_cleared(_cpuid_ecx(addr), from); }
+
+            inline auto is_disabled(value_type msr)
+            { return is_bit_cleared(msr, from); }
+
+            inline void dump(int level, std::string *msg = nullptr)
+            { bfdebug_subbool(level, name, is_enabled(), msg); }
+        }
+
+        namespace psn
+        {
+            constexpr const auto mask = 0x00040000ULL;
+            constexpr const auto from = 18ULL;
+            constexpr const auto name = "psn";
+
+            inline auto is_enabled()
+            { return is_bit_set(_cpuid_ecx(addr), from); }
+
+            inline auto is_enabled(value_type msr)
+            { return is_bit_set(msr, from); }
+
+            inline auto is_disabled()
+            { return is_bit_cleared(_cpuid_ecx(addr), from); }
+
+            inline auto is_disabled(value_type msr)
+            { return is_bit_cleared(msr, from); }
+
+            inline void dump(int level, std::string *msg = nullptr)
+            { bfdebug_subbool(level, name, is_enabled(), msg); }
+        }
+
+        namespace clfsh
+        {
+            constexpr const auto mask = 0x00080000ULL;
+            constexpr const auto from = 19ULL;
+            constexpr const auto name = "clfsh";
+
+            inline auto is_enabled()
+            { return is_bit_set(_cpuid_ecx(addr), from); }
+
+            inline auto is_enabled(value_type msr)
+            { return is_bit_set(msr, from); }
+
+            inline auto is_disabled()
+            { return is_bit_cleared(_cpuid_ecx(addr), from); }
+
+            inline auto is_disabled(value_type msr)
+            { return is_bit_cleared(msr, from); }
+
+            inline void dump(int level, std::string *msg = nullptr)
+            { bfdebug_subbool(level, name, is_enabled(), msg); }
+        }
+
+        namespace ds
+        {
+            constexpr const auto mask = 0x00200000ULL;
+            constexpr const auto from = 21ULL;
+            constexpr const auto name = "ds";
+
+            inline auto is_enabled()
+            { return is_bit_set(_cpuid_ecx(addr), from); }
+
+            inline auto is_enabled(value_type msr)
+            { return is_bit_set(msr, from); }
+
+            inline auto is_disabled()
+            { return is_bit_cleared(_cpuid_ecx(addr), from); }
+
+            inline auto is_disabled(value_type msr)
+            { return is_bit_cleared(msr, from); }
+
+            inline void dump(int level, std::string *msg = nullptr)
+            { bfdebug_subbool(level, name, is_enabled(), msg); }
+        }
+
+        namespace acpi
+        {
+            constexpr const auto mask = 0x00400000ULL;
+            constexpr const auto from = 22ULL;
+            constexpr const auto name = "acpi";
+
+            inline auto is_enabled()
+            { return is_bit_set(_cpuid_ecx(addr), from); }
+
+            inline auto is_enabled(value_type msr)
+            { return is_bit_set(msr, from); }
+
+            inline auto is_disabled()
+            { return is_bit_cleared(_cpuid_ecx(addr), from); }
+
+            inline auto is_disabled(value_type msr)
+            { return is_bit_cleared(msr, from); }
+
+            inline void dump(int level, std::string *msg = nullptr)
+            { bfdebug_subbool(level, name, is_enabled(), msg); }
+        }
+
+        namespace mmx
+        {
+            constexpr const auto mask = 0x00800000ULL;
+            constexpr const auto from = 23ULL;
+            constexpr const auto name = "mmx";
+
+            inline auto is_enabled()
+            { return is_bit_set(_cpuid_ecx(addr), from); }
+
+            inline auto is_enabled(value_type msr)
+            { return is_bit_set(msr, from); }
+
+            inline auto is_disabled()
+            { return is_bit_cleared(_cpuid_ecx(addr), from); }
+
+            inline auto is_disabled(value_type msr)
+            { return is_bit_cleared(msr, from); }
+
+            inline void dump(int level, std::string *msg = nullptr)
+            { bfdebug_subbool(level, name, is_enabled(), msg); }
+        }
+
+        namespace fxsr
+        {
+            constexpr const auto mask = 0x01000000ULL;
+            constexpr const auto from = 24ULL;
+            constexpr const auto name = "fxsr";
+
+            inline auto is_enabled()
+            { return is_bit_set(_cpuid_ecx(addr), from); }
+
+            inline auto is_enabled(value_type msr)
+            { return is_bit_set(msr, from); }
+
+            inline auto is_disabled()
+            { return is_bit_cleared(_cpuid_ecx(addr), from); }
+
+            inline auto is_disabled(value_type msr)
+            { return is_bit_cleared(msr, from); }
+
+            inline void dump(int level, std::string *msg = nullptr)
+            { bfdebug_subbool(level, name, is_enabled(), msg); }
+        }
+
+        namespace sse
+        {
+            constexpr const auto mask = 0x02000000ULL;
+            constexpr const auto from = 25ULL;
+            constexpr const auto name = "sse";
+
+            inline auto is_enabled()
+            { return is_bit_set(_cpuid_ecx(addr), from); }
+
+            inline auto is_enabled(value_type msr)
+            { return is_bit_set(msr, from); }
+
+            inline auto is_disabled()
+            { return is_bit_cleared(_cpuid_ecx(addr), from); }
+
+            inline auto is_disabled(value_type msr)
+            { return is_bit_cleared(msr, from); }
+
+            inline void dump(int level, std::string *msg = nullptr)
+            { bfdebug_subbool(level, name, is_enabled(), msg); }
+        }
+
+        namespace sse2
+        {
+            constexpr const auto mask = 0x04000000ULL;
+            constexpr const auto from = 26ULL;
+            constexpr const auto name = "sse2";
+
+            inline auto is_enabled()
+            { return is_bit_set(_cpuid_ecx(addr), from); }
+
+            inline auto is_enabled(value_type msr)
+            { return is_bit_set(msr, from); }
+
+            inline auto is_disabled()
+            { return is_bit_cleared(_cpuid_ecx(addr), from); }
+
+            inline auto is_disabled(value_type msr)
+            { return is_bit_cleared(msr, from); }
+
+            inline void dump(int level, std::string *msg = nullptr)
+            { bfdebug_subbool(level, name, is_enabled(), msg); }
+        }
+
+        namespace ss
+        {
+            constexpr const auto mask = 0x08000000ULL;
+            constexpr const auto from = 27ULL;
+            constexpr const auto name = "ss";
+
+            inline auto is_enabled()
+            { return is_bit_set(_cpuid_ecx(addr), from); }
+
+            inline auto is_enabled(value_type msr)
+            { return is_bit_set(msr, from); }
+
+            inline auto is_disabled()
+            { return is_bit_cleared(_cpuid_ecx(addr), from); }
+
+            inline auto is_disabled(value_type msr)
+            { return is_bit_cleared(msr, from); }
+
+            inline void dump(int level, std::string *msg = nullptr)
+            { bfdebug_subbool(level, name, is_enabled(), msg); }
+        }
+
+        namespace htt
+        {
+            constexpr const auto mask = 0x10000000ULL;
+            constexpr const auto from = 28ULL;
+            constexpr const auto name = "htt";
+
+            inline auto is_enabled()
+            { return is_bit_set(_cpuid_ecx(addr), from); }
+
+            inline auto is_enabled(value_type msr)
+            { return is_bit_set(msr, from); }
+
+            inline auto is_disabled()
+            { return is_bit_cleared(_cpuid_ecx(addr), from); }
+
+            inline auto is_disabled(value_type msr)
+            { return is_bit_cleared(msr, from); }
+
+            inline void dump(int level, std::string *msg = nullptr)
+            { bfdebug_subbool(level, name, is_enabled(), msg); }
+        }
+
+        namespace tm
+        {
+            constexpr const auto mask = 0x20000000ULL;
+            constexpr const auto from = 29ULL;
+            constexpr const auto name = "tm";
+
+            inline auto is_enabled()
+            { return is_bit_set(_cpuid_ecx(addr), from); }
+
+            inline auto is_enabled(value_type msr)
+            { return is_bit_set(msr, from); }
+
+            inline auto is_disabled()
+            { return is_bit_cleared(_cpuid_ecx(addr), from); }
+
+            inline auto is_disabled(value_type msr)
+            { return is_bit_cleared(msr, from); }
+
+            inline void dump(int level, std::string *msg = nullptr)
+            { bfdebug_subbool(level, name, is_enabled(), msg); }
+        }
+
+        namespace pbe
+        {
+            constexpr const auto mask = 0x80000000ULL;
+            constexpr const auto from = 31ULL;
+            constexpr const auto name = "pbe";
+
+            inline auto is_enabled()
+            { return is_bit_set(_cpuid_ecx(addr), from); }
+
+            inline auto is_enabled(value_type msr)
+            { return is_bit_set(msr, from); }
+
+            inline auto is_disabled()
+            { return is_bit_cleared(_cpuid_ecx(addr), from); }
+
+            inline auto is_disabled(value_type msr)
+            { return is_bit_cleared(msr, from); }
+
+            inline void dump(int level, std::string *msg = nullptr)
+            { bfdebug_subbool(level, name, is_enabled(), msg); }
+        }
+
+        inline void dump(int level, std::string *msg = nullptr)
+        {
+            bfdebug_nhex(level, name, get(), msg);
+            fpu::dump(level, msg);
+            vme::dump(level, msg);
+            de::dump(level, msg);
+            pse::dump(level, msg);
+            tsc::dump(level, msg);
+            msr::dump(level, msg);
+            pae::dump(level, msg);
+            mce::dump(level, msg);
+            cx8::dump(level, msg);
+            apic::dump(level, msg);
+            sep::dump(level, msg);
+            mtrr::dump(level, msg);
+            pge::dump(level, msg);
+            mca::dump(level, msg);
+            cmov::dump(level, msg);
+            pat::dump(level, msg);
+            pse_36::dump(level, msg);
+            psn::dump(level, msg);
+            clfsh::dump(level, msg);
+            ds::dump(level, msg);
+            acpi::dump(level, msg);
+            mmx::dump(level, msg);
+            fxsr::dump(level, msg);
+            sse::dump(level, msg);
+            sse2::dump(level, msg);
+            ss::dump(level, msg);
+            htt::dump(level, msg);
+            tm::dump(level, msg);
+            pbe::dump(level, msg);
+        }
+    }
+
     inline void dump(int level, std::string *msg = nullptr)
     {
+        eax::dump(level, msg);
+        ebx::dump(level, msg);
         ecx::dump(level, msg);
+        edx::dump(level, msg);
     }
+
 }
 
 namespace extended_feature_flags
