@@ -55,14 +55,175 @@ namespace ia32_apic_base
     inline void set(value_type val) noexcept
     { _write_msr(addr, val); }
 
-    //
-    // Note that this gets and sets the _full_address_
-    //
-    namespace base
+    namespace bsp
     {
-        constexpr const auto mask = 0xFFFFFF000ULL;
+        constexpr const auto mask = 0x0000000000000100ULL;
+        constexpr const auto from = 8ULL;
+        constexpr const auto name = "bsp";
+
+        inline auto is_enabled()
+        { return is_bit_set(_read_msr(addr), from); }
+
+        inline auto is_enabled(value_type msr)
+        { return is_bit_set(msr, from); }
+
+        inline auto is_disabled()
+        { return is_bit_cleared(_read_msr(addr), from); }
+
+        inline auto is_disabled(value_type msr)
+        { return is_bit_cleared(msr, from); }
+
+        inline void enable()
+        { _write_msr(addr, set_bit(_read_msr(addr), from)); }
+
+        inline auto enable(value_type msr)
+        { return set_bit(msr, from); }
+
+        inline void disable()
+        { _write_msr(addr, clear_bit(_read_msr(addr), from)); }
+
+        inline auto disable(value_type msr)
+        { return clear_bit(msr, from); }
+
+        inline void dump(int level, std::string *msg = nullptr)
+        { bfdebug_subbool(level, name, is_enabled(), msg); }
+    }
+
+    namespace extd
+    {
+        constexpr const auto mask = 0x0000000000000400ULL;
+        constexpr const auto from = 10ULL;
+        constexpr const auto name = "extd";
+
+        inline auto is_enabled()
+        { return is_bit_set(_read_msr(addr), from); }
+
+        inline auto is_enabled(value_type msr)
+        { return is_bit_set(msr, from); }
+
+        inline auto is_disabled()
+        { return is_bit_cleared(_read_msr(addr), from); }
+
+        inline auto is_disabled(value_type msr)
+        { return is_bit_cleared(msr, from); }
+
+        inline void enable()
+        { _write_msr(addr, set_bit(_read_msr(addr), from)); }
+
+        inline auto enable(value_type msr)
+        { return set_bit(msr, from); }
+
+        inline void disable()
+        { _write_msr(addr, clear_bit(_read_msr(addr), from)); }
+
+        inline auto disable(value_type msr)
+        { return clear_bit(msr, from); }
+
+        inline void dump(int level, std::string *msg = nullptr)
+        { bfdebug_subbool(level, name, is_enabled(), msg); }
+    }
+
+    namespace en
+    {
+        constexpr const auto mask = 0x0000000000000800ULL;
+        constexpr const auto from = 11ULL;
+        constexpr const auto name = "en";
+
+        inline auto is_enabled()
+        { return is_bit_set(_read_msr(addr), from); }
+
+        inline auto is_enabled(value_type msr)
+        { return is_bit_set(msr, from); }
+
+        inline auto is_disabled()
+        { return is_bit_cleared(_read_msr(addr), from); }
+
+        inline auto is_disabled(value_type msr)
+        { return is_bit_cleared(msr, from); }
+
+        inline void enable()
+        { _write_msr(addr, set_bit(_read_msr(addr), from)); }
+
+        inline auto enable(value_type msr)
+        { return set_bit(msr, from); }
+
+        inline void disable()
+        { _write_msr(addr, clear_bit(_read_msr(addr), from)); }
+
+        inline auto disable(value_type msr)
+        { return clear_bit(msr, from); }
+
+        inline void dump(int level, std::string *msg = nullptr)
+        { bfdebug_subbool(level, name, is_enabled(), msg); }
+    }
+
+    /* NOTE: `state` is a combination field of `extd` and `en` to facilitate
+     * atomic apic state changes and provide a simplified interface */
+    namespace state
+    {
+        constexpr const auto mask = 0xC00ULL;
+        constexpr const auto from = 10ULL;
+        constexpr const auto name = "state";
+
+        constexpr const auto disabled = 0x0ULL;
+        constexpr const auto invalid = 0x1ULL;
+        constexpr const auto xapic = 0x2ULL;
+        constexpr const auto x2apic = 0x3ULL;
+
+        inline auto get() noexcept
+        { return get_bits(_read_msr(addr), mask) >> from; }
+
+        inline auto get(value_type msr) noexcept
+        { return get_bits(msr, mask) >> from; }
+
+        inline void set(value_type val) noexcept
+        { _write_msr(addr, set_bits(_read_msr(addr), mask, val << from)); }
+
+        inline auto set(value_type msr, value_type val) noexcept
+        { return set_bits(msr, mask, val << from); }
+
+        inline void enable_x2apic() noexcept
+        { set(x2apic); }
+
+        inline auto enable_x2apic(value_type msr) noexcept
+        { return set_bits(msr, mask, x2apic << from); }
+
+        inline void enable_xapic() noexcept
+        { set(xapic); }
+
+        inline auto enable_xapic(value_type msr) noexcept
+        { return set_bits(msr, mask, xapic << from); }
+
+        inline void disable() noexcept
+        { set(disabled); }
+
+        inline auto disable(value_type msr) noexcept
+        { return set_bits(msr, mask, disabled << from); }
+
+        inline void dump(int level, std::string *msg = nullptr)
+        {
+            switch (get()) {
+                case x2apic:
+                    bfdebug_subtext(level, name, "x2apic", msg);
+                    return;
+                case xapic:
+                    bfdebug_subtext(level, name, "xapic", msg);
+                    return;
+                case disabled:
+                    bfdebug_subtext(level, name, "disabled", msg);
+                    return;
+                case invalid:
+                    bfdebug_subtext(level, name, "invalid", msg);
+                    return;
+            }
+        }
+    }
+
+    namespace apic_base
+    {
+        constexpr const auto mask = 0x0000000FFFFFF000ULL;
         constexpr const auto from = 12ULL;
-        constexpr const auto name = "base";
+        constexpr const auto name = "apic_base";
 
         inline auto get() noexcept
         { return get_bits(_read_msr(addr), mask); }
@@ -80,70 +241,14 @@ namespace ia32_apic_base
         { bfdebug_subnhex(level, name, get(), msg); }
     }
 
-    namespace state
+    inline void dump(int level, std::string *msg = nullptr)
     {
-        constexpr const auto mask = 0xC00ULL;
-        constexpr const auto from = 10ULL;
-        constexpr const auto name = "state";
-
-        constexpr const auto disabled = 0x0ULL;
-        constexpr const auto invalid = 0x4ULL;
-        constexpr const auto xapic = 0x8ULL;
-        constexpr const auto x2apic = 0xCULL;
-
-        inline auto get() noexcept
-        { return get_bits(_read_msr(addr), mask) >> from; }
-
-        inline auto get(value_type msr) noexcept
-        { return get_bits(msr, mask) >> from; }
-
-        inline void set(value_type val) noexcept
-        { _write_msr(addr, set_bits(_read_msr(addr), mask, val << from)); }
-
-        inline auto set(value_type msr, value_type val) noexcept
-        { return set_bits(msr, mask, val << from); }
-
-        inline auto enable_x2apic() noexcept
-        { set(x2apic); }
-
-        inline auto enable_x2apic(value_type msr) noexcept
-        { return set_bits(msr, mask, x2apic << from); }
-
-        inline auto enable_xapic() noexcept
-        { set(xapic); }
-
-        inline auto enable_xapic(value_type msr) noexcept
-        { return set_bits(msr, mask, xapic << from); }
-
-        inline auto disable() noexcept
-        { set(disable); }
-
-        inline auto disable(value_type msr) noexcept
-        { return set_bits(msr, mask, disable << from); }
-
-        inline void dump(int level, std::string *msg = nullptr)
-        {
-            switch (get()) {
-                case x2apic:
-                    bfdebug_subtext(level, name, "x2apic", msg);
-                    return;
-                case xapic:
-                    bfdebug_subtext(level, name, "xapic", msg);
-                    return;
-                case disabled:
-                    bfdebug_subtext(level, name, "disabled", msg);
-                    return;
-                case invalid:
-                    bfdebug_subtext(level, name, "invalid", msg);
-                    return;
-                default:
-                    bferror_subtext(level, name, "UNKNOWN", msg);
-                    return;
-            }
-        }
+        bfdebug_nhex(level, name, get(), msg);
+        bsp::dump(level, msg);
+        extd::dump(level, msg);
+        en::dump(level, msg);
+        apic_base::dump(level, msg);
     }
-
-    // TODO: add fields
 }
 }
 
@@ -151,15 +256,13 @@ namespace apic
 {
     inline auto present() noexcept
     {
-        // return cpuid::feature_information::edx::apic::is_enabled();
+        return cpuid::feature_information::edx::apic::is_enabled();
     }
 
     inline auto x2apic_supported() noexcept
     {
-        // return cpuid::feature_information::ecx::x2apic::is_enabled();
+        return cpuid::feature_information::ecx::x2apic::is_enabled();
     }
-
-    inline auto
 }
 
 /// Local APIC base class
