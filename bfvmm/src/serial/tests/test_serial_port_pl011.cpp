@@ -24,6 +24,7 @@
 #include <serial/serial_port_pl011.h>
 #include <hippomocks.h>
 #include <map>
+#include <bfgsl.h>
 
 #ifdef _HIPPOMOCKS__ENABLE_CFUNC_MOCKING_SUPPORT
 
@@ -77,6 +78,20 @@ TEST_CASE("serial: success")
     CHECK((g_ports[DEFAULT_COM_PORT + serial_pl011::uartlcr_h_reg] & serial_pl011::uartlcr_h_wlen_mask) == serial_port_pl011::DEFAULT_DATA_BITS);
     CHECK((g_ports[DEFAULT_COM_PORT + serial_pl011::uartlcr_h_reg] & serial_pl011::uartlcr_h_stop_mask) == serial_port_pl011::DEFAULT_STOP_BITS);
     CHECK((g_ports[DEFAULT_COM_PORT + serial_pl011::uartlcr_h_reg] & serial_pl011::uartlcr_h_parity_mask) == serial_port_pl011::DEFAULT_PARITY_BITS);
+}
+
+TEST_CASE("serial: port and set_port")
+{
+    MockRepository mocks;
+    mock_serial(mocks);
+
+    auto const invport = gsl::narrow_cast<serial_port_pl011::port_type>(~DEFAULT_COM_PORT & 0xffff);
+
+    serial_port_pl011::instance()->set_port(invport);
+    CHECK(serial_port_pl011::instance()->port() == invport);
+
+    serial_port_pl011::instance()->set_port(DEFAULT_COM_PORT);
+    CHECK(serial_port_pl011::instance()->port() == DEFAULT_COM_PORT);
 }
 
 TEST_CASE("serial: set_baud_rate_success")

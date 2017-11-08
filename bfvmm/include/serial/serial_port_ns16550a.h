@@ -282,6 +282,20 @@ public:
     virtual port_type port() const noexcept override
     { return m_port; }
 
+    /// Set Port
+    ///
+    /// Change the peripheral port/base address at runtime.
+    ///
+    /// @param port serial peripheral port or base address
+    ///
+    /// @expects none
+    /// @ensures none
+    ///
+    virtual void set_port(port_type port) noexcept override
+    {
+        m_port = port;
+    }
+
     /// Write Character
     ///
     /// Writes a character to the serial device.

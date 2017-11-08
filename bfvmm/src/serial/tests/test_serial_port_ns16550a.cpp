@@ -24,6 +24,7 @@
 #include <serial/serial_port_ns16550a.h>
 #include <hippomocks.h>
 #include <map>
+#include <bfgsl.h>
 
 #ifdef _HIPPOMOCKS__ENABLE_CFUNC_MOCKING_SUPPORT
 
@@ -83,6 +84,20 @@ TEST_CASE("serial: success")
     CHECK((g_ports[DEFAULT_COM_PORT + serial_ns16550a::line_control_reg] & serial_ns16550a::line_control_data_mask) == serial_port_ns16550a::DEFAULT_DATA_BITS);
     CHECK((g_ports[DEFAULT_COM_PORT + serial_ns16550a::line_control_reg] & serial_ns16550a::line_control_stop_mask) == serial_port_ns16550a::DEFAULT_STOP_BITS);
     CHECK((g_ports[DEFAULT_COM_PORT + serial_ns16550a::line_control_reg] & serial_ns16550a::line_control_parity_mask) == serial_port_ns16550a::DEFAULT_PARITY_BITS);
+}
+
+TEST_CASE("serial: port and set_port")
+{
+    MockRepository mocks;
+    mock_serial(mocks);
+
+    auto const invport = gsl::narrow_cast<serial_port_ns16550a::port_type>(~DEFAULT_COM_PORT & 0xffff);
+
+    serial_port_ns16550a::instance()->set_port(invport);
+    CHECK(serial_port_ns16550a::instance()->port() == invport);
+
+    serial_port_ns16550a::instance()->set_port(DEFAULT_COM_PORT);
+    CHECK(serial_port_ns16550a::instance()->port() == DEFAULT_COM_PORT);
 }
 
 TEST_CASE("serial: set_baud_rate_success")
