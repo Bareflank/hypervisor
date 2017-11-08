@@ -265,7 +265,7 @@ namespace lapic
 /// This abstract class provides an interface to lapic control operations
 /// that are common to both xAPIC and x2APIC modes.
 ///
-struct EXPORT_LAPIC lapic_ctl
+struct EXPORT_LAPIC lapic_control
 {
     using value_type = uint64_t;
     using vector_type = uint64_t;
@@ -340,14 +340,13 @@ struct EXPORT_LAPIC lapic_ctl
     //
     // Default operations
     //
-    lapic_ctl() = default;
-    virtual ~lapic_ctl() = default;
+    virtual ~lapic_control() = default;
+    lapic_control() = default;
+    lapic_control(lapic_control &&) = default;
+    lapic_control &operator=(lapic_control &&) = default;
 
-    lapic_ctl(lapic_ctl &&) = default;
-    lapic_ctl &operator=(lapic_ctl &&) = default;
-
-    lapic_ctl(const lapic_ctl &) = delete;
-    lapic_ctl &operator=(const lapic_ctl &) = delete;
+    lapic_control(const lapic_control &) = delete;
+    lapic_control &operator=(const lapic_control &) = delete;
 };
 
 }

@@ -18,8 +18,7 @@
 
 #include <intrinsics/x86/intel/apic/x2apic.h>
 
-using namespace intel_x64;
-using namespace msrs;
+using namespace intel_x64::msrs;
 
 inline auto
 x2apic::read_id() noexcept
@@ -27,10 +26,4 @@ x2apic::read_id() noexcept
     return ia32_x2apic_apicid::get();
 }
 
-inline auto
-x2apic::read_version() noexcept
-{
-    return ia32_x2apic_version::get();
-}
-
-// ...
+// implement x2apic_control interface defined in the x2apic.h intrinsics file

@@ -51,7 +51,7 @@ namespace intel_x64
 /// mode. It is marked final because it is intended to interact
 /// directly with xapic hardware.
 ///
-struct EXPORT_XAPIC xapic_ctl final : public lapic_ctl
+struct EXPORT_XAPIC xapic_control final : public lapic_control
 {
     using apic_base_type = uintptr_t;
 
@@ -123,20 +123,19 @@ struct EXPORT_XAPIC xapic_ctl final : public lapic_ctl
     //
     // Default operations
     //
-    xapic_ctl();
-    ~xapic_ctl() override = default;
+    xapic_control();
 
-    xapic_ctl(xapic_ctl &&) = default;
-    xapic_ctl &operator=(xapic_ctl &&) = default;
+    ~xapic_control() = default;
+    xapic_control(xapic_control &&) = default;
+    xapic_control &operator=(xapic_control &&) = default;
 
-    xapic_ctl(const xapic_ctl &) = delete;
-    xapic_ctl &operator=(const xapic_ctl &) = delete;
+    xapic_control(const xapic_control &) = delete;
+    xapic_control &operator=(const xapic_control &) = delete;
 
 
 private:
 
     std::unique_ptr<uint32_t[]> m_apic_page;
-
 };
 
 }

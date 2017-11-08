@@ -1993,8 +1993,8 @@ namespace msrs
 namespace x2apic
 {
     using namespace intel_x64::msrs;
-    using addr_type = constexpr const intel_x64::msrs::field_type;
-    using size_type = constexpr const std::size_t;
+    using addr_type = const intel_x64::msrs::field_type;
+    using size_type = const std::size_t;
     using addr_set_type = const std::array<addr_type, 44>;
 
     addr_type start_reg = 0x800U;
@@ -2060,7 +2060,7 @@ namespace x2apic
 /// mode. It is marked final because it is intended to interact
 /// directly with x2apic hardware.
 ///
-struct EXPORT_X2APIC x2apic_ctl final : public lapic_ctl
+struct EXPORT_X2APIC x2apic_control final : public lapic_control
 {
     //
     // Register reads
@@ -2130,14 +2130,13 @@ struct EXPORT_X2APIC x2apic_ctl final : public lapic_ctl
     //
     // Default operations
     //
-    x2apic_ctl() = default;
-    ~x2apic_ctl() override = default;
+    ~x2apic_control() = default;
+    x2apic_control() = default;
+    x2apic_control(x2apic_control &&) = default;
+    x2apic_control &operator=(x2apic_control &&) = default;
 
-    x2apic_ctl(x2apic_ctl &&) = default;
-    x2apic_ctl &operator=(x2apic_ctl &&) = default;
-
-    x2apic_ctl(const x2apic_ctl &) = delete;
-    x2apic_ctl &operator=(const x2apic_ctl &) = delete;
+    x2apic_control(const x2apic_control &) = delete;
+    x2apic_control &operator=(const x2apic_control &) = delete;
 };
 
 }
