@@ -19,7 +19,9 @@
 #ifndef INTRINSICS_X2APIC_INTEL_X64_H
 #define INTRINSICS_X2APIC_INTEL_X64_H
 
+#include <array>
 #include <intrinsics/x86/intel/apic/lapic.h>
+#include <intrinsics/x86/intel/cpuid_intel_x64.h>
 
 // -----------------------------------------------------------------------------
 // Exports
@@ -1985,6 +1987,70 @@ namespace msrs
             inline auto set(value_type msr, value_type val) noexcept
             { return set_bits(msr, mask, val << from); }
         }
+    }
+}
+
+namespace x2apic
+{
+    using namespace intel_x64::msrs;
+    using addr_type = constexpr const intel_x64::msrs::field_type;
+    using size_type = constexpr const std::size_t;
+    using addr_set_type = const std::array<addr_type, 44>;
+
+    addr_type start_reg = 0x800U;
+    addr_type end_reg = 0xBFFU;
+    size_type total_regs = (end_reg - start_reg) + 1U;
+
+    addr_set_type addr_set = {
+        ia32_x2apic_apicid::addr,
+        ia32_x2apic_version::addr,
+        ia32_x2apic_tpr::addr,
+        ia32_x2apic_ppr::addr,
+        ia32_x2apic_eoi::addr,
+        ia32_x2apic_ldr::addr,
+        ia32_x2apic_sivr::addr,
+        ia32_x2apic_isr0::addr,
+        ia32_x2apic_isr1::addr,
+        ia32_x2apic_isr2::addr,
+        ia32_x2apic_isr3::addr,
+        ia32_x2apic_isr4::addr,
+        ia32_x2apic_isr5::addr,
+        ia32_x2apic_isr6::addr,
+        ia32_x2apic_isr7::addr,
+        ia32_x2apic_tmr0::addr,
+        ia32_x2apic_tmr1::addr,
+        ia32_x2apic_tmr2::addr,
+        ia32_x2apic_tmr3::addr,
+        ia32_x2apic_tmr4::addr,
+        ia32_x2apic_tmr5::addr,
+        ia32_x2apic_tmr6::addr,
+        ia32_x2apic_tmr7::addr,
+        ia32_x2apic_irr0::addr,
+        ia32_x2apic_irr1::addr,
+        ia32_x2apic_irr2::addr,
+        ia32_x2apic_irr3::addr,
+        ia32_x2apic_irr4::addr,
+        ia32_x2apic_irr5::addr,
+        ia32_x2apic_irr6::addr,
+        ia32_x2apic_irr7::addr,
+        ia32_x2apic_esr::addr,
+        ia32_x2apic_lvt_cmci::addr,
+        ia32_x2apic_icr::addr,
+        ia32_x2apic_lvt_timer::addr,
+        ia32_x2apic_lvt_thermal::addr,
+        ia32_x2apic_lvt_pmi::addr,
+        ia32_x2apic_lvt_lint0::addr,
+        ia32_x2apic_lvt_lint1::addr,
+        ia32_x2apic_lvt_error::addr,
+        ia32_x2apic_init_count::addr,
+        ia32_x2apic_cur_count::addr,
+        ia32_x2apic_div_conf::addr,
+        ia32_x2apic_self_ipi::addr
+    };
+
+    inline auto supported() noexcept
+    {
+        return cpuid::feature_information::ecx::x2apic::is_enabled();
     }
 }
 

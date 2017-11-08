@@ -252,16 +252,11 @@ namespace ia32_apic_base
 }
 }
 
-namespace apic
+namespace lapic
 {
-    inline auto present() noexcept
+    inline auto is_present() noexcept
     {
         return cpuid::feature_information::edx::apic::is_enabled();
-    }
-
-    inline auto x2apic_supported() noexcept
-    {
-        return cpuid::feature_information::ecx::x2apic::is_enabled();
     }
 }
 
