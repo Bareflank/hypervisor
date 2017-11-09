@@ -270,9 +270,9 @@ struct EXPORT_LAPIC lapic_control
     using value_type = uint64_t;
     using vector_type = uint64_t;
 
-    enum index { idx0, idx1, idx2, idx3, idx4, idx5, idx6, idx7 };
-    enum lvt_reg { cmci, timer, thermal, perf, lint0, lint1, error };
-    enum count_reg { initial, current };
+    enum index : uint32_t { idx0, idx1, idx2, idx3, idx4, idx5, idx6, idx7 };
+    enum lvt_reg : uint32_t { cmci, timer, thermal, perf, lint0, lint1, error };
+    enum count_reg : uint32_t { initial, current };
 
     //
     // Register reads
