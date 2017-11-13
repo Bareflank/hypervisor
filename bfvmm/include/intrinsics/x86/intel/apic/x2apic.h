@@ -46,7 +46,6 @@
 
 namespace intel_x64
 {
-
 namespace msrs
 {
     namespace ia32_x2apic_apicid
@@ -845,6 +844,36 @@ namespace msrs
                 switch (get()) {
                     case physical: bfdebug_subtext(level, name, "physical", msg); break;
                     case logical: bfdebug_subtext(level, name, "logical", msg); break;
+                }
+            }
+        }
+
+        namespace delivery_status
+        {
+            constexpr const auto mask = 0x0000000000001000ULL;
+            constexpr const auto from = 12ULL;
+            constexpr const auto name = "delivery_status";
+
+            constexpr const auto idle = 0U;
+            constexpr const auto send_pending = 1U;
+
+            inline auto get() noexcept
+            { return get_bits(_read_msr(addr), mask) >> from; }
+
+            inline auto get(value_type msr) noexcept
+            { return get_bits(msr, mask) >> from; }
+
+            inline void set(value_type val) noexcept
+            { _write_msr(addr, set_bits(_read_msr(addr), mask, val << from)); }
+
+            inline auto set(value_type msr, value_type val) noexcept
+            { return set_bits(msr, mask, val << from); }
+
+            inline void dump(int level, std::string *msg = nullptr)
+            {
+                switch (get()) {
+                    case idle: bfdebug_subtext(level, name, "idle", msg); break;
+                    case send_pending: bfdebug_subtext(level, name, "send pending", msg); break;
                 }
             }
         }
@@ -1963,8 +1992,53 @@ namespace msrs
         inline void set(value_type val) noexcept
         { _write_msr(addr, val); }
 
+        namespace div_val
+        {
+            constexpr const auto mask = 0x000000000000000BULL;
+            constexpr const auto from = 0ULL;
+            constexpr const auto name = "div_val";
+
+            constexpr const auto div_by_2 = 0ULL;
+            constexpr const auto div_by_4 = 1ULL;
+            constexpr const auto div_by_8 = 2ULL;
+            constexpr const auto div_by_16 = 3ULL;
+            constexpr const auto div_by_32 = 8ULL;
+            constexpr const auto div_by_64 = 9ULL;
+            constexpr const auto div_by_128 = 10ULL;
+            constexpr const auto div_by_1 = 11ULL;
+
+            inline auto get() noexcept
+            { return get_bits(_read_msr(addr), mask) >> from; }
+
+            inline auto get(value_type msr) noexcept
+            { return get_bits(msr, mask) >> from; }
+
+            inline void set(value_type val) noexcept
+            { _write_msr(addr, set_bits(_read_msr(addr), mask, val << from)); }
+
+            inline auto set(value_type msr, value_type val) noexcept
+            { return set_bits(msr, mask, val << from); }
+
+            inline void dump(int level, std::string *msg = nullptr)
+            {
+                switch (get()) {
+                    case div_by_2: bfdebug_subtext(level, name, "div_by_2", msg); break;
+                    case div_by_4: bfdebug_subtext(level, name, "div_by_4", msg); break;
+                    case div_by_8: bfdebug_subtext(level, name, "div_by_8", msg); break;
+                    case div_by_16: bfdebug_subtext(level, name, "div_by_16", msg); break;
+                    case div_by_32: bfdebug_subtext(level, name, "div_by_32", msg); break;
+                    case div_by_64: bfdebug_subtext(level, name, "div_by_64", msg); break;
+                    case div_by_128: bfdebug_subtext(level, name, "div_by_128", msg); break;
+                    case div_by_1: bfdebug_subtext(level, name, "div_by_1", msg); break;
+                }
+            }
+        }
+
         inline void dump(int level, std::string *msg = nullptr)
-        { bfdebug_nhex(level, name, get(), msg); }
+        {
+            bfdebug_nhex(level, name, get(), msg);
+            div_val::dump(level, msg);
+        }
     }
 
     namespace ia32_x2apic_self_ipi
@@ -2060,36 +2134,139 @@ namespace x2apic
 /// mode. It is marked final because it is intended to interact
 /// directly with x2apic hardware.
 ///
-struct EXPORT_X2APIC x2apic_control final : public lapic_control
-{
+struct EXPORT_X2APIC x2apic_control final : public lapic_control {
     //
     // Register reads
     //
-    value_type read_id() noexcept override;
-    value_type read_version() noexcept override;
-    value_type read_tpr() noexcept override;
-    value_type read_ldr() noexcept override;
-    value_type read_svr() noexcept override;
-    value_type read_icr() noexcept override;
+    value_type read_id() noexcept override
+    { return msrs::ia32_x2apic_apicid::get(); }
 
-    value_type read_isr(index idx) noexcept override;
-    value_type read_tmr(index idx) noexcept override;
-    value_type read_irr(index idx) noexcept override;
+    value_type read_version() noexcept override
+    { return msrs::ia32_x2apic_version::get(); }
 
-    value_type read_lvt(lvt_reg reg) noexcept override;
-    value_type read_count(count_reg reg) noexcept override;
-    value_type read_div_config() noexcept override;
+    value_type read_tpr() noexcept override
+    { return msrs::ia32_x2apic_tpr::get(); }
+
+    value_type read_ldr() noexcept override
+    { return msrs::ia32_x2apic_ldr::get(); }
+
+    value_type read_svr() noexcept override
+    { return msrs::ia32_x2apic_sivr::get(); }
+
+    value_type read_icr() noexcept override
+    { return msrs::ia32_x2apic_icr::get(); }
+
+
+    value_type read_isr(index idx) noexcept override
+    {
+        auto addr = msrs::ia32_x2apic_isr0::addr | idx;
+        return msrs::get(addr);
+    }
+
+    value_type read_tmr(index idx) noexcept override
+    {
+        auto addr = msrs::ia32_x2apic_tmr0::addr | idx;
+        return msrs::get(addr);
+    }
+
+    value_type read_irr(index idx) noexcept override
+    {
+        auto addr = msrs::ia32_x2apic_irr0::addr | idx;
+        return msrs::get(addr);
+    }
+
+    value_type read_lvt(lvt_reg reg) noexcept override
+    {
+        switch (reg) {
+            case cmci:
+                return msrs::ia32_x2apic_lvt_cmci::get();
+            case timer:
+                return msrs::ia32_x2apic_lvt_timer::get();
+            case thermal:
+                return msrs::ia32_x2apic_lvt_thermal::get();
+            case perf:
+                return msrs::ia32_x2apic_lvt_pmi::get();
+            case lint0:
+                return msrs::ia32_x2apic_lvt_lint0::get();
+            case lint1:
+                return msrs::ia32_x2apic_lvt_lint1::get();
+            case error:
+                return msrs::ia32_x2apic_lvt_error::get();
+
+            default:
+                bferror_info(0, "invalid lvt_reg");
+                return 0;
+        }
+    }
+
+    value_type read_count(count_reg reg) noexcept override
+    {
+        switch (reg) {
+            case initial:
+                return msrs::ia32_x2apic_init_count::get();
+            case current:
+                return msrs::ia32_x2apic_cur_count::get();
+
+            default:
+                bferror_info(0, "invalid count_reg");
+                return 0;
+        }
+    }
+
+    value_type read_div_config() noexcept override
+    { return msrs::ia32_x2apic_div_conf::get(); }
 
     //
     // Register writes
     //
-    void write_eoi() noexcept override;
-    void write_tpr(value_type tpr) noexcept override;
-    void write_svr(value_type svr) noexcept override;
-    void write_icr(value_type icr) noexcept override;
-    void write_lvt(lvt_reg reg, value_type val) noexcept override;
-    void write_init_count(value_type count) noexcept override;
-    void write_div_config(value_type config) noexcept override;
+    void write_eoi() noexcept override
+    { msrs::ia32_x2apic_eoi::set(0x0ULL); }
+
+    void write_tpr(value_type tpr) noexcept override
+    { msrs::ia32_x2apic_tpr::set(tpr); }
+
+    void write_svr(value_type svr) noexcept override
+    { msrs::ia32_x2apic_sivr::set(svr); }
+
+    void write_icr(value_type icr) noexcept override
+    { msrs::ia32_x2apic_icr::set(icr); }
+
+    void write_lvt(lvt_reg reg, value_type val) noexcept override
+    {
+        switch (reg) {
+            case cmci:
+                msrs::ia32_x2apic_lvt_cmci::set(val);
+                return;
+            case timer:
+                msrs::ia32_x2apic_lvt_timer::set(val);
+                return;
+            case thermal:
+                msrs::ia32_x2apic_lvt_thermal::set(val);
+                return;
+            case perf:
+                msrs::ia32_x2apic_lvt_pmi::set(val);
+                return;
+            case lint0:
+                msrs::ia32_x2apic_lvt_lint0::set(val);
+                return;
+            case lint1:
+                msrs::ia32_x2apic_lvt_lint1::set(val);
+                return;
+            case error:
+                msrs::ia32_x2apic_lvt_error::set(val);
+                return;
+
+            default:
+                bferror_info(0, "invalid lvt_reg");
+                return;
+        }
+    }
+
+    void write_init_count(value_type count) noexcept override
+    { msrs::ia32_x2apic_init_count::set(count); }
+
+    void write_div_config(value_type config) noexcept override
+    { msrs::ia32_x2apic_div_conf::set(config); }
 
     //
     // Send a self-ipi
@@ -2099,7 +2276,8 @@ struct EXPORT_X2APIC x2apic_control final : public lapic_control
     //
     // @param vec - the vector of the self-ipi
     //
-    void write_self_ipi(vector_type vec) noexcept override;
+    void write_self_ipi(vector_type vec) noexcept override
+    { msrs::ia32_x2apic_self_ipi::vector::set(vec); }
 
     //
     // Check trigger-mode
@@ -2112,7 +2290,34 @@ struct EXPORT_X2APIC x2apic_control final : public lapic_control
     // @note to ensure an accurate result, the caller should mask
     // the vector prior to the call
     //
-    bool level_triggered(vector_type vec) noexcept override;
+    bool level_triggered(vector_type vec) noexcept override
+    {
+
+        auto reg = (vec & 0xE0) >> 5;
+        auto bit = 1ULL << (vec & 0x1F);
+        switch (reg) {
+            case 0:
+                return msrs::ia32_x2apic_tmr0::get() & bit;
+            case 1:
+                return msrs::ia32_x2apic_tmr1::get() & bit;
+            case 2:
+                return msrs::ia32_x2apic_tmr2::get() & bit;
+            case 3:
+                return msrs::ia32_x2apic_tmr3::get() & bit;
+            case 4:
+                return msrs::ia32_x2apic_tmr4::get() & bit;
+            case 5:
+                return msrs::ia32_x2apic_tmr5::get() & bit;
+            case 6:
+                return msrs::ia32_x2apic_tmr6::get() & bit;
+            case 7:
+                return msrs::ia32_x2apic_tmr7::get() & bit;
+
+            default:
+                bferror_info(0, "invalid vector_type");
+                return false;
+        }
+    }
 
     //
     // Check if in-service
@@ -2125,7 +2330,33 @@ struct EXPORT_X2APIC x2apic_control final : public lapic_control
     // @note to ensure an accurate result, the caller should mask
     // the vector prior to the call
     //
-    bool in_service(vector_type vec) noexcept override;
+    bool in_service(vector_type vec) noexcept override
+    {
+        auto reg = (vec & 0xE0) >> 5;
+        auto bit = 1ULL << (vec & 0x1F);
+        switch (reg) {
+            case 0:
+                return msrs::ia32_x2apic_isr0::get() & bit;
+            case 1:
+                return msrs::ia32_x2apic_isr1::get() & bit;
+            case 2:
+                return msrs::ia32_x2apic_isr2::get() & bit;
+            case 3:
+                return msrs::ia32_x2apic_isr3::get() & bit;
+            case 4:
+                return msrs::ia32_x2apic_isr4::get() & bit;
+            case 5:
+                return msrs::ia32_x2apic_isr5::get() & bit;
+            case 6:
+                return msrs::ia32_x2apic_isr6::get() & bit;
+            case 7:
+                return msrs::ia32_x2apic_isr7::get() & bit;
+
+            default:
+                bferror_info(0, "invalid vector_type");
+                return false;
+        }
+    }
 
     //
     // Default operations
