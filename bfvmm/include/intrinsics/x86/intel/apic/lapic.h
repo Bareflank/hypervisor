@@ -273,6 +273,12 @@ struct EXPORT_LAPIC lapic_control
     enum index : uint32_t { idx0, idx1, idx2, idx3, idx4, idx5, idx6, idx7 };
     enum lvt_reg : uint32_t { cmci, timer, thermal, perf, lint0, lint1, error };
     enum count_reg : uint32_t { initial, current };
+    enum reg_op : uint32_t { read, write };
+
+    virtual int validate_gpa_op(uintptr_t addr, reg_op op) = 0;
+    virtual int validate_msr_op(msrs::field_type msr, reg_op op) = 0;
+    virtual value_type read_register(uint32_t offset) = 0;
+    virtual void write_register(uint32_t offset, value_type val) = 0;
 
     //
     // Register reads
@@ -297,6 +303,8 @@ struct EXPORT_LAPIC lapic_control
     virtual void write_tpr(value_type tpr) = 0;
     virtual void write_svr(value_type svr) = 0;
     virtual void write_icr(value_type icr) = 0;
+    virtual void write_icr_low(value_type icr_low) = 0;
+    virtual void write_icr_high(value_type icr_high) = 0;
     virtual void write_lvt(lvt_reg reg, value_type val) = 0;
     virtual void write_init_count(value_type count) = 0;
     virtual void write_div_config(value_type config) = 0;
