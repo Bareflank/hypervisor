@@ -233,7 +233,7 @@ TEST_CASE("intrinsics: cpuid_processor_string_2_edx")
     setup_intrinsics(mocks);
 
     using namespace cpuid::processor_string_2;
-g_edx_cpuid[addr] = 0xFFFFFFFFULL;
+    g_edx_cpuid[addr] = 0xFFFFFFFFULL;
     CHECK(edx::get() == 0xFFFFFFFFULL);
 }
 

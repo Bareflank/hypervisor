@@ -285,7 +285,6 @@ TEST_CASE("vmcs_guest_ia32_debugctl_freeze_lbrs_on_pmi")
     CHECK(freeze_lbrs_on_pmi::is_disabled_if_exists());
 }
 
-
 TEST_CASE("vmcs_guest_ia32_debugctl_freeze_perfmon_on_pmi")
 {
     MockRepository mocks;
@@ -954,7 +953,6 @@ TEST_CASE("vmcs_guest_ia32_efer")
 {
     MockRepository mocks;
     setup_intrinsics(mocks);
-
 
     using namespace vmcs::guest_ia32_efer;
 

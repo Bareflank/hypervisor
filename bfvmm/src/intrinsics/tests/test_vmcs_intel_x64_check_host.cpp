@@ -320,7 +320,8 @@ setup_check_host_verify_load_ia32_efer_paths(std::vector<struct control_flow_pat
     cfg.push_back(path);
 }
 
-static void setup_check_host_es_selector_rpl_ti_equal_zero_paths(std::vector<struct control_flow_path> &cfg) {
+static void setup_check_host_es_selector_rpl_ti_equal_zero_paths(std::vector<struct control_flow_path> &cfg)
+{
     path.setup = [&] { host_es_selector::set(0U); };
     path.throws_exception = false;
     cfg.push_back(path);

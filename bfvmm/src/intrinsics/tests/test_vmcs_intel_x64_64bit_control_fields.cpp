@@ -620,11 +620,11 @@ TEST_CASE("vmcs_eptp_list_address")
     proc_ctl2_allow1(msrs::ia32_vmx_procbased_ctls2::enable_vm_functions::mask);
     vmfunc_ctl_allow1(msrs::ia32_vmx_vmfunc::eptp_switching::mask);
 
-//    CHECK(exists());
-//    set(100UL);
-//    CHECK(get() == 100UL);
-//    set_if_exists(200UL);
-//    CHECK(get_if_exists() == 200UL);
+    //    CHECK(exists());
+    //    set(100UL);
+    //    CHECK(get() == 100UL);
+    //    set_if_exists(200UL);
+    //    CHECK(get_if_exists() == 200UL);
 
     proc_ctl2_disallow1(msrs::ia32_vmx_procbased_ctls2::enable_vm_functions::mask);
 

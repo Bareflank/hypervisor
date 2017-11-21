@@ -674,9 +674,9 @@ TEST_CASE("intrinsics: cpuid_extended_feature_flags_subleaf0_eax_max_input")
 
     g_eax_cpuid[addr] = 0xFFFFFFFFULL;
     CHECK(subleaf0::eax::max_input::get() ==
-            (subleaf0::eax::max_input::mask >> subleaf0::eax::max_input::from));
+          (subleaf0::eax::max_input::mask >> subleaf0::eax::max_input::from));
     CHECK(subleaf0::eax::max_input::get(subleaf0::eax::max_input::mask) ==
-            (subleaf0::eax::max_input::mask >> subleaf0::eax::max_input::from));
+          (subleaf0::eax::max_input::mask >> subleaf0::eax::max_input::from));
 }
 
 TEST_CASE("intrinsics: cpuid_extended_feature_flags_subleaf0_ebx")
@@ -1196,9 +1196,9 @@ TEST_CASE("intrinsics: cpuid_extended_feature_flags_subleaf0_ecx_mawau")
 
     g_ecx_cpuid[addr] = 0xFFFFFFFFULL;
     CHECK(subleaf0::ecx::mawau::get() ==
-            (subleaf0::ecx::mawau::mask >> subleaf0::ecx::mawau::from));
+          (subleaf0::ecx::mawau::mask >> subleaf0::ecx::mawau::from));
     CHECK(subleaf0::ecx::mawau::get(subleaf0::ecx::mawau::mask) ==
-            (subleaf0::ecx::mawau::mask >> subleaf0::ecx::mawau::from));
+          (subleaf0::ecx::mawau::mask >> subleaf0::ecx::mawau::from));
 }
 
 TEST_CASE("intrinsics: cpuid_extended_feature_flags_subleaf0_ecx_rdpid")
@@ -1267,9 +1267,9 @@ TEST_CASE("intrinsics: cpuid_arch_perf_monitoring_eax_version_id")
 
     g_eax_cpuid[addr] = 0xFFFFFFFFULL;
     CHECK(eax::version_id::get() ==
-            (eax::version_id::mask >> eax::version_id::from));
+          (eax::version_id::mask >> eax::version_id::from));
     CHECK(eax::version_id::get(eax::version_id::mask) ==
-            (eax::version_id::mask >> eax::version_id::from));
+          (eax::version_id::mask >> eax::version_id::from));
 }
 
 TEST_CASE("intrinsics: cpuid_arch_perf_monitoring_eax_gppmc_count")
@@ -1281,9 +1281,9 @@ TEST_CASE("intrinsics: cpuid_arch_perf_monitoring_eax_gppmc_count")
 
     g_eax_cpuid[addr] = 0xFFFFFFFFULL;
     CHECK(eax::gppmc_count::get() ==
-            (eax::gppmc_count::mask >> eax::gppmc_count::from));
+          (eax::gppmc_count::mask >> eax::gppmc_count::from));
     CHECK(eax::gppmc_count::get(eax::gppmc_count::mask) ==
-            (eax::gppmc_count::mask >> eax::gppmc_count::from));
+          (eax::gppmc_count::mask >> eax::gppmc_count::from));
 }
 
 TEST_CASE("intrinsics: cpuid_arch_perf_monitoring_eax_gppmc_bit_width")
@@ -1295,9 +1295,9 @@ TEST_CASE("intrinsics: cpuid_arch_perf_monitoring_eax_gppmc_bit_width")
 
     g_eax_cpuid[addr] = 0xFFFFFFFFULL;
     CHECK(eax::gppmc_bit_width::get() ==
-            (eax::gppmc_bit_width::mask >> eax::gppmc_bit_width::from));
+          (eax::gppmc_bit_width::mask >> eax::gppmc_bit_width::from));
     CHECK(eax::gppmc_bit_width::get(eax::gppmc_bit_width::mask) ==
-            (eax::gppmc_bit_width::mask >> eax::gppmc_bit_width::from));
+          (eax::gppmc_bit_width::mask >> eax::gppmc_bit_width::from));
 }
 
 TEST_CASE("intrinsics: cpuid_arch_perf_monitoring_eax_ebx_enumeration_length")
@@ -1309,9 +1309,9 @@ TEST_CASE("intrinsics: cpuid_arch_perf_monitoring_eax_ebx_enumeration_length")
 
     g_eax_cpuid[addr] = 0xFFFFFFFFULL;
     CHECK(eax::ebx_enumeration_length::get() ==
-            (eax::ebx_enumeration_length::mask >> eax::ebx_enumeration_length::from));
+          (eax::ebx_enumeration_length::mask >> eax::ebx_enumeration_length::from));
     CHECK(eax::ebx_enumeration_length::get(eax::ebx_enumeration_length::mask) ==
-            (eax::ebx_enumeration_length::mask >> eax::ebx_enumeration_length::from));
+          (eax::ebx_enumeration_length::mask >> eax::ebx_enumeration_length::from));
 }
 
 TEST_CASE("intrinsics: cpuid_arch_perf_monitoring_ebx")
@@ -1471,9 +1471,9 @@ TEST_CASE("intrinsics: cpuid_arch_perf_monitoring_edx_ffpmc_count")
 
     g_edx_cpuid[addr] = 0xFFFFFFFFULL;
     CHECK(edx::ffpmc_count::get() ==
-            (edx::ffpmc_count::mask >> edx::ffpmc_count::from));
+          (edx::ffpmc_count::mask >> edx::ffpmc_count::from));
     CHECK(edx::ffpmc_count::get(edx::ffpmc_count::mask) ==
-            (edx::ffpmc_count::mask >> edx::ffpmc_count::from));
+          (edx::ffpmc_count::mask >> edx::ffpmc_count::from));
 }
 
 TEST_CASE("intrinsics: cpuid_arch_perf_monitoring_edx_ffpmc_bit_width")
@@ -1485,9 +1485,9 @@ TEST_CASE("intrinsics: cpuid_arch_perf_monitoring_edx_ffpmc_bit_width")
 
     g_edx_cpuid[addr] = 0xFFFFFFFFULL;
     CHECK(edx::ffpmc_bit_width::get() ==
-            (edx::ffpmc_bit_width::mask >> edx::ffpmc_bit_width::from));
+          (edx::ffpmc_bit_width::mask >> edx::ffpmc_bit_width::from));
     CHECK(edx::ffpmc_bit_width::get(edx::ffpmc_bit_width::mask) ==
-            (edx::ffpmc_bit_width::mask >> edx::ffpmc_bit_width::from));
+          (edx::ffpmc_bit_width::mask >> edx::ffpmc_bit_width::from));
 }
 
 TEST_CASE("intrinsics: cpuid_cache_tlb_info")
@@ -1606,9 +1606,9 @@ TEST_CASE("intrinsics: cpuid_cache_parameters_eax_cache_type")
 
     g_eax_cpuid[addr] = 0xFFFFFFFFULL;
     CHECK(eax::cache_type::get() ==
-            (eax::cache_type::mask >> eax::cache_type::from));
+          (eax::cache_type::mask >> eax::cache_type::from));
     CHECK(eax::cache_type::get(eax::cache_type::mask) ==
-            (eax::cache_type::mask >> eax::cache_type::from));
+          (eax::cache_type::mask >> eax::cache_type::from));
 }
 
 TEST_CASE("intrinsics: cpuid_cache_parameters_eax_cache_level")
@@ -1620,9 +1620,9 @@ TEST_CASE("intrinsics: cpuid_cache_parameters_eax_cache_level")
 
     g_eax_cpuid[addr] = 0xFFFFFFFFULL;
     CHECK(eax::cache_level::get() ==
-            (eax::cache_level::mask >> eax::cache_level::from));
+          (eax::cache_level::mask >> eax::cache_level::from));
     CHECK(eax::cache_level::get(eax::cache_level::mask) ==
-            (eax::cache_level::mask >> eax::cache_level::from));
+          (eax::cache_level::mask >> eax::cache_level::from));
 }
 
 TEST_CASE("intrinsics: cpuid_cache_parameters_eax_self_init_level")
@@ -1670,9 +1670,9 @@ TEST_CASE("intrinsics: cpuid_cache_parameters_eax_max_ids_logical")
 
     g_eax_cpuid[addr] = 0xFFFFFFFFULL;
     CHECK(eax::max_ids_logical::get() ==
-            (eax::max_ids_logical::mask >> eax::max_ids_logical::from));
+          (eax::max_ids_logical::mask >> eax::max_ids_logical::from));
     CHECK(eax::max_ids_logical::get(eax::max_ids_logical::mask) ==
-            (eax::max_ids_logical::mask >> eax::max_ids_logical::from));
+          (eax::max_ids_logical::mask >> eax::max_ids_logical::from));
 }
 
 TEST_CASE("intrinsics: cpuid_cache_parameters_eax_max_ids_physical")
@@ -1684,9 +1684,9 @@ TEST_CASE("intrinsics: cpuid_cache_parameters_eax_max_ids_physical")
 
     g_eax_cpuid[addr] = 0xFFFFFFFFULL;
     CHECK(eax::max_ids_physical::get() ==
-            (eax::max_ids_physical::mask >> eax::max_ids_physical::from));
+          (eax::max_ids_physical::mask >> eax::max_ids_physical::from));
     CHECK(eax::max_ids_physical::get(eax::max_ids_physical::mask) ==
-            (eax::max_ids_physical::mask >> eax::max_ids_physical::from));
+          (eax::max_ids_physical::mask >> eax::max_ids_physical::from));
 }
 
 TEST_CASE("intrinsics: cpuid_cache_parameters_ebx")
@@ -1709,9 +1709,9 @@ TEST_CASE("intrinsics: cpuid_cache_parameters_ebx_l")
 
     g_ebx_cpuid[addr] = 0xFFFFFFFFULL;
     CHECK(ebx::l::get() ==
-            (ebx::l::mask >> ebx::l::from));
+          (ebx::l::mask >> ebx::l::from));
     CHECK(ebx::l::get(ebx::l::mask) ==
-            (ebx::l::mask >> ebx::l::from));
+          (ebx::l::mask >> ebx::l::from));
 }
 
 TEST_CASE("intrinsics: cpuid_cache_parameters_ebx_p")
@@ -1723,9 +1723,9 @@ TEST_CASE("intrinsics: cpuid_cache_parameters_ebx_p")
 
     g_ebx_cpuid[addr] = 0xFFFFFFFFULL;
     CHECK(ebx::p::get() ==
-            (ebx::p::mask >> ebx::p::from));
+          (ebx::p::mask >> ebx::p::from));
     CHECK(ebx::p::get(ebx::p::mask) ==
-            (ebx::p::mask >> ebx::p::from));
+          (ebx::p::mask >> ebx::p::from));
 }
 
 TEST_CASE("intrinsics: cpuid_cache_parameters_ebx_w")
@@ -1737,9 +1737,9 @@ TEST_CASE("intrinsics: cpuid_cache_parameters_ebx_w")
 
     g_ebx_cpuid[addr] = 0xFFFFFFFFULL;
     CHECK(ebx::w::get() ==
-            (ebx::w::mask >> ebx::w::from));
+          (ebx::w::mask >> ebx::w::from));
     CHECK(ebx::w::get(ebx::w::mask) ==
-            (ebx::w::mask >> ebx::w::from));
+          (ebx::w::mask >> ebx::w::from));
 }
 
 TEST_CASE("intrinsics: cpuid_cache_parameters_ecx")
@@ -1762,9 +1762,9 @@ TEST_CASE("intrinsics: cpuid_cache_parameters_ecx_num_sets")
 
     g_ecx_cpuid[addr] = 0xFFFFFFFFULL;
     CHECK(ecx::num_sets::get() ==
-            (ecx::num_sets::mask >> ecx::num_sets::from));
+          (ecx::num_sets::mask >> ecx::num_sets::from));
     CHECK(ecx::num_sets::get(ecx::num_sets::mask) ==
-            (ecx::num_sets::mask >> ecx::num_sets::from));
+          (ecx::num_sets::mask >> ecx::num_sets::from));
 }
 
 TEST_CASE("intrinsics: cpuid_cache_parameters_edx")
@@ -1862,9 +1862,9 @@ TEST_CASE("intrinsics: cpuid_monitor_mwait_eax_min_line_size")
 
     g_eax_cpuid[addr] = 0xFFFFFFFFULL;
     CHECK(eax::min_line_size::get() ==
-            (eax::min_line_size::mask >> eax::min_line_size::from));
+          (eax::min_line_size::mask >> eax::min_line_size::from));
     CHECK(eax::min_line_size::get(eax::min_line_size::mask) ==
-            (eax::min_line_size::mask >> eax::min_line_size::from));
+          (eax::min_line_size::mask >> eax::min_line_size::from));
 }
 
 TEST_CASE("intrinsics: cpuid_monitor_mwait_ebx")
@@ -1887,9 +1887,9 @@ TEST_CASE("intrinsics: cpuid_monitor_mwait_ebx_max_line_size")
 
     g_ebx_cpuid[addr] = 0xFFFFFFFFULL;
     CHECK(ebx::max_line_size::get() ==
-            (ebx::max_line_size::mask >> ebx::max_line_size::from));
+          (ebx::max_line_size::mask >> ebx::max_line_size::from));
     CHECK(ebx::max_line_size::get(ebx::max_line_size::mask) ==
-            (ebx::max_line_size::mask >> ebx::max_line_size::from));
+          (ebx::max_line_size::mask >> ebx::max_line_size::from));
 }
 
 TEST_CASE("intrinsics: cpuid_monitor_mwait_ecx")
@@ -1959,9 +1959,9 @@ TEST_CASE("intrinsics: cpuid_monitor_mwait_edx_num_c0")
 
     g_edx_cpuid[addr] = 0xFFFFFFFFULL;
     CHECK(edx::num_c0::get() ==
-            (edx::num_c0::mask >> edx::num_c0::from));
+          (edx::num_c0::mask >> edx::num_c0::from));
     CHECK(edx::num_c0::get(edx::num_c0::mask) ==
-            (edx::num_c0::mask >> edx::num_c0::from));
+          (edx::num_c0::mask >> edx::num_c0::from));
 }
 
 TEST_CASE("intrinsics: cpuid_monitor_mwait_edx_num_c1")
@@ -1973,9 +1973,9 @@ TEST_CASE("intrinsics: cpuid_monitor_mwait_edx_num_c1")
 
     g_edx_cpuid[addr] = 0xFFFFFFFFULL;
     CHECK(edx::num_c1::get() ==
-            (edx::num_c1::mask >> edx::num_c1::from));
+          (edx::num_c1::mask >> edx::num_c1::from));
     CHECK(edx::num_c1::get(edx::num_c1::mask) ==
-            (edx::num_c1::mask >> edx::num_c1::from));
+          (edx::num_c1::mask >> edx::num_c1::from));
 }
 
 TEST_CASE("intrinsics: cpuid_monitor_mwait_edx_num_c2")
@@ -1987,9 +1987,9 @@ TEST_CASE("intrinsics: cpuid_monitor_mwait_edx_num_c2")
 
     g_edx_cpuid[addr] = 0xFFFFFFFFULL;
     CHECK(edx::num_c2::get() ==
-            (edx::num_c2::mask >> edx::num_c2::from));
+          (edx::num_c2::mask >> edx::num_c2::from));
     CHECK(edx::num_c2::get(edx::num_c2::mask) ==
-            (edx::num_c2::mask >> edx::num_c2::from));
+          (edx::num_c2::mask >> edx::num_c2::from));
 }
 
 TEST_CASE("intrinsics: cpuid_monitor_mwait_edx_num_c3")
@@ -2001,9 +2001,9 @@ TEST_CASE("intrinsics: cpuid_monitor_mwait_edx_num_c3")
 
     g_edx_cpuid[addr] = 0xFFFFFFFFULL;
     CHECK(edx::num_c3::get() ==
-            (edx::num_c3::mask >> edx::num_c3::from));
+          (edx::num_c3::mask >> edx::num_c3::from));
     CHECK(edx::num_c3::get(edx::num_c3::mask) ==
-            (edx::num_c3::mask >> edx::num_c3::from));
+          (edx::num_c3::mask >> edx::num_c3::from));
 }
 
 TEST_CASE("intrinsics: cpuid_monitor_mwait_edx_num_c4")
@@ -2015,9 +2015,9 @@ TEST_CASE("intrinsics: cpuid_monitor_mwait_edx_num_c4")
 
     g_edx_cpuid[addr] = 0xFFFFFFFFULL;
     CHECK(edx::num_c4::get() ==
-            (edx::num_c4::mask >> edx::num_c4::from));
+          (edx::num_c4::mask >> edx::num_c4::from));
     CHECK(edx::num_c4::get(edx::num_c4::mask) ==
-            (edx::num_c4::mask >> edx::num_c4::from));
+          (edx::num_c4::mask >> edx::num_c4::from));
 }
 
 TEST_CASE("intrinsics: cpuid_monitor_mwait_edx_num_c5")
@@ -2029,9 +2029,9 @@ TEST_CASE("intrinsics: cpuid_monitor_mwait_edx_num_c5")
 
     g_edx_cpuid[addr] = 0xFFFFFFFFULL;
     CHECK(edx::num_c5::get() ==
-            (edx::num_c5::mask >> edx::num_c5::from));
+          (edx::num_c5::mask >> edx::num_c5::from));
     CHECK(edx::num_c5::get(edx::num_c5::mask) ==
-            (edx::num_c5::mask >> edx::num_c5::from));
+          (edx::num_c5::mask >> edx::num_c5::from));
 }
 
 TEST_CASE("intrinsics: cpuid_monitor_mwait_edx_num_c6")
@@ -2043,9 +2043,9 @@ TEST_CASE("intrinsics: cpuid_monitor_mwait_edx_num_c6")
 
     g_edx_cpuid[addr] = 0xFFFFFFFFULL;
     CHECK(edx::num_c6::get() ==
-            (edx::num_c6::mask >> edx::num_c6::from));
+          (edx::num_c6::mask >> edx::num_c6::from));
     CHECK(edx::num_c6::get(edx::num_c6::mask) ==
-            (edx::num_c6::mask >> edx::num_c6::from));
+          (edx::num_c6::mask >> edx::num_c6::from));
 }
 
 TEST_CASE("intrinsics: cpuid_monitor_mwait_edx_num_c7")
@@ -2057,9 +2057,9 @@ TEST_CASE("intrinsics: cpuid_monitor_mwait_edx_num_c7")
 
     g_edx_cpuid[addr] = 0xFFFFFFFFULL;
     CHECK(edx::num_c7::get() ==
-            (edx::num_c7::mask >> edx::num_c7::from));
+          (edx::num_c7::mask >> edx::num_c7::from));
     CHECK(edx::num_c7::get(edx::num_c7::mask) ==
-            (edx::num_c7::mask >> edx::num_c7::from));
+          (edx::num_c7::mask >> edx::num_c7::from));
 }
 
 TEST_CASE("intrinsics: cpuid_therm_power_management")
@@ -2301,9 +2301,9 @@ TEST_CASE("intrinsics: cpuid_therm_power_management_ebx_num_interrupts")
 
     g_ebx_cpuid[addr] = 0xFFFFFFFFULL;
     CHECK(ebx::num_interrupts::get() ==
-            (ebx::num_interrupts::mask >> ebx::num_interrupts::from));
+          (ebx::num_interrupts::mask >> ebx::num_interrupts::from));
     CHECK(ebx::num_interrupts::get(ebx::num_interrupts::mask) ==
-            (ebx::num_interrupts::mask >> ebx::num_interrupts::from));
+          (ebx::num_interrupts::mask >> ebx::num_interrupts::from));
 }
 
 TEST_CASE("intrinsics: cpuid_therm_power_management_ecx")
@@ -2404,9 +2404,9 @@ TEST_CASE("intrinsics: cpuid_topology_enumeration_eax_x2apic_shift")
 
     g_eax_cpuid[addr] = 0xFFFFFFFFULL;
     CHECK(eax::x2apic_shift::get() ==
-            (eax::x2apic_shift::mask >> eax::x2apic_shift::from));
+          (eax::x2apic_shift::mask >> eax::x2apic_shift::from));
     CHECK(eax::x2apic_shift::get(eax::x2apic_shift::mask) ==
-            (eax::x2apic_shift::mask >> eax::x2apic_shift::from));
+          (eax::x2apic_shift::mask >> eax::x2apic_shift::from));
 }
 
 TEST_CASE("intrinsics: cpuid_topology_enumeration_ebx")
@@ -2429,9 +2429,9 @@ TEST_CASE("intrinsics: cpuid_topology_enumeration_ebx_num_processors")
 
     g_ebx_cpuid[addr] = 0xFFFFFFFFULL;
     CHECK(ebx::num_processors::get() ==
-            (ebx::num_processors::mask >> ebx::num_processors::from));
+          (ebx::num_processors::mask >> ebx::num_processors::from));
     CHECK(ebx::num_processors::get(ebx::num_processors::mask) ==
-            (ebx::num_processors::mask >> ebx::num_processors::from));
+          (ebx::num_processors::mask >> ebx::num_processors::from));
 }
 
 TEST_CASE("intrinsics: cpuid_topology_enumeration_ecx")
@@ -2454,9 +2454,9 @@ TEST_CASE("intrinsics: cpuid_topology_enumeration_ecx_level_number")
 
     g_ecx_cpuid[addr] = 0xFFFFFFFFULL;
     CHECK(ecx::level_number::get() ==
-            (ecx::level_number::mask >> ecx::level_number::from));
+          (ecx::level_number::mask >> ecx::level_number::from));
     CHECK(ecx::level_number::get(ecx::level_number::mask) ==
-            (ecx::level_number::mask >> ecx::level_number::from));
+          (ecx::level_number::mask >> ecx::level_number::from));
 }
 
 TEST_CASE("intrinsics: cpuid_topology_enumeration_ecx_level_type")
@@ -2468,9 +2468,9 @@ TEST_CASE("intrinsics: cpuid_topology_enumeration_ecx_level_type")
 
     g_ecx_cpuid[addr] = 0xFFFFFFFFULL;
     CHECK(ecx::level_type::get() ==
-            (ecx::level_type::mask >> ecx::level_type::from));
+          (ecx::level_type::mask >> ecx::level_type::from));
     CHECK(ecx::level_type::get(ecx::level_type::mask) ==
-            (ecx::level_type::mask >> ecx::level_type::from));
+          (ecx::level_type::mask >> ecx::level_type::from));
 }
 
 TEST_CASE("intrinsics: cpuid_topology_enumeration_edx")
@@ -2493,9 +2493,9 @@ TEST_CASE("intrinsics: cpuid_topology_enumeration_edx_x2apic_id")
 
     g_edx_cpuid[addr] = 0xFFFFFFFFULL;
     CHECK(edx::x2apic_id::get() ==
-            (edx::x2apic_id::mask >> edx::x2apic_id::from));
+          (edx::x2apic_id::mask >> edx::x2apic_id::from));
     CHECK(edx::x2apic_id::get(edx::x2apic_id::mask) ==
-            (edx::x2apic_id::mask >> edx::x2apic_id::from));
+          (edx::x2apic_id::mask >> edx::x2apic_id::from));
 }
 
 TEST_CASE("intrinsics: cpuid_extended_state_enum")
@@ -2655,9 +2655,9 @@ TEST_CASE("intrinsics: cpuid_extended_state_enum_subleaf1_ebx_xsave_size")
 
     g_ebx_cpuid[addr] = 0xFFFFFFFFULL;
     CHECK(subleaf1::ebx::xsave_size::get() ==
-            (subleaf1::ebx::xsave_size::mask >> subleaf1::ebx::xsave_size::from));
+          (subleaf1::ebx::xsave_size::mask >> subleaf1::ebx::xsave_size::from));
     CHECK(subleaf1::ebx::xsave_size::get(subleaf1::ebx::xsave_size::mask) ==
-            (subleaf1::ebx::xsave_size::mask >> subleaf1::ebx::xsave_size::from));
+          (subleaf1::ebx::xsave_size::mask >> subleaf1::ebx::xsave_size::from));
 }
 
 TEST_CASE("intrinsics: cpuid_extended_state_enum_subleaf1_ecx")
@@ -2680,9 +2680,9 @@ TEST_CASE("intrinsics: cpuid_extended_state_enum_subleaf1_ecx_supported_bits")
 
     g_ecx_cpuid[addr] = 0xFFFFFFFFULL;
     CHECK(subleaf1::ecx::supported_bits::get() ==
-            (subleaf1::ecx::supported_bits::mask >> subleaf1::ecx::supported_bits::from));
+          (subleaf1::ecx::supported_bits::mask >> subleaf1::ecx::supported_bits::from));
     CHECK(subleaf1::ecx::supported_bits::get(subleaf1::ecx::supported_bits::mask) ==
-            (subleaf1::ecx::supported_bits::mask >> subleaf1::ecx::supported_bits::from));
+          (subleaf1::ecx::supported_bits::mask >> subleaf1::ecx::supported_bits::from));
 }
 
 TEST_CASE("intrinsics: cpuid_extended_state_enum_subleaf1_edx")
@@ -2705,9 +2705,9 @@ TEST_CASE("intrinsics: cpuid_extended_state_enum_subleaf1_edx_supported_bits")
 
     g_edx_cpuid[addr] = 0xFFFFFFFFULL;
     CHECK(subleaf1::edx::supported_bits::get() ==
-            (subleaf1::edx::supported_bits::mask >> subleaf1::edx::supported_bits::from));
+          (subleaf1::edx::supported_bits::mask >> subleaf1::edx::supported_bits::from));
     CHECK(subleaf1::edx::supported_bits::get(subleaf1::edx::supported_bits::mask) ==
-            (subleaf1::edx::supported_bits::mask >> subleaf1::edx::supported_bits::from));
+          (subleaf1::edx::supported_bits::mask >> subleaf1::edx::supported_bits::from));
 }
 
 TEST_CASE("intrinsics: cpuid_intel_rdt")
@@ -2740,9 +2740,9 @@ TEST_CASE("intrinsics: cpuid_intel_rdt_subleaf0_ebx_rmid_max_range")
 
     g_ebx_cpuid[addr] = 0xFFFFFFFFULL;
     CHECK(subleaf0::ebx::rmid_max_range::get() ==
-            (subleaf0::ebx::rmid_max_range::mask >> subleaf0::ebx::rmid_max_range::from));
+          (subleaf0::ebx::rmid_max_range::mask >> subleaf0::ebx::rmid_max_range::from));
     CHECK(subleaf0::ebx::rmid_max_range::get(subleaf0::ebx::rmid_max_range::mask) ==
-            (subleaf0::ebx::rmid_max_range::mask >> subleaf0::ebx::rmid_max_range::from));
+          (subleaf0::ebx::rmid_max_range::mask >> subleaf0::ebx::rmid_max_range::from));
 }
 
 TEST_CASE("intrinsics: cpuid_intel_rdt_subleaf0_edx")
@@ -2794,9 +2794,9 @@ TEST_CASE("intrinsics: cpuid_intel_rdt_subleaf1_ebx_conversion_factor")
 
     g_ebx_cpuid[addr] = 0xFFFFFFFFULL;
     CHECK(subleaf1::ebx::conversion_factor::get() ==
-            (subleaf1::ebx::conversion_factor::mask >> subleaf1::ebx::conversion_factor::from));
+          (subleaf1::ebx::conversion_factor::mask >> subleaf1::ebx::conversion_factor::from));
     CHECK(subleaf1::ebx::conversion_factor::get(subleaf1::ebx::conversion_factor::mask) ==
-            (subleaf1::ebx::conversion_factor::mask >> subleaf1::ebx::conversion_factor::from));
+          (subleaf1::ebx::conversion_factor::mask >> subleaf1::ebx::conversion_factor::from));
 }
 
 TEST_CASE("intrinsics: cpuid_intel_rdt_subleaf1_ecx")
@@ -2819,9 +2819,9 @@ TEST_CASE("intrinsics: cpuid_intel_rdt_subleaf1_ecx_rmid_max_range")
 
     g_ecx_cpuid[addr] = 0xFFFFFFFFULL;
     CHECK(subleaf1::ecx::rmid_max_range::get() ==
-            (subleaf1::ecx::rmid_max_range::mask >> subleaf1::ecx::rmid_max_range::from));
+          (subleaf1::ecx::rmid_max_range::mask >> subleaf1::ecx::rmid_max_range::from));
     CHECK(subleaf1::ecx::rmid_max_range::get(subleaf1::ecx::rmid_max_range::mask) ==
-            (subleaf1::ecx::rmid_max_range::mask >> subleaf1::ecx::rmid_max_range::from));
+          (subleaf1::ecx::rmid_max_range::mask >> subleaf1::ecx::rmid_max_range::from));
 }
 
 TEST_CASE("intrinsics: cpuid_intel_rdt_subleaf1_edx")
@@ -2984,9 +2984,9 @@ TEST_CASE("intrinsics: cpuid_allocation_enumeration_subleaf1_eax_mask_length")
 
     g_eax_cpuid[addr] = 0xFFFFFFFFULL;
     CHECK(subleaf1::eax::mask_length::get() ==
-            (subleaf1::eax::mask_length::mask >> subleaf1::eax::mask_length::from));
+          (subleaf1::eax::mask_length::mask >> subleaf1::eax::mask_length::from));
     CHECK(subleaf1::eax::mask_length::get(subleaf1::eax::mask_length::mask) ==
-            (subleaf1::eax::mask_length::mask >> subleaf1::eax::mask_length::from));
+          (subleaf1::eax::mask_length::mask >> subleaf1::eax::mask_length::from));
 }
 
 TEST_CASE("intrinsics: cpuid_allocation_enumeration_subleaf1_ebx")
@@ -3009,9 +3009,9 @@ TEST_CASE("intrinsics: cpuid_allocation_enumeration_subleaf1_ebx_map")
 
     g_ebx_cpuid[addr] = 0xFFFFFFFFULL;
     CHECK(subleaf1::ebx::map::get() ==
-            (subleaf1::ebx::map::mask >> subleaf1::ebx::map::from));
+          (subleaf1::ebx::map::mask >> subleaf1::ebx::map::from));
     CHECK(subleaf1::ebx::map::get(subleaf1::ebx::map::mask) ==
-            (subleaf1::ebx::map::mask >> subleaf1::ebx::map::from));
+          (subleaf1::ebx::map::mask >> subleaf1::ebx::map::from));
 }
 
 TEST_CASE("intrinsics: cpuid_allocation_enumeration_subleaf1_ecx")
@@ -3063,9 +3063,9 @@ TEST_CASE("intrinsics: cpuid_allocation_enumeration_subleaf1_edx_max_cos")
 
     g_edx_cpuid[addr] = 0xFFFFFFFFULL;
     CHECK(subleaf1::edx::max_cos::get() ==
-            (subleaf1::edx::max_cos::mask >> subleaf1::edx::max_cos::from));
+          (subleaf1::edx::max_cos::mask >> subleaf1::edx::max_cos::from));
     CHECK(subleaf1::edx::max_cos::get(subleaf1::edx::max_cos::mask) ==
-            (subleaf1::edx::max_cos::mask >> subleaf1::edx::max_cos::from));
+          (subleaf1::edx::max_cos::mask >> subleaf1::edx::max_cos::from));
 }
 
 TEST_CASE("intrinsics: cpuid_allocation_enumeration_subleaf2_eax")
@@ -3088,9 +3088,9 @@ TEST_CASE("intrinsics: cpuid_allocation_enumeration_subleaf2_eax_mask_length")
 
     g_eax_cpuid[addr] = 0xFFFFFFFFULL;
     CHECK(subleaf2::eax::mask_length::get() ==
-            (subleaf2::eax::mask_length::mask >> subleaf2::eax::mask_length::from));
+          (subleaf2::eax::mask_length::mask >> subleaf2::eax::mask_length::from));
     CHECK(subleaf2::eax::mask_length::get(subleaf2::eax::mask_length::mask) ==
-            (subleaf2::eax::mask_length::mask >> subleaf2::eax::mask_length::from));
+          (subleaf2::eax::mask_length::mask >> subleaf2::eax::mask_length::from));
 }
 
 TEST_CASE("intrinsics: cpuid_allocation_enumeration_subleaf2_ebx")
@@ -3113,9 +3113,9 @@ TEST_CASE("intrinsics: cpuid_allocation_enumeration_subleaf2_ebx_map")
 
     g_ebx_cpuid[addr] = 0xFFFFFFFFULL;
     CHECK(subleaf2::ebx::map::get() ==
-            (subleaf2::ebx::map::mask >> subleaf2::ebx::map::from));
+          (subleaf2::ebx::map::mask >> subleaf2::ebx::map::from));
     CHECK(subleaf2::ebx::map::get(subleaf2::ebx::map::mask) ==
-            (subleaf2::ebx::map::mask >> subleaf2::ebx::map::from));
+          (subleaf2::ebx::map::mask >> subleaf2::ebx::map::from));
 }
 
 TEST_CASE("intrinsics: cpuid_allocation_enumeration_subleaf2_edx")
@@ -3138,9 +3138,9 @@ TEST_CASE("intrinsics: cpuid_allocation_enumeration_subleaf2_edx_max_cos")
 
     g_edx_cpuid[addr] = 0xFFFFFFFFULL;
     CHECK(subleaf2::edx::max_cos::get() ==
-            (subleaf2::edx::max_cos::mask >> subleaf2::edx::max_cos::from));
+          (subleaf2::edx::max_cos::mask >> subleaf2::edx::max_cos::from));
     CHECK(subleaf2::edx::max_cos::get(subleaf2::edx::max_cos::mask) ==
-            (subleaf2::edx::max_cos::mask >> subleaf2::edx::max_cos::from));
+          (subleaf2::edx::max_cos::mask >> subleaf2::edx::max_cos::from));
 }
 
 TEST_CASE("intrinsics: cpuid_allocation_enumeration_subleaf3_eax")
@@ -3163,9 +3163,9 @@ TEST_CASE("intrinsics: cpuid_allocation_enumeration_subleaf3_eax_max_throttle")
 
     g_eax_cpuid[addr] = 0xFFFFFFFFULL;
     CHECK(subleaf3::eax::max_throttle::get() ==
-            (subleaf3::eax::max_throttle::mask >> subleaf3::eax::max_throttle::from));
+          (subleaf3::eax::max_throttle::mask >> subleaf3::eax::max_throttle::from));
     CHECK(subleaf3::eax::max_throttle::get(subleaf3::eax::max_throttle::mask) ==
-            (subleaf3::eax::max_throttle::mask >> subleaf3::eax::max_throttle::from));
+          (subleaf3::eax::max_throttle::mask >> subleaf3::eax::max_throttle::from));
 }
 
 TEST_CASE("intrinsics: cpuid_allocation_enumeration_subleaf3_ecx")
@@ -3217,9 +3217,9 @@ TEST_CASE("intrinsics: cpuid_allocation_enumeration_subleaf3_edx_max_cos")
 
     g_edx_cpuid[addr] = 0xFFFFFFFFULL;
     CHECK(subleaf3::edx::max_cos::get() ==
-            (subleaf3::edx::max_cos::mask >> subleaf3::edx::max_cos::from));
+          (subleaf3::edx::max_cos::mask >> subleaf3::edx::max_cos::from));
     CHECK(subleaf3::edx::max_cos::get(subleaf3::edx::max_cos::mask) ==
-            (subleaf3::edx::max_cos::mask >> subleaf3::edx::max_cos::from));
+          (subleaf3::edx::max_cos::mask >> subleaf3::edx::max_cos::from));
 }
 
 TEST_CASE("intrinsics: cpuid_intel_sgx")
@@ -3299,9 +3299,9 @@ TEST_CASE("intrinsics: cpuid_intel_sgx_subleaf0_ebx_miscselect")
 
     g_ebx_cpuid[addr] = 0xFFFFFFFFULL;
     CHECK(subleaf0::ebx::miscselect::get() ==
-            (subleaf0::ebx::miscselect::mask >> subleaf0::ebx::miscselect::from));
+          (subleaf0::ebx::miscselect::mask >> subleaf0::ebx::miscselect::from));
     CHECK(subleaf0::ebx::miscselect::get(subleaf0::ebx::miscselect::mask) ==
-            (subleaf0::ebx::miscselect::mask >> subleaf0::ebx::miscselect::from));
+          (subleaf0::ebx::miscselect::mask >> subleaf0::ebx::miscselect::from));
 }
 
 TEST_CASE("intrinsics: cpuid_intel_sgx_subleaf0_edx")
@@ -3324,9 +3324,9 @@ TEST_CASE("intrinsics: cpuid_intel_sgx_subleaf0_edx_mes_not64")
 
     g_edx_cpuid[addr] = 0xFFFFFFFFULL;
     CHECK(subleaf0::edx::mes_not64::get() ==
-            (subleaf0::edx::mes_not64::mask >> subleaf0::edx::mes_not64::from));
+          (subleaf0::edx::mes_not64::mask >> subleaf0::edx::mes_not64::from));
     CHECK(subleaf0::edx::mes_not64::get(subleaf0::edx::mes_not64::mask) ==
-            (subleaf0::edx::mes_not64::mask >> subleaf0::edx::mes_not64::from));
+          (subleaf0::edx::mes_not64::mask >> subleaf0::edx::mes_not64::from));
 }
 
 TEST_CASE("intrinsics: cpuid_intel_sgx_subleaf0_edx_mes_64")
@@ -3338,9 +3338,9 @@ TEST_CASE("intrinsics: cpuid_intel_sgx_subleaf0_edx_mes_64")
 
     g_edx_cpuid[addr] = 0xFFFFFFFFULL;
     CHECK(subleaf0::edx::mes_64::get() ==
-            (subleaf0::edx::mes_64::mask >> subleaf0::edx::mes_64::from));
+          (subleaf0::edx::mes_64::mask >> subleaf0::edx::mes_64::from));
     CHECK(subleaf0::edx::mes_64::get(subleaf0::edx::mes_64::mask) ==
-            (subleaf0::edx::mes_64::mask >> subleaf0::edx::mes_64::from));
+          (subleaf0::edx::mes_64::mask >> subleaf0::edx::mes_64::from));
 }
 
 TEST_CASE("intrinsics: cpuid_intel_sgx_subleaf1_eax")
@@ -3407,9 +3407,9 @@ TEST_CASE("intrinsics: cpuid_intel_sgx_subleaf2_eax_subleaf_type")
 
     g_eax_cpuid[addr] = 0xFFFFFFFFULL;
     CHECK(subleaf2::eax::subleaf_type::get() ==
-            (subleaf2::eax::subleaf_type::mask >> subleaf2::eax::subleaf_type::from));
+          (subleaf2::eax::subleaf_type::mask >> subleaf2::eax::subleaf_type::from));
     CHECK(subleaf2::eax::subleaf_type::get(subleaf2::eax::subleaf_type::mask) ==
-            (subleaf2::eax::subleaf_type::mask >> subleaf2::eax::subleaf_type::from));
+          (subleaf2::eax::subleaf_type::mask >> subleaf2::eax::subleaf_type::from));
 }
 
 TEST_CASE("intrinsics: cpuid_intel_sgx_subleaf2_eax_address")
@@ -3421,9 +3421,9 @@ TEST_CASE("intrinsics: cpuid_intel_sgx_subleaf2_eax_address")
 
     g_eax_cpuid[addr] = 0xFFFFFFFFULL;
     CHECK(subleaf2::eax::address::get() ==
-            (subleaf2::eax::address::mask >> subleaf2::eax::address::from));
+          (subleaf2::eax::address::mask >> subleaf2::eax::address::from));
     CHECK(subleaf2::eax::address::get(subleaf2::eax::address::mask) ==
-            (subleaf2::eax::address::mask >> subleaf2::eax::address::from));
+          (subleaf2::eax::address::mask >> subleaf2::eax::address::from));
 }
 
 TEST_CASE("intrinsics: cpuid_intel_sgx_subleaf2_ebx")
@@ -3446,9 +3446,9 @@ TEST_CASE("intrinsics: cpuid_intel_sgx_subleaf2_ebx_address")
 
     g_ebx_cpuid[addr] = 0xFFFFFFFFULL;
     CHECK(subleaf2::ebx::address::get() ==
-            (subleaf2::ebx::address::mask >> subleaf2::ebx::address::from));
+          (subleaf2::ebx::address::mask >> subleaf2::ebx::address::from));
     CHECK(subleaf2::ebx::address::get(subleaf2::ebx::address::mask) ==
-            (subleaf2::ebx::address::mask >> subleaf2::ebx::address::from));
+          (subleaf2::ebx::address::mask >> subleaf2::ebx::address::from));
 }
 
 TEST_CASE("intrinsics: cpuid_intel_sgx_subleaf2_ecx")
@@ -3471,9 +3471,9 @@ TEST_CASE("intrinsics: cpuid_intel_sgx_subleaf2_ecx_epc_property")
 
     g_ecx_cpuid[addr] = 0xFFFFFFFFULL;
     CHECK(subleaf2::ecx::epc_property::get() ==
-            (subleaf2::ecx::epc_property::mask >> subleaf2::ecx::epc_property::from));
+          (subleaf2::ecx::epc_property::mask >> subleaf2::ecx::epc_property::from));
     CHECK(subleaf2::ecx::epc_property::get(subleaf2::ecx::epc_property::mask) ==
-            (subleaf2::ecx::epc_property::mask >> subleaf2::ecx::epc_property::from));
+          (subleaf2::ecx::epc_property::mask >> subleaf2::ecx::epc_property::from));
 }
 
 TEST_CASE("intrinsics: cpuid_intel_sgx_subleaf2_ecx_epc_size")
@@ -3485,9 +3485,9 @@ TEST_CASE("intrinsics: cpuid_intel_sgx_subleaf2_ecx_epc_size")
 
     g_ecx_cpuid[addr] = 0xFFFFFFFFULL;
     CHECK(subleaf2::ecx::epc_size::get() ==
-            (subleaf2::ecx::epc_size::mask >> subleaf2::ecx::epc_size::from));
+          (subleaf2::ecx::epc_size::mask >> subleaf2::ecx::epc_size::from));
     CHECK(subleaf2::ecx::epc_size::get(subleaf2::ecx::epc_size::mask) ==
-            (subleaf2::ecx::epc_size::mask >> subleaf2::ecx::epc_size::from));
+          (subleaf2::ecx::epc_size::mask >> subleaf2::ecx::epc_size::from));
 }
 
 TEST_CASE("intrinsics: cpuid_intel_sgx_subleaf2_edx")
@@ -3510,9 +3510,9 @@ TEST_CASE("intrinsics: cpuid_intel_sgx_subleaf2_edx_epc_size")
 
     g_edx_cpuid[addr] = 0xFFFFFFFFULL;
     CHECK(subleaf2::edx::epc_size::get() ==
-            (subleaf2::edx::epc_size::mask >> subleaf2::edx::epc_size::from));
+          (subleaf2::edx::epc_size::mask >> subleaf2::edx::epc_size::from));
     CHECK(subleaf2::edx::epc_size::get(subleaf2::edx::epc_size::mask) ==
-            (subleaf2::edx::epc_size::mask >> subleaf2::edx::epc_size::from));
+          (subleaf2::edx::epc_size::mask >> subleaf2::edx::epc_size::from));
 }
 
 TEST_CASE("intrinsics: cpuid_trace_enumeration")
@@ -3545,9 +3545,9 @@ TEST_CASE("intrinsics: cpuid_trace_enumeration_mainleaf_eax_max_subleaf")
 
     g_eax_cpuid[addr] = 0xFFFFFFFFULL;
     CHECK(mainleaf::eax::max_subleaf::get() ==
-            (mainleaf::eax::max_subleaf::mask >> mainleaf::eax::max_subleaf::from));
+          (mainleaf::eax::max_subleaf::mask >> mainleaf::eax::max_subleaf::from));
     CHECK(mainleaf::eax::max_subleaf::get(mainleaf::eax::max_subleaf::mask) ==
-            (mainleaf::eax::max_subleaf::mask >> mainleaf::eax::max_subleaf::from));
+          (mainleaf::eax::max_subleaf::mask >> mainleaf::eax::max_subleaf::from));
 }
 
 TEST_CASE("intrinsics: cpuid_trace_enumeration_mainleaf_ebx")
@@ -3790,9 +3790,9 @@ TEST_CASE("intrinsics: cpuid_trace_enumeration_subleaf1_eax_num_address_ranges")
 
     g_eax_cpuid[addr] = 0xFFFFFFFFULL;
     CHECK(subleaf1::eax::num_address_ranges::get() ==
-            (subleaf1::eax::num_address_ranges::mask >> subleaf1::eax::num_address_ranges::from));
+          (subleaf1::eax::num_address_ranges::mask >> subleaf1::eax::num_address_ranges::from));
     CHECK(subleaf1::eax::num_address_ranges::get(subleaf1::eax::num_address_ranges::mask) ==
-            (subleaf1::eax::num_address_ranges::mask >> subleaf1::eax::num_address_ranges::from));
+          (subleaf1::eax::num_address_ranges::mask >> subleaf1::eax::num_address_ranges::from));
 }
 
 TEST_CASE("intrinsics: cpuid_trace_enumeration_subleaf1_eax_bitmap_mtc")
@@ -3804,9 +3804,9 @@ TEST_CASE("intrinsics: cpuid_trace_enumeration_subleaf1_eax_bitmap_mtc")
 
     g_eax_cpuid[addr] = 0xFFFFFFFFULL;
     CHECK(subleaf1::eax::bitmap_mtc::get() ==
-            (subleaf1::eax::bitmap_mtc::mask >> subleaf1::eax::bitmap_mtc::from));
+          (subleaf1::eax::bitmap_mtc::mask >> subleaf1::eax::bitmap_mtc::from));
     CHECK(subleaf1::eax::bitmap_mtc::get(subleaf1::eax::bitmap_mtc::mask) ==
-            (subleaf1::eax::bitmap_mtc::mask >> subleaf1::eax::bitmap_mtc::from));
+          (subleaf1::eax::bitmap_mtc::mask >> subleaf1::eax::bitmap_mtc::from));
 }
 
 TEST_CASE("intrinsics: cpuid_trace_enumeration_subleaf1_ebx")
@@ -3829,9 +3829,9 @@ TEST_CASE("intrinsics: cpuid_trace_enumeration_subleaf1_ebx_bitmap_cycle_thresho
 
     g_ebx_cpuid[addr] = 0xFFFFFFFFULL;
     CHECK(subleaf1::ebx::bitmap_cycle_threshold::get() ==
-            (subleaf1::ebx::bitmap_cycle_threshold::mask >> subleaf1::ebx::bitmap_cycle_threshold::from));
+          (subleaf1::ebx::bitmap_cycle_threshold::mask >> subleaf1::ebx::bitmap_cycle_threshold::from));
     CHECK(subleaf1::ebx::bitmap_cycle_threshold::get(subleaf1::ebx::bitmap_cycle_threshold::mask) ==
-            (subleaf1::ebx::bitmap_cycle_threshold::mask >> subleaf1::ebx::bitmap_cycle_threshold::from));
+          (subleaf1::ebx::bitmap_cycle_threshold::mask >> subleaf1::ebx::bitmap_cycle_threshold::from));
 }
 
 TEST_CASE("intrinsics: cpuid_trace_enumeration_subleaf1_eax_bitmap_psb")
@@ -3843,9 +3843,9 @@ TEST_CASE("intrinsics: cpuid_trace_enumeration_subleaf1_eax_bitmap_psb")
 
     g_ebx_cpuid[addr] = 0xFFFFFFFFULL;
     CHECK(subleaf1::ebx::bitmap_psb::get() ==
-            (subleaf1::ebx::bitmap_psb::mask >> subleaf1::ebx::bitmap_psb::from));
+          (subleaf1::ebx::bitmap_psb::mask >> subleaf1::ebx::bitmap_psb::from));
     CHECK(subleaf1::ebx::bitmap_psb::get(subleaf1::ebx::bitmap_psb::mask) ==
-            (subleaf1::ebx::bitmap_psb::mask >> subleaf1::ebx::bitmap_psb::from));
+          (subleaf1::ebx::bitmap_psb::mask >> subleaf1::ebx::bitmap_psb::from));
 }
 
 TEST_CASE("intrinsics: cpuid_time_stamp_count")
@@ -3964,9 +3964,9 @@ TEST_CASE("intrinsics: cpuid_vendor_attribute_mainleaf_eax_max_socid")
 
     g_eax_cpuid[addr] = 0xFFFFFFFFULL;
     CHECK(mainleaf::eax::max_socid::get() ==
-            (mainleaf::eax::max_socid::mask >> mainleaf::eax::max_socid::from));
+          (mainleaf::eax::max_socid::mask >> mainleaf::eax::max_socid::from));
     CHECK(mainleaf::eax::max_socid::get(mainleaf::eax::max_socid::mask) ==
-            (mainleaf::eax::max_socid::mask >> mainleaf::eax::max_socid::from));
+          (mainleaf::eax::max_socid::mask >> mainleaf::eax::max_socid::from));
 }
 
 TEST_CASE("intrinsics: cpuid_vendor_attribute_mainleaf_ebx")
@@ -3989,9 +3989,9 @@ TEST_CASE("intrinsics: cpuid_vendor_attribute_mainleaf_ebx_soc_vendor")
 
     g_ebx_cpuid[addr] = 0xFFFFFFFFULL;
     CHECK(mainleaf::ebx::soc_vendor::get() ==
-            (mainleaf::ebx::soc_vendor::mask >> mainleaf::ebx::soc_vendor::from));
+          (mainleaf::ebx::soc_vendor::mask >> mainleaf::ebx::soc_vendor::from));
     CHECK(mainleaf::ebx::soc_vendor::get(mainleaf::ebx::soc_vendor::mask) ==
-            (mainleaf::ebx::soc_vendor::mask >> mainleaf::ebx::soc_vendor::from));
+          (mainleaf::ebx::soc_vendor::mask >> mainleaf::ebx::soc_vendor::from));
 }
 
 TEST_CASE("intrinsics: cpuid_vendor_attribute_mainleaf_ebx_is_vendor_scheme")
@@ -4032,9 +4032,9 @@ TEST_CASE("intrinsics: cpuid_vendor_attribute_mainleaf_ecx_project_id")
 
     g_ecx_cpuid[addr] = 0xFFFFFFFFULL;
     CHECK(mainleaf::ecx::project_id::get() ==
-            (mainleaf::ecx::project_id::mask >> mainleaf::ecx::project_id::from));
+          (mainleaf::ecx::project_id::mask >> mainleaf::ecx::project_id::from));
     CHECK(mainleaf::ecx::project_id::get(mainleaf::ecx::project_id::mask) ==
-            (mainleaf::ecx::project_id::mask >> mainleaf::ecx::project_id::from));
+          (mainleaf::ecx::project_id::mask >> mainleaf::ecx::project_id::from));
 }
 
 TEST_CASE("intrinsics: cpuid_vendor_attribute_mainleaf_edx")
@@ -4057,9 +4057,9 @@ TEST_CASE("intrinsics: cpuid_vendor_attribute_mainleaf_edx_stepping_id")
 
     g_edx_cpuid[addr] = 0xFFFFFFFFULL;
     CHECK(mainleaf::edx::stepping_id::get() ==
-            (mainleaf::edx::stepping_id::mask >> mainleaf::edx::stepping_id::from));
+          (mainleaf::edx::stepping_id::mask >> mainleaf::edx::stepping_id::from));
     CHECK(mainleaf::edx::stepping_id::get(mainleaf::edx::stepping_id::mask) ==
-            (mainleaf::edx::stepping_id::mask >> mainleaf::edx::stepping_id::from));
+          (mainleaf::edx::stepping_id::mask >> mainleaf::edx::stepping_id::from));
 }
 
 TEST_CASE("intrinsics: cpuid_vendor_attribute_subleaf1_eax")
@@ -4303,7 +4303,6 @@ TEST_CASE("intrinsics: cpuid_l2_info_ecx")
     CHECK(ecx::get() == 0xFFFFFFFFULL);
 }
 
-
 TEST_CASE("intrinsics: cpuid_l2_info_ecx_line_size")
 {
     MockRepository mocks;
@@ -4313,9 +4312,9 @@ TEST_CASE("intrinsics: cpuid_l2_info_ecx_line_size")
 
     g_ecx_cpuid[addr] = 0xFFFFFFFFULL;
     CHECK(ecx::line_size::get() ==
-            (ecx::line_size::mask >> ecx::line_size::from));
+          (ecx::line_size::mask >> ecx::line_size::from));
     CHECK(ecx::line_size::get(ecx::line_size::mask) ==
-            (ecx::line_size::mask >> ecx::line_size::from));
+          (ecx::line_size::mask >> ecx::line_size::from));
 }
 
 TEST_CASE("intrinsics: cpuid_l2_info_ecx_l2_associativity")
@@ -4327,9 +4326,9 @@ TEST_CASE("intrinsics: cpuid_l2_info_ecx_l2_associativity")
 
     g_ecx_cpuid[addr] = 0xFFFFFFFFULL;
     CHECK(ecx::l2_associativity::get() ==
-            (ecx::l2_associativity::mask >> ecx::l2_associativity::from));
+          (ecx::l2_associativity::mask >> ecx::l2_associativity::from));
     CHECK(ecx::l2_associativity::get(ecx::l2_associativity::mask) ==
-            (ecx::l2_associativity::mask >> ecx::l2_associativity::from));
+          (ecx::l2_associativity::mask >> ecx::l2_associativity::from));
 }
 
 TEST_CASE("intrinsics: cpuid_l2_info_ecx_cache_size")
@@ -4341,9 +4340,9 @@ TEST_CASE("intrinsics: cpuid_l2_info_ecx_cache_size")
 
     g_ecx_cpuid[addr] = 0xFFFFFFFFULL;
     CHECK(ecx::cache_size::get() ==
-            (ecx::cache_size::mask >> ecx::cache_size::from));
+          (ecx::cache_size::mask >> ecx::cache_size::from));
     CHECK(ecx::cache_size::get(ecx::cache_size::mask) ==
-            (ecx::cache_size::mask >> ecx::cache_size::from));
+          (ecx::cache_size::mask >> ecx::cache_size::from));
 }
 
 TEST_CASE("intrinsics: cpuid_invariant_tsc")
