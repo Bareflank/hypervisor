@@ -16,8 +16,34 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-add_subdirectory(src)
+if(${BUILD_TARGET_ARCH} STREQUAL x86_64)
+    list(APPEND SOURCES
+        arch/intel_x64/vcpu_factory_intel_x64.cpp
+    )
+elseif(${BUILD_TARGET_ARCH} STREQUAL aarch64)
+endif()
 
-if(ENABLE_UNITTESTING AND NOT CMAKE_TOOLCHAIN_FILE)
-    add_subdirectory(tests)
+if(BUILD_VMM_SHARED)
+    add_library(bfvmm_vcpu_factory_shared SHARED ${SOURCES})
+    set_target_properties(bfvmm_vcpu_factory_shared PROPERTIES OUTPUT_NAME "bfvmm_vcpu_factory")
+    target_compile_definitions(bfvmm_vcpu_factory_shared PRIVATE SHARED_VCPU)
+    target_link_libraries(bfvmm_vcpu_factory_shared bfvmm_vcpu_shared)
+    target_link_libraries(bfvmm_vcpu_factory_shared bfvmm_vmxon_shared)
+    target_link_libraries(bfvmm_vcpu_factory_shared bfvmm_exit_handler_shared)
+    target_link_libraries(bfvmm_vcpu_factory_shared bfvmm_vmcs_shared)
+    target_link_libraries(bfvmm_vcpu_factory_shared bfvmm_memory_manager_shared)
+    target_link_libraries(bfvmm_vcpu_factory_shared bfvmm_intrinsics_shared)
+    install(TARGETS bfvmm_vcpu_factory_shared DESTINATION ${BUILD_SYSROOT_VMM}/lib)
+endif()
+
+if(BUILD_VMM_STATIC)
+    add_library(bfvmm_vcpu_factory_static STATIC ${SOURCES})
+    set_target_properties(bfvmm_vcpu_factory_static PROPERTIES OUTPUT_NAME "bfvmm_vcpu_factory")
+    target_compile_definitions(bfvmm_vcpu_factory_static PUBLIC STATIC_VCPU)
+    target_compile_definitions(bfvmm_vcpu_factory_static PUBLIC STATIC_INTRINSICS)
+    target_compile_definitions(bfvmm_vcpu_factory_static PUBLIC STATIC_MEMORY_MANAGER)
+    target_compile_definitions(bfvmm_vcpu_factory_static PUBLIC STATIC_VMXON)
+    target_compile_definitions(bfvmm_vcpu_factory_static PUBLIC STATIC_VMCS)
+    target_compile_definitions(bfvmm_vcpu_factory_static PUBLIC STATIC_EXIT_HANDLER)
+    install(TARGETS bfvmm_vcpu_factory_static DESTINATION ${BUILD_SYSROOT_VMM}/lib)
 endif()

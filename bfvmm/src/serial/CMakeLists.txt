@@ -16,8 +16,28 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-add_subdirectory(src)
+# ------------------------------------------------------------------------------
+# Targets
+# ------------------------------------------------------------------------------
 
-if(ENABLE_UNITTESTING AND NOT CMAKE_TOOLCHAIN_FILE)
-    add_subdirectory(tests)
+list(APPEND SOURCES
+    serial_port_ns16550a.cpp
+    serial_port_pl011.cpp
+    serial_port_base.cpp
+)
+
+if(BUILD_VMM_SHARED)
+    add_library(bfvmm_serial_shared SHARED ${SOURCES})
+    set_target_properties(bfvmm_serial_shared PROPERTIES OUTPUT_NAME "bfvmm_serial")
+    target_compile_definitions(bfvmm_serial_shared PRIVATE SHARED_SERIAL)
+    target_link_libraries(bfvmm_serial_shared bfvmm_intrinsics_shared)
+    install(TARGETS bfvmm_serial_shared DESTINATION ${BUILD_SYSROOT_VMM}/lib)
+endif()
+
+if(BUILD_VMM_STATIC)
+    add_library(bfvmm_serial_static STATIC ${SOURCES})
+    set_target_properties(bfvmm_serial_static PROPERTIES OUTPUT_NAME "bfvmm_serial")
+    target_compile_definitions(bfvmm_serial_static PUBLIC STATIC_SERIAL)
+    target_compile_definitions(bfvmm_serial_static PUBLIC STATIC_INTRINSICS)
+    install(TARGETS bfvmm_serial_static DESTINATION ${BUILD_SYSROOT_VMM}/lib)
 endif()
