@@ -60,6 +60,16 @@ link_directories(
     ${BUILD_SYSROOT_TEST}/lib
 )
 
-add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../src ${CMAKE_CURRENT_BINARY_DIR}/src)
+add_subdirectory(../src ${CMAKE_CURRENT_BINARY_DIR}/src)
+add_subdirectory(debug_ring)
+add_subdirectory(exit_handler)
+add_subdirectory(intrinsics)
+add_subdirectory(memory_manager)
+add_subdirectory(serial)
+add_subdirectory(vcpu)
+add_subdirectory(vcpu_factory)
+add_subdirectory(vcpu_manager)
+add_subdirectory(vmcs)
+add_subdirectory(vmxon)
 
 install(DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/../include/ DESTINATION ${BUILD_SYSROOT_VMM}/include)
