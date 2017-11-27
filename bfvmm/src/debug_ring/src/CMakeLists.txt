@@ -16,24 +16,20 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-include(${CMAKE_INSTALL_PREFIX}/cmake/CMakeGlobal_Includes.txt)
-
-# ------------------------------------------------------------------------------
-# Targets
-# ------------------------------------------------------------------------------
-
 list(APPEND SOURCES
     debug_ring.cpp
 )
 
-if(BUILD_SHARED_LIBS)
-    add_library(bfvmm_debug_ring SHARED ${SOURCES})
-    target_compile_definitions(bfvmm_debug_ring PRIVATE SHARED_DEBUG_RING)
+if(BUILD_VMM_SHARED)
+    add_library(bfvmm_debug_ring_shared SHARED ${SOURCES})
+    set_target_properties(bfvmm_debug_ring_shared PROPERTIES OUTPUT_NAME "bfvmm_debug_ring")
+    target_compile_definitions(bfvmm_debug_ring_shared PRIVATE SHARED_DEBUG_RING)
+    install(TARGETS bfvmm_debug_ring_shared DESTINATION ${BUILD_SYSROOT_VMM}/lib)
 endif()
 
-if(BUILD_STATIC_LIBS)
-    add_library(bfvmm_debug_ring STATIC ${SOURCES})
-    target_compile_definitions(bfvmm_debug_ring PUBLIC STATIC_DEBUG_RING)
+if(BUILD_VMM_STATIC)
+    add_library(bfvmm_debug_ring_static STATIC ${SOURCES})
+    set_target_properties(bfvmm_debug_ring_static PROPERTIES OUTPUT_NAME "bfvmm_debug_ring")
+    target_compile_definitions(bfvmm_debug_ring_static PUBLIC STATIC_DEBUG_RING)
+    install(TARGETS bfvmm_debug_ring_static DESTINATION ${BUILD_SYSROOT_VMM}/lib)
 endif()
-
-install(TARGETS bfvmm_debug_ring DESTINATION ${INSTALL_LIB_DIR})

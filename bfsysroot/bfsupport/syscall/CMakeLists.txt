@@ -16,36 +16,22 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-include(${CMAKE_INSTALL_PREFIX}/cmake/CMakeGlobal_Includes.txt)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-rtti")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-exceptions")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-sized-deallocation")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-use-cxa-atexit")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-stack-protector")
 
-# ------------------------------------------------------------------------------
-# Custom Flags
-# ------------------------------------------------------------------------------
-
-if(CMAKE_TOOLCHAIN_FILE)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-rtti")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-exceptions")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-sized-deallocation")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-use-cxa-atexit")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-stack-protector")
+if(BUILD_VMM_SHARED)
+    add_library(bfsyscall_shared SHARED syscall.cpp)
+    set_target_properties(bfsyscall_shared PROPERTIES OUTPUT_NAME "bfsyscall")
+    target_compile_definitions(bfsyscall_shared PRIVATE SHARED_SYSCALL)
+    install(TARGETS bfsyscall_shared DESTINATION ${BUILD_SYSROOT_VMM}/lib)
 endif()
 
-# ------------------------------------------------------------------------------
-# Targets
-# ------------------------------------------------------------------------------
-
-if(BUILD_SHARED_LIBS)
-    add_library(bfsyscall SHARED syscall.cpp)
-    target_compile_definitions(bfsyscall PRIVATE SHARED_SYSCALL)
+if(BUILD_VMM_STATIC)
+    add_library(bfsyscall_static STATIC syscall.cpp)
+    set_target_properties(bfsyscall_static PROPERTIES OUTPUT_NAME "bfsyscall")
+    target_compile_definitions(bfsyscall_static PUBLIC STATIC_SYSCALL)
+    install(TARGETS bfsyscall_static DESTINATION ${BUILD_SYSROOT_VMM}/lib)
 endif()
-
-if(BUILD_STATIC_LIBS)
-    add_library(bfsyscall STATIC syscall.cpp)
-    target_compile_definitions(bfsyscall PUBLIC STATIC_SYSCALL)
-endif()
-
-# ------------------------------------------------------------------------------
-# Install
-# ------------------------------------------------------------------------------
-
-install(TARGETS bfsyscall DESTINATION ${INSTALL_LIB_DIR})

@@ -380,8 +380,8 @@ ioctl_driver::library_path()
         paths.emplace_back(path);
     }
 
-    paths.emplace_back(CMAKE_INSTALL_PREFIX "/sysroots/x86_64-vmm-elf/lib");
-    paths.emplace_back(CMAKE_INSTALL_PREFIX "/sysroots/x86_64-vmm-elf/bin");
+    paths.emplace_back(bfstringify(BAREFLANK_VMM_BIN_PATH));
+    paths.emplace_back(bfstringify(BAREFLANK_VMM_LIB_PATH));
 
     return paths;
 }
@@ -399,7 +399,7 @@ ioctl_driver::vmm_filename()
         return {vmm_path};
     }
 
-    return CMAKE_INSTALL_PREFIX "/sysroots/x86_64-vmm-elf/bin/" bfstringify(BFM_DEFAULT_VMM);
+    return bfstringify(BAREFLANK_VMM_BIN_PATH) bfstringify(BFM_DEFAULT_VMM);
 }
 
 ioctl_driver::list_type

@@ -16,23 +16,43 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-include(../cmake/CMakeGlobal_Includes.txt)
+cmake_minimum_required(VERSION 3.6)
+project(bfm_test C CXX)
+include(${BF_SCRIPTS_DIR}/cmake/flags/flags.cmake)
+include(CTest)
+enable_testing(true)
+enable_language(ASM_NASM)
 
-# ------------------------------------------------------------------------------
-# Targets
-# ------------------------------------------------------------------------------
+set(PROJECT_SRC_DIR ${CMAKE_CURRENT_LIST_DIR}/../src)
+set(PROJECT_TEST_DIR ${CMAKE_CURRENT_LIST_DIR}/../tests)
+set(PROJECT_INC_DIR ${CMAKE_CURRENT_LIST_DIR}/../include)
+
+include_directories(
+    ${PROJECT_INC_DIR}
+    ${BUILD_SYSROOT_TEST}/include
+    ${BUILD_SYSROOT_OS}/include
+)
+
+link_directories(
+    ${BUILD_SYSROOT_TEST}/lib
+)
 
 add_library(test_catch STATIC test.cpp)
-add_dependencies(test_catch catch)
+install(TARGETS test_catch DESTINATION ${BUILD_SYSROOT_TEST}/lib)
+
+set(BFSDK_TEST_FLAGS "-DENABLE_UNITTESTING")
+generate_flags(
+    USERSPACE
+    ADD_C_FLAGS ${BFSDK_TEST_FLAGS}
+    ADD_CXX_FLAGS ${BFSDK_TEST_FLAGS}
+    VERBOSE ${BUILD_VERBOSE}
+)
 
 macro(do_test str)
     add_executable(test_${str} test_${str}.cpp)
     target_link_libraries(test_${str} test_catch)
-    add_dependencies(test_${str} json)
-    add_dependencies(test_${str} gsl)
-    add_dependencies(test_${str} catch)
-    add_dependencies(test_${str} hippomocks)
     add_test(test_${str} test_${str})
+    install(TARGETS test_${str} DESTINATION ${BUILD_SYSROOT_TEST}/bin/bfsdk)
 endmacro(do_test)
 
 do_test(affinity)
@@ -54,8 +74,4 @@ do_test(types)
 do_test(upperlower)
 do_test(vector)
 
-# ------------------------------------------------------------------------------
-# Install
-# ------------------------------------------------------------------------------
-
-install(TARGETS test_catch DESTINATION lib)
+install(TARGETS test_catch DESTINATION ${BUILD_SYSROOT_TEST}/lib)

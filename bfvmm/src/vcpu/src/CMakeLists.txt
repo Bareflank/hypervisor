@@ -16,35 +16,31 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-include(${CMAKE_INSTALL_PREFIX}/cmake/CMakeGlobal_Includes.txt)
-
-# ------------------------------------------------------------------------------
-# Targets
-# ------------------------------------------------------------------------------
-
 list(APPEND SOURCES
     vcpu.cpp
     vcpu_intel_x64.cpp
 )
 
-if(BUILD_SHARED_LIBS)
-    add_library(bfvmm_vcpu SHARED ${SOURCES})
-    target_compile_definitions(bfvmm_vcpu PRIVATE SHARED_VCPU)
-    target_link_libraries(bfvmm_vcpu bfvmm_vmxon)
-    target_link_libraries(bfvmm_vcpu bfvmm_exit_handler)
-    target_link_libraries(bfvmm_vcpu bfvmm_vmcs)
-    target_link_libraries(bfvmm_vcpu bfvmm_memory_manager)
-    target_link_libraries(bfvmm_vcpu bfvmm_intrinsics)
+if(BUILD_VMM_SHARED)
+    add_library(bfvmm_vcpu_shared SHARED ${SOURCES})
+    set_target_properties(bfvmm_vcpu_shared PROPERTIES OUTPUT_NAME "bfvmm_vcpu")
+    target_compile_definitions(bfvmm_vcpu_shared PRIVATE SHARED_VCPU)
+    target_link_libraries(bfvmm_vcpu_shared bfvmm_vmxon_shared)
+    target_link_libraries(bfvmm_vcpu_shared bfvmm_exit_handler_shared)
+    target_link_libraries(bfvmm_vcpu_shared bfvmm_vmcs_shared)
+    target_link_libraries(bfvmm_vcpu_shared bfvmm_memory_manager_shared)
+    target_link_libraries(bfvmm_vcpu_shared bfvmm_intrinsics_shared)
+    install(TARGETS bfvmm_vcpu_shared DESTINATION ${BUILD_SYSROOT_VMM}/lib)
 endif()
 
-if(BUILD_STATIC_LIBS)
-    add_library(bfvmm_vcpu STATIC ${SOURCES})
-    target_compile_definitions(bfvmm_vcpu PUBLIC STATIC_VCPU)
-    target_compile_definitions(bfvmm_vcpu PUBLIC STATIC_VMXON)
-    target_compile_definitions(bfvmm_vcpu PUBLIC STATIC_EXIT_HANDLER)
-    target_compile_definitions(bfvmm_vcpu PUBLIC STATIC_VMCS)
-    target_compile_definitions(bfvmm_vcpu PUBLIC STATIC_MEMORY_MANAGER)
-    target_compile_definitions(bfvmm_vcpu PUBLIC STATIC_INTRINSICS)
+if(BUILD_VMM_STATIC)
+    add_library(bfvmm_vcpu_static STATIC ${SOURCES})
+    set_target_properties(bfvmm_vcpu_static PROPERTIES OUTPUT_NAME "bfvmm_vcpu")
+    target_compile_definitions(bfvmm_vcpu_static PUBLIC STATIC_VCPU)
+    target_compile_definitions(bfvmm_vcpu_static PUBLIC STATIC_VMXON)
+    target_compile_definitions(bfvmm_vcpu_static PUBLIC STATIC_EXIT_HANDLER)
+    target_compile_definitions(bfvmm_vcpu_static PUBLIC STATIC_VMCS)
+    target_compile_definitions(bfvmm_vcpu_static PUBLIC STATIC_MEMORY_MANAGER)
+    target_compile_definitions(bfvmm_vcpu_static PUBLIC STATIC_INTRINSICS)
+    install(TARGETS bfvmm_vcpu_static DESTINATION ${BUILD_SYSROOT_VMM}/lib)
 endif()
-
-install(TARGETS bfvmm_vcpu DESTINATION ${INSTALL_LIB_DIR})

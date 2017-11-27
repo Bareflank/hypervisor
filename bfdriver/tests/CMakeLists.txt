@@ -16,20 +16,47 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-include(${CMAKE_INSTALL_PREFIX}/cmake/CMakeGlobal_Includes.txt)
+cmake_minimum_required(VERSION 3.6)
+project(bfdriver_test C CXX)
+include(${BF_FLAGS_DIR}/flags.cmake)
+include(CTest)
+enable_testing(true)
 
-# ------------------------------------------------------------------------------
-# Targets
-# ------------------------------------------------------------------------------
+set(PROJECT_SRC_DIR ${CMAKE_CURRENT_LIST_DIR}/../src)
+set(PROJECT_TEST_DIR ${CMAKE_CURRENT_LIST_DIR}/../tests)
+set(PROJECT_INC_DIR ${CMAKE_CURRENT_LIST_DIR}/../include)
 
-add_library(test_support STATIC test_support.cpp)
+include_directories(
+    "${PROJECT_INC_DIR}"
+    "${PROJECT_TEST_DIR}"
+    "${BUILD_SYSROOT_OS}/include"
+    "${BUILD_SYSROOT_TEST}/include"
+)
+
+link_directories("${BUILD_SYSROOT_TEST}/lib")
+
+list(APPEND BFDRIVER_CXX_FLAGS
+    "-fno-stack-protector"
+    "-DBAREFLANK_SYSROOT_PATH='\"${BUILD_SYSROOT_VMM}\"'"
+)
+generate_flags(
+    USERSPACE
+    ADD_CXX_FLAGS ${BFDRIVER_CXX_FLAGS}
+    VERBOSE ${BUILD_VERBOSE}
+)
+
+add_library(bfdriver_test STATIC ${PROJECT_SRC_DIR}/common.c ${PROJECT_SRC_DIR}/arch/test/platform.c)
+add_library(test_bfdriver_support STATIC test_support.cpp)
+
+install(TARGETS bfdriver_test DESTINATION ${BUILD_SYSROOT_TEST}/lib)
 
 macro(do_test str)
     add_executable(test_${str} test_${str}.cpp)
-    target_link_libraries(test_${str} bfdriver)
-    target_link_libraries(test_${str} test_support)
+    target_link_libraries(test_${str} bfdriver_test)
+    target_link_libraries(test_${str} test_bfdriver_support)
     target_link_libraries(test_${str} test_catch)
     add_test(bfelf_${str} test_${str})
+    install(TARGETS test_${str} DESTINATION ${BUILD_SYSROOT_TEST}/bin/bfdriver)
 endmacro(do_test)
 
 do_test(common_add_module)
