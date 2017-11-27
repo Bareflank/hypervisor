@@ -587,5 +587,4 @@ TEST_CASE("srs_x64_tr_index")
     CHECK(index::get(index::mask) == (index::mask >> index::from));
 }
 
-
 #endif

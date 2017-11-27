@@ -142,21 +142,21 @@ TEST_CASE("set_vmcs_field_bits_if_exists")
     g_vmcs_fields[0UL] = 0UL;
 
     CHECK_NOTHROW(set_vmcs_field_bits_if_exists(0xFFFFFFFFULL, 0ULL,
-                0x00000008ULL, 3ULL, name, false, false));
+                  0x00000008ULL, 3ULL, name, false, false));
     CHECK(g_vmcs_fields[0UL] == 0UL);
 
     CHECK_NOTHROW(set_vmcs_field_bits_if_exists(0xFFFFFFFFULL, 0ULL,
-                0x00000008ULL, 3ULL, name, true, false));
+                  0x00000008ULL, 3ULL, name, true, false));
     CHECK(g_vmcs_fields[0UL] == 0UL);
 
     CHECK_NOTHROW(set_vmcs_field_bits_if_exists(0xFFFFFFFFULL, 0ULL,
-                0x00000008ULL, 3ULL, name, false, true));
+                  0x00000008ULL, 3ULL, name, false, true));
     CHECK(g_vmcs_fields[0UL] == 8UL);
 
     g_vmcs_fields[0UL] = 0UL;
 
     CHECK_NOTHROW(set_vmcs_field_bits_if_exists(0xFFFFFFFFULL, 0ULL,
-                0x00000008ULL, 3ULL, name, true, true));
+                  0x00000008ULL, 3ULL, name, true, true));
     CHECK(g_vmcs_fields[0UL] == 8UL);
 }
 
