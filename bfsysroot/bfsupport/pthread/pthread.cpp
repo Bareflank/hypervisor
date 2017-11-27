@@ -113,7 +113,7 @@ pthread_cond_wait(pthread_cond_t *cond, pthread_mutex_t *mutex)
     *cond = 1;
 
     pthread_mutex_unlock(mutex);
-    while (__sync_lock_test_and_set(cond, 1)) { while (*cond){} };
+    while (__sync_lock_test_and_set(cond, 1)) { while (*cond) {} };
     pthread_mutex_lock(mutex);
 
     return 0;
@@ -208,7 +208,7 @@ pthread_mutex_lock(pthread_mutex_t *mutex)
         return -EINVAL;
     }
 
-    while (__sync_lock_test_and_set(mutex, 1)) { while (*mutex){} };
+    while (__sync_lock_test_and_set(mutex, 1)) { while (*mutex) {} };
 
     return 0;
 }

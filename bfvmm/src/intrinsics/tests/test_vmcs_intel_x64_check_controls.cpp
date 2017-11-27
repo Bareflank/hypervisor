@@ -257,7 +257,6 @@ setup_check_control_msr_bitmap_address_bits_paths(std::vector<struct control_flo
     cfg.push_back(path);
 }
 
-
 static void
 setup_check_control_tpr_shadow_and_virtual_apic_paths(std::vector<struct control_flow_path> &cfg)
 {

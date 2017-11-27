@@ -545,7 +545,6 @@ TEST_CASE("exit_handler: vm_exit_reason_vmcall_stop")
     CHECK(bfscast(int64_t, ehlr.m_state_save->rdx) == BF_VMCALL_SUCCESS);
 }
 
-
 TEST_CASE("exit_handler: vm_exit_reason_vmcall_data_unknown")
 {
     MockRepository mocks;

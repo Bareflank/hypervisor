@@ -3867,7 +3867,6 @@ TEST_CASE("check_guest_v8086_gs_access_rights")
     test_vmcs_check(cfg, check::guest_v8086_gs_access_rights);
 }
 
-
 TEST_CASE("check_guest_cs_access_rights_type")
 {
     std::vector<struct control_flow_path> cfg;
