@@ -126,7 +126,7 @@ matrix:
     env:
       - TEST="Astyle Format"
     script:
-      - cmake -DENABLE_ASTYLE=ON ..
+      - cmake -DBFCONFIG=travis_astyle.cmake ..
       - make -j3
       - make format
       - |
@@ -155,7 +155,7 @@ matrix:
     env:
       - TEST="Clang Tidy"
     script:
-      - cmake -DBUILD_SHARED_LIBS=ON -DENABLE_UNITTESTING=ON -DENABLE_TIDY=ON ..
+      - cmake -DBFCONFIG=travis_tidy.cmake ..
       - make -j3
       - make test
       - make tidy
@@ -177,10 +177,10 @@ matrix:
     env:
       - TEST="Codecov"
     script:
-      - cmake -DBUILD_SHARED_LIBS=ON -DENABLE_UNITTESTING=ON -DENABLE_COVERAGE=ON ..
+      - cmake -DBFCONFIG=travis_codecov.cmake ..
       - make -j3
       - make test
-      - rm -Rf external
+      - rm -Rf depends
       - cd ..
       - bash <(curl -s https://codecov.io/bash)
 
@@ -201,7 +201,7 @@ matrix:
     env:
       - TEST="Google Address Sanitizer"
     script:
-      - cmake -DBUILD_SHARED_LIBS=ON -DENABLE_UNITTESTING=ON -DENABLE_DYNAMIC_ASAN=ON ..
+      - cmake -DBFCONFIG=travis_asan.cmake ..
       - make -j3
       - make test
 
@@ -222,7 +222,7 @@ matrix:
     env:
       - TEST="Google Undefined Sanitizer"
     script:
-      - cmake -DBUILD_SHARED_LIBS=ON -DENABLE_UNITTESTING=ON -DENABLE_DYNAMIC_USAN=ON ..
+      - cmake -DBFCONFIG=travis_usan.cmake ..
       - make -j3
       - make test
 
@@ -243,7 +243,7 @@ matrix:
     env:
       - TEST="Clang 3.8 (Static Libraries)"
     script:
-      - cmake -DENABLE_UNITTESTING=ON ..
+      - cmake -DBFCONFIG=travis_static.cmake ..
       - make -j3
       - make test
 
@@ -264,7 +264,7 @@ matrix:
     env:
       - TEST="Clang 3.9 (Static Libraries)"
     script:
-      - cmake -DENABLE_UNITTESTING=ON ..
+      - cmake -DBFCONFIG=travis_static.cmake ..
       - make -j3
       - make test
 
@@ -285,7 +285,7 @@ matrix:
     env:
       - TEST="Clang 4.0 (Static Libraries)"
     script:
-      - cmake -DENABLE_UNITTESTING=ON ..
+      - cmake -DBFCONFIG=travis_static.cmake ..
       - make -j3
       - make test
 
@@ -306,7 +306,7 @@ matrix:
     env:
       - TEST="Clang 3.8 (Shared Libraries)"
     script:
-      - cmake -DENABLE_UNITTESTING=ON -DBUILD_SHARED_LIBS=ON ..
+      - cmake -DBFCONFIG=travis_shared.cmake ..
       - make -j3
       - make test
 
@@ -327,7 +327,7 @@ matrix:
     env:
       - TEST="Clang 3.9 (Shared Libraries)"
     script:
-      - cmake -DENABLE_UNITTESTING=ON -DBUILD_SHARED_LIBS=ON ..
+      - cmake -DBFCONFIG=travis_shared.cmake ..
       - make -j3
       - make test
 
@@ -348,7 +348,7 @@ matrix:
     env:
       - TEST="Clang 4.0 (Shared Libraries)"
     script:
-      - cmake -DENABLE_UNITTESTING=ON -DBUILD_SHARED_LIBS=ON ..
+      - cmake -DBFCONFIG=travis_shared.cmake ..
       - make -j3
       - make test
 
@@ -369,9 +369,8 @@ matrix:
     env:
       - TEST="Clang 4.0  (No Tests / Static Libraries)"
     script:
-      - cmake -DENABLE_UNITTESTING=ON ..
+      - cmake -DBFCONFIG=travis_static_no_test.cmake ..
       - make -j3
-      - make test
 
   #
   # Clang 4.0 (No Tests / Shared Libraries)
@@ -390,6 +389,5 @@ matrix:
     env:
       - TEST="Clang 4.0 (No Tests / Shared Libraries)"
     script:
-      - cmake -DENABLE_UNITTESTING=ON -DBUILD_SHARED_LIBS=ON ..
+      - cmake -DBFCONFIG=travis_shared_no_test.cmake ..
       - make -j3
-      - make test

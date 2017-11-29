@@ -18,35 +18,27 @@
 
 cmake_minimum_required(VERSION 3.6)
 project(bfunwind C CXX)
+include(${BF_FLAGS_DIR}/flags.cmake)
+
+set(CMAKE_ASM_NASM_OBJECT_FORMAT "elf64")
+enable_language(ASM_NASM)
+
+if(ENABLE_UNITTESTING)
+    include(CTest)
+    enable_testing(true)
+endif()
 
 set(TIDY_EXCLUSIONS ,-cppcoreguidelines-pro*)
-include(${CMAKE_INSTALL_PREFIX}/cmake/CMakeGlobal_Project.txt)
 
-# ------------------------------------------------------------------------------
-# Flags
-# ------------------------------------------------------------------------------
+include_directories(${BUILD_SYSROOT_VMM}/include)
+include_directories(${BF_SOURCE_DIR}/bfsdk/include)
+include_directories(${CMAKE_CURRENT_LIST_DIR}/include)
 
-if(CMAKE_TOOLCHAIN_FILE)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DNOSTDLIB_C")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DNOSTDLIB_C -DNOSTDINC_CXX")
-endif()
-
-# ------------------------------------------------------------------------------
-# Subdirectories
-# ------------------------------------------------------------------------------
-
-if(CMAKE_TOOLCHAIN_FILE)
-    set(INSTALL_LIB_DIR ${BAREFLANK_SYSROOT_PATH}/lib)
-    set(INSTALL_BIN_DIR ${BAREFLANK_SYSROOT_PATH}/bin)
-else()
-    set(INSTALL_LIB_DIR ${CMAKE_INSTALL_PREFIX}/lib)
-    set(INSTALL_BIN_DIR ${CMAKE_INSTALL_PREFIX}/bin)
-endif()
+generate_flags(
+    VMM
+    VERBOSE ${BUILD_VERBOSE}
+)
 
 add_subdirectory(src)
 
-# ------------------------------------------------------------------------------
-# Install
-# ------------------------------------------------------------------------------
-
-install(FILES include/ia64_cxx_abi.h DESTINATION ${BAREFLANK_SYSROOT_PATH}/include RENAME unwind.h)
+install(FILES include/ia64_cxx_abi.h DESTINATION ${BUILD_SYSROOT_VMM}/include RENAME unwind.h)

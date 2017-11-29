@@ -16,21 +16,16 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-include(${CMAKE_INSTALL_PREFIX}/cmake/CMakeGlobal_Includes.txt)
-
-# ------------------------------------------------------------------------------
-# Targets
-# ------------------------------------------------------------------------------
-
 macro(do_test str)
     add_executable(test_${str} test_${str}.cpp)
     target_compile_definitions(test_${str} PRIVATE STATIC_VMCS)
     target_include_directories(test_${str} PRIVATE ${CMAKE_SOURCE_DIR}/test/include)
-    target_link_libraries(test_${str} bfvmm_vmcs)
-    target_link_libraries(test_${str} bfvmm_memory_manager)
-    target_link_libraries(test_${str} bfvmm_intrinsics)
+    target_link_libraries(test_${str} bfvmm_vmcs_static)
+    target_link_libraries(test_${str} bfvmm_memory_manager_static)
+    target_link_libraries(test_${str} bfvmm_intrinsics_static)
     target_link_libraries(test_${str} test_catch)
     add_test(test_${str} test_${str})
+    install(TARGETS test_${str} DESTINATION ${BUILD_SYSROOT_TEST}/bin/bfvmm)
 endmacro(do_test)
 
 do_test(vmcs_intel_x64)

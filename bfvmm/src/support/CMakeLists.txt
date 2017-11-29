@@ -16,8 +16,6 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-include(${CMAKE_INSTALL_PREFIX}/cmake/CMakeGlobal_Includes.txt)
-
 # ------------------------------------------------------------------------------
 # Targets
 # ------------------------------------------------------------------------------
@@ -26,12 +24,14 @@ list(APPEND SOURCES
     unistd.cpp
 )
 
-if(BUILD_SHARED_LIBS)
-    add_library(bfvmm_support SHARED ${SOURCES})
+if(BUILD_VMM_SHARED)
+    add_library(bfvmm_support_shared SHARED ${SOURCES})
+    set_target_properties(bfvmm_support_shared PROPERTIES OUTPUT_NAME "bfvmm_support")
+    install(TARGETS bfvmm_support_shared DESTINATION ${BUILD_SYSROOT_VMM}/lib)
 endif()
 
-if(BUILD_STATIC_LIBS)
-    add_library(bfvmm_support STATIC ${SOURCES})
+if(BUILD_VMM_STATIC)
+    add_library(bfvmm_support_static STATIC ${SOURCES})
+    set_target_properties(bfvmm_support_static PROPERTIES OUTPUT_NAME "bfvmm_support")
+    install(TARGETS bfvmm_support_static DESTINATION ${BUILD_SYSROOT_VMM}/lib)
 endif()
-
-install(TARGETS bfvmm_support DESTINATION ${INSTALL_LIB_DIR})

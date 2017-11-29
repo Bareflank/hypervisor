@@ -16,13 +16,7 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-include(${CMAKE_INSTALL_PREFIX}/cmake/CMakeGlobal_Includes.txt)
-
-# ------------------------------------------------------------------------------
-# Targets
-# ------------------------------------------------------------------------------
-
-if(NOT CMAKE_TOOLCHAIN_FILE)
+if(${PROJECT_NAME} STREQUAL bfvmm_test)
 
     list(APPEND SOURCES
         cache_x64_mock.cpp
@@ -64,16 +58,18 @@ else()
 
 endif()
 
-if(BUILD_SHARED_LIBS)
-    add_library(bfvmm_intrinsics SHARED ${SOURCES})
-    set_target_properties(bfvmm_intrinsics PROPERTIES LINKER_LANGUAGE C)
-    target_compile_definitions(bfvmm_intrinsics PRIVATE SHARED_INTRINSICS)
+if(BUILD_VMM_SHARED)
+    add_library(bfvmm_intrinsics_shared SHARED ${SOURCES})
+    set_target_properties(bfvmm_intrinsics_shared PROPERTIES OUTPUT_NAME "bfvmm_intrinsics")
+    set_target_properties(bfvmm_intrinsics_shared PROPERTIES LINKER_LANGUAGE C)
+    target_compile_definitions(bfvmm_intrinsics_shared PRIVATE SHARED_INTRINSICS)
+    install(TARGETS bfvmm_intrinsics_shared DESTINATION ${BUILD_SYSROOT_VMM}/lib)
 endif()
 
-if(BUILD_STATIC_LIBS)
-    add_library(bfvmm_intrinsics STATIC ${SOURCES})
-    set_target_properties(bfvmm_intrinsics PROPERTIES LINKER_LANGUAGE C)
-    target_compile_definitions(bfvmm_intrinsics PUBLIC STATIC_INTRINSICS)
+if(BUILD_VMM_STATIC)
+    add_library(bfvmm_intrinsics_static STATIC ${SOURCES})
+    set_target_properties(bfvmm_intrinsics_static PROPERTIES OUTPUT_NAME "bfvmm_intrinsics")
+    set_target_properties(bfvmm_intrinsics_static PROPERTIES LINKER_LANGUAGE C)
+    target_compile_definitions(bfvmm_intrinsics_static PUBLIC STATIC_INTRINSICS)
+    install(TARGETS bfvmm_intrinsics_static DESTINATION ${BUILD_SYSROOT_VMM}/lib)
 endif()
-
-install(TARGETS bfvmm_intrinsics DESTINATION ${INSTALL_LIB_DIR})

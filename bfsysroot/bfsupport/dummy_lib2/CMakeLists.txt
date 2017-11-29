@@ -16,21 +16,11 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-include(${CMAKE_INSTALL_PREFIX}/cmake/CMakeGlobal_Includes.txt)
-
-# ------------------------------------------------------------------------------
-# Targets
-# ------------------------------------------------------------------------------
-
 add_library(dummy_lib2 SHARED dummy_lib2.cpp)
 target_compile_definitions(dummy_lib2 PRIVATE SHARED_DUMMY)
 
 if(NOT WIN64)
-    set(CMAKE_SHARED_LINKER_FLAGS "--fuse-ld=gold")
+    set(CMAKE_SHARED_LINKER_FLAGS "-fuse-ld=gold")
 endif()
 
-# ------------------------------------------------------------------------------
-# Install
-# ------------------------------------------------------------------------------
-
-install(TARGETS dummy_lib2 DESTINATION ${BAREFLANK_SYSROOT_PATH}/lib)
+install(TARGETS dummy_lib2 DESTINATION ${BUILD_SYSROOT_VMM}/lib)

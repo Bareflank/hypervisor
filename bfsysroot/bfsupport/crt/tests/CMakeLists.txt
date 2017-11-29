@@ -16,17 +16,12 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-include(${CMAKE_INSTALL_PREFIX}/cmake/CMakeGlobal_Includes.txt)
-
-# ------------------------------------------------------------------------------
-# Targets
-# ------------------------------------------------------------------------------
-
 macro(do_test str)
     add_executable(test_${str} test_${str}.cpp)
-    target_link_libraries(test_${str} bfcrt)
+    target_link_libraries(test_${str} bfcrt_userspace)
     target_link_libraries(test_${str} test_catch)
     add_test(test_${str} test_${str})
+    install(TARGETS test_${str} DESTINATION "${BUILD_SYSROOT_TEST}/bin/bfsupport")
 endmacro(do_test)
 
 do_test(crt)

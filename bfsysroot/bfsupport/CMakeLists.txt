@@ -18,36 +18,39 @@
 
 cmake_minimum_required(VERSION 3.6)
 project(bfsupport C CXX)
-
+include(${BF_FLAGS_DIR}/flags.cmake)
 set(TIDY_EXCLUSIONS ,-cert-err34-c,-misc-misplaced-widening-cast,-cppcoreguidelines-no-malloc)
-include(${CMAKE_INSTALL_PREFIX}/cmake/CMakeGlobal_Project.txt)
 
-# ------------------------------------------------------------------------------
-# Flags
-# ------------------------------------------------------------------------------
+set(CMAKE_ASM_NASM_OBJECT_FORMAT "elf64")
+enable_language(ASM_NASM)
 
-if(CMAKE_TOOLCHAIN_FILE)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DNOSTDLIB_C")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DNOSTDLIB_C -DNOSTDLIB_CXX")
-endif()
+include_directories(
+    ${CMAKE_CURRENT_LIST_DIR}/include
+    ${BUILD_SYSROOT_VMM}/include/c++/v1
+    ${BUILD_SYSROOT_VMM}/include
+)
 
-# ------------------------------------------------------------------------------
-# Subdirectories
-# ------------------------------------------------------------------------------
+link_directories(
+    ${BUILD_SYSROOT_VMM}/lib
+)
 
-if(CMAKE_TOOLCHAIN_FILE)
-    set(INSTALL_LIB_DIR ${BAREFLANK_SYSROOT_PATH}/lib)
-    set(INSTALL_BIN_DIR ${BAREFLANK_SYSROOT_PATH}/bin)
-else()
-    set(INSTALL_LIB_DIR ${CMAKE_INSTALL_PREFIX}/lib)
-    set(INSTALL_BIN_DIR ${CMAKE_INSTALL_PREFIX}/bin)
-endif()
+list(APPEND BFSYSROOT_CXX_FLAGS
+    "-fno-stack-protector"
+    "-fvisibility=hidden"
+    "-fvisibility-inlines-hidden"
+    "-DNOSTDLIB_C"
+    "-DNOSTDLIB_CXX"
+)
+generate_flags(
+    VMM
+    ADD_CXX_FLAGS ${BFSYSROOT_CXX_FLAGS}
+    VERBOSE ${BUILD_VERBOSE}
+)
 
 add_subdirectory(crt)
-
-if(CMAKE_TOOLCHAIN_FILE)
-    add_subdirectory(syscall)
-    add_subdirectory(pthread)
+add_subdirectory(syscall)
+add_subdirectory(pthread)
+if(${UNITTEST_BFELF_LOADER} OR ${UNITTEST_BFDRIVER})
     add_subdirectory(dummy_lib1)
     add_subdirectory(dummy_lib2)
     add_subdirectory(dummy_main)
