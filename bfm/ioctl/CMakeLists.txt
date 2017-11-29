@@ -16,8 +16,6 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-include(${CMAKE_INSTALL_PREFIX}/cmake/CMakeGlobal_Includes.txt)
-
 # ------------------------------------------------------------------------------
 # Targets
 # ------------------------------------------------------------------------------
@@ -50,4 +48,4 @@ endif()
 # Install
 # ------------------------------------------------------------------------------
 
-install(TARGETS bf_ioctl DESTINATION lib)
+install(TARGETS bf_ioctl DESTINATION ${BUILD_SYSROOT_OS}/lib)

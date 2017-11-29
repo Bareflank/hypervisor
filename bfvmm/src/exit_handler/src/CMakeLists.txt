@@ -16,34 +16,32 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-include(${CMAKE_INSTALL_PREFIX}/cmake/CMakeGlobal_Includes.txt)
-
-# ------------------------------------------------------------------------------
-# Targets
-# ------------------------------------------------------------------------------
-
 list(APPEND SOURCES
     exit_handler_intel_x64.cpp
     exit_handler_intel_x64_entry.cpp
 )
 
-if(CMAKE_TOOLCHAIN_FILE)
-    list(APPEND SOURCES exit_handler_intel_x64_support.asm)
-else()
+if(${PROJECT_NAME} STREQUAL bfvmm_test)
     list(APPEND SOURCES exit_handler_intel_x64_support_mock.cpp)
+else()
+    list(APPEND SOURCES exit_handler_intel_x64_support.asm)
 endif()
 
-if(BUILD_SHARED_LIBS)
-    add_library(bfvmm_exit_handler SHARED ${SOURCES})
-    target_compile_definitions(bfvmm_exit_handler PRIVATE SHARED_EXIT_HANDLER)
+if(BUILD_VMM_SHARED)
+    add_library(bfvmm_exit_handler_shared SHARED ${SOURCES})
+    set_target_properties(bfvmm_exit_handler_shared PROPERTIES OUTPUT_NAME "bfvmm_exit_handler")
+    target_compile_definitions(bfvmm_exit_handler_shared PRIVATE SHARED_EXIT_HANDLER)
+    target_link_libraries(bfvmm_exit_handler_shared bfvmm_intrinsics_shared)
+    target_link_libraries(bfvmm_exit_handler_shared bfvmm_vmcs_shared)
+    install(TARGETS bfvmm_exit_handler_shared DESTINATION ${BUILD_SYSROOT_VMM}/lib)
 endif()
 
-if(BUILD_STATIC_LIBS)
-    add_library(bfvmm_exit_handler STATIC ${SOURCES})
-    target_compile_definitions(bfvmm_exit_handler PUBLIC STATIC_EXIT_HANDLER)
-    target_compile_definitions(bfvmm_exit_handler PUBLIC STATIC_VMCS)
-    target_compile_definitions(bfvmm_exit_handler PUBLIC STATIC_MEMORY_MANAGER)
-    target_compile_definitions(bfvmm_exit_handler PUBLIC STATIC_INTRINSICS)
+if(BUILD_VMM_STATIC)
+    add_library(bfvmm_exit_handler_static STATIC ${SOURCES})
+    set_target_properties(bfvmm_exit_handler_static PROPERTIES OUTPUT_NAME "bfvmm_exit_handler")
+    target_compile_definitions(bfvmm_exit_handler_static PUBLIC STATIC_EXIT_HANDLER)
+    target_compile_definitions(bfvmm_exit_handler_static PUBLIC STATIC_VMCS)
+    target_compile_definitions(bfvmm_exit_handler_static PUBLIC STATIC_MEMORY_MANAGER)
+    target_compile_definitions(bfvmm_exit_handler_static PUBLIC STATIC_INTRINSICS)
+    install(TARGETS bfvmm_exit_handler_static DESTINATION ${BUILD_SYSROOT_VMM}/lib)
 endif()
-
-install(TARGETS bfvmm_exit_handler DESTINATION ${INSTALL_LIB_DIR})

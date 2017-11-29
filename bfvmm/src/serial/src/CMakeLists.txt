@@ -16,8 +16,6 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-include(${CMAKE_INSTALL_PREFIX}/cmake/CMakeGlobal_Includes.txt)
-
 # ------------------------------------------------------------------------------
 # Targets
 # ------------------------------------------------------------------------------
@@ -28,16 +26,18 @@ list(APPEND SOURCES
     serial_port_base.cpp
 )
 
-if(BUILD_SHARED_LIBS)
-    add_library(bfvmm_serial SHARED ${SOURCES})
-    target_compile_definitions(bfvmm_serial PRIVATE SHARED_SERIAL)
-    target_link_libraries(bfvmm_serial bfvmm_intrinsics)
+if(BUILD_VMM_SHARED)
+    add_library(bfvmm_serial_shared SHARED ${SOURCES})
+    set_target_properties(bfvmm_serial_shared PROPERTIES OUTPUT_NAME "bfvmm_serial")
+    target_compile_definitions(bfvmm_serial_shared PRIVATE SHARED_SERIAL)
+    target_link_libraries(bfvmm_serial_shared bfvmm_intrinsics_shared)
+    install(TARGETS bfvmm_serial_shared DESTINATION ${BUILD_SYSROOT_VMM}/lib)
 endif()
 
-if(BUILD_STATIC_LIBS)
-    add_library(bfvmm_serial STATIC ${SOURCES})
-    target_compile_definitions(bfvmm_serial PUBLIC STATIC_SERIAL)
-    target_compile_definitions(bfvmm_serial PUBLIC STATIC_INTRINSICS)
+if(BUILD_VMM_STATIC)
+    add_library(bfvmm_serial_static STATIC ${SOURCES})
+    set_target_properties(bfvmm_serial_static PROPERTIES OUTPUT_NAME "bfvmm_serial")
+    target_compile_definitions(bfvmm_serial_static PUBLIC STATIC_SERIAL)
+    target_compile_definitions(bfvmm_serial_static PUBLIC STATIC_INTRINSICS)
+    install(TARGETS bfvmm_serial_static DESTINATION ${BUILD_SYSROOT_VMM}/lib)
 endif()
-
-install(TARGETS bfvmm_serial DESTINATION ${INSTALL_LIB_DIR})

@@ -17,7 +17,3 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 add_subdirectory(src)
-
-if(ENABLE_UNITTESTING AND NOT CMAKE_TOOLCHAIN_FILE)
-    add_subdirectory(tests)
-endif()

@@ -17,26 +17,26 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 cmake_minimum_required(VERSION 3.6)
-project(bfdrivers C CXX)
+project(bfdriver C CXX)
 
-include(${CMAKE_INSTALL_PREFIX}/cmake/CMakeGlobal_Project.txt)
+include_directories("include")
 
-# ------------------------------------------------------------------------------
-# Subdirectories
-# ------------------------------------------------------------------------------
+set(DRIVER_BUILD_CMD ${BF_SCRIPTS_DIR}/util/driver_build.sh ${CMAKE_SOURCE_DIR})
+set(DRIVER_CLEAN_CMD ${BF_SCRIPTS_DIR}/util/driver_clean.sh ${CMAKE_SOURCE_DIR})
+set(DRIVER_LOAD_CMD ${BF_SCRIPTS_DIR}/util/driver_load.sh ${CMAKE_SOURCE_DIR})
+set(DRIVER_UNLOAD_CMD ${BF_SCRIPTS_DIR}/util/driver_unload.sh ${CMAKE_SOURCE_DIR})
 
-if(NOT WIN32 AND ENABLE_UNITTESTING AND BUILD_SHARED_LIBS)
-    add_subdirectory(src)
-    add_subdirectory(tests)
-endif()
+execute_process(COMMAND ${DRIVER_BUILD_CMD})
+add_custom_target(bfdriver_build COMMAND ${DRIVER_BUILD_CMD})
+add_custom_target(bfdriver_clean COMMAND ${DRIVER_CLEAN_CMD})
+add_custom_target(bfdriver_load COMMAND ${DRIVER_LOAD_CMD})
+add_custom_target(bfdriver_unload COMMAND ${DRIVER_UNLOAD_CMD})
 
-# ------------------------------------------------------------------------------
-# Custom Targets
-# ------------------------------------------------------------------------------
-
-if(NOT WIN32)
-    add_custom_target(driver_build COMMAND ${CMAKE_SOURCE_DIR}/scripts/driver_build.sh ${CMAKE_SOURCE_DIR})
-    add_custom_target(driver_clean COMMAND ${CMAKE_SOURCE_DIR}/scripts/driver_clean.sh ${CMAKE_SOURCE_DIR})
-    add_custom_target(driver_load COMMAND ${CMAKE_SOURCE_DIR}/scripts/driver_load.sh ${CMAKE_SOURCE_DIR})
-    add_custom_target(driver_unload COMMAND ${CMAKE_SOURCE_DIR}/scripts/driver_unload.sh ${CMAKE_SOURCE_DIR})
+if(${BUILD_TARGET_OS} STREQUAL "Linux")
+    install(
+        PROGRAMS ${BF_SOURCE_DIR}/bfdriver/src/arch/linux/bareflank.ko
+        DESTINATION ${BUILD_SYSROOT_OS}/lib
+    )
+elseif(${BUILD_TARGET_OS} STREQUAL "Windows")
+    # TODO: Install bareflank.sys to ${BUILD_SYSROOT_OS}/lib
 endif()
