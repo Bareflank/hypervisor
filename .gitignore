@@ -17,8 +17,10 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 build/
+build_ubuntu17_04/
 doc
 doxygen_warnings.txt
+.vagrant
 .astyle_results.txt
 .clang_tidy_results.txt
 .vscode/
