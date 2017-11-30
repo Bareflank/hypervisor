@@ -38,11 +38,15 @@ ExternalProject_Add(
     STAMP_DIR           ${BF_BUILD_DEPENDS_DIR}/hippomocks/stamp
 )
 
-if(NOT EXISTS ${BUILD_SYSROOT_TEST}/include/hippomocks.h)
-    ExternalProject_Add_Step(
-        hippomocks
-        hippomocks_sysroot_install
-        COMMAND 			${CMAKE_COMMAND} -E copy_directory ${HIPPOMOCKS_INTERM_INSTALL_DIR}/include ${BUILD_SYSROOT_TEST}/include
-        DEPENDEES          	install
-    )
-endif()
+set(HIPPOMOCKS_COPY_CMD "COMMAND ${CMAKE_COMMAND} -E copy_if_different")
+
+ExternalProject_Add_Step(
+    hippomocks
+    hippomocks_os_sysroot_install
+    DEPENDEES install
+    COMMAND	${CMAKE_COMMAND}
+        -DGLOB_DIR=${HIPPOMOCKS_INTERM_INSTALL_DIR}
+        -DGLOB_EXPR=include/*
+        -DINSTALL_DIR=${BUILD_SYSROOT_TEST}
+        -P ${BF_SCRIPTS_DIR}/cmake/copy_files_if_different.cmake
+)

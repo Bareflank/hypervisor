@@ -39,11 +39,3 @@ ExternalProject_Add(
     STAMP_DIR           ${BF_BUILD_DEPENDS_DIR}/astyle/stamp
     DEPENDS             bfsdk
 )
-
-# TODO: Install to the appropirate sysroot in the build tree
-# ExternalProject_Add_Step(
-#     astyle
-#     sysroot_install
-#     COMMAND 			${CMAKE_COMMAND} -E copy_directory /path/to/build/artifacts /path/to/appropriate/sysroot
-#     DEPENDEES          	install
-#     )
