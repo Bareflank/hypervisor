@@ -38,20 +38,24 @@ ExternalProject_Add(
     STAMP_DIR           ${BF_BUILD_DEPENDS_DIR}/gsl/stamp
 )
 
-if(NOT EXISTS ${BUILD_SYSROOT_OS}/include/gsl)
-    ExternalProject_Add_Step(
-        gsl
-        gsl_os_sysroot_install
-        COMMAND 			${CMAKE_COMMAND} -E copy_directory ${GSL_INTERM_INSTALL_DIR}/include ${BUILD_SYSROOT_OS}/include
-        DEPENDEES install
-    )
-endif()
+ExternalProject_Add_Step(
+    gsl
+    gsl_os_sysroot_install
+    DEPENDEES install
+    COMMAND	${CMAKE_COMMAND}
+        -DGLOB_DIR=${GSL_INTERM_INSTALL_DIR}
+        -DGLOB_EXPR=include/*
+        -DINSTALL_DIR=${BUILD_SYSROOT_OS}
+        -P ${BF_SCRIPTS_DIR}/cmake/copy_files_if_different.cmake
+)
 
-if(NOT EXISTS ${BUILD_SYSROOT_VMM}/include/gsl AND ${BUILD_VMM})
-    ExternalProject_Add_Step(
-        gsl
-        gsl_vmm_sysroot_install
-        COMMAND 			${CMAKE_COMMAND} -E copy_directory ${GSL_INTERM_INSTALL_DIR}/include ${BUILD_SYSROOT_VMM}/include
-        DEPENDEES install
-    )
-endif()
+ExternalProject_Add_Step(
+    gsl
+    gsl_vmm_sysroot_install
+    DEPENDEES install
+    COMMAND	${CMAKE_COMMAND}
+        -DGLOB_DIR=${GSL_INTERM_INSTALL_DIR}
+        -DGLOB_EXPR=include/*
+        -DINSTALL_DIR=${BUILD_SYSROOT_VMM}
+        -P ${BF_SCRIPTS_DIR}/cmake/copy_files_if_different.cmake
+)
