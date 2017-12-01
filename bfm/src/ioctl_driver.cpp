@@ -27,10 +27,6 @@
 
 #include <ioctl_driver.h>
 
-#ifndef BFM_DEFAULT_VMM
-#define BFM_DEFAULT_VMM bfvmm
-#endif
-
 ioctl_driver::ioctl_driver(gsl::not_null<file *> f,
                            gsl::not_null<ioctl *> ctl,
                            gsl::not_null<command_line_parser *> clp) :
@@ -399,7 +395,7 @@ ioctl_driver::vmm_filename()
         return {vmm_path};
     }
 
-    return bfstringify(BAREFLANK_VMM_BIN_PATH) bfstringify(BFM_DEFAULT_VMM);
+    return bfstringify(BAREFLANK_VMM_BIN_PATH) "/" bfstringify(BFM_DEFAULT_VMM);
 }
 
 ioctl_driver::list_type

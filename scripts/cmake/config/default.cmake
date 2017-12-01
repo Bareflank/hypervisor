@@ -545,3 +545,40 @@ add_config(
     DEFAULT_VAL ""
     DESCRIPTION "Additional C++ compiler flags for userspace components"
 )
+
+# ------------------------------------------------------------------------------
+# BFM Configs
+# ------------------------------------------------------------------------------
+
+add_config(
+    CONFIG_NAME BFM_VMM_BIN_PATH
+    CONFIG_TYPE PATH
+    DEFAULT_VAL ${BUILD_SYSROOT_VMM}/bin
+    DESCRIPTION "Default path to vmm binaries to be loaded by bfm"
+    SKIP_VALIDATION
+)
+
+add_config(
+    CONFIG_NAME BFM_VMM_LIB_PATH
+    CONFIG_TYPE PATH
+    DEFAULT_VAL ${BUILD_SYSROOT_VMM}/lib
+    DESCRIPTION "Default path to vmm libraries to be loaded by bfm"
+    SKIP_VALIDATION
+)
+
+if(BUILD_VMM_SHARED AND BUILD_EXTENDED_APIS)
+    set(_BFM_DEFAULT_VMM_NAME "eapis_shared")
+elseif(BUILD_VMM_STATIC AND BUILD_EXTENDED_APIS)
+    set(_BFM_DEFAULT_VMM_NAME "eapis_static")
+elseif(BUILD_VMM_STATIC)
+    set(_BFM_DEFAULT_VMM_NAME "bfvmm_static")
+else()
+    set(_BFM_DEFAULT_VMM_NAME "bfvmm_shared")
+endif()
+add_config(
+    CONFIG_NAME BFM_DEFAULT_VMM
+    CONFIG_TYPE FILE
+    DEFAULT_VAL ${_BFM_DEFAULT_VMM_NAME}
+    DESCRIPTION "Name of the default vmm to be loaded by bfm when no vmm is specified"
+    SKIP_VALIDATION
+)
