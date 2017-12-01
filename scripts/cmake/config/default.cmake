@@ -133,6 +133,12 @@ add_config(
     DESCRIPTION "Include the Bareflank Extended APIs in this build"
 )
 
+add_config(
+    CONFIG_NAME EXTENDED_APIS_PATH
+    CONFIG_TYPE PATH
+    DEFAULT_VAL ${BF_SOURCE_DIR}/extended_apis
+    DESCRIPTION "Path to the Bareflank Extended APIs"
+)
 
 if(${CMAKE_VERBOSE_MAKEFILE})
     set(_BUILD_VERBOSE ON CACHE INTERNAL "")

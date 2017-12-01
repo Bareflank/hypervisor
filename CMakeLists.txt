@@ -150,7 +150,7 @@ endif()
 
 if(${BUILD_EXTENDED_APIS})
     add_subproject(
-        SOURCE_DIR ${BF_SOURCE_DIR}/extended_apis
+        SOURCE_DIR ${EXTENDED_APIS_PATH}
         TARGET extended_apis
         TOOLCHAIN ${TOOLCHAIN_PATH_EXTENDED_APIS}
         DEPENDS bfsdk binutils bfvmm
@@ -216,7 +216,7 @@ if(ENABLE_UNITTESTING)
 
     if(${UNITTEST_EXTENDED_APIS})
         add_subproject(
-            SOURCE_DIR ${BF_SOURCE_DIR}/extended_apis/tests
+            SOURCE_DIR ${EXTENDED_APIS_PATH}/tests
             TARGET extended_apis_test
             TOOLCHAIN ${TOOLCHAIN_PATH_UNITTEST}
             DEPENDS bfsdk bfsdk_test bfvmm_test
