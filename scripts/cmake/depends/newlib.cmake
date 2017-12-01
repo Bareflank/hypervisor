@@ -16,7 +16,7 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-if(NOT EXISTS "${BUILD_SYSROOT_VMM}/lib/libc.a")
+if(NOT EXISTS "${BUILD_SYSROOT_VMM}/lib/libc.a" OR NOT EXISTS "${BUILD_SYSROOT_VMM}/lib/libc.so")
     set(NEWLIB_DIR ${BF_BUILD_DEPENDS_DIR}/newlib/src)
     set(NEWLIB_BUILD_DIR ${BF_BUILD_DEPENDS_DIR}/newlib/build)
     set(NEWLIB_INTERM_INSTALL_DIR ${BF_BUILD_DEPENDS_DIR}/newlib/install)
@@ -91,14 +91,38 @@ if(NOT EXISTS "${BUILD_SYSROOT_VMM}/lib/libc.a")
         COMMAND cd ${NEWLIB_BUILD_DIR}/${NEWLIB_TARGET}/newlib && ${TOOLCHAIN_NEWLIB_CC} -shared *.o -o ${NEWLIB_INTERM_INSTALL_DIR}/${NEWLIB_TARGET}/lib/libc.so
         DEPENDEES install
         )
-    list(APPEND NEWLIB_INSTALL_DEPENDEES build_shared_lib)
 
-    list(APPEND NEWLIB_INSTALL_DEPENDEES install)
     ExternalProject_Add_Step(
         newlib
-        sysroot_install
-        COMMAND ${CMAKE_COMMAND} -E copy_directory ${NEWLIB_INTERM_INSTALL_DIR}/${NEWLIB_TARGET}/ ${BUILD_SYSROOT_VMM}
-        DEPENDEES "${NEWLIB_INSTALL_DEPENDEES}"
+        newlib_headers_sysroot_install
+        DEPENDEES install
+        COMMAND	${CMAKE_COMMAND}
+            -DGLOB_DIR=${NEWLIB_INTERM_INSTALL_DIR}/${NEWLIB_TARGET}
+            -DGLOB_EXPR=*.h
+            -DINSTALL_DIR=${BUILD_SYSROOT_VMM}
+            -P ${BF_SCRIPTS_DIR}/cmake/copy_files_if_different.cmake
+    )
+
+    ExternalProject_Add_Step(
+        newlib
+        newlib_static_sysroot_install
+        DEPENDEES install
+        COMMAND	${CMAKE_COMMAND}
+            -DGLOB_DIR=${NEWLIB_INTERM_INSTALL_DIR}/${NEWLIB_TARGET}
+            -DGLOB_EXPR=*.a
+            -DINSTALL_DIR=${BUILD_SYSROOT_VMM}
+            -P ${BF_SCRIPTS_DIR}/cmake/copy_files_if_different.cmake
+    )
+
+    ExternalProject_Add_Step(
+        newlib
+        newlib_shared_sysroot_install
+        DEPENDEES build_shared_lib
+        COMMAND	${CMAKE_COMMAND}
+            -DGLOB_DIR=${NEWLIB_INTERM_INSTALL_DIR}/${NEWLIB_TARGET}
+            -DGLOB_EXPR=*.so
+            -DINSTALL_DIR=${BUILD_SYSROOT_VMM}
+            -P ${BF_SCRIPTS_DIR}/cmake/copy_files_if_different.cmake
     )
 else()
     add_custom_target(newlib)

@@ -38,11 +38,13 @@ ExternalProject_Add(
     STAMP_DIR           ${BF_BUILD_DEPENDS_DIR}/catch/stamp
 )
 
-if(NOT EXISTS ${BUILD_SYSROOT_TEST}/include/catch)
-    ExternalProject_Add_Step(
-        catch
-        catch_sysroot_install
-        COMMAND 			${CMAKE_COMMAND} -E copy_directory ${CATCH_INTERM_INSTALL_DIR}/include ${BUILD_SYSROOT_TEST}/include
-        DEPENDEES          	install
-    )
-endif()
+ExternalProject_Add_Step(
+    catch
+    catch_sysroot_install
+    DEPENDEES install
+    COMMAND	${CMAKE_COMMAND}
+        -DGLOB_DIR=${CATCH_INTERM_INSTALL_DIR}
+        -DGLOB_EXPR=*.hpp
+        -DINSTALL_DIR=${BUILD_SYSROOT_TEST}
+        -P ${BF_SCRIPTS_DIR}/cmake/copy_files_if_different.cmake
+)

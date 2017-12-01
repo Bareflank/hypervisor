@@ -231,3 +231,19 @@ macro(print_usage)
     message(STATUS "${Yellow}    ${BF_BUILD_COMMAND} info${ColorReset}")
     message(STATUS "")
 endmacro(print_usage)
+
+# Copies all files that match the given recursive GLOB expression (relative to
+# to the given GLOB directory) only if the matched source file has changed.
+# @arg GLOB_EXPR: A cmake GLOB_RECURSE expression to generate a list of files
+#           to be copied
+# @arg GLOB_DIR: The directory that GLOB_EXPR will be calculated relative to
+# @arg INSTALL_DIR: The directory to install all files that matched GLOB_EXPR to
+macro(copy_files_if_different)
+    set(oneVal GLOB_DIR GLOB_EXPR INSTALL_DIR)
+    cmake_parse_arguments(_EP_INSTALL "" "${oneVal}" "" ${ARGN})
+
+    file(GLOB_RECURSE out_files RELATIVE ${_EP_INSTALL_GLOB_DIR} ${_EP_INSTALL_GLOB_DIR}/${_EP_INSTALL_GLOB_EXPR})
+    foreach(file ${out_files})
+        execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different ${_EP_INSTALL_GLOB_DIR}/${file} ${_EP_INSTALL_INSTALL_DIR}/${file})
+    endforeach()
+endmacro(copy_files_if_different)
