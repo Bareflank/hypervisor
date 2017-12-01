@@ -138,11 +138,11 @@ add_info_category("Bareflank Manager")
 add_custom_target(
     quick
     COMMAND ${SUDO} ${BUILD_SYSROOT_OS}/bin/bfm quick
-    COMMENT "Stopping, unloading, loading, and starting the VMM"
+    COMMENT "Loading and starting the VMM: ${BFM_VMM_BIN_PATH}/${BFM_DEFAULT_VMM}"
 )
 add_custom_target_info(
     TARGET quick
-    INFO_COMMENT "Stop, unload, load, and start the VMM"
+    INFO_COMMENT "Load and start the default VMM"
 )
 
 add_custom_target(
