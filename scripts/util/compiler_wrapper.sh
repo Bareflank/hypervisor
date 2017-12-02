@@ -23,6 +23,7 @@ BIN_LOCATION="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 # Compiler / Linker
 # ------------------------------------------------------------------------------
 
+TARGET_NAME=$(basename $0 | cut -d '-' -f 1)
 SYSROOT_NAME=$(basename $0 | cut -d '-' -f 2)
 PROGRAM_NAME=$(basename $0 | cut -d '-' -f 3)
 VERSION_NAME=$(basename $0 | cut -d '-' -f 4)
@@ -37,7 +38,7 @@ else
     COMPILER=$PROGRAM_NAME-$VERSION_NAME
 fi
 
-LINKER="$BIN_LOCATION/x86_64-vmm-elf-ld"
+LINKER="$BIN_LOCATION/${TARGET_NAME}-vmm-elf-ld"
 
 # ------------------------------------------------------------------------------
 # Mode Flags
@@ -383,7 +384,7 @@ if [[ -n "$SOURCE_ARGS" ]]; then
         done
     fi
 
-    $COMPILER -U__USER_LABEL_PREFIX__ -D__USER_LABEL_PREFIX__="" -D__ELF__ --target=x86_64-elf -Qunused-arguments --sysroot=$SYSROOT $SYSROOT_INC_PATH ${COMPILE_ARGS[*]} $REQUIRED_COMPILER_ARGS ${SOURCE_ARGS[*]}
+    $COMPILER -U__USER_LABEL_PREFIX__ -D__USER_LABEL_PREFIX__="" -D__ELF__ --target=${TARGET_NAME}-elf -Qunused-arguments --sysroot=$SYSROOT $SYSROOT_INC_PATH ${COMPILE_ARGS[*]} $REQUIRED_COMPILER_ARGS ${SOURCE_ARGS[*]}
 
 else
 
