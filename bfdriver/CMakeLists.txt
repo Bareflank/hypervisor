@@ -38,5 +38,8 @@ if(${BUILD_TARGET_OS} STREQUAL "Linux")
         DESTINATION ${BUILD_SYSROOT_OS}/lib
     )
 elseif(${BUILD_TARGET_OS} STREQUAL "Windows")
-    # TODO: Install bareflank.sys to ${BUILD_SYSROOT_OS}/lib
+    install(
+        PROGRAMS ${BF_SOURCE_DIR}/bfdriver/src/arch/windows/x64/Debug/bareflank.sys
+        DESTINATION ${BUILD_SYSROOT_OS}/lib
+    )
 endif()

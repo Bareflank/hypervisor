@@ -1,3 +1,4 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
 
 #
 # Bareflank Hypervisor
@@ -17,9 +18,8 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.27004.2008
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bareflank", "bareflank.vcxproj", "{9299115C-8A76-408B-B25B-BB3571EA196A}"
 EndProject
@@ -38,5 +38,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {5BB3266F-C8ED-491E-8FBD-B31BB90A5319}
 	EndGlobalSection
 EndGlobal
