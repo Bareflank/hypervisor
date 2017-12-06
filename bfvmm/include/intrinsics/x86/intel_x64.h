@@ -26,5 +26,6 @@
 #include <intrinsics/x86/intel/vmcs/vmcs_intel_x64.h>
 #include <intrinsics/x86/intel/cpuid_intel_x64.h>
 #include <intrinsics/x86/intel/apic/apic_intel_x64.h>
+#include <intrinsics/x86/intel/acpi_intel_x64.h>
 
 #endif

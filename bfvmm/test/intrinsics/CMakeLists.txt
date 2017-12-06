@@ -26,6 +26,7 @@ macro(do_test str)
     install(TARGETS test_${str} DESTINATION ${BUILD_SYSROOT_TEST}/bin/bfvmm)
 endmacro(do_test)
 
+do_test(acpi_intel_x64)
 do_test(apic_intel_x64_lapic)
 do_test(apic_intel_x64_xapic)
 do_test(apic_intel_x64_x2apic)
